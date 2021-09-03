@@ -3011,19 +3011,23 @@ void parse_class_constant(AsmState& as) {
     as.in.getc();
     assertx(isAbstract);
     as.pce->addAbstractConstant(makeStaticString(name),
-                                staticEmptyString(),
                                 kind,
                                 false);
     return;
   }
 
-  TypedValue tvInit = parse_member_tv_initializer(as);
+  auto tvInit = parse_member_tv_initializer(as);
+  if (isType && (!tvIsDict(tvInit) || val(tvInit).parr->empty())) {
+    as.error("type constant must have a valid array type structure");
+  }
+
   as.pce->addConstant(makeStaticString(name),
-                      staticEmptyString(), &tvInit,
-                      staticEmptyString(),
-                      kind,
-                      false,
+                      nullptr,
+                      &tvInit,
                       Array{},
+                      kind,
+                      PreClassEmitter::Const::Invariance::None,
+                      false,
                       isAbstract);
 }
 
@@ -3430,10 +3434,9 @@ void parse_alias(AsmState& as) {
   int line1;
   parse_line_range(as, line0, line1);
 
-  Variant ts = parse_maybe_php_serialized(as);
-
-  if (ts.isInitialized() && !ts.isArray()) {
-    as.error(".alias must have an array type structure");
+  auto ts = parse_php_serialized(as);
+  if (!ts.isInitialized() || !ts.isDict() || ts.asCArrRef().empty()) {
+    as.error(".alias must have a valid array type structure");
   }
 
   const StringData* typeName = ty.typeName();
@@ -3451,13 +3454,11 @@ void parse_alias(AsmState& as) {
     attrs,
     typeName,
     typeName->empty() ? AnnotType::Mixed : ty.type(),
-    (ty.flags() & TypeConstraint::Nullable) != 0
+    (ty.flags() & TypeConstraint::Nullable) != 0,
+    ArrNR{ArrayData::GetScalarArray(std::move(ts))},
+    Array{}
   );
   te->setUserAttributes(userAttrs);
-
-  if (ts.isInitialized()) {
-    te->setTypeStructure(ArrNR(ArrayData::GetScalarArray(std::move(ts))));
-  }
 
   as.in.expectWs(';');
 }

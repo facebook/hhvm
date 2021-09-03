@@ -574,7 +574,14 @@ Array implTypeStructure(const Variant& cls_or_obj,
       raise_error("Non-existent type alias %s", name.get()->data());
     }
 
-    auto const typeStructure = typeAlias->typeStructure();
+    auto const& preresolved = typeAlias->resolvedTypeStructure();
+    if (!preresolved.isNull()) {
+      assertx(!preresolved.empty());
+      assertx(preresolved.isDict());
+      return preresolved;
+    }
+
+    auto const& typeStructure = typeAlias->typeStructure();
     assertx(!typeStructure.empty());
     assertx(typeStructure.isDict());
     Array resolved;

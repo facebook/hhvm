@@ -224,12 +224,16 @@ struct Class : AtomicCountable {
     LowPtr<const Class> cls;
     LowStringPtr name;
     TypedValueAux val;
+    const PreClass::Const* preConst;
 #ifndef USE_LOWPTR
     StringData* pointedClsName;
 #endif
 
     bool isAbstractAndUninit() const {
-      return val.constModifiers().isAbstract() && !val.is_init() && val.is_const_val_missing();
+      return
+        val.constModifiers().isAbstract() &&
+        !val.is_init() &&
+        val.is_const_val_missing();
     }
     bool isAbstract() const {
       return val.constModifiers().isAbstract();

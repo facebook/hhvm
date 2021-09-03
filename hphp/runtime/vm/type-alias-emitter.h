@@ -41,7 +41,8 @@ struct TypeAliasEmitter {
   TypeAliasEmitter(UnitEmitter& ue, Id id, const std::string& name);
 
   void init(int line0, int line1, Attr attrs,
-            const StringData* value, AnnotType type, bool nullable);
+            const StringData* value, AnnotType type, bool nullable,
+            Array typeStructure, Array resolvedTypeStructure);
 
   UnitEmitter& ue() const { return m_ue; }
   const StringData* name() const { return m_name; }
@@ -54,10 +55,8 @@ struct TypeAliasEmitter {
   void setUserAttributes(UserAttributeMap map) {
     m_userAttributes = std::move(map);
   }
-  Array typeStructure() const { return m_typeStructure; }
-  void setTypeStructure(Array typeStructure) {
-    m_typeStructure = typeStructure;
-  }
+  const Array& typeStructure() const { return m_typeStructure; }
+  const Array& resolvedTypeStructure() const { return m_resolvedTypeStructure; }
 
   Id id() const { return m_id; }
 
@@ -69,18 +68,21 @@ struct TypeAliasEmitter {
     return std::make_pair(m_line0, m_line1);
   }
 
-  private:
-    UnitEmitter& m_ue;
-    LowStringPtr m_name;
-    LowStringPtr m_value;
-    Attr m_attrs;
-    AnnotType m_type;
-    int m_line0;
-    int m_line1;
-    bool m_nullable;  // null is allowed; for ?Foo aliases
-    UserAttributeMap m_userAttributes;
-    Array m_typeStructure{ArrayData::CreateDict()};
-    Id m_id;
+private:
+  UnitEmitter& m_ue;
+  LowStringPtr m_name;
+  LowStringPtr m_value;
+  Attr m_attrs;
+  AnnotType m_type;
+  int m_line0;
+  int m_line1;
+  bool m_nullable;  // null is allowed; for ?Foo aliases
+  UserAttributeMap m_userAttributes;
+  Array m_typeStructure{ArrayData::CreateDict()};
+  // If !isNull(), contains m_typeStructure in post-resolved form from
+  // HHBBC.
+  Array m_resolvedTypeStructure;
+  Id m_id;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

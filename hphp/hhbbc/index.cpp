@@ -2705,6 +2705,7 @@ void flatten_traits(const php::Program* program,
   for (auto const& c : cinfo->traitConsts) {
     ITRACE(5, "  - const {}\n", c.name);
     cls->constants.push_back(c);
+    cls->constants.back().cls = cls;
     cinfo->clsConstants[c.name].cls = cls;
     cinfo->clsConstants[c.name].idx = cls->constants.size()-1;
     cinfo->preResolveState->constsFromTraits.erase(c.name);

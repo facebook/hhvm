@@ -114,26 +114,34 @@ struct PreClassEmitter {
 
   struct Const {
     using CoeffectsVec = std::vector<LowStringPtr>;
+    using Invariance = PreClass::Const::Invariance;
 
     Const()
       : m_name(nullptr)
-      , m_typeConstraint(nullptr)
+      , m_cls(nullptr)
       , m_val(make_tv<KindOfUninit>())
-      , m_phpCode(nullptr)
       , m_coeffects({})
+      , m_resolvedTypeStructure()
       , m_kind(ConstModifiers::Kind::Value)
+      , m_invariance(Invariance::None)
       , m_isAbstract(false)
       , m_fromTrait(false)
     {}
-    Const(const StringData* n, const StringData* typeConstraint,
-          const TypedValue* val, const StringData* phpCode,
-          const CoeffectsVec&& coeffects, const ConstModifiers::Kind kind,
-          const bool isAbstract, const bool fromTrait)
+    Const(const StringData* n,
+          const StringData* cls,
+          const TypedValue* val,
+          CoeffectsVec coeffects,
+          Array resolvedTypeStructure,
+          ConstModifiers::Kind kind,
+          Invariance invariance,
+          bool isAbstract,
+          bool fromTrait)
       : m_name(n)
-      , m_typeConstraint(typeConstraint)
-      , m_phpCode(phpCode)
-      , m_coeffects(coeffects)
+      , m_cls(cls)
+      , m_coeffects(std::move(coeffects))
+      , m_resolvedTypeStructure(std::move(resolvedTypeStructure))
       , m_kind(kind)
+      , m_invariance(invariance)
       , m_isAbstract(isAbstract)
       , m_fromTrait(fromTrait) {
       if (!val) {
@@ -142,35 +150,50 @@ struct PreClassEmitter {
         m_val = *val;
       }
     }
-    ~Const() {}
 
     const StringData* name() const { return m_name; }
-    const StringData* typeConstraint() const { return m_typeConstraint; }
+    const StringData* cls() const { return m_cls; }
     const TypedValue& val() const { return m_val.value(); }
     const Optional<TypedValue>& valOption() const { return m_val; }
-    const StringData* phpCode() const { return m_phpCode; }
     bool isAbstract() const { return m_isAbstract; }
     const CoeffectsVec& coeffects() const { return m_coeffects; }
+    const Array& resolvedTypeStructure() const {
+      return m_resolvedTypeStructure;
+    }
     ConstModifiers::Kind kind() const { return m_kind; }
+    Invariance invariance() const { return m_invariance; }
     bool isFromTrait() const { return m_fromTrait; }
 
     template<class SerDe> void serde(SerDe& sd) {
       sd(m_name)
+        (m_cls)
         (m_val)
-        (m_phpCode)
         (m_coeffects)
+        (m_resolvedTypeStructure)
         (m_kind)
+        (m_invariance)
         (m_isAbstract)
         (m_fromTrait);
+      assertx(IMPLIES(!m_resolvedTypeStructure.isNull(),
+                      m_resolvedTypeStructure.isDict() &&
+                      !m_resolvedTypeStructure.empty() &&
+                      m_resolvedTypeStructure->isStatic() &&
+                      m_kind == ConstModifiers::Kind::Type &&
+                      m_val.has_value()));
+      assertx(IMPLIES(m_invariance != Invariance::None,
+                      !m_resolvedTypeStructure.isNull()));
     }
 
    private:
     LowStringPtr m_name;
-    LowStringPtr m_typeConstraint;
+    // Class which originally defined this const, if HHBBC has
+    // propagated the definition (nullptr otherwise).
+    LowStringPtr m_cls;
     Optional<TypedValue> m_val;
-    LowStringPtr m_phpCode;
     CoeffectsVec m_coeffects;
+    Array m_resolvedTypeStructure;
     ConstModifiers::Kind m_kind;
+    Invariance m_invariance;
     bool m_isAbstract;
     bool m_fromTrait;
   };
@@ -180,8 +203,6 @@ struct PreClassEmitter {
 
   PreClassEmitter(UnitEmitter& ue, Id id, const std::string& name);
   ~PreClassEmitter();
-
-
 
   void init(int line1, int line2, Attr attrs,
             const StringData* parent, const StringData* docComment);
@@ -235,21 +256,22 @@ struct PreClassEmitter {
                    const TypedValue* val,
                    RepoAuthType,
                    UserAttributeMap);
-  bool addConstant(const StringData* n, const StringData* typeConstraint,
-                   const TypedValue* val, const StringData* phpCode,
-                   const ConstModifiers::Kind kind =
-                    ConstModifiers::Kind::Value,
-                   const bool fromTrait = false,
-                   const Array& typeStructure = Array{},
-                   const bool isAbstract = false);
+  bool addConstant(const StringData* n,
+                   const StringData* cls,
+                   const TypedValue* val,
+                   Array resolvedTypeStructure,
+                   ConstModifiers::Kind kind,
+                   Const::Invariance invariance,
+                   bool fromTrait,
+                   bool isAbstract);
   bool addContextConstant(const StringData* n,
-                          Const::CoeffectsVec&& coeffects,
-                          const bool isAbstract, const bool fromTrait = false);
+                          Const::CoeffectsVec coeffects,
+                          bool isAbstract,
+                          bool fromTrait = false);
   bool addAbstractConstant(const StringData* n,
-                           const StringData* typeConstraint,
-                           const ConstModifiers::Kind kind =
+                           ConstModifiers::Kind kind =
                              ConstModifiers::Kind::Value,
-                           const bool fromTrait = false);
+                           bool fromTrait = false);
   void addUsedTrait(const StringData* traitName);
   void addClassRequirement(const PreClass::ClassRequirement req) {
     m_requirements.push_back(req);

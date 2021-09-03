@@ -1224,6 +1224,9 @@ void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
       break;
     }
     if (cconst.kind == ConstModifiers::Kind::Context) {
+      assertx(cconst.cls == &cls);
+      assertx(!cconst.resolvedTypeStructure);
+      assertx(cconst.invariance == php::Const::Invariance::None);
       pce->addContextConstant(
         cconst.name,
         std::vector<LowStringPtr>(cconst.coeffects),
@@ -1231,23 +1234,24 @@ void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
         cconst.isFromTrait
       );
     } else if (!cconst.val.has_value()) {
+      assertx(cconst.cls == &cls);
+      assertx(!cconst.resolvedTypeStructure);
+      assertx(cconst.invariance == php::Const::Invariance::None);
       pce->addAbstractConstant(
         cconst.name,
-        cconst.typeConstraint,
         cconst.kind,
         cconst.isFromTrait
       );
     } else {
       needs86cinit |= cconst.val->m_type == KindOfUninit;
-
       pce->addConstant(
         cconst.name,
-        cconst.typeConstraint,
+        (cconst.cls == &cls) ? nullptr : cconst.cls->name,
         &cconst.val.value(),
-        cconst.phpCode,
+        ArrNR{cconst.resolvedTypeStructure},
         cconst.kind,
+        cconst.invariance,
         cconst.isFromTrait,
-        Array{},
         cconst.isAbstract
       );
     }
@@ -1345,10 +1349,11 @@ void emit_typealias(UnitEmitter& ue, const php::TypeAlias& alias) {
       alias.attrs,
       alias.value,
       alias.type,
-      alias.nullable
+      alias.nullable,
+      alias.typeStructure,
+      alias.resolvedTypeStructure
   );
   te->setUserAttributes(alias.userAttrs);
-  te->setTypeStructure(alias.typeStructure);
 }
 
 void emit_constant(UnitEmitter& ue, const php::Constant& constant) {

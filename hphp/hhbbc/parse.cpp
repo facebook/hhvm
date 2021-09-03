@@ -953,10 +953,10 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
         cconst.name(),
         ret.get(),
         cconst.valOption(),
-        cconst.phpCode(),
-        cconst.typeConstraint(),
         cconst.coeffects(),
+        nullptr,
         cconst.kind(),
+        php::Const::Invariance::None,
         cconst.isAbstract(),
         cconst.isFromTrait(),
         true // NoOverride
@@ -975,10 +975,11 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
             cnsMap.first,
             ret.get(),
             tvaux,
-            staticEmptyString(),
-            staticEmptyString(),
             {},
+            nullptr,
             ConstModifiers::Kind::Value,
+            php::Const::Invariance::None,
+            false,
             false,
             false
           }
@@ -1078,7 +1079,8 @@ std::unique_ptr<php::TypeAlias> parse_type_alias(php::Unit* unit,
     te.type(),
     te.nullable(),
     te.userAttributes(),
-    te.typeStructure()
+    te.typeStructure(),
+    Array{}
   });
 }
 

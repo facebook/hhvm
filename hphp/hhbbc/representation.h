@@ -461,16 +461,14 @@ struct Const {
    */
   Optional<TypedValue> val;
 
-  /*
-   * We pass through eval'able php code and a string type constraint,
-   * only for exposure to reflection.
-   */
-  LSString phpCode;
-  LSString typeConstraint;
-
   std::vector<LowStringPtr> coeffects;
 
+  SArray resolvedTypeStructure;
+
   ConstModifiers::Kind kind;
+
+  using Invariance = PreClass::Const::Invariance;
+  Invariance invariance : 2;
   bool isAbstract   : 1;
   bool isFromTrait  : 1;
   bool isNoOverride : 1;
@@ -604,6 +602,7 @@ struct TypeAlias {
   bool nullable;  // null is allowed; for ?Foo aliases
   UserAttributeMap userAttrs;
   Array typeStructure{ArrayData::CreateDict()};
+  Array resolvedTypeStructure;
 };
 
 //////////////////////////////////////////////////////////////////////

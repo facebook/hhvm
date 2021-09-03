@@ -26,24 +26,41 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypeAliasEmitter::TypeAliasEmitter(UnitEmitter& ue, Id id, const std::string& name)
+TypeAliasEmitter::TypeAliasEmitter(UnitEmitter& ue,
+                                   Id id,
+                                   const std::string& name)
   : m_ue(ue)
   , m_name(makeStaticString(name))
   , m_id(id) {}
 
 void TypeAliasEmitter::init(int line0, int line1, Attr attrs,
-                            const StringData* value, AnnotType type, bool nullable) {
+                            const StringData* value,
+                            AnnotType type,
+                            bool nullable,
+                            Array typeStructure,
+                            Array resolvedTypeStructure) {
+  assertx(typeStructure.isDict() &&
+          !typeStructure.empty() &&
+          typeStructure->isStatic());
+  assertx(resolvedTypeStructure.isNull() ||
+          (resolvedTypeStructure.isDict() &&
+           !resolvedTypeStructure.empty() &&
+           resolvedTypeStructure->isStatic()));
   m_line0 = line0;
   m_line1 = line1;
   m_attrs = attrs;
   m_value = value;
   m_type = type;
   m_nullable = nullable;
+  m_typeStructure = std::move(typeStructure);
+  m_resolvedTypeStructure = std::move(resolvedTypeStructure);
 }
 
 PreTypeAlias TypeAliasEmitter::create(Unit& unit) const {
   return PreTypeAlias {
-      &unit, m_name, m_value, m_attrs, m_type, m_line0, m_line1, m_nullable, m_userAttributes, m_typeStructure };
+    &unit, m_name, m_value, m_attrs, m_type, m_line0, m_line1,
+    m_nullable, m_userAttributes, m_typeStructure, m_resolvedTypeStructure
+  };
 }
 
 template<class SerDe> void TypeAliasEmitter::serdeMetaData(SerDe& sd) {
@@ -55,18 +72,16 @@ template<class SerDe> void TypeAliasEmitter::serdeMetaData(SerDe& sd) {
     (m_type)
     (m_nullable)
     (m_userAttributes)
+    (m_typeStructure)
+    (m_resolvedTypeStructure)
     ;
 
-  if constexpr (SerDe::deserializing) {
-    TypedValue tv;
-    sd(tv);
-    assertx(tvIsDict(tv));
-    assertx(tvIsPlausible(tv));
-    m_typeStructure = tv.m_data.parr;
-  } else {
-    auto tv = make_array_like_tv(m_typeStructure.get());
-    sd(tv);
-  }
+  assertx(m_typeStructure.isDict());
+  assertx(!m_typeStructure.empty());
+  assertx(IMPLIES(!m_resolvedTypeStructure.isNull(),
+                  m_resolvedTypeStructure.isDict() &&
+                  !m_resolvedTypeStructure.empty() &&
+                  m_resolvedTypeStructure->isStatic()));
 }
 
 template void TypeAliasEmitter::serdeMetaData<>(BlobDecoder&);

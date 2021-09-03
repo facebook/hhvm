@@ -461,8 +461,7 @@ bool handle_builtin(ISS& env, const php::Func* func, const FCallArgs& fca) {
 } // namespace
 
 bool optimize_builtin(ISS& env, const php::Func* func, const FCallArgs& fca) {
-  if (!will_reduce(env) ||
-      any(env.collect.opts & CollectionOpts::Speculating) ||
+  if (any(env.collect.opts & CollectionOpts::Speculating) ||
       func->attrs & AttrNoFCallBuiltin ||
       (func->cls && !(func->attrs & AttrStatic))  ||
       !func->nativeInfo ||

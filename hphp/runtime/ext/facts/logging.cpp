@@ -21,13 +21,13 @@
 #include <string>
 
 #include <folly/Conv.h>
-#include <folly/Range.h>
 #include <folly/SynchronizedPtr.h>
+#include <folly/futures/FutureSplitter.h>
+#include <folly/io/async/ScopedEventBaseThread.h>
 #include <folly/logging/Init.h>
 #include <folly/logging/LogConfig.h>
 #include <folly/logging/LogFormatter.h>
 #include <folly/logging/LogHandlerFactory.h>
-#include <folly/logging/LogWriter.h>
 #include <folly/logging/Logger.h>
 #include <folly/logging/LoggerDB.h>
 #include <folly/logging/StandardLogHandler.h>
@@ -80,7 +80,7 @@ public:
     std::string link;
     std::string owner;
     int period_multiple = 1;
-    bool flush_after_write = false;
+    bool flush_after_write = true;
   };
 
   explicit CronoLogWriter(const Options& options)
@@ -147,8 +147,13 @@ private:
  * See Cronolog code for further information on the file, link, and period
  * settings.
  *
+ * async - Instead of writing to the file within the path of logging, queues
+ * the message for writing by a different thread.  This is the default setting.
+ *
  * flush_after_write - Perform a flush after each message to be sure the message
- * has been written.  This setting may have performance impacts.
+ * has been written.  If using asynchronously, the flush will occur after the
+ * file write has occurred.  If async is disabled, this setting may have
+ * performance impacts.  The default setting is true.
  */
 struct CronoLogHandlerFactory::WriterFactory final
     : public folly::StandardLogHandlerFactory::WriterFactory {
@@ -170,6 +175,9 @@ public:
       } else if (name == "owner") {
         m_options.owner = value.str();
         return true;
+      } else if (name == "async") {
+        m_async = folly::to<bool>(value);
+        return true;
       } else if (name == "flush_after_write") {
         m_options.flush_after_write = folly::to<bool>(value);
         return true;
@@ -185,10 +193,16 @@ public:
   }
 
   std::shared_ptr<folly::LogWriter> createWriter() override {
-    return std::make_shared<CronoLogWriter>(m_options);
+    if (m_async) {
+      return std::make_shared<AsyncLogWriter>(
+          std::make_unique<CronoLogWriter>(m_options));
+    } else {
+      return std::make_shared<CronoLogWriter>(m_options);
+    }
   }
 
 private:
+  bool m_async = true;
   CronoLogWriter::Options m_options;
 };
 
@@ -279,18 +293,44 @@ struct HhvmLogHandlerFactory::FormatterFactory final
   }
 };
 
+/*
+ * Supported settings:
+ *
+ * async - Instead of writing calling Logger::Error within path of logging, this
+ * queues the message for writing by a different thread.  Be warned that the
+ * HHVM logger displays adds its own thread information in the output and that
+ * logging to it asynchrounously probably means that thread information is going
+ * to be a lie.  The logger includes valid thread information if needed.
+ */
 struct HhvmLogHandlerFactory::WriterFactory final
     : public folly::StandardLogHandlerFactory::WriterFactory {
 
 public:
-  bool processOption(
-      folly::StringPiece /* name */, folly::StringPiece /* value */) override {
+  bool
+  processOption(folly::StringPiece name, folly::StringPiece value) override {
+    try {
+      if (name == "async") {
+        m_async = folly::to<bool>(value);
+        return true;
+      }
+    } catch (...) {
+      Logger::FError(
+          "Caught exception while parsing arguments: {} = {}", name, value);
+    }
     return false;
   }
 
   std::shared_ptr<folly::LogWriter> createWriter() override {
-    return std::make_shared<HhvmLogWriter>();
+    if (m_async) {
+      return std::make_shared<AsyncLogWriter>(
+          std::make_unique<HhvmLogWriter>());
+    } else {
+      return std::make_shared<HhvmLogWriter>();
+    }
   }
+
+private:
+  bool m_async = false;
 };
 
 std::shared_ptr<folly::LogHandler>
@@ -302,6 +342,39 @@ HhvmLogHandlerFactory::createHandler(const Options& options) {
 }
 
 } // namespace
+
+AsyncLogWriter::AsyncLogWriter(std::unique_ptr<folly::LogWriter> writer)
+    : m_is_tty{writer->ttyOutput()}
+    , m_writer{std::move(writer)}
+    , m_exec{std::make_unique<folly::ScopedEventBaseThread>("AsyncLogging")}
+    , m_syncedFuture{folly::makeFuture().via(m_exec.get())} {
+}
+
+void AsyncLogWriter::writeMessage(folly::StringPiece buffer, uint32_t flags) {
+  writeMessage(buffer.str(), flags);
+}
+
+void AsyncLogWriter::writeMessage(std::string&& buffer, uint32_t flags) {
+  auto wlock = m_syncedFuture.wlock();
+  *wlock = std::move(*wlock).thenValue(
+      [this, buffer{std::move(buffer)}, flags](auto) mutable {
+        m_writer->writeMessage(std::move(buffer), flags);
+      });
+}
+
+void AsyncLogWriter::flush() {
+  m_syncedFuture
+      .withWLock([this](folly::Future<folly::Unit>& future) {
+        auto splitter =
+            folly::splitFuture(std::move(future).thenValue([this](auto) {
+              m_writer->flush();
+              return folly::Unit();
+            }));
+        future = splitter.getFuture();
+        return splitter.getFuture();
+      })
+      .wait();
+}
 
 void enableFactsLogging(const std::string& owner, const std::string& options) {
   folly::LoggerDB::get().registerHandlerFactory(

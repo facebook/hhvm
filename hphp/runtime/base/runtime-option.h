@@ -492,6 +492,7 @@ struct RuntimeOption {
   static std::string AutoloadDBPath;
   static std::string AutoloadDBPerms;
   static std::string AutoloadDBGroup;
+  static std::string AutoloadLogging;
   static bool AutoloadEnforceOneDefinitionRule;
   static bool AutoloadRethrowExceptions;
 

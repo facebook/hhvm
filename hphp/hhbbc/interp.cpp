@@ -51,6 +51,7 @@
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/type-builtins.h"
 #include "hphp/hhbbc/type-ops.h"
+#include "hphp/hhbbc/type-structure.h"
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/unit-util.h"
 #include "hphp/hhbbc/wide-func.h"
@@ -529,200 +530,6 @@ SString getNameFromType(const Type& t) {
 
 namespace {
 
-ArrayData*
-resolveTSStaticallyImpl(ISS& env, hphp_fast_set<SArray>& seenTs, SArray ts,
-                        const php::Class* declaringCls);
-
-ArrayData*
-resolveTSListStatically(ISS& env, hphp_fast_set<SArray>& seenTs,
-                        SArray tsList, const php::Class* declaringCls) {
-  auto arr = Array::attach(const_cast<ArrayData*>(tsList));
-  for (auto i = 0; i < arr.size(); i++) {
-    auto elemArr = arr[i].getArrayData();
-    auto elem = resolveTSStaticallyImpl(env, seenTs, elemArr, declaringCls);
-    if (!elem) return nullptr;
-    arr.set(i, Variant(elem));
-  }
-  return arr.detach();
-}
-
-ArrayData*
-resolveTSStaticallyImpl(ISS& env, hphp_fast_set<SArray>& seenTs, SArray ts,
-                        const php::Class* declaringCls) {
-  if (seenTs.contains(ts)) return nullptr;
-  seenTs.emplace(ts);
-  SCOPE_EXIT { seenTs.erase(ts); };
-
-  auto const addModifiers = [&](ArrayData* result) {
-    auto a = Array::attach(result);
-    if (is_ts_like(ts) && !is_ts_like(a.get())) {
-      a.set(s_like, make_tv<KindOfBoolean>(true));
-    }
-    if (is_ts_nullable(ts) && !is_ts_nullable(a.get())) {
-      a.set(s_nullable, make_tv<KindOfBoolean>(true));
-    }
-    if (is_ts_soft(ts) && !is_ts_soft(a.get())) {
-      a.set(s_soft, make_tv<KindOfBoolean>(true));
-    }
-    return a.detach();
-  };
-  auto const finish = [&](const ArrayData* result) {
-    auto r = const_cast<ArrayData*>(result);
-    ArrayData::GetScalarArray(&r);
-    return r;
-  };
-  switch (get_ts_kind(ts)) {
-    case TypeStructure::Kind::T_int:
-    case TypeStructure::Kind::T_bool:
-    case TypeStructure::Kind::T_float:
-    case TypeStructure::Kind::T_string:
-    case TypeStructure::Kind::T_num:
-    case TypeStructure::Kind::T_arraykey:
-    case TypeStructure::Kind::T_void:
-    case TypeStructure::Kind::T_null:
-    case TypeStructure::Kind::T_nothing:
-    case TypeStructure::Kind::T_noreturn:
-    case TypeStructure::Kind::T_mixed:
-    case TypeStructure::Kind::T_dynamic:
-    case TypeStructure::Kind::T_nonnull:
-    case TypeStructure::Kind::T_resource:
-      return finish(ts);
-    case TypeStructure::Kind::T_typevar:
-      if (ts->exists(s_name.get()) &&
-          get_ts_name(ts)->equal(s_wildcard.get())) {
-        return finish(ts);
-      }
-      return nullptr;
-    case TypeStructure::Kind::T_dict:
-    case TypeStructure::Kind::T_vec:
-    case TypeStructure::Kind::T_keyset:
-    case TypeStructure::Kind::T_vec_or_dict:
-    case TypeStructure::Kind::T_any_array: {
-      if (!ts->exists(s_generic_types)) return finish(ts);
-      auto const generics = get_ts_generic_types(ts);
-      auto rgenerics =
-        resolveTSListStatically(env, seenTs, generics, declaringCls);
-      if (!rgenerics) return nullptr;
-      auto result = const_cast<ArrayData*>(ts);
-      return finish(result->setMove(s_generic_types.get(), Variant(rgenerics)));
-    }
-    case TypeStructure::Kind::T_class:
-    case TypeStructure::Kind::T_interface:
-    case TypeStructure::Kind::T_xhp:
-    case TypeStructure::Kind::T_enum:
-      // Generics for these must have been resolved already as we'd never set
-      // the TS Kind to be one of these until resolution
-      return finish(ts);
-    case TypeStructure::Kind::T_tuple: {
-      auto const elems = get_ts_elem_types(ts);
-      auto relems = resolveTSListStatically(env, seenTs, elems, declaringCls);
-      if (!relems) return nullptr;
-      auto result = const_cast<ArrayData*>(ts);
-      return finish(result->setMove(s_elem_types.get(), Variant(relems)));
-    }
-    case TypeStructure::Kind::T_shape:
-      // TODO(T31677864): We can also optimize this but shapes could have
-      // optional fields or they could allow unknown fields, so this one is
-      // slightly more tricky
-      return nullptr;
-    case TypeStructure::Kind::T_unresolved: {
-      assertx(ts->exists(s_classname));
-      auto result = const_cast<ArrayData*>(ts);
-      if (ts->exists(s_generic_types)) {
-        auto const generics = get_ts_generic_types(ts);
-        auto rgenerics =
-          resolveTSListStatically(env, seenTs, generics, declaringCls);
-        if (!rgenerics) return nullptr;
-        result = result->setMove(s_generic_types.get(), Variant(rgenerics));
-      }
-      auto const rcls = env.index.resolve_class(env.ctx, get_ts_classname(ts));
-      if (!rcls || !rcls->resolved()) return nullptr;
-      auto const attrs = rcls->cls()->attrs;
-      auto const kind = [&] {
-        if (attrs & AttrEnum)      return TypeStructure::Kind::T_enum;
-        if (attrs & AttrTrait)     return TypeStructure::Kind::T_trait;
-        if (attrs & AttrInterface) return TypeStructure::Kind::T_interface;
-        return TypeStructure::Kind::T_class;
-      }();
-      return finish(result->setMove(s_kind.get(),
-                                    Variant(static_cast<uint8_t>(kind))));
-    }
-    case TypeStructure::Kind::T_typeaccess: {
-      auto const accList = get_ts_access_list(ts);
-      auto const size = accList->size();
-      auto clsName = get_ts_root_name(ts);
-      auto checkNoOverrideOnFirst = false;
-      if (declaringCls) {
-        if (clsName->isame(s_self.get())) {
-          clsName = declaringCls->name;
-        } else if (clsName->isame(s_parent.get()) && declaringCls->parentName) {
-          clsName = declaringCls->parentName;
-        } else if (clsName->isame(s_this.get())) {
-          clsName = declaringCls->name;
-          checkNoOverrideOnFirst = true;
-        }
-      }
-      ArrayData* typeCnsVal = nullptr;
-      for (auto i = 0; i < size; i++) {
-        auto const rcls = env.index.resolve_class(env.ctx, clsName);
-        if (!rcls || !rcls->resolved()) return nullptr;
-        auto const cnsName = accList->at(i);
-        if (!tvIsString(&cnsName)) return nullptr;
-        auto const cnst = env.index.lookup_class_const_ptr(env.ctx, *rcls,
-                                                           cnsName.m_data.pstr,
-                                                           true);
-        if (!cnst || !cnst->val || cnst->kind != ConstModifiers::Kind::Type
-            || !tvIsDict(&*cnst->val)) {
-          return nullptr;
-        }
-        if (checkNoOverrideOnFirst && i == 0 && !cnst->isNoOverride) {
-          return nullptr;
-        }
-        typeCnsVal = resolveTSStaticallyImpl(env, seenTs,
-                                             cnst->val->m_data.parr, cnst->cls);
-        if (!typeCnsVal) return nullptr;
-        if (i == size - 1) break;
-        auto const kind = get_ts_kind(typeCnsVal);
-        if (kind != TypeStructure::Kind::T_class &&
-            kind != TypeStructure::Kind::T_interface) {
-          return nullptr;
-        }
-        clsName = get_ts_classname(typeCnsVal);
-      }
-      if (!typeCnsVal) return nullptr;
-      return finish(addModifiers(typeCnsVal));
-    }
-    case TypeStructure::Kind::T_fun: {
-      auto rreturn = resolveTSStaticallyImpl(env, seenTs,
-                                             get_ts_return_type(ts),
-                                             declaringCls);
-      if (!rreturn) return nullptr;
-      auto rparams = resolveTSListStatically(env, seenTs,
-                                             get_ts_param_types(ts),
-                                             declaringCls);
-      if (!rparams) return nullptr;
-      auto result = const_cast<ArrayData*>(ts)
-        ->setMove(s_return_type.get(), Variant(rreturn))
-        ->setMove(s_param_types.get(), Variant(rparams));
-      auto const variadic = get_ts_variadic_type_opt(ts);
-      if (variadic) {
-        auto rvariadic =
-          resolveTSStaticallyImpl(env, seenTs, variadic, declaringCls);
-        if (!rvariadic) return nullptr;
-        result = result->setMove(s_variadic_type.get(), Variant(rvariadic));
-      }
-      return finish(result);
-    }
-    case TypeStructure::Kind::T_darray:
-    case TypeStructure::Kind::T_varray:
-    case TypeStructure::Kind::T_varray_or_darray:
-    case TypeStructure::Kind::T_reifiedtype:
-    case TypeStructure::Kind::T_trait:
-      return nullptr;
-  }
-  not_reached();
-}
-
 /*
  * Very simple check to see if the top level class is reified or not
  * If not we can reduce a VerifyTypeTS to a regular VerifyType
@@ -734,12 +541,6 @@ bool shouldReduceToNonReifiedVerifyType(ISS& env, SArray ts) {
   return !rcls->cls()->hasReifiedGenerics;
 }
 
-} // namespace
-
-ArrayData*
-resolveTSStatically(ISS& env, SArray ts, const php::Class* declaringCls) {
-  hphp_fast_set<SArray> seenTs;
-  return resolveTSStaticallyImpl(env, seenTs, ts, declaringCls);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -2924,6 +2725,13 @@ void in(ISS& env, const bc::InstanceOf& /*op*/) {
   push(env, TBool);
 }
 
+void in(ISS& env, const bc::IsLateBoundCls& op) {
+  auto const cls = env.ctx.cls;
+  if (cls && !(cls->attrs & AttrTrait)) effect_free(env);
+  popC(env);
+  return push(env, TBool);
+}
+
 namespace {
 
 bool isValidTypeOpForIsAs(const IsTypeOp& op) {
@@ -2951,8 +2759,7 @@ bool isValidTypeOpForIsAs(const IsTypeOp& op) {
 }
 
 void isTypeStructImpl(ISS& env, SArray inputTS) {
-  auto const resolvedTS = resolveTSStatically(env, inputTS, env.ctx.cls);
-  auto const ts = resolvedTS ? resolvedTS : inputTS;
+  auto const ts = inputTS;
   auto const t = loosen_likeness(topC(env, 1)); // operand to is/as
 
   bool may_raise = true;
@@ -3082,94 +2889,9 @@ void isTypeStructImpl(ISS& env, SArray inputTS) {
   not_reached();
 }
 
-bool canReduceToDontResolveList(SArray tsList, bool checkArrays);
-
-bool canReduceToDontResolve(SArray ts, bool checkArrays) {
-  auto const checkGenerics = [&](SArray arr) {
-    if (!ts->exists(s_generic_types)) return true;
-    return canReduceToDontResolveList(get_ts_generic_types(ts), true);
-  };
-  switch (get_ts_kind(ts)) {
-    case TypeStructure::Kind::T_int:
-    case TypeStructure::Kind::T_bool:
-    case TypeStructure::Kind::T_float:
-    case TypeStructure::Kind::T_string:
-    case TypeStructure::Kind::T_num:
-    case TypeStructure::Kind::T_arraykey:
-    case TypeStructure::Kind::T_void:
-    case TypeStructure::Kind::T_null:
-    case TypeStructure::Kind::T_nothing:
-    case TypeStructure::Kind::T_noreturn:
-    case TypeStructure::Kind::T_mixed:
-    case TypeStructure::Kind::T_dynamic:
-    case TypeStructure::Kind::T_nonnull:
-    case TypeStructure::Kind::T_resource:
-      return true;
-    // Following have generic parameters that may need to be resolved
-    case TypeStructure::Kind::T_dict:
-    case TypeStructure::Kind::T_vec:
-    case TypeStructure::Kind::T_keyset:
-    case TypeStructure::Kind::T_vec_or_dict:
-    case TypeStructure::Kind::T_any_array:
-      return !checkArrays || checkGenerics(ts);
-    case TypeStructure::Kind::T_class:
-    case TypeStructure::Kind::T_interface:
-    case TypeStructure::Kind::T_xhp:
-    case TypeStructure::Kind::T_enum:
-      return isTSAllWildcards(ts) || checkGenerics(ts);
-    case TypeStructure::Kind::T_tuple:
-      return canReduceToDontResolveList(get_ts_elem_types(ts), checkArrays);
-    case TypeStructure::Kind::T_fun: {
-      auto const variadicType = get_ts_variadic_type_opt(ts);
-      return canReduceToDontResolve(get_ts_return_type(ts), checkArrays)
-        && canReduceToDontResolveList(get_ts_param_types(ts), checkArrays)
-        && (!variadicType || canReduceToDontResolve(variadicType, checkArrays));
-    }
-    case TypeStructure::Kind::T_shape:
-      // We cannot skip resolution on shapes since shapes contain "value" field
-      // which resolution removes.
-      return false;
-    // Following needs to be resolved
-    case TypeStructure::Kind::T_unresolved:
-    case TypeStructure::Kind::T_typeaccess:
-    // Following cannot be used in is/as expressions, we need to error on them
-    // Currently erroring happens as a part of the resolving phase,
-    // so keep resolving them
-    case TypeStructure::Kind::T_darray:
-    case TypeStructure::Kind::T_varray:
-    case TypeStructure::Kind::T_varray_or_darray:
-    case TypeStructure::Kind::T_reifiedtype:
-    case TypeStructure::Kind::T_typevar:
-    case TypeStructure::Kind::T_trait:
-      return false;
-  }
-  not_reached();
-}
-
-bool canReduceToDontResolveList(SArray tsList, bool checkArrays) {
-  auto result = true;
-  IterateV(
-    tsList,
-    [&](TypedValue v) {
-      assertx(isArrayLikeType(v.m_type));
-      result &= canReduceToDontResolve(v.m_data.parr, checkArrays);
-       // when result is false, we can short circuit
-      return !result;
-    }
-  );
-  return result;
-}
-
 const StaticString s_hh_type_structure_no_throw("HH\\type_structure_no_throw");
 
 } // namespace
-
-void in(ISS& env, const bc::IsLateBoundCls& op) {
-  auto const cls = env.ctx.cls;
-  if (cls && !(cls->attrs & AttrTrait)) effect_free(env);
-  popC(env);
-  return push(env, TBool);
-}
 
 void in(ISS& env, const bc::IsTypeStructC& op) {
   if (!topC(env).couldBe(BDict)) {
@@ -3184,20 +2906,15 @@ void in(ISS& env, const bc::IsTypeStructC& op) {
     return push(env, TBool);
   }
   if (op.subop1 == TypeStructResolveOp::Resolve) {
-    if (canReduceToDontResolve(a->m_data.parr, false)) {
+    if (auto const ts = resolve_type_structure(env, a->m_data.parr).sarray()) {
       return reduce(
         env,
+        bc::PopC {},
+        bc::Dict { ts },
         bc::IsTypeStructC { TypeStructResolveOp::DontResolve }
       );
     }
     if (auto const val = get_ts_this_type_access(a->m_data.parr)) {
-      auto const classconst_bc = []() -> Bytecode {
-        if (RuntimeOption::EvalEmitClassPointers == 2) {
-          return bc::LazyClassFromClass {};
-        } else {
-          return bc::ClassName {};
-        }
-      }();
       // Convert `$x is this::T` into
       // `$x is type_structure_no_throw(static::class, 'T')`
       // to take advantage of the caching that comes with the type_structure
@@ -3207,7 +2924,6 @@ void in(ISS& env, const bc::IsTypeStructC& op) {
         bc::NullUninit {},
         bc::NullUninit {},
         bc::LateBoundCls {},
-        classconst_bc,
         bc::String {val},
         bc::FCallFuncD {FCallArgs(2), s_hh_type_structure_no_throw.get()},
         bc::IsTypeStructC { TypeStructResolveOp::DontResolve }
@@ -3221,7 +2937,6 @@ void in(ISS& env, const bc::ThrowAsTypeStructException& op) {
   popC(env);
   popC(env);
   unreachable(env);
-  return;
 }
 
 void in(ISS& env, const bc::CombineAndResolveTypeStruct& op) {
@@ -3232,11 +2947,15 @@ void in(ISS& env, const bc::CombineAndResolveTypeStruct& op) {
     auto const ts = first->m_data.parr;
     // Optimize single input that does not need any combination
     if (op.arg1 == 1) {
-      if (canReduceToDontResolve(ts, true)) return reduce(env);
-      if (auto const resolved = resolveTSStatically(env, ts, env.ctx.cls)) {
-        return reduce(env, bc::PopC {}, bc::Dict  { resolved });
+      if (auto const r = resolve_type_structure(env, ts).sarray()) {
+        return reduce(
+          env,
+          bc::PopC {},
+          bc::Dict { r }
+        );
       }
     }
+
     // Optimize double input that needs a single combination and looks of the
     // form ?T, @T or ~T
     if (op.arg1 == 2 && get_ts_kind(ts) == TypeStructure::Kind::T_reifiedtype) {
@@ -5047,7 +4766,7 @@ void in(ISS& env, const bc::VerifyParamTypeTS& op) {
       return;
     }
     auto const resolvedTS =
-      resolveTSStatically(env, inputTS->m_data.parr, env.ctx.cls);
+      resolve_type_structure(env, inputTS->m_data.parr).sarray();
     if (resolvedTS && resolvedTS != inputTS->m_data.parr) {
       reduce(env, bc::PopC {});
       reduce(env, bc::Dict { resolvedTS });
@@ -5203,7 +4922,7 @@ void in(ISS& env, const bc::VerifyRetTypeTS& /*op*/) {
       return;
     }
     auto const resolvedTS =
-      resolveTSStatically(env, inputTS->m_data.parr, env.ctx.cls);
+      resolve_type_structure(env, inputTS->m_data.parr).sarray();
     if (resolvedTS && resolvedTS != inputTS->m_data.parr) {
       reduce(env, bc::PopC {});
       reduce(env, bc::Dict { resolvedTS });

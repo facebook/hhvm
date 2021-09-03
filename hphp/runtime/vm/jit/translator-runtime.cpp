@@ -578,23 +578,18 @@ ArrayData* recordReifiedGenericsAndGetTSList(ArrayData* tsList) {
   return result;
 }
 
-const StaticString s_classname("classname");
-const StaticString s_kind("kind");
-const StaticString s_type_structure_non_existant_class(
-  "hh\\__internal\\type_structure_non_existant_class");
-
 ArrayData* loadClsTypeCnsHelper(
   const Class* cls, const StringData* name, bool no_throw_on_undefined
 ) {
-  auto const getFake = [&] {
-    DictInit arr(2);
-    arr.set(s_kind,
-            Variant(static_cast<uint8_t>(TypeStructure::Kind::T_class)));
-    arr.set(s_classname,
-            Variant(s_type_structure_non_existant_class));
-    auto result = arr.create();
-    ArrayData::GetScalarArray(&result);
-    return result;
+  auto const getFake = [] {
+    auto array = make_dict_array(
+      s_kind,
+      Variant(static_cast<uint8_t>(TypeStructure::Kind::T_class)),
+      s_classname,
+      Variant(s_type_structure_non_existant_class)
+    );
+    array.setEvalScalar();
+    return array.get();
   };
   TypedValue typeCns;
   if (no_throw_on_undefined) {

@@ -32,6 +32,7 @@
 #include "hphp/hhbbc/context.h"
 #include "hphp/hhbbc/func-util.h"
 #include "hphp/hhbbc/index.h"
+#include "hphp/hhbbc/type-structure.h"
 #include "hphp/hhbbc/type-system.h"
 
 #include "hphp/util/text-util.h"
@@ -739,6 +740,16 @@ std::string show(const ClsConstLookupResult<Type>& r) {
     show(r.ty),
     show(r.found),
     r.mightThrow
+  );
+}
+
+std::string show(const ClsTypeConstLookupResult<TypeStructureResolution>& r) {
+  return folly::sformat(
+    "{{ty:{},fail:{},found:{},abstract:{}}}",
+    show(r.resolution.type),
+    r.resolution.mightFail,
+    show(r.found),
+    show(r.abstract)
   );
 }
 

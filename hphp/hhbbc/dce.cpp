@@ -44,6 +44,7 @@
 #include "hphp/hhbbc/optimize.h"
 #include "hphp/hhbbc/options.h"
 #include "hphp/hhbbc/representation.h"
+#include "hphp/hhbbc/type-structure.h"
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/unit-util.h"
 

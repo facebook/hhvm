@@ -1619,6 +1619,8 @@ TypedValue Class::clsCnsGet(const StringData* clsCnsName,
   };
 
   if (cns.kind() == ConstModifiers::Kind::Type) {
+    assertx(typeCns);
+
     Array resolvedTS;
     bool persistent = true;
     try {

@@ -19,6 +19,7 @@
 
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/representation.h"
+#include "hphp/hhbbc/type-structure.h"
 #include "hphp/hhbbc/unit-util.h"
 
 namespace HPHP { namespace HHBBC {
@@ -63,4 +64,3 @@ inline void state_after(const char* when, const php::Program& program) {
 //////////////////////////////////////////////////////////////////////
 
 }}
-

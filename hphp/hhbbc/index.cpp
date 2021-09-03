@@ -43,6 +43,7 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/tv-comparisons.h"
+#include "hphp/runtime/base/type-structure-helpers-defs.h"
 
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
@@ -59,6 +60,7 @@
 #include "hphp/hhbbc/parallel.h"
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/type-builtins.h"
+#include "hphp/hhbbc/type-structure.h"
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/unit-util.h"
 #include "hphp/hhbbc/wide-func.h"
@@ -828,6 +830,13 @@ const php::Class* Class::cls() const {
   return val.right() ? val.right()->cls : nullptr;
 }
 
+void
+Class::forEachSubclass(const std::function<void(const php::Class*)>& f) const {
+  auto const cinfo = val.right();
+  assertx(cinfo);
+  for (auto const& s : cinfo->subclassList) f(s->cls);
+}
+
 std::string show(const Class& c) {
   return c.val.match(
     [] (SString s) -> std::string {
@@ -1474,8 +1483,6 @@ struct ClsPreResolveUpdates {
     }
   };
 
-  hphp_fast_set<ClassInfo::ConstIndex, CnsHash, CnsEquals> removeNoOverride;
-
   hphp_hash_map<
     const php::Class*,
     hphp_fast_set<const php::Func*>
@@ -1543,12 +1550,6 @@ std::unique_ptr<php::Func> clone_meth(php::Unit* unit,
  * Make a flattened table of the constants on this class.
  */
 bool build_class_constants(const php::Program* program, ClassInfo* cinfo, ClsPreResolveUpdates& updates) {
-  auto const removeNoOverride = [&] (ClassInfo::ConstIndex cns) {
-    // During hhbbc/parse, all constants are pre-set to NoOverride
-    ITRACE(2, "Removing NoOverride on {}::{}\n", cns->cls->name, cns->name);
-    if (cns->isNoOverride) updates.removeNoOverride.emplace(cns);
-  };
-
   if (cinfo->parent) cinfo->clsConstants = cinfo->parent->clsConstants;
 
   auto const add = [&] (const ClassInfo::ConstIndex& cns, bool fromTrait) {
@@ -1616,10 +1617,7 @@ bool build_class_constants(const php::Program* program, ClassInfo* cinfo, ClsPre
 
       if (!RO::EvalTraitConstantInterfaceBehavior) {
         // Constants from traits silently lose
-        if (fromTrait) {
-          removeNoOverride(cns);
-          return true;
-        }
+        if (fromTrait) return true;
       }
 
       if ((cns->cls->attrs & AttrInterface ||
@@ -1646,7 +1644,6 @@ bool build_class_constants(const php::Program* program, ClassInfo* cinfo, ClsPre
       }
     }
 
-    removeNoOverride(existing);
     existing = cns;
     if (fromTrait) {
       cinfo->preResolveState->constsFromTraits.emplace(cns->name);
@@ -1668,7 +1665,6 @@ bool build_class_constants(const php::Program* program, ClassInfo* cinfo, ClsPre
   auto const addShallowConstants = [&]() {
     for (uint32_t idx = 0; idx < cinfo->cls->constants.size(); ++idx) {
       auto const cns = ClassInfo::ConstIndex { cinfo->cls, idx };
-      if (cinfo->cls->attrs & AttrTrait) removeNoOverride(cns);
       if (!add(cns, false)) return false;
     }
     return true;
@@ -4367,13 +4363,6 @@ void commitPreResolveUpdates(IndexData& index,
     },
     [&] {
       for (auto& u : updates) {
-        for (auto& cns : u.removeNoOverride) {
-          const_cast<php::Const*>(cns.get())->isNoOverride = false;
-        }
-      }
-    },
-    [&] {
-      for (auto& u : updates) {
         for (auto const& p : u.extraMethods) {
           index.classExtraMethodMap[p.first].insert(
             p.second.begin(),
@@ -4905,6 +4894,175 @@ void Index::preinit_bad_initial_prop_values() {
   );
 }
 
+void Index::preresolve_type_structures(php::Program& program) {
+  trace_time tracer("pre-resolve type-structures");
+
+  // First resolve and update type-aliases. We do this first because
+  // the resolutions may help us resolve the type-constants below
+  // faster.
+  struct TAUpdate {
+    php::TypeAlias* typeAlias;
+    SArray ts;
+  };
+
+  auto const taUpdates = parallel::map(
+    program.units,
+    [&] (const std::unique_ptr<php::Unit>& unit) {
+      CompactVector<TAUpdate> updates;
+      for (auto const& typeAlias : unit->typeAliases) {
+        assertx(typeAlias->resolvedTypeStructure.isNull());
+        if (auto const ts =
+            resolve_type_structure(*this, *typeAlias).sarray()) {
+          updates.emplace_back(TAUpdate{ typeAlias.get(), ts });
+        }
+      }
+      return updates;
+    }
+  );
+
+  parallel::for_each(
+    taUpdates,
+    [&] (const CompactVector<TAUpdate>& updates) {
+      for (auto const& u : updates) {
+        assertx(u.ts->isStatic());
+        assertx(u.ts->isDictType());
+        assertx(!u.ts->empty());
+        u.typeAlias->resolvedTypeStructure =
+          Array::attach(const_cast<ArrayData*>(u.ts));
+      }
+    }
+  );
+
+  // Then do the type-constants. Here we not only resolve the
+  // type-structures, we make a copy of each type-constant for each
+  // class. The reason is that a type-structure may be resolved
+  // differently for each class in the inheritance hierarchy (due to
+  // this::). By making a separate copy for each class, we can resolve
+  // the type-structure specifically for that class.
+  struct CnsUpdate {
+    ClassInfo* to;
+    ClassInfo::ConstIndex from;
+    php::Const cns;
+  };
+
+  auto const cnsUpdates = parallel::map(
+    m_data->allClassInfos,
+    [&] (const std::unique_ptr<ClassInfo>& cinfo) {
+      CompactVector<CnsUpdate> updates;
+      for (auto const& kv : cinfo->clsConstants) {
+        auto const& cns = *kv.second;
+        assertx(!cns.resolvedTypeStructure);
+        if (!cns.val.has_value()) continue;
+        if (cns.kind != ConstModifiers::Kind::Type) continue;
+        assertx(tvIsDict(*cns.val));
+
+        // If we can resolve it, schedule an update
+        if (auto const resolved =
+            resolve_type_structure(*this, cns, *cinfo->cls).sarray()) {
+          auto newCns = cns;
+          newCns.resolvedTypeStructure = resolved;
+          updates.emplace_back(CnsUpdate{ cinfo.get(), kv.second, newCns });
+        } else if (cinfo->cls != kv.second.cls) {
+          // Even if we can't, we need to copy it anyways (unless it's
+          // already in it's original location).
+          updates.emplace_back(CnsUpdate{ cinfo.get(), kv.second, cns });
+        }
+      }
+      return updates;
+    }
+  );
+
+  parallel::for_each(
+    cnsUpdates,
+    [&] (const CompactVector<CnsUpdate>& updates) {
+      for (auto const& u : updates) {
+        assertx(u.cns.val.has_value());
+        assertx(u.cns.kind == ConstModifiers::Kind::Type);
+
+        if (u.to->cls == u.from.cls) {
+          assertx(u.from.idx < u.to->cls->constants.size());
+          const_cast<php::Class*>(u.to->cls)->constants[u.from.idx] = u.cns;
+        } else {
+          auto const idx = u.to->cls->constants.size();
+          const_cast<php::Class*>(u.to->cls)->constants.emplace_back(u.cns);
+          u.to->clsConstants.insert_or_assign(
+            u.cns.name,
+            ClassInfo::ConstIndex{ u.to->cls, (uint32_t)idx }
+          );
+        }
+      }
+    }
+  );
+
+  // Now that everything has been updated, calculate the invariance
+  // for each resolved type-structure. For each class constant,
+  // examine all subclasses and see how the resolved type-structure
+  // changes.
+  parallel::for_each(
+    m_data->allClassInfos,
+    [&] (std::unique_ptr<ClassInfo>& cinfo) {
+      for (auto& cns : const_cast<php::Class*>(cinfo->cls)->constants) {
+        assertx(cns.invariance == php::Const::Invariance::None);
+        if (cns.kind != ConstModifiers::Kind::Type) continue;
+        if (!cns.val.has_value()) continue;
+        if (!cns.resolvedTypeStructure) continue;
+
+        auto const checkClassname =
+          tvIsString(cns.resolvedTypeStructure->get(s_classname));
+
+        // Assume it doesn't change
+        auto invariance = php::Const::Invariance::Same;
+        for (auto const& s : cinfo->subclassList) {
+          assertx(invariance != php::Const::Invariance::None);
+          assertx(
+            IMPLIES(!checkClassname,
+                    invariance != php::Const::Invariance::ClassnamePresent)
+          );
+          if (s == cinfo.get()) continue;
+
+          auto const it = s->clsConstants.find(cns.name);
+          assertx(it != s->clsConstants.end());
+          if (it->second.cls != s->cls) continue;
+          auto const& scns = *it->second;
+
+          // Overridden in some strange way. Be pessimistic.
+          if (!scns.val.has_value() ||
+              scns.kind != ConstModifiers::Kind::Type) {
+            invariance = php::Const::Invariance::None;
+            break;
+          }
+
+          // The resolved type structure in this subclass is not the
+          // same.
+          if (scns.resolvedTypeStructure != cns.resolvedTypeStructure) {
+            if (!scns.resolvedTypeStructure) {
+              // It's not even resolved here, so we can't assume
+              // anything.
+              invariance = php::Const::Invariance::None;
+              break;
+            }
+            // We might still be able to assert that a classname is
+            // always present, or a resolved type structure at least
+            // exists.
+            if (invariance == php::Const::Invariance::Same ||
+                invariance == php::Const::Invariance::ClassnamePresent) {
+              invariance =
+                (checkClassname &&
+                 tvIsString(scns.resolvedTypeStructure->get(s_classname)))
+                ? php::Const::Invariance::ClassnamePresent
+                : php::Const::Invariance::Present;
+            }
+          }
+        }
+
+        if (invariance != php::Const::Invariance::None) {
+          cns.invariance = invariance;
+        }
+      }
+    }
+  );
+}
+
 //////////////////////////////////////////////////////////////////////
 
 const CompactVector<const php::Class*>*
@@ -4995,6 +5153,12 @@ Optional<res::Class> Index::parentCls(const Context& ctx) const {
   if (!ctx.cls || !ctx.cls->parentName) return std::nullopt;
   if (auto const parent = resolve_class(ctx.cls).parent()) return parent;
   return resolve_class(ctx, ctx.cls->parentName);
+}
+
+const php::TypeAlias* Index::lookup_type_alias(SString name) const {
+  auto const it = m_data->typeAliases.find(name);
+  if (it == m_data->typeAliases.end()) return nullptr;
+  return it->second;
 }
 
 Index::ResolvedInfo<Optional<res::Class>>
@@ -5570,35 +5734,6 @@ bool Index::is_effect_free(res::Func rfunc) const {
   );
 }
 
-const php::Const* Index::lookup_class_const_ptr(Context ctx,
-                                                res::Class rcls,
-                                                SString cnsName,
-                                                bool allow_tconst) const {
-  if (rcls.val.left()) return nullptr;
-  auto const cinfo = rcls.val.right();
-
-  auto const it = cinfo->clsConstants.find(cnsName);
-  if (it != end(cinfo->clsConstants)) {
-    if (!it->second->val.has_value() ||
-        it->second->kind == ConstModifiers::Kind::Context ||
-        (!allow_tconst && it->second->kind == ConstModifiers::Kind::Type)) {
-      // This is an abstract class constant, context constant or type constant
-      return nullptr;
-    }
-    if (it->second->val.value().m_type == KindOfUninit) {
-      // This is a class constant that needs an 86cinit to run.
-      // We'll add a dependency to make sure we're re-run if it
-      // resolves anything.
-      auto const cinit = it->second->cls->methods.back().get();
-      assertx(cinit->name == s_86cinit.get());
-      add_dependency(*m_data, cinit, ctx, Dep::ClsConst);
-      return nullptr;
-    }
-    return it->second.get();
-  }
-  return nullptr;
-}
-
 ClsConstLookupResult<> Index::lookup_class_constant(Context ctx,
                                                     const Type& cls,
                                                     const Type& name) const {
@@ -5720,6 +5855,121 @@ ClsConstLookupResult<> Index::lookup_class_constant(Context ctx,
         );
       }
 
+      ITRACE(4, "-> {}\n", show(*result));
+      return *result;
+    }
+    case DCls::Exact:
+      return process(cinfo);
+  }
+  always_assert(false);
+}
+
+ClsTypeConstLookupResult<>
+Index::lookup_class_type_constant(
+    const Type& cls,
+    const Type& name,
+    const ClsTypeConstLookupResolver& resolver) const {
+  ITRACE(4, "lookup_class_type_constant: {}::{}\n", show(cls), show(name));
+  Trace::Indent _;
+
+  using R = ClsTypeConstLookupResult<>;
+
+  auto const conservative = [] {
+    ITRACE(4, "conservative\n");
+    return R{
+      TypeStructureResolution { TSDictN, true },
+      TriBool::Maybe,
+      TriBool::Maybe
+    };
+  };
+
+  auto const notFound = [] {
+    ITRACE(4, "not found\n");
+    return R {
+      TypeStructureResolution { TBottom, false },
+      TriBool::No,
+      TriBool::No
+    };
+  };
+
+  // Unlike lookup_class_constant, we distinguish abstract from
+  // not-found, as the runtime sometimes treats them differently.
+  auto const abstract = [] {
+    ITRACE(4, "abstract\n");
+    return R {
+      TypeStructureResolution { TBottom, false },
+      TriBool::No,
+      TriBool::Yes
+    };
+  };
+
+  if (!is_specialized_cls(cls)) return conservative();
+
+  auto const dcls = dcls_of(cls);
+  if (dcls.cls.val.left()) return conservative();
+  auto const cinfo = dcls.cls.val.right();
+
+  // As in lookup_class_constant, we could handle this, but it's not
+  // worth it.
+  if (!is_specialized_string(name)) return conservative();
+  auto const sname = sval_of(name);
+
+  auto const process = [&] (const ClassInfo* ci) {
+    ITRACE(4, "{}:\n", ci->cls->name);
+    Trace::Indent _;
+
+    // Does the type constant exist on this class?
+    auto const it = ci->clsConstants.find(sname);
+    if (it == ci->clsConstants.end()) return notFound();
+
+    // Is it an actual non-abstract type-constant?
+    auto const& cns = *it->second;
+    if (cns.kind != ConstModifiers::Kind::Type) return notFound();
+    if (!cns.val.has_value()) return abstract();
+
+    assertx(tvIsDict(*cns.val));
+    ITRACE(4, "({}) {}\n", cns.cls->name, show(dict_val(val(*cns.val).parr)));
+
+    // If we've been given a resolver, use it. Otherwise resolve it in
+    // the normal way.
+    auto resolved = resolver
+      ? resolver(cns, *ci->cls)
+      : resolve_type_structure(*this, cns, *ci->cls);
+
+    // The result of resolve_type_structure isn't, in general,
+    // static. However a type-constant will always be, so force that
+    // here.
+    assertx(resolved.type.is(BBottom) || resolved.type.couldBe(BUnc));
+    resolved.type &= TUnc;
+    auto const r = R{
+      std::move(resolved),
+      TriBool::Yes,
+      TriBool::No
+    };
+    ITRACE(4, "-> {}\n", show(r));
+    return r;
+  };
+
+  // If we know the exact class, just look up the constant and we're
+  // done. Otherwise, loop over all possible subclasses and do the
+  // lookup for each.
+  switch (dcls.type) {
+    case DCls::Sub: {
+      Optional<R> result;
+      for (auto const sub : cinfo->subclassList) {
+        if (result) {
+          ITRACE(5, "-> {}\n", show(*result));
+        }
+        auto r = process(sub);
+        if (!result) {
+          result.emplace(std::move(r));
+        } else {
+          *result |= r;
+        }
+      }
+      // This can happen if cls is an interface with no
+      // implementations.
+      if (!result) return notFound();
       ITRACE(4, "-> {}\n", show(*result));
       return *result;
     }

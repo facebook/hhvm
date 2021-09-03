@@ -34,6 +34,11 @@ namespace HPHP {
 struct String;
 struct StaticString;
 
+/*
+ * NB: This resolution logic and HHBBC must always agree exactly. If
+ * you change anything here, HHBBC must be changed to match.
+ */
+
 namespace {
 
 /* TSEnv holds values that are propagated through the entire resolution process
@@ -841,7 +846,24 @@ Array resolveTS(TSEnv& env, const TSCtx& ctx, const Array& arr) {
       break;
     }
     case TypeStructure::Kind::T_xhp:
-    default:
+    case TypeStructure::Kind::T_void:
+    case TypeStructure::Kind::T_int:
+    case TypeStructure::Kind::T_bool:
+    case TypeStructure::Kind::T_float:
+    case TypeStructure::Kind::T_string:
+    case TypeStructure::Kind::T_resource:
+    case TypeStructure::Kind::T_num:
+    case TypeStructure::Kind::T_arraykey:
+    case TypeStructure::Kind::T_noreturn:
+    case TypeStructure::Kind::T_mixed:
+    case TypeStructure::Kind::T_class:
+    case TypeStructure::Kind::T_interface:
+    case TypeStructure::Kind::T_trait:
+    case TypeStructure::Kind::T_enum:
+    case TypeStructure::Kind::T_nonnull:
+    case TypeStructure::Kind::T_null:
+    case TypeStructure::Kind::T_nothing:
+    case TypeStructure::Kind::T_dynamic:
       return arr.toDict();
   }
 

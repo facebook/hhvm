@@ -63,6 +63,7 @@ inline TriBool& operator&=(TriBool& a, TriBool b) {
 inline TriBool yesOrNo(bool b) { return b ? TriBool::Yes : TriBool::No; }
 inline TriBool yesOrMaybe(bool b) { return b ? TriBool::Yes : TriBool::Maybe; }
 inline TriBool maybeOrNo(bool b) { return b ? TriBool::Maybe : TriBool::No; }
+inline TriBool noOrMaybe(bool b) { return b ? TriBool::No : TriBool::Maybe; }
 
 inline const char* show(TriBool b) {
   if (b == TriBool::Yes) return "yes";

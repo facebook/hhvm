@@ -51,6 +51,8 @@ struct CallContext;
 struct PropertiesInfo;
 struct MethodsInfo;
 
+struct TypeStructureResolution;
+
 extern const Type TCell;
 
 namespace php {
@@ -60,6 +62,7 @@ struct Const;
 struct Func;
 struct Unit;
 struct Program;
+struct TypeAlias;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -248,6 +251,33 @@ inline ClsConstLookupResult<T>& operator|=(ClsConstLookupResult<T>& a,
 
 std::string show(const ClsConstLookupResult<Type>&);
 
+/*
+ * The result of Index::lookup_class_type_constant
+ */
+template <typename T = TypeStructureResolution>
+struct ClsTypeConstLookupResult {
+  T resolution;     // The result from resolving the type-structure
+  TriBool found;    // If the constant was found
+  TriBool abstract; // If the constant was abstract (this only applies
+                    // to the subset which wasn't found).
+};
+
+template <typename T>
+inline ClsTypeConstLookupResult<T>& operator|=(
+    ClsTypeConstLookupResult<T>& a,
+    const ClsTypeConstLookupResult<T>& b) {
+  a.resolution |= b.resolution;
+  if (a.found == TriBool::Yes) {
+    a.abstract = b.abstract;
+  } else if (b.found != TriBool::Yes) {
+    a.abstract |= b.abstract;
+  }
+  a.found |= b.found;
+  return a;
+}
+
+std::string show(const ClsTypeConstLookupResult<TypeStructureResolution>&);
+
 //////////////////////////////////////////////////////////////////////
 
 // private types
@@ -391,6 +421,12 @@ struct Class {
    * nullptr.
    */
   const php::Class* cls() const;
+
+  /*
+   * Invoke the given function on every possible subclass of this
+   * class. This must be a resolved class.
+   */
+  void forEachSubclass(const std::function<void(const php::Class*)>&) const;
 
 private:
   explicit Class(Either<SString,ClassInfo*>);
@@ -608,6 +644,12 @@ struct Index {
   Optional<res::Class> resolve_class(Context, SString name) const;
 
   /*
+   * Find a type-alias with the given name. If a nullptr is returned,
+   * then no type-alias exists with that name.
+   */
+  const php::TypeAlias* lookup_type_alias(SString name) const;
+
+  /*
    * Try to resolve self/parent types for the given context
    */
   Optional<res::Class> selfCls(const Context& ctx) const;
@@ -725,15 +767,26 @@ struct Index {
   lookup_class_constant(Context ctx, const Type& cls, const Type& name) const;
 
   /*
-   * Lookup what the best known Type for a class constant would be,
-   * using a given Index and Context, if a class of that name were
-   * loaded.
-   * If allow_tconst is not set, type constants will not be returned.
-   * lookup_class_const_ptr version returns the statically known version
-   * of the const if it can find it, otherwise returns nullptr.
+   * Lookup metadata about the constant access `cls'::`name', where
+   * that constant is meant to be a type-constant. The returned
+   * metadata includes the best known type of the resolved
+   * type-structure, whether it was found, and whether it was
+   * abstract. This is intended to be the source of truth about
+   * type-constants during analysis. The returned type-structure type
+   * will always be static.
+   *
+   * By default, lookup_class_type_constant calls
+   * resolve_type_structure to resolve any found type-structure. This
+   * behavior can be overridden by providing a customer resolver.
    */
-  const php::Const* lookup_class_const_ptr(Context, res::Class, SString cns,
-                                           bool allow_tconst) const;
+  using ClsTypeConstLookupResolver =
+    std::function<TypeStructureResolution(const php::Const&,const php::Class&)>;
+
+  ClsTypeConstLookupResult<>
+  lookup_class_type_constant(
+    const Type& cls,
+    const Type& name,
+    const ClsTypeConstLookupResolver& resolver = {}) const;
 
   /*
    * Lookup what the best known Type for a constant would be, using a
@@ -960,6 +1013,12 @@ struct Index {
    * redundant re-analyzes.
    */
   void preinit_bad_initial_prop_values();
+
+  /*
+   * Attempt to pre-resolve as many type-structures as possible in
+   * type-constants and type-aliases.
+   */
+  void preresolve_type_structures(php::Program&);
 
   /*
    * Refine the types of the class constants defined by an 86cinit,

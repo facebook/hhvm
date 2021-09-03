@@ -471,7 +471,6 @@ struct Const {
   Invariance invariance : 2;
   bool isAbstract   : 1;
   bool isFromTrait  : 1;
-  bool isNoOverride : 1;
 };
 
 /*

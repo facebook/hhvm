@@ -33,6 +33,7 @@
 #include "hphp/hhbbc/index.h"
 #include "hphp/hhbbc/options.h"
 #include "hphp/hhbbc/representation.h"
+#include "hphp/hhbbc/type-structure.h"
 #include "hphp/hhbbc/unit-util.h"
 
 #include "hphp/runtime/base/repo-auth-type-array.h"
@@ -1221,7 +1222,7 @@ void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
 
   for (auto& cconst : cls.constants) {
     if (nativeConsts && nativeConsts->count(cconst.name)) {
-      break;
+      continue;
     }
     if (cconst.kind == ConstModifiers::Kind::Context) {
       assertx(cconst.cls == &cls);

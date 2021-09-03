@@ -20,11 +20,13 @@
 
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/type-structure-helpers-defs.h"
 
 #include "hphp/hhbbc/eval-cell.h"
 #include "hphp/hhbbc/interp-internal.h"
 #include "hphp/hhbbc/optimize.h"
 #include "hphp/hhbbc/type-builtins.h"
+#include "hphp/hhbbc/type-structure.h"
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/unit-util.h"
 
@@ -296,115 +298,208 @@ TypeOrReduced builtin_is_list_like(ISS& env, const php::Func* func,
 }
 
 /*
- * This function optimizes type_structure{,_classname} statically.
- * Does not modify stack or locals.
- * Sets will_fail to true if we statically determined that this function
- * will throw.
- * If the resulting darray/dict is statically determined, it returns it.
- * Otherwise returns nullptr.
+ * Optimize type_structure, type_structure_nothrow, and
+ * type_structure_classname flavors. Returns the best known result
+ * they produce, and whether they might throw. Returns std::nullopt if
+ * no optimization should be done.
  */
-ArrayData* impl_type_structure_opts(ISS& env,
-                                    const php::Func* func, const FCallArgs& fca,
-                                    bool& will_fail) {
+Optional<std::pair<Type, TriBool>>
+impl_builtin_type_structure(ISS& env, const php::Func* func,
+                            const FCallArgs& fca,
+                            bool no_throw_on_undefined) {
   assertx(fca.numArgs() >= 1 && fca.numArgs() <= 2);
-  auto const fail = [&] {
-    will_fail = true;
-    return nullptr;
-  };
-  auto const result = [&](res::Class rcls, const StringData* cns,
-                          bool check_lsb) -> ArrayData* {
-    auto const cnst =
-      env.index.lookup_class_const_ptr(env.ctx, rcls, cns, true);
-    if (!cnst || !cnst->val || cnst->kind != ConstModifiers::Kind::Type) {
-      if (check_lsb && (!cnst || !cnst->val)) return nullptr;
-      // Either the const does not exist, it is abstract or is not a type const
-      return fail();
-    }
-    if (check_lsb && !cnst->isNoOverride) return nullptr;
-    auto const typeCns = cnst->val;
-    if (!tvIsDict(&*typeCns)) return nullptr;
-    return resolveTSStatically(env, typeCns->m_data.parr, env.ctx.cls);
-  };
-  auto const cns_name = tv(getArg(env, func, fca, 1));
-  auto const cls_or_obj = tv(getArg(env, func, fca, 0));
-  if (!cns_name || !tvIsString(&*cns_name)) return nullptr;
-  auto const cns_sd = cns_name->m_data.pstr;
-  if (!cls_or_obj) {
-    if (auto const last = op_from_slot(env, 1)) {
-      if (last->op == Op::ClassName || last->op == Op::LazyClassFromClass) {
-        if (auto const prev = op_from_slot(env, 1, 1)) {
-          if (prev->op == Op::LateBoundCls) {
-            if (!env.ctx.cls) return fail();
-            return result(env.index.resolve_class(env.ctx.cls), cns_sd, true);
-          }
-        }
-      }
-    }
-    return nullptr;
-  }
-  if (tvIsString(&*cls_or_obj) || tvIsLazyClass(&*cls_or_obj)) {
-    auto const rcls =
-      env.index.resolve_class(env.ctx,
-                              tvIsString(&*cls_or_obj) ?
-                              cls_or_obj->m_data.pstr :
-                              cls_or_obj->m_data.plazyclass.name());
-    if (!rcls || !rcls->resolved()) return nullptr;
-    return result(*rcls, cns_sd, false);
-  } else if (!tvIsObject(&*cls_or_obj) && !tvIsClass(&*cls_or_obj)) {
-    return fail();
-  }
-  return nullptr;
-}
 
-TypeOrReduced impl_builtin_type_structure(ISS& env, const php::Func* func,
-                                          const FCallArgs& fca, bool no_throw) {
-  assertx(fca.numArgs() >= 1 && fca.numArgs() <= 2);
-  bool fail = false;
-  auto const ts = impl_type_structure_opts(env, func, fca, fail);
-  if (fail && !no_throw) {
-    unreachable(env);
-    return TBottom;
+  auto const name = getArg(env, func, fca, 1);
+
+  if (name.subtypeOf(BInitNull)) {
+    // Type-alias case:
+    auto throws = TriBool::No;
+    auto const clsStr = [&] () -> SString {
+      auto const t = getArg(env, func, fca, 0);
+      if (t.subtypeOf(BCls) && is_specialized_cls(t)) {
+        auto const dcls = dcls_of(t);
+        if (dcls.type != DCls::Exact) return nullptr;
+        if (RO::EvalRaiseClassConversionWarning) throws = TriBool::Maybe;
+        return dcls.cls.name();
+      }
+      if (t.subtypeOf(BStr) && is_specialized_string(t)) {
+        return sval_of(t);
+      }
+      if (t.subtypeOf(BLazyCls) && is_specialized_lazycls(t)) {
+        if (RO::EvalRaiseClassConversionWarning) throws = TriBool::Maybe;
+        return lazyclsval_of(t);
+      }
+      return nullptr;
+    }();
+    if (!clsStr) return std::nullopt;
+
+    auto const typeAlias = env.index.lookup_type_alias(clsStr);
+    if (!typeAlias) {
+      // No type-alias with that name
+      unreachable(env);
+      return std::make_pair(TBottom, TriBool::Yes);
+    }
+
+    // Found a type-alias, resolve it's type-structure.
+    auto const r = resolve_type_structure(env.index, *typeAlias);
+    if (r.type.is(BBottom)) {
+      // Resolution will always fail
+      unreachable(env);
+      return std::make_pair(TBottom, TriBool::Yes);
+    }
+
+    return std::make_pair(
+      r.type,
+      noOrMaybe(throws == TriBool::No && !r.mightFail)
+    );
+  } else if (!name.subtypeOf(BStr)) {
+    // Don't know whether it's a class or type-alias.
+    return std::nullopt;
   }
-  if (!ts) return NoReduced{};
-  if (fca.numArgs() == 2) reduce(env, bc::PopC {});
-  reduce(env, bc::PopC {});
-  reduce(env, bc::Dict { ts });
-  return Reduced{};
+
+  // Class constant case:
+
+  auto throws = TriBool::No;
+
+  auto const cls = [&] {
+    auto const t = getArg(env, func, fca, 0);
+    if (t.subtypeOf(BCls)) return t;
+    if (t.subtypeOf(BObj)) return objcls(t);
+    if (t.subtypeOf(BStr) && is_specialized_string(t)) {
+      auto const str = sval_of(t);
+      auto const rcls = env.index.resolve_class(env.ctx, str);
+      if (!rcls || !rcls->resolved()) {
+        throws = TriBool::Maybe;
+        return TCls;
+      }
+      return clsExact(*rcls);
+    }
+    if (t.subtypeOf(BLazyCls) && is_specialized_lazycls(t)) {
+      auto const str = lazyclsval_of(t);
+      auto const rcls = env.index.resolve_class(env.ctx, str);
+      if (!rcls || !rcls->resolved()) {
+        throws = TriBool::Maybe;
+        return TCls;
+      }
+      return clsExact(*rcls);
+    }
+    throws = TriBool::Maybe;
+    return TCls;
+  }();
+
+  auto lookup = env.index.lookup_class_type_constant(cls, name);
+  assertx(lookup.resolution.type.subtypeOf(BSDictN));
+
+  // Match behavior of runtime and return "fake" resolution for
+  // nothrow failure.
+  auto const fake = [] {
+    auto array = make_dict_array(
+      s_kind,
+      Variant(static_cast<uint8_t>(TypeStructure::Kind::T_class)),
+      s_classname,
+      Variant(s_type_structure_non_existant_class)
+    );
+    array.setEvalScalar();
+    return dict_val(array.get());
+  };
+
+  switch (lookup.found) {
+    case TriBool::No:
+      assertx(!lookup.resolution.mightFail);
+      assertx(lookup.resolution.type.is(BBottom));
+      if (!no_throw_on_undefined || lookup.abstract == TriBool::No) {
+        throws = TriBool::Yes;
+      } else {
+        if (lookup.abstract == TriBool::Maybe) throws = TriBool::Maybe;
+        lookup.resolution.type = fake();
+      }
+      break;
+    case TriBool::Maybe:
+      if (!no_throw_on_undefined || lookup.abstract == TriBool::No) {
+        throws = TriBool::Maybe;
+      } else {
+        if (lookup.abstract == TriBool::Maybe) throws = TriBool::Maybe;
+        lookup.resolution.type |= fake();
+      }
+      break;
+    case TriBool::Yes:
+      assertx(lookup.abstract == TriBool::No);
+      break;
+  }
+
+  if (lookup.resolution.mightFail) {
+    if (no_throw_on_undefined) {
+      lookup.resolution.type |= fake();
+    } else if (throws != TriBool::Yes) {
+      throws =
+        lookup.resolution.type.is(BBottom) ? TriBool::Yes : TriBool::Maybe;
+    }
+  }
+
+  return std::make_pair(lookup.resolution.type, throws);
 }
 
 TypeOrReduced builtin_type_structure(ISS& env, const php::Func* func,
                                      const FCallArgs& fca) {
-  assertx(fca.numArgs() >= 1 && fca.numArgs() <= 2);
-  return impl_builtin_type_structure(env, func, fca, false);
+  auto const r = impl_builtin_type_structure(env, func, fca, false);
+  if (!r) return NoReduced{};
+  switch (r->second) {
+   case TriBool::Yes:
+      unreachable(env);
+      return TBottom;
+    case TriBool::No:
+      effect_free(env);
+      constprop(env);
+      return r->first;
+    case TriBool::Maybe:
+      return r->first;
+  }
+  always_assert(false);
 }
 
 TypeOrReduced builtin_type_structure_no_throw(ISS& env, const php::Func* func,
                                               const FCallArgs& fca) {
-  assertx(fca.numArgs() >= 1 && fca.numArgs() <= 2);
-  return impl_builtin_type_structure(env, func, fca, true);
+  auto const r = impl_builtin_type_structure(env, func, fca, true);
+  if (!r) return NoReduced{};
+  switch (r->second) {
+   case TriBool::Yes:
+      unreachable(env);
+      return TBottom;
+    case TriBool::No:
+      effect_free(env);
+      constprop(env);
+      return r->first;
+    case TriBool::Maybe:
+      return r->first;
+  }
+  always_assert(false);
 }
 
 const StaticString s_classname("classname");
 
 TypeOrReduced builtin_type_structure_classname(ISS& env, const php::Func* func,
                                                const FCallArgs& fca) {
-  assertx(fca.numArgs() >= 1 && fca.numArgs() <= 2);
-  bool fail = false;
-  auto const ts = impl_type_structure_opts(env, func, fca, fail);
-  if (fail) {
+  auto const r = impl_builtin_type_structure(env, func, fca, false);
+  if (!r) return NoReduced{};
+  if (r->second == TriBool::Yes) {
     unreachable(env);
     return TBottom;
   }
-  if (ts) {
-    auto const classname_field = ts->get(s_classname.get());
-    if (isStringType(classname_field.type())) {
-      if (fca.numArgs() == 2) reduce(env, bc::PopC {});
-      reduce(env, bc::PopC {},
-             bc::String { classname_field.val().pstr });
-      return Reduced{};
-    }
+  assertx(r->first.subtypeOf(BDictN));
+
+  auto const [classname, present] =
+    array_like_elem(r->first, sval(s_classname.get()));
+  if (classname.is(BBottom)) {
+    unreachable(env);
+    return TBottom;
   }
-  return TSStr;
+  if (!classname.couldBe(BSStr)) return NoReduced{};
+
+  if (r->second == TriBool::No && present) {
+    effect_free(env);
+    constprop(env);
+  }
+  return intersection_of(classname, TSStr);
 }
 
 #define SPECIAL_BUILTINS                                                \

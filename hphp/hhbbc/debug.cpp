@@ -119,7 +119,28 @@ void dump_class_state(std::ostream& out,
     if (constant.val) {
       auto const ty = from_cell(*constant.val);
       out << clsName << "::" << constant.name->data() << " :: "
-          << (ty.subtypeOf(BUninit) ? "<dynamic>" : show(ty)) << '\n';
+          << (ty.subtypeOf(BUninit) ? "<dynamic>" : show(ty));
+      if (constant.kind == ConstModifiers::Kind::Type) {
+        if (constant.resolvedTypeStructure) {
+          out << " (" << show(dict_val(constant.resolvedTypeStructure)) << ")";
+          switch ((php::Const::Invariance)constant.invariance) {
+            case php::Const::Invariance::None:
+              break;
+            case php::Const::Invariance::Present:
+              out << " <present>";
+              break;
+            case php::Const::Invariance::ClassnamePresent:
+              out << " <classname>";
+              break;
+            case php::Const::Invariance::Same:
+              out << " <same>";
+              break;
+          }
+        } else {
+          out << " <unresolved>";
+        }
+      }
+      out << '\n';
     }
   }
 }

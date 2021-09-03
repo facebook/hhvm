@@ -38,6 +38,7 @@
 #include "hphp/hhbbc/context.h"
 #include "hphp/hhbbc/eval-cell.h"
 #include "hphp/hhbbc/index.h"
+#include "hphp/hhbbc/type-structure.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -3817,7 +3818,9 @@ Optional<Type> type_of_type_structure(const Index& index,
         auto map = MapElems{};
         auto const fields = get_ts_fields(ts);
         for (auto i = 0; i < fields->size(); i++) {
-          auto key = fields->getKey(i).getStringData();
+          auto const keyV = fields->getKey(i);
+          if (!keyV.isString()) return std::nullopt;
+          auto key = keyV.getStringData();
           auto const wrapper = fields->getValue(i).getArrayData();
 
           // Shapes can be defined using class constants, these keys
@@ -3849,8 +3852,18 @@ Optional<Type> type_of_type_structure(const Index& index,
 
           // Optional fields are hard to represent as a type
           if (is_optional_ts_shape_field(wrapper)) return std::nullopt;
-          auto t = type_of_type_structure(index, ctx, get_ts_value(wrapper));
+
+          auto const value = [&] () -> SArray {
+            auto const v = wrapper->get(s_value);
+            if (!v.is_init()) return wrapper;
+            if (!tvIsDict(v)) return nullptr;
+            return val(v).parr;
+          }();
+          if (!value) return std::nullopt;
+
+          auto t = type_of_type_structure(index, ctx, value);
           if (!t) return std::nullopt;
+
           map.emplace_back(
             make_tv<KindOfPersistentString>(key),
             MapElem::SStrKey(remove_uninit(std::move(t.value())))

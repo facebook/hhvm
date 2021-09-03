@@ -1445,10 +1445,24 @@ void fcallObjMethod(IRGS& env, const FCallArgs& fca, const StringData* clsHint,
     if (extraInput) popDecRef(env, DataTypeGeneric);
     if (fca.hasGenerics()) popDecRef(env, DataTypeGeneric);
     if (fca.hasUnpack()) popDecRef(env, DataTypeGeneric);
-    for (uint32_t i = 0; i < fca.numArgs; ++i) popDecRef(env, DataTypeGeneric);
+
+    // Save any inout arguments, as those will be pushed unchanged as
+    // the output.
+    std::vector<SSATmp*> inOuts;
+    for (uint32_t i = 0; i < fca.numArgs; ++i) {
+      if (fca.enforceInOut() && fca.isInOut(fca.numArgs - i - 1)) {
+        inOuts.emplace_back(popC(env));
+      } else {
+        popDecRef(env, DataTypeGeneric);
+      }
+    }
+
     for (uint32_t i = 0; i < kNumActRecCells - 1; ++i) popU(env);
     popDecRef(env, DataTypeGeneric);
     for (uint32_t i = 0; i < fca.numRets - 1; ++i) popU(env);
+
+    assertx(inOuts.size() == fca.numRets - 1);
+    for (auto const tmp : inOuts) push(env, tmp);
     push(env, cns(env, TInitNull));
     return;
   }

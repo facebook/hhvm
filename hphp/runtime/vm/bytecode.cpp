@@ -3828,10 +3828,24 @@ fcallObjMethodHandleInput(const FCallArgs& fca, ObjMethodOp op,
   if (extraStk) stack.popC();
   if (fca.hasGenerics()) stack.popC();
   if (fca.hasUnpack()) stack.popC();
-  for (uint32_t i = 0; i < fca.numArgs; ++i) stack.popTV();
+
+  // Save any inout arguments, as those will be pushed unchanged as
+  // the output.
+  std::vector<TypedValue> inOuts;
+  for (uint32_t i = 0; i < fca.numArgs; ++i) {
+    if (fca.enforceInOut() && fca.isInOut(fca.numArgs - i - 1)) {
+      inOuts.emplace_back(*stack.top());
+      stack.discard();
+    } else {
+      stack.popTV();
+    }
+  }
   stack.popU();
   stack.popC();
   for (uint32_t i = 0; i < fca.numRets - 1; ++i) stack.popU();
+
+  assertx(inOuts.size() == fca.numRets - 1);
+  for (auto const tv : inOuts) *stack.allocC() = tv;
   stack.pushNull();
 
   // Handled.

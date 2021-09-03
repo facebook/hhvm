@@ -3569,9 +3569,13 @@ bool fcallOptimizeChecks(
   const FCallArgs& fca,
   const res::Func& func,
   FCallWithFCA fcallWithFCA,
-  Optional<uint32_t> inOutNum
+  Optional<uint32_t> inOutNum,
+  bool maybeNullsafe
 ) {
-  if (fca.enforceInOut()) {
+  // Don't optimize away in-out checks if we might use the null safe
+  // operator. If we do so, we need the in-out bits to shuffle the
+  // stack properly.
+  if (!maybeNullsafe && fca.enforceInOut()) {
     if (inOutNum == fca.numRets() - 1) {
       bool match = true;
       for (auto i = 0; i < fca.numArgs(); ++i) {
@@ -3754,39 +3758,63 @@ Type typeFromWH(Type t) {
   return wait_handle_inner(t);
 }
 
-void pushCallReturnType(ISS& env, Type&& ty, const FCallArgs& fca) {
+void pushCallReturnType(ISS& env,
+                        Type ty,
+                        const FCallArgs& fca,
+                        bool nullsafe,
+                        std::vector<Type> inOuts) {
   auto const numRets = fca.numRets();
   if (numRets != 1) {
     assertx(fca.asyncEagerTarget() == NoBlockId);
+    assertx(IMPLIES(nullsafe, inOuts.size() == numRets - 1));
 
     for (auto i = uint32_t{0}; i < numRets - 1; ++i) popU(env);
     if (!ty.couldBe(BVecN)) {
       // Function cannot have an in-out args match, so call will
       // always fail.
-      for (int32_t i = 0; i < numRets; i++) push(env, TBottom);
-      return unreachable(env);
+      if (!nullsafe) {
+        for (int32_t i = 0; i < numRets; i++) push(env, TBottom);
+        return unreachable(env);
+      }
+      // We'll only hit the nullsafe null case, so the outputs are the
+      // inout inputs.
+      for (auto& t : inOuts) push(env, std::move(t));
+      push(env, TInitNull);
+      return;
     }
+
+    // If we might use the nullsafe operator, we need to union in the
+    // null case (which means the inout args are unchanged).
     if (is_specialized_array_like(ty)) {
       for (int32_t i = 1; i < numRets; i++) {
-        push(env, array_like_elem(ty, ival(i)).first);
+        auto elem = array_like_elem(ty, ival(i)).first;
+        if (nullsafe) elem |= inOuts[i-1];
+        push(env, std::move(elem));
       }
-      push(env, array_like_elem(ty, ival(0)).first);
+      push(
+        env,
+        nullsafe
+          ? opt(array_like_elem(ty, ival(0)).first)
+          : array_like_elem(ty, ival(0)).first
+      );
     } else {
       for (int32_t i = 0; i < numRets; ++i) push(env, TInitCell);
     }
     return;
   }
-  if (ty.subtypeOf(BBottom)) {
-    // The callee function never returns.  It might throw, or loop
-    // forever.
-    push(env, TBottom);
-    return unreachable(env);
-  }
   if (fca.asyncEagerTarget() != NoBlockId) {
+    assertx(!ty.is(BBottom));
     push(env, typeFromWH(ty));
     assertx(!topC(env).subtypeOf(BBottom));
     env.propagate(fca.asyncEagerTarget(), &env.state);
     popC(env);
+  }
+  if (nullsafe) ty = opt(std::move(ty));
+  if (ty.is(BBottom)) {
+    // The callee function never returns.  It might throw, or loop
+    // forever.
+    push(env, TBottom);
+    return unreachable(env);
   }
   return push(env, std::move(ty));
 }
@@ -3813,14 +3841,20 @@ void fcallKnownImpl(
       args[i] = topCV(env, firstArgPos - i);
     }
 
-    auto ty = fca.hasUnpack()
+    return fca.hasUnpack()
       ? env.index.lookup_return_type(env.ctx, &env.collect.methods, func)
       : env.index.lookup_return_type(
           env.ctx, &env.collect.methods, args, context, func
         );
-    if (nullsafe) ty = opt(std::move(ty));
-    return ty;
   }();
+
+  // If there's a caller/callee inout mismatch, then the call will
+  // always fail.
+  if (fca.enforceInOut()) {
+    if (inOutNum && (*inOutNum + 1 != fca.numRets())) {
+      returnType = TBottom;
+    }
+  }
 
   if (fca.asyncEagerTarget() != NoBlockId && typeFromWH(returnType) == TBottom) {
     // Kill the async eager target if the function never returns.
@@ -3834,21 +3868,21 @@ void fcallKnownImpl(
     handle_function_exists(env, topT(env, numExtraInputs + numArgs - 1));
   }
 
-  // If there's a caller/callee inout mismatch, then the call will
-  // always fail.
-  if (fca.enforceInOut()) {
-    if (inOutNum && (*inOutNum + 1 != fca.numRets())) {
-      returnType = TBottom;
-    }
-  }
-
   for (auto i = uint32_t{0}; i < numExtraInputs; ++i) popC(env);
   if (fca.hasGenerics()) popC(env);
   if (fca.hasUnpack()) popC(env);
-  for (auto i = uint32_t{0}; i < numArgs; ++i) popCV(env);
+  std::vector<Type> inOuts;
+  for (auto i = uint32_t{0}; i < numArgs; ++i) {
+    if (nullsafe && fca.isInOut(numArgs - i - 1)) {
+      inOuts.emplace_back(popCV(env));
+    } else {
+      popCV(env);
+    }
+  }
   popU(env);
   popCU(env);
-  pushCallReturnType(env, std::move(returnType), fca);
+  pushCallReturnType(env, std::move(returnType),
+                     fca, nullsafe, std::move(inOuts));
 }
 
 void fcallUnknownImpl(ISS& env, const FCallArgs& fca) {
@@ -3895,7 +3929,7 @@ void in(ISS& env, const bc::FCallFuncD& op) {
     ? env.index.lookup_num_inout_params(env.ctx, rfunc)
     : std::nullopt;
 
-  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut) ||
+  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut, false) ||
       fcallTryFold(env, op.fca, rfunc, TBottom, false, 0)) {
     return;
   }
@@ -3958,7 +3992,9 @@ void fcallFuncStr(ISS& env, const bc::FCallFunc& op) {
     ? env.index.lookup_num_inout_params(env.ctx, rfunc)
     : std::nullopt;
 
-  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut)) return;
+  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut, false)) {
+    return;
+  }
   fcallKnownImpl(env, op.fca, rfunc, TBottom, false, 1, updateBC, numInOut);
 }
 
@@ -4092,11 +4128,48 @@ Context getCallContext(const ISS& env, const FCallArgs& fca) {
   return env.ctx;
 }
 
+void fcallObjMethodNullsafeNoFold(ISS& env,
+                                  const FCallArgs& fca,
+                                  bool extraInput) {
+  assertx(fca.asyncEagerTarget() == NoBlockId);
+  if (extraInput) popC(env);
+  if (fca.hasGenerics()) popC(env);
+  if (fca.hasUnpack()) popC(env);
+  auto const numArgs = fca.numArgs();
+  auto const numRets = fca.numRets();
+  std::vector<Type> inOuts;
+  for (auto i = uint32_t{0}; i < numArgs; ++i) {
+    if (fca.enforceInOut() && fca.isInOut(numArgs - i - 1)) {
+      inOuts.emplace_back(popCV(env));
+    } else {
+      popCV(env);
+    }
+  }
+  popU(env);
+  popCU(env);
+  for (auto i = uint32_t{0}; i < numRets - 1; ++i) popU(env);
+  assertx(inOuts.size() == numRets - 1);
+  for (auto& t : inOuts) push(env, std::move(t));
+  push(env, TInitNull);
+}
+
 void fcallObjMethodNullsafe(ISS& env, const FCallArgs& fca, bool extraInput) {
+  // Don't fold if there's inout arguments. We could, in principal,
+  // fold away the inout case like we do below, but we don't have the
+  // bytecodes necessary to shuffle the stack.
+  if (fca.enforceInOut()) {
+    for (uint32_t i = 0; i < fca.numArgs(); ++i) {
+      if (fca.isInOut(i)) {
+        return fcallObjMethodNullsafeNoFold(env, fca, extraInput);
+      }
+    }
+  }
+
   BytecodeVec repl;
   if (extraInput) repl.push_back(bc::PopC {});
   if (fca.hasGenerics()) repl.push_back(bc::PopC {});
   if (fca.hasUnpack()) repl.push_back(bc::PopC {});
+
   auto const numArgs = fca.numArgs();
   for (uint32_t i = 0; i < numArgs; ++i) {
     assertx(topC(env, repl.size()).subtypeOf(BInitCell));
@@ -4104,10 +4177,7 @@ void fcallObjMethodNullsafe(ISS& env, const FCallArgs& fca, bool extraInput) {
   }
   repl.push_back(bc::PopU {});
   repl.push_back(bc::PopC {});
-  auto const numRets = fca.numRets();
-  for (uint32_t i = 0; i < numRets - 1; ++i) {
-    repl.push_back(bc::PopU {});
-  }
+  assertx(fca.numRets() == 1);
   repl.push_back(bc::Null {});
 
   reduce(env, std::move(repl));
@@ -4157,7 +4227,10 @@ void fcallObjMethodImpl(ISS& env, const Op& op, SString methName, bool dynamic,
   if (!mayCallMethod) {
     // May only return null, but can't fold as we may still throw.
     assertx(mayUseNullsafe && mayThrowNonObj);
-    return unknown();
+    if (op.fca.asyncEagerTarget() != NoBlockId) {
+      return reduce(env, updateBC(op.fca.withoutAsyncEagerTarget()));
+    }
+    return fcallObjMethodNullsafeNoFold(env, op.fca, extraInput);
   }
 
   if (isBadContext(op.fca)) {
@@ -4178,7 +4251,8 @@ void fcallObjMethodImpl(ISS& env, const Op& op, SString methName, bool dynamic,
     : std::nullopt;
 
   auto const canFold = !mayUseNullsafe && !mayThrowNonObj;
-  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut) ||
+  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC,
+                          numInOut, mayUseNullsafe) ||
       (canFold && fcallTryFold(env, op.fca, rfunc, ctxTy, dynamic,
                                extraInput ? 1 : 0))) {
     return;
@@ -4272,7 +4346,7 @@ void fcallClsMethodImpl(ISS& env, const Op& op, Type clsTy, SString methName,
     ? env.index.lookup_num_inout_params(env.ctx, rfunc)
     : std::nullopt;
 
-  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut) ||
+  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut, false) ||
       fcallTryFold(env, op.fca, rfunc, clsTy, dynamic, numExtraInputs)) {
     return;
   }
@@ -4372,7 +4446,7 @@ void fcallClsMethodSImpl(ISS& env, const Op& op, SString methName, bool dynamic,
     ? env.index.lookup_num_inout_params(env.ctx, rfunc)
     : std::nullopt;
 
-  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut) ||
+  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut, false) ||
       fcallTryFold(env, op.fca, rfunc, ctxCls(env), dynamic,
                    extraInput ? 1 : 0)) {
     return;
@@ -4577,7 +4651,7 @@ void in(ISS& env, const bc::FCallCtor& op) {
     : std::nullopt;
 
   auto const canFold = obj.subtypeOf(BObj);
-  if (fcallOptimizeChecks(env, op.fca, *rfunc, updateFCA, numInOut) ||
+  if (fcallOptimizeChecks(env, op.fca, *rfunc, updateFCA, numInOut, false) ||
       (canFold && fcallTryFold(env, op.fca, *rfunc,
                                obj, false /* dynamic */, 0))) {
     return;

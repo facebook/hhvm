@@ -1,0 +1,1 @@
+Fatal error: Method 'foo' declared in multiple traits (T1, T2) in %s/diamond_use.php on line 13

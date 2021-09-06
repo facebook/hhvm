@@ -1373,6 +1373,7 @@ std::string mangleUnitSha1(const std::string& fileSha1,
     + (RuntimeOption::EvalTraitConstantInterfaceBehavior ? '1' : '0')
     + (RuntimeOption::EvalEnableImplicitContext ? '1' : '0')
     + RuntimeOption::EvalUnitCacheBreaker + '\0'
+    + (RuntimeOption::EvalDiamondTraitMethods ? '1' : '0')
     + CoeffectsConfig::mangle()
     + opts.cacheKeySha1().toString()
     + mangleExtension(fileName)

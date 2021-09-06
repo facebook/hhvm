@@ -351,6 +351,14 @@ struct Func : FuncBase {
   Unit* originalUnit{};
 
   /*
+   * The refernece of the trait where the method was originally defined.
+   * This is used to detected if a method is imported multiple
+   * times via different use-chains as the pair (name, originalClass)
+   * uniquely identifies a method.
+   */
+  Class* originalClass;
+
+  /*
    * This is the generated function for a closure body.  I.e. this
    * function contains the code that should run when the closure is
    * invoked.

@@ -98,7 +98,7 @@ constexpr bool CheckSize() { static_assert(Expected == Actual); return true; };
 static_assert(CheckSize<php::Block, 24>(), "");
 static_assert(CheckSize<php::Local, use_lowptr ? 12 : 16>(), "");
 static_assert(CheckSize<php::Param, use_lowptr ? 64 : 88>(), "");
-static_assert(CheckSize<php::Func, use_lowptr ? 176 : 208>(), "");
+static_assert(CheckSize<php::Func, use_lowptr ? 184 : 216>(), "");
 
 // Likewise, we also keep the bytecode and immediate types small.
 static_assert(CheckSize<Bytecode, use_lowptr ? 32 : 40>(), "");
@@ -1337,6 +1337,7 @@ void find_deps(IndexData& data,
 struct TraitMethod {
   using class_type = const ClassInfo*;
   using method_type = const php::Func*;
+  using origin_type = const php::Class*;
 
   TraitMethod(class_type trait_, method_type method_, Attr modifiers_)
       : trait(trait_)
@@ -1353,6 +1354,7 @@ struct TMIOps {
   using string_type = LSString;
   using class_type = TraitMethod::class_type;
   using method_type = TraitMethod::method_type;
+  using origin_type = TraitMethod::origin_type;
 
   struct TMIException : std::exception {
     explicit TMIException(std::string msg) : msg(msg) {}
@@ -1369,6 +1371,11 @@ struct TMIOps {
   // Return the name for the trait method.
   static const string_type methName(method_type meth) {
     return meth->name;
+  }
+
+  // Return the name of the trait where the method was originally defined
+  static origin_type originalClass(method_type meth) {
+    return meth->originalClass;
   }
 
   // Is-a methods.
@@ -1439,7 +1446,7 @@ struct TMIOps {
   }
   static void errorDuplicateMethod(class_type cls,
                                    string_type methName,
-                                   const std::list<TraitMethod>&) {
+                                   const std::vector<const StringData*>&) {
     auto const& m = cls->cls->methods;
     if (std::find_if(m.begin(), m.end(),
                      [&] (auto const& f) {
@@ -2042,7 +2049,6 @@ bool build_class_methods(const IndexData& index,
         }
       }
     }
-
     for (auto const& precRule : cinfo->cls->traitPrecRules) {
       tmid.applyPrecRule(precRule, cinfo);
     }
@@ -2386,6 +2392,7 @@ std::unique_ptr<php::Func> clone_meth_helper(
     cloneMeth->originalUnit = origMeth->unit;
   }
   cloneMeth->unit = newContext->unit;
+  cloneMeth->originalClass = origMeth->originalClass;
 
   if (!origMeth->hasCreateCl) return cloneMeth;
 

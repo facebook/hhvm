@@ -696,6 +696,7 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
   ret->hasReturnWithMultiUBs = fe.hasReturnWithMultiUBs;
   ret->returnUBs          = fe.retUpperBounds;
   ret->originalFilename   = fe.originalFilename;
+  ret->originalClass      = ret->cls;
 
   ret->isClosureBody       = fe.isClosureBody;
   ret->isAsync             = fe.isAsync;

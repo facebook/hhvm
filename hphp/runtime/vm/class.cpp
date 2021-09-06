@@ -4432,6 +4432,7 @@ struct TraitMethod {
 
   using class_type = const Class*;
   using method_type = const Func*;
+  using origin_type = const PreClass*;
 
   const Class* trait;
   const Func* method;
@@ -4439,6 +4440,8 @@ struct TraitMethod {
 };
 
 struct TMIOps {
+  using origin_type = TraitMethod::origin_type;
+
   // Return the name for the trait class.
   static const StringData* clsName(const Class* traitCls) {
     return traitCls->name();
@@ -4446,6 +4449,10 @@ struct TMIOps {
 
   static const StringData* methName(const Func* method) {
     return method->name();
+  }
+
+  static origin_type originalClass(const Func* method) {
+    return method->preClass();
   }
 
   // Is-a methods.
@@ -4526,13 +4533,13 @@ struct TMIOps {
   }
   static void errorDuplicateMethod(const Class* cls,
                                    const StringData* methName,
-                                   const std::list<TraitMethod>& methods) {
+                                   const std::vector<const StringData*>& methodDefinitions) {
     // No error if the class will override the method.
     if (cls->preClass()->hasMethod(methName)) return;
 
     std::vector<folly::StringPiece> traitNames;
-    for (auto& method : methods) {
-      traitNames.push_back(method.trait->name()->slice());
+    for (auto& clsName : methodDefinitions) {
+      traitNames.push_back(clsName->slice());
     }
     std::string traits;
     folly::join(", ", traitNames, traits);

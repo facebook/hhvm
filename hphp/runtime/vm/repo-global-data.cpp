@@ -45,6 +45,7 @@ void RepoGlobalData::load(bool loadConstantFuncs) const {
   RO::EvalEnableReadonlyPropertyEnforcement        = EnableReadonlyPropertyEnforcement;
   RO::EvalBuildMayNoticeOnMethCallerHelperIsObject =
     BuildMayNoticeOnMethCallerHelperIsObject;
+  RO::EvalDiamondTraitMethods                      = DiamondTraitMethods;
 
   if (HardGenericsUB) RO::EvalEnforceGenericsUB = 2;
 
@@ -102,6 +103,7 @@ std::string show(const RepoGlobalData& gd) {
   SHOW(TraitConstantInterfaceBehavior);
   SHOW(EnableReadonlyPropertyEnforcement);
   SHOW(BuildMayNoticeOnMethCallerHelperIsObject);
+  SHOW(DiamondTraitMethods);
 #undef SHOW
   return out;
 }

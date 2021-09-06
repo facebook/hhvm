@@ -179,6 +179,7 @@ RepoGlobalData getGlobalData() {
   gd.BuildMayNoticeOnMethCallerHelperIsObject =
     RO::EvalBuildMayNoticeOnMethCallerHelperIsObject;
   gd.EnableReadonlyPropertyEnforcement = RuntimeOption::EvalEnableReadonlyPropertyEnforcement;
+  gd.DiamondTraitMethods = RuntimeOption::EvalDiamondTraitMethods;
 
   for (auto const& elm : RuntimeOption::ConstantFunctions) {
     auto const s = internal_serialize(tvAsCVarRef(elm.second));

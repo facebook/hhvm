@@ -2459,20 +2459,51 @@ void Class::setConstants() {
 
       for (Slot slot = 0; slot < includedEnum->m_constants.size(); ++slot) {
         auto const eConst = includedEnum->m_constants[slot];
+
+        // If you're inheriting a constant with the same name as an existing
+        // one, they must originate from the same place, unless the constant
+        // was defined as abstract.
         auto const existing = builder.find(eConst.name);
 
         if (existing == builder.end()) {
           builder.add(eConst.name, eConst);
           continue;
-        } else {
-          auto& existingConst = builder[existing->second];
-          if (existingConst.cls != eConst.cls) {
-            raise_error("%s cannot inherit the constant %s from %s, because "
-                        "it was previously inherited from %s",
-                        m_preClass->name()->data(),
-                        eConst.name->data(),
-                        eConst.cls->name()->data(),
-                        existingConst.cls->name()->data());
+        }
+
+        auto& existingConst = builder[existing->second];
+
+        if (eConst.kind() != existingConst.kind()) {
+          raise_error("%s cannot inherit the %s %s from %s, because it "
+                     "was previously inherited as a %s from %s",
+                     m_preClass->name()->data(),
+                     ConstModifiers::show(eConst.kind()),
+                     eConst.name->data(),
+                     eConst.cls->name()->data(),
+                     ConstModifiers::show(existingConst.kind()),
+                     existingConst.cls->name()->data());
+        }
+
+        if (eConst.isAbstractAndUninit()) {
+          // note: enum class abstract constant cannot have default values
+          continue;
+        }
+
+        if (existingConst.isAbstract()) {
+          // The case where the incoming constant is abstract without a default is covered above.
+          // For enum classes, we do not allow default values, so this case is impossible and
+          // is a parse error.
+          raise_error("In %s, abstract constant %s must not have a default value",
+            m_preClass->name()->data(),
+            eConst.name->data());
+        } else { // existing is concrete
+          if (!eConst.isAbstract() && existingConst.cls != eConst.cls) {
+            raise_error("%s cannot inherit the %s %s from %s, because "
+                      "it was previously inherited from %s",
+                      m_preClass->name()->data(),
+                      ConstModifiers::show(eConst.kind()),
+                      eConst.name->data(),
+                      eConst.cls->name()->data(),
+                      existingConst.cls->name()->data());
           }
         }
       }

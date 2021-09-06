@@ -1698,7 +1698,7 @@ bool build_class_constants(const php::Program* program, ClassInfo* cinfo, ClsPre
 
   for (auto const ienum : cinfo->includedEnums) {
     for (auto const& cns : ienum->clsConstants) {
-      if (!add(cns.second, true)) return false;
+      if (!add(cns.second, false)) return false;
     }
   }
 

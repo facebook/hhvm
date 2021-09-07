@@ -63,6 +63,18 @@ let check_ifc_enabled tcopt attrs =
     Errors.experimental_feature pos "IFC InferFlows"
   | _ -> ()
 
+let check_internal_method_visibility m =
+  let attr =
+    Naming_attributes.find SN.UserAttributes.uaInternal m.m_user_attributes
+  in
+  match (attr, m.m_visibility) with
+  | (Some { ua_name = (pos, _); _ }, Aast.Private)
+  | (Some { ua_name = (pos, _); _ }, Aast.Protected) ->
+    Errors.internal_method_with_invalid_visibility
+      ~attr_pos:pos
+      ~visibility:m.m_visibility
+  | (_, _) -> ()
+
 (* TODO: error if both Governed and InferFlows are attributes on a function or method *)
 
 let handler =
@@ -139,7 +151,8 @@ let handler =
         match variadic_pos m.m_variadic with
         | Some p -> Errors.variadic_memoize p
         | None -> ());
-      check_attribute_arity m.m_user_attributes SN.UserAttributes.uaInternal 0 0
+      check_attribute_arity m.m_user_attributes SN.UserAttributes.uaInternal 0 0;
+      check_internal_method_visibility m
 
     method! at_class_ _env c =
       check_attribute_arity c.c_user_attributes SN.UserAttributes.uaModule 1 1

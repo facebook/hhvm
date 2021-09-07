@@ -1803,3 +1803,6 @@ val module_hint : def_pos:Pos_or_decl.t -> use_pos:Pos.t -> unit
 
 val expression_tree_non_public_property :
   use_pos:Pos.t -> def_pos:Pos_or_decl.t -> unit
+
+val internal_method_with_invalid_visibility :
+  attr_pos:Pos.t -> visibility:Ast_defs.visibility -> unit

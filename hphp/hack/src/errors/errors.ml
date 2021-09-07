@@ -5944,6 +5944,15 @@ let expression_tree_non_public_property ~use_pos ~def_pos =
     (use_pos, "Cannot access non-public properties within expression trees.")
     [(def_pos, "Property defined here")]
 
+let internal_method_with_invalid_visibility ~attr_pos ~visibility =
+  let open Markdown_lite in
+  add (NastCheck.err_code NastCheck.InternalProtectedOrPrivate) attr_pos
+  @@ md_codify "__Internal"
+  ^ " methods must be public, they cannot be "
+  ^ String.lowercase
+  @@ md_codify
+  @@ Ast_defs.show_visibility visibility
+
 (*****************************************************************************)
 (* Printing *)
 (*****************************************************************************)

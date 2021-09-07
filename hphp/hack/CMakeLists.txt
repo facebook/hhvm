@@ -129,7 +129,6 @@ add_custom_target(
   hack_ffi
   COMMAND
    . "${CMAKE_CURRENT_BINARY_DIR}/dev_env_rust_only.sh" &&
-    ${CARGO_BUILD} hack_parser_ffi rust_parser_ffi &&
     ${CARGO_BUILD} compile_ffi compile_ffi &&
     ${CARGO_BUILD} decl_cpp_ffi decl_cpp_ffi
   COMMENT "Compiling Rust FFI"
@@ -177,6 +176,7 @@ function(build_cxx_bridge NAME FFI_BRIDGE_DIR)
 endfunction()
 
 build_cxx_bridge(rust_facts "src/facts/ffi_bridge")
+build_cxx_bridge(rust_parser "src/parser/ffi_bridge")
 
 add_dependencies(hack_ffi rustc cargo)
 # Not a true dependency, but we need to make sure we don't have two cargo/rustc

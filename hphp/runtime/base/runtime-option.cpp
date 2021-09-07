@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/base/runtime-option.h"
 
-#include "hphp/hack/src/parser/positioned_full_trivia_parser_ffi_types.h"
 #include "hphp/parser/scanner.h"
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/bespoke-array.h"
@@ -288,9 +287,8 @@ RDS_LOCAL(std::string, s_lastSeenRepoConfig);
 
 }
 
-hackc_parse_positioned_full_trivia_environment
-RepoOptions::getParserEnvironment() const {
-  return hackc_parse_positioned_full_trivia_environment {
+ParserEnv RepoOptions::getParserEnvironment() const {
+  return ParserEnv {
       true // codegen
     , true  // hhvm_compat_mode
     , true  // php5_compat_mode

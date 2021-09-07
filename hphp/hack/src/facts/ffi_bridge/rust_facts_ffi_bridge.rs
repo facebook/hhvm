@@ -11,7 +11,6 @@ mod ffi {
             flags: i32,
             filename: &CxxString,
             source_text: &CxxString,
-            mangle_xhp: bool,
         ) -> String;
     }
 }
@@ -20,7 +19,6 @@ pub fn hackc_extract_as_json_cpp_ffi(
     flags: i32,
     filename: &CxxString,
     source_text: &CxxString,
-    mangle_xhp: bool,
 ) -> String {
     use std::os::unix::ffi::OsStrExt;
     let filepath = RelativePath::make(
@@ -36,7 +34,7 @@ pub fn hackc_extract_as_json_cpp_ffi(
         ((1 << 5) & flags) != 0, // disallow_hash_comments
         filepath,
         source_text.as_bytes(),
-        mangle_xhp,
+        true, // mangle_xhp
     ) {
         Some(s) => s,
         None => String::new(),

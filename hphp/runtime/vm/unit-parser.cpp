@@ -224,22 +224,21 @@ void compilers_start() {
 
 ParseFactsResult extract_facts(
   const std::string& filename,
-  const char* code,
+  const std::string& code,
   const RepoOptions& options
 ) {
-  auto const get_facts = [&](const char* source_text) -> ParseFactsResult {
+  auto const get_facts = [&](const std::string& source_text) -> ParseFactsResult {
     try {
       auto facts = hackc_extract_as_json_cpp_ffi(options.getFactsFlags(),
                                                  filename,
-                                                 source_text,
-                                                 true);
+                                                 source_text);
       return FactsJSONString { std::string(facts) };
     } catch (const std::exception& e) {
       return FactsJSONString { "" }; // Swallow errors from HackC
     }
   };
 
-  if (code && code[0] != '\0') {
+  if (!code.empty()) {
     return get_facts(code);
   } else {
     auto w = Stream::getWrapperFromURI(StrNR(filename));
@@ -249,7 +248,7 @@ ParseFactsResult extract_facts(
     const auto f = w->open(StrNR(filename), "r", 0, nullptr);
     if (!f) throwErrno("Failed to extract facts: Could not read source code.");
     auto const str = f->read();
-    return get_facts(str.data());
+    return get_facts(str.get()->toCppString());
   }
 }
 

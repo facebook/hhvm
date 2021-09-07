@@ -56,7 +56,7 @@ struct HackCFactsExtractor {
     folly::StringPiece code,
     result_type& res
   ) {
-    auto result = extract_facts(path, code.data(),
+    auto result = extract_facts(path, code.toString(),
                                 RepoOptions::forFile(path.data()));
     match<void>(
       result,

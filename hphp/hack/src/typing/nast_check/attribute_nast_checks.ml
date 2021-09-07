@@ -113,7 +113,9 @@ let handler =
             SN.UserAttributes.uaCanCall
             0
             0)
-        params
+        params;
+      check_attribute_arity f.f_user_attributes SN.UserAttributes.uaModule 1 1;
+      check_attribute_arity f.f_user_attributes SN.UserAttributes.uaInternal 0 0
 
     method! at_method_ env m =
       check_attribute_arity m.m_user_attributes SN.UserAttributes.uaPolicied 0 1;
@@ -130,11 +132,15 @@ let handler =
         2;
       check_deprecated_static m.m_user_attributes;
       (* Ban variadic arguments on memoized methods. *)
-      if
-        has_attribute "__Memoize" m.m_user_attributes
-        || has_attribute "__MemoizeLSB" m.m_user_attributes
+      (if
+       has_attribute "__Memoize" m.m_user_attributes
+       || has_attribute "__MemoizeLSB" m.m_user_attributes
       then
         match variadic_pos m.m_variadic with
         | Some p -> Errors.variadic_memoize p
-        | None -> ()
+        | None -> ());
+      check_attribute_arity m.m_user_attributes SN.UserAttributes.uaInternal 0 0
+
+    method! at_class_ _env c =
+      check_attribute_arity c.c_user_attributes SN.UserAttributes.uaModule 1 1
   end

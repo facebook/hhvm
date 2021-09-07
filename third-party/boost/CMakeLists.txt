@@ -5,7 +5,6 @@ set(
   context
   fiber
   filesystem
-  headers
   iostreams
   program_options
   regex
@@ -15,12 +14,15 @@ set(
 if(FORCE_BUNDLED_BOOST)
   set(Boost_FOUND false)
 else()
-  find_package(Boost 1.62.0 COMPONENTS ${BOOST_COMPONENTS})
+  find_package(Boost 1.69.0 COMPONENTS ${BOOST_COMPONENTS})
   if("${Boost_VERSION}" EQUAL "107000")
     # https://github.com/boostorg/variant/issues/69
     message(WARNING "System boost is blacklisted version")
 
     set(Boost_FOUND false)
+  endif()
+  if(${Boost_FOUND} AND "${Boost_VERSION}" GREATER "107000")
+    find_package(Boost 1.69.0 COMPONENTS ${BOOST_COMPONENTS} headers)
   endif()
 endif()
 

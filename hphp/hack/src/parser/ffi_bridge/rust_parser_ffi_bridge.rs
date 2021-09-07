@@ -22,7 +22,6 @@ mod ffi {
 
     extern "Rust" {
         pub fn hackc_parse_positioned_full_trivia_cpp_ffi(
-            filename: &CxxString,
             source_text: &CxxString,
             env: &ParserEnv,
         ) -> String;
@@ -30,14 +29,12 @@ mod ffi {
 }
 
 pub fn hackc_parse_positioned_full_trivia_cpp_ffi(
-    filename: &CxxString,
     source_text: &CxxString,
     env: &ffi::ParserEnv,
 ) -> String {
-    use std::os::unix::ffi::OsStrExt;
     let filepath = RelativePath::make(
         oxidized::relative_path::Prefix::Dummy,
-        std::path::PathBuf::from(std::ffi::OsStr::from_bytes(filename.as_bytes())),
+        std::path::PathBuf::new(),
     );
     let env: parser_core_types::parser_env::ParserEnv = ffi::ParserEnv::to_parser_env(env);
     let indexed_source = parser_core_types::indexed_source_text::IndexedSourceText::new(

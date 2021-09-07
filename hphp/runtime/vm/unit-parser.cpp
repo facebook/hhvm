@@ -254,12 +254,11 @@ ParseFactsResult extract_facts(
 }
 
 FfpResult ffp_parse_file(
-  const std::string& file,
   const std::string& contents,
   const RepoOptions& options
 ) {
   auto const env = options.getParserEnvironment();
-  auto const parse_tree = hackc_parse_positioned_full_trivia_cpp_ffi(file, contents, env);
+  auto const parse_tree = hackc_parse_positioned_full_trivia_cpp_ffi(contents, env);
   return FfpJSONString {  std::string(parse_tree) };
 }
 

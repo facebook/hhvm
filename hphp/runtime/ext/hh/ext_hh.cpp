@@ -605,7 +605,7 @@ String HHVM_FUNCTION(ffp_parse_string_native, const String& str) {
   );
 
   auto result =
-    ffp_parse_file("", str.get()->toCppString(), RepoOptions::forFile(file));
+    ffp_parse_file(str.get()->toCppString(), RepoOptions::forFile(file));
 
   FfpJSONString res;
   match<void>(

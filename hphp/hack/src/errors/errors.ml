@@ -4535,27 +4535,49 @@ let noreturn_usage p noreturn_witness =
   let msg = "You are using the return value of a `noreturn` function" in
   add_list (Typing.err_code Typing.NoreturnUsage) (p, msg) noreturn_witness
 
+let pluralize_arguments n =
+  string_of_int n
+  ^
+  if n = 1 then
+    " argument"
+  else
+    " arguments"
+
 let attribute_too_few_arguments pos x n =
-  let n = string_of_int n in
   add
     (Typing.err_code Typing.AttributeTooFewArguments)
     pos
     ("The attribute "
     ^ Markdown_lite.md_codify x
     ^ " expects at least "
-    ^ n
-    ^ " arguments")
+    ^ pluralize_arguments n)
 
 let attribute_too_many_arguments pos x n =
-  let n = string_of_int n in
   add
     (Typing.err_code Typing.AttributeTooManyArguments)
     pos
     ("The attribute "
     ^ Markdown_lite.md_codify x
     ^ " expects at most "
-    ^ n
-    ^ " arguments")
+    ^ pluralize_arguments n)
+
+let attribute_not_exact_number_of_args
+    pos ~attr_name ~expected_args ~actual_args =
+  add
+    (Typing.err_code
+       (if actual_args > expected_args then
+         Typing.AttributeTooManyArguments
+       else
+         Typing.AttributeTooFewArguments))
+    pos
+    ("The attribute "
+    ^ Markdown_lite.md_codify attr_name
+    ^ " expects "
+    ^
+    match expected_args with
+    | 0 -> "no arguments"
+    | 1 -> "exactly 1 argument"
+    | _ -> "exactly " ^ string_of_int expected_args ^ " arguments")
 
 let attribute_param_type pos x =
   add

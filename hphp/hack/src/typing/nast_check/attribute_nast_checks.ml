@@ -28,15 +28,22 @@ let variadic_pos v : pos option =
   | FVellipsis p -> Some p
   | FVnonVariadic -> None
 
-let check_attribute_arity attrs attr_name min_args max_args =
+let check_attribute_arity attrs attr_name arg_spec =
   let attr = Naming_attributes.find attr_name attrs in
-  match attr with
-  | Some { ua_name = (pos, _); ua_params } when List.length ua_params < min_args
-    ->
+  match (arg_spec, attr) with
+  | (`Range (min_args, _), Some { ua_name = (pos, _); ua_params })
+    when List.length ua_params < min_args ->
     Errors.attribute_too_few_arguments pos attr_name min_args
-  | Some { ua_name = (pos, _); ua_params } when List.length ua_params > max_args
-    ->
+  | (`Range (_, max_args), Some { ua_name = (pos, _); ua_params })
+    when List.length ua_params > max_args ->
     Errors.attribute_too_many_arguments pos attr_name max_args
+  | (`Exact expected_args, Some { ua_name = (pos, _); ua_params })
+    when List.length ua_params <> expected_args ->
+    Errors.attribute_not_exact_number_of_args
+      pos
+      ~attr_name
+      ~expected_args
+      ~actual_args:(List.length ua_params)
   | _ -> ()
 
 let check_deprecated_static attrs =
@@ -99,17 +106,18 @@ let handler =
         match variadic_pos f.f_variadic with
         | Some p -> Errors.variadic_memoize p
         | None -> ());
-      check_attribute_arity f.f_user_attributes SN.UserAttributes.uaPolicied 0 1;
+      check_attribute_arity
+        f.f_user_attributes
+        SN.UserAttributes.uaPolicied
+        (`Range (0, 1));
       check_attribute_arity
         f.f_user_attributes
         SN.UserAttributes.uaInferFlows
-        0
-        0;
+        (`Exact 0);
       check_attribute_arity
         f.f_user_attributes
         SN.UserAttributes.uaDeprecated
-        1
-        2;
+        (`Range (1, 2));
       check_deprecated_static f.f_user_attributes;
       check_ifc_enabled (Nast_check_env.get_tcopt env) f.f_user_attributes;
       let params = f.f_params in
@@ -118,30 +126,35 @@ let handler =
           check_attribute_arity
             fp.param_user_attributes
             SN.UserAttributes.uaExternal
-            0
-            0;
+            (`Exact 0);
           check_attribute_arity
             fp.param_user_attributes
             SN.UserAttributes.uaCanCall
-            0
-            0)
+            (`Exact 0))
         params;
-      check_attribute_arity f.f_user_attributes SN.UserAttributes.uaModule 1 1;
-      check_attribute_arity f.f_user_attributes SN.UserAttributes.uaInternal 0 0
+      check_attribute_arity
+        f.f_user_attributes
+        SN.UserAttributes.uaModule
+        (`Exact 1);
+      check_attribute_arity
+        f.f_user_attributes
+        SN.UserAttributes.uaInternal
+        (`Exact 0)
 
     method! at_method_ env m =
-      check_attribute_arity m.m_user_attributes SN.UserAttributes.uaPolicied 0 1;
+      check_attribute_arity
+        m.m_user_attributes
+        SN.UserAttributes.uaPolicied
+        (`Range (0, 1));
       check_attribute_arity
         m.m_user_attributes
         SN.UserAttributes.uaInferFlows
-        0
-        0;
+        (`Exact 0);
       check_ifc_enabled (Nast_check_env.get_tcopt env) m.m_user_attributes;
       check_attribute_arity
         m.m_user_attributes
         SN.UserAttributes.uaDeprecated
-        1
-        2;
+        (`Range (1, 2));
       check_deprecated_static m.m_user_attributes;
       (* Ban variadic arguments on memoized methods. *)
       (if
@@ -151,9 +164,15 @@ let handler =
         match variadic_pos m.m_variadic with
         | Some p -> Errors.variadic_memoize p
         | None -> ());
-      check_attribute_arity m.m_user_attributes SN.UserAttributes.uaInternal 0 0;
+      check_attribute_arity
+        m.m_user_attributes
+        SN.UserAttributes.uaInternal
+        (`Exact 0);
       check_internal_method_visibility m
 
     method! at_class_ _env c =
-      check_attribute_arity c.c_user_attributes SN.UserAttributes.uaModule 1 1
+      check_attribute_arity
+        c.c_user_attributes
+        SN.UserAttributes.uaModule
+        (`Exact 1)
   end

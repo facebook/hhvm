@@ -1165,6 +1165,7 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
 let daemon_main
     (args : ClientIdeMessage.daemon_args)
     (channels : ('a, 'b) Daemon.channel_pair) : unit =
+  Folly.ensure_folly_init ();
   Printexc.record_backtrace true;
   let (ic, oc) = channels in
   let in_fd = Lwt_unix.of_unix_file_descr (Daemon.descr_of_in_channel ic) in

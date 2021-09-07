@@ -38,8 +38,7 @@
 #include "hphp/hack/src/facts/ffi_bridge/rust_facts_ffi_bridge.rs"
 #include "hphp/hack/src/hhbc/compile_ffi.h"
 #include "hphp/hack/src/hhbc/compile_ffi_types.h"
-#include "hphp/hack/src/parser/positioned_full_trivia_parser_ffi.h"
-#include "hphp/hack/src/parser/positioned_full_trivia_parser_ffi_types.h"
+#include "hphp/hack/src/parser/ffi_bridge/rust_parser_ffi_bridge.rs"
 #include "hphp/runtime/base/autoload-map.h"
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"
@@ -255,20 +254,13 @@ ParseFactsResult extract_facts(
 }
 
 FfpResult ffp_parse_file(
-  std::string file,
-  const char *contents,
+  const std::string& file,
+  const std::string& contents,
   const RepoOptions& options
 ) {
   auto const env = options.getParserEnvironment();
-  hackc_parse_positioned_full_trivia_ptr parse_tree{
-    hackc_parse_positioned_full_trivia(file.c_str(), contents, &env)
-  };
-  if (parse_tree) {
-    std::string ffp_str{parse_tree.get()};
-    return FfpJSONString { ffp_str };
-  } else {
-    return FfpJSONString { "{}" };
-  }
+  auto const parse_tree = hackc_parse_positioned_full_trivia_cpp_ffi(file, contents, env);
+  return FfpJSONString {  std::string(parse_tree) };
 }
 
 std::unique_ptr<UnitCompiler>

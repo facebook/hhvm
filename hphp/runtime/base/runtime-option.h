@@ -38,7 +38,7 @@
 #include "hphp/util/hash-map.h"
 #include "hphp/util/sha1.h"
 
-#include "hphp/hack/src/parser/positioned_full_trivia_parser_ffi_types_fwd.h"
+#include "hphp/hack/src/parser/ffi_bridge/rust_parser_ffi_bridge.rs"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -126,7 +126,7 @@ struct RepoOptions {
   std::uint32_t getParserFlags() const;
   std::uint32_t getCompilerFlags() const;
   std::uint32_t getFactsFlags() const;
-  hackc_parse_positioned_full_trivia_environment getParserEnvironment() const;
+  ParserEnv getParserEnvironment() const;
   std::string getAliasedNamespacesConfig() const;
   struct stat stat() const { return m_stat; }
   std::string autoloadQuery() const noexcept { return Query; }

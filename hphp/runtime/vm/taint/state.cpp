@@ -114,17 +114,17 @@ void Stack::clear() {
   m_stack.clear();
 }
 
-void Heap::set(const AccessPath& accessPath, const Value& value) {
-  m_heap[accessPath] = value;
+void Heap::set(const tv_lval& typedValue, const Value& value) {
+  m_heap[typedValue] = value;
 }
 
-Value Heap::get(const AccessPath& accessPath) const {
-  auto value = m_heap.find(accessPath);
+Value Heap::get(const tv_lval& typedValue) const {
+  auto value = m_heap.find(typedValue);
   if (value != m_heap.end()) {
     return value->second;
-  } else {
-    return std::nullopt;
   }
+
+  return std::nullopt;
 }
 
 void Heap::clear() {

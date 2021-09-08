@@ -22,6 +22,7 @@
 
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/vm/member-key.h"
+#include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/method-lookup.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
@@ -547,7 +548,7 @@ void iopCGetL(named_local_var fr) {
   iopPreamble("CGetL");
 
   auto state = State::get();
-  auto value = state->heap.get(AccessPath{fr.lval});
+  auto value = state->heap.get(fr.lval);
 
   FTRACE(2, "taint: getting {} (name: {}, value: {})\n", fr.lval, fr.name, value);
 
@@ -634,7 +635,7 @@ void iopSetL(tv_lval to) {
 
   FTRACE(2, "taint: setting {} to `{}`\n", to, value);
 
-  state->heap.set(AccessPath{to}, value);
+  state->heap.set(to, value);
 }
 
 void iopSetG() {
@@ -968,7 +969,8 @@ void iopVerifyParamType(local_var param) {
   auto state = State::get();
   auto func = vmfp()->func();
 
-  auto value = state->stack.peek(func->numParams() - (param.index + 1));
+  auto index = func->numParams() - (param.index + 1);
+  auto value = state->stack.peek(index);
   if (value) {
     FTRACE(
         2,
@@ -977,7 +979,7 @@ void iopVerifyParamType(local_var param) {
         param.index,
         value);
     value->hops.push_back(func);
-    state->heap.set(AccessPath{param.lval}, value);
+    state->heap.set(param.lval, value);
   }
 }
 
@@ -1148,25 +1150,59 @@ void iopDim(MOpMode /* mode */, MemberKey /* mk */) {
   iopUnhandled("Dim");
 }
 
+namespace {
+
+TypedValue typedValue(MemberKey memberKey) {
+  switch (memberKey.mcode) {
+    case MW:
+      return TypedValue{};
+    case MEL: case MPL: {
+      auto const local = frame_local(vmfp(), memberKey.local.id);
+      if (type(local) == KindOfUninit) {
+        return make_tv<KindOfNull>();
+      }
+      return tvClassToString(*local);
+    }
+    case MEC: case MPC:
+      return tvClassToString(*vmStack().indTV(memberKey.iva));
+    case MEI:
+      return make_tv<KindOfInt64>(memberKey.int64);
+    case MET: case MPT: case MQT:
+      return make_tv<KindOfPersistentString>(memberKey.litstr);
+  }
+  not_reached();
+}
+
+tv_lval resolveMemberKey(const MemberKey& memberKey) {
+  auto& instructionState = vmMInstrState();
+  auto key = typedValue(memberKey);
+  return Prop<MOpMode::None>(
+      instructionState.tvTempBase,
+      arGetContextClass(vmfp()),
+      instructionState.base,
+      key,
+      ReadonlyOp::Readonly);
+}
+
+}  // namespace
+
 void iopQueryM(
     uint32_t /* nDiscard */,
     QueryMOp op,
     MemberKey memberKey) {
   iopPreamble("QueryM");
 
-  auto state = State::get();
-  auto& base = vmMInstrState().base;
-
   switch(op) {
-    case QueryMOp::CGet:
-    case QueryMOp::CGetQuiet: {
-      auto value = state->heap.get(AccessPath{base, memberKey});
-      FTRACE(2, "taint: getting {}.{}, value: `{}`\n", base, memberKey, value);
+    case QueryMOp::CGet: {
+      auto state = State::get();
+      auto from = resolveMemberKey(memberKey);
+      auto value = state->heap.get(from);
+      FTRACE(2, "taint: getting member {}, value: `{}`\n", memberKey, value);
       state->stack.push(value);
       break;
     }
     default:
-      FTRACE(2, "taint: unsuppoted query operation\n");
+      FTRACE(1, "taint: (WARNING) unsuppoted query operation\n");
       return;
   }
 }
@@ -1176,10 +1212,10 @@ void iopSetM(uint32_t /* nDiscard */, MemberKey memberKey) {
 
   auto state = State::get();
   auto value = state->stack.top();
+  auto to = resolveMemberKey(memberKey);
 
-  auto& base = vmMInstrState().base;
-  FTRACE(2, "taint: setting {}.{} to `{}`\n", base, memberKey, value);
-  state->heap.set(AccessPath{base, memberKey}, value);
+  FTRACE(2, "taint: setting member {} to `{}`\n", memberKey, value);
+  state->heap.set(to, value);
 }
 
 void iopSetRangeM(

@@ -14,7 +14,6 @@ function source_through_attribute_into_sink(): void {
 }
 
 function into_sink(MyClass $object): void {
-  // TODO(T93549800): indirect flow is not yet captured
   __sink($object->attribute);
 }
 
@@ -25,6 +24,6 @@ function source_through_attribute_dereferenced_in_callee(): void {
 }
 
 <<__EntryPoint>> function main(): void {
-  // source_through_attribute_into_sink();
+  source_through_attribute_into_sink();
   source_through_attribute_dereferenced_in_callee();
 }

@@ -15,6 +15,8 @@ from typing import Callable, Dict, List, Optional, Tuple
 
 from hphp.hack.test.parse_errors import Error, parse_errors, sprint_errors
 
+DEFAULT_OUT_EXT = ".out"
+DEFAULT_EXP_EXT = ".exp"
 
 max_workers = 48
 verbose = False
@@ -102,7 +104,7 @@ def compare_output_files_error_lines_only(
 
 
 def check_output_error_lines_only(
-    test: str, out_ext: str = ".out", exp_ext: str = ".exp"
+    test: str, out_ext: str = DEFAULT_OUT_EXT, exp_ext: str = DEFAULT_EXP_EXT
 ) -> Tuple[bool, str]:
     file_out = test + out_ext
     file_exp = test + exp_ext
@@ -418,13 +420,10 @@ def report_failures(
             dump_failures(failures)
         fnames = [failure.test_case.file_path for failure in failures]
         print("To review the failures, use the following command: ")
-        fallback_expect_ext_var = ""
-        if fallback_expect_extension is not None:
-            fallback_expect_ext_var = "FALLBACK_EXP_EXT=%s " % fallback_expect_extension
+
         first_test_file = os.path.realpath(failures[0].test_case.file_path)
         out_dir: str  # for Pyre
         (exp_dir, out_dir) = get_exp_out_dirs(first_test_file)
-        output_dir_var = "SOURCE_ROOT=%s OUTPUT_ROOT=%s " % (exp_dir, out_dir)
 
         # Get a full path to 'review.sh' so this command be run
         # regardless of your current directory.
@@ -437,14 +436,21 @@ def report_failures(
         def fname_map_var(f: str) -> str:
             return "hphp/hack/" + os.path.relpath(f, out_dir)
 
+        env_vars = []
+        if out_extension != DEFAULT_OUT_EXT:
+            env_vars.append("OUT_EXT=%s" % out_extension)
+        if expect_extension != DEFAULT_EXP_EXT:
+            env_vars.append("EXP_EXT=%s" % expect_extension)
+        if fallback_expect_extension is not None:
+            env_vars.append("FALLBACK_EXP_EXT=%s " % fallback_expect_extension)
+        env_vars.append("NO_COPY=%s" % ("true" if no_copy else "false"))
+
+        env_vars.extend(["SOURCE_ROOT=%s" % exp_dir, "OUTPUT_ROOT=%s" % out_dir])
+
         print(
-            "OUT_EXT=%s EXP_EXT=%s %s%sNO_COPY=%s %s %s"
+            "%s %s %s"
             % (
-                out_extension,
-                expect_extension,
-                fallback_expect_ext_var,
-                output_dir_var,
-                "true" if no_copy else "false",
+                " ".join(env_vars),
                 review_script,
                 " ".join(map(fname_map_var, fnames)),
             )
@@ -690,8 +696,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("test_path", help="A file or a directory. ")
     parser.add_argument("--program", type=os.path.abspath)
-    parser.add_argument("--out-extension", type=str, default=".out")
-    parser.add_argument("--expect-extension", type=str, default=".exp")
+    parser.add_argument("--out-extension", type=str, default=DEFAULT_OUT_EXT)
+    parser.add_argument("--expect-extension", type=str, default=DEFAULT_EXP_EXT)
     parser.add_argument("--fallback-expect-extension", type=str)
     parser.add_argument("--default-expect-regex", type=str)
     parser.add_argument("--in-extension", type=str, default=".php")

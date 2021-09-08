@@ -30,6 +30,7 @@
 #include "hphp/runtime/vm/taint/state.h"
 
 #include "hphp/util/trace.h"
+#include "hphp/util/text-color.h"
 
 namespace folly {
 
@@ -115,6 +116,14 @@ void iopConstant(const std::string& name) {
 void iopUnhandled(const std::string& name) {
   iopPreamble(name);
   FTRACE(1, "taint: (WARNING) unhandled opcode\n");
+}
+
+std::string yellow(const std::string& string) {
+  return folly::sformat(
+      "{}`{}`{}",
+      ANSI_COLOR_YELLOW,
+      string,
+      ANSI_COLOR_END);
 }
 
 } // namespace
@@ -503,7 +512,7 @@ void iopRetC(PC& /* pc */) {
   stack.pop(2 + func->params().size());
 
   std::string name = func->fullName()->data();
-  FTRACE(1, "taint: -> returning from `{}`\n", name);
+  FTRACE(1, "taint: leaving {}\n", yellow(name));
 
   // Check if this function is the origin of a source.
   auto& sources = Configuration::get()->sources;
@@ -809,7 +818,7 @@ TCA iopFCallCtor(
       MethodLookupErrorOptions::RaiseOnNotFound);
   auto name = func->fullName()->data();
 
-  FTRACE(1, "taint: -> calling `{}`\n", name);
+  FTRACE(1, "taint: entering {}\n", yellow(name));
 
   return nullptr;
 }
@@ -835,7 +844,7 @@ TCA iopFCallFuncD(
   auto const func = Func::load(nep.second, nep.first);
   auto name = func->fullName()->data();
 
-  FTRACE(1, "taint: -> calling `{}`\n", name);
+  FTRACE(1, "taint: entering {}\n", yellow(name));
 
   const auto& sinks = Configuration::get()->sinks(name);
   for (const auto& sink : sinks) {

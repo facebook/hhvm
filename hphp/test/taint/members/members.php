@@ -25,6 +25,6 @@ function source_through_attribute_dereferenced_in_callee(): void {
 }
 
 <<__EntryPoint>> function main(): void {
-  source_through_attribute_into_sink();
+  // source_through_attribute_into_sink();
   source_through_attribute_dereferenced_in_callee();
 }

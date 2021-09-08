@@ -304,7 +304,7 @@ void iopInt(int64_t /* imm */) {
 }
 
 void iopDouble(double /* imm */) {
-  iopConstant("Int");
+  iopConstant("Double");
 }
 
 void iopString(const StringData* /* s */) {

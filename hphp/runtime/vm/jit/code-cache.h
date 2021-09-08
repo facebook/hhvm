@@ -24,11 +24,10 @@
 namespace HPHP { namespace jit {
 
 /*
- * CodeCache contains our Translation Cache, which is partitioned into 4
+ * CodeCache contains our Translation Cache, which is partitioned into 3
  * sections:
- *   - hot: Hot code from optimized translations.
- *   - main: Cold code from optimized translations, hot cold from other.
- *   - cold: Cold code from all Funcs.
+ *   - main: Hot code from all translations.
+ *   - cold: Cold code from optimized and live translations.
  *   - frozen: Code that is almost never used, and cold code from profiling
        translations.
  *
@@ -73,7 +72,6 @@ struct CodeCache {
 
   template<typename L>
   void forEachBlock(L body) const {
-    body("hot", m_hot);
     body("main", m_main);
     body("cold", m_cold);
     body("frozen", m_frozen);
@@ -85,7 +83,6 @@ struct CodeCache {
    */
   template<typename M>
   static void forEachName(M body) {
-    body("hot");
     body("main");
     body("cold");
     body("frozen");
@@ -124,13 +121,13 @@ struct CodeCache {
   }
   bool isValidCodeAddress(ConstCodeAddress addr) const;
 
-  bool inHotOrMain(ConstCodeAddress addr) const {
-    return m_hot.contains(addr) || m_main.contains(addr);
+  bool inMain(ConstCodeAddress addr) const {
+    return m_main.contains(addr);
   }
 
-  bool inHotOrMainOrColdOrFrozen(ConstCodeAddress addr) const {
-    return m_hot.contains(addr)  || m_main.contains(addr) ||
-           m_cold.contains(addr) || m_frozen.contains(addr);
+  bool inMainOrColdOrFrozen(ConstCodeAddress addr) const {
+    return m_main.contains(addr) || m_cold.contains(addr) ||
+           m_frozen.contains(addr);
   }
 
   /*
@@ -139,7 +136,6 @@ struct CodeCache {
   void protect();
   void unprotect();
 
-  const CodeBlock& hot()    const { return m_hot; }
   const CodeBlock& main()   const { return m_main; }
   const CodeBlock& cold()   const { return m_cold; }
   const CodeBlock& frozen() const { return m_frozen; }
@@ -161,16 +157,6 @@ struct CodeCache {
   const CodeBlock& blockFor(CodeAddress addr) const;
         CodeBlock& blockFor(CodeAddress addr);
 
-  /*
-   * Set a flag preventing further use of hot because it has filled up.
-   */
-  void disableHot() { m_useHot = false; }
-
-  /*
-   * Returns whether or not the hot code area is enabled.
-   */
-  bool hotEnabled() const { return m_useHot; }
-
   Address threadLocalStart() { return m_threadLocalStart; }
 
 private:
@@ -180,11 +166,9 @@ private:
   size_t m_codeSize; // all code (jit+bytecode)
   size_t m_totalSize;
   size_t m_threadLocalSize;
-  bool m_useHot;
 
   CodeBlock m_main;
   CodeBlock m_cold;
-  CodeBlock m_hot;
   CodeBlock m_frozen;
   CodeBlock m_bytecode;
   DataBlock m_data;

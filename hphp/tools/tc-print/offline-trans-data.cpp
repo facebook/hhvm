@@ -50,8 +50,6 @@ void OfflineTransData::loadTCHeader() {
 
   // read header info
   READ("repo_schema = %40s", repoSchema);
-  READ("ahot.base = %p", &ahotBase);
-  READ("ahot.frontier = %p", &ahotFrontier);
   READ("a.base = %p", &aBase);
   READ("a.frontier = %p", &aFrontier);
   READ("acold.base = %p", &coldBase);

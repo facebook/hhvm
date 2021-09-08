@@ -488,11 +488,6 @@ ALWAYS_INLINE uint32_t addrToOffset(CTCA addr) {
  */
 bool isValidCodeAddress(TCA addr);
 
-/*
- * Check if `addr' is an address within the hot code block in the TC.
- */
-bool isHotCodeAddress(TCA addr);
-
 ////////////////////////////////////////////////////////////////////////////////
 
 /*

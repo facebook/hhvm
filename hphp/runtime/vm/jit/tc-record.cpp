@@ -180,6 +180,12 @@ size_t getProfMainUsage() {
   return it->second->getSum();
 }
 
+size_t getOptMainUsage() {
+  auto const it = s_counters.find("opt.main");
+  if (it == s_counters.end()) return 0;
+  return it->second->getSum();
+}
+
 /*
  * Update JIT maturity with the current amount of emitted code and state of the
  * JIT.
@@ -198,7 +204,7 @@ void reportJitMaturity() {
     mcgen::retranslateAllPending() || isJitSerializing();
   // If retranslateAll is enabled, wait until it finishes before counting in
   // optimized translations.
-  auto const hotSize = beforeRetranslateAll ? 0 : code().hot().used();
+  const size_t hotSize = beforeRetranslateAll ? 0 : getOptMainUsage();
   // When we jit from serialized profile data, the profile code won't be
   // present. In order to make jit maturity somewhat comparable between the two
   // cases, we pretend to have some profiling code.
@@ -464,7 +470,6 @@ std::string warmupStatusString() {
         }
       };
       checkCodeSize("main", CodeCache::ASize);
-      checkCodeSize("hot", CodeCache::AHotSize);
     }
     if (status_str.empty()) {
       if (RuntimeOption::EvalJitSerdesMode == JitSerdesMode::SerializeAndExit) {

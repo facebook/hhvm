@@ -240,22 +240,6 @@ TranslationResult::Scope shouldTranslate(SrcKey sk, TransKind kind) {
     return shouldTranslateNoSizeLimit(sk, kind);
   }
 
-  // We use cold and frozen for all kinds of translations, but we
-  // allow PGO translations past the limit for main if there's still
-  // space in code.hot.
-  if (cold_under && froz_under) {
-    switch (kind) {
-      case TransKind::ProfPrologue:
-      case TransKind::Profile:
-      case TransKind::OptPrologue:
-      case TransKind::Optimize:
-        if (code().hotEnabled()) return shouldTranslateNoSizeLimit(sk, kind);
-        break;
-      default:
-        break;
-    }
-  }
-
   // Set a flag so we quickly bail from trying to generate new
   // translations next time.
   s_TCisFull.store(true, std::memory_order_relaxed);
@@ -386,14 +370,9 @@ bool isValidCodeAddress(TCA addr) {
   return g_code->isValidCodeAddress(addr);
 }
 
-bool isHotCodeAddress(TCA addr) {
-  return g_code->hot().contains(addr);
-}
-
 void checkFreeProfData() {
   // In PGO mode, we free all the profiling data once the main code area reaches
-  // its maximum usage and either the hot area is also full or all the functions
-  // that were profiled have already been optimized.
+  // its maximum usage.
   //
   // However, we keep the data around indefinitely in a few special modes:
   // * Eval.EnableReusableTC
@@ -406,8 +385,6 @@ void checkFreeProfData() {
       !RuntimeOption::EvalEnableReusableTC &&
       (code().main().used() >= CodeCache::AMaxUsage ||
        getLiveMainUsage() >= RuntimeOption::EvalJitMaxLiveMainUsage) &&
-      (!code().hotEnabled() ||
-       profData()->profilingFuncs() == profData()->optimizedFuncs()) &&
       !transdb::enabled() &&
       !mcgen::retranslateAllEnabled()) {
     discardProfData();
@@ -620,14 +597,6 @@ Translator::translate(Optional<CodeCache::View> view) {
                 mcgen::dumpTCAnnotation(kind) ? getAnnotations()
                                               : nullptr);
     } catch (const DataBlockFull& dbFull) {
-      if (dbFull.name == "hot") {
-        always_assert(!view->isLocal());
-        code().disableHot();
-        // Rollback tags and try again.
-        maker.rollback();
-        fixups.clear();
-        continue;
-      }
       // Rollback so the area can be used by something else.
       auto const range = maker.rollback();
       auto const bytes = range.main.size() + range.cold.size() +
@@ -726,11 +695,6 @@ Optional<TranslationResult> Translator::relocate(bool alignMain) {
         }
 
       } catch (const DataBlockFull& dbFull) {
-        if (dbFull.name == "hot") {
-          maker.rollback();
-          code().disableHot();
-          continue;
-        }
         // Rollback so the area can be used by something else.
         maker.rollback();
         auto const bytes = range.main.size() + range.cold.size() +

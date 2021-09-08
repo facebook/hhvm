@@ -35,4 +35,5 @@ function source_stopped(): void {
 <<__EntryPoint>> function main(): void {
   source_through_assignment_to_sink();
   source_through_function_to_sink();
+  source_stopped();
 }

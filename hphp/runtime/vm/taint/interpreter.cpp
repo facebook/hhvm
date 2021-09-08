@@ -1214,7 +1214,12 @@ void iopSetM(uint32_t /* nDiscard */, MemberKey memberKey) {
   auto value = state->stack.top();
   auto to = resolveMemberKey(memberKey);
 
-  FTRACE(2, "taint: setting member {} to `{}`\n", memberKey, value);
+  FTRACE(
+      2,
+      "taint: setting member {} (resolved: {}) to `{}`\n",
+      memberKey,
+      to,
+      value);
   state->heap.set(to, value);
 }
 

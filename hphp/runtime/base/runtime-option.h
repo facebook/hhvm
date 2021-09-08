@@ -969,6 +969,7 @@ struct RuntimeOption {
   F(uint32_t, JitLiveThreshold,       ServerExecutionMode() ? 1000 : 0) \
   F(uint32_t, JitProfileThreshold,     ServerExecutionMode() ? 200 : 0) \
   F(uint32_t, JitSrcKeyThreshold,      0)                               \
+  F(uint32_t, JitMaxLiveMainUsage,     96 * 1024 * 1024)                \
   F(uint64_t, FuncCountHint,           10000)                           \
   F(uint64_t, PGOFuncCountHint,        1000)                            \
   F(bool, RegionRelaxGuards,           true)                            \

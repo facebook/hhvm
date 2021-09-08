@@ -24,14 +24,13 @@
 namespace HPHP { namespace jit {
 
 /*
- * CodeCache contains our Translation Cache, which is partitioned into 5
+ * CodeCache contains our Translation Cache, which is partitioned into 4
  * sections:
  *   - hot: Hot code from optimized translations.
  *   - main: Cold code from optimized translations, hot cold from other.
  *   - cold: Cold code from all Funcs.
  *   - frozen: Code that is almost never used, and cold code from profiling
        translations.
- *   - prof: Profiling translations.
  *
  * There is also a 'data' section containing things like jump tables, floating
  * point constants, and other values that must be directly addressable from
@@ -59,7 +58,6 @@ struct CodeCache {
   static uint32_t GlobalDataSize;
 
   static uint32_t AMaxUsage;
-  static uint32_t AProfMaxUsage;
   static uint32_t AColdMaxUsage;
   static uint32_t AFrozenMaxUsage;
 
@@ -77,7 +75,6 @@ struct CodeCache {
   void forEachBlock(L body) const {
     body("hot", m_hot);
     body("main", m_main);
-    body("prof", m_prof);
     body("cold", m_cold);
     body("frozen", m_frozen);
     body("bytecode", m_bytecode);
@@ -90,7 +87,6 @@ struct CodeCache {
   static void forEachName(M body) {
     body("hot");
     body("main");
-    body("prof");
     body("cold");
     body("frozen");
     body("data");
@@ -147,7 +143,6 @@ struct CodeCache {
   const CodeBlock& main()   const { return m_main; }
   const CodeBlock& cold()   const { return m_cold; }
   const CodeBlock& frozen() const { return m_frozen; }
-  const CodeBlock& prof()   const { return m_prof; }
 
   const CodeBlock& bytecode() const { return m_bytecode; }
         CodeBlock& bytecode()       { return m_bytecode; }
@@ -178,8 +173,6 @@ struct CodeCache {
 
   Address threadLocalStart() { return m_threadLocalStart; }
 
-  void freeProf();
-
 private:
   Address m_threadLocalStart{nullptr};
   CodeAddress m_base;
@@ -188,12 +181,10 @@ private:
   size_t m_totalSize;
   size_t m_threadLocalSize;
   bool m_useHot;
-  bool m_profFreed{false};
 
   CodeBlock m_main;
   CodeBlock m_cold;
   CodeBlock m_hot;
-  CodeBlock m_prof;
   CodeBlock m_frozen;
   CodeBlock m_bytecode;
   DataBlock m_data;

@@ -310,12 +310,6 @@ bool profileFunc(const Func* func);
  */
 void checkFreeProfData();
 
-/*
- * Discard the memory used for the main portion of the profile translations via
- * the treadmill.
- */
-void freeProfCode();
-
 ////////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -493,11 +487,6 @@ ALWAYS_INLINE uint32_t addrToOffset(CTCA addr) {
  * Check if `addr' is an address within the TC.
  */
 bool isValidCodeAddress(TCA addr);
-
-/*
- * Check if `addr' is an address within the profile code block in the TC.
- */
-bool isProfileCodeAddress(TCA addr);
 
 /*
  * Check if `addr' is an address within the hot code block in the TC.

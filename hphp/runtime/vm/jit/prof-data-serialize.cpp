@@ -47,6 +47,7 @@
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/switch-profile.h"
 #include "hphp/runtime/vm/jit/tc-internal.h"
+#include "hphp/runtime/vm/jit/tc-record.h"
 #include "hphp/runtime/vm/jit/trans-cfg.h"
 #include "hphp/runtime/vm/jit/type-profile.h"
 #include "hphp/runtime/vm/jit/vasm-block-counters.h"
@@ -428,10 +429,10 @@ void write_prof_trans_rec(ProfDataSerializer& ser,
     auto lock = ptr->lockCallerList();
     std::vector<TransID> callers;
     auto addCaller = [&] (TCA caller) {
-      if (!tc::isProfileCodeAddress(caller)) return;
       auto const callerTransId = pd->jmpTransID(caller);
-      assertx(callerTransId != kInvalidTransID);
-      callers.push_back(callerTransId);
+      if (callerTransId != kInvalidTransID) {
+        callers.push_back(callerTransId);
+      }
     };
     for (auto const caller : ptr->mainCallers()) addCaller(caller);
     write_container(ser, callers, write_raw<TransID>);
@@ -1807,9 +1808,9 @@ std::string serializeProfData(const std::string& filename) {
       serializeBespokeLayouts(ser);
     }
 
-    // Record the size of prof so we can use it to fake jit.maturity
-    // if we're going to restart before running RTA.
-    write_raw(ser, (size_t)jit::tc::code().prof().used());
+    // Record the size of main profile code so we can use it to fake
+    // jit.maturity if we're going to restart before running RTA.
+    write_raw(ser, tc::getProfMainUsage());
 
     ser.finalize();
 

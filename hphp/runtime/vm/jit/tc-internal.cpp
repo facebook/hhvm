@@ -229,11 +229,14 @@ TranslationResult::Scope shouldTranslate(SrcKey sk, TransKind kind) {
     return TranslationResult::Scope::Request;
   }
 
+  const bool reachedMaxLiveMainLimit =
+    getLiveMainUsage() >= RuntimeOption::EvalJitMaxLiveMainUsage;
+
   auto const main_under = code().main().used() < CodeCache::AMaxUsage;
   auto const cold_under = code().cold().used() < CodeCache::AColdMaxUsage;
   auto const froz_under = code().frozen().used() < CodeCache::AFrozenMaxUsage;
 
-  if (main_under && cold_under && froz_under) {
+  if (!reachedMaxLiveMainLimit && main_under && cold_under && froz_under) {
     return shouldTranslateNoSizeLimit(sk, kind);
   }
 
@@ -383,10 +386,6 @@ bool isValidCodeAddress(TCA addr) {
   return g_code->isValidCodeAddress(addr);
 }
 
-bool isProfileCodeAddress(TCA addr) {
-  return g_code->prof().contains(addr);
-}
-
 bool isHotCodeAddress(TCA addr) {
   return g_code->hot().contains(addr);
 }
@@ -405,38 +404,14 @@ void checkFreeProfData() {
   // generated.
   if (profData() &&
       !RuntimeOption::EvalEnableReusableTC &&
-      code().main().used() >= CodeCache::AMaxUsage &&
+      (code().main().used() >= CodeCache::AMaxUsage ||
+       getLiveMainUsage() >= RuntimeOption::EvalJitMaxLiveMainUsage) &&
       (!code().hotEnabled() ||
        profData()->profilingFuncs() == profData()->optimizedFuncs()) &&
       !transdb::enabled() &&
       !mcgen::retranslateAllEnabled()) {
     discardProfData();
   }
-}
-
-static void dropSrcDBProfIncomingBranches() {
-  auto const base     = code().prof().base();
-  auto const frontier = code().prof().frontier();
-  for (auto& it : srcDB()) {
-    auto sr = it.second;
-    sr->removeIncomingBranchesInRange(base, frontier);
-  }
-}
-
-void freeProfCode() {
-  Treadmill::enqueue([]{
-    dropSrcDBProfIncomingBranches();
-    code().freeProf();
-    // Clearing the inline stacks map is purely an optimization, and it barely
-    // buys us anything when we're using jumpstart (because we have very few
-    // profiling translations, if any), so we skip it in this case.
-    if (!isJitDeserializing()) {
-      auto metaLock = lockMetadata();
-      auto const base     = code().prof().base();
-      auto const frontier = code().prof().frontier();
-      eraseInlineStacksInRange(base, frontier);
-    }
-  });
 }
 
 bool shouldProfileNewFuncs() {
@@ -458,7 +433,11 @@ bool profileFunc(const Func* func) {
   // being added to ProfData.
   if (mcgen::retranslateAllScheduled()) return false;
 
-  if (code().prof().used() >= CodeCache::AProfMaxUsage) return false;
+  if (code().main().used() >= CodeCache::AMaxUsage) return false;
+
+  if (getLiveMainUsage() >= RuntimeOption::EvalJitMaxLiveMainUsage) {
+    return false;
+  }
 
   if (!shouldPGOFunc(func)) return false;
 

@@ -1133,7 +1133,6 @@ int main(int argc, char *argv[]) {
   transCode = new OfflineCode(dumpDir,
                               g_transData->getHotBase(),
                               g_transData->getMainBase(),
-                              g_transData->getProfBase(),
                               g_transData->getColdBase(),
                               g_transData->getFrozenBase());
   g_repo = new RepoWrapper(g_transData->getRepoSchema(), repoFileName, !useJSON);

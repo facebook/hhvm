@@ -66,6 +66,18 @@ void recordTranslationSizes(const TransRec& tr);
 void updateCodeSizeCounters();
 
 /*
+ * Return how much code in the main code area is being used for live
+ * translations.
+ */
+size_t getLiveMainUsage();
+
+/*
+ * Return how much code in the main code area is being used for profile
+ * translations.
+ */
+size_t getProfMainUsage();
+
+/*
  * Log statistics about a translation to scribe via StructuredLog.
  */
 void logTranslation(const Translator* trans, const TransRange& range);

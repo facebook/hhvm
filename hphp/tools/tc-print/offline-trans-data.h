@@ -126,14 +126,6 @@ struct OfflineTransData {
     return aFrontier;
   }
 
-  TCA getProfBase() const {
-    return aprofBase;
-  }
-
-  TCA getProfFrontier() const {
-    return aprofFrontier;
-  }
-
   TCA getColdBase() const {
     return coldBase;
   }
@@ -158,7 +150,6 @@ struct OfflineTransData {
   bool isAddrInSomeTrans(TCA addr) const {
     if ((ahotBase   <= addr && addr < ahotFrontier)  ||
         (aBase      <= addr && addr < aFrontier)     ||
-        (aprofBase  <= addr && addr < aprofFrontier) ||
         (coldBase   <= addr && addr < coldFrontier)  ||
         (frozenBase <= addr && addr < frozenFrontier)) {
       return getTransContaining(addr) != INVALID_ID;
@@ -190,8 +181,6 @@ private:
   TCA                         ahotFrontier;
   TCA                         aBase;
   TCA                         aFrontier;
-  TCA                         aprofBase;
-  TCA                         aprofFrontier;
   TCA                         coldBase;
   TCA                         coldFrontier;
   TCA                         frozenBase;

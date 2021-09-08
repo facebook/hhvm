@@ -47,7 +47,6 @@ bool dumpTCCode(folly::StringPiece filename) {
 
   OPEN_FILE(ahotFile,       "_ahot");
   OPEN_FILE(aFile,          "_a");
-  OPEN_FILE(aprofFile,      "_aprof");
   OPEN_FILE(acoldFile,      "_acold");
   OPEN_FILE(afrozenFile,    "_afrozen");
 
@@ -64,7 +63,6 @@ bool dumpTCCode(folly::StringPiece filename) {
 
   writeBlock(code().hot(), ahotFile);
   writeBlock(code().main(), aFile);
-  writeBlock(code().prof(), aprofFile);
   writeBlock(code().cold(), acoldFile);
   writeBlock(code().frozen(), afrozenFile);
   return result;
@@ -82,8 +80,6 @@ bool dumpTCData() {
                 "ahot.frontier    = %p\n"
                 "a.base           = %p\n"
                 "a.frontier       = %p\n"
-                "aprof.base       = %p\n"
-                "aprof.frontier   = %p\n"
                 "acold.base       = %p\n"
                 "acold.frontier   = %p\n"
                 "afrozen.base     = %p\n"
@@ -91,7 +87,6 @@ bool dumpTCData() {
                 repoSchemaId().begin(),
                 code().hot().base(),    code().hot().frontier(),
                 code().main().base(),   code().main().frontier(),
-                code().prof().base(),   code().prof().frontier(),
                 code().cold().base(),   code().cold().frontier(),
                 code().frozen().base(), code().frozen().frontier())) {
     return false;

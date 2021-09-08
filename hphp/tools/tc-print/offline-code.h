@@ -41,7 +41,6 @@ enum TCRegion {
 
   TCRHot,
   TCRMain,
-  TCRProfile,
   TCRCold,
   TCRFrozen,
   TCRCount, // keep last
@@ -183,12 +182,11 @@ struct OfflineCode {
   OfflineCode(std::string _dumpDir,
                  TCA _ahotBase,
                  TCA _aBase,
-                 TCA _aprofBase,
                  TCA _coldBase,
                  TCA _frozenBase)
       : dumpDir(_dumpDir) {
     TCA tcRegionBases[TCRCount] = {
-      _ahotBase, _aBase, _aprofBase, _coldBase, _frozenBase
+      _ahotBase, _aBase, _coldBase, _frozenBase
     };
 #if defined(HAVE_LIBXED)
     xedInit();

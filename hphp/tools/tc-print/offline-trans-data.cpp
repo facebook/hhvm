@@ -54,8 +54,6 @@ void OfflineTransData::loadTCHeader() {
   READ("ahot.frontier = %p", &ahotFrontier);
   READ("a.base = %p", &aBase);
   READ("a.frontier = %p", &aFrontier);
-  READ("aprof.base = %p", &aprofBase);
-  READ("aprof.frontier = %p", &aprofFrontier);
   READ("acold.base = %p", &coldBase);
   READ("acold.frontier = %p", &coldFrontier);
   READ("afrozen.base = %p", &frozenBase);

@@ -125,9 +125,10 @@ createCallGraphFromProfCode(jit::hash_map<hfsort::TargetId, FuncId>& funcID) {
                               const auto& callerAddrs,
                               uint64_t& totalCalls) {
     for (auto callAddr : callerAddrs) {
-      if (!tc::isProfileCodeAddress(callAddr)) continue;
       auto const callerTransId = pd->jmpTransID(callAddr);
-      addCallerCount(callAddr, calleeTargetId, callerTransId, totalCalls);
+      if (callerTransId != kInvalidTransID) {
+        addCallerCount(callAddr, calleeTargetId, callerTransId, totalCalls);
+      }
     }
   };
 

@@ -168,6 +168,18 @@ void updateCodeSizeCounters() {
   codeUsed->addValue(code().data().used() - codeUsed->getSum());
 }
 
+size_t getLiveMainUsage() {
+  auto const it = s_counters.find("live.main");
+  if (it == s_counters.end()) return 0;
+  return it->second->getSum();
+}
+
+size_t getProfMainUsage() {
+  auto const it = s_counters.find("prof.main");
+  if (it == s_counters.end()) return 0;
+  return it->second->getSum();
+}
+
 /*
  * Update JIT maturity with the current amount of emitted code and state of the
  * JIT.
@@ -187,18 +199,17 @@ void reportJitMaturity() {
   // If retranslateAll is enabled, wait until it finishes before counting in
   // optimized translations.
   auto const hotSize = beforeRetranslateAll ? 0 : code().hot().used();
-  // When we jit from serialized profile data, aprof is empty. In order to make
-  // jit maturity somewhat comparable between the two cases, we pretend to have
-  // some profiling code.
+  // When we jit from serialized profile data, the profile code won't be
+  // present. In order to make jit maturity somewhat comparable between the two
+  // cases, we pretend to have some profiling code.
   //
-  // If we've restarted to reload profiling data before RTA, aprof
-  // will be empty. Since hotSize and mainSize will also be zero in
-  // this case, our maturity will sit at 0. To avoid this, we've
-  // recorded the size of aprof before we restarted in the profiling
-  // data. Use that to simulate the size of aprof (this will be zero
-  // if we haven't restarted).
+  // If we've restarted to reload profiling data before RTA, the profile code
+  // won't be present. Since hotSize and mainSize will also be zero in this
+  // case, our maturity will sit at 0. To avoid this, we've recorded the size of
+  // the main profile code before we restarted with the profiling data. Use that
+  // to simulate the size of the profile code.
   auto const profSize = std::max(
-    code().prof().used() + (isJitSerializing() ? ProfData::prevProfSize() : 0),
+    getProfMainUsage() + (isJitSerializing() ? ProfData::prevProfSize() : 0),
     hotSize
   );
   auto const mainSize = code().main().used();
@@ -208,6 +219,8 @@ void reportJitMaturity() {
   int64_t maturity = before;
   if (beforeRetranslateAll) {
     maturity = std::min(kMaxMaturityBeforeRTA, codeSize * 100 / fullSize);
+  } else if (getLiveMainUsage() >= RuntimeOption::EvalJitMaxLiveMainUsage) {
+    maturity = 100;
   } else if (codeSize >= fullSize) {
     maturity = (mainSize >= CodeCache::AMaxUsage) ? 100 : 99;
   } else {

@@ -25,7 +25,6 @@ from typing import List, Optional, Union
 
 import clingo
 from clingo import Number, Symbol
-
 from hphp.hack.src.hh_codesynthesis.codeGenerator import CodeGenerator
 from hphp.hack.src.hh_codesynthesis.hackGenerator import HackCodeGenerator
 

@@ -20,7 +20,6 @@
 from typing import Set, Dict, Any, Tuple, List
 
 import clingo
-
 from hphp.hack.src.hh_codesynthesis.codeGenerator import CodeGenerator
 
 

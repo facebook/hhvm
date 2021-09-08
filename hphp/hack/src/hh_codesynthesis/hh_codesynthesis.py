@@ -32,8 +32,10 @@ from hphp.hack.src.hh_codesynthesis.hackGenerator import HackCodeGenerator
 try:
     importlib.util.find_spec("libfb.py")
     from libfb.py import parutil
+    g_internal_run = True
 except ModuleNotFoundError:
-    pass
+    g_internal_run = False
+
 
 class ClingoContext:
     """Context class interact with Python and Clingo."""
@@ -232,15 +234,12 @@ def extract_logic_rules(lines: List[str]) -> List[str]:
 def do_reasoning(additional_programs: List[str], generator: CodeGenerator) -> None:
     # Logic programs for code synthesis.
 
-    try:
+    asp_files = "hphp/hack/src/hh_codesynthesis"
+    if g_internal_run:
         # Check if we are running in the internal environment.
-        importlib.util.find_spec("libfb.py")
         asp_files = os.path.join(
-             parutil.get_dir_path("hphp/hack/src/hh_codesynthesis/"), "asp_code"
+            parutil.get_dir_path("hphp/hack/src/hh_codesynthesis/"), "asp_code"
         )
-    except ModuleNotFoundError:
-        # Otherwise, we are running in the external environment.
-        asp_files = "hphp/hack/src/hh_codesynthesis"
 
     # Clingo interfaces.
     ctl = clingo.Control()

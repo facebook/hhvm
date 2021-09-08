@@ -11,6 +11,7 @@ export HACK_OPAM_DEPS=(
   dtoa.0.3.2
   dune.2.7.1
   fileutils.0.6.3
+  fmt.0.8.9
   lru.0.3.0
   lwt.5.4.0
   lwt_log.1.1.1

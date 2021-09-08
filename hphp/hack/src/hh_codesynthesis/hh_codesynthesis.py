@@ -32,6 +32,7 @@ from hphp.hack.src.hh_codesynthesis.hackGenerator import HackCodeGenerator
 try:
     importlib.util.find_spec("libfb.py")
     from libfb.py import parutil
+
     g_internal_run = True
 except ModuleNotFoundError:
     g_internal_run = False

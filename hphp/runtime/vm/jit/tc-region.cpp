@@ -743,6 +743,7 @@ void RegionTranslator::publishMetaImpl() {
   if (RuntimeOption::EvalJitUseVtuneAPI) {
     reportTraceletToVtune(sk.unit(), sk.func(), tr);
   }
+  recordTranslationSizes(tr);
 
   fixups.process(&tailBranches);
 }

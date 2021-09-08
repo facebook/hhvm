@@ -54,6 +54,11 @@ void recordBCInstr(uint32_t op, const TCA addr, const TCA end, bool cold);
 void reportJitMaturity();
 
 /*
+ * Record the sizes of the different translation areas per translation kind.
+ */
+void recordTranslationSizes(const TransRec& tr);
+
+/*
  * Update the jit.code.*.used ServiceData counters to reflect the
  * current usage of the TC. Call this whenever a new translation is
  * emitted into the TC. The code lock must be already held.
@@ -103,4 +108,3 @@ void recordFuncPrologue(const Func* func, TransLoc loc);
 std::string warmupStatusString();
 
 }}}
-

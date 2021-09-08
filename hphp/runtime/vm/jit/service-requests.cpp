@@ -24,6 +24,7 @@
 #include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/tc-internal.h"
+#include "hphp/runtime/vm/jit/tc-record.h"
 #include "hphp/runtime/vm/jit/trans-db.h"
 #include "hphp/runtime/vm/jit/trans-rec.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -137,6 +138,7 @@ TCA emitStub(StubType type, SrcKey sk, SBInvOffset spOff) {
     if (RuntimeOption::EvalJitUseVtuneAPI) {
       reportTraceletToVtune(sk.unit(), sk.func(), tr);
     }
+    tc::recordTranslationSizes(tr);
 
     assertx(!transdb::enabled() ||
             transdb::getTransRec(coldStart)->kind == TransKind::Anchor);

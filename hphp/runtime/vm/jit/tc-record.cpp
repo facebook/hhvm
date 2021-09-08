@@ -90,6 +90,21 @@ buildCodeSizeCounters() {
         );
   };
   CodeCache::forEachName(codeCounterInit);
+  codeCounterInit("prof.main");
+  codeCounterInit("prof.cold");
+  codeCounterInit("prof.frozen");
+  codeCounterInit("opt.main");
+  codeCounterInit("opt.cold");
+  codeCounterInit("opt.frozen");
+  codeCounterInit("live.main");
+  codeCounterInit("live.cold");
+  codeCounterInit("live.frozen");
+  codeCounterInit("anchor.main");
+  codeCounterInit("anchor.cold");
+  codeCounterInit("anchor.frozen");
+  codeCounterInit("interp.main");
+  codeCounterInit("interp.cold");
+  codeCounterInit("interp.frozen");
   return counters;
 }
 
@@ -106,6 +121,38 @@ static ServiceData::CounterCallback s_warmedUpCounter(
     counters["jit.warmed-up"] = warmupStatusString().empty() ? 1 : 0;
   }
 );
+
+void recordTranslationSizes(const TransRec& tr) {
+  const char* kindName = nullptr;
+  switch (tr.kind) {
+    case TransKind::Profile:
+    case TransKind::ProfPrologue:
+      kindName = "prof";
+      break;
+    case TransKind::Optimize:
+    case TransKind::OptPrologue:
+      kindName = "opt";
+      break;
+    case TransKind::Live:
+    case TransKind::LivePrologue:
+      kindName = "live";
+      break;
+    case TransKind::Anchor:
+      kindName = "anchor";
+      break;
+    case TransKind::Interp:
+      kindName = "interp";
+      break;
+    case TransKind::Invalid:
+      always_assert(0);
+  }
+  auto mainCounter   = s_counters.at(folly::sformat("{}.main", kindName));
+  auto coldCounter   = s_counters.at(folly::sformat("{}.cold", kindName));
+  auto frozenCounter = s_counters.at(folly::sformat("{}.frozen", kindName));
+  mainCounter->addValue(tr.aLen);
+  coldCounter->addValue(tr.acoldLen);
+  frozenCounter->addValue(tr.afrozenLen);
+}
 
 void updateCodeSizeCounters() {
   assertOwnsCodeLock();

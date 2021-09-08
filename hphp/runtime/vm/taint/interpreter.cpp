@@ -21,6 +21,7 @@
 #include <folly/Singleton.h>
 
 #include "hphp/runtime/base/init-fini-node.h"
+#include "hphp/runtime/vm/member-key.h"
 #include "hphp/runtime/vm/method-lookup.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
@@ -60,6 +61,18 @@ template<> class FormatValue<HPHP::tv_lval> {
   const HPHP::tv_lval& m_value;
 };
 
+template<> class FormatValue<HPHP::MemberKey> {
+ public:
+  explicit FormatValue(const HPHP::MemberKey& memberKey): m_value(memberKey) {}
+  template<class FormatCallback>
+  void format(FormatArg& arg, FormatCallback& cb) const {
+    auto string = folly::sformat("{}", HPHP::show(m_value));
+    format_value::formatString(string, arg, cb);
+  }
+ private:
+  const HPHP::MemberKey& m_value;
+};
+
 } // folly
 
 
@@ -88,7 +101,7 @@ void iopPreamble(const std::string& name) {
     for (int i = shadow_stack_size; i <= vm_stack_size; i++) {
       stack.push(std::nullopt);
     }
-    for (int i = vm_stack_size; i > shadow_stack_size; i--) {
+    for (int i = shadow_stack_size; i > vm_stack_size; i--) {
       stack.pop();
     }
   }
@@ -525,7 +538,7 @@ void iopCGetL(named_local_var fr) {
   iopPreamble("CGetL");
 
   auto state = State::get();
-  auto value = state->heap.get(fr.lval);
+  auto value = state->heap.get(AccessPath{fr.lval});
 
   FTRACE(2, "taint: getting {} (name: {}, value: {})\n", fr.lval, fr.name, value);
 
@@ -612,7 +625,7 @@ void iopSetL(tv_lval to) {
 
   FTRACE(2, "taint: setting {} to `{}`\n", to, value);
 
-  state->heap.set(to, state->stack.top());
+  state->heap.set(AccessPath{to}, value);
 }
 
 void iopSetG() {
@@ -955,7 +968,7 @@ void iopVerifyParamType(local_var param) {
         param.index,
         value);
     value->hops.push_back(func);
-    state->heap.set(param.lval, value);
+    state->heap.set(AccessPath{param.lval}, value);
   }
 }
 
@@ -1111,7 +1124,7 @@ void iopBaseL(
     named_local_var /* loc */,
     MOpMode /* mode */,
     ReadonlyOp /* op */) {
-  iopUnhandled("BaseL");
+  iopPreamble("BaseL");
 }
 
 void iopBaseC(uint32_t /* idx */, MOpMode) {
@@ -1128,13 +1141,36 @@ void iopDim(MOpMode /* mode */, MemberKey /* mk */) {
 
 void iopQueryM(
     uint32_t /* nDiscard */,
-    QueryMOp /* subop */,
-    MemberKey /* mk */) {
-  iopUnhandled("QueryM");
+    QueryMOp op,
+    MemberKey memberKey) {
+  iopPreamble("QueryM");
+
+  auto state = State::get();
+  auto& base = vmMInstrState().base;
+
+  switch(op) {
+    case QueryMOp::CGet:
+    case QueryMOp::CGetQuiet: {
+      auto value = state->heap.get(AccessPath{base, memberKey});
+      FTRACE(2, "taint: getting {}.{}, value: `{}`\n", base, memberKey, value);
+      state->stack.push(value);
+      break;
+    }
+    default:
+      FTRACE(2, "taint: unsuppoted query operation\n");
+      return;
+  }
 }
 
-void iopSetM(uint32_t /* nDiscard */, MemberKey /* mk */) {
-  iopUnhandled("SetM");
+void iopSetM(uint32_t /* nDiscard */, MemberKey memberKey) {
+  iopPreamble("SetM");
+
+  auto state = State::get();
+  auto value = state->stack.top();
+
+  auto& base = vmMInstrState().base;
+  FTRACE(2, "taint: setting {}.{} to `{}`\n", base, memberKey, value);
+  state->heap.set(AccessPath{base, memberKey}, value);
 }
 
 void iopSetRangeM(

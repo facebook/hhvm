@@ -123,14 +123,14 @@ let handler =
           shape
           (Pos_or_decl.of_raw_pos pos, field_name)
       | ( _,
-          p,
+          _,
           Call
             ( (_, _, Class_const ((_, _, CI (_, class_name)), (_, method_name))),
               _,
               [shape; (_, pos, String field_name); _],
               None ) )
       | ( _,
-          p,
+          _,
           Call
             ( (_, _, Class_const ((_, _, CI (_, class_name)), (_, method_name))),
               _,
@@ -140,7 +140,7 @@ let handler =
              && (String.equal method_name SN.Shapes.idx
                 || String.equal method_name SN.Shapes.at) ->
         shapes_method_access_with_non_existent_field
-          p
+          pos
           env
           method_name
           shape

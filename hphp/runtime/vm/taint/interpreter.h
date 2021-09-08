@@ -23,74 +23,10 @@
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/jit/types.h"
 
-#include <map>
-#include <memory>
-#include <optional>
-#include <set>
-
-template <>
-struct std::hash<HPHP::tv_lval> {
-  std::size_t operator()(const HPHP::tv_lval& val) const {
-    return val.hash();
-  }
-};
-
 namespace HPHP {
 namespace taint {
 
 using jit::TCA;
-
-struct Path {
-  // Print trace in JSON-line format to stderr.
-  void dump() const;
-  std::vector<const Func*> hops;
-};
-
-using Value = Optional<Path>;
-
-struct Stack {
-  Stack(const std::vector<Value>& stack = {}) : m_stack(stack) {}
-
-  void push(const Value& value);
-
-  Value top() const;
-  Value peek(int offset) const;
-
-  void pop(int n = 1);
-  void replaceTop(const Value& value);
-
-  size_t size() const;
-  std::string show() const;
-
-  void clear();
-
- private:
-  std::vector<Value> m_stack;
-};
-
-/*
- * Our shadow heap is not replicating the full VM heap but keeps track
- * of tainted values (cells) on the heap.
- */
-struct Heap {
-  void set(tv_lval to, const Value& value);
-  Value get(tv_lval from) const;
-
-  void clear();
-
- private:
-  hphp_fast_map<tv_lval, Value> m_heap;
-};
-
-struct State {
-  static std::shared_ptr<State> get();
-
-  void initialize();
-  void reset();
-
-  Stack stack;
-  Heap heap;
-};
 
 void iopNop();
 void iopEntryNop();
@@ -117,7 +53,6 @@ void iopNewDictArray(uint32_t capacity);
 void iopNewStructDict(imm_array<int32_t> ids);
 void iopNewVec(uint32_t n);
 void iopNewKeysetArray(uint32_t n);
-void iopNewRecord(const StringData* s, imm_array<int32_t> ids);
 void iopAddElemC();
 void iopAddNewElemC();
 void iopNewCol(CollectionType cType);

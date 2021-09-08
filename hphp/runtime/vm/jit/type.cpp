@@ -76,7 +76,7 @@ Type Type::narrowToVanilla() const {
 
 Type Type::narrowToLayout(ArrayLayout layout) const {
   if (!supports(SpecKind::Array)) return *this;
-  if (supports(SpecKind::Class) || supports(SpecKind::Record)) return *this;
+  if (supports(SpecKind::Class)) return *this;
   auto const spec = arrSpec().narrowToLayout(layout);
   if (spec == ArraySpec::Bottom()) return TBottom;
   return Type(*this, spec);
@@ -140,9 +140,6 @@ std::string Type::constValString() const {
       m_clsmethVal->getFunc() ?
       m_clsmethVal->getFunc()->fullName()->data() : "nullptr"
     ).str();
-  }
-  if (*this <= TRecDesc) {
-    return folly::format("RecDesc({})", m_recVal->name()->data()).str();
   }
   if (*this <= TTCA) {
     auto name = getNativeFunctionName(m_tcaVal);
@@ -236,9 +233,6 @@ std::string Type::toString() const {
     if (*this <= TLazyCls) {
       return folly::sformat("LazyCls={}", m_lclsVal.name()->data());
     }
-    if (*this <= TRecDesc) {
-      return folly::sformat("RecDesc={}", m_recVal->name()->data());
-    }
     return folly::sformat("{}<{}>",
                           dropConstVal().toString(), constValString());
   }
@@ -275,10 +269,6 @@ std::string Type::toString() const {
     if (auto const cls = t.clsSpec()) {
       auto const base = Type{m_bits & kClsSpecBits, t.ptrKind(), t.memKind()};
       parts.push_back(folly::to<std::string>(base.toString(), cls.toString()));
-      t -= base;
-    } else if (auto const rec = t.recSpec()) {
-      auto const base = Type{m_bits & kRecSpecBits, t.ptrKind(), t.memKind()};
-      parts.push_back(folly::to<std::string>(base.toString(), rec.toString()));
       t -= base;
     } else if (auto const arr = t.arrSpec()) {
       auto const base = Type{m_bits & kArrSpecBits, t.ptrKind(), t.memKind()};
@@ -347,14 +337,11 @@ enum TypeKey : uint8_t {
   ClsSub,
   ClsExact,
   ArrSpec,
-  RecSub,
-  RecExact,
 };
 
 TypeKey getTypeKey(const Type& t) {
   return t.hasConstVal() ? TypeKey::Const :
     t.clsSpec() ? (t.clsSpec().exact() ? TypeKey::ClsExact : TypeKey::ClsSub) :
-    t.recSpec() ? (t.recSpec().exact() ? TypeKey::RecExact : TypeKey::RecSub) :
     t.arrSpec() ? TypeKey::ArrSpec : TypeKey::None;
 }
 }
@@ -393,9 +380,6 @@ void Type::serialize(ProfDataSerializer& ser) const {
 
   if (key == TypeKey::ClsSub || key == TypeKey::ClsExact) {
     return write_class(ser, t.clsSpec().cls());
-  }
-  if (key == TypeKey::RecSub || key == TypeKey::RecExact) {
-    return write_record(ser, t.recSpec().rec());
   }
   if (key == TypeKey::ArrSpec) {
     auto const arrSpec = t.arrSpec();
@@ -453,13 +437,6 @@ Type Type::deserialize(ProfDataDeserializer& ser) {
       } else {
         t.m_clsSpec = ClassSpec{cls, ClassSpec::SubTag{}};
       }
-    } else if (key == TypeKey::RecSub || key == TypeKey::RecExact) {
-      auto const rec = read_record(ser);
-      if (key == TypeKey::RecExact) {
-        t.m_recSpec = RecordSpec{rec, RecordSpec::ExactTag{}};
-      } else {
-        t.m_recSpec = RecordSpec{rec, RecordSpec::SubTag{}};
-      }
     } else {
       assertx(key == TypeKey::ArrSpec);
       auto const layout = read_layout(ser);
@@ -505,10 +482,6 @@ size_t Type::stableHash() const {
       auto const cls = t.clsSpec().cls();
       return cls ? cls->stableHash() : 0;
     }
-    if (key == TypeKey::RecSub || key == TypeKey::RecExact) {
-      auto const rec = t.recSpec().rec();
-      return rec ? rec->stableHash() : 0;
-    }
     if (key == TypeKey::ArrSpec) {
       auto const spec = t.arrSpec();
       return folly::hash::hash_combine(
@@ -532,13 +505,12 @@ bool Type::checkValid() const {
   // NOTE: Be careful: the TFoo objects aren't all constructed yet in this
   // function, and we can't call operator<=, etc. because they call checkValid.
   auto constexpr kNonNullConstVals = kArrLike | kCls | kLazyCls |
-                                     kFunc | kRecDesc | kStr;
+                                     kFunc | kStr;
   if (m_hasConstVal && ((m_bits & kNonNullConstVals) == m_bits)) {
     assert_flog(m_extra, "Null constant type: {}", m_bits.hexStr());
   }
   if (m_extra) {
     assert_flog(((m_bits & kClsSpecBits) == kBottom ||
-                 (m_bits & kRecSpecBits) == kBottom ||
                  (m_bits & kArrSpecBits) == kBottom) &&
                 "Conflicting specialization: {}", m_bits.hexStr());
   }
@@ -586,7 +558,6 @@ Type::bits_t Type::bitsFromDataType(DataType outer) {
     case KindOfLazyClass        : return kLazyCls;
     case KindOfClsMeth          : return kClsMeth;
     case KindOfRClsMeth         : return kRClsMeth;
-    case KindOfRecord           : return kRecord;
   }
   not_reached();
 }
@@ -616,7 +587,6 @@ DataType Type::toDataType() const {
   if (*this <= TCls)         return KindOfClass;
   if (*this <= TLazyCls)     return KindOfLazyClass;
   if (*this <= TClsMeth)     return KindOfClsMeth;
-  if (*this <= TRecord)      return KindOfRecord;
   if (*this <= TRFunc)       return KindOfRFunc;
   if (*this <= TRClsMeth)    return KindOfRClsMeth;
   always_assert_flog(false, "Bad Type {} in Type::toDataType()", *this);
@@ -628,27 +598,20 @@ DataType Type::toDataType() const {
 Type Type::specialize(TypeSpec spec) const {
   assertx(!spec.arrSpec() || supports(SpecKind::Array));
   assertx(!spec.clsSpec() || supports(SpecKind::Class));
-  assertx(!spec.recSpec() || supports(SpecKind::Record));
 
   // If we don't have exactly one kind of specialization, or if our bits
   // support more than one kinds, don't specialize.
-  if ((bool)spec.arrSpec() + (bool)spec.clsSpec() + (bool)spec.recSpec() != 1) {
+  if ((bool)spec.arrSpec() + (bool)spec.clsSpec() != 1) {
     return *this;
   }
-  if (supports(SpecKind::Array) +
-      supports(SpecKind::Class) +
-      supports(SpecKind::Record) > 1) return *this;
+  if (supports(SpecKind::Array) + supports(SpecKind::Class) > 1) return *this;
 
   if (spec.arrSpec() != ArraySpec::Bottom()) {
     return Type{*this, spec.arrSpec()};
   }
 
-  if (spec.clsSpec() != ClassSpec::Bottom()) {
-    return Type{*this, spec.clsSpec()};
-  }
-
-  assertx(spec.recSpec() != RecordSpec::Bottom());
-  return Type{*this, spec.recSpec()};
+  assertx(spec.clsSpec() != ClassSpec::Bottom());
+  return Type{*this, spec.clsSpec()};
 }
 
 Type Type::modified() const {
@@ -778,7 +741,6 @@ Type Type::operator&(Type rhs) const {
   auto mem = lhs.memKind() & rhs.memKind();
   auto arrSpec = lhs.arrSpec() & rhs.arrSpec();
   auto clsSpec = lhs.clsSpec() & rhs.clsSpec();
-  auto recSpec = lhs.recSpec() & rhs.recSpec();
 
   // Certain component sublattices of Type are dependent on one another.  For
   // each set of such "interfering" components, if any component goes to
@@ -790,10 +752,8 @@ Type Type::operator&(Type rhs) const {
   // Arr/Cls bits and specs.
   if (arrSpec == ArraySpec::Bottom()) bits &= ~kArrSpecBits;
   if (clsSpec == ClassSpec::Bottom()) bits &= ~kClsSpecBits;
-  if (recSpec == RecordSpec::Bottom()) bits &= ~kRecSpecBits;
   if (!supports(bits, SpecKind::Array)) arrSpec = ArraySpec::Bottom();
   if (!supports(bits, SpecKind::Class)) clsSpec = ClassSpec::Bottom();
-  if (!supports(bits, SpecKind::Record)) recSpec = RecordSpec::Bottom();
 
   // Ptr and Mem also depend on Cell bits. This must come after all possible
   // fixups of bits.
@@ -810,7 +770,7 @@ Type Type::operator&(Type rhs) const {
     static_assert(Mem::Top == (Mem::Mem | Mem::NotMem), "");
   }
 
-  return Type{bits, ptr, mem}.specialize({arrSpec, clsSpec, recSpec});
+  return Type{bits, ptr, mem}.specialize({arrSpec, clsSpec});
 }
 
 Type Type::operator-(Type rhs) const {
@@ -853,7 +813,6 @@ Type Type::operator-(Type rhs) const {
   auto mem = lhs.memKind() - rhs.memKind();
   auto arrSpec = lhs.arrSpec() - rhs.arrSpec();
   auto clsSpec = lhs.clsSpec() - rhs.clsSpec();
-  auto recSpec = lhs.recSpec() - rhs.recSpec();
 
   auto const have_gen_bits = (bits & kCell) != kBottom;
 
@@ -867,10 +826,8 @@ Type Type::operator-(Type rhs) const {
 
   auto const have_arr_bits = supports(bits, SpecKind::Array);
   auto const have_cls_bits = supports(bits, SpecKind::Class);
-  auto const have_rec_bits = supports(bits, SpecKind::Record);
   auto const have_arr_spec = arrSpec != ArraySpec::Bottom();
   auto const have_cls_spec = clsSpec != ClassSpec::Bottom();
-  auto const have_rec_spec = recSpec != RecordSpec::Bottom();
 
   // ptr and mem can only interact with clsSpec if lhs.m_bits has at least one
   // kCell member of kClsSpecBits.
@@ -891,11 +848,10 @@ Type Type::operator-(Type rhs) const {
   }
   if (have_arr_spec) bits |= lhs.m_bits & kArrSpecBits;
   if (have_cls_spec) bits |= lhs.m_bits & kClsSpecBits;
-  if (have_rec_spec) bits |= lhs.m_bits & kRecSpecBits;
 
   // ptr and mem
   if (have_gen_bits || have_arr_spec ||
-      (have_cls_spec && have_ptr_cls) || have_rec_spec) {
+      (have_cls_spec && have_ptr_cls)) {
     ptr = lhs.ptrKind();
     mem = lhs.memKind();
   }
@@ -907,11 +863,8 @@ Type Type::operator-(Type rhs) const {
   if ((have_memness && have_ptr_cls) || have_cls_bits) {
     clsSpec = lhs.clsSpec();
   }
-  if (have_memness || have_rec_bits) {
-    recSpec = lhs.recSpec();
-  }
 
-  return Type{bits, ptr, mem}.specialize({arrSpec, clsSpec, recSpec});
+  return Type{bits, ptr, mem}.specialize({arrSpec, clsSpec});
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -932,16 +885,6 @@ Type typeFromTV(tv_rval tv, const Class* ctx) {
       return TObj;
     }
     return Type::ExactObj(cls);
-  }
-  if (isRecordType(type(tv))) {
-    auto const rec = val(tv).prec->record();
-    assertx(rec);
-
-    if (!(rec->attrs() & AttrFinal) ||
-        !(rec->attrs() & AttrUnique)) {
-      return TRecord;
-    }
-    return Type::ExactRecord(rec);
   }
 
   auto const result = Type(dt_modulo_persistence(type(tv)));
@@ -996,7 +939,6 @@ Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
     case T::OptCls:         return TCls        | TInitNull;
     case T::OptLazyCls:     return TLazyCls    | TInitNull;
     case T::OptClsMeth:     return TClsMeth    | TInitNull;
-    case T::OptRecord:      return TRecord     | TInitNull;
     case T::OptArrKey:      return TInt | TStr | TInitNull;
     case T::OptUncArrKey:   return TInt | TPersistentStr | TInitNull;
     case T::OptUncStrLike:
@@ -1028,7 +970,6 @@ Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
     case T::Cls:            return TCls;
     case T::LazyCls:        return TLazyCls;
     case T::ClsMeth:        return TClsMeth;
-    case T::Record:         return TRecord;
 
     case T::Cell:           return TCell;
     case T::UncArrKey:      return TInt | TPersistentStr;
@@ -1141,25 +1082,6 @@ Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
       }
       return base;
     }
-
-    case T::SubRecord:
-    case T::ExactRecord:
-    case T::OptSubRecord:
-    case T::OptExactRecord: {
-      auto base = TRecord;
-
-      if (auto const rec = RecordDesc::lookupUnique(ty.recordName())) {
-        if (ty.tag() == T::ExactRecord || ty.tag() == T::OptExactRecord) {
-          base = Type::ExactRecord(rec);
-        } else {
-          base = Type::SubRecord(rec);
-        }
-      }
-      if (ty.tag() == T::OptSubRecord || ty.tag() == T::OptExactRecord) {
-        base |= TInitNull;
-      }
-      return base;
-    }
   }
   not_reached();
 }
@@ -1180,7 +1102,6 @@ Type typeFromPropTC(const HPHP::TypeConstraint& tc,
       case A::Int:        return TInt;
       case A::Float:      return TDbl;
       case A::String:     return TStr;
-      case A::Record:     return TRecord;
       // We only call this once we've attempted resolving the
       // type-constraint. If we successfully resolved it, we'll never get here,
       // So if we're here and we have AnnotType::Object, we don't know what the
@@ -1304,7 +1225,7 @@ Type relaxToConstraint(Type t, const GuardConstraint& gc) {
   if (!gc.isSpecialized()) return relaxType(t, gc.category);
 
   assertx(t.isSpecialized());
-  assertx(gc.wantClass() + gc.isArrayLayoutSensitive() + gc.wantRecord() == 1);
+  assertx(gc.wantClass() + gc.isArrayLayoutSensitive() == 1);
 
   // NOTE: This second check here causes us to guard to specific classes where
   // we could guard to superclasses and unify multiple regions. Rethink it.

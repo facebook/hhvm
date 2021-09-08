@@ -54,7 +54,6 @@ CASE(Class)
 CASE(LazyClass)
 CASE(ClsMeth)
 CASE(RClsMeth)
-CASE(Record)
 
 #undef CASE
 
@@ -73,4 +72,3 @@ ALWAYS_INLINE double tvAssertDouble(T&& tv) {
 ///////////////////////////////////////////////////////////////////////////////
 
 }
-

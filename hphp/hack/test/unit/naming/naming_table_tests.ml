@@ -103,6 +103,7 @@ let run_naming_table_test f =
             dep_table_pow = 16;
             hash_table_pow = 10;
             shm_dirs = [];
+            shm_use_sharded_hashtbl = false;
             shm_min_avail = 0;
             log_level = 0;
             sample_rate = 0.0;
@@ -275,7 +276,7 @@ let test_local_changes () =
         FileInfo.
           {
             FileInfo.empty_t with
-            consts = [(a_pos, a_name)];
+            consts = [(a_pos, a_name, None)];
             hash = Some (Int64.of_int 1234567);
           }
       in
@@ -689,7 +690,8 @@ let test_naming_table_query_by_dep_hash () =
             [
               ( FileInfo.File
                   (FileInfo.Class, Relative_path.from_root ~suffix:"bar.php"),
-                "\\Baz" );
+                "\\Baz",
+                None );
             ];
         }
       in
@@ -726,6 +728,7 @@ let () =
         dep_table_pow = 16;
         hash_table_pow = 10;
         shm_dirs = [];
+        shm_use_sharded_hashtbl = false;
         shm_min_avail = 0;
         log_level = 0;
         sample_rate = 0.0;

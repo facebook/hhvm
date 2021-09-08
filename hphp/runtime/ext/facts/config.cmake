@@ -5,6 +5,7 @@ HHVM_DEFINE_EXTENSION(
     exception.cpp
     ext_facts.cpp
     fact-extractor.cpp
+    logging.cpp
     std-string-ptr.cpp
     string-data-ptr.cpp
     symbol-map-prod.cpp
@@ -21,6 +22,7 @@ HHVM_DEFINE_EXTENSION(
     file-facts.h
     inheritance-info.h
     lazy-two-way-map.h
+    logging.h
     path-and-hash.h
     path-symbols-map.h
     string-ptr.h

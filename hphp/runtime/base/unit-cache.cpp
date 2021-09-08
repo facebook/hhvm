@@ -36,11 +36,11 @@
 #include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/server/source-root-info.h"
 #include "hphp/runtime/vm/debugger-hook.h"
-#include "hphp/runtime/vm/extern-compiler.h"
 #include "hphp/runtime/vm/repo-file.h"
 #include "hphp/runtime/vm/runtime-compiler.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/unit-emitter.h"
+#include "hphp/runtime/vm/unit-parser.h"
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/build-info.h"
@@ -1363,7 +1363,6 @@ std::string mangleUnitSha1(const std::string& fileSha1,
     + (RuntimeOption::EvalEnableImplicitContext ? '1' : '0')
     + (RuntimeOption::EvalEmitClsMethPointers ? '1' : '0')
     + (RuntimeOption::EvalIsVecNotices ? '1' : '0')
-    + (RuntimeOption::EvalHackRecords ? '1' : '0')
     + (RuntimeOption::EvalAllowHhas ? '1' : '0')
     + std::to_string(RuntimeOption::EvalEnforceGenericsUB)
     + (RuntimeOption::EvalEmitMethCallerFuncPointers ? '1' : '0')
@@ -1374,6 +1373,7 @@ std::string mangleUnitSha1(const std::string& fileSha1,
     + (RuntimeOption::EvalTraitConstantInterfaceBehavior ? '1' : '0')
     + (RuntimeOption::EvalEnableImplicitContext ? '1' : '0')
     + RuntimeOption::EvalUnitCacheBreaker + '\0'
+    + (RuntimeOption::EvalDiamondTraitMethods ? '1' : '0')
     + CoeffectsConfig::mangle()
     + opts.cacheKeySha1().toString()
     + mangleExtension(fileName)

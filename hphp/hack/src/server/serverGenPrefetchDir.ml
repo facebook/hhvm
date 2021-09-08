@@ -10,14 +10,18 @@
 (*
  * This module is used in saved state jobs to create two primary artifacts for
  * each changed file in a mergebase commit
- *  1) a marshalled ocaml blob representing the shallow decls in said file
+ *  1) a marshalled ocaml blob representing the decls in said file
  *  2) a json blob representing the "fan in" or in other words the decls
  *     needed to typecheck said file
  *)
 
 open Hh_prelude
 
-let get_shallow_decls_filename (filename : string) : string = filename ^ ".bin"
+let get_shallow_decls_filename (filename : string) : string =
+  filename ^ ".shallow.bin"
+
+let get_folded_decls_filename (filename : string) : string =
+  filename ^ ".folded.bin"
 
 let save_contents (output_filename : string) (contents : 'a) : unit =
   let chan = Stdlib.open_out_bin output_filename in
@@ -27,10 +31,14 @@ let save_contents (output_filename : string) (contents : 'a) : unit =
 let get_classes_from_file (file : Relative_path.t) (ctx : Provider_context.t) :
     SSet.t =
   (match
-     Direct_decl_utils.direct_decl_parse_and_cache ~decl_hash:true ctx file
+     Direct_decl_utils.direct_decl_parse_and_cache
+       ~file_decl_hash:true
+       ~symbol_decl_hashes:false
+       ctx
+       file
    with
   | None -> []
-  | Some (decls, _, _) ->
+  | Some (decls, _, _, _) ->
     List.filter_map
       ~f:(fun (name, decl) ->
         match decl with
@@ -38,6 +46,19 @@ let get_classes_from_file (file : Relative_path.t) (ctx : Provider_context.t) :
         | _ -> None)
       decls)
   |> SSet.of_list
+
+let dump_folded_decls
+    (ctx : Provider_context.t) (dir : string) (path : Relative_path.t) : unit =
+  let file_name = Relative_path.suffix path in
+  let classes_in_file = get_classes_from_file path ctx in
+  let folded_decls_in_file =
+    Decl_export.collect_legacy_decls ctx classes_in_file
+  in
+  let folded_decls_dir = Filename.concat dir "folded_decls" in
+  let file = file_name |> Filename.concat folded_decls_dir in
+  Sys_utils.mkdir_p (Filename.dirname file);
+  save_contents (get_folded_decls_filename file) folded_decls_in_file;
+  ()
 
 let dump_shallow_decls
     (ctx : Provider_context.t)
@@ -53,51 +74,6 @@ let dump_shallow_decls
   let file = file_name |> Filename.concat shallow_decls_dir in
   Sys_utils.mkdir_p (Filename.dirname file);
   save_contents (get_shallow_decls_filename file) shallow_decls_in_file;
-  ()
-
-let dump_fan_in_deps
-    (ctx : Provider_context.t) (dir : string) (path : Relative_path.t) : unit =
-  let file_name = Relative_path.suffix path in
-  let recorded_decls = Caml.Hashtbl.create 10 in
-  Typing_deps.add_dependency_callback
-    "hh_single collect decls"
-    (fun _ dependency ->
-      Caml.Hashtbl.replace
-        recorded_decls
-        (Typing_deps.Dep.extract_name dependency)
-        true);
-  let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
-  Hh_logger.log "typechecking %s" file_name;
-  let _ = Tast_provider.compute_tast_and_errors_unquarantined ~ctx ~entry in
-  let symbol_to_file name =
-    let name = "\\" ^ name in
-    match Naming_provider.get_class_path ctx name with
-    | Some path ->
-      (match Relative_path.prefix path with
-      | Relative_path.Root -> Some (Relative_path.suffix path)
-      | _ -> None)
-    | _ ->
-      Hh_logger.log "Couldn't find filename for symbol %s" name;
-      None
-  in
-  let typecheck_decl_deps =
-    Caml.Hashtbl.to_seq recorded_decls
-    |> Sequence.of_seq
-    |> Sequence.to_list
-    |> List.filter_map ~f:(fun (classname, _) -> symbol_to_file classname)
-    |> List.map ~f:(fun path -> Hh_json.string_ path)
-    |> HashSet.of_list
-    |> HashSet.to_list
-  in
-  let typecheck_decl_deps =
-    Hh_json.(
-      json_to_string ~pretty:true
-      @@ JSON_Object [("decl_deps", JSON_Array typecheck_decl_deps)])
-  in
-  let typecheck_deps_dir = Filename.concat dir "typecheck_deps" in
-  let file = file_name |> Filename.concat typecheck_deps_dir in
-  Sys_utils.mkdir_p (Filename.dirname file);
-  Disk.write_file ~file ~contents:typecheck_decl_deps;
   ()
 
 let go (env : ServerEnv.env) (genv : ServerEnv.genv) (dir : string) : unit =
@@ -134,7 +110,7 @@ let go (env : ServerEnv.env) (genv : ServerEnv.genv) (dir : string) : unit =
   in
   List.iter
     ~f:(fun path ->
-      dump_fan_in_deps ctx dir path;
-      dump_shallow_decls ctx genv dir path)
+      dump_shallow_decls ctx genv dir path;
+      dump_folded_decls ctx dir path)
     changed_files;
   ()

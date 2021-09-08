@@ -8,14 +8,4 @@ Exception: ClsMeth to vec conversion
 Exception: ClsMeth to dict conversion
 Exception: ClsMeth to vec conversion
 Exception: ClsMeth to keyset conversion
-
-Fatal error: Cannot convert record to dict in %s/arrayish-casts.php on line 19
-
-Fatal error: Cannot convert record to vec in %s/arrayish-casts.php on line 15
-
-Fatal error: Cannot convert record to dict in %s/arrayish-casts.php on line 23
-
-Fatal error: Cannot convert record to vec in %s/arrayish-casts.php on line 27
-
-Fatal error: Cannot convert record to keyset in %s/arrayish-casts.php on line 31
-Exception: Out of bounds vec access: invalid index 15
+Exception: Out of bounds vec access: invalid index 10

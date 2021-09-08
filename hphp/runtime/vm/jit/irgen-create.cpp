@@ -320,10 +320,8 @@ SSATmp* allocObjFast(IRGS& env, const Class* cls) {
  */
 void emitCreateCl(IRGS& env, uint32_t numParams, uint32_t clsIx) {
   auto const preCls = curFunc(env)->unit()->lookupPreClassId(clsIx);
-  auto cls = Class::defClosure(preCls);
-
+  auto cls = Class::defClosure(preCls, false);
   assertx(cls);
-  assertx(cls->attrs() & AttrUnique);
 
   cls = cls->rescope(const_cast<Class*>(curClass(env)));
   assertx(!cls->needInitialization());
@@ -494,31 +492,6 @@ void emitNewPair(IRGS& env) {
   // elements were pushed onto the stack in the order they should appear
   // in the pair, so the top of the stack should become the second element
   push(env, gen(env, NewPair, c2, c1));
-}
-
-void emitNewRecordImpl(IRGS& env, const StringData* name,
-                       const ImmVector& immVec,
-                       Opcode newRecordOp) {
-  auto const recDesc = RecordDesc::lookupUnique(name);
-  auto const isPersistent = recordHasPersistentRDS(recDesc);
-  auto const cachedRec = isPersistent ?
-    cns(env, recDesc) : gen(env, LdRecDescCached, RecNameData{name});
-  auto const numArgs = immVec.size();
-  auto const ids = immVec.vec32();
-  NewStructData extra;
-  extra.offset = spOffBCFromIRSP(env);
-  extra.numKeys = numArgs;
-  extra.keys = new (env.unit.arena()) StringData*[numArgs];
-  for (auto i = size_t{0}; i < numArgs; ++i) {
-    extra.keys[i] = curUnit(env)->lookupLitstrId(ids[i]);
-  }
-  auto const recData = gen(env, newRecordOp, extra, cachedRec, sp(env));
-  discard(env, numArgs);
-  push(env, recData);
-}
-
-void emitNewRecord(IRGS& env, const StringData* name, const ImmVector& immVec) {
-  emitNewRecordImpl(env, name, immVec, NewRecord);
 }
 
 void emitColFromArray(IRGS& env, CollectionType type) {

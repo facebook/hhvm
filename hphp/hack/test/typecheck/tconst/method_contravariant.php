@@ -1,7 +1,7 @@
 <?hh // strict
 
-class X {
-  const type T as arraykey = string;
+abstract class X {
+  abstract const type T as arraykey = string;
 
   final private function __construct(private this::T $val) {}
 
@@ -15,16 +15,18 @@ class X {
 
   private function test(this::T $x): (this, X, X, Y) {
     return
-      tuple(static::create($x), self::create(''), X::create(''), Y::create(0));
+      tuple(static::create($x), self::create(''), XConcrete::create(''), Y::create(0));
   }
 }
+
+final class XConcrete extends X {}
 
 class Y extends X {
   const type T = int;
 }
 
 function test(Y $y): (Y, X, Y) {
-  return tuple($y::create(0), X::create(''), Y::create(0));
+  return tuple($y::create(0), XConcrete::create(''), Y::create(0));
 }
 
 function error(X $x): void {

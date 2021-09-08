@@ -81,8 +81,6 @@ struct RepoAuthType {
     TAG(OptCls)                                   \
     TAG(ClsMeth)                                  \
     TAG(OptClsMeth)                               \
-    TAG(Record)                                   \
-    TAG(OptRecord)                                \
     TAG(LazyCls)                                  \
     TAG(OptLazyCls)                               \
     TAG(Num)                                      \
@@ -137,12 +135,6 @@ struct RepoAuthType {
     TAG(SubCls)                                   \
     TAG(OptExactCls)                              \
     TAG(OptSubCls)                                \
-    /* Types where recordName() will be non-null. */ \
-    TAG(ExactRecord)                              \
-    TAG(SubRecord)                                \
-    TAG(OptExactRecord)                           \
-    TAG(OptSubRecord)                             \
-
 
   enum class Tag : uint16_t {
 #define TAG(x) x,
@@ -158,8 +150,6 @@ struct RepoAuthType {
     case Tag::SubObj:    case Tag::ExactObj:
     case Tag::OptSubCls: case Tag::OptExactCls:
     case Tag::SubCls:    case Tag::ExactCls:
-    case Tag::ExactRecord:  case Tag::OptExactRecord:
-    case Tag::SubRecord: case Tag::OptSubRecord:
       assertx(sd != nullptr);
       break;
     default:
@@ -177,26 +167,6 @@ struct RepoAuthType {
   bool operator==(RepoAuthType) const;
   bool operator!=(RepoAuthType o) const { return !(*this == o); }
   size_t hash() const;
-
-  /*
-   * Record names.
-   */
-
-  const StringData* recordName() const {
-    assertx(hasRecordName());
-    return static_cast<const StringData*>(m_data.ptr());
-  }
-
-  bool hasRecordName() const {
-    switch (tag()) {
-    case Tag::SubRecord: case Tag::ExactRecord:
-    case Tag::OptSubRecord: case Tag::OptExactRecord:
-      return true;
-    default:
-      return false;
-    }
-    not_reached();
-  }
 
   /*
    * Class Names.
@@ -315,12 +285,6 @@ struct RepoAuthType {
         m_data.set(static_cast<uint16_t>(t),
                    reinterpret_cast<const void*>(lc.get()));
       }
-    }
-
-    if (hasRecordName()) {
-      auto r = recordName();
-      sd(r);
-      m_data.set(static_cast<uint16_t>(t), reinterpret_cast<const void*>(r));
     }
   }
 

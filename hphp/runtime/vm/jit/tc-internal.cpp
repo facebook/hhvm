@@ -229,28 +229,15 @@ TranslationResult::Scope shouldTranslate(SrcKey sk, TransKind kind) {
     return TranslationResult::Scope::Request;
   }
 
+  const bool reachedMaxLiveMainLimit =
+    getLiveMainUsage() >= RuntimeOption::EvalJitMaxLiveMainUsage;
+
   auto const main_under = code().main().used() < CodeCache::AMaxUsage;
   auto const cold_under = code().cold().used() < CodeCache::AColdMaxUsage;
   auto const froz_under = code().frozen().used() < CodeCache::AFrozenMaxUsage;
 
-  if (main_under && cold_under && froz_under) {
+  if (!reachedMaxLiveMainLimit && main_under && cold_under && froz_under) {
     return shouldTranslateNoSizeLimit(sk, kind);
-  }
-
-  // We use cold and frozen for all kinds of translations, but we
-  // allow PGO translations past the limit for main if there's still
-  // space in code.hot.
-  if (cold_under && froz_under) {
-    switch (kind) {
-      case TransKind::ProfPrologue:
-      case TransKind::Profile:
-      case TransKind::OptPrologue:
-      case TransKind::Optimize:
-        if (code().hotEnabled()) return shouldTranslateNoSizeLimit(sk, kind);
-        break;
-      default:
-        break;
-    }
   }
 
   // Set a flag so we quickly bail from trying to generate new
@@ -383,18 +370,9 @@ bool isValidCodeAddress(TCA addr) {
   return g_code->isValidCodeAddress(addr);
 }
 
-bool isProfileCodeAddress(TCA addr) {
-  return g_code->prof().contains(addr);
-}
-
-bool isHotCodeAddress(TCA addr) {
-  return g_code->hot().contains(addr);
-}
-
 void checkFreeProfData() {
   // In PGO mode, we free all the profiling data once the main code area reaches
-  // its maximum usage and either the hot area is also full or all the functions
-  // that were profiled have already been optimized.
+  // its maximum usage.
   //
   // However, we keep the data around indefinitely in a few special modes:
   // * Eval.EnableReusableTC
@@ -405,38 +383,12 @@ void checkFreeProfData() {
   // generated.
   if (profData() &&
       !RuntimeOption::EvalEnableReusableTC &&
-      code().main().used() >= CodeCache::AMaxUsage &&
-      (!code().hotEnabled() ||
-       profData()->profilingFuncs() == profData()->optimizedFuncs()) &&
+      (code().main().used() >= CodeCache::AMaxUsage ||
+       getLiveMainUsage() >= RuntimeOption::EvalJitMaxLiveMainUsage) &&
       !transdb::enabled() &&
       !mcgen::retranslateAllEnabled()) {
     discardProfData();
   }
-}
-
-static void dropSrcDBProfIncomingBranches() {
-  auto const base     = code().prof().base();
-  auto const frontier = code().prof().frontier();
-  for (auto& it : srcDB()) {
-    auto sr = it.second;
-    sr->removeIncomingBranchesInRange(base, frontier);
-  }
-}
-
-void freeProfCode() {
-  Treadmill::enqueue([]{
-    dropSrcDBProfIncomingBranches();
-    code().freeProf();
-    // Clearing the inline stacks map is purely an optimization, and it barely
-    // buys us anything when we're using jumpstart (because we have very few
-    // profiling translations, if any), so we skip it in this case.
-    if (!isJitDeserializing()) {
-      auto metaLock = lockMetadata();
-      auto const base     = code().prof().base();
-      auto const frontier = code().prof().frontier();
-      eraseInlineStacksInRange(base, frontier);
-    }
-  });
 }
 
 bool shouldProfileNewFuncs() {
@@ -458,7 +410,11 @@ bool profileFunc(const Func* func) {
   // being added to ProfData.
   if (mcgen::retranslateAllScheduled()) return false;
 
-  if (code().prof().used() >= CodeCache::AProfMaxUsage) return false;
+  if (code().main().used() >= CodeCache::AMaxUsage) return false;
+
+  if (getLiveMainUsage() >= RuntimeOption::EvalJitMaxLiveMainUsage) {
+    return false;
+  }
 
   if (!shouldPGOFunc(func)) return false;
 
@@ -641,14 +597,6 @@ Translator::translate(Optional<CodeCache::View> view) {
                 mcgen::dumpTCAnnotation(kind) ? getAnnotations()
                                               : nullptr);
     } catch (const DataBlockFull& dbFull) {
-      if (dbFull.name == "hot") {
-        always_assert(!view->isLocal());
-        code().disableHot();
-        // Rollback tags and try again.
-        maker.rollback();
-        fixups.clear();
-        continue;
-      }
       // Rollback so the area can be used by something else.
       auto const range = maker.rollback();
       auto const bytes = range.main.size() + range.cold.size() +
@@ -747,11 +695,6 @@ Optional<TranslationResult> Translator::relocate(bool alignMain) {
         }
 
       } catch (const DataBlockFull& dbFull) {
-        if (dbFull.name == "hot") {
-          maker.rollback();
-          code().disableHot();
-          continue;
-        }
         // Rollback so the area can be used by something else.
         maker.rollback();
         auto const bytes = range.main.size() + range.cold.size() +

@@ -709,10 +709,6 @@ void print_prop_or_field_impl(Output& out, const T& f) {
   });
 }
 
-void print_field(Output& out, const PreRecordDesc::Field& field) {
-  print_prop_or_field_impl(out, field);
-}
-
 void print_property(Output& out, const PreClass::Prop* prop) {
   print_prop_or_field_impl(out, *prop);
 }
@@ -835,36 +831,11 @@ void print_cls_directives(Output& out, const PreClass* cls) {
   for (auto* m : cls->allMethods())    print_method(out, m);
 }
 
-void print_rec_fields(Output& out, const PreRecordDesc* rec) {
-  for (auto& f : rec->allFields()) print_field(out, f);
-}
-
-void print_rec(Output& out, const PreRecordDesc* rec) {
-  out.indent();
-  out.fmt(".record {} {}{}",
-      opt_attrs(AttrContext::Class, rec->attrs()),
-      rec->name()->toCppString(),
-      format_line_pair(rec));
-  if (!rec->parentName()->empty()) {
-    out.fmt(" extends {}", rec->parentName());
-  }
-  out.fmt(" {{");
-  out.nl();
-  if (RuntimeOption::EvalDisassemblerDocComments) {
-    if (rec->docComment() && !rec->docComment()->empty()) {
-      out.fmtln(".doc {};", escaped_long(rec->docComment()));
-    }
-  }
-  indented(out, [&] { print_rec_fields(out, rec); });
-  out.fmt("}}");
-  out.nl();
-}
-
 void print_cls(Output& out, const PreClass* cls) {
   out.indent();
   auto name = cls->name()->toCppString();
   if (PreClassEmitter::IsAnonymousClassName(name)) {
-    auto p = name.find(';');
+    auto const p = name.find(';');
     if (p != std::string::npos) {
       name = name.substr(0, p);
     }
@@ -962,7 +933,6 @@ void print_unit(Output& out, const Unit* unit) {
   print_unit_metadata(out, unit);
   for (auto* func : unit->funcs())        print_func(out, func);
   for (auto& cls : unit->preclasses())    print_cls(out, cls.get());
-  for (auto& rec : unit->prerecords())    print_rec(out, rec.get());
   for (auto& alias : unit->typeAliases()) print_alias(out, alias);
   for (auto& c : unit->constants())       print_constant(out, c);
   out.fmtln("# {} ends here", unit->origFilepath());

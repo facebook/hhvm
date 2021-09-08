@@ -21,13 +21,17 @@
 #include <folly/Singleton.h>
 
 #include "hphp/runtime/base/init-fini-node.h"
+#include "hphp/runtime/vm/member-key.h"
+#include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/method-lookup.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/vm/taint/configuration.h"
 #include "hphp/runtime/vm/taint/interpreter.h"
+#include "hphp/runtime/vm/taint/state.h"
 
 #include "hphp/util/trace.h"
+#include "hphp/util/text-color.h"
 
 namespace folly {
 
@@ -59,6 +63,18 @@ template<> class FormatValue<HPHP::tv_lval> {
   const HPHP::tv_lval& m_value;
 };
 
+template<> class FormatValue<HPHP::MemberKey> {
+ public:
+  explicit FormatValue(const HPHP::MemberKey& memberKey): m_value(memberKey) {}
+  template<class FormatCallback>
+  void format(FormatArg& arg, FormatCallback& cb) const {
+    auto string = folly::sformat("{}", HPHP::show(m_value));
+    format_value::formatString(string, arg, cb);
+  }
+ private:
+  const HPHP::MemberKey& m_value;
+};
+
 } // folly
 
 
@@ -66,138 +82,6 @@ namespace HPHP {
 namespace taint {
 
 TRACE_SET_MOD(taint);
-
-void Path::dump() const {
-  std::stringstream stream;
-  stream << "{\"hops\": [";
-  for (int i = 0; i < hops.size(); i++) {
-    stream << "\"" << hops[i]->fullName()->data() << "\"";
-    if (i != hops.size() - 1) {
-      stream << ", ";
-    }
-  }
-  stream << "]}";
-  std::cerr << stream.str() << std::endl;
-}
-
-std::ostream& operator<<(std::ostream& out, const HPHP::taint::Value& value) {
-  if (!value) {
-    return out << "_";
-  } else {
-    return out << "S";
-  }
-}
-
-void Stack::push(const Value& value) {
-  m_stack.push_back(value);
-}
-
-Value Stack::top() const {
-  return peek(0);
-}
-
-Value Stack::peek(int offset) const {
-  // TODO(T93491972): replace with assertions once we can run the integration
-  // tests.
-  if (m_stack.size() <= offset) {
-    FTRACE(
-        3,
-        "taint: (WARNING) called `Stack::peek({})` on stack of size {}\n",
-        offset,
-        m_stack.size());
-    return std::nullopt;
-  }
-  return m_stack[m_stack.size() - 1 - offset];
-}
-
-void Stack::pop(int n) {
-  if (m_stack.size() < n) {
-    FTRACE(
-        3,
-        "taint: (WARNING) called `Stack::pop({})` on stack of size {}\n",
-        n,
-        m_stack.size());
-    n = m_stack.size();
-  }
-
-  for (int i = 0; i < n; i++) {
-    m_stack.pop_back();
-  }
-}
-
-void Stack::replaceTop(const Value& value) {
-  if (m_stack.empty()) {
-    FTRACE(3, "taint: (WARNING) called `Stack::replaceTop()` on empty stack\n");
-    return;
-  }
-  m_stack.back() = value;
-}
-
-size_t Stack::size() const {
-  return m_stack.size();
-}
-
-std::string Stack::show() const {
-  std::stringstream stream;
-  for (const auto value : m_stack) {
-    stream << value << " ";
-  }
-  stream << "(t)";
-  return stream.str();
-}
-
-void Stack::clear() {
-  m_stack.clear();
-}
-
-void Heap::set(tv_lval to, const Value& value) {
-  m_heap[to] = value;
-}
-
-Value Heap::get(tv_lval from) const {
-  auto value = m_heap.find(from);
-  if (value != m_heap.end()) {
-    return value->second;
-  } else {
-    return std::nullopt;
-  }
-}
-
-void Heap::clear() {
-  m_heap.clear();
-}
-
-namespace {
-
-struct SingletonTag {};
-
-} // namespace
-
-InitFiniNode s_stateInitialization(
-    []() {
-      State::get()->initialize();
-    },
-    InitFiniNode::When::ProcessInit);
-
-folly::Singleton<State, SingletonTag> kSingleton{};
-/* static */ std::shared_ptr<State> State::get() {
-  return kSingleton.try_get();
-}
-
-void State::initialize() {
-  // Stack is initialized with 4 values before any operation happens.
-  // We don't care about these values but mirroring simplifies
-  // consistency checks.
-  for (int i = 0; i < 4; i++) {
-    stack.push(std::nullopt);
-  }
-}
-
-void State::reset() {
-  stack.clear();
-  heap.clear();
-  initialize();
-}
 
 namespace {
 
@@ -219,7 +103,7 @@ void iopPreamble(const std::string& name) {
     for (int i = shadow_stack_size; i <= vm_stack_size; i++) {
       stack.push(std::nullopt);
     }
-    for (int i = vm_stack_size; i > shadow_stack_size; i--) {
+    for (int i = shadow_stack_size; i > vm_stack_size; i--) {
       stack.pop();
     }
   }
@@ -233,6 +117,14 @@ void iopConstant(const std::string& name) {
 void iopUnhandled(const std::string& name) {
   iopPreamble(name);
   FTRACE(1, "taint: (WARNING) unhandled opcode\n");
+}
+
+std::string yellow(const std::string& string) {
+  return folly::sformat(
+      "{}`{}`{}",
+      ANSI_COLOR_YELLOW,
+      string,
+      ANSI_COLOR_END);
 }
 
 } // namespace
@@ -304,7 +196,7 @@ void iopInt(int64_t /* imm */) {
 }
 
 void iopDouble(double /* imm */) {
-  iopConstant("Int");
+  iopConstant("Double");
 }
 
 void iopString(const StringData* /* s */) {
@@ -337,10 +229,6 @@ void iopNewVec(uint32_t /* n */) {
 
 void iopNewKeysetArray(uint32_t /* n */) {
   iopUnhandled("NewKeysetArray");
-}
-
-void iopNewRecord(const StringData* /* s */, imm_array<int32_t> /* ids */) {
-  iopUnhandled("NewRecord");
 }
 
 void iopAddElemC() {
@@ -625,7 +513,7 @@ void iopRetC(PC& /* pc */) {
   stack.pop(2 + func->params().size());
 
   std::string name = func->fullName()->data();
-  FTRACE(1, "taint: -> returning from `{}`\n", name);
+  FTRACE(1, "taint: leaving {}\n", yellow(name));
 
   // Check if this function is the origin of a source.
   auto& sources = Configuration::get()->sources;
@@ -747,7 +635,7 @@ void iopSetL(tv_lval to) {
 
   FTRACE(2, "taint: setting {} to `{}`\n", to, value);
 
-  state->heap.set(to, state->stack.top());
+  state->heap.set(to, value);
 }
 
 void iopSetG() {
@@ -931,7 +819,7 @@ TCA iopFCallCtor(
       MethodLookupErrorOptions::RaiseOnNotFound);
   auto name = func->fullName()->data();
 
-  FTRACE(1, "taint: -> calling `{}`\n", name);
+  FTRACE(1, "taint: entering {}\n", yellow(name));
 
   return nullptr;
 }
@@ -957,7 +845,7 @@ TCA iopFCallFuncD(
   auto const func = Func::load(nep.second, nep.first);
   auto name = func->fullName()->data();
 
-  FTRACE(1, "taint: -> calling `{}`\n", name);
+  FTRACE(1, "taint: entering {}\n", yellow(name));
 
   const auto& sinks = Configuration::get()->sinks(name);
   for (const auto& sink : sinks) {
@@ -1081,7 +969,8 @@ void iopVerifyParamType(local_var param) {
   auto state = State::get();
   auto func = vmfp()->func();
 
-  auto value = state->stack.peek(func->numParams() - (param.index + 1));
+  auto index = func->numParams() - (param.index + 1);
+  auto value = state->stack.peek(index);
   if (value) {
     FTRACE(
         2,
@@ -1246,7 +1135,7 @@ void iopBaseL(
     named_local_var /* loc */,
     MOpMode /* mode */,
     ReadonlyOp /* op */) {
-  iopUnhandled("BaseL");
+  iopPreamble("BaseL");
 }
 
 void iopBaseC(uint32_t /* idx */, MOpMode) {
@@ -1261,15 +1150,77 @@ void iopDim(MOpMode /* mode */, MemberKey /* mk */) {
   iopUnhandled("Dim");
 }
 
-void iopQueryM(
-    uint32_t /* nDiscard */,
-    QueryMOp /* subop */,
-    MemberKey /* mk */) {
-  iopUnhandled("QueryM");
+namespace {
+
+TypedValue typedValue(MemberKey memberKey) {
+  switch (memberKey.mcode) {
+    case MW:
+      return TypedValue{};
+    case MEL: case MPL: {
+      auto const local = frame_local(vmfp(), memberKey.local.id);
+      if (type(local) == KindOfUninit) {
+        return make_tv<KindOfNull>();
+      }
+      return tvClassToString(*local);
+    }
+    case MEC: case MPC:
+      return tvClassToString(*vmStack().indTV(memberKey.iva));
+    case MEI:
+      return make_tv<KindOfInt64>(memberKey.int64);
+    case MET: case MPT: case MQT:
+      return make_tv<KindOfPersistentString>(memberKey.litstr);
+  }
+  not_reached();
 }
 
-void iopSetM(uint32_t /* nDiscard */, MemberKey /* mk */) {
-  iopUnhandled("SetM");
+tv_lval resolveMemberKey(const MemberKey& memberKey) {
+  auto& instructionState = vmMInstrState();
+  auto key = typedValue(memberKey);
+  return Prop<MOpMode::None>(
+      instructionState.tvTempBase,
+      arGetContextClass(vmfp()),
+      instructionState.base,
+      key,
+      ReadonlyOp::Readonly);
+}
+
+}  // namespace
+
+void iopQueryM(
+    uint32_t /* nDiscard */,
+    QueryMOp op,
+    MemberKey memberKey) {
+  iopPreamble("QueryM");
+
+  switch(op) {
+    case QueryMOp::CGet: {
+      auto state = State::get();
+      auto from = resolveMemberKey(memberKey);
+      auto value = state->heap.get(from);
+      FTRACE(2, "taint: getting member {}, value: `{}`\n", memberKey, value);
+      state->stack.push(value);
+      break;
+    }
+    default:
+      FTRACE(1, "taint: (WARNING) unsuppoted query operation\n");
+      return;
+  }
+}
+
+void iopSetM(uint32_t /* nDiscard */, MemberKey memberKey) {
+  iopPreamble("SetM");
+
+  auto state = State::get();
+  auto value = state->stack.top();
+  auto to = resolveMemberKey(memberKey);
+
+  FTRACE(
+      2,
+      "taint: setting member {} (resolved: {}) to `{}`\n",
+      memberKey,
+      to,
+      value);
+  state->heap.set(to, value);
 }
 
 void iopSetRangeM(

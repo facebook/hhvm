@@ -41,7 +41,7 @@ class WithConst {
   const CWITHOUT_HINT = 'constant with inferred type';
   const type WITH_CONSTRAINT = A0;
   const type WITH_THIS = this::WITH_CONSTRAINT;
-  const type TYPECONST as num = int;
+  const type TYPECONST = int;
 
   public function with_type_constants(this::TYPECONST $arg1,
                                       this::WITH_CONSTRAINT $arg2): void {}

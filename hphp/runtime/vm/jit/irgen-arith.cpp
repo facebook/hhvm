@@ -428,7 +428,6 @@ void implCmp(IRGS& env, Op op) {
   discard(env, 2);
 
   if (leftTy <= TNull) push(env, emitConstCmp(env, op, false, false));
-  else if (leftTy <= TRecord)   PUNT(Record-cmp);
   else if (leftTy <= TRFunc)    PUNT(RFunc-cmp);
   else if (leftTy <= TRClsMeth) PUNT(RClsMeth-cmp);
   else {

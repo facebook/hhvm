@@ -65,12 +65,16 @@ struct UpdateDBWorkItem {
  * Queries the SQLite AutoloadDB when the DB has information
  * we don't, and updates the AutoloadDB when we have
  * information the DB doesn't have.
+ *
+ * Iff `enforceOneDefinition` is true, we treat multiple definitions of the
+ * same symbol as though the symbol were completely undefined.
  */
 template <typename S> struct SymbolMap {
 
   explicit SymbolMap(
       folly::fs::path root,
       DBData dbData,
+      bool enforceOneDefinition,
       hphp_hash_set<std::string> indexedMethodAttributes = {},
       SQLite::OpenMode dbMode = SQLite::OpenMode::ReadWrite);
   SymbolMap() = delete;
@@ -186,12 +190,27 @@ template <typename S> struct SymbolMap {
   std::vector<Symbol<S, SymKind::Type>> getAttributesOfType(const S& type);
 
   /**
-   * Return the types and type aliases with a given attribute
+   * Return the attributes decorating a type alias
    */
   std::vector<Symbol<S, SymKind::Type>>
-  getTypesAndTypeAliasesWithAttribute(Symbol<S, SymKind::Type> attr);
+  getAttributesOfTypeAlias(Symbol<S, SymKind::Type> typeAlias);
   std::vector<Symbol<S, SymKind::Type>>
-  getTypesAndTypeAliasesWithAttribute(const S& attr);
+  getAttributesOfTypeAlias(const S& typeAlias);
+
+  /**
+   * Return the types decorated with a given attribute
+   */
+  std::vector<Symbol<S, SymKind::Type>>
+  getTypesWithAttribute(Symbol<S, SymKind::Type> attr);
+  std::vector<Symbol<S, SymKind::Type>> getTypesWithAttribute(const S& attr);
+
+  /**
+   * Return the type aliases decorated with a given attribute
+   */
+  std::vector<Symbol<S, SymKind::Type>>
+  getTypeAliasesWithAttribute(Symbol<S, SymKind::Type> attr);
+  std::vector<Symbol<S, SymKind::Type>>
+  getTypeAliasesWithAttribute(const S& attr);
 
   /**
    * Return the attributes of a method
@@ -247,6 +266,11 @@ template <typename S> struct SymbolMap {
       Symbol<S, SymKind::Type> type, Symbol<S, SymKind::Type> attribute);
   std::vector<folly::dynamic>
   getTypeAttributeArgs(const S& type, const S& attribute);
+
+  std::vector<folly::dynamic> getTypeAliasAttributeArgs(
+      Symbol<S, SymKind::Type> type, Symbol<S, SymKind::Type> attribute);
+  std::vector<folly::dynamic>
+  getTypeAliasAttributeArgs(const S& type, const S& attribute);
 
   std::vector<folly::dynamic> getMethodAttributeArgs(
       Symbol<S, SymKind::Type> type,
@@ -339,15 +363,19 @@ template <typename S> struct SymbolMap {
   /**
    * Return the one and only path where `symbol` is defined.
    *
-   * If `symbol` is not defined, or if `symbol` is defined in more
-   * than one path, return nullptr.
+   * If `symbol` is not defined, return nullptr.
+   *
+   * If `symbol` is defined in more than one path, return either one of the
+   * paths that defines `symbol`, or return `nullptr`. In Hack, it's a bug to
+   * define the same symbol in multiple paths, so we leave this behavior
+   * flexible.
    *
    * Query the DB if there is no data about `symbol` in the given
    * symbolMap, and add any information found to the corresponding symbolMap if
    * so.
    */
   template <SymKind k>
-  Path<S> getOnlyPath(Symbol<S, k> symbol); // throws(SQLiteExc)
+  Path<S> getSymbolPath(Symbol<S, k> symbol); // throws(SQLiteExc)
 
   /**
    * Return all the symbols of the kind corresponding to symbolMap
@@ -451,6 +479,11 @@ template <typename S> struct SymbolMap {
      * Maps between types and the attributes that decorate them.
      */
     AttributeMap<S, TypeDecl<S>> m_typeAttrs;
+
+    /**
+     * Maps between type aliases and the attributes that decorate them.
+     */
+    AttributeMap<S, TypeDecl<S>> m_typeAliasAttrs;
 
     /**
      * Maps between methods and the attributes that decorate them.
@@ -567,6 +600,7 @@ private:
   const folly::fs::path m_root;
   const std::string m_schemaHash;
   const DBData m_dbData;
+  const bool m_enforceOneDefinition;
   const hphp_hash_set<std::string> m_indexedMethodAttrs;
   const SQLite::OpenMode m_dbMode{SQLite::OpenMode::ReadWrite};
 };

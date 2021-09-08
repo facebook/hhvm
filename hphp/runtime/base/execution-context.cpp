@@ -1649,7 +1649,7 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
   // Caller checks.
   if (dynamic) callerDynamicCallChecks(f, allowDynCallNoPointer);
   if (f->attrs() & AttrReadonlyReturn) {
-    throwParamReadonlyMismatch(f, kInvalidId);
+    throwReadonlyMismatch(f, kReadonlyReturnId);
   }
 
   return invokeFuncImpl(f, thiz, cls, numArgs, providedCoeffects,
@@ -1700,7 +1700,7 @@ TypedValue ExecutionContext::invokeFuncFew(
   // Caller checks.
   if (dynamic) callerDynamicCallChecks(f, allowDynCallNoPointer);
   if (f->attrs() & AttrReadonlyReturn) {
-    throwParamReadonlyMismatch(f, kInvalidId);
+    throwReadonlyMismatch(f, kReadonlyReturnId);
   }
 
   return invokeFuncImpl(f, thisOrCls.left(), thisOrCls.right(), numArgs,

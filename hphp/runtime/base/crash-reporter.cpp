@@ -61,6 +61,7 @@ enum class CrashReportStage {
   ReportHeader,
   ReportAssertDetail,
   ReportTrap,
+  DumpTreadmill,
   ReportCppStack,
   ReportPhpStack,
   ReportApproximatePhpStack,
@@ -188,7 +189,7 @@ static void bt_handler(int sigin, siginfo_t* info, void* args) {
       // fall through
     }
     case CrashReportStage::ReportTrap:
-      s_crash_report_stage = CrashReportStage::ReportCppStack;
+      s_crash_report_stage = CrashReportStage::DumpTreadmill;
 
       if (sig == SIGILL && sig_addr) {
         auto reason = jit::getTrapReason((jit::CTCA)sig_addr);
@@ -197,6 +198,11 @@ static void bt_handler(int sigin, siginfo_t* info, void* args) {
                   sig_addr, reason->file, reason->line);
         }
       }
+      // fall through
+    case CrashReportStage::DumpTreadmill:
+      s_crash_report_stage = CrashReportStage::ReportCppStack;
+      dprintf(fd, "Treadmill Information:\n%s\n",
+              Treadmill::dumpTreadmillInfo(true).data());
       // fall through
     case CrashReportStage::ReportCppStack:
       s_crash_report_stage = CrashReportStage::ReportPhpStack;

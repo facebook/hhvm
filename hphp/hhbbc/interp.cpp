@@ -51,6 +51,7 @@
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/type-builtins.h"
 #include "hphp/hhbbc/type-ops.h"
+#include "hphp/hhbbc/type-structure.h"
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/unit-util.h"
 #include "hphp/hhbbc/wide-func.h"
@@ -529,200 +530,6 @@ SString getNameFromType(const Type& t) {
 
 namespace {
 
-ArrayData*
-resolveTSStaticallyImpl(ISS& env, hphp_fast_set<SArray>& seenTs, SArray ts,
-                        const php::Class* declaringCls);
-
-ArrayData*
-resolveTSListStatically(ISS& env, hphp_fast_set<SArray>& seenTs,
-                        SArray tsList, const php::Class* declaringCls) {
-  auto arr = Array::attach(const_cast<ArrayData*>(tsList));
-  for (auto i = 0; i < arr.size(); i++) {
-    auto elemArr = arr[i].getArrayData();
-    auto elem = resolveTSStaticallyImpl(env, seenTs, elemArr, declaringCls);
-    if (!elem) return nullptr;
-    arr.set(i, Variant(elem));
-  }
-  return arr.detach();
-}
-
-ArrayData*
-resolveTSStaticallyImpl(ISS& env, hphp_fast_set<SArray>& seenTs, SArray ts,
-                        const php::Class* declaringCls) {
-  if (seenTs.contains(ts)) return nullptr;
-  seenTs.emplace(ts);
-  SCOPE_EXIT { seenTs.erase(ts); };
-
-  auto const addModifiers = [&](ArrayData* result) {
-    auto a = Array::attach(result);
-    if (is_ts_like(ts) && !is_ts_like(a.get())) {
-      a.set(s_like, make_tv<KindOfBoolean>(true));
-    }
-    if (is_ts_nullable(ts) && !is_ts_nullable(a.get())) {
-      a.set(s_nullable, make_tv<KindOfBoolean>(true));
-    }
-    if (is_ts_soft(ts) && !is_ts_soft(a.get())) {
-      a.set(s_soft, make_tv<KindOfBoolean>(true));
-    }
-    return a.detach();
-  };
-  auto const finish = [&](const ArrayData* result) {
-    auto r = const_cast<ArrayData*>(result);
-    ArrayData::GetScalarArray(&r);
-    return r;
-  };
-  switch (get_ts_kind(ts)) {
-    case TypeStructure::Kind::T_int:
-    case TypeStructure::Kind::T_bool:
-    case TypeStructure::Kind::T_float:
-    case TypeStructure::Kind::T_string:
-    case TypeStructure::Kind::T_num:
-    case TypeStructure::Kind::T_arraykey:
-    case TypeStructure::Kind::T_void:
-    case TypeStructure::Kind::T_null:
-    case TypeStructure::Kind::T_nothing:
-    case TypeStructure::Kind::T_noreturn:
-    case TypeStructure::Kind::T_mixed:
-    case TypeStructure::Kind::T_dynamic:
-    case TypeStructure::Kind::T_nonnull:
-    case TypeStructure::Kind::T_resource:
-      return finish(ts);
-    case TypeStructure::Kind::T_typevar:
-      if (ts->exists(s_name.get()) &&
-          get_ts_name(ts)->equal(s_wildcard.get())) {
-        return finish(ts);
-      }
-      return nullptr;
-    case TypeStructure::Kind::T_dict:
-    case TypeStructure::Kind::T_vec:
-    case TypeStructure::Kind::T_keyset:
-    case TypeStructure::Kind::T_vec_or_dict:
-    case TypeStructure::Kind::T_any_array: {
-      if (!ts->exists(s_generic_types)) return finish(ts);
-      auto const generics = get_ts_generic_types(ts);
-      auto rgenerics =
-        resolveTSListStatically(env, seenTs, generics, declaringCls);
-      if (!rgenerics) return nullptr;
-      auto result = const_cast<ArrayData*>(ts);
-      return finish(result->setMove(s_generic_types.get(), Variant(rgenerics)));
-    }
-    case TypeStructure::Kind::T_class:
-    case TypeStructure::Kind::T_interface:
-    case TypeStructure::Kind::T_xhp:
-    case TypeStructure::Kind::T_enum:
-      // Generics for these must have been resolved already as we'd never set
-      // the TS Kind to be one of these until resolution
-      return finish(ts);
-    case TypeStructure::Kind::T_tuple: {
-      auto const elems = get_ts_elem_types(ts);
-      auto relems = resolveTSListStatically(env, seenTs, elems, declaringCls);
-      if (!relems) return nullptr;
-      auto result = const_cast<ArrayData*>(ts);
-      return finish(result->setMove(s_elem_types.get(), Variant(relems)));
-    }
-    case TypeStructure::Kind::T_shape:
-      // TODO(T31677864): We can also optimize this but shapes could have
-      // optional fields or they could allow unknown fields, so this one is
-      // slightly more tricky
-      return nullptr;
-    case TypeStructure::Kind::T_unresolved: {
-      assertx(ts->exists(s_classname));
-      auto result = const_cast<ArrayData*>(ts);
-      if (ts->exists(s_generic_types)) {
-        auto const generics = get_ts_generic_types(ts);
-        auto rgenerics =
-          resolveTSListStatically(env, seenTs, generics, declaringCls);
-        if (!rgenerics) return nullptr;
-        result = result->setMove(s_generic_types.get(), Variant(rgenerics));
-      }
-      auto const rcls = env.index.resolve_class(env.ctx, get_ts_classname(ts));
-      if (!rcls || !rcls->resolved()) return nullptr;
-      auto const attrs = rcls->cls()->attrs;
-      auto const kind = [&] {
-        if (attrs & AttrEnum)      return TypeStructure::Kind::T_enum;
-        if (attrs & AttrTrait)     return TypeStructure::Kind::T_trait;
-        if (attrs & AttrInterface) return TypeStructure::Kind::T_interface;
-        return TypeStructure::Kind::T_class;
-      }();
-      return finish(result->setMove(s_kind.get(),
-                                    Variant(static_cast<uint8_t>(kind))));
-    }
-    case TypeStructure::Kind::T_typeaccess: {
-      auto const accList = get_ts_access_list(ts);
-      auto const size = accList->size();
-      auto clsName = get_ts_root_name(ts);
-      auto checkNoOverrideOnFirst = false;
-      if (declaringCls) {
-        if (clsName->isame(s_self.get())) {
-          clsName = declaringCls->name;
-        } else if (clsName->isame(s_parent.get()) && declaringCls->parentName) {
-          clsName = declaringCls->parentName;
-        } else if (clsName->isame(s_this.get())) {
-          clsName = declaringCls->name;
-          checkNoOverrideOnFirst = true;
-        }
-      }
-      ArrayData* typeCnsVal = nullptr;
-      for (auto i = 0; i < size; i++) {
-        auto const rcls = env.index.resolve_class(env.ctx, clsName);
-        if (!rcls || !rcls->resolved()) return nullptr;
-        auto const cnsName = accList->at(i);
-        if (!tvIsString(&cnsName)) return nullptr;
-        auto const cnst = env.index.lookup_class_const_ptr(env.ctx, *rcls,
-                                                           cnsName.m_data.pstr,
-                                                           true);
-        if (!cnst || !cnst->val || cnst->kind != ConstModifiers::Kind::Type
-            || !tvIsDict(&*cnst->val)) {
-          return nullptr;
-        }
-        if (checkNoOverrideOnFirst && i == 0 && !cnst->isNoOverride) {
-          return nullptr;
-        }
-        typeCnsVal = resolveTSStaticallyImpl(env, seenTs,
-                                             cnst->val->m_data.parr, cnst->cls);
-        if (!typeCnsVal) return nullptr;
-        if (i == size - 1) break;
-        auto const kind = get_ts_kind(typeCnsVal);
-        if (kind != TypeStructure::Kind::T_class &&
-            kind != TypeStructure::Kind::T_interface) {
-          return nullptr;
-        }
-        clsName = get_ts_classname(typeCnsVal);
-      }
-      if (!typeCnsVal) return nullptr;
-      return finish(addModifiers(typeCnsVal));
-    }
-    case TypeStructure::Kind::T_fun: {
-      auto rreturn = resolveTSStaticallyImpl(env, seenTs,
-                                             get_ts_return_type(ts),
-                                             declaringCls);
-      if (!rreturn) return nullptr;
-      auto rparams = resolveTSListStatically(env, seenTs,
-                                             get_ts_param_types(ts),
-                                             declaringCls);
-      if (!rparams) return nullptr;
-      auto result = const_cast<ArrayData*>(ts)
-        ->setMove(s_return_type.get(), Variant(rreturn))
-        ->setMove(s_param_types.get(), Variant(rparams));
-      auto const variadic = get_ts_variadic_type_opt(ts);
-      if (variadic) {
-        auto rvariadic =
-          resolveTSStaticallyImpl(env, seenTs, variadic, declaringCls);
-        if (!rvariadic) return nullptr;
-        result = result->setMove(s_variadic_type.get(), Variant(rvariadic));
-      }
-      return finish(result);
-    }
-    case TypeStructure::Kind::T_darray:
-    case TypeStructure::Kind::T_varray:
-    case TypeStructure::Kind::T_varray_or_darray:
-    case TypeStructure::Kind::T_reifiedtype:
-    case TypeStructure::Kind::T_trait:
-      return nullptr;
-  }
-  not_reached();
-}
-
 /*
  * Very simple check to see if the top level class is reified or not
  * If not we can reduce a VerifyTypeTS to a regular VerifyType
@@ -734,12 +541,6 @@ bool shouldReduceToNonReifiedVerifyType(ISS& env, SArray ts) {
   return !rcls->cls()->hasReifiedGenerics;
 }
 
-} // namespace
-
-ArrayData*
-resolveTSStatically(ISS& env, SArray ts, const php::Class* declaringCls) {
-  hphp_fast_set<SArray> seenTs;
-  return resolveTSStaticallyImpl(env, seenTs, ts, declaringCls);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -885,12 +686,6 @@ void in(ISS& env, const bc::Keyset& op) {
 void in(ISS& env, const bc::NewDictArray& op) {
   effect_free(env);
   push(env, op.arg1 == 0 ? dict_empty() : some_dict_empty());
-}
-
-void in(ISS& env, const bc::NewRecord& op) {
-  discard(env, op.keys.size());
-  auto const rrec = env.index.resolve_record(op.str1);
-  push(env, rrec ? exactRecord(*rrec) : TRecord);
 }
 
 void in(ISS& env, const bc::NewStructDict& op) {
@@ -1115,38 +910,68 @@ void in(ISS& env, const bc::CnsE& op) {
   push(env, std::move(t));
 }
 
-void in(ISS& env, const bc::ClsCns& op) {
-  auto const& t1 = topC(env);
-  if (t1.subtypeOf(BCls) && is_specialized_cls(t1)) {
-    auto const dcls = dcls_of(t1);
-    auto const finish = [&] {
-      reduce(env, bc::PopC { },
-                  bc::ClsCnsD { op.str1, dcls.cls.name() });
-    };
-    if (dcls.type == DCls::Exact) return finish();
-    auto const cnst = env.index.lookup_class_const_ptr(env.ctx, dcls.cls,
-                                                       op.str1, false);
-    if (cnst && cnst->isNoOverride) return finish();
-  }
-  popC(env);
-  push(env, TInitCell);
-}
+namespace {
 
-void in(ISS& env, const bc::ClsCnsD& op) {
-  if (auto const rcls = env.index.resolve_class(env.ctx, op.str2)) {
-    auto t = env.index.lookup_class_constant(env.ctx, *rcls, op.str1, false);
-    constprop(env);
-    push(env, std::move(t));
+void clsCnsImpl(ISS& env, const Type& cls, const Type& name) {
+  if (!cls.couldBe(BCls) || !name.couldBe(BStr)) {
+    push(env, TBottom);
+    unreachable(env);
     return;
   }
-  push(env, TInitCell);
+
+  auto lookup = env.index.lookup_class_constant(env.ctx, cls, name);
+  if (lookup.found == TriBool::No) {
+    push(env, TBottom);
+    unreachable(env);
+    return;
+  }
+
+  if (cls.subtypeOf(BCls) &&
+      name.subtypeOf(BStr) &&
+      lookup.found == TriBool::Yes &&
+      !lookup.mightThrow) {
+    constprop(env);
+    effect_free(env);
+  }
+
+  push(env, std::move(lookup.ty));
+}
+
+}
+
+void in(ISS& env, const bc::ClsCns& op) {
+  auto const cls = topC(env);
+
+  if (cls.subtypeOf(BCls) && is_specialized_cls(cls)) {
+    auto const dcls = dcls_of(cls);
+    if (dcls.type == DCls::Exact) {
+      return reduce(env, bc::PopC {}, bc::ClsCnsD { op.str1, dcls.cls.name() });
+    }
+  }
+
+  popC(env);
+  clsCnsImpl(env, cls, sval(op.str1));
 }
 
 void in(ISS& env, const bc::ClsCnsL& op) {
-  //For now, just pop a stack value and push a TCell.
-  mayReadLocal(env, op.loc1);
+  auto const cls = topC(env);
+  auto const name = locRaw(env, op.loc1);
+
+  if (name.subtypeOf(BStr) && is_specialized_string(name)) {
+    return reduce(env, bc::ClsCns { sval_of(name) });
+  }
+
   popC(env);
-  push(env, TInitCell);
+  clsCnsImpl(env, cls, name);
+}
+
+void in(ISS& env, const bc::ClsCnsD& op) {
+  auto const rcls = env.index.resolve_class(env.ctx, op.str2);
+  if (!rcls || !rcls->resolved()) {
+    push(env, TInitCell);
+    return;
+  }
+  clsCnsImpl(env, clsExact(*rcls), sval(op.str1));
 }
 
 void in(ISS& env, const bc::File&)   { effect_free(env); push(env, TSStr); }
@@ -2900,6 +2725,13 @@ void in(ISS& env, const bc::InstanceOf& /*op*/) {
   push(env, TBool);
 }
 
+void in(ISS& env, const bc::IsLateBoundCls& op) {
+  auto const cls = env.ctx.cls;
+  if (cls && !(cls->attrs & AttrTrait)) effect_free(env);
+  popC(env);
+  return push(env, TBool);
+}
+
 namespace {
 
 bool isValidTypeOpForIsAs(const IsTypeOp& op) {
@@ -2927,8 +2759,7 @@ bool isValidTypeOpForIsAs(const IsTypeOp& op) {
 }
 
 void isTypeStructImpl(ISS& env, SArray inputTS) {
-  auto const resolvedTS = resolveTSStatically(env, inputTS, env.ctx.cls);
-  auto const ts = resolvedTS ? resolvedTS : inputTS;
+  auto const ts = inputTS;
   auto const t = loosen_likeness(topC(env, 1)); // operand to is/as
 
   bool may_raise = true;
@@ -3058,94 +2889,9 @@ void isTypeStructImpl(ISS& env, SArray inputTS) {
   not_reached();
 }
 
-bool canReduceToDontResolveList(SArray tsList, bool checkArrays);
-
-bool canReduceToDontResolve(SArray ts, bool checkArrays) {
-  auto const checkGenerics = [&](SArray arr) {
-    if (!ts->exists(s_generic_types)) return true;
-    return canReduceToDontResolveList(get_ts_generic_types(ts), true);
-  };
-  switch (get_ts_kind(ts)) {
-    case TypeStructure::Kind::T_int:
-    case TypeStructure::Kind::T_bool:
-    case TypeStructure::Kind::T_float:
-    case TypeStructure::Kind::T_string:
-    case TypeStructure::Kind::T_num:
-    case TypeStructure::Kind::T_arraykey:
-    case TypeStructure::Kind::T_void:
-    case TypeStructure::Kind::T_null:
-    case TypeStructure::Kind::T_nothing:
-    case TypeStructure::Kind::T_noreturn:
-    case TypeStructure::Kind::T_mixed:
-    case TypeStructure::Kind::T_dynamic:
-    case TypeStructure::Kind::T_nonnull:
-    case TypeStructure::Kind::T_resource:
-      return true;
-    // Following have generic parameters that may need to be resolved
-    case TypeStructure::Kind::T_dict:
-    case TypeStructure::Kind::T_vec:
-    case TypeStructure::Kind::T_keyset:
-    case TypeStructure::Kind::T_vec_or_dict:
-    case TypeStructure::Kind::T_any_array:
-      return !checkArrays || checkGenerics(ts);
-    case TypeStructure::Kind::T_class:
-    case TypeStructure::Kind::T_interface:
-    case TypeStructure::Kind::T_xhp:
-    case TypeStructure::Kind::T_enum:
-      return isTSAllWildcards(ts) || checkGenerics(ts);
-    case TypeStructure::Kind::T_tuple:
-      return canReduceToDontResolveList(get_ts_elem_types(ts), checkArrays);
-    case TypeStructure::Kind::T_fun: {
-      auto const variadicType = get_ts_variadic_type_opt(ts);
-      return canReduceToDontResolve(get_ts_return_type(ts), checkArrays)
-        && canReduceToDontResolveList(get_ts_param_types(ts), checkArrays)
-        && (!variadicType || canReduceToDontResolve(variadicType, checkArrays));
-    }
-    case TypeStructure::Kind::T_shape:
-      // We cannot skip resolution on shapes since shapes contain "value" field
-      // which resolution removes.
-      return false;
-    // Following needs to be resolved
-    case TypeStructure::Kind::T_unresolved:
-    case TypeStructure::Kind::T_typeaccess:
-    // Following cannot be used in is/as expressions, we need to error on them
-    // Currently erroring happens as a part of the resolving phase,
-    // so keep resolving them
-    case TypeStructure::Kind::T_darray:
-    case TypeStructure::Kind::T_varray:
-    case TypeStructure::Kind::T_varray_or_darray:
-    case TypeStructure::Kind::T_reifiedtype:
-    case TypeStructure::Kind::T_typevar:
-    case TypeStructure::Kind::T_trait:
-      return false;
-  }
-  not_reached();
-}
-
-bool canReduceToDontResolveList(SArray tsList, bool checkArrays) {
-  auto result = true;
-  IterateV(
-    tsList,
-    [&](TypedValue v) {
-      assertx(isArrayLikeType(v.m_type));
-      result &= canReduceToDontResolve(v.m_data.parr, checkArrays);
-       // when result is false, we can short circuit
-      return !result;
-    }
-  );
-  return result;
-}
-
 const StaticString s_hh_type_structure_no_throw("HH\\type_structure_no_throw");
 
 } // namespace
-
-void in(ISS& env, const bc::IsLateBoundCls& op) {
-  auto const cls = env.ctx.cls;
-  if (cls && !(cls->attrs & AttrTrait)) effect_free(env);
-  popC(env);
-  return push(env, TBool);
-}
 
 void in(ISS& env, const bc::IsTypeStructC& op) {
   if (!topC(env).couldBe(BDict)) {
@@ -3160,20 +2906,15 @@ void in(ISS& env, const bc::IsTypeStructC& op) {
     return push(env, TBool);
   }
   if (op.subop1 == TypeStructResolveOp::Resolve) {
-    if (canReduceToDontResolve(a->m_data.parr, false)) {
+    if (auto const ts = resolve_type_structure(env, a->m_data.parr).sarray()) {
       return reduce(
         env,
+        bc::PopC {},
+        bc::Dict { ts },
         bc::IsTypeStructC { TypeStructResolveOp::DontResolve }
       );
     }
     if (auto const val = get_ts_this_type_access(a->m_data.parr)) {
-      auto const classconst_bc = []() -> Bytecode {
-        if (RuntimeOption::EvalEmitClassPointers == 2) {
-          return bc::LazyClassFromClass {};
-        } else {
-          return bc::ClassName {};
-        }
-      }();
       // Convert `$x is this::T` into
       // `$x is type_structure_no_throw(static::class, 'T')`
       // to take advantage of the caching that comes with the type_structure
@@ -3183,7 +2924,6 @@ void in(ISS& env, const bc::IsTypeStructC& op) {
         bc::NullUninit {},
         bc::NullUninit {},
         bc::LateBoundCls {},
-        classconst_bc,
         bc::String {val},
         bc::FCallFuncD {FCallArgs(2), s_hh_type_structure_no_throw.get()},
         bc::IsTypeStructC { TypeStructResolveOp::DontResolve }
@@ -3197,7 +2937,6 @@ void in(ISS& env, const bc::ThrowAsTypeStructException& op) {
   popC(env);
   popC(env);
   unreachable(env);
-  return;
 }
 
 void in(ISS& env, const bc::CombineAndResolveTypeStruct& op) {
@@ -3208,11 +2947,15 @@ void in(ISS& env, const bc::CombineAndResolveTypeStruct& op) {
     auto const ts = first->m_data.parr;
     // Optimize single input that does not need any combination
     if (op.arg1 == 1) {
-      if (canReduceToDontResolve(ts, true)) return reduce(env);
-      if (auto const resolved = resolveTSStatically(env, ts, env.ctx.cls)) {
-        return reduce(env, bc::PopC {}, bc::Dict  { resolved });
+      if (auto const r = resolve_type_structure(env, ts).sarray()) {
+        return reduce(
+          env,
+          bc::PopC {},
+          bc::Dict { r }
+        );
       }
     }
+
     // Optimize double input that needs a single combination and looks of the
     // form ?T, @T or ~T
     if (op.arg1 == 2 && get_ts_kind(ts) == TypeStructure::Kind::T_reifiedtype) {
@@ -3575,9 +3318,13 @@ bool fcallOptimizeChecks(
   const FCallArgs& fca,
   const res::Func& func,
   FCallWithFCA fcallWithFCA,
-  Optional<uint32_t> inOutNum
+  Optional<uint32_t> inOutNum,
+  bool maybeNullsafe
 ) {
-  if (fca.enforceInOut()) {
+  // Don't optimize away in-out checks if we might use the null safe
+  // operator. If we do so, we need the in-out bits to shuffle the
+  // stack properly.
+  if (!maybeNullsafe && fca.enforceInOut()) {
     if (inOutNum == fca.numRets() - 1) {
       bool match = true;
       for (auto i = 0; i < fca.numArgs(); ++i) {
@@ -3649,6 +3396,13 @@ bool fcallOptimizeChecks(
   if (fca.enforceMutableReturn()) {
     if (env.index.lookup_return_readonly(env.ctx, func) == TriBool::No) {
       reduce(env, fcallWithFCA(fca.withoutEnforceMutableReturn()));
+      return true;
+    }
+  }
+
+  if (fca.enforceReadonlyThis()) {
+    if (env.index.lookup_readonly_this(env.ctx, func) == TriBool::Yes) {
+      reduce(env, fcallWithFCA(fca.withoutEnforceReadonlyThis()));
       return true;
     }
   }
@@ -3753,39 +3507,63 @@ Type typeFromWH(Type t) {
   return wait_handle_inner(t);
 }
 
-void pushCallReturnType(ISS& env, Type&& ty, const FCallArgs& fca) {
+void pushCallReturnType(ISS& env,
+                        Type ty,
+                        const FCallArgs& fca,
+                        bool nullsafe,
+                        std::vector<Type> inOuts) {
   auto const numRets = fca.numRets();
   if (numRets != 1) {
     assertx(fca.asyncEagerTarget() == NoBlockId);
+    assertx(IMPLIES(nullsafe, inOuts.size() == numRets - 1));
 
     for (auto i = uint32_t{0}; i < numRets - 1; ++i) popU(env);
     if (!ty.couldBe(BVecN)) {
       // Function cannot have an in-out args match, so call will
       // always fail.
-      for (int32_t i = 0; i < numRets; i++) push(env, TBottom);
-      return unreachable(env);
+      if (!nullsafe) {
+        for (int32_t i = 0; i < numRets; i++) push(env, TBottom);
+        return unreachable(env);
+      }
+      // We'll only hit the nullsafe null case, so the outputs are the
+      // inout inputs.
+      for (auto& t : inOuts) push(env, std::move(t));
+      push(env, TInitNull);
+      return;
     }
+
+    // If we might use the nullsafe operator, we need to union in the
+    // null case (which means the inout args are unchanged).
     if (is_specialized_array_like(ty)) {
       for (int32_t i = 1; i < numRets; i++) {
-        push(env, array_like_elem(ty, ival(i)).first);
+        auto elem = array_like_elem(ty, ival(i)).first;
+        if (nullsafe) elem |= inOuts[i-1];
+        push(env, std::move(elem));
       }
-      push(env, array_like_elem(ty, ival(0)).first);
+      push(
+        env,
+        nullsafe
+          ? opt(array_like_elem(ty, ival(0)).first)
+          : array_like_elem(ty, ival(0)).first
+      );
     } else {
       for (int32_t i = 0; i < numRets; ++i) push(env, TInitCell);
     }
     return;
   }
-  if (ty.subtypeOf(BBottom)) {
-    // The callee function never returns.  It might throw, or loop
-    // forever.
-    push(env, TBottom);
-    return unreachable(env);
-  }
   if (fca.asyncEagerTarget() != NoBlockId) {
+    assertx(!ty.is(BBottom));
     push(env, typeFromWH(ty));
     assertx(!topC(env).subtypeOf(BBottom));
     env.propagate(fca.asyncEagerTarget(), &env.state);
     popC(env);
+  }
+  if (nullsafe) ty = opt(std::move(ty));
+  if (ty.is(BBottom)) {
+    // The callee function never returns.  It might throw, or loop
+    // forever.
+    push(env, TBottom);
+    return unreachable(env);
   }
   return push(env, std::move(ty));
 }
@@ -3812,14 +3590,20 @@ void fcallKnownImpl(
       args[i] = topCV(env, firstArgPos - i);
     }
 
-    auto ty = fca.hasUnpack()
+    return fca.hasUnpack()
       ? env.index.lookup_return_type(env.ctx, &env.collect.methods, func)
       : env.index.lookup_return_type(
           env.ctx, &env.collect.methods, args, context, func
         );
-    if (nullsafe) ty = opt(std::move(ty));
-    return ty;
   }();
+
+  // If there's a caller/callee inout mismatch, then the call will
+  // always fail.
+  if (fca.enforceInOut()) {
+    if (inOutNum && (*inOutNum + 1 != fca.numRets())) {
+      returnType = TBottom;
+    }
+  }
 
   if (fca.asyncEagerTarget() != NoBlockId && typeFromWH(returnType) == TBottom) {
     // Kill the async eager target if the function never returns.
@@ -3833,24 +3617,26 @@ void fcallKnownImpl(
     handle_function_exists(env, topT(env, numExtraInputs + numArgs - 1));
   }
 
-  // If there's a caller/callee inout mismatch, then the call will
-  // always fail.
-  if (fca.enforceInOut()) {
-    if (inOutNum && (*inOutNum + 1 != fca.numRets())) {
-      returnType = TBottom;
-    }
-  }
-
   for (auto i = uint32_t{0}; i < numExtraInputs; ++i) popC(env);
   if (fca.hasGenerics()) popC(env);
   if (fca.hasUnpack()) popC(env);
-  for (auto i = uint32_t{0}; i < numArgs; ++i) popCV(env);
+  std::vector<Type> inOuts;
+  for (auto i = uint32_t{0}; i < numArgs; ++i) {
+    if (nullsafe && fca.isInOut(numArgs - i - 1)) {
+      inOuts.emplace_back(popCV(env));
+    } else {
+      popCV(env);
+    }
+  }
   popU(env);
   popCU(env);
-  pushCallReturnType(env, std::move(returnType), fca);
+  pushCallReturnType(env, std::move(returnType),
+                     fca, nullsafe, std::move(inOuts));
 }
 
-void fcallUnknownImpl(ISS& env, const FCallArgs& fca) {
+void fcallUnknownImpl(ISS& env,
+                      const FCallArgs& fca,
+                      const Type& retTy = TInitCell) {
   if (fca.hasGenerics()) popC(env);
   if (fca.hasUnpack()) popC(env);
   auto const numArgs = fca.numArgs();
@@ -3860,12 +3646,13 @@ void fcallUnknownImpl(ISS& env, const FCallArgs& fca) {
   popCU(env);
   if (fca.asyncEagerTarget() != NoBlockId) {
     assertx(numRets == 1);
-    push(env, TInitCell);
+    assertx(!retTy.is(BBottom));
+    push(env, retTy);
     env.propagate(fca.asyncEagerTarget(), &env.state);
     popC(env);
   }
   for (auto i = uint32_t{0}; i < numRets - 1; ++i) popU(env);
-  for (auto i = uint32_t{0}; i < numRets; ++i) push(env, TInitCell);
+  for (auto i = uint32_t{0}; i < numRets; ++i) push(env, retTy);
 }
 
 void in(ISS& env, const bc::FCallFuncD& op) {
@@ -3894,7 +3681,7 @@ void in(ISS& env, const bc::FCallFuncD& op) {
     ? env.index.lookup_num_inout_params(env.ctx, rfunc)
     : std::nullopt;
 
-  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut) ||
+  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut, false) ||
       fcallTryFold(env, op.fca, rfunc, TBottom, false, 0)) {
     return;
   }
@@ -3957,7 +3744,9 @@ void fcallFuncStr(ISS& env, const bc::FCallFunc& op) {
     ? env.index.lookup_num_inout_params(env.ctx, rfunc)
     : std::nullopt;
 
-  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut)) return;
+  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut, false)) {
+    return;
+  }
   fcallKnownImpl(env, op.fca, rfunc, TBottom, false, 1, updateBC, numInOut);
 }
 
@@ -4091,11 +3880,48 @@ Context getCallContext(const ISS& env, const FCallArgs& fca) {
   return env.ctx;
 }
 
+void fcallObjMethodNullsafeNoFold(ISS& env,
+                                  const FCallArgs& fca,
+                                  bool extraInput) {
+  assertx(fca.asyncEagerTarget() == NoBlockId);
+  if (extraInput) popC(env);
+  if (fca.hasGenerics()) popC(env);
+  if (fca.hasUnpack()) popC(env);
+  auto const numArgs = fca.numArgs();
+  auto const numRets = fca.numRets();
+  std::vector<Type> inOuts;
+  for (auto i = uint32_t{0}; i < numArgs; ++i) {
+    if (fca.enforceInOut() && fca.isInOut(numArgs - i - 1)) {
+      inOuts.emplace_back(popCV(env));
+    } else {
+      popCV(env);
+    }
+  }
+  popU(env);
+  popCU(env);
+  for (auto i = uint32_t{0}; i < numRets - 1; ++i) popU(env);
+  assertx(inOuts.size() == numRets - 1);
+  for (auto& t : inOuts) push(env, std::move(t));
+  push(env, TInitNull);
+}
+
 void fcallObjMethodNullsafe(ISS& env, const FCallArgs& fca, bool extraInput) {
+  // Don't fold if there's inout arguments. We could, in principal,
+  // fold away the inout case like we do below, but we don't have the
+  // bytecodes necessary to shuffle the stack.
+  if (fca.enforceInOut()) {
+    for (uint32_t i = 0; i < fca.numArgs(); ++i) {
+      if (fca.isInOut(i)) {
+        return fcallObjMethodNullsafeNoFold(env, fca, extraInput);
+      }
+    }
+  }
+
   BytecodeVec repl;
   if (extraInput) repl.push_back(bc::PopC {});
   if (fca.hasGenerics()) repl.push_back(bc::PopC {});
   if (fca.hasUnpack()) repl.push_back(bc::PopC {});
+
   auto const numArgs = fca.numArgs();
   for (uint32_t i = 0; i < numArgs; ++i) {
     assertx(topC(env, repl.size()).subtypeOf(BInitCell));
@@ -4103,10 +3929,7 @@ void fcallObjMethodNullsafe(ISS& env, const FCallArgs& fca, bool extraInput) {
   }
   repl.push_back(bc::PopU {});
   repl.push_back(bc::PopC {});
-  auto const numRets = fca.numRets();
-  for (uint32_t i = 0; i < numRets - 1; ++i) {
-    repl.push_back(bc::PopU {});
-  }
+  assertx(fca.numRets() == 1);
   repl.push_back(bc::Null {});
 
   reduce(env, std::move(repl));
@@ -4135,17 +3958,19 @@ void fcallObjMethodImpl(ISS& env, const Op& op, SString methName, bool dynamic,
     }
   };
 
-  auto const unknown = [&] {
+  auto const throws = [&] {
+    if (op.fca.asyncEagerTarget() != NoBlockId) {
+      // Kill the async eager target if the function never returns.
+      return reduce(env, updateBC(op.fca.withoutAsyncEagerTarget()));
+    }
     if (extraInput) popC(env);
-    fcallUnknownImpl(env, op.fca);
-    refineLoc();
+    fcallUnknownImpl(env, op.fca, TBottom);
+    unreachable(env);
   };
 
   if (!mayCallMethod && !mayUseNullsafe) {
-    // This FCallObjMethodD may only throw, make sure it's not optimized away.
-    unknown();
-    unreachable(env);
-    return;
+    // This FCallObjMethodD may only throw
+    return throws();
   }
 
   if (!mayCallMethod && !mayThrowNonObj) {
@@ -4156,14 +3981,13 @@ void fcallObjMethodImpl(ISS& env, const Op& op, SString methName, bool dynamic,
   if (!mayCallMethod) {
     // May only return null, but can't fold as we may still throw.
     assertx(mayUseNullsafe && mayThrowNonObj);
-    return unknown();
+    if (op.fca.asyncEagerTarget() != NoBlockId) {
+      return reduce(env, updateBC(op.fca.withoutAsyncEagerTarget()));
+    }
+    return fcallObjMethodNullsafeNoFold(env, op.fca, extraInput);
   }
 
-  if (isBadContext(op.fca)) {
-    unknown();
-    unreachable(env);
-    return;
-  }
+  if (isBadContext(op.fca)) return throws();
 
   auto const ctx = getCallContext(env, op.fca);
   auto const ctxTy = input.couldBe(BObj)
@@ -4177,7 +4001,8 @@ void fcallObjMethodImpl(ISS& env, const Op& op, SString methName, bool dynamic,
     : std::nullopt;
 
   auto const canFold = !mayUseNullsafe && !mayThrowNonObj;
-  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut) ||
+  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC,
+                          numInOut, mayUseNullsafe) ||
       (canFold && fcallTryFold(env, op.fca, rfunc, ctxTy, dynamic,
                                extraInput ? 1 : 0))) {
     return;
@@ -4271,7 +4096,7 @@ void fcallClsMethodImpl(ISS& env, const Op& op, Type clsTy, SString methName,
     ? env.index.lookup_num_inout_params(env.ctx, rfunc)
     : std::nullopt;
 
-  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut) ||
+  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut, false) ||
       fcallTryFold(env, op.fca, rfunc, clsTy, dynamic, numExtraInputs)) {
     return;
   }
@@ -4371,7 +4196,7 @@ void fcallClsMethodSImpl(ISS& env, const Op& op, SString methName, bool dynamic,
     ? env.index.lookup_num_inout_params(env.ctx, rfunc)
     : std::nullopt;
 
-  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut) ||
+  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut, false) ||
       fcallTryFold(env, op.fca, rfunc, ctxCls(env), dynamic,
                    extraInput ? 1 : 0)) {
     return;
@@ -4576,7 +4401,7 @@ void in(ISS& env, const bc::FCallCtor& op) {
     : std::nullopt;
 
   auto const canFold = obj.subtypeOf(BObj);
-  if (fcallOptimizeChecks(env, op.fca, *rfunc, updateFCA, numInOut) ||
+  if (fcallOptimizeChecks(env, op.fca, *rfunc, updateFCA, numInOut, false) ||
       (canFold && fcallTryFold(env, op.fca, *rfunc,
                                obj, false /* dynamic */, 0))) {
     return;
@@ -4941,7 +4766,7 @@ void in(ISS& env, const bc::VerifyParamTypeTS& op) {
       return;
     }
     auto const resolvedTS =
-      resolveTSStatically(env, inputTS->m_data.parr, env.ctx.cls);
+      resolve_type_structure(env, inputTS->m_data.parr).sarray();
     if (resolvedTS && resolvedTS != inputTS->m_data.parr) {
       reduce(env, bc::PopC {});
       reduce(env, bc::Dict { resolvedTS });
@@ -5097,7 +4922,7 @@ void in(ISS& env, const bc::VerifyRetTypeTS& /*op*/) {
       return;
     }
     auto const resolvedTS =
-      resolveTSStatically(env, inputTS->m_data.parr, env.ctx.cls);
+      resolve_type_structure(env, inputTS->m_data.parr).sarray();
     if (resolvedTS && resolvedTS != inputTS->m_data.parr) {
       reduce(env, bc::PopC {});
       reduce(env, bc::Dict { resolvedTS });

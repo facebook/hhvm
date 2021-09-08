@@ -351,6 +351,14 @@ struct Func : FuncBase {
   Unit* originalUnit{};
 
   /*
+   * The refernece of the trait where the method was originally defined.
+   * This is used to detected if a method is imported multiple
+   * times via different use-chains as the pair (name, originalClass)
+   * uniquely identifies a method.
+   */
+  Class* originalClass;
+
+  /*
    * This is the generated function for a closure body.  I.e. this
    * function contains the code that should run when the closure is
    * invoked.
@@ -391,6 +399,8 @@ struct Func : FuncBase {
   bool hasCreateCl : 1; // Function has CreateCl opcode
 
   bool isReadonlyReturn : 1;
+
+  bool isReadonlyThis : 1;
 
   /*
    * Type parameter upper bounds. May be enforced and used for optimizations.
@@ -459,19 +469,16 @@ struct Const {
    */
   Optional<TypedValue> val;
 
-  /*
-   * We pass through eval'able php code and a string type constraint,
-   * only for exposure to reflection.
-   */
-  LSString phpCode;
-  LSString typeConstraint;
-
   std::vector<LowStringPtr> coeffects;
 
+  SArray resolvedTypeStructure;
+
   ConstModifiers::Kind kind;
+
+  using Invariance = PreClass::Const::Invariance;
+  Invariance invariance : 2;
   bool isAbstract   : 1;
   bool isFromTrait  : 1;
-  bool isNoOverride : 1;
 };
 
 /*
@@ -602,33 +609,7 @@ struct TypeAlias {
   bool nullable;  // null is allowed; for ?Foo aliases
   UserAttributeMap userAttrs;
   Array typeStructure{ArrayData::CreateDict()};
-};
-
-//////////////////////////////////////////////////////////////////////
-/*
- * A record field
- */
-struct RecordField {
-  LSString name;
-  Attr attrs;
-  LSString userType;
-  LSString docComment;
-  TypedValue val;
-  TypeConstraint typeConstraint;
-  UserAttributeMap userAttributes;
-};
-/*
- * Representation of a Hack record
- */
-struct Record {
-  Unit* unit;
-  SrcInfo srcInfo;
-  LSString name;
-  LSString parentName;
-  Attr attrs;
-  int32_t id;
-  UserAttributeMap userAttributes;
-  CompactVector<RecordField> fields;
+  Array resolvedTypeStructure;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -652,7 +633,6 @@ struct Unit {
   std::unique_ptr<FatalInfo> fatalInfo{nullptr};
   CompactVector<std::unique_ptr<Func>> funcs;
   CompactVector<std::unique_ptr<Class>> classes;
-  CompactVector<std::unique_ptr<Record>> records;
   CompactVector<std::unique_ptr<TypeAlias>> typeAliases;
   CompactVector<std::unique_ptr<Constant>> constants;
   CompactVector<SrcLoc> srcLocs;
@@ -675,8 +655,8 @@ struct Program {
 std::string show(const Func&);
 std::string show(const Func&, const Block&);
 std::string show(const Func&, const Bytecode& bc);
-std::string show(const Class&, bool normalizeClosures = false);
-std::string show(const Unit&, bool normalizeClosures = false);
+std::string show(const Class&);
+std::string show(const Unit&);
 std::string show(const Program&);
 std::string local_string(const Func&, LocalId);
 

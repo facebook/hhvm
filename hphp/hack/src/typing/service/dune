@@ -1,9 +1,10 @@
 (library
   (name typing_service_types)
   (wrapped false)
-  (modules 
+  (modules
     typing_service_types)
   (libraries
+    adhoc_profiler
     biglist
     core_kernel
     errors

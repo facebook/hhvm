@@ -158,6 +158,7 @@ const X64Instr instr_roundsd = { { 0xF1,0xF1,0x0b,0x00,0xF1,0xF1 }, 0x64112 };
 const X64Instr instr_cmpsd =   { { 0xF1,0xF1,0xC2,0xF1,0xF1,0xF1 }, 0x10112 };
 const X64Instr instr_crc32 =   { { 0xF1,0xF1,0xF1,0x00,0xF1,0xF1 }, 0x30001 };
 const X64Instr instr_prefetch ={ { 0x18,0xF1,0xF1,0x02,0xF1,0xF1 }, 0x0002  };
+const X64Instr instr_btr      ={ { 0xB3,0xF1,0xBA,0x06,0xF1,0xF1 }, 0x0012  };
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -395,6 +396,8 @@ public:
   void shlq (Reg64 r) { instrR(instr_shl, r); }
   void shrq (Reg64 r) { instrR(instr_shr, r); }
   void sarq (Reg64 r) { instrR(instr_sar, r); }
+
+  void btrq (Immed i, Reg64 r) { instrIR(instr_btr, i, r); }
 
   void roundsd (RoundDirection d, RegXMM src, RegXMM dst) {
     emitIRR(instr_roundsd, rn(dst), rn(src), ssize_t(d));
@@ -1398,4 +1401,3 @@ private:
 };
 
 }}
-

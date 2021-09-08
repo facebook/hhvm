@@ -59,7 +59,7 @@ void getBaseType(Opcode rawOp, bool predict,
   }
 
   if ((op == SetElem || op == SetRange || op == UnsetElem) &&
-      baseType.maybe(TArrLike | TStr | TRecord | TClsMeth)) {
+      baseType.maybe(TArrLike | TStr | TClsMeth)) {
     /* Member operations never cause us to lose the vanilla bit. */
     auto const vanilla = baseType.arrSpec().vanilla();
 

@@ -583,6 +583,7 @@ let () =
   (* no-op, needed at entry point for the Daemon module (used by
      HackfmtEventLogger) to behave correctly *)
   Daemon.check_entry_point ();
+  Folly.ensure_folly_init ();
 
   let (options, root, parser_env, (debug, test)) = parse_options () in
   let env =

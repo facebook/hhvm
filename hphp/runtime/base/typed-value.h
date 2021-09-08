@@ -42,7 +42,6 @@ struct MemoCacheBase;
 struct Func;
 struct RFuncData;
 struct Class;
-struct RecordData;
 struct RClsMethData;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -67,7 +66,6 @@ union Value {
   Class*        pclass; // KindOfClass
   ClsMethDataRef pclsmeth; // KindOfClsMeth
   RClsMethData* prclsmeth; // KindOfRClsMeth
-  RecordData*   prec;   // KindOfRecord
   LazyClassData plazyclass;   // KindOfLazyClass
 };
 
@@ -171,10 +169,15 @@ static_assert((sizeof(TypedValue) & (kTypedValueAlignMask)) == 0,
 static_assert(sizeof(TypedValue) <= 16, "Don't add big things to AuxUnion");
 
 /*
- * Used to set m_data when a PreClassEmitter::Const's valOption() is none
- * to distinguish from constants that have an 86cinit. See tvWriteConstValMissing
+ * Used to set m_data when a PreClassEmitter::Const's valOption() is
+ * none to distinguish from constants that have an 86cinit. See
+ * tvWriteConstValMissing.
+ *
+ * NB: We want the least significant bit to be unset to avoid
+ * confusion with a resolved type-structure (see Class::clsCnsGet).
  */
-constexpr int64_t kConstValMissing = -1;
+constexpr int64_t kConstValMissing = -2;
+static_assert(!(kConstValMissing & 0x1));
 
 /*
  * Subclass of TypedValue which exposes m_aux accessors.
@@ -312,7 +315,6 @@ X(KindOfRFunc,        RFuncData*);
 X(KindOfClass,        Class*);
 X(KindOfClsMeth,      ClsMethDataRef);
 X(KindOfRClsMeth,     RClsMethData*);
-X(KindOfRecord,       RecordData*);
 X(KindOfLazyClass,    LazyClassData);
 
 #undef X

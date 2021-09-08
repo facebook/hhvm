@@ -33,13 +33,11 @@ using std::string;
 namespace HPHP { namespace jit {
 
 string TCRegionString[] = {
-  "hot", "main", "profile", "cold", "frozen"
+  "main", "cold", "frozen"
 };
 
 static string nmMapFileName("/hhvm.nm");
-static string tcRegionFileNames[TCRCount] = { "/tc_dump_ahot",
-                                              "/tc_dump_a",
-                                              "/tc_dump_aprof",
+static string tcRegionFileNames[TCRCount] = { "/tc_dump_a",
                                               "/tc_dump_acold",
                                               "/tc_dump_afrozen" };
 
@@ -92,7 +90,7 @@ TCA OfflineCode::getTransJmpTargets(const TransRec *transRec,
 
   TCRegion tcrMain = findTCRegionContaining(transRec->aStart);
 
-  assert(tcrMain == TCRHot || tcrMain == TCRMain || tcrMain == TCRProfile);
+  assert(tcrMain == TCRMain);
 
   TCA aFallThru = collectJmpTargets(tcRegions[tcrMain].file,
                                     tcRegions[tcrMain].baseAddr,
@@ -219,9 +217,7 @@ string OfflineCode::getSymbolName(TCA addr) {
 
 TCA OfflineCode::getRegionStart(TCRegion region, TransBCMapping transBCMap) {
   switch (region) {
-    case TCRHot:
     case TCRMain:
-    case TCRProfile:
       return transBCMap.aStart;
     case TCRCold:
       return transBCMap.acoldStart;

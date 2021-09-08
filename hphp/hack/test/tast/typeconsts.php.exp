@@ -1,3 +1,5 @@
+Errors:
+  [8:14-17] `as` constraints are only legal on abstract type constants
 [(Class
     { c_span = [3:1-10:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Abstract); 

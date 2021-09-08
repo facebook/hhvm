@@ -1784,8 +1784,33 @@ where
                             ParenthesizedExpression(_) => Some(Self::p_pos(recv, env)),
                             _ => None,
                         };
+
                         let recv = Self::p_expr(recv, env)?;
                         let recv = match (&recv.2, pos_if_has_parens) {
+                            (E_::ReadonlyExpr(r), Some(ref _p)) => {
+                                let ast::Expr(_, _, inner_exp) = &**r;
+                                match inner_exp {
+                                    E_::ObjGet(t) => {
+                                        let (a, b, c, _false) = &**t;
+                                        let new_inner = E::new(
+                                            (),
+                                            r.1.clone(),
+                                            E_::mk_obj_get(a.clone(), b.clone(), c.clone(), true),
+                                        );
+                                        E::new((), recv.1.clone(), E_::mk_readonly_expr(new_inner))
+                                    }
+                                    E_::ClassGet(c) => {
+                                        let (a, b, _false) = &**c;
+                                        let new_inner = E::new(
+                                            (),
+                                            r.1.clone(),
+                                            E_::mk_class_get(a.clone(), b.clone(), true),
+                                        );
+                                        E::new((), recv.1.clone(), E_::mk_readonly_expr(new_inner))
+                                    }
+                                    _ => recv,
+                                }
+                            }
                             (E_::ObjGet(t), Some(ref _p)) => {
                                 let (a, b, c, _false) = &**t;
                                 E::new(

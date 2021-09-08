@@ -965,18 +965,36 @@ SSATmp* propImpl(IRGS& env, MOpMode mode, SSATmp* key, bool nullsafe, ReadonlyOp
     (op == ReadonlyOp::CheckMutROCOW || op == ReadonlyOp::CheckROCOW))) {
     return propGenericImpl(env, mode, base, key, nullsafe, op);
   }
+
   if (RO::EvalEnableReadonlyPropertyEnforcement) {
     auto data = ClassData { propInfo->propClass };
     if (propInfo->readOnly && op == ReadonlyOp::Mutable) {
-      if (mode == MOpMode::Unset || mode == MOpMode::Define) {
-        gen(env, ThrowMustBeMutableException, data, key);
+      auto writeMode = mode == MOpMode::Unset || mode == MOpMode::Define;
+      if (RO::EvalEnableReadonlyPropertyEnforcement == 1) {
+        auto const ro_data = ReadonlyPropData {
+          writeMode ? ReadonlyViolation::Mutable : ReadonlyViolation::EnclosedInRO,
+          propInfo->propClass
+        };
+        gen(env, RaiseReadonlyPropViolation, ro_data, key);
       } else {
-        gen(env, ThrowMustBeEnclosedInReadonly, data, key);
+        if (writeMode) {
+          gen(env, ThrowMustBeMutableException, data, key);
+        } else {
+          gen(env, ThrowMustBeEnclosedInReadonly, data, key);
+        }
+        return cns(env, TBottom);
       }
-      return cns(env, TBottom);
     } else if (!propInfo->readOnly && op == ReadonlyOp::CheckROCOW) {
-      gen(env, ThrowMustBeReadonlyException, data, key);
-      return cns(env, TBottom);
+      auto const ro_data = ReadonlyPropData{
+        ReadonlyViolation::Readonly,
+        propInfo->propClass
+      };
+      if (RO::EvalEnableReadonlyPropertyEnforcement == 1) {
+        gen(env, RaiseReadonlyPropViolation, ro_data, key);
+      } else {
+        gen(env, ThrowMustBeReadonlyException, data, key);
+        return cns(env, TBottom);
+      }
     }
   }
 
@@ -1186,9 +1204,17 @@ SSATmp* cGetPropImpl(IRGS& env, SSATmp* base, SSATmp* key,
   if (propInfo) {
     if (RO::EvalEnableReadonlyPropertyEnforcement && propInfo->readOnly &&
       op == ReadonlyOp::Mutable) {
-      auto data = ClassData { propInfo->propClass };
-      gen(env, ThrowMustBeEnclosedInReadonly, data, key);
-      return cns(env, TBottom);
+      if (RO::EvalEnableReadonlyPropertyEnforcement == 1) {
+        auto const data = ReadonlyPropData{
+          ReadonlyViolation::EnclosedInRO,
+          propInfo->propClass
+        };
+        gen(env, RaiseReadonlyPropViolation, data, key);
+      } else {
+        auto data = ClassData { propInfo->propClass };
+        gen(env, ThrowMustBeEnclosedInReadonly, data, key);
+        return cns(env, TBottom);
+      }
     }
     auto propAddr =
       emitPropSpecialized(env, base, key, nullsafe, mode, *propInfo).first;
@@ -1265,9 +1291,17 @@ SSATmp* setPropImpl(IRGS& env, uint32_t nDiscard, SSATmp* key, ReadonlyOp op) {
   if (propInfo && !propInfo->isConst) {
     if (RO::EvalEnableReadonlyPropertyEnforcement && !propInfo->readOnly &&
       op == ReadonlyOp::Readonly) {
-      auto data = ClassData { propInfo->propClass };
-      gen(env, ThrowMustBeReadonlyException, data, key);
-      return cns(env, TBottom);
+      if (RO::EvalEnableReadonlyPropertyEnforcement == 1) {
+        auto const data = ReadonlyPropData{
+          ReadonlyViolation::Readonly,
+          propInfo->propClass
+        };
+        gen(env, RaiseReadonlyPropViolation, data, key);
+      } else {
+        auto data = ClassData { propInfo->propClass };
+        gen(env, ThrowMustBeReadonlyException, data, key);
+        return cns(env, TBottom);
+      }
     }
     SSATmp* propPtr;
     SSATmp* obj;

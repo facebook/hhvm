@@ -2,7 +2,8 @@
 <<file:__EnableUnstableFeatures('readonly')>>
 
 class C {
-  readonly static function inner() {
+  static function inner() {
+    readonly 1;
     var_dump(__METHOD__);
   }
 }

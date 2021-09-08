@@ -196,7 +196,7 @@ let visitor =
       if not FileInfo.(equal_mode decl_env.Decl_env.mode Mhhi) then
         this#traverse_fun_body
           (hint_of_type_hint fun_.f_ret)
-          fun_.f_span
+          (fst fun_.f_name)
           fun_.f_fun_kind
           has_impl_ret
           env
@@ -212,7 +212,7 @@ let visitor =
       then
         this#traverse_fun_body
           (hint_of_type_hint method_.m_ret)
-          method_.m_span
+          (fst method_.m_name)
           method_.m_fun_kind
           has_impl_ret
           env

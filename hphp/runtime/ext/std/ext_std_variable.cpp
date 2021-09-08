@@ -482,7 +482,6 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
     case KindOfClsMeth:
     case KindOfRClsMeth:
     case KindOfRFunc:
-    case KindOfRecord:
       break;
   }
   VariableSerializer vs(VariableSerializer::Type::Serialize);

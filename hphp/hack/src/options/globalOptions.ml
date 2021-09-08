@@ -119,6 +119,7 @@ type t = {
   po_enable_readonly_in_emitter: bool;
   po_escape_brace: bool;
   tco_use_direct_decl_parser: bool;
+  tco_use_direct_decl_in_tc_loop: bool;
   tco_ifc_enabled: string list;
   po_enable_enum_supertyping: bool;
   po_interpret_soft_types_as_like_types: bool;
@@ -253,7 +254,7 @@ let default =
     tco_simple_pessimize = 0.0;
     tco_complex_coercion = false;
     tco_disable_partially_abstract_typeconsts = false;
-    tco_disallow_partially_abstract_typeconst_definitions = false;
+    tco_disallow_partially_abstract_typeconst_definitions = true;
     error_codes_treated_strictly = ISet.of_list [];
     tco_check_xhp_attribute = false;
     tco_check_redundant_generics = false;
@@ -311,6 +312,7 @@ let default =
     po_enable_readonly_in_emitter = false;
     po_escape_brace = false;
     tco_use_direct_decl_parser = false;
+    tco_use_direct_decl_in_tc_loop = false;
     tco_ifc_enabled = [];
     po_enable_enum_supertyping = false;
     po_interpret_soft_types_as_like_types = false;
@@ -458,6 +460,7 @@ let make
     ?(po_enable_readonly_in_emitter = default.po_enable_readonly_in_emitter)
     ?(po_escape_brace = default.po_escape_brace)
     ?(tco_use_direct_decl_parser = default.tco_use_direct_decl_parser)
+    ?(tco_use_direct_decl_in_tc_loop = default.tco_use_direct_decl_in_tc_loop)
     ?(tco_ifc_enabled = default.tco_ifc_enabled)
     ?(po_enable_enum_supertyping = default.po_enable_enum_supertyping)
     ?(po_interpret_soft_types_as_like_types =
@@ -592,6 +595,7 @@ let make
     po_enable_readonly_in_emitter;
     po_escape_brace;
     tco_use_direct_decl_parser;
+    tco_use_direct_decl_in_tc_loop;
     tco_ifc_enabled;
     po_enable_enum_supertyping;
     po_interpret_soft_types_as_like_types;
@@ -861,6 +865,8 @@ let po_enable_readonly_in_emitter t = t.po_enable_readonly_in_emitter
 let po_escape_brace t = t.po_escape_brace
 
 let tco_use_direct_decl_parser t = t.tco_use_direct_decl_parser
+
+let tco_use_direct_decl_in_tc_loop t = t.tco_use_direct_decl_in_tc_loop
 
 let po_enable_enum_supertyping t = t.po_enable_enum_supertyping
 

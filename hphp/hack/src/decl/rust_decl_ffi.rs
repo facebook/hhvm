@@ -20,11 +20,20 @@ pub unsafe extern "C" fn hh_parse_decls_and_mode_ffi(
     opts_ptr: usize,
     filename_ptr: usize,
     text_ptr: usize,
-    include_hash: usize,
+    include_file_decl_hash: usize,
+    include_symbol_decl_hashes: usize,
 ) -> usize {
-    fn inner(opts_ptr: usize, filename_ptr: usize, text_ptr: usize, include_hash: usize) -> usize {
+    fn inner(
+        opts_ptr: usize,
+        filename_ptr: usize,
+        text_ptr: usize,
+        include_file_decl_hash: usize,
+        include_symbol_decl_hashes: usize,
+    ) -> usize {
         // SAFETY: We trust we've been handed a valid, immutable OCaml value
-        let include_hash = unsafe { bool::from_ocaml(include_hash).unwrap() };
+        let include_file_decl_hash = unsafe { bool::from_ocaml(include_file_decl_hash).unwrap() };
+        let include_symbol_decl_hashes =
+            unsafe { bool::from_ocaml(include_symbol_decl_hashes).unwrap() };
 
         let make_retryable = move || {
             move |stack_limit: &StackLimit, _nonmain_stack_size: Option<usize>| {
@@ -55,7 +64,18 @@ pub unsafe extern "C" fn hh_parse_decls_and_mode_ffi(
                 let (decls, mode) =
                     parse_decls_and_mode(&opts, filename, &text, &arena, Some(stack_limit));
 
-                let hash = if include_hash {
+                let symbol_decl_hashes = if include_symbol_decl_hashes {
+                    Some(
+                        decls
+                            .iter()
+                            .map(|x| Int64(position_insensitive_hash(&x) as i64))
+                            .collect::<Vec<Int64>>(),
+                    )
+                } else {
+                    None
+                };
+
+                let file_decl_hash = if include_file_decl_hash {
                     Some(Int64(position_insensitive_hash(&decls) as i64))
                 } else {
                     None
@@ -67,7 +87,9 @@ pub unsafe extern "C" fn hh_parse_decls_and_mode_ffi(
                 // this function scope. Instead, we convert the decls to OCaml
                 // ourselves, and return the pointer (the converted OCaml value does not
                 // borrow the arena).
-                unsafe { ocamlrep_ocamlpool::to_ocaml(&(decls, mode, hash)) }
+                unsafe {
+                    ocamlrep_ocamlpool::to_ocaml(&(decls, mode, file_decl_hash, symbol_decl_hashes))
+                }
             }
         };
 
@@ -102,7 +124,15 @@ pub unsafe extern "C" fn hh_parse_decls_and_mode_ffi(
             }
         }
     }
-    ocamlrep_ocamlpool::catch_unwind(|| inner(opts_ptr, filename_ptr, text_ptr, include_hash))
+    ocamlrep_ocamlpool::catch_unwind(|| {
+        inner(
+            opts_ptr,
+            filename_ptr,
+            text_ptr,
+            include_file_decl_hash,
+            include_symbol_decl_hashes,
+        )
+    })
 }
 
 ocaml_ffi_with_arena! {

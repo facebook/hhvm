@@ -29,50 +29,6 @@
 
 namespace HPHP {
 
-namespace {
-
-/*
- * Important: We rely on generating unique anonymous class names (ie
- * Closures) by tacking ";<next_anon_class>" onto the end of the name.
- *
- * Its important that code that creates new closures goes through
- * preClassName, or NewAnonymousClassName to make sure this works.
- */
-static std::atomic<uint32_t> next_anon_class{};
-
-const StringData* preClassName(const std::string& name) {
-  if (PreClassEmitter::IsAnonymousClassName(name)) {
-    auto const pos = name.find(';');
-    if (pos == std::string::npos) {
-      return makeStaticString(NewAnonymousClassName(name));
-    }
-    auto const id = strtol(name.c_str() + pos + 1, nullptr, 10);
-    if (id > 0 && id < INT_MAX) {
-      auto next = next_anon_class.load(std::memory_order_relaxed);
-      while (id >= next &&
-             next_anon_class.compare_exchange_weak(
-               next, id + 1, std::memory_order_relaxed
-             )) {
-        // nothing to do; just try again.
-      }
-    }
-  }
-  return makeStaticString(name);
-}
-
-}
-
-std::string NewAnonymousClassName(folly::StringPiece name) {
-  return folly::sformat("{};{}", name, next_anon_class.fetch_add(1));
-}
-
-folly::StringPiece StripIdFromAnonymousClassName(folly::StringPiece name) {
-  auto const pos = RuntimeOption::RepoAuthoritative ?
-    std::string::npos : qfind(name, ';');
-  return pos == std::string::npos ?
-    name : folly::StringPiece{name.data(), pos};
-}
-
 //=============================================================================
 // PreClassEmitter::Prop.
 
@@ -108,7 +64,7 @@ PreClassEmitter::PreClassEmitter(UnitEmitter& ue,
                                  Id id,
                                  const std::string& n)
   : m_ue(ue)
-  , m_name(preClassName(n))
+  , m_name(makeStaticString(n))
   , m_id(id) {}
 
 void PreClassEmitter::init(int line1, int line2, Attr attrs,
@@ -189,9 +145,8 @@ bool PreClassEmitter::addProperty(const StringData* n, Attr attrs,
 }
 
 bool PreClassEmitter::addAbstractConstant(const StringData* n,
-                                          const StringData* typeConstraint,
-                                          const ConstModifiers::Kind kind,
-                                          const bool fromTrait) {
+                                          ConstModifiers::Kind kind,
+                                          bool fromTrait) {
   assertx(kind == ConstModifiers::Kind::Value ||
           kind == ConstModifiers::Kind::Type);
 
@@ -199,53 +154,60 @@ bool PreClassEmitter::addAbstractConstant(const StringData* n,
   if (it != m_constMap.end()) {
     return false;
   }
-  PreClassEmitter::Const cns(n, typeConstraint, nullptr, nullptr,
-                             {}, kind, true, fromTrait);
+  PreClassEmitter::Const cns(n, nullptr, nullptr,
+                             {}, Array{}, kind,
+                             Const::Invariance::None,
+                             true, fromTrait);
   m_constMap.add(cns.name(), cns);
   return true;
 }
 
-bool PreClassEmitter::addContextConstant(const StringData* n,
-                                         PreClassEmitter::Const::CoeffectsVec&&
-                                           coeffects,
-                                         const bool isAbstract,
-                                         const bool fromTrait) {
+bool PreClassEmitter::addContextConstant(
+    const StringData* n,
+    PreClassEmitter::Const::CoeffectsVec coeffects,
+    bool isAbstract,
+    bool fromTrait) {
   auto it = m_constMap.find(n);
   if (it != m_constMap.end()) {
     return false;
   }
-  PreClassEmitter::Const cns(n, nullptr, nullptr, nullptr,
+  PreClassEmitter::Const cns(n, nullptr, nullptr,
                              std::move(coeffects),
+                             Array{},
                              ConstModifiers::Kind::Context,
+                             Const::Invariance::None,
                              isAbstract, fromTrait);
   m_constMap.add(cns.name(), cns);
   return true;
 }
 
 bool PreClassEmitter::addConstant(const StringData* n,
-                                  const StringData* typeConstraint,
+                                  const StringData* cls,
                                   const TypedValue* val,
-                                  const StringData* phpCode,
-                                  const ConstModifiers::Kind kind,
-                                  const bool fromTrait,
-                                  const Array& typeStructure,
-                                  const bool isAbstract) {
+                                  Array resolvedTypeStructure,
+                                  ConstModifiers::Kind kind,
+                                  Const::Invariance invariance,
+                                  bool fromTrait,
+                                  bool isAbstract) {
   assertx(kind == ConstModifiers::Kind::Value ||
           kind == ConstModifiers::Kind::Type);
+  assertx(IMPLIES(kind == ConstModifiers::Kind::Value, !cls));
+  assertx(IMPLIES(kind == ConstModifiers::Kind::Value,
+                  resolvedTypeStructure.isNull()));
+  assertx(IMPLIES(!resolvedTypeStructure.isNull(),
+                  resolvedTypeStructure.isDict() &&
+                  !resolvedTypeStructure.empty() &&
+                  resolvedTypeStructure->isStatic()));
+  assertx(IMPLIES(invariance != Const::Invariance::None,
+                  !resolvedTypeStructure.isNull()));
+  assertx(val);
+
   ConstMap::Builder::const_iterator it = m_constMap.find(n);
   if (it != m_constMap.end()) {
     return false;
   }
-  TypedValue tvVal;
-  if (kind == ConstModifiers::Kind::Type && !typeStructure.empty())  {
-    assertx(typeStructure.isDict());
-    tvVal = make_persistent_array_like_tv(typeStructure.get());
-    assertx(tvIsPlausible(tvVal));
-  } else {
-    tvVal = *val;
-  }
-  PreClassEmitter::Const cns(n, typeConstraint, &tvVal, phpCode, {}, kind,
-                             isAbstract, fromTrait);
+  PreClassEmitter::Const cns(n, cls, val, {}, std::move(resolvedTypeStructure),
+                             kind, invariance, isAbstract, fromTrait);
   m_constMap.add(cns.name(), cns);
   return true;
 }
@@ -421,10 +383,34 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
 
     tvaux.constModifiers().setKind(const_.kind());
 
-    constBuild.add(const_.name(), PreClass::Const(const_.name(),
-                                                  tvaux,
-                                                  const_.phpCode(),
-                                                  const_.isFromTrait()));
+    assertx(
+      IMPLIES(const_.kind() != ConstModifiers::Kind::Type, !const_.cls())
+    );
+    assertx(
+      IMPLIES(const_.kind() != ConstModifiers::Kind::Type,
+              const_.resolvedTypeStructure().isNull())
+    );
+    assertx(
+      IMPLIES(!const_.resolvedTypeStructure().isNull(),
+              const_.resolvedTypeStructure().isDict() &&
+              !const_.resolvedTypeStructure().empty())
+    );
+    assertx(
+      IMPLIES(const_.invariance() != Const::Invariance::None,
+              !const_.resolvedTypeStructure().isNull())
+    );
+
+    constBuild.add(
+      const_.name(),
+      PreClass::Const(
+        const_.name(),
+        const_.cls(),
+        tvaux,
+        const_.resolvedTypeStructure(),
+        const_.invariance(),
+        const_.isFromTrait()
+      )
+    );
   }
   if (auto nativeConsts = Native::getClassConstants(m_name)) {
     for (auto cnsMap : *nativeConsts) {
@@ -432,8 +418,10 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
       tvCopy(cnsMap.second, tvaux);
       tvaux.constModifiers() = {};
       constBuild.add(cnsMap.first, PreClass::Const(cnsMap.first,
+                                                   nullptr,
                                                    tvaux,
-                                                   staticEmptyString(),
+                                                   Array{},
+                                                   Const::Invariance::None,
                                                    false));
     }
   }

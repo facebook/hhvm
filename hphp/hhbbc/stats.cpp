@@ -74,7 +74,6 @@ TRACE_SET_MOD(hhbbc_stats);
   X(lazy_cls, "lazy class", is_specialized_lazycls)                  \
   X(int, "int", is_specialized_int)                                  \
   X(dbl, "double", is_specialized_double)                            \
-  X(record, "record", is_specialized_record)                         \
 
 struct TypeStat {
 #define X(y, ...)                               \
@@ -111,7 +110,6 @@ struct Stats {
   std::atomic<uint64_t> ratL_specialized_array{};
   std::atomic<uint64_t> ratStk_specialized_array{};
   std::atomic<uint64_t> totalClasses{};
-  std::atomic<uint64_t> totalRecords{};
   std::atomic<uint64_t> totalFunctions{};
   std::atomic<uint64_t> totalMethods{};
   std::atomic<uint64_t> effectfulFuncs{};
@@ -185,7 +183,6 @@ std::string show(const Stats& stats) {
     "            total_methods:  {: >12}\n"
     "              total_funcs:  {: >12}\n"
     "            total_classes:  {: >12}\n"
-    "            total_records:  {: >12}\n"
     "\n"
     "          effectful_funcs:  {: >12}\n"
     "        effect_free_funcs:  {: >12}\n"
@@ -197,7 +194,6 @@ std::string show(const Stats& stats) {
     stats.totalMethods.load(),
     stats.totalFunctions.load(),
     stats.totalClasses.load(),
-    stats.totalRecords.load(),
     stats.effectfulFuncs.load(),
     stats.effectFreeFuncs.load(),
     stats.totalSProps.load(),
@@ -403,10 +399,6 @@ void collect_func(Stats& stats, const Index& index, const php::Func& func) {
   }
 }
 
-void collect_record(Stats& stats, const php::Record& rec) {
-  ++stats.totalRecords;
-}
-
 void collect_class(Stats& stats, const Index& index, const php::Class& cls) {
   ++stats.totalClasses;
   stats.totalMethods += cls.methods.size();
@@ -445,9 +437,6 @@ void collect_stats(Stats& stats,
           collect_func(stats, index, *m);
         }
       }
-      for (auto const& r : unit->records) {
-        collect_record(stats, *r);
-      }
       for (auto const& x : unit->funcs) {
         collect_func(stats, index, *x);
       }
@@ -483,9 +472,6 @@ void collect_stats(const StatsHolder& stats,
     for (auto& m : c->methods) {
       collect_func(*stats.stats, index, *m);
     }
-  }
-  for (auto& r : unit->records) {
-    collect_record(*stats.stats, *r);
   }
   for (auto& x : unit->funcs) {
     collect_func(*stats.stats, index, *x);

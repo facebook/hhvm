@@ -100,9 +100,11 @@ int64_t getRequestGenCount();
 void deferredFree(void*);
 
 /*
- * Used to get debug information about the treadmill.
+ * Used to get debug information about the treadmill. If forCrash is true then
+ * an attempt will be made to acquire the treadmill mutex but a result will be
+ * returned regardless of whether the lock was acquired.
  */
-std::string dumpTreadmillInfo();
+std::string dumpTreadmillInfo(bool forCrash = false);
 
 /*
  * Schedule a function to run on the next appropriate treadmill round.

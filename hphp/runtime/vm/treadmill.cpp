@@ -60,6 +60,7 @@ const int64_t ONE_SEC_IN_MICROSEC = 1000000;
 struct TreadmillRequestInfo {
   GenCount  startTime;
   pthread_t pthreadId;
+  int64_t requestId;
   SessionKind sessionKind;
 };
 
@@ -198,12 +199,13 @@ void startRequest(SessionKind session_kind) {
     checkOldest();
     if (requestIdx >= s_inflightRequests.size()) {
       s_inflightRequests.resize(
-        requestIdx + 1, {kIdleGenCount, 0, SessionKind::None});
+        requestIdx + 1, {kIdleGenCount, 0, 0, SessionKind::None});
     } else {
       assertx(s_inflightRequests[requestIdx].startTime == kIdleGenCount);
     }
     s_inflightRequests[requestIdx].startTime = correctTime(startTime);
     s_inflightRequests[requestIdx].pthreadId = Process::GetThreadId();
+    s_inflightRequests[requestIdx].requestId = Logger::GetRequestId();
     s_inflightRequests[requestIdx].sessionKind = session_kind;
     FTRACE(1, "requestIdx {} pthreadId {} start @gen {}\n", requestIdx,
            s_inflightRequests[requestIdx].pthreadId,
@@ -351,9 +353,21 @@ char const* getSessionKindName(SessionKind value) {
   return "";
 }
 
-std::string dumpTreadmillInfo() {
+std::string dumpTreadmillInfo(bool forCrash) {
   std::string out;
-  GenCountGuard g;
+  Optional<GenCountGuard> g;
+
+  if (!forCrash) g.emplace();
+  else {
+    if (pthread_mutex_trylock(&s_genLock) != 0) {
+      folly::format(
+        &out,
+        "Attempting to dump treadmill without acquiring GenCountGuard: {}\n",
+        folly::errnoStr(errno)
+      );
+    }
+  }
+
   int64_t oldestStart =
     s_oldestRequestInFlight.load(std::memory_order_relaxed);
 
@@ -373,8 +387,9 @@ std::string dumpTreadmillInfo() {
     if (req.startTime != kIdleGenCount) {
       folly::format(
           &out,
-          "{} {} {}{}\n",
+          "{} {} {} {}{}\n",
           req.pthreadId,
+          req.requestId,
           req.startTime,
           getSessionKindName(req.sessionKind),
           req.startTime == oldestStart ? " OLDEST" : ""

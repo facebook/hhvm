@@ -45,15 +45,13 @@ bool dumpTCCode(folly::StringPiece filename) {
   if (F == nullptr) return false;                                       \
   SCOPE_EXIT{ fclose(F); };
 
-  OPEN_FILE(ahotFile,       "_ahot");
   OPEN_FILE(aFile,          "_a");
-  OPEN_FILE(aprofFile,      "_aprof");
   OPEN_FILE(acoldFile,      "_acold");
   OPEN_FILE(afrozenFile,    "_afrozen");
 
 #undef OPEN_FILE
 
-  // dump starting from the hot region
+  // dump starting from the main region
   auto result = true;
   auto writeBlock = [&](const CodeBlock& cb, FILE* file) {
     if (result) {
@@ -62,9 +60,7 @@ bool dumpTCCode(folly::StringPiece filename) {
     }
   };
 
-  writeBlock(code().hot(), ahotFile);
   writeBlock(code().main(), aFile);
-  writeBlock(code().prof(), aprofFile);
   writeBlock(code().cold(), acoldFile);
   writeBlock(code().frozen(), afrozenFile);
   return result;
@@ -78,20 +74,14 @@ bool dumpTCData() {
 
   if (!gzprintf(tcDataFile,
                 "repo_schema      = %s\n"
-                "ahot.base        = %p\n"
-                "ahot.frontier    = %p\n"
                 "a.base           = %p\n"
                 "a.frontier       = %p\n"
-                "aprof.base       = %p\n"
-                "aprof.frontier   = %p\n"
                 "acold.base       = %p\n"
                 "acold.frontier   = %p\n"
                 "afrozen.base     = %p\n"
                 "afrozen.frontier = %p\n\n",
                 repoSchemaId().begin(),
-                code().hot().base(),    code().hot().frontier(),
                 code().main().base(),   code().main().frontier(),
-                code().prof().base(),   code().prof().frontier(),
                 code().cold().base(),   code().cold().frontier(),
                 code().frozen().base(), code().frozen().frontier())) {
     return false;

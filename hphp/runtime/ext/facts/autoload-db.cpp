@@ -450,6 +450,16 @@ struct TypeStmts {
             "  JOIN type_details USING (typeid)"
             "  JOIN all_paths USING (pathid)"
             " WHERE name = @type"
+            " AND kind_of = 'type'"
+            " AND path = @path"
+            " AND attribute_name = @attribute_name")}
+      , m_getTypeAliasAttributeArgs{db.prepare(
+            "SELECT attribute_value"
+            " FROM type_attributes"
+            "  JOIN type_details USING (typeid)"
+            "  JOIN all_paths USING (pathid)"
+            " WHERE name = @type"
+            " AND kind_of = 'typeAlias'"
             " AND path = @path"
             " AND attribute_name = @attribute_name")}
       , m_getMethodAttributeArgs{db.prepare(
@@ -468,7 +478,15 @@ struct TypeStmts {
             "  SELECT * FROM type_attributes"
             "   WHERE attribute_name = @attribute_name"
             "   AND type_attributes.typeid=type_details.typeid"
-            " )")}
+            " ) AND kind_of <> 'typeAlias'")}
+      , m_getTypeAliasesWithAttribute{db.prepare(
+            "SELECT name, path from type_details"
+            " JOIN all_paths USING (pathid)"
+            " WHERE EXISTS ("
+            "  SELECT * FROM type_attributes"
+            "   WHERE attribute_name = @attribute_name"
+            "   AND type_attributes.typeid=type_details.typeid"
+            " ) AND kind_of = 'typeAlias'")}
       , m_getMethodsInPath{db.prepare(
             "SELECT name, method, path FROM type_details"
             " JOIN method_attributes USING (typeid)"
@@ -497,8 +515,10 @@ struct TypeStmts {
   SQLiteStmt m_getTypeAttributes;
   SQLiteStmt m_getMethodAttributes;
   SQLiteStmt m_getTypeAttributeArgs;
+  SQLiteStmt m_getTypeAliasAttributeArgs;
   SQLiteStmt m_getMethodAttributeArgs;
   SQLiteStmt m_getTypesWithAttribute;
+  SQLiteStmt m_getTypeAliasesWithAttribute;
   SQLiteStmt m_getMethodsInPath;
   SQLiteStmt m_getMethodsWithAttribute;
   SQLiteStmt m_getCorrectCase;
@@ -1019,6 +1039,20 @@ struct AutoloadDBImpl final : public AutoloadDB {
     return results;
   }
 
+  std::vector<TypeDeclaration> getTypeAliasesWithAttribute(
+      SQLiteTxn& txn, const std::string_view attributeName) override {
+    auto query = txn.query(m_typeStmts.m_getTypeAliasesWithAttribute);
+    query.bindString("@attribute_name", attributeName);
+    std::vector<TypeDeclaration> results;
+    FTRACE(5, "Running {}\n", query.sql());
+    for (query.step(); query.row(); query.step()) {
+      results.push_back(TypeDeclaration{
+          .m_type = std::string{query.getString(0)},
+          .m_path = folly::fs::path{std::string{query.getString(1)}}});
+    }
+    return results;
+  }
+
   std::vector<MethodDeclaration>
   getPathMethods(SQLiteTxn& txn, std::string_view path) override {
     auto query = txn.query(m_typeStmts.m_getMethodsInPath);
@@ -1068,6 +1102,26 @@ struct AutoloadDBImpl final : public AutoloadDB {
       const std::string_view attributeName) override {
     auto query = txn.query(m_typeStmts.m_getTypeAttributeArgs);
     query.bindString("@type", type);
+    query.bindString("@path", path);
+    query.bindString("@attribute_name", attributeName);
+    FTRACE(5, "Running {}\n", query.sql());
+    std::vector<folly::dynamic> args;
+    for (query.step(); query.row(); query.step()) {
+      auto arg = query.getNullableString(0);
+      if (arg) {
+        args.push_back(folly::parseJson(*arg));
+      }
+    }
+    return args;
+  }
+
+  std::vector<folly::dynamic> getTypeAliasAttributeArgs(
+      SQLiteTxn& txn,
+      const std::string_view typeAlias,
+      const std::string_view path,
+      const std::string_view attributeName) override {
+    auto query = txn.query(m_typeStmts.m_getTypeAliasAttributeArgs);
+    query.bindString("@type", typeAlias);
     query.bindString("@path", path);
     query.bindString("@attribute_name", attributeName);
     FTRACE(5, "Running {}\n", query.sql());

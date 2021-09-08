@@ -137,6 +137,7 @@ function(embed_sections TARGET DEST)
     #        "${CMAKE_CURRENT_SOURCE_DIR}/generated-build-id.txt"
     COMMAND
       "INSTALL_DIR=${CMAKE_BINARY_DIR}/hphp/util"
+      "SOURCE_ROOT=${CMAKE_SOURCE_DIR}"
       "${HPHP_HOME}/hphp/hhvm/generate-buildinfo.sh"
     WORKING_DIRECTORY "${HPHP_HOME}/hphp/util"
     COMMENT "Generating Repo Schema ID and Compiler ID"

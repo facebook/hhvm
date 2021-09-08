@@ -172,6 +172,7 @@ struct Vunit;
   O(andq, I(fl), U(s0) UH(s1,d), DH(d,s1) D(sf))     \
   O(andqi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
   O(andqi64, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
+  O(btrq, I(s0), UH(s1,d), DH(d,s1) D(sf))\
   O(decl, I(fl), UH(s,d), DH(d,s) D(sf))\
   O(declm, I(fl), UM(m), D(sf))\
   O(decq, I(fl), UH(s,d), DH(d,s) D(sf))\
@@ -998,6 +999,8 @@ struct andl  { Vreg32 s0, s1, d; VregSF sf; Vflags fl; };
 struct andli { Immed s0; Vreg32 s1, d; VregSF sf; Vflags fl; };
 struct andq  { Vreg64 s0, s1, d; VregSF sf; Vflags fl; };
 struct andqi { Immed s0; Vreg64 s1, d; VregSF sf; Vflags fl; };
+// Set bit s0 in s1 to 0, sets carry if set, sets d to s1
+struct btrq { Immed s0; Vreg64 s1, d; VregSF sf; Vflags fl; };
 // dec: {s|m} - 1 => {d|m}, sf
 struct decl { Vreg32 s, d; VregSF sf; Vflags fl; };
 struct declm { Vptr32 m; VregSF sf; Vflags fl; };

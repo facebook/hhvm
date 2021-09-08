@@ -267,7 +267,6 @@ inline size_t allocSize(const HeapObject* h) {
     0, /* Resource */
     sizeClass<ClsMethData>(),
     sizeClass<RClsMethData>(),
-    0, /* Record */
     sizeClass<RFuncData>(),
     0, /* Object */
     0, /* NativeObject */
@@ -315,7 +314,6 @@ inline size_t allocSize(const HeapObject* h) {
   CHECKSIZE(Keyset)
   CHECKSIZE(String)
   CHECKSIZE(Resource)
-  CHECKSIZE(Record)
   CHECKSIZE(Object)
   CHECKSIZE(NativeObject)
   CHECKSIZE(WaitHandle)
@@ -368,11 +366,6 @@ inline size_t allocSize(const HeapObject* h) {
       // size = h->aux16
       // [ResourceHdr][ResourceData subclass]
       size = static_cast<const ResourceHdr*>(h)->heapSize();
-      break;
-    case HeaderKind::Record:
-      // size = h->m_record->numFields() * sz(TV) + sz(RD)
-      // [RecordData][fields]
-      size = static_cast<const RecordData*>(h)->heapSize();
       break;
     case HeaderKind::Object:
     case HeaderKind::Closure:

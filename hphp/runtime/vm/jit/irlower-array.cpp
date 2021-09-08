@@ -22,7 +22,6 @@
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/object-data.h"
-#include "hphp/runtime/base/record-data.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-variant.h"
@@ -383,35 +382,6 @@ void cgInitVecElemLoop(IRLS& env, const IRInstruction* inst) {
     },
     count
   );
-}
-
-namespace {
-
-template<typename Fn>
-void newRecordImpl(IRLS& env, const IRInstruction* inst, Fn creatorFn) {
-  auto const rec = srcLoc(env, inst, 0).reg();
-  auto const sp = srcLoc(env, inst, 1).reg();
-  auto const extra = inst->extra<NewStructData>();
-  auto& v = vmain(env);
-
-  auto table = v.allocData<const StringData*>(extra->numKeys);
-  memcpy(table, extra->keys, extra->numKeys * sizeof(*extra->keys));
-
-  auto const args = argGroup(env, inst)
-    .reg(rec)
-    .imm(extra->numKeys)
-    .dataPtr(table)
-    .addr(sp, cellsToBytes(extra->offset.offset));
-
-  cgCallHelper(v, env, CallSpec::direct(creatorFn),
-               callDest(env, inst),
-               SyncOptions::Sync, args);
-}
-
-}
-
-void cgNewRecord(IRLS& env, const IRInstruction* inst) {
-  newRecordImpl(env, inst, RecordData::newRecord);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -46,7 +46,6 @@ namespace HPHP {
 
 const StaticString
   s_InvalidKeysetOperationMsg{"Invalid operation on keyset"},
-  s_ReadOnlyCollectionMutationMsg{"Read-Only collections cannot be mutated."},
   s_VarrayUnsetMsg{"varrays do not support unsetting non-end elements"},
   s_VecUnsetMsg{"Vecs do not support unsetting non-end elements"};
 ///////////////////////////////////////////////////////////////////////////////
@@ -121,7 +120,6 @@ size_t hashArrayPortion(const ArrayData* arr) {
         case KindOfResource:
         case KindOfRFunc:
         case KindOfRClsMeth:
-        case KindOfRecord:
           always_assert(false);
       }
     }
@@ -786,7 +784,6 @@ std::string describeKeyValue(TypedValue tv) {
   case KindOfLazyClass:
   case KindOfClsMeth:
   case KindOfRClsMeth:
-  case KindOfRecord:
     return "<invalid key type>";
   }
   not_reached();
@@ -848,7 +845,7 @@ void throwInvalidKeysetOperation() {
 }
 
 void throwReadOnlyCollectionMutation() {
-  SystemLib::throwInvalidOperationExceptionObject(s_ReadOnlyCollectionMutationMsg);
+  SystemLib::throwInvalidOperationExceptionObject(Strings::READONLY_COLLECTIONS_CANNOT_BE_MODIFIED);
 }
 
 void throwVarrayUnsetException() {
@@ -860,6 +857,10 @@ void throwVecUnsetException() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void raiseReadOnlyCollectionMutation() {
+  raise_warning(Strings::READONLY_COLLECTIONS_CANNOT_BE_MODIFIED);
+}
 
 void raiseHackArrCompatArrHackArrCmp() {
   raise_hac_compare_notice(Strings::HACKARR_COMPAT_ARR_HACK_ARR_CMP);

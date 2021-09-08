@@ -17,7 +17,7 @@ abstract class A {
 
 class Aint extends A {
   const type abs_class_by_class = int;
-  const type me as Aint = Aint;
+  const type me  = Aint;
   const type Aint = self::hop;
   const type hop = int;
   const type vec = ConstVector<int>;

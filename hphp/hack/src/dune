@@ -179,6 +179,7 @@
   (link_flags (:standard (:include dune_config/ld-opts.sexp)))
   (libraries
     default_injector_config
+    folly_stubs
     hackfmt
     hackfmt_debug
     utils_config_file

@@ -514,52 +514,55 @@ SSATmp* opt_array_key_cast(IRGS& env, const ParamPrep& params) {
 }
 
 SSATmp* impl_opt_type_structure(IRGS& env, const ParamPrep& params,
-                                bool getName, bool no_throw) {
+                                bool getName, bool noThrow) {
   if (params.size() != 2) return nullptr;
   auto const clsNameTmp = params[0].value;
   auto const cnsNameTmp = params[1].value;
 
-  if (!clsNameTmp->isA(TStr|TCls|TLazyCls)) return nullptr;
   if (!cnsNameTmp->hasConstVal(TStaticStr)) return nullptr;
   auto const cnsName = cnsNameTmp->strVal();
 
   auto const clsTmp = [&] () -> SSATmp* {
     if (clsNameTmp->isA(TCls)) return clsNameTmp;
+    if (clsNameTmp->isA(TObj)) return gen(env, LdObjClass, clsNameTmp);
     if (clsNameTmp->inst()->is(LdClsName) ||
         clsNameTmp->inst()->is(LdLazyCls)) {
       return clsNameTmp->inst()->src(0);
     }
-    return ldCls(env, clsNameTmp, make_opt_catch(env, params));
+    if (clsNameTmp->type().subtypeOfAny(TStr, TLazyCls)) {
+      return ldCls(env, clsNameTmp, make_opt_catch(env, params));
+    }
+    return nullptr;
   }();
+  if (!clsTmp) return nullptr;
 
   if (!clsTmp->type().clsSpec()) return nullptr;
   auto const cls = clsTmp->type().clsSpec().cls();
+  // Slot indices aren't invariant for non-normal classes.
+  if (!isNormalClass(cls)) return nullptr;
 
   auto const cnsSlot =
     cls->clsCnsSlot(cnsName, ConstModifiers::Kind::Type, true);
   if (cnsSlot == kInvalidSlot) return nullptr;
 
-  auto const data = LdSubClsCnsData { cnsName, cnsSlot };
   if (!getName) {
     return cond(
       env,
       [&] (Block* taken) {
-        auto const val = gen(
-          env,
-          CheckType,
-          TUncountedInit,
-          taken,
-          gen(env, LdSubClsCns, data, clsTmp)
-        );
-        return gen(env, LdTypeCns, taken, val);
-      },
-      [&] (SSATmp* cns) { return cns; },
-      [&] /* taken */ {
-        auto const extra = LdClsTypeCnsData { no_throw };
         return gen(
           env,
-          LdClsTypeCns,
-          extra,
+          LdResolvedTypeCns,
+          taken,
+          ClsCnsSlotData { cnsName, cnsSlot },
+          clsTmp
+        );
+      },
+      [&] (SSATmp* cns) { return cns; },
+      [&] {
+        hint(env, Block::Hint::Unlikely);
+        return gen(
+          env,
+          noThrow ? LdTypeCnsNoThrow : LdTypeCns,
           make_opt_catch(env, params),
           clsTmp,
           cnsNameTmp
@@ -567,18 +570,26 @@ SSATmp* impl_opt_type_structure(IRGS& env, const ParamPrep& params,
       }
     );
   }
-  assert(!no_throw);
+
+  assertx(!noThrow);
+
   return cond(
     env,
     [&] (Block* taken) {
-      auto const clsNameFromTS = gen(env, LdSubClsCnsClsName, data, clsTmp);
-      return gen(env, CheckNonNull, taken, clsNameFromTS);
+      auto const classname = gen(
+        env,
+        LdResolvedTypeCnsClsName,
+        ClsCnsSlotData { cnsName, cnsSlot },
+        clsTmp
+      );
+      return gen(env, CheckNonNull, taken, classname);
     },
     [&] (SSATmp* s) { return s; },
     [&] {
+      hint(env, Block::Hint::Unlikely);
       return gen(
         env,
-        LdClsTypeCnsClsName,
+        LdTypeCnsClsName,
         make_opt_catch(env, params),
         clsTmp,
         cnsNameTmp
@@ -739,7 +750,6 @@ SSATmp* opt_foldable(IRGS& env,
       case KindOfClass:
       case KindOfClsMeth:
       case KindOfRClsMeth:
-      case KindOfRecord: // TODO(arnabde)
         return nullptr;
     }
   } catch (...) {

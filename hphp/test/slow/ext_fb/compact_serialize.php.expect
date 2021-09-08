@@ -1450,8 +1450,8 @@ HH\is_php_array: true
 HH\is_darray: false
 HH\is_varray: true
 
-fb_compact_serialize(): unable to serialize object/resource/ref/func/class/record
-fb_compact_serialize(): unable to serialize object/resource/ref/func/class/record
+fb_compact_serialize(): unable to serialize object/resource/ref/func/class
+fb_compact_serialize(): unable to serialize object/resource/ref/func/class
 serialize output is string: true
 string(13) "
 FA F3 F3 FC "
@@ -1496,8 +1496,8 @@ HH\is_php_array: true
 HH\is_darray: true
 HH\is_varray: false
 
-fb_compact_serialize(): unable to serialize object/resource/ref/func/class/record
-fb_compact_serialize(): unable to serialize object/resource/ref/func/class/record
+fb_compact_serialize(): unable to serialize object/resource/ref/func/class
+fb_compact_serialize(): unable to serialize object/resource/ref/func/class
 serialize output is string: true
 string(19) "
 FB 2A F3 2F F3 FC "

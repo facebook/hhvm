@@ -68,7 +68,7 @@ object(CounterArray) (5) {
   ["addme"]=>
   string(5) "added"
   ["addmetoo"]=>
-  object(Closure$test_object_get;%d) (0) {
+  object(Closure$test_object_get) (0) {
   }
   ["42"]=>
   string(10) "addmethree"

@@ -24,7 +24,7 @@ let invalidate_local_decl_caches_for_file
      one file change, but worse in the case of 5000 file changes. *)
 
   (* Shallow decl cache: we only need clear the ones affected *)
-  List.iter file_info.classes ~f:(fun (_, name) ->
+  List.iter file_info.classes ~f:(fun (_, name, _) ->
       Shallow_decl_cache.remove
         local_memory.shallow_decl_cache
         ~key:(Shallow_decl_cache_entry.Shallow_class_decl name));
@@ -45,19 +45,19 @@ let invalidate_local_decl_caches_for_file
      at least the user has a fallback of opening relevant files in the
      IDE to get their relevant decls+linearizations correct. *)
   let open Provider_backend.Decl_cache_entry in
-  List.iter file_info.consts ~f:(fun (_, name) ->
+  List.iter file_info.consts ~f:(fun (_, name, _) ->
       Decl_cache.remove local_memory.decl_cache ~key:(Gconst_decl name));
-  List.iter file_info.funs ~f:(fun (_, name) ->
+  List.iter file_info.funs ~f:(fun (_, name, _) ->
       Decl_cache.remove local_memory.decl_cache ~key:(Fun_decl name));
-  List.iter file_info.record_defs ~f:(fun (_, name) ->
+  List.iter file_info.record_defs ~f:(fun (_, name, _) ->
       Decl_cache.remove local_memory.decl_cache ~key:(Record_decl name));
-  List.iter file_info.typedefs ~f:(fun (_, name) ->
+  List.iter file_info.typedefs ~f:(fun (_, name, _) ->
       Decl_cache.remove local_memory.decl_cache ~key:(Typedef_decl name));
-  List.iter file_info.classes ~f:(fun (_, name) ->
+  List.iter file_info.classes ~f:(fun (_, name, _) ->
       Decl_cache.remove local_memory.decl_cache ~key:(Class_decl name));
   (* Linearizations are only keyed by class names *)
   let open Provider_backend.Linearization_cache_entry in
-  List.iter file_info.classes ~f:(fun (_, name) ->
+  List.iter file_info.classes ~f:(fun (_, name, _) ->
       Linearization_cache.remove
         local_memory.linearization_cache
         ~key:(Linearization name));

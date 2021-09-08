@@ -117,7 +117,6 @@ static const struct {
   { OpAddNewElemC, {StackTop2,        Stack1,       OutModifiedInput2 }},
   { OpNewCol,      {None,             Stack1,       OutObject       }},
   { OpNewPair,     {StackTop2,        Stack1,       OutObject       }},
-  { OpNewRecord,   {StackN,           Stack1,       OutRecord       }},
   { OpColFromArray,   {Stack1,        Stack1,       OutObject       }},
   { OpCnsE,        {None,             Stack1,       OutCns          }},
   { OpClsCns,      {Stack1,           Stack1,       OutUnknown      }},
@@ -492,7 +491,6 @@ int64_t getStackPopped(PC pc) {
     case Op::SetRangeM:
       return getImm(pc, 0).u_IVA + 3;
 
-    case Op::NewRecord:
     case Op::NewStructDict:
       return getImmVector(pc).size();
 
@@ -1003,7 +1001,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::NewObjD:
   case Op::NewObjRD:
   case Op::NewObjS:
-  case Op::NewRecord:
   case Op::Not:
   case Op::Null:
   case Op::NullUninit:

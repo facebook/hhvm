@@ -258,7 +258,6 @@ struct TypeConstraint {
   bool isObject()   const { return m_type == Type::Object; }
   bool isInt()      const { return m_type == Type::Int; }
   bool isString()   const { return m_type == Type::String; }
-  bool isRecord()   const { return m_type == Type::Record; }
   bool isArrayLike() const { return m_type == Type::ArrayLike; }
   bool isVecOrDict() const { return m_type == Type::VecOrDict; }
   bool isClassname() const { return m_type == Type::Classname; }
@@ -270,11 +269,6 @@ struct TypeConstraint {
 
   bool validForProp() const {
     return !isSelf() && !isParent() && !isCallable() && !isNothing() && !isNoReturn();
-  }
-
-  bool validForRecField() const {
-    return !isSelf() && !isParent() && !isCallable() && !isNothing() &&
-           !isNoReturn() && !isThis();
   }
 
   /*
@@ -369,11 +363,7 @@ struct TypeConstraint {
   bool alwaysPasses(DataType dt) const;
 
   bool checkTypeAliasObj(const Class* cls) const {
-    return checkTypeAliasImpl<Class, false>(cls);
-  }
-
-  bool checkTypeAliasRecord(const RecordDesc* rec) const {
-    return checkTypeAliasImpl<RecordDesc, false>(rec);
+    return checkTypeAliasImpl<false>(cls);
   }
 
   // NB: Can throw if the check fails.
@@ -392,9 +382,6 @@ struct TypeConstraint {
                             const Class* thisCls,
                             const Class* declCls,
                             const StringData* propName) const;
-  void verifyRecField(tv_rval val,
-                   const StringData* recordName,
-                   const StringData* fieldName) const;
 
   void verifyFail(const Func* func, tv_lval val, int id) const;
   void verifyParamFail(const Func* func, tv_lval val, int paramNum) const;
@@ -408,9 +395,6 @@ struct TypeConstraint {
   void verifyPropFail(const Class* thisCls, const Class* declCls,
                       tv_lval val, const StringData* propName,
                       bool isStatic) const;
-  void verifyRecFieldFail(tv_rval val,
-                       const StringData* recordName,
-                       const StringData* fieldName) const;
 
 private:
   void init();
@@ -418,7 +402,6 @@ private:
   enum class CheckMode {
     Exact, // Do an exact check with autoloading
     ExactProp, // Do an exact prop check with autoloading
-    ExactRecField, // Do an exact record field check with autoloading
     AlwaysPasses, // Don't check environment at all. Return false if not sure.
     Assert // Check loaded classes/type-aliases, but don't autoload. Return true
            // if not sure.
@@ -430,8 +413,7 @@ private:
   template <bool, bool>
   bool checkNamedTypeNonObj(tv_rval val) const;
 
-  template <typename T, bool>
-  bool checkTypeAliasImpl(const T* type) const;
+  template <bool> bool checkTypeAliasImpl(const Class* type) const;
 
   void verifyFail(const Func* func, TypedValue* tv, int id,
                   bool useStrictTypes) const;

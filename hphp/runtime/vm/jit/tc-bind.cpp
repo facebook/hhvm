@@ -48,10 +48,9 @@ void bindCall(TCA toSmash, TCA start, Func* callee, int nArgs) {
     return;
   }
 
-  // For functions to be PGO'ed, if their current prologues are still
-  // profiling ones (living in code.prof()), then save toSmash as a
-  // caller to the prologue, so that it can later be smashed to call a
-  // new prologue when it's generated.
+  // For functions to be PGO'ed, if their current prologues are still profiling
+  // ones, then save toSmash as a caller to the prologue, so that it can later
+  // be smashed to call a new prologue when it's generated.
   int calleeNumParams = callee->numNonVariadicParams();
   int calledPrologNumArgs = (nArgs <= calleeNumParams ?
                              nArgs :  calleeNumParams + 1);
@@ -63,28 +62,25 @@ void bindCall(TCA toSmash, TCA start, Func* callee, int nArgs) {
   // if the prologue being smashed is in Aprof.
   ProfTransRec* rec{nullptr};
   std::unique_lock<Mutex> recLock;
-  if (profData && code().prof().contains(start)) {
+  if (profData) {
     rec = profData->prologueTransRec(callee, calledPrologNumArgs);
-    recLock = rec->lockCallerList();
+    if (rec != nullptr) {
+      recLock = rec->lockCallerList();
 
-    // It's possible that the callee prologue was reset before we acquired the
-    // lock. Make sure we have the right one.
-    auto const trans = mcgen::getFuncPrologue(callee, nArgs);
-    start = trans.isProcessPersistentFailure()
-      ? tc::ustubs().fcallHelperNoTranslateThunk
-      : trans.addr();
+      // It's possible that the callee prologue was reset before we acquired the
+      // lock. Make sure we have the right one.
+      auto const trans = mcgen::getFuncPrologue(callee, nArgs);
+      start = trans.isProcessPersistentFailure()
+        ? tc::ustubs().fcallHelperNoTranslateThunk
+        : trans.addr();
 
-    // Do these checks again with the lock.
-    if (start == nullptr || !smashableCallTarget(toSmash) ||
-        smashableCallTarget(toSmash) == start) {
-      return;
-    }
+      // Do these checks again with the lock.
+      if (start == nullptr || !smashableCallTarget(toSmash) ||
+          smashableCallTarget(toSmash) == start) {
+        return;
+      }
 
-    if (code().prof().contains(start)) {
       rec->addMainCaller(toSmash);
-    } else {
-      rec = nullptr;
-      recLock.unlock();
     }
   }
 

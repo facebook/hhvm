@@ -149,25 +149,6 @@ void raise_property_typehint_error(const std::string& msg,
                                    bool isSoft, bool isUB);
 
 /*
- * Raise the appropriate warning or error (with the given message) for some
- * violation of a record field type-hint. If isSoft is true, than a warning is
- * always raised.
- */
-void raise_record_field_typehint_error(const std::string& msg, bool isSoft);
-
-/*
- * Raise  error if a record field is not inititialized after construction.
- */
-void raise_record_init_error(const StringData* recName,
-                             const StringData* fieldName);
-
-/*
- * Raise error if a record field is not declared.
- */
-[[noreturn]] void raise_record_field_error(const StringData* recName,
-                                           const StringData* fieldName);
-
-/*
  * Raise the appropriate warning or error if we try to unset a property, and
  * that property has a type-hint which we're enforcing.
  */
@@ -180,7 +161,6 @@ void raise_resolve_undefined(const StringData* name, const Class* c = nullptr);
                                           const Class* c = nullptr);
 
 void raise_convert_object_to_string(const char* cls_name);
-void raise_convert_record_to_type(const char* typeName);
 void raise_convert_rfunc_to_type(const char* typeName);
 void raise_convert_rcls_meth_to_type(const char* typeName);
 
@@ -238,4 +218,3 @@ void raise_clsmeth_compat_type_hint_property_notice(
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

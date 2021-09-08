@@ -615,10 +615,6 @@ To string conversions:
 
   Checks if two Lazy class values are equal.
 
-| EqRecDesc,                   D(Bool), S(RecDesc) S(RecDesc),            NF
-
-  Checks if two record types are equal.
-
 | EqFunc,                      D(Bool), S(Func) S(Func),                  NF
 
   Checks if two Func values are equal.
@@ -671,10 +667,6 @@ To string conversions:
   A fast-path for instanceof checks. Sets D based on whether S0 is a descendant
   of the class named by S1, where S1 must have a bit allocated for it in the
   fast instance check bitvector (see class.h).
-
-| InstanceOfRecDesc, D(Bool), S(RecDesc) S(RecDesc), NF
-
-  Sets D to true if S0 is a descendant of the record in S1, false otherwise.
 
 | InterfaceSupportsArrLike,    D(Bool), S(Str), NF
 
@@ -970,20 +962,6 @@ To string conversions:
 
   Loads into D the func pointer stored in the higher 32 bits of S0.
 
-| LdRecDesc, D(RecDesc), S(Record), NF
-
-  Load the record type out of the record in S0 and put it in D.
-
-| LdRecDescCached<recName>, D(RecDesc), NA, NF
-
-  Loads the record whose name is recName via the RDS. Invokes autoload and may raise an error
-  if the record is not defined.
-
-| LdRecDescCachedSafe<recName>, D(RecDesc), NA, B
-
-  Loads the record whose name is recName out of the RDS. If the record is not
-  defined, branch to B.
-
 | DefConst<T>, DParam(Top), NA, NF
 
   Define a constant value of type T. D is presumed to be globally available and
@@ -1064,42 +1042,55 @@ To string conversions:
   Slow path for LdSubClsCns. Used when LdSubClsCns indicates the slot is
   uninitialized.
 
-| LdSubClsCnsClsName<constantName,slot>, D(StaticStr|Nullptr), S(Cls), NF
-
-  Loads the name of the class pointed by the constant 'constantName' for the
-  class S0. The constant is known to be in the given slot. Returns nullptr if
-  constant is abstract, not type constant or does not point to a class.
-
 | CheckSubClsCns<constantName,slot>, ND, S(Cls), B
 
   Check that the constant 'constantName' lives in the given slot for the class
   S0, and branch if not. S0 must have at least slot+1 constants.
-
-| LdClsCnsVecLen, D(Int), S(Cls), NF
-
-  Load the size of S0's constant table.
-
-| LdTypeCns, D(StaticDict), S(InitCell), B
-
-  Loads the resolved type constant S0 or branches to B if S0 is not resolved or
-  not a type constant.
-
-| LdClsTypeCns, D(StaticDict), S(Cls) S(Str), NF
-
-  Loads type constant S1 of class S0 or raises an error if no such constant
-  could be found, or if S0::S1 is not a type constant.
-
-| LdClsTypeCnsClsName, D(StaticStr), S(Cls) S(Str), NF
-
-  Loads the name of the class pointed by the type constant S1 of class S0 or
-  raises an error if no such constant could be found, or if S0::S1 is not a
-  type constant.
 
 | ProfileSubClsCns<constantName,handle>, D(Cell), S(Cls), NF
 
   Load the constant 'constantName' for the class S0, profiling the observed
   slots. If the returned value is Uninit, the constant does not exist or is
   abstract or is a type-constant.
+
+| LdClsCnsVecLen, D(Int), S(Cls), NF
+
+  Load the size of S0's constant table.
+
+| LdResolvedTypeCns<slot>, D(StaticDict), S(Cls), B
+
+  Loads the resolved type constant in the slot `slot' on S0 or branches to B if
+  the type constant is not resolved.
+
+| LdResolvedTypeCnsNoCheck<slot>, D(StaticDict), S(Cls), NF
+
+  Loads the resolved type constant in the slot `slot' on S0. The type constant
+  is assumed to be present and resolved.
+
+| LdTypeCns, D(StaticDict), S(Cls) S(Str), NF
+
+  Loads type constant with name S1 from class S0, performing any necessary
+  resolution. Raises an error if no such constant could be found, if S0::S1 is
+  not a type constant, if resolution fails, or if S0::S1 is abstract.
+
+| LdTypeCnsNoThrow, D(StaticDict), S(Cls) S(Str), NF
+
+  Loads type constant with name S1 from class S0, performing any necessary
+  resolution. If no such constant can be found, if S0::S1 is not a type
+  constant, if resolution fails, or if S0::S1 is abstract, then a "fake"
+  invalid type-structure is returned.
+
+| LdResolvedTypeCnsClsName<slot>, DTypeCnsClsName, S(Cls), NF
+
+  Loads the cached 'classname' field from the resolved type constant in the
+  slot `slot' on S0. If there is no cached field, returns nullptr.
+
+| LdTypeCnsClsName, D(StaticStr), S(Cls) S(Str), NF
+
+  Loads and resolved type constant with name S1 from class S0, as if by
+  LdTypeCns. Returns the 'classname' field from that type constant. Raises an
+  error if the type constant loading fails, or if there is no 'classname' field
+  present.
 
 | LdClsMethodFCacheFunc<clsName,methodName>, D(Func), NA, B
 
@@ -1500,13 +1491,6 @@ To string conversions:
   Allocate a new dict with the bespoke StructLayout `layout`.  Then, init the
   N fields with the given `slots` with N stack elements starting at `offset`.
   This op moves stack values with no refcounting.
-
-| NewRecord<offset,keys...>, D(Record), S(RecDesc) S(StkPtr), PRc|CRc
-
-  Allocate a new record, given the type S0 and N immediate keys
-  and taking N elements off the stack given by S1, at `offset'.
-  This instruction assumes it can take the values from the stack
-  without increfing them.
 
 | NewCol<type>, DCol, NA, PRc
 
@@ -1969,13 +1953,6 @@ To string conversions:
   a class) or implement (if S1 is an interface) S1, this instruction will raise
   a recoverable fatal error describing the type mismatch.
 
-| VerifyParamRecDesc, ND, S(RecDesc) S(RecDesc|Nullptr) C(Int) C(Int), NF
-
-  Verify parameter type for records. If S0 does not extend S1 (if S1 is a record
-  type) or does not satisfy the type hint S2 (if S1 is null pointer),
-  this instruction will raise a recoverable fatal error describing the type
-  mismatch for parameter S3.
-
 | VerifyParamCallable, ND, S(Cell) C(Int), NF
 
   If S0 is not callable, as defined by the php function is_callable, this
@@ -2003,10 +1980,6 @@ To string conversions:
 
   Verify a return type hint for a class.
 
-| VerifyRetRecDesc, ND, S(RecDesc) S(RecDesc|Nullptr) C(Int) S(Cell), NF
-
-  Verify a return type hint for a record.
-
 | VerifyRetFail, ND, S(PtrToCell), NF
 
   Failure to verify a return type hint.
@@ -2025,16 +1998,6 @@ To string conversions:
   S3 will be checked to see if its an instance of S2. Otherwise, the type-hint
   refers to a type-alias, and the alias will be resolved and checked against
   S3. S4 is true if this is a static property, false otherwise.
-
-| VerifyPropRecDesc, ND, S(Cls) S(Int) S(RecDesc|Nullptr) S(Record) C(Bool), NF
-
-  Verify a property type hint with AnnotType::Record against a record value. S0
-  is the class of the object containing the property. S1 is the slot of the
-  property. S3 is the record being set in the property. If S2 is not nullptr,
-  it is the type hint and S3 will be checked to see if it's an instance of S2.
-  Otherwise, the type hint refers to a type-alias and the type-alias will be
-  resolved and checked against S3. S4 is true if this is a static property,
-  otherwise false.
 
 | VerifyPropFail, ND, S(Cls) S(Int) S(Cell) C(Bool), NF
 
@@ -2108,6 +2071,12 @@ To string conversions:
 | RaiseNotice, ND, S(Str), NF
 
   Raises a notice with the text in S0 as its message.
+
+| RaiseReadonlyPropViolation<cls, flag>, ND, S(Str), NF
+
+  Raises a warning indicating a readonly semantics violation. Cls is the class
+  the property was declared on. Flag is the readonly rule we are enforcing.
+  S0 is the property name.
 
 | ThrowHasThisNeedStatic, ND, S(Func), T
 
@@ -3263,28 +3232,32 @@ fields of that struct for holding intermediate values.
   Throws a RuntimeException if calling a function with an argument that has the
   wrong type
 
-| ThrowMustBeMutableException<cls>, ND, S(Str), T
+| ThrowMustBeMutableException<cls>, ND, S(Str), NF
 
   Throws an InvalidOperationException indicating a readonly semantics violation
   where the property was required to be mutable. cls is the class the property
-  was declared on. S0 is the property name.
+  was declared on. S0 is the property name. Raises a warning if
+  EnableReadonlyPropertyEnforcement=1.
 
-| ThrowMustBeReadonlyException<cls>, ND, S(Str), T
+| ThrowMustBeReadonlyException<cls>, ND, S(Str), NF
 
   Throws an InvalidOperationException indicating a readonly semantics violation
   where the property was required to be readonly. cls is the class the property
-  was declared on. S0 is the property name.
+  was declared on. S0 is the property name. Raises a warning if
+  EnableReadonlyPropertyEnforcement=1.
 
-| ThrowMustBeValueTypeException, ND, S(Str), T
+| ThrowMustBeValueTypeException, ND, S(Str), NF
 
   Throws an InvalidOperationException indicating a readonly semantics violation
-  where the local was required to be a value type. S0 is the local name.
+  where the local was required to be a value type. S0 is the local name. Raises
+  a warning if EnableReadonlyPropertyEnforcement=1.
 
-| ThrowMustBeEnclosedInReadonly<cls>, ND, S(Str), T
+| ThrowMustBeEnclosedInReadonly<cls>, ND, S(Str), NF
 
   Throws an InvalidOperationException indicating a readonly semantics violation
   where the property was required to be enclosed in a readonly expression. cls
-  is the class the property was declared on. S0 is the property name.
+  is the class the property was declared on. S0 is the property name. Raises a
+  warning if EnableReadonlyPropertyEnforcement=1.
 
 | ProfileType, ND, S(Cell), NF
 

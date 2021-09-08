@@ -1534,10 +1534,11 @@ let key_exists env pos shape field =
         Typing_shapes.refine_shape field_name pos env shape_ty)
 
 (** Add a fresh type parameter to [env] with a name starting [prefix]
-    and a subtype constraint on [ty]. *)
+    and a constraint on [ty]. *)
 let synthesize_type_param env p prefix ty =
   let (env, name) = Env.fresh_param_name env prefix in
   let env = Env.add_upper_bound_global env name ty in
+  let env = Env.add_lower_bound_global env name ty in
 
   let hint = (p, Aast.Habstr (name, [])) in
   (hint, env)
@@ -1596,7 +1597,8 @@ let rec rewrite_expr_tree_maketree env expr f =
     synthesized type parameter to the desugared runtime expression.
 
         MyVisitor`1`; // we infer MyVisitorInt
-        MyVisitor::makeTree<_>(...) where _ as MyVisitorInt // we add this constrained type parameter
+        // we add this constrained type parameter:
+        MyVisitor::makeTree<TInfer#1>(...) where TInfer#1 = MyVisitorInt 
 
  *)
 let maketree_with_type_param env p expr expected_ty =

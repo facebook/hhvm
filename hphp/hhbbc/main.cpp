@@ -332,6 +332,8 @@ RepoGlobalData get_global_data() {
   gd.BuildMayNoticeOnMethCallerHelperIsObject =
     RuntimeOption::EvalBuildMayNoticeOnMethCallerHelperIsObject;
   gd.EnableReadonlyPropertyEnforcement = RuntimeOption::EvalEnableReadonlyPropertyEnforcement;
+  gd.DiamondTraitMethods = RuntimeOption::EvalDiamondTraitMethods;
+
 
   for (auto const& elm : RuntimeOption::ConstantFunctions) {
     auto const s = internal_serialize(tvAsCVarRef(elm.second));
@@ -507,6 +509,7 @@ int main(int argc, char** argv) try {
   RO::EvalEnforceGenericsUB                     = gd.HardGenericsUB ? 2 : 1;
   RO::EvalTraitConstantInterfaceBehavior        = gd.TraitConstantInterfaceBehavior;
   RO::EvalEnableReadonlyPropertyEnforcement     = gd.EnableReadonlyPropertyEnforcement;
+  RO::EvalDiamondTraitMethods                   = gd.DiamondTraitMethods;
 
   if (print_bytecode_stats_and_exit) {
     print_repo_bytecode_stats();

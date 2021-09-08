@@ -252,7 +252,6 @@ Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromContainer,
       break;
     case KindOfPersistentString:
     case KindOfString:
-    case KindOfRecord:
     case KindOfUninit:
     case KindOfNull:
     case KindOfBoolean:

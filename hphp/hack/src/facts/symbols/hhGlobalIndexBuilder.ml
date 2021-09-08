@@ -94,6 +94,7 @@ let parse_options () : index_builder_context option =
 (* Run the application *)
 let main () : unit =
   Daemon.check_entry_point ();
+  Folly.ensure_folly_init ();
   PidLog.init "/tmp/hh_server/global_index_builder.pids";
   PidLog.log ~reason:"main" (Unix.getpid ());
   let ctxt_opt = parse_options () in

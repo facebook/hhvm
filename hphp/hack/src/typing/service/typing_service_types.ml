@@ -37,12 +37,23 @@ ACCUMULATE: we start with all fields empty, and then merge in the output of each
 type typing_result = {
   errors: Errors.t;
   dep_edges: Typing_deps.dep_edges;
+  adhoc_profiling: Adhoc_profiler.CallTree.t;
   telemetry: Telemetry.t;
   jobs_finished_to_end: Measure.record;
       (** accumulates information about jobs where process_files finished every file in the bucket *)
   jobs_finished_early: Measure.record;
       (** accumulates information about jobs where process_files stopped early, due to memory pressure *)
 }
+
+let make_typing_result () =
+  {
+    errors = Errors.empty;
+    dep_edges = Typing_deps.dep_edges_make ();
+    telemetry = Telemetry.create ();
+    adhoc_profiling = Adhoc_profiler.CallTree.make ();
+    jobs_finished_to_end = Measure.create ();
+    jobs_finished_early = Measure.create ();
+  }
 
 (** This controls how much logging to do for each decl accessor.
 The user configures it via --config profile_decling=...
@@ -82,6 +93,10 @@ let accumulate_job_output
       Typing_deps.merge_dep_edges
         produced_by_job.dep_edges
         accumulated_so_far.dep_edges;
+    adhoc_profiling =
+      Adhoc_profiler.CallTree.merge
+        produced_by_job.adhoc_profiling
+        accumulated_so_far.adhoc_profiling;
     telemetry =
       Telemetry.add produced_by_job.telemetry accumulated_so_far.telemetry;
     jobs_finished_to_end = acc_finished_to_end;

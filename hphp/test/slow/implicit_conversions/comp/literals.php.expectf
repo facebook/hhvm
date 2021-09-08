@@ -37,7 +37,7 @@ Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare
 Pair < 42
 Threw: Cannot compare HH\Pair and int using a relational operator
 closure < 42
-Threw: Cannot compare Closure$less#21;95 and int using a relational operator
+Threw: Cannot compare Closure$less#21 and int using a relational operator
 fun < 42
 Threw: Cannot compare func and int using a relational operator
 fun < 'baz'
@@ -108,7 +108,7 @@ Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare
 Pair <= 42
 Threw: Cannot compare HH\Pair and int using a relational operator
 closure <= 42
-Threw: Cannot compare Closure$lesseq#21;132 and int using a relational operator
+Threw: Cannot compare Closure$lesseq#21 and int using a relational operator
 fun <= 42
 Threw: Cannot compare func and int using a relational operator
 fun <= 'baz'
@@ -179,7 +179,7 @@ Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare
 Pair > 42
 Threw: Cannot compare HH\Pair and int using a relational operator
 closure > 42
-Threw: Cannot compare Closure$gt#21;169 and int using a relational operator
+Threw: Cannot compare Closure$gt#21 and int using a relational operator
 fun > 42
 Threw: Cannot compare func and int using a relational operator
 fun > 'baz'
@@ -250,7 +250,7 @@ Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare
 Pair >= 42
 Threw: Cannot compare HH\Pair and int using a relational operator
 closure >= 42
-Threw: Cannot compare Closure$gte#21;206 and int using a relational operator
+Threw: Cannot compare Closure$gte#21 and int using a relational operator
 fun >= 42
 Threw: Cannot compare func and int using a relational operator
 fun >= 'baz'
@@ -321,7 +321,7 @@ Threw: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare
 Pair <=> 42
 Threw: Cannot compare HH\Pair and int using a relational operator
 closure <=> 42
-Threw: Cannot compare Closure$cmp#21;243 and int using a relational operator
+Threw: Cannot compare Closure$cmp#21 and int using a relational operator
 fun <=> 42
 Threw: Cannot compare func and int using a relational operator
 fun <=> 'baz'

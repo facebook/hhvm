@@ -8,6 +8,7 @@
   (libraries
     client_ide_message
     client_ide_utils
+    folly_stubs
     lwt
     lsp
     server

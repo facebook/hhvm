@@ -122,7 +122,7 @@ var_dump(socket_listen($s));
 var_dump(socket_close($s));
 
 $s = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-@socket_bind($s, "127.0.0.1", 80);
+@socket_bind($s, "127.0.0.1", 25);
 if (socket_last_error($s) == 13) {
   var_dump(socket_strerror(13) == "Permission denied");
   socket_clear_error($s);

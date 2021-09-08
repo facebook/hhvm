@@ -1,0 +1,37 @@
+dict(2) {
+  ["kind"]=>
+  int(14)
+  ["fields"]=>
+  dict(6) {
+    ["C1"]=>
+    dict(1) {
+      ["kind"]=>
+      int(1)
+    }
+    ["C2"]=>
+    dict(1) {
+      ["kind"]=>
+      int(1)
+    }
+    ["C3"]=>
+    dict(1) {
+      ["kind"]=>
+      int(1)
+    }
+    ["C4"]=>
+    dict(1) {
+      ["kind"]=>
+      int(1)
+    }
+    ["C5"]=>
+    dict(1) {
+      ["kind"]=>
+      int(1)
+    }
+    ["C6"]=>
+    dict(1) {
+      ["kind"]=>
+      int(2)
+    }
+  }
+}

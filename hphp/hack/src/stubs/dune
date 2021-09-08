@@ -45,6 +45,13 @@
     (pps lwt_ppx ppx_deriving.std)))
 
 (library
+  (name justknobs_stubs)
+  (wrapped false)
+  (modules justKnobs)
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std)))
+
+(library
   (name linting_stubs)
   (wrapped false)
   (modules

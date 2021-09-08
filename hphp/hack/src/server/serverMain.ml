@@ -1493,6 +1493,8 @@ let run_once options config local_config =
  * via ic.
  *)
 let daemon_main_exn ~informant_managed options monitor_pid in_fds =
+  Folly.ensure_folly_init ();
+
   Printexc.record_backtrace true;
   let (config, local_config) =
     ServerConfig.(load ~silent:false filename options)

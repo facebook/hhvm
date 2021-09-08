@@ -1,10 +1,4 @@
 File "constructor_error.php", line 14, characters 19-24:
 Can't use `new static()` for `X`; `__construct` arguments are not guaranteed to be consistent in child classes (Typing[4060])
-File "constructor_error.php", line 3, characters 7-7:
-This declaration is neither `final` nor uses the `<<__ConsistentConstruct>>` attribute
-File "constructor_error.php", line 14, characters 26-27:
-Invalid argument (Typing[4110])
-File "constructor_error.php", line 8, characters 39-45:
-Expected `this::T`
-File "constructor_error.php", line 14, characters 26-27:
-But got `string`
+  File "constructor_error.php", line 3, characters 7-7:
+  This declaration is neither `final` nor uses the `<<__ConsistentConstruct>>` attribute

@@ -160,6 +160,11 @@ struct RepoGlobalData {
 
   uint32_t EnableReadonlyPropertyEnforcement = 0;
 
+  /* Enable a method defined in a trait to be imported multiple times
+   * along trait use paths
+   */
+  bool DiamondTraitMethods = false;
+
   // Load the appropriate options into their matching
   // RuntimeOptions. If `loadConstantFuncs' is true, also deserialize
   // ConstantFunctions and store it in RuntimeOptions (this can only
@@ -203,6 +208,7 @@ struct RepoGlobalData {
       (ConstantFunctions)
       (BuildMayNoticeOnMethCallerHelperIsObject)
       (EnableReadonlyPropertyEnforcement)
+      (DiamondTraitMethods)
       ;
   }
 };

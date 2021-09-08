@@ -172,6 +172,14 @@ bool checkNumArgs(SrcKey callSK,
     }
   }
 
+  if (fca.enforceMutableReturn() && (callee->attrs() & AttrReadonlyReturn)) {
+    return refuse("caller requries mutable return but callee is readonly return");
+  }
+
+  if (fca.enforceReadonlyThis() && !(callee->attrs() & AttrReadonlyThis)) {
+    return refuse("caller expects no modifications to the instance but callee does modify");
+  }
+
   return true;
 }
 

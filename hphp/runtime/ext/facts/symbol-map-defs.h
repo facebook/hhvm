@@ -86,12 +86,14 @@ template <typename S>
 SymbolMap<S>::SymbolMap(
     folly::fs::path root,
     DBData dbData,
+    bool enforceOneDefinition,
     hphp_hash_set<std::string> indexedMethodAttrs,
     SQLite::OpenMode dbMode)
     : m_exec{std::make_shared<folly::CPUThreadPoolExecutor>(
           1, std::make_shared<folly::NamedThreadFactory>("Autoload DB update"))}
     , m_root{std::move(root)}
     , m_dbData{std::move(dbData)}
+    , m_enforceOneDefinition{enforceOneDefinition}
     , m_indexedMethodAttrs{std::move(indexedMethodAttrs)}
     , m_dbMode{dbMode} {
   assertx(m_root.is_absolute());
@@ -105,7 +107,7 @@ template <typename S>
 Optional<Symbol<S, SymKind::Type>>
 SymbolMap<S>::getTypeName(const S& typeName) {
   Symbol<S, SymKind::Type> type{typeName};
-  auto path = getOnlyPath(type);
+  auto path = getSymbolPath(type);
   if (path == nullptr) {
     return {};
   }
@@ -119,7 +121,7 @@ SymbolMap<S>::getTypeName(const S& typeName) {
 
 template <typename S>
 Path<S> SymbolMap<S>::getTypeFile(Symbol<S, SymKind::Type> type) {
-  auto path = getOnlyPath(type);
+  auto path = getSymbolPath(type);
   auto [kind, _] = getKindAndFlags(type, path);
   if (kind == TypeKind::TypeAlias) {
     return Path<S>{nullptr};
@@ -133,7 +135,7 @@ template <typename S> Path<S> SymbolMap<S>::getTypeFile(const S& type) {
 
 template <typename S>
 Path<S> SymbolMap<S>::getFunctionFile(Symbol<S, SymKind::Function> function) {
-  return getOnlyPath(function);
+  return getSymbolPath(function);
 }
 
 template <typename S> Path<S> SymbolMap<S>::getFunctionFile(const S& function) {
@@ -142,7 +144,7 @@ template <typename S> Path<S> SymbolMap<S>::getFunctionFile(const S& function) {
 
 template <typename S>
 Path<S> SymbolMap<S>::getConstantFile(Symbol<S, SymKind::Constant> constant) {
-  return getOnlyPath(constant);
+  return getSymbolPath(constant);
 }
 
 template <typename S> Path<S> SymbolMap<S>::getConstantFile(const S& constant) {
@@ -151,7 +153,7 @@ template <typename S> Path<S> SymbolMap<S>::getConstantFile(const S& constant) {
 
 template <typename S>
 Path<S> SymbolMap<S>::getTypeAliasFile(Symbol<S, SymKind::Type> typeAlias) {
-  auto path = getOnlyPath(typeAlias);
+  auto path = getSymbolPath(typeAlias);
   auto [kind, _] = getKindAndFlags(typeAlias, path);
   if (kind != TypeKind::TypeAlias) {
     return Path<S>{nullptr};
@@ -304,7 +306,7 @@ SymbolMap<S>::getAllTypeAliases() {
 template <typename S>
 std::vector<Symbol<S, SymKind::Type>> SymbolMap<S>::getBaseTypes(
     Symbol<S, SymKind::Type> derivedType, DeriveKind kind) {
-  auto derivedTypePath = getOnlyPath(derivedType);
+  auto derivedTypePath = getSymbolPath(derivedType);
   if (derivedTypePath == nullptr) {
     return {};
   }
@@ -359,7 +361,7 @@ template <typename S>
 std::vector<Symbol<S, SymKind::Type>> SymbolMap<S>::getDerivedTypes(
     Symbol<S, SymKind::Type> baseType, DeriveKind kind) {
   // Return empty results if the given type doesn't have a single definition
-  if (getOnlyPath(baseType) == nullptr) {
+  if (getSymbolPath(baseType) == nullptr) {
     return {};
   }
 
@@ -401,14 +403,16 @@ std::vector<Symbol<S, SymKind::Type>> SymbolMap<S>::getDerivedTypes(
             baseType, kind, std::move(edgesFromDB)));
       });
   // Remove types that are duplicate-defined or missing
-  subtypes.erase(
-      std::remove_if(
-          subtypes.begin(),
-          subtypes.end(),
-          [this](const Symbol<S, SymKind::Type>& subtype) {
-            return getOnlyPath(subtype) == nullptr;
-          }),
-      subtypes.end());
+  if (m_enforceOneDefinition) {
+    subtypes.erase(
+        std::remove_if(
+            subtypes.begin(),
+            subtypes.end(),
+            [this](const Symbol<S, SymKind::Type>& subtype) {
+              return getSymbolPath(subtype) == nullptr;
+            }),
+        subtypes.end());
+  }
   return subtypes;
 }
 
@@ -449,7 +453,7 @@ SymbolMap<S>::getTransitiveDerivedTypes(
 template <typename S>
 std::vector<Symbol<S, SymKind::Type>>
 SymbolMap<S>::getAttributesOfType(Symbol<S, SymKind::Type> type) {
-  auto path = getOnlyPath(type);
+  auto path = getSymbolPath(type);
   if (path == nullptr) {
     return {};
   }
@@ -496,8 +500,56 @@ SymbolMap<S>::getAttributesOfType(const S& type) {
 
 template <typename S>
 std::vector<Symbol<S, SymKind::Type>>
-SymbolMap<S>::getTypesAndTypeAliasesWithAttribute(
-    Symbol<S, SymKind::Type> attr) {
+SymbolMap<S>::getAttributesOfTypeAlias(Symbol<S, SymKind::Type> typeAlias) {
+  auto path = getSymbolPath(typeAlias);
+  if (path == nullptr) {
+    return {};
+  }
+  using AttrVec = std::vector<Symbol<S, SymKind::Type>>;
+  auto makeVec = [&](auto const& attrs) -> AttrVec {
+    AttrVec attrVec;
+    attrVec.reserve(attrs.size());
+    for (auto const& attr : attrs) {
+      attrVec.emplace_back(attr);
+    }
+    return attrVec;
+  };
+  return readOrUpdate<AttrVec>(
+      [&](const Data& data) -> Optional<AttrVec> {
+        auto const* attrs =
+            data.m_typeAliasAttrs.getAttributes({typeAlias, path});
+        if (!attrs) {
+          return std::nullopt;
+        }
+        return makeVec(*attrs);
+      },
+      [&](AutoloadDB& db,
+          SQLiteTxn& txn) -> std::vector<Symbol<S, SymKind::Type>> {
+        auto const attrStrs =
+            db.getAttributesOfType(txn, typeAlias.slice(), path.native());
+        std::vector<Symbol<S, SymKind::Type>> attrs;
+        attrs.reserve(attrStrs.size());
+        for (auto const& attrStr : attrStrs) {
+          attrs.emplace_back(attrStr);
+        }
+        return attrs;
+      },
+      [&](Data& data,
+          std::vector<Symbol<S, SymKind::Type>> attrsFromDB) -> AttrVec {
+        return makeVec(data.m_typeAliasAttrs.getAttributes(
+            {typeAlias, path}, std::move(attrsFromDB)));
+      });
+}
+
+template <typename S>
+std::vector<Symbol<S, SymKind::Type>>
+SymbolMap<S>::getAttributesOfTypeAlias(const S& typeAlias) {
+  return getAttributesOfTypeAlias(Symbol<S, SymKind::Type>{typeAlias});
+}
+
+template <typename S>
+std::vector<Symbol<S, SymKind::Type>>
+SymbolMap<S>::getTypesWithAttribute(Symbol<S, SymKind::Type> attr) {
   using TypeVec = std::vector<Symbol<S, SymKind::Type>>;
   auto makeVec = [&](auto const& typeDefs) -> TypeVec {
     TypeVec typeVec;
@@ -529,27 +581,85 @@ SymbolMap<S>::getTypesAndTypeAliasesWithAttribute(
             attr, std::move(typesFromDB)));
       });
   // Remove types that are duplicate-defined or missing
-  types.erase(
-      std::remove_if(
-          types.begin(),
-          types.end(),
-          [this](const Symbol<S, SymKind::Type>& type) {
-            return getOnlyPath(type) == nullptr;
-          }),
-      types.end());
+  if (m_enforceOneDefinition) {
+    types.erase(
+        std::remove_if(
+            types.begin(),
+            types.end(),
+            [this](const Symbol<S, SymKind::Type>& type) {
+              return getSymbolPath(type) == nullptr;
+            }),
+        types.end());
+  }
   return types;
 }
 
 template <typename S>
 std::vector<Symbol<S, SymKind::Type>>
-SymbolMap<S>::getTypesAndTypeAliasesWithAttribute(const S& attr) {
-  return getTypesAndTypeAliasesWithAttribute(Symbol<S, SymKind::Type>{attr});
+SymbolMap<S>::getTypesWithAttribute(const S& attr) {
+  return getTypesWithAttribute(Symbol<S, SymKind::Type>{attr});
+}
+
+template <typename S>
+std::vector<Symbol<S, SymKind::Type>>
+SymbolMap<S>::getTypeAliasesWithAttribute(Symbol<S, SymKind::Type> attr) {
+  using TypeAliasVec = std::vector<Symbol<S, SymKind::Type>>;
+  auto makeVec = [&](auto const& typeAliasDefs) -> TypeAliasVec {
+    TypeAliasVec typeAliasVec;
+    typeAliasVec.reserve(typeAliasDefs.size());
+    for (auto const& [typeAlias, typeAliasPath] : typeAliasDefs) {
+      typeAliasVec.emplace_back(typeAlias);
+    }
+    return typeAliasVec;
+  };
+  auto typeAliases = readOrUpdate<TypeAliasVec>(
+      [&](const Data& data) -> Optional<TypeAliasVec> {
+        auto const* attrs = data.m_typeAliasAttrs.getKeysWithAttribute(attr);
+        if (!attrs) {
+          return std::nullopt;
+        }
+        return makeVec(*attrs);
+      },
+      [&](AutoloadDB& db, SQLiteTxn& txn) -> std::vector<TypeDecl<S>> {
+        auto const typeAliasDefStrs =
+            db.getTypeAliasesWithAttribute(txn, attr.slice());
+        std::vector<TypeDecl<S>> typeAliasDefs;
+        typeAliasDefs.reserve(typeAliasDefStrs.size());
+        for (auto const& [type, path] : typeAliasDefStrs) {
+          typeAliasDefs.push_back(
+              {Symbol<S, SymKind::Type>{type}, Path<S>{path}});
+        }
+        return typeAliasDefs;
+      },
+      [&](Data& data,
+          std::vector<TypeDecl<S>> typeAliasesFromDB) -> TypeAliasVec {
+        return makeVec(data.m_typeAliasAttrs.getKeysWithAttribute(
+            attr, std::move(typeAliasesFromDB)));
+      });
+  // Remove type aliases that are duplicate-defined or missing
+  if (m_enforceOneDefinition) {
+    typeAliases.erase(
+        std::remove_if(
+            typeAliases.begin(),
+            typeAliases.end(),
+            [this](const Symbol<S, SymKind::Type>& typeAlias) {
+              return getSymbolPath(typeAlias) == nullptr;
+            }),
+        typeAliases.end());
+  }
+  return typeAliases;
+}
+
+template <typename S>
+std::vector<Symbol<S, SymKind::Type>>
+SymbolMap<S>::getTypeAliasesWithAttribute(const S& attr) {
+  return getTypeAliasesWithAttribute(Symbol<S, SymKind::Type>{attr});
 }
 
 template <typename S>
 std::vector<Symbol<S, SymKind::Type>> SymbolMap<S>::getAttributesOfMethod(
     Symbol<S, SymKind::Type> type, Symbol<S, SymKind::Function> method) {
-  auto path = getOnlyPath(type);
+  auto path = getSymbolPath(type);
   if (path == nullptr) {
     return {};
   }
@@ -639,14 +749,17 @@ SymbolMap<S>::getMethodsWithAttribute(Symbol<S, SymKind::Type> attr) {
             attr, std::move(methodsFromDB)));
       });
   // Remove types that are duplicate-defined or missing
-  methods.erase(
-      std::remove_if(
-          methods.begin(),
-          methods.end(),
-          [this](const MethodDecl<S>& method) {
-            return getOnlyPath(method.m_type.m_name) != method.m_type.m_path;
-          }),
-      methods.end());
+  if (m_enforceOneDefinition) {
+    methods.erase(
+        std::remove_if(
+            methods.begin(),
+            methods.end(),
+            [this](const MethodDecl<S>& method) {
+              return getSymbolPath(method.m_type.m_name) !=
+                     method.m_type.m_path;
+            }),
+        methods.end());
+  }
   return methods;
 }
 
@@ -740,7 +853,7 @@ std::vector<Path<S>> SymbolMap<S>::getFilesWithAttribute(const S& attr) {
 template <typename S>
 std::vector<folly::dynamic> SymbolMap<S>::getTypeAttributeArgs(
     Symbol<S, SymKind::Type> type, Symbol<S, SymKind::Type> attr) {
-  auto path = getOnlyPath(type);
+  auto path = getSymbolPath(type);
   if (path == nullptr) {
     return {};
   }
@@ -772,11 +885,45 @@ SymbolMap<S>::getTypeAttributeArgs(const S& type, const S& attribute) {
 }
 
 template <typename S>
+std::vector<folly::dynamic> SymbolMap<S>::getTypeAliasAttributeArgs(
+    Symbol<S, SymKind::Type> typeAlias, Symbol<S, SymKind::Type> attr) {
+  auto path = getSymbolPath(typeAlias);
+  if (path == nullptr) {
+    return {};
+  }
+  using ArgVec = std::vector<folly::dynamic>;
+  return readOrUpdate<ArgVec>(
+      [&](const Data& data) -> Optional<ArgVec> {
+        auto const* args =
+            data.m_typeAliasAttrs.getAttributeArgs({typeAlias, path}, attr);
+        if (!args) {
+          return std::nullopt;
+        }
+        return *args;
+      },
+      [&](AutoloadDB& db, SQLiteTxn& txn) -> ArgVec {
+        return db.getTypeAliasAttributeArgs(
+            txn, typeAlias.slice(), path.slice(), attr.slice());
+      },
+      [&](Data& data, std::vector<folly::dynamic> argsFromDB) -> ArgVec {
+        return data.m_typeAliasAttrs.getAttributeArgs(
+            {typeAlias, path}, attr, std::move(argsFromDB));
+      });
+}
+
+template <typename S>
+std::vector<folly::dynamic> SymbolMap<S>::getTypeAliasAttributeArgs(
+    const S& typeAlias, const S& attribute) {
+  return getTypeAliasAttributeArgs(
+      Symbol<S, SymKind::Type>{typeAlias}, Symbol<S, SymKind::Type>{attribute});
+}
+
+template <typename S>
 std::vector<folly::dynamic> SymbolMap<S>::getMethodAttributeArgs(
     Symbol<S, SymKind::Type> type,
     Symbol<S, SymKind::Function> method,
     Symbol<S, SymKind::Type> attr) {
-  auto path = getOnlyPath(type);
+  auto path = getSymbolPath(type);
   if (path == nullptr) {
     return {};
   }
@@ -870,7 +1017,7 @@ template <typename S> bool SymbolMap<S>::isTypeFinal(const S& type) {
 template <typename S>
 std::pair<TypeKind, TypeFlagMask>
 SymbolMap<S>::getKindAndFlags(Symbol<S, SymKind::Type> type) {
-  return getKindAndFlags(type, getOnlyPath(type));
+  return getKindAndFlags(type, getSymbolPath(type));
 }
 
 template <typename S>
@@ -1319,12 +1466,13 @@ Ret SymbolMap<S>::readOrUpdate(
 
 template <typename S>
 template <SymKind k>
-Path<S> SymbolMap<S>::getOnlyPath(Symbol<S, k> symbol) {
-  auto onlyPath = [](auto const& paths) -> Path<S> {
-    if (LIKELY(paths.size() == 1)) {
-      return *paths.begin();
-    } else {
+Path<S> SymbolMap<S>::getSymbolPath(Symbol<S, k> symbol) {
+  auto symbolPath = [this](auto const& paths) -> Path<S> {
+    if (UNLIKELY(paths.empty()) ||
+        UNLIKELY(m_enforceOneDefinition && paths.size() > 1)) {
       return Path<S>{nullptr};
+    } else {
+      return *paths.begin();
     }
   };
 
@@ -1332,7 +1480,7 @@ Path<S> SymbolMap<S>::getOnlyPath(Symbol<S, k> symbol) {
       [&](const Data& data) -> Optional<Path<S>> {
         auto paths = getPathSymMap<S, k>(data).getSymbolPaths(symbol);
         if (paths) {
-          return {onlyPath(*paths)};
+          return {symbolPath(*paths)};
         } else {
           return std::nullopt;
         }
@@ -1359,7 +1507,7 @@ Path<S> SymbolMap<S>::getOnlyPath(Symbol<S, k> symbol) {
         return paths;
       },
       [&](Data& data, std::vector<Path<S>> pathsFromDB) -> Path<S> {
-        return onlyPath(getPathSymMap<S, k>(data).getSymbolPaths(
+        return symbolPath(getPathSymMap<S, k>(data).getSymbolPaths(
             symbol, std::move(pathsFromDB)));
       });
 }
@@ -1425,7 +1573,12 @@ void SymbolMap<S>::Data::updatePath(
 
     types.insert(typeName);
     m_typeKind.setKindAndFlags(typeName, path, type.m_kind, type.m_flags);
-    m_typeAttrs.setAttributes({typeName, path}, std::move(type.m_attributes));
+    if (type.m_kind == TypeKind::TypeAlias) {
+      m_typeAliasAttrs.setAttributes(
+          {typeName, path}, std::move(type.m_attributes));
+    } else {
+      m_typeAttrs.setAttributes({typeName, path}, std::move(type.m_attributes));
+    }
     m_inheritanceInfo.setBaseTypes(
         typeName, path, DeriveKind::Extends, std::move(type.m_baseTypes));
     m_inheritanceInfo.setBaseTypes(

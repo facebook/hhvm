@@ -76,7 +76,7 @@ std::vector<NameTy> sorted_prop_state(const PropState& ps) {
 void dump_class_state(std::ostream& out,
                       const Index& index,
                       const php::Class* c) {
-  auto const clsName = normalized_class_name(*c);
+  auto const clsName = c->name->toCppString();
 
   if (is_closure(*c)) {
     auto const invoke = find_method(c, s_invoke.get());
@@ -119,7 +119,28 @@ void dump_class_state(std::ostream& out,
     if (constant.val) {
       auto const ty = from_cell(*constant.val);
       out << clsName << "::" << constant.name->data() << " :: "
-          << (ty.subtypeOf(BUninit) ? "<dynamic>" : show(ty)) << '\n';
+          << (ty.subtypeOf(BUninit) ? "<dynamic>" : show(ty));
+      if (constant.kind == ConstModifiers::Kind::Type) {
+        if (constant.resolvedTypeStructure) {
+          out << " (" << show(dict_val(constant.resolvedTypeStructure)) << ")";
+          switch ((php::Const::Invariance)constant.invariance) {
+            case php::Const::Invariance::None:
+              break;
+            case php::Const::Invariance::Present:
+              out << " <present>";
+              break;
+            case php::Const::Invariance::ClassnamePresent:
+              out << " <classname>";
+              break;
+            case php::Const::Invariance::Same:
+              out << " <same>";
+              break;
+          }
+        } else {
+          out << " <unresolved>";
+        }
+      }
+      out << '\n';
     }
   }
 }
@@ -130,9 +151,9 @@ void dump_func_state(std::ostream& out,
   auto const name = f->cls
     ? folly::sformat(
         "{}::{}()",
-        normalized_class_name(*f->cls), f->name->data()
+        f->cls->name, f->name
       )
-    : folly::sformat("{}()", f->name->toCppString());
+    : folly::sformat("{}()", f->name);
 
   auto const retTy = index.lookup_return_type_raw(f).first;
   out << name << " :: " << show(retTy) <<
@@ -171,7 +192,7 @@ std::string debug_dump_to() {
 void dump_representation(const std::string& dir, const php::Unit* unit) {
   auto const rep_dir = fs::path{dir} / "representation";
   with_file(rep_dir, unit, [&] (std::ostream& out) {
-      out << show(*unit, true);
+      out << show(*unit);
     }
   );
 }

@@ -29,7 +29,6 @@
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/named-entity-pair-table.h"
 #include "hphp/runtime/vm/preclass.h"
-#include "hphp/runtime/vm/record.h"
 #include "hphp/runtime/vm/source-location.h"
 #include "hphp/runtime/vm/type-alias.h"
 
@@ -426,13 +425,6 @@ public:
   folly::Range<const PreTypeAlias*> typeAliases() const;
 
   /////////////////////////////////////////////////////////////////////////////
-  // PreRecords.
-
-  PreRecordDesc* lookupPreRecordId(Id id) const;
-  folly::Range<PreRecordDescPtr*> prerecords();
-  folly::Range<const PreRecordDescPtr*> prerecords() const;
-
-  /////////////////////////////////////////////////////////////////////////////
   // File attributes.
 
   const UserAttributeMap& fileAttributes() const;
@@ -545,7 +537,6 @@ private:
   PreClassPtrVec m_preClasses;
   TypeAliasVec m_typeAliases;
   ConstantVec m_constants;
-  CompactVector<PreRecordDescPtr> m_preRecords;
 
   Id m_entryPointId{kInvalidId};
 

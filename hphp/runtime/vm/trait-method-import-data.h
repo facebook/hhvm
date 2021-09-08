@@ -41,6 +41,7 @@ namespace HPHP {
  * TraitMethod {
  *    typename class_type;
  *    typename method_type;
+ *    typename origin_type;
  *
  *    class_type trait;
  *    method_type method;
@@ -54,6 +55,10 @@ namespace HPHP {
  *    // Return the name for a trait class/method.
  *    String clsName(TraitMethod::class_type traitCls);
  *    String methName(TraitMethod::method_type meth);
+ *
+ *    // Return the reference of the trait where the method was
+ *    // originally defined in the bytecode.
+ *    origin_type originalClass(TraitMethod::method_type meth);
  *
  *    // Is-a methods.
  *    bool isTrait(TraitMethod::class_type traitCls);
@@ -105,6 +110,9 @@ struct TraitMethodImportData {
     std::list<TraitMethod> methods;
     // In-order aliases of the name.
     std::vector<String> aliases;
+    // For error reporting, list of names of traits that declare methods with the name
+    // Includes duplicates that might have been removed from methods.
+    std::vector<String> methodOriginsWithDuplicates;
   };
 
   /*
@@ -176,7 +184,7 @@ struct TraitMethodImportData {
 
 private:
   void removeSpareTraitAbstractMethods();
-
+  void removeDiamondDuplicates();
 
   /////////////////////////////////////////////////////////////////////////////
   // Data members.
@@ -194,4 +202,3 @@ private:
 }
 
 #include "hphp/runtime/vm/trait-method-import-data-inl.h"
-

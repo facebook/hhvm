@@ -115,7 +115,16 @@ void c_Closure::init(int numArgs, ActRec* ar, TypedValue* sp) {
    */
   auto const hasCoeffectsProp = cls->hasClosureCoeffectsProp();
   DEBUG_ONLY auto const numProps = cls->numDeclProperties();
-  assertx(numProps == numArgs + (hasCoeffectsProp ? 1 : 0));
+  //assertx(numProps == numArgs + (hasCoeffectsProp ? 1 : 0));
+  always_assert_flog(
+    numProps == numArgs + (hasCoeffectsProp ? 1 : 0),
+    "{} {} {} {} {}",
+    cls->name(),
+    cls->preClass()->unit()->origFilepath(),
+    numProps,
+    numArgs,
+    hasCoeffectsProp
+  );
 
   if (debug) {
     // Closure properties shouldn't have type-hints nor should they be LateInit.

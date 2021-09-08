@@ -33,6 +33,7 @@
 #include "hphp/hhbbc/index.h"
 #include "hphp/hhbbc/options.h"
 #include "hphp/hhbbc/representation.h"
+#include "hphp/hhbbc/type-structure.h"
 #include "hphp/hhbbc/unit-util.h"
 
 #include "hphp/runtime/base/repo-auth-type-array.h"
@@ -44,7 +45,6 @@
 #include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
-#include "hphp/runtime/vm/record-emitter.h"
 #include "hphp/runtime/vm/type-alias-emitter.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 
@@ -1001,7 +1001,6 @@ void merge_repo_auth_type(UnitEmitter& ue, RepoAuthType rat) {
   case T::OptFunc:
   case T::OptCls:
   case T::OptClsMeth:
-  case T::OptRecord:
   case T::OptLazyCls:
   case T::OptUncArrKey:
   case T::OptArrKey:
@@ -1032,7 +1031,6 @@ void merge_repo_auth_type(UnitEmitter& ue, RepoAuthType rat) {
   case T::Func:
   case T::Cls:
   case T::ClsMeth:
-  case T::Record:
   case T::LazyCls:
   case T::Num:
   case T::OptNum:
@@ -1077,13 +1075,6 @@ void merge_repo_auth_type(UnitEmitter& ue, RepoAuthType rat) {
   case T::SubCls:
   case T::ExactCls:
     ue.mergeLitstr(rat.clsName());
-    return;
-
-  case T::OptSubRecord:
-  case T::OptExactRecord:
-  case T::SubRecord:
-  case T::ExactRecord:
-    ue.mergeLitstr(rat.recordName());
     return;
   }
 }
@@ -1200,33 +1191,6 @@ void emit_func(EmitUnitState& state, UnitEmitter& ue,
   emit_finish_func(state, fe, func, info);
 }
 
-void emit_record(UnitEmitter& ue, const php::Record& rec) {
-  assertx(rec.attrs & AttrUnique);
-  assertx(rec.attrs & AttrPersistent);
-  auto const re = ue.newRecordEmitter(rec.name->toCppString());
-  re->init(
-      std::get<0>(rec.srcInfo.loc),
-      std::get<1>(rec.srcInfo.loc),
-      rec.attrs,
-      rec.parentName ? rec.parentName : staticEmptyString(),
-      rec.srcInfo.docComment
-  );
-  re->setUserAttributes(rec.userAttributes);
-  for (auto&& f : rec.fields) {
-    re->addField(
-        f.name,
-        f.attrs,
-        f.userType,
-        f.typeConstraint,
-        RecordEmitter::UpperBoundVec{},
-        f.docComment,
-        &f.val,
-        RepoAuthType{},
-        f.userAttributes
-    );
-  }
-}
-
 void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
                 Offset offset, php::Class& cls) {
   FTRACE(2, "    class: {}\n", cls.name->data());
@@ -1258,9 +1222,12 @@ void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
 
   for (auto& cconst : cls.constants) {
     if (nativeConsts && nativeConsts->count(cconst.name)) {
-      break;
+      continue;
     }
     if (cconst.kind == ConstModifiers::Kind::Context) {
+      assertx(cconst.cls == &cls);
+      assertx(!cconst.resolvedTypeStructure);
+      assertx(cconst.invariance == php::Const::Invariance::None);
       pce->addContextConstant(
         cconst.name,
         std::vector<LowStringPtr>(cconst.coeffects),
@@ -1268,23 +1235,24 @@ void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
         cconst.isFromTrait
       );
     } else if (!cconst.val.has_value()) {
+      assertx(cconst.cls == &cls);
+      assertx(!cconst.resolvedTypeStructure);
+      assertx(cconst.invariance == php::Const::Invariance::None);
       pce->addAbstractConstant(
         cconst.name,
-        cconst.typeConstraint,
         cconst.kind,
         cconst.isFromTrait
       );
     } else {
       needs86cinit |= cconst.val->m_type == KindOfUninit;
-
       pce->addConstant(
         cconst.name,
-        cconst.typeConstraint,
+        (cconst.cls == &cls) ? nullptr : cconst.cls->name,
         &cconst.val.value(),
-        cconst.phpCode,
+        ArrNR{cconst.resolvedTypeStructure},
         cconst.kind,
+        cconst.invariance,
         cconst.isFromTrait,
-        Array{},
         cconst.isAbstract
       );
     }
@@ -1382,10 +1350,11 @@ void emit_typealias(UnitEmitter& ue, const php::TypeAlias& alias) {
       alias.attrs,
       alias.value,
       alias.type,
-      alias.nullable
+      alias.nullable,
+      alias.typeStructure,
+      alias.resolvedTypeStructure
   );
   te->setUserAttributes(alias.userAttrs);
-  te->setTypeStructure(alias.typeStructure);
 }
 
 void emit_constant(UnitEmitter& ue, const php::Constant& constant) {
@@ -1486,10 +1455,6 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index& index, php::Unit& unit) {
 
   for (size_t id = 0; id < unit.constants.size(); ++id) {
     emit_constant(*ue, *unit.constants[id]);
-  }
-
-  for (size_t id = 0; id < unit.records.size(); ++id) {
-    emit_record(*ue, *unit.records[id]);
   }
 
   ue->finish();

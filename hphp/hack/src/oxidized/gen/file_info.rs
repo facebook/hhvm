@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ed2bf8baefcbb774ffd98420bf34d01d>>
+// @generated SignedSource<<b3b4e01946d29a2607f5094d88fec21b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -102,7 +102,9 @@ pub enum Pos {
     File(NameType, ocamlrep::rc::RcOc<relative_path::RelativePath>),
 }
 
-pub type Id = (Pos, String);
+/// An id contains a pos, name and a optional decl hash. The decl hash is None
+/// only in the case when we didn't compute it for performance reasons
+pub type Id = (Pos, String, Option<isize>);
 
 pub type HashType = Option<isize>;
 

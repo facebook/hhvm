@@ -84,6 +84,7 @@ TRACE_SET_MOD(hhir);
 #define DPtrIter       HasDest
 #define DPtrIterVal    HasDest
 #define DEscalateToVanilla HasDest
+#define DTypeCnsClsName HasDest
 
 namespace {
 template<Opcode op, uint64_t flags>
@@ -358,15 +359,15 @@ bool opcodeMayRaise(Opcode opc) {
   case LdClsCtor:
   case LdClsPropAddrOrNull:
   case LdClsPropAddrOrRaise:
-  case LdClsTypeCns:
-  case LdClsTypeCnsClsName:
   case LdFunc:
   case LdFuncCached:
   case LdGblAddr:
   case LdGblAddrDef:
-  case LdRecDescCached:
   case LdObjMethodD:
   case LdObjMethodS:
+  case LdTypeCns:
+  case LdTypeCnsClsName:
+  case LdTypeCnsNoThrow:
   case LookupClsCns:
   case LookupClsCtxCns:
   case LookupClsMethod:
@@ -386,7 +387,6 @@ bool opcodeMayRaise(Opcode opc) {
   case NeqArrLike:
   case NeqObj:
   case NewKeysetArray:
-  case NewRecord:
   case NSameArrLike:
   case OODeclExists:
   case OrdStrIdx:
@@ -406,6 +406,7 @@ bool opcodeMayRaise(Opcode opc) {
   case RaiseErrorOnInvalidIsAsExpressionType:
   case RaiseForbiddenDynCall:
   case RaiseForbiddenDynConstruct:
+  case RaiseReadonlyPropViolation:
   case RaiseNotice:
   case RaiseStrToClassNotice:
   case RaiseTooManyArg:
@@ -473,9 +474,6 @@ bool opcodeMayRaise(Opcode opc) {
   case VerifyRetCls:
   case VerifyRetFail:
   case VerifyRetFailHard:
-  case VerifyParamRecDesc:
-  case VerifyRetRecDesc:
-  case VerifyPropRecDesc:
     return true;
 
   case AbsDbl:
@@ -628,7 +626,6 @@ bool opcodeMayRaise(Opcode opc) {
   case EqFunc:
   case EqInt:
   case EqPtrIter:
-  case EqRecDesc:
   case EqRes:
   case EqStr:
   case EqStrPtr:
@@ -671,7 +668,6 @@ bool opcodeMayRaise(Opcode opc) {
   case InstanceOfBitmask:
   case InstanceOfIface:
   case InstanceOfIfaceVtable:
-  case InstanceOfRecDesc:
   case InterfaceSupportsArrLike:
   case InterfaceSupportsDbl:
   case InterfaceSupportsInt:
@@ -762,8 +758,9 @@ bool opcodeMayRaise(Opcode opc) {
   case LdPtrIterKey:
   case LdPtrIterVal:
   case LdRDSAddr:
-  case LdRecDesc:
-  case LdRecDescCachedSafe:
+  case LdResolvedTypeCns:
+  case LdResolvedTypeCnsClsName:
+  case LdResolvedTypeCnsNoCheck:
   case LdRetVal:
   case LdSmashable:
   case LdSmashableFunc:
@@ -772,10 +769,8 @@ bool opcodeMayRaise(Opcode opc) {
   case LdStkAddr:
   case LdStrLen:
   case LdSubClsCns:
-  case LdSubClsCnsClsName:
   case LdTVAux:
   case LdTVFromRDS:
-  case LdTypeCns:
   case LdUnitPerRequestFilepath:
   case LdUnwinderValue:
   case LdMonotypeDictTombstones:

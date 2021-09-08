@@ -428,6 +428,7 @@ type t = {
   cpu_priority: int;
   can_skip_deptable: bool;
   shm_dirs: string list;
+  shm_use_sharded_hashtbl: bool;
   max_workers: int option;
   (* max_bucket_size is the default bucket size for ALL users of MultiWorker unless they provide a specific override max_size *)
   max_bucket_size: int;
@@ -435,7 +436,6 @@ type t = {
   small_buckets_for_dirty_names: bool;
   (* See HhMonitorInformant. *)
   use_dummy_informant: bool;
-  monitor_kill_again_fix: bool;
   informant_min_distance_restart: int;
   use_full_fidelity_parser: bool;
   interrupt_on_watchman: bool;
@@ -531,6 +531,8 @@ type t = {
   tico_invalidate_smart: bool;
   (* Enable use of the direct decl parser for parsing type signatures. *)
   use_direct_decl_parser: bool;
+  (* Direct decl parsing in type check loop fix *)
+  use_direct_decl_in_tc_loop: bool;
   (* If --profile-log, we'll record telemetry on typechecks that took longer than the threshold (in seconds). In case of profile_type_check_twice we judge by the second type check. *)
   profile_type_check_duration_threshold: float;
   (* If --profile-log, we'll record telemetry on any file which allocated more than this many mb on the ocaml heap. In case of profile_type_check_twice we judge by the second type check. *)
@@ -581,11 +583,11 @@ let default =
     cpu_priority = 10;
     can_skip_deptable = true;
     shm_dirs = [GlobalConfig.shm_dir; GlobalConfig.tmp_dir];
+    shm_use_sharded_hashtbl = false;
     max_workers = None;
     max_bucket_size = Bucket.max_size ();
     small_buckets_for_dirty_names = false;
     use_dummy_informant = true;
-    monitor_kill_again_fix = false;
     informant_min_distance_restart = 100;
     use_full_fidelity_parser = true;
     interrupt_on_watchman = false;
@@ -637,6 +639,7 @@ let default =
     tico_invalidate_files = false;
     tico_invalidate_smart = false;
     use_direct_decl_parser = false;
+    use_direct_decl_in_tc_loop = false;
     profile_type_check_duration_threshold = 0.05;
     (* seconds *)
     profile_type_check_memory_threshold_mb = 100;
@@ -840,13 +843,6 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
-  let monitor_kill_again_fix =
-    bool_if_min_version
-      "monitor_kill_again_fix"
-      ~default:default.monitor_kill_again_fix
-      ~current_version
-      config
-  in
   let informant_min_distance_restart =
     int_
       "informant_min_distance_restart"
@@ -874,6 +870,13 @@ let load_ fn ~silent ~current_version overrides =
   let shm_dirs =
     string_list "shm_dirs" ~default:default.shm_dirs config
     |> List.map ~f:(fun dir -> Path.(to_string @@ make dir))
+  in
+  let shm_use_sharded_hashtbl =
+    bool_if_min_version
+      "shm_use_sharded_hashtbl"
+      ~default:default.shm_use_sharded_hashtbl
+      ~current_version
+      config
   in
   let max_workers = int_opt "max_workers" config in
   let max_bucket_size =
@@ -1145,6 +1148,13 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
+  let use_direct_decl_in_tc_loop =
+    bool_if_min_version
+      "use_direct_decl_in_tc_loop"
+      ~default:default.use_direct_decl_in_tc_loop
+      ~current_version
+      config
+  in
   let profile_type_check_duration_threshold =
     float_
       "profile_type_check_duration_threshold"
@@ -1233,11 +1243,11 @@ let load_ fn ~silent ~current_version overrides =
     cpu_priority;
     can_skip_deptable;
     shm_dirs;
+    shm_use_sharded_hashtbl;
     max_workers;
     max_bucket_size;
     small_buckets_for_dirty_names;
     use_dummy_informant;
-    monitor_kill_again_fix;
     informant_min_distance_restart;
     use_full_fidelity_parser;
     interrupt_on_watchman;
@@ -1287,6 +1297,7 @@ let load_ fn ~silent ~current_version overrides =
     tico_invalidate_files;
     tico_invalidate_smart;
     use_direct_decl_parser;
+    use_direct_decl_in_tc_loop;
     profile_type_check_duration_threshold;
     profile_type_check_memory_threshold_mb;
     profile_type_check_twice;
@@ -1315,5 +1326,5 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       symbolindex_search_provider = options.symbolindex_search_provider;
       require_saved_state = options.require_saved_state;
       stream_errors = options.stream_errors;
-      monitor_kill_again_fix = options.monitor_kill_again_fix;
+      use_direct_decl_in_tc_loop = options.use_direct_decl_in_tc_loop;
     }

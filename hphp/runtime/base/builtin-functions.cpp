@@ -86,10 +86,6 @@ const StaticString s_cmpWithKeyset(
   "Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare "
   "keysets"
 );
-const StaticString s_cmpWithRecord(
-  "Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare "
-  "records"
-);
 const StaticString s_cmpWithClsMeth(
   "Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare "
   "a clsmeth"
@@ -105,9 +101,6 @@ const StaticString s_cmpWithRFunc(
 const StaticString s_cmpWithOpaqueResource(
   "Cannot use relational comparison operators (<, <=, >, >=, <=>) with "
   "opaque values"
-);
-const StaticString s_cmpWithNonRecord(
-  "Cannot compare records with non-records"
 );
 const StaticString s_cmpWithNonArr(
   "Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare "
@@ -802,20 +795,12 @@ void throw_dict_compare_exception() {
   SystemLib::throwInvalidOperationExceptionObject(s_cmpWithDict);
 }
 
-void throw_record_compare_exception() {
-  SystemLib::throwInvalidOperationExceptionObject(s_cmpWithRecord);
-}
-
 void throw_rfunc_compare_exception() {
   SystemLib::throwInvalidOperationExceptionObject(s_cmpWithRFunc);
 }
 
 void throw_opaque_resource_compare_exception() {
   SystemLib::throwInvalidOperationExceptionObject(s_cmpWithOpaqueResource);
-}
-
-void throw_rec_non_rec_compare_exception() {
-  SystemLib::throwInvalidOperationExceptionObject(s_cmpWithNonRecord);
 }
 
 void throw_keyset_compare_exception() {
@@ -884,53 +869,52 @@ void throw_cannot_modify_static_const_prop(const char* className,
                                            const char* propName)
 {
   auto msg = folly::sformat(
-   "Cannot modify static const property {} of class {}.",
-   propName, className
-  );
-  SystemLib::throwInvalidOperationExceptionObject(msg);
-}
-
-void throw_must_be_readonly(const char* className, const char* propName)
-{
-  auto msg = folly::sformat(
-   "Cannot store readonly value in a non-readonly property {} of class {}.",
-   propName, className
-  );
-  SystemLib::throwInvalidOperationExceptionObject(msg);
-}
-
-void throw_must_be_mutable(const char* className, const char* propName)
-{
-  auto msg = folly::sformat(
-   "Property {} of class {} must be mutable.",
-   propName, className
-  );
-  SystemLib::throwInvalidOperationExceptionObject(msg);
-}
-
-void throw_must_be_enclosed_in_readonly(const char* className, const char* propName)
-{
-  auto msg = folly::sformat(
-   "Property {} of class {} is readonly, but isn't enclosed in a "
-   "readonly expression", propName, className
+    "Cannot modify static const property {} of class {}.",
+    propName, className
   );
   SystemLib::throwInvalidOperationExceptionObject(msg);
 }
 
 void throw_local_must_be_value_type(const char* locName)
 {
-  auto msg = folly::sformat("Local {} must be a value type.", locName);
-  SystemLib::throwInvalidOperationExceptionObject(msg);
+  if (RO::EvalEnableReadonlyPropertyEnforcement == 0) return;
+  auto const msg = folly::sformat("Local {} must be a value type.", locName);
+  if (RO::EvalEnableReadonlyPropertyEnforcement == 1) {
+    raise_warning(msg);
+  } else if (RO::EvalEnableReadonlyPropertyEnforcement > 1) {
+    SystemLib::throwInvalidOperationExceptionObject(msg);
+  }
 }
 
-void throw_must_be_value_type(const char* className, const char* propName)
-{
-  auto msg = folly::sformat(
-    "Property {} of class {} is readonly, and therefore must be a value "
-    "type to be modified.",
-    propName, className
-  );
-  SystemLib::throwInvalidOperationExceptionObject(msg);
+namespace {
+void throw_readonly_violation(const char* className, const char* propName,
+                              const char* msg) {
+  if (RO::EvalEnableReadonlyPropertyEnforcement == 0) return;
+  if (RO::EvalEnableReadonlyPropertyEnforcement == 1) {
+    raise_warning(msg, propName, className);
+  } else {
+    assertx(RO::EvalEnableReadonlyPropertyEnforcement == 2);
+    std::string fmtMsg;
+    string_printf(fmtMsg, msg, propName, className);
+    SystemLib::throwInvalidOperationExceptionObject(fmtMsg);
+  }
+}
+}
+
+void throw_must_be_readonly(const char* className, const char* propName) {
+  throw_readonly_violation(className, propName, Strings::MUST_BE_READONLY);
+}
+
+void throw_must_be_mutable(const char* className, const char* propName) {
+  throw_readonly_violation(className, propName, Strings::MUST_BE_MUTABLE);
+}
+
+void throw_must_be_enclosed_in_readonly(const char* className, const char* propName) {
+  throw_readonly_violation(className, propName, Strings::MUST_BE_ENCLOSED_IN_READONLY);
+}
+
+void throw_must_be_value_type(const char* className, const char* propName) {
+  throw_readonly_violation(className, propName, Strings::MUST_BE_VALUE_TYPE);
 }
 
 bool readonlyLocalShouldThrow(TypedValue tv, ReadonlyOp op, bool& roProp) {
@@ -942,6 +926,7 @@ bool readonlyLocalShouldThrow(TypedValue tv, ReadonlyOp op, bool& roProp) {
   }
   return false;
 }
+
 void checkReadonly(const TypedValue* tv,
                    const Class* cls,
                    const StringData* name,

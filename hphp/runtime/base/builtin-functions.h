@@ -36,7 +36,6 @@ extern const StaticString s_cmpWithKeyset;
 extern const StaticString s_cmpWithClsMeth;
 extern const StaticString s_cmpWithRClsMeth;
 extern const StaticString s_cmpWithRFunc;
-extern const StaticString s_cmpWithRecord;
 extern const StaticString s_cmpWithNonArr;
 extern const StaticString s_cmpWithFunc;
 
@@ -223,7 +222,6 @@ bool is_constructor_name(const char* func);
 [[noreturn]] void throw_keyset_compare_exception();
 [[noreturn]] void throw_clsmeth_compare_exception();
 [[noreturn]] void throw_rclsmeth_compare_exception();
-[[noreturn]] void throw_record_compare_exception();
 [[noreturn]] void throw_rfunc_compare_exception();
 [[noreturn]] void throw_opaque_resource_compare_exception();
 [[noreturn]] void throw_rec_non_rec_compare_exception();
@@ -237,13 +235,6 @@ bool is_constructor_name(const char* func);
                                                  const char* propName);
 [[noreturn]] void throw_cannot_modify_static_const_prop(const char* className,
                                                         const char* propName);
-[[noreturn]] void throw_must_be_readonly(const char* className, const char* propName);
-[[noreturn]] void throw_must_be_mutable(const char* className, const char* propName);
-[[noreturn]] void throw_must_be_enclosed_in_readonly(const char* className,
-                                                     const char* propName);
-[[noreturn]] void throw_local_must_be_value_type(const char* locName);
-[[noreturn]] void throw_must_be_value_type(const char* className,
-                                           const char* propName);
 [[noreturn]] void throw_late_init_prop(const Class* cls,
                                        const StringData* propName,
                                        bool isSProp);
@@ -252,6 +243,11 @@ bool is_constructor_name(const char* func);
                                              unsigned int arg_num,
                                              const StringData* type);
 
+void throw_must_be_mutable(const char* className, const char* propName);
+void throw_must_be_readonly(const char* className, const char* propName);
+void throw_must_be_enclosed_in_readonly(const char* className, const char* propName);
+void throw_must_be_value_type(const char* className, const char* propName);
+void throw_local_must_be_value_type(const char* locName);
 void checkReadonly(const TypedValue* tv, const Class* cls, const StringData* name,
                    bool readonly, ReadonlyOp op, bool* roProp, bool writeMode);
 bool readonlyLocalShouldThrow(TypedValue tv, ReadonlyOp op, bool& roProp);

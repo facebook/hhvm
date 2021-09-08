@@ -42,7 +42,6 @@ namespace HPHP {
 
 struct FuncEmitter;
 struct PreClassEmitter;
-struct RecordEmitter;
 struct StringData;
 struct TypeAliasEmitter;
 
@@ -197,22 +196,6 @@ struct UnitEmitter {
    */
   PreClassEmitter* newPreClassEmitter(const std::string& name);
 
-  RecordEmitter* newRecordEmitter(const std::string& name);
-
-  /////////////////////////////////////////////////////////////////////////////
-  // RecordEmitters.
-
-  /*
-   * Number of RecordEmitters in the Unit.
-   */
-  size_t numRecords() const;
-
-  /*
-   * The RecordEmitter for `recordId'.
-   */
-  const RecordEmitter* re(Id recordId) const;
-  RecordEmitter* re(Id recordId);
-
   /////////////////////////////////////////////////////////////////////////////
   // Type aliases.
 
@@ -325,11 +308,6 @@ private:
    * PreClassEmitter table.
    */
   std::vector<PreClassEmitter*> m_pceVec;
-
-  /*
-   * RecordEmitter table.
-   */
-  std::vector<RecordEmitter*> m_reVec;
 
   mutable std::mutex m_verifyLock;
 

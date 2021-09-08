@@ -190,25 +190,10 @@ struct NamedTypeExistsChecker {
       }
     }
     return m_ne->getCachedClass() != nullptr ||
-           m_ne->getCachedTypeAlias() != nullptr ||
-           m_ne->getCachedRecordDesc() != nullptr;
+           m_ne->getCachedTypeAlias() != nullptr;
   }
 };
-struct RecordExistsChecker {
-  const String& m_name;
-  mutable NamedEntity* m_ne;
-  explicit RecordExistsChecker(const String& name)
-    : m_name(name), m_ne(nullptr) {}
-  bool operator()() const {
-    if (!m_ne) {
-      m_ne = NamedEntity::get(m_name.get(), false);
-      if (!m_ne) {
-        return false;
-      }
-    }
-    return m_ne->getCachedRecordDesc() != nullptr;
-  }
-};
+
 }
 
 const StaticString
@@ -386,26 +371,6 @@ bool AutoloadHandler::autoloadClass(const String& clsName) {
   return false;
 }
 
-bool AutoloadHandler::autoloadRecordDesc(const String& recName) {
-  tracing::BlockNoTrace _{
-    (m_map && m_map->isNative()) ? "autoload-native" : "autoload"
-  };
-  if (recName.empty()) return false;
-  return m_map &&
-         loadFromMap(recName, AutoloadMap::KindOf::Type,
-                     RecordExistsChecker(recName)) !=
-         AutoloadMap::Result::Failure;
-}
-
-template<>
-bool AutoloadHandler::autoloadType<Class>(const String& name) {
-  return autoloadClass(name);
-}
-template<>
-bool AutoloadHandler::autoloadType<RecordDesc>(const String& name) {
-  return autoloadRecordDesc(name);
-}
-
 template <class T>
 AutoloadMap::Result
 AutoloadHandler::loadFromMapPartial(const String& className,
@@ -464,10 +429,10 @@ bool AutoloadHandler::autoloadNamedType(const String& clsName) {
                                         typeAliasErr);
       if (typeAliasRes == AutoloadMap::Result::Success) return true;
     }
-    // If we reach this point, then for each map either nothing was found
-    // or the file we included didn't define a class or type alias or record
-    // with the specified name, and the failure callback (if one exists)
-    // did not throw or raise a fatal error.
+    // If we reach this point, then for each map either nothing was
+    // found or the file we included didn't define a class or type
+    // alias with the specified name, and the failure callback (if one
+    // exists) did not throw or raise a fatal error.
     if (m_map->canHandleFailure()) {
       // First, call the failure callback for 'class' if we didn't do so
       // above
@@ -475,8 +440,8 @@ bool AutoloadHandler::autoloadNamedType(const String& clsName) {
         assertx(tryType);
         typeRes = m_map->handleFailure(AutoloadMap::KindOf::Type,
                                         className, typeErr);
-        // The failure callback may have defined a class or record for
-        // us, in which case we're done.
+        // The failure callback may have defined a class for us, in
+        // which case we're done.
         if (cte()) return true;
       }
       // Next, call the failure callback for 'type alias'
@@ -493,8 +458,8 @@ bool AutoloadHandler::autoloadNamedType(const String& clsName) {
               typeAliasRes != AutoloadMap::Result::Failure);
       tryType = (typeRes == AutoloadMap::Result::RetryAutoloading);
       tryTypeAlias = (typeAliasRes == AutoloadMap::Result::RetryAutoloading);
-      // If the failure callback requested a retry for 'class', 'type', or
-      // 'record', jump back to the top to try again.
+      // If the failure callback requested a retry for 'class' or
+      // 'type' jump back to the top to try again.
       if (tryType || tryTypeAlias) {
         continue;
       }

@@ -7,7 +7,7 @@ object(__SystemLib\DynMethCallerHelper) (3) {
   ["method":"__SystemLib\DynMethCallerHelper":private]=>
   string(8) "inst_dyn"
   ["lambda":"__SystemLib\DynMethCallerHelper":private]=>
-  object(Closure$main;%d) (1) {
+  object(Closure$main) (1) {
     ["parameter"]=>
     dict(3) {
       ["$o"]=>

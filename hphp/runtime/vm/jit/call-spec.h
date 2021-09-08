@@ -22,7 +22,6 @@
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
 #include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/record-data.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 
 #include <array>
@@ -107,17 +106,6 @@ template<typename A> struct jit_cpp_type<
   static auto constexpr type() { return TArrLike; }
 };
 
-template<typename A> struct jit_cpp_type<
-  A*, std::enable_if_t<std::is_base_of<RecordData, A>::value>
-> {
-  static auto constexpr type() { return TRecord; }
-};
-
-template<typename A> struct jit_cpp_type<
-  A*, std::enable_if_t<std::is_base_of<RecordDesc, A>::value>
-> {
-  static auto constexpr type() { return TRecDesc; }
-};
 /*
  * Parameter types: Many helper functions take various enums or pointers to
  * runtime types that have no jit::Type equivalent. These are usually passed as

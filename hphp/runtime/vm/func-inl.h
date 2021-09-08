@@ -164,7 +164,9 @@ inline String Func::nameWithClosureName() const {
   if (!isClosureBody()) return String(const_cast<StringData*>(name()));
   // Strip the file hash from the closure name.
   String name{const_cast<StringData*>(baseCls()->name())};
-  return name.substr(0, name.find(';'));
+  auto const pos = name.find(';');
+  if (pos < 0) return name;
+  return name.substr(0, pos);
 }
 
 inline StrNR Func::nameStr() const {

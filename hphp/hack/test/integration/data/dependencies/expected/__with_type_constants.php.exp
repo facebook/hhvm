@@ -6,7 +6,7 @@ abstract class WithAbstractConst {
 }
 
 class WithConst {
-  const type TYPECONST as num = int;
+  const type TYPECONST = int;
 
   const type WITH_THIS = this::WITH_CONSTRAINT;
 

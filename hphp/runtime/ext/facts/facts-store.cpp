@@ -457,16 +457,6 @@ Array makeVecOfString(StringPtrIterable&& vector) {
   return ret.toArray();
 }
 
-template <typename StringPtrIterable, typename Predicate>
-Array makeVecOfString(StringPtrIterable&& vector, Predicate&& predicate) {
-  auto ret = VecInit{vector.size()};
-  for (auto&& str : std::forward<StringPtrIterable>(vector)) {
-    if (predicate(str)) {
-      ret.append(VarNR{StrNR{str.get()}}.tv());
-    }
-  }
-  return ret.toArray();
-}
 
 /**
  * Convert a C++ StringData structure into a Hack `vec<(string, string)>`.
@@ -556,7 +546,7 @@ struct FactsStoreImpl final
       hphp_hash_set<std::string> indexedMethodAttributes)
       : m_updateExec{1, make_thread_factory("Autoload update")}
       , m_root{std::move(root)}
-      , m_map{m_root, std::move(dbData), std::move(indexedMethodAttributes)}
+      , m_map{m_root, std::move(dbData), RuntimeOption::AutoloadEnforceOneDefinitionRule, std::move(indexedMethodAttributes)}
       , m_watchmanData{
             {.m_queryExpr = addFieldsToQuery(std::move(queryExpr)),
              .m_watchmanClient = watchmanClient}} {
@@ -565,7 +555,10 @@ struct FactsStoreImpl final
   FactsStoreImpl(folly::fs::path root, DBData dbData)
       : m_updateExec{1, make_thread_factory("Autoload update")}
       , m_root{std::move(root)}
-      , m_map{m_root, std::move(dbData)} {
+      , m_map{
+            m_root,
+            std::move(dbData),
+            RuntimeOption::AutoloadEnforceOneDefinitionRule} {
   }
 
   ~FactsStoreImpl() override {
@@ -728,21 +721,11 @@ struct FactsStoreImpl final
   }
 
   Array getTypesWithAttribute(const String& attr) override {
-    return makeVecOfString(
-        m_map.getTypesAndTypeAliasesWithAttribute(*attr.get()),
-        [&](Symbol<StringData, SymKind::Type> type) {
-          auto kind = m_map.getKind(type);
-          return kind != TypeKind::TypeAlias &&
-                 LIKELY(kind != TypeKind::Unknown);
-        });
+    return makeVecOfString(m_map.getTypesWithAttribute(*attr.get()));
   }
 
   Array getTypeAliasesWithAttribute(const String& attr) override {
-    return makeVecOfString(
-        m_map.getTypesAndTypeAliasesWithAttribute(*attr.get()),
-        [&](Symbol<StringData, SymKind::Type> type) {
-          return m_map.getKind(type) == TypeKind::TypeAlias;
-        });
+    return makeVecOfString(m_map.getTypeAliasesWithAttribute(*attr.get()));
   }
 
   Array getMethodsWithAttribute(const String& attr) override {
@@ -757,6 +740,10 @@ struct FactsStoreImpl final
     return makeVecOfString(m_map.getAttributesOfType(*type.get()));
   }
 
+  Array getTypeAliasAttributes(const String& typeAlias) override {
+    return makeVecOfString(m_map.getAttributesOfType(*typeAlias.get()));
+  }
+
   Array getMethodAttributes(const String& type, const String& method) override {
     return makeVecOfString(
         m_map.getAttributesOfMethod(*type.get(), *method.get()));
@@ -769,6 +756,11 @@ struct FactsStoreImpl final
   Array getTypeAttrArgs(const String& type, const String& attribute) override {
     return makeVecOfDynamic(
         m_map.getTypeAttributeArgs(*type.get(), *attribute.get()));
+  }
+
+  Array getTypeAliasAttrArgs(const String& typeAlias, const String& attribute) override {
+    return makeVecOfDynamic(
+        m_map.getTypeAliasAttributeArgs(*typeAlias.get(), *attribute.get()));
   }
 
   Array getMethodAttrArgs(

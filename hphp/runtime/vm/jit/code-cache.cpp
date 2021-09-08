@@ -36,8 +36,6 @@ namespace HPHP { namespace jit {
 
 TRACE_SET_MOD(mcg);
 
-// FIXME: kMinTranslationBytes is probably no longer needed
-static constexpr int kMinTranslationBytes = 32;
 static constexpr size_t kRoundUp = 2ull << 20;
 
 /* Initialized by RuntimeOption. */
@@ -49,7 +47,6 @@ uint32_t CodeCache::AFrozenSize = 0;
 uint32_t CodeCache::ABytecodeSize = 0;
 uint32_t CodeCache::GlobalDataSize = 0;
 uint32_t CodeCache::AMaxUsage = 0;
-uint32_t CodeCache::AProfMaxUsage = 0;
 uint32_t CodeCache::AColdMaxUsage = 0;
 uint32_t CodeCache::AFrozenMaxUsage = 0;
 bool CodeCache::MapTCHuge = false;
@@ -62,8 +59,12 @@ static size_t ru(size_t sz) { return sz + (-sz & (kRoundUp - 1)); }
 
 static size_t rd(size_t sz) { return sz & ~(kRoundUp - 1); }
 
+static size_t mainAdjustedSize(size_t hotSize, size_t mainSize,
+                               size_t profSize) {
+  return hotSize + mainSize + profSize;
+}
+
 CodeCache::CodeCache()
-  : m_useHot{RuntimeOption::RepoAuthoritative && CodeCache::AHotSize > 0}
 {
 
   // We want to ensure that all code blocks are close to each other so that we
@@ -76,17 +77,16 @@ CodeCache::CodeCache()
     RuntimeOption::EvalThreadTCDataBufferSize
   );
 
-  auto const kAHotSize = RuntimeOption::EvalJitAHotSizeRoundUp ?
-    ru(CodeCache::AHotSize) : CodeCache::AHotSize;
-  auto const kASize       = ru(CodeCache::ASize);
-  auto const kAProfSize   = ru(CodeCache::AProfSize);
+  auto const kASize       = ru(mainAdjustedSize(CodeCache::AHotSize,
+                                                CodeCache::ASize,
+                                                CodeCache::AProfSize));
   auto const kAColdSize   = ru(CodeCache::AColdSize);
   auto const kAFrozenSize = ru(CodeCache::AFrozenSize);
   auto const kABytecodeSize = ru(CodeCache::ABytecodeSize);
 
   auto kGDataSize = ru(CodeCache::GlobalDataSize);
-  m_totalSize = ru(kAHotSize + kASize + kAColdSize + kAProfSize +
-               kAFrozenSize + kABytecodeSize + kGDataSize + thread_local_size);
+  m_totalSize = ru(kASize + kAColdSize + kAFrozenSize +
+                   kABytecodeSize + kGDataSize + thread_local_size);
   m_tcSize = m_totalSize - kABytecodeSize - kGDataSize;
   m_codeSize = m_totalSize - kGDataSize;
 
@@ -102,7 +102,7 @@ CodeCache::CodeCache()
   auto const cutTCSizeTo = [] (size_t targetSize) {
     assertx(targetSize < (2ull << 30));
     // Make sure the result if size_t to avoid 32-bit overflow
-    auto const total = static_cast<size_t>(AHotSize) + ASize + AProfSize +
+    auto const total = mainAdjustedSize(AHotSize, ASize, AProfSize) +
                        AColdSize + AFrozenSize + GlobalDataSize;
     if (total <= targetSize) return;
 
@@ -113,12 +113,11 @@ CodeCache::CodeCache()
     AFrozenSize = rd(AFrozenSize * targetSize / total);
     GlobalDataSize = rd(GlobalDataSize * targetSize / total);
 
-    AMaxUsage = maxUsage(ASize);
-    AProfMaxUsage = maxUsage(AProfSize);
+    AMaxUsage = maxUsage(mainAdjustedSize(AHotSize, ASize, AProfSize));
     AColdMaxUsage = maxUsage(AColdSize);
     AFrozenMaxUsage = maxUsage(AFrozenSize);
 
-    assertx(static_cast<size_t>(AHotSize) + ASize + AProfSize + AColdSize +
+    assertx(mainAdjustedSize(AHotSize, ASize, AProfSize) + AColdSize +
             AFrozenSize + GlobalDataSize <= targetSize);
 
     if (RuntimeOption::ServerExecutionMode()) {
@@ -226,26 +225,20 @@ CodeCache::CodeCache()
 
   numa_interleave(base, m_totalSize);
 
-  if (kAHotSize) {
-    FTRACE(1, "init ahot @{}, size = {}\n", base, kAHotSize);
-    m_hot.init(base, kAHotSize, "hot");
-    const uint32_t hugeHotMBs = std::min(CodeCache::TCNumHugeHotMB,
-                                         uint32_t(kAHotSize >> 20));
-    enhugen(base, hugeHotMBs);
-    base += kAHotSize;
-  }
-
   TRACE(1, "init a @%p\n", base);
 
   m_main.init(base, kASize, "main");
-  const uint32_t hugeMainMBs = std::min(CodeCache::TCNumHugeMainMB,
-                                        uint32_t(kASize >> 20));
+  uint32_t hugeMainMBs = CodeCache::TCNumHugeHotMB + CodeCache::TCNumHugeMainMB;
+  // Don't map more pages to huge pages than kASize.  And if we're not in
+  // jumpstart consumer mode, then we'll need to generate profiling code, which
+  // will be placed in the beginning of code.main.  In this case, map all of
+  // code.main to huge pages to ensure that the optimized code is placed on huge
+  // pages.
+  if ((kASize >> 20 < hugeMainMBs) || !isJitDeserializing()) {
+    hugeMainMBs = uint32_t(kASize >> 20);
+  }
   enhugen(base, hugeMainMBs);
   base += kASize;
-
-  TRACE(1, "init aprof @%p\n", base);
-  m_prof.init(base, kAProfSize, "prof");
-  base += kAProfSize;
 
   TRACE(1, "init acold @%p\n", base);
   m_cold.init(base, kAColdSize, "cold");
@@ -282,8 +275,7 @@ CodeCache::CodeCache()
   }
   m_threadLocalSize = thread_local_size;
 
-  AMaxUsage = maxUsage(ASize);
-  AProfMaxUsage = maxUsage(AProfSize);
+  AMaxUsage = maxUsage(mainAdjustedSize(AHotSize, ASize, AProfSize));
   AColdMaxUsage = maxUsage(AColdSize);
   AFrozenMaxUsage = maxUsage(AFrozenSize);
 
@@ -293,7 +285,7 @@ CodeCache::CodeCache()
 }
 
 CodeBlock& CodeCache::blockFor(CodeAddress addr) {
-  return codeBlockChoose(addr, m_main, m_hot, m_prof, m_cold, m_frozen);
+  return codeBlockChoose(addr, m_main, m_cold, m_frozen);
 }
 
 const CodeBlock& CodeCache::blockFor(CodeAddress addr) const {
@@ -312,10 +304,6 @@ size_t CodeCache::totalUsed() const {
 }
 
 bool CodeCache::isValidCodeAddress(ConstCodeAddress addr) const {
-  if (m_profFreed && m_prof.contains(addr)) {
-    return false;
-  }
-
   return addr >= m_base && addr < m_base + m_codeSize &&
     (addr < m_threadLocalStart ||
      addr >= m_threadLocalStart + m_threadLocalSize);
@@ -329,53 +317,10 @@ void CodeCache::unprotect() {
   mprotect(m_base, m_codeSize, PROT_READ | PROT_WRITE | PROT_EXEC);
 }
 
-void CodeCache::freeProf() {
-  if (RuntimeOption::ServerExecutionMode()) {
-    Logger::Info("Freeing code.prof");
-  }
-
-  // If the transdb is enabled, we don't actually free the memory in order to
-  // allow the profile code to be included in TC dumps.  However, we still set
-  // m_profFreed below in order to trigger asserts.
-  if (!transdb::enabled()) {
-    if (madvise(m_prof.base(), m_prof.size(), MADV_DONTNEED) == -1) {
-      if (RuntimeOption::ServerExecutionMode()) {
-        Logger::Warning("code.prof madvise failure: %s\n",
-                        folly::errnoStr(errno).c_str());
-      }
-    }
-    mprotect(m_prof.base(), m_prof.size(), PROT_NONE);
-#if USE_JEMALLOC_EXTENT_HOOKS
-    // Reuse the memory region as an emergency buffer for low memory.
-    if (use_lowptr && RO::EvalRecycleAProf &&
-        is_low_mem(m_prof.base()) && low_arena) {
-      auto const base = reinterpret_cast<uintptr_t>(m_prof.base());
-      assertx((base & ~(s_pageSize - 1)) == 0);
-      assertx((m_prof.size() & ~(s_pageSize - 1)) == 0);
-      using namespace alloc;
-      auto prof_range = new RangeState(base, base + m_prof.size(), Reserved{});
-      auto mapper =
-        new BumpEmergencyMapper([]{ kill(getpid(), SIGTERM); }, *prof_range);
-      reinterpret_cast<LowArena*>(&g_lowerArena)->appendMapper(mapper);
-      reinterpret_cast<LowArena*>(&g_lowArena)->appendMapper(mapper);
-      reinterpret_cast<LowArena*>(&g_lowColdArena)->appendMapper(mapper);
-    }
-#endif
-  }
-
-  m_profFreed = true;
-}
-
 CodeCache::View CodeCache::view(TransKind kind) {
   auto view = [&] {
     if (isProfiling(kind)) {
-      return View{m_prof, m_frozen, m_frozen, m_data, false};
-    }
-
-    const bool isOpt = kind == TransKind::Optimize ||
-                       kind == TransKind::OptPrologue;
-    if (isOpt && m_useHot && m_hot.available() > kMinTranslationBytes) {
-      return View{m_hot, m_cold, m_frozen, m_data, false};
+      return View{m_main, m_frozen, m_frozen, m_data, false};
     }
 
     return View{m_main, m_cold, m_frozen, m_data, false};

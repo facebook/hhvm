@@ -591,8 +591,10 @@ void whole_program(php::ProgramPtr program,
     index.rewrite_default_initial_values(*program);
     index.use_class_dependencies(false);
     analyze_iteratively(index, *program, AnalyzeMode::ConstPass);
-    // Defer initializing public static property types until after the
-    // constant pass, to try to get better initial values.
+    // Defer preresolve type-structures and initializing public static
+    // property types until after the constant pass, to try to get
+    // better initial values.
+    index.preresolve_type_structures(*program);
     index.init_public_static_prop_types();
     index.preinit_bad_initial_prop_values();
     index.use_class_dependencies(options.HardPrivatePropInference);

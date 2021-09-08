@@ -118,7 +118,6 @@ bool RepoAuthType::operator==(RepoAuthType o) const {
   case T::OptFunc:
   case T::OptCls:
   case T::OptClsMeth:
-  case T::OptRecord:
   case T::OptLazyCls:
   case T::OptArrKey:
   case T::OptUncArrKey:
@@ -149,7 +148,6 @@ bool RepoAuthType::operator==(RepoAuthType o) const {
   case T::Func:
   case T::Cls:
   case T::ClsMeth:
-  case T::Record:
   case T::LazyCls:
   case T::Num:
   case T::OptNum:
@@ -192,12 +190,6 @@ bool RepoAuthType::operator==(RepoAuthType o) const {
   case T::OptSubCls:
   case T::OptExactCls:
     return clsName() == o.clsName();
-
-  case T::SubRecord:
-  case T::ExactRecord:
-  case T::OptSubRecord:
-  case T::OptExactRecord:
-    return recordName() == o.recordName();
   }
   not_reached();
 }
@@ -249,9 +241,6 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
   case T::OptClsMeth:   if (initNull) return true;
                         // fallthrough
   case T::ClsMeth:      return tv.m_type == KindOfClsMeth;
-  case T::OptRecord:    if (initNull) return true;
-                        // fallthrough
-  case T::Record:       return tv.m_type == KindOfRecord;
   case T::OptLazyCls:   if (initNull) return true;
                         // fallthrough
   case T::LazyCls:      return tv.m_type == KindOfLazyClass;
@@ -427,27 +416,6 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
       return tv.m_type == KindOfClass && tv.m_data.pclass == cls;
     }
 
-  case T::OptSubRecord:
-    if (initNull) return true;
-    // fallthrough
-  case T::SubRecord:
-    {
-      auto const rec = RecordDesc::lookup(ty.recordName());
-      if (!rec) return false;
-      return tv.m_type == KindOfRecord &&
-             tv.m_data.prec->record()->recordDescOf(rec);
-    }
-
-  case T::OptExactRecord:
-    if (initNull) return true;
-    // fallthrough
-  case T::ExactRecord:
-    {
-      auto const rec = RecordDesc::lookup(ty.recordName());
-      if (!rec) return false;
-      return tv.m_type == KindOfRecord && tv.m_data.prec->record() == rec;
-    }
-
   case T::InitUnc:
     if (tv.m_type == KindOfUninit) return false;
     // fallthrough
@@ -555,7 +523,6 @@ std::string show(RepoAuthType rat) {
   case T::OptFunc:       return "?Func";
   case T::OptCls:        return "?Cls";
   case T::OptClsMeth:    return "?ClsMeth";
-  case T::OptRecord:     return "?Record";
   case T::OptLazyCls:    return "?LazyCls";
   case T::OptUncArrKey:  return "?UncArrKey";
   case T::OptArrKey:     return "?ArrKey";
@@ -586,7 +553,6 @@ std::string show(RepoAuthType rat) {
   case T::Func:          return "Func";
   case T::Cls:           return "Cls";
   case T::ClsMeth:       return "ClsMeth";
-  case T::Record:        return "Record";
   case T::LazyCls:       return "LazyCls";
   case T::Num:           return "Num";
   case T::OptNum:        return "OptNum";
@@ -684,20 +650,8 @@ std::string show(RepoAuthType rat) {
       ret += rat.clsName()->data();
       return ret;
     }
-  case T::OptSubRecord:
-  case T::OptExactRecord:
-  case T::SubRecord:
-  case T::ExactRecord:
-    {
-      auto ret = std::string{};
-      if (tag == T::OptSubRecord || tag == T::OptExactRecord) ret += '?';
-      ret += "Record";
-      if (tag == T::OptSubRecord || tag == T::SubRecord) ret += '<';
-      ret += '=';
-      ret += rat.recordName()->data();
-      return ret;
-    }
   }
+
   not_reached();
 }
 

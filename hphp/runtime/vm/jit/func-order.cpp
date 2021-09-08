@@ -125,9 +125,10 @@ createCallGraphFromProfCode(jit::hash_map<hfsort::TargetId, FuncId>& funcID) {
                               const auto& callerAddrs,
                               uint64_t& totalCalls) {
     for (auto callAddr : callerAddrs) {
-      if (!tc::isProfileCodeAddress(callAddr)) continue;
       auto const callerTransId = pd->jmpTransID(callAddr);
-      addCallerCount(callAddr, calleeTargetId, callerTransId, totalCalls);
+      if (callerTransId != kInvalidTransID) {
+        addCallerCount(callAddr, calleeTargetId, callerTransId, totalCalls);
+      }
     }
   };
 
@@ -371,13 +372,8 @@ void incCount(const ActRec* fp) {
   if (callerRip == nullptr) return;
   auto const callee = fp->func()->getFuncId();
   auto const caller = getCallFuncId(callerRip);
-  if (caller.isInvalid()) {
-    // assert callerRip is not in the hot code area, where only optimized code
-    // lives
-    assert_flog(!tc::isHotCodeAddress(callerRip),
-                "callerRip not found: {}", callerRip);
-    return;
-  }
+  if (caller.isInvalid()) return;
+
   auto pair = FuncPair(caller.toInt(), callee.toInt());
   {
     CallCounters::accessor acc;

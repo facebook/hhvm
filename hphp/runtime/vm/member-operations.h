@@ -145,7 +145,6 @@ inline ObjectData* instanceFromTv(tv_rval tv) {
 [[noreturn]] void throw_cannot_use_newelem_for_lval_read_col();
 [[noreturn]] void throw_cannot_use_newelem_for_lval_read(const ArrayData*);
 [[noreturn]] void throw_cannot_use_newelem_for_lval_read_clsmeth();
-[[noreturn]] void throw_cannot_use_newelem_for_lval_read_record();
 [[noreturn]] void throw_cannot_unset_for_clsmeth();
 
 [[noreturn]] void unknownBaseType(DataType);
@@ -429,20 +428,6 @@ inline TypedValue ElemObject(ObjectData* base, key_type<keyType> key) {
 }
 
 /**
- * Elem when base is a Record
- */
-// TODO (T41029813): Handle different modes
-template <KeyType keyType>
-inline TypedValue ElemRecord(RecordData* base, key_type<keyType> key) {
-  auto const fieldName = tvCastToString(initScratchKey(key));
-  auto const idx = base->record()->lookupField(fieldName.get());
-  if (idx == kInvalidSlot) {
-    raise_record_field_error(base->record()->name(), fieldName.get());
-  }
-  return *base->rvalAt(idx);
-}
-
-/**
  * $result = $base[$key];
  */
 template<MOpMode mode, KeyType keyType>
@@ -488,9 +473,6 @@ NEVER_INLINE TypedValue ElemSlow(tv_rval base, key_type<keyType> key) {
 
     case KindOfClsMeth:
       return ElemScalar();
-
-    case KindOfRecord:
-      return ElemRecord<keyType>(base.val().prec, key);
   }
   unknownBaseType(type(base));
 }
@@ -727,26 +709,6 @@ inline tv_lval ElemDString(tv_lval base) {
 }
 
 /**
- * ElemD when base is a Record
- */
-template <KeyType keyType>
-inline tv_lval ElemDRecord(tv_lval base, key_type<keyType> key) {
-  assertx(tvIsRecord(base));
-  assertx(tvIsPlausible(base.tv()));
-  auto const oldRecData = val(base).prec;
-  if (oldRecData->cowCheck()) {
-    val(base).prec = oldRecData->copyRecord();
-    decRefRec(oldRecData);
-  }
-  auto const fieldName = tvCastToString(initScratchKey(key));
-  auto const rec = val(base).prec->record();
-  auto const idx = rec->lookupField(fieldName.get());
-  if (idx == kInvalidSlot) {
-    raise_record_field_error(rec->name(), fieldName.get());
-  }
-  return val(base).prec->lvalAt(idx);
-}
-/**
  * ElemD when base is an Object
  */
 template<KeyType keyType>
@@ -774,7 +736,11 @@ tv_lval ElemD(tv_lval base, key_type<keyType> key, bool roProp) {
 
   if (RO::EvalEnableReadonlyPropertyEnforcement && roProp &&
     !hasPersistentFlavor(base.type()) && isRefcountedType(base.type())) {
-    throwReadOnlyCollectionMutation();
+      if (RO::EvalEnableReadonlyPropertyEnforcement == 1) {
+        raiseReadOnlyCollectionMutation();
+      } else {
+        throwReadOnlyCollectionMutation();
+      }
   }
 
   switch (base.type()) {
@@ -808,8 +774,6 @@ tv_lval ElemD(tv_lval base, key_type<keyType> key, bool roProp) {
       return ElemDObject<keyType>(base, key);
     case KindOfClsMeth:
       return ElemDScalar();
-    case KindOfRecord:
-      return ElemDRecord<keyType>(base, key);
   }
   unknownBaseType(type(base));
 }
@@ -1008,7 +972,11 @@ tv_lval ElemU(tv_lval base, key_type<keyType> key, bool roProp) {
 
   if (RO::EvalEnableReadonlyPropertyEnforcement && roProp &&
     (!hasPersistentFlavor(type(base)) && isRefcountedType(type(base)))) {
-    throwReadOnlyCollectionMutation();
+    if (RO::EvalEnableReadonlyPropertyEnforcement == 1) {
+      raiseReadOnlyCollectionMutation();
+    } else {
+      throwReadOnlyCollectionMutation();
+    }
   }
 
   switch (type(base)) {
@@ -1051,8 +1019,6 @@ tv_lval ElemU(tv_lval base, key_type<keyType> key, bool roProp) {
       return ElemUVec<keyType>(base, key);
     case KindOfObject:
       return ElemUObject<keyType>(base, key);
-    case KindOfRecord:
-      raise_error(Strings::OP_NOT_SUPPORTED_RECORD);
   }
   unknownBaseType(type(base));
 }
@@ -1134,8 +1100,6 @@ inline tv_lval NewElem(tv_lval base) {
       return NewElemObject(base);
     case KindOfClsMeth:
       throw_cannot_use_newelem_for_lval_read_clsmeth();
-    case KindOfRecord:
-      throw_cannot_use_newelem_for_lval_read_record();
   }
   unknownBaseType(type(base));
 }
@@ -1276,32 +1240,6 @@ inline void SetElemObject(tv_lval base, key_type<keyType> key,
   failOnNonCollectionObjArrayAccess(obj);
   auto const scratchKey = initScratchKey(key);
   collections::set(obj, &scratchKey, value);
-}
-
-/**
- * SetElem where base is a record
- */
-template <KeyType keyType>
-inline void SetElemRecord(tv_lval base, key_type<keyType> key,
-                          TypedValue* value) {
-  auto const fieldName = tvCastToString(initScratchKey(key));
-  auto const oldRecData = val(base).prec;
-  auto const rec = oldRecData->record();
-  auto const idx = rec->lookupField(fieldName.get());
-  if (idx == kInvalidSlot) {
-    raise_record_field_error(rec->name(), fieldName.get());
-  }
-  auto const& field = rec->field(idx);
-  auto const& tc = field.typeConstraint();
-  if (tc.isCheckable()) {
-    tc.verifyRecField(value, rec->name(), field.name());
-  }
-  if (oldRecData->cowCheck()) {
-    val(base).prec = oldRecData->copyRecord();
-    decRefRec(oldRecData);
-  }
-  auto const& tv = val(base).prec->lvalAt(idx);
-  tvSet(*value, tv);
 }
 
 /*
@@ -1461,9 +1399,6 @@ StringData* SetElemSlow(tv_lval base, key_type<keyType> key,
       return nullptr;
     case KindOfClsMeth:
       SetElemScalar<setResult>(value);
-      return nullptr;
-    case KindOfRecord:
-      SetElemRecord<keyType>(base, key, value);
       return nullptr;
   }
   unknownBaseType(type(base));
@@ -1639,8 +1574,6 @@ inline void SetNewElem(tv_lval base, TypedValue* value) {
       return SetNewElemObject(base, value);
     case KindOfClsMeth:
       return SetNewElemScalar<setResult>(value);
-    case KindOfRecord:
-      raise_error(Strings::OP_NOT_SUPPORTED_RECORD);
   }
   unknownBaseType(type(base));
 }
@@ -1761,12 +1694,6 @@ inline TypedValue SetOpElem(SetOpOp op, tv_lval base,
 
     case KindOfClsMeth:
       return SetOpElemScalar();
-
-    case KindOfRecord: {
-      auto const result = ElemDRecord<KeyType::Any>(base, key);
-      setopBody(tvAssertPlausible(result), op, rhs);
-      return *result;
-    }
   }
   unknownBaseType(type(base));
 }
@@ -1823,9 +1750,6 @@ inline TypedValue SetOpNewElem(SetOpOp op, tv_lval base, TypedValue* rhs) {
 
     case KindOfClsMeth:
       throw_cannot_use_newelem_for_lval_read_clsmeth();
-
-    case KindOfRecord:
-      throw_cannot_use_newelem_for_lval_read_record();
   }
   unknownBaseType(type(base));
 }
@@ -1936,9 +1860,6 @@ inline TypedValue IncDecElem(IncDecOp op, tv_lval base, TypedValue key) {
 
     case KindOfClsMeth:
       return IncDecElemScalar();
-
-    case KindOfRecord:
-      return IncDecBody(op, ElemDRecord<KeyType::Any>(base, key));
   }
   unknownBaseType(type(base));
 }
@@ -1998,9 +1919,6 @@ inline TypedValue IncDecNewElem(IncDecOp op, tv_lval base) {
 
     case KindOfClsMeth:
       throw_cannot_use_newelem_for_lval_read_clsmeth();
-
-    case KindOfRecord:
-      throw_cannot_use_newelem_for_lval_read_record();
   }
   unknownBaseType(type(base));
 }
@@ -2188,9 +2106,6 @@ void UnsetElemSlow(tv_lval base, key_type<keyType> key) {
 
     case KindOfClsMeth:
       raise_error("Cannot unset a class method pointer");
-
-    case KindOfRecord:
-      raise_error("Cannot unset a record field");
   }
   unknownBaseType(type(base));
 }
@@ -2309,15 +2224,6 @@ bool IssetElemClsMeth(ClsMethDataRef base, key_type<keyType> key) {
 }
 
 /**
- * IssetElem when base is a Record
- */
-template<KeyType keyType>
-bool IssetElemRecord(RecordData* base, key_type<keyType> key) {
-  auto const result = ElemRecord<keyType>(base, key);
-  return !tvIsNull(tvAssertPlausible(result));
-}
-
-/**
  * isset($base[$key])
  */
 template <KeyType keyType>
@@ -2364,9 +2270,6 @@ NEVER_INLINE bool IssetElemSlow(tv_rval base, key_type<keyType> key) {
 
     case KindOfClsMeth:
       return false;
-
-    case KindOfRecord:
-      return IssetElemRecord<keyType>(val(base).prec, key);
   }
   unknownBaseType(type(base));
 }
@@ -2440,7 +2343,6 @@ tv_lval propPre(TypedValue& tvRef, tv_lval base) {
     case KindOfKeyset:
     case KindOfClsMeth:
     case KindOfRClsMeth:
-    case KindOfRecord:
       return propPreNull<mode>(tvRef);
 
     case KindOfObject:
@@ -2478,7 +2380,6 @@ inline tv_lval nullSafeProp(TypedValue& tvRef,
     case KindOfLazyClass:
     case KindOfClsMeth:
     case KindOfRClsMeth:
-    case KindOfRecord:
       tvWriteNull(tvRef);
       raise_notice("Cannot access property on non-object");
       return &tvRef;
@@ -2588,7 +2489,6 @@ inline void SetProp(Class* ctx, tv_lval base, key_type<keyType> key,
     case KindOfLazyClass:
     case KindOfClsMeth:
     case KindOfRClsMeth:
-    case KindOfRecord:
       return SetPropNull<setResult>(val);
 
     case KindOfPersistentString:
@@ -2647,7 +2547,6 @@ inline tv_lval SetOpProp(TypedValue& tvRef,
     case KindOfLazyClass:
     case KindOfClsMeth:
     case KindOfRClsMeth:
-    case KindOfRecord:
       return SetOpPropNull(tvRef);
 
     case KindOfPersistentString:
@@ -2708,7 +2607,6 @@ inline TypedValue IncDecProp(
     case KindOfLazyClass:
     case KindOfClsMeth:
     case KindOfRClsMeth:
-    case KindOfRecord:
       return IncDecPropNull();
 
     case KindOfPersistentString:

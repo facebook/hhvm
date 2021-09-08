@@ -690,6 +690,7 @@ pub fn emit_class<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
 
     let is_abstract = match ast_class.kind {
         ast::ClassishKind::Cclass(k) => k.is_abstract(),
+        ast::ClassishKind::CenumClass(k) => k.is_abstract(),
         _ => false,
     };
     let is_final = ast_class.final_ || is_trait;

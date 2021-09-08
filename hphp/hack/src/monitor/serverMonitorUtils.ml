@@ -56,10 +56,7 @@ module type Server_config = sig
   val kill_server : violently:bool -> ServerProcess.process_data -> unit
 
   val wait_for_server_exit :
-    timeout_t:float option ->
-    ServerProcess.process_data ->
-    float (* Kill signal time *) ->
-    bool
+    timeout_t:float -> ServerProcess.process_data -> bool
 
   val wait_pid : ServerProcess.process_data -> int * Unix.process_status
 

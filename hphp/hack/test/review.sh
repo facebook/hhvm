@@ -14,8 +14,9 @@ if [ -z "${EXP_EXT+x}" ]; then
   EXP_EXT=".exp"
 fi
 
-if [ -z "${NO_COPY+x}" ]; then
-  NO_COPY=false
+if [ -z "${UPDATE+x}" ]; then
+  # "always", "prompt" or "never"
+  UPDATE=prompt
 fi
 
 ARROW="$(tput bold)$(tput setaf 6)==>$(tput setaf 7)"
@@ -66,25 +67,38 @@ for f in "$@"; do
   # --no-index makes us ignore the git repo, if any - otherwise this only
   # works in hg checkouts (i.e. fbcode)
   git --no-pager diff --no-index --diff-algorithm=histogram --color=always \
-    --word-diff=color --word-diff-regex='[a-zA-Z0-9_:;()\\-]+' \
+    --word-diff=color --word-diff-regex='[^[:space:]]+' \
     $EXP "$OUT" | tail -n +5
   echo
-  if [ "$NO_COPY" = true ]; then
+
+  if [ "$UPDATE" = always ]; then
+    # UPDATE=always updates all the .exp files without prompting.
+    cp "$OUT" "$EXP_TO"
+  elif [ "$UPDATE" = never ]; then
+      # UPDATE=never allows users to see a diff of each .exp file with .out.
     if [ "$TERM" = "dumb" ]; then
       read -r -p "$(tput bold)View next file? [Y/q] $(tput sgr0)"
     else
       read -p "$(tput bold)View next file? [Y/q] $(tput sgr0)" -n 1 -r
     fi
-  elif [ "$TERM" = "dumb" ]; then
-      read -r -p "$(tput bold)Copy output to expected output? [y/q/N] $(tput sgr0)"
+
+    if [ "$REPLY" = "q" ]; then
+      exit 0
+    fi
   else
+    # UPDATE=prompt allows users to see a diff of each .exp with
+    # .out, then prompts to replace the .exp file.
+    if [ "$TERM" = "dumb" ]; then
+      read -r -p "$(tput bold)Copy output to expected output? [y/q/N] $(tput sgr0)"
+    else
       read -p "$(tput bold)Copy output to expected output? [y/q/N] $(tput sgr0)" -n 1 -r
-  fi
-  echo ""
-  if [ "$REPLY" = "y" ] && [ "$NO_COPY" = false ]; then
-    cp "$OUT" "$EXP_TO"
-  elif [ "$REPLY" = "q" ]; then
-    exit 0
+    fi
+
+    if [ "$REPLY" = "y" ]; then
+      cp "$OUT" "$EXP_TO"
+    elif [ "$REPLY" = "q" ]; then
+      exit 0
+    fi
   fi
 
   # A single blank line between loop iterations, even if the user hit enter.

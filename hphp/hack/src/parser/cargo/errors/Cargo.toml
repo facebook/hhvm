@@ -19,8 +19,8 @@ naming_special_names_rust = { path = "../../../naming" }
 oxidized = { path = "../../../oxidized" }
 parser_core_types = { path = "../core_types" }
 regex = "1.4.2"
-strum = "0.19"
-strum_macros = "0.19"
+strum = "0.21"
+strum_macros = "0.21"
 
 [profile.release]
 incremental = false

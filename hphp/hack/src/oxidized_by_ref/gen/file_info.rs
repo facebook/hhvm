@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<50846321c661321a1998b7b643b6d72d>>
+// @generated SignedSource<<5cd8f195c4a29f7a597b056e0d69739c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -58,7 +58,9 @@ pub enum Pos<'a> {
 impl<'a> TrivialDrop for Pos<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(Pos<'arena>);
 
-pub type Id<'a> = (Pos<'a>, &'a str);
+/// An id contains a pos, name and a optional decl hash. The decl hash is None
+/// only in the case when we didn't compute it for performance reasons
+pub type Id<'a> = (Pos<'a>, &'a str, Option<isize>);
 
 pub type HashType<'a> = Option<isize>;
 

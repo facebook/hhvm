@@ -9,7 +9,6 @@ abstract class Test {
     3 as this::Ta::Tx;
     4 as this::Ta::Ty;
     5 as this::Ta::Tz;
-    6 as this::Ta::Tw;
   }
 
   // This shows that only the last type constant is relevant. It doesn't matter
@@ -18,7 +17,6 @@ abstract class Test {
     3 as this::Tb::Tx;
     4 as this::Tb::Ty;
     5 as this::Tb::Tz;
-    6 as this::Tb::Tw;
   }
 }
 
@@ -26,7 +24,6 @@ abstract class A {
   abstract const type Tx as X;
   const type Ty = Y;
   const type Tz = Z<int>;
-  const type Tw as X = Y; // partially abstract
 }
 
 class B extends A {

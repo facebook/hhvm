@@ -43,10 +43,10 @@
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"
 #include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
-#include "hphp/runtime/vm/extern-compiler.h"
 #include "hphp/runtime/vm/memo-cache.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/unit-parser.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/file.h"
 #include "hphp/util/match.h"
@@ -443,8 +443,7 @@ void serialize_memoize_tv(StringBuffer& sb, int depth, TypedValue tv) {
       serialize_memoize_rcls_meth(sb, depth, tv.m_data.prclsmeth);
       break;
 
-    case KindOfResource:
-    case KindOfRecord: { // TODO(T41025646)
+    case KindOfResource: {
       auto msg = folly::format(
         "Cannot Serialize unexpected type {}",
         tname(tv.m_type)
@@ -601,14 +600,12 @@ bool HHVM_FUNCTION(clear_static_memoization,
 }
 
 String HHVM_FUNCTION(ffp_parse_string_native, const String& str) {
-  std::string program = str.get()->data();
-
   auto const file = fromCaller(
     [] (const ActRec* fp, Offset) { return fp->unit()->filepath()->data(); }
   );
 
-  auto result = ffp_parse_file("", program.c_str(), program.size(),
-                               RepoOptions::forFile(file));
+  auto result =
+    ffp_parse_file(str.get()->toCppString(), RepoOptions::forFile(file));
 
   FfpJSONString res;
   match<void>(
@@ -1247,7 +1244,6 @@ Class* getClass(TypedValue cls) {
     case KindOfRFunc:
     case KindOfClsMeth:
     case KindOfRClsMeth:
-    case KindOfRecord:
       SystemLib::throwInvalidArgumentExceptionObject(
         folly::sformat(
           "Invalid argument type passed to reflection class constructor")

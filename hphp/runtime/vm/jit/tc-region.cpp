@@ -129,8 +129,7 @@ bool checkTCLimits() {
   auto const cold_under = code().cold().used() < CodeCache::AColdMaxUsage;
   auto const froz_under = code().frozen().used() < CodeCache::AFrozenMaxUsage;
 
-  if (main_under && cold_under && froz_under) return true;
-  return cold_under && froz_under && code().hotEnabled();
+  return main_under && cold_under && froz_under;
 }
 
 void relocateOptFunc(FuncMetaInfo& info,
@@ -175,7 +174,7 @@ void relocateOptFunc(FuncMetaInfo& info,
     translator->bindOutgoingEdges();
     if (!translator->translateSuccess()) continue;
 
-    always_assert(code().inHotOrMain(translator->entry()));
+    always_assert(code().inMain(translator->entry()));
     if (prologueTranslator) {
       const auto pid = PrologueID(func, prologueTranslator->paramIndex());
       prologueTCAs[pid] = translator->entry();
@@ -279,8 +278,8 @@ void smashOptCalls(CGMeta& meta,
     FTRACE(1, "smashedOptCalls: found candidate call @ {}, "
            "target prologue @ {} (funcId={}, nArgs={})\n",
            call, target, pid.funcId(), pid.nargs());
-    assertx(code().inHotOrMainOrColdOrFrozen(call));
-    assertx(code().inHotOrMainOrColdOrFrozen(target));
+    assertx(code().inMainOrColdOrFrozen(call));
+    assertx(code().inMainOrColdOrFrozen(target));
 
     smashCall(call, target);
     optimizeSmashedCall(call);
@@ -354,9 +353,9 @@ void smashOptBinds(CGMeta& meta,
            bind.smashable.show(), showShort(bind.sk), bind.fallback);
     // The bound ADDR pointer may not belong to the data segment, as is the case
     // with SSwitchMap (see #10347945)
-    assertx(code().inHotOrMainOrColdOrFrozen(bind.smashable.toSmash()) ||
+    assertx(code().inMainOrColdOrFrozen(bind.smashable.toSmash()) ||
             bind.smashable.type() == IncomingBranch::Tag::ADDR);
-    assertx(code().inHotOrMainOrColdOrFrozen(succTCA));
+    assertx(code().inMainOrColdOrFrozen(succTCA));
     bind.smashable.patch(succTCA);
     bind.smashable.optimize();
     smashed.insert(bind.smashable.toSmash());
@@ -396,7 +395,7 @@ void smashOptSortedOptFuncs(std::vector<FuncMetaInfo>& infos,
     for (auto& translator : finfo.translators) {
       // Skip if the translation wasn't relocated (e.g. ran out of TC space).
       if (!translator->entry()) continue;
-      assertx(code().inHotOrMainOrColdOrFrozen(translator->entry()));
+      assertx(code().inMainOrColdOrFrozen(translator->entry()));
 
       if (isPrologue(translator->kind)) {
         smashOptBinds(translator->meta(), nullptr, srcKeyTrans);
@@ -461,7 +460,7 @@ std::string show(const SrcKeyTransMap& map) {
 }
 
 void checkPublishedAddr(TCA tca, const jit::hash_set<TCA>& publishedSet) {
-  always_assert_flog(code().inHotOrMainOrColdOrFrozen(tca),
+  always_assert_flog(code().inMainOrColdOrFrozen(tca),
                      "srcKeyTrans has address not in hot/main: {}", tca);
   always_assert_flog(publishedSet.count(tca),
                      "srcKeyTrans has unpublished translation @ {}", tca);
@@ -743,6 +742,7 @@ void RegionTranslator::publishMetaImpl() {
   if (RuntimeOption::EvalJitUseVtuneAPI) {
     reportTraceletToVtune(sk.unit(), sk.func(), tr);
   }
+  recordTranslationSizes(tr);
 
   fixups.process(&tailBranches);
 }

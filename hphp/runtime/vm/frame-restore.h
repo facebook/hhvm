@@ -20,7 +20,6 @@
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/vm/preclass.h"
-#include "hphp/runtime/vm/record.h"
 #include "hphp/runtime/vm/type-alias.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
@@ -30,9 +29,6 @@ namespace HPHP {
 struct FrameRestore : private VMRegAnchor {
   explicit FrameRestore(const PreClass* preClass) :
     FrameRestore(VMParserFrame { preClass->unit()->filepath(), preClass->line1() }) {}
-
-  explicit FrameRestore(const PreRecordDesc* pr) :
-    FrameRestore(VMParserFrame { pr->unit()->filepath(), pr->line1() }) {}
 
   explicit FrameRestore(const PreTypeAlias* ta) :
     FrameRestore(VMParserFrame { ta->unit->filepath(), ta->line1 }) {}

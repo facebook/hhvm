@@ -110,28 +110,12 @@ struct OfflineTransData {
     return repoSchema;
   }
 
-  TCA getHotBase() const {
-    return ahotBase;
-  }
-
-  TCA getHotFrontier() const {
-    return ahotFrontier;
-  }
-
   TCA getMainBase() const {
     return aBase;
   }
 
   TCA getMainFrontier() const {
     return aFrontier;
-  }
-
-  TCA getProfBase() const {
-    return aprofBase;
-  }
-
-  TCA getProfFrontier() const {
-    return aprofFrontier;
   }
 
   TCA getColdBase() const {
@@ -156,9 +140,7 @@ struct OfflineTransData {
   void printTransRec(TransID transId, const PerfEventsMap<TransID>& transStats);
 
   bool isAddrInSomeTrans(TCA addr) const {
-    if ((ahotBase   <= addr && addr < ahotFrontier)  ||
-        (aBase      <= addr && addr < aFrontier)     ||
-        (aprofBase  <= addr && addr < aprofFrontier) ||
+    if ((aBase      <= addr && addr < aFrontier)     ||
         (coldBase   <= addr && addr < coldFrontier)  ||
         (frozenBase <= addr && addr < frozenFrontier)) {
       return getTransContaining(addr) != INVALID_ID;
@@ -186,12 +168,8 @@ private:
   Addr2TransMap               addr2TransMap;
 
   char                        repoSchema[100];
-  TCA                         ahotBase;
-  TCA                         ahotFrontier;
   TCA                         aBase;
   TCA                         aFrontier;
-  TCA                         aprofBase;
-  TCA                         aprofFrontier;
   TCA                         coldBase;
   TCA                         coldFrontier;
   TCA                         frozenBase;

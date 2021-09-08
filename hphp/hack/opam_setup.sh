@@ -98,7 +98,9 @@ if [[ -f "${MINI_REPO_FETCH_SCRIPT}" && "${SKIP_MINI_REPO}" -eq 0 ]]; then
     # Patching ocaml base compiler so we can pass it CFLAGS/LDFLAGS
     # The goal is to make it use the right glibc, not the system one
     opam switch create "$HACK_OPAM_NAME" --empty
-    pushd "$OPAMROOT/repo/offline_clone" || exit 1
+    pushd "$OPAMROOT/repo" || exit 1
+    tar xzf offline_clone.tar.gz
+    cd offline_clone || exit 1
     mkdir -p base-compiler-source
     cd base-compiler-source
     opam source "$OCAML_COMPILER_NAME"
@@ -109,7 +111,7 @@ if [[ -f "${MINI_REPO_FETCH_SCRIPT}" && "${SKIP_MINI_REPO}" -eq 0 ]]; then
 
     opam pin "$OCAML_COMPILER_NAME" .
     popd  || exit 1
-    opam switch set-base "$OCAML_BASE_NAME"
+    opam switch set-invariant "$OCAML_BASE_NAME"
   fi
 else
   opam init --disable-sandboxing --reinit --no-setup --bare

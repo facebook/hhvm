@@ -46,7 +46,7 @@
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/server/xbox-server.h"
-#include "hphp/runtime/vm/extern-compiler.h"
+#include "hphp/runtime/vm/unit-parser.h"
 #include "hphp/util/hugetlb.h"
 #include "hphp/util/light-process.h"
 #include "hphp/util/lock.h"

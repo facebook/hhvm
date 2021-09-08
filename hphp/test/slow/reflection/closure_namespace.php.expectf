@@ -2,11 +2,11 @@ int(1)
 int(2)
 int(42)
 string(8) "__invoke"
-string(%d) "Closure$Foo\Bar\C::func;%d"
+string(%d) "Closure$Foo\Bar\C::func"
 string(3) "arg"
 string(8) "__invoke"
-string(%d) "Closure$Foo\Bar\C::func;%d"
-string(%d) "Closure$Foo\Bar\C::func;%d"
+string(%d) "Closure$Foo\Bar\C::func"
+string(%d) "Closure$Foo\Bar\C::func"
 int(2)
 string(12) "\Foo\Bar\BAZ"
 string(12) "\Foo\Bar\BAZ"

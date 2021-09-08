@@ -443,7 +443,8 @@ def report_failures(
             env_vars.append("EXP_EXT=%s" % expect_extension)
         if fallback_expect_extension is not None:
             env_vars.append("FALLBACK_EXP_EXT=%s " % fallback_expect_extension)
-        env_vars.append("NO_COPY=%s" % ("true" if no_copy else "false"))
+        if no_copy:
+            env_vars.append("UPDATE=never")
 
         env_vars.extend(["SOURCE_ROOT=%s" % exp_dir, "OUTPUT_ROOT=%s" % out_dir])
 
@@ -455,6 +456,14 @@ def report_failures(
                 " ".join(map(fname_map_var, fnames)),
             )
         )
+
+        # If more than 75% of files have changed, we're probably doing
+        # a transformation to all the .exp files.
+        if len(fnames) >= (0.75 * total):
+            print(
+                "\nJust want to update all the %s files? Use UPDATE=always with the above command."
+                % expect_extension
+            )
 
 
 def dump_failures(failures: List[Result]) -> None:

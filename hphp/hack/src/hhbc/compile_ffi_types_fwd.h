@@ -13,4 +13,8 @@ struct output_config;
 
 struct error_buf_t;
 
+struct bump_allocator;
+
+struct hhas_program;
+
 }}} //namespace HPHP::hackc::compile

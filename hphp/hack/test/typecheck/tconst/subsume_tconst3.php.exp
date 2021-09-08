@@ -1,6 +1,0 @@
-File "subsume_tconst3.php", line 8, characters 14-14:
-The assigned type of this type constant is inconsistent with its parent (Typing[4110])
-File "subsume_tconst3.php", line 4, characters 30-35:
-Expected `string`
-File "subsume_tconst3.php", line 8, characters 18-20:
-But got `int`

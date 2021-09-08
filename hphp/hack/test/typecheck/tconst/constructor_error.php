@@ -1,7 +1,7 @@
 <?hh // strict
 
 class X {
-  const type T as arraykey = string;
+  const type T = string;
 
   private this::T $priv;
 
@@ -10,7 +10,7 @@ class X {
   }
 
   public static function test(this::T $t): void {
-    // Invalid because T can be overridden to accept only int,.
+    // Valid because T cannot be overridden
     $static = new static('');
   }
 }

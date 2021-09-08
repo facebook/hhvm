@@ -1,24 +1,18 @@
 File "method_contravariant.php", line 13, characters 16-21:
 Can't use `new static()` for `X`; `__construct` arguments are not guaranteed to be consistent in child classes (Typing[4060])
-File "method_contravariant.php", line 3, characters 7-7:
-This declaration is neither `final` nor uses the `<<__ConsistentConstruct>>` attribute
+  File "method_contravariant.php", line 3, characters 16-16:
+  This declaration is neither `final` nor uses the `<<__ConsistentConstruct>>` attribute
 File "method_contravariant.php", line 18, characters 46-47:
 Invalid argument (Typing[4110])
-File "method_contravariant.php", line 12, characters 39-45:
-Expected `this::T`
-File "method_contravariant.php", line 18, characters 46-47:
-But got `string`
-File "method_contravariant.php", line 23, characters 14-14:
-The assigned type of this type constant is inconsistent with its parent (Typing[4110])
-File "method_contravariant.php", line 4, characters 30-35:
-Expected `string`
-File "method_contravariant.php", line 23, characters 18-20:
-But got `int`
-File "method_contravariant.php", line 31, characters 14-15:
+  File "method_contravariant.php", line 12, characters 39-45:
+  Expected `this::T`
+  File "method_contravariant.php", line 18, characters 46-47:
+  But got `string`
+File "method_contravariant.php", line 33, characters 14-15:
 Invalid argument (Typing[4110])
-File "method_contravariant.php", line 12, characters 39-45:
-Expected `<expr#1>::T`
-File "method_contravariant.php", line 31, characters 3-4:
-  where `<expr#1>` is a reference to this expression
-File "method_contravariant.php", line 31, characters 14-15:
-But got `string`
+  File "method_contravariant.php", line 12, characters 39-45:
+  Expected `<expr#1>::T`
+  File "method_contravariant.php", line 33, characters 3-4:
+    where `<expr#1>` is a reference to this expression
+  File "method_contravariant.php", line 33, characters 14-15:
+  But got `string`

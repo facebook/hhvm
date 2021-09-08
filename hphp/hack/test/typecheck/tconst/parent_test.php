@@ -1,7 +1,7 @@
 <?hh // strict
 
-class X {
-  const type T as arraykey = arraykey;
+abstract class X {
+  abstract const type T as arraykey = arraykey;
 
   private this::T $priv;
 

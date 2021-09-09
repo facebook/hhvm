@@ -85,7 +85,7 @@ let post_init genv (env, t) =
     }
   in
   let env = { env with local_symbol_table = run_search genv env } in
-  SharedMem.init_done ();
+  SharedMem.SMTelemetry.init_done ();
   env
 
 let get_lazy_level (genv : ServerEnv.genv) : lazy_level =

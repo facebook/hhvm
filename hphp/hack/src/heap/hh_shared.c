@@ -1165,14 +1165,6 @@ value hh_get_handle(void) {
   CAMLreturn(connector);
 }
 
-/* Master is 0, workers start at 1 */
-value hh_get_worker_id() {
-  CAMLparam0();
-  CAMLlocal1(result);
-  result = Val_long(worker_id);
-  CAMLreturn(result);
-}
-
 /*****************************************************************************/
 /* Counter
  *
@@ -1253,13 +1245,13 @@ CAMLprim value hh_set_can_worker_stop(value val) {
   CAMLreturn(Val_unit);
 }
 
-CAMLprim value hh_allow_removes(value val) {
+CAMLprim value hh_set_allow_removes(value val) {
   CAMLparam1(val);
   *allow_removes = Bool_val(val);
   CAMLreturn(Val_unit);
 }
 
-CAMLprim value hh_allow_hashtable_writes_by_current_process(value val) {
+CAMLprim value hh_set_allow_hashtable_writes_by_current_process(value val) {
   CAMLparam1(val);
   allow_hashtable_writes_by_current_process = Bool_val(val);
   CAMLreturn(Val_unit);

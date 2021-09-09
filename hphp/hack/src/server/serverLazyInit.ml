@@ -59,7 +59,7 @@ let lock_and_load_deptable
       try
         LoadScriptUtils.lock_saved_state fn;
         let start_t = Unix.gettimeofday () in
-        SharedMem.load_dep_table_sqlite fn ignore_hh_version;
+        SharedMem.DepTable.load_dep_table_sqlite ~fn ~ignore_hh_version;
         let (_t : float) =
           Hh_logger.log_duration "Did read the dependency file (sec)" start_t
         in
@@ -859,7 +859,7 @@ let initialize_naming_table
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
     (profiling : CgroupProfiler.Profiling.t) : ServerEnv.env * float =
-  SharedMem.cleanup_sqlite ();
+  SharedMem.DepTable.cleanup_sqlite ();
   ServerProgress.send_progress "%s" progress_message;
   let (get_next, count, t) =
     match fnl with

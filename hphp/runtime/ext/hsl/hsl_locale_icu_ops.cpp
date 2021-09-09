@@ -328,6 +328,13 @@ int64_t strpos_impl(const String& haystack,
                     uint32_t caseFoldFlags) {
   auto uhs = ustr_from_utf8(haystack);
   auto un = ustr_from_utf8(needle);
+
+  icu::ErrorCode err;
+  // Singleton, do not free
+  auto normalizer = icu::Normalizer2::getNFCInstance(err);
+  uhs = normalizer->normalize(uhs, err);
+  un = normalizer->normalize(un, err);
+
   auto char32_len = uhs.countChar32();
   if (offset >= 0) {
     offset = HSLLocale::Ops::normalize_offset(offset, char32_len);
@@ -428,39 +435,39 @@ String HSLLocaleICUOps::reverse(const String& str) const {
   return ret;
 }
 
-String HSLLocaleICUOps::pad_left(const String& str, int64_t len, const String& pad) const {
+String HSLLocaleICUOps::pad_left(const String& str, int64_t desired_len, const String& pad) const {
   auto ustr = ustr_from_utf8(str);
   const auto strl = ustr.countChar32();
-  if (strl >= len) {
+  if (strl >= desired_len) {
     return str;
   }
 
   const auto upad = ustr_from_utf8(pad);
-  const auto padl = ustr.countChar32();
+  const auto padl = upad.countChar32();
   icu::UnicodeString uret;
-  for (int64_t diff = len - strl; diff >= 0; diff -= padl) {
+  for (int64_t diff = desired_len - strl; diff >= 0; diff -= padl) {
     uret.append(upad);
   }
-  uret.truncate(uret.moveIndex32(0, len - strl));
+  uret.truncate(uret.moveIndex32(0, desired_len - strl));
   uret.append(ustr);
   std::string ret;
   uret.toUTF8String(ret);
   return ret;
 }
 
-String HSLLocaleICUOps::pad_right(const String& str, int64_t len, const String& pad) const {
+String HSLLocaleICUOps::pad_right(const String& str, int64_t desired_len, const String& pad) const {
   auto ustr = ustr_from_utf8(str);
   const auto strl = ustr.countChar32();
-  if (strl >= len) {
+  if (strl >= desired_len) {
     return str;
   }
 
   const auto upad = ustr_from_utf8(pad);
-  const auto padl = ustr.countChar32();
-  for (int64_t diff = len - strl; diff >= 0; diff -= padl) {
+  const auto padl = upad.countChar32();
+  for (int64_t diff = desired_len - strl; diff >= 0; diff -= padl) {
     ustr.append(upad);
   }
-  ustr.truncate(ustr.moveIndex32(0, len));
+  ustr.truncate(ustr.moveIndex32(0, desired_len));
   std::string ret;
   ustr.toUTF8String(ret);
   return ret;

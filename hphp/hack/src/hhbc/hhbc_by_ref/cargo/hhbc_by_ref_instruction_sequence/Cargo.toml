@@ -17,7 +17,7 @@ hhbc_by_ref_local = { path = "../hhbc_by_ref_local" }
 hhbc_by_ref_runtime = { path = "../hhbc_by_ref_runtime" }
 itertools = "0.10.1"
 oxidized = { path = "../../../../oxidized" }
-thiserror = "1.0"
+thiserror = "1.0.29"
 
 [dev-dependencies]
 pretty_assertions = "0.6"

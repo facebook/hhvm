@@ -176,15 +176,15 @@ struct TraitMethodImportData {
    *
    * Continued use of `this' after calling finish() is undefined.
    */
-  auto finish(typename TraitMethod::class_type ctx);
-
+  auto finish(typename TraitMethod::class_type ctx,
+              const bool enableMethodTraitDiamond);
 
   /////////////////////////////////////////////////////////////////////////////
   // Internals.
 
 private:
   void removeSpareTraitAbstractMethods();
-  void removeDiamondDuplicates();
+  void removeDiamondDuplicates(const bool enableMethodTraitDiamond);
 
   /////////////////////////////////////////////////////////////////////////////
   // Data members.

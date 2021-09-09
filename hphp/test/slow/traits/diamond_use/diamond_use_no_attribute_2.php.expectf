@@ -1,0 +1,1 @@
+Fatal error: Cannot use unstable feature: `method_trait_diamond` in %s/diamond_use_no_attribute_2.php on line 15

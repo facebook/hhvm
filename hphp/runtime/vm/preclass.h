@@ -363,6 +363,8 @@ public:
   void
   enforceInMaybeSealedParentWhitelist(const PreClass* parentPreClass) const;
 
+  bool enableMethodTraitDiamond();
+
   /*
    * Funcs, Consts, and Props all behave similarly.  Define raw accessors
    * foo() and numFoos() for people munging by hand, and ranges.

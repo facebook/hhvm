@@ -323,7 +323,8 @@ where
     Ok(())
 }
 
-pub fn from_text<W, S: AsRef<str>>(
+pub fn from_text<'arena, W, S: AsRef<str>>(
+    alloc: &'arena bumpalo::Bump,
     env: &Env<S>,
     stack_limit: &StackLimit,
     writer: &mut W,
@@ -334,10 +335,19 @@ where
     W::Error: Send + Sync + 'static, // required by anyhow::Error
 {
     let source_text = SourceText::make(RcOc::new(env.filepath.clone()), text);
-    from_text_(env, stack_limit, writer, source_text, None, NoDeclProvider)
+    from_text_(
+        alloc,
+        env,
+        stack_limit,
+        writer,
+        source_text,
+        None,
+        NoDeclProvider,
+    )
 }
 
-pub fn from_text_<'decl, W, S: AsRef<str>, D: DeclProvider<'decl>>(
+pub fn from_text_<'arena, 'decl, W, S: AsRef<str>, D: DeclProvider<'decl>>(
+    alloc: &'arena bumpalo::Bump,
     env: &Env<S>,
     stack_limit: &StackLimit,
     writer: &mut W,
@@ -384,7 +394,6 @@ where
     });
     let log_extern_compiler_perf = emitter.options().log_extern_compiler_perf();
 
-    let alloc = &bumpalo::Bump::new();
     let (program, codegen_t) = match &mut parse_result {
         Either::Right(ast) => {
             elaborate_namespaces_visitor::elaborate_program(RcOc::clone(&namespace_env), ast);
@@ -450,6 +459,61 @@ fn rewrite<'p, 'arena, 'decl, D: DeclProvider<'decl>>(
     namespace_env: RcOc<NamespaceEnv>,
 ) -> Result<(), Error> {
     rewrite_program(alloc, emitter, ast, namespace_env)
+}
+
+pub fn hhas_from_text<'arena, 'decl, S: AsRef<str>, D: DeclProvider<'decl>>(
+    alloc: &'arena bumpalo::Bump,
+    env: &Env<S>,
+    stack_limit: &StackLimit,
+    source_text: SourceText,
+    native_env: Option<&NativeEnv<S>>,
+    decl_provider: D,
+) -> anyhow::Result<HhasProgram<'arena>> {
+    let opts = match native_env {
+        None => Options::from_configs(&env.config_jsons, &env.config_list)
+            .map_err(anyhow::Error::msg)?,
+        Some(native_env) => NativeEnv::to_options(&native_env),
+    };
+
+    let mut emitter = Emitter::new(
+        opts,
+        env.flags.contains(EnvFlags::IS_SYSTEMLIB),
+        env.flags.contains(EnvFlags::FOR_DEBUGGER_EVAL),
+        decl_provider,
+    );
+
+    let namespace_env = RcOc::new(NamespaceEnv::empty(
+        emitter.options().hhvm.aliased_namespaces_cloned().collect(),
+        true, /* is_codegen */
+        emitter
+            .options()
+            .hhvm
+            .hack_lang
+            .flags
+            .contains(LangFlags::DISABLE_XHP_ELEMENT_MANGLING),
+    ));
+
+    let (parse_result, _) = time(|| {
+        parse_file(
+            emitter.options(),
+            stack_limit,
+            source_text,
+            !env.flags.contains(EnvFlags::DISABLE_TOPLEVEL_ELABORATION),
+            RcOc::clone(&namespace_env),
+        )
+    });
+
+    let (program, _) = match parse_result {
+        Either::Right(mut ast) => {
+            elaborate_namespaces_visitor::elaborate_program(RcOc::clone(&namespace_env), &mut ast);
+            let e = &mut emitter;
+            time(move || rewrite_and_emit(alloc, e, &env, namespace_env, &mut ast))
+        }
+        Either::Left((pos, msg, is_runtime_error)) => {
+            time(|| emit_fatal(alloc, is_runtime_error, &pos, msg))
+        }
+    };
+    program.map_err(|e| anyhow!("Unhandled Emitter error: {}", e))
 }
 
 fn emit<'p, 'arena, 'decl, D: DeclProvider<'decl>, S: AsRef<str>>(

@@ -76,14 +76,15 @@ function lowercase(
 }
 
 /**
- * Returns the string padded to the total length by appending the `$pad_string`
- * to the left.
+ * Returns the string padded to the total length (in bytes) by appending the
+ * `$pad_string` to the left.
  *
  * If the length of the input string plus the pad string exceeds the total
  * length, the pad string will be truncated. If the total length is less than or
  * equal to the length of the input string, no padding will occur.
  *
  * To pad the string on the right, see `Str\pad_right()`.
+ * To pad the string to a fixed number of characters, see `Str\pad_left_l()`.
  */
 function pad_left(
   string $string,
@@ -96,14 +97,15 @@ function pad_left(
 }
 
 /**
- * Returns the string padded to the total length by appending the `$pad_string`
- * to the right.
+ * Returns the string padded to the total length (in bytes) by appending the
+ * `$pad_string` to the right.
  *
  * If the length of the input string plus the pad string exceeds the total
  * length, the pad string will be truncated. If the total length is less than or
  * equal to the length of the input string, no padding will occur.
  *
  * To pad the string on the left, see `Str\pad_left()`.
+ * To pad the string to a fixed number of characters, see `Str\pad_right_l()`.
  */
 function pad_right(
   string $string,
@@ -307,6 +309,10 @@ function replace_every_nonrecursive_ci(
   return $output;
 }
 
+/** Reverse a string by bytes.
+ *
+ * @see `Str\reverse_l()` to reverse by characters instead.
+ */
 function reverse(string $string)[]: string {
   for ($lo = 0, $hi = namespace\length($string) - 1; $lo < $hi; $lo++, $hi--) {
     $temp = $string[$lo];

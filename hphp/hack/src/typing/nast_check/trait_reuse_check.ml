@@ -12,6 +12,7 @@ open Hh_prelude
 open Aast
 open Typing_defs
 module Cls = Decl_provider.Class
+module SN = Naming_special_names
 
 type tgenv = {
   ctx: Provider_context.t;
@@ -381,5 +382,11 @@ let handler =
       in
 
       check_reuse_final_method tgenv c;
-      check_reuse_method_without_override tgenv c
+      if
+        not
+          (Naming_attributes.mem
+             SN.UserAttributes.uaEnableMethodTraitDiamond
+             c.c_user_attributes)
+      then
+        check_reuse_method_without_override tgenv c
   end

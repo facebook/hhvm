@@ -1,6 +1,8 @@
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
+<<file:__EnableUnstableFeatures('method_trait_diamond')>>
+
 trait T {
   public function foo() : void {
     echo "I am T\n";
@@ -13,6 +15,7 @@ trait T2 {
   use T;
 }
 
+<<__EnableMethodTraitDiamond>>
 trait T3 {
   use T1, T2;
 }
@@ -23,6 +26,7 @@ trait T4 {
   }
 }
 
+<<__EnableMethodTraitDiamond>>
 class C {
   use T, T4;
 }

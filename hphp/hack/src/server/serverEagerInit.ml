@@ -42,7 +42,7 @@ let type_decl
   let bucket_size = genv.local_config.SLC.type_decl_bucket_size in
   let ctx = Provider_utils.ctx_from_server_env env in
   let errorl = Decl_service.go ~bucket_size ctx genv.workers fast in
-  let hs = SharedMem.heap_size () in
+  let hs = SharedMem.SMTelemetry.heap_size () in
   Hh_logger.log "Heap size: %d" hs;
   Stats.(stats.init_heap_size <- hs);
   HackEventLogger.type_decl_end t;
@@ -113,7 +113,7 @@ let init
     | _ -> (env, t)
   in
   (* Type-checking everything *)
-  SharedMem.cleanup_sqlite ();
+  SharedMem.DepTable.cleanup_sqlite ();
   ServerInitCommon.type_check
     genv
     env

@@ -156,6 +156,10 @@ void PreClass::enforceInMaybeSealedParentWhitelist(
   }
 }
 
+const StaticString s___EnableMethodTraitDiamond("__EnableMethodTraitDiamond");
+bool PreClass::enableMethodTraitDiamond() {
+  return m_userAttributes.find(s___EnableMethodTraitDiamond.get()) != m_userAttributes.end();
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // PreClass::Prop.

@@ -69,7 +69,7 @@ let relativize root path =
 
 (* Returns a list of (file_name, assoc list of counts) *)
 let get_coverage root ctx neutral fnl =
-  SharedMem.invalidate_caches ();
+  SharedMem.invalidate_local_caches ();
   let naming_table = NamingTableStore.load () in
   let file_counts =
     List.rev_filter_map fnl ~f:(fun fn ->

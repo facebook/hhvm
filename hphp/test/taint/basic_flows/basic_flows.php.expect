@@ -1,2 +1,3 @@
-{"hops": ["__source", "__sink"]}
-{"hops": ["__source", "identity", "__sink"]}
+{"hops": ["__source", "source_through_assignment_to_sink", "__sink"]}
+{"hops": ["__source", "source_through_function_to_sink", "identity", "source_through_function_to_sink", "__sink"]}
+{"hops": ["__source", "returns_source", "source_through_indirection_to_sink", "into_sink", "__sink"]}

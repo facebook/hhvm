@@ -293,7 +293,7 @@ let parsing genv env to_check ~stop_at_errors profiling =
           ~paths:to_check;
     }
   in
-  SharedMem.collect `gentle;
+  SharedMem.GC.collect `gentle;
   let max_size =
     if genv.local_config.ServerLocalConfig.small_buckets_for_dirty_names then
       Some 1
@@ -1325,7 +1325,7 @@ functor
       let time_first_error =
         Option.first_some time_first_error time_errors_pushed
       in
-      let hs = SharedMem.heap_size () in
+      let hs = SharedMem.SMTelemetry.heap_size () in
       let telemetry =
         telemetry
         |> Telemetry.duration ~key:"parse_end" ~start_time
@@ -1432,7 +1432,7 @@ functor
         Option.first_some time_first_error time_errors_pushed
       in
 
-      let heap_size = SharedMem.heap_size () in
+      let heap_size = SharedMem.SMTelemetry.heap_size () in
       Hh_logger.log "Heap size: %d" heap_size;
       HackEventLogger.naming_end ~count:reparse_count t heap_size;
       let t = Hh_logger.log_duration logstring t in
@@ -1479,7 +1479,7 @@ functor
       let to_redecl_phase2 =
         Typing_deps.Files.get_files to_redecl_phase2_deps
       in
-      let hs = SharedMem.heap_size () in
+      let hs = SharedMem.SMTelemetry.heap_size () in
       HackEventLogger.first_redecl_end t hs;
       let t = Hh_logger.log_duration logstring t in
       Hh_logger.log "Heap size: %d" hs;
@@ -1613,7 +1613,7 @@ functor
           ~to_redecl_phase2
           ~to_redecl_phase2_deps
       in
-      let hs = SharedMem.heap_size () in
+      let hs = SharedMem.SMTelemetry.heap_size () in
       HackEventLogger.second_redecl_end t hs;
       let t = Hh_logger.log_duration logstring t in
       Hh_logger.log "Heap size: %d" hs;
@@ -1796,7 +1796,7 @@ functor
         ~before:old_env.diag_subscribe
         ~after:diag_subscribe;
 
-      let heap_size = SharedMem.heap_size () in
+      let heap_size = SharedMem.SMTelemetry.heap_size () in
       Hh_logger.log "Heap size: %d" heap_size;
 
       let logstring =
@@ -1872,16 +1872,16 @@ functor
       in
 
       (* STATS LOGGING *********************************************************)
-      if SharedMem.hh_log_level () > 0 then begin
+      if SharedMem.SMTelemetry.hh_log_level () > 0 then begin
         Measure.print_stats ();
         Measure.print_distributions ()
       end;
       let telemetry =
-        if SharedMem.hh_log_level () > 0 then
+        if SharedMem.SMTelemetry.hh_log_level () > 0 then
           Telemetry.object_
             telemetry
             ~key:"shmem"
-            ~value:(SharedMem.get_telemetry ())
+            ~value:(SharedMem.SMTelemetry.get_telemetry ())
         else
           telemetry
       in

@@ -150,7 +150,8 @@ fn process_single_file_impl(
         config_list: vec![],
         flags,
     };
-    hhbc_by_ref_compile::from_text(&env, stack_limit, &mut output, content)?;
+    let alloc = bumpalo::Bump::new();
+    hhbc_by_ref_compile::from_text(&alloc, &env, stack_limit, &mut output, content)?;
     Ok((output, None))
 }
 

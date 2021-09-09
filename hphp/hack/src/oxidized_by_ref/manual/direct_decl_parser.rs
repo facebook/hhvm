@@ -142,13 +142,7 @@ impl<'a> Decl<'a> {
     }
 
     pub fn to_slab(&self) -> OwnedSlab {
-        match self {
-            Decl::Class(decl) => ocamlrep::slab::to_slab(decl),
-            Decl::Fun(decl) => ocamlrep::slab::to_slab(decl),
-            Decl::Record(decl) => ocamlrep::slab::to_slab(decl),
-            Decl::Typedef(decl) => ocamlrep::slab::to_slab(decl),
-            Decl::Const(decl) => ocamlrep::slab::to_slab(decl),
-        }
-        .expect("Got immediate value, but decls should always be block values")
+        ocamlrep::slab::to_slab(self)
+            .expect("Got immediate value, but Decl should always convert to a block value")
     }
 }

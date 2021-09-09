@@ -8,7 +8,7 @@ edition = "2018"
 path = "lib.rs"
 
 [dependencies]
-thiserror = "1.0"
+thiserror = "1.0.29"
 
 [profile.release]
 incremental = false

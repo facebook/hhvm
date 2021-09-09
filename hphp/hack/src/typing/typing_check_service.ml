@@ -221,11 +221,13 @@ let process_file
       Caml.Printexc.raise_with_backtrace e stack
 
 let get_mem_telemetry () : Telemetry.t option =
-  if SharedMem.hh_log_level () > 0 then
+  if SharedMem.SMTelemetry.hh_log_level () > 0 then
     Some
       (Telemetry.create ()
       |> Telemetry.object_ ~key:"gc" ~value:(Telemetry.quick_gc_stat ())
-      |> Telemetry.object_ ~key:"shmem" ~value:(SharedMem.get_telemetry ()))
+      |> Telemetry.object_
+           ~key:"shmem"
+           ~value:(SharedMem.SMTelemetry.get_telemetry ()))
   else
     None
 
@@ -302,7 +304,7 @@ let profile_log
       (Option.value duration_second_run ~default:duration)
       start_heap_mb
       end_heap_mb
-      (if SharedMem.hh_log_level () > 0 then
+      (if SharedMem.SMTelemetry.hh_log_level () > 0 then
         "\n" ^ Telemetry.to_string telemetry
       else
         "")
@@ -366,7 +368,7 @@ external hh_malloc_trim : unit -> unit = "hh_malloc_trim"
  * the system.
  *)
 let clear_caches_and_force_gc () =
-  SharedMem.invalidate_caches ();
+  SharedMem.invalidate_local_caches ();
   HackEventLogger.flush ();
   Gc.compact ();
   hh_malloc_trim ()
@@ -388,7 +390,7 @@ let process_files
     ~(longlived_workers : bool)
     ~(remote_execution : ReEnv.t option)
     ~(check_info : check_info) : typing_result * computation_progress =
-  if not longlived_workers then SharedMem.invalidate_caches ();
+  if not longlived_workers then SharedMem.invalidate_local_caches ();
   File_provider.local_changes_push_sharedmem_stack ();
   Ast_provider.local_changes_push_sharedmem_stack ();
 

@@ -144,7 +144,7 @@ let redeclare_files ctx filel =
   (List.length filel, errors)
 
 let on_the_fly_decl_files filel =
-  SharedMem.invalidate_caches ();
+  SharedMem.invalidate_local_caches ();
 
   (* Redeclaring the files *)
   redeclare_files filel
@@ -293,7 +293,7 @@ let parallel_on_the_fly_decl
     (errors, changed, to_redecl, to_recheck)
   with
   | e ->
-    if SharedMem.is_heap_overflow () then
+    if SharedMem.SMTelemetry.is_heap_overflow () then
       Exit.exit Exit_status.Redecl_heap_overflow
     else
       raise e
@@ -313,7 +313,7 @@ let oldify_defs
   Decl_heap.RecordDefs.oldify_batch n_record_defs;
   Decl_heap.Typedefs.oldify_batch n_types;
   Decl_heap.GConsts.oldify_batch n_consts;
-  if collect_garbage then SharedMem.collect `gentle;
+  if collect_garbage then SharedMem.GC.collect `gentle;
   ()
 
 let remove_old_defs
@@ -327,7 +327,7 @@ let remove_old_defs
   Decl_heap.RecordDefs.remove_old_batch n_record_defs;
   Decl_heap.Typedefs.remove_old_batch n_types;
   Decl_heap.GConsts.remove_old_batch n_consts;
-  SharedMem.collect `gentle;
+  SharedMem.GC.collect `gentle;
   ()
 
 let remove_defs
@@ -343,7 +343,7 @@ let remove_defs
   Decl_heap.RecordDefs.remove_batch n_record_defs;
   Decl_heap.Typedefs.remove_batch n_types;
   Decl_heap.GConsts.remove_batch n_consts;
-  if collect_garbage then SharedMem.collect `gentle;
+  if collect_garbage then SharedMem.GC.collect `gentle;
   ()
 
 let is_dependent_class_of_any ctx classes (c : string) : bool =

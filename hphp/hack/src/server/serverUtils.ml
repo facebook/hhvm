@@ -56,14 +56,16 @@ let log_and_get_sharedmem_load_telemetry () : Telemetry.t =
     | Error telemetry -> telemetry
   in
   let (telemetry : Telemetry.t) =
-    Utils.try_with_stack SharedMem.dep_stats
+    Utils.try_with_stack SharedMem.SMTelemetry.dep_stats
     |> Result.map_error ~f:(fun (exn, Utils.Callstack stack) ->
            Hh_logger.exc ~stack exn;
            Telemetry.string_
              telemetry
              ~key:"deptable_stats_error"
              ~value:(Exn.to_string exn))
-    |> Result.map ~f:(fun { SharedMem.used_slots; slots; nonempty_slots = _ } ->
+    |> Result.map
+         ~f:(fun { SharedMem.SMTelemetry.used_slots; slots; nonempty_slots = _ }
+            ->
            let load_factor = float_of_int used_slots /. float_of_int slots in
            Hh_logger.log
              "Dependency table load factor: %d / %d (%.02f)"
@@ -76,14 +78,15 @@ let log_and_get_sharedmem_load_telemetry () : Telemetry.t =
              ~value:load_factor)
     |> unwrap
   in
-  Utils.try_with_stack SharedMem.hash_stats
+  Utils.try_with_stack SharedMem.SMTelemetry.hash_stats
   |> Result.map_error ~f:(fun (exn, Utils.Callstack stack) ->
          Hh_logger.exc ~stack exn;
          Telemetry.string_
            telemetry
            ~key:"hashtable_stats_error"
            ~value:(Exn.to_string exn))
-  |> Result.map ~f:(fun { SharedMem.used_slots; slots; nonempty_slots } ->
+  |> Result.map
+       ~f:(fun { SharedMem.SMTelemetry.used_slots; slots; nonempty_slots } ->
          let load_factor = float_of_int used_slots /. float_of_int slots in
          Hh_logger.log
            "Hashtable load factor: %d / %d (%.02f) with %d nonempty slots"

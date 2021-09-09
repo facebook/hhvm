@@ -913,14 +913,18 @@ let register_discovered_dep_edges : dep_edges -> unit = function
 let save_discovered_edges mode ~dest ~build_revision ~reset_state_after_saving =
   match mode with
   | SQLiteMode ->
-    SharedMem.save_dep_table_blob dest build_revision ~reset_state_after_saving
+    SharedMem.DepTable.save_dep_table_blob
+      ~fn:dest
+      ~build_revision
+      ~reset_state_after_saving
   | CustomMode _ -> CustomGraph.save_delta dest reset_state_after_saving
   | SaveCustomMode _ ->
     failwith "save_discovered_edges not supported for SaveCustomMode"
 
 let load_discovered_edges mode source ~ignore_hh_version =
   match mode with
-  | SQLiteMode -> SharedMem.load_dep_table_blob source ignore_hh_version
+  | SQLiteMode ->
+    SharedMem.DepTable.load_dep_table_blob ~fn:source ~ignore_hh_version
   | CustomMode _ -> CustomGraph.load_delta mode source
   | SaveCustomMode _ ->
     failwith "load_discovered_edges not supported for SaveCustomMode"

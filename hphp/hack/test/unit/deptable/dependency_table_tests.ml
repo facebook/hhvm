@@ -177,12 +177,12 @@ let test_dep_graph_blob () =
 
         Asserter.Int_asserter.assert_equals
           1
-          (SharedMem.get_in_memory_dep_table_entry_count ())
+          (SharedMem.DepTable.get_in_memory_dep_table_entry_count ())
           "Expected the correct # of edges in memory after saving dep table blob";
 
         let filename = Path.(to_string (concat dir "deptable.bin")) in
         let edges =
-          SharedMem.save_dep_table_blob
+          SharedMem.DepTable.save_dep_table_blob
             filename
             "build_revision"
             ~reset_state_after_saving:true
@@ -195,7 +195,7 @@ let test_dep_graph_blob () =
 
         Asserter.Int_asserter.assert_equals
           0
-          (SharedMem.get_in_memory_dep_table_entry_count ())
+          (SharedMem.DepTable.get_in_memory_dep_table_entry_count ())
           "Expected 0 edges in memory after saving dep table blob"
       done)
 

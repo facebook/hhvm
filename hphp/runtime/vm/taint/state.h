@@ -36,10 +36,19 @@ struct std::hash<HPHP::tv_lval> {
 namespace HPHP {
 namespace taint {
 
+/*
+ * Single hop in a trace. Can be from callee to caller on trace from source
+ * to root; or caller to callee on trace from root to sink.
+ */
+struct Hop {
+  const Func* from;
+  const Func* to;
+};
+
 struct Path {
   // Print trace in JSON-line format to stderr.
   void dump() const;
-  std::vector<const Func*> hops;
+  std::vector<Hop> hops;
 };
 
 using Value = Optional<Path>;

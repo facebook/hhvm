@@ -32,10 +32,23 @@ namespace taint {
 TRACE_SET_MOD(taint);
 
 void Path::dump() const {
+  const Func* last = nullptr;
+
   std::stringstream stream;
   stream << "{\"hops\": [";
   for (int i = 0; i < hops.size(); i++) {
-    stream << "\"" << hops[i]->fullName()->data() << "\"";
+    auto hop = hops[i];
+
+    if (last != hop.from) {
+      stream << "\"" << hop.from->fullName()->data() << "\", ";
+    }
+    last = hop.from;
+
+    if (last != hop.to) {
+      stream << "\"" << hop.to->fullName()->data() << "\"";
+    }
+    last = hop.to;
+
     if (i != hops.size() - 1) {
       stream << ", ";
     }

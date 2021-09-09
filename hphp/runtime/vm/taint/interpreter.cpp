@@ -127,6 +127,14 @@ std::string yellow(const std::string& string) {
       ANSI_COLOR_END);
 }
 
+const Func* callee() {
+  auto sfp = vmfp()->sfp();
+  if (sfp != nullptr) {
+    return sfp->func();
+  }
+  return nullptr;
+}
+
 } // namespace
 
 void iopNop() {
@@ -520,7 +528,7 @@ void iopRetC(PC& /* pc */) {
   if (sources.find(name) != sources.end()) {
     FTRACE(1, "taint: function returns source\n");
     Path path;
-    path.hops.push_back(func);
+    path.hops.push_back(Hop{func, callee()});
     stack.replaceTop(path);
   }
 
@@ -853,7 +861,7 @@ TCA iopFCallFuncD(
     if (!value) { continue; }
 
     FTRACE(1, "taint: tainted value flows into sink\n");
-    value->hops.push_back(func);
+    value->hops.push_back(Hop{vmfp()->func(), func});
     value->dump();
   }
 
@@ -978,7 +986,7 @@ void iopVerifyParamType(local_var param) {
         param.lval,
         param.index,
         value);
-    value->hops.push_back(func);
+    value->hops.push_back(Hop{callee(), func});
     state->heap.set(param.lval, value);
   }
 }

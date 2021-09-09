@@ -207,7 +207,7 @@ TraitMethodImportData<TraitMethod, Ops>
 template <class TraitMethod, class Ops>
 inline void
 TraitMethodImportData<TraitMethod, Ops>
-::removeDiamondDuplicates() {
+::removeDiamondDuplicates(const bool enableMethodTraitDiamond) {
   for (auto& nameData : m_dataForName) {
     auto& methods = nameData.second.methods;
 
@@ -215,7 +215,7 @@ TraitMethodImportData<TraitMethod, Ops>
       nameData.second.methodOriginsWithDuplicates.push_back(Ops::clsName(method.trait));
     }
 
-    if (RO::EvalDiamondTraitMethods) {
+    if (RO::EvalDiamondTraitMethods && enableMethodTraitDiamond) {
       std::set<typename TraitMethod::origin_type> origins;
       methods.erase(
         std::remove_if(methods.begin(), methods.end(),
@@ -230,9 +230,9 @@ TraitMethodImportData<TraitMethod, Ops>
 template <class TraitMethod, class Ops>
 inline auto
 TraitMethodImportData<TraitMethod, Ops>
-::finish(typename TraitMethod::class_type ctx) {
+::finish(typename TraitMethod::class_type ctx, const bool enableMethodTraitDiamond) {
   removeSpareTraitAbstractMethods();
-  removeDiamondDuplicates();
+  removeDiamondDuplicates(enableMethodTraitDiamond);
 
   std::unordered_set<String> seenNames;
   std::vector<MethodData> output;

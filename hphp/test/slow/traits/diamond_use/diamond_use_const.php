@@ -1,6 +1,8 @@
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
+<<file:__EnableUnstableFeatures('method_trait_diamond')>>
+
 class C {
   const int X = 1;
 }
@@ -20,6 +22,7 @@ trait T2 {
   const int X = 2;
 }
 
+<<__EnableMethodTraitDiamond>>
 class D extends C {
   use T1, T2;
 }

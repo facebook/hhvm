@@ -1933,6 +1933,14 @@ bool build_class_properties(ClassInfo* cinfo) {
   return true;
 }
 
+const StaticString s___EnableMethodTraitDiamond("__EnableMethodTraitDiamond");
+
+bool enable_method_trait_diamond(const ClassInfo* cinfo) {
+  assertx(cinfo->cls);
+  auto const cls_attrs = cinfo->cls->userAttributes;
+  return cls_attrs.find(s___EnableMethodTraitDiamond.get()) != cls_attrs.end();
+}
+
 /*
  * Make a flattened table of the methods on this class.
  *
@@ -2055,7 +2063,8 @@ bool build_class_methods(const IndexData& index,
     for (auto const& aliasRule : cinfo->cls->traitAliasRules) {
       tmid.applyAliasRule(aliasRule, cinfo);
     }
-    auto traitMethods = tmid.finish(cinfo);
+
+    auto traitMethods = tmid.finish(cinfo, enable_method_trait_diamond(cinfo));
     // Import the methods.
     for (auto const& mdata : traitMethods) {
       auto const method = mdata.tm.method;

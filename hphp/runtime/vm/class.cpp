@@ -4682,7 +4682,9 @@ void Class::importTraitMethods(MethodMapBuilder& builder) {
 
   // Apply trait rules and import the methods.
   applyTraitRules(this, tmid);
-  auto traitMethods = tmid.finish(this);
+
+  bool enableMethodTraitDiamond = m_preClass->enableMethodTraitDiamond();
+  auto traitMethods = tmid.finish(this, enableMethodTraitDiamond);
 
   // Import the methods.
   for (auto const& mdata : traitMethods) {

@@ -1,1 +1,1 @@
-Fatal error: Method 'foo' declared in multiple traits (T, T4) in %s/diamond_use5.php on line 26
+Fatal error: Method 'foo' declared in multiple traits (T, T4) in %s/diamond_use5.php on line 29

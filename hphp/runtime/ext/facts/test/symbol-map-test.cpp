@@ -20,6 +20,7 @@
 #include <string_view>
 
 #include <folly/ScopeGuard.h>
+#include <folly/concurrency/ConcurrentHashMap.h>
 #include <folly/executors/CPUThreadPoolExecutor.h>
 #include <folly/executors/GlobalExecutor.h>
 #include <folly/executors/ManualExecutor.h>
@@ -29,8 +30,11 @@
 
 #include "hphp/runtime/ext/facts/exception.h"
 #include "hphp/runtime/ext/facts/file-facts.h"
+#include "hphp/runtime/ext/facts/string-ptr.h"
 #include "hphp/runtime/ext/facts/symbol-map.h"
+#include "hphp/util/bstring.h"
 #include "hphp/util/hash-set.h"
+#include "hphp/util/hash.h"
 
 using ::testing::AllOf;
 using ::testing::Contains;
@@ -40,29 +44,153 @@ using ::testing::IsEmpty;
 using ::testing::SizeIs;
 using ::testing::UnorderedElementsAre;
 
+/**
+ * Implements our StringPtr class in terms of std::string.
+ *
+ * For unit-testing purposes only. By contrast, see
+ * string_data_ptr.cpp, which implements this class in terms of
+ * HPHP::StringData for production use.
+ */
+
 namespace HPHP {
+
+struct StringData {
+public:
+  // These two constructions allow implicit construction for convenience
+  // in unit tests.
+  /* implicit */ StringData(const char* s) : m_impl{s} {};
+  /* implicit */ StringData(std::string&& s) : m_impl{std::move(s)} {
+  }
+
+  explicit StringData(const std::string_view& s) : m_impl{s} {
+  }
+
+  std::string* impl() const {
+    return &m_impl;
+  }
+  std::string_view slice() const noexcept {
+    return std::string_view{m_impl};
+  }
+  bool empty() const {
+    return m_impl.empty();
+  }
+  size_t size() const {
+    return m_impl.size();
+  }
+  strhash_t hash() const noexcept {
+    strhash_t h = hash_string_i_unsafe(m_impl.c_str(), m_impl.size());
+    assertx(h >= 0);
+    return h;
+  }
+  bool same(const StringData& o) const noexcept {
+    return m_impl == o.m_impl;
+  }
+  bool isame(const StringData& o) const noexcept {
+    auto lower = [](const std::string& _s) {
+      std::string s = _s;
+      std::transform(s.begin(), s.end(), s.begin(), ::tolower);
+      return s;
+    };
+    return lower(m_impl) == lower(o.m_impl);
+  }
+
+private:
+  mutable std::string m_impl;
+};
+
 namespace Facts {
 
-template <typename S, SymKind k>
-void PrintTo(const Symbol<S, k>& symbol, ::std::ostream* os) {
+/**
+ * Insert-only store of static pointers
+ */
+folly::ConcurrentHashMap<StringPtr, std::unique_ptr<StringData>> s_stringTable;
+
+std::string_view StringPtr::StringPtr::slice() const noexcept {
+  assertx(m_impl != nullptr);
+  return std::string_view{*m_impl->impl()};
+}
+
+int StringPtr::StringPtr::size() const noexcept {
+  assertx(m_impl != nullptr);
+  return m_impl->impl()->size();
+}
+
+bool StringPtr::StringPtr::empty() const noexcept {
+  assertx(m_impl != nullptr);
+  return m_impl->impl()->empty();
+}
+
+strhash_t StringPtr::StringPtr::hash() const noexcept {
+  assertx(m_impl != nullptr);
+  return hash_string_i(m_impl->impl()->c_str(), m_impl->impl()->size());
+}
+
+bool StringPtr::StringPtr::same(const StringPtr& s) const noexcept {
+  if (m_impl->impl() == s.m_impl->impl()) {
+    return true;
+  }
+  if (m_impl->impl() == nullptr || s.m_impl->impl() == nullptr) {
+    return false;
+  }
+  return *m_impl->impl() == *s.m_impl->impl();
+}
+
+bool StringPtr::StringPtr::isame(const StringPtr& s) const noexcept {
+  if (m_impl->impl() == s.m_impl->impl()) {
+    return true;
+  }
+  if (m_impl->impl() == nullptr || s.m_impl->impl() == nullptr) {
+    return false;
+  }
+  if (m_impl->impl()->size() != s.m_impl->impl()->size()) {
+    return false;
+  }
+  return bstrcaseeq(
+      m_impl->impl()->c_str(),
+      s.m_impl->impl()->c_str(),
+      m_impl->impl()->size());
+}
+
+StringPtr makeStringPtr(const StringData& s) {
+  auto it = s_stringTable.find(StringPtr{&s});
+  if (it != s_stringTable.end()) {
+    return it->first;
+  }
+
+  auto staticStr = std::make_unique<StringData>(s);
+  auto strKey = StringPtr{staticStr.get()};
+  return StringPtr{
+      s_stringTable.insert(strKey, std::move(staticStr)).first->first};
+}
+
+StringPtr makeStringPtr(const std::string_view sv) {
+  return makeStringPtr(StringData{sv});
+}
+
+std::ostream& operator<<(std::ostream& os, const StringPtr& s) {
+  if (s.get()->impl() == nullptr) {
+    return os << "<nullptr>";
+  }
+  return os << *s.get()->impl();
+}
+
+template <SymKind k> void PrintTo(const Symbol<k>& symbol, ::std::ostream* os) {
   *os << symbol.slice();
 }
 
-template <typename S, SymKind k>
-bool operator==(const Symbol<S, k>& symbol, const char* str) {
+template <SymKind k> bool operator==(const Symbol<k>& symbol, const char* str) {
   return symbol.slice() == str;
 }
 
-template <typename S, SymKind k, typename T, typename U>
+template <SymKind k, typename T, typename U>
 void PrintTo(
-    const std::tuple<Symbol<S, k>, Path<S>, T, U>& typeInfo,
-    ::std::ostream* os) {
+    const std::tuple<Symbol<k>, Path, T, U>& typeInfo, ::std::ostream* os) {
   *os << std::get<0>(typeInfo).slice();
 }
 
-template <typename S, SymKind k, typename T, typename U>
+template <SymKind k, typename T, typename U>
 bool operator==(
-    const std::tuple<Symbol<S, k>, Path<S>, T, U>& typeInfo, const char* str) {
+    const std::tuple<Symbol<k>, Path, T, U>& typeInfo, const char* str) {
   return std::get<0>(typeInfo) == str;
 }
 
@@ -79,8 +207,7 @@ auto constexpr kSHA = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
  */
 struct SymbolMapWrapper {
   SymbolMapWrapper(
-      std::unique_ptr<SymbolMap<std::string>> m,
-      std::shared_ptr<folly::ManualExecutor> exec)
+      std::unique_ptr<SymbolMap> m, std::shared_ptr<folly::ManualExecutor> exec)
       : m_exec{exec}, m_map{std::move(m)} {
     if (m_exec) {
       m_map->m_exec = m_exec;
@@ -101,22 +228,21 @@ struct SymbolMapWrapper {
   SymbolMapWrapper& operator=(SymbolMapWrapper&& old) noexcept = delete;
 
   std::shared_ptr<folly::ManualExecutor> m_exec;
-  std::unique_ptr<SymbolMap<std::string>> m_map;
+  std::unique_ptr<SymbolMap> m_map;
 };
 
 /**
  * If a map has a manual executor assigned to it, use this to
  * explicitly tell the executor to run.
  */
-void waitForDB(
-    SymbolMap<std::string>& m, std::shared_ptr<folly::ManualExecutor>& exec) {
+void waitForDB(SymbolMap& m, std::shared_ptr<folly::ManualExecutor>& exec) {
   ASSERT_EQ(m.m_exec.get(), static_cast<folly::Executor*>(exec.get()));
   exec->drain();
   m.waitForDBUpdate();
 }
 
 void update(
-    SymbolMap<std::string>& m,
+    SymbolMap& m,
     std::string_view since,
     std::string_view clock,
     std::vector<folly::fs::path> alteredPaths,
@@ -150,7 +276,7 @@ protected:
     m_wrappers.clear();
   }
 
-  SymbolMap<std::string>& make(
+  SymbolMap& make(
       std::string root,
       std::shared_ptr<folly::ManualExecutor> exec = nullptr,
       hphp_hash_set<std::string> indexedMethodAttributes = {}) {
@@ -158,7 +284,7 @@ protected:
                   folly::to<std::string>(
                       "autoload_", std::hash<std::string>{}(root), "_db.sql3");
     m_wrappers.push_back(SymbolMapWrapper{
-        std::make_unique<SymbolMap<std::string>>(
+        std::make_unique<SymbolMap>(
             std::move(root),
             DBData::readWrite(
                 std::move(dbPath), static_cast<::gid_t>(-1), 0644),
@@ -1228,14 +1354,14 @@ TEST_P(SymbolMapTest, MemoryAndDBDisagreeOnFileHash) {
   update(m1, "", "1:2:3", {path1}, {}, {ff});
   waitForDB(m1, m_exec);
   EXPECT_EQ(
-      m1.getAllPathsWithHashes().at(Path<std::string>{path1}),
+      m1.getAllPathsWithHashes().at(Path{path1}),
       SHA1{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"});
 
   ff.m_sha1hex = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
 
   update(m2, "1:2:3", "1:2:4", {path1}, {}, {ff});
   EXPECT_EQ(
-      m2.getAllPathsWithHashes().at(Path<std::string>{path1}),
+      m2.getAllPathsWithHashes().at(Path{path1}),
       SHA1{"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"});
 }
 
@@ -1492,7 +1618,8 @@ TEST_P(SymbolMapTest, GetTypesAndTypeAliasesWithAttribute) {
       m1.getAttributesOfType("SomeClass"),
       UnorderedElementsAre("Bar", "Baz", "Foo"));
   EXPECT_THAT(
-      m1.getTypeAliasAttributeArgs("SomeTypeAlias", "Foo"), ElementsAre(42, "a"));
+      m1.getTypeAliasAttributeArgs("SomeTypeAlias", "Foo"),
+      ElementsAre(42, "a"));
   EXPECT_THAT(
       m1.getTypeAttributeArgs("SomeClass", "Foo"), ElementsAre("apple", 38));
   EXPECT_THAT(
@@ -1514,7 +1641,8 @@ TEST_P(SymbolMapTest, GetTypesAndTypeAliasesWithAttribute) {
       m2.getTypeAliasesWithAttribute("Foo"),
       UnorderedElementsAre("SomeTypeAlias"));
   EXPECT_THAT(
-      m2.getTypeAliasAttributeArgs("SomeTypeAlias", "Foo"), ElementsAre(42, "a"));
+      m2.getTypeAliasAttributeArgs("SomeTypeAlias", "Foo"),
+      ElementsAre(42, "a"));
   EXPECT_THAT(
       m2.getTypesWithAttribute("Bar"),
       UnorderedElementsAre("SomeClass", "OtherClass"));
@@ -1587,13 +1715,11 @@ TEST_P(SymbolMapTest, GetMethodsWithAttribute) {
         methods,
         AllOf(
             SizeIs(2),
-            Contains(MethodDecl<std::string>{
+            Contains(MethodDecl{
                 .m_type =
-                    {.m_name =
-                         Symbol<std::string, SymKind::Type>{std::string{"C1"}},
-                     .m_path = Path<std::string>{p1}},
-                .m_method = Symbol<std::string, SymKind::Function>{
-                    std::string{"m1"}}})));
+                    {.m_name = Symbol<SymKind::Type>{StringData{"C1"}},
+                     .m_path = Path{p1}},
+                .m_method = Symbol<SymKind::Function>{StringData{"m1"}}})));
 
     EXPECT_THAT(m.getAttributesOfMethod("C1", "m1"), ElementsAre("A1"));
     EXPECT_THAT(m.getMethodAttributeArgs("C1", "m1", "A1"), ElementsAre(1));
@@ -1677,7 +1803,7 @@ TEST_P(SymbolMapTest, OnlyIndexCertainMethodAttrs) {
       .m_sha1hex = kSHA};
   folly::fs::path p1{"some/path1.php"};
 
-  auto check = [&](SymbolMap<std::string>& m) {
+  auto check = [&](SymbolMap& m) {
     auto attrs = m.getAttributesOfMethod("C1", "m1");
     ASSERT_EQ(attrs.size(), 1);
     EXPECT_EQ(attrs[0].m_name, "A2");
@@ -1718,13 +1844,13 @@ TEST_P(SymbolMapTest, GetFilesWithAttribute) {
     auto a2files = m.getFilesWithAttribute("A2");
     EXPECT_THAT(a1files, ElementsAre(p1.native()));
 
-    auto attrs = m.getAttributesOfFile(Path{p1.native()});
+    auto attrs = m.getAttributesOfFile(Path{p1});
     EXPECT_THAT(attrs, UnorderedElementsAre("A1", "A2"));
 
-    auto a1args = m.getFileAttributeArgs(Path{p1.native()}, "A1");
+    auto a1args = m.getFileAttributeArgs(Path{p1}, "A1");
     EXPECT_THAT(a1args, ElementsAre(1));
 
-    auto a2args = m.getFileAttributeArgs(Path{p1.native()}, "A2");
+    auto a2args = m.getFileAttributeArgs(Path{p1}, "A2");
     EXPECT_THAT(a2args, ElementsAre());
   };
   testMap(m1);

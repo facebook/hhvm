@@ -32,8 +32,8 @@
 namespace HPHP {
 namespace Facts {
 
-template <typename S, typename Key> struct AttributeMap {
-  using KeyToAttrMap = LazyTwoWayMap<Key, Symbol<S, SymKind::Type>>;
+template <typename Key> struct AttributeMap {
+  using KeyToAttrMap = LazyTwoWayMap<Key, Symbol<SymKind::Type>>;
 
   using TypeDefSet = typename KeyToAttrMap::KeysSet;
   using AttrSet = typename KeyToAttrMap::ValuesSet;
@@ -50,7 +50,7 @@ template <typename S, typename Key> struct AttributeMap {
    * Fill the map with `attrsFromDB` and return a complete set of attributes.
    */
   const AttrSet&
-  getAttributes(Key key, std::vector<Symbol<S, SymKind::Type>> attrsFromDB) {
+  getAttributes(Key key, std::vector<Symbol<SymKind::Type>> attrsFromDB) {
     return m_attrMap.getValuesForKey(key, std::move(attrsFromDB));
   }
 
@@ -58,7 +58,7 @@ template <typename S, typename Key> struct AttributeMap {
    * Returns the keys present in the map, or `nullptr` if the map needs to be
    * filled from the DB.
    */
-  const TypeDefSet* getKeysWithAttribute(Symbol<S, SymKind::Type> attr) const {
+  const TypeDefSet* getKeysWithAttribute(Symbol<SymKind::Type> attr) const {
     return m_attrMap.getKeysForValue(attr);
   }
 
@@ -66,7 +66,7 @@ template <typename S, typename Key> struct AttributeMap {
    * Fill the map with `keysFromDB` and return a complete set of keys.
    */
   const TypeDefSet& getKeysWithAttribute(
-      Symbol<S, SymKind::Type> attr, std::vector<Key> keysFromDB) {
+      Symbol<SymKind::Type> attr, std::vector<Key> keysFromDB) {
     return m_attrMap.getKeysForValue(attr, std::move(keysFromDB));
   }
 
@@ -74,7 +74,7 @@ template <typename S, typename Key> struct AttributeMap {
     AttrSet attrs;
     attrs.reserve(attrVec.size());
     for (auto& attr : attrVec) {
-      auto attrSym = Symbol<S, SymKind::Type>{attr.m_name};
+      auto attrSym = Symbol<SymKind::Type>{attr.m_name};
       attrs.emplace(attrSym);
       m_attrArgs.setAttributeArgs(key, attrSym, std::move(attr.m_args));
     }
@@ -82,28 +82,27 @@ template <typename S, typename Key> struct AttributeMap {
   }
 
   const std::vector<folly::dynamic>*
-  getAttributeArgs(Key key, Symbol<S, SymKind::Type> attr) const {
+  getAttributeArgs(Key key, Symbol<SymKind::Type> attr) const {
     return m_attrArgs.getAttributeArgs(key, attr);
   }
 
   const std::vector<folly::dynamic>& getAttributeArgs(
       Key key,
-      Symbol<S, SymKind::Type> attr,
+      Symbol<SymKind::Type> attr,
       std::vector<folly::dynamic> argsFromDB) {
     return m_attrArgs.getAttributeArgs(key, attr, std::move(argsFromDB));
   }
 
   void removeKey(Key key, std::vector<std::string> attrsFromDB) {
     m_attrMap.setValuesForKey(key, {});
-    auto attrs =
-        getAttributes(key, Symbol<S, SymKind::Type>::from(attrsFromDB));
+    auto attrs = getAttributes(key, Symbol<SymKind::Type>::from(attrsFromDB));
     for (auto attr : attrs) {
       m_attrArgs.setAttributeArgs(key, attr, {});
     }
   }
 
   KeyToAttrMap m_attrMap;
-  AttributeArgumentMap<S, Key> m_attrArgs;
+  AttributeArgumentMap<Key> m_attrArgs;
 };
 
 } // namespace Facts

@@ -183,7 +183,7 @@ std::string facts_json_from_path(const folly::fs::path& path) {
   assertx(path.is_absolute());
 
   auto const result =
-    extract_facts(path.native(), "", RepoOptions::forFile(path.c_str()));
+      extract_facts(path.native(), "", RepoOptions::forFile(path.c_str()));
   return match<std::string>(
       result,
       [&](const FactsJSONString& r) { return r.value; },

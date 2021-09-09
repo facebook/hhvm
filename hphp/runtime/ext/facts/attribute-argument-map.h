@@ -16,19 +16,17 @@
 namespace HPHP {
 namespace Facts {
 
-template <typename S, typename Key> struct AttributeArgumentMap {
+template <typename Key> struct AttributeArgumentMap {
 
-  using ArgKey = std::tuple<Key, Symbol<S, SymKind::Type>>;
+  using ArgKey = std::tuple<Key, Symbol<SymKind::Type>>;
 
   void setAttributeArgs(
-      Key key,
-      Symbol<S, SymKind::Type> attr,
-      std::vector<folly::dynamic> args) {
+      Key key, Symbol<SymKind::Type> attr, std::vector<folly::dynamic> args) {
     m_attrArgs.insert_or_assign({key, attr}, std::move(args));
   }
 
   const std::vector<folly::dynamic>*
-  getAttributeArgs(Key key, Symbol<S, SymKind::Type> attr) const {
+  getAttributeArgs(Key key, Symbol<SymKind::Type> attr) const {
     ArgKey argKey{key, attr};
 
     auto const it = m_attrArgs.find(argKey);
@@ -40,7 +38,7 @@ template <typename S, typename Key> struct AttributeArgumentMap {
 
   const std::vector<folly::dynamic>& getAttributeArgs(
       Key key,
-      Symbol<S, SymKind::Type> attr,
+      Symbol<SymKind::Type> attr,
       const std::vector<folly::dynamic>& argsFromDB) {
     ArgKey argKey{key, attr};
 

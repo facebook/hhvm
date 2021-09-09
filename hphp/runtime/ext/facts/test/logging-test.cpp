@@ -40,7 +40,7 @@ void PrintTo(StringPiece sp, std::ostream* os) {
   *os << "\"" << sp << "\"";
 }
 
-}
+} // namespace folly
 
 namespace HPHP {
 namespace Facts {
@@ -51,8 +51,7 @@ public:
   MockLogWriter() {
     // ttyOutput() is called by the constructor of the AsyncLogWriter and
     // generally isn't interesting.
-    ON_CALL(*this, ttyOutput())
-        .WillByDefault(Return(false));
+    ON_CALL(*this, ttyOutput()).WillByDefault(Return(false));
   }
 
   MOCK_METHOD(void, writeMessage, (folly::StringPiece, uint32_t), (override));
@@ -97,16 +96,11 @@ TEST(LoggingTest, asyncFlush) {
   };
 
   InSequence seq;
-  EXPECT_CALL(*mock, writeMessage(An<folly::StringPiece>(), _))
-      .Times(0);
-  EXPECT_CALL(*mock, writeMessage(An<std::string&&>(), _))
-      .Times(1);
-  EXPECT_CALL(*mock, flush())
-      .WillOnce(check_and_increment);
-  EXPECT_CALL(*mock, writeMessage(An<std::string&&>(), _))
-      .Times(1);
-  EXPECT_CALL(*mock, flush())
-      .WillOnce(check_and_increment);
+  EXPECT_CALL(*mock, writeMessage(An<folly::StringPiece>(), _)).Times(0);
+  EXPECT_CALL(*mock, writeMessage(An<std::string&&>(), _)).Times(1);
+  EXPECT_CALL(*mock, flush()).WillOnce(check_and_increment);
+  EXPECT_CALL(*mock, writeMessage(An<std::string&&>(), _)).Times(1);
+  EXPECT_CALL(*mock, flush()).WillOnce(check_and_increment);
 
   AsyncLogWriter async_writer(std::move(writer));
   async_writer.writeMessage(folly::StringPiece{"Some Message"}, 1);
@@ -206,10 +200,9 @@ TEST(LoggingTest, flushedOnDestruction) {
   std::unique_ptr<MockLogWriter> writer = std::make_unique<MockLogWriter>();
   MockLogWriter* mock = writer.get();
 
-  EXPECT_CALL(*mock, flush())
-    .WillOnce([&]() {
-      called_flush_during_destructor = true;
-    });
+  EXPECT_CALL(*mock, flush()).WillOnce([&]() {
+    called_flush_during_destructor = true;
+  });
 
   auto logger = std::make_unique<AsyncLogWriter>(std::move(writer));
 

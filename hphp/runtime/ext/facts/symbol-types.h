@@ -56,26 +56,26 @@ constexpr bool isCaseSensitive(SymKind k) {
 }
 
 /**
- * Type-safe wrapper around StringPtr<S> to represent the path to a file,
+ * Type-safe wrapper around StringPtr to represent the path to a file,
  * relative to the repo's root.
  */
-template <typename S> struct Path {
+struct Path {
 
   explicit Path(std::nullptr_t) : m_path{nullptr} {
   }
-  explicit Path(StringPtr<S> path) : m_path{path} {
+  explicit Path(StringPtr path) : m_path{path} {
     assertx(!m_path.empty());
   }
-  explicit Path(const S& path) : Path{makeStringPtr<S>(path)} {
+  explicit Path(const StringData& path) : Path{makeStringPtr(path)} {
   }
   explicit Path(const folly::fs::path& path)
-      : Path{makeStringPtr<S>(path.native())} {
+      : Path{makeStringPtr(path.native())} {
     assertx(path.is_relative());
   }
-  explicit Path(const std::string_view path) : Path{makeStringPtr<S>(path)} {
+  explicit Path(const std::string_view path) : Path{makeStringPtr(path)} {
   }
 
-  bool operator==(const Path<S>& o) const noexcept {
+  bool operator==(const Path& o) const noexcept {
     return m_path.same(o.m_path);
   }
 
@@ -99,27 +99,26 @@ template <typename S> struct Path {
     return folly::fs::path{std::string{slice()}};
   }
 
-  const S* get() const noexcept {
+  const StringData* get() const noexcept {
     return m_path.get();
   }
 
-  StringPtr<S> m_path;
+  StringPtr m_path;
 };
 
 /**
- * Type-safe wrapper around a StringPtr<S> to represent the name of a Type,
+ * Type-safe wrapper around a StringPtr to represent the name of a Type,
  * Function, Constant, or Type Alias in the repo.
  *
  * This may compare case
  */
-template <typename S, SymKind k> struct Symbol {
+template <SymKind k> struct Symbol {
 
-  explicit Symbol(StringPtr<S> name) : m_name{name} {
+  explicit Symbol(StringPtr name) : m_name{name} {
   }
-  explicit Symbol(const S& name) : Symbol{makeStringPtr<S>(name)} {
+  explicit Symbol(const StringData& name) : Symbol{makeStringPtr(name)} {
   }
-  explicit Symbol(const std::string_view name)
-      : Symbol{makeStringPtr<S>(name)} {
+  explicit Symbol(const std::string_view name) : Symbol{makeStringPtr(name)} {
   }
 
   /**
@@ -127,7 +126,7 @@ template <typename S, SymKind k> struct Symbol {
    * but not Constants. This mirrors the case-insensitivity of PHP's runtime and
    * autoloader.
    */
-  bool operator==(const Symbol<S, k>& o) const noexcept {
+  bool operator==(const Symbol<k>& o) const noexcept {
     return isCaseSensitive(k) ? m_name.same(o.m_name) : m_name.isame(o.m_name);
   }
 
@@ -146,12 +145,12 @@ template <typename S, SymKind k> struct Symbol {
     return m_name.slice();
   }
 
-  const S* get() const noexcept {
+  const StringData* get() const noexcept {
     return m_name.get();
   }
 
-  static std::vector<Symbol<S, k>> from(const std::vector<std::string>& strs) {
-    std::vector<Symbol<S, k>> syms;
+  static std::vector<Symbol<k>> from(const std::vector<std::string>& strs) {
+    std::vector<Symbol<k>> syms;
     syms.reserve(strs.size());
     for (auto const& s : strs) {
       syms.emplace_back(s);
@@ -159,47 +158,67 @@ template <typename S, SymKind k> struct Symbol {
     return syms;
   }
 
-  StringPtr<S> m_name;
+  StringPtr m_name;
 };
 
-template <typename S> struct TypeDecl {
-  Symbol<S, SymKind::Type> m_name;
-  Path<S> m_path;
+struct TypeDecl {
+  Symbol<SymKind::Type> m_name;
+  Path m_path;
 
-  bool operator==(const TypeDecl<S>& o) const {
+  bool operator==(const TypeDecl& o) const {
     return m_name == o.m_name && m_path == o.m_path;
   }
 
-  std::vector<Symbol<S, SymKind::Type>>
+  std::vector<Symbol<SymKind::Type>>
   getAttributesFromDB(AutoloadDB& db, SQLiteTxn& txn) const;
 };
 
-template <typename S> struct MethodDecl {
-  TypeDecl<S> m_type;
-  Symbol<S, SymKind::Function> m_method;
+struct MethodDecl {
+  TypeDecl m_type;
+  Symbol<SymKind::Function> m_method;
 
-  bool operator==(const MethodDecl<S>& o) const {
+  bool operator==(const MethodDecl& o) const {
     return m_type == o.m_type && m_method == o.m_method;
   }
 
-  std::vector<Symbol<S, SymKind::Type>>
+  std::vector<Symbol<SymKind::Type>>
   getAttributesFromDB(AutoloadDB& db, SQLiteTxn& txn) const;
 };
 
 } // namespace Facts
 } // namespace HPHP
 
-template <typename S> struct std::hash<HPHP::Facts::Path<S>> {
-  std::size_t operator()(const HPHP::Facts::Path<S>& p) const noexcept {
+template <> struct std::hash<HPHP::Facts::Path> {
+  std::size_t operator()(const HPHP::Facts::Path& p) const noexcept {
     return p.m_path.hash();
   }
 };
 
-template <typename S, HPHP::Facts::SymKind k>
-struct std::hash<HPHP::Facts::Symbol<S, k>> {
-  std::size_t operator()(const HPHP::Facts::Symbol<S, k>& s) const noexcept {
+template <HPHP::Facts::SymKind k> struct std::hash<HPHP::Facts::Symbol<k>> {
+  std::size_t operator()(const HPHP::Facts::Symbol<k>& s) const noexcept {
     // This is a case-insensitive hash, suitable for use whether the equality
     // comparator is case-sensitive or case-insensitive.
     return s.m_name.hash();
   }
 };
+
+namespace std {
+
+template <> struct hash<typename HPHP::Facts::TypeDecl> {
+  size_t operator()(const typename HPHP::Facts::TypeDecl& d) const {
+    return folly::hash::hash_combine(
+        std::hash<HPHP::Facts::Symbol<HPHP::Facts::SymKind::Type>>{}(d.m_name),
+        std::hash<HPHP::Facts::Path>{}(d.m_path));
+  }
+};
+
+template <> struct hash<typename HPHP::Facts::MethodDecl> {
+  size_t operator()(const typename HPHP::Facts::MethodDecl& d) const {
+    return folly::hash::hash_combine(
+        std::hash<HPHP::Facts::TypeDecl>{}(d.m_type),
+        std::hash<HPHP::Facts::Symbol<HPHP::Facts::SymKind::Function>>{}(
+            d.m_method));
+  }
+};
+
+} // namespace std

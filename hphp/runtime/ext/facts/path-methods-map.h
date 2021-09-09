@@ -25,9 +25,9 @@
 namespace HPHP {
 namespace Facts {
 
-template <typename S> struct PathToMethodsMap {
+struct PathToMethodsMap {
 
-  using PathMethodMap = LazyTwoWayMap<Path<S>, MethodDecl<S>>;
+  using PathMethodMap = LazyTwoWayMap<Path, MethodDecl>;
 
   using MethodSet = typename PathMethodMap::ValuesSet;
   using PathSet = typename PathMethodMap::KeysSet;
@@ -42,28 +42,27 @@ template <typename S> struct PathToMethodsMap {
    * non-const overload to get a definitive response.
    */
 
-  const PathSet* getMethodPaths(MethodDecl<S> method) const {
+  const PathSet* getMethodPaths(MethodDecl method) const {
     return m_pathMethodMap.getKeysForValue(method);
   }
   const PathSet&
-  getMethodPaths(MethodDecl<S> method, std::vector<Path<S>> pathsFromDB) {
+  getMethodPaths(MethodDecl method, std::vector<Path> pathsFromDB) {
     return m_pathMethodMap.getKeysForValue(method, std::move(pathsFromDB));
   }
 
-  const MethodSet* getPathMethods(Path<S> path) const {
+  const MethodSet* getPathMethods(Path path) const {
     return m_pathMethodMap.getValuesForKey(path);
   }
   const MethodSet& getPathMethods(
-      Path<S> path,
+      Path path,
       const std::vector<AutoloadDB::MethodDeclaration>& methodsFromDB) {
-    std::vector<MethodDecl<S>> decls;
+    std::vector<MethodDecl> decls;
     decls.reserve(methodsFromDB.size());
     for (auto const& [type, method, path] : methodsFromDB) {
       decls.push_back(
           {.m_type =
-               {.m_name = Symbol<S, SymKind::Type>{type},
-                .m_path = Path<S>{path}},
-           .m_method = Symbol<S, SymKind::Function>{method}});
+               {.m_name = Symbol<SymKind::Type>{type}, .m_path = Path{path}},
+           .m_method = Symbol<SymKind::Function>{method}});
     }
     return m_pathMethodMap.getValuesForKey(path, std::move(decls));
   }
@@ -71,7 +70,7 @@ template <typename S> struct PathToMethodsMap {
   /**
    * Mark the given path as no longer defined.
    */
-  void removePath(Path<S> path) {
+  void removePath(Path path) {
     m_pathMethodMap.setValuesForKey(path, {});
   }
 
@@ -79,7 +78,7 @@ template <typename S> struct PathToMethodsMap {
    * Mark the given path as containing each of the given methods, and no other
    * methods.
    */
-  void replacePathMethods(Path<S> path, MethodSet methods) {
+  void replacePathMethods(Path path, MethodSet methods) {
     m_pathMethodMap.setValuesForKey(path, std::move(methods));
   }
 

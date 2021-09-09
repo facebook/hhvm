@@ -25,9 +25,9 @@
 namespace HPHP {
 namespace Facts {
 
-template <typename S, SymKind k> struct PathToSymbolsMap {
+template <SymKind k> struct PathToSymbolsMap {
 
-  using PathSymbolMap = LazyTwoWayMap<Path<S>, Symbol<S, k>>;
+  using PathSymbolMap = LazyTwoWayMap<Path, Symbol<k>>;
 
   using SymbolSet = typename PathSymbolMap::ValuesSet;
   using PathSet = typename PathSymbolMap::KeysSet;
@@ -42,26 +42,26 @@ template <typename S, SymKind k> struct PathToSymbolsMap {
    * non-const overload to get a definitive response.
    */
 
-  const PathSet* getSymbolPaths(Symbol<S, k> symbol) const {
+  const PathSet* getSymbolPaths(Symbol<k> symbol) const {
     return m_pathSymbolMap.getKeysForValue(symbol);
   }
   const PathSet&
-  getSymbolPaths(Symbol<S, k> symbol, std::vector<Path<S>> pathsFromDB) {
+  getSymbolPaths(Symbol<k> symbol, std::vector<Path> pathsFromDB) {
     return m_pathSymbolMap.getKeysForValue(symbol, std::move(pathsFromDB));
   }
 
-  const SymbolSet* getPathSymbols(Path<S> path) const {
+  const SymbolSet* getPathSymbols(Path path) const {
     return m_pathSymbolMap.getValuesForKey(path);
   }
   const SymbolSet&
-  getPathSymbols(Path<S> path, std::vector<Symbol<S, k>> symbolsFromDB) {
+  getPathSymbols(Path path, std::vector<Symbol<k>> symbolsFromDB) {
     return m_pathSymbolMap.getValuesForKey(path, std::move(symbolsFromDB));
   }
 
   /**
    * Mark the given path as no longer defined.
    */
-  void removePath(Path<S> path) {
+  void removePath(Path path) {
     m_pathSymbolMap.setValuesForKey(path, {});
   }
 
@@ -69,7 +69,7 @@ template <typename S, SymKind k> struct PathToSymbolsMap {
    * Mark the given path as containing each of the given symbols, and no other
    * symbols of this map's kind.
    */
-  void replacePathSymbols(Path<S> path, SymbolSet symbols) {
+  void replacePathSymbols(Path path, SymbolSet symbols) {
     m_pathSymbolMap.setValuesForKey(path, std::move(symbols));
   }
 

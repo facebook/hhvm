@@ -6,10 +6,8 @@ HHVM_DEFINE_EXTENSION(
     ext_facts.cpp
     fact-extractor.cpp
     logging.cpp
-    std-string-ptr.cpp
     string-data-ptr.cpp
-    symbol-map-prod.cpp
-    symbol-map-unit.cpp
+    symbol-map.cpp
     thread-factory.cpp
     facts-store.cpp
   HEADERS
@@ -26,7 +24,6 @@ HHVM_DEFINE_EXTENSION(
     path-and-hash.h
     path-symbols-map.h
     string-ptr.h
-    symbol-map-defs.h
     symbol-map.h
     symbol-types.h
     thread-factory.h

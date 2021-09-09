@@ -8,11 +8,11 @@ builtin_call_bad_arg.php:4:22
 [1]  4 |   xhprof_frame_begin(3);
      5 | }
 
-/tmp/Bg5a0e0LNp/builtins_fb.hhi:70:29
-    68 | function xhprof_network_disable();
-    69 | <<__PHPStdLib>>
-[2] 70 | function xhprof_frame_begin(string $name);
-    71 | <<__PHPStdLib>>
-    72 | function xhprof_frame_end();
+/tmp/mo1CEtdD5D/builtins_fb.hhi:71:29
+    69 | function xhprof_network_disable();
+    70 | <<__PHPStdLib>>
+[2] 71 | function xhprof_frame_begin(string $name);
+    72 | <<__PHPStdLib>>
+    73 | function xhprof_frame_end();
 
 1 error found.

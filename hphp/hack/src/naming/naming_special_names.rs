@@ -278,6 +278,8 @@ pub mod user_attributes {
 
     pub const INTERNAL: &str = "__Internal";
 
+    pub const ENABLE_METHOD_TRAIT_DIAMOND: &str = "__EnableMethodTraitDiamond";
+
     lazy_static! {
         pub static ref AS_SET: HashSet<&'static str> = vec![
             OVERRIDE,

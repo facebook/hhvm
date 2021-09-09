@@ -101,10 +101,11 @@ enum UnstableFeatures {
     ClassConstDefault,
     AbstractEnumClass,
     ContextAliasDeclarationShort,
+    MethodTraitDiamond,
 }
 impl UnstableFeatures {
     // Preview features are allowed to run in prod. This function decides
-    // whether the feature is considered Unstable or Previw.
+    // whether the feature is considered Unstable or Preview.
     fn get_feature_status(&self) -> FeatureStatus {
         use FeatureStatus::*;
         match self {
@@ -119,6 +120,7 @@ impl UnstableFeatures {
             UnstableFeatures::ClassConstDefault => Migration,
             UnstableFeatures::AbstractEnumClass => Unstable,
             UnstableFeatures::ContextAliasDeclarationShort => Preview,
+            UnstableFeatures::MethodTraitDiamond => Unstable,
         }
     }
 }
@@ -5485,13 +5487,16 @@ where
                 self.check_can_use_feature(node, &UnstableFeatures::EnumClassLabel)
             }
             OldAttributeSpecification(x) => {
-                let attributes_string = self.text(&x.attributes);
-                let has_via_label = attributes_string
-                    .split(',')
-                    .any(|attr| attr.trim() == sn::user_attributes::VIA_LABEL);
-                if has_via_label {
-                    self.check_can_use_feature(node, &UnstableFeatures::EnumClassLabel)
-                }
+                let attributes = self.text(&x.attributes).split(',');
+                attributes.for_each(|attr| match attr.trim() {
+                    sn::user_attributes::VIA_LABEL => {
+                        self.check_can_use_feature(node, &UnstableFeatures::EnumClassLabel)
+                    }
+                    sn::user_attributes::ENABLE_METHOD_TRAIT_DIAMOND => {
+                        self.check_can_use_feature(node, &UnstableFeatures::MethodTraitDiamond)
+                    }
+                    _ => {}
+                });
             }
             _ => {}
         }

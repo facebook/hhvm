@@ -633,6 +633,12 @@ function is_dynamically_callable_inst_method(
 )[]: bool;
 
 <<__Native>>
+function check_dynamically_callable_inst_method(
+    string $class,
+    string $method
+)[]: void;
+
+<<__Native>>
 function reflection_class_get_name(
     mixed $class,
 )[]: string;

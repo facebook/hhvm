@@ -71,19 +71,8 @@ namespace __SystemLib {
 
   function dynamic_meth_caller(string $class, string $method, mixed $lambda,
                                bool $force)[] {
-    if (!$force &&
-        !\__SystemLib\is_dynamically_callable_inst_method($class, $method)) {
-      $level = (int)\ini_get('hhvm.dynamic_meth_caller_level');
-      if ($level === 1) {
-        \trigger_error(
-          "dynamic_meth_caller(): $class::$method is not a dynamically ".
-          "callable instance method",
-          \E_USER_WARNING);
-      } else if ($level >= 2) {
-        throw new \InvalidArgumentException(
-          "dynamic_meth_caller(): $class::$method is not a dynamically ".
-          "callable instance method");
-      }
+    if (!$force) {
+      \__SystemLib\check_dynamically_callable_inst_method($class, $method);
     }
     return new \__SystemLib\DynMethCallerHelper($class, $method, $lambda);
   }

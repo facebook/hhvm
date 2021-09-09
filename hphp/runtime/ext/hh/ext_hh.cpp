@@ -1205,14 +1205,36 @@ Variant HHVM_FUNCTION(enter_policied_of, const Variant& function) {
                                RuntimeCoeffects::policied_of(), false);
 }
 
-bool HHVM_FUNCTION(is_dynamically_callable_inst_method, StringArg cls,
-                                                        StringArg meth) {
-  if (auto const c = Class::load(cls.get())) {
-    if (auto const m = c->lookupMethod(meth.get())) {
+namespace {
+bool is_dynamically_callable_inst_method_impl(const StringData* cls,
+                                              const StringData* meth) {
+  if (auto const c = Class::load(cls)) {
+    if (auto const m = c->lookupMethod(meth)) {
       return !m->isStatic() && m->isDynamicallyCallable();
     }
   }
   return false;
+}
+} // namespace
+
+bool HHVM_FUNCTION(is_dynamically_callable_inst_method, StringArg cls,
+                                                        StringArg meth) {
+  return is_dynamically_callable_inst_method_impl(cls.get(), meth.get());
+}
+
+void HHVM_FUNCTION(check_dynamically_callable_inst_method, StringArg cls,
+                                                           StringArg meth) {
+  if (is_dynamically_callable_inst_method_impl(cls.get(), meth.get())) return;
+  if (RO::EvalDynamicMethCallerLevel == 0) return;
+  auto const msg = folly::sformat(
+    "dynamic_meth_caller(): {}::{} is not a dynamically "
+    "callable instance method",
+    cls.get(), meth.get());
+  if (RO::EvalDynamicMethCallerLevel == 1) {
+    raise_warning(msg);
+    return;
+  }
+  SystemLib::throwInvalidArgumentExceptionObject(msg);
 }
 
 namespace {
@@ -1409,6 +1431,7 @@ static struct HHExtension final : Extension {
 
 #define X(nm) HHVM_NAMED_FE(__SystemLib\\nm, HHVM_FN(nm))
     X(is_dynamically_callable_inst_method);
+    X(check_dynamically_callable_inst_method);
     X(reflection_class_get_name);
     X(reflection_class_is_abstract);
     X(reflection_class_is_final);

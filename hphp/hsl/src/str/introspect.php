@@ -139,6 +139,11 @@ function is_empty(
 
 /**
  * Returns the length of the given string, i.e. the number of bytes.
+ *
+ * This function is `O(1)`: it always returns the number of bytes in the string,
+ * even if a byte is null. For example, `Str\length("foo\0bar")` is 7, not 3.
+ *
+ * @see `Str\length_l()` for the length in characters.
  */
 function length(
   string $string,

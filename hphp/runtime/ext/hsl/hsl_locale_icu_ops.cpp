@@ -328,6 +328,13 @@ int64_t strpos_impl(const String& haystack,
                     uint32_t caseFoldFlags) {
   auto uhs = ustr_from_utf8(haystack);
   auto un = ustr_from_utf8(needle);
+
+  icu::ErrorCode err;
+  // Singleton, do not free
+  auto normalizer = icu::Normalizer2::getNFCInstance(err);
+  uhs = normalizer->normalize(uhs, err);
+  un = normalizer->normalize(un, err);
+
   auto char32_len = uhs.countChar32();
   if (offset >= 0) {
     offset = HSLLocale::Ops::normalize_offset(offset, char32_len);

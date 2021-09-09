@@ -395,9 +395,7 @@ unsafe extern "C" fn hackc_compile_hhas_from_text_cpp_ffi<'arena>(
             )
         };
         match compile_result.map_err(|e| e.to_string()) {
-            Ok(p) => {
-                Box::into_raw(Box::new(p))
-            }
+            Ok(p) => Box::into_raw(Box::new(p)),
             Err(e) => {
                 if e.len() >= buf.len() {
                     warn!("Provided error buffer too small.");

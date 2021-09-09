@@ -706,6 +706,7 @@ struct RuntimeOption {
   F(uint64_t, JitMatureSize,           125 << 20)                       \
   F(bool, JitMatureAfterWarmup,        false)                           \
   F(double, JitMaturityExponent,       1.)                              \
+  F(double, JitMaturityProfWeight,     1.)                              \
   F(bool, JitTimer,                    kJitTimerDefault)                \
   F(int, JitConcurrently,              1)                               \
   F(int, JitThreads,                   4)                               \

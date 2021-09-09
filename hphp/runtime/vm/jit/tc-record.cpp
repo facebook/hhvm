@@ -221,7 +221,9 @@ void reportJitMaturity() {
   auto const mainSize = code().main().used();
 
   auto const fullSize = RuntimeOption::EvalJitMatureSize;
-  const uint64_t codeSize = profSize + mainSize + hotSize;
+  auto const codeSize = mainSize + hotSize +
+    static_cast<size_t>(profSize * RuntimeOption::EvalJitMaturityProfWeight);
+
   int64_t maturity = before;
   if (beforeRetranslateAll) {
     maturity = std::min(kMaxMaturityBeforeRTA, codeSize * 100 / fullSize);

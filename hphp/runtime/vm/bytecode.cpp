@@ -1085,6 +1085,10 @@ OPTBLD_INLINE void iopFalse() {
 }
 
 OPTBLD_INLINE void iopFile() {
+  if (auto const of = vmfp()->func()->originalFilename()) {
+    vmStack().pushStaticString(of);
+    return;
+  }
   auto s = vmfp()->func()->unit()->filepath();
   vmStack().pushStaticString(s);
 }

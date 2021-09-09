@@ -457,7 +457,12 @@ void emitFile(IRGS& env) {
   if (handle != rds::kUninitHandle) {
     assertx(!RuntimeOption::RepoAuthoritative);
     assertx(RuntimeOption::EvalReuseUnitsByHash);
+    assertx(!curFunc(env)->originalFilename());
     push(env, gen(env, LdUnitPerRequestFilepath, RDSHandleData { handle }));
+    return;
+  }
+  if (auto const of = curFunc(env)->originalFilename()) {
+    push(env, cns(env, of));
     return;
   }
   push(env, cns(env, unit->origFilepath()));

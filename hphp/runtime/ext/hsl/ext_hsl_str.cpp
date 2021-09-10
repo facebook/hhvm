@@ -16,7 +16,9 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/thread-safe-setlocale.h"
 #include "hphp/runtime/base/locale.h"
+#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/ext/fb/ext_fb.h"
 #include "hphp/runtime/ext/hsl/ext_hsl_locale.h"
 #include "hphp/runtime/ext/hsl/hsl_locale_ops.h"
@@ -37,15 +39,55 @@ namespace HPHP {
 namespace {
 
 THREAD_LOCAL(HSLLocale*, c_hsl_locale);
+enum DefaultLocaleMigrationLevel : int {
+  SILENTLY_USE_REQUEST_LOCALE = 0,
+  USE_REQUEST_LOCALE_WARN_IF_DIFFERENT = 1,
+  USE_REQUEST_LOCALE_ERROR_IF_DIFFERENT = 2,
+  SILENTLY_USE_FIXED_LOCALE = 3
+};
+int s_defaultBehavior;
+
+THREAD_LOCAL(std::shared_ptr<Locale>, s_last_request_locale);
+THREAD_LOCAL(HSLLocale, s_request_hsl_locale);
+
+HSLLocale* get_default_locale() {
+  assertx(*c_hsl_locale);
+  if (s_defaultBehavior == SILENTLY_USE_FIXED_LOCALE) {
+    return *c_hsl_locale;
+  }
+
+  auto request_locale = ThreadSafeLocaleHandler::getRequestLocale();
+  if (request_locale == Locale::getCLocale()) {
+    return *c_hsl_locale;
+  }
+
+  if (request_locale != *s_last_request_locale) {
+    *s_last_request_locale = request_locale;
+    *s_request_hsl_locale = std::move(HSLLocale(request_locale));
+  }
+
+  if (s_defaultBehavior == SILENTLY_USE_REQUEST_LOCALE) {
+    return s_request_hsl_locale.get();
+  }
+
+  if (s_defaultBehavior == USE_REQUEST_LOCALE_WARN_IF_DIFFERENT) {
+    raise_warning("Request locale !== 'C'; Str\\foo behavior will change. Use Str\\foo_l instead.");
+    return s_request_hsl_locale.get();
+  }
+
+  if (s_defaultBehavior != USE_REQUEST_LOCALE_ERROR_IF_DIFFERENT) {
+    SystemLib::throwExceptionObject(
+      fmt::format("Invalid setting for HSL string locale behavior: {}", s_defaultBehavior)
+    );
+  }
+
+  SystemLib::throwExceptionObject(
+    "Request locale !== 'C'; use `Str\\foo_l` instead of `Str\\foo`");
+}
 
 const HSLLocale* get_locale(const Variant& maybe_locale) {
   if (LIKELY(maybe_locale.isNull())) {
-    // TODO:
-    // - test perf with this default
-    // - add runtime option to request vs C locale
-    // - go back to this shortly after
-    assertx(*c_hsl_locale);
-    return *c_hsl_locale;
+    return get_default_locale();
   }
   if (!maybe_locale.isObject()) {
     raise_fatal_error("Locale is not null or an object");
@@ -419,6 +461,14 @@ String HHVM_FUNCTION(replace_every_nonrecursive_ci_l,
 struct HSLStrExtension final : Extension {
   HSLStrExtension() : Extension("hsl_str", "0.1") {}
 
+  void moduleLoad(const IniSetting::Map& ini, const Hdf hdf) override {
+    Config::Bind(
+      s_defaultBehavior,
+      ini, hdf, "Eval.HSLStrDefaultLocale",
+      static_cast<int>(DefaultLocaleMigrationLevel::SILENTLY_USE_REQUEST_LOCALE)
+    );
+  }
+
   void moduleInit() override {
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\strlen_l, strlen_l);
     // - clang doesn't like the HHVM_FALIAS macro with \\u
@@ -476,6 +526,10 @@ struct HSLStrExtension final : Extension {
 
   void threadInit() override {
     *c_hsl_locale.get() = new HSLLocale(Locale::getCLocale());
+  }
+
+  const DependencySet getDeps() const override {
+    return DependencySet({"hsl_locale"});
   }
 } s_hsl_str_extension;
 

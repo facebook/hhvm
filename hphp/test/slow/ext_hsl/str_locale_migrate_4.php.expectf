@@ -1,0 +1,5 @@
+Fatal error: Uncaught exception 'Exception' with message 'Invalid setting for HSL string locale behavior: 4' in %s/str_locale_migrate_4.php:7
+Stack trace:
+#0 %s/str_locale_migrate_4.php(7): HH\Lib\_Private\_Str\vsprintf_l()
+#1 (): main()
+#2 {main}

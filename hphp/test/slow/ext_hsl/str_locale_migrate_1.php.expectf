@@ -1,0 +1,2 @@
+Warning: Request locale !== 'C'; Str\foo behavior will change. Use Str\foo_l instead. in %s/str_locale_migrate_1.php on line 7
+string(10) "123,000000"

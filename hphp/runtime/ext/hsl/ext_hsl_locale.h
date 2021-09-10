@@ -32,14 +32,14 @@ struct HSLLocale {
   void sweep();
 
   std::shared_ptr<Locale> get() const { return m_locale; }
-  Ops* ops() const { assertx(m_ops); return m_ops; }
+  Ops* ops() const { assertx(m_ops); return m_ops.get(); }
   Array __debugInfo() const;
 
   static Object newInstance(std::shared_ptr<Locale> loc);
   static HSLLocale* fromObject(const Object& obj);
  private:
   std::shared_ptr<Locale> m_locale;
-  Ops* m_ops = nullptr;
+  std::shared_ptr<Ops> m_ops;
 };
 
 } // namespace HPHP

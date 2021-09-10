@@ -723,10 +723,6 @@ module HH = struct
   let contains_key = "\\HH\\Lib\\C\\contains_key"
 end
 
-module Rx = struct
-  let is_enabled = "\\HH\\Rx\\IS_ENABLED"
-end
-
 module Shapes = struct
   let cShapes = "\\HH\\Shapes"
 

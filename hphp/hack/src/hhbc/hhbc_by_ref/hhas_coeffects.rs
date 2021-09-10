@@ -412,26 +412,6 @@ impl<'arena> HhasCoeffects<'arena> {
     }
 }
 
-pub fn halves_of_is_enabled_body<Ex, En>(
-    body: &a::FuncBody<Ex, En>,
-) -> Option<(&a::Block<Ex, En>, &a::Block<Ex, En>)> {
-    use a::*;
-    if let [Stmt(_, Stmt_::If(if_))] = body.fb_ast.as_slice() {
-        if let (Expr(_, _, Expr_::Id(sid)), enabled, disabled) = &**if_ {
-            let Id(_, name) = &**sid;
-            return if name != sn::rx::IS_ENABLED {
-                None
-            } else {
-                match disabled.as_slice() {
-                    [] | [Stmt(_, Stmt_::Noop)] => None,
-                    _ => Some((enabled, disabled)),
-                }
-            };
-        }
-    }
-    None
-}
-
 #[allow(clippy::needless_lifetimes)]
 #[no_mangle]
 pub unsafe extern "C" fn no_call_compile_only_USED_TYPES_hhas_ctx_constant<'arena>(

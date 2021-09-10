@@ -8149,20 +8149,6 @@ and condition ?lhs_of_null_coalesce env tparamet ((ty, p, e) as te : Tast.expr)
         Ast_defs.Eqeqeq
     in
     condition env (not tparamet) (ty, p, Aast.Binop (op, e1, e2))
-  | Aast.Id (p, s) when String.equal s SN.Rx.is_enabled ->
-    (* when Rx\IS_ENABLED is false - switch env to non-reactive *)
-    let env =
-      if not tparamet then
-        if TypecheckerOptions.any_coeffects (Env.get_tcopt env) then
-          let env = Typing_local_ops.enforce_rx_is_enabled p env in
-          let defaults = MakeType.default_capability Pos_or_decl.none in
-          fst @@ Typing_coeffects.register_capabilities env defaults defaults
-        else
-          env
-      else
-        env
-    in
-    (env, Local_id.Set.empty)
   (* Conjunction of conditions. Matches the two following forms:
       if (cond1 && cond2)
       if (!(cond1 || cond2))

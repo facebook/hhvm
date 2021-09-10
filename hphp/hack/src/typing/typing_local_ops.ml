@@ -85,9 +85,6 @@ let enforce_memoize_object =
 let enforce_io =
   enforce_local_capability Capabilities.(mk io) "`echo` or `print` builtin"
 
-let enforce_rx_is_enabled =
-  enforce_local_capability Capabilities.(mk rx) ("`" ^ SN.Rx.is_enabled ^ "`")
-
 let enforce_enum_class_variant =
   enforce_local_capability
     Capabilities.(mk writeProperty)

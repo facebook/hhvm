@@ -19,9 +19,6 @@ val enforce_memoize_object :
 val enforce_mutable_static_variable :
   ?msg:string -> Pos.t -> Typing_env_types.env -> Typing_env_types.env
 
-val enforce_rx_is_enabled :
-  Pos.t -> Typing_env_types.env -> Typing_env_types.env
-
 val enforce_enum_class_variant :
   Pos.t -> Typing_env_types.env -> Typing_env_types.env
 

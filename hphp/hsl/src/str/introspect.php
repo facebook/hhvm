@@ -10,7 +10,7 @@
 
 namespace HH\Lib\Str;
 
-use namespace HH\Lib\_Private;
+use namespace HH\Lib\{_Private, _Private\_Str};
 
 /**
  * Returns < 0 if `$string1` is less than `$string2`, > 0 if `$string1` is
@@ -22,7 +22,8 @@ function compare(
   string $string1,
   string $string2,
 )[]: int {
-  return \strcmp($string1, $string2);
+  /* HH_FIXME[4390] missing [] */
+  return _Str\strcoll_l($string1, $string2);
 }
 
 /**
@@ -35,7 +36,8 @@ function compare_ci(
   string $string1,
   string $string2,
 )[]: int {
-  return \strcasecmp($string1, $string2);
+  /* HH_FIXME[4390] missing [] */
+  return _Str\strcasecmp_l($string1, $string2);
 }
 
 /**
@@ -55,8 +57,14 @@ function contains(
   int $offset = 0,
 )[]: bool {
   if ($needle === '') {
-    if ($offset !== 0) {
-      _Private\validate_offset($offset, length($haystack));
+    if ($offset === 0) {
+      return true;
+    }
+    $length = length($haystack);
+    if ($offset > $length || $offset < -$length) {
+      throw new \InvalidArgumentException(
+        format('Offset %d out of bounds for length %d', $offset, $length)
+      );
     }
     return true;
   }
@@ -81,8 +89,14 @@ function contains_ci(
   int $offset = 0,
 )[]: bool {
   if ($needle === '') {
-    if ($offset !== 0) {
-      _Private\validate_offset($offset, length($haystack));
+    if ($offset === 0) {
+      return true;
+    }
+    $length = length($haystack);
+    if ($offset > $length || $offset < -$length) {
+      throw new \InvalidArgumentException(
+        format('Offset %d out of bounds for length %d', $offset, $length)
+      );
     }
     return true;
   }
@@ -98,11 +112,8 @@ function ends_with(
   string $string,
   string $suffix,
 )[]: bool {
-  $suffix_length = length($suffix);
-  return $suffix_length === 0 || (
-    length($string) >= $suffix_length &&
-    \substr_compare($string, $suffix, -$suffix_length, $suffix_length) === 0
-  );
+  /* HH_FIXME[4390] missing [] */
+  return _Str\ends_with_l($string, $suffix);
 }
 
 /**
@@ -114,17 +125,8 @@ function ends_with_ci(
   string $string,
   string $suffix,
 )[]: bool {
-  $suffix_length = length($suffix);
-  return $suffix_length === 0 || (
-    length($string) >= $suffix_length &&
-    \substr_compare(
-      $string,
-      $suffix,
-      -$suffix_length,
-      $suffix_length,
-      true, // case-insensitive
-    ) === 0
-  );
+  /* HH_FIXME[4390] missing [] */
+  return _Str\ends_with_ci_l($string, $suffix);
 }
 
 /**
@@ -148,7 +150,8 @@ function is_empty(
 function length(
   string $string,
 )[]: int {
-  return \strlen($string);
+  /* HH_FIXME[4390] missing [] */
+  return _Str\strlen_l($string);
 }
 
 /**
@@ -171,11 +174,9 @@ function search(
   string $needle,
   int $offset = 0,
 )[]: ?int {
-  if ($offset !== 0) {
-    $offset = _Private\validate_offset($offset, length($haystack));
-  }
-  $position = \strpos($haystack, $needle, $offset);
-  if ($position === false) {
+  /* HH_FIXME[4390] missing [] */
+  $position = _Str\strpos_l($haystack, $needle, $offset);
+  if ($position < 0) {
     return null;
   }
   return $position;
@@ -201,11 +202,9 @@ function search_ci(
   string $needle,
   int $offset = 0,
 )[]: ?int {
-  if ($offset !== 0) {
-    $offset = _Private\validate_offset($offset, length($haystack));
-  }
-  $position = \stripos($haystack, $needle, $offset);
-  if ($position === false) {
+  /* HH_FIXME[4390] missing [] */
+  $position = _Str\stripos_l($haystack, $needle, $offset);
+  if ($position < 0) {
     return null;
   }
   return $position;
@@ -230,13 +229,10 @@ function search_last(
   string $needle,
   int $offset = 0,
 )[]: ?int {
-  $haystack_length = length($haystack);
-  invariant(
-    $offset >= -$haystack_length && $offset <= $haystack_length,
-    'Offset is out-of-bounds.',
-  );
-  $position = \strrpos($haystack, $needle, $offset);
-  if ($position === false) {
+$haystack_length = length($haystack);
+  /* HH_FIXME[4390] missing [] */
+  $position = _Str\strrpos_l($haystack, $needle, $offset);
+  if ($position < 0) {
     return null;
   }
   return $position;
@@ -251,7 +247,8 @@ function starts_with(
   string $string,
   string $prefix,
 )[]: bool {
-  return \strncmp($string, $prefix, length($prefix)) === 0;
+  /* HH_FIXME[4390] missing [] */
+  return _Str\starts_with_l($string, $prefix);
 }
 
 /**
@@ -263,5 +260,6 @@ function starts_with_ci(
   string $string,
   string $prefix,
 )[]: bool {
-  return \strncasecmp($string, $prefix, length($prefix)) === 0;
+  /* HH_FIXME[4390] missing [] */
+  return _Str\starts_with_ci_l($string, $prefix);
 }

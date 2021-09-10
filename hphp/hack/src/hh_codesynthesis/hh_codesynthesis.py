@@ -17,6 +17,7 @@
 # Currently, we are synthesising Hack code only, we will support more
 # languages like C#, Java later on.
 import argparse
+import importlib
 import logging
 import os
 import sys
@@ -26,7 +27,15 @@ import clingo
 from clingo import Number, Symbol
 from hphp.hack.src.hh_codesynthesis.codeGenerator import CodeGenerator
 from hphp.hack.src.hh_codesynthesis.hackGenerator import HackCodeGenerator
-from libfb.py import parutil
+
+# If libfb.py library exists, we run in the internal environment.
+try:
+    importlib.util.find_spec("libfb.py")
+    from libfb.py import parutil
+
+    g_internal_run = True
+except ModuleNotFoundError:
+    g_internal_run = False
 
 
 class ClingoContext:
@@ -225,9 +234,13 @@ def extract_logic_rules(lines: List[str]) -> List[str]:
 # Take in a dependency graph and a code generator to emit code.
 def do_reasoning(additional_programs: List[str], generator: CodeGenerator) -> None:
     # Logic programs for code synthesis.
-    asp_files = os.path.join(
-        parutil.get_dir_path("hphp/hack/src/hh_codesynthesis/"), "asp_code"
-    )
+
+    asp_files = "hphp/hack/src/hh_codesynthesis"
+    if g_internal_run:
+        # Check if we are running in the internal environment.
+        asp_files = os.path.join(
+            parutil.get_dir_path("hphp/hack/src/hh_codesynthesis/"), "asp_code"
+        )
 
     # Clingo interfaces.
     ctl = clingo.Control()

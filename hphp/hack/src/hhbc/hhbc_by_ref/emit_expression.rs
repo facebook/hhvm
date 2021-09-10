@@ -971,7 +971,12 @@ fn inline_gena_call<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                             vec![
                                 instr::cgetl(alloc, val_local),
                                 instr::whresult(alloc),
-                                instr::basel(alloc, arr_local, MemberOpMode::Define),
+                                instr::basel(
+                                    alloc,
+                                    arr_local,
+                                    MemberOpMode::Define,
+                                    ReadonlyOp::Any, // TODO, handle await assignment statements correctly
+                                ),
                                 instr::setm(alloc, 0, MemberKey::EL(key_local, ReadonlyOp::Any)),
                                 instr::popc(alloc),
                             ],
@@ -3615,6 +3620,7 @@ pub fn emit_reified_generic_instrs<'arena>(
                 string_utils::reified::GENERICS_LOCAL_NAME,
             )),
             MemberOpMode::Warn,
+            ReadonlyOp::Any,
         )
     } else {
         InstrSeq::gather(
@@ -5613,7 +5619,7 @@ fn emit_base_<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                         base_stack_size,
                         cls_stack_size,
                     },
-                    store: instr::basel(alloc, local, MemberOpMode::Define),
+                    store: instr::basel(alloc, local, MemberOpMode::Define, ReadonlyOp::Any),
                 }
             }
             _ => ArrayGetBase::Regular(ArrayGetBaseData {
@@ -5623,6 +5629,42 @@ fn emit_base_<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                 base_stack_size,
                 cls_stack_size,
             }),
+        }
+    };
+    // Called when emitting a base with MemberOpMode::Define on a Readonly expression
+    let emit_readonly_lval_base = |
+        e: &mut Emitter<'arena, 'decl, D>,
+        env: &Env<'a, 'arena>,
+        inner_expr: &ast::Expr, // expression inside of readonly expression
+    | -> Option<Result<ArrayGetBase>> {
+        // Readonly local variable requires a CheckROCOW
+        if let aast::Expr(_, _, E_::Lvar(x)) = &*inner_expr {
+            if !is_local_this(env, &x.1) || env.flags.contains(EnvFlags::NEEDS_LOCAL_THIS) {
+                match get_local(e, env, &x.0, &(x.1).1) {
+                    Ok(v) => {
+                    let base_instr = if local_temp_kind.is_some() {
+                        instr::cgetquietl(alloc, v)
+                    } else {
+                        instr::empty(alloc)
+                    };
+                    Some(Ok(emit_default(
+                        e,
+                        base_instr,
+                        instr::empty(alloc),
+                        instr::basel(alloc, v, MemberOpMode::Define, ReadonlyOp::CheckROCOW),
+                        0,
+                        0,
+                    )))
+                 }
+                    Err(e) => Some(Err(e))
+                }
+            } else {
+                None // Found a local variable case that does not work
+            }
+        } else {
+            // The only other reasonable case is if the inner expression
+            // is a ClassGet, in which case we can use the default emit_base_ logic to handle
+            None // Otherwise, ignore readonly
         }
     };
 
@@ -5641,6 +5683,28 @@ fn emit_base_<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
 
     use ast::Expr_ as E_;
     match expr_ {
+        // Readonly expression in assignment
+        E_::ReadonlyExpr(r) if base_mode == MemberOpMode::Define => {
+            if let Some(result) = emit_readonly_lval_base(e, env, r) {
+                result
+            } else {
+                // If we're not able to emit special readonly expression instructions, emit code as if readonly
+                // expression does not exist
+                emit_base_(
+                    e,
+                    env,
+                    r,
+                    mode,
+                    is_object,
+                    notice,
+                    null_coalesce_assignment,
+                    base_offset,
+                    rhs_stack_size,
+                    inout_param_info,
+                    readonly_op,
+                )
+            }
+        }
         E_::Lvar(x) if superglobals::is_superglobal(&(x.1).1) => {
             let base_instrs = emit_pos_then(
                 alloc,
@@ -5681,7 +5745,7 @@ fn emit_base_<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                 e,
                 base_instr,
                 instr::empty(alloc),
-                instr::basel(alloc, v, base_mode),
+                instr::basel(alloc, v, base_mode, ReadonlyOp::Any),
                 0,
                 0,
             ))
@@ -6127,7 +6191,10 @@ fn emit_array_get_fixed<'arena, 'decl, D: DeclProvider<'decl>>(
             1,
         )
     } else {
-        (instr::basel(alloc, local, MemberOpMode::Warn), 0)
+        (
+            instr::basel(alloc, local, MemberOpMode::Warn, ReadonlyOp::Any),
+            0,
+        )
     };
     let indices = InstrSeq::gather(
         alloc,
@@ -6428,7 +6495,7 @@ pub fn emit_lval_op_nonlist_steps<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                         emit_elem(e, env, opt_elem_expr, None, null_coalesce_assignment)?;
                     let base_offset = elem_stack_size + rhs_stack_size;
                     let readonly_op = if rhs_readonly {
-                        ReadonlyOp::CheckROCOW // writing a readonly value requires a readony copy on write array
+                        ReadonlyOp::CheckROCOW // writing a readonly value requires a readonly copy on write array
                     } else {
                         ReadonlyOp::CheckMutROCOW // writing a mut value requires left side to be mutable or a ROCOW
                     };

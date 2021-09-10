@@ -303,10 +303,15 @@ fn check_assignment_nonlocal(
                 (Rty::Readonly, Rty::Readonly) => {
                     // make rhs explicit (to make sure we are not writing a readonly value to a mutable one)
                     explicit_readonly(rhs);
+                    // make lhs readonly explicitly, to check that it's a readonly copy on write array
+                    // here the lefthandside is either a local variable or a class_get.
+                    explicit_readonly(lhs);
                 }
-                (_, Rty::Mutable) => {
-                    // Assigning to a mutable value always succeeds, so no explicit checks are needed
+                (Rty::Readonly, Rty::Mutable) => {
+                    explicit_readonly(lhs);
                 }
+                // Assigning to a mutable value always succeeds, so no explicit checks are needed
+                (Rty::Mutable, Rty::Mutable) => {}
             }
         }
     }

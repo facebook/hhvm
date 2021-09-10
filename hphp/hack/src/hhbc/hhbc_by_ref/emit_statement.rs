@@ -1301,7 +1301,12 @@ fn emit_iterator_lvalue_storage<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             let (preamble, load_values) = emit_load_list_elements(
                 e,
                 env,
-                vec![instr::basel(alloc, local, MemberOpMode::Warn)],
+                vec![instr::basel(
+                    alloc,
+                    local,
+                    MemberOpMode::Warn,
+                    ReadonlyOp::Any,
+                )],
                 es,
             )?;
             let load_values = vec![

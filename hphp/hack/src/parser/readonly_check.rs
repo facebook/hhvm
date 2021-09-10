@@ -554,6 +554,16 @@ impl<'ast> VisitorMut<'ast> for Checker {
                 context.locals = result_lenv.clone();
                 Ok(())
             }
+            aast::Stmt_::Throw(t) => {
+                let inner = &**t;
+                match rty_expr(context, &inner) {
+                    Rty::Readonly => {
+                        self.add_error(&inner.1, syntax_error::throw_readonly_exception);
+                    }
+                    Rty::Mutable => {}
+                }
+                t.recurse(context, self.object())
+            }
             aast::Stmt_::Foreach(f) => {
                 let (e, as_expr, b) = &mut **f;
                 e.recurse(context, self.object())?;

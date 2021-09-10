@@ -1,2 +1,2 @@
 string(45) "Property ro_f2 of class Foo1 must be mutable."
-string(85) "Property ro_f2 of class Foo1 is readonly, but isn't enclosed in a readonly expression"
+string(86) "Property ro_f2 of class Foo1 is readonly, but isn't enclosed in a readonly expression."

@@ -296,7 +296,8 @@ let check_name (p, name) =
    * a parent node of this class to enums during the AST transform *)
   if
     (String.equal name SN.Classes.cHH_BuiltinEnum
-    || String.equal name SN.Classes.cHH_BuiltinEnumClass)
+    || String.equal name SN.Classes.cHH_BuiltinEnumClass
+    || String.equal name SN.Classes.cHH_BuiltinAbstractEnumClass)
     && not (string_ends_with (Relative_path.suffix (Pos.filename p)) ".hhi")
   then
     Errors.using_internal_class p (strip_ns name)
@@ -893,10 +894,20 @@ let rec class_ ctx c =
   let xhp_attrs = List.map ~f:(xhp_attribute_decl env) c.Aast.c_xhp_attrs in
   (* These would be out of order with the old attributes, but that shouldn't matter? *)
   let props = props @ xhp_attrs in
-  let in_enum_class = Ast_defs.is_c_enum_class c.Aast.c_kind in
+  let (in_enum_class, abstract_enum_class) =
+    let open Ast_defs in
+    match c.Aast.c_kind with
+    | Cenum_class Concrete -> (true, false)
+    | Cenum_class Abstract -> (true, true)
+    | Cclass _
+    | Cinterface
+    | Cenum
+    | Ctrait ->
+      (false, false)
+  in
   let (enum_bound, enum) =
     match c.Aast.c_enum with
-    | Some enum -> enum_ env name ~in_enum_class enum
+    | Some enum -> enum_ env name ~in_enum_class ~abstract_enum_class enum
     | None -> (None, None)
   in
   let parents = List.map c.Aast.c_extends ~f:(hint ~allow_retonly:false env) in
@@ -905,15 +916,18 @@ let rec class_ ctx c =
     (* Make enums implicitly extend the BuiltinEnum/BuiltinEnumClass classes in
      * order to provide utility methods.
      *)
-    | Some bound ->
+    | Some bounds_list ->
       let pos = fst name in
       let builtin =
         if in_enum_class then
-          SN.Classes.cHH_BuiltinEnumClass
+          if abstract_enum_class then
+            SN.Classes.cHH_BuiltinAbstractEnumClass
+          else
+            SN.Classes.cHH_BuiltinEnumClass
         else
           SN.Classes.cHH_BuiltinEnum
       in
-      let parent = (pos, N.Happly ((pos, builtin), [bound])) in
+      let parent = (pos, N.Happly ((pos, builtin), bounds_list)) in
       parent :: parents
     | None -> parents
   in
@@ -1107,7 +1121,7 @@ and xhp_attribute_decl env (h, cv, tag, maybe_enum) =
     N.cv_span = cv.Aast.cv_span;
   }
 
-and enum_ env enum_name ~in_enum_class e =
+and enum_ env enum_name ~in_enum_class ~abstract_enum_class e =
   let open Aast in
   let pos = fst enum_name in
   let enum_hint = (pos, Happly (enum_name, [])) in
@@ -1115,12 +1129,15 @@ and enum_ env enum_name ~in_enum_class e =
   let new_base = hint env old_base in
   let bound =
     if in_enum_class then
-      (* Turn the base type of the enum class into MemberOf<E, base> *)
-      let elt = (pos, SN.Classes.cMemberOf) in
-      let h = (pos, Happly (elt, [enum_hint; old_base])) in
-      hint env h
+      if abstract_enum_class then
+        []
+      else
+        (* Turn the base type of the enum class into MemberOf<E, base> *)
+        let elt = (pos, SN.Classes.cMemberOf) in
+        let h = (pos, Happly (elt, [enum_hint; old_base])) in
+        [hint env h]
     else
-      enum_hint
+      [enum_hint]
   in
   let enum =
     {

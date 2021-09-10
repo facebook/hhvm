@@ -130,29 +130,6 @@ void raise_property_typehint_error(const std::string& msg,
   }
 }
 
-void raise_record_field_typehint_error(const std::string& msg, bool isSoft) {
-  if (isSoft) {
-    raise_warning_unsampled(msg);
-    return;
-  }
-  raise_recoverable_error(msg);
-  raise_error("Error handler tried to recover from a record field typehint "
-              "violation");
-}
-
-void raise_record_init_error(const StringData* recName,
-                             const StringData* fieldName) {
-  raise_error(
-    folly::sformat("Record field '{}::{}' not initialized", recName, fieldName)
-  );
-}
-
-void raise_record_field_error(const StringData* recName,
-                              const StringData* fieldName) {
-  raise_error(folly::sformat("Field '{}' does not exist in record '{}'",
-                              fieldName, recName));
-}
-
 void raise_property_typehint_unset_error(const Class* declCls,
                                          const StringData* propName,
                                          bool isSoft, bool isUB) {
@@ -169,10 +146,6 @@ void raise_property_typehint_unset_error(const Class* declCls,
 
 void raise_convert_object_to_string(const char* cls_name) {
   raise_error("Cannot convert object to string (got instance of %s)", cls_name);
-}
-
-void raise_convert_record_to_type(const char* typeName) {
-  raise_error("Cannot convert record to %s", typeName);
 }
 
 void raise_convert_rfunc_to_type(const char* typeName) {

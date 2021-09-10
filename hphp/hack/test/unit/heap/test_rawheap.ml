@@ -51,8 +51,8 @@ let test_heap_handle () =
 
 let test_serialize_deserialize () =
   let test_val kind x =
-    let entry = SharedMem.serialize_raw x in
-    let y = SharedMem.deserialize_raw entry in
+    let entry = SharedMem.RawAccess.serialize_raw x in
+    let y = SharedMem.RawAccess.deserialize_raw entry in
     expect
       ~msg:
         (Format.sprintf "%s value not preserved via serialize/deserialize" kind)
@@ -64,10 +64,10 @@ let test_serialize_deserialize () =
 
 let test_add_raw_get_raw () =
   let test_key_val key value =
-    let entry = SharedMem.serialize_raw value in
-    let () = SharedMem.add_raw key entry in
-    let entry2 = SharedMem.get_raw key in
-    let value2 = SharedMem.deserialize_raw entry2 in
+    let entry = SharedMem.RawAccess.serialize_raw value in
+    let () = SharedMem.RawAccess.add_raw key entry in
+    let entry2 = SharedMem.RawAccess.get_raw key in
+    let value2 = SharedMem.RawAccess.deserialize_raw entry2 in
     expect ~msg:(Format.sprintf "%s add/get failed" key) (value = value2)
   in
   test_key_val "foo" "bar";
@@ -95,6 +95,7 @@ let tests () =
               dep_table_pow = 2;
               hash_table_pow = 12;
               shm_dirs = [];
+              shm_use_sharded_hashtbl = false;
               shm_min_avail = 0;
               log_level = 0;
               sample_rate = 0.0;

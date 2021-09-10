@@ -296,7 +296,6 @@ std::pair<int, double> sizeOfArray(
         case KindOfLazyClass:
         case KindOfClsMeth:
         case KindOfRClsMeth:
-        case KindOfRecord:
           always_assert(false);
       }
 
@@ -395,7 +394,6 @@ void stringsOfArray(
         case KindOfLazyClass:
         case KindOfClsMeth:
         case KindOfRClsMeth:
-        case KindOfRecord:
           // this should be an always_assert(false), but that appears to trigger
           // a gcc-4.9 bug (t16350411); even after t16350411 is fixed, we
           // can't always_assert(false) here until we stop supporting gcc-4.9
@@ -581,9 +579,6 @@ std::pair<int, double> tvGetSize(
       sized += sz / (double)ref_count;
       add_array_size(rclsmeth->m_arr);
     }
-
-    case KindOfRecord: // TODO(T41026982)
-      raise_error(Strings::RECORD_NOT_SUPPORTED);
   }
 
   return std::make_pair(size, sized);
@@ -652,8 +647,6 @@ void tvGetStrings(
       );
       break;
     }
-    case HPHP::KindOfRecord: // TODO(T41026982)
-      raise_error(Strings::RECORD_NOT_SUPPORTED);
   }
 }
 

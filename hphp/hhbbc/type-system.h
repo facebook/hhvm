@@ -103,11 +103,10 @@
  *
  *     Obj{<}=c
  *     Cls{<}=c
- *     Record{<}=c
  *
- *       Object, Class, or Record with a known class/record type. The
- *       class/record type can either be exact or a
- *       subclass. Supported by BObj, BCls, or BRecord.
+ *       Object or Class with a known class type. The
+ *       class type can either be exact or a
+ *       subclass. Supported by BObj or BCls.
  *
  *     Obj=WaitH<T>
  *
@@ -183,7 +182,6 @@ struct Type;
   DT(WaitHandle, DWaitHandle, dwh)                              \
   DT(Cls, DCls, dcls)                                           \
   DT(LazyCls, SString, lazyclsval)                              \
-  DT(Record, DRecord, drec)                                     \
   DT(ArrLikePacked, copy_ptr<DArrLikePacked>, packed)           \
   DT(ArrLikePackedN, copy_ptr<DArrLikePackedN>, packedn)        \
   DT(ArrLikeMap, copy_ptr<DArrLikeMap>, map)                    \
@@ -249,22 +247,6 @@ struct DWaitHandle {
   // available.
   res::Class cls;
   copy_ptr<Type> inner;
-};
-
-/*
- * Information about a specific record type.  The record type is either
- * exact or a subtype of the supplied record.
- */
-struct DRecord {
-  enum Tag : uint16_t { Exact, Sub };
-
-  DRecord(Tag type, res::Record rec)
-    : type(type)
-    , rec(rec)
-  {}
-
-  Tag type;
-  res::Record rec;
 };
 
 struct DArrLikePacked;
@@ -494,7 +476,6 @@ private:
   friend bool is_specialized_array_like_map(const Type&);
 
   friend bool is_specialized_obj(const Type&);
-  friend bool is_specialized_record(const Type&);
   friend bool is_specialized_cls(const Type&);
   friend bool is_specialized_lazycls(const Type&);
   friend bool is_specialized_string(const Type&);
@@ -511,15 +492,12 @@ private:
   friend Type objExact(res::Class);
   friend Type subCls(res::Class);
   friend Type clsExact(res::Class);
-  friend Type exactRecord(res::Record);
-  friend Type subRecord(res::Record);
   friend Type packed_impl(trep, HAMSandwich, std::vector<Type>);
   friend Type packedn_impl(trep, HAMSandwich, Type);
   friend Type map_impl(trep, HAMSandwich, MapElems, Type, Type);
   friend Type mapn_impl(trep, HAMSandwich, Type, Type);
   friend DObj dobj_of(const Type&);
   friend Type demote_wait_handle(Type);
-  friend DRecord drec_of(const Type&);
   friend DCls dcls_of(Type);
   friend SString sval_of(const Type&);
   friend SString lazyclsval_of(const Type&);
@@ -605,7 +583,6 @@ private:
 
   friend Type make_obj_for_testing(trep, res::Class, DObj::Tag, bool);
   friend Type make_cls_for_testing(trep, res::Class, DCls::Tag, bool);
-  friend Type make_record_for_testing(trep, res::Record, DRecord::Tag);
   friend Type make_arrval_for_testing(trep, SArray);
   friend Type make_arrpacked_for_testing(trep, std::vector<Type>,
                                          Optional<LegacyMark>);
@@ -812,13 +789,6 @@ Type subCls(res::Class);
 Type clsExact(res::Class);
 
 /*
- * Create types for records with some known constraint on an associated
- * res::Record.
- */
-Type exactRecord(res::Record);
-Type subRecord(res::Record);
-
-/*
  * vec types with known size.
  *
  * Pre: !v.empty()
@@ -932,12 +902,6 @@ bool is_specialized_obj(const Type&);
 bool is_specialized_cls(const Type&);
 
 /*
- * Returns true if type 't' represents a "specialized" record--i.e. a
- * record with a DRecord structure.
- */
-bool is_specialized_record(const Type&);
-
-/*
  * Returns true if type 't' represents a "specialized"
  * string/int/double/lazy class--i.e. with a known value.
  */
@@ -1010,14 +974,14 @@ Type remove_bits(Type, trep);
 /*
  * Returns the best known instantiation of a class type.
  *
- * Pre: t.subypeOf(TObj)
+ * Pre: t.subypeOf(TCls)
  */
 Type toobj(const Type& t);
 
 /*
  * Returns the best known TCls subtype for an object type.
  *
- * Pre: t.subtypeOf(TCls)
+ * Pre: t.subtypeOf(TObj)
  */
 Type objcls(const Type& t);
 

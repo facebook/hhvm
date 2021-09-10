@@ -1,4 +1,4 @@
-object(Closure$%S;%d) (1) {
+object(Closure$%S) (1) {
   ["parameter"]=>
   dict(1) {
     ["$x"]=>
@@ -7,7 +7,7 @@ object(Closure$%S;%d) (1) {
 }
 object(stdClass) (0) {
 }
-object(Closure$%s#2;%d) (1) {
+object(Closure$%s#2) (1) {
   ["parameter"]=>
   dict(1) {
     ["$x"]=>

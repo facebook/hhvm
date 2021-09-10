@@ -1,0 +1,3 @@
+Verification Error (unit /:systemlib.php func HH\invariant_violation): statics are forbidden in Pure functions: CGetS
+
+Done

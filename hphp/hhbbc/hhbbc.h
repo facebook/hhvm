@@ -194,14 +194,12 @@ void validate_uniqueness(const T& t, const E& other) {
   };
 }
 
-template <typename T, typename R, typename E, typename F>
+template <typename T, typename R, typename E>
 void add_symbol(R& map,
                 T t,
                 const char* type,
-                const E& other1,
-                const F& other2) {
-  validate_uniqueness(t, other1);
-  validate_uniqueness(t, other2);
+                const E& other) {
+  validate_uniqueness(t, other);
   add_symbol(map, std::move(t), type);
 }
 

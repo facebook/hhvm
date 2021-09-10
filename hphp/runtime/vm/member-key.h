@@ -141,6 +141,6 @@ inline bool operator!=(MemberKey a, MemberKey b) {
   return !(a == b);
 }
 
-std::string show(MemberKey);
+std::string show(const MemberKey&);
 
 }

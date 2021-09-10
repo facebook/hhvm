@@ -47,6 +47,7 @@
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/switch-profile.h"
 #include "hphp/runtime/vm/jit/tc-internal.h"
+#include "hphp/runtime/vm/jit/tc-record.h"
 #include "hphp/runtime/vm/jit/trans-cfg.h"
 #include "hphp/runtime/vm/jit/type-profile.h"
 #include "hphp/runtime/vm/jit/vasm-block-counters.h"
@@ -90,7 +91,6 @@ constexpr uint32_t k86linitSlot = 0x80000002u;
 
 enum class SeenType : uint8_t {
   Class,
-  Record,
   TypeAlias,
   End
 };
@@ -119,11 +119,6 @@ Class* deserializeImpl(ProfDataDeserializer& ser,
                        ProfDataSerializer::Id id,
                        Class*) {
   return ser.getClass(id);
-}
-RecordDesc* deserializeImpl(ProfDataDeserializer& ser,
-                            ProfDataSerializer::Id id,
-                            RecordDesc*) {
-  return ser.getRecord(id);
 }
 const TypeAlias* deserializeImpl(ProfDataDeserializer& ser,
                                  ProfDataSerializer::Id id,
@@ -434,10 +429,10 @@ void write_prof_trans_rec(ProfDataSerializer& ser,
     auto lock = ptr->lockCallerList();
     std::vector<TransID> callers;
     auto addCaller = [&] (TCA caller) {
-      if (!tc::isProfileCodeAddress(caller)) return;
       auto const callerTransId = pd->jmpTransID(caller);
-      assertx(callerTransId != kInvalidTransID);
-      callers.push_back(callerTransId);
+      if (callerTransId != kInvalidTransID) {
+        callers.push_back(callerTransId);
+      }
     };
     for (auto const caller : ptr->mainCallers()) addCaller(caller);
     write_container(ser, callers, write_raw<TransID>);
@@ -481,15 +476,6 @@ bool write_seen_type(ProfDataSerializer& ser, const NamedEntity* ne) {
       write_class(ser, cls);
     }
     return true;
-  } else if (auto const rec = ne->recordList()) {
-    if (!(rec->attrs() & AttrUnique)) return false;
-    auto const filepath = rec->preRecordDesc()->unit()->origFilepath();
-    if (!filepath || filepath->empty()) return false;
-    if (!ser.present(rec)) {
-      write_raw(ser, SeenType::Record);
-      write_record(ser, rec);
-    }
-    return true;
   } else if (auto const td = ne->getCachedTypeAlias()) {
     if (!ne->isPersistentTypeAlias()) return false;
     auto const filepath = td->unit()->origFilepath();
@@ -508,9 +494,6 @@ void write_named_type(ProfDataSerializer& ser, const NamedEntity* ne) {
   if (auto const cls = ne->clsList()) {
     write_raw(ser, SeenType::Class);
     write_class(ser, cls);
-  } else if (auto const rec = ne->recordList()) {
-    write_raw(ser, SeenType::Record);
-    write_record(ser, rec);
   } else if (auto const td = ne->getCachedTypeAlias()) {
     write_raw(ser, SeenType::TypeAlias);
     write_typealias(ser, td);
@@ -562,45 +545,12 @@ Class* read_class_internal(ProfDataDeserializer& ser) {
   return cls;
 }
 
-RecordDesc* read_record_internal(ProfDataDeserializer& ser) {
-  auto const id = read_raw<decltype(std::declval<PreRecordDesc*>()->id())>(ser);
-  auto const unit = read_unit(ser);
-
-  read_container(ser,
-                 [&] {
-                   auto const dep = read_record(ser);
-                   auto const ne = dep->preRecordDesc()->namedEntity();
-                   // if it's not persistent, make sure that dep
-                   // is the active record for this NamedEntity
-                   assertx(ne->m_cachedRecordDesc.bound());
-                   if (ne->m_cachedRecordDesc.isNormal()) {
-                     ne->setCachedRecordDesc(dep);
-                   }
-                 });
-
-  auto const preRec = unit->lookupPreRecordId(id);
-  auto const ne = preRec->namedEntity();
-  // If it's not persistent, make sure its NamedEntity is
-  // unbound, ready for DefClass
-  if (ne->m_cachedRecordDesc.bound() &&
-      ne->m_cachedRecordDesc.isNormal()) {
-    ne->m_cachedRecordDesc.markUninit();
-  }
-
-  auto const rec = RecordDesc::def(preRec, true);
-  return rec;
-}
-
 const TypeAlias* read_typealias_internal(ProfDataDeserializer& ser) {
   const Id id = read_raw<Id>(ser);
   auto const unit = read_unit(ser);
   auto const has_class = read_raw<bool>(ser);
   if (has_class) {
     read_class(ser);
-  }
-  auto const has_record = read_raw<bool>(ser);
-  if (has_record) {
-    read_record(ser);
   }
   auto const td = unit->lookupTypeAliasId(id);
   return TypeAlias::def(td);
@@ -619,10 +569,6 @@ bool read_seen_type(ProfDataDeserializer& ser) {
       read_class(ser);
       return true;
     }
-    case SeenType::Record: {
-      read_record(ser);
-      return true;
-    }
     case SeenType::TypeAlias: {
       read_typealias(ser);
       return true;
@@ -638,9 +584,6 @@ void read_named_type(ProfDataDeserializer& ser) {
   switch (type) {
     case SeenType::Class:
       read_class(ser);
-      return;
-    case SeenType::Record:
-      read_record(ser);
       return;
     case SeenType::TypeAlias:
       read_typealias(ser);
@@ -684,7 +627,7 @@ void write_seen_types(ProfDataSerializer& ser, ProfData* pd) {
 }
 
 void read_seen_types(ProfDataDeserializer& ser) {
-  BootStats::Block timer("DES_read_classes_and_type_aliases_and_records",
+  BootStats::Block timer("DES_read_classes_and_type_aliases",
                          RuntimeOption::ServerExecutionMode());
   while (read_seen_type(ser)) {
     // nothing to do. this was just to make sure everything is loaded
@@ -1172,7 +1115,6 @@ ProfDataSerializer::Mappers ProfDataDeserializer::getMappers() const {
   rev(unitMap, mappers.unitMap);
   rev(funcMap, mappers.funcMap);
   rev(classMap, mappers.classMap);
-  rev(recordMap, mappers.recordMap);
   rev(typeAliasMap, mappers.typeAliasMap);
   rev(stringMap, mappers.stringMap);
   rev(arrayMap, mappers.arrayMap);
@@ -1252,10 +1194,6 @@ Class* ProfDataDeserializer::getClass(ProfDataSerializer::Id id) const {
   return classMap.get(id);
 }
 
-RecordDesc* ProfDataDeserializer::getRecord(ProfDataSerializer::Id id) const {
-  return recordMap.get(id);
-}
-
 const TypeAlias*
 ProfDataDeserializer::getTypeAlias(ProfDataSerializer::Id id) const {
   return typeAliasMap.get(id);
@@ -1288,10 +1226,6 @@ void ProfDataDeserializer::record(ProfDataSerializer::Id id, Func* func) {
 
 void ProfDataDeserializer::record(ProfDataSerializer::Id id, Class* cls) {
   classMap.record(id, cls);
-}
-
-void ProfDataDeserializer::record(ProfDataSerializer::Id id, RecordDesc* rec) {
-  recordMap.record(id, rec);
 }
 
 void ProfDataDeserializer::record(ProfDataSerializer::Id id,
@@ -1332,11 +1266,6 @@ ProfDataSerializer::serialize(const Class* cls) {
 }
 
 std::pair<ProfDataSerializer::Id, bool>
-ProfDataSerializer::serialize(const RecordDesc* rec) {
-  return mappers.recordMap.get(rec);
-}
-
-std::pair<ProfDataSerializer::Id, bool>
 ProfDataSerializer::serialize(const TypeAlias* td) {
   return mappers.typeAliasMap.get(td);
 }
@@ -1363,10 +1292,6 @@ ProfDataSerializer::serialize(FuncId fid) {
 
 bool ProfDataSerializer::present(const Class* cls) const {
   return mappers.classMap.present(cls);
-}
-
-bool ProfDataSerializer::present(const RecordDesc* rec) const {
-  return mappers.recordMap.present(rec);
 }
 
 bool ProfDataSerializer::present(const TypeAlias* ta) const {
@@ -1592,45 +1517,6 @@ LazyClassData read_lclass(ProfDataDeserializer& ser) {
   return LazyClassData::create(name);
 }
 
-void write_record(ProfDataSerializer& ser, const RecordDesc* rec) {
-  SCOPE_EXIT {
-    ITRACE(2, "RecordDesc: {}\n", rec ? rec->name() : staticEmptyString());
-  };
-  ITRACE(2, "RecordDesc>\n");
-  Trace::Indent _;
-
-  auto const [id, old] = ser.serialize(rec);
-  if (old) return write_id(ser, id);
-
-  write_serialized_id(ser, id);
-  write_raw(ser, rec->preRecordDesc()->id());
-  write_unit(ser, rec->preRecordDesc()->unit());
-
-  jit::vector<const RecordDesc*> dependents;
-  auto record_dep = [&] (const RecordDesc* dep) {
-    if (!dep) return;
-    if (!ser.present(dep) || !recordHasPersistentRDS(dep)) {
-      dependents.emplace_back(dep);
-    }
-  };
-  record_dep(rec->parent());
-  write_container(ser, dependents, write_record);
-}
-
-RecordDesc* read_record(ProfDataDeserializer& ser) {
-  ITRACE(2, "RecordDesc>\n");
-  auto const ret = deserialize(
-    ser,
-    [&] () -> RecordDesc* {
-      Trace::Indent _;
-      return read_record_internal(ser);
-    }
-  );
-
-  ITRACE(2, "RecordDesc: {}\n", ret ? ret->name() : staticEmptyString());
-  return ret;
-}
-
 void write_typealias(ProfDataSerializer& ser, const TypeAlias* td) {
   SCOPE_EXIT {
     ITRACE(2, "TypeAlias: {}\n", td->name());
@@ -1659,12 +1545,6 @@ void write_typealias(ProfDataSerializer& ser, const TypeAlias* td) {
   if (td->klass) {
     write_raw(ser, true);
     write_class(ser, td->klass);
-  } else {
-    write_raw(ser, false);
-  }
-  if (td->rec) {
-    write_raw(ser, true);
-    write_record(ser, td->rec);
   } else {
     write_raw(ser, false);
   }
@@ -1928,9 +1808,9 @@ std::string serializeProfData(const std::string& filename) {
       serializeBespokeLayouts(ser);
     }
 
-    // Record the size of prof so we can use it to fake jit.maturity
-    // if we're going to restart before running RTA.
-    write_raw(ser, (size_t)jit::tc::code().prof().used());
+    // Record the size of main profile code so we can use it to fake
+    // jit.maturity if we're going to restart before running RTA.
+    write_raw(ser, tc::getProfMainUsage());
 
     ser.finalize();
 

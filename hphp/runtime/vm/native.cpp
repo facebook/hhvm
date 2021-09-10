@@ -284,8 +284,7 @@ void callFunc(const Func* const func,
     case KindOfKeyset:
     case KindOfClsMeth:
     case KindOfObject:
-    case KindOfResource:
-    case KindOfRecord: {
+    case KindOfResource: {
       assertx(isBuiltinByRef(ret.m_type));
       if (func->isReturnByValue()) {
         auto val = callFuncInt64Impl(f, GP_args, GP_count, SIMD_args,
@@ -565,8 +564,7 @@ static Optional<TypedValue> builtinInValue(
   case KindOfClass:
   case KindOfLazyClass:
   case KindOfClsMeth:
-  case KindOfRClsMeth:
-  case KindOfRecord:  return make_tv<KindOfNull>();
+  case KindOfRClsMeth: return make_tv<KindOfNull>();
   }
 
   not_reached();
@@ -614,8 +612,7 @@ static bool tcCheckNative(const TypeConstraint& tc, const NativeSig::Type ty) {
     case KindOfClass:        return ty == T::Class;
     case KindOfClsMeth:      return ty == T::ClsMeth;
     case KindOfRClsMeth:     // TODO(T67037453)
-    case KindOfLazyClass:    // TODO (T68823958)
-    case KindOfRecord:       return false; // TODO (T41031632)
+    case KindOfLazyClass:    return false; // TODO (T68823958)
   }
   not_reached();
 }
@@ -647,8 +644,7 @@ static bool tcCheckNativeIO(
       case KindOfClass:        return ty == T::ClassIO;
       case KindOfClsMeth:      return ty == T::ClsMethIO;
       case KindOfRClsMeth:     // TODO (T67037453)
-      case KindOfLazyClass:    // TODO (T68823958)
-      case KindOfRecord:       return false; // TODO (T41031632)
+      case KindOfLazyClass:    return false; // TODO (T68823958)
     }
     not_reached();
   };

@@ -469,7 +469,11 @@ impl<'ast> VisitorMut<'ast> for Checker {
                 }
             }
             aast::Expr_::Call(x) => {
-                let (_caller, _targs, params, _variadic) = &mut **x;
+                let (caller, _targs, params, _variadic) = &mut **x;
+                match rty_expr(context, caller) {
+                    Rty::Readonly => explicit_readonly(caller),
+                    Rty::Mutable => {}
+                };
                 for param in params.iter_mut() {
                     match rty_expr(context, param) {
                         Rty::Readonly => explicit_readonly(param),

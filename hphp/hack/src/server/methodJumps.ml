@@ -87,13 +87,13 @@ let check_if_extends_class_and_find_methods
 
 let filter_extended_classes
     ctx target_class_name get_method target_class_pos acc classes =
-  List.fold_left classes ~init:acc ~f:(fun acc cid ->
+  List.fold_left classes ~init:acc ~f:(fun acc (_, cid, _) ->
       check_if_extends_class_and_find_methods
         ctx
         target_class_name
         get_method
         target_class_pos
-        (snd cid)
+        cid
         acc)
 
 let find_extended_classes_in_files

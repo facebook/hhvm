@@ -38,16 +38,13 @@ inline TypeSpec::TypeSpec()
 {}
 
 inline TypeSpec::TypeSpec(ArraySpec arrSpec,
-                          ClassSpec clsSpec,
-                          RecordSpec recSpec)
+                          ClassSpec clsSpec)
   : m_kind(SpecKind::None)
   , m_arrSpec(arrSpec)
   , m_clsSpec(clsSpec)
-  , m_recSpec(recSpec)
 {
   if (arrSpec != ArraySpec::Bottom()) m_kind |= SpecKind::Array;
   if (clsSpec != ClassSpec::Bottom()) m_kind |= SpecKind::Class;
-  if (recSpec != RecordSpec::Bottom()) m_kind |= SpecKind::Record;
 }
 
 inline SpecKind TypeSpec::kind() const {
@@ -62,15 +59,10 @@ inline ClassSpec TypeSpec::clsSpec() const {
   return m_clsSpec;
 }
 
-inline RecordSpec TypeSpec::recSpec() const {
-  return m_recSpec;
-}
-
 inline bool TypeSpec::operator==(const TypeSpec& rhs) const {
   auto const& lhs = *this;
   return lhs.arrSpec() == rhs.arrSpec() &&
-         lhs.clsSpec() == rhs.clsSpec() &&
-         lhs.recSpec() == rhs.recSpec();
+         lhs.clsSpec() == rhs.clsSpec();
 }
 
 inline bool TypeSpec::operator!=(const TypeSpec& rhs) const {
@@ -80,8 +72,7 @@ inline bool TypeSpec::operator!=(const TypeSpec& rhs) const {
 inline bool TypeSpec::operator<=(const TypeSpec& rhs) const {
   auto const& lhs = *this;
   return lhs.arrSpec() <= rhs.arrSpec() &&
-         lhs.clsSpec() <= rhs.clsSpec() &&
-         lhs.recSpec() <= rhs.recSpec();
+         lhs.clsSpec() <= rhs.clsSpec();
 }
 
 inline bool TypeSpec::operator>=(const TypeSpec& rhs) const {
@@ -91,68 +82,53 @@ inline bool TypeSpec::operator>=(const TypeSpec& rhs) const {
 inline TypeSpec TypeSpec::operator|(const TypeSpec& rhs) const {
   auto const& lhs = *this;
   return TypeSpec(lhs.arrSpec() | rhs.arrSpec(),
-                  lhs.clsSpec() | rhs.clsSpec(),
-                  lhs.recSpec() | rhs.recSpec());
+                  lhs.clsSpec() | rhs.clsSpec());
+
 }
 
 inline TypeSpec TypeSpec::operator&(const TypeSpec& rhs) const {
   auto const& lhs = *this;
   return TypeSpec(lhs.arrSpec() & rhs.arrSpec(),
-                  lhs.clsSpec() & rhs.clsSpec(),
-                  lhs.recSpec() & rhs.recSpec());
+                  lhs.clsSpec() & rhs.clsSpec());
+
 }
 
 inline TypeSpec TypeSpec::operator-(const TypeSpec& rhs) const {
   auto const& lhs = *this;
   return TypeSpec(lhs.arrSpec() - rhs.arrSpec(),
-                  lhs.clsSpec() - rhs.clsSpec(),
-                  lhs.recSpec() - rhs.recSpec());
+                  lhs.clsSpec() - rhs.clsSpec());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#define EMIT_TEMPLATE(b, T) EMIT_TEMPLATE_##b(T)
-#define EMIT_TEMPLATE_true(T) template<typename T>
-#define EMIT_TEMPLATE_false(T)
-
-#define IMPLEMENT_SPEC_OPERS(Spec, is_template, ...)      \
-  EMIT_TEMPLATE(is_template, __VA_ARGS__)                 \
+#define IMPLEMENT_SPEC_OPERS(Spec)                        \
   inline uintptr_t Spec::bits() const {                   \
     return m_bits;                                        \
   }                                                       \
-  EMIT_TEMPLATE(is_template, __VA_ARGS__)                 \
   constexpr Spec Spec::Top() {                            \
     return Spec{};                                        \
   }                                                       \
-  EMIT_TEMPLATE(is_template, __VA_ARGS__)                 \
   constexpr Spec Spec::Bottom() {                         \
     return Spec{BottomTag{}};                             \
   }                                                       \
-  EMIT_TEMPLATE(is_template, __VA_ARGS__)                 \
   inline Spec::operator bool() const {                    \
     return *this != Top() && *this != Bottom();           \
   }                                                       \
-  EMIT_TEMPLATE(is_template, __VA_ARGS__)                 \
   inline bool Spec::operator==(const Spec& rhs) const {   \
     return m_bits == rhs.m_bits;                          \
   }                                                       \
-  EMIT_TEMPLATE(is_template, __VA_ARGS__)                 \
   inline bool Spec::operator!=(const Spec& rhs) const {   \
     return !(*this == rhs);                               \
   }                                                       \
-  EMIT_TEMPLATE(is_template, __VA_ARGS__)                 \
   inline bool Spec::operator>=(const Spec& rhs) const {   \
     return rhs <= *this;                                  \
   }                                                       \
-  EMIT_TEMPLATE(is_template, __VA_ARGS__)                 \
   inline bool Spec::operator<(const Spec& rhs) const {    \
     return *this <= rhs && *this != rhs;                  \
   }                                                       \
-  EMIT_TEMPLATE(is_template, __VA_ARGS__)                 \
   inline bool Spec::operator>(const Spec& rhs) const {    \
     return *this >= rhs && *this != rhs;                  \
   }                                                       \
-  EMIT_TEMPLATE(is_template, __VA_ARGS__)                 \
   inline Spec Spec::operator-(const Spec& rhs) const {    \
     return *this <= rhs ? Bottom() : *this;               \
   }
@@ -211,99 +187,81 @@ inline const RepoAuthType::Array* ArraySpec::type() const {
   return reinterpret_cast<const RepoAuthType::Array*>(m_type);
 }
 
-IMPLEMENT_SPEC_OPERS(ArraySpec, false)
+IMPLEMENT_SPEC_OPERS(ArraySpec)
 
 ///////////////////////////////////////////////////////////////////////////////
-// ClsRecSpec.
-template<typename T>
-constexpr inline ClsRecSpec<T>::ClsRecSpec()
+// ClasssSpec.
+
+constexpr inline ClassSpec::ClassSpec()
   : m_sort(IsTop)
   , m_ptr(0)
 {}
 
-template<typename T>
-constexpr inline ClsRecSpec<T>::ClsRecSpec(ClsRecSpec<T>::BottomTag)
+constexpr inline ClassSpec::ClassSpec(ClassSpec::BottomTag)
   : m_sort(IsBottom)
   , m_ptr(0)
 {}
 
-template<typename T>
-inline ClsRecSpec<T>::ClsRecSpec(const T* t, ClsRecSpec<T>::SubTag)
+inline ClassSpec::ClassSpec(const Class* c, ClassSpec::SubTag)
   : m_sort(IsSub)
-  , m_ptr(reinterpret_cast<uintptr_t>(t))
+  , m_ptr(reinterpret_cast<uintptr_t>(c))
 {}
 
-template<typename T>
-inline ClsRecSpec<T>::ClsRecSpec(const T* t, ClsRecSpec<T>::ExactTag)
+inline ClassSpec::ClassSpec(const Class* c, ClassSpec::ExactTag)
   : m_sort(IsExact)
-  , m_ptr(reinterpret_cast<uintptr_t>(t))
+  , m_ptr(reinterpret_cast<uintptr_t>(c))
 {}
 
-template<typename T>
-inline bool ClsRecSpec<T>::exact() const {
+inline bool ClassSpec::exact() const {
   return m_sort == IsExact;
 }
 
-template<typename T>
-inline const T* ClsRecSpec<T>::typeCns() const {
+inline const Class* ClassSpec::cls() const {
   return (m_sort == IsSub || m_sort == IsExact)
-    ? reinterpret_cast<const T*>(m_ptr)
+    ? reinterpret_cast<const Class*>(m_ptr)
     : nullptr;
 }
 
-template<typename T>
-inline const T* ClsRecSpec<T>::exactTypeCns() const {
+inline const Class* ClassSpec::exactCls() const {
   return (m_sort == IsExact)
-    ? reinterpret_cast<const T*>(m_ptr)
+    ? reinterpret_cast<const Class*>(m_ptr)
     : nullptr;
 }
 
-template<typename T>
-std::string ClsRecSpec<T>::toString() const {
+inline std::string ClassSpec::toString() const {
   auto const type = exact() ? "=" : "<=";
-  auto const name = typeCns()->name()->data();
+  auto const name = cls()->name()->data();
   return folly::to<std::string>(type, name);
 }
 
-IMPLEMENT_SPEC_OPERS(ClsRecSpec<T>, true, T)
+IMPLEMENT_SPEC_OPERS(ClassSpec)
 
-template<typename T>
-bool ClsRecSpec<T>::operator<=(const ClsRecSpec<T>& rhs) const {
+inline bool ClassSpec::operator<=(const ClassSpec& rhs) const {
   auto const& lhs = *this;
 
   if (lhs == rhs) return true;
   if (lhs == Bottom() || rhs == Top()) return true;
   if (lhs == Top() || rhs == Bottom()) return false;
 
-  return !rhs.exact() && lhs.typeCns()->subtypeOf(rhs.typeCns());
+  return !rhs.exact() && lhs.cls()->subtypeOf(rhs.cls());
 }
 
-namespace {
-bool isNormalType(const Class* cls) {
-  return isNormalClass(cls);
-}
-bool isNormalType(const RecordDesc*) {
-  return true;
-}
-}
-
-template<typename T>
-ClsRecSpec<T> ClsRecSpec<T>::operator|(const ClsRecSpec<T>& rhs) const {
+inline ClassSpec ClassSpec::operator|(const ClassSpec& rhs) const {
   auto const& lhs = *this;
 
   if (lhs <= rhs) return rhs;
   if (rhs <= lhs) return lhs;
 
-  assertx(lhs.typeCns() && rhs.typeCns());
+  assertx(lhs.cls() && rhs.cls());
 
   // We're unwilling to unify with interfaces, so just return Top.
-  if (!isNormalType(lhs.typeCns()) || !isNormalType(rhs.typeCns())) {
+  if (!isNormalClass(lhs.cls()) || !isNormalClass(rhs.cls())) {
     return Top();
   }
 
   // Unify to a common ancestor if possible.
-  if (auto t = lhs.typeCns()->commonAncestor(rhs.typeCns())) {
-    return ClsRecSpec<T>(t, ClsRecSpec<T>::SubTag{});
+  if (auto t = lhs.cls()->commonAncestor(rhs.cls())) {
+    return ClassSpec(t, ClassSpec::SubTag{});
   }
 
   return Top();

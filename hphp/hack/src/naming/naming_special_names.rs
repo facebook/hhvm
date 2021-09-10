@@ -39,6 +39,8 @@ pub mod classes {
 
     pub const HH_BUILTIN_ENUM_CLASS: &str = "\\HH\\BuiltinEnumClass";
 
+    pub const HH_BUILTIN_ABSTRACT_ENUM_CLASS: &str = "\\HH\\BuiltinAbstractEnumClass";
+
     pub const THROWABLE: &str = "\\Throwable";
 
     pub const STD_CLASS: &str = "\\stdClass";
@@ -277,6 +279,8 @@ pub mod user_attributes {
     pub const MODULE: &str = "__Module";
 
     pub const INTERNAL: &str = "__Internal";
+
+    pub const ENABLE_METHOD_TRAIT_DIAMOND: &str = "__EnableMethodTraitDiamond";
 
     lazy_static! {
         pub static ref AS_SET: HashSet<&'static str> = vec![

@@ -93,15 +93,14 @@
 #include "hphp/runtime/vm/as-shared.h"
 #include "hphp/runtime/vm/bc-pattern.h"
 #include "hphp/runtime/vm/coeffects.h"
-#include "hphp/runtime/vm/extern-compiler.h"
 #include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
-#include "hphp/runtime/vm/record-emitter.h"
 #include "hphp/runtime/vm/type-alias-emitter.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/unit-emitter.h"
+#include "hphp/runtime/vm/unit-parser.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/zend/zend-string.h"
 
@@ -648,7 +647,7 @@ struct AsmState {
   }
 
   void finishClass() {
-    assertx(!fe && !re);
+    assertx(!fe);
     pce = 0;
     enumTySet = false;
   }
@@ -767,9 +766,6 @@ struct AsmState {
 
   // When inside a class, this state is active.
   PreClassEmitter* pce{nullptr};
-
-  // When inside a record, this state is active.
-  RecordEmitter* re{nullptr};
 
   // When we're doing a function or method body, this state is active.
   FuncEmitter* fe{nullptr};
@@ -994,10 +990,6 @@ RepoAuthType read_repo_auth_type(AsmState& as) {
   Y("?Cls=",    T::OptExactCls);
   Y("?Cls<=",   T::OptSubCls);
   Y("Cls<=",    T::SubCls);
-  Y("Record=",  T::ExactRecord);
-  Y("?Record=", T::OptExactRecord);
-  Y("?Record<=",T::OptSubRecord);
-  Y("Record<=", T::SubRecord);
   X("Vec",      T::Vec);
   X("?Vec",     T::OptVec);
   X("Dict",     T::Dict);
@@ -1024,10 +1016,8 @@ RepoAuthType read_repo_auth_type(AsmState& as) {
   X("?Cls",     T::OptCls);
   X("ClsMeth",  T::ClsMeth);
   X("?ClsMeth", T::OptClsMeth);
-  X("Record",   T::Record);
-  X("?Record",  T::OptRecord);
-  X("LazyCls",     T::LazyCls);
-  X("?LazyCls",    T::OptLazyCls);
+  X("LazyCls",  T::LazyCls);
+  X("?LazyCls", T::OptLazyCls);
   X("?Res",     T::OptRes);
   X("Res",      T::Res);
   X("?SVec",    T::OptSVec);
@@ -1118,8 +1108,6 @@ RepoAuthType read_repo_auth_type(AsmState& as) {
   case T::OptCls:
   case T::ClsMeth:
   case T::OptClsMeth:
-  case T::Record:
-  case T::OptRecord:
   case T::LazyCls:
   case T::OptLazyCls:
   case T::InitUnc:
@@ -1156,10 +1144,6 @@ RepoAuthType read_repo_auth_type(AsmState& as) {
   case T::SubCls:
   case T::OptExactCls:
   case T::OptSubCls:
-  case T::ExactRecord:
-  case T::SubRecord:
-  case T::OptExactRecord:
-  case T::OptSubRecord:
     break;
   }
 
@@ -1348,6 +1332,10 @@ FCallArgs::Flags read_fcall_flags(AsmState& as, Op thisOpcode) {
     if (flag == "SkipRepack") { flags |= FCallArgs::SkipRepack; continue; }
     if (flag == "EnforceMutableReturn") {
       flags |= FCallArgs::EnforceMutableReturn;
+      continue;
+    }
+    if (flag == "EnforceReadonlyThis") {
+      flags |= FCallArgs::EnforceReadonlyThis;
       continue;
     }
 
@@ -2995,17 +2983,6 @@ void parse_property(AsmState& as, bool class_is_const,
   );
 }
 
-void parse_record_field(AsmState& as) {
-  parse_prop_or_field_impl(
-    as,
-    [](Attr attrs) {},
-    [&](auto&&... args) {
-      as.re->addField(std::forward<decltype(args)>(args)...);
-    },
-    {}
-  );
-}
-
 /*
  * const-flags     : isType
  *                 : isAbstract
@@ -3034,19 +3011,23 @@ void parse_class_constant(AsmState& as) {
     as.in.getc();
     assertx(isAbstract);
     as.pce->addAbstractConstant(makeStaticString(name),
-                                staticEmptyString(),
                                 kind,
                                 false);
     return;
   }
 
-  TypedValue tvInit = parse_member_tv_initializer(as);
+  auto tvInit = parse_member_tv_initializer(as);
+  if (isType && (!tvIsDict(tvInit) || val(tvInit).parr->empty())) {
+    as.error("type constant must have a valid array type structure");
+  }
+
   as.pce->addConstant(makeStaticString(name),
-                      staticEmptyString(), &tvInit,
-                      staticEmptyString(),
-                      kind,
-                      false,
+                      nullptr,
+                      &tvInit,
                       Array{},
+                      kind,
+                      PreClassEmitter::Const::Invariance::None,
+                      false,
                       isAbstract);
 }
 
@@ -3290,24 +3271,6 @@ void parse_class_body(AsmState& as, bool class_is_const,
 }
 
 /*
- * record-body : record-body-line* '}'
- *             ;
- *
- * record-body-line : ".property"  directive-property
- *                  ;
- */
-void parse_record_body(AsmState& as) {
-  std::string directive;
-  while (as.in.readword(directive)) {
-    if (directive == ".property") { parse_record_field(as); continue; }
-
-    as.error(folly::to<std::string>("unrecognized directive `",
-                                    directive, "` in record"));
-  }
-  as.in.expect('}');
-}
-
-/*
  * directive-class : upper-bound-list ?"top" attribute-list identifier
  *                   ?line-range extension-clause implements-clause '{'
  *                   class-body
@@ -3345,14 +3308,17 @@ void parse_class(AsmState& as) {
   if (!as.in.readname(name)) {
     as.error(".class must have a name");
   }
+
   if (PreClassEmitter::IsAnonymousClassName(name)) {
     // assign unique numbers to anonymous classes
     // they must not be pre-numbered in the hhas
     auto p = name.find(';');
     if (p != std::string::npos) {
-      as.error("anonymous class and closure names may not contain ids in hhas");
+      as.error(
+        "anonymous class and closure names may not contain " \
+        "a semicolon in hhas"
+      );
     }
-    name = HPHP::NewAnonymousClassName(name);
   }
 
   int line0;
@@ -3404,62 +3370,6 @@ void parse_class(AsmState& as) {
   parse_class_body(as, attrs & AttrIsConst, ubs);
 
   as.finishClass();
-}
-
-/*
- * directive-record : attribute identifier ?line-range
- *                      extension-clause '{' record-body
- *                  ;
- *
- * extension-clause : empty
- *                  | "extends" identifier
- *                  ;
- */
-void parse_record(AsmState& as) {
-  if (!RuntimeOption::EvalHackRecords) {
-    as.error("Records not supported");
-  }
-
-  as.in.skipWhitespace();
-
-  Attr attrs = parse_attribute_list(as, AttrContext::Class);
-  if (!(attrs & AttrFinal)) {
-    // parser only sets the final flag. If the final flag is not set,
-    // the record is abstract.
-    attrs |= AttrAbstract;
-  } else if (attrs & AttrAbstract) {
-    as.error("A record cannot be both final and abstract");
-  }
-
-
-  std::string name;
-  if (!as.in.readname(name)) {
-    as.error(".record must have a name");
-  }
-
-  int line0;
-  int line1;
-  parse_line_range(as, line0, line1);
-
-  std::string parentName;
-  if (as.in.tryConsume("extends")) {
-    if (!as.in.readname(parentName)) {
-      as.error("expected parent record name after `extends'");
-    }
-  }
-
-  as.re = as.ue->newRecordEmitter(name);
-  as.re->init(line0,
-              line1,
-              attrs,
-              makeStaticString(parentName),
-              staticEmptyString());
-
-  as.in.expectWs('{');
-  parse_record_body(as);
-
-  assertx(!as.fe && !as.pce);
-  as.re = nullptr;
 }
 
 /*
@@ -3524,10 +3434,9 @@ void parse_alias(AsmState& as) {
   int line1;
   parse_line_range(as, line0, line1);
 
-  Variant ts = parse_maybe_php_serialized(as);
-
-  if (ts.isInitialized() && !ts.isArray()) {
-    as.error(".alias must have an array type structure");
+  auto ts = parse_php_serialized(as);
+  if (!ts.isInitialized() || !ts.isDict() || ts.asCArrRef().empty()) {
+    as.error(".alias must have a valid array type structure");
   }
 
   const StringData* typeName = ty.typeName();
@@ -3545,13 +3454,11 @@ void parse_alias(AsmState& as) {
     attrs,
     typeName,
     typeName->empty() ? AnnotType::Mixed : ty.type(),
-    (ty.flags() & TypeConstraint::Nullable) != 0
+    (ty.flags() & TypeConstraint::Nullable) != 0,
+    ArrNR{ArrayData::GetScalarArray(std::move(ts))},
+    Array{}
   );
   te->setUserAttributes(userAttrs);
-
-  if (ts.isInitialized()) {
-    te->setTypeStructure(ArrNR(ArrayData::GetScalarArray(std::move(ts))));
-  }
 
   as.in.expectWs(';');
 }
@@ -3708,7 +3615,6 @@ void parse(AsmState& as) {
     if (directive == ".function")      { parse_function(as)      ; continue; }
     if (directive == ".adata")         { parse_adata(as)         ; continue; }
     if (directive == ".class")         { parse_class(as)         ; continue; }
-    if (directive == ".record")        { parse_record(as)        ; continue; }
     if (directive == ".alias")         { parse_alias(as)         ; continue; }
     if (directive == ".includes")      { parse_includes(as)      ; continue; }
     if (directive == ".const")         { parse_constant(as)      ; continue; }

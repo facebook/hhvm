@@ -164,11 +164,6 @@ bool UnitChecker::checkConstructor(
 
 bool UnitChecker::checkClosure(const PreClassEmitter* cls){
   bool ok = true;
-  if (!(cls->attrs() & AttrUnique)) {
-    error("Closure %s must be uniquely named\n", cls->name()->data());
-    ok = false;
-  }
-
   if (cls->methods().size() != 1 ||
       !cls->hasMethod(s_invoke.get()) ||
       !(cls->lookupMethod(s_invoke.get())->attrs & AttrPublic)) {

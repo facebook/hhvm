@@ -211,6 +211,12 @@ struct AutoloadDB {
       std::string_view path,
       std::string_view attributeName) = 0;
 
+  virtual std::vector<folly::dynamic> getTypeAliasAttributeArgs(
+      SQLiteTxn& txn,
+      std::string_view typeAlias,
+      std::string_view path,
+      std::string_view attributeName) = 0;
+
   virtual std::vector<folly::dynamic> getMethodAttributeArgs(
       SQLiteTxn& txn,
       std::string_view type,
@@ -229,6 +235,8 @@ struct AutoloadDB {
   };
   virtual std::vector<TypeDeclaration>
   getTypesWithAttribute(SQLiteTxn& txn, std::string_view attributeName) = 0;
+  virtual std::vector<TypeDeclaration> getTypeAliasesWithAttribute(
+      SQLiteTxn& txn, std::string_view attributeName) = 0;
 
   struct MethodDeclaration {
     std::string m_type;

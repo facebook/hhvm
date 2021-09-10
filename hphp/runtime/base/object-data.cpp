@@ -1383,10 +1383,7 @@ void ObjectData::setProp(Class* ctx, const StringData* key, TypedValue val, Read
     if (UNLIKELY(lookup.isConst) && !isBeingConstructed()) {
       throwMutateConstProp(lookup.slot);
     }
-    if (RO::EvalEnableReadonlyPropertyEnforcement && !lookup.readonly &&
-      op == ReadonlyOp::Readonly) {
-      throwMustBeReadonly(lookup.slot);
-    }
+    checkReadonly(lookup, op, nullptr, true);
     // TODO(T61738946): We can remove the temporary here once we no longer
     // coerce class_meth types.
     Variant tmp = tvAsVariant(&val);

@@ -38,6 +38,7 @@ end
 
 let () =
   Daemon.check_entry_point ();
+  Folly.ensure_folly_init ();
   let args = Args.parse () in
   if args.Args.get_sockname then
     Printf.printf "%s%!" (Config.socket_file args.Args.root)

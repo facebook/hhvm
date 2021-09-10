@@ -299,7 +299,6 @@ void emitCastVec(IRGS& env) {
       if (src->isA(TArrLike)) return gen(env, ConvArrLikeToVec, src);
       if (src->isA(TClsMeth)) return raise("ClsMeth");
       if (src->isA(TObj))     return gen(env, ConvObjToVec, src);
-      if (src->isA(TRecord))  PUNT(CastVecRecord); // TODO: T53309767
       if (src->isA(TNull))    return raise("Null");
       if (src->isA(TBool))    return raise("Bool");
       if (src->isA(TInt))     return raise("Int");
@@ -334,7 +333,6 @@ void emitCastDict(IRGS& env) {
       if (src->isA(TArrLike)) return gen(env, ConvArrLikeToDict, src);
       if (src->isA(TClsMeth)) return raise("ClsMeth");
       if (src->isA(TObj))     return gen(env, ConvObjToDict, src);
-      if (src->isA(TRecord))  PUNT(CastDictRecord); // TODO: T53309767
       if (src->isA(TNull))    return raise("Null");
       if (src->isA(TBool))    return raise("Bool");
       if (src->isA(TInt))     return raise("Int");
@@ -369,7 +367,6 @@ void emitCastKeyset(IRGS& env) {
       if (src->isA(TArrLike)) return gen(env, ConvArrLikeToKeyset, src);
       if (src->isA(TClsMeth)) return raise("ClsMeth");
       if (src->isA(TObj))     return gen(env, ConvObjToKeyset, src);
-      if (src->isA(TRecord))  PUNT(CastKeysetRecord); // TODO: T53309767
       if (src->isA(TNull))    return raise("Null");
       if (src->isA(TBool))    return raise("Bool");
       if (src->isA(TInt))     return raise("Int");
@@ -460,7 +457,12 @@ void emitFile(IRGS& env) {
   if (handle != rds::kUninitHandle) {
     assertx(!RuntimeOption::RepoAuthoritative);
     assertx(RuntimeOption::EvalReuseUnitsByHash);
+    assertx(!curFunc(env)->originalFilename());
     push(env, gen(env, LdUnitPerRequestFilepath, RDSHandleData { handle }));
+    return;
+  }
+  if (auto const of = curFunc(env)->originalFilename()) {
+    push(env, cns(env, of));
     return;
   }
   push(env, cns(env, unit->origFilepath()));

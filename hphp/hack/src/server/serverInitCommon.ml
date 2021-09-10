@@ -13,12 +13,14 @@ open ServerEnv
 
 let hh_log_heap () =
   let to_g n = Float.of_int n /. (1024.0 *. 1024.0 *. 1024.0) in
-  let hs = SharedMem.heap_size () in
+  let hs = SharedMem.SMTelemetry.heap_size () in
   Hh_logger.log "Heap size: %fG" (to_g hs)
 
 let no_incremental_check (options : ServerArgs.options) : bool =
   let in_check_mode = ServerArgs.check_mode options in
-  let full_init = Option.is_none (SharedMem.loaded_dep_table_filename ()) in
+  let full_init =
+    Option.is_none (SharedMem.DepTable.loaded_dep_table_filename ())
+  in
   in_check_mode && full_init
 
 let indexing ?hhi_filter ~(profile_label : string) (genv : ServerEnv.genv) :
@@ -67,7 +69,7 @@ let parsing
   in
   let naming_table = Naming_table.update_many env.naming_table fast in
   hh_log_heap ();
-  let hs = SharedMem.heap_size () in
+  let hs = SharedMem.SMTelemetry.heap_size () in
   Stats.(stats.init_parsing_heap_size <- hs);
 
   (* The true count of how many files we parsed is wrapped up in the get_next closure.
@@ -143,12 +145,19 @@ let naming
   HackEventLogger.global_naming_end
     ~count:!count
     ~desc:profile_label
-    ~heap_size:(SharedMem.heap_size ())
+    ~heap_size:(SharedMem.SMTelemetry.heap_size ())
     ~start_t:t;
   (env, Hh_logger.log_duration ("Naming " ^ profile_label) t)
 
 let log_type_check_end
-    env genv ~start_t ~count ~desc ~init_telemetry ~typecheck_telemetry =
+    env
+    genv
+    ~start_t
+    ~count
+    ~desc
+    ~init_telemetry
+    ~typecheck_telemetry
+    ~adhoc_profiling : unit =
   let hash_telemetry = ServerUtils.log_and_get_sharedmem_load_telemetry () in
   let telemetry =
     Telemetry.create ()
@@ -162,7 +171,8 @@ let log_type_check_end
   in
   HackEventLogger.type_check_end
     (Some telemetry)
-    ~heap_size:(SharedMem.heap_size ())
+    ~adhoc_profiling:(Adhoc_profiler.CallTree.to_string adhoc_profiling)
+    ~heap_size:(SharedMem.SMTelemetry.heap_size ())
     ~started_count:count
     ~count
     ~desc
@@ -203,6 +213,7 @@ let type_check
       Typing_check_service.errors = errorl;
       delegate_state;
       telemetry = typecheck_telemetry;
+      adhoc_profiling;
       _;
     } =
       let memory_cap =
@@ -242,7 +253,8 @@ let type_check
       ~count
       ~desc:profile_label
       ~init_telemetry
-      ~typecheck_telemetry;
+      ~typecheck_telemetry
+      ~adhoc_profiling;
     (env, Hh_logger.log_duration logstring t)
   ) else
     let needs_recheck =

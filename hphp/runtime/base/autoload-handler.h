@@ -49,27 +49,23 @@ struct AutoloadHandler final : RequestEventHandler {
   void requestInit() override;
   void requestShutdown() override;
 
-  template<class T>
-  bool autoloadType(const String& name);
-
   bool autoloadClass(const String& className);
 
   /**
-   * autoloadNamedType() tries to autoload either a class or
-   * a type alias or a record with the specified name. This method avoids
-   * calling the failure callback until one of the following happens:
-   * (1) we tried to autoload the specified name from the 'class', 'type' and
-   * 'record' maps but for each map either nothing was found or the file
-   * we included did not define a class or type alias or record
-   * with the specified name, or (2) there was an uncaught exception or fatal
-   * error during an include operation.
+   * autoloadNamedType() tries to autoload either a class or a type
+   * alias with the specified name. This method avoids calling the
+   * failure callback until one of the following happens: (1) we tried
+   * to autoload the specified name from the 'class' and 'type' maps
+   * but for each map either nothing was found or the file we included
+   * did not define a class or type alias with the specified name, or
+   * (2) there was an uncaught exception or fatal error during an
+   * include operation.
    */
   bool autoloadNamedType(const String& className);
 
   bool autoloadFunc(StringData* name);
   bool autoloadConstant(StringData* name);
   bool autoloadType(const String& name);
-  bool autoloadRecordDesc(const String& name);
   DECLARE_STATIC_REQUEST_LOCAL(AutoloadHandler, s_instance);
 
   /**

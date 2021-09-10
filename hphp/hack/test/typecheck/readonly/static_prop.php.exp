@@ -10,5 +10,9 @@ Invalid property assignment (Typing[4411])
   This expression is readonly
   File "static_prop.php", line 9, characters 22-32:
   But it's being assigned to a mutable property
+File "static_prop.php", line 23, characters 8-10:
+This static property returns a readonly value. It must be explicitly wrapped in a readonly expression. (Typing[4412])
+  File "static_prop.php", line 10, characters 31-44:
+  The static property is defined here.
 File "static_prop.php", line 31, characters 5-6:
 This value is readonly, its properties cannot be modified (Typing[4409])

@@ -483,7 +483,6 @@ void retranslateAll(bool skipSerialize) {
     // discard ProfData in this mode.
     if (!RuntimeOption::EvalEnableReusableTC) {
       discardProfData();
-      tc::freeProfCode();
     }
   }
 

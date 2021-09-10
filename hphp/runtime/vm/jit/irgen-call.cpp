@@ -129,7 +129,12 @@ bool emitCallerReadonlyChecksKnown(IRGS& env, const Func* callee,
     }
   }
   if (fca.enforceMutableReturn() && (callee->attrs() & AttrReadonlyReturn)) {
-    auto const data = ParamData { kInvalidId };
+    auto const data = ParamData { kReadonlyReturnId };
+    gen(env, ThrowReadonlyMismatch, data, cns(env, callee));
+    if (RO::EvalEnableReadonlyCallEnforcement > 1) return false;
+  }
+  if (fca.enforceReadonlyThis() && !(callee->attrs() & AttrReadonlyThis)) {
+    auto const data = ParamData { kReadonlyThisId };
     gen(env, ThrowReadonlyMismatch, data, cns(env, callee));
     if (RO::EvalEnableReadonlyCallEnforcement > 1) return false;
   }
@@ -153,7 +158,22 @@ void emitCallerReadonlyChecksUnknown(IRGS& env, SSATmp* callee,
       },
       [&] {
         hint(env, Block::Hint::Unlikely);
-        auto const data = ParamData { kInvalidId };
+        auto const data = ParamData { kReadonlyReturnId };
+        gen(env, ThrowReadonlyMismatch, data, callee);
+      }
+    );
+  }
+  if (fca.enforceReadonlyThis()) {
+    ifThen(
+      env,
+      [&] (Block* taken) {
+        auto const data = AttrData { AttrReadonlyThis };
+        auto const success = gen(env, FuncHasAttr, data, callee);
+        gen(env, JmpZero, taken, success);
+      },
+      [&] {
+        hint(env, Block::Hint::Unlikely);
+        auto const data = ParamData { kReadonlyThisId };
         gen(env, ThrowReadonlyMismatch, data, callee);
       }
     );
@@ -1425,10 +1445,24 @@ void fcallObjMethod(IRGS& env, const FCallArgs& fca, const StringData* clsHint,
     if (extraInput) popDecRef(env, DataTypeGeneric);
     if (fca.hasGenerics()) popDecRef(env, DataTypeGeneric);
     if (fca.hasUnpack()) popDecRef(env, DataTypeGeneric);
-    for (uint32_t i = 0; i < fca.numArgs; ++i) popDecRef(env, DataTypeGeneric);
+
+    // Save any inout arguments, as those will be pushed unchanged as
+    // the output.
+    std::vector<SSATmp*> inOuts;
+    for (uint32_t i = 0; i < fca.numArgs; ++i) {
+      if (fca.enforceInOut() && fca.isInOut(fca.numArgs - i - 1)) {
+        inOuts.emplace_back(popC(env));
+      } else {
+        popDecRef(env, DataTypeGeneric);
+      }
+    }
+
     for (uint32_t i = 0; i < kNumActRecCells - 1; ++i) popU(env);
     popDecRef(env, DataTypeGeneric);
     for (uint32_t i = 0; i < fca.numRets - 1; ++i) popU(env);
+
+    assertx(inOuts.size() == fca.numRets - 1);
+    for (auto const tmp : inOuts) push(env, tmp);
     push(env, cns(env, TInitNull));
     return;
   }

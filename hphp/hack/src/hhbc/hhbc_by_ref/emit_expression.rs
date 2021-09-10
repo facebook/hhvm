@@ -511,8 +511,10 @@ pub fn emit_expr<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             pos,
             emit_lambda(emitter, env, &e.0, &e.1)?,
         )),
-
-        Expr_::ClassGet(e) => emit_class_get(emitter, env, QueryOp::CGet, &e.0, &e.1),
+        Expr_::ClassGet(e) => {
+            // class gets without a readonly expression must be mutable
+            emit_class_get(emitter, env, QueryOp::CGet, &e.0, &e.1, ReadonlyOp::Mutable)
+        }
 
         Expr_::String2(es) => emit_string2(emitter, env, pos, es),
         Expr_::Id(e) => Ok(emit_pos_then(alloc, pos, emit_id(emitter, env, e)?)),
@@ -1689,7 +1691,7 @@ fn emit_call_isset_expr<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         .0);
     }
     if let Some((cid, id, _)) = expr.2.as_class_get() {
-        return emit_class_get(e, env, QueryOp::Isset, cid, id);
+        return emit_class_get(e, env, QueryOp::Isset, cid, id, ReadonlyOp::Any);
     }
     if let Some((expr_, prop, nullflavor, _)) = expr.2.as_obj_get() {
         return Ok(emit_obj_get(
@@ -1881,6 +1883,10 @@ fn emit_call<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         let fid = function::FunctionType::<'arena>::from_ast_name(alloc, s);
         emit_symbol_refs::add_function(alloc, e, fid);
     }
+    let readonly_this = match &expr.2 {
+        ast::Expr_::ReadonlyExpr(_) => true,
+        _ => false,
+    };
     let fcall_args = get_fcall_args(
         e,
         alloc,
@@ -1890,6 +1896,7 @@ fn emit_call<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         env.call_context.clone(),
         false,
         readonly_return,
+        readonly_this,
     );
     match expr.2.as_id() {
         None => emit_call_default(e, env, pos, expr, targs, args, uarg, fcall_args),
@@ -1919,7 +1926,7 @@ fn emit_call_default<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     scope::with_unnamed_locals(alloc, e, |alloc, em| {
         let FcallArgs(_, _, num_ret, _, _, _, _) = &fcall_args;
         let num_uninit = num_ret - 1;
-        let (lhs, fcall) = emit_call_lhs_and_fcall(em, env, expr, fcall_args, targs)?;
+        let (lhs, fcall) = emit_call_lhs_and_fcall(em, env, expr, fcall_args, targs, None)?;
         let (args, inout_setters) = emit_args_inout_setters(em, env, args)?;
         let uargs = match uarg {
             Some(uarg) => emit_expr(em, env, uarg)?,
@@ -2069,6 +2076,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     expr: &ast::Expr,
     mut fcall_args: FcallArgs<'arena>,
     targs: &[ast::Targ],
+    caller_readonly_opt: Option<&Pos>,
 ) -> Result<(InstrSeq<'arena>, InstrSeq<'arena>)> {
     let ast::Expr(_, pos, expr_) = expr;
     use ast::{Expr as E, Expr_ as E_};
@@ -2098,15 +2106,22 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         env,
         expr: &ast::Expr,
         fcall_args: FcallArgs<'arena>,
+        caller_readonly_opt: Option<&Pos>,
     | -> Result<(InstrSeq<'arena>, InstrSeq<'arena>)> {
         let tmp = e.local_gen_mut().get_unnamed();
+        // if the original expression was wrapped in readonly, emit a readonly expression here
+        let res = if let Some(p) = caller_readonly_opt {
+            emit_readonly_expr(e, env, p, expr)?
+        } else {
+            emit_expr(e, env, expr)?
+        };
         Ok((
             InstrSeq::gather(
                 alloc,
                 vec![
                     instr::nulluninit(alloc),
                     instr::nulluninit(alloc),
-                    emit_expr(e, env, expr)?,
+                    res,
                     instr::popl(alloc, tmp),
                 ],
             ),
@@ -2121,6 +2136,13 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     };
 
     match expr_ {
+        E_::ReadonlyExpr(r) => {
+            // If calling a Readonly expression, first recurse inside to
+            // handle ObjGet and ClassGet prop call cases. Keep track of the position of the
+            // outer readonly expression for use later.
+            // TODO: use the fact that this is a readonly call in HHVM enforcement
+            emit_call_lhs_and_fcall(e, env, r, fcall_args, targs, Some(pos))
+        }
         E_::ObjGet(o) => {
             if o.as_ref().3 {
                 // Case ($x->foo)(...).
@@ -2129,9 +2151,10 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                     pos.clone(),
                     E_::ObjGet(Box::new((o.0.clone(), o.1.clone(), o.2.clone(), false))),
                 );
-                emit_fcall_func(e, env, &expr, fcall_args)
+                emit_fcall_func(e, env, &expr, fcall_args, caller_readonly_opt)
             } else {
                 // Case $x->foo(...).
+                // TODO: utilze caller_readonly_opt here for method calls
                 let emit_id = |
                     e: &mut Emitter<'arena, 'decl, D>,
                     obj,
@@ -2363,7 +2386,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                     pos.clone(),
                     E_::ClassGet(Box::new((c.0.clone(), c.1.clone(), false))),
                 );
-                emit_fcall_func(e, env, &expr, fcall_args)
+                emit_fcall_func(e, env, &expr, fcall_args, caller_readonly_opt)
             } else {
                 // Case Foo::bar(...).
                 let (cid, cls_get_expr, _) = &**c;
@@ -2530,7 +2553,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                 ),
             ))
         }
-        _ => emit_fcall_func(e, env, expr, fcall_args),
+        _ => emit_fcall_func(e, env, expr, fcall_args, caller_readonly_opt),
     }
 }
 
@@ -2705,6 +2728,7 @@ fn get_fcall_args<'arena, 'decl, D: DeclProvider<'decl>>(
     context: Option<String>,
     lock_while_unwinding: bool,
     readonly_return: bool,
+    readonly_this: bool,
 ) -> FcallArgs<'arena> {
     let num_args = args.len();
     let num_rets = 1 + args.iter().filter(|x| is_inout_arg(*x)).count();
@@ -2712,6 +2736,7 @@ fn get_fcall_args<'arena, 'decl, D: DeclProvider<'decl>>(
     flags.set(FcallFlags::HAS_UNPACK, uarg.is_some());
     flags.set(FcallFlags::LOCK_WHILE_UNWINDING, lock_while_unwinding);
     flags.set(FcallFlags::ENFORCE_MUTABLE_RETURN, !readonly_return);
+    flags.set(FcallFlags::ENFORCE_READONLY_THIS, readonly_this);
     let is_readonly_arg = if e
         .options()
         .hhvm
@@ -3862,6 +3887,7 @@ fn emit_new<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                                 env.call_context.clone(),
                                 true,
                                 true, // we do not need to enforce readonly return for constructors
+                                false, // we do not need to enforce readonly this for constructors
                             ),
                         ),
                         instr::popc(alloc),
@@ -4538,6 +4564,7 @@ fn emit_class_get<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     query_op: QueryOp,
     cid: &ast::ClassId,
     prop: &ast::ClassGetExpr,
+    readonly_op: ReadonlyOp,
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
     let cexpr = ClassExpr::class_id_to_class_expr(e, false, false, &env.scope, cid);
@@ -4546,7 +4573,7 @@ fn emit_class_get<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         vec![
             InstrSeq::from((alloc, emit_class_expr(e, env, cexpr, prop)?)),
             match query_op {
-                QueryOp::CGet => instr::cgets(alloc, ReadonlyOp::Any),
+                QueryOp::CGet => instr::cgets(alloc, readonly_op),
                 QueryOp::Isset => instr::issets(alloc),
                 QueryOp::CGetQuiet => {
                     return Err(Unrecoverable("emit_class_get: CGetQuiet".into()));
@@ -4983,6 +5010,9 @@ fn emit_readonly_expr<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             Ok(emit_obj_get(e, env, pos, QueryOp::CGet, &x.0, &x.1, &x.2, false, true)?.0)
         }
         aast::Expr_::Call(c) => emit_call_expr(e, env, pos, None, true, c),
+        aast::Expr_::ClassGet(x) => {
+            emit_class_get(e, env, QueryOp::CGet, &x.0, &x.1, ReadonlyOp::Any)
+        }
         _ => emit_expr(e, env, expr),
     }
 }

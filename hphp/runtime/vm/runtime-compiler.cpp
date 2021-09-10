@@ -65,7 +65,9 @@ Unit* compile_systemlib_string(const char* s, size_t sz, const char* fname,
       return u;
     }
   }
-  return compile_string(s, sz, fname, nativeFuncs, RepoOptions::defaults());
+  auto const u = compile_string(s, sz, fname, nativeFuncs, RepoOptions::defaults());
+  always_assert(u);
+  return u;
 }
 
 Unit* compile_debugger_string(

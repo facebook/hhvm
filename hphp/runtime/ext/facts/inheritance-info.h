@@ -36,37 +36,68 @@ namespace Facts {
  *                   .m_kind=DeriveKind::Extends,
  *                   .m_path="foo.hck"}
  */
-template <typename S> struct EdgeToSupertype {
+struct EdgeToSupertype {
 
   bool operator==(const EdgeToSupertype& o) const noexcept {
     return m_type == o.m_type && m_kind == o.m_kind && m_path == o.m_path;
   }
 
-  Symbol<S, SymKind::Type> m_type;
+  Symbol<SymKind::Type> m_type;
   DeriveKind m_kind;
-  Path<S> m_path;
+  Path m_path;
 };
+
+} // namespace Facts
+} // namespace HPHP
+
+template <> struct std::hash<HPHP::Facts::EdgeToSupertype> {
+  size_t operator()(const HPHP::Facts::EdgeToSupertype& typeDef) const {
+    return folly::hash::hash_combine(
+        std::hash<HPHP::Facts::Path>{}(typeDef.m_path),
+        std::hash<HPHP::Facts::Symbol<HPHP::Facts::SymKind::Type>>{}(
+            typeDef.m_type),
+        std::hash<int>{}(static_cast<int>(typeDef.m_kind)));
+  }
+};
+
+namespace HPHP {
+namespace Facts {
 
 /**
  * Represents an edge from a type to one its subtypes, using the given
  * kind of inheritance..
  */
-template <typename S> struct SubtypeQuery {
+struct SubtypeQuery {
 
   bool operator==(const SubtypeQuery& o) const noexcept {
     return m_type == o.m_type && m_kind == o.m_kind;
   }
 
-  Symbol<S, SymKind::Type> m_type;
+  Symbol<SymKind::Type> m_type;
   DeriveKind m_kind;
 };
+
+} // namespace Facts
+} // namespace HPHP
+
+template <> struct std::hash<HPHP::Facts::SubtypeQuery> {
+  size_t operator()(const HPHP::Facts::SubtypeQuery& query) const {
+    return folly::hash::hash_combine(
+        std::hash<HPHP::Facts::Symbol<HPHP::Facts::SymKind::Type>>{}(
+            query.m_type),
+        std::hash<int>{}(static_cast<int>(query.m_kind)));
+  }
+};
+
+namespace HPHP {
+namespace Facts {
 
 /**
  * Information about which types use, extend, or implement which other types.
  */
-template <typename S> struct InheritanceInfo {
+struct InheritanceInfo {
 
-  using TypeToBaseTypesMap = LazyTwoWayMap<EdgeToSupertype<S>, SubtypeQuery<S>>;
+  using TypeToBaseTypesMap = LazyTwoWayMap<EdgeToSupertype, SubtypeQuery>;
 
   using TypeDefSet = typename TypeToBaseTypesMap::KeysSet;
   using TypeSet = typename TypeToBaseTypesMap::ValuesSet;
@@ -80,35 +111,35 @@ template <typename S> struct InheritanceInfo {
    */
 
   const TypeSet* getBaseTypes(
-      Symbol<S, SymKind::Type> derivedType,
-      Path<S> derivedTypePath,
+      Symbol<SymKind::Type> derivedType,
+      Path derivedTypePath,
       DeriveKind kind) const {
     return m_baseTypesMap.getValuesForKey(
         {.m_type = derivedType, .m_kind = kind, .m_path = derivedTypePath});
   }
 
   const TypeSet& getBaseTypes(
-      Symbol<S, SymKind::Type> derivedType,
-      Path<S> derivedTypePath,
+      Symbol<SymKind::Type> derivedType,
+      Path derivedTypePath,
       DeriveKind kind,
-      std::vector<SubtypeQuery<S>> edgesFromDB) {
+      std::vector<SubtypeQuery> edgesFromDB) {
     return m_baseTypesMap.getValuesForKey(
-        EdgeToSupertype<S>{
+        EdgeToSupertype{
             .m_type = derivedType, .m_kind = kind, .m_path = derivedTypePath},
         std::move(edgesFromDB));
   }
 
   const TypeDefSet*
-  getDerivedTypes(Symbol<S, SymKind::Type> baseType, DeriveKind kind) const {
+  getDerivedTypes(Symbol<SymKind::Type> baseType, DeriveKind kind) const {
     return m_baseTypesMap.getKeysForValue({.m_type = baseType, .m_kind = kind});
   }
 
   const TypeDefSet& getDerivedTypes(
-      Symbol<S, SymKind::Type> baseType,
+      Symbol<SymKind::Type> baseType,
       DeriveKind kind,
-      std::vector<EdgeToSupertype<S>> edgesFromDB) {
+      std::vector<EdgeToSupertype> edgesFromDB) {
     return m_baseTypesMap.getKeysForValue(
-        SubtypeQuery<S>{.m_type = baseType, .m_kind = kind},
+        SubtypeQuery{.m_type = baseType, .m_kind = kind},
         std::move(edgesFromDB));
   }
 
@@ -116,8 +147,7 @@ template <typename S> struct InheritanceInfo {
    * Remove all known information about the given type defined at the given
    * path.
    */
-  void
-  removeType(Symbol<S, SymKind::Type> derivedType, Path<S> derivedTypePath) {
+  void removeType(Symbol<SymKind::Type> derivedType, Path derivedTypePath) {
     for (auto kind :
          {DeriveKind::Extends,
           DeriveKind::RequireExtends,
@@ -132,15 +162,15 @@ template <typename S> struct InheritanceInfo {
    * Mark `derivedType` as inheriting from each of the `baseTypes`.
    */
   void setBaseTypes(
-      Symbol<S, SymKind::Type> derivedType,
-      Path<S> derivedTypePath,
+      Symbol<SymKind::Type> derivedType,
+      Path derivedTypePath,
       DeriveKind kind,
       const std::vector<std::string>& baseTypeStrs) {
     TypeSet baseTypes;
     baseTypes.reserve(baseTypeStrs.size());
     for (auto const& baseTypeStr : baseTypeStrs) {
       baseTypes.insert(
-          {.m_type = Symbol<S, SymKind::Type>{baseTypeStr}, .m_kind = kind});
+          {.m_type = Symbol<SymKind::Type>{baseTypeStr}, .m_kind = kind});
     }
     return m_baseTypesMap.setValuesForKey(
         {.m_type = derivedType, .m_kind = kind, .m_path = derivedTypePath},
@@ -153,22 +183,3 @@ private:
 
 } // namespace Facts
 } // namespace HPHP
-
-template <typename S> struct std::hash<HPHP::Facts::EdgeToSupertype<S>> {
-  size_t operator()(const HPHP::Facts::EdgeToSupertype<S>& typeDef) const {
-    return folly::hash::hash_combine(
-        std::hash<HPHP::Facts::Path<S>>{}(typeDef.m_path),
-        std::hash<HPHP::Facts::Symbol<S, HPHP::Facts::SymKind::Type>>{}(
-            typeDef.m_type),
-        std::hash<int>{}(static_cast<int>(typeDef.m_kind)));
-  }
-};
-
-template <typename S> struct std::hash<HPHP::Facts::SubtypeQuery<S>> {
-  size_t operator()(const HPHP::Facts::SubtypeQuery<S>& query) const {
-    return folly::hash::hash_combine(
-        std::hash<HPHP::Facts::Symbol<S, HPHP::Facts::SymKind::Type>>{}(
-            query.m_type),
-        std::hash<int>{}(static_cast<int>(query.m_kind)));
-  }
-};

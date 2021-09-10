@@ -47,7 +47,6 @@ bool tvInstanceOfImpl(const TypedValue* tv, F lookupClass) {
     case KindOfNull:
     case KindOfBoolean:
     case KindOfResource:
-    case KindOfRecord:
     case KindOfRFunc:
     case KindOfClsMeth:
     case KindOfRClsMeth:
@@ -352,7 +351,7 @@ bool typeStructureIsTypeList(
   std::vector<TypeParamInfo> tpinfo;
   bool found = false;
   if (!strict && clsname) {
-    if (auto const cls = Class::lookup(clsname)) {
+    if (auto const cls = Class::load(clsname)) {
       found = true;
       tpinfo = cls->getReifiedGenericsInfo().m_typeParamInfo;
       if (tpinfo.size() == 0) return true;
@@ -387,7 +386,7 @@ ALWAYS_INLINE
 bool checkReifiedGenericsMatch(
   const Array& ts,
   TypedValue c1,
-  const NamedEntity* ne,
+  const StringData* name,
   bool& warn,
   bool strict // whether to return false on erased generics
 ) {
@@ -395,7 +394,7 @@ bool checkReifiedGenericsMatch(
   // TODO(T31677864): Handle non KindOfObject types
   if (c1.m_type != KindOfObject) return true;
   auto const obj = c1.m_data.pobj;
-  auto const cls = Class::lookup(ne);
+  auto const cls = Class::load(name);
   assertx(cls);
   if (!cls->hasReifiedGenerics()) {
     if (!strict) return true;
@@ -621,7 +620,7 @@ bool checkTypeStructureMatchesTVImpl(
 
     case TypeStructure::Kind::T_enum: {
       assertx(ts.exists(s_classname));
-      auto const cls = Class::lookup(ts[s_classname].asStrRef().get());
+      auto const cls = Class::load(ts[s_classname].asCStrRef().get());
       if (!isOrAsOp) {
         if (auto const dt = cls ? cls->enumBaseTy() : std::nullopt) {
           return equivDataTypes(*dt, type);
@@ -639,9 +638,10 @@ bool checkTypeStructureMatchesTVImpl(
     case TypeStructure::Kind::T_interface:
     case TypeStructure::Kind::T_xhp: {
       assertx(ts.exists(s_classname));
-      auto const ne = NamedEntity::get(ts[s_classname].asStrRef().get());
-      return tvInstanceOf(&c1, ne) &&
-             checkReifiedGenericsMatch(ts, c1, ne, warn, isOrAsOp);
+      auto const name = ts[s_classname].asCStrRef().get();
+      return
+        tvInstanceOfImpl(&c1, [&] { return Class::load(name); }) &&
+        checkReifiedGenericsMatch(ts, c1, name, warn, isOrAsOp);
     }
 
     case TypeStructure::Kind::T_tuple: {

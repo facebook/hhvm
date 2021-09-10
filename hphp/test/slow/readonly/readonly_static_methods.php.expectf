@@ -1,0 +1,1 @@
+Fatal error: Static methods do not need to be marked readonly in %s on line 5

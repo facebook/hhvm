@@ -1,3 +1,0 @@
-Fatal error: Uncaught exception 'InvalidOperationException' with message 'Cannot perform mathematical operation on Foo and int' in %s/record-arith.php:7
-Stack trace:
-%A

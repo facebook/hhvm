@@ -36,8 +36,12 @@ endif()
 if ("${CMAKE_CURRENT_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_BINARY_DIR}")
   set(DUNE_BUILD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/_build")
   set(OPAM_STAMP_FILE "_build/opam.stamp")
+  set(RUST_FFI_BUILD_ROOT "${DUNE_BUILD_DIR}/rust_ffi")
+  set(CARGO_HOME "${DUNE_BUILD_DIR}/cargo_home")
 else()
   set(DUNE_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}")
+  set(RUST_FFI_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}")
+  set(CARGO_HOME "${CMAKE_CURRENT_BINARY_DIR}/cargo_home")
   set(OPAM_STAMP_FILE "opam.stamp")
 endif()
 set(HACK_BUILD_ROOT "${DUNE_BUILD_DIR}/default")
@@ -125,12 +129,54 @@ add_custom_target(
   hack_ffi
   COMMAND
    . "${CMAKE_CURRENT_BINARY_DIR}/dev_env_rust_only.sh" &&
-    ${CARGO_BUILD} hack_parser_ffi rust_parser_ffi &&
-    ${CARGO_BUILD} rust_facts_ffi rust_facts_ffi &&
     ${CARGO_BUILD} compile_ffi compile_ffi &&
     ${CARGO_BUILD} decl_cpp_ffi decl_cpp_ffi
   COMMENT "Compiling Rust FFI"
 )
+
+# Compiling cxx entrypoints for hhvm
+if(DEFINED ENV{HACKDEBUG})
+  set(PROFILE "debug")
+else()
+  set(PROFILE "release")
+endif()
+
+function(build_cxx_bridge NAME FFI_BRIDGE_DIR)
+  set(FFI_BRIDGE_SRC "${CMAKE_CURRENT_SOURCE_DIR}/${FFI_BRIDGE_DIR}")
+  set(FFI_BRIDGE_BIN "${RUST_FFI_BUILD_ROOT}/hphp/hack/${FFI_BRIDGE_DIR}")
+
+  set(RUST_PART_LIB "${FFI_BRIDGE_BIN}/${PROFILE}/${CMAKE_STATIC_LIBRARY_PREFIX}${NAME}_ffi_bridge${CMAKE_STATIC_LIBRARY_SUFFIX}")
+  set(RUST_PART_CXX "${FFI_BRIDGE_BIN}/${NAME}_ffi_bridge.cpp")
+  set(RUST_PART_HEADER "${FFI_BRIDGE_BIN}/${NAME}_ffi_bridge.rs")
+  set(GENERATED "${FFI_BRIDGE_BIN}/cxxbridge/${NAME}_ffi_bridge/${NAME}_ffi_bridge")
+
+  add_custom_command(
+      OUTPUT ${RUST_PART_CXX}
+      COMMAND
+        ${CMAKE_COMMAND} -E make_directory "${FFI_BRIDGE_BIN}" &&
+        . "${CMAKE_CURRENT_BINARY_DIR}/dev_env_rust_only.sh" &&
+        ${CARGO_BUILD} "${NAME}_ffi_bridge" "${NAME}_ffi_bridge" --cxx "${FFI_BRIDGE_BIN}" &&
+        ${CMAKE_COMMAND} -E copy "${GENERATED}.rs.cc" "${RUST_PART_CXX}" &&
+        ${CMAKE_COMMAND} -E copy "${GENERATED}.rs.h" "${RUST_PART_HEADER}"
+      WORKING_DIRECTORY ${FFI_BRIDGE_SRC}
+      DEPENDS rustc cargo
+  )
+  add_custom_target(
+    "${NAME}_cxx"
+    DEPENDS ${RUST_PART_CXX}
+  )
+
+  add_library("${NAME}_ffi_bridge" STATIC ${RUST_PART_CXX})
+  add_dependencies("${NAME}_ffi_bridge" rustc cargo "${NAME}_cxx")
+  target_link_libraries("${NAME}_ffi_bridge" PUBLIC ${RUST_PART_LIB})
+  # `-iquote` is like `-I` (or target_include_directories()`), except:
+  # - it takes precedence over `-I`
+  # - it only applies to `#include "foo"`, not `#include <foo>`
+  target_compile_options("${NAME}_ffi_bridge" INTERFACE "-iquote" "${RUST_FFI_BUILD_ROOT}")
+endfunction()
+
+build_cxx_bridge(rust_facts "src/facts/ffi_bridge")
+build_cxx_bridge(rust_parser "src/parser/ffi_bridge")
 
 add_dependencies(hack_ffi rustc cargo)
 # Not a true dependency, but we need to make sure we don't have two cargo/rustc
@@ -161,18 +207,12 @@ endif()
 add_custom_target(hack ALL DEPENDS hack_dune)
 add_custom_target(hack_test DEPENDS hack_dune_test)
 
-# libcompile_ffi_stubs.a, librust_facts_ffi_stubs.a, and
-# librust_parser_ffi_stubs.a need to be exposed as library targets to cmake
-# for other targets (e.g. hhvm) to depend on.
+# libcompile_ffi_stubs.a and librust_parser_ffi_stubs.a need to be exposed as
+# library targets to cmake for other targets (e.g. hhvm) to depend on.
 set(LIBCOMPILE_PATH "${CMAKE_BINARY_DIR}/hphp/hack/libcompile_ffi_stubs.a")
 add_library(libcompile_ffi_stubs STATIC IMPORTED GLOBAL)
 add_dependencies(libcompile_ffi_stubs hack_ffi)
 set_target_properties(libcompile_ffi_stubs PROPERTIES IMPORTED_LOCATION ${LIBCOMPILE_PATH})
-
-set(LIBRUST_PATH "${CMAKE_BINARY_DIR}/hphp/hack/librust_facts_ffi_stubs.a")
-add_library(librust_facts_ffi_stubs STATIC IMPORTED GLOBAL)
-add_dependencies(librust_facts_ffi_stubs hack_ffi)
-set_target_properties(librust_facts_ffi_stubs PROPERTIES IMPORTED_LOCATION ${LIBRUST_PATH})
 
 set(LIBRUST_PARSER_PATH "${CMAKE_BINARY_DIR}/hphp/hack/librust_parser_ffi_stubs.a")
 add_library(librust_parser_ffi_stubs STATIC IMPORTED GLOBAL)

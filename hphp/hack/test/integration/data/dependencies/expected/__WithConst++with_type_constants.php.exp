@@ -7,7 +7,7 @@ enum SomeEnum: int {
 }
 
 class WithConst {
-  const type TYPECONST as num = int;
+  const type TYPECONST = int;
 
   const type WITH_CONSTRAINT = \A0;
 

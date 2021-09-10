@@ -651,7 +651,6 @@ void staticStreamer(const TypedValue* tv, std::string& out) {
     case KindOfRFunc:
     case KindOfFunc:
     case KindOfClass:
-    case KindOfRecord:
       break;
   }
   not_reached();
@@ -989,6 +988,12 @@ static const char* ReadonlyOp_names[] = {
 #undef OP
 };
 
+static const char* ReadonlyViolation_names[] = {
+#define OP(x) #x,
+  READONLY_VIOLATION_OPS
+#undef OP
+};
+
 template<class T, size_t Sz>
 const char* subopToNameImpl(const char* (&arr)[Sz], T opcode, int off) {
   static_assert(
@@ -1063,6 +1068,8 @@ X(SpecialClsRef,  static_cast<int>(SpecialClsRef::Self))
 X(IsLogAsDynamicCallOp,
                   static_cast<int>(IsLogAsDynamicCallOp::LogAsDynamicCall))
 X(ReadonlyOp,     static_cast<int>(ReadonlyOp::Any))
+X(ReadonlyViolation,
+                  static_cast<int>(ReadonlyViolation::Readonly))
 #undef X
 
 //////////////////////////////////////////////////////////////////////
@@ -1176,6 +1183,7 @@ std::string show(const FCallArgsBase& fca, const uint8_t* inoutArgs,
   if (fca.lockWhileUnwinding()) flags.push_back("LockWhileUnwinding");
   if (fca.skipRepack()) flags.push_back("SkipRepack");
   if (fca.enforceMutableReturn()) flags.push_back("EnforceMutableReturn");
+  if (fca.enforceReadonlyThis()) flags.push_back("EnforceReadonlyThis");
   return folly::sformat(
     "<{}> {} {} \"{}\" \"{}\" {} \"{}\"",
     folly::join(' ', flags), fca.numArgs, fca.numRets,

@@ -250,7 +250,6 @@ enum OutTypeConstraints {
   OutKeyset,
   OutKeysetImm,
   OutObject,
-  OutRecord,
   OutResource,
   OutThisObject,        // Object from current environment
   OutFDesc,             // Blows away the current function desc

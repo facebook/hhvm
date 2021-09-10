@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/base/runtime-option.h"
 
-#include "hphp/hack/src/parser/positioned_full_trivia_parser_ffi_types.h"
 #include "hphp/parser/scanner.h"
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/bespoke-array.h"
@@ -288,9 +287,8 @@ RDS_LOCAL(std::string, s_lastSeenRepoConfig);
 
 }
 
-hackc_parse_positioned_full_trivia_environment
-RepoOptions::getParserEnvironment() const {
-  return hackc_parse_positioned_full_trivia_environment {
+ParserEnv RepoOptions::getParserEnvironment() const {
+  return ParserEnv {
       true // codegen
     , true  // hhvm_compat_mode
     , true  // php5_compat_mode
@@ -862,6 +860,8 @@ bool RuntimeOption::AutoloadEnabled;
 std::string RuntimeOption::AutoloadDBPath;
 std::string RuntimeOption::AutoloadDBPerms{"0644"};
 std::string RuntimeOption::AutoloadDBGroup;
+std::string RuntimeOption::AutoloadLogging;
+bool RuntimeOption::AutoloadEnforceOneDefinitionRule = true;
 bool RuntimeOption::AutoloadRethrowExceptions = true;
 std::string RuntimeOption::FileCache;
 std::string RuntimeOption::DefaultDocument;
@@ -2462,6 +2462,9 @@ void RuntimeOption::Load(
     Config::Bind(AutoloadDBPath, ini, config, "Autoload.DB.Path");
     Config::Bind(AutoloadDBPerms, ini, config, "Autoload.DB.Perms", "0644");
     Config::Bind(AutoloadDBGroup, ini, config, "Autoload.DB.Group");
+    Config::Bind(AutoloadLogging, ini, config, "Autoload.Logging", "");
+    Config::Bind(AutoloadEnforceOneDefinitionRule, ini, config,
+                 "Autoload.EnforceOneDefinitionRule", true);
     Config::Bind(AutoloadRethrowExceptions, ini, config,
                  "Autoload.RethrowExceptions", true);
 

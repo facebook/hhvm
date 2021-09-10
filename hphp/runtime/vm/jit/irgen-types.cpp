@@ -76,21 +76,6 @@ SSATmp* ldClassSafe(IRGS& env, const StringData* className,
   );
 }
 
-SSATmp* ldRecDescSafe(IRGS& env, const StringData* recName) {
-  return cond(
-    env,
-    [&] (Block* taken) {
-      return gen(env, LdRecDescCachedSafe, RecNameData{recName}, taken);
-    },
-    [&] (SSATmp* rec) { // next
-      return rec;
-    },
-    [&] { // taken
-      return cns(env, nullptr);
-    }
-  );
-}
-
 /*
  * Returns a Bool value indicating if src (which must be <= TObj) is an
  * instance of the class given in className, or nullptr if we don't have an
@@ -178,8 +163,6 @@ SSATmp* implInstanceCheck(IRGS& env, SSATmp* src, const StringData* className,
  * - Callable:  Emit code to verify that the given value is callable.
  * - VerifyCls: Emit code to verify that the given value is an instance of the
  *              given Class.
- * - VerifyRecordDesc: Emit code to verify that the given value is an instance
- *              of the given record.
  * - Giveup:    Called when the type check cannot be resolved statically. Either
  *              PUNT or call a runtime helper to do the check.
  *
@@ -193,7 +176,6 @@ template <typename GetVal,
           typename Fail,
           typename Callable,
           typename VerifyCls,
-          typename VerifyRecordDesc,
           typename Giveup>
 void verifyTypeImpl(IRGS& env,
                     const TypeConstraint& tc,
@@ -206,7 +188,6 @@ void verifyTypeImpl(IRGS& env,
                     Fail fail,
                     Callable callable,
                     VerifyCls verifyCls,
-                    VerifyRecordDesc verifyRecDesc,
                     Giveup giveup) {
 
   if (!tc.isCheckable()) return;
@@ -278,15 +259,6 @@ void verifyTypeImpl(IRGS& env,
       assertx(valType <= TLazyCls);
       if (!lazyClassToStr(val)) return genFail();
       return;
-    case AnnotAction::RecordCheck: {
-      assertx(valType <= TRecord);
-      auto const rec = RecordDesc::lookupUnique(tc.typeName());
-      auto const isPersistent = recordHasPersistentRDS(rec);
-      auto const checkRecDesc = isPersistent ?
-        cns(env, rec) : ldRecDescSafe(env, tc.typeName());
-      verifyRecDesc(gen(env, LdRecDesc, val), checkRecDesc, val);
-      return;
-    }
     case AnnotAction::WarnClassname:
       assertx(valType <= TCls || valType <= TLazyCls);
       gen(
@@ -310,10 +282,10 @@ void verifyTypeImpl(IRGS& env,
       auto const td = tc.namedEntity()->getCachedTypeAlias();
       if (tc.namedEntity()->isPersistentTypeAlias() && td &&
           ((td->nullable && valType <= TNull) ||
-           annotCompat(valType.toDataType(), td->type,
-             td->klass ?
-             td->klass->name() :
-             (td->rec ? td->rec->name() : nullptr)) == AnnotAction::Pass)) {
+           annotCompat(
+             valType.toDataType(), td->type,
+             td->klass ? td->klass->name() : nullptr
+           ) == AnnotAction::Pass)) {
         env.irb->constrainValue(val, DataTypeSpecific);
         return;
       }
@@ -1183,18 +1155,6 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
           val
         );
       },
-      [&] (SSATmp* valRecDesc, SSATmp* checkRec, SSATmp* val) {
-        // Record/type-alias check
-        gen(
-          env,
-          VerifyRetRecDesc,
-          ParamData { id },
-          valRecDesc,
-          checkRec,
-          cns(env, uintptr_t(&tc)),
-          val
-        );
-      },
       [] { // Giveup
         PUNT(VerifyReturnType);
       }
@@ -1271,17 +1231,6 @@ void verifyParamTypeImpl(IRGS& env, int32_t id) {
           VerifyParamCls,
           objClass,
           checkCls,
-          cns(env, uintptr_t(&tc)),
-          cns(env, id)
-        );
-      },
-      [&] (SSATmp* valRecDesc, SSATmp* checkRec, SSATmp*) {
-        // Record/type-alias check
-        gen(
-          env,
-          VerifyParamRecDesc,
-          valRecDesc,
-          checkRec,
           cns(env, uintptr_t(&tc)),
           cns(env, id)
         );
@@ -1374,18 +1323,6 @@ void verifyPropType(IRGS& env,
           cns(env, slot),
           checkCls,
           v,
-          cns(env, isSProp)
-        );
-      },
-      [&] (SSATmp*, SSATmp* checkRec, SSATmp* val) { // Record/type-alias check
-        gen(
-          env,
-          VerifyPropRecDesc,
-          TypeConstraintData{ tc },
-          cls,
-          cns(env, slot),
-          checkRec,
-          val,
           cns(env, isSProp)
         );
       },

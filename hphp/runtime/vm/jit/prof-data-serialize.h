@@ -52,7 +52,6 @@ struct ProfDataSerializer {
   std::pair<Id, bool> serialize(const Unit*);
   std::pair<Id, bool> serialize(const Func*);
   std::pair<Id, bool> serialize(const Class*);
-  std::pair<Id, bool> serialize(const RecordDesc*);
   std::pair<Id, bool> serialize(const TypeAlias*);
   std::pair<Id, bool> serialize(const ArrayData*);
   std::pair<Id, bool> serialize(const StringData*);
@@ -60,7 +59,6 @@ struct ProfDataSerializer {
   std::pair<Id, bool> serialize(FuncId);
 
   bool present(const Class*) const;
-  bool present(const RecordDesc*) const;
   bool present(const TypeAlias*) const;
 
   // Atomically create the output file, or throw runtime error upon failure.
@@ -97,7 +95,6 @@ struct ProfDataSerializer {
     Mapper<const Unit*> unitMap;
     Mapper<const Func*> funcMap;
     Mapper<const Class*> classMap;
-    Mapper<const RecordDesc*> recordMap;
     Mapper<const TypeAlias*> typeAliasMap;
     Mapper<const StringData*> stringMap;
     Mapper<const ArrayData*> arrayMap;
@@ -130,7 +127,6 @@ struct ProfDataDeserializer {
   Unit* getUnit(ProfDataSerializer::Id) const;
   Func* getFunc(ProfDataSerializer::Id) const;
   Class* getClass(ProfDataSerializer::Id) const;
-  RecordDesc* getRecord(ProfDataSerializer::Id) const;
   const TypeAlias* getTypeAlias(ProfDataSerializer::Id) const;
   ArrayData* getArray(ProfDataSerializer::Id) const;
   StringData* getString(ProfDataSerializer::Id) const;
@@ -140,7 +136,6 @@ struct ProfDataDeserializer {
   void record(ProfDataSerializer::Id, Unit*);
   void record(ProfDataSerializer::Id, Func*);
   void record(ProfDataSerializer::Id, Class*);
-  void record(ProfDataSerializer::Id, RecordDesc*);
   void record(ProfDataSerializer::Id, const TypeAlias*);
   void record(ProfDataSerializer::Id, ArrayData*);
   void record(ProfDataSerializer::Id, StringData*);
@@ -179,7 +174,6 @@ struct ProfDataDeserializer {
   RevMapper<Unit*> unitMap;
   RevMapper<Func*> funcMap;
   RevMapper<Class*> classMap;
-  RevMapper<RecordDesc*> recordMap;
   RevMapper<const TypeAlias*> typeAliasMap;
   RevMapper<StringData*> stringMap;
   RevMapper<ArrayData*> arrayMap;
@@ -237,8 +231,6 @@ void write_class(ProfDataSerializer& ser, const Class* cls);
 Class* read_class(ProfDataDeserializer& ser);
 void write_lclass(ProfDataSerializer& ser, const LazyClassData cls);
 LazyClassData read_lclass(ProfDataDeserializer& ser);
-void write_record(ProfDataSerializer& ser, const RecordDesc* rec);
-RecordDesc* read_record(ProfDataDeserializer& ser);
 void write_typealias(ProfDataSerializer& ser, const TypeAlias* td);
 const TypeAlias* read_typealias(ProfDataDeserializer& ser);
 void write_func(ProfDataSerializer& ser, const Func* func);

@@ -223,33 +223,6 @@ static bool VerifyTypeSlowImpl(const Class* cls,
   return expected->checkTypeAliasObj(cls);
 }
 
-ALWAYS_INLINE
-static bool verifyRecDescImpl(const RecordDesc* rec,
-                              const RecordDesc* constraint,
-                              const TypeConstraint* tc) {
-  if (constraint) return rec->recordDescOf(constraint);
-  return tc->checkTypeAliasRecord(rec);
-}
-
-void VerifyParamRecDescImpl(const RecordDesc* rec,
-                            const RecordDesc* constraint,
-                            const TypeConstraint* tc,
-                            int param) {
-  if (UNLIKELY(!verifyRecDescImpl(rec, constraint, tc))) {
-    VerifyParamTypeFail(param, tc);
-  }
-}
-
-void VerifyRetRecDescImpl(int32_t id,
-                          const RecordDesc* rec,
-                          const RecordDesc* constraint,
-                          const TypeConstraint* tc,
-                          TypedValue tv) {
-  if (UNLIKELY(!verifyRecDescImpl(rec, constraint, tc))) {
-    VerifyRetTypeFail(id, &tv, tc);
-  }
-}
-
 void VerifyParamTypeSlow(const Class* cls,
                          const Class* constraint,
                          const TypeConstraint* expected,
@@ -605,23 +578,18 @@ ArrayData* recordReifiedGenericsAndGetTSList(ArrayData* tsList) {
   return result;
 }
 
-const StaticString s_classname("classname");
-const StaticString s_kind("kind");
-const StaticString s_type_structure_non_existant_class(
-  "hh\\__internal\\type_structure_non_existant_class");
-
 ArrayData* loadClsTypeCnsHelper(
   const Class* cls, const StringData* name, bool no_throw_on_undefined
 ) {
-  auto const getFake = [&] {
-    DictInit arr(2);
-    arr.set(s_kind,
-            Variant(static_cast<uint8_t>(TypeStructure::Kind::T_class)));
-    arr.set(s_classname,
-            Variant(s_type_structure_non_existant_class));
-    auto result = arr.create();
-    ArrayData::GetScalarArray(&result);
-    return result;
+  auto const getFake = [] {
+    auto array = make_dict_array(
+      s_kind,
+      Variant(static_cast<uint8_t>(TypeStructure::Kind::T_class)),
+      s_classname,
+      Variant(s_type_structure_non_existant_class)
+    );
+    array.setEvalScalar();
+    return array.get();
   };
   TypedValue typeCns;
   if (no_throw_on_undefined) {
@@ -658,15 +626,11 @@ ArrayData* loadClsTypeCnsHelper(
 StringData* loadClsTypeCnsClsNameHelper(const Class* cls,
                                         const StringData* name) {
   auto const ts = loadClsTypeCnsHelper(cls, name, false);
-  auto const classname_field = ts->get(s_classname.get());
-  if (classname_field.is_init()) {
-    assertx(isStringType(classname_field.type()));
-    return classname_field.val().pstr;
-  }
-  raise_error("Type constant %s::%s does not have a 'classname' field",
-              cls->name()->data(), name->data());
+  auto const classname = ts->get(s_classname.get(), true);
+  assertx(isStringType(type(classname)));
+  assertx(val(classname).pstr->isStatic());
+  return val(classname).pstr;
 }
-
 
 void raiseCoeffectsCallViolationHelper(const Func* callee,
                                        uint64_t providedCoeffects,

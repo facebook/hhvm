@@ -1,1 +1,3 @@
-Fatal error: Type constant A::T does not have a 'classname' field in %s on line 11
+Fatal error: Uncaught exception 'OutOfBoundsException' with message 'Out of bounds dict access: invalid index "classname"' in %s:11
+Stack trace:
+%a

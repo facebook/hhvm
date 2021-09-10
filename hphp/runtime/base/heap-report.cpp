@@ -80,9 +80,6 @@ DEBUG_ONLY std::string describe(const HeapGraph& g, int n) {
     case HeaderKind::AwaitAllWH:
       out << ":" << static_cast<const ObjectData*>(h)->classname_cstr();
       break;
-    case HeaderKind::Record:
-      out << ":" <<
-        static_cast<const RecordData*>(h)->record()->name()->data();
     case HeaderKind::Vector:
     case HeaderKind::Map:
     case HeaderKind::Set:

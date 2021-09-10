@@ -19,7 +19,6 @@
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/vm/class.h"
-#include "hphp/runtime/vm/record.h"
 
 namespace HPHP { namespace jit {
 
@@ -123,19 +122,18 @@ bool ArraySpec::checkInvariants() const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// ClsRecSpec.
+// ClassSpec
 
-template<>
 ClassSpec ClassSpec::operator&(const ClassSpec& rhs) const {
   auto const& lhs = *this;
 
   if (lhs <= rhs) return lhs;
   if (rhs <= lhs) return rhs;
 
-  assertx(lhs.typeCns() && rhs.typeCns());
+  assertx(lhs.cls() && rhs.cls());
 
   // If neither class is an interface, their intersection is trivial.
-  if (isNormalClass(lhs.typeCns()) && isNormalClass(rhs.typeCns())) {
+  if (isNormalClass(lhs.cls()) && isNormalClass(rhs.cls())) {
     return Bottom();
   }
 
@@ -145,26 +143,15 @@ ClassSpec ClassSpec::operator&(const ClassSpec& rhs) const {
   // class better than an interface, because it might influence important
   // things like method dispatch or property accesses better than an interface
   // type could.
-  if (isNormalClass(lhs.typeCns())) return lhs;
-  if (isNormalClass(rhs.typeCns())) return rhs;
+  if (isNormalClass(lhs.cls())) return lhs;
+  if (isNormalClass(rhs.cls())) return rhs;
 
   // If they are both interfaces, we have to pick one arbitrarily, but we must
   // do so in a way that is stable regardless of which one was passed as lhs or
   // rhs (to guarantee that operator& is commutative).  We use the class name
   // in this case to ensure that the ordering is dependent only on the source
   // program (Class* or something like that seems less desirable).
-  return lhs.typeCns()->name()->compare(rhs.typeCns()->name()) < 0 ? lhs : rhs;
-}
-
-template<>
-RecordSpec RecordSpec::operator&(const RecordSpec& rhs) const {
-  auto const& lhs = *this;
-
-  if (lhs <= rhs) return lhs;
-  if (rhs <= lhs) return rhs;
-
-  assertx(lhs.typeCns() && rhs.typeCns());
-  return Bottom();
+  return lhs.cls()->name()->compare(rhs.cls()->name()) < 0 ? lhs : rhs;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

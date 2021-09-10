@@ -280,7 +280,7 @@ void PropertiesInfo::mergeInPrivateStatic(const Index& index,
                                           const Type& t,
                                           bool ignoreConst,
                                           bool mustBeReadOnly) {
-  assertx(!mustBeReadOnly || RO::EvalEnableReadonlyPropertyEnforcement);
+  assertx(!mustBeReadOnly || RO::EvalEnableReadonlyPropertyEnforcement == 2);
   if (!m_cls || t.is(BBottom)) return;
   auto it = m_cls->privateStatics.find(name);
   if (it == m_cls->privateStatics.end()) return;
@@ -351,7 +351,7 @@ void PropertiesInfo::mergeInAllPrivateStatics(const Index& index,
                                               const Type& t,
                                               bool ignoreConst,
                                               bool mustBeReadOnly) {
-  assertx(!mustBeReadOnly || RO::EvalEnableReadonlyPropertyEnforcement);
+  assertx(!mustBeReadOnly || RO::EvalEnableReadonlyPropertyEnforcement == 2);
   if (!m_cls || t.is(BBottom)) return;
   for (auto& kv : m_cls->privateStatics) {
     if (!ignoreConst && (kv.second.attrs & AttrIsConst)) return;

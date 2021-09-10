@@ -422,7 +422,6 @@ bool HHVM_FUNCTION(array_key_exists,
     case KindOfKeyset:
     case KindOfObject:
     case KindOfResource:
-    case KindOfRecord:
     case KindOfRFunc:
     case KindOfFunc:
       throwInvalidArrayKeyException(cell, ad);
@@ -802,7 +801,6 @@ TypedValue HHVM_FUNCTION(array_product,
       case KindOfLazyClass:
       case KindOfClsMeth:
       case KindOfRClsMeth:
-      case KindOfRecord:
         continue;
     }
     not_reached();
@@ -825,7 +823,6 @@ DOUBLE:
       case KindOfRClsMeth:
       case KindOfObject:
       case KindOfResource:
-      case KindOfRecord:
       case KindOfRFunc:
         continue;
     }
@@ -1081,7 +1078,6 @@ TypedValue HHVM_FUNCTION(array_sum,
       case KindOfLazyClass:
       case KindOfClsMeth:
       case KindOfRClsMeth:
-      case KindOfRecord:
         continue;
     }
     not_reached();
@@ -1104,7 +1100,6 @@ DOUBLE:
       case KindOfRClsMeth:
       case KindOfObject:
       case KindOfResource:
-      case KindOfRecord:
       case KindOfRFunc:
         continue;
     }
@@ -1298,9 +1293,6 @@ int64_t HHVM_FUNCTION(count,
         }
       }
       return 1;
-
-    case KindOfRecord: // TODO (T41258617)
-      raise_error(Strings::RECORD_NOT_SUPPORTED);
   }
   not_reached();
 }
@@ -3072,10 +3064,6 @@ TypedValue HHVM_FUNCTION(HH_array_key_cast, const Variant& input) {
     case KindOfRFunc:
       SystemLib::throwInvalidArgumentExceptionObject(
         "Reified functions cannot be cast to an array key"
-      );
-    case KindOfRecord:
-      SystemLib::throwInvalidArgumentExceptionObject(
-        "Records cannot be cast to an array-key"
       );
   }
   not_reached();

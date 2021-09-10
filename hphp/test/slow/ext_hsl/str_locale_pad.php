@@ -13,7 +13,10 @@ function main(): void {
     tuple('abc', 4, '💩'),
     tuple('💩abc', 4, '-'),
     tuple('💩a', 3, '-'),
+    tuple('💩a', 4, '-'),
     tuple('💩', 3, '💩'),
+    tuple("😀😀😀😀", 5, '!'),
+    tuple("😀😀😀😀", 6, '!'),
   ];
   foreach($cases as list($str, $len, $pad)) {
     var_dump(dict[

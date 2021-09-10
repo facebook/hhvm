@@ -13,12 +13,14 @@ external parse_decls_and_mode_ffi :
   Relative_path.t ->
   string ->
   bool ->
-  decls * FileInfo.mode option * Int64.t option = "hh_parse_decls_and_mode_ffi"
+  bool ->
+  decls * FileInfo.mode option * Int64.t option * Int64.t list option
+  = "hh_parse_decls_and_mode_ffi"
 
 external decls_hash : decls -> Int64.t = "decls_hash"
 
 let parse_decls_ffi
     (opts : DeclParserOptions.t) (path : Relative_path.t) (text : string) :
     decls =
-  let (decls, _, _) = parse_decls_and_mode_ffi opts path text false in
+  let (decls, _, _, _) = parse_decls_and_mode_ffi opts path text false false in
   decls

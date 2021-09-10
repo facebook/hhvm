@@ -32,7 +32,6 @@ module Tools = struct
       min_distance_restart = 100;
       ignore_hh_version = false;
       is_saved_state_precomputed = false;
-      monitor_kill_again_fix = false;
     }
 end
 
@@ -76,7 +75,7 @@ let make_test test =
 
       let get_kill_server_count () = !kill_server_count
 
-      let wait_for_server_exit ~timeout_t:_ _ _ = true
+      let wait_for_server_exit ~timeout_t:_ _ = true
 
       let wait_pid _ = (0, Unix.WEXITED 0)
 

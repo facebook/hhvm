@@ -8,14 +8,11 @@ abstract class Test {
   const type Tc = int;
   const type Td = this::Tc;
 
-  const type Te as nonnull = arraykey;
-  const type Tf = this::Te;
   const type Tg = C;
 
   public function f(): void {
     3 as this::Tb; // looks safe, but points to abstract type const
     4 as this::Td;
-    5 as this::Tf; // same thing, but partially abstract
     6 as this::Tg::T; // make sure this resolves to the C::Tc and not Test::Tc
   }
 }

@@ -1,0 +1,2 @@
+File "as_mut_collections.php", line 21, characters 3-20:
+Only value types and arrays can be converted to mutable. (Typing[4434])

@@ -78,13 +78,6 @@ bool is_unused_trait(const php::Class& cls);
 bool is_used_trait(const php::Class& cls);
 
 /*
- * Normalizes a class' name to remove any non-deterministic elements. For
- * closures and anonymous classes, it removes the unique integer identifier from
- * it. Otherwise, it returns the unmodified class name.
- */
-std::string normalized_class_name(const php::Class& cls);
-
-/*
  * Returns true if the property has an initial value which might
  * possibly violate its type-hint. If it returns false, it is
  * guaranteed to not violate the type-hint.

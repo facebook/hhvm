@@ -541,14 +541,6 @@ static std::string toStringElm(TypedValue tv) {
          << tv.m_data.pobj->getClassName().get()->data()
          << ")";
       continue;
-    case KindOfRecord:
-      assertx(tv.m_data.prec->checkCount());
-      os << tv.m_data.prec;
-      print_count();
-      os << ":Record("
-         << tv.m_data.prec->record()->name()->data()
-         << ")";
-      continue;
     case KindOfResource:
       assertx(tv.m_data.pres->checkCount());
       os << tv.m_data.pres;
@@ -1093,6 +1085,10 @@ OPTBLD_INLINE void iopFalse() {
 }
 
 OPTBLD_INLINE void iopFile() {
+  if (auto const of = vmfp()->func()->originalFilename()) {
+    vmStack().pushStaticString(of);
+    return;
+  }
   auto s = vmfp()->func()->unit()->filepath();
   vmStack().pushStaticString(s);
 }
@@ -1206,36 +1202,6 @@ OPTBLD_INLINE void iopNewKeysetArray(uint32_t n) {
   auto const ad = VanillaKeyset::MakeSet(n, vmStack().topC());
   vmStack().ndiscard(n);
   vmStack().pushKeysetNoRc(bespoke::maybeMakeLoggingArray(ad));
-}
-
-namespace {
-template<typename CreatorFn, typename PushFn>
-void newRecordImpl(const StringData* s,
-                   const imm_array<int32_t>& ids,
-                   CreatorFn creatorFn, PushFn pushFn) {
-  auto rec = RecordDesc::get(s, true);
-  if (!rec) {
-    raise_error(Strings::UNKNOWN_RECORD, s->data());
-  }
-  auto const n = ids.size;
-  assertx(n > 0 && n <= ArrayData::MaxElemsOnStack);
-  req::vector<const StringData*> names;
-  names.reserve(n);
-  auto const unit = vmfp()->func()->unit();
-  for (size_t i = 0; i < n; ++i) {
-    auto name = unit->lookupLitstrId(ids[i]);
-    names.push_back(name);
-  }
-  auto recdata = creatorFn(rec, names.size(), names.data(), vmStack().topC());
-  vmStack().ndiscard(n);
-  pushFn(vmStack(), recdata);
-}
-}
-
-// TODO (T29595301): Use id instead of StringData
-OPTBLD_INLINE void iopNewRecord(const StringData* s, imm_array<int32_t> ids) {
-  newRecordImpl(s, ids, RecordData::newRecord,
-                [] (Stack& st, RecordData* r) { st.pushRecordNoRc(r); });
 }
 
 OPTBLD_INLINE void iopAddElemC() {
@@ -2382,7 +2348,7 @@ OPTBLD_INLINE void iopCGetS(ReadonlyOp op) {
                 ss.name->data());
   }
   if (RO::EvalEnableReadonlyPropertyEnforcement &&
-    ss.readonly && op == ReadonlyOp::Mutable){
+    ss.readonly && op == ReadonlyOp::Mutable) {
     throw_must_be_enclosed_in_readonly(
       ss.cls->name()->data(), ss.name->data()
     );
@@ -3244,10 +3210,12 @@ OPTBLD_INLINE void iopSetS(ReadonlyOp op) {
                accessible, constant, readonly, true);
 
   SCOPE_EXIT { decRefStr(name); };
-  if (RO::EvalEnableReadonlyPropertyEnforcement &&
-    !readonly && op == ReadonlyOp::Readonly) {
+
+  if (RO::EvalEnableReadonlyPropertyEnforcement && !readonly &&
+    op == ReadonlyOp::Readonly) {
     throw_must_be_readonly(cls->name()->data(), name->data());
   }
+
   if (!(visible && accessible)) {
     raise_error("Invalid static property access: %s::%s",
                 cls->name()->data(),
@@ -3508,7 +3476,10 @@ TCA fcallImpl(bool retToJit, PC origpc, PC& pc, const FCallArgs& fca,
     checkReadonlyMismatch(func, fca.numArgs, fca.readonlyArgs);
   }
   if (fca.enforceMutableReturn() && (func->attrs() & AttrReadonlyReturn)) {
-    throwParamReadonlyMismatch(func, kInvalidId);
+    throwReadonlyMismatch(func, kReadonlyReturnId);
+  }
+  if (fca.enforceReadonlyThis() && !(func->attrs() & AttrReadonlyThis)) {
+    throwReadonlyMismatch(func, kReadonlyThisId);
   }
   if (dynamic && logAsDynamicCall) callerDynamicCallChecks(func);
   checkStack(vmStack(), func, 0);
@@ -3861,10 +3832,24 @@ fcallObjMethodHandleInput(const FCallArgs& fca, ObjMethodOp op,
   if (extraStk) stack.popC();
   if (fca.hasGenerics()) stack.popC();
   if (fca.hasUnpack()) stack.popC();
-  for (uint32_t i = 0; i < fca.numArgs; ++i) stack.popTV();
+
+  // Save any inout arguments, as those will be pushed unchanged as
+  // the output.
+  std::vector<TypedValue> inOuts;
+  for (uint32_t i = 0; i < fca.numArgs; ++i) {
+    if (fca.enforceInOut() && fca.isInOut(fca.numArgs - i - 1)) {
+      inOuts.emplace_back(*stack.top());
+      stack.discard();
+    } else {
+      stack.popTV();
+    }
+  }
   stack.popU();
   stack.popC();
   for (uint32_t i = 0; i < fca.numRets - 1; ++i) stack.popU();
+
+  assertx(inOuts.size() == fca.numRets - 1);
+  for (auto const tv : inOuts) *stack.allocC() = tv;
   stack.pushNull();
 
   // Handled.
@@ -4674,7 +4659,7 @@ OPTBLD_INLINE void iopParent() {
 OPTBLD_INLINE void iopCreateCl(uint32_t numArgs, uint32_t clsIx) {
   auto const func = vmfp()->func();
   auto const preCls = func->unit()->lookupPreClassId(clsIx);
-  auto const c = Class::defClosure(preCls);
+  auto const c = Class::defClosure(preCls, true);
 
   auto const cls = c->rescope(const_cast<Class*>(func->cls()));
   assertx(!cls->needInitialization());

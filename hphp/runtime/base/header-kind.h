@@ -47,7 +47,7 @@ enum class HeaderKind : uint8_t {
   Vec, BespokeVec, Dict, BespokeDict, Keyset, BespokeKeyset,
 
   // Other ordinary refcounted heap objects
-  String, Resource, ClsMeth, RClsMeth, Record, RFunc,
+  String, Resource, ClsMeth, RClsMeth, RFunc,
 
   // Valid kinds for an ObjectData; all but Object and NativeObject are
   // isCppBuiltin()
@@ -311,4 +311,3 @@ inline constexpr bool collectionAllowsIntStringKeys(CollectionType ctype) {
 }
 
 }
-

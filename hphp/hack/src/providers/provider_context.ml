@@ -212,7 +212,9 @@ let get_telemetry (t : t) : Telemetry.t =
     |> Telemetry.string_
          ~key:"backend"
          ~value:(t.backend |> Provider_backend.t_to_string)
-    |> Telemetry.object_ ~key:"SharedMem" ~value:(SharedMem.get_telemetry ())
+    |> Telemetry.object_
+         ~key:"SharedMem"
+         ~value:(SharedMem.SMTelemetry.get_telemetry ())
     (* We get SharedMem telemetry for all providers, not just the SharedMem
        provider, just in case there are code paths which use SharedMem despite
        it not being the intended provider. *)

@@ -190,6 +190,20 @@ let check_readonly_property env obj get obj_ro =
       (Lazy.force elt.Typing_defs.ce_pos)
   | _ -> ()
 
+let check_static_readonly_property env (class_ : Tast.class_id) get obj_ro =
+  let prop_elts = get_static_prop_elts env class_ get in
+  let (_, pos, _) = class_ in
+  (* If there's any property in the list of possible properties that could be readonly,
+      it must be explicitly cast to readonly *)
+  let readonly_prop = List.find ~f:Typing_defs.get_ce_readonly_prop prop_elts in
+  match (readonly_prop, obj_ro) with
+  | (Some elt, Mut) when Typing_defs.get_ce_readonly_prop elt ->
+    Errors.explicit_readonly_cast
+      "static property"
+      pos
+      (Lazy.force elt.Typing_defs.ce_pos)
+  | _ -> ()
+
 let check =
   object (self)
     inherit Tast_visitor.iter as super
@@ -462,7 +476,7 @@ let check =
         when String.equal (Utils.strip_ns x) (Utils.strip_ns SN.Readonly.as_mut)
         ->
         let arg_ty = Tast.get_type arg in
-        if not (self#is_safe_mut_ty env arg_ty) then
+        if not (self#is_safe_mut_ty env SSet.empty arg_ty) then
           Errors.readonly_invalid_as_mut pos
         else
           ()
@@ -544,24 +558,53 @@ let check =
 
     (* Check if type is safe to convert from readonly to mut
        TODO(readonly): Update to include more complex types. *)
-    method is_safe_mut_ty env ty =
-      let env = Tast_env.tast_env_as_typing_env env in
-      let primitive_types =
-        [
-          MakeType.bool Reason.none;
-          MakeType.int Reason.none;
-          MakeType.arraykey Reason.none;
-          MakeType.string Reason.none;
-          MakeType.float Reason.none;
-          MakeType.null Reason.none;
-          MakeType.num Reason.none;
-          (* Keysets only contain arraykeys so if they're readonly its safe to remove *)
-          MakeType.keyset Reason.none (MakeType.arraykey Reason.none);
-        ]
-      in
-      (* Make a union type to subtype with the ty *)
-      let union = MakeType.union Reason.none primitive_types in
-      Typing_utils.is_sub_type env ty union
+    method is_safe_mut_ty env (seen : SSet.t) ty =
+      let open Typing_defs_core in
+      match get_node ty with
+      | Tshape (Open_shape, _) -> false
+      | Tshape (Closed_shape, fields) ->
+        TShapeMap.for_all
+          (fun _k v -> self#is_safe_mut_ty env seen v.sft_ty)
+          fields
+      (* If it's a Tclass it's an array type by is_value_collection *)
+      | Tintersection tyl ->
+        List.exists tyl ~f:(fun l -> self#is_safe_mut_ty env seen l)
+      | Tunion tyl ->
+        List.exists tyl ~f:(fun l -> self#is_safe_mut_ty env seen l)
+      | Tdependent (_, upper) ->
+        (* check upper bounds *)
+        self#is_safe_mut_ty env seen upper
+      | Tclass (_, _, tyl) when self#is_value_collection_ty env ty ->
+        List.for_all tyl ~f:(fun l -> self#is_safe_mut_ty env seen l)
+      | Tgeneric (name, tyargs) ->
+        (* Avoid circular generics with a set *)
+        if SSet.mem name seen then
+          false
+        else
+          let new_seen = SSet.add name seen in
+          let upper_bounds = Tast_env.get_upper_bounds env name tyargs in
+          Typing_set.exists
+            (fun l -> self#is_safe_mut_ty env new_seen l)
+            upper_bounds
+      | _ ->
+        (* Otherwise, check if it's primitive *)
+        let env = Tast_env.tast_env_as_typing_env env in
+        let primitive_types =
+          [
+            MakeType.bool Reason.none;
+            MakeType.int Reason.none;
+            MakeType.arraykey Reason.none;
+            MakeType.string Reason.none;
+            MakeType.float Reason.none;
+            MakeType.null Reason.none;
+            MakeType.num Reason.none;
+            (* Keysets only contain arraykeys so if they're readonly its safe to remove *)
+            MakeType.keyset Reason.none (MakeType.arraykey Reason.none);
+          ]
+        in
+        (* Make a union type to subtype with the ty *)
+        let union = MakeType.union Reason.none primitive_types in
+        Typing_utils.is_sub_type env ty union
 
     method is_value_collection_ty env ty =
       let mixed = MakeType.mixed Reason.none in
@@ -704,6 +747,18 @@ let check =
         (* During a property assignment, skip the self#expr call to avoid erroring *)
         self#on_Obj_get env obj get nullable is_prop_call;
         self#on_expr env rval
+      (* Static property assignment *)
+      | ( _,
+          _,
+          Binop
+            ( (Ast_defs.Eq _ as bop),
+              ((_, _, Class_get (class_id, get, is_prop_call)) as lval),
+              rval ) ) ->
+        self#assign env lval rval;
+        self#on_bop env bop;
+        (* During a static property assignment, skip the self#expr call to avoid erroring *)
+        self#on_Class_get env class_id get is_prop_call;
+        self#on_expr env rval
       (* All other assignment *)
       | (_, _, Binop (Ast_defs.Eq _, lval, rval)) ->
         self#assign env lval rval;
@@ -739,8 +794,14 @@ let check =
         ->
         (* Skip the recursive step into ReadonlyExpr to avoid erroring *)
         self#on_Obj_get env obj get nullable is_prop_call
+      | (_, _, ReadonlyExpr (_, _, Class_get (class_, get, x))) ->
+        (* Skip the recursive step into ReadonlyExpr to avoid erroring *)
+        self#on_Class_get env class_ get x
       | (_, _, Obj_get (obj, get, _nullable, _is_prop_call)) ->
-        check_readonly_property env obj get (self#ty_expr env obj);
+        check_readonly_property env obj get Mut;
+        super#on_expr env e
+      | (_, _, Class_get (class_, get, _is_prop_call)) ->
+        check_static_readonly_property env class_ get Mut;
         super#on_expr env e
       | (_, pos, New (_, _, args, unpacked_arg, constructor_fty)) ->
         (* Constructors never return readonly, so that specific check is irrelevant *)
@@ -758,7 +819,6 @@ let check =
       | (_, _, Lvar _)
       | (_, _, Clone _)
       | (_, _, Array_get (_, _))
-      | (_, _, Class_get (_, _, _))
       | (_, _, Yield _)
       | (_, _, Await _)
       | (_, _, Tuple _)
@@ -919,6 +979,8 @@ let handler =
             without readonly keyword/analysis *)
         | (_, _, Obj_get (obj, get, _, _)) ->
           check_readonly_property env obj get Mut
+        | (_, _, Class_get (class_id, get, _)) ->
+          check_static_readonly_property env class_id get Mut
         | _ -> ()
       in
       check e

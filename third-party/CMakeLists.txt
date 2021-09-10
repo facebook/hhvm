@@ -44,8 +44,7 @@ list(APPEND EXTRA_INCLUDE_PATHS
   "${TP_DIR}/forks/libmbfl/filters"
 )
 
-list(APPEND THIRD_PARTY_MODULES forks/timelib)
-list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/forks/timelib")
+list(APPEND THIRD_PARTY_MODULES timelib)
 
 # Required by folly
 add_subdirectory(double-conversion)

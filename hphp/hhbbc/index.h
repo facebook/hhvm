@@ -51,16 +51,18 @@ struct CallContext;
 struct PropertiesInfo;
 struct MethodsInfo;
 
+struct TypeStructureResolution;
+
 extern const Type TCell;
 
 namespace php {
 struct Class;
 struct Prop;
-struct Record;
 struct Const;
 struct Func;
 struct Unit;
 struct Program;
+struct TypeAlias;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -226,11 +228,60 @@ inline PropMergeResult<T>& operator|=(PropMergeResult<T>& a,
 
 std::string show(const PropMergeResult<Type>&);
 
+/*
+ * The result of Index::lookup_class_constant
+ */
+template <typename T = Type> // NB: The template parameter is here to
+                             // break a cyclic dependency on Type
+struct ClsConstLookupResult {
+  T ty;            // The best known type of the constant (might not be a
+                   // scalar).
+  TriBool found;   // If the constant was found
+  bool mightThrow; // If accessing the constant can throw
+};
+
+template <typename T>
+inline ClsConstLookupResult<T>& operator|=(ClsConstLookupResult<T>& a,
+                                           const ClsConstLookupResult<T>& b) {
+  a.ty |= b.ty;
+  a.found |= b.found;
+  a.mightThrow |= b.mightThrow;
+  return a;
+}
+
+std::string show(const ClsConstLookupResult<Type>&);
+
+/*
+ * The result of Index::lookup_class_type_constant
+ */
+template <typename T = TypeStructureResolution>
+struct ClsTypeConstLookupResult {
+  T resolution;     // The result from resolving the type-structure
+  TriBool found;    // If the constant was found
+  TriBool abstract; // If the constant was abstract (this only applies
+                    // to the subset which wasn't found).
+};
+
+template <typename T>
+inline ClsTypeConstLookupResult<T>& operator|=(
+    ClsTypeConstLookupResult<T>& a,
+    const ClsTypeConstLookupResult<T>& b) {
+  a.resolution |= b.resolution;
+  if (a.found == TriBool::Yes) {
+    a.abstract = b.abstract;
+  } else if (b.found != TriBool::Yes) {
+    a.abstract |= b.abstract;
+  }
+  a.found |= b.found;
+  return a;
+}
+
+std::string show(const ClsTypeConstLookupResult<TypeStructureResolution>&);
+
 //////////////////////////////////////////////////////////////////////
 
 // private types
 struct ClassInfo;
-struct RecordInfo;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -371,6 +422,12 @@ struct Class {
    */
   const php::Class* cls() const;
 
+  /*
+   * Invoke the given function on every possible subclass of this
+   * class. This must be a resolved class.
+   */
+  void forEachSubclass(const std::function<void(const php::Class*)>&) const;
+
 private:
   explicit Class(Either<SString,ClassInfo*>);
   template <bool> bool subtypeOfImpl(const Class&) const;
@@ -380,90 +437,6 @@ private:
   friend struct ::HPHP::HHBBC::Index;
   friend struct ::HPHP::HHBBC::PublicSPropMutations;
   Either<SString,ClassInfo*> val;
-};
-
-/*
- * A resolved runtime Record, for a particular php::Record.
- *
- * Provides various lookup tables that allow querying the Record's
- * information.
- */
-struct Record {
-  /*
-   * Returns whether two records are definitely same at runtime.  If
-   * this function returns false, they still *may* be the same at
-   * runtime.
-   */
-  bool same(const Record&) const;
-
-  /*
-   * Returns true if this record is definitely going to be a subtype
-   * of `o' at runtime.  If this function returns false, this may
-   * still be a subtype of `o' at runtime, it just may not be known.
-   * A typical example is with "non unique" records.
-   */
-  bool mustBeSubtypeOf(const Record& o) const;
-
-  /*
-   * Returns false if this record is definitely not going to be a subtype
-   * of `o' at runtime.  If this function returns true, this may
-   * still not be a subtype of `o' at runtime, it just may not be known.
-   */
-  bool maybeSubtypeOf(const Record& o) const;
-
-  /*
-   * If this function return false, it is known that this record
-   * is in no subtype relationship with the argument record 'o'.
-   * Returns true if this record could be a subtype of `o' at runtime.
-   * When true is returned the two records may still be unrelated but it is
-   * not possible to tell. A typical example is with "non unique" records.
-   */
-  bool couldBe(const Record& o) const;
-
-  /*
-   * Returns false if this is a final record.
-   */
-  bool couldBeOverriden() const;
-
-  /*
-   * Returns the name of this record.  Non-null guarantee.
-   */
-  SString name() const;
-
-  /*
-   * Returns the res::Record for this Record's parent if there is one,
-   * or nullptr.
-   */
-  Optional<Record> parent() const;
-
-  /*
-   * Returns the Record that is the first common ancestor between
-   * 'this' and 'o'.
-   * If there is no common ancestor std::nullopt is returned
-   */
-  Optional<Record> commonAncestor(const Record&) const;
-
-  /*
-   * Returns true if we have a RecordInfo for this Record.
-   */
-  bool resolved() const {
-    return val.right() != nullptr;
-  }
-
-  /*
-   * Returns the php::Record for this Record if there is one, or
-   * nullptr.
-   */
-  const php::Record* rec() const;
-
-private:
-  explicit Record(Either<SString,RecordInfo*>);
-  template <bool> bool subtypeOfImpl(const Record&) const;
-
-private:
-  friend std::string show(const Record&);
-  friend struct ::HPHP::HHBBC::Index;
-  Either<SString,RecordInfo*> val;
 };
 
 /*
@@ -632,19 +605,6 @@ struct Index {
   std::unique_ptr<ArrayTypeTable::Builder>& array_table_builder() const;
 
   /*
-   * Try to resolve which record will be the record named `name`,
-   * if we can resolve it to a single record.
-   *
-   * Note, the returned record may or may not be *defined* at the
-   * program point you care about (it could be non-hoistable, even
-   * though it's unique, for example).
-   *
-   * Returns std::nullopt if we can't prove the supplied name must be a
-   * record type.  (E.g. if there are type aliases.)
-   */
-  Optional<res::Record> resolve_record(SString name) const;
-
-  /*
    * Find all the closures created inside the context of a given
    * php::Class.
    */
@@ -684,6 +644,12 @@ struct Index {
   Optional<res::Class> resolve_class(Context, SString name) const;
 
   /*
+   * Find a type-alias with the given name. If a nullptr is returned,
+   * then no type-alias exists with that name.
+   */
+  const php::TypeAlias* lookup_type_alias(SString name) const;
+
+  /*
    * Try to resolve self/parent types for the given context
    */
   Optional<res::Class> selfCls(const Context& ctx) const;
@@ -699,8 +665,7 @@ struct Index {
   /*
    * Try to resolve name, looking through TypeAliases and enums.
    */
-  ResolvedInfo<boost::variant<boost::blank,res::Class,res::Record>>
-  resolve_type_name(SString name) const;
+  ResolvedInfo<Optional<res::Class>> resolve_type_name(SString name) const;
 
   /*
    * Resolve a closure class.
@@ -787,17 +752,41 @@ struct Index {
   bool could_have_reified_type(Context ctx, const TypeConstraint& tc) const;
 
   /*
-   * Lookup what the best known Type for a class constant would be,
-   * using a given Index and Context, if a class of that name were
-   * loaded.
-   * If allow_tconst is not set, type constants will not be returned.
-   * lookup_class_const_ptr version returns the statically known version
-   * of the const if it can find it, otherwise returns nullptr.
+   * Lookup metadata about the constant access `cls'::`name', in the
+   * current context `ctx'. The returned metadata not only includes
+   * the best known type of the constant, but whether it is definitely
+   * found, and whether accessing the constant might throw.  This
+   * function is responsible for walking the class hierarchy to find
+   * all possible constants and combining the results.  This is
+   * intended to be the source of truth about constants during
+   * analysis.
+   *
+   * This function only looks up non-type, non-context constants.
    */
-  Type lookup_class_constant(Context, res::Class, SString cns,
-                             bool allow_tconst) const;
-  const php::Const* lookup_class_const_ptr(Context, res::Class, SString cns,
-                                           bool allow_tconst) const;
+  ClsConstLookupResult<>
+  lookup_class_constant(Context ctx, const Type& cls, const Type& name) const;
+
+  /*
+   * Lookup metadata about the constant access `cls'::`name', where
+   * that constant is meant to be a type-constant. The returned
+   * metadata includes the best known type of the resolved
+   * type-structure, whether it was found, and whether it was
+   * abstract. This is intended to be the source of truth about
+   * type-constants during analysis. The returned type-structure type
+   * will always be static.
+   *
+   * By default, lookup_class_type_constant calls
+   * resolve_type_structure to resolve any found type-structure. This
+   * behavior can be overridden by providing a customer resolver.
+   */
+  using ClsTypeConstLookupResolver =
+    std::function<TypeStructureResolution(const php::Const&,const php::Class&)>;
+
+  ClsTypeConstLookupResult<>
+  lookup_class_type_constant(
+    const Type& cls,
+    const Type& name,
+    const ClsTypeConstLookupResolver& resolver = {}) const;
 
   /*
    * Lookup what the best known Type for a constant would be, using a
@@ -888,6 +877,11 @@ struct Index {
    * Returns whether the function's return value is readonly
    */
   TriBool lookup_return_readonly(Context, res::Func) const;
+
+  /*
+   * Returns whether the function is marked as readonly
+   */
+  TriBool lookup_readonly_this(Context, res::Func) const;
 
   /*
    * Returns the control-flow insensitive inferred private instance
@@ -1021,6 +1015,12 @@ struct Index {
   void preinit_bad_initial_prop_values();
 
   /*
+   * Attempt to pre-resolve as many type-structures as possible in
+   * type-constants and type-aliases.
+   */
+  void preresolve_type_structures(php::Program&);
+
+  /*
    * Refine the types of the class constants defined by an 86cinit,
    * based on a round of analysis.
    *
@@ -1032,7 +1032,7 @@ struct Index {
    */
   void refine_class_constants(
     const Context& ctx,
-    const CompactVector<std::pair<size_t, TypedValue>>& resolved,
+    const CompactVector<std::pair<size_t, Type>>& resolved,
     DependencyContextSet& deps);
 
   /*
@@ -1219,11 +1219,8 @@ private:
 
   void init_return_type(const php::Func* func);
 
-  ResolvedInfo<boost::variant<boost::blank,SString,ClassInfo*,RecordInfo*>>
+  ResolvedInfo<boost::variant<boost::blank,SString,ClassInfo*>>
   resolve_type_name_internal(SString name) const;
-
-  template<typename T>
-  Optional<T> resolve_type_impl(SString name) const;
 
 private:
   std::unique_ptr<IndexData> const m_data;

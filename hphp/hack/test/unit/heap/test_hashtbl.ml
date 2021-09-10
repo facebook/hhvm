@@ -48,10 +48,11 @@ let move k1 k2 = hh_move (to_key k1) (to_key k2)
 
 let get key = hh_get (to_key key)
 
-let gentle_collect () = if SharedMem.should_collect `gentle then hh_collect ()
+let gentle_collect () =
+  if SharedMem.GC.should_collect `gentle then hh_collect ()
 
 let aggressive_collect () =
-  if SharedMem.should_collect `aggressive then hh_collect ()
+  if SharedMem.GC.should_collect `aggressive then hh_collect ()
 
 let expect_equals ~name value expected =
   expect
@@ -64,7 +65,7 @@ let expect_equals ~name value expected =
     (value = expected)
 
 let expect_stats ~nonempty ~used =
-  SharedMem.(
+  SharedMem.SMTelemetry.(
     let expected =
       { nonempty_slots = nonempty; used_slots = used; slots = 8 }
     in
@@ -116,7 +117,7 @@ let expect_gentle_collect expected =
            ""
          else
            "not "))
-    (SharedMem.should_collect `gentle = expected)
+    (SharedMem.GC.should_collect `gentle = expected)
 
 let expect_aggressive_collect expected =
   expect
@@ -127,7 +128,7 @@ let expect_aggressive_collect expected =
            ""
          else
            "not "))
-    (SharedMem.should_collect `aggressive = expected)
+    (SharedMem.GC.should_collect `aggressive = expected)
 
 let test_ops () =
   expect_stats ~nonempty:0 ~used:0;
@@ -361,6 +362,7 @@ let tests () =
               dep_table_pow = 2;
               hash_table_pow = 3;
               shm_dirs = [];
+              shm_use_sharded_hashtbl = false;
               shm_min_avail = 0;
               log_level = 0;
               sample_rate = 0.0;

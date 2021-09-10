@@ -120,7 +120,7 @@ void emitClsCns(IRGS& env, const StringData* cnsNameStr) {
   if (!(clsTy <= TCls)) PUNT(ClsCns-NotClass);
 
   auto const loadSlot = [&] (Slot slot) {
-    auto const data = LdSubClsCnsData { cnsNameStr, slot };
+    auto const data = ClsCnsSlotData { cnsNameStr, slot };
     auto const cns = cond(
       env,
       [&] (Block* taken) {
@@ -165,7 +165,7 @@ void emitClsCns(IRGS& env, const StringData* cnsNameStr) {
         auto const len = gen(env, LdClsCnsVecLen, clsTmp);
         auto const cmp = gen(env, LteInt, len, cns(env, slot));
         gen(env, JmpNZero, exit, cmp);
-        auto const data = LdSubClsCnsData { cnsNameStr, slot };
+        auto const data = ClsCnsSlotData { cnsNameStr, slot };
         gen(env, CheckSubClsCns, data, exit, clsTmp);
         return loadSlot(slot);
       }

@@ -102,17 +102,17 @@ function idate(string $format, ?int $timestamp = null);
 <<__PHPStdLib>>
 function localtime(?int $timestamp = null, bool $is_associative = false);
 <<__PHPStdLib>>
-function microtime(bool $get_as_float = false);
+function microtime(bool $get_as_float = false)[controlled];
 <<__PHPStdLib>>
-function mktime(int $hour = PHP_INT_MAX, int $minute = PHP_INT_MAX, int $second = PHP_INT_MAX, int $month = PHP_INT_MAX, int $day = PHP_INT_MAX, int $year = PHP_INT_MAX);
+function mktime(int $hour = PHP_INT_MAX, int $minute = PHP_INT_MAX, int $second = PHP_INT_MAX, int $month = PHP_INT_MAX, int $day = PHP_INT_MAX, int $year = PHP_INT_MAX)[controlled];
 <<__PHPStdLib>>
-function strftime(string $format, ?int $timestamp = null);
+function strftime(string $format, ?int $timestamp = null)[controlled];
 <<__PHPStdLib>>
 function strptime(string $date, string $format);
 <<__PHPStdLib>>
-function strtotime(string $input, ?int $timestamp = null);
+function strtotime(string $input, ?int $timestamp = null)[controlled];
 <<__PHPStdLib>>
-function time(): int { }
+function time()[controlled]: int;
 <<__PHPStdLib>>
 function timezone_abbreviations_list();
 <<__PHPStdLib>>

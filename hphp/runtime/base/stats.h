@@ -59,7 +59,6 @@ namespace Stats {
   STAT(UnitMerge_mergeable_define) \
   STAT(UnitMerge_mergeable_persistent_define) \
   STAT(UnitMerge_mergeable_class) \
-  STAT(UnitMerge_mergeable_record) \
   STAT(UnitMerge_mergeable_typealias) \
   STAT(UnitMerge_redo_hoistable) \
   /* stub reuse stats */ \
@@ -119,4 +118,3 @@ extern void clear();
 void incStatGrouped(const StringData* cat, const StringData* name, int n = 1);
 
 } }
-

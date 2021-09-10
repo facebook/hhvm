@@ -21,6 +21,7 @@
   (modes exe byte_complete)
   (libraries
     default_injector_config
+    folly_stubs
     watchman_config
     watchman_lib))
 

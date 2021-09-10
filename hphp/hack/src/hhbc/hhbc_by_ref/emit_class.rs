@@ -131,15 +131,23 @@ fn from_extends<'arena>(
     alloc: &'arena bumpalo::Bump,
     is_enum: bool,
     is_enum_class: bool,
+    is_abstract: bool,
     extends: &[ast::Hint],
 ) -> Option<hhbc_id::class::ClassType<'arena>> {
     if is_enum {
         // Do not use special_names:: as there's a prefix \ which breaks HHVM
         if is_enum_class {
-            Some(hhbc_id::class::from_raw_string(
-                alloc,
-                "HH\\BuiltinEnumClass",
-            ))
+            if is_abstract {
+                Some(hhbc_id::class::from_raw_string(
+                    alloc,
+                    "HH\\BuiltinAbstractEnumClass",
+                ))
+            } else {
+                Some(hhbc_id::class::from_raw_string(
+                    alloc,
+                    "HH\\BuiltinEnumClass",
+                ))
+            }
         } else {
             Some(hhbc_id::class::from_raw_string(alloc, "HH\\BuiltinEnum"))
         }
@@ -690,6 +698,7 @@ pub fn emit_class<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
 
     let is_abstract = match ast_class.kind {
         ast::ClassishKind::Cclass(k) => k.is_abstract(),
+        ast::ClassishKind::CenumClass(k) => k.is_abstract(),
         _ => false,
     };
     let is_final = ast_class.final_ || is_trait;
@@ -708,6 +717,7 @@ pub fn emit_class<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             alloc,
             enum_type.is_some(),
             is_enum_class,
+            is_abstract,
             &ast_class.extends,
         )
     };

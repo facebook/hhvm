@@ -101,10 +101,11 @@ enum UnstableFeatures {
     ClassConstDefault,
     AbstractEnumClass,
     ContextAliasDeclarationShort,
+    MethodTraitDiamond,
 }
 impl UnstableFeatures {
     // Preview features are allowed to run in prod. This function decides
-    // whether the feature is considered Unstable or Previw.
+    // whether the feature is considered Unstable or Preview.
     fn get_feature_status(&self) -> FeatureStatus {
         use FeatureStatus::*;
         match self {
@@ -119,6 +120,7 @@ impl UnstableFeatures {
             UnstableFeatures::ClassConstDefault => Migration,
             UnstableFeatures::AbstractEnumClass => Unstable,
             UnstableFeatures::ContextAliasDeclarationShort => Preview,
+            UnstableFeatures::MethodTraitDiamond => Unstable,
         }
     }
 }
@@ -732,6 +734,10 @@ where
     // does the node contain the Static keyword in its modifiers
     fn has_modifier_static(node: S<'a, Token, Value>) -> bool {
         Self::has_modifier_helper(|x| x.is_static(), node)
+    }
+
+    fn has_modifier_readonly(node: S<'a, Token, Value>) -> bool {
+        Self::has_modifier_helper(|x| x.is_readonly(), node)
     }
 
     // does the node contain the Private keyword in its modifiers
@@ -1524,6 +1530,15 @@ where
         }
     }
 
+    fn methodish_readonly_check(&mut self, node: S<'a, Token, Value>) {
+        if Self::has_modifier_readonly(node) && Self::has_modifier_static(node) {
+            self.errors.push(Self::make_error_from_node(
+                node,
+                errors::readonly_static_method,
+            ))
+        }
+    }
+
     fn function_declaration_contains_attribute(
         &self,
         node: S<'a, Token, Value>,
@@ -1759,7 +1774,7 @@ where
                         modifier,
                     );
                 }
-
+                self.methodish_readonly_check(node);
                 self.methodish_memoize_lsb_on_non_static(node);
                 let async_annotation =
                     Self::extract_keyword(|x| x.is_async(), node).unwrap_or(node);
@@ -1821,6 +1836,15 @@ where
         Self::variadic_param(params).filter(|x| Self::is_parameter_with_callconv(x))
     }
 
+    fn variadic_param_with_readonly(params: S<'a, Token, Value>) -> Option<S<'a, Token, Value>> {
+        Self::variadic_param(params).filter(|x| match &x.children {
+            ParameterDeclaration(x) => x.readonly.is_readonly(),
+            // A VariadicParameter cannot parse readonly, only decorated ... expressions can
+            // so it would parse error anyways
+            _ => false,
+        })
+    }
+
     // If an inout parameter has a default, return the default
     fn param_with_callconv_has_default(node: S<'a, Token, Value>) -> Option<S<'a, Token, Value>> {
         match &node.children {
@@ -1848,6 +1872,9 @@ where
 
         self.produce_error_from_check(&Self::variadic_param_with_callconv, params, || {
             errors::error2073
+        });
+        self.produce_error_from_check(&Self::variadic_param_with_readonly, params, || {
+            errors::variadic_readonly_param
         });
     }
 
@@ -5460,13 +5487,16 @@ where
                 self.check_can_use_feature(node, &UnstableFeatures::EnumClassLabel)
             }
             OldAttributeSpecification(x) => {
-                let attributes_string = self.text(&x.attributes);
-                let has_via_label = attributes_string
-                    .split(',')
-                    .any(|attr| attr.trim() == sn::user_attributes::VIA_LABEL);
-                if has_via_label {
-                    self.check_can_use_feature(node, &UnstableFeatures::EnumClassLabel)
-                }
+                let attributes = self.text(&x.attributes).split(',');
+                attributes.for_each(|attr| match attr.trim() {
+                    sn::user_attributes::VIA_LABEL => {
+                        self.check_can_use_feature(node, &UnstableFeatures::EnumClassLabel)
+                    }
+                    sn::user_attributes::ENABLE_METHOD_TRAIT_DIAMOND => {
+                        self.check_can_use_feature(node, &UnstableFeatures::MethodTraitDiamond)
+                    }
+                    _ => {}
+                });
             }
             _ => {}
         }

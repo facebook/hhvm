@@ -664,9 +664,6 @@ fn print_class_special_attributes<W: Write>(
     if hhas_attribute::has_dynamically_constructible(user_attrs) {
         special_attributes.push("dyn_constructible");
     }
-    if c.is_closure() && !is_system_lib {
-        special_attributes.push("unique");
-    }
     if c.is_closure() {
         special_attributes.push("no_override");
     }
@@ -1165,6 +1162,9 @@ fn print_fcall_args<W: Write>(
     });
     if_then(fls.contains(F::ENFORCE_MUTABLE_RETURN), || {
         flags.push("EnforceMutableReturn")
+    });
+    if_then(fls.contains(F::ENFORCE_READONLY_THIS), || {
+        flags.push("EnforceReadonlyThis")
     });
     angle(w, |w| concat_str_by(w, " ", flags))?;
     w.write(" ")?;

@@ -242,6 +242,7 @@ static size_t global_size;
 static size_t heap_size;
 static size_t dep_table_pow;
 static size_t hash_table_pow;
+static size_t shm_use_sharded_hashtbl;
 
 /* Used for the dependency hashtable */
 static uint64_t dep_size;
@@ -1042,18 +1043,20 @@ CAMLprim value hh_shared_init(
   value num_workers_val
 ) {
   CAMLparam3(config_val, shm_dir_val, num_workers_val);
+  CAMLlocal1(connector);
   CAMLlocal5(
-    connector,
     config_global_size_val,
     config_heap_size_val,
     config_dep_table_pow_val,
-    config_hash_table_pow_val
+    config_hash_table_pow_val,
+    config_shm_use_sharded_hashtbl
   );
 
   config_global_size_val = Field(config_val, 0);
   config_heap_size_val = Field(config_val, 1);
   config_dep_table_pow_val = Field(config_val, 2);
   config_hash_table_pow_val = Field(config_val, 3);
+  config_shm_use_sharded_hashtbl = Field(config_val, 4);
 
   set_sizes(
     Long_val(config_global_size_val),
@@ -1062,6 +1065,7 @@ CAMLprim value hh_shared_init(
     Long_val(config_hash_table_pow_val),
     Long_val(num_workers_val)
   );
+  shm_use_sharded_hashtbl = Bool_val(config_shm_use_sharded_hashtbl);
 
   // None -> NULL
   // Some str -> String_val(str)
@@ -1073,7 +1077,7 @@ CAMLprim value hh_shared_init(
   memfd_init(
     shm_dir,
     shared_mem_size,
-    Long_val(Field(config_val, 5))
+    Long_val(Field(config_val, 6))
   );
   char *shared_mem_init = memfd_map(shared_mem_size);
   define_globals(shared_mem_init);
@@ -1088,9 +1092,9 @@ CAMLprim value hh_shared_init(
 #endif
 
   init_shared_globals(
-    Long_val(Field(config_val, 6)),
-    Double_val(Field(config_val, 7)),
-    Long_val(Field(config_val, 8))
+    Long_val(Field(config_val, 7)),
+    Double_val(Field(config_val, 8)),
+    Long_val(Field(config_val, 9))
   );
   // Checking that we did the maths correctly.
   assert(*heap + heap_size == shared_mem + shared_mem_size);
@@ -1107,13 +1111,14 @@ CAMLprim value hh_shared_init(
   sigaction(SIGSEGV, &sigact, NULL);
 #endif
 
-  connector = caml_alloc_tuple(6);
+  connector = caml_alloc_tuple(7);
   Store_field(connector, 0, Val_handle(memfd));
   Store_field(connector, 1, config_global_size_val);
   Store_field(connector, 2, config_heap_size_val);
   Store_field(connector, 3, config_dep_table_pow_val);
   Store_field(connector, 4, config_hash_table_pow_val);
   Store_field(connector, 5, num_workers_val);
+  Store_field(connector, 6, config_shm_use_sharded_hashtbl);
 
   CAMLreturn(connector);
 }
@@ -1129,6 +1134,7 @@ value hh_connect(value connector, value worker_id_val) {
     Long_val(Field(connector, 4)),
     Long_val(Field(connector, 5))
   );
+  shm_use_sharded_hashtbl = Bool_val(Field(connector, 6));
   worker_id = Long_val(worker_id_val);
 #ifdef _WIN32
   my_pid = 1; // Trick
@@ -1147,23 +1153,16 @@ value hh_get_handle(void) {
   CAMLlocal1(
       connector
   );
-  connector = caml_alloc_tuple(6);
+  connector = caml_alloc_tuple(7);
   Store_field(connector, 0, Val_handle(memfd));
   Store_field(connector, 1, Val_long(global_size));
   Store_field(connector, 2, Val_long(heap_size));
   Store_field(connector, 3, Val_long(dep_table_pow));
   Store_field(connector, 4, Val_long(hash_table_pow));
   Store_field(connector, 5, Val_long(num_workers));
+  Store_field(connector, 6, Val_bool(shm_use_sharded_hashtbl));
 
   CAMLreturn(connector);
-}
-
-/* Master is 0, workers start at 1 */
-value hh_get_worker_id() {
-  CAMLparam0();
-  CAMLlocal1(result);
-  result = Val_long(worker_id);
-  CAMLreturn(result);
 }
 
 /*****************************************************************************/
@@ -1246,13 +1245,13 @@ CAMLprim value hh_set_can_worker_stop(value val) {
   CAMLreturn(Val_unit);
 }
 
-CAMLprim value hh_allow_removes(value val) {
+CAMLprim value hh_set_allow_removes(value val) {
   CAMLparam1(val);
   *allow_removes = Bool_val(val);
   CAMLreturn(Val_unit);
 }
 
-CAMLprim value hh_allow_hashtable_writes_by_current_process(value val) {
+CAMLprim value hh_set_allow_hashtable_writes_by_current_process(value val) {
   CAMLparam1(val);
   allow_hashtable_writes_by_current_process = Bool_val(val);
   CAMLreturn(Val_unit);
@@ -1629,6 +1628,10 @@ value hh_check_heap_overflow(void) {
 /*****************************************************************************/
 
 CAMLprim value hh_collect(void) {
+  if (shm_use_sharded_hashtbl != 0) {
+    raise_assertion_failure(LOCATION": shm_use_sharded_hashtbl not implemented");
+  }
+
   // NOTE: explicitly do NOT call CAMLparam or any of the other functions/macros
   // defined in caml/memory.h .
   // This function takes a boolean and returns unit.
@@ -1764,6 +1767,9 @@ value hh_serialize_raw(value data) {
   size_t size = 0;
   size_t uncompressed_size = 0;
   storage_kind kind = 0;
+  if (shm_use_sharded_hashtbl != 0) {
+    raise_assertion_failure(LOCATION": shm_use_sharded_hashtbl not implemented");
+  }
 
   // If the data is an Ocaml string it is more efficient to copy its contents
   // directly instead of serializing it.
@@ -1997,6 +2003,9 @@ static void raise_hash_table_full(void) {
 /*****************************************************************************/
 value hh_add(value key, value data) {
   CAMLparam2(key, data);
+  if (shm_use_sharded_hashtbl != 0) {
+    raise_assertion_failure(LOCATION": shm_use_sharded_hashtbl not implemented");
+  }
   check_should_exit();
   uint64_t hash = get_hash(key);
   unsigned int slot = hash & (hashtbl_size - 1);
@@ -2101,6 +2110,9 @@ static value write_raw_at(unsigned int slot, value data) {
 /*****************************************************************************/
 CAMLprim value hh_add_raw(value key, value data) {
   CAMLparam2(key, data);
+  if (shm_use_sharded_hashtbl != 0) {
+    raise_assertion_failure(LOCATION": shm_use_sharded_hashtbl not implemented");
+  }
   check_should_exit();
   uint64_t hash = get_hash(key);
   unsigned int slot = hash & (hashtbl_size - 1);
@@ -2232,11 +2244,17 @@ int hh_mem_inner(value key) {
 /*****************************************************************************/
 value hh_mem(value key) {
   CAMLparam1(key);
+  if (shm_use_sharded_hashtbl != 0) {
+    raise_assertion_failure(LOCATION": shm_use_sharded_hashtbl not implemented");
+  }
   CAMLreturn(Val_bool(hh_mem_inner(key) == 1));
 }
 
 CAMLprim value hh_mem_status(value key) {
   CAMLparam1(key);
+  if (shm_use_sharded_hashtbl != 0) {
+    raise_assertion_failure(LOCATION": shm_use_sharded_hashtbl not implemented");
+  }
   int res = hh_mem_inner(key);
   switch (res) {
     case 1:
@@ -2295,6 +2313,9 @@ CAMLprim value hh_get_and_deserialize(value key) {
   CAMLparam1(key);
   check_should_exit();
   CAMLlocal1(result);
+  if (shm_use_sharded_hashtbl != 0) {
+    raise_assertion_failure(LOCATION": shm_use_sharded_hashtbl not implemented");
+  }
 
   unsigned int slot = find_slot(key);
   assert(hashtbl[slot].hash == get_hash(key));
@@ -2308,6 +2329,9 @@ CAMLprim value hh_get_and_deserialize(value key) {
 /*****************************************************************************/
 CAMLprim value hh_get_raw(value key) {
   CAMLparam1(key);
+  if (shm_use_sharded_hashtbl != 0) {
+    raise_assertion_failure(LOCATION": shm_use_sharded_hashtbl not implemented");
+  }
   check_should_exit();
   CAMLlocal1(result);
 
@@ -2329,6 +2353,9 @@ CAMLprim value hh_get_raw(value key) {
 CAMLprim value hh_deserialize_raw(value heap_entry) {
   CAMLparam1(heap_entry);
   CAMLlocal1(result);
+  if (shm_use_sharded_hashtbl != 0) {
+    raise_assertion_failure(LOCATION": shm_use_sharded_hashtbl not implemented");
+  }
 
   heap_entry_t* entry = (heap_entry_t*)Bytes_val(heap_entry);
   result = hh_deserialize(entry);
@@ -2341,6 +2368,9 @@ CAMLprim value hh_deserialize_raw(value heap_entry) {
 /*****************************************************************************/
 CAMLprim value hh_get_size(value key) {
   CAMLparam1(key);
+  if (shm_use_sharded_hashtbl != 0) {
+    raise_assertion_failure(LOCATION": shm_use_sharded_hashtbl not implemented");
+  }
 
   unsigned int slot = find_slot(key);
   assert(hashtbl[slot].hash == get_hash(key));
@@ -2355,6 +2385,10 @@ CAMLprim value hh_get_size(value key) {
  */
 /*****************************************************************************/
 void hh_move(value key1, value key2) {
+  if (shm_use_sharded_hashtbl != 0) {
+    raise_assertion_failure(LOCATION": shm_use_sharded_hashtbl not implemented");
+  }
+
   unsigned int slot1 = find_slot(key1);
   unsigned int slot2 = find_slot(key2);
 
@@ -2380,6 +2414,10 @@ void hh_move(value key1, value key2) {
 /*****************************************************************************/
 CAMLprim value hh_remove(value key) {
   CAMLparam1(key);
+  if (shm_use_sharded_hashtbl != 0) {
+    raise_assertion_failure(LOCATION": shm_use_sharded_hashtbl not implemented");
+  }
+
   unsigned int slot = find_slot(key);
 
   assert_master();

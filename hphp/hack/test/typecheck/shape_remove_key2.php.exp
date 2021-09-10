@@ -1,4 +1,4 @@
-File "shape_remove_key2.php", line 24, characters 3-23:
+File "shape_remove_key2.php", line 24, characters 20-22:
 You are calling `Shapes::idx()` on a field known to not exist (Typing[4251])
-File "shape_remove_key2.php", line 22, characters 3-35:
-The field `x` is not defined in this shape
+  File "shape_remove_key2.php", line 22, characters 3-35:
+  The field `x` is not defined in this shape

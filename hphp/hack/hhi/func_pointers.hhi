@@ -192,6 +192,6 @@ function invariant(
  */
 function invariant_callback_register(
   (function(string, mixed ...): void) $callback
-): void {}
+)[globals]: void {}
 
 } // namespace HH

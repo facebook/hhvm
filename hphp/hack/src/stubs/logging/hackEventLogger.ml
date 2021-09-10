@@ -19,7 +19,7 @@ type rollout_flags = {
   symbolindex_search_provider: string;
   require_saved_state: bool;
   stream_errors: bool;
-  monitor_kill_again_fix: bool;
+  use_direct_decl_in_tc_loop: bool;
 }
 
 let flush () = ()
@@ -306,7 +306,14 @@ let invariant_violation_bug
   ()
 
 let type_check_end
-    _ ~heap_size:_ ~started_count:_ ~count:_ ~desc:_ ~experiments:_ ~start_t:_ =
+    _
+    ~heap_size:_
+    ~started_count:_
+    ~count:_
+    ~adhoc_profiling:_
+    ~desc:_
+    ~experiments:_
+    ~start_t:_ =
   ()
 
 let notifier_returned _ _ = ()
@@ -425,10 +432,6 @@ let watchman_uncaught_exception _ = ()
 let monitor_giving_up_exception _ = ()
 
 let processed_clients _ = ()
-
-let monitor_wait_for_server_exit_bug ~pid:_ ~waited_for:_ = ()
-
-let monitor_wait_for_server_exit_recovery ~pid:_ ~waited_for:_ = ()
 
 let search_symbol_index
     ~query_text:_

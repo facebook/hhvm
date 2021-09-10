@@ -41,7 +41,6 @@ struct GuardConstraint {
    */
   /* implicit */ GuardConstraint(DataTypeCategory cat = DataTypeGeneric);
   explicit GuardConstraint(const Class* cls);
-  explicit GuardConstraint(const RecordDesc* cls);
 
   /*
    * Stringify the GuardConstraint.
@@ -73,8 +72,7 @@ struct GuardConstraint {
   // Specialization.
 
   static constexpr uint8_t kWantArrayLayout = 0x1;
-  static constexpr uint8_t kWantRecord = 0x2;
-  static_assert(alignof(Class*) > kWantRecord,
+  static_assert(alignof(Class*) > kWantArrayLayout,
                 "Spec bits must fit in lower bits of pointers");
 
   /*
@@ -103,20 +101,6 @@ struct GuardConstraint {
   bool wantClass() const;
   const Class* desiredClass() const;
 
-  /*
-   * Set, check, or return the specialized Record.
-   *
-   * @requires:
-   *    setDesiredRecord: isSpecialized()
-   *                      desiredRecord() is either nullptr, a parent of `rec',
-   *                      or a child of `rec'
-   *    desiredRecord:    wantRecord()
-   */
-  GuardConstraint& setDesiredRecord(const RecordDesc* rec);
-  bool wantRecord() const;
-  const RecordDesc* desiredRecord() const;
-
-
   /////////////////////////////////////////////////////////////////////////////
   // Data members.
 
@@ -137,10 +121,9 @@ struct GuardConstraint {
 
 private:
   /*
-   * `m_specialized' holds a Class*, or a RecordDesc* with a 1 in its
-   * second lowest bit, or a 1 in its low bit, indicating
+   * `m_specialized' holds a Class*, or a 1 in its low bit, indicating
    * that for a DataTypeSpecialized constraint, we require the specified class
-   * or the specified record or an array kind, respectively.
+   * or an array kind, respectively.
    */
   uintptr_t m_specialized;
 };
@@ -183,4 +166,3 @@ GuardConstraint applyConstraint(GuardConstraint origGc, GuardConstraint newGc);
 }}
 
 #include "hphp/runtime/vm/jit/guard-constraint-inl.h"
-

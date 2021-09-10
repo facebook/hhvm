@@ -52,6 +52,7 @@
 #include "hphp/runtime/ext/facts/ext_facts.h"
 #include "hphp/runtime/ext/facts/fact-extractor.h"
 #include "hphp/runtime/ext/facts/facts-store.h"
+#include "hphp/runtime/ext/facts/logging.h"
 #include "hphp/runtime/ext/facts/string-ptr.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/system/systemlib.h"
@@ -481,6 +482,20 @@ struct Facts final : Extension {
   }
 
   void moduleInit() override {
+    // This, unfortunately, cannot be done in moduleLoad() due to the fact
+    // that certain async loggers may create a new thread.  HHVM will throw
+    // if any threads have been created during the moduleLoad() step.
+    if (!RuntimeOption::AutoloadLogging.empty() &&
+        RuntimeOption::AutoloadEnabled) {
+      try {
+        enableFactsLogging(
+            RuntimeOption::ServerUser, RuntimeOption::AutoloadLogging);
+      } catch (std::exception& e) {
+        Logger::FError(
+            "Caught exception while setting up logging: {}", e.what());
+      }
+    }
+
     HHVM_NAMED_FE(HH\\Facts\\enabled, HHVM_FN(facts_enabled));
     HHVM_NAMED_FE(HH\\Facts\\db_path, HHVM_FN(facts_db_path));
     HHVM_NAMED_FE(HH\\Facts\\type_to_path, HHVM_FN(facts_type_to_path));
@@ -858,7 +873,7 @@ Array HHVM_FUNCTION(
     facts_type_alias_attribute_parameters,
     const String& type,
     const String& attr) {
-  return Facts::getFactsOrThrow().getTypeAttrArgs(type, attr);
+  return Facts::getFactsOrThrow().getTypeAliasAttrArgs(type, attr);
 }
 
 Array HHVM_FUNCTION(

@@ -246,10 +246,12 @@ let dump_errors_json (output_filename : string) (errors : Errors.t) : unit =
 
 let dump_dep_graph_32bit ~db_name =
   let t = Unix.gettimeofday () in
-  match SharedMem.loaded_dep_table_filename () with
+  match SharedMem.DepTable.loaded_dep_table_filename () with
   | None ->
     let dep_table_edges_added =
-      SharedMem.save_dep_table_sqlite db_name Build_id.build_revision
+      SharedMem.DepTable.save_dep_table_sqlite
+        ~fn:db_name
+        ~build_revision:Build_id.build_revision
     in
     let (_ : float) = Hh_logger.log_duration "Saving saved state took" t in
     { dep_table_edges_added }
@@ -267,7 +269,9 @@ let dump_dep_graph_32bit ~db_name =
       failwith
         "Existing save state SQL file missing; disk copy must have failed";
     let dep_table_edges_added =
-      SharedMem.update_dep_table_sqlite db_name Build_id.build_revision
+      SharedMem.DepTable.update_dep_table_sqlite
+        ~fn:db_name
+        ~build_revision:Build_id.build_revision
     in
     let (_ : float) = Hh_logger.log_duration "Updating saved state took" t in
     { dep_table_edges_added }
@@ -378,7 +382,7 @@ let save_state
 
 let get_in_memory_dep_table_entry_count () : (int, string) result =
   Utils.try_with_stack (fun () ->
-      SharedMem.get_in_memory_dep_table_entry_count ())
+      SharedMem.DepTable.get_in_memory_dep_table_entry_count ())
   |> Result.map_error ~f:(fun (exn, _stack) -> Exn.to_string exn)
 
 let go_naming (naming_table : Naming_table.t) (output_filename : string) :

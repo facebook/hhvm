@@ -43,11 +43,6 @@ namespace HPHP { namespace jit { namespace irlower {
 TRACE_SET_MOD(irlower);
 
 ///////////////////////////////////////////////////////////////////////////////
-void cgLdRecDesc(IRLS& env, const IRInstruction* inst) {
-  auto dst = dstLoc(env, inst, 0).reg();
-  auto val = srcLoc(env, inst, 0).reg();
-  emitLdRecDesc(vmain(env), val, dst);
-}
 
 void cgLdObjClass(IRLS& env, const IRInstruction* inst) {
   auto dst = dstLoc(env, inst, 0).reg();

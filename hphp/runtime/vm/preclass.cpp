@@ -156,6 +156,10 @@ void PreClass::enforceInMaybeSealedParentWhitelist(
   }
 }
 
+const StaticString s___EnableMethodTraitDiamond("__EnableMethodTraitDiamond");
+bool PreClass::enableMethodTraitDiamond() {
+  return m_userAttributes.find(s___EnableMethodTraitDiamond.get()) != m_userAttributes.end();
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // PreClass::Prop.
@@ -232,12 +236,16 @@ void PreClass::Prop::prettyPrint(std::ostream& out,
 // PreClass::Const.
 
 PreClass::Const::Const(const StringData* name,
+                       const StringData* cls,
                        const TypedValueAux& val,
-                       const StringData* phpCode,
-                       const bool fromTrait)
+                       Array resolvedTypeStructure,
+                       Invariance invariance,
+                       bool fromTrait)
   : m_name(name)
+  , m_cls(cls)
   , m_val(val)
-  , m_phpCode(phpCode)
+  , m_resolvedTypeStructure(std::move(resolvedTypeStructure))
+  , m_invariance(invariance)
   , m_fromTrait(fromTrait)
 {}
 
@@ -253,26 +261,51 @@ void PreClass::Const::prettyPrint(std::ostream& out,
       out << "Context ";
       break;
   }
+  auto const name = [&] {
+    out << preClass->name()->data() << "::" << m_name->data();
+    if (cls()) out << " (" << cls()->data() << ")";
+  };
   if (isAbstractAndUninit()) {
-    out << "Constant (abstract) "
-        << preClass->name()->data() << "::" << m_name->data()
-        << std::endl;
+    out << "Constant (abstract) ";
+    name();
+    out << std::endl;
     return;
   }
   if (kind() == ConstModifiers::Kind::Context) {
-    out << "Constant "
-        << preClass->name()->data() << "::" << m_name->data()
-        << " " << coeffects().toString()
+    out << "Constant ";
+    name();
+    out << " " << coeffects().toString()
         << std::endl;
     return;
   }
-  out << "Constant " << preClass->name()->data() << "::" << m_name->data();
+  out << "Constant ";
+  name();
   if (m_val.m_type == KindOfUninit) {
-    out << " = " << "<non-scalar>";
+    out << " = <non-scalar>";
   } else {
     std::string ss;
     staticStreamer(&m_val, ss);
     out << " = " << ss;
+  }
+  if (!m_resolvedTypeStructure.isNull()) {
+    std::string ss;
+    auto const tv =
+      make_array_like_tv(m_resolvedTypeStructure.get());
+    staticStreamer(&tv, ss);
+    out << " (resolved = " << ss << ")";
+    switch (invariance()) {
+      case Invariance::None:
+        break;
+      case Invariance::Present:
+        out << " <present>";
+        break;
+      case Invariance::ClassnamePresent:
+        out << " <classname>";
+        break;
+      case Invariance::Same:
+        out << " <same>";
+        break;
+    }
   }
   out << std::endl;
 }

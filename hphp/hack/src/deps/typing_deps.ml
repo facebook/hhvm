@@ -663,24 +663,28 @@ module SaveHumanReadableDepMap = struct
 end
 
 module SaveCustomGraph = struct
+  external hh_save_custom_dep_graph_save_delta : string -> string -> int
+    = "hh_save_custom_dep_graph_save_delta"
+
   let discovered_deps_batch : (CustomGraph.dep_edge, unit) Hashtbl.t =
     Hashtbl.create 1000
 
   let destination_file_handle_ref : Out_channel.t option ref = ref None
 
+  let destination_filepath mode =
+    match mode with
+    | SaveCustomMode { new_edges_dir; _ } ->
+      let worker_id = Base.Option.value_exn !worker_id in
+      Filename.concat
+        new_edges_dir
+        (Printf.sprintf "new-edges-worker-%d.bin" worker_id)
+    | _ -> failwith "programming error: wrong mode"
+
   let destination_file_handle mode =
     match !destination_file_handle_ref with
     | Some handle -> handle
     | None ->
-      let filepath =
-        match mode with
-        | SaveCustomMode { new_edges_dir; _ } ->
-          let worker_id = Base.Option.value_exn !worker_id in
-          Filename.concat
-            new_edges_dir
-            (Printf.sprintf "new-edges-worker-%d.bin" worker_id)
-        | _ -> failwith "programming error: wrong mode"
-      in
+      let filepath = destination_filepath mode in
       let handle =
         Out_channel.create ~binary:true ~append:true ~perm:0o600 filepath
       in
@@ -699,6 +703,7 @@ module SaveCustomGraph = struct
                idependent
                idependency)
         then begin
+          (* To be kept in sync with typing_deps.rs::hh_custom_dep_graph_save_delta! *)
           (* output_binary_int outputs the lower 4-bytes only, regardless
            * of architecture. It outputs in big-endian format.*)
           Out_channel.output_binary_int handle (idependent lsr 32);
@@ -729,6 +734,10 @@ module SaveCustomGraph = struct
       let () = SaveHumanReadableDepMap.add mode (dependent, idependent) in
       SaveHumanReadableDepMap.add mode (dependency, idependency)
     )
+
+  let save_delta mode ~source =
+    let dest = destination_filepath mode in
+    hh_save_custom_dep_graph_save_delta source dest
 end
 
 (** Registeres Rust custom types with the OCaml runtime, supporting deserialization *)
@@ -775,7 +784,7 @@ module Files = struct
         consts
         ~f:
           begin
-            fun acc (_, const_id) ->
+            fun acc (_, const_id, _) ->
             Dep.make hash_mode (Dep.GConst const_id) :: acc
           end
         ~init:[]
@@ -785,7 +794,7 @@ module Files = struct
         funs
         ~f:
           begin
-            fun acc (_, fun_id) ->
+            fun acc (_, fun_id, _) ->
             Dep.make hash_mode (Dep.Fun fun_id) :: acc
           end
         ~init:defs
@@ -795,7 +804,7 @@ module Files = struct
         classes
         ~f:
           begin
-            fun acc (_, class_id) ->
+            fun acc (_, class_id, _) ->
             Dep.make hash_mode (Dep.Type class_id) :: acc
           end
         ~init:defs
@@ -805,7 +814,7 @@ module Files = struct
         record_defs
         ~f:
           begin
-            fun acc (_, type_id) ->
+            fun acc (_, type_id, _) ->
             Dep.make hash_mode (Dep.Type type_id) :: acc
           end
         ~init:defs
@@ -815,7 +824,7 @@ module Files = struct
         typedefs
         ~f:
           begin
-            fun acc (_, type_id) ->
+            fun acc (_, type_id, _) ->
             Dep.make hash_mode (Dep.Type type_id) :: acc
           end
         ~init:defs
@@ -913,17 +922,20 @@ let register_discovered_dep_edges : dep_edges -> unit = function
 let save_discovered_edges mode ~dest ~build_revision ~reset_state_after_saving =
   match mode with
   | SQLiteMode ->
-    SharedMem.save_dep_table_blob dest build_revision ~reset_state_after_saving
+    SharedMem.DepTable.save_dep_table_blob
+      ~fn:dest
+      ~build_revision
+      ~reset_state_after_saving
   | CustomMode _ -> CustomGraph.save_delta dest reset_state_after_saving
   | SaveCustomMode _ ->
     failwith "save_discovered_edges not supported for SaveCustomMode"
 
 let load_discovered_edges mode source ~ignore_hh_version =
   match mode with
-  | SQLiteMode -> SharedMem.load_dep_table_blob source ignore_hh_version
+  | SQLiteMode ->
+    SharedMem.DepTable.load_dep_table_blob ~fn:source ~ignore_hh_version
   | CustomMode _ -> CustomGraph.load_delta mode source
-  | SaveCustomMode _ ->
-    failwith "load_discovered_edges not supported for SaveCustomMode"
+  | SaveCustomMode _ -> SaveCustomGraph.save_delta mode ~source
 
 let get_ideps_from_hash mode hash =
   let open DepSet in

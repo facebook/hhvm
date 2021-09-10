@@ -199,11 +199,40 @@ TraitMethodImportData<TraitMethod, Ops>
   }
 }
 
+/*
+ * If a method has been imported multiple times via multiple use chains, remove
+ * the duplicates.  Duplicates are detected comparing (name, originalClass)
+ * information, which uniquely identifies a method.
+ */
+template <class TraitMethod, class Ops>
+inline void
+TraitMethodImportData<TraitMethod, Ops>
+::removeDiamondDuplicates(const bool enableMethodTraitDiamond) {
+  for (auto& nameData : m_dataForName) {
+    auto& methods = nameData.second.methods;
+
+    for (auto& method : methods) {
+      nameData.second.methodOriginsWithDuplicates.push_back(Ops::clsName(method.trait));
+    }
+
+    if (RO::EvalDiamondTraitMethods && enableMethodTraitDiamond) {
+      std::set<typename TraitMethod::origin_type> origins;
+      methods.erase(
+        std::remove_if(methods.begin(), methods.end(),
+                      [&](const auto &m) {
+                        return !origins.insert(Ops::originalClass(m.method)).second;
+                      }),
+        methods.end());
+    }
+  }
+}
+
 template <class TraitMethod, class Ops>
 inline auto
 TraitMethodImportData<TraitMethod, Ops>
-::finish(typename TraitMethod::class_type ctx) {
+::finish(typename TraitMethod::class_type ctx, const bool enableMethodTraitDiamond) {
   removeSpareTraitAbstractMethods();
+  removeDiamondDuplicates(enableMethodTraitDiamond);
 
   std::unordered_set<String> seenNames;
   std::vector<MethodData> output;
@@ -221,7 +250,9 @@ TraitMethodImportData<TraitMethod, Ops>
     if (methods.size() > 1) {
       // This may or may not actually throw; if it doesn't, the client is okay
       // with the duplication.
-      Ops::errorDuplicateMethod(ctx, name, methods);
+      // For error reporting, we keep the
+      auto const& methodOriginsWithDuplicates = m_dataForName[name].methodOriginsWithDuplicates;
+      Ops::errorDuplicateMethod(ctx, name, methodOriginsWithDuplicates);
     }
 
     seenNames.insert(name);

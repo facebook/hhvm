@@ -160,9 +160,6 @@ APCHandle::Pair APCHandle::Create(const_variant_ref source,
 
     case KindOfRClsMeth:
       return APCRClsMeth::Construct(val(cell).prclsmeth);
-
-    case KindOfRecord: // TODO (T41019518)
-      raise_error(Strings::RECORD_NOT_SUPPORTED);
   }
   not_reached();
 }

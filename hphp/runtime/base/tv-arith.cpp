@@ -342,7 +342,6 @@ void tvIncDecOp(Op op, tv_lval cell) {
     case KindOfClsMeth:
     case KindOfRClsMeth:
     case KindOfRFunc:
-    case KindOfRecord:
       raiseIncDecInvalidType(cell);
       return;
   }
@@ -635,7 +634,6 @@ void tvBitNot(TypedValue& cell) {
     case KindOfClsMeth:
     case KindOfRClsMeth:
     case KindOfRFunc:
-    case KindOfRecord:
       raise_error("Unsupported operand type for ~");
   }
 }

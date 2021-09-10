@@ -115,26 +115,28 @@ struct FCallArgsBase {
     // Indicates that the caller requires the return value to be mutable
     // (not readonly)
     EnforceMutableReturn         = (1 << 4),
+    // Indicates that the callee should not modify its instance
+    EnforceReadonlyThis          = (1 << 5),
     // HHBC-only: Op should be resolved using an explicit context class
-    ExplicitContext              = (1 << 5),
+    ExplicitContext              = (1 << 6),
     // HHBC-only: is the number of returns provided? false => 1
-    HasInOut                     = (1 << 6),
+    HasInOut                     = (1 << 7),
     // HHBC-only: should this FCall enforce argument inout-ness?
-    EnforceInOut                 = (1 << 7),
+    EnforceInOut                 = (1 << 8),
     // HHBC-only: should this FCall enforce argument readonly-ness?
-    EnforceReadonly              = (1 << 8),
+    EnforceReadonly              = (1 << 9),
     // HHBC-only: is the async eager offset provided? false => kInvalidOffset
-    HasAsyncEagerOffset          = (1 << 9),
+    HasAsyncEagerOffset          = (1 << 10),
     // HHBC-only: the remaining space is used for number of arguments
-    NumArgsStart                 = (1 << 10),
+    NumArgsStart                 = (1 << 11),
   };
 
   // Flags that are valid on FCallArgsBase::flags struct (i.e. non-HHBC-only).
   static constexpr uint8_t kInternalFlags =
     HasUnpack | HasGenerics | LockWhileUnwinding | SkipRepack |
-    EnforceMutableReturn;
+    EnforceMutableReturn | EnforceReadonlyThis;
   // The first (lowest) bit of numArgs.
-  static constexpr uint8_t kFirstNumArgsBit = 10;
+  static constexpr uint8_t kFirstNumArgsBit = 11;
 
   explicit FCallArgsBase(Flags flags, uint32_t numArgs, uint32_t numRets)
     : numArgs(numArgs)
@@ -149,6 +151,9 @@ struct FCallArgsBase {
   bool skipRepack() const { return flags & Flags::SkipRepack; }
   bool enforceMutableReturn() const {
     return flags & Flags::EnforceMutableReturn;
+  }
+  bool enforceReadonlyThis() const {
+    return flags & Flags::EnforceReadonlyThis;
   }
   uint32_t numInputs() const {
     return numArgs + (hasUnpack() ? 1 : 0) + (hasGenerics() ? 1 : 0);
@@ -327,6 +332,19 @@ enum class IncDecOp : uint8_t {
   INCDEC_OPS
 #undef INCDEC_OP
 };
+
+
+#define READONLY_VIOLATION_OPS   \
+  OP(Readonly)                   \
+  OP(Mutable)                    \
+  OP(EnclosedInRO)
+
+enum class ReadonlyViolation : uint8_t {
+#define OP(op) op,
+  READONLY_VIOLATION_OPS
+#undef OP
+};
+
 
 inline bool isPre(IncDecOp op) {
   return
@@ -586,7 +604,6 @@ constexpr uint32_t kMaxConcatN = 4;
   O(NewStructDict,   ONE(VSA),         SMANY,           ONE(CV),    NF) \
   O(NewVec,          ONE(IVA),         CMANY,           ONE(CV),    NF) \
   O(NewKeysetArray,  ONE(IVA),         CMANY,           ONE(CV),    NF) \
-  O(NewRecord,       TWO(SA,VSA),      SMANY,           ONE(CV),    NF) \
   O(AddElemC,        NA,               THREE(CV,CV,CV), ONE(CV),    NF) \
   O(AddNewElemC,     NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(NewCol,          ONE(OA(CollectionType)),                           \
@@ -979,6 +996,7 @@ const char* subopToName(CudOp);
 const char* subopToName(SpecialClsRef);
 const char* subopToName(IsLogAsDynamicCallOp);
 const char* subopToName(ReadonlyOp);
+const char* subopToName(ReadonlyViolation);
 
 /*
  * Returns true iff the given SubOp is in the valid range for its type.

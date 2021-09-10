@@ -177,6 +177,7 @@ void PrologueTranslator::publishMetaImpl() {
   if (RuntimeOption::EvalJitUseVtuneAPI) {
     reportTraceletToVtune(func->unit(), func, tr);
   }
+  recordTranslationSizes(tr);
   recordGdbTranslation(sk, transMeta->view.main(), loc.mainStart(),
                        loc.mainEnd());
   recordGdbTranslation(sk, transMeta->view.cold(), loc.coldStart(),

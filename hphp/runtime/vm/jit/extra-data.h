@@ -431,18 +431,6 @@ struct FuncArgTypeData : IRExtraData {
   const StringData* type;
 };
 
-struct LdClsTypeCnsData : IRExtraData {
-  explicit LdClsTypeCnsData(bool no_throw) : noThrow(no_throw) {}
-
-  std::string show() const { return folly::to<std::string>(noThrow); }
-
-  bool equals(LdClsTypeCnsData o) const { return noThrow == o.noThrow; }
-  size_t hash() const { return noThrow ? 1 : 0; }
-  size_t stableHash() const { return noThrow ? 1 : 0; }
-
-  bool noThrow;
-};
-
 /*
  * Local variable ID.
  */
@@ -1220,28 +1208,6 @@ struct RetCtrlData : IRExtraData {
 };
 
 /*
- * Name of a record
- */
-struct RecNameData : IRExtraData {
-  explicit RecNameData(const StringData* name)
-    : recName(name)
-  {}
-
-  std::string show() const {
-    return folly::to<std::string>(recName->data());
-  }
-
-  size_t hash() const { return recName->hash(); }
-
-  size_t stableHash() const { return recName->hash(); }
-  bool equals(const RecNameData& o) const {
-    return recName == o.recName;
-  }
-
-  const StringData* recName;
-};
-
-/*
  * Name of a class constant in a known class
  */
 struct ClsCnsName : IRExtraData {
@@ -1270,16 +1236,16 @@ struct ClsCnsName : IRExtraData {
 };
 
 /*
- * Name of a class constant in an unknown class.
+ * Name and slot of a class constant.
  */
-struct LdSubClsCnsData : IRExtraData {
-  explicit LdSubClsCnsData(const StringData* cns, Slot s)
+struct ClsCnsSlotData : IRExtraData {
+  explicit ClsCnsSlotData(const StringData* cns, Slot s)
     : cnsName(cns)
     , slot(s)
   {}
 
   std::string show() const {
-    return folly::sformat("<cls>::{}({})", cnsName, slot);
+    return folly::sformat("{},{}", cnsName, slot);
   }
   size_t stableHash() const {
     return folly::hash::hash_combine(
@@ -1287,7 +1253,7 @@ struct LdSubClsCnsData : IRExtraData {
       std::hash<Slot>()(slot)
     );
   }
-  bool equals(const LdSubClsCnsData& o) const {
+  bool equals(const ClsCnsSlotData& o) const {
     return cnsName == o.cnsName && slot == o.slot;
   }
 
@@ -2044,6 +2010,31 @@ struct ReadonlyData : IRExtraData {
   ReadonlyOp op;
 };
 
+struct ReadonlyPropData : IRExtraData {
+  explicit ReadonlyPropData(ReadonlyViolation rv, const Class* cls)
+    : rv(rv), cls(cls) {
+}
+  std::string show() const {
+    return folly::sformat("{},{}",
+      subopToName(rv),
+      cls ? cls->name()->data() : "nullptr"
+    );
+  }
+
+  size_t stableHash() const {
+    return folly::hash::hash_combine(
+      std::hash<ReadonlyViolation>()(rv), cls ? cls->stableHash() : 0
+    );
+  }
+
+  bool equals(const ReadonlyPropData& o) const {
+    return cls == o.cls && rv == o.rv ;
+  }
+
+  ReadonlyViolation rv;
+  const Class* cls;
+};
+
 struct SetOpData : IRExtraData {
   explicit SetOpData(SetOpOp op) : op(op) {}
   std::string show() const { return subopToName(op); }
@@ -2727,10 +2718,12 @@ X(LookupClsMethodFCache,        ClsMethodData);
 X(LdIfaceMethod,                IfaceMethodData);
 X(LdClsCns,                     ClsCnsName);
 X(InitClsCns,                   ClsCnsName);
-X(InitSubClsCns,                LdSubClsCnsData);
-X(LdSubClsCns,                  LdSubClsCnsData);
-X(LdSubClsCnsClsName,           LdSubClsCnsData);
-X(CheckSubClsCns,               LdSubClsCnsData);
+X(InitSubClsCns,                ClsCnsSlotData);
+X(LdSubClsCns,                  ClsCnsSlotData);
+X(CheckSubClsCns,               ClsCnsSlotData);
+X(LdResolvedTypeCns,            ClsCnsSlotData);
+X(LdResolvedTypeCnsClsName,     ClsCnsSlotData);
+X(LdResolvedTypeCnsNoCheck,     ClsCnsSlotData);
 X(ProfileSubClsCns,             ProfileSubClsCnsData);
 X(LdFuncCached,                 FuncNameData);
 X(LookupFuncCached,             FuncNameData);
@@ -2756,7 +2749,6 @@ X(RBTraceEntry,                 RBEntryData);
 X(RBTraceMsg,                   RBMsgData);
 X(OODeclExists,                 ClassKindData);
 X(NewStructDict,                NewStructData);
-X(NewRecord,                    NewStructData);
 X(AllocStructDict,              NewStructData);
 X(AllocBespokeStructDict,       ArrayLayoutData);
 X(InitStructPositions,          InitStructPositionsData);
@@ -2840,14 +2832,12 @@ X(Unreachable,                  AssertReason);
 X(EndBlock,                     AssertReason);
 X(VerifyRetCallable,            ParamData);
 X(VerifyRetCls,                 ParamData);
-X(VerifyRetRecDesc,             ParamData);
 X(VerifyParamFail,              ParamWithTCData);
 X(VerifyParamFailHard,          ParamWithTCData);
 X(VerifyRetFail,                ParamWithTCData);
 X(VerifyRetFailHard,            ParamWithTCData);
 X(VerifyReifiedLocalType,       ParamData);
 X(VerifyPropCls,                TypeConstraintData);
-X(VerifyPropRecDesc,            TypeConstraintData);
 X(VerifyPropFail,               TypeConstraintData);
 X(VerifyPropFailHard,           TypeConstraintData);
 X(VerifyProp,                   TypeConstraintData);
@@ -2857,10 +2847,7 @@ X(EnterTCUnwind,                EnterTCUnwindData);
 X(FuncHasAttr,                  AttrData);
 X(ClassHasAttr,                 AttrData);
 X(LdMethCallerName,             MethCallerData);
-X(LdRecDescCached,              RecNameData);
-X(LdRecDescCachedSafe,          RecNameData);
 X(LdUnitPerRequestFilepath,     RDSHandleData);
-X(LdClsTypeCns,                 LdClsTypeCnsData);
 X(ConvTVToStr,                  ConvNoticeData);
 X(CheckFuncNeedsCoverage,       FuncData);
 X(RecordFuncCall,               FuncData);
@@ -2869,6 +2856,7 @@ X(LdClsPropAddrOrRaise,         ReadonlyData);
 X(ThrowMustBeEnclosedInReadonly,ClassData);
 X(ThrowMustBeMutableException,  ClassData);
 X(ThrowMustBeReadonlyException, ClassData);
+X(RaiseReadonlyPropViolation,   ReadonlyPropData);
 
 #undef X
 

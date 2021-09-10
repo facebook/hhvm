@@ -148,7 +148,7 @@ let finalize_init init_env typecheck_telemetry init_telemetry =
   ServerProgress.send_warning None;
   (* rest is just logging/telemetry *)
   let t' = Unix.gettimeofday () in
-  let heap_size = SharedMem.heap_size () in
+  let heap_size = SharedMem.SMTelemetry.heap_size () in
   let hash_telemetry = ServerUtils.log_and_get_sharedmem_load_telemetry () in
   let telemetry =
     Telemetry.create ()
@@ -549,7 +549,7 @@ let idle_if_no_client env waiting_client =
       (List.length per_batch_telemetry)
       rechecked_count
       total_rechecked_count
-      (fun () -> SharedMem.collect `aggressive);
+      (fun () -> SharedMem.GC.collect `aggressive);
     let t = Unix.gettimeofday () in
     if Float.(t -. env.last_idle_job_time > 0.5) then
       let env = ServerIdle.go env in
@@ -1493,6 +1493,8 @@ let run_once options config local_config =
  * via ic.
  *)
 let daemon_main_exn ~informant_managed options monitor_pid in_fds =
+  Folly.ensure_folly_init ();
+
   Printexc.record_backtrace true;
   let (config, local_config) =
     ServerConfig.(load ~silent:false filename options)

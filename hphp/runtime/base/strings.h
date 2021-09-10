@@ -27,7 +27,6 @@ constexpr char DIVISION_BY_ZERO[] =
   "Division by zero";
 constexpr char INTEGER_OVERFLOW[] = "Integer overflow";
 constexpr char UNKNOWN_CLASS[] = "Class undefined: %s";
-constexpr char UNKNOWN_RECORD[] = "Record undefined: %s";
 constexpr char CANT_ACCESS_SELF[] =
   "Cannot access self:: when no class scope is active";
 constexpr char CANT_ACCESS_PARENT_WHEN_NO_CLASS[] =
@@ -56,8 +55,6 @@ constexpr char OP_NOT_SUPPORTED_STRING[] =
   "Operator not supported for strings";
 constexpr char OP_NOT_SUPPORTED_FUNC[] =
   "Operator not supported for funcs";
-constexpr char OP_NOT_SUPPORTED_RECORD[] =
-  "Operator not supported for records";
 constexpr char OP_NOT_SUPPORTED_CLASS[] =
   "Operator not supported for classes";
 constexpr char TRAITS_UNKNOWN_TRAIT[] =
@@ -98,8 +95,6 @@ constexpr char FUNCTION_CALLED_DYNAMICALLY_WITH_ATTRIBUTE[] =
 constexpr char CLASS_CONSTRUCTED_DYNAMICALLY[] = "'%s' constructed dynamically";
 constexpr char NEW_STATIC_ON_REIFIED_CLASS[] =
   "Cannot call new static since class %s has reified generics";
-constexpr char RECORD_NOT_SUPPORTED[] =
-  "Records are not supported here";
 constexpr char CALL_ILLFORMED_FUNC[] =
   "calling an ill-formed function pointer without resolved "
   "class/object pointer";
@@ -134,6 +129,16 @@ constexpr char INVALID_ARGUMENT_FOREACH[] =
   "Invalid argument supplied for foreach()";
 constexpr char INVALID_REIFIED_COEFFECT_CLASSNAME[] =
   "Reified generic used for coeffect rule does not refer to a class";
+constexpr char READONLY_COLLECTIONS_CANNOT_BE_MODIFIED[] =
+  "Readonly collections cannot be modified.";
+constexpr char MUST_BE_READONLY[] =
+  "Cannot store readonly value in a non-readonly property %s of class %s.";
+constexpr char MUST_BE_MUTABLE[] = "Property %s of class %s must be mutable.";
+constexpr char MUST_BE_VALUE_TYPE[] = "Property %s of class %s is readonly, and "
+  "therefore must be a value type to be modified.";
+constexpr char MUST_BE_ENCLOSED_IN_READONLY[] =
+  "Property %s of class %s is readonly, but isn't enclosed in a readonly expression.";
+
 
 } // namespace Strings
 } // namespace HPHP

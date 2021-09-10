@@ -1,0 +1,2 @@
+
+Fatal error: G cannot inherit the constant X from F, because it was previously inherited from E in %s/abstract_enum_class04.php on line 12

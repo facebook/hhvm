@@ -7,7 +7,4 @@ abstract class C {
 
   <<__Enforceable>>
   abstract const type T2 = vec<int>;
-
-  <<__Enforceable>>
-  const type T3 as vec<arraykey> = vec<int>;
 }

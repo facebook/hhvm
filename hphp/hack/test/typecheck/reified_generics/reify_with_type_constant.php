@@ -6,7 +6,7 @@ function expectReified<reify T>(mixed $x):void {
 class B { }
 final class D
 {
-  const type TQ as B = B;
+  const type TQ = B;
 
   public function test():void {
     expectReified<this::TQ>(new B());

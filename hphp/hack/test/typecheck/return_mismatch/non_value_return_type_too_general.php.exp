@@ -1,6 +1,6 @@
-File "non_value_return_type_too_general.php", line 4, characters 1-39:
+File "non_value_return_type_too_general.php", line 4, characters 10-15:
 Functions that do not return a value must have a type of void (Typing[4422])
-File "non_value_return_type_too_general.php", line 9, characters 1-29:
+File "non_value_return_type_too_general.php", line 9, characters 10-15:
 Functions that do not return a value must have a type of void (Typing[4422])
 File "non_value_return_type_too_general.php", line 13, characters 10-15:
 Invalid return type (Typing[4336])

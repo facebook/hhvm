@@ -43,10 +43,10 @@
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"
 #include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
-#include "hphp/runtime/vm/extern-compiler.h"
 #include "hphp/runtime/vm/memo-cache.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/unit-parser.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/file.h"
 #include "hphp/util/match.h"
@@ -443,8 +443,7 @@ void serialize_memoize_tv(StringBuffer& sb, int depth, TypedValue tv) {
       serialize_memoize_rcls_meth(sb, depth, tv.m_data.prclsmeth);
       break;
 
-    case KindOfResource:
-    case KindOfRecord: { // TODO(T41025646)
+    case KindOfResource: {
       auto msg = folly::format(
         "Cannot Serialize unexpected type {}",
         tname(tv.m_type)
@@ -601,14 +600,12 @@ bool HHVM_FUNCTION(clear_static_memoization,
 }
 
 String HHVM_FUNCTION(ffp_parse_string_native, const String& str) {
-  std::string program = str.get()->data();
-
   auto const file = fromCaller(
     [] (const ActRec* fp, Offset) { return fp->unit()->filepath()->data(); }
   );
 
-  auto result = ffp_parse_file("", program.c_str(), program.size(),
-                               RepoOptions::forFile(file));
+  auto result =
+    ffp_parse_file(str.get()->toCppString(), RepoOptions::forFile(file));
 
   FfpJSONString res;
   match<void>(
@@ -1208,14 +1205,36 @@ Variant HHVM_FUNCTION(enter_policied_of, const Variant& function) {
                                RuntimeCoeffects::policied_of(), false);
 }
 
-bool HHVM_FUNCTION(is_dynamically_callable_inst_method, StringArg cls,
-                                                        StringArg meth) {
-  if (auto const c = Class::load(cls.get())) {
-    if (auto const m = c->lookupMethod(meth.get())) {
+namespace {
+bool is_dynamically_callable_inst_method_impl(const StringData* cls,
+                                              const StringData* meth) {
+  if (auto const c = Class::load(cls)) {
+    if (auto const m = c->lookupMethod(meth)) {
       return !m->isStatic() && m->isDynamicallyCallable();
     }
   }
   return false;
+}
+} // namespace
+
+bool HHVM_FUNCTION(is_dynamically_callable_inst_method, StringArg cls,
+                                                        StringArg meth) {
+  return is_dynamically_callable_inst_method_impl(cls.get(), meth.get());
+}
+
+void HHVM_FUNCTION(check_dynamically_callable_inst_method, StringArg cls,
+                                                           StringArg meth) {
+  if (is_dynamically_callable_inst_method_impl(cls.get(), meth.get())) return;
+  if (RO::EvalDynamicMethCallerLevel == 0) return;
+  auto const msg = folly::sformat(
+    "dynamic_meth_caller(): {}::{} is not a dynamically "
+    "callable instance method",
+    cls.get(), meth.get());
+  if (RO::EvalDynamicMethCallerLevel == 1) {
+    raise_warning(msg);
+    return;
+  }
+  SystemLib::throwInvalidArgumentExceptionObject(msg);
 }
 
 namespace {
@@ -1247,7 +1266,6 @@ Class* getClass(TypedValue cls) {
     case KindOfRFunc:
     case KindOfClsMeth:
     case KindOfRClsMeth:
-    case KindOfRecord:
       SystemLib::throwInvalidArgumentExceptionObject(
         folly::sformat(
           "Invalid argument type passed to reflection class constructor")
@@ -1413,6 +1431,7 @@ static struct HHExtension final : Extension {
 
 #define X(nm) HHVM_NAMED_FE(__SystemLib\\nm, HHVM_FN(nm))
     X(is_dynamically_callable_inst_method);
+    X(check_dynamically_callable_inst_method);
     X(reflection_class_get_name);
     X(reflection_class_is_abstract);
     X(reflection_class_is_final);

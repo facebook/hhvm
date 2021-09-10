@@ -38,7 +38,7 @@ trait CoercionsTestUtils {
       // handle closure numbers
       $msg = Regex\replace(
         $e->getMessage(),
-        re"/CoercionsTestUtils::getData(#\d+)?;\d+/",
+        re"/CoercionsTestUtils::getData(#\d+)?/",
         'CoercionsTestUtils::getData',
       );
       self::assertUnchanged($msg, $case);

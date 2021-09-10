@@ -232,6 +232,7 @@ module NastCheck = struct
     | ListRvalue [@value 3092]
     | PartiallyAbstractTypeconstDefinition [@value 3093]
     | EntryPointGenerics [@value 3094]
+    | InternalProtectedOrPrivate [@value 3095]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

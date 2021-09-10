@@ -132,6 +132,28 @@ dict(5) {
 }
 dict(5) {
   ["str"]=>
+  string(5) "💩a"
+  ["len"]=>
+  int(4)
+  ["pad"]=>
+  string(1) "-"
+  ["pad_left_l()"]=>
+  dict(2) {
+    ["C"]=>
+    string(5) "💩a"
+    ["en_US.UTF-8"]=>
+    string(7) "--💩a"
+  }
+  ["pad_right_l()"]=>
+  dict(2) {
+    ["C"]=>
+    string(5) "💩a"
+    ["en_US.UTF-8"]=>
+    string(7) "💩a--"
+  }
+}
+dict(5) {
+  ["str"]=>
   string(4) "💩"
   ["len"]=>
   int(3)
@@ -150,5 +172,49 @@ dict(5) {
     string(4) "💩"
     ["en_US.UTF-8"]=>
     string(12) "💩💩💩"
+  }
+}
+dict(5) {
+  ["str"]=>
+  string(16) "😀😀😀😀"
+  ["len"]=>
+  int(5)
+  ["pad"]=>
+  string(1) "!"
+  ["pad_left_l()"]=>
+  dict(2) {
+    ["C"]=>
+    string(16) "😀😀😀😀"
+    ["en_US.UTF-8"]=>
+    string(17) "!😀😀😀😀"
+  }
+  ["pad_right_l()"]=>
+  dict(2) {
+    ["C"]=>
+    string(16) "😀😀😀😀"
+    ["en_US.UTF-8"]=>
+    string(17) "😀😀😀😀!"
+  }
+}
+dict(5) {
+  ["str"]=>
+  string(16) "😀😀😀😀"
+  ["len"]=>
+  int(6)
+  ["pad"]=>
+  string(1) "!"
+  ["pad_left_l()"]=>
+  dict(2) {
+    ["C"]=>
+    string(16) "😀😀😀😀"
+    ["en_US.UTF-8"]=>
+    string(18) "!!😀😀😀😀"
+  }
+  ["pad_right_l()"]=>
+  dict(2) {
+    ["C"]=>
+    string(16) "😀😀😀😀"
+    ["en_US.UTF-8"]=>
+    string(18) "😀😀😀😀!!"
   }
 }

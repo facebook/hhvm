@@ -146,6 +146,7 @@ let remove_decls env fast_parsed =
             hash = _;
           } ->
         (* we use [snd] to strip away positions *)
+        let snd (_, x, _) = x in
         Naming_global.remove_decls
           ~backend:(Provider_backend.get ())
           ~funs:(List.map funs ~f:snd)
@@ -292,7 +293,7 @@ let parsing genv env to_check ~stop_at_errors profiling =
           ~paths:to_check;
     }
   in
-  SharedMem.collect `gentle;
+  SharedMem.GC.collect `gentle;
   let max_size =
     if genv.local_config.ServerLocalConfig.small_buckets_for_dirty_names then
       Some 1
@@ -767,8 +768,10 @@ functor
       match Naming_table.get_file_info naming_table path with
       | None -> SSet.empty
       | Some info ->
-        List.fold info.FileInfo.classes ~init:SSet.empty ~f:(fun acc (_, cid) ->
-            SSet.add acc cid)
+        List.fold
+          info.FileInfo.classes
+          ~init:SSet.empty
+          ~f:(fun acc (_, cid, _) -> SSet.add acc cid)
 
     let clear_failed_parsing env errors failed_parsing =
       (* In most cases, set of files processed in a phase is a superset
@@ -1045,6 +1048,7 @@ functor
       diag_subscribe: Diagnostic_subscription.t option;
       errors: Errors.t;
       telemetry: Telemetry.t;
+      adhoc_profiling: Adhoc_profiler.CallTree.t;
       files_checked: Relative_path.Set.t;
       full_check_done: bool;
       needs_recheck: Relative_path.Set.t;
@@ -1080,7 +1084,12 @@ functor
       in
       let diag_subscribe_before = env.diag_subscribe in
 
-      let (errorl', telemetry, env, cancelled, time_first_typing_error) =
+      let ( errorl',
+            telemetry,
+            adhoc_profiling,
+            env,
+            cancelled,
+            time_first_typing_error ) =
         let ctx = Provider_utils.ctx_from_server_env env in
         CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"type check"
         @@ fun () ->
@@ -1089,6 +1098,7 @@ functor
                   Typing_check_service.errors = errorl;
                   delegate_state;
                   telemetry;
+                  adhoc_profiling;
                   diagnostic_pusher =
                     (diagnostic_pusher, time_first_typing_error);
                 } ),
@@ -1116,7 +1126,12 @@ functor
             typing_service = { env.typing_service with delegate_state };
           }
         in
-        (errorl, telemetry, env, cancelled, time_first_typing_error)
+        ( errorl,
+          telemetry,
+          adhoc_profiling,
+          env,
+          cancelled,
+          time_first_typing_error )
       in
 
       log_if_diag_subscribe_changed
@@ -1195,6 +1210,7 @@ functor
         diag_subscribe;
         errors;
         telemetry;
+        adhoc_profiling;
         files_checked = files_to_check;
         full_check_done;
         needs_recheck;
@@ -1309,7 +1325,7 @@ functor
       let time_first_error =
         Option.first_some time_first_error time_errors_pushed
       in
-      let hs = SharedMem.heap_size () in
+      let hs = SharedMem.SMTelemetry.heap_size () in
       let telemetry =
         telemetry
         |> Telemetry.duration ~key:"parse_end" ~start_time
@@ -1319,6 +1335,41 @@ functor
       HackEventLogger.parsing_end_for_typecheck t hs ~parsed_count:reparse_count;
       let t = Hh_logger.log_duration logstring t in
       Hh_logger.log "Heap size: %d" hs;
+
+      (* DIRECT DECL PARSER *****************)
+      (* We should use the direct decl parser results for the naming phase.
+         The direct decl parser behaviour is different from the legacy parser:
+         parser errors in the body might be ignored! As such, if we use the
+         legacy parser result to update the naming table, we might erroneously
+         remove entries! When typechecking files using that entry, erroneous
+         "Name unbound" errors will be reported. Those are unrecoverable,
+         because decl diffing won't catch any changes (the direct decl parser
+         returns the same result with or without parsing errors), and no fanout
+         will be computed.
+
+         TODO(hverr, jakebailey): It would be great if we could only do a
+         direct-decl-parse (rather than doing a direct-decl-parse pass after the
+         AST-parse pass). If we removed the AST-parse pass, it would probably be
+         best to remove the failed_parsing tracking too (since the direct decl
+         parser won't emit the complete set of parse errors). Then we'd attempt
+         to typecheck those files, and we could make sure that we emit parsing
+         errors during the typechecking step.*)
+      let ctx = Provider_utils.ctx_from_server_env env in
+      let fast_parsed =
+        if
+          TypecheckerOptions.use_direct_decl_in_tc_loop
+            (Provider_context.get_tcopt ctx)
+          && use_direct_decl_parser ctx
+        then
+          let get_next =
+            MultiWorker.next
+              genv.workers
+              (Relative_path.Set.elements files_to_parse)
+          in
+          Direct_decl_service.go ctx genv.workers get_next
+        else
+          fast_parsed
+      in
 
       (* UPDATE NAMING TABLES **************************************************)
       let logstring = "Updating deps" in
@@ -1355,7 +1406,6 @@ functor
       let deptable_unlocked =
         Typing_deps.allow_dependency_table_reads env.deps_mode true
       in
-      let ctx = Provider_utils.ctx_from_server_env env in
       (* Run Naming_global, updating the reverse naming table (which maps the names
          of toplevel symbols to the files in which they were declared) in shared
          memory. Does not run Naming itself (which converts an AST to a NAST by
@@ -1382,7 +1432,7 @@ functor
         Option.first_some time_first_error time_errors_pushed
       in
 
-      let heap_size = SharedMem.heap_size () in
+      let heap_size = SharedMem.SMTelemetry.heap_size () in
       Hh_logger.log "Heap size: %d" heap_size;
       HackEventLogger.naming_end ~count:reparse_count t heap_size;
       let t = Hh_logger.log_duration logstring t in
@@ -1429,7 +1479,7 @@ functor
       let to_redecl_phase2 =
         Typing_deps.Files.get_files to_redecl_phase2_deps
       in
-      let hs = SharedMem.heap_size () in
+      let hs = SharedMem.SMTelemetry.heap_size () in
       HackEventLogger.first_redecl_end t hs;
       let t = Hh_logger.log_duration logstring t in
       Hh_logger.log "Heap size: %d" hs;
@@ -1563,7 +1613,7 @@ functor
           ~to_redecl_phase2
           ~to_redecl_phase2_deps
       in
-      let hs = SharedMem.heap_size () in
+      let hs = SharedMem.SMTelemetry.heap_size () in
       HackEventLogger.second_redecl_end t hs;
       let t = Hh_logger.log_duration logstring t in
       Hh_logger.log "Heap size: %d" hs;
@@ -1712,6 +1762,7 @@ functor
         diag_subscribe;
         errors;
         telemetry = typecheck_telemetry;
+        adhoc_profiling;
         files_checked;
         full_check_done = _;
         needs_recheck;
@@ -1745,7 +1796,7 @@ functor
         ~before:old_env.diag_subscribe
         ~after:diag_subscribe;
 
-      let heap_size = SharedMem.heap_size () in
+      let heap_size = SharedMem.SMTelemetry.heap_size () in
       Hh_logger.log "Heap size: %d" heap_size;
 
       let logstring =
@@ -1821,16 +1872,16 @@ functor
       in
 
       (* STATS LOGGING *********************************************************)
-      if SharedMem.hh_log_level () > 0 then begin
+      if SharedMem.SMTelemetry.hh_log_level () > 0 then begin
         Measure.print_stats ();
         Measure.print_distributions ()
       end;
       let telemetry =
-        if SharedMem.hh_log_level () > 0 then
+        if SharedMem.SMTelemetry.hh_log_level () > 0 then
           Telemetry.object_
             telemetry
             ~key:"shmem"
-            ~value:(SharedMem.get_telemetry ())
+            ~value:(SharedMem.SMTelemetry.get_telemetry ())
         else
           telemetry
       in
@@ -1901,7 +1952,8 @@ functor
         ~count:total_rechecked_count
         ~experiments:genv.local_config.ServerLocalConfig.experiments
         ~desc:"serverTypeCheck"
-        ~start_t:type_check_start_t;
+        ~start_t:type_check_start_t
+        ~adhoc_profiling:(Adhoc_profiler.CallTree.to_string adhoc_profiling);
 
       ( env,
         {

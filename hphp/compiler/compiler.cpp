@@ -28,8 +28,8 @@
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/array-provenance.h"
 #include "hphp/runtime/base/program-functions.h"
-#include "hphp/runtime/vm/extern-compiler.h"
 #include "hphp/runtime/version.h"
+#include "hphp/runtime/vm/unit-parser.h"
 #include "hphp/system/systemlib.h"
 
 #include "hphp/util/async-func.h"

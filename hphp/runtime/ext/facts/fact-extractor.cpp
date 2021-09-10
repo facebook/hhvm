@@ -28,7 +28,7 @@
 #include "hphp/runtime/ext/facts/exception.h"
 #include "hphp/runtime/ext/facts/fact-extractor.h"
 #include "hphp/runtime/ext/facts/thread-factory.h"
-#include "hphp/runtime/vm/extern-compiler.h"
+#include "hphp/runtime/vm/unit-parser.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/match.h"
 #include "hphp/util/text-util.h"
@@ -183,7 +183,7 @@ std::string facts_json_from_path(const folly::fs::path& path) {
   assertx(path.is_absolute());
 
   auto const result =
-      extract_facts(path.native(), "", 0, RepoOptions::forFile(path.c_str()));
+      extract_facts(path.native(), "", RepoOptions::forFile(path.c_str()));
   return match<std::string>(
       result,
       [&](const FactsJSONString& r) { return r.value; },

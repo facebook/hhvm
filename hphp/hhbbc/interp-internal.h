@@ -28,6 +28,7 @@
 #include "hphp/hhbbc/interp.h"
 #include "hphp/hhbbc/options.h"
 #include "hphp/hhbbc/representation.h"
+#include "hphp/hhbbc/type-structure.h"
 #include "hphp/hhbbc/type-system.h"
 
 namespace HPHP { namespace HHBBC {
@@ -106,7 +107,6 @@ void rewind(ISS& env, const Bytecode&);
 void rewind(ISS& env, int);
 const Bytecode* last_op(ISS& env, int idx = 0);
 const Bytecode* op_from_slot(ISS& env, int, int prev = 0);
-ArrayData* resolveTSStatically(ISS& env, SArray, const php::Class*);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -402,6 +402,23 @@ bool canDefinitelyCallWithoutCoeffectViolation(const php::Func* caller,
                              callee->staticCoeffects.end());
 }
 
+bool canDefinitelyCallWithoutReadonlyViolation(const php::Func* callee,
+                                               const FCallArgs& fca) {
+  if (fca.enforceReadonly()) {
+    for (auto i = 0; i < fca.numArgs(); ++i) {
+      if (!fca.isReadonly(i)) continue;
+      if (i >= callee->params.size() ||
+          callee->params[i].isVariadic ||
+          !callee->params[i].readonly) {
+        return false;
+      }
+    }
+  }
+  if (fca.enforceMutableReturn() && callee->isReadonlyReturn) return false;
+  if (fca.enforceReadonlyThis() && !callee->isReadonlyThis) return false;
+  return true;
+}
+
 const StaticString s___NEVER_INLINE("__NEVER_INLINE");
 bool shouldAttemptToFold(ISS& env, const php::Func* func, const FCallArgs& fca,
              Type context, bool maybeDynamic) {
@@ -440,6 +457,9 @@ bool shouldAttemptToFold(ISS& env, const php::Func* func, const FCallArgs& fca,
   if (!canDefinitelyCallWithoutCoeffectViolation(env.ctx.func, func)) {
     return false;
   }
+
+  // Readonly violation may raise warning or throw an exception
+  if (!canDefinitelyCallWithoutReadonlyViolation(func, fca)) return false;
 
   // We only fold functions when numRets == 1
   if (func->hasInOutArgs) return false;
@@ -992,7 +1012,8 @@ void badPropInitialValue(ISS& env) {
 
 bool checkReadonlyOp(ReadonlyOp expected = ReadonlyOp::Any,
                      ReadonlyOp actual = ReadonlyOp::Any) {
-  return RO::EvalEnableReadonlyPropertyEnforcement && expected == actual;
+  return RO::EvalEnableReadonlyPropertyEnforcement == 2 &&
+    expected == actual;
 }
 #ifdef __clang__
 #pragma clang diagnostic pop

@@ -417,8 +417,7 @@ const StaticString
   s_func("function"),
   s_class("class"),
   s_clsmeth("clsmeth"),
-  s_rclsmeth("rclsmeth"),
-  s_record("record");
+  s_rclsmeth("rclsmeth");
 
 StaticString getDataTypeString(DataType t, bool isLegacy) {
   switch (t) {
@@ -442,7 +441,6 @@ StaticString getDataTypeString(DataType t, bool isLegacy) {
     case KindOfClass:      return s_class;
     case KindOfClsMeth:    return s_clsmeth;
     case KindOfRClsMeth:   return s_rclsmeth;
-    case KindOfRecord:     return s_record;
     case KindOfLazyClass:  return s_class;
   }
   not_reached();

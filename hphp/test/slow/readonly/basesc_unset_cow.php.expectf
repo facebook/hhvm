@@ -1,4 +1,4 @@
-string(40) "Read-Only collections cannot be mutated."
+string(40) "Readonly collections cannot be modified."
 
 Fatal error: Uncaught exception 'InvalidOperationException' with message 'Property bad_c1 of class Foo is readonly, and therefore must be a value type to be modified.' in %s/basesc_unset_cow.php:21
 %A

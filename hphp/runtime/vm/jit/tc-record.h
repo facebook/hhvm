@@ -54,11 +54,28 @@ void recordBCInstr(uint32_t op, const TCA addr, const TCA end, bool cold);
 void reportJitMaturity();
 
 /*
+ * Record the sizes of the different translation areas per translation kind.
+ */
+void recordTranslationSizes(const TransRec& tr);
+
+/*
  * Update the jit.code.*.used ServiceData counters to reflect the
  * current usage of the TC. Call this whenever a new translation is
  * emitted into the TC. The code lock must be already held.
  */
 void updateCodeSizeCounters();
+
+/*
+ * Return how much code in the main code area is being used for live
+ * translations.
+ */
+size_t getLiveMainUsage();
+
+/*
+ * Return how much code in the main code area is being used for profile
+ * translations.
+ */
+size_t getProfMainUsage();
 
 /*
  * Log statistics about a translation to scribe via StructuredLog.
@@ -103,4 +120,3 @@ void recordFuncPrologue(const Func* func, TransLoc loc);
 std::string warmupStatusString();
 
 }}}
-

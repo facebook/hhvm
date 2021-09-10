@@ -31,7 +31,6 @@ namespace HPHP {
 
 struct ArrayData;
 struct Class;
-struct RecordDesc;
 struct StringData;
 struct Unit;
 
@@ -57,7 +56,10 @@ struct PreTypeAlias {
   int line1;
   bool nullable;  // null is allowed; for ?Foo aliases
   UserAttributeMap userAttrs;
-  Array typeStructure{ArrayData::CreateDict()};
+  Array typeStructure;
+  // If !isNull(), contains m_typeStructure in post-resolved form from
+  // HHBBC.
+  Array resolvedTypeStructure;
 
   std::pair<int,int> getLocation() const {
     return std::make_pair(line0, line1);
@@ -104,8 +106,6 @@ struct TypeAlias {
   bool nullable{false};
   // Aliased Class; nullptr if type != Object.
   LowPtr<Class> klass{nullptr};
-  // Aliased RecordDesc; nullptr if type != Record.
-  LowPtr<RecordDesc> rec{nullptr};
 
   explicit TypeAlias(const PreTypeAlias* preTypeAlias)
     : m_preTypeAlias(preTypeAlias)
@@ -115,7 +115,10 @@ struct TypeAlias {
   const StringData* name() const { return m_preTypeAlias->name; }
   const Unit* unit() const { return m_preTypeAlias->unit; }
   UserAttributeMap userAttrs() const { return m_preTypeAlias->userAttrs; }
-  Array typeStructure() const { return m_preTypeAlias->typeStructure; }
+  const Array& typeStructure() const { return m_preTypeAlias->typeStructure; }
+  const Array& resolvedTypeStructure() const {
+    return m_preTypeAlias->resolvedTypeStructure;
+  }
 
   /*
    * Define the type alias given by `id', binding it to the appropriate

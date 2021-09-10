@@ -36,22 +36,21 @@ template <> struct WorkerInfo<IFJob> {
 struct InitFiniNode {
   enum class When {
     RequestStart,            // before executing PHP code in a request
-      RequestFini,
-      ThreadInit,
-      ThreadFini,
-      // ProcessInitConcurrent should only be used for thread-safe code with few
-      // dependencies (e.g., runtime options, logging).
-      PostRuntimeOptions,    // after runtime options are set, single-threaded
-      ProcessPreInit,        // after pthread initialization and config parsing
-      ProcessInit,           // after PreInit
-      ProcessInitConcurrent, // after PreInit, concurrently with Init and others
-      ProcessExit,           // after Init and InitConcurrent
-      ServerPreInit,
-      ServerInit,
-      WarmupConcurrent,      // concurrent with OS file cache warmup, optional
-      ServerExit,
-
-      Sentinel
+    RequestFini,
+    ThreadInit,
+    ThreadFini,
+    // ProcessInitConcurrent should only be used for thread-safe code with few
+    // dependencies (e.g., runtime options, logging).
+    PostRuntimeOptions,    // after runtime options are set, single-threaded
+    ProcessPreInit,        // after pthread initialization and config parsing
+    ProcessInit,           // after PreInit
+    ProcessInitConcurrent, // after PreInit, concurrently with Init and others
+    ProcessExit,           // after Init and InitConcurrent
+    ServerPreInit,
+    ServerInit,
+    WarmupConcurrent,      // concurrent with OS file cache warmup, optional
+    ServerExit,
+    Sentinel
   };
 
   const static unsigned NumNodes = static_cast<unsigned>(When::Sentinel);
@@ -116,4 +115,3 @@ struct InitFiniNode {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

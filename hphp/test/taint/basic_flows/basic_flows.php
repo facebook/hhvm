@@ -32,7 +32,22 @@ function source_stopped(): void {
   __sink($temporary);
 }
 
+function returns_source(): int {
+  return __source();
+}
+
+function into_sink(int $data): void {
+  __sink($data);
+}
+
+function source_through_indirection_to_sink(): void {
+  $data = returns_source();
+  into_sink($data);
+}
+
 <<__EntryPoint>> function main(): void {
   source_through_assignment_to_sink();
   source_through_function_to_sink();
+  source_stopped();
+  source_through_indirection_to_sink();
 }

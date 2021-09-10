@@ -71,8 +71,6 @@ size_t encodedRATSize(const unsigned char* pc) {
   case T::OptFunc:
   case T::ClsMeth:
   case T::OptClsMeth:
-  case T::Record:
-  case T::OptRecord:
   case T::Cls:
   case T::OptCls:
   case T::LazyCls:
@@ -133,10 +131,6 @@ size_t encodedRATSize(const unsigned char* pc) {
   case T::SubCls:
   case T::OptExactCls:
   case T::OptSubCls:
-  case T::ExactRecord:
-  case T::OptExactRecord:
-  case T::SubRecord:
-  case T::OptSubRecord:
     assertx(!highBitSet);
     return ((int8_t(nextPcVal) < 0) ? 4 : 1) + tagSize;
   }

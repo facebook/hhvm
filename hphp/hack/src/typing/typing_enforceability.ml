@@ -110,6 +110,8 @@ let get_enforcement (env : env) (ty : decl_ty) : Typing_defs.enforcement =
        *)
       Unenforced
     | Taccess _ -> Unenforced
+    | Tlike ty when enable_sound_dynamic ->
+      enforcement include_dynamic env visited ty
     | Tlike _ -> Unenforced
     | Tprim prim ->
       begin

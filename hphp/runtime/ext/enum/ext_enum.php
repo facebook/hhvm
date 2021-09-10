@@ -82,6 +82,20 @@ newtype Label<-TEnumClass, TType> = string;
 
 
 /**
+ * BuiltinAbstractEnumClass contains the utility methods provided by
+ * abstract enum classes.
+ *
+ * HHVM provides a native implementation for this class. The PHP class
+ * definition below is not actually used at run time; it is simply
+ * provided for the typechecker and for developer reference.
+ */
+abstract class BuiltinAbstractEnumClass {
+  final public static function nameOf<TType>(EnumClass\Label<this, TType> $atom): string {
+    return $atom;
+  }
+}
+
+/**
  * BuiltinEnumClass contains the utility methods provided by enum classes.
  * Under the hood, an enum class Foo : Bar will extend
  * BuiltinEnumClass<HH\MemberOf<this, Bar>>.
@@ -90,7 +104,7 @@ newtype Label<-TEnumClass, TType> = string;
  * definition below is not actually used at run time; it is simply
  * provided for the typechecker and for developer reference.
  */
-abstract class BuiltinEnumClass<+T> {
+abstract class BuiltinEnumClass<+T> extends BuiltinAbstractEnumClass {
   /**
    * Get the values of the public consts defined on this class,
    * indexed by the string name of those consts.
@@ -99,10 +113,6 @@ abstract class BuiltinEnumClass<+T> {
    */
   <<__Native>>
   final public static function getValues()[write_props]: darray<string, T>;
-
-  final public static function nameOf<TType>(EnumClass\Label<this, TType> $atom): string {
-    return $atom;
-  }
 
   final public static function valueOf<TEnum super this, TType>(EnumClass\Label<TEnum, TType> $atom): MemberOf<TEnum, TType> {
     return \__SystemLib\get_enum_member_by_label($atom);

@@ -155,7 +155,6 @@ RawDestructors computeDestructors() {
   set(KindOfVec,      &vecReleaseWrapper);
   set(KindOfDict,     &dictReleaseWrapper);
   set(KindOfKeyset,   &keysetReleaseWrapper);
-  set(KindOfRecord,   getMethodPtr(&RecordData::release));
   set(KindOfString,   getMethodPtr(&StringData::release));
   set(KindOfObject,   &objReleaseWrapper);
   set(KindOfResource, getMethodPtr(&ResourceHdr::release));
@@ -303,7 +302,6 @@ DataType Variant::toNumeric(int64_t &ival, double &dval,
     case KindOfPersistentKeyset:
     case KindOfKeyset:
     case KindOfObject:
-    case KindOfRecord:
     case KindOfResource:
     case KindOfRFunc:
     case KindOfFunc:
@@ -342,7 +340,6 @@ bool Variant::isScalar() const noexcept {
     case KindOfResource:
     case KindOfClsMeth:
     case KindOfRClsMeth:
-    case KindOfRecord:
     case KindOfRFunc:
       return false;
 
@@ -407,7 +404,6 @@ static Variant::AllowedAsConstantValue isAllowedAsConstantValueImpl(TypedValue t
     case KindOfClass:
     case KindOfRFunc:
     case KindOfRClsMeth:
-    case KindOfRecord:
       return Variant::AllowedAsConstantValue::NotAllowed;
   }
   not_reached();
@@ -453,9 +449,6 @@ bool Variant::toBooleanHelper() const {
     case KindOfClsMeth:
     case KindOfRClsMeth:
     case KindOfLazyClass:        return true;
-    case KindOfRecord:
-      raise_convert_record_to_type("bool");
-      return false;
   }
   not_reached();
 }
@@ -492,9 +485,6 @@ int64_t Variant::toInt64Helper(int base /* = 10 */) const {
       SystemLib::throwInvalidOperationExceptionObject(
         "RClsMeth to Int64 conversion");
       return 1;
-    case KindOfRecord:
-      raise_convert_record_to_type("int");
-      return 0;
   }
   not_reached();
 }
@@ -540,9 +530,6 @@ Array Variant::toPHPArrayHelper() const {
       SystemLib::throwInvalidOperationExceptionObject(
         "RClsMeth to PHPArray conversion");
       return empty_dict_array();
-    case KindOfRecord:
-      raise_convert_record_to_type("array");
-      return empty_dict_array();
   }
   not_reached();
 }
@@ -569,7 +556,6 @@ Resource Variant::toResourceHelper() const {
     case KindOfLazyClass:
     case KindOfClsMeth:
     case KindOfRClsMeth:
-    case KindOfRecord:
       return Resource(req::make<DummyResource>());
 
     case KindOfResource:
@@ -661,9 +647,6 @@ void Variant::setEvalScalar() {
 
     case KindOfRFunc:
       raise_error(Strings::RFUNC_NOT_SUPPORTED);
-
-    case KindOfRecord:
-      raise_error(Strings::RECORD_NOT_SUPPORTED);
 
     case KindOfRClsMeth:
       raise_error(Strings::RCLS_METH_NOT_SUPPORTED);

@@ -665,7 +665,7 @@ std::pair<Type, Effects> elemHelper(ISS& env, MOpMode mode, Type key) {
   auto const justNull = BNull | BFalse;
   auto const DEBUG_ONLY handled =
     warnsWithNull | justNull | BClsMeth |
-    BStr | BCls | BLazyCls | BObj | BRecord | BArrLike;
+    BStr | BCls | BLazyCls | BObj | BArrLike;
 
   static_assert(handled == BCell);
 
@@ -701,7 +701,7 @@ std::pair<Type, Effects> elemHelper(ISS& env, MOpMode mode, Type key) {
     ty |= TSStr;
   }
   // These can throw and push anything.
-  if (base.couldBe(BObj | BRecord)) {
+  if (base.couldBe(BObj)) {
     effects = unionEffects(effects, Effects::Throws);
     ty |= TInitCell;
   }
@@ -757,7 +757,7 @@ Effects setOpElemHelper(ISS& env, int32_t nDiscard, const Type& key,
   auto const null =
     BTrue | BNum | BRes | BFunc | BRFunc |
     BCls | BLazyCls | BClsMeth | BRClsMeth;
-  auto const handled = throws | null | BArrLike | BObj | BRecord;
+  auto const handled = throws | null | BArrLike | BObj;
 
   static_assert(handled == BCell);
 
@@ -777,16 +777,9 @@ Effects setOpElemHelper(ISS& env, int32_t nDiscard, const Type& key,
     pushed |= TInitNull;
   }
   // Objects can throw and push anything
-  if (base.couldBe(BObj | BRecord)) {
+  if (base.couldBe(BObj)) {
     effects = unionEffects(effects, Effects::Throws);
     pushed |= TInitCell;
-  }
-  // Records can throw and push anything. Since we might be mutating
-  // the record, record an update.
-  if (base.couldBe(BRecord)) {
-    effects = unionEffects(effects, Effects::Throws);
-    pushed |= TInitCell;
-    update = true;
   }
   if (base.couldBe(BArrLike)) {
     auto const unreachable = [&] {
@@ -880,7 +873,7 @@ Effects setOpNewElemHelper(ISS& env, int32_t nDiscard) {
   assertx(!base.is(BBottom));
 
   auto const alwaysThrow =
-    BNull | BFalse | BStr | BArrLike | BObj | BClsMeth | BRecord;
+    BNull | BFalse | BStr | BArrLike | BObj | BClsMeth;
   auto const null =
     BTrue | BNum | BRes | BRFunc | BFunc | BRClsMeth | BCls | BLazyCls;
   auto const handled = alwaysThrow | null;
@@ -1097,7 +1090,7 @@ Effects miElem(ISS& env, MOpMode mode, Type key, LocalId keyLoc) {
     // Uninit.
     auto const alwaysThrows =
       BCls | BLazyCls | BFunc | BRFunc | BStr | BClsMeth |
-      BRClsMeth | BRecord;
+      BRClsMeth;
     auto const movesToUninit = BPrim | BRes;
     auto const handled =
       alwaysThrows | movesToUninit | BObj | BArrLike;
@@ -1195,7 +1188,7 @@ Effects miElem(ISS& env, MOpMode mode, Type key, LocalId keyLoc) {
       BTrue | BNum | BRes | BFunc | BRFunc | BCls | BLazyCls |
       BClsMeth | BRClsMeth;
     auto const handled =
-      alwaysThrows | warnsAndNull | BObj | BRecord | BArrLike;
+      alwaysThrows | warnsAndNull | BObj | BArrLike;
 
     static_assert(handled == BCell);
 
@@ -1248,13 +1241,6 @@ Effects miElem(ISS& env, MOpMode mode, Type key, LocalId keyLoc) {
       effects = unionEffects(effects, Effects::Throws);
       ty |= TInitCell;
     }
-    // Records can throw and push anything as well. Since we might be
-    // mutating the record, we need to perform an update.
-    if (base.couldBe(BRecord)) {
-      effects = unionEffects(effects, Effects::Throws);
-      ty |= TInitCell;
-      update = true;
-    }
     // For arrays we can lookup the specific element
     if (base.couldBe(BArrLike)) {
       auto elem = array_do_elem(env, key, true);
@@ -1300,7 +1286,7 @@ Effects miNewElem(ISS& env) {
   assertx(!base.is(BBottom));
 
   auto const alwaysThrows =
-    BNull | BFalse | BArrLike | BObj | BClsMeth | BRecord;
+    BNull | BFalse | BArrLike | BObj | BClsMeth;
   auto const uninit =
     BTrue | BNum | BRes | BRFunc | BFunc |
     BRClsMeth | BCls | BLazyCls;
@@ -1676,7 +1662,7 @@ Effects miFinalSetElem(ISS& env,
     BTrue | BNum | BRes | BFunc | BRFunc |
     BCls | BLazyCls | BClsMeth | BRClsMeth;
   auto const handled =
-    alwaysThrows | pushesNull | BObj | BRecord | BStr | BArrLike;
+    alwaysThrows | pushesNull | BObj | BStr | BArrLike;
 
   static_assert(handled == BCell);
 
@@ -1716,13 +1702,6 @@ Effects miFinalSetElem(ISS& env,
     // the rhs.
     effects = unionEffects(effects, Effects::Throws);
     pushed |= rhs;
-  }
-  if (base.couldBe(BRecord)) {
-    // Records can throw but otherwise don't affect the base and push
-    // the rhs. Record an update since we're potentially mutating it.
-    effects = unionEffects(effects, Effects::Throws);
-    pushed |= rhs;
-    update = true;
   }
   if (base.couldBe(BArrLike)) {
     // Arrays will set the value and push the right hande side of the
@@ -1796,7 +1775,7 @@ Effects miFinalUnsetElem(ISS& env, int32_t nDiscard, const Type& key) {
 
   auto const doesNothing = BNull | BBool | BNum | BRes;
   auto const alwaysThrows =
-    BFunc | BRFunc | BCls | BLazyCls | BStr | BRecord | BClsMeth | BRClsMeth;
+    BFunc | BRFunc | BCls | BLazyCls | BStr | BClsMeth | BRClsMeth;
   auto const handled = doesNothing | alwaysThrows | BArrLike | BObj;
 
   static_assert(handled == BCell);
@@ -1868,7 +1847,7 @@ Effects miFinalSetNewElem(ISS& env, int32_t nDiscard) {
   auto const pushesNull =
     BTrue | BNum | BRes | BFunc | BRFunc | BCls |
     BLazyCls | BClsMeth | BRClsMeth;
-  auto const alwaysThrows = BNull | BStr | BRecord | BFalse;
+  auto const alwaysThrows = BNull | BStr | BFalse;
   auto const handled = pushesNull | alwaysThrows | BObj | BArrLike;
 
   static_assert(handled == BCell);

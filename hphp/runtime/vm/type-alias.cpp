@@ -26,15 +26,6 @@ namespace HPHP {
 
 namespace {
 
-TypeAlias typeAliasFromRecordDesc(const PreTypeAlias* thisType,
-                                  RecordDesc* rec) {
-  TypeAlias req(thisType);
-  req.nullable = thisType->nullable;
-  req.type = AnnotType::Record;
-  req.rec = rec;
-  return req;
-}
-
 TypeAlias typeAliasFromClass(const PreTypeAlias* thisType,
                              Class *klass) {
   TypeAlias req(thisType);
@@ -94,10 +85,6 @@ TypeAlias resolveTypeAlias(const PreTypeAlias* thisType, bool failIsFatal) {
     return TypeAlias::From(*targetTd, thisType);
   }
 
-  if (auto rec = RecordDesc::lookup(targetNE)) {
-    return typeAliasFromRecordDesc(thisType, rec);
-  }
-
   if (failIsFatal &&
       AutoloadHandler::s_instance->autoloadNamedType(
         StrNR(const_cast<StringData*>(typeName))
@@ -107,9 +94,6 @@ TypeAlias resolveTypeAlias(const PreTypeAlias* thisType, bool failIsFatal) {
     }
     if (auto targetTd = targetNE->getCachedTypeAlias()) {
       return TypeAlias::From(*targetTd, thisType);
-    }
-    if (auto rec = RecordDesc::lookup(targetNE)) {
-      return typeAliasFromRecordDesc(thisType, rec);
     }
   }
 
@@ -122,8 +106,7 @@ TypeAlias resolveTypeAlias(const PreTypeAlias* thisType, bool failIsFatal) {
 bool TypeAlias::compat(const PreTypeAlias& alias) const {
   return (alias.type == AnnotType::Mixed && type == AnnotType::Mixed) ||
          (alias.type == type && alias.nullable == nullable &&
-          Class::lookup(alias.value) == klass &&
-          RecordDesc::lookup(alias.value) == rec);
+          Class::lookup(alias.value) == klass);
 }
 
 const TypeAlias* TypeAlias::lookup(const StringData* name,
@@ -182,7 +165,7 @@ const TypeAlias* TypeAlias::def(const PreTypeAlias* thisType, bool failIsFatal) 
     return current;
   }
 
-  // There might also be a class or record with this name already.
+  // There might also be a class with this name already.
   auto existingKind = nameList->checkSameName<PreTypeAlias>();
   if (existingKind) {
     if (!failIsFatal) return nullptr;
@@ -203,7 +186,6 @@ const TypeAlias* TypeAlias::def(const PreTypeAlias* thisType, bool failIsFatal) 
   auto const isPersistent = (thisType->attrs & AttrPersistent);
   if (isPersistent) {
     assertx(!resolved.klass || classHasPersistentRDS(resolved.klass));
-    assertx(!resolved.rec || recordHasPersistentRDS(resolved.rec));
   }
 
   nameList->m_cachedTypeAlias.bind(

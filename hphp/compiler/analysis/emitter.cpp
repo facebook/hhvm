@@ -26,16 +26,15 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/vm/disas.h"
-#include "hphp/runtime/vm/extern-compiler.h"
 #include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
-#include "hphp/runtime/vm/record-emitter.h"
 #include "hphp/runtime/vm/repo-autoload-map-builder.h"
 #include "hphp/runtime/vm/repo-file.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/type-alias-emitter.h"
 #include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/unit-parser.h"
 #include "hphp/util/job-queue.h"
 #include "hphp/util/logger.h"
 
@@ -180,6 +179,7 @@ RepoGlobalData getGlobalData() {
   gd.BuildMayNoticeOnMethCallerHelperIsObject =
     RO::EvalBuildMayNoticeOnMethCallerHelperIsObject;
   gd.EnableReadonlyPropertyEnforcement = RuntimeOption::EvalEnableReadonlyPropertyEnforcement;
+  gd.DiamondTraitMethods = RuntimeOption::EvalDiamondTraitMethods;
 
   for (auto const& elm : RuntimeOption::ConstantFunctions) {
     auto const s = internal_serialize(tvAsCVarRef(elm.second));
@@ -226,7 +226,6 @@ struct SymbolSets {
   IMap classes;
   IMap funcs;
   IMap typeAliases;
-  IMap records;
   Map constants;
 
   static std::unique_ptr<Data> make(const UnitEmitter* ue,
@@ -278,7 +277,7 @@ void writeUnit(UnitEmitter& ue,
       HHBBC::add_symbol(sets.enums, make(pce->name(), pce->attrs()), "enum");
     }
     HHBBC::add_symbol(sets.classes, make(pce->name(), pce->attrs()), "class",
-                      sets.records, sets.typeAliases);
+                      sets.typeAliases);
   }
   for (auto& fe : ue.fevec()) {
     // Dedup meth_caller wrappers
@@ -289,17 +288,11 @@ void writeUnit(UnitEmitter& ue,
   for (auto& te : ue.typeAliases()) {
     te->setAttrs(te->attrs() | AttrUnique | AttrPersistent);
     HHBBC::add_symbol(sets.typeAliases, make(te->name(), te->attrs()),
-                      "type alias", sets.classes, sets.records);
+                      "type alias", sets.classes);
   }
   for (auto& c : ue.constants()) {
     c.attrs |= AttrUnique | AttrPersistent;
     HHBBC::add_symbol(sets.constants, make(c.name, c.attrs), "constant");
-  }
-  for (size_t n = 0; n < ue.numRecords(); ++n) {
-    auto const re = ue.re(n);
-    re->setAttrs(re->attrs() | AttrUnique | AttrPersistent);
-    HHBBC::add_symbol(sets.records, make(re->name(), re->attrs()), "record",
-                      sets.classes, sets.typeAliases);
   }
 
   autoloadMapBuilder.addUnit(ue);
@@ -485,44 +478,39 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const SHA1& sha1,
   RID().setJitFolding(true);
   SCOPE_EXIT { RID().setJitFolding(prevFolding); };
 
-  try {
-    if (!filename) filename = "";
+  if (!filename) filename = "";
 
-    std::unique_ptr<UnitEmitter> ue;
-    // Check if this file contains raw hip hop bytecode instead of
-    // php.  This is dictated by a special file extension.
-    if (RuntimeOption::EvalAllowHhas) {
-      if (const char* dot = strrchr(filename, '.')) {
-        const char hhbc_ext[] = "hhas";
-        if (!strcmp(dot + 1, hhbc_ext)) {
-          ue = assemble_string(code, codeLen, filename, sha1, nativeFuncs);
-        }
+  std::unique_ptr<UnitEmitter> ue;
+  // Check if this file contains raw hip hop bytecode instead of
+  // php.  This is dictated by a special file extension.
+  if (RuntimeOption::EvalAllowHhas) {
+    if (const char* dot = strrchr(filename, '.')) {
+      const char hhbc_ext[] = "hhas";
+      if (!strcmp(dot + 1, hhbc_ext)) {
+        ue = assemble_string(code, codeLen, filename, sha1, nativeFuncs);
       }
     }
-
-    // If ue != nullptr then we assembled it above, so don't feed it into
-    // the extern compiler
-    if (!ue) {
-      auto uc = UnitCompiler::create(code, codeLen, filename, sha1,
-                                     nativeFuncs, forDebuggerEval, options);
-      assertx(uc);
-      tracing::BlockNoTrace _{"unit-compiler-run"};
-      bool ignore;
-      ue = uc->compile(ignore);
-    }
-
-    unit = ue->create();
-    if (BuiltinSymbols::s_systemAr) {
-      assertx(ue->m_filepath->data()[0] == '/' &&
-              ue->m_filepath->data()[1] == ':');
-      BuiltinSymbols::s_systemAr->addHhasFile(std::move(ue));
-    }
-
-    return unit.release();
-  } catch (const std::exception&) {
-    // extern "C" function should not be throwing exceptions...
-    return nullptr;
   }
+
+  // If ue != nullptr then we assembled it above, so don't feed it into
+  // the extern compiler
+  if (!ue) {
+    auto uc = UnitCompiler::create(code, codeLen, filename, sha1,
+                                   nativeFuncs, forDebuggerEval, options);
+    assertx(uc);
+    tracing::BlockNoTrace _{"unit-compiler-run"};
+    bool ignore;
+    ue = uc->compile(ignore);
+  }
+
+  unit = ue->create();
+  if (BuiltinSymbols::s_systemAr) {
+    assertx(ue->m_filepath->data()[0] == '/' &&
+            ue->m_filepath->data()[1] == ':');
+    BuiltinSymbols::s_systemAr->addHhasFile(std::move(ue));
+  }
+
+  return unit.release();
 }
 
 } // extern "C"

@@ -90,6 +90,21 @@ buildCodeSizeCounters() {
         );
   };
   CodeCache::forEachName(codeCounterInit);
+  codeCounterInit("prof.main");
+  codeCounterInit("prof.cold");
+  codeCounterInit("prof.frozen");
+  codeCounterInit("opt.main");
+  codeCounterInit("opt.cold");
+  codeCounterInit("opt.frozen");
+  codeCounterInit("live.main");
+  codeCounterInit("live.cold");
+  codeCounterInit("live.frozen");
+  codeCounterInit("anchor.main");
+  codeCounterInit("anchor.cold");
+  codeCounterInit("anchor.frozen");
+  codeCounterInit("interp.main");
+  codeCounterInit("interp.cold");
+  codeCounterInit("interp.frozen");
   return counters;
 }
 
@@ -107,6 +122,38 @@ static ServiceData::CounterCallback s_warmedUpCounter(
   }
 );
 
+void recordTranslationSizes(const TransRec& tr) {
+  const char* kindName = nullptr;
+  switch (tr.kind) {
+    case TransKind::Profile:
+    case TransKind::ProfPrologue:
+      kindName = "prof";
+      break;
+    case TransKind::Optimize:
+    case TransKind::OptPrologue:
+      kindName = "opt";
+      break;
+    case TransKind::Live:
+    case TransKind::LivePrologue:
+      kindName = "live";
+      break;
+    case TransKind::Anchor:
+      kindName = "anchor";
+      break;
+    case TransKind::Interp:
+      kindName = "interp";
+      break;
+    case TransKind::Invalid:
+      always_assert(0);
+  }
+  auto mainCounter   = s_counters.at(folly::sformat("{}.main", kindName));
+  auto coldCounter   = s_counters.at(folly::sformat("{}.cold", kindName));
+  auto frozenCounter = s_counters.at(folly::sformat("{}.frozen", kindName));
+  mainCounter->addValue(tr.aLen);
+  coldCounter->addValue(tr.acoldLen);
+  frozenCounter->addValue(tr.afrozenLen);
+}
+
 void updateCodeSizeCounters() {
   assertOwnsCodeLock();
 
@@ -119,6 +166,24 @@ void updateCodeSizeCounters() {
   // Manually add code.data.
   auto codeUsed = s_counters.at("data");
   codeUsed->addValue(code().data().used() - codeUsed->getSum());
+}
+
+size_t getLiveMainUsage() {
+  auto const it = s_counters.find("live.main");
+  if (it == s_counters.end()) return 0;
+  return it->second->getSum();
+}
+
+size_t getProfMainUsage() {
+  auto const it = s_counters.find("prof.main");
+  if (it == s_counters.end()) return 0;
+  return it->second->getSum();
+}
+
+size_t getOptMainUsage() {
+  auto const it = s_counters.find("opt.main");
+  if (it == s_counters.end()) return 0;
+  return it->second->getSum();
 }
 
 /*
@@ -139,28 +204,31 @@ void reportJitMaturity() {
     mcgen::retranslateAllPending() || isJitSerializing();
   // If retranslateAll is enabled, wait until it finishes before counting in
   // optimized translations.
-  auto const hotSize = beforeRetranslateAll ? 0 : code().hot().used();
-  // When we jit from serialized profile data, aprof is empty. In order to make
-  // jit maturity somewhat comparable between the two cases, we pretend to have
-  // some profiling code.
+  const size_t hotSize = beforeRetranslateAll ? 0 : getOptMainUsage();
+  // When we jit from serialized profile data, the profile code won't be
+  // present. In order to make jit maturity somewhat comparable between the two
+  // cases, we pretend to have some profiling code.
   //
-  // If we've restarted to reload profiling data before RTA, aprof
-  // will be empty. Since hotSize and mainSize will also be zero in
-  // this case, our maturity will sit at 0. To avoid this, we've
-  // recorded the size of aprof before we restarted in the profiling
-  // data. Use that to simulate the size of aprof (this will be zero
-  // if we haven't restarted).
+  // If we've restarted to reload profiling data before RTA, the profile code
+  // won't be present. Since hotSize and mainSize will also be zero in this
+  // case, our maturity will sit at 0. To avoid this, we've recorded the size of
+  // the main profile code before we restarted with the profiling data. Use that
+  // to simulate the size of the profile code.
   auto const profSize = std::max(
-    code().prof().used() + (isJitSerializing() ? ProfData::prevProfSize() : 0),
+    getProfMainUsage() + (isJitSerializing() ? ProfData::prevProfSize() : 0),
     hotSize
   );
   auto const mainSize = code().main().used();
 
   auto const fullSize = RuntimeOption::EvalJitMatureSize;
-  const uint64_t codeSize = profSize + mainSize + hotSize;
+  auto const codeSize = mainSize + hotSize +
+    static_cast<size_t>(profSize * RuntimeOption::EvalJitMaturityProfWeight);
+
   int64_t maturity = before;
   if (beforeRetranslateAll) {
     maturity = std::min(kMaxMaturityBeforeRTA, codeSize * 100 / fullSize);
+  } else if (getLiveMainUsage() >= RuntimeOption::EvalJitMaxLiveMainUsage) {
+    maturity = 100;
   } else if (codeSize >= fullSize) {
     maturity = (mainSize >= CodeCache::AMaxUsage) ? 100 : 99;
   } else {
@@ -404,7 +472,6 @@ std::string warmupStatusString() {
         }
       };
       checkCodeSize("main", CodeCache::ASize);
-      checkCodeSize("hot", CodeCache::AHotSize);
     }
     if (status_str.empty()) {
       if (RuntimeOption::EvalJitSerdesMode == JitSerdesMode::SerializeAndExit) {

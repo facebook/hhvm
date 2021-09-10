@@ -1,0 +1,8 @@
+File "module_bad_arity.php", line 6, characters 3-10:
+The attribute `__Module` expects exactly 1 argument (Typing[4153])
+File "module_bad_arity.php", line 9, characters 3-10:
+The attribute `__Module` expects exactly 1 argument (Typing[4126])
+File "module_bad_arity.php", line 12, characters 18-27:
+The attribute `__Internal` expects no arguments (Typing[4126])
+File "module_bad_arity.php", line 18, characters 5-14:
+The attribute `__Internal` expects no arguments (Typing[4126])

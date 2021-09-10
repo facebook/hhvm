@@ -397,9 +397,12 @@ fn collect(mut acc: CollectAcc, node: Node) -> CollectAcc {
                     &mut enum_class_facts.base_types,
                     acc.2,
                 );
-                enum_class_facts
-                    .base_types
-                    .insert("HH\\BuiltinEnumClass".into());
+                let parent = if Flag::Abstract.is_set(flags) {
+                    "HH\\BuiltinAbstractEnumClass"
+                } else {
+                    "HH\\BuiltinEnumClass"
+                };
+                enum_class_facts.base_types.insert(parent.into());
                 add_or_update_classish_decl(name, enum_class_facts, &mut acc.1.types);
             }
         }

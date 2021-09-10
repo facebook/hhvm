@@ -1,8 +1,8 @@
 <?hh // strict
 
 <<__ConsistentConstruct>>
-class X {
-  const type T as arraykey = arraykey;
+abstract class X {
+  abstract const type T as arraykey = arraykey;
 
   private this::T $priv;
 
@@ -12,8 +12,6 @@ class X {
 
   public static function test(this::T $t): void {
     $static = new static($t);
-    $self = new self('');
-    $x = new X('');
     $y = new Y(0);
   }
 }
@@ -30,7 +28,6 @@ class Y extends X {
     // Since T cannot be overridden by sub-classes, we can pass in an int
     $static = new static(0);
     $self = new self(0);
-    $x = new X('');
     $y = new Y(0);
   }
 }

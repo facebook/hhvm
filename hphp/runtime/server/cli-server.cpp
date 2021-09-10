@@ -436,7 +436,7 @@ struct CLIServer final : folly::AsyncServerSocket::AcceptCallback {
 
   void connectionAccepted(folly::NetworkSocket fdNetworkSocket,
                           const folly::SocketAddress&) noexcept override {
-int fd = fdNetworkSocket.toFd();
+    int fd = fdNetworkSocket.toFd();
 
     if (RuntimeOption::EvalUnixServerFailWhenBusy) {
       if (m_dispatcher->getActiveWorker() >=
@@ -447,7 +447,7 @@ int fd = fdNetworkSocket.toFd();
       }
     }
 
-    Logger::Info("Accepting CLI connection");
+    Logger::Verbose("Accepting CLI connection");
     FTRACE(1, "CLIServer::connectionAccepted({}): enqueue job\n", fd);
     int opts = fcntl(fd, F_GETFL);
     int res = fcntl(fd, F_SETFL, opts & ~O_NONBLOCK);
@@ -957,6 +957,10 @@ void CLIWorker::doJob(int client) {
     }
     envp[env.size()] = nullptr;
 
+    UserInfo user(uc.uid);
+    Logger::FInfo("Running `{}` for user {}",
+                  folly::join(" ", args), user.pw->pw_name);
+
     tl_ucred = &uc;
     SCOPE_EXIT { tl_ucred = nullptr; };
 
@@ -967,6 +971,8 @@ void CLIWorker::doJob(int client) {
 
     int ret = 255;
     init_command_line_session(args.size(), buf.get());
+
+    SCOPE_EXIT { Logger::FInfo("Completed command with return code {}", ret); };
 
     CliStdoutHook stdout_hook(cli_out.fd);
     CliLoggerHook logging_hook(cli_err.fd);

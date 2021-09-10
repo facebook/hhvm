@@ -35,7 +35,6 @@ namespace HPHP {
 struct ArrayData;
 struct Class;
 struct Func;
-struct RecordDesc;
 struct StringData;
 struct TypeConstraint;
 struct TypedValue;
@@ -276,18 +275,16 @@ constexpr bool operator>(Mem a, Mem b) {
   c(Func,            bits_t::bit<19>())                                 \
   c(Cls,             bits_t::bit<20>())                                 \
   c(ClsMeth,         bits_t::bit<21>())                                 \
-  c(Record,          bits_t::bit<22>())                                 \
-  c(RecDesc,         bits_t::bit<23>())                                 \
-  c(RFunc,           bits_t::bit<24>())                                 \
-  c(RClsMeth,        bits_t::bit<25>())                                 \
-  c(LazyCls,         bits_t::bit<26>())                                 \
+  c(RFunc,           bits_t::bit<22>())                                 \
+  c(RClsMeth,        bits_t::bit<23>())                                 \
+  c(LazyCls,         bits_t::bit<24>())                                 \
 /**/
 
 #define UNCCOUNTED_INIT_UNION \
-  kInitNull|kBool|kInt|kDbl|kPersistent|kFunc|kCls|kRecDesc|kLazyCls|kClsMeth
+  kInitNull|kBool|kInt|kDbl|kPersistent|kFunc|kCls|kLazyCls|kClsMeth
 
 #define INIT_CELL_UNION \
-  kUncountedInit|kStr|kArrLike|kObj|kRes|kRecord|kRFunc|kRClsMeth
+  kUncountedInit|kStr|kArrLike|kObj|kRes|kRFunc|kRClsMeth
 
 /*
  * This list should be in non-decreasing order of specificity.
@@ -335,7 +332,7 @@ constexpr bool operator>(Mem a, Mem b) {
  */
 #define COUNTED_INIT_UNION \
   kCountedStr|kCountedVec|kCountedDict|kCountedKeyset|kObj|kRes| \
-  kRecord|kRFunc|kRClsMeth
+  kRFunc|kRClsMeth
 
 #define IRT_SPECIAL                                           \
   /* Bottom and Top use IRTX to specify a custom Ptr kind */  \
@@ -403,7 +400,6 @@ public:
 
   static constexpr bits_t kArrSpecBits  = kArrLike;
   static constexpr bits_t kClsSpecBits  = kObj | kCls;
-  static constexpr bits_t kRecSpecBits  = kRecord | kRecDesc;
 
   /////////////////////////////////////////////////////////////////////////////
   // Basic methods.
@@ -674,7 +670,6 @@ public:
   const HPHP::Func* funcVal() const;
   const Class* clsVal() const;
   LazyClassData lclsVal() const;
-  const RecordDesc* recVal() const;
   ClsMethDataRef clsmethVal() const;
   rds::Handle rdsHandleVal() const;
   jit::TCA tcaVal() const;
@@ -712,11 +707,8 @@ public:
   static Type ExactObj(const Class* cls);
 
   /*
-   * Return a specialized TRecord.
+   * Return a specialized TCls.
    */
-  static Type SubRecord(const RecordDesc*);
-  static Type ExactRecord(const RecordDesc*);
-
   static Type ExactCls(const Class* cls);
   static Type SubCls(const Class* cls);
 
@@ -782,7 +774,6 @@ public:
    */
   ArraySpec arrSpec() const;
   ClassSpec clsSpec() const;
-  RecordSpec recSpec() const;
 
   /*
    * Return a discriminated TypeSpec for this Type's specialization.
@@ -824,7 +815,6 @@ private:
   Type(bits_t bits, Ptr ptr, Mem mem, bool hasConstVal, uintptr_t extra);
   Type(Type t, ArraySpec arraySpec);
   Type(Type t, ClassSpec classSpec);
-  Type(Type t, RecordSpec recSpec);
 
   /*
    * Bit-pack a DataType
@@ -874,17 +864,15 @@ private:
     const ArrayData* m_keysetVal;
     const HPHP::Func* m_funcVal;
     const Class* m_clsVal;
-    const RecordDesc* m_recVal;
     ClsMethDataRef m_clsmethVal;
     LazyClassData m_lclsVal;
     jit::TCA m_tcaVal;
     rds::Handle m_rdsHandleVal;
     TypedValue* m_ptrVal;
 
-    // Specializations for object classes, records and arrays.
+    // Specializations for object classes and arrays.
     ClassSpec m_clsSpec;
     ArraySpec m_arrSpec;
-    RecordSpec m_recSpec;
   };
 };
 

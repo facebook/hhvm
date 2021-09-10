@@ -154,7 +154,6 @@ DEBUG_ONLY bool checkEnqueuedKind(const HeapObject* h) {
     case HeaderKind::SmallMalloc:
     case HeaderKind::BigMalloc:
     case HeaderKind::String:
-    case HeaderKind::Record:
     case HeaderKind::Vec:
     case HeaderKind::Dict:
     case HeaderKind::Keyset:

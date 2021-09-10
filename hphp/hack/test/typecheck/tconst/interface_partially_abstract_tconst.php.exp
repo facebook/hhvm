@@ -1,2 +1,0 @@
-File "interface_partially_abstract_tconst.php", line 6, characters 14-14:
-An interface cannot contain a partially abstract type constant (NastCheck[3031])

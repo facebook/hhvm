@@ -79,7 +79,7 @@ impl<'a> Value<'a> {
     }
 
     #[inline(always)]
-    pub fn as_byte_string(&self) -> Option<&[u8]> {
+    pub fn as_byte_string(self) -> Option<&'a [u8]> {
         let block = self.as_block()?;
         if block.tag() != block::STRING_TAG {
             return None;
@@ -96,7 +96,7 @@ impl<'a> Value<'a> {
     }
 
     #[inline(always)]
-    pub fn as_str(&self) -> Option<Cow<str>> {
+    pub fn as_str(self) -> Option<Cow<'a, str>> {
         let slice = self.as_byte_string()?;
         Some(String::from_utf8_lossy(slice))
     }

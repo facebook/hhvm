@@ -5,7 +5,8 @@ if echo "$1" | grep -q -e 'install_dir='; then
   shift 1
 fi
 
-DIR=$(pwd -P)
+DIR="$(pwd -P)"
+SOURCE_ROOT="${SOURCE_ROOT:-$DIR}"
 
 # MacOS portability
 SHA1SUM=(openssl dgst -sha1 -r)
@@ -28,7 +29,7 @@ elif hg root >& /dev/null; then
 else
   root=$(dirname "$(readlink -e "${BASH_SOURCE[0]}/../..")")
   compiler=(date +%s_%N)
-  find_files=(find hphp -type f '!' -iregex '.*\(~\|#.*\|\.swp\|/tags\|/.bash_history\|/out\)')
+  find_files=(find "${SOURCE_ROOT}/hphp" -type f '!' -iregex '.*\(~\|#.*\|\.swp\|/tags\|/.bash_history\|/out\)')
 fi
 
 ################################################################################
@@ -56,7 +57,8 @@ if [ -z "${HHVM_REPO_SCHEMA}" ] ; then
     # Use Perl as BSD grep (MacOS) does not support negated groups
     HHVM_REPO_SCHEMA=$("${find_files[@]}" |\
         { perl -ne 'chomp; print "$_\n" if !m#^hphp/(bin|facebook(?!/extensions)|hack(?!/src)|neo|public_tld|test|tools|util|vixl|zend)|(/\.|/test/)# && !-l && -f' | \
-        LC_ALL=C sort | xargs -d'\n' "${xargs_args[@]}" ; } | "${SHA1SUM[@]}" | cut -b-40)
+        LC_ALL=C sort | tr "\n" "\0" | \
+        xargs -0 "${xargs_args[@]}" ; } | "${SHA1SUM[@]}" | cut -b-40)
 fi
 
 ################################################################################

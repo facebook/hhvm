@@ -34,6 +34,8 @@ let make_tmp_dir () =
     requests to the typechecker process. *)
 let monitor_daemon_main
     (options : ServerArgs.options) ~(proc_stack : string list) =
+  Folly.ensure_folly_init ();
+
   let www_root = ServerArgs.root options in
 
   (* Check mode: --check means we'll start up the server and it will do a typecheck
@@ -111,8 +113,6 @@ let monitor_daemon_main
           (match ServerArgs.with_saved_state options with
           | Some (ServerArgs.Saved_state_target_info _) -> true
           | _ -> false);
-        monitor_kill_again_fix =
-          local_config.ServerLocalConfig.monitor_kill_again_fix;
       }
     in
     SM.start_monitoring

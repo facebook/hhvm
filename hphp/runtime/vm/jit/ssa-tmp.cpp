@@ -115,7 +115,6 @@ Variant SSATmp::variantVal() const {
     case KindOfObject:
     case KindOfResource:
     case KindOfRFunc:
-    case KindOfRecord:
       break;
   }
   always_assert(false);

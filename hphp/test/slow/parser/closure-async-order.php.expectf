@@ -19,7 +19,7 @@ vec(1) {
       ["type_hint_nullable"]=>
       bool(true)
       ["default"]=>
-      object(Closure$%s;%s) (1) {
+      object(Closure$%s) (1) {
         ["parameter"]=>
         dict(1) {
           ["$x"]=>

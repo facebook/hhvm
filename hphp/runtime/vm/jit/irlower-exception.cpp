@@ -207,6 +207,15 @@ void cgThrowLateInitPropError(IRLS& env, const IRInstruction* inst) {
                argGroup(env, inst).ssa(0).ssa(1).ssa(2));
 }
 
+void cgRaiseCoeffectsCallViolation(IRLS& env, const IRInstruction* inst) {
+  if (RO::EvalCoeffectViolationWarningSampleRate == 0) return;
+  auto const data = inst->extra<FuncData>();
+  cgCallHelper(vmain(env), env,
+               CallSpec::direct(raiseCoeffectsCallViolationHelper),
+               kVoidDest, SyncOptions::Sync,
+               argGroup(env, inst).imm(data->func).ssa(0).ssa(1));
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 IMPL_OPCODE_CALL(InitThrowableFileAndLine)
@@ -221,13 +230,13 @@ IMPL_OPCODE_CALL(CheckFunReifiedGenericMismatch)
 IMPL_OPCODE_CALL(CheckInOutMismatch)
 IMPL_OPCODE_CALL(CheckReadonlyMismatch)
 IMPL_OPCODE_CALL(RaiseErrorOnInvalidIsAsExpressionType)
-IMPL_OPCODE_CALL(RaiseCoeffectsCallViolation)
 IMPL_OPCODE_CALL(RaiseCoeffectsFunParamCoeffectRulesViolation)
 IMPL_OPCODE_CALL(RaiseCoeffectsFunParamTypeViolation)
 IMPL_OPCODE_CALL(RaiseError)
 IMPL_OPCODE_CALL(RaiseTooManyArg)
 IMPL_OPCODE_CALL(RaiseNotice)
 IMPL_OPCODE_CALL(ThrowUndefPropException)
+IMPL_OPCODE_CALL(RaiseReadonlyPropViolation)
 IMPL_OPCODE_CALL(ThrowUninitLoc)
 IMPL_OPCODE_CALL(RaiseWarning)
 IMPL_OPCODE_CALL(ThrowArrayIndexException)

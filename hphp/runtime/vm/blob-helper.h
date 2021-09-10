@@ -211,6 +211,14 @@ struct BlobEncoder {
 
   void encode(const TypedValueAux& tv) = delete;
 
+  void encode(const Array& a) {
+    if (a.isNull()) {
+      encode(make_tv<KindOfUninit>());
+      return;
+    }
+    encode(make_array_like_tv(a.get()));
+  }
+
   template<class T>
   void encode(const Optional<T>& opt) {
     const bool some = opt.has_value();
@@ -453,6 +461,18 @@ struct BlobDecoder {
   }
 
   void decode(TypedValueAux& tv) = delete;
+
+  void decode(Array& a) {
+    TypedValue tv;
+    decode(tv);
+    if (tv.m_type == KindOfUninit) {
+      a = Array{};
+      return;
+    }
+    assertx(tvIsArrayLike(tv));
+    assertx(tv.m_data.parr->isStatic());
+    a = Array::attach(tv.m_data.parr);
+  }
 
   template<class T>
   void decode(Optional<T>& opt) {

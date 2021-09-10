@@ -34,6 +34,11 @@ namespace HPHP {
 struct String;
 struct StaticString;
 
+/*
+ * NB: This resolution logic and HHBBC must always agree exactly. If
+ * you change anything here, HHBBC must be changed to match.
+ */
+
 namespace {
 
 /* TSEnv holds values that are propagated through the entire resolution process
@@ -447,11 +452,15 @@ std::string resolveContextMsg(const TSCtx& ctx) {
   return msg;
 }
 
-/* returns the unresolved TypeStructure; if aliasName is not an alias,
- * return an empty Array. */
-Array getAlias(TSEnv& env, const String& aliasName) {
+/*
+ * Returns the type-structure for the alias with the given name. If
+ * the name is not an alias, return an empty Array. The bool is
+ * whether the returned type-structure is already resolved or not.
+*/
+std::pair<Array, bool> getAlias(TSEnv& env, const String& aliasName,
+                                bool usePreResolved = true) {
   if (aliasName.same(s_this) || Class::lookup(aliasName.get())) {
-    return Array::CreateDict();
+    return std::make_pair(Array::CreateDict(), false);
   }
 
   auto persistentTA = true;
@@ -460,13 +469,24 @@ Array getAlias(TSEnv& env, const String& aliasName) {
     : TypeAlias::load(aliasName.get(), &persistentTA);
   if (!typeAlias) {
     env.partial = true;
-    return Array::CreateDict();
+    return std::make_pair(Array::CreateDict(), false);
+  }
+
+  env.persistent &= persistentTA;
+
+  if (usePreResolved) {
+    auto const& preresolved = typeAlias->resolvedTypeStructure();
+    if (!preresolved.isNull()) {
+      assertx(preresolved.isDict());
+      assertx(!preresolved.empty());
+      return std::make_pair(preresolved, true);
+    }
   }
 
   // this returned type structure is unresolved.
   assertx(typeAlias->typeStructure().isDict());
-  env.persistent &= persistentTA;
-  return typeAlias->typeStructure();
+  assertx(!typeAlias->typeStructure().empty());
+  return std::make_pair(typeAlias->typeStructure(), false);
 }
 
 const Class* getClass(TSEnv& env, const TSCtx& ctx, const String& clsName) {
@@ -501,7 +521,9 @@ const Class* getClass(TSEnv& env, const TSCtx& ctx, const String& clsName) {
   }
 
   auto name = clsName;
-  auto ts = getAlias(env, name);
+  // We can't use preresolved aliases here in order to keep the error
+  // message the same.
+  auto ts = getAlias(env, name, false).first;
   while (!ts.empty()) {
     assertx(ts.exists(s_kind));
     if (!ts.exists(s_classname)) {
@@ -512,7 +534,7 @@ const Class* getClass(TSEnv& env, const TSCtx& ctx, const String& clsName) {
         name.data());
     }
     name = ts[s_classname].asCStrRef();
-    ts = getAlias(env, name);
+    ts = getAlias(env, name, false).first;
   }
 
   auto const cls = env.allow_partial ? Class::lookup(name.get())
@@ -685,9 +707,13 @@ Array resolveTS(TSEnv& env, const TSCtx& ctx, const Array& arr) {
     case TypeStructure::Kind::T_unresolved: {
       assertx(arr.exists(s_classname));
       auto const clsName = arr[s_classname].asCStrRef();
-      auto ts = getAlias(env, clsName);
+      auto tsAndPreresolved = getAlias(env, clsName);
+      auto ts = tsAndPreresolved.first;
+      auto const preresolved = tsAndPreresolved.second;
 
       auto resolve = [&] (const ArrayData* generics = nullptr) {
+        // If it's already resolved, don't do so again.
+        if (preresolved) return ts;
         TSCtx newCtx;
         newCtx.name = clsName.get();
         newCtx.generics = generics;
@@ -820,7 +846,24 @@ Array resolveTS(TSEnv& env, const TSCtx& ctx, const Array& arr) {
       break;
     }
     case TypeStructure::Kind::T_xhp:
-    default:
+    case TypeStructure::Kind::T_void:
+    case TypeStructure::Kind::T_int:
+    case TypeStructure::Kind::T_bool:
+    case TypeStructure::Kind::T_float:
+    case TypeStructure::Kind::T_string:
+    case TypeStructure::Kind::T_resource:
+    case TypeStructure::Kind::T_num:
+    case TypeStructure::Kind::T_arraykey:
+    case TypeStructure::Kind::T_noreturn:
+    case TypeStructure::Kind::T_mixed:
+    case TypeStructure::Kind::T_class:
+    case TypeStructure::Kind::T_interface:
+    case TypeStructure::Kind::T_trait:
+    case TypeStructure::Kind::T_enum:
+    case TypeStructure::Kind::T_nonnull:
+    case TypeStructure::Kind::T_null:
+    case TypeStructure::Kind::T_nothing:
+    case TypeStructure::Kind::T_dynamic:
       return arr.toDict();
   }
 

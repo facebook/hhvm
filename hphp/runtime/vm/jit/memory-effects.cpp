@@ -691,7 +691,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case VerifyParamCallable:
   case VerifyParamCls:
   case VerifyParamFailHard:
-  case VerifyParamRecDesc:
     return may_load_store(AUnknown, AHeapAny);
   // VerifyParamFail might coerce the parameter to the desired type rather than
   // throwing.
@@ -716,7 +715,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case VerifyRetCallable:
   case VerifyRetCls:
   case VerifyReifiedReturnType:
-  case VerifyRetRecDesc:
     return may_load_store(AHeapAny | livefp(inst), AHeapAny);
 
   case VerifyRetFail:
@@ -730,7 +728,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case VerifyPropAll:
   case VerifyPropCoerce:
   case VerifyPropCoerceAll:
-  case VerifyPropRecDesc:
     return may_load_store(AHeapAny | livefp(inst), AHeapAny);
 
   case ContEnter:
@@ -1214,15 +1211,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       return may_load_store_move(stack_in, AEmpty, stack_in);
     }
 
-  case NewRecord:
-    {
-      auto const extra = inst.extra<NewStructData>();
-      auto const stack_in = AStack::range(
-        extra->offset,
-        extra->offset + static_cast<int32_t>(extra->numKeys)
-      );
-      return may_load_store_move(stack_in, AEmpty, stack_in);
-    }
   case MemoGetStaticValue:
   case MemoGetLSBValue:
   case MemoGetInstanceValue:
@@ -1575,7 +1563,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case EqBool:
   case EqCls:
   case EqLazyCls:
-  case EqRecDesc:
   case EqFunc:
   case EqStrPtr:
   case EqArrayDataPtr:
@@ -1654,8 +1641,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdMROPropAddr:
   case LdClsCns:
   case LdSubClsCns:
-  case LdSubClsCnsClsName:
-  case LdTypeCns:
+  case LdResolvedTypeCns:
+  case LdResolvedTypeCnsClsName:
+  case LdResolvedTypeCnsNoCheck:
   case CheckSubClsCns:
   case LdClsCnsVecLen:
   case FuncHasAttr:
@@ -1771,7 +1759,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case InstanceOfBitmask:
   case NInstanceOfBitmask:
   case InstanceOfIface:
-  case InstanceOfRecDesc:
   case InterfaceSupportsArrLike:
   case InterfaceSupportsDbl:
   case InterfaceSupportsInt:
@@ -1822,7 +1809,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ContArIncKey:
   case ContArUpdateIdx:
   case LdClsCachedSafe:
-  case LdRecDescCachedSafe:
   case LdClsInitData:
   case UnwindCheckSideExit:
   case LdCns:
@@ -1831,8 +1817,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdClsMethodCacheCls:
   case LdClsMethodCacheFunc:
   case LdClsMethodFCacheFunc:
-  case LdClsTypeCns:
-  case LdClsTypeCnsClsName:
+  case LdTypeCns:
+  case LdTypeCnsNoThrow:
+  case LdTypeCnsClsName:
   case ProfileSwitchDest:
   case LdFuncCls:
   case LdFuncInOutBits:
@@ -1840,7 +1827,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdFuncName:
   case LdMethCallerName:
   case LdObjClass:
-  case LdRecDesc:
   case LdObjInvoke:
   case LdObjMethodD:
   case LdObjMethodS:
@@ -1929,6 +1915,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case RaiseForbiddenDynCall:
   case RaiseForbiddenDynConstruct:
   case RaiseStrToClassNotice:
+  case RaiseReadonlyPropViolation:
   case CheckClsMethFunc:
   case CheckClsReifiedGenericMismatch:
   case CheckFunReifiedGenericMismatch:
@@ -1954,7 +1941,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdClsCached:    // autoload
   case LdFunc:         // autoload
   case LdFuncCached:   // autoload
-  case LdRecDescCached:    // autoload
   case InitClsCns:      // autoload
   case InitSubClsCns: // May run 86cinit
   case ProfileSubClsCns: // May run 86cinit

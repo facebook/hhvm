@@ -8,6 +8,7 @@
  *)
 
 open Hh_prelude
+module Lint = Lints_core
 
 type result = Pos.absolute Lint.t list
 

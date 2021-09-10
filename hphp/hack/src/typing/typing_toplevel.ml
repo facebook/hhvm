@@ -1825,7 +1825,11 @@ let class_def_ env c tc =
   in
   let (env, file_attrs) = Typing.file_attributes env c.c_file_attributes in
   let ctx = Env.get_ctx env in
-  if (not Ast_defs.(is_c_trait c.c_kind)) && not (shallow_decl_enabled ctx) then (
+  if
+    (not (skip_hierarchy_checks ctx))
+    && (not Ast_defs.(is_c_trait c.c_kind))
+    && not (shallow_decl_enabled ctx)
+  then (
     (* These checks are only for eager mode. The same checks are performed
      * for shallow mode in Typing_inheritance *)
     let method_pos ~is_static class_id meth_id =
@@ -1864,7 +1868,7 @@ let class_def_ env c tc =
     List.iter (Cls.methods tc) ~f:(check_override ~is_static:false);
     List.iter (Cls.smethods tc) ~f:(check_override ~is_static:true)
   );
-  check_enum_includes env c;
+  if not (skip_hierarchy_checks ctx) then check_enum_includes env c;
   let (pc, c_name) = c.c_name in
   let (req_extends, req_implements) = split_reqs c.c_reqs in
   let hints_and_decl_tys hints =
@@ -1885,8 +1889,10 @@ let class_def_ env c tc =
     | Ast_defs.(Cclass _ | Cinterface | Cenum | Cenum_class _) -> []
   in
   let check_constructor_dep = check_constructor_dep env in
-  check_implements_or_extends_unique implements;
-  check_implements_or_extends_unique extends;
+  if not (skip_hierarchy_checks ctx) then (
+    check_implements_or_extends_unique implements;
+    check_implements_or_extends_unique extends
+  );
   check_constructor_dep extends;
   check_constructor_dep uses;
   check_constructor_dep req_extends;
@@ -1927,9 +1933,14 @@ let class_def_ env c tc =
       impl
   in
   let env = check_class_parents_where_constraints env pc impl in
-  check_parent env c tc;
-  check_parents_sealed env c tc;
-  if TypecheckerOptions.enforce_sealed_subclasses (Env.get_tcopt env) then
+  if not (skip_hierarchy_checks ctx) then (
+    check_parent env c tc;
+    check_parents_sealed env c tc
+  );
+  if
+    (not (skip_hierarchy_checks ctx))
+    && TypecheckerOptions.enforce_sealed_subclasses (Env.get_tcopt env)
+  then
     if is_enum_or_enum_class c.c_kind then
       if TypecheckerOptions.enable_enum_supertyping (Env.get_tcopt env) then
         sealed_subtype ctx c ~is_enum:true
@@ -1940,19 +1951,21 @@ let class_def_ env c tc =
   let (_ : env) =
     check_generic_class_with_SupportDynamicType env c (extends @ implements)
   in
-  check_extend_abstract (pc, tc);
-  if Cls.const tc then
+  if not (skip_hierarchy_checks ctx) then check_extend_abstract (pc, tc);
+  if (not (skip_hierarchy_checks ctx)) && Cls.const tc then
     List.iter c.c_uses ~f:(check_non_const_trait_members pc env);
   let (static_vars, vars) = split_vars c.c_vars in
-  List.iter static_vars ~f:(fun { cv_id = (p, id); _ } ->
-      check_static_class_element (Cls.get_prop tc) ~elt_type:`Property id p);
-  List.iter vars ~f:(fun { cv_id = (p, id); _ } ->
-      check_dynamic_class_element (Cls.get_sprop tc) ~elt_type:`Property id p);
   let (constructor, static_methods, methods) = split_methods c.c_methods in
-  List.iter static_methods ~f:(fun { m_name = (p, id); _ } ->
-      check_static_class_element (Cls.get_method tc) ~elt_type:`Method id p);
-  List.iter methods ~f:(fun { m_name = (p, id); _ } ->
-      check_dynamic_class_element (Cls.get_smethod tc) ~elt_type:`Method id p);
+  if not (skip_hierarchy_checks ctx) then (
+    List.iter static_vars ~f:(fun { cv_id = (p, id); _ } ->
+        check_static_class_element (Cls.get_prop tc) ~elt_type:`Property id p);
+    List.iter vars ~f:(fun { cv_id = (p, id); _ } ->
+        check_dynamic_class_element (Cls.get_sprop tc) ~elt_type:`Property id p);
+    List.iter static_methods ~f:(fun { m_name = (p, id); _ } ->
+        check_static_class_element (Cls.get_method tc) ~elt_type:`Method id p);
+    List.iter methods ~f:(fun { m_name = (p, id); _ } ->
+        check_dynamic_class_element (Cls.get_smethod tc) ~elt_type:`Method id p)
+  );
   let env =
     if skip_hierarchy_checks ctx then
       env
@@ -1963,7 +1976,7 @@ let class_def_ env c tc =
         ~parents:(List.map impl ~f:snd)
         (fst c.c_name, tc)
   in
-  if Cls.is_disposable tc then
+  if (not (skip_hierarchy_checks ctx)) && Cls.is_disposable tc then
     List.iter
       (c.c_extends @ c.c_uses)
       ~f:(Typing_disposable.enforce_is_disposable env);

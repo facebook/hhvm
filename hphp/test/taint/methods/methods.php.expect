@@ -1,4 +1,4 @@
-{"hops": ["__source", "__sink"]}
-{"hops": ["__source", "MyClass::identity", "__sink"]}
-{"hops": ["__source", "MySubClass::identity", "__sink"]}
-{"hops": ["__source", "MyClass::static_identity", "__sink"]}
+{"hops": ["__source", "source_bypassing_identity_method_into_sink", "__sink"]}
+{"hops": ["__source", "source_through_identity_method_into_sink", "MyClass::identity", "source_through_identity_method_into_sink", "__sink"]}
+{"hops": ["__source", "source_through_virtual_identity_method_into_sink", "MySubClass::identity", "source_through_virtual_identity_method_into_sink", "__sink"]}
+{"hops": ["__source", "source_through_static_identity_method_into_sink", "MyClass::static_identity", "source_through_static_identity_method_into_sink", "__sink"]}

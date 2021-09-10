@@ -219,6 +219,11 @@ struct FactsStore : public AutoloadMap {
   virtual Array getTypeAttributes(const String& type) = 0;
 
   /**
+   * Return all attributes decorating the given type alias.
+   */
+  virtual Array getTypeAliasAttributes(const String& typeAlias) = 0;
+
+  /**
    * Return all attributes decorating the given method.
    */
   virtual Array getMethodAttributes(const String& type, const String& method) = 0;
@@ -235,6 +240,15 @@ struct FactsStore : public AutoloadMap {
    * If the given type does not have the given attribute, return an empty vec.
    */
   virtual Array getTypeAttrArgs(const String& type, const String& attr) = 0;
+
+  /**
+   * Return the arguments associated with the given type alias and attribute,
+   * as a vec.
+   *
+   * If the given type alias does not have the given attribute, return an
+   * empty vec.
+   */
+  virtual Array getTypeAliasAttrArgs(const String& type, const String& attr) = 0;
 
   /**
    * Return the arguments associated with the given method and attribute, as a

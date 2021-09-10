@@ -23,6 +23,9 @@
 #include "hphp/util/hash.h"
 
 namespace HPHP {
+
+struct StringData;
+
 namespace Facts {
 
 /**
@@ -31,27 +34,26 @@ namespace Facts {
  * In prod code, this wraps HPHP::StringData. In test code, this wraps
  * std::string.
  */
-template <typename S> struct StringPtr {
-  /**
-   * Pass either a `const StringData*` in prod code or a `const
-   * std::string*` in test code.
-   */
-  explicit StringPtr(const S*) noexcept;
+struct StringPtr {
+
+  explicit StringPtr(const StringData* impl) noexcept : m_impl{impl} {
+  }
+
   StringPtr() = default;
 
-  bool operator==(const StringPtr<S>& o) const noexcept {
+  bool operator==(const StringPtr& o) const noexcept {
     return same(o);
   }
 
-  bool operator!=(const StringPtr<S>& o) const noexcept {
+  bool operator!=(const StringPtr& o) const noexcept {
     return !operator==(o);
   }
 
-  bool operator==(const S* p) const noexcept {
+  bool operator==(const StringData* p) const noexcept {
     return m_impl == p;
   }
 
-  bool operator!=(const S* p) const noexcept {
+  bool operator!=(const StringData* p) const noexcept {
     return !operator==(p);
   }
 
@@ -106,56 +108,33 @@ template <typename S> struct StringPtr {
    */
   bool isame(const StringPtr& s) const noexcept;
 
-  const S* get() const noexcept {
+  const StringData* get() const noexcept {
     return m_impl;
   }
 
-  const S* operator->() const noexcept {
+  const StringData* operator->() const noexcept {
     return get();
   }
 
-  const S& operator*() const noexcept {
+  const StringData& operator*() const noexcept {
     return *get();
   }
 
-  const S* m_impl = nullptr;
+private:
+  friend std::ostream& operator<<(std::ostream& os, const StringPtr& s);
+  const StringData* m_impl = nullptr;
 };
 
-template <typename S> StringPtr<S> makeStringPtr(std::string_view s);
+StringPtr makeStringPtr(std::string_view s);
+StringPtr makeStringPtr(const StringData& s);
 
-template <typename S> StringPtr<S> makeStringPtr(const S& s);
-
-template <typename S> struct string_ptr_hash {
-  strhash_t operator()(StringPtr<S> s) const noexcept {
-    return s.hash();
-  }
-};
-
-template <typename S> struct string_ptr_same {
-  bool operator()(StringPtr<S> s1, StringPtr<S> s2) const noexcept {
-    return s1.same(s2);
-  }
-};
-
-template <typename S> struct string_ptr_isame {
-  bool operator()(StringPtr<S> s1, StringPtr<S> s2) const noexcept {
-    return s1.isame(s2);
-  }
-};
-
-template <typename S>
-std::ostream& operator<<(std::ostream& os, const StringPtr<S>& s) {
-  if (s.m_impl == nullptr) {
-    return os << "<nullptr>";
-  }
-  return os << *s.m_impl;
-}
+std::ostream& operator<<(std::ostream& os, const StringPtr& s);
 
 } // namespace Facts
 } // namespace HPHP
 
-template <typename S> struct std::hash<HPHP::Facts::StringPtr<S>> {
-  std::size_t operator()(const HPHP::Facts::StringPtr<S>& s) const noexcept {
+template <> struct std::hash<HPHP::Facts::StringPtr> {
+  std::size_t operator()(const HPHP::Facts::StringPtr& s) const noexcept {
     return s.hash();
   }
 };

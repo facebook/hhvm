@@ -16,6 +16,16 @@ pkg="$1"
 lib="$2"
 shift 2
 
+while :; do
+    case $1 in
+        --cxx) cxx=$2
+          shift 2
+        ;;
+        *) break
+    esac
+done
+
+
 if [ -z "${HACK_NO_CARGO_VENDOR}" ]; then
   LOCK_FLAG="--frozen"
 else
@@ -23,6 +33,10 @@ else
 fi
 
 TARGET_DIR="${HACK_BUILD_ROOT}/target"
+if [ -n "$cxx" ]
+then
+  TARGET_DIR=$cxx
+fi
 
 profile=debug; profile_flags=
 if [ -z ${HACKDEBUG+1} ]; then

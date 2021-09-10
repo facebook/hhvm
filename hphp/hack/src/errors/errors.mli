@@ -1209,6 +1209,9 @@ val attribute_too_many_arguments : Pos.t -> string -> int -> unit
 
 val attribute_too_few_arguments : Pos.t -> string -> int -> unit
 
+val attribute_not_exact_number_of_args :
+  Pos.t -> attr_name:string -> expected_args:int -> actual_args:int -> unit
+
 val attribute_param_type : Pos.t -> string -> unit
 
 val deprecated_use : Pos.t -> ?pos_def:Pos_or_decl.t option -> string -> unit
@@ -1803,3 +1806,6 @@ val module_hint : def_pos:Pos_or_decl.t -> use_pos:Pos.t -> unit
 
 val expression_tree_non_public_property :
   use_pos:Pos.t -> def_pos:Pos_or_decl.t -> unit
+
+val internal_method_with_invalid_visibility :
+  attr_pos:Pos.t -> visibility:Ast_defs.visibility -> unit

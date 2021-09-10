@@ -41,7 +41,6 @@
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/preclass.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
-#include "hphp/runtime/vm/record-emitter.h"
 #include "hphp/runtime/vm/repo-autoload-map-builder.h"
 #include "hphp/runtime/vm/type-alias-emitter.h"
 #include "hphp/runtime/vm/unit.h"
@@ -85,7 +84,6 @@ UnitEmitter::UnitEmitter(const SHA1& sha1,
 
 UnitEmitter::~UnitEmitter() {
   for (auto& pce : m_pceVec) delete pce;
-  for (auto& re : m_reVec) delete re;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -201,12 +199,6 @@ PreClassEmitter* UnitEmitter::newPreClassEmitter(
   auto pce = new PreClassEmitter(*this, m_pceVec.size(), name);
   m_pceVec.push_back(pce);
   return pce;
-}
-
-RecordEmitter* UnitEmitter::newRecordEmitter(const std::string& name) {
-  auto const re = new RecordEmitter(*this, m_reVec.size(), name);
-  m_reVec.push_back(re);
-  return re;
 }
 
 Id UnitEmitter::pceId(folly::StringPiece clsName) {
@@ -387,9 +379,6 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
   u->m_bcSha1 = m_bcSha1;
   for (auto const& pce : m_pceVec) {
     u->m_preClasses.push_back(PreClassPtr(pce->create(*u)));
-  }
-  for (auto const& re : m_reVec) {
-    u->m_preRecords.push_back(PreRecordDescPtr(re->create(*u)));
   }
   for (auto const& te : m_typeAliases) {
     u->m_typeAliases.push_back(te->create(*u));
@@ -610,27 +599,9 @@ void UnitEmitter::serde(SerDe& sd, bool lazy) {
       serdeMethods(pce);
     },
     [&] (auto& sd, PreClassEmitter* pce) {
-      auto const nm = StripIdFromAnonymousClassName(pce->name()->slice());
-      sd(nm.toString());
+      sd(pce->name()->toCppString());
       pce->serdeMetaData(sd);
       serdeMethods(pce);
-    }
-  );
-
-  // Record emitters
-  seq(
-    m_reVec,
-    [&] (auto& sd, size_t i) {
-      std::string name;
-      sd(name);
-      auto re = newRecordEmitter(name);
-      re->serdeMetaData(sd);
-      assertx(re->id() == i);
-    },
-    [&] (auto& sd, RecordEmitter* re) {
-      auto const nm = StripIdFromAnonymousClassName(re->name()->slice());
-      sd(nm.toString());
-      re->serdeMetaData(sd);
     }
   );
 

@@ -1,5 +1,5 @@
 Errors:
-  [14:5-27] You are calling `Shapes::idx()` on a field known to not exist
+  [14:21-26] You are calling `Shapes::idx()` on a field known to not exist
   [4:45-52] The field `foo` is not defined in this shape
 [(Fun
     { fd_namespace =

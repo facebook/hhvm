@@ -4,6 +4,7 @@
   (libraries
     core_kernel
     facts
+    folly_stubs
     heap_shared_mem_hash
     hhbc
     hhi

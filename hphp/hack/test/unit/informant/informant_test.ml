@@ -57,7 +57,6 @@ let basic_setup_rev_5_and_200_and_start_informant temp_dir =
         watchman_debug_logging = false;
         ignore_hh_version = false;
         is_saved_state_precomputed = false;
-        monitor_kill_again_fix = false;
       }
   in
   let report = HhMonitorInformant.report informant Informant_sig.Server_alive in

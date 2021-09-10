@@ -32,6 +32,7 @@
 #include "hphp/hhbbc/context.h"
 #include "hphp/hhbbc/func-util.h"
 #include "hphp/hhbbc/index.h"
+#include "hphp/hhbbc/type-structure.h"
 #include "hphp/hhbbc/type-system.h"
 
 #include "hphp/util/text-util.h"
@@ -337,11 +338,11 @@ std::string show(const Func& f) {
   return ret;
 }
 
-std::string show(const Class& cls, bool normalizeClosures) {
+std::string show(const Class& cls) {
   std::string ret;
   folly::toAppend(
     "class ",
-    normalizeClosures ? normalized_class_name(cls) : cls.name->data(),
+    cls.name->data(),
     &ret
   );
   if (cls.parentName) {
@@ -362,7 +363,7 @@ std::string show(const Class& cls, bool normalizeClosures) {
   return ret;
 }
 
-std::string show(const Unit& unit, bool normalizeClosures) {
+std::string show(const Unit& unit) {
   std::string ret;
   folly::toAppend(
     "Unit ", unit.filename->data(), "\n",
@@ -371,7 +372,7 @@ std::string show(const Unit& unit, bool normalizeClosures) {
 
   for (auto& c : unit.classes) {
     folly::toAppend(
-      indent(2, show(*c, normalizeClosures)),
+      indent(2, show(*c)),
       &ret
     );
   }
@@ -603,18 +604,6 @@ std::string show(const Type& t) {
       if (t.m_data.dcls.isCtx) folly::toAppend(" this", &ret);
       return impl(BCls, ret);
     }
-    case DataTag::Record: {
-      std::string ret;
-      switch (t.m_data.drec.type) {
-      case DRecord::Exact:
-        folly::toAppend("=", show(t.m_data.drec.rec), &ret);
-        break;
-      case DRecord::Sub:
-        folly::toAppend("<=", show(t.m_data.drec.rec), &ret);
-        break;
-      }
-      return impl(BRecord, ret);
-    }
     case DataTag::ArrLikePacked:
       return impl(
         BArrLikeN,
@@ -708,6 +697,7 @@ std::string show(const Type& t) {
 
 std::string show(Context ctx) {
   if (!ctx.func) {
+    if (!ctx.cls) return "-";
     return ctx.cls->name->toCppString();
   }
   auto ret = std::string{};
@@ -741,6 +731,25 @@ std::string show(const PropMergeResult<Type>& r) {
     "{{adjusted:{},throws:{}}}",
     show(r.adjusted),
     show(r.throws)
+  );
+}
+
+std::string show(const ClsConstLookupResult<Type>& r) {
+  return folly::sformat(
+    "{{ty:{},found:{},throw:{}}}",
+    show(r.ty),
+    show(r.found),
+    r.mightThrow
+  );
+}
+
+std::string show(const ClsTypeConstLookupResult<TypeStructureResolution>& r) {
+  return folly::sformat(
+    "{{ty:{},fail:{},found:{},abstract:{}}}",
+    show(r.resolution.type),
+    r.resolution.mightFail,
+    show(r.found),
+    show(r.abstract)
   );
 }
 

@@ -8,6 +8,7 @@
  *)
 
 module SyntaxError = Full_fidelity_syntax_error
+module Lint = Lints_core
 open Hh_prelude
 open Scoured_comments
 

@@ -217,7 +217,7 @@ let parse_options () =
   let simple_pessimize = ref 0.0 in
   let complex_coercion = ref false in
   let disable_partially_abstract_typeconsts = ref false in
-  let disallow_partially_abstract_typeconst_definitions = ref false in
+  let disallow_partially_abstract_typeconst_definitions = ref true in
   let rust_parser_errors = ref false in
   let symbolindex_file = ref None in
   let check_xhp_attribute = ref false in
@@ -1292,7 +1292,8 @@ let test_decl_compare ctx filenames builtins files_contents files_info =
     let get_classes path =
       match Relative_path.Map.find_opt files_info path with
       | None -> SSet.empty
-      | Some info -> SSet.of_list @@ List.map info.FileInfo.classes ~f:snd
+      | Some info ->
+        SSet.of_list @@ List.map info.FileInfo.classes ~f:(fun (_, x, _) -> x)
     in
     (* We need to oldify, not remove, for ClassEltDiff to work *)
     Decl_redecl_service.oldify_type_decl
@@ -1698,7 +1699,7 @@ let handle_mode
         ~init:[]
         ~f:(fun fn content lint_errors ->
           lint_errors
-          @ fst (Lint.do_ (fun () -> Linting_service.lint ctx fn content)))
+          @ fst (Lints_core.do_ (fun () -> Linting_main.lint ctx fn content)))
     in
     if not (List.is_empty lint_errors) then (
       let lint_errors =
@@ -1706,11 +1707,11 @@ let handle_mode
           ~compare:
             begin
               fun x y ->
-              Pos.compare (Lint.get_pos x) (Lint.get_pos y)
+              Pos.compare (Lints_core.get_pos x) (Lints_core.get_pos y)
             end
           lint_errors
       in
-      let lint_errors = List.map ~f:Lint.to_absolute lint_errors in
+      let lint_errors = List.map ~f:Lints_core.to_absolute lint_errors in
       ServerLintTypes.output_text stdout lint_errors error_format;
       exit 2
     ) else
@@ -1736,7 +1737,7 @@ let handle_mode
         if Relative_path.Map.mem builtins fn then
           ()
         else (
-          List.iter fileinfo.FileInfo.classes ~f:(fun (_p, class_) ->
+          List.iter fileinfo.FileInfo.classes ~f:(fun (_p, class_, _) ->
               Printf.printf
                 "Ancestors of %s and their overridden methods:\n"
                 class_;
@@ -1755,7 +1756,7 @@ let handle_mode
                 ~find_children:false;
               Printf.printf "\n");
           Printf.printf "\n";
-          List.iter fileinfo.FileInfo.classes ~f:(fun (_p, class_) ->
+          List.iter fileinfo.FileInfo.classes ~f:(fun (_p, class_, _) ->
               Printf.printf
                 "Children of %s and the methods they override:\n"
                 class_;
@@ -2178,7 +2179,7 @@ let handle_mode
     Relative_path.Map.iter files_info ~f:(fun _file info ->
         let { FileInfo.classes; _ } = info in
         let is_first = ref true in
-        List.iter classes ~f:(fun (_, classname) ->
+        List.iter classes ~f:(fun (_, classname, _) ->
             if not !is_first then Printf.printf "\n";
             is_first := false;
             let { Decl_linearize.lin_members; Decl_linearize.lin_ancestors } =

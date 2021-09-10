@@ -122,15 +122,7 @@ type seconds_since_epoch = float
 
 type progress = job_progress
 
-let neutral : unit -> typing_result =
- fun () ->
-  {
-    errors = Errors.empty;
-    dep_edges = Typing_deps.dep_edges_make ();
-    telemetry = Telemetry.create ();
-    jobs_finished_to_end = Measure.create ();
-    jobs_finished_early = Measure.create ();
-  }
+let neutral : unit -> typing_result = Typing_service_types.make_typing_result
 
 let should_enable_deferring
     (opts : GlobalOptions.t) (file : check_file_computation) =
@@ -190,6 +182,7 @@ let process_file
             (GlobalOptions.tco_defer_class_memory_mb_threshold opts)
         @@ fun () ->
         Errors.do_with_context fn Errors.Typing @@ fun () ->
+        let snd (_, x, _) = x in
         let (fun_tasts, fun_global_tvenvs) =
           List.map funs ~f:snd
           |> List.filter_map ~f:(type_fun ctx fn)
@@ -228,11 +221,13 @@ let process_file
       Caml.Printexc.raise_with_backtrace e stack
 
 let get_mem_telemetry () : Telemetry.t option =
-  if SharedMem.hh_log_level () > 0 then
+  if SharedMem.SMTelemetry.hh_log_level () > 0 then
     Some
       (Telemetry.create ()
       |> Telemetry.object_ ~key:"gc" ~value:(Telemetry.quick_gc_stat ())
-      |> Telemetry.object_ ~key:"shmem" ~value:(SharedMem.get_telemetry ()))
+      |> Telemetry.object_
+           ~key:"shmem"
+           ~value:(SharedMem.SMTelemetry.get_telemetry ()))
   else
     None
 
@@ -309,7 +304,7 @@ let profile_log
       (Option.value duration_second_run ~default:duration)
       start_heap_mb
       end_heap_mb
-      (if SharedMem.hh_log_level () > 0 then
+      (if SharedMem.SMTelemetry.hh_log_level () > 0 then
         "\n" ^ Telemetry.to_string telemetry
       else
         "")
@@ -373,7 +368,7 @@ external hh_malloc_trim : unit -> unit = "hh_malloc_trim"
  * the system.
  *)
 let clear_caches_and_force_gc () =
-  SharedMem.invalidate_caches ();
+  SharedMem.invalidate_local_caches ();
   HackEventLogger.flush ();
   Gc.compact ();
   hh_malloc_trim ()
@@ -381,14 +376,21 @@ let clear_caches_and_force_gc () =
 let process_files
     (dynamic_view_files : Relative_path.Set.t)
     (ctx : Provider_context.t)
-    ({ errors; dep_edges; telemetry; jobs_finished_early; jobs_finished_to_end } :
+    ({
+       errors;
+       dep_edges;
+       telemetry;
+       adhoc_profiling;
+       jobs_finished_early;
+       jobs_finished_to_end;
+     } :
       typing_result)
     (progress : computation_progress)
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
     ~(remote_execution : ReEnv.t option)
     ~(check_info : check_info) : typing_result * computation_progress =
-  if not longlived_workers then SharedMem.invalidate_caches ();
+  if not longlived_workers then SharedMem.invalidate_local_caches ();
   File_provider.local_changes_push_sharedmem_stack ();
   Ast_provider.local_changes_push_sharedmem_stack ();
 
@@ -580,7 +582,19 @@ let process_files
   TypingLogger.flush_buffers ();
   Ast_provider.local_changes_pop_sharedmem_stack ();
   File_provider.local_changes_pop_sharedmem_stack ();
-  ( { errors; dep_edges; telemetry; jobs_finished_early; jobs_finished_to_end },
+  let adhoc_profiling =
+    Adhoc_profiler.CallTree.merge
+      adhoc_profiling
+      (Adhoc_profiler.get_and_reset ())
+  in
+  ( {
+      errors;
+      dep_edges;
+      telemetry;
+      adhoc_profiling;
+      jobs_finished_early;
+      jobs_finished_to_end;
+    },
     progress )
 
 let load_and_process_files
@@ -1076,6 +1090,7 @@ type result = {
   errors: Errors.t;
   delegate_state: Delegate.state;
   telemetry: Telemetry.t;
+  adhoc_profiling: Adhoc_profiler.CallTree.t;
   diagnostic_pusher: Diagnostic_pusher.t option * seconds_since_epoch option;
 }
 
@@ -1178,8 +1193,9 @@ let go_with_interrupt
     errors;
     dep_edges;
     telemetry = typing_telemetry;
-    jobs_finished_to_end;
+    adhoc_profiling;
     jobs_finished_early;
+    jobs_finished_to_end;
   } =
     typing_result
   in
@@ -1213,7 +1229,9 @@ let go_with_interrupt
     |> Telemetry.object_ ~key:"profiling_info" ~value:typing_telemetry
     |> Telemetry.object_ ~key:"job_sizes" ~value:job_size_telemetry
   in
-  ( (env, { errors; delegate_state; telemetry; diagnostic_pusher }),
+  ( ( env,
+      { errors; delegate_state; telemetry; adhoc_profiling; diagnostic_pusher }
+    ),
     cancelled_fnl )
 
 let go

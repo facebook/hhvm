@@ -29,36 +29,29 @@
 namespace HPHP {
 namespace Facts {
 
-template <>
-StringPtr<StringData>::StringPtr(const StringData* impl) noexcept
-    : m_impl{impl} {
-}
-
-template <> std::string_view StringPtr<StringData>::slice() const noexcept {
+std::string_view StringPtr::slice() const noexcept {
   if (m_impl == nullptr) {
     return std::string_view{};
   }
   return m_impl->slice();
 }
 
-template <> int StringPtr<StringData>::size() const noexcept {
+int StringPtr::size() const noexcept {
   if (m_impl == nullptr) {
     return 0;
   }
   return m_impl->size();
 }
 
-template <> bool StringPtr<StringData>::empty() const noexcept {
+bool StringPtr::empty() const noexcept {
   return m_impl == nullptr || m_impl->empty();
 }
 
-template <> strhash_t StringPtr<StringData>::hash() const noexcept {
+strhash_t StringPtr::hash() const noexcept {
   return m_impl->hash();
 }
 
-template <>
-bool StringPtr<StringData>::same(
-    const StringPtr<StringData>& s) const noexcept {
+bool StringPtr::same(const StringPtr& s) const noexcept {
   if (m_impl == s.m_impl) {
     return true;
   }
@@ -68,9 +61,7 @@ bool StringPtr<StringData>::same(
   return m_impl->same(s.m_impl);
 }
 
-template <>
-bool StringPtr<StringData>::isame(
-    const StringPtr<StringData>& s) const noexcept {
+bool StringPtr::isame(const StringPtr& s) const noexcept {
   if (m_impl == s.m_impl) {
     return true;
   }
@@ -80,18 +71,24 @@ bool StringPtr<StringData>::isame(
   return m_impl->isame(s.m_impl);
 }
 
-template <> StringPtr<StringData> makeStringPtr(const StringData& s) {
-  return StringPtr<StringData>{makeStaticString(&s)};
+StringPtr makeStringPtr(const StringData& s) {
+  return StringPtr{makeStaticString(&s)};
 }
 
-template <> StringPtr<StringData> makeStringPtr(std::string_view s) {
-  return StringPtr<StringData>{makeStaticString(s)};
+StringPtr makeStringPtr(const std::string& s) {
+  return StringPtr{makeStaticString(s)};
 }
 
-// Use `extern template struct StringPtr<StringData>` in cpp files
-// linked against this to avoid instantiating spurious copies of the
-// same code
-template struct StringPtr<StringData>;
+StringPtr makeStringPtr(std::string_view s) {
+  return StringPtr{makeStaticString(s)};
+}
+
+std::ostream& operator<<(std::ostream& os, const StringPtr& s) {
+  if (s.m_impl == nullptr) {
+    return os << "<nullptr>";
+  }
+  return os << s.m_impl->slice();
+}
 
 } // namespace Facts
 } // namespace HPHP

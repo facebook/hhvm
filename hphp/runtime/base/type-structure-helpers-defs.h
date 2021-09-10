@@ -40,7 +40,13 @@ const StaticString s_is_cls_cns("is_cls_cns");
 const StaticString s_access_list("access_list");
 const StaticString s_root_name("root_name");
 const StaticString s_alias("alias");
+const StaticString s_callable("callable");
+const StaticString s_exact("exact");
+const StaticString s_typevars("typevars");
+const StaticString s_typevar_types("typevar_types");
 const StaticString s_hh_this("HH\\this");
+const StaticString s_type_structure_non_existant_class(
+  "hh\\__internal\\type_structure_non_existant_class");
 
 // Fixed error messages
 const StaticString s_reified_type_must_be_ts(
@@ -62,6 +68,14 @@ ALWAYS_INLINE bool is_ts_bool(const ArrayData* ts, const String& s) {
 ALWAYS_INLINE const ArrayData* get_ts_varray(const ArrayData* ts,
                                              const String& s) {
   auto const field = ts->get(s.get());
+  assertx(tvIsVec(field));
+  return field.val().parr;
+}
+
+ALWAYS_INLINE const ArrayData* get_ts_varray_opt(const ArrayData* ts,
+                                                 const String& s) {
+  auto const field = ts->get(s.get());
+  if (!field.is_init()) return nullptr;
   assertx(tvIsVec(field));
   return field.val().parr;
 }
@@ -142,6 +156,10 @@ ALWAYS_INLINE const ArrayData* get_ts_access_list(const ArrayData* ts) {
 
 ALWAYS_INLINE const ArrayData* get_ts_generic_types(const ArrayData* ts) {
   return detail::get_ts_varray(ts, s_generic_types);
+}
+
+ALWAYS_INLINE const ArrayData* get_ts_generic_types_opt(const ArrayData* ts) {
+  return detail::get_ts_varray_opt(ts, s_generic_types);
 }
 
 ALWAYS_INLINE const StringData* get_ts_classname(const ArrayData* ts) {

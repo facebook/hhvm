@@ -1619,6 +1619,8 @@ TypedValue Class::clsCnsGet(const StringData* clsCnsName,
   };
 
   if (cns.kind() == ConstModifiers::Kind::Type) {
+    assertx(typeCns);
+
     Array resolvedTS;
     bool persistent = true;
     try {
@@ -2256,6 +2258,65 @@ void Class::setRTAttributes() {
   }
 }
 
+namespace {
+
+// Return the Class which originally defined this constant. This is
+// not necessarily the Class where the constant lives! HHBBC can copy
+// and propagate constants across the hierarchy. We need to preserve
+// the original defining class to make sure type-structure resolution
+// behaves properly in this case.
+Class* preConstDefiningCls(const PreClass::Const& preConst,
+                           Class* thisCls) {
+  // The common case is that preConst.cls() is null, which means the
+  // defining class is the current class.
+  if (!preConst.cls() || preConst.cls() == thisCls->name()) return thisCls;
+  auto const cls = Class::lookup(preConst.cls());
+  // The actual defining class should be higher up the type hierarchy,
+  // so it had better be loaded already at this point.
+  always_assert(cls);
+  return cls;
+}
+
+// Initialize the val field of a constant. If this is a type-constant,
+// we can store any pre-resolved type-structure in the val from the
+// beginning and save a resolution at runtime. If a constant has a
+// pre-resolved type-structure, the JIT is allowed to assume that this
+// is done (and elide some checks).
+void setConstVal(Class::Const& cns, const PreClass::Const& preConst) {
+  // Start off with the normal value
+  cns.val = preConst.val();
+
+  // Do this check first, to avoid stomping on bits that other const
+  // types might use.
+  if (preConst.kind() != ConstModifiers::Kind::Type) return;
+  cns.setPointedClsName(nullptr);
+
+  auto const a = preConst.resolvedTypeStructure().get();
+  if (!a) return;
+
+  // We have a type-structure. Make sure we're the right constant type
+  // to have one.
+  assertx(a->isDictType());
+  assertx(a->isStatic());
+  assertx(!preConst.isAbstractAndUninit());
+
+  // Initialize the value as if it had been resolved within
+  // clsCnsGet(). This prevents the pre-resolved type-structure from
+  // being resolved again (which is important, as type-structure
+  // resolution is not idempotent).
+  auto const rawData = reinterpret_cast<intptr_t>(a);
+  assertx((rawData & 0x7) == 0 && "ArrayData not 8-byte aligned");
+
+  assertx(tvIsDict(cns.val));
+  cns.val.m_data.parr = reinterpret_cast<ArrayData*>(rawData | 0x1);
+
+  // Also cache any classname field.
+  auto const classname = a->get(s_classname);
+  if (tvIsString(classname)) cns.setPointedClsName(classname.val().pstr);
+}
+
+}
+
 void Class::importTraitConsts(ConstMap::Builder& builder) {
   auto importConst = [&] (const Const& tConst, bool isFromInterface) {
     auto const existing = builder.find(tConst.name);
@@ -2283,6 +2344,7 @@ void Class::importTraitConsts(ConstMap::Builder& builder) {
     if (existingConst.isAbstractAndUninit()) {
       existingConst.cls = tConst.cls;
       existingConst.val = tConst.val;
+      existingConst.preConst = tConst.preConst;
       return;
     }
 
@@ -2296,6 +2358,7 @@ void Class::importTraitConsts(ConstMap::Builder& builder) {
         // cover situations where there are multiple competing defaults.
         existingConst.cls = tConst.cls;
         existingConst.val = tConst.val;
+        existingConst.preConst = tConst.preConst;
         return;
       } else { // existing is concrete
         // the existing constant will win over any incoming abstracts and retain a fatal when two
@@ -2313,7 +2376,7 @@ void Class::importTraitConsts(ConstMap::Builder& builder) {
     } else {
       // Constants in interfaces implemented by traits don't fatal with constants
       // in declInterfaces
-      if (isFromInterface) { return; }
+      if (isFromInterface) return;
 
       // Type and Context constants in interfaces can be overriden.
       if (tConst.kind() == ConstModifiers::Kind::Type ||
@@ -2348,9 +2411,10 @@ void Class::importTraitConsts(ConstMap::Builder& builder) {
     for (Slot i = traitIdx; i < m_preClass->numConstants(); i++) {
         auto const* preConst = &m_preClass->constants()[i];
         Const tConst;
-        tConst.cls = this;
+        tConst.cls = preConstDefiningCls(*preConst, this);
         tConst.name = preConst->name();
-        tConst.val = preConst->val();
+        tConst.preConst = preConst;
+        setConstVal(tConst, *preConst);
         importConst(tConst, false);
     }
     // If we flatten, we need to check implemented interfaces for constants
@@ -2378,7 +2442,6 @@ void Class::importTraitConsts(ConstMap::Builder& builder) {
   }
 }
 
-
 void Class::setConstants() {
   ConstMap::Builder builder;
 
@@ -2396,20 +2459,51 @@ void Class::setConstants() {
 
       for (Slot slot = 0; slot < includedEnum->m_constants.size(); ++slot) {
         auto const eConst = includedEnum->m_constants[slot];
+
+        // If you're inheriting a constant with the same name as an existing
+        // one, they must originate from the same place, unless the constant
+        // was defined as abstract.
         auto const existing = builder.find(eConst.name);
 
         if (existing == builder.end()) {
           builder.add(eConst.name, eConst);
           continue;
-        } else {
-          auto& existingConst = builder[existing->second];
-          if (existingConst.cls != eConst.cls) {
-            raise_error("%s cannot inherit the constant %s from %s, because "
-                        "it was previously inherited from %s",
-                        m_preClass->name()->data(),
-                        eConst.name->data(),
-                        eConst.cls->name()->data(),
-                        existingConst.cls->name()->data());
+        }
+
+        auto& existingConst = builder[existing->second];
+
+        if (eConst.kind() != existingConst.kind()) {
+          raise_error("%s cannot inherit the %s %s from %s, because it "
+                     "was previously inherited as a %s from %s",
+                     m_preClass->name()->data(),
+                     ConstModifiers::show(eConst.kind()),
+                     eConst.name->data(),
+                     eConst.cls->name()->data(),
+                     ConstModifiers::show(existingConst.kind()),
+                     existingConst.cls->name()->data());
+        }
+
+        if (eConst.isAbstractAndUninit()) {
+          // note: enum class abstract constant cannot have default values
+          continue;
+        }
+
+        if (existingConst.isAbstract()) {
+          // The case where the incoming constant is abstract without a default is covered above.
+          // For enum classes, we do not allow default values, so this case is impossible and
+          // is a parse error.
+          raise_error("In %s, abstract constant %s must not have a default value",
+            m_preClass->name()->data(),
+            eConst.name->data());
+        } else { // existing is concrete
+          if (!eConst.isAbstract() && existingConst.cls != eConst.cls) {
+            raise_error("%s cannot inherit the %s %s from %s, because "
+                      "it was previously inherited from %s",
+                      m_preClass->name()->data(),
+                      ConstModifiers::show(eConst.kind()),
+                      eConst.name->data(),
+                      eConst.cls->name()->data(),
+                      existingConst.cls->name()->data());
           }
         }
       }
@@ -2458,6 +2552,7 @@ void Class::setConstants() {
         // cover situations where there are multiple competing defaults.
         existingConst.cls = iConst.cls;
         existingConst.val = iConst.val;
+        existingConst.preConst = iConst.preConst;
       } else { // existing is concrete
         // the existing constant will win over any incoming abstracts and retain a fatal when two
         // concrete constants collide
@@ -2479,6 +2574,7 @@ void Class::setConstants() {
 
   for (Slot i = 0, sz = m_preClass->numConstants(); i < sz; ++i) {
     const PreClass::Const* preConst = &m_preClass->constants()[i];
+
     ConstMap::Builder::iterator it2 = builder.find(preConst->name());
     if (it2 != builder.end()) {
       auto definingClass = builder[it2->second].cls;
@@ -2530,14 +2626,16 @@ void Class::setConstants() {
                     preConst->name()->data(),
                     m_preClass->name()->data());
       }
-      builder[it2->second].cls = this;
-      builder[it2->second].val = preConst->val();
+      builder[it2->second].cls = preConstDefiningCls(*preConst, this);
+      builder[it2->second].preConst = preConst;
+      setConstVal(builder[it2->second], *preConst);
     } else {
       // Append constant.
       Const constant;
-      constant.cls = this;
+      constant.cls = preConstDefiningCls(*preConst, this);
       constant.name = preConst->name();
-      constant.val = preConst->val();
+      constant.preConst = preConst;
+      setConstVal(constant, *preConst);
       builder.add(preConst->name(), constant);
     }
   }
@@ -2574,17 +2672,13 @@ void Class::setConstants() {
     }
   }
 
-
   // For type constants, we have to use the value from the PreClass of the
   // declaring class, because the parent class or interface we got it from may
   // have replaced it with a resolved value.
   for (auto& pair : builder) {
     auto& cns = builder[pair.second];
     if (cns.kind() == ConstModifiers::Kind::Type) {
-      auto& preConsts = cns.cls->preClass()->constantsMap();
-      auto const idx = preConsts.findIndex(cns.name.get());
-      assertx(idx != -1);
-      cns.val = preConsts[idx].val();
+      setConstVal(cns, *cns.preConst);
     }
 
     // Concretize inherited abstract type constants with defaults
@@ -2593,10 +2687,6 @@ void Class::setConstants() {
         cns.concretize();
       }
     }
-
-#ifndef USE_LOWPTR
-    cns.pointedClsName = nullptr;
-#endif
   }
 
   m_constants.create(builder);
@@ -3139,7 +3229,6 @@ bool Class::compatibleTraitPropInit(const TypedValue& tv1,
     case KindOfLazyClass:
     case KindOfClsMeth:
     case KindOfRClsMeth:
-    case KindOfRecord:
       return false;
   }
   not_reached();
@@ -4374,6 +4463,7 @@ struct TraitMethod {
 
   using class_type = const Class*;
   using method_type = const Func*;
+  using origin_type = const PreClass*;
 
   const Class* trait;
   const Func* method;
@@ -4381,6 +4471,8 @@ struct TraitMethod {
 };
 
 struct TMIOps {
+  using origin_type = TraitMethod::origin_type;
+
   // Return the name for the trait class.
   static const StringData* clsName(const Class* traitCls) {
     return traitCls->name();
@@ -4388,6 +4480,10 @@ struct TMIOps {
 
   static const StringData* methName(const Func* method) {
     return method->name();
+  }
+
+  static origin_type originalClass(const Func* method) {
+    return method->preClass();
   }
 
   // Is-a methods.
@@ -4468,13 +4564,13 @@ struct TMIOps {
   }
   static void errorDuplicateMethod(const Class* cls,
                                    const StringData* methName,
-                                   const std::list<TraitMethod>& methods) {
+                                   const std::vector<const StringData*>& methodDefinitions) {
     // No error if the class will override the method.
     if (cls->preClass()->hasMethod(methName)) return;
 
     std::vector<folly::StringPiece> traitNames;
-    for (auto& method : methods) {
-      traitNames.push_back(method.trait->name()->slice());
+    for (auto& clsName : methodDefinitions) {
+      traitNames.push_back(clsName->slice());
     }
     std::string traits;
     folly::join(", ", traitNames, traits);
@@ -4586,7 +4682,9 @@ void Class::importTraitMethods(MethodMapBuilder& builder) {
 
   // Apply trait rules and import the methods.
   applyTraitRules(this, tmid);
-  auto traitMethods = tmid.finish(this);
+
+  bool enableMethodTraitDiamond = m_preClass->enableMethodTraitDiamond();
+  auto traitMethods = tmid.finish(this, enableMethodTraitDiamond);
 
   // Import the methods.
   for (auto const& mdata : traitMethods) {
@@ -4790,13 +4888,26 @@ Class* Class::def(const PreClass* preClass, bool failIsFatal /* = true */) {
   }
 }
 
-Class* Class::defClosure(const PreClass* preClass) {
+Class* Class::defClosure(const PreClass* preClass, bool cache) {
   auto const nameList = preClass->namedEntity();
 
-  if (nameList->clsList()) return nameList->clsList();
+  auto const find = [&] () -> Class* {
+    if (auto const cls = nameList->getCachedClass()) {
+      if (cls->preClass() == preClass) return cls;
+    }
+    for (auto class_ = nameList->clsList(); class_; class_ = class_->m_next) {
+      if (class_->preClass() == preClass) {
+        if (cache && !classHasPersistentRDS(class_)) {
+          nameList->setCachedClass(class_);
+        }
+        return class_;
+      }
+    }
+    return nullptr;
+  };
+  if (auto const cls = find()) return cls;
 
   auto const parent = c_Closure::classof();
-
   assertx(preClass->parent() == parent->name());
   // Create a new class.
 
@@ -4806,11 +4917,11 @@ Class* Class::defClosure(const PreClass* preClass) {
 
   Lock l(g_classesMutex);
 
-  if (UNLIKELY(nameList->clsList() != nullptr)) return nameList->clsList();
-
+  if (auto const cls = find()) return cls;
   setupClass(newClass.get(), nameList);
-
-  if (classHasPersistentRDS(newClass.get())) newClass.get()->setCached();
+  if (cache || classHasPersistentRDS(newClass.get())) {
+    newClass.get()->setCached();
+  }
   return newClass.get();
 }
 

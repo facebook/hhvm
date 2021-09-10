@@ -37,7 +37,9 @@ let make_local_server_api
         ~edges
         start_t;
       let (_t : float) =
-        Hh_logger.log_duration "Updated dependency graph" start_t
+        Hh_logger.log_duration
+          (Printf.sprintf "Updated dependency graph: added %d edges" edges)
+          start_t
       in
       ()
 

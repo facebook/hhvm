@@ -5,7 +5,7 @@ type ANY<T> = T;
 type TANY = ANY;
 
 abstract class Base {
-  const type TData as TANY = TANY;
+  const type TData = TANY;
 
   final private function __construct(protected this::TData $data) {}
 
@@ -15,7 +15,7 @@ abstract class Base {
 }
 
 abstract class Middle extends Base {
-  const type TData as string = string;
+  const type TData  = string;
 }
 
 trait ChildTrait1 {

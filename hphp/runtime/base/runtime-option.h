@@ -38,7 +38,7 @@
 #include "hphp/util/hash-map.h"
 #include "hphp/util/sha1.h"
 
-#include "hphp/hack/src/parser/positioned_full_trivia_parser_ffi_types_fwd.h"
+#include "hphp/hack/src/parser/ffi_bridge/rust_parser_ffi_bridge.rs"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -126,7 +126,7 @@ struct RepoOptions {
   std::uint32_t getParserFlags() const;
   std::uint32_t getCompilerFlags() const;
   std::uint32_t getFactsFlags() const;
-  hackc_parse_positioned_full_trivia_environment getParserEnvironment() const;
+  ParserEnv getParserEnvironment() const;
   std::string getAliasedNamespacesConfig() const;
   struct stat stat() const { return m_stat; }
   std::string autoloadQuery() const noexcept { return Query; }
@@ -492,6 +492,8 @@ struct RuntimeOption {
   static std::string AutoloadDBPath;
   static std::string AutoloadDBPerms;
   static std::string AutoloadDBGroup;
+  static std::string AutoloadLogging;
+  static bool AutoloadEnforceOneDefinitionRule;
   static bool AutoloadRethrowExceptions;
 
   static std::string FileCache;
@@ -704,6 +706,7 @@ struct RuntimeOption {
   F(uint64_t, JitMatureSize,           125 << 20)                       \
   F(bool, JitMatureAfterWarmup,        false)                           \
   F(double, JitMaturityExponent,       1.)                              \
+  F(double, JitMaturityProfWeight,     1.)                              \
   F(bool, JitTimer,                    kJitTimerDefault)                \
   F(int, JitConcurrently,              1)                               \
   F(int, JitThreads,                   4)                               \
@@ -967,6 +970,7 @@ struct RuntimeOption {
   F(uint32_t, JitLiveThreshold,       ServerExecutionMode() ? 1000 : 0) \
   F(uint32_t, JitProfileThreshold,     ServerExecutionMode() ? 200 : 0) \
   F(uint32_t, JitSrcKeyThreshold,      0)                               \
+  F(uint32_t, JitMaxLiveMainUsage,     96 * 1024 * 1024)                \
   F(uint64_t, FuncCountHint,           10000)                           \
   F(uint64_t, PGOFuncCountHint,        1000)                            \
   F(bool, RegionRelaxGuards,           true)                            \
@@ -1226,8 +1230,6 @@ struct RuntimeOption {
   F(bool, NoticeOnMethCallerHelperIsObject, false)                      \
   F(bool, NoticeOnCollectionToBool, false)                              \
   F(bool, NoticeOnSimpleXMLBehavior, false)                             \
-  /* Enables Hack records. */                                           \
-  F(bool, HackRecords, false)                                           \
   /*                                                                    \
    * Control dynamic calls to functions and dynamic constructs of       \
    * classes which haven't opted into being called that way.            \
@@ -1374,12 +1376,15 @@ struct RuntimeOption {
   F(bool, TypeconstAbstractDefaultReflectionIsAbstract, false)          \
   F(bool, AbstractContextConstantUninitAccess, false)                   \
   F(bool, TraitConstantInterfaceBehavior, false)                        \
-  /* 0 nothing, 1 notice, 2 error */                                    \
+  /* 0 nothing, 1 warning, 2 error */                                   \
   F(uint32_t, EnableReadonlyPropertyEnforcement, 0)                     \
   /* 0 nothing, 1 warning, 2 error */                                   \
   F(uint32_t, EnableReadonlyCallEnforcement, 0)                         \
+  /* 0 nothing, 1 notice, 2 error */                                    \
+  F(uint32_t, ThrowOnIterationOverObjects, 0)                           \
   F(string, TaintConfigurationPath, std::string(""))                    \
   F(bool, EnableReadonlyInEmitter, false)                               \
+  F(bool, DiamondTraitMethods, false)                                   \
   /* */
 
 private:

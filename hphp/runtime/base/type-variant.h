@@ -17,7 +17,6 @@
 #pragma once
 
 #include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/record-data.h"
 #include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-refcount.h"
@@ -819,7 +818,6 @@ struct Variant : private TypedValue {
       case KindOfLazyClass:
       case KindOfClsMeth:
       case KindOfRClsMeth:
-      case KindOfRecord:
         return false;
     }
     not_reached();
@@ -1451,9 +1449,6 @@ private:
         return;
       case KindOfResource:
         assertx(m_data.pres->checkCount());
-        return;
-      case KindOfRecord:
-        assertx(m_data.prec->checkCount());
         return;
       case KindOfRFunc:
         assertx(m_data.prfunc->checkCount());

@@ -4535,27 +4535,49 @@ let noreturn_usage p noreturn_witness =
   let msg = "You are using the return value of a `noreturn` function" in
   add_list (Typing.err_code Typing.NoreturnUsage) (p, msg) noreturn_witness
 
+let pluralize_arguments n =
+  string_of_int n
+  ^
+  if n = 1 then
+    " argument"
+  else
+    " arguments"
+
 let attribute_too_few_arguments pos x n =
-  let n = string_of_int n in
   add
     (Typing.err_code Typing.AttributeTooFewArguments)
     pos
     ("The attribute "
     ^ Markdown_lite.md_codify x
     ^ " expects at least "
-    ^ n
-    ^ " arguments")
+    ^ pluralize_arguments n)
 
 let attribute_too_many_arguments pos x n =
-  let n = string_of_int n in
   add
     (Typing.err_code Typing.AttributeTooManyArguments)
     pos
     ("The attribute "
     ^ Markdown_lite.md_codify x
     ^ " expects at most "
-    ^ n
-    ^ " arguments")
+    ^ pluralize_arguments n)
+
+let attribute_not_exact_number_of_args
+    pos ~attr_name ~expected_args ~actual_args =
+  add
+    (Typing.err_code
+       (if actual_args > expected_args then
+         Typing.AttributeTooManyArguments
+       else
+         Typing.AttributeTooFewArguments))
+    pos
+    ("The attribute "
+    ^ Markdown_lite.md_codify attr_name
+    ^ " expects "
+    ^
+    match expected_args with
+    | 0 -> "no arguments"
+    | 1 -> "exactly 1 argument"
+    | _ -> "exactly " ^ string_of_int expected_args ^ " arguments")
 
 let attribute_param_type pos x =
   add
@@ -5774,7 +5796,7 @@ let readonly_invalid_as_mut pos =
   add
     (Typing.err_code Typing.ReadonlyInvalidAsMut)
     pos
-    "Only primitive value types can be converted to mutable."
+    "Only value types and arrays can be converted to mutable."
 
 let readonly_exception pos =
   add
@@ -5943,6 +5965,15 @@ let expression_tree_non_public_property ~use_pos ~def_pos =
     (Typing.err_code Typing.ExpressionTreeNonPublicProperty)
     (use_pos, "Cannot access non-public properties within expression trees.")
     [(def_pos, "Property defined here")]
+
+let internal_method_with_invalid_visibility ~attr_pos ~visibility =
+  let open Markdown_lite in
+  add (NastCheck.err_code NastCheck.InternalProtectedOrPrivate) attr_pos
+  @@ md_codify "__Internal"
+  ^ " methods must be public, they cannot be "
+  ^ String.lowercase
+  @@ md_codify
+  @@ Ast_defs.show_visibility visibility
 
 (*****************************************************************************)
 (* Printing *)

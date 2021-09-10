@@ -593,7 +593,6 @@ let init
       watchman_debug_logging;
       ignore_hh_version;
       is_saved_state_precomputed;
-      monitor_kill_again_fix = _;
     } =
   if use_dummy then
     let () = Printf.eprintf "Informant using dummy - resigning\n" in
@@ -678,8 +677,6 @@ let should_start_first_server t =
     end
 
 let should_ignore_hh_version init_env = init_env.ignore_hh_version
-
-let monitor_kill_again_fix init_env = init_env.monitor_kill_again_fix
 
 let is_managing = function
   | Resigned -> false

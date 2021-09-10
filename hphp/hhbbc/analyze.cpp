@@ -475,9 +475,7 @@ FuncAnalysis do_analyze(const Index& index,
     for (auto const& c : ctx.cls->constants) {
       if (c.val && c.val->m_type == KindOfUninit) {
         auto const fa = analyze_func_inline(index, ctx, TCls, { sval(c.name) });
-        if (auto const val = tv(fa.inferredReturn)) {
-          ret.resolvedConstants.emplace_back(idx, *val);
-        }
+        ret.resolvedConstants.emplace_back(idx, unctx(fa.inferredReturn));
       }
       ++idx;
     }

@@ -65,7 +65,7 @@ Optional<MemberCode> parseMemberCode(const char* s) {
   return std::nullopt;
 }
 
-std::string show(MemberKey mk) {
+std::string show(const MemberKey& mk) {
   std::string ret = memberCodeString(mk.mcode);
   auto const op = readOnlyString(mk.rop);
 

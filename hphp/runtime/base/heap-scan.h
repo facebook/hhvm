@@ -173,8 +173,6 @@ inline void scanHeapObject(const HeapObject* h, type_scan::Scanner& scanner) {
       auto const rclsmeth = static_cast<const RClsMethData*>(h);
       return VanillaVec::scan(rclsmeth->m_arr, scanner);
     }
-    case HeaderKind::Record:
-      return static_cast<const RecordData*>(h)->scan(scanner);
     case HeaderKind::RFunc: {
       auto const rfunc = static_cast<const RFuncData*>(h);
       return VanillaVec::scan(rfunc->m_arr, scanner);
@@ -214,15 +212,6 @@ inline void c_Awaitable::scan(type_scan::Scanner& scanner) const {
               asio_object_size(this);
   scanner.scanByIndex(m_tyindex, this, size);
   ObjectData::scan(scanner);
-}
-
-inline void RecordBase::scan(type_scan::Scanner& scanner) const {
-  auto fields = fieldVec();
-  scanner.scan(*fields, m_record->numFields() * sizeof(*fields));
-}
-
-inline void RecordData::scan(type_scan::Scanner& scanner) const {
-  RecordBase::scan(scanner);
 }
 
 inline void ObjectData::scan(type_scan::Scanner& scanner) const {

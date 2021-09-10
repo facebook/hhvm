@@ -70,8 +70,6 @@ RepoAuthType decodeRATImpl(const unsigned char*& pc, LookupStr lookupStr,
   case T::OptCls:
   case T::ClsMeth:
   case T::OptClsMeth:
-  case T::Record:
-  case T::OptRecord:
   case T::LazyCls:
   case T::OptLazyCls:
   case T::UncArrKey:
@@ -134,10 +132,6 @@ RepoAuthType decodeRATImpl(const unsigned char*& pc, LookupStr lookupStr,
   case T::SubCls:
   case T::OptExactCls:
   case T::OptSubCls:
-  case T::ExactRecord:
-  case T::SubRecord:
-  case T::OptExactRecord:
-  case T::OptSubRecord:
     assertx(!highBitSet);
     {
       uint32_t id = decode_iva(pc);
@@ -210,8 +204,6 @@ void encodeRAT(FuncEmitter& fe, RepoAuthType rat) {
   case T::OptCls:
   case T::ClsMeth:
   case T::OptClsMeth:
-  case T::Record:
-  case T::OptRecord:
   case T::LazyCls:
   case T::OptLazyCls:
   case T::UncArrKey:
@@ -273,14 +265,6 @@ void encodeRAT(FuncEmitter& fe, RepoAuthType rat) {
   case T::OptSubCls:
     fe.emitIVA(fe.ue().mergeLitstr(rat.clsName()));
     break;
-
-  case T::ExactRecord:
-  case T::SubRecord:
-  case T::OptExactRecord:
-  case T::OptSubRecord:
-    fe.emitIVA(fe.ue().mergeLitstr(rat.recordName()));
-    break;
-
   }
 }
 

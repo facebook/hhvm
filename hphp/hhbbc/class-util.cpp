@@ -86,12 +86,6 @@ bool is_used_trait(const php::Class& c) {
     (c.attrs & (AttrTrait | AttrNoOverride)) == AttrTrait;
 }
 
-std::string normalized_class_name(const php::Class& cls) {
-  auto const name = cls.name->toCppString();
-  if (!PreClassEmitter::IsAnonymousClassName(name)) return name;
-  return name.substr(0, name.find_last_of(';'));
-}
-
 bool prop_might_have_bad_initial_value(const Index& index,
                                        const php::Class& cls,
                                        const php::Prop& prop) {

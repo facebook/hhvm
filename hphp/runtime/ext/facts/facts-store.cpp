@@ -182,7 +182,7 @@ struct AttributeFilterData {
    */
   using ArgMap = hphp_hash_map<size_t, folly::dynamic>;
 
-  hphp_hash_map<Symbol<StringData, SymKind::Type>, ArgMap> m_attrs;
+  hphp_hash_map<Symbol<SymKind::Type>, ArgMap> m_attrs;
 
   static AttributeFilterData createFromShapes(const ArrayData* attrFilters) {
     assertx(attrFilters);
@@ -197,10 +197,10 @@ struct AttributeFilterData {
   }
 
 private:
-  static std::pair<StringPtr<StringData>, ArgMap>
+  static std::pair<StringPtr, ArgMap>
   createAttrFilterFromShape(const ArrayData* attrShape) {
     assertx(attrShape);
-    StringPtr<StringData> name{nullptr};
+    StringPtr name{nullptr};
     hphp_hash_map<size_t, folly::dynamic> args;
     IterateKV(attrShape, [&](TypedValue k, TypedValue v) {
       if (!tvIsString(k)) {
@@ -457,21 +457,10 @@ Array makeVecOfString(StringPtrIterable&& vector) {
   return ret.toArray();
 }
 
-template <typename StringPtrIterable, typename Predicate>
-Array makeVecOfString(StringPtrIterable&& vector, Predicate&& predicate) {
-  auto ret = VecInit{vector.size()};
-  for (auto&& str : std::forward<StringPtrIterable>(vector)) {
-    if (predicate(str)) {
-      ret.append(VarNR{StrNR{str.get()}}.tv());
-    }
-  }
-  return ret.toArray();
-}
-
 /**
  * Convert a C++ StringData structure into a Hack `vec<(string, string)>`.
  */
-Array makeVecOfStringString(const std::vector<MethodDecl<StringData>>& vector) {
+Array makeVecOfStringString(const std::vector<MethodDecl>& vector) {
   auto ret = VecInit{vector.size()};
   for (auto const& [typeDecl, method] : vector) {
     auto stringStringTuple = VecInit{2};
@@ -556,7 +545,7 @@ struct FactsStoreImpl final
       hphp_hash_set<std::string> indexedMethodAttributes)
       : m_updateExec{1, make_thread_factory("Autoload update")}
       , m_root{std::move(root)}
-      , m_map{m_root, std::move(dbData), std::move(indexedMethodAttributes)}
+      , m_map{m_root, std::move(dbData), RuntimeOption::AutoloadEnforceOneDefinitionRule, std::move(indexedMethodAttributes)}
       , m_watchmanData{
             {.m_queryExpr = addFieldsToQuery(std::move(queryExpr)),
              .m_watchmanClient = watchmanClient}} {
@@ -565,7 +554,10 @@ struct FactsStoreImpl final
   FactsStoreImpl(folly::fs::path root, DBData dbData)
       : m_updateExec{1, make_thread_factory("Autoload update")}
       , m_root{std::move(root)}
-      , m_map{m_root, std::move(dbData)} {
+      , m_map{
+            m_root,
+            std::move(dbData),
+            RuntimeOption::AutoloadEnforceOneDefinitionRule} {
   }
 
   ~FactsStoreImpl() override {
@@ -625,8 +617,8 @@ struct FactsStoreImpl final
   }
 
   Variant getKind(const String& type) override {
-    auto const* kindStr = makeStaticString(toString(
-        m_map.getKind(Symbol<StringData, SymKind::Type>{*type.get()})));
+    auto const* kindStr = makeStaticString(
+        toString(m_map.getKind(Symbol<SymKind::Type>{*type.get()})));
 
     if (kindStr == nullptr || kindStr->empty()) {
       return Variant{Variant::NullInit{}};
@@ -646,61 +638,48 @@ struct FactsStoreImpl final
   Optional<String> getTypeFile(const String& type) override {
     return getSymbolFile<SymKind::Type>(
         type,
-        [](SymbolMap<StringData>& m, Symbol<StringData, SymKind::Type> s) {
-          return m.getTypeFile(s);
-        });
+        [](SymbolMap& m, Symbol<SymKind::Type> s) { return m.getTypeFile(s); });
   }
 
   Optional<String> getFunctionFile(const String& function) override {
     return getSymbolFile<SymKind::Function>(
-        function,
-        [](SymbolMap<StringData>& m, Symbol<StringData, SymKind::Function> s) {
+        function, [](SymbolMap& m, Symbol<SymKind::Function> s) {
           return m.getFunctionFile(s);
         });
   }
 
   Optional<String> getConstantFile(const String& constant) override {
     return getSymbolFile<SymKind::Constant>(
-        constant,
-        [](SymbolMap<StringData>& m, Symbol<StringData, SymKind::Constant> s) {
+        constant, [](SymbolMap& m, Symbol<SymKind::Constant> s) {
           return m.getConstantFile(s);
         });
   }
 
   Optional<String> getTypeAliasFile(const String& typeAlias) override {
     return getSymbolFile<SymKind::Type>(
-        typeAlias,
-        [](SymbolMap<StringData>& m, Symbol<StringData, SymKind::Type> s) {
+        typeAlias, [](SymbolMap& m, Symbol<SymKind::Type> s) {
           return m.getTypeAliasFile(s);
         });
   }
 
   Array getFileTypes(const String& path) override {
     return getFileSymbols<SymKind::Type>(
-        path, [](SymbolMap<StringData>& m, Path<StringData> s) {
-          return m.getFileTypes(s);
-        });
+        path, [](SymbolMap& m, Path s) { return m.getFileTypes(s); });
   }
 
   Array getFileFunctions(const String& path) override {
     return getFileSymbols<SymKind::Function>(
-        path, [](SymbolMap<StringData>& m, Path<StringData> s) {
-          return m.getFileFunctions(s);
-        });
+        path, [](SymbolMap& m, Path s) { return m.getFileFunctions(s); });
   }
 
   Array getFileConstants(const String& path) override {
     return getFileSymbols<SymKind::Constant>(
-        path, [](SymbolMap<StringData>& m, Path<StringData> s) {
-          return m.getFileConstants(s);
-        });
+        path, [](SymbolMap& m, Path s) { return m.getFileConstants(s); });
   }
 
   Array getFileTypeAliases(const String& path) override {
     return getFileSymbols<SymKind::Type>(
-        path, [](SymbolMap<StringData>& m, Path<StringData> s) {
-          return m.getFileTypeAliases(s);
-        });
+        path, [](SymbolMap& m, Path s) { return m.getFileTypeAliases(s); });
   }
 
   Array
@@ -728,21 +707,11 @@ struct FactsStoreImpl final
   }
 
   Array getTypesWithAttribute(const String& attr) override {
-    return makeVecOfString(
-        m_map.getTypesAndTypeAliasesWithAttribute(*attr.get()),
-        [&](Symbol<StringData, SymKind::Type> type) {
-          auto kind = m_map.getKind(type);
-          return kind != TypeKind::TypeAlias &&
-                 LIKELY(kind != TypeKind::Unknown);
-        });
+    return makeVecOfString(m_map.getTypesWithAttribute(*attr.get()));
   }
 
   Array getTypeAliasesWithAttribute(const String& attr) override {
-    return makeVecOfString(
-        m_map.getTypesAndTypeAliasesWithAttribute(*attr.get()),
-        [&](Symbol<StringData, SymKind::Type> type) {
-          return m_map.getKind(type) == TypeKind::TypeAlias;
-        });
+    return makeVecOfString(m_map.getTypeAliasesWithAttribute(*attr.get()));
   }
 
   Array getMethodsWithAttribute(const String& attr) override {
@@ -757,6 +726,10 @@ struct FactsStoreImpl final
     return makeVecOfString(m_map.getAttributesOfType(*type.get()));
   }
 
+  Array getTypeAliasAttributes(const String& typeAlias) override {
+    return makeVecOfString(m_map.getAttributesOfType(*typeAlias.get()));
+  }
+
   Array getMethodAttributes(const String& type, const String& method) override {
     return makeVecOfString(
         m_map.getAttributesOfMethod(*type.get(), *method.get()));
@@ -769,6 +742,12 @@ struct FactsStoreImpl final
   Array getTypeAttrArgs(const String& type, const String& attribute) override {
     return makeVecOfDynamic(
         m_map.getTypeAttributeArgs(*type.get(), *attribute.get()));
+  }
+
+  Array getTypeAliasAttrArgs(
+      const String& typeAlias, const String& attribute) override {
+    return makeVecOfDynamic(
+        m_map.getTypeAliasAttributeArgs(*typeAlias.get(), *attribute.get()));
   }
 
   Array getMethodAttrArgs(
@@ -1040,7 +1019,7 @@ private:
       assertx(path.is_relative());
       assertx(pathData["exists"].asBool());
 
-      auto pathStr = Path<StringData>{path};
+      auto pathStr = Path{path};
 
       auto sha1hex = getSha1Hash(pathData);
 
@@ -1106,11 +1085,11 @@ private:
   Array getBaseTypes(
       const String& derivedType, const InheritanceFilterData& filters) {
 
-    std::vector<Symbol<StringData, SymKind::Type>> baseTypes;
+    std::vector<Symbol<SymKind::Type>> baseTypes;
 
     auto addBaseTypes = [&](DeriveKind kind) {
-      auto newBaseTypes = m_map.getBaseTypes(
-          Symbol<StringData, SymKind::Type>{*derivedType.get()}, kind);
+      auto newBaseTypes =
+          m_map.getBaseTypes(Symbol<SymKind::Type>{*derivedType.get()}, kind);
       baseTypes.reserve(baseTypes.size() + newBaseTypes.size());
       std::move(
           std::begin(newBaseTypes),
@@ -1133,11 +1112,11 @@ private:
 
   Array getDerivedTypes(
       const String& baseType, const InheritanceFilterData& filters) {
-    std::vector<Symbol<StringData, SymKind::Type>> derivedTypes;
+    std::vector<Symbol<SymKind::Type>> derivedTypes;
 
     auto addDerivedTypes = [&](DeriveKind kind) {
-      auto newDerivedTypes = m_map.getDerivedTypes(
-          Symbol<StringData, SymKind::Type>{*baseType.get()}, kind);
+      auto newDerivedTypes =
+          m_map.getDerivedTypes(Symbol<SymKind::Type>{*baseType.get()}, kind);
       derivedTypes.reserve(derivedTypes.size() + newDerivedTypes.size());
       std::move(
           std::begin(newDerivedTypes),
@@ -1186,7 +1165,7 @@ private:
 
   std::atomic<bool> m_closing{false};
   folly::fs::path m_root;
-  SymbolMap<StringData> m_map;
+  SymbolMap m_map;
 
   /**
    * Updates this AutoloadMap using Watchman to track changed files.
@@ -1207,16 +1186,16 @@ private:
       return Array::CreateVec();
     }
 
-    auto symbols = [&]() -> std::vector<Symbol<StringData, k>> {
+    auto symbols = [&]() -> std::vector<Symbol<k>> {
       if (path.slice().at(0) != '/') {
-        return lambda(m_map, Path<StringData>{*path.get()});
+        return lambda(m_map, Path{*path.get()});
       }
       auto resolvedPath =
           resolvePathRelativeToRoot(folly::fs::path{path.slice()}, m_root);
       if (!resolvedPath) {
         return {};
       }
-      return lambda(m_map, Path<StringData>{*resolvedPath});
+      return lambda(m_map, Path{*resolvedPath});
     }();
     VecInit ret{symbols.size()};
     for (auto s : std::move(symbols)) {
@@ -1227,8 +1206,7 @@ private:
 
   template <SymKind k, class T>
   Optional<String> getSymbolFile(const String& symbol, T lambda) {
-    const StringData* fileStr =
-        lambda(m_map, Symbol<StringData, k>{*symbol.get()}).get();
+    const StringData* fileStr = lambda(m_map, Symbol<k>{*symbol.get()}).get();
     if (UNLIKELY(fileStr == nullptr)) {
       return {};
     }
@@ -1244,9 +1222,8 @@ private:
    *
    * The Hack type of `kinds` is `keyset<HH\Facts\TypeKind>`.
    */
-  std::vector<Symbol<StringData, SymKind::Type>> filterByKind(
-      std::vector<Symbol<StringData, SymKind::Type>> types,
-      const KindFilterData& kinds) {
+  std::vector<Symbol<SymKind::Type>> filterByKind(
+      std::vector<Symbol<SymKind::Type>> types, const KindFilterData& kinds) {
     // Bail out if we aren't filtering on kind
     if (kinds.doesIncludeEverything()) {
       return types;
@@ -1255,7 +1232,7 @@ private:
         std::remove_if(
             types.begin(),
             types.end(),
-            [&](const Symbol<StringData, SymKind::Type>& type) {
+            [&](const Symbol<SymKind::Type>& type) {
               auto kind = m_map.getKind(type);
               switch (kind) {
                 case Facts::TypeKind::Class:
@@ -1281,9 +1258,9 @@ private:
   std::vector<T> filterTypesByAttribute(
       std::vector<T> types, const AttributeFilterData& filter) {
     return filterTypesByAttribute(
-        std::move(types),
-        filter,
-        [](T type) -> Symbol<StringData, SymKind::Type> { return type; });
+        std::move(types), filter, [](T type) -> Symbol<SymKind::Type> {
+          return type;
+        });
   }
 
   template <typename T, typename TypeGetFn>
@@ -1298,8 +1275,8 @@ private:
 
     // True iff the given attribute satisfies one of our AttributeFilterData
     // constraints.
-    auto attrMatchesFilter = [&](Symbol<StringData, SymKind::Type> type,
-                                 Symbol<StringData, SymKind::Type> attr) {
+    auto attrMatchesFilter = [&](Symbol<SymKind::Type> type,
+                                 Symbol<SymKind::Type> attr) {
       // The given attribute isn't one of our constraints.
       auto it = filter.m_attrs.find(attr);
       if (it == filter.m_attrs.end()) {

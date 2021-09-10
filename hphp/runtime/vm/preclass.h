@@ -121,16 +121,39 @@ struct PreClass : AtomicCountable {
    * Class constant information.
    */
   struct Const {
+    // Invariance defines the relationship of m_resolvedTypeStructure
+    // to any derived classes which might override this
+    // type-constant. It is only meaningful for type-constants with a
+    // non-null m_resolvedTypeStructure.
+    enum class Invariance : uint8_t {
+      // Nothing can be said
+      None,
+      // m_resolvedTypeStructure is present in all derived classes
+      // (not necessarily the same contents, however).
+      Present,
+      // m_resolvedTypeStructure is present in all derived classes and
+      // always has a classname field.
+      ClassnamePresent,
+      // m_resolvedTypeStructure is present and identical in all
+      // derived classes
+      Same
+    };
+
     Const(const StringData* name,
+          const StringData* cls,
           const TypedValueAux& val,
-          const StringData* phpCode,
-          const bool fromTrait);
+          Array resolvedTypeStructure,
+          Invariance invariance,
+          bool fromTrait);
 
     void prettyPrint(std::ostream&, const PreClass*) const;
 
     const StringData* name()     const { return m_name; }
+    const StringData* cls()      const { return m_cls; }
     const TypedValueAux& val()   const { return m_val; }
-    const StringData* phpCode()  const { return m_phpCode; }
+    const Array& resolvedTypeStructure() const {
+      return m_resolvedTypeStructure;
+    }
     bool isFromTrait()     const { return m_fromTrait; }
     bool isAbstractAndUninit()   const {
       return (m_val.constModifiers().isAbstract() &&
@@ -141,17 +164,25 @@ struct PreClass : AtomicCountable {
       return m_val.constModifiers().isAbstract();
     }
     ConstModifiers::Kind kind()  const { return m_val.constModifiers().kind(); }
-    StaticCoeffects coeffects()  const;
+    Invariance invariance() const { return m_invariance; }
 
-    template<class SerDe> void serde(SerDe& sd);
+    StaticCoeffects coeffects()  const;
 
   private:
     LowStringPtr m_name;
+    // The original class which defined this constant, if
+    // non-null. This is normally the PreClass where this constant
+    // exists. However if this is non-null, HHBBC has propagated the
+    // constant and we need to preserve the original declaring class.
+    LowStringPtr m_cls;
     /* m_aux.u_isAbstractConst indicates an abstract constant. A TypedValue
      * with KindOfUninit represents a constant whose value is not
      * statically available (e.g. "const X = self::Y + 5;") */
     TypedValueAux m_val;
-    LowStringPtr m_phpCode;
+    // HHBBC pre-resolved type-structure. Only present if this is a
+    // non-abstract type-constant.
+    Array m_resolvedTypeStructure;
+    Invariance m_invariance : 2;
     bool m_fromTrait : 1;
   };
 
@@ -331,6 +362,8 @@ public:
    */
   void
   enforceInMaybeSealedParentWhitelist(const PreClass* parentPreClass) const;
+
+  bool enableMethodTraitDiamond();
 
   /*
    * Funcs, Consts, and Props all behave similarly.  Define raw accessors

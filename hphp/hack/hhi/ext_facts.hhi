@@ -21,7 +21,7 @@ enum DeriveKind : string {
 }
 
 type TypeAttributeFilter = shape(
-  'name' => classname<\HH\ClassAttribute>,
+  'name' => classname<\HH\ClassLikeAttribute>,
   'parameters' => dict<int, dynamic>,
 );
 
@@ -156,7 +156,7 @@ function supertypes(
  * Throws InvalidOperationException if Facts is not enabled.
  */
 function types_with_attribute(
-  classname<\HH\ClassAttribute> $attribute,
+  classname<\HH\ClassLikeAttribute> $attribute,
 ): vec<classname<mixed>>;
 
 /**
@@ -196,7 +196,7 @@ function files_with_attribute(
  */
 function type_attributes(
   classname<mixed> $type,
-): vec<classname<\HH\ClassAttribute>>;
+): vec<classname<\HH\ClassLikeAttribute>>;
 
 /**
  * Get all attributes on the given type alias.
@@ -238,7 +238,7 @@ function file_attributes(
  */
 function type_attribute_parameters(
   classname<mixed> $type,
-  classname<\HH\ClassAttribute> $attribute,
+  classname<\HH\ClassLikeAttribute> $attribute,
 ): vec<dynamic>;
 
 /**

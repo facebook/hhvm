@@ -53,6 +53,7 @@
     typing_defs
     utils_core
     shallow_decl_defs
+    typing_deps
     sys_utils)
   (preprocess (pps ppx_deriving.std)))
 

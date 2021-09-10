@@ -11,7 +11,7 @@ abstract final class InvariantCallback {
  * which causes a fatal. Handle them gracefully by displaying the class
  * name.
  */
-function invariant_violation_helper($arg) {
+function invariant_violation_helper($arg)[] {
   if (!\is_object($arg) || \method_exists($arg, '__toString')) {
     return $arg;
   }
@@ -30,7 +30,7 @@ class InvariantException extends \Exception {}
  *
  * @param $callback - The function that will be called if your invariant fails.
  */
-function invariant_callback_register($callback) {
+function invariant_callback_register($callback)[globals] {
   invariant(
     \is_callable($callback),
     'Callback not callable: %s',
@@ -72,7 +72,7 @@ function invariant_callback_register($callback) {
  *                      invariant fails, with possible placeholders.
  * @param $args - Actual values to placeholders in your format string.
  */
-function invariant(mixed $test, $format_str, ...$args): void {
+function invariant(mixed $test, $format_str, ...$args)[]: void {
   if (!$test) {
     \HH\invariant_violation($format_str, ...$args);
   }
@@ -87,7 +87,10 @@ function invariant(mixed $test, $format_str, ...$args): void {
  *                      fails.
  * @param $args - Actual values to placeholders in your format string.
  */
-function invariant_violation(string $format_str, ...$args): void {
+function invariant_violation(string $format_str, ...$args)[]: void {
+  // TODO(T94673071): The callback only ever gets set once at the beginning of
+  // the request for FB WWW. This means that this global read is technically
+  // pure within the request.
   $cb = \__SystemLib\InvariantCallback::$cb;
   if ($cb is nonnull) {
     $cb($format_str, ...$args);

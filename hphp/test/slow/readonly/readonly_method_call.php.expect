@@ -1,0 +1,2 @@
+Foo::bar() modifies the instance, but the caller has a readonly instance
+Done

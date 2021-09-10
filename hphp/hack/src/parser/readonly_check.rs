@@ -445,18 +445,36 @@ impl<'ast> VisitorMut<'ast> for Checker {
         m.recurse(&mut context, self.object())
     }
 
-    fn visit_fun_(&mut self, _context: &mut Context, f: &mut aast::Fun_<(), ()>) -> Result<(), ()> {
+    fn visit_fun_(&mut self, context: &mut Context, f: &mut aast::Fun_<(), ()>) -> Result<(), ()> {
+        // Is run on every function definition and closure definition
         let readonly_return = ro_kind_to_rty(f.readonly_ret);
         let readonly_this = ro_kind_to_rty(f.readonly_this);
-        let mut context = Context::new(readonly_return, readonly_this);
-
-        for p in f.params.iter() {
-            if let Some(_) = p.readonly {
-                context.add_local(&p.name, Rty::Readonly)
+        let mut new_context = Context::new(readonly_return, readonly_this);
+        // Add the old context's stuff into the new context, as readonly if needed
+        for (local, rty) in context.locals.lenv.iter() {
+            if readonly_this == Rty::Readonly {
+                new_context.add_local(&local, Rty::Readonly);
             } else {
-                context.add_local(&p.name, Rty::Mutable)
+                new_context.add_local(&local, *rty);
             }
         }
+        for p in f.params.iter() {
+            if let Some(_) = p.readonly {
+                new_context.add_local(&p.name, Rty::Readonly)
+            } else {
+                new_context.add_local(&p.name, Rty::Mutable)
+            }
+        }
+        f.recurse(&mut new_context, self.object())
+    }
+
+    fn visit_fun_def(
+        &mut self,
+        _context: &mut Context,
+        f: &mut aast::FunDef<(), ()>,
+    ) -> Result<(), ()> {
+        // Clear the context completely on a fun_def
+        let mut context = Context::new(Rty::Mutable, Rty::Mutable);
         f.recurse(&mut context, self.object())
     }
 

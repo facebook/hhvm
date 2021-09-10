@@ -37,13 +37,19 @@ namespace {
 
 struct SingletonTag {};
 
-} // namespace
-
 InitFiniNode s_configurationInitialization(
     []() {
       Configuration::get()->read(RO::EvalTaintConfigurationPath);
     },
     InitFiniNode::When::ProcessInit);
+
+folly::Singleton<Configuration, SingletonTag> kSingleton{};
+
+} // namespace
+
+/* static */ std::shared_ptr<Configuration> Configuration::get() {
+  return kSingleton.try_get();
+}
 
 void Configuration::read(const std::string& path) {
   sources.clear();
@@ -66,11 +72,6 @@ void Configuration::read(const std::string& path) {
   }
 }
 
-folly::Singleton<Configuration, SingletonTag> kSingleton{};
-/* static */ std::shared_ptr<Configuration> Configuration::get() {
-  return kSingleton.try_get();
-}
-
 void Configuration::addSink(const Sink& sink) {
   auto sinks = m_sinks.find(sink.name);
   if (sinks != m_sinks.end()) {
@@ -79,7 +80,11 @@ void Configuration::addSink(const Sink& sink) {
   m_sinks.insert({sink.name, SinkSet{sink}});
 }
 
-static SinkSet kEmptySet = {};
+namespace {
+
+SinkSet kEmptySet = {};
+
+} // namespace
 
 const SinkSet& Configuration::sinks(const std::string& name) const {
   auto sinks = m_sinks.find(name);

@@ -446,6 +446,10 @@ let visitor =
             String.equal builtin_enum_class SN.Classes.cHH_BuiltinEnumClass
             && String.equal memberof SN.Classes.cMemberOf
             && String.equal name c_name
+          | (_, Happly ((_, builtin_abstract_enum_class), [])) ->
+            String.equal
+              builtin_abstract_enum_class
+              SN.Classes.cHH_BuiltinAbstractEnumClass
           | _ -> false
         in
         (* Checks if the hint is matching the pattern

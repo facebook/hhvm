@@ -39,6 +39,8 @@ pub mod classes {
 
     pub const HH_BUILTIN_ENUM_CLASS: &str = "\\HH\\BuiltinEnumClass";
 
+    pub const HH_BUILTIN_ABSTRACT_ENUM_CLASS: &str = "\\HH\\BuiltinAbstractEnumClass";
+
     pub const THROWABLE: &str = "\\Throwable";
 
     pub const STD_CLASS: &str = "\\stdClass";

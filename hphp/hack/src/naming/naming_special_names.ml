@@ -36,6 +36,8 @@ module Classes = struct
 
   let cHH_BuiltinEnumClass = "\\HH\\BuiltinEnumClass"
 
+  let cHH_BuiltinAbstractEnumClass = "\\HH\\BuiltinAbstractEnumClass"
+
   let cThrowable = "\\Throwable"
 
   let cStdClass = "\\stdClass"

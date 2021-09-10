@@ -4357,15 +4357,19 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             .node_to_ty(base)
             .unwrap_or_else(|| self.tany_with_pos(name.0));
 
-        let mut class_kind = ClassishKind::CenumClass(&Abstraction::Concrete);
+        let mut is_abstract = false;
         for modifier in modifiers.iter() {
             match modifier.token_kind() {
-                Some(TokenKind::Abstract) => {
-                    class_kind = ClassishKind::CenumClass(&Abstraction::Abstract);
-                }
+                Some(TokenKind::Abstract) => is_abstract = true,
                 _ => {}
             }
         }
+
+        let class_kind = if is_abstract {
+            ClassishKind::CenumClass(&Abstraction::Abstract)
+        } else {
+            ClassishKind::CenumClass(&Abstraction::Concrete)
+        };
 
         let builtin_enum_class_ty = {
             let pos = name.0;
@@ -4376,10 +4380,14 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                 bumpalo::vec![in self.arena; enum_class_ty, base].into_bump_slice(),
             )));
             let elt_ty = self.alloc(Ty(self.alloc(Reason::hint(pos)), elt_ty_));
-            let builtin_enum_ty_ = Ty_::Tapply(self.alloc((
-                (pos, "\\HH\\BuiltinEnumClass"),
-                std::slice::from_ref(self.alloc(elt_ty)),
-            )));
+            let builtin_enum_ty_ = if is_abstract {
+                Ty_::Tapply(self.alloc(((pos, "\\HH\\BuiltinAbstractEnumClass"), &[])))
+            } else {
+                Ty_::Tapply(self.alloc((
+                    (pos, "\\HH\\BuiltinEnumClass"),
+                    std::slice::from_ref(self.alloc(elt_ty)),
+                )))
+            };
             self.alloc(Ty(self.alloc(Reason::hint(pos)), builtin_enum_ty_))
         };
 

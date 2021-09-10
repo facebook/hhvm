@@ -19,3 +19,5 @@ val static_string : ?no_consts:bool -> Pos.t -> unit
 val shape_idx_access_required_field : Pos.t -> string -> unit
 
 val opt_closed_shape_idx_missing_field : string option -> Pos.t -> unit
+
+val sealed_not_subtype : string -> Pos.t -> string -> string -> string -> unit

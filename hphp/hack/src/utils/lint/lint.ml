@@ -82,3 +82,20 @@ let opt_closed_shape_idx_missing_field method_name field_pos =
     Lint_error
     field_pos
     msg
+
+let sealed_not_subtype verb parent_pos parent_name child_name child_kind =
+  let parent_name = Utils.strip_ns parent_name in
+  let child_name = Utils.strip_ns child_name in
+  add
+    (Codes.to_enum Codes.SealedNotSubtype)
+    Lint_error
+    parent_pos
+    (child_kind
+    ^ " "
+    ^ Markdown_lite.md_codify child_name
+    ^ " in sealed whitelist for "
+    ^ Markdown_lite.md_codify parent_name
+    ^ ", but does not "
+    ^ verb
+    ^ " "
+    ^ Markdown_lite.md_codify parent_name)

@@ -1325,16 +1325,6 @@ functor
       let time_first_error =
         Option.first_some time_first_error time_errors_pushed
       in
-      let hs = SharedMem.SMTelemetry.heap_size () in
-      let telemetry =
-        telemetry
-        |> Telemetry.duration ~key:"parse_end" ~start_time
-        |> Telemetry.int_ ~key:"parse_end_heap_size" ~value:hs
-        |> Telemetry.int_ ~key:"parse_count" ~value:reparse_count
-      in
-      HackEventLogger.parsing_end_for_typecheck t hs ~parsed_count:reparse_count;
-      let t = Hh_logger.log_duration logstring t in
-      Hh_logger.log "Heap size: %d" hs;
 
       (* DIRECT DECL PARSER *****************)
       (* We should use the direct decl parser results for the naming phase.
@@ -1370,6 +1360,17 @@ functor
         else
           fast_parsed
       in
+
+      let hs = SharedMem.SMTelemetry.heap_size () in
+      let telemetry =
+        telemetry
+        |> Telemetry.duration ~key:"parse_end" ~start_time
+        |> Telemetry.int_ ~key:"parse_end_heap_size" ~value:hs
+        |> Telemetry.int_ ~key:"parse_count" ~value:reparse_count
+      in
+      HackEventLogger.parsing_end_for_typecheck t hs ~parsed_count:reparse_count;
+      let t = Hh_logger.log_duration logstring t in
+      Hh_logger.log "Heap size: %d" hs;
 
       (* UPDATE NAMING TABLES **************************************************)
       let logstring = "Updating deps" in

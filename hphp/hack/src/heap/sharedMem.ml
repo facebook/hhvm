@@ -423,7 +423,6 @@ module GC = struct
     let old_size = SMTelemetry.heap_size () in
     Stats.update_max_heap_size old_size;
     let start_t = Unix.gettimeofday () in
-    (* The wrapper is used to run the function in a worker instead of master. *)
     if should_collect effort then hh_collect ();
     let new_size = SMTelemetry.heap_size () in
     let time_taken = Unix.gettimeofday () -. start_t in

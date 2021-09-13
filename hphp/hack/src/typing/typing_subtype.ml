@@ -85,6 +85,11 @@ module VisitedGoals = struct
         Some (SMap.add name (ITySet.add ty lower, upper) v)
 end
 
+let is_err ty =
+  match get_node ty with
+  | Terr -> true
+  | _ -> false
+
 type subtype_env = {
   ignore_generic_params: bool;
       (** If set, finish as soon as we see a goal of the form T <: t or t <: T
@@ -1117,6 +1122,7 @@ and simplify_subtype_i
       | ConstraintType cty when is_constraint_type_union cty ->
         default_subtype env
       | LoclType lty when is_union lty -> default_subtype env
+      | LoclType lty when is_err lty -> valid env
       (* t <: (t1 & ... & tn)
        *   if and only if
        * t <: t1 /\  ... /\ t <: tn

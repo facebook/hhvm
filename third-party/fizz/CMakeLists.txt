@@ -69,6 +69,7 @@ set(
 )
 add_dependencies(bundled_fizz ${FIZZ_DEPS})
 add_library(fizz INTERFACE)
+add_dependencies(fizz bundled_fizz)
 target_include_directories(fizz INTERFACE "${INSTALL_DIR}/include")
 target_link_libraries(
   fizz

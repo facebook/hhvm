@@ -405,6 +405,8 @@ pub mod reified {
 pub mod coeffects {
     #[allow(clippy::redundant_static_lifetimes)]
     pub static LOCAL_NAME: &'static str = "$0Coeffects";
+    #[allow(clippy::redundant_static_lifetimes)]
+    pub static CALLER: &'static str = "86caller";
 }
 
 #[cfg(test)]

@@ -175,6 +175,10 @@ pub fn from_ast<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         )
     };
 
+    if is_closure_body && coeffects.is_86caller() {
+        coeffects = coeffects.with_caller(alloc)
+    }
+
     if is_native_opcode_impl
         && (class.name.1.as_str() == classes::GENERATOR
             || class.name.1.as_str() == classes::ASYNC_GENERATOR)

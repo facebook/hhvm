@@ -905,7 +905,7 @@ functor
           ~defs:fast
       in
       (* Things that were redeclared are no longer in old heap, so we substract
-       * defs_ro_redecl from oldified_defs *)
+       * defs_to_redecl from oldified_defs *)
       let oldified_defs =
         snd @@ Decl_utils.split_defs oldified_defs defs_to_redecl
       in

@@ -1,6 +1,0 @@
-File "generic_attr2.php", line 8, characters 23-24:
-Invalid xhp value for attribute `:foo` in `:my-xhp` (Typing[4343])
-  File "generic_attr2.php", line 4, characters 13-13:
-  Expected `~string` because it is an unenforceable type
-  File "generic_attr2.php", line 7, characters 15-17:
-  But got `int`

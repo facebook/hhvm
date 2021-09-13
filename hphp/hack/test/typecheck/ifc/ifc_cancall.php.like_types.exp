@@ -1,2 +1,0 @@
-File "ifc_cancall.php", line 5, characters 1-141:
-IFC Internal Error: IFC internal assertion failure: calling something that is not a function. If you see this error and aren't expecting it, please `hh rage` and let the Hack team know. (Typing[4398])

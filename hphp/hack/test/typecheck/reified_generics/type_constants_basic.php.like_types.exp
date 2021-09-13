@@ -1,8 +1,0 @@
-File "type_constants_basic.php", line 10, characters 10-17:
-Invalid `as` expression hint (Typing[4195])
-  File "type_constants_basic.php", line 5, characters 23-24:
-  The `as` operator cannot be used with the abstract type constant Ta because it is not marked `<<__Enforceable>>`
-File "type_constants_basic.php", line 12, characters 10-17:
-Invalid `as` expression hint (Typing[4195])
-  File "type_constants_basic.php", line 7, characters 19-24:
-  The `as` operator cannot be used with a type with an erased generic type argument, except in a like cast when the corresponding type parameter is covariant

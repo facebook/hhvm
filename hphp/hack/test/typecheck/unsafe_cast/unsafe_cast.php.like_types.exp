@@ -1,4 +1,0 @@
-File "unsafe_cast.php", line 4, characters 10-47:
-This cast violates type safety and may lead to unexpected behavior at runtime. (Typing[4417])
-File "unsafe_cast.php", line 8, characters 10-72:
-This cast violates type safety and may lead to unexpected behavior at runtime. (Typing[4417])

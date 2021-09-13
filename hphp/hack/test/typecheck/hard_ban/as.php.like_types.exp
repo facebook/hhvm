@@ -1,6 +1,0 @@
-File "as.php", line 4, characters 3-21:
-You cannot use `HH_FIXME` or `HH_IGNORE_ERROR` comments to suppress error 4195, and this cannot be enabled by configuration (Typing[4195])
-File "as.php", line 5, characters 9-16:
-Invalid `as` expression hint (Typing[4195])
-File "as.php", line 5, characters 9-16:
-The `as` operator cannot be used with a type with an erased generic type argument, except in a like cast when the corresponding type parameter is covariant

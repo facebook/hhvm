@@ -42,7 +42,7 @@ namespace HH\ExperimentalParserUtils {
     return tuple($left, $right);
   }
 
-  function find_boundary_token(darray $body, bool $right): ?(int, int) {
+  function find_boundary_token(darray $body, bool $right)[]: ?(int, int) {
     return ffp_json_dfs(
       $body,
       $right,
@@ -66,7 +66,7 @@ namespace HH\ExperimentalParserUtils {
     );
   }
 
-  function extract_name_from_node(darray $name_elem): ?string {
+  function extract_name_from_node(darray $name_elem)[]: ?string {
     if ($name_elem["kind"] === "missing") {
       return null;
     }
@@ -93,7 +93,7 @@ namespace HH\ExperimentalParserUtils {
   function find_method_names_in_concrete_derived_class(
     darray $class_decl,
     ?string $namespace
-  ): vec<(string, string, string)> {
+  )[]: vec<(string, string, string)> {
     if ($class_decl["classish_keyword"]["token"]["kind"] !== "class") {
       // ignore interfaces and traits
       return vec[];
@@ -131,7 +131,7 @@ namespace HH\ExperimentalParserUtils {
     return $results;
   }
 
-  function find_test_methods(darray $json): vec<(string, string, string)> {
+  function find_test_methods(darray $json)[]: vec<(string, string, string)> {
     $results = vec[];
     $namespace = null;
 
@@ -370,7 +370,7 @@ namespace HH\ExperimentalParserUtils {
     return null;
   }
 
-  function extract_shape_from_type(darray $type): darray {
+  function extract_shape_from_type(darray $type)[]: darray {
     if ($type["kind"] === "shape_type_specifier") {
       return $type;
     } else if ($type["kind"] === "nullable_type_specifier") { // ?shape
@@ -411,7 +411,7 @@ namespace HH\ExperimentalParserUtils {
     return $result;
   }
 
-  function collect_comments(darray $shape_field): vec<string> {
+  function collect_comments(darray $shape_field)[]: vec<string> {
     $trivia = Vector {};
     ffp_json_dfs(
       $shape_field,
@@ -447,7 +447,7 @@ namespace HH\ExperimentalParserUtils {
     bool $right,
     (function (varray_or_darray): ?varray_or_darray) $predicate,
     (function (varray_or_darray): bool) $skip_node,
-  ): ?varray_or_darray {
+  )[]: ?varray_or_darray {
     if (!\HH\is_any_array($json)) {
       return null;
     }

@@ -124,6 +124,8 @@ target_link_libraries(folly
   "${INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}folly${CMAKE_STATIC_LIBRARY_SUFFIX}"
   folly_deps
 )
+# Use target_link_directories instead once our minimum is CMake 3.13
+set(FOLLY_INSTALL_DIR "${INSTALL_DIR}" PARENT_SCOPE)
 
 if(APPLE)
   target_link_libraries(folly INTERFACE "c++abi")

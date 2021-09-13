@@ -1,0 +1,24 @@
+diff --git a/folly/CMakeLists.txt b/folly/CMakeLists.txt
+index 883f27ce4..f69e56fae 100644
+--- a/folly/CMakeLists.txt
++++ b/folly/CMakeLists.txt
+@@ -21,7 +21,6 @@ target_link_libraries(follybenchmark PUBLIC folly)
+ apply_folly_compile_options_to_target(follybenchmark)
+ install(
+   TARGETS follybenchmark
+-  EXPORT folly
+   RUNTIME DESTINATION ${BIN_INSTALL_DIR}
+   LIBRARY DESTINATION ${LIB_INSTALL_DIR}
+   ARCHIVE DESTINATION ${LIB_INSTALL_DIR}
+diff --git a/folly/experimental/exception_tracer/CMakeLists.txt b/folly/experimental/exception_tracer/CMakeLists.txt
+index 0a4049f5b..1774284f4 100644
+--- a/folly/experimental/exception_tracer/CMakeLists.txt
++++ b/folly/experimental/exception_tracer/CMakeLists.txt
+@@ -63,7 +63,6 @@ if (FOLLY_HAVE_ELF AND FOLLY_HAVE_DWARF)
+       folly_exception_tracer_base
+       folly_exception_tracer
+       folly_exception_counter
+-    EXPORT folly
+     RUNTIME DESTINATION ${BIN_INSTALL_DIR}
+     LIBRARY DESTINATION ${LIB_INSTALL_DIR}
+     ARCHIVE DESTINATION ${LIB_INSTALL_DIR}

@@ -10,7 +10,7 @@
 
 namespace HH\Lib\Str;
 
-use namespace HH\Lib\{_Private, C, Keyset, Vec, _Private\_Str};
+use namespace HH\Lib\{_Private, C, Keyset, Vec};
 
 /**
  * Returns the string with the first character capitalized.
@@ -24,11 +24,8 @@ use namespace HH\Lib\{_Private, C, Keyset, Vec, _Private\_Str};
 function capitalize(
   string $string,
 )[]: string {
-  if ($string === '') {
-    return '';
-  }
-  /* HH_FIXME[4390] missing [] */
-  return _Str\uppercase_l(slice($string, 0, 1)) . slice($string, 1);
+  /* HH_FIXME[4390] \ucfirst is missing [] */
+  return \ucfirst($string);
 }
 
 /**
@@ -42,13 +39,9 @@ function capitalize(
  */
 function capitalize_words(
   string $string,
-  ?string $delimiters = null,
+  string $delimiters = " \t\r\n\f\v",
 )[]: string {
-  if ($delimiters === null) {
-    /* HH_FIXME[4390] missing [] */
-    return _Str\titlecase_l($string, $delimiters);
-  }
-  /* HH_FIXME[4390] missing [] */
+  /* HH_FIXME[4390] \ucwords is missing [] */
   return \ucwords($string, $delimiters);
 }
 
@@ -79,8 +72,7 @@ function format_number(
 function lowercase(
   string $string,
 )[]: string {
-  /* HH_FIXME[4390] missing [] */
-  return _Str\lowercase_l($string);
+  return \strtolower($string);
 }
 
 /**
@@ -99,8 +91,9 @@ function pad_left(
   int $total_length,
   string $pad_string = ' ',
 )[]: string {
-  /* HH_FIXME[4390] missing [] */
-  return _Str\pad_left_l($string, $total_length, $pad_string);
+  invariant($pad_string !== '', 'Expected non-empty pad string.');
+  invariant($total_length >= 0, 'Expected non-negative total length.');
+  return \str_pad($string, $total_length, $pad_string, \STR_PAD_LEFT);
 }
 
 /**
@@ -119,8 +112,9 @@ function pad_right(
   int $total_length,
   string $pad_string = ' ',
 )[]: string {
-  /* HH_FIXME[4390] missing [] */
-  return _Str\pad_right_l($string, $total_length, $pad_string);
+  invariant($pad_string !== '', 'Expected non-empty pad string.');
+  invariant($total_length >= 0, 'Expected non-negative total length.');
+  return \str_pad($string, $total_length, $pad_string, \STR_PAD_RIGHT);
 }
 
 /**
@@ -132,9 +126,7 @@ function repeat(
   string $string,
   int $multiplier,
 )[]: string {
-  if ($multiplier < 0) {
-    throw new \InvalidArgumentException('Expected non-negative multiplier');
-  }
+  invariant($multiplier >= 0, 'Expected non-negative multiplier');
   return \str_repeat($string, $multiplier);
 }
 
@@ -151,8 +143,7 @@ function replace(
   string $needle,
   string $replacement,
 )[]: string {
-  /* HH_FIXME[4390] missing [] */
-  return _Str\replace_l($haystack, $needle, $replacement);
+  return \str_replace($needle, $replacement, $haystack);
 }
 
 /**
@@ -169,8 +160,7 @@ function replace_ci(
   string $needle,
   string $replacement,
 )[rx]: string {
-  /* HH_FIXME[4390] missing [] */
-  return _Str\replace_ci_l($haystack, $needle, $replacement);
+  return \str_ireplace($needle, $replacement, $haystack);
 }
 
 /**
@@ -194,8 +184,11 @@ function replace_every(
   string $haystack,
   KeyedContainer<string, string> $replacements,
 )[]: string {
-  /* HH_FIXME[4390] missing [] */
-  return _Str\replace_every_l($haystack, dict($replacements));
+  return \str_replace(
+    \array_keys($replacements),
+    \array_values($replacements),
+    $haystack,
+  );
 }
 
 /**
@@ -219,8 +212,11 @@ function replace_every_ci(
   string $haystack,
   KeyedContainer<string, string> $replacements,
 )[rx]: string {
-  /* HH_FIXME[4390] missing [] */
-  return _Str\replace_every_ci_l($haystack, dict($replacements));
+  return \str_ireplace(
+    \array_keys($replacements),
+    \array_values($replacements),
+    $haystack,
+  );
 }
 
 /**
@@ -239,8 +235,12 @@ function replace_every_nonrecursive(
   string $haystack,
   KeyedContainer<string, string> $replacements,
 )[rx]: string {
-  /* HH_FIXME[4390] missing [] */
-  return _Str\replace_every_nonrecursive_l($haystack, dict($replacements));
+  invariant(
+    !C\contains_key($replacements, ''),
+    'Expected non-empty keys only.',
+  );
+
+  return \strtr($haystack, $replacements);
 }
 
 /**
@@ -255,7 +255,7 @@ function replace_every_nonrecursive(
  * The ordering of `$replacements` therefore doesn't matter.
  *
  * When two replacers are passed that are identical except for case,
- * an InvalidArgumentException is thrown.
+ * an invariant exception is thrown.
  *
  * Time complexity: O(a + length * b), where a is the sum of all key lengths and
  * b is the sum of distinct key lengths (length is the length of `$haystack`)
@@ -266,8 +266,47 @@ function replace_every_nonrecursive_ci(
   string $haystack,
   KeyedContainer<string, string> $replacements,
 )[rx]: string {
-  /* HH_FIXME[4390] missing [] */
-  return _Str\replace_every_nonrecursive_ci_l($haystack, dict($replacements));
+  invariant(
+    !C\contains_key($replacements, ''),
+    'Expected non-empty keys only.',
+  );
+
+  $haystack_lc = lowercase($haystack);
+  $key_lengths = keyset[];
+  $replacements_lc = dict[];
+  foreach ($replacements as $key => $value) {
+    $key_lc = lowercase($key);
+    invariant(
+      !C\contains_key($replacements_lc, $key_lc),
+      'Duplicate case-insensitive search string "%s".',
+      $key_lc,
+    );
+    $key_lengths[] = length($key_lc);
+    $replacements_lc[$key_lc] = $value;
+  }
+
+  $key_lengths = Vec\sort($key_lengths) |> Vec\reverse($$);
+
+  $output = '';
+  for ($pos = 0; $pos < length($haystack); ) {
+    $found_match_at_pos = false;
+    foreach ($key_lengths as $key_length) {
+      $possible_match = slice($haystack_lc, $pos, $key_length);
+      if (C\contains_key($replacements_lc, $possible_match)) {
+        $found_match_at_pos = true;
+        $output .= $replacements_lc[$possible_match];
+        $pos += $key_length;
+        break;
+      }
+    }
+
+    if (!$found_match_at_pos) {
+      $output .= $haystack[$pos];
+      $pos++;
+    }
+  }
+
+  return $output;
 }
 
 /** Reverse a string by bytes.
@@ -299,8 +338,11 @@ function splice(
   int $offset,
   ?int $length = null,
 )[]: string {
-  /* HH_FIXME[4390] missing [] */
-  return _Str\splice_l($string, $replacement, $offset, $length);
+  invariant($length === null || $length >= 0, 'Expected non-negative length.');
+  $offset = _Private\validate_offset($offset, length($string));
+  return $length === null
+    ? \substr_replace($string, $replacement, $offset)
+    : \substr_replace($string, $replacement, $offset, $length);
 }
 
 /**
@@ -321,6 +363,5 @@ function to_int(
 function uppercase(
   string $string,
 )[]: string {
-  /* HH_FIXME[4390] missing [] */
-  return _Str\uppercase_l($string);
+  return \strtoupper($string);
 }

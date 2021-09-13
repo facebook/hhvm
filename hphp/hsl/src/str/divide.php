@@ -10,7 +10,7 @@
 
 namespace HH\Lib\Str;
 
-use namespace HH\Lib\{Locale, _Private\_Str};
+use namespace HH\Lib\Str;
 
 /**
  * Returns a vec containing the string split into chunks of the given size.
@@ -21,8 +21,8 @@ function chunk(
   string $string,
   int $chunk_size = 1,
 )[]: vec<string> {
-  /* HH_FIXME[4390] missing [] */
-  return _Str\chunk_l($string, $chunk_size);
+  invariant($chunk_size >= 1, 'Expected positive chunk size.');
+  return vec(\str_split($string, $chunk_size));
 }
 
 /**
@@ -42,6 +42,20 @@ function split(
   string $delimiter,
   ?int $limit = null,
 )[]: vec<string> {
-  /* HH_FIXME[4390] missing [] */
-  return vec(_Str\split_l($string, $delimiter, $limit));
+  if ($delimiter === '') {
+    if ($limit === null || $limit >= Str\length($string)) {
+      return chunk($string);
+    } else if ($limit === 1) {
+      return vec[$string];
+    } else {
+      invariant($limit > 1, 'Expected positive limit.');
+      $result = chunk(\substr($string, 0, $limit - 1));
+      $result[] = \substr($string, $limit - 1);
+      return $result;
+    }
+  } else if ($limit === null) {
+    return vec(\explode($delimiter, $string));
+  } else {
+    return vec(\explode($delimiter, $string, $limit));
+  }
 }

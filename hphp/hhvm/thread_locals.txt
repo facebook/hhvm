@@ -126,5 +126,3 @@ HPHP::jit::(anonymous namespace)::tl_dataStorePtr
 # Probably can be moved to a global (D29176455), thread local instead of RDS as
 # a cherry-pickable leak fix
 HPHP::(anonymous namespace)::c_hsl_locale
-HPHP::(anonymous namespace)::s_last_request_locale
-HPHP::(anonymous namespace)::s_request_hsl_locale

@@ -79,11 +79,11 @@ final class StrSelectTest extends HackTest {
 
   public function testSliceExceptions(): void {
     expect(() ==> Str\slice('hello', 0, -1))
-      ->toThrow(InvalidArgumentException::class);
+      ->toThrow(InvariantException::class);
     expect(() ==> Str\slice('hello', 10))
-      ->toThrow(InvalidArgumentException::class);
+      ->toThrow(InvariantException::class);
     expect(() ==> Str\slice('hello', -6))
-      ->toThrow(InvalidArgumentException::class);
+      ->toThrow(InvariantException::class);
   }
 
   public static function provideStripPrefix(): varray<mixed> {

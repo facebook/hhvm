@@ -116,20 +116,20 @@ final class StrIntrospectTest extends HackTest {
 
   public function testContainsExceptions(): void {
     expect(() ==> Str\contains('foo', 'f', 5))
-      ->toThrow(InvalidArgumentException::class);
+      ->toThrow(InvariantException::class);
     expect(() ==> Str\contains('foo', 'f', -1));
 
     expect(() ==> Str\contains('hello world', 'world', -16))
-      ->toThrow(InvalidArgumentException::class);
+      ->toThrow(InvariantException::class);
     expect(() ==> Str\contains('hello world', '', -16))
-      ->toThrow(InvalidArgumentException::class);
+      ->toThrow(InvariantException::class);
 
     expect(() ==> Str\contains_ci('foo', 'F', 5))
-      ->toThrow(InvalidArgumentException::class);
+      ->toThrow(InvariantException::class);
     expect(() ==> Str\contains_ci('hello world', 'World', -16))
-      ->toThrow(InvalidArgumentException::class);
+      ->toThrow(InvariantException::class);
     expect(() ==> Str\contains_ci('hello world', '', -16))
-      ->toThrow(InvalidArgumentException::class);
+      ->toThrow(InvariantException::class);
   }
 
   public static function provideEndsWith(): varray<mixed> {
@@ -328,19 +328,19 @@ final class StrIntrospectTest extends HackTest {
 
   public function testPositionExceptions(): void {
     expect(() ==> Str\search('foo', 'f', 5))
-      ->toThrow(InvalidArgumentException::class);
+      ->toThrow(InvariantException::class);
     expect(() ==> Str\search('hello world', 'World', -16))
-      ->toThrow(InvalidArgumentException::class);
+      ->toThrow(InvariantException::class);
 
     expect(() ==> Str\search_ci('foo', 'f', 5))
-      ->toThrow(InvalidArgumentException::class);
+      ->toThrow(InvariantException::class);
     expect(() ==> Str\search_ci('hello world', 'World', -16))
-      ->toThrow(InvalidArgumentException::class);
+      ->toThrow(InvariantException::class);
 
     expect(() ==> Str\search_last('foo', 'f', 5))
-      ->toThrow(InvalidArgumentException::class);
+      ->toThrow(InvariantException::class);
     expect(() ==> Str\search_last('hello world', 'World', -16))
-      ->toThrow(InvalidArgumentException::class);
+      ->toThrow(InvariantException::class);
   }
 
   public static function provideStartsWith(): varray<mixed> {

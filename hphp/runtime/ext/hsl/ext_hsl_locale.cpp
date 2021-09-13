@@ -36,20 +36,16 @@ const StaticString
   s_InvalidLocaleException("HH\\Lib\\Locale\\InvalidLocaleException");
 
 Class* s_HSLLocaleClass = nullptr;
-std::shared_ptr<HSLLocaleByteOps> s_byteops;
 
 } // namespace
 
 HSLLocale::HSLLocale(std::shared_ptr<Locale> loc): m_locale(loc) {
   if (loc == Locale::getCLocale()) {
-    if (UNLIKELY(!s_byteops)) {
-      s_byteops = std::make_shared<HSLLocaleByteOps>();
-    }
-    m_ops = s_byteops;
+    m_ops = new HSLLocaleByteOps();
   } else if (loc->getCodesetKind() == Locale::CodesetKind::SINGLE_BYTE) {
-    m_ops = std::make_shared<HSLLocaleLibcOps>(*loc.get());
+    m_ops = new HSLLocaleLibcOps(*loc.get());
   } else {
-    m_ops = std::make_shared<HSLLocaleICUOps>(*loc.get());
+    m_ops = new HSLLocaleICUOps(*loc.get());
   }
 }
 
@@ -58,8 +54,8 @@ HSLLocale::~HSLLocale() {
 }
 
 void HSLLocale::sweep() {
+  delete m_ops;
   m_locale.reset();
-  m_ops.reset();
 }
 
 Object HSLLocale::newInstance(std::shared_ptr<Locale> loc) {

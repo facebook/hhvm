@@ -1,5 +1,0 @@
-Fatal error: Uncaught exception 'Exception' with message 'Request locale !== 'C'; use `Str\foo_l` instead of `Str\foo`' in %s/str_locale_migrate_2.php:7
-Stack trace:
-#0 %s/str_locale_migrate_2.php(7): HH\Lib\_Private\_Str\vsprintf_l()
-#1 (): main()
-#2 {main}

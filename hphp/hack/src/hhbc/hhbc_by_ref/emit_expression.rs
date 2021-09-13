@@ -6074,8 +6074,16 @@ pub fn emit_lval_op<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                     } else {
                         None
                     };
-                    let (instr_lhs, instr_assign) =
-                        emit_lval_op_list(e, env, pos, loc, &[], expr1, false)?;
+                    let (instr_lhs, instr_assign) = emit_lval_op_list(
+                        e,
+                        env,
+                        pos,
+                        loc,
+                        &[],
+                        expr1,
+                        false,
+                        is_readonly_expr(expr2),
+                    )?;
                     Ok((
                         InstrSeq::gather(
                             alloc,
@@ -6234,6 +6242,7 @@ pub fn emit_lval_op_list<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     indices: &[isize],
     expr: &ast::Expr,
     last_usage: bool,
+    rhs_readonly: bool,
 ) -> Result<(InstrSeq<'arena>, InstrSeq<'arena>)> {
     use ast::Expr_ as E_;
     use hhbc_by_ref_options::Php7Flags;
@@ -6268,6 +6277,7 @@ pub fn emit_lval_op_list<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                         &new_indices[..],
                         expr,
                         last_non_omitted.map_or(false, |j| j == i),
+                        rhs_readonly,
                     )
                 })
                 .collect::<Result<Vec<_>>>()?
@@ -6311,8 +6321,8 @@ pub fn emit_lval_op_list<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                 expr,
                 access_instrs,
                 1,
+                rhs_readonly,
                 false,
-                false, // TODO: readonly assignment (list expressions)
             )?;
             Ok(if is_ltr {
                 (

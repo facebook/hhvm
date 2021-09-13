@@ -10,9 +10,6 @@
 [submodule "fb303"]
 	path = third-party/fb303/src
 	url = https://github.com/facebookincubator/fb303.git
-[submodule "fizz"]
-	path = third-party/fizz/src
-	url = https://github.com/facebookincubator/fizz
 [submodule "libafdt"]
 	path = third-party/libafdt/src
 	url = https://github.com/facebook/libafdt

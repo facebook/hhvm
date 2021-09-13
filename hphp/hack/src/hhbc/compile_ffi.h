@@ -54,7 +54,6 @@ hhas_program const* hackc_compile_hhas_from_text_cpp_ffi(
        bump_allocator const* alloc
      , native_environment const* env
      , char const* source_text
-     , output_config const* config
      , error_buf_t* error_buf );
 
 void hackc_compile_hhas_free_prog_cpp_ffi(hhas_program const*);
@@ -71,12 +70,11 @@ inline hackc_compile_hhas_from_text_ptr
   hackc_compile_hhas_from_text(
       native_environment const* env
     , char const* source_text
-    , output_config const* config
     , error_buf_t* error_buf
   ) {
   bump_allocator const* alloc = hackc_compile_hhas_create_arena();
   hackc_compile_hhas_from_text_ptr result = hackc_compile_hhas_from_text_ptr {
-      hackc_compile_hhas_from_text_cpp_ffi(alloc, env, source_text, config, error_buf)
+      hackc_compile_hhas_from_text_cpp_ffi(alloc, env, source_text, error_buf)
     , hackc_compile_hhas_free_prog_cpp_ffi
   };
   hackc_compile_hhas_free_arena(alloc);

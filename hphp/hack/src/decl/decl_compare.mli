@@ -32,28 +32,28 @@ val get_classes_deps :
   Class.t option SMap.t ->
   Class.t option SMap.t ->
   SSet.t ->
-  DepSet.t * DepSet.t * DepSet.t
+  (DepSet.t * DepSet.t * DepSet.t) * int
 
 val get_funs_deps :
   ctx:Provider_context.t ->
   Funs.t option SMap.t ->
   SSet.t ->
-  DepSet.t * DepSet.t * DepSet.t
+  (DepSet.t * DepSet.t * DepSet.t) * int
 
 val get_types_deps :
   ctx:Provider_context.t ->
   Typedef.t option SMap.t ->
   SSet.t ->
-  DepSet.t * DepSet.t
+  (DepSet.t * DepSet.t) * int
 
 val get_gconsts_deps :
   ctx:Provider_context.t ->
   GConsts.t option SMap.t ->
   SSet.t ->
-  DepSet.t * DepSet.t * DepSet.t
+  (DepSet.t * DepSet.t * DepSet.t) * int
 
 val get_record_defs_deps :
   ctx:Provider_context.t ->
   Decl_heap.RecordDef.t option SMap.t ->
   SSet.t ->
-  Typing_deps.DepSet.t * Typing_deps.DepSet.t * Typing_deps.DepSet.t
+  (Typing_deps.DepSet.t * Typing_deps.DepSet.t * Typing_deps.DepSet.t) * int

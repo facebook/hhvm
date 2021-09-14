@@ -340,11 +340,10 @@ let parsing genv env to_check ~stop_at_errors profiling =
  *)
 (*****************************************************************************)
 
-let update_naming_table env fast_parsed profiling =
+let update_naming_table ctx env fast_parsed profiling =
   let naming_table =
     CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"update_deps"
     @@ fun () ->
-    let ctx = Provider_utils.ctx_from_server_env env in
     let deps_mode = Provider_context.get_deps_mode ctx in
     Relative_path.Map.iter fast_parsed ~f:(fun file fi ->
         let old = Naming_table.get_file_info env.naming_table file in
@@ -377,8 +376,7 @@ let declare_names env fast_parsed =
         end
       ~init:(Errors.empty, Relative_path.Set.empty)
   in
-  let fast = Naming_table.to_fast (Naming_table.create fast_parsed) in
-  (errorl, failed_naming, fast)
+  (errorl, failed_naming)
 
 let diff_set_and_map_keys set map =
   Relative_path.Map.fold map ~init:set ~f:(fun k _ acc ->
@@ -804,49 +802,49 @@ functor
         } )
 
     type naming_result = {
-      env: env;
-      errors_after_naming: Errors.t;
+      duplicate_name_errors: Errors.t;
       failed_naming: Relative_path.Set.t;
-      fast: Naming_table.fast;
-      time_errors_pushed: seconds_since_epoch option;
+      naming_table: Naming_table.t;
+      telemetry: Telemetry.t;
     }
 
+    (** Update the naming_table, which is a map from filename to the names of
+        toplevel symbols declared in that file. Also, update Typing_deps' table,
+        which is a map from toplevel symbol hash (Dep.t) to filename.
+        Also run Naming_global, updating the reverse naming table (which maps the names
+        of toplevel symbols to the files in which they were declared) in shared
+        memory. Does not run Naming itself (which converts an AST to a NAST by
+        assigning unique identifiers to locals, among other things). The Naming
+        module is something of a historical artifact and is slated for removal,
+        but for now, it is run immediately before typechecking. *)
     let do_naming
-        (genv : genv)
         (env : env)
         (ctx : Provider_context.t)
-        ~(errors : Errors.t)
         ~(fast_parsed : FileInfo.t Relative_path.Map.t)
-        ~(naming_table : Naming_table.t)
-        ~(files_to_parse : Relative_path.Set.t)
         ~(profiling : CgroupProfiler.Profiling.t) : naming_result =
+      let telemetry = Telemetry.create () in
+      let start_t = Unix.gettimeofday () in
+
+      let naming_table = update_naming_table ctx env fast_parsed profiling in
+      HackEventLogger.updating_deps_end
+        ~count:(Relative_path.Map.cardinal fast_parsed)
+        ~desc:"serverTypeCheck"
+        ~start_t;
+
       CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"naming"
       @@ fun () ->
-      let (errorl', failed_naming, fast) = declare_names env fast_parsed in
-      let (env, errors, time_errors_pushed) =
-        push_and_accumulate_errors
-          (env, errors)
-          errorl'
-          ~rechecked:
-            (fast |> Relative_path.Map.keys |> Relative_path.Set.of_list)
-          ~phase:Errors.Naming
+      let (duplicate_name_errors, failed_naming) =
+        declare_names env fast_parsed
       in
-      (* failed_naming can be a superset of keys in fast - see comment in
-       * Naming_global.ndecl_file *)
-      let fast = extend_fast genv fast naming_table failed_naming in
-      (* COMPUTES WHAT MUST BE REDECLARED  *)
-      let failed_decl =
-        CheckKind.get_defs_to_redecl ~reparsed:files_to_parse ~env ~ctx
-      in
-      let fast = extend_fast genv fast naming_table failed_decl in
-      let fast = add_old_decls env.naming_table fast in
-      {
-        env;
-        errors_after_naming = errors;
-        failed_naming;
-        fast;
-        time_errors_pushed;
-      }
+
+      let heap_size = SharedMem.SMTelemetry.heap_size () in
+      Hh_logger.log "Heap size: %d" heap_size;
+      HackEventLogger.naming_end
+        ~count:(Relative_path.Map.cardinal fast_parsed)
+        start_t
+        heap_size;
+
+      { duplicate_name_errors; failed_naming; naming_table; telemetry }
 
     type redecl_phase1_result = {
       changed: Typing_deps.DepSet.t;
@@ -1339,70 +1337,42 @@ functor
       Hh_logger.log "Heap size: %d" hs;
 
       (* UPDATE NAMING TABLES **************************************************)
-      let logstring = "Updating deps" in
-      Hh_logger.log "Begin %s" logstring;
-      let telemetry =
-        Telemetry.duration telemetry ~key:"naming_update_start" ~start_time
-      in
-
-      (* Update the naming_table, which is a map from filename to the names of
-         toplevel symbols declared in that file. Also, update Typing_deps' table,
-         which is a map from toplevel symbol hash (Dep.t) to filename. *)
-      let naming_table = update_naming_table env fast_parsed profiling in
-      HackEventLogger.updating_deps_end
-        ~count:reparse_count
-        ~desc:"serverTypeCheck"
-        ~start_t:t;
-      let t = Hh_logger.log_duration logstring t in
-      let telemetry =
-        Telemetry.duration telemetry ~key:"naming_update_end" ~start_time
-      in
-
-      (* NAMING ****************************************************************)
       ServerProgress.send_progress
         ~include_in_logs:false
-        "resolving symbol references";
-      let logstring = "Naming" in
+        "updating naming tables";
+      let logstring = "updating naming tables" in
       Hh_logger.log "Begin %s" logstring;
       let telemetry =
         Telemetry.duration telemetry ~key:"naming_start" ~start_time
       in
-
-      (* Run Naming_global, updating the reverse naming table (which maps the names
-         of toplevel symbols to the files in which they were declared) in shared
-         memory. Does not run Naming itself (which converts an AST to a NAST by
-         assigning unique identifiers to locals, among other things). The Naming
-         module is something of a historical artifact and is slated for removal,
-         but for now, it is run immediately before typechecking. *)
       let {
-        env;
-        errors_after_naming = errors;
+        duplicate_name_errors;
         failed_naming;
-        fast;
-        time_errors_pushed;
+        naming_table;
+        telemetry = naming_telemetry;
       } =
-        do_naming
-          genv
-          env
-          ctx
-          ~errors
-          ~fast_parsed
-          ~naming_table
-          ~files_to_parse
-          ~profiling
+        do_naming env ctx ~fast_parsed ~profiling
+        (* Note: although do_naming updates global reverse-naming-table maps,
+           the updated forward-naming-table "naming_table" only gets assigned
+           into env.naming_table later on, in get_env_after_decl. *)
       in
-      let time_first_error =
-        Option.first_some time_first_error time_errors_pushed
-      in
-
-      let heap_size = SharedMem.SMTelemetry.heap_size () in
-      Hh_logger.log "Heap size: %d" heap_size;
-      HackEventLogger.naming_end ~count:reparse_count t heap_size;
       let t = Hh_logger.log_duration logstring t in
       let telemetry =
         telemetry
         |> Telemetry.duration ~key:"naming_end" ~start_time
-        |> Telemetry.int_ ~key:"naming_end_heap_size" ~value:heap_size
+        |> Telemetry.object_ ~key:"naming" ~value:naming_telemetry
+      in
+
+      let (env, errors, time_errors_pushed) =
+        push_and_accumulate_errors
+          (env, errors)
+          duplicate_name_errors
+          ~rechecked:
+            (fast_parsed |> Relative_path.Map.keys |> Relative_path.Set.of_list)
+          ~phase:Errors.Naming
+      in
+      let time_first_error =
+        Option.first_some time_first_error time_errors_pushed
       in
 
       (* REDECL PHASE 1 ********************************************************)
@@ -1410,6 +1380,20 @@ functor
       let deptable_unlocked =
         Typing_deps.allow_dependency_table_reads env.deps_mode true
       in
+
+      Hh_logger.log "(Recomputing type declarations in relation to naming)";
+      (* failed_naming can be a superset of keys in fast - see comment in Naming_global.ndecl_file *)
+      let failed_decl =
+        CheckKind.get_defs_to_redecl ~reparsed:files_to_parse ~env ~ctx
+      in
+      (* The term [fast] doesn't mean anything. It's just exactly the same as fast_parsed,
+         that is a filename->FileInfo.t map of the files we just parsed,
+         except it's just filename->FileInfo.names -- i.e. purely the names, without positions. *)
+      let fast = Naming_table.to_fast (Naming_table.create fast_parsed) in
+      let fast = extend_fast genv fast naming_table failed_naming in
+      let fast = extend_fast genv fast naming_table failed_decl in
+      let fast = add_old_decls env.naming_table fast in
+
       let count = Relative_path.Map.cardinal fast in
       let logstring =
         Printf.sprintf "Type declaration (phase 1) for %d files" count

@@ -506,8 +506,6 @@ module StdlibFunctions = struct
 
   let get_class = "\\get_class"
 
-  let array_filter = "\\array_filter"
-
   let array_map = "\\array_map"
 
   let call_user_func = "\\call_user_func"
@@ -534,7 +532,6 @@ module StdlibFunctions = struct
         SpecialFunctions.echo;
         PseudoFunctions.isset;
         PseudoFunctions.unset;
-        array_filter;
         type_structure;
         array_map;
         PseudoFunctions.unsafe_cast;

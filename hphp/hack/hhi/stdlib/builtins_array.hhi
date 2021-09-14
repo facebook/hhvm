@@ -71,21 +71,25 @@ function array_fill_keys<Tk as arraykey, Tv>(
   Container<Tk> $keys,
   Tv $value,
 )[]: darray<Tk, Tv>;
-/*
- * Calls to array_filter are rewritten depending on the type
- * of argument to have one of the following signatures:
+/**
+ * `array_filter` returns a `KeyedContainer<_, _>` with the items that match
+ * the predicate.
  *
- * function(array, ?(function(Tv):bool)): array
- * function(KeyedContainer<Tk, Tv>, ?(function(Tv):bool)): array<Tk, Tv>
- * function(Container<Tv>, ?(function(Tv):bool)): array<arraykey, Tv>
+ * This function is deprecated; please use `Dict\filter` or `Vec\filter`
+ * instead, or the respective `filter_nulls` variant.
  *
- * Single argument calls additionally remove nullability of Tv, i.e.:
+ * `array_filter` used to have special typing to indicate:
+ *   - Whether or not it preserved the input type
+ *   - How it removed nulls upon not providing a callback
  *
- * function(Container<?Tv>): array<arraykey, Tv>
- *
+ * These typing behaviors are now split into the aforementioned four Hack
+ * Standard Library functions.
  */
 <<__PHPStdLib>>
-function array_filter<Tv>(Container<Tv> $input, ?(function(Tv):bool) $callback = null);
+function array_filter<Tk as arraykey, Tv>(
+  KeyedContainer<Tk, Tv> $input,
+  ?(function(Tv): bool) $callback = null,
+): KeyedContainer<Tk, Tv>;
 <<__PHPStdLib>>
 function array_flip($trans)[];
 <<__PHPStdLib>>

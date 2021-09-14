@@ -24,17 +24,6 @@ mappers();
 
 echo "---\n";
 
-function filters() {
-  $dump = ($ar,$fn) ==> {
-    var_dump(array_filter($ar, $fn));
-  };
-
-  $dump(varray[1,2,3,4,5,6],         $x ==> $x % 2 == 0);
-  $dump(varray["a", "b", "ac", "k"], $x ==> $x[0] == "a");
-  $dump(varray["asd", new box(123)], $x ==> $x is string);
-}
-filters();
-
 function collection() {
   $blah = Vector {
     new box(1),

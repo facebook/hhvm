@@ -77,7 +77,6 @@ struct
     | Runpack_param (p1, p2, i) -> Runpack_param (pos p1, pos_or_decl p2, i)
     | Rinout_param p -> Rinout_param (pos_or_decl p)
     | Rinstantiate (r1, x, r2) -> Rinstantiate (reason r1, x, reason r2)
-    | Rarray_filter (p, r) -> Rarray_filter (pos p, reason r)
     | Rtypeconst (r1, (p, s1), s2, r2) ->
       Rtypeconst (reason r1, (pos_or_decl p, s1), s2, reason r2)
     | Rtype_access (r1, ls) ->

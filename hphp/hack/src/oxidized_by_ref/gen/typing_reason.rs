@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1302e20831216e10a309a3a8833597f1>>
+// @generated SignedSource<<c38d33221f4afba3880dac05915806eb>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -242,8 +242,6 @@ pub enum T_<'a> {
     RinoutParam(&'a pos_or_decl::PosOrDecl<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Rinstantiate(&'a (T_<'a>, &'a str, T_<'a>)),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    RarrayFilter(&'a (&'a pos::Pos<'a>, T_<'a>)),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Rtypeconst(
         &'a (

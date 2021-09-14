@@ -106,7 +106,7 @@ let update_files
       ?warn_on_naming_costly_iter
       naming_table
       ~f:(fun path fi ->
-        Typing_deps.Files.update_file deps_mode path fi;
+        Typing_deps.Files.update_file deps_mode path fi ~old:None;
         count := !count + 1);
     HackEventLogger.updating_deps_end
       ~count:!count

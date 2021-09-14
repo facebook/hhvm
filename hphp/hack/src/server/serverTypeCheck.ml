@@ -363,9 +363,9 @@ let update_naming_table env fast_parsed profiling =
     @@ fun () ->
     let ctx = Provider_utils.ctx_from_server_env env in
     let deps_mode = Provider_context.get_deps_mode ctx in
-    Relative_path.Map.iter
-      fast_parsed
-      ~f:(Typing_deps.Files.update_file deps_mode);
+    Relative_path.Map.iter fast_parsed ~f:(fun file fi ->
+        let old = Naming_table.get_file_info env.naming_table file in
+        Typing_deps.Files.update_file deps_mode file fi ~old);
     Naming_table.update_many env.naming_table fast_parsed
   in
   naming_table

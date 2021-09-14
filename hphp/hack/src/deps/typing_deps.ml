@@ -831,7 +831,30 @@ module Files = struct
     in
     defs
 
-  let update_file mode filename info =
+  let update_file mode filename info ~old =
+    (* remove old typing deps *)
+    List.iter
+      (Option.value_map old ~default:[] ~f:(deps_of_file_info mode))
+      ~f:(fun def ->
+        match Caml.Hashtbl.find_opt !ifiles def with
+        | Some files when Relative_path.Set.mem files filename ->
+          Caml.Hashtbl.replace
+            !ifiles
+            def
+            (Relative_path.Set.remove files filename)
+        | _ ->
+          let desc = "remove_absent_dep" in
+          Hh_logger.log
+            "INVARIANT_VIOLATION_BUG [%s] file=%s"
+            desc
+            (Relative_path.to_absolute filename);
+          HackEventLogger.invariant_violation_bug
+            ~desc
+            ~typechecking_is_deferring:false
+            ~path:filename
+            ~pos:""
+            (Telemetry.create ()));
+    (* add new typing deps *)
     List.iter (deps_of_file_info mode info) ~f:(fun def ->
         let previous =
           match Hashtbl.find_opt !ifiles def with

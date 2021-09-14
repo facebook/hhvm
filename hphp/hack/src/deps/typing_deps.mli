@@ -134,7 +134,8 @@ module Files : sig
 
   val deps_of_file_info : Mode.t -> FileInfo.t -> Dep.t list
 
-  val update_file : Mode.t -> Relative_path.t -> FileInfo.t -> unit
+  val update_file :
+    Mode.t -> Relative_path.t -> FileInfo.t -> old:FileInfo.t option -> unit
 end
 
 type dep_edge

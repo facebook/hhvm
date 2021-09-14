@@ -1732,7 +1732,9 @@ let handle_mode
     let open ServerCommandTypes.Method_jumps in
     let deps_mode = Provider_context.get_deps_mode ctx in
     let naming_table = Naming_table.create files_info in
-    Naming_table.iter naming_table ~f:(Typing_deps.Files.update_file deps_mode);
+    Naming_table.iter
+      naming_table
+      ~f:(Typing_deps.Files.update_file deps_mode ~old:None);
     Naming_table.iter naming_table ~f:(fun fn fileinfo ->
         if Relative_path.Map.mem builtins fn then
           ()
@@ -1890,7 +1892,9 @@ let handle_mode
     let path = expect_single_file () in
     let deps_mode = Provider_context.get_deps_mode ctx in
     let naming_table = Naming_table.create files_info in
-    Naming_table.iter naming_table ~f:(Typing_deps.Files.update_file deps_mode);
+    Naming_table.iter
+      naming_table
+      ~f:(Typing_deps.Files.update_file deps_mode ~old:None);
     let genv = ServerEnvBuild.default_genv in
     let init_id = Random_id.short_string () in
     let env =
@@ -1931,7 +1935,9 @@ let handle_mode
     let filename = expect_single_file () in
     let deps_mode = Provider_context.get_deps_mode ctx in
     let naming_table = Naming_table.create files_info in
-    Naming_table.iter naming_table ~f:(Typing_deps.Files.update_file deps_mode);
+    Naming_table.iter
+      naming_table
+      ~f:(Typing_deps.Files.update_file deps_mode ~old:None);
     let genv = ServerEnvBuild.default_genv in
     let init_id = Random_id.short_string () in
     let env =

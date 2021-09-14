@@ -1,0 +1,2 @@
+Fatal error: Uncaught exception 'InvalidOperationException' with message 'Local y must be a value type.' in %s/basel.php:18
+%A

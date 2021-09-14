@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::mem;
 use std::path::PathBuf;
 
 use itertools::{Either, EitherOrBoth::*, Itertools};
@@ -1451,18 +1450,6 @@ impl<'ast, 'a, 'arena> VisitorMut<'ast> for ClosureConvertVisitor<'a, 'arena> {
             {
                 add_var(env, &mut self.state, "$this");
                 let mut res = Expr_::Call(x);
-                res.recurse(env, self.object())?;
-                res
-            }
-            Expr_::Call(mut x)
-                if x.0
-                    .as_id()
-                    .map(|id| id.1.eq_ignore_ascii_case("tuple"))
-                    .unwrap_or_default() =>
-            {
-                // replace tuple with varray
-                let call_args = mem::replace(&mut x.2, vec![]);
-                let mut res = Expr_::mk_varray(None, call_args);
                 res.recurse(env, self.object())?;
                 res
             }

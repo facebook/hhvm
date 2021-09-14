@@ -235,7 +235,7 @@ let check_expression_tree_vis ~use_pos ~def_pos env vis =
   if Typing_env.is_in_expr_tree env then
     match vis with
     | Vpublic -> ()
-    | _ -> Errors.expression_tree_non_public_property ~use_pos ~def_pos
+    | _ -> Errors.expression_tree_non_public_member ~use_pos ~def_pos
 
 let check_inst_meth_access ~use_pos ~def_pos vis =
   match vis with

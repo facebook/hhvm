@@ -175,6 +175,14 @@ class Code {
     throw new Exception();
   }
 
+  public function visitInstanceMethod(
+    ?ExprPos $_,
+    Code::TAst $_obj,
+    string $_method_name,
+  ): Code::TAst {
+    throw new Exception();
+  }
+
   public function splice<T>(
     ?ExprPos $_,
     string $_key,

@@ -2,9 +2,10 @@
 
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
-function test(): void {
-  Code`(?MyState $x) ==> {
-    return $x?->foo(1);
+function test(ExprTree<Code, Code::TAst, string> $y): void {
+  Code`(MyState $x) ==> {
+    $z = ${ $y };
+    return $x->$z;
   }`;
 }
 

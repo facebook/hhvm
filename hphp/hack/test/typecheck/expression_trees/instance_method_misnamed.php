@@ -2,12 +2,12 @@
 
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
-function test(): void {
-  Code`(?MyState $x) ==> {
-    return $x?->foo(1);
-  }`;
-}
+  function test(): void {
+    Code`(MyClass $x) ==> {
+      $x->fooo();
+    }`;
+  }
 
-abstract class MyState {
+abstract class MyClass {
   public function foo(ExampleInt $x): void {}
 }

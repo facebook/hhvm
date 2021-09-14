@@ -891,6 +891,7 @@ pub mod expression_trees {
     pub const VISIT_CONTINUE: &str = "visitContinue";
     pub const VISIT_PROPERTY_ACCESS: &str = "visitPropertyAccess";
     pub const VISIT_XHP: &str = "visitXhp";
+    pub const VISIT_INSTANCE_METHOD: &str = "visitInstanceMethod";
 
     pub const SPLICE: &str = "splice";
 }

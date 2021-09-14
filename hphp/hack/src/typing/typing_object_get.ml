@@ -61,7 +61,11 @@ let smember_not_found
 let member_not_found
     (env : Typing_env_types.env) pos ~is_method class_ member_name r on_error =
   let cls_name = strip_ns (Cls.name class_) in
-  if env.Typing_env_types.in_expr_tree && is_method then
+  if
+    env.Typing_env_types.in_expr_tree
+    && is_method
+    && String_utils.string_starts_with member_name "__"
+  then
     Errors.expr_tree_unsupported_operator cls_name member_name pos
   else
     let kind =

@@ -940,11 +940,54 @@ fn rewrite_expr(
                     );
                     (virtual_expr, desugar_expr)
                 }
+                // Source: MyDsl`$x->bar()`
+                // Virtualized: $x->bar()
+                // Desugared: $0v->visitCall($0v->visitMethodCall(new ExprPos(...), $0v->visitLocal(new ExprPos(...), '$x'), 'bar'), vec[])
                 ObjGet(og) if !og.3 => {
-                    return Err((
-                        pos,
-                        "Expression trees do not support calling instance methods".into(),
-                    ));
+                    let (e1, e2, null_flavor, is_prop_call) = *og;
+                    if null_flavor == OgNullFlavor::OGNullsafe {
+                        return Err((
+                            pos,
+                            "Expression Trees do not support nullsafe method calls".into(),
+                        ));
+                    }
+                    let (virtual_e1, desugar_e1) = rewrite_expr(temps, e1, visitor_name)?;
+                    let id = if let Id(id) = &e2.2 {
+                        string_literal(id.0.clone(), &id.1)
+                    } else {
+                        return Err((
+                            pos,
+                            "Expression trees only support named method calls.".into(),
+                        ));
+                    };
+                    let desugar_expr = v_meth_call(
+                        et::VISIT_CALL,
+                        vec![
+                            pos_expr.clone(),
+                            v_meth_call(
+                                et::VISIT_INSTANCE_METHOD,
+                                vec![pos_expr, desugar_e1, id],
+                                &pos,
+                            ),
+                            vec_literal(desugar_args),
+                        ],
+                        &pos,
+                    );
+                    let virtual_expr = Expr(
+                        (),
+                        pos.clone(),
+                        Call(Box::new((
+                            Expr(
+                                (),
+                                pos,
+                                ObjGet(Box::new((virtual_e1, e2, null_flavor, is_prop_call))),
+                            ),
+                            vec![],
+                            virtual_args,
+                            None,
+                        ))),
+                    );
+                    (virtual_expr, desugar_expr)
                 }
                 _ => {
                     let (virtual_recv, desugar_recv) =

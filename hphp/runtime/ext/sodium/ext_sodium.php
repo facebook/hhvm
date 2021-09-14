@@ -495,6 +495,12 @@ function sodium_crypto_kdf_derive_from_key(
 ///// Ristretto
 
 <<__Native>>
+function sodium_crypto_core_ristretto255_from_hash(string $r): string;
+
+<<__Native>>
+function sodium_crypto_scalarmult_ristretto255(string $n, string $p): string;
+
+<<__Native>>
 function sodium_crypto_core_ristretto255_scalar_reduce(string $s): string;
 
 // The range of outputs of random_bytes(SODIUM_CRYPTO_CORE_RISTRETTO255_SCALARBYTES)

@@ -1493,6 +1493,57 @@ String HHVM_FUNCTION(sodium_crypto_stream_xor,
 }
 
 #ifdef crypto_core_ristretto255_SCALARBYTES
+const StaticString s_crypto_core_ristretto255_from_hash(
+  "scalar must be CRYPTO_CORE_RISTRETTO255_HASHBYTES bytes"
+);
+
+String HHVM_FUNCTION(sodium_crypto_core_ristretto255_from_hash,
+                     const String& r) {
+  if (
+    r.size() != crypto_core_ristretto255_HASHBYTES
+  ) {
+    throwSodiumException(s_crypto_core_ristretto255_from_hash);
+  }
+
+  String p(crypto_core_ristretto255_BYTES, ReserveString);
+  crypto_core_ristretto255_from_hash(
+    reinterpret_cast<unsigned char*>(p.mutableData()),
+    reinterpret_cast<const unsigned char*>(r.data())
+  );
+  p.setSize(crypto_core_ristretto255_BYTES);
+  return p;
+}
+
+const StaticString s_crypto_scalarmult_ristretto255(
+  "scalar and point must be CRYPTO_SCALARMULT_RISTRETTO255_SCALARBYTES bytes"
+);
+const StaticString s_crypto_scalarmult_ristretto255_fail(
+  "sodium_crypto_scalarmult_ristretto255 failed"
+);
+
+String HHVM_FUNCTION(sodium_crypto_scalarmult_ristretto255,
+                     const String& n,
+                     const String& p) {
+  if (
+    n.size() != crypto_scalarmult_ristretto255_SCALARBYTES ||
+    p.size() != crypto_scalarmult_ristretto255_BYTES
+  ) {
+    throwSodiumException(s_crypto_scalarmult_ristretto255);
+  }
+
+  String q(crypto_scalarmult_ristretto255_BYTES, ReserveString);
+  int ret = crypto_scalarmult_ristretto255(
+    reinterpret_cast<unsigned char*>(q.mutableData()),
+    reinterpret_cast<const unsigned char*>(n.data()),
+    reinterpret_cast<const unsigned char*>(p.data())
+  );
+  if (ret != 0) {
+    throwSodiumException(s_crypto_scalarmult_ristretto255_fail);
+  }
+  q.setSize(crypto_scalarmult_ristretto255_BYTES);
+  return q;
+}
+
 const StaticString s_crypto_core_ristretto255_scalar_reduce(
   "scalar must be CRYPTO_CORE_RISTRETTO255_NONREDUCEDSCALARBYTES bytes"
 );
@@ -2052,13 +2103,31 @@ struct SodiumExtension final : Extension {
 
 #ifdef crypto_core_ristretto255_SCALARBYTES
     HHVM_RC_INT(
-      SODIUM_CRYPTO_CORE_RISTRETTO255_NONREDUCEDSCALARBYTES,
-      crypto_core_ristretto255_NONREDUCEDSCALARBYTES
+      SODIUM_CRYPTO_SCALARMULT_RISTRETTO255_BYTES,
+      crypto_scalarmult_ristretto255_BYTES
+    );
+    HHVM_RC_INT(
+      SODIUM_CRYPTO_SCALARMULT_RISTRETTO255_SCALARBYTES,
+      crypto_scalarmult_ristretto255_SCALARBYTES
+    );
+    HHVM_RC_INT(
+      SODIUM_CRYPTO_CORE_RISTRETTO255_BYTES,
+      crypto_core_ristretto255_BYTES
+    );
+    HHVM_RC_INT(
+      SODIUM_CRYPTO_CORE_RISTRETTO255_HASHBYTES,
+      crypto_core_ristretto255_HASHBYTES
     );
     HHVM_RC_INT(
       SODIUM_CRYPTO_CORE_RISTRETTO255_SCALARBYTES,
       crypto_core_ristretto255_SCALARBYTES
     );
+    HHVM_RC_INT(
+      SODIUM_CRYPTO_CORE_RISTRETTO255_NONREDUCEDSCALARBYTES,
+      crypto_core_ristretto255_NONREDUCEDSCALARBYTES
+    );
+    HHVM_FE(sodium_crypto_core_ristretto255_from_hash);
+    HHVM_FE(sodium_crypto_scalarmult_ristretto255);
     HHVM_FE(sodium_crypto_core_ristretto255_scalar_reduce);
     HHVM_FE(sodium_crypto_core_ristretto255_scalar_invert);
     HHVM_FE(sodium_crypto_core_ristretto255_scalar_negate);

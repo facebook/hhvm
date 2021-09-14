@@ -16,6 +16,8 @@ var_dump(sodium_crypto_core_ristretto255_scalar_add($b, $asubb) == $a);
 $bsuba = sodium_crypto_core_ristretto255_scalar_sub($b, $a);
 var_dump(sodium_crypto_core_ristretto255_scalar_negate($asubb) == $bsuba);
 var_dump(sodium_crypto_core_ristretto255_scalar_add($b, $nega) == $bsuba);
+$afromhash = sodium_crypto_core_ristretto255_from_hash($a.$a);
+var_dump(sodium_crypto_scalarmult_ristretto255($one, $afromhash) == $afromhash);
 $invalid = "I am a string of invalid length";
 $valid = "I am a string with valid length.";
 try {
@@ -60,6 +62,16 @@ try {
 }
 try {
   $subkey = sodium_crypto_core_ristretto255_scalar_sub($valid, $invalid);
+} catch (SodiumException $ex) {
+  var_dump(true);
+}
+try {
+  $subkey = sodium_crypto_core_ristretto255_from_hash($invalid);
+} catch (SodiumException $ex) {
+  var_dump(true);
+}
+try {
+  $subkey = sodium_crypto_scalarmult_ristretto255($valid, $invalid);
 } catch (SodiumException $ex) {
   var_dump(true);
 }

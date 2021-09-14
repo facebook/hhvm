@@ -370,6 +370,12 @@ function sodium_crypto_aead_xchacha20poly1305_ietf_encrypt(
 ///// Ristretto
 
 <<__PHPStdLib>>
+function sodium_crypto_core_ristretto255_from_hash(string $r): string;
+
+<<__PHPStdLib>>
+function sodium_crypto_scalarmult_ristretto255(string $n, string $p): string;
+
+<<__PHPStdLib>>
 function sodium_crypto_core_ristretto255_scalar_reduce(string $s): string;
 
 <<__PHPStdLib>>
@@ -487,5 +493,9 @@ const int SODIUM_CRYPTO_KX_SESSIONKEYBYTES = 0;
 const int SODIUM_CRYPTO_KX_SECRETKEYBYTES = 0;
 const int SODIUM_CRYPTO_KX_KEYPAIRBYTES = 0;
 
-const int SODIUM_CRYPTO_CORE_RISTRETTO255_NONREDUCEDSCALARBYTES = 0;
+const int SODIUM_CRYPTO_SCALARMULT_RISTRETTO255_BYTES = 0;
+const int SODIUM_CRYPTO_SCALARMULT_RISTRETTO255_SCALARBYTES = 0;
+const int SODIUM_CRYPTO_CORE_RISTRETTO255_BYTES = 0;
+const int SODIUM_CRYPTO_CORE_RISTRETTO255_HASHBYTES = 0;
 const int SODIUM_CRYPTO_CORE_RISTRETTO255_SCALARBYTES = 0;
+const int SODIUM_CRYPTO_CORE_RISTRETTO255_NONREDUCEDSCALARBYTES = 0;

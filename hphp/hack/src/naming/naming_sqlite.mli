@@ -65,28 +65,20 @@ val fold :
 
 val get_file_info : db_path -> Relative_path.t -> FileInfo.t option
 
+val get_path_by_64bit_dep :
+  db_path -> Typing_deps.Dep.t -> Relative_path.t option
+
 val get_type_path_by_name :
   db_path -> string -> (Relative_path.t * Naming_types.kind_of_type) option
 
 val get_itype_path_by_name :
   db_path -> string -> (Relative_path.t * Naming_types.kind_of_type) option
 
-val get_type_path_by_64bit_dep :
-  db_path ->
-  Typing_deps.Dep.t ->
-  (Relative_path.t * Naming_types.kind_of_type) option
-
 val get_fun_path_by_name : db_path -> string -> Relative_path.t option
 
 val get_ifun_path_by_name : db_path -> string -> Relative_path.t option
 
-val get_fun_path_by_64bit_dep :
-  db_path -> Typing_deps.Dep.t -> Relative_path.t option
-
 val get_const_path_by_name : db_path -> string -> Relative_path.t option
-
-val get_const_path_by_64bit_dep :
-  db_path -> Typing_deps.Dep.t -> Relative_path.t option
 
 (** The canonical name (and assorted *Canon heaps) store the canonical name for a
     symbol, keyed off of the lowercase version of its name. We use the canon

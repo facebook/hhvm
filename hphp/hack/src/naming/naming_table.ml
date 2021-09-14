@@ -261,26 +261,9 @@ let get_64bit_dep_set_files
         deps
         ~init:Relative_path.Set.empty
         ~f:(fun dep acc ->
-          (* NOTE: This is done with three separate SQL queries into three separate tables. *)
-          let acc =
-            Option.fold
-              (Naming_sqlite.get_const_path_by_64bit_dep db_path dep)
-              ~init:acc
-              ~f:Relative_path.Set.add
-          in
-          let acc =
-            Option.fold
-              (Naming_sqlite.get_fun_path_by_64bit_dep db_path dep)
-              ~init:acc
-              ~f:Relative_path.Set.add
-          in
-          let acc =
-            Option.fold
-              (Naming_sqlite.get_type_path_by_64bit_dep db_path dep)
-              ~init:acc
-              ~f:(fun acc (path, _kind) -> Relative_path.Set.add acc path)
-          in
-          acc)
+          match Naming_sqlite.get_path_by_64bit_dep db_path dep with
+          | None -> acc
+          | Some file -> Relative_path.Set.add acc file)
     in
 
     Relative_path.Map.fold

@@ -916,11 +916,6 @@ let get_itype_path_by_name (db_path : db_path) name =
     |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit)
     TypesTable.get_sqlite_case_insensitive
 
-let get_type_path_by_64bit_dep (db_path : db_path) (dep : Typing_deps.Dep.t) :
-    (Relative_path.t * Naming_types.kind_of_type) option =
-  let (db, stmt_cache) = get_db_and_stmt_cache db_path in
-  TypesTable.get db stmt_cache dep TypesTable.get_sqlite
-
 let get_fun_path_by_name (db_path : db_path) name =
   let (db, stmt_cache) = get_db_and_stmt_cache db_path in
   FunsTable.get
@@ -938,10 +933,6 @@ let get_ifun_path_by_name (db_path : db_path) name =
     |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit)
     FunsTable.get_sqlite_case_insensitive
 
-let get_fun_path_by_64bit_dep (db_path : db_path) (dep : Typing_deps.Dep.t) =
-  let (db, stmt_cache) = get_db_and_stmt_cache db_path in
-  FunsTable.get db stmt_cache dep FunsTable.get_sqlite
-
 let get_const_path_by_name (db_path : db_path) name =
   let (db, stmt_cache) = get_db_and_stmt_cache db_path in
   ConstsTable.get
@@ -951,6 +942,9 @@ let get_const_path_by_name (db_path : db_path) name =
     |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit)
     ConstsTable.get_sqlite
 
-let get_const_path_by_64bit_dep (db_path : db_path) (dep : Typing_deps.Dep.t) =
+let get_path_by_64bit_dep (db_path : db_path) (dep : Typing_deps.Dep.t) =
   let (db, stmt_cache) = get_db_and_stmt_cache db_path in
-  ConstsTable.get db stmt_cache dep ConstsTable.get_sqlite
+  (* hack: the three methods FunsTable.get, ConstsTable.get, TypesTable.get, all
+     use the exact same sqlite and query the exact same table. We're arbitrarily
+     picking FunsTable for now. *)
+  FunsTable.get db stmt_cache dep FunsTable.get_sqlite

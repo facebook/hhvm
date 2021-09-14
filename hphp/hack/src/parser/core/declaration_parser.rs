@@ -301,11 +301,15 @@ where
         )
     }
 
-    fn parse_enum_or_enum_class_declaration(&mut self, attrs: S::R) -> S::R {
-        let modifiers = S!(make_missing, self, self.pos());
+    fn parse_enum_or_enum_class_declaration(&mut self, attrs: S::R, modifiers: S::R) -> S::R {
         match self.peek_token_kind_with_lookahead(1) {
             TokenKind::Class => self.parse_enum_class_declaration(attrs, modifiers),
-            _ => self.parse_enum_declaration(attrs),
+            _ => {
+                if !modifiers.is_missing() {
+                    self.with_error(Errors::enum_with_modifiers)
+                }
+                self.parse_enum_declaration(attrs)
+            }
         }
     }
 
@@ -624,7 +628,7 @@ where
         let modifiers = self.parse_classish_modifiers();
 
         if self.peek_token_kind() == TokenKind::Enum {
-            return self.parse_enum_class_declaration(attribute_spec, modifiers);
+            return self.parse_enum_or_enum_class_declaration(attribute_spec, modifiers);
         }
 
         let (xhp, is_xhp_class) = self.parse_xhp_keyword();
@@ -2231,7 +2235,10 @@ where
         };
 
         match self.peek_token_kind() {
-            TokenKind::Enum => self.parse_enum_or_enum_class_declaration(attribute_specification),
+            TokenKind::Enum => {
+                let modifiers = S!(make_missing, self, self.pos());
+                self.parse_enum_or_enum_class_declaration(attribute_specification, modifiers)
+            }
             TokenKind::Type | TokenKind::Newtype => {
                 self.parse_type_alias_declaration(attribute_specification)
             }
@@ -2539,8 +2546,9 @@ where
                 self.parse_ctx_alias_declaration(missing)
             }
             TokenKind::Enum => {
-                let missing = S!(make_missing, self, self.pos());
-                self.parse_enum_or_enum_class_declaration(missing)
+                let missing_attr = S!(make_missing, self, self.pos());
+                let missing_mod = S!(make_missing, self, self.pos());
+                self.parse_enum_or_enum_class_declaration(missing_attr, missing_mod)
             }
             TokenKind::RecordDec => {
                 let missing = S!(make_missing, self, self.pos());

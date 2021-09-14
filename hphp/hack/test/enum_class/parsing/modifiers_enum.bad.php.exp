@@ -1,0 +1,5 @@
+(3,10)-(3,10) Enums can't have any modifiers
+(8,12)-(8,12) An equals sign `=` is expected here.
+(11,7)-(11,7) Enums can't have any modifiers
+(15,16)-(15,16) Enums can't have any modifiers
+(17,16)-(17,16) Enums can't have any modifiers

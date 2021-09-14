@@ -1673,6 +1673,10 @@ end = struct
       Fmt.(pair ~sep:(const string " ?as ") pp_expr @@ pp_hint ~is_ctx:false)
         ppf
         (expr, hint)
+    | Aast.Upcast (expr, hint) ->
+      Fmt.(pair ~sep:(const string " upcast ") pp_expr @@ pp_hint ~is_ctx:false)
+        ppf
+        (expr, hint)
     | Aast.New (class_id, targs, exprs, expr_opt, _) ->
       Fmt.(
         prefix (const string "new")

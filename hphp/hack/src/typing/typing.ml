@@ -1598,7 +1598,7 @@ let rec rewrite_expr_tree_maketree env expr f =
 
         MyVisitor`1`; // we infer MyVisitorInt
         // we add this constrained type parameter:
-        MyVisitor::makeTree<TInfer#1>(...) where TInfer#1 = MyVisitorInt 
+        MyVisitor::makeTree<TInfer#1>(...) where TInfer#1 = MyVisitorInt
 
  *)
 let maketree_with_type_param env p expr expected_ty =
@@ -4025,6 +4025,20 @@ and expr_
         refine_type env e_p expr_ty hint_ty
     in
     make_result env p (Aast.As (te, hint, is_nullable)) hint_ty
+  | Upcast (e, hint) ->
+    let (env, te, expr_ty) = expr env e in
+    let (env, hint_ty) =
+      Phase.localize_hint_no_subst env ~ignore_errors:false hint
+    in
+    let env =
+      SubType.sub_type
+        ~coerce:(Some Typing_logic.CoerceToDynamic)
+        env
+        expr_ty
+        hint_ty
+        (Errors.unify_error_at p)
+    in
+    make_result env p (Aast.Upcast (te, hint)) hint_ty
   | Efun (f, idl)
   | Lfun (f, idl) ->
     let is_anon =

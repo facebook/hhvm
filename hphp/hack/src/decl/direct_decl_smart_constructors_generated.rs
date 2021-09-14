@@ -470,6 +470,10 @@ impl<'src, 'text, S: SourceTextAllocator<'text, 'src>> SmartConstructors for Dir
         <Self as FlattenSmartConstructors<'src, Self>>::make_nullable_as_expression(self, left_operand, operator, right_operand)
     }
 
+    fn make_upcast_expression(&mut self, left_operand: Self::R, operator: Self::R, right_operand: Self::R) -> Self::R {
+        <Self as FlattenSmartConstructors<'src, Self>>::make_upcast_expression(self, left_operand, operator, right_operand)
+    }
+
     fn make_conditional_expression(&mut self, test: Self::R, question: Self::R, consequence: Self::R, colon: Self::R, alternative: Self::R) -> Self::R {
         <Self as FlattenSmartConstructors<'src, Self>>::make_conditional_expression(self, test, question, consequence, colon, alternative)
     }

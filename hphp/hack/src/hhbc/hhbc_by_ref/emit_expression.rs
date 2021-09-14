@@ -419,6 +419,7 @@ pub fn emit_expr<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             ))
         }
         Expr_::As(e) => emit_as(emitter, env, pos, e),
+        Expr_::Upcast(e) => emit_expr(emitter, env, &e.0),
         Expr_::Cast(e) => emit_cast(emitter, env, pos, &(e.0).1, &e.1),
         Expr_::Eif(e) => emit_conditional_expr(emitter, env, pos, &e.0, &e.1, &e.2),
         Expr_::ArrayGet(e) => {
@@ -6159,6 +6160,7 @@ fn can_use_as_rhs_in_list_assignment(expr: &ast::Expr_) -> Result<bool> {
         | E_::Clone(_)
         | E_::Unop(_)
         | E_::As(_)
+        | E_::Upcast(_)
         | E_::Await(_)
         | E_::ReadonlyExpr(_)
         | E_::ClassConst(_) => true,

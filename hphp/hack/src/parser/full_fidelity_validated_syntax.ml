@@ -308,6 +308,8 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
     | Syntax.AsExpression _ -> tag validate_as_expression (fun x -> ExprAs x) x
     | Syntax.NullableAsExpression _ ->
       tag validate_nullable_as_expression (fun x -> ExprNullableAs x) x
+    | Syntax.UpcastExpression _ ->
+      tag validate_upcast_expression (fun x -> ExprUpcast x) x
     | Syntax.ConditionalExpression _ ->
       tag validate_conditional_expression (fun x -> ExprConditional x) x
     | Syntax.EvalExpression _ ->
@@ -424,6 +426,7 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
     | ExprIs thing -> invalidate_is_expression (value, thing)
     | ExprAs thing -> invalidate_as_expression (value, thing)
     | ExprNullableAs thing -> invalidate_nullable_as_expression (value, thing)
+    | ExprUpcast thing -> invalidate_upcast_expression (value, thing)
     | ExprConditional thing -> invalidate_conditional_expression (value, thing)
     | ExprEval thing -> invalidate_eval_expression (value, thing)
     | ExprIsset thing -> invalidate_isset_expression (value, thing)
@@ -787,6 +790,8 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
       tag validate_as_expression (fun x -> LambdaAs x) x
     | Syntax.NullableAsExpression _ ->
       tag validate_nullable_as_expression (fun x -> LambdaNullableAs x) x
+    | Syntax.UpcastExpression _ ->
+      tag validate_upcast_expression (fun x -> LambdaUpcast x) x
     | Syntax.ConditionalExpression _ ->
       tag validate_conditional_expression (fun x -> LambdaConditional x) x
     | Syntax.EvalExpression _ ->
@@ -914,6 +919,7 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
     | LambdaIs thing -> invalidate_is_expression (value, thing)
     | LambdaAs thing -> invalidate_as_expression (value, thing)
     | LambdaNullableAs thing -> invalidate_nullable_as_expression (value, thing)
+    | LambdaUpcast thing -> invalidate_upcast_expression (value, thing)
     | LambdaConditional thing -> invalidate_conditional_expression (value, thing)
     | LambdaEval thing -> invalidate_eval_expression (value, thing)
     | LambdaIsset thing -> invalidate_isset_expression (value, thing)
@@ -1010,6 +1016,8 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
     | Syntax.AsExpression _ -> tag validate_as_expression (fun x -> CExprAs x) x
     | Syntax.NullableAsExpression _ ->
       tag validate_nullable_as_expression (fun x -> CExprNullableAs x) x
+    | Syntax.UpcastExpression _ ->
+      tag validate_upcast_expression (fun x -> CExprUpcast x) x
     | Syntax.ConditionalExpression _ ->
       tag validate_conditional_expression (fun x -> CExprConditional x) x
     | Syntax.EvalExpression _ ->
@@ -1127,6 +1135,7 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
     | CExprIs thing -> invalidate_is_expression (value, thing)
     | CExprAs thing -> invalidate_as_expression (value, thing)
     | CExprNullableAs thing -> invalidate_nullable_as_expression (value, thing)
+    | CExprUpcast thing -> invalidate_upcast_expression (value, thing)
     | CExprConditional thing -> invalidate_conditional_expression (value, thing)
     | CExprEval thing -> invalidate_eval_expression (value, thing)
     | CExprIsset thing -> invalidate_isset_expression (value, thing)
@@ -4499,6 +4508,29 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
             nullable_as_operator = invalidate_token x.nullable_as_operator;
             nullable_as_right_operand =
               invalidate_specifier x.nullable_as_right_operand;
+          };
+      Syntax.value = v;
+    }
+
+  and validate_upcast_expression : upcast_expression validator = function
+    | { Syntax.syntax = Syntax.UpcastExpression x; value = v } ->
+      ( v,
+        {
+          upcast_right_operand = validate_specifier x.upcast_right_operand;
+          upcast_operator = validate_token x.upcast_operator;
+          upcast_left_operand = validate_expression x.upcast_left_operand;
+        } )
+    | s -> validation_fail (Some SyntaxKind.UpcastExpression) s
+
+  and invalidate_upcast_expression : upcast_expression invalidator =
+   fun (v, x) ->
+    {
+      Syntax.syntax =
+        Syntax.UpcastExpression
+          {
+            upcast_left_operand = invalidate_expression x.upcast_left_operand;
+            upcast_operator = invalidate_token x.upcast_operator;
+            upcast_right_operand = invalidate_specifier x.upcast_right_operand;
           };
       Syntax.value = v;
     }

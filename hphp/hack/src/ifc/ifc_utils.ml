@@ -99,6 +99,7 @@ let expr_name = function
   | A.Eif _ -> "Eif"
   | A.Is _ -> "Is"
   | A.As _ -> "As"
+  | A.Upcast _ -> "Upcast"
   | A.New _ -> "New"
   | A.Record _ -> "Record"
   | A.Efun _ -> "Efun"

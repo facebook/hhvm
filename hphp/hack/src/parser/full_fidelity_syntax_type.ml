@@ -766,6 +766,11 @@ struct
         nullable_as_operator: t;
         nullable_as_right_operand: t;
       }
+    | UpcastExpression of {
+        upcast_left_operand: t;
+        upcast_operator: t;
+        upcast_right_operand: t;
+      }
     | ConditionalExpression of {
         conditional_test: t;
         conditional_question: t;
@@ -1226,6 +1231,7 @@ struct
     | ExprIs of is_expression
     | ExprAs of as_expression
     | ExprNullableAs of nullable_as_expression
+    | ExprUpcast of upcast_expression
     | ExprConditional of conditional_expression
     | ExprEval of eval_expression
     | ExprIsset of isset_expression
@@ -1348,6 +1354,7 @@ struct
     | LambdaIs of is_expression
     | LambdaAs of as_expression
     | LambdaNullableAs of nullable_as_expression
+    | LambdaUpcast of upcast_expression
     | LambdaConditional of conditional_expression
     | LambdaEval of eval_expression
     | LambdaIsset of isset_expression
@@ -1396,6 +1403,7 @@ struct
     | CExprIs of is_expression
     | CExprAs of as_expression
     | CExprNullableAs of nullable_as_expression
+    | CExprUpcast of upcast_expression
     | CExprConditional of conditional_expression
     | CExprEval of eval_expression
     | CExprIsset of isset_expression
@@ -2138,6 +2146,12 @@ struct
     nullable_as_left_operand: expression value;
     nullable_as_operator: Token.t value;
     nullable_as_right_operand: specifier value;
+  }
+
+  and upcast_expression = {
+    upcast_left_operand: expression value;
+    upcast_operator: Token.t value;
+    upcast_right_operand: specifier value;
   }
 
   and conditional_expression = {

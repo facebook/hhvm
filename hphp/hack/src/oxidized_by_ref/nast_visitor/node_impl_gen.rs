@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2609073e66976143137559ab30a79eea>>
+// @generated SignedSource<<6ff8f77c05c095942d0e5f73489d38f8>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -765,6 +765,7 @@ impl<'a> Node<'a> for Expr_<'a, &'a crate::pos::Pos<'a>, ()> {
             Expr_::Eif(ref __binding_0) => __binding_0.accept(v),
             Expr_::Is(ref __binding_0) => __binding_0.accept(v),
             Expr_::As(ref __binding_0) => __binding_0.accept(v),
+            Expr_::Upcast(ref __binding_0) => __binding_0.accept(v),
             Expr_::New(ref __binding_0) => __binding_0.accept(v),
             Expr_::Record(ref __binding_0) => __binding_0.accept(v),
             Expr_::Efun(ref __binding_0) => __binding_0.accept(v),

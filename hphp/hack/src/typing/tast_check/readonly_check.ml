@@ -333,6 +333,7 @@ let check =
         | _ -> Mut)
       | Eif (_, None, e2) -> self#ty_expr env e2
       | As (expr, _, _) -> self#ty_expr env expr
+      | Upcast (expr, _) -> self#ty_expr env expr
       | Hole (expr, _, _, _) -> self#ty_expr env expr
       | Is _ -> Mut (* Booleans are value types *)
       | Pair (_, e1, e2) ->
@@ -829,6 +830,7 @@ let check =
       | (_, _, Eif (_, _, _))
       | (_, _, Is (_, _))
       | (_, _, As (_, _, _))
+      | (_, _, Upcast (_, _))
       | (_, _, Callconv (_, _))
       | (_, _, Import (_, _))
       | (_, _, Lplaceholder _)

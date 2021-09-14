@@ -37,6 +37,7 @@ let operators =
     make_operator "Is";
     make_operator "Instanceof";
     make_operator "As";
+    make_operator "Upcast";
     make_operator "UnaryPlus";
     make_operator "UnaryMinus";
     make_operator "Not";

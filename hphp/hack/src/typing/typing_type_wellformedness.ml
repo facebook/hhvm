@@ -510,6 +510,7 @@ let expr : Typing_env_types.env -> Nast.expr -> unit =
       }
   | Is (_, h)
   | As (_, h, _)
+  | Upcast (_, h)
   | Cast (h, _) ->
     hint tenv h
   | Lfun (f, _)

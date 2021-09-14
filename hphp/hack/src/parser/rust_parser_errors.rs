@@ -102,6 +102,7 @@ enum UnstableFeatures {
     AbstractEnumClass,
     ContextAliasDeclarationShort,
     MethodTraitDiamond,
+    UpcastExpression,
 }
 impl UnstableFeatures {
     // Preview features are allowed to run in prod. This function decides
@@ -121,6 +122,7 @@ impl UnstableFeatures {
             UnstableFeatures::AbstractEnumClass => Unstable,
             UnstableFeatures::ContextAliasDeclarationShort => Preview,
             UnstableFeatures::MethodTraitDiamond => Unstable,
+            UnstableFeatures::UpcastExpression => Unstable,
         }
     }
 }
@@ -5485,6 +5487,9 @@ where
             }
             EnumClassLabelExpression(_) => {
                 self.check_can_use_feature(node, &UnstableFeatures::EnumClassLabel)
+            }
+            UpcastExpression(_) => {
+                self.check_can_use_feature(node, &UnstableFeatures::UpcastExpression)
             }
             OldAttributeSpecification(x) => {
                 let attributes = self.text(&x.attributes).split(',');

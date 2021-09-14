@@ -2241,6 +2241,11 @@ and expr_ env p (e : Nast.expr_) =
       ( expr env e,
         hint ~allow_wildcard:true ~allow_like:true ~ignore_hack_arr:true env h,
         b )
+  | Aast.Upcast (e, h) ->
+    N.Upcast
+      ( expr env e,
+        hint ~allow_wildcard:false ~allow_like:true ~ignore_hack_arr:true env h
+      )
   | Aast.New
       ((_, _, Aast.CIexpr (_, p, Aast.Id x)), tal, el, unpacked_element, _) ->
     N.New

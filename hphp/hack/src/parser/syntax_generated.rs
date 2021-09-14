@@ -1146,6 +1146,16 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_upcast_expression(_: &C, upcast_left_operand: Self, upcast_operator: Self, upcast_right_operand: Self) -> Self {
+        let syntax = SyntaxVariant::UpcastExpression(Box::new(UpcastExpressionChildren {
+            upcast_left_operand,
+            upcast_operator,
+            upcast_right_operand,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
     fn make_conditional_expression(_: &C, conditional_test: Self, conditional_question: Self, conditional_consequence: Self, conditional_colon: Self, conditional_alternative: Self) -> Self {
         let syntax = SyntaxVariant::ConditionalExpression(Box::new(ConditionalExpressionChildren {
             conditional_test,
@@ -2725,6 +2735,13 @@ where
                 let acc = f(nullable_as_right_operand, acc);
                 acc
             },
+            SyntaxVariant::UpcastExpression(x) => {
+                let UpcastExpressionChildren { upcast_left_operand, upcast_operator, upcast_right_operand } = *x;
+                let acc = f(upcast_left_operand, acc);
+                let acc = f(upcast_operator, acc);
+                let acc = f(upcast_right_operand, acc);
+                acc
+            },
             SyntaxVariant::ConditionalExpression(x) => {
                 let ConditionalExpressionChildren { conditional_test, conditional_question, conditional_consequence, conditional_colon, conditional_alternative } = *x;
                 let acc = f(conditional_test, acc);
@@ -3365,6 +3382,7 @@ where
             SyntaxVariant::IsExpression {..} => SyntaxKind::IsExpression,
             SyntaxVariant::AsExpression {..} => SyntaxKind::AsExpression,
             SyntaxVariant::NullableAsExpression {..} => SyntaxKind::NullableAsExpression,
+            SyntaxVariant::UpcastExpression {..} => SyntaxKind::UpcastExpression,
             SyntaxVariant::ConditionalExpression {..} => SyntaxKind::ConditionalExpression,
             SyntaxVariant::EvalExpression {..} => SyntaxKind::EvalExpression,
             SyntaxVariant::IssetExpression {..} => SyntaxKind::IssetExpression,
@@ -4157,6 +4175,12 @@ where
                  nullable_as_right_operand: ts.pop().unwrap(),
                  nullable_as_operator: ts.pop().unwrap(),
                  nullable_as_left_operand: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::UpcastExpression, 3) => SyntaxVariant::UpcastExpression(Box::new(UpcastExpressionChildren {
+                 upcast_right_operand: ts.pop().unwrap(),
+                 upcast_operator: ts.pop().unwrap(),
+                 upcast_left_operand: ts.pop().unwrap(),
                  
              })),
              (SyntaxKind::ConditionalExpression, 5) => SyntaxVariant::ConditionalExpression(Box::new(ConditionalExpressionChildren {
@@ -5443,6 +5467,13 @@ pub struct NullableAsExpressionChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+pub struct UpcastExpressionChildren<T, V> {
+    pub upcast_left_operand: Syntax<T, V>,
+    pub upcast_operator: Syntax<T, V>,
+    pub upcast_right_operand: Syntax<T, V>,
+}
+
+#[derive(Debug, Clone)]
 pub struct ConditionalExpressionChildren<T, V> {
     pub conditional_test: Syntax<T, V>,
     pub conditional_question: Syntax<T, V>,
@@ -6079,6 +6110,7 @@ pub enum SyntaxVariant<T, V> {
     IsExpression(Box<IsExpressionChildren<T, V>>),
     AsExpression(Box<AsExpressionChildren<T, V>>),
     NullableAsExpression(Box<NullableAsExpressionChildren<T, V>>),
+    UpcastExpression(Box<UpcastExpressionChildren<T, V>>),
     ConditionalExpression(Box<ConditionalExpressionChildren<T, V>>),
     EvalExpression(Box<EvalExpressionChildren<T, V>>),
     IssetExpression(Box<IssetExpressionChildren<T, V>>),
@@ -7187,6 +7219,15 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                         0 => Some(&x.nullable_as_left_operand),
                     1 => Some(&x.nullable_as_operator),
                     2 => Some(&x.nullable_as_right_operand),
+                        _ => None,
+                    }
+                })
+            },
+            UpcastExpression(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.upcast_left_operand),
+                    1 => Some(&x.upcast_operator),
+                    2 => Some(&x.upcast_right_operand),
                         _ => None,
                     }
                 })

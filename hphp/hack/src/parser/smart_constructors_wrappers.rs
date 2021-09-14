@@ -377,6 +377,9 @@ where S: SmartConstructors<State = State>,
     fn make_nullable_as_expression(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R {
         compose(SyntaxKind::NullableAsExpression, self.s.make_nullable_as_expression(arg0.1, arg1.1, arg2.1))
     }
+    fn make_upcast_expression(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R {
+        compose(SyntaxKind::UpcastExpression, self.s.make_upcast_expression(arg0.1, arg1.1, arg2.1))
+    }
     fn make_conditional_expression(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R) -> Self::R {
         compose(SyntaxKind::ConditionalExpression, self.s.make_conditional_expression(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1))
     }

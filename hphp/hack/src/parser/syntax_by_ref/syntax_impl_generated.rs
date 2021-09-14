@@ -126,6 +126,7 @@ impl<T: LexableToken, V> Syntax<'_, T, V> {
             SyntaxVariant::IsExpression {..} => SyntaxKind::IsExpression,
             SyntaxVariant::AsExpression {..} => SyntaxKind::AsExpression,
             SyntaxVariant::NullableAsExpression {..} => SyntaxKind::NullableAsExpression,
+            SyntaxVariant::UpcastExpression {..} => SyntaxKind::UpcastExpression,
             SyntaxVariant::ConditionalExpression {..} => SyntaxKind::ConditionalExpression,
             SyntaxVariant::EvalExpression {..} => SyntaxKind::EvalExpression,
             SyntaxVariant::IssetExpression {..} => SyntaxKind::IssetExpression,

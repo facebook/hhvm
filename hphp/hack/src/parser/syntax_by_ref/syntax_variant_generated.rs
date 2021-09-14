@@ -127,6 +127,7 @@ pub enum SyntaxVariant<'a, T, V> {
     IsExpression(&'a IsExpressionChildren<'a, T, V>),
     AsExpression(&'a AsExpressionChildren<'a, T, V>),
     NullableAsExpression(&'a NullableAsExpressionChildren<'a, T, V>),
+    UpcastExpression(&'a UpcastExpressionChildren<'a, T, V>),
     ConditionalExpression(&'a ConditionalExpressionChildren<'a, T, V>),
     EvalExpression(&'a EvalExpressionChildren<'a, T, V>),
     IssetExpression(&'a IssetExpressionChildren<'a, T, V>),
@@ -1012,6 +1013,13 @@ pub struct AsExpressionChildren<'a, T, V> {
 
 #[derive(Debug, Clone)]
 pub struct NullableAsExpressionChildren<'a, T, V> {
+    pub left_operand: Syntax<'a, T, V>,
+    pub operator: Syntax<'a, T, V>,
+    pub right_operand: Syntax<'a, T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct UpcastExpressionChildren<'a, T, V> {
     pub left_operand: Syntax<'a, T, V>,
     pub operator: Syntax<'a, T, V>,
     pub right_operand: Syntax<'a, T, V>,

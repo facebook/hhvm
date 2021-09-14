@@ -1,0 +1,11 @@
+File "upcast.good.php", line 6, characters 3-13:
+  dynamic
+File "upcast.good.php", line 11, characters 3-13:
+  dynamic
+File "upcast.good.php", line 16, characters 3-13:
+  vec<dynamic>
+File "upcast.good.php", line 18, characters 3-13:
+  dynamic
+File "upcast.good.php", line 23, characters 3-13:
+  dynamic
+No errors

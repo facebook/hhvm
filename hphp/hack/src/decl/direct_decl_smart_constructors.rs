@@ -1144,8 +1144,8 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                         | Id(_) | Import(_) | Is(_) | KeyValCollection(_) | Lfun(_) | List(_)
                         | Lplaceholder(_) | Lvar(_) | MethodCaller(_) | MethodId(_) | New(_)
                         | ObjGet(_) | Omitted | Pair(_) | Pipe(_) | ReadonlyExpr(_) | Record(_)
-                        | Shape(_) | SmethodId(_) | Tuple(_) | ValCollection(_) | Varray(_)
-                        | Xml(_) | Yield(_) => None,
+                        | Shape(_) | SmethodId(_) | Tuple(_) | Upcast(_) | ValCollection(_)
+                        | Varray(_) | Xml(_) | Yield(_) => None,
                     }
                 }
                 Some(self.alloc(Ty(
@@ -2559,6 +2559,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             | TokenKind::Throw
             | TokenKind::Try
             | TokenKind::Unset
+            | TokenKind::Upcast
             | TokenKind::Use
             | TokenKind::Using
             | TokenKind::Var

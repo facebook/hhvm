@@ -2215,6 +2215,10 @@ where
                 Self::p_hint(&c.right_operand, env)?,
                 true,
             )),
+            UpcastExpression(c) => Ok(E_::mk_upcast(
+                Self::p_expr(&c.left_operand, env)?,
+                Self::p_hint(&c.right_operand, env)?,
+            )),
             AnonymousFunction(c) => {
                 let p_arg = |n: S<'a, T, V>, e: &mut Env<'a, TF>| match &n.children {
                     Token(_) => mk_name_lid(n, e),

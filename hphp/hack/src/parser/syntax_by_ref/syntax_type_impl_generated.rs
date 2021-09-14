@@ -1152,6 +1152,16 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_upcast_expression(ctx: &C, left_operand: Self, operator: Self, right_operand: Self) -> Self {
+        let syntax = SyntaxVariant::UpcastExpression(ctx.get_arena().alloc(UpcastExpressionChildren {
+            left_operand,
+            operator,
+            right_operand,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
     fn make_conditional_expression(ctx: &C, test: Self, question: Self, consequence: Self, colon: Self, alternative: Self) -> Self {
         let syntax = SyntaxVariant::ConditionalExpression(ctx.get_arena().alloc(ConditionalExpressionChildren {
             test,

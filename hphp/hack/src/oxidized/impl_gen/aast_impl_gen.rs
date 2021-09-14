@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5691f022bf2ea545a9230e30b72d9c8d>>
+// @generated SignedSource<<c89898c8e4cedb90aeb89d9bd2add574>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -952,6 +952,9 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn mk_as(p0: Expr<Ex, En>, p1: Hint, p2: bool) -> Self {
         Expr_::As(Box::new((p0, p1, p2)))
     }
+    pub fn mk_upcast(p0: Expr<Ex, En>, p1: Hint) -> Self {
+        Expr_::Upcast(Box::new((p0, p1)))
+    }
     pub fn mk_new(
         p0: ClassId<Ex, En>,
         p1: Vec<Targ<Ex>>,
@@ -1231,6 +1234,12 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn is_as(&self) -> bool {
         match self {
             Expr_::As(..) => true,
+            _ => false,
+        }
+    }
+    pub fn is_upcast(&self) -> bool {
+        match self {
+            Expr_::Upcast(..) => true,
             _ => false,
         }
     }
@@ -1545,6 +1554,12 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn as_as(&self) -> Option<(&Expr<Ex, En>, &Hint, &bool)> {
         match self {
             Expr_::As(p0) => Some((&p0.0, &p0.1, &p0.2)),
+            _ => None,
+        }
+    }
+    pub fn as_upcast(&self) -> Option<(&Expr<Ex, En>, &Hint)> {
+        match self {
+            Expr_::Upcast(p0) => Some((&p0.0, &p0.1)),
             _ => None,
         }
     }
@@ -1897,6 +1912,12 @@ impl<Ex, En> Expr_<Ex, En> {
             _ => None,
         }
     }
+    pub fn as_upcast_mut(&mut self) -> Option<(&mut Expr<Ex, En>, &mut Hint)> {
+        match self {
+            Expr_::Upcast(p0) => Some((&mut p0.0, &mut p0.1)),
+            _ => None,
+        }
+    }
     pub fn as_new_mut(
         &mut self,
     ) -> Option<(
@@ -2236,6 +2257,12 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn as_as_into(self) -> Option<(Expr<Ex, En>, Hint, bool)> {
         match self {
             Expr_::As(p0) => Some(((*p0).0, (*p0).1, (*p0).2)),
+            _ => None,
+        }
+    }
+    pub fn as_upcast_into(self) -> Option<(Expr<Ex, En>, Hint)> {
+        match self {
+            Expr_::Upcast(p0) => Some(((*p0).0, (*p0).1)),
             _ => None,
         }
     }

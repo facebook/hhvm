@@ -188,6 +188,11 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
             let (exp, _, _) = &**a;
             rty_expr(context, &exp)
         }
+        Upcast(a) => {
+            // Readonlyness of inner expression
+            let (exp, _) = &**a;
+            rty_expr(context, &exp)
+        }
         Eif(e) => {
             // $x ? a : b is readonly if either a or b are readonly
             let (_, exp1_opt, exp2) = &**e;

@@ -37,6 +37,7 @@ module type Sig = sig
     | IsOperator
     | InstanceofOperator
     | AsOperator
+    | UpcastOperator
     | UnaryPlusOperator
     | UnaryMinusOperator
     | NotOperator
@@ -113,6 +114,7 @@ module Impl : Sig = struct
     | IsOperator
     | InstanceofOperator
     | AsOperator
+    | UpcastOperator
     | UnaryPlusOperator
     | UnaryMinusOperator
     | NotOperator

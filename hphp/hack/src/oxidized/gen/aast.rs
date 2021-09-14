@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<cedcebdd62c16f6a5495e6c5f068488d>>
+// @generated SignedSource<<834b72dcbdec4b754b958665a6c039f8>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -681,6 +681,10 @@ pub enum Expr_<Ex, En> {
     /// $foo as int
     /// $foo ?as int
     As(Box<(Expr<Ex, En>, Hint, bool)>),
+    /// Upcast operator.
+    ///
+    /// $foo : int
+    Upcast(Box<(Expr<Ex, En>, Hint)>),
     /// Instantiation.
     ///
     /// new Foo(1, 2);

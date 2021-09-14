@@ -529,6 +529,7 @@ and expr_ env acc p e =
     expr acc e3
   | Is (e, _) -> expr acc e
   | As (e, _, _) -> expr acc e
+  | Upcast (e, _) -> expr acc e
   | Efun (f, _)
   | Lfun (f, _) ->
     let acc = fun_paraml acc f.f_params in

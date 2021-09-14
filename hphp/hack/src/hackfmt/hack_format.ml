@@ -1546,6 +1546,12 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           nullable_as_left_operand = left;
           nullable_as_operator = kw;
           nullable_as_right_operand = right;
+        }
+    | Syntax.UpcastExpression
+        {
+          upcast_left_operand = left;
+          upcast_operator = kw;
+          upcast_right_operand = right;
         } ->
       Concat
         [

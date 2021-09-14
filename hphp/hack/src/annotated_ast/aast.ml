@@ -518,6 +518,10 @@ and ('ex, 'en) expr_ =
 
           $foo as int
           $foo ?as int *)
+  | Upcast of ('ex, 'en) expr * hint
+      (** Upcast operator.
+
+          $foo : int *)
   | New of
       ('ex, 'en) class_id
       * 'ex targ list

@@ -509,6 +509,8 @@ module Visitor_DEPRECATED = struct
 
       method on_as : 'a -> expr -> hint -> bool -> 'a
 
+      method on_upcast : 'a -> expr -> hint -> 'a
+
       method on_class_id : 'a -> class_id -> 'a
 
       method on_class_id_ : 'a -> class_id_ -> 'a
@@ -771,6 +773,7 @@ module Visitor_DEPRECATED = struct
         | Eif (e1, e2, e3) -> this#on_eif acc e1 e2 e3
         | Is (e, h) -> this#on_is acc e h
         | As (e, h, b) -> this#on_as acc e h b
+        | Upcast (e, h) -> this#on_upcast acc e h
         | New (cid, _, el, unpacked_element, _) ->
           this#on_new acc cid el unpacked_element
         | Efun (f, idl) -> this#on_efun acc f idl
@@ -972,6 +975,8 @@ module Visitor_DEPRECATED = struct
       method on_is acc e _ = this#on_expr acc e
 
       method on_as acc e _ _ = this#on_expr acc e
+
+      method on_upcast acc e _ = this#on_expr acc e
 
       method on_class_id acc (_, _, cid) = this#on_class_id_ acc cid
 

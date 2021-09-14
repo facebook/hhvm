@@ -6,6 +6,7 @@ import json
 import os
 import shlex
 import shutil
+import sys
 import tempfile
 from typing import Iterable, List, Mapping, NamedTuple, Optional, TextIO, TypeVar, Union
 
@@ -97,9 +98,12 @@ class SavedStateTestDriver(common_tests.CommonTestDriver):
 
         stdout, stderr, retcode = cls.proc_call(hh_command)
         if not (retcode == 0 or (ignore_errors and retcode == 2)):
-            raise Exception(
-                'Failed to save! stdout: "%s" stderr: "%s"' % (stdout, stderr)
-            )
+            logs = cls.get_all_logs(init_dir)
+            print("STDOUT:\n%s\n\n" % stdout, file=sys.stderr)
+            print("STDERR:\n%s\n\n" % stderr, file=sys.stderr)
+            print("SERVER-LOG:\n%s\n\n" % logs.all_server_logs, file=sys.stderr)
+            print("MONITOR-LOG:\n%s\n\n" % logs.all_monitor_logs, file=sys.stderr)
+            raise Exception("Failed to save!")
         result = SaveStateCommandResult(retcode)
 
         if cls.enable_naming_table_fallback:
@@ -330,17 +334,19 @@ auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
         result = super(SavedStateTestDriver, self).check_cmd(
             expected_output, stdin, options
         )
-        logs = self.get_server_logs()
-        self.assertIn("Using watchman", logs)
-        if assert_loaded_saved_state:
-            self.assertIn(
-                "loading saved state succeeded",
-                logs,
-                msg=(
+        logs = self.get_all_logs(self.repo_dir)
+        try:
+            self.assertTrue("Using watchman" in logs.current_server_log)
+            if assert_loaded_saved_state:
+                self.assertTrue(
+                    "loading saved state succeeded" in logs.current_server_log,
                     "***Logs contain an init with no saved state. Did your "
-                    "hh_server die and get restarted by the monitor?***"
-                ),
-            )
+                    "hh_server die and get restarted by the monitor?***",
+                )
+        except AssertionError:
+            print("SERVER-LOG:\n%s\n\n" % logs.all_server_logs, file=sys.stderr)
+            print("MONITOR_LOG:\n%s\n\n" % logs.all_monitor_logs, file=sys.stderr)
+            raise
         return result
 
     def assertEqualString(

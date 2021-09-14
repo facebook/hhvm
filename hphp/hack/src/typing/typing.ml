@@ -1675,7 +1675,8 @@ let is_lvalue = function
  * is specified, then union with Tany. (So it's as though we did a conditional
  * assignment of the default expression to the parameter).
  * Set the type of the parameter in the locals environment *)
-let rec bind_param env ?(immutable = false) (ty1, param) =
+let rec bind_param
+    env ?(immutable = false) ?(can_read_globals = false) (ty1, param) =
   let (env, param_te, ty1) =
     match param.param_expr with
     | None -> (env, None, ty1)
@@ -1699,15 +1700,13 @@ let rec bind_param env ?(immutable = false) (ty1, param) =
           ty1_enforced
       in
       let (env, (te, ty2)) =
-        let pure = MakeType.mixed (Reason.Rwitness param.param_pos) in
-        let (env, cap) =
-          MakeType.apply
-            (Reason.Rwitness_from_decl (Pos_or_decl.of_raw_pos param.param_pos))
-            (* Accessing statics for default arguments is allowed *)
-            ( Pos_or_decl.of_raw_pos param.param_pos,
-              SN.Capabilities.accessGlobals )
-            []
-          |> Phase.localize_no_subst env ~ignore_errors:false
+        let reason = Reason.Rwitness param.param_pos in
+        let pure = MakeType.mixed reason in
+        let cap =
+          if can_read_globals then
+            MakeType.capability reason SN.Capabilities.accessGlobals
+          else
+            pure
         in
         with_special_coeffects env cap pure @@ fun env ->
         expr ?expected env e ~allow_awaitable:(*?*) false |> triple_to_pair
@@ -7767,7 +7766,7 @@ and call
         SubType.is_sub_type
           env
           capability
-          (MakeType.write_property_capability Reason.Rnone)
+          (MakeType.capability Reason.Rnone SN.Capabilities.writeProperty)
       in
 
       (* First check the non-lambda arguments. For generic functions, this

@@ -433,13 +433,21 @@ let fun_def ctx fd :
   let check_has_hint p t = check_param_has_hint env p t partial_callback in
   List.iter2_exn ~f:check_has_hint f.f_params param_tys;
   let params_need_immutable = get_ctx_vars f.f_ctxs in
+  let can_read_globals =
+    Typing_subtype.is_sub_type
+      env
+      cap_ty
+      (MakeType.capability (get_reason cap_ty) SN.Capabilities.accessGlobals)
+  in
   let (env, typed_params) =
     let bind_param_and_check env param =
       let name = (snd param).param_name in
       let immutable =
         List.exists ~f:(String.equal name) params_need_immutable
       in
-      let (env, fun_param) = Typing.bind_param ~immutable env param in
+      let (env, fun_param) =
+        Typing.bind_param ~immutable ~can_read_globals env param
+      in
       (env, fun_param)
     in
     List.map_env env (List.zip_exn param_tys f.f_params) ~f:bind_param_and_check
@@ -769,13 +777,21 @@ let method_def env cls m =
   List.iter2_exn ~f:param_fn m.m_params param_tys;
   Typing_memoize.check_method env m;
   let params_need_immutable = get_ctx_vars m.m_ctxs in
+  let can_read_globals =
+    Typing_subtype.is_sub_type
+      env
+      cap_ty
+      (MakeType.capability (get_reason cap_ty) SN.Capabilities.accessGlobals)
+  in
   let (env, typed_params) =
     let bind_param_and_check env param =
       let name = (snd param).param_name in
       let immutable =
         List.exists ~f:(String.equal name) params_need_immutable
       in
-      let (env, fun_param) = Typing.bind_param ~immutable env param in
+      let (env, fun_param) =
+        Typing.bind_param ~immutable ~can_read_globals env param
+      in
       (env, fun_param)
     in
     List.map_env env (List.zip_exn param_tys m.m_params) ~f:bind_param_and_check

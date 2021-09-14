@@ -190,8 +190,7 @@ let simple_variadic_splat r ty =
              d_kind = SplatUnpack;
            } ))
 
-let write_property_capability r : locl_ty =
-  class_type r SN.Capabilities.writeProperty []
+let capability r name : locl_ty = class_type r name []
 
 let default_capability p : locl_ty =
   let r = Reason.Rdefault_capability p in

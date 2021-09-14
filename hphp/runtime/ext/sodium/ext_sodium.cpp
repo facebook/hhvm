@@ -14,9 +14,13 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/type-array.h"
+#include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/vm/native.h"
 
+#include <cstring>
 #include <sodium.h>
 #include <folly/tracing/StaticTracepoint.h>
 
@@ -1900,6 +1904,166 @@ HHVM_SODIUM_AEAD_DECRYPT_FUNCTION(xchacha20poly1305_ietf,
     HHVM_FE(sodium_crypto_aead_##lowercase##_decrypt);\
     HHVM_FE(sodium_crypto_aead_##lowercase##_encrypt)
 
+
+#ifdef crypto_secretstream_xchacha20poly1305_KEYBYTES
+const StaticString s_crypto_secretstream_xchacha20poly130_state_string_required(
+  "incorrect state type, a string is required"
+),
+s_crypto_secretstream_xchacha20poly130_incorrect_key_size(
+  "key size should be crypto_secretstream_xchacha20poly1305_KEYBYTES bytes"
+);
+
+String HHVM_FUNCTION(sodium_crypto_secretstream_xchacha20poly1305_keygen) {
+  String key(crypto_secretstream_xchacha20poly1305_KEYBYTES, ReserveString);
+  crypto_secretstream_xchacha20poly1305_keygen(reinterpret_cast<unsigned char*>(key.mutableData()));
+  key.setSize(crypto_secretstream_xchacha20poly1305_KEYBYTES);
+  return key;
+}
+
+Array HHVM_FUNCTION(sodium_crypto_secretstream_xchacha20poly1305_init_push,
+                    const String& key) {
+  // check key size
+  if (key.size() != crypto_secretstream_xchacha20poly1305_KEYBYTES) {
+    throwSodiumException(s_crypto_secretstream_xchacha20poly130_state_string_required);
+  }
+  // secret stream init push
+  size_t state_len = sizeof(crypto_secretstream_xchacha20poly1305_state);
+  String state(state_len, ReserveString);
+  String header(crypto_secretstream_xchacha20poly1305_HEADERBYTES, ReserveString);
+  crypto_secretstream_xchacha20poly1305_state st;
+  crypto_secretstream_xchacha20poly1305_init_push(&st,
+                                                  reinterpret_cast<unsigned char*>(header.mutableData()),
+                                                  reinterpret_cast<const unsigned char*>(key.data()));
+  header.setSize(crypto_secretstream_xchacha20poly1305_HEADERBYTES);
+  // copy state struct into String
+  memcpy(state.mutableData(), &st, state_len);
+  state.setSize(state_len);
+  sodium_memzero(&st, state_len);
+  return make_vec_array(state, header);
+}
+
+String HHVM_FUNCTION(sodium_crypto_secretstream_xchacha20poly1305_push,
+                     Variant& state_inout,
+                     const String& plaintext,
+                     const String& ad,
+                     int tag) {
+  // parse state string into the struct
+  if (!state_inout.isString()) {
+    throwSodiumException(s_crypto_secretstream_xchacha20poly130_state_string_required);
+  }
+  auto state = sodium_separate_string(state_inout);
+  size_t state_len = sizeof(crypto_secretstream_xchacha20poly1305_state);
+  if (state.size() != state_len) {
+    throwSodiumException(s_crypto_generichash_update_incorrect_state_length);
+  }
+  crypto_secretstream_xchacha20poly1305_state st;
+  SCOPE_EXIT {
+    sodium_memzero(&st, state_len);
+  };
+  memcpy(&st, state.data(), state_len);
+  // secret stream push
+  String ciphertext(plaintext.size() + crypto_secretstream_xchacha20poly1305_ABYTES, ReserveString);
+  unsigned long long int ciphertext_len = 0;
+  crypto_secretstream_xchacha20poly1305_push(&st,
+                                             reinterpret_cast<unsigned char*>(ciphertext.mutableData()),
+                                             &ciphertext_len,
+                                             reinterpret_cast<const unsigned char*>(plaintext.data()),
+                                             plaintext.size(),
+                                             reinterpret_cast<const unsigned char*>(ad.data()),
+                                             ad.size(),
+                                             tag);
+  ciphertext.setSize(ciphertext_len);
+  // copy state back to string
+  memcpy(state.mutableData(), &st, state_len);
+  return ciphertext;
+}
+
+String HHVM_FUNCTION(sodium_crypto_secretstream_xchacha20poly1305_init_pull,
+                     const String& key,
+                     const String& header) {
+  // check key size
+  if (key.size() != crypto_secretstream_xchacha20poly1305_KEYBYTES) {
+    throwSodiumException(s_crypto_secretstream_xchacha20poly130_state_string_required);
+  }
+  // secret stream init pull
+  size_t state_len = sizeof(crypto_secretstream_xchacha20poly1305_state);
+  String state(state_len, ReserveString);
+  crypto_secretstream_xchacha20poly1305_state st;
+  crypto_secretstream_xchacha20poly1305_init_pull(&st,
+                                                  reinterpret_cast<const unsigned char*>(header.data()),
+                                                  reinterpret_cast<const unsigned char*>(key.data()));
+  // copy state struct to String
+  memcpy(state.mutableData(), &st, state_len);
+  state.setSize(state_len);
+  sodium_memzero(&st, state_len);
+  return state;
+}
+
+Array HHVM_FUNCTION(sodium_crypto_secretstream_xchacha20poly1305_pull,
+                    Variant& state_inout,
+                    const String& ciphertext,
+                    const String& ad)
+{
+  // parse state string into the struct
+  if (!state_inout.isString()) {
+    throwSodiumException(s_crypto_secretstream_xchacha20poly130_state_string_required);
+  }
+  auto state = sodium_separate_string(state_inout);
+  size_t state_len = sizeof(crypto_secretstream_xchacha20poly1305_state);
+  if (state.size() != state_len) {
+    throwSodiumException(s_crypto_generichash_update_incorrect_state_length);
+  }
+  crypto_secretstream_xchacha20poly1305_state st;
+  SCOPE_EXIT {
+    sodium_memzero(&st, state_len);
+  };
+  memcpy(&st, state.data(), state_len);
+  // secret stream pull
+  String plaintext(ciphertext.size(), ReserveString);
+  unsigned long long int plaintext_len = 0;
+  unsigned char tag;
+  int ret = crypto_secretstream_xchacha20poly1305_pull(
+              &st,
+              reinterpret_cast<unsigned char*>(plaintext.mutableData()),
+              &plaintext_len,
+              &tag,
+              reinterpret_cast<const unsigned char*>(ciphertext.data()),
+              ciphertext.size(),
+              reinterpret_cast<const unsigned char*>(ad.data()),
+              ad.size()
+            );
+  if (ret != 0) {
+    throwSodiumException(s_internal_error);
+  }
+  plaintext.setSize(plaintext_len);
+  // copy state back to string
+  memcpy(state.mutableData(), &st, state_len);
+  return make_vec_array(plaintext, tag);
+}
+
+void HHVM_FUNCTION(sodium_crypto_secretstream_xchacha20poly1305_rekey,
+                   Variant& state_inout) {
+  // parse state string into the struct
+  if (!state_inout.isString()) {
+    throwSodiumException(s_crypto_secretstream_xchacha20poly130_state_string_required);
+  }
+  auto state = sodium_separate_string(state_inout);
+  size_t state_len = sizeof(crypto_secretstream_xchacha20poly1305_state);
+  if (state.size() != state_len) {
+    throwSodiumException(s_crypto_generichash_update_incorrect_state_length);
+  }
+  crypto_secretstream_xchacha20poly1305_state st;
+  SCOPE_EXIT {
+    sodium_memzero(&st, state_len);
+  };
+  memcpy(&st, state.data(), state_len);
+  // secret stream rekey
+  crypto_secretstream_xchacha20poly1305_rekey(&st);
+  // copy state back to string
+  memcpy(state.mutableData(), &st, state_len);
+}
+#endif // crypto_secretstream_xchacha20poly1305_KEYBYTES
+
 struct SodiumExtension final : Extension {
   SodiumExtension() : Extension("sodium", "7.2-hhvm1") {}
 
@@ -2136,6 +2300,47 @@ struct SodiumExtension final : Extension {
     HHVM_FE(sodium_crypto_core_ristretto255_scalar_sub);
     HHVM_FE(sodium_crypto_core_ristretto255_scalar_mul);
 #endif
+
+#ifdef crypto_secretstream_xchacha20poly1305_KEYBYTES
+    HHVM_RC_INT(
+      SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_ABYTES,
+      crypto_secretstream_xchacha20poly1305_ABYTES
+    );
+    HHVM_RC_INT(
+      SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_HEADERBYTES,
+      crypto_secretstream_xchacha20poly1305_HEADERBYTES
+    );
+    HHVM_RC_INT(
+      SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_KEYBYTES,
+      crypto_secretstream_xchacha20poly1305_KEYBYTES
+    );
+    HHVM_RC_INT(
+      SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_MESSAGEBYTES_MAX,
+      crypto_secretstream_xchacha20poly1305_MESSAGEBYTES_MAX
+    );
+    HHVM_RC_INT(
+      SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_TAG_MESSAGE,
+      crypto_secretstream_xchacha20poly1305_TAG_MESSAGE
+    );
+    HHVM_RC_INT(
+      SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_TAG_PUSH,
+      crypto_secretstream_xchacha20poly1305_TAG_PUSH
+    );
+    HHVM_RC_INT(
+      SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_TAG_REKEY,
+      crypto_secretstream_xchacha20poly1305_TAG_REKEY
+    );
+    HHVM_RC_INT(
+      SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_TAG_FINAL,
+      crypto_secretstream_xchacha20poly1305_TAG_FINAL
+    );
+    HHVM_FE(sodium_crypto_secretstream_xchacha20poly1305_keygen);
+    HHVM_FE(sodium_crypto_secretstream_xchacha20poly1305_init_push);
+    HHVM_FE(sodium_crypto_secretstream_xchacha20poly1305_push);
+    HHVM_FE(sodium_crypto_secretstream_xchacha20poly1305_init_pull);
+    HHVM_FE(sodium_crypto_secretstream_xchacha20poly1305_pull);
+    HHVM_FE(sodium_crypto_secretstream_xchacha20poly1305_rekey);
+#endif // crypto_secretstream_xchacha20poly1305_KEYBYTES
 
     loadSystemlib();
   }

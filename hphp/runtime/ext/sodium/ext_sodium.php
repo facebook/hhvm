@@ -527,3 +527,33 @@ function sodium_crypto_core_ristretto255_scalar_sub(string $x, string $y): strin
 
 <<__Native>>
 function sodium_crypto_core_ristretto255_scalar_mul(string $x, string $y): string;
+
+///// AEAD secretstream
+
+// Generate random key bits for xchacha20 poly1305 based secretstream.
+// This function is not required. Any key of size
+// crypto_secretstream_xchacha20poly1305_KEYBYTES can be used in secretstream APIs.
+<<__Native>>
+function sodium_crypto_secretstream_xchacha20poly1305_keygen(): string;
+
+// Initialize the state for encryption/push side secretstream.
+// Return the state string and the header string.
+<<__Native>>
+function sodium_crypto_secretstream_xchacha20poly1305_init_push(string $key): varray<string>;
+
+// Encryption. Return the ciphertext.
+<<__Native>>
+function sodium_crypto_secretstream_xchacha20poly1305_push(inout mixed $state, string $plaintext, string $ad, int $tag): string;
+
+// Initialize the state for decryption/pull side secretstream.
+// Return the state string.
+<<__Native>>
+function sodium_crypto_secretstream_xchacha20poly1305_init_pull(string $key, string $header): string;
+
+// Decryption. Return the plaintext and the tag.
+<<__Native>>
+function sodium_crypto_secretstream_xchacha20poly1305_pull(inout mixed $state, string $ciphertext, string $ad): varray;
+
+// Renew the symmetric key used in the secretstream.
+<<__Native>>
+function sodium_crypto_secretstream_xchacha20poly1305_rekey(inout mixed $state): void;

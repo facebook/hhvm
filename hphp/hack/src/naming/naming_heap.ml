@@ -65,8 +65,7 @@ module type ReverseNamingTable = sig
 
   val add : string -> pos -> unit
 
-  val get_pos :
-    Naming_sqlite.db_path option -> ?bypass_cache:bool -> string -> pos option
+  val get_pos : Naming_sqlite.db_path option -> string -> pos option
 
   val get_filename :
     Naming_sqlite.db_path option -> string -> Relative_path.t option
@@ -126,13 +125,7 @@ module Types = struct
     TypeCanonHeap.add (Naming_sqlite.to_canon_name_key id) id;
     TypePosHeap.write_around id type_info
 
-  let get_pos db_path_opt ?(bypass_cache = false) id =
-    let get_func =
-      if bypass_cache then
-        TypePosHeap.get_no_cache
-      else
-        TypePosHeap.get
-    in
+  let get_pos db_path_opt id =
     let map_result (path, entry_type) =
       let name_type =
         match entry_type with
@@ -147,7 +140,7 @@ module Types = struct
     in
     get_and_cache
       ~map_result
-      ~get_func
+      ~get_func:TypePosHeap.get
       ~check_block_func:BlockedEntries.get
       ~fallback_get_func_opt
       ~cache_func:TypePosHeap.write_around
@@ -276,7 +269,7 @@ module Funs = struct
     FunCanonHeap.add (Naming_sqlite.to_canon_name_key id) id;
     FunPosHeap.add id pos
 
-  let get_pos db_path_opt ?bypass_cache:(_ = false) id =
+  let get_pos db_path_opt id =
     let map_result path = Some (FileInfo.File (FileInfo.Fun, path)) in
     let fallback_get_func_opt =
       Option.map db_path_opt ~f:Naming_sqlite.get_fun_path_by_name
@@ -362,7 +355,7 @@ module Consts = struct
 
   let add id pos = ConstPosHeap.add id pos
 
-  let get_pos db_path_opt ?bypass_cache:(_ = false) id =
+  let get_pos db_path_opt id =
     let map_result path = Some (FileInfo.File (FileInfo.Const, path)) in
     let fallback_get_func_opt =
       Option.map db_path_opt ~f:(fun db_path ->

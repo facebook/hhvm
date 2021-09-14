@@ -12,8 +12,7 @@ module type ReverseNamingTable = sig
 
   val add : string -> pos -> unit
 
-  val get_pos :
-    Naming_sqlite.db_path option -> ?bypass_cache:bool -> string -> pos option
+  val get_pos : Naming_sqlite.db_path option -> string -> pos option
 
   val get_filename :
     Naming_sqlite.db_path option -> string -> Relative_path.t option

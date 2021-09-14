@@ -19,6 +19,7 @@ pub struct Env {
     pub quick_mode: bool,
     pub show_all_errors: bool,
     pub fail_open: bool,
+    pub is_systemlib: bool,
     pub parser_options: parser_options::ParserOptions,
 }
 

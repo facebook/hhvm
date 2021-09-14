@@ -143,7 +143,7 @@ impl<'src> AastParser {
 
             let mut empty_program = vec![];
             let mut aast = aast.unwrap_or(&mut empty_program);
-            if env.parser_options.po_enable_readonly_in_emitter {
+            if env.parser_options.po_enable_readonly_in_emitter && !env.is_systemlib {
                 errors.extend(readonly_check::check_program(&mut aast));
             }
             errors.extend(aast_check::check_program(&aast));
@@ -186,6 +186,7 @@ impl<'src> AastParser {
             None | Some(Mode::Mhhi) => !env.codegen,
             _ => !env.codegen && env.quick_mode,
         };
+
         let parser_env = ParserEnv {
             codegen: env.codegen,
             hhvm_compat_mode: env.codegen,

@@ -27,6 +27,7 @@ type t = {
   disallow_fun_and_cls_meth_pseudo_funcs: bool;
   disallow_inst_meth: bool;
   interpret_soft_types_as_like_types: bool;
+  is_systemlib: bool;
 }
 [@@deriving show]
 
@@ -51,6 +52,7 @@ let default =
     disallow_fun_and_cls_meth_pseudo_funcs = false;
     disallow_inst_meth = false;
     interpret_soft_types_as_like_types = false;
+    is_systemlib = false;
   }
 
 let make
@@ -79,6 +81,7 @@ let make
     ?(disallow_inst_meth = default.disallow_inst_meth)
     ?(interpret_soft_types_as_like_types =
       default.interpret_soft_types_as_like_types)
+    ?(is_systemlib = default.is_systemlib)
     () =
   {
     hhvm_compat_mode;
@@ -100,6 +103,7 @@ let make
     disallow_fun_and_cls_meth_pseudo_funcs;
     disallow_inst_meth;
     interpret_soft_types_as_like_types;
+    is_systemlib;
   }
 
 let hhvm_compat_mode e = e.hhvm_compat_mode

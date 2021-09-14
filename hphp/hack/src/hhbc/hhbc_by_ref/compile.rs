@@ -390,6 +390,7 @@ where
             source_text,
             !env.flags.contains(EnvFlags::DISABLE_TOPLEVEL_ELABORATION),
             RcOc::clone(&namespace_env),
+            env.flags.contains(EnvFlags::IS_SYSTEMLIB),
         )
     });
     let log_extern_compiler_perf = emitter.options().log_extern_compiler_perf();
@@ -500,6 +501,7 @@ pub fn hhas_from_text<'arena, 'decl, S: AsRef<str>, D: DeclProvider<'decl>>(
             source_text,
             !env.flags.contains(EnvFlags::DISABLE_TOPLEVEL_ELABORATION),
             RcOc::clone(&namespace_env),
+            env.flags.contains(EnvFlags::IS_SYSTEMLIB),
         )
     });
 
@@ -619,6 +621,7 @@ fn parse_file(
     source_text: SourceText,
     elaborate_namespaces: bool,
     namespace_env: RcOc<NamespaceEnv>,
+    is_systemlib: bool,
 ) -> Either<(Pos, String, bool), ast::Program> {
     let aast_env = AastEnv {
         codegen: true,
@@ -629,6 +632,7 @@ fn parse_file(
         //   (not (Hhbc_options.enable_uniform_variable_syntax hhbc_options))
         php5_compat_mode: !opts.php7_flags.contains(Php7Flags::UVS),
         keep_errors: false,
+        is_systemlib,
         elaborate_namespaces,
         parser_options: create_parser_options(opts),
         ..AastEnv::default()

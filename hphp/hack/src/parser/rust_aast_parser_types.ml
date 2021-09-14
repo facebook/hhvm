@@ -19,6 +19,7 @@ type env = {
    * typechecking properly. *)
   show_all_errors: bool;
   fail_open: bool;
+  is_systemlib: bool;
   parser_options: ParserOptions.t;
 }
 

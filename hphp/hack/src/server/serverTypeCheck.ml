@@ -55,23 +55,6 @@ let use_direct_decl_parser (ctx : Provider_context.t) =
 (* Debugging *)
 (*****************************************************************************)
 
-let log_if_diag_subscribe_changed
-    (title : string)
-    ~(before : Diagnostic_subscription.t option)
-    ~(after : Diagnostic_subscription.t option) : unit =
-  match (before, after) with
-  | (None, None)
-  | (Some _, Some _) ->
-    ()
-  | _ ->
-    let disposition =
-      if Option.is_none before then
-        "added"
-      else
-        "removed"
-    in
-    Hh_logger.log "Diag_subscribe: %s - %s!" title disposition
-
 let print_defs prefix defs =
   List.iter defs ~f:(fun (_, fname) -> Printf.printf "  %s %s\n" prefix fname)
 
@@ -575,12 +558,6 @@ module FullCheckKind : CheckKindType = struct
         Some why_needed_full_init
       | _ -> None
     in
-    let () =
-      log_if_diag_subscribe_changed
-        "get_env[FullCheckKind]"
-        ~before:old_env.diag_subscribe
-        ~after:diag_subscribe
-    in
     {
       old_env with
       errorl;
@@ -709,12 +686,6 @@ module LazyCheckKind : CheckKindType = struct
       match old_env.full_check_status with
       | Full_check_started -> Full_check_started
       | _ -> Full_check_needed
-    in
-    let () =
-      log_if_diag_subscribe_changed
-        "get_env[LazyCheckKind]"
-        ~before:old_env.diag_subscribe
-        ~after:diag_subscribe
     in
     {
       old_env with
@@ -1070,7 +1041,6 @@ functor
         ~(files_to_check : Relative_path.Set.t)
         ~(files_to_parse : Relative_path.Set.t)
         ~(lazy_check_later : Relative_path.Set.t)
-        ~(old_env : env)
         ~(profiling : CgroupProfiler.Profiling.t) : type_checking_result =
       let telemetry = Telemetry.create () in
       if Relative_path.(Set.mem files_to_check default) then
@@ -1088,7 +1058,6 @@ functor
       let longlived_workers =
         genv.local_config.ServerLocalConfig.longlived_workers
       in
-      let diag_subscribe_before = env.diag_subscribe in
 
       let ( errorl',
             telemetry,
@@ -1140,10 +1109,6 @@ functor
           time_first_typing_error )
       in
 
-      log_if_diag_subscribe_changed
-        "type_checking.go_with_interrupt"
-        ~before:diag_subscribe_before
-        ~after:env.diag_subscribe;
       (* Add new things that need to be rechecked *)
       let needs_recheck =
         Relative_path.Set.union env.needs_recheck lazy_check_later
@@ -1197,18 +1162,6 @@ functor
               ~global_errors:errors
               ~full_check_done)
       in
-      log_if_diag_subscribe_changed
-        "type_checking[old_env->env]"
-        ~before:old_env.diag_subscribe
-        ~after:env.diag_subscribe;
-      log_if_diag_subscribe_changed
-        "type_checking[env->diag_subscribe]"
-        ~before:env.diag_subscribe
-        ~after:diag_subscribe;
-      log_if_diag_subscribe_changed
-        "type_checking[old_env->diag_subscribe]"
-        ~before:old_env.diag_subscribe
-        ~after:diag_subscribe;
 
       let total_rechecked_count = Relative_path.Set.cardinal files_to_check in
       {
@@ -1385,8 +1338,6 @@ functor
         Telemetry.duration telemetry ~key:"naming_update_start" ~start_time
       in
 
-      (* Hold on to the original environment; it's used by do_type_checking. *)
-      let old_env = env in
       (* Update the naming_table, which is a map from filename to the names of
          toplevel symbols declared in that file. Also, update Typing_deps' table,
          which is a map from toplevel symbol hash (Dep.t) to filename. *)
@@ -1800,24 +1751,11 @@ functor
           ~files_to_check
           ~files_to_parse
           ~lazy_check_later
-          ~old_env
           ~profiling
       in
       let time_first_error =
         Option.first_some time_first_error time_first_typing_error
       in
-      log_if_diag_subscribe_changed
-        "type_check_core[old_env->env]"
-        ~before:old_env.diag_subscribe
-        ~after:env.diag_subscribe;
-      log_if_diag_subscribe_changed
-        "type_check_core.[env->diag_subscribe]"
-        ~before:env.diag_subscribe
-        ~after:diag_subscribe;
-      log_if_diag_subscribe_changed
-        "type_check_core[old_env->diag_subscribe]"
-        ~before:old_env.diag_subscribe
-        ~after:diag_subscribe;
 
       let heap_size = SharedMem.SMTelemetry.heap_size () in
       Hh_logger.log "Heap size: %d" heap_size;

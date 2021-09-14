@@ -84,20 +84,4 @@ let handler =
       match env.class_name with
       | Some _ -> ()
       | None -> assert false
-
-    method! at_contexts env (_pos, hl) =
-      if get_tcopt env |> TypecheckerOptions.strict_contexts then
-        hl
-        |> List.iter ~f:(function
-               | (p, Happly ((_, id), _)) ->
-                 let (ns, _) = Utils.split_ns_from_name id in
-                 if not @@ String.is_prefix ~prefix:SN.Coeffects.contexts ns
-                 then
-                   Errors.illegal_context p id
-               | (p, Hprim t) -> Errors.illegal_context p (Nast.show_tprim t)
-               | (p, Habstr (name, _))
-                 when not (SN.Coeffects.is_generated_generic name) ->
-                 (* TODO(coeffects) make this a parser error *)
-                 Errors.illegal_context p ("generic " ^ name)
-               | _ -> ())
   end

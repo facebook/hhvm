@@ -1,0 +1,15 @@
+File "typeconst_indirection.php", line 6, characters 31-72:
+Illegal context: `this::T::T`
+Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Hack provides a list of supported contexts here
+File "typeconst_indirection.php", line 6, characters 31-72:
+Illegal context: `this::T`
+Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Hack provides a list of supported contexts here
+File "typeconst_indirection.php", line 12, characters 22-40:
+Illegal context: `this::Tc`
+Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
+  File "coeffect/contexts.hhi", line 28, characters 1-23:
+  Hack provides a list of supported contexts here

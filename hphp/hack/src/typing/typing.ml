@@ -776,11 +776,12 @@ let type_capability env ctxs unsafe_ctxs default_pos =
   let (decl_pos, cap) = cc env.decl_env ctxs default_pos in
   let (env, cap_ty) =
     match cap with
-    | CapTy ty -> Phase.localize_no_subst env ~ignore_errors:false ty
+    | CapTy ty ->
+      if TypecheckerOptions.strict_contexts (Env.get_tcopt env) then
+        Typing_coeffects.validate_capability env decl_pos ty;
+      Phase.localize_no_subst env ~ignore_errors:false ty
     | CapDefaults p -> (env, MakeType.default_capability p)
   in
-  if TypecheckerOptions.strict_contexts (Env.get_tcopt env) then
-    Typing_coeffects.validate_capability env decl_pos cap_ty;
   let (env, unsafe_cap_ty) =
     match snd @@ cc env.decl_env unsafe_ctxs default_pos with
     | CapTy ty -> Phase.localize_no_subst env ~ignore_errors:false ty

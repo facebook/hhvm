@@ -1,15 +1,5 @@
-File "generic_as_context.php", line 5, characters 19-20:
-Illegal context: `generic Te`
-Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
-  File "coeffect/contexts.hhi", line 28, characters 1-23:
-  Hack provides a list of supported contexts here
-File "generic_as_context.php", line 6, characters 3-4:
-Illegal context: `generic Te`
-Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
-  File "coeffect/contexts.hhi", line 28, characters 1-23:
-  Hack provides a list of supported contexts here
-File "generic_as_context.php", line 13, characters 17-18:
-Illegal context: `generic Te`
+File "generic_as_context.php", line 6, characters 2-5:
+Illegal context: `Te`
 Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
   File "coeffect/contexts.hhi", line 28, characters 1-23:
   Hack provides a list of supported contexts here

@@ -1280,7 +1280,7 @@ end = struct
       | Tresource -> Fmt.string ppf "resource"
       | Tnoreturn -> Fmt.string ppf "noreturn")
 
-  let rec pp_hint ~is_ctx ppf (_, hint_) =
+  let rec pp_hint ~is_ctx ppf (pos, hint_) =
     match hint_ with
     | Aast.Hany
     | Aast.Herr ->
@@ -1304,7 +1304,7 @@ end = struct
     | Aast.Hunion hints ->
       Fmt.(parens @@ list ~sep:vbar @@ pp_hint ~is_ctx:false) ppf hints
     | Aast.Hintersection hints when is_ctx ->
-      Fmt.(brackets @@ list ~sep:comma @@ pp_hint ~is_ctx:false) ppf hints
+      Fmt.(brackets @@ list ~sep:comma @@ pp_hint ~is_ctx:true) ppf hints
     | Aast.Hintersection hints ->
       Fmt.(parens @@ list ~sep:amp @@ pp_hint ~is_ctx:false) ppf hints
     | Aast.Hprim prim -> pp_tprim ppf prim
@@ -1351,6 +1351,8 @@ end = struct
         @@ pair ~sep:comma (pp_hint ~is_ctx:false) (pp_hint ~is_ctx:false))
         ppf
         (khint, vhint)
+    | Aast.Happly ((p, name), hs) when is_ctx ->
+      pp_hint ~is_ctx:false ppf (pos, Aast.Happly ((p, strip_ns name), hs))
     | Aast.Habstr (name, [])
     | Aast.Happly ((_, name), []) ->
       Fmt.string ppf name
@@ -1443,7 +1445,7 @@ end = struct
       Fmt.(pair ~sep:dbl_colon string string) ppf (c, s)
 
   and pp_contexts ppf (_, ctxts) =
-    Fmt.(brackets @@ list ~sep:comma @@ pp_hint ~is_ctx:false) ppf ctxts
+    Fmt.(brackets @@ list ~sep:comma @@ pp_hint ~is_ctx:true) ppf ctxts
 
   let pp_lid ppf lid =
     Fmt.(prefix (const string "$") string) ppf @@ Local_id.get_name lid

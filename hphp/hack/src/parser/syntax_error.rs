@@ -1077,3 +1077,5 @@ pub const variadic_readonly_param: Error =
 pub const throw_readonly_exception: Error = Cow::Borrowed(
     "This exception is readonly; throwing readonly exceptions is not currently supported.",
 );
+pub const direct_coeffects_reference: Error =
+    Cow::Borrowed("Direct references to coeffects namespaces are not allowed");

@@ -3031,7 +3031,10 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         };
         let ty = match self.node_to_ty(ctx_list) {
             Some(ty) => ty,
-            None => return Node::Ignored(SK::ContextAliasDeclaration),
+            None => self.alloc(Ty(
+                self.alloc(Reason::hint(pos)),
+                Ty_::Tapply(self.alloc(((pos, "\\HH\\Contexts\\defaults"), &[]))),
+            )),
         };
 
         // lowerer ensures there is only one as constraint

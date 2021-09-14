@@ -2,7 +2,7 @@
 <?hh
 <<file:__EnableUnstableFeatures('context_alias_declaration')>>
 
-newctx First as [] = [\HH\Contexts\defaults];
+newctx First as [] = [defaults];
 
 //// g.php
 <?hh

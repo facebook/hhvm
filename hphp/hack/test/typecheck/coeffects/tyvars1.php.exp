@@ -1,3 +1,5 @@
+File "tyvars1.php", line 4, characters 13-31:
+Direct references to coeffects namespaces are not allowed (Parsing[1002])
 File "tyvars1.php", line 16, characters 5-20:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
   File "tyvars1.php", line 15, characters 19-20:

@@ -1,3 +1,9 @@
+File "globals_static_property.php", line 6, characters 32-61:
+Direct references to coeffects namespaces are not allowed (Parsing[1002])
+File "globals_static_property.php", line 14, characters 22-51:
+Direct references to coeffects namespaces are not allowed (Parsing[1002])
+File "globals_static_property.php", line 20, characters 19-48:
+Direct references to coeffects namespaces are not allowed (Parsing[1002])
 File "globals_static_property.php", line 10, characters 20-21:
 Reading static properties requires the capability ReadGlobals, which is not provided by the context. (Typing[4401])
   File "globals_static_property.php", line 9, characters 30-31:

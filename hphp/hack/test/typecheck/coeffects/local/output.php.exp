@@ -1,3 +1,5 @@
+File "output.php", line 3, characters 20-38:
+Direct references to coeffects namespaces are not allowed (Parsing[1002])
 File "output.php", line 9, characters 3-6:
 `echo` or `print` builtin requires the capability IO, which is not provided by the context. (Typing[4401])
   File "output.php", line 8, characters 23-24:

@@ -849,6 +849,18 @@ where
                 } else if "real".eq_ignore_ascii_case(&name) {
                     suggest(&name, special_typehints::FLOAT);
                 }
+
+                use naming_special_names_rust::coeffects::{CAPABILITIES, CONTEXTS};
+                if env.file_mode() != file_info::Mode::Mhhi && !env.codegen() {
+                    let sn = Self::strip_ns(&name);
+                    if sn.starts_with(CONTEXTS) || sn.starts_with(CAPABILITIES) {
+                        Self::raise_parsing_error(
+                            node,
+                            env,
+                            &syntax_error::direct_coeffects_reference,
+                        );
+                    }
+                }
                 Ok(Happly(ast::Id(pos, name), vec![]))
             }
             ShapeTypeSpecifier(c) => {
@@ -5093,13 +5105,6 @@ where
         }
     }
 
-    fn defaults_coeffect(env: &mut Env<'a, TF>, node: S<'a, T, V>) -> ast::Hint {
-        use ast::Hint_::Happly;
-        let pos = Self::p_pos(node, env);
-        let hint_ = Happly(ast::Id(pos.clone(), String::from("defaults")), vec![]);
-        ast::Hint::new(pos, hint_)
-    }
-
     fn p_def(node: S<'a, T, V>, env: &mut Env<'a, TF>) -> Result<Vec<ast::Def>, Error> {
         let doc_comment_opt = Self::extract_docblock(node, env);
         match &node.children {
@@ -5302,6 +5307,17 @@ where
                         )
                     }
                 }
+                let kind = match Self::p_context_list_to_intersection(&c.context, env)? {
+                    Some(h) => h,
+                    None => {
+                        let pos = pos_name.0.clone();
+                        let hint_ = ast::Hint_::Happly(
+                            ast::Id(pos.clone(), String::from("defaults")),
+                            vec![],
+                        );
+                        ast::Hint::new(pos, hint_)
+                    }
+                };
                 Ok(vec![ast::Def::mk_typedef(ast::Typedef {
                     annotation: (),
                     name: pos_name,
@@ -5316,10 +5332,7 @@ where
                     namespace: Self::mk_empty_ns_env(env),
                     mode: env.file_mode(),
                     vis: ast::TypedefVisibility::Opaque,
-                    kind: match Self::p_context_list_to_intersection(&c.context, env)? {
-                        Some(h) => h,
-                        None => Self::defaults_coeffect(env, &c.context),
-                    },
+                    kind,
                     span: Self::p_pos(node, env),
                     emit_id: None,
                     is_ctx: true,

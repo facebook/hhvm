@@ -1523,7 +1523,7 @@ let class_const_def ~in_enum_class c env cc =
         (* Enum class constant initializers are restricted to be `write_props` *)
         let make_hint pos s = (pos, Aast.Happly ((pos, s), [])) in
         let enum_class_ctx =
-          Some (e_pos, [make_hint e_pos SN.Capabilities.writeProperty])
+          Some (e_pos, [make_hint e_pos SN.Capabilities.write_props])
         in
         Typing.type_capability env enum_class_ctx enum_class_ctx e_pos
       in

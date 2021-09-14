@@ -775,6 +775,10 @@ pub mod coeffects {
 
     pub const GLOBALS: &str = "globals";
 
+    pub const CONTEXTS: &str = "HH\\Contexts";
+
+    pub const CAPABILITIES: &str = "HH\\Capabilities";
+
     pub fn is_any_policied(x: &str) -> bool {
         lazy_static! {
             static ref POLICIED_SET: HashSet<&'static str> =

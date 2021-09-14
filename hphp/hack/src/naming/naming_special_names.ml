@@ -821,6 +821,8 @@ end
 module Capabilities = struct
   let defaults = Coeffects.contexts ^ "\\defaults"
 
+  let write_props = Coeffects.contexts ^ "\\write_props"
+
   let prefix = "\\HH\\Capabilities\\"
 
   let writeProperty = prefix ^ "WriteProperty"

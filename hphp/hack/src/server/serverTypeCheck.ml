@@ -1361,9 +1361,6 @@ functor
         Telemetry.duration telemetry ~key:"naming_start" ~start_time
       in
 
-      let deptable_unlocked =
-        Typing_deps.allow_dependency_table_reads env.deps_mode true
-      in
       (* Run Naming_global, updating the reverse naming table (which maps the names
          of toplevel symbols to the files in which they were declared) in shared
          memory. Does not run Naming itself (which converts an AST to a NAST by
@@ -1402,6 +1399,9 @@ functor
 
       (* REDECL PHASE 1 ********************************************************)
       ServerProgress.send_progress ~include_in_logs:false "determining changes";
+      let deptable_unlocked =
+        Typing_deps.allow_dependency_table_reads env.deps_mode true
+      in
       let count = Relative_path.Map.cardinal fast in
       let logstring =
         Printf.sprintf "Type declaration (phase 1) for %d files" count

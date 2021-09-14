@@ -849,5 +849,4 @@ let get_const_path_by_name (db_path : db_path) name =
 
 let get_path_by_64bit_dep (db_path : db_path) (dep : Typing_deps.Dep.t) =
   let (db, stmt_cache) = get_db_and_stmt_cache db_path in
-  (* 'fst' picks only the filename, ignoring the name-kind *)
-  SymbolTable.get db stmt_cache dep SymbolTable.get_sqlite |> Option.map ~f:fst
+  SymbolTable.get db stmt_cache dep SymbolTable.get_sqlite

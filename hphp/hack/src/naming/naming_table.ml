@@ -263,7 +263,7 @@ let get_64bit_dep_set_files
         ~f:(fun dep acc ->
           match Naming_sqlite.get_path_by_64bit_dep db_path dep with
           | None -> acc
-          | Some file -> Relative_path.Set.add acc file)
+          | Some (file, _namekind) -> Relative_path.Set.add acc file)
     in
 
     Relative_path.Map.fold

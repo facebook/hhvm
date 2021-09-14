@@ -1428,7 +1428,8 @@ and simplify_subtype_i
         | _ -> default_subtype env))
     | (r_dynamic, Tdynamic)
       when TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
-           && coercing_to_dynamic subtype_env ->
+           && (coercing_to_dynamic subtype_env
+              || env.in_support_dynamic_type_method_check) ->
       (match ety_sub with
       | ConstraintType _cty ->
         (* TODO *)

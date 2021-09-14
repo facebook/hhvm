@@ -1,0 +1,1 @@
+Warning: Cannot store readonly value in a non-readonly property not_ro_vec of class Foo. in %s on line 30

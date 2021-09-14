@@ -1,0 +1,1 @@
+Warning: Property ro_prop of class Foo is readonly, but isn't enclosed in a readonly expression. in %s/cgets.hhas on line %d

@@ -1,0 +1,1 @@
+Warning: Cannot store readonly value in a non-readonly property a1 of class A. in %s/sets.hhas on line 17

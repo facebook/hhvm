@@ -1,0 +1,1 @@
+Warning: Property c of class Foo is readonly, and therefore must be a value type to be modified. in %s/basesc_cow.php on line 12

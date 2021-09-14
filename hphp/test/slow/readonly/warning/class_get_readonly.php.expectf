@@ -1,0 +1,1 @@
+Warning: Property ro_static of class Foo is readonly, but isn't enclosed in a readonly expression. in %s on line 34

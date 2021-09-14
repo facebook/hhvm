@@ -1,0 +1,63 @@
+.file_attributes ["__EnableUnstableFeatures"("""y:1:{s:8:\"readonly\";}""")] ;
+
+.function{} ["__EntryPoint"("""y:0:{}""")] (13,18) <"HH\\void" N  > main() {
+  .declvars $a;
+  .srcloc 14:8,14:14;
+  NewObjD "A"
+  Dup
+  NullUninit
+  FCallCtor <LockWhileUnwinding> 0 1 "" "" - "" ""
+  PopC
+  LockObj
+  .srcloc 14:3,14:14;
+  SetL $a
+  .srcloc 14:3,14:15;
+  PopC
+  .srcloc 15:6,15:8;
+  String "a1"
+  String "A"
+  ClassGetC
+  .srcloc 15:12,15:17;
+  BaseL $a Warn Any
+  QueryM 0 CGet PT:"b1" Mutable
+  .srcloc 15:3,15:8;
+  SetS Any
+  .srcloc 15:3,15:18;
+  PopC
+  .srcloc 16:6,16:7;
+  String "a"
+  String "A"
+  ClassGetC
+  .srcloc 16:11,16:15;
+  BaseL $a Warn Any
+  QueryM 0 CGet PT:"b" Any
+  .srcloc 16:3,16:7;
+  SetS Readonly
+  .srcloc 16:3,16:16;
+  PopC
+  .srcloc 17:6,17:8;
+  String "a1"
+  String "A"
+  ClassGetC
+  .srcloc 17:12,17:16;
+  BaseL $a Warn Any
+  QueryM 0 CGet PT:"b" Any
+  .srcloc 17:3,17:8;
+  SetS Readonly
+  .srcloc 17:3,17:17;
+  PopC
+  .srcloc 18:2,18:2;
+  Null
+  RetC
+}
+
+.class {}  A (5,10) {
+  .property [public static readonly] <"HH\\int" "HH\\int" extended_hint > a =
+    """i:5;""";
+  .property [public static] <"HH\\int" "HH\\int" extended_hint > a1 =
+    """i:50;""";
+  .property [public readonly] <"HH\\int" "HH\\int" extended_hint > b =
+    """i:6;""";
+  .property [public] <"HH\\int" "HH\\int" extended_hint > b1 =
+    """i:60;""";
+}

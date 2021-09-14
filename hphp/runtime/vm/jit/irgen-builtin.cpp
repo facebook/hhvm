@@ -886,6 +886,8 @@ SSATmp* opt_fun_get_function(IRGS& env, const ParamPrep& params) {
   auto const type = value->type();
   if (type <= TFunc) {
     return gen(env, LdFuncName, value);
+  } else if (type <= TRFunc) {
+    return gen(env, LdFuncName, gen(env, LdFuncFromRFunc, value));
   }
   return nullptr;
 }

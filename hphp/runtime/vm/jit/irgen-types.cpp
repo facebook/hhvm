@@ -454,6 +454,7 @@ SSATmp* isFuncImpl(IRGS& env, SSATmp* src) {
     auto const isMC = gen(env, FuncHasAttr, attr, func);
     return gen(env, EqBool, isMC, cns(env, false));
   });
+  mc.ifTypeThen(src, TRFunc, [&](SSATmp*) { return cns(env, true); });
   return mc.elseDo([&]{ return cns(env, false); });
 }
 

@@ -10,11 +10,11 @@ null x func_ptr: >   :Cannot compare null and func using a relational operator
 null x func_ptr: >=  :Cannot compare null and func using a relational operator
 null x func_ptr: <=> :Cannot compare null and func using a relational operator
 
-rfunc_ptr x null <   :Cannot compare reified function and null using a relational operator
-rfunc_ptr x null <=  :Cannot compare reified function and null using a relational operator
-rfunc_ptr x null >   :Cannot compare reified function and null using a relational operator
-rfunc_ptr x null >=  :Cannot compare reified function and null using a relational operator
-rfunc_ptr x null <=> :Cannot compare reified function and null using a relational operator
+rfunc_ptr x null <   :Cannot compare reified function and bool using a relational operator
+rfunc_ptr x null <=  :Cannot compare reified function and bool using a relational operator
+rfunc_ptr x null >   :Cannot compare reified function and bool using a relational operator
+rfunc_ptr x null >=  :Cannot compare reified function and bool using a relational operator
+rfunc_ptr x null <=> :Cannot compare reified function and bool using a relational operator
 
 null x rfunc_ptr: <   :Cannot compare null and reified function using a relational operator
 null x rfunc_ptr: <=  :Cannot compare null and reified function using a relational operator

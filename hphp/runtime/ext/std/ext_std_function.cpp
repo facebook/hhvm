@@ -153,13 +153,17 @@ void StandardExtension::initFunction() {
 ///////////////////////////////////////////////////////////////////////////////
 
 String HHVM_FUNCTION(HH_fun_get_function, TypedValue v) {
-  if (!tvIsFunc(v)) {
+  if (tvIsFunc(v)) {
+    auto const f = val(v).pfunc;
+    return f->nameStr();
+  } else if (tvIsRFunc(v)) {
+    auto const f = val(v).prfunc->m_func;
+    return f->nameStr();
+  } else {
     SystemLib::throwInvalidArgumentExceptionObject(
       folly::sformat("Argument 1 passed to {}() must be a fun",
       __FUNCTION__+5));
   }
-  auto const f = val(v).pfunc;
-  return f->nameStr();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

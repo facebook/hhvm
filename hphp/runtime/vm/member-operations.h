@@ -502,15 +502,6 @@ inline TypedValue Elem(tv_rval base, key_type<keyType> key) {
 /**
  * ElemD when base is a bespoke array-like
  */
-inline void ElemDBespokeUpdateBase(tv_lval base, arr_lval result) {
-  auto const oldArr = base.val().parr;
-  if (result.arr != oldArr) {
-    type(base) = dt_with_rc(type(base));
-    val(base).parr = result.arr;
-    decRefArr(oldArr);
-  }
-}
-
 inline tv_lval ElemDBespokePre(tv_lval base, int64_t key) {
   return BespokeArray::ElemInt(base, key, true);
 }

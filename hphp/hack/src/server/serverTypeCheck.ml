@@ -333,51 +333,6 @@ let parsing genv env to_check ~stop_at_errors profiling =
   ) else
     (env, fast, errors, failed_parsing)
 
-(*****************************************************************************)
-(* At any given point in time, we want to know what each file defines.
- * The datastructure that maintains this information is called file_info.
- * This code updates the file information.
- *)
-(*****************************************************************************)
-
-let update_naming_table ctx env fast_parsed profiling =
-  let naming_table =
-    CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"update_deps"
-    @@ fun () ->
-    let deps_mode = Provider_context.get_deps_mode ctx in
-    Relative_path.Map.iter fast_parsed ~f:(fun file fi ->
-        let old = Naming_table.get_file_info env.naming_table file in
-        Typing_deps.Files.update_file deps_mode file fi ~old);
-    Naming_table.update_many env.naming_table fast_parsed
-  in
-  naming_table
-
-(*****************************************************************************)
-(* Defining the global naming environment.
- * Defines an environment with the names of all the globals (classes/funs).
- *)
-(*****************************************************************************)
-
-let declare_names env fast_parsed =
-  remove_decls env fast_parsed;
-  let ctx = Provider_utils.ctx_from_server_env env in
-  let (errorl, failed_naming) =
-    Relative_path.Map.fold
-      fast_parsed
-      ~f:
-        begin
-          fun k v (errorl, failed) ->
-          let (errorl', failed') =
-            Naming_global.ndecl_file_error_if_already_bound ctx k v
-          in
-          let errorl = Errors.merge errorl' errorl in
-          let failed = Relative_path.Set.union failed' failed in
-          (errorl, failed)
-        end
-      ~init:(Errors.empty, Relative_path.Set.empty)
-  in
-  (errorl, failed_naming)
-
 let diff_set_and_map_keys set map =
   Relative_path.Map.fold map ~init:set ~f:(fun k _ acc ->
       Relative_path.Set.remove acc k)
@@ -809,7 +764,10 @@ functor
     }
 
     (** Update the naming_table, which is a map from filename to the names of
-        toplevel symbols declared in that file. Also, update Typing_deps' table,
+        toplevel symbols declared in that file: at any given point in time, we want
+        to know what each file defines. The datastructure that maintains this information
+        is called file_info. This code updates the file information.
+        Also, update Typing_deps' table,
         which is a map from toplevel symbol hash (Dep.t) to filename.
         Also run Naming_global, updating the reverse naming table (which maps the names
         of toplevel symbols to the files in which they were declared) in shared
@@ -824,26 +782,41 @@ functor
         ~(profiling : CgroupProfiler.Profiling.t) : naming_result =
       let telemetry = Telemetry.create () in
       let start_t = Unix.gettimeofday () in
-
-      let naming_table = update_naming_table ctx env fast_parsed profiling in
+      let deps_mode = Provider_context.get_deps_mode ctx in
+      CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"naming"
+      @@ fun () ->
+      (* 1. Update dephash->filenames reverse naming table (global,mutable) *)
+      Relative_path.Map.iter fast_parsed ~f:(fun file fi ->
+          let old = Naming_table.get_file_info env.naming_table file in
+          Typing_deps.Files.update_file deps_mode file fi ~old);
       HackEventLogger.updating_deps_end
         ~count:(Relative_path.Map.cardinal fast_parsed)
         ~desc:"serverTypeCheck"
         ~start_t;
-
-      CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"naming"
-      @@ fun () ->
+      (* 2. Update name->filename reverse naming table (global, mutable),
+         and gather "duplicate name" errors *)
+      remove_decls env fast_parsed;
       let (duplicate_name_errors, failed_naming) =
-        declare_names env fast_parsed
+        Relative_path.Map.fold
+          fast_parsed
+          ~init:(Errors.empty, Relative_path.Set.empty)
+          ~f:(fun file fileinfo (errorl, failed) ->
+            let (errorl', failed') =
+              Naming_global.ndecl_file_error_if_already_bound ctx file fileinfo
+            in
+            (Errors.merge errorl' errorl, Relative_path.Set.union failed' failed))
       in
-
+      (* 3. Update filename->FileInfo.t forward naming table (into this local variable) *)
+      let naming_table =
+        Naming_table.update_many env.naming_table fast_parsed
+      in
+      (* final telemetry *)
       let heap_size = SharedMem.SMTelemetry.heap_size () in
       Hh_logger.log "Heap size: %d" heap_size;
       HackEventLogger.naming_end
         ~count:(Relative_path.Map.cardinal fast_parsed)
         start_t
         heap_size;
-
       { duplicate_name_errors; failed_naming; naming_table; telemetry }
 
     type redecl_phase1_result = {

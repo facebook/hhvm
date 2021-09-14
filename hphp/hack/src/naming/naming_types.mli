@@ -6,6 +6,9 @@
  *
  *)
 
+(* The types in this file duplicate what's in FileInfo.name_type, but with more structure.
+It'd be nice to unify them. *)
+
 (** In the naming table, global constants and global functions can be
 syntactically disambiguated at their use-site, and therefore can live in
 separate namespaces. However, types (such as classes) cannot be syntactically
@@ -15,4 +18,14 @@ type kind_of_type =
   | TClass
   | TTypedef
   | TRecordDef
-[@@deriving show, eq, enum]
+[@@deriving show, eq]
+
+type name_kind =
+  | Type_kind of kind_of_type
+  | Fun_kind
+  | Const_kind
+[@@deriving show, eq]
+
+val name_kind_to_enum : name_kind -> int
+
+val name_kind_of_enum : int -> name_kind option

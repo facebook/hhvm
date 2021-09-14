@@ -39,6 +39,8 @@ val string_of_mode : mode -> string
 (* The record produced by the parsing phase. *)
 (*****************************************************************************)
 
+(** This type replicates what's in Naming_types.name_kind, but with less structure.
+It'd be nice to unify them. *)
 type name_type =
   | Fun [@value 0]
   | Class [@value 1]

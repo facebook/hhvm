@@ -9,9 +9,9 @@
 type db_path = Db_path of string [@@deriving show]
 
 type insertion_error = {
-  canon_hash: Int64.t option;
+  canon_hash: Int64.t;
   hash: Int64.t;
-  kind_of_type: Naming_types.kind_of_type option;
+  name_kind: Naming_types.name_kind;
   name: string;
   origin_exception: Exception.t;
       [@printer (fun fmt e -> fprintf fmt "%s" (Exception.get_ctor_string e))]

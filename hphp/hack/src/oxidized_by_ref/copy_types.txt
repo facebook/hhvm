@@ -99,6 +99,7 @@ oxidized::errors::Severity
 oxidized::file_info::Mode
 oxidized::file_info::NameType
 oxidized::naming_types::KindOfType
+oxidized::naming_types::NameKind
 phase_map::PhaseMap
 prim_defs::Comment
 prop_flags::PropFlags

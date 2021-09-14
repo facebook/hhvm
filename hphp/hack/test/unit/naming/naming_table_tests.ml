@@ -22,11 +22,11 @@ let hash_mode = Typing_deps_mode.hash_mode deps_mode
 module Types_pos_asserter = Asserter.Make_asserter (struct
   type t = FileInfo.pos * Naming_types.kind_of_type
 
-  let to_string (pos, type_of_type) =
+  let to_string (pos, kind_of_type) =
     Printf.sprintf
-      "(%s, %d)"
+      "(%s, %s)"
       (FileInfo.show_pos pos)
-      (Naming_types.kind_of_type_to_enum type_of_type)
+      (Naming_types.show_kind_of_type kind_of_type)
 
   let is_equal = Poly.( = )
 end)

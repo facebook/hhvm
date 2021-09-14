@@ -6,10 +6,33 @@
  *
  *)
 
-(* These values are stored in the naming table database, so be careful when
-changing them! *)
 type kind_of_type =
-  | TClass [@value 0]
-  | TTypedef [@value 1]
-  | TRecordDef [@value 2]
-[@@deriving show, eq, enum]
+  | TClass
+  | TTypedef
+  | TRecordDef
+[@@deriving show, eq]
+
+type name_kind =
+  | Type_kind of kind_of_type
+  | Fun_kind
+  | Const_kind
+[@@deriving show, eq]
+
+let name_kind_to_enum (name_kind : name_kind) : int =
+  (* These values are stored in the naming table database, and must match [flag_of_enum] and naming_types_impl.rs *)
+  match name_kind with
+  | Type_kind TClass -> 0
+  | Type_kind TTypedef -> 1
+  | Type_kind TRecordDef -> 2
+  | Fun_kind -> 3
+  | Const_kind -> 4
+
+let name_kind_of_enum (i : int) : name_kind option =
+  (* These values are stored in the naming table database, and must match [flag_to_enum] and naming_types_impl.rs *)
+  match i with
+  | 0 -> Some (Type_kind TClass)
+  | 1 -> Some (Type_kind TTypedef)
+  | 2 -> Some (Type_kind TRecordDef)
+  | 3 -> Some Fun_kind
+  | 4 -> Some Const_kind
+  | _ -> None

@@ -3225,7 +3225,7 @@ where
                             | (GenericTypeSpecifier(_), _) => (true, false, true),
                             _ => (true, false, false),
                         };
-                if !is_valid && self.env.is_typechecker() {
+                if !is_valid {
                     self.errors.push(Self::make_error_from_node(
                         node,
                         errors::invalid_scope_resolution_qualifier,

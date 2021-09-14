@@ -1,1 +1,1 @@
-Fatal error: Expected constant expression for initializer in %s/test/slow/parser/static_call_access_const_expr.php on line 10
+Fatal error: Only classnames and variables are allowed before `::`. in %s/static_call_access_const_expr.php on line 10

@@ -804,6 +804,7 @@ functor
         } )
 
     type naming_result = {
+      env: env;
       errors_after_naming: Errors.t;
       failed_naming: Relative_path.Set.t;
       fast: Naming_table.fast;
@@ -839,7 +840,13 @@ functor
       in
       let fast = extend_fast genv fast naming_table failed_decl in
       let fast = add_old_decls env.naming_table fast in
-      { errors_after_naming = errors; failed_naming; fast; time_errors_pushed }
+      {
+        env;
+        errors_after_naming = errors;
+        failed_naming;
+        fast;
+        time_errors_pushed;
+      }
 
     type redecl_phase1_result = {
       changed: Typing_deps.DepSet.t;
@@ -1368,6 +1375,7 @@ functor
          module is something of a historical artifact and is slated for removal,
          but for now, it is run immediately before typechecking. *)
       let {
+        env;
         errors_after_naming = errors;
         failed_naming;
         fast;

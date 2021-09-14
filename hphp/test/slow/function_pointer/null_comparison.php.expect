@@ -34,11 +34,11 @@ null x clsmeth: >   :Cannot compare null and clsmeth using a relational operator
 null x clsmeth: >=  :Cannot compare null and clsmeth using a relational operator
 null x clsmeth: <=> :Cannot compare null and clsmeth using a relational operator
 
-rclsmeth x null <   :Cannot compare reified clsmeth and null using a relational operator
-rclsmeth x null <=  :Cannot compare reified clsmeth and null using a relational operator
-rclsmeth x null >   :Cannot compare reified clsmeth and null using a relational operator
-rclsmeth x null >=  :Cannot compare reified clsmeth and null using a relational operator
-rclsmeth x null <=> :Cannot compare reified clsmeth and null using a relational operator
+rclsmeth x null <   :Cannot compare reified clsmeth and bool using a relational operator
+rclsmeth x null <=  :Cannot compare reified clsmeth and bool using a relational operator
+rclsmeth x null >   :Cannot compare reified clsmeth and bool using a relational operator
+rclsmeth x null >=  :Cannot compare reified clsmeth and bool using a relational operator
+rclsmeth x null <=> :Cannot compare reified clsmeth and bool using a relational operator
 
 null x rclsmeth: <   :Cannot compare null and reified clsmeth using a relational operator
 null x rclsmeth: <=  :Cannot compare null and reified clsmeth using a relational operator

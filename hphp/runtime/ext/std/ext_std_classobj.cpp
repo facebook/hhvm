@@ -362,21 +362,27 @@ Array HHVM_FUNCTION(get_object_vars, const Object& object) {
 ///////////////////////////////////////////////////////////////////////////////
 
 String HHVM_FUNCTION(HH_class_meth_get_class, TypedValue v) {
-  if (!tvIsClsMeth(v)) {
+  if (tvIsClsMeth(v)) {
+    return val(v).pclsmeth->getCls()->nameStr();
+  } else if (tvIsRClsMeth(v)) {
+    return val(v).prclsmeth->m_cls->nameStr();
+  } else {
     SystemLib::throwInvalidArgumentExceptionObject(
       folly::sformat("Argument 1 passed to {}() must be a class_meth",
       __FUNCTION__+5));
   }
-  return val(v).pclsmeth->getCls()->nameStr();
 }
 
 String HHVM_FUNCTION(HH_class_meth_get_method, TypedValue v) {
-  if (!tvIsClsMeth(v)) {
+  if (tvIsClsMeth(v)) {
+    return val(v).pclsmeth->getFunc()->nameStr();
+  } else if (tvIsRClsMeth(v)) {
+    return val(v).prclsmeth->m_func->nameStr();
+  } else {
     SystemLib::throwInvalidArgumentExceptionObject(
       folly::sformat("Argument 1 passed to {}() must be a class_meth",
       __FUNCTION__+5));
   }
-  return val(v).pclsmeth->getFunc()->nameStr();
 }
 
 String HHVM_FUNCTION(HH_class_get_class_name, TypedValue v) {

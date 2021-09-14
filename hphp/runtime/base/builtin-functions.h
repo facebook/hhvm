@@ -132,7 +132,7 @@ inline bool is_object(const TypedValue* c) {
 
 inline bool is_clsmeth(const TypedValue* c) {
   assertx(tvIsPlausible(*c));
-  return tvIsClsMeth(c);
+  return tvIsClsMeth(c) || tvIsRClsMeth(c);
 }
 
 inline bool is_class(const TypedValue* c) {

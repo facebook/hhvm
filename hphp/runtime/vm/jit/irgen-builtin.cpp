@@ -985,6 +985,8 @@ SSATmp* opt_class_meth_get_class(IRGS& env, const ParamPrep& params) {
   auto const value = params[0].value;
   if (value->type() <= TClsMeth) {
     return gen(env, LdClsName, gen(env, LdClsFromClsMeth, value));
+  } else if (value->type() <= TRClsMeth) {
+    return gen(env, LdClsName, gen(env, LdClsFromRClsMeth, value));
   }
   return nullptr;
 }
@@ -994,6 +996,8 @@ SSATmp* opt_class_meth_get_method(IRGS& env, const ParamPrep& params) {
   auto const value = params[0].value;
   if (value->type() <= TClsMeth) {
     return gen(env, LdFuncName, gen(env, LdFuncFromClsMeth, value));
+  } else if (value->type() <= TRClsMeth) {
+    return gen(env, LdFuncName, gen(env, LdFuncFromRClsMeth, value));
   }
   return nullptr;
 }

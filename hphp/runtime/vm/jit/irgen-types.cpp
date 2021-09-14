@@ -385,7 +385,7 @@ Type typeOpToType(IsTypeOp op) {
   case IsTypeOp::Keyset:  return TKeyset;
   case IsTypeOp::Obj:     return TObj;
   case IsTypeOp::Res:     return TRes;
-  case IsTypeOp::ClsMeth: return TClsMeth;
+  case IsTypeOp::ClsMeth:
   case IsTypeOp::Func:
   case IsTypeOp::Class:
   case IsTypeOp::Vec:
@@ -455,6 +455,13 @@ SSATmp* isFuncImpl(IRGS& env, SSATmp* src) {
     return gen(env, EqBool, isMC, cns(env, false));
   });
   mc.ifTypeThen(src, TRFunc, [&](SSATmp*) { return cns(env, true); });
+  return mc.elseDo([&]{ return cns(env, false); });
+}
+
+SSATmp* isClsMethImpl(IRGS& env, SSATmp* src) {
+  MultiCond mc{env};
+  mc.ifTypeThen(src, TClsMeth, [&](SSATmp*) { return cns(env, true); });
+  mc.ifTypeThen(src, TRClsMeth, [&](SSATmp*) { return cns(env, true); });
   return mc.elseDo([&]{ return cns(env, false); });
 }
 
@@ -1470,6 +1477,7 @@ SSATmp* isTypeHelper(IRGS& env, IsTypeOp subop, SSATmp* val) {
     case IsTypeOp::LegacyArrLike: return isLegacyArrLikeImpl(env, val);
     case IsTypeOp::Class:         return isClassImpl(env, val);
     case IsTypeOp::Func:          return isFuncImpl(env, val);
+    case IsTypeOp::ClsMeth:       return isClsMethImpl(env, val);
     default: break;
   }
 

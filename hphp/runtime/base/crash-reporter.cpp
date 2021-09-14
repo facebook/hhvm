@@ -201,8 +201,14 @@ static void bt_handler(int sigin, siginfo_t* info, void* args) {
       // fall through
     case CrashReportStage::DumpTreadmill:
       s_crash_report_stage = CrashReportStage::ReportCppStack;
-      dprintf(fd, "Treadmill Information:\n%s\n",
-              Treadmill::dumpTreadmillInfo(true).data());
+      ::fsync(fd);
+      dprintf(
+        fd,
+        "\n-------------------------------"
+        "Treadmill Information"
+        "----------------------------\n%s\n",
+        Treadmill::dumpTreadmillInfo(true).data()
+      );
       // fall through
     case CrashReportStage::ReportCppStack:
       s_crash_report_stage = CrashReportStage::ReportPhpStack;

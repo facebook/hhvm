@@ -1,0 +1,26 @@
+<?hh
+<<file:__EnableUnstableFeatures('readonly')>>
+class Baz {
+}
+class Foo {
+  public int $prop;
+  public readonly Baz $baz;
+  public function __construct() {
+    $this->prop = 1;
+    $this->baz = new Baz();
+  }
+
+}
+function returns_readonly(Foo $z) : readonly Baz {
+  $f =
+    readonly (Foo $x, readonly Foo $y) ==> {
+    $x->prop = 4; // ok
+    return;
+  };
+  $z->prop = 4;// ok
+  return new Baz();
+}
+<<__EntryPoint>>
+function main(): void {
+  echo "Done\n";
+}

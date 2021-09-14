@@ -4456,16 +4456,13 @@ class TestLsp(TestCase[LspTestDriver]):
                     {
                         "range": {
                             "start": {"line": 0, "character": 0},
-                            "end": {"line": 15, "character": 0},
+                            "end": {"line": 12, "character": 0},
                         },
                         "newText": "<?hh //strict\n\nfunction x(): string {\n"
-                        + "     /* @lint-ignore TXT2 3 tabs on purpose */\n"
                         + '     $a = "this";\n\n'
-                        + "     /* @lint-ignore TXT2 2 tabs on purpose */\n"
                         + '     $b = "is";\n\n'
-                        + "     /* lint-ignore TXT2 1 tab on purpose */\n"
-                        + '     $c = "messy"; // 1 tab\n\n'
-                        + '     $d = "."; // 4 spaces\n'
+                        + '     $c = "messy";\n\n'
+                        + '     $d = ".";\n'
                         + '     return "$a"."$b"."$c"."d";\n}\n',
                     }
                 ],
@@ -4506,16 +4503,16 @@ class TestLsp(TestCase[LspTestDriver]):
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
                     "range": {
-                        "start": {"line": 4, "character": 0},
-                        "end": {"line": 5, "character": 0},
+                        "start": {"line": 3, "character": 0},
+                        "end": {"line": 4, "character": 0},
                     },
                     "options": {"tabSize": 5, "insertSpaces": True},
                 },
                 result=[
                     {
                         "range": {
-                            "start": {"line": 4, "character": 0},
-                            "end": {"line": 5, "character": 0},
+                            "start": {"line": 3, "character": 0},
+                            "end": {"line": 4, "character": 0},
                         },
                         "newText": '     $a = "this";\n',
                     }

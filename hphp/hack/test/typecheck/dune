@@ -85,24 +85,7 @@ let () =
       %s
       %s)" (deps files_tc)
     (command true cmd) in
-  (* like types *)
-  let cmds = [ "--out-extension .like_types.out"
-    ; "--expect-extension .like_types.exp"
-    ; "--fallback-expect-extension .exp"
-    ; "--flags"
-    ; "--like-types-all"
-    ; "--error-format raw"
-    ; "--out-extension .like_types.out" ] in
-  let cmd = String.concat " " cmds in
-  let typecheck_like_types =
-    Printf.sprintf "
-
-(alias
-      (name typecheck_like_types)
-      %s
-      %s)" (deps files_tc)
-    (command true cmd) in
-  (* decl_compare *)
+ (* decl_compare *)
   let decl_compare =
     Printf.sprintf "
 
@@ -135,10 +118,9 @@ let () =
     (deps
       (alias typecheck)
       (alias decl_compare)
-      (alias typecheck_legacy_decl)
-      (alias typecheck_like_types)))" in
+      (alias typecheck_legacy_decl)))" in
 
   let dune_file = typecheck ^
-                  typecheck_legacy_decl ^ typecheck_like_types ^ decl_compare ^
+                  typecheck_legacy_decl ^ decl_compare ^
                   run_tests in
   Jbuild_plugin.V1.send dune_file

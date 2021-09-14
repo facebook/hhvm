@@ -739,10 +739,6 @@ pub mod hh {
     pub const CONTAINS_KEY: &str = "\\HH\\Lib\\C\\contains_key";
 }
 
-pub mod rx {
-    pub const IS_ENABLED: &str = "\\HH\\Rx\\IS_ENABLED";
-}
-
 pub mod readonly {
     pub const AS_MUT: &str = "\\HH\\Readonly\\as_mut";
 }

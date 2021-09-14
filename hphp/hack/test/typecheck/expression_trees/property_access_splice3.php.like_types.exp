@@ -1,6 +1,0 @@
-File "property_access_splice3.php", line 12, characters 14-26:
-Typing error (Typing[4110])
-  File "property_access_splice3.php", line 12, characters 14-26:
-  Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree
-  File "property_access_splice3.php", line 18, characters 13-50:
-  But got `dynamic` because it is an unenforceable type

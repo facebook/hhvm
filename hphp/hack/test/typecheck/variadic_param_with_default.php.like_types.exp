@@ -1,2 +1,0 @@
-File "variadic_param_with_default.php", line 9, characters 31-51:
-A variadic parameter `...` must not have a default value. (Parsing[1002])

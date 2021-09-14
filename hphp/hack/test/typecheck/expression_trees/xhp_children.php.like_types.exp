@@ -1,6 +1,0 @@
-File "xhp_children.php", line 35, characters 57-61:
-Typing error (Typing[4110])
-  File "xhp_children.php", line 35, characters 57-61:
-  Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree
-  File "expr_tree.hhi", line 14, characters 6-39:
-  But got `dynamic` because it is an unenforceable type

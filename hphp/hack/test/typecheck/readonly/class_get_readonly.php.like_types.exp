@@ -1,4 +1,0 @@
-File "class_get_readonly.php", line 34, characters 8-10:
-This static property returns a readonly value. It must be explicitly wrapped in a readonly expression. (Typing[4412])
-  File "class_get_readonly.php", line 7, characters 26-29:
-  The static property is defined here.

@@ -1,0 +1,4 @@
+
+Fatal error: Uncaught exception 'InvalidOperationException' with message 'Property bar of class Foo is readonly, and therefore must be a value type to be modified.' in %s:19
+Stack trace:
+%A

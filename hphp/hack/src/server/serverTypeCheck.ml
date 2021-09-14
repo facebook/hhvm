@@ -876,6 +876,7 @@ functor
       to_recheck1: Relative_path.Set.t;
       to_recheck1_deps: Typing_deps.DepSet.t;
       to_redecl_phase2_deps: Typing_deps.DepSet.t;
+      old_decl_missing_count: int;
     }
 
     let do_redecl_phase1
@@ -893,6 +894,7 @@ functor
         changed;
         to_redecl = to_redecl_phase2_deps;
         to_recheck = to_recheck1_deps;
+        old_decl_missing_count;
       } =
         CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"redecl phase 1"
         @@ fun () ->
@@ -905,7 +907,7 @@ functor
           ~defs:fast
       in
       (* Things that were redeclared are no longer in old heap, so we substract
-       * defs_ro_redecl from oldified_defs *)
+       * defs_to_redecl from oldified_defs *)
       let oldified_defs =
         snd @@ Decl_utils.split_defs oldified_defs defs_to_redecl
       in
@@ -916,6 +918,7 @@ functor
         to_recheck1;
         to_recheck1_deps;
         to_redecl_phase2_deps;
+        old_decl_missing_count;
       }
 
     type redecl_phase2_result = {
@@ -927,6 +930,7 @@ functor
             [get_files to_recheck2_deps == to_recheck2] does NOT hold. That's
             because in a lazy check, we might add files open in the IDE *)
       time_errors_pushed: seconds_since_epoch option;
+      old_decl_missing_count: int;
     }
 
     let do_redecl_phase2
@@ -955,6 +959,7 @@ functor
         changed = _;
         to_redecl = _;
         to_recheck = to_recheck2_deps;
+        old_decl_missing_count;
       } =
         CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"redecl phase 2"
         @@ fun () ->
@@ -998,6 +1003,7 @@ functor
         to_recheck2;
         to_recheck2_deps;
         time_errors_pushed;
+        old_decl_missing_count;
       }
 
     (** Merge the results of the two redecl phases. *)
@@ -1325,16 +1331,6 @@ functor
       let time_first_error =
         Option.first_some time_first_error time_errors_pushed
       in
-      let hs = SharedMem.SMTelemetry.heap_size () in
-      let telemetry =
-        telemetry
-        |> Telemetry.duration ~key:"parse_end" ~start_time
-        |> Telemetry.int_ ~key:"parse_end_heap_size" ~value:hs
-        |> Telemetry.int_ ~key:"parse_count" ~value:reparse_count
-      in
-      HackEventLogger.parsing_end_for_typecheck t hs ~parsed_count:reparse_count;
-      let t = Hh_logger.log_duration logstring t in
-      Hh_logger.log "Heap size: %d" hs;
 
       (* DIRECT DECL PARSER *****************)
       (* We should use the direct decl parser results for the naming phase.
@@ -1370,6 +1366,17 @@ functor
         else
           fast_parsed
       in
+
+      let hs = SharedMem.SMTelemetry.heap_size () in
+      let telemetry =
+        telemetry
+        |> Telemetry.duration ~key:"parse_end" ~start_time
+        |> Telemetry.int_ ~key:"parse_end_heap_size" ~value:hs
+        |> Telemetry.int_ ~key:"parse_count" ~value:reparse_count
+      in
+      HackEventLogger.parsing_end_for_typecheck t hs ~parsed_count:reparse_count;
+      let t = Hh_logger.log_duration logstring t in
+      Hh_logger.log "Heap size: %d" hs;
 
       (* UPDATE NAMING TABLES **************************************************)
       let logstring = "Updating deps" in
@@ -1473,9 +1480,17 @@ functor
         to_recheck1;
         to_recheck1_deps;
         to_redecl_phase2_deps;
+        old_decl_missing_count;
       } =
         do_redecl_phase1 genv env ~fast ~naming_table ~oldified_defs ~profiling
       in
+      let telemetry =
+        telemetry
+        |> Telemetry.int_
+             ~key:"phase_1_old_decl_missing_count"
+             ~value:old_decl_missing_count
+      in
+
       let to_redecl_phase2 =
         Typing_deps.Files.get_files to_redecl_phase2_deps
       in
@@ -1574,6 +1589,7 @@ functor
         to_recheck2;
         to_recheck2_deps;
         time_errors_pushed;
+        old_decl_missing_count;
       } =
         if shallow_decl_enabled ctx then
           {
@@ -1582,6 +1598,7 @@ functor
             to_recheck2 = Relative_path.Set.empty;
             to_recheck2_deps = Typing_deps.DepSet.make env.deps_mode;
             time_errors_pushed = None;
+            old_decl_missing_count = 0;
           }
         else
           do_redecl_phase2
@@ -1594,6 +1611,12 @@ functor
             ~oldified_defs
             ~to_redecl_phase2_deps
             ~profiling
+      in
+      let telemetry =
+        telemetry
+        |> Telemetry.int_
+             ~key:"phase_2_old_decl_missing_count"
+             ~value:old_decl_missing_count
       in
       let telemetry =
         Telemetry.duration telemetry ~key:"redecl2_end" ~start_time

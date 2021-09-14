@@ -21,6 +21,8 @@ type redo_type_decl_result = {
       (** The symbols which need to be re-declared, for the second phase of two-phase redecl. *)
   to_recheck: DepSet.t;
       (** The symbols which need to be re-typechecked as a result of the change. *)
+  old_decl_missing_count: int;
+      (** The number of old decls we didn't have when calculating the redecl. *)
 }
 
 (** Oldify any defs in [defs] which aren't already in

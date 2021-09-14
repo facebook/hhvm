@@ -24,6 +24,7 @@ type redo_type_decl_result = {
   changed: DepSet.t;
   to_redecl: DepSet.t;
   to_recheck: DepSet.t;
+  old_decl_missing_count: int;
 }
 
 let lvl = Hh_logger.Level.Debug
@@ -38,7 +39,7 @@ let on_the_fly_neutral = Errors.empty
 
 let compute_deps_neutral mode =
   let empty = DepSet.make mode in
-  (empty, empty, empty)
+  ((empty, empty, empty), 0)
 
 (*****************************************************************************)
 (* This is the place where we are going to put everything necessary for
@@ -73,13 +74,13 @@ let on_the_fly_decl_file ctx errors fn =
 
 let compute_classes_deps ctx old_classes new_classes acc classes =
   let (changed, to_redecl, to_recheck) = acc in
-  let (rc, rdd, rdc) =
+  let ((rc, rdd, rdc), old_classes_missing) =
     Decl_compare.get_classes_deps ~ctx old_classes new_classes classes
   in
   let changed = DepSet.union rc changed in
   let to_redecl = DepSet.union rdd to_redecl in
   let to_recheck = DepSet.union rdc to_recheck in
-  (changed, to_redecl, to_recheck)
+  ((changed, to_redecl, to_recheck), old_classes_missing)
 
 (*****************************************************************************)
 (* Given a set of functions, compare the old and the new type and deduce
@@ -88,11 +89,13 @@ let compute_classes_deps ctx old_classes new_classes acc classes =
 (*****************************************************************************)
 
 let compute_funs_deps ctx old_funs (changed, to_redecl, to_recheck) funs =
-  let (rc, rdd, rdc) = Decl_compare.get_funs_deps ~ctx old_funs funs in
+  let ((rc, rdd, rdc), old_funs_missing) =
+    Decl_compare.get_funs_deps ~ctx old_funs funs
+  in
   let changed = DepSet.union rc changed in
   let to_redecl = DepSet.union rdd to_redecl in
   let to_recheck = DepSet.union rdc to_recheck in
-  (changed, to_redecl, to_recheck)
+  ((changed, to_redecl, to_recheck), old_funs_missing)
 
 (*****************************************************************************)
 (* Given a set of typedefs, compare the old and the new type and deduce
@@ -101,20 +104,22 @@ let compute_funs_deps ctx old_funs (changed, to_redecl, to_recheck) funs =
 (*****************************************************************************)
 
 let compute_types_deps ctx old_types (changed, to_redecl, to_recheck) types =
-  let (rc, rdc) = Decl_compare.get_types_deps ~ctx old_types types in
+  let ((rc, rdc), old_types_missing) =
+    Decl_compare.get_types_deps ~ctx old_types types
+  in
   let changed = DepSet.union rc changed in
   let to_recheck = DepSet.union rdc to_recheck in
-  (changed, to_redecl, to_recheck)
+  ((changed, to_redecl, to_recheck), old_types_missing)
 
 let compute_record_defs_deps ctx old_record_defs acc record_defs =
   let (changed, to_redecl, to_recheck) = acc in
-  let (rc, rdd, rdc) =
+  let ((rc, rdd, rdc), old_record_defs_missing) =
     Decl_compare.get_record_defs_deps ~ctx old_record_defs record_defs
   in
   let changed = DepSet.union rc changed in
   let to_redecl = DepSet.union rdd to_redecl in
   let to_recheck = DepSet.union rdc to_recheck in
-  (changed, to_redecl, to_recheck)
+  ((changed, to_redecl, to_recheck), old_record_defs_missing)
 
 (*****************************************************************************)
 (* Given a set of global constants, compare the old and the new type and
@@ -124,11 +129,13 @@ let compute_record_defs_deps ctx old_record_defs acc record_defs =
 
 let compute_gconsts_deps
     ctx old_gconsts (changed, to_redecl, to_recheck) gconsts =
-  let (rc, rdd, rdc) = Decl_compare.get_gconsts_deps ~ctx old_gconsts gconsts in
+  let ((rc, rdd, rdc), old_gconsts_missing) =
+    Decl_compare.get_gconsts_deps ~ctx old_gconsts gconsts
+  in
   let changed = DepSet.union rc changed in
   let to_redecl = DepSet.union rdd to_redecl in
   let to_recheck = DepSet.union rdc to_recheck in
-  (changed, to_redecl, to_recheck)
+  ((changed, to_redecl, to_recheck), old_gconsts_missing)
 
 (*****************************************************************************)
 (* Redeclares a list of files
@@ -161,23 +168,36 @@ let compute_deps ctx fast (filel : Relative_path.t list) =
   let acc = (empty, empty, empty) in
   (* Fetching everything at once is faster *)
   let old_funs = Decl_heap.Funs.get_old_batch n_funs in
-  let acc = compute_funs_deps ctx old_funs acc n_funs in
+  let (acc, old_funs_missing) = compute_funs_deps ctx old_funs acc n_funs in
   let old_types = Decl_heap.Typedefs.get_old_batch n_types in
-  let acc = compute_types_deps ctx old_types acc n_types in
+  let (acc, old_types_missing) = compute_types_deps ctx old_types acc n_types in
   let old_record_defs = Decl_heap.RecordDefs.get_old_batch n_record_defs in
-  let acc = compute_record_defs_deps ctx old_record_defs acc n_record_defs in
+  let (acc, old_record_defs_missing) =
+    compute_record_defs_deps ctx old_record_defs acc n_record_defs
+  in
   let old_consts = Decl_heap.GConsts.get_old_batch n_consts in
-  let acc = compute_gconsts_deps ctx old_consts acc n_consts in
-  let acc =
+  let (acc, old_gconsts_missing) =
+    compute_gconsts_deps ctx old_consts acc n_consts
+  in
+
+  let (acc, old_classes_missing) =
     if shallow_decl_enabled ctx then
-      acc
+      (acc, 0)
     else
       let old_classes = Decl_heap.Classes.get_old_batch n_classes in
       let new_classes = Decl_heap.Classes.get_batch n_classes in
       compute_classes_deps ctx old_classes new_classes acc n_classes
   in
+
+  let old_decl_missing_count =
+    old_funs_missing
+    + old_types_missing
+    + old_record_defs_missing
+    + old_gconsts_missing
+    + old_classes_missing
+  in
   let (changed, to_redecl, to_recheck) = acc in
-  (changed, to_redecl, to_recheck)
+  ((changed, to_redecl, to_recheck), old_decl_missing_count)
 
 (*****************************************************************************)
 (* Load the environment and then redeclare *)
@@ -191,11 +211,13 @@ let load_and_on_the_fly_decl_files ctx _ filel =
     raise e
 
 let load_and_compute_deps ctx _acc (filel : Relative_path.t list) :
-    DepSet.t * DepSet.t * DepSet.t * int =
+    (DepSet.t * DepSet.t * DepSet.t * int) * int =
   try
     let fast = OnTheFlyStore.load () in
-    let (changed, to_redecl, to_recheck) = compute_deps ctx fast filel in
-    (changed, to_redecl, to_recheck, List.length filel)
+    let ((changed, to_redecl, to_recheck), old_decl_missing_count) =
+      compute_deps ctx fast filel
+    in
+    ((changed, to_redecl, to_recheck, List.length filel), old_decl_missing_count)
   with
   | e ->
     Printf.printf "Error: %s\n" (Exn.to_string e);
@@ -221,8 +243,9 @@ let merge_on_the_fly
 let merge_compute_deps
     files_initial_count
     files_computed_count
-    (changed1, to_redecl1, to_recheck1, computed_count)
-    (changed2, to_redecl2, to_recheck2) =
+    ( (changed1, to_redecl1, to_recheck1, computed_count),
+      old_decl_missing_count1 )
+    ((changed2, to_redecl2, to_recheck2), old_decl_missing_count2) =
   files_computed_count := !files_computed_count + computed_count;
 
   let (changed, to_redecl, to_recheck) =
@@ -238,7 +261,8 @@ let merge_compute_deps
     ~unit:"files"
     ~extra:None;
 
-  (changed, to_redecl, to_recheck)
+  ( (changed, to_redecl, to_recheck),
+    old_decl_missing_count1 + old_decl_missing_count2 )
 
 (*****************************************************************************)
 (* The parallel worker *)
@@ -248,7 +272,8 @@ let parallel_on_the_fly_decl
     (workers : MultiWorker.worker list option)
     (bucket_size : int)
     (fast : FileInfo.names Relative_path.Map.t)
-    (fnl : Relative_path.t list) : Errors.t * DepSet.t * DepSet.t * DepSet.t =
+    (fnl : Relative_path.t list) :
+    (Errors.t * DepSet.t * DepSet.t * DepSet.t) * int =
   try
     OnTheFlyStore.store fast;
     let files_initial_count = List.length fnl in
@@ -278,7 +303,7 @@ let parallel_on_the_fly_decl
       ~total_count:files_initial_count
       ~unit:"files"
       ~extra:None;
-    let (changed, to_redecl, to_recheck) =
+    let ((changed, to_redecl, to_recheck), old_decl_missing_count) =
       MultiWorker.call
         workers
         ~job:(load_and_compute_deps ctx)
@@ -290,7 +315,7 @@ let parallel_on_the_fly_decl
       Hh_logger.log_duration ~lvl "Finished computing dependencies" t
     in
     OnTheFlyStore.clear ();
-    (errors, changed, to_redecl, to_recheck)
+    ((errors, changed, to_redecl, to_recheck), old_decl_missing_count)
   with
   | e ->
     if SharedMem.SMTelemetry.is_heap_overflow () then
@@ -556,11 +581,13 @@ let redo_type_decl
   let all_elems = SMap.union current_elems oldified_elems in
   let fnl = Relative_path.Map.keys defs in
   (* If there aren't enough files, let's do this ourselves ... it's faster! *)
-  let (errors, changed, to_redecl, to_recheck) =
+  let ((errors, changed, to_redecl, to_recheck), old_decl_missing_count) =
     if List.length fnl < 10 then
       let ((_declared : int), errors) = on_the_fly_decl_files ctx fnl in
-      let (changed, to_redecl, to_recheck) = compute_deps ctx defs fnl in
-      (errors, changed, to_redecl, to_recheck)
+      let ((changed, to_redecl, to_recheck), old_decl_missing_count) =
+        compute_deps ctx defs fnl
+      in
+      ((errors, changed, to_redecl, to_recheck), old_decl_missing_count)
     else
       parallel_on_the_fly_decl ctx workers bucket_size defs fnl
   in
@@ -592,7 +619,7 @@ let redo_type_decl
   Hh_logger.log "  to_redecl: %d" (DepSet.cardinal to_redecl);
   Hh_logger.log "  to_recheck: %d" (DepSet.cardinal to_recheck);
 
-  { errors; changed; to_redecl; to_recheck }
+  { errors; changed; to_redecl; to_recheck; old_decl_missing_count }
 
 let oldify_type_decl
     (ctx : Provider_context.t)

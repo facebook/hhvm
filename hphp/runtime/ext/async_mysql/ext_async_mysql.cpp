@@ -418,6 +418,16 @@ void HHVM_STATIC_METHOD(
   getClient()->setPoolsConnectionLimit(limit);
 }
 
+static AsyncMysqlConnection::AttributeMap transformAttributes(
+    const Array& attributes) {
+  AsyncMysqlConnection::AttributeMap cppAttributes;
+  IterateKV(attributes.get(), [&](TypedValue k, TypedValue v) {
+    cppAttributes[tvCastToString(k).toCppString()] =
+        tvCastToString(v).toCppString();
+  });
+  return cppAttributes;
+}
+
 static Object newAsyncMysqlConnectEvent(
     std::shared_ptr<am::ConnectOperation> op,
     std::shared_ptr<am::AsyncMysqlClient> clientPtr) {
@@ -434,6 +444,77 @@ static Object newAsyncMysqlConnectEvent(
     return Object{event->getWaitHandle()};
   } catch (...) {
     assertx(false);
+    event->abandon();
+    return Object{};
+  }
+}
+
+static Object newAsyncMysqlConnectAndQueryEvent(
+    std::shared_ptr<am::ConnectOperation> connectOp,
+    std::shared_ptr<am::AsyncMysqlClient> clientPtr,
+    const Variant& queries,
+    const Array& queryAttributes,
+    bool connReusable) {
+
+  auto event = new AsyncMysqlConnectAndMultiQueryEvent(connectOp);
+  auto queries_as_array = queries.isArray()
+    ? queries.asCArrRef()
+    // In this codepath, queries must be a Hack collection
+    : collections::toArray(queries.getObjectData());
+  auto transformedQueries = transformQueries(queries_as_array);
+  auto transformedAttributes = transformAttributes(queryAttributes);
+  try {
+    connectOp->setCallback(
+            [clientPtr,
+            connReusable,
+            event,
+            transformedQueries,
+            transformedAttributes]
+        (am::ConnectOperation& op) mutable {
+
+        if (!op.ok()) {
+          // early exit must collect stats
+          event->setClientStats(clientPtr->collectPerfStats());
+          event->opFinished();
+          return;
+        }
+
+        auto query_op = am::Connection::beginMultiQuery(
+          op.releaseConnection(), std::move(transformedQueries));
+        query_op->setAttributes(transformedAttributes);
+        event->setQueryOp(query_op);
+
+        try {
+          am::MultiQueryAppenderCallback appender_callback = [event, clientPtr, connReusable](
+            am::MultiQueryOperation& op,
+            std::vector<am::QueryResult> query_results,
+            am::QueryCallbackReason reason) {
+            DCHECK(reason != am::QueryCallbackReason::RowsFetched);
+            DCHECK(reason != am::QueryCallbackReason::QueryBoundary);
+            if (!op.done()) {
+              Logger::Error("Invalid state! Callback called as finished "
+                            "but operation didn't finish");
+            }
+            op.setQueryResults(std::move(query_results));
+            event->setClientStats(clientPtr->collectPerfStats());
+            if (connReusable) {
+              auto conn = op.releaseConnection();
+              conn->setReusable(true);
+            }
+            event->opFinished();
+          };
+          query_op->setCallback(am::resultAppender(appender_callback));
+          query_op->run();
+        } catch (...) {
+          Logger::Error("Unexpected exception while executing Query");
+          event->abandon();
+        }
+
+    });
+    connectOp->run();
+    return Object{event->getWaitHandle()};
+  } catch (...) {
+    Logger::Error("Unexpected exception while creating Connection");
     event->abandon();
     return Object{};
   }
@@ -506,16 +587,6 @@ Object HHVM_STATIC_METHOD(
   return newAsyncMysqlConnectEvent(std::move(op), getClient());
 }
 
-static AsyncMysqlConnection::AttributeMap transformAttributes(
-    const Array& attributes) {
-  AsyncMysqlConnection::AttributeMap cppAttributes;
-  IterateKV(attributes.get(), [&](TypedValue k, TypedValue v) {
-    cppAttributes[tvCastToString(k).toCppString()] =
-        tvCastToString(v).toCppString();
-  });
-  return cppAttributes;
-}
-
 Object HHVM_STATIC_METHOD(
     AsyncMysqlClient,
     connectAndQuery,
@@ -527,16 +598,13 @@ Object HHVM_STATIC_METHOD(
     const String& password,
     const Object& asyncMysqlConnOpts,
     const Array& queryAttributes) {
+
   if (UNLIKELY(!isContainer(queries))) {
     raise_warning("AsyncMysqlClient::connectAndQuery() expects parameter 1 to "
                   "be array, %s given",
                   getDataTypeString(queries.getType()).c_str());
     return Object{};
   }
-  auto queries_as_array = queries.isArray()
-    ? queries.asCArrRef()
-    // In this codepath, queries must be a Hack collection
-    : collections::toArray(queries.getObjectData());
   am::ConnectionKey key(
       static_cast<std::string>(host),
       port,
@@ -548,59 +616,14 @@ Object HHVM_STATIC_METHOD(
   auto* obj = getConnectionOptions(asyncMysqlConnOpts);
   const auto& connOpts = obj->getConnectionOptions();
   connectOp->setConnectionOptions(connOpts);
-  auto event = new AsyncMysqlConnectAndMultiQueryEvent(connectOp);
-  auto transformedQueries = transformQueries(queries_as_array);
-  auto transformedAttributes = transformAttributes(queryAttributes);
-  try {
-    connectOp->setCallback(
-            [clientPtr,
-            event,
-            transformedQueries,
-            transformedAttributes]
-        (am::ConnectOperation& op) mutable {
 
-        if (!op.ok()) {
-          // early exit must collect stats
-          event->setClientStats(clientPtr->collectPerfStats());
-          event->opFinished();
-          return;
-        }
+  return newAsyncMysqlConnectAndQueryEvent(
+    std::move(connectOp),
+    clientPtr,
+    queries,
+    queryAttributes,
+    false /* connReusable*/);
 
-        auto query_op = am::Connection::beginMultiQuery(
-          op.releaseConnection(), std::move(transformedQueries));
-        query_op->setAttributes(transformedAttributes);
-        event->setQueryOp(query_op);
-
-        try {
-          am::MultiQueryAppenderCallback appender_callback = [event, clientPtr](
-            am::MultiQueryOperation& op,
-            std::vector<am::QueryResult> query_results,
-            am::QueryCallbackReason reason) {
-            DCHECK(reason != am::QueryCallbackReason::RowsFetched);
-            DCHECK(reason != am::QueryCallbackReason::QueryBoundary);
-            if (!op.done()) {
-              Logger::Error("Invalid state! Callback called as finished "
-                            "but operation didn't finish");
-            }
-            op.setQueryResults(std::move(query_results));
-            event->setClientStats(clientPtr->collectPerfStats());
-            event->opFinished();
-          };
-          query_op->setCallback(am::resultAppender(appender_callback));
-          query_op->run();
-        } catch (...) {
-          Logger::Error("Unexpected exception while executing Query");
-          event->abandon();
-        }
-
-    });
-    connectOp->run();
-    return Object{event->getWaitHandle()};
-  } catch (...) {
-    Logger::Error("Unexpected exception while creating Connection");
-    event->abandon();
-    return Object{};
-  }
 }
 
 Object HHVM_STATIC_METHOD(
@@ -773,6 +796,45 @@ static Object HHVM_METHOD(
 
   return newAsyncMysqlConnectEvent(
       std::move(op), data->m_async_pool->getMysqlClient());
+}
+
+static Object HHVM_METHOD(
+    AsyncMysqlConnectionPool,
+    connectAndQuery,
+    const Variant& queries,
+    const String& host,
+    int port,
+    const String& dbname,
+    const String& user,
+    const String& password,
+    const Object& asyncMysqlConnOpts,
+    const String& extra_key,
+    const Array& queryAttributes) {
+  if (UNLIKELY(!isContainer(queries))) {
+    raise_warning("AsyncMysqlConnectionPool::connectAndQuery() expects parameter 1 to "
+                  "be array, %s given",
+                  getDataTypeString(queries.getType()).c_str());
+    return Object{};
+  }
+  auto* data = Native::data<AsyncMysqlConnectionPool>(this_);
+
+  auto connectOp = data->m_async_pool->beginConnection(
+      static_cast<std::string>(host),
+      port,
+      static_cast<std::string>(dbname),
+      static_cast<std::string>(user),
+      static_cast<std::string>(password),
+      static_cast<std::string>(extra_key));
+
+  auto* obj = getConnectionOptions(asyncMysqlConnOpts);
+  const auto& connOpts = obj->getConnectionOptions();
+  connectOp->setConnectionOptions(connOpts);
+  return newAsyncMysqlConnectAndQueryEvent(
+    std::move(connectOp),
+    data->m_async_pool->getMysqlClient(),
+    queries,
+    queryAttributes,
+    true /* connReusable*/);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1904,7 +1966,7 @@ static struct AsyncMysqlExtension final : Extension {
   // bump the version number and use a version guard in www:
   //   $ext = new ReflectionExtension("async_mysql");
   //   $version = (float) $ext->getVersion();
-  AsyncMysqlExtension() : Extension("async_mysql", "4.0") {}
+  AsyncMysqlExtension() : Extension("async_mysql", "5.0") {}
   void moduleInit() override {
     // expose the mysql flags
     HHVM_RC_INT_SAME(NOT_NULL_FLAG);
@@ -1956,6 +2018,7 @@ static struct AsyncMysqlExtension final : Extension {
     HHVM_ME(AsyncMysqlConnectionPool, getPoolStats);
     HHVM_ME(AsyncMysqlConnectionPool, connect);
     HHVM_ME(AsyncMysqlConnectionPool, connectWithOpts);
+    HHVM_ME(AsyncMysqlConnectionPool, connectAndQuery);
     Native::registerNativeDataInfo<AsyncMysqlConnectionPool>(
         AsyncMysqlConnectionPool::s_className.get(), Native::NDIFlags::NO_COPY);
 

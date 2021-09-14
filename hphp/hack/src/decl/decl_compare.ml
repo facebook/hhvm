@@ -328,7 +328,8 @@ let get_extend_deps mode cid_hash to_redecl =
  * the old and the new type signature of "fid" (function identifier).
  *)
 (*****************************************************************************)
-let get_fun_deps ~mode old_funs fid (changed, to_redecl, to_recheck) =
+let get_fun_deps
+    ~mode old_funs fid ((changed, to_redecl, to_recheck), old_funs_missing) =
   match (SMap.find fid old_funs, Decl_heap.Funs.get fid) with
   (* Note that we must include all dependencies even if we get the None, None
    * case. Due to the fact we can declare types lazily, there may be no
@@ -341,64 +342,71 @@ let get_fun_deps ~mode old_funs fid (changed, to_redecl, to_recheck) =
     let dep = Dep.Fun fid in
     let where_fun_is_used = Typing_deps.get_ideps mode dep in
     let to_recheck = DepSet.union where_fun_is_used to_recheck in
-    (add_changed mode changed dep, to_redecl, to_recheck)
+    ((add_changed mode changed dep, to_redecl, to_recheck), old_funs_missing + 1)
   | (Some fe1, Some fe2) ->
     let fe1 = Decl_pos_utils.NormalizeSig.fun_elt fe1 in
     let fe2 = Decl_pos_utils.NormalizeSig.fun_elt fe2 in
     if Poly.( = ) fe1 fe2 then
-      (changed, to_redecl, to_recheck)
+      ((changed, to_redecl, to_recheck), old_funs_missing)
     else
       let dep = Dep.Fun fid in
       let where_fun_is_used = Typing_deps.get_ideps mode dep in
-      ( add_changed mode changed dep,
-        to_redecl,
-        DepSet.union where_fun_is_used to_recheck )
+      ( ( add_changed mode changed dep,
+          to_redecl,
+          DepSet.union where_fun_is_used to_recheck ),
+        old_funs_missing )
 
 let get_funs_deps ~ctx old_funs funs =
   let mode = Provider_context.get_deps_mode ctx in
   SSet.fold
     (get_fun_deps ~mode old_funs)
     funs
-    (DepSet.make mode, DepSet.make mode, DepSet.make mode)
+    ((DepSet.make mode, DepSet.make mode, DepSet.make mode), 0)
 
 (*****************************************************************************)
 (* Determine which functions/classes have to be rechecked after comparing
  * the old and the new typedef
  *)
 (*****************************************************************************)
-let get_type_deps ~mode old_types tid (changed, to_recheck) =
+let get_type_deps ~mode old_types tid ((changed, to_recheck), old_types_missing)
+    =
   match (SMap.find tid old_types, Decl_heap.Typedefs.get tid) with
   | (None, _)
   | (_, None) ->
     let dep = Dep.Type tid in
     let where_typedef_was_used = Typing_deps.get_ideps mode dep in
-    ( add_changed mode changed dep,
-      DepSet.union where_typedef_was_used to_recheck )
+    ( ( add_changed mode changed dep,
+        DepSet.union where_typedef_was_used to_recheck ),
+      old_types_missing + 1 )
   | (Some tdef1, Some tdef2) ->
     let tdef1 = Decl_pos_utils.NormalizeSig.typedef tdef1 in
     let tdef2 = Decl_pos_utils.NormalizeSig.typedef tdef2 in
     let is_same_signature = Poly.( = ) tdef1 tdef2 in
     if is_same_signature then
-      (changed, to_recheck)
+      ((changed, to_recheck), old_types_missing)
     else
       let dep = Dep.Type tid in
       let where_type_is_used = Typing_deps.get_ideps mode dep in
       let to_recheck = DepSet.union where_type_is_used to_recheck in
-      (add_changed mode changed dep, to_recheck)
+      ((add_changed mode changed dep, to_recheck), old_types_missing)
 
 let get_types_deps ~ctx old_types types =
   let mode = Provider_context.get_deps_mode ctx in
   SSet.fold
     (get_type_deps ~mode old_types)
     types
-    (DepSet.make mode, DepSet.make mode)
+    ((DepSet.make mode, DepSet.make mode), 0)
 
 (*****************************************************************************)
 (* Determine which top level definitions have to be rechecked if the constant
  * changed.
  *)
 (*****************************************************************************)
-let get_gconst_deps ~mode old_gconsts cst_id (changed, to_redecl, to_recheck) =
+let get_gconst_deps
+    ~mode
+    old_gconsts
+    cst_id
+    ((changed, to_redecl, to_recheck), old_gconsts_missing) =
   let cst1 = SMap.find cst_id old_gconsts in
   let cst2 = Decl_heap.GConsts.get cst_id in
   match (cst1, cst2) with
@@ -408,23 +416,27 @@ let get_gconst_deps ~mode old_gconsts cst_id (changed, to_redecl, to_recheck) =
     let where_const_is_used = Typing_deps.get_ideps mode dep in
     let to_recheck = DepSet.union where_const_is_used to_recheck in
     let const_name = Typing_deps.get_ideps mode (Dep.GConstName cst_id) in
-    (add_changed mode changed dep, to_redecl, DepSet.union const_name to_recheck)
+    ( ( add_changed mode changed dep,
+        to_redecl,
+        DepSet.union const_name to_recheck ),
+      old_gconsts_missing + 1 )
   | (Some cst1, Some cst2) ->
     let is_same_signature = Poly.( = ) cst1 cst2 in
     if is_same_signature then
-      (changed, to_redecl, to_recheck)
+      ((changed, to_redecl, to_recheck), old_gconsts_missing)
     else
       let dep = Dep.GConst cst_id in
       let where_type_is_used = Typing_deps.get_ideps mode dep in
       let to_recheck = DepSet.union where_type_is_used to_recheck in
-      (add_changed mode changed dep, to_redecl, to_recheck)
+      ( (add_changed mode changed dep, to_redecl, to_recheck),
+        old_gconsts_missing )
 
 let get_gconsts_deps ~ctx old_gconsts gconsts =
   let mode = Provider_context.get_deps_mode ctx in
   SSet.fold
     (get_gconst_deps ~mode old_gconsts)
     gconsts
-    (DepSet.make mode, DepSet.make mode, DepSet.make mode)
+    ((DepSet.make mode, DepSet.make mode, DepSet.make mode), 0)
 
 let shallow_decl_enabled (ctx : Provider_context.t) : bool =
   TypecheckerOptions.shallow_class_decl (Provider_context.get_tcopt ctx)
@@ -435,16 +447,24 @@ let shallow_decl_enabled (ctx : Provider_context.t) : bool =
  *)
 (*****************************************************************************)
 let get_class_deps
-    ctx old_classes new_classes trace cid (changed, to_redecl, to_recheck) =
+    ctx
+    old_classes
+    new_classes
+    trace
+    cid
+    ((changed, to_redecl, to_recheck), old_classes_missing) =
   let mode = Provider_context.get_deps_mode ctx in
   match (SMap.find cid old_classes, SMap.find cid new_classes) with
   | _ when shallow_decl_enabled ctx ->
-    get_all_dependencies ~mode trace cid (changed, to_redecl, to_recheck)
+    ( get_all_dependencies ~mode trace cid (changed, to_redecl, to_recheck),
+      old_classes_missing )
   | (None, _)
   | (_, None) ->
-    get_all_dependencies ~mode trace cid (changed, to_redecl, to_recheck)
+    ( get_all_dependencies ~mode trace cid (changed, to_redecl, to_recheck),
+      old_classes_missing + 1 )
   | (Some class1, Some class2) when class_big_diff class1 class2 ->
-    get_all_dependencies ~mode trace cid (changed, to_redecl, to_recheck)
+    ( get_all_dependencies ~mode trace cid (changed, to_redecl, to_recheck),
+      old_classes_missing + 1 )
   | (Some class1, Some class2) ->
     let nclass1 = Decl_pos_utils.NormalizeSig.class_type class1 in
     let nclass2 = Decl_pos_utils.NormalizeSig.class_type class2 in
@@ -517,14 +537,14 @@ let get_class_deps
       else
         to_recheck
     in
-    (changed, to_redecl, DepSet.union deps to_recheck)
+    ((changed, to_redecl, DepSet.union deps to_recheck), old_classes_missing)
 
 let get_classes_deps ~ctx old_classes new_classes classes =
   let mode = Provider_context.get_deps_mode ctx in
   SSet.fold
     (get_class_deps ctx old_classes new_classes (VisitedSet.make mode))
     classes
-    (DepSet.make mode, DepSet.make mode, DepSet.make mode)
+    ((DepSet.make mode, DepSet.make mode, DepSet.make mode), 0)
 
 (*****************************************************************************)
 (* Determine which top level definitions have to be rechecked if the record
@@ -532,26 +552,31 @@ let get_classes_deps ~ctx old_classes new_classes classes =
  *)
 (*****************************************************************************)
 let get_record_def_deps
-    ~mode old_record_defs rdid (changed, to_redecl, to_recheck) =
+    ~mode
+    old_record_defs
+    rdid
+    ((changed, to_redecl, to_recheck), old_record_defs_missing) =
   match (SMap.find rdid old_record_defs, Decl_heap.RecordDefs.get rdid) with
   | (None, _)
   | (_, None) ->
     let dep = Dep.Type rdid in
     let where_record_is_used = Typing_deps.get_ideps mode dep in
     let to_recheck = DepSet.union where_record_is_used to_recheck in
-    (add_changed mode changed dep, to_redecl, to_recheck)
+    ( (add_changed mode changed dep, to_redecl, to_recheck),
+      old_record_defs_missing + 1 )
   | (Some rd1, Some rd2) ->
     if Poly.( = ) rd1 rd2 then
-      (changed, to_redecl, to_recheck)
+      ((changed, to_redecl, to_recheck), old_record_defs_missing)
     else
       let dep = Dep.Type rdid in
       let where_record_is_used = Typing_deps.get_ideps mode dep in
       let to_recheck = DepSet.union where_record_is_used to_recheck in
-      (add_changed mode changed dep, to_redecl, to_recheck)
+      ( (add_changed mode changed dep, to_redecl, to_recheck),
+        old_record_defs_missing )
 
 let get_record_defs_deps ~ctx old_record_defs record_defs =
   let mode = Provider_context.get_deps_mode ctx in
   SSet.fold
     (get_record_def_deps ~mode old_record_defs)
     record_defs
-    (DepSet.make mode, DepSet.make mode, DepSet.make mode)
+    ((DepSet.make mode, DepSet.make mode, DepSet.make mode), 0)

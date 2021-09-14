@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ffi::{Pair, Slice, Str, Triple};
+use hhbc_by_ref_hhbc_string_utils as string_utils;
 use hhbc_by_ref_hhbc_string_utils::strip_ns;
 use naming_special_names_rust::{self as sn, coeffects as c};
 use oxidized::{
@@ -356,6 +357,7 @@ impl<'arena> HhasCoeffects<'arena> {
     pub fn with_caller(&self, alloc: &'arena bumpalo::Bump) -> Self {
         Self {
             static_coeffects: Slice::from_vec(alloc, vec![Ctx::Pure]),
+            unenforced_static_coeffects: Slice::empty(),
             caller: true,
             ..self.clone()
         }
@@ -410,26 +412,14 @@ impl<'arena> HhasCoeffects<'arena> {
     pub fn is_closure_parent_scope(&self) -> bool {
         self.closure_parent_scope
     }
-}
 
-pub fn halves_of_is_enabled_body<Ex, En>(
-    body: &a::FuncBody<Ex, En>,
-) -> Option<(&a::Block<Ex, En>, &a::Block<Ex, En>)> {
-    use a::*;
-    if let [Stmt(_, Stmt_::If(if_))] = body.fb_ast.as_slice() {
-        if let (Expr(_, _, Expr_::Id(sid)), enabled, disabled) = &**if_ {
-            let Id(_, name) = &**sid;
-            return if name != sn::rx::IS_ENABLED {
-                None
-            } else {
-                match disabled.as_slice() {
-                    [] | [Stmt(_, Stmt_::Noop)] => None,
-                    _ => Some((enabled, disabled)),
-                }
-            };
-        }
+    pub fn is_86caller(&self) -> bool {
+        !self.has_coeffect_rules()
+            && self.static_coeffects.len() == 0
+            && self.unenforced_static_coeffects.len() == 1
+            && self.unenforced_static_coeffects.as_ref()[0]
+                == string_utils::coeffects::CALLER.into()
     }
-    None
 }
 
 #[allow(clippy::needless_lifetimes)]

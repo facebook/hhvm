@@ -106,11 +106,9 @@ impl CNativeEnv {
     ///   containing valid UTF-8, or arrays of same
     #[cfg(unix)]
     pub unsafe fn to_compile_env<'a>(
-        env: *const CNativeEnv,
+        env: &CNativeEnv,
     ) -> Option<hhbc_by_ref_compile::NativeEnv<&'a str>> {
         use std::os::unix::ffi::OsStrExt;
-
-        let env = env.as_ref()?;
 
         Some(hhbc_by_ref_compile::NativeEnv {
             filepath: RelativePath::make(
@@ -180,7 +178,7 @@ unsafe extern "C" fn hackc_compile_from_text_cpp_ffi(
                 // legitmately reinterpreted as a `*const CEnv` and that
                 // on doing so, it points to a valid properly initialized
                 // value.
-                let cnative_env = env as *const CNativeEnv;
+                let cnative_env = (env as *const CNativeEnv).as_ref().unwrap();
                 let native_env: hhbc_by_ref_compile::NativeEnv<&str> =
                     CNativeEnv::to_compile_env(cnative_env).unwrap();
                 let env = hhbc_by_ref_compile::Env::<&str> {
@@ -237,7 +235,8 @@ unsafe extern "C" fn hackc_compile_from_text_cpp_ffi(
                 // legitmately reinterpreted as a `*const CEnv` and that
                 // on doing so, it points to a valid properly initialized
                 // value.
-                let env = CNativeEnv::to_compile_env(env as *const CNativeEnv).unwrap();
+                let env = CNativeEnv::to_compile_env((env as *const CNativeEnv).as_ref().unwrap())
+                    .unwrap();
                 eprintln!(
                     "[hrust] warning: hackc_compile_from_text_ffi exceeded stack of {} KiB on: {}",
                     (stack_size_tried - stack_slack(stack_size_tried)) / KI,
@@ -312,90 +311,134 @@ unsafe extern "C" fn hackc_compile_hhas_free_arena(arena: *mut bumpalo::Bump) {
     let _ = Box::from_raw(arena);
 }
 
+mod unsafe_utils {
+    // Raw pointers are not in `Send` (so, e.g. neither are
+    // `HhasProgram`s). Bumpalo allocators are not `UnwindSafe`
+    // or`RefUnwindSafe`. We use this device to work around these
+    // things so that we may use elastic stack.
+    #[derive(Debug, Clone, Copy)]
+    pub struct AssertSafe<T>(pub T);
+
+    unsafe impl<T> Send for AssertSafe<T> {}
+    impl<T> std::panic::UnwindSafe for AssertSafe<T> {}
+    impl<T> std::panic::RefUnwindSafe for AssertSafe<T> {}
+
+    #[inline]
+    pub fn assert_safe<T>(t: T) -> AssertSafe<T> {
+        AssertSafe(t)
+    }
+}
+
 // Compile to HHAS from source text.
 #[no_mangle]
-unsafe extern "C" fn hackc_compile_hhas_from_text_cpp_ffi<'arena>(
+unsafe extern "C" fn hackc_compile_hhas_from_text_cpp_ffi(
     alloc: *const bumpalo::Bump,
-    env: usize,
+    cnative_env: *const CNativeEnv,
     source_text: *const c_char,
-    output_cfg: usize,
-    err_buf: usize,
-) -> *const HhasProgram<'arena> {
+    err_buf: *const CErrBuf,
+) -> *const HhasProgram<'static> {
     match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-        // Safety: We rely on the C caller that `env` can be legitmately
-        // reinterpreted as a `*const CErrBuf` and that on doing so, it is
-        // non-null is well aligned and points to a valid properly
-        // initialized value.
-        let err_buf: &CErrBuf = (err_buf as *const CErrBuf).as_ref().unwrap();
-        let buf_len: c_int = err_buf.buf_len;
-        // Safety : We rely on the C caller that `err_buf.buf` be valid for
-        // reads and write for `buf_len * mem::sizeof::<u8>()` bytes.
-        let buf: &mut [u8] =
-            std::slice::from_raw_parts_mut(err_buf.buf as *mut u8, buf_len as usize);
+        // Safety: `alloc` came via `hackc_compile_hhas_create_arena`.
+        let alloc: unsafe_utils::AssertSafe<&'static bumpalo::Bump> =
+            unsafe_utils::assert_safe(alloc.as_ref().unwrap());
+        // Safety: `cnative_env`is a well aligned, properly initialized
+        // `*const CNativeEnv`.
+        let cnative_env: unsafe_utils::AssertSafe<&'static CNativeEnv> =
+            unsafe_utils::assert_safe(cnative_env.as_ref().unwrap());
+        // Safety: `err_buf` is a well aligned, properly initialized
+        // `*const CErrBuf`.
+        let err_buf: &'static CErrBuf = err_buf.as_ref().unwrap();
+        // Safety : `err_buf.buf` must be valid for reads and writes
+        // for `err_buf.buf_len * mem::sizeof::<u8>()` bytes.
+        let buf: &'static mut [u8] =
+            std::slice::from_raw_parts_mut(err_buf.buf as *mut u8, err_buf.buf_len as usize);
+        // Safety: `source_text` is a properly iniitalized
+        // nul-terminated C string.
+        let text: &'static [u8] = std::ffi::CStr::from_ptr(source_text).to_bytes();
 
-        // Safety: We rely on the C caller that `output_cfg` can be
-        // legitmately reinterpreted as a `*const COutputConfig` and that
-        // on doing so, it points to a valid properly initialized value.
-        let _output_config: Option<RustOutputConfig> =
-            RustOutputConfig::from_c_output_config(output_cfg as *const COutputConfig);
-        // Safety: We rely on the C caller that `source_text` be a
-        // properly iniitalized null-terminated C string.
-        let text: &[u8] = std::ffi::CStr::from_ptr(source_text).to_bytes();
+        let job_builder = || {
+            let job = move |stack_limit: &StackLimit, _nomain_stack_size: Option<usize>| -> Result<unsafe_utils::AssertSafe<*const HhasProgram<'static>>, anyhow::Error>{
+                let alloc = alloc.0;
+                let cnative_env = cnative_env.0;
+                let native_env = CNativeEnv::to_compile_env(cnative_env).unwrap();
+                let env = hhbc_by_ref_compile::Env::<&str> {
+                    filepath: native_env.filepath.clone(),
+                    config_jsons: vec![],
+                    config_list: vec![],
+                    flags: native_env.flags,
+                };
+                let source_text = SourceText::make(RcOc::new(env.filepath.clone()), text);
+                let compile_result = if native_env
+                    .flags
+                    .contains(hhbc_by_ref_compile::EnvFlags::ENABLE_DECL)
+                {
+                    hhbc_by_ref_compile::hhas_from_text(
+                        alloc,
+                        &env,
+                        &stack_limit,
+                        source_text,
+                        Some(&native_env),
+                        ExternalDeclProvider(
+                            cnative_env.decl_getter,
+                            cnative_env.decl_provider,
+                            std::marker::PhantomData,
+                        ),
+                    )
+                } else {
+                    hhbc_by_ref_compile::hhas_from_text(
+                        alloc,
+                        &env,
+                        &stack_limit,
+                        source_text,
+                        Some(&native_env),
+                        NoDeclProvider,
+                    )
+                };
+                match compile_result {
+                    Ok(hhas_prog) => {
+                        Ok(unsafe_utils::assert_safe(Box::into_raw(Box::new(hhas_prog))))
+                    },
+                    Err(e) => Err(anyhow!("{}", e)),
+                }
+            };
+            job
+        };
 
-        // TODO(milliechen): Use .with_elastic_stack like in hackc_compile_from_text_cpp_ffi
-        let stack_size = 2 * MI;
         // Assume peak is 2.5x of stack. This is initial estimation, need
         // to be improved later.
         let stack_slack = |stack_size| stack_size * 6 / 10;
-        let relative_stack_size = stack_size - stack_slack(stack_size);
-        if relative_stack_size >= stack_size {
-            // check for underflow (i.e., if stack_slack > stack_size)
-            panic!("bad compute_stack_slack (must return < stack_size)");
-        }
-        let stack_limit = stack_limit::StackLimit::relative(relative_stack_size);
+        let on_retry = &mut |stack_size_tried: usize| {
+            // Not always printing warning here because this would fail
+            // some HHVM tests.
+            if std::env::var_os("HH_TEST_MODE").is_some() {
+                // Safety : We rely on the C caller that `env` can be
+                // legitmately reinterpreted as a `*const CEnv` and that
+                // on doing so, it points to a valid properly initialized
+                // value.
+                let unsafe_utils::AssertSafe(cnative_env) = cnative_env;
+                let env = CNativeEnv::to_compile_env(cnative_env).unwrap();
+                eprintln!(
+                    "[hrust] warning: hackc_compile_hhas_from_text_ffi exceeded stack of {} KiB on: {}",
+                    (stack_size_tried - stack_slack(stack_size_tried)) / KI,
+                    env.filepath.path_str(),
+                );
+            }
+        };
+        let job = stack_limit::retry::Job {
+            nonmain_stack_min: 13 * MI,
+            // TODO(hrust) aast_parser_ffi only requies 1 * GI, it's like
+            // rust compiler produce inconsistent binary.
+            nonmain_stack_max: Some(7 * GI),
+            ..Default::default()
+        };
 
-        // Safety: We rely on the C caller that `env` can be
-        // legitmately reinterpreted as a `*const CEnv` and that
-        // on doing so, it points to a valid properly initialized
-        // value.
-        let cnative_env = env as *const CNativeEnv;
-        let native_env: hhbc_by_ref_compile::NativeEnv<&str> =
-            CNativeEnv::to_compile_env(cnative_env).unwrap();
-        let env = hhbc_by_ref_compile::Env::<&str> {
-            filepath: native_env.filepath.clone(),
-            config_jsons: vec![],
-            config_list: vec![],
-            flags: native_env.flags,
-        };
-        let source_text = SourceText::make(RcOc::new(env.filepath.clone()), text);
-        let compile_result = if native_env
-            .flags
-            .contains(hhbc_by_ref_compile::EnvFlags::ENABLE_DECL)
+        match job
+            .with_elastic_stack(job_builder, on_retry, stack_slack)
+            .map_err(|e| format!("{}", e))
+            .expect("hackc_compile_hhas_from_text_cpp_ffi: retry failed")
+            .map_err(|e| e.to_string())
         {
-            hhbc_by_ref_compile::hhas_from_text(
-                &(*alloc),
-                &env,
-                &stack_limit,
-                source_text,
-                Some(&native_env),
-                ExternalDeclProvider(
-                    (*cnative_env).decl_getter,
-                    (*cnative_env).decl_provider,
-                    std::marker::PhantomData,
-                ),
-            )
-        } else {
-            hhbc_by_ref_compile::hhas_from_text(
-                &(*alloc),
-                &env,
-                &stack_limit,
-                source_text,
-                Some(&native_env),
-                NoDeclProvider,
-            )
-        };
-        match compile_result.map_err(|e| e.to_string()) {
-            Ok(p) => Box::into_raw(Box::new(p)),
+            Ok(unsafe_utils::AssertSafe(hhas_prog)) => hhas_prog,
             Err(e) => {
                 if e.len() >= buf.len() {
                     warn!("Provided error buffer too small.");
@@ -427,7 +470,7 @@ unsafe extern "C" fn hackc_compile_hhas_from_text_cpp_ffi<'arena>(
         Ok(hhas_prog) => hhas_prog,
         Err(_) => {
             if std::env::var_os("HH_TEST_MODE").is_some() {
-                eprintln!("Error: panic in ffi function hackc_compile_hhas_from_text_cpp_ffi");
+                eprintln!("hackc_compile_hhas_from_text_cpp_ffi: panic!");
             }
             std::ptr::null()
         }

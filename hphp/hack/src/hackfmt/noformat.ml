@@ -26,6 +26,8 @@ let begin_manual_section_regexp =
 
 let end_manual_section_tag = "/* END MANUAL SECTION */"
 
+let lint_ignore_tag = "@" ^ "lint-ignore"
+
 let is_generated_file text = String.is_substring text ~substring:generated_tag
 
 let is_partially_generated_file text =
@@ -40,6 +42,8 @@ let is_begin_manual_section_tag text =
 
 let is_end_manual_section_tag text = String.equal text end_manual_section_tag
 
+let is_lint_ignore text = String.is_substring text ~substring:lint_ignore_tag
+
 let add_fixme_ranges fixmes trivia =
   let trivium_range trivium =
     (Trivia.start_offset trivium, Trivia.end_offset trivium)
@@ -47,6 +51,9 @@ let add_fixme_ranges fixmes trivia =
   let add_fixme_range fixmes trivium =
     match Trivia.kind trivium with
     | Full_fidelity_trivia_kind.(FixMe | IgnoreError) ->
+      trivium_range trivium :: fixmes
+    | Full_fidelity_trivia_kind.(DelimitedComment | SingleLineComment)
+      when is_lint_ignore (Trivia.text trivium) ->
       trivium_range trivium :: fixmes
     | _ -> fixmes
   in

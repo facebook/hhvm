@@ -610,7 +610,7 @@ class LazyMapIterator implements \HH\Iterator {
   private $it;
   private $fn;
 
-  public function __construct($it, $fn) {
+  public function __construct($it, $fn)[] {
     $this->it = $it;
     $this->fn = $fn;
   }
@@ -640,7 +640,7 @@ class LazyMapIterable implements \HH\Iterable {
   private $iterable;
   private $fn;
 
-  public function __construct($iterable, $fn) {
+  public function __construct($iterable, $fn)[] {
     $this->iterable = $iterable;
     $this->fn = $fn;
   }
@@ -653,7 +653,7 @@ class LazyMapKeyedIterator implements \HH\KeyedIterator {
   private $it;
   private $fn;
 
-  public function __construct($it, $fn) {
+  public function __construct($it, $fn)[] {
     $this->it = $it;
     $this->fn = $fn;
   }
@@ -683,7 +683,7 @@ class LazyMapKeyedIterable implements \HH\KeyedIterable {
   private $iterable;
   private $fn;
 
-  public function __construct($iterable, $fn) {
+  public function __construct($iterable, $fn)[] {
     $this->iterable = $iterable;
     $this->fn = $fn;
   }
@@ -696,7 +696,7 @@ class LazyMapWithKeyIterator implements \HH\KeyedIterator {
   private $it;
   private $fn;
 
-  public function __construct($it, $fn) {
+  public function __construct($it, $fn)[] {
     $this->it = $it;
     $this->fn = $fn;
   }
@@ -726,7 +726,7 @@ class LazyMapWithKeyIterable implements \HH\KeyedIterable {
   private $iterable;
   private $fn;
 
-  public function __construct($iterable, $fn) {
+  public function __construct($iterable, $fn)[] {
     $this->iterable = $iterable;
     $this->fn = $fn;
   }
@@ -740,7 +740,7 @@ class LazyFilterIterator implements \HH\Iterator {
   private $it;
   private $fn;
 
-  public function __construct($it, $fn) {
+  public function __construct($it, $fn)[] {
     $this->it = $it;
     $this->fn = $fn;
   }
@@ -780,7 +780,7 @@ class LazyFilterIterable implements \HH\Iterable {
   private $iterable;
   private $fn;
 
-  public function __construct($iterable, $fn) {
+  public function __construct($iterable, $fn)[] {
     $this->iterable = $iterable;
     $this->fn = $fn;
   }
@@ -793,7 +793,7 @@ class LazyFilterKeyedIterator implements \HH\KeyedIterator {
   private $it;
   private $fn;
 
-  public function __construct($it, $fn) {
+  public function __construct($it, $fn)[] {
     $this->it = $it;
     $this->fn = $fn;
   }
@@ -833,7 +833,7 @@ class LazyFilterKeyedIterable implements \HH\KeyedIterable {
   private $iterable;
   private $fn;
 
-  public function __construct($iterable, $fn) {
+  public function __construct($iterable, $fn)[] {
     $this->iterable = $iterable;
     $this->fn = $fn;
   }
@@ -847,7 +847,7 @@ class LazyFilterWithKeyIterator implements \HH\KeyedIterator {
   private $it;
   private $fn;
 
-  public function __construct($it, $fn) {
+  public function __construct($it, $fn)[] {
     $this->it = $it;
     $this->fn = $fn;
   }
@@ -887,7 +887,7 @@ class LazyFilterWithKeyIterable implements \HH\KeyedIterable {
   private $iterable;
   private $fn;
 
-  public function __construct($iterable, $fn) {
+  public function __construct($iterable, $fn)[] {
     $this->iterable = $iterable;
     $this->fn = $fn;
   }
@@ -901,7 +901,7 @@ class LazyZipIterator implements \HH\Iterator {
   private $it1;
   private $it2;
 
-  public function __construct($it1, $it2) {
+  public function __construct($it1, $it2)[] {
     $this->it1 = $it1;
     $this->it2 = $it2;
   }
@@ -934,7 +934,7 @@ class LazyZipIterable implements \HH\Iterable {
   private $iterable1;
   private $iterable2;
 
-  public function __construct($iterable1, $iterable2) {
+  public function __construct($iterable1, $iterable2)[] {
     $this->iterable1 = $iterable1;
     $this->iterable2 = $iterable2;
   }
@@ -948,7 +948,7 @@ class LazyZipKeyedIterator implements \HH\KeyedIterator {
   private $it1;
   private $it2;
 
-  public function __construct($it1, $it2) {
+  public function __construct($it1, $it2)[] {
     $this->it1 = $it1;
     $this->it2 = $it2;
   }
@@ -981,7 +981,7 @@ class LazyZipKeyedIterable implements \HH\KeyedIterable {
   private $iterable1;
   private $iterable2;
 
-  public function __construct($iterable1, $iterable2) {
+  public function __construct($iterable1, $iterable2)[] {
     $this->iterable1 = $iterable1;
     $this->iterable2 = $iterable2;
   }
@@ -996,7 +996,7 @@ class LazyTakeIterator implements \HH\Iterator {
   private $n;
   private $numLeft;
 
-  public function __construct($it, $n) {
+  public function __construct($it, $n)[] {
     $this->it = $it;
     $this->n = $n;
     $this->numLeft = $n;
@@ -1029,7 +1029,7 @@ class LazyTakeIterable implements \HH\Iterable {
   private $iterable;
   private $n;
 
-  public function __construct($iterable, $n) {
+  public function __construct($iterable, $n)[] {
     $this->iterable = $iterable;
     $this->n = $n;
   }
@@ -1044,7 +1044,7 @@ class LazyTakeKeyedIterator implements \HH\KeyedIterator {
   private $n;
   private $numLeft;
 
-  public function __construct($it, $n) {
+  public function __construct($it, $n)[] {
     $this->it = $it;
     $this->n = $n;
     $this->numLeft = $n;
@@ -1077,7 +1077,7 @@ class LazyTakeKeyedIterable implements \HH\KeyedIterable {
   private $iterable;
   private $n;
 
-  public function __construct($iterable, $n) {
+  public function __construct($iterable, $n)[] {
     $this->iterable = $iterable;
     $this->n = $n;
   }
@@ -1125,7 +1125,7 @@ class LazyTakeWhileIterable implements \HH\Iterable {
   private $iterable;
   private $fn;
 
-  public function __construct($iterable, $fn) {
+  public function __construct($iterable, $fn)[] {
     $this->iterable = $iterable;
     $this->fn = $fn;
   }
@@ -1139,7 +1139,7 @@ class LazyTakeWhileKeyedIterator implements \HH\Iterator {
   private $it;
   private $fn;
 
-  public function __construct($it, $fn) {
+  public function __construct($it, $fn)[] {
     $this->it = $it;
     $this->fn = $fn;
   }
@@ -1170,7 +1170,7 @@ class LazyTakeWhileKeyedIterable implements \HH\Iterable {
   private $iterable;
   private $fn;
 
-  public function __construct($iterable, $fn) {
+  public function __construct($iterable, $fn)[] {
     $this->iterable = $iterable;
     $this->fn = $fn;
   }
@@ -1224,7 +1224,7 @@ class LazySkipIterable implements \HH\Iterable {
   private $iterable;
   private $n;
 
-  public function __construct($iterable, $n) {
+  public function __construct($iterable, $n)[] {
     $this->iterable = $iterable;
     $this->n = $n;
   }
@@ -1278,7 +1278,7 @@ class LazySkipKeyedIterable implements \HH\KeyedIterable {
   private $iterable;
   private $n;
 
-  public function __construct($iterable, $n) {
+  public function __construct($iterable, $n)[] {
     $this->iterable = $iterable;
     $this->n = $n;
   }
@@ -1330,7 +1330,7 @@ class LazySkipWhileIterable implements \HH\Iterable {
   private $iterable;
   private $fn;
 
-  public function __construct($iterable, $fn) {
+  public function __construct($iterable, $fn)[] {
     $this->iterable = $iterable;
     $this->fn = $fn;
   }
@@ -1382,7 +1382,7 @@ class LazySkipWhileKeyedIterable implements \HH\Iterable {
   private $iterable;
   private $fn;
 
-  public function __construct($iterable, $fn) {
+  public function __construct($iterable, $fn)[] {
     $this->iterable = $iterable;
     $this->fn = $fn;
   }
@@ -1446,7 +1446,7 @@ class LazySliceIterable implements \HH\Iterable {
   private $start;
   private $len;
 
-  public function __construct($iterable, $start, $len) {
+  public function __construct($iterable, $start, $len)[] {
     $this->iterable = $iterable;
     $this->start = $start;
     $this->len = $len;
@@ -1512,7 +1512,7 @@ class LazySliceKeyedIterable implements \HH\KeyedIterable {
   private $start;
   private $len;
 
-  public function __construct($iterable, $start, $len) {
+  public function __construct($iterable, $start, $len)[] {
     $this->iterable = $iterable;
     $this->start = $start;
     $this->len = $len;
@@ -1527,7 +1527,7 @@ class LazySliceKeyedIterable implements \HH\KeyedIterable {
 class LazyKeysIterator implements \HH\Iterator {
   private $it;
 
-  public function __construct($it) {
+  public function __construct($it)[] {
     $this->it = $it;
   }
   public function __clone() {
@@ -1555,7 +1555,7 @@ class LazyKeysIterable implements \HH\Iterable {
 
   private $iterable;
 
-  public function __construct($iterable) {
+  public function __construct($iterable)[] {
     $this->iterable = $iterable;
   }
   public function getIterator() {
@@ -1566,7 +1566,7 @@ class LazyKeysIterable implements \HH\Iterable {
 class LazyValuesIterator implements \HH\Iterator {
   private $it;
 
-  public function __construct($it) {
+  public function __construct($it)[] {
     $this->it = $it;
   }
   public function __clone() {
@@ -1594,7 +1594,7 @@ class LazyValuesIterable implements \HH\Iterable {
 
   private $iterable;
 
-  public function __construct($iterable) {
+  public function __construct($iterable)[] {
     $this->iterable = $iterable;
   }
   public function getIterator() {
@@ -1605,7 +1605,7 @@ class LazyValuesIterable implements \HH\Iterable {
 class LazyKVZipIterator implements \HH\Iterator {
   private $it;
 
-  public function __construct($it) {
+  public function __construct($it)[] {
     $this->it = $it;
   }
   public function __clone() {
@@ -1633,7 +1633,7 @@ class LazyKVZipIterable implements \HH\Iterable {
 
   private $iterable;
 
-  public function __construct($iterable) {
+  public function __construct($iterable)[] {
     $this->iterable = $iterable;
   }
   public function getIterator() {
@@ -1696,7 +1696,7 @@ class LazyConcatIterable implements \HH\Iterable {
   private $iterable1;
   private $iterable2;
 
-  public function __construct($iterable1, $iterable2) {
+  public function __construct($iterable1, $iterable2)[] {
     $this->iterable1 = $iterable1;
     $this->iterable2 = $iterable2;
   }
@@ -1790,7 +1790,7 @@ class LazyIterableView implements \HH\Iterable {
 class LazyKeyedIterableView implements \HH\KeyedIterable {
   public $iterable;
 
-  public function __construct($iterable) { $this->iterable = $iterable; }
+  public function __construct($iterable)[] { $this->iterable = $iterable; }
   public function getIterator() { return $this->iterable->getIterator(); }
   public function toArray() {
     $arr = darray[];

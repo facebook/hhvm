@@ -878,7 +878,7 @@ let check_parent env class_def class_type =
       Errors.extend_final position (Cls.pos parent_type) (Cls.name parent_type)
   | None -> ()
 
-let sealed_subtype ctx (c : Nast.class_) ~is_enum =
+let sealed_subtype ctx (c : Nast.class_) ~is_enum ~hard_error =
   let parent_name = snd c.c_name in
   let is_sealed (attr : Nast.user_attribute) =
     String.equal (snd attr.ua_name) SN.UserAttributes.uaSealed
@@ -920,13 +920,21 @@ let sealed_subtype ctx (c : Nast.class_) ~is_enum =
               | Ast_defs.Cenum -> ("Enum", "use")
               | Ast_defs.Cenum_class _ -> ("Enum Class", "extend")
             in
-            Errors.sealed_not_subtype
-              verb
-              parent_pos
-              child_pos
-              parent_name
-              child_name
-              child_kind)
+            if hard_error then
+              Errors.sealed_not_subtype
+                verb
+                parent_pos
+                child_pos
+                parent_name
+                child_name
+                child_kind
+            else
+              Lint.sealed_not_subtype
+                verb
+                parent_pos
+                parent_name
+                child_name
+                child_kind)
       (* unit below is fine because error cases are handled as Parsing[1002] *)
       | _ -> ()
     in
@@ -1937,17 +1945,17 @@ let class_def_ env c tc =
     check_parent env c tc;
     check_parents_sealed env c tc
   );
-  if
-    (not (skip_hierarchy_checks ctx))
-    && TypecheckerOptions.enforce_sealed_subclasses (Env.get_tcopt env)
-  then
+  (if not (skip_hierarchy_checks ctx) then
+    let hard_error =
+      TypecheckerOptions.enforce_sealed_subclasses (Env.get_tcopt env)
+    in
     if is_enum_or_enum_class c.c_kind then
       if TypecheckerOptions.enable_enum_supertyping (Env.get_tcopt env) then
-        sealed_subtype ctx c ~is_enum:true
+        sealed_subtype ctx c ~is_enum:true ~hard_error
       else
         ()
     else
-      sealed_subtype ctx c ~is_enum:false;
+      sealed_subtype ctx c ~is_enum:false ~hard_error);
   let (_ : env) =
     check_generic_class_with_SupportDynamicType env c (extends @ implements)
   in

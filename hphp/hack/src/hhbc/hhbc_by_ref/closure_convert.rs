@@ -999,6 +999,13 @@ fn make_dyn_meth_caller_lambda(pos: &Pos, cexpr: &Expr, fexpr: &Expr, force: boo
     } else {
         vec![]
     };
+    let ctxs = Some(Contexts(
+        pos(),
+        vec![Hint::new(
+            pos(),
+            Hint_::mk_happly(Id(pos(), string_utils::coeffects::CALLER.into()), vec![]),
+        )],
+    ));
 
     let fd = Fun_ {
         span: pos(),
@@ -1015,7 +1022,7 @@ fn make_dyn_meth_caller_lambda(pos: &Pos, cexpr: &Expr, fexpr: &Expr, force: boo
             make_fn_param(pos(), &meth_var.1, false, false),
             variadic_param,
         ],
-        ctxs: None,
+        ctxs,
         unsafe_ctxs: None,
         body: FuncBody {
             fb_ast: vec![Stmt(pos(), Stmt_::Return(Box::new(Some(invoke_method))))],

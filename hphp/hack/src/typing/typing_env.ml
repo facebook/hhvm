@@ -175,22 +175,22 @@ let bind env v ty =
   wrap_inference_env_call_env env (fun env -> Inf.bind env v ty)
 
 (** Unions and intersections containing unsolved type variables may remain
-in an unsimplified form once those type variables get solved.
+    in an unsimplified form once those type variables get solved.
 
-For example, consider the union (#1 | int) where #1 is an unsolved type variable.
-If #1 gets solved to int, then this union will remain in the unsimplified form
-(int | int) which compromise the robustness of some of our logic and might
-cause performance issues (by creating big unsimplified unions).
+    For example, consider the union (#1 | int) where #1 is an unsolved type variable.
+    If #1 gets solved to int, then this union will remain in the unsimplified form
+    (int | int) which compromise the robustness of some of our logic and might
+    cause performance issues (by creating big unsimplified unions).
 
-To solve this problem, we wrap each union and intersection in a type var,
-so we'd get `#2 -> (#1 | int)` (This is done in Typing_union and
-Typing_intersection), and register that #1 occurs in #2 in
-[env.tyvar_occurrences]. Then when #1 gets solved, we simplify #2.
+    To solve this problem, we wrap each union and intersection in a type var,
+    so we'd get `#2 -> (#1 | int)` (This is done in Typing_union and
+    Typing_intersection), and register that #1 occurs in #2 in
+    [env.tyvar_occurrences]. Then when #1 gets solved, we simplify #2.
 
-This function deals with this simplification.
+    This function deals with this simplification.
 
-The simplification is recursive: simplifying a type variable will
-trigger simplification of its own occurrences. *)
+    The simplification is recursive: simplifying a type variable will
+    trigger simplification of its own occurrences. *)
 let simplify_occurrences env v =
   let rec simplify_occurrences env v ~seen_tyvars =
     let vars = Inf.get_tyvar_occurrences env.inference_env v in
@@ -692,26 +692,12 @@ let make_depend_on_class_def env x cd =
   | Some cd when Pos_or_decl.is_hhi (Cls.pos cd) -> ()
   | _ -> make_depend_on_class env x
 
-let print_size _kind _name obj =
-  match obj with
-  | None -> obj
-  | Some _r ->
-    (* Printf.printf
-       "%s %s: %d\n"
-       kind
-       name
-       (Obj.reachable_words (Obj.repr r) * (Sys.word_size / 8));*)
-    obj
-
 let get_typedef env x =
   let res =
-    print_size
-      "type"
+    Decl_provider.get_typedef
+      ?tracing_info:(get_tracing_info env)
+      (get_ctx env)
       x
-      (Decl_provider.get_typedef
-         ?tracing_info:(get_tracing_info env)
-         (get_ctx env)
-         x)
   in
   match res with
   | Some td when Pos_or_decl.is_hhi td.td_pos -> res
@@ -739,13 +725,10 @@ let is_typedef_visible env ?(expand_visible_newtype = true) td =
 
 let get_class (env : env) (name : Decl_provider.type_key) : Cls.t option =
   let res =
-    print_size
-      "class"
+    Decl_provider.get_class
+      ?tracing_info:(get_tracing_info env)
+      (get_ctx env)
       name
-      (Decl_provider.get_class
-         ?tracing_info:(get_tracing_info env)
-         (get_ctx env)
-         name)
   in
   make_depend_on_class_def env name res;
   res
@@ -770,13 +753,7 @@ let get_class_dep env x =
 
 let get_fun env x =
   let res =
-    print_size
-      "fun"
-      x
-      (Decl_provider.get_fun
-         ?tracing_info:(get_tracing_info env)
-         (get_ctx env)
-         x)
+    Decl_provider.get_fun ?tracing_info:(get_tracing_info env) (get_ctx env) x
   in
   match res with
   | Some fd when Pos_or_decl.is_hhi fd.fe_pos -> res

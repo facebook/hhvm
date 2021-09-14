@@ -1,6 +1,0 @@
-File "varray_with_array_map_does_not_return_dict_like_array.php", line 4, characters 10-52:
-Invalid return type (Typing[4110])
-  File "varray_with_array_map_does_not_return_dict_like_array.php", line 3, characters 35-50:
-  Expected `darray<int, int>`
-  File "stdlib/builtins_array.hhi", line 121, characters 10-18:
-  But got `varray<[unresolved]>`

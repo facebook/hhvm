@@ -44,6 +44,13 @@ fn emit_return<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     tfr::emit_return(e, false, env)
 }
 
+fn is_readonly_expr(e: &ast::Expr) -> bool {
+    match &e.2 {
+        ast::Expr_::ReadonlyExpr(_) => true,
+        _ => false,
+    }
+}
+
 fn set_bytes_kind(name: &str) -> Option<Setrange> {
     lazy_static! {
         static ref RE: Regex =
@@ -163,6 +170,7 @@ pub fn emit_stmt<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                                                 &[],
                                                 e_lhs,
                                                 false,
+                                                is_readonly_expr(e_rhs),
                                             )?,
                                         )
                                             .into(),
@@ -1301,7 +1309,12 @@ fn emit_iterator_lvalue_storage<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             let (preamble, load_values) = emit_load_list_elements(
                 e,
                 env,
-                vec![instr::basel(alloc, local, MemberOpMode::Warn)],
+                vec![instr::basel(
+                    alloc,
+                    local,
+                    MemberOpMode::Warn,
+                    ReadonlyOp::Any,
+                )],
                 es,
             )?;
             let load_values = vec![
@@ -1475,6 +1488,7 @@ fn emit_foreach_await_lvalue_storage<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                     Some(&local),
                     indices,
                     lvalue,
+                    false,
                     false,
                 )?,
             )

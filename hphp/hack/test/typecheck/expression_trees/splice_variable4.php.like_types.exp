@@ -1,8 +1,0 @@
-File "splice_variable4.php", line 15, characters 5-6:
-Variable `$x` is undefined, or not always defined. (Naming[2050])
-File "splice_variable4.php", line 13, characters 5-19:
-Typing error (Typing[4110])
-  File "splice_variable4.php", line 13, characters 5-19:
-  Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree
-  File "splice_variable4.php", line 5, characters 25-62:
-  But got `dynamic` because it is an unenforceable type

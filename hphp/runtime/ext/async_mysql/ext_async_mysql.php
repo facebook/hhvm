@@ -320,6 +320,19 @@ class AsyncMysqlConnectionPool {
                           AsyncMysqlConnectionOptions $conn_options,
                           string $extra_key = "",
                          ): Awaitable<AsyncMysqlConnection>;
+
+  <<__Native>>
+  public function connectAndQuery(
+    AnyArray<arraykey, string> $queries,
+    string $host,
+    int $port,
+    string $dbname,
+    string $user,
+    string $password,
+    AsyncMysqlConnectionOptions $conn_opts,
+    string $extra_key = "",
+    dict<string, string> $query_attributes = dict[],
+  ): Awaitable<(AsyncMysqlConnectResult, Vector<AsyncMysqlQueryResult>)>;
 }
 
 /**

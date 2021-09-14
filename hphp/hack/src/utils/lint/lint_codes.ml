@@ -12,7 +12,9 @@ type t =
   | UseCollectionLiteral
   | StaticString
   | ShapeIdxRequiredField [@value 5005]
-  | OptClosedShapeIdxMissingField [@value 5006] (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
+  | OptClosedShapeIdxMissingField [@value 5006]
+  | SealedNotSubtype [@value 5007]
+(* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 [@@deriving enum]
 
 let err_code = to_enum

@@ -1072,3 +1072,6 @@ pub const readonly_static_method: Error =
     Cow::Borrowed("Static methods do not need to be marked readonly");
 pub const variadic_readonly_param: Error =
     Cow::Borrowed("Variadic parameters cannot be marked readonly");
+pub const throw_readonly_exception: Error = Cow::Borrowed(
+    "This exception is readonly; throwing readonly exceptions is not currently supported.",
+);

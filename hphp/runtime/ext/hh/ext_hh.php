@@ -152,7 +152,7 @@ function serialize_memoize_param(mixed $param): arraykey;
 function clear_static_memoization(?string $cls, ?string $func = null) : bool;
 
 <<__Native>>
-function ffp_parse_string_native(string $program): string;
+function ffp_parse_string_native(string $program)[]: string;
 
 newtype ParseTree = darray;
 

@@ -2913,7 +2913,12 @@ RematLookup find_defining_inst_for_remat(State& state,
           r = inst.reload_.s;
           break;
         case Vinstr::spill:
-          if (inst.copy_.s.isPhys()) return if_compatible(inst);
+          if (inst.spill_.s.isPhys()) {
+            // We cannot return a spill here as the rematerialization
+            // instruction. We can just copy from the source of the
+            // spill.
+            return if_compatible(copy{inst.spill_.s, inst.spill_.d});
+          }
           assertx(inst.spill_.d == r);
           r = inst.spill_.s;
           break;

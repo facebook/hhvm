@@ -108,6 +108,10 @@ struct GenCountGuard {
     pthread_mutex_lock(&s_genLock);
     pushRank(RankTreadmill);
   }
+
+  struct Locked {};
+  GenCountGuard(Locked) { pushRank(RankTreadmill); }
+
   ~GenCountGuard() {
     popRank(RankTreadmill);
     pthread_mutex_unlock(&s_genLock);
@@ -357,14 +361,17 @@ std::string dumpTreadmillInfo(bool forCrash) {
   std::string out;
   Optional<GenCountGuard> g;
 
-  if (!forCrash) g.emplace();
-  else {
+  if (!forCrash) {
+    g.emplace();
+  } else {
     if (pthread_mutex_trylock(&s_genLock) != 0) {
       folly::format(
         &out,
         "Attempting to dump treadmill without acquiring GenCountGuard: {}\n",
         folly::errnoStr(errno)
       );
+    } else {
+      g.emplace(GenCountGuard::Locked{});
     }
   }
 

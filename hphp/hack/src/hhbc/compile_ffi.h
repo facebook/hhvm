@@ -7,6 +7,7 @@
 #pragma once
 
 #include "hphp/hack/src/hhbc/compile_ffi_types_fwd.h"
+#include "hphp/hack/src/hhbc/hhbc_by_ref/hhbc-ast.h"
 
 #include <cstdint>
 #include <cstddef>
@@ -50,14 +51,13 @@ inline hackc_compile_from_text_ptr
 }
 
 extern "C" {
-hhas_program const* hackc_compile_hhas_from_text_cpp_ffi(
+HPHP::hackc::hhbc::HhasProgram const* hackc_compile_hhas_from_text_cpp_ffi(
        bump_allocator const* alloc
      , native_environment const* env
      , char const* source_text
-     , output_config const* config
      , error_buf_t* error_buf );
 
-void hackc_compile_hhas_free_prog_cpp_ffi(hhas_program const*);
+void hackc_compile_hhas_free_prog_cpp_ffi(HPHP::hackc::hhbc::HhasProgram const*);
 
 bump_allocator const* hackc_compile_hhas_create_arena();
 
@@ -65,18 +65,17 @@ void hackc_compile_hhas_free_arena(bump_allocator const*);
 } //extern"C"
 
 using hackc_compile_hhas_from_text_ptr =
-  std::unique_ptr<hhas_program const, void(*)(hhas_program const*)>;
+  std::unique_ptr<HPHP::hackc::hhbc::HhasProgram const, void(*)(HPHP::hackc::hhbc::HhasProgram const*)>;
 
 inline hackc_compile_hhas_from_text_ptr
   hackc_compile_hhas_from_text(
       native_environment const* env
     , char const* source_text
-    , output_config const* config
     , error_buf_t* error_buf
   ) {
   bump_allocator const* alloc = hackc_compile_hhas_create_arena();
   hackc_compile_hhas_from_text_ptr result = hackc_compile_hhas_from_text_ptr {
-      hackc_compile_hhas_from_text_cpp_ffi(alloc, env, source_text, config, error_buf)
+      hackc_compile_hhas_from_text_cpp_ffi(alloc, env, source_text, error_buf)
     , hackc_compile_hhas_free_prog_cpp_ffi
   };
   hackc_compile_hhas_free_arena(alloc);

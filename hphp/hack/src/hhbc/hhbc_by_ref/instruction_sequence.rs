@@ -890,10 +890,11 @@ pub mod instr {
         alloc: &'a bumpalo::Bump,
         local: Local<'a>,
         mode: MemberOpMode,
+        readonly_op: ReadonlyOp,
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IBase(InstructBase::BaseL(local, mode, ReadonlyOp::Any)),
+            Instruct::IBase(InstructBase::BaseL(local, mode, readonly_op)),
         )
     }
 

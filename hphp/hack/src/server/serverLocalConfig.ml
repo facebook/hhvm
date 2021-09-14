@@ -661,10 +661,57 @@ let path =
   in
   Filename.concat dir "hh.conf"
 
+let apply_justknobs_overrides ~silent config =
+  let hash = Unix.gethostname () in
+  let switch = Config_file.Getters.string_opt "rollout_group" config in
+  let eval key knob =
+    match JustKnobs.eval knob ~hash ?switch with
+    | Ok value -> Some (key, Bool.to_string value)
+    (* OSS builds don't have JK *)
+    | Error "Not implemented: JustKnobs.eval" -> None
+    | Error msg ->
+      (* We failed to fetch the knob (perhaps JustKnobs is broken, or perhaps a
+         developer deleted a knob they shouldn't have), so don't override anything. *)
+      Hh_logger.log "JustKnobs error: %s" msg;
+      None
+  in
+  let overrides =
+    List.filter_map
+      ~f:Fn.id
+      [
+        eval
+          "store_decls_in_saved_state"
+          "hack/config:store_decls_in_saved_state";
+        eval
+          "load_decls_from_saved_state"
+          "hack/config:load_decls_from_saved_state";
+        eval "use_direct_decl_parser" "hack/config:use_direct_decl_parser";
+      ]
+  in
+  match overrides with
+  | [] -> config
+  | overrides ->
+    (* eprintf used here rather than Hh_logger because apply_overrides also
+       prints to stderr. *)
+    if not silent then Printf.eprintf "Applying overrides from JustKnobs:\n%!";
+    Config_file.apply_overrides
+      ~silent
+      ~config
+      ~overrides:(Config_file.of_list overrides)
+
 let apply_overrides ~silent ~current_version ~config ~overrides =
-  (* First of all, apply the CLI overrides so the settings below could be specified
-     altered via the CLI, even though the CLI overrides take precedence
-     over the experiments overrides *)
+  (* Override on-disk values with values from JustKnobs (if present). Allow CLI
+     overrides to take precedence over JustKnobs overrides. *)
+  let config =
+    (* Do not use values from JustKnobs in tests. *)
+    if Sys_utils.is_test_mode () then
+      config
+    else
+      apply_justknobs_overrides ~silent config
+  in
+  (* Apply the CLI overrides before experiments overrides, so that
+     experiments_config settings can be specified via the CLI, even though the
+     CLI overrides take precedence over the experiments overrides. *)
   let config = Config_file.apply_overrides ~silent ~config ~overrides in
   let enabled =
     bool_if_min_version

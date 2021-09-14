@@ -303,10 +303,15 @@ fn check_assignment_nonlocal(
                 (Rty::Readonly, Rty::Readonly) => {
                     // make rhs explicit (to make sure we are not writing a readonly value to a mutable one)
                     explicit_readonly(rhs);
+                    // make lhs readonly explicitly, to check that it's a readonly copy on write array
+                    // here the lefthandside is either a local variable or a class_get.
+                    explicit_readonly(lhs);
                 }
-                (_, Rty::Mutable) => {
-                    // Assigning to a mutable value always succeeds, so no explicit checks are needed
+                (Rty::Readonly, Rty::Mutable) => {
+                    explicit_readonly(lhs);
                 }
+                // Assigning to a mutable value always succeeds, so no explicit checks are needed
+                (Rty::Mutable, Rty::Mutable) => {}
             }
         }
     }
@@ -445,18 +450,36 @@ impl<'ast> VisitorMut<'ast> for Checker {
         m.recurse(&mut context, self.object())
     }
 
-    fn visit_fun_(&mut self, _context: &mut Context, f: &mut aast::Fun_<(), ()>) -> Result<(), ()> {
+    fn visit_fun_(&mut self, context: &mut Context, f: &mut aast::Fun_<(), ()>) -> Result<(), ()> {
+        // Is run on every function definition and closure definition
         let readonly_return = ro_kind_to_rty(f.readonly_ret);
         let readonly_this = ro_kind_to_rty(f.readonly_this);
-        let mut context = Context::new(readonly_return, readonly_this);
-
-        for p in f.params.iter() {
-            if let Some(_) = p.readonly {
-                context.add_local(&p.name, Rty::Readonly)
+        let mut new_context = Context::new(readonly_return, readonly_this);
+        // Add the old context's stuff into the new context, as readonly if needed
+        for (local, rty) in context.locals.lenv.iter() {
+            if readonly_this == Rty::Readonly {
+                new_context.add_local(&local, Rty::Readonly);
             } else {
-                context.add_local(&p.name, Rty::Mutable)
+                new_context.add_local(&local, *rty);
             }
         }
+        for p in f.params.iter() {
+            if let Some(_) = p.readonly {
+                new_context.add_local(&p.name, Rty::Readonly)
+            } else {
+                new_context.add_local(&p.name, Rty::Mutable)
+            }
+        }
+        f.recurse(&mut new_context, self.object())
+    }
+
+    fn visit_fun_def(
+        &mut self,
+        _context: &mut Context,
+        f: &mut aast::FunDef<(), ()>,
+    ) -> Result<(), ()> {
+        // Clear the context completely on a fun_def
+        let mut context = Context::new(Rty::Mutable, Rty::Mutable);
         f.recurse(&mut context, self.object())
     }
 
@@ -553,6 +576,16 @@ impl<'ast> VisitorMut<'ast> for Checker {
                         );
                 context.locals = result_lenv.clone();
                 Ok(())
+            }
+            aast::Stmt_::Throw(t) => {
+                let inner = &**t;
+                match rty_expr(context, &inner) {
+                    Rty::Readonly => {
+                        self.add_error(&inner.1, syntax_error::throw_readonly_exception);
+                    }
+                    Rty::Mutable => {}
+                }
+                t.recurse(context, self.object())
             }
             aast::Stmt_::Foreach(f) => {
                 let (e, as_expr, b) = &mut **f;

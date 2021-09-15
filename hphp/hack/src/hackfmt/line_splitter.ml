@@ -68,6 +68,11 @@ let solve_chunk_group env ?range ?source_text chunk_group =
          lists if it is associated with splits both inside and outside the
          formatting range. *)
       let (rules_in_range, rules_out_of_range) =
+        (* Contract the range to work around edge cases: if a chunk starts on
+           the first character of the range, we don't want to consider its split
+           to be inside the range (otherwise we might attempt to join onto the
+           previous line, which is out of range and can't be modified). *)
+        let range = (fst range + 1, snd range) in
         List.partition_map chunk_group.Chunk_group.chunks ~f:(fun chunk ->
             (* Each chunk is preceded by a split, and contains the ID of the rule
                governing that split. *)

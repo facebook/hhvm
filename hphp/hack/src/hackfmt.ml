@@ -105,6 +105,7 @@ let read_hhconfig path =
             "hackfmt.format_generated_code"
             ~default:default.format_generated_code
             config;
+        version = Config_file.Getters.int_opt "hackfmt.version" config;
       },
     Full_fidelity_parser_env.make
       ?enable_xhp_class_modifier:
@@ -151,6 +152,7 @@ let parse_options () =
   let cli_line_width = ref None in
   let cli_root = ref None in
   let cli_format_generated_code = ref false in
+  let cli_version = ref None in
   let rec options =
     ref
       [
@@ -194,6 +196,10 @@ let parse_options () =
           " Enable formatting of generated files and generated sections in "
           ^ "partially-generated files. By default, generated code will be left "
           ^ "untouched." );
+        ( "--version",
+          Arg.Int (fun x -> cli_version := Some x),
+          " For version-gated formatter features, specify the version to use. "
+          ^ "Defaults to latest." );
         ( "--diff",
           Arg.Set diff,
           " Format the changed lines in a diff"
@@ -252,6 +258,11 @@ let parse_options () =
         line_width = opt_default !cli_line_width config.line_width;
         format_generated_code =
           !cli_format_generated_code || config.format_generated_code;
+        version =
+          (if Option.is_some !cli_version then
+            !cli_version
+          else
+            config.version);
       }
   in
   ( ( !files,

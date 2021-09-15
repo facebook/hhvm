@@ -13,6 +13,7 @@ type t = {
   indent_with_tabs: bool;
   line_width: int;
   format_generated_code: bool;
+  version: int option;
 }
 
 let default =
@@ -22,4 +23,10 @@ let default =
     indent_with_tabs = false;
     line_width = 80;
     format_generated_code = false;
+    version = None;
   }
+
+let version_gte env min_version =
+  match env.version with
+  | None -> true (* If no version is specified, use latest *)
+  | Some v -> v >= min_version

@@ -317,14 +317,20 @@ mod unsafe_utils {
     // or`RefUnwindSafe`. We use this device to work around these
     // things so that we may use elastic stack.
     #[derive(Debug, Clone, Copy)]
-    pub struct AssertSafe<T>(pub T);
+    pub struct AssertSafe<T>(T);
+
+    impl<T> AssertSafe<T> {
+        pub fn get(self) -> T {
+            self.0
+        }
+    }
 
     unsafe impl<T> Send for AssertSafe<T> {}
     impl<T> std::panic::UnwindSafe for AssertSafe<T> {}
     impl<T> std::panic::RefUnwindSafe for AssertSafe<T> {}
 
     #[inline]
-    pub fn assert_safe<T>(t: T) -> AssertSafe<T> {
+    pub unsafe fn assert_safe<T>(t: T) -> AssertSafe<T> {
         AssertSafe(t)
     }
 }
@@ -358,8 +364,8 @@ unsafe extern "C" fn hackc_compile_hhas_from_text_cpp_ffi(
 
         let job_builder = || {
             let job = move |stack_limit: &StackLimit, _nomain_stack_size: Option<usize>| -> Result<unsafe_utils::AssertSafe<*const HhasProgram<'static>>, anyhow::Error>{
-                let alloc = alloc.0;
-                let cnative_env = cnative_env.0;
+                let alloc = alloc.get();
+                let cnative_env = cnative_env.get();
                 let native_env = CNativeEnv::to_compile_env(cnative_env).unwrap();
                 let env = hhbc_by_ref_compile::Env::<&str> {
                     filepath: native_env.filepath.clone(),
@@ -415,7 +421,7 @@ unsafe extern "C" fn hackc_compile_hhas_from_text_cpp_ffi(
                 // legitmately reinterpreted as a `*const CEnv` and that
                 // on doing so, it points to a valid properly initialized
                 // value.
-                let unsafe_utils::AssertSafe(cnative_env) = cnative_env;
+                let cnative_env = cnative_env.get();
                 let env = CNativeEnv::to_compile_env(cnative_env).unwrap();
                 eprintln!(
                     "[hrust] warning: hackc_compile_hhas_from_text_ffi exceeded stack of {} KiB on: {}",
@@ -438,7 +444,7 @@ unsafe extern "C" fn hackc_compile_hhas_from_text_cpp_ffi(
             .expect("hackc_compile_hhas_from_text_cpp_ffi: retry failed")
             .map_err(|e| e.to_string())
         {
-            Ok(unsafe_utils::AssertSafe(hhas_prog)) => hhas_prog,
+            Ok(hhas_prog) => hhas_prog.get(),
             Err(e) => {
                 if e.len() >= buf.len() {
                     warn!("Provided error buffer too small.");

@@ -133,6 +133,7 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     tco_require_extends_implements_ancestors: false,
     tco_strict_value_equality: false,
     tco_enforce_sealed_subclasses: false,
+    tco_everything_sdt: false,
 };
 
 impl GlobalOptions<'static> {

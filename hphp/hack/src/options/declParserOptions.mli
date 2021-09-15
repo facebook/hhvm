@@ -10,6 +10,7 @@ type t = {
   auto_namespace_map: (string * string) list;
   disable_xhp_element_mangling: bool;
   interpret_soft_types_as_like_types: bool;
+  everything_sdt: bool;
 }
 [@@deriving show]
 

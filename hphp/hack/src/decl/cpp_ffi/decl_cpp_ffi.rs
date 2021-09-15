@@ -69,6 +69,7 @@ unsafe extern "C" fn hackc_create_direct_decl_parse_options(
         auto_namespace_map: &[],
         disable_xhp_element_mangling,
         interpret_soft_types_as_like_types,
+        everything_sdt: false,
     }))
 }
 

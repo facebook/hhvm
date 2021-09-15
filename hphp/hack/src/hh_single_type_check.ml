@@ -280,6 +280,7 @@ let parse_options () =
   let sharedmem_config = ref SharedMem.default_config in
   let print_position = ref true in
   let enforce_sealed_subclasses = ref false in
+  let everything_sdt = ref false in
   let options =
     [
       ( "--no-print-position",
@@ -693,6 +694,10 @@ let parse_options () =
       ( "--enable-sealed-subclasses",
         Arg.Set enforce_sealed_subclasses,
         " Require all __Sealed arguments to be subclasses" );
+      ( "--everything-sdt",
+        Arg.Set everything_sdt,
+        " Treat all classes as though they are annotated with <<__SupportDynamicType>>"
+      );
     ]
   in
 
@@ -858,6 +863,7 @@ let parse_options () =
         !require_extends_implements_ancestors
       ~tco_strict_value_equality:!strict_value_equality
       ~tco_enforce_sealed_subclasses:!enforce_sealed_subclasses
+      ~tco_everything_sdt:!everything_sdt
       ()
   in
   Errors.allowed_fixme_codes_strict :=

@@ -158,6 +158,8 @@ let interpret_soft_types_as_like_types =
 let with_interpret_soft_types_as_like_types po b =
   { po with GlobalOptions.po_interpret_soft_types_as_like_types = b }
 
+let with_everything_sdt po b = { po with GlobalOptions.tco_everything_sdt = b }
+
 let make
     ~auto_namespace_map
     ~codegen

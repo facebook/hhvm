@@ -135,6 +135,7 @@ type t = {
   tco_require_extends_implements_ancestors: bool;
   tco_strict_value_equality: bool;
   tco_enforce_sealed_subclasses: bool;
+  tco_everything_sdt: bool;
 }
 [@@deriving eq, show]
 
@@ -328,6 +329,7 @@ let default =
     tco_require_extends_implements_ancestors = false;
     tco_strict_value_equality = false;
     tco_enforce_sealed_subclasses = false;
+    tco_everything_sdt = false;
   }
 
 let make
@@ -482,6 +484,7 @@ let make
       default.tco_require_extends_implements_ancestors)
     ?(tco_strict_value_equality = default.tco_strict_value_equality)
     ?(tco_enforce_sealed_subclasses = default.tco_enforce_sealed_subclasses)
+    ?(tco_everything_sdt = default.tco_everything_sdt)
     () =
   {
     tco_experimental_features;
@@ -611,6 +614,7 @@ let make
     tco_require_extends_implements_ancestors;
     tco_strict_value_equality;
     tco_enforce_sealed_subclasses;
+    tco_everything_sdt;
   }
 
 let tco_experimental_feature_enabled t s =
@@ -903,3 +907,5 @@ let tco_require_extends_implements_ancestors t =
 let tco_strict_value_equality t = t.tco_strict_value_equality
 
 let tco_enforce_sealed_subclasses t = t.tco_enforce_sealed_subclasses
+
+let tco_everything_sdt t = t.tco_everything_sdt

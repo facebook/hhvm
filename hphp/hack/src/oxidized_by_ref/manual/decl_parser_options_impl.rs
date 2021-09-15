@@ -23,6 +23,7 @@ impl DeclParserOptions<'_> {
             auto_namespace_map: opts.po_auto_namespace_map,
             disable_xhp_element_mangling: opts.po_disable_xhp_element_mangling,
             interpret_soft_types_as_like_types: opts.po_interpret_soft_types_as_like_types,
+            everything_sdt: opts.tco_everything_sdt,
         }
     }
 }

@@ -488,6 +488,7 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
       ?tco_strict_value_equality:(bool_opt "strict_value_equality" config)
       ?tco_enforce_sealed_subclasses:
         (bool_opt "enforce_sealed_subclasses" config)
+      ?tco_everything_sdt:(bool_opt "everything_sdt" config)
       ~log_levels:(prepare_log_levels config)
       ()
   in

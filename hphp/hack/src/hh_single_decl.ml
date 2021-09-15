@@ -15,7 +15,8 @@ let popt
     ~disable_xhp_element_mangling
     ~disable_enum_classes
     ~enable_enum_supertyping
-    ~interpret_soft_types_as_like_types =
+    ~interpret_soft_types_as_like_types
+    ~everything_sdt =
   let enable_enum_classes = not disable_enum_classes in
   let po = ParserOptions.default in
   let po =
@@ -36,6 +37,7 @@ let popt
       po
       interpret_soft_types_as_like_types
   in
+  let po = ParserOptions.with_everything_sdt po everything_sdt in
   po
 
 let init root popt : Provider_context.t =
@@ -155,6 +157,7 @@ let () =
   let disable_enum_classes = ref false in
   let enable_enum_supertyping = ref false in
   let interpret_soft_types_as_like_types = ref false in
+  let everything_sdt = ref false in
   let ignored_flag flag = (flag, Arg.Unit (fun _ -> ()), "(ignored)") in
   let ignored_arg flag = (flag, Arg.String (fun _ -> ()), "(ignored)") in
   Arg.parse
@@ -191,6 +194,7 @@ let () =
       ( "--interpret-soft-types-as-like-types",
         Arg.Set interpret_soft_types_as_like_types,
         "Interpret <<__Soft>> type hints as like types" );
+      ("--everything-sdt", Arg.Set everything_sdt, "Classes have SDT");
       (* The following options do not affect the direct decl parser and can be ignored
          (they are used by hh_single_type_check, and we run hh_single_decl over all of
          the typecheck test cases). *)
@@ -274,6 +278,7 @@ let () =
         let interpret_soft_types_as_like_types =
           !interpret_soft_types_as_like_types
         in
+        let everything_sdt = !everything_sdt in
         let popt =
           popt
             ~auto_namespace_map
@@ -282,6 +287,7 @@ let () =
             ~disable_enum_classes
             ~enable_enum_supertyping
             ~interpret_soft_types_as_like_types
+            ~everything_sdt
         in
         let ctx = init (Path.dirname file) popt in
         let file = Relative_path.(create Root (Path.to_string file)) in

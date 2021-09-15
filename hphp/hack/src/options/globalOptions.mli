@@ -320,6 +320,8 @@ type t = {
   tco_strict_value_equality: bool;
   (* All member of the __Sealed whitelist should be subclasses*)
   tco_enforce_sealed_subclasses: bool;
+  (* All classes are implcitly marked <<__SupportDynamicType>> *)
+  tco_everything_sdt: bool;
 }
 [@@deriving eq, show]
 
@@ -450,6 +452,7 @@ val make :
   ?tco_require_extends_implements_ancestors:bool ->
   ?tco_strict_value_equality:bool ->
   ?tco_enforce_sealed_subclasses:bool ->
+  ?tco_everything_sdt:bool ->
   unit ->
   t
 
@@ -738,3 +741,5 @@ val tco_require_extends_implements_ancestors : t -> bool
 val tco_strict_value_equality : t -> bool
 
 val tco_enforce_sealed_subclasses : t -> bool
+
+val tco_everything_sdt : t -> bool

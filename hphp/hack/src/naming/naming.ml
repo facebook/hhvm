@@ -872,6 +872,17 @@ let ensure_name_not_dynamic env e =
     if Partial.should_check_error (fst env).in_mode 2078 then
       Errors.dynamic_class_name_in_strict_mode p
 
+let make_sdt ctx pos attrs =
+  if TypecheckerOptions.everything_sdt (Provider_context.get_tcopt ctx) then
+    N.
+      {
+        ua_name = (pos, SN.UserAttributes.uaSupportDynamicType);
+        ua_params = [];
+      }
+    :: attrs
+  else
+    attrs
+
 (* Naming of a class *)
 let rec class_ ctx c =
   let env = Env.make_class_env ctx c in
@@ -971,6 +982,17 @@ let rec class_ ctx c =
     match constructor with
     | None -> smethods @ methods
     | Some c -> c :: smethods @ methods
+  in
+  let attrs =
+    let open Ast_defs in
+    match c.Aast.c_kind with
+    | Cclass _
+    | Cinterface
+    | Ctrait ->
+      make_sdt ctx (fst name) attrs
+    | Cenum
+    | Cenum_class _ ->
+      attrs
   in
   {
     N.c_annotation = ();
@@ -1600,6 +1622,8 @@ and fun_ genv f =
   in
   let f_ctxs = Option.map ~f:(contexts env) f.Aast.f_ctxs in
   let f_unsafe_ctxs = Option.map ~f:(contexts env) f.Aast.f_unsafe_ctxs in
+  let attrs = user_attributes env f.Aast.f_user_attributes in
+  let attrs = make_sdt genv.ctx (fst f.Aast.f_name) attrs in
   let named_fun =
     {
       N.f_annotation = ();
@@ -1617,7 +1641,7 @@ and fun_ genv f =
       f_body = body;
       f_fun_kind = f_kind;
       f_variadic = variadicity;
-      f_user_attributes = user_attributes env f.Aast.f_user_attributes;
+      f_user_attributes = attrs;
       f_external = f.Aast.f_external;
       f_doc_comment = f.Aast.f_doc_comment;
     }

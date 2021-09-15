@@ -395,7 +395,12 @@ let visitor =
       self#plus acc (super#on_Haccess env root ids)
 
     method! on_Lvar env (pos, id) =
-      let acc = process_lvar_id (pos, Local_id.get_name id) in
+      let acc =
+        if Local_id.is_user_denotable id then
+          process_lvar_id (pos, Local_id.get_name id)
+        else
+          Result_set.empty
+      in
       self#plus acc (super#on_Lvar env (pos, id))
 
     method! on_fun_param env param =

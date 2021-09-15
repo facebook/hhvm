@@ -1146,14 +1146,6 @@ let get_local_in_ctx env ?error_if_undef_at_pos:p x ctx_opt =
     || Fake.is_valid ctx.LEnvC.fake_members x
   in
   let error_if_pos_provided posopt ctx =
-    (* Is this local variable something the user could write, or an
-       internal variable used in desugaring? *)
-    let denotable_local (lid : LID.t) : bool =
-      (* Allow $foo or $_bar1 but not $#foo or $0bar. *)
-      let local_regexp = Str.regexp "^\\$[a-zA-z_][a-zA-Z0-9_]*$" in
-      Str.string_match local_regexp (LID.to_string lid) 0
-    in
-
     match posopt with
     | Some p ->
       let lid = LID.to_string x in
@@ -1162,7 +1154,7 @@ let get_local_in_ctx env ?error_if_undef_at_pos:p x ctx_opt =
         let all_locals =
           LID.Map.fold
             (fun k v acc ->
-              if denotable_local k then
+              if LID.is_user_denotable k then
                 (k, v) :: acc
               else
                 acc)

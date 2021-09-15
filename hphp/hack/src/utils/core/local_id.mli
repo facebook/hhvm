@@ -33,6 +33,13 @@ val to_int : t -> int
 
 val get_name : t -> string
 
+(** Is this local variable something a user could write, or an
+    internally generated variable?
+
+    Yes: $foo, $_bar1, $$
+    No: $#foo, $0bar *)
+val is_user_denotable : t -> bool
+
 (** Make an id for a scoped variable. Return a fresh id every time.
 This is used to enforce that two locals with the same name but with
 different scopes have different ids. *)

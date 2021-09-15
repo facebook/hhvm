@@ -16,7 +16,6 @@ class Foo {
   }
 }
 
-
 function test(): void {
   $x = readonly new Foo();
   $y = $x->get(); // ok

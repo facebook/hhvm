@@ -20,7 +20,7 @@ class Foo {
 
 function test() : void {
   Foo::$baz_static = readonly new Baz();
-  $a = Foo::$baz_ro_static;
+  $a = readonly Foo::$baz_ro_static;
   // ok
   Foo::$baz_ro_static = readonly new Baz();
   // ok

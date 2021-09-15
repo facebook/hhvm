@@ -1,4 +1,4 @@
-File "params.php", line 12, characters 3-4:
-This value is readonly, its properties cannot be modified (Typing[4409])
-File "params.php", line 19, characters 5-6:
-This value is readonly, its properties cannot be modified (Typing[4409])
+File "params.php", line 12, characters 3-14:
+This expression is readonly, its members cannot be modified (Parsing[1002])
+File "params.php", line 19, characters 5-16:
+This expression is readonly, its members cannot be modified (Parsing[1002])

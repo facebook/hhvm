@@ -360,6 +360,14 @@ fn check_assignment_validity(
                 check_assignment_validity(context, checker, &e.1.clone(), e, rhs);
             }
         }
+        // directly assigning to a class static is always valid (locally) as long as the rhs is explicit on its readonlyness
+        aast::Expr_::ClassGet(_) => {
+            let rhs_rty = rty_expr(context, &rhs);
+            match rhs_rty {
+                Rty::Readonly => explicit_readonly(rhs),
+                _ => {}
+            }
+        }
         _ => {
             check_assignment_nonlocal(context, checker, pos, lhs, rhs);
         }

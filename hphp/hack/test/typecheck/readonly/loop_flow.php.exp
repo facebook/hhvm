@@ -1,16 +1,22 @@
-File "loop_flow.php", line 53, characters 3-4:
-This value is readonly, its properties cannot be modified (Typing[4409])
-File "loop_flow.php", line 60, characters 3-4:
-This value is readonly, its properties cannot be modified (Typing[4409])
-File "loop_flow.php", line 70, characters 5-6:
-This value is readonly, its properties cannot be modified (Typing[4409])
-File "loop_flow.php", line 84, characters 3-4:
-This value is readonly, its properties cannot be modified (Typing[4409])
-File "loop_flow.php", line 94, characters 5-6:
-This value is readonly, its properties cannot be modified (Typing[4409])
-File "loop_flow.php", line 99, characters 3-4:
-This value is readonly, its properties cannot be modified (Typing[4409])
-File "loop_flow.php", line 100, characters 3-4:
-This value is readonly, its properties cannot be modified (Typing[4409])
-File "loop_flow.php", line 101, characters 3-4:
-This value is readonly, its properties cannot be modified (Typing[4409])
+File "loop_flow.php", line 13, characters 3-14:
+This expression is readonly, its members cannot be modified (Parsing[1002])
+File "loop_flow.php", line 20, characters 3-14:
+This expression is readonly, its members cannot be modified (Parsing[1002])
+File "loop_flow.php", line 28, characters 3-14:
+This expression is readonly, its members cannot be modified (Parsing[1002])
+File "loop_flow.php", line 53, characters 3-14:
+This expression is readonly, its members cannot be modified (Parsing[1002])
+File "loop_flow.php", line 60, characters 3-14:
+This expression is readonly, its members cannot be modified (Parsing[1002])
+File "loop_flow.php", line 70, characters 5-16:
+This expression is readonly, its members cannot be modified (Parsing[1002])
+File "loop_flow.php", line 84, characters 3-14:
+This expression is readonly, its members cannot be modified (Parsing[1002])
+File "loop_flow.php", line 94, characters 5-16:
+This expression is readonly, its members cannot be modified (Parsing[1002])
+File "loop_flow.php", line 99, characters 3-14:
+This expression is readonly, its members cannot be modified (Parsing[1002])
+File "loop_flow.php", line 100, characters 3-14:
+This expression is readonly, its members cannot be modified (Parsing[1002])
+File "loop_flow.php", line 101, characters 3-14:
+This expression is readonly, its members cannot be modified (Parsing[1002])

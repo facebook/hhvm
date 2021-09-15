@@ -6340,6 +6340,31 @@ and dispatch_call
     (result, should_forget_fakes)
   (* Calling parent / class method *)
   | Class_const (class_id, m) -> dispatch_class_const env class_id m
+  (* Readonly Expressions do not affect the type, but need to be threaded through when they're part of a call *)
+  | ReadonlyExpr r ->
+    (* Recurse onto the inner call *)
+    let ((env, expr, ty), s) =
+      dispatch_call
+        ~expected
+        ~is_using_clause
+        ?in_await
+        p
+        env
+        r
+        explicit_targs
+        el
+        unpacked_element
+    in
+    (match expr with
+    | (ty, _, Call (caller, tal, tel, c)) ->
+      let (caller_ty, caller_pos, _) = caller in
+      (* Rewrap the caller in the readonly expression after we're done *)
+      let wrapped_caller =
+        Tast.make_typed_expr caller_pos caller_ty (Aast.ReadonlyExpr caller)
+      in
+      let result = make_call env wrapped_caller tal tel c ty in
+      (result, s)
+    | _ -> ((env, expr, ty), s))
   (* Call instance method *)
   | Obj_get (e1, (_, pos_id, Id m), nullflavor, false)
     when not (TypecheckerOptions.method_call_inference (Env.get_tcopt env)) ->

@@ -99,7 +99,7 @@ ocaml_ffi! {
              (tree, arena)
         };
 
-        let errors = rust_parser_errors::parse_errors(
+        let (errors, _) = rust_parser_errors::parse_errors(
             &tree,
             parser_options,
             hhvm_compat_mode,

@@ -130,7 +130,7 @@ impl<'src> AastParser {
     ) -> Vec<SyntaxError> {
         let find_errors = |hhi_mode: bool| -> Vec<SyntaxError> {
             let mut errors = tree.errors().into_iter().cloned().collect::<Vec<_>>();
-            errors.extend(parse_errors_with_text(
+            let (parse_errors, uses_readonly) = parse_errors_with_text(
                 tree,
                 indexed_source_text.clone(),
                 // TODO(hrust) change to parser_otions to ref in ParserErrors
@@ -138,12 +138,16 @@ impl<'src> AastParser {
                 true, /* hhvm_compat_mode */
                 hhi_mode,
                 env.codegen,
-            ));
+            );
+            errors.extend(parse_errors);
             errors.sort_by(SyntaxError::compare_offset);
 
             let mut empty_program = vec![];
             let mut aast = aast.unwrap_or(&mut empty_program);
-            if env.parser_options.po_enable_readonly_in_emitter && !env.is_systemlib {
+            if uses_readonly
+                && env.parser_options.po_enable_readonly_in_emitter
+                && !env.is_systemlib
+            {
                 errors.extend(readonly_check::check_program(&mut aast));
             }
             errors.extend(aast_check::check_program(&aast));

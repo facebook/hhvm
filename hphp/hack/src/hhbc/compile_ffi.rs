@@ -345,22 +345,22 @@ unsafe extern "C" fn hackc_compile_hhas_from_text_cpp_ffi(
 ) -> *const HhasProgram<'static> {
     match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
         // Safety: `alloc` came via `hackc_compile_hhas_create_arena`.
-        let alloc: unsafe_utils::AssertSafe<&'static bumpalo::Bump> =
+        let alloc: unsafe_utils::AssertSafe<&bumpalo::Bump> =
             unsafe_utils::assert_safe(alloc.as_ref().unwrap());
         // Safety: `cnative_env`is a well aligned, properly initialized
         // `*const CNativeEnv`.
-        let cnative_env: unsafe_utils::AssertSafe<&'static CNativeEnv> =
+        let cnative_env: unsafe_utils::AssertSafe<&CNativeEnv> =
             unsafe_utils::assert_safe(cnative_env.as_ref().unwrap());
         // Safety: `err_buf` is a well aligned, properly initialized
         // `*const CErrBuf`.
-        let err_buf: &'static CErrBuf = err_buf.as_ref().unwrap();
+        let err_buf: &CErrBuf = err_buf.as_ref().unwrap();
         // Safety : `err_buf.buf` must be valid for reads and writes
         // for `err_buf.buf_len * mem::sizeof::<u8>()` bytes.
-        let buf: &'static mut [u8] =
+        let buf: &mut [u8] =
             std::slice::from_raw_parts_mut(err_buf.buf as *mut u8, err_buf.buf_len as usize);
         // Safety: `source_text` is a properly iniitalized
         // nul-terminated C string.
-        let text: &'static [u8] = std::ffi::CStr::from_ptr(source_text).to_bytes();
+        let text: &[u8] = std::ffi::CStr::from_ptr(source_text).to_bytes();
 
         let job_builder = || {
             let job = move |stack_limit: &StackLimit, _nomain_stack_size: Option<usize>| -> Result<unsafe_utils::AssertSafe<*const HhasProgram<'static>>, anyhow::Error>{

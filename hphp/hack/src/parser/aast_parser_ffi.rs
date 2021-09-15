@@ -22,12 +22,13 @@ fn stack_slack_for_traversal_and_parsing(stack_size: usize) -> usize {
 #[no_mangle]
 extern "C" fn from_text(env: usize, source_text: usize) -> usize {
     ocamlrep_ocamlpool::catch_unwind(|| {
+        let env = unsafe { &Env::from_ocaml(env).unwrap() };
+
         let make_retryable = move || {
             move |stack_limit: &StackLimit, _nonmain_stack_size: Option<usize>| {
-                let env = unsafe { Env::from_ocaml(env).unwrap() };
                 let source_text = unsafe { SourceText::from_ocaml(source_text).unwrap() };
                 let indexed_source_text = IndexedSourceText::new(source_text);
-                let res = AastParser::from_text(&env, &indexed_source_text, Some(stack_limit));
+                let res = AastParser::from_text(env, &indexed_source_text, Some(stack_limit));
                 // Safety: Requires no concurrent interaction with OCaml
                 // runtime from other threads.
                 unsafe { to_ocaml(&res) }

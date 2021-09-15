@@ -16,7 +16,7 @@ use oxidized_by_ref::{decl_parser_options::DeclParserOptions, direct_decl_parser
 use stack_limit::{StackLimit, KI, MI, STACK_SLACK_1K};
 
 #[no_mangle]
-pub unsafe extern "C" fn hh_parse_decls_and_mode_ffi(
+unsafe extern "C" fn hh_parse_decls_and_mode_ffi(
     opts_ptr: usize,
     filename_ptr: usize,
     text_ptr: usize,
@@ -30,6 +30,19 @@ pub unsafe extern "C" fn hh_parse_decls_and_mode_ffi(
         include_file_decl_hash: usize,
         include_symbol_decl_hashes: usize,
     ) -> usize {
+        let arena = &Bump::new();
+        // SAFETY: We trust we've been handed a valid, immutable OCaml value,
+        // and that the OCaml runtime (e.g., allocation, GC) has not been
+        // called into since our FFI call began
+        let opts_value = unsafe { ocamlrep::Value::from_bits(opts_ptr) };
+        let opts = &DeclParserOptions::from_ocamlrep_in(opts_value, arena).unwrap();
+
+        // SAFETY: the OCaml garbage collector must not run as long as text_ptr
+        // and text_value exist. We don't call into OCaml here or anywhere in
+        // the direct decl parser smart constructors, so it won't.
+        let text_value = unsafe { ocamlrep::Value::from_bits(text_ptr) };
+        let text = bytes_from_ocamlrep(text_value).expect("expected string");
+
         // SAFETY: We trust we've been handed a valid, immutable OCaml value
         let include_file_decl_hash = unsafe { bool::from_ocaml(include_file_decl_hash).unwrap() };
         let include_symbol_decl_hashes =
@@ -37,32 +50,14 @@ pub unsafe extern "C" fn hh_parse_decls_and_mode_ffi(
 
         let make_retryable = move || {
             move |stack_limit: &StackLimit, _nonmain_stack_size: Option<usize>| {
-                // SAFETY: the OCaml garbage collector must not run as long as text_ptr
-                // and text_value exist. We don't call into OCaml here or anywhere in
-                // the direct decl parser smart constructors, so it won't.
-                let text_value = unsafe { ocamlrep::Value::from_bits(text_ptr) };
-                let text = bytes_from_ocamlrep(text_value).expect("expected string");
-
                 // SAFETY: We trust we've been handed a valid, immutable OCaml value,
                 // and that the OCaml runtime (e.g., allocation, GC) has not been
                 // called into since our FFI call began
                 let filename = unsafe { RelativePath::from_ocaml(filename_ptr).unwrap() };
 
-                let arena = Bump::new();
-
-                // SAFETY: We trust we've been handed a valid, immutable OCaml value,
-                // and that the OCaml runtime (e.g., allocation, GC) has not been
-                // called into since our FFI call began
-                let opts = unsafe {
-                    DeclParserOptions::from_ocamlrep_in(
-                        ocamlrep::Value::from_bits(opts_ptr),
-                        &arena,
-                    )
-                    .unwrap()
-                };
-
+                let arena = &Bump::new();
                 let (decls, mode) =
-                    parse_decls_and_mode(&opts, filename, &text, &arena, Some(stack_limit));
+                    parse_decls_and_mode(opts, filename, text, arena, Some(stack_limit));
 
                 let symbol_decl_hashes = if include_symbol_decl_hashes {
                     Some(
@@ -82,7 +77,7 @@ pub unsafe extern "C" fn hh_parse_decls_and_mode_ffi(
                 };
 
                 // SAFETY: We immediately hand this pointer to the OCaml runtime.
-                // The use of UnsafeOcamlPtr is necessary here because we cannot return
+                // The use of to_ocaml is necessary here because we cannot return
                 // `decls`, since it borrows `arena`, which is destroyed at the end of
                 // this function scope. Instead, we convert the decls to OCaml
                 // ourselves, and return the pointer (the converted OCaml value does not

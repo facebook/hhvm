@@ -61,8 +61,8 @@ impl Job {
     ) -> Result<T, JobFailed>
     where
         F: FnOnce(&StackLimit, NonMainStackSize) -> T,
-        F: Send + 'static + std::panic::UnwindSafe,
-        T: Send + 'static,
+        F: Send + std::panic::UnwindSafe,
+        T: Send,
     {
         // Eagerly validate job parameters via getters, so we can panic before executing
         let max_stack_size = self.check_nonmain_space_max();
@@ -96,12 +96,15 @@ impl Job {
             // Call retryable on the current thread in the 1st iteration or nonmain thread otherwise.
             let result_opt = match nonmain_stack_size {
                 None => try_retryable(),
-                Some(stack_size) => std::thread::Builder::new()
-                    .stack_size(stack_size)
-                    .spawn(try_retryable)
-                    .expect("ERROR: thread::spawn")
-                    .join()
-                    .expect("ERROR: failed to wait on new thread"),
+                Some(stack_size) => crossbeam::scope(|s| {
+                    s.builder()
+                        .stack_size(stack_size)
+                        .spawn(|_| try_retryable())
+                        .expect("ERROR: thread::spawn")
+                        .join()
+                        .expect("ERROR: failed to wait on new thread")
+                })
+                .expect("ERROR: crossbeam::scope"),
             };
             if let Some(result) = result_opt {
                 return Ok(result);

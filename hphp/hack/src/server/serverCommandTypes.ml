@@ -420,6 +420,7 @@ type _ t =
       string * position * bool
       -> AutocompleteTypes.ide_result t
   | IDE_FFP_AUTOCOMPLETE : string * position -> AutocompleteTypes.ide_result t
+  | CODE_ACTIONS : string * range -> Lsp.CodeAction.command_or_action list t
   | DISCONNECT : unit t
   | SUBSCRIBE_DIAGNOSTIC : subscribe_diagnostic -> unit t
   | UNSUBSCRIBE_DIAGNOSTIC : int -> unit t

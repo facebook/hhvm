@@ -458,6 +458,10 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         char_at_pos;
         is_complete = true;
       } )
+  | CODE_ACTIONS (path, range) ->
+    let (ctx, entry) = single_ctx_path env path in
+    let actions = CodeActionsService.go ~ctx ~entry ~path ~range in
+    (env, actions)
   | DISCONNECT -> (ServerFileSync.clear_sync_data env, ())
   | SUBSCRIBE_DIAGNOSTIC { id; error_limit } ->
     if TypecheckerOptions.stream_errors env.tcopt then

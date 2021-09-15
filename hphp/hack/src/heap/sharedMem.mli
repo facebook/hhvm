@@ -389,8 +389,6 @@ module type NoCache = sig
 
   val remove_batch : KeySet.t -> unit
 
-  val string_of_key : key -> string
-
   val mem : key -> bool
 
   val mem_old : key -> bool
@@ -440,8 +438,6 @@ module type CacheType = sig
   val remove : key -> unit
 
   val clear : unit -> unit
-
-  val string_of_key : key -> string
 
   val get_size : unit -> int
 

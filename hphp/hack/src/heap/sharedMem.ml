@@ -1135,8 +1135,6 @@ module type NoCache = sig
 
   val remove_batch : KeySet.t -> unit
 
-  val string_of_key : key -> string
-
   val mem : key -> bool
 
   val mem_old : key -> bool
@@ -1179,8 +1177,6 @@ module type CacheType = sig
   val remove : key -> unit
 
   val clear : unit -> unit
-
-  val string_of_key : key -> string
 
   val get_size : unit -> int
 
@@ -1248,9 +1244,6 @@ module NoCache (Raw : Raw) (UserKeyType : UserKeyType) (Value : Value.Type) :
   type key = UserKeyType.t
 
   type t = Value.t
-
-  let string_of_key key =
-    key |> Key.make Value.prefix |> Key.md5 |> Key.string_of_md5
 
   let add x y = New.add (Key.make Value.prefix x) y
 
@@ -1391,8 +1384,6 @@ struct
 
   type value = LocalHashtblConfig.value
 
-  let string_of_key _key = failwith "FreqCache does not support 'string_of_key'"
-
   (* The cache itself *)
   let (cache : (Key.t, int ref * value) Hashtbl.t) =
     Hashtbl.create (2 * LocalHashtblConfig.capacity)
@@ -1475,9 +1466,6 @@ struct
   type key = Key.t
 
   type value = LocalHashtblConfig.value
-
-  let string_of_key _key =
-    failwith "OrderedCache does not support 'string_of_key'"
 
   let (cache : (Key.t, LocalHashtblConfig.value) Hashtbl.t) =
     Hashtbl.create LocalHashtblConfig.capacity
@@ -1653,8 +1641,6 @@ module WithCache
   module KeySet = Direct.KeySet
   module KeyMap = Direct.KeyMap
   module Cache = LocalCache (UserKeyType) (ValueForCache) (Capacity)
-
-  let string_of_key key = Direct.string_of_key key
 
   let add x y =
     Direct.add x y;

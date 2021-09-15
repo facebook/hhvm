@@ -47,7 +47,9 @@ let expect_equals ~name value expected =
     (value = expected)
 
 let test_local_changes
-    (module IntHeap : SharedMem.NoCache with type t = int and type key = string)
+    (module IntHeap : SharedMem.NoCache
+      with type value = int
+       and type key = string)
     () =
   let expect_value ~name expected =
     expect_equals ~name (IntHeap.get name) expected;
@@ -151,14 +153,16 @@ module type WithVisibleCache = sig
   include SharedMem.WithCache
 
   module Cache : sig
-    module L1 : SharedMem.CacheType with type key := key and type value := t
+    module L1 : SharedMem.CacheType with type key := key and type value := value
 
-    module L2 : SharedMem.CacheType with type key := key and type value := t
+    module L2 : SharedMem.CacheType with type key := key and type value := value
   end
 end
 
 let test_cache_behavior
-    (module IntHeap : WithVisibleCache with type t = int and type key = string)
+    (module IntHeap : WithVisibleCache
+      with type value = int
+       and type key = string)
     () =
   let expect_cache_size expected_l1 expected_l2 =
     let actual_l1 = IntHeap.Cache.L1.get_size () in

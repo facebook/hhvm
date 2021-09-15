@@ -128,7 +128,7 @@ module ClassEltDiff = struct
       (type t)
       (module EltHeap : SharedMem.NoCache
         with type key = string * string
-         and type t = t)
+         and type value = t)
       ~cid
       ~elts1
       ~elts2

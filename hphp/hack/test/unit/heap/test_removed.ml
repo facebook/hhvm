@@ -19,7 +19,9 @@ module IntVal = struct
 end
 
 let test_add_remove
-    (module IntHeap : SharedMem.NoCache with type t = int and type key = string)
+    (module IntHeap : SharedMem.NoCache
+      with type value = int
+       and type key = string)
     () =
   assert (SharedMem.SMTelemetry.hh_removed_count () = 0);
   IntHeap.add "a" 4;

@@ -367,25 +367,25 @@ end
 module type NoCache = sig
   type key
 
-  type t
+  type value
 
   module KeySet : Set.S with type elt = key
 
   module KeyMap : WrappedMap.S with type key = key
 
-  val add : key -> t -> unit
+  val add : key -> value -> unit
 
-  val get : key -> t option
+  val get : key -> value option
 
-  val get_old : key -> t option
+  val get_old : key -> value option
 
-  val get_old_batch : KeySet.t -> t option KeyMap.t
+  val get_old_batch : KeySet.t -> value option KeyMap.t
 
   val remove_old_batch : KeySet.t -> unit
 
-  val find_unsafe : key -> t (* May throw {!Shared_mem_not_found} *)
+  val find_unsafe : key -> value (* May throw {!Shared_mem_not_found} *)
 
-  val get_batch : KeySet.t -> t option KeyMap.t
+  val get_batch : KeySet.t -> value option KeyMap.t
 
   val remove_batch : KeySet.t -> unit
 
@@ -421,7 +421,7 @@ end
 module NoCache (_ : Raw) (UserKeyType : UserKeyType) (Value : Value.Type) :
   NoCache
     with type key = UserKeyType.t
-     and type t = Value.t
+     and type value = Value.t
      and module KeySet = Set.Make(UserKeyType)
      and module KeyMap = WrappedMap.Make(UserKeyType)
 
@@ -501,11 +501,11 @@ module LocalCache
 module type WithCache = sig
   include NoCache
 
-  val write_around : key -> t -> unit
+  val write_around : key -> value -> unit
 
-  val get_no_cache : key -> t option
+  val get_no_cache : key -> value option
 
-  module Cache : LocalCache with type key = key and type value = t
+  module Cache : LocalCache with type key = key and type value = value
 end
 
 module WithCache
@@ -515,6 +515,6 @@ module WithCache
     (_ : LocalCapacityType) :
   WithCache
     with type key = UserKeyType.t
-     and type t = Value.t
+     and type value = Value.t
      and module KeySet = Set.Make(UserKeyType)
      and module KeyMap = WrappedMap.Make(UserKeyType)

@@ -956,20 +956,16 @@ Effects miProp(ISS& env, MOpMode mode, Type key, ReadonlyOp op) {
     if (name) {
       auto const [ty, effects] = [&] () -> std::pair<Type, Effects> {
         if (update) {
+          if (checkReadonlyOpThrows(ReadonlyOp::Mutable, op) &&
+            isDefinitelyThisPropAttr(env, name, AttrIsReadonly)) {
+            return { TBottom, Effects::AlwaysThrows };
+          }
           if (auto const elem = thisPropType(env, name)) {
             return { *elem, Effects::Throws };
           }
         } else if (auto const propTy = thisPropAsCell(env, name)) {
           if (propTy->subtypeOf(BBottom)) {
             return { TBottom, Effects::AlwaysThrows };
-          }
-          if (checkReadonlyOpThrows(ReadonlyOp::Mutable, op) &&
-            isDefinitelyThisPropAttr(env, name, AttrIsReadonly)) {
-            return { TBottom, Effects::AlwaysThrows };
-          }
-          if (checkReadonlyOpMaybeThrows(ReadonlyOp::Mutable, op) &&
-            isMaybeThisPropAttr(env, name, AttrIsReadonly)) {
-            return { *propTy, Effects::Throws };
           }
           if (isMaybeThisPropAttr(env, name, AttrLateInit)) {
             return { *propTy, Effects::Throws };
@@ -1372,11 +1368,12 @@ Effects miFinalCGetProp(ISS& env, int32_t nDiscard, const Type& key,
           push(env, TBottom);
           return Effects::AlwaysThrows;
         }
-        push(env, std::move(*t));
         if (checkReadonlyOpThrows(ReadonlyOp::Mutable, op) &&
           isDefinitelyThisPropAttr(env, name, AttrIsReadonly)) {
+          push(env, TBottom);
           return Effects::AlwaysThrows;
         }
+        push(env, std::move(*t));
         if (checkReadonlyOpMaybeThrows(ReadonlyOp::Mutable, op) &&
           isMaybeThisPropAttr(env, name, AttrIsReadonly)) {
           return Effects::Throws;

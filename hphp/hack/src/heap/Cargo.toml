@@ -12,7 +12,7 @@ test = false
 [dependencies]
 depgraph = { path = "../depgraph/cargo/depgraph" }
 indicatif = { version = "0.15", features = ["with_rayon"] }
-rusqlite = { version = "0.23", features = ["blob"] }
+rusqlite = { version = "0.23", features = ["backup", "blob"] }
 structopt = "0.3.21"
 
 [profile.release]

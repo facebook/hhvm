@@ -63,6 +63,12 @@ impl FromOcamlRep for UnsafeOcamlPtr {
     }
 }
 
+impl<'a> crate::FromOcamlRepIn<'a> for UnsafeOcamlPtr {
+    fn from_ocamlrep_in(value: Value<'_>, _alloc: &'a bumpalo::Bump) -> Result<Self, FromError> {
+        Self::from_ocamlrep(value)
+    }
+}
+
 /// Any kind of foreign pointer (i.e., a pointer to any data at all--it need not
 /// look like a valid OCaml value).
 ///

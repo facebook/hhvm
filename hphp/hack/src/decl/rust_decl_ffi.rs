@@ -8,52 +8,31 @@ use bumpalo::Bump;
 
 use decl_rust::direct_decl_parser::parse_decls_and_mode;
 use no_pos_hash::position_insensitive_hash;
-use ocamlrep::{bytes_from_ocamlrep, FromOcamlRep, FromOcamlRepIn};
+use ocamlrep::{bytes_from_ocamlrep, ptr::UnsafeOcamlPtr};
 use ocamlrep_caml_builtins::Int64;
 use ocamlrep_ocamlpool::ocaml_ffi_with_arena;
 use oxidized::relative_path::RelativePath;
 use oxidized_by_ref::{decl_parser_options::DeclParserOptions, direct_decl_parser::Decls};
 use stack_limit::{StackLimit, KI, MI, STACK_SLACK_1K};
 
-#[no_mangle]
-unsafe extern "C" fn hh_parse_decls_and_mode_ffi(
-    opts_ptr: usize,
-    filename_ptr: usize,
-    text_ptr: usize,
-    include_file_decl_hash: usize,
-    include_symbol_decl_hashes: usize,
-) -> usize {
-    fn inner(
-        opts_ptr: usize,
-        filename_ptr: usize,
-        text_ptr: usize,
-        include_file_decl_hash: usize,
-        include_symbol_decl_hashes: usize,
-    ) -> usize {
-        let arena = &Bump::new();
-        // SAFETY: We trust we've been handed a valid, immutable OCaml value,
-        // and that the OCaml runtime (e.g., allocation, GC) has not been
-        // called into since our FFI call began
-        let opts_value = unsafe { ocamlrep::Value::from_bits(opts_ptr) };
-        let opts = &DeclParserOptions::from_ocamlrep_in(opts_value, arena).unwrap();
-
-        // SAFETY: the OCaml garbage collector must not run as long as text_ptr
-        // and text_value exist. We don't call into OCaml here or anywhere in
+ocaml_ffi_with_arena! {
+    fn hh_parse_decls_and_mode_ffi<'a>(
+        arena: &'a Bump,
+        opts: &'a DeclParserOptions<'a>,
+        filename: &'a oxidized_by_ref::relative_path::RelativePath<'a>,
+        text: UnsafeOcamlPtr,
+        include_file_decl_hash: bool,
+        include_symbol_decl_hashes: bool,
+    ) -> UnsafeOcamlPtr {
+        // SAFETY: the OCaml garbage collector must not run as long as
+        // text_value exists. We don't call into OCaml here or anywhere in
         // the direct decl parser smart constructors, so it won't.
-        let text_value = unsafe { ocamlrep::Value::from_bits(text_ptr) };
+        let text_value = unsafe { text.as_value() };
         let text = bytes_from_ocamlrep(text_value).expect("expected string");
-
-        // SAFETY: We trust we've been handed a valid, immutable OCaml value
-        let include_file_decl_hash = unsafe { bool::from_ocaml(include_file_decl_hash).unwrap() };
-        let include_symbol_decl_hashes =
-            unsafe { bool::from_ocaml(include_symbol_decl_hashes).unwrap() };
 
         let make_retryable = move || {
             move |stack_limit: &StackLimit, _nonmain_stack_size: Option<usize>| {
-                // SAFETY: We trust we've been handed a valid, immutable OCaml value,
-                // and that the OCaml runtime (e.g., allocation, GC) has not been
-                // called into since our FFI call began
-                let filename = unsafe { RelativePath::from_ocaml(filename_ptr).unwrap() };
+                let filename = RelativePath::make(filename.prefix(), filename.path().to_owned());
 
                 let arena = &Bump::new();
                 let (decls, mode) =
@@ -83,7 +62,12 @@ unsafe extern "C" fn hh_parse_decls_and_mode_ffi(
                 // ourselves, and return the pointer (the converted OCaml value does not
                 // borrow the arena).
                 unsafe {
-                    ocamlrep_ocamlpool::to_ocaml(&(decls, mode, file_decl_hash, symbol_decl_hashes))
+                    UnsafeOcamlPtr::new(ocamlrep_ocamlpool::to_ocaml(&(
+                        decls,
+                        mode,
+                        file_decl_hash,
+                        symbol_decl_hashes,
+                    )))
                 }
             }
         };
@@ -94,8 +78,7 @@ unsafe extern "C" fn hh_parse_decls_and_mode_ffi(
                 eprintln!(
                     "[hrust] warning: direct_decl_parser exceeded stack of {} KiB on: {:?}",
                     (stack_size_tried - STACK_SLACK_1K(stack_size_tried)) / KI,
-                    // SAFETY: We trust we've been handed a valid, immutable OCaml value
-                    unsafe { RelativePath::from_ocaml(filename_ptr).unwrap() },
+                    filename,
                 );
             }
         };
@@ -119,18 +102,7 @@ unsafe extern "C" fn hh_parse_decls_and_mode_ffi(
             }
         }
     }
-    ocamlrep_ocamlpool::catch_unwind(|| {
-        inner(
-            opts_ptr,
-            filename_ptr,
-            text_ptr,
-            include_file_decl_hash,
-            include_symbol_decl_hashes,
-        )
-    })
-}
 
-ocaml_ffi_with_arena! {
     fn decls_hash<'a>(arena: &'a Bump, decls: Decls<'a>) -> Int64 {
         Int64(position_insensitive_hash(&decls) as i64)
     }

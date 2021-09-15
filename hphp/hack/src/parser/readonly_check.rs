@@ -4,6 +4,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use aast::Expr_ as E_;
 use naming_special_names_rust::special_idents;
 use oxidized::{
     aast,
@@ -594,6 +595,41 @@ impl<'ast> VisitorMut<'ast> for Checker {
             }
             aast::Stmt_::Foreach(f) => {
                 let (e, as_expr, b) = &mut **f;
+                match as_expr {
+                    aast::AsExpr::AsV(aast::Expr(_, _, E_::Lvar(id))) => {
+                        let var_name = local_id::get_name(&id.1);
+                        let rty = rty_expr(context, e);
+                        context.add_local(var_name, rty)
+                    }
+                    aast::AsExpr::AsKv(
+                        _, // key is arraykey and does not need to be readonly
+                        aast::Expr(_, _, E_::Lvar(value_id)),
+                    ) => {
+                        let var_name = local_id::get_name(&value_id.1);
+                        let rty = rty_expr(context, e);
+                        context.add_local(var_name, rty);
+                    }
+                    aast::AsExpr::AwaitAsV(_, aast::Expr(_, _, E_::Lvar(id))) => {
+                        let var_name = local_id::get_name(&id.1);
+                        let rty = rty_expr(context, e);
+                        context.add_local(var_name, rty)
+                    }
+                    aast::AsExpr::AwaitAsKv(
+                        _,
+                        _, // key is arraykey and does not need to be readonly
+                        aast::Expr(_, _, E_::Lvar(value_id)),
+                    ) => {
+                        let var_name = local_id::get_name(&value_id.1);
+                        let rty = rty_expr(context, e);
+                        context.add_local(var_name, rty);
+                    }
+                    // Any other Foreach here would mean no Lvar
+                    // where an Lvar is needed. In those cases
+                    // we will parse error, but the parse tree might still exist
+                    // so we just ignore those cases and continue our analysis
+                    // knowing that a parse error will show up
+                    _ => {}
+                };
                 e.recurse(context, self.object())?;
                 as_expr.recurse(context, self.object())?;
                 let old_lenv = context.locals.clone();

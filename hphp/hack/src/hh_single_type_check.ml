@@ -1209,18 +1209,23 @@ let add_newline contents =
       ~pos:after_header
       ~len:(String.length contents - after_header)
 
-(* Might raise {!SharedMem.Shared_mem_not_found} *)
+(* Might raise because of Option.value_exn *)
 let get_decls defs =
   ( SSet.fold
-      (fun x acc -> Decl_heap.Typedefs.find_unsafe x :: acc)
+      (fun x acc ->
+        Option.value_exn ~message:"Decl not found" (Decl_heap.Typedefs.get x)
+        :: acc)
       defs.FileInfo.n_types
       [],
     SSet.fold
-      (fun x acc -> Decl_heap.Funs.find_unsafe x :: acc)
+      (fun x acc ->
+        Option.value_exn ~message:"Decl not found" (Decl_heap.Funs.get x) :: acc)
       defs.FileInfo.n_funs
       [],
     SSet.fold
-      (fun x acc -> Decl_heap.Classes.find_unsafe x :: acc)
+      (fun x acc ->
+        Option.value_exn ~message:"Decl not found" (Decl_heap.Classes.get x)
+        :: acc)
       defs.FileInfo.n_classes
       [] )
 
@@ -2058,7 +2063,7 @@ let handle_mode
     if not (List.is_empty errors) then exit 2
   | Decl_compare ->
     let filename = expect_single_file () in
-    (* Might raise {!SharedMem.Shared_mem_not_found} *)
+    (* Might raise because of Option.value_exn *)
     test_decl_compare ctx filename builtins files_contents files_info
   | Shallow_class_diff ->
     print_errors_if_present parse_errors;

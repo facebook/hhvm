@@ -332,8 +332,6 @@ module New (Raw : Raw) (Key : Key) (Value : Value.Type) : sig
 
   val get : Key.t -> Value.t option
 
-  val find_unsafe : Key.t -> Value.t (* may throw {!Shared_mem_not_found} *)
-
   val remove : Key.t -> unit
 
   val mem : Key.t -> bool
@@ -382,8 +380,6 @@ module type NoCache = sig
   val get_old_batch : KeySet.t -> value option KeyMap.t
 
   val remove_old_batch : KeySet.t -> unit
-
-  val find_unsafe : key -> value (* May throw {!Shared_mem_not_found} *)
 
   val get_batch : KeySet.t -> value option KeyMap.t
 

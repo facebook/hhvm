@@ -24,8 +24,6 @@ let make_workers n =
 module UnitVal = struct
   type t = unit
 
-  let prefix = Prefix.make ()
-
   let description = "Test_UnitVal"
 end
 

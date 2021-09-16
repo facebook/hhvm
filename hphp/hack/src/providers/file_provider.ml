@@ -29,8 +29,6 @@ module FileHeap =
     (struct
       type t = file_type
 
-      let prefix = Prefix.make ()
-
       let description = "File"
     end)
 

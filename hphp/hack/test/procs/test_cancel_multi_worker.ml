@@ -10,8 +10,6 @@ let num_jobs = 100000
 module IntVal = struct
   type t = int
 
-  let prefix = Prefix.make ()
-
   let description = "Test_IntVal"
 end
 

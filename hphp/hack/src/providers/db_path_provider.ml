@@ -14,8 +14,6 @@ module Shared_db_settings =
     (struct
       type t = Naming_sqlite.db_path
 
-      let prefix = Prefix.make ()
-
       let description = "NamingTableDatabaseSettings"
     end)
 

@@ -13,8 +13,6 @@ type key = OpaqueDigest.t
 module IntVal = struct
   type t = int
 
-  let prefix = Prefix.make ()
-
   let description = "Test_IntVal"
 end
 

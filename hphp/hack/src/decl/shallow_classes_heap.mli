@@ -15,13 +15,7 @@ module Capacity : sig
   val capacity : int
 end
 
-module Class : sig
-  type t = shallow_class
-
-  val prefix : Prefix.t
-
-  val description : string
-end
+module Class : Value.Type with type t = shallow_class
 
 module Classes :
     module type of
@@ -32,13 +26,7 @@ module FilterCapacity : sig
   val capacity : int
 end
 
-module Filter : sig
-  type t = BloomFilter.t
-
-  val prefix : Prefix.t
-
-  val description : string
-end
+module Filter : Value.Type with type t = BloomFilter.t
 
 module MemberFilters : sig
   include module type of

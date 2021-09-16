@@ -16,8 +16,6 @@ end
 module Class = struct
   type t = shallow_class
 
-  let prefix = Prefix.make ()
-
   let description = "Decl_ShallowClass"
 end
 
@@ -33,8 +31,6 @@ end
 
 module Filter = struct
   type t = BloomFilter.t
-
-  let prefix = Prefix.make ()
 
   let description = "Decl_MemberFilter"
 end

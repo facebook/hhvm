@@ -14,85 +14,25 @@ module Capacity : sig
   val capacity : int
 end
 
-module Class : sig
-  type t = decl_class_type
+module Class : Value.Type with type t = decl_class_type
 
-  val prefix : Prefix.t
+module Fun : Value.Type with type t = fun_elt
 
-  val description : string
-end
+module Typedef : Value.Type with type t = typedef_type
 
-module Fun : sig
-  type t = fun_elt
+module RecordDef : Value.Type with type t = record_def_type
 
-  val prefix : Prefix.t
+module GConst : Value.Type with type t = const_decl
 
-  val description : string
-end
+module Property : Value.Type with type t = decl_ty
 
-module Typedef : sig
-  type t = typedef_type
+module StaticProperty : Value.Type with type t = decl_ty
 
-  val prefix : Prefix.t
+module Method : Value.Type with type t = fun_elt
 
-  val description : string
-end
+module StaticMethod : Value.Type with type t = fun_elt
 
-module RecordDef : sig
-  type t = record_def_type
-
-  val prefix : Prefix.t
-
-  val description : string
-end
-
-module GConst : sig
-  type t = const_decl
-
-  val prefix : Prefix.t
-
-  val description : string
-end
-
-module Property : sig
-  type t = decl_ty
-
-  val prefix : Prefix.t
-
-  val description : string
-end
-
-module StaticProperty : sig
-  type t = decl_ty
-
-  val prefix : Prefix.t
-
-  val description : string
-end
-
-module Method : sig
-  type t = fun_elt
-
-  val prefix : Prefix.t
-
-  val description : string
-end
-
-module StaticMethod : sig
-  type t = fun_elt
-
-  val prefix : Prefix.t
-
-  val description : string
-end
-
-module Constructor : sig
-  type t = fun_elt
-
-  val prefix : Prefix.t
-
-  val description : string
-end
+module Constructor : Value.Type with type t = fun_elt
 
 module ClassEltKey : SharedMem.UserKeyType with type t = string * string
 

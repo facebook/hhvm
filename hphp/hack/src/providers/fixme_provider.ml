@@ -28,8 +28,6 @@ module HH_FIXMES =
     (struct
       type t = fixme_map
 
-      let prefix = Prefix.make ()
-
       let description = "Fixme_HH_FIXMES"
     end)
     (struct
@@ -41,8 +39,6 @@ module DECL_HH_FIXMES =
     (struct
       type t = fixme_map
 
-      let prefix = Prefix.make ()
-
       let description = "Fixme_DECL_HH_FIXMES"
     end)
     (struct
@@ -53,8 +49,6 @@ module DISALLOWED_FIXMES =
   SharedMem.WithCache (SharedMem.Immediate) (Relative_path.S)
     (struct
       type t = fixme_map
-
-      let prefix = Prefix.make ()
 
       let description = "Fixme_DISALLOWED_FIXMES"
     end)

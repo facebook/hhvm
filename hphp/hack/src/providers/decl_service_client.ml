@@ -32,8 +32,6 @@ module Decls =
     (struct
       type t = decl option
 
-      let prefix = Prefix.make ()
-
       let description = "Decl_service_client_Decls"
     end)
     (struct

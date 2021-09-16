@@ -54,8 +54,6 @@ module Cache =
     (struct
       type t = Typing_classes_heap.class_t
 
-      let prefix = Prefix.make ()
-
       let description = "Decl_Typing_ClassType"
     end)
     (struct

@@ -27,6 +27,16 @@ end
 module Types : sig
   module CanonName : Value.Type with type t = string
 
+  module TypeCanonHeap :
+    SharedMem.NoCache
+      with type key = string
+       and module KeyHasher = SharedMem.MakeKeyHasher(StringKey)
+
+  module TypePosHeap :
+    SharedMem.WithCache
+      with type key = string
+       and module KeyHasher = SharedMem.MakeKeyHasher(StringKey)
+
   include
     ReverseNamingTable with type pos = FileInfo.pos * Naming_types.kind_of_type
 
@@ -44,12 +54,29 @@ end
 module Funs : sig
   module CanonName : Value.Type with type t = string
 
+  module FunCanonHeap :
+    SharedMem.NoCache
+      with type key = string
+       and module KeyHasher = SharedMem.MakeKeyHasher(StringKey)
+
+  module FunPosHeap :
+    SharedMem.NoCache
+      with type key = string
+       and module KeyHasher = SharedMem.MakeKeyHasher(StringKey)
+
   include ReverseNamingTable with type pos = FileInfo.pos
 
   val get_canon_name : Provider_context.t -> string -> string option
 end
 
-module Consts : ReverseNamingTable with type pos = FileInfo.pos
+module Consts : sig
+  module ConstPosHeap :
+    SharedMem.NoCache
+      with type key = string
+       and module KeyHasher = SharedMem.MakeKeyHasher(StringKey)
+
+  include ReverseNamingTable with type pos = FileInfo.pos
+end
 
 val push_local_changes : unit -> unit
 

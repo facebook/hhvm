@@ -447,9 +447,9 @@ module type KeyHasher = sig
 
   type hash
 
-  val hash : Prefix.t -> key -> hash
+  val hash : key -> hash
 
-  val hash_old : Prefix.t -> key -> hash
+  val hash_old : key -> hash
 
   val to_bytes : hash -> string
 end
@@ -460,24 +460,23 @@ module MakeKeyHasher (UserKeyType : UserKeyType) :
 
   type hash = string
 
+  let prefix = Prefix.make ()
+
   (* The prefix we use for old keys. The prefix guarantees that we never
    * mix old and new data, because a key can never start with the prefix
    * "old_", it always starts with a number (cf Prefix.make()).
    *)
   let old_prefix = "old_"
 
-  let full_key : Prefix.t -> key -> string =
-   (fun prefix x -> Prefix.make_key prefix (UserKeyType.to_string x))
+  let full_key (x : key) : string =
+    Prefix.make_key prefix (UserKeyType.to_string x)
 
-  let full_key_old : Prefix.t -> key -> string =
-   fun prefix x ->
+  let full_key_old (x : key) : string =
     old_prefix ^ Prefix.make_key prefix (UserKeyType.to_string x)
 
-  let hash (prefix : Prefix.t) (key : key) : hash =
-    Stdlib.Digest.string (full_key prefix key)
+  let hash (key : key) : hash = Stdlib.Digest.string (full_key key)
 
-  let hash_old (prefix : Prefix.t) (key : key) : hash =
-    Stdlib.Digest.string (full_key_old prefix key)
+  let hash_old (key : key) : hash = Stdlib.Digest.string (full_key_old key)
 
   let to_bytes (hash : hash) : string = hash
 end
@@ -670,8 +669,6 @@ functor
         representation provided Value.t is a record type containing at least one
         non-float member. *)
       type t = Value.t profiled_value
-
-      let prefix = Value.prefix
 
       let description = Value.description
     end
@@ -977,6 +974,8 @@ module type NoCache = sig
 
   type value
 
+  module KeyHasher : KeyHasher with type key = key
+
   module KeySet : Set.S with type elt = key
 
   module KeyMap : WrappedMap.S with type key = key
@@ -1085,6 +1084,7 @@ module NoCache (Raw : Raw) (UserKeyType : UserKeyType) (Value : Value.Type) :
   NoCache
     with type key = UserKeyType.t
      and type value = Value.t
+     and module KeyHasher = MakeKeyHasher(UserKeyType)
      and module KeySet = Set.Make(UserKeyType)
      and module KeyMap = WrappedMap.Make(UserKeyType) = struct
   module KeyHasher = MakeKeyHasher (UserKeyType)
@@ -1100,9 +1100,9 @@ module NoCache (Raw : Raw) (UserKeyType : UserKeyType) (Value : Value.Type) :
 
   type value = Value.t
 
-  let hash_of_key x = KeyHasher.hash Value.prefix x
+  let hash_of_key x = KeyHasher.hash x
 
-  let old_hash_of_key x = KeyHasher.hash_old Value.prefix x
+  let old_hash_of_key x = KeyHasher.hash_old x
 
   let add x y = WithLocalChanges.add (hash_of_key x) y
 
@@ -1493,6 +1493,7 @@ module WithCache
   WithCache
     with type key = UserKeyType.t
      and type value = Value.t
+     and module KeyHasher = MakeKeyHasher(UserKeyType)
      and module KeySet = Set.Make(UserKeyType)
      and module KeyMap = WrappedMap.Make(UserKeyType)
      and module Cache = LocalCache(UserKeyType)(Value)(Capacity) = struct
@@ -1508,6 +1509,7 @@ module WithCache
 
   type value = Direct.value
 
+  module KeyHasher = Direct.KeyHasher
   module KeySet = Direct.KeySet
   module KeyMap = Direct.KeyMap
   module Cache = LocalCache (UserKeyType) (ValueForCache) (Capacity)

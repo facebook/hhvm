@@ -28,8 +28,6 @@ end
 module Class = struct
   type t = decl_class_type
 
-  let prefix = Prefix.make ()
-
   let description = "Decl_Class"
 end
 
@@ -37,15 +35,11 @@ end
 module Fun = struct
   type t = fun_elt
 
-  let prefix = Prefix.make ()
-
   let description = "Decl_Fun"
 end
 
 module RecordDef = struct
   type t = Typing_defs.record_def_type
-
-  let prefix = Prefix.make ()
 
   let description = "Decl_RecordDef"
 end
@@ -53,15 +47,11 @@ end
 module Typedef = struct
   type t = Typing_defs.typedef_type
 
-  let prefix = Prefix.make ()
-
   let description = "Decl_Typedef"
 end
 
 module GConst = struct
   type t = const_decl
-
-  let prefix = Prefix.make ()
 
   let description = "Decl_GConst"
 end
@@ -101,15 +91,11 @@ module GConsts =
 module Property = struct
   type t = decl_ty
 
-  let prefix = Prefix.make ()
-
   let description = "Decl_Property"
 end
 
 module StaticProperty = struct
   type t = decl_ty
-
-  let prefix = Prefix.make ()
 
   let description = "Decl_StaticProperty"
 end
@@ -117,23 +103,17 @@ end
 module Method = struct
   type t = fun_elt
 
-  let prefix = Prefix.make ()
-
   let description = "Decl_Method"
 end
 
 module StaticMethod = struct
   type t = fun_elt
 
-  let prefix = Prefix.make ()
-
   let description = "Decl_StaticMethod"
 end
 
 module Constructor = struct
   type t = fun_elt
-
-  let prefix = Prefix.make ()
 
   let description = "Decl_Constructor"
 end

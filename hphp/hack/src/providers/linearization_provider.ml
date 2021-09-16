@@ -17,8 +17,6 @@ module Cache =
     (struct
       type t = Decl_defs.lin
 
-      let prefix = Prefix.make ()
-
       let description = "Decl_Linearization"
     end)
     (struct
@@ -30,8 +28,6 @@ module DeclServiceLocalCache =
     (StringKey)
     (struct
       type t = Decl_defs.lin
-
-      let prefix = Prefix.make ()
 
       let description = "Decl_LocalLinearization"
     end)

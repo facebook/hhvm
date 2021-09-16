@@ -212,6 +212,8 @@ end
     Each hash is built by concatenating an optional "old" prefix, a heap-prefix
     and an object-specific key, then hashing the concatenation.
 
+    The unique heap-prefix is automatically generated when calling `MakeKeyHasher`.
+
     Currently we use MD5 as the hashing algorithm. Note that only the first
     8 bytes are used to index the shared memory table. *)
 module type KeyHasher = sig
@@ -224,9 +226,9 @@ module type KeyHasher = sig
   (** The hash of an old or new key. *)
   type hash
 
-  val hash : Prefix.t -> key -> hash
+  val hash : key -> hash
 
-  val hash_old : Prefix.t -> key -> hash
+  val hash_old : key -> hash
 
   (** Return the raw bytes of the digest. Note that this is not hex encoded. *)
   val to_bytes : hash -> string
@@ -308,6 +310,13 @@ module type NoCache = sig
 
   type value
 
+  (** [KeyHasher] created for this heap.
+
+      A new [KeyHasher] with a unique prefix is automatically generated
+      for each heap. Normally, you shouldn't have to use the [KeyHasher]
+      directly, but Zonkolan does. *)
+  module KeyHasher : KeyHasher with type key = key
+
   module KeySet : Set.S with type elt = key
 
   module KeyMap : WrappedMap.S with type key = key
@@ -368,6 +377,7 @@ module NoCache (_ : Raw) (UserKeyType : UserKeyType) (Value : Value.Type) :
   NoCache
     with type key = UserKeyType.t
      and type value = Value.t
+     and module KeyHasher = MakeKeyHasher(UserKeyType)
      and module KeySet = Set.Make(UserKeyType)
      and module KeyMap = WrappedMap.Make(UserKeyType)
 
@@ -462,5 +472,6 @@ module WithCache
   WithCache
     with type key = UserKeyType.t
      and type value = Value.t
+     and module KeyHasher = MakeKeyHasher(UserKeyType)
      and module KeySet = Set.Make(UserKeyType)
      and module KeyMap = WrappedMap.Make(UserKeyType)

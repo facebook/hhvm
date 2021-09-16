@@ -15,8 +15,6 @@ module Ids =
     (struct
       type t = int array
 
-      let prefix = Prefix.make ()
-
       let description = "Test_Ids"
     end)
 

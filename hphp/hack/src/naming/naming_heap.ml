@@ -86,15 +86,11 @@ module Types = struct
   module CanonName = struct
     type t = string
 
-    let prefix = Prefix.make ()
-
     let description = "Naming_TypeCanon"
   end
 
   module Position = struct
     type t = pos
-
-    let prefix = Prefix.make ()
 
     let description = "Naming_TypePos"
   end
@@ -112,8 +108,6 @@ module Types = struct
     SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey)
       (struct
         type t = blocked_entry
-
-        let prefix = Prefix.make ()
 
         let description = "Naming_TypeBlocked"
       end)
@@ -236,8 +230,6 @@ module Funs = struct
   module CanonName = struct
     type t = string
 
-    let prefix = Prefix.make ()
-
     let description = "Naming_FunCanon"
   end
 
@@ -246,8 +238,6 @@ module Funs = struct
 
   module Position = struct
     type t = pos
-
-    let prefix = Prefix.make ()
 
     let description = "Naming_FunPos"
   end
@@ -259,8 +249,6 @@ module Funs = struct
     SharedMem.NoCache (SharedMem.ProfiledImmediate) (StringKey)
       (struct
         type t = blocked_entry
-
-        let prefix = Prefix.make ()
 
         let description = "Naming_FunBlocked"
       end)
@@ -335,8 +323,6 @@ module Consts = struct
   module Position = struct
     type t = pos
 
-    let prefix = Prefix.make ()
-
     let description = "Naming_ConstPos"
   end
 
@@ -347,8 +333,6 @@ module Consts = struct
     SharedMem.NoCache (SharedMem.ProfiledImmediate) (StringKey)
       (struct
         type t = blocked_entry
-
-        let prefix = Prefix.make ()
 
         let description = "Naming_ConstBlocked"
       end)

@@ -25,8 +25,6 @@ module ParserHeap =
     (struct
       type t = Nast.program * parse_type
 
-      let prefix = Prefix.make ()
-
       let description = "Ast_Parser"
     end)
     (struct
@@ -38,8 +36,6 @@ module LocalParserCache =
     (Relative_path.S)
     (struct
       type t = Nast.program
-
-      let prefix = Prefix.make ()
 
       let description = "Ast_ParserLocal"
     end)

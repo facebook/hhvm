@@ -2618,7 +2618,7 @@ SSATmp* simplifyJmpNZero(State& env, const IRInstruction* i) {
 SSATmp* simplifyJmp(State& env, const IRInstruction* inst) {
   assertx(inst->taken());
   if (inst->taken()->isUnreachable()) {
-    return gen(env, Unreachable, ASSERT_REASON);
+    return gen(env, Unreachable, *inst->taken()->back().extra<Unreachable>());
   }
 
   return nullptr;

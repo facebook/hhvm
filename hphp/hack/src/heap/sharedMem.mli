@@ -316,52 +316,15 @@ module WithLocalChanges (Raw : Raw) (Key : Key) (Value : Value.Type) : sig
   end
 end
 
-(** Heap used to access "new" values (as opposed to "old" ones).
+(** A heap for a user-defined type.
+
+    Each heap supports "old" and "new" values.
 
     There are several cases where we need to compare the old and the new
     representations of objects to determine what has changed.
 
     The "old" representation is the value that was bound to that key in
     the last round of type-checking. *)
-module New (Raw : Raw) (Key : Key) (Value : Value.Type) : sig
-  (** Adds a binding to the table.
-
-      Note: the table is left unchanged if the key was already bound!
-      TODO(hverr): this will no longer be true with sharded hash tables. *)
-  val add : Key.t -> Value.t -> unit
-
-  val get : Key.t -> Value.t option
-
-  val remove : Key.t -> unit
-
-  val mem : Key.t -> bool
-
-  (** Marks the value bound to this key as "old".
-
-      In pratice, the value will be moved to the same key, prefixed with
-      the old-prefix. *)
-  val oldify : Key.t -> unit
-
-  module WithLocalChanges : module type of WithLocalChanges (Raw) (Key) (Value)
-end
-
-(** Same as [New] but for old values. *)
-module Old
-    (Raw : Raw)
-    (Key : Key)
-    (Value : Value.Type)
-    (_ : module type of WithLocalChanges (Raw) (Key) (Value)) : sig
-  val get : Key.old -> Value.t option
-
-  val remove : Key.old -> unit
-
-  val mem : Key.old -> bool
-
-  (** Takes an old value and moves it back to a "new" one *)
-  val revive : Key.old -> unit
-end
-
-(** A heap for a user-defined type. *)
 module type NoCache = sig
   type key
 
@@ -371,6 +334,11 @@ module type NoCache = sig
 
   module KeyMap : WrappedMap.S with type key = key
 
+  (** Adds a binding to the table.
+
+      Note: TODO(hverr), currently the semantics of inserting a value for a key
+      that's already in the heap are unclear and depend on whether you have a
+      local-changes stack or not. *)
   val add : key -> value -> unit
 
   val get : key -> value option

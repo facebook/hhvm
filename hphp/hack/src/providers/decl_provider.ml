@@ -49,7 +49,7 @@ let use_direct_decl_parser ctx =
 (** This cache caches the result of full class computations
       (the class merged with all its inherited members.)  *)
 module Cache =
-  SharedMem.LocalCache
+  SharedMem.MultiCache
     (StringKey)
     (struct
       type t = Typing_classes_heap.class_t

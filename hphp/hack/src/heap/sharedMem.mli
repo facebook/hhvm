@@ -358,11 +358,13 @@ module NoCache (_ : Raw) (UserKeyType : UserKeyType) (Value : Value.Type) :
      and module KeySet = Set.Make(UserKeyType)
      and module KeyMap = WrappedMap.Make(UserKeyType)
 
-(** A local cache.
+(** A worker-local cache layer.
 
     Each local cache defines its own eviction strategy.
-    For example, we currently have [FreqCache] and [OrderedCache]. *)
-module type CacheType = sig
+    For example, we currently have [FreqCache] and [OrderedCache].
+
+    We even have one that combines the two strategies in [MultiCache]. *)
+module type LocalCacheLayer = sig
   type key
 
   type value
@@ -375,10 +377,11 @@ module type CacheType = sig
 
   val clear : unit -> unit
 
-  val get_size : unit -> int
-
   val get_telemetry_items_and_keys : unit -> Obj.t * key Seq.t
 end
+
+(** Invalidate all worker-local caches *)
+val invalidate_local_caches : unit -> unit
 
 (** Capacity of a worker-local cache.
 
@@ -387,40 +390,41 @@ module type Capacity = sig
   val capacity : int
 end
 
+(** FreqCache is an LFU (Least Frequently Used) cache.
+
+    It keeps count of how many times each item in the cache has been
+    added/replaced/fetched and, when it reaches 2*capacity, then it
+    flushes 1*capacity items and they lose their counts. This might result
+    in a lucky few early items getting to stay in the cache while newcomers
+    get evicted...
+
+    It is Hashtbl.t-based with a bounded number of elements. *)
 module FreqCache (Key : UserKeyType) (Value : Value.Type) (_ : Capacity) :
-  CacheType with type key = Key.t and type value = Value.t
+  LocalCacheLayer with type key = Key.t and type value = Value.t
 
+(** OrderedCache is an LRA (Least Recently Added) cache.
+
+    Whenever you add an item beyond capacity, it will evict the oldest one
+    to be added.
+
+    It is Hashtbl.t-based with a bounded number of elements. *)
 module OrderedCache (Key : UserKeyType) (Value : Value.Type) (_ : Capacity) :
-  CacheType with type key = Key.t and type value = Value.t
+  LocalCacheLayer with type key = Key.t and type value = Value.t
 
-(** Invalidate all worker-local caches *)
-val invalidate_local_caches : unit -> unit
+module type MultiCache = sig
+  include LocalCacheLayer
 
-module type LocalCache = sig
-  type key
+  module L1 : LocalCacheLayer with type key = key and type value = value
 
-  type value
-
-  module L1 : CacheType with type key = key and type value = value
-
-  module L2 : CacheType with type key = key and type value = value
-
-  val add : key -> value -> unit
-
-  val get : key -> value option
-
-  val remove : key -> unit
-
-  val clear : unit -> unit
-
-  val get_telemetry : Telemetry.t -> Telemetry.t
+  module L2 : LocalCacheLayer with type key = key and type value = value
 end
 
-module LocalCache
-    (UserKeyType : UserKeyType)
-    (Value : Value.Type)
-    (_ : Capacity) :
-  LocalCache with type key = UserKeyType.t and type value = Value.t
+(** MultiCache uses both FreqCache and OrderedCache simultaneously.
+
+    It uses both caches with the hope that each one will paper over the
+    other's weaknesses. *)
+module MultiCache (Key : UserKeyType) (Value : Value.Type) (_ : Capacity) :
+  MultiCache with type key = Key.t and type value = Value.t
 
 (** Same as [NoCache] but provides a worker-local cache. *)
 module type WithCache = sig
@@ -430,7 +434,7 @@ module type WithCache = sig
 
   val get_no_cache : key -> value option
 
-  module Cache : LocalCache with type key = key and type value = value
+  module Cache : MultiCache with type key = key and type value = value
 end
 
 module WithCache

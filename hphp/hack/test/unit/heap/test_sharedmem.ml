@@ -151,9 +151,11 @@ module type WithVisibleCache = sig
   include SharedMem.WithCache
 
   module Cache : sig
-    module L1 : SharedMem.CacheType with type key := key and type value := value
+    module L1 :
+      SharedMem.LocalCacheLayer with type key := key and type value := value
 
-    module L2 : SharedMem.CacheType with type key := key and type value := value
+    module L2 :
+      SharedMem.LocalCacheLayer with type key := key and type value := value
   end
 end
 
@@ -163,7 +165,10 @@ let test_cache_behavior
        and type key = string)
     () =
   let expect_cache_size expected_l1 expected_l2 =
-    let actual_l1 = IntHeap.Cache.L1.get_size () in
+    let seq_len = Seq.fold_left (fun x _ -> x + 1) 0 in
+    let actual_l1 =
+      seq_len @@ snd @@ IntHeap.Cache.L1.get_telemetry_items_and_keys ()
+    in
     expect
       ~msg:
         (Printf.sprintf
@@ -171,7 +176,9 @@ let test_cache_behavior
            expected_l1
            actual_l1)
       (actual_l1 = expected_l1);
-    let actual_l2 = IntHeap.Cache.L2.get_size () in
+    let actual_l2 =
+      seq_len @@ snd @@ IntHeap.Cache.L2.get_telemetry_items_and_keys ()
+    in
     expect
       ~msg:
         (Printf.sprintf

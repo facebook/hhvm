@@ -27,7 +27,7 @@ type decl = Shallow_decl_defs.decl =
   | Const of Shallow_decl_defs.const_decl
 
 module Decls =
-  SharedMem.LocalCache
+  SharedMem.MultiCache
     (CacheKey)
     (struct
       type t = decl option

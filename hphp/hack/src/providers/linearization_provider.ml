@@ -24,7 +24,7 @@ module Cache =
     end)
 
 module DeclServiceLocalCache =
-  SharedMem.LocalCache
+  SharedMem.MultiCache
     (StringKey)
     (struct
       type t = Decl_defs.lin

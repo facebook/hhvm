@@ -493,12 +493,7 @@ module type Raw = functor (KeyHasher : KeyHasher) (Value : Value.Type) -> sig
   val move : KeyHasher.hash -> KeyHasher.hash -> unit
 end
 
-(*****************************************************************************)
-(* Some heaps are parameterized by how many local (ocaml heap) items they    *)
-(* can fit.                                                                  *)
-(*****************************************************************************)
-
-module type LocalCapacityType = sig
+module type Capacity = sig
   val capacity : int
 end
 
@@ -1026,7 +1021,7 @@ end
  *)
 (*****************************************************************************)
 
-module type CacheType = sig
+module type LocalCacheLayer = sig
   type key
 
   type value
@@ -1038,30 +1033,16 @@ module type CacheType = sig
   val remove : key -> unit
 
   val clear : unit -> unit
-
-  val get_size : unit -> int
 
   val get_telemetry_items_and_keys : unit -> Obj.t * key Seq.t
 end
 
-module type LocalCache = sig
-  type key
+module type MultiCache = sig
+  include LocalCacheLayer
 
-  type value
+  module L1 : LocalCacheLayer with type key = key and type value = value
 
-  module L1 : CacheType with type key = key and type value = value
-
-  module L2 : CacheType with type key = key and type value = value
-
-  val add : key -> value -> unit
-
-  val get : key -> value option
-
-  val remove : key -> unit
-
-  val clear : unit -> unit
-
-  val get_telemetry : Telemetry.t -> Telemetry.t
+  module L2 : LocalCacheLayer with type key = key and type value = value
 end
 
 module type WithCache = sig
@@ -1071,7 +1052,7 @@ module type WithCache = sig
 
   val get_no_cache : key -> value option
 
-  module Cache : LocalCache with type key = key and type value = value
+  module Cache : MultiCache with type key = key and type value = value
 end
 
 (*****************************************************************************)
@@ -1217,29 +1198,16 @@ module NoCache (Raw : Raw) (UserKeyType : UserKeyType) (Value : Value.Type) :
   end
 end
 
-(*****************************************************************************)
-(* FreqCache and OrderedCache are both local Hashtbl.t-based caches of       *)
-(* bounded size in the ocaml heap, design to be used together.               *)
-(*                                                                           *)
-(* - FreqCache is an LFU cache - "Least Frequently Used" - which keeps count *)
-(* of how many times each item in the cache has been added/replaced/fetched  *)
-(* and, when it reaches 2*capacity, then it flushes 1*capacity items and     *)
-(* they lose their counts. This might result in a lucky few early items      *)
-(* getting to stay in the cache while newcomers get evicted...               *)
-(*                                                                           *)
-(* - OrderedCache is a LRA cache - "Least Recently Added" - which, whenever  *)
-(* you add an item beyond capacity, will evict the oldest one to be added.   *)
-(*                                                                           *)
-(* If you keep both kinds of caches simultaneously, and add items to both    *)
-(* of them, then hopefully each one will paper over the other's weaknesses.  *)
-(*****************************************************************************)
+(** Every time a new worker-local cache is created, a clearing function is
+    registered for it here. **)
+let invalidate_local_caches_callback_list = ref []
 
-module type Capacity = sig
-  val capacity : int
-end
+let invalidate_local_caches () =
+  List.iter !invalidate_local_caches_callback_list ~f:(fun callback ->
+      callback ())
 
 module FreqCache (Key : UserKeyType) (Value : Value.Type) (Capacity : Capacity) :
-  CacheType with type key = Key.t and type value = Value.t = struct
+  LocalCacheLayer with type key = Key.t and type value = Value.t = struct
   type key = Key.t
 
   type value = Value.t
@@ -1249,8 +1217,6 @@ module FreqCache (Key : UserKeyType) (Value : Value.Type) (Capacity : Capacity) 
     Hashtbl.create (2 * Capacity.capacity)
 
   let size = ref 0
-
-  let get_size () = !size
 
   let get_telemetry_items_and_keys () =
     (Obj.repr cache, Hashtbl.to_seq_keys cache)
@@ -1321,7 +1287,7 @@ module OrderedCache
     (Key : UserKeyType)
     (Value : Value.Type)
     (Capacity : Capacity) :
-  CacheType with type key = Key.t and type value = Value.t = struct
+  LocalCacheLayer with type key = Key.t and type value = Value.t = struct
   type key = Key.t
 
   type value = Value.t
@@ -1331,8 +1297,6 @@ module OrderedCache
   let queue = Queue.create ()
 
   let size = ref 0
-
-  let get_size () = !size
 
   let get_telemetry_items_and_keys () =
     (Obj.repr cache, Hashtbl.to_seq_keys cache)
@@ -1366,24 +1330,8 @@ module OrderedCache
     end
 end
 
-(*****************************************************************************)
-(* Every time we create a new worker-local cache, a function that knows how to
- * clear the cache is registered in the "invalidate_local_caches_callback_list"
- * global.
- *)
-(*****************************************************************************)
-
-let invalidate_local_caches_callback_list = ref []
-
-let invalidate_local_caches () =
-  List.iter !invalidate_local_caches_callback_list ~f:(fun callback ->
-      callback ())
-
-module LocalCache
-    (Key : UserKeyType)
-    (Value : Value.Type)
-    (Capacity : LocalCapacityType) :
-  LocalCache with type key = Key.t and type value = Value.t = struct
+module MultiCache (Key : UserKeyType) (Value : Value.Type) (Capacity : Capacity) :
+  MultiCache with type key = Key.t and type value = Value.t = struct
   type key = Key.t
 
   type value = Value.t
@@ -1419,25 +1367,30 @@ module LocalCache
     L1.clear ();
     L2.clear ()
 
+  let get_telemetry_items_and_keys () =
+    let (obj1, keys1) = L1.get_telemetry_items_and_keys () in
+    let (obj2, keys2) = L2.get_telemetry_items_and_keys () in
+    let combined =
+      KeySet.empty
+      |> KeySet.add_seq keys1
+      |> KeySet.add_seq keys2
+      |> KeySet.to_seq
+    in
+    (Obj.repr (obj1, obj2), combined)
+
   let get_telemetry (telemetry : Telemetry.t) : Telemetry.t =
     (* Many items are stored in both L1 (ordered) and L2 (freq) caches.
        We don't want to double-count them.
        So: we'll figure out the reachable words of the (L1,L2) tuple,
        and we'll figure out the set union of keys in both of them. *)
-    let (obj1, keys1) = L1.get_telemetry_items_and_keys () in
-    let (obj2, keys2) = L2.get_telemetry_items_and_keys () in
-    let count =
-      KeySet.empty
-      |> KeySet.add_seq keys1
-      |> KeySet.add_seq keys2
-      |> KeySet.cardinal
-    in
+    let (objs, keys) = get_telemetry_items_and_keys () in
+    let count = Seq.fold_left (fun a _ -> a + 1) 0 keys in
     if count = 0 then
       telemetry
     else
       let bytes =
         if SMTelemetry.hh_log_level () > 0 then
-          Some (Obj.reachable_words (Obj.repr (obj1, obj2)) * Sys.word_size / 8)
+          Some (Obj.reachable_words (Obj.repr objs) * Sys.word_size / 8)
         else
           None
       in
@@ -1461,6 +1414,13 @@ module LocalCache
       :: !invalidate_local_caches_callback_list
 end
 
+(** Create a new value, but append the "__cache" prefix to its description *)
+module ValueForCache (Value : Value.Type) = struct
+  include Value
+
+  let description = Value.description ^ "__cache"
+end
+
 (*****************************************************************************)
 (* A functor returning an implementation of the S module with caching.
  * We need to avoid constantly deserializing types, because it costs us too
@@ -1471,20 +1431,15 @@ module WithCache
     (Raw : Raw)
     (UserKeyType : UserKeyType)
     (Value : Value.Type)
-    (Capacity : LocalCapacityType) :
+    (Capacity : Capacity) :
   WithCache
     with type key = UserKeyType.t
      and type value = Value.t
      and module KeyHasher = MakeKeyHasher(UserKeyType)
      and module KeySet = Set.Make(UserKeyType)
      and module KeyMap = WrappedMap.Make(UserKeyType)
-     and module Cache = LocalCache(UserKeyType)(Value)(Capacity) = struct
-  module ValueForCache = struct
-    include Value
-
-    let description = Value.description ^ "__cache"
-  end
-
+     and module Cache = MultiCache(UserKeyType)(ValueForCache(Value))(Capacity) =
+struct
   module Direct = NoCache (Raw) (UserKeyType) (Value)
 
   type key = Direct.key
@@ -1494,7 +1449,7 @@ module WithCache
   module KeyHasher = Direct.KeyHasher
   module KeySet = Direct.KeySet
   module KeyMap = Direct.KeyMap
-  module Cache = LocalCache (UserKeyType) (ValueForCache) (Capacity)
+  module Cache = MultiCache (UserKeyType) (ValueForCache (Value)) (Capacity)
 
   let add x y =
     Direct.add x y;

@@ -1815,25 +1815,32 @@ let check_SupportDynamicType env c =
         (Cls.name parent, Cls.kind parent)
         f
     in
-    List.iter parent_names ~f:(fun name ->
-        match Env.get_class_dep env name with
-        | Some parent_type ->
-          begin
-            match Cls.kind parent_type with
-            | Ast_defs.Cclass _
-            | Ast_defs.Cinterface ->
-              (* ensure that we implement dynamic if we are a subclass/subinterface of a class/interface
-               * that implements dynamic.  Upward well-formedness checks are performed in Typing_extends *)
-              if
-                Cls.get_support_dynamic_type parent_type
-                && not support_dynamic_type
-              then
-                error_parent_support_dynamic_type
-                  parent_type
-                  support_dynamic_type
-            | Ast_defs.(Cenum | Cenum_class _ | Ctrait) -> ()
-          end
-        | None -> ())
+    match c.c_kind with
+    | Ast_defs.(Cenum | Cenum_class _) ->
+      (* Avoid parent SDT check on things that cannot be SDT themselves *)
+      ()
+    | Ast_defs.Cclass _
+    | Ast_defs.Cinterface
+    | Ast_defs.Ctrait ->
+      List.iter parent_names ~f:(fun name ->
+          match Env.get_class_dep env name with
+          | Some parent_type ->
+            begin
+              match Cls.kind parent_type with
+              | Ast_defs.Cclass _
+              | Ast_defs.Cinterface ->
+                (* ensure that we implement dynamic if we are a subclass/subinterface of a class/interface
+                 * that implements dynamic.  Upward well-formedness checks are performed in Typing_extends *)
+                if
+                  Cls.get_support_dynamic_type parent_type
+                  && not support_dynamic_type
+                then
+                  error_parent_support_dynamic_type
+                    parent_type
+                    support_dynamic_type
+              | Ast_defs.(Cenum | Cenum_class _ | Ctrait) -> ()
+            end
+          | None -> ())
 
 let class_def_ env c tc =
   let env =

@@ -247,6 +247,7 @@ let () =
       ignored_flag "--require-extends-implements-ancestors";
       ignored_flag "--strict-value-equality";
       ignored_flag "--enable-sealed-subclasses";
+      ignored_flag "--enable-sound-dynamic-type";
     ]
     set_file
     usage;

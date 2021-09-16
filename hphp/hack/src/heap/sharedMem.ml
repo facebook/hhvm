@@ -434,26 +434,26 @@ module GC = struct
     )
 end
 
-module type Key = sig
+module type KeyHasher = sig
   type key
 
-  type md5
+  type hash
 
-  val md5 : Prefix.t -> key -> md5
+  val hash : Prefix.t -> key -> hash
 
-  val md5_old : Prefix.t -> key -> md5
+  val hash_old : Prefix.t -> key -> hash
 
-  val string_of_md5 : md5 -> string
+  val to_bytes : hash -> string
 end
 
-module KeyFunctor (UserKeyType : sig
+module MakeKeyHasher (UserKeyType : sig
   type t
 
   val to_string : t -> string
-end) : Key with type key = UserKeyType.t = struct
+end) : KeyHasher with type key = UserKeyType.t = struct
   type key = UserKeyType.t
 
-  type md5 = string
+  type hash = string
 
   (* The prefix we use for old keys. The prefix guarantees that we never
    * mix old and new data, because a key can never start with the prefix
@@ -468,25 +468,25 @@ end) : Key with type key = UserKeyType.t = struct
    fun prefix x ->
     old_prefix ^ Prefix.make_key prefix (UserKeyType.to_string x)
 
-  let md5 (prefix : Prefix.t) (key : key) : md5 =
+  let hash (prefix : Prefix.t) (key : key) : hash =
     Stdlib.Digest.string (full_key prefix key)
 
-  let md5_old (prefix : Prefix.t) (key : key) : md5 =
+  let hash_old (prefix : Prefix.t) (key : key) : hash =
     Stdlib.Digest.string (full_key_old prefix key)
 
-  let string_of_md5 : md5 -> string = (fun x -> x)
+  let to_bytes (hash : hash) : string = hash
 end
 
-module type Raw = functor (Key : Key) (Value : Value.Type) -> sig
-  val add : Key.md5 -> Value.t -> unit
+module type Raw = functor (KeyHasher : KeyHasher) (Value : Value.Type) -> sig
+  val add : KeyHasher.hash -> Value.t -> unit
 
-  val mem : Key.md5 -> bool
+  val mem : KeyHasher.hash -> bool
 
-  val get : Key.md5 -> Value.t
+  val get : KeyHasher.hash -> Value.t
 
-  val remove : Key.md5 -> unit
+  val remove : KeyHasher.hash -> unit
 
-  val move : Key.md5 -> Key.md5 -> unit
+  val move : KeyHasher.hash -> KeyHasher.hash -> unit
 end
 
 (*****************************************************************************)
@@ -505,26 +505,26 @@ end
 (*****************************************************************************)
 module Immediate : Raw =
 functor
-  (Key : Key)
+  (KeyHasher : KeyHasher)
   (Value : Value.Type)
   ->
   struct
     (* Returns the number of bytes allocated in the heap, or a negative number
      * if no new memory was allocated *)
-    external hh_add : Key.md5 -> Value.t -> int * int * int = "hh_add"
+    external hh_add : KeyHasher.hash -> Value.t -> int * int * int = "hh_add"
 
-    external hh_mem : Key.md5 -> bool = "hh_mem"
+    external hh_mem : KeyHasher.hash -> bool = "hh_mem"
 
-    external hh_mem_status : Key.md5 -> int = "hh_mem_status"
+    external hh_mem_status : KeyHasher.hash -> int = "hh_mem_status"
 
-    external hh_get_size : Key.md5 -> int = "hh_get_size"
+    external hh_get_size : KeyHasher.hash -> int = "hh_get_size"
 
-    external hh_get_and_deserialize : Key.md5 -> Value.t
+    external hh_get_and_deserialize : KeyHasher.hash -> Value.t
       = "hh_get_and_deserialize"
 
-    external hh_remove : Key.md5 -> int = "hh_remove"
+    external hh_remove : KeyHasher.hash -> int = "hh_remove"
 
-    external hh_move : Key.md5 -> Key.md5 -> unit = "hh_move"
+    external hh_move : KeyHasher.hash -> KeyHasher.hash -> unit = "hh_move"
 
     let _ = hh_mem_status
 
@@ -655,7 +655,7 @@ type 'a profiled_value =
 
 module ProfiledImmediate : Raw =
 functor
-  (Key : Key)
+  (KeyHasher : KeyHasher)
   (Value : Value.Type)
   ->
   struct
@@ -671,7 +671,7 @@ functor
       let description = Value.description
     end
 
-    module Immediate = Immediate (Key) (ProfiledValue)
+    module Immediate = Immediate (KeyHasher) (ProfiledValue)
 
     let add x y =
       let sample_rate = SMTelemetry.hh_sample_rate () in
@@ -694,7 +694,7 @@ functor
           log_if_initialized @@ fun () ->
           sharedmem_access_sample
             ~heap_name:Value.description
-            ~key:(Key.string_of_md5 x)
+            ~key:(KeyHasher.to_bytes x)
             ~write_time);
         entry
 
@@ -712,10 +712,10 @@ functor
 (*****************************************************************************)
 module WithLocalChanges : functor
   (Raw : Raw)
-  (Key : Key)
+  (KeyHasher : KeyHasher)
   (Value : Value.Type)
   -> sig
-  include module type of Raw (Key) (Value)
+  include module type of Raw (KeyHasher) (Value)
 
   module LocalChanges : sig
     val has_local_changes : unit -> bool
@@ -724,9 +724,9 @@ module WithLocalChanges : functor
 
     val pop_stack : unit -> unit
 
-    val revert : Key.md5 -> unit
+    val revert : KeyHasher.hash -> unit
 
-    val commit : Key.md5 -> unit
+    val commit : KeyHasher.hash -> unit
 
     val revert_all : unit -> unit
 
@@ -735,11 +735,11 @@ module WithLocalChanges : functor
 end =
 functor
   (Raw : Raw)
-  (Key : Key)
+  (KeyHasher : KeyHasher)
   (Value : Value.Type)
   ->
   struct
-    module Raw = Raw (Key) (Value)
+    module Raw = Raw (KeyHasher) (Value)
 
     (**
       Represents a set of local changes to the view of the shared memory heap
@@ -773,7 +773,7 @@ functor
         | Replace of Value.t
 
       type t = {
-        current: (Key.md5, action) Hashtbl.t;
+        current: (KeyHasher.hash, action) Hashtbl.t;
         prev: t option;
       }
 
@@ -1094,22 +1094,22 @@ module NoCache (Raw : Raw) (UserKeyType : UserKeyType) (Value : Value.Type) :
      and type value = Value.t
      and module KeySet = Set.Make(UserKeyType)
      and module KeyMap = WrappedMap.Make(UserKeyType) = struct
-  module Key = KeyFunctor (UserKeyType)
+  module KeyHasher = MakeKeyHasher (UserKeyType)
   module KeySet = Set.Make (UserKeyType)
   module KeyMap = WrappedMap.Make (UserKeyType)
 
   (** Stacks that keeps track of local, non-committed changes. If
       no stacks are active, changs will be committed immediately to
       the shared-memory backend *)
-  module WithLocalChanges = WithLocalChanges (Raw) (Key) (Value)
+  module WithLocalChanges = WithLocalChanges (Raw) (KeyHasher) (Value)
 
   type key = UserKeyType.t
 
   type value = Value.t
 
-  let hash_of_key x = Key.md5 Value.prefix x
+  let hash_of_key x = KeyHasher.hash Value.prefix x
 
-  let old_hash_of_key x = Key.md5_old Value.prefix x
+  let old_hash_of_key x = KeyHasher.hash_old Value.prefix x
 
   let add x y = WithLocalChanges.add (hash_of_key x) y
 

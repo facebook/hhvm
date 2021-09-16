@@ -206,33 +206,30 @@ module GC : sig
   val collect : [ `aggressive | `always_TEST | `gentle ] -> unit
 end
 
-(** Key in the big shared-memory table.
+(** A hasher that hashes user-defined keys. The resulting hash can be used
+    to index the big shared-memory table.
 
-    Each key is built by concatenating an optional "old" prefix, a heap-prefix
-    and an object-specific key.
+    Each hash is built by concatenating an optional "old" prefix, a heap-prefix
+    and an object-specific key, then hashing the concatenation.
 
-    The key module provides a way to convert the result of this string
-    concatenation to an MD5-hash, of which the first few bytes are used
-    to index the hashtable. *)
-module type Key = sig
+    Currently we use MD5 as the hashing algorithm. Note that only the first
+    8 bytes are used to index the shared memory table. *)
+module type KeyHasher = sig
   (** The type of keys that OCaml-land callers try to insert.
 
       This key will be object-specific (unique within a heap), but might not be
       unique across heaps. *)
   type key
 
-  (** The md5 of an [old] or a new [key].
+  (** The hash of an old or new key. *)
+  type hash
 
-     We will use the first few bytes of this MD5 digest to index into
-     the hash table. *)
-  type md5
+  val hash : Prefix.t -> key -> hash
 
-  val md5 : Prefix.t -> key -> md5
+  val hash_old : Prefix.t -> key -> hash
 
-  val md5_old : Prefix.t -> key -> md5
-
-  (** Note that this returns the raw MD5 bytes, not its hex encoding. *)
-  val string_of_md5 : md5 -> string
+  (** Return the raw bytes of the digest. Note that this is not hex encoded. *)
+  val to_bytes : hash -> string
 end
 
 (** The interface that all keys need to implement *)
@@ -245,20 +242,20 @@ module type UserKeyType = sig
 end
 
 (** Make a new key that can be stored in shared-memory. *)
-module KeyFunctor (UserKeyType : UserKeyType) :
-  Key with type key = UserKeyType.t
+module MakeKeyHasher (UserKeyType : UserKeyType) :
+  KeyHasher with type key = UserKeyType.t
 
 (** Heap type that represents immediate access to the underlying hashtable. *)
-module type Raw = functor (Key : Key) (Value : Value.Type) -> sig
-  val add : Key.md5 -> Value.t -> unit
+module type Raw = functor (KeyHasher : KeyHasher) (Value : Value.Type) -> sig
+  val add : KeyHasher.hash -> Value.t -> unit
 
-  val mem : Key.md5 -> bool
+  val mem : KeyHasher.hash -> bool
 
-  val get : Key.md5 -> Value.t
+  val get : KeyHasher.hash -> Value.t
 
-  val remove : Key.md5 -> unit
+  val remove : KeyHasher.hash -> unit
 
-  val move : Key.md5 -> Key.md5 -> unit
+  val move : KeyHasher.hash -> KeyHasher.hash -> unit
 end
 
 (** Heap that provides immediate access to the underlying hashtable. *)
@@ -277,8 +274,8 @@ module ProfiledImmediate : Raw
 (** Heap that provides direct access to shared memory, but with a layer
     of local changes that allows us to decide whether or not to commit
     specific values. *)
-module WithLocalChanges (Raw : Raw) (Key : Key) (Value : Value.Type) : sig
-  include module type of Raw (Key) (Value)
+module WithLocalChanges (Raw : Raw) (KeyHasher : KeyHasher) (Value : Value.Type) : sig
+  include module type of Raw (KeyHasher) (Value)
 
   module LocalChanges : sig
     val has_local_changes : unit -> bool
@@ -287,9 +284,9 @@ module WithLocalChanges (Raw : Raw) (Key : Key) (Value : Value.Type) : sig
 
     val pop_stack : unit -> unit
 
-    val revert : Key.md5 -> unit
+    val revert : KeyHasher.hash -> unit
 
-    val commit : Key.md5 -> unit
+    val commit : KeyHasher.hash -> unit
 
     val revert_all : unit -> unit
 

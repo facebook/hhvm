@@ -704,7 +704,7 @@ functor
 (** Heap that provides direct access to shared memory, but with a layer
     of local changes that allows us to decide whether or not to commit
     specific values. *)
-module WithLocalChanges : functor
+module BackendWithLocalChanges : functor
   (Backend : Backend)
   (KeyHasher : KeyHasher)
   (Value : Value)
@@ -1064,7 +1064,8 @@ module NoCache (Backend : Backend) (Key : Key) (Value : Value) :
   (** Stacks that keeps track of local, non-committed changes. If
       no stacks are active, changs will be committed immediately to
       the shared-memory backend *)
-  module WithLocalChanges = WithLocalChanges (Backend) (KeyHasher) (Value)
+  module WithLocalChanges =
+    BackendWithLocalChanges (Backend) (KeyHasher) (Value)
 
   type key = Key.t
 

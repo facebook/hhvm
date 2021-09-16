@@ -61,8 +61,6 @@ impl Job {
     ) -> Result<T, JobFailed>
     where
         F: FnOnce(&StackLimit, NonMainStackSize) -> T,
-        F: Send,
-        T: Send,
     {
         // Eagerly validate job parameters via getters, so we can panic before executing
         let max_stack_size = self.check_nonmain_space_max();
@@ -79,13 +77,13 @@ impl Job {
                 panic!("bad compute_stack_slack (must return < stack_size)");
             }
 
-            let retryable = make_retryable();
+            let retryable = AssertSend(make_retryable());
             let try_retryable = move || {
                 let stack_limit = StackLimit::relative(relative_stack_size);
                 stack_limit.reset();
                 let stack_limit_ref = &stack_limit;
                 match std::panic::catch_unwind(std::panic::AssertUnwindSafe(move || {
-                    retryable(stack_limit_ref, nonmain_stack_size)
+                    AssertSend(retryable.0(stack_limit_ref, nonmain_stack_size))
                 })) {
                     Ok(result) => Some(result),
                     Err(_) if stack_limit.exceeded() => None,
@@ -107,7 +105,7 @@ impl Job {
                 .expect("ERROR: crossbeam::scope"),
             };
             if let Some(result) = result_opt {
-                return Ok(result);
+                return Ok(result.0);
             } else {
                 on_retry(stack_size)
             }
@@ -171,6 +169,13 @@ impl fmt::Display for JobFailed {
         )
     }
 }
+
+/// Since the main thread blocks until the nonmain worker thread terminates, we
+/// know there will be no concurrent access of values captured by the job
+/// closure. This means it should be safe to close over non-Send values, so we
+/// assert that the job closure is Send using this struct.
+struct AssertSend<T>(T);
+unsafe impl<T> Send for AssertSend<T> {}
 
 #[cfg(test)]
 mod tests {

@@ -377,13 +377,17 @@ module type NoCache = sig
 
   val get_old : key -> value option
 
-  val get_old_batch : KeySet.t -> value option KeyMap.t
-
-  val remove_old_batch : KeySet.t -> unit
-
   val get_batch : KeySet.t -> value option KeyMap.t
 
+  val get_old_batch : KeySet.t -> value option KeyMap.t
+
+  val remove : key -> unit
+
+  val remove_old : key -> unit
+
   val remove_batch : KeySet.t -> unit
+
+  val remove_old_batch : KeySet.t -> unit
 
   val mem : key -> bool
 

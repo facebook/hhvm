@@ -1116,13 +1116,17 @@ module type NoCache = sig
 
   val get_old : key -> value option
 
-  val get_old_batch : KeySet.t -> value option KeyMap.t
-
-  val remove_old_batch : KeySet.t -> unit
-
   val get_batch : KeySet.t -> value option KeyMap.t
 
+  val get_old_batch : KeySet.t -> value option KeyMap.t
+
+  val remove : key -> unit
+
+  val remove_old : key -> unit
+
   val remove_batch : KeySet.t -> unit
+
+  val remove_old_batch : KeySet.t -> unit
 
   val mem : key -> bool
 
@@ -1225,111 +1229,132 @@ module NoCache (Raw : Raw) (UserKeyType : UserKeyType) (Value : Value.Type) :
      and module KeySet = Set.Make(UserKeyType)
      and module KeyMap = WrappedMap.Make(UserKeyType) = struct
   module Key = KeyFunctor (UserKeyType)
-  module New = New (Raw) (Key) (Value)
-  module Old = Old (Raw) (Key) (Value) (New.WithLocalChanges)
   module KeySet = Set.Make (UserKeyType)
   module KeyMap = WrappedMap.Make (UserKeyType)
+
+  (** Stacks that keeps track of local, non-committed changes. If
+      no stacks are active, changs will be committed immediately to
+      the shared-memory backend *)
+  module WithLocalChanges = WithLocalChanges (Raw) (Key) (Value)
 
   type key = UserKeyType.t
 
   type value = Value.t
 
-  let add x y = New.add (Key.make Value.prefix x) y
+  let hash_of_key x = Key.make Value.prefix x |> Key.md5
 
-  let get x = New.get (Key.make Value.prefix x)
+  let old_hash_of_key x = Key.make_old Value.prefix x |> Key.md5_old
+
+  let add x y = WithLocalChanges.add (hash_of_key x) y
+
+  let get x =
+    let hash = hash_of_key x in
+    if WithLocalChanges.mem hash then
+      Some (WithLocalChanges.get hash)
+    else
+      None
 
   let get_old x =
-    let key = Key.make_old Value.prefix x in
-    Old.get key
+    let old_hash = old_hash_of_key x in
+    if WithLocalChanges.mem old_hash then
+      Some (WithLocalChanges.get old_hash)
+    else
+      None
 
-  let get_old_batch xs =
+  let get_batch xs =
     KeySet.fold
       begin
-        fun str_key acc ->
-        let key = Key.make_old Value.prefix str_key in
-        KeyMap.add str_key (Old.get key) acc
+        fun key acc ->
+        KeyMap.add key (get key) acc
       end
       xs
       KeyMap.empty
 
-  let remove_batch xs =
-    KeySet.iter
+  let get_old_batch xs =
+    KeySet.fold
       begin
-        fun str_key ->
-        let key = Key.make Value.prefix str_key in
-        New.remove key
+        fun key acc ->
+        KeyMap.add key (get_old key) acc
       end
       xs
+      KeyMap.empty
+
+  let remove x =
+    let hash = hash_of_key x in
+    if WithLocalChanges.mem hash then
+      WithLocalChanges.remove hash
+    else
+      ()
+
+  let remove_old x =
+    let old_hash = old_hash_of_key x in
+    if WithLocalChanges.mem old_hash then
+      WithLocalChanges.remove old_hash
+    else
+      ()
+
+  let remove_batch xs = KeySet.iter remove xs
+
+  let remove_old_batch xs = KeySet.iter remove_old xs
+
+  let mem x = WithLocalChanges.mem (hash_of_key x)
+
+  let mem_old x = WithLocalChanges.mem (old_hash_of_key x)
+
+  let oldify x =
+    if mem x then
+      WithLocalChanges.move (hash_of_key x) (old_hash_of_key x)
+    else
+      ()
+
+  let revive x =
+    if mem_old x then (
+      remove x;
+      WithLocalChanges.move (old_hash_of_key x) (hash_of_key x)
+    )
 
   let oldify_batch xs =
     KeySet.iter
       begin
-        fun str_key ->
-        let key = Key.make Value.prefix str_key in
-        if New.mem key then
-          New.oldify key
+        fun key ->
+        if mem key then
+          oldify key
         else
-          let key = Key.make_old Value.prefix str_key in
-          Old.remove key
+          (* this is weird, semantics of `oldify x` and `oldify_batch {x}` are
+             different for some mysterious reason *)
+          remove_old key
       end
       xs
 
   let revive_batch xs =
     KeySet.iter
       begin
-        fun str_key ->
-        let old_key = Key.make_old Value.prefix str_key in
-        if Old.mem old_key then
-          Old.revive old_key
+        fun key ->
+        if mem_old key then
+          revive key
         else
-          let key = Key.make Value.prefix str_key in
-          New.remove key
-      end
-      xs
-
-  let get_batch xs =
-    KeySet.fold
-      begin
-        fun str_key acc ->
-        let key = Key.make Value.prefix str_key in
-        match New.get key with
-        | None -> KeyMap.add str_key None acc
-        | Some data -> KeyMap.add str_key (Some data) acc
-      end
-      xs
-      KeyMap.empty
-
-  let mem x = New.mem (Key.make Value.prefix x)
-
-  let mem_old x = Old.mem (Key.make_old Value.prefix x)
-
-  let remove_old_batch xs =
-    KeySet.iter
-      begin
-        fun str_key ->
-        let key = Key.make_old Value.prefix str_key in
-        Old.remove key
+          (* this is weird, semantics of `revive x` and `revive {x}` are
+               different for some mysterious reason *)
+          remove key
       end
       xs
 
   module LocalChanges = struct
-    include New.WithLocalChanges.LocalChanges
+    include WithLocalChanges.LocalChanges
 
     let revert_batch keys =
       KeySet.iter
         begin
-          fun str_key ->
-          let key = Key.make Value.prefix str_key in
-          revert (Key.md5 key)
+          fun key ->
+          revert (hash_of_key key)
         end
         keys
 
     let commit_batch keys =
       KeySet.iter
         begin
-          fun str_key ->
-          let key = Key.make Value.prefix str_key in
-          commit (Key.md5 key)
+          fun key ->
+          commit (hash_of_key key)
         end
         keys
   end
@@ -1697,6 +1722,14 @@ module WithCache
   let revive_batch keys =
     Direct.revive_batch keys;
     KeySet.iter Cache.remove keys
+
+  let remove x =
+    Direct.remove x;
+    Cache.remove x
+
+  let remove_old x : unit =
+    Direct.remove_old x;
+    failwith "TODO(hverr): Cache.remove_old"
 
   let remove_batch xs =
     Direct.remove_batch xs;

@@ -791,7 +791,7 @@ fn rewrite_expr(
             } else {
                 return Err((
                     pos,
-                    "Unsupport expression tree syntax: Elvis operator".into(),
+                    "Unsupported expression tree syntax: Elvis operator".into(),
                 ));
             };
             let (virtual_e3, desugar_e3) = rewrite_expr(temps, e3, visitor_name)?;

@@ -12,7 +12,7 @@ use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_ocamlpool::to_ocaml;
 use oxidized::relative_path::RelativePath;
 use parser_core_types::source_text::SourceText;
-use stack_limit::{StackLimit, GI, KI, MI};
+use stack_limit::{StackLimit, GI, MI};
 
 use anyhow::{anyhow, Result};
 use serde_json::{map::Map, value::Value};
@@ -225,23 +225,7 @@ unsafe extern "C" fn hackc_compile_from_text_cpp_ffi(
         // Assume peak is 2.5x of stack. This is initial estimation, need
         // to be improved later.
         let stack_slack = |stack_size| stack_size * 6 / 10;
-        let on_retry = &mut |stack_size_tried: usize| {
-            // Not always printing warning here because this would fail
-            // some HHVM tests.
-            if std::env::var_os("HH_TEST_MODE").is_some() {
-                // Safety : We rely on the C caller that `env` can be
-                // legitmately reinterpreted as a `*const CEnv` and that
-                // on doing so, it points to a valid properly initialized
-                // value.
-                let env = CNativeEnv::to_compile_env((env as *const CNativeEnv).as_ref().unwrap())
-                    .unwrap();
-                eprintln!(
-                    "[hrust] warning: hackc_compile_from_text_ffi exceeded stack of {} KiB on: {}",
-                    (stack_size_tried - stack_slack(stack_size_tried)) / KI,
-                    env.filepath.path_str(),
-                );
-            }
-        };
+        let on_retry = &mut |_| ();
         let job = stack_limit::retry::Job {
             nonmain_stack_min: 13 * MI,
             // TODO(hrust) aast_parser_ffi only requies 1 * GI, it's like
@@ -381,22 +365,7 @@ unsafe extern "C" fn hackc_compile_hhas_from_text_cpp_ffi(
         // Assume peak is 2.5x of stack. This is initial estimation, need
         // to be improved later.
         let stack_slack = |stack_size| stack_size * 6 / 10;
-        let on_retry = &mut |stack_size_tried: usize| {
-            // Not always printing warning here because this would fail
-            // some HHVM tests.
-            if std::env::var_os("HH_TEST_MODE").is_some() {
-                // Safety : We rely on the C caller that `env` can be
-                // legitmately reinterpreted as a `*const CEnv` and that
-                // on doing so, it points to a valid properly initialized
-                // value.
-                let env = CNativeEnv::to_compile_env(cnative_env).unwrap();
-                eprintln!(
-                    "[hrust] warning: hackc_compile_hhas_from_text_ffi exceeded stack of {} KiB on: {}",
-                    (stack_size_tried - stack_slack(stack_size_tried)) / KI,
-                    env.filepath.path_str(),
-                );
-            }
-        };
+        let on_retry = &mut |_| ();
         let job = stack_limit::retry::Job {
             nonmain_stack_min: 13 * MI,
             // TODO(hrust) aast_parser_ffi only requies 1 * GI, it's like
@@ -491,17 +460,7 @@ extern "C" fn compile_from_text_ffi(
             // Assume peak is 2.5x of stack.
             // This is initial estimation, need to be improved later.
             let stack_slack = |stack_size| stack_size * 6 / 10;
-            let on_retry = &mut |stack_size_tried: usize| {
-                // Not always printing warning here because this would fail some HHVM tests
-                if std::env::var_os("HH_TEST_MODE").is_some() {
-                    let source_text = unsafe { SourceText::from_ocaml(source_text).unwrap() };
-                    eprintln!(
-                        "[hrust] warning: hhbc_by_ref_compile_from_text_ffi exceeded stack of {} KiB on: {}",
-                        (stack_size_tried - stack_slack(stack_size_tried)) / KI,
-                        source_text.file_path().path_str(),
-                    );
-                }
-            };
+            let on_retry = &mut |_| ();
             let job = stack_limit::retry::Job {
                 nonmain_stack_min: 13 * MI,
                 // TODO(hrust) aast_parser_ffi only requies 1 * GI, it's like rust compiler produce inconsistent binary.

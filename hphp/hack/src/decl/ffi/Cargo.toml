@@ -11,7 +11,6 @@ doctest = false
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
-atty = "0.2"
 bumpalo = { version = "3.2.1", features = ["collections"] }
 decl_rust = { path = "../decl_rust" }
 no_pos_hash = { path = "../../utils/no_pos_hash" }

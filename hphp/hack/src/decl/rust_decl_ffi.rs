@@ -70,16 +70,7 @@ ocaml_ffi_with_arena! {
             }
         };
 
-        let on_retry = &mut |stack_size_tried: usize| {
-            // Not always printing warning here because this would fail some HHVM tests
-            if atty::is(atty::Stream::Stderr) || std::env::var_os("HH_TEST_MODE").is_some() {
-                eprintln!(
-                    "[hrust] warning: direct_decl_parser exceeded stack of {} KiB on: {:?}",
-                    (stack_size_tried - STACK_SLACK_1K(stack_size_tried)) / KI,
-                    filename,
-                );
-            }
-        };
+        let on_retry = &mut |_| ();
 
         const MAX_STACK_SIZE: usize = 1024 * MI;
 

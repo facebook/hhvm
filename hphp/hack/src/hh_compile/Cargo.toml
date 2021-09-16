@@ -11,7 +11,6 @@ path = "hh_compile.rs"
 [dependencies]
 aast_parser = { path = "../parser/cargo/aast_parser" }
 anyhow = "1.0"
-atty = "0.2"
 bumpalo = { version = "3.2.1", features = ["collections"] }
 direct_decl_parser = { path = "../parser/api/cargo/direct_decl_parser" }
 hhbc_by_ref_compile = { path = "../hhbc/hhbc_by_ref/cargo/hhbc_by_ref_compile" }

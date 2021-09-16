@@ -8,7 +8,7 @@ use aast_parser::{rust_aast_parser_types::Env, AastParser, Error as AastParserEr
 use ocamlrep::FromOcamlRep;
 use ocamlrep_ocamlpool::to_ocaml;
 use parser_core_types::{indexed_source_text::IndexedSourceText, source_text::SourceText};
-use stack_limit::{StackLimit, GI, KI, MI};
+use stack_limit::{StackLimit, GI, MI};
 
 const MAX_STACK_SIZE: usize = GI;
 
@@ -33,20 +33,7 @@ extern "C" fn from_text(env: usize, source_text: usize) -> usize {
             unsafe { to_ocaml(&res) }
         };
 
-        let on_retry = &mut |stack_size_tried: usize| {
-            // Not always printing warning here because this would fail some HHVM tests
-            let istty = unsafe { libc::isatty(libc::STDERR_FILENO as i32) != 0 };
-            if istty || std::env::var_os("HH_TEST_MODE").is_some() {
-                let source_text = indexed_source_text.source_text();
-                let file_path = source_text.file_path().path_str();
-                eprintln!(
-                    "[hrust] warning: aast_parser exceeded stack of {} KiB on: {}",
-                    (stack_size_tried - stack_slack_for_traversal_and_parsing(stack_size_tried))
-                        / KI,
-                    file_path,
-                );
-            }
-        };
+        let on_retry = &mut |_| ();
 
         use stack_limit::retry;
         let job = retry::Job {

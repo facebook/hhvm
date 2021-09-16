@@ -133,19 +133,7 @@ where
 
     const MAX_STACK_SIZE: usize = 1024 * MI;
 
-    let on_retry = &mut |stack_size_tried: usize| {
-        // Not always printing warning here because this would fail some HHVM tests
-        let istty = unsafe { libc::isatty(libc::STDERR_FILENO as i32) != 0 };
-        if istty || std::env::var_os("HH_TEST_MODE").is_some() {
-            let source_text = unsafe { SourceText::from_ocaml(ocaml_source_text).unwrap() };
-            let file_path = source_text.file_path().path_str();
-            eprintln!(
-                "[hrust] warning: parser exceeded stack of {} KiB on: {}",
-                (stack_size_tried - stack_slack_for_traversal_and_parsing(stack_size_tried)) / KI,
-                file_path,
-            );
-        }
-    };
+    let on_retry = &mut |_| ();
 
     use stack_limit::retry;
     let job = retry::Job {

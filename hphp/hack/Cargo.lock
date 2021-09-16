@@ -28,7 +28,6 @@ name = "aast_parser_ffi"
 version = "0.0.0"
 dependencies = [
  "aast_parser",
- "libc",
  "ocamlrep",
  "ocamlrep_ocamlpool",
  "parser_core_types",
@@ -705,7 +704,6 @@ dependencies = [
 name = "decl_rust_ffi"
 version = "0.0.0"
 dependencies = [
- "atty",
  "bumpalo",
  "decl_rust",
  "no_pos_hash",
@@ -1125,7 +1123,6 @@ version = "0.0.0"
 dependencies = [
  "aast_parser",
  "anyhow",
- "atty",
  "bumpalo",
  "direct_decl_parser",
  "hhbc_by_ref_compile",
@@ -3203,7 +3200,6 @@ name = "rust_parser_ffi"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "libc",
  "mode_parser",
  "ocamlrep",
  "ocamlrep_ocamlpool",

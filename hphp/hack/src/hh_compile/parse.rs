@@ -12,7 +12,7 @@ use parser_core_types::{
     indexed_source_text::IndexedSourceText, parser_env::ParserEnv, source_text::SourceText,
 };
 use rayon::prelude::*;
-use stack_limit::{StackLimit, KI, MI};
+use stack_limit::{StackLimit, MI};
 use std::{
     io::{stdin, BufRead, BufReader},
     iter::Iterator,
@@ -124,17 +124,7 @@ fn parse_file(parser: Parser, filepath: PathBuf) -> anyhow::Result<()> {
             Ok(())
         };
 
-    let on_retry = &mut |stack_size_tried: usize| {
-        // Not always printing warning here because this would fail some HHVM tests
-        if atty::is(atty::Stream::Stderr) || std::env::var_os("HH_TEST_MODE").is_some() {
-            eprintln!(
-                "[hrust] warning: exceeded stack of {} KiB on {:?}",
-                (stack_size_tried - utils::stack_slack_for_traversal_and_parsing(stack_size_tried))
-                    / KI,
-                ctx.0,
-            );
-        }
-    };
+    let on_retry = &mut |_| ();
 
     use stack_limit::retry;
     let job = retry::Job {

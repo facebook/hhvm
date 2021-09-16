@@ -10,7 +10,7 @@ use hhbc_by_ref_options::Options;
 use multifile_rust as multifile;
 use oxidized::relative_path::{self, RelativePath};
 use rayon::prelude::*;
-use stack_limit::{StackLimit, KI, MI};
+use stack_limit::{StackLimit, MI};
 use structopt::StructOpt;
 
 use std::{
@@ -171,16 +171,7 @@ fn process_single_file_with_retry(
     // This is initial estimation, need to be improved later.
     let stack_slack = |stack_size| stack_size * 6 / 10;
 
-    let on_retry = &mut |stack_size_tried: usize| {
-        // Not always printing warning here because this would fail some HHVM tests
-        if atty::is(atty::Stream::Stderr) || std::env::var_os("HH_TEST_MODE").is_some() {
-            eprintln!(
-                "[hrust] warning: hh_compile exceeded stack of {} KiB on: {:?}",
-                (stack_size_tried - stack_slack(stack_size_tried)) / KI,
-                ctx.1,
-            );
-        }
-    };
+    let on_retry = &mut |_| ();
 
     let job = stack_limit::retry::Job {
         nonmain_stack_min: 13 * MI,

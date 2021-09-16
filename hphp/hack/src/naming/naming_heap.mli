@@ -21,11 +21,11 @@ module type ReverseNamingTable = sig
 
   val remove_batch : Naming_sqlite.db_path option -> string list -> unit
 
-  module Position : Value.Type with type t = pos
+  module Position : SharedMem.Value with type t = pos
 end
 
 module Types : sig
-  module CanonName : Value.Type with type t = string
+  module CanonName : SharedMem.Value with type t = string
 
   module TypeCanonHeap :
     SharedMem.NoCache
@@ -52,7 +52,7 @@ module Types : sig
 end
 
 module Funs : sig
-  module CanonName : Value.Type with type t = string
+  module CanonName : SharedMem.Value with type t = string
 
   module FunCanonHeap :
     SharedMem.NoCache

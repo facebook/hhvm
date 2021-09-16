@@ -74,7 +74,7 @@ module type ReverseNamingTable = sig
 
   val remove_batch : Naming_sqlite.db_path option -> string list -> unit
 
-  module Position : Value.Type with type t = pos
+  module Position : SharedMem.Value with type t = pos
 end
 
 (* The Types module records both class names and typedefs since they live in the

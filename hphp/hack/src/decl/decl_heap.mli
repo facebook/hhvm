@@ -14,25 +14,25 @@ module Capacity : sig
   val capacity : int
 end
 
-module Class : Value.Type with type t = decl_class_type
+module Class : SharedMem.Value with type t = decl_class_type
 
-module Fun : Value.Type with type t = fun_elt
+module Fun : SharedMem.Value with type t = fun_elt
 
-module Typedef : Value.Type with type t = typedef_type
+module Typedef : SharedMem.Value with type t = typedef_type
 
-module RecordDef : Value.Type with type t = record_def_type
+module RecordDef : SharedMem.Value with type t = record_def_type
 
-module GConst : Value.Type with type t = const_decl
+module GConst : SharedMem.Value with type t = const_decl
 
-module Property : Value.Type with type t = decl_ty
+module Property : SharedMem.Value with type t = decl_ty
 
-module StaticProperty : Value.Type with type t = decl_ty
+module StaticProperty : SharedMem.Value with type t = decl_ty
 
-module Method : Value.Type with type t = fun_elt
+module Method : SharedMem.Value with type t = fun_elt
 
-module StaticMethod : Value.Type with type t = fun_elt
+module StaticMethod : SharedMem.Value with type t = fun_elt
 
-module Constructor : Value.Type with type t = fun_elt
+module Constructor : SharedMem.Value with type t = fun_elt
 
 module ClassEltKey : SharedMem.UserKeyType with type t = string * string
 

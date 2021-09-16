@@ -15,7 +15,7 @@ module Capacity : sig
   val capacity : int
 end
 
-module Class : Value.Type with type t = shallow_class
+module Class : SharedMem.Value with type t = shallow_class
 
 module Classes :
     module type of
@@ -26,7 +26,7 @@ module FilterCapacity : sig
   val capacity : int
 end
 
-module Filter : Value.Type with type t = BloomFilter.t
+module Filter : SharedMem.Value with type t = BloomFilter.t
 
 module MemberFilters : sig
   include module type of

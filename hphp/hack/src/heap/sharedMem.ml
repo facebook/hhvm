@@ -481,7 +481,13 @@ module MakeKeyHasher (UserKeyType : UserKeyType) :
   let to_bytes (hash : hash) : string = hash
 end
 
-module type Raw = functor (KeyHasher : KeyHasher) (Value : Value.Type) -> sig
+module type Value = sig
+  type t
+
+  val description : string
+end
+
+module type Raw = functor (KeyHasher : KeyHasher) (Value : Value) -> sig
   val add : KeyHasher.hash -> Value.t -> unit
 
   val mem : KeyHasher.hash -> bool
@@ -505,7 +511,7 @@ end
 module Immediate : Raw =
 functor
   (KeyHasher : KeyHasher)
-  (Value : Value.Type)
+  (Value : Value)
   ->
   struct
     (* Returns the number of bytes allocated in the heap, or a negative number
@@ -655,7 +661,7 @@ type 'a profiled_value =
 module ProfiledImmediate : Raw =
 functor
   (KeyHasher : KeyHasher)
-  (Value : Value.Type)
+  (Value : Value)
   ->
   struct
     module ProfiledValue = struct
@@ -708,7 +714,7 @@ functor
 module WithLocalChanges : functor
   (Raw : Raw)
   (KeyHasher : KeyHasher)
-  (Value : Value.Type)
+  (Value : Value)
   -> sig
   include module type of Raw (KeyHasher) (Value)
 
@@ -731,7 +737,7 @@ end =
 functor
   (Raw : Raw)
   (KeyHasher : KeyHasher)
-  (Value : Value.Type)
+  (Value : Value)
   ->
   struct
     module Raw = Raw (KeyHasher) (Value)
@@ -1051,7 +1057,7 @@ end
 (* A functor returning an implementation of the S module without caching. *)
 (*****************************************************************************)
 
-module NoCache (Raw : Raw) (UserKeyType : UserKeyType) (Value : Value.Type) :
+module NoCache (Raw : Raw) (UserKeyType : UserKeyType) (Value : Value) :
   NoCache
     with type key = UserKeyType.t
      and type value = Value.t
@@ -1198,7 +1204,7 @@ let invalidate_local_caches () =
   List.iter !invalidate_local_caches_callback_list ~f:(fun callback ->
       callback ())
 
-module FreqCache (Key : UserKeyType) (Value : Value.Type) (Capacity : Capacity) :
+module FreqCache (Key : UserKeyType) (Value : Value) (Capacity : Capacity) :
   LocalCacheLayer with type key = Key.t and type value = Value.t = struct
   type key = Key.t
 
@@ -1275,10 +1281,7 @@ module FreqCache (Key : UserKeyType) (Value : Value.Type) (Capacity : Capacity) 
     Hashtbl.remove cache x
 end
 
-module OrderedCache
-    (Key : UserKeyType)
-    (Value : Value.Type)
-    (Capacity : Capacity) :
+module OrderedCache (Key : UserKeyType) (Value : Value) (Capacity : Capacity) :
   LocalCacheLayer with type key = Key.t and type value = Value.t = struct
   type key = Key.t
 
@@ -1322,7 +1325,7 @@ module OrderedCache
     end
 end
 
-module MultiCache (Key : UserKeyType) (Value : Value.Type) (Capacity : Capacity) :
+module MultiCache (Key : UserKeyType) (Value : Value) (Capacity : Capacity) :
   LocalCacheLayer with type key = Key.t and type value = Value.t = struct
   type key = Key.t
 
@@ -1407,7 +1410,7 @@ module MultiCache (Key : UserKeyType) (Value : Value.Type) (Capacity : Capacity)
 end
 
 (** Create a new value, but append the "__cache" prefix to its description *)
-module ValueForCache (Value : Value.Type) = struct
+module ValueForCache (Value : Value) = struct
   include Value
 
   let description = Value.description ^ "__cache"
@@ -1422,7 +1425,7 @@ end
 module WithCache
     (Raw : Raw)
     (UserKeyType : UserKeyType)
-    (Value : Value.Type)
+    (Value : Value)
     (Capacity : Capacity) :
   WithCache
     with type key = UserKeyType.t

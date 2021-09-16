@@ -247,8 +247,15 @@ end
 module MakeKeyHasher (UserKeyType : UserKeyType) :
   KeyHasher with type key = UserKeyType.t
 
+(** The interface that all values need to implement *)
+module type Value = sig
+  type t
+
+  val description : string
+end
+
 (** Heap type that represents immediate access to the underlying hashtable. *)
-module type Raw = functor (KeyHasher : KeyHasher) (Value : Value.Type) -> sig
+module type Raw = functor (KeyHasher : KeyHasher) (Value : Value) -> sig
   val add : KeyHasher.hash -> Value.t -> unit
 
   val mem : KeyHasher.hash -> bool
@@ -350,7 +357,7 @@ end
 
     Provides no worker-local caching. Directly stores to and queries from
     shared memory. *)
-module NoCache (_ : Raw) (UserKeyType : UserKeyType) (Value : Value.Type) :
+module NoCache (_ : Raw) (UserKeyType : UserKeyType) (Value : Value) :
   NoCache
     with type key = UserKeyType.t
      and type value = Value.t
@@ -399,7 +406,7 @@ end
     get evicted...
 
     It is Hashtbl.t-based with a bounded number of elements. *)
-module FreqCache (Key : UserKeyType) (Value : Value.Type) (_ : Capacity) :
+module FreqCache (Key : UserKeyType) (Value : Value) (_ : Capacity) :
   LocalCacheLayer with type key = Key.t and type value = Value.t
 
 (** OrderedCache is an LRA (Least Recently Added) cache.
@@ -408,14 +415,14 @@ module FreqCache (Key : UserKeyType) (Value : Value.Type) (_ : Capacity) :
     to be added.
 
     It is Hashtbl.t-based with a bounded number of elements. *)
-module OrderedCache (Key : UserKeyType) (Value : Value.Type) (_ : Capacity) :
+module OrderedCache (Key : UserKeyType) (Value : Value) (_ : Capacity) :
   LocalCacheLayer with type key = Key.t and type value = Value.t
 
 (** MultiCache uses both FreqCache and OrderedCache simultaneously.
 
     It uses both caches with the hope that each one will paper over the
     other's weaknesses. *)
-module MultiCache (Key : UserKeyType) (Value : Value.Type) (_ : Capacity) :
+module MultiCache (Key : UserKeyType) (Value : Value) (_ : Capacity) :
   LocalCacheLayer with type key = Key.t and type value = Value.t
 
 (** Same as [NoCache] but provides a worker-local cache. *)
@@ -432,7 +439,7 @@ end
 module WithCache
     (_ : Raw)
     (UserKeyType : UserKeyType)
-    (Value : Value.Type)
+    (Value : Value)
     (_ : Capacity) :
   WithCache
     with type key = UserKeyType.t

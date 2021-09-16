@@ -2861,24 +2861,6 @@ fn emit_special_function<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
                 ],
             )))
         }
-        ("HH\\sequence", &[]) => Ok(Some(instr::null(alloc))),
-        ("HH\\sequence", args) => {
-            let es = args
-                .iter()
-                .map(|arg| emit_expr(e, env, arg))
-                .collect::<Result<Vec<_>>>()?;
-            // This is horrible but we can't use `intersperse` because
-            // `InstrSeq` doesn't implement `Clone`.
-            let mut iss = Vec::new();
-            let len = es.len();
-            for (count, e) in es.into_iter().enumerate() {
-                iss.push(e);
-                if count != len - 1 {
-                    iss.push(instr::popc(alloc));
-                }
-            }
-            Ok(Some(InstrSeq::gather(alloc, iss)))
-        }
         ("class_exists", &[ref arg1, ..])
         | ("trait_exists", &[ref arg1, ..])
         | ("interface_exists", &[ref arg1, ..])

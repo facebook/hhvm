@@ -8,9 +8,9 @@ edition = "2018"
 path = "mod.rs"
 
 [dependencies]
-libc = "0.2.86"
+libc = "0.2.98"
 lz4 = "1.23.1"
-nohash-hasher = "0.1"
+nohash-hasher = "0.2"
 ocamlrep = { path = "../ocamlrep" }
 ocamlrep_ocamlpool = { path = "../ocamlrep_ocamlpool" }
 once_cell = "1.4"

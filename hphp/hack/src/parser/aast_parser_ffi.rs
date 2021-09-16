@@ -8,16 +8,6 @@ use aast_parser::{rust_aast_parser_types::Env, AastParser, Error as AastParserEr
 use ocamlrep::FromOcamlRep;
 use ocamlrep_ocamlpool::to_ocaml;
 use parser_core_types::{indexed_source_text::IndexedSourceText, source_text::SourceText};
-use stack_limit::{StackLimit, GI, MI};
-
-const MAX_STACK_SIZE: usize = GI;
-
-fn stack_slack_for_traversal_and_parsing(stack_size: usize) -> usize {
-    // Syntax::to_ocaml is deeply & mutually recursive and uses nearly 2.5x of stack
-    // TODO: rewrite to_ocaml iteratively & reduce it to "stack_size - MB" as in HHVM
-    // (https://github.com/facebook/hhvm/blob/master/hphp/runtime/base/request-info.h)
-    stack_size * 6 / 10
-}
 
 #[no_mangle]
 extern "C" fn from_text(env: usize, source_text: usize) -> usize {
@@ -26,22 +16,12 @@ extern "C" fn from_text(env: usize, source_text: usize) -> usize {
         let source_text = unsafe { SourceText::from_ocaml(source_text).unwrap() };
         let indexed_source_text = IndexedSourceText::new(source_text);
 
-        let retryable = |stack_limit: &StackLimit, _nonmain_stack_size: Option<usize>| {
+        match stack_limit::with_elastic_stack(|stack_limit| {
             let res = AastParser::from_text(&env, &indexed_source_text, Some(stack_limit));
             // Safety: Requires no concurrent interaction with OCaml
             // runtime from other threads.
             unsafe { to_ocaml(&res) }
-        };
-
-        let on_retry = &mut |_| ();
-
-        use stack_limit::retry;
-        let job = retry::Job {
-            nonmain_stack_min: 13 * MI, // assume we need much more if default stack size isn't enough
-            nonmain_stack_max: Some(MAX_STACK_SIZE),
-            ..Default::default()
-        };
-        match job.with_elastic_stack(retryable, on_retry, stack_slack_for_traversal_and_parsing) {
+        }) {
             Ok(r) => r,
             Err(_) => {
                 let r: &Result<(), AastParserError> =

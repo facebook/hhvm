@@ -3874,7 +3874,8 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         let user_attributes = user_attributes.into_bump_slice();
         let extends = self.slice(extends.iter().filter_map(|&node| self.node_to_ty(node)));
         let implements = self.slice(implements.iter().filter_map(|&node| self.node_to_ty(node)));
-        let support_dynamic_type = self.opts.everything_sdt || class_attributes.support_dynamic_type;
+        let support_dynamic_type =
+            self.opts.everything_sdt || class_attributes.support_dynamic_type;
         // Pop the type params stack only after creating all inner types.
         let tparams = self.pop_type_params(tparams);
         let module = class_attributes.module;

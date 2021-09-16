@@ -3009,6 +3009,7 @@ void Class::setProperties() {
         prop.typeConstraint = tc;
 
         prop.ubs = preProp->upperBounds();
+        prop.repoAuthType = preProp->repoAuthType();
 
         if (preProp->attrs() & AttrNoImplicitNullable) {
           prop.attrs |= AttrNoImplicitNullable;
@@ -3019,6 +3020,9 @@ void Class::setProperties() {
         attrSetter(prop.attrs,
                    preProp->attrs() & AttrInitialSatisfiesTC,
                    AttrInitialSatisfiesTC);
+        attrSetter(prop.attrs,
+                   preProp->attrs() & AttrPersistent,
+                   AttrPersistent);
 
         checkPrePropVal(prop, preProp);
         auto index = slotIndex[slot];
@@ -3316,6 +3320,15 @@ void Class::importTraitInstanceProp(Prop& traitProp,
       curPropMap[serializationIdx++].serializationIdx = prevIt->second;
       serializationVisited[prevIt->second] = true;
     }
+
+    if (prevProp.cls != this) {
+      prevProp.repoAuthType = traitProp.repoAuthType;
+      attrSetter(
+        prevProp.attrs,
+        traitProp.attrs & AttrPersistent,
+        AttrPersistent
+      );
+    }
   }
 }
 
@@ -3364,6 +3377,13 @@ void Class::importTraitStaticProp(
       assertx(prevPropInd != kInvalidSlot);
 
       prevPropVal = prevSProps[prevPropInd].val;
+
+      prevProp.repoAuthType = traitProp.repoAuthType;
+      attrSetter(
+        prevProp.attrs,
+        traitProp.attrs & AttrPersistent,
+        AttrPersistent
+      );
     }
     if (((prevProp.attrs ^ traitProp.attrs) & kRedeclarePropAttrMask) ||
         (!(prevProp.attrs & AttrSystemInitialValue) &&
@@ -3374,12 +3394,6 @@ void Class::importTraitStaticProp(
     }
     prevProp.cls = this;
     prevProp.val = prevPropVal;
-
-    attrSetter(
-      prevProp.attrs,
-      traitProp.attrs & AttrPersistent,
-      AttrPersistent
-    );
 
     assertx(staticSerializationVisited.size() > prevIt->second);
     if (!staticSerializationVisited[prevIt->second]) {

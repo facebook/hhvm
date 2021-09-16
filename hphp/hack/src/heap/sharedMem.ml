@@ -1037,14 +1037,6 @@ module type LocalCacheLayer = sig
   val get_telemetry_items_and_keys : unit -> Obj.t * key Seq.t
 end
 
-module type MultiCache = sig
-  include LocalCacheLayer
-
-  module L1 : LocalCacheLayer with type key = key and type value = value
-
-  module L2 : LocalCacheLayer with type key = key and type value = value
-end
-
 module type WithCache = sig
   include NoCache
 
@@ -1052,7 +1044,7 @@ module type WithCache = sig
 
   val get_no_cache : key -> value option
 
-  module Cache : MultiCache with type key = key and type value = value
+  module Cache : LocalCacheLayer with type key = key and type value = value
 end
 
 (*****************************************************************************)
@@ -1331,7 +1323,7 @@ module OrderedCache
 end
 
 module MultiCache (Key : UserKeyType) (Value : Value.Type) (Capacity : Capacity) :
-  MultiCache with type key = Key.t and type value = Value.t = struct
+  LocalCacheLayer with type key = Key.t and type value = Value.t = struct
   type key = Key.t
 
   type value = Value.t

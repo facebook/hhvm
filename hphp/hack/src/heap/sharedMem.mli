@@ -411,20 +411,12 @@ module FreqCache (Key : UserKeyType) (Value : Value.Type) (_ : Capacity) :
 module OrderedCache (Key : UserKeyType) (Value : Value.Type) (_ : Capacity) :
   LocalCacheLayer with type key = Key.t and type value = Value.t
 
-module type MultiCache = sig
-  include LocalCacheLayer
-
-  module L1 : LocalCacheLayer with type key = key and type value = value
-
-  module L2 : LocalCacheLayer with type key = key and type value = value
-end
-
 (** MultiCache uses both FreqCache and OrderedCache simultaneously.
 
     It uses both caches with the hope that each one will paper over the
     other's weaknesses. *)
 module MultiCache (Key : UserKeyType) (Value : Value.Type) (_ : Capacity) :
-  MultiCache with type key = Key.t and type value = Value.t
+  LocalCacheLayer with type key = Key.t and type value = Value.t
 
 (** Same as [NoCache] but provides a worker-local cache. *)
 module type WithCache = sig
@@ -434,7 +426,7 @@ module type WithCache = sig
 
   val get_no_cache : key -> value option
 
-  module Cache : MultiCache with type key = key and type value = value
+  module Cache : LocalCacheLayer with type key = key and type value = value
 end
 
 module WithCache

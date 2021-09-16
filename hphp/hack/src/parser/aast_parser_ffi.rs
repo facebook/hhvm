@@ -22,24 +22,22 @@ fn stack_slack_for_traversal_and_parsing(stack_size: usize) -> usize {
 #[no_mangle]
 extern "C" fn from_text(env: usize, source_text: usize) -> usize {
     ocamlrep_ocamlpool::catch_unwind(|| {
-        let env = unsafe { &Env::from_ocaml(env).unwrap() };
+        let env = unsafe { Env::from_ocaml(env).unwrap() };
+        let source_text = unsafe { SourceText::from_ocaml(source_text).unwrap() };
+        let indexed_source_text = IndexedSourceText::new(source_text);
 
-        let make_retryable = move || {
-            move |stack_limit: &StackLimit, _nonmain_stack_size: Option<usize>| {
-                let source_text = unsafe { SourceText::from_ocaml(source_text).unwrap() };
-                let indexed_source_text = IndexedSourceText::new(source_text);
-                let res = AastParser::from_text(env, &indexed_source_text, Some(stack_limit));
-                // Safety: Requires no concurrent interaction with OCaml
-                // runtime from other threads.
-                unsafe { to_ocaml(&res) }
-            }
+        let retryable = |stack_limit: &StackLimit, _nonmain_stack_size: Option<usize>| {
+            let res = AastParser::from_text(&env, &indexed_source_text, Some(stack_limit));
+            // Safety: Requires no concurrent interaction with OCaml
+            // runtime from other threads.
+            unsafe { to_ocaml(&res) }
         };
 
         let on_retry = &mut |stack_size_tried: usize| {
             // Not always printing warning here because this would fail some HHVM tests
             let istty = unsafe { libc::isatty(libc::STDERR_FILENO as i32) != 0 };
             if istty || std::env::var_os("HH_TEST_MODE").is_some() {
-                let source_text = unsafe { SourceText::from_ocaml(source_text).unwrap() };
+                let source_text = indexed_source_text.source_text();
                 let file_path = source_text.file_path().path_str();
                 eprintln!(
                     "[hrust] warning: aast_parser exceeded stack of {} KiB on: {}",
@@ -56,11 +54,7 @@ extern "C" fn from_text(env: usize, source_text: usize) -> usize {
             nonmain_stack_max: Some(MAX_STACK_SIZE),
             ..Default::default()
         };
-        match job.with_elastic_stack(
-            make_retryable,
-            on_retry,
-            stack_slack_for_traversal_and_parsing,
-        ) {
+        match job.with_elastic_stack(retryable, on_retry, stack_slack_for_traversal_and_parsing) {
             Ok(r) => r,
             Err(_) => {
                 let r: &Result<(), AastParserError> =

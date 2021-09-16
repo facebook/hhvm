@@ -71,9 +71,9 @@ pub fn run(opts: Opts) -> Result<()> {
 fn parse_file(parser: Parser, filepath: PathBuf) -> anyhow::Result<()> {
     let content = utils::read_file(&filepath)?;
     let ctx = &Arc::new((filepath, content));
-    let make_retryable = move || {
-        let new_ctx = Arc::clone(ctx);
-        move |stack_limit: &StackLimit, _nonmain_stack_size: Option<usize>| -> anyhow::Result<()> {
+    let retryable =
+        |stack_limit: &StackLimit, _nonmain_stack_size: Option<usize>| -> anyhow::Result<()> {
+            let new_ctx = Arc::clone(ctx);
             let env = ParserEnv::default();
             let (filepath, content) = new_ctx.as_ref();
             let path = RelativePath::make(relative_path::Prefix::Dummy, filepath.clone());
@@ -122,8 +122,7 @@ fn parse_file(parser: Parser, filepath: PathBuf) -> anyhow::Result<()> {
                 }
             }
             Ok(())
-        }
-    };
+        };
 
     let on_retry = &mut |stack_size_tried: usize| {
         // Not always printing warning here because this would fail some HHVM tests
@@ -144,7 +143,7 @@ fn parse_file(parser: Parser, filepath: PathBuf) -> anyhow::Result<()> {
         ..Default::default()
     };
     match job.with_elastic_stack(
-        make_retryable,
+        retryable,
         on_retry,
         utils::stack_slack_for_traversal_and_parsing,
     ) {

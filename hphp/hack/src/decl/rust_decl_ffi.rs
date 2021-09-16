@@ -30,45 +30,43 @@ ocaml_ffi_with_arena! {
         let text_value = unsafe { text.as_value() };
         let text = bytes_from_ocamlrep(text_value).expect("expected string");
 
-        let make_retryable = move || {
-            move |stack_limit: &StackLimit, _nonmain_stack_size: Option<usize>| {
-                let filename = RelativePath::make(filename.prefix(), filename.path().to_owned());
+        let retryable = |stack_limit: &StackLimit, _nonmain_stack_size: Option<usize>| {
+            let filename = RelativePath::make(filename.prefix(), filename.path().to_owned());
 
-                let arena = &Bump::new();
-                let (decls, mode) =
-                    parse_decls_and_mode(opts, filename, text, arena, Some(stack_limit));
+            let arena = &Bump::new();
+            let (decls, mode) =
+                parse_decls_and_mode(opts, filename, text, arena, Some(stack_limit));
 
-                let symbol_decl_hashes = if include_symbol_decl_hashes {
-                    Some(
-                        decls
-                            .iter()
-                            .map(|x| Int64(position_insensitive_hash(&x) as i64))
-                            .collect::<Vec<Int64>>(),
-                    )
-                } else {
-                    None
-                };
+            let symbol_decl_hashes = if include_symbol_decl_hashes {
+                Some(
+                    decls
+                        .iter()
+                        .map(|x| Int64(position_insensitive_hash(&x) as i64))
+                        .collect::<Vec<Int64>>(),
+                )
+            } else {
+                None
+            };
 
-                let file_decl_hash = if include_file_decl_hash {
-                    Some(Int64(position_insensitive_hash(&decls) as i64))
-                } else {
-                    None
-                };
+            let file_decl_hash = if include_file_decl_hash {
+                Some(Int64(position_insensitive_hash(&decls) as i64))
+            } else {
+                None
+            };
 
-                // SAFETY: We immediately hand this pointer to the OCaml runtime.
-                // The use of to_ocaml is necessary here because we cannot return
-                // `decls`, since it borrows `arena`, which is destroyed at the end of
-                // this function scope. Instead, we convert the decls to OCaml
-                // ourselves, and return the pointer (the converted OCaml value does not
-                // borrow the arena).
-                unsafe {
-                    UnsafeOcamlPtr::new(ocamlrep_ocamlpool::to_ocaml(&(
-                        decls,
-                        mode,
-                        file_decl_hash,
-                        symbol_decl_hashes,
-                    )))
-                }
+            // SAFETY: We immediately hand this pointer to the OCaml runtime.
+            // The use of to_ocaml is necessary here because we cannot return
+            // `decls`, since it borrows `arena`, which is destroyed at the end of
+            // this function scope. Instead, we convert the decls to OCaml
+            // ourselves, and return the pointer (the converted OCaml value does not
+            // borrow the arena).
+            unsafe {
+                UnsafeOcamlPtr::new(ocamlrep_ocamlpool::to_ocaml(&(
+                    decls,
+                    mode,
+                    file_decl_hash,
+                    symbol_decl_hashes,
+                )))
             }
         };
 
@@ -92,7 +90,7 @@ ocaml_ffi_with_arena! {
             ..Default::default()
         };
 
-        match job.with_elastic_stack(make_retryable, on_retry, STACK_SLACK_1K) {
+        match job.with_elastic_stack(retryable, on_retry, STACK_SLACK_1K) {
             Ok(ocaml_result) => ocaml_result,
             Err(failure) => {
                 panic!(

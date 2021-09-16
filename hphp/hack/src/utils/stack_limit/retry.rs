@@ -55,12 +55,12 @@ impl Job {
     /// ```
     pub fn with_elastic_stack<F, T>(
         &self,
-        make_retryable: impl Fn() -> F,
+        mut retryable: F,
         on_retry: &mut impl FnMut(usize),
         compute_stack_slack: StackSlackFunction,
     ) -> Result<T, JobFailed>
     where
-        F: FnOnce(&StackLimit, NonMainStackSize) -> T,
+        F: FnMut(&StackLimit, NonMainStackSize) -> T,
     {
         // Eagerly validate job parameters via getters, so we can panic before executing
         let max_stack_size = self.check_nonmain_space_max();
@@ -77,7 +77,7 @@ impl Job {
                 panic!("bad compute_stack_slack (must return < stack_size)");
             }
 
-            let retryable = AssertSend(make_retryable());
+            let retryable = AssertSend(&mut retryable);
             let try_retryable = move || {
                 let stack_limit = StackLimit::relative(relative_stack_size);
                 stack_limit.reset();
@@ -195,16 +195,14 @@ mod tests {
             ..Default::default()
         };
 
-        let make_expo_grower = || {
-            Box::new(|limit: &StackLimit, _: super::NonMainStackSize| {
-                eprintln!("limit = {} B", limit.get());
-                let bounded = crate::tests::StackBounded {
-                    // Note: safe because we're not leaking bounded from the closure
-                    limit: unsafe { std::mem::transmute(limit) },
-                };
-                bounded.min_n_that_fails_ackermann(3);
-                limit.panic_if_exceeded();
-            })
+        let expo_grower = |limit: &StackLimit, _: super::NonMainStackSize| {
+            eprintln!("limit = {} B", limit.get());
+            let bounded = crate::tests::StackBounded {
+                // Note: safe because we're not leaking bounded from the closure
+                limit: unsafe { std::mem::transmute(limit) },
+            };
+            bounded.min_n_that_fails_ackermann(3);
+            limit.panic_if_exceeded();
         };
 
         let mut stack_sizes = Vec::<usize>::new();
@@ -213,7 +211,7 @@ mod tests {
         };
 
         assert!(
-            job.with_elastic_stack(&make_expo_grower, &mut on_retry, get_slack_space,)
+            job.with_elastic_stack(&expo_grower, &mut on_retry, get_slack_space,)
                 .is_err()
         );
 

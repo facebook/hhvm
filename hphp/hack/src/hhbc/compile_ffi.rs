@@ -172,56 +172,54 @@ unsafe extern "C" fn hackc_compile_from_text_cpp_ffi(
         // properly iniitalized null-terminated C string.
         let text: &[u8] = std::ffi::CStr::from_ptr(source_text).to_bytes();
 
-        let job_builder = move || {
-            move |stack_limit: &StackLimit, _nomain_stack_size: Option<usize>| {
-                // Safety: We rely on the C caller that `env` can be
-                // legitmately reinterpreted as a `*const CEnv` and that
-                // on doing so, it points to a valid properly initialized
-                // value.
-                let cnative_env = (env as *const CNativeEnv).as_ref().unwrap();
-                let native_env: hhbc_by_ref_compile::NativeEnv<&str> =
-                    CNativeEnv::to_compile_env(cnative_env).unwrap();
-                let env = hhbc_by_ref_compile::Env::<&str> {
-                    filepath: native_env.filepath.clone(),
-                    config_jsons: vec![],
-                    config_list: vec![],
-                    flags: native_env.flags,
-                };
-                let source_text = SourceText::make(RcOc::new(env.filepath.clone()), text);
-                let mut w = String::new();
-                let alloc = bumpalo::Bump::new();
-                let compile_result = if native_env
-                    .flags
-                    .contains(hhbc_by_ref_compile::EnvFlags::ENABLE_DECL)
-                {
-                    hhbc_by_ref_compile::from_text_(
-                        &alloc,
-                        &env,
-                        stack_limit,
-                        &mut w,
-                        source_text,
-                        Some(&native_env),
-                        ExternalDeclProvider(
-                            (*cnative_env).decl_getter,
-                            (*cnative_env).decl_provider,
-                            std::marker::PhantomData,
-                        ),
-                    )
-                } else {
-                    hhbc_by_ref_compile::from_text_(
-                        &alloc,
-                        &env,
-                        stack_limit,
-                        &mut w,
-                        source_text,
-                        Some(&native_env),
-                        NoDeclProvider,
-                    )
-                };
-                match compile_result {
-                    Ok(_) => Ok(w),
-                    Err(e) => Err(anyhow!("{}", e)),
-                }
+        let retryable = |stack_limit: &StackLimit, _nomain_stack_size: Option<usize>| {
+            // Safety: We rely on the C caller that `env` can be
+            // legitmately reinterpreted as a `*const CEnv` and that
+            // on doing so, it points to a valid properly initialized
+            // value.
+            let cnative_env = (env as *const CNativeEnv).as_ref().unwrap();
+            let native_env: hhbc_by_ref_compile::NativeEnv<&str> =
+                CNativeEnv::to_compile_env(cnative_env).unwrap();
+            let env = hhbc_by_ref_compile::Env::<&str> {
+                filepath: native_env.filepath.clone(),
+                config_jsons: vec![],
+                config_list: vec![],
+                flags: native_env.flags,
+            };
+            let source_text = SourceText::make(RcOc::new(env.filepath.clone()), text);
+            let mut w = String::new();
+            let alloc = bumpalo::Bump::new();
+            let compile_result = if native_env
+                .flags
+                .contains(hhbc_by_ref_compile::EnvFlags::ENABLE_DECL)
+            {
+                hhbc_by_ref_compile::from_text_(
+                    &alloc,
+                    &env,
+                    stack_limit,
+                    &mut w,
+                    source_text,
+                    Some(&native_env),
+                    ExternalDeclProvider(
+                        (*cnative_env).decl_getter,
+                        (*cnative_env).decl_provider,
+                        std::marker::PhantomData,
+                    ),
+                )
+            } else {
+                hhbc_by_ref_compile::from_text_(
+                    &alloc,
+                    &env,
+                    stack_limit,
+                    &mut w,
+                    source_text,
+                    Some(&native_env),
+                    NoDeclProvider,
+                )
+            };
+            match compile_result {
+                Ok(_) => Ok(w),
+                Err(e) => Err(anyhow!("{}", e)),
             }
         };
         // Assume peak is 2.5x of stack. This is initial estimation, need
@@ -253,7 +251,7 @@ unsafe extern "C" fn hackc_compile_from_text_cpp_ffi(
         };
 
         match job
-            .with_elastic_stack(job_builder, on_retry, stack_slack)
+            .with_elastic_stack(retryable, on_retry, stack_slack)
             .map_err(|e| format!("{}", e))
             .expect("compile_ffi: hackc_compile_from_text_cpp_ffi: retry failed")
             .map_err(|e| e.to_string())
@@ -336,51 +334,48 @@ unsafe extern "C" fn hackc_compile_hhas_from_text_cpp_ffi(
         // nul-terminated C string.
         let text: &[u8] = std::ffi::CStr::from_ptr(source_text).to_bytes();
 
-        let job_builder = || {
-            let job = move |
-                stack_limit: &StackLimit,
-                _nomain_stack_size: Option<usize>,
-            | -> Result<*const HhasProgram<'static>, anyhow::Error> {
-                let native_env = CNativeEnv::to_compile_env(cnative_env).unwrap();
-                let env = hhbc_by_ref_compile::Env::<&str> {
-                    filepath: native_env.filepath.clone(),
-                    config_jsons: vec![],
-                    config_list: vec![],
-                    flags: native_env.flags,
-                };
-                let source_text = SourceText::make(RcOc::new(env.filepath.clone()), text);
-                let compile_result = if native_env
-                    .flags
-                    .contains(hhbc_by_ref_compile::EnvFlags::ENABLE_DECL)
-                {
-                    hhbc_by_ref_compile::hhas_from_text(
-                        alloc,
-                        &env,
-                        &stack_limit,
-                        source_text,
-                        Some(&native_env),
-                        ExternalDeclProvider(
-                            cnative_env.decl_getter,
-                            cnative_env.decl_provider,
-                            std::marker::PhantomData,
-                        ),
-                    )
-                } else {
-                    hhbc_by_ref_compile::hhas_from_text(
-                        alloc,
-                        &env,
-                        &stack_limit,
-                        source_text,
-                        Some(&native_env),
-                        NoDeclProvider,
-                    )
-                };
-                match compile_result {
-                    Ok(hhas_prog) => Ok(Box::into_raw(Box::new(hhas_prog))),
-                    Err(e) => Err(anyhow!("{}", e)),
-                }
+        let retryable = |
+            stack_limit: &StackLimit,
+            _nomain_stack_size: Option<usize>,
+        | -> Result<*const HhasProgram<'static>, anyhow::Error> {
+            let native_env = CNativeEnv::to_compile_env(cnative_env).unwrap();
+            let env = hhbc_by_ref_compile::Env::<&str> {
+                filepath: native_env.filepath.clone(),
+                config_jsons: vec![],
+                config_list: vec![],
+                flags: native_env.flags,
             };
-            job
+            let source_text = SourceText::make(RcOc::new(env.filepath.clone()), text);
+            let compile_result = if native_env
+                .flags
+                .contains(hhbc_by_ref_compile::EnvFlags::ENABLE_DECL)
+            {
+                hhbc_by_ref_compile::hhas_from_text(
+                    alloc,
+                    &env,
+                    &stack_limit,
+                    source_text,
+                    Some(&native_env),
+                    ExternalDeclProvider(
+                        cnative_env.decl_getter,
+                        cnative_env.decl_provider,
+                        std::marker::PhantomData,
+                    ),
+                )
+            } else {
+                hhbc_by_ref_compile::hhas_from_text(
+                    alloc,
+                    &env,
+                    &stack_limit,
+                    source_text,
+                    Some(&native_env),
+                    NoDeclProvider,
+                )
+            };
+            match compile_result {
+                Ok(hhas_prog) => Ok(Box::into_raw(Box::new(hhas_prog))),
+                Err(e) => Err(anyhow!("{}", e)),
+            }
         };
 
         // Assume peak is 2.5x of stack. This is initial estimation, need
@@ -411,7 +406,7 @@ unsafe extern "C" fn hackc_compile_hhas_from_text_cpp_ffi(
         };
 
         match job
-            .with_elastic_stack(job_builder, on_retry, stack_slack)
+            .with_elastic_stack(retryable, on_retry, stack_slack)
             .map_err(|e| format!("{}", e))
             .expect("hackc_compile_hhas_from_text_cpp_ffi: retry failed")
             .map_err(|e| e.to_string())
@@ -468,32 +463,29 @@ extern "C" fn compile_from_text_ffi(
 ) -> usize {
     ocamlrep_ocamlpool::catch_unwind_with_handler(
         || {
-            let job_builder = move || {
-                move |stack_limit: &StackLimit, _nomain_stack_size: Option<usize>| {
-                    let source_text = unsafe { SourceText::from_ocaml(source_text).unwrap() };
-                    let output_config =
-                        unsafe { RustOutputConfig::from_ocaml(rust_output_config).unwrap() };
-                    let env =
-                        unsafe { hhbc_by_ref_compile::Env::<OcamlStr>::from_ocaml(env).unwrap() };
-                    let mut w = String::new();
-                    let alloc = bumpalo::Bump::new();
-                    match hhbc_by_ref_compile::from_text_(
-                        &alloc,
-                        &env,
-                        stack_limit,
-                        &mut w,
-                        source_text,
-                        None,
-                        NoDeclProvider,
-                    ) {
-                        Ok(profile) => print_output(
-                            w,
-                            output_config,
-                            &env.filepath,
-                            profile.map(|p| (p.parsing_t, p.codegen_t, p.parsing_t)),
-                        ),
-                        Err(e) => Err(anyhow!("{}", e)),
-                    }
+            let retryable = |stack_limit: &StackLimit, _nomain_stack_size: Option<usize>| {
+                let source_text = unsafe { SourceText::from_ocaml(source_text).unwrap() };
+                let output_config =
+                    unsafe { RustOutputConfig::from_ocaml(rust_output_config).unwrap() };
+                let env = unsafe { hhbc_by_ref_compile::Env::<OcamlStr>::from_ocaml(env).unwrap() };
+                let mut w = String::new();
+                let alloc = bumpalo::Bump::new();
+                match hhbc_by_ref_compile::from_text_(
+                    &alloc,
+                    &env,
+                    stack_limit,
+                    &mut w,
+                    source_text,
+                    None,
+                    NoDeclProvider,
+                ) {
+                    Ok(profile) => print_output(
+                        w,
+                        output_config,
+                        &env.filepath,
+                        profile.map(|p| (p.parsing_t, p.codegen_t, p.parsing_t)),
+                    ),
+                    Err(e) => Err(anyhow!("{}", e)),
                 }
             };
             // Assume peak is 2.5x of stack.
@@ -518,7 +510,7 @@ extern "C" fn compile_from_text_ffi(
             };
 
             let r: Result<(), String> = job
-                .with_elastic_stack(job_builder, on_retry, stack_slack)
+                .with_elastic_stack(retryable, on_retry, stack_slack)
                 .map_err(|e| format!("{}", e))
                 .expect("Retry Failed")
                 .map_err(|e| e.to_string());

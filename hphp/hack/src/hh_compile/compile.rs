@@ -161,12 +161,10 @@ fn process_single_file_with_retry(
     content: Vec<u8>,
 ) -> anyhow::Result<(String, Option<Profile>)> {
     let ctx = &Arc::new((opts.clone(), filepath, content));
-    let job_builder = move || {
+    let retryable = |stack_limit: &StackLimit, _nonmain_stack_size: Option<usize>| {
         let new_ctx = Arc::clone(ctx);
-        move |stack_limit: &StackLimit, _nonmain_stack_size: Option<usize>| {
-            let (opts, filepath, content) = new_ctx.as_ref();
-            process_single_file_impl(opts, filepath, content.as_slice(), stack_limit)
-        }
+        let (opts, filepath, content) = new_ctx.as_ref();
+        process_single_file_impl(opts, filepath, content.as_slice(), stack_limit)
     };
 
     // Assume peak is 2.5x of stack.
@@ -189,7 +187,7 @@ fn process_single_file_with_retry(
         nonmain_stack_max: None,
         ..Default::default()
     };
-    job.with_elastic_stack(job_builder, on_retry, stack_slack)?
+    job.with_elastic_stack(retryable, on_retry, stack_slack)?
 }
 
 fn process_single_file(

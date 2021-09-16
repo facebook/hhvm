@@ -447,11 +447,6 @@ module type Key = sig
 
   val make_old : Prefix.t -> userkey -> old
 
-  val to_old : t -> old
-
-  val new_from_old : old -> t
-
-  (* Md5 primitives *)
   val md5 : t -> md5
 
   val md5_old : old -> md5
@@ -484,13 +479,6 @@ end) : Key with type userkey = UserKeyType.t = struct
   let make_old : Prefix.t -> userkey -> old =
    fun prefix x ->
     old_prefix ^ Prefix.make_key prefix (UserKeyType.to_string x)
-
-  let to_old : t -> old = (fun x -> old_prefix ^ x)
-
-  let new_from_old : old -> t =
-   fun x ->
-    let module S = String in
-    S.sub x ~pos:(S.length old_prefix) ~len:(S.length x - S.length old_prefix)
 
   let md5 : t -> md5 = Stdlib.Digest.string
 

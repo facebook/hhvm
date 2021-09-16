@@ -242,10 +242,6 @@ module type Key = sig
 
   val make_old : Prefix.t -> userkey -> old
 
-  val to_old : t -> old
-
-  val new_from_old : old -> t
-
   val md5 : t -> md5
 
   val md5_old : old -> md5

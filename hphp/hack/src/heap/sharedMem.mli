@@ -235,7 +235,7 @@ module type KeyHasher = sig
 end
 
 (** The interface that all keys need to implement *)
-module type UserKeyType = sig
+module type Key = sig
   type t
 
   val to_string : t -> string
@@ -244,8 +244,7 @@ module type UserKeyType = sig
 end
 
 (** Make a new key that can be stored in shared-memory. *)
-module MakeKeyHasher (UserKeyType : UserKeyType) :
-  KeyHasher with type key = UserKeyType.t
+module MakeKeyHasher (Key : Key) : KeyHasher with type key = Key.t
 
 (** The interface that all values need to implement *)
 module type Value = sig
@@ -357,13 +356,13 @@ end
 
     Provides no worker-local caching. Directly stores to and queries from
     shared memory. *)
-module NoCache (_ : Raw) (UserKeyType : UserKeyType) (Value : Value) :
+module NoCache (_ : Raw) (Key : Key) (Value : Value) :
   NoCache
-    with type key = UserKeyType.t
+    with type key = Key.t
      and type value = Value.t
-     and module KeyHasher = MakeKeyHasher(UserKeyType)
-     and module KeySet = Set.Make(UserKeyType)
-     and module KeyMap = WrappedMap.Make(UserKeyType)
+     and module KeyHasher = MakeKeyHasher(Key)
+     and module KeySet = Set.Make(Key)
+     and module KeyMap = WrappedMap.Make(Key)
 
 (** A worker-local cache layer.
 
@@ -406,7 +405,7 @@ end
     get evicted...
 
     It is Hashtbl.t-based with a bounded number of elements. *)
-module FreqCache (Key : UserKeyType) (Value : Value) (_ : Capacity) :
+module FreqCache (Key : Key) (Value : Value) (_ : Capacity) :
   LocalCacheLayer with type key = Key.t and type value = Value.t
 
 (** OrderedCache is an LRA (Least Recently Added) cache.
@@ -415,14 +414,14 @@ module FreqCache (Key : UserKeyType) (Value : Value) (_ : Capacity) :
     to be added.
 
     It is Hashtbl.t-based with a bounded number of elements. *)
-module OrderedCache (Key : UserKeyType) (Value : Value) (_ : Capacity) :
+module OrderedCache (Key : Key) (Value : Value) (_ : Capacity) :
   LocalCacheLayer with type key = Key.t and type value = Value.t
 
 (** MultiCache uses both FreqCache and OrderedCache simultaneously.
 
     It uses both caches with the hope that each one will paper over the
     other's weaknesses. *)
-module MultiCache (Key : UserKeyType) (Value : Value) (_ : Capacity) :
+module MultiCache (Key : Key) (Value : Value) (_ : Capacity) :
   LocalCacheLayer with type key = Key.t and type value = Value.t
 
 (** Same as [NoCache] but provides a worker-local cache. *)
@@ -436,14 +435,10 @@ module type WithCache = sig
   module Cache : LocalCacheLayer with type key = key and type value = value
 end
 
-module WithCache
-    (_ : Raw)
-    (UserKeyType : UserKeyType)
-    (Value : Value)
-    (_ : Capacity) :
+module WithCache (_ : Raw) (Key : Key) (Value : Value) (_ : Capacity) :
   WithCache
-    with type key = UserKeyType.t
+    with type key = Key.t
      and type value = Value.t
-     and module KeyHasher = MakeKeyHasher(UserKeyType)
-     and module KeySet = Set.Make(UserKeyType)
-     and module KeyMap = WrappedMap.Make(UserKeyType)
+     and module KeyHasher = MakeKeyHasher(Key)
+     and module KeySet = Set.Make(Key)
+     and module KeyMap = WrappedMap.Make(Key)

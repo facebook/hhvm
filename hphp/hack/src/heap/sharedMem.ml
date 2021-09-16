@@ -434,7 +434,7 @@ module GC = struct
     )
 end
 
-module type UserKeyType = sig
+module type Key = sig
   type t
 
   val to_string : t -> string
@@ -454,9 +454,8 @@ module type KeyHasher = sig
   val to_bytes : hash -> string
 end
 
-module MakeKeyHasher (UserKeyType : UserKeyType) :
-  KeyHasher with type key = UserKeyType.t = struct
-  type key = UserKeyType.t
+module MakeKeyHasher (Key : Key) : KeyHasher with type key = Key.t = struct
+  type key = Key.t
 
   type hash = string
 
@@ -468,11 +467,10 @@ module MakeKeyHasher (UserKeyType : UserKeyType) :
    *)
   let old_prefix = "old_"
 
-  let full_key (x : key) : string =
-    Prefix.make_key prefix (UserKeyType.to_string x)
+  let full_key (x : key) : string = Prefix.make_key prefix (Key.to_string x)
 
   let full_key_old (x : key) : string =
-    old_prefix ^ Prefix.make_key prefix (UserKeyType.to_string x)
+    old_prefix ^ Prefix.make_key prefix (Key.to_string x)
 
   let hash (key : key) : hash = Stdlib.Digest.string (full_key key)
 
@@ -1057,23 +1055,23 @@ end
 (* A functor returning an implementation of the S module without caching. *)
 (*****************************************************************************)
 
-module NoCache (Raw : Raw) (UserKeyType : UserKeyType) (Value : Value) :
+module NoCache (Raw : Raw) (Key : Key) (Value : Value) :
   NoCache
-    with type key = UserKeyType.t
+    with type key = Key.t
      and type value = Value.t
-     and module KeyHasher = MakeKeyHasher(UserKeyType)
-     and module KeySet = Set.Make(UserKeyType)
-     and module KeyMap = WrappedMap.Make(UserKeyType) = struct
-  module KeyHasher = MakeKeyHasher (UserKeyType)
-  module KeySet = Set.Make (UserKeyType)
-  module KeyMap = WrappedMap.Make (UserKeyType)
+     and module KeyHasher = MakeKeyHasher(Key)
+     and module KeySet = Set.Make(Key)
+     and module KeyMap = WrappedMap.Make(Key) = struct
+  module KeyHasher = MakeKeyHasher (Key)
+  module KeySet = Set.Make (Key)
+  module KeyMap = WrappedMap.Make (Key)
 
   (** Stacks that keeps track of local, non-committed changes. If
       no stacks are active, changs will be committed immediately to
       the shared-memory backend *)
   module WithLocalChanges = WithLocalChanges (Raw) (KeyHasher) (Value)
 
-  type key = UserKeyType.t
+  type key = Key.t
 
   type value = Value.t
 
@@ -1204,7 +1202,7 @@ let invalidate_local_caches () =
   List.iter !invalidate_local_caches_callback_list ~f:(fun callback ->
       callback ())
 
-module FreqCache (Key : UserKeyType) (Value : Value) (Capacity : Capacity) :
+module FreqCache (Key : Key) (Value : Value) (Capacity : Capacity) :
   LocalCacheLayer with type key = Key.t and type value = Value.t = struct
   type key = Key.t
 
@@ -1281,7 +1279,7 @@ module FreqCache (Key : UserKeyType) (Value : Value) (Capacity : Capacity) :
     Hashtbl.remove cache x
 end
 
-module OrderedCache (Key : UserKeyType) (Value : Value) (Capacity : Capacity) :
+module OrderedCache (Key : Key) (Value : Value) (Capacity : Capacity) :
   LocalCacheLayer with type key = Key.t and type value = Value.t = struct
   type key = Key.t
 
@@ -1325,7 +1323,7 @@ module OrderedCache (Key : UserKeyType) (Value : Value) (Capacity : Capacity) :
     end
 end
 
-module MultiCache (Key : UserKeyType) (Value : Value) (Capacity : Capacity) :
+module MultiCache (Key : Key) (Value : Value) (Capacity : Capacity) :
   LocalCacheLayer with type key = Key.t and type value = Value.t = struct
   type key = Key.t
 
@@ -1422,20 +1420,15 @@ end
  * much time. The caches keep a deserialized version of the types.
  *)
 (*****************************************************************************)
-module WithCache
-    (Raw : Raw)
-    (UserKeyType : UserKeyType)
-    (Value : Value)
-    (Capacity : Capacity) :
+module WithCache (Raw : Raw) (Key : Key) (Value : Value) (Capacity : Capacity) :
   WithCache
-    with type key = UserKeyType.t
+    with type key = Key.t
      and type value = Value.t
-     and module KeyHasher = MakeKeyHasher(UserKeyType)
-     and module KeySet = Set.Make(UserKeyType)
-     and module KeyMap = WrappedMap.Make(UserKeyType)
-     and module Cache = MultiCache(UserKeyType)(ValueForCache(Value))(Capacity) =
-struct
-  module Direct = NoCache (Raw) (UserKeyType) (Value)
+     and module KeyHasher = MakeKeyHasher(Key)
+     and module KeySet = Set.Make(Key)
+     and module KeyMap = WrappedMap.Make(Key)
+     and module Cache = MultiCache(Key)(ValueForCache(Value))(Capacity) = struct
+  module Direct = NoCache (Raw) (Key) (Value)
 
   type key = Direct.key
 
@@ -1444,7 +1437,7 @@ struct
   module KeyHasher = Direct.KeyHasher
   module KeySet = Direct.KeySet
   module KeyMap = Direct.KeyMap
-  module Cache = MultiCache (UserKeyType) (ValueForCache (Value)) (Capacity)
+  module Cache = MultiCache (Key) (ValueForCache (Value)) (Capacity)
 
   let add x y =
     Direct.add x y;

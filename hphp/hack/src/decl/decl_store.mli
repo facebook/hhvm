@@ -21,7 +21,7 @@ type class_members = {
 
 type class_entries = Decl_defs.decl_class_type * class_members option
 
-module ClassEltKey : SharedMem.UserKeyType with type t = string * string
+module ClassEltKey : SharedMem.Key with type t = string * string
 
 type decl_store = {
   add_class: string -> Decl_defs.decl_class_type -> unit;

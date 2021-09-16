@@ -34,7 +34,7 @@ module StaticMethod : SharedMem.Value with type t = fun_elt
 
 module Constructor : SharedMem.Value with type t = fun_elt
 
-module ClassEltKey : SharedMem.UserKeyType with type t = string * string
+module ClassEltKey : SharedMem.Key with type t = string * string
 
 module Funs :
     module type of

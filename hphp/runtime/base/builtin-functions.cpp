@@ -932,15 +932,13 @@ void checkReadonly(const TypedValue* tv,
                    const StringData* name,
                    bool readonly,
                    ReadonlyOp op,
-                   bool* roProp,
                    bool writeMode) {
   if (!RO::EvalEnableReadonlyPropertyEnforcement) return;
   auto cow = !isRefcountedType(type(tv)) || hasPersistentFlavor(type(tv));
   if (readonly) {
     if (op == ReadonlyOp::CheckMutROCOW || op == ReadonlyOp::CheckROCOW) {
       if (cow) {
-        assertx(roProp);
-        *roProp = true;
+        vmMInstrState().roProp = true;
       } else {
         throw_must_be_value_type(cls->name()->data(), name->data());
       }

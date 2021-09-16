@@ -406,7 +406,6 @@ TypedValue* getSPropOrNull(ReadonlyOp op,
                            const Class* cls,
                            const StringData* name,
                            Class* ctx,
-                           bool* roProp,
                            bool ignoreLateInit,
                            bool writeMode) {
   auto const lookup = ignoreLateInit
@@ -415,7 +414,7 @@ TypedValue* getSPropOrNull(ReadonlyOp op,
   if (writeMode && UNLIKELY(lookup.constant)) {
     throw_cannot_modify_static_const_prop(cls->name()->data(), name->data());
   }
-  checkReadonly(lookup.val, cls, name, lookup.readonly, op, roProp, writeMode);
+  checkReadonly(lookup.val, cls, name, lookup.readonly, op, writeMode);
   if (UNLIKELY(!lookup.val || !lookup.accessible)) return nullptr;
 
   return lookup.val;
@@ -425,11 +424,9 @@ TypedValue* getSPropOrRaise(ReadonlyOp op,
                             const Class* cls,
                             const StringData* name,
                             Class* ctx,
-                            bool* roProp,
                             bool ignoreLateInit,
                             bool writeMode) {
-  auto sprop = getSPropOrNull(op, cls, name, ctx, roProp, ignoreLateInit,
-                              writeMode);
+  auto sprop = getSPropOrNull(op, cls, name, ctx, ignoreLateInit, writeMode);
   if (UNLIKELY(!sprop)) {
     raise_error("Invalid static property access: %s::%s",
                 cls->name()->data(), name->data());

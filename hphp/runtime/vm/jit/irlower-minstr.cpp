@@ -87,9 +87,8 @@ void implProp(IRLS& env, const IRInstruction* inst) {
 
   auto const args = propArgs(env, inst)
     .memberKeyS(1)
-    .ssa(3)
-    .imm(static_cast<int32_t>(inst->extra<PropData>()->op))
-    .ssa(2);
+    .ssa(2)
+    .imm(static_cast<int32_t>(inst->extra<PropData>()->op));
 
   auto const target = [&] {
     if (inst->is(PropDX)) {
@@ -123,9 +122,8 @@ void cgPropQ(IRLS& env, const IRInstruction* inst) {
 
   auto const args = propArgs(env, inst)
     .ssa(1)
-    .ssa(3)
-    .imm(static_cast<int32_t>(inst->extra<ReadonlyData>()->op))
-    .ssa(2);
+    .ssa(2)
+    .imm(static_cast<int32_t>(inst->extra<ReadonlyData>()->op));
 
   auto helper = inst->src(0)->isA(TObj)
     ? CallSpec::direct(propCOQ)

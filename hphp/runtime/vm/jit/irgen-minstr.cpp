@@ -942,10 +942,9 @@ SSATmp* propGenericImpl(IRGS& env, MOpMode mode, SSATmp* base, SSATmp* key,
   }
 
   auto const tvRef = propTvRefPtr(env, base, key);
-  auto const roProp = gen(env, LdMROPropAddr);
-  if (nullsafe) return gen(env, PropQ, ReadonlyData { rop }, base, key, roProp, tvRef);
+  if (nullsafe) return gen(env, PropQ, ReadonlyData { rop }, base, key, tvRef);
   auto const op = define ? PropDX : PropX;
-  return gen(env, op, PropData { mode, rop }, base, key, roProp, tvRef);
+  return gen(env, op, PropData { mode, rop }, base, key, tvRef);
 }
 
 SSATmp* propImpl(IRGS& env, MOpMode mode, SSATmp* key, bool nullsafe, ReadonlyOp op) {
@@ -1644,8 +1643,7 @@ void emitBaseSC(IRGS& env,
   auto const writeMode = mode == MOpMode::Define || mode == MOpMode::Unset;
 
   const LdClsPropOptions opts { op, true, false, writeMode };
-  auto const roProp = gen(env, LdMROPropAddr);
-  auto const spropPtr = ldClsPropAddr(env, cls, name, roProp, opts).propPtr;
+  auto const spropPtr = ldClsPropAddr(env, cls, name, opts).propPtr;
   stMBase(env, spropPtr);
 }
 

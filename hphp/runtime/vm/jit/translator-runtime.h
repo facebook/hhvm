@@ -112,14 +112,12 @@ TypedValue* getSPropOrNull(ReadonlyOp op,
                            const Class* cls,
                            const StringData* name,
                            Class* ctx,
-                           bool* roProp,
                            bool ignoreLateInit,
                            bool writeMode);
 TypedValue* getSPropOrRaise(ReadonlyOp op,
                             const Class* cls,
                             const StringData* name,
                             Class* ctx,
-                            bool* roProp,
                             bool ignoreLateInit,
                             bool writeMode);
 

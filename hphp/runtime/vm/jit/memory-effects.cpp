@@ -478,9 +478,8 @@ GeneralEffects interp_one_effects(const IRInstruction& inst) {
 MemEffects minstr_with_tvref(const IRInstruction& inst) {
   auto const srcs = inst.srcs();
   assertx(srcs.back()->isA(TMemToMISCell));
-  assertx(inst.src(2)->isA(TMemToMISBool));
   auto const loads = AHeapAny | all_pointees(srcs.subpiece(0, srcs.size() - 2));
-  auto const stores = AHeapAny | all_pointees(inst);
+  auto const stores = AHeapAny | all_pointees(inst) | AMIStateROProp;
   return may_load_store(loads, stores);
 }
 
@@ -1400,8 +1399,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   /*
    * Intermediate minstr operations. In addition to a base pointer like the
-   * operations above, these may take a pointer to MInstrState::tvRef and
-   * MInstrState::roProp, which they may store to (but not read from).
+   * operations above, these may take a pointer to MInstrState::tvRef
+   * which they may store to (but not read from).
    */
   case PropX:
   case PropDX:
@@ -1638,7 +1637,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvDblToInt:
   case DblAsBits:
   case LdMIStateAddr:
-  case LdMROPropAddr:
   case LdClsCns:
   case LdSubClsCns:
   case LdResolvedTypeCns:
@@ -1901,7 +1899,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdClsPropAddrOrRaise:  // raises errors, and 86{s,p}init
     return may_load_store(
       AHeapAny,
-      AHeapAny | all_pointees(inst)
+      AHeapAny | all_pointees(inst) | AMIStateROProp
     );
   case Clone:
   case ThrowArrayIndexException:

@@ -511,7 +511,7 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
     bool readonly;
   };
 
-  void checkReadonly(const PropLookup&, ReadonlyOp, bool*, bool) const;
+  void checkReadonly(const PropLookup&, ReadonlyOp, bool) const;
 
   template <bool forWrite, bool forRead, bool ignoreLateInit>
   ALWAYS_INLINE
@@ -524,15 +524,15 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   };
 
   template<PropMode mode>
-  tv_lval propImpl(TypedValue* tvRef, const Class* ctx, const StringData* key, const ReadonlyOp op = ReadonlyOp::Any, bool* roProp = nullptr);
+  tv_lval propImpl(TypedValue* tvRef, const Class* ctx, const StringData* key, const ReadonlyOp op = ReadonlyOp::Any);
 
   void setDynProp(const StringData* key, TypedValue val);
 
  public:
-  tv_lval prop(TypedValue* tvRef, const Class* ctx, const StringData* key, const ReadonlyOp op, bool* roProp = nullptr);
+  tv_lval prop(TypedValue* tvRef, const Class* ctx, const StringData* key, const ReadonlyOp op);
   tv_lval propW(TypedValue* tvRef, const Class* ctx, const StringData* key, const ReadonlyOp op);
-  tv_lval propU(TypedValue* tvRef, const Class* ctx, const StringData* key, const ReadonlyOp op, bool* roProp);
-  tv_lval propD(TypedValue* tvRef, const Class* ctx, const StringData* key, const ReadonlyOp op, bool* roProp);
+  tv_lval propU(TypedValue* tvRef, const Class* ctx, const StringData* key, const ReadonlyOp op);
+  tv_lval propD(TypedValue* tvRef, const Class* ctx, const StringData* key, const ReadonlyOp op);
 
   bool propIsset(const Class* ctx, const StringData* key);
 

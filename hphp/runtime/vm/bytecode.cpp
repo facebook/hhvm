@@ -2417,8 +2417,7 @@ OPTBLD_INLINE void iopBaseSC(uint32_t keyIdx,
       name->data());
   }
 
-  checkReadonly(lookup.val, class_, name, lookup.readonly, op,
-                &mstate.roProp, writeMode);
+  checkReadonly(lookup.val, class_, name, lookup.readonly, op, writeMode);
   mstate.base = tv_lval(lookup.val);
 }
 
@@ -2465,12 +2464,10 @@ static OPTBLD_INLINE void propDispatch(MOpMode mode, TypedValue key, ReadonlyOp 
         return Prop<MOpMode::Warn>(mstate.tvTempBase, ctx, mstate.base, key, op);
       case MOpMode::Define:
         return Prop<MOpMode::Define,KeyType::Any>(
-          mstate.tvTempBase, ctx, mstate.base, key, op, &mstate.roProp
+          mstate.tvTempBase, ctx, mstate.base, key, op
         );
       case MOpMode::Unset:
-        return Prop<MOpMode::Unset>(
-          mstate.tvTempBase, ctx, mstate.base, key, op, &mstate.roProp
-        );
+        return Prop<MOpMode::Unset>(mstate.tvTempBase, ctx, mstate.base, key, op);
       case MOpMode::InOut:
         always_assert_flog(false, "MOpMode::InOut can only occur on Elem");
     }
@@ -2485,7 +2482,7 @@ static OPTBLD_INLINE void propQDispatch(MOpMode mode, TypedValue key, ReadonlyOp
   assertx(mode == MOpMode::None || mode == MOpMode::Warn);
   assertx(key.m_type == KindOfPersistentString);
   mstate.base = nullSafeProp(mstate.tvTempBase, ctx, mstate.base,
-                             key.m_data.pstr, op, &mstate.roProp);
+                             key.m_data.pstr, op);
 }
 
 static OPTBLD_INLINE

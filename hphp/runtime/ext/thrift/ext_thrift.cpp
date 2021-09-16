@@ -34,6 +34,7 @@ Class* InteractionId::PhpClass() {
 
 Class* RpcOptions::c_RpcOptions = nullptr;
 Class* TClientBufferedStream::c_TClientBufferedStream = nullptr;
+Class* TClientSink::c_TClientSink = nullptr;
 
 Object HHVM_METHOD(TClientBufferedStream, genNext) {
   auto data = TClientBufferedStream::GetDataOrThrowException(this_);
@@ -232,6 +233,9 @@ static struct ThriftExtension final : Extension {
     Native::registerNativeDataInfo<TClientBufferedStream>(
       s_TClientBufferedStream.get(), Native::NDIFlags::NO_COPY);
     HHVM_ME(TClientBufferedStream, genNext);
+
+    Native::registerNativeDataInfo<TClientSink>(
+      s_TClientSink.get(), Native::NDIFlags::NO_COPY);
 
     loadSystemlib("thrift");
   }

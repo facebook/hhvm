@@ -330,6 +330,67 @@ struct TClientBufferedStream {
 
   static Class* c_TClientBufferedStream;
 };
+
+///////////////////////////////////////////////////////////////////////////////
+
+const StaticString s_TClientSink("TClientSink");
+
+struct TClientSink {
+  TClientSink() = default;
+  TClientSink(const TClientSink&) = delete;
+  TClientSink& operator=(const TClientSink&) = delete;
+  ~TClientSink() {
+    sweep();
+  }
+
+  void sweep() {
+    cancel();
+  }
+
+  void init(apache::thrift::detail::ClientSinkBridge::Ptr sinkBridge) {
+    sinkBridge_ = std::move(sinkBridge);
+  }
+
+  void endSink() {
+    sinkBridge_.reset();
+  }
+
+  void cancel() {
+    if (sinkBridge_) {
+      // TODO (T100686382) : Send cancellation payload to the server once the
+      // pinned thrift version is updated on the hhvm
+      endSink();
+    }
+  }
+
+  static Class* PhpClass() {
+    if (!c_TClientSink) {
+      c_TClientSink = Class::lookup(s_TClientSink.get());
+      assert(c_TClientSink);
+    }
+    return c_TClientSink;
+  }
+
+  static Object newInstance() {
+    return Object{PhpClass()};
+  }
+
+  static TClientSink* GetDataOrThrowException(ObjectData* object_) {
+    if (object_ == nullptr) {
+      throw_null_pointer_exception();
+      not_reached();
+    }
+    if (!object_->getVMClass()->classofNonIFace(PhpClass())) {
+      raise_error("TClientSink expected");
+      not_reached();
+    }
+    return Native::data<TClientSink>(object_);
+  }
+
+ public:
+  apache::thrift::detail::ClientSinkBridge::Ptr sinkBridge_;
+  static Class* c_TClientSink;
+};
 } // namespace thrift
 inline String ioBufToString(const folly::IOBuf& ioBuf) {
   auto resultStringData = StringData::Make(ioBuf.computeChainDataLength());

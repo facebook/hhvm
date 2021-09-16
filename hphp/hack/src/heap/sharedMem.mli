@@ -358,7 +358,10 @@ module NoCache (_ : Raw) (UserKeyType : UserKeyType) (Value : Value.Type) :
      and module KeySet = Set.Make(UserKeyType)
      and module KeyMap = WrappedMap.Make(UserKeyType)
 
-(** A process-local cache type. *)
+(** A local cache.
+
+    Each local cache defines its own eviction strategy.
+    For example, we currently have [FreqCache] and [OrderedCache]. *)
 module type CacheType = sig
   type key
 
@@ -377,29 +380,18 @@ module type CacheType = sig
   val get_telemetry_items_and_keys : unit -> Obj.t * key Seq.t
 end
 
-module type LocalHashtblConfigType = sig
-  (* The type of object we want to keep in cache *)
-  type value
+(** Capacity of a worker-local cache.
 
-  (* The capacity of the cache *)
+    In number of elements. *)
+module type Capacity = sig
   val capacity : int
 end
 
-module FreqCache (Key : sig
-  type t
-end)
-(LocalHashtblConfig : LocalHashtblConfigType) :
-  CacheType with type key := Key.t and type value := LocalHashtblConfig.value
+module FreqCache (Key : UserKeyType) (Value : Value.Type) (_ : Capacity) :
+  CacheType with type key = Key.t and type value = Value.t
 
-module OrderedCache (Key : sig
-  type t
-end)
-(LocalHashtblConfig : LocalHashtblConfigType) :
-  CacheType with type key := Key.t and type value := LocalHashtblConfig.value
-
-module type LocalCapacityType = sig
-  val capacity : int
-end
+module OrderedCache (Key : UserKeyType) (Value : Value.Type) (_ : Capacity) :
+  CacheType with type key = Key.t and type value = Value.t
 
 (** Invalidate all worker-local caches *)
 val invalidate_local_caches : unit -> unit
@@ -427,7 +419,7 @@ end
 module LocalCache
     (UserKeyType : UserKeyType)
     (Value : Value.Type)
-    (_ : LocalCapacityType) :
+    (_ : Capacity) :
   LocalCache with type key = UserKeyType.t and type value = Value.t
 
 (** Same as [NoCache] but provides a worker-local cache. *)
@@ -445,7 +437,7 @@ module WithCache
     (_ : Raw)
     (UserKeyType : UserKeyType)
     (Value : Value.Type)
-    (_ : LocalCapacityType) :
+    (_ : Capacity) :
   WithCache
     with type key = UserKeyType.t
      and type value = Value.t

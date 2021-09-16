@@ -1234,27 +1234,19 @@ end
 (* of them, then hopefully each one will paper over the other's weaknesses.  *)
 (*****************************************************************************)
 
-module type LocalHashtblConfigType = sig
-  (* The type of object we want to keep in cache *)
-  type value
-
-  (* The capacity of the cache *)
+module type Capacity = sig
   val capacity : int
 end
 
-module FreqCache (Key : sig
-  type t
-end)
-(LocalHashtblConfig : LocalHashtblConfigType) :
-  CacheType with type key = Key.t and type value = LocalHashtblConfig.value =
-struct
+module FreqCache (Key : UserKeyType) (Value : Value.Type) (Capacity : Capacity) :
+  CacheType with type key = Key.t and type value = Value.t = struct
   type key = Key.t
 
-  type value = LocalHashtblConfig.value
+  type value = Value.t
 
   (* The cache itself *)
-  let (cache : (Key.t, int ref * value) Hashtbl.t) =
-    Hashtbl.create (2 * LocalHashtblConfig.capacity)
+  let (cache : (key, int ref * value) Hashtbl.t) =
+    Hashtbl.create (2 * Capacity.capacity)
 
   let size = ref 0
 
@@ -1274,7 +1266,7 @@ struct
    * After collection: size = capacity (with the most frequently used objects)
    *)
   let collect () =
-    if !size < 2 * LocalHashtblConfig.capacity then
+    if !size < 2 * Capacity.capacity then
       ()
     else
       let l = ref [] in
@@ -1287,15 +1279,15 @@ struct
       Hashtbl.clear cache;
       l := List.sort ~compare:(fun (_, x, _) (_, y, _) -> y - x) !l;
       let i = ref 0 in
-      while !i < LocalHashtblConfig.capacity do
+      while !i < Capacity.capacity do
         match !l with
-        | [] -> i := LocalHashtblConfig.capacity
+        | [] -> i := Capacity.capacity
         | (k, _freq, v) :: rl ->
           Hashtbl.replace cache k (ref 0, v);
           l := rl;
           incr i
       done;
-      size := LocalHashtblConfig.capacity;
+      size := Capacity.capacity;
       ()
 
   let add x y =
@@ -1325,18 +1317,16 @@ struct
     Hashtbl.remove cache x
 end
 
-module OrderedCache (Key : sig
-  type t
-end)
-(LocalHashtblConfig : LocalHashtblConfigType) :
-  CacheType with type key = Key.t and type value = LocalHashtblConfig.value =
-struct
+module OrderedCache
+    (Key : UserKeyType)
+    (Value : Value.Type)
+    (Capacity : Capacity) :
+  CacheType with type key = Key.t and type value = Value.t = struct
   type key = Key.t
 
-  type value = LocalHashtblConfig.value
+  type value = Value.t
 
-  let (cache : (Key.t, LocalHashtblConfig.value) Hashtbl.t) =
-    Hashtbl.create LocalHashtblConfig.capacity
+  let (cache : (key, value) Hashtbl.t) = Hashtbl.create Capacity.capacity
 
   let queue = Queue.create ()
 
@@ -1354,7 +1344,7 @@ struct
     ()
 
   let add x y =
-    (if !size >= LocalHashtblConfig.capacity then
+    (if !size >= Capacity.capacity then
       (* Remove oldest element - if it's still around. *)
       let elt = Queue.pop queue in
       if Hashtbl.mem cache elt then (
@@ -1390,26 +1380,20 @@ let invalidate_local_caches () =
       callback ())
 
 module LocalCache
-    (UserKeyType : UserKeyType)
+    (Key : UserKeyType)
     (Value : Value.Type)
     (Capacity : LocalCapacityType) :
-  LocalCache with type key = UserKeyType.t and type value = Value.t = struct
-  type key = UserKeyType.t
+  LocalCache with type key = Key.t and type value = Value.t = struct
+  type key = Key.t
 
   type value = Value.t
 
-  module LocalHashtblConfig = struct
-    type value = Value.t
-
-    let capacity = Capacity.capacity
-  end
-
   (* Young values cache *)
-  module L1 = OrderedCache (UserKeyType) (LocalHashtblConfig)
+  module L1 = OrderedCache (Key) (Value) (Capacity)
 
   (* Frequent values cache *)
-  module L2 = FreqCache (UserKeyType) (LocalHashtblConfig)
-  module KeySet = Set.Make (UserKeyType)
+  module L2 = FreqCache (Key) (Value) (Capacity)
+  module KeySet = Set.Make (Key)
 
   let add x y =
     L1.add x y;

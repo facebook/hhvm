@@ -45,8 +45,11 @@ module IdeAstCache =
   SharedMem.FreqCache
     (StringKey)
     (struct
-      type value = Parser_return.t * Fixme_provider.fixme_map * Errors.t
+      type t = Parser_return.t * Fixme_provider.fixme_map * Errors.t
 
+      let description = "IdeAstCache"
+    end)
+    (struct
       let capacity = 10
     end)
 
@@ -54,8 +57,11 @@ module IdeCstCache =
   SharedMem.FreqCache
     (StringKey)
     (struct
-      type value = SyntaxTree.t
+      type t = SyntaxTree.t
 
+      let description = "IdeCstCache"
+    end)
+    (struct
       let capacity = 10
     end)
 

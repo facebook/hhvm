@@ -61,7 +61,7 @@ impl Job {
     ) -> Result<T, JobFailed>
     where
         F: FnOnce(&StackLimit, NonMainStackSize) -> T,
-        F: Send + std::panic::UnwindSafe,
+        F: Send,
         T: Send,
     {
         // Eagerly validate job parameters via getters, so we can panic before executing
@@ -84,9 +84,9 @@ impl Job {
                 let stack_limit = StackLimit::relative(relative_stack_size);
                 stack_limit.reset();
                 let stack_limit_ref = &stack_limit;
-                match std::panic::catch_unwind(move || {
+                match std::panic::catch_unwind(std::panic::AssertUnwindSafe(move || {
                     retryable(stack_limit_ref, nonmain_stack_size)
-                }) {
+                })) {
                     Ok(result) => Some(result),
                     Err(_) if stack_limit.exceeded() => None,
                     Err(msg) => std::panic::panic_any(msg),

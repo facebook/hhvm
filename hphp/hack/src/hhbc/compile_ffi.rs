@@ -312,26 +312,28 @@ unsafe extern "C" fn hackc_compile_hhas_free_arena(arena: *mut bumpalo::Bump) {
 }
 
 mod unsafe_utils {
-    // Raw pointers are not in `Send` (so, e.g. neither are
-    // `HhasProgram`s). Bumpalo allocators are not `UnwindSafe`
-    // or`RefUnwindSafe`. We use this device to work around these
-    // things so that we may use elastic stack.
+    // Raw pointers are not `Send`. Bumpalo allocators are `Send`, but a
+    // reference to one is not `Send` (`&T` is only `Send` if `T` is `Sync`, and
+    // a bumpalo allocator is not `Sync`).
+    // We use this device to work around this limitation so that we may use
+    // elastic stack. To be used safely, we must ensure that no concurrent use
+    // of the value occurs from multiple threads. In elastic stack use cases,
+    // this will never happen--the main thread blocks until the worker thread
+    // terminates.
     #[derive(Debug, Clone, Copy)]
-    pub struct AssertSafe<T>(T);
+    pub struct AssertSend<T>(T);
 
-    impl<T> AssertSafe<T> {
+    impl<T> AssertSend<T> {
         pub fn get(self) -> T {
             self.0
         }
     }
 
-    unsafe impl<T> Send for AssertSafe<T> {}
-    impl<T> std::panic::UnwindSafe for AssertSafe<T> {}
-    impl<T> std::panic::RefUnwindSafe for AssertSafe<T> {}
+    unsafe impl<T> Send for AssertSend<T> {}
 
     #[inline]
-    pub unsafe fn assert_safe<T>(t: T) -> AssertSafe<T> {
-        AssertSafe(t)
+    pub unsafe fn assert_send<T>(t: T) -> AssertSend<T> {
+        AssertSend(t)
     }
 }
 
@@ -345,12 +347,12 @@ unsafe extern "C" fn hackc_compile_hhas_from_text_cpp_ffi(
 ) -> *const HhasProgram<'static> {
     match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
         // Safety: `alloc` came via `hackc_compile_hhas_create_arena`.
-        let alloc: unsafe_utils::AssertSafe<&bumpalo::Bump> =
-            unsafe_utils::assert_safe(alloc.as_ref().unwrap());
+        let alloc: unsafe_utils::AssertSend<&bumpalo::Bump> =
+            unsafe_utils::assert_send(alloc.as_ref().unwrap());
         // Safety: `cnative_env`is a well aligned, properly initialized
         // `*const CNativeEnv`.
-        let cnative_env: unsafe_utils::AssertSafe<&CNativeEnv> =
-            unsafe_utils::assert_safe(cnative_env.as_ref().unwrap());
+        let cnative_env: unsafe_utils::AssertSend<&CNativeEnv> =
+            unsafe_utils::assert_send(cnative_env.as_ref().unwrap());
         // Safety: `err_buf` is a well aligned, properly initialized
         // `*const CErrBuf`.
         let err_buf: &CErrBuf = err_buf.as_ref().unwrap();
@@ -363,7 +365,7 @@ unsafe extern "C" fn hackc_compile_hhas_from_text_cpp_ffi(
         let text: &[u8] = std::ffi::CStr::from_ptr(source_text).to_bytes();
 
         let job_builder = || {
-            let job = move |stack_limit: &StackLimit, _nomain_stack_size: Option<usize>| -> Result<unsafe_utils::AssertSafe<*const HhasProgram<'static>>, anyhow::Error>{
+            let job = move |stack_limit: &StackLimit, _nomain_stack_size: Option<usize>| -> Result<unsafe_utils::AssertSend<*const HhasProgram<'static>>, anyhow::Error>{
                 let alloc = alloc.get();
                 let cnative_env = cnative_env.get();
                 let native_env = CNativeEnv::to_compile_env(cnative_env).unwrap();
@@ -402,7 +404,7 @@ unsafe extern "C" fn hackc_compile_hhas_from_text_cpp_ffi(
                 };
                 match compile_result {
                     Ok(hhas_prog) => {
-                        Ok(unsafe_utils::assert_safe(Box::into_raw(Box::new(hhas_prog))))
+                        Ok(unsafe_utils::assert_send(Box::into_raw(Box::new(hhas_prog))))
                     },
                     Err(e) => Err(anyhow!("{}", e)),
                 }

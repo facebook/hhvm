@@ -253,8 +253,10 @@ module type Value = sig
   val description : string
 end
 
-(** Heap type that represents immediate access to the underlying hashtable. *)
-module type Raw = functor (KeyHasher : KeyHasher) (Value : Value) -> sig
+(** Module type for a shared-memory backend for a heap.
+
+    Each backend provided raw access to the underlying shared hash table. *)
+module type Backend = functor (KeyHasher : KeyHasher) (Value : Value) -> sig
   val add : KeyHasher.hash -> Value.t -> unit
 
   val mem : KeyHasher.hash -> bool
@@ -266,8 +268,8 @@ module type Raw = functor (KeyHasher : KeyHasher) (Value : Value) -> sig
   val move : KeyHasher.hash -> KeyHasher.hash -> unit
 end
 
-(** Heap that provides immediate access to the underlying hashtable. *)
-module Immediate : Raw
+(** Backend that provides immediate access to the underlying hashtable. *)
+module ImmediateBackend : Backend
 
 type 'a profiled_value =
   | RawValue of 'a
@@ -276,8 +278,8 @@ type 'a profiled_value =
       write_time: float;
     }
 
-(** Heap that provides profiled access (?) to the underlying hashtable. *)
-module ProfiledImmediate : Raw
+(** Backend that provides profiled access to the underlying hashtable. *)
+module ProfiledBackend : Backend
 
 (** A heap for a user-defined type.
 
@@ -356,7 +358,7 @@ end
 
     Provides no worker-local caching. Directly stores to and queries from
     shared memory. *)
-module NoCache (_ : Raw) (Key : Key) (Value : Value) :
+module NoCache (_ : Backend) (Key : Key) (Value : Value) :
   NoCache
     with type key = Key.t
      and type value = Value.t
@@ -435,7 +437,7 @@ module type WithCache = sig
   module Cache : LocalCacheLayer with type key = key and type value = value
 end
 
-module WithCache (_ : Raw) (Key : Key) (Value : Value) (_ : Capacity) :
+module WithCache (_ : Backend) (Key : Key) (Value : Value) (_ : Capacity) :
   WithCache
     with type key = Key.t
      and type value = Value.t

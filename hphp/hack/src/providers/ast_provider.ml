@@ -21,7 +21,7 @@ type parse_type =
   | Full
 
 module ParserHeap =
-  SharedMem.WithCache (SharedMem.ProfiledImmediate) (Relative_path.S)
+  SharedMem.WithCache (SharedMem.ProfiledBackend) (Relative_path.S)
     (struct
       type t = Nast.program * parse_type
 

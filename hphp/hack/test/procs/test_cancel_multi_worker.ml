@@ -13,7 +13,8 @@ module IntVal = struct
   let description = "Test_IntVal"
 end
 
-module TestHeap = SharedMem.NoCache (SharedMem.Immediate) (StringKey) (IntVal)
+module TestHeap =
+  SharedMem.NoCache (SharedMem.ImmediateBackend) (StringKey) (IntVal)
 
 let sum acc x = acc + x
 

@@ -30,7 +30,7 @@ let test_add_remove
   assert (SharedMem.SMTelemetry.hh_removed_count () = 1)
 
 module TestNoCache =
-  SharedMem.NoCache (SharedMem.Immediate) (StringKey) (IntVal)
+  SharedMem.NoCache (SharedMem.ImmediateBackend) (StringKey) (IntVal)
 
 let tests () =
   let list = [("test_add_remove", test_add_remove (module TestNoCache))] in

@@ -485,7 +485,7 @@ module type Value = sig
   val description : string
 end
 
-module type Raw = functor (KeyHasher : KeyHasher) (Value : Value) -> sig
+module type Backend = functor (KeyHasher : KeyHasher) (Value : Value) -> sig
   val add : KeyHasher.hash -> Value.t -> unit
 
   val mem : KeyHasher.hash -> bool
@@ -501,12 +501,7 @@ module type Capacity = sig
   val capacity : int
 end
 
-(*****************************************************************************)
-(* Immediate access to shared memory (cf hh_shared.c for the underlying
- * representation).
- *)
-(*****************************************************************************)
-module Immediate : Raw =
+module ImmediateBackend : Backend =
 functor
   (KeyHasher : KeyHasher)
   (Value : Value)
@@ -656,7 +651,7 @@ type 'a profiled_value =
       write_time: float;
     }
 
-module ProfiledImmediate : Raw =
+module ProfiledBackend : Backend =
 functor
   (KeyHasher : KeyHasher)
   (Value : Value)
@@ -672,7 +667,7 @@ functor
       let description = Value.description
     end
 
-    module Immediate = Immediate (KeyHasher) (ProfiledValue)
+    module Immediate = ImmediateBackend (KeyHasher) (ProfiledValue)
 
     let add x y =
       let sample_rate = SMTelemetry.hh_sample_rate () in
@@ -710,11 +705,11 @@ functor
     of local changes that allows us to decide whether or not to commit
     specific values. *)
 module WithLocalChanges : functor
-  (Raw : Raw)
+  (Backend : Backend)
   (KeyHasher : KeyHasher)
   (Value : Value)
   -> sig
-  include module type of Raw (KeyHasher) (Value)
+  include module type of Backend (KeyHasher) (Value)
 
   module LocalChanges : sig
     val has_local_changes : unit -> bool
@@ -733,12 +728,12 @@ module WithLocalChanges : functor
   end
 end =
 functor
-  (Raw : Raw)
+  (Backend : Backend)
   (KeyHasher : KeyHasher)
   (Value : Value)
   ->
   struct
-    module Raw = Raw (KeyHasher) (Value)
+    module Backend = Backend (KeyHasher) (Value)
 
     (**
       Represents a set of local changes to the view of the shared memory heap
@@ -782,7 +777,7 @@ functor
 
       let rec mem stack_opt key =
         match stack_opt with
-        | None -> Raw.mem key
+        | None -> Backend.mem key
         | Some stack ->
           (match Hashtbl.find_opt stack.current key with
           | Some Remove -> false
@@ -791,7 +786,7 @@ functor
 
       let rec get stack_opt key =
         match stack_opt with
-        | None -> Raw.get key
+        | None -> Backend.get key
         | Some stack ->
           (match Hashtbl.find_opt stack.current key with
           | Some Remove -> failwith "Trying to get a non-existent value"
@@ -826,7 +821,7 @@ functor
        *)
       let remove stack_opt key =
         match stack_opt with
-        | None -> Raw.remove key
+        | None -> Backend.remove key
         | Some stack ->
           (match Hashtbl.find_opt stack.current key with
           | Some Remove -> failwith "Trying to remove a non-existent value"
@@ -848,7 +843,7 @@ functor
        *)
       let add stack_opt key value =
         match stack_opt with
-        | None -> Raw.add key value
+        | None -> Backend.add key value
         | Some stack ->
           (match Hashtbl.find_opt stack.current key with
           | Some (Remove | Replace _) ->
@@ -862,7 +857,7 @@ functor
 
       let move stack_opt from_key to_key =
         match stack_opt with
-        | None -> Raw.move from_key to_key
+        | None -> Backend.move from_key to_key
         | Some _stack ->
           assert (mem stack_opt from_key);
           assert (not @@ mem stack_opt to_key);
@@ -1055,7 +1050,7 @@ end
 (* A functor returning an implementation of the S module without caching. *)
 (*****************************************************************************)
 
-module NoCache (Raw : Raw) (Key : Key) (Value : Value) :
+module NoCache (Backend : Backend) (Key : Key) (Value : Value) :
   NoCache
     with type key = Key.t
      and type value = Value.t
@@ -1069,7 +1064,7 @@ module NoCache (Raw : Raw) (Key : Key) (Value : Value) :
   (** Stacks that keeps track of local, non-committed changes. If
       no stacks are active, changs will be committed immediately to
       the shared-memory backend *)
-  module WithLocalChanges = WithLocalChanges (Raw) (KeyHasher) (Value)
+  module WithLocalChanges = WithLocalChanges (Backend) (KeyHasher) (Value)
 
   type key = Key.t
 
@@ -1420,7 +1415,11 @@ end
  * much time. The caches keep a deserialized version of the types.
  *)
 (*****************************************************************************)
-module WithCache (Raw : Raw) (Key : Key) (Value : Value) (Capacity : Capacity) :
+module WithCache
+    (Backend : Backend)
+    (Key : Key)
+    (Value : Value)
+    (Capacity : Capacity) :
   WithCache
     with type key = Key.t
      and type value = Value.t
@@ -1428,7 +1427,7 @@ module WithCache (Raw : Raw) (Key : Key) (Value : Value) (Capacity : Capacity) :
      and module KeySet = Set.Make(Key)
      and module KeyMap = WrappedMap.Make(Key)
      and module Cache = MultiCache(Key)(ValueForCache(Value))(Capacity) = struct
-  module Direct = NoCache (Raw) (Key) (Value)
+  module Direct = NoCache (Backend) (Key) (Value)
 
   type key = Direct.key
 

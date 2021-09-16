@@ -179,13 +179,15 @@ let test_cache_behavior
    in the combined cache. *)
 
 module TestNoCache =
-  SharedMem.NoCache (SharedMem.Immediate) (StringKey) (IntVal)
+  SharedMem.NoCache (SharedMem.ImmediateBackend) (StringKey) (IntVal)
 
 (* We shall not mix compressions, so create 2 separate caches  *)
 module TestWithCacheLz4 =
-  SharedMem.WithCache (SharedMem.Immediate) (StringKey) (IntVal) (Capacity)
+  SharedMem.WithCache (SharedMem.ImmediateBackend) (StringKey) (IntVal)
+    (Capacity)
 module TestWithCacheZstd =
-  SharedMem.WithCache (SharedMem.Immediate) (StringKey) (IntVal) (Capacity)
+  SharedMem.WithCache (SharedMem.ImmediateBackend) (StringKey) (IntVal)
+    (Capacity)
 
 let tests () =
   let zstd_compression_with_default_level = 3 in

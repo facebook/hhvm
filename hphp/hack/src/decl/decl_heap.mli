@@ -38,53 +38,52 @@ module ClassEltKey : SharedMem.Key with type t = string * string
 
 module Funs :
     module type of
-      SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Fun)
+      SharedMem.WithCache (SharedMem.ProfiledBackend) (StringKey) (Fun)
         (Capacity)
 
 module Classes :
     module type of
-      SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Class)
+      SharedMem.WithCache (SharedMem.ProfiledBackend) (StringKey) (Class)
         (Capacity)
 
 module RecordDefs :
     module type of
-      SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (RecordDef)
+      SharedMem.WithCache (SharedMem.ProfiledBackend) (StringKey) (RecordDef)
         (Capacity)
 
 module Typedefs :
     module type of
-      SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Typedef)
+      SharedMem.WithCache (SharedMem.ProfiledBackend) (StringKey) (Typedef)
         (Capacity)
 
 module GConsts :
     module type of
-      SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (GConst)
+      SharedMem.WithCache (SharedMem.ProfiledBackend) (StringKey) (GConst)
         (Capacity)
 
 module Props :
     module type of
-      SharedMem.WithCache (SharedMem.ProfiledImmediate) (ClassEltKey) (Property)
+      SharedMem.WithCache (SharedMem.ProfiledBackend) (ClassEltKey) (Property)
         (Capacity)
 
 module StaticProps :
     module type of
-      SharedMem.WithCache (SharedMem.ProfiledImmediate) (ClassEltKey)
+      SharedMem.WithCache (SharedMem.ProfiledBackend) (ClassEltKey)
         (StaticProperty)
         (Capacity)
 
 module Methods :
     module type of
-      SharedMem.WithCache (SharedMem.ProfiledImmediate) (ClassEltKey) (Method)
+      SharedMem.WithCache (SharedMem.ProfiledBackend) (ClassEltKey) (Method)
         (Capacity)
 
 module StaticMethods :
     module type of
-      SharedMem.WithCache (SharedMem.ProfiledImmediate) (ClassEltKey)
+      SharedMem.WithCache (SharedMem.ProfiledBackend) (ClassEltKey)
         (StaticMethod)
         (Capacity)
 
 module Constructors :
     module type of
-      SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey)
-        (Constructor)
+      SharedMem.WithCache (SharedMem.ProfiledBackend) (StringKey) (Constructor)
         (Capacity)

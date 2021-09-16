@@ -57,11 +57,11 @@ module GConst = struct
 end
 
 module Funs =
-  SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Fun) (Capacity)
+  SharedMem.WithCache (SharedMem.ProfiledBackend) (StringKey) (Fun) (Capacity)
 
 module Classes = struct
   include
-    SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Class)
+    SharedMem.WithCache (SharedMem.ProfiledBackend) (StringKey) (Class)
       (Capacity)
 
   let add class_name decl =
@@ -79,13 +79,13 @@ module Classes = struct
 end
 
 module RecordDefs =
-  SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (RecordDef)
+  SharedMem.WithCache (SharedMem.ProfiledBackend) (StringKey) (RecordDef)
     (Capacity)
 module Typedefs =
-  SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Typedef)
+  SharedMem.WithCache (SharedMem.ProfiledBackend) (StringKey) (Typedef)
     (Capacity)
 module GConsts =
-  SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (GConst)
+  SharedMem.WithCache (SharedMem.ProfiledBackend) (StringKey) (GConst)
     (Capacity)
 
 module Property = struct
@@ -132,18 +132,17 @@ module ClassEltKey = struct
 end
 
 module Props =
-  SharedMem.WithCache (SharedMem.ProfiledImmediate) (ClassEltKey) (Property)
+  SharedMem.WithCache (SharedMem.ProfiledBackend) (ClassEltKey) (Property)
     (Capacity)
 module StaticProps =
-  SharedMem.WithCache (SharedMem.ProfiledImmediate) (ClassEltKey)
-    (StaticProperty)
+  SharedMem.WithCache (SharedMem.ProfiledBackend) (ClassEltKey) (StaticProperty)
     (Capacity)
 module Methods =
-  SharedMem.WithCache (SharedMem.ProfiledImmediate) (ClassEltKey) (Method)
+  SharedMem.WithCache (SharedMem.ProfiledBackend) (ClassEltKey) (Method)
     (Capacity)
 module StaticMethods =
-  SharedMem.WithCache (SharedMem.ProfiledImmediate) (ClassEltKey) (StaticMethod)
+  SharedMem.WithCache (SharedMem.ProfiledBackend) (ClassEltKey) (StaticMethod)
     (Capacity)
 module Constructors =
-  SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Constructor)
+  SharedMem.WithCache (SharedMem.ProfiledBackend) (StringKey) (Constructor)
     (Capacity)

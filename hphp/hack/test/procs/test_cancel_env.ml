@@ -27,7 +27,8 @@ module UnitVal = struct
   let description = "Test_UnitVal"
 end
 
-module TestHeap = SharedMem.NoCache (SharedMem.Immediate) (StringKey) (UnitVal)
+module TestHeap =
+  SharedMem.NoCache (SharedMem.ImmediateBackend) (StringKey) (UnitVal)
 
 (* The tasks will be numbers 1...num_workers_and_jobs,
  * and the job will be to sum them. Each worker will get one number at a time.

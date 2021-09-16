@@ -96,16 +96,16 @@ module Types = struct
   end
 
   module TypeCanonHeap =
-    SharedMem.NoCache (SharedMem.ProfiledImmediate) (StringKey) (CanonName)
+    SharedMem.NoCache (SharedMem.ProfiledBackend) (StringKey) (CanonName)
 
   module TypePosHeap =
-    SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Position)
+    SharedMem.WithCache (SharedMem.ProfiledBackend) (StringKey) (Position)
       (struct
         let capacity = 1000
       end)
 
   module BlockedEntries =
-    SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey)
+    SharedMem.WithCache (SharedMem.ProfiledBackend) (StringKey)
       (struct
         type t = blocked_entry
 
@@ -234,7 +234,7 @@ module Funs = struct
   end
 
   module FunCanonHeap =
-    SharedMem.NoCache (SharedMem.ProfiledImmediate) (StringKey) (CanonName)
+    SharedMem.NoCache (SharedMem.ProfiledBackend) (StringKey) (CanonName)
 
   module Position = struct
     type t = pos
@@ -243,10 +243,10 @@ module Funs = struct
   end
 
   module FunPosHeap =
-    SharedMem.NoCache (SharedMem.ProfiledImmediate) (StringKey) (Position)
+    SharedMem.NoCache (SharedMem.ProfiledBackend) (StringKey) (Position)
 
   module BlockedEntries =
-    SharedMem.NoCache (SharedMem.ProfiledImmediate) (StringKey)
+    SharedMem.NoCache (SharedMem.ProfiledBackend) (StringKey)
       (struct
         type t = blocked_entry
 
@@ -327,10 +327,10 @@ module Consts = struct
   end
 
   module ConstPosHeap =
-    SharedMem.NoCache (SharedMem.ProfiledImmediate) (StringKey) (Position)
+    SharedMem.NoCache (SharedMem.ProfiledBackend) (StringKey) (Position)
 
   module BlockedEntries =
-    SharedMem.NoCache (SharedMem.ProfiledImmediate) (StringKey)
+    SharedMem.NoCache (SharedMem.ProfiledBackend) (StringKey)
       (struct
         type t = blocked_entry
 

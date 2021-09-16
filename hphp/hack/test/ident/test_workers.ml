@@ -11,7 +11,7 @@ module IntKey = struct
 end
 
 module Ids =
-  SharedMem.NoCache (SharedMem.Immediate) (IntKey)
+  SharedMem.NoCache (SharedMem.ImmediateBackend) (IntKey)
     (struct
       type t = int array
 

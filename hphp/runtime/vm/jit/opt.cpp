@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/mutation.h"
 #include "hphp/runtime/vm/jit/print.h"
+#include "hphp/runtime/vm/jit/simple-propagation.h"
 #include "hphp/runtime/vm/jit/simplify.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/dce.h"
@@ -161,6 +162,17 @@ uint64_t count_inline_returns(const IRUnit& unit) {
   return ret;
 }
 
+void mandatoryPropagation(IRUnit& unit) {
+  forEachInst(
+    rpoSortCfg(unit),
+    [&] (IRInstruction* inst) {
+      copyProp(inst);
+      constProp(unit, inst);
+      retypeDests(inst, &unit);
+     }
+  );
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }
@@ -248,7 +260,13 @@ void optimize(IRUnit& unit, TransKind kind) {
   if (kind != TransKind::Profile && RuntimeOption::EvalHHIRSimplification) {
     rqtrace::EventGuard trace{"OPT_SIMPLIFY"};
     doPass(unit, simplifyPass, DCE::Full);
+  } else {
+    // If we don't run the simplifier, we still need to run mandatory
+    // propagation at least to remove the use of non-DefConst
+    // constants.
+    mandatoryPropagation(unit);
   }
+
   doPass(unit, fixBlockHints, DCE::None);
 
   if (kind == TransKind::Optimize) {

@@ -40,6 +40,7 @@
 #include "hphp/runtime/vm/jit/ir-builder.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/minstr-effects.h"
+#include "hphp/runtime/vm/jit/mutation.h"
 #include "hphp/runtime/vm/jit/simple-propagation.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 #include "hphp/runtime/vm/jit/type-array-elem.h"
@@ -4010,6 +4011,7 @@ void simplifyInPlace(IRUnit& unit, IRInstruction* origInst) {
 
   copyProp(origInst);
   constProp(unit, origInst);
+  retypeDests(origInst, &unit);
   auto res = simplify(unit, origInst);
 
   // No simplification occurred; nothing to do.

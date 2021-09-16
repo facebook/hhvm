@@ -8,9 +8,9 @@ Invalid argument (Typing[4110])
     via this generic `T`
   File "hackarray.hhi", line 19, characters 77-78:
     via this generic `Tv`
-  File "interfaces.hhi", line 111, characters 66-67:
+  File "interfaces.hhi", line 110, characters 66-67:
     via this generic `Tv`
-  File "interfaces.hhi", line 93, characters 53-54:
+  File "interfaces.hhi", line 92, characters 53-54:
     via this generic `Tv`
   File "rx/interfaces.hhi", line 26, characters 52-53:
     via this generic `Tv`

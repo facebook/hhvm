@@ -33,7 +33,6 @@ namespace HH {
  * @guide /hack/collections/interfaces
  */
 <<__Sealed(
-  \DOMNodeList::class,
   \Imagick::class,
   Iterator::class,
   \IteratorAggregate::class,

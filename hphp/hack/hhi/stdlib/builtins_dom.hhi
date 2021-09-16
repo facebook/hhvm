@@ -65,12 +65,17 @@ class DOMXPath {
   public function registerPHPFunctions($funcs = null);
 }
 
-class DOMNodeList<Tnode as DOMNode> implements Traversable<Tnode> {
+class DOMNodeList<+Tnode as DOMNode> implements IteratorAggregate<Tnode> {
   /* Properties */
   /* readonly */ public int $length;
 
   // Methods
   public function item(int $index): Tnode;
+
+  /**
+   * Actually returns DOMNodeIterator which is not exposed as an HHI
+   */
+  public function getIterator(): Iterator<Tnode>;
 }
 
 class DOMNamedNodeMap<Tnode as DOMNode>
@@ -216,8 +221,8 @@ class DOMElement extends DOMNode {
   public function getAttributeNode(string $name);
   public function getAttributeNodeNS(string $namespaceuri, string $localname);
   public function getAttributeNS(string $namespaceuri, string $localname);
-  public function getElementsByTagName(string $name);
-  public function getElementsByTagNameNS(string $namespaceuri, string $localname);
+  public function getElementsByTagName(string $name): DOMNodeList<DOMElement>;
+  public function getElementsByTagNameNS(string $namespaceuri, string $localname): DOMNodeList<DOMElement>;
   public function hasAttribute(string $name);
   public function hasAttributeNS(string $namespaceuri, string $localname);
   public function removeAttribute(string $name);

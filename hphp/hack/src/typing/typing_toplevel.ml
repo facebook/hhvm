@@ -423,6 +423,9 @@ let fun_def ctx fd :
       return_ty
       return_decl_ty
   in
+  let (env, _) =
+    Typing_coeffects.register_capabilities env cap_ty unsafe_cap_ty
+  in
   let sound_dynamic_check_saved_env = env in
   let (env, param_tys) =
     List.zip_exn f.f_params params_decl_ty
@@ -468,9 +471,6 @@ let fun_def ctx fd :
     Naming_attributes.mem
       SN.UserAttributes.uaDisableTypecheckerInternal
       f.f_user_attributes
-  in
-  let (env, _) =
-    Typing_coeffects.register_capabilities env cap_ty unsafe_cap_ty
   in
   Typing_memoize.check_function env f;
   let (env, tb) = Typing.fun_ ~disable env return pos f.f_body f.f_fun_kind in

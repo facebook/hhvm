@@ -481,6 +481,8 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
       ?tco_math_new_code:(bool_opt "math_new_code" config)
       ?tco_typeconst_concrete_concrete_error:
         (bool_opt "typeconst_concrete_concrete_error" config)
+      ?tco_enable_strict_const_semantics:
+        (bool_opt "enable_strict_const_semantics" config)
       ?tco_meth_caller_only_public_visibility:
         (bool_opt "meth_caller_only_public_visibility" config)
       ?tco_require_extends_implements_ancestors:

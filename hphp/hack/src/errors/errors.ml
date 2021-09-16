@@ -1733,7 +1733,7 @@ let concrete_const_interface_override
         ^ "." );
     ]
 
-let interface_const_multiple_defs
+let interface_or_trait_const_multiple_defs
     child_pos
     parent_pos
     child_origin
@@ -1746,7 +1746,7 @@ let interface_const_multiple_defs
     ~code:(Typing.err_code Typing.ConcreteConstInterfaceOverride)
     [
       ( child_pos,
-        "Non-abstract constants defined in an interface cannot conflict with other inherited constants."
+        "Non-abstract constants defined in an interface or trait cannot conflict with other inherited constants."
       );
       ( parent_pos,
         Markdown_lite.md_codify name

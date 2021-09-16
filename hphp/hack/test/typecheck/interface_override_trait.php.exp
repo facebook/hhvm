@@ -3,7 +3,7 @@ Class `A` does not correctly implement all required members  (Typing[4340])
   File "interface_override_trait.php", line 12, characters 7-7:
   Some members are incompatible with those declared in type `T`
   File "interface_override_trait.php", line 8, characters 9-12:
-  Non-abstract constants defined in an interface cannot conflict with other inherited constants.
+  Non-abstract constants defined in an interface or trait cannot conflict with other inherited constants.
   File "interface_override_trait.php", line 4, characters 9-12:
   `FOO1` inherited from `T`
   File "interface_override_trait.php", line 8, characters 9-12:

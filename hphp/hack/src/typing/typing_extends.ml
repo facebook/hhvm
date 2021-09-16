@@ -21,6 +21,7 @@ module Phase = Typing_phase
 module SN = Naming_special_names
 module Cls = Decl_provider.Class
 module MakeType = Typing_make_type
+module TCO = TypecheckerOptions
 
 (*****************************************************************************)
 (* Helpers *)
@@ -396,39 +397,69 @@ let check_override
 
 (* Constants and type constants with declared values in declared interfaces can never be
  * overridden by other inherited constants.
+ * Constants from traits are taken into account only if the --enable-strict-const-semantics is enabled
  * @precondition: both constants must not be synthesized
  *)
-let conflict_with_declared_interface
-    env implements parent_class class_ parent_origin origin const_name =
+let conflict_with_declared_interface_or_trait
+    ?(include_traits = true)
+    env
+    implements
+    parent_class
+    class_
+    parent_origin
+    origin
+    const_name =
+  let strict_const_semantics =
+    TCO.enable_strict_const_semantics (Env.get_tcopt env)
+  in
   let is_inherited_and_conflicts_with_parent =
     String.( <> ) origin (Cls.name class_) && String.( <> ) origin parent_origin
   in
+  let child_const_from_used_trait =
+    if strict_const_semantics && include_traits then
+      match Env.get_class env origin with
+      | Some cls -> Cls.kind cls |> Ast_defs.is_c_trait
+      | None -> false
+    else
+      false
+  in
+
   (* True if a declared interface on class_ has a concrete constant with
      the same name and origin as child constant *)
   let child_const_from_declared_interface =
     match Env.get_class env origin with
     | Some cls ->
       Cls.kind cls |> Ast_defs.is_c_interface
-      && List.fold implements ~init:false ~f:(fun acc iface ->
-             acc
-             ||
-             match Cls.get_const iface const_name with
-             | None -> false
-             | Some const -> String.( = ) const.cc_origin origin)
+      &&
+      if strict_const_semantics && include_traits then
+        true
+      else
+        List.fold implements ~init:false ~f:(fun acc iface ->
+            acc
+            ||
+            match Cls.get_const iface const_name with
+            | None -> false
+            | Some const -> String.( = ) const.cc_origin origin)
     | None -> false
   in
+
   match Cls.kind parent_class with
   | Ast_defs.Cinterface -> is_inherited_and_conflicts_with_parent
   | Ast_defs.Cclass _ ->
     is_inherited_and_conflicts_with_parent
-    && child_const_from_declared_interface
+    && (child_const_from_declared_interface || child_const_from_used_trait)
   | Ast_defs.Ctrait ->
     is_inherited_and_conflicts_with_parent
-    && child_const_from_declared_interface
+    && (child_const_from_declared_interface || child_const_from_used_trait)
     &&
-    (* constant must be declared on a trait to conflict *)
+    (* constant must be declared on a trait (or interface if include_traits == true) to conflict *)
     (match Env.get_class env parent_origin with
-    | Some cls -> Cls.kind cls |> Ast_defs.is_c_trait
+    | Some cls ->
+      if strict_const_semantics && include_traits then
+        Cls.kind cls |> fun k ->
+        Ast_defs.is_c_trait k || Ast_defs.is_c_interface k
+      else
+        Cls.kind cls |> Ast_defs.is_c_trait
     | None -> false)
   | Ast_defs.Cenum_class _
   | Ast_defs.Cenum ->
@@ -465,11 +496,11 @@ let check_const_override
       && is_concrete class_const.cc_abstract
       && is_concrete parent_class_const.cc_abstract
     in
-    let const_interface_member_not_unique =
+    let const_interface_or_trait_member_not_unique =
       (* Similar to should_check_member_unique, we check if there are multiple
          concrete implementations of class constants with no override.
       *)
-      conflict_with_declared_interface
+      conflict_with_declared_interface_or_trait
         env
         implements
         parent_class
@@ -481,8 +512,8 @@ let check_const_override
     in
     let is_bad_interface_const_override =
       (* HHVM does not support one specific case of overriding constants:
-         If the original constant was defined as non-abstract in an interface,
-         it cannot be overridden when implementing or extending that interface. *)
+         If the original constant was defined as non-abstract in an interface or trait,
+         it cannot be overridden when implementing or extending that interface or using that trait. *)
       if Ast_defs.is_c_interface parent_kind then
         both_are_non_synthetic_and_concrete
         (* Check that the constant is indeed defined in class_ *)
@@ -514,8 +545,8 @@ let check_const_override
         parent_class_const.cc_type
     in
 
-    if const_interface_member_not_unique then
-      Errors.interface_const_multiple_defs
+    if const_interface_or_trait_member_not_unique then
+      Errors.interface_or_trait_const_multiple_defs
         class_const.cc_pos
         parent_class_const.cc_pos
         class_const.cc_origin
@@ -535,6 +566,7 @@ let check_const_override
         parent_class_const.cc_pos
         `constant
         ~current_decl_and_file:(Env.get_current_decl_and_file env);
+
     Phase.sub_type_decl
       env
       class_const_type
@@ -1067,7 +1099,8 @@ let check_typeconst_override
         (not is_context_constant)
         && (not tconst.ttc_synthesized)
         && (not parent_tconst.ttc_synthesized)
-        && conflict_with_declared_interface
+        && conflict_with_declared_interface_or_trait
+             ~include_traits:false
              env
              implements
              parent_class
@@ -1185,7 +1218,8 @@ let check_class_implements
 (* The externally visible function *)
 (*****************************************************************************)
 
-let check_implements_extends_uses env ~implements ~parents (name_pos, class_) =
+let check_implements_extends_uses
+    env ~implements ~parents (name_pos, (class_ : Cls.t)) =
   let get_interfaces acc x =
     let (_, (_, name), _) = TUtils.unwrap_class_type x in
     match Env.get_class env name with

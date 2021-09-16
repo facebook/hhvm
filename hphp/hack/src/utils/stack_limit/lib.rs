@@ -120,6 +120,27 @@ pub fn init() {
     });
 }
 
+pub fn with_elastic_stack<F, T>(mut retryable: F) -> Result<T, retry::JobFailed>
+where
+    F: FnMut(&StackLimit) -> T,
+{
+    let job = retry::Job {
+        nonmain_stack_min: 13 * MI,
+        // TODO(hrust) compile_ffi needs as much as 7 * GI, but aast_parser_ffi
+        // only requies 1 * GI. Why? it's like rust compiler produce inconsistent binary.
+        nonmain_stack_max: Some(7 * GI),
+        ..Default::default()
+    };
+    let on_retry = &mut |_| ();
+    // Assume peak is 2.5x of stack.
+    let stack_slack = |stack_size| stack_size * 6 / 10;
+    job.with_elastic_stack(
+        |stack_limit, _nonmain_stack_size| retryable(stack_limit),
+        on_retry,
+        stack_slack,
+    )
+}
+
 // Implementation details (hidden to facilitate swapping in something less hacky)
 mod detail {
     use std::cell::RefCell;

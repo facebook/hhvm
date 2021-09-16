@@ -12,7 +12,6 @@ use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_ocamlpool::to_ocaml;
 use oxidized::relative_path::RelativePath;
 use parser_core_types::source_text::SourceText;
-use stack_limit::{StackLimit, GI, MI};
 
 use anyhow::{anyhow, Result};
 use serde_json::{map::Map, value::Value};
@@ -172,7 +171,7 @@ unsafe extern "C" fn hackc_compile_from_text_cpp_ffi(
         // properly iniitalized null-terminated C string.
         let text: &[u8] = std::ffi::CStr::from_ptr(source_text).to_bytes();
 
-        let retryable = |stack_limit: &StackLimit, _nomain_stack_size: Option<usize>| {
+        match stack_limit::with_elastic_stack(|stack_limit| {
             // Safety: We rely on the C caller that `env` can be
             // legitmately reinterpreted as a `*const CEnv` and that
             // on doing so, it points to a valid properly initialized
@@ -221,24 +220,10 @@ unsafe extern "C" fn hackc_compile_from_text_cpp_ffi(
                 Ok(_) => Ok(w),
                 Err(e) => Err(anyhow!("{}", e)),
             }
-        };
-        // Assume peak is 2.5x of stack. This is initial estimation, need
-        // to be improved later.
-        let stack_slack = |stack_size| stack_size * 6 / 10;
-        let on_retry = &mut |_| ();
-        let job = stack_limit::retry::Job {
-            nonmain_stack_min: 13 * MI,
-            // TODO(hrust) aast_parser_ffi only requies 1 * GI, it's like
-            // rust compiler produce inconsistent binary.
-            nonmain_stack_max: Some(7 * GI),
-            ..Default::default()
-        };
-
-        match job
-            .with_elastic_stack(retryable, on_retry, stack_slack)
-            .map_err(|e| format!("{}", e))
-            .expect("compile_ffi: hackc_compile_from_text_cpp_ffi: retry failed")
-            .map_err(|e| e.to_string())
+        })
+        .map_err(|e| format!("{}", e))
+        .expect("compile_ffi: hackc_compile_from_text_cpp_ffi: retry failed")
+        .map_err(|e| e.to_string())
         {
             Ok(out) => {
                 let cs = std::ffi::CString::new(out)
@@ -318,67 +303,51 @@ unsafe extern "C" fn hackc_compile_hhas_from_text_cpp_ffi(
         // nul-terminated C string.
         let text: &[u8] = std::ffi::CStr::from_ptr(source_text).to_bytes();
 
-        let retryable = |
-            stack_limit: &StackLimit,
-            _nomain_stack_size: Option<usize>,
-        | -> Result<*const HhasProgram<'static>, anyhow::Error> {
-            let native_env = CNativeEnv::to_compile_env(cnative_env).unwrap();
-            let env = hhbc_by_ref_compile::Env::<&str> {
-                filepath: native_env.filepath.clone(),
-                config_jsons: vec![],
-                config_list: vec![],
-                flags: native_env.flags,
-            };
-            let source_text = SourceText::make(RcOc::new(env.filepath.clone()), text);
-            let compile_result = if native_env
-                .flags
-                .contains(hhbc_by_ref_compile::EnvFlags::ENABLE_DECL)
-            {
-                hhbc_by_ref_compile::hhas_from_text(
-                    alloc,
-                    &env,
-                    &stack_limit,
-                    source_text,
-                    Some(&native_env),
-                    ExternalDeclProvider(
-                        cnative_env.decl_getter,
-                        cnative_env.decl_provider,
-                        std::marker::PhantomData,
-                    ),
-                )
-            } else {
-                hhbc_by_ref_compile::hhas_from_text(
-                    alloc,
-                    &env,
-                    &stack_limit,
-                    source_text,
-                    Some(&native_env),
-                    NoDeclProvider,
-                )
-            };
-            match compile_result {
-                Ok(hhas_prog) => Ok(Box::into_raw(Box::new(hhas_prog))),
-                Err(e) => Err(anyhow!("{}", e)),
-            }
-        };
-
-        // Assume peak is 2.5x of stack. This is initial estimation, need
-        // to be improved later.
-        let stack_slack = |stack_size| stack_size * 6 / 10;
-        let on_retry = &mut |_| ();
-        let job = stack_limit::retry::Job {
-            nonmain_stack_min: 13 * MI,
-            // TODO(hrust) aast_parser_ffi only requies 1 * GI, it's like
-            // rust compiler produce inconsistent binary.
-            nonmain_stack_max: Some(7 * GI),
-            ..Default::default()
-        };
-
-        match job
-            .with_elastic_stack(retryable, on_retry, stack_slack)
-            .map_err(|e| format!("{}", e))
-            .expect("hackc_compile_hhas_from_text_cpp_ffi: retry failed")
-            .map_err(|e| e.to_string())
+        match stack_limit::with_elastic_stack(
+            |stack_limit| -> Result<*const HhasProgram<'static>, anyhow::Error> {
+                let native_env = CNativeEnv::to_compile_env(cnative_env).unwrap();
+                let env = hhbc_by_ref_compile::Env::<&str> {
+                    filepath: native_env.filepath.clone(),
+                    config_jsons: vec![],
+                    config_list: vec![],
+                    flags: native_env.flags,
+                };
+                let source_text = SourceText::make(RcOc::new(env.filepath.clone()), text);
+                let compile_result = if native_env
+                    .flags
+                    .contains(hhbc_by_ref_compile::EnvFlags::ENABLE_DECL)
+                {
+                    hhbc_by_ref_compile::hhas_from_text(
+                        alloc,
+                        &env,
+                        &stack_limit,
+                        source_text,
+                        Some(&native_env),
+                        ExternalDeclProvider(
+                            cnative_env.decl_getter,
+                            cnative_env.decl_provider,
+                            std::marker::PhantomData,
+                        ),
+                    )
+                } else {
+                    hhbc_by_ref_compile::hhas_from_text(
+                        alloc,
+                        &env,
+                        &stack_limit,
+                        source_text,
+                        Some(&native_env),
+                        NoDeclProvider,
+                    )
+                };
+                match compile_result {
+                    Ok(hhas_prog) => Ok(Box::into_raw(Box::new(hhas_prog))),
+                    Err(e) => Err(anyhow!("{}", e)),
+                }
+            },
+        )
+        .map_err(|e| format!("{}", e))
+        .expect("hackc_compile_hhas_from_text_cpp_ffi: retry failed")
+        .map_err(|e| e.to_string())
         {
             Ok(hhas_prog) => hhas_prog,
             Err(e) => {
@@ -432,7 +401,7 @@ extern "C" fn compile_from_text_ffi(
 ) -> usize {
     ocamlrep_ocamlpool::catch_unwind_with_handler(
         || {
-            let retryable = |stack_limit: &StackLimit, _nomain_stack_size: Option<usize>| {
+            let r: Result<(), String> = stack_limit::with_elastic_stack(|stack_limit| {
                 let source_text = unsafe { SourceText::from_ocaml(source_text).unwrap() };
                 let output_config =
                     unsafe { RustOutputConfig::from_ocaml(rust_output_config).unwrap() };
@@ -456,23 +425,10 @@ extern "C" fn compile_from_text_ffi(
                     ),
                     Err(e) => Err(anyhow!("{}", e)),
                 }
-            };
-            // Assume peak is 2.5x of stack.
-            // This is initial estimation, need to be improved later.
-            let stack_slack = |stack_size| stack_size * 6 / 10;
-            let on_retry = &mut |_| ();
-            let job = stack_limit::retry::Job {
-                nonmain_stack_min: 13 * MI,
-                // TODO(hrust) aast_parser_ffi only requies 1 * GI, it's like rust compiler produce inconsistent binary.
-                nonmain_stack_max: Some(7 * GI),
-                ..Default::default()
-            };
-
-            let r: Result<(), String> = job
-                .with_elastic_stack(retryable, on_retry, stack_slack)
-                .map_err(|e| format!("{}", e))
-                .expect("Retry Failed")
-                .map_err(|e| e.to_string());
+            })
+            .map_err(|e| format!("{}", e))
+            .expect("Retry Failed")
+            .map_err(|e| e.to_string());
             unsafe { to_ocaml(&r) }
         },
         // This handler is to catch `panic` from parser,

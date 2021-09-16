@@ -434,6 +434,14 @@ module GC = struct
     )
 end
 
+module type UserKeyType = sig
+  type t
+
+  val to_string : t -> string
+
+  val compare : t -> t -> int
+end
+
 module type KeyHasher = sig
   type key
 
@@ -446,11 +454,8 @@ module type KeyHasher = sig
   val to_bytes : hash -> string
 end
 
-module MakeKeyHasher (UserKeyType : sig
-  type t
-
-  val to_string : t -> string
-end) : KeyHasher with type key = UserKeyType.t = struct
+module MakeKeyHasher (UserKeyType : UserKeyType) :
+  KeyHasher with type key = UserKeyType.t = struct
   type key = UserKeyType.t
 
   type hash = string
@@ -1070,18 +1075,6 @@ module type WithCache = sig
   val get_no_cache : key -> value option
 
   module Cache : LocalCache with type key = key and type value = value
-end
-
-(*****************************************************************************)
-(* The interface that all keys need to implement *)
-(*****************************************************************************)
-
-module type UserKeyType = sig
-  type t
-
-  val to_string : t -> string
-
-  val compare : t -> t -> int
 end
 
 (*****************************************************************************)

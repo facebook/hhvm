@@ -137,6 +137,7 @@ type t = {
   tco_strict_value_equality: bool;
   tco_enforce_sealed_subclasses: bool;
   tco_everything_sdt: bool;
+  tco_deferments_light: bool;
 }
 [@@deriving eq, show]
 
@@ -332,6 +333,7 @@ let default =
     tco_strict_value_equality = false;
     tco_enforce_sealed_subclasses = false;
     tco_everything_sdt = false;
+    tco_deferments_light = false;
   }
 
 let make
@@ -489,6 +491,7 @@ let make
     ?(tco_strict_value_equality = default.tco_strict_value_equality)
     ?(tco_enforce_sealed_subclasses = default.tco_enforce_sealed_subclasses)
     ?(tco_everything_sdt = default.tco_everything_sdt)
+    ?(tco_deferments_light = default.tco_deferments_light)
     () =
   {
     tco_experimental_features;
@@ -620,6 +623,7 @@ let make
     tco_strict_value_equality;
     tco_enforce_sealed_subclasses;
     tco_everything_sdt;
+    tco_deferments_light;
   }
 
 let tco_experimental_feature_enabled t s =
@@ -916,3 +920,5 @@ let tco_strict_value_equality t = t.tco_strict_value_equality
 let tco_enforce_sealed_subclasses t = t.tco_enforce_sealed_subclasses
 
 let tco_everything_sdt t = t.tco_everything_sdt
+
+let tco_deferments_light t = t.tco_deferments_light

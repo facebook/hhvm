@@ -137,6 +137,7 @@ impl Default for GlobalOptions {
             tco_strict_value_equality: false,
             tco_enforce_sealed_subclasses: false,
             tco_everything_sdt: false,
+            tco_deferments_light: false,
         }
     }
 }

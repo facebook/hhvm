@@ -554,6 +554,8 @@ type t = {
   watchman: Watchman.t;
   (* If enabled, saves naming table into a temp folder and uploads it to the remote typechecker *)
   save_and_upload_naming_table: bool;
+  deferments_light: bool;
+      (** Stop typechecking when deferment threshold is reached and instead get decls to predeclare from names in AST. *)
 }
 
 let default =
@@ -652,6 +654,7 @@ let default =
     stream_errors = false;
     watchman = Watchman.default;
     save_and_upload_naming_table = false;
+    deferments_light = false;
   }
 
 let path =
@@ -686,6 +689,7 @@ let apply_justknobs_overrides ~silent config =
           "load_decls_from_saved_state"
           "hack/config:load_decls_from_saved_state";
         eval "use_direct_decl_parser" "hack/config:use_direct_decl_parser";
+        eval "deferments_light" "hack/config:deferments_light";
       ]
   in
   match overrides with
@@ -1265,6 +1269,13 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
+  let deferments_light =
+    bool_if_min_version
+      "deferments_light"
+      ~default:default.deferments_light
+      ~current_version
+      config
+  in
   {
     min_log_level;
     attempt_fix_credentials;
@@ -1357,6 +1368,7 @@ let load_ fn ~silent ~current_version overrides =
     watchman;
     force_remote_type_check;
     save_and_upload_naming_table;
+    deferments_light;
   }
 
 let load ~silent ~current_version config_overrides =
@@ -1374,4 +1386,5 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       require_saved_state = options.require_saved_state;
       stream_errors = options.stream_errors;
       use_direct_decl_in_tc_loop = options.use_direct_decl_in_tc_loop;
+      deferments_light = options.deferments_light;
     }

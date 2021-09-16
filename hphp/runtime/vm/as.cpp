@@ -1759,12 +1759,12 @@ Variant checkSize(Variant val) {
  * caller to make sure it is a legal literal.
  */
 Variant parse_php_serialized(folly::StringPiece str) {
+  SuppressClassConversionWarning suppressor;
   VariableUnserializer vu(
     str.data(),
     str.size(),
     VariableUnserializer::Type::Internal,
-    /* allowUnknownSerializableClass = */ true,
-    /* suppressClassConversionWarnings = */ true
+    /* allowUnknownSerializableClass = */ true
   );
   try {
     return checkSize(vu.unserialize());

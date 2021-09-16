@@ -201,6 +201,27 @@ HAC_CHECK_OPTS
 HAC_CHECK_OPTS
 #undef HC
 
+void raise_class_to_string_conversion_warning();
+
+/*
+ * RAII mechanism to temporarily suppress lazyclass-to-string conversion notices
+ * within a scope.
+ */
+struct SuppressClassConversionWarning {
+  SuppressClassConversionWarning();
+  ~SuppressClassConversionWarning();
+  SuppressClassConversionWarning(const SuppressClassConversionWarning&)
+      = delete;
+  SuppressClassConversionWarning(SuppressClassConversionWarning&&) = delete;
+  SuppressClassConversionWarning&
+      operator=(const SuppressClassConversionWarning&) = delete;
+  SuppressClassConversionWarning&
+      operator=(SuppressClassConversionWarning&&) = delete;
+private:
+  bool old;
+};
+
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void raise_str_to_class_notice(const StringData* name);

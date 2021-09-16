@@ -57,7 +57,7 @@ bool tvInstanceOfImpl(const TypedValue* tv, F lookupClass) {
       auto const cls = lookupClass();
       if (cls && interface_supports_string(cls->name())) {
         if (RuntimeOption::EvalRaiseClassConversionWarning) {
-          raise_warning(Strings::CLASS_TO_STRING);
+          raise_class_to_string_conversion_warning();
         }
         return true;
       }

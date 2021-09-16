@@ -1,0 +1,5 @@
+-vEval.EmitClassPointers=2
+-vEval.RaiseClassConversionWarning=true
+-vEval.ClassAsStringVarDump=false
+-vEval.ClassAsStringVarExport=false
+-vEval.ClassPassesClassname=true

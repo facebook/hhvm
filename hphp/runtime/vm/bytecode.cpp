@@ -2155,7 +2155,7 @@ OPTBLD_INLINE void iopThrowNonExhaustiveSwitch() {
 
 OPTBLD_INLINE void iopRaiseClassStringConversionWarning() {
   if (RuntimeOption::EvalRaiseClassConversionWarning) {
-    raise_warning(Strings::CLASS_TO_STRING);
+    raise_class_to_string_conversion_warning();
   }
 }
 
@@ -2165,7 +2165,7 @@ OPTBLD_INLINE void iopResolveClass(Id id) {
   // TODO (T61651936): Disallow implicit conversion to string
   if (class_ == nullptr) {
     if (RuntimeOption::EvalRaiseClassConversionWarning) {
-      raise_warning(Strings::CLASS_TO_STRING);
+      raise_class_to_string_conversion_warning();
     }
     vmStack().pushStaticString(cname);
   }

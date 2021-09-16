@@ -143,7 +143,6 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
         value.data(), value.size(),
         VariableUnserializer::Type::Internal,
         /* allowUnknownSerializableClass = */ false,
-        /* suppressClassConversionWarnings = */ false,
         empty_dict_array()
       };
       try {

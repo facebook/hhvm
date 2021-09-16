@@ -713,6 +713,8 @@ void RequestInjectionData::reset() {
 #define HC(Opt, ...) m_suppressHAC##Opt = false;
   HAC_CHECK_OPTS
 #undef HC
+  m_suppressClassConversionWarnings = false;
+
   m_breakPointFilter.clear();
   m_flowFilter.clear();
   m_lineBreakPointFilter.clear();

@@ -246,6 +246,12 @@ struct RequestInjectionData {
 #undef HC
 
   /*
+   * Whether to suppress the emission of Class to String conversion warnings.
+   */
+  bool getSuppressClassConversionWarnings() const;
+  void setSuppressClassConversionWarnings(bool);
+
+  /*
    * Whether coverage is being collected.
    */
   bool getCoverage() const;
@@ -375,6 +381,8 @@ private:
 #define HC(Opt, ...) bool m_suppressHAC##Opt{false};
   HAC_CHECK_OPTS
 #undef HC
+
+  bool m_suppressClassConversionWarnings{false};
 
   bool m_debuggerStepIn{false};
   bool m_debuggerNext{false};

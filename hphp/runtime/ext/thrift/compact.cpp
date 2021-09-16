@@ -1196,6 +1196,10 @@ void HHVM_FUNCTION(thrift_protocol_write_compact,
                    const Object& request_struct,
                    int seqid,
                    bool oneway) {
+  // Suppress class-to-string conversion warnings that occur during
+  // serialization and deserialization.
+  SuppressClassConversionWarning suppressor;
+
   PHPOutputTransport transport(transportobj);
 
   CompactWriter writer(&transport);
@@ -1214,6 +1218,10 @@ Variant HHVM_FUNCTION(thrift_protocol_read_compact,
                       const Object& transportobj,
                       const String& obj_typename,
                       int options) {
+  // Suppress class-to-string conversion warnings that occur during
+  // serialization and deserialization.
+  SuppressClassConversionWarning suppressor;
+
   VMRegAnchor _;
   CompactReader reader(transportobj, options);
   return reader.read(obj_typename);
@@ -1223,6 +1231,10 @@ Object HHVM_FUNCTION(thrift_protocol_read_compact_struct,
                      const Object& transportobj,
                      const String& obj_typename,
                      int options) {
+  // Suppress class-to-string conversion warnings that occur during
+  // serialization and deserialization.
+  SuppressClassConversionWarning suppressor;
+
   VMRegAnchor _;
   CompactReader reader(transportobj, options);
   return reader.readStruct(obj_typename);

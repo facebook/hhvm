@@ -589,4 +589,18 @@ HAC_CHECK_OPTS
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void raise_class_to_string_conversion_warning() {
+  if (LIKELY(!RID().getSuppressClassConversionWarnings())) {
+    raise_warning(Strings::CLASS_TO_STRING);
+  }
+}
+
+SuppressClassConversionWarning::SuppressClassConversionWarning()
+  : old(RID().getSuppressClassConversionWarnings()) {
+  RID().setSuppressClassConversionWarnings(true);
+}
+SuppressClassConversionWarning::~SuppressClassConversionWarning() {
+  RID().setSuppressClassConversionWarnings(old);
+}
+
 }

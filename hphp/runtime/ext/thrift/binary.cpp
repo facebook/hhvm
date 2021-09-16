@@ -653,6 +653,9 @@ void HHVM_FUNCTION(thrift_protocol_write_binary,
                    int seqid,
                    bool strict_write,
                    bool oneway) {
+  // Suppress class-to-string conversion warnings that occur during
+  // serialization and deserialization.
+  SuppressClassConversionWarning suppressor;
 
   PHPOutputTransport transport(transportobj);
 
@@ -683,6 +686,10 @@ Object HHVM_FUNCTION(thrift_protocol_read_binary,
                      const String& obj_typename,
                      bool strict_read,
                      int options) {
+  // Suppress class-to-string conversion warnings that occur during
+  // serialization and deserialization.
+  SuppressClassConversionWarning suppressor;
+
   VMRegAnchor _;
   PHPInputTransport transport(transportobj);
   int8_t messageType = 0;
@@ -729,6 +736,10 @@ Variant HHVM_FUNCTION(thrift_protocol_read_binary_struct,
                       const Object& transportobj,
                       const String& obj_typename,
                       int options) {
+  // Suppress class-to-string conversion warnings that occur during
+  // serialization and deserialization.
+  SuppressClassConversionWarning suppressor;
+
   VMRegAnchor _;
   PHPInputTransport transport(transportobj);
   return binary_deserialize_struct(obj_typename, transport, options);

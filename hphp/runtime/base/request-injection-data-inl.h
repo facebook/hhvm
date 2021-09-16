@@ -66,6 +66,14 @@ inline void RequestInjectionData::setJitFolding(bool flag) {
   HAC_CHECK_OPTS
 #undef HC
 
+inline bool RequestInjectionData::getSuppressClassConversionWarnings() const {
+  return m_suppressClassConversionWarnings;
+}
+
+inline void RequestInjectionData::setSuppressClassConversionWarnings(bool flag) {
+  m_suppressClassConversionWarnings = flag;
+}
+
 inline bool RequestInjectionData::getCoverage() const {
   return m_coverage;
 }

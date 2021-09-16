@@ -707,11 +707,9 @@ functor
     let move = Immediate.move
   end
 
-(*****************************************************************************)
-(* Direct access to shared memory, but with a layer of local changes that allow
- * us to decide whether or not to commit specific values.
- *)
-(*****************************************************************************)
+(** Heap that provides direct access to shared memory, but with a layer
+    of local changes that allows us to decide whether or not to commit
+    specific values. *)
 module WithLocalChanges : functor
   (Raw : Raw)
   (KeyHasher : KeyHasher)

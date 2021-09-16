@@ -273,29 +273,6 @@ type 'a profiled_value =
 (** Heap that provides profiled access (?) to the underlying hashtable. *)
 module ProfiledImmediate : Raw
 
-(** Heap that provides direct access to shared memory, but with a layer
-    of local changes that allows us to decide whether or not to commit
-    specific values. *)
-module WithLocalChanges (Raw : Raw) (KeyHasher : KeyHasher) (Value : Value.Type) : sig
-  include module type of Raw (KeyHasher) (Value)
-
-  module LocalChanges : sig
-    val has_local_changes : unit -> bool
-
-    val push_stack : unit -> unit
-
-    val pop_stack : unit -> unit
-
-    val revert : KeyHasher.hash -> unit
-
-    val commit : KeyHasher.hash -> unit
-
-    val revert_all : unit -> unit
-
-    val commit_all : unit -> unit
-  end
-end
-
 (** A heap for a user-defined type.
 
     Each heap supports "old" and "new" values.

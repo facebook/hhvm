@@ -167,59 +167,16 @@ struct RpcOptions {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct TClientBufferedStreamError {
+struct TClientStreamError {
  public:
-  TClientBufferedStreamError() {}
-  TClientBufferedStreamError(std::unique_ptr<folly::IOBuf> encodedErrorMsg)
+  TClientStreamError() {}
+  TClientStreamError(std::unique_ptr<folly::IOBuf> encodedErrorMsg)
       : errorMsg_(std::move(encodedErrorMsg)), isEncoded_(true) {}
-  TClientBufferedStreamError(std::string errorStr)
+  TClientStreamError(std::string errorStr)
       : errorMsg_(folly::IOBuf::copyBuffer(errorStr, errorStr.size())),
         isEncoded_(false) {}
-  std::unique_ptr<folly::IOBuf> errorMsg_;
-  bool isEncoded_;
-};
 
-const StaticString s_TClientBufferedStream("TClientBufferedStream");
-
-struct TClientBufferedStream {
-  TClientBufferedStream() = default;
-  TClientBufferedStream(const TClientBufferedStream&) = delete;
-  TClientBufferedStream& operator=(const TClientBufferedStream&) = delete;
-  ~TClientBufferedStream() {
-    sweep();
-  }
-
-  using BufferAndErrorPair = std::pair<
-      std::vector<std::unique_ptr<folly::IOBuf>>,
-      TClientBufferedStreamError>;
-
-  void sweep() {
-    endStream();
-  }
-
-  void init(
-      apache::thrift::detail::ClientStreamBridge::ClientPtr streamBridge,
-      apache::thrift::BufferOptions bufferOptions) {
-    streamBridge_ = std::move(streamBridge);
-    bufferOptions_ = bufferOptions;
-    if (bufferOptions_.chunkSize == 0) {
-      streamBridge_->requestN(1);
-      ++bufferOptions_.chunkSize;
-    }
-    outstanding_ = bufferOptions_.chunkSize;
-    payloadDataSize_ = 0;
-  }
-
-  void endStream() {
-    streamBridge_.reset();
-  }
-
-  bool shouldRequestMore() {
-    return (outstanding_ <= bufferOptions_.chunkSize / 2) ||
-        (payloadDataSize_ >= kRequestCreditPayloadSize);
-  }
-
-  TClientBufferedStreamError getErrorMessage(folly::exception_wrapper ew) {
+  static TClientStreamError create(folly::exception_wrapper ew) {
     std::unique_ptr<folly::IOBuf> msgBuffer;
     std::string msgStr = ew.what().toStdString();
     ew.handle(
@@ -259,14 +216,57 @@ struct TClientBufferedStream {
         [](...) {});
 
     if (msgBuffer) {
-      return TClientBufferedStreamError(std::move(msgBuffer));
+      return TClientStreamError(std::move(msgBuffer));
     }
-    return TClientBufferedStreamError(msgStr);
+    return TClientStreamError(msgStr);
+  }
+
+  std::unique_ptr<folly::IOBuf> errorMsg_;
+  bool isEncoded_;
+};
+
+const StaticString s_TClientBufferedStream("TClientBufferedStream");
+
+struct TClientBufferedStream {
+  TClientBufferedStream() = default;
+  TClientBufferedStream(const TClientBufferedStream&) = delete;
+  TClientBufferedStream& operator=(const TClientBufferedStream&) = delete;
+  ~TClientBufferedStream() {
+    sweep();
+  }
+
+  using BufferAndErrorPair =
+      std::pair<std::vector<std::unique_ptr<folly::IOBuf>>, TClientStreamError>;
+
+  void sweep() {
+    endStream();
+  }
+
+  void init(
+      apache::thrift::detail::ClientStreamBridge::ClientPtr streamBridge,
+      apache::thrift::BufferOptions bufferOptions) {
+    streamBridge_ = std::move(streamBridge);
+    bufferOptions_ = bufferOptions;
+    if (bufferOptions_.chunkSize == 0) {
+      streamBridge_->requestN(1);
+      ++bufferOptions_.chunkSize;
+    }
+    outstanding_ = bufferOptions_.chunkSize;
+    payloadDataSize_ = 0;
+  }
+
+  void endStream() {
+    streamBridge_.reset();
+  }
+
+  bool shouldRequestMore() {
+    return (outstanding_ <= bufferOptions_.chunkSize / 2) ||
+        (payloadDataSize_ >= kRequestCreditPayloadSize);
   }
 
   BufferAndErrorPair clientQueueToVec() {
     std::vector<std::unique_ptr<folly::IOBuf>> bufferVec;
-    TClientBufferedStreamError error;
+    TClientStreamError error;
     while (!queue_.empty()) {
       auto& payload = queue_.front();
       if (!payload.hasValue() && !payload.hasException()) {
@@ -275,7 +275,7 @@ struct TClientBufferedStream {
         break;
       }
       if (payload.hasException()) {
-        error = getErrorMessage(payload.exception());
+        error = TClientStreamError::create(payload.exception());
         queue_.pop();
         endStream();
         break;
@@ -462,7 +462,7 @@ struct Thrift2StreamEvent final : AsioExternalThreadEvent {
 
   // any error while processing queue, this should be returned as error message
   // along with the buffer and should be sequenced after any received payloads
-  thrift::TClientBufferedStreamError error_;
+  thrift::TClientStreamError error_;
 
   // Unexpected server error which should be thrown immediately
   std::unique_ptr<folly::IOBuf> serverError_;

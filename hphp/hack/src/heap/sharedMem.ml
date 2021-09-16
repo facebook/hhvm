@@ -435,21 +435,13 @@ module GC = struct
 end
 
 module type Key = sig
-  type userkey
-
-  type t
-
-  type old
+  type key
 
   type md5
 
-  val make : Prefix.t -> userkey -> t
+  val md5 : Prefix.t -> key -> md5
 
-  val make_old : Prefix.t -> userkey -> old
-
-  val md5 : t -> md5
-
-  val md5_old : old -> md5
+  val md5_old : Prefix.t -> key -> md5
 
   val string_of_md5 : md5 -> string
 end
@@ -458,12 +450,8 @@ module KeyFunctor (UserKeyType : sig
   type t
 
   val to_string : t -> string
-end) : Key with type userkey = UserKeyType.t = struct
-  type userkey = UserKeyType.t
-
-  type t = string
-
-  type old = string
+end) : Key with type key = UserKeyType.t = struct
+  type key = UserKeyType.t
 
   type md5 = string
 
@@ -473,16 +461,18 @@ end) : Key with type userkey = UserKeyType.t = struct
    *)
   let old_prefix = "old_"
 
-  let make : Prefix.t -> userkey -> t =
+  let full_key : Prefix.t -> key -> string =
    (fun prefix x -> Prefix.make_key prefix (UserKeyType.to_string x))
 
-  let make_old : Prefix.t -> userkey -> old =
+  let full_key_old : Prefix.t -> key -> string =
    fun prefix x ->
     old_prefix ^ Prefix.make_key prefix (UserKeyType.to_string x)
 
-  let md5 : t -> md5 = Stdlib.Digest.string
+  let md5 (prefix : Prefix.t) (key : key) : md5 =
+    Stdlib.Digest.string (full_key prefix key)
 
-  let md5_old : old -> md5 = Stdlib.Digest.string
+  let md5_old (prefix : Prefix.t) (key : key) : md5 =
+    Stdlib.Digest.string (full_key_old prefix key)
 
   let string_of_md5 : md5 -> string = (fun x -> x)
 end
@@ -1117,9 +1107,9 @@ module NoCache (Raw : Raw) (UserKeyType : UserKeyType) (Value : Value.Type) :
 
   type value = Value.t
 
-  let hash_of_key x = Key.make Value.prefix x |> Key.md5
+  let hash_of_key x = Key.md5 Value.prefix x
 
-  let old_hash_of_key x = Key.make_old Value.prefix x |> Key.md5_old
+  let old_hash_of_key x = Key.md5_old Value.prefix x
 
   let add x y = WithLocalChanges.add (hash_of_key x) y
 

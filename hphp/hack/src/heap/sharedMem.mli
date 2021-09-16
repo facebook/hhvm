@@ -219,18 +219,7 @@ module type Key = sig
 
       This key will be object-specific (unique within a heap), but might not be
       unique across heaps. *)
-  type userkey
-
-  (** The concatenation of the heap-prefix with the object-specific [userkey].
-
-     This key is unique across all heaps. *)
-  type t
-
-  (** The normal [t] key prefixed with the old-prefix.
-
-     This is used to distinguish between new and old values of the same
-     object in the same heap. *)
-  type old
+  type key
 
   (** The md5 of an [old] or a new [key].
 
@@ -238,13 +227,9 @@ module type Key = sig
      the hash table. *)
   type md5
 
-  val make : Prefix.t -> userkey -> t
+  val md5 : Prefix.t -> key -> md5
 
-  val make_old : Prefix.t -> userkey -> old
-
-  val md5 : t -> md5
-
-  val md5_old : old -> md5
+  val md5_old : Prefix.t -> key -> md5
 
   (** Note that this returns the raw MD5 bytes, not its hex encoding. *)
   val string_of_md5 : md5 -> string
@@ -261,7 +246,7 @@ end
 
 (** Make a new key that can be stored in shared-memory. *)
 module KeyFunctor (UserKeyType : UserKeyType) :
-  Key with type userkey = UserKeyType.t
+  Key with type key = UserKeyType.t
 
 (** Heap type that represents immediate access to the underlying hashtable. *)
 module type Raw = functor (Key : Key) (Value : Value.Type) -> sig

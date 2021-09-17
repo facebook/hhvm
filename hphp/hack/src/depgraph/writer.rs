@@ -549,7 +549,7 @@ mod sharded_mmap_tests {
 
         let sharded_mmap = ShardedMmap::new(&mut mmap_vec);
         sharded_mmap.write(at, &write_vec);
-        &mut control_vec[at..at + write_size].copy_from_slice(&write_vec);
+        control_vec[at..at + write_size].copy_from_slice(&write_vec);
         if control_vec != mmap_vec {
             assert!(false, "{:?} failed", test);
         }

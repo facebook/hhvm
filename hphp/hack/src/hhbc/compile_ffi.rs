@@ -488,6 +488,126 @@ fn print_output(
     Ok(())
 }
 
+#[no_mangle]
+unsafe extern "C" fn hackc_hhas_to_string_cpp_ffi(
+    cnative_env: *const CNativeEnv,
+    prog: *const HhasProgram<'static>,
+    err_buf: *const CErrBuf,
+) -> *const c_char {
+    match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+        // Safety: `prog`is a well aligned, properly initialized
+        // `*const HhasProgram`.
+        let prog = prog.as_ref().unwrap();
+        // Safety: `cnative_env`is a well aligned, properly initialized
+        // `*const CNativeEnv`.
+        let cnative_env = cnative_env.as_ref().unwrap();
+
+        // Safety : `err_buf.buf` must be valid for reads and writes
+        // for `err_buf.buf_len * mem::sizeof::<u8>()` bytes.
+        let buf_len: c_int = (*err_buf).buf_len;
+        let buf: &mut [u8] =
+            std::slice::from_raw_parts_mut((*err_buf).buf as *mut u8, buf_len as usize);
+
+        match stack_limit::with_elastic_stack(|_stack_limit| {
+            let native_env: hhbc_by_ref_compile::NativeEnv<&str> =
+                CNativeEnv::to_compile_env(cnative_env).unwrap();
+            let env = hhbc_by_ref_compile::Env::<&str> {
+                filepath: native_env.filepath.clone(),
+                config_jsons: vec![],
+                config_list: vec![],
+                flags: native_env.flags,
+            };
+            let mut w = String::new();
+            let compile_result = if native_env
+                .flags
+                .contains(hhbc_by_ref_compile::EnvFlags::ENABLE_DECL)
+            {
+                hhbc_by_ref_compile::hhas_to_string(
+                    &env,
+                    Some(&native_env),
+                    &mut w,
+                    prog,
+                    ExternalDeclProvider(
+                        cnative_env.decl_getter,
+                        cnative_env.decl_provider,
+                        std::marker::PhantomData,
+                    ),
+                )
+            } else {
+                hhbc_by_ref_compile::hhas_to_string(
+                    &env,
+                    Some(&native_env),
+                    &mut w,
+                    prog,
+                    NoDeclProvider,
+                )
+            };
+            match compile_result {
+                Ok(_) => Ok(w),
+                Err(e) => Err(anyhow!("{}", e)),
+            }
+        })
+        .map_err(|e| format!("{}", e))
+        .expect("compile_ffi: hackc_hhas_to_string_cpp_ffi: retry failed")
+        .map_err(|e| e.to_string())
+        {
+            Ok(out) => {
+                let cs = std::ffi::CString::new(out)
+                    .expect("compile_ffi: hackc_hhas_to_string_cpp_ffi: String::new failed");
+                cs.into_raw() as *const c_char
+            }
+            Err(e) => {
+                if e.len() >= buf.len() {
+                    warn!("Provided error buffer too small.");
+                    warn!(
+                        "Expected at least {} bytes but got {}.",
+                        e.len() + 1,
+                        buf.len()
+                    );
+                } else {
+                    /*
+                    Safety:
+                      - `e` must be valid for reads of `e.len() *
+                        size_of::<u8>()` bytes;
+                      - `buf` must be valid for writes of of `e.len() *
+                        size_of::<u8>()` bytes;
+                      - The region of memory beginning at `e` with a
+                        size of of `e.len() * size_of::<u8>()` bytes must
+                        not overlap with the region of memory beginning
+                        at `buf` with the same size;
+                      - Even if the of `e.len() * size_of::<u8>()` is
+                        `0`, the pointers must be non-null and properly
+                        aligned.
+                    */
+                    std::ptr::copy_nonoverlapping(e.as_ptr(), buf.as_mut_ptr(), e.len());
+                    buf[e.len()] = 0;
+                }
+                std::ptr::null::<_>()
+            }
+        }
+    })) {
+        Ok(ptr) => ptr,
+        _ => {
+            if std::env::var_os("HH_TEST_MODE").is_some() {
+                eprintln!("Error: panic in ffi function hackc_hhas_to_string_cpp_ffi");
+            }
+            std::ptr::null()
+        }
+    }
+}
+
+#[no_mangle]
+unsafe extern "C" fn hackc_hhas_to_string_free_string_cpp_ffi(s: *mut c_char) {
+    /*
+    Safety:
+      - This should only ever be called on a pointer obtained by
+        `CString::into_raw`.
+      - `CString::from_raw` and `CString::to_raw` should not be
+        used with C functions that can modify the string's length.
+    */
+    let _ = std::ffi::CString::from_raw(s);
+}
+
 ocamlrep_ocamlpool::ocaml_ffi! {
   fn desugar_and_print_expr_trees(env: hhbc_by_ref_compile::Env<OcamlStr>) {
     hhbc_by_ref_compile::dump_expr_tree::desugar_and_print(&env);

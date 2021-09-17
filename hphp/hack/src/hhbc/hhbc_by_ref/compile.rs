@@ -518,6 +518,41 @@ pub fn hhas_from_text<'arena, 'decl, S: AsRef<str>, D: DeclProvider<'decl>>(
     program.map_err(|e| anyhow!("Unhandled Emitter error: {}", e))
 }
 
+pub fn hhas_to_string<'decl, W: std::fmt::Write, S: AsRef<str>, D: DeclProvider<'decl>>(
+    env: &Env<S>,
+    native_env: Option<&NativeEnv<S>>,
+    writer: &mut W,
+    program: &HhasProgram,
+    decl_provider: D,
+) -> anyhow::Result<()> {
+    let opts = match native_env {
+        None => Options::from_configs(&env.config_jsons, &env.config_list)
+            .map_err(anyhow::Error::msg)?,
+        Some(native_env) => NativeEnv::to_options(&native_env),
+    };
+
+    let mut emitter = Emitter::new(
+        opts,
+        env.flags.contains(EnvFlags::IS_SYSTEMLIB),
+        env.flags.contains(EnvFlags::FOR_DEBUGGER_EVAL),
+        decl_provider,
+    );
+
+    let (print_result, _) = time(|| {
+        print_program(
+            &mut Context::new(
+                &mut emitter,
+                Some(&env.filepath),
+                env.flags.contains(EnvFlags::DUMP_SYMBOL_REFS),
+                env.flags.contains(EnvFlags::IS_SYSTEMLIB),
+            ),
+            writer,
+            program,
+        )
+    });
+    print_result.map_err(|e| anyhow!("{}", e))
+}
+
 fn emit<'p, 'arena, 'decl, D: DeclProvider<'decl>, S: AsRef<str>>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl, D>,

@@ -536,9 +536,11 @@ namespace {
  */
 bool shouldReduceToNonReifiedVerifyType(ISS& env, SArray ts) {
   if (get_ts_kind(ts) != TypeStructure::Kind::T_unresolved) return false;
-  auto const rcls = env.index.resolve_class(env.ctx, get_ts_classname(ts));
-  if (!rcls || !rcls->resolved()) return false;
-  return !rcls->cls()->hasReifiedGenerics;
+  auto const clsName = get_ts_classname(ts);
+  auto const rcls = env.index.resolve_class(env.ctx, clsName);
+  if (rcls && rcls->resolved()) return !rcls->cls()->hasReifiedGenerics;
+  // Type aliases cannot have reified generics
+  return env.index.lookup_type_alias(clsName) != nullptr;
 }
 
 }

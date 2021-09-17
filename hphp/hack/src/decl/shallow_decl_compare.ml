@@ -62,7 +62,4 @@ let compute_class_fanout
   else
     Hh_logger.log "Computing fanout from %d changed classes" change_count;
 
-  Shallow_class_fanout.fanout_of_changes
-    ~mode:(Provider_context.get_deps_mode ctx)
-    ~get_classes_in_file
-    changes
+  Shallow_class_fanout.fanout_of_changes ~ctx ~get_classes_in_file changes

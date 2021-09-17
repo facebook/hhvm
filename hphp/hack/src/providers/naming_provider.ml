@@ -823,7 +823,7 @@ module ByHash = struct
   let ifiles : (Typing_deps.Dep.t, Relative_path.Set.t) Caml.Hashtbl.t ref =
     ref (Caml.Hashtbl.create 23)
 
-  let get_files_TRANSITIONAL deps =
+  let get_files _ctx deps =
     Typing_deps.DepSet.fold
       ~f:
         begin
@@ -834,8 +834,6 @@ module ByHash = struct
         end
       deps
       ~init:Relative_path.Set.empty
-
-  let get_files _ctx deps = get_files_TRANSITIONAL deps
 
   let update_file ctx filename info ~old =
     let mode = Provider_context.get_deps_mode ctx in

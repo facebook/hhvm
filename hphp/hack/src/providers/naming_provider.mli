@@ -179,6 +179,4 @@ module ByHash : sig
 
   val get_files :
     Provider_context.t -> Typing_deps.DepSet.t -> Relative_path.Set.t
-
-  val get_files_TRANSITIONAL : Typing_deps.DepSet.t -> Relative_path.Set.t
 end

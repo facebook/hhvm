@@ -8,7 +8,7 @@
  *)
 
 val fanout_of_changes :
-  mode:Typing_deps_mode.t ->
+  ctx:Provider_context.t ->
   get_classes_in_file:(Relative_path.t -> SSet.t) ->
   (string * ClassDiff.t) list ->
   AffectedDeps.t

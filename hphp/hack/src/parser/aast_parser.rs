@@ -145,7 +145,8 @@ impl<'src> AastParser {
             let mut empty_program = vec![];
             let mut aast = aast.unwrap_or(&mut empty_program);
             if uses_readonly
-                && env.parser_options.po_enable_readonly_in_emitter
+                // enabled either by parser option or by typechecker
+                && (env.parser_options.po_enable_readonly_in_emitter || !env.codegen)
                 && !env.is_systemlib
             {
                 errors.extend(readonly_check::check_program(&mut aast));

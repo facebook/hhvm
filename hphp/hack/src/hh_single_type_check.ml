@@ -870,7 +870,6 @@ let parse_options () =
       ~tco_strict_value_equality:!strict_value_equality
       ~tco_enforce_sealed_subclasses:!enforce_sealed_subclasses
       ~tco_everything_sdt:!everything_sdt
-      ~po_enable_readonly_in_emitter:true
       ()
   in
   Errors.allowed_fixme_codes_strict :=

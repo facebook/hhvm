@@ -401,6 +401,57 @@ module Consts = struct
       ()
 end
 
+let get_filename_by_hash
+    (db_path_opt : Naming_sqlite.db_path option) (hash : Typing_deps.Dep.t) :
+    Relative_path.t option =
+  (* This function embodies the complicated storage we have for names:
+     1. If the name's in TypePosHeap/FunPosHeap/ConstPosHeap, that reflects either
+     that we've cached it from sqlite or we're storing an authoritative delta;
+     2. Otherwise, if it's in BlockedEntries, then the authoritative delta
+     says that it was removed;
+     3. Otherwise, see what sqlite says.
+     The complication is that there are three separate BlockedEntries heaps, one for
+     each name_kind (Types/Funs/Consts), so we'll actually query sqlite first to
+     discover the name_kind and only afterwards check the BlockedEntries heap.
+     All this logic is complicated enought that we just won't bother writing
+     our sqlite-reads into the TypePosHeap/FunPosHeap/ConstPosHeap caches,
+     like the normal reads do. *)
+  let pos =
+    match Types.TypePosHeap.get hash with
+    | Some (pos, _type_kind) -> Some pos
+    | None ->
+      (match Funs.FunPosHeap.get hash with
+      | Some pos -> Some pos
+      | None -> Consts.ConstPosHeap.get hash)
+  in
+  match (pos, db_path_opt) with
+  | (Some pos, _) -> Some (FileInfo.get_pos_filename pos)
+  | (None, None) -> None
+  | (None, Some db_path) ->
+    (match Naming_sqlite.get_path_by_64bit_dep db_path hash with
+    | None -> None
+    | Some (file, name_kind) ->
+      let is_blocked =
+        match name_kind with
+        | Naming_types.Type_kind _ -> Types.BlockedEntries.get hash
+        | Naming_types.Fun_kind -> Funs.BlockedEntries.get hash
+        | Naming_types.Const_kind -> Consts.BlockedEntries.get hash
+      in
+      (match is_blocked with
+      | Some Blocked -> None
+      | None -> Some file))
+
+let get_filenames_by_hash
+    (db_path_opt : Naming_sqlite.db_path option) (hashes : Typing_deps.DepSet.t)
+    : Relative_path.Set.t =
+  Typing_deps.DepSet.fold
+    hashes
+    ~init:Relative_path.Set.empty
+    ~f:(fun hash files ->
+      match get_filename_by_hash db_path_opt hash with
+      | None -> files
+      | Some file -> Relative_path.Set.add files file)
+
 let push_local_changes () =
   Types.TypePosHeap.LocalChanges.push_stack ();
   Types.TypeCanonHeap.LocalChanges.push_stack ();

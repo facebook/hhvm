@@ -68,6 +68,14 @@ module Consts : sig
   include ReverseNamingTable with type pos = FileInfo.pos
 end
 
+(** This function searches all three namespaces (types, funs, consts) to
+find which one contains each Dep.t. The earlier functions in this module
+only search one specified namespace. Note: this function doesn't
+use the sharedmem cache of names - doesn't benefit from it, doesn't
+write into it. *)
+val get_filenames_by_hash :
+  Naming_sqlite.db_path option -> Typing_deps.DepSet.t -> Relative_path.Set.t
+
 val push_local_changes : unit -> unit
 
 val pop_local_changes : unit -> unit

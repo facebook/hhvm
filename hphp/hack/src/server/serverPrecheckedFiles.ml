@@ -18,7 +18,8 @@ let should_use options local_config =
 let set env prechecked_files = { env with prechecked_files }
 
 let intersect_with_master_deps
-    ~deps_mode ~deps ~dirty_master_deps ~rechecked_files genv env =
+    ~ctx ~deps ~dirty_master_deps ~rechecked_files genv env =
+  let deps_mode = Provider_context.get_deps_mode ctx in
   (* Compute maximum fan-out of input dep set *)
   let deps = Typing_deps.add_all_deps deps_mode deps in
   (* See if it intersects in any way with dirty_master_deps *)
@@ -31,7 +32,7 @@ let intersect_with_master_deps
     Typing_deps.DepSet.diff dirty_master_deps common_deps
   in
   (* Translate the dependencies to files that need to be rechecked. *)
-  let needs_recheck = Naming_provider.ByHash.get_files_TRANSITIONAL more_deps in
+  let needs_recheck = Naming_provider.ByHash.get_files ctx more_deps in
   let needs_recheck = Relative_path.Set.diff needs_recheck rechecked_files in
   let size = Relative_path.Set.cardinal needs_recheck in
   let env =
@@ -101,7 +102,7 @@ let update_after_recheck genv env rechecked ~start_time =
      * and expand them too *)
     let (env, dirty_master_deps, size) =
       intersect_with_master_deps
-        ~deps_mode
+        ~ctx
         ~deps:dirty_local_deps
         ~dirty_master_deps
         ~rechecked_files
@@ -150,7 +151,6 @@ let update_after_recheck genv env rechecked ~start_time =
 
 let update_after_local_changes genv env changes ~start_time =
   let ctx = Provider_utils.ctx_from_server_env env in
-  let deps_mode = Provider_context.get_deps_mode ctx in
   let telemetry =
     Telemetry.create ()
     |> Telemetry.duration ~key:"start" ~start_time
@@ -195,7 +195,7 @@ let update_after_local_changes genv env changes ~start_time =
         in
         let (env, dirty_master_deps, size) =
           intersect_with_master_deps
-            ~deps_mode
+            ~ctx
             ~deps:changes
             ~dirty_master_deps:dirty_deps.dirty_master_deps
             ~rechecked_files:dirty_deps.rechecked_files

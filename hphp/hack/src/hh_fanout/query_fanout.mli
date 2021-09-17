@@ -9,7 +9,7 @@
 type result
 
 val go :
-  deps_mode:Typing_deps_mode.t ->
+  ctx:Provider_context.t ->
   dep_hash:Typing_deps.Dep.t ->
   include_extends:bool ->
   result

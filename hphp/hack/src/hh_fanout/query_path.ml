@@ -64,9 +64,10 @@ let rec search
       ~finish:(fun _seen_acc -> None)
 
 let go
-    ~(deps_mode : Typing_deps_mode.t)
+    ~(ctx : Provider_context.t)
     ~(source : Typing_deps.Dep.t)
     ~(dest : Typing_deps.Dep.t) : result =
+  let deps_mode = Provider_context.get_deps_mode ctx in
   search
     ~deps_mode
     ~dep_path_acc:[]
@@ -78,7 +79,7 @@ let go
              let paths =
                dep
                |> Typing_deps.DepSet.singleton deps_mode
-               |> Naming_provider.ByHash.get_files_TRANSITIONAL
+               |> Naming_provider.ByHash.get_files ctx
              in
              { dep; paths }))
 

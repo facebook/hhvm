@@ -399,8 +399,9 @@ let get_maybe_dependent_classes
       SSet.union acc @@ get_classes x)
   |> SSet.elements
 
-let get_dependent_classes_files (mode : Typing_deps_mode.t) (classes : SSet.t) :
+let get_dependent_classes_files (ctx : Provider_context.t) (classes : SSet.t) :
     Relative_path.Set.t =
+  let mode = Provider_context.get_deps_mode ctx in
   let visited = VisitedSet.make mode in
   SSet.fold
     classes
@@ -408,7 +409,7 @@ let get_dependent_classes_files (mode : Typing_deps_mode.t) (classes : SSet.t) :
     ~f:(fun c acc ->
       let source_class = Dep.make (hash_mode mode) (Dep.Type c) in
       Typing_deps.get_extend_deps ~mode ~visited ~source_class ~acc)
-  |> Naming_provider.ByHash.get_files_TRANSITIONAL
+  |> Naming_provider.ByHash.get_files ctx
 
 let filter_dependent_classes
     (ctx : Provider_context.t)
@@ -487,7 +488,7 @@ let get_dependent_classes
     ~(bucket_size : int)
     (get_classes : Relative_path.t -> SSet.t)
     (classes : SSet.t) : SSet.t =
-  get_dependent_classes_files (Provider_context.get_deps_mode ctx) classes
+  get_dependent_classes_files ctx classes
   |> get_maybe_dependent_classes get_classes classes
   |> filter_dependent_classes_parallel ctx workers ~bucket_size classes
   |> SSet.of_list

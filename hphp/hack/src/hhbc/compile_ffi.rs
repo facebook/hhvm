@@ -317,7 +317,7 @@ unsafe extern "C" fn hackc_compile_hhas_from_text_cpp_ffi(
                     .flags
                     .contains(hhbc_by_ref_compile::EnvFlags::ENABLE_DECL)
                 {
-                    hhbc_by_ref_compile::hhas_from_text(
+                    hhbc_by_ref_compile::hhas_from_text_(
                         alloc,
                         &env,
                         &stack_limit,
@@ -330,7 +330,7 @@ unsafe extern "C" fn hackc_compile_hhas_from_text_cpp_ffi(
                         ),
                     )
                 } else {
-                    hhbc_by_ref_compile::hhas_from_text(
+                    hhbc_by_ref_compile::hhas_from_text_(
                         alloc,
                         &env,
                         &stack_limit,

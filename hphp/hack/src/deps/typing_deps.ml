@@ -765,7 +765,7 @@ module Files = struct
       deps
       ~init:Relative_path.Set.empty
 
-  let deps_of_file_info (mode : Mode.t) (file_info : FileInfo.t) : Dep.t list =
+  let deps_of_file_info (mode : Mode.t) (file_info : FileInfo.t) : DepSet.t =
     let {
       FileInfo.funs;
       classes;
@@ -829,12 +829,15 @@ module Files = struct
           end
         ~init:defs
     in
-    defs
+    DepSet.of_list mode defs
 
   let update_file mode filename info ~old =
     (* remove old typing deps *)
-    List.iter
-      (Option.value_map old ~default:[] ~f:(deps_of_file_info mode))
+    DepSet.iter
+      (Option.value_map
+         old
+         ~default:(DepSet.make mode)
+         ~f:(deps_of_file_info mode))
       ~f:(fun def ->
         match Caml.Hashtbl.find_opt !ifiles def with
         | Some files when Relative_path.Set.mem files filename ->
@@ -855,7 +858,7 @@ module Files = struct
             ~pos:""
             (Telemetry.create ()));
     (* add new typing deps *)
-    List.iter (deps_of_file_info mode info) ~f:(fun def ->
+    DepSet.iter (deps_of_file_info mode info) ~f:(fun def ->
         let previous =
           match Hashtbl.find_opt !ifiles def with
           | Some files -> files

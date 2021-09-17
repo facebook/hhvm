@@ -707,7 +707,6 @@ dependencies = [
  "bumpalo",
  "decl_rust",
  "hh_hash",
- "no_pos_hash",
  "ocamlrep",
  "ocamlrep_caml_builtins",
  "ocamlrep_ocamlpool",

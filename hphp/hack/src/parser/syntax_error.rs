@@ -1046,6 +1046,14 @@ pub fn user_ctx_should_be_caps(ctx_name: &str) -> Error {
         ctx_name.to_string()
     ))
 }
+
+pub fn user_ctx_require_as(ctx_name: &str) -> Error {
+    Cow::Owned(format!(
+        "Context {} must declare a context constraint e.g. `as [write_props]`",
+        ctx_name.to_string()
+    ))
+}
+
 pub const assignment_to_readonly: Error =
     Cow::Borrowed("This expression is readonly, its members cannot be modified");
 

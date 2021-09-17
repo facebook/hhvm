@@ -5307,6 +5307,13 @@ where
                         )
                     }
                 }
+                if as_constraint.is_none() {
+                    Self::raise_parsing_error(
+                        &c.name,
+                        env,
+                        &syntax_error::user_ctx_require_as(&pos_name.1),
+                    )
+                }
                 let kind = match Self::p_context_list_to_intersection(&c.context, env)? {
                     Some(h) => h,
                     None => {

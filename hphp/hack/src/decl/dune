@@ -384,6 +384,7 @@
     affectedDeps
     classDiff
     decl_defs
+    naming_provider
     shallow_decl_defs
     typing_defs)
   (preprocess (pps ppx_deriving.std)))

@@ -1747,11 +1747,10 @@ let handle_mode
     dump_debug_glean_deps dbg_glean_deps
   | Dump_inheritance ->
     let open ServerCommandTypes.Method_jumps in
-    let deps_mode = Provider_context.get_deps_mode ctx in
     let naming_table = Naming_table.create files_info in
     Naming_table.iter
       naming_table
-      ~f:(Typing_deps.Files.update_file deps_mode ~old:None);
+      ~f:(Naming_provider.ByHash.update_file ctx ~old:None);
     Naming_table.iter naming_table ~f:(fun fn fileinfo ->
         if Relative_path.Map.mem builtins fn then
           ()
@@ -1907,11 +1906,10 @@ let handle_mode
           patched)
   | Find_refs (line, column) ->
     let path = expect_single_file () in
-    let deps_mode = Provider_context.get_deps_mode ctx in
     let naming_table = Naming_table.create files_info in
     Naming_table.iter
       naming_table
-      ~f:(Typing_deps.Files.update_file deps_mode ~old:None);
+      ~f:(Naming_provider.ByHash.update_file ctx ~old:None);
     let genv = ServerEnvBuild.default_genv in
     let init_id = Random_id.short_string () in
     let env =
@@ -1950,11 +1948,10 @@ let handle_mode
     ClientFindRefsPrint.print_ide_readable results
   | Go_to_impl (line, column) ->
     let filename = expect_single_file () in
-    let deps_mode = Provider_context.get_deps_mode ctx in
     let naming_table = Naming_table.create files_info in
     Naming_table.iter
       naming_table
-      ~f:(Typing_deps.Files.update_file deps_mode ~old:None);
+      ~f:(Naming_provider.ByHash.update_file ctx ~old:None);
     let genv = ServerEnvBuild.default_genv in
     let init_id = Random_id.short_string () in
     let env =

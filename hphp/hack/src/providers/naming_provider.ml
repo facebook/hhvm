@@ -818,3 +818,63 @@ let local_changes_push_sharedmem_stack () : unit =
 
 let local_changes_pop_sharedmem_stack () : unit =
   Naming_heap.pop_local_changes ()
+
+module ByHash = struct
+  let ifiles : (Typing_deps.Dep.t, Relative_path.Set.t) Caml.Hashtbl.t ref =
+    ref (Caml.Hashtbl.create 23)
+
+  let get_files_TRANSITIONAL deps =
+    Typing_deps.DepSet.fold
+      ~f:
+        begin
+          fun dep acc ->
+          match Caml.Hashtbl.find_opt !ifiles dep with
+          | Some files -> Relative_path.Set.union files acc
+          | None -> acc
+        end
+      deps
+      ~init:Relative_path.Set.empty
+
+  let get_files _ctx deps = get_files_TRANSITIONAL deps
+
+  let update_file ctx filename info ~old =
+    let mode = Provider_context.get_deps_mode ctx in
+    (* remove old typing deps *)
+    Typing_deps.DepSet.iter
+      (Option.value_map
+         old
+         ~default:(Typing_deps.DepSet.make mode)
+         ~f:(Typing_deps.deps_of_file_info mode))
+      ~f:(fun def ->
+        match Caml.Hashtbl.find_opt !ifiles def with
+        | Some files when Relative_path.Set.mem files filename ->
+          Caml.Hashtbl.replace
+            !ifiles
+            def
+            (Relative_path.Set.remove files filename)
+        | _ ->
+          let desc = "remove_absent_dep" in
+          Hh_logger.log
+            "INVARIANT_VIOLATION_BUG [%s] file=%s"
+            desc
+            (Relative_path.to_absolute filename);
+          HackEventLogger.invariant_violation_bug
+            ~desc
+            ~typechecking_is_deferring:false
+            ~path:filename
+            ~pos:""
+            (Telemetry.create ()));
+    (* add new typing deps *)
+    Typing_deps.DepSet.iter
+      (Typing_deps.deps_of_file_info mode info)
+      ~f:(fun def ->
+        let previous =
+          match Caml.Hashtbl.find_opt !ifiles def with
+          | Some files -> files
+          | None -> Relative_path.Set.empty
+        in
+        Caml.Hashtbl.replace
+          !ifiles
+          def
+          (Relative_path.Set.add previous filename))
+end

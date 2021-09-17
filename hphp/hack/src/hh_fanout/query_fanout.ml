@@ -30,7 +30,7 @@ let go
   |> Typing_deps.DepSet.elements
   |> List.map ~f:(fun hash ->
          let paths =
-           Typing_deps.Files.get_files
+           Naming_provider.ByHash.get_files_TRANSITIONAL
              (Typing_deps.DepSet.singleton deps_mode hash)
          in
          { hash; paths })

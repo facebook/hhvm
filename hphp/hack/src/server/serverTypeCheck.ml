@@ -561,7 +561,7 @@ module LazyCheckKind : CheckKindType = struct
     let deps_mode = Provider_context.get_deps_mode ctx in
     Typing_deps.(
       add_typing_deps deps_mode (DepSet.singleton deps_mode dep)
-      |> Files.get_files)
+      |> Naming_provider.ByHash.get_files ctx)
 
   let get_to_recheck2_approximation ~to_redecl_phase2_deps ~env ~ctx =
     (* We didn't do the full fan-out from to_redecl_phase2_deps, so the
@@ -783,13 +783,12 @@ functor
       let telemetry = Telemetry.create () in
       let start_t = Unix.gettimeofday () in
       let count = Relative_path.Map.cardinal fast_parsed in
-      let deps_mode = Provider_context.get_deps_mode ctx in
       CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"naming"
       @@ fun () ->
       (* 1. Update dephash->filenames reverse naming table (global,mutable) *)
       Relative_path.Map.iter fast_parsed ~f:(fun file fi ->
           let old = Naming_table.get_file_info env.naming_table file in
-          Typing_deps.Files.update_file deps_mode file fi ~old);
+          Naming_provider.ByHash.update_file ctx file fi ~old);
       HackEventLogger.updating_deps_end ~count ~desc:"serverTypeCheck" ~start_t;
       let t1 =
         Hh_logger.log_duration "UPDATING_DEPS_END (dephash->filename)" start_t
@@ -872,7 +871,7 @@ functor
       let oldified_defs =
         snd @@ Decl_utils.split_defs oldified_defs defs_to_redecl
       in
-      let to_recheck1 = Typing_deps.Files.get_files to_recheck1_deps in
+      let to_recheck1 = Naming_provider.ByHash.get_files ctx to_recheck1_deps in
       {
         changed;
         oldified_defs;
@@ -949,7 +948,7 @@ functor
           (* Redeclarations completed now. *)
           fast_redecl_phase2_now
       in
-      let to_recheck2 = Typing_deps.Files.get_files to_recheck2_deps in
+      let to_recheck2 = Naming_provider.ByHash.get_files ctx to_recheck2_deps in
       let to_recheck2 =
         Relative_path.Set.union
           to_recheck2
@@ -1420,7 +1419,7 @@ functor
       in
 
       let to_redecl_phase2 =
-        Typing_deps.Files.get_files to_redecl_phase2_deps
+        Naming_provider.ByHash.get_files ctx to_redecl_phase2_deps
       in
       let hs = SharedMem.SMTelemetry.heap_size () in
       HackEventLogger.first_redecl_end t hs;

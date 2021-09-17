@@ -78,7 +78,7 @@ let go
              let paths =
                dep
                |> Typing_deps.DepSet.singleton deps_mode
-               |> Typing_deps.Files.get_files
+               |> Naming_provider.ByHash.get_files_TRANSITIONAL
              in
              { dep; paths }))
 

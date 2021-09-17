@@ -98,7 +98,6 @@ let update_files
     t
   else (
     Hh_logger.log "Updating dep->filename [%s]... " profile_label;
-    let deps_mode = Provider_context.get_deps_mode ctx in
     let count = ref 0 in
     CgroupProfiler.collect_cgroup_stats ~profiling ~stage:profile_label
     @@ fun () ->
@@ -106,7 +105,7 @@ let update_files
       ?warn_on_naming_costly_iter
       naming_table
       ~f:(fun path fi ->
-        Typing_deps.Files.update_file deps_mode path fi ~old:None;
+        Naming_provider.ByHash.update_file ctx path fi ~old:None;
         count := !count + 1);
     HackEventLogger.updating_deps_end
       ~count:!count

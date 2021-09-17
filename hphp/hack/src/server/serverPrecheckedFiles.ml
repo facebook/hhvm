@@ -31,7 +31,7 @@ let intersect_with_master_deps
     Typing_deps.DepSet.diff dirty_master_deps common_deps
   in
   (* Translate the dependencies to files that need to be rechecked. *)
-  let needs_recheck = Typing_deps.Files.get_files more_deps in
+  let needs_recheck = Naming_provider.ByHash.get_files_TRANSITIONAL more_deps in
   let needs_recheck = Relative_path.Set.diff needs_recheck rechecked_files in
   let size = Relative_path.Set.cardinal needs_recheck in
   let env =
@@ -240,7 +240,7 @@ let expand_all env =
     let deps =
       Typing_deps.add_all_deps deps_mode dirty_deps.dirty_master_deps
     in
-    let needs_recheck = Typing_deps.Files.get_files deps in
+    let needs_recheck = Naming_provider.ByHash.get_files ctx deps in
     let needs_recheck =
       Relative_path.Set.diff needs_recheck dirty_deps.rechecked_files
     in

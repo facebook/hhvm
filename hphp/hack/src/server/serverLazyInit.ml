@@ -578,8 +578,8 @@ let get_files_to_undecl_and_recheck
   Decl_redecl_service.remove_old_defs ctx ~bucket_size genv.workers dirty_names;
   let to_recheck_deps = Typing_deps.add_all_deps env.deps_mode to_redecl in
   let to_recheck_deps = Typing_deps.DepSet.union to_recheck_deps to_recheck in
-  let files_to_undecl = Typing_deps.Files.get_files to_redecl in
-  let files_to_recheck = Typing_deps.Files.get_files to_recheck_deps in
+  let files_to_undecl = Naming_provider.ByHash.get_files ctx to_redecl in
+  let files_to_recheck = Naming_provider.ByHash.get_files ctx to_recheck_deps in
   (* we use lazy here to avoid expensive string generation when logging
        * is not enabled *)
   Hh_logger.log_lazy ~category:"fanout_information"
@@ -687,7 +687,7 @@ let type_check_dirty
           get_files_to_undecl_and_recheck dirty_local_files_changed_hash
         else
           let deps = Typing_deps.add_all_deps env.deps_mode local_deps in
-          (Relative_path.Set.empty, Typing_deps.Files.get_files deps)
+          (Relative_path.Set.empty, Naming_provider.ByHash.get_files ctx deps)
       in
       ( ServerPrecheckedFiles.set
           env
@@ -708,7 +708,7 @@ let type_check_dirty
         else
           let deps = Typing_deps.DepSet.union master_deps local_deps in
           let deps = Typing_deps.add_all_deps env.deps_mode deps in
-          (Relative_path.Set.empty, Typing_deps.Files.get_files deps)
+          (Relative_path.Set.empty, Naming_provider.ByHash.get_files ctx deps)
       in
       (env, to_undecl, to_recheck)
   in

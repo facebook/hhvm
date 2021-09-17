@@ -24,9 +24,7 @@ let deps_of_paths ctx workers naming_table relative_paths =
         fileinfos
         ~init:(DepSet.make deps_mode)
         ~f:(fun acc fileinfo ->
-          DepSet.union
-            acc
-            (Typing_deps.Files.deps_of_file_info deps_mode fileinfo))
+          DepSet.union acc (Typing_deps.deps_of_file_info deps_mode fileinfo))
     in
     DepSet.union acc (Typing_deps.add_all_deps deps_mode initial_deps)
   in
@@ -38,7 +36,7 @@ let deps_of_paths ctx workers naming_table relative_paths =
       ~merge:DepSet.union
       ~next:(MultiWorker.next workers relative_paths)
   in
-  all_deps |> Typing_deps.Files.get_files |> Relative_path.Set.elements
+  all_deps |> Naming_provider.ByHash.get_files ctx |> Relative_path.Set.elements
 
 let go (genv : ServerEnv.genv) (env : ServerEnv.env) (filenames : string list) =
   let ctx = Provider_utils.ctx_from_server_env env in

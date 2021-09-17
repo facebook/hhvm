@@ -753,127 +753,71 @@ let () = CustomGraph.hh_custom_dep_graph_register_custom_types ()
 
 let hash_mode = Typing_deps_mode.hash_mode
 
-(*****************************************************************************)
-(* Module keeping track which files contain the toplevel definitions. *)
-(*****************************************************************************)
-
-module Files = struct
-  let ifiles : (Dep.t, Relative_path.Set.t) Hashtbl.t ref =
-    ref (Hashtbl.create 23)
-
-  let get_files deps =
-    DepSet.fold
+let deps_of_file_info (mode : Mode.t) (file_info : FileInfo.t) : DepSet.t =
+  let {
+    FileInfo.funs;
+    classes;
+    record_defs;
+    typedefs;
+    consts;
+    comments = _;
+    file_mode = _;
+    hash = _;
+  } =
+    file_info
+  in
+  let hash_mode = Mode.hash_mode mode in
+  let defs =
+    List.fold_left
+      consts
       ~f:
         begin
-          fun dep acc ->
-          match Hashtbl.find_opt !ifiles dep with
-          | Some files -> Relative_path.Set.union files acc
-          | None -> acc
+          fun acc (_, const_id, _) ->
+          Dep.make hash_mode (Dep.GConst const_id) :: acc
         end
-      deps
-      ~init:Relative_path.Set.empty
-
-  let deps_of_file_info (mode : Mode.t) (file_info : FileInfo.t) : DepSet.t =
-    let {
-      FileInfo.funs;
-      classes;
-      record_defs;
-      typedefs;
-      consts;
-      comments = _;
-      file_mode = _;
-      hash = _;
-    } =
-      file_info
-    in
-    let hash_mode = Mode.hash_mode mode in
-    let defs =
-      List.fold_left
-        consts
-        ~f:
-          begin
-            fun acc (_, const_id, _) ->
-            Dep.make hash_mode (Dep.GConst const_id) :: acc
-          end
-        ~init:[]
-    in
-    let defs =
-      List.fold_left
-        funs
-        ~f:
-          begin
-            fun acc (_, fun_id, _) ->
-            Dep.make hash_mode (Dep.Fun fun_id) :: acc
-          end
-        ~init:defs
-    in
-    let defs =
-      List.fold_left
-        classes
-        ~f:
-          begin
-            fun acc (_, class_id, _) ->
-            Dep.make hash_mode (Dep.Type class_id) :: acc
-          end
-        ~init:defs
-    in
-    let defs =
-      List.fold_left
-        record_defs
-        ~f:
-          begin
-            fun acc (_, type_id, _) ->
-            Dep.make hash_mode (Dep.Type type_id) :: acc
-          end
-        ~init:defs
-    in
-    let defs =
-      List.fold_left
-        typedefs
-        ~f:
-          begin
-            fun acc (_, type_id, _) ->
-            Dep.make hash_mode (Dep.Type type_id) :: acc
-          end
-        ~init:defs
-    in
-    DepSet.of_list mode defs
-
-  let update_file mode filename info ~old =
-    (* remove old typing deps *)
-    DepSet.iter
-      (Option.value_map
-         old
-         ~default:(DepSet.make mode)
-         ~f:(deps_of_file_info mode))
-      ~f:(fun def ->
-        match Caml.Hashtbl.find_opt !ifiles def with
-        | Some files when Relative_path.Set.mem files filename ->
-          Caml.Hashtbl.replace
-            !ifiles
-            def
-            (Relative_path.Set.remove files filename)
-        | _ ->
-          let desc = "remove_absent_dep" in
-          Hh_logger.log
-            "INVARIANT_VIOLATION_BUG [%s] file=%s"
-            desc
-            (Relative_path.to_absolute filename);
-          HackEventLogger.invariant_violation_bug
-            ~desc
-            ~typechecking_is_deferring:false
-            ~path:filename
-            ~pos:""
-            (Telemetry.create ()));
-    (* add new typing deps *)
-    DepSet.iter (deps_of_file_info mode info) ~f:(fun def ->
-        let previous =
-          match Hashtbl.find_opt !ifiles def with
-          | Some files -> files
-          | None -> Relative_path.Set.empty
-        in
-        Hashtbl.replace !ifiles def (Relative_path.Set.add previous filename))
-end
+      ~init:[]
+  in
+  let defs =
+    List.fold_left
+      funs
+      ~f:
+        begin
+          fun acc (_, fun_id, _) ->
+          Dep.make hash_mode (Dep.Fun fun_id) :: acc
+        end
+      ~init:defs
+  in
+  let defs =
+    List.fold_left
+      classes
+      ~f:
+        begin
+          fun acc (_, class_id, _) ->
+          Dep.make hash_mode (Dep.Type class_id) :: acc
+        end
+      ~init:defs
+  in
+  let defs =
+    List.fold_left
+      record_defs
+      ~f:
+        begin
+          fun acc (_, type_id, _) ->
+          Dep.make hash_mode (Dep.Type type_id) :: acc
+        end
+      ~init:defs
+  in
+  let defs =
+    List.fold_left
+      typedefs
+      ~f:
+        begin
+          fun acc (_, type_id, _) ->
+          Dep.make hash_mode (Dep.Type type_id) :: acc
+        end
+      ~init:defs
+  in
+  DepSet.of_list mode defs
 
 module Telemetry = struct
   let depgraph_delta_num_edges mode =

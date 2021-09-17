@@ -137,14 +137,7 @@ module VisitedSet : sig
   val make : Mode.t -> t
 end
 
-module Files : sig
-  val get_files : DepSet.t -> Relative_path.Set.t
-
-  val deps_of_file_info : Mode.t -> FileInfo.t -> DepSet.t
-
-  val update_file :
-    Mode.t -> Relative_path.t -> FileInfo.t -> old:FileInfo.t option -> unit
-end
+val deps_of_file_info : Mode.t -> FileInfo.t -> DepSet.t
 
 type dep_edge
 

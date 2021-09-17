@@ -255,6 +255,14 @@ module CustomDepSet = struct
     pp_print_string fmt "}"
 end
 
+module DepHashKey = struct
+  type t = Dep.t
+
+  let compare t1 t2 = t1 - t2
+
+  let to_string t = string_of_int t
+end
+
 (** Unified interface for `SQLiteDepSet` and `CustomDepSet`
 
     The actual representation dependends on the value in `mode`. *)

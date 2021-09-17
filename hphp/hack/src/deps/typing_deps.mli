@@ -89,6 +89,14 @@ module Dep : sig
   val variant_to_string : 'a variant -> string
 end
 
+module DepHashKey : sig
+  type t = Dep.t
+
+  val compare : t -> t -> int
+
+  val to_string : t -> string
+end
+
 module DepSet : sig
   type t
 

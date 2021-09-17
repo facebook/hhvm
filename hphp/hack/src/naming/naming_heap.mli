@@ -10,6 +10,8 @@
 module type ReverseNamingTable = sig
   type pos
 
+  val hash : string -> Typing_deps.Dep.t
+
   val add : string -> pos -> unit
 
   val get_pos : Naming_sqlite.db_path option -> string -> pos option
@@ -29,13 +31,13 @@ module Types : sig
 
   module TypeCanonHeap :
     SharedMem.NoCache
-      with type key = string
-       and module KeyHasher = SharedMem.MakeKeyHasher(StringKey)
+      with type key = Typing_deps.Dep.t
+       and module KeyHasher = SharedMem.MakeKeyHasher(Typing_deps.DepHashKey)
 
   module TypePosHeap :
     SharedMem.WithCache
-      with type key = string
-       and module KeyHasher = SharedMem.MakeKeyHasher(StringKey)
+      with type key = Typing_deps.Dep.t
+       and module KeyHasher = SharedMem.MakeKeyHasher(Typing_deps.DepHashKey)
 
   include
     ReverseNamingTable with type pos = FileInfo.pos * Naming_types.kind_of_type
@@ -48,6 +50,8 @@ module Types : sig
     string ->
     (Relative_path.t * Naming_types.kind_of_type) option
 
+  val canon_hash : string -> Typing_deps.Dep.t
+
   val get_canon_name : Provider_context.t -> string -> string option
 end
 
@@ -56,15 +60,17 @@ module Funs : sig
 
   module FunCanonHeap :
     SharedMem.NoCache
-      with type key = string
-       and module KeyHasher = SharedMem.MakeKeyHasher(StringKey)
+      with type key = Typing_deps.Dep.t
+       and module KeyHasher = SharedMem.MakeKeyHasher(Typing_deps.DepHashKey)
 
   module FunPosHeap :
     SharedMem.NoCache
-      with type key = string
-       and module KeyHasher = SharedMem.MakeKeyHasher(StringKey)
+      with type key = Typing_deps.Dep.t
+       and module KeyHasher = SharedMem.MakeKeyHasher(Typing_deps.DepHashKey)
 
   include ReverseNamingTable with type pos = FileInfo.pos
+
+  val canon_hash : string -> Typing_deps.Dep.t
 
   val get_canon_name : Provider_context.t -> string -> string option
 end
@@ -72,8 +78,8 @@ end
 module Consts : sig
   module ConstPosHeap :
     SharedMem.NoCache
-      with type key = string
-       and module KeyHasher = SharedMem.MakeKeyHasher(StringKey)
+      with type key = Typing_deps.Dep.t
+       and module KeyHasher = SharedMem.MakeKeyHasher(Typing_deps.DepHashKey)
 
   include ReverseNamingTable with type pos = FileInfo.pos
 end

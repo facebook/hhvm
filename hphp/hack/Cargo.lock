@@ -706,6 +706,7 @@ version = "0.0.0"
 dependencies = [
  "bumpalo",
  "decl_rust",
+ "hh_hash",
  "no_pos_hash",
  "ocamlrep",
  "ocamlrep_caml_builtins",
@@ -1175,6 +1176,14 @@ dependencies = [
  "json",
  "log",
  "ocamlrep_ocamlpool",
+]
+
+[[package]]
+name = "hh_hash"
+version = "0.0.0"
+dependencies = [
+ "fnv",
+ "no_pos_hash",
 ]
 
 [[package]]

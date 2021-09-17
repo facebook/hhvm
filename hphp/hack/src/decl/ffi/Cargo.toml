@@ -13,6 +13,7 @@ crate-type = ["lib", "staticlib"]
 [dependencies]
 bumpalo = { version = "3.2.1", features = ["collections"] }
 decl_rust = { path = "../decl_rust" }
+hh_hash = { path = "../../utils/hh_hash" }
 no_pos_hash = { path = "../../utils/no_pos_hash" }
 ocamlrep = { path = "../../ocamlrep" }
 ocamlrep_caml_builtins = { path = "../../utils/ocamlrep_caml_builtins" }

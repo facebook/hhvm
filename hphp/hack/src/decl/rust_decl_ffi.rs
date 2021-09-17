@@ -7,7 +7,7 @@
 use bumpalo::Bump;
 
 use decl_rust::direct_decl_parser::parse_decls_and_mode;
-use no_pos_hash::position_insensitive_hash;
+use hh_hash::{position_insensitive_hash, position_sensitive_hash};
 use ocamlrep::{bytes_from_ocamlrep, ptr::UnsafeOcamlPtr};
 use ocamlrep_caml_builtins::Int64;
 use ocamlrep_ocamlpool::ocaml_ffi_with_arena;
@@ -36,17 +36,16 @@ ocaml_ffi_with_arena! {
             let (decls, mode) =
                 parse_decls_and_mode(opts, filename, text, arena, Some(stack_limit));
 
-            let symbol_decl_hashes = if include_symbol_decl_hashes {
-                Some(
-                    decls
-                        .iter()
-                        .map(|x| Int64(position_insensitive_hash(&x) as i64))
-                        .collect::<Vec<Int64>>(),
-                )
-            } else {
-                None
-            };
-
+                let symbol_decl_hashes = if include_symbol_decl_hashes {
+                    Some(
+                        decls
+                            .iter()
+                            .map(|x| Int64(position_sensitive_hash(&x) as i64))
+                            .collect::<Vec<Int64>>(),
+                    )
+                } else {
+                    None
+                };
             let file_decl_hash = if include_file_decl_hash {
                 Some(Int64(position_insensitive_hash(&decls) as i64))
             } else {

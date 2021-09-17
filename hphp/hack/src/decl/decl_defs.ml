@@ -159,7 +159,6 @@ type decl_class_type = {
   dc_need_init: bool;
   dc_abstract: bool;
   dc_final: bool;
-  dc_is_disposable: bool;
   dc_const: bool;
   dc_internal: bool;
   dc_deferred_init_members: SSet.t;

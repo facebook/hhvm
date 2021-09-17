@@ -514,3 +514,9 @@ val make_locl_subst_for_class_tparams :
 val is_sub_class_refl : Typing_env_types.env -> string -> string -> bool
 
 val class_has_no_params : Typing_env_types.env -> string -> bool
+
+val has_ancestor_including_req_refl :
+  Typing_env_types.env -> string -> string -> bool
+
+val has_ancestor_including_req :
+  Typing_env_types.env -> Decl_provider.Class.t -> string -> bool

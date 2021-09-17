@@ -674,7 +674,7 @@ let method_dynamically_callable
   in
   if not interface_check then method_body_check ()
 
-let method_def env cls m =
+let method_def ~is_disposable env cls m =
   Errors.run_with_span m.m_span @@ fun () ->
   with_timeout env m.m_name @@ fun env ->
   FunUtils.check_params m.m_params;
@@ -717,14 +717,10 @@ let method_def env cls m =
     | _ -> env
   in
   let env =
-    match Env.get_self_class env with
-    | None -> env
-    | Some c ->
-      (* Mark $this as a using variable if it has a disposable type *)
-      if Cls.is_disposable c then
-        Env.set_using_var env this
-      else
-        env
+    if is_disposable then
+      Env.set_using_var env this
+    else
+      env
   in
   let env = Env.clear_params env in
   let (ret_decl_ty, params_decl_ty, variadicity_decl_ty) =
@@ -1562,9 +1558,9 @@ let class_const_def ~in_enum_class c env cc =
       },
       ty ) )
 
-let class_constr_def env cls constructor =
+let class_constr_def ~is_disposable env cls constructor =
   let env = { env with inside_constructor = true } in
-  Option.bind constructor ~f:(method_def env cls)
+  Option.bind constructor ~f:(method_def ~is_disposable env cls)
 
 (** Type-check a property declaration, with optional initializer *)
 let class_var_def ~is_static cls env cv =
@@ -2007,7 +2003,8 @@ let class_def_ env c tc =
         ~parents:(List.map impl ~f:snd)
         (fst c.c_name, tc)
   in
-  if (not (skip_hierarchy_checks ctx)) && Cls.is_disposable tc then
+  let is_disposable = Typing_disposable.is_disposable_class env tc in
+  if (not (skip_hierarchy_checks ctx)) && is_disposable then
     List.iter
       (c.c_extends @ c.c_uses)
       ~f:(Typing_disposable.enforce_is_disposable env);
@@ -2018,7 +2015,7 @@ let class_def_ env c tc =
     List.unzip typed_vars_and_global_inference_envs
   in
   let (typed_methods, methods_global_inference_envs) =
-    List.filter_map methods ~f:(method_def env tc) |> List.unzip
+    List.filter_map methods ~f:(method_def ~is_disposable env tc) |> List.unzip
   in
   let (env, typed_typeconsts) =
     List.map_env env c.c_typeconsts ~f:(typeconst_def c)
@@ -2029,7 +2026,7 @@ let class_def_ env c tc =
   in
   let (typed_consts, const_types) = List.unzip consts in
   let env = Typing_enum.enum_class_check env tc c.c_consts const_types in
-  let typed_constructor = class_constr_def env tc constructor in
+  let typed_constructor = class_constr_def ~is_disposable env tc constructor in
   let env = Env.set_static env in
   let (env, typed_static_vars_and_global_inference_envs) =
     List.map_env env static_vars ~f:(class_var_def ~is_static:true tc)
@@ -2038,7 +2035,8 @@ let class_def_ env c tc =
     List.unzip typed_static_vars_and_global_inference_envs
   in
   let (typed_static_methods, static_methods_global_inference_envs) =
-    List.filter_map static_methods ~f:(method_def env tc) |> List.unzip
+    List.filter_map static_methods ~f:(method_def ~is_disposable env tc)
+    |> List.unzip
   in
   let (methods, constr_global_inference_env) =
     match typed_constructor with

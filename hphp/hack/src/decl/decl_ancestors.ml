@@ -11,7 +11,6 @@ open Hh_prelude
 open Decl_defs
 open Typing_defs
 module Reason = Typing_reason
-module SN = Naming_special_names
 
 let type_of_mro_element mro =
   let { mro_name; mro_type_args; mro_use_pos; mro_ty_pos; _ } = mro in
@@ -35,25 +34,3 @@ let all_requirements ~lin_members =
   |> Sequence.filter_map ~f:(fun mro ->
          Option.map mro.mro_required_at ~f:(fun pos ->
              (pos, type_of_mro_element mro)))
-
-let is_disposable ~lin_members =
-  (* Precisely which ancestors need we traverse to see if they're disposable?
-     * We need to look at things via req_extends and req_impl; they're present
-     in the member linearization but not the ancestor linearization.
-     * It doesn't matter whether we travese the implicit "stringish" interface
-     that is implicitly on classes that implement toString, since stringish
-     isn't disposable; this is present on ancestor but not member linearization.
-     * It doesn't matter whether we traverse enum include ancestors which are
-     present in member but not ancestor lienarization, since they only relate
-     to enums and don't factor into disposability.
-     * We must not look at use_xhp_attr ancestors because using XHP attrs only
-     brings in the attrs from a class, not its disposability; xhp_attrs ancestors
-     are present in the member linearization but not the ancestor linearization.
-     * Summary: the member linearization is the most complete thing to work off,
-     and is suitable so long as we filter out xhp-attrs.
-  *)
-  lazy
-    (Sequence.exists lin_members ~f:(fun mro ->
-         (not (Decl_defs.is_set Decl_defs.mro_xhp_attrs_only mro.mro_flags))
-         && (String.equal mro.mro_name SN.Classes.cIDisposable
-            || String.equal mro.mro_name SN.Classes.cIAsyncDisposable)))

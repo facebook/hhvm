@@ -13,6 +13,19 @@ open Hh_prelude
 module Env = Typing_env
 module Cls = Decl_provider.Class
 
+let is_disposable_class env cls =
+  let name = Cls.name cls in
+  String.equal name Naming_special_names.Classes.cIDisposable
+  || String.equal name Naming_special_names.Classes.cIAsyncDisposable
+  || Typing_utils.has_ancestor_including_req
+       env
+       cls
+       Naming_special_names.Classes.cIDisposable
+  || Typing_utils.has_ancestor_including_req
+       env
+       cls
+       Naming_special_names.Classes.cIAsyncDisposable
+
 let is_disposable_visitor env =
   object (this)
     inherit [string option] Type_visitor.locl_type_visitor
@@ -26,7 +39,7 @@ let is_disposable_visitor env =
       match Env.get_class env class_name with
       | None -> default ()
       | Some c ->
-        if Cls.is_disposable c then
+        if is_disposable_class env c then
           Some (Utils.strip_ns class_name)
         else
           default ()
@@ -47,7 +60,8 @@ let enforce_is_disposable env hint =
       match Env.get_class_dep env c with
       | None -> ()
       | Some c ->
-        if not (Cls.is_disposable c || Ast_defs.is_c_interface (Cls.kind c))
+        if
+          not (is_disposable_class env c || Ast_defs.is_c_interface (Cls.kind c))
         then
           Errors.must_extend_disposable p
     end

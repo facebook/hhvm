@@ -342,7 +342,6 @@ let get_kvc_inst p kvc_kind ty =
     Some (kty, vty)
   | _ -> get_key_value_collection_inst p ty
 
-(* Is this type darray<kty, vty> or a supertype for some kty and vty? *)
 (* Check whether this is a function type that (a) either returns a disposable
  * or (b) has the <<__ReturnDisposable>> attribute
  *)
@@ -5048,7 +5047,7 @@ and new_object
     if
       (not check_parent)
       && (not is_using_clause)
-      && Cls.is_disposable class_info
+      && Typing_disposable.is_disposable_class env class_info
     then
       Errors.invalid_new_disposable p;
     let r_witness = Reason.Rwitness p in

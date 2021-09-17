@@ -44,23 +44,8 @@ let is_private_visible env origin_id self_id =
       None
     | _ -> Some "You cannot access this member"
 
-(* Is super_id an ancestor of sub_id, including through requires steps? *)
-let rec has_ancestor_including_req env sub_id super_id =
-  String.equal sub_id super_id
-  ||
-  match Env.get_class env sub_id with
-  | None -> false
-  | Some cls ->
-    Cls.has_ancestor cls super_id
-    ||
-    let bounds = Cls.upper_bounds_on_this cls in
-    List.exists bounds ~f:(fun ty ->
-        match get_node ty with
-        | Tapply ((_, name), _) -> has_ancestor_including_req env name super_id
-        | _ -> false)
-
 let is_protected_visible env origin_id self_id =
-  if has_ancestor_including_req env self_id origin_id then
+  if TUtils.has_ancestor_including_req_refl env self_id origin_id then
     None
   else
     match Env.get_class env origin_id with

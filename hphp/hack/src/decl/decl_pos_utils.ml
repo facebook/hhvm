@@ -264,7 +264,6 @@ struct
       dc_kind = dc.dc_kind;
       dc_is_xhp = dc.dc_is_xhp;
       dc_has_xhp_keyword = dc.dc_has_xhp_keyword;
-      dc_is_disposable = dc.dc_is_disposable;
       dc_module = dc.dc_module;
       dc_name = dc.dc_name;
       dc_pos = dc.dc_pos;

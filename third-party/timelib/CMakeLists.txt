@@ -12,6 +12,12 @@ SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
   FILENAME_PREFIX "timelib-"
 )
 
+if(USE_BUNDLED_TZDATA)
+  set(HAVE_SYSTEM_TZDATA OFF)
+else()
+  set(HAVE_SYSTEM_TZDATA ON)
+endif()
+
 ExternalProject_Add(
   bundled_timelib
   ${TIMELIB_DOWNLOAD_ARGS}
@@ -19,11 +25,15 @@ ExternalProject_Add(
     "${CMAKE_COMMAND}" -E copy
     "${CMAKE_CURRENT_SOURCE_DIR}/timelib-CMakeLists.txt"
     "<SOURCE_DIR>/CMakeLists.txt"
+    &&
+    "${CMAKE_CURRENT_SOURCE_DIR}/../apply-quilt-patches.sh"
+    "${CMAKE_CURRENT_SOURCE_DIR}/patches"
   CMAKE_ARGS
     "-DRE2C_EXECUTABLE=${RE2C_EXECUTABLE}"
     -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
     -DCMAKE_INSTALL_INCLUDEDIR=include
     -DCMAKE_INSTALL_LIBDIR=lib
+    -DHAVE_SYSTEM_TZDATA=${HAVE_SYSTEM_TZDATA}
 )
 
 ExternalProject_Get_Property(bundled_timelib INSTALL_DIR)

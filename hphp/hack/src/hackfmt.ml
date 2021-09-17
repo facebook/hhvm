@@ -284,7 +284,7 @@ type format_options =
       config: FEnv.t;
     }
   | InPlace of {
-      filename: filename;
+      files: filename list;
       config: FEnv.t;
     }
   | AtChar of {
@@ -330,6 +330,7 @@ let validate_options
   let filename =
     match files with
     | [filename] -> Some filename
+    | filename :: _ :: _ when inplace -> Some filename
     | [] -> None
     | _ -> fail "More than one file given"
   in
@@ -369,14 +370,8 @@ let validate_options
     fail "--at-char expects no range"
   | { diff = false; inplace = false; at_char = None; _ } ->
     Print { text_source; range; config }
-  | {
-   diff = false;
-   inplace = true;
-   text_source = File filename;
-   range = None;
-   _;
-  } ->
-    InPlace { filename; config }
+  | { diff = false; inplace = true; text_source = File _; range = None; _ } ->
+    InPlace { files; config }
   | { diff = false; inplace = false; range = None; at_char = Some pos; _ } ->
     AtChar { text_source; pos; config }
   | { diff = true; text_source = Stdin None; range = None; _ } ->
@@ -520,14 +515,15 @@ let main
       debug_print ?range ~config text_source
     else
       text_source |> parse ~parser_env |> format ?range ~config env |> output
-  | InPlace { filename; config } ->
-    let text_source = File filename in
-    env.Env.text_source <- text_source;
-    if env.Env.debug then debug_print ~config text_source;
-    text_source
-    |> parse ~parser_env
-    |> format ~config env
-    |> output ~text_source
+  | InPlace { files; config } ->
+    List.iter files ~f:(fun filename ->
+        let text_source = File filename in
+        env.Env.text_source <- text_source;
+        if env.Env.debug then debug_print ~config text_source;
+        text_source
+        |> parse ~parser_env
+        |> format ~config env
+        |> output ~text_source)
   | AtChar { text_source; pos; config } ->
     env.Env.text_source <- text_source;
     let tree = parse ~parser_env text_source in

@@ -193,6 +193,29 @@ class Code {
     return "continue;";
   }
 
+  public function visitXhp(
+    ?ExprPos $_,
+    string $class_name,
+    dict<string, Code::TAst> $attrs,
+    vec<Code::TAst> $children,
+  ): Code::TAst {
+    $attr_parts = vec[];
+    foreach ($attrs as $name => $value) {
+      $attr_parts[] = $name."=".$value;
+    }
+    $attr_string = implode(" ", $attr_parts);
+
+    return "<".
+      $class_name.
+      " ".
+      $attr_string.
+      ">\n".
+      concat_block($children).
+      "\n</".
+      $class_name.
+      ">";
+  }
+
   // Splice
   public function splice<T>(
     ?ExprPos $_,

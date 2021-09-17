@@ -1,2 +1,0 @@
--v hhvm.hack.lang.allow_unstable_features=1
--v hhvm.hack.lang.disallow_hash_comments=1

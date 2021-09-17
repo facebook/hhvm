@@ -385,7 +385,6 @@ pub fn emit_expr<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     let ast::Expr(_, pos, expr) = expression;
     match expr {
         Expr_::Float(_)
-        | Expr_::EnumClassLabel(_)
         | Expr_::String(_)
         | Expr_::Int(_)
         | Expr_::Null
@@ -394,6 +393,27 @@ pub fn emit_expr<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             let v = ast_constant_folder::expr_to_typed_value(alloc, emitter, expression)
                 .map_err(|_| unrecoverable("expr_to_typed_value failed"))?;
             Ok(emit_pos_then(alloc, pos, instr::typedvalue(alloc, v)))
+        }
+        Expr_::EnumClassLabel(label) => {
+            // emitting E#A as __Systemlib\create_opaque_value(OpaqueValue::EnumClassLabel, "A")
+            let create_opaque_value = "__Systemlib\\create_opaque_value".to_string();
+            let create_opaque_value = ast_defs::Id(pos.clone(), create_opaque_value);
+            let create_opaque_value = Expr_::Id(Box::new(create_opaque_value));
+            let create_opaque_value = ast::Expr((), pos.clone(), create_opaque_value);
+            // OpaqueValue::EnumClassLabel = 0 defined in
+            // hphp/runtime/ext/hh/ext_hh.php
+            let enum_class_label_index = Expr_::Int("0".to_string());
+            let enum_class_label_index = ast::Expr((), pos.clone(), enum_class_label_index);
+            let label_string = label.1.to_string();
+            let label = Expr_::String(bstr::BString::from(label_string));
+            let label = ast::Expr((), pos.clone(), label);
+            let call_expr = (
+                create_opaque_value,
+                vec![],
+                vec![enum_class_label_index, label],
+                None,
+            );
+            emit_call_expr(emitter, env, pos, None, false, &call_expr)
         }
         Expr_::PrefixedString(e) => emit_expr(emitter, env, &e.1),
         Expr_::Lvar(e) => {

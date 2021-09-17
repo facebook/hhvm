@@ -235,7 +235,12 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
         Int(_) | Float(_) | String(_) | String2(_) | PrefixedString(_) => Rty::Mutable,
         Id(_) => Rty::Mutable,
         // TODO: Need to handle dollardollar with pipe expressions correctly
-        Dollardollar(_) => Rty::Mutable,
+        Dollardollar(lid) => {
+            let (id, dollardollar) = &lid.1;
+            let var_name = format!("{}{}", dollardollar.clone(), id);
+            println!("{}", var_name);
+            context.get_rty(&var_name)
+        }
         Clone(_) => Rty::Mutable,
         // Mutable unless wrapped in a readonly expression
         Call(_) | ClassGet(_) | ClassConst(_) => Rty::Mutable,
@@ -245,7 +250,14 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
         // Operators are all primitive in result
         Unop(_) | Binop(_) => Rty::Mutable,
         // TODO: track the left side of pipe expressions' readonlyness for $$
-        Pipe(_) => Rty::Mutable,
+        Pipe(p) => {
+            let (lid, left, _) = &**p;
+            // The only time the id number matters is for Dollardollar
+            let (_, dollardollar) = &lid.1;
+            let left_rty = rty_expr(context, left);
+            context.add_local(&dollardollar, left_rty);
+            rty_expr(context, &p.2)
+        }
         ExpressionTree(_) | EnumClassLabel(_) | ETSplice(_) => Rty::Mutable,
         Import(_) | Lplaceholder(_) => Rty::Mutable,
         // More function values which are always mutable
@@ -517,6 +529,13 @@ impl<'ast> VisitorMut<'ast> for Checker {
                         Rty::Mutable => {}
                     }
                 }
+            }
+            aast::Expr_::Pipe(p) => {
+                let (lid, left, _) = &**p;
+                // The only time the id number matters is for Dollardollar
+                let (_, dollardollar) = &lid.1;
+                let left_rty = rty_expr(context, left);
+                context.add_local(&dollardollar, left_rty);
             }
             _ => {}
         }

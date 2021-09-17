@@ -11,7 +11,7 @@
 
 
 % $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-% Genrating n agents.
+% Generating n agents.
 % =============================================================================
 % The actual agent created in Python interface is internal_agents/2,
 % The first arity is a string, the second arity is a number.
@@ -31,8 +31,8 @@ internal_agents(X, X) :- agents(X).
 % Constraint on number of product agents
 :- #count{ X : product_agent(X) } < number_of_product_agents.
 
-% Temporary constraint to require infra agent's number is smaller than the product one.
-:- product_agent(X), infra_agent(Y), X < Y.
+% % Temporary constraint to require infra agent's number is smaller than the product one.
+% :- product_agent(X), infra_agent(Y), X < Y.
 
 % We separated the below part to Python interface to avoid "grounding bottleneck."
 % And we are using normal distrubution to create a sequence of "depends_on" among

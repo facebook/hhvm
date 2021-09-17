@@ -1,0 +1,6 @@
+File "bad_constraint.php", line 6, characters 8-8:
+Invalid constraint on `newtype` (Typing[4332])
+  File "coeffect/contexts.hhi", line 123, characters 5-40:
+  Expected `HH\Capabilities\ImplicitPolicyOf<int>`
+  File "bad_constraint.php", line 6, characters 8-8:
+  But got `(HH\Capabilities\Codegen & HH\Capabilities\System & HH\Capabilities\AccessGlobals & HH\Capabilities\WriteProperty & HH\Capabilities\RxLocal & HH\Capabilities\ImplicitPolicyLocal & HH\Capabilities\IO)`

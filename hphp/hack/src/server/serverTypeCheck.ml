@@ -786,9 +786,10 @@ functor
       CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"naming"
       @@ fun () ->
       (* 1. Update dephash->filenames reverse naming table (global,mutable) *)
-      Relative_path.Map.iter fast_parsed ~f:(fun file fi ->
-          let old = Naming_table.get_file_info env.naming_table file in
-          Naming_provider.ByHash.update_file ctx file fi ~old);
+      if Naming_provider.ByHash.need_update_files ctx then
+        Relative_path.Map.iter fast_parsed ~f:(fun file fi ->
+            let old = Naming_table.get_file_info env.naming_table file in
+            Naming_provider.ByHash.update_file ctx file fi ~old);
       HackEventLogger.updating_deps_end ~count ~desc:"serverTypeCheck" ~start_t;
       let t1 =
         Hh_logger.log_duration "UPDATING_DEPS_END (dephash->filename)" start_t
@@ -1346,6 +1347,9 @@ functor
         |> Telemetry.duration ~key:"naming_end" ~start_time
         |> Telemetry.object_ ~key:"naming" ~value:naming_telemetry
       in
+
+      (* this is a temporary debugging aid *)
+      Naming_provider.ByHash.set_failed_naming failed_naming;
 
       let (env, errors, time_errors_pushed) =
         push_and_accumulate_errors

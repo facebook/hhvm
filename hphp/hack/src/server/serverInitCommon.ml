@@ -101,12 +101,13 @@ let update_files
     let count = ref 0 in
     CgroupProfiler.collect_cgroup_stats ~profiling ~stage:profile_label
     @@ fun () ->
-    Naming_table.iter
-      ?warn_on_naming_costly_iter
-      naming_table
-      ~f:(fun path fi ->
-        Naming_provider.ByHash.update_file ctx path fi ~old:None;
-        count := !count + 1);
+    if Naming_provider.ByHash.need_update_files ctx then
+      Naming_table.iter
+        ?warn_on_naming_costly_iter
+        naming_table
+        ~f:(fun path fi ->
+          Naming_provider.ByHash.update_file ctx path fi ~old:None;
+          count := !count + 1);
     HackEventLogger.updating_deps_end
       ~count:!count
       ~desc:profile_label
@@ -146,6 +147,7 @@ let naming
     ~desc:profile_label
     ~heap_size:(SharedMem.SMTelemetry.heap_size ())
     ~start_t:t;
+  Naming_provider.ByHash.set_failed_naming env.failed_naming;
   (env, Hh_logger.log_duration ("Naming " ^ profile_label) t)
 
 let log_type_check_end

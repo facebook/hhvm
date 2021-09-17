@@ -820,59 +820,188 @@ let local_changes_pop_sharedmem_stack () : unit =
   Naming_heap.pop_local_changes ()
 
 module ByHash = struct
+  (** There are two different implementations of the "dephash -> filename" map.
+  The legacy implementation "ifiles" is just a Hashtbl.t which we initialize
+  in serverInitCommon.update_files, and update in serverTypeCheck.update_naming_table.
+  The newer implementation is to use the existing reverse-naming-table, i.e. the
+  one typically backed by sqlite. This newer implementation only applies if
+  (1) our dependency mode is 64bit dephashes, (2) the in-memory reverse naming table
+  cache/delta also uses 64bit dephashes. Condition (2) is only met by shared memory.
+  Fortunately, 64bit+sharedmem is the only scenario where we ever look up dephashes! *)
+  let can_use_naming_heap (ctx : Provider_context.t) : bool =
+    let hash_mode =
+      Provider_context.get_deps_mode ctx |> Typing_deps_mode.hash_mode
+    in
+    match (hash_mode, Provider_context.get_backend ctx) with
+    | (Typing_deps_mode.Hash64Bit, Provider_backend.Shared_memory) -> true
+    | (hash_mode, backend) ->
+      let desc =
+        Printf.sprintf
+          "dephash_lookup_%s_%s"
+          (Typing_deps_mode.show_hash_mode hash_mode)
+          (Provider_backend.t_to_string backend)
+      in
+      Hh_logger.log "INVARIANT_VIOLATION_BUG [%s]" desc;
+      HackEventLogger.invariant_violation_bug
+        ~desc
+        ~typechecking_is_deferring:false
+        ~path:Relative_path.default
+        ~pos:""
+        (Telemetry.create ());
+      false
+
+  (** This is the public API for callers to learn whether they must call
+  update_files. It's not mandatory (the check is also performed inside update_files
+  itself) but callers might chose to do this to avoid large chunks of work. *)
+  let need_update_files (_ctx : Provider_context.t) : bool =
+    (* For now, we're validating that ifiles and naming-table give the same answer,
+       so callers must always call [update_files]. In future once we no longer validate,
+       then they won't need to [update_files] in cases where [can_use_naming_heap]. *)
+    true
+
   let ifiles : (Typing_deps.Dep.t, Relative_path.Set.t) Caml.Hashtbl.t ref =
     ref (Caml.Hashtbl.create 23)
 
-  let get_files _ctx deps =
-    Typing_deps.DepSet.fold
-      ~f:
-        begin
-          fun dep acc ->
-          match Caml.Hashtbl.find_opt !ifiles dep with
-          | Some files -> Relative_path.Set.union files acc
-          | None -> acc
-        end
-      deps
-      ~init:Relative_path.Set.empty
+  (** TODO(ljw): failed_naming is solely used while we're validating that ifiles and
+  naming-table give identical results. Once we no longer validate, this can be removed. *)
+  let failed_naming : Relative_path.Set.t ref = ref Relative_path.Set.empty
+
+  (** TODO(ljw): failed_naming is solely used while we're validating that ifiles and
+  naming-table give identical results. Once we no longer validate, this can be removed. *)
+  let set_failed_naming files =
+    failed_naming := files;
+    ()
+
+  (* Validate that [from_ifiles] and [from_naming] are identical, except we don't bother
+     complaining if [from_ifiles] has some additional files that are all in [!failed_naming]. *)
+  let validate_same_files
+      ~(deps : Typing_deps.DepSet.t)
+      ~(from_ifiles : Relative_path.Set.t)
+      ~(from_naming : Relative_path.Set.t) : unit =
+    let in_ifiles_but_not_naming =
+      Relative_path.Set.diff from_ifiles from_naming
+    in
+    let in_ifiles_but_not_naming_nor_failed =
+      Relative_path.Set.diff in_ifiles_but_not_naming !failed_naming
+    in
+    let in_ifiles_and_failed_but_not_naming =
+      Relative_path.Set.inter in_ifiles_but_not_naming !failed_naming
+    in
+    let in_naming_but_not_ifiles =
+      Relative_path.Set.diff from_naming from_ifiles
+    in
+    if
+      Relative_path.Set.is_empty in_ifiles_but_not_naming_nor_failed
+      && Relative_path.Set.is_empty in_naming_but_not_ifiles
+    then
+      ()
+    else
+      let telemetry =
+        Telemetry.create ()
+        |> Telemetry.int_
+             ~key:"num_deps"
+             ~value:(Typing_deps.DepSet.cardinal deps)
+        |> Telemetry.int_
+             ~key:"num_files_common"
+             ~value:
+               (Relative_path.Set.cardinal from_ifiles
+               - Relative_path.Set.cardinal in_ifiles_but_not_naming)
+        |> Telemetry.string_
+             ~key:"files_only_in_naming"
+             ~value:(Relative_path.Set.show_large in_naming_but_not_ifiles)
+        |> Telemetry.int_
+             ~key:"num_files_only_in_naming"
+             ~value:(Relative_path.Set.cardinal in_naming_but_not_ifiles)
+        |> Telemetry.string_
+             ~key:"files_only_in_ifiles_that_passed_naming"
+             ~value:
+               (Relative_path.Set.show_large
+                  in_ifiles_but_not_naming_nor_failed)
+        |> Telemetry.int_
+             ~key:"num_files_only_in_ifiles_that_passed_naming"
+             ~value:
+               (Relative_path.Set.cardinal in_ifiles_but_not_naming_nor_failed)
+        |> Telemetry.int_
+             ~key:"num_files_only_in_ifiles_that_failed_naming"
+             ~value:
+               (Relative_path.Set.cardinal in_ifiles_and_failed_but_not_naming)
+      in
+      let desc = "ifiles_disagrees_with_naming" in
+      Hh_logger.log
+        "INVARIANT_VIOLATION_BUG [%s] %s"
+        desc
+        (Telemetry.to_string telemetry);
+      HackEventLogger.invariant_violation_bug
+        ~desc
+        ~typechecking_is_deferring:false
+        ~path:Relative_path.default
+        ~pos:""
+        telemetry;
+      ()
+
+  let get_files ctx deps =
+    (* TODO(ljw): we're currently validating that ifiles and naming
+       give the same results. Once we remove the validation, then
+       [can_use_naming_heap] will decide whether to use ifiles or naming. *)
+    let from_ifiles =
+      Typing_deps.DepSet.fold
+        ~f:
+          begin
+            fun dep acc ->
+            match Caml.Hashtbl.find_opt !ifiles dep with
+            | Some files -> Relative_path.Set.union files acc
+            | None -> acc
+          end
+        deps
+        ~init:Relative_path.Set.empty
+    in
+    (if can_use_naming_heap ctx then
+      let from_naming =
+        Naming_heap.get_filenames_by_hash (db_path_of_ctx ctx) deps
+      in
+      validate_same_files ~deps ~from_ifiles ~from_naming);
+    from_ifiles
 
   let update_file ctx filename info ~old =
-    let mode = Provider_context.get_deps_mode ctx in
-    (* remove old typing deps *)
-    Typing_deps.DepSet.iter
-      (Option.value_map
-         old
-         ~default:(Typing_deps.DepSet.make mode)
-         ~f:(Typing_deps.deps_of_file_info mode))
-      ~f:(fun def ->
-        match Caml.Hashtbl.find_opt !ifiles def with
-        | Some files when Relative_path.Set.mem files filename ->
+    if need_update_files ctx then begin
+      let mode = Provider_context.get_deps_mode ctx in
+      (* remove old typing deps *)
+      Typing_deps.DepSet.iter
+        (Option.value_map
+           old
+           ~default:(Typing_deps.DepSet.make mode)
+           ~f:(Typing_deps.deps_of_file_info mode))
+        ~f:(fun def ->
+          match Caml.Hashtbl.find_opt !ifiles def with
+          | Some files when Relative_path.Set.mem files filename ->
+            Caml.Hashtbl.replace
+              !ifiles
+              def
+              (Relative_path.Set.remove files filename)
+          | _ ->
+            let desc = "remove_absent_dep" in
+            Hh_logger.log
+              "INVARIANT_VIOLATION_BUG [%s] file=%s"
+              desc
+              (Relative_path.to_absolute filename);
+            HackEventLogger.invariant_violation_bug
+              ~desc
+              ~typechecking_is_deferring:false
+              ~path:filename
+              ~pos:""
+              (Telemetry.create ()));
+      (* add new typing deps *)
+      Typing_deps.DepSet.iter
+        (Typing_deps.deps_of_file_info mode info)
+        ~f:(fun def ->
+          let previous =
+            match Caml.Hashtbl.find_opt !ifiles def with
+            | Some files -> files
+            | None -> Relative_path.Set.empty
+          in
           Caml.Hashtbl.replace
             !ifiles
             def
-            (Relative_path.Set.remove files filename)
-        | _ ->
-          let desc = "remove_absent_dep" in
-          Hh_logger.log
-            "INVARIANT_VIOLATION_BUG [%s] file=%s"
-            desc
-            (Relative_path.to_absolute filename);
-          HackEventLogger.invariant_violation_bug
-            ~desc
-            ~typechecking_is_deferring:false
-            ~path:filename
-            ~pos:""
-            (Telemetry.create ()));
-    (* add new typing deps *)
-    Typing_deps.DepSet.iter
-      (Typing_deps.deps_of_file_info mode info)
-      ~f:(fun def ->
-        let previous =
-          match Caml.Hashtbl.find_opt !ifiles def with
-          | Some files -> files
-          | None -> Relative_path.Set.empty
-        in
-        Caml.Hashtbl.replace
-          !ifiles
-          def
-          (Relative_path.Set.add previous filename))
+            (Relative_path.Set.add previous filename))
+    end
 end

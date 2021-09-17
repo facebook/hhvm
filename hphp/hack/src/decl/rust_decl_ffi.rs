@@ -7,7 +7,7 @@
 use bumpalo::Bump;
 
 use decl_rust::direct_decl_parser::parse_decls_and_mode;
-use hh_hash::{position_insensitive_hash, position_sensitive_hash};
+use hh_hash::{hash, position_insensitive_hash};
 use ocamlrep::{bytes_from_ocamlrep, ptr::UnsafeOcamlPtr};
 use ocamlrep_caml_builtins::Int64;
 use ocamlrep_ocamlpool::ocaml_ffi_with_arena;
@@ -40,7 +40,7 @@ ocaml_ffi_with_arena! {
                     Some(
                         decls
                             .iter()
-                            .map(|x| Int64(position_sensitive_hash(&x) as i64))
+                            .map(|x| Int64(hash(&x) as i64))
                             .collect::<Vec<Int64>>(),
                     )
                 } else {

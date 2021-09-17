@@ -7,7 +7,7 @@ pub use std::hash::{Hash, Hasher};
 
 pub use no_pos_hash::position_insensitive_hash;
 
-pub fn position_sensitive_hash<T: Hash>(value: &T) -> u64 {
+pub fn hash<T: Hash>(value: &T) -> u64 {
     let mut hasher = fnv::FnvHasher::default();
     value.hash(&mut hasher);
     hasher.finish()

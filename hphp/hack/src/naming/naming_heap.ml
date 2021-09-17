@@ -61,20 +61,21 @@ let get_and_cache
 module type ReverseNamingTable = sig
   type pos
 
-  val hash : string -> Typing_deps.Dep.t
+  module Position : SharedMem.Value with type t = pos
+
+  module CanonName : SharedMem.Value with type t = string
 
   val add : string -> pos -> unit
 
   val get_pos : Naming_sqlite.db_path option -> string -> pos option
 
-  val get_filename :
-    Naming_sqlite.db_path option -> string -> Relative_path.t option
-
-  val is_defined : Naming_sqlite.db_path option -> string -> bool
-
   val remove_batch : Naming_sqlite.db_path option -> string list -> unit
 
-  module Position : SharedMem.Value with type t = pos
+  val get_canon_name : Provider_context.t -> string -> string option
+
+  val hash : string -> Typing_deps.Dep.t
+
+  val canon_hash : string -> Typing_deps.Dep.t
 end
 
 (* The Types module records both class names and typedefs since they live in the
@@ -83,12 +84,11 @@ end
 module Types = struct
   type pos = FileInfo.pos * Naming_types.kind_of_type
 
-  let hash name =
-    Typing_deps.Dep.Type name |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit
+  module Position = struct
+    type t = pos
 
-  let canon_hash name =
-    Typing_deps.Dep.Type (Naming_sqlite.to_canon_name_key name)
-    |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit
+    let description = "Naming_TypePos"
+  end
 
   module CanonName = struct
     type t = string
@@ -96,22 +96,16 @@ module Types = struct
     let description = "Naming_TypeCanon"
   end
 
-  module Position = struct
-    type t = pos
-
-    let description = "Naming_TypePos"
-  end
-
-  module TypeCanonHeap =
-    SharedMem.NoCache (SharedMem.ProfiledBackend) (Typing_deps.DepHashKey)
-      (CanonName)
-
   module TypePosHeap =
     SharedMem.WithCache (SharedMem.ProfiledBackend) (Typing_deps.DepHashKey)
       (Position)
       (struct
         let capacity = 1000
       end)
+
+  module TypeCanonHeap =
+    SharedMem.NoCache (SharedMem.ProfiledBackend) (Typing_deps.DepHashKey)
+      (CanonName)
 
   module BlockedEntries =
     SharedMem.WithCache (SharedMem.ProfiledBackend) (Typing_deps.DepHashKey)
@@ -123,6 +117,13 @@ module Types = struct
       (struct
         let capacity = 1000
       end)
+
+  let hash name =
+    Typing_deps.Dep.Type name |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit
+
+  let canon_hash name =
+    Typing_deps.Dep.Type (Naming_sqlite.to_canon_name_key name)
+    |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit
 
   let add id pos =
     TypePosHeap.write_around (hash id) pos;
@@ -156,23 +157,6 @@ module Types = struct
       ~cache_func:TypePosHeap.write_around
       ~measure_name:"Reverse naming table (types) cache hit rate"
       ~key:(hash id)
-
-  let get_kind db_path_opt id =
-    match get_pos db_path_opt id with
-    | Some (_pos, kind) -> Some kind
-    | None -> None
-
-  let get_filename_and_kind db_path_opt id =
-    match get_pos db_path_opt id with
-    | Some (pos, kind) -> Some (FileInfo.get_pos_filename pos, kind)
-    | None -> None
-
-  let get_filename db_path_opt id =
-    match get_pos db_path_opt id with
-    | None -> None
-    | Some (pos, _) -> Some (FileInfo.get_pos_filename pos)
-
-  let is_defined db_path_opt id = Option.is_some (get_pos db_path_opt id)
 
   let get_canon_name ctx id =
     let map_result (path, entry_type) =
@@ -245,12 +229,11 @@ end
 module Funs = struct
   type pos = FileInfo.pos
 
-  let hash name =
-    Typing_deps.Dep.Fun name |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit
+  module Position = struct
+    type t = pos
 
-  let canon_hash name =
-    Typing_deps.Dep.Fun (Naming_sqlite.to_canon_name_key name)
-    |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit
+    let description = "Naming_FunPos"
+  end
 
   module CanonName = struct
     type t = string
@@ -258,19 +241,12 @@ module Funs = struct
     let description = "Naming_FunCanon"
   end
 
-  module FunCanonHeap =
-    SharedMem.NoCache (SharedMem.ProfiledBackend) (Typing_deps.DepHashKey)
-      (CanonName)
-
-  module Position = struct
-    type t = pos
-
-    let description = "Naming_FunPos"
-  end
-
   module FunPosHeap =
     SharedMem.NoCache (SharedMem.ProfiledBackend) (Typing_deps.DepHashKey)
       (Position)
+  module FunCanonHeap =
+    SharedMem.NoCache (SharedMem.ProfiledBackend) (Typing_deps.DepHashKey)
+      (CanonName)
 
   module BlockedEntries =
     SharedMem.NoCache (SharedMem.ProfiledBackend) (Typing_deps.DepHashKey)
@@ -279,6 +255,13 @@ module Funs = struct
 
         let description = "Naming_FunBlocked"
       end)
+
+  let hash name =
+    Typing_deps.Dep.Fun name |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit
+
+  let canon_hash name =
+    Typing_deps.Dep.Fun (Naming_sqlite.to_canon_name_key name)
+    |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit
 
   let add id pos =
     FunCanonHeap.add (canon_hash id) id;
@@ -299,12 +282,6 @@ module Funs = struct
       ~cache_func:FunPosHeap.add
       ~measure_name:"Reverse naming table (functions) cache hit rate"
       ~key:(hash id)
-
-  let get_filename db_path_opt id =
-    get_pos db_path_opt id
-    |> Core_kernel.Option.map ~f:FileInfo.get_pos_filename
-
-  let is_defined db_path_opt id = Option.is_some (get_pos db_path_opt id)
 
   let get_canon_name ctx name =
     let map_result path =
@@ -351,14 +328,17 @@ end
 module Consts = struct
   type pos = FileInfo.pos
 
-  let hash name =
-    Typing_deps.Dep.GConst name
-    |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit
-
   module Position = struct
     type t = pos
 
     let description = "Naming_ConstPos"
+  end
+
+  (** This module isn't actually used. It's here only for uniformity with the other ReverseNamingTables. *)
+  module CanonName = struct
+    type t = string
+
+    let description = "Naming_ConstCanon"
   end
 
   module ConstPosHeap =
@@ -372,6 +352,14 @@ module Consts = struct
 
         let description = "Naming_ConstBlocked"
       end)
+
+  let hash name =
+    Typing_deps.Dep.GConst name
+    |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit
+
+  let canon_hash name =
+    Typing_deps.Dep.GConst (Naming_sqlite.to_canon_name_key name)
+    |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit
 
   let add id pos = ConstPosHeap.add (hash id) pos
 
@@ -390,11 +378,18 @@ module Consts = struct
       ~measure_name:"Reverse naming table (consts) cache hit rate"
       ~key:(hash id)
 
-  let get_filename db_path_opt id =
-    get_pos db_path_opt id
-    |> Core_kernel.Option.map ~f:FileInfo.get_pos_filename
-
-  let is_defined db_path_opt id = Option.is_some (get_pos db_path_opt id)
+  (* This function isn't even used, because the only callers who wish to obtain canonical
+     names are "class fOo isn't defined; did you mean Foo?" and "error class Foobar differs
+     from class FooBar only in capitalization", and they don't do their checks for constants.
+     Nevertheless, we maintain consistent behavior: get_canon_name only returns a name if
+     that name is defined in the repository. *)
+  let get_canon_name ctx name =
+    let db_path_opt =
+      Db_path_provider.get_naming_db_path (Provider_context.get_backend ctx)
+    in
+    match get_pos db_path_opt name with
+    | Some _ -> Some name
+    | None -> None
 
   let remove_batch db_path_opt consts =
     let hashes = consts |> List.map ~f:hash in

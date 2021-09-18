@@ -215,35 +215,4 @@ void mergeKeyOrderMap(KeyOrderMap& dst, const KeyOrderMap& src) {
   }
 }
 
-PersistentKeyOrder::PersistentKeyOrder(const KeyOrderData* data)
-  : KeyOrder(data)
-{}
-
-PersistentKeyOrder PersistentKeyOrder::From(const KeyOrder& ko) {
-  return Make(*ko.m_keys);
-}
-
-PersistentKeyOrder PersistentKeyOrder::Make(const KeyOrderData& keyOrderData) {
-  if (auto const existing = GetExisting(keyOrderData)) return *existing;
-
-  folly::SharedMutex::WriteHolder wlock{s_keyOrderLock};
-  auto const ret = s_persistentKeyOrders.insert(keyOrderData);
-  return PersistentKeyOrder{&*ret.first};
-}
-
-folly::Optional<PersistentKeyOrder> PersistentKeyOrder::GetExisting(
-    const KeyOrder& keyOrder) {
-  return GetExisting(*keyOrder.m_keys);
-}
-
-folly::Optional<PersistentKeyOrder> PersistentKeyOrder::GetExisting(
-    const KeyOrderData& keyOrderData) {
-  folly::SharedMutex::ReadHolder rlock{s_keyOrderLock};
-  auto it = s_persistentKeyOrders.find(keyOrderData);
-  if (it != s_persistentKeyOrders.end()) {
-    return PersistentKeyOrder{&*it};
-  }
-  return folly::none;
-}
-
 }}

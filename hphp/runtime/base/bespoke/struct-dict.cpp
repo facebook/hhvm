@@ -25,6 +25,8 @@
 #include "hphp/runtime/vm/jit/array-layout.h"
 #include "hphp/runtime/vm/jit/type.h"
 
+#include <sstream>
+
 namespace HPHP { namespace bespoke {
 
 //////////////////////////////////////////////////////////////////////////////
@@ -33,13 +35,20 @@ namespace {
 
 static constexpr size_t kMaxNumStructLayouts = 1 << 14;
 size_t s_numStructLayouts = 0;
-folly::SharedMutex s_keySetLock;
 
-using PersistentKeyOrderMap =
-  folly::F14FastMap<PersistentKeyOrder, LayoutIndex, PersistentKeyOrderHash,
-                    PersistentKeyOrderEqual>;
+struct FieldVectorHash {
+  size_t operator()(const StructLayout::FieldVector& fv) const {
+    auto hash = size_t {0};
+    for (auto const& f : fv) {
+      hash = folly::hash::hash_combine(hash, f.key->hash());
+    }
+    return hash;
+  }
+};
 
-PersistentKeyOrderMap s_keySetToIdx;
+folly::SharedMutex s_fieldVectorLock;
+std::unordered_map<StructLayout::FieldVector, LayoutIndex, FieldVectorHash>
+  s_fieldVectorToIdx;
 
 const LayoutFunctions* structDictVtable() {
   static auto const result = fromArray<StructDict>();
@@ -50,9 +59,14 @@ uint16_t packSizeIndexAndAuxBits(uint8_t idx, uint8_t aux) {
   return (static_cast<uint16_t>(idx) << 8) | aux;
 }
 
-std::string describeStructLayout(const PersistentKeyOrder& ko) {
-  auto const base = ko.toString();
-  return folly::sformat("StructDict<{}>", base.substr(1, base.size() - 2));
+std::string describeStructLayout(const StructLayout::FieldVector& fv) {
+  std::stringstream ss;
+  for (auto i = 0; i < fv.size(); ++i) {
+    auto const& f = fv[i];
+    if (i > 0) ss << ',';
+    ss << '"' << folly::cEscape<std::string>(f.key->data()) << '"';
+  }
+  return folly::sformat("StructDict<{}>", ss.str());
 }
 
 constexpr uint16_t indexRaw(uint16_t idx) {
@@ -123,22 +137,19 @@ bool StructLayout::IsStructLayout(LayoutIndex index) {
   return (byte & 0b10000001) == 0b00000001;
 }
 
-const StructLayout* StructLayout::GetLayout(const KeyOrder& ko, bool create) {
-  if (ko.empty() || !ko.valid()) return nullptr;
+const StructLayout* StructLayout::GetLayout(
+    const FieldVector& fv, bool create) {
+	if (fv.empty()) return nullptr;
   {
-    folly::SharedMutex::ReadHolder rlock{s_keySetLock};
-    if (auto const pko = PersistentKeyOrder::GetExisting(ko)) {
-      auto const it = s_keySetToIdx.find(*pko);
-      if (it != s_keySetToIdx.end()) return As(FromIndex(it->second));
-    }
+    folly::SharedMutex::ReadHolder rlock{s_fieldVectorLock};
+    auto const it = s_fieldVectorToIdx.find(fv);
+    if (it != s_fieldVectorToIdx.end()) return As(FromIndex(it->second));
   }
   if (!create) return nullptr;
 
-  folly::SharedMutex::WriteHolder wlock{s_keySetLock};
-  if (auto const pko = PersistentKeyOrder::GetExisting(ko)) {
-    auto const it = s_keySetToIdx.find(*pko);
-    if (it != s_keySetToIdx.end()) return As(FromIndex(it->second));
-  }
+  folly::SharedMutex::WriteHolder wlock{s_fieldVectorLock};
+  auto const it = s_fieldVectorToIdx.find(fv);
+  if (it != s_fieldVectorToIdx.end()) return As(FromIndex(it->second));
 
   if (s_numStructLayouts == kMaxNumStructLayouts) return nullptr;
 
@@ -150,37 +161,35 @@ const StructLayout* StructLayout::GetLayout(const KeyOrder& ko, bool create) {
   }
 
   auto const index = Index(safe_cast<uint16_t>(s_numStructLayouts++));
-  auto const bytes = sizeof(StructLayout) + sizeof(Field) * (ko.size() - 1);
-  auto const pko = PersistentKeyOrder::From(ko);
-  auto const result = new (malloc(bytes)) StructLayout(index, pko);
-  s_keySetToIdx.emplace(pko, index);
+  auto const bytes = sizeof(StructLayout) + sizeof(Field) * (fv.size() - 1);
+  auto const result = new (malloc(bytes)) StructLayout(index, fv);
+  s_fieldVectorToIdx.emplace(fv, index);
   return result;
 }
 
 const StructLayout* StructLayout::Deserialize(
-    LayoutIndex index, const PersistentKeyOrder& ko) {
-  auto const layout = GetLayout(ko, true);
+    LayoutIndex index, const FieldVector& fv) {
+  auto const layout = GetLayout(fv, true);
   always_assert(layout != nullptr);
   always_assert(layout->index() == index);
   return layout;
 }
 
-StructLayout::StructLayout(LayoutIndex index, const PersistentKeyOrder& ko)
-  : ConcreteLayout(index, describeStructLayout(ko),
+StructLayout::StructLayout(LayoutIndex index, const FieldVector& fv)
+  : ConcreteLayout(index, describeStructLayout(fv),
                    {TopStructLayout::Index()}, structDictVtable())
-  , m_key_order(ko)
 {
   Slot i = 0;
-  m_key_to_slot.reserve(ko.size());
-  for (auto const key : ko) {
-    assertx(key->isStatic());
-    m_key_to_slot.insert({StaticKey{key}, i});
-    m_fields[i].key = key;
+  m_key_to_slot.reserve(fv.size());
+  for (auto const& field : fv) {
+    assertx(field.key->isStatic());
+    m_key_to_slot.insert({StaticKey{field.key}, i});
+    m_fields[i] = field;
     i++;
   }
 
   m_layout_index = index;
-  m_num_fields = ko.size();
+  m_num_fields = fv.size();
   assertx(numFields() == m_key_to_slot.size());
 
   static_assert(sizeof(Value) == 8);
@@ -293,7 +302,8 @@ void StructLayout::createColoringHashMap() const {
   for (auto i = 0; i < kMaxColor; i++) {
     table[i] = { nullptr, 0, 0 };
   }
-  for (auto const key : keyOrder()) {
+  for (auto i = 0; i < numFields(); i++) {
+    auto const key = m_fields[i].key;
     auto const color = key->color();
     assertx(color != StringData::kInvalidColor);
     assertx(table[color].str == nullptr);

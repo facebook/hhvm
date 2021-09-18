@@ -457,6 +457,13 @@ void updateStructAnalysis(const SinkProfile& profile, StructAnalysis& sa) {
   sa.merge_sinks.push_back(&profile);
 }
 
+StructLayout::FieldVector collectFieldVector(const KeyOrder& ko) {
+  if (!ko.valid()) return {};
+  StructLayout::FieldVector result;
+  for (auto const key : ko) result.push_back({key});
+  return result;
+}
+
 StructAnalysisResult finishStructAnalysis(StructAnalysis& sa) {
   auto const p_cutoff = RO::EvalBespokeArraySourceSpecializationThreshold / 100;
   auto groups = std::vector<StructGroup>{};
@@ -492,9 +499,10 @@ StructAnalysisResult finishStructAnalysis(StructAnalysis& sa) {
       }
     }
     auto const threshold = keyCoverageThreshold();
-    auto const groupKO =
+    auto const& groupKO =
       sortKeyOrder(pruneKeyOrder(group.profiles, threshold), keys);
-    auto const layout = StructLayout::GetLayout(groupKO, true);
+    auto const fields = collectFieldVector(groupKO);
+    auto const layout = StructLayout::GetLayout(fields, true);
     group.layout = layout;
     if (layout) layoutWeights[layout] += group.weight;
   }

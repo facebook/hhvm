@@ -267,27 +267,28 @@ Type ArrayLayout::iterPosType(Type pos, bool isKey) const {
 //////////////////////////////////////////////////////////////////////////////
 
 namespace {
-using bespoke::PersistentKeyOrder;
-using bespoke::KeyOrderData;
 using bespoke::LoggingProfileKey;
 using bespoke::SinkProfileKey;
 using bespoke::StructLayout;
+using FieldVector = bespoke::StructLayout::FieldVector;
 
-void write_key_order(ProfDataSerializer& ser, const PersistentKeyOrder& ko) {
-  write_raw(ser, ko.size());
-  for (auto const key : ko) {
-    write_string(ser, key);
+void write_field_vector(ProfDataSerializer& ser, const StructLayout* layout) {
+  auto const num = layout->numFields();
+  write_raw(ser, num);
+  for (auto slot = 0; slot < num; ++slot) {
+    auto const& f = layout->field(slot);
+    write_string(ser, f.key);
   }
 }
 
-PersistentKeyOrder read_key_order(ProfDataDeserializer& des) {
-  auto data = KeyOrderData{};
-  auto const keys = read_raw<size_t>(des);
-  for (auto i = 0; i < keys; i++) {
-    data.push_back(read_string(des));
+FieldVector read_field_vector(ProfDataDeserializer& des) {
+  auto data = FieldVector{};
+  auto const num = read_raw<size_t>(des);
+  for (auto i = 0; i < num; i++) {
+    auto const key = read_string(des);
+    data.push_back({key});
   }
-  auto const result = PersistentKeyOrder::Make(data);
-  return result;
+  return data;
 }
 
 void write_source_key(ProfDataSerializer& ser, const LoggingProfileKey& key) {
@@ -418,7 +419,7 @@ void serializeBespokeLayouts(ProfDataSerializer& ser) {
   write_raw(ser, layouts.size());
   for (auto const layout : layouts) {
     write_raw(ser, layout->index());
-    write_key_order(ser, layout->keyOrder());
+    write_field_vector(ser, layout);
   }
 
   // Serialize the runtime sources.
@@ -454,7 +455,8 @@ void deserializeBespokeLayouts(ProfDataDeserializer& des) {
   auto const layouts = read_raw<size_t>(des);
   for (auto i = 0; i < layouts; i++) {
     auto const index = read_raw<bespoke::LayoutIndex>(des);
-    auto const layout = StructLayout::Deserialize(index, read_key_order(des));
+    auto const fields = read_field_vector(des);
+    auto const layout = StructLayout::Deserialize(index, fields);
     layout->createColoringHashMap();
   }
   auto const runtimeStructs = read_raw<size_t>(des);

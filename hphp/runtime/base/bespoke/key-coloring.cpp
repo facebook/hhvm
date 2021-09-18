@@ -51,11 +51,12 @@ Optional<ColorMap> performColoring(
     auto result = EdgeSet();
     std::for_each(begin, end, [&](auto const& pair) {
       auto const& layout = pair.first;
-      auto const& keyOrder = layout->keyOrder();
-      for (auto const& first : keyOrder) {
+      auto const numFields = layout->numFields();
+      for (Slot i = 0; i < numFields; ++i) {
+        auto const first = layout->field(i).key;
         result.try_emplace(first);
-        for (auto const& second : keyOrder) {
-          if (first == second) continue;
+        for (Slot j = i + 1; j < numFields; ++j) {
+          auto const second = layout->field(j).key;
           result[first].insert(second);
           result[second].insert(first);
         }
@@ -119,11 +120,12 @@ Optional<ColorMap> performColoring(
   if constexpr (debug) {
     std::for_each(begin, end, [&](auto const& pair) {
       auto const& layout = pair.first;
-      auto const& keyOrder = layout->keyOrder();
-      for (auto const& first : keyOrder) {
-        assertx(colors[first] > 0 && colors[first] <= StructLayout::kMaxColor);
-        for (auto const& second : keyOrder) {
-          if (first == second) continue;
+      auto const numFields = layout->numFields();
+      for (Slot i = 0; i < numFields; ++i) {
+        auto const first = layout->field(i).key;
+        assertx(0 < colors[first] && colors[first] <= StructLayout::kMaxColor);
+        for (Slot j = i + 1; j < numFields; ++j) {
+          auto const second = layout->field(j).key;
           assertx(colors[first] != colors[second]);
         }
       }
@@ -255,7 +257,9 @@ std::string dumpColoringInfo() {
     for (auto const& [layout, _] : s_metadata.coloringAcceptedLayouts) {
       auto const& coloring = *s_metadata.coloring;
       auto maxColor = Color{0};
-      for (auto const& key : layout->keyOrder()) {
+      auto const numFields = layout->numFields();
+      for (Slot i = 0; i < numFields; ++i) {
+        auto const key = layout->field(i).key;
         auto const iter = coloring.find(key);
         assertx(iter != coloring.end());
         maxColor = std::max(maxColor, iter->second);

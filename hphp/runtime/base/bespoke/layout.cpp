@@ -624,6 +624,13 @@ BespokeArray* maybeMonoify(ArrayData* ad) {
     : MonotypeVec::MakeFromVanilla(ad, dt);
 }
 
+StructLayout::FieldVector collectFieldVector(const KeyOrder& ko) {
+  if (!ko.valid()) return {};
+  StructLayout::FieldVector result;
+  for (auto const key : ko) result.push_back({key});
+  return result;
+}
+
 BespokeArray* maybeStructify(ArrayData* ad, const LoggingProfile* profile) {
   if (!ad->isVanilla() || ad->isKeysetType()) return nullptr;
 
@@ -633,7 +640,8 @@ BespokeArray* maybeStructify(ArrayData* ad, const LoggingProfile* profile) {
 
   auto const ko = collectKeyOrder(koMap);
   auto const create = !s_hierarchyFinal.load(std::memory_order_acquire);
-  auto const layout = StructLayout::GetLayout(ko, create);
+  auto const fields = collectFieldVector(ko);
+  auto const layout = StructLayout::GetLayout(fields, create);
   return layout ? StructDict::MakeFromVanilla(ad, layout) : nullptr;
 }
 

@@ -106,15 +106,20 @@ struct StructDict : public BespokeArray {
  *     make some fields required, we can skip existence checks on lookup.
  */
 struct StructLayout : public ConcreteLayout {
-  struct Field { LowStringPtr key; };
+  struct Field {
+    LowStringPtr key;
+
+    bool operator==(const Field& o) const { return key == o.key; }
+  };
+
+  using FieldVector = std::vector<Field>;
 
   static LayoutIndex Index(uint16_t raw);
   static bool IsStructLayout(LayoutIndex index);
 
   static const StructLayout* As(const Layout*);
-  static const StructLayout* GetLayout(const KeyOrder& ko, bool create);
-  static const StructLayout* Deserialize(
-      LayoutIndex index, const PersistentKeyOrder&);
+  static const StructLayout* GetLayout(const FieldVector&, bool create);
+  static const StructLayout* Deserialize(LayoutIndex index, const FieldVector&);
 
   size_t numFields() const;
   size_t sizeIndex() const;
@@ -128,7 +133,6 @@ struct StructLayout : public ConcreteLayout {
 
   const Field& field(Slot slot) const;
 
-  PersistentKeyOrder keyOrder() const { return m_key_order; }
   size_t typeOffset() const { return typeOffsetForSlot(0); }
   size_t valueOffset() const { return valueOffsetForSlot(0); }
   size_t positionOffset() const;
@@ -183,9 +187,7 @@ private:
     }
   };
 
-  StructLayout(LayoutIndex index, const PersistentKeyOrder&);
-
-  PersistentKeyOrder m_key_order;
+  StructLayout(LayoutIndex index, const FieldVector&);
 
   // Fields used to initialize a new StructDict. The "m_extra_initializer" is
   // computed when we create the layout and used to initialize three fields in

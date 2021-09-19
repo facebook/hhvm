@@ -450,7 +450,7 @@ struct TypeStmts {
             "  JOIN type_details USING (typeid)"
             "  JOIN all_paths USING (pathid)"
             " WHERE name = @type"
-            " AND kind_of = 'type'"
+            " AND kind_of <> 'typeAlias'"
             " AND path = @path"
             " AND attribute_name = @attribute_name")}
       , m_getTypeAliasAttributeArgs{db.prepare(

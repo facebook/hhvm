@@ -696,6 +696,13 @@ bool Type::operator<=(Type rhs) const {
   if (lhs.hasConstVal(TArrLike)) {
     return arrayFitsSpec(lhs.m_arrVal, rhs.arrSpec());
   }
+
+  // If `lhs' doesn't support a specialization, it doesn't matter what
+  // the `rhs' specialization is.
+  if (!supports(SpecKind::Array) && !supports(SpecKind::Class)) {
+    return true;
+  }
+
   return lhs.spec() <= rhs.spec();
 }
 

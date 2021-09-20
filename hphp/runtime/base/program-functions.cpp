@@ -894,20 +894,25 @@ static void pagein_self(void) {
   // Other than the jemalloc background threads, which should've been stopped by
   // now, the only thread allowed here is the current one.  Check that and alarm
   // people when they accidentally created threads before this point.
-  int nThreads = Process::GetNumThreads();
+  int numTry = 0;
+  while (Process::GetNumThreads() > 1) {
+    if (numTry < 3) {
+      numTry++;
+      usleep(1000);
+    } else {
+      break;
+    }
+  }
+  auto nThreads = Process::GetNumThreads();
   if (nThreads > 1) {
-    usleep(1000);
-    nThreads = Process::GetNumThreads();
-    if (nThreads > 1) {
-      Logger::Error("%d threads running, cannot hugify text!", nThreads);
-      fprintf(stderr,
-              "HHVM is broken: %u threads running in hugifyText()!\n",
-              nThreads);
-      if (debug) {
-        throw std::runtime_error{
-          "you cannot create threads before pagein_self"
-        };
-      }
+    Logger::Error("%d threads running, cannot hugify text!", nThreads);
+    fprintf(stderr,
+            "HHVM is broken: %u threads running in hugifyText()!\n",
+            nThreads);
+    if (debug) {
+      throw std::runtime_error{
+        "you cannot create threads before pagein_self"
+      };
     }
   }
 

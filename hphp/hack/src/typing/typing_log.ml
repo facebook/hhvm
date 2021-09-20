@@ -768,6 +768,23 @@ let log_localize ~level ety_env (decl_ty : decl_ty) (env, result_ty) =
       ] );
   (env, result_ty)
 
+let log_pessimize_prop env pos class_name prop_name =
+  log_with_level env "pessimize" ~level:1 @@ fun () ->
+  let p = Pos_or_decl.unsafe_to_raw_pos pos in
+  let (file, line) =
+    let p = Pos.to_absolute p in
+    (Pos.filename p, Pos.line p)
+  in
+  lnewline ();
+  lprintf
+    (Normal Yellow)
+    "pessimize:\t%s:%d,prop,%s,%s"
+    file
+    line
+    class_name
+    prop_name;
+  lnewline ()
+
 let increment_feature_count env s =
   if GlobalOptions.tco_language_feature_logging (Env.get_tcopt env) then
     Measure.sample s 1.0

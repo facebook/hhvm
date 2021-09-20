@@ -107,6 +107,9 @@ val log_localize :
 
 val increment_feature_count : Typing_env_types.env -> string -> unit
 
+val log_pessimize_prop :
+  Typing_env_types.env -> Pos_or_decl.t -> string -> string -> unit
+
 module GlobalInference : sig
   val log_merging_subgraph : Typing_env_types.env -> Pos.t -> unit
 

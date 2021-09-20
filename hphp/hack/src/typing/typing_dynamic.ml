@@ -48,24 +48,26 @@ let check_property_sound_for_dynamic_read ~on_error env classname id ty =
          env
          ty
          (mk (Reason.Rnone, Tdynamic)))
-  then
-    on_error
-      (fst id)
-      (snd id)
-      classname
-      (get_pos ty, Typing_print.full_strip_ns env ty)
+  then (
+    let pos = get_pos ty in
+    Typing_log.log_pessimize_prop env pos classname (snd id);
+    on_error (fst id) (snd id) classname (pos, Typing_print.full_strip_ns env ty)
+  )
 
 let check_property_sound_for_dynamic_write ~on_error env classname id ty =
   let te_check = Typing_enforceability.is_enforceable env ty in
   (* If the property tyoe isn't enforceable, but is just dynamic,
      then the property will still be safe to write via a receiver expression of type
      dynamic. *)
-  if not (te_check || is_dynamic_decl env ty) then
+  if not (te_check || is_dynamic_decl env ty) then (
+    let pos = get_pos ty in
+    Typing_log.log_pessimize_prop env pos classname (snd id);
     on_error
       (fst id)
       (snd id)
       classname
-      (get_pos ty, Typing_print.full_strip_ns_decl env ty)
+      (pos, Typing_print.full_strip_ns_decl env ty)
+  )
 
 let sound_dynamic_interface_check env params_decl_ty ret_locl_ty =
   (* 1. check if all the parameters of the method are enforceable *)

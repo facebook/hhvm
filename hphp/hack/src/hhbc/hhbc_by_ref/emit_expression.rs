@@ -2845,14 +2845,6 @@ fn emit_special_function<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         ))),
         ("unsafe_cast", &[]) => Ok(Some(instr::null(alloc))),
         ("unsafe_cast", args) => Ok(Some(emit_expr(e, env, &args[0])?)),
-        ("HH\\Readonly\\as_mut", args) if args.len() == 1 => Ok(Some(emit_expr(e, env, &args[0])?)),
-        ("HH\\Readonly\\as_mut", _) => Err(emit_fatal::raise_fatal_runtime(
-            pos,
-            format!(
-                "HH\\Readonly\\as_mut() expects exactly 1 parameter, {} given",
-                nargs.to_string()
-            ),
-        )),
         ("HH\\invariant", args) if args.len() >= 2 => {
             let l = e.label_gen_mut().next_regular();
             let expr_id = ast::Expr(

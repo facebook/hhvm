@@ -323,30 +323,7 @@ where
     Ok(())
 }
 
-pub fn from_text<'arena, W, S: AsRef<str>>(
-    alloc: &'arena bumpalo::Bump,
-    env: &Env<S>,
-    stack_limit: &StackLimit,
-    writer: &mut W,
-    text: &[u8],
-) -> anyhow::Result<Option<Profile>>
-where
-    W: Write,
-    W::Error: Send + Sync + 'static, // required by anyhow::Error
-{
-    let source_text = SourceText::make(RcOc::new(env.filepath.clone()), text);
-    from_text_(
-        alloc,
-        env,
-        stack_limit,
-        writer,
-        source_text,
-        None,
-        NoDeclProvider,
-    )
-}
-
-pub fn from_text_<'arena, 'decl, W, S: AsRef<str>, D: DeclProvider<'decl>>(
+pub fn from_text<'arena, 'decl, W, S: AsRef<str>, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
     env: &Env<S>,
     stack_limit: &StackLimit,
@@ -413,17 +390,7 @@ fn rewrite<'p, 'arena, 'decl, D: DeclProvider<'decl>>(
     rewrite_program(alloc, emitter, ast, namespace_env)
 }
 
-pub fn hhas_from_text<'arena, S: AsRef<str>>(
-    alloc: &'arena bumpalo::Bump,
-    env: &Env<S>,
-    stack_limit: &StackLimit,
-    text: &[u8],
-) -> anyhow::Result<HhasProgram<'arena>> {
-    let source_text = SourceText::make(RcOc::new(env.filepath.clone()), text);
-    Ok(hhas_from_text_(alloc, env, stack_limit, source_text, None, NoDeclProvider)?.0)
-}
-
-pub fn hhas_from_text_<'arena, 'decl, S: AsRef<str>, D: DeclProvider<'decl>>(
+pub fn hhas_from_text<'arena, 'decl, S: AsRef<str>, D: DeclProvider<'decl>>(
     alloc: &'arena bumpalo::Bump,
     env: &Env<S>,
     stack_limit: &StackLimit,

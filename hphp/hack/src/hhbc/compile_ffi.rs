@@ -192,7 +192,7 @@ unsafe extern "C" fn hackc_compile_from_text_cpp_ffi(
                 .flags
                 .contains(hhbc_by_ref_compile::EnvFlags::ENABLE_DECL)
             {
-                hhbc_by_ref_compile::from_text_(
+                hhbc_by_ref_compile::from_text(
                     &alloc,
                     &env,
                     stack_limit,
@@ -206,7 +206,7 @@ unsafe extern "C" fn hackc_compile_from_text_cpp_ffi(
                     ),
                 )
             } else {
-                hhbc_by_ref_compile::from_text_(
+                hhbc_by_ref_compile::from_text(
                     &alloc,
                     &env,
                     stack_limit,
@@ -317,7 +317,7 @@ unsafe extern "C" fn hackc_compile_hhas_from_text_cpp_ffi(
                     .flags
                     .contains(hhbc_by_ref_compile::EnvFlags::ENABLE_DECL)
                 {
-                    hhbc_by_ref_compile::hhas_from_text_(
+                    hhbc_by_ref_compile::hhas_from_text(
                         alloc,
                         &env,
                         &stack_limit,
@@ -330,7 +330,7 @@ unsafe extern "C" fn hackc_compile_hhas_from_text_cpp_ffi(
                         ),
                     )
                 } else {
-                    hhbc_by_ref_compile::hhas_from_text_(
+                    hhbc_by_ref_compile::hhas_from_text(
                         alloc,
                         &env,
                         &stack_limit,
@@ -408,7 +408,7 @@ extern "C" fn compile_from_text_ffi(
                 let env = unsafe { hhbc_by_ref_compile::Env::<OcamlStr>::from_ocaml(env).unwrap() };
                 let mut w = String::new();
                 let alloc = bumpalo::Bump::new();
-                match hhbc_by_ref_compile::from_text_(
+                match hhbc_by_ref_compile::from_text(
                     &alloc,
                     &env,
                     stack_limit,

@@ -5,10 +5,13 @@
 
 use crate::utils;
 use ::anyhow::anyhow;
+use decl_provider::NoDeclProvider;
 use hhbc_by_ref_compile::Profile;
 use hhbc_by_ref_options::Options;
 use multifile_rust as multifile;
+use ocamlrep::rc::RcOc;
 use oxidized::relative_path::{self, RelativePath};
+use parser_core_types::source_text::SourceText;
 use rayon::prelude::*;
 use stack_limit::{StackLimit, MI};
 use structopt::StructOpt;
@@ -138,6 +141,7 @@ fn process_single_file_impl(
     }
 
     let rel_path = RelativePath::make(relative_path::Prefix::Dummy, filepath.to_owned());
+    let source_text = SourceText::make(RcOc::new(rel_path.clone()), content);
     let mut output = String::new();
     let mut flags = hhbc_by_ref_compile::EnvFlags::empty();
     flags.set(
@@ -151,7 +155,15 @@ fn process_single_file_impl(
         flags,
     };
     let alloc = bumpalo::Bump::new();
-    hhbc_by_ref_compile::from_text(&alloc, &env, stack_limit, &mut output, content)?;
+    hhbc_by_ref_compile::from_text(
+        &alloc,
+        &env,
+        stack_limit,
+        &mut output,
+        source_text,
+        None,
+        NoDeclProvider,
+    )?;
     Ok((output, None))
 }
 

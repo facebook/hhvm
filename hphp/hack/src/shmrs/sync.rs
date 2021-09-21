@@ -142,8 +142,13 @@ impl<'a, T> RwLockRef<'a, T> {
         // Safety: A RwLockRef can only be obtained by calling
         // RwLock::initialize or -acquire. Therefore, we should
         // have a pointer to a valid rwlock.
-        unsafe {
-            Errno::from(libc::pthread_rwlock_rdlock(self.0.lock_ptr()))?;
+        let success = Self::try_fastlock(|| unsafe {
+            libc::pthread_rwlock_tryrdlock(self.0.lock_ptr()) == 0
+        });
+        if !success {
+            unsafe {
+                Errno::from(libc::pthread_rwlock_rdlock(self.0.lock_ptr()))?;
+            }
         }
         Ok(RwLockReadGuard { lock: self })
     }
@@ -157,8 +162,13 @@ impl<'a, T> RwLockRef<'a, T> {
         // Safety: A RwLockRef can only be obtained by calling
         // RwLock::initialize or -acquire. Therefore, we should
         // have a pointer to a valid rwlock.
-        unsafe {
-            Errno::from(libc::pthread_rwlock_wrlock(self.0.lock_ptr()))?;
+        let success = Self::try_fastlock(|| unsafe {
+            libc::pthread_rwlock_trywrlock(self.0.lock_ptr()) == 0
+        });
+        if !success {
+            unsafe {
+                Errno::from(libc::pthread_rwlock_wrlock(self.0.lock_ptr()))?;
+            }
         }
         Ok(RwLockWriteGuard { lock: self })
     }
@@ -168,6 +178,25 @@ impl<'a, T> RwLockRef<'a, T> {
     /// Safety: The thread must be locked, duh.
     unsafe fn unlock(self) {
         Errno::from(libc::pthread_rwlock_unlock(self.0.lock_ptr())).unwrap();
+    }
+
+    #[inline]
+    fn try_fastlock(try_lock: impl Fn() -> bool) -> bool {
+        for counter in 1..=20 {
+            if try_lock() {
+                return true;
+            }
+
+            if counter <= 10 {
+                for _ in 0..(4 << counter) {
+                    std::hint::spin_loop();
+                }
+            } else {
+                std::thread::yield_now();
+            }
+        }
+
+        false
     }
 }
 

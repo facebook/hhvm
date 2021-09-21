@@ -2324,22 +2324,6 @@ value hh_mem(value key) {
   CAMLreturn(Val_bool(hh_mem_inner(key) == 1));
 }
 
-CAMLprim value hh_mem_status(value key) {
-  CAMLparam1(key);
-  if (shm_use_sharded_hashtbl != 0) {
-    CAMLreturn(shmffi_mem_status(get_hash(key)));
-  }
-  int res = hh_mem_inner(key);
-  switch (res) {
-    case 1:
-    case -1:
-    case -2:
-      CAMLreturn(Val_int(res));
-    default:
-      caml_failwith("Unreachable case: result must be 1 or -1 or -2");
-  }
-}
-
 /*****************************************************************************/
 /* Deserializes the value pointed to by elt. */
 /*****************************************************************************/

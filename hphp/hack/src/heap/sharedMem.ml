@@ -455,8 +455,6 @@ functor
 
     external hh_mem : KeyHasher.hash -> bool = "hh_mem"
 
-    external hh_mem_status : KeyHasher.hash -> int = "hh_mem_status"
-
     external hh_get_size : KeyHasher.hash -> int = "hh_get_size"
 
     external hh_get_and_deserialize : KeyHasher.hash -> Value.t
@@ -465,8 +463,6 @@ functor
     external hh_remove : KeyHasher.hash -> int = "hh_remove"
 
     external hh_move : KeyHasher.hash -> KeyHasher.hash -> unit = "hh_move"
-
-    let _ = hh_mem_status
 
     let measure_add = Value.description ^ " (bytes serialized into shared heap)"
 

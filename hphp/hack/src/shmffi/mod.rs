@@ -76,6 +76,16 @@ impl HeapValueHeader {
     }
 }
 
+/// A value stored in shared-memory.
+///
+/// This is just a pointer to some buffer in shared-memory,
+/// together with some metadata.
+///
+/// Note that it does not implement drop to deallocate the
+/// underlying buffer. That would require tracking which
+/// shard allocator was originally used to allocate the buffer,
+/// as values can freely move between shards. The memory overhead
+/// for this is prohibitively expensive.
 struct HeapValue {
     header: HeapValueHeader,
     data: NonNull<u8>,
@@ -127,15 +137,6 @@ impl HeapValue {
         let len = self.header.buffer_size();
         // Safety: We own the data. The return value cannot outlive `self`.
         unsafe { std::slice::from_raw_parts(self.data.as_ptr(), len) }
-    }
-
-    fn free(self, alloc: &MapAlloc<'static>) {
-        let len = self.header.buffer_size();
-        let layout = Layout::from_size_align(len, 1).unwrap();
-        // Safety: We own `self`, so we have sole access to data.
-        unsafe {
-            alloc.deallocate(self.data, layout);
-        }
     }
 }
 
@@ -406,22 +407,15 @@ pub extern "C" fn shmffi_move(hash1: u64, hash2: u64) {
             let cloned_value = value.clone_in(allocator);
             map2.insert(hash2, cloned_value);
         });
-
-        // TODO(hverr): Free value. For now freeing doesn't do anything
-        // so I prefer not to lock map1 again for no good reason.
     });
 }
 
 #[no_mangle]
 pub extern "C" fn shmffi_remove(hash: u64) -> usize {
     let size = with(|cmap| {
-        cmap.write_map(&hash, |map, allocator| {
+        cmap.write_map(&hash, |map, _allocator| {
             let heap_value = map.remove(&hash).unwrap();
-            let result = heap_value.as_slice().len();
-
-            // TODO(hverr): Free should be done on drop.
-            heap_value.free(allocator);
-            result
+            heap_value.as_slice().len()
         })
     });
     Value::int(size as isize).to_bits()

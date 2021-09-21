@@ -32,7 +32,7 @@ static_assertions::const_assert!(NUM_SHARDS.is_power_of_two());
 pub struct CMap<'shm, K, V, S = DefaultHashBuilder> {
     hash_builder: S,
     file_alloc: FileAlloc,
-    shard_allocs: [MapAllocControlData; NUM_SHARDS],
+    shard_allocs: [RwLock<MapAllocControlData>; NUM_SHARDS],
     maps: [RwLock<Map<'shm, K, V, S>>; NUM_SHARDS],
 }
 
@@ -91,10 +91,10 @@ impl<'shm, K, V, S: Clone> CMap<'shm, K, V, S> {
         // Initialize the memory properly.
         //
         // See MaybeUninit docs for examples.
-        let mut shard_allocs: [MaybeUninit<MapAllocControlData>; NUM_SHARDS] =
+        let mut shard_allocs: [MaybeUninit<RwLock<MapAllocControlData>>; NUM_SHARDS] =
             MaybeUninit::uninit().assume_init();
         for shard_alloc in &mut shard_allocs[..] {
-            *shard_alloc = MaybeUninit::new(MapAllocControlData::new());
+            *shard_alloc = MaybeUninit::new(RwLock::new(MapAllocControlData::new()));
         }
 
         let mut maps: [MaybeUninit<RwLock<Map<'shm, K, V, S>>>; NUM_SHARDS] =
@@ -118,10 +118,10 @@ impl<'shm, K, V, S: Clone> CMap<'shm, K, V, S> {
             .map(|r| r.initialize().unwrap())
             .collect();
 
-        // Attach shard allocators.
+        // Initialize shard allocator locks.
         let mut shard_allocs: Vec<MapAlloc<'shm>> = Vec::with_capacity(cmap.shard_allocs.len());
-        for control_data in &cmap.shard_allocs {
-            shard_allocs.push(MapAlloc::new(control_data, &cmap.file_alloc))
+        for lock in &mut cmap.shard_allocs {
+            shard_allocs.push(MapAlloc::new(lock.initialize().unwrap(), &cmap.file_alloc));
         }
 
         // Initialize maps themselves.
@@ -159,8 +159,8 @@ impl<'shm, K, V, S: Clone> CMap<'shm, K, V, S> {
 
         // Attach shard allocators.
         let mut shard_allocs: Vec<MapAlloc<'shm>> = Vec::with_capacity(cmap.shard_allocs.len());
-        for control_data in &cmap.shard_allocs {
-            shard_allocs.push(MapAlloc::new(control_data, &cmap.file_alloc))
+        for lock in &mut cmap.shard_allocs {
+            shard_allocs.push(MapAlloc::new(lock.attach(), &cmap.file_alloc));
         }
 
         CMapRef {

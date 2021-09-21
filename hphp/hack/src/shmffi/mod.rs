@@ -265,6 +265,32 @@ impl<'a> SerializedValue<'a> {
             data: data.cast(),
         }
     }
+
+    pub fn uncompressed_size(&self) -> usize {
+        use SerializedValue::*;
+        match self {
+            String(..) => self.as_slice().len(),
+            Serialized { ptr: _, len } => *len,
+            Compressed {
+                ptr: _,
+                uncompressed_size,
+                len: _,
+            } => *uncompressed_size as usize,
+        }
+    }
+
+    pub fn compressed_size(&self) -> usize {
+        use SerializedValue::*;
+        match self {
+            String(..) => self.as_slice().len(),
+            Serialized { ptr: _, len } => *len,
+            Compressed {
+                ptr: _,
+                uncompressed_size: _,
+                len,
+            } => *len,
+        }
+    }
 }
 
 fn with<R>(f: impl FnOnce(&HackMap) -> R) -> R {
@@ -315,6 +341,8 @@ pub extern "C" fn shmffi_add(hash: u64, data: usize) -> usize {
         let data = unsafe { Value::from_bits(data) };
         let serialized = SerializedValue::from(data);
         let compressed = serialized.maybe_compress();
+        let compressed_size = compressed.compressed_size();
+        let uncompressed_size = compressed.uncompressed_size();
         with(|cmap| {
             cmap.write_map(&hash, |map| {
                 // Safety: allocator will not escape critical section.
@@ -327,8 +355,13 @@ pub extern "C" fn shmffi_add(hash: u64, data: usize) -> usize {
         });
         compressed.free();
 
-        // TODO(hverr): Return correct values
-        let ret: (isize, isize, isize) = (0, 0, 0);
+        // TODO(hverr): We don't have access to "total_size" (which includes
+        // alignment overhead), remove the third field.
+        let ret: (isize, isize, isize) = (
+            compressed_size as isize,
+            uncompressed_size as isize,
+            compressed_size as isize,
+        );
         unsafe { ocamlrep_ocamlpool::to_ocaml(&ret) }
     })
 }

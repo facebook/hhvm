@@ -143,6 +143,7 @@ let parse_options () =
   let inplace = ref false in
   let diff = ref false in
   let diff_dry = ref false in
+  let check = ref false in
   let debug = ref false in
   let test = ref false in
   (* The following are either inferred from context (cwd and .hhconfig),
@@ -211,6 +212,10 @@ let parse_options () =
         ( "--diff-dry-run",
           Arg.Set diff_dry,
           " Preview the files that would be overwritten by --diff mode" );
+        ( "--check-formatting",
+          Arg.Set check,
+          " Given a list of filenames, check whether they are formatted and "
+          ^ "print the filenames which would be modified by hackfmt -i" );
         ( "--debug",
           Arg.Unit
             (fun () ->
@@ -272,6 +277,7 @@ let parse_options () =
       !inplace,
       !diff,
       !diff_dry,
+      !check,
       config ),
     root,
     parser_env,
@@ -284,6 +290,10 @@ type format_options =
       config: FEnv.t;
     }
   | InPlace of {
+      files: filename list;
+      config: FEnv.t;
+    }
+  | Check of {
       files: filename list;
       config: FEnv.t;
     }
@@ -304,6 +314,7 @@ let mode_string format_options =
   | Print { text_source = Stdin _; range = None; _ } -> "STDIN"
   | Print { text_source = Stdin _; range = Some _; _ } -> "STDIN_RANGE"
   | InPlace _ -> "IN_PLACE"
+  | Check _ -> "CHECK_FORMATTING"
   | AtChar _ -> "AT_CHAR"
   | Diff { dry = false; _ } -> "DIFF"
   | Diff { dry = true; _ } -> "DIFF_DRY"
@@ -314,6 +325,7 @@ type validate_options_input = {
   at_char: int option;
   inplace: bool;
   diff: bool;
+  check: bool;
 }
 
 let validate_options
@@ -325,12 +337,13 @@ let validate_options
       inplace,
       diff,
       diff_dry,
+      check,
       config ) =
   let fail msg = raise (InvalidCliArg msg) in
   let filename =
     match files with
     | [filename] -> Some filename
-    | filename :: _ :: _ when inplace -> Some filename
+    | filename :: _ :: _ when inplace || check -> Some filename
     | [] -> None
     | _ -> fail "More than one file given"
   in
@@ -352,7 +365,7 @@ let validate_options
 
   (* Let --diff-dry-run imply --diff *)
   let diff = diff || diff_dry in
-  match { diff; inplace; text_source; range; at_char } with
+  match { diff; inplace; text_source; range; at_char; check } with
   | _ when env.Env.debug && diff -> fail "Can't format diff in debug mode"
   | { diff = true; text_source = File _; _ }
   | { diff = true; text_source = Stdin (Some _); _ } ->
@@ -360,18 +373,30 @@ let validate_options
   | { diff = true; range = Some _; _ } -> fail "--diff mode expects no range"
   | { diff = true; at_char = Some _; _ } ->
     fail "--diff mode can't format at-char"
+  | { diff = true; check = true; _ } ->
+    fail "Can't check formatting in --diff mode"
   | { inplace = true; text_source = Stdin _; _ } ->
     fail "Provide a filename to format in-place"
   | { inplace = true; range = Some _; _ } ->
     fail "Can't format a range in-place"
   | { inplace = true; at_char = Some _; _ } ->
     fail "Can't format at-char in-place"
+  | { check = true; text_source = Stdin _; _ } ->
+    fail "Provide a filename to check formatting"
+  | { inplace = true; check = true; _ } ->
+    fail "Can't check formatting in-place"
+  | { check = true; range = Some _; _ } ->
+    fail "Can't check formatting for a range"
+  | { check = true; at_char = Some _; _ } ->
+    fail "Can't check formatting at-char"
   | { diff = false; inplace = false; range = Some _; at_char = Some _; _ } ->
     fail "--at-char expects no range"
-  | { diff = false; inplace = false; at_char = None; _ } ->
+  | { diff = false; inplace = false; at_char = None; check = false; _ } ->
     Print { text_source; range; config }
   | { diff = false; inplace = true; text_source = File _; range = None; _ } ->
     InPlace { files; config }
+  | { diff = false; check = true; text_source = File _; range = None; _ } ->
+    Check { files; config }
   | { diff = false; inplace = false; range = None; at_char = Some pos; _ } ->
     AtChar { text_source; pos; config }
   | { diff = true; text_source = Stdin None; range = None; _ } ->
@@ -527,11 +552,28 @@ let main
         if env.Env.debug then debug_print ~config text_source;
         let source_text = read_file filename in
         let source_text_string = SourceText.text source_text in
-        let formatted_text =
-          text_source |> parse ~parser_env |> format ~config env
-        in
-        if String.(source_text_string <> formatted_text) then
-          output ~text_source formatted_text)
+        try
+          let formatted_text =
+            text_source |> parse ~parser_env |> format ~config env
+          in
+          if String.(source_text_string <> formatted_text) then
+            output ~text_source formatted_text
+        with
+        | InvalidSyntax -> eprintf "Parse error in file: %s\n%!" filename)
+  | Check { files; config } ->
+    List.iter files ~f:(fun filename ->
+        let text_source = File filename in
+        env.Env.text_source <- text_source;
+        let source_text = read_file filename in
+        let source_text_string = SourceText.text source_text in
+        try
+          let formatted_text =
+            text_source |> parse ~parser_env |> format ~config env
+          in
+          if String.(source_text_string <> formatted_text) then
+            printf "%s\n" filename
+        with
+        | InvalidSyntax -> eprintf "Parse error in file: %s\n%!" filename)
   | AtChar { text_source; pos; config } ->
     env.Env.text_source <- text_source;
     let tree = parse ~parser_env text_source in

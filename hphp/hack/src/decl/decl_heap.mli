@@ -38,52 +38,59 @@ module ClassEltKey : SharedMem.Key with type t = string * string
 
 module Funs :
     module type of
-      SharedMem.WithCache (SharedMem.ProfiledBackend) (StringKey) (Fun)
+      SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (StringKey) (Fun)
         (Capacity)
 
 module Classes :
     module type of
-      SharedMem.WithCache (SharedMem.ProfiledBackend) (StringKey) (Class)
+      SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (StringKey)
+        (Class)
         (Capacity)
 
 module RecordDefs :
     module type of
-      SharedMem.WithCache (SharedMem.ProfiledBackend) (StringKey) (RecordDef)
+      SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (StringKey)
+        (RecordDef)
         (Capacity)
 
 module Typedefs :
     module type of
-      SharedMem.WithCache (SharedMem.ProfiledBackend) (StringKey) (Typedef)
+      SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (StringKey)
+        (Typedef)
         (Capacity)
 
 module GConsts :
     module type of
-      SharedMem.WithCache (SharedMem.ProfiledBackend) (StringKey) (GConst)
+      SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (StringKey)
+        (GConst)
         (Capacity)
 
 module Props :
     module type of
-      SharedMem.WithCache (SharedMem.ProfiledBackend) (ClassEltKey) (Property)
+      SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (ClassEltKey)
+        (Property)
         (Capacity)
 
 module StaticProps :
     module type of
-      SharedMem.WithCache (SharedMem.ProfiledBackend) (ClassEltKey)
+      SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (ClassEltKey)
         (StaticProperty)
         (Capacity)
 
 module Methods :
     module type of
-      SharedMem.WithCache (SharedMem.ProfiledBackend) (ClassEltKey) (Method)
+      SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (ClassEltKey)
+        (Method)
         (Capacity)
 
 module StaticMethods :
     module type of
-      SharedMem.WithCache (SharedMem.ProfiledBackend) (ClassEltKey)
+      SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (ClassEltKey)
         (StaticMethod)
         (Capacity)
 
 module Constructors :
     module type of
-      SharedMem.WithCache (SharedMem.ProfiledBackend) (StringKey) (Constructor)
+      SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (StringKey)
+        (Constructor)
         (Capacity)

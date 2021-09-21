@@ -97,18 +97,22 @@ module Types = struct
   end
 
   module TypePosHeap =
-    SharedMem.WithCache (SharedMem.ProfiledBackend) (Typing_deps.DepHashKey)
+    SharedMem.HeapWithLocalCache
+      (SharedMem.ProfiledBackend)
+      (Typing_deps.DepHashKey)
       (Position)
       (struct
         let capacity = 1000
       end)
 
   module TypeCanonHeap =
-    SharedMem.NoCache (SharedMem.ProfiledBackend) (Typing_deps.DepHashKey)
+    SharedMem.Heap (SharedMem.ProfiledBackend) (Typing_deps.DepHashKey)
       (CanonName)
 
   module BlockedEntries =
-    SharedMem.WithCache (SharedMem.ProfiledBackend) (Typing_deps.DepHashKey)
+    SharedMem.HeapWithLocalCache
+      (SharedMem.ProfiledBackend)
+      (Typing_deps.DepHashKey)
       (struct
         type t = blocked_entry
 
@@ -242,14 +246,14 @@ module Funs = struct
   end
 
   module FunPosHeap =
-    SharedMem.NoCache (SharedMem.ProfiledBackend) (Typing_deps.DepHashKey)
+    SharedMem.Heap (SharedMem.ProfiledBackend) (Typing_deps.DepHashKey)
       (Position)
   module FunCanonHeap =
-    SharedMem.NoCache (SharedMem.ProfiledBackend) (Typing_deps.DepHashKey)
+    SharedMem.Heap (SharedMem.ProfiledBackend) (Typing_deps.DepHashKey)
       (CanonName)
 
   module BlockedEntries =
-    SharedMem.NoCache (SharedMem.ProfiledBackend) (Typing_deps.DepHashKey)
+    SharedMem.Heap (SharedMem.ProfiledBackend) (Typing_deps.DepHashKey)
       (struct
         type t = blocked_entry
 
@@ -342,11 +346,11 @@ module Consts = struct
   end
 
   module ConstPosHeap =
-    SharedMem.NoCache (SharedMem.ProfiledBackend) (Typing_deps.DepHashKey)
+    SharedMem.Heap (SharedMem.ProfiledBackend) (Typing_deps.DepHashKey)
       (Position)
 
   module BlockedEntries =
-    SharedMem.NoCache (SharedMem.ProfiledBackend) (Typing_deps.DepHashKey)
+    SharedMem.Heap (SharedMem.ProfiledBackend) (Typing_deps.DepHashKey)
       (struct
         type t = blocked_entry
 

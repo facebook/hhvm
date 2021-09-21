@@ -10,7 +10,7 @@ open Hh_prelude
 
 (** This sharedmem is used only for the Shared_memory backend *)
 module Shared_db_settings =
-  SharedMem.NoCache (SharedMem.ProfiledBackend) (StringKey)
+  SharedMem.Heap (SharedMem.ProfiledBackend) (StringKey)
     (struct
       type t = Naming_sqlite.db_path
 

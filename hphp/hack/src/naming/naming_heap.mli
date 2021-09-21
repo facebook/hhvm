@@ -32,12 +32,12 @@ end
 
 module Types : sig
   module TypeCanonHeap :
-    SharedMem.NoCache
+    SharedMem.Heap
       with type key = Typing_deps.Dep.t
        and module KeyHasher = SharedMem.MakeKeyHasher(Typing_deps.DepHashKey)
 
   module TypePosHeap :
-    SharedMem.WithCache
+    SharedMem.Heap
       with type key = Typing_deps.Dep.t
        and module KeyHasher = SharedMem.MakeKeyHasher(Typing_deps.DepHashKey)
 
@@ -47,12 +47,12 @@ end
 
 module Funs : sig
   module FunCanonHeap :
-    SharedMem.NoCache
+    SharedMem.Heap
       with type key = Typing_deps.Dep.t
        and module KeyHasher = SharedMem.MakeKeyHasher(Typing_deps.DepHashKey)
 
   module FunPosHeap :
-    SharedMem.NoCache
+    SharedMem.Heap
       with type key = Typing_deps.Dep.t
        and module KeyHasher = SharedMem.MakeKeyHasher(Typing_deps.DepHashKey)
 
@@ -61,7 +61,7 @@ end
 
 module Consts : sig
   module ConstPosHeap :
-    SharedMem.NoCache
+    SharedMem.Heap
       with type key = Typing_deps.Dep.t
        and module KeyHasher = SharedMem.MakeKeyHasher(Typing_deps.DepHashKey)
 

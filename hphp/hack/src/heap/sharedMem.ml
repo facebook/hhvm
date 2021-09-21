@@ -299,7 +299,7 @@ module SMTelemetry = struct
    * - Immediate caches - only records its existence
    * - WithLocalChanges caches - they do Obj.reachable_words to count up the stack
    * - Local caches - they do Obj.reachable_words
-   * In the case of compound caches, e.g. WithCache which includes all three,
+   * In the case of compound caches, e.g. HeapWithLocalCache which includes all three,
    * it doesn't have to report telemetry since each of its constituents already
    * reports telemetry on its own.
    * Anyway, each cache registers in the global "get_telemetry_list" so that
@@ -958,11 +958,7 @@ functor
     let move from_key to_key = LocalChanges.(move !stack from_key to_key)
   end
 
-(*****************************************************************************)
-(* The signatures of what we are actually going to expose to the user *)
-(*****************************************************************************)
-
-module type NoCache = sig
+module type Heap = sig
   type key
 
   type value
@@ -1016,11 +1012,6 @@ module type NoCache = sig
   end
 end
 
-(*****************************************************************************)
-(* All the caches are functors returning a module of the following signature
- *)
-(*****************************************************************************)
-
 module type LocalCacheLayer = sig
   type key
 
@@ -1037,22 +1028,8 @@ module type LocalCacheLayer = sig
   val get_telemetry_items_and_keys : unit -> Obj.t * key Seq.t
 end
 
-module type WithCache = sig
-  include NoCache
-
-  val write_around : key -> value -> unit
-
-  val get_no_cache : key -> value option
-
-  module Cache : LocalCacheLayer with type key = key and type value = value
-end
-
-(*****************************************************************************)
-(* A functor returning an implementation of the S module without caching. *)
-(*****************************************************************************)
-
-module NoCache (Backend : Backend) (Key : Key) (Value : Value) :
-  NoCache
+module Heap (Backend : Backend) (Key : Key) (Value : Value) :
+  Heap
     with type key = Key.t
      and type value = Value.t
      and module KeyHasher = MakeKeyHasher(Key)
@@ -1411,25 +1388,26 @@ module ValueForCache (Value : Value) = struct
   let description = Value.description ^ "__cache"
 end
 
-(*****************************************************************************)
-(* A functor returning an implementation of the S module with caching.
- * We need to avoid constantly deserializing types, because it costs us too
- * much time. The caches keep a deserialized version of the types.
- *)
-(*****************************************************************************)
-module WithCache
+module HeapWithLocalCache
     (Backend : Backend)
     (Key : Key)
     (Value : Value)
-    (Capacity : Capacity) :
-  WithCache
-    with type key = Key.t
-     and type value = Value.t
-     and module KeyHasher = MakeKeyHasher(Key)
-     and module KeySet = Set.Make(Key)
-     and module KeyMap = WrappedMap.Make(Key)
-     and module Cache = MultiCache(Key)(ValueForCache(Value))(Capacity) = struct
-  module Direct = NoCache (Backend) (Key) (Value)
+    (Capacity : Capacity) : sig
+  include
+    Heap
+      with type key = Key.t
+       and type value = Value.t
+       and module KeyHasher = MakeKeyHasher(Key)
+       and module KeySet = Set.Make(Key)
+       and module KeyMap = WrappedMap.Make(Key)
+
+  val write_around : key -> value -> unit
+
+  val get_no_cache : key -> value option
+
+  module Cache : LocalCacheLayer with type key = key and type value = value
+end = struct
+  module Direct = Heap (Backend) (Key) (Value)
 
   type key = Direct.key
 

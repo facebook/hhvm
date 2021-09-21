@@ -57,11 +57,12 @@ module GConst = struct
 end
 
 module Funs =
-  SharedMem.WithCache (SharedMem.ProfiledBackend) (StringKey) (Fun) (Capacity)
+  SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (StringKey) (Fun)
+    (Capacity)
 
 module Classes = struct
   include
-    SharedMem.WithCache (SharedMem.ProfiledBackend) (StringKey) (Class)
+    SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (StringKey) (Class)
       (Capacity)
 
   let add class_name decl =
@@ -79,13 +80,14 @@ module Classes = struct
 end
 
 module RecordDefs =
-  SharedMem.WithCache (SharedMem.ProfiledBackend) (StringKey) (RecordDef)
+  SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (StringKey)
+    (RecordDef)
     (Capacity)
 module Typedefs =
-  SharedMem.WithCache (SharedMem.ProfiledBackend) (StringKey) (Typedef)
+  SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (StringKey) (Typedef)
     (Capacity)
 module GConsts =
-  SharedMem.WithCache (SharedMem.ProfiledBackend) (StringKey) (GConst)
+  SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (StringKey) (GConst)
     (Capacity)
 
 module Property = struct
@@ -132,17 +134,22 @@ module ClassEltKey = struct
 end
 
 module Props =
-  SharedMem.WithCache (SharedMem.ProfiledBackend) (ClassEltKey) (Property)
+  SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (ClassEltKey)
+    (Property)
     (Capacity)
 module StaticProps =
-  SharedMem.WithCache (SharedMem.ProfiledBackend) (ClassEltKey) (StaticProperty)
+  SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (ClassEltKey)
+    (StaticProperty)
     (Capacity)
 module Methods =
-  SharedMem.WithCache (SharedMem.ProfiledBackend) (ClassEltKey) (Method)
+  SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (ClassEltKey)
+    (Method)
     (Capacity)
 module StaticMethods =
-  SharedMem.WithCache (SharedMem.ProfiledBackend) (ClassEltKey) (StaticMethod)
+  SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (ClassEltKey)
+    (StaticMethod)
     (Capacity)
 module Constructors =
-  SharedMem.WithCache (SharedMem.ProfiledBackend) (StringKey) (Constructor)
+  SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (StringKey)
+    (Constructor)
     (Capacity)

@@ -224,7 +224,9 @@ module type KeyHasher = sig
       unique across heaps. *)
   type key
 
-  (** The hash of an old or new key. *)
+  (** The hash of an old or new key.
+
+      This hash will be unique across all heaps. *)
   type hash
 
   val hash : key -> hash
@@ -291,7 +293,7 @@ module ProfiledBackend : Backend
 
     The "old" representation is the value that was bound to that key in
     the last round of type-checking. *)
-module type NoCache = sig
+module type Heap = sig
   type key
 
   type value
@@ -300,7 +302,7 @@ module type NoCache = sig
 
       A new [KeyHasher] with a unique prefix is automatically generated
       for each heap. Normally, you shouldn't have to use the [KeyHasher]
-      directly, but Zonkolan does. *)
+      directly, but Zoncolan does. *)
   module KeyHasher : KeyHasher with type key = key
 
   module KeySet : Set.S with type elt = key
@@ -359,8 +361,8 @@ end
 
     Provides no worker-local caching. Directly stores to and queries from
     shared memory. *)
-module NoCache (_ : Backend) (Key : Key) (Value : Value) :
-  NoCache
+module Heap (_ : Backend) (Key : Key) (Value : Value) :
+  Heap
     with type key = Key.t
      and type value = Value.t
      and module KeyHasher = MakeKeyHasher(Key)
@@ -427,9 +429,19 @@ module OrderedCache (Key : Key) (Value : Value) (_ : Capacity) :
 module MultiCache (Key : Key) (Value : Value) (_ : Capacity) :
   LocalCacheLayer with type key = Key.t and type value = Value.t
 
-(** Same as [NoCache] but provides a worker-local cache. *)
-module type WithCache = sig
-  include NoCache
+(** Same as [Heap] but provides a layer of worker-local caching. *)
+module HeapWithLocalCache
+    (_ : Backend)
+    (Key : Key)
+    (Value : Value)
+    (_ : Capacity) : sig
+  include
+    Heap
+      with type key = Key.t
+       and type value = Value.t
+       and module KeyHasher = MakeKeyHasher(Key)
+       and module KeySet = Set.Make(Key)
+       and module KeyMap = WrappedMap.Make(Key)
 
   val write_around : key -> value -> unit
 
@@ -437,11 +449,3 @@ module type WithCache = sig
 
   module Cache : LocalCacheLayer with type key = key and type value = value
 end
-
-module WithCache (_ : Backend) (Key : Key) (Value : Value) (_ : Capacity) :
-  WithCache
-    with type key = Key.t
-     and type value = Value.t
-     and module KeyHasher = MakeKeyHasher(Key)
-     and module KeySet = Set.Make(Key)
-     and module KeyMap = WrappedMap.Make(Key)

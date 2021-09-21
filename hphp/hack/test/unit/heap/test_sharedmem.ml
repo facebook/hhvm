@@ -45,9 +45,7 @@ let expect_equals ~name value expected =
     (value = expected)
 
 let test_local_changes
-    (module IntHeap : SharedMem.NoCache
-      with type value = int
-       and type key = string)
+    (module IntHeap : SharedMem.Heap with type value = int and type key = string)
     () =
   let expect_value ~name expected =
     expect_equals ~name (IntHeap.get name) expected;
@@ -147,11 +145,13 @@ let test_local_changes
   test ();
   IntHeap.LocalChanges.pop_stack ()
 
-let test_cache_behavior
-    (module IntHeap : SharedMem.WithCache
-      with type value = int
-       and type key = string)
-    () =
+module type HeapWithLocalCache =
+    module type of
+      SharedMem.HeapWithLocalCache (SharedMem.ImmediateBackend) (StringKey)
+        (IntVal)
+        (Capacity)
+
+let test_cache_behavior (module IntHeap : HeapWithLocalCache) () =
   let expect_cache_size expected =
     let seq_len = Seq.fold_left (fun x _ -> x + 1) 0 in
     let actual =
@@ -179,14 +179,14 @@ let test_cache_behavior
    in the combined cache. *)
 
 module TestNoCache =
-  SharedMem.NoCache (SharedMem.ImmediateBackend) (StringKey) (IntVal)
+  SharedMem.Heap (SharedMem.ImmediateBackend) (StringKey) (IntVal)
 
 (* We shall not mix compressions, so create 2 separate caches  *)
 module TestWithCacheLz4 =
-  SharedMem.WithCache (SharedMem.ImmediateBackend) (StringKey) (IntVal)
+  SharedMem.HeapWithLocalCache (SharedMem.ImmediateBackend) (StringKey) (IntVal)
     (Capacity)
 module TestWithCacheZstd =
-  SharedMem.WithCache (SharedMem.ImmediateBackend) (StringKey) (IntVal)
+  SharedMem.HeapWithLocalCache (SharedMem.ImmediateBackend) (StringKey) (IntVal)
     (Capacity)
 
 let tests () =

@@ -13,7 +13,7 @@ let key_to_local_key (key : string) :
   Provider_backend.Linearization_cache_entry.Linearization key
 
 module Cache =
-  SharedMem.WithCache (SharedMem.ProfiledBackend) (StringKey)
+  SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (StringKey)
     (struct
       type t = Decl_defs.lin
 

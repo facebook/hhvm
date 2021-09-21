@@ -4,8 +4,10 @@
 // LICENSE file in the "hack" directory of this source tree.
 #![feature(allocator_api)]
 
+use std::alloc::{Allocator, Layout};
 use std::convert::TryInto;
 use std::hash::BuildHasherDefault;
+use std::ptr::NonNull;
 
 use lz4::liblz4;
 use nohash_hasher::NoHashHasher;
@@ -34,11 +36,49 @@ extern "C" {
     fn malloc(size: libc::size_t) -> *mut u8;
 }
 
+#[derive(Clone, Copy)]
+struct HeapValueHeader(u64);
+
+impl HeapValueHeader {
+    fn new(buffer_size: usize, uncompressed_size: usize, is_serialized: bool) -> Self {
+        let buffer_size: u32 = buffer_size.try_into().unwrap();
+        let uncompressed_size: u32 = uncompressed_size.try_into().unwrap();
+        // Make sure the MSB are 0 because we will need 1 additional bits for
+        // another field and 1 bit for OCaml's internals.
+        assert_eq!(buffer_size & (1 << 31), 0);
+        assert_eq!(uncompressed_size & (1 << 31), 0);
+
+        let mut result: u64 = 0;
+        result |= buffer_size as u64;
+        result |= (uncompressed_size as u64) << 31;
+        result |= (is_serialized as u64) << 62;
+        Self(result)
+    }
+
+    /// Size of the buffer attached to this value.
+    fn buffer_size(&self) -> usize {
+        (self.0 & ((1 << 31) - 1)) as usize
+    }
+
+    /// Size if the buffer were uncompressed.
+    fn uncompressed_size(&self) -> usize {
+        ((self.0 >> 31) & ((1 << 31) - 1)) as usize
+    }
+
+    /// Was the buffer serialized, or does it contain a raw OCaml string?
+    fn is_serialized(&self) -> bool {
+        ((self.0 >> 62) & 1) == 1
+    }
+
+    /// Was the buffer compressed?
+    fn is_compressed(&self) -> bool {
+        self.uncompressed_size() != self.buffer_size()
+    }
+}
+
 struct HeapValue {
-    is_serialized: bool,
-    is_compressed: bool,
-    uncompressed_size: i32,
-    data: Vec<u8, MapAlloc<'static>>,
+    header: HeapValueHeader,
+    data: NonNull<u8>,
 }
 
 impl HeapValue {
@@ -48,20 +88,20 @@ impl HeapValue {
     /// It may deallocate each and every object you haven't registered as a
     /// root.
     unsafe fn to_ocaml_value(&self) -> usize {
-        if !self.is_serialized {
-            caml_alloc_initialized_string(self.data.as_ptr(), self.data.len())
-        } else if !self.is_compressed {
-            caml_input_value_from_block(self.data.as_ptr(), self.data.len())
+        if !self.header.is_serialized() {
+            caml_alloc_initialized_string(self.data.as_ptr(), self.header.buffer_size())
+        } else if !self.header.is_compressed() {
+            caml_input_value_from_block(self.data.as_ptr(), self.header.buffer_size())
         } else {
             // TODO(hverr): Make thus more Rust-idiomatic
-            let data = malloc(self.uncompressed_size as libc::size_t);
+            let data = malloc(self.header.uncompressed_size());
             let uncompressed_size = liblz4::LZ4_decompress_safe(
                 self.data.as_ptr() as *const i8,
                 data as *mut i8,
-                self.data.len().try_into().unwrap(),
-                self.uncompressed_size,
+                self.header.buffer_size().try_into().unwrap(),
+                self.header.uncompressed_size().try_into().unwrap(),
             );
-            assert!(self.uncompressed_size == uncompressed_size);
+            assert!(self.header.uncompressed_size() == uncompressed_size as usize);
 
             let result = caml_input_value_from_block(data, uncompressed_size as libc::size_t);
             free(data);
@@ -70,15 +110,31 @@ impl HeapValue {
     }
 
     fn clone_in(&self, alloc: MapAlloc<'static>) -> HeapValue {
-        let mut data = Vec::with_capacity_in(self.data.len(), alloc);
-        data.resize(self.data.len(), 0);
-        data.as_mut_slice().copy_from_slice(&self.data);
+        let layout = Layout::from_size_align(self.header.buffer_size(), 1).unwrap();
+        let mut data = alloc.allocate(layout).unwrap();
+        // Safety: we are the only ones with access to the allocated chunk.
+        unsafe {
+            data.as_mut().copy_from_slice(self.as_slice())
+        };
 
         HeapValue {
-            is_serialized: self.is_serialized,
-            is_compressed: self.is_compressed,
-            uncompressed_size: self.uncompressed_size,
-            data,
+            header: self.header,
+            data: data.cast(),
+        }
+    }
+
+    fn as_slice(&self) -> &[u8] {
+        let len = self.header.buffer_size();
+        // Safety: We own the data. The return value cannot outlive `self`.
+        unsafe { std::slice::from_raw_parts(self.data.as_ptr(), len) }
+    }
+
+    fn free(self, alloc: MapAlloc<'static>) {
+        let len = self.header.buffer_size();
+        let layout = Layout::from_size_align(len, 1).unwrap();
+        // Safety: We own `self`, so we have sole access to data.
+        unsafe {
+            alloc.deallocate(self.data, layout);
         }
     }
 }
@@ -187,32 +243,26 @@ impl<'a> SerializedValue<'a> {
 
     fn to_heap_value_in(&self, alloc: MapAlloc<'static>) -> HeapValue {
         let slice = self.as_slice();
-        let mut data = Vec::with_capacity_in(slice.len(), alloc);
-        data.resize(slice.len(), 0);
-        data.as_mut_slice().copy_from_slice(slice);
+
+        let layout = Layout::from_size_align(slice.len(), 1).unwrap();
+        let mut data = alloc.allocate(layout).unwrap();
+        // Safety: we are the only ones with access to the allocated chunk.
+        unsafe {
+            data.as_mut().copy_from_slice(slice)
+        };
 
         use SerializedValue::*;
-        match self {
-            String(..) => HeapValue {
-                is_serialized: false,
-                is_compressed: false,
-                uncompressed_size: 0,
-                data,
-            },
-            Serialized { .. } => HeapValue {
-                is_serialized: true,
-                is_compressed: false,
-                uncompressed_size: 0,
-                data,
-            },
+        let header = match self {
+            String(..) => HeapValueHeader::new(slice.len(), slice.len(), false),
+            Serialized { .. } => HeapValueHeader::new(slice.len(), slice.len(), true),
             Compressed {
                 uncompressed_size, ..
-            } => HeapValue {
-                is_serialized: true,
-                is_compressed: true,
-                uncompressed_size: *uncompressed_size,
-                data,
-            },
+            } => HeapValueHeader::new(slice.len(), *uncompressed_size as usize, true),
+        };
+
+        HeapValue {
+            header,
+            data: data.cast(),
         }
     }
 }
@@ -315,7 +365,7 @@ pub extern "C" fn shmffi_mem_status(hash: u64) -> usize {
 
 #[no_mangle]
 pub extern "C" fn shmffi_get_size(hash: u64) -> usize {
-    let size = with(|cmap| cmap.read_map(&hash, |map| map[&hash].data.len()));
+    let size = with(|cmap| cmap.read_map(&hash, |map| map[&hash].header.buffer_size()));
     Value::int(size as isize).to_bits()
 }
 
@@ -329,11 +379,54 @@ pub extern "C" fn shmffi_move(hash1: u64, hash2: u64) {
             let cloned_value = value.clone_in(allocator);
             map2.insert(hash2, cloned_value);
         });
+
+        // TODO(hverr): Free value. For now freeing doesn't do anything
+        // so I prefer not to lock map1 again for no good reason.
     });
 }
 
 #[no_mangle]
 pub extern "C" fn shmffi_remove(hash: u64) -> usize {
-    let size = with(|cmap| cmap.write_map(&hash, |map| map.remove(&hash).unwrap().data.len()));
+    let size = with(|cmap| {
+        cmap.write_map(&hash, |map| {
+            let heap_value = map.remove(&hash).unwrap();
+            let result = heap_value.as_slice().len();
+
+            // Safety: allocator does not escape critical section!
+            let allocator = unsafe { map.allocator() };
+            heap_value.free(allocator);
+            result
+        })
+    });
     Value::int(size as isize).to_bits()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    use rand::prelude::*;
+
+    #[test]
+    fn test_heap_value_header() {
+        const NUM_TESTS: usize = 100;
+        let mut rng = StdRng::from_seed([0; 32]);
+
+        for _ in 0..NUM_TESTS {
+            let buffer_size = (rng.gen::<u32>() & ((1 << 31) - 1)) as usize;
+            let uncompressed_size = if rng.gen_bool(0.5) {
+                buffer_size
+            } else {
+                (rng.gen::<u32>() & ((1 << 31) - 1)) as usize
+            };
+            let is_serialized = rng.gen_bool(0.5);
+
+            let header = HeapValueHeader::new(buffer_size, uncompressed_size, is_serialized);
+
+            assert_eq!(header.buffer_size(), buffer_size);
+            assert_eq!(header.uncompressed_size(), uncompressed_size);
+            assert_eq!(header.is_serialized(), is_serialized);
+            assert_eq!(header.is_compressed(), buffer_size != uncompressed_size);
+        }
+    }
 }

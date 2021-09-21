@@ -6,6 +6,7 @@ edition = "2018"
 
 [lib]
 path = "mod.rs"
+crate-type = ["lib", "staticlib"]
 
 [dependencies]
 libc = "0.2.98"

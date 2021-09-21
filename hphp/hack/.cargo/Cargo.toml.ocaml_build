@@ -167,6 +167,7 @@ members = [
     "src/parser/lowerer",
     "src/parser/schema",
     "src/providers/cargo/decl_provider_rust",
+    "src/shmffi",
     "src/typing/cargo/typing_collections_rust",
     "src/typing/cargo/typing_defs_rust",
     "src/utils/arena_deserializer",

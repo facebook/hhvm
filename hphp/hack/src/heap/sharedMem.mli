@@ -55,6 +55,7 @@ type handle = private {
   h_hash_table_pow_val: int;
   h_num_workers_val: int;
   h_shm_use_sharded_hashtbl: bool;
+  h_sharded_hashtbl_fd: Unix.file_descr;
 }
 
 (** Initialize shared memory. *)

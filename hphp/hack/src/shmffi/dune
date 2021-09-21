@@ -1,0 +1,19 @@
+(library
+  (name shmffi)
+  (modules)
+  (wrapped false)
+  (preprocess (pps ppx_deriving.std))
+  (self_build_stubs_archive (shmffi))
+)
+
+(rule
+  (targets libshmffi_stubs.a)
+  (deps (source_tree %{workspace_root}/src))
+  (locks /cargo)
+  (action
+    (run %{workspace_root}/scripts/build_rust_to_ocaml.sh
+      shmffi
+      shmffi
+    )
+  )
+)

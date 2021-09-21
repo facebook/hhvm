@@ -11,6 +11,8 @@
     (:include config/c_library_flags.sexp)))
   (preprocess (pps ppx_deriving.std visitors.ppx))
   (libraries
+    ocamlpool
+    shmffi
     utils_core))
 
 (library
@@ -30,7 +32,9 @@
     sharedMemHash)
   (preprocess (pps ppx_deriving.std visitors.ppx))
   (libraries
-    heap_libc))
+    heap_libc
+    ocamlpool
+    shmffi))
 
 (library
   (name heap_shared_mem)
@@ -43,6 +47,8 @@
     global_config
     heap_libc
     logging_common
+    ocamlpool
+    shmffi
     utils_core
     worker_cancel))
 
@@ -54,6 +60,8 @@
   (preprocess (pps ppx_deriving.std visitors.ppx))
   (libraries
     heap_libc
+    ocamlpool
+    shmffi
     utils_core))
 
 (library
@@ -63,4 +71,6 @@
     globalStorage)
   (preprocess (pps ppx_deriving.std visitors.ppx))
   (libraries
-    heap_libc))
+    heap_libc
+    ocamlpool
+    shmffi))

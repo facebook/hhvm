@@ -402,14 +402,13 @@ pub fn hhas_from_text<'arena, 'decl, S: AsRef<str>, D: DeclProvider<'decl>>(
     emit_prog_from_text(alloc, &mut emitter, env, stack_limit, source_text)
 }
 
-pub fn hhas_to_string<'decl, W: std::fmt::Write, S: AsRef<str>, D: DeclProvider<'decl>>(
+pub fn hhas_to_string<W: std::fmt::Write, S: AsRef<str>>(
     env: &Env<S>,
     native_env: Option<&NativeEnv<S>>,
     writer: &mut W,
     program: &HhasProgram,
-    decl_provider: D,
 ) -> anyhow::Result<()> {
-    let mut emitter = create_emitter(env, native_env, decl_provider)?;
+    let mut emitter = create_emitter(env, native_env, NoDeclProvider)?;
     let (print_result, _) = time(|| {
         print_program(
             &mut Context::new(

@@ -517,39 +517,13 @@ unsafe extern "C" fn hackc_hhas_to_string_cpp_ffi(
                 config_list: vec![],
                 flags: native_env.flags,
             };
-            let mut w = String::new();
-            let compile_result = if native_env
-                .flags
-                .contains(hhbc_by_ref_compile::EnvFlags::ENABLE_DECL)
-            {
-                hhbc_by_ref_compile::hhas_to_string(
-                    &env,
-                    Some(&native_env),
-                    &mut w,
-                    prog,
-                    ExternalDeclProvider(
-                        cnative_env.decl_getter,
-                        cnative_env.decl_provider,
-                        std::marker::PhantomData,
-                    ),
-                )
-            } else {
-                hhbc_by_ref_compile::hhas_to_string(
-                    &env,
-                    Some(&native_env),
-                    &mut w,
-                    prog,
-                    NoDeclProvider,
-                )
-            };
-            match compile_result {
-                Ok(_) => Ok(w),
-                Err(e) => Err(anyhow!("{}", e)),
-            }
+            let mut output = String::new();
+            hhbc_by_ref_compile::hhas_to_string(&env, Some(&native_env), &mut output, prog)?;
+            Ok(output)
         })
         .map_err(|e| format!("{}", e))
         .expect("compile_ffi: hackc_hhas_to_string_cpp_ffi: retry failed")
-        .map_err(|e| e.to_string())
+        .map_err(|e: anyhow::Error| e.to_string())
         {
             Ok(out) => {
                 let cs = std::ffi::CString::new(out)

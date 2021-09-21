@@ -7,7 +7,7 @@ use std::ops::{Deref, DerefMut};
 
 use hashbrown::{hash_map::DefaultHashBuilder, HashMap};
 
-use crate::mapalloc::MapAlloc;
+use crate::filealloc::FileAlloc;
 
 /// A hash map that lives in shared memory.
 ///
@@ -18,12 +18,13 @@ pub struct Map<'shm, K, V, S = DefaultHashBuilder> {
 }
 
 struct MapInner<'shm, K, V, S> {
-    map: HashMap<K, V, S, MapAlloc<'shm>>,
-    alloc: MapAlloc<'shm>,
+    map: HashMap<K, V, S, &'shm FileAlloc>,
+    #[allow(unused)]
+    alloc: &'shm FileAlloc,
 }
 
 impl<'shm, K, V, S> Deref for Map<'shm, K, V, S> {
-    type Target = HashMap<K, V, S, MapAlloc<'shm>>;
+    type Target = HashMap<K, V, S, &'shm FileAlloc>;
 
     fn deref(&self) -> &Self::Target {
         &self.inner.as_ref().unwrap().map
@@ -40,7 +41,7 @@ impl<'shm, K, V> Map<'shm, K, V, DefaultHashBuilder> {
     /// Re-allocate the hash map.
     ///
     /// See `reset_with_hasher`
-    pub fn reset(&mut self, alloc: MapAlloc<'shm>) {
+    pub fn reset(&mut self, alloc: &'shm FileAlloc) {
         let map = HashMap::new_in(alloc.clone());
         self.inner = Some(MapInner { map, alloc });
     }
@@ -56,30 +57,10 @@ impl<'shm, K, V, S> Map<'shm, K, V, S> {
 
     /// Re-allocate the hash map.
     ///
-    /// Uses the given map allocator as underlying allocator.
-    ///
-    /// Each hash map must have a unique `MapAlloc`. Otherwise, your
-    /// program will panic (even though this function takes an immutable ref,
-    /// under the hood mutability is protected by a `RefCell`).
-    pub fn reset_with_hasher(&mut self, alloc: MapAlloc<'shm>, hash_builder: S) {
+    /// Uses the given file allocator to allocate the hashmap's table.
+    pub fn reset_with_hasher(&mut self, alloc: &'shm FileAlloc, hash_builder: S) {
         let map = HashMap::with_hasher_in(hash_builder, alloc.clone());
         self.inner = Some(MapInner { map, alloc })
-    }
-
-    /// Return a clone to the underlying allocator
-    ///
-    /// Safety:
-    ///  - You must ensure you are the ONLY one using this allocator.
-    ///    While this map should be protected by shared-memory locks, and
-    ///    as a result you should be the only one being able to call this
-    ///    method, the result of this method IS ALLOWED TO ESCAPE THE
-    ///    CRITICAL SECTION! However, you must not use it outside the
-    ///    critical section!
-    ///
-    /// TODO: Make `MapAlloc` thread/process-safe!
-    ///
-    pub unsafe fn allocator(&self) -> MapAlloc<'shm> {
-        self.inner.as_ref().unwrap().alloc.clone()
     }
 }
 
@@ -96,12 +77,10 @@ mod integration_tests {
     use rand::prelude::*;
 
     use crate::filealloc::FileAlloc;
-    use crate::mapalloc::{MapAlloc, MapAllocControlData};
     use crate::sync::RwLock;
 
     struct InsertMany {
         file_alloc: FileAlloc,
-        map_alloc: MapAllocControlData,
         map: RwLock<Map<'static, u64, u64>>,
     }
 
@@ -149,7 +128,6 @@ mod integration_tests {
                     MEM_HEAP_SIZE,
                     std::mem::size_of::<InsertMany>(),
                 ),
-                map_alloc: MapAllocControlData::new(),
                 map: RwLock::new(Map::new()),
             });
             inserter.assume_init_mut()
@@ -157,11 +135,7 @@ mod integration_tests {
         // Safety: We are the only ones to attach to this lock.
         let map = unsafe { inserter.map.initialize() }.unwrap();
 
-        let map_alloc = unsafe {
-            // Safety: we'll only use this for one map.
-            MapAlloc::new(&inserter.map_alloc, &inserter.file_alloc)
-        };
-        map.write().unwrap().reset(map_alloc);
+        map.write().unwrap().reset(&inserter.file_alloc);
 
         let mut child_procs = vec![];
         for scenario in &scenarios {

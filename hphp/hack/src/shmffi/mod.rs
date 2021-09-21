@@ -109,7 +109,7 @@ impl HeapValue {
         }
     }
 
-    fn clone_in(&self, alloc: MapAlloc<'static>) -> HeapValue {
+    fn clone_in(&self, alloc: &MapAlloc<'static>) -> HeapValue {
         let layout = Layout::from_size_align(self.header.buffer_size(), 1).unwrap();
         let mut data = alloc.allocate(layout).unwrap();
         // Safety: we are the only ones with access to the allocated chunk.
@@ -129,7 +129,7 @@ impl HeapValue {
         unsafe { std::slice::from_raw_parts(self.data.as_ptr(), len) }
     }
 
-    fn free(self, alloc: MapAlloc<'static>) {
+    fn free(self, alloc: &MapAlloc<'static>) {
         let len = self.header.buffer_size();
         let layout = Layout::from_size_align(len, 1).unwrap();
         // Safety: We own `self`, so we have sole access to data.
@@ -241,7 +241,7 @@ impl<'a> SerializedValue<'a> {
         }
     }
 
-    fn to_heap_value_in(&self, alloc: MapAlloc<'static>) -> HeapValue {
+    fn to_heap_value_in(&self, alloc: &MapAlloc<'static>) -> HeapValue {
         let slice = self.as_slice();
 
         let layout = Layout::from_size_align(slice.len(), 1).unwrap();
@@ -344,11 +344,7 @@ pub extern "C" fn shmffi_add(hash: u64, data: usize) -> usize {
         let compressed_size = compressed.compressed_size();
         let uncompressed_size = compressed.uncompressed_size();
         with(|cmap| {
-            cmap.write_map(&hash, |map| {
-                // Safety: allocator will not escape critical section.
-                //
-                // TODO(hverr): make allocators thread-safe.
-                let allocator = unsafe { map.allocator() };
+            cmap.write_map(&hash, |map, allocator| {
                 let heap_value = compressed.to_heap_value_in(allocator);
                 map.insert(hash, heap_value);
             })
@@ -405,10 +401,8 @@ pub extern "C" fn shmffi_get_size(hash: u64) -> usize {
 #[no_mangle]
 pub extern "C" fn shmffi_move(hash1: u64, hash2: u64) {
     with(|cmap| {
-        let value = cmap.write_map(&hash1, |map1| map1.remove(&hash1).unwrap());
-        cmap.write_map(&hash2, |map2| {
-            // Safety: does not escape critical section!
-            let allocator = unsafe { map2.allocator() };
+        let value = cmap.write_map(&hash1, |map1, _allocator| map1.remove(&hash1).unwrap());
+        cmap.write_map(&hash2, |map2, allocator| {
             let cloned_value = value.clone_in(allocator);
             map2.insert(hash2, cloned_value);
         });
@@ -421,12 +415,11 @@ pub extern "C" fn shmffi_move(hash1: u64, hash2: u64) {
 #[no_mangle]
 pub extern "C" fn shmffi_remove(hash: u64) -> usize {
     let size = with(|cmap| {
-        cmap.write_map(&hash, |map| {
+        cmap.write_map(&hash, |map, allocator| {
             let heap_value = map.remove(&hash).unwrap();
             let result = heap_value.as_slice().len();
 
-            // Safety: allocator does not escape critical section!
-            let allocator = unsafe { map.allocator() };
+            // TODO(hverr): Free should be done on drop.
             heap_value.free(allocator);
             result
         })

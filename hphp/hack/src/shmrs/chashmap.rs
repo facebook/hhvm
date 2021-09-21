@@ -32,7 +32,7 @@ static_assertions::const_assert!(NUM_SHARDS.is_power_of_two());
 pub struct CMap<'shm, K, V, S = DefaultHashBuilder> {
     hash_builder: S,
     file_alloc: FileAlloc,
-    map_allocs: [MapAllocControlData; NUM_SHARDS],
+    shard_allocs: [MapAllocControlData; NUM_SHARDS],
     maps: [RwLock<Map<'shm, K, V, S>>; NUM_SHARDS],
 }
 
@@ -45,6 +45,7 @@ pub struct CMap<'shm, K, V, S = DefaultHashBuilder> {
 pub struct CMapRef<'shm, K, V, S = DefaultHashBuilder> {
     hash_builder: S,
     file_alloc: &'shm FileAlloc,
+    shard_allocs: Vec<MapAlloc<'shm>>,
     maps: Vec<RwLockRef<'shm, Map<'shm, K, V, S>>>,
 }
 
@@ -90,10 +91,10 @@ impl<'shm, K, V, S: Clone> CMap<'shm, K, V, S> {
         // Initialize the memory properly.
         //
         // See MaybeUninit docs for examples.
-        let mut map_allocs: [MaybeUninit<MapAllocControlData>; NUM_SHARDS] =
+        let mut shard_allocs: [MaybeUninit<MapAllocControlData>; NUM_SHARDS] =
             MaybeUninit::uninit().assume_init();
-        for map_alloc in &mut map_allocs[..] {
-            *map_alloc = MaybeUninit::new(MapAllocControlData::new());
+        for shard_alloc in &mut shard_allocs[..] {
+            *shard_alloc = MaybeUninit::new(MapAllocControlData::new());
         }
 
         let mut maps: [MaybeUninit<RwLock<Map<'shm, K, V, S>>>; NUM_SHARDS] =
@@ -105,7 +106,7 @@ impl<'shm, K, V, S: Clone> CMap<'shm, K, V, S> {
         cmap.as_mut_ptr().write(CMap {
             hash_builder,
             file_alloc: FileAlloc::new(file_start, file_size, next_free_byte),
-            map_allocs: MaybeUninit::array_assume_init(map_allocs),
+            shard_allocs: MaybeUninit::array_assume_init(shard_allocs),
             maps: MaybeUninit::array_assume_init(maps),
         });
         let cmap = cmap.assume_init_mut();
@@ -117,18 +118,23 @@ impl<'shm, K, V, S: Clone> CMap<'shm, K, V, S> {
             .map(|r| r.initialize().unwrap())
             .collect();
 
+        // Attach shard allocators.
+        let mut shard_allocs: Vec<MapAlloc<'shm>> = Vec::with_capacity(cmap.shard_allocs.len());
+        for control_data in &cmap.shard_allocs {
+            shard_allocs.push(MapAlloc::new(control_data, &cmap.file_alloc))
+        }
+
         // Initialize maps themselves.
-        assert_eq!(maps.len(), cmap.map_allocs.len());
-        for (control_data, map) in cmap.map_allocs.iter().zip(maps.iter()) {
-            let map_alloc = MapAlloc::new(control_data, &cmap.file_alloc);
+        for map in maps.iter() {
             map.write()
                 .unwrap()
-                .reset_with_hasher(map_alloc, cmap.hash_builder.clone());
+                .reset_with_hasher(&cmap.file_alloc, cmap.hash_builder.clone());
         }
 
         CMapRef {
             hash_builder: cmap.hash_builder.clone(),
             file_alloc: &cmap.file_alloc,
+            shard_allocs,
             maps,
         }
     }
@@ -151,9 +157,16 @@ impl<'shm, K, V, S: Clone> CMap<'shm, K, V, S> {
         // Attach to the map locks.
         let maps: Vec<RwLockRef<'shm, _>> = cmap.maps.iter_mut().map(|r| r.attach()).collect();
 
+        // Attach shard allocators.
+        let mut shard_allocs: Vec<MapAlloc<'shm>> = Vec::with_capacity(cmap.shard_allocs.len());
+        for control_data in &cmap.shard_allocs {
+            shard_allocs.push(MapAlloc::new(control_data, &cmap.file_alloc))
+        }
+
         CMapRef {
             hash_builder: cmap.hash_builder.clone(),
             file_alloc: &cmap.file_alloc,
+            shard_allocs,
             maps,
         }
     }
@@ -193,7 +206,8 @@ impl<'shm, K: Hash, V, S: BuildHasher> CMapRef<'shm, K, V, S> {
         f(&map)
     }
 
-    /// Access the map that belongs to the given key for writing.
+    /// Access the map and that belongs to the given key for writing. Also provides
+    /// access to the corresponding shard allocator.
     ///
     /// Warning! May deadlock (and thus panic) when you already hold a writer lock on the
     /// queried map.
@@ -203,10 +217,15 @@ impl<'shm, K: Hash, V, S: BuildHasher> CMapRef<'shm, K, V, S> {
     /// this means you can't try to hold multiple writer locks (or a write lock
     /// a read lock) at the same time, because the hasher is abstract. You have
     /// no way of knowing which map you need!
-    pub fn write_map<R>(&self, key: &K, f: impl FnOnce(&mut Map<'shm, K, V, S>) -> R) -> R {
+    pub fn write_map<R>(
+        &self,
+        key: &K,
+        f: impl FnOnce(&mut Map<'shm, K, V, S>, &MapAlloc<'shm>) -> R,
+    ) -> R {
         let shard_index = self.shard_index_for(key);
         let mut map = self.maps[shard_index].write().unwrap();
-        f(&mut map)
+        let alloc = &self.shard_allocs[shard_index];
+        f(&mut map, alloc)
     }
 
     /// Return the total number of bytes allocated.
@@ -282,7 +301,7 @@ mod integration_tests {
                         unsafe { CMap::attach(mmap_ptr, MEM_HEAP_SIZE) };
 
                     for &(key, value) in scenario.iter() {
-                        cmap.write_map(&key, |map| {
+                        cmap.write_map(&key, |map, _alloc| {
                             map.insert(key, value);
                             std::thread::sleep(OP_SLEEP);
                         });

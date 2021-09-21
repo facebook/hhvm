@@ -137,7 +137,7 @@ module VisitedSet : sig
   val make : Mode.t -> t
 end
 
-val deps_of_file_info : Mode.t -> FileInfo.t -> DepSet.t
+val deps_of_file_info : Mode.t -> FileInfo.t -> Dep.t list
 
 type dep_edge
 

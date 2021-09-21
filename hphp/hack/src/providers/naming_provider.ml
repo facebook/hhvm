@@ -966,10 +966,10 @@ module ByHash = struct
     if need_update_files ctx then begin
       let mode = Provider_context.get_deps_mode ctx in
       (* remove old typing deps *)
-      Typing_deps.DepSet.iter
+      List.iter
         (Option.value_map
            old
-           ~default:(Typing_deps.DepSet.make mode)
+           ~default:[]
            ~f:(Typing_deps.deps_of_file_info mode))
         ~f:(fun def ->
           match Caml.Hashtbl.find_opt !ifiles def with
@@ -979,6 +979,8 @@ module ByHash = struct
               def
               (Relative_path.Set.remove files filename)
           | _ ->
+            (* TODO(ljw): this will incorrectly fire when a file has two copies of the same symbol.
+               Should fix it by turning deps_of_file_info into a set before removing. *)
             let desc = "remove_absent_dep" in
             Hh_logger.log
               "INVARIANT_VIOLATION_BUG [%s] file=%s"
@@ -991,9 +993,7 @@ module ByHash = struct
               ~pos:""
               (Telemetry.create ()));
       (* add new typing deps *)
-      Typing_deps.DepSet.iter
-        (Typing_deps.deps_of_file_info mode info)
-        ~f:(fun def ->
+      List.iter (Typing_deps.deps_of_file_info mode info) ~f:(fun def ->
           let previous =
             match Caml.Hashtbl.find_opt !ifiles def with
             | Some files -> files

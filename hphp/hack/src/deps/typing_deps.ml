@@ -753,7 +753,7 @@ let () = CustomGraph.hh_custom_dep_graph_register_custom_types ()
 
 let hash_mode = Typing_deps_mode.hash_mode
 
-let deps_of_file_info (mode : Mode.t) (file_info : FileInfo.t) : DepSet.t =
+let deps_of_file_info (mode : Mode.t) (file_info : FileInfo.t) : Dep.t list =
   let {
     FileInfo.funs;
     classes;
@@ -817,7 +817,7 @@ let deps_of_file_info (mode : Mode.t) (file_info : FileInfo.t) : DepSet.t =
         end
       ~init:defs
   in
-  DepSet.of_list mode defs
+  defs
 
 module Telemetry = struct
   let depgraph_delta_num_edges mode =

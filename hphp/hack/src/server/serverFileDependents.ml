@@ -24,7 +24,11 @@ let deps_of_paths ctx workers naming_table relative_paths =
         fileinfos
         ~init:(DepSet.make deps_mode)
         ~f:(fun acc fileinfo ->
-          DepSet.union acc (Typing_deps.deps_of_file_info deps_mode fileinfo))
+          let deps =
+            Typing_deps.deps_of_file_info deps_mode fileinfo
+            |> Typing_deps.DepSet.of_list deps_mode
+          in
+          DepSet.union acc deps)
     in
     DepSet.union acc (Typing_deps.add_all_deps deps_mode initial_deps)
   in

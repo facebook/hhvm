@@ -1432,13 +1432,13 @@ end = struct
     Direct.remove x;
     Cache.remove x
 
-  let remove_old x : unit =
-    Direct.remove_old x;
-    failwith "TODO(hverr): Cache.remove_old"
+  let remove_old x : unit = Direct.remove_old x
 
   let remove_batch xs =
     Direct.remove_batch xs;
     KeySet.iter Cache.remove xs
+
+  let remove_old_batch = Direct.remove_old_batch
 
   let () =
     invalidate_local_caches_callback_list :=
@@ -1447,8 +1447,6 @@ end = struct
         Cache.clear ()
       end
       :: !invalidate_local_caches_callback_list
-
-  let remove_old_batch = Direct.remove_old_batch
 
   module LocalChanges = struct
     let push_stack () =

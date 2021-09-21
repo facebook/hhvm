@@ -40,7 +40,14 @@ type config = {
 (** Default configuration object *)
 val default_config : config
 
-(** Empty configuration object *)
+(** Empty configuration object.
+
+    There are places where we don't expect to write to shared memory, and doing
+    so would be a memory leak. But since shared memory is global, it's very easy
+    to accidentally call a function that will attempt such write. This config
+    initializes shared memory with zero sizes. As such, attempting to write to
+    shared memory that was initialized with this config, will make the program
+    fail immediately. *)
 val empty_config : config
 
 (** A handle to initialized shared memory. Used to connect other workers to
@@ -58,7 +65,9 @@ type handle = private {
   h_sharded_hashtbl_fd: Unix.file_descr;
 }
 
-(** Initialize shared memory. *)
+(** Initialize shared memory.
+
+    Must be called before forking. *)
 val init : config -> num_workers:int -> handle
 
 (** Connect other workers to shared memory *)
@@ -73,9 +82,6 @@ val set_allow_removes : bool -> unit
 
 (** Allow or disallow shared memory writes for the current process. *)
 val set_allow_hashtable_writes_by_current_process : bool -> unit
-
-(** Invoke the garbage collector. *)
-val hh_collect : unit -> unit
 
 (** Directly access the shared memory table.
 

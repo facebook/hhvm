@@ -409,6 +409,14 @@ pub extern "C" fn shmffi_allocated_bytes() -> usize {
     })
 }
 
+#[no_mangle]
+pub extern "C" fn shmffi_num_entries() -> usize {
+    catch_unwind(|| {
+        let num_entries = with(|cmap| cmap.len());
+        Value::int(num_entries as isize).to_bits()
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

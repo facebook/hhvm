@@ -244,6 +244,7 @@ extern value shmffi_get_size(uint64_t hash);
 extern void shmffi_move(uint64_t hash1, uint64_t hash2);
 extern value shmffi_remove(uint64_t hash);
 extern value shmffi_allocated_bytes();
+extern value shmffi_num_entries();
 
 
 /*****************************************************************************/
@@ -590,13 +591,20 @@ CAMLprim value hh_sample_rate(void) {
 }
 
 CAMLprim value hh_hash_used_slots(void) {
-  // TODO(hverr): Support sharded hash tables
+  // TODO(hverr): For some reason this returns a tuple.
+  // Fix this when the migration is complete.
   CAMLparam0();
-  CAMLlocal1(connector);
+  CAMLlocal2(connector, num_entries);
 
   connector = caml_alloc_tuple(2);
-  Store_field(connector, 0, Val_long(*hcounter_filled));
-  Store_field(connector, 1, Val_long(*hcounter));
+  if (shm_use_sharded_hashtbl) {
+    num_entries = shmffi_num_entries();
+    Store_field(connector, 0, num_entries);
+    Store_field(connector, 1, num_entries);
+  } else {
+    Store_field(connector, 0, Val_long(*hcounter_filled));
+    Store_field(connector, 1, Val_long(*hcounter));
+  }
 
   CAMLreturn(connector);
 }

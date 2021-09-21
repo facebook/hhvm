@@ -216,6 +216,17 @@ impl<'shm, K: Hash, V, S: BuildHasher> CMapRef<'shm, K, V, S> {
     pub fn allocated_bytes(&self) -> usize {
         self.file_alloc.allocated_bytes()
     }
+
+    /// Return the number of total entries in the hash map.
+    ///
+    /// Will loop over each shard.
+    pub fn len(&self) -> usize {
+        let mut count = 0;
+        for map in &self.maps {
+            count += map.read().unwrap().len();
+        }
+        count
+    }
 }
 
 #[cfg(test)]

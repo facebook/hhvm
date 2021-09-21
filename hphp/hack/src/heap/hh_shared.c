@@ -239,6 +239,11 @@ extern void shmffi_attach(void* mmap_address, size_t file_size);
 extern value shmffi_add(uint64_t hash, value data);
 extern value shmffi_mem(uint64_t hash);
 extern value shmffi_get_and_deserialize(uint64_t hash);
+extern value shmffi_mem_status(uint64_t hash);
+extern value shmffi_get_size(uint64_t hash);
+extern void shmffi_move(uint64_t hash1, uint64_t hash2);
+extern value shmffi_remove(uint64_t hash);
+
 
 /*****************************************************************************/
 /* Config settings (essentially constants, so they don't need to live in shared
@@ -2305,7 +2310,7 @@ value hh_mem(value key) {
 CAMLprim value hh_mem_status(value key) {
   CAMLparam1(key);
   if (shm_use_sharded_hashtbl != 0) {
-    raise_assertion_failure(LOCATION": shm_use_sharded_hashtbl not implemented");
+    CAMLreturn(shmffi_mem_status(get_hash(key)));
   }
   int res = hh_mem_inner(key);
   switch (res) {
@@ -2421,7 +2426,7 @@ CAMLprim value hh_deserialize_raw(value heap_entry) {
 CAMLprim value hh_get_size(value key) {
   CAMLparam1(key);
   if (shm_use_sharded_hashtbl != 0) {
-    raise_assertion_failure(LOCATION": shm_use_sharded_hashtbl not implemented");
+    CAMLreturn(shmffi_get_size(get_hash(key)));
   }
 
   unsigned int slot = find_slot(key);
@@ -2438,7 +2443,8 @@ CAMLprim value hh_get_size(value key) {
 /*****************************************************************************/
 void hh_move(value key1, value key2) {
   if (shm_use_sharded_hashtbl != 0) {
-    raise_assertion_failure(LOCATION": shm_use_sharded_hashtbl not implemented");
+    shmffi_move(get_hash(key1), get_hash(key2));
+    return;
   }
 
   unsigned int slot1 = find_slot(key1);
@@ -2467,7 +2473,7 @@ void hh_move(value key1, value key2) {
 CAMLprim value hh_remove(value key) {
   CAMLparam1(key);
   if (shm_use_sharded_hashtbl != 0) {
-    raise_assertion_failure(LOCATION": shm_use_sharded_hashtbl not implemented");
+    CAMLreturn(shmffi_remove(get_hash(key)));
   }
 
   unsigned int slot = find_slot(key);

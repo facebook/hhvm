@@ -68,6 +68,19 @@ impl HeapValue {
             result
         }
     }
+
+    fn clone_in(&self, alloc: MapAlloc<'static>) -> HeapValue {
+        let mut data = Vec::with_capacity_in(self.data.len(), alloc);
+        data.resize(self.data.len(), 0);
+        data.as_mut_slice().copy_from_slice(&self.data);
+
+        HeapValue {
+            is_serialized: self.is_serialized,
+            is_compressed: self.is_compressed,
+            uncompressed_size: self.uncompressed_size,
+            data,
+        }
+    }
 }
 
 enum SerializedValue<'a> {
@@ -275,7 +288,7 @@ pub extern "C" fn shmffi_get_and_deserialize(hash: u64) -> usize {
     catch_unwind(|| {
         with(|cmap| {
             cmap.read_map(&hash, |map| {
-                let heap_value = map.get(&hash).unwrap();
+                let heap_value = &map[&hash];
 
                 // Safety: we are not holding on to unrooted OCaml values.
                 unsafe { heap_value.to_ocaml_value() }
@@ -287,7 +300,40 @@ pub extern "C" fn shmffi_get_and_deserialize(hash: u64) -> usize {
 #[no_mangle]
 pub extern "C" fn shmffi_mem(hash: u64) -> usize {
     catch_unwind(|| {
-        let flag = with(|cmap| cmap.read_map(&hash, |map| map.get(&hash).is_some()));
+        let flag = with(|cmap| cmap.read_map(&hash, |map| map.contains_key(&hash)));
         Value::int(flag as isize).to_bits()
     })
+}
+
+#[no_mangle]
+pub extern "C" fn shmffi_mem_status(hash: u64) -> usize {
+    let flag = with(|cmap| cmap.read_map(&hash, |map| map.contains_key(&hash)));
+    // From hh_shared.c: 1 = present, -1 = not present
+    let result = if flag { 1 } else { -1 };
+    Value::int(result).to_bits()
+}
+
+#[no_mangle]
+pub extern "C" fn shmffi_get_size(hash: u64) -> usize {
+    let size = with(|cmap| cmap.read_map(&hash, |map| map[&hash].data.len()));
+    Value::int(size as isize).to_bits()
+}
+
+#[no_mangle]
+pub extern "C" fn shmffi_move(hash1: u64, hash2: u64) {
+    with(|cmap| {
+        let value = cmap.write_map(&hash1, |map1| map1.remove(&hash1).unwrap());
+        cmap.write_map(&hash2, |map2| {
+            // Safety: does not escape critical section!
+            let allocator = unsafe { map2.allocator() };
+            let cloned_value = value.clone_in(allocator);
+            map2.insert(hash2, cloned_value);
+        });
+    });
+}
+
+#[no_mangle]
+pub extern "C" fn shmffi_remove(hash: u64) -> usize {
+    let size = with(|cmap| cmap.write_map(&hash, |map| map.remove(&hash).unwrap().data.len()));
+    Value::int(size as isize).to_bits()
 }

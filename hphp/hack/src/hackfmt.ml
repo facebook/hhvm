@@ -399,13 +399,7 @@ let print_error source_text error =
   in
   Printf.eprintf "%s\n" text
 
-let parse ~parser_env text_source =
-  let source_text =
-    match text_source with
-    | File filename ->
-      SourceText.from_file @@ Relative_path.create Relative_path.Dummy filename
-    | Stdin _ -> SourceText.make Relative_path.default @@ read_stdin ()
-  in
+let parse_text ~parser_env source_text =
   let parser_env =
     {
       parser_env with
@@ -420,6 +414,17 @@ let parse ~parser_env text_source =
     List.iter (SyntaxTree.all_errors tree) ~f:(print_error source_text);
     raise Hackfmt_error.InvalidSyntax
   )
+
+let read_file filename =
+  SourceText.from_file @@ Relative_path.create Relative_path.Dummy filename
+
+let parse ~parser_env text_source =
+  let source_text =
+    match text_source with
+    | File filename -> read_file filename
+    | Stdin _ -> SourceText.make Relative_path.default @@ read_stdin ()
+  in
+  parse_text ~parser_env source_text
 
 let logging_time_taken env logger thunk =
   let start_t = Unix.gettimeofday () in
@@ -520,10 +525,13 @@ let main
         let text_source = File filename in
         env.Env.text_source <- text_source;
         if env.Env.debug then debug_print ~config text_source;
-        text_source
-        |> parse ~parser_env
-        |> format ~config env
-        |> output ~text_source)
+        let source_text = read_file filename in
+        let source_text_string = SourceText.text source_text in
+        let formatted_text =
+          text_source |> parse ~parser_env |> format ~config env
+        in
+        if String.(source_text_string <> formatted_text) then
+          output ~text_source formatted_text)
   | AtChar { text_source; pos; config } ->
     env.Env.text_source <- text_source;
     let tree = parse ~parser_env text_source in

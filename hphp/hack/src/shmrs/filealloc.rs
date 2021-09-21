@@ -27,6 +27,11 @@ impl FileAlloc {
             next_free_byte: AtomicUsize::new(next_free_byte),
         }
     }
+
+    /// Return the total number of allocated bytes.
+    pub fn allocated_bytes(&self) -> usize {
+        self.next_free_byte.load(Ordering::Relaxed)
+    }
 }
 
 unsafe impl Allocator for FileAlloc {

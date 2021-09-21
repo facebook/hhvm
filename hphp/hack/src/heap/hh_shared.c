@@ -243,6 +243,7 @@ extern value shmffi_mem_status(uint64_t hash);
 extern value shmffi_get_size(uint64_t hash);
 extern void shmffi_move(uint64_t hash1, uint64_t hash2);
 extern value shmffi_remove(uint64_t hash);
+extern value shmffi_allocated_bytes();
 
 
 /*****************************************************************************/
@@ -565,7 +566,9 @@ static long removed_count = 0;
 
 /* Expose so we can display diagnostics */
 CAMLprim value hh_used_heap_size(void) {
-  // TODO(hverr): Support sharded hash tables
+  if (shm_use_sharded_hashtbl) {
+    return shmffi_allocated_bytes();
+  }
   return Val_long(used_heap_size());
 }
 

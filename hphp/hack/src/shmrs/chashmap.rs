@@ -44,6 +44,7 @@ pub struct CMap<'shm, K, V, S = DefaultHashBuilder> {
 /// Obtained by calling `initialize` or `attach` on `CMap`.
 pub struct CMapRef<'shm, K, V, S = DefaultHashBuilder> {
     hash_builder: S,
+    file_alloc: &'shm FileAlloc,
     maps: Vec<RwLockRef<'shm, Map<'shm, K, V, S>>>,
 }
 
@@ -127,6 +128,7 @@ impl<'shm, K, V, S: Clone> CMap<'shm, K, V, S> {
 
         CMapRef {
             hash_builder: cmap.hash_builder.clone(),
+            file_alloc: &cmap.file_alloc,
             maps,
         }
     }
@@ -151,6 +153,7 @@ impl<'shm, K, V, S: Clone> CMap<'shm, K, V, S> {
 
         CMapRef {
             hash_builder: cmap.hash_builder.clone(),
+            file_alloc: &cmap.file_alloc,
             maps,
         }
     }
@@ -204,6 +207,14 @@ impl<'shm, K: Hash, V, S: BuildHasher> CMapRef<'shm, K, V, S> {
         let shard_index = self.shard_index_for(key);
         let mut map = self.maps[shard_index].write().unwrap();
         f(&mut map)
+    }
+
+    /// Return the total number of bytes allocated.
+    ///
+    /// Note that this might include bytes that were later free'd, as we
+    /// (currently) don't free memory to the OS.
+    pub fn allocated_bytes(&self) -> usize {
+        self.file_alloc.allocated_bytes()
     }
 }
 

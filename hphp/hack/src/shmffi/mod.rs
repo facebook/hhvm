@@ -401,6 +401,14 @@ pub extern "C" fn shmffi_remove(hash: u64) -> usize {
     Value::int(size as isize).to_bits()
 }
 
+#[no_mangle]
+pub extern "C" fn shmffi_allocated_bytes() -> usize {
+    catch_unwind(|| {
+        let bytes = with(|cmap| cmap.allocated_bytes());
+        Value::int(bytes as isize).to_bits()
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

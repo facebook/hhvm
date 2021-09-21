@@ -340,7 +340,7 @@ unsafe extern "C" fn hackc_compile_hhas_from_text_cpp_ffi(
                     )
                 };
                 match compile_result {
-                    Ok(hhas_prog) => Ok(Box::into_raw(Box::new(hhas_prog))),
+                    Ok((hhas_prog, _)) => Ok(Box::into_raw(Box::new(hhas_prog))),
                     Err(e) => Err(anyhow!("{}", e)),
                 }
             },

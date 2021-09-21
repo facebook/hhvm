@@ -610,8 +610,14 @@ CAMLprim value hh_hash_used_slots(void) {
 }
 
 CAMLprim value hh_hash_slots(void) {
-  // TODO(hverr): Support sharded hash tables
   CAMLparam0();
+  if (shm_use_sharded_hashtbl) {
+    // In the sharded hash table implementation, we dynamically resize
+    // the tables. As such, this doesn't really make sense. Return the
+    // number of entries for now.
+    CAMLreturn(shmffi_num_entries());
+  }
+
   CAMLreturn(Val_long(hashtbl_size));
 }
 

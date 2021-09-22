@@ -99,12 +99,6 @@ buildCodeSizeCounters() {
   codeCounterInit("live.main");
   codeCounterInit("live.cold");
   codeCounterInit("live.frozen");
-  codeCounterInit("anchor.main");
-  codeCounterInit("anchor.cold");
-  codeCounterInit("anchor.frozen");
-  codeCounterInit("interp.main");
-  codeCounterInit("interp.cold");
-  codeCounterInit("interp.frozen");
   return counters;
 }
 
@@ -162,14 +156,9 @@ void recordTranslationSizes(const TransRec& tr) {
     case TransKind::LivePrologue:
       kindName = "live";
       break;
-    case TransKind::Anchor:
-      kindName = "anchor";
-      break;
-    case TransKind::Interp:
-      kindName = "interp";
-      break;
-    case TransKind::Invalid:
-      always_assert(0);
+    // We don't record the other, less common translation kinds.
+    default:
+      return;
   }
   auto mainCounter   = s_counters.at(folly::sformat("{}.main", kindName));
   auto coldCounter   = s_counters.at(folly::sformat("{}.cold", kindName));

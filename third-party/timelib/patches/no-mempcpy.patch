@@ -1,0 +1,24 @@
+commit 48d0be54b878eced8065f916d068b50b00884691
+Author: Fred Emmott <fe@fb.com>
+Date:   Fri Sep 17 08:42:52 2021 -0500
+
+    Use memcpy instead of mempcpy
+    
+    mempcpy is not available on MacOS.
+    
+    Call introduced by Ubuntu patch.
+
+diff --git a/parse_tz.c b/parse_tz.c
+index 69265ca..16ba9e4 100644
+--- a/parse_tz.c
++++ b/parse_tz.c
+@@ -914,7 +914,8 @@ static void fake_data_segment(timelib_tzdb *sysdb,
+         
+         data = malloc(3 * sysdb->index_size + 7);
+ 
+-        p = mempcpy(data, FAKE_HEADER, sizeof(FAKE_HEADER) - 1);
++        n = sizeof(FAKE_HEADER) - 1;
++        p = memcpy(data, FAKE_HEADER, n) + n;
+ 
+         for (n = 0; n < sysdb->index_size; n++) {
+                 const struct location_info *li;

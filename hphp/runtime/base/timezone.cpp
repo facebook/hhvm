@@ -107,11 +107,7 @@ const timelib_tzdb* timezone_get_tzdb() {
   if (s_tzdb_cache.load() == nullptr) {
     Lock tzdbLock(s_tzdb_mutex);
     if (s_tzdb_cache.load() == nullptr) {
-      #ifdef HAVE_SYSTEM_TZDATA
-      s_tzdb_cache = timelib_zoneinfo("/usr/share/zoneinfo");
-      #else
       s_tzdb_cache = (*timezone_raw_get_tzdb)();
-      #endif
     }
   }
   if (s_tzdb_cache == nullptr) {

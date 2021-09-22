@@ -79,26 +79,33 @@ void recordBCInstr(uint32_t op, const TCA addr, const TCA end, bool cold) {
 std::map<std::string, ServiceData::ExportedTimeSeries*>
 buildCodeSizeCounters() {
   std::map<std::string, ServiceData::ExportedTimeSeries*> counters;
-  auto codeCounterInit = [&] (const char* name) {
-    auto counterName = folly::sformat("jit.code.{}.used", name);
-    counters[name] = ServiceData::createTimeSeries(
-        counterName,
-        {ServiceData::StatsType::RATE,
-        ServiceData::StatsType::SUM},
-        {std::chrono::seconds(RuntimeOption::EvalJitWarmupRateSeconds),
-        std::chrono::seconds(0)}
-        );
+  auto codeCounterInit =
+    [&] (const char* name,
+         const std::vector<ServiceData::StatsType>& stats) {
+      auto counterName = folly::sformat("jit.code.{}.used", name);
+      counters[name] = ServiceData::createTimeSeries(
+          counterName, stats,
+          {std::chrono::seconds(RuntimeOption::EvalJitWarmupRateSeconds),
+           std::chrono::seconds(0)}
+      );
+    };
+  auto codeCounterSumAndRateInit = [&] (const char* name) {
+    codeCounterInit(name, {ServiceData::StatsType::RATE,
+                           ServiceData::StatsType::SUM});
   };
-  CodeCache::forEachName(codeCounterInit);
-  codeCounterInit("prof.main");
-  codeCounterInit("prof.cold");
-  codeCounterInit("prof.frozen");
-  codeCounterInit("opt.main");
-  codeCounterInit("opt.cold");
-  codeCounterInit("opt.frozen");
-  codeCounterInit("live.main");
-  codeCounterInit("live.cold");
-  codeCounterInit("live.frozen");
+  auto codeCounterSumInit = [&] (const char* name) {
+    codeCounterInit(name, {ServiceData::StatsType::SUM});
+  };
+  CodeCache::forEachName(codeCounterSumAndRateInit);
+  codeCounterSumInit("prof.main");
+  codeCounterSumInit("prof.cold");
+  codeCounterSumInit("prof.frozen");
+  codeCounterSumInit("opt.main");
+  codeCounterSumInit("opt.cold");
+  codeCounterSumInit("opt.frozen");
+  codeCounterSumInit("live.main");
+  codeCounterSumInit("live.cold");
+  codeCounterSumInit("live.frozen");
   return counters;
 }
 

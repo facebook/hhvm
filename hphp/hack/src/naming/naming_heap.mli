@@ -31,39 +31,24 @@ module type ReverseNamingTable = sig
 end
 
 module Types : sig
-  module TypeCanonHeap :
-    SharedMem.Heap
-      with type key = Typing_deps.Dep.t
-       and module KeyHasher = SharedMem.MakeKeyHasher(Typing_deps.DepHashKey)
+  module TypeCanonHeap : SharedMem.Heap with type key = Typing_deps.Dep.t
 
-  module TypePosHeap :
-    SharedMem.Heap
-      with type key = Typing_deps.Dep.t
-       and module KeyHasher = SharedMem.MakeKeyHasher(Typing_deps.DepHashKey)
+  module TypePosHeap : SharedMem.Heap with type key = Typing_deps.Dep.t
 
   include
     ReverseNamingTable with type pos = FileInfo.pos * Naming_types.kind_of_type
 end
 
 module Funs : sig
-  module FunCanonHeap :
-    SharedMem.Heap
-      with type key = Typing_deps.Dep.t
-       and module KeyHasher = SharedMem.MakeKeyHasher(Typing_deps.DepHashKey)
+  module FunCanonHeap : SharedMem.Heap with type key = Typing_deps.Dep.t
 
-  module FunPosHeap :
-    SharedMem.Heap
-      with type key = Typing_deps.Dep.t
-       and module KeyHasher = SharedMem.MakeKeyHasher(Typing_deps.DepHashKey)
+  module FunPosHeap : SharedMem.Heap with type key = Typing_deps.Dep.t
 
   include ReverseNamingTable with type pos = FileInfo.pos
 end
 
 module Consts : sig
-  module ConstPosHeap :
-    SharedMem.Heap
-      with type key = Typing_deps.Dep.t
-       and module KeyHasher = SharedMem.MakeKeyHasher(Typing_deps.DepHashKey)
+  module ConstPosHeap : SharedMem.Heap with type key = Typing_deps.Dep.t
 
   include ReverseNamingTable with type pos = FileInfo.pos
 end

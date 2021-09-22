@@ -966,12 +966,19 @@ module ByHash = struct
     if need_update_files ctx then begin
       let mode = Provider_context.get_deps_mode ctx in
       (* remove old typing deps *)
-      List.iter
-        (Option.value_map
-           old
-           ~default:[]
-           ~f:(Typing_deps.deps_of_file_info mode))
-        ~f:(fun def ->
+      (* Note: if a file has two definitions of a symbol name, our construction of
+         ifiles will only include symbol->filename once for that file. We'll
+         turn the deps into a set right now so we can remove it only once; that way,
+         other unexpected "remove_absent_deps" violations will still be flagged.
+         Note: we're using our own DepSet here, because Typing_deps.DepSet.t
+         is very inefficient due to its Rust interop. *)
+      let module DepSet = Caml.Set.Make (Typing_deps.DepHashKey) in
+      let deps =
+        Option.value_map old ~default:[] ~f:(Typing_deps.deps_of_file_info mode)
+        |> DepSet.of_list
+      in
+      DepSet.iter
+        (fun def ->
           match Caml.Hashtbl.find_opt !ifiles def with
           | Some files when Relative_path.Set.mem files filename ->
             Caml.Hashtbl.replace
@@ -979,8 +986,6 @@ module ByHash = struct
               def
               (Relative_path.Set.remove files filename)
           | _ ->
-            (* TODO(ljw): this will incorrectly fire when a file has two copies of the same symbol.
-               Should fix it by turning deps_of_file_info into a set before removing. *)
             let desc = "remove_absent_dep" in
             Hh_logger.log
               "INVARIANT_VIOLATION_BUG [%s] file=%s"
@@ -991,7 +996,8 @@ module ByHash = struct
               ~typechecking_is_deferring:false
               ~path:filename
               ~pos:""
-              (Telemetry.create ()));
+              (Telemetry.create ()))
+        deps;
       (* add new typing deps *)
       List.iter (Typing_deps.deps_of_file_info mode info) ~f:(fun def ->
           let previous =

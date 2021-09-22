@@ -91,7 +91,7 @@ module RawAccess : sig
 
   val mem_raw : string -> bool
 
-  val get_raw : string -> serialized
+  val get_raw : string -> serialized option
 
   val add_raw : string -> serialized -> unit
 
@@ -270,7 +270,7 @@ module type Backend = functor (KeyHasher : KeyHasher) (Value : Value) -> sig
 
   val mem : KeyHasher.hash -> bool
 
-  val get : KeyHasher.hash -> Value.t
+  val get : KeyHasher.hash -> Value.t option
 
   val remove : KeyHasher.hash -> unit
 

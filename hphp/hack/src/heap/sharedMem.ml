@@ -195,7 +195,7 @@ module RawAccess = struct
 
   external mem_raw : string -> bool = "hh_mem"
 
-  external get_raw : string -> serialized = "hh_get_raw"
+  external get_raw : string -> serialized option = "hh_get_raw"
 
   external add_raw : string -> serialized -> unit = "hh_add_raw"
 
@@ -432,7 +432,7 @@ module type Backend = functor (KeyHasher : KeyHasher) (Value : Value) -> sig
 
   val mem : KeyHasher.hash -> bool
 
-  val get : KeyHasher.hash -> Value.t
+  val get : KeyHasher.hash -> Value.t option
 
   val remove : KeyHasher.hash -> unit
 
@@ -457,7 +457,7 @@ functor
 
     external hh_get_size : KeyHasher.hash -> int = "hh_get_size"
 
-    external hh_get_and_deserialize : KeyHasher.hash -> Value.t
+    external hh_get_and_deserialize : KeyHasher.hash -> Value.t option
       = "hh_get_and_deserialize"
 
     external hh_remove : KeyHasher.hash -> int = "hh_remove"
@@ -523,10 +523,12 @@ functor
 
     let mem key = hh_mem key
 
-    let get key =
+    let get (key : KeyHasher.hash) : Value.t option =
       let v = hh_get_and_deserialize key in
       if SMTelemetry.hh_log_level () > 0 then
-        log_deserialize (hh_get_size key) (Obj.repr v);
+        Option.iter
+          ~f:(fun v -> log_deserialize (hh_get_size key) (Obj.repr v))
+          v;
       v
 
     let remove key =
@@ -620,17 +622,18 @@ functor
       in
       Immediate.add x entry
 
-    let get x =
+    let get x : Value.t option =
       match Immediate.get x with
-      | RawValue y -> y
-      | ProfiledValue { entry; write_time } ->
+      | None -> None
+      | Some (RawValue y) -> Some y
+      | Some (ProfiledValue { entry; write_time }) ->
         EventLogger.(
           log_if_initialized @@ fun () ->
           sharedmem_access_sample
             ~heap_name:Value.description
             ~key:(KeyHasher.to_bytes x)
             ~write_time);
-        entry
+        Some entry
 
     let mem = Immediate.mem
 
@@ -727,8 +730,8 @@ functor
         | None -> Backend.get key
         | Some stack ->
           (match Hashtbl.find_opt stack.current key with
-          | Some Remove -> failwith "Trying to get a non-existent value"
-          | Some (Replace value | Add value) -> value
+          | Some Remove -> None
+          | Some (Replace value | Add value) -> Some value
           | None -> get stack.prev key)
 
       (*
@@ -799,7 +802,7 @@ functor
         | Some _stack ->
           assert (mem stack_opt from_key);
           assert (not @@ mem stack_opt to_key);
-          let value = get stack_opt from_key in
+          let value = Option.value_exn (get stack_opt from_key) in
           remove stack_opt from_key;
           add stack_opt to_key value
 
@@ -994,17 +997,11 @@ module Heap (Backend : Backend) (Key : Key) (Value : Value) :
 
   let get x =
     let hash = hash_of_key x in
-    if WithLocalChanges.mem hash then
-      Some (WithLocalChanges.get hash)
-    else
-      None
+    WithLocalChanges.get hash
 
   let get_old x =
     let old_hash = old_hash_of_key x in
-    if WithLocalChanges.mem old_hash then
-      Some (WithLocalChanges.get old_hash)
-    else
-      None
+    WithLocalChanges.get old_hash
 
   let get_batch xs =
     KeySet.fold

@@ -126,6 +126,17 @@
 #ifndef NO_SQLITE3
 #include <sqlite3.h>
 
+// Some OCaml utility functions (introduced only in 4.12.0)
+//
+// TODO(hverr): Remove these when we move to 4.12.0
+value hh_shared_caml_alloc_some(value v) {
+  CAMLparam1(v);
+  value some = caml_alloc_small(1, 0);
+  Store_field(some, 0, v);
+  CAMLreturn(some);
+}
+#define Val_none Val_int(0)
+
 // global SQLite DB pointer
 static sqlite3 *g_db = NULL;
 
@@ -2263,9 +2274,7 @@ static unsigned int find_slot(value key) {
   }
 }
 
-_Bool hh_mem_inner(value key) {
-  check_should_exit();
-  unsigned int slot = find_slot(key);
+_Bool hh_is_slot_taken_for_key(unsigned int slot, value key) {
   _Bool good_hash = hashtbl[slot].hash == get_hash(key);
   _Bool non_null_addr = hashtbl[slot].addr != NULL;
   if (good_hash && non_null_addr) {
@@ -2289,8 +2298,13 @@ _Bool hh_mem_inner(value key) {
     }
     return 1;
   }
-
   return 0;
+}
+
+_Bool hh_mem_inner(value key) {
+  check_should_exit();
+  unsigned int slot = find_slot(key);
+  return hh_is_slot_taken_for_key(slot, key);
 }
 
 /*****************************************************************************/
@@ -2349,25 +2363,28 @@ CAMLprim value hh_deserialize(heap_entry_t *elt) {
 
 /*****************************************************************************/
 /* Returns the value associated to a given key, and deserialize it. */
-/* The key MUST be present. */
+/* Returns [None] if the slot for the key is empty. */
 /*****************************************************************************/
 CAMLprim value hh_get_and_deserialize(value key) {
   CAMLparam1(key);
   check_should_exit();
-  CAMLlocal1(result);
+  CAMLlocal2(deserialized_value, result);
   if (shm_use_sharded_hashtbl != 0) {
     CAMLreturn(shmffi_get_and_deserialize(get_hash(key)));
   }
 
   unsigned int slot = find_slot(key);
-  assert(hashtbl[slot].hash == get_hash(key));
-  result = hh_deserialize(hashtbl[slot].addr);
+  if (!hh_is_slot_taken_for_key(slot, key)) {
+    CAMLreturn(Val_none);
+  }
+  deserialized_value = hh_deserialize(hashtbl[slot].addr);
+  result = hh_shared_caml_alloc_some(deserialized_value);
   CAMLreturn(result);
 }
 
 /*****************************************************************************/
-/* Returns Ocaml bytes representing the raw heap_entry. Key must exist. */
-/* The key MUST be present. */
+/* Returns Ocaml bytes representing the raw heap_entry. */
+/* Returns [None] if the slot for the key is empty. */
 /*****************************************************************************/
 CAMLprim value hh_get_raw(value key) {
   CAMLparam1(key);
@@ -2375,16 +2392,19 @@ CAMLprim value hh_get_raw(value key) {
     raise_assertion_failure(LOCATION": shm_use_sharded_hashtbl not implemented");
   }
   check_should_exit();
-  CAMLlocal1(result);
+  CAMLlocal2(result, bytes);
 
   unsigned int slot = find_slot(key);
-  assert(hashtbl[slot].hash == get_hash(key));
+  if (!hh_is_slot_taken_for_key(slot, key)) {
+    CAMLreturn(Val_none);
+  }
 
   heap_entry_t *elt = hashtbl[slot].addr;
   size_t size = Heap_entry_total_size(elt->header);
   char *data = (char *)elt;
-  result = caml_alloc_string(size);
-  memcpy(Bytes_val(result), data, size);
+  bytes = caml_alloc_string(size);
+  memcpy(Bytes_val(bytes), data, size);
+  result = hh_shared_caml_alloc_some(bytes);
   CAMLreturn(result);
 }
 

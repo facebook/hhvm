@@ -18,7 +18,7 @@ external hh_remove : key -> unit = "hh_remove"
 
 external hh_move : key -> key -> unit = "hh_move"
 
-external hh_get : key -> string = "hh_get_and_deserialize"
+external hh_get : key -> string option = "hh_get_and_deserialize"
 
 external hh_collect : unit -> unit = "hh_collect"
 
@@ -84,7 +84,7 @@ let expect_not_mem key =
   @@ not (mem key)
 
 let expect_get key expected =
-  let value = get key in
+  let value = Option.get (get key) in
   expect
     ~msg:
       (Printf.sprintf

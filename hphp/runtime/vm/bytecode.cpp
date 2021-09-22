@@ -2428,7 +2428,7 @@ OPTBLD_INLINE void baseLImpl(named_local_var loc, MOpMode mode, ReadonlyOp op) {
     raise_undefined_local(vmfp(), loc.name);
   }
 
-  if (readonlyLocalShouldThrow(*local, op, mstate.roProp)) {
+  if (readonlyLocalShouldThrow(*local, op)) {
     assertx(loc.name < vmfp()->func()->numNamedLocals());
     assertx(vmfp()->func()->localVarName(loc.name));
     auto const name = vmfp()->func()->localVarName(loc.name);

@@ -250,7 +250,7 @@ void throw_must_be_value_type(const char* className, const char* propName);
 void throw_local_must_be_value_type(const char* locName);
 void checkReadonly(const TypedValue* tv, const Class* cls, const StringData* name,
                    bool readonly, ReadonlyOp op, bool writeMode);
-bool readonlyLocalShouldThrow(TypedValue tv, ReadonlyOp op, bool& roProp);
+bool readonlyLocalShouldThrow(TypedValue tv, ReadonlyOp op);
 
 void check_collection_cast_to_array();
 

@@ -917,12 +917,12 @@ void throw_must_be_value_type(const char* className, const char* propName) {
   throw_readonly_violation(className, propName, Strings::MUST_BE_VALUE_TYPE);
 }
 
-bool readonlyLocalShouldThrow(TypedValue tv, ReadonlyOp op, bool& roProp) {
+bool readonlyLocalShouldThrow(TypedValue tv, ReadonlyOp op) {
   if (!RO::EvalEnableReadonlyPropertyEnforcement) return false;
   if (op == ReadonlyOp::CheckROCOW) {
     auto cow = !isRefcountedType(type(tv)) || hasPersistentFlavor(type(tv));
     if (!cow) return true;
-    roProp = true;
+    vmMInstrState().roProp = true;
   }
   return false;
 }

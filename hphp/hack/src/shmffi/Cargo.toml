@@ -17,6 +17,9 @@ ocamlrep_ocamlpool = { path = "../ocamlrep_ocamlpool" }
 once_cell = "1.4"
 shmrs = { path = "../shmrs" }
 
+[dev-dependencies]
+rand = { version = "0.7", features = ["small_rng"] }
+
 [profile.release]
 incremental = false
 

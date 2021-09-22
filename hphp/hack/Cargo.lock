@@ -3403,6 +3403,7 @@ dependencies = [
  "ocamlrep",
  "ocamlrep_ocamlpool",
  "once_cell",
+ "rand",
  "shmrs",
 ]
 

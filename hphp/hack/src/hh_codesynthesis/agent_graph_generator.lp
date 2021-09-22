@@ -6,6 +6,7 @@
 #const number_of_agents = @na().
 #const number_of_roots = @nr().
 #const number_of_leaves = @nl().
+#const number_of_edges = @ne().
 #const number_of_infra_agents = @nia().
 #const number_of_product_agents = @npa().
 
@@ -13,14 +14,7 @@
 % $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 % Generating n agents.
 % =============================================================================
-% The actual agent created in Python interface is internal_agents/2,
-% The first arity is a string, the second arity is a number.
-% like, internal_agents("A0", 0).
-% We are converting it to agents/1. here, simply ignore the second arity with "_".
-% agents(X) :- internal_agents(X, _).
-% Uncomment this for an easy prototyping without Python interface.
-agents(1..number_of_agents).
-internal_agents(X, X) :- agents(X).
+agents(0..number_of_agents-1).
 
 % An agent X could be an infra agent or a product agent.
 1 {infra_agent(X); product_agent(X)} 1 :- agents(X).
@@ -30,9 +24,6 @@ internal_agents(X, X) :- agents(X).
 
 % Constraint on number of product agents
 :- #count{ X : product_agent(X) } < number_of_product_agents.
-
-% % Temporary constraint to require infra agent's number is smaller than the product one.
-% :- product_agent(X), infra_agent(Y), X < Y.
 
 % We separated the below part to Python interface to avoid "grounding bottleneck."
 % And we are using normal distrubution to create a sequence of "depends_on" among
@@ -52,6 +43,10 @@ internal_agents(X, X) :- agents(X).
 % Calculate the in/out degree of each agent.
 in_degree_of_agent(X, InDegree) :- agents(X), InDegree = #count{ Y : depends_on(X, Y) }.
 out_degree_of_agent(X, OutDegree) :- agents(X), OutDegree = #count{ Y : depends_on(Y, X) }.
+
+% Edge constraint.
+% The number of edges in this graph is the sum of all out degree or in degree.
+:- Edges = #sum{D : out_degree_of_agent(X, D), agents(X)}, Edges < @ne().
 
 % Constraint on number of roots in the agent graph.
 :- #count{ X : in_degree_of_agent(X, 0) } < number_of_roots.
@@ -74,24 +69,21 @@ out_degree_of_agent(X, OutDegree) :- agents(X), OutDegree = #count{ Y : depends_
 :- in_degree_of_agent(X, D), product_agent(X), D < @product_agent_in_degree_low(X).
 :- in_degree_of_agent(X, D), product_agent(X), D >= @product_agent_in_degree_high(X).
 
-% Edge constraint.
-:- Edges = #sum{D : out_degree_of_agent(X, D), agents(X)}, Edges < 100.
-
 % $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 % Edge (Agent relationships) requirement.
 % =============================================================================
-% {depends_on(Y, X) : XN + 10 < YN, YN < XN + 50} :-
-%     internal_agents(X, XN), internal_agents(Y, YN).
 % If X, Y is number, not string, we can simply write without XN, YN.
 {depends_on(Y, X) : X < Y, Y < X + 200} :- agents(X), agents(Y).
 
 {depends_on(Y, X) : X * 3 + 200 < Y} :- product_agent(Y), infra_agent(X).
 
-:- depends_on(Y, X), infra_agent(Y), product_agent(X).
-
 % {depends_on(Y, X)} :- product_agent(Y), infra_agent(X).
 % {depends_on(Y, X)} :- infra_agent(Y), infra_agent(X).
 % {depends_on(Y, X)} :- product_agent(Y), product_agent(X).
+
+% Constraint on agent relationship.
+% An infra agent shouldn't depend on any product agent.
+:- depends_on(Y, X), infra_agent(Y), product_agent(X).
 
 % $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 % General Constraints

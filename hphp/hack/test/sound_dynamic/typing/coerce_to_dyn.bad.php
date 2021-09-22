@@ -1,60 +1,49 @@
 <?hh
+<<file:__EnableUnstableFeatures('upcast_expression')>>
 
 class C {}
 
-function d(dynamic $d) : void {}
-
 function test_prim(mixed $m, nonnull $n, C $c) : void {
   //hh_log_level('sub', 2);
-  d($c);
-  d($m);
-  d($n);
+  $c upcast dynamic;
+  $m upcast dynamic;
+  $n upcast dynamic;
 }
 
 function test_contain((string, C) $t, vec<C> $v, dict<string, C> $di,
                       darray<arraykey, C> $da,
                       varray<C> $va)
   : void {
-  d($t);
-  d($v);
-  d($di);
-  d($da);
-  d($va);
+  $t upcast dynamic;
+  $v upcast dynamic;
+  $di upcast dynamic;
+  $da upcast dynamic;
+  $va upcast dynamic;
 }
 
 function test_shape(shape('x' => int, ?'y' => vec<C>) $s) : void {
-  d($s);
+  $s upcast dynamic;
 }
 
 
-function test_container_context1(vec<dynamic> $v,
-                                 dict<arraykey, dynamic> $d,
-                                 darray<arraykey, dynamic> $da,
-                                 varray<dynamic> $va) : void {
-
+function test_container_context(vec<C> $v,
+                                dict<int, C> $d,
+                                darray<arraykey, C> $da,
+                                varray<C> $va) : void {
+  $v upcast vec<dynamic>;
+  $d upcast dict<arraykey, dynamic>;
 }
 
-function test_container_context2(vec<C> $v,
-                                 dict<int, C> $d,
-                                 darray<arraykey, C> $da,
-                                 varray<C> $va) : void {
-  test_container_context1($v, $d, $da, $va);
-}
-
-function test_shape_context1(shape('x' => dynamic, ?'y' => dynamic) $s) : void {
-}
-
-function test_shape_context2(shape('x' => int, ?'y' => C) $s) : void {
-  test_shape_context1($s);
+function test_shape_context(shape('x' => int, ?'y' => C) $s) : void {
+  $s upcast shape('x' => dynamic, ?'y' => dynamic);
 }
 
 class V1<T> {};
 class V2<+T> {};
 
-function test_class_context1(V1<dynamic> $v1, V2<dynamic> $v2) : void {}
-
-function test_class_context2(V1<int> $v1, V2<C> $v2) : void {
-  test_class_context1($v1, $v2);
+function test_class_context(V1<int> $v1, V2<C> $v2) : void {
+  $v1 upcast V1<dynamic>;
+  $v2 upcast V2<dynamic>;
 }
 
 function test_union(int $i, C $c, bool $b) : void {
@@ -63,5 +52,5 @@ function test_union(int $i, C $c, bool $b) : void {
   } else {
     $x = $c;
   }
-  d($x);
+  $x upcast dynamic;
 }

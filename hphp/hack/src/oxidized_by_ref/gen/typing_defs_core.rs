@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<67dc0bfc6134407829a6c273f3957153>>
+// @generated SignedSource<<4e1dd5a2e08cdb35095ad99ad0edee59>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -496,40 +496,12 @@ arena_deserializer::impl_deserialize_in_arena!(WhereConstraint<'arena>);
     ToOcamlRep
 )]
 #[repr(C)]
-pub enum CollectionStyle {
-    VecStyle,
-    DictStyle,
-    KeysetStyle,
-    ArraykeyStyle,
-}
-impl TrivialDrop for CollectionStyle {}
-arena_deserializer::impl_deserialize_in_arena!(CollectionStyle);
-
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(C)]
-pub enum Enforcement<'a> {
+pub enum Enforcement {
     Unenforced,
     Enforced,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    PartiallyEnforced(&'a (CollectionStyle, PosId<'a>)),
 }
-impl<'a> TrivialDrop for Enforcement<'a> {}
-arena_deserializer::impl_deserialize_in_arena!(Enforcement<'arena>);
+impl TrivialDrop for Enforcement {}
+arena_deserializer::impl_deserialize_in_arena!(Enforcement);
 
 #[derive(
     Clone,
@@ -938,8 +910,7 @@ arena_deserializer::impl_deserialize_in_arena!(FunArity<'arena>);
 #[repr(C)]
 pub struct PossiblyEnforcedTy<'a> {
     /// True if consumer of this type enforces it at runtime
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub enforced: Enforcement<'a>,
+    pub enforced: Enforcement,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub type_: &'a Ty<'a>,
 }

@@ -1,26 +1,26 @@
-File "generic_params.bad.php", line 18, characters 17-31:
-Invalid argument (Typing[4110])
-  File "generic_params.bad.php", line 18, characters 25-27:
+File "generic_params.bad.php", line 18, characters 3-32:
+Typing error (Typing[4110])
+  File "generic_params.bad.php", line 18, characters 11-13:
   Expected `int`
-  File "generic_params.bad.php", line 16, characters 24-30:
+  File "generic_params.bad.php", line 18, characters 26-32:
   But got `dynamic`
-  File "generic_params.bad.php", line 16, characters 24-30:
+  File "generic_params.bad.php", line 18, characters 26-32:
   This type argument to `Box` must match exactly (it is invariant)
-File "generic_params.bad.php", line 19, characters 17-42:
-Invalid argument (Typing[4110])
-  File "generic_params.bad.php", line 19, characters 31-36:
+File "generic_params.bad.php", line 19, characters 3-43:
+Typing error (Typing[4110])
+  File "generic_params.bad.php", line 19, characters 17-22:
   Expected `string`
-  File "generic_params.bad.php", line 16, characters 24-30:
+  File "generic_params.bad.php", line 19, characters 37-43:
   But got `dynamic`
-  File "generic_params.bad.php", line 16, characters 24-30:
+  File "generic_params.bad.php", line 19, characters 37-43:
   This type argument to `SimpleBox` must match exactly (it is invariant)
-File "generic_params.bad.php", line 20, characters 17-34:
-Invalid argument (Typing[4110])
-  File "generic_params.bad.php", line 20, characters 28-30:
+File "generic_params.bad.php", line 20, characters 3-35:
+Typing error (Typing[4110])
+  File "generic_params.bad.php", line 20, characters 14-16:
   Expected `int`
-  File "generic_params.bad.php", line 16, characters 24-30:
+  File "generic_params.bad.php", line 20, characters 29-35:
   But got `(dynamic & arraykey)`
-  File "generic_params.bad.php", line 16, characters 24-30:
+  File "generic_params.bad.php", line 20, characters 29-35:
   This type argument to `KeyBox` must match exactly (it is invariant)
 File "generic_params.bad.php", line 29, characters 7-16:
 Class AnotherBox must support dynamic at least as often as Getter:

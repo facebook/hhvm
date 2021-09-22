@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<974fb726ee44384a4c70cad031ea5abc>>
+// @generated SignedSource<<f0931fed597ff422d686d30c99e94b78>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -46,9 +46,6 @@ pub trait Visitor<'a> {
     fn visit_classish_kind(&mut self, p: &'a ClassishKind<'a>) {
         p.recurse(self.object())
     }
-    fn visit_collection_style(&mut self, p: &'a CollectionStyle) {
-        p.recurse(self.object())
-    }
     fn visit_concrete_typeconst(&mut self, p: &'a ConcreteTypeconst<'a>) {
         p.recurse(self.object())
     }
@@ -67,7 +64,7 @@ pub trait Visitor<'a> {
     fn visit_dependent_type(&mut self, p: &'a DependentType) {
         p.recurse(self.object())
     }
-    fn visit_enforcement(&mut self, p: &'a Enforcement<'a>) {
+    fn visit_enforcement(&mut self, p: &'a Enforcement) {
         p.recurse(self.object())
     }
     fn visit_enum_type(&mut self, p: &'a EnumType<'a>) {

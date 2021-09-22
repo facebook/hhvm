@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<be0a8aceb89cb74eac59aaea114adc7e>>
+// @generated SignedSource<<1efb74aeb21d2cdbb56047f7499e3502>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -146,19 +146,6 @@ impl<'a> Node<'a> for ClassishKind<'a> {
         }
     }
 }
-impl<'a> Node<'a> for CollectionStyle {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_collection_style(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            CollectionStyle::VecStyle => {}
-            CollectionStyle::DictStyle => {}
-            CollectionStyle::KeysetStyle => {}
-            CollectionStyle::ArraykeyStyle => {}
-        }
-    }
-}
 impl<'a> Node<'a> for ConcreteTypeconst<'a> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_concrete_typeconst(self)
@@ -235,7 +222,7 @@ impl<'a> Node<'a> for DependentType {
         }
     }
 }
-impl<'a> Node<'a> for Enforcement<'a> {
+impl<'a> Node<'a> for Enforcement {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_enforcement(self)
     }
@@ -243,7 +230,6 @@ impl<'a> Node<'a> for Enforcement<'a> {
         match self {
             Enforcement::Unenforced => {}
             Enforcement::Enforced => {}
-            Enforcement::PartiallyEnforced(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }

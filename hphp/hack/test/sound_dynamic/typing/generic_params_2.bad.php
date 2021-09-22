@@ -1,5 +1,6 @@
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+<<file:__EnableUnstableFeatures('upcast_expression')>>
 
 <<__SupportDynamicType>>
 class Box<T> {
@@ -16,7 +17,7 @@ function expect_int(int $i) : void {}
 <<__EntryPoint>>
 function f() : void {
   $b = new Box<int>(1);
-  $d = "1" as dynamic;
+  $d = "1" upcast dynamic;
   $b->call_set();
   expect_int($b->get());
 }

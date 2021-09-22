@@ -443,9 +443,7 @@ let check_expected_ty_res
                     message
                     (match ty.et_enforced with
                     | Unenforced -> "unenforced"
-                    | Enforced -> "enforced"
-                    | PartiallyEnforced (_, (_, cn)) ->
-                      "partially enforced " ^ cn),
+                    | Enforced -> "enforced"),
                   [
                     Log_type ("inferred_ty", inferred_ty);
                     Log_type ("expected_ty", ty.et_type);
@@ -3987,20 +3985,19 @@ and expr_
     let enable_sound_dynamic =
       TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
     in
-    let is_dyn = Typing_utils.is_dynamic env hint_ty in
-    let env =
-      if enable_sound_dynamic && is_dyn then
-        SubType.sub_type
-          ~coerce:(Some Typing_logic.CoerceToDynamic)
-          env
-          expr_ty
-          hint_ty
-          (Errors.unify_error_at p)
-      else
-        env
-    in
     let (env, hint_ty) =
-      if is_dyn && not enable_sound_dynamic then
+      if Typing_utils.is_dynamic env hint_ty then
+        let env =
+          if enable_sound_dynamic then
+            SubType.sub_type
+              ~coerce:(Some Typing_logic.CoerceToDynamic)
+              env
+              expr_ty
+              hint_ty
+              (Errors.unify_error_at p)
+          else
+            env
+        in
         let env =
           if is_instance_var e then
             let (env, ivar) = get_instance_var env e in
@@ -4009,7 +4006,7 @@ and expr_
             env
         in
         (env, hint_ty)
-      else if is_nullable && not is_dyn then
+      else if is_nullable then
         let (_, e_p, _) = e in
         let (env, hint_ty) = refine_type env e_p expr_ty hint_ty in
         (env, MakeType.nullable_locl (Reason.Rwitness p) hint_ty)
@@ -7455,16 +7452,12 @@ and call
               Result.fold
                 ~ok:(fun env -> (env, None))
                 ~error:(fun env -> (env, Some (e_ty, ty)))
-              @@ Typing_coercion.coerce_type_res
-                   pos
-                   Reason.URnone
+              @@ Typing_subtype.sub_type_res
+                   ~coerce:(Some Typing_logic.CoerceToDynamic)
                    env
                    e_ty
-                   {
-                     Typing_defs_core.et_type = ty;
-                     Typing_defs_core.et_enforced = Unenforced;
-                   }
-                   Errors.unify_error
+                   ty
+                   (Errors.unify_error_at pos)
             in
             (env, hole_on_err ~err_opt te))
       in

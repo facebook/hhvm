@@ -1,5 +1,6 @@
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+<<file:__EnableUnstableFeatures('upcast_expression')>>
 
 class D { }
 
@@ -54,7 +55,7 @@ class Dyn extends NonDyn { }
 // Demonstrates why we need the checks above
 <<__EntryPoint>>
 function main():void {
-  $d = new Dyn();
+  $d = new Dyn() upcast dynamic;
   $d->bad3($d);
   $x = $d->get();
 }

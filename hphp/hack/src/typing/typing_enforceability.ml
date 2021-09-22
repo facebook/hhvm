@@ -18,19 +18,6 @@ let wrap_like ty =
   let r = Typing_reason.Renforceable (get_pos ty) in
   MakeType.like r ty
 
-let partially_enforced_types =
-  SMap.of_list
-    Naming_special_names.Collections.
-      [
-        (cTraversable, VecStyle);
-        (cKeyedContainer, DictStyle);
-        (cContainer, VecStyle);
-        (cAnyArray, DictStyle);
-        (cVec, VecStyle);
-        (cDict, DictStyle);
-        (cKeyset, KeysetStyle);
-      ]
-
 let get_enforcement (env : env) (ty : decl_ty) : Typing_defs.enforcement =
   let enable_sound_dynamic =
     TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
@@ -59,40 +46,32 @@ let get_enforcement (env : env) (ty : decl_ty) : Typing_defs.enforcement =
             match tyl with
             | [] -> Enforced
             | targs ->
-              let cname = Cls.name tc in
-              let pos = get_pos ty in
-              (match SMap.find_opt cname partially_enforced_types with
-              | Some pek when enable_sound_dynamic ->
-                PartiallyEnforced (pek, (pos, cname))
-              | _ ->
-                List.Or_unequal_lengths.(
-                  begin
-                    match
-                      List.fold2
-                        ~init:Enforced
-                        targs
-                        (Cls.tparams tc)
-                        ~f:(fun acc targ tparam ->
-                          match get_node targ with
-                          | Tdynamic
-                          (* We accept the inner type being dynamic regardless of reification *)
-                          | Tlike _
-                            when not enable_sound_dynamic ->
-                            acc
-                          | _ ->
-                            (match tparam.tp_reified with
-                            | Aast.Erased -> Unenforced
-                            | Aast.SoftReified -> Unenforced
-                            | Aast.Reified ->
-                              (match acc with
-                              | Enforced -> enforcement true env visited targ
-                              | Unenforced
-                              | PartiallyEnforced _ ->
-                                Unenforced)))
-                    with
-                    | Ok new_acc -> new_acc
-                    | Unequal_lengths -> Enforced
-                  end))
+              List.Or_unequal_lengths.(
+                begin
+                  match
+                    List.fold2
+                      ~init:Enforced
+                      targs
+                      (Cls.tparams tc)
+                      ~f:(fun acc targ tparam ->
+                        match get_node targ with
+                        | Tdynamic
+                        (* We accept the inner type being dynamic regardless of reification *)
+                        | Tlike _
+                          when not enable_sound_dynamic ->
+                          acc
+                        | _ ->
+                          (match tparam.tp_reified with
+                          | Aast.Erased -> Unenforced
+                          | Aast.SoftReified -> Unenforced
+                          | Aast.Reified ->
+                            (match acc with
+                            | Enforced -> enforcement true env visited targ
+                            | Unenforced -> Unenforced)))
+                  with
+                  | Ok new_acc -> new_acc
+                  | Unequal_lengths -> Enforced
+                end)
           end
         | _ -> Unenforced
       end
@@ -153,9 +132,7 @@ let get_enforcement (env : env) (ty : decl_ty) : Typing_defs.enforcement =
 let is_enforceable (env : env) (ty : decl_ty) =
   match get_enforcement env ty with
   | Enforced -> true
-  | Unenforced
-  | PartiallyEnforced _ ->
-    false
+  | Unenforced -> false
 
 let make_locl_like_type env ty =
   if env.Typing_env_types.pessimize then
@@ -188,9 +165,7 @@ let pessimize_type env { et_type; et_enforced } =
   let is_fully_enforced e =
     match e with
     | Enforced -> true
-    | Unenforced
-    | PartiallyEnforced _ ->
-      false
+    | Unenforced -> false
   in
   let et_type =
     if is_fully_enforced et_enforced || not env.pessimize then

@@ -1,21 +1,20 @@
 <?hh
+<<file:__EnableUnstableFeatures('upcast_expression')>>
 
-function dyn(): dynamic { return "4" as dynamic; }
+function dyn(): dynamic { return "4" upcast dynamic; }
 
 function my_vec<T>(T $a, T $b) : vec<T> {
   return vec[$a, $b];
 }
 
 function test1(): vec<dynamic> {
-  return vec[1, dyn()];
+  return vec[1 upcast dynamic, dyn()];
 }
 
 function test2(): vec<dynamic> {
-  return my_vec(1, dyn());
+  return my_vec(1 upcast dynamic, dyn());
 }
 
-function expectVecDyn(vec<dynamic> $vd):void { }
-
 function test3():void {
-  expectVecDyn(vec[5]);
+  vec[5] upcast vec<dynamic>;
 }

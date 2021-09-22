@@ -1,14 +1,13 @@
 <?hh
-
-function d(dynamic $d) : void {}
+<<file:__EnableUnstableFeatures('upcast_expression')>>
 
 function test(Traversable<int> $e) : void {
-  d(varray($e));
+  varray($e) upcast dynamic;
 }
 
 function test2(Traversable<int> $e) : void {
   $v = varray($e);
-  d($v);
+  $v upcast dynamic;
 }
 
 function foo<T>(vec<T> $v): T {
@@ -16,10 +15,10 @@ function foo<T>(vec<T> $v): T {
 }
 
 function test3(vec<int> $v): dynamic {
-  return foo($v);
+  return foo($v) upcast dynamic;
 }
 
 function test4(vec<int> $v): dynamic {
   $e = foo($v);
-  return $e;
+  return $e upcast dynamic;
 }

@@ -868,30 +868,19 @@ let assign_array_get_with_err
             (any, any)
         in
         let tk =
-          if TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env) then
-            (* With sound dynamic and partial enforcement, we don't have to
-               decide up front whether tk = arraykey and hence should be enforced.
-               We can let inference figure that out for us. *)
-            {
-              et_type = tk;
-              et_enforced =
-                PartiallyEnforced
-                  (ArraykeyStyle, (Pos_or_decl.of_raw_pos expr_pos, "arraykey"));
-            }
+          let (_, p, _) = key in
+          let ak_t = MakeType.arraykey (Reason.Ridx_vector p) in
+          if Typing_utils.is_sub_type_for_union env ak_t tk then
+            (* hhvm will enforce that the key is an arraykey, so if
+               $x : Map<arraykey, t>, then it should be allowed to
+               set $x[$d] = e where $d : dynamic. NB above, we don't need
+               to check that tk <: arraykey, because the Map ensures that. *)
+            MakeType.enforced tk
           else
-            let (_, p, _) = key in
-            let ak_t = MakeType.arraykey (Reason.Ridx_vector p) in
-            if Typing_utils.is_sub_type_for_union env ak_t tk then
-              (* hhvm will enforce that the key is an arraykey, so if
-                 $x : Map<arraykey, t>, then it should be allowed to
-                 set $x[$d] = e where $d : dynamic. NB above, we don't need
-                 to check that tk <: arraykey, because the Map ensures that. *)
-              MakeType.enforced tk
-            else
-              (* It is unsound to allow $x[$d] = e if $x : Map<string, t>
-                 since the dynamic $d might be an int and hhvm wouldn't
-                 complain.*)
-              MakeType.unenforced tk
+            (* It is unsound to allow $x[$d] = e if $x : Map<string, t>
+               since the dynamic $d might be an int and hhvm wouldn't
+               complain.*)
+            MakeType.unenforced tk
         in
         let (env, idx_err2) =
           type_index env expr_pos tkey tk (Reason.index_class cn)

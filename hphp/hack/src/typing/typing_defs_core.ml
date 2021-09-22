@@ -195,17 +195,9 @@ type 'ty tparam = {
 type 'ty where_constraint = 'ty * Ast_defs.constraint_kind * 'ty
 [@@deriving eq, show]
 
-type collection_style =
-  | VecStyle
-  | DictStyle
-  | KeysetStyle
-  | ArraykeyStyle
-[@@deriving eq, show, ord]
-
 type enforcement =
   | Unenforced
   | Enforced
-  | PartiallyEnforced of collection_style * pos_id
 [@@deriving eq, show, ord]
 
 type 'phase ty = 'phase Reason.t_ * 'phase ty_

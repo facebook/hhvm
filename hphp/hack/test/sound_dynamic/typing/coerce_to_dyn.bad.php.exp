@@ -1,104 +1,92 @@
-File "coerce_to_dyn.bad.php", line 9, characters 5-6:
-Invalid argument (Typing[4110])
-  File "coerce_to_dyn.bad.php", line 5, characters 12-18:
+File "coerce_to_dyn.bad.php", line 8, characters 3-19:
+Typing error (Typing[4110])
+  File "coerce_to_dyn.bad.php", line 8, characters 13-19:
   Expected `dynamic`
-  File "coerce_to_dyn.bad.php", line 7, characters 42-42:
+  File "coerce_to_dyn.bad.php", line 6, characters 42-42:
   But got `C`
-File "coerce_to_dyn.bad.php", line 10, characters 5-6:
-Invalid argument (Typing[4110])
-  File "coerce_to_dyn.bad.php", line 5, characters 12-18:
+File "coerce_to_dyn.bad.php", line 9, characters 3-19:
+Typing error (Typing[4110])
+  File "coerce_to_dyn.bad.php", line 9, characters 13-19:
   Expected `dynamic`
-  File "coerce_to_dyn.bad.php", line 7, characters 20-24:
+  File "coerce_to_dyn.bad.php", line 6, characters 20-24:
   But got `mixed`
-File "coerce_to_dyn.bad.php", line 11, characters 5-6:
-Invalid argument (Typing[4110])
-  File "coerce_to_dyn.bad.php", line 5, characters 12-18:
+File "coerce_to_dyn.bad.php", line 10, characters 3-19:
+Typing error (Typing[4110])
+  File "coerce_to_dyn.bad.php", line 10, characters 13-19:
   Expected `dynamic`
-  File "coerce_to_dyn.bad.php", line 7, characters 30-36:
+  File "coerce_to_dyn.bad.php", line 6, characters 30-36:
   But got `nonnull`
-File "coerce_to_dyn.bad.php", line 18, characters 5-6:
-Invalid argument (Typing[4110])
-  File "coerce_to_dyn.bad.php", line 5, characters 12-18:
+File "coerce_to_dyn.bad.php", line 17, characters 3-19:
+Typing error (Typing[4110])
+  File "coerce_to_dyn.bad.php", line 17, characters 13-19:
   Expected `dynamic`
-  File "coerce_to_dyn.bad.php", line 14, characters 32-32:
+  File "coerce_to_dyn.bad.php", line 13, characters 32-32:
   But got `C`
-File "coerce_to_dyn.bad.php", line 19, characters 5-6:
-Invalid argument (Typing[4110])
-  File "coerce_to_dyn.bad.php", line 5, characters 12-18:
+File "coerce_to_dyn.bad.php", line 18, characters 3-19:
+Typing error (Typing[4110])
+  File "coerce_to_dyn.bad.php", line 18, characters 13-19:
   Expected `dynamic`
-  File "coerce_to_dyn.bad.php", line 14, characters 43-43:
+  File "coerce_to_dyn.bad.php", line 13, characters 43-43:
   But got `C`
-File "coerce_to_dyn.bad.php", line 20, characters 5-7:
-Invalid argument (Typing[4110])
-  File "coerce_to_dyn.bad.php", line 5, characters 12-18:
+File "coerce_to_dyn.bad.php", line 19, characters 3-20:
+Typing error (Typing[4110])
+  File "coerce_to_dyn.bad.php", line 19, characters 14-20:
   Expected `dynamic`
-  File "coerce_to_dyn.bad.php", line 14, characters 63-63:
+  File "coerce_to_dyn.bad.php", line 13, characters 63-63:
   But got `C`
-File "coerce_to_dyn.bad.php", line 21, characters 5-7:
-Invalid argument (Typing[4110])
-  File "coerce_to_dyn.bad.php", line 5, characters 12-18:
+File "coerce_to_dyn.bad.php", line 20, characters 3-20:
+Typing error (Typing[4110])
+  File "coerce_to_dyn.bad.php", line 20, characters 14-20:
   Expected `dynamic`
-  File "coerce_to_dyn.bad.php", line 15, characters 40-40:
+  File "coerce_to_dyn.bad.php", line 14, characters 40-40:
   But got `C`
-File "coerce_to_dyn.bad.php", line 22, characters 5-7:
-Invalid argument (Typing[4110])
-  File "coerce_to_dyn.bad.php", line 5, characters 12-18:
+File "coerce_to_dyn.bad.php", line 21, characters 3-20:
+Typing error (Typing[4110])
+  File "coerce_to_dyn.bad.php", line 21, characters 14-20:
   Expected `dynamic`
-  File "coerce_to_dyn.bad.php", line 16, characters 30-30:
+  File "coerce_to_dyn.bad.php", line 15, characters 30-30:
   But got `C`
-File "coerce_to_dyn.bad.php", line 26, characters 5-6:
-Invalid argument (Typing[4110])
-  File "coerce_to_dyn.bad.php", line 5, characters 12-18:
+File "coerce_to_dyn.bad.php", line 25, characters 3-19:
+Typing error (Typing[4110])
+  File "coerce_to_dyn.bad.php", line 25, characters 13-19:
   Expected `dynamic`
-  File "coerce_to_dyn.bad.php", line 25, characters 51-51:
+  File "coerce_to_dyn.bad.php", line 24, characters 51-51:
   But got `C`
-File "coerce_to_dyn.bad.php", line 41, characters 27-28:
-Invalid argument (Typing[4110])
-  File "coerce_to_dyn.bad.php", line 30, characters 38-44:
+File "coerce_to_dyn.bad.php", line 33, characters 3-24:
+Typing error (Typing[4110])
+  File "coerce_to_dyn.bad.php", line 33, characters 17-23:
   Expected `dynamic`
-  File "coerce_to_dyn.bad.php", line 37, characters 38-38:
+  File "coerce_to_dyn.bad.php", line 29, characters 37-37:
   But got `C`
-File "coerce_to_dyn.bad.php", line 41, characters 31-32:
-Invalid argument (Typing[4110])
-  File "coerce_to_dyn.bad.php", line 31, characters 49-55:
+File "coerce_to_dyn.bad.php", line 34, characters 3-35:
+Typing error (Typing[4110])
+  File "coerce_to_dyn.bad.php", line 34, characters 28-34:
   Expected `dynamic`
-  File "coerce_to_dyn.bad.php", line 38, characters 44-44:
+  File "coerce_to_dyn.bad.php", line 30, characters 43-43:
   But got `C`
-File "coerce_to_dyn.bad.php", line 41, characters 35-37:
-Invalid argument (Typing[4110])
-  File "coerce_to_dyn.bad.php", line 32, characters 51-57:
+File "coerce_to_dyn.bad.php", line 38, characters 3-50:
+Typing error (Typing[4110])
+  File "coerce_to_dyn.bad.php", line 38, characters 43-49:
   Expected `dynamic`
-  File "coerce_to_dyn.bad.php", line 39, characters 51-51:
+  File "coerce_to_dyn.bad.php", line 37, characters 55-55:
   But got `C`
-File "coerce_to_dyn.bad.php", line 41, characters 40-42:
-Invalid argument (Typing[4110])
-  File "coerce_to_dyn.bad.php", line 33, characters 41-47:
-  Expected `dynamic`
-  File "coerce_to_dyn.bad.php", line 40, characters 41-41:
-  But got `C`
-File "coerce_to_dyn.bad.php", line 48, characters 23-24:
-Invalid argument (Typing[4110])
-  File "coerce_to_dyn.bad.php", line 44, characters 60-66:
-  Expected `dynamic`
-  File "coerce_to_dyn.bad.php", line 47, characters 56-56:
-  But got `C`
-File "coerce_to_dyn.bad.php", line 57, characters 23-25:
-Invalid argument (Typing[4110])
-  File "coerce_to_dyn.bad.php", line 56, characters 33-35:
+File "coerce_to_dyn.bad.php", line 45, characters 3-24:
+Typing error (Typing[4110])
+  File "coerce_to_dyn.bad.php", line 44, characters 32-34:
   Expected `int`
-  File "coerce_to_dyn.bad.php", line 54, characters 33-39:
+  File "coerce_to_dyn.bad.php", line 45, characters 17-23:
   But got `dynamic`
-  File "coerce_to_dyn.bad.php", line 54, characters 33-39:
+  File "coerce_to_dyn.bad.php", line 45, characters 17-23:
   This type argument to `V1` must match exactly (it is invariant)
-File "coerce_to_dyn.bad.php", line 57, characters 28-30:
-Invalid argument (Typing[4110])
-  File "coerce_to_dyn.bad.php", line 54, characters 50-56:
+File "coerce_to_dyn.bad.php", line 46, characters 3-24:
+Typing error (Typing[4110])
+  File "coerce_to_dyn.bad.php", line 46, characters 17-23:
   Expected `dynamic`
-  File "coerce_to_dyn.bad.php", line 56, characters 46-46:
+  File "coerce_to_dyn.bad.php", line 44, characters 45-45:
   But got `C`
-File "coerce_to_dyn.bad.php", line 66, characters 5-6:
-Invalid argument (Typing[4110])
-  File "coerce_to_dyn.bad.php", line 5, characters 12-18:
+File "coerce_to_dyn.bad.php", line 55, characters 3-19:
+Typing error (Typing[4110])
+  File "coerce_to_dyn.bad.php", line 55, characters 13-19:
   Expected `dynamic`
-  File "coerce_to_dyn.bad.php", line 60, characters 29-29:
+  File "coerce_to_dyn.bad.php", line 49, characters 29-29:
   But got `C`

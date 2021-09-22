@@ -1,5 +1,6 @@
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+<<file:__EnableUnstableFeatures('upcast_expression')>>
 
 <<__SupportDynamicType>>
 class Box<T> {
@@ -13,11 +14,10 @@ class SimpleBox<T> {
   public function __construct(public T $item) { }
 }
 
-function expectDynamic(dynamic $d):void { }
 function testit():void {
-  expectDynamic(new Box<int>(3));
-  expectDynamic(new SimpleBox<string>("a"));
-  expectDynamic(new KeyBox<int>(3));
+  new Box<int>(3) upcast dynamic;
+  new SimpleBox<string>("a") upcast dynamic;
+  new KeyBox<int>(3) upcast dynamic;
 }
 
 <<__SupportDynamicType>>

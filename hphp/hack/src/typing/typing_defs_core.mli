@@ -164,26 +164,11 @@ type 'ty tparam = {
 type 'ty where_constraint = 'ty * Ast_defs.constraint_kind * 'ty
 [@@deriving eq, show]
 
-type collection_style =
-  (* A collection with a single generic w/o upper or lower bound *)
-  | VecStyle
-  (* A collection with two generics, the first with arraykey as upper bound *)
-  | DictStyle
-  (* A collection with a single generic with arraykey upper bound *)
-  | KeysetStyle
-  (* an arraykey *)
-  | ArraykeyStyle
-[@@deriving eq, show, ord]
-
 type enforcement =
   (* The consumer doesn't enforce the type at runtime *)
   | Unenforced
   (* The consumer enforces the type at runtime *)
   | Enforced
-  (* The consumer enforces part of the type at runtime, e.g.,
-   * in vec<t> it enforces that the value is a vec, but does not enforce the
-   * type argument. *)
-  | PartiallyEnforced of collection_style * pos_id
 [@@deriving eq, show, ord]
 
 (* = Reason.t * 'phase ty_ *)

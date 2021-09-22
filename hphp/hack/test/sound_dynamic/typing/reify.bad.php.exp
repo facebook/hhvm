@@ -1,28 +1,32 @@
-File "reify.bad.php", line 10, characters 15-17:
-Invalid argument (Typing[4110])
-  File "reify.bad.php", line 5, characters 22-31:
-  Expected `C<dynamic>`
-  File "reify.bad.php", line 9, characters 31-36:
-  But got `<expr#1> as C<int>`
-  File "reify.bad.php", line 10, characters 15-17:
-    where `<expr#1>` is a reference to this expression
-File "reify.bad.php", line 11, characters 15-17:
-Invalid argument (Typing[4110])
-  File "reify.bad.php", line 7, characters 22-27:
-  Expected `C<int>`
-  File "reify.bad.php", line 9, characters 15-24:
-  But got `<expr#2> as C<dynamic>`
-  File "reify.bad.php", line 11, characters 15-17:
-    where `<expr#2>` is a reference to this expression
-File "reify.bad.php", line 12, characters 15-26:
-Invalid argument (Typing[4110])
-  File "reify.bad.php", line 5, characters 22-31:
-  Expected `C<dynamic>`
-  File "reify.bad.php", line 12, characters 19-19:
-  But got `C<int>`
-File "reify.bad.php", line 13, characters 15-30:
-Invalid argument (Typing[4110])
-  File "reify.bad.php", line 7, characters 22-27:
-  Expected `C<int>`
-  File "reify.bad.php", line 13, characters 19-19:
-  But got `C<dynamic>`
+File "reify.bad.php", line 11, characters 3-23:
+Typing error (Typing[4110])
+  File "reify.bad.php", line 10, characters 33-35:
+  Expected `int`
+  File "reify.bad.php", line 11, characters 16-22:
+  But got `dynamic`
+  File "reify.bad.php", line 11, characters 16-22:
+  This type argument to `C` must match exactly (it is invariant)
+File "reify.bad.php", line 12, characters 3-19:
+Typing error (Typing[4110])
+  File "reify.bad.php", line 12, characters 16-18:
+  Expected `int`
+  File "reify.bad.php", line 12, characters 16-18:
+  This type argument to `C` must match exactly (it is invariant)
+  File "reify.bad.php", line 10, characters 17-23:
+  But got `dynamic`
+File "reify.bad.php", line 13, characters 3-32:
+Typing error (Typing[4110])
+  File "reify.bad.php", line 13, characters 9-11:
+  Expected `int`
+  File "reify.bad.php", line 13, characters 25-31:
+  But got `dynamic`
+  File "reify.bad.php", line 13, characters 25-31:
+  This type argument to `C` must match exactly (it is invariant)
+File "reify.bad.php", line 14, characters 3-32:
+Typing error (Typing[4110])
+  File "reify.bad.php", line 14, characters 29-31:
+  Expected `int`
+  File "reify.bad.php", line 14, characters 29-31:
+  This type argument to `C` must match exactly (it is invariant)
+  File "reify.bad.php", line 14, characters 9-15:
+  But got `dynamic`

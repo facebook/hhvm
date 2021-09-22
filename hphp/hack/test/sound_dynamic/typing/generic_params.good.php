@@ -1,5 +1,6 @@
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+<<file:__EnableUnstableFeatures('upcast_expression')>>
 
 <<__SupportDynamicType>>
 class Box<T> {
@@ -31,11 +32,10 @@ class KeyBox<T as arraykey> {
   public function set(T $x):void { $this->item = $x; }
 }
 
-function expectDynamic(dynamic $d):void { }
 function testit(Getter<float> $g):void {
-  expectDynamic(new Box(3));
-  expectDynamic(new Box(true));
-  expectDynamic(new SimpleBox("a"));
-  expectDynamic(new KeyBox<arraykey>(3));
-  expectDynamic($g);
+  new Box(3) upcast dynamic;
+  new Box(true) upcast dynamic;
+  new SimpleBox("a") upcast dynamic;
+  new KeyBox<arraykey>(3) upcast dynamic;
+  $g upcast dynamic;
 }

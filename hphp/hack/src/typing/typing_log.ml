@@ -294,7 +294,6 @@ let possibly_enforced_type_as_value env et =
   Atom
     ((match et.et_enforced with
      | Enforced -> "enforced "
-     | PartiallyEnforced _ -> "partially enforced "
      | Unenforced -> "")
     ^ Typing_print.debug env et.et_type)
 

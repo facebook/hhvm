@@ -87,6 +87,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
             | TokenKind.HeredocStringLiteralTail
             | TokenKind.NowdocStringLiteral ->
               make_string (Token.text x) (Token.width x)
+            | TokenKind.XHPStringLiteral when Env.version_gte env 2 ->
+              make_string (Token.text x) (Token.width x)
             | _ -> Text (Token.text x, Token.width x)
           end;
           transform_trailing_trivia (Token.trailing x);

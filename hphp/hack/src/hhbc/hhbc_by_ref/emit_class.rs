@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use decl_provider::DeclProvider;
 use ffi::{Maybe, Maybe::*, Pair, Slice, Str};
 use hhbc_by_ref_emit_attribute as emit_attribute;
 use hhbc_by_ref_emit_body as emit_body;
@@ -50,9 +49,9 @@ use oxidized::{
 
 use std::collections::BTreeMap;
 
-fn add_symbol_refs<'arena, 'decl, D: DeclProvider<'decl>>(
+fn add_symbol_refs<'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena, 'decl, D>,
+    emitter: &mut Emitter<'arena, 'decl>,
     base: &Option<class::ClassType<'arena>>,
     implements: &[class::ClassType<'arena>],
     uses: &[&str],
@@ -71,9 +70,9 @@ fn add_symbol_refs<'arena, 'decl, D: DeclProvider<'decl>>(
         .for_each(|(x, _)| emit_symbol_refs::add_class(alloc, emitter, *x));
 }
 
-fn make_86method<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
+fn make_86method<'a, 'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena, 'decl, D>,
+    emitter: &mut Emitter<'arena, 'decl>,
     name: method::MethodType<'arena>,
     params: Vec<HhasParam<'arena>>,
     is_static: bool,
@@ -178,9 +177,9 @@ fn from_includes<'arena>(
         .collect()
 }
 
-fn from_type_constant<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
+fn from_type_constant<'a, 'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena, 'decl, D>,
+    emitter: &mut Emitter<'arena, 'decl>,
     tc: &'a ast::ClassTypeconstDef,
 ) -> Result<HhasTypeConstant<'arena>> {
     use ast::ClassTypeconst::*;
@@ -255,9 +254,9 @@ fn from_ctx_constant<'a, 'arena>(
     })
 }
 
-fn from_class_elt_classvars<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
+fn from_class_elt_classvars<'a, 'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena, 'decl, D>,
+    emitter: &mut Emitter<'arena, 'decl>,
     ast_class: &'a ast::Class_,
     class_is_const: bool,
     tparams: &[&str],
@@ -299,8 +298,8 @@ fn from_class_elt_classvars<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         .collect::<Result<Vec<_>>>()
 }
 
-fn from_class_elt_constants<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
-    emitter: &mut Emitter<'arena, 'decl, D>,
+fn from_class_elt_constants<'a, 'arena, 'decl>(
+    emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     class_: &'a ast::Class_,
 ) -> Result<Vec<HhasConstant<'arena>>> {
@@ -392,8 +391,8 @@ fn validate_class_name(ns: &namespace_env::Env, ast::Id(p, class_name): &ast::Id
     }
 }
 
-fn emit_reified_extends_params<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
-    e: &mut Emitter<'arena, 'decl, D>,
+fn emit_reified_extends_params<'a, 'arena, 'decl>(
+    e: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     ast_class: &'a ast::Class_,
 ) -> Result<InstrSeq<'arena>> {
@@ -422,8 +421,8 @@ fn emit_reified_extends_params<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     Ok(instr::typedvalue(alloc, tv))
 }
 
-fn emit_reified_init_body<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
-    e: &mut Emitter<'arena, 'decl, D>,
+fn emit_reified_init_body<'a, 'arena, 'decl>(
+    e: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     num_reified: usize,
     ast_class: &'a ast::Class_,
@@ -496,8 +495,8 @@ fn emit_reified_init_body<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     })
 }
 
-fn emit_reified_init_method<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
-    emitter: &mut Emitter<'arena, 'decl, D>,
+fn emit_reified_init_method<'a, 'arena, 'decl>(
+    emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     ast_class: &'a ast::Class_,
 ) -> Result<Option<HhasMethod<'arena>>> {
@@ -543,9 +542,9 @@ fn emit_reified_init_method<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     }
 }
 
-fn make_init_method<'a, 'arena, 'decl, D: DeclProvider<'decl>, F>(
+fn make_init_method<'a, 'arena, 'decl, F>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena, 'decl, D>,
+    emitter: &mut Emitter<'arena, 'decl>,
     properties: &[HhasProperty<'arena>],
     filter: F,
     name: &'static str,
@@ -591,9 +590,9 @@ where
     }
 }
 
-pub fn emit_class<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
+pub fn emit_class<'a, 'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena, 'decl, D>,
+    emitter: &mut Emitter<'arena, 'decl>,
     ast_class: &'a ast::Class_,
 ) -> Result<HhasClass<'arena>> {
     let namespace = &ast_class.namespace;
@@ -805,9 +804,9 @@ pub fn emit_class<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     let cinit_method = if initialized_constants.is_empty() {
         None
     } else {
-        fn make_cinit_instrs<'arena, 'decl, D: DeclProvider<'decl>>(
+        fn make_cinit_instrs<'arena, 'decl>(
             alloc: &'arena bumpalo::Bump,
-            e: &mut Emitter<'arena, 'decl, D>,
+            e: &mut Emitter<'arena, 'decl>,
             default_label: label::Label,
             pos: &Pos,
             consts: &[(&r#const::ConstType<'arena>, label::Label, &InstrSeq<'arena>)],
@@ -971,9 +970,9 @@ pub fn emit_class<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     })
 }
 
-pub fn emit_classes_from_program<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
+pub fn emit_classes_from_program<'a, 'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena, 'decl, D>,
+    emitter: &mut Emitter<'arena, 'decl>,
     ast: &'a [ast::Def],
 ) -> Result<Vec<HhasClass<'arena>>> {
     ast.iter()

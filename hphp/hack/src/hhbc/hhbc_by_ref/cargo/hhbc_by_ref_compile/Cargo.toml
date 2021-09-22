@@ -29,6 +29,7 @@ oxidized = { path = "../../../../oxidized" }
 parser_core_types = { path = "../../../../parser/cargo/core_types" }
 profile_rust = { path = "../../../../utils/perf/cargo/profile" }
 stack_limit = { path = "../../../../utils/stack_limit" }
+unified_decl_provider = { path = "../../../unified_decl_provider" }
 
 [profile.release]
 incremental = false

@@ -188,34 +188,27 @@ unsafe extern "C" fn hackc_compile_from_text_cpp_ffi(
             let source_text = SourceText::make(RcOc::new(env.filepath.clone()), text);
             let mut w = String::new();
             let alloc = bumpalo::Bump::new();
-            let compile_result = if native_env
+            let decl_provider = if native_env
                 .flags
                 .contains(hhbc_by_ref_compile::EnvFlags::ENABLE_DECL)
             {
-                hhbc_by_ref_compile::from_text(
-                    &alloc,
-                    &env,
-                    stack_limit,
-                    &mut w,
-                    source_text,
-                    Some(&native_env),
-                    ExternalDeclProvider(
-                        (*cnative_env).decl_getter,
-                        (*cnative_env).decl_provider,
-                        std::marker::PhantomData,
-                    ),
-                )
+                unified_decl_provider::DeclProvider::ExternalDeclProvider(ExternalDeclProvider(
+                    (*cnative_env).decl_getter,
+                    (*cnative_env).decl_provider,
+                    std::marker::PhantomData,
+                ))
             } else {
-                hhbc_by_ref_compile::from_text(
-                    &alloc,
-                    &env,
-                    stack_limit,
-                    &mut w,
-                    source_text,
-                    Some(&native_env),
-                    NoDeclProvider,
-                )
+                unified_decl_provider::DeclProvider::NoDeclProvider(NoDeclProvider)
             };
+            let compile_result = hhbc_by_ref_compile::from_text(
+                &alloc,
+                &env,
+                stack_limit,
+                &mut w,
+                source_text,
+                Some(&native_env),
+                decl_provider,
+            );
             match compile_result {
                 Ok(_) => Ok(w),
                 Err(e) => Err(anyhow!("{}", e)),
@@ -313,32 +306,27 @@ unsafe extern "C" fn hackc_compile_hhas_from_text_cpp_ffi(
                     flags: native_env.flags,
                 };
                 let source_text = SourceText::make(RcOc::new(env.filepath.clone()), text);
-                let compile_result = if native_env
+                let decl_provider = if native_env
                     .flags
                     .contains(hhbc_by_ref_compile::EnvFlags::ENABLE_DECL)
                 {
-                    hhbc_by_ref_compile::hhas_from_text(
-                        alloc,
-                        &env,
-                        &stack_limit,
-                        source_text,
-                        Some(&native_env),
-                        ExternalDeclProvider(
-                            cnative_env.decl_getter,
-                            cnative_env.decl_provider,
-                            std::marker::PhantomData,
-                        ),
-                    )
+                    unified_decl_provider::DeclProvider::ExternalDeclProvider(ExternalDeclProvider(
+                        (*cnative_env).decl_getter,
+                        (*cnative_env).decl_provider,
+                        std::marker::PhantomData,
+                    ))
                 } else {
-                    hhbc_by_ref_compile::hhas_from_text(
-                        alloc,
-                        &env,
-                        &stack_limit,
-                        source_text,
-                        Some(&native_env),
-                        NoDeclProvider,
-                    )
+                    unified_decl_provider::DeclProvider::NoDeclProvider(NoDeclProvider)
                 };
+
+                let compile_result = hhbc_by_ref_compile::hhas_from_text(
+                    alloc,
+                    &env,
+                    &stack_limit,
+                    source_text,
+                    Some(&native_env),
+                    decl_provider,
+                );
                 match compile_result {
                     Ok((hhas_prog, _)) => Ok(Box::into_raw(Box::new(hhas_prog))),
                     Err(e) => Err(anyhow!("{}", e)),
@@ -415,7 +403,7 @@ extern "C" fn compile_from_text_ffi(
                     &mut w,
                     source_text,
                     None,
-                    NoDeclProvider,
+                    unified_decl_provider::DeclProvider::NoDeclProvider(NoDeclProvider),
                 ) {
                     Ok(profile) => print_output(
                         w,

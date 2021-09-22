@@ -10,7 +10,6 @@ path = "../../env.rs"
 [dependencies]
 bitflags = "1.2"
 bumpalo = { version = "3.2.1", features = ["collections"] }
-decl_provider = { path = "../../../decl_provider" }
 hhbc_by_ref_adata_state = { path = "../hhbc_by_ref_adata_state" }
 hhbc_by_ref_ast_body = { path = "../hhbc_by_ref_ast_body" }
 hhbc_by_ref_ast_scope = { path = "../hhbc_by_ref_ast_scope" }
@@ -23,6 +22,7 @@ hhbc_by_ref_statement_state = { path = "../hhbc_by_ref_statement_state" }
 hhbc_by_ref_symbol_refs_state = { path = "../hhbc_by_ref_symbol_refs_state" }
 ocamlrep = { path = "../../../../ocamlrep" }
 oxidized = { path = "../../../../oxidized" }
+unified_decl_provider = { path = "../../../unified_decl_provider" }
 
 [profile.release]
 incremental = false

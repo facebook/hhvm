@@ -10,7 +10,6 @@ path = "../../emit_memoize_method.rs"
 [dependencies]
 bitflags = "1.2"
 bumpalo = { version = "3.2.1", features = ["collections"] }
-decl_provider = { path = "../../../decl_provider" }
 ffi = { path = "../../../../utils/ffi" }
 hhbc_by_ref_ast_scope = { path = "../hhbc_by_ref_ast_scope" }
 hhbc_by_ref_emit_attribute = { path = "../hhbc_by_ref_emit_attribute" }

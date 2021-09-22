@@ -242,7 +242,6 @@ version = "0.0.0"
 dependencies = [
  "bumpalo",
  "core_utils_rust",
- "decl_provider",
  "escaper",
  "ffi",
  "hhbc_by_ref_ast_class_expr",
@@ -378,6 +377,7 @@ dependencies = [
  "parser_core_types",
  "serde_json",
  "stack_limit",
+ "unified_decl_provider",
 ]
 
 [[package]]
@@ -1150,6 +1150,7 @@ dependencies = [
  "aast_parser",
  "anyhow",
  "bumpalo",
+ "decl_provider",
  "direct_decl_parser",
  "hhbc_by_ref_compile",
  "hhbc_by_ref_options",
@@ -1232,7 +1233,6 @@ dependencies = [
 name = "hhbc_by_ref_ast_class_expr"
 version = "0.0.0"
 dependencies = [
- "decl_provider",
  "hhbc_by_ref_ast_scope",
  "hhbc_by_ref_env",
  "hhbc_by_ref_hhbc_ast",
@@ -1247,7 +1247,6 @@ name = "hhbc_by_ref_ast_constant_folder"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "decl_provider",
  "ffi",
  "hhbc_by_ref_ast_class_expr",
  "hhbc_by_ref_ast_scope",
@@ -1277,7 +1276,6 @@ name = "hhbc_by_ref_closure_convert"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "decl_provider",
  "hash",
  "hhbc_by_ref_ast_body",
  "hhbc_by_ref_ast_constant_folder",
@@ -1324,6 +1322,7 @@ dependencies = [
  "parser_core_types",
  "profile_rust",
  "stack_limit",
+ "unified_decl_provider",
 ]
 
 [[package]]
@@ -1346,7 +1345,6 @@ name = "hhbc_by_ref_emit_adata"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "decl_provider",
  "ffi",
  "hhbc_by_ref_adata_state",
  "hhbc_by_ref_env",
@@ -1364,7 +1362,6 @@ name = "hhbc_by_ref_emit_attribute"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "decl_provider",
  "escaper",
  "ffi",
  "hhbc_by_ref_ast_constant_folder",
@@ -1387,7 +1384,6 @@ dependencies = [
  "bstr",
  "bumpalo",
  "bytecode_printer",
- "decl_provider",
  "ffi",
  "hash",
  "hhbc_by_ref_ast_body",
@@ -1432,7 +1428,6 @@ name = "hhbc_by_ref_emit_class"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "decl_provider",
  "ffi",
  "hhbc_by_ref_emit_attribute",
  "hhbc_by_ref_emit_body",
@@ -1474,7 +1469,6 @@ name = "hhbc_by_ref_emit_constant"
 version = "0.0.0"
 dependencies = [
  "core_utils_rust",
- "decl_provider",
  "ffi",
  "hhbc_by_ref_emit_body",
  "hhbc_by_ref_emit_type_hint",
@@ -1495,7 +1489,6 @@ version = "0.0.0"
 dependencies = [
  "bstr",
  "bumpalo",
- "decl_provider",
  "ffi",
  "hash",
  "hhbc_by_ref_ast_class_expr",
@@ -1540,7 +1533,6 @@ name = "hhbc_by_ref_emit_file_attributes"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "decl_provider",
  "hhbc_by_ref_emit_attribute",
  "hhbc_by_ref_env",
  "hhbc_by_ref_hhas_attribute",
@@ -1554,7 +1546,6 @@ name = "hhbc_by_ref_emit_function"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "decl_provider",
  "ffi",
  "hhbc_by_ref_ast_scope",
  "hhbc_by_ref_emit_attribute",
@@ -1606,7 +1597,6 @@ version = "0.0.0"
 dependencies = [
  "bitflags",
  "bumpalo",
- "decl_provider",
  "ffi",
  "hhbc_by_ref_ast_scope",
  "hhbc_by_ref_emit_attribute",
@@ -1640,7 +1630,6 @@ name = "hhbc_by_ref_emit_method"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "decl_provider",
  "ffi",
  "hhbc_by_ref_ast_scope",
  "hhbc_by_ref_emit_attribute",
@@ -1669,7 +1658,6 @@ name = "hhbc_by_ref_emit_native_opcode"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "decl_provider",
  "ffi",
  "hhbc_by_ref_ast_scope",
  "hhbc_by_ref_emit_body",
@@ -1687,7 +1675,6 @@ name = "hhbc_by_ref_emit_param"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "decl_provider",
  "ffi",
  "hhbc_by_ref_ast_scope",
  "hhbc_by_ref_emit_attribute",
@@ -1722,7 +1709,6 @@ version = "0.0.0"
 dependencies = [
  "bitflags",
  "bumpalo",
- "decl_provider",
  "ffi",
  "hhbc_by_ref_emit_adata",
  "hhbc_by_ref_emit_class",
@@ -1746,7 +1732,6 @@ name = "hhbc_by_ref_emit_property"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "decl_provider",
  "ffi",
  "hhbc_by_ref_ast_constant_folder",
  "hhbc_by_ref_emit_attribute",
@@ -1771,7 +1756,6 @@ name = "hhbc_by_ref_emit_record_def"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "decl_provider",
  "ffi",
  "hhbc_by_ref_ast_constant_folder",
  "hhbc_by_ref_emit_fatal",
@@ -1791,7 +1775,6 @@ name = "hhbc_by_ref_emit_symbol_refs"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "decl_provider",
  "hhbc_by_ref_env",
  "hhbc_by_ref_hhbc_id",
  "hhbc_by_ref_symbol_refs_state",
@@ -1832,7 +1815,6 @@ name = "hhbc_by_ref_emit_typedef"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "decl_provider",
  "hhbc_by_ref_emit_attribute",
  "hhbc_by_ref_emit_body",
  "hhbc_by_ref_emit_type_constant",
@@ -1852,7 +1834,6 @@ name = "hhbc_by_ref_emit_xhp"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "decl_provider",
  "hhbc_by_ref_emit_method",
  "hhbc_by_ref_emit_property",
  "hhbc_by_ref_env",
@@ -1872,7 +1853,6 @@ version = "0.0.0"
 dependencies = [
  "bitflags",
  "bumpalo",
- "decl_provider",
  "hhbc_by_ref_adata_state",
  "hhbc_by_ref_ast_body",
  "hhbc_by_ref_ast_scope",
@@ -1885,6 +1865,7 @@ dependencies = [
  "hhbc_by_ref_symbol_refs_state",
  "ocamlrep",
  "oxidized",
+ "unified_decl_provider",
 ]
 
 [[package]]
@@ -1966,7 +1947,6 @@ dependencies = [
 name = "hhbc_by_ref_hhas_constant"
 version = "0.0.0"
 dependencies = [
- "decl_provider",
  "ffi",
  "hhbc_by_ref_ast_constant_folder",
  "hhbc_by_ref_emit_expression",
@@ -2176,7 +2156,6 @@ name = "hhbc_by_ref_label_rewriter"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "decl_provider",
  "ffi",
  "hash",
  "hhbc_by_ref_env",
@@ -2225,7 +2204,6 @@ name = "hhbc_by_ref_rewrite_program"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "decl_provider",
  "hhbc_by_ref_closure_convert",
  "hhbc_by_ref_emit_fatal",
  "hhbc_by_ref_env",
@@ -2240,7 +2218,6 @@ name = "hhbc_by_ref_rewrite_xml"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "decl_provider",
  "hhbc_by_ref_emit_symbol_refs",
  "hhbc_by_ref_env",
  "hhbc_by_ref_hhbc_id",
@@ -2262,7 +2239,6 @@ name = "hhbc_by_ref_scope"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "decl_provider",
  "hhbc_by_ref_env",
  "hhbc_by_ref_instruction_sequence",
  "hhbc_by_ref_iterator",
@@ -3704,6 +3680,15 @@ name = "unicode-xid"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "826e7639553986605ec5979c7dd957c7895e93eabed50ab2ffa7f6128a75097c"
+
+[[package]]
+name = "unified_decl_provider"
+version = "0.0.0"
+dependencies = [
+ "decl_provider",
+ "external_decl_provider",
+ "oxidized_by_ref",
+]
 
 [[package]]
 name = "value-bag"

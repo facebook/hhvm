@@ -7,7 +7,6 @@ use std::path::PathBuf;
 
 use itertools::{Either, EitherOrBoth::*, Itertools};
 
-use decl_provider::DeclProvider;
 use hash::HashSet;
 use hhbc_by_ref_ast_scope::{
     self as ast_scope, Lambda, LongLambda, Scope as AstScope, ScopeItem as AstScopeItem,
@@ -1672,9 +1671,9 @@ fn extract_debugger_main(
     Ok(())
 }
 
-pub fn convert_toplevel_prog<'arena, 'local_arena, 'decl, D: DeclProvider<'decl>>(
+pub fn convert_toplevel_prog<'arena, 'local_arena, 'decl>(
     alloc: &'local_arena bumpalo::Bump,
-    e: &mut Emitter<'arena, 'decl, D>,
+    e: &mut Emitter<'arena, 'decl>,
     defs: &mut Program,
     namespace_env: RcOc<namespace_env::Env>,
 ) -> Result<()>

@@ -9,7 +9,6 @@ path = "../../emit_constant.rs"
 
 [dependencies]
 core_utils_rust = { path = "../../../../utils/core" }
-decl_provider = { path = "../../../decl_provider" }
 ffi = { path = "../../../../utils/ffi" }
 hhbc_by_ref_emit_body = { path = "../hhbc_by_ref_emit_body" }
 hhbc_by_ref_emit_type_hint = { path = "../hhbc_by_ref_emit_type_hint" }

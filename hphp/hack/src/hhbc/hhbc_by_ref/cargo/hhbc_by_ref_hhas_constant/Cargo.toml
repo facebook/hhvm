@@ -8,7 +8,6 @@ edition = "2018"
 path = "../../hhas_constant.rs"
 
 [dependencies]
-decl_provider = { path = "../../../decl_provider" }
 ffi = { path = "../../../../utils/ffi" }
 hhbc_by_ref_ast_constant_folder = { path = "../hhbc_by_ref_ast_constant_folder" }
 hhbc_by_ref_emit_expression = { path = "../hhbc_by_ref_emit_expression" }

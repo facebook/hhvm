@@ -9,7 +9,6 @@ path = "../../emit_class.rs"
 
 [dependencies]
 bumpalo = { version = "3.2.1", features = ["collections"] }
-decl_provider = { path = "../../../decl_provider" }
 ffi = { path = "../../../../utils/ffi" }
 hhbc_by_ref_emit_attribute = { path = "../hhbc_by_ref_emit_attribute" }
 hhbc_by_ref_emit_body = { path = "../hhbc_by_ref_emit_body" }

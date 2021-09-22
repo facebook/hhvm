@@ -162,7 +162,7 @@ fn process_single_file_impl(
         &mut output,
         source_text,
         None,
-        NoDeclProvider,
+        unified_decl_provider::DeclProvider::NoDeclProvider(NoDeclProvider),
     )?;
     Ok((output, None))
 }

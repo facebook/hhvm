@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 pub mod scope {
-    use decl_provider::DeclProvider;
     use hhbc_by_ref_env::emitter::Emitter;
     use hhbc_by_ref_instruction_sequence::{instr, InstrSeq, Result};
     use hhbc_by_ref_iterator as iterator;
@@ -15,15 +14,15 @@ pub mod scope {
     /// blocks -- before, inner, after. If emit () registered any unnamed locals, the
     /// inner block will be wrapped in a try/catch that will unset these unnamed
     /// locals upon exception.
-    pub fn with_unnamed_locals<'arena, 'decl, D: DeclProvider<'decl>, F>(
+    pub fn with_unnamed_locals<'arena, 'decl, F>(
         alloc: &'arena bumpalo::Bump,
-        e: &mut Emitter<'arena, 'decl, D>,
+        e: &mut Emitter<'arena, 'decl>,
         emit: F,
     ) -> Result<InstrSeq<'arena>>
     where
         F: FnOnce(
             &'arena bumpalo::Bump,
-            &mut Emitter<'arena, 'decl, D>,
+            &mut Emitter<'arena, 'decl>,
         ) -> Result<(InstrSeq<'arena>, InstrSeq<'arena>, InstrSeq<'arena>)>,
     {
         let local_counter = e.local_gen().counter;
@@ -51,15 +50,15 @@ pub mod scope {
     /// instruction blocks -- before, inner, after. If emit () registered any unnamed
     /// locals or iterators, the inner block will be wrapped in a try/catch that will
     /// unset these unnamed locals and free these iterators upon exception.
-    pub fn with_unnamed_locals_and_iterators<'arena, 'decl, D: DeclProvider<'decl>, F>(
+    pub fn with_unnamed_locals_and_iterators<'arena, 'decl, F>(
         alloc: &'arena bumpalo::Bump,
-        e: &mut Emitter<'arena, 'decl, D>,
+        e: &mut Emitter<'arena, 'decl>,
         emit: F,
     ) -> Result<InstrSeq<'arena>>
     where
         F: FnOnce(
             &'arena bumpalo::Bump,
-            &mut Emitter<'arena, 'decl, D>,
+            &mut Emitter<'arena, 'decl>,
         ) -> Result<(InstrSeq<'arena>, InstrSeq<'arena>, InstrSeq<'arena>)>,
     {
         let local_counter = e.local_gen().counter;
@@ -89,15 +88,15 @@ pub mod scope {
 
     /// An equivalent of with_unnamed_locals that allocates a single local and
     /// passes it to emit
-    pub fn with_unnamed_local<'arena, 'decl, D: DeclProvider<'decl>, F>(
+    pub fn with_unnamed_local<'arena, 'decl, F>(
         alloc: &'arena bumpalo::Bump,
-        e: &mut Emitter<'arena, 'decl, D>,
+        e: &mut Emitter<'arena, 'decl>,
         emit: F,
     ) -> Result<InstrSeq<'arena>>
     where
         F: FnOnce(
             &'arena bumpalo::Bump,
-            &mut Emitter<'arena, 'decl, D>,
+            &mut Emitter<'arena, 'decl>,
             Local<'arena>,
         ) -> Result<(InstrSeq<'arena>, InstrSeq<'arena>, InstrSeq<'arena>)>,
     {
@@ -107,16 +106,13 @@ pub mod scope {
         })
     }
 
-    pub fn stash_top_in_unnamed_local<'arena, 'decl, D: DeclProvider<'decl>, F>(
+    pub fn stash_top_in_unnamed_local<'arena, 'decl, F>(
         alloc: &'arena bumpalo::Bump,
-        e: &mut Emitter<'arena, 'decl, D>,
+        e: &mut Emitter<'arena, 'decl>,
         emit: F,
     ) -> Result<InstrSeq<'arena>>
     where
-        F: FnOnce(
-            &'arena bumpalo::Bump,
-            &mut Emitter<'arena, 'decl, D>,
-        ) -> Result<InstrSeq<'arena>>,
+        F: FnOnce(&'arena bumpalo::Bump, &mut Emitter<'arena, 'decl>) -> Result<InstrSeq<'arena>>,
     {
         with_unnamed_locals(alloc, e, |alloc, e| {
             let tmp = e.local_gen_mut().get_unnamed();

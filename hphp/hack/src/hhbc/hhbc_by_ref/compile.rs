@@ -12,7 +12,7 @@ use aast_parser::{
 use anyhow::{anyhow, *};
 use bitflags::bitflags;
 use bytecode_printer::{print_program, Context, Write};
-use decl_provider::{DeclProvider, NoDeclProvider};
+use decl_provider::NoDeclProvider;
 use hhbc_by_ref_emit_program::{self as emit_program, emit_program, FromAstFlags};
 use hhbc_by_ref_env::emitter::Emitter;
 use hhbc_by_ref_hhas_program::HhasProgram;
@@ -305,7 +305,7 @@ where
         opts,
         is_systemlib,
         env.flags.contains(EnvFlags::FOR_DEBUGGER_EVAL),
-        NoDeclProvider,
+        unified_decl_provider::DeclProvider::NoDeclProvider(NoDeclProvider),
     );
     let alloc = &bumpalo::Bump::new();
     let prog = emit_program::emit_fatal_program(alloc, FatalOp::Parse, &Pos::make_none(), err_msg);
@@ -323,14 +323,14 @@ where
     Ok(())
 }
 
-pub fn from_text<'arena, 'decl, W, S: AsRef<str>, D: DeclProvider<'decl>>(
+pub fn from_text<'arena, 'decl, W, S: AsRef<str>>(
     alloc: &'arena bumpalo::Bump,
     env: &Env<S>,
     stack_limit: &StackLimit,
     writer: &mut W,
     source_text: SourceText,
     native_env: Option<&NativeEnv<S>>,
-    decl_provider: D,
+    decl_provider: unified_decl_provider::DeclProvider<'decl>,
 ) -> anyhow::Result<Option<Profile>>
 where
     W: Write,
@@ -360,9 +360,9 @@ where
     }))
 }
 
-fn rewrite_and_emit<'p, 'arena, 'decl, D: DeclProvider<'decl>, S: AsRef<str>>(
+fn rewrite_and_emit<'p, 'arena, 'decl, S: AsRef<str>>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena, 'decl, D>,
+    emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<S>,
     namespace_env: RcOc<NamespaceEnv>,
     ast: &'p mut ast::Program,
@@ -381,22 +381,22 @@ fn rewrite_and_emit<'p, 'arena, 'decl, D: DeclProvider<'decl>, S: AsRef<str>>(
     }
 }
 
-fn rewrite<'p, 'arena, 'decl, D: DeclProvider<'decl>>(
+fn rewrite<'p, 'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena, 'decl, D>,
+    emitter: &mut Emitter<'arena, 'decl>,
     ast: &'p mut ast::Program,
     namespace_env: RcOc<NamespaceEnv>,
 ) -> Result<(), Error> {
     rewrite_program(alloc, emitter, ast, namespace_env)
 }
 
-pub fn hhas_from_text<'arena, 'decl, S: AsRef<str>, D: DeclProvider<'decl>>(
+pub fn hhas_from_text<'arena, S: AsRef<str>>(
     alloc: &'arena bumpalo::Bump,
     env: &Env<S>,
     stack_limit: &StackLimit,
     source_text: SourceText,
     native_env: Option<&NativeEnv<S>>,
-    decl_provider: D,
+    decl_provider: unified_decl_provider::DeclProvider<'arena>,
 ) -> anyhow::Result<(HhasProgram<'arena>, Option<Profile>)> {
     let mut emitter = create_emitter(env, native_env, decl_provider)?;
     emit_prog_from_text(alloc, &mut emitter, env, stack_limit, source_text)
@@ -408,7 +408,11 @@ pub fn hhas_to_string<W: std::fmt::Write, S: AsRef<str>>(
     writer: &mut W,
     program: &HhasProgram,
 ) -> anyhow::Result<()> {
-    let mut emitter = create_emitter(env, native_env, NoDeclProvider)?;
+    let mut emitter = create_emitter(
+        env,
+        native_env,
+        unified_decl_provider::DeclProvider::NoDeclProvider(NoDeclProvider),
+    )?;
     let (print_result, _) = time(|| {
         print_program(
             &mut Context::new(
@@ -424,9 +428,9 @@ pub fn hhas_to_string<W: std::fmt::Write, S: AsRef<str>>(
     print_result.map_err(|e| anyhow!("{}", e))
 }
 
-fn emit_prog_from_ast<'p, 'arena, 'decl, D: DeclProvider<'decl>, S: AsRef<str>>(
+fn emit_prog_from_ast<'p, 'arena, 'decl, S: AsRef<str>>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena, 'decl, D>,
+    emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<S>,
     namespace: RcOc<NamespaceEnv>,
     ast: &'p mut ast::Program,
@@ -459,9 +463,9 @@ fn emit_prog_from_ast<'p, 'arena, 'decl, D: DeclProvider<'decl>, S: AsRef<str>>(
     emit_program(alloc, emitter, flags, namespace, ast)
 }
 
-fn emit_prog_from_text<'arena, 'decl, S: AsRef<str>, D: DeclProvider<'decl>>(
+fn emit_prog_from_text<'arena, 'decl, S: AsRef<str>>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena, 'decl, D>,
+    emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<S>,
     stack_limit: &StackLimit,
     source_text: SourceText,
@@ -528,11 +532,11 @@ fn emit_fatal<'arena>(
     emit_program::emit_fatal_program(alloc, op, pos, msg)
 }
 
-fn create_emitter<'arena, 'decl, S: AsRef<str>, D: DeclProvider<'decl>>(
+fn create_emitter<'arena, 'decl, S: AsRef<str>>(
     env: &Env<S>,
     native_env: Option<&NativeEnv<S>>,
-    decl_provider: D,
-) -> anyhow::Result<Emitter<'arena, 'decl, D>> {
+    decl_provider: unified_decl_provider::DeclProvider<'decl>,
+) -> anyhow::Result<Emitter<'arena, 'decl>> {
     let opts = match native_env {
         None => Options::from_configs(&env.config_jsons, &env.config_list)
             .map_err(anyhow::Error::msg)?,
@@ -690,7 +694,7 @@ pub fn expr_to_string_lossy<S: AsRef<str>>(env: &Env<S>, expr: &ast::Expr) -> St
         opts,
         env.flags.contains(EnvFlags::IS_SYSTEMLIB),
         env.flags.contains(EnvFlags::FOR_DEBUGGER_EVAL),
-        NoDeclProvider,
+        unified_decl_provider::DeclProvider::NoDeclProvider(NoDeclProvider),
     );
     let ctx = Context::new(
         &mut emitter,

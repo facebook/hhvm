@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use decl_provider::DeclProvider;
 use hhbc_by_ref_closure_convert as closure_convert;
 use hhbc_by_ref_emit_fatal as emit_fatal;
 use hhbc_by_ref_env::emitter::Emitter;
@@ -38,9 +37,9 @@ fn debugger_eval_should_modify(tast: &[ast::Def]) -> Result<bool> {
     }
 }
 
-pub fn rewrite_program<'p, 'arena, 'emitter, 'decl, D: DeclProvider<'decl>>(
+pub fn rewrite_program<'p, 'arena, 'emitter, 'decl>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &'emitter mut Emitter<'arena, 'decl, D>,
+    emitter: &'emitter mut Emitter<'arena, 'decl>,
     prog: &'p mut ast::Program,
     namespace_env: RcOc<namespace_env::Env>,
 ) -> Result<()> {

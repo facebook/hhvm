@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use decl_provider::DeclProvider;
 use ffi::{Maybe::Just, Pair};
 use hash::{HashMap, HashSet};
 use hhbc_by_ref_env::emitter::Emitter;
@@ -189,8 +188,8 @@ pub fn relabel_function<'arena>(
     rewrite_params_and_body(alloc, &defs, &used, &refs, params, body)
 }
 
-pub fn clone_with_fresh_regular_labels<'arena, 'decl, D: DeclProvider<'decl>>(
-    emitter: &mut Emitter<'arena, 'decl, D>,
+pub fn clone_with_fresh_regular_labels<'arena, 'decl>(
+    emitter: &mut Emitter<'arena, 'decl>,
     block: &mut InstrSeq<'arena>,
 ) {
     let mut folder = |mut regular: HashMap<Id, Label>, instr: &Instruct<'arena>| {

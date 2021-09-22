@@ -12,6 +12,7 @@ path = "hh_compile.rs"
 aast_parser = { path = "../parser/cargo/aast_parser" }
 anyhow = "1.0"
 bumpalo = { version = "3.2.1", features = ["collections"] }
+decl_provider = { path = "../hhbc/decl_provider" }
 direct_decl_parser = { path = "../parser/api/cargo/direct_decl_parser" }
 hhbc_by_ref_compile = { path = "../hhbc/hhbc_by_ref/cargo/hhbc_by_ref_compile" }
 hhbc_by_ref_options = { path = "../hhbc/hhbc_by_ref/cargo/hhbc_by_ref_options" }

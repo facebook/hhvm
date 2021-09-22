@@ -7,6 +7,7 @@ use decl_provider::{self, DeclProvider};
 use libc::c_char;
 use oxidized_by_ref::{direct_decl_parser::Decls, shallow_decl_defs::Decl};
 
+#[derive(Debug)]
 pub struct ExternalDeclProvider<'decl>(
     pub unsafe extern "C" fn(*const std::ffi::c_void, *const c_char) -> *const std::ffi::c_void,
     pub *const std::ffi::c_void,

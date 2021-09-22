@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use decl_provider::DeclProvider;
 use hhbc_by_ref_emit_method as emit_method;
 use hhbc_by_ref_emit_property as emit_property;
 use hhbc_by_ref_env::emitter::Emitter;
@@ -15,9 +14,9 @@ use hhbc_by_ref_hhbc_string_utils as string_utils;
 use hhbc_by_ref_instruction_sequence::{unrecoverable, Result};
 use oxidized::{ast::*, ast_defs, local_id, pos::Pos};
 
-pub fn properties_for_cache<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
+pub fn properties_for_cache<'a, 'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena, 'decl, D>,
+    emitter: &mut Emitter<'arena, 'decl>,
     class: &'a Class_,
     class_is_const: bool,
 ) -> Result<Option<HhasProperty<'arena>>> {
@@ -43,9 +42,9 @@ pub fn properties_for_cache<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     Ok(Some(property))
 }
 
-pub fn from_attribute_declaration<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
+pub fn from_attribute_declaration<'a, 'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena, 'decl, D>,
+    emitter: &mut Emitter<'arena, 'decl>,
     class: &'a Class_,
     xal: &[HhasXhpAttribute],
     xual: &[Hint],
@@ -156,9 +155,9 @@ pub fn from_attribute_declaration<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     )
 }
 
-pub fn from_children_declaration<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
+pub fn from_children_declaration<'a, 'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena, 'decl, D>,
+    emitter: &mut Emitter<'arena, 'decl>,
     ast_class: &'a Class_,
     (pos, children): &(&ast_defs::Pos, Vec<&XhpChild>),
 ) -> Result<HhasMethod<'arena>> {
@@ -178,9 +177,9 @@ pub fn from_children_declaration<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     )
 }
 
-pub fn from_category_declaration<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
+pub fn from_category_declaration<'a, 'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena, 'decl, D>,
+    emitter: &mut Emitter<'arena, 'decl>,
     ast_class: &'a Class_,
     (pos, categories): &(&ast_defs::Pos, Vec<&String>),
 ) -> Result<HhasMethod<'arena>> {
@@ -434,9 +433,9 @@ fn emit_xhp_attribute_array<'arena>(
     Ok(mk_expr(Expr_::mk_darray(None, xal_arr)))
 }
 
-fn from_xhp_attribute_declaration_method<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
+fn from_xhp_attribute_declaration_method<'a, 'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena, 'decl, D>,
+    emitter: &mut Emitter<'arena, 'decl>,
     class: &'a Class_,
     pos: Option<Pos>,
     name: &str,

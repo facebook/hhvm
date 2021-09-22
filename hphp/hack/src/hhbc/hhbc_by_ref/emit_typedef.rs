@@ -2,7 +2,6 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use decl_provider::DeclProvider;
 use hhbc_by_ref_emit_attribute as emit_attribute;
 use hhbc_by_ref_emit_body as emit_body;
 use hhbc_by_ref_emit_type_constant as emit_type_constant;
@@ -18,9 +17,9 @@ use oxidized::{aast_defs::Hint, ast};
 
 use std::collections::BTreeMap;
 
-pub fn emit_typedefs_from_program<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
+pub fn emit_typedefs_from_program<'a, 'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
-    e: &mut Emitter<'arena, 'decl, D>,
+    e: &mut Emitter<'arena, 'decl>,
     prog: &'a [ast::Def],
 ) -> Result<Vec<HhasTypedef<'arena>>> {
     prog.iter()
@@ -36,9 +35,9 @@ pub fn emit_typedefs_from_program<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         .collect()
 }
 
-fn emit_typedef<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
+fn emit_typedef<'a, 'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena, 'decl, D>,
+    emitter: &mut Emitter<'arena, 'decl>,
     typedef: &'a ast::Typedef,
 ) -> Result<HhasTypedef<'arena>> {
     let name = ClassType::<'arena>::from_ast_name(alloc, &typedef.name.1);
@@ -76,9 +75,9 @@ fn kind_to_type_info<'arena>(
     emit_type_hint::hint_to_type_info(alloc, &Kind::TypeDef, false, h.1.is_hoption(), tparams, h)
 }
 
-fn kind_to_type_structure<'arena, 'decl, D: DeclProvider<'decl>>(
+fn kind_to_type_structure<'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena, 'decl, D>,
+    emitter: &mut Emitter<'arena, 'decl>,
     tparams: &[&str],
     h: Hint,
     is_opaque: bool,

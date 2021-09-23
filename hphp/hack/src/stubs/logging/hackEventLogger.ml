@@ -22,6 +22,7 @@ type rollout_flags = {
   use_direct_decl_in_tc_loop: bool;
   deferments_light: bool;
   old_naming_table_for_redecl: bool;
+  log_from_client_when_slow_monitor_connections: bool;
 }
 
 let flush () = ()

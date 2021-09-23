@@ -557,6 +557,8 @@ type t = {
   deferments_light: bool;
       (** Stop typechecking when deferment threshold is reached and instead get decls to predeclare from names in AST. *)
   old_naming_table_for_redecl: bool;  (** Use old naming table when redecling *)
+  log_from_client_when_slow_monitor_connections: bool;
+      (**  Alerts hh users what processes are using hh_server when hh_client is slow to connect. *)
 }
 
 let default =
@@ -657,6 +659,7 @@ let default =
     save_and_upload_naming_table = false;
     deferments_light = false;
     old_naming_table_for_redecl = false;
+    log_from_client_when_slow_monitor_connections = false;
   }
 
 let path =
@@ -695,6 +698,9 @@ let apply_justknobs_overrides ~silent config =
         eval
           "old_naming_table_for_redecl"
           "hack/config:old_naming_table_for_redecl";
+        eval
+          "log_from_client_when_slow_monitor_connections"
+          "hack/config:log_from_client_when_slow_monitor_connections";
       ]
   in
   match overrides with
@@ -1288,6 +1294,13 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
+  let log_from_client_when_slow_monitor_connections =
+    bool_if_min_version
+      "log_from_client_when_slow_monitor_connections"
+      ~default:default.log_from_client_when_slow_monitor_connections
+      ~current_version
+      config
+  in
   {
     min_log_level;
     attempt_fix_credentials;
@@ -1382,6 +1395,7 @@ let load_ fn ~silent ~current_version overrides =
     save_and_upload_naming_table;
     deferments_light;
     old_naming_table_for_redecl;
+    log_from_client_when_slow_monitor_connections;
   }
 
 let load ~silent ~current_version config_overrides =
@@ -1401,4 +1415,6 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       use_direct_decl_in_tc_loop = options.use_direct_decl_in_tc_loop;
       deferments_light = options.deferments_light;
       old_naming_table_for_redecl = options.old_naming_table_for_redecl;
+      log_from_client_when_slow_monitor_connections =
+        options.log_from_client_when_slow_monitor_connections;
     }

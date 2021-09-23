@@ -47,6 +47,7 @@ members = [
     "src/hhbc/bytecode_printer",
     "src/hhbc/cargo/compile_ffi",
     "src/hhbc/cargo/options_ffi",
+    "src/hhbc/ffi_bridge",
     "src/hhbc/hhbc_by_ref/cargo/decl_vars",
     "src/hhbc/hhbc_by_ref/cargo/emit_param",
     "src/hhbc/hhbc_by_ref/cargo/generator",

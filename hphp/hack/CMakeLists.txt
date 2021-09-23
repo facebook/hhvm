@@ -129,7 +129,6 @@ add_custom_target(
   hack_ffi
   COMMAND
    . "${CMAKE_CURRENT_BINARY_DIR}/dev_env_rust_only.sh" &&
-    ${CARGO_BUILD} compile_ffi compile_ffi &&
     ${CARGO_BUILD} decl_cpp_ffi decl_cpp_ffi
   COMMENT "Compiling Rust FFI"
 )
@@ -177,6 +176,7 @@ endfunction()
 
 build_cxx_bridge(rust_facts "src/facts/ffi_bridge")
 build_cxx_bridge(rust_parser "src/parser/ffi_bridge")
+build_cxx_bridge(rust_compile "src/hhbc/ffi_bridge")
 
 add_dependencies(hack_ffi rustc cargo)
 # Not a true dependency, but we need to make sure we don't have two cargo/rustc
@@ -207,18 +207,8 @@ endif()
 add_custom_target(hack ALL DEPENDS hack_dune)
 add_custom_target(hack_test DEPENDS hack_dune_test)
 
-# libcompile_ffi_stubs.a and librust_parser_ffi_stubs.a need to be exposed as
-# library targets to cmake for other targets (e.g. hhvm) to depend on.
-set(LIBCOMPILE_PATH "${CMAKE_BINARY_DIR}/hphp/hack/libcompile_ffi_stubs.a")
-add_library(libcompile_ffi_stubs STATIC IMPORTED GLOBAL)
-add_dependencies(libcompile_ffi_stubs hack_ffi)
-set_target_properties(libcompile_ffi_stubs PROPERTIES IMPORTED_LOCATION ${LIBCOMPILE_PATH})
-
-set(LIBRUST_PARSER_PATH "${CMAKE_BINARY_DIR}/hphp/hack/librust_parser_ffi_stubs.a")
-add_library(librust_parser_ffi_stubs STATIC IMPORTED GLOBAL)
-add_dependencies(librust_parser_ffi_stubs hack_ffi)
-set_target_properties(librust_parser_ffi_stubs PROPERTIES IMPORTED_LOCATION ${LIBRUST_PARSER_PATH})
-
+# libdecl_cpp_ffi_stubs.a needs to be exposed as a library target to cmake
+# for other targets (e.g. hhvm) to depend on.
 set(LIBRUST_DECL_PATH "${CMAKE_BINARY_DIR}/hphp/hack/libdecl_cpp_ffi_stubs.a")
 add_library(libdecl_cpp_ffi_stubs STATIC IMPORTED GLOBAL)
 add_dependencies(libdecl_cpp_ffi_stubs hack_ffi)

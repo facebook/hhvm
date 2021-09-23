@@ -1167,6 +1167,7 @@ dependencies = [
  "structopt",
  "strum",
  "strum_macros",
+ "unified_decl_provider",
 ]
 
 [[package]]
@@ -3186,6 +3187,28 @@ dependencies = [
  "ocamlrep_derive",
  "oxidized",
  "parser_core_types",
+]
+
+[[package]]
+name = "rust_compile_ffi_bridge"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "bumpalo",
+ "cxx",
+ "cxx-build",
+ "decl_provider",
+ "hhbc_by_ref_compile",
+ "libc",
+ "log",
+ "ocamlrep",
+ "ocamlrep_derive",
+ "ocamlrep_ocamlpool",
+ "oxidized",
+ "parser_core_types",
+ "serde_json",
+ "stack_limit",
+ "unified_decl_provider",
 ]
 
 [[package]]

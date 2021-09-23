@@ -29,6 +29,7 @@ stack_limit = { path = "../utils/stack_limit" }
 structopt = "0.3.21"
 strum = "0.21"
 strum_macros = "0.21"
+unified_decl_provider = { path = "../hhbc/unified_decl_provider" }
 
 [profile.release]
 incremental = false

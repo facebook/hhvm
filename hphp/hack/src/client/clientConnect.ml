@@ -351,7 +351,14 @@ let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
     "ClientConnect.connect: attempting MonitorConnection.connect_once (%ds)"
     timeout;
   let conn =
-    MonitorConnection.connect_once ~tracker ~timeout env.root handoff_options
+    MonitorConnection.connect_once
+      ~log_on_slow_connect:
+        env.local_config
+          .ServerLocalConfig.log_from_client_when_slow_monitor_connections
+      ~tracker
+      ~timeout
+      env.root
+      handoff_options
   in
   let t_connected_to_monitor = Unix.gettimeofday () in
   match conn with

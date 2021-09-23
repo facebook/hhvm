@@ -1,0 +1,48 @@
+[(Typedef
+    { t_annotation = (); t_name = ([4:8-9], "\\X"); t_tparams = []; t_constraint = (Some ([4:13-26], (Hintersection [([4:14-25], (Happly (([4:14-25], "\\HH\\Contexts\\write_props"), [])))])));
+      t_kind = ([4:8-9], (Happly (([4:8-9], "\\HH\\Contexts\\defaults"), []))); 
+      t_user_attributes = []; t_mode = Mstrict; t_vis = Opaque;
+      t_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+        ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      t_span = [4:1-27]; t_emit_id = None; t_is_ctx = true });
+  (Class
+     { c_span = [6:1-9:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
+       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Abstract); 
+       c_name = ([6:16-17], "\\A"); c_tparams = []; c_extends = []; c_uses = []; 
+       c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
+       c_xhp_category = None; c_reqs = []; c_implements = []; c_where_constraints = []; 
+       c_consts = [];
+       c_typeconsts =
+       [{ c_tconst_user_attributes = []; c_tconst_name = ([7:13-14], "C");
+          c_tconst_kind =
+          (TCConcrete { c_tc_type = ([7:17-34], (Hintersection [([7:18-30], (Happly (([7:18-30], "\\HH\\Contexts\\read_globals"), []))); ([7:32-33], (Happly (([7:32-33], "\\X"), [])))])) });
+          c_tconst_span = [7:3-35]; c_tconst_doc_comment = None; c_tconst_is_ctx = true };
+         { c_tconst_user_attributes = []; c_tconst_name = ([8:22-24], "C2");
+           c_tconst_kind =
+           (TCAbstract
+              { c_atc_as_constraint = (Some ([8:28-45], (Hintersection [([8:29-41], (Happly (([8:29-41], "\\HH\\Contexts\\read_globals"), []))); ([8:43-44], (Happly (([8:43-44], "\\X"), [])))])));
+                c_atc_super_constraint = None;
+                c_atc_default = (Some ([8:48-65], (Hintersection [([8:49-61], (Happly (([8:49-61], "\\HH\\Contexts\\read_globals"), []))); ([8:63-64], (Happly (([8:63-64], "\\X"), [])))]))) });
+           c_tconst_span = [8:3-66]; c_tconst_doc_comment = None; c_tconst_is_ctx = true }
+         ];
+       c_vars = []; c_methods = []; c_attributes = []; c_xhp_children = []; 
+       c_xhp_attrs = [];
+       c_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+         ns_disable_xhp_element_mangling = false };
+       c_user_attributes = [];
+       c_file_attributes =
+       [{ fa_user_attributes = [{ ua_name = ([3:8-32], "__EnableUnstableFeatures"); ua_params = [((), [3:33-66], (String "context_alias_declaration_short"))] }];
+          fa_namespace =
+          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+            ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+            ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+            ns_disable_xhp_element_mangling = false }
+          }
+         ];
+       c_enum = None; c_doc_comment = None; c_emit_id = None })
+  ]

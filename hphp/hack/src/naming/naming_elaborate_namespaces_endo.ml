@@ -131,9 +131,33 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
       let env = extend_tparams env c.c_tparams in
       super#on_class_ env c
 
+    method on_class_ctx_const env kind =
+      match kind with
+      | TCConcrete { c_tc_type } ->
+        TCConcrete { c_tc_type = self#on_ctx_hint_ns contexts_ns env c_tc_type }
+      | TCAbstract
+          {
+            c_atc_as_constraint = as_;
+            c_atc_super_constraint = super;
+            c_atc_default = default;
+          } ->
+        let as_ = Option.map ~f:(self#on_ctx_hint_ns contexts_ns env) as_ in
+        let super = Option.map ~f:(self#on_ctx_hint_ns contexts_ns env) super in
+        let default =
+          Option.map ~f:(self#on_ctx_hint_ns contexts_ns env) default
+        in
+        TCAbstract
+          {
+            c_atc_as_constraint = as_;
+            c_atc_super_constraint = super;
+            c_atc_default = default;
+          }
+      | TCPartiallyAbstract _ -> failwith "unreachable"
+
     method! on_class_typeconst_def env tc =
       if tc.c_tconst_is_ctx then
-        super#on_class_typeconst_def { env with namespace = contexts_ns } tc
+        let c_tconst_kind = self#on_class_ctx_const env tc.c_tconst_kind in
+        super#on_class_typeconst_def env { tc with c_tconst_kind }
       else
         super#on_class_typeconst_def env tc
 

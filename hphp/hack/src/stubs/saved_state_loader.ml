@@ -107,3 +107,5 @@ let long_user_message_of_error _ =
 let debug_details_of_error _ = ""
 
 let is_error_actionable _ = false
+
+let get_project_name _ = ""

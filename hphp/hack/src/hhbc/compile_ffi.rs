@@ -493,29 +493,25 @@ unsafe extern "C" fn hackc_hhas_to_string_cpp_ffi(
         let buf: &mut [u8] =
             std::slice::from_raw_parts_mut((*err_buf).buf as *mut u8, buf_len as usize);
 
-        match stack_limit::with_elastic_stack(|_stack_limit| {
-            let native_env: hhbc_by_ref_compile::NativeEnv<&str> =
-                CNativeEnv::to_compile_env(cnative_env).unwrap();
-            let env = hhbc_by_ref_compile::Env::<&str> {
-                filepath: native_env.filepath.clone(),
-                config_jsons: vec![],
-                config_list: vec![],
-                flags: native_env.flags,
-            };
-            let mut output = String::new();
-            hhbc_by_ref_compile::hhas_to_string(&env, Some(&native_env), &mut output, prog)?;
-            Ok(output)
-        })
-        .map_err(|e| format!("{}", e))
-        .expect("compile_ffi: hackc_hhas_to_string_cpp_ffi: retry failed")
-        .map_err(|e: anyhow::Error| e.to_string())
-        {
-            Ok(out) => {
-                let cs = std::ffi::CString::new(out)
+        let native_env: hhbc_by_ref_compile::NativeEnv<&str> =
+            CNativeEnv::to_compile_env(cnative_env).unwrap();
+        let env = hhbc_by_ref_compile::Env::<&str> {
+            filepath: native_env.filepath.clone(),
+            config_jsons: vec![],
+            config_list: vec![],
+            flags: native_env.flags,
+        };
+        let mut output = String::new();
+        let compile_result =
+            hhbc_by_ref_compile::hhas_to_string(&env, Some(&native_env), &mut output, prog);
+        match compile_result {
+            Ok(_) => {
+                let cs = std::ffi::CString::new(output)
                     .expect("compile_ffi: hackc_hhas_to_string_cpp_ffi: String::new failed");
                 cs.into_raw() as *const c_char
             }
             Err(e) => {
+                let e = e.to_string();
                 if e.len() >= buf.len() {
                     warn!("Provided error buffer too small.");
                     warn!(

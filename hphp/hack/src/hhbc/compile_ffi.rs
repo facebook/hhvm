@@ -145,17 +145,20 @@ unsafe extern "C" fn hackc_compile_from_text_free_string_cpp_ffi(s: *mut c_char)
 // Compile to pretty printed HHAS from source text.
 #[no_mangle]
 unsafe extern "C" fn hackc_compile_from_text_cpp_ffi(
-    env: usize,
+    cnative_env: *const CNativeEnv,
     source_text: *const c_char,
-    output_cfg: usize,
-    err_buf: usize,
+    output_cfg: *const COutputConfig,
+    err_buf: *const CErrBuf,
 ) -> *const c_char {
     match std::panic::catch_unwind(|| {
+        // Safety: `cnative_env`is a well aligned, properly initialized
+        // `*const CNativeEnv`.
+        let cnative_env: &CNativeEnv = cnative_env.as_ref().unwrap();
         // Safety: We rely on the C caller that `env` can be legitmately
         // reinterpreted as a `*const CErrBuf` and that on doing so, it is
         // non-null is well aligned and points to a valid properly
         // initialized value.
-        let err_buf: &CErrBuf = (err_buf as *const CErrBuf).as_ref().unwrap();
+        let err_buf: &CErrBuf = err_buf.as_ref().unwrap();
         let buf_len: c_int = err_buf.buf_len;
         // Safety : We rely on the C caller that `err_buf.buf` be valid for
         // reads and write for `buf_len * mem::sizeof::<u8>()` bytes.
@@ -166,17 +169,12 @@ unsafe extern "C" fn hackc_compile_from_text_cpp_ffi(
         // legitmately reinterpreted as a `*const COutputConfig` and that
         // on doing so, it points to a valid properly initialized value.
         let _output_config: Option<RustOutputConfig> =
-            RustOutputConfig::from_c_output_config(output_cfg as *const COutputConfig);
+            RustOutputConfig::from_c_output_config(output_cfg);
         // Safety: We rely on the C caller that `source_text` be a
         // properly iniitalized null-terminated C string.
         let text: &[u8] = std::ffi::CStr::from_ptr(source_text).to_bytes();
 
         match stack_limit::with_elastic_stack(|stack_limit| {
-            // Safety: We rely on the C caller that `env` can be
-            // legitmately reinterpreted as a `*const CEnv` and that
-            // on doing so, it points to a valid properly initialized
-            // value.
-            let cnative_env = (env as *const CNativeEnv).as_ref().unwrap();
             let native_env: hhbc_by_ref_compile::NativeEnv<&str> =
                 CNativeEnv::to_compile_env(cnative_env).unwrap();
             let env = hhbc_by_ref_compile::Env::<&str> {
@@ -186,17 +184,15 @@ unsafe extern "C" fn hackc_compile_from_text_cpp_ffi(
                 flags: native_env.flags,
             };
             let source_text = SourceText::make(RcOc::new(env.filepath.clone()), text);
-            let mut w = String::new();
+            let mut output = String::new();
             let alloc = bumpalo::Bump::new();
             let decl_provider = if native_env
                 .flags
                 .contains(hhbc_by_ref_compile::EnvFlags::ENABLE_DECL)
             {
-                unified_decl_provider::DeclProvider::ExternalDeclProvider(ExternalDeclProvider(
-                    (*cnative_env).decl_getter,
-                    (*cnative_env).decl_provider,
-                    std::marker::PhantomData,
-                ))
+                unified_decl_provider::DeclProvider::ExternalDeclProvider(
+                    ExternalDeclProvider::new(cnative_env.decl_getter, cnative_env.decl_provider),
+                )
             } else {
                 unified_decl_provider::DeclProvider::NoDeclProvider(NoDeclProvider)
             };
@@ -204,13 +200,13 @@ unsafe extern "C" fn hackc_compile_from_text_cpp_ffi(
                 &alloc,
                 &env,
                 stack_limit,
-                &mut w,
+                &mut output,
                 source_text,
                 Some(&native_env),
                 decl_provider,
             );
             match compile_result {
-                Ok(_) => Ok(w),
+                Ok(_) => Ok(output),
                 Err(e) => Err(anyhow!("{}", e)),
             }
         })
@@ -310,11 +306,12 @@ unsafe extern "C" fn hackc_compile_hhas_from_text_cpp_ffi(
                     .flags
                     .contains(hhbc_by_ref_compile::EnvFlags::ENABLE_DECL)
                 {
-                    unified_decl_provider::DeclProvider::ExternalDeclProvider(ExternalDeclProvider(
-                        (*cnative_env).decl_getter,
-                        (*cnative_env).decl_provider,
-                        std::marker::PhantomData,
-                    ))
+                    unified_decl_provider::DeclProvider::ExternalDeclProvider(
+                        ExternalDeclProvider::new(
+                            cnative_env.decl_getter,
+                            cnative_env.decl_provider,
+                        ),
+                    )
                 } else {
                     unified_decl_provider::DeclProvider::NoDeclProvider(NoDeclProvider)
                 };

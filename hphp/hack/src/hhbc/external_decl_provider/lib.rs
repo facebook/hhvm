@@ -32,3 +32,15 @@ impl<'decl> DeclProvider<'decl> for ExternalDeclProvider<'decl> {
         }
     }
 }
+
+impl<'decl> ExternalDeclProvider<'decl> {
+    pub fn new(
+        decl_getter: unsafe extern "C" fn(
+            *const std::ffi::c_void,
+            *const c_char,
+        ) -> *const std::ffi::c_void,
+        decl_provider: *const std::ffi::c_void,
+    ) -> Self {
+        Self(decl_getter, decl_provider, std::marker::PhantomData)
+    }
+}

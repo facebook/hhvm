@@ -54,20 +54,37 @@ let check_property_sound_for_dynamic_read ~on_error env classname id ty =
     on_error (fst id) (snd id) classname (pos, Typing_print.full_strip_ns env ty)
   )
 
-let check_property_sound_for_dynamic_write ~on_error env classname id ty =
-  let te_check = Typing_enforceability.is_enforceable env ty in
-  (* If the property tyoe isn't enforceable, but is just dynamic,
+(* The optional ty should be (if not None) the localisation of the decl_ty.
+   This lets us avoid re-localising the decl type when the caller has already
+  localised it *)
+let check_property_sound_for_dynamic_write ~on_error env classname id decl_ty ty
+    =
+  let te_check = Typing_enforceability.is_enforceable env decl_ty in
+  (* If the property type isn't enforceable, but is a supertype of dynamic,
      then the property will still be safe to write via a receiver expression of type
      dynamic. *)
-  if not (te_check || is_dynamic_decl env ty) then (
-    let pos = get_pos ty in
-    Typing_log.log_pessimize_prop env pos classname (snd id);
-    on_error
-      (fst id)
-      (snd id)
-      classname
-      (pos, Typing_print.full_strip_ns_decl env ty)
-  )
+  if not te_check then
+    let (env, ty) =
+      match ty with
+      | Some ty -> (env, ty)
+      | None -> Typing_phase.localize_no_subst ~ignore_errors:true env decl_ty
+    in
+    if
+      not
+        (Typing_utils.is_sub_type_for_union
+           ~coerce:(Some Typing_logic.CoerceToDynamic)
+           env
+           (Typing_make_type.dynamic Reason.Rnone)
+           ty)
+    then (
+      let pos = get_pos decl_ty in
+      Typing_log.log_pessimize_prop env pos classname (snd id);
+      on_error
+        (fst id)
+        (snd id)
+        classname
+        (pos, Typing_print.full_strip_ns_decl env decl_ty)
+    )
 
 let sound_dynamic_interface_check env params_decl_ty ret_locl_ty =
   (* 1. check if all the parameters of the method are enforceable *)

@@ -623,6 +623,7 @@ let rec obj_get_concrete_ty
               (Cls.name self_class)
               (id_pos, id_str)
               ty
+              None
         | _ -> ())
       | _ -> ());
     let ty = MakeType.dynamic (Reason.Rdynamic_prop id_pos) in

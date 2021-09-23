@@ -1647,7 +1647,7 @@ let class_var_def ~is_static cls env cv =
       (Provider_context.get_tcopt (Env.get_ctx env))
     && Cls.get_support_dynamic_type cls
     && not (Aast.equal_visibility cv.cv_visibility Private)
-  then begin
+  then (
     let env_with_require_dynamic =
       Typing_dynamic.add_require_dynamic_bounds env cls
     in
@@ -1657,14 +1657,15 @@ let class_var_def ~is_static cls env cv =
           env_with_require_dynamic
           (Cls.name cls)
           cv.cv_id
-          ty);
+          ty
+          (Some cv_type_ty));
     Typing_dynamic.check_property_sound_for_dynamic_read
       ~on_error:Errors.property_is_not_dynamic
       env_with_require_dynamic
       (Cls.name cls)
       cv.cv_id
       cv_type_ty
-  end;
+  );
   ( env,
     ( {
         Aast.cv_final = cv.cv_final;

@@ -23,6 +23,7 @@ val check_property_sound_for_dynamic_write :
   string ->
   'a * string ->
   Typing_defs.decl_ty ->
+  Typing_defs.locl_ty option ->
   unit
 
 (* checks that a method can be invoked in a dynamic context by ensuring that

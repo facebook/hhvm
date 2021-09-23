@@ -17,14 +17,11 @@
 #include <folly/ScopeGuard.h>
 #include <folly/executors/CPUThreadPoolExecutor.h>
 #include <folly/hash/Hash.h>
+#include <folly/logging/xlog.h>
 
 #include "hphp/runtime/ext/facts/exception.h"
 #include "hphp/runtime/ext/facts/symbol-map.h"
 #include "hphp/util/assertions.h"
-#include "hphp/util/logger.h"
-#include "hphp/util/trace.h"
-
-TRACE_SET_MOD(facts);
 
 namespace HPHP {
 
@@ -1117,12 +1114,12 @@ void SymbolMap::update(
                 // current update and try again later, and there's no reason
                 // to slam stderr with a warning in this case.
                 case SQLiteExc::Code::BUSY:
-                  Logger::Info(
-                      "Exception while updating autoload DB: %s", e.what());
+                  XLOG(DBG9)
+                      << "Exception while updating autoload DB: " << e.what();
                   break;
                 default:
-                  Logger::Warning(
-                      "Exception while updating autoload DB: %s", e.what());
+                  XLOG(WARN)
+                      << "Exception while updating autoload DB: " << e.what();
               }
             }));
   }
@@ -1228,27 +1225,27 @@ void SymbolMap::updateDB(
   if (since.isInitial()) {
     try {
       auto DEBUG_ONLY t0 = std::chrono::steady_clock::now();
-      FTRACE(2, "Running ANALYZE on {}...\n", m_dbData.m_path.native());
+      XLOGF(DBG9, "Running ANALYZE on {}...", m_dbData.m_path.native());
       db.analyze();
       auto DEBUG_ONLY tf = std::chrono::steady_clock::now();
-      FTRACE(
-          2,
-          "Finished ANALYZE on {} in {:.3} seconds.\n",
+      XLOGF(
+          DBG9,
+          "Finished ANALYZE on {} in {:.3} seconds.",
           m_dbData.m_path.native(),
           static_cast<double>(
               std::chrono::duration_cast<std::chrono::milliseconds>(tf - t0)
                   .count()) /
               1000);
     } catch (const SQLiteExc& e) {
-      FTRACE(
-          1,
-          "Error while running ANALYZE on {}: {}\n",
+      XLOGF(
+          ERR,
+          "Error while running ANALYZE on {}: {}",
           m_dbData.m_path.native(),
           e.what());
     } catch (std::exception& e) {
-      FTRACE(
-          1,
-          "Error while running ANALYZE on {}: {}\n",
+      XLOGF(
+          ERR,
+          "Error while running ANALYZE on {}: {}",
           m_dbData.m_path.native(),
           e.what());
     }

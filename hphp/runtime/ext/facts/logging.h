@@ -29,7 +29,10 @@
 namespace HPHP {
 namespace Facts {
 
-void enableFactsLogging(const std::string& owner, const std::string& options);
+void enableFactsLogging(
+    const std::string& owner,
+    const std::string& options,
+    bool allow_propagation);
 
 /*
  * AsyncLogWriter is a wrapper for other log writers which makes them

@@ -22,6 +22,7 @@
 #include <folly/executors/CPUThreadPoolExecutor.h>
 #include <folly/futures/Future.h>
 #include <folly/futures/FutureSplitter.h>
+#include <folly/logging/xlog.h>
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
@@ -43,9 +44,6 @@
 #include "hphp/util/hash-set.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/sha1.h"
-#include "hphp/util/trace.h"
-
-TRACE_SET_MOD(facts);
 
 namespace HPHP {
 namespace Facts {
@@ -811,10 +809,12 @@ struct FactsStoreImpl final
           if (results.hasValue()) {
             auto const* files = results->get_ptr("files");
             if (files && files->isArray()) {
-              FTRACE(
-                  3, "Subscription result. {} paths received\n", files->size());
+              XLOGF(
+                  INFO,
+                  "Subscription result: {} paths received.",
+                  files->size());
             } else {
-              FTRACE(3, "Subscription result: {}\n", folly::toJson(*results));
+              XLOGF(DBG9, "Subscription result: {}", folly::toJson(*results));
             }
             auto sharedThis = weakThis.lock();
             if (!sharedThis) {
@@ -822,10 +822,8 @@ struct FactsStoreImpl final
             }
             sharedThis->update();
           } else if (results.hasException()) {
-            FTRACE(
-                2,
-                "Watchman subscription Error: {}\n",
-                results.exception().what());
+            XLOG(ERR) << "Watchman subscription Error: "
+                      << results.exception().what();
           }
         });
   }
@@ -865,7 +863,7 @@ private:
     }
     auto query = addWatchmanSince(m_watchmanData->m_queryExpr, since);
 
-    FTRACE(3, "Querying watchman ({})\n", folly::toJson(query));
+    XLOGF(DBG9, "Querying watchman ({})", folly::toJson(query));
     return m_watchmanData->m_watchmanClient.query(std::move(query))
         .via(&m_updateExec)
         .thenValue([this, since](
@@ -873,7 +871,7 @@ private:
           auto const& result = wrappedResults.raw_;
           if (result.count("error")) {
             throw UpdateExc{folly::sformat(
-                "Got a watchman error: {}\n", folly::toJson(result))};
+                "Got a watchman error: {}", folly::toJson(result))};
           }
 
           // isFresh means we either didn't pass Watchman a "since" token,
@@ -903,9 +901,9 @@ private:
             return;
           }
 
-          FTRACE(
-              3,
-              "{} altered, {} deleted\n",
+          XLOGF(
+              INFO,
+              "{} paths altered, {} paths deleted.",
               alteredPathsAndHashes.size(),
               deletedPaths.size());
 
@@ -920,8 +918,9 @@ private:
             try {
               facts.push_back(std::move(alteredPathFacts[i]).value());
             } catch (FactsExtractionExc& e) {
-              Logger::Warning(
-                  "Error extracting facts from %s: %s\n",
+              XLOGF(
+                  CRITICAL,
+                  "Error extracting facts from {}: {}",
                   alteredPathsAndHashes.at(i).m_path.c_str(),
                   e.what());
               // Treat a parse error as if we had deleted the path
@@ -943,9 +942,9 @@ private:
                 alteredPathsAndHashes.end());
           }
 
-          FTRACE(
-              3,
-              "Facts size: {}. Altered paths size: {}\n",
+          XLOGF(
+              DBG9,
+              "Facts size: {}. Altered paths size: {}",
               facts.size(),
               alteredPathsAndHashes.size());
           assertx(facts.size() == alteredPathsAndHashes.size());
@@ -978,11 +977,10 @@ private:
             }
           }();
 
-          FTRACE(
-              3,
-              "SymbolMap.update("
-              "since={}, clock={}, alteredPathsAndHashes.size()={}, "
-              "deletedPaths.size()={})\n",
+          XLOGF(
+              DBG9,
+              "SymbolMap.update(since={}, clock={}, "
+              "alteredPathsAndHashes.size()={}, deletedPaths.size()={})",
               since,
               clock,
               alteredPathsAndHashes.size(),
@@ -994,7 +992,7 @@ private:
               std::move(deletedPaths),
               std::move(facts));
 
-          FTRACE(3, "{} has finished updating\n", curthread());
+          XLOGF(INFO, "Thread {} has finished updating.", curthread());
         });
   }
 
@@ -1007,9 +1005,9 @@ private:
   getFreshDelta(const folly::dynamic& result) const {
 
     auto allPaths = m_map.getAllPathsWithHashes();
-    FTRACE(
-        3,
-        "Received fresh query, checking against our list of {} paths\n",
+    XLOGF(
+        INFO,
+        "Received fresh query, checking against our list of {} paths.",
         allPaths.size());
 
     std::vector<PathAndHash> alteredPaths;

@@ -861,6 +861,7 @@ std::string RuntimeOption::AutoloadDBPath;
 std::string RuntimeOption::AutoloadDBPerms{"0644"};
 std::string RuntimeOption::AutoloadDBGroup;
 std::string RuntimeOption::AutoloadLogging;
+bool RuntimeOption::AutoloadLoggingAllowPropagation;
 bool RuntimeOption::AutoloadEnforceOneDefinitionRule = true;
 bool RuntimeOption::AutoloadRethrowExceptions = true;
 std::string RuntimeOption::FileCache;
@@ -2462,7 +2463,10 @@ void RuntimeOption::Load(
     Config::Bind(AutoloadDBPath, ini, config, "Autoload.DB.Path");
     Config::Bind(AutoloadDBPerms, ini, config, "Autoload.DB.Perms", "0644");
     Config::Bind(AutoloadDBGroup, ini, config, "Autoload.DB.Group");
-    Config::Bind(AutoloadLogging, ini, config, "Autoload.Logging", "");
+    Config::Bind(AutoloadLogging, ini, config, "Autoload.Logging",
+      "hphp.runtime.ext.facts:=CRITICAL:slog;slog=hhvm");
+    Config::Bind(AutoloadLoggingAllowPropagation, ini, config,
+                 "Autoload.AllowLoggingPropagation", false);
     Config::Bind(AutoloadEnforceOneDefinitionRule, ini, config,
                  "Autoload.EnforceOneDefinitionRule", true);
     Config::Bind(AutoloadRethrowExceptions, ini, config,

@@ -22,6 +22,7 @@
 #include <folly/executors/CPUThreadPoolExecutor.h>
 #include <folly/experimental/io/FsUtil.h>
 #include <folly/futures/Future.h>
+#include <folly/logging/xlog.h>
 
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -32,9 +33,6 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/match.h"
 #include "hphp/util/text-util.h"
-#include "hphp/util/trace.h"
-
-TRACE_SET_MOD(facts);
 
 namespace HPHP {
 namespace Facts {
@@ -210,17 +208,24 @@ std::vector<folly::Try<FileFacts>> facts_from_paths(
   // Otherwise use the SimpleExtractor.
   auto extractor = [&]() -> std::unique_ptr<Extractor> {
     if (s_extractorFactory) {
-      FTRACE(3, "Creating a custom HPHP::Facts::Extractor.\n");
+      XLOG(INFO) << "Creating a custom HPHP::Facts::Extractor.";
       return s_extractorFactory(exec);
     } else {
-      FTRACE(3, "Creating a HPHP::Facts::SimpleExtractor.\n");
+      XLOG(INFO) << "Creating a HPHP::Facts::SimpleExtractor.";
       return std::make_unique<SimpleExtractor>(exec);
     }
   }();
 
+  std::atomic<int> completed_tasks = 0;
   std::vector<folly::SemiFuture<FileFacts>> factsFutures;
   factsFutures.reserve(pathsAndHashes.size());
-  for (auto const& pathAndHash : pathsAndHashes) {
+
+  XLOGF(INFO, "Extracting facts for {} files.", pathsAndHashes.size());
+  for (int i = 0; i < pathsAndHashes.size(); ++i) {
+    auto const& pathAndHash = pathsAndHashes.at(i);
+    XLOG_EVERY_N(INFO, 50000) << "Enqueued " << i << " out of "
+                              << pathsAndHashes.size() << " updates.";
+
     assertx(pathAndHash.m_path.is_relative());
     PathAndHash absPathAndHash{root / pathAndHash.m_path, pathAndHash.m_hash};
     factsFutures.push_back(
@@ -255,8 +260,9 @@ std::vector<folly::Try<FileFacts>> facts_from_paths(
               if (facts.hasValue()) {
                 return *std::move(facts);
               } else {
-                Logger::Info(
-                    "Error extracting %s: %s\n",
+                XLOGF(
+                    CRITICAL,
+                    "Error extracting {}: {}",
                     absPathAndHash.m_path.native().c_str(),
                     facts.exception().what().c_str());
                 return parse_json(facts_json_from_path(absPathAndHash.m_path));
@@ -264,9 +270,18 @@ std::vector<folly::Try<FileFacts>> facts_from_paths(
             })
             .thenValue([](folly::dynamic&& facts) {
               return make_file_facts(std::move(facts));
+            })
+            .thenTry([&completed_tasks,
+                      &pathsAndHashes](folly::Try<FileFacts>&& facts) {
+              int completed = ++completed_tasks;
+              XLOG_EVERY_N(INFO, 50000)
+                  << "Finished " << completed << " out of "
+                  << pathsAndHashes.size() << " updates.";
+              return std::move(facts);
             }));
   }
 
+  XLOG(INFO) << "Done updating.";
   return folly::collectAll(factsFutures).wait().get();
 }
 

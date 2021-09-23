@@ -28,6 +28,7 @@
 #include <folly/logging/LogConfig.h>
 #include <folly/logging/LogFormatter.h>
 #include <folly/logging/LogHandlerFactory.h>
+#include <folly/logging/LogLevel.h>
 #include <folly/logging/Logger.h>
 #include <folly/logging/LoggerDB.h>
 #include <folly/logging/StandardLogHandler.h>
@@ -40,6 +41,8 @@ namespace HPHP {
 namespace Facts {
 
 namespace {
+
+const std::string kDefaultFactsLogCategory = "hphp.runtime.ext.facts";
 
 folly::SynchronizedPtr<std::unique_ptr<Cronolog>> make_synchronized_crono(
     const std::string& file_template,
@@ -376,7 +379,11 @@ void AsyncLogWriter::flush() {
       .wait();
 }
 
-void enableFactsLogging(const std::string& owner, const std::string& options) {
+void enableFactsLogging(
+    const std::string& owner,
+    const std::string& options,
+    bool allow_propagation) {
+
   folly::LoggerDB::get().registerHandlerFactory(
       std::make_unique<CronoLogHandlerFactory>(owner));
 
@@ -389,6 +396,15 @@ void enableFactsLogging(const std::string& owner, const std::string& options) {
   // might end up overwriting the overridden settings with the base
   // configuration before applying our own settings.
   folly::initLogging(options);
+
+  // We don't really want facts messages to propagate up because if nothing
+  // has configured logging higher up in the hierarchy, this will result in
+  // logging being emitted to stderr.  Sadly, this can't be configured via
+  // options in initLogging, so we have to do this.
+  if (!allow_propagation) {
+    auto* facts = folly::LoggerDB::get().getCategory(kDefaultFactsLogCategory);
+    facts->setPropagateLevelMessagesToParent(folly::LogLevel::MAX_LEVEL);
+  }
 }
 
 } // namespace Facts

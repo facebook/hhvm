@@ -17,6 +17,7 @@ get_target_property(LIBSODIUM_INCLUDE_DIR libsodium INTERFACE_INCLUDE_DIRECTORIE
 get_target_property(LIBSODIUM_LIBRARY libsodium INTERFACE_LINK_LIBRARIES)
 get_target_property(ZSTD_INCLUDE_DIR zstd INTERFACE_INCLUDE_DIRECTORIES)
 get_target_property(ZSTD_LIBRARY zstd INTERFACE_LINK_LIBRARIES)
+get_target_property(JEMALLOC_INCLUDE_DIR jemalloc INTERFACE_INCLUDE_DIRECTORIES)
 
 
 SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
@@ -70,6 +71,8 @@ ExternalProject_Add(
 
     "-Dfmt_DIR=${FMT_INSTALL_DIR}/lib/cmake/fmt"
     "-Dfolly_DIR=${FOLLY_INSTALL_DIR}/lib/cmake/folly"
+
+    "-DCMAKE_CXX_FLAGS=-I${JEMALLOC_INCLUDE_DIR}"
 )
 ExternalProject_Get_property(bundled_fizz INSTALL_DIR)
 
@@ -77,6 +80,7 @@ set(
   FIZZ_DEPS
   boost
   folly
+  jemalloc
   libsodium
   zstd
 )

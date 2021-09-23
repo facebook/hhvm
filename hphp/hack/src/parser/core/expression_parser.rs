@@ -2002,7 +2002,7 @@ where
     fn parse_upcast_expression(&mut self, left: S::R) -> S::R {
         // SPEC:
         // upcast-expression:
-        //   upcast-subject  :  type-specifier
+        //   upcast-subject upcast type-specifier
         //
         // upcast-subject:
         //   expression

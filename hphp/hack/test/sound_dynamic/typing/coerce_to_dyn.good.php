@@ -105,3 +105,16 @@ function test_inter(int $i, bool $b) : void {
     $i upcast dynamic;
   }
 }
+
+function test_expression_helper() : int {
+  return 10;
+}
+
+function test_expression(int $i) : void {
+  $x = test_expression_helper() upcast dynamic;
+  $y = ($i + 1) upcast dynamic;
+  $z = 1 upcast dynamic;
+  $m = (1 upcast int) + 1;
+  $n = 1 + (1 upcast int);
+  $o = 1 upcast int + 1;
+}

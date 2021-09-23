@@ -1,0 +1,7 @@
+write_props called
+xf called
+
+Warning: Call to xf() requires [defaults] coeffects but badpure() provided [] in %s/hphp/test/slow/coeffects/coeffect-encapsulation-1.php on line 16
+write_props called
+xf called
+done

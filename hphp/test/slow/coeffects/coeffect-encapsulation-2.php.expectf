@@ -1,0 +1,7 @@
+m called
+poly called
+
+Warning: Call to A::m() requires [defaults] coeffects but badpure() provided [] in %s/hphp/test/slow/coeffects/coeffect-encapsulation-2.php on line 19
+m called
+badpure called
+done

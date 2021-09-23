@@ -325,6 +325,7 @@ type t = {
   (* All classes are implcitly marked <<__SupportDynamicType>> *)
   tco_everything_sdt: bool;
   tco_deferments_light: bool;
+  tco_old_naming_table_for_redecl: bool;
 }
 [@@deriving eq, show]
 
@@ -458,6 +459,7 @@ val make :
   ?tco_enforce_sealed_subclasses:bool ->
   ?tco_everything_sdt:bool ->
   ?tco_deferments_light:bool ->
+  ?tco_old_naming_table_for_redecl:bool ->
   unit ->
   t
 
@@ -752,3 +754,5 @@ val tco_enforce_sealed_subclasses : t -> bool
 val tco_everything_sdt : t -> bool
 
 val tco_deferments_light : t -> bool
+
+val tco_old_naming_table_for_redecl : t -> bool

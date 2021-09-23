@@ -138,6 +138,7 @@ impl Default for GlobalOptions {
             tco_enforce_sealed_subclasses: false,
             tco_everything_sdt: false,
             tco_deferments_light: false,
+            tco_old_naming_table_for_redecl: false,
         }
     }
 }

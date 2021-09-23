@@ -556,6 +556,7 @@ type t = {
   save_and_upload_naming_table: bool;
   deferments_light: bool;
       (** Stop typechecking when deferment threshold is reached and instead get decls to predeclare from names in AST. *)
+  old_naming_table_for_redecl: bool;  (** Use old naming table when redecling *)
 }
 
 let default =
@@ -655,6 +656,7 @@ let default =
     watchman = Watchman.default;
     save_and_upload_naming_table = false;
     deferments_light = false;
+    old_naming_table_for_redecl = false;
   }
 
 let path =
@@ -690,6 +692,9 @@ let apply_justknobs_overrides ~silent config =
           "hack/config:load_decls_from_saved_state";
         eval "use_direct_decl_parser" "hack/config:use_direct_decl_parser";
         eval "deferments_light" "hack/config:deferments_light";
+        eval
+          "old_naming_table_for_redecl"
+          "hack/config:old_naming_table_for_redecl";
       ]
   in
   match overrides with
@@ -1276,6 +1281,13 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
+  let old_naming_table_for_redecl =
+    bool_if_min_version
+      "old_naming_table_for_redecl"
+      ~default:default.old_naming_table_for_redecl
+      ~current_version
+      config
+  in
   {
     min_log_level;
     attempt_fix_credentials;
@@ -1369,6 +1381,7 @@ let load_ fn ~silent ~current_version overrides =
     force_remote_type_check;
     save_and_upload_naming_table;
     deferments_light;
+    old_naming_table_for_redecl;
   }
 
 let load ~silent ~current_version config_overrides =
@@ -1387,4 +1400,5 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       stream_errors = options.stream_errors;
       use_direct_decl_in_tc_loop = options.use_direct_decl_in_tc_loop;
       deferments_light = options.deferments_light;
+      old_naming_table_for_redecl = options.old_naming_table_for_redecl;
     }

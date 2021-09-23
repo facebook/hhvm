@@ -688,8 +688,8 @@ functor
           end
         ~init:FileInfo.empty_names
 
-    let get_classes naming_table path =
-      match Naming_table.get_file_info naming_table path with
+    let get_classes ~old_naming_table path =
+      match Naming_table.get_file_info old_naming_table path with
       | None -> SSet.empty
       | Some info ->
         List.fold
@@ -847,6 +847,12 @@ functor
         ~(naming_table : Naming_table.t)
         ~(oldified_defs : FileInfo.names)
         ~(profiling : CgroupProfiler.Profiling.t) : redecl_phase1_result =
+      let naming_table =
+        if genv.local_config.ServerLocalConfig.old_naming_table_for_redecl then
+          env.naming_table
+        else
+          naming_table
+      in
       let bucket_size = genv.local_config.SLC.type_decl_bucket_size in
       let defs_to_redecl = get_defs fast in
       let ctx = Provider_utils.ctx_from_server_env env in
@@ -863,7 +869,7 @@ functor
           ~bucket_size
           ctx
           genv.workers
-          (get_classes naming_table)
+          (get_classes ~old_naming_table:naming_table)
           ~previously_oldified_defs:oldified_defs
           ~defs:fast
       in
@@ -904,6 +910,12 @@ functor
         ~(oldified_defs : FileInfo.names)
         ~(to_redecl_phase2_deps : Typing_deps.DepSet.t)
         ~(profiling : CgroupProfiler.Profiling.t) : redecl_phase2_result =
+      let naming_table =
+        if genv.local_config.ServerLocalConfig.old_naming_table_for_redecl then
+          env.naming_table
+        else
+          naming_table
+      in
       let ctx = Provider_utils.ctx_from_server_env env in
       let bucket_size = genv.local_config.SLC.type_decl_bucket_size in
       let defs_to_oldify = get_defs lazy_decl_later in
@@ -911,7 +923,7 @@ functor
         ctx
         ~bucket_size
         genv.workers
-        (get_classes naming_table)
+        (get_classes ~old_naming_table:naming_table)
         ~previously_oldified_defs:oldified_defs
         ~defs:defs_to_oldify;
       let oldified_defs = FileInfo.merge_names oldified_defs defs_to_oldify in
@@ -928,7 +940,7 @@ functor
           ~bucket_size
           ctx
           genv.workers
-          (get_classes naming_table)
+          (get_classes ~old_naming_table:naming_table)
           ~previously_oldified_defs:oldified_defs
           ~defs:fast_redecl_phase2_now
       in

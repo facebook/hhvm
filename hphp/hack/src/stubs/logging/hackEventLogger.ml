@@ -21,6 +21,7 @@ type rollout_flags = {
   stream_errors: bool;
   use_direct_decl_in_tc_loop: bool;
   deferments_light: bool;
+  old_naming_table_for_redecl: bool;
 }
 
 let flush () = ()

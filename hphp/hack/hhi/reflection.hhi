@@ -111,7 +111,7 @@ class ReflectionClass implements Reflector {
 
 class ReflectionObject extends ReflectionClass {}
 
-class ReflectionException extends Exception {}
+class ReflectionException extends ExceptionWithPureGetMessage {}
 
 abstract class ReflectionFunctionAbstract implements Reflector {
 

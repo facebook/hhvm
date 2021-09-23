@@ -62,6 +62,18 @@ class DivisionByZeroError extends Error {}
 class ParseError extends Error {}
 class TypeError extends Error {}
 
+interface IExceptionWithPureGetMessage {
+  require extends Exception;
+
+  public function getMessage()[]: string;
+}
+
+class ExceptionWithPureGetMessage
+  extends Exception implements IExceptionWithPureGetMessage {
+
+  public function getMessage()[]: string;
+}
+
 class Exception implements Throwable {
   protected int $code;
   protected string $file;
@@ -92,7 +104,7 @@ class Exception implements Throwable {
   final public static function setTraceOptions($opts)[globals];
 }
 
-class ErrorException extends Exception {
+class ErrorException extends ExceptionWithPureGetMessage {
   public function __construct(
     $message = "",
     int $code = 0,
@@ -104,7 +116,7 @@ class ErrorException extends Exception {
   public final function getSeverity()[]: int;
 }
 
-class LogicException extends Exception {}
+class LogicException extends ExceptionWithPureGetMessage {}
 class BadFunctionCallException extends LogicException {}
 class BadMethodCallException extends BadFunctionCallException {}
 class DomainException extends LogicException {}
@@ -118,7 +130,7 @@ final class UndefinedPropertyException extends LogicException {}
 final class UndefinedVariableException extends LogicException {}
 final class AccessPropertyOnNonObjectException extends LogicException {}
 
-class RuntimeException extends Exception {}
+class RuntimeException extends ExceptionWithPureGetMessage {}
 class OutOfBoundsException extends RuntimeException {}
 class OverflowException extends RuntimeException {}
 class RangeException extends RuntimeException {}
@@ -126,8 +138,8 @@ class UnderflowException extends RuntimeException {}
 class UnexpectedValueException extends RuntimeException {}
 
 class InvariantException extends Exception {}
-final class TypeAssertionException extends Exception {}
-class DivisionByZeroException extends Exception {}
+final class TypeAssertionException extends RuntimeException {}
+class DivisionByZeroException extends ExceptionWithPureGetMessage {}
 
 } // namespace
 

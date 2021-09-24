@@ -15,7 +15,9 @@ class C<reify Tc1> {
 <<__EntryPoint>>
 function main() {
   var_dump((new ReflectionFunction('f'))->getCoeffects());
-  var_dump((new ReflectionFunction('g'))->getCoeffects());
+  $result = (new ReflectionFunction('g'))->getCoeffects();
+  sort(inout $result);
+  var_dump($result);
   var_dump((new ReflectionFunction('h'))->getCoeffects());
   var_dump((new ReflectionMethod('C', 'f'))->getCoeffects());
 }

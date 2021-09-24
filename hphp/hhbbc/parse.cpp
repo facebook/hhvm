@@ -721,6 +721,10 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
   ret->hasCreateCl = true;
 
   for (auto& name : fe.staticCoeffects) ret->staticCoeffects.push_back(name);
+  // So that we can later compare in linear time
+  std::sort(ret->staticCoeffects.begin(),
+            ret->staticCoeffects.end(),
+            [](LowStringPtr a, LowStringPtr b) { return a->compare(b) < 0; });
   for (auto& rule : fe.coeffectRules) ret->coeffectRules.push_back(rule);
 
   ret->sampleDynamicCalls = [&] {

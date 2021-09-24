@@ -1013,6 +1013,53 @@ uint32_t Func::maxNonVariadicParams() const {
   );
 }
 
+const CompactVector<LowStringPtr>* Func::staticCoeffects() const {
+  auto const get = [&](const php::Func* f) { return &f->staticCoeffects; };
+  return match<const CompactVector<LowStringPtr>*>(
+    val,
+    [&] (FuncName) { return nullptr; },
+    [&] (MethodName) { return nullptr; },
+    [&] (FuncInfo* fi) { return get(fi->func); },
+    [&] (const MethTabEntryPair* mte) { return get(mte->second.func); },
+    [&] (FuncFamily* fa) -> const CompactVector<LowStringPtr>* {
+      const CompactVector<LowStringPtr>* result = nullptr;
+      for (auto const pf : fa->possibleFuncs()) {
+        if (!result) {
+          result = get(pf->second.func);
+          continue;
+        }
+        auto const cur = get(pf->second.func);
+        assertx(cur);
+        if (*result != *cur) return nullptr;
+      }
+      return result;
+    }
+  );
+}
+
+TriBool Func::hasCoeffectRules() const {
+  auto const get = [&](const php::Func* f) { return !f->coeffectRules.empty(); };
+  return match<TriBool>(
+    val,
+    [&] (FuncName) { return TriBool::Maybe; },
+    [&] (MethodName) { return TriBool::Maybe; },
+    [&] (FuncInfo* fi) { return yesOrNo(get(fi->func)); },
+    [&] (const MethTabEntryPair* mte) { return yesOrNo(get(mte->second.func)); },
+    [&] (FuncFamily* fa) {
+      Optional<bool> result;
+      for (auto const pf : fa->possibleFuncs()) {
+        if (!result) {
+          result = get(pf->second.func);
+          continue;
+        }
+        if (get(pf->second.func) != *result) return TriBool::Maybe;
+      }
+      assertx(result);
+      return yesOrNo(*result);
+    }
+  );
+}
+
 std::string show(const Func& f) {
   auto ret = f.name()->toCppString();
   match<void>(

@@ -112,31 +112,34 @@ struct FCallArgsBase {
     // Arguments are known to be compatible with prologue of the callee and
     // do not need to be repacked.
     SkipRepack                   = (1 << 3),
+    // Coeffects are known to be correct, no need to check.
+    // If the callee has polymoprhic coeffects, pass caller's coeffects.
+    SkipCoeffectsCheck           = (1 << 4),
     // Indicates that the caller requires the return value to be mutable
     // (not readonly)
-    EnforceMutableReturn         = (1 << 4),
+    EnforceMutableReturn         = (1 << 5),
     // Indicates that the callee should not modify its instance
-    EnforceReadonlyThis          = (1 << 5),
+    EnforceReadonlyThis          = (1 << 6),
     // HHBC-only: Op should be resolved using an explicit context class
-    ExplicitContext              = (1 << 6),
+    ExplicitContext              = (1 << 7),
     // HHBC-only: is the number of returns provided? false => 1
-    HasInOut                     = (1 << 7),
+    HasInOut                     = (1 << 8),
     // HHBC-only: should this FCall enforce argument inout-ness?
-    EnforceInOut                 = (1 << 8),
+    EnforceInOut                 = (1 << 9),
     // HHBC-only: should this FCall enforce argument readonly-ness?
-    EnforceReadonly              = (1 << 9),
+    EnforceReadonly              = (1 << 10),
     // HHBC-only: is the async eager offset provided? false => kInvalidOffset
-    HasAsyncEagerOffset          = (1 << 10),
+    HasAsyncEagerOffset          = (1 << 11),
     // HHBC-only: the remaining space is used for number of arguments
-    NumArgsStart                 = (1 << 11),
+    NumArgsStart                 = (1 << 12),
   };
 
   // Flags that are valid on FCallArgsBase::flags struct (i.e. non-HHBC-only).
   static constexpr uint8_t kInternalFlags =
     HasUnpack | HasGenerics | LockWhileUnwinding | SkipRepack |
-    EnforceMutableReturn | EnforceReadonlyThis;
+    SkipCoeffectsCheck | EnforceMutableReturn | EnforceReadonlyThis;
   // The first (lowest) bit of numArgs.
-  static constexpr uint8_t kFirstNumArgsBit = 11;
+  static constexpr uint8_t kFirstNumArgsBit = 12;
 
   explicit FCallArgsBase(Flags flags, uint32_t numArgs, uint32_t numRets)
     : numArgs(numArgs)
@@ -149,6 +152,7 @@ struct FCallArgsBase {
   bool hasGenerics() const { return flags & Flags::HasGenerics; }
   bool lockWhileUnwinding() const { return flags & Flags::LockWhileUnwinding; }
   bool skipRepack() const { return flags & Flags::SkipRepack; }
+  bool skipCoeffectsCheck() const { return flags & Flags::SkipCoeffectsCheck; }
   bool enforceMutableReturn() const {
     return flags & Flags::EnforceMutableReturn;
   }

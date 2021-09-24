@@ -48,6 +48,7 @@ void emitCalleeDynamicCallChecks(IRGS& env, const Func* callee,
 
 void emitCalleeCoeffectChecks(IRGS& env, const Func* callee,
                               SSATmp* callFlags, SSATmp* providedCoeffects,
+                              bool skipCoeffectsCheck,
                               uint32_t argc, SSATmp* prologueCtx);
 
 void emitCalleeRecordFuncCoverage(IRGS& env, const Func* callee);

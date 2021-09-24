@@ -242,6 +242,7 @@ void beginInlining(IRGS& env,
   emitCalleeGenericsChecks(env, target, callFlags, fca.hasGenerics());
   emitCalleeDynamicCallChecks(env, target, callFlags);
   emitCalleeCoeffectChecks(env, target, callFlags, coeffects,
+                           fca.skipCoeffectsCheck(),
                            numArgsInclUnpack, ctx);
   emitCalleeRecordFuncCoverage(env, target);
   emitInitFuncInputs(env, target, numArgsInclUnpack);

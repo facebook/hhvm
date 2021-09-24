@@ -205,6 +205,12 @@ struct FCallArgsLong : FCallArgsBase {
     return fca;
   }
 
+  FCallArgsLong withoutCoeffectsCheck() const {
+    auto fca = *this;
+    fca.flags = static_cast<Flags>(fca.flags | Flags::SkipCoeffectsCheck);
+    return fca;
+  }
+
   FCallArgsLong withoutInOut() const {
     auto fca = *this;
     fca.inoutArgs = nullptr;
@@ -352,6 +358,9 @@ struct FCallArgs {
   FCallArgs withoutRepack() const {
     return l->withoutRepack();
   }
+  FCallArgs withoutCoeffectsCheck() const {
+    return l->withoutCoeffectsCheck();
+  }
 
   FCallArgsBase base() const {
     return l->base();
@@ -418,6 +427,9 @@ struct FCallArgs {
   }
   bool skipRepack() const {
     return l->skipRepack();
+  }
+  bool skipCoeffectsCheck() const {
+    return l->skipCoeffectsCheck();
   }
   template<int nin>
   uint32_t numPop() const {

@@ -3314,6 +3314,28 @@ bool fcallCanSkipRepack(ISS& env, const FCallArgs& fca, const res::Func& func) {
   return unpackArgs.subtypeOf(BVec);
 }
 
+const StaticString
+  s_construct("__construct"),
+  s_pure("pure");
+
+bool fcallCanSkipCoeffectsCheck(ISS& env, const res::Func& func) {
+  // Let runtime handle constructors since there are special cases related to
+  // write_this_props
+  if (func.name()->same(s_construct.get())) return false;
+  if (func.hasCoeffectRules() != TriBool::No) return false;
+  auto const calleeStaticCoeffectsOpt = func.staticCoeffects();
+  if (!calleeStaticCoeffectsOpt) return false;
+  auto const calleeStaticCoeffects = *calleeStaticCoeffectsOpt;
+  if (calleeStaticCoeffects.size() == 1 &&
+      calleeStaticCoeffects[0]->same(s_pure.get())) {
+    return true;
+  }
+  auto const callerStaticCoeffects = env.ctx.func->staticCoeffects;
+  // TODO: Use the bit format of coeffects and actually use canCall to compare
+  if (callerStaticCoeffects == calleeStaticCoeffects) return true;
+  return false;
+}
+
 template<typename FCallWithFCA>
 bool fcallOptimizeChecks(
   ISS& env,
@@ -3420,6 +3442,11 @@ bool fcallOptimizeChecks(
 
   if (!fca.skipRepack() && fcallCanSkipRepack(env, fca, func)) {
     reduce(env, fcallWithFCA(fca.withoutRepack()));
+    return true;
+  }
+
+  if (!fca.skipCoeffectsCheck() && fcallCanSkipCoeffectsCheck(env, func)) {
+    reduce(env, fcallWithFCA(fca.withoutCoeffectsCheck()));
     return true;
   }
 

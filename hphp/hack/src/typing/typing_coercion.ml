@@ -43,14 +43,34 @@ open Typing_env_types
 
 (* does coercion, including subtyping *)
 let coerce_type_impl
-    env ty_have ty_expect (on_error : Errors.error_from_reasons_callback) =
+    ~coerce_for_op
+    env
+    ty_have
+    ty_expect
+    (on_error : Errors.error_from_reasons_callback) =
   if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then
-    Typing_utils.sub_type_res
-      ~coerce:None
-      env
-      ty_have
-      ty_expect.et_type
-      on_error
+    if coerce_for_op then
+      (* If the coercion is for a built-in operation, then we want to allow it to apply to
+         dynamic *)
+      let (env, tunion) =
+        Typing_union.union
+          env
+          ty_expect.et_type
+          (Typing_make_type.dynamic Reason.Rnone)
+      in
+      let tunion =
+        with_reason
+          tunion
+          (Reason.Rdynamic_coercion (get_reason ty_expect.et_type))
+      in
+      Typing_utils.sub_type_res ~coerce:None env ty_have tunion on_error
+    else
+      Typing_utils.sub_type_res
+        ~coerce:None
+        env
+        ty_have
+        ty_expect.et_type
+        on_error
   else
     let is_expected_enforced =
       equal_enforcement ty_expect.et_enforced Enforced
@@ -86,14 +106,36 @@ let result t ~on_ok ~on_err =
   | Error y -> on_err y
 
 let coerce_type
-    p ur env ty_have ty_expect (on_error : Errors.typing_error_callback) =
+    ?(coerce_for_op = false)
+    p
+    ur
+    env
+    ty_have
+    ty_expect
+    (on_error : Errors.typing_error_callback) =
   result ~on_ok:Fn.id ~on_err:Fn.id
-  @@ coerce_type_impl env ty_have ty_expect (fun ?code ?quickfixes reasons ->
+  @@ coerce_type_impl
+       ~coerce_for_op
+       env
+       ty_have
+       ty_expect
+       (fun ?code ?quickfixes reasons ->
          on_error ?code ?quickfixes (p, Reason.string_of_ureason ur) reasons)
 
 let coerce_type_res
-    p ur env ty_have ty_expect (on_error : Errors.typing_error_callback) =
-  coerce_type_impl env ty_have ty_expect (fun ?code ?quickfixes reasons ->
+    ?(coerce_for_op = false)
+    p
+    ur
+    env
+    ty_have
+    ty_expect
+    (on_error : Errors.typing_error_callback) =
+  coerce_type_impl
+    ~coerce_for_op
+    env
+    ty_have
+    ty_expect
+    (fun ?code ?quickfixes reasons ->
       on_error ?code ?quickfixes (p, Reason.string_of_ureason ur) reasons)
 
 (* does coercion if possible, returning Some env with resultant coercion constraints
@@ -111,8 +153,12 @@ let try_coerce env ty_have ty_expect =
       (fun () ->
         Some
           (result ~on_ok:Fn.id ~on_err:Fn.id
-          @@ coerce_type_impl env ty_have ty_expect (Errors.unify_error_at pos)
-          ))
+          @@ coerce_type_impl
+               ~coerce_for_op:false
+               env
+               ty_have
+               ty_expect
+               (Errors.unify_error_at pos)))
       (fun _ -> None)
   in
   Errors.is_hh_fixme := f;

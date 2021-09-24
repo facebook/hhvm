@@ -67,6 +67,7 @@ let check_dynamic_or_enforce_num env p t r err =
       ~ok:(fun env -> (env, None))
       ~error:(fun env -> (env, Some (t, et_type)))
     @@ Typing_coercion.coerce_type_res
+         ~coerce_for_op:true
          p
          Reason.URnone
          env
@@ -103,6 +104,7 @@ let check_dynamic_or_enforce_int env p t r err =
       ~ok:(fun env -> (env, None))
       ~error:(fun env -> (env, Some (t, et_type)))
     @@ Typing_coercion.coerce_type_res
+         ~coerce_for_op:true
          p
          Reason.URnone
          env

@@ -172,6 +172,7 @@ let check_arraykey_index error env pos container_ty index_ty =
     in
     Result.fold ~ok ~error:(fun env -> (env, Error (index_ty, ty_arraykey)))
     @@ Typing_coercion.coerce_type_res
+         ~coerce_for_op:true
          pos
          reason
          env
@@ -284,6 +285,7 @@ let rec array_get
           ~ok:(fun env -> (env, Ok ty_have))
           ~error:(fun env -> (env, Error (ty_have, ty_expect.et_type)))
         @@ Typing_coercion.coerce_type_res
+             ~coerce_for_op:true
              p
              reason
              env
@@ -800,6 +802,7 @@ let assign_array_get_with_err
           ~ok:(fun env -> (env, Ok ty_have))
           ~error:(fun env -> (env, Error (ty_have, ty_expect.et_type)))
         @@ Typing_coercion.coerce_type_res
+             ~coerce_for_op:true
              p
              reason
              env

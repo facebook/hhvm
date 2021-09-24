@@ -326,7 +326,7 @@ def filter_temp_hhi_path(text: str) -> str:
 
 
 def compare_expected(expected: str, out: str) -> bool:
-    if expected == "No errors\n" or out == "No errors\n":
+    if expected == "No errors" or out == "No errors":
         return expected == out
     else:
         return True

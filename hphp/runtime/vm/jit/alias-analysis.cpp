@@ -269,6 +269,7 @@ ALocBits AliasAnalysis::may_alias(AliasClass acls) const {
   if (auto const mis = acls.mis()) {
     add_single(mis, AMIStateTempBase);
     add_single(mis, AMIStateBase);
+    add_single(mis, AMIStateROProp);
   }
 
   if (auto const fbase = acls.frame_base()) {
@@ -331,9 +332,9 @@ ALocBits AliasAnalysis::expand(AliasClass acls) const {
 
   if (auto const mis = acls.mis()) {
     auto const add_mis = [&] (AliasClass cls) { add_single(mis, cls); };
-
     add_mis(AMIStateTempBase);
     add_mis(AMIStateBase);
+    add_mis(AMIStateROProp);
   }
 
   if (auto const fbase = acls.frame_base()) {

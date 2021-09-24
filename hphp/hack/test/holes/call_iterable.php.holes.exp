@@ -13,7 +13,7 @@
          m_params =
          [{ param_annotation = (Iterable<int>); param_type_hint = ((Iterable<int>), (Some ([4:21-34], (Happly (([4:21-29], "\\HH\\Iterable"), [([4:30-33], (Hprim Tint))])))));
             param_is_variadic = false; param_pos = [4:35-37]; param_name = "$m"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)] }; 
@@ -43,7 +43,7 @@
          f_params =
          [{ param_annotation = (Iterable<int>); param_type_hint = ((Iterable<int>), (Some ([7:12-25], (Happly (([7:12-20], "\\HH\\Iterable"), [([7:21-24], (Hprim Tint))])))));
             param_is_variadic = false; param_pos = [7:26-28]; param_name = "$m"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
@@ -65,7 +65,7 @@
          f_params =
          [{ param_annotation = (Iterable<float>); param_type_hint = ((Iterable<float>), (Some ([10:3-18], (Happly (([10:3-11], "\\HH\\Iterable"), [([10:12-17], (Hprim Tfloat))])))));
             param_is_variadic = false; param_pos = [10:19-21]; param_name = "$m"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
@@ -109,7 +109,7 @@
          f_params =
          [{ param_annotation = (Iterable<float>); param_type_hint = ((Iterable<float>), (Some ([22:3-18], (Happly (([22:3-11], "\\HH\\Iterable"), [([22:12-17], (Hprim Tfloat))])))));
             param_is_variadic = false; param_pos = [22:19-21]; param_name = "$m"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;

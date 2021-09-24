@@ -3085,7 +3085,7 @@ fn print_fparam<W: Write>(
     env: &ExprEnv,
     param: &ast::FunParam,
 ) -> Result<(), W::Error> {
-    if let Some(ast_defs::ParamKind::Pinout) = param.callconv {
+    if param.callconv == ast_defs::ParamKind::Pinout {
         w.write("inout ")?;
     }
     if param.is_variadic {

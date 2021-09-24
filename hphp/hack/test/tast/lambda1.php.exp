@@ -27,7 +27,7 @@
                              param_type_hint = (((dynamic | ?(bool | float | resource | arraykey | HH\FormatString<nothing>))), None); 
                              param_is_variadic = false; param_pos = [4:8-10]; 
                              param_name = "$n"; param_expr = None; param_readonly = None; 
-                             param_callconv = None; param_user_attributes = []; 
+                             param_callconv = Pnormal; param_user_attributes = []; 
                              param_visibility = None }
                             ];
                           f_ctxs = None; f_unsafe_ctxs = None;

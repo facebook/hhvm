@@ -12,12 +12,12 @@
         f_params =
         [{ param_annotation = (nothing); param_type_hint = ((nothing), (Some ([3:43-57], (Hintersection [([3:44-47], (Hprim Tint)); ([3:50-56], (Hprim Tstring))])))); 
            param_is_variadic = false; param_pos = [3:58-60]; param_name = "$x"; 
-           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_expr = None; param_readonly = None; param_callconv = Pnormal; 
            param_user_attributes = []; param_visibility = None };
           { param_annotation = (Vector<nothing>);
             param_type_hint = ((Vector<nothing>), (Some ([3:62-83], (Happly (([3:62-68], "\\HH\\Vector"), [([3:69-82], (Hintersection [([3:70-73], (Hprim Tint)); ([3:76-81], (Hprim Tfloat))]))])))));
             param_is_variadic = false; param_pos = [3:84-87]; param_name = "$xs"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None;

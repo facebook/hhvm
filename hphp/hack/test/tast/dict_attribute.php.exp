@@ -14,7 +14,7 @@
          [{ param_annotation = (dict<string, int>);
             param_type_hint = ((dict<string, int>), (Some ([6:31-48], (Happly (([6:31-35], "\\HH\\dict"), [([6:36-42], (Hprim Tstring)); ([6:44-47], (Hprim Tint))]))))); 
             param_is_variadic = false; param_pos = [6:49-51]; param_name = "$_"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)] }; 
@@ -344,7 +344,7 @@
          f_params =
          [{ param_annotation = (int); param_type_hint = ((int), (Some ([20:44-47], (Hprim Tint)))); 
             param_is_variadic = false; param_pos = [20:48-50]; param_name = "$i"; 
-            param_expr = None; param_readonly = None; param_callconv = None;
+            param_expr = None; param_readonly = None; param_callconv = Pnormal;
             param_user_attributes =
             [{ ua_name = ([20:15-16], "\\P");
                ua_params =

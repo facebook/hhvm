@@ -16,7 +16,7 @@ Errors:
         f_params =
         [{ param_annotation = (bool); param_type_hint = ((bool), (Some ([3:27-31], (Hprim Tbool)))); 
            param_is_variadic = false; param_pos = [3:32-34]; param_name = "$x"; 
-           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_expr = None; param_readonly = None; param_callconv = Pnormal; 
            param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None;
@@ -39,7 +39,7 @@ Errors:
          f_params =
          [{ param_annotation = (bool); param_type_hint = ((bool), (Some ([7:27-31], (Hprim Tbool)))); 
             param_is_variadic = false; param_pos = [7:32-34]; param_name = "$x"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([8:3-22], (Return (Some (((int, int)), [8:10-21], (Tuple [((int), [8:16-17], (Int "1")); ((int), [8:19-20], (Int "1"))])))))] };
@@ -61,7 +61,7 @@ Errors:
          f_params =
          [{ param_annotation = (bool); param_type_hint = ((bool), (Some ([11:25-29], (Hprim Tbool)))); 
             param_is_variadic = false; param_pos = [11:30-32]; param_name = "$x"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
@@ -95,7 +95,7 @@ Errors:
          f_params =
          [{ param_annotation = (bool); param_type_hint = ((bool), (Some ([15:26-30], (Hprim Tbool)))); 
             param_is_variadic = false; param_pos = [15:31-33]; param_name = "$x"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;

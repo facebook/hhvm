@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d9d182cbcae040b90a4598c9ee077ee6>>
+// @generated SignedSource<<2b089962db6f6f386b703323d88f1863>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -183,7 +183,7 @@ pub struct Contexts(pub Pos, pub Vec<Hint>);
 )]
 #[repr(C)]
 pub struct HfParamInfo {
-    pub kind: Option<ast_defs::ParamKind>,
+    pub kind: ast_defs::ParamKind,
     pub readonlyness: Option<ast_defs::ReadonlyKind>,
 }
 

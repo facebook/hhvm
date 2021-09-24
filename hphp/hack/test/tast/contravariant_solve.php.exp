@@ -42,11 +42,11 @@
          f_params =
          [{ param_annotation = (I<T>); param_type_hint = ((I<T>), (Some ([8:15-19], (Happly (([8:15-16], "\\I"), [([8:17-18], (Habstr ("T", [])))]))))); 
             param_is_variadic = false; param_pos = [8:20-22]; param_name = "$_"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None };
            { param_annotation = (I<T>); param_type_hint = ((I<T>), (Some ([8:24-28], (Happly (([8:24-25], "\\I"), [([8:26-27], (Habstr ("T", [])))]))))); 
              param_is_variadic = false; param_pos = [8:29-31]; param_name = "$_"; 
-             param_expr = None; param_readonly = None; param_callconv = None; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
              param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
@@ -75,7 +75,7 @@
          f_params =
          [{ param_annotation = (T); param_type_hint = ((T), (Some ([12:15-16], (Habstr ("T", []))))); 
             param_is_variadic = false; param_pos = [12:17-19]; param_name = "$_"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;

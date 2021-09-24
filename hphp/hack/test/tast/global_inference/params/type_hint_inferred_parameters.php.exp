@@ -12,7 +12,7 @@
         f_params =
         [{ param_annotation = (mixed); param_type_hint = ((mixed), None); 
            param_is_variadic = false; param_pos = [3:14-16]; param_name = "$x"; 
-           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_expr = None; param_readonly = None; param_callconv = Pnormal; 
            param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None;
@@ -42,7 +42,7 @@
          f_params =
          [{ param_annotation = (num); param_type_hint = ((num), None); 
             param_is_variadic = false; param_pos = [10:14-16]; param_name = "$x"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;

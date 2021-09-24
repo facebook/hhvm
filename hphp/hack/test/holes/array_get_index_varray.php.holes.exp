@@ -12,11 +12,11 @@
         f_params =
         [{ param_annotation = (vec<int>); param_type_hint = ((vec<int>), (Some ([3:33-44], (Happly (([3:33-39], "\\HH\\vec"), [([3:40-43], (Hprim Tint))]))))); 
            param_is_variadic = false; param_pos = [3:45-48]; param_name = "$xs"; 
-           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_expr = None; param_readonly = None; param_callconv = Pnormal; 
            param_user_attributes = []; param_visibility = None };
           { param_annotation = (mixed); param_type_hint = ((mixed), (Some ([3:50-55], Hmixed))); 
             param_is_variadic = false; param_pos = [3:56-60]; param_name = "$idx"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None;

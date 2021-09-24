@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0fb061a7a63832239ff37eb2b18ba20c>>
+// @generated SignedSource<<38dd6d786b3b78c883f820acf3b6eed7>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -201,6 +201,7 @@ pub enum ClassishKind {
 #[repr(C)]
 pub enum ParamKind {
     Pinout,
+    Pnormal,
 }
 impl TrivialDrop for ParamKind {}
 arena_deserializer::impl_deserialize_in_arena!(ParamKind);

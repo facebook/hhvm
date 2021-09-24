@@ -67,11 +67,11 @@
          f_params =
          [{ param_annotation = (); param_type_hint = ((), None); param_is_variadic = false; 
             param_pos = [26:18-20]; param_name = "$_"; param_expr = None; 
-            param_readonly = None; param_callconv = None; param_user_attributes = []; 
+            param_readonly = None; param_callconv = Pnormal; param_user_attributes = []; 
             param_visibility = None };
            { param_annotation = (); param_type_hint = ((), None); param_is_variadic = false; 
              param_pos = [26:22-24]; param_name = "$_"; param_expr = None; 
-             param_readonly = None; param_callconv = None; param_user_attributes = []; 
+             param_readonly = None; param_callconv = Pnormal; param_user_attributes = []; 
              param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 

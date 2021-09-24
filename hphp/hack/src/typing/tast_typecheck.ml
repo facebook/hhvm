@@ -143,7 +143,9 @@ let check_expr env ((_, p, _) as expr : ETast.expr) (gamma : gamma) : gamma =
 
       method! on_Callconv _env param_kind _expr =
         match param_kind with
-        | Ast_defs.Pinout -> raise Not_implemented
+        | Ast_defs.Pinout
+        | Ast_defs.Pnormal ->
+          raise Not_implemented
     end
   in
   expr_checker#on_expr env expr;

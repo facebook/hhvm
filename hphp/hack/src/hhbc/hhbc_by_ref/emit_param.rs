@@ -178,8 +178,8 @@ fn from_ast<'a, 'arena, 'decl>(
         None
     };
     let is_inout = match param.callconv {
-        Some(ParamKind::Pinout) => true,
-        _ => false,
+        ParamKind::Pinout => true,
+        ParamKind::Pnormal => false,
     };
     let is_readonly = match param.readonly {
         Some(ReadonlyKind::Readonly) => true,

@@ -701,7 +701,7 @@ and ('ex, 'en) fun_param = {
   param_name: string;
   param_expr: ('ex, 'en) expr option;
   param_readonly: Ast_defs.readonly_kind option;
-  param_callconv: Ast_defs.param_kind option;
+  param_callconv: Ast_defs.param_kind;
   param_user_attributes: ('ex, 'en) user_attribute list;
   param_visibility: visibility option;
 }

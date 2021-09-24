@@ -13,7 +13,7 @@
          m_params =
          [{ param_annotation = (keyset<int>); param_type_hint = ((keyset<int>), (Some ([4:21-32], (Happly (([4:21-27], "\\HH\\keyset"), [([4:28-31], (Hprim Tint))]))))); 
             param_is_variadic = false; param_pos = [4:33-35]; param_name = "$f"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)] }; 
@@ -43,7 +43,7 @@
          f_params =
          [{ param_annotation = (keyset<int>); param_type_hint = ((keyset<int>), (Some ([7:12-23], (Happly (([7:12-18], "\\HH\\keyset"), [([7:19-22], (Hprim Tint))]))))); 
             param_is_variadic = false; param_pos = [7:24-26]; param_name = "$f"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
@@ -65,7 +65,7 @@
          f_params =
          [{ param_annotation = (keyset<string>); param_type_hint = ((keyset<string>), (Some ([10:3-17], (Happly (([10:3-9], "\\HH\\keyset"), [([10:10-16], (Hprim Tstring))])))));
             param_is_variadic = false; param_pos = [10:18-20]; param_name = "$f"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
@@ -108,7 +108,7 @@
          f_params =
          [{ param_annotation = (keyset<string>); param_type_hint = ((keyset<string>), (Some ([22:3-17], (Happly (([22:3-9], "\\HH\\keyset"), [([22:10-16], (Hprim Tstring))])))));
             param_is_variadic = false; param_pos = [22:18-20]; param_name = "$f"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;

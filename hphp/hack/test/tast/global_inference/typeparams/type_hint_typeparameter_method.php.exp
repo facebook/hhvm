@@ -14,7 +14,7 @@ Errors:
         f_params =
         [{ param_annotation = (Map<string, (int | string)>); param_type_hint = ((Map<string, (int | string)>), (Some ([3:14-17], (Happly (([3:14-17], "\\HH\\Map"), []))))); 
            param_is_variadic = false; param_pos = [3:18-20]; param_name = "$x"; 
-           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_expr = None; param_readonly = None; param_callconv = Pnormal; 
            param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None;

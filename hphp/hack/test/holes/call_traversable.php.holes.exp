@@ -13,7 +13,7 @@
          m_params =
          [{ param_annotation = (Traversable<int>); param_type_hint = ((Traversable<int>), (Some ([4:21-37], (Happly (([4:21-32], "\\HH\\Traversable"), [([4:33-36], (Hprim Tint))])))));
             param_is_variadic = false; param_pos = [4:38-40]; param_name = "$i"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)] }; 
@@ -43,7 +43,7 @@
          f_params =
          [{ param_annotation = (Traversable<int>); param_type_hint = ((Traversable<int>), (Some ([7:12-28], (Happly (([7:12-23], "\\HH\\Traversable"), [([7:24-27], (Hprim Tint))])))));
             param_is_variadic = false; param_pos = [7:29-31]; param_name = "$i"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
@@ -65,7 +65,7 @@
          f_params =
          [{ param_annotation = (Traversable<float>); param_type_hint = ((Traversable<float>), (Some ([10:3-21], (Happly (([10:3-14], "\\HH\\Traversable"), [([10:15-20], (Hprim Tfloat))])))));
             param_is_variadic = false; param_pos = [10:22-24]; param_name = "$i"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
@@ -112,7 +112,7 @@
          f_params =
          [{ param_annotation = (Traversable<float>); param_type_hint = ((Traversable<float>), (Some ([22:3-21], (Happly (([22:3-14], "\\HH\\Traversable"), [([22:15-20], (Hprim Tfloat))])))));
             param_is_variadic = false; param_pos = [22:22-24]; param_name = "$i"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;

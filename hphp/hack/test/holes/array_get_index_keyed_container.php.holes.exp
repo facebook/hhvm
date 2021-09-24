@@ -13,11 +13,11 @@
         [{ param_annotation = (KeyedContainer<string, int>);
            param_type_hint = ((KeyedContainer<string, int>), (Some ([4:3-30], (Happly (([4:3-17], "\\HH\\KeyedContainer"), [([4:18-24], (Hprim Tstring)); ([4:26-29], (Hprim Tint))])))));
            param_is_variadic = false; param_pos = [4:31-34]; param_name = "$xs"; 
-           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_expr = None; param_readonly = None; param_callconv = Pnormal; 
            param_user_attributes = []; param_visibility = None };
           { param_annotation = (mixed); param_type_hint = ((mixed), (Some ([5:3-8], Hmixed))); 
             param_is_variadic = false; param_pos = [5:9-13]; param_name = "$idx"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None;

@@ -34,7 +34,7 @@ Errors:
          f_params =
          [{ param_annotation = (D<nothing, string>); param_type_hint = ((D<nothing, string>), (Some ([4:12-13], (Happly (([4:12-13], "\\D"), []))))); 
             param_is_variadic = false; param_pos = [4:14-16]; param_name = "$x"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 

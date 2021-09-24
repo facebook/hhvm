@@ -38,7 +38,7 @@
          f_params =
          [{ param_annotation = (?string); param_type_hint = ((?string), (Some ([8:32-39], (Hoption ([8:33-39], (Hprim Tstring)))))); 
             param_is_variadic = false; param_pos = [8:40-42]; param_name = "$x"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;

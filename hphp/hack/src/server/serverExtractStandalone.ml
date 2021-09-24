@@ -1264,7 +1264,8 @@ end = struct
   let pp_paramkind ppf =
     Ast_defs.(
       function
-      | Pinout -> Fmt.string ppf "inout")
+      | Pinout -> Fmt.string ppf "inout"
+      | Pnormal -> ())
 
   let pp_tprim ppf =
     Aast.(
@@ -1377,7 +1378,10 @@ end = struct
           }) ->
       let hf_param_kinds =
         List.map hf_param_info ~f:(fun i ->
-            Option.bind i ~f:(fun i -> i.Aast.hfparam_kind))
+            Option.bind i ~f:(fun i ->
+                match i.Aast.hfparam_kind with
+                | Ast_defs.Pnormal -> None
+                | Ast_defs.Pinout -> Some Ast_defs.Pinout))
       in
       let pp_typed_param ppf kp =
         Fmt.(
@@ -1941,7 +1945,7 @@ end = struct
         param_user_attributes
         Fmt.(option pp_visibility)
         param_visibility
-        Fmt.(option pp_paramkind)
+        pp_paramkind
         param_callconv
         (pp_type_hint ~is_ret_type:false)
         (* Type hint for parameter $f used for contextful function must be a

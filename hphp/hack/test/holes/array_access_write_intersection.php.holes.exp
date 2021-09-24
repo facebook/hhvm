@@ -12,7 +12,7 @@
         f_params =
         [{ param_annotation = (string); param_type_hint = ((string), (Some ([3:42-61], (Hintersection [([3:43-51], (Hprim Tarraykey)); ([3:54-60], (Hprim Tstring))])))); 
            param_is_variadic = false; param_pos = [3:62-65]; param_name = "$xs"; 
-           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_expr = None; param_readonly = None; param_callconv = Pnormal; 
            param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None;
@@ -43,7 +43,7 @@
          f_params =
          [{ param_annotation = (int); param_type_hint = ((int), (Some ([8:48-64], (Hintersection [([8:49-57], (Hprim Tarraykey)); ([8:60-63], (Hprim Tint))])))); 
             param_is_variadic = false; param_pos = [8:65-68]; param_name = "$xs"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;

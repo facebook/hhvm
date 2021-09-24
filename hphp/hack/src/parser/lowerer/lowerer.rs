@@ -703,12 +703,9 @@ where
     ) -> Result<(ast::Hint, Option<ast::HfParamInfo>), Error> {
         match &node.children {
             ClosureParameterTypeSpecifier(c) => {
-                let kind = Self::mp_optional(Self::p_param_kind, &c.call_convention, env)?;
+                let kind = Self::p_param_kind(&c.call_convention, env)?;
                 let readonlyness = Self::mp_optional(Self::p_readonly, &c.readonly, env)?;
-                let info = match (kind, readonlyness) {
-                    (None, None) => None,
-                    _ => Some(ast::HfParamInfo { kind, readonlyness }),
-                };
+                let info = Some(ast::HfParamInfo { kind, readonlyness });
                 let hint = Self::p_hint(&c.type_, env)?;
                 Ok((hint, info))
             }
@@ -1628,7 +1625,7 @@ where
                                 pos: p,
                                 name: n,
                                 expr: None,
-                                callconv: None,
+                                callconv: ast::ParamKind::Pnormal,
                                 readonly: None,
                                 user_attributes: vec![],
                                 visibility: None,
@@ -3581,6 +3578,7 @@ where
     fn p_param_kind(node: S<'a, T, V>, env: &mut Env<'a, TF>) -> Result<ast::ParamKind, Error> {
         match Self::token_kind(node) {
             Some(TK::Inout) => Ok(ast::ParamKind::Pinout),
+            None => Ok(ast::ParamKind::Pnormal),
             _ => Self::missing_syntax("param kind", node, env),
         }
     }
@@ -3601,7 +3599,7 @@ where
             pos,
             name: Self::text(node, env),
             expr: None,
-            callconv: None,
+            callconv: ast::ParamKind::Pnormal,
             readonly: None,
             user_attributes: vec![],
             visibility: None,
@@ -3660,7 +3658,7 @@ where
                     pos,
                     name,
                     expr: Self::p_fun_param_default_value(default_value, env)?,
-                    callconv: Self::mp_optional(Self::p_param_kind, call_convention, env)?,
+                    callconv: Self::p_param_kind(call_convention, env)?,
                     readonly: Self::mp_optional(Self::p_readonly, readonly, env)?,
                     /* implicit field via constructor parameter.
                      * This is always None except for constructors and the modifier

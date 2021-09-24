@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e44f2c5134ac1980cbebeaff08b041f2>>
+// @generated SignedSource<<3e248921a1264979917d85170e54ef24>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -157,7 +157,7 @@ arena_deserializer::impl_deserialize_in_arena!(Contexts<'arena>);
 )]
 #[repr(C)]
 pub struct HfParamInfo {
-    pub kind: Option<oxidized::ast_defs::ParamKind>,
+    pub kind: oxidized::ast_defs::ParamKind,
     pub readonlyness: Option<oxidized::ast_defs::ReadonlyKind>,
 }
 impl TrivialDrop for HfParamInfo {}

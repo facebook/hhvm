@@ -17,7 +17,7 @@
         f_params =
         [{ param_annotation = (T); param_type_hint = ((T), (Some ([2:45-46], (Habstr ("T", []))))); 
            param_is_variadic = false; param_pos = [2:47-51]; param_name = "$arr"; 
-           param_expr = None; param_readonly = None; param_callconv = (Some Pinout); 
+           param_expr = None; param_readonly = None; param_callconv = Pinout; 
            param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([3:3-16], (Return (Some ((bool), [3:10-15], False))))] }; 
@@ -60,7 +60,7 @@
          f_params =
          [{ param_annotation = (T); param_type_hint = ((T), (Some ([8:39-40], (Habstr ("T", []))))); 
             param_is_variadic = false; param_pos = [8:41-45]; param_name = "$arr"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;

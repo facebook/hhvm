@@ -16,11 +16,11 @@
             (Some ([3:20-41],
                    (Hfun
                       { hf_is_readonly = None; hf_param_tys = [([3:31-34], (Hprim Tint))]; 
-                        hf_param_info = [None]; hf_variadic_ty = None; 
-                        hf_ctxs = None; hf_return_ty = ([3:37-40], (Hprim Tnum)); 
+                        hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None })]; 
+                        hf_variadic_ty = None; hf_ctxs = None; hf_return_ty = ([3:37-40], (Hprim Tnum)); 
                         hf_is_readonly_return = None }))));
            param_is_variadic = false; param_pos = [3:42-44]; param_name = "$f"; 
-           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_expr = None; param_readonly = None; param_callconv = Pnormal; 
            param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
@@ -57,7 +57,7 @@
                            [{ param_annotation = (int); param_type_hint = ((int), None); 
                               param_is_variadic = false; param_pos = [6:13-15]; 
                               param_name = "$x"; param_expr = None; param_readonly = None; 
-                              param_callconv = None; param_user_attributes = []; 
+                              param_callconv = Pnormal; param_user_attributes = []; 
                               param_visibility = None }
                              ];
                            f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([6:20-22], (Return (Some ((int), [6:20-22], (Lvar ([6:20-22], $x))))))] }; 

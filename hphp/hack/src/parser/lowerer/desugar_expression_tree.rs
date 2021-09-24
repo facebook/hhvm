@@ -92,7 +92,7 @@ pub fn desugar<TF>(hint: &aast::Hint, e: Expr, env: &Env<TF>) -> Result<Expr, (P
         pos: hint.0.clone(),
         name: visitor_variable(),
         expr: None,
-        callconv: None,
+        callconv: ParamKind::Pnormal,
         readonly: None,
         user_attributes: vec![],
         visibility: None,

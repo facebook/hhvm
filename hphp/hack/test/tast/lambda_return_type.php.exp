@@ -23,7 +23,7 @@
                      [{ param_annotation = (string); param_type_hint = ((string), (Some ([5:4-10], (Hprim Tstring)))); 
                         param_is_variadic = false; param_pos = [5:11-13]; 
                         param_name = "$s"; param_expr = None; param_readonly = None; 
-                        param_callconv = None; param_user_attributes = []; 
+                        param_callconv = Pnormal; param_user_attributes = []; 
                         param_visibility = None }
                        ];
                      f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([5:19-21], (Return (Some ((string), [5:19-21], (Lvar ([5:19-21], $s))))))] }; 

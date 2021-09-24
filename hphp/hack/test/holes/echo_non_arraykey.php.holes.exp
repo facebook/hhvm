@@ -12,11 +12,11 @@
         f_params =
         [{ param_annotation = (mixed); param_type_hint = ((mixed), (Some ([3:28-33], Hmixed))); 
            param_is_variadic = false; param_pos = [3:34-36]; param_name = "$x"; 
-           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_expr = None; param_readonly = None; param_callconv = Pnormal; 
            param_user_attributes = []; param_visibility = None };
           { param_annotation = (bool); param_type_hint = ((bool), (Some ([3:38-42], (Hprim Tbool)))); 
             param_is_variadic = false; param_pos = [3:43-45]; param_name = "$y"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None;

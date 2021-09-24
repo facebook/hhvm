@@ -13,7 +13,7 @@
          m_params =
          [{ param_annotation = (string); param_type_hint = ((string), None); 
             param_is_variadic = false; param_pos = [4:28-30]; param_name = "$x"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([5:5-15], (Return (Some ((string), [5:12-14], (Lvar ([5:12-14], $x))))))] }; 
@@ -41,7 +41,7 @@
          m_params =
          [{ param_annotation = (string); param_type_hint = ((string), None); 
             param_is_variadic = false; param_pos = [4:28-30]; param_name = "$x"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          m_ctxs = None; m_unsafe_ctxs = None;
@@ -78,7 +78,7 @@
          m_params =
          [{ param_annotation = (string); param_type_hint = ((string), None); 
             param_is_variadic = false; param_pos = [4:28-30]; param_name = "$x"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          m_ctxs = None; m_unsafe_ctxs = None;

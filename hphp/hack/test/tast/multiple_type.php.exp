@@ -62,15 +62,15 @@
          f_params =
          [{ param_annotation = (C1); param_type_hint = ((C1), (Some ([16:15-17], (Happly (([16:15-17], "\\C1"), []))))); 
             param_is_variadic = false; param_pos = [16:18-21]; param_name = "$c1"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None };
            { param_annotation = (C2); param_type_hint = ((C2), (Some ([16:23-25], (Happly (([16:23-25], "\\C2"), []))))); 
              param_is_variadic = false; param_pos = [16:26-29]; param_name = "$c2"; 
-             param_expr = None; param_readonly = None; param_callconv = None; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
              param_user_attributes = []; param_visibility = None };
            { param_annotation = (bool); param_type_hint = ((bool), (Some ([16:31-35], (Hprim Tbool)))); 
              param_is_variadic = false; param_pos = [16:36-41]; param_name = "$cond"; 
-             param_expr = None; param_readonly = None; param_callconv = None; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
              param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;

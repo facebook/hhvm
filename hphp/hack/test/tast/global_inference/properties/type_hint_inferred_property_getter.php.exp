@@ -19,7 +19,7 @@
          m_params =
          [{ param_annotation = (int); param_type_hint = ((int), None); 
             param_is_variadic = false; param_pos = [6:31-33]; param_name = "$x"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          m_ctxs = None; m_unsafe_ctxs = None;
@@ -107,7 +107,7 @@
          f_params =
          [{ param_annotation = (int); param_type_hint = ((int), (Some ([21:14-17], (Hprim Tint)))); 
             param_is_variadic = false; param_pos = [21:18-20]; param_name = "$_"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 

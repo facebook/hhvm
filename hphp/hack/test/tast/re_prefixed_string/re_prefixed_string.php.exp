@@ -72,7 +72,7 @@ Errors:
          [{ param_annotation = (HH\Lib\Regex\Pattern<T>);
             param_type_hint = ((HH\Lib\Regex\Pattern<T>), (Some ([18:43-66], (Happly (([18:43-63], "\\HH\\Lib\\Regex\\Pattern"), [([18:64-65], (Habstr ("T", [])))]))))); 
             param_is_variadic = false; param_pos = [18:67-75]; param_name = "$pattern"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;

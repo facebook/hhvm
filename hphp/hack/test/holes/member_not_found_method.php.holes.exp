@@ -27,7 +27,7 @@
          f_params =
          [{ param_annotation = (C); param_type_hint = ((C), (Some ([5:34-35], (Happly (([5:34-35], "\\C"), []))))); 
             param_is_variadic = false; param_pos = [5:36-38]; param_name = "$c"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;

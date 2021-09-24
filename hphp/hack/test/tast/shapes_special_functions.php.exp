@@ -30,7 +30,7 @@
          f_params =
          [{ param_annotation = (shape('x' => int, ?'y' => int)); param_type_hint = ((shape('x' => int, ?'y' => int)), (Some ([5:15-20], (Happly (([5:15-20], "\\Point"), [])))));
             param_is_variadic = false; param_pos = [5:21-23]; param_name = "$p"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;

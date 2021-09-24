@@ -255,7 +255,7 @@ val make_tany : unit -> 'a ty_
 
 val arity_min : 'a fun_type -> int
 
-val get_param_mode : Ast_defs.param_kind option -> param_mode
+val get_param_mode : Ast_defs.param_kind -> param_mode
 
 module DependentKind : sig
   val to_string : dependent_type -> string

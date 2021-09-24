@@ -16,35 +16,38 @@
             (Some ([4:3-24],
                    (Hfun
                       { hf_is_readonly = None; hf_param_tys = [([4:13-16], (Hprim Tint))]; 
-                        hf_param_info = [None]; hf_variadic_ty = None; 
-                        hf_ctxs = None; hf_return_ty = ([4:19-23], (Hprim Tbool)); 
+                        hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None })]; 
+                        hf_variadic_ty = None; hf_ctxs = None; hf_return_ty = ([4:19-23], (Hprim Tbool)); 
                         hf_is_readonly_return = None }))));
            param_is_variadic = false; param_pos = [4:25-27]; param_name = "$f"; 
-           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_expr = None; param_readonly = None; param_callconv = Pnormal; 
            param_user_attributes = []; param_visibility = None };
           { param_annotation = ((function(int, string): bool));
             param_type_hint =
             (((function(int, string): bool)),
              (Some ([5:3-32],
                     (Hfun
-                       { hf_is_readonly = None; hf_param_tys = [([5:13-16], (Hprim Tint)); ([5:18-24], (Hprim Tstring))]; 
-                         hf_param_info = [None; None]; hf_variadic_ty = None; 
-                         hf_ctxs = None; hf_return_ty = ([5:27-31], (Hprim Tbool)); 
+                       { hf_is_readonly = None; hf_param_tys = [([5:13-16], (Hprim Tint)); ([5:18-24], (Hprim Tstring))];
+                         hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None }); (Some { hfparam_kind = Pnormal; hfparam_readonlyness = None })]; 
+                         hf_variadic_ty = None; hf_ctxs = None; hf_return_ty = ([5:27-31], (Hprim Tbool)); 
                          hf_is_readonly_return = None }))));
             param_is_variadic = false; param_pos = [5:33-35]; param_name = "$g"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None };
           { param_annotation = ((function(int, string, num): Container<int>));
             param_type_hint =
             (((function(int, string, num): Container<int>)),
              (Some ([6:3-47],
                     (Hfun
-                       { hf_is_readonly = None; hf_param_tys = [([6:13-16], (Hprim Tint)); ([6:18-24], (Hprim Tstring)); ([6:26-29], (Hprim Tnum))]; 
-                         hf_param_info = [None; None; None]; hf_variadic_ty = None; 
-                         hf_ctxs = None; hf_return_ty = ([6:32-46], (Happly (([6:32-41], "\\HH\\Container"), [([6:42-45], (Hprim Tint))]))); 
+                       { hf_is_readonly = None; hf_param_tys = [([6:13-16], (Hprim Tint)); ([6:18-24], (Hprim Tstring)); ([6:26-29], (Hprim Tnum))];
+                         hf_param_info =
+                         [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None }); (Some 
+                           { hfparam_kind = Pnormal; hfparam_readonlyness = None }); (Some 
+                           { hfparam_kind = Pnormal; hfparam_readonlyness = None })];
+                         hf_variadic_ty = None; hf_ctxs = None; hf_return_ty = ([6:32-46], (Happly (([6:32-41], "\\HH\\Container"), [([6:42-45], (Hprim Tint))]))); 
                          hf_is_readonly_return = None }))));
             param_is_variadic = false; param_pos = [6:48-50]; param_name = "$h"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None };
           { param_annotation = ((function(num): bool));
             param_type_hint =
@@ -52,28 +55,28 @@
              (Some ([7:3-24],
                     (Hfun
                        { hf_is_readonly = None; hf_param_tys = [([7:13-16], (Hprim Tnum))]; 
-                         hf_param_info = [None]; hf_variadic_ty = None; 
-                         hf_ctxs = None; hf_return_ty = ([7:19-23], (Hprim Tbool)); 
+                         hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None })]; 
+                         hf_variadic_ty = None; hf_ctxs = None; hf_return_ty = ([7:19-23], (Hprim Tbool)); 
                          hf_is_readonly_return = None }))));
             param_is_variadic = false; param_pos = [7:25-27]; param_name = "$i"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None };
           { param_annotation = (Container<int>); param_type_hint = ((Container<int>), (Some ([8:3-17], (Happly (([8:3-12], "\\HH\\Container"), [([8:13-16], (Hprim Tint))])))));
             param_is_variadic = false; param_pos = [8:18-21]; param_name = "$ci"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None };
           { param_annotation = (Container<string>); param_type_hint = ((Container<string>), (Some ([9:3-20], (Happly (([9:3-12], "\\HH\\Container"), [([9:13-19], (Hprim Tstring))])))));
             param_is_variadic = false; param_pos = [9:21-24]; param_name = "$cs"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None };
           { param_annotation = (KeyedContainer<int, num>);
             param_type_hint = ((KeyedContainer<int, num>), (Some ([10:3-27], (Happly (([10:3-17], "\\HH\\KeyedContainer"), [([10:18-21], (Hprim Tint)); ([10:23-26], (Hprim Tnum))])))));
             param_is_variadic = false; param_pos = [10:28-31]; param_name = "$cn"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None };
           { param_annotation = (bool); param_type_hint = ((bool), (Some ([11:3-7], (Hprim Tbool)))); 
             param_is_variadic = false; param_pos = [11:8-10]; param_name = "$b"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None;

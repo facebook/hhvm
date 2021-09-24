@@ -12,7 +12,7 @@
         f_params =
         [{ param_annotation = (Set<arraykey>); param_type_hint = ((Set<arraykey>), (Some ([3:34-47], (Happly (([3:34-37], "\\HH\\Set"), [([3:38-46], (Hprim Tarraykey))])))));
            param_is_variadic = false; param_pos = [3:48-51]; param_name = "$xs"; 
-           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_expr = None; param_readonly = None; param_callconv = Pnormal; 
            param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None;

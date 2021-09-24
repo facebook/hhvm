@@ -41,19 +41,19 @@
          [{ param_annotation = (dict<string, dynamic>);
             param_type_hint = ((dict<string, dynamic>), (Some ([7:14-37], (Happly (([7:14-20], "\\HH\\dict"), [([7:21-27], (Hprim Tstring)); ([7:29-36], Hdynamic)]))))); 
             param_is_variadic = false; param_pos = [7:38-49]; param_name = "$attributes"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = (Some Public) };
            { param_annotation = (vec<dynamic>); param_type_hint = ((vec<dynamic>), (Some ([8:14-29], (Happly (([8:14-20], "\\HH\\vec"), [([8:21-28], Hdynamic)]))))); 
              param_is_variadic = false; param_pos = [8:30-39]; param_name = "$children"; 
-             param_expr = None; param_readonly = None; param_callconv = None; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
              param_user_attributes = []; param_visibility = (Some Public) };
            { param_annotation = (string); param_type_hint = ((string), (Some ([9:14-20], (Hprim Tstring)))); 
              param_is_variadic = false; param_pos = [9:21-26]; param_name = "$file"; 
-             param_expr = None; param_readonly = None; param_callconv = None; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
              param_user_attributes = []; param_visibility = (Some Public) };
            { param_annotation = (int); param_type_hint = ((int), (Some ([10:14-17], (Hprim Tint)))); 
              param_is_variadic = false; param_pos = [10:18-23]; param_name = "$line"; 
-             param_expr = None; param_readonly = None; param_callconv = None; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
              param_user_attributes = []; param_visibility = (Some Public) }
            ];
          m_ctxs = None; m_unsafe_ctxs = None;
@@ -109,7 +109,7 @@
          f_params =
          [{ param_annotation = (string); param_type_hint = ((string), (Some ([14:33-39], (Hprim Tstring)))); 
             param_is_variadic = false; param_pos = [14:40-45]; param_name = "$prop"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;

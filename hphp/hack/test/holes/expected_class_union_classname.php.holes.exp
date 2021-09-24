@@ -32,7 +32,7 @@ Errors:
             param_type_hint =
             (((int | classname<C>)), (Some ([4:41-61], (Hunion [([4:42-45], (Hprim Tint)); ([4:48-60], (Happly (([4:48-57], "\\HH\\classname"), [([4:58-59], (Happly (([4:58-59], "\\C"), [])))])))]))));
             param_is_variadic = false; param_pos = [4:62-73]; param_name = "$class_name"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;

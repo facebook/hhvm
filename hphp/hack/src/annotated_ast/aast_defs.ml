@@ -69,7 +69,7 @@ and variadic_hint = hint option
 and contexts = pos * hint list
 
 and hf_param_info = {
-  hfparam_kind: Ast_defs.param_kind option;
+  hfparam_kind: Ast_defs.param_kind;
   hfparam_readonlyness: Ast_defs.readonly_kind option;
 }
 

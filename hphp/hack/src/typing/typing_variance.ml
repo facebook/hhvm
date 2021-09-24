@@ -631,8 +631,9 @@ and hint_list env variance tyl = List.iter tyl ~f:(hint env variance)
 
 and hfun_param env variance info h =
   let pos = Ast_defs.get_pos h in
-  match Option.bind info ~f:(fun x -> x.Aast.hfparam_kind) with
-  | None ->
+  match Option.map info ~f:(fun x -> x.Aast.hfparam_kind) with
+  | None
+  | Some Ast_defs.Pnormal ->
     let reason = (pos, Rfun_parameter, Pcontravariant) in
     let variance = flip reason variance in
     hint env variance h

@@ -12,7 +12,7 @@
         f_params =
         [{ param_annotation = (bool); param_type_hint = ((bool), (Some ([3:30-34], (Hprim Tbool)))); 
            param_is_variadic = false; param_pos = [3:35-37]; param_name = "$x"; 
-           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_expr = None; param_readonly = None; param_callconv = Pnormal; 
            param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None;
@@ -44,7 +44,7 @@
          f_params =
          [{ param_annotation = (?string); param_type_hint = ((?string), (Some ([9:41-48], (Hoption ([9:42-48], (Hprim Tstring)))))); 
             param_is_variadic = false; param_pos = [9:49-51]; param_name = "$x"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;

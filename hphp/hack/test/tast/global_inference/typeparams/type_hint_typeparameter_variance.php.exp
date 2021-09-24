@@ -19,11 +19,11 @@ Errors:
          m_params =
          [{ param_annotation = (Tu); param_type_hint = ((Tu), (Some ([4:31-33], (Habstr ("Tu", []))))); 
             param_is_variadic = false; param_pos = [4:34-36]; param_name = "$x"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None };
            { param_annotation = (Tv); param_type_hint = ((Tv), (Some ([4:38-40], (Habstr ("Tv", []))))); 
              param_is_variadic = false; param_pos = [4:41-43]; param_name = "$y"; 
-             param_expr = None; param_readonly = None; param_callconv = None; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
              param_user_attributes = []; param_visibility = None }
            ];
          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)] }; 
@@ -53,7 +53,7 @@ Errors:
          f_params =
          [{ param_annotation = (C<mixed, nothing>); param_type_hint = ((C<mixed, nothing>), (Some ([7:12-13], (Happly (([7:12-13], "\\C"), []))))); 
             param_is_variadic = false; param_pos = [7:14-16]; param_name = "$x"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 

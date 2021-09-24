@@ -14,7 +14,7 @@ Errors:
         f_params =
         [{ param_annotation = (int); param_type_hint = ((int), (Some ([3:25-28], (Hprim Tint)))); 
            param_is_variadic = false; param_pos = [3:29-31]; param_name = "$_"; 
-           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_expr = None; param_readonly = None; param_callconv = Pnormal; 
            param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([4:3-15], (Return (Some ((bool), [4:10-14], True))))] }; 

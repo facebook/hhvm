@@ -802,9 +802,9 @@ fn make_fn_param(pos: Pos, lid: &LocalId, is_variadic: bool, is_inout: bool) -> 
         name: local_id::get_name(lid).clone(),
         expr: None,
         callconv: if is_inout {
-            Some(ParamKind::Pinout)
+            ParamKind::Pinout
         } else {
-            None
+            ParamKind::Pnormal
         },
         readonly: None, // TODO
         user_attributes: vec![],

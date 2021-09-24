@@ -14,7 +14,7 @@
          [{ param_annotation = (dict<int, int>);
             param_type_hint = ((dict<int, int>), (Some ([4:21-35], (Happly (([4:21-25], "\\HH\\dict"), [([4:26-29], (Hprim Tint)); ([4:31-34], (Hprim Tint))]))))); 
             param_is_variadic = false; param_pos = [4:36-38]; param_name = "$n"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)] }; 
@@ -45,7 +45,7 @@
          [{ param_annotation = (dict<int, int>);
             param_type_hint = ((dict<int, int>), (Some ([7:12-26], (Happly (([7:12-16], "\\HH\\dict"), [([7:17-20], (Hprim Tint)); ([7:22-25], (Hprim Tint))]))))); 
             param_is_variadic = false; param_pos = [7:27-29]; param_name = "$n"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
@@ -68,12 +68,12 @@
          [{ param_annotation = (dict<string, int>);
             param_type_hint = ((dict<string, int>), (Some ([10:3-20], (Happly (([10:3-7], "\\HH\\dict"), [([10:8-14], (Hprim Tstring)); ([10:16-19], (Hprim Tint))]))))); 
             param_is_variadic = false; param_pos = [10:21-24]; param_name = "$n1"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None };
            { param_annotation = (dict<int, string>);
              param_type_hint = ((dict<int, string>), (Some ([11:3-20], (Happly (([11:3-7], "\\HH\\dict"), [([11:8-11], (Hprim Tint)); ([11:13-19], (Hprim Tstring))]))))); 
              param_is_variadic = false; param_pos = [11:21-24]; param_name = "$n2"; 
-             param_expr = None; param_readonly = None; param_callconv = None; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
              param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
@@ -128,12 +128,12 @@
          [{ param_annotation = (dict<string, int>);
             param_type_hint = ((dict<string, int>), (Some ([27:3-20], (Happly (([27:3-7], "\\HH\\dict"), [([27:8-14], (Hprim Tstring)); ([27:16-19], (Hprim Tint))]))))); 
             param_is_variadic = false; param_pos = [27:21-24]; param_name = "$n1"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None };
            { param_annotation = (dict<int, string>);
              param_type_hint = ((dict<int, string>), (Some ([28:3-20], (Happly (([28:3-7], "\\HH\\dict"), [([28:8-11], (Hprim Tint)); ([28:13-19], (Hprim Tstring))]))))); 
              param_is_variadic = false; param_pos = [28:21-24]; param_name = "$n2"; 
-             param_expr = None; param_readonly = None; param_callconv = None; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
              param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;

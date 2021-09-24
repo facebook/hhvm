@@ -13,7 +13,7 @@
          m_params =
          [{ param_annotation = (Set<int>); param_type_hint = ((Set<int>), (Some ([4:21-29], (Happly (([4:21-24], "\\HH\\Set"), [([4:25-28], (Hprim Tint))]))))); 
             param_is_variadic = false; param_pos = [4:30-32]; param_name = "$h"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)] }; 
@@ -43,7 +43,7 @@
          f_params =
          [{ param_annotation = (Set<int>); param_type_hint = ((Set<int>), (Some ([7:12-20], (Happly (([7:12-15], "\\HH\\Set"), [([7:16-19], (Hprim Tint))]))))); 
             param_is_variadic = false; param_pos = [7:21-23]; param_name = "$h"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
@@ -65,7 +65,7 @@
          f_params =
          [{ param_annotation = (Set<string>); param_type_hint = ((Set<string>), (Some ([10:3-14], (Happly (([10:3-6], "\\HH\\Set"), [([10:7-13], (Hprim Tstring))]))))); 
             param_is_variadic = false; param_pos = [10:15-17]; param_name = "$h"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
@@ -107,7 +107,7 @@
          f_params =
          [{ param_annotation = (Set<string>); param_type_hint = ((Set<string>), (Some ([22:3-14], (Happly (([22:3-6], "\\HH\\Set"), [([22:7-13], (Hprim Tstring))]))))); 
             param_is_variadic = false; param_pos = [22:15-17]; param_name = "$h"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;

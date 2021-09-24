@@ -16,7 +16,7 @@ use once_cell::unsync::OnceCell;
 use shmrs::chashmap::{CMap, CMapRef};
 use shmrs::mapalloc::MapAlloc;
 
-use ocamlrep::{Value, STRING_TAG};
+use ocamlrep::{ptr::UnsafeOcamlPtr, Value, STRING_TAG};
 use ocamlrep_ocamlpool::catch_unwind;
 
 type HashBuilder = BuildHasherDefault<NoHashHasher<u64>>;
@@ -96,7 +96,9 @@ impl HeapValue {
     ///
     /// Safety: this allocates in the OCaml heap, and thus enters the runtime.
     /// It may deallocate each and every object you haven't registered as a
-    /// root.
+    /// root. It may even reallocate (i.e. move from the young generation to
+    /// the old) values *inside* registered nodes). There's no guarantee that
+    /// every object reachable from a root won't move!
     unsafe fn to_ocaml_value(&self) -> usize {
         if !self.header.is_serialized() {
             caml_alloc_initialized_string(self.header.buffer_size(), self.data.as_ptr())
@@ -368,10 +370,29 @@ pub extern "C" fn shmffi_get_and_deserialize(hash: u64) -> usize {
     catch_unwind(|| {
         with(|cmap| {
             cmap.read_map(&hash, |map| {
-                let heap_value = &map[&hash];
+                let result = match &map.get(&hash) {
+                    None => None,
+                    Some(heap_value) => {
+                        // Safety: we are not holding on to unrooted OCaml values.
+                        //
+                        // This value itself is unrooted, but we are not calling into
+                        // the OCalm runtime after this. The option that will be allocated
+                        // later is allocated via ocamlpool, which cannot trigger the GC.
+                        let deserialized_value = unsafe { heap_value.to_ocaml_value() };
 
-                // Safety: we are not holding on to unrooted OCaml values.
-                unsafe { heap_value.to_ocaml_value() }
+                        // Safety: the value is only used to wrap it in an option.
+                        //
+                        // Because we use ocamlpool below, the GC won't run while this
+                        // value exists.
+                        let deserialized_value = unsafe { UnsafeOcamlPtr::new(deserialized_value) };
+
+                        Some(deserialized_value)
+                    }
+                };
+
+                // Safety: we don't call into the OCaml runtime, so there's no
+                // risk of us GC'ing the deserialized value.
+                unsafe { ocamlrep_ocamlpool::to_ocaml(&result) }
             })
         })
     })

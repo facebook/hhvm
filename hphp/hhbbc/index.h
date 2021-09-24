@@ -490,7 +490,7 @@ struct Func {
   /*
    * Coeffects
    */
-  const CompactVector<LowStringPtr>* staticCoeffects() const;
+  const RuntimeCoeffects* requiredCoeffects() const;
   TriBool hasCoeffectRules() const;
 
   struct FuncInfo;

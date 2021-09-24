@@ -98,7 +98,7 @@ constexpr bool CheckSize() { static_assert(Expected == Actual); return true; };
 static_assert(CheckSize<php::Block, 24>(), "");
 static_assert(CheckSize<php::Local, use_lowptr ? 12 : 16>(), "");
 static_assert(CheckSize<php::Param, use_lowptr ? 64 : 88>(), "");
-static_assert(CheckSize<php::Func, use_lowptr ? 184 : 216>(), "");
+static_assert(CheckSize<php::Func, use_lowptr ? 184 : 224>(), "");
 
 // Likewise, we also keep the bytecode and immediate types small.
 static_assert(CheckSize<Bytecode, use_lowptr ? 32 : 40>(), "");
@@ -1013,16 +1013,16 @@ uint32_t Func::maxNonVariadicParams() const {
   );
 }
 
-const CompactVector<LowStringPtr>* Func::staticCoeffects() const {
-  auto const get = [&](const php::Func* f) { return &f->staticCoeffects; };
-  return match<const CompactVector<LowStringPtr>*>(
+const RuntimeCoeffects* Func::requiredCoeffects() const {
+  auto const get = [&](const php::Func* f) { return &f->requiredCoeffects; };
+  return match<const RuntimeCoeffects*>(
     val,
     [&] (FuncName) { return nullptr; },
     [&] (MethodName) { return nullptr; },
     [&] (FuncInfo* fi) { return get(fi->func); },
     [&] (const MethTabEntryPair* mte) { return get(mte->second.func); },
-    [&] (FuncFamily* fa) -> const CompactVector<LowStringPtr>* {
-      const CompactVector<LowStringPtr>* result = nullptr;
+    [&] (FuncFamily* fa) -> const RuntimeCoeffects* {
+      const RuntimeCoeffects* result = nullptr;
       for (auto const pf : fa->possibleFuncs()) {
         if (!result) {
           result = get(pf->second.func);
@@ -1030,7 +1030,7 @@ const CompactVector<LowStringPtr>* Func::staticCoeffects() const {
         }
         auto const cur = get(pf->second.func);
         assertx(cur);
-        if (*result != *cur) return nullptr;
+        if (result->value() != cur->value()) return nullptr;
       }
       return result;
     }

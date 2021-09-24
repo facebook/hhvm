@@ -417,15 +417,22 @@ struct Func : FuncBase {
   TypeConstraint retTypeConstraint;
 
   /*
-   * User attribute list.
+   * Static coeffects in bit encoding
    */
-  UserAttributeMap userAttributes;
+  RuntimeCoeffects requiredCoeffects{RuntimeCoeffects::none()};
+  RuntimeCoeffects coeffectEscapes{RuntimeCoeffects::none()};
 
   /*
    * Lists of all static coeffect names and coeffect rules
    */
   CompactVector<LowStringPtr> staticCoeffects;
   CompactVector<CoeffectRule> coeffectRules;
+
+  /*
+   * User attribute list.
+   */
+  UserAttributeMap userAttributes;
+
 };
 
 //////////////////////////////////////////////////////////////////////

@@ -393,10 +393,11 @@ bool canDefinitelyCallWithoutCoeffectViolation(const php::Func* caller,
   if (!caller->coeffectRules.empty() || !callee->coeffectRules.empty()) {
     return false;
   }
-  // TODO(oulgen): We can actually be smarter here and actually check for
-  // bits matching but HHBBC currently does not know about the bit patterns
-  // and enforcement levels, so just check for coeffects matching identically
-  return caller->staticCoeffects == callee->staticCoeffects;
+  auto const required = callee->requiredCoeffects;
+  auto const provided =
+    RuntimeCoeffects::fromValue(caller->requiredCoeffects.value() |
+                                caller->coeffectEscapes.value());
+  return provided.canCall(required);
 }
 
 bool canDefinitelyCallWithoutReadonlyViolation(const php::Func* callee,

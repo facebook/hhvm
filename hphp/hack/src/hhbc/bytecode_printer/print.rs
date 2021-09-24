@@ -48,7 +48,11 @@ use hhbc_by_ref_runtime::TypedValue;
 use lazy_static::lazy_static;
 use naming_special_names_rust::classes;
 use ocaml_helper::escaped;
-use oxidized::{ast, ast_defs, local_id};
+use oxidized::{
+    ast,
+    ast_defs::{self, ParamKind},
+    local_id,
+};
 use regex::Regex;
 use write::*;
 
@@ -2642,7 +2646,10 @@ pub fn print_expr<W: Write>(
                 }
             };
             paren(w, |w| {
-                concat_by(w, ", ", &es, |w, e| print_expr(ctx, w, env, e))?;
+                concat_by(w, ", ", &es, |w, (pk, e)| match pk {
+                    ParamKind::Pnormal => print_expr(ctx, w, env, e),
+                    ParamKind::Pinout => Err(Error::fail("illegal default value")),
+                })?;
                 match unpacked_element {
                     None => Ok(()),
                     Some(e) => {
@@ -2890,7 +2897,6 @@ pub fn print_expr<W: Write>(
                 ))
             }
         }
-        E_::Callconv(_) => Err(Error::fail("illegal default value")),
         E_::ETSplice(splice) => {
             w.write("${")?;
             print_expr(ctx, w, env, splice)?;
@@ -3085,7 +3091,7 @@ fn print_fparam<W: Write>(
     env: &ExprEnv,
     param: &ast::FunParam,
 ) -> Result<(), W::Error> {
-    if param.callconv == ast_defs::ParamKind::Pinout {
+    if param.callconv == ParamKind::Pinout {
         w.write("inout ")?;
     }
     if param.is_variadic {

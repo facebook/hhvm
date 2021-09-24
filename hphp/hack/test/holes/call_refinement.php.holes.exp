@@ -98,7 +98,7 @@
                  ((dynamic), [15:7-22],
                   (Call ((((function<T as ?Container<nothing>, Tv>(inout nothing $arr): dynamic)), [15:7-10], (Id ([15:7-10], "\\foo"))),
                      [((nothing), ([15:7-10], (Happly (([Pos.none], "_"), [])))); ((nothing), ([15:7-10], (Happly (([Pos.none], "_"), []))))],
-                     [((dynamic), [15:11-21], (Callconv (Pinout, ((dynamic), [15:11-21], (Hole (((dynamic), [15:17-21], (Lvar ([15:17-21], $arr))), (dynamic), (nothing), Typing))))))], None))),
+                     [(Pinout, ((dynamic), [15:17-21], (Hole (((dynamic), [15:17-21], (Lvar ([15:17-21], $arr))), (dynamic), (nothing), Typing))))], None))),
                  [([16:5-12], (Return None))], [([Pos.none], Noop)])));
              ([18:3-25],
               (Expr
@@ -107,7 +107,7 @@
                      ((nothing), [18:15-24],
                       (Call ((((function<T as ?Container<nothing>, Tv>(nothing $arr): nothing)), [18:15-18], (Id ([18:15-18], "\\qux"))),
                          [((nothing), ([18:15-18], (Happly (([Pos.none], "_"), [])))); ((nothing), ([18:15-18], (Happly (([Pos.none], "_"), []))))],
-                         [((nothing), [18:19-23], (Lvar ([18:19-23], $arr)))], None)))
+                         [(Pnormal, ((nothing), [18:19-23], (Lvar ([18:19-23], $arr))))], None)))
                      )))))
              ]
            };

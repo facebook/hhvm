@@ -397,8 +397,8 @@ and ('ex, 'en) expr_ =
       ('ex, 'en) expr
       * (* explicit type annotations *)
       'ex targ list
-      * (* positional args *)
-      ('ex, 'en) expr list
+      * (* positional args, plus their calling convention *)
+      (Ast_defs.param_kind * ('ex, 'en) expr) list
       * (* unpacked arg *)
       ('ex, 'en) expr option
       (** Function or method call.
@@ -407,6 +407,8 @@ and ('ex, 'en) expr_ =
           $x()
           foo<int>(1, 2, ...$rest)
           $x->foo()
+          bar(inout $x);
+          foobar(inout $x[0])
 
           async { return 1; }
           // lowered to:
@@ -558,12 +560,6 @@ and ('ex, 'en) expr_ =
       (** XHP expression. May contain interpolated expressions.
 
           <foo x="hello" y={$foo}>hello {$bar}</foo> *)
-  | Callconv of Ast_defs.param_kind * ('ex, 'en) expr
-      (** Explicit calling convention, used for inout. Inout supports any lvalue.
-
-          TODO: This could be a flag on parameters in Call.
-
-          foo(inout $x[0]) *)
   | Import of import_flavor * ('ex, 'en) expr
       (** Include or require expression.
 

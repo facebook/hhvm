@@ -617,8 +617,8 @@ let call_special ~pos renv env args ret = function
   | StaticMethod ("\\HH\\Shapes", "idx") ->
     let (ty, key, def) =
       match args with
-      | [(ty, _); (_, Some key)] -> (ty, key, None)
-      | [(ty, _); (_, Some key); (def, _)] -> (ty, key, Some def)
+      | [(ty, _); (_, Some (_, key))] -> (ty, key, None)
+      | [(ty, _); (_, Some (_, key)); (def, _)] -> (ty, key, Some def)
       | _ -> fail "incorrect arguments to Shapes::idx"
     in
     let key =
@@ -1086,9 +1086,9 @@ let rec expr ~pos renv (env : Env.expr_env) ((ety, epos, e) : Tast.expr) =
     (env, class_pty)
   in
   let funargs env =
-    let f env e =
+    let f env (pk, e) =
       let (env, ty) = expr env e in
-      (env, (ty, Some e))
+      (env, (ty, Some (pk, e)))
     in
     List.map_env env ~f
   in
@@ -1410,7 +1410,9 @@ let rec expr ~pos renv (env : Env.expr_env) ((ety, epos, e) : Tast.expr) =
     (* TODO(T70139741): support variadic functions and constructors
      * TODO(T70139893): support classes with type parameters
      *)
-    let (env, args_pty) = funargs env args in
+    let (env, args_pty) =
+      funargs env (List.map ~f:(fun e -> (Ast_defs.Pnormal, e)) args)
+    in
     let env =
       match cid with
       | A.CIexpr e -> fst @@ expr env e

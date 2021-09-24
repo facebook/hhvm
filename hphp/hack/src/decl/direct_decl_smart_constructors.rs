@@ -1137,15 +1137,15 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                         Unop(&(_op, expr)) => expr_to_ty(arena, expr),
                         Hole(&(expr, _, _, _)) => expr_to_ty(arena, expr),
 
-                        ArrayGet(_) | As(_) | Await(_) | Binop(_) | Call(_) | Callconv(_)
-                        | Cast(_) | ClassConst(_) | ClassGet(_) | Clone(_) | Collection(_)
-                        | Darray(_) | Dollardollar(_) | Efun(_) | Eif(_) | EnumClassLabel(_)
-                        | ETSplice(_) | ExpressionTree(_) | FunctionPointer(_) | FunId(_)
-                        | Id(_) | Import(_) | Is(_) | KeyValCollection(_) | Lfun(_) | List(_)
-                        | Lplaceholder(_) | Lvar(_) | MethodCaller(_) | MethodId(_) | New(_)
-                        | ObjGet(_) | Omitted | Pair(_) | Pipe(_) | ReadonlyExpr(_) | Record(_)
-                        | Shape(_) | SmethodId(_) | Tuple(_) | Upcast(_) | ValCollection(_)
-                        | Varray(_) | Xml(_) | Yield(_) => None,
+                        ArrayGet(_) | As(_) | Await(_) | Binop(_) | Call(_) | Cast(_)
+                        | ClassConst(_) | ClassGet(_) | Clone(_) | Collection(_) | Darray(_)
+                        | Dollardollar(_) | Efun(_) | Eif(_) | EnumClassLabel(_) | ETSplice(_)
+                        | ExpressionTree(_) | FunctionPointer(_) | FunId(_) | Id(_) | Import(_)
+                        | Is(_) | KeyValCollection(_) | Lfun(_) | List(_) | Lplaceholder(_)
+                        | Lvar(_) | MethodCaller(_) | MethodId(_) | New(_) | ObjGet(_)
+                        | Omitted | Pair(_) | Pipe(_) | ReadonlyExpr(_) | Record(_) | Shape(_)
+                        | SmethodId(_) | Tuple(_) | Upcast(_) | ValCollection(_) | Varray(_)
+                        | Xml(_) | Yield(_) => None,
                     }
                 }
                 Some(self.alloc(Ty(

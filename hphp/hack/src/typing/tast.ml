@@ -164,7 +164,7 @@ let nast_converter =
           List.map ~f:(fun hint -> ((), super#on_hint () hint)) hints
         in
         let id = ((), pos, Aast.Id (pos, name)) in
-        Aast.Call (id, targs, [ex], None)
+        Aast.Call (id, targs, [(Ast_defs.Pnormal, ex)], None)
       in
       match src with
       | Aast.UnsafeCast hints ->

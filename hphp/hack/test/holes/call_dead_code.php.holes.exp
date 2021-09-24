@@ -41,10 +41,12 @@
                     (Expr
                        ((void), [10:5-12],
                         (Call ((((function(int $x): void)), [10:5-8], (Id ([10:5-8], "\\foo"))), 
-                           [], [((string), [10:9-11], (Hole (((string), [10:9-11], (Lvar ([10:9-11], $x))), (string), (int), Typing)))], None)))))
+                           [], [(Pnormal, ((string), [10:9-11], (Hole (((string), [10:9-11], (Lvar ([10:9-11], $x))), (string), (int), Typing))))], None)))))
                    ],
                  [([12:5-19], (Expr ((string), [12:5-18], (Binop ((Eq None), ((string), [12:5-7], (Lvar ([12:5-7], $x))), ((string), [12:10-18], (String "string")))))));
-                   ([13:5-13], (Expr ((void), [13:5-12], (Call ((((function(int $x): void)), [13:5-8], (Id ([13:5-8], "\\foo"))), [], [((nothing), [13:9-11], (Lvar ([13:9-11], $x)))], None)))))]
+                   ([13:5-13],
+                    (Expr ((void), [13:5-12], (Call ((((function(int $x): void)), [13:5-8], (Id ([13:5-8], "\\foo"))), [], [(Pnormal, ((nothing), [13:9-11], (Lvar ([13:9-11], $x))))], None)))))
+                   ]
                  )))
              ]
            };
@@ -75,11 +77,14 @@
                        ((void), [22:5-47],
                         (Call ((((function(int $x): void)), [22:5-8], (Id ([22:5-8], "\\foo"))), 
                            [],
-                           [((int), [22:9-46], (Hole (((string), [22:43-45], (Lvar ([22:43-45], $x))), (string), (int), (UnsafeCast [([22:31-37], (Hprim Tstring)); ([22:38-41], (Hprim Tint))]))))],
+                           [(Pnormal,
+                             ((int), [22:9-46], (Hole (((string), [22:43-45], (Lvar ([22:43-45], $x))), (string), (int), (UnsafeCast [([22:31-37], (Hprim Tstring)); ([22:38-41], (Hprim Tint))])))))],
                            None)))))
                    ],
                  [([24:5-19], (Expr ((string), [24:5-18], (Binop ((Eq None), ((string), [24:5-7], (Lvar ([24:5-7], $x))), ((string), [24:10-18], (String "string")))))));
-                   ([25:5-13], (Expr ((void), [25:5-12], (Call ((((function(int $x): void)), [25:5-8], (Id ([25:5-8], "\\foo"))), [], [((nothing), [25:9-11], (Lvar ([25:9-11], $x)))], None)))))]
+                   ([25:5-13],
+                    (Expr ((void), [25:5-12], (Call ((((function(int $x): void)), [25:5-8], (Id ([25:5-8], "\\foo"))), [], [(Pnormal, ((nothing), [25:9-11], (Lvar ([25:9-11], $x))))], None)))))
+                   ]
                  )))
              ]
            };

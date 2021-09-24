@@ -55,7 +55,7 @@
                 ((void), [7:3-26],
                  (Call ((((function<T as num>(int $x, int $y): void)), [7:3-18], (Id ([7:3-18], "\\generic_bounded"))), 
                     [((int), ([7:3-18], (Happly (([Pos.none], "_"), []))))],
-                    [((int), [7:19-21], (Lvar ([7:19-21], $x))); ((string), [7:23-25], (Hole (((string), [7:23-25], (Lvar ([7:23-25], $y))), (string), (int), Typing)))], None)))))
+                    [(Pnormal, ((int), [7:19-21], (Lvar ([7:19-21], $x)))); (Pnormal, ((string), [7:23-25], (Hole (((string), [7:23-25], (Lvar ([7:23-25], $y))), (string), (int), Typing))))], None)))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
@@ -91,8 +91,10 @@
                 ((void), [12:3-63],
                  (Call ((((function<T as num>(num $x, num $y): void)), [12:3-18], (Id ([12:3-18], "\\generic_bounded"))), 
                     [((num), ([12:3-18], (Happly (([Pos.none], "_"), []))))],
-                    [((int), [12:19-21], (Lvar ([12:19-21], $x)));
-                      ((float), [12:23-62], (Hole (((string), [12:59-61], (Lvar ([12:59-61], $y))), (string), (float), (UnsafeCast [([12:45-51], (Hprim Tstring)); ([12:52-57], (Hprim Tfloat))]))))],
+                    [(Pnormal, ((int), [12:19-21], (Lvar ([12:19-21], $x))));
+                      (Pnormal,
+                       ((float), [12:23-62], (Hole (((string), [12:59-61], (Lvar ([12:59-61], $y))), (string), (float), (UnsafeCast [([12:45-51], (Hprim Tstring)); ([12:52-57], (Hprim Tfloat))])))))
+                      ],
                     None)))))
              ]
            };

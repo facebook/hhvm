@@ -305,6 +305,9 @@ and assign_expr env acc e1 =
   | (_, _, List el) -> List.fold_left ~f:(assign_expr env) ~init:acc el
   | _ -> acc
 
+and argument_list env acc el =
+  List.fold_left ~f:(fun acc_ (_, e) -> expr env acc_ e) ~init:acc el
+
 and stmt env acc st =
   let expr = expr env in
   let block = block env in
@@ -314,7 +317,7 @@ and stmt env acc st =
   | Expr (* only in top level!*)
       (_, _, Call ((_, _, Class_const ((_, _, CIparent), (_, m))), _, el, _uel))
     when String.equal m SN.Members.__construct ->
-    let acc = List.fold_left ~f:expr ~init:acc el in
+    let acc = argument_list env acc el in
     assign env acc DeferredMembers.parent_init_prop
   | Expr e ->
     if Typing_func_terminality.expression_exits env.tenv e then
@@ -464,7 +467,7 @@ and expr_ env acc p e =
         (* First time we encounter this private method. Let's check its
          * arguments first, and then recurse into the method body.
          *)
-        let acc = List.fold_left ~f:expr ~init:acc el in
+        let acc = argument_list env acc el in
         let acc =
           Option.value_map ~f:(expr acc) ~default:acc unpacked_element
         in
@@ -475,11 +478,11 @@ and expr_ env acc p e =
       match e with
       | (_, _, Id (_, fun_name)) when is_whitelisted fun_name ->
         List.filter el ~f:(function
-            | (_, _, This) -> false
+            | (_, (_, _, This)) -> false
             | _ -> true)
       | _ -> el
     in
-    let acc = List.fold_left ~f:expr ~init:acc el in
+    let acc = argument_list env acc el in
     let acc = Option.value_map ~f:(expr acc) ~default:acc unpacked_element in
     expr acc e
   | True
@@ -539,7 +542,6 @@ and expr_ env acc p e =
     let l = List.map l ~f:get_xhp_attr_expr in
     let acc = exprl acc l in
     exprl acc el
-  | Callconv (_, e) -> expr acc e
   | Shape fdm ->
     List.fold_left
       ~f:

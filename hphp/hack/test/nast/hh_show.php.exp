@@ -63,7 +63,8 @@
                                                              ((), [7:10-11],
                                                               (Call (((), [7:10-11], (Class_const (((), [7:10-11], (CI ([7:10-11], "\\Code"))), ([7:10-11], "intType")))), [], [], None)))
                                                              )))));
-                                                      ([8:5-17], (Expr ((), [8:5-16], (Call (((), [8:5-12], (Id ([8:5-12], "\\hh_show"))), [], [((), [8:13-15], (Lvar ([8:13-15], $x)))], None)))));
+                                                      ([8:5-17],
+                                                       (Expr ((), [8:5-16], (Call (((), [8:5-12], (Id ([8:5-12], "\\hh_show"))), [], [(Pnormal, ((), [8:13-15], (Lvar ([8:13-15], $x))))], None)))));
                                                       ([6:8-9:4],
                                                        (Return
                                                           (Some ((), [6:8-9:4],
@@ -85,103 +86,107 @@
                      ((), [6:8-9:4],
                       (Call (((), [6:8-9:4], (Class_const (((), [6:8-9:4], (CI ([6:8-9:4], "\\Code"))), ([6:8-9:4], "makeTree")))), 
                          [],
-                         [((), [6:8-9:4],
-                           (Shape
-                              [((SFlit_str ([6:8-9:4], "path")), ((), [6:8-9:4], (Id ([6:8-9:4], "\\__FILE__")))); (
-                                (SFlit_str ([6:8-9:4], "start_line")), ((), [6:8-9:4], (Int "6"))); (
-                                (SFlit_str ([6:8-9:4], "end_line")), ((), [6:8-9:4], (Int "9"))); (
-                                (SFlit_str ([6:8-9:4], "start_column")), ((), [6:8-9:4], (Int "7"))); (
-                                (SFlit_str ([6:8-9:4], "end_column")), ((), [6:8-9:4], (Int "3")))]));
+                         [(Pnormal,
                            ((), [6:8-9:4],
                             (Shape
-                               [((SFlit_str ([6:8-9:4], "splices")), ((), [6:8-9:4], (KeyValCollection (Dict, None, []))));
-                                 ((SFlit_str ([6:8-9:4], "functions")), ((), [6:8-9:4], (ValCollection (Vec, None, []))));
-                                 ((SFlit_str ([6:8-9:4], "static_methods")), ((), [6:8-9:4], (ValCollection (Vec, None, []))))]));
-                           ((), [6:8-9:4],
-                            (Lfun (
-                               { f_span = [6:8-9:4]; f_readonly_this = None; 
-                                 f_annotation = (); f_readonly_ret = None; 
-                                 f_ret = ((), None); f_name = ([6:8-9:4], ";anonymous"); 
-                                 f_tparams = []; f_where_constraints = []; 
-                                 f_variadic = FVnonVariadic;
-                                 f_params =
-                                 [{ param_annotation = (); param_type_hint = ((), (Some ([6:3-7], (Happly (([6:3-7], "\\Code"), []))))); 
-                                    param_is_variadic = false; param_pos = [6:3-7]; 
-                                    param_name = "$0v"; param_expr = None; 
-                                    param_readonly = None; param_callconv = Pnormal; 
-                                    param_user_attributes = []; param_visibility = None }
-                                   ];
-                                 f_ctxs = None; f_unsafe_ctxs = None;
-                                 f_body =
-                                 { fb_ast =
-                                   [([6:8-9:4],
-                                     (Return
-                                        (Some ((), [6:8-9:4],
-                                               (Call (((), [6:8-9:4], (Obj_get (((), [6:8-9:4], (Lvar ([6:8-9:4], $0v))), ((), [6:8-9:4], (Id ([6:8-9:4], "visitLambda"))), OG_nullthrows, false))),
-                                                  [],
-                                                  [((), [6:8-9:4],
-                                                    (Shape
-                                                       [((SFlit_str ([6:8-9:4], "path")), ((), [6:8-9:4], (Id ([6:8-9:4], "\\__FILE__"))));
-                                                         ((SFlit_str ([6:8-9:4], "start_line")), ((), [6:8-9:4], (Int "6"))); (
-                                                         (SFlit_str ([6:8-9:4], "end_line")), ((), [6:8-9:4], (Int "9"))); (
-                                                         (SFlit_str ([6:8-9:4], "start_column")), ((), [6:8-9:4], (Int "7"))); (
-                                                         (SFlit_str ([6:8-9:4], "end_column")), ((), [6:8-9:4], (Int "3")))]));
-                                                    ((), [Pos.none], (ValCollection (Vec, None, [])));
-                                                    ((), [7:5-8:16],
-                                                     (ValCollection (Vec, None,
-                                                        [((), [7:5-11],
-                                                          (Call (
-                                                             ((), [7:5-11], (Obj_get (((), [7:5-11], (Lvar ([7:5-11], $0v))), ((), [7:5-11], (Id ([7:5-11], "visitAssign"))), OG_nullthrows, false))),
-                                                             [],
-                                                             [((), [7:5-11],
-                                                               (Shape
-                                                                  [((SFlit_str ([7:5-11], "path")), ((), [7:5-11], (Id ([7:5-11], "\\__FILE__"))));
-                                                                    (
-                                                                    (SFlit_str ([7:5-11], "start_line")), ((), [7:5-11], (Int "7"))); (
+                               [((SFlit_str ([6:8-9:4], "path")), ((), [6:8-9:4], (Id ([6:8-9:4], "\\__FILE__")))); (
+                                 (SFlit_str ([6:8-9:4], "start_line")), ((), [6:8-9:4], (Int "6"))); (
+                                 (SFlit_str ([6:8-9:4], "end_line")), ((), [6:8-9:4], (Int "9"))); (
+                                 (SFlit_str ([6:8-9:4], "start_column")), ((), [6:8-9:4], (Int "7"))); (
+                                 (SFlit_str ([6:8-9:4], "end_column")), ((), [6:8-9:4], (Int "3")))])));
+                           (Pnormal,
+                            ((), [6:8-9:4],
+                             (Shape
+                                [((SFlit_str ([6:8-9:4], "splices")), ((), [6:8-9:4], (KeyValCollection (Dict, None, []))));
+                                  ((SFlit_str ([6:8-9:4], "functions")), ((), [6:8-9:4], (ValCollection (Vec, None, []))));
+                                  ((SFlit_str ([6:8-9:4], "static_methods")), ((), [6:8-9:4], (ValCollection (Vec, None, []))))])));
+                           (Pnormal,
+                            ((), [6:8-9:4],
+                             (Lfun (
+                                { f_span = [6:8-9:4]; f_readonly_this = None; 
+                                  f_annotation = (); f_readonly_ret = None; 
+                                  f_ret = ((), None); f_name = ([6:8-9:4], ";anonymous"); 
+                                  f_tparams = []; f_where_constraints = []; 
+                                  f_variadic = FVnonVariadic;
+                                  f_params =
+                                  [{ param_annotation = (); param_type_hint = ((), (Some ([6:3-7], (Happly (([6:3-7], "\\Code"), []))))); 
+                                     param_is_variadic = false; param_pos = [6:3-7]; 
+                                     param_name = "$0v"; param_expr = None; 
+                                     param_readonly = None; param_callconv = Pnormal; 
+                                     param_user_attributes = []; param_visibility = None }
+                                    ];
+                                  f_ctxs = None; f_unsafe_ctxs = None;
+                                  f_body =
+                                  { fb_ast =
+                                    [([6:8-9:4],
+                                      (Return
+                                         (Some ((), [6:8-9:4],
+                                                (Call (((), [6:8-9:4], (Obj_get (((), [6:8-9:4], (Lvar ([6:8-9:4], $0v))), ((), [6:8-9:4], (Id ([6:8-9:4], "visitLambda"))), OG_nullthrows, false))),
+                                                   [],
+                                                   [(Pnormal,
+                                                     ((), [6:8-9:4],
+                                                      (Shape
+                                                         [((SFlit_str ([6:8-9:4], "path")), ((), [6:8-9:4], (Id ([6:8-9:4], "\\__FILE__"))));
+                                                           ((SFlit_str ([6:8-9:4], "start_line")), ((), [6:8-9:4], (Int "6"))); (
+                                                           (SFlit_str ([6:8-9:4], "end_line")), ((), [6:8-9:4], (Int "9"))); (
+                                                           (SFlit_str ([6:8-9:4], "start_column")), ((), [6:8-9:4], (Int "7"))); (
+                                                           (SFlit_str ([6:8-9:4], "end_column")), ((), [6:8-9:4], (Int "3")))])));
+                                                     (Pnormal, ((), [Pos.none], (ValCollection (Vec, None, []))));
+                                                     (Pnormal,
+                                                      ((), [7:5-8:16],
+                                                       (ValCollection (Vec, None,
+                                                          [((), [7:5-11],
+                                                            (Call (
+                                                               ((), [7:5-11], (Obj_get (((), [7:5-11], (Lvar ([7:5-11], $0v))), ((), [7:5-11], (Id ([7:5-11], "visitAssign"))), OG_nullthrows, false))),
+                                                               [],
+                                                               [(Pnormal,
+                                                                 ((), [7:5-11],
+                                                                  (Shape
+                                                                    [((SFlit_str ([7:5-11], "path")), ((), [7:5-11], (Id ([7:5-11], "\\__FILE__"))));
+                                                                    ((SFlit_str ([7:5-11], "start_line")), ((), [7:5-11], (Int "7"))); (
                                                                     (SFlit_str ([7:5-11], "end_line")), ((), [7:5-11], (Int "7")));
-                                                                    (
-                                                                    (SFlit_str ([7:5-11], "start_column")), ((), [7:5-11], (Int "4")));
-                                                                    (
-                                                                    (SFlit_str ([7:5-11], "end_column")), ((), [7:5-11], (Int "10")))]));
-                                                               ((), [7:5-7],
-                                                                (Call (
-                                                                   ((), [7:5-7], (Obj_get (((), [7:5-7], (Lvar ([7:5-7], $0v))), ((), [7:5-7], (Id ([7:5-7], "visitLocal"))), OG_nullthrows, false))),
-                                                                   [],
-                                                                   [((), [7:5-7],
+                                                                    ((SFlit_str ([7:5-11], "start_column")), ((), [7:5-11], (Int "4")));
+                                                                    ((SFlit_str ([7:5-11], "end_column")), ((), [7:5-11], (Int "10")))])));
+                                                                 (Pnormal,
+                                                                  ((), [7:5-7],
+                                                                   (Call (
+                                                                    ((), [7:5-7], (Obj_get (((), [7:5-7], (Lvar ([7:5-7], $0v))), ((), [7:5-7], (Id ([7:5-7], "visitLocal"))), OG_nullthrows, false))),
+                                                                    [],
+                                                                    [(Pnormal,
+                                                                    ((), [7:5-7],
                                                                     (Shape
                                                                     [((SFlit_str ([7:5-7], "path")), ((), [7:5-7], (Id ([7:5-7], "\\__FILE__"))));
                                                                     ((SFlit_str ([7:5-7], "start_line")), ((), [7:5-7], (Int "7"))); (
                                                                     (SFlit_str ([7:5-7], "end_line")), ((), [7:5-7], (Int "7"))); (
                                                                     (SFlit_str ([7:5-7], "start_column")), ((), [7:5-7], (Int "4"))); (
-                                                                    (SFlit_str ([7:5-7], "end_column")), ((), [7:5-7], (Int "6")))])); (
-                                                                    (), [7:5-7], (String "$x"))],
-                                                                   None)));
-                                                               ((), [7:10-11],
-                                                                (Call (
-                                                                   ((), [7:10-11],
-                                                                    (
-                                                                    Obj_get (((), [7:10-11], (Lvar ([7:10-11], $0v))), ((), [7:10-11], (Id ([7:10-11], "visitInt"))), OG_nullthrows, false))),
-                                                                   [],
-                                                                   [((), [7:10-11],
+                                                                    (SFlit_str ([7:5-7], "end_column")), ((), [7:5-7], (Int "6")))]))); (
+                                                                    Pnormal, ((), [7:5-7], (String "$x")))], None))));
+                                                                 (Pnormal,
+                                                                  ((), [7:10-11],
+                                                                   (Call (
+                                                                    ((), [7:10-11],
+                                                                    (Obj_get (((), [7:10-11], (Lvar ([7:10-11], $0v))), ((), [7:10-11], (Id ([7:10-11], "visitInt"))), OG_nullthrows, false))), 
+                                                                    [],
+                                                                    [(Pnormal,
+                                                                    ((), [7:10-11],
                                                                     (Shape
                                                                     [((SFlit_str ([7:10-11], "path")), ((), [7:10-11], (Id ([7:10-11], "\\__FILE__"))));
                                                                     ((SFlit_str ([7:10-11], "start_line")), ((), [7:10-11], (Int "7")));
                                                                     ((SFlit_str ([7:10-11], "end_line")), ((), [7:10-11], (Int "7")));
                                                                     ((SFlit_str ([7:10-11], "start_column")), ((), [7:10-11], (Int "9")));
-                                                                    ((SFlit_str ([7:10-11], "end_column")), ((), [7:10-11], (Int "10")))])); (
-                                                                    (), [7:10-11], (Int "1"))],
-                                                                   None)))
-                                                               ],
-                                                             None)));
-                                                          ((), [8:5-16], (Call (((), [8:5-12], (Id ([8:5-12], "\\hh_show"))), [], [((), [8:13-15], (Lvar ([8:13-15], $x)))], None)))]
-                                                        )))
-                                                    ],
-                                                  None))))))
-                                     ]
-                                   };
-                                 f_fun_kind = FSync; f_user_attributes = []; 
-                                 f_external = false; f_doc_comment = None },
-                               [([8:13-15], $x)])))
+                                                                    ((SFlit_str ([7:10-11], "end_column")), ((), [7:10-11], (Int "10")))]))); (
+                                                                    Pnormal, ((), [7:10-11], (Int "1")))], None))))
+                                                                 ],
+                                                               None)));
+                                                            ((), [8:5-16], (Call (((), [8:5-12], (Id ([8:5-12], "\\hh_show"))), [], [(Pnormal, ((), [8:13-15], (Lvar ([8:13-15], $x))))], None)))]
+                                                          ))))
+                                                     ],
+                                                   None))))))
+                                      ]
+                                    };
+                                  f_fun_kind = FSync; f_user_attributes = []; 
+                                  f_external = false; f_doc_comment = None },
+                                [([8:13-15], $x)]))))
                            ],
                          None)))
                      }))))

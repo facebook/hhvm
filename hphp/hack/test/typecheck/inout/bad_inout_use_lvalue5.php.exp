@@ -2,7 +2,7 @@ File "bad_inout_use_lvalue5.php", line 6, characters 11-22:
 Arguments for `inout` parameters must be local variables or simple subscript expressions on vecs, dicts, keysets, or arrays (NastCheck[3050])
 File "bad_inout_use_lvalue5.php", line 6, characters 11-22:
 `list()` can only be used for destructuring assignment. Did you mean `tuple()` or `vec[]`? (NastCheck[3092])
-File "bad_inout_use_lvalue5.php", line 6, characters 5-22:
+File "bad_inout_use_lvalue5.php", line 6, characters 11-22:
 Invalid argument (Typing[4110])
   File "bad_inout_use_lvalue5.php", line 3, characters 18-28:
   Expected `vec<int>`

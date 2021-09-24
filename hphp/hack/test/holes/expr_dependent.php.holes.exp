@@ -140,7 +140,7 @@
                                           (Call (
                                              (((function(T::TX $x): void)), [17:23-33],
                                               (Obj_get (((T), [17:23-28], (Lvar ([17:23-28], $left))), (((function(T::TX $x): void)), [17:30-33], (Id ([17:30-33], "log"))), OG_nullthrows, false))),
-                                             [], [((TR), [17:34-36], (Lvar ([17:34-36], $x)))], None))))))
+                                             [], [(Pnormal, ((TR), [17:34-36], (Lvar ([17:34-36], $x))))], None))))))
                                 ]
                               };
                             f_fun_kind = FSync; f_user_attributes = []; 
@@ -183,7 +183,7 @@
                     ((<expr#1>::TX), [21:10-20],
                      (Call ((((function<T as WithTypeConstant, TR>(<expr#1> as WithTypeConstant $left): <expr#1>::TX)), [21:10-16], (Id ([21:10-16], "\\my_gen"))),
                         [((<expr#1> as WithTypeConstant), ([21:10-16], (Happly (([Pos.none], "_"), [])))); ((<expr#1>::TX), ([21:10-16], (Happly (([Pos.none], "_"), []))))],
-                        [((WithTypeConstant), [21:17-19], (Lvar ([21:17-19], $x)))], None)))
+                        [(Pnormal, ((WithTypeConstant), [21:17-19], (Lvar ([21:17-19], $x))))], None)))
                     )))));
              ([22:3-21],
               (Expr
@@ -192,13 +192,13 @@
                      (((function(<expr#2>::TX): void)), [22:10-20],
                       (Call ((((function<T as WithTypeConstant, TR>(<expr#2> as WithTypeConstant $left): (function(<expr#2>::TX): void))), [22:10-16], (Id ([22:10-16], "\\my_log"))),
                          [((<expr#2> as WithTypeConstant), ([22:10-16], (Happly (([Pos.none], "_"), [])))); ((<expr#2>::TX), ([22:10-16], (Happly (([Pos.none], "_"), []))))],
-                         [((WithTypeConstant), [22:17-19], (Lvar ([22:17-19], $y)))], None)))
+                         [(Pnormal, ((WithTypeConstant), [22:17-19], (Lvar ([22:17-19], $y))))], None)))
                      )))));
              ([26:3-14],
               (Expr
                  ((void), [26:3-13],
                   (Call ((((function(<expr#2>::TX): void)), [26:3-7], (Lvar ([26:3-7], $log))), 
-                     [], [((<expr#1>::TX), [26:8-12], (Hole (((<expr#1>::TX), [26:8-12], (Lvar ([26:8-12], $gen))), (<expr#1>::TX), (<expr#2>::TX), Typing)))], None)))))
+                     [], [(Pnormal, ((<expr#1>::TX), [26:8-12], (Hole (((<expr#1>::TX), [26:8-12], (Lvar ([26:8-12], $gen))), (<expr#1>::TX), (<expr#2>::TX), Typing))))], None)))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

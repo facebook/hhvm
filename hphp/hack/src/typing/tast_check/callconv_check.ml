@@ -62,6 +62,11 @@ let handler =
 
     method! at_expr env =
       function
-      | (_, _, Callconv (_, te)) -> check_types env te
+      | (_, _, Call (_, _, te, _)) ->
+        List.iter
+          ~f:(function
+            | (Ast_defs.Pnormal, _) -> ()
+            | (Ast_defs.Pinout, e) -> check_types env e)
+          te
       | _ -> ()
   end

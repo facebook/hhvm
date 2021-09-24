@@ -82,9 +82,10 @@
                  ((void), [18:3-17],
                   (Call ((((function(int $_): void)), [18:3-6], (Id ([18:3-6], "\\bar"))), 
                      [],
-                     [((int), [18:7-16],
-                       (Call ((((function(): int)), [18:7-14], (Obj_get (((A), [18:7-9], (Lvar ([18:7-9], $a))), (((function(): int)), [18:11-14], (Id ([18:11-14], "get"))), OG_nullthrows, false))),
-                          [], [], None)))
+                     [(Pnormal,
+                       ((int), [18:7-16],
+                        (Call ((((function(): int)), [18:7-14], (Obj_get (((A), [18:7-9], (Lvar ([18:7-9], $a))), (((function(): int)), [18:11-14], (Id ([18:11-14], "get"))), OG_nullthrows, false))),
+                           [], [], None))))
                        ],
                      None)))))
              ]

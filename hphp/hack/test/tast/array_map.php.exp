@@ -95,31 +95,34 @@
              (Expr
                 ((dict<arraykey, _>), [15:3-21],
                  (Call ((((function($callback, $arr1, ...): dict<arraykey, _>)), [15:3-12], (Id ([15:3-12], "\\array_map"))), 
-                    [], [(((function(int): bool)), [15:13-15], (Lvar ([15:13-15], $f))); ((Container<int>), [15:17-20], (Lvar ([15:17-20], $ci)))], None)))));
+                    [], [(Pnormal, (((function(int): bool)), [15:13-15], (Lvar ([15:13-15], $f)))); (Pnormal, ((Container<int>), [15:17-20], (Lvar ([15:17-20], $ci))))], None)))));
             ([16:3-27],
              (Expr
                 ((_), [16:3-26],
                  (Call ((((function($callback, $arr1, ...): _)), [16:3-12], (Id ([16:3-12], "\\array_map"))), 
                     [],
-                    [(((function(int, string): bool)), [16:13-15], (Lvar ([16:13-15], $g))); (
-                      (Container<int>), [16:17-20], (Lvar ([16:17-20], $ci))); (
-                      (Container<string>), [16:22-25], (Lvar ([16:22-25], $cs)))],
+                    [(Pnormal, (((function(int, string): bool)), [16:13-15], (Lvar ([16:13-15], $g)))); (
+                      Pnormal, ((Container<int>), [16:17-20], (Lvar ([16:17-20], $ci)))); (
+                      Pnormal, ((Container<string>), [16:22-25], (Lvar ([16:22-25], $cs))))],
                     None)))));
             ([17:3-32],
              (Expr
                 ((_), [17:3-31],
                  (Call ((((function($callback, $arr1, ...): _)), [17:3-12], (Id ([17:3-12], "\\array_map"))), 
                     [],
-                    [(((function(int, string, num): Container<int>)), [17:13-15], (Lvar ([17:13-15], $h))); (
-                      (Container<int>), [17:17-20], (Lvar ([17:17-20], $ci))); (
-                      (Container<string>), [17:22-25], (Lvar ([17:22-25], $cs))); (
-                      (KeyedContainer<int, num>), [17:27-30], (Lvar ([17:27-30], $cn)))],
+                    [(Pnormal, (((function(int, string, num): Container<int>)), [17:13-15], (Lvar ([17:13-15], $h)))); (
+                      Pnormal, ((Container<int>), [17:17-20], (Lvar ([17:17-20], $ci)))); (
+                      Pnormal, ((Container<string>), [17:22-25], (Lvar ([17:22-25], $cs)))); (
+                      Pnormal, ((KeyedContainer<int, num>), [17:27-30], (Lvar ([17:27-30], $cn))))],
                     None)))));
             ([18:3-30],
              (Expr
                 ((dict<arraykey, _>), [18:3-29],
                  (Call ((((function($callback, $arr1, ...): dict<arraykey, _>)), [18:3-12], (Id ([18:3-12], "\\array_map"))), 
-                    [], [(((function(num): bool)), [18:13-15], (Lvar ([18:13-15], $i))); (((Container<int> | KeyedContainer<int, num>)), [18:17-28], (Lvar ([18:17-28], $unresolved)))], None)))))
+                    [],
+                    [(Pnormal, (((function(num): bool)), [18:13-15], (Lvar ([18:13-15], $i))));
+                      (Pnormal, (((Container<int> | KeyedContainer<int, num>)), [18:17-28], (Lvar ([18:17-28], $unresolved))))],
+                    None)))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

@@ -35,9 +35,11 @@
                (Some ((int), [4:10-20],
                       (Call ((((function(int $x): int)), [4:10-11], (Id ([4:10-11], "\\g"))), 
                          [],
-                         [((int), [4:12-19],
-                           (Call ((((function(int $x): int)), [4:12-13], (Id ([4:12-13], "\\g"))), 
-                              [], [((int), [4:14-18], (Call ((((function(int $x): int)), [4:14-15], (Id ([4:14-15], "\\g"))), [], [((int), [4:16-17], (Int "0"))], None)))], None)))
+                         [(Pnormal,
+                           ((int), [4:12-19],
+                            (Call ((((function(int $x): int)), [4:12-13], (Id ([4:12-13], "\\g"))), 
+                               [], [(Pnormal, ((int), [4:14-18], (Call ((((function(int $x): int)), [4:14-15], (Id ([4:14-15], "\\g"))), [], [(Pnormal, ((int), [4:16-17], (Int "0")))], None))))],
+                               None))))
                            ],
                          None))))))
             ]

@@ -73,7 +73,7 @@ Errors:
                  (Binop ((Eq None),
                     (((int, int, int)), [12:3-19], (List [((int), [12:8-10], (Lvar ([12:8-10], $u))); ((int), [12:12-14], (Lvar ([12:12-14], $v))); ((int), [12:16-18], (Lvar ([12:16-18], $w)))])),
                     (((int, int, int)), [12:22-42],
-                     (Call ((((function(bool $x): (int, int, int))), [12:22-38], (Id ([12:22-38], "\\__return_3_tuple"))), [], [((bool), [12:39-41], (Lvar ([12:39-41], $x)))], None)))
+                     (Call ((((function(bool $x): (int, int, int))), [12:22-38], (Id ([12:22-38], "\\__return_3_tuple"))), [], [(Pnormal, ((bool), [12:39-41], (Lvar ([12:39-41], $x))))], None)))
                     )))))
              ]
            };
@@ -110,7 +110,7 @@ Errors:
                     (((int, int)), [17:22-42],
                      (Hole (
                         (((int, int)), [17:22-42],
-                         (Call ((((function(bool $x): (int, int))), [17:22-38], (Id ([17:22-38], "\\__return_2_tuple"))), [], [((bool), [17:39-41], (Lvar ([17:39-41], $x)))], None))),
+                         (Call ((((function(bool $x): (int, int))), [17:22-38], (Id ([17:22-38], "\\__return_2_tuple"))), [], [(Pnormal, ((bool), [17:39-41], (Lvar ([17:39-41], $x))))], None))),
                         ((int, int)), ({suggest:nothing}), Typing)))
                     )))))
              ]

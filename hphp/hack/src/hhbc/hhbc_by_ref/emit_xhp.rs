@@ -83,19 +83,22 @@ pub fn from_attribute_declaration<'a, 'arena, 'decl>(
         mk_var_r(),
         mk_expr(Expr_::mk_null()),
     ));
-    let mut args = vec![mk_expr(Expr_::mk_call(
-        mk_expr(Expr_::mk_class_const(
-            ClassId(
-                (),
-                Pos::make_none(),
-                ClassId_::CIexpr(mk_expr(id_from_str("parent"))),
-            ),
-            (Pos::make_none(), "__xhpAttributeDeclaration".into()),
+    let mut args = vec![(
+        ParamKind::Pnormal,
+        mk_expr(Expr_::mk_call(
+            mk_expr(Expr_::mk_class_const(
+                ClassId(
+                    (),
+                    Pos::make_none(),
+                    ClassId_::CIexpr(mk_expr(id_from_str("parent"))),
+                ),
+                (Pos::make_none(), "__xhpAttributeDeclaration".into()),
+            )),
+            vec![],
+            vec![],
+            None,
         )),
-        vec![],
-        vec![],
-        None,
-    ))];
+    )];
     for xua in xual.iter() {
         match xua.1.as_happly() {
             Some((ast_defs::Id(_, s), hints)) if hints.is_empty() => {
@@ -116,12 +119,12 @@ pub fn from_attribute_declaration<'a, 'arena, 'decl>(
                     vec![],
                     None,
                 ));
-                args.push(arg);
+                args.push((ParamKind::Pnormal, arg));
             }
             _ => return Err(unrecoverable("Xhp use attribute - unexpected attribute")),
         }
     }
-    args.push(emit_xhp_attribute_array(alloc, xal)?);
+    args.push((ParamKind::Pnormal, emit_xhp_attribute_array(alloc, xal)?));
     let array_merge_call = mk_expr(Expr_::mk_call(
         mk_expr(id_from_str("__SystemLib\\merge_xhp_attr_declarations")),
         vec![],

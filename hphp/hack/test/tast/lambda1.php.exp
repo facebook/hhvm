@@ -53,7 +53,7 @@
                  (Binop ((Eq None), ((string), [5:3-5], (Lvar ([5:3-5], $x))),
                     ((string), [5:8-13],
                      (Call ((((function((dynamic | ?(bool | float | resource | arraykey | HH\FormatString<nothing>)) $n): string)), [5:8-10], (Lvar ([5:8-10], $f))), 
-                        [], [((int), [5:11-12], (Int "4"))], None)))
+                        [], [(Pnormal, ((int), [5:11-12], (Int "4")))], None)))
                     )))));
             ([6:3-18],
              (Expr
@@ -61,7 +61,7 @@
                  (Binop ((Eq None), ((string), [6:3-5], (Lvar ([6:3-5], $y))),
                     ((string), [6:8-17],
                      (Call ((((function((dynamic | ?(bool | float | resource | arraykey | HH\FormatString<nothing>)) $n): string)), [6:8-10], (Lvar ([6:8-10], $f))), 
-                        [], [((string), [6:11-16], (String "bar"))], None)))
+                        [], [(Pnormal, ((string), [6:11-16], (String "bar")))], None)))
                     )))))
             ]
           };

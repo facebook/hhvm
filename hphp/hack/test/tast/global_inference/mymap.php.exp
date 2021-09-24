@@ -23,14 +23,14 @@
                 (Call (
                    (((function(string $x, int $y): void)), [5:3-10],
                     (Obj_get (((MyMap<string, int>), [5:3-5], (Lvar ([5:3-5], $m))), (((function(string $x, int $y): void)), [5:7-10], (Id ([5:7-10], "add"))), OG_nullthrows, false))),
-                   [], [((string), [5:11-16], (String "hey")); ((int), [5:18-20], (Int "40"))], None)))));
+                   [], [(Pnormal, ((string), [5:11-16], (String "hey"))); (Pnormal, ((int), [5:18-20], (Int "40")))], None)))));
             ([6:3-24],
              (Return
                 (Some ((?int), [6:10-23],
                        (Call (
                           (((function(string $x): ?int)), [6:10-17],
                            (Obj_get (((MyMap<string, int>), [6:10-12], (Lvar ([6:10-12], $m))), (((function(string $x): ?int)), [6:14-17], (Id ([6:14-17], "get"))), OG_nullthrows, false))),
-                          [], [((string), [6:18-22], (String "ho"))], None))))))
+                          [], [(Pnormal, ((string), [6:18-22], (String "ho")))], None))))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

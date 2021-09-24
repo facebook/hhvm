@@ -46,7 +46,7 @@ Errors:
                 ((string), [8:3-21],
                  (Call ((((function<reify T, Tu>(string $f): string)), [8:3-4], (Id ([8:3-4], "\\f"))), 
                     [((int), ([8:5-8], (Hprim Tint))); ((string), ([8:10-16], (Hprim Tstring)))], 
-                    [((int), [8:18-20], (Hole (((int), [8:18-20], (Int "42")), (int), (string), Typing)))], None)))))
+                    [(Pnormal, ((int), [8:18-20], (Hole (((int), [8:18-20], (Int "42")), (int), (string), Typing))))], None)))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

@@ -62,6 +62,11 @@ let handler =
 
     method! at_expr _ (_, _, e) =
       match e with
-      | Callconv (_, e) -> check_callconv_expr e
+      | Call (_fn, _targs, args, _unpacked_arg) ->
+        List.iter
+          ~f:(function
+            | (Ast_defs.Pnormal, _) -> ()
+            | (Ast_defs.Pinout, e) -> check_callconv_expr e)
+          args
       | _ -> ()
   end

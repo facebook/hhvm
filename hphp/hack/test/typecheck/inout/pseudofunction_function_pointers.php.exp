@@ -1,14 +1,14 @@
 File "pseudofunction_function_pointers.php", line 6, characters 13-20:
 literal is not allowed in write context (Parsing[1002])
-File "pseudofunction_function_pointers.php", line 6, characters 7-20:
+File "pseudofunction_function_pointers.php", line 6, characters 13-20:
 The argument to `fun()` must be a single-quoted, constant literal string representing a valid function name. (Naming[2024])
-File "pseudofunction_function_pointers.php", line 9, characters 13-20:
+File "pseudofunction_function_pointers.php", line 9, characters 19-20:
 The argument to `inst_meth()` must be an expression and a constant literal string representing a valid method name. (Naming[2025])
 File "pseudofunction_function_pointers.php", line 10, characters 13-14:
 The argument to `inst_meth()` must be an expression and a constant literal string representing a valid method name. (Naming[2025])
-File "pseudofunction_function_pointers.php", line 11, characters 13-20:
+File "pseudofunction_function_pointers.php", line 11, characters 19-20:
 The argument to `inst_meth()` must be an expression and a constant literal string representing a valid method name. (Naming[2025])
-File "pseudofunction_function_pointers.php", line 12, characters 15-22:
+File "pseudofunction_function_pointers.php", line 12, characters 21-22:
 The two arguments to `meth_caller()` must be:
  - first: `ClassOrInterface::class`
  - second: a single-quoted string literal containing the name of a non-static method of that class (Naming[2026])
@@ -16,11 +16,11 @@ File "pseudofunction_function_pointers.php", line 13, characters 15-16:
 The two arguments to `meth_caller()` must be:
  - first: `ClassOrInterface::class`
  - second: a single-quoted string literal containing the name of a non-static method of that class (Naming[2026])
-File "pseudofunction_function_pointers.php", line 14, characters 15-22:
+File "pseudofunction_function_pointers.php", line 14, characters 21-22:
 The two arguments to `meth_caller()` must be:
  - first: `ClassOrInterface::class`
  - second: a single-quoted string literal containing the name of a non-static method of that class (Naming[2026])
-File "pseudofunction_function_pointers.php", line 15, characters 14-21:
+File "pseudofunction_function_pointers.php", line 15, characters 20-21:
 The two arguments to `class_meth()` must be:
  - first: `ValidClassname::class`
  - second: a single-quoted string literal containing the name of a static method of that class (Naming[2022])
@@ -28,7 +28,7 @@ File "pseudofunction_function_pointers.php", line 16, characters 14-15:
 The two arguments to `class_meth()` must be:
  - first: `ValidClassname::class`
  - second: a single-quoted string literal containing the name of a static method of that class (Naming[2022])
-File "pseudofunction_function_pointers.php", line 17, characters 14-21:
+File "pseudofunction_function_pointers.php", line 17, characters 20-21:
 The two arguments to `class_meth()` must be:
  - first: `ValidClassname::class`
  - second: a single-quoted string literal containing the name of a static method of that class (Naming[2022])

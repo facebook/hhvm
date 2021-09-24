@@ -325,7 +325,7 @@ let method_call caller =
 
 let check_special_function env caller args =
   match (caller, args) with
-  | ((_, _, Id (pos, x)), [arg])
+  | ((_, _, Id (pos, x)), [(_, arg)])
     when String.equal (Utils.strip_ns x) (Utils.strip_ns SN.Readonly.as_mut) ->
     let arg_ty = Tast.get_type arg in
     if not (is_safe_mut_ty env SSet.empty arg_ty) then
@@ -344,7 +344,7 @@ let call
     (pos : Pos.t)
     (caller_ty : Tast.ty)
     (caller_rty : rty)
-    (args : Tast.expr list)
+    (args : (Ast_defs.param_kind * Tast.expr) list)
     (unpacked_arg : Tast.expr option) =
   let open Typing_defs in
   let (env, caller_ty) = Tast_env.expand_type env caller_ty in
@@ -372,7 +372,7 @@ let call
     | _ -> ()
   in
   (* Checks a single arg against a parameter *)
-  let check_arg param arg =
+  let check_arg param (_, arg) =
     let param_rty = param_to_rty param in
     let arg_rty = ty_expr env arg in
     if not (subtype_rty arg_rty param_rty) then
@@ -396,7 +396,11 @@ let call
   let check_args caller_ty args unpacked_arg =
     match get_node caller_ty with
     | Tfun fty ->
-      let unpacked_rty = Option.to_list unpacked_arg in
+      let unpacked_rty =
+        unpacked_arg
+        |> Option.map ~f:(fun e -> (Ast_defs.Pnormal, e))
+        |> Option.to_list
+      in
       let args = args @ unpacked_rty in
       (* If the args are unequal length, we errored elsewhere so this does not care *)
       let _ = List.iter2 fty.ft_params args ~f:check_arg in
@@ -458,7 +462,14 @@ let check =
         super#on_expr env e
       | (_, pos, New (_, _, args, unpacked_arg, constructor_fty)) ->
         (* Constructors never return readonly, so that specific check is irrelevant *)
-        call ~is_readonly:false env pos constructor_fty Mut args unpacked_arg
+        call
+          ~is_readonly:false
+          env
+          pos
+          constructor_fty
+          Mut
+          (List.map ~f:(fun e -> (Ast_defs.Pnormal, e)) args)
+          unpacked_arg
       | (_, _, This)
       | (_, _, ValCollection (_, _, _))
       | (_, _, KeyValCollection (_, _, _))
@@ -476,7 +487,6 @@ let check =
       | (_, _, Is (_, _))
       | (_, _, As (_, _, _))
       | (_, _, Upcast (_, _))
-      | (_, _, Callconv (_, _))
       | (_, _, Import (_, _))
       | (_, _, Lplaceholder _)
       | (_, _, Pair (_, _, _))

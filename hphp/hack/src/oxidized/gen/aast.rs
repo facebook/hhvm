@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5818a7e5a7c750a720bfa16a2bb88a79>>
+// @generated SignedSource<<ad292d864d176032db03f7cf86d83a13>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -562,6 +562,8 @@ pub enum Expr_<Ex, En> {
     /// $x()
     /// foo<int>(1, 2, ...$rest)
     /// $x->foo()
+    /// bar(inout $x);
+    /// foobar(inout $x[0])
     ///
     /// async { return 1; }
     /// // lowered to:
@@ -570,7 +572,7 @@ pub enum Expr_<Ex, En> {
         Box<(
             Expr<Ex, En>,
             Vec<Targ<Ex>>,
-            Vec<Expr<Ex, En>>,
+            Vec<(ast_defs::ParamKind, Expr<Ex, En>)>,
             Option<Expr<Ex, En>>,
         )>,
     ),
@@ -723,12 +725,6 @@ pub enum Expr_<Ex, En> {
     ///
     /// <foo x="hello" y={$foo}>hello {$bar}</foo>
     Xml(Box<(Sid, Vec<XhpAttribute<Ex, En>>, Vec<Expr<Ex, En>>)>),
-    /// Explicit calling convention, used for inout. Inout supports any lvalue.
-    ///
-    /// TODO: This could be a flag on parameters in Call.
-    ///
-    /// foo(inout $x[0])
-    Callconv(Box<(ast_defs::ParamKind, Expr<Ex, En>)>),
     /// Include or require expression.
     ///
     /// require('foo.php')

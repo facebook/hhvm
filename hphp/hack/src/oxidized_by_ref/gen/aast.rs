@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a547680a47c3ec336efb39e496b79393>>
+// @generated SignedSource<<e1431b2cc01ed8b2e22de985190ad812>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -699,6 +699,8 @@ pub enum Expr_<'a, Ex, En> {
     /// $x()
     /// foo<int>(1, 2, ...$rest)
     /// $x->foo()
+    /// bar(inout $x);
+    /// foobar(inout $x[0])
     ///
     /// async { return 1; }
     /// // lowered to:
@@ -708,7 +710,7 @@ pub enum Expr_<'a, Ex, En> {
         &'a (
             &'a Expr<'a, Ex, En>,
             &'a [&'a Targ<'a, Ex>],
-            &'a [&'a Expr<'a, Ex, En>],
+            &'a [(oxidized::ast_defs::ParamKind, &'a Expr<'a, Ex, En>)],
             Option<&'a Expr<'a, Ex, En>>,
         ),
     ),
@@ -903,13 +905,6 @@ pub enum Expr_<'a, Ex, En> {
             &'a [&'a Expr<'a, Ex, En>],
         ),
     ),
-    /// Explicit calling convention, used for inout. Inout supports any lvalue.
-    ///
-    /// TODO: This could be a flag on parameters in Call.
-    ///
-    /// foo(inout $x[0])
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Callconv(&'a (oxidized::ast_defs::ParamKind, &'a Expr<'a, Ex, En>)),
     /// Include or require expression.
     ///
     /// require('foo.php')

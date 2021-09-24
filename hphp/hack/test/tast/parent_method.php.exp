@@ -43,7 +43,9 @@
           m_body =
           { fb_ast =
             [([8:5-18],
-              (Expr ((void), [8:5-17], (Call ((((function(int $i): void)), [8:5-14], (Class_const (((C), [8:5-11], CIparent), ([8:13-14], "f")))), [], [((int), [8:15-16], (Int "3"))], None)))))]
+              (Expr
+                 ((void), [8:5-17], (Call ((((function(int $i): void)), [8:5-14], (Class_const (((C), [8:5-11], CIparent), ([8:13-14], "f")))), [], [(Pnormal, ((int), [8:15-16], (Int "3")))], None)))))
+              ]
             };
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
           m_ret = ((void), (Some ([7:24-28], (Hprim Tvoid)))); m_external = false; 

@@ -174,10 +174,6 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
             ro_expr_list2(context, &fields)
         }
         Xml(_) | Efun(_) | Lfun(_) => Rty::Mutable,
-        Callconv(c) => {
-            let (_, expr) = &**c;
-            rty_expr(context, &expr)
-        }
         Tuple(t) => ro_expr_list(context, t),
         // Only list destructuring
         List(_) => Rty::Mutable,
@@ -523,7 +519,7 @@ impl<'ast> VisitorMut<'ast> for Checker {
                     Rty::Readonly => explicit_readonly(caller),
                     Rty::Mutable => {}
                 };
-                for param in params.iter_mut() {
+                for (_, param) in params.iter_mut() {
                     match rty_expr(context, param) {
                         Rty::Readonly => explicit_readonly(param),
                         Rty::Mutable => {}

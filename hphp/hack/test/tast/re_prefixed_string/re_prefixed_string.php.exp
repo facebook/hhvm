@@ -34,7 +34,7 @@ Errors:
                     ((shape(0 => string)), [7:8-19],
                      (Call ((((function<T as shape(...)>(HH\Lib\Regex\Pattern<shape(0 => string)> $pattern): shape(0 => string))), [7:8-15], (Id ([7:8-15], "\\goodbye"))),
                         [((shape(0 => string)), ([7:8-15], (Happly (([Pos.none], "_"), []))))], 
-                        [((HH\Lib\Regex\Pattern<shape(0 => string)>), [7:16-18], (Lvar ([7:16-18], $x)))], None)))
+                        [(Pnormal, ((HH\Lib\Regex\Pattern<shape(0 => string)>), [7:16-18], (Lvar ([7:16-18], $x))))], None)))
                     )))));
             ([12:3-16],
              (Expr

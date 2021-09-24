@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c89898c8e4cedb90aeb89d9bd2add574>>
+// @generated SignedSource<<0123f9b94343d422e381c7a2904ebe8b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -893,7 +893,7 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn mk_call(
         p0: Expr<Ex, En>,
         p1: Vec<Targ<Ex>>,
-        p2: Vec<Expr<Ex, En>>,
+        p2: Vec<(ast_defs::ParamKind, Expr<Ex, En>)>,
         p3: Option<Expr<Ex, En>>,
     ) -> Self {
         Expr_::Call(Box::new((p0, p1, p2, p3)))
@@ -975,9 +975,6 @@ impl<Ex, En> Expr_<Ex, En> {
     }
     pub fn mk_xml(p0: Sid, p1: Vec<XhpAttribute<Ex, En>>, p2: Vec<Expr<Ex, En>>) -> Self {
         Expr_::Xml(Box::new((p0, p1, p2)))
-    }
-    pub fn mk_callconv(p0: ast_defs::ParamKind, p1: Expr<Ex, En>) -> Self {
-        Expr_::Callconv(Box::new((p0, p1)))
     }
     pub fn mk_import(p0: ImportFlavor, p1: Expr<Ex, En>) -> Self {
         Expr_::Import(Box::new((p0, p1)))
@@ -1273,12 +1270,6 @@ impl<Ex, En> Expr_<Ex, En> {
             _ => false,
         }
     }
-    pub fn is_callconv(&self) -> bool {
-        match self {
-            Expr_::Callconv(..) => true,
-            _ => false,
-        }
-    }
     pub fn is_import(&self) -> bool {
         match self {
             Expr_::Import(..) => true,
@@ -1441,7 +1432,7 @@ impl<Ex, En> Expr_<Ex, En> {
     ) -> Option<(
         &Expr<Ex, En>,
         &Vec<Targ<Ex>>,
-        &Vec<Expr<Ex, En>>,
+        &Vec<(ast_defs::ParamKind, Expr<Ex, En>)>,
         &Option<Expr<Ex, En>>,
     )> {
         match self {
@@ -1598,12 +1589,6 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn as_xml(&self) -> Option<(&Sid, &Vec<XhpAttribute<Ex, En>>, &Vec<Expr<Ex, En>>)> {
         match self {
             Expr_::Xml(p0) => Some((&p0.0, &p0.1, &p0.2)),
-            _ => None,
-        }
-    }
-    pub fn as_callconv(&self) -> Option<(&ast_defs::ParamKind, &Expr<Ex, En>)> {
-        match self {
-            Expr_::Callconv(p0) => Some((&p0.0, &p0.1)),
             _ => None,
         }
     }
@@ -1786,7 +1771,7 @@ impl<Ex, En> Expr_<Ex, En> {
     ) -> Option<(
         &mut Expr<Ex, En>,
         &mut Vec<Targ<Ex>>,
-        &mut Vec<Expr<Ex, En>>,
+        &mut Vec<(ast_defs::ParamKind, Expr<Ex, En>)>,
         &mut Option<Expr<Ex, En>>,
     )> {
         match self {
@@ -1959,12 +1944,6 @@ impl<Ex, En> Expr_<Ex, En> {
     )> {
         match self {
             Expr_::Xml(p0) => Some((&mut p0.0, &mut p0.1, &mut p0.2)),
-            _ => None,
-        }
-    }
-    pub fn as_callconv_mut(&mut self) -> Option<(&mut ast_defs::ParamKind, &mut Expr<Ex, En>)> {
-        match self {
-            Expr_::Callconv(p0) => Some((&mut p0.0, &mut p0.1)),
             _ => None,
         }
     }
@@ -2144,7 +2123,7 @@ impl<Ex, En> Expr_<Ex, En> {
     ) -> Option<(
         Expr<Ex, En>,
         Vec<Targ<Ex>>,
-        Vec<Expr<Ex, En>>,
+        Vec<(ast_defs::ParamKind, Expr<Ex, En>)>,
         Option<Expr<Ex, En>>,
     )> {
         match self {
@@ -2301,12 +2280,6 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn as_xml_into(self) -> Option<(Sid, Vec<XhpAttribute<Ex, En>>, Vec<Expr<Ex, En>>)> {
         match self {
             Expr_::Xml(p0) => Some(((*p0).0, (*p0).1, (*p0).2)),
-            _ => None,
-        }
-    }
-    pub fn as_callconv_into(self) -> Option<(ast_defs::ParamKind, Expr<Ex, En>)> {
-        match self {
-            Expr_::Callconv(p0) => Some(((*p0).0, (*p0).1)),
             _ => None,
         }
     }

@@ -364,7 +364,9 @@ let visitor =
       let ( + ) = self#plus in
       let ea =
         match expr_ with
-        | Aast.Call ((_, _, Aast.Class_const (_, (_, methName))), _, [arg], _)
+        (*  TODO(T98469681): `inout` is silently dropped here, now *)
+        | Aast.Call
+            ((_, _, Aast.Class_const (_, (_, methName))), _, [(_, arg)], _)
           when Tast_env.is_in_expr_tree env
                && String.equal methName SN.ExpressionTrees.symbolType ->
           (* Treat MyVisitor::symbolType(foo<>) as just foo(). *)
@@ -377,7 +379,8 @@ let visitor =
         | _ -> self#on_expr env e
       in
       let tala = self#on_list self#on_targ env tal in
-      let ela = self#on_list self#on_expr env el in
+      (* TODO(T98469681): `inout` is silently dropped here, now *)
+      let ela = self#on_list self#on_expr env (List.map ~f:snd el) in
       let uea =
         Option.value_map
           ~default:Result_set.empty

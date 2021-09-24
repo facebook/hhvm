@@ -20,7 +20,12 @@ use hhbc_by_ref_statement_state::StatementState;
 use ffi::{Maybe, Slice, Str};
 use lazy_static::lazy_static;
 use naming_special_names_rust::{special_functions, special_idents, superglobals};
-use oxidized::{aast as a, ast, ast_defs, local_id, pos::Pos};
+use oxidized::{
+    aast as a, ast,
+    ast_defs::{self, ParamKind},
+    local_id,
+    pos::Pos,
+};
 use regex::Regex;
 
 // Expose a mutable ref to state for emit_body so that it can set it appropriately
@@ -109,34 +114,13 @@ pub fn emit_stmt<'a, 'arena, 'decl>(
                             alloc,
                             exprs
                                 .iter()
-                                .map(|ex| emit_expr::emit_unset_expr(e, env, ex))
+                                // TODO(T98469681): `inout` is silently dropped here, now
+                                .map(|(_, ex)| emit_expr::emit_unset_expr(e, env, ex))
                                 .collect::<std::result::Result<Vec<_>, _>>()?,
                         ))
                     } else {
                         if let Some(kind) = set_bytes_kind(fname) {
-                            let exprs = exprs.iter().collect::<Vec<&ast::Expr>>();
-                            match exprs.first() {
-                                Some(a::Expr(_, _, a::Expr_::Callconv(cc))) if cc.0.is_pinout() => {
-                                    let mut args = vec![&cc.1];
-                                    args.extend_from_slice(&exprs[1..exprs.len()]);
-                                    emit_expr::emit_set_range_expr(
-                                        e,
-                                        env,
-                                        &e_.1,
-                                        fname,
-                                        kind,
-                                        &args[..],
-                                    )
-                                }
-                                _ => emit_expr::emit_set_range_expr(
-                                    e,
-                                    env,
-                                    &e_.1,
-                                    fname,
-                                    kind,
-                                    &exprs[..],
-                                ),
-                            }
+                            emit_expr::emit_set_range_expr(e, env, &e_.1, fname, kind, exprs)
                         } else {
                             emit_expr::emit_ignored_expr(e, env, &e_.1, e_)
                         }
@@ -1728,7 +1712,7 @@ pub fn emit_markup<'a, 'arena, 'decl>(
                     ast::Expr_::mk_id(ast_defs::Id(Pos::make_none(), fname)),
                 ),
                 vec![],
-                vec![expr],
+                vec![(ParamKind::Pnormal, expr)],
                 None,
             ),
         );

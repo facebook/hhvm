@@ -553,7 +553,6 @@ let expr : Typing_env_types.env -> Nast.expr -> unit =
   | New _
   | Record _
   | Xml _
-  | Callconv _
   | Import _
   | Collection _
   | Lplaceholder _

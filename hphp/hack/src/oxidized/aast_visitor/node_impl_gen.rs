@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<689d272e1f92cf7a7d9ffaf42f595759>>
+// @generated SignedSource<<f71ac92a2e97cf85c6d947f555fd1d18>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1008,11 +1008,6 @@ impl<P: Params> Node<P> for Expr_<P::Ex, P::En> {
                 a.0.accept(c, v)?;
                 a.1.accept(c, v)?;
                 a.2.accept(c, v)?;
-                Ok(())
-            }
-            Expr_::Callconv(a) => {
-                a.0.accept(c, v)?;
-                a.1.accept(c, v)?;
                 Ok(())
             }
             Expr_::Import(a) => {

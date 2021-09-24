@@ -75,7 +75,7 @@ let debug_print_last_pos _ =
 (* Helpers *)
 (*****************************************************************************)
 
-let mk_hole ?(source = Aast.Typing) expr ~ty_have ~ty_expect =
+let mk_hole ?(source = Aast.Typing) ((_, pos, _) as expr) ~ty_have ~ty_expect =
   if equal_locl_ty ty_have ty_expect then
     expr
   else
@@ -89,16 +89,7 @@ let mk_hole ?(source = Aast.Typing) expr ~ty_have ~ty_expect =
       | EnforcedCast _ ->
         ty_expect
     in
-    match expr with
-    | (ty, pos, Aast.Callconv (param_kind, expr)) ->
-      (* push the hole inside the `Callconv` constructor *)
-      let expr' =
-        make_typed_expr pos ty_hole
-        @@ Aast.Hole (expr, ty_have, ty_expect, source)
-      in
-      make_typed_expr pos ty @@ Aast.Callconv (param_kind, expr')
-    | (_, pos, _) ->
-      make_typed_expr pos ty_hole @@ Aast.Hole (expr, ty_have, ty_expect, source)
+    make_typed_expr pos ty_hole @@ Aast.Hole (expr, ty_have, ty_expect, source)
 
 let hole_on_err (te : Tast.expr) ~err_opt =
   Option.value_map err_opt ~default:te ~f:(fun (ty_have, ty_expect) ->
@@ -1061,13 +1052,14 @@ let variadic_param env ft =
   | Fvariadic param -> (env, Some param)
   | Fstandard -> (env, None)
 
-let param_modes ?(is_variadic = false) ({ fp_pos; _ } as fp) (_, pos, e) =
-  match (get_fp_mode fp, e) with
-  | (FPnormal, Callconv _) ->
+let param_modes
+    ?(is_variadic = false) ({ fp_pos; _ } as fp) (_, pos, _) param_kind =
+  match (get_fp_mode fp, param_kind) with
+  | (FPnormal, Ast_defs.Pnormal) -> ()
+  | (FPinout, Ast_defs.Pinout) -> ()
+  | (FPnormal, Ast_defs.Pinout) ->
     Errors.inout_annotation_unexpected pos fp_pos is_variadic
-  | (FPnormal, _) -> ()
-  | (FPinout, Callconv (Ast_defs.Pinout, _)) -> ()
-  | (FPinout, _) -> Errors.inout_annotation_missing pos fp_pos
+  | (FPinout, Ast_defs.Pnormal) -> Errors.inout_annotation_missing pos fp_pos
 
 let split_remaining_params_required_optional ft remaining_params =
   (* Same example as above
@@ -1111,9 +1103,12 @@ let generate_splat_type_vars
   (env, (d_required, d_optional, d_variadic))
 
 let call_param
-    env param (((_, pos, expr_) as e : Nast.expr), arg_ty) ~is_variadic :
-    env * (locl_ty * locl_ty) option =
-  param_modes ~is_variadic param e;
+    env
+    param
+    param_kind
+    (((_, pos, expr_) as e : Nast.expr), arg_ty)
+    ~is_variadic : env * (locl_ty * locl_ty) option =
+  param_modes ~is_variadic param e param_kind;
   (* When checking params, the type 'x' may be expression dependent. Since
    * we store the expression id in the local env for Lvar, we want to apply
    * it in this case.
@@ -1193,7 +1188,7 @@ let rec condition_nullity ~nonnull (env : env) te =
       Aast.Call
         ( (_, _, Aast.Class_const ((_, _, Aast.CI (_, shapes)), (_, idx))),
           _,
-          [shape; field],
+          [(Ast_defs.Pnormal, shape); (Ast_defs.Pnormal, field)],
           _ ) )
     when String.equal shapes SN.Shapes.cShapes && String.equal idx SN.Shapes.idx
     ->
@@ -2615,6 +2610,14 @@ and exprs
     in
     (env, te :: tel, ty :: tyl)
 
+and argument_list_exprs expr_cb env el =
+  match el with
+  | [] -> (env, [], [])
+  | (pk, e) :: el ->
+    let (env, te, ty) = expr_cb env e in
+    let (env, tel, tyl) = argument_list_exprs expr_cb env el in
+    (env, (pk, te) :: tel, ty :: tyl)
+
 and exprs_expected (pos, ur, expected_tyl) env el =
   match (el, expected_tyl) with
   | ([], _) -> (env, [], [])
@@ -3409,7 +3412,9 @@ and expr_
       ty
   | Call ((_, pos_id, Id ((_, s) as id)), [], el, None)
     when Hash_set.mem typing_env_pseudofunctions s ->
-    let (env, tel, tys) = exprs ~accept_using_var:true env el in
+    let (env, tel, tys) =
+      argument_list_exprs (expr ~accept_using_var:true) env el
+    in
     let env =
       if String.equal s SN.PseudoFunctions.hh_show then (
         List.iter tys ~f:(Typing_log.hh_show p env);
@@ -3419,7 +3424,10 @@ and expr_
         env
       ) else if String.equal s SN.PseudoFunctions.hh_log_level then
         match el with
-        | [(_, _, String key_str); (_, _, Int level_str)] ->
+        | [
+         (Ast_defs.Pnormal, (_, _, String key_str));
+         (Ast_defs.Pnormal, (_, _, Int level_str));
+        ] ->
           Env.set_log_level env key_str (int_of_string level_str)
         | _ -> env
       else if String.equal s SN.PseudoFunctions.hh_force_solve then
@@ -3883,7 +3891,7 @@ and expr_
         env
         c
         explicit_targs
-        el
+        (List.map ~f:(fun e -> (Ast_defs.Pnormal, e)) el)
         unpacked_element
     in
     let env =
@@ -3895,7 +3903,7 @@ and expr_
     make_result
       env
       p
-      (Aast.New (tc, tal, tel, typed_unpack_element, ctor_fty))
+      (Aast.New (tc, tal, List.map ~f:snd tel, typed_unpack_element, ctor_fty))
       ty
   | Record ((pos, id), field_values) ->
     (match Decl_provider.get_record_def (Env.get_ctx env) id with
@@ -4380,9 +4388,6 @@ and expr_
     (match class_info with
     | None -> make_result env p txml (TUtils.terr env (Reason.Runknown_class p))
     | Some _ -> make_result env p txml obj)
-  | Callconv (kind, e) ->
-    let (env, te, ty) = expr env e in
-    make_result env p (Aast.Callconv (kind, te)) ty
   | Shape fdm ->
     let (env, fdm_with_expected) =
       match expand_expected_and_get_node env expected with
@@ -4777,11 +4782,11 @@ and closure_make
         match (l1, l2, var_param) with
         | (_, [], _) -> ()
         | ([], _, None) -> ()
-        | ([], x2 :: rl2, Some def1) ->
-          param_modes ~is_variadic:true def1 x2;
+        | ([], (pkx_2, x2) :: rl2, Some def1) ->
+          param_modes ~is_variadic:true def1 x2 pkx_2;
           iter [] rl2
-        | (x1 :: rl1, x2 :: rl2, _) ->
-          param_modes x1 x2;
+        | (x1 :: rl1, (pkx_2, x2) :: rl2, _) ->
+          param_modes x1 x2 pkx_2;
           iter rl1 rl2
       in
       iter ft.ft_params x;
@@ -5144,7 +5149,9 @@ and new_object
   let (env, tel, typed_unpack_element, ty, ctor_fty) =
     match class_types_and_ctor_types with
     | [] ->
-      let (env, tel, _) = exprs env el ~allow_awaitable:(*?*) false in
+      let (env, tel, _) =
+        argument_list_exprs (expr ~allow_awaitable:false) env el
+      in
       let (env, typed_unpack_element, _) =
         match unpacked_element with
         | None -> (env, None, MakeType.nothing Reason.Rnone)
@@ -5758,7 +5765,6 @@ and dispatch_call
     el
     unpacked_element =
   let expr = expr ~allow_awaitable:(*?*) false in
-  let exprs = exprs ~allow_awaitable:(*?*) false in
   let make_call env te tal tel typed_unpack_element ty =
     make_result env p (Aast.Call (te, tal, tel, typed_unpack_element)) ty
   in
@@ -5879,13 +5885,15 @@ and dispatch_call
          * remove special casing of [echo] and [print].
          *)
         let env = Typing_local_ops.enforce_io pos env in
-        let (env, tel, _) = exprs ~accept_using_var:true env el in
+        let (env, tel, _) =
+          argument_list_exprs (expr ~accept_using_var:true) env el
+        in
         let arraykey_ty = MakeType.arraykey (Reason.Rwitness pos) in
         let (env, rev_tel) =
           List.fold
             tel
             ~init:(env, [])
-            ~f:(fun (env, tel) ((ty, pos, _) as te) ->
+            ~f:(fun (env, tel) (pk, ((ty, pos, _) as te)) ->
               let (env, err_opt) =
                 Result.fold
                   ~ok:(fun env -> (env, None))
@@ -5896,7 +5904,7 @@ and dispatch_call
                      arraykey_ty
                      (Errors.invalid_echo_argument_at pos)
               in
-              (env, hole_on_err ~err_opt te :: tel))
+              (env, (pk, hole_on_err ~err_opt te) :: tel))
         in
         let tel = List.rev rev_tel in
         let should_forget_fakes = false in
@@ -5906,13 +5914,11 @@ and dispatch_call
       | unsafe_cast when String.equal unsafe_cast SN.PseudoFunctions.unsafe_cast
         ->
         let result =
-          if
-            Int.(List.length el = 1)
-            && TypecheckerOptions.ignore_unsafe_cast (Env.get_tcopt env)
-          then
-            let original_expr = List.hd_exn el in
+          match el with
+          | [(Ast_defs.Pnormal, original_expr)]
+            when TypecheckerOptions.ignore_unsafe_cast (Env.get_tcopt env) ->
             expr env original_expr
-          else (
+          | _ ->
             Errors.unsafe_cast p;
             (* first type the `unsafe_cast` as a call, handling arity errors *)
             let (env, fty, tal) = fun_type_of_id env id explicit_targs el in
@@ -5924,9 +5930,9 @@ and dispatch_call
                if necessary *)
             let dflt_ty = MakeType.err Reason.none in
             let el =
-              Option.value
-                (List.hd tel)
-                ~default:(Tast.make_typed_expr fpos dflt_ty Aast.Null)
+              match tel with
+              | (_, e) :: _ -> e
+              | [] -> Tast.make_typed_expr fpos dflt_ty Aast.Null
             and (ty_from, ty_to) =
               match tal with
               | (ty_from, _) :: (ty_to, _) :: _ -> (ty_from, ty_to)
@@ -5938,14 +5944,16 @@ and dispatch_call
                 (el, ty_from, ty_to, UnsafeCast (List.map ~f:snd explicit_targs))
             in
             make_result env p te ty
-          )
         in
         let should_forget_fakes = false in
         (result, should_forget_fakes)
       (* Special function `isset` *)
       | isset when String.equal isset SN.PseudoFunctions.isset ->
         let (env, tel, _) =
-          exprs ~accept_using_var:true ~check_defined:false env el
+          argument_list_exprs
+            (expr ~accept_using_var:true ~check_defined:false)
+            env
+            el
         in
         if Option.is_some unpacked_element then
           Errors.unpacking_disallowed_builtin_function p isset;
@@ -5954,7 +5962,7 @@ and dispatch_call
         (result, should_forget_fakes)
       (* Special function `unset` *)
       | unset when String.equal unset SN.PseudoFunctions.unset ->
-        let (env, tel, _) = exprs env el in
+        let (env, tel, _) = argument_list_exprs expr env el in
         if Option.is_some unpacked_element then
           Errors.unpacking_disallowed_builtin_function p unset;
         let env = Typing_local_ops.check_unset_target env tel in
@@ -5967,11 +5975,15 @@ and dispatch_call
         in
         let env =
           match (el, unpacked_element) with
-          | ([(_, _, Array_get ((_, _, Class_const _), Some _))], None)
+          | ( [
+                ( Ast_defs.Pnormal,
+                  (_, _, Array_get ((_, _, Class_const _), Some _)) );
+              ],
+              None )
             when Partial.should_check_error (Env.get_mode env) 4011 ->
             Errors.const_mutation p Pos_or_decl.none "";
             env
-          | ([(_, _, Array_get (ea, Some _))], None) ->
+          | ([(Ast_defs.Pnormal, (_, _, Array_get (ea, Some _)))], None) ->
             let (env, _te, ty) = expr env ea in
             let r = Reason.Rwitness p in
             let tmixed = MakeType.mixed r in
@@ -6000,7 +6012,7 @@ and dispatch_call
         let should_forget_fakes = false in
         let result =
           match el with
-          | [(_, p, Obj_get (_, _, OG_nullsafe, _))] ->
+          | [(_, (_, p, Obj_get (_, _, OG_nullsafe, _)))] ->
             Errors.nullsafe_property_write_context p;
             make_call_special_from_def env id tel (TUtils.terr env)
           | _ -> make_call_special_from_def env id tel MakeType.void
@@ -6014,17 +6026,17 @@ and dispatch_call
         (match el with
         | [e1; e2] ->
           (match e2 with
-          | (_, p, String cst) ->
+          | (_, (_, p, String cst)) ->
             (* find the class constant implicitly defined by the typeconst *)
             let cid =
               match e1 with
-              | (_, _, Class_const (cid, (_, x)))
-              | (_, _, Class_get (cid, CGstring (_, x), _))
+              | (_, (_, _, Class_const (cid, (_, x))))
+              | (_, (_, _, Class_get (cid, CGstring (_, x), _)))
                 when String.equal x SN.Members.mClass ->
                 cid
               | _ ->
-                let (_, p1, _) = e1 in
-                ((), p1, CIexpr e1)
+                let (_, ((_, p1, _) as e1_)) = e1 in
+                ((), p1, CIexpr e1_)
             in
             let result = class_const ~incl_tc:true env p (cid, (p, cst)) in
             (result, should_forget_fakes)
@@ -6134,9 +6146,9 @@ and dispatch_call
         let (env, fty) =
           match (deref fty, el) with
           | ((_, Tfun funty), [_; x]) ->
-            let (_, x_pos, _) = x in
-            let (env, _tx, x) = expr env x in
-            let (env, output_container) = build_output_container x_pos env x in
+            let (_, ((_, x_pos, _) as x_)) = x in
+            let (env, _tx, x_) = expr env x_ in
+            let (env, output_container) = build_output_container x_pos env x_ in
             begin
               match get_varray_inst funty.ft_ret.et_type with
               | None -> (env, fty)
@@ -6179,7 +6191,7 @@ and dispatch_call
           unpacked_element
           (fun env fty res el ->
             match el with
-            | [shape; field] ->
+            | [(_, shape); (_, field)] ->
               let (env, _ts, shape_ty) = expr env shape in
               let (_, shape_pos, _) = shape in
               Typing_shapes.idx
@@ -6190,7 +6202,7 @@ and dispatch_call
                 ~expr_pos:p
                 ~fun_pos:(get_reason fty)
                 ~shape_pos
-            | [shape; field; default] ->
+            | [(_, shape); (_, field); (_, default)] ->
               let (env, _ts, shape_ty) = expr env shape in
               let (env, _td, default_ty) = expr env default in
               let (_, shape_pos, _) = shape in
@@ -6215,7 +6227,7 @@ and dispatch_call
           unpacked_element
           (fun env _fty res el ->
             match el with
-            | [shape; field] ->
+            | [(_, shape); (_, field)] ->
               let (env, _te, shape_ty) = expr env shape in
               let (_, shape_pos, _) = shape in
               Typing_shapes.at env ~expr_pos:p ~shape_pos shape_ty field
@@ -6231,7 +6243,7 @@ and dispatch_call
           unpacked_element
           (fun env fty res el ->
             match el with
-            | [shape; field] ->
+            | [(_, shape); (_, field)] ->
               let (env, _te, shape_ty) = expr env shape in
               (* try accessing the field, to verify existence, but ignore
                  * the returned type and keep the one coming from function
@@ -6260,16 +6272,11 @@ and dispatch_call
           unpacked_element
           (fun env _ res el ->
             match el with
-            | [shape; field] ->
+            | [(Ast_defs.Pinout, shape); (_, field)] ->
               begin
                 match shape with
                 | (_, _, Lvar (_, lvar))
-                | (_, _, Callconv (Ast_defs.Pinout, (_, _, Lvar (_, lvar))))
-                | ( _,
-                    _,
-                    Callconv
-                      ( Ast_defs.Pinout,
-                        (_, _, Hole ((_, _, Lvar (_, lvar)), _, _, _)) ) ) ->
+                | (_, _, Hole ((_, _, Lvar (_, lvar)), _, _, _)) ->
                   let (env, _te, shape_ty) = expr env shape in
                   let (env, shape_ty) =
                     Typing_shapes.remove_key p env shape_ty field
@@ -6293,7 +6300,7 @@ and dispatch_call
           unpacked_element
           (fun env _ res el ->
             match el with
-            | [shape] ->
+            | [(_, shape)] ->
               let (env, _te, shape_ty) = expr env shape in
               Typing_shapes.to_array env p shape_ty res
             | _ -> (env, res))
@@ -6308,7 +6315,7 @@ and dispatch_call
           unpacked_element
           (fun env _ res el ->
             match el with
-            | [shape] ->
+            | [(_, shape)] ->
               let (env, _te, shape_ty) = expr env shape in
               Typing_shapes.to_dict env p shape_ty res
             | _ -> (env, res))
@@ -7313,7 +7320,9 @@ and call_construct p env class_ params el unpacked_element cid cid_ty =
       && (FileInfo.is_strict mode || FileInfo.(equal_mode mode Mpartial))
     then
       Errors.constructor_no_args p;
-    let (env, tel, _tyl) = exprs env el ~allow_awaitable:(*?*) false in
+    let (env, tel, _tyl) =
+      argument_list_exprs (expr ~allow_awaitable:false) env el
+    in
     let should_forget_fakes = true in
     (env, tel, None, TUtils.terr env Reason.Rnone, should_forget_fakes)
   | Some { ce_visibility = vis; ce_type = (lazy m); ce_deprecated; _ } ->
@@ -7368,9 +7377,9 @@ and call_construct p env class_ params el unpacked_element cid cid_ty =
     in
     (env, tel, typed_unpack_element, m, should_forget_fakes)
 
-and inout_write_back env { fp_type; _ } (_, _, e) =
-  match e with
-  | Callconv (Ast_defs.Pinout, e1) ->
+and inout_write_back env { fp_type; _ } (pk, ((_, pos, _) as e)) =
+  match pk with
+  | Ast_defs.Pinout ->
     (* Translate the write-back semantics of inout parameters.
      *
      * This matters because we want to:
@@ -7379,9 +7388,8 @@ and inout_write_back env { fp_type; _ } (_, _, e) =
      * (2) allow for growing of locals / Tunions (type side effect)
      *     but otherwise unify the argument type with the parameter hint
      *)
-    let (_, pos, _) = e1 in
     let (env, _te, _ty) =
-      assign_ pos Reason.URparam_inout env e1 pos fp_type.et_type
+      assign_ pos Reason.URparam_inout env e pos fp_type.et_type
     in
     env
   | _ -> env
@@ -7398,11 +7406,14 @@ and call
     pos
     env
     fty
-    (el : Nast.expr list)
+    (el : (Ast_defs.param_kind * Nast.expr) list)
     (unpacked_element : Nast.expr option) :
-    env * (Tast.expr list * Tast.expr option * locl_ty * bool) =
+    env
+    * ((Ast_defs.param_kind * Tast.expr) list
+      * Tast.expr option
+      * locl_ty
+      * bool) =
   let expr = expr ~allow_awaitable:(*?*) false in
-  let exprs = exprs ~allow_awaitable:(*?*) false in
   let (env, tyl) = TUtils.get_concrete_supertypes ~abstract_enum:true env fty in
   if List.is_empty tyl then begin
     bad_call env pos fty;
@@ -7432,21 +7443,24 @@ and call
          * to the check below in call_untyped_unpack, that it is unpackable.
          * We don't need to unpack and check each type because a tuple is
          * coercible iff it's constituent types are. *)
-        Option.value_map ~f:(fun u -> el @ [u]) ~default:el unpacked_element
+        Option.value_map
+          ~f:(fun u -> el @ [(Ast_defs.Pnormal, u)])
+          ~default:el
+          unpacked_element
       in
       let (env, tel) =
-        List.map_env env el ~f:(fun env elt ->
+        List.map_env env el ~f:(fun env (pk, elt) ->
             (* TODO(sowens): Pass the expected type to expr *)
             let (env, te, e_ty) = expr env elt in
             let env =
-              match elt with
-              | (_, _, Callconv (Ast_defs.Pinout, e1)) ->
-                let (_, pos, _) = e1 in
+              match pk with
+              | Ast_defs.Pinout ->
+                let (_, pos, _) = elt in
                 let (env, _te, _ty) =
-                  assign_ pos Reason.URparam_inout env e1 pos efty
+                  assign_ pos Reason.URparam_inout env elt pos efty
                 in
                 env
-              | _ -> env
+              | Ast_defs.Pnormal -> env
             in
             let (env, err_opt) =
               Result.fold
@@ -7459,7 +7473,7 @@ and call
                    ty
                    (Errors.unify_error_at pos)
             in
-            (env, hole_on_err ~err_opt te))
+            (env, (pk, hole_on_err ~err_opt te)))
       in
       let env = call_untyped_unpack env (Reason.to_pos r) unpacked_element in
       let should_forget_fakes = true in
@@ -7469,14 +7483,17 @@ and call
            | Tprim Tnull -> Option.is_some nullsafe
            | _ -> true ->
       let el =
-        Option.value_map ~f:(fun u -> el @ [u]) ~default:el unpacked_element
+        Option.value_map
+          ~f:(fun u -> el @ [(Ast_defs.Pnormal, u)])
+          ~default:el
+          unpacked_element
       in
       let expected_arg_ty =
         (* Note: We ought to be using 'mixed' here *)
         ExpectedTy.make pos Reason.URparam (Typing_utils.mk_tany env pos)
       in
       let (env, tel) =
-        List.map_env env el ~f:(fun env elt ->
+        List.map_env env el ~f:(fun env (pk, elt) ->
             let (env, te, ty) = expr ~expected:expected_arg_ty env elt in
             let (env, err_opt) =
               if TCO.global_inference (Env.get_tcopt env) then
@@ -7499,16 +7516,16 @@ and call
                 (env, None)
             in
             let env =
-              match elt with
-              | (_, _, Callconv (Ast_defs.Pinout, e1)) ->
-                let (_, pos, _) = e1 in
+              match pk with
+              | Ast_defs.Pinout ->
+                let (_, pos, _) = elt in
                 let (env, _te, _ty) =
-                  assign_ pos Reason.URparam_inout env e1 pos efty
+                  assign_ pos Reason.URparam_inout env elt pos efty
                 in
                 env
-              | _ -> env
+              | Ast_defs.Pnormal -> env
             in
-            (env, hole_on_err ~err_opt te))
+            (env, (pk, hole_on_err ~err_opt te)))
       in
       let env = call_untyped_unpack env (Reason.to_pos r) unpacked_element in
       let ty =
@@ -7629,7 +7646,7 @@ and call
           (* Already reported, see Typing_type_wellformedness *)
           None
       in
-      let check_arg env ((_, pos, arg) as e) opt_param ~is_variadic =
+      let check_arg env param_kind ((_, pos, arg) as e) opt_param ~is_variadic =
         match opt_param with
         | Some param ->
           (* First check if __ViaLabel is used or if the parameter is
@@ -7695,7 +7712,9 @@ and call
                 env
                 e
           in
-          let (env, err_opt) = call_param env param (e, ty) ~is_variadic in
+          let (env, err_opt) =
+            call_param env param param_kind (e, ty) ~is_variadic
+          in
           (env, Some (hole_on_err ~err_opt te, ty))
         | None ->
           let expected =
@@ -7731,21 +7750,21 @@ and call
       let rec check_args check_lambdas env el paraml =
         match el with
         (* We've got an argument *)
-        | (e, opt_result) :: el ->
+        | ((pk, e), opt_result) :: el ->
           (* Pick up next parameter type info *)
           let (is_variadic, opt_param, paraml) = get_next_param_info paraml in
           let (env, one_result) =
             match (check_lambdas, is_lambda e) with
             | (false, false)
             | (true, true) ->
-              check_arg env e opt_param ~is_variadic
+              check_arg env pk e opt_param ~is_variadic
             | (false, true) ->
               let env = set_tyvar_variance_from_lambda_param env opt_param in
               (env, opt_result)
             | (true, false) -> (env, opt_result)
           in
           let (env, rl, paraml) = check_args check_lambdas env el paraml in
-          (env, (e, one_result) :: rl, paraml)
+          (env, ((pk, e), one_result) :: rl, paraml)
         | [] -> (env, [], paraml)
       in
       (* Same as above, but checks the types of the implicit arguments, which are
@@ -7794,13 +7813,13 @@ and call
       (* Now check the lambda arguments, hopefully with type variables resolved *)
       let (env, rl, paraml) = check_args true env rl ft.ft_params in
       (* We expect to see results for all arguments after this second pass *)
-      let get_param opt =
+      let get_param ((pk, _), opt) =
         match opt with
-        | Some x -> x
+        | Some (e, ty) -> ((pk, e), ty)
         | None -> failwith "missing parameter in check_args"
       in
       let (tel, _) =
-        let l = List.map rl ~f:(fun (_, opt) -> get_param opt) in
+        let l = List.map rl ~f:get_param in
         List.unzip l
       in
       let env = check_implicit_args env in
@@ -7874,7 +7893,12 @@ and call
                   required_params
                   ~f:(fun (env, errs) elt param ->
                     let (env, err_opt) =
-                      call_param env param (e, elt) ~is_variadic:false
+                      call_param
+                        env
+                        param
+                        Ast_defs.Pnormal
+                        (e, elt)
+                        ~is_variadic:false
                     in
                     (env, err_opt :: errs))
               in
@@ -7885,13 +7909,18 @@ and call
                   optional_params
                   ~f:(fun (env, errs) elt param ->
                     let (env, err_opt) =
-                      call_param env param (e, elt) ~is_variadic:false
+                      call_param
+                        env
+                        param
+                        Ast_defs.Pnormal
+                        (e, elt)
+                        ~is_variadic:false
                     in
                     (env, err_opt :: errs))
               in
               let (env, var_err_opt) =
                 Option.map2 d_variadic var_param ~f:(fun v vp ->
-                    call_param env vp (e, v) ~is_variadic:true)
+                    call_param env vp Ast_defs.Pnormal (e, v) ~is_variadic:true)
                 |> Option.value ~default:(env, None)
               in
               let subtyping_errs = (List.rev err_opts, var_err_opt) in
@@ -7926,7 +7955,9 @@ and call
             Typecheck calls with unresolved function type by constructing a
             suitable function type from the arguments and invoking subtyping.
           *)
-      let (env, typed_el, type_of_el) = exprs ~accept_using_var:true env el in
+      let (env, typed_el, type_of_el) =
+        argument_list_exprs (expr ~accept_using_var:true) env el
+      in
       let (env, typed_unpacked_element, type_of_unpacked_element) =
         match unpacked_element with
         | Some unpacked ->
@@ -8053,12 +8084,12 @@ and condition ?lhs_of_null_coalesce env tparamet ((ty, p, e) as te : Tast.expr)
   | Aast.True when not tparamet ->
     (LEnv.drop_cont env C.Next, Local_id.Set.empty)
   | Aast.False when tparamet -> (LEnv.drop_cont env C.Next, Local_id.Set.empty)
-  | Aast.Call ((_, _, Aast.Id (_, func)), _, [param], None)
+  | Aast.Call ((_, _, Aast.Id (_, func)), _, [(_, param)], None)
     when String.equal SN.PseudoFunctions.isset func
          && tparamet
          && not (Env.is_strict env) ->
     condition_isset env param
-  | Aast.Call ((_, _, Aast.Id (_, func)), _, [te], None)
+  | Aast.Call ((_, _, Aast.Id (_, func)), _, [(_, te)], None)
     when String.equal SN.StdlibFunctions.is_null func ->
     condition_nullity ~nonnull:(not tparamet) env te
   | Aast.Binop ((Ast_defs.Eqeq | Ast_defs.Eqeqeq), (_, _, Aast.Null), e)
@@ -8119,16 +8150,16 @@ and condition ?lhs_of_null_coalesce env tparamet ((ty, p, e) as te : Tast.expr)
           condition env tparamet e2)
     in
     (env, Local_id.Set.union lset1 lset2)
-  | Aast.Call ((_, p, Aast.Id (_, f)), _, [lv], None)
+  | Aast.Call ((_, p, Aast.Id (_, f)), _, [(_, lv)], None)
     when tparamet && String.equal f SN.StdlibFunctions.is_dict_or_darray ->
     safely_refine_is_array env `HackDictOrDArray p f lv
-  | Aast.Call ((_, p, Aast.Id (_, f)), _, [lv], None)
+  | Aast.Call ((_, p, Aast.Id (_, f)), _, [(_, lv)], None)
     when tparamet && String.equal f SN.StdlibFunctions.is_vec_or_varray ->
     safely_refine_is_array env `HackVecOrVArray p f lv
-  | Aast.Call ((_, p, Aast.Id (_, f)), _, [lv], None)
+  | Aast.Call ((_, p, Aast.Id (_, f)), _, [(_, lv)], None)
     when tparamet && String.equal f SN.StdlibFunctions.is_any_array ->
     safely_refine_is_array env `AnyArray p f lv
-  | Aast.Call ((_, p, Aast.Id (_, f)), _, [lv], None)
+  | Aast.Call ((_, p, Aast.Id (_, f)), _, [(_, lv)], None)
     when tparamet && String.equal f SN.StdlibFunctions.is_php_array ->
     safely_refine_is_array env `PHPArray p f lv
   | Aast.Call
@@ -8137,7 +8168,7 @@ and condition ?lhs_of_null_coalesce env tparamet ((ty, p, e) as te : Tast.expr)
           Aast.Class_const ((_, _, Aast.CI (_, class_name)), (_, method_name))
         ),
         _,
-        [shape; field],
+        [(_, shape); (_, field)],
         None )
     when tparamet
          && String.equal class_name SN.Shapes.cShapes
@@ -8263,7 +8294,9 @@ and type_param env t =
 and overload_function
     make_call fpos p env class_id method_id el unpacked_element f =
   let (env, _tal, tcid, ty) = class_expr env [] class_id in
-  let (env, _tel, _) = exprs env el ~allow_awaitable:(*?*) false in
+  let (env, _tel, _) =
+    argument_list_exprs (expr ~allow_awaitable:false (*?*)) env el
+  in
   let (env, (fty, tal)) =
     class_get
       ~is_method:true

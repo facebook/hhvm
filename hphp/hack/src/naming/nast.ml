@@ -464,7 +464,8 @@ module Visitor_DEPRECATED = struct
 
       method on_class_const : 'a -> class_id -> pstring -> 'a
 
-      method on_call : 'a -> expr -> expr list -> expr option -> 'a
+      method on_call :
+        'a -> expr -> (Ast_defs.param_kind * expr) list -> expr option -> 'a
 
       method on_function_pointer :
         'a -> (unit, unit) function_ptr_id -> targ list -> 'a
@@ -526,8 +527,6 @@ module Visitor_DEPRECATED = struct
       method on_xml : 'a -> sid -> xhp_attribute list -> expr list -> 'a
 
       method on_param_kind : 'a -> Ast_defs.param_kind -> 'a
-
-      method on_callconv : 'a -> Ast_defs.param_kind -> expr -> 'a
 
       method on_clone : 'a -> expr -> 'a
 
@@ -779,7 +778,6 @@ module Visitor_DEPRECATED = struct
         | Efun (f, idl) -> this#on_efun acc f idl
         | Record (cid, fl) -> this#on_record acc cid fl
         | Xml (sid, attrl, el) -> this#on_xml acc sid attrl el
-        | Callconv (kind, e) -> this#on_callconv acc kind e
         | ValCollection (s, ta, el) -> this#on_valCollection acc s ta el
         | KeyValCollection (s, tap, fl) -> this#on_keyValCollection acc s tap fl
         | Omitted -> acc
@@ -893,7 +891,11 @@ module Visitor_DEPRECATED = struct
 
       method on_call acc e el unpacked_element =
         let acc = this#on_expr acc e in
-        let acc = List.fold_left el ~f:this#on_expr ~init:acc in
+        let f acc_ (pk, e_) =
+          let acc_ = this#on_param_kind acc_ pk in
+          this#on_expr acc_ e_
+        in
+        let acc = List.fold_left el ~f ~init:acc in
         let acc =
           Option.value_map unpacked_element ~f:(this#on_expr acc) ~default:acc
         in
@@ -1011,11 +1013,6 @@ module Visitor_DEPRECATED = struct
         acc
 
       method on_param_kind acc _ = acc
-
-      method on_callconv acc kind e =
-        let acc = this#on_param_kind acc kind in
-        let acc = this#on_expr acc e in
-        acc
 
       method on_clone acc e = this#on_expr acc e
 

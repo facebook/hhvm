@@ -183,7 +183,10 @@ impl<'ast, 'a> Visitor<'ast> for DeclvarVisitor<'a> {
                     }
                     _ => self.visit_expr(env, func_e)?,
                 }
-                for arg in pos_args {
+                // TODO(T98469681): `inout` is silently dropped here, now; given that in the
+                // old `Callconv` case we'd just recurse w/o inspecting the convention, this is
+                // probably fine.
+                for (_, arg) in pos_args {
                     on_arg(self, env, arg)?
                 }
                 if let Some(arg) = unpacked_arg {

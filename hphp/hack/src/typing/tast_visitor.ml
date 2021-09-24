@@ -465,7 +465,7 @@ class type handler =
       Env.t ->
       Tast.expr ->
       Tast.targ list ->
-      Tast.expr list ->
+      (Ast_defs.param_kind * Tast.expr) list ->
       Tast.expr option ->
       unit
 

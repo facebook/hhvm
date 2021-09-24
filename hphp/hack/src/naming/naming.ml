@@ -1371,7 +1371,7 @@ and check_constant_expr env expr =
          || String.equal cn SN.AutoimportedFunctions.class_meth
          || String.equal cn SN.StdlibFunctions.array_mark_legacy ->
     arg_unpack_unexpected unpacked_element;
-    List.for_all el ~f:(check_constant_expr env)
+    List.for_all el ~f:(fun (_, e) -> check_constant_expr env e)
   | Aast.Tuple el -> List.for_all el ~f:(check_constant_expr env)
   | Aast.FunctionPointer ((Aast.FP_id _ | Aast.FP_class_const _), _) -> true
   | Aast.Collection (id, _, l) ->
@@ -1701,7 +1701,8 @@ and stmt env (pos, st) =
         | [_] ->
           Errors.naming_too_few_arguments p;
           N.Expr (invalid_expr p)
-        | (_, cond_p, cond) :: el ->
+        (*  TODO(T98469681): `inout` is silently dropped here, now *)
+        | (_, (_, cond_p, cond)) :: el ->
           let violation =
             ( (),
               cp,
@@ -1880,6 +1881,8 @@ and expr_obj_get_name env expr_ =
 
 and exprl env l = List.map ~f:(expr env) l
 
+and expr_call_args env = List.map ~f:(fun (pk, e) -> (pk, expr env e))
+
 and oexpr env e = Option.map e ~f:(expr env)
 
 and expr env ((), p, e) = ((), p, expr_ env p e)
@@ -2006,7 +2009,11 @@ and expr_ env p (e : Nast.expr_) =
   | Aast.Call ((_, _, Aast.Id (p, pseudo_func)), tal, el, unpacked_element)
     when String.equal pseudo_func SN.SpecialFunctions.echo ->
     arg_unpack_unexpected unpacked_element;
-    N.Call (((), p, N.Id (p, pseudo_func)), targl env p tal, exprl env el, None)
+    N.Call
+      ( ((), p, N.Id (p, pseudo_func)),
+        targl env p tal,
+        expr_call_args env el,
+        None )
   | Aast.Call ((_, p, Aast.Id (_, cn)), tal, el, _)
     when String.equal cn SN.StdlibFunctions.call_user_func ->
     Errors.deprecated_use
@@ -2019,7 +2026,9 @@ and expr_ env p (e : Nast.expr_) =
       | [] ->
         Errors.naming_too_few_arguments p;
         invalid_expr_ p
-      | f :: el -> N.Call (expr env f, targl env p tal, exprl env el, None)
+      (*  TODO(T98469681): `inout` is silently dropped here, now *)
+      | (_, f) :: el ->
+        N.Call (expr env f, targl env p tal, expr_call_args env el, None)
     end
   | Aast.Call ((_, p, Aast.Id (_, cn)), _, el, unpacked_element)
     when String.equal cn SN.AutoimportedFunctions.fun_ ->
@@ -2029,8 +2038,8 @@ and expr_ env p (e : Nast.expr_) =
       | [] ->
         Errors.naming_too_few_arguments p;
         invalid_expr_ p
-      | [(_, p, Aast.String x)] -> N.Fun_id (p, x)
-      | [(_, p, _)] ->
+      | [(Ast_defs.Pnormal, (_, p, Aast.String x))] -> N.Fun_id (p, x)
+      | [(_, (_, p, _))] ->
         Errors.illegal_fun p;
         invalid_expr_ p
       | _ ->
@@ -2046,9 +2055,11 @@ and expr_ env p (e : Nast.expr_) =
       | [_] ->
         Errors.naming_too_few_arguments p;
         invalid_expr_ p
-      | [instance; (_, p, Aast.String meth)] ->
+      | [
+       (Ast_defs.Pnormal, instance); (Ast_defs.Pnormal, (_, p, Aast.String meth));
+      ] ->
         N.Method_id (expr env instance, (p, meth))
-      | [(_, p, _); _] ->
+      | [(_, (_, p, _)); _] ->
         Errors.illegal_inst_meth p;
         invalid_expr_ p
       | _ ->
@@ -2064,7 +2075,7 @@ and expr_ env p (e : Nast.expr_) =
       | [_] ->
         Errors.naming_too_few_arguments p;
         invalid_expr_ p
-      | [e1; e2] ->
+      | [(Ast_defs.Pnormal, e1); (Ast_defs.Pnormal, e2)] ->
         begin
           match (expr env e1, expr env e2) with
           | ((_, pc, N.String cl), (_, pm, N.String meth)) ->
@@ -2079,6 +2090,10 @@ and expr_ env p (e : Nast.expr_) =
             Errors.illegal_meth_caller p;
             invalid_expr_ p
         end
+      | [(Ast_defs.Pinout, (_, p, _)); _]
+      | [(_, (_, p, _)); (Ast_defs.Pinout, _)] ->
+        Errors.illegal_meth_caller p;
+        invalid_expr_ p
       | _ ->
         Errors.naming_too_many_arguments p;
         invalid_expr_ p
@@ -2092,7 +2107,7 @@ and expr_ env p (e : Nast.expr_) =
       | [_] ->
         Errors.naming_too_few_arguments p;
         invalid_expr_ p
-      | [e1; e2] ->
+      | [(Ast_defs.Pnormal, e1); (Ast_defs.Pnormal, e2)] ->
         begin
           match (expr env e1, expr env e2) with
           | ((_, pc, N.String cl), (_, pm, N.String meth)) ->
@@ -2149,6 +2164,10 @@ and expr_ env p (e : Nast.expr_) =
             Errors.illegal_class_meth p;
             invalid_expr_ p
         end
+      | [(Ast_defs.Pinout, (_, p, _)); _]
+      | [(_, (_, p, _)); (Ast_defs.Pinout, _)] ->
+        Errors.illegal_class_meth p;
+        invalid_expr_ p
       | _ ->
         Errors.naming_too_many_arguments p;
         invalid_expr_ p
@@ -2163,7 +2182,7 @@ and expr_ env p (e : Nast.expr_) =
     N.Call
       ( ((), p, N.Id f),
         targl env p tal,
-        exprl env el,
+        expr_call_args env el,
         oexpr env unpacked_element )
   (* match *)
   (* Handle nullsafe instance method calls here. Because Obj_get is used
@@ -2181,12 +2200,15 @@ and expr_ env p (e : Nast.expr_) =
           N.Obj_get
             (expr env e1, expr_obj_get_name env e2, N.OG_nullsafe, in_parens) ),
         targl env p tal,
-        exprl env el,
+        expr_call_args env el,
         oexpr env unpacked_element )
   (* Handle all kinds of calls that weren't handled by any of the cases above *)
   | Aast.Call (e, tal, el, unpacked_element) ->
     N.Call
-      (expr env e, targl env p tal, exprl env el, oexpr env unpacked_element)
+      ( expr env e,
+        targl env p tal,
+        expr_call_args env el,
+        oexpr env unpacked_element )
   | Aast.FunctionPointer (Aast.FP_id fid, targs) ->
     N.FunctionPointer (N.FP_id fid, targl env p targs)
   | Aast.FunctionPointer
@@ -2344,7 +2366,6 @@ and expr_ env p (e : Nast.expr_) =
     N.Shape shp
   | Aast.Import _ -> ignored_expr_ p
   | Aast.Omitted -> N.Omitted
-  | Aast.Callconv (kind, e) -> N.Callconv (kind, expr env e)
   | Aast.EnumClassLabel (opt_sid, x) ->
     let () = Option.iter ~f:check_name opt_sid in
     N.EnumClassLabel (opt_sid, x)

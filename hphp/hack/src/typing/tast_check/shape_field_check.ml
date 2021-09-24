@@ -113,7 +113,7 @@ let handler =
           Call
             ( (_, _, Class_const ((_, _, CI (_, class_name)), (_, method_name))),
               _,
-              [shape; (_, pos, String field_name)],
+              [(_, shape); (_, (_, pos, String field_name))],
               None ) )
         when String.equal class_name SN.Shapes.cShapes
              && String.equal method_name SN.Shapes.keyExists ->
@@ -127,14 +127,14 @@ let handler =
           Call
             ( (_, _, Class_const ((_, _, CI (_, class_name)), (_, method_name))),
               _,
-              [shape; (_, pos, String field_name); _],
+              [(_, shape); (_, (_, pos, String field_name)); _],
               None ) )
       | ( _,
           _,
           Call
             ( (_, _, Class_const ((_, _, CI (_, class_name)), (_, method_name))),
               _,
-              [shape; (_, pos, String field_name)],
+              [(_, shape); (_, (_, pos, String field_name))],
               None ) )
         when String.equal class_name SN.Shapes.cShapes
              && (String.equal method_name SN.Shapes.idx

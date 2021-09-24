@@ -16,7 +16,8 @@
            param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None;
-        f_body = { fb_ast = [([4:5-13], (Expr ((void), [4:5-12], (Call ((((function(int $_): void)), [4:5-8], (Id ([4:5-8], "\\bar"))), [], [((int), [4:9-11], (Lvar ([4:9-11], $x)))], None)))))] };
+        f_body =
+        { fb_ast = [([4:5-13], (Expr ((void), [4:5-12], (Call ((((function(int $_): void)), [4:5-8], (Id ([4:5-8], "\\bar"))), [], [(Pnormal, ((int), [4:9-11], (Lvar ([4:9-11], $x))))], None)))))] };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       });

@@ -50,7 +50,8 @@
            [([5:5-26],
              (Return
                 (Some ((string), [5:12-25],
-                       (Call ((((function(string $x): string)), [5:12-21], (Class_const (((A), [5:12-18], CIparent), ([5:20-21], "f")))), [], [((string), [5:22-24], (Lvar ([5:22-24], $x)))], None))))))
+                       (Call ((((function(string $x): string)), [5:12-21], (Class_const (((A), [5:12-18], CIparent), ([5:20-21], "f")))), 
+                          [], [(Pnormal, ((string), [5:22-24], (Lvar ([5:22-24], $x))))], None))))))
              ]
            };
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
@@ -92,11 +93,12 @@
                          (((function(string $x): string)), [4:10-15],
                           (Obj_get (((B), [4:10-12], (Lvar ([4:10-12], $b))), (((function(string $x): string)), [4:14-15], (Id ([4:14-15], "f"))), OG_nullthrows, false))),
                          [],
-                         [((string), [4:16-25],
-                           (Call (
-                              (((function(string $x): string)), [4:16-21],
-                               (Obj_get (((A), [4:16-18], (Lvar ([4:16-18], $a))), (((function(string $x): string)), [4:20-21], (Id ([4:20-21], "f"))), OG_nullthrows, false))),
-                              [], [((string), [4:22-24], (String ""))], None)))
+                         [(Pnormal,
+                           ((string), [4:16-25],
+                            (Call (
+                               (((function(string $x): string)), [4:16-21],
+                                (Obj_get (((A), [4:16-18], (Lvar ([4:16-18], $a))), (((function(string $x): string)), [4:20-21], (Id ([4:20-21], "f"))), OG_nullthrows, false))),
+                               [], [(Pnormal, ((string), [4:22-24], (String "")))], None))))
                            ],
                          None))))))
             ]

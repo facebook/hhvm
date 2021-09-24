@@ -372,7 +372,7 @@ pub fn expr_to_typed_value_<'local_arena, 'arena, 'decl>(
                 .map_or(false, |x| x.1 == special_functions::HHAS_ADATA) =>
         {
             match id.2[..] {
-                [ast::Expr(_, _, ast::Expr_::String(ref data))] => {
+                [(ast_defs::ParamKind::Pnormal, ast::Expr(_, _, ast::Expr_::String(ref data)))] => {
                     // FIXME: This is not safe--string literals are binary strings.
                     // There's no guarantee that they're valid UTF-8.
                     Ok(TypedValue::mk_hhas_adata(

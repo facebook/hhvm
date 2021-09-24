@@ -358,6 +358,12 @@ fn visitor_variable() -> String {
     "$0v".to_string()
 }
 
+/// Given a list of arguments, make each a "normal" argument by annotating it with
+/// `ParamKind::Pnormal`
+fn build_args(args: Vec<Expr>) -> Vec<(ParamKind, Expr)> {
+    args.into_iter().map(|n| (ParamKind::Pnormal, n)).collect()
+}
+
 /// Build `$v->meth_name(args)`.
 fn v_meth_call(meth_name: &str, args: Vec<Expr>, pos: &Pos) -> Expr {
     let receiver = Expr::mk_lvar(pos, &visitor_variable());
@@ -379,7 +385,7 @@ fn v_meth_call(meth_name: &str, args: Vec<Expr>, pos: &Pos) -> Expr {
             ))),
         ),
         vec![],
-        args,
+        build_args(args),
         None,
     )));
     Expr::new((), pos.clone(), c)
@@ -404,7 +410,7 @@ fn meth_call(receiver: Expr, meth_name: &str, args: Vec<Expr>, pos: &Pos) -> Exp
             ))),
         ),
         vec![],
-        args,
+        build_args(args),
         None,
     )));
     Expr::new((), pos.clone(), c)
@@ -431,7 +437,7 @@ fn static_meth_call(classname: &str, meth_name: &str, args: Vec<Expr>, pos: &Pos
     Expr::new(
         (),
         pos.clone(),
-        Expr_::Call(Box::new((callee, vec![], args, None))),
+        Expr_::Call(Box::new((callee, vec![], build_args(args), None))),
     )
 }
 
@@ -842,6 +848,17 @@ fn rewrite_expr(
                 _ => {}
             }
 
+            let args = args
+                .into_iter()
+                .map(|e| match e {
+                    (ParamKind::Pnormal, e) => Ok(e),
+                    (ParamKind::Pinout, Expr(_, p, _)) => Err((
+                        p,
+                        "Expression trees do not support `inout` function calls.".into(),
+                    )),
+                })
+                .collect::<Result<Vec<_>, _>>()?;
+
             let (virtual_args, desugar_args) = rewrite_exprs(temps, args, visitor_name)?;
 
             match recv.2 {
@@ -877,7 +894,7 @@ fn rewrite_expr(
                                 &pos,
                             ),
                             vec![],
-                            virtual_args,
+                            build_args(virtual_args),
                             None,
                         ))),
                     );
@@ -934,7 +951,7 @@ fn rewrite_expr(
                                 &pos,
                             ),
                             vec![],
-                            virtual_args,
+                            build_args(virtual_args),
                             None,
                         ))),
                     );
@@ -983,7 +1000,7 @@ fn rewrite_expr(
                                 ObjGet(Box::new((virtual_e1, e2, null_flavor, is_prop_call))),
                             ),
                             vec![],
-                            virtual_args,
+                            build_args(virtual_args),
                             None,
                         ))),
                     );
@@ -1000,7 +1017,12 @@ fn rewrite_expr(
                     let virtual_expr = Expr(
                         (),
                         pos,
-                        Call(Box::new((virtual_recv, vec![], virtual_args, None))),
+                        Call(Box::new((
+                            virtual_recv,
+                            vec![],
+                            build_args(virtual_args),
+                            None,
+                        ))),
                     );
                     (virtual_expr, desugar_expr)
                 }

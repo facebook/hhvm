@@ -1689,7 +1689,9 @@ end = struct
         @@ pair ~sep:nop pp_class_id
         @@ pair ~sep:nop pp_targs pp_arg_exprs)
         ppf
-        (class_id, (targs, (exprs, expr_opt)))
+        ( class_id,
+          (targs, (List.map ~f:(fun e -> (Ast_defs.Pnormal, e)) exprs, expr_opt))
+        )
     | Aast.Record ((_, name), flds) ->
       Fmt.(
         pair ~sep:nop string
@@ -1698,8 +1700,6 @@ end = struct
         @@ pair ~sep:fat_arrow pp_expr pp_expr)
         ppf
         (name, flds)
-    | Aast.Callconv (param_kind, expr) ->
-      Fmt.(pair ~sep:sp pp_paramkind pp_expr) ppf (param_kind, expr)
     | Aast.Lplaceholder _ -> Fmt.string ppf "$_"
     | Aast.Fun_id (_, name) ->
       Fmt.(prefix (const string "fun") @@ quote string) ppf name
@@ -1749,10 +1749,15 @@ end = struct
         parens
         @@ pair
              ~sep:comma
-             (list ~sep:comma pp_expr)
+             (list ~sep:comma pp_arg)
              (option @@ prefix (const string "...") pp_expr))
         ppf
         (exprs, expr_opt)
+
+  and pp_arg ppf (pk, e) =
+    match pk with
+    | Ast_defs.Pnormal -> pp_expr ppf e
+    | Ast_defs.Pinout -> Fmt.(pair ~sep:sp pp_paramkind pp_expr) ppf (pk, e)
 
   and pp_afield ppf = function
     | Aast.AFvalue expr -> pp_expr ppf expr

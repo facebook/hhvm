@@ -168,16 +168,18 @@
                   (Call (
                      (((function(X $x): void)), [34:3-10],
                       (Obj_get (((MyPhonyVector<X>), [34:3-5], (Lvar ([34:3-5], $x))), (((function(X $x): void)), [34:7-10], (Id ([34:7-10], "add"))), OG_nullthrows, false))),
-                     [], [((B), [34:11-18], (New (((B), [34:15-16], (CI ([34:15-16], "\\B"))), [], [], None, (_))))], None)))));
+                     [], [(Pnormal, ((B), [34:11-18], (New (((B), [34:15-16], (CI ([34:15-16], "\\B"))), [], [], None, (_)))))], None)))));
              ([35:3-20],
               (Expr
                  ((void), [35:3-19],
                   (Call (
                      (((function(X $x): void)), [35:3-10],
                       (Obj_get (((MyPhonyVector<X>), [35:3-5], (Lvar ([35:3-5], $x))), (((function(X $x): void)), [35:7-10], (Id ([35:7-10], "add"))), OG_nullthrows, false))),
-                     [], [((A), [35:11-18], (New (((A), [35:15-16], (CI ([35:15-16], "\\A"))), [], [], None, (_))))], None)))));
+                     [], [(Pnormal, ((A), [35:11-18], (New (((A), [35:15-16], (CI ([35:15-16], "\\A"))), [], [], None, (_)))))], None)))));
              ([36:3-12],
-              (Expr ((void), [36:3-11], (Call ((((function(MyPhonyVector<X> $v): void)), [36:3-7], (Id ([36:3-7], "\\test"))), [], [((MyPhonyVector<X>), [36:8-10], (Lvar ([36:8-10], $x)))], None)))))
+              (Expr
+                 ((void), [36:3-11],
+                  (Call ((((function(MyPhonyVector<X> $v): void)), [36:3-7], (Id ([36:3-7], "\\test"))), [], [(Pnormal, ((MyPhonyVector<X>), [36:8-10], (Lvar ([36:8-10], $x))))], None)))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

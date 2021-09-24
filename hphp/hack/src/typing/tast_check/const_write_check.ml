@@ -96,7 +96,7 @@ let rec check_expr env ((_, _, e) : Tast.expr) =
       | (_, _, Array_get (e, Some _)) -> check_unset_exp e
       | _ -> check_expr (Env.set_val_kind env Typing_defs.Lval) e
     in
-    List.iter el ~f:check_unset_exp
+    List.iter el ~f:(fun (_, e) -> check_unset_exp e)
   | _ -> ()
 
 let handler =

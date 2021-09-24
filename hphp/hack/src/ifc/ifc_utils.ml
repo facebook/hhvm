@@ -105,7 +105,6 @@ let expr_name = function
   | A.Efun _ -> "Efun"
   | A.Lfun _ -> "Lfun"
   | A.Xml _ -> "Xml"
-  | A.Callconv _ -> "Callconv"
   | A.Import _ -> "Import"
   | A.Collection _ -> "Collection"
   | A.ExpressionTree _ -> "ExpressionTree"

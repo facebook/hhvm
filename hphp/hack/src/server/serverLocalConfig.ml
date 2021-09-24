@@ -559,6 +559,8 @@ type t = {
   old_naming_table_for_redecl: bool;  (** Use old naming table when redecling *)
   log_from_client_when_slow_monitor_connections: bool;
       (**  Alerts hh users what processes are using hh_server when hh_client is slow to connect. *)
+  naming_sqlite_in_hack_64: bool;
+      (** Add sqlite naming table to hack/64 ss job *)
 }
 
 let default =
@@ -660,6 +662,7 @@ let default =
     deferments_light = false;
     old_naming_table_for_redecl = false;
     log_from_client_when_slow_monitor_connections = false;
+    naming_sqlite_in_hack_64 = false;
   }
 
 let path =
@@ -701,6 +704,7 @@ let apply_justknobs_overrides ~silent config =
         eval
           "log_from_client_when_slow_monitor_connections"
           "hack/config:log_from_client_when_slow_monitor_connections";
+        eval "naming_sqlite_in_hack_64" "hack/config:naming_sqlite_in_hack_64";
       ]
   in
   match overrides with
@@ -1301,6 +1305,13 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
+  let naming_sqlite_in_hack_64 =
+    bool_if_min_version
+      "naming_sqlite_in_hack_64"
+      ~default:default.deferments_light
+      ~current_version
+      config
+  in
   {
     min_log_level;
     attempt_fix_credentials;
@@ -1396,6 +1407,7 @@ let load_ fn ~silent ~current_version overrides =
     deferments_light;
     old_naming_table_for_redecl;
     log_from_client_when_slow_monitor_connections;
+    naming_sqlite_in_hack_64;
   }
 
 let load ~silent ~current_version config_overrides =
@@ -1417,4 +1429,5 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       old_naming_table_for_redecl = options.old_naming_table_for_redecl;
       log_from_client_when_slow_monitor_connections =
         options.log_from_client_when_slow_monitor_connections;
+      naming_sqlite_in_hack_64 = options.naming_sqlite_in_hack_64;
     }

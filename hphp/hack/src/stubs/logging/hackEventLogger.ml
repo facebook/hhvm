@@ -23,6 +23,7 @@ type rollout_flags = {
   deferments_light: bool;
   old_naming_table_for_redecl: bool;
   log_from_client_when_slow_monitor_connections: bool;
+  naming_sqlite_in_hack_64: bool;
 }
 
 let flush () = ()

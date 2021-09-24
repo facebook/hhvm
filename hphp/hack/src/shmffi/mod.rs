@@ -28,7 +28,7 @@ thread_local! {
 
 extern "C" {
     fn caml_input_value_from_block(data: *const u8, size: usize) -> usize;
-    fn caml_alloc_initialized_string(data: *const u8, size: usize) -> usize;
+    fn caml_alloc_initialized_string(size: usize, data: *const u8) -> usize;
     fn caml_output_value_to_malloc(value: usize, flags: usize, ptr: *mut usize, len: *mut usize);
 
     // TODO(hverr): Switch to Rust buffer allocation.
@@ -99,7 +99,7 @@ impl HeapValue {
     /// root.
     unsafe fn to_ocaml_value(&self) -> usize {
         if !self.header.is_serialized() {
-            caml_alloc_initialized_string(self.data.as_ptr(), self.header.buffer_size())
+            caml_alloc_initialized_string(self.header.buffer_size(), self.data.as_ptr())
         } else if !self.header.is_compressed() {
             caml_input_value_from_block(self.data.as_ptr(), self.header.buffer_size())
         } else {

@@ -539,7 +539,7 @@ let fun_def ctx fd :
 let method_dynamically_callable
     env cls m params_decl_ty variadicity_decl_ty ret_locl_ty =
   let env = { env with in_support_dynamic_type_method_check = true } in
-  (* Add `dynamic` lower and upper bound to any type parameters that are not marked <<__NoRequireDynamic>> *)
+  (* Add `dynamic` lower and upper bound to any type parameters that are marked <<__RequireDynamic>> *)
   let env_with_require_dynamic =
     Typing_dynamic.add_require_dynamic_bounds env cls
   in
@@ -1731,7 +1731,7 @@ let check_generic_class_with_SupportDynamicType env c parents =
     (* Any class that extends a class or implements an interface
      * that declares <<__SupportDynamicType>> must itself declare
      * <<__SupportDynamicType>>. This is checked elsewhere. But if any generic
-     * parameters are not marked <<__NoRequireDynamic>> then we must check that the
+     * parameters are marked <<__RequireDynamic>> then we must check that the
      * conditional support for dynamic is sound.
      * We require that
      *    If t <: dynamic

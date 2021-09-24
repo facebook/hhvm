@@ -1393,10 +1393,9 @@ and simplify_subtype_i
                 | (_, []) -> []
                 | (tp :: tparams, tyarg :: tyargs) ->
                   let require_dynamic =
-                    not
-                      (Attributes.mem
-                         SN.UserAttributes.uaNoRequireDynamic
-                         tp.tp_user_attributes)
+                    Attributes.mem
+                      SN.UserAttributes.uaRequireDynamic
+                      tp.tp_user_attributes
                   in
                   (if require_dynamic then
                     let upper_bounds =
@@ -1415,7 +1414,7 @@ and simplify_subtype_i
                   :: replaceArgs tparams tyargs env
               in
               (* If the class is marked <<__SupportDynamicType>> then for any
-               * type parameters not marked <<__NoRequireDynamic>> then the class does not
+               * type parameters marked <<__RequireDynamic>> then the class does not
                * unconditionally implement dynamic, but rather we must check that
                * it is a subtype of the same type whose corresponding type arguments
                * are replaced by dynamic, intersected with the parameter's upper bounds.

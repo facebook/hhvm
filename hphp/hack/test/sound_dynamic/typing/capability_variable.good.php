@@ -1,7 +1,7 @@
 <?hh
 
 <<__SupportDynamicType>>
-class C<T> {}
+class C<<<__RequireDynamic>> T> {}
 
 <<__SupportDynamicType>>
 function f(): void {}

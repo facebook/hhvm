@@ -342,8 +342,7 @@ let add_generic_parameters tpenv tparaml =
       Attributes.mem SN.UserAttributes.uaNewable tp_user_attributes
     in
     let require_dynamic =
-      not
-        (Attributes.mem SN.UserAttributes.uaNoRequireDynamic tp_user_attributes)
+      Attributes.mem SN.UserAttributes.uaRequireDynamic tp_user_attributes
     in
     let nested_params =
       List.map tp_tparams ~f:(fun tp -> (tp.tp_name, make_param_info tp))

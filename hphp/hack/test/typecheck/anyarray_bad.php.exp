@@ -44,7 +44,7 @@ Invalid return type (Typing[4110])
   This type argument to `Set` must match exactly (it is invariant)
   File "anyarray_bad.php", line 31, characters 10-24:
   But got `mixed` from the argument to this \HH\is_any_array test
-  File "hackarray.hhi", line 19, characters 77-78:
+  File "hackarray.hhi", line 19, characters 119-120:
     via this generic `Tv`
   File "interfaces.hhi", line 110, characters 66-67:
     via this generic `Tv`

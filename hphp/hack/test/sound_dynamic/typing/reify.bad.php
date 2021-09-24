@@ -1,7 +1,7 @@
 <?hh
 <<file:__EnableUnstableFeatures('upcast_expression')>>
 
-class C<<<__NoRequireDynamic>> reify T> {}
+class C<reify T> {}
 
 function expect_Cdyn(C<dynamic> $c) : void { }
 

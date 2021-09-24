@@ -1,6 +1,6 @@
 Errors:
   [3:14-17] Wrong number of type arguments (expected 2, got 0)
-  [55:13-16] Definition is here
+  [55:15-18] Definition is here
 [(Fun
     { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 

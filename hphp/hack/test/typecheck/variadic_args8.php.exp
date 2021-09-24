@@ -4,9 +4,9 @@ Invalid argument (Typing[4110])
   Expected `string`
   File "variadic_args8.php", line 5, characters 19-23:
   But got `int` (variadic argument)
-  File "hackarray.hhi", line 28, characters 52-52:
+  File "hackarray.hhi", line 28, characters 73-73:
     via this generic `T`
-  File "hackarray.hhi", line 19, characters 77-78:
+  File "hackarray.hhi", line 19, characters 119-120:
     via this generic `Tv`
   File "interfaces.hhi", line 110, characters 66-67:
     via this generic `Tv`

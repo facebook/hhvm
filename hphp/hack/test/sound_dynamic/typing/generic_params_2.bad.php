@@ -3,7 +3,7 @@
 <<file:__EnableUnstableFeatures('upcast_expression')>>
 
 <<__SupportDynamicType>>
-class Box<T> {
+class Box<<<__RequireDynamic>> T> {
   public function __construct(private T $x) {}
   public function get() : T { return $this->x; }
   public function set(T $x) : void { $this->x = $x; }

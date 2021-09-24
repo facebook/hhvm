@@ -38,8 +38,8 @@ function test_shape_context(shape('x' => int, ?'y' => C) $s) : void {
   $s upcast shape('x' => dynamic, ?'y' => dynamic);
 }
 
-class V1<T> {};
-class V2<+T> {};
+class V1<<<__RequireDynamic>> T> {};
+class V2<<<__RequireDynamic>> +T> {};
 
 function test_class_context(V1<int> $v1, V2<C> $v2) : void {
   $v1 upcast V1<dynamic>;

@@ -4,9 +4,9 @@ Typing error (Typing[4110])
   Expected `num` because this is used in an arithmetic operation
   File "foreach_vector.php", line 18, characters 19-21:
   But got `Foo`
-  File "collections/Vector.hhi", line 46, characters 50-51:
+  File "collections/Vector.hhi", line 46, characters 71-72:
     via this generic `Tv`
-  File "collections/interfaces.hhi", line 552, characters 49-50:
+  File "collections/interfaces.hhi", line 552, characters 70-71:
     via this generic `Tv`
   File "collections/interfaces.hhi", line 295, characters 56-57:
     via this generic `Tv`

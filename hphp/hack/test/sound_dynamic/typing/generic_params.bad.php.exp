@@ -25,7 +25,7 @@ Typing error (Typing[4110])
 File "generic_params.bad.php", line 29, characters 7-16:
 Class AnotherBox must support dynamic at least as often as Getter:
 Getter<vec<T>> is subtype of dynamic implies AnotherBox<T> is subtype of dynamic (Typing[4433])
-  File "generic_params.bad.php", line 29, characters 18-18:
+  File "generic_params.bad.php", line 29, characters 39-39:
   Expected `T`
   File "generic_params.bad.php", line 29, characters 7-16:
   But got `dynamic`

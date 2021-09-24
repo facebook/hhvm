@@ -1,7 +1,7 @@
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-class Box<T> {}
+class Box<<<__RequireDynamic>> T> {}
 
 class Foo {
   public function foo(Box<int> $x) : Box<int> {

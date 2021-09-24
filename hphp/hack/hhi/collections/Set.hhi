@@ -45,7 +45,7 @@ namespace HH {
  * @guide /hack/collections/classes
  */
 <<__SupportDynamicType>>
-final class Set<Tv as arraykey> implements \MutableSet<Tv> {
+final class Set<<<__RequireDynamic>> Tv as arraykey> implements \MutableSet<Tv> {
   /**
    * Creates a `Set` from the given `Traversable`, or an empty `Set` if `null`
    * is passed.

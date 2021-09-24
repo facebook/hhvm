@@ -329,7 +329,7 @@ module UserAttributes = struct
 
   let uaSupportDynamicType = "__SupportDynamicType"
 
-  let uaNoRequireDynamic = "__NoRequireDynamic"
+  let uaRequireDynamic = "__RequireDynamic"
 
   let uaModule = "__Module"
 
@@ -377,7 +377,7 @@ module UserAttributes = struct
           (uaCanCall, [parameter]);
           (uaViaLabel, [parameter]);
           (uaSupportDynamicType, [fn; cls; mthd]);
-          (uaNoRequireDynamic, [typeparam]);
+          (uaRequireDynamic, [typeparam]);
           (uaModule, [fn; cls; file; typealias; enum; enumcls]);
           ( uaInternal,
             [

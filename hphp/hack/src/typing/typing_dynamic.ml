@@ -13,14 +13,11 @@ module Env = Typing_env
 module SN = Naming_special_names
 module Reason = Typing_reason
 
-(* Add `dynamic` lower and upper bound to any type parameters that are not marked <<__NoRequireDynamic>> *)
+(* Add `dynamic` lower and upper bound to any type parameters that are marked <<__RequireDynamic>> *)
 let add_require_dynamic_bounds env cls =
   List.fold_left (Decl_provider.Class.tparams cls) ~init:env ~f:(fun env tp ->
       let require_dynamic =
-        not
-          (Attributes.mem
-             SN.UserAttributes.uaNoRequireDynamic
-             tp.tp_user_attributes)
+        Attributes.mem SN.UserAttributes.uaRequireDynamic tp.tp_user_attributes
       in
       if require_dynamic then
         let dtype =

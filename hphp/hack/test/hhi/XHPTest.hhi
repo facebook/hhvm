@@ -1,7 +1,6 @@
 <?hh
 
 abstract class XHPTest {
-  <<__Rx>>
   public function __construct(
     public darray<string,mixed> $_, // Attributes
     public varray<mixed> $_, // Children

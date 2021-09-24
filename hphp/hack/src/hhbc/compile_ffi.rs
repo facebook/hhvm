@@ -99,6 +99,23 @@ impl CNativeEnv {
     }
 }
 
+fn decl_provider<'a, 'decl>(
+    native_env: &hhbc_by_ref_compile::NativeEnv<&'a str>,
+    cnative_env: &CNativeEnv,
+) -> unified_decl_provider::DeclProvider<'decl> {
+    if native_env
+        .flags
+        .contains(hhbc_by_ref_compile::EnvFlags::ENABLE_DECL)
+    {
+        unified_decl_provider::DeclProvider::ExternalDeclProvider(ExternalDeclProvider::new(
+            cnative_env.decl_getter,
+            cnative_env.decl_provider,
+        ))
+    } else {
+        unified_decl_provider::DeclProvider::NoDeclProvider(NoDeclProvider)
+    }
+}
+
 #[no_mangle]
 unsafe extern "C" fn hackc_compile_hhas_create_arena() -> *mut bumpalo::Bump {
     Box::into_raw(Box::new(bumpalo::Bump::new()))
@@ -144,27 +161,13 @@ unsafe extern "C" fn hackc_compile_hhas_from_text_cpp_ffi(
                     flags: native_env.flags,
                 };
                 let source_text = SourceText::make(RcOc::new(env.filepath.clone()), text);
-                let decl_provider = if native_env
-                    .flags
-                    .contains(hhbc_by_ref_compile::EnvFlags::ENABLE_DECL)
-                {
-                    unified_decl_provider::DeclProvider::ExternalDeclProvider(
-                        ExternalDeclProvider::new(
-                            cnative_env.decl_getter,
-                            cnative_env.decl_provider,
-                        ),
-                    )
-                } else {
-                    unified_decl_provider::DeclProvider::NoDeclProvider(NoDeclProvider)
-                };
-
                 let compile_result = hhbc_by_ref_compile::hhas_from_text(
                     alloc,
                     &env,
                     &stack_limit,
                     source_text,
                     Some(&native_env),
-                    decl_provider,
+                    decl_provider(&native_env, &cnative_env),
                 );
                 match compile_result {
                     Ok((hhas_prog, _)) => Ok(Box::into_raw(Box::new(hhas_prog))),

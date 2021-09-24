@@ -4,29 +4,21 @@ This call is not allowed because its coeffects are incompatible with the context
   From this declaration, the context of this function body provides the capability set {ReadGlobals, System, WriteProperty}
   File "controlled_caller.php", line 20, characters 28-34:
   But the function being called requires the capability AccessGlobals
-  File "coeffect/contexts.hhi", line 28, characters 1-23:
-  Hack provides a list of supported contexts here
 File "controlled_caller.php", line 14, characters 3-14:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
   File "controlled_caller.php", line 11, characters 23-32:
   From this declaration, the context of this function body provides the capability set {ReadGlobals, System, WriteProperty}
   File "controlled_caller.php", line 21, characters 23-30:
   But the function being called requires the capability set {ImplicitPolicy, ReadGlobals, System, WriteProperty}
-  File "coeffect/contexts.hhi", line 28, characters 1-23:
-  Hack provides a list of supported contexts here
 File "controlled_caller.php", line 16, characters 3-17:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
   File "controlled_caller.php", line 11, characters 23-32:
   From this declaration, the context of this function body provides the capability set {ReadGlobals, System, WriteProperty}
   File "controlled_caller.php", line 22, characters 10-22:
   But the function being called requires the capability set {AccessGlobals, Codegen, IO, ImplicitPolicyLocal, RxLocal, System, WriteProperty}
-  File "coeffect/contexts.hhi", line 28, characters 1-23:
-  Hack provides a list of supported contexts here
 File "controlled_caller.php", line 17, characters 3-14:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
   File "controlled_caller.php", line 11, characters 23-32:
   From this declaration, the context of this function body provides the capability set {ReadGlobals, System, WriteProperty}
   File "controlled_caller.php", line 23, characters 23-30:
   But the function being called requires the capability set {AccessGlobals, Codegen, IO, ImplicitPolicyLocal, RxLocal, System, WriteProperty}
-  File "coeffect/contexts.hhi", line 28, characters 1-23:
-  Hack provides a list of supported contexts here

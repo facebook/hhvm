@@ -3,5 +3,3 @@ Direct references to coeffects namespaces are not allowed (Parsing[1002])
 File "capability_as_context.php", line 3, characters 46-81:
 Illegal context: `\HH\Capabilities\WriteProperty`
 Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
-  File "coeffect/contexts.hhi", line 28, characters 1-23:
-  Hack provides a list of supported contexts here

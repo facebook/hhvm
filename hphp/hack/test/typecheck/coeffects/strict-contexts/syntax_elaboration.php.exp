@@ -11,15 +11,9 @@ Unbound name: `AccessGlobals` (Naming[2049])
 File "syntax_elaboration.php", line 12, characters 45-84:
 Illegal context: `\HH\Capabilities\WriteProperty`
 Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
-  File "coeffect/contexts.hhi", line 28, characters 1-23:
-  Hack provides a list of supported contexts here
 File "syntax_elaboration.php", line 27, characters 40-75:
 Illegal context: `\HH\Capabilities\AccessGlobals`
 Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
-  File "coeffect/contexts.hhi", line 28, characters 1-23:
-  Hack provides a list of supported contexts here
 File "syntax_elaboration.php", line 37, characters 43-47:
 Illegal context: `int`
 Cannot use a context defined outside namespace \HH\Contexts (NastCheck[3090])
-  File "coeffect/contexts.hhi", line 28, characters 1-23:
-  Hack provides a list of supported contexts here

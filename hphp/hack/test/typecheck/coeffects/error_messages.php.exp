@@ -2,13 +2,9 @@ File "error_messages.php", line 4, characters 3-6:
 `echo` or `print` builtin requires the capability IO, which is not provided by the context. (Typing[4401])
   File "error_messages.php", line 3, characters 17-18:
   The local (enclosing) context provides the capability set {}
-  File "coeffect/contexts.hhi", line 28, characters 1-23:
-  Hack provides a list of supported contexts here
 File "error_messages.php", line 8, characters 10-17:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
   File "error_messages.php", line 7, characters 18-19:
   From this declaration, the context of this function body provides the capability set {}
   File "error_messages.php", line 9, characters 10-15:
   But the function being called requires the capability set {AccessGlobals, Codegen, IO, ImplicitPolicyLocal, RxLocal, System, WriteProperty}
-  File "coeffect/contexts.hhi", line 28, characters 1-23:
-  Hack provides a list of supported contexts here

@@ -5,5 +5,3 @@ This object's property is being mutated (used as an lvalue)
 Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
   File "byval_collection_unresolved.php", line 14, characters 46-47:
   The local (enclosing) context provides the capability set {}
-  File "coeffect/contexts.hhi", line 28, characters 1-23:
-  Hack provides a list of supported contexts here

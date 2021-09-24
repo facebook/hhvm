@@ -333,6 +333,7 @@ RepoGlobalData get_global_data() {
     RuntimeOption::EvalBuildMayNoticeOnMethCallerHelperIsObject;
   gd.EnableReadonlyPropertyEnforcement = RuntimeOption::EvalEnableReadonlyPropertyEnforcement;
   gd.DiamondTraitMethods = RuntimeOption::EvalDiamondTraitMethods;
+  gd.EvalCoeffectEnforcementLevels = RO::EvalCoeffectEnforcementLevels;
 
 
   for (auto const& elm : RuntimeOption::ConstantFunctions) {
@@ -474,6 +475,12 @@ int main(int argc, char** argv) try {
 
   Hdf config;
   IniSetting::Map ini = IniSetting::Map::object;
+
+  // We need to write correct coeffects before we load
+  for (auto const [name, value] : gd.EvalCoeffectEnforcementLevels) {
+    config["Eval"]["CoeffectEnforcementLevels"][name] = value;
+  }
+
   RO::Load(ini, config);
   RO::RepoAuthoritative   = true;
   RO::EvalJit             = false;
@@ -510,6 +517,7 @@ int main(int argc, char** argv) try {
   RO::EvalTraitConstantInterfaceBehavior        = gd.TraitConstantInterfaceBehavior;
   RO::EvalEnableReadonlyPropertyEnforcement     = gd.EnableReadonlyPropertyEnforcement;
   RO::EvalDiamondTraitMethods                   = gd.DiamondTraitMethods;
+  RO::EvalCoeffectEnforcementLevels             = gd.EvalCoeffectEnforcementLevels;
 
   if (print_bytecode_stats_and_exit) {
     print_repo_bytecode_stats();

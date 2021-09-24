@@ -86,7 +86,9 @@ unsafe impl<'shm> Allocator for MapAlloc<'shm> {
         let align_offset = control_data.current.align_offset(l.align());
         let mut pointer = unsafe { control_data.current.add(align_offset) };
         let mut new_current = unsafe { pointer.add(size) };
-        if new_current > control_data.end {
+        // We must make sure we don't produce null pointers when `size == 0`
+        // and `new_current == NULL`.
+        if new_current > control_data.end || new_current.is_null() {
             self.extend(&mut control_data)?;
             let align_offset = control_data.current.align_offset(l.align());
             pointer = unsafe { control_data.current.add(align_offset) };
@@ -99,5 +101,35 @@ unsafe impl<'shm> Allocator for MapAlloc<'shm> {
 
     unsafe fn deallocate(&self, _ptr: NonNull<u8>, _layout: Layout) {
         // Doesn't do anything.
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    use crate::sync::RwLock;
+
+    const FILE_ALLOC_SIZE: usize = 10 * 1024 * 1024;
+
+    fn with_file_alloc(f: impl FnOnce(&FileAlloc)) {
+        let mut vec: Vec<u8> = vec![0; FILE_ALLOC_SIZE];
+        let vec_ptr = vec.as_mut_ptr();
+        let file_alloc = FileAlloc::new(vec_ptr as *mut _, FILE_ALLOC_SIZE, 0);
+        f(&file_alloc);
+        drop(file_alloc);
+        drop(vec);
+    }
+
+    #[test]
+    fn test_alloc_zero() {
+        with_file_alloc(|file_alloc| {
+            let core_data = RwLock::new(MapAllocControlData::new());
+            let core_data_ref = unsafe { core_data.initialize().unwrap() };
+            let alloc = unsafe { MapAlloc::new(core_data_ref, file_alloc) };
+
+            let layout = std::alloc::Layout::from_size_align(0, 1).unwrap();
+            let _ = alloc.allocate(layout).unwrap();
+        })
     }
 }

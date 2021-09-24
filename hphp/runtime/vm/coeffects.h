@@ -114,6 +114,14 @@ static_assert(sizeof(StaticCoeffects) == sizeof(RuntimeCoeffects), "");
 
 ///////////////////////////////////////////////////////////////////////////////
 
+/*
+ * Returns the combined static coeffects and escapes from a list of coeffects
+ */
+std::pair<StaticCoeffects, RuntimeCoeffects>
+getCoeffectsInfoFromList(std::vector<LowStringPtr>, bool);
+
+///////////////////////////////////////////////////////////////////////////////
+
 struct CoeffectRule final {
   struct FunParam {};
   struct CCParam {};

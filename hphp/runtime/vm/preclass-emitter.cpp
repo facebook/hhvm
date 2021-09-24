@@ -361,15 +361,8 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
     tvaux.constModifiers() = {};
     tvaux.constModifiers().setIsAbstract(const_.isAbstract());
     if (const_.kind() == ConstModifiers::Kind::Context) {
-      auto const coeffects = [&] {
-        if (const_.coeffects().empty()) return StaticCoeffects::defaults();
-        auto coeffects =
-          CoeffectsConfig::fromName(const_.coeffects()[0]->toCppString());
-        for (auto const& coeffect : const_.coeffects()) {
-          coeffects |= CoeffectsConfig::fromName(coeffect->toCppString());
-        }
-        return coeffects;
-      }();
+      auto const coeffects =
+        getCoeffectsInfoFromList(const_.coeffects(), false).first;
       tvaux.constModifiers().setCoeffects(coeffects);
       if (!const_.coeffects().empty()) {
         tvCopy(make_tv<KindOfInt64>(0), tvaux); // dummy value for m_data

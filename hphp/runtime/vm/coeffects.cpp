@@ -299,6 +299,22 @@ RuntimeCoeffects emitCaller(RuntimeCoeffects provided) {
 
 } // namespace
 
+std::pair<StaticCoeffects, RuntimeCoeffects>
+getCoeffectsInfoFromList(std::vector<LowStringPtr> staticCoeffects,
+                         bool ctor) {
+  if (staticCoeffects.empty()) {
+    return {StaticCoeffects::defaults(), RuntimeCoeffects::none()};
+  }
+  auto coeffects = StaticCoeffects::none();
+  auto escapes = RuntimeCoeffects::none();
+  for (auto const& name : staticCoeffects) {
+    coeffects |= CoeffectsConfig::fromName(name->toCppString());
+    escapes |= CoeffectsConfig::escapesTo(name->toCppString());
+  }
+  if (ctor) coeffects |= StaticCoeffects::write_this_props();
+  return {coeffects, escapes};
+}
+
 RuntimeCoeffects CoeffectRule::emit(const Func* f,
                                     uint32_t numArgsInclUnpack,
                                     void* prologueCtx,

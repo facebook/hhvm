@@ -15,8 +15,10 @@ from clingo.symbol import Number, Symbol
 class AgentGraphClingoContext:
     """ """
 
+    scale = 10
+
     def na(self) -> Symbol:
-        return Number(100)
+        return Number(100 * self.scale)
 
     def nr(self) -> Symbol:
         return Number(5)
@@ -24,14 +26,17 @@ class AgentGraphClingoContext:
     def nl(self) -> Symbol:
         return Number(30)
 
-    def ne(self) -> Symbol:
-        return Number(100)
-
     def nia(self) -> Symbol:
-        return Number(20)
+        return Number(20 * self.scale)
 
     def npa(self) -> Symbol:
-        return Number(60)
+        return Number(60 * self.scale)
+
+    def nlv(self) -> Symbol:
+        return Number(9)
+
+    def s(self) -> Symbol:
+        return Number(self.scale)
 
     def infra_agent_out_degree_low(self, agent: Number) -> Symbol:
         agent_number = agent.number
@@ -60,6 +65,36 @@ class AgentGraphClingoContext:
 
     def product_agent_in_degree_high(self, agent: Number) -> Symbol:
         return Number(20)
+
+    def agents_at_each_level(self, level: Number) -> Symbol:
+        nodes_at_each_level = [
+            x * self.scale for x in [5, 10, 10, 10, 10, 10, 10, 15, 15]
+        ]
+        return Number(nodes_at_each_level[level.number])
+
+    def agent_decider(
+        self, source_agent, target_agent, source_level, target_level
+    ) -> Symbol:
+        src_agent_number = source_agent.number
+        tgt_agent_number = target_agent.number
+        src_level_number = source_level.number
+        tgt_level_number = target_level.number
+        if (
+            src_agent_number < tgt_agent_number + 200
+            and tgt_agent_number < src_agent_number
+            and tgt_level_number < src_level_number
+        ):
+            return Number(1)
+        else:
+            return Number(0)
+
+    def agent_type_decider(self, source_agent, target_agent) -> Symbol:
+        src_agent_number = source_agent.number
+        tgt_agent_number = target_agent.number
+        if tgt_agent_number * 3 + 200 < src_agent_number:
+            return Number(1)
+        else:
+            return Number(0)
 
 
 class AgentGraphGenerator:
@@ -104,16 +139,21 @@ class AgentGraphGenerator:
 
         print("Number of infra agents: {0}".format(len(self.infra_agents)))
         print("Number of product agents: {0}".format(len(self.product_agents)))
+        print("Number of edges: {0}".format(sum([len(x) for x in self.edges])))
 
         similar_agents = 0
         checked_agents = set()
+        similar_relations = []
         for key, value in enumerate(self.edges):
             for number, agent in enumerate(self.edges[key + 1 :]):
                 if value == agent and len(value) != 0 and number not in checked_agents:
                     similar_agents += 1
                     checked_agents.add(number)
+                    if agent not in similar_relations:
+                        similar_relations.append(agent)
 
         print("There are {0} similar agents.".format(similar_agents))
+        print(similar_relations)
 
 
 agent_graph = AgentGraphGenerator()

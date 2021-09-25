@@ -491,7 +491,8 @@ struct Func {
    * Coeffects
    */
   const RuntimeCoeffects* requiredCoeffects() const;
-  TriBool hasCoeffectRules() const;
+  // Returns nullptr if we cant tell whether there are coeffect rules
+  const CompactVector<CoeffectRule>* coeffectRules() const;
 
   struct FuncInfo;
   struct MethTabEntryPair;

@@ -3314,15 +3314,62 @@ bool fcallCanSkipRepack(ISS& env, const FCallArgs& fca, const res::Func& func) {
   return unpackArgs.subtypeOf(BVec);
 }
 
-bool fcallCanSkipCoeffectsCheck(ISS& env, const res::Func& func) {
-  if (func.hasCoeffectRules() != TriBool::No) return false;
+bool coeffectRulesMatch(ISS& env,
+                        const FCallArgs& fca,
+                        const res::Func& func,
+                        uint32_t numExtraInputs,
+                        const CoeffectRule& caller,
+                        const CoeffectRule& callee) {
+  if (caller.m_type != callee.m_type) return false;
+  switch (caller.m_type) {
+    case CoeffectRule::Type::CCThis: {
+      if (caller.m_name != callee.m_name ||
+          caller.m_types != callee.m_types) {
+        return false;
+      }
+      if (!thisAvailable(env)) return false;
+      auto const loc = topStkEquiv(env, fca.numInputs() + numExtraInputs + 1);
+      return loc == StackThisId || (loc <= MaxLocalId && locIsThis(env, loc));
+    }
+    case CoeffectRule::Type::FunParam:
+    case CoeffectRule::Type::CCParam:
+    case CoeffectRule::Type::CCReified:
+      // TODO: optimize these
+      return false;
+    case CoeffectRule::Type::ClosureParentScope:
+    case CoeffectRule::Type::GeneratorThis:
+    case CoeffectRule::Type::Caller:
+    case CoeffectRule::Type::Invalid:
+      return false;
+  }
+  not_reached();
+}
+
+bool fcallCanSkipCoeffectsCheck(ISS& env,
+                                const FCallArgs& fca,
+                                const res::Func& func,
+                                uint32_t numExtraInputs) {
   auto const requiredCoeffectsOpt = func.requiredCoeffects();
   if (!requiredCoeffectsOpt) return false;
   auto const required = *requiredCoeffectsOpt;
   auto const provided =
     RuntimeCoeffects::fromValue(env.ctx.func->requiredCoeffects.value() |
                                 env.ctx.func->coeffectEscapes.value());
-  return provided.canCall(required);
+  if (!provided.canCall(required)) return false;
+  auto const calleeRules = func.coeffectRules();
+  // If we couldn't tell whether callee has rules or not, punt.
+  if (!calleeRules) return false;
+  if (calleeRules->empty()) return true;
+  if (calleeRules->size() == 1 && (*calleeRules)[0].isCaller()) return true;
+  auto const callerRules = env.ctx.func->coeffectRules;
+  return std::is_permutation(callerRules.begin(), callerRules.end(),
+                             calleeRules->begin(), calleeRules->end(),
+                             [&] (const CoeffectRule& a,
+                                  const CoeffectRule& b) {
+                               return coeffectRulesMatch(env, fca, func,
+                                                         numExtraInputs,
+                                                         a, b);
+                              });
 }
 
 template<typename FCallWithFCA>
@@ -3332,7 +3379,8 @@ bool fcallOptimizeChecks(
   const res::Func& func,
   FCallWithFCA fcallWithFCA,
   Optional<uint32_t> inOutNum,
-  bool maybeNullsafe
+  bool maybeNullsafe,
+  uint32_t numExtraInputs
 ) {
   // Don't optimize away in-out checks if we might use the null safe
   // operator. If we do so, we need the in-out bits to shuffle the
@@ -3434,7 +3482,8 @@ bool fcallOptimizeChecks(
     return true;
   }
 
-  if (!fca.skipCoeffectsCheck() && fcallCanSkipCoeffectsCheck(env, func)) {
+  if (!fca.skipCoeffectsCheck() &&
+      fcallCanSkipCoeffectsCheck(env, fca, func, numExtraInputs)) {
     reduce(env, fcallWithFCA(fca.withoutCoeffectsCheck()));
     return true;
   }
@@ -3699,7 +3748,7 @@ void in(ISS& env, const bc::FCallFuncD& op) {
     ? env.index.lookup_num_inout_params(env.ctx, rfunc)
     : std::nullopt;
 
-  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut, false) ||
+  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut, false, 0) ||
       fcallTryFold(env, op.fca, rfunc, TBottom, false, 0)) {
     return;
   }
@@ -3762,7 +3811,7 @@ void fcallFuncStr(ISS& env, const bc::FCallFunc& op) {
     ? env.index.lookup_num_inout_params(env.ctx, rfunc)
     : std::nullopt;
 
-  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut, false)) {
+  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut, false, 0)) {
     return;
   }
   fcallKnownImpl(env, op.fca, rfunc, TBottom, false, 1, updateBC, numInOut);
@@ -4019,10 +4068,11 @@ void fcallObjMethodImpl(ISS& env, const Op& op, SString methName, bool dynamic,
     : std::nullopt;
 
   auto const canFold = !mayUseNullsafe && !mayThrowNonObj;
+  auto const numExtraInputs = extraInput ? 1 : 0;
   if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC,
-                          numInOut, mayUseNullsafe) ||
+                          numInOut, mayUseNullsafe, numExtraInputs) ||
       (canFold && fcallTryFold(env, op.fca, rfunc, ctxTy, dynamic,
-                               extraInput ? 1 : 0))) {
+                               numExtraInputs))) {
     return;
   }
 
@@ -4114,7 +4164,8 @@ void fcallClsMethodImpl(ISS& env, const Op& op, Type clsTy, SString methName,
     ? env.index.lookup_num_inout_params(env.ctx, rfunc)
     : std::nullopt;
 
-  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut, false) ||
+  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut, false,
+                          numExtraInputs) ||
       fcallTryFold(env, op.fca, rfunc, clsTy, dynamic, numExtraInputs)) {
     return;
   }
@@ -4214,9 +4265,11 @@ void fcallClsMethodSImpl(ISS& env, const Op& op, SString methName, bool dynamic,
     ? env.index.lookup_num_inout_params(env.ctx, rfunc)
     : std::nullopt;
 
-  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut, false) ||
+  auto const numExtraInputs = extraInput ? 1 : 0;
+  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut, false,
+                          numExtraInputs) ||
       fcallTryFold(env, op.fca, rfunc, ctxCls(env), dynamic,
-                   extraInput ? 1 : 0)) {
+                   numExtraInputs)) {
     return;
   }
 
@@ -4419,7 +4472,7 @@ void in(ISS& env, const bc::FCallCtor& op) {
     : std::nullopt;
 
   auto const canFold = obj.subtypeOf(BObj);
-  if (fcallOptimizeChecks(env, op.fca, *rfunc, updateFCA, numInOut, false) ||
+  if (fcallOptimizeChecks(env, op.fca, *rfunc, updateFCA, numInOut, false, 0) ||
       (canFold && fcallTryFold(env, op.fca, *rfunc,
                                obj, false /* dynamic */, 0))) {
     return;

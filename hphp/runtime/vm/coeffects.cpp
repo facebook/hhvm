@@ -387,6 +387,14 @@ std::string CoeffectRule::getDirectiveString() const {
   not_reached();
 }
 
+bool CoeffectRule::operator==(const CoeffectRule& o) const {
+  return m_type == o.m_type &&
+         m_isClass == o.m_isClass &&
+         m_index == o.m_index &&
+         m_types == o.m_types &&
+         m_name == o.m_name;
+}
+
 template<class SerDe>
 void CoeffectRule::serde(SerDe& sd) {
   sd(m_type)

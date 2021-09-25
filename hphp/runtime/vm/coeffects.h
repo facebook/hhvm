@@ -190,10 +190,11 @@ struct CoeffectRule final {
   Optional<std::string> toString(const Func*) const;
   std::string getDirectiveString() const;
 
+  bool operator==(const CoeffectRule&) const;
+
   template<class SerDe>
   void serde(SerDe&);
 
-private:
   enum class Type {
     Invalid = 0,
 

@@ -1037,25 +1037,28 @@ const RuntimeCoeffects* Func::requiredCoeffects() const {
   );
 }
 
-TriBool Func::hasCoeffectRules() const {
-  auto const get = [&](const php::Func* f) { return !f->coeffectRules.empty(); };
-  return match<TriBool>(
+const CompactVector<CoeffectRule>* Func::coeffectRules() const {
+  auto const get = [&](const php::Func* f) { return &f->coeffectRules; };
+  return match<const CompactVector<CoeffectRule>*>(
     val,
-    [&] (FuncName) { return TriBool::Maybe; },
-    [&] (MethodName) { return TriBool::Maybe; },
-    [&] (FuncInfo* fi) { return yesOrNo(get(fi->func)); },
-    [&] (const MethTabEntryPair* mte) { return yesOrNo(get(mte->second.func)); },
-    [&] (FuncFamily* fa) {
-      Optional<bool> result;
+    [&] (FuncName) { return nullptr; },
+    [&] (MethodName) { return nullptr; },
+    [&] (FuncInfo* fi) { return get(fi->func); },
+    [&] (const MethTabEntryPair* mte) { return get(mte->second.func); },
+    [&] (FuncFamily* fa) -> const CompactVector<CoeffectRule>* {
+      const CompactVector<CoeffectRule>* result = nullptr;
       for (auto const pf : fa->possibleFuncs()) {
         if (!result) {
           result = get(pf->second.func);
           continue;
         }
-        if (get(pf->second.func) != *result) return TriBool::Maybe;
+        auto const cur = get(pf->second.func);
+        if (!std::is_permutation(cur->begin(), cur->end(),
+                                 result->begin(), result->end())) {
+          return nullptr;
+        }
       }
-      assertx(result);
-      return yesOrNo(*result);
+      return result;
     }
   );
 }

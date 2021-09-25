@@ -34,6 +34,9 @@ let direct_decl_parse_and_cache
 let shallow_decl_enabled ctx =
   TypecheckerOptions.shallow_class_decl (Provider_context.get_tcopt ctx)
 
+let force_shallow_decl_fanout_enabled (ctx : Provider_context.t) =
+  TypecheckerOptions.force_shallow_decl_fanout (Provider_context.get_tcopt ctx)
+
 let use_direct_decl_parser ctx =
   TypecheckerOptions.use_direct_decl_parser (Provider_context.get_tcopt ctx)
 
@@ -53,7 +56,9 @@ let decl (ctx : Provider_context.t) (class_ : Nast.class_) : shallow_class =
   | Provider_backend.Analysis -> failwith "invalid"
   | Provider_backend.Shared_memory ->
     let decl = class_naming_and_decl ctx class_ in
-    if shallow_decl_enabled ctx && not (Shallow_classes_heap.Classes.mem name)
+    if
+      (shallow_decl_enabled ctx || force_shallow_decl_fanout_enabled ctx)
+      && not (Shallow_classes_heap.Classes.mem name)
     then (
       Shallow_classes_heap.Classes.add name decl;
       Shallow_classes_heap.MemberFilters.add decl
@@ -91,7 +96,10 @@ let get (ctx : Provider_context.t) (name : string) : shallow_class option =
             | None -> err_not_found path name
             | Some class_ ->
               let decl = class_naming_and_decl ctx class_ in
-              if shallow_decl_enabled ctx then (
+              if
+                shallow_decl_enabled ctx
+                || force_shallow_decl_fanout_enabled ctx
+              then (
                 Shallow_classes_heap.Classes.add name decl;
                 Shallow_classes_heap.MemberFilters.add decl
               );

@@ -1534,7 +1534,11 @@ functor
         time_errors_pushed;
         old_decl_missing_count;
       } =
-        if shallow_decl_enabled ctx then
+        if
+          shallow_decl_enabled ctx
+          || TypecheckerOptions.force_shallow_decl_fanout
+               (Provider_context.get_tcopt ctx)
+        then
           {
             errors_after_phase2 = errors;
             needs_phase2_redecl = Relative_path.Set.empty;

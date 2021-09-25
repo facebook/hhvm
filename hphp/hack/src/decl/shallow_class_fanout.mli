@@ -12,3 +12,9 @@ val fanout_of_changes :
   get_classes_in_file:(Relative_path.t -> SSet.t) ->
   (string * ClassDiff.t) list ->
   AffectedDeps.t
+
+val class_names_from_deps :
+  ctx:Provider_context.t ->
+  get_classes_in_file:(Relative_path.t -> SSet.t) ->
+  Typing_deps.DepSet.t ->
+  SSet.t

@@ -203,7 +203,10 @@ let merge_saved_state_futures
         ~ignore_hh_version
         ~fail_if_missing;
       let load_decls = genv.local_config.SLC.load_decls_from_saved_state in
-      let shallow_decls = genv.local_config.SLC.shallow_class_decl in
+      let shallow_decls =
+        genv.local_config.SLC.shallow_class_decl
+        || genv.local_config.SLC.force_shallow_decl_fanout
+      in
       let naming_table_fallback_path =
         get_naming_table_fallback_path genv downloaded_naming_table_path
       in

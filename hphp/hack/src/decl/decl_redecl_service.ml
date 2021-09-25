@@ -32,6 +32,9 @@ let lvl = Hh_logger.Level.Debug
 let shallow_decl_enabled (ctx : Provider_context.t) =
   TypecheckerOptions.shallow_class_decl (Provider_context.get_tcopt ctx)
 
+let force_shallow_decl_fanout_enabled (ctx : Provider_context.t) =
+  TypecheckerOptions.force_shallow_decl_fanout (Provider_context.get_tcopt ctx)
+
 (*****************************************************************************)
 (* The neutral element of declaration (cf procs/multiWorker.mli) *)
 (*****************************************************************************)
@@ -181,7 +184,7 @@ let compute_deps ctx fast (filel : Relative_path.t list) =
   in
 
   let (acc, old_classes_missing) =
-    if shallow_decl_enabled ctx then
+    if shallow_decl_enabled ctx || force_shallow_decl_fanout_enabled ctx then
       (acc, 0)
     else
       let old_classes = Decl_heap.Classes.get_old_batch n_classes in
@@ -552,6 +555,23 @@ let get_elems
     in
     elements
 
+let invalidate_folded_classes_for_shallow_fanout
+    ctx workers ~bucket_size ~get_classes_in_file changed_classes =
+  let invalidated =
+    changed_classes
+    |> Typing_deps.add_extend_deps (Provider_context.get_deps_mode ctx)
+    |> Shallow_class_fanout.class_names_from_deps ~ctx ~get_classes_in_file
+  in
+  let get_elems n_classes =
+    get_elems ctx workers ~bucket_size FileInfo.{ empty_names with n_classes }
+  in
+  Decl_class_elements.remove_old_all (get_elems invalidated ~old:true);
+  Decl_class_elements.remove_all (get_elems invalidated ~old:false);
+  Decl_heap.Classes.remove_old_batch invalidated;
+  Decl_heap.Classes.remove_batch invalidated;
+  SharedMem.GC.collect `gentle;
+  ()
+
 (*****************************************************************************)
 (* The main entry point *)
 (*****************************************************************************)
@@ -581,6 +601,7 @@ let redo_type_decl
   let oldified_elems = get_elems oldified_defs ~old:true in
   let all_elems = SMap.union current_elems oldified_elems in
   let fnl = Relative_path.Map.keys defs in
+
   (* If there aren't enough files, let's do this ourselves ... it's faster! *)
   let ((errors, changed, to_redecl, to_recheck), old_decl_missing_count) =
     if List.length fnl < 10 then
@@ -609,6 +630,26 @@ let redo_type_decl
                SSet.union acc (get_classes path))
       in
       Linearization_provider.remove_batch ctx mro_invalidated;
+      (changed, to_recheck)
+    ) else if force_shallow_decl_fanout_enabled ctx then (
+      let AffectedDeps.
+            { changed = changed'; mro_invalidated = _; needs_recheck } =
+        Shallow_decl_compare.compute_class_fanout
+          ctx
+          ~get_classes_in_file:get_classes
+          fnl
+      in
+
+      invalidate_folded_classes_for_shallow_fanout
+        ctx
+        workers
+        ~bucket_size
+        ~get_classes_in_file:get_classes
+        changed';
+
+      let changed = DepSet.union changed changed' in
+      let to_recheck = DepSet.union to_recheck needs_recheck in
+
       (changed, to_recheck)
     ) else
       (changed, to_recheck)

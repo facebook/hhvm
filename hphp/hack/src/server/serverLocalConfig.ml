@@ -478,6 +478,9 @@ type t = {
   (* Look up class members lazily from shallow declarations instead of eagerly
      computing folded declarations representing the entire class type. *)
   shallow_class_decl: bool;
+  (* Use fanout algorithm based solely on shallow decl comparison. This is the
+     default in shallow decl mode. Use this option if using folded decls. *)
+  force_shallow_decl_fanout: bool;
   (* Skip checks on hierarchy e.g. overrides, require extend, etc.
      Set to true only for debugging purposes! *)
   skip_hierarchy_checks: bool;
@@ -619,6 +622,7 @@ let default =
     load_decls_from_saved_state = false;
     idle_gc_slice = 0;
     shallow_class_decl = false;
+    force_shallow_decl_fanout = false;
     skip_hierarchy_checks = false;
     num_local_workers = None;
     parallel_type_checking_threshold = 10;
@@ -1126,6 +1130,13 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
+  let force_shallow_decl_fanout =
+    bool_if_min_version
+      "force_shallow_decl_fanout"
+      ~default:default.force_shallow_decl_fanout
+      ~current_version
+      config
+  in
   let skip_hierarchy_checks =
     bool_if_min_version
       "skip_hierarchy_checks"
@@ -1339,6 +1350,14 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
+  let force_shallow_decl_fanout =
+    if not use_direct_decl_parser then (
+      Hh_logger.warn
+        "Direct decl parser off while using shallow decl fanout. Turning off shallow decl fanout";
+      false
+    ) else
+      force_shallow_decl_fanout
+  in
   {
     min_log_level;
     attempt_fix_credentials;
@@ -1394,6 +1413,7 @@ let load_ fn ~silent ~current_version overrides =
     load_decls_from_saved_state;
     idle_gc_slice;
     shallow_class_decl;
+    force_shallow_decl_fanout;
     skip_hierarchy_checks;
     num_local_workers;
     parallel_type_checking_threshold;

@@ -375,6 +375,8 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
         (ServerArgs.log_inference_constraints options)
       ~tco_migration_flags:(config_tc_migration_flags config)
       ~tco_shallow_class_decl:local_config.ServerLocalConfig.shallow_class_decl
+      ~tco_force_shallow_decl_fanout:
+        local_config.ServerLocalConfig.force_shallow_decl_fanout
       ~tco_skip_hierarchy_checks:
         local_config.ServerLocalConfig.skip_hierarchy_checks
       ~po_allow_unstable_features:

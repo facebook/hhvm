@@ -3331,8 +3331,19 @@ bool coeffectRulesMatch(ISS& env,
       auto const loc = topStkEquiv(env, fca.numInputs() + numExtraInputs + 1);
       return loc == StackThisId || (loc <= MaxLocalId && locIsThis(env, loc));
     }
-    case CoeffectRule::Type::FunParam:
     case CoeffectRule::Type::CCParam:
+      if (caller.m_name != callee.m_name) return false;
+      // fallthrough
+    case CoeffectRule::Type::FunParam: {
+      if (fca.hasUnpack()) return false;
+      if (fca.numArgs() <= callee.m_index) return false;
+      auto const l1 = caller.m_index;
+      auto const l2 = topStkEquiv(env, fca.numInputs() - callee.m_index - 1);
+      return l1 == l2 ||
+             (l1 <= MaxLocalId &&
+              l2 <= MaxLocalId &&
+              locsAreEquiv(env, l1, l2));
+    }
     case CoeffectRule::Type::CCReified:
       // TODO: optimize these
       return false;

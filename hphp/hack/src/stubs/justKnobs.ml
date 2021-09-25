@@ -10,4 +10,6 @@
    it without updating sites where we look for it. *)
 let eval ?hash:_ ?switch:_ _ = Error "Not implemented: JustKnobs.eval"
 
+(* NB: This error string is matched against in ServerLocalConfig. Don't change
+   it without updating sites where we look for it. *)
 let get ?switch:_ _ = Error "Not implemented: JustKnobs.get"

@@ -570,6 +570,7 @@ private:
   friend Type loosen_emptiness(Type);
   friend Type loosen_likeness(Type);
   friend Type loosen_likeness_recursively(Type);
+  friend Type loosen_to_datatype(Type);
   friend Type add_nonemptiness(Type);
   friend Type assert_emptiness(Type);
   friend Type assert_nonemptiness(Type);
@@ -1273,6 +1274,12 @@ Type loosen_likeness_recursively(Type t);
  * to its most basic form (except for object class information).
  */
 Type loosen_all(Type t);
+
+/*
+ * Like loosen_all, but also drops all object/class information. This
+ * puts a type into it's most basic form.
+ */
+Type loosen_to_datatype(Type t);
 
 /*
  * If t contains TUninit, returns the best type we can that contains

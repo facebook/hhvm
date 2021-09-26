@@ -5006,6 +5006,17 @@ Type loosen_all(Type t) {
     );
 }
 
+Type loosen_to_datatype(Type t) {
+  if (t.couldBe(BFalse) || t.couldBe(BTrue)) t |= TBool;
+  return loosen_staticness(
+    loosen_emptiness(
+      loosen_likeness(
+        Type { t.bits(), t.m_ham }
+      )
+    )
+  );
+}
+
 Type add_nonemptiness(Type t) {
   auto const check = [&] (trep a, trep b) {
     if (t.couldBe(a)) t.m_bits |= b;

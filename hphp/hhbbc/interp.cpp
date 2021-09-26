@@ -1452,7 +1452,7 @@ bool cmpWillThrow(const Type& t1, const Type& t2) {
    // relational comparisons allow for int v dbl
   if (couldBeIntAndDbl(t1, t2) || couldBeIntAndDbl(t2, t1)) return false;
 
-  return !loosen_all(t1).couldBe(loosen_all(t2));
+  return !loosen_to_datatype(t1).couldBe(loosen_to_datatype(t2));
 }
 
 void eqImpl(ISS& env, bool eq) {
@@ -1473,10 +1473,11 @@ void eqImpl(ISS& env, bool eq) {
   });
 }
 
-bool shortCircuitRelationalComparison(ISS& env, const Type& t1, const Type& t2) {
+bool cmpThrowCheck(ISS& env, const Type& t1, const Type& t2) {
   if (!cmpWillThrow(t1, t2)) return false;
   discard(env, 2);
   push(env, TBottom);
+  unreachable(env);
   return true;
 }
 
@@ -1486,26 +1487,26 @@ void in(ISS& env, const bc::Eq&) { eqImpl(env, true); }
 void in(ISS& env, const bc::Neq&) { eqImpl(env, false); }
 
 void in(ISS& env, const bc::Lt&) {
-  if (shortCircuitRelationalComparison(env, topC(env, 0), topC(env, 1))) return;
+  if (cmpThrowCheck(env, topC(env, 0), topC(env, 1))) return;
   cmpImpl(env, static_cast<bool (*)(TypedValue, TypedValue)>(tvLess));
 }
 void in(ISS& env, const bc::Gt&) {
-  if (shortCircuitRelationalComparison(env, topC(env, 0), topC(env, 1))) return;
+  if (cmpThrowCheck(env, topC(env, 0), topC(env, 1))) return;
   cmpImpl(env, static_cast<bool (*)(TypedValue, TypedValue)>(tvGreater));
 }
 void in(ISS& env, const bc::Lte&) {
-  if (shortCircuitRelationalComparison(env, topC(env, 0), topC(env, 1))) return;
+  if (cmpThrowCheck(env, topC(env, 0), topC(env, 1))) return;
   cmpImpl(env, tvLessOrEqual);
 }
 void in(ISS& env, const bc::Gte&) {
-  if (shortCircuitRelationalComparison(env, topC(env, 0), topC(env, 1))) return;
+  if (cmpThrowCheck(env, topC(env, 0), topC(env, 1))) return;
   cmpImpl(env, tvGreaterOrEqual);
 }
 
 void in(ISS& env, const bc::Cmp&) {
   auto const t1 = topC(env, 0);
   auto const t2 = topC(env, 1);
-  if (shortCircuitRelationalComparison(env, t1, t2)) return;
+  if (cmpThrowCheck(env, t1, t2)) return;
   discard(env, 2);
   if (t1 == t2) {
     auto const v1 = tv(t1);

@@ -485,10 +485,10 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
 
   [[noreturn]] NEVER_INLINE
   void throwMutateConstProp(Slot prop) const;
-  void throwMustBeMutable(Slot prop) const;
-  void throwMustBeEnclosedInReadonly(Slot prop) const;
-  void throwMustBeReadonly(Slot prop) const;
-  void throwMustBeValueType(Slot prop) const;
+  void throwOrWarnMustBeMutable(Slot prop) const;
+  void throwOrWarnMustBeEnclosedInReadonly(Slot prop) const;
+  void throwOrWarnMustBeReadonly(Slot prop) const;
+  void throwOrWarnMustBeValueType(Slot prop) const;
 
  public:
   // never box the lval returned from getPropLval; use propB instead

@@ -2070,12 +2070,6 @@ To string conversions:
 
   Raises a notice with the text in S0 as its message.
 
-| RaiseReadonlyPropViolation<cls, flag>, ND, S(Str), NF
-
-  Raises a warning indicating a readonly semantics violation. Cls is the class
-  the property was declared on. Flag is the readonly rule we are enforcing.
-  S0 is the property name.
-
 | ThrowHasThisNeedStatic, ND, S(Func), T
 
   Throws a BadMethodCallException to indicate that func was called on an object
@@ -3226,27 +3220,27 @@ fields of that struct for holding intermediate values.
   Throws a RuntimeException if calling a function with an argument that has the
   wrong type
 
-| ThrowMustBeMutableException<cls>, ND, S(Str), NF
+| ThrowOrWarnMustBeMutableException<cls>, ND, S(Str), NF
 
   Throws an InvalidOperationException indicating a readonly semantics violation
   where the property was required to be mutable. cls is the class the property
   was declared on. S0 is the property name. Raises a warning if
   EnableReadonlyPropertyEnforcement=1.
 
-| ThrowMustBeReadonlyException<cls>, ND, S(Str), NF
+| ThrowOrWarnMustBeReadonlyException<cls>, ND, S(Str), NF
 
   Throws an InvalidOperationException indicating a readonly semantics violation
   where the property was required to be readonly. cls is the class the property
   was declared on. S0 is the property name. Raises a warning if
   EnableReadonlyPropertyEnforcement=1.
 
-| ThrowMustBeValueTypeException, ND, S(Str), NF
+| ThrowOrWarnMustBeValueTypeException, ND, S(Str), NF
 
   Throws an InvalidOperationException indicating a readonly semantics violation
   where the local was required to be a value type. S0 is the local name. Raises
   a warning if EnableReadonlyPropertyEnforcement=1.
 
-| ThrowMustBeEnclosedInReadonly<cls>, ND, S(Str), NF
+| ThrowOrWarnMustBeEnclosedInReadonly<cls>, ND, S(Str), NF
 
   Throws an InvalidOperationException indicating a readonly semantics violation
   where the property was required to be enclosed in a readonly expression. cls

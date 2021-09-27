@@ -191,35 +191,20 @@ void throwArrayKeyException(const ArrayData* ad, const StringData* key) {
   throwOOBArrayKeyException(key, ad);
 }
 
-void throwMustBeEnclosedInReadonly(const Class* cls, const StringData* propName) {
-  throw_must_be_enclosed_in_readonly(cls->name()->data(), propName->data());
+void throwOrWarnMustBeEnclosedInReadonly(const Class* cls, const StringData* propName) {
+  throw_or_warn_must_be_enclosed_in_readonly(cls->name()->data(), propName->data());
 }
 
-void throwMustBeReadonlyException(const Class* cls, const StringData* propName) {
-  throw_must_be_readonly(cls->name()->data(), propName->data());
+void throwOrWarnMustBeReadonlyException(const Class* cls, const StringData* propName) {
+  throw_or_warn_must_be_readonly(cls->name()->data(), propName->data());
 }
 
-void throwMustBeMutableException(const Class* cls, const StringData* propName) {
-  throw_must_be_mutable(cls->name()->data(), propName->data());
+void throwOrWarnMustBeMutableException(const Class* cls, const StringData* propName) {
+  throw_or_warn_must_be_mutable(cls->name()->data(), propName->data());
 }
 
-void throwMustBeValueTypeException(const StringData* locName) {
-  throw_local_must_be_value_type(locName->data());
-}
-
-void raiseReadonlyViolationWarning(ReadonlyViolation rv, const Class* cls, const StringData* propName) {
-  switch (rv) {
-    case ReadonlyViolation::Readonly:
-      throw_must_be_readonly(cls->name()->data(), propName->data());
-      return;
-    case ReadonlyViolation::Mutable:
-      throw_must_be_mutable(cls->name()->data(), propName->data());
-      return;
-    case ReadonlyViolation::EnclosedInRO:
-       throw_must_be_enclosed_in_readonly(cls->name()->data(), propName->data());
-      return;
-  }
-  not_reached();
+void throwOrWarnMustBeValueTypeException(const StringData* locName) {
+  throw_or_warn_local_must_be_value_type(locName->data());
 }
 
 std::string formatParamInOutMismatch(const char* fname, uint32_t index,

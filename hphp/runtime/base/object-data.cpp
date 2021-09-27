@@ -1104,32 +1104,32 @@ void ObjectData::throwMutateConstProp(Slot prop) const {
 }
 
 NEVER_INLINE
-void ObjectData::throwMustBeMutable(Slot prop) const {
-  throw_must_be_mutable(
+void ObjectData::throwOrWarnMustBeMutable(Slot prop) const {
+  throw_or_warn_must_be_mutable(
     getClassName().data(),
     m_cls->declProperties()[prop].name->data()
   );
 }
 
 NEVER_INLINE
-void ObjectData::throwMustBeEnclosedInReadonly(Slot prop) const {
-  throw_must_be_enclosed_in_readonly(
+void ObjectData::throwOrWarnMustBeEnclosedInReadonly(Slot prop) const {
+  throw_or_warn_must_be_enclosed_in_readonly(
     getClassName().data(),
     m_cls->declProperties()[prop].name->data()
   );
 }
 
 NEVER_INLINE
-void ObjectData::throwMustBeReadonly(Slot prop) const {
-  throw_must_be_readonly(
+void ObjectData::throwOrWarnMustBeReadonly(Slot prop) const {
+  throw_or_warn_must_be_readonly(
     getClassName().data(),
     m_cls->declProperties()[prop].name->data()
   );
 }
 
 NEVER_INLINE
-void ObjectData::throwMustBeValueType(Slot prop) const {
-  throw_must_be_value_type(
+void ObjectData::throwOrWarnMustBeValueType(Slot prop) const {
+  throw_or_warn_must_be_value_type(
     getClassName().data(),
     m_cls->declProperties()[prop].name->data()
   );
@@ -1145,17 +1145,17 @@ void ObjectData::checkReadonly(const PropLookup& lookup, ReadonlyOp op,
       if (cow) {
         vmMInstrState().roProp = true;
       } else {
-        throwMustBeValueType(lookup.slot);
+        throwOrWarnMustBeValueType(lookup.slot);
       }
     } else if (op == ReadonlyOp::Mutable) {
       if (writeMode) {
-        throwMustBeMutable(lookup.slot);
+        throwOrWarnMustBeMutable(lookup.slot);
       } else {
-        throwMustBeEnclosedInReadonly(lookup.slot);
+        throwOrWarnMustBeEnclosedInReadonly(lookup.slot);
       }
     }
   } else if (op == ReadonlyOp::Readonly || op == ReadonlyOp::CheckROCOW) {
-    throwMustBeReadonly(lookup.slot);
+    throwOrWarnMustBeReadonly(lookup.slot);
   }
 }
 

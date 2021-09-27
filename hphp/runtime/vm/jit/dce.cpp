@@ -499,7 +499,6 @@ bool canDCE(IRInstruction* inst) {
   case RaiseErrorOnInvalidIsAsExpressionType:
   case RaiseWarning:
   case RaiseNotice:
-  case RaiseReadonlyPropViolation:
   case ThrowArrayIndexException:
   case ThrowArrayKeyException:
   case RaiseForbiddenDynCall:
@@ -650,10 +649,10 @@ bool canDCE(IRInstruction* inst) {
   case ThrowParameterWrongType:
   case ThrowInOutMismatch:
   case ThrowReadonlyMismatch:
-  case ThrowMustBeEnclosedInReadonly:
-  case ThrowMustBeMutableException:
-  case ThrowMustBeReadonlyException:
-  case ThrowMustBeValueTypeException:
+  case ThrowOrWarnMustBeEnclosedInReadonly:
+  case ThrowOrWarnMustBeMutableException:
+  case ThrowOrWarnMustBeReadonlyException:
+  case ThrowOrWarnMustBeValueTypeException:
   case StMBase:
   case StMROProp:
   case FinishMemberOp:

@@ -243,11 +243,11 @@ bool is_constructor_name(const char* func);
                                              unsigned int arg_num,
                                              const StringData* type);
 
-void throw_must_be_mutable(const char* className, const char* propName);
-void throw_must_be_readonly(const char* className, const char* propName);
-void throw_must_be_enclosed_in_readonly(const char* className, const char* propName);
-void throw_must_be_value_type(const char* className, const char* propName);
-void throw_local_must_be_value_type(const char* locName);
+void throw_or_warn_must_be_mutable(const char* className, const char* propName);
+void throw_or_warn_must_be_readonly(const char* className, const char* propName);
+void throw_or_warn_must_be_enclosed_in_readonly(const char* className, const char* propName);
+void throw_or_warn_must_be_value_type(const char* className, const char* propName);
+void throw_or_warn_local_must_be_value_type(const char* locName);
 void checkReadonly(const TypedValue* tv, const Class* cls, const StringData* name,
                    bool readonly, ReadonlyOp op, bool writeMode);
 bool readonlyLocalShouldThrow(TypedValue tv, ReadonlyOp op);

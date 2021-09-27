@@ -875,7 +875,7 @@ void throw_cannot_modify_static_const_prop(const char* className,
   SystemLib::throwInvalidOperationExceptionObject(msg);
 }
 
-void throw_local_must_be_value_type(const char* locName)
+void throw_or_warn_local_must_be_value_type(const char* locName)
 {
   if (RO::EvalEnableReadonlyPropertyEnforcement == 0) return;
   auto const msg = folly::sformat("Local {} must be a value type.", locName);
@@ -887,7 +887,7 @@ void throw_local_must_be_value_type(const char* locName)
 }
 
 namespace {
-void throw_readonly_violation(const char* className, const char* propName,
+void throw_or_warn_readonly_violation(const char* className, const char* propName,
                               const char* msg) {
   if (RO::EvalEnableReadonlyPropertyEnforcement == 0) return;
   if (RO::EvalEnableReadonlyPropertyEnforcement == 1) {
@@ -901,20 +901,20 @@ void throw_readonly_violation(const char* className, const char* propName,
 }
 }
 
-void throw_must_be_readonly(const char* className, const char* propName) {
-  throw_readonly_violation(className, propName, Strings::MUST_BE_READONLY);
+void throw_or_warn_must_be_readonly(const char* className, const char* propName) {
+  throw_or_warn_readonly_violation(className, propName, Strings::MUST_BE_READONLY);
 }
 
-void throw_must_be_mutable(const char* className, const char* propName) {
-  throw_readonly_violation(className, propName, Strings::MUST_BE_MUTABLE);
+void throw_or_warn_must_be_mutable(const char* className, const char* propName) {
+  throw_or_warn_readonly_violation(className, propName, Strings::MUST_BE_MUTABLE);
 }
 
-void throw_must_be_enclosed_in_readonly(const char* className, const char* propName) {
-  throw_readonly_violation(className, propName, Strings::MUST_BE_ENCLOSED_IN_READONLY);
+void throw_or_warn_must_be_enclosed_in_readonly(const char* className, const char* propName) {
+  throw_or_warn_readonly_violation(className, propName, Strings::MUST_BE_ENCLOSED_IN_READONLY);
 }
 
-void throw_must_be_value_type(const char* className, const char* propName) {
-  throw_readonly_violation(className, propName, Strings::MUST_BE_VALUE_TYPE);
+void throw_or_warn_must_be_value_type(const char* className, const char* propName) {
+  throw_or_warn_readonly_violation(className, propName, Strings::MUST_BE_VALUE_TYPE);
 }
 
 bool readonlyLocalShouldThrow(TypedValue tv, ReadonlyOp op) {
@@ -940,17 +940,17 @@ void checkReadonly(const TypedValue* tv,
       if (cow) {
         vmMInstrState().roProp = true;
       } else {
-        throw_must_be_value_type(cls->name()->data(), name->data());
+        throw_or_warn_must_be_value_type(cls->name()->data(), name->data());
       }
     } else if (op == ReadonlyOp::Mutable) {
       if (writeMode) {
-        throw_must_be_mutable(cls->name()->data(), name->data());
+        throw_or_warn_must_be_mutable(cls->name()->data(), name->data());
       } else {
-        throw_must_be_enclosed_in_readonly(cls->name()->data(), name->data());
+        throw_or_warn_must_be_enclosed_in_readonly(cls->name()->data(), name->data());
       }
     }
   } else if (op == ReadonlyOp::Readonly || op == ReadonlyOp::CheckROCOW) {
-    throw_must_be_readonly(cls->name()->data(), name->data());
+    throw_or_warn_must_be_readonly(cls->name()->data(), name->data());
   }
 }
 

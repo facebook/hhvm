@@ -1913,7 +1913,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case RaiseForbiddenDynCall:
   case RaiseForbiddenDynConstruct:
   case RaiseStrToClassNotice:
-  case RaiseReadonlyPropViolation:
   case CheckClsMethFunc:
   case CheckClsReifiedGenericMismatch:
   case CheckFunReifiedGenericMismatch:
@@ -1985,10 +1984,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ThrowParameterWrongType:
   case ArrayMarkLegacyShallow:
   case ArrayMarkLegacyRecursive:
-  case ThrowMustBeEnclosedInReadonly:
-  case ThrowMustBeMutableException:
-  case ThrowMustBeReadonlyException:
-  case ThrowMustBeValueTypeException:
+  case ThrowOrWarnMustBeEnclosedInReadonly:
+  case ThrowOrWarnMustBeMutableException:
+  case ThrowOrWarnMustBeReadonlyException:
+  case ThrowOrWarnMustBeValueTypeException:
   case ArrayUnmarkLegacyShallow:
   case ArrayUnmarkLegacyRecursive:
   case SetOpTV:

@@ -406,7 +406,6 @@ bool opcodeMayRaise(Opcode opc) {
   case RaiseErrorOnInvalidIsAsExpressionType:
   case RaiseForbiddenDynCall:
   case RaiseForbiddenDynConstruct:
-  case RaiseReadonlyPropViolation:
   case RaiseNotice:
   case RaiseStrToClassNotice:
   case RaiseTooManyArg:
@@ -449,10 +448,10 @@ bool opcodeMayRaise(Opcode opc) {
   case ThrowMissingThis:
   case ThrowOutOfBounds:
   case ThrowParameterWrongType:
-  case ThrowMustBeEnclosedInReadonly:
-  case ThrowMustBeMutableException:
-  case ThrowMustBeReadonlyException:
-  case ThrowMustBeValueTypeException:
+  case ThrowOrWarnMustBeEnclosedInReadonly:
+  case ThrowOrWarnMustBeMutableException:
+  case ThrowOrWarnMustBeReadonlyException:
+  case ThrowOrWarnMustBeValueTypeException:
   case UnsetElem:
   case UnsetProp:
   case VecSet:

@@ -64,6 +64,9 @@ fn mk_builder(opts: &Opt) -> Builder {
         builder = builder.with_src(src)
     }
     for inc in opts.includes.iter() {
+        if inc.is_empty() {
+            continue;
+        }
         builder = builder.with_include(inc)
     }
     match &opts.namespaces[..] {

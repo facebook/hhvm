@@ -307,6 +307,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "cbindgen"
+version = "0.20.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "51e3973b165dc0f435831a9e426de67e894de532754ff7a3f307c03ee5dec7dc"
+dependencies = [
+ "clap",
+ "heck",
+ "indexmap",
+ "log",
+ "proc-macro2",
+ "quote",
+ "serde",
+ "serde_json",
+ "syn",
+ "tempfile",
+ "toml",
+]
+
+[[package]]
 name = "cc"
 version = "1.0.69"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -952,6 +971,14 @@ name = "ffi"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
+]
+
+[[package]]
+name = "ffi_cbindgen"
+version = "0.0.0"
+dependencies = [
+ "cbindgen",
+ "structopt",
 ]
 
 [[package]]
@@ -3650,6 +3677,15 @@ version = "0.0.0"
 dependencies = [
  "ocamlrep",
  "parser_core_types",
+]
+
+[[package]]
+name = "toml"
+version = "0.5.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a31142970826733df8241ef35dc040ef98c679ab14d7c3e54d827099b3acecaa"
+dependencies = [
+ "serde",
 ]
 
 [[package]]

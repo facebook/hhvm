@@ -17,15 +17,20 @@
 
 #pragma once
 
+#include <folly/Overload.h>
 #include <folly/io/IOBuf.h>
 #include <thrift/lib/cpp/transport/TTransportException.h>
 #include <thrift/lib/cpp2/async/ClientStreamBridge.h>
 #include <thrift/lib/cpp2/async/RequestCallback.h>
 #include <thrift/lib/cpp2/async/RequestChannel.h>
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
+#include <variant>
 #include <exception>
+#include <tuple>
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/type-resource.h"
+#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/ext/asio/asio-external-thread-event.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/vm/native-data.h"
@@ -333,6 +338,9 @@ struct TClientBufferedStream {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+using TClientSinkCreditsOrFinalResponse =
+    std::variant<uint32_t, std::unique_ptr<folly::IOBuf>, TClientStreamError>;
+
 const StaticString s_TClientSink("TClientSink");
 
 struct TClientSink {
@@ -463,6 +471,64 @@ struct Thrift2StreamEvent final : AsioExternalThreadEvent {
   // any error while processing queue, this should be returned as error message
   // along with the buffer and should be sequenced after any received payloads
   thrift::TClientStreamError error_;
+
+  // Unexpected server error which should be thrown immediately
+  std::unique_ptr<folly::IOBuf> serverError_;
+};
+
+struct ThriftSinkEvent final : AsioExternalThreadEvent {
+  ThriftSinkEvent() = default;
+
+  void finish(thrift::TClientSinkCreditsOrFinalResponse credits) {
+    creditsOrFinalResponse_ = std::move(credits);
+    markAsFinished();
+  }
+
+  void error(std::unique_ptr<folly::IOBuf> err) {
+    serverError_ = std::move(err);
+    markAsFinished();
+  }
+
+ protected:
+  // Called by PHP thread
+  void unserialize(TypedValue& result) final {
+    if (serverError_) {
+      throw_object(
+          "TTransportException",
+          make_vec_array(
+              ioBufToString(*serverError_),
+              0 // error code UNKNOWN
+              ));
+    }
+    auto responseStr = null_string;
+    auto errorStr = null_string;
+    uint32_t credits = 0;
+    folly::variant_match(
+        creditsOrFinalResponse_,
+        [&](const std::unique_ptr<folly::IOBuf>& finalResponse) {
+          responseStr = ioBufToString(*finalResponse);
+        },
+        [&](const thrift::TClientStreamError& finalResponseError) {
+          if (finalResponseError.errorMsg_) {
+            // Encoded stream exceptions need to be deserialized by generated
+            // code. Returning it as the response string so that it will be
+            // decoded
+            if (finalResponseError.isEncoded_) {
+              responseStr = ioBufToString(*finalResponseError.errorMsg_);
+            } else {
+              errorStr = ioBufToString(*finalResponseError.errorMsg_);
+            }
+          }
+        },
+        [&](const uint32_t& n) { credits = n; });
+    return tvCopy(
+        make_array_like_tv(
+            make_vec_array(credits, responseStr, errorStr).detach()),
+        result);
+  }
+
+ private:
+  thrift::TClientSinkCreditsOrFinalResponse creditsOrFinalResponse_;
 
   // Unexpected server error which should be thrown immediately
   std::unique_ptr<folly::IOBuf> serverError_;

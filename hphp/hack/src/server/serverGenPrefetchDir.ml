@@ -39,53 +39,58 @@ let save_contents (output_filename : string) (contents : 'a) : unit =
   Marshal.to_channel chan contents [];
   Stdlib.close_out chan
 
-let get_classes_from_file (file : Relative_path.t) (ctx : Provider_context.t) :
-    SSet.t =
-  (match
-     Direct_decl_utils.direct_decl_parse_and_cache
-       ~file_decl_hash:true
-       ~symbol_decl_hashes:false
-       ctx
-       file
-   with
+let get_decls_from_file (file : Relative_path.t) (ctx : Provider_context.t) :
+    (string * Int64.t) list =
+  match
+    Direct_decl_utils.direct_decl_parse_and_cache
+      ~file_decl_hash:true
+      ~symbol_decl_hashes:true
+      ctx
+      file
+  with
   | None -> []
-  | Some (decls, _, _, _) ->
-    List.filter_map
-      ~f:(fun (name, decl) ->
-        match decl with
-        | Shallow_decl_defs.Class _ -> Some name
-        | _ -> None)
-      decls)
-  |> SSet.of_list
+  | Some (decls, _, _, decl_hashes) ->
+    List.map
+      ~f:(fun ((name, _decl), decl_hash) -> (name, Option.value_exn decl_hash))
+      (List.zip_exn decls decl_hashes)
 
 let dump_folded_decls
     (ctx : Provider_context.t) (dir : string) (path : Relative_path.t) : unit =
-  let file_name = Relative_path.suffix path in
-  let classes_in_file = get_classes_from_file path ctx in
-  let folded_decls_in_file =
-    Decl_export.collect_legacy_decls ctx classes_in_file
-  in
-  let folded_decls_dir = Filename.concat dir "folded_decls" in
-  let file = file_name |> Filename.concat folded_decls_dir in
-  Sys_utils.mkdir_p (Filename.dirname file);
-  save_contents (get_folded_decls_filename file) folded_decls_in_file;
-  ()
+  let decls_in_file = get_decls_from_file path ctx in
+  List.iter
+    ~f:(fun (name, decl_hash) ->
+      let folded_decls_in_file =
+        Decl_export.collect_legacy_decls ctx (SSet.singleton name)
+      in
+      let folded_decls_dir = Filename.concat dir "folded_decls" in
+      let file =
+        Filename.concat folded_decls_dir @@ Int64.to_string decl_hash
+      in
+      Sys_utils.mkdir_p (Filename.dirname file);
+      save_contents (get_folded_decls_filename file) folded_decls_in_file)
+    decls_in_file
 
 let dump_shallow_decls
     (ctx : Provider_context.t)
     (genv : ServerEnv.genv)
     (dir : string)
     (path : Relative_path.t) : unit =
-  let file_name = Relative_path.suffix path in
-  let classes_in_file = get_classes_from_file path ctx in
-  let shallow_decls_in_file =
-    Decl_export.collect_shallow_decls ctx genv.ServerEnv.workers classes_in_file
-  in
-  let shallow_decls_dir = Filename.concat dir "shallow_decls" in
-  let file = file_name |> Filename.concat shallow_decls_dir in
-  Sys_utils.mkdir_p (Filename.dirname file);
-  save_contents (get_shallow_decls_filename file) shallow_decls_in_file;
-  ()
+  let decls_in_file = get_decls_from_file path ctx in
+  List.iter
+    ~f:(fun (name, decl_hash) ->
+      let shallow_decls_in_file =
+        Decl_export.collect_shallow_decls
+          ctx
+          genv.ServerEnv.workers
+          (SSet.singleton name)
+      in
+      let shallow_decls_dir = Filename.concat dir "shallow_decls" in
+      let file =
+        Int64.to_string decl_hash |> Filename.concat shallow_decls_dir
+      in
+      Sys_utils.mkdir_p (Filename.dirname file);
+      save_contents (get_shallow_decls_filename file) shallow_decls_in_file)
+    decls_in_file
 
 let get_project_metadata ~(repo : Path.t) ~ignore_hh_version :
     (string, string) result Future.Promise.t =
@@ -277,5 +282,4 @@ let go (env : ServerEnv.env) (genv : ServerEnv.genv) (dir : string) : unit =
     ~f:(fun path ->
       dump_shallow_decls ctx genv dir path;
       dump_folded_decls ctx dir path)
-    changed_files;
-  ()
+    changed_files

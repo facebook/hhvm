@@ -56,13 +56,15 @@ let decl (ctx : Provider_context.t) (class_ : Nast.class_) : shallow_class =
   | Provider_backend.Analysis -> failwith "invalid"
   | Provider_backend.Shared_memory ->
     let decl = class_naming_and_decl ctx class_ in
-    if
-      (shallow_decl_enabled ctx || force_shallow_decl_fanout_enabled ctx)
-      && not (Shallow_classes_heap.Classes.mem name)
+    if shallow_decl_enabled ctx && not (Shallow_classes_heap.Classes.mem name)
     then (
       Shallow_classes_heap.Classes.add name decl;
       Shallow_classes_heap.MemberFilters.add decl
-    );
+    ) else if
+        force_shallow_decl_fanout_enabled ctx
+        && not (Shallow_classes_heap.Classes.mem name)
+      then
+      Shallow_classes_heap.Classes.add name decl;
     decl
   | Provider_backend.Local_memory _ -> class_naming_and_decl ctx class_
   | Provider_backend.Decl_service _ ->
@@ -96,13 +98,11 @@ let get (ctx : Provider_context.t) (name : string) : shallow_class option =
             | None -> err_not_found path name
             | Some class_ ->
               let decl = class_naming_and_decl ctx class_ in
-              if
-                shallow_decl_enabled ctx
-                || force_shallow_decl_fanout_enabled ctx
-              then (
+              if shallow_decl_enabled ctx then (
                 Shallow_classes_heap.Classes.add name decl;
                 Shallow_classes_heap.MemberFilters.add decl
-              );
+              ) else if force_shallow_decl_fanout_enabled ctx then
+                Shallow_classes_heap.Classes.add name decl;
               decl)))
   | Provider_backend.Local_memory { Provider_backend.shallow_decl_cache; _ } ->
     Provider_backend.Shallow_decl_cache.find_or_add

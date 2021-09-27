@@ -133,13 +133,69 @@ add_custom_target(
   COMMENT "Compiling Rust FFI"
 )
 
-# Compiling cxx entrypoints for hhvm
 if(DEFINED ENV{HACKDEBUG})
   set(PROFILE "debug")
 else()
   set(PROFILE "release")
 endif()
 
+set(HHBC_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/src/hhbc/hhbc_by_ref")
+set(HHBC_AST_SRCS
+  "hhas_adata.rs"
+  "hhas_attribute.rs"
+  "hhas_body.rs"
+  "hhas_class.rs"
+  "hhas_coeffects.rs"
+  "hhas_constant.rs"
+  "hhas_function.rs"
+  "hhas_method.rs"
+  "hhas_param.rs"
+  "hhas_pos.rs"
+  "hhas_program.rs"
+  "hhas_property.rs"
+  "hhas_record_def.rs"
+  "hhas_symbol_refs.rs"
+  "hhas_type.rs"
+  "hhas_type_const.rs"
+  "hhas_typedef.rs"
+  "hhbc_ast.rs"
+  "hhbc_id.rs"
+  "instruction_sequence.rs"
+  "label.rs"
+  "local.rs"
+  "symbol_refs_state.rs"
+  "typed_value.rs"
+)
+
+foreach(src ${HHBC_AST_SRCS})
+  string(APPEND HHBC_AST_SRC_ARG "${HHBC_PREFIX}/${src},")
+endforeach()
+
+set(HHBC_AST_HEADER "${RUST_FFI_BUILD_ROOT}/hphp/hack/src/hhbc/hhbc_by_ref/hhbc-ast.h")
+set(FFI_HEADER "${RUST_FFI_BUILD_ROOT}/hphp/hack/src/utils/ffi.h")
+add_custom_command(
+  OUTPUT ${HHBC_AST_HEADER}
+  COMMAND
+   . "${CMAKE_CURRENT_BINARY_DIR}/dev_env_rust_only.sh" &&
+    ${CARGO_BUILD} ffi_cbindgen ffi_cbindgen --exe
+      --header "${FFI_HEADER}" --srcs "${CMAKE_CURRENT_SOURCE_DIR}/src/utils/ffi/ffi.rs"
+      --namespaces "HPHP,hackc" &&
+    ${CARGO_BUILD} ffi_cbindgen ffi_cbindgen --exe
+      --header "${HHBC_AST_HEADER}" --srcs "${HHBC_AST_SRC_ARG}" --namespaces "HPHP,hackc,hhbc"
+      --includes "${FFI_HEADER}"
+  DEPENDS rustc cargo
+  COMMENT "Generating hhbc-ast.h"
+)
+
+add_custom_target(
+  "hhbc_ast_cbindgen"
+  DEPENDS ${HHBC_AST_HEADER}
+)
+
+add_library("hhbc_ast_header" INTERFACE)
+add_dependencies("hhbc_ast_header" "hhbc_ast_cbindgen")
+
+# Compiling cxx entrypoints for hhvm
 function(build_cxx_bridge NAME FFI_BRIDGE_DIR)
   set(FFI_BRIDGE_SRC "${CMAKE_CURRENT_SOURCE_DIR}/${FFI_BRIDGE_DIR}")
   set(FFI_BRIDGE_BIN "${RUST_FFI_BUILD_ROOT}/hphp/hack/${FFI_BRIDGE_DIR}")

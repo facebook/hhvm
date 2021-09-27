@@ -21,6 +21,21 @@ while :; do
         --cxx) cxx=$2
           shift 2
         ;;
+        --exe) exe=$1
+          shift 1
+        ;;
+        --header) header=$2
+          shift 2
+        ;;
+        --srcs) srcs=$2
+          shift 2
+        ;;
+        --namespaces) namespaces=$2
+          shift 2
+        ;;
+        --includes) includes=$2
+          shift 2
+        ;;
         *) break
     esac
 done
@@ -54,4 +69,12 @@ fi
     --package "$pkg" \
     $profile_flags \
     "$@";
-) && cp "${TARGET_DIR}/$profile/lib$lib.a" "lib${lib}_stubs.a"
+if [ -n "$exe" ]
+then
+  cargo run --bin ffi_cbindgen -- --header "$header" --srcs "$srcs" \
+  --includes "$includes" --namespaces "$namespaces"
+fi) &&
+if [ -z "$exe" ]
+then
+  cp "${TARGET_DIR}/$profile/lib$lib.a" "lib${lib}_stubs.a"
+fi

@@ -177,6 +177,7 @@ members = [
     "src/utils/eq_modulo_pos",
     "src/utils/eq_modulo_pos_derive",
     "src/utils/escaper",
+    "src/utils/ffi_cbindgen",
     "src/utils/find_utils",
     "src/utils/hash",
     "src/utils/html_entities",

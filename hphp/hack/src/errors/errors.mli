@@ -613,6 +613,8 @@ val static_synthetic_method : string -> string -> Pos.t -> Pos_or_decl.t -> unit
 
 val isset_in_strict : Pos.t -> unit
 
+val isset_inout_arg : Pos.t -> unit
+
 val unset_nonidx_in_strict : Pos.t -> (Pos_or_decl.t * string) list -> unit
 
 val unpacking_disallowed_builtin_function : Pos.t -> string -> unit

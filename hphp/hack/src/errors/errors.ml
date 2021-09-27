@@ -3060,6 +3060,12 @@ let isset_in_strict pos =
     ("`isset` tends to hide errors due to variable typos and so is limited to dynamic checks in "
     ^ "`strict` mode")
 
+let isset_inout_arg pos =
+  add
+    (Typing.err_code Typing.InoutInPseudofunction)
+    pos
+    "`isset` does not allow arguments to be passed by `inout`"
+
 let unset_nonidx_in_strict pos msgs =
   add_list
     (Typing.err_code Typing.UnsetNonidxInStrict)

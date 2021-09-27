@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6f07574be1b436b1c4873a2dbb5556ca>>
+// @generated SignedSource<<fa7ebd61c5164a30e1c8530084a1485d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -558,6 +558,7 @@ pub enum Typing {
     MemoizeObjectWithoutGlobals = 4447,
     ExpressionTreeNonPublicProperty = 4448,
     CovariantIndexTypeMismatch = 4449,
+    InoutInPseudofunction = 4450,
 }
 impl TrivialDrop for Typing {}
 arena_deserializer::impl_deserialize_in_arena!(Typing);

@@ -35,4 +35,6 @@ In `strict` mode, `unset` is banned except on dynamic, darray, keyset, or dict i
 File "pseudofunction_etc.php", line 9, characters 9-13:
 Unbound global constant (Typing) (Typing[4106])
 File "pseudofunction_etc.php", line 10, characters 3-17:
+`isset` does not allow arguments to be passed by `inout` (Typing[4450])
+File "pseudofunction_etc.php", line 10, characters 3-17:
 `isset` tends to hide errors due to variable typos and so is limited to dynamic checks in `strict` mode (Typing[4016])

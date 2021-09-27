@@ -645,6 +645,7 @@ module Typing = struct
     | MemoizeObjectWithoutGlobals [@value 4447]
     | ExpressionTreeNonPublicProperty [@value 4448]
     | CovariantIndexTypeMismatch [@value 4449]
+    | InoutInPseudofunction [@value 4450]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

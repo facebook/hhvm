@@ -1,40 +1,28 @@
 % agent_graph_generator.lp -> Agent Graph generating algorithm in Clingo.
 % Can be combined with Clingo Python/Lua interface
 % Some placeholders in this file can be run in command line with below section.
-% Or "clingo agent_graph_generator.lp -c number_of_agents=1000 -c number_of_roots=1", etc
+% Or "clingo agent_graph_generator.lp -c number_of_infra_agents=100 
+% -c number_of_product_agents=100 ", etc
 % =============================================================================
-#const number_of_agents = @na().
-#const number_of_roots = @nr().
 #const number_of_leaves = @nl().
 #const number_of_infra_agents = @nia().
 #const number_of_product_agents = @npa().
 
-#const scale = @s().
-
+% This is very slow, so we changed to write down the level specifically in the 
+% Python interface.
 % $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 % Generating n candidate agents.
 % =============================================================================
-candidate_agents(0..number_of_agents-1).
+% candidate_agents(0..number_of_agents-1).
 
 % $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 % Critical path requirement.
 % =============================================================================
 % levels(0..number_of_levels-1).
-% This is very slow,
 % 1 {agents(X, L): levels(L)} 1 :- candidate_agents(X).
 % Constraint on number of agents in each level.
 % number_of_agents_at_each_level(Total, L) :- Total = #count{ X : agents(X, L) }, levels(L).
 % :- number_of_agents_at_each_level(Total, L), Total < @agents_at_each_level(L).
-% So, we changed to write down the level specifically in the Python code.
-agents(0..5*scale-1, 0).
-agents(5*scale..15*scale-1, 1).
-agents(15*scale..25*scale-1, 2).
-agents(25*scale..35*scale-1, 3).
-agents(35*scale..45*scale-1, 4).
-agents(45*scale..55*scale-1, 5).
-agents(55*scale..65*scale-1, 6).
-agents(65*scale..80*scale-1, 7).
-agents(80*scale..100*scale-1, 8).
 
 
 % An agent X could be an infra agent or a product agent.
@@ -54,13 +42,16 @@ in_degree_of_agent(X, InDegree) :- agents(X, _), InDegree = #count{ Y : depends_
 out_degree_of_agent(X, OutDegree) :- agents(X, _), OutDegree = #count{ Y : depends_on(Y, X) }.
 
 % Constraint on number of roots in the agent graph.
-:- #count{ X : in_degree_of_agent(X, 0) } < number_of_roots.
+% :- #count{ X : in_degree_of_agent(X, 0) } < number_of_roots.
 
 % Constraint on number of leaves in the agent graph.
 :- #count{ X : out_degree_of_agent(X, 0) } < number_of_leaves.
 
 % Constraint on root agent, must be at level 0.
-:- in_degree_of_agent(X, 0), agents(X, L), L != 0.
+:- in_degree_of_agent(X, 0), agents(X, Level), Level != 0.
+
+% Constraint on root agent, in degree must be 0.
+:- in_degree_of_agent(X, Degree), agents(X, 0), Degree != 0.
 
 % Constraint on each type of the agent.
 % If we adjust the function defined in Python, we could specify not only for 
@@ -81,7 +72,8 @@ out_degree_of_agent(X, OutDegree) :- agents(X, _), OutDegree = #count{ Y : depen
 % Edge (Agent relationships) requirement.
 % =============================================================================
 % If X, Y is number, not string, we can simply write without XN, YN.
-{depends_on(Y, X) : @agent_connector(Y, X, YL, XL) != 0} :- agents(X, XL), agents(Y, YL).
+{depends_on(Y, X) : @agent_connector(Y, X, YLevel, XLevel) != 0} :- 
+    agents(X, XLevel), agents(Y, YLevel).
 
 {depends_on(Y, X) : @agent_type_connector(Y, X) != 0} :- product_agent(Y), infra_agent(X).
 

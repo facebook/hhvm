@@ -15,49 +15,44 @@ from clingo.symbol import Number, Symbol
 class AgentGraphClingoContext:
     """ """
 
-    scale = 10
-
-    def na(self) -> Symbol:
-        return Number(100 * self.scale)
-
-    def nr(self) -> Symbol:
-        return Number(5)
+    number_of_leaves = 30
+    number_of_infra_agents = 20
+    number_of_product_agents = 60
+    infra_agent_profile = {"in_degree": [0, 10], "out_degree": [5, 100]}
+    product_agent_profile = {"in_degree": [5, 20], "out_degree": [0, 5]}
 
     def nl(self) -> Symbol:
-        return Number(30)
+        return Number(self.number_of_leaves)
 
     def nia(self) -> Symbol:
-        return Number(20 * self.scale)
+        return Number(self.number_of_infra_agents)
 
     def npa(self) -> Symbol:
-        return Number(60 * self.scale)
-
-    def s(self) -> Symbol:
-        return Number(self.scale)
+        return Number(self.number_of_product_agents)
 
     def infra_agent_out_degree_low(self, agent: Number) -> Symbol:
-        return Number(5)
+        return Number(self.infra_agent_profile["out_degree"][0])
 
     def infra_agent_out_degree_high(self, agent: Number) -> Symbol:
-        return Number(100)
+        return Number(self.infra_agent_profile["out_degree"][1])
 
     def infra_agent_in_degree_low(self, agent: Number) -> Symbol:
-        return Number(0)
+        return Number(self.infra_agent_profile["in_degree"][0])
 
     def infra_agent_in_degree_high(self, agent: Number) -> Symbol:
-        return Number(10)
+        return Number(self.infra_agent_profile["in_degree"][1])
 
     def product_agent_out_degree_low(self, agent: Number) -> Symbol:
-        return Number(0)
+        return Number(self.product_agent_profile["out_degree"][0])
 
     def product_agent_out_degree_high(self, agent: Number) -> Symbol:
-        return Number(5)
+        return Number(self.product_agent_profile["out_degree"][1])
 
     def product_agent_in_degree_low(self, agent: Number) -> Symbol:
-        return Number(5)
+        return Number(self.product_agent_profile["in_degree"][0])
 
     def product_agent_in_degree_high(self, agent: Number) -> Symbol:
-        return Number(20)
+        return Number(self.product_agent_profile["in_degree"][1])
 
     def agent_connector(
         self, source_agent, target_agent, source_level, target_level
@@ -146,7 +141,21 @@ class AgentGraphGenerator:
         raise RuntimeError("Must specify either evaluate or generate.")
 
 
-def generating_an_agent_graph(generator: AgentGraphGenerator):
+def generating_agent_distribution(agent_distribution: List[int]) -> List[str]:
+    # The levels in the generated agent graph is the length of this list.
+    return [
+        "agents({0}..{1}, {2}).".format(
+            sum(agent_distribution[:level]),
+            sum(agent_distribution[:level]) + number_of_agents_at_this_level - 1,
+            level,
+        )
+        for level, number_of_agents_at_this_level in enumerate(agent_distribution)
+    ]
+
+
+def generating_an_agent_graph(
+    agent_distribution: List[int], generator: AgentGraphGenerator
+) -> None:
     # Logic programs for code synthesis.
     asp_files = "hphp/hack/src/hh_codesynthesis"
 
@@ -155,6 +164,8 @@ def generating_an_agent_graph(generator: AgentGraphGenerator):
 
     # Load LP for agent graph generating.
     ctl.load(asp_files + "/agent_graph_generator.lp")
+    # Load LP for agent distribution.
+    ctl.add("base", [], "\n".join(generating_agent_distribution(agent_distribution)))
     ctl.ground([("base", [])], context=AgentGraphClingoContext())
 
     result: Union[clingo.solving.SolveHandle, clingo.solving.SolveResult] = ctl.solve(
@@ -169,4 +180,12 @@ if __name__ == "__main__":
     agent_graph = AgentGraphGenerator()
     agent_graph.on_model = agent_graph.evaluate
 
-    generating_an_agent_graph(agent_graph)
+    scale = 10
+
+    agent_distribution = [5, 10, 10, 10, 10, 10, 10, 15, 20]
+    agent_distribution = [x * scale for x in agent_distribution]
+
+    AgentGraphClingoContext.number_of_infra_agents = 20 * scale
+    AgentGraphClingoContext.number_of_product_agents = 60 * scale
+
+    generating_an_agent_graph(agent_distribution, agent_graph)

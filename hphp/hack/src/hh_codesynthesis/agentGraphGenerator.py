@@ -32,18 +32,11 @@ class AgentGraphClingoContext:
     def npa(self) -> Symbol:
         return Number(60 * self.scale)
 
-    def nlv(self) -> Symbol:
-        return Number(9)
-
     def s(self) -> Symbol:
         return Number(self.scale)
 
     def infra_agent_out_degree_low(self, agent: Number) -> Symbol:
-        agent_number = agent.number
-        if agent_number < 10:
-            return Number(0)
-        else:
-            return Number(5)
+        return Number(5)
 
     def infra_agent_out_degree_high(self, agent: Number) -> Symbol:
         return Number(100)
@@ -66,13 +59,7 @@ class AgentGraphClingoContext:
     def product_agent_in_degree_high(self, agent: Number) -> Symbol:
         return Number(20)
 
-    def agents_at_each_level(self, level: Number) -> Symbol:
-        nodes_at_each_level = [
-            x * self.scale for x in [5, 10, 10, 10, 10, 10, 10, 15, 15]
-        ]
-        return Number(nodes_at_each_level[level.number])
-
-    def agent_decider(
+    def agent_connector(
         self, source_agent, target_agent, source_level, target_level
     ) -> Symbol:
         src_agent_number = source_agent.number
@@ -88,7 +75,7 @@ class AgentGraphClingoContext:
         else:
             return Number(0)
 
-    def agent_type_decider(self, source_agent, target_agent) -> Symbol:
+    def agent_type_connector(self, source_agent, target_agent) -> Symbol:
         src_agent_number = source_agent.number
         tgt_agent_number = target_agent.number
         if tgt_agent_number * 3 + 200 < src_agent_number:
@@ -155,22 +142,31 @@ class AgentGraphGenerator:
         print("There are {0} similar agents.".format(similar_agents))
         print(similar_relations)
 
+    def on_model(self, m: clingo.Model) -> None:
+        raise RuntimeError("Must specify either evaluate or generate.")
 
-agent_graph = AgentGraphGenerator()
 
-# Logic programs for code synthesis.
-asp_files = "hphp/hack/src/hh_codesynthesis"
+def generating_an_agent_graph(generator: AgentGraphGenerator):
+    # Logic programs for code synthesis.
+    asp_files = "hphp/hack/src/hh_codesynthesis"
 
-# Clingo interfaces.
-ctl = clingo.Control()
+    # Clingo interfaces.
+    ctl = clingo.Control()
 
-# Load LP for agent graph generating.
-ctl.load(asp_files + "/agent_graph_generator.lp")
-ctl.ground([("base", [])], context=AgentGraphClingoContext())
+    # Load LP for agent graph generating.
+    ctl.load(asp_files + "/agent_graph_generator.lp")
+    ctl.ground([("base", [])], context=AgentGraphClingoContext())
 
-result: Union[clingo.solving.SolveHandle, clingo.solving.SolveResult] = ctl.solve(
-    on_model=agent_graph.evaluate
-)
-if isinstance(result, clingo.solving.SolveResult):
-    if result.unsatisfiable:
-        raise RuntimeError("Unsatisfiable.")
+    result: Union[clingo.solving.SolveHandle, clingo.solving.SolveResult] = ctl.solve(
+        on_model=agent_graph.on_model
+    )
+    if isinstance(result, clingo.solving.SolveResult):
+        if result.unsatisfiable:
+            raise RuntimeError("Unsatisfiable.")
+
+
+if __name__ == "__main__":
+    agent_graph = AgentGraphGenerator()
+    agent_graph.on_model = agent_graph.evaluate
+
+    generating_an_agent_graph(agent_graph)

@@ -8,7 +8,6 @@
 #const number_of_leaves = @nl().
 #const number_of_infra_agents = @nia().
 #const number_of_product_agents = @npa().
-#const number_of_levels = @nlv().
 
 #const scale = @s().
 
@@ -20,13 +19,13 @@ candidate_agents(0..number_of_agents-1).
 % $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 % Critical path requirement.
 % =============================================================================
-levels(0..number_of_levels-1).
+% levels(0..number_of_levels-1).
 % This is very slow,
 % 1 {agents(X, L): levels(L)} 1 :- candidate_agents(X).
 % Constraint on number of agents in each level.
 % number_of_agents_at_each_level(Total, L) :- Total = #count{ X : agents(X, L) }, levels(L).
 % :- number_of_agents_at_each_level(Total, L), Total < @agents_at_each_level(L).
-% So, we changed to write down the level specific
+% So, we changed to write down the level specifically in the Python code.
 agents(0..5*scale-1, 0).
 agents(5*scale..15*scale-1, 1).
 agents(15*scale..25*scale-1, 2).
@@ -54,16 +53,13 @@ agents(80*scale..100*scale-1, 8).
 in_degree_of_agent(X, InDegree) :- agents(X, _), InDegree = #count{ Y : depends_on(X, Y) }.
 out_degree_of_agent(X, OutDegree) :- agents(X, _), OutDegree = #count{ Y : depends_on(Y, X) }.
 
-% Edge constraint.
-% The number of edges in this graph is the sum of all out degree or in degree.
-% :- Edges = #sum{D : out_degree_of_agent(X, D), agents(X, _)}, Edges < @ne().
-
 % Constraint on number of roots in the agent graph.
 :- #count{ X : in_degree_of_agent(X, 0) } < number_of_roots.
 
 % Constraint on number of leaves in the agent graph.
 :- #count{ X : out_degree_of_agent(X, 0) } < number_of_leaves.
 
+% Constraint on root agent, must be at level 0.
 :- in_degree_of_agent(X, 0), agents(X, L), L != 0.
 
 % Constraint on each type of the agent.
@@ -85,13 +81,9 @@ out_degree_of_agent(X, OutDegree) :- agents(X, _), OutDegree = #count{ Y : depen
 % Edge (Agent relationships) requirement.
 % =============================================================================
 % If X, Y is number, not string, we can simply write without XN, YN.
-{depends_on(Y, X) : @agent_decider(Y, X, YL, XL) != 0} :- agents(X, XL), agents(Y, YL).
+{depends_on(Y, X) : @agent_connector(Y, X, YL, XL) != 0} :- agents(X, XL), agents(Y, YL).
 
-{depends_on(Y, X) : @agent_type_decider(Y, X) != 0} :- product_agent(Y), infra_agent(X).
-
-% {depends_on(Y, X)} :- product_agent(Y), infra_agent(X).
-% {depends_on(Y, X)} :- infra_agent(Y), infra_agent(X).
-% {depends_on(Y, X)} :- product_agent(Y), product_agent(X).
+{depends_on(Y, X) : @agent_type_connector(Y, X) != 0} :- product_agent(Y), infra_agent(X).
 
 % Constraint on agent relationship.
 % An infra agent shouldn't depend on any product agent.

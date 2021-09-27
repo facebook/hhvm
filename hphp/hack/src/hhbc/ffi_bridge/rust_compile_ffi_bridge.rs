@@ -9,7 +9,6 @@ use decl_provider::NoDeclProvider;
 use hhbc_by_ref_compile::EnvFlags;
 use oxidized::relative_path::RelativePath;
 use parser_core_types::source_text::SourceText;
-use stack_limit::{StackLimit, GI, KI, MI};
 
 #[cxx::bridge]
 mod ffi {
@@ -96,7 +95,7 @@ pub fn hackc_compile_from_text_cpp_ffi<'a>(
     env: &ffi::NativeEnv,
     source_text: &CxxString,
 ) -> Result<String, String> {
-    let retryable = |stack_limit: &StackLimit, _nomain_stack_size: Option<usize>| {
+    stack_limit::with_elastic_stack(|stack_limit| {
         let native_env: hhbc_by_ref_compile::NativeEnv<&str> =
             ffi::NativeEnv::to_compile_env(&env).unwrap();
         let compile_env = hhbc_by_ref_compile::Env::<&str> {
@@ -110,46 +109,19 @@ pub fn hackc_compile_from_text_cpp_ffi<'a>(
             ocamlrep::rc::RcOc::new(native_env.filepath.clone()),
             source_text.as_bytes(),
         );
-        let mut w = String::new();
+        let mut output = String::new();
         let alloc = bumpalo::Bump::new();
-        let compile_result = hhbc_by_ref_compile::from_text(
+        hhbc_by_ref_compile::from_text(
             &alloc,
             &compile_env,
             &stack_limit,
-            &mut w,
+            &mut output,
             text,
             Some(&native_env),
             unified_decl_provider::DeclProvider::NoDeclProvider(NoDeclProvider),
-        );
-        match compile_result {
-            Ok(_) => Ok(w),
-            Err(e) => Err(e.to_string()),
-        }
-    };
-
-    // Assume peak is 2.5x of stack. This is initial estimation, need
-    // to be improved later.
-    let stack_slack = |stack_size| stack_size * 6 / 10;
-    let on_retry = &mut |stack_size_tried: usize| {
-        if std::env::var_os("HH_TEST_MODE").is_some() {
-            let env = ffi::NativeEnv::to_compile_env(&env).unwrap();
-            eprintln!(
-                "[hrust] warning: hackc_compile_from_text_ffi exceeded stack of {} KiB on: {}",
-                (stack_size_tried - stack_slack(stack_size_tried)) / KI,
-                env.filepath.path_str(),
-            );
-        }
-    };
-    let job = stack_limit::retry::Job {
-        nonmain_stack_min: 13 * MI,
-        // TODO(hrust) aast_parser_ffi only requies 1 * GI, it's like
-        // rust compiler produce inconsistent binary.
-        nonmain_stack_max: Some(7 * GI),
-        ..Default::default()
-    };
-
-    job.with_elastic_stack(retryable, on_retry, stack_slack)
-        .map_err(|e| format!("{}", e))
-        .expect("compile_ffi: hackc_compile_from_text_cpp_ffi: retry failed")
-        .map_err(|e| e.to_string())
+        )?;
+        Ok(output)
+    })
+    .map_err(|e| e.to_string())?
+    .map_err(|e: anyhow::Error| format!("{}", e))
 }

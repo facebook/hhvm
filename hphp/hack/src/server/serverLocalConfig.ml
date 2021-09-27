@@ -481,6 +481,8 @@ type t = {
   (* Use fanout algorithm based solely on shallow decl comparison. This is the
      default in shallow decl mode. Use this option if using folded decls. *)
   force_shallow_decl_fanout: bool;
+  (* Always load hot shallow decls from saved state. *)
+  force_load_hot_shallow_decls: bool;
   (* Skip checks on hierarchy e.g. overrides, require extend, etc.
      Set to true only for debugging purposes! *)
   skip_hierarchy_checks: bool;
@@ -623,6 +625,7 @@ let default =
     idle_gc_slice = 0;
     shallow_class_decl = false;
     force_shallow_decl_fanout = false;
+    force_load_hot_shallow_decls = false;
     skip_hierarchy_checks = false;
     num_local_workers = None;
     parallel_type_checking_threshold = 10;
@@ -736,6 +739,9 @@ let apply_justknobs_overrides ~silent config =
           "log_from_client_when_slow_monitor_connections"
           "hack/config:log_from_client_when_slow_monitor_connections";
         eval "naming_sqlite_in_hack_64" "hack/config:naming_sqlite_in_hack_64";
+        eval
+          "force_load_hot_shallow_decls"
+          "hack/config:force_load_hot_shallow_decls";
       ]
   in
   match overrides with
@@ -1137,6 +1143,13 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
+  let force_load_hot_shallow_decls =
+    bool_if_min_version
+      "force_load_hot_shallow_decls"
+      ~default:default.force_load_hot_shallow_decls
+      ~current_version
+      config
+  in
   let skip_hierarchy_checks =
     bool_if_min_version
       "skip_hierarchy_checks"
@@ -1358,6 +1371,14 @@ let load_ fn ~silent ~current_version overrides =
     ) else
       force_shallow_decl_fanout
   in
+  let force_load_hot_shallow_decls =
+    if not force_load_hot_shallow_decls then (
+      Hh_logger.warn
+        "Force shallow decl fanout off while load hot shallow decls on. Turning off load hot shallow decls";
+      false
+    ) else
+      force_load_hot_shallow_decls
+  in
   {
     min_log_level;
     attempt_fix_credentials;
@@ -1414,6 +1435,7 @@ let load_ fn ~silent ~current_version overrides =
     idle_gc_slice;
     shallow_class_decl;
     force_shallow_decl_fanout;
+    force_load_hot_shallow_decls;
     skip_hierarchy_checks;
     num_local_workers;
     parallel_type_checking_threshold;

@@ -104,6 +104,9 @@ let shallow_class_decl = GlobalOptions.tco_shallow_class_decl
 
 let force_shallow_decl_fanout = GlobalOptions.tco_force_shallow_decl_fanout
 
+let force_load_hot_shallow_decls =
+  GlobalOptions.tco_force_load_hot_shallow_decls
+
 let skip_hierarchy_checks = GlobalOptions.tco_skip_hierarchy_checks
 
 let call_coeffects = GlobalOptions.tco_call_coeffects

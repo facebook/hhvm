@@ -51,6 +51,7 @@ impl Default for GlobalOptions {
             po_disable_lval_as_an_expression: false,
             tco_shallow_class_decl: false,
             tco_force_shallow_decl_fanout: false,
+            tco_force_load_hot_shallow_decls: false,
             tco_skip_hierarchy_checks: false,
             po_rust_parser_errors: false,
             tco_like_type_hints: false,

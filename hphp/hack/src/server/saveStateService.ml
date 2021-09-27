@@ -60,13 +60,14 @@ let partition_error_files_tf
 let load_class_decls
     ~(shallow_decls : bool)
     ~(legacy_hot_decls_path : string)
-    ~(shallow_hot_decls_path : string) : unit =
+    ~(shallow_hot_decls_path : string)
+    ~(force_load_hot_shallow_decls : bool) : unit =
   let start_t = Unix.gettimeofday () in
   Hh_logger.log "Begin loading class declarations";
 
   try
     let (filename, num_classes) =
-      if shallow_decls then
+      if shallow_decls || force_load_hot_shallow_decls then
         ( shallow_hot_decls_path,
           load_contents_unsafe shallow_hot_decls_path
           |> Decl_export.restore_shallow_decls )
@@ -123,11 +124,16 @@ let load_saved_state
     else
       Marshal.from_channel (In_channel.create ~binary:true errors_path)
   in
-  if load_decls then
+  let force_load_hot_shallow_decls =
+    TypecheckerOptions.force_load_hot_shallow_decls
+      (Provider_context.get_tcopt ctx)
+  in
+  if load_decls || force_load_hot_shallow_decls then
     load_class_decls
       ~shallow_decls
       ~legacy_hot_decls_path
-      ~shallow_hot_decls_path;
+      ~shallow_hot_decls_path
+      ~force_load_hot_shallow_decls;
 
   (old_naming_table, old_errors)
 

@@ -134,6 +134,8 @@ type t = {
   (* Use shallow decl fanout algorithm while remaining to use folded decls
      for typechecking *)
   tco_force_shallow_decl_fanout: bool;
+  (* Always load hot shallow decls from saved state *)
+  tco_force_load_hot_shallow_decls: bool;
   (* Skip checks on hierarchy e.g. overrides, require extend, etc.
      Set to true only for debugging purposes! *)
   tco_skip_hierarchy_checks: bool;
@@ -374,6 +376,7 @@ val make :
   ?po_disable_lval_as_an_expression:bool ->
   ?tco_shallow_class_decl:bool ->
   ?tco_force_shallow_decl_fanout:bool ->
+  ?tco_force_load_hot_shallow_decls:bool ->
   ?tco_skip_hierarchy_checks:bool ->
   ?po_rust_parser_errors:bool ->
   ?tco_like_type_hints:bool ->
@@ -570,6 +573,8 @@ val po_disable_lval_as_an_expression : t -> bool
 val tco_shallow_class_decl : t -> bool
 
 val tco_force_shallow_decl_fanout : t -> bool
+
+val tco_force_load_hot_shallow_decls : t -> bool
 
 val tco_skip_hierarchy_checks : t -> bool
 

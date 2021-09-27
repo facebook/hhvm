@@ -55,7 +55,11 @@ class AgentGraphClingoContext:
         return Number(self.product_agent_profile["in_degree"][1])
 
     def agent_connector(
-        self, source_agent, target_agent, source_level, target_level
+        self,
+        source_agent: Number,
+        target_agent: Number,
+        source_level: Number,
+        target_level: Number,
     ) -> Symbol:
         src_agent_number = source_agent.number
         tgt_agent_number = target_agent.number
@@ -70,7 +74,9 @@ class AgentGraphClingoContext:
         else:
             return Number(0)
 
-    def agent_type_connector(self, source_agent, target_agent) -> Symbol:
+    def agent_type_connector(
+        self, source_agent: Number, target_agent: Number
+    ) -> Symbol:
         src_agent_number = source_agent.number
         tgt_agent_number = target_agent.number
         if tgt_agent_number * 3 + 200 < src_agent_number:
@@ -80,7 +86,7 @@ class AgentGraphClingoContext:
 
 
 class AgentGraphGenerator:
-    def __init__(self):
+    def __init__(self) -> None:
         self.infra_agents: List[int] = []
         self.product_agents: List[int] = []
         self.edges: List[Set] = []
@@ -137,11 +143,16 @@ class AgentGraphGenerator:
         print("There are {0} similar agents.".format(similar_agents))
         print(similar_relations)
 
+    def generate_raw(self, m: clingo.Model) -> None:
+        self._raw_model = m.__str__()
+
     def on_model(self, m: clingo.Model) -> None:
-        raise RuntimeError("Must specify either evaluate or generate.")
+        raise RuntimeError("Must specify a valid method.")
 
 
 def generating_agent_distribution(agent_distribution: List[int]) -> List[str]:
+    if not all(i > 0 for i in agent_distribution):
+        raise RuntimeError("Agent distribution must have all positive integers.")
     # The levels in the generated agent graph is the length of this list.
     return [
         "agents({0}..{1}, {2}).".format(
@@ -169,7 +180,7 @@ def generating_an_agent_graph(
     ctl.ground([("base", [])], context=AgentGraphClingoContext())
 
     result: Union[clingo.solving.SolveHandle, clingo.solving.SolveResult] = ctl.solve(
-        on_model=agent_graph.on_model
+        on_model=generator.on_model
     )
     if isinstance(result, clingo.solving.SolveResult):
         if result.unsatisfiable:
@@ -178,14 +189,25 @@ def generating_an_agent_graph(
 
 if __name__ == "__main__":
     agent_graph = AgentGraphGenerator()
-    agent_graph.on_model = agent_graph.evaluate
+    agent_graph.on_model = agent_graph.generate_raw
 
-    scale = 10
+    scale = 1
 
     agent_distribution = [5, 10, 10, 10, 10, 10, 10, 15, 20]
+    agent_distribution = [2, 4, 4]
     agent_distribution = [x * scale for x in agent_distribution]
 
-    AgentGraphClingoContext.number_of_infra_agents = 20 * scale
-    AgentGraphClingoContext.number_of_product_agents = 60 * scale
+    AgentGraphClingoContext.number_of_infra_agents = 2 * scale
+    AgentGraphClingoContext.number_of_product_agents = 6 * scale
+    AgentGraphClingoContext.number_of_leaves = 5
+    AgentGraphClingoContext.infra_agent_profile = {
+        "in_degree": [0, 10],
+        "out_degree": [1, 10],
+    }
+    AgentGraphClingoContext.product_agent_profile = {
+        "in_degree": [1, 10],
+        "out_degree": [0, 5],
+    }
 
     generating_an_agent_graph(agent_distribution, agent_graph)
+    print(agent_graph._raw_model)

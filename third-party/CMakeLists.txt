@@ -60,9 +60,7 @@ add_subdirectory(folly)
 list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/fatal")
 
 add_subdirectory(brotli) # Required by fizz
-
-list(APPEND THIRD_PARTY_MODULES fizz)
-list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/fizz/src")
+add_subdirectory(fizz)
 
 list(APPEND THIRD_PARTY_MODULES wangle)
 list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/wangle/src")

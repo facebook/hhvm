@@ -1,0 +1,31 @@
+diff --git a/fizz/CMakeLists.txt b/fizz/CMakeLists.txt
+index 471d61a5..026970c7 100644
+--- a/fizz/CMakeLists.txt
++++ b/fizz/CMakeLists.txt
+@@ -61,7 +61,7 @@ endif()
+ 
+ include(CheckAtomic)
+ 
+-find_package(Sodium REQUIRED)
++find_package(LibSodium REQUIRED)
+ 
+ SET(FIZZ_SHINY_DEPENDENCIES "")
+ SET(FIZZ_LINK_LIBRARIES "")
+@@ -234,7 +234,7 @@ target_include_directories(
+     $<INSTALL_INTERFACE:${INCLUDE_INSTALL_DIR}>
+     ${FOLLY_INCLUDE_DIR}
+     ${OPENSSL_INCLUDE_DIR}
+-    ${sodium_INCLUDE_DIR}
++    ${LIBSODIUM_INCLUDE_DIRS}
+   PRIVATE
+     ${GLOG_INCLUDE_DIRS}
+     ${FIZZ_INCLUDE_DIRECTORIES}
+@@ -246,7 +246,7 @@ target_link_libraries(fizz
+   PUBLIC
+     ${FOLLY_LIBRARIES}
+     ${OPENSSL_LIBRARIES}
+-    sodium
++    ${LIBSODIUM_LIBRARIES}
+     Threads::Threads
+     ZLIB::ZLIB
+   PRIVATE

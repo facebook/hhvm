@@ -9,21 +9,22 @@ SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
   "SHA512=d21085a2010786ff18c47acb033d9e4d51a3d58f9707cd9adf0f44642c1e4d80fd8cddafe58d95bb4f3e4a84ac5799caafead4a9feb12cc549b03d4d389fcc93"
 )
 
-set(FMT_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/fmt-prefix")
+set(INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/fmt-prefix")
 ExternalProject_add(
-  fmtBuild
+  bundled_fmt
   ${FMT_SOURCE_ARGS}
-  PREFIX "${FMT_PREFIX}"
   CMAKE_ARGS
-    -DCMAKE_INSTALL_PREFIX=${FMT_PREFIX}
+    -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
     -DCMAKE_INSTALL_INCLUDEDIR=include
     -DCMAKE_INSTALL_LIBDIR=lib
 )
 cmake_minimum_required(VERSION 2.8.0)
+ExternalProject_get_property(bundled_fmt INSTALL_DIR)
 
 add_library(fmt INTERFACE)
-add_dependencies(fmt fmtBuild)
-target_include_directories(fmt INTERFACE "${FMT_PREFIX}/include")
+add_dependencies(fmt bundled_fmt)
+target_include_directories(fmt INTERFACE "${INSTALL_DIR}/include")
 target_link_libraries(fmt INTERFACE
-  "${FMT_PREFIX}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}fmt${CMAKE_STATIC_LIBRARY_SUFFIX}"
+  "${INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}fmt${CMAKE_STATIC_LIBRARY_SUFFIX}"
 )
+set(FMT_INSTALL_DIR "${INSTALL_DIR}" PARENT_SCOPE)

@@ -263,7 +263,8 @@ bool opcodeMayRaise(Opcode opc) {
   switch (opc) {
   case IsTypeStruct:
     return RuntimeOption::EvalIsExprEnableUnresolvedWarning ||
-           RuntimeOption::EvalIsVecNotices;
+           RuntimeOption::EvalIsVecNotices ||
+           RuntimeOption::EvalWarnOnImplicitCoercionOfEnumValue;
 
   case AddNewElemKeyset:
   case AFWHPrepareChild:

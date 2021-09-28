@@ -26,6 +26,11 @@ namespace HPHP {
  */
 bool enumHasValue(const Class* cls, const TypedValue* value);
 
+/**
+ * Determine if the input is a string that can be coerced into an integer.
+ */
+bool isCoercibleToInteger(const TypedValue *cell, int64_t &num, const char* callsite);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }

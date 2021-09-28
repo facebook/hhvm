@@ -792,6 +792,14 @@ struct RuntimeOption {
    * 2 - Throw when incrementing or decrementing non numeric types
    */                                                                   \
   F(uint32_t, WarnOnIncDecInvalidType, 0)                               \
+  /* WarnOnImplicitCoercionOfEnumValue
+   * This flag exists to control behaviour when implicit coercion is
+   * taking place on an enum value.
+   * 0 - No warning
+   * 1 - Warning
+   * 2 - Do not do implicit coercion
+   */                                                                   \
+  F(uint32_t, WarnOnImplicitCoercionOfEnumValue, 0)                     \
   F(bool, EnableImplicitContext,       false)                           \
   F(bool, MoreAccurateMemStats,        true)                            \
   F(bool, AllowScopeBinding,           false)                           \

@@ -26,6 +26,7 @@
 
 #include "hphp/runtime/vm/taint/configuration.h"
 
+
 namespace HPHP {
 namespace taint {
 
@@ -39,7 +40,14 @@ struct SingletonTag {};
 
 InitFiniNode s_configurationInitialization(
     []() {
-      Configuration::get()->read(RO::EvalTaintConfigurationPath);
+      auto configuration = Configuration::get();
+
+      configuration->read(RO::EvalTaintConfigurationPath);
+
+      auto outputDirectory = RO::EvalTaintOutputDirectory;
+      if (outputDirectory != "") {
+        configuration->outputDirectory = outputDirectory;
+      }
     },
     InitFiniNode::When::ProcessInit);
 
@@ -55,6 +63,10 @@ void Configuration::read(const std::string& path) {
   sources.clear();
   m_sinks.clear();
 
+  if (path == "") {
+    return;
+  }
+
   try {
     std::string contents;
     boost::filesystem::load_string_file(path, contents);
@@ -66,9 +78,7 @@ void Configuration::read(const std::string& path) {
       addSink(Sink{sink["name"].asString(), sink["index"].asInt()});
     }
   } catch (std::exception& exception) {
-    // Swallow because we don't use it in tests.
-    std::cerr << "taint: warning, unable to read configuration ("
-              << exception.what() << ")" << std::endl;
+    throw std::invalid_argument("unable to read configuration at `" + path + "`");
   }
 }
 

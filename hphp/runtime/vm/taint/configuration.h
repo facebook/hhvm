@@ -60,6 +60,8 @@ struct Configuration {
 
   void addSink(const Sink& sink);
   const SinkSet& sinks(const std::string& name) const;
+
+  Optional<std::string> outputDirectory;
  private:
   std::unordered_map<std::string, SinkSet> m_sinks;
 };

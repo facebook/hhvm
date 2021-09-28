@@ -46,8 +46,7 @@ struct Hop {
 };
 
 struct Path {
-  // Print trace in JSON-line format to stderr.
-  void dump() const;
+  std::string jsonLine() const;
   std::vector<Hop> hops;
 };
 
@@ -91,10 +90,13 @@ struct State {
   static std::shared_ptr<State> get();
 
   void initialize();
+  void teardown();
   void reset();
 
   Stack stack;
   Heap heap;
+
+  std::vector<Path> paths;
 };
 
 } // namespace taint

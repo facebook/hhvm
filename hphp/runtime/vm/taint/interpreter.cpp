@@ -862,7 +862,7 @@ TCA iopFCallFuncD(
 
     FTRACE(1, "taint: tainted value flows into sink\n");
     value->hops.push_back(Hop{vmfp()->func(), func});
-    value->dump();
+    State::get()->paths.push_back(*value);
   }
 
   return nullptr;

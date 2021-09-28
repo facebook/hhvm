@@ -1387,7 +1387,9 @@ bool irrelevant_inst(const IRInstruction& inst) {
       if (inst.consumesReferences()) return false;
 
       if (g.loads <= AEmpty &&
-          g.stores <= AEmpty) {
+          g.backtrace <= AEmpty &&
+          g.stores <= AEmpty &&
+          g.inout <= AEmpty) {
         return true;
       }
       return false;
@@ -2091,10 +2093,11 @@ void analyze_mem_effects(Env& env,
                                        EndInlining,
                                        InlineReturn
                                       );
-      if (may_decref && x.stores != AEmpty) {
+      if (may_decref && (x.stores != AEmpty || x.inout != AEmpty)) {
         observe_unbalanced_decrefs(env, state, add_node);
       }
       reduce_support(env, state, x.stores, may_decref, add_node);
+      reduce_support(env, state, x.inout, may_decref, add_node);
       // For the moves set, we have no way to track where the pointers may be
       // moved to, so we need to account for it, via unsupported_refs.
       reduce_support(env, state, x.moves, false, add_node);

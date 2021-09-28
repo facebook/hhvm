@@ -1755,6 +1755,11 @@ To string conversions:
   Load the address of the storage for out parameter `index` provided by the
   callee (the address will be a location on the callee stack).
 
+| LdOutAddrInlined<index>, D(PtrToStkCell), S(FramePtr), NF
+
+  Load the address of the storage for out parameter `index`. For an inlined
+  frame, this is an address on the caller's stack.
+
 | RecordReifiedGenericsAndGetTSList, D(Vec), S(Vec), CRc|LA
 
   Takes a varray of reified generics from the stack and adds them to the reified

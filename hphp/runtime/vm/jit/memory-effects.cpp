@@ -102,6 +102,13 @@ AliasClass pointee(
         return AliasClass {
           AStack::at(sinst->extra<LdStkAddr>()->offset)
         };
+      } else if (sinst->is(LdOutAddrInlined)) {
+        auto const fp = sinst->src(0)->inst();
+        assertx(fp->is(BeginInlining));
+        auto const stackOff = fp->extra<BeginInlining>()->spOffset;
+        return AliasClass {
+          AStack::at(stackOff + kNumActRecCells + sinst->extra<LdOutAddrInlined>()->index)
+        };
       }
       return AStackAny;
     }
@@ -385,30 +392,32 @@ GeneralEffects may_reenter(const IRInstruction& inst, GeneralEffects x) {
   }();
 
   return GeneralEffects {
-    x.loads | AHeapAny | ARdsAny | AVMRegAny | AVMRegState | backtrace_locals(inst),
+    x.loads | AHeapAny | ARdsAny | AVMRegAny | AVMRegState,
     x.stores | AHeapAny | ARdsAny | AVMRegAny,
     x.moves,
-    new_kills
+    new_kills,
+    x.inout,
+    backtrace_locals(inst)
   };
 }
 
 //////////////////////////////////////////////////////////////////////
 
 GeneralEffects may_load_store(AliasClass loads, AliasClass stores) {
-  return GeneralEffects { loads, stores, AEmpty, AEmpty };
+  return GeneralEffects { loads, stores, AEmpty, AEmpty, AEmpty, AEmpty };
 }
 
 GeneralEffects may_load_store_kill(AliasClass loads,
                                    AliasClass stores,
                                    AliasClass kill) {
-  return GeneralEffects { loads, stores, AEmpty, kill };
+  return GeneralEffects { loads, stores, AEmpty, kill, AEmpty, AEmpty };
 }
 
 GeneralEffects may_load_store_move(AliasClass loads,
                                    AliasClass stores,
                                    AliasClass move) {
   assertx(move <= loads);
-  return GeneralEffects { loads, stores, move, AEmpty };
+  return GeneralEffects { loads, stores, move, AEmpty, AEmpty, AEmpty };
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -779,31 +788,33 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case CallBuiltin:
     {
-      AliasClass out_stk = AEmpty;
       auto const extra = inst.extra<CallBuiltin>();
       auto const callee = extra->callee;
-      auto const stk = [&] () -> AliasClass {
-        AliasClass ret = AEmpty;
-        for (auto i = uint32_t{2}; i < inst.numSrcs(); ++i) {
+      auto const [inout, read]  = [&] {
+        auto read = AEmpty;
+        auto inout = AEmpty;
+        auto const paramOff = callee->isMethod() ? 3 : 2;
+        for (auto i = paramOff; i < inst.numSrcs(); ++i) {
           if (inst.src(i)->type() <= TPtrToCell) {
             auto const cls = pointee(inst.src(i));
-            if (cls.maybe(AStackAny)) {
-              ret = ret | cls;
-              auto const paramOff = callee->isMethod() ? 3 : 2;
-              if (i >= paramOff && callee->isInOut(i - paramOff)) {
-                out_stk = out_stk | cls;
-              }
+            if (callee->isInOut(i - paramOff)) {
+              inout = inout | cls;
+            } else {
+              read = read | cls;
             }
           }
         }
-        return ret;
+        return std::make_pair(inout, read);
       }();
       auto const foldable = callee->isFoldable() ? AEmpty : ARdsAny;
-      return may_load_store_kill(
-        stk | AHeapAny | foldable | AVMRegAny | AVMRegState,
-        out_stk | AHeapAny | foldable | AVMRegAny,
-        stack_below(extra->spOffset) | AMIStateAny
-      );
+      return GeneralEffects {
+        read | AHeapAny | foldable | AVMRegAny | AVMRegState,
+        AHeapAny | foldable | AVMRegAny,
+        AEmpty,
+        stack_below(extra->spOffset) | AMIStateAny,
+        inout,
+        AEmpty
+      };
     }
 
   // Resumable suspension takes everything from the frame and moves it into the
@@ -1496,6 +1507,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return may_load_store(AEmpty, AEmpty);
 
   case LdOutAddr:
+  case LdOutAddrInlined:
     return IrrelevantEffects{};
 
   case CheckStk:
@@ -2029,17 +2041,20 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case DbgTrashStk:
     return GeneralEffects {
       AEmpty, AEmpty, AEmpty,
-      AStack::at(inst.extra<DbgTrashStk>()->offset)
+      AStack::at(inst.extra<DbgTrashStk>()->offset),
+      AEmpty, AEmpty
     };
   case DbgTrashFrame:
     return GeneralEffects {
       AEmpty, AEmpty, AEmpty,
-      actrec(inst.src(0), inst.extra<DbgTrashFrame>()->offset)
+      actrec(inst.src(0), inst.extra<DbgTrashFrame>()->offset),
+      AEmpty, AEmpty
     };
   case DbgTrashMem:
     return GeneralEffects {
       AEmpty, AEmpty, AEmpty,
-      pointee(inst.src(0))
+      pointee(inst.src(0)),
+      AEmpty, AEmpty
     };
 
   //////////////////////////////////////////////////////////////////////
@@ -2074,6 +2089,7 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, MemEffects me) {
       check(x.stores);
       check(x.moves);
       check(x.kills);
+      check(x.inout);
 
       // Locations may-moved always should also count as may-loads.
       always_assert(x.moves <= x.loads);
@@ -2141,7 +2157,7 @@ MemEffects memory_effects(const IRInstruction& inst) {
             return GeneralEffects {
               x.loads | AVMRegAny | AVMRegState,
               x.stores | AVMRegAny,
-              x.moves, x.kills
+              x.moves, x.kills, x.inout, x.backtrace
             };
           },
           [&] (CallEffects x)      { return fail(); },
@@ -2209,7 +2225,9 @@ MemEffects canonicalize(MemEffects me) {
         canonicalize(x.loads),
         canonicalize(x.stores),
         canonicalize(x.moves),
-        canonicalize(x.kills)
+        canonicalize(x.kills),
+        canonicalize(x.inout),
+        canonicalize(x.backtrace)
       };
     },
     [&] (PureLoad x) -> R {
@@ -2259,11 +2277,13 @@ std::string show(MemEffects effects) {
   return match<std::string>(
     effects,
     [&] (GeneralEffects x) {
-      return sformat("mlsmk({} ; {} ; {} ; {})",
+      return sformat("mlsmkib({} ; {} ; {} ; {} ; {} ; {})",
         show(x.loads),
         show(x.stores),
         show(x.moves),
-        show(x.kills)
+        show(x.kills),
+        show(x.inout),
+        show(x.backtrace)
       );
     },
     [&] (ExitEffects x) {
@@ -2299,7 +2319,7 @@ std::string show(MemEffects effects) {
 
 GeneralEffects general_effects_for_vmreg_liveness(
     GeneralEffects l, KnownRegState liveness) {
-  auto ret = GeneralEffects { l.loads, l.stores, l.moves, l.kills };
+  auto ret = GeneralEffects { l.loads, l.stores, l.moves, l.kills, l.inout, l.backtrace };
 
   if (liveness == KnownRegState::Dead) {
     ret.loads = l.loads.exclude_vm_reg().value_or(AEmpty);

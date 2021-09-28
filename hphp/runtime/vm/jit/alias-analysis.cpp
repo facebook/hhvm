@@ -57,8 +57,10 @@ void visit_locations(const BlockList& blocks, Visit visit) {
                                     visit(x.locals); },
         [&] (GeneralEffects x)    { visit(x.loads);
                                     visit(x.stores);
+                                    visit(x.inout);
                                     visit(x.moves);
-                                    visit(x.kills); },
+                                    visit(x.kills);
+                                    visit(x.backtrace); },
         [&] (PureLoad x)          { visit(x.src); },
         [&] (PureStore x)         { visit(x.dst); },
         [&] (ExitEffects x)       { visit(x.live); visit(x.kills); },

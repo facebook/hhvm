@@ -514,6 +514,18 @@ void implReturnBlock(IRGS& env, const RegionDesc& calleeRegion) {
   auto const callee = curFunc(env);
 
   auto const nret = callee->numInOutParams() + 1;
+  if (nret > 1 && callee->isCPPBuiltin()) {
+    auto const ret = pop(env, DataTypeGeneric);
+    implInlineReturn(env, false);
+    for (int32_t idx = 0; idx < nret - 1; ++idx) {
+      auto const off = offsetFromIRSP(env, BCSPRelOffset{idx});
+      auto const type = callOutType(callee, idx);
+      gen(env, AssertStk, type, IRSPRelOffsetData{off}, sp(env));
+    }
+    push(env, gen(env, AssertType, callReturnType(callee), ret));
+    return;
+  }
+
   jit::vector<SSATmp*> retVals{nret, nullptr};
   for (auto& v : retVals) v = pop(env, DataTypeGeneric);
 
@@ -605,9 +617,7 @@ bool endInlining(IRGS& env, const RegionDesc& calleeRegion) {
 
 bool conjureEndInlining(IRGS& env, const RegionDesc& calleeRegion,
                         bool builtin) {
-  if (!builtin) {
-    if (!endInlining(env, calleeRegion)) return false;
-  }
+  if (!endInlining(env, calleeRegion)) return false;
   gen(env, ConjureUse, pop(env));
   gen(env, EndBlock, ASSERT_REASON);
   return true;

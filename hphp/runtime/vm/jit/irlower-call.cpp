@@ -315,14 +315,10 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
   if (dest.reg0.isValid()) dest.reg0 = tmpData;
   if (dest.reg1.isValid()) dest.reg1 = tmpType;
 
-  auto const isInlined = env.unit.context().initSrcKey.func() != callee;
-  if (isInlined) v << inlinestart{callee, 0};
-
   // Call epilogue: handle builtin return types and inlining accounting.
   auto const end = [&] (Vout& v) {
     v << copy{tmpData, dstData};
     if (dstType.isValid()) v << copy{tmpType, dstType};
-    if (isInlined) v << inlineend{};
   };
 
   cgCallHelper(v, env, CallSpec::direct(callee->nativeFuncPtr(), nullptr),

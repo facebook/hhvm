@@ -753,6 +753,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LdObjClass:
   case LdObjInvoke:
   case LdOutAddr:
+  case LdOutAddrInlined:
   case LdPairElem:
   case LdPropAddr:
   case LdPtrIterKey:

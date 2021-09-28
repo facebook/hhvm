@@ -1045,17 +1045,14 @@ struct StFrameMetaData : IRExtraData {
 
 struct CallBuiltinData : IRExtraData {
   explicit CallBuiltinData(IRSPRelOffset spOffset,
-                           Optional<IRSPRelOffset> retSpOffset,
                            const Func* callee)
     : spOffset(spOffset)
-    , retSpOffset(retSpOffset)
     , callee{callee}
   {}
 
   std::string show() const {
     return folly::to<std::string>(
       spOffset.offset, ',',
-      retSpOffset ? folly::to<std::string>(retSpOffset->offset) : "*", ',',
       callee->fullName()->data()
     );
   }
@@ -1063,18 +1060,16 @@ struct CallBuiltinData : IRExtraData {
   size_t stableHash() const {
     return folly::hash::hash_combine(
       std::hash<int32_t>()(spOffset.offset),
-      retSpOffset ? std::hash<int32_t>()(retSpOffset->offset) : 0,
       callee->stableHash()
     );
   }
 
   bool equals(const CallBuiltinData& o) const {
-    return spOffset == o.spOffset && retSpOffset == o.retSpOffset &&
+    return spOffset == o.spOffset &&
       callee == o.callee;
   }
 
   IRSPRelOffset spOffset; // offset from StkPtr to last passed arg
-  Optional<IRSPRelOffset> retSpOffset; // offset from StkPtr after a return
   const Func* callee;
 };
 
@@ -2658,6 +2653,7 @@ X(StStk,                        IRSPRelOffsetData);
 X(StStkRange,                   StackRange);
 X(StOutValue,                   IndexData);
 X(LdOutAddr,                    IndexData);
+X(LdOutAddrInlined,             IndexData);
 X(AssertStk,                    IRSPRelOffsetData);
 X(DefFP,                        DefFPData);
 X(DefFrameRelSP,                DefStackData);

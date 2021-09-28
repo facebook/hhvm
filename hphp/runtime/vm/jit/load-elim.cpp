@@ -432,6 +432,7 @@ bool handle_minstr(Local& env, const IRInstruction& inst, GeneralEffects m) {
   auto const old_val = env.state.tracked[meta->index];
   auto const effects = MInstrEffects(inst.op(), old_val.knownType & TCell);
   store(env, m.stores, nullptr);
+  store(env, m.inout, nullptr);
 
   SCOPE_ASSERT_DETAIL("handle_minstr") { return inst.toString(); };
   always_assert(!env.state.avail[meta->index]);
@@ -466,6 +467,8 @@ Flags handle_general_effects(Local& env,
   }
 
   auto handleCheck = [&](Type typeParam) -> Optional<Flags> {
+    assertx(m.inout == AEmpty);
+    assertx(m.backtrace == AEmpty);
     auto const meta = env.global.ainfo.find(canonicalize(m.loads));
     if (!meta) return std::nullopt;
 
@@ -507,6 +510,8 @@ Flags handle_general_effects(Local& env,
     break;
 
   case CheckIter: {
+    assertx(m.inout == AEmpty);
+    assertx(m.backtrace == AEmpty);
     auto const meta = env.global.ainfo.find(canonicalize(m.loads));
     if (!meta || !env.state.avail[meta->index]) break;
     auto const& type = env.state.tracked[meta->index].knownType;
@@ -565,6 +570,7 @@ Flags handle_general_effects(Local& env,
   }
 
   store(env, m.stores, nullptr);
+  store(env, m.inout, nullptr);
   store(env, m.kills, nullptr);
 
   return FNone{};
@@ -1235,6 +1241,8 @@ void save_taken_state(Global& genv, const IRInstruction& inst,
     assertx(!inst.maySyncVMRegsWithSources());
     auto const effects = memory_effects(inst);
     auto const ge = boost::get<GeneralEffects>(effects);
+    assertx(ge.inout == AEmpty);
+    assertx(ge.backtrace == AEmpty);
     auto const meta = genv.ainfo.find(canonicalize(ge.loads));
     if (auto const tloc = find_tracked(outState, meta)) {
       tloc->knownType &= TUninit;

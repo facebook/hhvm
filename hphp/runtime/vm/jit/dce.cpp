@@ -313,6 +313,7 @@ bool canDCE(IRInstruction* inst) {
   case ConvArrLikeToKeyset:
   case ConvObjToKeyset:
   case LdOutAddr:
+  case LdOutAddrInlined:
     return !opcodeMayRaise(inst->op()) &&
       (!inst->consumesReferences() || inst->producesReference());
 
@@ -932,7 +933,9 @@ void processCatchBlock(IRUnit& unit, DceState& state, Block* block,
       [&] (GeneralEffects x)     {
         return
           process_stack(x.loads) ||
+          process_stack(x.inout) ||
           process_stack(x.stores) ||
+          process_stack(x.backtrace) ||
           process_stack(x.kills);
       },
       [&] (PureLoad x)           { return process_stack(x.src); },

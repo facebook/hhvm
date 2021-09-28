@@ -649,7 +649,10 @@ void visit(Local& env, IRInstruction& inst) {
       auto const liveness = env.global.vmRegsLiveness[inst];
       auto const l = general_effects_for_vmreg_liveness(preL, liveness);
       load(env, l.loads);
+      load(env, l.inout);
+      load(env, l.backtrace);
       mayStore(env, l.stores);
+      mayStore(env, l.inout);
       kill(env, l.kills);
     },
 

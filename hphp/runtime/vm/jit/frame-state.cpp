@@ -314,19 +314,6 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     }
     break;
 
-  case CallBuiltin:
-    {
-      auto const extra = inst->extra<CallBuiltin>();
-      if (auto const base = extra->retSpOffset) {
-        auto const numOut = extra->callee->numInOutParams();
-        for (auto i = uint32_t{0}; i < numOut; ++i) {
-          auto const ty = irgen::callOutType(extra->callee, i);
-          setType(stk(*base + i), ty);
-        }
-      }
-    }
-    break;
-
   case ContEnter:
     trackCall();
     break;
@@ -367,8 +354,10 @@ void FrameStateMgr::update(const IRInstruction* inst) {
   case StMem:
     // If we ever start using StMem to store to pointers that might be
     // stack/locals, we have to update tracked state here.
-    always_assert(!inst->src(0)->type().maybe(TMemToFrameCell));
-    always_assert(!inst->src(0)->type().maybe(TMemToStkCell));
+    if (!canonical(inst->src(0))->inst()->is(LdOutAddrInlined)) {
+      always_assert(!inst->src(0)->type().maybe(TMemToFrameCell));
+      always_assert(!inst->src(0)->type().maybe(TMemToStkCell));
+    }
     break;
 
   case LdStk:
@@ -736,7 +725,7 @@ void FrameStateMgr::updateMBase(const IRInstruction* inst) {
   };
 
   auto const effects = memory_effects(*inst);
-  match<void>(effects, [&](GeneralEffects m) { handle_stores(m.stores); },
+  match<void>(effects, [&](GeneralEffects m) { handle_stores(m.stores); handle_stores(m.inout); },
               [&](PureStore m) { handle_stores(m.dst); },
               [&](CallEffects x) {
                 handle_stores(x.kills);
@@ -1024,6 +1013,14 @@ void FrameStateMgr::trackInlineCall(const IRInstruction* inst) {
     setValue(stk(extra->spOffset + i), nullptr);
   }
   cur().bcSPOff = savedSPOff;
+
+  if (target->isCPPBuiltin()) {
+    auto const inout = target->numInOutParams();
+    for (auto i = uint32_t{0}; i < inout; ++i) {
+      auto const type = irgen::callOutType(target, i);
+      setType(stk(extra->spOffset + kNumActRecCells + i), type);
+    }
+  }
 
   m_stack.emplace_back(FrameState{target});
 

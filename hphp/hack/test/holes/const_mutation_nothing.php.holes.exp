@@ -1,0 +1,105 @@
+[(Fun
+    { fd_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+        ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      fd_file_attributes = []; fd_mode = Mstrict;
+      fd_fun =
+      { f_span = [3:1-6:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((void), (Some ([3:53-57], (Hprim Tvoid)))); 
+        f_name = ([3:10-29], "\\const_mutation_pair"); f_tparams = []; 
+        f_where_constraints = []; f_variadic = FVnonVariadic;
+        f_params =
+        [{ param_annotation = (Pair<string, int>);
+           param_type_hint = ((Pair<string, int>), (Some ([3:30-46], (Happly (([3:30-34], "\\HH\\Pair"), [([3:35-41], (Hprim Tstring)); ([3:42-45], (Hprim Tint))]))))); 
+           param_is_variadic = false; param_pos = [3:47-49]; param_name = "$x"; 
+           param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+           param_user_attributes = []; param_visibility = None }
+          ];
+        f_ctxs = None; f_unsafe_ctxs = None;
+        f_body =
+        { fb_ast =
+          [([5:3-13],
+            (Expr
+               ((int), [5:3-12],
+                (Binop ((Eq None),
+                   ((int), [5:3-8],
+                    (Array_get (((Pair<string, int>), [5:3-5], (Hole (((Pair<string, int>), [5:3-5], (Lvar ([5:3-5], $x))), (Pair<string, int>), (nothing), Typing))),
+                       (Some ((int), [5:6-7], (Int "1")))))),
+                   ((int), [5:11-12], (Int "1")))))))
+            ]
+          };
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+        f_doc_comment = None }
+      });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+         ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [8:1-11:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((void), (Some ([8:73-77], (Hprim Tvoid)))); 
+         f_name = ([8:10-39], "\\const_mutation_keyedcontainer"); f_tparams = []; 
+         f_where_constraints = []; f_variadic = FVnonVariadic;
+         f_params =
+         [{ param_annotation = (KeyedContainer<string, int>);
+            param_type_hint = ((KeyedContainer<string, int>), (Some ([8:40-66], (Happly (([8:40-54], "\\HH\\KeyedContainer"), [([8:55-61], (Hprim Tstring)); ([8:62-65], (Hprim Tint))])))));
+            param_is_variadic = false; param_pos = [8:67-69]; param_name = "$x"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([10:3-13],
+             (Expr
+                ((int), [10:3-12],
+                 (Binop ((Eq None),
+                    ((int), [10:3-8],
+                     (Array_get (
+                        ((KeyedContainer<string, int>), [10:3-5], (Hole (((KeyedContainer<string, int>), [10:3-5], (Lvar ([10:3-5], $x))), (KeyedContainer<string, int>), (nothing), Typing))),
+                        (Some ((int), [10:6-7], (Int "1")))))),
+                    ((int), [10:11-12], (Int "1")))))))
+             ]
+           };
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None }
+       });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+         ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict;
+       fd_fun =
+       { f_span = [13:1-16:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((void), (Some ([13:61-65], (Hprim Tvoid)))); 
+         f_name = ([13:10-33], "\\const_mutation_anyarray"); f_tparams = []; 
+         f_where_constraints = []; f_variadic = FVnonVariadic;
+         f_params =
+         [{ param_annotation = (AnyArray<string, int>);
+            param_type_hint = ((AnyArray<string, int>), (Some ([13:34-54], (Happly (([13:34-42], "\\HH\\AnyArray"), [([13:43-49], (Hprim Tstring)); ([13:50-53], (Hprim Tint))])))));
+            param_is_variadic = false; param_pos = [13:55-57]; param_name = "$x"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([15:3-13],
+             (Expr
+                ((int), [15:3-12],
+                 (Binop ((Eq None),
+                    ((int), [15:3-8],
+                     (Array_get (((AnyArray<string, int>), [15:3-5], (Hole (((AnyArray<string, int>), [15:3-5], (Lvar ([15:3-5], $x))), (AnyArray<string, int>), (nothing), Typing))),
+                        (Some ((int), [15:6-7], (Int "1")))))),
+                    ((int), [15:11-12], (Int "1")))))))
+             ]
+           };
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None }
+       })

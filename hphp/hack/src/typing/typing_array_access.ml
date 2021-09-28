@@ -398,13 +398,15 @@ let rec array_get
           type_index env expr_pos ty2 ty1 (Reason.index_class cn)
         in
         (env, ty, dflt_arr_res, idx_err_res)
-      | Tclass ((_, cn), _, _)
+      | Tclass ((_, cn), _, tys)
         when is_lvalue
              && (String.equal cn SN.Collections.cConstVector
                 || String.equal cn SN.Collections.cImmVector) ->
         let (env, ty1) = error_const_mutation env expr_pos ty1 in
-        let ty_nothing = Typing_make_type.nothing Reason.none in
-        (env, ty1, Error (ty1, ty_nothing), Ok ty2)
+        let ty_vector =
+          Typing_make_type.class_type Reason.none SN.Collections.cVector tys
+        in
+        (env, ty1, Error (ty1, ty_vector), Ok ty2)
       | Tdarray (_k, v)
       | Tvec_or_dict (_k, v)
       | Tvarray_or_darray (_k, v) ->
@@ -924,23 +926,38 @@ let assign_array_get_with_err
           Error (ety1, Typing_make_type.nothing Reason.none),
           Ok tkey,
           Ok ty2 )
-      | Tclass ((_, cn), _, _)
+      | Tclass ((_, cn), _, tys)
         when String.equal cn SN.Collections.cConstMap
-             || String.equal cn SN.Collections.cImmMap
-             || String.equal cn SN.Collections.cKeyedContainer
+             || String.equal cn SN.Collections.cImmMap ->
+        Errors.const_mutation
+          expr_pos
+          (Reason.to_pos r)
+          (Typing_print.error env ety1);
+        let ty_expect =
+          MakeType.class_type Reason.none SN.Collections.cMap tys
+        in
+        (env, ety1, Error (ety1, ty_expect), Ok tkey, Ok ty2)
+      | Tclass ((_, cn), _, tys)
+        when String.equal cn SN.Collections.cConstVector
+             || String.equal cn SN.Collections.cImmVector ->
+        Errors.const_mutation
+          expr_pos
+          (Reason.to_pos r)
+          (Typing_print.error env ety1);
+        let ty_expect =
+          MakeType.class_type Reason.none SN.Collections.cVector tys
+        in
+        (env, ety1, Error (ety1, ty_expect), Ok tkey, Ok ty2)
+      | Tclass ((_, cn), _, _)
+        when String.equal cn SN.Collections.cKeyedContainer
              || String.equal cn SN.Collections.cAnyArray
-             || String.equal cn SN.Collections.cConstVector
-             || String.equal cn SN.Collections.cImmVector
              || String.equal cn SN.Collections.cPair ->
         Errors.const_mutation
           expr_pos
           (Reason.to_pos r)
           (Typing_print.error env ety1);
-        ( env,
-          ety1,
-          Error (ety1, Typing_make_type.nothing Reason.none),
-          Ok tkey,
-          Ok ty2 )
+        let ty_expect = MakeType.nothing Reason.none in
+        (env, ety1, Error (ety1, ty_expect), Ok tkey, Ok ty2)
       | Tdarray (tk, tv) ->
         let (env, idx_err) =
           check_arraykey_index_write env expr_pos ety1 tkey

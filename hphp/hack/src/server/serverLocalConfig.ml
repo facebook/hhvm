@@ -1359,7 +1359,7 @@ let load_ fn ~silent ~current_version overrides =
   let naming_sqlite_in_hack_64 =
     bool_if_min_version
       "naming_sqlite_in_hack_64"
-      ~default:default.deferments_light
+      ~default:default.naming_sqlite_in_hack_64
       ~current_version
       config
   in

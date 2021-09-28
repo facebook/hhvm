@@ -1,10 +1,1 @@
-Naming[2049] Unrecognized user attribute: __NoRequireDynamic starts with __ but is not a standard attribute [1]
-
-prop.good.php:3:37
-    1 | <?hh
-    2 | 
-[1] 3 | <<__SupportDynamicType>> class E< <<__NoRequireDynamic>> T as dynamic> {}
-    4 | 
-    5 | <<__SupportDynamicType>> class C {
-
-1 error found.
+No errors

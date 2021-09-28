@@ -1,6 +1,6 @@
 <?hh
 
-<<__SupportDynamicType>> class E< <<__NoRequireDynamic>> T as dynamic> {}
+<<__SupportDynamicType>> class E<T as dynamic> {}
 
 <<__SupportDynamicType>> class C {
    public ~E<int> $x;

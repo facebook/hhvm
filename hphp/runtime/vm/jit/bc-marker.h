@@ -59,6 +59,7 @@ struct BCMarker {
            const TransIDSet& tids, SSATmp* fp, SSATmp* sp)
     : m_sk(sk)
     , m_bcSPOff(bcSPOff)
+    , m_frameStackBaseOff(SBInvOffset{0})
     , m_stublogue(stublogue)
     , m_profTransIDs{tids}
     , m_fp{fp}
@@ -72,6 +73,7 @@ struct BCMarker {
   bool operator==(const BCMarker& b) const {
     return b.m_sk == m_sk &&
            b.m_bcSPOff == m_bcSPOff &&
+           b.m_frameStackBaseOff == m_frameStackBaseOff &&
            b.m_stublogue == m_stublogue &&
            b.m_profTransIDs == m_profTransIDs &&
            b.m_fp == m_fp &&
@@ -95,6 +97,10 @@ struct BCMarker {
   SSATmp*     fixupFP()   const { assertx(valid()); return m_fixupFP;       }
   SSATmp*     sp()        const { assertx(valid()); return m_sp;            }
   SrcKey      fixupSk()   const { assertx(valid()); return m_fixupSk;       }
+  SBInvOffset frameSBOff() const {
+    assertx(valid());
+    return m_frameStackBaseOff;
+  }
 
   const TransIDSet& profTransIDs() const {
     assertx(valid());
@@ -134,10 +140,16 @@ struct BCMarker {
     ret.m_fixupSk = sk;
     return ret;
   }
+  BCMarker adjustFrameStackBaseOff(SBInvOffset spOff) const {
+    auto ret = *this;
+    ret.m_frameStackBaseOff = spOff;
+    return ret;
+  }
 
   void reset() {
     m_sk = SrcKey();
     m_bcSPOff = SBInvOffset{0};
+    m_frameStackBaseOff = SBInvOffset{0};
     m_stublogue = false;
     TransIDSet emptyTransIDSet;
     m_profTransIDs.swap(emptyTransIDSet);
@@ -150,6 +162,7 @@ struct BCMarker {
 private:
   SrcKey      m_sk;
   SBInvOffset m_bcSPOff{0};
+  SBInvOffset m_frameStackBaseOff{0};
   bool        m_stublogue;
   TransIDSet  m_profTransIDs;
   SSATmp*     m_fp{nullptr};

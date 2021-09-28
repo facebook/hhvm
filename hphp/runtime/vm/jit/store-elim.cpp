@@ -1566,11 +1566,22 @@ void adjust_inline_marker(IRInstruction& inst, Frames& scratch_frames,
     return SBInvOffset{0}.to<IRSPRelOffset>(irSPOff);
   }();
   auto const stackBaseDelta = newStackBaseOffset - curStackBaseOffset;
+  auto const newSBOffset = [&] {
+    if (fp->inst()->is(BeginInlining)) {
+      auto const newBIData = fp->inst()->extra<BeginInlining>();
+      return newBIData->spOffset;
+    }
+    assertx(fp->inst()->is(DefFP, DefFuncEntryFP));
+    auto const defSP = curFp->inst()->src(0)->inst();
+    auto const irSPOff = defSP->extra<DefStackData>()->irSPOff;
+    return SBInvOffset{0}.to<IRSPRelOffset>(irSPOff);
+  }();
 
   inst.marker() = inst.marker()
     .adjustFixupFP(fp)
     .adjustSPOff(inst.marker().bcSPOff() + stackBaseDelta)
-    .adjustFixupSK(fixupSk);
+    .adjustFixupSK(fixupSk)
+    .adjustFrameStackBaseOff(inst.marker().frameSBOff() + (newSBOffset - curBIData->spOffset));
 }
 
 void insert_eager_sync(Global& genv, IRInstruction& endCatch) {

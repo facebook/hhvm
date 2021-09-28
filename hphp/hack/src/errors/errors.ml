@@ -2284,6 +2284,12 @@ let inout_argument_bad_expr pos =
     ("Arguments for `inout` parameters must be local variables or simple "
     ^ "subscript expressions on vecs, dicts, keysets, or arrays")
 
+let inout_invariant_predicate pos =
+  add
+    (NastCheck.err_code NastCheck.InoutInvariantPredicate)
+    pos
+    "`invariant` does not take its first argument by `inout`"
+
 let illegal_destructor pos =
   add
     (NastCheck.err_code NastCheck.IllegalDestructor)

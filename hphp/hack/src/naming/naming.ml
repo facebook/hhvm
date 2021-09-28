@@ -1701,8 +1701,12 @@ and stmt env (pos, st) =
         | [_] ->
           Errors.naming_too_few_arguments p;
           N.Expr (invalid_expr p)
-        (*  TODO(T98469681): `inout` is silently dropped here, now *)
-        | (_, (_, cond_p, cond)) :: el ->
+        | (pk, (_, cond_p, cond)) :: el ->
+          begin
+            match pk with
+            | Ast_defs.Pnormal -> ()
+            | Ast_defs.Pinout -> Errors.inout_invariant_predicate p
+          end;
           let violation =
             ( (),
               cp,

@@ -233,6 +233,7 @@ module NastCheck = struct
     | PartiallyAbstractTypeconstDefinition [@value 3093]
     | EntryPointGenerics [@value 3094]
     | InternalProtectedOrPrivate [@value 3095]
+    | InoutInvariantPredicate [@value 3096]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

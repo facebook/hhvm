@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/backtrace.h"
+#include "hphp/runtime/base/implicit-context.h"
 #include "hphp/runtime/base/intercept.h"
 #include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/base/tv-refcount.h"
@@ -301,8 +302,9 @@ void runUserProfilerOnFunctionEnter(const ActRec* ar, bool isResume) {
     frameinfo
   );
 
+  ImplicitContext::Saver s;
   g_context->invokeFunc(func, params, ctx.this_, ctx.cls,
-                        RuntimeCoeffects::fixme(), ctx.dynamic);
+                        RuntimeCoeffects::none(), ctx.dynamic);
 }
 
 void runUserProfilerOnFunctionExit(const ActRec* ar, const TypedValue* retval,
@@ -335,8 +337,9 @@ void runUserProfilerOnFunctionExit(const ActRec* ar, const TypedValue* retval,
     frameinfo
   );
 
+  ImplicitContext::Saver s;
   g_context->invokeFunc(func, params, ctx.this_, ctx.cls,
-                        RuntimeCoeffects::fixme(), ctx.dynamic);
+                        RuntimeCoeffects::none(), ctx.dynamic);
 }
 
 static Variant call_intercept_handler(
@@ -370,9 +373,10 @@ static Variant call_intercept_handler(
   par.append(called_on);
   par.append(args);
 
+  ImplicitContext::Saver s;
   auto ret = Variant::attach(
     g_context->invokeFunc(f, par.toVariant(), callCtx.this_, callCtx.cls,
-                          RuntimeCoeffects::fixme(), callCtx.dynamic)
+                          RuntimeCoeffects::none(), callCtx.dynamic)
   );
 
   auto& arr = ret.asCArrRef();
@@ -425,13 +429,13 @@ static Variant call_intercept_handler_callback(
     assertx(tvIsVec(generics));
     return Array(val(generics).parr);
   }();
-  auto ret = Variant::attach(
+  ImplicitContext::Saver s;
+  return Variant::attach(
     g_context->invokeFunc(f, args, callCtx.this_, callCtx.cls,
-                          RuntimeCoeffects::fixme(),
+                          RuntimeCoeffects::none(),
                           callCtx.dynamic, false, false,
                           std::move(reifiedGenerics))
   );
-  return ret;
 }
 
 } // namespace

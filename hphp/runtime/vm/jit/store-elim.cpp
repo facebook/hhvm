@@ -1532,7 +1532,7 @@ void adjust_inline_marker(IRInstruction& inst, Frames& scratch_frames,
 
   // Find the last ancestor of this frame that's been published. This search
   // definitely stops at the DefFP at i = 0, so it must be successful.
-  populate_ancestor_frames(inst.marker().fp(), scratch_frames);
+  populate_ancestor_frames(inst.marker().fixupFP(), scratch_frames);
   if (published_frames.empty() || scratch_frames.empty()) return;
   auto i = std::min(published_frames.size(), scratch_frames.size()) - 1;
   while (published_frames[i] != scratch_frames[i]) {
@@ -1544,7 +1544,7 @@ void adjust_inline_marker(IRInstruction& inst, Frames& scratch_frames,
   // right after fp in the scratch_frames list exists and is the first call
   // from a published frame to an unpublished ancestor of curFp.
   auto const fp = published_frames[i];
-  auto const curFp = inst.marker().fp();
+  auto const curFp = inst.marker().fixupFP();
   assertx(curFp == scratch_frames.back());
   if (curFp == fp) return;
   assertx(i + 1 < scratch_frames.size());
@@ -1568,7 +1568,7 @@ void adjust_inline_marker(IRInstruction& inst, Frames& scratch_frames,
   auto const stackBaseDelta = newStackBaseOffset - curStackBaseOffset;
 
   inst.marker() = inst.marker()
-    .adjustFP(fp)
+    .adjustFixupFP(fp)
     .adjustSPOff(inst.marker().bcSPOff() + stackBaseDelta)
     .adjustFixupSK(fixupSk);
 }

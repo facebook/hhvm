@@ -150,7 +150,7 @@ bool optimizePhis(IRUnit& unit) {
         // DefLabel is the same as the one from the LdLocAddr, if that's the
         // instruction we're trying to sink.
         if (sink.inst->is(LdLocAddr) &&
-            sink.inst->marker().fp() != label.marker().fp()) {
+            sink.inst->marker().fixupFP() != label.marker().fixupFP()) {
           continue;
         }
 

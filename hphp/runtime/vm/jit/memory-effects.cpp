@@ -255,7 +255,7 @@ AliasClass livefp(SSATmp* fp) {
 }
 
 AliasClass livefp(const IRInstruction& inst) {
-  return livefp(inst.marker().fp());
+  return livefp(inst.marker().fixupFP());
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -367,10 +367,10 @@ GeneralEffects may_reenter(const IRInstruction& inst, GeneralEffects x) {
    * writing anyway.
    */
   auto const new_kills = [&] {
-    if (inst.marker().fp() == nullptr) return AEmpty;
+    if (inst.marker().fixupFP() == nullptr) return AEmpty;
 
     auto const offset = [&]() -> IRSPRelOffset {
-      auto const fp = canonical(inst.marker().fp());
+      auto const fp = canonical(inst.marker().fixupFP());
       if (fp->inst()->is(BeginInlining)) {
         assertx(inst.marker().resumeMode() == ResumeMode::None);
         auto const extra = fp->inst()->extra<BeginInlining>();
@@ -707,7 +707,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     assertx(extra->paramId >= 0);
     auto const stores =
       AHeapAny |
-      ALocal{inst.marker().fp(), safe_cast<uint32_t>(extra->paramId)};
+      ALocal{inst.marker().fixupFP(), safe_cast<uint32_t>(extra->paramId)};
     return may_load_store(AUnknown, stores);
   }
   case VerifyReifiedLocalType: {
@@ -715,7 +715,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     assertx(extra->paramId >= 0);
     auto const stores =
       AHeapAny |
-      ALocal{inst.marker().fp(), safe_cast<uint32_t>(extra->paramId)};
+      ALocal{inst.marker().fixupFP(), safe_cast<uint32_t>(extra->paramId)};
     return may_load_store(AUnknown, stores);
   }
   // However the following ones can't read locals from our frame on the way
@@ -2109,7 +2109,7 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, MemEffects me) {
          * may_reenter right now, which will kill the stack below the re-entry
          * depth---unless the marker for `inst' doesn't have an fp set.
          */
-        always_assert(inst.marker().fp() == nullptr ||
+        always_assert(inst.marker().fixupFP() == nullptr ||
                       AStackAny.maybe(x.kills));
       }
     },

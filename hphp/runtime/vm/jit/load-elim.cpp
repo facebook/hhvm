@@ -1051,7 +1051,7 @@ void optimize_enter_tc_unwind(
     FTRACE(5, "    Emitting decref for LocalId {}\n", locId);
     auto const loadInst =
       env.unit.gen(LdLoc, inst.bcctx(), type,
-                   LocalId{(uint32_t)locId}, inst.marker().fp());
+                   LocalId{(uint32_t)locId}, inst.marker().fixupFP());
     block->insert(block->iteratorTo(&inst), loadInst);
     auto const decref =
       env.unit.gen(DecRef, inst.bcctx(), DecRefData{locId}, loadInst->dst());

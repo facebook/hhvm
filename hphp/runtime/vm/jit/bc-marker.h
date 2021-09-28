@@ -62,6 +62,7 @@ struct BCMarker {
     , m_stublogue(stublogue)
     , m_profTransIDs{tids}
     , m_fp{fp}
+    , m_fixupFP{fp}
     , m_sp{sp}
     , m_fixupSk(sk)
   {
@@ -74,6 +75,7 @@ struct BCMarker {
            b.m_stublogue == m_stublogue &&
            b.m_profTransIDs == m_profTransIDs &&
            b.m_fp == m_fp &&
+           b.m_fixupFP == m_fixupFP &&
            b.m_sp == m_sp;
   }
   bool operator!=(const BCMarker& b) const { return !operator==(b); }
@@ -90,6 +92,7 @@ struct BCMarker {
   SBInvOffset bcSPOff()   const { assertx(valid()); return m_bcSPOff;       }
   bool        stublogue() const { assertx(valid()); return m_stublogue;     }
   SSATmp*     fp()        const { assertx(valid()); return m_fp;            }
+  SSATmp*     fixupFP()   const { assertx(valid()); return m_fixupFP;       }
   SSATmp*     sp()        const { assertx(valid()); return m_sp;            }
   SrcKey      fixupSk()   const { assertx(valid()); return m_fixupSk;       }
 
@@ -117,10 +120,14 @@ struct BCMarker {
 
   // Return a copy of this marker with an updated bcSPOff, fp, or fixupSK.
   BCMarker adjustSPOff(SBInvOffset bcSPOff) const {
-    return BCMarker { m_sk, bcSPOff, m_stublogue, m_profTransIDs, m_fp, m_sp };
+    auto ret = *this;
+    ret.m_bcSPOff = bcSPOff;
+    return ret;
   }
-  BCMarker adjustFP(SSATmp* fp) const {
-    return BCMarker { m_sk, m_bcSPOff, m_stublogue, m_profTransIDs, fp, m_sp };
+  BCMarker adjustFixupFP(SSATmp* fp) const {
+    auto ret = *this;
+    ret.m_fixupFP = fp;
+    return ret;
   }
   BCMarker adjustFixupSK(SrcKey sk) const {
     auto ret = *this;
@@ -135,6 +142,7 @@ struct BCMarker {
     TransIDSet emptyTransIDSet;
     m_profTransIDs.swap(emptyTransIDSet);
     m_fp = nullptr;
+    m_fixupFP = nullptr;
     m_sp = nullptr;
     m_fixupSk = SrcKey();
   }
@@ -145,6 +153,7 @@ private:
   bool        m_stublogue;
   TransIDSet  m_profTransIDs;
   SSATmp*     m_fp{nullptr};
+  SSATmp*     m_fixupFP{nullptr};
   SSATmp*     m_sp{nullptr};
 
   // Normally the fixup SrcKey is the same as the SrcKey for the marker,

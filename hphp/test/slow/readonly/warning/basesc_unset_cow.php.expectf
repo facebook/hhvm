@@ -3,5 +3,4 @@ Warning: Readonly collections cannot be modified. in %s/basesc_unset_cow.php on 
 Warning: Property bad_c1 of class Foo is readonly, and therefore must be a value type to be modified. in %s/basesc_unset_cow.php on line 17
 
 Fatal error: Uncaught exception 'RuntimeException' with message 'Cannot unset an element of a Vector' in %s/basesc_unset_cow.php:17
-Stack trace:
 %A

@@ -1638,9 +1638,8 @@ void emitBaseL(IRGS& env, NamedLocal loc, MOpMode mode, ReadonlyOp op) {
 
   if (RO::EvalEnableReadonlyPropertyEnforcement &&
     (op == ReadonlyOp::CheckROCOW || op == ReadonlyOp::CheckMutROCOW)) {
-    if (!base->type().maybe(TCounted) || base->type().subtypeOfAny(TArrLike)) {
-      gen(env, StMROProp, cns(env, true));
-    } else {
+    gen(env, StMROProp, cns(env, true));
+    if (base->isA(TObj)) {
       auto const baseName = curFunc(env)->localVarName(loc.name);
       gen(env, ThrowOrWarnMustBeValueTypeException, cns(env, baseName));
     }

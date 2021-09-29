@@ -920,9 +920,8 @@ void throw_or_warn_must_be_value_type(const char* className, const char* propNam
 bool readonlyLocalShouldThrow(TypedValue tv, ReadonlyOp op) {
   if (!RO::EvalEnableReadonlyPropertyEnforcement) return false;
   if (op == ReadonlyOp::CheckROCOW || op == ReadonlyOp::CheckMutROCOW) {
-    auto cow = !isRefcountedType(type(tv)) || hasPersistentFlavor(type(tv));
-    if (!cow) return true;
     vmMInstrState().roProp = true;
+    if (type(tv) == KindOfObject) return true;
   }
   return false;
 }
@@ -934,12 +933,12 @@ void checkReadonly(const TypedValue* tv,
                    ReadonlyOp op,
                    bool writeMode) {
   if (!RO::EvalEnableReadonlyPropertyEnforcement) return;
-  auto cow = !isRefcountedType(type(tv)) || hasPersistentFlavor(type(tv));
+  if ((op == ReadonlyOp::CheckMutROCOW && readonly) || op == ReadonlyOp::CheckROCOW) {
+    vmMInstrState().roProp = true;
+  }
   if (readonly) {
     if (op == ReadonlyOp::CheckMutROCOW || op == ReadonlyOp::CheckROCOW) {
-      if (cow) {
-        vmMInstrState().roProp = true;
-      } else {
+      if (type(tv) == KindOfObject) {
         throw_or_warn_must_be_value_type(cls->name()->data(), name->data());
       }
     } else if (op == ReadonlyOp::Mutable) {

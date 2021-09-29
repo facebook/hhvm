@@ -1138,13 +1138,13 @@ void ObjectData::throwOrWarnMustBeValueType(Slot prop) const {
 void ObjectData::checkReadonly(const PropLookup& lookup, ReadonlyOp op,
                                bool writeMode) const {
   if (!RO::EvalEnableReadonlyPropertyEnforcement) return;
-  auto cow = !isRefcountedType(type(lookup.val)) ||
-             hasPersistentFlavor(type(lookup.val));
+  if ((op == ReadonlyOp::CheckMutROCOW && lookup.readonly) ||
+    op == ReadonlyOp::CheckROCOW) {
+    vmMInstrState().roProp = true;
+  }
   if (lookup.readonly) {
     if (op == ReadonlyOp::CheckMutROCOW || op == ReadonlyOp::CheckROCOW) {
-      if (cow) {
-        vmMInstrState().roProp = true;
-      } else {
+      if (type(lookup.val) == KindOfObject) {
         throwOrWarnMustBeValueType(lookup.slot);
       }
     } else if (op == ReadonlyOp::Mutable) {

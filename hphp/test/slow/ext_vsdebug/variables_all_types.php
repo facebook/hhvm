@@ -26,6 +26,9 @@ require(__DIR__ . '/common.inc');
 
   $testProcess = vsDebugLaunch($path, true, $breakpoints);
 
+  // Skip breakpoint resolution messages.
+  skipMessages(count($breakpoints[0]{'breakpoints'}));
+
   // we should have stopped at the first BP
   verifyBpHit($path, $bp1);
 

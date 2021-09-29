@@ -161,6 +161,12 @@ function getHhvmPath() {
   return PHP_BINARY;
 }
 
+function skipMessages($skip) {
+  for ($i = 0; $i < $skip; $i++) {
+    getNextVsDebugMessage();
+  }
+}
+
 function checkForOutput($testProcess, $expectedOutput, $expectedCategory, $error = false) {
   $pipes = $testProcess[1];
   $msg = json_decode(getNextVsDebugMessage(), true);
@@ -400,7 +406,7 @@ function vsDebugLaunch($scriptPath, $sendDefaultInit = true, $breakpoints = varr
     checkObjEqualRecursively($msg, darray["type" => "event", "event" => "readyForEvaluations"]);
 
     // Set any initial breakpoints that need to be set before we resume the target.
-    setBreakpoints($breakpoints);
+    setBreakpoints($breakpoints, false);
 
     // Send configuration done, which resumes the target.
     $configDoneCommand = darray[

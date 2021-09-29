@@ -15,6 +15,9 @@ $breakpoints = varray[
 
 $testProcess = vsDebugLaunch(__FILE__ . ".test", true, $breakpoints);
 
+// Skip breakpoint resolution messages.
+skipMessages(count($breakpoints[0]{'breakpoints'}));
+
 // Breakpoint 1 should not hit: its condition is false.
 // Breakpoint 2 should hit: condition is true.
 verifyBpHit($breakpoints[0]{'path'}, $breakpoints[0]{'breakpoints'}[1]);

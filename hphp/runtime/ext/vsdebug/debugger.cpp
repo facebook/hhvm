@@ -1583,61 +1583,36 @@ void Debugger::tryInstallBreakpoints(DebuggerRequestInfo* ri) {
     }
 
     bool resolved = tryResolveBreakpoint(ri, breakpointId, bp);
-    if (!resolved) {
-      if (!RuntimeOption::RepoAuthoritative &&
-          bp->m_type == BreakpointType::Source) {
+    // This breakpoint could not be resolved yet. As new compilation units
+    // are loaded, we'll try again.
+    // In debugger clients that support multiple languages like Nuclide,
+    // users tend to leave breakpoints set in files that are for other
+    // debuggers. It's annoying to see warnings in those cases. Assume
+    // any file path that doesn't end in PHP is ok not to tell the user
+    // that the breakpoint failed to set.
+    const bool phpFile =
+      bp->m_path.size() >= 4 &&
+      std::equal(
+        bp->m_path.rbegin(),
+        bp->m_path.rend(),
+        std::string(".php").rbegin()
+      );
+    if (phpFile && !resolved) {
+      std::string resolveMsg = "Warning: request ";
+      resolveMsg += std::to_string(getCurrentThreadId());
+      resolveMsg += " could not resolve breakpoint #";
+      resolveMsg += std::to_string(breakpointId);
+      resolveMsg += ". The Hack/PHP file at ";
+      resolveMsg += bp->m_path;
+      resolveMsg += " is not yet loaded, or failed to compile.";
 
-        // It's possible this compilation unit just isn't loaded yet. Try
-        // to force a pre-load and compile of the unit and place the bp.
-        HPHP::String unitPath(bp->m_path.c_str());
-        const auto compilationUnit = lookupUnit(unitPath.get(), "", nullptr,
-                                                Native::s_noNativeFuncs, false);
-
-        if (compilationUnit != nullptr) {
-          ri->m_breakpointInfo->m_loadedUnits[bp->m_path] = compilationUnit;
-          resolved = tryResolveBreakpoint(ri, breakpointId, bp);
-        }
-
-        // In debugger clients that support multiple languages like Nuclide,
-        // users tend to leave breakpoints set in files that are for other
-        // debuggers. It's annoying to see warnings in those cases. Assume
-        // any file path that doesn't end in PHP is ok not to tell the user
-        // that the breakpoint failed to set.
-        const bool phpFile =
-          bp->m_path.size() >= 4 &&
-          std::equal(
-            bp->m_path.rbegin(),
-            bp->m_path.rend(),
-            std::string(".php").rbegin()
-          );
-
-        if (phpFile && !resolved) {
-          std::string resolveMsg = "Warning: request ";
-          resolveMsg += std::to_string(getCurrentThreadId());
-          resolveMsg += " could not resolve breakpoint #";
-          resolveMsg += std::to_string(breakpointId);
-          resolveMsg += ". The Hack/PHP file at ";
-          resolveMsg += bp->m_path;
-
-          if (compilationUnit == nullptr) {
-            resolveMsg += " could not be loaded, or failed to compile.";
-          } else {
-            resolveMsg += " was loaded, but the breakpoint did not resolve "
-              "to any executable instruction.";
-          }
-
-          sendUserMessage(
-            resolveMsg.c_str(),
-            DebugTransport::OutputLevelWarning
-          );
-        }
-      }
-
-      // This breakpoint could not be resolved yet. As new compilation units
-      // are loaded, we'll try again.
-      if (!resolved || bp->isRelativeBp()) {
-        ri->m_breakpointInfo->m_unresolvedBreakpoints.emplace(breakpointId);
-      }
+      sendUserMessage(
+        resolveMsg.c_str(),
+        DebugTransport::OutputLevelWarning
+      );
+    }
+    if (!resolved || bp->isRelativeBp()) {
+      ri->m_breakpointInfo->m_unresolvedBreakpoints.emplace(breakpointId);
     }
   }
 

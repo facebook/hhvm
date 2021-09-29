@@ -4531,14 +4531,20 @@ OPTBLD_INLINE void iopVerifyParamType(local_var param) {
   assertx(param.index < func->numParams());
   assertx(func->numParams() == int(func->params().size()));
   const TypeConstraint& tc = func->params()[param.index].typeConstraint;
-  if (tc.isCheckable()) tc.verifyParam(param.lval, func, param.index);
+  if (tc.isCheckable()) {
+    auto const ctx = tc.isThis() ? frameStaticClass(vmfp()) : nullptr;
+    tc.verifyParam(param.lval, ctx, func, param.index);
+  }
   if (func->hasParamsWithMultiUBs()) {
     auto& ubs = const_cast<Func::ParamUBMap&>(func->paramUBs());
     auto it = ubs.find(param.index);
     if (it != ubs.end()) {
       for (auto& ub : it->second) {
         applyFlagsToUB(ub, tc);
-        if (ub.isCheckable()) ub.verifyParam(param.lval, func, param.index);
+        if (ub.isCheckable()) {
+          auto const ctx = ub.isThis() ? frameStaticClass(vmfp()) : nullptr;
+          ub.verifyParam(param.lval, ctx, func, param.index);
+        }
       }
     }
   }
@@ -4571,7 +4577,10 @@ OPTBLD_INLINE void iopVerifyOutType(uint32_t paramId) {
   assertx(paramId < func->numParams());
   assertx(func->numParams() == int(func->params().size()));
   auto const& tc = func->params()[paramId].typeConstraint;
-  if (tc.isCheckable()) tc.verifyOutParam(vmStack().topTV(), func, paramId);
+  if (tc.isCheckable()) {
+    auto const ctx = tc.isThis() ? frameStaticClass(vmfp()) : nullptr;
+    tc.verifyOutParam(vmStack().topTV(), ctx, func, paramId);
+  }
   if (func->hasParamsWithMultiUBs()) {
     auto& ubs = const_cast<Func::ParamUBMap&>(func->paramUBs());
     auto it = ubs.find(paramId);
@@ -4579,7 +4588,8 @@ OPTBLD_INLINE void iopVerifyOutType(uint32_t paramId) {
       for (auto& ub : it->second) {
         applyFlagsToUB(ub, tc);
         if (ub.isCheckable()) {
-          ub.verifyOutParam(vmStack().topTV(), func, paramId);
+          auto const ctx = ub.isThis() ? frameStaticClass(vmfp()) : nullptr;
+          ub.verifyOutParam(vmStack().topTV(), ctx, func, paramId);
         }
       }
     }
@@ -4591,12 +4601,18 @@ namespace {
 OPTBLD_INLINE void verifyRetTypeImpl(size_t ind) {
   const auto func = vmfp()->func();
   const auto tc = func->returnTypeConstraint();
-  if (tc.isCheckable()) tc.verifyReturn(vmStack().indC(ind), func);
+  if (tc.isCheckable()) {
+    auto const ctx = tc.isThis() ? frameStaticClass(vmfp()) : nullptr;
+    tc.verifyReturn(vmStack().indC(ind), ctx, func);
+  }
   if (func->hasReturnWithMultiUBs()) {
     auto& ubs = const_cast<Func::UpperBoundVec&>(func->returnUBs());
     for (auto& ub : ubs) {
       applyFlagsToUB(ub, tc);
-      if (ub.isCheckable()) ub.verifyReturn(vmStack().indC(ind), func);
+      if (ub.isCheckable()) {
+        auto const ctx = ub.isThis() ? frameStaticClass(vmfp()) : nullptr;
+        ub.verifyReturn(vmStack().indC(ind), ctx, func);
+      }
     }
   }
 }
@@ -4632,7 +4648,8 @@ OPTBLD_INLINE void iopVerifyRetTypeTS() {
 OPTBLD_INLINE void iopVerifyRetNonNullC() {
   const auto func = vmfp()->func();
   const auto tc = func->returnTypeConstraint();
-  tc.verifyReturnNonNull(vmStack().topC(), func);
+  auto const ctx = tc.isThis() ? frameStaticClass(vmfp()) : nullptr;
+  tc.verifyReturnNonNull(vmStack().topC(), ctx, func);
 }
 
 OPTBLD_INLINE TCA iopNativeImpl(PC& pc) {

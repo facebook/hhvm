@@ -365,10 +365,17 @@ struct TypeConstraint {
   }
 
   // NB: Can throw if the check fails.
-  void verifyParam(tv_lval val, const Func* func, int paramNum) const;
-  void verifyReturn(TypedValue* tv, const Func* func) const;
-  void verifyReturnNonNull(TypedValue* tv, const Func* func) const;
-  void verifyOutParam(TypedValue* tv, const Func* func,
+  void verifyParam(tv_lval val,
+                   const Class* ctx,
+                   const Func* func,
+                   int paramNum) const;
+  void verifyReturn(TypedValue* tv, const Class* ctx, const Func* func) const;
+  void verifyReturnNonNull(TypedValue* tv,
+                           const Class* ctx,
+                           const Func* func) const;
+  void verifyOutParam(TypedValue* tv,
+                      const Class* ctx,
+                      const Func* func,
                       int paramNum) const;
   // TODO(T61738946): We can take a tv_rval here once we remove support for
   // coercing class_meth types.
@@ -381,12 +388,18 @@ struct TypeConstraint {
                             const Class* declCls,
                             const StringData* propName) const;
 
-  void verifyFail(const Func* func, tv_lval val, int id) const;
-  void verifyParamFail(const Func* func, tv_lval val, int paramNum) const;
-  void verifyOutParamFail(const Func* func, TypedValue* tv,
+  void verifyParamFail(tv_lval val,
+                       const Class* ctx,
+                       const Func* func,
+                       int paramNum) const;
+  void verifyOutParamFail(TypedValue* tv,
+                          const Class* ctx,
+                          const Func* func,
                           int paramNum) const;
-  void verifyReturnFail(const Func* func, TypedValue* tv) const {
-    verifyFail(func, tv, ReturnId);
+  void verifyReturnFail(TypedValue* tv,
+                        const Class* ctx,
+                        const Func* func) const {
+    verifyFail(tv, ctx, func, ReturnId);
   }
   // TODO(T61738946): We can take a tv_rval here once we remove support for
   // coercing class_meth types.
@@ -413,8 +426,10 @@ private:
 
   template <bool> bool checkTypeAliasImpl(const Class* type) const;
 
-  void verifyFail(const Func* func, TypedValue* tv, int id,
-                  bool useStrictTypes) const;
+  void verifyFail(tv_lval val,
+                  const Class* ctx,
+                  const Func* func,
+                  int id) const;
 
   bool checkStringCompatible() const;
 

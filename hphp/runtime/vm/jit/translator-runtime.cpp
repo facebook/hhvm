@@ -240,8 +240,11 @@ void VerifyParamTypeFail(int paramNum, const TypeConstraint* tc) {
     tc = &func->params()[paramNum].typeConstraint;
   }
   auto const param = frame_local(ar, paramNum);
-  assertx(!tc->check(param, func->cls()));
-  tc->verifyParamFail(func, param, paramNum);
+  auto const ctx = tc->isThis() && func->cls()
+    ? (ar->hasThis() ? ar->getThis()->getVMClass() : ar->getClass())
+    : nullptr;
+  assertx(!tc->check(param, ctx));
+  tc->verifyParamFail(param, ctx, func, paramNum);
 }
 
 void VerifyRetTypeSlow(int32_t id,
@@ -266,12 +269,18 @@ void VerifyRetTypeFail(int32_t id, TypedValue* tv, const TypeConstraint* tc) {
   const Func* func = ar->func();
   if (id == TypeConstraint::ReturnId) {
     if (!tc) tc = &func->returnTypeConstraint();
-    assertx(!tc->check(tv, func->cls()));
-    tc->verifyReturnFail(func, tv);
+    auto const ctx = tc->isThis() && func->cls()
+      ? (ar->hasThis() ? ar->getThis()->getVMClass() : ar->getClass())
+      : nullptr;
+    assertx(!tc->check(tv, ctx));
+    tc->verifyReturnFail(tv, ctx, func);
   } else {
     if (!tc) tc = &func->params()[id].typeConstraint;
-    assertx(!tc->check(tv, func->cls()));
-    tc->verifyOutParamFail(func, tv, id);
+    auto const ctx = tc->isThis() && func->cls()
+      ? (ar->hasThis() ? ar->getThis()->getVMClass() : ar->getClass())
+      : nullptr;
+    assertx(!tc->check(tv, ctx));
+    tc->verifyOutParamFail(tv, ctx, func, id);
   }
 }
 

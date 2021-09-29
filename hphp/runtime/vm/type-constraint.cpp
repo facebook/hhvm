@@ -160,19 +160,6 @@ std::string TypeConstraint::displayName(const Class* context /*= nullptr*/,
 
 namespace {
 
-const Class* getThis() {
-  auto const ar = vmfp();
-  if (ar->func()->cls()) {
-    if (ar->hasThis()) {
-      return ar->getThis()->getVMClass();
-    } else {
-      assertx(ar->hasClass());
-      return ar->getClass();
-    }
-  }
-  return nullptr;
-}
-
 /*
  * Look up a TypeAlias for the supplied NamedEntity (which must be the
  * NamedEntity for `name'), invoking autoload if necessary for types but not
@@ -545,11 +532,7 @@ bool TypeConstraint::checkImpl(tv_rval val,
         case MetaType::This:
           if (isAssert) return true;
           if (isPasses) return false;
-          if (isProp) return val.val().pobj->getVMClass() == context;
-          if (auto const cls = getThis()) {
-            return val.val().pobj->getVMClass() == cls;
-          }
-          return false;
+          return val.val().pobj->getVMClass() == context;
         case MetaType::Callable:
           assertx(!isProp);
           if (isAssert) return true;
@@ -709,24 +692,28 @@ bool TypeConstraint::alwaysPasses(DataType dt) const {
 }
 
 void TypeConstraint::verifyParam(tv_lval val,
+                                 const Class* ctx,
                                  const Func* func,
                                  int paramNum) const {
-  if (UNLIKELY(!check(val, func->cls()))) {
-    verifyParamFail(func, val, paramNum);
+  if (UNLIKELY(!check(val, ctx))) {
+    verifyParamFail(val, ctx, func, paramNum);
   }
 }
 
-void TypeConstraint::verifyReturn(TypedValue* tv, const Func* func) const {
-  if (UNLIKELY(!check(tv, func->cls()))) {
-    verifyReturnFail(func, tv);
+void TypeConstraint::verifyReturn(TypedValue* tv,
+                                  const Class* ctx,
+                                  const Func* func) const {
+  if (UNLIKELY(!check(tv, ctx))) {
+    verifyReturnFail(tv, ctx, func);
   }
 }
 
 void TypeConstraint::verifyOutParam(TypedValue* tv,
+                                    const Class* ctx,
                                     const Func* func,
                                     int paramNum) const {
-  if (UNLIKELY(!check(tv, func->cls()))) {
-    verifyOutParamFail(func, tv, paramNum);
+  if (UNLIKELY(!check(tv, ctx))) {
+    verifyOutParamFail(tv, ctx, func, paramNum);
   }
 }
 
@@ -753,15 +740,16 @@ void TypeConstraint::verifyStaticProperty(tv_lval val,
 }
 
 void TypeConstraint::verifyReturnNonNull(TypedValue* tv,
+                                         const Class* ctx,
                                          const Func* func) const {
   const auto DEBUG_ONLY tc = func->returnTypeConstraint();
   assertx(!tc.isNullable());
   if (UNLIKELY(tvIsNull(tv))) {
-    verifyReturnFail(func, tv);
+    verifyReturnFail(tv, ctx, func);
   } else if (debug) {
     auto vm = &*g_context;
     always_assert_flog(
-      check(tv, func->cls()),
+      check(tv, ctx),
       "HHBBC incorrectly converted VerifyRetTypeC to VerifyRetNonNull in {}:{}",
       vm->getContainingFileName()->data(),
       vm->getLine()
@@ -837,14 +825,16 @@ bool TypeConstraint::checkStringCompatible() const {
   return false;
 }
 
-void TypeConstraint::verifyParamFail(const Func* func, tv_lval val,
+void TypeConstraint::verifyParamFail(tv_lval val,
+                                     const Class* ctx,
+                                     const Func* func,
                                      int paramNums) const {
-  verifyFail(func, val, paramNums);
+  verifyFail(val, ctx, func, paramNums);
   assertx(
     isSoft() ||
     (isThis() && couldSeeMockObject()) ||
     (RO::EvalEnforceGenericsUB < 2 && isUpperBound()) ||
-    check(val, func->cls())
+    check(val, ctx)
   );
 }
 
@@ -863,9 +853,12 @@ void castClsMeth(tv_lval c, F make) {
 
 }
 
-void TypeConstraint::verifyOutParamFail(const Func* func,
-                                        TypedValue* c,
+void TypeConstraint::verifyOutParamFail(TypedValue* c,
+                                        const Class*,
+                                        const Func* func,
                                         int paramNum) const {
+  // FIXME: does this need to support mock classes with `this` tc?
+
   if ((isClassType(c->m_type) || isLazyClassType(c->m_type)) &&
       checkStringCompatible()) {
     if (RuntimeOption::EvalClassStringHintNotices) {
@@ -938,17 +931,15 @@ void TypeConstraint::verifyPropFail(const Class* thisCls,
   );
 }
 
-void TypeConstraint::verifyFail(const Func* func, tv_lval c,
+void TypeConstraint::verifyFail(tv_lval c, const Class* ctx, const Func* func,
                                 int id) const {
-  VMRegAnchor _;
   std::string name = displayName(func->cls());
   auto const givenType = describe_actual_type(c);
 
   if (UNLIKELY(isThis() && c.type() == KindOfObject)) {
     Class* cls = val(c).pobj->getVMClass();
-    auto const thisClass = getThis();
     if (cls->preClass()->userAttributes().count(s___MockClass.get()) &&
-        cls->parent() == thisClass) {
+        cls->parent() == ctx) {
       return;
     }
   }

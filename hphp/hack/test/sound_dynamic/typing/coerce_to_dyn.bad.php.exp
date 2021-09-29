@@ -3,7 +3,7 @@ Typing error (Typing[4110])
   File "coerce_to_dyn.bad.php", line 8, characters 13-19:
   Expected `dynamic`
   File "coerce_to_dyn.bad.php", line 6, characters 42-42:
-  But got `C`
+  Type `C` is not a subtype of `dynamic` under dynamic-aware subtyping
 File "coerce_to_dyn.bad.php", line 9, characters 3-19:
 Typing error (Typing[4110])
   File "coerce_to_dyn.bad.php", line 9, characters 13-19:
@@ -15,61 +15,61 @@ Typing error (Typing[4110])
   File "coerce_to_dyn.bad.php", line 10, characters 13-19:
   Expected `dynamic`
   File "coerce_to_dyn.bad.php", line 6, characters 30-36:
-  But got `nonnull`
+  Type `nonnull` is not a subtype of `dynamic` under dynamic-aware subtyping
 File "coerce_to_dyn.bad.php", line 17, characters 3-19:
 Typing error (Typing[4110])
   File "coerce_to_dyn.bad.php", line 17, characters 13-19:
   Expected `dynamic`
-  File "coerce_to_dyn.bad.php", line 13, characters 32-32:
-  But got `C`
+  File "coerce_to_dyn.bad.php", line 13, characters 23-33:
+  Type `(string, C)` is not a subtype of `dynamic` under dynamic-aware subtyping
 File "coerce_to_dyn.bad.php", line 18, characters 3-19:
 Typing error (Typing[4110])
   File "coerce_to_dyn.bad.php", line 18, characters 13-19:
   Expected `dynamic`
-  File "coerce_to_dyn.bad.php", line 13, characters 43-43:
-  But got `C`
+  File "coerce_to_dyn.bad.php", line 13, characters 39-44:
+  Type `vec<C>` is not a subtype of `dynamic` under dynamic-aware subtyping
 File "coerce_to_dyn.bad.php", line 19, characters 3-20:
 Typing error (Typing[4110])
   File "coerce_to_dyn.bad.php", line 19, characters 14-20:
   Expected `dynamic`
-  File "coerce_to_dyn.bad.php", line 13, characters 63-63:
-  But got `C`
+  File "coerce_to_dyn.bad.php", line 13, characters 50-64:
+  Type `dict<string, C>` is not a subtype of `dynamic` under dynamic-aware subtyping
 File "coerce_to_dyn.bad.php", line 20, characters 3-20:
 Typing error (Typing[4110])
   File "coerce_to_dyn.bad.php", line 20, characters 14-20:
   Expected `dynamic`
-  File "coerce_to_dyn.bad.php", line 14, characters 40-40:
-  But got `C`
+  File "coerce_to_dyn.bad.php", line 14, characters 23-41:
+  Type `dict<arraykey, C>` is not a subtype of `dynamic` under dynamic-aware subtyping
 File "coerce_to_dyn.bad.php", line 21, characters 3-20:
 Typing error (Typing[4110])
   File "coerce_to_dyn.bad.php", line 21, characters 14-20:
   Expected `dynamic`
-  File "coerce_to_dyn.bad.php", line 15, characters 30-30:
-  But got `C`
+  File "coerce_to_dyn.bad.php", line 15, characters 23-31:
+  Type `vec<C>` is not a subtype of `dynamic` under dynamic-aware subtyping
 File "coerce_to_dyn.bad.php", line 25, characters 3-19:
 Typing error (Typing[4110])
   File "coerce_to_dyn.bad.php", line 25, characters 13-19:
   Expected `dynamic`
-  File "coerce_to_dyn.bad.php", line 24, characters 51-51:
-  But got `C`
+  File "coerce_to_dyn.bad.php", line 24, characters 21-53:
+  Type `shape('x' => int, ?'y' => vec<C>)` is not a subtype of `dynamic` under dynamic-aware subtyping
 File "coerce_to_dyn.bad.php", line 33, characters 3-24:
 Typing error (Typing[4110])
   File "coerce_to_dyn.bad.php", line 33, characters 17-23:
   Expected `dynamic`
   File "coerce_to_dyn.bad.php", line 29, characters 37-37:
-  But got `C`
+  Type `C` is not a subtype of `dynamic` under dynamic-aware subtyping
 File "coerce_to_dyn.bad.php", line 34, characters 3-35:
 Typing error (Typing[4110])
   File "coerce_to_dyn.bad.php", line 34, characters 28-34:
   Expected `dynamic`
   File "coerce_to_dyn.bad.php", line 30, characters 43-43:
-  But got `C`
+  Type `C` is not a subtype of `dynamic` under dynamic-aware subtyping
 File "coerce_to_dyn.bad.php", line 38, characters 3-50:
 Typing error (Typing[4110])
   File "coerce_to_dyn.bad.php", line 38, characters 43-49:
   Expected `dynamic`
   File "coerce_to_dyn.bad.php", line 37, characters 55-55:
-  But got `C`
+  Type `C` is not a subtype of `dynamic` under dynamic-aware subtyping
 File "coerce_to_dyn.bad.php", line 45, characters 3-24:
 Typing error (Typing[4110])
   File "coerce_to_dyn.bad.php", line 44, characters 32-34:
@@ -83,10 +83,10 @@ Typing error (Typing[4110])
   File "coerce_to_dyn.bad.php", line 46, characters 17-23:
   Expected `dynamic`
   File "coerce_to_dyn.bad.php", line 44, characters 45-45:
-  But got `C`
+  Type `C` is not a subtype of `dynamic` under dynamic-aware subtyping
 File "coerce_to_dyn.bad.php", line 55, characters 3-19:
 Typing error (Typing[4110])
   File "coerce_to_dyn.bad.php", line 55, characters 13-19:
   Expected `dynamic`
-  File "coerce_to_dyn.bad.php", line 49, characters 29-29:
-  But got `C`
+  File "coerce_to_dyn.bad.php", line 49, characters 21-23:
+  Type `(int | C)` is not a subtype of `dynamic` under dynamic-aware subtyping

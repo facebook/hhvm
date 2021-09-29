@@ -6042,6 +6042,18 @@ let try_if_no_errors f1 f2 =
     result
   | None -> f2 result
 
+let not_sub_dynamic dynamic_part pos ty (on_error : error_from_reasons_callback)
+    =
+  on_error
+    ~code:(Typing.err_code Typing.UnifyError)
+    (dynamic_part
+    @ [
+        ( pos,
+          "Type "
+          ^ Markdown_lite.md_codify ty
+          ^ " is not a subtype of `dynamic` under dynamic-aware subtyping" );
+      ])
+
 (*****************************************************************************)
 (* Do. *)
 (*****************************************************************************)

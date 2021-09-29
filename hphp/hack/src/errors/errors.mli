@@ -1813,3 +1813,10 @@ val expression_tree_non_public_member :
 
 val internal_method_with_invalid_visibility :
   attr_pos:Pos.t -> visibility:Ast_defs.visibility -> unit
+
+val not_sub_dynamic :
+  (Pos_or_decl.t * string) list ->
+  Pos_or_decl.t ->
+  string ->
+  error_from_reasons_callback ->
+  unit

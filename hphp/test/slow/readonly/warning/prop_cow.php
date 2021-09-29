@@ -16,5 +16,5 @@ function test(): void {
   $b = new Bar();
   $b->myFoo = new Foo();
   $b->myFoo->c[0][0][0] = 10;
-  $b->myFoo->bad_c[0][0][0] = 20;
+  $b->myFoo->bad_c[0][0][0] = 20; // bad_c[0] needs to be COW.
 }

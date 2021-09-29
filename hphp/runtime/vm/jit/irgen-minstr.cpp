@@ -872,6 +872,7 @@ void baseGImpl(IRGS& env, SSATmp* name, MOpMode mode) {
   auto base_mode = mode != MOpMode::Unset ? mode : MOpMode::None;
   auto gblPtr = gen(env, BaseG, MOpModeData{base_mode}, name);
   stMBase(env, gblPtr);
+  gen(env, StMROProp, cns(env, false));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1617,6 +1618,7 @@ void emitBaseSC(IRGS& env,
   assertx(mode != MOpMode::InOut);
   auto const writeMode = mode == MOpMode::Define || mode == MOpMode::Unset;
 
+  gen(env, StMROProp, cns(env, false));
   const LdClsPropOptions opts { op, true, false, writeMode };
   auto const spropPtr = ldClsPropAddr(env, cls, name, opts).propPtr;
   stMBase(env, spropPtr);
@@ -1624,6 +1626,7 @@ void emitBaseSC(IRGS& env,
 
 void emitBaseL(IRGS& env, NamedLocal loc, MOpMode mode, ReadonlyOp op) {
   stMBase(env, ldLocAddr(env, loc.id));
+  gen(env, StMROProp, cns(env, false));
 
   auto base = ldLoc(env, loc.id, DataTypeGeneric);
 
@@ -1651,6 +1654,7 @@ void emitBaseL(IRGS& env, NamedLocal loc, MOpMode mode, ReadonlyOp op) {
 void emitBaseC(IRGS& env, uint32_t idx, MOpMode mode) {
   auto const bcOff = BCSPRelOffset{safe_cast<int32_t>(idx)};
   stMBase(env, ldStkAddr(env, bcOff));
+  gen(env, StMROProp, cns(env, false));
 
   auto base = topC(env, bcOff);
   env.irb->fs().setMemberBase(base);
@@ -1661,6 +1665,7 @@ void emitBaseH(IRGS& env) {
 
   auto const base = ldThis(env);
   stMBase(env, baseValueToLval(env, base));
+  gen(env, StMROProp, cns(env, false));
   env.irb->fs().setMemberBase(base);
 }
 

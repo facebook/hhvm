@@ -4,15 +4,13 @@
 class Foo {
   public static readonly vec<vec<vec<int>>> $c =
     vec[vec[vec[0], vec[1], vec[2]]];
-  public static readonly vec<Vector<vec<int>>> $bad_c =
-    vec[Vector {vec[0], vec[1], vec[2]}];
-  public static readonly Vector<vec<int>> $bad_c1 =
-    Vector {vec[0], vec[1], vec[2]};
+  public static readonly vec<Map<int, Map<int, int>>> $bad_c = vec[Map{1 => Map{1 => 2}}];
+  public static readonly Map<int, Map<int, int>> $bad_c1 = Map{1 => Map{1 => 2}};
 }
 
 <<__EntryPoint>>
 function test(): void {
-  unset(Foo::$c[0][0][0]);
-  unset(Foo::$bad_c[0][0][0]);
-  unset(Foo::$bad_c1[0]);
+  unset(Foo::$c[0][0][0]); //ok
+  unset(Foo::$bad_c[0][1][1]); // [0] must be COW
+  unset(Foo::$bad_c1[1][1]); // bad_c1 must be COW
 }

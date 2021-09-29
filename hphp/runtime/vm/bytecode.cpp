@@ -2359,6 +2359,7 @@ OPTBLD_INLINE void iopCGetS(ReadonlyOp op) {
 static inline void baseGImpl(tv_rval key, MOpMode mode) {
   auto& mstate = vmMInstrState();
   StringData* name;
+  mstate.roProp = false;
 
   auto const baseVal = (mode == MOpMode::Define)
     ? lookupd_gbl(vmfp(), name, key)
@@ -2417,6 +2418,7 @@ OPTBLD_INLINE void iopBaseSC(uint32_t keyIdx,
       name->data());
   }
 
+  mstate.roProp = false;
   checkReadonly(lookup.val, class_, name, lookup.readonly, op, writeMode);
   mstate.base = tv_lval(lookup.val);
 }
@@ -2428,6 +2430,7 @@ OPTBLD_INLINE void baseLImpl(named_local_var loc, MOpMode mode, ReadonlyOp op) {
     raise_undefined_local(vmfp(), loc.name);
   }
 
+  mstate.roProp = false;
   if (readonlyLocalShouldThrow(*local, op)) {
     assertx(loc.name < vmfp()->func()->numNamedLocals());
     assertx(vmfp()->func()->localVarName(loc.name));
@@ -2444,12 +2447,14 @@ OPTBLD_INLINE void iopBaseL(named_local_var loc, MOpMode mode, ReadonlyOp op) {
 OPTBLD_INLINE void iopBaseC(uint32_t idx, MOpMode) {
   auto& mstate = vmMInstrState();
   mstate.base = vmStack().indC(idx);
+  mstate.roProp = false;
 }
 
 OPTBLD_INLINE void iopBaseH() {
   auto& mstate = vmMInstrState();
   mstate.tvTempBase = make_tv<KindOfObject>(vmfp()->getThis());
   mstate.base = &mstate.tvTempBase;
+  mstate.roProp = false;
 }
 
 static OPTBLD_INLINE void propDispatch(MOpMode mode, TypedValue key, ReadonlyOp op) {

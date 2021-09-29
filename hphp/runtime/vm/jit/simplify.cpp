@@ -1626,11 +1626,13 @@ SSATmp* simplifyCmpRes(State& env, const IRInstruction* inst) {
   return (left == right) ? cns(env, 0) : nullptr;
 }
 
-SSATmp* isTypeImpl(State& env, const IRInstruction* inst) {
-  bool const trueSense = inst->op() == IsType;
+SSATmp* isTypeImpl(State& env, const IRInstruction* inst, const Type& srcType) {
+ assertx(inst->is(IsNType,
+                  IsNTypeMem,
+                  IsType,
+                  IsTypeMem));
+  bool const trueSense = inst->is(IsType, IsTypeMem);
   auto const type      = inst->typeParam();
-  auto const src       = inst->src(0);
-  auto const srcType   = src->type();
 
   // Testing for StaticStr will make you miss out on CountedStr, and vice versa,
   // and similarly for arrays. PHP treats both types of string the same, so if
@@ -1824,11 +1826,23 @@ SSATmp* simplifyInstanceOfIfaceVtable(State& env, const IRInstruction* inst) {
 }
 
 SSATmp* simplifyIsType(State& env, const IRInstruction* i) {
-  return isTypeImpl(env, i);
+  auto const src = i->src(0);
+  return isTypeImpl(env, i, src->type());
 }
 
 SSATmp* simplifyIsNType(State& env, const IRInstruction* i) {
-  return isTypeImpl(env, i);
+  auto const src = i->src(0);
+  return isTypeImpl(env, i, src->type());
+}
+
+SSATmp* simplifyIsTypeMem(State& env, const IRInstruction* i) {
+  auto const addr = i->src(0);
+  return isTypeImpl(env, i, addr->type().deref());
+}
+
+SSATmp* simplifyIsNTypeMem(State& env, const IRInstruction* i) {
+  auto const addr = i->src(0);
+  return isTypeImpl(env, i, addr->type().deref());
 }
 
 SSATmp* simplifyMethodExists(State& env, const IRInstruction* inst) {
@@ -3798,7 +3812,9 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(InstanceOfIface)
       X(InstanceOfIfaceVtable)
       X(IsNType)
+      X(IsNTypeMem)
       X(IsType)
+      X(IsTypeMem)
       X(IsLegacyArrLike)
       X(IsWaitHandle)
       X(IsCol)

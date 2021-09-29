@@ -368,18 +368,20 @@ void raiseCoeffectsCallViolation(const Func* callee,
     });
     assertx(!result.isNull());
     return result;
-  }();
+  };
 
-  auto const errMsg = folly::sformat(
-    "Call to {}() requires [{}] coeffects but {}() provided [{}]",
-    callee->fullNameWithClosureName(),
-    required.toString(),
-    callerName,
-    provided.toString()
-  );
+  auto const errMsg = [&] {
+    return folly::sformat(
+      "Call to {}() requires [{}] coeffects but {}() provided [{}]",
+      callee->fullNameWithClosureName(),
+      required.toString(),
+      callerName(),
+      provided.toString()
+    );
+  };
 
   FTRACE_MOD(Trace::coeffects, 1, "{}\n {:016b} -> {:016b}\n",
-             errMsg, provided.value(), required.value());
+             errMsg(), provided.value(), required.value());
 
   assertx(!provided.canCall(required));
   if (provided.canCallWithWarning(required)) {
@@ -388,9 +390,9 @@ void raiseCoeffectsCallViolation(const Func* callee,
       return rate > 0 && folly::Random::rand32(rate) == 0;
     }();
     if (!coinflip) return;
-    raise_warning(errMsg);
+    raise_warning(errMsg());
   } else {
-    SystemLib::throwBadMethodCallExceptionObject(errMsg);
+    SystemLib::throwBadMethodCallExceptionObject(errMsg());
   }
 }
 

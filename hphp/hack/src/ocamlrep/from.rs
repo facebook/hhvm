@@ -57,10 +57,10 @@ pub fn expect_block_tag(block: Block<'_>, tag: u8) -> Result<(), FromError> {
 }
 
 pub fn expect_block_with_size_and_tag(
-    value: Value,
+    value: Value<'_>,
     size: usize,
     tag: u8,
-) -> Result<Block, FromError> {
+) -> Result<Block<'_>, FromError> {
     let block = expect_block(value)?;
     expect_block_size(block, size)?;
     expect_block_tag(block, tag)?;

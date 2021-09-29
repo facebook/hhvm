@@ -43,7 +43,7 @@ impl UnsafeOcamlPtr {
 }
 
 impl fmt::Debug for UnsafeOcamlPtr {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "0x{:x}", self.0)
     }
 }
@@ -97,7 +97,7 @@ impl<T> NakedPtr<T> {
 }
 
 impl<T> fmt::Debug for NakedPtr<T> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{:p}", self.0)
     }
 }

@@ -61,7 +61,7 @@ impl<'a> Value<'a> {
             return None;
         }
         let block = unsafe {
-            let ptr = self.0 as *const Value;
+            let ptr = self.0 as *const Value<'_>;
             let header = ptr.offset(-1);
             let size = Header::from_bits((*header).to_bits()).size() + 1;
             std::slice::from_raw_parts(header, size)
@@ -85,7 +85,7 @@ impl<'a> Value<'a> {
             return None;
         }
         let slice = unsafe {
-            let size = block.size() * std::mem::size_of::<Value>();
+            let size = block.size() * std::mem::size_of::<Value<'_>>();
             let ptr = self.0 as *mut u8;
             let last_byte = ptr.offset(size as isize - 1);
             let padding = *last_byte;
@@ -165,7 +165,7 @@ impl<'a> Value<'a> {
 }
 
 impl Debug for Value<'_> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.as_block() {
             None => write!(f, "{}", self.as_int().unwrap()),
             Some(block) => write!(f, "{:?}", block),
@@ -233,7 +233,7 @@ impl<'a> OpaqueValue<'a> {
 }
 
 impl Debug for OpaqueValue<'_> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.as_int() {
             Some(x) => write!(f, "{}", x),
             None => write!(f, "0x{:x}", self.0),

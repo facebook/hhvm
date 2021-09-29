@@ -45,9 +45,9 @@
     (pps lwt_ppx ppx_deriving.std)))
 
 (library
-  (name justknobs_stubs)
+  (name server_local_config_knobs_stubs)
   (wrapped false)
-  (modules justKnobs)
+  (modules serverLocalConfigKnobs)
   (preprocess
     (pps lwt_ppx ppx_deriving.std)))
 

@@ -679,82 +679,6 @@ let path =
   in
   Filename.concat dir "hh.conf"
 
-let apply_justknobs_overrides ~silent config =
-  let handle_jk_error msg =
-    if
-      (* OSS builds don't have JK, and return one of these error messages
-         instead. Don't print an error message in OSS builds. *)
-      (not String.(msg = "Not implemented: JustKnobs.eval"))
-      && not String.(msg = "Not implemented: JustKnobs.get")
-    then
-      Hh_logger.log "JustKnobs error: %s" msg;
-    (* We failed to fetch the knob (perhaps JustKnobs is broken, or perhaps a
-       developer deleted a knob they shouldn't have), so don't override
-       anything by returning None. *)
-    None
-  in
-  let hash = Unix.gethostname () in
-  let switch = Config_file.Getters.string_opt "rollout_group" config in
-  let eval key knob =
-    match JustKnobs.eval knob ~hash ?switch with
-    | Ok value -> Some (key, Bool.to_string value)
-    | Error msg -> handle_jk_error msg
-  in
-  let get key knob =
-    match JustKnobs.get knob ?switch with
-    | Ok value -> Some (key, Int.to_string value)
-    | Error msg -> handle_jk_error msg
-  in
-  let overrides =
-    List.filter_map
-      ~f:Fn.id
-      [
-        eval
-          "store_decls_in_saved_state"
-          "hack/config:store_decls_in_saved_state";
-        eval
-          "load_decls_from_saved_state"
-          "hack/config:load_decls_from_saved_state";
-        (* rollout_flags (except for symbolindex_search_provider, which, being a
-           string, cannot be configured via JustKnobs. We could enumerate its
-           values and map them to an integer, but I don't see a need right now) *)
-        eval "use_direct_decl_parser" "hack/config:use_direct_decl_parser";
-        eval "longlived_workers" "hack/config:longlived_workers";
-        get
-          "max_times_to_defer_type_checking"
-          "hack/config:max_times_to_defer_type_checking";
-        eval
-          "small_buckets_for_dirty_names"
-          "hack/config:small_buckets_for_dirty_names";
-        eval "require_saved_state" "hack/config:require_saved_state";
-        eval "stream_errors" "hack/config:stream_errors";
-        eval
-          "use_direct_decl_in_tc_loop"
-          "hack/config:use_direct_decl_in_tc_loop";
-        eval "deferments_light" "hack/config:deferments_light";
-        eval
-          "old_naming_table_for_redecl"
-          "hack/config:old_naming_table_for_redecl";
-        eval
-          "log_from_client_when_slow_monitor_connections"
-          "hack/config:log_from_client_when_slow_monitor_connections";
-        eval "naming_sqlite_in_hack_64" "hack/config:naming_sqlite_in_hack_64";
-        eval
-          "force_load_hot_shallow_decls"
-          "hack/config:force_load_hot_shallow_decls";
-      ]
-  in
-  match overrides with
-  | [] -> config
-  | overrides ->
-    (* eprintf used here rather than Hh_logger because apply_overrides also
-       prints to stderr. *)
-    if not silent then Printf.eprintf "Applying overrides from JustKnobs:\n%!";
-    Config_file.apply_overrides
-      ~silent
-      ~config
-      ~overrides:(Config_file.of_list overrides)
-
 let apply_overrides ~silent ~current_version ~config ~overrides =
   (* Override on-disk values with values from JustKnobs (if present). Allow CLI
      overrides to take precedence over JustKnobs overrides. *)
@@ -763,7 +687,7 @@ let apply_overrides ~silent ~current_version ~config ~overrides =
     if Sys_utils.is_test_mode () then
       config
     else
-      apply_justknobs_overrides ~silent config
+      ServerLocalConfigKnobs.apply_justknobs_overrides ~silent config
   in
   (* Apply the CLI overrides before experiments overrides, so that
      experiments_config settings can be specified via the CLI, even though the

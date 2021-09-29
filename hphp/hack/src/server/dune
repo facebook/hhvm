@@ -160,7 +160,7 @@
     experiments_config_file
     file_info
     glean_options
-    justknobs_stubs
+    server_local_config_knobs_stubs
     symbol_write_options
     parser_options
     pos

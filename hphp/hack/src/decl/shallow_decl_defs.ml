@@ -84,6 +84,7 @@ module PropFlags = struct
       if get_lsb t then print "lsb";
       if get_needs_init t then print "needs_init";
       if get_php_std_lib t then print "php_std_lib";
+      if get_readonly t then print "readonly";
       Format.fprintf fmt "@,@]"
     )
 

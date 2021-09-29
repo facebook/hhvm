@@ -75,12 +75,12 @@
         [{ Shallow_decl_defs.sp_name = ([15:23-25], "x"); sp_xhp_attr = None;
            sp_type =
            (Some (Rhint ([15:19-22]), (Tapply (([15:19-22], "\\Foo"), []))));
-           sp_visibility = Public; sp_flags = needs_init };
+           sp_visibility = Public; sp_flags = needs_init | readonly };
           { Shallow_decl_defs.sp_name = ([18:25-27], "y");
             sp_xhp_attr = None;
             sp_type =
             (Some (Rhint ([18:21-24]), (Tapply (([18:21-24], "\\Foo"), []))));
-            sp_visibility = Public; sp_flags = needs_init }
+            sp_visibility = Public; sp_flags = needs_init | readonly }
           ];
         sc_sprops = [];
         sc_constructor =

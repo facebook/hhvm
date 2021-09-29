@@ -358,7 +358,7 @@ struct Modifiers {
     visibility: aast::Visibility,
     is_abstract: bool,
     is_final: bool,
-    is_readonly: bool, // TODO: handle readonly modifiers in direct decl
+    is_readonly: bool,
 }
 
 fn read_member_modifiers<'a: 'b, 'b>(modifiers: impl Iterator<Item = &'b Node<'a>>) -> Modifiers {
@@ -1578,6 +1578,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                                 flags.set(PropFlags::CONST, attributes.const_);
                                 flags.set(PropFlags::NEEDS_INIT, self.file_mode != Mode::Mhhi);
                                 flags.set(PropFlags::PHP_STD_LIB, attributes.php_std_lib);
+                                flags.set(PropFlags::READONLY, readonly);
                                 properties.push(ShallowProp {
                                     xhp_attr: None,
                                     name: (pos, name),
@@ -3206,7 +3207,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         attributes: Self::R,
         visibility: Self::R,
         inout: Self::R,
-        readonly: Self::R, // TODO: handle readonly in declarations
+        readonly: Self::R,
         hint: Self::R,
         name: Self::R,
         initializer: Self::R,

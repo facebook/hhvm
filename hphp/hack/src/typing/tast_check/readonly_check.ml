@@ -237,6 +237,13 @@ let check_static_readonly_property pos env (class_ : Tast.class_id) get obj_ro =
       (Lazy.force elt.Typing_defs.ce_pos)
   | _ -> ()
 
+let is_method_caller (caller : Tast.expr) =
+  match caller with
+  | (_, _, ReadonlyExpr (_, _, Obj_get (_, _, _, (* is_prop_call *) false)))
+  | (_, _, Obj_get (_, _, _, (* is_prop_call *) false)) ->
+    true
+  | _ -> false
+
 let rec assign env lval rval =
   (* Check that we're assigning a readonly value to a readonly property *)
   let check_ro_prop_assignment prop_elts =
@@ -340,6 +347,7 @@ let check_special_function env caller args =
 *)
 let call
     ~is_readonly
+    ~method_call
     (env : Tast_env.t)
     (pos : Pos.t)
     (caller_ty : Tast.ty)
@@ -350,7 +358,8 @@ let call
   let (env, caller_ty) = Tast_env.expand_type env caller_ty in
   let check_readonly_closure caller_ty caller_rty =
     match (get_node caller_ty, caller_rty) with
-    | (Tfun fty, Readonly) when not (get_ft_readonly_this fty) ->
+    | (Tfun fty, Readonly)
+      when (not (get_ft_readonly_this fty)) && not method_call ->
       (* Get the position of why this function is its current type (usually a typehint) *)
       let reason = get_reason caller_ty in
       let f_pos = Reason.to_pos (get_reason caller_ty) in
@@ -420,10 +429,10 @@ let check =
       | (_, _, Binop (Ast_defs.Eq _, lval, rval)) ->
         assign env lval rval;
         self#on_expr env rval
-      (* Readonly calls *)
       | (_, _, ReadonlyExpr (_, _, Call (caller, targs, args, unpacked_arg))) ->
         call
           ~is_readonly:true
+          ~method_call:(is_method_caller caller)
           env
           (Tast.get_position caller)
           (Tast.get_type caller)
@@ -439,6 +448,7 @@ let check =
         call
           env
           ~is_readonly:false
+          ~method_call:(is_method_caller caller)
           (Tast.get_position caller)
           (Tast.get_type caller)
           (ty_expr env caller)
@@ -464,6 +474,7 @@ let check =
         (* Constructors never return readonly, so that specific check is irrelevant *)
         call
           ~is_readonly:false
+          ~method_call:false
           env
           pos
           constructor_fty

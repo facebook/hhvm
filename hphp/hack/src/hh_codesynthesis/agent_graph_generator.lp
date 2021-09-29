@@ -8,8 +8,12 @@
 #const number_of_infra_agents = @nia().
 #const number_of_product_agents = @npa().
 
+
+% We organize the agents into layers, and an agent on level X can only depend 
+% on agents on level Y, where Y < X. These rules are important to making the 
+% construction realistic.
 % This is very slow, so we changed to write down the level specifically in the 
-% Python interface.
+% Python interface, `generating_agent_distribution`.
 % $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 % Generating n candidate agents.
 % =============================================================================
@@ -42,6 +46,7 @@ in_degree_of_agent(X, InDegree) :- agents(X, _), InDegree = #count{ Y : depends_
 out_degree_of_agent(X, OutDegree) :- agents(X, _), OutDegree = #count{ Y : depends_on(Y, X) }.
 
 % Constraint on number of roots in the agent graph.
+% This is the same as the agent at level 0, so we don't need this constraint.
 % :- #count{ X : in_degree_of_agent(X, 0) } < number_of_roots.
 
 % Constraint on number of leaves in the agent graph.
@@ -71,11 +76,23 @@ out_degree_of_agent(X, OutDegree) :- agents(X, _), OutDegree = #count{ Y : depen
 % $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 % Edge (Agent relationships) requirement.
 % =============================================================================
-% If X, Y is number, not string, we can simply write without XN, YN.
+% An agent_connector and product_and_infra_agent_connector can decide whether 
+% or not the two agents could have a dependency.
+% This is a choice rule, so in Python interface, @agent_connector will decide 
+% this rule is enable or disable for agent pair <X, Y>. If it's enabled, the 
+% solver can choose to form an edge or not. The edge constrained by other 
+% requirements. For example, we said agent 2, 3, 4, 5 could all depend on 
+% agent 1 (by our @agent_connector), then we also have a constraint says, 
+% "agent 1 at most can have two other agents depend on it". The solver have to 
+% pick one pair of agents from {2, 3}, {2, 4}, {2, 5}, {3, 4}, {3, 5}, {4, 5} 
+% combinations. We can adjust @agent_connector to add more randomness.
+% For instance, instead of using consective number 2, 3, 4, 5; we could use a
+% set of random agent number like 17, 29, 42, 75.
 {depends_on(Y, X) : @agent_connector(Y, X, YLevel, XLevel) != 0} :- 
     agents(X, XLevel), agents(Y, YLevel).
 
-{depends_on(Y, X) : @agent_type_connector(Y, X) != 0} :- product_agent(Y), infra_agent(X).
+{depends_on(Y, X) : @product_and_infra_agent_connector(Y, X) != 0} :- 
+    product_agent(Y), infra_agent(X), agents(X, XLevel), agents(Y, YLevel), XLevel < YLevel.
 
 % Constraint on agent relationship.
 % An infra agent shouldn't depend on any product agent.

@@ -62,6 +62,15 @@ class AgentGraphClingoContext:
     def product_agent_in_degree_high(self, agent: Number) -> Symbol:
         return Number(self.product_agent_profile["in_degree"][1])
 
+    # A connector that decide whether or not two agents can be connected using
+    # their number and level. We are not connecting two agents here, only added
+    # a choice to the solver, the solver can decide how to connect two agents
+    # based on other constraints.
+    # @param source_agent, the number of source agent.
+    # @param target_agent, the number of target agent.
+    # @param source_level, the level of source agent.
+    # @param target_level, the level of target agent.
+    # @return 1 if source_argent can be connected to target_agent.
     def agent_connector(
         self,
         source_agent: Number,
@@ -84,7 +93,14 @@ class AgentGraphClingoContext:
         else:
             return Number(0)
 
-    def agent_type_connector(
+    # Similar to `agent_connector`, this connector works for deciding a product
+    # agent could have an edge to an infra agent or not. We are not connecting
+    # two agents here, only added a choice to the solver, the solver can decide
+    # how to connect two agents based on other constraints.
+    # @param source_agent, the number of source agent.
+    # @param target_agent, the number of target agent.
+    # @return 1 if product argent can be connected to infra agent.
+    def product_and_infra_agent_connector(
         self, source_agent: Number, target_agent: Number
     ) -> Symbol:
         src_agent_number = source_agent.number
@@ -215,46 +231,105 @@ def generating_an_agent_graph(
             raise RuntimeError("Unsatisfiable.")
 
 
-def main() -> int:
+def main() -> None:
     agent_graph = AgentGraphGenerator()
 
     agent_graph.on_model = agent_graph.generate_raw
 
     # Parse the arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument("--agents", nargs="+", type=int)
+    parser.add_argument(
+        "--agents",
+        nargs="+",
+        type=int,
+        default=[5, 10, 10, 10, 10, 10, 10, 15, 20],
+        help=(
+            "A sequence of numbers indicating the number of agents at each level. For"
+            " example, [2, 4, 4] means the agent graph has three levels in it, and each"
+            " level has 2, 4, 4 agents respectively."
+        ),
+    )
 
-    parser.add_argument("--number_of_infra_agents", type=int)
-    parser.add_argument("--number_of_product_agents", type=int)
-    parser.add_argument("--number_of_leaves", type=int)
+    parser.add_argument(
+        "--number_of_infra_agents",
+        type=int,
+        default=20,
+        help="Number of infra agents in the generated agent graph.",
+    )
+    parser.add_argument(
+        "--number_of_product_agents",
+        type=int,
+        default=60,
+        help="Number of product agents in the generated agent graph.",
+    )
+    parser.add_argument(
+        "--number_of_leaves",
+        type=int,
+        default=30,
+        help="Number of leaves in the generated agent graph.",
+    )
 
-    parser.add_argument("--infra_agent_indegrees", nargs=2, type=int)
-    parser.add_argument("--infra_agent_outdegrees", nargs=2, type=int)
-    parser.add_argument("--product_agent_indegrees", nargs=2, type=int)
-    parser.add_argument("--product_agent_outdegrees", nargs=2, type=int)
+    parser.add_argument(
+        "--infra_agent_indegrees",
+        nargs=2,
+        type=int,
+        default=[0, 10],
+        help=(
+            "A boundary for describing one infra agent can dependent on how many other"
+            " agents."
+        ),
+    )
+    parser.add_argument(
+        "--infra_agent_outdegrees",
+        nargs=2,
+        type=int,
+        default=[5, 100],
+        help=(
+            "A boundary for describing how many other agents can depent on one infra"
+            " agent."
+        ),
+    )
+    parser.add_argument(
+        "--product_agent_indegrees",
+        nargs=2,
+        type=int,
+        default=[5, 20],
+        help=(
+            "A boundary for describing one product agent can dependent on how many"
+            " other agents."
+        ),
+    )
+    parser.add_argument(
+        "--product_agent_outdegrees",
+        nargs=2,
+        type=int,
+        default=[0, 5],
+        help=(
+            "A boundary for describing how many other agents can depent on one product"
+            " agent."
+        ),
+    )
 
     parser.add_argument('--evaluate', action=argparse.BooleanOptionalAction)
 
     args: argparse.Namespace = parser.parse_args()
 
-    agent_distribution = args.agents or [5, 10, 10, 10, 10, 10, 10, 15, 20]
-    AgentGraphClingoContext.number_of_infra_agents = args.number_of_infra_agents or 20
-    AgentGraphClingoContext.number_of_product_agents = (
-        args.number_of_product_agents or 60
-    )
-    AgentGraphClingoContext.number_of_leaves = args.number_of_leaves or 30
+    agent_distribution = args.agents
+    AgentGraphClingoContext.number_of_infra_agents = args.number_of_infra_agents
+    AgentGraphClingoContext.number_of_product_agents = args.number_of_product_agents
+    AgentGraphClingoContext.number_of_leaves = args.number_of_leaves
     AgentGraphClingoContext.infra_agent_profile[
         "in_degree"
-    ] = args.infra_agent_indegrees or [0, 10]
+    ] = args.infra_agent_indegrees
     AgentGraphClingoContext.infra_agent_profile[
         "out_degree"
-    ] = args.infra_agent_outdegrees or [5, 100]
+    ] = args.infra_agent_outdegrees
     AgentGraphClingoContext.product_agent_profile[
         "in_degree"
-    ] = args.product_agent_indegrees or [5, 20]
+    ] = args.product_agent_indegrees
     AgentGraphClingoContext.product_agent_profile[
         "out_degree"
-    ] = args.product_agent_outdegrees or [0, 5]
+    ] = args.product_agent_outdegrees
 
     if args.evaluate:
         agent_graph.on_model = agent_graph.evaluate

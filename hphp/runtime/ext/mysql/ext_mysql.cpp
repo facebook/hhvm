@@ -776,7 +776,6 @@ int mysqlExtension::ConnectTimeout = 1000;
 int mysqlExtension::ReadTimeout = 60000;
 int mysqlExtension::WaitTimeout = -1;
 int mysqlExtension::SlowQueryThreshold = 1000; // ms
-bool mysqlExtension::KillOnTimeout = false;
 int mysqlExtension::MaxRetryOpenOnFail = 1;
 int mysqlExtension::MaxRetryQueryOnFail = 1;
 std::string mysqlExtension::Socket = "";
@@ -806,7 +805,6 @@ void mysqlExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
   Config::Bind(WaitTimeout, ini, config, "MySQL.WaitTimeout", -1);
   Config::Bind(SlowQueryThreshold, ini, config, "MySQL.SlowQueryThreshold",
                1000);
-  Config::Bind(KillOnTimeout, ini, config, "MySQL.KillOnTimeout", false);
   Config::Bind(MaxRetryOpenOnFail, ini, config, "MySQL.MaxRetryOpenOnFail", 1);
   Config::Bind(MaxRetryQueryOnFail, ini, config, "MySQL.MaxRetryQueryOnFail",
                1);

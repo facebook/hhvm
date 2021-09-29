@@ -1278,7 +1278,6 @@ MySQLQueryReturn php_mysql_do_query(const String& query, const Variant& link_id)
   SlowTimer timer(mysqlExtension::SlowQueryThreshold,
                   "runtime/ext_mysql: slow query", query.data());
   IOStatusHelper io("mysql::query", rconn->m_host.c_str(), rconn->m_port);
-  unsigned long tid = mysql_thread_id(conn);
 
   // disable explicitly
   auto mySQL = MySQL::Get(link_id);
@@ -1296,34 +1295,6 @@ MySQLQueryReturn php_mysql_do_query(const String& query, const Variant& link_id)
     raise_notice("runtime/ext_mysql: failed executing [%s] [%s]",
                  query.data(), mysql_error(conn));
 #endif
-
-    // When we are timed out, and we're SELECT-ing, we're potentially
-    // running a long query on the server without waiting for any results
-    // back, wasting server resource. So we're sending a KILL command
-    // to see if we can stop the query execution.
-    if (tid && mysqlExtension::KillOnTimeout) {
-      unsigned int errcode = mysql_errno(conn);
-      if (errcode == 2058 /* CR_NET_READ_INTERRUPTED */ ||
-          errcode == 2059 /* CR_NET_WRITE_INTERRUPTED */) {
-        Variant ret =
-          preg_match("/^((\\/\\*.*?\\*\\/)|\\(|\\s)*select/is", query);
-        if (!same(ret, false)) {
-          MYSQL *new_conn = create_new_conn();
-          IOStatusHelper io2("mysql::kill", rconn->m_host.c_str(),
-                             rconn->m_port);
-          MYSQL *connected = mysql_real_connect
-            (new_conn, rconn->m_host.c_str(), rconn->m_username.c_str(),
-             rconn->m_password.c_str(), nullptr, rconn->m_port, nullptr, 0);
-          if (connected) {
-            std::string killsql = "KILL " + folly::to<std::string>(tid);
-            if (mysql_real_query(connected, killsql.c_str(), killsql.size())) {
-              raise_warning("Unable to kill thread %lu", tid);
-            }
-          }
-          mysql_close(new_conn);
-        }
-      }
-    }
 
     return MySQLQueryReturn::FAIL;
   }

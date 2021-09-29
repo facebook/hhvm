@@ -1644,7 +1644,7 @@ void emitBaseL(IRGS& env, NamedLocal loc, MOpMode mode, ReadonlyOp op) {
     gen(env, StMROProp, cns(env, true));
     if (base->isA(TObj)) {
       auto const baseName = curFunc(env)->localVarName(loc.name);
-      gen(env, ThrowOrWarnMustBeValueTypeException, cns(env, baseName));
+      gen(env, ThrowOrWarnLocalMustBeValueTypeException, cns(env, baseName));
     }
   }
 

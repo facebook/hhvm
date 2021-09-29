@@ -2693,7 +2693,7 @@ To string conversions:
 
   Load the current value of the roProp field of MInstrState
 
-| StMROProp, ND, C(Bool), NF
+| StMROProp, ND, S(Bool), NF
 
   Set the roProp field of MInstrState to S0.
 
@@ -3239,11 +3239,18 @@ fields of that struct for holding intermediate values.
   was declared on. S0 is the property name. Raises a warning if
   EnableReadonlyPropertyEnforcement=1.
 
-| ThrowOrWarnMustBeValueTypeException, ND, S(Str), NF
+| ThrowOrWarnLocalMustBeValueTypeException, ND, S(Str), NF
 
   Throws an InvalidOperationException indicating a readonly semantics violation
   where the local was required to be a value type. S0 is the local name. Raises
   a warning if EnableReadonlyPropertyEnforcement=1.
+
+| ThrowOrWarnMustBeValueTypeException<cls>, ND, S(Str), NF
+
+  Throws an InvalidOperationException indicating a readonly semantics violation
+  where the property was required to be a value type. S0 is the property
+  name. cls is the class the property was declared on. Raises a warning if
+  EnableReadonlyPropertyEnforcement=1.
 
 | ThrowOrWarnMustBeEnclosedInReadonly<cls>, ND, S(Str), NF
 

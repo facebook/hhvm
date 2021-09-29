@@ -650,6 +650,7 @@ bool canDCE(IRInstruction* inst) {
   case ThrowParameterWrongType:
   case ThrowInOutMismatch:
   case ThrowReadonlyMismatch:
+  case ThrowOrWarnLocalMustBeValueTypeException:
   case ThrowOrWarnMustBeEnclosedInReadonly:
   case ThrowOrWarnMustBeMutableException:
   case ThrowOrWarnMustBeReadonlyException:

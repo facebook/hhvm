@@ -191,7 +191,7 @@ void throwArrayKeyException(const ArrayData* ad, const StringData* key) {
   throwOOBArrayKeyException(key, ad);
 }
 
-void throwOrWarnMustBeEnclosedInReadonly(const Class* cls, const StringData* propName) {
+void throwOrWarnMustBeEnclosedInReadonlyException(const Class* cls, const StringData* propName) {
   throw_or_warn_must_be_enclosed_in_readonly(cls->name()->data(), propName->data());
 }
 
@@ -203,8 +203,12 @@ void throwOrWarnMustBeMutableException(const Class* cls, const StringData* propN
   throw_or_warn_must_be_mutable(cls->name()->data(), propName->data());
 }
 
-void throwOrWarnMustBeValueTypeException(const StringData* locName) {
+void throwOrWarnLocalMustBeValueTypeException(const StringData* locName) {
   throw_or_warn_local_must_be_value_type(locName->data());
+}
+
+void throwOrWarnMustBeValueTypeException(const Class* cls, const StringData* propName) {
+  throw_or_warn_must_be_value_type(cls->name()->data(), propName->data());
 }
 
 std::string formatParamInOutMismatch(const char* fname, uint32_t index,

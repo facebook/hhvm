@@ -2831,6 +2831,8 @@ X(ThrowOrWarnMustBeMutableException,
                                 ClassData);
 X(ThrowOrWarnMustBeReadonlyException,
                                 ClassData);
+X(ThrowOrWarnMustBeValueTypeException,
+                                ClassData);
 
 #undef X
 

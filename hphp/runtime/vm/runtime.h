@@ -64,10 +64,11 @@ void checkReadonlyMismatch(const Func* func, uint32_t numArgs,
 void throwReadonlyMismatch(const Func* func, int32_t index);
 [[noreturn]] void throwInvalidUnpackArgs();
 [[noreturn]] void throwMissingArgument(const Func* func, int got);
-void throwOrWarnMustBeEnclosedInReadonly(const Class* cls, const StringData* propName);
+void throwOrWarnLocalMustBeValueTypeException(const StringData* locName);
+void throwOrWarnMustBeEnclosedInReadonlyException(const Class* cls, const StringData* propName);
 void throwOrWarnMustBeMutableException(const Class* cls, const StringData* propName);
 void throwOrWarnMustBeReadonlyException(const Class* cls, const StringData* propName);
-void throwOrWarnMustBeValueTypeException(const StringData* locName);
+void throwOrWarnMustBeValueTypeException(const Class* cls, const StringData* propName);
 void raiseTooManyArguments(const Func* func, int got);
 void raiseTooManyArgumentsPrologue(const Func* func, ArrayData* unpackArgs);
 

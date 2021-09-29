@@ -447,12 +447,13 @@ bool opcodeMayRaise(Opcode opc) {
   case ThrowLateInitPropError:
   case ThrowMissingArg:
   case ThrowMissingThis:
-  case ThrowOutOfBounds:
-  case ThrowParameterWrongType:
+  case ThrowOrWarnLocalMustBeValueTypeException:
   case ThrowOrWarnMustBeEnclosedInReadonly:
   case ThrowOrWarnMustBeMutableException:
   case ThrowOrWarnMustBeReadonlyException:
   case ThrowOrWarnMustBeValueTypeException:
+  case ThrowOutOfBounds:
+  case ThrowParameterWrongType:
   case UnsetElem:
   case UnsetProp:
   case VecSet:

@@ -78,7 +78,9 @@ void initThrowable(IRGS& env, const Class* cls, SSATmp* throwable) {
     env,
     SystemLib::s_ExceptionClass,
     s_traceOpts.get(),
-    false
+    false,
+    false,
+    ReadonlyOp::Any
   );
   assertx(!lookup.tc->isCheckable());
   auto const sprop = lookup.propPtr;

@@ -51,7 +51,9 @@ void destroyName(IRGS& env, SSATmp* name) {
 ClsPropLookup ldClsPropAddrKnown(IRGS& env,
                                  const Class* cls,
                                  const StringData* name,
-                                 bool ignoreLateInit) {
+                                 bool ignoreLateInit,
+                                 bool writeMode,
+                                 ReadonlyOp readonlyOp) {
   initSProps(env, cls); // calls init; must be above sPropHandle()
   auto const slot = cls->lookupSProp(name);
   auto const handle = cls->sPropHandle(slot);
@@ -83,6 +85,49 @@ ClsPropLookup ldClsPropAddrKnown(IRGS& env,
   profileRDSAccess(env, handle);
 
   auto const ptrTy = knownType.ptr(Ptr::SProp);
+  auto data = ClassData { cls };
+  auto const readonly = prop.attrs & AttrIsReadonly;
+
+  auto const checkReadonly = [&](SSATmp* addr) {
+    if (!RO::EvalEnableReadonlyPropertyEnforcement) return addr;
+    auto const finish = [&]() {
+      return (RO::EvalEnableReadonlyPropertyEnforcement == 1) ?
+              addr : cns(env, TBottom);
+    };
+    auto const copyOnWriteCheck = [&]() {
+      gen(env, StMROProp, cns(env, true));
+      ifElse(
+          env,
+          [&] (Block* taken) {
+            gen(env, CheckTypeMem, TObj, taken, addr);
+          },
+          [&] {
+            gen(env, ThrowOrWarnMustBeValueTypeException, data, cns(env, name));
+            return finish();
+          }
+        );
+      return addr;
+    };
+
+    if (readonly && readonlyOp == ReadonlyOp::Mutable) {
+      if (writeMode) {
+        gen(env, ThrowOrWarnMustBeMutableException, data, cns(env, name));
+        return finish();
+      } else {
+        gen(env, ThrowOrWarnMustBeEnclosedInReadonly, data, cns(env, name));
+        return finish();
+      }
+    } else if (readonly && readonlyOp == ReadonlyOp::CheckMutROCOW) {
+      return copyOnWriteCheck();
+    } else if (readonlyOp == ReadonlyOp::CheckROCOW) {
+      if (!readonly) {
+        gen(env, ThrowOrWarnMustBeReadonlyException, data, cns(env, name));
+        return finish();
+      }
+      return copyOnWriteCheck();
+    }
+    return addr;
+  };
 
   auto const addr = [&]{
     if (!(prop.attrs & AttrLateInit) || ignoreLateInit) {
@@ -109,8 +154,10 @@ ClsPropLookup ldClsPropAddrKnown(IRGS& env,
     );
   }();
 
+  auto const checkedAddr = checkReadonly(addr);
+
   return {
-    addr,
+    checkedAddr,
     &prop.typeConstraint,
     &prop.ubs,
     slot,
@@ -142,17 +189,6 @@ ClsPropLookup ldClsPropAddr(IRGS& env, SSATmp* ssaCls, SSATmp* ssaName,
     if (lookup.slot == kInvalidSlot) return false;
     if (!lookup.accessible) return false;
     if (opts.writeMode && lookup.constant) return false;
-
-    if (lookup.readonly &&
-      (opts.readOnlyCheck == ReadonlyOp::Mutable ||
-       opts.readOnlyCheck == ReadonlyOp::CheckMutROCOW)) {
-      return false;
-    }
-    if (!lookup.readonly &&
-      (opts.readOnlyCheck == ReadonlyOp::Readonly ||
-       opts.readOnlyCheck == ReadonlyOp::CheckROCOW)) {
-      return false;
-    }
     return true;
   }();
 
@@ -161,7 +197,9 @@ ClsPropLookup ldClsPropAddr(IRGS& env, SSATmp* ssaCls, SSATmp* ssaName,
       env,
       ssaCls->clsVal(),
       ssaName->strVal(),
-      opts.ignoreLateInit
+      opts.ignoreLateInit,
+      opts.writeMode,
+      opts.readOnlyCheck
     );
     if (lookup.propPtr) return lookup;
   }

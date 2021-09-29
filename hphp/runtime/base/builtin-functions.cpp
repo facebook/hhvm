@@ -919,7 +919,7 @@ void throw_or_warn_must_be_value_type(const char* className, const char* propNam
 
 bool readonlyLocalShouldThrow(TypedValue tv, ReadonlyOp op) {
   if (!RO::EvalEnableReadonlyPropertyEnforcement) return false;
-  if (op == ReadonlyOp::CheckROCOW) {
+  if (op == ReadonlyOp::CheckROCOW || op == ReadonlyOp::CheckMutROCOW) {
     auto cow = !isRefcountedType(type(tv)) || hasPersistentFlavor(type(tv));
     if (!cow) return true;
     vmMInstrState().roProp = true;

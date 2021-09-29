@@ -1636,7 +1636,8 @@ void emitBaseL(IRGS& env, NamedLocal loc, MOpMode mode, ReadonlyOp op) {
     gen(env, ThrowUninitLoc, cns(env, baseName));
   }
 
-  if (RO::EvalEnableReadonlyPropertyEnforcement && op == ReadonlyOp::CheckROCOW) {
+  if (RO::EvalEnableReadonlyPropertyEnforcement &&
+    (op == ReadonlyOp::CheckROCOW || op == ReadonlyOp::CheckMutROCOW)) {
     if (!base->type().maybe(TCounted) || base->type().subtypeOfAny(TArrLike)) {
       gen(env, StMROProp, cns(env, true));
     } else {

@@ -13,12 +13,19 @@ open Typing_defs
 module Cls = Decl_provider.Class
 module SN = Naming_special_names
 
-let ft_redundant_tparams env root tparams tpenv ty =
+let ft_redundant_generics env tparams ty =
+  let tracked =
+    List.fold_left
+      tparams
+      ~f:(fun tracked t -> SSet.add (snd t.tp_name) tracked)
+      ~init:SSet.empty
+  in
   let (positive, negative) =
-    Typing_variance.get_typarams
+    Typing_variance.get_positive_negative_generics
+      ~tracked
+      ~is_mutable:false
       (Tast_env.tast_env_as_typing_env env)
-      root
-      tpenv
+      (SMap.empty, SMap.empty)
       ty
   in
   List.iter tparams ~f:(fun t ->
@@ -70,45 +77,26 @@ let ft_redundant_tparams env root tparams tpenv ty =
         | (None, Some _positions) -> ()
         | (None, None) -> ())
 
-let check_redundant_generics_class_method env root tpenv (_method_name, method_)
-    =
+let check_redundant_generics_class_method env (_method_name, method_) =
   match method_.ce_type with
   | (lazy (ty as ft)) ->
     begin
       match get_node ty with
-      | Tfun { ft_tparams; _ } ->
-        let tpenv =
-          List.fold_left
-            ft_tparams
-            ~f:(fun tpenv t -> SMap.remove (snd t.tp_name) tpenv)
-            ~init:tpenv
-        in
-        ft_redundant_tparams env root ft_tparams tpenv ft
+      | Tfun { ft_tparams; _ } -> ft_redundant_generics env ft_tparams ft
       | _ -> assert false
     end
 
-let check_redundant_generics_fun env root ft =
-  ft_redundant_tparams
-    env
-    root
-    ft.ft_tparams
-    SMap.empty
-    (mk (Reason.Rnone, Tfun ft))
+let check_redundant_generics_fun env ft =
+  ft_redundant_generics env ft.ft_tparams (mk (Reason.Rnone, Tfun ft))
 
 let check_redundant_generics_class env class_name class_type =
-  let root = (Typing_deps.Dep.Type class_name, Some class_type) in
-  let tparams = Cls.tparams class_type in
-  let tpenv =
-    List.fold_left tparams ~init:SMap.empty ~f:(fun env tp ->
-        SMap.add (snd tp.tp_name) (Typing_variance.make_tparam_variance tp) env)
-  in
   Cls.methods class_type
   |> ListLabels.filter ~f:(fun (_, meth) ->
          String.equal meth.ce_origin class_name)
-  |> List.iter ~f:(check_redundant_generics_class_method env root tpenv);
+  |> List.iter ~f:(check_redundant_generics_class_method env);
   Cls.smethods class_type
   |> List.filter ~f:(fun (_, meth) -> String.equal meth.ce_origin class_name)
-  |> List.iter ~f:(check_redundant_generics_class_method env root tpenv)
+  |> List.iter ~f:(check_redundant_generics_class_method env)
 
 let get_tracing_info env =
   {
@@ -122,7 +110,6 @@ let make_handler ctx =
       inherit Tast_visitor.handler_base
 
       method! at_fun_ env f =
-        let fid = snd f.f_name in
         match
           Decl_provider.get_fun
             ~tracing_info:(get_tracing_info env)
@@ -132,9 +119,7 @@ let make_handler ctx =
         | Some { fe_type; _ } ->
           begin
             match get_node fe_type with
-            | Tfun ft ->
-              let root = (Typing_deps.Dep.Fun fid, None) in
-              check_redundant_generics_fun env root ft
+            | Tfun ft -> check_redundant_generics_fun env ft
             | _ -> ()
           end
         | _ -> ()

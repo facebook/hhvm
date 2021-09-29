@@ -30,6 +30,7 @@ let typed_linters =
     Linter_sketchy_null_check.handler;
     Linter_truthiness_test.handler;
     Linter_redundant_generics.handler;
+    Linter_infer_variance.handler;
     Linter_as_invalid_type.handler;
     Linter_class_overrides_trait.handler;
     Linter_expr_tree_types.handler;

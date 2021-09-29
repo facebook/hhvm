@@ -311,6 +311,13 @@ let redundant_generic pos =
   Lints.add Codes.redundant_generic Lint_warning pos
   @@ "This generic parameter is unused."
 
+let inferred_variance pos description syntax =
+  Lints.add Codes.inferred_variance Lint_advice pos
+  @@ "This generic parameter could be marked "
+  ^ description
+  ^ ". Consider prefixing the generic parameter with "
+  ^ syntax
+
 let nullsafe_not_needed pos =
   Lints.add Codes.nullsafe_not_needed Lint_advice pos
   @@ "You are using the "

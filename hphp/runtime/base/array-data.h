@@ -771,11 +771,9 @@ extern const ArrayFunctions g_array_funcs;
                                             const ArrayData* ad);
 [[noreturn]] void throwFalseyPromoteException(const char* type);
 [[noreturn]] void throwInvalidKeysetOperation();
-[[noreturn]] void throwReadOnlyCollectionMutation();
 [[noreturn]] void throwVarrayUnsetException();
 [[noreturn]] void throwVecUnsetException();
 
-void raiseReadOnlyCollectionMutation();
 void raiseHackArrCompatArrHackArrCmp();
 
 std::string makeHackArrCompatImplicitArrayKeyMsg(const TypedValue* key);

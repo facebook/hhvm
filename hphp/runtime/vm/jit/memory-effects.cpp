@@ -136,7 +136,7 @@ AliasClass pointee(
 
     if (type <= TMemToMISCell) {
       if (sinst->is(LdMIStateAddr)) {
-        return mis_from_offset(sinst->src(0)->intVal());
+      return mis_from_offset(sinst->src(0)->intVal());
       }
       if (ptr->hasConstVal() && ptr->rawVal() == 0) {
         // nullptr tvRef pointer, representing an instruction that doesn't use
@@ -1996,6 +1996,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ThrowParameterWrongType:
   case ArrayMarkLegacyShallow:
   case ArrayMarkLegacyRecursive:
+  case ThrowOrWarnCannotModifyReadonlyCollection:
   case ThrowOrWarnLocalMustBeValueTypeException:
   case ThrowOrWarnMustBeEnclosedInReadonly:
   case ThrowOrWarnMustBeMutableException:

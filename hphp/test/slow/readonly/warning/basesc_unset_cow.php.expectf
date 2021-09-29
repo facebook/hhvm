@@ -1,5 +1,11 @@
-Warning: Readonly collections cannot be modified. in %s/basesc_unset_cow.php on line 14
+Warning: Readonly collections cannot be modified. in %s/basesc_unset_cow.php on line 16
 
-Warning: Property bad_c1 of class Foo is readonly, and therefore must be a value type to be modified. in %s/basesc_unset_cow.php on line 15
+Warning: Readonly collections cannot be modified. in %s/basesc_unset_cow.php on line 16
 
-Warning: Readonly collections cannot be modified. in %s/basesc_unset_cow.php on line 15
+Warning: Readonly collections cannot be modified. in %s/basesc_unset_cow.php on line 17
+
+Warning: Property bad_c2 of class Foo is readonly, and therefore must be a value type to be modified. in %s/basesc_unset_cow.php on line 18
+
+Warning: Readonly collections cannot be modified. in %s/basesc_unset_cow.php on line 18
+
+Warning: Property bad_c3 of class Foo is readonly, and therefore must be a value type to be modified. in %s/basesc_unset_cow.php on line 19

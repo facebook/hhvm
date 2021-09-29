@@ -85,6 +85,11 @@ bool canUpdateCanonicalBase(SSATmp* baseLoc);
  */
 void updateCanonicalBase(IRGS& env, SSATmp* baseLoc, SSATmp* newArr);
 
+/* Checks that a Dim result is not a Collection if the roProp field in
+ * the MInstrState is true
+ */
+void checkDimForReadonly(IRGS& env);
+
 /*
  * Use profiling data from an ArrayAccessProfile to conditionally optimize
  * the array access represented by `generic' using `direct' or `missing`.

@@ -3259,6 +3259,12 @@ fields of that struct for holding intermediate values.
   is the class the property was declared on. S0 is the property name. Raises a
   warning if EnableReadonlyPropertyEnforcement=1.
 
+| ThrowOrWarnCannotModifyReadonlyCollection, ND, NA, NF
+
+  Throws an InvalidOperationException indicating a readonly semantics violation
+  where a collection is modified. Raises a warning if
+  EnableReadonlyPropertyEnforcement=1.
+
 | ProfileType, ND, S(Cell), NF
 
   Profile the type of S0.

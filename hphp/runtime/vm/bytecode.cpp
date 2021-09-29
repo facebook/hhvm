@@ -2500,6 +2500,13 @@ void elemDispatch(MOpMode mode, TypedValue key) {
     return tv_lval { &mstate.tvTempBase };
   };
 
+  auto const checkDimForReadonly = [&](DataType dt) {
+    if (!RO::EvalEnableReadonlyPropertyEnforcement) return;
+    if (mstate.roProp && dt == KindOfObject) {
+      throw_or_warn_cannot_modify_readonly_collection();
+    }
+  };
+
   mstate.base = [&]{
     switch (mode) {
       case MOpMode::None:
@@ -2508,10 +2515,16 @@ void elemDispatch(MOpMode mode, TypedValue key) {
         return baseValueToLval(Elem<MOpMode::Warn>(b, key));
       case MOpMode::InOut:
         return baseValueToLval(Elem<MOpMode::InOut>(b, key));
-      case MOpMode::Define:
-        return ElemD(b, key);
-      case MOpMode::Unset:
-        return ElemU(b, key);
+      case MOpMode::Define: {
+        auto const result = ElemD(b, key);
+        checkDimForReadonly(result.type());
+        return result;
+      }
+      case MOpMode::Unset: {
+        auto const result = ElemU(b, key);
+        checkDimForReadonly(result.type());
+        return result;
+      }
     }
     always_assert(false);
   }();

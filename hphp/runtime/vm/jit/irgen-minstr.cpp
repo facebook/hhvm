@@ -1677,6 +1677,7 @@ void emitDim(IRGS& env, MOpMode mode, MemberKey mk) {
   }();
 
   stMBase(env, base);
+  if (mcodeIsElem(mk.mcode)) checkDimForReadonly(env);
 }
 
 void emitQueryM(IRGS& env, uint32_t nDiscard, QueryMOp query, MemberKey mk) {
@@ -2009,6 +2010,23 @@ void annotArrayAccessProfile(IRGS& env,
     folly::sformat("BC={} FN={}: {}: {}: {}: {}\n",
                    bcOff(env), fnName, *arr, *key, profile, result)
   );
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void checkDimForReadonly(IRGS& env) {
+  if (!RO::EvalEnableReadonlyPropertyEnforcement) return;
+  ifElse(
+    env,
+    [&] (Block* taken) {
+      gen(env, JmpZero, taken, gen(env, LdMROProp));
+      auto const mbr = gen(env, LdMBase, TLvalToCell);
+      gen(env, CheckMBase, TObj, taken, mbr);
+    },
+    [&] {
+      env.irb->exceptionStackBoundary();
+      gen(env, ThrowOrWarnCannotModifyReadonlyCollection);
+    });
 }
 
 //////////////////////////////////////////////////////////////////////

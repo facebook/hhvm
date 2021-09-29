@@ -447,6 +447,7 @@ bool opcodeMayRaise(Opcode opc) {
   case ThrowLateInitPropError:
   case ThrowMissingArg:
   case ThrowMissingThis:
+  case ThrowOrWarnCannotModifyReadonlyCollection:
   case ThrowOrWarnLocalMustBeValueTypeException:
   case ThrowOrWarnMustBeEnclosedInReadonly:
   case ThrowOrWarnMustBeMutableException:

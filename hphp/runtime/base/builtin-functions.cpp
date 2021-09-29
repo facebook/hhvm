@@ -917,6 +917,17 @@ void throw_or_warn_must_be_value_type(const char* className, const char* propNam
   throw_or_warn_readonly_violation(className, propName, Strings::MUST_BE_VALUE_TYPE);
 }
 
+void throw_or_warn_cannot_modify_readonly_collection() {
+  if (RO::EvalEnableReadonlyPropertyEnforcement == 0) return;
+  if (RO::EvalEnableReadonlyPropertyEnforcement == 1) {
+    raise_warning(Strings::READONLY_COLLECTIONS_CANNOT_BE_MODIFIED);
+  } else {
+    SystemLib::throwInvalidOperationExceptionObject(
+      Strings::READONLY_COLLECTIONS_CANNOT_BE_MODIFIED
+    );
+  }
+}
+
 bool readonlyLocalShouldThrow(TypedValue tv, ReadonlyOp op) {
   if (!RO::EvalEnableReadonlyPropertyEnforcement) return false;
   if (op == ReadonlyOp::CheckROCOW || op == ReadonlyOp::CheckMutROCOW) {

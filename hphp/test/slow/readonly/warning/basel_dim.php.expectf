@@ -1,0 +1,5 @@
+Warning: Local loc must be a value type. in %s/basel_dim.php on line 8
+
+Warning: Readonly collections cannot be modified. in %s/basel_dim.php on line 8
+
+Warning: Readonly collections cannot be modified. in %s/basel_dim.php on line 10

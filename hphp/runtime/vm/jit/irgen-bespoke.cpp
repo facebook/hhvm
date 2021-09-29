@@ -536,7 +536,7 @@ void emitBespokeDim(IRGS& env, MOpMode mode, MemberKey mk) {
   auto const baseType = env.irb->fs().mbase().type;
   auto const finish = [&](SSATmp* val) {
     stMBase(env, val);
-    checkDimForReadonly(env);
+    checkElemDimForReadonly(env);
   };
   auto const val = bespokeElemImpl(env, mode, baseType, key, finish);
   finish(val);

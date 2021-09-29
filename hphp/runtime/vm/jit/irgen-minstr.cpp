@@ -960,9 +960,7 @@ SSATmp* propImpl(IRGS& env, MOpMode mode, SSATmp* key, bool nullsafe, ReadonlyOp
 
   auto const propInfo =
     getCurrentPropertyOffset(env, base, key->type(), false);
-  if (!propInfo || propInfo->isConst || mode == MOpMode::Unset ||
-    (propInfo->readOnly &&
-    (op == ReadonlyOp::CheckMutROCOW || op == ReadonlyOp::CheckROCOW))) {
+  if (!propInfo || propInfo->isConst || mode == MOpMode::Unset) {
     return propGenericImpl(env, mode, base, key, nullsafe, op);
   }
 
@@ -995,6 +993,12 @@ SSATmp* propImpl(IRGS& env, MOpMode mode, SSATmp* key, bool nullsafe, ReadonlyOp
     mode,
     *propInfo
   );
+
+  if (op == ReadonlyOp::CheckROCOW ||
+    (op == ReadonlyOp::CheckMutROCOW && propInfo->readOnly)) {
+    checkPropDimForReadonly(env, propPtr, propInfo->propClass, key);
+  }
+
   assertx(IMPLIES(mode == MOpMode::Define, obj != nullptr));
   return propPtr;
 }
@@ -1677,7 +1681,7 @@ void emitDim(IRGS& env, MOpMode mode, MemberKey mk) {
   }();
 
   stMBase(env, base);
-  if (mcodeIsElem(mk.mcode)) checkDimForReadonly(env);
+  if (mcodeIsElem(mk.mcode)) checkElemDimForReadonly(env);
 }
 
 void emitQueryM(IRGS& env, uint32_t nDiscard, QueryMOp query, MemberKey mk) {
@@ -2014,7 +2018,7 @@ void annotArrayAccessProfile(IRGS& env,
 
 //////////////////////////////////////////////////////////////////////
 
-void checkDimForReadonly(IRGS& env) {
+void checkElemDimForReadonly(IRGS& env) {
   if (!RO::EvalEnableReadonlyPropertyEnforcement) return;
   ifElse(
     env,
@@ -2027,6 +2031,24 @@ void checkDimForReadonly(IRGS& env) {
       env.irb->exceptionStackBoundary();
       gen(env, ThrowOrWarnCannotModifyReadonlyCollection);
     });
+}
+
+void checkPropDimForReadonly(IRGS& env, SSATmp* propPtr, const Class* cls,
+                             SSATmp* propName) {
+  if (!RO::EvalEnableReadonlyPropertyEnforcement) return;
+  gen(env, StMROProp, cns(env, true));
+
+  ifThen(
+    env,
+    [&] (Block* taken) {
+      gen(env, JmpNZero, taken, gen(env, IsTypeMem, TObj, propPtr));
+    },
+    [&] {
+      env.irb->exceptionStackBoundary();
+      auto const data = ClassData { cls };
+      gen(env, ThrowOrWarnMustBeValueTypeException, data, propName);
+    }
+  );
 }
 
 //////////////////////////////////////////////////////////////////////

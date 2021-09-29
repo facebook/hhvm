@@ -1950,44 +1950,44 @@ To string conversions:
 
 13. Runtime helpers
 
-| VerifyParamCls, ND, S(Cls) S(Cls|Nullptr) C(Int) C(Int), NF
+| VerifyParamCls<func,param,tc>, ND, S(Obj) S(Cls) S(Cls|Nullptr), NF
 
-  Verify parameter type for classes or traits. If S0 does not extend (if S1 is
-  a class) or implement (if S1 is an interface) S1, this instruction will raise
+  Verify parameter type for classes or traits. If S1 does not extend (if S2 is
+  a class) or implement (if S2 is an interface) S2, this instruction will raise
   a recoverable fatal error describing the type mismatch.
 
-| VerifyParamCallable, ND, S(Cell) C(Int), NF
+| VerifyParamCallable<func,param>, ND, S(Cell), NF
 
   If S0 is not callable, as defined by the php function is_callable, this
   instruction will raise a recoverable fatal error describing the type
   mismatch.
 
-| VerifyParamFail, ND, NA, NF
+| VerifyParamFail<func,param,tc>, DVerifyParamFail, S(Cell) S(Cls|Nullptr), NF
 
   Assumes that parameter specified in extra-data in the current function
   has failed a its type check. Depending on the typehint being verified and
   a number of runtime options, may coerce the parameter to the correct type i
   or raise a recoverable fatal error describing the type mismatch.
 
-| VerifyParamFailHard, ND, NA, T
+| VerifyParamFailHard<func,param,tc>, ND, S(Cell) S(Cls|Nullptr), T
 
   A terminal version of VerifyParamFail, to be used when the compiler can
   statically prove that this failure will result in a fatal error rather than a
   type coercion.
 
-| VerifyRetCallable, ND, S(Cell), NF
+| VerifyRetCallable<func,param>, ND, S(Cell), NF
 
   Verify a return type hint.
 
-| VerifyRetCls, ND, S(Cls) S(Cls|Nullptr) C(Int) S(Cell), NF
+| VerifyRetCls<func,param,tc>, ND, S(Obj) S(Cls) S(Cls|Nullptr), NF
 
   Verify a return type hint for a class.
 
-| VerifyRetFail, ND, S(PtrToCell), NF
+| VerifyRetFail<func,param,tc>, DVerifyParamFail, S(Cell) S(Cls|Nullptr), NF
 
   Failure to verify a return type hint.
 
-| VerifyRetFailHard, ND, S(PtrToCell), T
+| VerifyRetFailHard<func,param,tc>, ND, S(Cell) S(Cls|Nullptr), T
 
   Terminal version of VerifyRetFail, to be used when the compiler can prove
   that this failure will result in a fatal error.

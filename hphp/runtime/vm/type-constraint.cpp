@@ -825,6 +825,10 @@ bool TypeConstraint::checkStringCompatible() const {
   return false;
 }
 
+bool TypeConstraint::maybeStringCompatible() const {
+  return isString() || isArrayKey() || isObject();
+}
+
 void TypeConstraint::verifyParamFail(tv_lval val,
                                      const Class* ctx,
                                      const Func* func,

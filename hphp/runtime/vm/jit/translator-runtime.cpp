@@ -216,72 +216,69 @@ static bool VerifyTypeSlowImpl(const Class* cls,
   return expected->checkTypeAliasObj(cls);
 }
 
-void VerifyParamTypeSlow(const Class* cls,
+void VerifyParamTypeSlow(ObjectData* obj,
                          const Class* constraint,
-                         const TypeConstraint* expected,
-                         int param) {
-  if (!VerifyTypeSlowImpl(cls, constraint, expected)) {
-    VerifyParamTypeFail(param, expected);
+                         const Func* func,
+                         int32_t paramId,
+                         const TypeConstraint* expected) {
+  if (!VerifyTypeSlowImpl(obj->getVMClass(), constraint, expected)) {
+    assertx(expected->isObject());
+    VerifyParamTypeFail(
+      make_tv<KindOfObject>(obj), nullptr, func, paramId, expected);
   }
 }
 
-void VerifyParamTypeCallable(TypedValue value, int param) {
+void VerifyParamTypeCallable(TypedValue value, const Func* func,
+                             int32_t paramId) {
   if (UNLIKELY(!is_callable(tvAsCVarRef(&value)))) {
-    VerifyParamTypeFail(param, nullptr);
+    auto const& tc = func->params()[paramId].typeConstraint;
+    assertx(tc.isCallable());
+    VerifyParamTypeFail(value, nullptr, func, paramId, &tc);
   }
 }
 
 
-void VerifyParamTypeFail(int paramNum, const TypeConstraint* tc) {
-  VMRegAnchor _;
-  const ActRec* ar = liveFrame();
-  const Func* func = ar->func();
-  if (!tc) {
-    tc = &func->params()[paramNum].typeConstraint;
-  }
-  auto const param = frame_local(ar, paramNum);
-  auto const ctx = tc->isThis() && func->cls()
-    ? (ar->hasThis() ? ar->getThis()->getVMClass() : ar->getClass())
-    : nullptr;
-  assertx(!tc->check(param, ctx));
-  tc->verifyParamFail(param, ctx, func, paramNum);
+TypedValue VerifyParamTypeFail(TypedValue value, const Class* ctx,
+                               const Func* func, int32_t paramId,
+                               const TypeConstraint* tc) {
+  assertx(!tc->check(&value, ctx));
+  tc->verifyParamFail(&value, ctx, func, paramId);
+  return value;
 }
 
-void VerifyRetTypeSlow(int32_t id,
-                       const Class* cls,
+void VerifyRetTypeSlow(ObjectData* obj,
                        const Class* constraint,
-                       const TypeConstraint* expected,
-                       TypedValue tv) {
-  if (!VerifyTypeSlowImpl(cls, constraint, expected)) {
-    VerifyRetTypeFail(id, &tv, expected);
+                       const Func* func,
+                       int32_t retId,
+                       const TypeConstraint* expected) {
+  if (!VerifyTypeSlowImpl(obj->getVMClass(), constraint, expected)) {
+    assertx(expected->isObject());
+    VerifyRetTypeFail(
+      make_tv<KindOfObject>(obj), nullptr, func, retId, expected);
   }
 }
 
-void VerifyRetTypeCallable(int32_t id, TypedValue value) {
+void VerifyRetTypeCallable(TypedValue value, const Func* func, int32_t retId) {
   if (UNLIKELY(!is_callable(tvAsCVarRef(&value)))) {
-    VerifyRetTypeFail(id, &value, nullptr);
+    auto const& tc = retId == TypeConstraint::ReturnId
+      ? func->returnTypeConstraint()
+      : func->params()[retId].typeConstraint;
+    assertx(tc.isCallable());
+    VerifyRetTypeFail(value, nullptr, func, retId, &tc);
   }
 }
 
-void VerifyRetTypeFail(int32_t id, TypedValue* tv, const TypeConstraint* tc) {
-  VMRegAnchor _;
-  const ActRec* ar = liveFrame();
-  const Func* func = ar->func();
-  if (id == TypeConstraint::ReturnId) {
-    if (!tc) tc = &func->returnTypeConstraint();
-    auto const ctx = tc->isThis() && func->cls()
-      ? (ar->hasThis() ? ar->getThis()->getVMClass() : ar->getClass())
-      : nullptr;
-    assertx(!tc->check(tv, ctx));
-    tc->verifyReturnFail(tv, ctx, func);
+TypedValue VerifyRetTypeFail(TypedValue value, const Class* ctx,
+                             const Func* func, int32_t retId,
+                             const TypeConstraint* tc) {
+  if (retId == TypeConstraint::ReturnId) {
+    assertx(!tc->check(&value, ctx));
+    tc->verifyReturnFail(&value, ctx, func);
   } else {
-    if (!tc) tc = &func->params()[id].typeConstraint;
-    auto const ctx = tc->isThis() && func->cls()
-      ? (ar->hasThis() ? ar->getThis()->getVMClass() : ar->getClass())
-      : nullptr;
-    assertx(!tc->check(tv, ctx));
-    tc->verifyOutParamFail(tv, ctx, func, id);
+    assertx(!tc->check(&value, ctx));
+    tc->verifyOutParamFail(&value, ctx, func, retId);
   }
+  return value;
 }
 
 void VerifyReifiedLocalTypeImpl(int32_t id, ArrayData* ts) {

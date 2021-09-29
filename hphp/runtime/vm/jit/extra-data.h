@@ -2306,29 +2306,60 @@ struct ParamData : IRExtraData {
   int32_t paramId;
 };
 
-struct ParamWithTCData : IRExtraData {
-  explicit ParamWithTCData(int32_t paramId, const TypeConstraint* tc)
-    : paramId(paramId)
-    , tc(tc) {}
+struct FuncParamData : IRExtraData {
+  explicit FuncParamData(const Func* func, int32_t paramId)
+    : func(func)
+    , paramId(paramId) {}
 
   std::string show() const {
-    return folly::to<std::string>(paramId, ":", tc->displayName());
+    return folly::to<std::string>(func->fullName()->data(), ":", paramId);
   }
 
   size_t stableHash() const {
     return folly::hash::hash_combine(
+      func->stableHash(),
+      std::hash<int32_t>()(paramId)
+    );
+  }
+
+  bool equals(const FuncParamData& o) const {
+    return func == o.func && paramId == o.paramId;
+  }
+
+  const Func* func;
+  int32_t paramId;
+};
+
+struct FuncParamWithTCData : IRExtraData {
+  explicit FuncParamWithTCData(const Func* func, int32_t paramId,
+                               const TypeConstraint* tc)
+    : func(func)
+    , paramId(paramId)
+    , tc(tc) {}
+
+  std::string show() const {
+    return folly::to<std::string>(
+      func->fullName()->data(), ":", paramId, ":", tc->displayName());
+  }
+
+  size_t stableHash() const {
+    return folly::hash::hash_combine(
+      func->stableHash(),
       std::hash<int32_t>()(paramId),
       std::hash<std::string>()(tc->fullName())  // Not great but hey its easy.
     );
   }
 
-  bool equals(const ParamWithTCData& o) const {
-    return paramId == o.paramId &&
-           *tc == *o.tc;
+  bool equals(const FuncParamWithTCData& o) const {
+    return func == o.func && paramId == o.paramId && *tc == *o.tc;
   }
 
+  const Func* func;
   int32_t paramId;
-  const TypeConstraint* tc;
+  union {
+    const TypeConstraint* tc;
+    uintptr_t tcAsInt;
+  };
 };
 
 struct TypeConstraintData : IRExtraData {
@@ -2802,12 +2833,14 @@ X(LdTVAux,                      LdTVAuxData);
 X(DbgAssertRefCount,            AssertReason);
 X(Unreachable,                  AssertReason);
 X(EndBlock,                     AssertReason);
-X(VerifyRetCallable,            ParamData);
-X(VerifyRetCls,                 ParamData);
-X(VerifyParamFail,              ParamWithTCData);
-X(VerifyParamFailHard,          ParamWithTCData);
-X(VerifyRetFail,                ParamWithTCData);
-X(VerifyRetFailHard,            ParamWithTCData);
+X(VerifyParamCallable,          FuncParamData);
+X(VerifyParamCls,               FuncParamWithTCData);
+X(VerifyParamFail,              FuncParamWithTCData);
+X(VerifyParamFailHard,          FuncParamWithTCData);
+X(VerifyRetCallable,            FuncParamData);
+X(VerifyRetCls,                 FuncParamWithTCData);
+X(VerifyRetFail,                FuncParamWithTCData);
+X(VerifyRetFailHard,            FuncParamWithTCData);
 X(VerifyReifiedLocalType,       ParamData);
 X(VerifyPropCls,                TypeConstraintData);
 X(VerifyPropFail,               TypeConstraintData);

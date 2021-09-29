@@ -202,7 +202,13 @@ void verifyTypeImpl(IRGS& env,
 
   if (tc.isNullable() && valType <= TInitNull) return;
 
-  auto const genFail = [&] {
+  auto const genFail = [&] (SSATmp* ctx = nullptr) {
+    if (ctx == nullptr) {
+      ctx = tc.isThis()
+        ? propCls ? propCls : ldCtxCls(env)
+        : cns(env, nullptr);
+    }
+
     // If we know there are no mock classes for the current class, it is
     // okay to fail hard.  Otherwise, mock objects may still pass, and we
     // have to be ready for execution to resume.
@@ -212,7 +218,7 @@ void verifyTypeImpl(IRGS& env,
       && !tc.isSoft()
       && (!tc.isThis() || thisFailsHard)
       && (!tc.isUpperBound() || RuntimeOption::EvalEnforceGenericsUB >= 2);
-    return fail(valType, failHard);
+    return fail(val, ctx, failHard);
   };
 
   auto const result =
@@ -314,7 +320,7 @@ void verifyTypeImpl(IRGS& env,
       },
       [&] {
         hint(env, Block::Hint::Unlikely);
-        genFail();
+        genFail(ctxCls);
       }
     );
     return;
@@ -1112,21 +1118,28 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
         env.irb->exceptionStackBoundary();
         return true;
       },
-      [&] (Type, bool hard) { // Check failure
+      [&] (SSATmp* val, SSATmp* ctx, bool hard) { // Check failure
         updateMarker(env);
         env.irb->exceptionStackBoundary();
-        gen(
+        auto const updated = gen(
           env,
           hard ? VerifyRetFailHard : VerifyRetFail,
-          ParamWithTCData { id, &tc },
-          ldStkAddr(env, BCSPRelOffset { ind })
+          FuncParamWithTCData { func, id, &tc },
+          val,
+          ctx
         );
+
+        if (!hard) {
+          auto const offset = offsetFromIRSP(env, BCSPRelOffset { ind });
+          gen(env, StStk, IRSPRelOffsetData{offset}, sp(env), updated);
+          env.irb->exceptionStackBoundary();
+        }
       },
       [&] (SSATmp* val) { // Callable check
         gen(
           env,
           VerifyRetCallable,
-          ParamData { id },
+          FuncParamData { func, id },
           val
         );
       },
@@ -1135,11 +1148,10 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
         gen(
           env,
           VerifyRetCls,
-          ParamData { id },
+          FuncParamWithTCData { func, id, &tc },
+          val,
           objClass,
-          checkCls,
-          cns(env, uintptr_t(&tc)),
-          val
+          checkCls
         );
       },
       [] { // Giveup
@@ -1196,30 +1208,36 @@ void verifyParamTypeImpl(IRGS& env, int32_t id) {
         stLocRaw(env, id, fp(env), str);
         return true;
       },
-      [&] (Type valType, bool hard) { // Check failure
-        gen(
+      [&] (SSATmp* val, SSATmp* ctx, bool hard) { // Check failure
+        auto const updated = gen(
           env,
           hard ? VerifyParamFailHard : VerifyParamFail,
-          ParamWithTCData { id, &tc }
+          FuncParamWithTCData { func, id, &tc },
+          val,
+          ctx
         );
+
+        if (!hard) {
+          stLocRaw(env, id, fp(env), updated);
+        }
       },
       [&] (SSATmp* val) { // Callable check
         gen(
           env,
           VerifyParamCallable,
-          val,
-          cns(env, id)
+          FuncParamData { func, id },
+          val
         );
       },
-      [&] (SSATmp*, SSATmp* objClass, SSATmp* checkCls) {
+      [&] (SSATmp* val, SSATmp* objClass, SSATmp* checkCls) {
         // Class/type-alias check
         gen(
           env,
           VerifyParamCls,
+          FuncParamWithTCData { func, id, &tc },
+          val,
           objClass,
-          checkCls,
-          cns(env, uintptr_t(&tc)),
-          cns(env, id)
+          checkCls
         );
       },
       [] { // Giveup
@@ -1284,7 +1302,7 @@ void verifyPropType(IRGS& env,
         *coerce = gen(env, LdLazyClsName, val);
         return true;
       },
-      [&] (Type, bool hard) { // Check failure
+      [&] (SSATmp*, SSATmp*, bool hard) { // Check failure
         auto const failHard =
           hard && RuntimeOption::EvalCheckPropTypeHints >= 3 &&
           (!tc->isUpperBound() || RuntimeOption::EvalEnforceGenericsUB >= 2);

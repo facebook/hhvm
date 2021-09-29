@@ -62,6 +62,7 @@ TRACE_SET_MOD(hhir);
 #define DArrLikeUnset  HasDest
 #define DArrLikeAppend HasDest
 #define DKeysetElem    HasDest
+#define DEscalateToVanilla HasDest
 #define DBespokeElemLval  HasDest
 #define DVecKey           HasDest
 #define DFirstElem        HasDest
@@ -83,8 +84,8 @@ TRACE_SET_MOD(hhir);
 #define DLvalOfPtr     HasDest
 #define DPtrIter       HasDest
 #define DPtrIterVal    HasDest
-#define DEscalateToVanilla HasDest
 #define DTypeCnsClsName HasDest
+#define DVerifyParamFail HasDest
 
 namespace {
 template<Opcode op, uint64_t flags>
@@ -159,6 +160,10 @@ OpInfo g_opInfo[] = {
 #undef DUnion
 #undef DMemoKey
 #undef DLvalOfPtr
+#undef DPtrIter
+#undef DPtrIterVal
+#undef DTypeCnsClsName
+#undef DVerifyParamFail
 
 ///////////////////////////////////////////////////////////////////////////////
 

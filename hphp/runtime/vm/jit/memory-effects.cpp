@@ -698,26 +698,18 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case NativeImpl:
     return UnknownEffects {};
 
-  // NB: on the failure path, these C++ helpers do a fixup and read frame
-  // locals before they throw.  They can also invoke the user error handler and
-  // go do whatever they want to non-frame locations.
-  //
-  // TODO(#5372569): if we combine dv inits into the same regions we could
-  // possibly avoid storing KindOfUninits if we modify this.
+  // These C++ helpers can invoke the user error handler and go do whatever
+  // they want to non-frame locations.
   case VerifyParamCallable:
   case VerifyParamCls:
+  case VerifyParamFail:
   case VerifyParamFailHard:
-    return may_load_store(AUnknown, AHeapAny);
-  // VerifyParamFail might coerce the parameter to the desired type rather than
-  // throwing.
-  case VerifyParamFail: {
-    auto const extra = inst.extra<ParamWithTCData>();
-    assertx(extra->paramId >= 0);
-    auto const stores =
-      AHeapAny |
-      ALocal{inst.marker().fixupFP(), safe_cast<uint32_t>(extra->paramId)};
-    return may_load_store(AUnknown, stores);
-  }
+  case VerifyRetCallable:
+  case VerifyRetCls:
+  case VerifyRetFail:
+  case VerifyRetFailHard:
+    return may_load_store(AHeapAny, AHeapAny);
+
   case VerifyReifiedLocalType: {
     auto const extra = inst.extra<ParamData>();
     assertx(extra->paramId >= 0);
@@ -728,14 +720,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   }
   // However the following ones can't read locals from our frame on the way
   // out, except as a side effect of raising a warning.
-  case VerifyRetCallable:
-  case VerifyRetCls:
   case VerifyReifiedReturnType:
     return may_load_store(AHeapAny | livefp(inst), AHeapAny);
-
-  case VerifyRetFail:
-  case VerifyRetFailHard:
-    return may_load_store(AHeapAny | AStackAny | livefp(inst), AHeapAny);
 
   case VerifyPropCls:
   case VerifyPropFail:

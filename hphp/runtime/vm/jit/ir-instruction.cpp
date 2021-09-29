@@ -619,6 +619,18 @@ Type typeCnsClsName(const IRInstruction* inst) {
   always_assert(false);
 }
 
+Type verifyParamFailReturn(const IRInstruction* inst) {
+  assertx(inst->is(VerifyParamFail, VerifyRetFail));
+  auto const tc = inst->extra<FuncParamWithTCData>()->tc;
+  auto const srcTy = inst->src(0)->type();
+  auto dstTy = srcTy;
+  if (tc->maybeStringCompatible() &&
+      (srcTy.maybe(TCls) || srcTy.maybe(TLazyCls))) {
+    dstTy |= TPersistentStr;
+  }
+  return dstTy;
+}
+
 // Is this instruction an array cast that always modifies the type of the
 // input array? Such casts are guaranteed to return vanilla arrays.
 bool isNontrivialArrayCast(const IRInstruction* inst) {
@@ -708,6 +720,7 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #define DPtrIterVal     return ptrIterValReturn(inst);
 #define DBespokeElemLval return bespokeElemLvalReturn(inst);
 #define DTypeCnsClsName return typeCnsClsName(inst);
+#define DVerifyParamFail return verifyParamFailReturn(inst);
 
 #define O(name, dstinfo, srcinfo, flags) case name: dstinfo not_reached();
 
@@ -754,6 +767,7 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #undef DPtrIterVal
 #undef DBespokeElemLval
 #undef DTypeCnsClsName
+#undef DVerifyParamFail
 }
 
 bool IRInstruction::maySyncVMRegsWithSources() const {

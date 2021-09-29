@@ -407,6 +407,8 @@ struct TypeConstraint {
                       tv_lval val, const StringData* propName,
                       bool isStatic) const;
 
+  bool maybeStringCompatible() const;
+
 private:
   void init();
 

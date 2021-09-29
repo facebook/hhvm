@@ -575,10 +575,13 @@ private:
   // or unresolved breakpoints, so that the hook can skip calling into the
   // debugger (and acquiring the debugger lock) every time a new func or
   // compilation unit is defined if there are no unresolved breakpoints.
-  static inline void updateUnresolvedBpFlag(DebuggerRequestInfo* ri) {
-    ri->m_flags.unresolvedBps =
+  static inline void updateUnresolvedBpFlag(DebuggerRequestInfo* ri,
+                                            RequestInfo* ti) {
+    auto urb =
       !ri->m_breakpointInfo->m_unresolvedBreakpoints.empty() ||
       !ri->m_breakpointInfo->m_pendingBreakpoints.empty();
+    ri->m_flags.unresolvedBps = urb;
+    if (ti) ti->m_reqInjectionData.m_hasUnresolvedBreakPoint = urb;
     std::atomic_thread_fence(std::memory_order_release);
   }
 

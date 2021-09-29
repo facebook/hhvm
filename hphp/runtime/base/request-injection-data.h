@@ -389,6 +389,7 @@ private:
   StepOutState m_debuggerStepOut{StepOutState::None};
 
 public:
+  bool m_hasUnresolvedBreakPoint{false};
   PCFilter m_breakPointFilter;
   PCFilter m_flowFilter;
   PCFilter m_lineBreakPointFilter;

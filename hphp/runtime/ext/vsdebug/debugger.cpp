@@ -336,7 +336,7 @@ void Debugger::setClientConnected(
             assertx(ri->m_breakpointInfo->m_pendingBreakpoints.empty());
             assertx(ri->m_breakpointInfo->m_unresolvedBreakpoints.empty());
           }
-          updateUnresolvedBpFlag(ri);
+          updateUnresolvedBpFlag(ri, ti);
         },
         true /* includeDummyRequest */
       );
@@ -950,7 +950,7 @@ DebuggerRequestInfo* Debugger::attachToRequest(RequestInfo* ti) {
     );
   }
 
-  updateUnresolvedBpFlag(requestInfo);
+  updateUnresolvedBpFlag(requestInfo, ti);
   return requestInfo;
 }
 
@@ -1518,7 +1518,7 @@ void Debugger::onBreakpointAdded(int bpId) {
       }
 
       ri->m_breakpointInfo->m_pendingBreakpoints.emplace(bpId);
-      updateUnresolvedBpFlag(ri);
+      updateUnresolvedBpFlag(ri, ti);
 
       // If the program is running, the request thread will pick up and install
       // the breakpoint the next time it calls into the opcode hook, except for
@@ -1635,7 +1635,7 @@ void Debugger::tryInstallBreakpoints(DebuggerRequestInfo* ri) {
     }
   }
 
-  updateUnresolvedBpFlag(ri);
+  updateUnresolvedBpFlag(ri, &RI());
   assertx(ri->m_breakpointInfo->m_pendingBreakpoints.empty());
 }
 
@@ -1873,7 +1873,7 @@ void Debugger::onFunctionDefined(
     }
   }
 
-  updateUnresolvedBpFlag(ri);
+  updateUnresolvedBpFlag(ri, &RI());
 }
 
 void Debugger::onCompilationUnitLoaded(
@@ -1934,7 +1934,7 @@ void Debugger::onCompilationUnitLoaded(
     it++;
   }
 
-  updateUnresolvedBpFlag(ri);
+  updateUnresolvedBpFlag(ri, &RI());
 }
 
 void Debugger::onFuncIntercepted(std::string funcName) {

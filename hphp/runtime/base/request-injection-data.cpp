@@ -732,7 +732,9 @@ void RequestInjectionData::updateJit() {
     !(RuntimeOption::EvalJitDisabledByHphpd && m_debuggerAttached) &&
     !m_coverage &&
     (rl_typeProfileLocals.isNull() || !isForcedToInterpret()) &&
-    !getDebuggerForceIntr();
+    !getDebuggerForceIntr() &&
+    !(RuntimeOption::EvalJitDisabledByBps && m_debuggerAttached &&
+      (m_hasUnresolvedBreakPoint || !m_breakPointFilter.isNull()));
 }
 
 void RequestInjectionData::clearFlag(SurpriseFlag flag) {

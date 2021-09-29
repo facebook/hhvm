@@ -908,9 +908,15 @@ DebuggerRequestInfo* Debugger::attachToRequest(RequestInfo* ti) {
 
   assertx(requestInfo != nullptr && requestInfo->m_breakpointInfo != nullptr);
 
-  // Have the debugger hook update the output hook on next interrupt.
+  // Have the debugger hook update the output hook when we enter the debugger.
   requestInfo->m_flags.outputHooked = false;
-  ti->m_reqInjectionData.setDebuggerIntr(true);
+
+  // Currently we depend on this interrupt to run the top-level VM in intep mode
+  // when the debugger is attached. Preserve this behavior when JitDisabledByBps
+  // is not set.
+  if (!RuntimeOption::EvalJitDisabledByBps) {
+    ti->m_reqInjectionData.setDebuggerIntr(true);
+  }
 
   if (ti->m_executing == RequestInfo::Executing::UserFunctions ||
       ti->m_executing == RequestInfo::Executing::RuntimeFunctions) {

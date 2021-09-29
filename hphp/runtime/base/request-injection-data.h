@@ -269,12 +269,6 @@ struct RequestInjectionData {
    * debugger interrupt conditions being true.
    */
   bool getDebuggerForceIntr() const;
-
-  /*
-   * Indicating we should force interrupts for debuggers.  This is intended to
-   * be used by debuggers for forcing onOpcode events.
-   */
-  bool getDebuggerIntr() const;
   void setDebuggerIntr(bool);
 
   /*

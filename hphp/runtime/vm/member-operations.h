@@ -714,7 +714,7 @@ inline tv_lval ElemDObject(tv_lval base, key_type<keyType> key) {
  * Intermediate elem operation for defining member instructions.
  */
 template<KeyType keyType = KeyType::Any>
-tv_lval ElemD(tv_lval base, key_type<keyType> key, bool roProp) {
+tv_lval ElemD(tv_lval base, key_type<keyType> key) {
   assertx(tvIsPlausible(base.tv()));
 
   // ElemD helpers hand out lvals to immutable_null_base in cases where we know
@@ -723,15 +723,6 @@ tv_lval ElemD(tv_lval base, key_type<keyType> key, bool roProp) {
 
   if (tvIsArrayLike(base) && !base.val().parr->isVanilla()) {
     return ElemDBespoke<keyType>(base, key);
-  }
-
-  if (RO::EvalEnableReadonlyPropertyEnforcement && roProp &&
-    !hasPersistentFlavor(base.type()) && isRefcountedType(base.type())) {
-      if (RO::EvalEnableReadonlyPropertyEnforcement == 1) {
-        raiseReadOnlyCollectionMutation();
-      } else {
-        throwReadOnlyCollectionMutation();
-      }
   }
 
   switch (base.type()) {
@@ -950,7 +941,7 @@ inline tv_lval ElemUObject(tv_lval base, key_type<keyType> key) {
  * Intermediate Elem operation for an unsetting member instruction.
  */
 template <KeyType keyType = KeyType::Any>
-tv_lval ElemU(tv_lval base, key_type<keyType> key, bool roProp) {
+tv_lval ElemU(tv_lval base, key_type<keyType> key) {
   assertx(tvIsPlausible(*base));
 
   // ElemU helpers hand out lvals to immutable_null_base in cases where we know
@@ -959,15 +950,6 @@ tv_lval ElemU(tv_lval base, key_type<keyType> key, bool roProp) {
 
   if (tvIsArrayLike(base) && !base.val().parr->isVanilla()) {
     return ElemUBespoke<keyType>(base, key);
-  }
-
-  if (RO::EvalEnableReadonlyPropertyEnforcement && roProp &&
-    (!hasPersistentFlavor(type(base)) && isRefcountedType(type(base)))) {
-    if (RO::EvalEnableReadonlyPropertyEnforcement == 1) {
-      raiseReadOnlyCollectionMutation();
-    } else {
-      throwReadOnlyCollectionMutation();
-    }
   }
 
   switch (type(base)) {

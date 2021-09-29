@@ -127,7 +127,7 @@ SSATmp* emitGet(IRGS& env, SSATmp* arr, SSATmp* key, Block* taken) {
 }
 
 SSATmp* emitElem(IRGS& env, SSATmp* arr, SSATmp* key, bool throwOnMissing) {
-  return gen(env, BespokeElem, arr, key, cns(env, throwOnMissing), cns(env, false));
+  return gen(env, BespokeElem, arr, key, cns(env, throwOnMissing));
 }
 
 SSATmp* emitSet(IRGS& env, SSATmp* arr, SSATmp* key, SSATmp* val) {

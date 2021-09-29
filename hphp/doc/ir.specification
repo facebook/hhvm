@@ -2858,12 +2858,12 @@ fields of that struct for holding intermediate values.
 
   Returns an lval to the element of keyset S0 at the known position S2 in S1.
 
-| ElemDX, D(LvalToMembCell), S(LvalToCell) S(Cell) S(Bool), MElem
+| ElemDX, D(LvalToMembCell), S(LvalToCell) S(Cell), MElem
 
   Like ElemX, but used for intermediate element lookups that may modify the
   base.
 
-| ElemUX, D(LvalToMembCell), S(LvalToCell) S(Cell) S(Bool), MElem
+| ElemUX, D(LvalToMembCell), S(LvalToCell) S(Cell), MElem
 
   Like ElemX, but used for intermediate element lookups that may modify the
   base as part of an unset operation.
@@ -3013,7 +3013,7 @@ fields of that struct for holding intermediate values.
   Get element with key S1 in the array S0, which may have an arbitrary layout.
   This op throws if the key is not in the array.
 
-| BespokeElem, DBespokeElemLval, S(LvalToArrLike) S(Int,Str) C(Bool) C(Bool), LA|MElem
+| BespokeElem, DBespokeElemLval, S(LvalToArrLike) S(Int,Str) C(Bool), LA|MElem
 
   Get a half-lval to an element of type T with key S1 in the array S0, which
   may have an arbitrary layout. The op will copy or escalate the S0 as needed,

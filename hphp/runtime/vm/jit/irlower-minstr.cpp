@@ -282,7 +282,6 @@ void implElem(IRLS& env, const IRInstruction* inst) {
 
   if (inst->is(ElemDX)) {
     assertx(mode == MOpMode::Define);
-    args.ssa(2);
     BUILD_OPTAB(ELEMD_HELPER_TABLE, getKeyType(key));
     cgCallHelper(vmain(env), env, target, callDest(env, inst), sync, args);
     return;
@@ -290,7 +289,6 @@ void implElem(IRLS& env, const IRInstruction* inst) {
 
   if (inst->is(ElemUX)) {
     assertx(mode == MOpMode::Unset);
-    args.ssa(2);
     BUILD_OPTAB(ELEMU_HELPER_TABLE, getKeyType(key));
     cgCallHelper(vmain(env), env, target, callDest(env, inst), sync, args);
     return;

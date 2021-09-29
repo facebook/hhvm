@@ -2509,9 +2509,9 @@ void elemDispatch(MOpMode mode, TypedValue key) {
       case MOpMode::InOut:
         return baseValueToLval(Elem<MOpMode::InOut>(b, key));
       case MOpMode::Define:
-        return ElemD(b, key, mstate.roProp);
+        return ElemD(b, key);
       case MOpMode::Unset:
-        return ElemU(b, key, mstate.roProp);
+        return ElemU(b, key);
     }
     always_assert(false);
   }();

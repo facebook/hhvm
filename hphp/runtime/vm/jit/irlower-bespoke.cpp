@@ -366,7 +366,6 @@ void cgBespokeElem(IRLS& env, const IRInstruction* inst) {
           : CallSpec::direct(elemKeysetIU);
       }
     }
-    args.ssa(3);
     return key->isA(TStr)
       ? CallSpec::direct(throwOnMissing ? elemSD : elemSU)
       : CallSpec::direct(throwOnMissing ? elemID : elemIU);

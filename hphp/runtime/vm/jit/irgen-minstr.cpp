@@ -1175,9 +1175,8 @@ SSATmp* elemImpl(IRGS& env, MOpMode mode, SSATmp* key) {
   auto const base = ldMBase(env);
   auto const data = MOpModeData { mode };
   if (define || unset) {
-    auto const roProp = gen(env, LdMROProp);
     auto const op = define ? ElemDX : ElemUX;
-    return gen(env, op, data, base, key, roProp);
+    return gen(env, op, data, base, key);
   }
   auto const value = gen(env, ElemX, data, base, key);
   return baseValueToLval(env, value);

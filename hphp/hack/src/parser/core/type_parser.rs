@@ -177,6 +177,7 @@ where
                 S!(make_simple_type_specifier, self, token)
             }
             | TokenKind::This => self.parse_simple_type_or_type_constant(),
+            | TokenKind::SelfToken => self.parse_type_constant(),
             // Any keyword-type could be a non-keyword type, because PHP, so check whether
             // these have generics.
             | TokenKind::Double // TODO: Specification does not mention double; fix it.
@@ -208,8 +209,6 @@ where
                 let name = self.scan_qualified_name(missing, token);
                 self.parse_remaining_simple_type_or_type_constant_or_generic(name)
             }
-            | TokenKind::SelfToken
-            | TokenKind::Parent => self.parse_simple_type_or_type_constant(),
             | TokenKind::Category
             | TokenKind::XHP
             | TokenKind::XHPClassName => self.parse_simple_type_or_type_constant_or_generic(),
@@ -278,6 +277,18 @@ where
     pub fn parse_simple_type_or_generic(&mut self) -> S::R {
         let name = self.next_xhp_class_name_or_other();
         self.parse_remaining_simple_type_or_generic(name)
+    }
+
+    fn parse_type_constant(&mut self) -> S::R {
+        let name = self.next_xhp_class_name_or_other();
+        let token = self.peek_token();
+        match token.kind() {
+            TokenKind::ColonColon => self.parse_remaining_type_constant(name),
+            _ => {
+                self.with_error(Errors::error1047);
+                S!(make_error, self, name)
+            }
+        }
     }
 
     fn parse_remaining_simple_type_or_type_constant(&mut self, name: S::R) -> S::R {

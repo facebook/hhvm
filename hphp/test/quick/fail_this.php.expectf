@@ -1,0 +1,2 @@
+
+Catchable fatal error: Argument 1 passed to X::test() must be an instance of this, string given in %s/test/quick/fail_this.php on line 8

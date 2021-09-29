@@ -244,9 +244,7 @@ struct TypeConstraint {
 
   bool isPrecise()  const { return metaType() == MetaType::Precise; }
   bool isMixed()    const { return m_type == Type::Mixed; }
-  bool isSelf()     const { return m_type == Type::Self; }
   bool isThis()     const { return m_type == Type::This; }
-  bool isParent()   const { return m_type == Type::Parent; }
   bool isCallable() const { return m_type == Type::Callable; }
   bool isNumber()   const { return m_type == Type::Number; }
   bool isNothing()  const { return m_type == Type::Nothing; }
@@ -268,7 +266,7 @@ struct TypeConstraint {
   AnnotType type()  const { return m_type; }
 
   bool validForProp() const {
-    return !isSelf() && !isParent() && !isCallable() && !isNothing() && !isNoReturn();
+    return !isCallable() && !isNothing() && !isNoReturn();
   }
 
   /*
@@ -291,8 +289,8 @@ struct TypeConstraint {
 
   /*
    * Format this TypeConstraint for display to the user. Context is used to
-   * optionally resolve Self, Parent, and This to their class names. Extra will
-   * cause the resolved type (if any) to be appended to the name.
+   * optionally resolve This to its class name. Extra will cause the resolved
+   * type (if any) to be appended to the name.
    */
   std::string displayName(const Class* context = nullptr,
                           bool extra = false) const;
@@ -330,7 +328,7 @@ struct TypeConstraint {
    * (using the given context). This can invoke the autoloader and is always
    * exact. This should not be used for property type-hints (which behave
    * slightly differently) and the context is required. The context determines
-   * the meaning of Self, Parent, and This type-constraints.
+   * the meaning of This type-constraint.
    */
   bool check(tv_rval val, const Class* context) const {
     return checkImpl<CheckMode::Exact>(val, context);

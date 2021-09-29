@@ -10,7 +10,7 @@ dict(9) {
   [4]=>
   string(37) "Parameter #4 [ <required> Object $o ]"
   [5]=>
-  string(38) "Parameter #5 [ <required> self $self ]"
+  string(41) "Parameter #5 [ <required> HH\this $thiz ]"
   [6]=>
   string(47) "Parameter #6 [ <optional> $opt_untyped = NULL ]"
   [7]=>

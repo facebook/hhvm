@@ -68,10 +68,6 @@ class B extends A {
   public async function f21_soft(): <<__Soft>> Awaitable<this> { return $this; }
   public async function f22($p): Awaitable<this> { return $p; }
   public async function f22_soft($p): <<__Soft>> Awaitable<this> { return $p; }
-  public static async function f23($p): Awaitable<self> { return $p; }
-  public static async function f23_soft($p): <<__Soft>> Awaitable<self> { return $p; }
-  public static async function f24($p): Awaitable<parent> { return $p; }
-  public static async function f24_soft($p): <<__Soft>> Awaitable<parent> { return $p; }
   public static function testfunc() {}
 }
 class C extends B {}
@@ -128,10 +124,6 @@ function main() {
   $callbacks = Map {
     'f22' => varray[$c, 'f22'],
     'f22_soft' => varray[$c, 'f22_soft'],
-    'f23' => varray['C', 'f23'],
-    'f23_soft' => varray['C', 'f23_soft'],
-    'f24' => varray['C', 'f24'],
-    'f24_soft' => varray['C', 'f24_soft']
   };
   foreach ($callbacks as $name => $f) {
     echo "\ncalling $name\n";

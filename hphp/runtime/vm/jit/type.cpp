@@ -1132,8 +1132,6 @@ Type typeFromPropTC(const HPHP::TypeConstraint& tc,
           : Type::SubObj(propCls);
       case A::Nothing:
       case A::NoReturn:
-      case A::Self:
-      case A::Parent:
       case A::Callable:
         break;
     }

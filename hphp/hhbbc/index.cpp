@@ -5666,12 +5666,6 @@ Index::ConstraintResolution Index::get_type_for_annotated_type(
     case AnnotMetaType::This:
       if (auto s = selfCls(ctx)) return setctx(subObj(*s));
       break;
-    case AnnotMetaType::Self:
-      if (auto s = selfCls(ctx)) return subObj(*s);
-      break;
-    case AnnotMetaType::Parent:
-      if (auto p = parentCls(ctx)) return subObj(*p);
-      break;
     case AnnotMetaType::Callable:
       break;
     case AnnotMetaType::Number:

@@ -761,11 +761,7 @@ where
                 let list_item = S!(make_list_item, self, item, comma);
                 (list_item, is_missing)
             }
-            TokenKind::Parent
-            | TokenKind::Enum
-            | TokenKind::RecordDec
-            | TokenKind::Shape
-            | TokenKind::SelfToken
+            TokenKind::Enum | TokenKind::RecordDec | TokenKind::Shape
                 if self.env.hhvm_compat_mode =>
             {
                 // HHVM allows these keywords here for some reason

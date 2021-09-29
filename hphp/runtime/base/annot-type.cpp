@@ -80,8 +80,6 @@ static const std::pair<HhvmStrToTypeMap, StdStrToTypeMap>& getAnnotTypeMaps() {
       { "HH\\num",      AnnotType::Number },
       { "HH\\arraykey", AnnotType::ArrayKey },
       { "HH\\this",     AnnotType::This },
-      { "self",         AnnotType::Self },
-      { "parent",       AnnotType::Parent },
       { "callable",     AnnotType::Callable },
       { "HH\\vec",      AnnotType::Vec },
       { "HH\\dict",     AnnotType::Dict },
@@ -178,8 +176,6 @@ bool interface_supports_double(folly::StringPiece s) {
 TypedValue annotDefaultValue(AnnotType at) {
   switch (at) {
     case AnnotType::Mixed:
-    case AnnotType::Self:
-    case AnnotType::Parent:
     case AnnotType::This:
     case AnnotType::Callable:
     case AnnotType::Resource:
@@ -232,13 +228,9 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
       }
       return (isIntType(dt) || isStringType(dt))
         ? AnnotAction::Pass : AnnotAction::Fail;
-    case AnnotMetaType::Self:
-    case AnnotMetaType::Parent:
-      // For "self" and "parent", if `dt' is not an object we know
-      // it's not compatible, otherwise more checks are required
-      return (dt == KindOfObject)
-        ? AnnotAction::ObjectCheck : AnnotAction::Fail;
     case AnnotMetaType::This:
+      // For "this", if `dt' is not an object we know
+      // it's not compatible, otherwise more checks are required
       return (dt == KindOfObject)
         ? AnnotAction::ObjectCheck
         : AnnotAction::Fail;

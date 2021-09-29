@@ -198,16 +198,10 @@ ALWAYS_INLINE
 static bool VerifyTypeSlowImpl(const Class* cls,
                                const Class* constraint,
                                const TypeConstraint* expected) {
-  // This helper should only be called for the Object, This, Self, and Parent
-  // cases
-  assertx(expected->isObject() || expected->isSelf() || expected->isParent()
-          || expected->isThis());
-  // For the This, Self and Parent cases, we must always have a resolved class
-  // for the constraint
-  assertx(IMPLIES(
-    expected->isSelf() || expected->isParent() || expected->isThis(),
-    constraint != nullptr
-  ));
+  // This helper should only be called for the Object and This cases
+  assertx(expected->isObject() || expected->isThis());
+  // For the This case, we must always have a resolved class for the constraint
+  assertx(IMPLIES(expected->isThis(), constraint != nullptr));
   // If we have a resolved class for the constraint, all we have to do is
   // check if the value's class is compatible with it
   if (LIKELY(constraint != nullptr)) {
@@ -216,8 +210,7 @@ static bool VerifyTypeSlowImpl(const Class* cls,
     }
     return cls->classof(constraint);
   }
-  // The Self and Parent cases should never reach here because they were
-  // handled above
+  // The This case should never reach here because it was handled above
   assertx(expected->isObject());
   // Handle the case where the constraint is a type alias
   return expected->checkTypeAliasObj(cls);

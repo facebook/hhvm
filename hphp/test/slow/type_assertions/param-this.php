@@ -1,7 +1,7 @@
 <?hh
 
 interface X {
-  public function foo(self $x);
+  public function foo(this $x);
 }
 
 class Y implements X {
@@ -13,7 +13,7 @@ class Z extends Y {
 }
 
 class R implements X {
-  public function foo(self $x) { var_dump($x); }
+  public function foo(this $x) { var_dump($x); }
 }
 
 <<__EntryPoint>> function main(): void { echo "Done.\n"; }

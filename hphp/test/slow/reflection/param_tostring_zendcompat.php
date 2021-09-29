@@ -12,7 +12,7 @@ class Foo {
     string $str,
     int $i,
     Object $o,
-    self $self,
+    this $thiz,
     $opt_untyped = null,
     mixed $opt_m = null,
     Object $opt_o = null

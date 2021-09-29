@@ -1,2 +1,4 @@
 File "instanceof_parent_outside.php", line 4, characters 13-18:
-Unbound name: `parent` (Naming[2049])
+A type specifier is expected here. (Parsing[1002])
+File "instanceof_parent_outside.php", line 4, characters 13-18:
+Encountered unexpected text `parent`, was expecting a type hint. (Parsing[1002])

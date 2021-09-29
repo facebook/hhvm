@@ -320,41 +320,20 @@ void verifyTypeImpl(IRGS& env,
     return;
   }
 
-  // If we reach here then valType is Obj and tc is Object, Self, or Parent
+  // If we reach here then valType is Obj and tc is Object
+  assertx(tc.isObject());
   const StringData* clsName;
   const Class* knownConstraint = nullptr;
-  if (tc.isObject()) {
-    auto const td = tc.namedEntity()->getCachedTypeAlias();
-    if (RuntimeOption::RepoAuthoritative && td &&
-        tc.namedEntity()->isPersistentTypeAlias() &&
-        td->klass) {
-      assertx(classHasPersistentRDS(td->klass));
-      clsName = td->klass->name();
-      knownConstraint = td->klass;
-    } else {
-      clsName = tc.typeName();
-    }
+  auto const td = tc.namedEntity()->getCachedTypeAlias();
+  if (RuntimeOption::RepoAuthoritative && td &&
+      tc.namedEntity()->isPersistentTypeAlias() &&
+      td->klass) {
+    assertx(classHasPersistentRDS(td->klass));
+    clsName = td->klass->name();
+    knownConstraint = td->klass;
   } else {
-    assertx(!propCls);
-    if (tc.isSelf()) {
-      knownConstraint = curFunc(env)->cls();
-    } else {
-      assertx(tc.isParent());
-      if (auto cls = curFunc(env)->cls()) knownConstraint = cls->parent();
-    }
-    if (!knownConstraint) {
-      // The hint was self or parent and there's no corresponding
-      // class for the current func. This typehint will always fail.
-      return genFail();
-    }
-    clsName = knownConstraint->preClass()->name();
+    clsName = tc.typeName();
   }
-
-  // For "self" and "parent", knownConstraint should always be
-  // non-null at this point
-  assertx(IMPLIES(tc.isSelf() || tc.isParent(), knownConstraint != nullptr));
-  assertx(IMPLIES(tc.isSelf() || tc.isParent(), clsName != nullptr));
-  assertx(IMPLIES(tc.isSelf() || tc.isParent(), !propCls));
 
   auto const checkCls = ldClassSafe(env, clsName, knownConstraint);
   auto const fastIsInstance = implInstanceCheck(env, val, clsName, checkCls);

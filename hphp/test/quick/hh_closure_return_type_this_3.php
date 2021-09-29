@@ -72,14 +72,6 @@ class B extends A {
   public function f21_soft() { return function (): <<__Soft>> this { return $this; }; }
   public function f22() { return function ($p): this { return $p; }; }
   public function f22_soft() { return function ($p): <<__Soft>> this { return $p; }; }
-  public static function f23() { return function ($p): self { return $p; }; }
-  public static function f23_soft() {
-    return function ($p): <<__Soft>> self { return $p; };
-  }
-  public static function f24() { return function ($p): parent { return $p; }; }
-  public static function f24_soft() {
-    return function ($p): <<__Soft>> parent { return $p; };
-  }
   public static function testfunc() {}
 }
 class C extends B {}
@@ -140,10 +132,6 @@ function call_wrapper($fn, $arg) {
   $callbacks = Map {
     'f22' => varray[$c, 'f22'],
     'f22_soft' => varray[$c, 'f22_soft'],
-    'f23' => varray['C', 'f23'],
-    'f23_soft' => varray['C', 'f23_soft'],
-    'f24' => varray['C', 'f24'],
-    'f24_soft' => varray['C', 'f24_soft']
   };
   foreach ($callbacks as $name => $f) {
     echo "\ncalling $name\n";

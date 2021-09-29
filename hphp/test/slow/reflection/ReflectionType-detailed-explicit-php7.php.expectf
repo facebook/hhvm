@@ -114,23 +114,8 @@ string(10) "SplSubject"
 bool(true)
 bool(false)
 bool(false)
-string(4) "self"
-** Method 2 - parameter 0
-bool(true)
-bool(true)
-bool(false)
-string(5) "?self"
-** Method 3 - parameter 0
-bool(true)
-bool(false)
-bool(false)
-string(6) "parent"
-** Method 4 - parameter 0
-bool(true)
-bool(false)
-bool(false)
 string(4) "Test"
-** Method 5 - parameter 0
+** Method 2 - parameter 0
 bool(true)
 bool(true)
 bool(false)
@@ -147,44 +132,19 @@ string(8) "stdClass"
 ** Function/method return type 2
 bool(true)
 bool(false)
-bool(true)
-string(6) "HH\int"
+bool(false)
+string(4) "Test"
 ** Function/method return type 3
 bool(true)
-bool(true)
-bool(true)
-string(7) "?HH\int"
+bool(false)
+bool(false)
+string(4) "Test"
 ** Function/method return type 4
-bool(true)
-bool(false)
-bool(false)
-string(4) "self"
-** Function/method return type 5
-bool(true)
-bool(true)
-bool(false)
-string(5) "?self"
-** Function/method return type 6
-bool(true)
-bool(false)
-bool(false)
-string(6) "parent"
-** Function/method return type 7
-bool(true)
-bool(false)
-bool(false)
-string(4) "Test"
-** Function/method return type 8
-bool(true)
-bool(false)
-bool(false)
-string(4) "Test"
-** Function/method return type 9
 bool(true)
 bool(true)
 bool(false)
 string(5) "?Test"
-** Function/method return type 10
+** Function/method return type 5
 bool(true)
 bool(true)
 bool(false)

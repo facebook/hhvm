@@ -201,9 +201,7 @@ fn valid_for_prop(tc: &constraint::Constraint) -> bool {
     match &tc.name {
         Nothing => true,
         Just(s) => {
-            !(string_utils::is_self(&s)
-                || string_utils::is_parent(&s)
-                || s.as_str().eq_ignore_ascii_case("hh\\nothing")
+            !(s.as_str().eq_ignore_ascii_case("hh\\nothing")
                 || s.as_str().eq_ignore_ascii_case("hh\\noreturn")
                 || s.as_str().eq_ignore_ascii_case("callable"))
         }

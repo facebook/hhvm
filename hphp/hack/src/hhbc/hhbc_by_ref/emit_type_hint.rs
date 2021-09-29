@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use ffi::{Maybe, Maybe::*, Str};
-use hhbc_by_ref_emit_fatal as emit_fatal;
 use hhbc_by_ref_hhas_type::{constraint, HhasTypeInfo};
 use hhbc_by_ref_hhbc_id::{class, Id as ClassId};
 use hhbc_by_ref_hhbc_string_utils as string_utils;
@@ -12,7 +11,6 @@ use naming_special_names_rust::{classes, typehints};
 use oxidized::{
     aast_defs::{Hint, Hint_, Hint_::*, NastShapeInfo, ShapeFieldInfo, Tprim},
     ast_defs::{Id, ShapeFieldName},
-    pos::Pos,
 };
 use std::borrow::Cow;
 
@@ -30,7 +28,7 @@ fn fmt_name_or_prim<'arena>(
     tparams: &[&str],
     name: &str,
 ) -> Cow<'arena, str> {
-    if tparams.contains(&name) || string_utils::is_self(&name) || string_utils::is_parent(&name) {
+    if tparams.contains(&name) {
         (alloc.alloc_str(name) as &str).into()
     } else {
         let id: class::ClassType<'arena> = class::ClassType::from_ast_name(alloc, &name);
@@ -201,7 +199,7 @@ fn hint_to_type_constraint<'arena>(
     h: &Hint,
 ) -> std::result::Result<constraint::Constraint<'arena>, hhbc_by_ref_instruction_sequence::Error> {
     use constraint::{Constraint, ConstraintFlags};
-    let Hint(pos, hint) = h;
+    let Hint(_, hint) = h;
     Ok(match &**hint {
         Hdynamic | Hlike(_) | Hfun(_) | Hunion(_) | Hintersection(_) | Hmixed => {
             Constraint::default()
@@ -286,10 +284,10 @@ fn hint_to_type_constraint<'arena>(
                 }
                 _ => {}
             };
-            type_application_helper(alloc, tparams, kind, pos, s)?
+            type_application_helper(alloc, tparams, kind, s)?
         }
-        Habstr(s, _hs) => type_application_helper(alloc, tparams, kind, pos, s)?,
-        h => type_application_helper(alloc, tparams, kind, pos, &hint_to_string(h))?,
+        Habstr(s, _hs) => type_application_helper(alloc, tparams, kind, s)?,
+        h => type_application_helper(alloc, tparams, kind, &hint_to_string(h))?,
     })
 }
 
@@ -321,7 +319,6 @@ fn type_application_helper<'arena>(
     alloc: &'arena bumpalo::Bump,
     tparams: &[&str],
     kind: &Kind,
-    pos: &Pos,
     name: &str,
 ) -> std::result::Result<constraint::Constraint<'arena>, hhbc_by_ref_instruction_sequence::Error> {
     use constraint::{Constraint, ConstraintFlags};
@@ -334,18 +331,6 @@ fn type_application_helper<'arena>(
             Just(Str::new_str(alloc, tc_name)),
             ConstraintFlags::EXTENDED_HINT | ConstraintFlags::TYPE_VAR,
         ))
-    } else if string_utils::is_self(&name) || string_utils::is_parent(name) {
-        if is_typedef(&kind) {
-            Err(emit_fatal::raise_fatal_runtime(
-                pos,
-                format!("Cannot access {} when no class scope is active", name),
-            ))
-        } else {
-            Ok(Constraint::make(
-                Just(Str::new_str(alloc, name)),
-                ConstraintFlags::empty(),
-            ))
-        }
     } else {
         let name: String = class::ClassType::from_ast_name(alloc, name).into();
         Ok(Constraint::make(

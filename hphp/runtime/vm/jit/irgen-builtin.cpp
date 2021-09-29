@@ -1722,10 +1722,6 @@ Type builtinOutType(const Func* builtin, uint32_t i) {
       return Type{*tc.underlyingDataType()};
     case AnnotMetaType::Mixed:
       return TInitCell;
-    case AnnotMetaType::Self:
-      return TObj;
-    case AnnotMetaType::Parent:
-      return TObj;
     case AnnotMetaType::Callable:
       return TInitCell;
     case AnnotMetaType::Number:

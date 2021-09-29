@@ -90,53 +90,43 @@ std::string TypeConstraint::displayName(const Class* context /*= nullptr*/,
   if ((m_flags & Flags::DisplayNullable) && isExtended()) {
     name += '?';
   }
-  if (isSelf()) {
-    if (context) tn = context->name();
-    name += tn->data();
-  } else if (isParent()) {
-    if (context) {
-      if (auto const parent = context->parent()) {
-        tn = parent->name();
-      }
+
+  const char* str = tn->data();
+  auto len = tn->size();
+  if (len > 3 && tolower(str[0]) == 'h' && tolower(str[1]) == 'h' &&
+      str[2] == '\\') {
+    bool strip = false;
+    const char* stripped = str + 3;
+    switch (len - 3) {
+      case 3:
+        strip = (!strcasecmp(stripped, "int") ||
+                 !strcasecmp(stripped, "num"));
+        break;
+      case 4:
+        strip = (!strcasecmp(stripped, "bool") ||
+                 !strcasecmp(stripped, "this") ||
+                 !strcasecmp(stripped, "null"));
+        break;
+      case 5: strip = !strcasecmp(stripped, "float"); break;
+      case 6: strip = !strcasecmp(stripped, "string"); break;
+      case 7:
+        strip = (!strcasecmp(stripped, "nonnull") ||
+                 !strcasecmp(stripped, "nothing"));
+        break;
+      case 8:
+        strip = (!strcasecmp(stripped, "resource") ||
+                 !strcasecmp(stripped, "noreturn") ||
+                 !strcasecmp(stripped, "arraykey"));
+        break;
+      default:
+        break;
     }
-    name += tn->data();
-  } else {
-    const char* str = tn->data();
-    auto len = tn->size();
-    if (len > 3 && tolower(str[0]) == 'h' && tolower(str[1]) == 'h' &&
-        str[2] == '\\') {
-      bool strip = false;
-      const char* stripped = str + 3;
-      switch (len - 3) {
-        case 3:
-          strip = (!strcasecmp(stripped, "int") ||
-                   !strcasecmp(stripped, "num"));
-          break;
-        case 4:
-          strip = (!strcasecmp(stripped, "bool") ||
-                   !strcasecmp(stripped, "this") ||
-                   !strcasecmp(stripped, "null"));
-          break;
-        case 5: strip = !strcasecmp(stripped, "float"); break;
-        case 6: strip = !strcasecmp(stripped, "string"); break;
-        case 7:
-          strip = (!strcasecmp(stripped, "nonnull") ||
-                   !strcasecmp(stripped, "nothing"));
-          break;
-        case 8:
-          strip = (!strcasecmp(stripped, "resource") ||
-                   !strcasecmp(stripped, "noreturn") ||
-                   !strcasecmp(stripped, "arraykey"));
-          break;
-        default:
-          break;
-      }
-      if (strip) {
-        str = stripped;
-      }
+    if (strip) {
+      str = stripped;
     }
-    name += str;
   }
+  name += str;
+
   if (extra && m_flags & Flags::Resolved && m_type != AnnotType::Object) {
     const char* str = nullptr;
     switch (m_type) {
@@ -157,9 +147,7 @@ std::string TypeConstraint::displayName(const Class* context /*= nullptr*/,
       case AnnotType::ArrayLike: str = "AnyArray"; break;
       case AnnotType::Nonnull:  str = "nonnull"; break;
       case AnnotType::Classname: str = "classname"; break;
-      case AnnotType::Self:
       case AnnotType::This:
-      case AnnotType::Parent:
       case AnnotType::Object:
       case AnnotType::Mixed:
       case AnnotType::Callable:
@@ -243,7 +231,7 @@ getNamedTypeWithAutoload(const NamedEntity* ne,
 }
 
 MaybeDataType TypeConstraint::underlyingDataTypeResolved() const {
-  assertx(!isSelf() && !isParent() && !isCallable());
+  assertx(!isCallable());
   assertx(IMPLIES(
     !hasConstraint() || isTypeVar() || isTypeConstant(),
     isMixed()));
@@ -362,8 +350,6 @@ bool TypeConstraint::equivalentForProp(const TypeConstraint& other) const {
         break;
       case MetaType::Nothing:
       case MetaType::NoReturn:
-      case MetaType::Self:
-      case MetaType::Parent:
       case MetaType::Callable:
       case MetaType::Mixed:
         always_assert(false);
@@ -436,7 +422,6 @@ bool TypeConstraint::checkNamedTypeNonObj(tv_rval val) const {
 
   // Common case is that we actually find the alias:
   if (td) {
-    assertx(td->type != AnnotType::Self && td->type != AnnotType::Parent);
     if (td->nullable && val.type() == KindOfNull) return true;
     auto result = annotCompat(val.type(), td->type,
                               td->klass ? td->klass->name() : nullptr);
@@ -519,11 +504,6 @@ bool TypeConstraint::checkTypeAliasImpl(const Class* type) const {
     case AnnotMetaType::ArrayLike:
     case AnnotMetaType::Classname:  // TODO: T83332251
       return false;
-    case AnnotMetaType::Self:
-    case AnnotMetaType::Parent:
-      // These should never happen, because type aliases are not allowed to use
-      // those MetaTypes
-      always_assert(false);
   }
   not_reached();
 }
@@ -562,12 +542,6 @@ bool TypeConstraint::checkImpl(tv_rval val,
       if (isPasses && c && !classHasPersistentRDS(c)) c = nullptr;
     } else {
       switch (metaType()) {
-        case MetaType::Self:
-          assertx(!isProp);
-          if (isAssert) return true;
-          if (isPasses) return false;
-          c = context;
-          break;
         case MetaType::This:
           if (isAssert) return true;
           if (isPasses) return false;
@@ -576,12 +550,6 @@ bool TypeConstraint::checkImpl(tv_rval val,
             return val.val().pobj->getVMClass() == cls;
           }
           return false;
-        case MetaType::Parent:
-          assertx(!isProp);
-          if (isAssert) return true;
-          if (isPasses) return false;
-          if (context) c = context->parent();
-          break;
         case MetaType::Callable:
           assertx(!isProp);
           if (isAssert) return true;
@@ -695,9 +663,7 @@ bool TypeConstraint::alwaysPasses(const StringData* clsName) const {
   }
 
   switch (metaType()) {
-    case MetaType::Self:
     case MetaType::This:
-    case MetaType::Parent:
     case MetaType::Callable:
     case MetaType::Precise:
     case MetaType::Nothing:
@@ -1141,9 +1107,7 @@ MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint& tc) {
     case AnnotMetaType::Nothing:
     case AnnotMetaType::NoReturn:
     case AnnotMetaType::Nonnull:
-    case AnnotMetaType::Self:
     case AnnotMetaType::This:
-    case AnnotMetaType::Parent:
     case AnnotMetaType::Callable:
     case AnnotMetaType::Number:
     case AnnotMetaType::VecOrDict:

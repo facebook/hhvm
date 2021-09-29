@@ -1,6 +1,6 @@
 <?hh
 class X {
-  static function test(self $s) {
+  static function test(this $s) {
     var_dump($s);
   }
 }

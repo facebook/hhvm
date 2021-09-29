@@ -1169,7 +1169,7 @@ const RepoOptions& ExecutionContext::getRepoOptionsForFrame(int frame) const {
 
   const RepoOptions* ret{nullptr};
 
-  walkStack([&] (ActRec* ar, Offset) {
+  walkStack([&] (ActRec* ar, const ActRec*, Offset) {
     if (frame--) {
       return false;
     }
@@ -1235,7 +1235,7 @@ int ExecutionContext::getLine() {
 
 ActRec* ExecutionContext::getFrameAtDepthForDebuggerUnsafe(int frameDepth) const {
   ActRec* ret = nullptr;
-  walkStack([&] (ActRec* fp, Offset) {
+  walkStack([&] (ActRec* fp, const ActRec*, Offset) {
     if (frameDepth == 0) {
       if (fp && !fp->localsDecRefd()) {
         ret = fp;

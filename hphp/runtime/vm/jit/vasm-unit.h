@@ -152,11 +152,13 @@ struct Vframe {
   Vframe(
     const Func* func,
     int32_t callOff,
+    int32_t arOff,
     int parent,
     int cost,
     uint64_t entry_weight
   ) : func(func)
     , callOff(callOff)
+    , arOff(arOff)
     , parent(parent)
     , entry_weight(entry_weight)
     , inclusive_cost(cost)
@@ -172,6 +174,7 @@ struct Vframe {
 
   LowPtr<const Func> func;
   int32_t callOff{-1};
+  int32_t arOff{-1};
   int parent;
 
   uint64_t entry_weight;

@@ -305,6 +305,7 @@ constexpr IFrameID kInvalidIFrameID = std::numeric_limits<IFrameID>::max();
 struct IFrame {
   const Func* func; // callee (m_func)
   int32_t callOff;  // caller offset (callOffset())
+  int32_t arOff;
   IFrameID parent;  // parent frame (m_sfp)
 };
 
@@ -312,11 +313,13 @@ struct IStack {
   IFrameID frame; // leaf frame in this stack
   uint32_t nframes;
   uint32_t callOff;
+  int32_t sbOff;
 
   template<class SerDe> void serde(SerDe& sd) {
     sd(frame)
       (nframes)
       (callOff)
+      (sbOff)
       ;
   }
 };
@@ -328,6 +331,7 @@ struct IStack {
  */
 struct BTFrame {
   ActRec* fp{nullptr};
+  ActRec* realFp{nullptr};
   Offset pc{kInvalidOffset};
 
   operator bool() const { return fp != nullptr; }

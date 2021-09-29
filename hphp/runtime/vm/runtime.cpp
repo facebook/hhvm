@@ -358,7 +358,7 @@ void raiseCoeffectsCallViolation(const Func* callee,
       return String{makeStaticString("[vm-entry]")};
     }
     String result;
-    walkStack([&] (const ActRec* fp, Offset) {
+    walkStack([&] (const ActRec* fp, const ActRec*, Offset) {
       assertx(fp);
       auto const func = fp->func();
       assertx(func);

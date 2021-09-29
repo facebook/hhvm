@@ -95,7 +95,7 @@ void walkStackFrom(
   if (skipTop) frm = getPrevActRec(ctx, frm, visitedWHs);
 
   for (; frm; frm = getPrevActRec(ctx, frm, visitedWHs)) {
-    if (ArrayData::call_helper(func, frm.fp, frm.pc)) return;
+    if (ArrayData::call_helper(func, frm.fp, frm.realFp, frm.pc)) return;
   }
 }
 
@@ -122,6 +122,19 @@ void walkStack(L func, bool skipTop) {
   walkStack(func, nullptr, skipTop);
 }
 
+template<typename F>
+using result_of_t_3 = std::result_of_t<F(const ActRec*, const ActRec*, Offset)>;
+
+template<typename F>
+result_of_t_3<F> fromLeafUnpublished(F f, result_of_t_3<F> def) {
+  auto ret = def;
+  walkStack([&] (const ActRec* fp, const ActRec* realFp, Offset off) {
+    ret = f(fp, realFp, off);
+    return true;
+  }, nullptr, false);
+  return ret;
+}
+
 namespace backtrace_detail {
 
 template<typename F, typename Pred>
@@ -130,7 +143,7 @@ from_ret_t<F> fromLeafImpl(F f, Pred pred,
                            c_WaitableWaitHandle* wh,
                            bool skipTop) {
   auto ret = def;
-  walkStack([&] (const ActRec* fp, Offset off) {
+  walkStack([&] (const ActRec* fp, const ActRec*, Offset off) {
     if (!pred(fp)) return false;
     ret = f(fp, off);
     return true;

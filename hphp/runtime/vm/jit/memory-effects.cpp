@@ -283,6 +283,15 @@ bool any_frame_has_metadata(SSATmp* fp) {
   return false;
 }
 
+AliasClass coeffect_local(const IRInstruction& inst) {
+  auto const fp = inst.marker().fp();
+  if (!fp) return ALocalAny;
+  auto const func = func_from_fp(fp);
+  auto const coeff = func->lookupVarId(s_coeffects_var.get());
+  return coeff != kInvalidId ? ALocal  { fp, (uint32_t)coeff } : AEmpty;
+}
+
+
 AliasClass backtrace_locals(const IRInstruction& inst) {
   auto eachFunc = [&] (auto fn) {
     auto ac = AEmpty;
@@ -293,19 +302,17 @@ AliasClass backtrace_locals(const IRInstruction& inst) {
     return ac;
   };
 
-  auto const add86meta = [&] (const Func* func, SSATmp* fp) -> AliasClass {
-    // The 86metadata variable can also exist in a VarEnv, but accessing that is
-    // considered a heap effect, so we can ignore it.
-    auto const local = func->lookupVarId(s_86metadata.get());
-    if (local == kInvalidId) return AEmpty;
-    return ALocal { fp, (uint32_t)local };
-  };
+  auto const addInspectable =
+    [&] (const Func* func, SSATmp* fp) -> AliasClass {
+      auto const meta = func->lookupVarId(s_86metadata.get());
+      return meta != kInvalidId ? ALocal { fp, (uint32_t)meta } : AEmpty;;
+    };
 
   // Either there's no func or no frame-pointer. Either way, be conservative and
   // assume anything can be read. This can happen in test code, for instance.
   if (!inst.marker().fp()) return ALocalAny;
 
-  if (!RuntimeOption::EnableArgsInBacktraces) return eachFunc(add86meta);
+  if (!RuntimeOption::EnableArgsInBacktraces) return eachFunc(addInspectable);
 
   return eachFunc([&] (const Func* func, SSATmp* fp) {
     auto ac = AEmpty;
@@ -323,10 +330,10 @@ AliasClass backtrace_locals(const IRInstruction& inst) {
       ac |= APropAny;
     }
 
-    if (!numParams) return add86meta(func, fp) | ac;
+    if (!numParams) return addInspectable(func, fp) | ac;
 
     AliasIdSet params{ AliasIdSet::IdRange{0, numParams} };
-    return add86meta(func, fp) | ac | ALocal { fp, params };
+    return addInspectable(func, fp) | ac | ALocal { fp, params };
   });
 }
 
@@ -397,27 +404,28 @@ GeneralEffects may_reenter(const IRInstruction& inst, GeneralEffects x) {
     x.moves,
     new_kills,
     x.inout,
-    backtrace_locals(inst)
+    backtrace_locals(inst),
+    coeffect_local(inst)
   };
 }
 
 //////////////////////////////////////////////////////////////////////
 
 GeneralEffects may_load_store(AliasClass loads, AliasClass stores) {
-  return GeneralEffects { loads, stores, AEmpty, AEmpty, AEmpty, AEmpty };
+  return GeneralEffects { loads, stores, AEmpty, AEmpty, AEmpty, AEmpty, AEmpty };
 }
 
 GeneralEffects may_load_store_kill(AliasClass loads,
                                    AliasClass stores,
                                    AliasClass kill) {
-  return GeneralEffects { loads, stores, AEmpty, kill, AEmpty, AEmpty };
+  return GeneralEffects { loads, stores, AEmpty, kill, AEmpty, AEmpty, AEmpty };
 }
 
 GeneralEffects may_load_store_move(AliasClass loads,
                                    AliasClass stores,
                                    AliasClass move) {
   assertx(move <= loads);
-  return GeneralEffects { loads, stores, move, AEmpty, AEmpty, AEmpty };
+  return GeneralEffects { loads, stores, move, AEmpty, AEmpty, AEmpty, AEmpty };
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -813,7 +821,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
         AEmpty,
         stack_below(extra->spOffset) | AMIStateAny,
         inout,
-        AEmpty
+        AEmpty, AEmpty
       };
     }
 
@@ -2044,19 +2052,19 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return GeneralEffects {
       AEmpty, AEmpty, AEmpty,
       AStack::at(inst.extra<DbgTrashStk>()->offset),
-      AEmpty, AEmpty
+      AEmpty, AEmpty, AEmpty
     };
   case DbgTrashFrame:
     return GeneralEffects {
       AEmpty, AEmpty, AEmpty,
       actrec(inst.src(0), inst.extra<DbgTrashFrame>()->offset),
-      AEmpty, AEmpty
+      AEmpty, AEmpty, AEmpty
     };
   case DbgTrashMem:
     return GeneralEffects {
       AEmpty, AEmpty, AEmpty,
       pointee(inst.src(0)),
-      AEmpty, AEmpty
+      AEmpty, AEmpty, AEmpty
     };
 
   //////////////////////////////////////////////////////////////////////
@@ -2092,6 +2100,8 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, MemEffects me) {
       check(x.moves);
       check(x.kills);
       check(x.inout);
+      check(x.backtrace);
+      check(x.coeffect);
 
       // Locations may-moved always should also count as may-loads.
       always_assert(x.moves <= x.loads);
@@ -2159,7 +2169,7 @@ MemEffects memory_effects(const IRInstruction& inst) {
             return GeneralEffects {
               x.loads | AVMRegAny | AVMRegState,
               x.stores | AVMRegAny,
-              x.moves, x.kills, x.inout, x.backtrace
+              x.moves, x.kills, x.inout, x.backtrace, x.coeffect
             };
           },
           [&] (CallEffects x)      { return fail(); },
@@ -2229,7 +2239,8 @@ MemEffects canonicalize(MemEffects me) {
         canonicalize(x.moves),
         canonicalize(x.kills),
         canonicalize(x.inout),
-        canonicalize(x.backtrace)
+        canonicalize(x.backtrace),
+        canonicalize(x.coeffect)
       };
     },
     [&] (PureLoad x) -> R {
@@ -2279,13 +2290,14 @@ std::string show(MemEffects effects) {
   return match<std::string>(
     effects,
     [&] (GeneralEffects x) {
-      return sformat("mlsmkib({} ; {} ; {} ; {} ; {} ; {})",
+      return sformat("mlsmkibc({} ; {} ; {} ; {} ; {} ; {}; {})",
         show(x.loads),
         show(x.stores),
         show(x.moves),
         show(x.kills),
         show(x.inout),
-        show(x.backtrace)
+        show(x.backtrace),
+        show(x.coeffect)
       );
     },
     [&] (ExitEffects x) {
@@ -2321,7 +2333,7 @@ std::string show(MemEffects effects) {
 
 GeneralEffects general_effects_for_vmreg_liveness(
     GeneralEffects l, KnownRegState liveness) {
-  auto ret = GeneralEffects { l.loads, l.stores, l.moves, l.kills, l.inout, l.backtrace };
+  auto ret = GeneralEffects { l.loads, l.stores, l.moves, l.kills, l.inout, l.backtrace, l.coeffect };
 
   if (liveness == KnownRegState::Dead) {
     ret.loads = l.loads.exclude_vm_reg().value_or(AEmpty);

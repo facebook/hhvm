@@ -88,7 +88,7 @@ ArrayData* debug_backtrace_jit(int64_t options) {
 Array HHVM_FUNCTION(hphp_debug_caller_info) {
   Array ret = empty_dict_array();
   bool skipped = false;
-  walkStack([&] (const ActRec* fp, Offset pc) {
+  walkStack([&] (const ActRec* fp, const ActRec*, Offset pc) {
     if (!skipped && fp->func()->isSkipFrame()) return false;
     if (!skipped) {
       skipped = true;

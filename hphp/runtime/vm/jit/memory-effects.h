@@ -85,7 +85,8 @@ struct GeneralEffects   { AliasClass loads;
                           AliasClass moves;
                           AliasClass kills;
                           AliasClass inout;
-                          AliasClass backtrace; };
+                          AliasClass backtrace;
+                          AliasClass coeffect; };
 
 /*
  * The effect of definitely loading from an abstract location, without

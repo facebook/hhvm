@@ -1388,6 +1388,7 @@ bool irrelevant_inst(const IRInstruction& inst) {
 
       if (g.loads <= AEmpty &&
           g.backtrace <= AEmpty &&
+          g.coeffect <= AEmpty &&
           g.stores <= AEmpty &&
           g.inout <= AEmpty) {
         return true;

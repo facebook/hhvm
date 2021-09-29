@@ -40,7 +40,7 @@ namespace {
 
 c_ResumableWaitHandle* GetResumedWaitHandle() {
   c_ResumableWaitHandle* ret = nullptr;
-  walkStack([&] (const ActRec* fp, Offset) {
+  walkStack([&] (const ActRec* fp, const ActRec*, Offset) {
     if (isResumed(fp) && fp->func()->isAsync()) {
       if (fp->func()->isGenerator()) {
         // async generator

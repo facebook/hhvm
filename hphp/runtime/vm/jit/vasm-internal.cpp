@@ -273,7 +273,7 @@ void computeFrames(Vunit& unit) {
   auto const rpo = sortBlocks(unit);
 
   unit.frames.emplace_back(
-    topFunc, 0, Vframe::Top, 0, unit.blocks[rpo[0]].weight
+    topFunc, 0, 0, Vframe::Top, 0, unit.blocks[rpo[0]].weight
   );
   unit.blocks[rpo[0]].frame = 0;
   unit.blocks[rpo[0]].pending_frames = 0;
@@ -301,6 +301,7 @@ void computeFrames(Vunit& unit) {
           unit.frames.emplace_back(
             inst.inlinestart_.func,
             origin->marker().bcOff(),
+            origin->marker().bcSPOff().offset,
             frame,
             inst.inlinestart_.cost,
             block.weight

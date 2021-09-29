@@ -137,17 +137,19 @@ BTFrame getARFromWHImpl(
 
     if (currentWaitHandle->getKind() == c_Awaitable::Kind::AsyncFunction) {
       auto const resumable = currentWaitHandle->asAsyncFunction()->resumable();
-      return BTFrame { resumable->actRec(), resumable->suspendOffset() };
+      auto const ar = resumable->actRec();
+      return BTFrame { ar, ar, resumable->suspendOffset() };
     }
     if (currentWaitHandle->getKind() == c_Awaitable::Kind::AsyncGenerator) {
       auto const resumable = currentWaitHandle->asAsyncGenerator()->resumable();
-      return BTFrame { resumable->actRec(), resumable->suspendOffset() };
+      auto const ar = resumable->actRec();
+      return BTFrame { ar, ar, resumable->suspendOffset() };
     }
     currentWaitHandle = getParentWH(currentWaitHandle, contextIdx, visitedWHs);
   }
   auto const fp = AsioSession::Get()->getContext(contextIdx)->getSavedFP();
   assertx(fp != nullptr && fp->func() != nullptr);
-  return BTFrame { fp, 0 };
+  return BTFrame { fp, fp, 0 };
 }
 
 }
@@ -189,7 +191,12 @@ BTFrame initBTContextAt(BTContext& ctx, jit::CTCA ip, BTFrame frm) {
 
     ctx.stashedFrm = frm;
 
-    return BTFrame { prevFP, safe_cast<int>(stk->callOff) };
+    auto const ar = frm.fp;
+    auto const stackBase = Stack::anyFrameStackBase(ar);
+    auto const sp = stackBase - stk->sbOff;
+    FTRACE_MOD(Trace::fixup, 1, "BaseAR: {}, offset: {}, addr: {}\n", ar, stk->sbOff, sp);
+
+    return BTFrame { prevFP, (ActRec*)sp, safe_cast<int>(stk->callOff) };
   }
 
   // If we don't have an inlined frame, it's always safe to use pcOff() if
@@ -217,7 +224,7 @@ BTFrame getPrevActRec(
       auto const sk = getAsyncFrame(wh->tailFrame(ctx.afwhTailFrameIndex++));
       auto const prevFP = fp->m_sfp;
       prevFP->setFunc(sk.func());
-      return BTFrame{prevFP, sk.offset()};
+      return BTFrame{prevFP, nullptr, sk.offset()};
     }
 
     // We could use stashedFrm.fp->savedRip as the return TCA here, but for
@@ -240,6 +247,8 @@ BTFrame getPrevActRec(
 
     auto prev = BTFrame{};
     prev.fp = fp->m_sfp;
+    // TODO(mcolavita): This should generate the new realFp using frame info.
+    prev.realFp = nullptr;
     prev.fp->setFunc(ifr.func);
     prev.fp->m_callOffAndFlags = ActRec::encodeCallOffsetAndFlags(
       ifr.callOff,
@@ -312,7 +321,7 @@ BTFrame getPrevActRec(
       prevFP->setFunc(sk.func());
       prevFP->m_callOffAndFlags =
         ActRec::encodeCallOffsetAndFlags(0, 1 << ActRec::LocalsDecRefd);
-      return BTFrame{prevFP, sk.offset()};
+      return BTFrame{prevFP, nullptr, sk.offset()};
     }
 
     auto const contextIdx = wh->getContextIdx();
@@ -413,6 +422,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
     BTContext ctxCopy;
     auto curFrm = BTFrame {
       const_cast<ActRec*>(ctxCopy.clone(ctx, frm.fp)),
+      frm.realFp,
       frm.pc
     };
     while (curFrm && curFrm.fp->func()->isBuiltin()) {
@@ -530,6 +540,8 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
       frame.set(s_args_idx, s_args, args);
     }
 
+    // TODO(mcolavita): This should determine when the real frame is available
+    // to extract metadata.
     if (btArgs.m_withMetadata && !fp->localsDecRefd()) {
       auto local = fp->func()->lookupVarId(s_86metadata.get());
       if (local != kInvalidId) {
@@ -552,7 +564,7 @@ Array createCrashBacktrace(BTFrame frame, jit::CTCA addr) {
   folly::small_vector<c_WaitableWaitHandle*, 64> visitedWHs;
 
   CompactTraceData trace;
-  walkStackFrom([&] (ActRec* fp, Offset prevPc) {
+  walkStackFrom([&] (ActRec* fp, const ActRec*, Offset prevPc) {
     if (fp->func()->isNoInjection()) return;
     trace.insert(fp, prevPc);
   }, frame, addr, false, visitedWHs);
@@ -600,7 +612,7 @@ int64_t createBacktraceHash(bool consider_metadata) {
   uint64_t hash = 0x9e3779b9;
   Unit* prev_unit = nullptr;
 
-  walkStack([&] (ActRec* fp, Offset) {
+  walkStack([&] (ActRec* fp, const ActRec*, Offset) {
     // Do not capture frame for HPHP only functions.
     if (fp->func()->isNoInjection()) return;
 
@@ -624,6 +636,7 @@ int64_t createBacktraceHash(bool consider_metadata) {
     auto funchash = curFunc->fullName()->hash();
     hash ^= funchash + 0x9e3779b9 + (hash << 6) + (hash >> 2);
 
+    // TODO(mcolavita): proper conditions
     if (consider_metadata && !fp->localsDecRefd()) {
       tv_rval meta;
       auto local = fp->func()->lookupVarId(s_86metadata.get());
@@ -644,7 +657,7 @@ int64_t createBacktraceHash(bool consider_metadata) {
 }
 
 void fillCompactBacktrace(CompactTraceData* trace, bool skipTop) {
-  walkStack([trace] (ActRec* fp, Offset prevPc) {
+  walkStack([trace] (ActRec* fp, const ActRec*, Offset prevPc) {
     // Do not capture frame for HPHP only functions.
     if (fp->func()->isNoInjection()) return;
     trace->insert(fp, prevPc);
@@ -662,7 +675,8 @@ std::pair<const Func*, Offset> getCurrentFuncAndOffset() {
   folly::small_vector<c_WaitableWaitHandle*, 64> visitedWHs;
   BTContext ctx;
 
-  auto frm = BTFrame { vmfp() };
+  auto const fp = vmfp();
+  auto frm = BTFrame { fp, fp };
   frm = initBTContextAt(ctx, vmJitReturnAddr(), frm);
 
   // Builtins don't have a file and line number, so find the first user frame

@@ -80,6 +80,9 @@ let experimental_abstract_type_const_with_default =
 let experimental_case_sensitive_inheritance =
   GlobalOptions.tco_experimental_case_sensitive_inheritance
 
+let experimental_supportdynamic_type_hint =
+  GlobalOptions.tco_experimental_supportdynamic_type_hint
+
 let experimental_all = GlobalOptions.tco_experimental_all
 
 let migration_flags_all = GlobalOptions.tco_migration_flags_all

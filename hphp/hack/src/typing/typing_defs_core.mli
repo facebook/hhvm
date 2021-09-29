@@ -249,6 +249,7 @@ and _ ty_ =
    * See tests in typecheck/dynamic/ for more examples.
    *)
   | Tdynamic
+  | Tsupportdynamic
   (* Nullable, called "option" in the ML parlance. *)
   | Toption : 'phase ty -> 'phase ty_
   (* All the primitive types: int, string, void, etc. *)

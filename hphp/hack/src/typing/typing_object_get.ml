@@ -239,6 +239,7 @@ let rec this_appears_covariantly ~contra env ty =
   | Terr
   | Tnonnull
   | Tdynamic
+  | Tsupportdynamic
   | Tprim _
   | Tvar _
   | Tgeneric _ ->

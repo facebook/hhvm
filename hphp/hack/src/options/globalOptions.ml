@@ -187,6 +187,8 @@ let tco_experimental_infer_flows = "ifc_infer_flows"
 *)
 let tco_experimental_case_sensitive_inheritance = "case_sensitive_inheritance"
 
+let tco_experimental_supportdynamic_type_hint = "supportdynamic_type_hint"
+
 let tco_experimental_all =
   SSet.empty
   |> List.fold_right
@@ -198,6 +200,7 @@ let tco_experimental_all =
          tco_experimental_abstract_type_const_with_default;
          tco_experimental_infer_flows;
          tco_experimental_case_sensitive_inheritance;
+         tco_experimental_supportdynamic_type_hint;
        ]
 
 let tco_migration_flags_all =

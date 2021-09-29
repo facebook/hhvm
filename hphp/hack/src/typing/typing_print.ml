@@ -332,6 +332,7 @@ module Full = struct
     | Tthis -> text SN.Typehints.this
     | Tmixed -> text "mixed"
     | Tdynamic -> text "dynamic"
+    | Tsupportdynamic -> text "supportdynamic"
     | Tnonnull -> text "nonnull"
     | Tdarray (x, y) -> tdarray k x y
     | Tvarray x -> tvarray k x
@@ -403,6 +404,7 @@ module Full = struct
     | Tany _ -> text "_"
     | Terr -> terr ()
     | Tdynamic -> text "dynamic"
+    | Tsupportdynamic -> text "supportdynamic"
     | Tnonnull -> text "nonnull"
     | Tvarray_or_darray (x, y) -> tvarray_or_darray k x y
     | Tvec_or_dict (x, y) -> list "vec_or_dict<" k [x; y] ">"
@@ -787,6 +789,7 @@ module ErrorString = struct
     | Tany _ -> "an untyped value"
     | Terr -> "a type error"
     | Tdynamic -> "a dynamic value"
+    | Tsupportdynamic -> "a supportdynamic value"
     | Tunion l when ignore_dynamic ->
       union env (List.filter l ~f:(fun x -> not (is_dynamic x)))
     | Tunion l -> union env l
@@ -961,6 +964,7 @@ module Json = struct
       obj @@ kind p "any"
     | (p, Tnonnull) -> obj @@ kind p "nonnull"
     | (p, Tdynamic) -> obj @@ kind p "dynamic"
+    | (p, Tsupportdynamic) -> obj @@ kind p "supportdynamic"
     | (p, Tgeneric (s, tyargs)) ->
       obj @@ kind p "generic" @ is_array true @ name s @ args tyargs
     | (p, Tunapplied_alias s) -> obj @@ kind p "unapplied_alias" @ name s

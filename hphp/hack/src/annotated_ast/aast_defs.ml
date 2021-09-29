@@ -129,6 +129,7 @@ and hint_ =
   | Hprim of tprim
   | Hthis
   | Hdynamic
+  | Hsupportdynamic
   | Hnothing
   | Hunion of hint list
   | Hintersection of hint list

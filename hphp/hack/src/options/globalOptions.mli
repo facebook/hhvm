@@ -556,6 +556,8 @@ val tco_experimental_infer_flows : string
 
 val tco_experimental_case_sensitive_inheritance : string
 
+val tco_experimental_supportdynamic_type_hint : string
+
 val tco_experimental_all : SSet.t
 
 val tco_migration_flags_all : SSet.t

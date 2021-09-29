@@ -264,6 +264,7 @@ and _ ty_ =
   | Terr
   | Tnonnull
   | Tdynamic
+  | Tsupportdynamic
       (** A dynamic type is a special type which sometimes behaves as if it were a
        * top type; roughly speaking, where a specific value of a particular type is
        * expected and that type is dynamic, anything can be given. We call this
@@ -541,6 +542,7 @@ module Pp = struct
     | Tthis -> Format.pp_print_string fmt "Tthis"
     | Tmixed -> Format.pp_print_string fmt "Tmixed"
     | Tdynamic -> Format.pp_print_string fmt "Tdynamic"
+    | Tsupportdynamic -> Format.pp_print_string fmt "Tsupportdynamic"
     | Tnonnull -> Format.pp_print_string fmt "Tnonnull"
     | Tapply (a0, a1) ->
       Format.fprintf fmt "(@[<2>Tapply (@,";

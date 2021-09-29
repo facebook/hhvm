@@ -161,6 +161,7 @@ and hint_ ~via_label ~in_signature env p h_ =
   | Haccess _
   | Habstr _
   | Hdynamic
+  | Hsupportdynamic
   | Hnothing ->
     ()
   | Hoption (_, Hprim Tnull) -> Errors.option_null p

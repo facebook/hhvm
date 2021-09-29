@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4e1dd5a2e08cdb35095ad99ad0edee59>>
+// @generated SignedSource<<874a53efcc3ce23010a2c0b0ae9f60c7>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -635,6 +635,7 @@ pub enum Ty_<'a> {
     Tany(tany_sentinel::TanySentinel),
     Terr,
     Tnonnull,
+    Tdynamic,
     /// A dynamic type is a special type which sometimes behaves as if it were a
     /// top type; roughly speaking, where a specific value of a particular type is
     /// expected and that type is dynamic, anything can be given. We call this
@@ -644,7 +645,7 @@ pub enum Ty_<'a> {
     ///
     /// it captures dynamicism within function scope.
     /// See tests in typecheck/dynamic/ for more examples.
-    Tdynamic,
+    Tsupportdynamic,
     /// Nullable, called "option" in the ML parlance.
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Toption(&'a Ty<'a>),

@@ -132,6 +132,7 @@ impl std::fmt::Debug for Ty_<'_> {
             Terr => write!(f, "Terr"),
             Tnonnull => write!(f, "Tnonnull"),
             Tdynamic => write!(f, "Tdynamic"),
+            Tsupportdynamic => write!(f, "Tsupportdynamic"),
             TunappliedAlias(name) => write!(f, "TunappliedAlias({:?})", name),
             Toption(ty) => f.debug_tuple("Toption").field(ty).finish(),
             Tprim(tprim) => write!(f, "Tprim({:?})", tprim),

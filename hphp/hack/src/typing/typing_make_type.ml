@@ -102,6 +102,8 @@ let nonnull r = mk (r, Tnonnull)
 
 let dynamic r = mk (r, Tdynamic)
 
+let supportdynamic r = mk (r, Tsupportdynamic)
+
 let like r ty = mk (r, Tlike ty)
 
 let mixed r = mk (r, Toption (nonnull r))

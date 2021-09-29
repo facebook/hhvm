@@ -302,6 +302,7 @@ and get_typarams ~tracked tenv (ty : decl_ty) =
       empty
   | Tnonnull
   | Tdynamic
+  | Tsupportdynamic
   | Tprim _
   | Tany _
   | Terr
@@ -564,6 +565,7 @@ let rec hint : Env.t -> variance -> Aast_defs.hint -> unit =
   | Hmixed
   | Hnonnull
   | Hdynamic
+  | Hsupportdynamic
   | Hnothing
   | Hvar _
   | Hfun_context _

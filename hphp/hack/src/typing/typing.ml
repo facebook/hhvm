@@ -6977,9 +6977,9 @@ and class_get_inner
   | (_, Tunapplied_alias _) ->
     Typing_defs.error_Tunapplied_alias_in_illegal_context ()
   | ( _,
-      ( Tvar _ | Tnonnull | Tvarray _ | Tdarray _ | Tvarray_or_darray _
-      | Tvec_or_dict _ | Toption _ | Tprim _ | Tfun _ | Ttuple _ | Tshape _
-      | Taccess _ | Tneg _ ) ) ->
+      ( Tvar _ | Tnonnull | Tsupportdynamic | Tvarray _ | Tdarray _
+      | Tvarray_or_darray _ | Tvec_or_dict _ | Toption _ | Tprim _ | Tfun _
+      | Ttuple _ | Tshape _ | Taccess _ | Tneg _ ) ) ->
     Errors.non_class_member
       ~is_method
       mid
@@ -7271,9 +7271,10 @@ and class_expr
       | (_, Tunapplied_alias _) ->
         Typing_defs.error_Tunapplied_alias_in_illegal_context ()
       | ( _,
-          ( Tany _ | Tnonnull | Tvarray _ | Tdarray _ | Tvarray_or_darray _
-          | Tvec_or_dict _ | Toption _ | Tprim _ | Tfun _ | Ttuple _
-          | Tnewtype _ | Tdependent _ | Tshape _ | Taccess _ | Tneg _ ) ) ->
+          ( Tany _ | Tnonnull | Tsupportdynamic | Tvarray _ | Tdarray _
+          | Tvarray_or_darray _ | Tvec_or_dict _ | Toption _ | Tprim _ | Tfun _
+          | Ttuple _ | Tnewtype _ | Tdependent _ | Tshape _ | Taccess _ | Tneg _
+            ) ) ->
         Errors.expected_class
           ~suffix:(", but got " ^ Typing_print.error env base_ty)
           p;

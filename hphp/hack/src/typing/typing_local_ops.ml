@@ -122,6 +122,7 @@ let rec is_byval_collection_or_string_or_any_type env ty =
       false
     | Terr
     | Tnonnull
+    | Tsupportdynamic
     | Tprim _
     | Tfun _
     | Tvar _

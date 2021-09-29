@@ -443,6 +443,7 @@ let is_union_or_inter_type (ty : locl_ty) =
   | Tnonnull
   | Tneg _
   | Tdynamic
+  | Tsupportdynamic
   | Tany _
   | Tprim _
   | Tfun _
@@ -578,6 +579,7 @@ let ty_con_ordinal_ : type a. a ty_ -> int = function
   | Tvarray_or_darray _ -> 22
   | Taccess _ -> 24
   | Tvec_or_dict _ -> 25
+  | Tsupportdynamic -> 26
   (* only locl constructors *)
   | Tunapplied_alias _ -> 200
   | Tnewtype _ -> 201
@@ -694,12 +696,13 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
     | (Tneg neg1, Tneg neg2) -> compare_neg_type neg1 neg2
     | (Tnonnull, Tnonnull) -> 0
     | (Tdynamic, Tdynamic) -> 0
+    | (Tsupportdynamic, Tsupportdynamic) -> 0
     | (Terr, Terr) -> 0
     | ( ( Tprim _ | Toption _ | Tvarray _ | Tdarray _ | Tvarray_or_darray _
         | Tvec_or_dict _ | Tfun _ | Tintersection _ | Tunion _ | Ttuple _
         | Tgeneric _ | Tnewtype _ | Tdependent _ | Tclass _ | Tshape _ | Tvar _
-        | Tunapplied_alias _ | Tnonnull | Tdynamic | Terr | Taccess _ | Tany _
-        | Tneg _ ),
+        | Tunapplied_alias _ | Tnonnull | Tdynamic | Tsupportdynamic | Terr
+        | Taccess _ | Tany _ | Tneg _ ),
         _ ) ->
       ty_con_ordinal_ ty_1 - ty_con_ordinal_ ty_2
   and shape_field_type_compare :

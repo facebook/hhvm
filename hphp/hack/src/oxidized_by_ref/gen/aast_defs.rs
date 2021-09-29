@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<da98e5a3c3d04c937cba831b61b10584>>
+// @generated SignedSource<<ddc39762eb352641c45719894373ecf9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -269,6 +269,7 @@ pub enum Hint_<'a> {
     Hprim(&'a Tprim),
     Hthis,
     Hdynamic,
+    Hsupportdynamic,
     Hnothing,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Hunion(&'a [&'a Hint<'a>]),

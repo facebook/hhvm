@@ -1189,9 +1189,10 @@ and simplify_subtype_i
           | ((_, Tunapplied_alias _), _) ->
             Typing_defs.error_Tunapplied_alias_in_illegal_context ()
           | ( ( _,
-                ( Tdynamic | Tprim _ | Tnonnull | Tfun _ | Ttuple _ | Tshape _
-                | Tclass _ | Tvarray _ | Tdarray _ | Tvarray_or_darray _
-                | Tvec_or_dict _ | Tany _ | Terr | Taccess _ ) ),
+                ( Tdynamic | Tsupportdynamic | Tprim _ | Tnonnull | Tfun _
+                | Ttuple _ | Tshape _ | Tclass _ | Tvarray _ | Tdarray _
+                | Tvarray_or_darray _ | Tvec_or_dict _ | Tany _ | Terr
+                | Taccess _ ) ),
               _ ) ->
             simplify_subtype ~subtype_env ~this_ty lty_sub arg_ty_super env
           (* This is treating the option as a union, and using the sound, but incomplete,
@@ -1322,6 +1323,7 @@ and simplify_subtype_i
         (* negations always contain null *)
         | (_, Tneg _) -> invalid_env env
         | _ -> default_subtype env))
+    | (_, Tsupportdynamic) -> invalid_env env (* not implemented *)
     | (r_dynamic, Tdynamic)
       when TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
            && (coercing_to_dynamic subtype_env
@@ -1332,6 +1334,7 @@ and simplify_subtype_i
         default_subtype env
       | LoclType lty_sub ->
         (match deref lty_sub with
+        | (_, Tsupportdynamic) -> invalid_env env (* not implemented *)
         | (_, Tdynamic)
         | (_, Tany _)
         | (_, Terr)
@@ -3210,8 +3213,12 @@ let is_type_disjoint env ty1 ty2 =
     let (env, ty1) = Env.expand_type env ty1 in
     let (env, ty2) = Env.expand_type env ty2 in
     match (get_node ty1, get_node ty2) with
-    | (_, (Tany _ | Terr | Tdynamic | Taccess _ | Tunapplied_alias _))
-    | ((Tany _ | Terr | Tdynamic | Taccess _ | Tunapplied_alias _), _) ->
+    | ( _,
+        ( Tany _ | Terr | Tdynamic | Tsupportdynamic | Taccess _
+        | Tunapplied_alias _ ) )
+    | ( ( Tany _ | Terr | Tdynamic | Tsupportdynamic | Taccess _
+        | Tunapplied_alias _ ),
+        _ ) ->
       false
     | (Tshape _, Tshape _) ->
       (* This could be more precise, e.g., if we have two closed shapes with different fields.

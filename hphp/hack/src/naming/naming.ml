@@ -455,6 +455,7 @@ and hint_
     | N.Hprim _
     | N.Hmixed
     | N.Hnonnull
+    | N.Hsupportdynamic
     | N.Hdynamic
     | N.Hnothing ->
       if not (List.is_empty hl) then Errors.unexpected_type_arguments p
@@ -537,6 +538,7 @@ and hint_
   | Aast.Hprim _
   | Aast.Hthis
   | Aast.Hdynamic
+  | Aast.Hsupportdynamic
   | Aast.Hnothing ->
     Errors.internal_error Pos.none "Unexpected hint not present on legacy AST";
     N.Herr
@@ -615,6 +617,15 @@ and hint_id
       | x when String.equal x SN.Typehints.mixed -> N.Hmixed
       | x when String.equal x SN.Typehints.nonnull -> N.Hnonnull
       | x when String.equal x SN.Typehints.dynamic -> N.Hdynamic
+      | x when String.equal x SN.Typehints.supportdynamic ->
+        if
+          not
+            (TypecheckerOptions.experimental_feature_enabled
+               (Provider_context.get_tcopt (fst env).ctx)
+               TypecheckerOptions.experimental_supportdynamic_type_hint)
+        then
+          Errors.experimental_feature p "supportdynamic type hint";
+        N.Hsupportdynamic
       | x when String.equal x SN.Typehints.nothing -> N.Hnothing
       | x when String.equal x SN.Typehints.this && not forbid_this ->
         if not (List.is_empty hl) then Errors.this_no_argument p;

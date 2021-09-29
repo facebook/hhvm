@@ -799,11 +799,11 @@ fn make_fn_param(pos: Pos, lid: &LocalId, is_variadic: bool, is_inout: bool) -> 
         annotation: (),
         type_hint: TypeHint((), None),
         is_variadic,
-        pos,
+        pos: pos.clone(),
         name: local_id::get_name(lid).clone(),
         expr: None,
         callconv: if is_inout {
-            ParamKind::Pinout
+            ParamKind::Pinout(pos)
         } else {
             ParamKind::Pnormal
         },

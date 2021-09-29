@@ -22,7 +22,7 @@ use oxidized::{
     aast_defs::{Hint, Hint_},
     aast_visitor::{self, AstParams, Node},
     ast as a,
-    ast_defs::{Id, ParamKind, ReadonlyKind},
+    ast_defs::{Id, ReadonlyKind},
     pos::Pos,
 };
 
@@ -177,10 +177,6 @@ fn from_ast<'a, 'arena, 'decl>(
     } else {
         None
     };
-    let is_inout = match param.callconv {
-        ParamKind::Pinout => true,
-        ParamKind::Pnormal => false,
-    };
     let is_readonly = match param.readonly {
         Some(ReadonlyKind::Readonly) => true,
         _ => false,
@@ -190,7 +186,7 @@ fn from_ast<'a, 'arena, 'decl>(
         HhasParam {
             name: Str::new_str(alloc, &param.name),
             is_variadic: param.is_variadic,
-            is_inout,
+            is_inout: param.callconv.is_pinout(),
             is_readonly,
             user_attributes: Slice::new(alloc.alloc_slice_fill_iter(attrs.into_iter())).into(),
             type_info: Maybe::from(type_info),

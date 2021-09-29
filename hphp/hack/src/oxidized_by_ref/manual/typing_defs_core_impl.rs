@@ -205,10 +205,10 @@ impl<'a> InternalType<'a> {
     }
 }
 
-impl From<ParamKind> for ParamMode {
+impl<'a> From<ParamKind<'a>> for ParamMode {
     fn from(callconv: ParamKind) -> Self {
         match callconv {
-            ParamKind::Pinout => ParamMode::FPinout,
+            ParamKind::Pinout(_) => ParamMode::FPinout,
             ParamKind::Pnormal => ParamMode::FPnormal,
         }
     }

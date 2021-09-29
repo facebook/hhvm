@@ -2648,7 +2648,7 @@ pub fn print_expr<W: Write>(
             paren(w, |w| {
                 concat_by(w, ", ", &es, |w, (pk, e)| match pk {
                     ParamKind::Pnormal => print_expr(ctx, w, env, e),
-                    ParamKind::Pinout => Err(Error::fail("illegal default value")),
+                    ParamKind::Pinout(_) => Err(Error::fail("illegal default value")),
                 })?;
                 match unpacked_element {
                     None => Ok(()),
@@ -3091,7 +3091,7 @@ fn print_fparam<W: Write>(
     env: &ExprEnv,
     param: &ast::FunParam,
 ) -> Result<(), W::Error> {
-    if param.callconv == ParamKind::Pinout {
+    if param.callconv.is_pinout() {
         w.write("inout ")?;
     }
     if param.is_variadic {

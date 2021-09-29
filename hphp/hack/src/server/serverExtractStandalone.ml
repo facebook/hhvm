@@ -1264,7 +1264,7 @@ end = struct
   let pp_paramkind ppf =
     Ast_defs.(
       function
-      | Pinout -> Fmt.string ppf "inout"
+      | Pinout _ -> Fmt.string ppf "inout"
       | Pnormal -> ())
 
   let pp_tprim ppf =
@@ -1381,7 +1381,7 @@ end = struct
             Option.bind i ~f:(fun i ->
                 match i.Aast.hfparam_kind with
                 | Ast_defs.Pnormal -> None
-                | Ast_defs.Pinout -> Some Ast_defs.Pinout))
+                | Ast_defs.Pinout p -> Some (Ast_defs.Pinout p)))
       in
       let pp_typed_param ppf kp =
         Fmt.(
@@ -1757,7 +1757,7 @@ end = struct
   and pp_arg ppf (pk, e) =
     match pk with
     | Ast_defs.Pnormal -> pp_expr ppf e
-    | Ast_defs.Pinout -> Fmt.(pair ~sep:sp pp_paramkind pp_expr) ppf (pk, e)
+    | Ast_defs.Pinout _ -> Fmt.(pair ~sep:sp pp_paramkind pp_expr) ppf (pk, e)
 
   and pp_afield ppf = function
     | Aast.AFvalue expr -> pp_expr ppf expr

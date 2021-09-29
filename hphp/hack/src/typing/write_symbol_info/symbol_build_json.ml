@@ -193,7 +193,7 @@ let build_signature_json ctx source_map params vararg ret_ty =
     in
     let is_inout =
       match p.param_callconv with
-      | Pinout -> true
+      | Pinout _ -> true
       | Pnormal -> false
     in
     let def_value =

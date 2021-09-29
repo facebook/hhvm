@@ -57,7 +57,13 @@ and classish_kind =
   *)
 
 and param_kind =
-  | Pinout
+  | Pinout of pos
+      (**
+       * Contains the position for an entire `inout` annotated expression, e.g.:
+       *
+       *   foo(inout $bar);
+       *       ^^^^^^^^^^
+       *)
   | Pnormal
 
 and readonly_kind = Readonly

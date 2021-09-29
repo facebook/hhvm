@@ -1,4 +1,4 @@
-File "cross_file.php--file2.php", line 4, characters 11-14:
+File "cross_file.php--file2.php", line 4, characters 5-14:
 Invalid argument (Typing[4110])
   File "cross_file.php--file1.php", line 3, characters 18-20:
   Expected `int`

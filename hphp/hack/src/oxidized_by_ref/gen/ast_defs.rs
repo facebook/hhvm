@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8ce1d56f2f6b0cfd515cb29c6377510f>>
+// @generated SignedSource<<d54f34724fc29909ca209c2a2d8a53d5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -125,7 +125,34 @@ pub enum ClassishKind<'a> {
 impl<'a> TrivialDrop for ClassishKind<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(ClassishKind<'arena>);
 
-pub use oxidized::ast_defs::ParamKind;
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[repr(C)]
+pub enum ParamKind<'a> {
+    /// Contains the position for an entire `inout` annotated expression, e.g.:
+    ///
+    ///   foo(inout $bar);
+    ///       ^^^^^^^^^^
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    Pinout(&'a Pos<'a>),
+    Pnormal,
+}
+impl<'a> TrivialDrop for ParamKind<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(ParamKind<'arena>);
 
 pub use oxidized::ast_defs::ReadonlyKind;
 

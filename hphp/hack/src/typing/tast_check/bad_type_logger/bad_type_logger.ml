@@ -62,7 +62,7 @@ let mk_param_decl_info_internal ~context_id ~indicator ~is_variadic pos callconv
   let common_info = mk_common_info ~context_id ~indicator pos in
   let is_inout =
     match callconv with
-    | Ast_defs.Pinout -> true
+    | Ast_defs.Pinout _ -> true
     | Ast_defs.Pnormal -> false
   in
   let position = Parameter { is_inout; is_variadic } in

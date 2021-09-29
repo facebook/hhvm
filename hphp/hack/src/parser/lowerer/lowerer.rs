@@ -1343,9 +1343,10 @@ where
             DecoratedExpression(DecoratedExpressionChildren {
                 decorator,
                 expression,
-            }) if Self::token_kind(decorator) == Some(TK::Inout) => {
-                Ok((ast::ParamKind::Pinout, Self::p_expr(expression, env)?))
-            }
+            }) if Self::token_kind(decorator) == Some(TK::Inout) => Ok((
+                ast::ParamKind::Pinout(Self::p_pos(decorator, env)),
+                Self::p_expr(expression, env)?,
+            )),
             _ => Ok((ast::ParamKind::Pnormal, Self::p_expr(node, env)?)),
         }
     }
@@ -3613,7 +3614,7 @@ where
 
     fn p_param_kind(node: S<'a, T, V>, env: &mut Env<'a, TF>) -> Result<ast::ParamKind, Error> {
         match Self::token_kind(node) {
-            Some(TK::Inout) => Ok(ast::ParamKind::Pinout),
+            Some(TK::Inout) => Ok(ast::ParamKind::Pinout(Self::p_pos(node, env))),
             None => Ok(ast::ParamKind::Pnormal),
             _ => Self::missing_syntax("param kind", node, env),
         }

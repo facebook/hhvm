@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f71ac92a2e97cf85c6d947f555fd1d18>>
+// @generated SignedSource<<4e7d219a7674062b411aedbd5f3df885>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1716,7 +1716,10 @@ impl<P: Params> Node<P> for ParamKind {
         v: &mut dyn Visitor<'node, P = P>,
     ) -> Result<(), P::Error> {
         match self {
-            ParamKind::Pinout => Ok(()),
+            ParamKind::Pinout(a0) => {
+                a0.accept(c, v)?;
+                Ok(())
+            }
             ParamKind::Pnormal => Ok(()),
         }
     }

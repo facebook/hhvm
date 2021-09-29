@@ -1,4 +1,4 @@
-File "bad_inout_use_call1.php", line 9, characters 14-15:
+File "bad_inout_use_call1.php", line 9, characters 8-15:
 Invalid argument (Typing[4110])
   File "bad_inout_use_call1.php", line 3, characters 21-23:
   Expected `int`

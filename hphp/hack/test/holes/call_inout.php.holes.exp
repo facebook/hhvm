@@ -12,7 +12,7 @@
         f_params =
         [{ param_annotation = (int); param_type_hint = ((int), (Some ([3:27-30], (Hprim Tint)))); 
            param_is_variadic = false; param_pos = [3:31-33]; param_name = "$i"; 
-           param_expr = None; param_readonly = None; param_callconv = Pinout; 
+           param_expr = None; param_readonly = None; param_callconv = (Pinout [3:21-26]); 
            param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
@@ -44,7 +44,7 @@
              (Expr
                 ((void), [7:3-23],
                  (Call ((((function(inout int $i): void)), [7:3-13], (Id ([7:3-13], "\\with_inout"))), 
-                    [], [(Pinout, ((float), [7:20-22], (Hole (((float), [7:20-22], (Lvar ([7:20-22], $f))), (float), (int), Typing))))], None)))))
+                    [], [((Pinout [7:14-19]), ((float), [7:20-22], (Hole (((float), [7:20-22], (Lvar ([7:20-22], $f))), (float), (int), Typing))))], None)))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

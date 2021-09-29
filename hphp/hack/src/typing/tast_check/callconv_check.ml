@@ -66,7 +66,7 @@ let handler =
         List.iter
           ~f:(function
             | (Ast_defs.Pnormal, _) -> ()
-            | (Ast_defs.Pinout, e) -> check_types env e)
+            | (Ast_defs.Pinout _, e) -> check_types env e)
           te
       | _ -> ()
   end

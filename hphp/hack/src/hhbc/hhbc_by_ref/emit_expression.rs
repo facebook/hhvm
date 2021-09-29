@@ -174,7 +174,7 @@ mod inout_locals {
         let mut acc = HashMap::default();
         args.iter()
             .enumerate()
-            .for_each(|(i, (pk, arg))| handle_arg(env, true, i, *pk, arg, &mut acc));
+            .for_each(|(i, (pk, arg))| handle_arg(env, true, i, pk, arg, &mut acc));
         acc
     }
 
@@ -182,14 +182,14 @@ mod inout_locals {
         env: &Env<'ast, 'arena>,
         is_top: bool,
         i: usize,
-        pk: ParamKind,
+        pk: &ParamKind,
         arg: &'ast ast::Expr,
         acc: &mut AliasInfoMap<'ast>,
     ) {
         use ast::{Expr, Expr_};
         let Expr(_, _, e) = arg;
         // inout $v
-        if let (ParamKind::Pinout, Expr_::Lvar(lid)) = (pk, e) {
+        if let (ParamKind::Pinout(_), Expr_::Lvar(lid)) = (pk, e) {
             let Lid(_, lid) = &**lid;
             if !is_local_this(env, &lid) {
                 add_use(&lid.1, acc);
@@ -237,9 +237,9 @@ mod inout_locals {
             if let ast::Expr_::Call(expr) = p {
                 let (_, _, args, uarg) = &**expr;
                 args.iter()
-                    .for_each(|(pk, arg)| handle_arg(&c.env, false, c.i, *pk, arg, &mut c.state));
+                    .for_each(|(pk, arg)| handle_arg(&c.env, false, c.i, pk, arg, &mut c.state));
                 if let Some(arg) = uarg.as_ref() {
-                    handle_arg(&c.env, false, c.i, ParamKind::Pnormal, arg, &mut c.state)
+                    handle_arg(&c.env, false, c.i, &ParamKind::Pnormal, arg, &mut c.state)
                 }
                 Ok(())
             } else {
@@ -595,8 +595,8 @@ fn emit_exprs_and_error_on_inout<'a, 'arena, 'decl>(
                 .iter()
                 .map(|(pk, expr)| match pk {
                     ParamKind::Pnormal => emit_expr(e, env, expr),
-                    ParamKind::Pinout => Err(emit_fatal::raise_fatal_parse(
-                        expr.pos(),
+                    ParamKind::Pinout(p) => Err(emit_fatal::raise_fatal_parse(
+                        &Pos::merge(p, expr.pos()).map_err(Error::Unrecoverable)?,
                         format!(
                             "Unexpected `inout` argument on pseudofunction: `{}`",
                             fn_name
@@ -1722,10 +1722,10 @@ fn emit_call_isset_expr<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     outer_pos: &Pos,
-    pk: ParamKind,
+    pk: &ParamKind,
     expr: &ast::Expr,
 ) -> Result<InstrSeq<'arena>> {
-    if pk == ParamKind::Pinout {
+    if pk.is_pinout() {
         return Err(emit_fatal::raise_fatal_parse(
             outer_pos,
             "`isset` cannot take an argument by `inout`",
@@ -1819,7 +1819,7 @@ fn emit_call_isset_exprs<'a, 'arena, 'decl>(
             pos,
             "Cannot use isset() without any arguments",
         )),
-        [(pk, expr)] => emit_call_isset_expr(e, env, pos, *pk, expr),
+        [(pk, expr)] => emit_call_isset_expr(e, env, pos, pk, expr),
         _ => {
             let its_done = e.label_gen_mut().next_regular();
             Ok(InstrSeq::gather(
@@ -1834,7 +1834,7 @@ fn emit_call_isset_exprs<'a, 'arena, 'decl>(
                                 Ok(InstrSeq::gather(
                                     alloc,
                                     vec![
-                                        emit_call_isset_expr(e, env, pos, *pk, expr)?,
+                                        emit_call_isset_expr(e, env, pos, pk, expr)?,
                                         if i < exprs.len() - 1 {
                                             InstrSeq::gather(
                                                 alloc,
@@ -2661,7 +2661,7 @@ fn emit_args_inout_setters<'a, 'arena, 'decl>(
         e: &mut Emitter<'arena, 'decl>,
         env: &Env<'a, 'arena>,
         i: usize,
-        pk: ParamKind,
+        pk: &ParamKind,
         arg: &ast::Expr,
         aliases: &inout_locals::AliasInfoMap,
     ) -> Result<(InstrSeq<'arena>, InstrSeq<'arena>)> {
@@ -2669,7 +2669,7 @@ fn emit_args_inout_setters<'a, 'arena, 'decl>(
         let alloc = env.arena;
         match (pk, &arg.2) {
             // inout $var
-            (ParamKind::Pinout, E_::Lvar(l)) => {
+            (ParamKind::Pinout(_), E_::Lvar(l)) => {
                 let local = get_local(e, env, &l.0, local_id::get_name(&l.1))?;
                 let move_instrs = if !env.flags.contains(hhbc_by_ref_env::Flags::IN_TRY)
                     && inout_locals::should_move_local_value(&local, aliases)
@@ -2684,7 +2684,7 @@ fn emit_args_inout_setters<'a, 'arena, 'decl>(
                 ))
             }
             // inout $arr[...][...]
-            (ParamKind::Pinout, E_::ArrayGet(ag)) => {
+            (ParamKind::Pinout(_), E_::ArrayGet(ag)) => {
                 let array_get_result = emit_array_get_(
                     e,
                     env,
@@ -2745,7 +2745,7 @@ fn emit_args_inout_setters<'a, 'arena, 'decl>(
                     }
                 })
             }
-            (ParamKind::Pinout, _) => Err(unrecoverable(
+            (ParamKind::Pinout(_), _) => Err(unrecoverable(
                 "emit_arg_and_inout_setter: Unexpected inout expression type",
             )),
             _ => Ok((emit_expr(e, env, arg)?, instr::empty(alloc))),
@@ -2754,7 +2754,7 @@ fn emit_args_inout_setters<'a, 'arena, 'decl>(
     let (instr_args, instr_setters): (Vec<InstrSeq>, Vec<InstrSeq>) = args
         .iter()
         .enumerate()
-        .map(|(i, (pk, arg))| emit_arg_and_inout_setter(e, env, i, *pk, arg, &aliases))
+        .map(|(i, (pk, arg))| emit_arg_and_inout_setter(e, env, i, pk, arg, &aliases))
         .collect::<Result<Vec<_>>>()?
         .into_iter()
         .unzip();
@@ -2876,7 +2876,7 @@ fn get_fcall_args<'arena, 'decl>(
         readonly_return,
         readonly_this,
         |(_, expr): &(ParamKind, ast::Expr)| is_readonly_expr(expr),
-        |(pk, _): &(ParamKind, ast::Expr)| *pk == ParamKind::Pinout,
+        |(pk, _): &(ParamKind, ast::Expr)| pk.is_pinout(),
     )
 }
 
@@ -2888,14 +2888,14 @@ fn is_readonly_expr(e: &ast::Expr) -> bool {
 }
 
 fn has_inout_arg(es: &[(ParamKind, ast::Expr)]) -> bool {
-    es.iter().any(|(pk, _)| *pk == ParamKind::Pinout)
+    es.iter().any(|(pk, _)| pk.is_pinout())
 }
 
 fn expect_normal_paramkind(arg: &(ParamKind, ast::Expr)) -> Result<&ast::Expr> {
     match arg {
         (ParamKind::Pnormal, e) => Ok(e),
-        (ParamKind::Pinout, e) => Err(emit_fatal::raise_fatal_parse(
-            e.pos(),
+        (ParamKind::Pinout(pk_pos), e) => Err(emit_fatal::raise_fatal_parse(
+            &Pos::merge(pk_pos, e.pos()).map_err(Error::Unrecoverable)?,
             "Unexpected `inout` annotation",
         )),
     }

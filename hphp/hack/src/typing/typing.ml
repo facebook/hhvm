@@ -1056,9 +1056,9 @@ let param_modes
     ?(is_variadic = false) ({ fp_pos; _ } as fp) (_, pos, _) param_kind =
   match (get_fp_mode fp, param_kind) with
   | (FPnormal, Ast_defs.Pnormal) -> ()
-  | (FPinout, Ast_defs.Pinout) -> ()
-  | (FPnormal, Ast_defs.Pinout) ->
-    Errors.inout_annotation_unexpected pos fp_pos is_variadic
+  | (FPinout, Ast_defs.Pinout _) -> ()
+  | (FPnormal, Ast_defs.Pinout p) ->
+    Errors.inout_annotation_unexpected (Pos.merge p pos) fp_pos is_variadic
   | (FPinout, Ast_defs.Pnormal) -> Errors.inout_annotation_missing pos fp_pos
 
 let split_remaining_params_required_optional ft remaining_params =
@@ -1119,6 +1119,11 @@ let call_param
     | Lvar _ ->
       ExprDepTy.make env ~cid:(CIexpr e) arg_ty
     | _ -> (env, arg_ty)
+  in
+  let pos =
+    match param_kind with
+    | Ast_defs.Pnormal -> pos
+    | Ast_defs.Pinout pk_pos -> Pos.merge pk_pos pos
   in
   Result.fold
     ~ok:(fun env -> (env, None))
@@ -6272,7 +6277,7 @@ and dispatch_call
           unpacked_element
           (fun env _ res el ->
             match el with
-            | [(Ast_defs.Pinout, shape); (_, field)] ->
+            | [(Ast_defs.Pinout _, shape); (_, field)] ->
               begin
                 match shape with
                 | (_, _, Lvar (_, lvar))
@@ -7379,7 +7384,7 @@ and call_construct p env class_ params el unpacked_element cid cid_ty =
 
 and inout_write_back env { fp_type; _ } (pk, ((_, pos, _) as e)) =
   match pk with
-  | Ast_defs.Pinout ->
+  | Ast_defs.Pinout _ ->
     (* Translate the write-back semantics of inout parameters.
      *
      * This matters because we want to:
@@ -7454,7 +7459,7 @@ and call
             let (env, te, e_ty) = expr env elt in
             let env =
               match pk with
-              | Ast_defs.Pinout ->
+              | Ast_defs.Pinout _ ->
                 let (_, pos, _) = elt in
                 let (env, _te, _ty) =
                   assign_ pos Reason.URparam_inout env elt pos efty
@@ -7517,7 +7522,7 @@ and call
             in
             let env =
               match pk with
-              | Ast_defs.Pinout ->
+              | Ast_defs.Pinout _ ->
                 let (_, pos, _) = elt in
                 let (env, _te, _ty) =
                   assign_ pos Reason.URparam_inout env elt pos efty

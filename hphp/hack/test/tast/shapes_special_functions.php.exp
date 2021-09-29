@@ -59,7 +59,7 @@
                      (((function<T as shape(...)>(inout shape('x' => int, ?'y' => int) $shape, arraykey $index): void)), [9:3-20],
                       (Class_const (((Shapes), [9:3-9], (CI ([9:3-9], "\\HH\\Shapes"))), ([9:11-20], "removeKey")))),
                      [((shape('x' => int, ?'y' => int)), ([9:11-20], (Happly (([Pos.none], "_"), []))))],
-                     [(Pinout, ((shape('x' => int, ?'y' => int)), [9:27-29], (Lvar ([9:27-29], $p)))); (Pnormal, ((string), [9:31-34], (String "y")))], None)))));
+                     [((Pinout [9:21-26]), ((shape('x' => int, ?'y' => int)), [9:27-29], (Lvar ([9:27-29], $p)))); (Pnormal, ((string), [9:31-34], (String "y")))], None)))));
              ([10:3-23],
               (Expr
                  ((dict<string, int>), [10:3-22],

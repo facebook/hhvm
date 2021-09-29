@@ -1,4 +1,4 @@
-File "pseudofunction_with_signature.php", line 8, characters 21-22:
+File "pseudofunction_with_signature.php", line 8, characters 15-22:
 Unexpected `inout` annotation for argument (Typing[4183])
   File "Shapes.hhi", line 42, characters 17-22:
   This is a normal parameter (does not have `inout`)
@@ -6,27 +6,27 @@ File "pseudofunction_with_signature.php", line 9, characters 28-30:
 No class constant `T` in `dict` (Typing[4090])
   File "hackarray.hhi", line 24, characters 22-25:
   Declaration of `dict` is here
-File "pseudofunction_with_signature.php", line 10, characters 22-23:
+File "pseudofunction_with_signature.php", line 10, characters 16-23:
 Unexpected `inout` annotation for argument (Typing[4183])
   File "printf.hhi", line 48, characters 38-39:
   This is a normal parameter (does not have `inout`)
-File "pseudofunction_with_signature.php", line 11, characters 17-18:
+File "pseudofunction_with_signature.php", line 11, characters 11-18:
 Unexpected `inout` annotation for argument (Typing[4183])
   File "stdlib/builtins_variable.hhi", line 34, characters 18-21:
   This is a normal parameter (does not have `inout`)
-File "pseudofunction_with_signature.php", line 12, characters 30-31:
+File "pseudofunction_with_signature.php", line 12, characters 24-31:
 Unexpected `inout` annotation for argument (Typing[4183])
   File "container_functions.hhi", line 112, characters 43-48:
   This is a normal parameter (does not have `inout`)
-File "pseudofunction_with_signature.php", line 13, characters 25-26:
+File "pseudofunction_with_signature.php", line 13, characters 19-26:
 Unexpected `inout` annotation for argument (Typing[4183])
   File "functions.hhi", line 47, characters 29-32:
   This is a normal parameter (does not have `inout`)
-File "pseudofunction_with_signature.php", line 14, characters 29-30:
+File "pseudofunction_with_signature.php", line 14, characters 23-30:
 Unexpected `inout` annotation for argument (Typing[4183])
   File "container_functions.hhi", line 110, characters 42-47:
   This is a normal parameter (does not have `inout`)
-File "pseudofunction_with_signature.php", line 15, characters 30-31:
+File "pseudofunction_with_signature.php", line 15, characters 24-31:
 Unexpected `inout` annotation for argument (Typing[4183])
   File "container_functions.hhi", line 112, characters 43-48:
   This is a normal parameter (does not have `inout`)

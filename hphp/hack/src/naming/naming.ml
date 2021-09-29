@@ -1705,7 +1705,8 @@ and stmt env (pos, st) =
           begin
             match pk with
             | Ast_defs.Pnormal -> ()
-            | Ast_defs.Pinout -> Errors.inout_invariant_predicate p
+            | Ast_defs.Pinout pk_p ->
+              Errors.inout_invariant_predicate (Pos.merge pk_p p)
           end;
           let violation =
             ( (),
@@ -2094,8 +2095,8 @@ and expr_ env p (e : Nast.expr_) =
             Errors.illegal_meth_caller p;
             invalid_expr_ p
         end
-      | [(Ast_defs.Pinout, (_, p, _)); _]
-      | [(_, (_, p, _)); (Ast_defs.Pinout, _)] ->
+      | [(Ast_defs.Pinout _, _); _]
+      | [_; (Ast_defs.Pinout _, _)] ->
         Errors.illegal_meth_caller p;
         invalid_expr_ p
       | _ ->
@@ -2168,8 +2169,8 @@ and expr_ env p (e : Nast.expr_) =
             Errors.illegal_class_meth p;
             invalid_expr_ p
         end
-      | [(Ast_defs.Pinout, (_, p, _)); _]
-      | [(_, (_, p, _)); (Ast_defs.Pinout, _)] ->
+      | [(Ast_defs.Pinout _, _); _]
+      | [_; (Ast_defs.Pinout _, _)] ->
         Errors.illegal_class_meth p;
         invalid_expr_ p
       | _ ->

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<33ab0cd777c56ef2a9b1f93cc1663b9c>>
+// @generated SignedSource<<67b9dd583f4a8ce6379d29844d3eb13e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -254,15 +254,15 @@ impl ClassishKind {
     }
 }
 impl ParamKind {
-    pub fn mk_pinout() -> Self {
-        ParamKind::Pinout
+    pub fn mk_pinout(p0: Pos) -> Self {
+        ParamKind::Pinout(p0)
     }
     pub fn mk_pnormal() -> Self {
         ParamKind::Pnormal
     }
     pub fn is_pinout(&self) -> bool {
         match self {
-            ParamKind::Pinout => true,
+            ParamKind::Pinout(..) => true,
             _ => false,
         }
     }
@@ -270,6 +270,24 @@ impl ParamKind {
         match self {
             ParamKind::Pnormal => true,
             _ => false,
+        }
+    }
+    pub fn as_pinout(&self) -> Option<&Pos> {
+        match self {
+            ParamKind::Pinout(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_pinout_mut(&mut self) -> Option<&mut Pos> {
+        match self {
+            ParamKind::Pinout(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_pinout_into(self) -> Option<Pos> {
+        match self {
+            ParamKind::Pinout(p0) => Some(p0),
+            _ => None,
         }
     }
 }

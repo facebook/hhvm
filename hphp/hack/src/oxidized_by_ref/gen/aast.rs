@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e1431b2cc01ed8b2e22de985190ad812>>
+// @generated SignedSource<<db2e2c91a95dbe1bb86ad9ab45e0304e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -710,7 +710,7 @@ pub enum Expr_<'a, Ex, En> {
         &'a (
             &'a Expr<'a, Ex, En>,
             &'a [&'a Targ<'a, Ex>],
-            &'a [(oxidized::ast_defs::ParamKind, &'a Expr<'a, Ex, En>)],
+            &'a [(ast_defs::ParamKind<'a>, &'a Expr<'a, Ex, En>)],
             Option<&'a Expr<'a, Ex, En>>,
         ),
     ),
@@ -1279,7 +1279,8 @@ pub struct FunParam<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub expr: Option<&'a Expr<'a, Ex, En>>,
     pub readonly: Option<oxidized::ast_defs::ReadonlyKind>,
-    pub callconv: oxidized::ast_defs::ParamKind,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub callconv: ast_defs::ParamKind<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub user_attributes: &'a [&'a UserAttribute<'a, Ex, En>],
     pub visibility: Option<oxidized::aast::Visibility>,

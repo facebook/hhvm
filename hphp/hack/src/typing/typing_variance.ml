@@ -640,7 +640,7 @@ and hfun_param env variance info h =
     let reason = (pos, Rfun_parameter, Pcontravariant) in
     let variance = flip reason variance in
     hint env variance h
-  | Some Ast_defs.Pinout ->
+  | Some (Ast_defs.Pinout _) ->
     let variance = make_variance Rfun_inout_parameter pos Ast_defs.Invariant in
     hint env variance h
 

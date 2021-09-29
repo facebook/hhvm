@@ -852,7 +852,7 @@ fn rewrite_expr(
                 .into_iter()
                 .map(|e| match e {
                     (ParamKind::Pnormal, e) => Ok(e),
-                    (ParamKind::Pinout, Expr(_, p, _)) => Err((
+                    (ParamKind::Pinout(_), Expr(_, p, _)) => Err((
                         p,
                         "Expression trees do not support `inout` function calls.".into(),
                     )),

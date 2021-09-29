@@ -487,7 +487,7 @@ let arity_min ft : int =
 
 let get_param_mode callconv =
   match callconv with
-  | Ast_defs.Pinout -> FPinout
+  | Ast_defs.Pinout _ -> FPinout
   | Ast_defs.Pnormal -> FPnormal
 
 module DependentKind = struct

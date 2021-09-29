@@ -1,4 +1,5 @@
 aast_defs::Hint_
+aast_defs::ParamKind
 aast_defs::ReifyKind
 aast_defs::Sid
 aast_defs::Tprim
@@ -19,6 +20,7 @@ aast::Expr_
 aast::FunctionPtrId
 aast::FunVariadicity
 aast::HoleSource
+aast::ParamKind
 aast::ReifyKind
 aast::Sid
 aast::Stmt_
@@ -27,6 +29,7 @@ aast::XhpAttribute
 ast_defs::Bop
 ast_defs::ClassishKind
 ast_defs::Id
+ast_defs::ParamKind
 ast_defs::ShapeFieldName
 ast_defs::XhpEnumValue
 decl_defs::ConditionTypeName
@@ -64,7 +67,6 @@ oxidized::aast::ImportFlavor
 oxidized::aast::KvcKind
 oxidized::aast::NsKind
 oxidized::aast::OgNullFlavor
-oxidized::aast::ParamKind
 oxidized::aast::ParamMutability
 oxidized::aast::ReadonlyKind
 oxidized::aast::ReifyKind
@@ -81,7 +83,6 @@ oxidized::ast_defs::Abstraction
 oxidized::ast_defs::ConstraintKind
 oxidized::ast_defs::FunKind
 oxidized::ast_defs::OgNullFlavor
-oxidized::ast_defs::ParamKind
 oxidized::ast_defs::ReadonlyKind
 oxidized::ast_defs::Uop
 oxidized::ast_defs::Variance

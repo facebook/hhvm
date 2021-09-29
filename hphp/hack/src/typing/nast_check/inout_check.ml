@@ -14,13 +14,15 @@ module SN = Naming_special_names
 let check_param _env params p user_attributes name =
   List.iter params ~f:(fun param ->
       match param.param_callconv with
-      | Ast_defs.Pinout ->
+      | Ast_defs.Pinout _ ->
         let pos = param.param_pos in
         if SSet.mem name SN.Members.as_set then Errors.inout_params_special pos
       | Ast_defs.Pnormal -> ());
   let inout =
     List.find params ~f:(fun x ->
-        Ast_defs.equal_param_kind x.param_callconv Ast_defs.Pinout)
+        match x.param_callconv with
+        | Ast_defs.Pinout _ -> true
+        | Ast_defs.Pnormal -> false)
   in
   match inout with
   | Some param ->
@@ -66,7 +68,7 @@ let handler =
         List.iter
           ~f:(function
             | (Ast_defs.Pnormal, _) -> ()
-            | (Ast_defs.Pinout, e) -> check_callconv_expr e)
+            | (Ast_defs.Pinout _, e) -> check_callconv_expr e)
           args
       | _ -> ()
   end

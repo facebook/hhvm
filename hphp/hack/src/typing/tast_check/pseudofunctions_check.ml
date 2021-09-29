@@ -16,7 +16,9 @@ let disallow_isset_inout_args_check p = function
   | Call ((_, _, Id (_, pseudo_func)), _, el, _)
     when String.equal pseudo_func SN.PseudoFunctions.isset
          && List.exists
-              (fun (pk, _) -> Ast_defs.equal_param_kind pk Ast_defs.Pinout)
+              (function
+                | (Ast_defs.Pinout _, _) -> true
+                | (Ast_defs.Pnormal, _) -> false)
               el ->
     Errors.isset_inout_arg p
   | _ -> ()

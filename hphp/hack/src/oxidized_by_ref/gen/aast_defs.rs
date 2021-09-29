@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3e248921a1264979917d85170e54ef24>>
+// @generated SignedSource<<da98e5a3c3d04c937cba831b61b10584>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -156,12 +156,13 @@ arena_deserializer::impl_deserialize_in_arena!(Contexts<'arena>);
     ToOcamlRep
 )]
 #[repr(C)]
-pub struct HfParamInfo {
-    pub kind: oxidized::ast_defs::ParamKind,
+pub struct HfParamInfo<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub kind: ast_defs::ParamKind<'a>,
     pub readonlyness: Option<oxidized::ast_defs::ReadonlyKind>,
 }
-impl TrivialDrop for HfParamInfo {}
-arena_deserializer::impl_deserialize_in_arena!(HfParamInfo);
+impl<'a> TrivialDrop for HfParamInfo<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(HfParamInfo<'arena>);
 
 #[derive(
     Clone,
@@ -184,7 +185,7 @@ pub struct HintFun<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub param_tys: &'a [&'a Hint<'a>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub param_info: &'a [Option<&'a HfParamInfo>],
+    pub param_info: &'a [Option<&'a HfParamInfo<'a>>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub variadic_ty: &'a VariadicHint<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

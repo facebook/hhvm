@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<058da8a47b5dfb58f3c6b076e1265776>>
+// @generated SignedSource<<0f71b603be06f9efdf3200d55aa80d07>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1716,7 +1716,10 @@ impl<P: Params> NodeMut<P> for ParamKind {
         v: &mut dyn VisitorMut<'node, P = P>,
     ) -> Result<(), P::Error> {
         match self {
-            ParamKind::Pinout => Ok(()),
+            ParamKind::Pinout(a0) => {
+                a0.accept(c, v)?;
+                Ok(())
+            }
             ParamKind::Pnormal => Ok(()),
         }
     }

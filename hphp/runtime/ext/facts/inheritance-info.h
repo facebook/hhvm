@@ -21,6 +21,7 @@
 
 #include "hphp/runtime/ext/facts/autoload-db.h"
 #include "hphp/runtime/ext/facts/lazy-two-way-map.h"
+#include "hphp/runtime/ext/facts/path-versions.h"
 #include "hphp/runtime/ext/facts/symbol-types.h"
 
 namespace HPHP {
@@ -99,18 +100,22 @@ struct InheritanceInfo {
 
   using TypeToBaseTypesMap = LazyTwoWayMap<EdgeToSupertype, SubtypeQuery>;
 
-  using TypeDefSet = typename TypeToBaseTypesMap::KeysSet;
-  using TypeSet = typename TypeToBaseTypesMap::ValuesSet;
+  using TypeDefs = typename TypeToBaseTypesMap::Keys;
+  using Types = typename TypeToBaseTypesMap::Values;
+
+  explicit InheritanceInfo(std::shared_ptr<PathVersions> versions)
+      : m_baseTypesMap{std::move(versions)} {
+  }
 
   /**
    * Return inheritance data about the given type.
    *
-   * The const overloads will return `nullptr` if we don't yet have all the
+   * The const overloads will return `std::nullopt` if we don't yet have all the
    * data we need to definitively answer this query. If the caller receives
-   * `nullptr`, they will need to call a non-const overload.
+   * `std::nullopt`, they will need to call a non-const overload.
    */
 
-  const TypeSet* getBaseTypes(
+  Optional<Types> getBaseTypes(
       Symbol<SymKind::Type> derivedType,
       Path derivedTypePath,
       DeriveKind kind) const {
@@ -118,7 +123,7 @@ struct InheritanceInfo {
         {.m_type = derivedType, .m_kind = kind, .m_path = derivedTypePath});
   }
 
-  const TypeSet& getBaseTypes(
+  Types getBaseTypes(
       Symbol<SymKind::Type> derivedType,
       Path derivedTypePath,
       DeriveKind kind,
@@ -129,33 +134,18 @@ struct InheritanceInfo {
         std::move(edgesFromDB));
   }
 
-  const TypeDefSet*
+  Optional<TypeDefs>
   getDerivedTypes(Symbol<SymKind::Type> baseType, DeriveKind kind) const {
     return m_baseTypesMap.getKeysForValue({.m_type = baseType, .m_kind = kind});
   }
 
-  const TypeDefSet& getDerivedTypes(
+  TypeDefs getDerivedTypes(
       Symbol<SymKind::Type> baseType,
       DeriveKind kind,
       std::vector<EdgeToSupertype> edgesFromDB) {
     return m_baseTypesMap.getKeysForValue(
         SubtypeQuery{.m_type = baseType, .m_kind = kind},
         std::move(edgesFromDB));
-  }
-
-  /**
-   * Remove all known information about the given type defined at the given
-   * path.
-   */
-  void removeType(Symbol<SymKind::Type> derivedType, Path derivedTypePath) {
-    for (auto kind :
-         {DeriveKind::Extends,
-          DeriveKind::RequireExtends,
-          DeriveKind::RequireImplements}) {
-      m_baseTypesMap.setValuesForKey(
-          {.m_type = derivedType, .m_kind = kind, .m_path = derivedTypePath},
-          {});
-    }
   }
 
   /**
@@ -166,10 +156,10 @@ struct InheritanceInfo {
       Path derivedTypePath,
       DeriveKind kind,
       const std::vector<std::string>& baseTypeStrs) {
-    TypeSet baseTypes;
+    Types baseTypes;
     baseTypes.reserve(baseTypeStrs.size());
     for (auto const& baseTypeStr : baseTypeStrs) {
-      baseTypes.insert(
+      baseTypes.push_back(
           {.m_type = Symbol<SymKind::Type>{baseTypeStr}, .m_kind = kind});
     }
     return m_baseTypesMap.setValuesForKey(

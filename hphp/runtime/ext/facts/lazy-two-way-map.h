@@ -16,235 +16,186 @@
 
 #pragma once
 
+#include <algorithm>
+#include <memory>
+#include <vector>
+
+#include <folly/hash/Hash.h>
+
+#include "hphp/runtime/ext/facts/path-versions.h"
+#include "hphp/runtime/ext/facts/symbol-types.h"
 #include "hphp/util/hash-map.h"
 #include "hphp/util/hash-set.h"
 
 namespace HPHP {
 namespace Facts {
 
-/**
- * A set which needs to be completed by reading from a DB before we can access
- * its data. This allows us to avoid reading data from a DB until we know we
- * actually need it.
- *
- * Until we fetch from the DB, we store any information which we'll need to add
- * or remove if we ever do fetch that data.
- */
-template <typename T> class LazySet {
+namespace detail {
 
-public:
-  using Set = hphp_hash_set<T>;
+inline const Path& getPathFromKey(const Path& path) {
+  return path;
+}
+inline const Path& getPathFromKey(const MethodDecl& methodDecl) {
+  return methodDecl.m_type.m_path;
+}
+template <typename Key> const Path& getPathFromKey(const Key& key) {
+  return key.m_path;
+}
 
-  void insert(T value) {
-    if (m_complete) {
-      assertx(m_excluded.empty());
-    } else {
-      m_excluded.erase(value);
-    }
-
-    m_included.insert(value);
-  }
-
-  void erase(T value) {
-    m_included.erase(value);
-    if (m_complete) {
-      assertx(m_excluded.empty());
-    } else {
-      m_excluded.insert(std::move(value));
-    }
-  }
-
-  /**
-   * True iff this lazy-set definitely contains the given value. False iff it
-   * definitely doesn't contain the given value. `std::nullopt` if this question
-   * can't be answered without falling back to the DB.
-   */
-  Optional<bool> contains(const T& value) const {
-    if (m_included.count(value)) {
-      return true;
-    }
-    if (m_complete) {
-      assertx(m_excluded.empty());
-      return false;
-    }
-    if (m_excluded.count(value)) {
-      return false;
-    }
-    return std::nullopt;
-  }
-
-  /**
-   * Assign the contents of a Set to this lazy-set, making this no longer lazy.
-   */
-  LazySet& operator=(Set values) {
-    m_included = std::move(values);
-    m_excluded.clear();
-    m_complete = true;
-    return *this;
-  }
-
-  /**
-   * If we haven't filled this data structure from the DB yet, return
-   * `nullptr`. Otherwise return the data.
-   */
-  const Set* get() const {
-    if (!m_complete) {
-      return nullptr;
-    }
-    assertx(m_excluded.empty());
-    return &m_included;
-  }
-
-  /**
-   * Pass in data from the DB, integrate it with the data we have in-memory,
-   * and return a reference to the integrated results.
-   */
-  template <typename ValuesFromSource>
-  Set& get(ValuesFromSource&& valuesFromSource) {
-    fillFromSource(std::forward<ValuesFromSource>(valuesFromSource));
-    assertx(m_excluded.empty());
-    return m_included;
-  }
-
-  /**
-   * Get data from SourceFn and set `m_complete` to `true`.
-   */
-  template <typename ValuesFromSource>
-  void fillFromSource(ValuesFromSource&& valuesFromSource) {
-    if (m_complete) {
-      return;
-    }
-    for (auto value : std::forward<ValuesFromSource>(valuesFromSource)) {
-      m_included.insert(std::move(value));
-    }
-    for (auto const& value : m_excluded) {
-      m_included.erase(value);
-    }
-    m_excluded.clear();
-    m_complete = true;
-  }
-
-  Set m_included;
-  Set m_excluded;
-  bool m_complete{false};
-};
+} // namespace detail
 
 /**
  * A map representing a many-to-many relationship between keys and values.
  *
- * We guarantee that the mapping from key to values is canonical and up-to-date,
- * but the mapping from values to keys may have obsolete data. To return a
- * correct value => key mapping, this class double-checks the value => key
- * mapping it has against the canonical key => value mapping. This allows us to
- * lazily ensure consistency between the key=>value and value=>key mappings,
- * which is useful since most of the data we store won't ever be queried.
+ * This data structure overlays a source DB which contains stale data.
  */
 template <
-    // Must have std::hash and operator== defined
+    // Must have std::hash and operator== defined. Must either be a Path, or
+    // have a field which contains a Path.
     typename Key,
     // Must also have std::hash and operator== defined
     typename Value>
-class LazyTwoWayMap {
+struct LazyTwoWayMap {
 
-  template <typename K, typename V> using Map = hphp_hash_map<K, V>;
-  using ValuesLazySet = LazySet<Value>;
-  using KeysLazySet = LazySet<Key>;
+  using Keys = std::vector<Key>;
+  using Values = std::vector<Value>;
 
-public:
-  using ValuesSet = typename ValuesLazySet::Set;
-  using KeysSet = typename KeysLazySet::Set;
+  struct VersionedKeys {
+    bool m_complete = false;
+    hphp_hash_map<Key, uint64_t> m_keys;
+  };
 
-  /**
-   * The `const` methods which return a `const*` will return `nullptr` if we
-   * haven't yet filled our data from the DB. The non-`const` methods which
-   * return a `const&` may fetch data and modify this map using the
-   * corresponding SourceFn.
-   */
-
-  const ValuesSet* getValuesForKey(Key key) const {
-    auto valuesSetIt = m_keyToValues.find(key);
-    if (valuesSetIt == m_keyToValues.end()) {
-      return nullptr;
-    }
-    return valuesSetIt->second.get();
-  }
-  template <typename ValuesFromSource>
-  const ValuesSet&
-  getValuesForKey(Key key, ValuesFromSource&& valuesFromSource) {
-    return m_keyToValues[key].get(
-        std::forward<ValuesFromSource>(valuesFromSource));
-  }
-
-  const KeysSet* getKeysForValue(Value value) const {
-    auto const* keysSet = [&]() -> const KeysSet* {
-      auto const keysSetIt = m_valueToKeys.find(value);
-      if (keysSetIt == m_valueToKeys.end()) {
-        return nullptr;
-      }
-      return keysSetIt->second.get();
-    }();
-    if (!keysSet) {
-      return nullptr;
-    }
-
-    // This is the non-canonical direction, so double-check that each key is
-    // also in the key-to-value mapping. If our in-memory data shows that the
-    // `keysSet` we got isn't totally correct, abort by returning `nullptr`.
-    for (auto key : *keysSet) {
-      auto const& valuesSetIt = m_keyToValues.find(key);
-      if (valuesSetIt != m_keyToValues.end()) {
-        if (!valuesSetIt->second.contains(value).value_or(true)) {
-          return nullptr;
-        }
-      }
-    }
-
-    return keysSet;
-  }
-  template <typename KeysFromSource>
-  const KeysSet& getKeysForValue(Value value, KeysFromSource&& keysFromSource) {
-    auto& keysSet =
-        m_valueToKeys[value].get(std::forward<KeysFromSource>(keysFromSource));
-
-    // This is the non-canonical direction, so double-check that each key is
-    // also in the key-to-value mapping, erasing the keys which are no longer in
-    // the key-to-value mapping.
-    for (auto key : keysSet) {
-      if (!m_keyToValues[key].contains(value).value_or(true)) {
-        keysSet.erase(key);
-      }
-    }
-    return keysSet;
+  explicit LazyTwoWayMap(std::shared_ptr<PathVersions> versions)
+      : m_versions{std::move(versions)} {
   }
 
   /**
-   * This is the only way to modify a LazyTwoWayMap's contents. In practical
-   * terms, we're describing the new contents of a file after it has changed -
-   * the key is the file path, and the values are the classes declared in that
-   * path.
+   * The `const` methods which return an `Optional` will return `std::nullopt`
+   * if we haven't yet filled our data from the DB.
+   *
+   * Call the `const` overload first, and if it returns a non-`std::nullopt`
+   * value then that value is correct and up-to-date. If it returns
+   * `std::nullopt`, get data from the DB and pass that data into the
+   * non-`const` overload. The non-const overload will store the data you gave
+   * it, remove stale values, and give you a correct answer.
    */
-  void setValuesForKey(Key key, ValuesSet&& newValues) {
-    auto& canonicalValues = m_keyToValues[key];
 
-    // Add any new value-to-keys mappings.
-    for (auto value : newValues) {
-      m_valueToKeys[value].insert(key);
+  Optional<Values> getValuesForKey(const Key& key) const noexcept {
+    auto const valuesIt = m_keyToValues.find(key);
+    if (valuesIt == m_keyToValues.end()) {
+      return {};
     }
-
-    // Erase obsolete mappings.
-    for (auto oldValue : canonicalValues.m_included) {
-      if (!newValues.count(oldValue)) {
-        m_valueToKeys[oldValue].erase(key);
+    return valuesIt->second;
+  }
+  Values getValuesForKey(Key key, const Values& valuesFromSource) noexcept {
+    // Data from the DB is always considered to be more stale than data in the
+    // map, and gets a version number of 0.
+    if (getVersion(key) == 0) {
+      setValuesForKey(key, valuesFromSource);
+    } else {
+      auto values = getValuesForKey(key);
+      if (values) {
+        return *values;
       }
     }
+    return valuesFromSource;
+  }
 
-    // Set the canonical key-to-values mappings.
-    canonicalValues = std::move(newValues);
+  Optional<Keys> getKeysForValue(Value value) const noexcept {
+    auto const versionedKeysIt = m_valueToKeys.find(value);
+    if (versionedKeysIt == m_valueToKeys.end()) {
+      return {};
+    }
+    const VersionedKeys& versionedKeys = versionedKeysIt->second;
+
+    // Bail out if we haven't filled our keys from the DB yet
+    if (!versionedKeys.m_complete) {
+      return {};
+    }
+
+    // Return only the up-to-date keys
+    Keys keys;
+    for (auto const& [key, version] : versionedKeys.m_keys) {
+      if (version == getVersion(key)) {
+        keys.push_back(key);
+      }
+    }
+    return keys;
+  }
+  Keys getKeysForValue(Value value, const Keys& keysFromSource) noexcept {
+    VersionedKeys& versionedKeys = m_valueToKeys[value];
+
+    // Data in the DB is always considered to be more stale than data in the
+    // map, and gets a version number of 0.
+    for (auto const& key : keysFromSource) {
+      versionedKeys.m_keys.insert({key, 0});
+    }
+
+    // Mark our list of keys as filled from the DB
+    versionedKeys.m_complete = true;
+
+    // Remove keys from older versions of files past
+    removeStaleKeys(versionedKeys);
+
+    Keys keys;
+    keys.reserve(versionedKeys.m_keys.size());
+    for (auto const& [key, _] : versionedKeys.m_keys) {
+      keys.push_back(key);
+    }
+    return keys;
+  }
+
+  /**
+   * This is how we modify a LazyTwoWayMap's contents with fresh data. In
+   * practical terms, we're describing the new contents of a file after it has
+   * changed - the key is the file path, and the values are the classes declared
+   * in that path.
+   */
+  void setValuesForKey(const Key& key, Values newValues) noexcept {
+
+    // Erase old mappings.
+    auto& existingValues = m_keyToValues[key];
+    for (const Value& value : existingValues) {
+      auto& versionedKeys = m_valueToKeys[value];
+      versionedKeys.m_keys.erase(key);
+    }
+
+    // Add the value-to-keys mappings.
+    uint64_t version = getVersion(key);
+    for (const Value& value : newValues) {
+      VersionedKeys& versionedKeys = m_valueToKeys[value];
+
+      // Two keys with differently uppercased/lowercased characters can still be
+      // equal due to case-insensitive equality. `insert_or_assign` never
+      // changes keys, so we need to explicitly erase the key here.
+      versionedKeys.m_keys.erase(key);
+      versionedKeys.m_keys.insert_or_assign(key, version);
+    }
+
+    // Set the key-to-values mappings.
+    existingValues = std::move(newValues);
   }
 
 private:
-  Map<Key, ValuesLazySet> m_keyToValues;
-  Map<Value, KeysLazySet> m_valueToKeys;
+  uint64_t getVersion(const Key& key) const noexcept {
+    return m_versions->getVersion(detail::getPathFromKey(key));
+  }
+
+  void removeStaleKeys(VersionedKeys& versionedKeys) const noexcept {
+    auto it = versionedKeys.m_keys.begin();
+    while (it != versionedKeys.m_keys.end()) {
+      auto& [key, version] = *it;
+      if (version != getVersion(key)) {
+        it = versionedKeys.m_keys.erase(it);
+      } else {
+        ++it;
+      }
+    }
+  }
+
+  hphp_hash_map<Key, Values> m_keyToValues;
+  hphp_hash_map<Value, VersionedKeys> m_valueToKeys;
+  std::shared_ptr<PathVersions> m_versions;
 };
 
 } // namespace Facts

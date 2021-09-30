@@ -484,7 +484,7 @@ TEST_P(SymbolMapTest, DBFill) {
 
   // file -> symbol
   EXPECT_THAT(
-      m1.getFileTypes(path), UnorderedElementsAre("BaseClass", "SomeClass"));
+      m2.getFileTypes(path), UnorderedElementsAre("BaseClass", "SomeClass"));
   EXPECT_EQ(m2.getFileFunctions(path).at(0).slice(), "some_fn");
   EXPECT_EQ(m2.getFileConstants(path).at(0).slice(), "SOME_CONSTANT");
   EXPECT_EQ(m2.getFileTypeAliases(path).at(0).slice(), "SomeTypeAlias");

@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
@@ -27,6 +28,7 @@
 #include "hphp/runtime/ext/facts/attribute-argument-map.h"
 #include "hphp/runtime/ext/facts/file-facts.h"
 #include "hphp/runtime/ext/facts/lazy-two-way-map.h"
+#include "hphp/runtime/ext/facts/path-versions.h"
 #include "hphp/runtime/ext/facts/symbol-types.h"
 
 namespace HPHP {
@@ -35,22 +37,25 @@ namespace Facts {
 template <typename Key> struct AttributeMap {
   using KeyToAttrMap = LazyTwoWayMap<Key, Symbol<SymKind::Type>>;
 
-  using TypeDefSet = typename KeyToAttrMap::KeysSet;
-  using AttrSet = typename KeyToAttrMap::ValuesSet;
+  using TypeDefs = typename KeyToAttrMap::Keys;
+  using Attrs = typename KeyToAttrMap::Values;
+
+  explicit AttributeMap(std::shared_ptr<PathVersions> versions)
+      : m_attrMap{std::move(versions)} {
+  }
 
   /**
    * Returns the attributes present in the map, or `nullptr` if the map needs
    * to be filled from the DB.
    */
-  const AttrSet* getAttributes(Key key) const {
+  Optional<Attrs> getAttributes(Key key) const {
     return m_attrMap.getValuesForKey(key);
   }
 
   /**
    * Fill the map with `attrsFromDB` and return a complete set of attributes.
    */
-  const AttrSet&
-  getAttributes(Key key, std::vector<Symbol<SymKind::Type>> attrsFromDB) {
+  Attrs getAttributes(Key key, std::vector<Symbol<SymKind::Type>> attrsFromDB) {
     return m_attrMap.getValuesForKey(key, std::move(attrsFromDB));
   }
 
@@ -58,24 +63,24 @@ template <typename Key> struct AttributeMap {
    * Returns the keys present in the map, or `nullptr` if the map needs to be
    * filled from the DB.
    */
-  const TypeDefSet* getKeysWithAttribute(Symbol<SymKind::Type> attr) const {
+  Optional<TypeDefs> getKeysWithAttribute(Symbol<SymKind::Type> attr) const {
     return m_attrMap.getKeysForValue(attr);
   }
 
   /**
    * Fill the map with `keysFromDB` and return a complete set of keys.
    */
-  const TypeDefSet& getKeysWithAttribute(
+  TypeDefs getKeysWithAttribute(
       Symbol<SymKind::Type> attr, std::vector<Key> keysFromDB) {
     return m_attrMap.getKeysForValue(attr, std::move(keysFromDB));
   }
 
   void setAttributes(Key key, std::vector<Attribute> attrVec) {
-    AttrSet attrs;
+    Attrs attrs;
     attrs.reserve(attrVec.size());
     for (auto& attr : attrVec) {
       auto attrSym = Symbol<SymKind::Type>{attr.m_name};
-      attrs.emplace(attrSym);
+      attrs.push_back(attrSym);
       m_attrArgs.setAttributeArgs(key, attrSym, std::move(attr.m_args));
     }
     m_attrMap.setValuesForKey(std::move(key), std::move(attrs));
@@ -91,14 +96,6 @@ template <typename Key> struct AttributeMap {
       Symbol<SymKind::Type> attr,
       std::vector<folly::dynamic> argsFromDB) {
     return m_attrArgs.getAttributeArgs(key, attr, std::move(argsFromDB));
-  }
-
-  void removeKey(Key key, std::vector<std::string> attrsFromDB) {
-    m_attrMap.setValuesForKey(key, {});
-    auto attrs = getAttributes(key, Symbol<SymKind::Type>::from(attrsFromDB));
-    for (auto attr : attrs) {
-      m_attrArgs.setAttributeArgs(key, attr, {});
-    }
   }
 
   KeyToAttrMap m_attrMap;

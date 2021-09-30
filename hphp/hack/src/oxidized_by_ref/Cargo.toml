@@ -24,7 +24,7 @@ typing_deps_hash = { path = "../deps/cargo/typing_deps_hash" }
 
 [dev-dependencies]
 pretty_assertions = "0.6"
-serde_json = { version = "1.0", features = ["float_roundtrip"] }
+serde_json = { version = "1.0", features = ["float_roundtrip", "unbounded_depth"] }
 
 [profile.release]
 incremental = false

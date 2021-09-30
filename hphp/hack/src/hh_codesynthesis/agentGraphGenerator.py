@@ -154,19 +154,28 @@ class AgentGraphGenerator:
     def add_edge(self, left_agent: int, right_agent: int) -> None:
         self.edges[left_agent].add(right_agent)
 
-    def validate_range_in_profile(self, degree: List[int], direction: str) -> bool:
-        for node, degree in enumerate(degree):
+    def validate_range_in_profile(self, degrees: List[int], direction: str) -> bool:
+        for node, degree in enumerate(degrees):
             # Select a right profile to use.
-            agent_profile = self.solving_context.infra_agent_profile
-            if node in self.product_agents:
+            if node in self.infra_agents:
+                agent_profile = self.solving_context.infra_agent_profile
+            elif node in self.product_agents:
                 agent_profile = self.solving_context.product_agent_profile
+            else:
+                raise RuntimeError("Can't find a profile for agent {0}".format(node))
 
             # Check the degree within the range or not.
-            if (
-                degree < agent_profile[direction][0]
-                or degree > agent_profile[direction][1]
-            ):
-                return False
+            assert (
+                degree >= agent_profile[direction][0]
+                and degree < agent_profile[direction][1]
+            ), "Node {0}'s {1}: {2} is out of range {3}, {4}.".format(
+                node,
+                direction,
+                degree,
+                agent_profile[direction][0],
+                agent_profile[direction][1],
+            )
+
         return True
 
     def validate(
@@ -176,10 +185,16 @@ class AgentGraphGenerator:
         ] = None,
     ) -> bool:
         # Graph validation using the constraints specified in the context.
-        if len(self.infra_agents) < self.solving_context.number_of_infra_agents:
-            return False
-        if len(self.product_agents) < self.solving_context.number_of_product_agents:
-            return False
+        assert (
+            len(self.infra_agents) >= self.solving_context.number_of_infra_agents
+        ), "Expected to get at least {0}, but only have {1} infra agents.".format(
+            len(self.infra_agents), self.solving_context.number_of_infra_agents
+        )
+        assert (
+            len(self.product_agents) >= self.solving_context.number_of_product_agents
+        ), "Expected to get at least {0}, but only have {1} product agents.".format(
+            len(self.product_agents), self.solving_context.number_of_product_agents
+        )
 
         # Compute in/out degree.
         in_degrees = [0] * sum(self.agent_distribution)
@@ -191,10 +206,8 @@ class AgentGraphGenerator:
                 out_degrees[x] += 1
 
         # Validate the degrees are in the range specified by the profile.
-        if self.validate_range_in_profile(in_degrees, "in_degree") is False:
-            return False
-        if self.validate_range_in_profile(out_degrees, "out_degree") is False:
-            return False
+        self.validate_range_in_profile(in_degrees, "in_degree")
+        self.validate_range_in_profile(out_degrees, "out_degree")
 
         # Customized range function needs a customized validator.
         if customize_validator is not None:

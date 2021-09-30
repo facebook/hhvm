@@ -93,7 +93,7 @@ let dump_shallow_decls
     decls_in_file
 
 let get_project_metadata ~(repo : Path.t) ~ignore_hh_version :
-    (string, string) result Future.Promise.t =
+    (string * string, string) result Future.Promise.t =
   let hhconfig_path =
     Path.to_string
       (Path.concat repo Config_file.file_path_relative_to_repo_root)
@@ -120,7 +120,7 @@ let get_project_metadata ~(repo : Path.t) ~ignore_hh_version :
       || String.length Build_id.build_revision <= 16
     in
     if not derived_ignore_hh_version then
-      return_ok Build_id.build_revision
+      return_ok (Build_id.build_revision, Hh_version.version)
     else
       let version = Config_file.Getters.string_opt "version" config in
       begin
@@ -157,7 +157,7 @@ let get_project_metadata ~(repo : Path.t) ~ignore_hh_version :
       Future.Promise.bind process_result (function
           | Ok stdout ->
             let hash = String.slice stdout 0 40 in
-            return_ok hash
+            return_ok (hash, hh_version)
           | Error process_failure ->
             let error =
               Printf.sprintf
@@ -167,18 +167,20 @@ let get_project_metadata ~(repo : Path.t) ~ignore_hh_version :
             in
             return_err error)
   end
-  >>= fun hh_server_hash ->
+  >>= fun (hh_server_hash, hh_version) ->
   let project_metadata = Printf.sprintf "%s-%s" hhconfig_hash hh_server_hash in
-  return_ok project_metadata
+  return_ok (project_metadata, hh_version)
 
-let get_changed_files_since_last_saved_state ~(ignore_hh_version : bool) :
-    (Relative_path.t list, string) result Future.Promise.t =
+let get_changed_files_and_hh_version_since_last_saved_state
+    ~(ignore_hh_version : bool) :
+    (Relative_path.t list * string, string) result Future.Promise.t =
   let saved_state_type =
     Saved_state_loader.Naming_and_dep_table { is_64bit = true }
   in
   let root = Wwwroot.get None in
   let project_name = Saved_state_loader.get_project_name saved_state_type in
-  get_project_metadata ~repo:root ~ignore_hh_version >>= fun project_metadata ->
+  get_project_metadata ~repo:root ~ignore_hh_version
+  >>= fun (project_metadata, hh_version) ->
   let query =
     Printf.sprintf
       {|
@@ -247,25 +249,18 @@ let get_changed_files_since_last_saved_state ~(ignore_hh_version : bool) :
   let changed_files =
     List.map files ~f:(fun suffix -> Relative_path.from_root ~suffix)
   in
-  return_ok changed_files
+  return_ok (changed_files, hh_version)
 
 let go (env : ServerEnv.env) (genv : ServerEnv.genv) (dir : string) : unit =
   let ctx = Provider_utils.ctx_from_server_env env in
-  (* TODO: Make this more robust. I should be able to get the root from somewhere... *)
-  let root = Wwwroot.get None in
-  let mergebase_rev =
-    match Future.get @@ Hg.current_mergebase_hg_rev (Path.to_string root) with
-    | Ok hash -> hash
-    | Error _ -> failwith "Exception getting the current mergebase revision"
-  in
-  let dir = Filename.concat dir mergebase_rev in
-  let changed_files_since_last_saved_state =
-    get_changed_files_since_last_saved_state
-      ~ignore_hh_version:(ServerArgs.ignore_hh_version genv.ServerEnv.options)
-  in
-  let changed_files : Relative_path.t list =
-    match Future.get changed_files_since_last_saved_state with
-    | Ok (Ok files) -> files
+  let (changed_files, hh_version) =
+    match
+      Future.get
+      @@ get_changed_files_and_hh_version_since_last_saved_state
+           ~ignore_hh_version:
+             (ServerArgs.ignore_hh_version genv.ServerEnv.options)
+    with
+    | Ok (Ok result) -> result
     | Ok (Error e) -> failwith (Printf.sprintf "%s" e)
     | Error e -> failwith (Printf.sprintf "%s" (Future.error_to_string e))
   in
@@ -278,6 +273,7 @@ let go (env : ServerEnv.env) (genv : ServerEnv.genv) (dir : string) : unit =
           None)
       changed_files
   in
+  let dir = Filename.concat dir hh_version in
   List.iter
     ~f:(fun path ->
       dump_shallow_decls ctx genv dir path;

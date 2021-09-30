@@ -154,6 +154,21 @@ class AgentGraphGenerator:
     def add_edge(self, left_agent: int, right_agent: int) -> None:
         self.edges[left_agent].add(right_agent)
 
+    def validate_range_in_profile(self, degree: List[int], direction: str) -> bool:
+        for node, degree in enumerate(degree):
+            # Select a right profile to use.
+            agent_profile = self.solving_context.infra_agent_profile
+            if node in self.product_agents:
+                agent_profile = self.solving_context.product_agent_profile
+
+            # Check the degree within the range or not.
+            if (
+                degree < agent_profile[direction][0]
+                or degree > agent_profile[direction][1]
+            ):
+                return False
+        return True
+
     def validate(
         self,
         customize_validator: Optional[
@@ -175,33 +190,13 @@ class AgentGraphGenerator:
             for x in depends_on:
                 out_degrees[x] += 1
 
-        for node, degree in enumerate(in_degrees):
-            agent_profile = self.solving_context.infra_agent_profile
-            if node in self.product_agents:
-                agent_profile = self.solving_context.product_agent_profile
+        # Validate the degrees are in the range specified by the profile.
+        if self.validate_range_in_profile(in_degrees, "in_degree") is False:
+            return False
+        if self.validate_range_in_profile(out_degrees, "out_degree") is False:
+            return False
 
-            if (
-                degree < agent_profile["in_degree"][0]
-                or degree > agent_profile["in_degree"][1]
-            ):
-                raise RuntimeError(
-                    "node: {0}, degree: {1}, models: {2}".format(
-                        node, degree, self._raw_model
-                    )
-                )
-                return False
-
-        for node, degree in enumerate(out_degrees):
-            agent_profile = self.solving_context.infra_agent_profile
-            if node in self.product_agents:
-                agent_profile = self.solving_context.product_agent_profile
-
-            if (
-                degree < agent_profile["out_degree"][0]
-                or degree > agent_profile["out_degree"][1]
-            ):
-                return False
-
+        # Customized range function needs a customized validator.
         if customize_validator is not None:
             return customize_validator(
                 self.infra_agents, self.product_agents, in_degrees, out_degrees

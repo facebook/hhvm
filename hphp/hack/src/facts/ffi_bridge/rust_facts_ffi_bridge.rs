@@ -3,7 +3,7 @@
 use cxx::CxxString;
 use facts_rust::facts;
 use oxidized::relative_path::RelativePath;
-use rust_facts_ffi::extract_as_json_ffi0;
+use rust_facts_ffi::{extract_as_json_ffi0, extract_facts_ffi0};
 use std::collections::{BTreeMap, BTreeSet};
 
 #[cxx::bridge]
@@ -54,7 +54,7 @@ mod ffi {
         typefacts: TypeFacts,
     }
 
-    #[derive(Debug)]
+    #[derive(Debug, Default)]
     struct Facts {
         pub types: Vec<TypeFactsByName>,
         pub functions: Vec<String>,
@@ -63,12 +63,27 @@ mod ffi {
         pub file_attributes: Vec<Attribute>,
     }
 
+    #[derive(Debug, Default)]
+    struct FactsResult {
+        facts: Facts,
+        md5sum: String,
+        sha1sum: String,
+    }
+
     extern "Rust" {
         pub fn hackc_extract_as_json_cpp_ffi(
             flags: i32,
             filename: &CxxString,
             source_text: &CxxString,
         ) -> String;
+    }
+
+    extern "Rust" {
+        pub fn hackc_extract_facts_cpp_ffi(
+            flags: i32,
+            filename: &CxxString,
+            source_text: &CxxString,
+        ) -> FactsResult;
     }
 }
 
@@ -95,6 +110,40 @@ pub fn hackc_extract_as_json_cpp_ffi(
     ) {
         Some(s) => s,
         None => String::new(),
+    }
+}
+
+pub fn hackc_extract_facts_cpp_ffi(
+    flags: i32,
+    filename: &CxxString,
+    source_text: &CxxString,
+) -> ffi::FactsResult {
+    use std::os::unix::ffi::OsStrExt;
+    let filepath = RelativePath::make(
+        oxidized::relative_path::Prefix::Dummy,
+        std::path::PathBuf::from(std::ffi::OsStr::from_bytes(filename.as_bytes())),
+    );
+    let text = source_text.as_bytes();
+    match extract_facts_ffi0(
+        ((1 << 0) & flags) != 0, // php5_compat_mode
+        ((1 << 1) & flags) != 0, // hhvm_compat_mode
+        ((1 << 2) & flags) != 0, // allow_new_attribute_syntax
+        ((1 << 3) & flags) != 0, // enable_xhp_class_modifier
+        ((1 << 4) & flags) != 0, // disable_xhp_element_mangling
+        ((1 << 5) & flags) != 0, // disallow_hash_comments
+        filepath,
+        text,
+        true, // mangle_xhp
+    ) {
+        Some(facts) => {
+            let (md5sum, sha1sum) = facts::md5_and_sha1(text);
+            ffi::FactsResult {
+                facts: facts.into(),
+                md5sum,
+                sha1sum,
+            }
+        }
+        None => Default::default(),
     }
 }
 

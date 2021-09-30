@@ -62,3 +62,26 @@ pub fn extract_as_json_ffi0(
         without_xhp_mangling(|| extract_as_json(text, opts))
     }
 }
+
+pub fn extract_facts_ffi0(
+    php5_compat_mode: bool,
+    hhvm_compat_mode: bool,
+    allow_new_attribute_syntax: bool,
+    enable_xhp_class_modifier: bool,
+    disable_xhp_element_mangling: bool,
+    disallow_hash_comments: bool,
+    filename: RelativePath,
+    text: &[u8],
+    _mangle_xhp: bool,
+) -> Option<facts::facts::Facts> {
+    let opts = ExtractAsJsonOpts {
+        php5_compat_mode,
+        hhvm_compat_mode,
+        allow_new_attribute_syntax,
+        enable_xhp_class_modifier,
+        disable_xhp_element_mangling,
+        filename,
+        disallow_hash_comments,
+    };
+    from_text(text, opts)
+}

@@ -861,6 +861,7 @@ void Class::initProps() const {
   auto propVec = PropInitVec::allocWithReqAllocator(m_declPropInit);
 
   VMRegAnchor _;
+  CoeffectsAutoGuard _2;
 
   initPropHandle();
   m_propDataCache.initWith(propVec);
@@ -915,8 +916,10 @@ void Class::initSProps() const {
 
   const bool hasNonscalarInit = !m_sinitVec.empty() || !m_linitVec.empty();
   Optional<VMRegAnchor> _;
+  Optional<CoeffectsAutoGuard> _2;
   if (hasNonscalarInit) {
     _.emplace();
+    _2.emplace();
   }
 
   // Initialize static props for parent.
@@ -4949,6 +4952,7 @@ Class* Class::load(const NamedEntity* ne, const StringData* name) {
 
 Class* Class::loadMissing(const NamedEntity* ne, const StringData* name) {
   VMRegAnchor _;
+  CoeffectsAutoGuard _2;
   AutoloadHandler::s_instance->autoloadClass(
     StrNR(const_cast<StringData*>(name)));
   return Class::lookup(ne);

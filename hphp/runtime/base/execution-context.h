@@ -26,6 +26,7 @@
 #include "hphp/runtime/ext/stream/ext_stream.h"
 #include "hphp/runtime/server/transport.h"
 #include "hphp/runtime/server/virtual-host.h"
+#include "hphp/runtime/vm/coeffects.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/minstr-state.h"
@@ -65,6 +66,8 @@ struct VMState {
   jit::TCA jitReturnAddr;
   Either<ObjectData*, Exception*> exn;
   bool unwinderSideEnter;
+  bool savedCoeffectsAvailable;
+  Optional<RuntimeCoeffects> savedAutoCoeffects;
 };
 
 enum class InclOpFlags {

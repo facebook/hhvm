@@ -79,6 +79,7 @@ void copySlice(ArrayData* from, ArrayData* to,
 // Used by addAll for Vector only
 void BaseVector::addAllImpl(const Variant& t) {
   if (t.isNull()) return;
+  CoeffectsAutoGuard _;
 
   auto ok = IterateV(
     *t.asTypedValue(),

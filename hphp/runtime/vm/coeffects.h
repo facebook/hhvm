@@ -17,6 +17,7 @@
 #pragma once
 
 #include "hphp/runtime/vm/class.h"
+#include "hphp/util/optional.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -49,6 +50,7 @@ struct RuntimeCoeffects {
     return RuntimeCoeffects::defaults();
   }
 
+  static RuntimeCoeffects automatic();
 
   uint16_t value() const { return m_data; }
 
@@ -70,6 +72,18 @@ struct RuntimeCoeffects {
 private:
   explicit RuntimeCoeffects(uint16_t data) : m_data(data) {}
   storage_t m_data;
+};
+
+struct CoeffectsAutoGuard {
+  CoeffectsAutoGuard();
+  ~CoeffectsAutoGuard();
+
+  static Optional<RuntimeCoeffects>& savedState();
+  static bool& available();
+
+private:
+  Optional<RuntimeCoeffects> savedCoeffects;
+  bool savedAvailable;
 };
 
 struct StaticCoeffects {

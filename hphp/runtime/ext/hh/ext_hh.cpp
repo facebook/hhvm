@@ -43,6 +43,7 @@
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"
 #include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
+#include "hphp/runtime/vm/coeffects.h"
 #include "hphp/runtime/vm/memo-cache.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/runtime.h"
@@ -475,24 +476,28 @@ ALWAYS_INLINE TypedValue serialize_memoize_string_top(StringData* str) {
 } // end anonymous namespace
 
 TypedValue serialize_memoize_param_arr(ArrayData* arr) {
+  CoeffectsAutoGuard _;
   StringBuffer sb;
   serialize_memoize_array(sb, 0, arr);
   return tvReturn(sb.detach());
 }
 
 TypedValue serialize_memoize_param_set(ArrayData* arr) {
+  CoeffectsAutoGuard _;
   StringBuffer sb;
   serialize_memoize_set(sb, arr);
   return tvReturn(sb.detach());
 }
 
 TypedValue serialize_memoize_param_obj(ObjectData* obj) {
+  CoeffectsAutoGuard _;
   StringBuffer sb;
   serialize_memoize_obj(sb, 0, obj);
   return tvReturn(sb.detach());
 }
 
 TypedValue serialize_memoize_param_col(ObjectData* obj) {
+  CoeffectsAutoGuard _;
   StringBuffer sb;
   serialize_memoize_col(sb, 0, obj);
   return tvReturn(sb.detach());
@@ -517,6 +522,7 @@ TypedValue serialize_memoize_param_dbl(double val) {
 TypedValue HHVM_FUNCTION(serialize_memoize_param, TypedValue param) {
   // Memoize throws in the emitter if any function parameters are references, so
   // we can just assert that the param is cell here
+  CoeffectsAutoGuard _;
   assertx(tvIsPlausible(param));
   auto const type = param.m_type;
 

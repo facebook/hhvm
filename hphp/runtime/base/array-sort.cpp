@@ -26,6 +26,7 @@
 #include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/runtime/base/vanilla-vec-defs.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/coeffects.h"
 
 #include <folly/ScopeGuard.h>
 
@@ -273,6 +274,7 @@ void VanillaVec::Sort(ArrayData* ad, int sort_flags, bool ascending) {
 
 #define USER_SORT_BODY(acc_type, resetKeys)                     \
   do {                                                          \
+    CoeffectsAutoGuard _;                                       \
     if (!a->m_size) return true;                                \
     CallCtx ctx;                                                \
     vm_decode_function(cmp_function, ctx);                      \
@@ -343,6 +345,7 @@ bool VanillaVec::Usort(ArrayData* ad, const Variant& cmp_function) {
     return true;
   }
   assertx(!ad->hasMultipleRefs());
+  CoeffectsAutoGuard _;
   CallCtx ctx;
   vm_decode_function(cmp_function, ctx);
   if (!ctx.func) {

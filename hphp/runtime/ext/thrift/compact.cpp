@@ -33,6 +33,7 @@
 #include "hphp/runtime/ext/thrift/util.h"
 
 #include "hphp/runtime/vm/vm-regs.h"
+#include "hphp/runtime/vm/coeffects.h"
 
 #include "hphp/runtime/vm/jit/perf-counters.h"
 
@@ -1196,6 +1197,7 @@ void HHVM_FUNCTION(thrift_protocol_write_compact,
                    const Object& request_struct,
                    int seqid,
                    bool oneway) {
+  CoeffectsAutoGuard _;
   // Suppress class-to-string conversion warnings that occur during
   // serialization and deserialization.
   SuppressClassConversionWarning suppressor;
@@ -1218,11 +1220,12 @@ Variant HHVM_FUNCTION(thrift_protocol_read_compact,
                       const Object& transportobj,
                       const String& obj_typename,
                       int options) {
+  CoeffectsAutoGuard _;
   // Suppress class-to-string conversion warnings that occur during
   // serialization and deserialization.
   SuppressClassConversionWarning suppressor;
 
-  VMRegAnchor _;
+  VMRegAnchor _2;
   CompactReader reader(transportobj, options);
   return reader.read(obj_typename);
 }

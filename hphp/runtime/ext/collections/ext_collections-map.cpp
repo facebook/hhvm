@@ -11,6 +11,7 @@
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/vm/vm-regs.h"
+#include "hphp/runtime/vm/coeffects.h"
 
 namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
@@ -59,6 +60,7 @@ void BaseMap::setAllImpl(const Variant& iterable) {
 void BaseMap::addAllImpl(const Variant& iterable) {
   if (iterable.isNull()) return;
   VMRegGuard _;
+  CoeffectsAutoGuard _2;
 
   decltype(cap()) oldCap = 0;
   bool ok = IterateKV(
@@ -128,6 +130,7 @@ void BaseMap::addAllImpl(const Variant& iterable) {
 void BaseMap::addAllPairs(const Variant& iterable) {
   if (iterable.isNull()) return;
   VMRegGuard _;
+  CoeffectsAutoGuard _2;
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
   auto oldCap = cap();

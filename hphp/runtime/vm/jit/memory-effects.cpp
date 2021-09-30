@@ -398,6 +398,10 @@ GeneralEffects may_reenter(const IRInstruction& inst, GeneralEffects x) {
     return kills_union ? *kills_union : killed_stack;
   }();
 
+  auto const coeffects = inst.maySyncCoeffectsWithSources()
+    ? coeffect_local(inst)
+    : AEmpty;
+
   return GeneralEffects {
     x.loads | AHeapAny | ARdsAny | AVMRegAny | AVMRegState,
     x.stores | AHeapAny | ARdsAny | AVMRegAny,
@@ -405,7 +409,7 @@ GeneralEffects may_reenter(const IRInstruction& inst, GeneralEffects x) {
     new_kills,
     x.inout,
     backtrace_locals(inst),
-    coeffect_local(inst)
+    coeffects
   };
 }
 
@@ -2138,6 +2142,7 @@ MemEffects memory_effects(const IRInstruction& inst) {
   auto const inner = memory_effects_impl(inst);
   auto const ret = [&] () -> MemEffects {
     if (!inst.mayRaiseErrorWithSources()) {
+      assertx(!inst.maySyncCoeffectsWithSources());
       if (inst.maySyncVMRegsWithSources()) {
         auto fail = [&] {
           always_assert_flog(

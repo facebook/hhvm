@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/coeffects.h"
 
 #include "hphp/runtime/base/coeffects-config.h"
+#include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/vm/blob-helper.h"
 #include "hphp/runtime/vm/runtime.h"
 
@@ -297,7 +298,61 @@ RuntimeCoeffects emitCaller(RuntimeCoeffects provided) {
   return provided;
 }
 
+RDS_LOCAL(Optional<RuntimeCoeffects>, autoCoeffects);
+RDS_LOCAL(bool, autoCoeffectsAvailable);
+
+RuntimeCoeffects computeAutomaticCoeffects() {
+  // Return the coeffects corresponding to the leaf VM frame. If there is no
+  // such frame, return default coeffects.
+  return fromLeafUnpublished([](const ActRec* fp, const ActRec* realFp, Offset off) {
+    assertx(realFp);
+    auto const func = fp->func();
+    if (!func->hasCoeffectsLocal()) {
+      if (func->hasCoeffectRules()) {
+        return RuntimeCoeffects::fixme();
+      }
+      return func->requiredCoeffects();
+    }
+    auto const id = func->coeffectsLocalId();
+    auto const tv = reinterpret_cast<const TypedValue*>(realFp) - (id + 1);
+    assertx(tvIsInt(tv));
+    return RuntimeCoeffects::fromValue(tv->m_data.num);
+  }, RuntimeCoeffects::defaults());
+}
+
 } // namespace
+
+CoeffectsAutoGuard::CoeffectsAutoGuard() {
+  savedCoeffects = *autoCoeffects;
+  savedAvailable = *autoCoeffectsAvailable;
+  *autoCoeffectsAvailable = true;
+  *autoCoeffects = std::nullopt;
+}
+
+CoeffectsAutoGuard::~CoeffectsAutoGuard() {
+  *autoCoeffects = savedCoeffects;
+  *autoCoeffectsAvailable = savedAvailable;
+}
+
+Optional<RuntimeCoeffects>& CoeffectsAutoGuard::savedState() {
+  return *autoCoeffects;
+}
+
+bool& CoeffectsAutoGuard::available() {
+  return *autoCoeffectsAvailable;
+}
+
+RuntimeCoeffects RuntimeCoeffects::automatic() {
+  if (!*autoCoeffectsAvailable) {
+    return computeAutomaticCoeffects();
+  }
+  if (autoCoeffects->has_value()) {
+    return **autoCoeffects;
+  }
+  auto const coeffects = computeAutomaticCoeffects();
+  *autoCoeffects = coeffects;
+  return coeffects;
+}
 
 std::pair<StaticCoeffects, RuntimeCoeffects>
 getCoeffectsInfoFromList(std::vector<LowStringPtr> staticCoeffects,

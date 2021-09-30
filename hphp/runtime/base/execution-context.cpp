@@ -648,6 +648,8 @@ void ExecutionContext::executeFunctions(ShutdownType type) {
     *ImplicitContext::activeCtx = nullptr;
   }
 
+  CoeffectsAutoGuard _;
+
   // We mustn't destroy any callbacks until we're done with all
   // of them. So hold them in tmp.
   // XXX still true in a world without destructors?
@@ -1313,7 +1315,9 @@ void ExecutionContext::pushVMState(TypedValue* savedSP) {
       vmJitCalledFrame(),
       vmJitReturnAddr(),
       jit::g_unwind_rds->exn,
-      jit::g_unwind_rds->sideEnter
+      jit::g_unwind_rds->sideEnter,
+      CoeffectsAutoGuard::available(),
+      CoeffectsAutoGuard::savedState()
     }
   );
   jit::g_unwind_rds->exn = nullptr;
@@ -1357,6 +1361,8 @@ void ExecutionContext::popVMState() {
   vmJitReturnAddr() = savedVM.jitReturnAddr;
   jit::g_unwind_rds->exn = savedVM.exn;
   jit::g_unwind_rds->sideEnter = savedVM.unwinderSideEnter;
+  CoeffectsAutoGuard::savedState() = savedVM.savedAutoCoeffects;
+  CoeffectsAutoGuard::available() = savedVM.savedCoeffectsAvailable;
 
   if (debug) {
     if (savedVM.fp &&
@@ -1507,6 +1513,8 @@ static inline void enterVM(ActRec* ar, Action action) {
   vmFirstAR() = ar;
   vmJitCalledFrame() = nullptr;
   vmJitReturnAddr() = 0;
+  CoeffectsAutoGuard::savedState() = std::nullopt;
+  CoeffectsAutoGuard::available() = false;
 
   action();
 

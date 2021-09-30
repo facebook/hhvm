@@ -16,6 +16,7 @@ namespace HH\Lib\_Private\_Locale {
 
 final class Locale {
   private function __construct() {}
+  public function __debugInfo(): dict<arraykey, mixed>;
 }
 
 function get_c_locale()[]: Locale;

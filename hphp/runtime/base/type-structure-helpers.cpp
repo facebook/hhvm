@@ -461,8 +461,10 @@ bool isTSAllWildcards(const ArrayData* ts) {
 // This function will only be called when either `param` is an object or `type_`
 // is a primitive reified type parameter
 bool verifyReifiedLocalType(
-  const ArrayData* type_,
   tv_rval param,
+  const ArrayData* type_,
+  const Class* ctx,
+  const Func* func,
   bool isTypeVar,
   bool& warn
 ) {
@@ -488,10 +490,7 @@ bool verifyReifiedLocalType(
   if (isObj && get_ts_kind(type_) == TypeStructure::Kind::T_unresolved) {
     try {
       bool persistent = true;
-      auto const declaringCls = vmfp()->func()->cls();
-      auto const thiz = declaringCls && vmfp()->hasThis()
-        ? vmfp()->getThis()->getVMClass() : nullptr;
-      type = TypeStructure::resolve(type, thiz, declaringCls,
+      type = TypeStructure::resolve(type, ctx, func->cls(),
                                     req::vector<Array>(), persistent);
     } catch (Exception& e) {
       if (is_ts_soft(type_)) warn = true;

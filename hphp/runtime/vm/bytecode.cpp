@@ -4557,7 +4557,9 @@ OPTBLD_INLINE void iopVerifyParamTypeTS(local_var param) {
   auto isTypeVar = tcCouldBeReified(vmfp()->func(), param.index);
   bool warn = false;
   if ((isTypeVar || tvIsObject(param.lval)) &&
-      !verifyReifiedLocalType(cell->m_data.parr, param.lval, isTypeVar, warn)) {
+      !verifyReifiedLocalType(
+        param.lval, cell->m_data.parr, frameStaticClass(vmfp()), vmfp()->func(),
+        isTypeVar, warn)) {
     raise_reified_typehint_error(
       folly::sformat(
         "Argument {} passed to {}() must be an instance of {}, {} given",
@@ -4631,7 +4633,9 @@ OPTBLD_INLINE void iopVerifyRetTypeTS() {
   bool isTypeVar = tcCouldBeReified(vmfp()->func(), TypeConstraint::ReturnId);
   bool warn = false;
   if ((isTypeVar || tvIsObject(cell)) &&
-      !verifyReifiedLocalType(ts->m_data.parr, cell, isTypeVar, warn)) {
+      !verifyReifiedLocalType(
+        cell, ts->m_data.parr, frameStaticClass(vmfp()), vmfp()->func(),
+        isTypeVar, warn)) {
     raise_reified_typehint_error(
       folly::sformat(
         "Value returned from function {}() must be of type {}, {} given",

@@ -99,8 +99,15 @@ TypedValue VerifyRetTypeFail(TypedValue value,
                              int32_t retId,
                              const TypeConstraint* tc);
 
-void VerifyReifiedLocalTypeImpl(int32_t, ArrayData*);
-void VerifyReifiedReturnTypeImpl(TypedValue, ArrayData*);
+void VerifyReifiedLocalTypeImpl(TypedValue value,
+                                ArrayData* ts,
+                                const Class* ctx,
+                                const Func* func,
+                                int32_t paramId);
+void VerifyReifiedReturnTypeImpl(TypedValue value,
+                                 ArrayData* ts,
+                                 const Class* ctx,
+                                 const Func* func);
 
 void raise_error_sd(const StringData* sd);
 

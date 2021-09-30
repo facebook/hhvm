@@ -2039,12 +2039,12 @@ To string conversions:
   false otherwise. Once support for coercing class_meth types is removed this
   ir instruction can also be removed (T61738946).
 
-| VerifyReifiedLocalType<id>, ND, S(Dict), LA
+| VerifyReifiedLocalType<func,paramId>, ND, S(Cell) S(Dict) S(Cls|Nullptr), LA
 
   Raises a catchable type hint error if the reified generics of function
   parameter id does not match the type structure given on S0.
 
-| VerifyReifiedReturnType, ND, S(Cell) S(Dict), LA
+| VerifyReifiedReturnType<func>, ND, S(Cell) S(Dict) S(Cls|Nullptr), LA
 
   Raises a catchable type hint error if the reified generics of S0 does not
   match the type structure given on S1.

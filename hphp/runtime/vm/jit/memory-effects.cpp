@@ -708,24 +708,13 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case VerifyParamCls:
   case VerifyParamFail:
   case VerifyParamFailHard:
+  case VerifyReifiedLocalType:
+  case VerifyReifiedReturnType:
   case VerifyRetCallable:
   case VerifyRetCls:
   case VerifyRetFail:
   case VerifyRetFailHard:
     return may_load_store(AHeapAny, AHeapAny);
-
-  case VerifyReifiedLocalType: {
-    auto const extra = inst.extra<ParamData>();
-    assertx(extra->paramId >= 0);
-    auto const stores =
-      AHeapAny |
-      ALocal{inst.marker().fixupFP(), safe_cast<uint32_t>(extra->paramId)};
-    return may_load_store(AUnknown, stores);
-  }
-  // However the following ones can't read locals from our frame on the way
-  // out, except as a side effect of raising a warning.
-  case VerifyReifiedReturnType:
-    return may_load_store(AHeapAny | livefp(inst), AHeapAny);
 
   case VerifyPropCls:
   case VerifyPropFail:

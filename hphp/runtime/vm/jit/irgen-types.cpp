@@ -1379,7 +1379,8 @@ void emitVerifyRetTypeTS(IRGS& env) {
   auto const cell = topC(env);
   auto const reified = tcCouldBeReified(curFunc(env), TypeConstraint::ReturnId);
   if (reified || cell->isA(TObj)) {
-    gen(env, VerifyReifiedReturnType, cell, ts);
+    auto const funcData = FuncData { curFunc(env) };
+    gen(env, VerifyReifiedReturnType, funcData, cell, ts, ldCtxCls(env));
   } else if (cell->type().maybe(TObj) && !reified) {
     // Meaning we did not not guard on the stack input correctly
     PUNT(VerifyRetTypeTS-UnguardedObj);
@@ -1413,7 +1414,8 @@ void emitVerifyParamTypeTS(IRGS& env, int32_t paramId) {
         return gen(env, CheckType, TDict, taken, ts);
       },
       [&] (SSATmp* dts) {
-        gen(env, VerifyReifiedLocalType, ParamData { paramId }, dts);
+        auto const fpData = FuncParamData { curFunc(env), paramId };
+        gen(env, VerifyReifiedLocalType, fpData, cell, dts, ldCtxCls(env));
         return nullptr;
       },
       [&] {

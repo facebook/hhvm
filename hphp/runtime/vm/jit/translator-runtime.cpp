@@ -281,34 +281,31 @@ TypedValue VerifyRetTypeFail(TypedValue value, const Class* ctx,
   return value;
 }
 
-void VerifyReifiedLocalTypeImpl(int32_t id, ArrayData* ts) {
-  VMRegAnchor _;
-  const ActRec* ar = liveFrame();
-  const Func* func = ar->func();
-  auto const param = frame_local(ar, id);
+void VerifyReifiedLocalTypeImpl(TypedValue value, ArrayData* ts,
+                                const Class* ctx, const Func* func,
+                                int32_t paramId) {
+  auto const couldBeReified = tcCouldBeReified(func, paramId);
   bool warn = false;
-  if (verifyReifiedLocalType(ts, param, tcCouldBeReified(func, id), warn)) {
+  if (verifyReifiedLocalType(&value, ts, ctx, func, couldBeReified, warn)) {
     return;
   }
   raise_reified_typehint_error(
     folly::sformat(
       "Argument {} passed to {}() must be an instance of {}, {} given",
-      id + 1,
+      paramId + 1,
       func->fullName()->data(),
       TypeStructure::toString(ArrNR(ts),
         TypeStructure::TSDisplayType::TSDisplayTypeUser).c_str(),
-      describe_actual_type(param)
+      describe_actual_type(&value)
     ), warn
   );
 }
 
-void VerifyReifiedReturnTypeImpl(TypedValue cell, ArrayData* ts) {
-  VMRegAnchor _;
-  const ActRec* ar = liveFrame();
-  const Func* func = ar->func();
+void VerifyReifiedReturnTypeImpl(TypedValue value, ArrayData* ts,
+                                 const Class* ctx, const Func* func) {
+  auto const couldBeReified = tcCouldBeReified(func, TypeConstraint::ReturnId);
   bool warn = false;
-  if (verifyReifiedLocalType(ts, &cell,
-        tcCouldBeReified(func, TypeConstraint::ReturnId), warn)) {
+  if (verifyReifiedLocalType(&value, ts, ctx, func, couldBeReified, warn)) {
     return;
   }
   raise_reified_typehint_error(
@@ -317,7 +314,7 @@ void VerifyReifiedReturnTypeImpl(TypedValue cell, ArrayData* ts) {
       func->fullName()->data(),
       TypeStructure::toString(ArrNR(ts),
         TypeStructure::TSDisplayType::TSDisplayTypeUser).c_str(),
-      describe_actual_type(&cell)
+      describe_actual_type(&value)
     ), warn
   );
 }

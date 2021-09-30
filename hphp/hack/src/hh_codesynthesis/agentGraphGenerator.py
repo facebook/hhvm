@@ -11,7 +11,7 @@
 import argparse
 import sys
 
-from typing import List, Optional, Set, Union
+from typing import Callable, Dict, List, Optional, Set, Union
 
 import clingo
 from clingo.symbol import Number, Symbol
@@ -23,11 +23,27 @@ class AgentGraphClingoContext:
     different settings. Refer to the test case `test_small_agent_graph`
     for more detail usages."""
 
-    number_of_leaves = 30
-    number_of_infra_agents = 20
-    number_of_product_agents = 60
-    infra_agent_profile = {"in_degree": [0, 10], "out_degree": [5, 100]}
-    product_agent_profile = {"in_degree": [5, 20], "out_degree": [0, 5]}
+    def __init__(
+        self,
+        number_of_leaves: int,
+        number_of_infra_agents: int,
+        number_of_product_agents: int,
+        infra_agent_profile: Dict[str, List[int]],
+        product_agent_profile: Dict[str, List[int]],
+    ) -> None:
+        if (
+            number_of_leaves <= 0
+            or number_of_infra_agents <= 0
+            or number_of_product_agents <= 0
+            or len(infra_agent_profile) < 2
+            or len(product_agent_profile) < 2
+        ):
+            raise RuntimeError("Invalid agent graph metrics.")
+        self.number_of_leaves = number_of_leaves
+        self.number_of_infra_agents = number_of_infra_agents
+        self.number_of_product_agents = number_of_product_agents
+        self.infra_agent_profile = infra_agent_profile
+        self.product_agent_profile = product_agent_profile
 
     def nl(self) -> Symbol:
         return Number(self.number_of_leaves)
@@ -119,46 +135,82 @@ class AgentGraphGenerator:
     the user can do a dry run to evaluate the quality of actual graph.
     The user must specify which on_model is going to use."""
 
-    _raw_model = ""
-
-    def __init__(self) -> None:
+    def __init__(
+        self, agent_distribution: List[int], solving_context: AgentGraphClingoContext
+    ) -> None:
         self.infra_agents: List[int] = []
         self.product_agents: List[int] = []
         self.edges: List[Set] = []
+        self._raw_model = ""
+        self.agent_distribution = agent_distribution
+        self.solving_context = solving_context
 
-    def infra_agent_evaluate(self, agent_number: int) -> None:
+    def add_infra_agent(self, agent_number: int) -> None:
         self.infra_agents.append(agent_number)
 
-    def product_agent_evaluate(self, agent_number: int) -> None:
+    def add_product_agent(self, agent_number: int) -> None:
         self.product_agents.append(agent_number)
 
-    def edge_evaluate(self, left_agent: int, right_agent: int) -> None:
+    def add_edge(self, left_agent: int, right_agent: int) -> None:
         self.edges[left_agent].add(right_agent)
 
-    def evaluate(self, m: clingo.Model) -> None:
-        self.infra_agents = []
-        self.product_agents = []
+    def validate(
+        self,
+        customize_validator: Optional[
+            Callable[[int, int, List[int], List[int]], bool]
+        ] = None,
+    ) -> bool:
+        # Graph validation using the constraints specified in the context.
+        if len(self.infra_agents) < self.solving_context.number_of_infra_agents:
+            return False
+        if len(self.product_agents) < self.solving_context.number_of_product_agents:
+            return False
 
-        predicates = m.symbols(atoms=True)
-        node_func = {
-            "infra_agent": self.infra_agent_evaluate,
-            "product_agent": self.product_agent_evaluate,
-        }
-        edge_func = {"depends_on": self.edge_evaluate}
+        # Compute in/out degree.
+        in_degrees = [0] * sum(self.agent_distribution)
+        out_degrees = [0] * sum(self.agent_distribution)
+        # Iterate through adjacency matrix.
+        for node, depends_on in enumerate(self.edges):
+            in_degrees[node] += len(depends_on)
+            for x in depends_on:
+                out_degrees[x] += 1
 
-        for predicate in predicates:
-            if predicate.name in node_func:
-                node_func[predicate.name](predicate.arguments[0].number)
+        for node, degree in enumerate(in_degrees):
+            agent_profile = self.solving_context.infra_agent_profile
+            if node in self.product_agents:
+                agent_profile = self.solving_context.product_agent_profile
 
-        self.edges = [
-            set() for x in range(len(self.infra_agents) + len(self.product_agents))
-        ]
-
-        for predicate in predicates:
-            if predicate.name in edge_func:
-                edge_func[predicate.name](
-                    predicate.arguments[0].number, predicate.arguments[1].number
+            if (
+                degree < agent_profile["in_degree"][0]
+                or degree > agent_profile["in_degree"][1]
+            ):
+                raise RuntimeError(
+                    "node: {0}, degree: {1}, models: {2}".format(
+                        node, degree, self._raw_model
+                    )
                 )
+                return False
+
+        for node, degree in enumerate(out_degrees):
+            agent_profile = self.solving_context.infra_agent_profile
+            if node in self.product_agents:
+                agent_profile = self.solving_context.product_agent_profile
+
+            if (
+                degree < agent_profile["out_degree"][0]
+                or degree > agent_profile["out_degree"][1]
+            ):
+                return False
+
+        if customize_validator is not None:
+            return customize_validator(
+                self.infra_agents, self.product_agents, in_degrees, out_degrees
+            )
+
+        return True
+
+    def evaluate(self, m: clingo.Model) -> None:
+        self.generate(m)
 
         print("Number of infra agents: {0}".format(len(self.infra_agents)))
         print("Number of product agents: {0}".format(len(self.product_agents)))
@@ -184,8 +236,34 @@ class AgentGraphGenerator:
         print("There are {0} similar agents.".format(similar_agents))
         print("Common dependents set is {0}".format(similar_relations))
 
-    def generate_raw(self, m: clingo.Model) -> None:
+    def generate(self, m: clingo.Model) -> None:
         self._raw_model = m.__str__()
+
+        self.infra_agents = []
+        self.product_agents = []
+
+        predicates = m.symbols(atoms=True)
+        node_func = {
+            "infra_agent": self.add_infra_agent,
+            "product_agent": self.add_product_agent,
+        }
+        edge_func = {"depends_on": self.add_edge}
+
+        for predicate in predicates:
+            if predicate.name in node_func:
+                node_func[predicate.name](predicate.arguments[0].number)
+
+        self.edges = [
+            set() for x in range(len(self.infra_agents) + len(self.product_agents))
+        ]
+
+        for predicate in predicates:
+            if predicate.name in edge_func:
+                edge_func[predicate.name](
+                    predicate.arguments[0].number, predicate.arguments[1].number
+                )
+
+        print(self._raw_model)
 
     def on_model(self, m: clingo.Model) -> None:
         raise RuntimeError("Must specify a valid method.")
@@ -208,9 +286,7 @@ def generating_agent_distribution(agent_distribution: List[int]) -> List[str]:
 
 
 # Take in an agent distribution and a generator to create an agent graph.
-def generating_an_agent_graph(
-    agent_distribution: List[int], generator: AgentGraphGenerator
-) -> None:
+def generating_an_agent_graph(generator: AgentGraphGenerator) -> None:
     # Logic programs for code synthesis.
     asp_files = "hphp/hack/src/hh_codesynthesis"
 
@@ -220,8 +296,12 @@ def generating_an_agent_graph(
     # Load LP for agent graph generating.
     ctl.load(asp_files + "/agent_graph_generator.lp")
     # Load LP for agent distribution.
-    ctl.add("base", [], "\n".join(generating_agent_distribution(agent_distribution)))
-    ctl.ground([("base", [])], context=AgentGraphClingoContext())
+    ctl.add(
+        "base",
+        [],
+        "\n".join(generating_agent_distribution(generator.agent_distribution)),
+    )
+    ctl.ground([("base", [])], context=generator.solving_context)
 
     result: Union[clingo.solving.SolveHandle, clingo.solving.SolveResult] = ctl.solve(
         on_model=generator.on_model
@@ -232,11 +312,7 @@ def generating_an_agent_graph(
 
 
 def main() -> None:
-    agent_graph = AgentGraphGenerator()
-
-    agent_graph.on_model = agent_graph.generate_raw
-
-    # Parse the arguments
+    # Parse the arguments.
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--agents",
@@ -314,27 +390,27 @@ def main() -> None:
 
     args: argparse.Namespace = parser.parse_args()
 
-    agent_distribution = args.agents
-    AgentGraphClingoContext.number_of_infra_agents = args.number_of_infra_agents
-    AgentGraphClingoContext.number_of_product_agents = args.number_of_product_agents
-    AgentGraphClingoContext.number_of_leaves = args.number_of_leaves
-    AgentGraphClingoContext.infra_agent_profile[
-        "in_degree"
-    ] = args.infra_agent_indegrees
-    AgentGraphClingoContext.infra_agent_profile[
-        "out_degree"
-    ] = args.infra_agent_outdegrees
-    AgentGraphClingoContext.product_agent_profile[
-        "in_degree"
-    ] = args.product_agent_indegrees
-    AgentGraphClingoContext.product_agent_profile[
-        "out_degree"
-    ] = args.product_agent_outdegrees
-
+    # Setup generator and context.
+    agent_graph_generator = AgentGraphGenerator(
+        agent_distribution=args.agents,
+        solving_context=AgentGraphClingoContext(
+            number_of_infra_agents=args.number_of_infra_agents,
+            number_of_product_agents=args.number_of_product_agents,
+            number_of_leaves=args.number_of_leaves,
+            infra_agent_profile={
+                "in_degree": args.infra_agent_indegrees,
+                "out_degree": args.infra_agent_outdegrees,
+            },
+            product_agent_profile={
+                "in_degree": args.product_agent_indegrees,
+                "out_degree": args.product_agent_outdegrees,
+            },
+        ),
+    )
+    agent_graph_generator.on_model = agent_graph_generator.generate
     if args.evaluate:
-        agent_graph.on_model = agent_graph.evaluate
-    generating_an_agent_graph(agent_distribution, agent_graph)
-    print(agent_graph._raw_model)
+        agent_graph_generator.on_model = agent_graph_generator.evaluate
+    generating_an_agent_graph(agent_graph_generator)
 
 
 if __name__ == "__main__":

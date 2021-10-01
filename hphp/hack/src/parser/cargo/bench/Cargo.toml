@@ -12,6 +12,7 @@ path = "../../bench/bench.rs"
 aast_parser = { path = "../aast_parser" }
 bumpalo = { version = "3.2.1", features = ["collections"] }
 criterion = "=0.3.1"
+cst_and_decl_parser = { path = "../../api/cargo/cst_and_decl_parser" }
 direct_decl_parser = { path = "../../api/cargo/direct_decl_parser" }
 facts_parser = { path = "../../api/cargo/facts_parser" }
 ocamlrep = { path = "../../../ocamlrep" }

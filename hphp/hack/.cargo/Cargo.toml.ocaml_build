@@ -133,6 +133,7 @@ members = [
     "src/ocamlrep_ocamlpool",
     "src/oxidized",
     "src/oxidized_by_ref",
+    "src/parser/api/cargo/cst_and_decl_parser",
     "src/parser/api/cargo/decl_mode_parser",
     "src/parser/api/cargo/direct_decl_parser",
     "src/parser/api/cargo/facts_parser",

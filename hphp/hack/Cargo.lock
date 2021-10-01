@@ -158,6 +158,7 @@ dependencies = [
  "aast_parser",
  "bumpalo",
  "criterion",
+ "cst_and_decl_parser",
  "direct_decl_parser",
  "facts_parser",
  "ocamlrep",
@@ -586,6 +587,20 @@ checksum = "d82cfc11ce7f2c3faef78d8a684447b40d503d9681acebed6cb728d45940c4db"
 dependencies = [
  "cfg-if 1.0.0",
  "lazy_static",
+]
+
+[[package]]
+name = "cst_and_decl_parser"
+version = "0.0.0"
+dependencies = [
+ "bumpalo",
+ "direct_decl_smart_constructors",
+ "oxidized_by_ref",
+ "pair_smart_constructors",
+ "parser",
+ "parser_core_types",
+ "positioned_smart_constructors",
+ "stack_limit",
 ]
 
 [[package]]

@@ -1288,17 +1288,17 @@ let load_ fn ~silent ~current_version overrides =
       config
   in
   let force_shallow_decl_fanout =
-    if not use_direct_decl_parser then (
+    if force_shallow_decl_fanout && not use_direct_decl_parser then (
       Hh_logger.warn
-        "Direct decl parser off while using shallow decl fanout. Turning off shallow decl fanout";
+        "You have force_shallow_decl_fanout=true but use_direct_decl_parser=false. This is incompatible. Turning off force_shallow_decl_fanout";
       false
     ) else
       force_shallow_decl_fanout
   in
   let force_load_hot_shallow_decls =
-    if not force_load_hot_shallow_decls then (
+    if force_load_hot_shallow_decls && not force_shallow_decl_fanout then (
       Hh_logger.warn
-        "Force shallow decl fanout off while load hot shallow decls on. Turning off load hot shallow decls";
+        "You have force_load_hot_shallow_decls=true but force_shallow_decl_fanout=false. This is incompatible. Turning off force_load_hot_shallow_decls";
       false
     ) else
       force_load_hot_shallow_decls

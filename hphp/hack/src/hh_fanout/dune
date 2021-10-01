@@ -38,8 +38,7 @@
   (locks /cargo)
   (action
     (run %{workspace_root}/scripts/build_rust_to_ocaml.sh
-      hh_fanout_build_rust
-      hh_fanout_build_rust
+      --pkg hh_fanout_build_rust
     )
   )
 )
@@ -58,8 +57,7 @@
   (locks /cargo)
   (action
     (run %{workspace_root}/scripts/build_rust_to_ocaml.sh
-      hh_fanout_dep_graph_is_subgraph_rust
-      hh_fanout_dep_graph_is_subgraph_rust
+      --pkg hh_fanout_dep_graph_is_subgraph_rust
     )
   )
 )
@@ -78,8 +76,7 @@
   (locks /cargo)
   (action
     (run %{workspace_root}/scripts/build_rust_to_ocaml.sh
-      hh_fanout_dep_graph_stats_rust
-      hh_fanout_dep_graph_stats_rust
+      --pkg hh_fanout_dep_graph_stats_rust
     )
   )
 )

@@ -12,12 +12,17 @@ if (( "$#" < 2 )); then
    echo "Usage: CARGO_BIN=path/to/cargo-bin $0 PACKAGE_NAME LIB_NAME"
    exit 2
 fi
-pkg="$1"
-lib="$2"
-shift 2
+
+manifest="./.cargo/Cargo.toml.ocaml_build"
 
 while :; do
     case $1 in
+        --pkg) pkg=$2
+          shift 2
+        ;;
+        --lib) lib=$2
+          shift 2
+        ;;
         --cxx) cxx=$2
           shift 2
         ;;
@@ -36,6 +41,9 @@ while :; do
         --includes) includes=$2
           shift 2
         ;;
+        --manifest) manifest=$2
+          shift 2
+        ;;
         *) break
     esac
 done
@@ -52,16 +60,22 @@ if [ -n "$cxx" ]
 then
   TARGET_DIR=$cxx
 fi
+if [ -z "$lib" ]
+then
+  lib="$pkg"
+fi
+
 
 profile=debug; profile_flags=
 if [ -z ${HACKDEBUG+1} ]; then
   profile=release; profile_flags="--release"
 fi
+
 ( # add CARGO_BIN to PATH so that rustc and other tools can be invoked
   [[ -n "$CARGO_BIN" ]] && PATH="$CARGO_BIN:$PATH";
   # note: --manifest-path doesn't work with custom toolchain, so do cd
   cd "$HACK_SOURCE_ROOT" && \
-  sed '/\/facebook\//d' ./.cargo/Cargo.toml.ocaml_build > ./Cargo.toml && \
+  sed '/\/facebook\//d' "$manifest" > ./Cargo.toml && \
   cargo build \
     $LOCK_FLAG \
     --quiet \

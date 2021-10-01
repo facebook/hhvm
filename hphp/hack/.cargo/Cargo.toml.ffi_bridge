@@ -1,0 +1,7 @@
+[workspace]
+members = [
+    "src/decl/ffi_bridge",
+    "src/facts/ffi_bridge",
+    "src/hhbc/ffi_bridge",
+    "src/parser/ffi_bridge",
+]

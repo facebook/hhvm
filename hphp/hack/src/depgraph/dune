@@ -13,8 +13,7 @@
   (locks /cargo)
   (action
     (run %{workspace_root}/scripts/build_rust_to_ocaml.sh
-      depgraph
-      depgraph
+      --pkg depgraph
     )
   )
 )

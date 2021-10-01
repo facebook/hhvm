@@ -14,8 +14,7 @@
   (locks /cargo)
   (action
     (run %{workspace_root}/scripts/build_rust_to_ocaml.sh
-      decl_rust_ffi
-      decl_rust_ffi
+      --pkg decl_rust_ffi
     )
   )
 )

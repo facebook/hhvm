@@ -58,8 +58,7 @@
   (locks /cargo)
   (action
     (run %{workspace_root}/scripts/build_rust_to_ocaml.sh
-      config_file_ffi
-      config_file_ffi
+      --pkg config_file_ffi
     )
   )
 )

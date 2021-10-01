@@ -169,10 +169,10 @@ add_custom_command(
   OUTPUT ${HHBC_AST_HEADER}
   COMMAND
    . "${CMAKE_CURRENT_BINARY_DIR}/dev_env_rust_only.sh" &&
-    ${CARGO_BUILD} ffi_cbindgen ffi_cbindgen --exe
+    ${CARGO_BUILD} --pkg ffi_cbindgen --exe
       --header "${FFI_HEADER}" --srcs "${CMAKE_CURRENT_SOURCE_DIR}/src/utils/ffi/ffi.rs"
       --namespaces "HPHP,hackc" &&
-    ${CARGO_BUILD} ffi_cbindgen ffi_cbindgen --exe
+    ${CARGO_BUILD} --pkg ffi_cbindgen --exe
       --header "${HHBC_AST_HEADER}" --srcs "${HHBC_AST_SRC_ARG}" --namespaces "HPHP,hackc,hhbc"
       --includes "${FFI_HEADER}"
   DEPENDS rustc cargo
@@ -189,26 +189,32 @@ add_dependencies("hhbc_ast_header" "hhbc_ast_cbindgen")
 
 add_custom_target(hack_rust_ffi_bridge_targets)
 
+set(FFI_BRIDGE_BIN "${RUST_FFI_BUILD_ROOT}/hphp/hack/${FFI_BRIDGE_DIR}")
+add_custom_target(
+  build_rust_ffi_bridge_targets
+  COMMAND
+    ${CMAKE_COMMAND} -E make_directory "${FFI_BRIDGE_BIN}" &&
+      . "${CMAKE_CURRENT_BINARY_DIR}/dev_env_rust_only.sh" &&
+      ${CARGO_BUILD} --manifest "${CMAKE_CURRENT_SOURCE_DIR}/.cargo/Cargo.toml.ffi_bridge"
+      --cxx "${FFI_BRIDGE_BIN}"
+  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+)
+
 # Compiling cxx entrypoints for hhvm
 function(build_cxx_bridge NAME FFI_BRIDGE_DIR)
   set(FFI_BRIDGE_SRC "${CMAKE_CURRENT_SOURCE_DIR}/${FFI_BRIDGE_DIR}")
-  set(FFI_BRIDGE_BIN "${RUST_FFI_BUILD_ROOT}/hphp/hack/${FFI_BRIDGE_DIR}")
-
   set(RUST_PART_LIB "${FFI_BRIDGE_BIN}/${PROFILE}/${CMAKE_STATIC_LIBRARY_PREFIX}${NAME}_ffi_bridge${CMAKE_STATIC_LIBRARY_SUFFIX}")
   set(RUST_PART_CXX "${FFI_BRIDGE_BIN}/${NAME}_ffi_bridge.cpp")
   set(RUST_PART_HEADER "${FFI_BRIDGE_BIN}/${NAME}_ffi_bridge.rs")
   set(GENERATED "${FFI_BRIDGE_BIN}/cxxbridge/${NAME}_ffi_bridge/${NAME}_ffi_bridge")
 
   add_custom_command(
-      OUTPUT ${RUST_PART_CXX}
-      COMMAND
-        ${CMAKE_COMMAND} -E make_directory "${FFI_BRIDGE_BIN}" &&
-        . "${CMAKE_CURRENT_BINARY_DIR}/dev_env_rust_only.sh" &&
-        ${CARGO_BUILD} "${NAME}_ffi_bridge" "${NAME}_ffi_bridge" --cxx "${FFI_BRIDGE_BIN}" &&
-        ${CMAKE_COMMAND} -E copy "${GENERATED}.rs.cc" "${RUST_PART_CXX}" &&
-        ${CMAKE_COMMAND} -E copy "${GENERATED}.rs.h" "${RUST_PART_HEADER}"
-      WORKING_DIRECTORY ${FFI_BRIDGE_SRC}
-      DEPENDS rustc cargo
+    OUTPUT ${RUST_PART_CXX}
+    COMMAND
+      ${CMAKE_COMMAND} -E copy "${GENERATED}.rs.cc" "${RUST_PART_CXX}" &&
+      ${CMAKE_COMMAND} -E copy "${GENERATED}.rs.h" "${RUST_PART_HEADER}"
+    WORKING_DIRECTORY ${FFI_BRIDGE_SRC}
+    DEPENDS rustc cargo build_rust_ffi_bridge_targets
   )
   add_custom_target(
     "${NAME}_cxx"

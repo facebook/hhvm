@@ -12,8 +12,7 @@
   (locks /cargo)
   (action
     (run %{workspace_root}/scripts/build_rust_to_ocaml.sh
-      shmffi
-      shmffi
+     --pkg shmffi
     )
   )
 )

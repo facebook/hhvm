@@ -25,8 +25,7 @@
   (locks /cargo)
   (action
     (run %{workspace_root}/scripts/build_rust_to_ocaml.sh
-      options_ffi
-      options_ffi
+      --pkg options_ffi
     )
   )
 )
@@ -44,8 +43,7 @@
   (locks /cargo)
   (action
     (run %{workspace_root}/scripts/build_rust_to_ocaml.sh
-      compile_ffi
-      compile_ffi
+      --pkg compile_ffi
     )
   )
 )

@@ -54,8 +54,7 @@
   (locks /cargo)
   (action
     (run %{workspace_root}/scripts/build_rust_to_ocaml.sh
-      deps_rust
-      deps_rust
+      --pkg deps_rust
     )
   )
 )

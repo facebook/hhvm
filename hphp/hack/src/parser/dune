@@ -14,8 +14,8 @@
   (locks /cargo)
   (action
     (run %{workspace_root}/scripts/build_rust_to_ocaml.sh
-      hack_parser_ffi
-      rust_parser_ffi
+      --pkg hack_parser_ffi
+      --lib rust_parser_ffi
     )
   )
 )
@@ -36,8 +36,7 @@
   (locks /cargo)
   (action
     (run %{workspace_root}/scripts/build_rust_to_ocaml.sh
-      rust_parser_errors_ffi
-      rust_parser_errors_ffi
+      --pkg rust_parser_errors_ffi
     )
   )
 )

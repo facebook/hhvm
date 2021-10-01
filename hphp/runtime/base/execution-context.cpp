@@ -1305,6 +1305,8 @@ void ExecutionContext::pushVMState(TypedValue* savedSP) {
 
   TRACE(3, "savedVM: %p %p %p %p\n", vmpc(), vmfp(), vmFirstAR(), savedSP);
 
+  auto const coeffectsEnabled = CoeffectsConfig::enabled();
+
   auto& savedVM = m_nestedVMs.emplace_back(
     VMState {
       vmpc(),
@@ -1316,8 +1318,8 @@ void ExecutionContext::pushVMState(TypedValue* savedSP) {
       vmJitReturnAddr(),
       jit::g_unwind_rds->exn,
       jit::g_unwind_rds->sideEnter,
-      CoeffectsAutoGuard::available(),
-      CoeffectsAutoGuard::savedState()
+      coeffectsEnabled ? CoeffectsAutoGuard::available() : false,
+      coeffectsEnabled ? CoeffectsAutoGuard::savedState() : std::nullopt
     }
   );
   jit::g_unwind_rds->exn = nullptr;
@@ -1361,8 +1363,10 @@ void ExecutionContext::popVMState() {
   vmJitReturnAddr() = savedVM.jitReturnAddr;
   jit::g_unwind_rds->exn = savedVM.exn;
   jit::g_unwind_rds->sideEnter = savedVM.unwinderSideEnter;
-  CoeffectsAutoGuard::savedState() = savedVM.savedAutoCoeffects;
-  CoeffectsAutoGuard::available() = savedVM.savedCoeffectsAvailable;
+  if (CoeffectsConfig::enabled()) {
+    CoeffectsAutoGuard::savedState() = savedVM.savedAutoCoeffects;
+    CoeffectsAutoGuard::available() = savedVM.savedCoeffectsAvailable;
+  }
 
   if (debug) {
     if (savedVM.fp &&
@@ -1513,8 +1517,10 @@ static inline void enterVM(ActRec* ar, Action action) {
   vmFirstAR() = ar;
   vmJitCalledFrame() = nullptr;
   vmJitReturnAddr() = 0;
-  CoeffectsAutoGuard::savedState() = std::nullopt;
-  CoeffectsAutoGuard::available() = false;
+  if (CoeffectsConfig::enabled()) {
+    CoeffectsAutoGuard::savedState() = std::nullopt;
+    CoeffectsAutoGuard::available() = false;
+  }
 
   action();
 

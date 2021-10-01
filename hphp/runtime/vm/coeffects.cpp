@@ -322,6 +322,7 @@ RuntimeCoeffects computeAutomaticCoeffects() {
 } // namespace
 
 CoeffectsAutoGuard::CoeffectsAutoGuard() {
+  if (!CoeffectsConfig::enabled()) return;
   savedCoeffects = *autoCoeffects;
   savedAvailable = *autoCoeffectsAvailable;
   *autoCoeffectsAvailable = true;
@@ -329,6 +330,7 @@ CoeffectsAutoGuard::CoeffectsAutoGuard() {
 }
 
 CoeffectsAutoGuard::~CoeffectsAutoGuard() {
+  if (!CoeffectsConfig::enabled()) return;
   *autoCoeffects = savedCoeffects;
   *autoCoeffectsAvailable = savedAvailable;
 }

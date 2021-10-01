@@ -20,24 +20,24 @@ mod ffi {
         Mixed,
     }
 
-    #[derive(Debug)]
+    #[derive(Debug, PartialEq)]
     struct Attribute {
         name: String,
         args: Vec<String>,
     }
 
-    #[derive(Debug)]
+    #[derive(Debug, PartialEq)]
     struct MethodFacts {
         attributes: Vec<Attribute>,
     }
 
-    #[derive(Debug)]
+    #[derive(Debug, PartialEq)]
     struct Method {
         name: String,
         methfacts: MethodFacts,
     }
 
-    #[derive(Debug)]
+    #[derive(Debug, PartialEq)]
     pub struct TypeFacts {
         pub base_types: Vec<String>,
         pub kind: TypeKind,
@@ -48,13 +48,13 @@ mod ffi {
         pub methods: Vec<Method>,
     }
 
-    #[derive(Debug)]
+    #[derive(Debug, PartialEq)]
     struct TypeFactsByName {
         name: String,
         typefacts: TypeFacts,
     }
 
-    #[derive(Debug, Default)]
+    #[derive(Debug, Default, PartialEq)]
     struct Facts {
         pub types: Vec<TypeFactsByName>,
         pub functions: Vec<String>,
@@ -318,5 +318,169 @@ impl From<facts::Facts> for ffi::Facts {
             type_aliases: facts.type_aliases,
             file_attributes: map_to_vec(facts.file_attributes),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_method_facts_1() {
+        let (ffi_method_facts, rust_method_facts) = create_method_facts();
+        assert_eq!(
+            facts::MethodFacts::from(ffi_method_facts),
+            rust_method_facts
+        )
+    }
+
+    #[test]
+    fn test_method_facts_2() {
+        let (ffi_method_facts, mut rust_method_facts) = create_method_facts();
+        rust_method_facts.attributes.remove_entry("MyAttribute2");
+        assert_ne!(ffi::MethodFacts::from(rust_method_facts), ffi_method_facts)
+    }
+
+    #[test]
+    fn test_methods_1() {
+        let (ffi_methods, rust_methods) = create_methods();
+        assert_eq!(
+            map_to_vec::<String, facts::MethodFacts, ffi::Method>(rust_methods),
+            ffi_methods
+        )
+    }
+
+    #[test]
+    fn test_methods_2() {
+        let (ffi_methods, mut rust_methods) = create_methods();
+        rust_methods.clear();
+        assert_ne!(vec_to_map(ffi_methods), rust_methods)
+    }
+
+    #[test]
+    fn test_type_facts() {
+        let (ffi_type_facts, rust_type_facts) = create_type_facts();
+        assert_eq!(ffi::TypeFacts::from(rust_type_facts), ffi_type_facts)
+    }
+
+    #[test]
+    fn test_type_facts_by_name() {
+        let (ffi_type_facts_by_name, rust_type_facts_by_name) = create_type_facts_by_name();
+        assert_eq!(
+            map_to_vec::<String, facts::TypeFacts, ffi::TypeFactsByName>(rust_type_facts_by_name),
+            ffi_type_facts_by_name
+        )
+    }
+
+    #[test]
+    fn test_facts() {
+        let (ffi_type_facts_by_name, rust_type_facts_by_name) = create_type_facts_by_name();
+        let (ffi_attributes, rust_attributes) = create_attributes();
+        let ffi_facts = ffi::Facts {
+            types: ffi_type_facts_by_name,
+            functions: vec!["f1".to_string(), "f2".to_string()],
+            constants: vec!["C".to_string()],
+            type_aliases: vec!["foo".to_string(), "bar".to_string()],
+            file_attributes: ffi_attributes,
+        };
+        let rust_facts = facts::Facts {
+            types: rust_type_facts_by_name,
+            functions: vec!["f1".to_string(), "f2".to_string()],
+            constants: vec!["C".to_string()],
+            type_aliases: vec!["foo".to_string(), "bar".to_string()],
+            file_attributes: rust_attributes,
+        };
+        assert_eq!(facts::Facts::from(ffi_facts), rust_facts)
+    }
+
+    fn create_attributes() -> (Vec<ffi::Attribute>, facts::Attributes) {
+        let ffi_attributes = vec![
+            ffi::Attribute {
+                name: "MyAttribute1".to_string(),
+                args: vec!["arg1".to_string(), "arg2".to_string(), "arg3".to_string()],
+            },
+            ffi::Attribute {
+                name: "MyAttribute2".to_string(),
+                args: vec![],
+            },
+        ];
+
+        let mut rust_attributes = BTreeMap::new();
+        rust_attributes.insert(
+            "MyAttribute1".to_string(),
+            vec!["arg1".to_string(), "arg2".to_string(), "arg3".to_string()],
+        );
+        rust_attributes.insert("MyAttribute2".to_string(), vec![]);
+
+        (ffi_attributes, rust_attributes)
+    }
+
+    fn create_method_facts() -> (ffi::MethodFacts, facts::MethodFacts) {
+        let (ffi_attributes, rust_attributes) = create_attributes();
+
+        let ffi_method_facts = ffi::MethodFacts {
+            attributes: ffi_attributes,
+        };
+        let rust_method_facts = facts::MethodFacts {
+            attributes: rust_attributes,
+        };
+
+        (ffi_method_facts, rust_method_facts)
+    }
+
+    fn create_methods() -> (Vec<ffi::Method>, facts::Methods) {
+        let (ffi_method_facts, rust_method_facts) = create_method_facts();
+        let ffi_methods = vec![ffi::Method {
+            name: "m".to_string(),
+            methfacts: ffi_method_facts,
+        }];
+        let mut rust_methods = BTreeMap::new();
+        rust_methods.insert("m".to_string(), rust_method_facts);
+
+        (ffi_methods, rust_methods)
+    }
+
+    fn create_type_facts() -> (ffi::TypeFacts, facts::TypeFacts) {
+        let (ffi_attributes, rust_attributes) = create_attributes();
+        let (ffi_methods, rust_methods) = create_methods();
+        let base_types = vec!["int".to_string(), "string".to_string()];
+        let require_extends = vec!["A".to_string()];
+        let require_implements = vec!["B".to_string()];
+
+        let rust_type_facts = facts::TypeFacts {
+            base_types: vec_to_set(base_types.clone()),
+            kind: facts::TypeKind::Class,
+            attributes: rust_attributes,
+            flags: 0,
+            require_extends: vec_to_set(require_extends.clone()),
+            require_implements: vec_to_set(require_implements.clone()),
+            methods: rust_methods,
+        };
+
+        let ffi_type_facts = ffi::TypeFacts {
+            base_types,
+            kind: ffi::TypeKind::Class,
+            attributes: ffi_attributes,
+            flags: 0,
+            require_extends,
+            require_implements,
+            methods: ffi_methods,
+        };
+
+        (ffi_type_facts, rust_type_facts)
+    }
+
+    fn create_type_facts_by_name() -> (Vec<ffi::TypeFactsByName>, facts::TypeFactsByName) {
+        let (ffi_type_facts, rust_type_facts) = create_type_facts();
+
+        let ffi_type_facts_by_name = vec![ffi::TypeFactsByName {
+            name: "C".to_string(),
+            typefacts: ffi_type_facts,
+        }];
+
+        let mut rust_type_facts_by_name = BTreeMap::new();
+        rust_type_facts_by_name.insert("C".to_string(), rust_type_facts);
+
+        (ffi_type_facts_by_name, rust_type_facts_by_name)
     }
 }

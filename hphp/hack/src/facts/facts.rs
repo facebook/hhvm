@@ -28,7 +28,7 @@ pub enum TypeKind {
 pub type StringSet = BTreeSet<String>;
 pub type Attributes = BTreeMap<String, Vec<String>>;
 
-#[derive(Serialize)]
+#[derive(Debug, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct MethodFacts {
     #[serde(skip_serializing_if = "Attributes::is_empty")]
@@ -37,7 +37,7 @@ pub struct MethodFacts {
 
 pub type Methods = BTreeMap<String, MethodFacts>;
 
-#[derive(Serialize)]
+#[derive(Debug, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TypeFacts {
     pub base_types: StringSet,
@@ -53,7 +53,7 @@ pub struct TypeFacts {
 
 pub type TypeFactsByName = BTreeMap<String, TypeFacts>;
 
-#[derive(Default, Serialize)]
+#[derive(Default, Debug, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Facts {
     #[serde(serialize_with = "types_to_json")]

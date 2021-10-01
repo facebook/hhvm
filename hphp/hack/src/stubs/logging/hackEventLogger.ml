@@ -231,6 +231,8 @@ let client_connect_once ~t_start:_ = ()
 
 let client_connect_once_failure ~t_start:_ _ = ()
 
+let client_connect_to_monitor_slow_log () = ()
+
 let client_connect_autostart () = ()
 
 let check_response _ = ()

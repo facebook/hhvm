@@ -5,10 +5,13 @@
     collections
     connection_tracker
     core_kernel
+    exec_command
     libancillary
     logging
     marshal_tools
     messages
+    process
+    process_types
     relative_path
     server_command_types
     server_files

@@ -40,7 +40,7 @@ if ("${CMAKE_CURRENT_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_BINARY_DIR}")
   set(CARGO_HOME "${DUNE_BUILD_DIR}/cargo_home")
 else()
   set(DUNE_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}")
-  set(RUST_FFI_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}")
+  set(RUST_FFI_BUILD_ROOT "${CMAKE_BINARY_DIR}")
   set(CARGO_HOME "${CMAKE_CURRENT_BINARY_DIR}/cargo_home")
   set(OPAM_STAMP_FILE "opam.stamp")
 endif()
@@ -195,6 +195,8 @@ add_custom_target(
 add_library("hhbc_ast_header" INTERFACE)
 add_dependencies("hhbc_ast_header" "hhbc_ast_cbindgen")
 
+add_custom_target(hack_rust_ffi_bridge_targets)
+
 # Compiling cxx entrypoints for hhvm
 function(build_cxx_bridge NAME FFI_BRIDGE_DIR)
   set(FFI_BRIDGE_SRC "${CMAKE_CURRENT_SOURCE_DIR}/${FFI_BRIDGE_DIR}")
@@ -223,6 +225,7 @@ function(build_cxx_bridge NAME FFI_BRIDGE_DIR)
 
   add_library("${NAME}_ffi_bridge" STATIC ${RUST_PART_CXX})
   add_dependencies("${NAME}_ffi_bridge" rustc cargo "${NAME}_cxx")
+  add_dependencies(hack_rust_ffi_bridge_targets "${NAME}_ffi_bridge")
   target_link_libraries("${NAME}_ffi_bridge" PUBLIC ${RUST_PART_LIB})
   # `-iquote` is like `-I` (or target_include_directories()`), except:
   # - it takes precedence over `-I`

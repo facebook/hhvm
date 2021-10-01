@@ -3499,6 +3499,12 @@ where
                     Some((hint_opt, param_pos, _is_variadic)) => match hint_opt {
                         Some(_) if env.codegen() => {}
                         Some(ref mut param_hint) => match *param_hint.1 {
+                            Hint_::Hlike(ref mut h) => match *h.1 {
+                                Hint_::Hoption(ref mut hinner) => {
+                                    rewrite_fun_ctx(env, tparams, hinner, name)
+                                }
+                                _ => rewrite_fun_ctx(env, tparams, h, name),
+                            },
                             Hint_::Hoption(ref mut h) => rewrite_fun_ctx(env, tparams, h, name),
                             _ => rewrite_fun_ctx(env, tparams, param_hint, name),
                         },
@@ -3528,28 +3534,30 @@ where
                                 } else {
                                     match hint_opt {
                                         Some(_) if env.codegen() => {}
-                                        Some(ref mut param_hint) => match *param_hint.1 {
-                                            Hint_::Hoption(ref mut h) => rewrite_arg_ctx(
-                                                env,
-                                                tparams,
-                                                where_constraints,
-                                                h,
-                                                param_pos,
-                                                name,
-                                                &context_hint.0,
-                                                &csts[0],
-                                            ),
-                                            _ => rewrite_arg_ctx(
-                                                env,
-                                                tparams,
-                                                where_constraints,
-                                                param_hint,
-                                                param_pos,
-                                                name,
-                                                &context_hint.0,
-                                                &csts[0],
-                                            ),
-                                        },
+                                        Some(ref mut param_hint) => {
+                                            let mut rewrite = |h| {
+                                                rewrite_arg_ctx(
+                                                    env,
+                                                    tparams,
+                                                    where_constraints,
+                                                    h,
+                                                    param_pos,
+                                                    name,
+                                                    &context_hint.0,
+                                                    &csts[0],
+                                                )
+                                            };
+                                            match *param_hint.1 {
+                                                Hint_::Hlike(ref mut h) => match *h.1 {
+                                                    Hint_::Hoption(ref mut hinner) => {
+                                                        rewrite(hinner)
+                                                    }
+                                                    _ => rewrite(h),
+                                                },
+                                                Hint_::Hoption(ref mut h) => rewrite(h),
+                                                _ => rewrite(param_hint),
+                                            }
+                                        }
                                         None => Self::raise_parsing_error_pos(
                                             param_pos,
                                             env,

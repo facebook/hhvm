@@ -1,0 +1,234 @@
+[("\\f",
+  (Shallow_decl_defs.Fun
+     { Typing_defs.fe_deprecated = None; fe_module = None;
+       fe_internal = false;
+       fe_type =
+       (Rwitness_from_decl ([3:10-11]),
+        (Tfun
+           { ft_arity = (Fstandard ());
+             ft_tparams =
+             [{ Typing_defs_core.tp_variance = Invariant;
+                tp_name = ([3:25-26], "T/[ctx $f]"); tp_tparams = [];
+                tp_constraints = []; tp_reified = Erased;
+                tp_user_attributes = [] }
+               ];
+             ft_where_constraints = [];
+             ft_params =
+             [{ fp_pos = [3:35-37]; fp_name = (Some "$f");
+                fp_type =
+                { et_enforced = Typing_defs_core.Unenforced;
+                  et_type =
+                  (Rhint ([3:12-34]),
+                   (Tfun
+                      { ft_arity = (Fstandard ()); ft_tparams = [];
+                        ft_where_constraints = []; ft_params = [];
+                        ft_implicit_params =
+                        { capability =
+                          (CapTy (Rhint ([3:25-26]),
+                                  (Tgeneric ("T/[ctx $f]", []))))
+                          };
+                        ft_ret =
+                        { et_enforced = Typing_defs_core.Unenforced;
+                          et_type = (Rhint ([3:29-33]), (Tprim Tvoid)) };
+                        ft_flags =
+                        (make_ft_flags FSync ~return_disposable:false
+                          ~returns_readonly:false ~readonly_this:false);
+                        ft_ifc_decl = FDPolicied {PUBLIC} }))
+                  };
+                fp_flags =
+                (make_fp_flags ~accept_disposable:false ~has_default:false
+                  ~mode:Typing_defs_core.FPnormal ~ifc_external:false
+                  ~ifc_can_call:false ~via_label:false ~readonly:false);
+                 }
+               ];
+             ft_implicit_params =
+             { capability =
+               (CapTy (Rhint ([3:39-45]), (Tgeneric ("T/[ctx $f]", [])))) };
+             ft_ret =
+             { et_enforced = Typing_defs_core.Unenforced;
+               et_type = (Rhint ([3:48-52]), (Tprim Tvoid)) };
+             ft_flags =
+             (make_ft_flags FSync ~return_disposable:false
+               ~returns_readonly:false ~readonly_this:false);
+             ft_ifc_decl = FDPolicied {PUBLIC} }));
+       fe_pos = [3:10-11]; fe_php_std_lib = false;
+       fe_support_dynamic_type = false }));
+  ("\\f_option",
+   (Shallow_decl_defs.Fun
+      { Typing_defs.fe_deprecated = None; fe_module = None;
+        fe_internal = false;
+        fe_type =
+        (Rwitness_from_decl ([5:10-18]),
+         (Tfun
+            { ft_arity = (Fstandard ());
+              ft_tparams =
+              [{ Typing_defs_core.tp_variance = Invariant;
+                 tp_name = ([5:33-34], "T/[ctx $f]"); tp_tparams = [];
+                 tp_constraints = []; tp_reified = Erased;
+                 tp_user_attributes = [] }
+                ];
+              ft_where_constraints = [];
+              ft_params =
+              [{ fp_pos = [5:43-45]; fp_name = (Some "$f");
+                 fp_type =
+                 { et_enforced = Typing_defs_core.Unenforced;
+                   et_type =
+                   (Rhint ([5:19-42]),
+                    (Toption
+                       (Rhint ([5:20-42]),
+                        (Tfun
+                           { ft_arity = (Fstandard ()); ft_tparams = [];
+                             ft_where_constraints = []; ft_params = [];
+                             ft_implicit_params =
+                             { capability =
+                               (CapTy (Rhint ([5:33-34]),
+                                       (Tgeneric ("T/[ctx $f]", []))))
+                               };
+                             ft_ret =
+                             { et_enforced = Typing_defs_core.Unenforced;
+                               et_type = (Rhint ([5:37-41]), (Tprim Tvoid)) };
+                             ft_flags =
+                             (make_ft_flags FSync ~return_disposable:false
+                               ~returns_readonly:false ~readonly_this:false);
+                             ft_ifc_decl = FDPolicied {PUBLIC} }))))
+                   };
+                 fp_flags =
+                 (make_fp_flags ~accept_disposable:false ~has_default:false
+                   ~mode:Typing_defs_core.FPnormal ~ifc_external:false
+                   ~ifc_can_call:false ~via_label:false ~readonly:false);
+                  }
+                ];
+              ft_implicit_params =
+              { capability =
+                (CapTy (Rhint ([5:47-53]), (Tgeneric ("T/[ctx $f]", [])))) };
+              ft_ret =
+              { et_enforced = Typing_defs_core.Unenforced;
+                et_type = (Rhint ([5:56-60]), (Tprim Tvoid)) };
+              ft_flags =
+              (make_ft_flags FSync ~return_disposable:false
+                ~returns_readonly:false ~readonly_this:false);
+              ft_ifc_decl = FDPolicied {PUBLIC} }));
+        fe_pos = [5:10-18]; fe_php_std_lib = false;
+        fe_support_dynamic_type = false }));
+  ("\\f_like",
+   (Shallow_decl_defs.Fun
+      { Typing_defs.fe_deprecated = None; fe_module = None;
+        fe_internal = false;
+        fe_type =
+        (Rwitness_from_decl ([7:10-16]),
+         (Tfun
+            { ft_arity = (Fstandard ());
+              ft_tparams =
+              [{ Typing_defs_core.tp_variance = Invariant;
+                 tp_name = ([7:31-32], "T/[ctx $f]"); tp_tparams = [];
+                 tp_constraints = []; tp_reified = Erased;
+                 tp_user_attributes = [] }
+                ];
+              ft_where_constraints = [];
+              ft_params =
+              [{ fp_pos = [7:41-43]; fp_name = (Some "$f");
+                 fp_type =
+                 { et_enforced = Typing_defs_core.Unenforced;
+                   et_type =
+                   (Rhint ([7:17-40]),
+                    (Tlike
+                       (Rhint ([7:18-40]),
+                        (Tfun
+                           { ft_arity = (Fstandard ()); ft_tparams = [];
+                             ft_where_constraints = []; ft_params = [];
+                             ft_implicit_params =
+                             { capability =
+                               (CapTy (Rhint ([7:31-32]),
+                                       (Tgeneric ("T/[ctx $f]", []))))
+                               };
+                             ft_ret =
+                             { et_enforced = Typing_defs_core.Unenforced;
+                               et_type = (Rhint ([7:35-39]), (Tprim Tvoid)) };
+                             ft_flags =
+                             (make_ft_flags FSync ~return_disposable:false
+                               ~returns_readonly:false ~readonly_this:false);
+                             ft_ifc_decl = FDPolicied {PUBLIC} }))))
+                   };
+                 fp_flags =
+                 (make_fp_flags ~accept_disposable:false ~has_default:false
+                   ~mode:Typing_defs_core.FPnormal ~ifc_external:false
+                   ~ifc_can_call:false ~via_label:false ~readonly:false);
+                  }
+                ];
+              ft_implicit_params =
+              { capability =
+                (CapTy (Rhint ([7:45-51]), (Tgeneric ("T/[ctx $f]", [])))) };
+              ft_ret =
+              { et_enforced = Typing_defs_core.Unenforced;
+                et_type = (Rhint ([7:54-58]), (Tprim Tvoid)) };
+              ft_flags =
+              (make_ft_flags FSync ~return_disposable:false
+                ~returns_readonly:false ~readonly_this:false);
+              ft_ifc_decl = FDPolicied {PUBLIC} }));
+        fe_pos = [7:10-16]; fe_php_std_lib = false;
+        fe_support_dynamic_type = false }));
+  ("\\f_like_option",
+   (Shallow_decl_defs.Fun
+      { Typing_defs.fe_deprecated = None; fe_module = None;
+        fe_internal = false;
+        fe_type =
+        (Rwitness_from_decl ([9:10-23]),
+         (Tfun
+            { ft_arity = (Fstandard ());
+              ft_tparams =
+              [{ Typing_defs_core.tp_variance = Invariant;
+                 tp_name = ([9:39-40], "T/[ctx $f]"); tp_tparams = [];
+                 tp_constraints = []; tp_reified = Erased;
+                 tp_user_attributes = [] }
+                ];
+              ft_where_constraints = [];
+              ft_params =
+              [{ fp_pos = [9:49-51]; fp_name = (Some "$f");
+                 fp_type =
+                 { et_enforced = Typing_defs_core.Unenforced;
+                   et_type =
+                   (Rhint ([9:24-48]),
+                    (Tlike
+                       (Rhint ([9:25-48]),
+                        (Toption
+                           (Rhint ([9:26-48]),
+                            (Tfun
+                               { ft_arity = (Fstandard ()); ft_tparams = [];
+                                 ft_where_constraints = []; ft_params = [];
+                                 ft_implicit_params =
+                                 { capability =
+                                   (CapTy (Rhint ([9:39-40]),
+                                           (Tgeneric ("T/[ctx $f]", []))))
+                                   };
+                                 ft_ret =
+                                 { et_enforced = Typing_defs_core.Unenforced;
+                                   et_type =
+                                   (Rhint ([9:43-47]), (Tprim Tvoid)) };
+                                 ft_flags =
+                                 (make_ft_flags FSync
+                                   ~return_disposable:false
+                                   ~returns_readonly:false
+                                   ~readonly_this:false);
+                                 ft_ifc_decl = FDPolicied {PUBLIC} }))))))
+                   };
+                 fp_flags =
+                 (make_fp_flags ~accept_disposable:false ~has_default:false
+                   ~mode:Typing_defs_core.FPnormal ~ifc_external:false
+                   ~ifc_can_call:false ~via_label:false ~readonly:false);
+                  }
+                ];
+              ft_implicit_params =
+              { capability =
+                (CapTy (Rhint ([9:53-59]), (Tgeneric ("T/[ctx $f]", [])))) };
+              ft_ret =
+              { et_enforced = Typing_defs_core.Unenforced;
+                et_type = (Rhint ([9:62-66]), (Tprim Tvoid)) };
+              ft_flags =
+              (make_ft_flags FSync ~return_disposable:false
+                ~returns_readonly:false ~readonly_this:false);
+              ft_ifc_decl = FDPolicied {PUBLIC} }));
+        fe_pos = [9:10-23]; fe_php_std_lib = false;
+        fe_support_dynamic_type = false }))
+  ]
+
+They matched!

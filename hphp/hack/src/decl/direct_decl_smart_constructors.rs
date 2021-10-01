@@ -2008,35 +2008,32 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         // For a polymorphic context with form `ctx $f` (represented here as
         // `Tapply "$f"`), add a type parameter named `Tctx$f`, and rewrite the
         // parameter `(function (ts)[_]: t) $f` as `(function (ts)[Tctx$f]: t) $f`
-        let rewrite_fun_ctx = |
-            tparams: &mut Vec<&'a Tparam<'a>>,
-            ty: &Ty<'a>,
-            param_name: &str,
-        | -> Option<&'a Ty<'a>> {
-            let ft = match ty.1 {
-                Ty_::Tfun(ft) => ft,
-                _ => return None,
+        let rewrite_fun_ctx =
+            |tparams: &mut Vec<&'a Tparam<'a>>, ty: &Ty<'a>, param_name: &str| -> Ty<'a> {
+                let ft = match ty.1 {
+                    Ty_::Tfun(ft) => ft,
+                    _ => return ty.clone(),
+                };
+                let cap_ty = match ft.implicit_params.capability {
+                    CapTy(&Ty(_, Ty_::Tintersection(&[ty]))) | CapTy(ty) => ty,
+                    _ => return ty.clone(),
+                };
+                let pos = match cap_ty.1 {
+                    Ty_::Tapply(((pos, "_"), _)) => pos,
+                    _ => return ty.clone(),
+                };
+                let name = self.ctx_generic_for_fun(param_name);
+                let tparam = tp((pos, name), &[]);
+                tparams.push(tparam);
+                let cap_ty = self.alloc(Ty(cap_ty.0, Ty_::Tgeneric(self.alloc((name, &[])))));
+                let ft = self.alloc(FunType {
+                    implicit_params: self.alloc(FunImplicitParams {
+                        capability: CapTy(cap_ty),
+                    }),
+                    ..*ft
+                });
+                Ty(ty.0, Ty_::Tfun(ft))
             };
-            let cap_ty = match ft.implicit_params.capability {
-                CapTy(&Ty(_, Ty_::Tintersection(&[ty]))) | CapTy(ty) => ty,
-                _ => return None,
-            };
-            let pos = match cap_ty.1 {
-                Ty_::Tapply(((pos, "_"), _)) => pos,
-                _ => return None,
-            };
-            let name = self.ctx_generic_for_fun(param_name);
-            let tparam = tp((pos, name), &[]);
-            tparams.push(tparam);
-            let cap_ty = self.alloc(Ty(cap_ty.0, Ty_::Tgeneric(self.alloc((name, &[])))));
-            let ft = self.alloc(FunType {
-                implicit_params: self.alloc(FunImplicitParams {
-                    capability: CapTy(cap_ty),
-                }),
-                ..*ft
-            });
-            Some(self.alloc(Ty(ty.0, Ty_::Tfun(ft))))
-        };
 
         // For a polymorphic context with form `$g::C`, if we have a function
         // parameter `$g` with type `G` (where `G` is not a type parameter),
@@ -2048,12 +2045,12 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         let rewrite_arg_ctx = |
             tparams: &mut Vec<&'a Tparam<'a>>,
             where_constraints: &mut Vec<&'a WhereConstraint<'a>>,
-            ty: &'a Ty<'a>,
+            ty: &Ty<'a>,
             param_pos: &'a Pos<'a>,
             name: &str,
             context_reason: &'a Reason<'a>,
             cst: PosId<'a>,
-        | -> Option<&'a Ty<'a>> {
+        | -> Ty<'a> {
             let rewritten_ty = match ty.1 {
                 // If the type hint for this function parameter is a type
                 // parameter introduced in this function declaration, don't add
@@ -2061,7 +2058,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                 Ty_::Tgeneric(&(type_name, _))
                     if tparams.iter().any(|tp| tp.name.1 == type_name) =>
                 {
-                    None
+                    ty.clone()
                 }
                 // Otherwise, if the parameter is `G $g`, create tparam
                 // `T$g as G` and replace $g's type hint
@@ -2069,16 +2066,17 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                     let id = (param_pos, self.concat("T/", name));
                     tparams.push(tp(
                         id,
-                        std::slice::from_ref(self.alloc((ConstraintKind::ConstraintAs, ty))),
+                        std::slice::from_ref(
+                            self.alloc((ConstraintKind::ConstraintAs, self.alloc(ty.clone()))),
+                        ),
                     ));
-                    Some(self.alloc(Ty(
+                    Ty(
                         self.alloc(Reason::hint(param_pos)),
                         Ty_::Tgeneric(self.alloc((id.1, &[]))),
-                    )))
+                    )
                 }
             };
-            let ty = rewritten_ty.unwrap_or(ty);
-            let ty = self.alloc(Ty(context_reason, ty.1));
+            let ty = self.alloc(Ty(context_reason, rewritten_ty.1));
             let right = self.alloc(Ty(
                 context_reason,
                 Ty_::Taccess(self.alloc(TaccessType(ty, cst))),
@@ -2104,52 +2102,70 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         let mut where_constraints =
             Vec::from_iter_in(where_constraints.iter().copied(), self.arena);
 
-        let mut ty_by_param: BTreeMap<&str, (&'a Ty<'a>, &'a Pos<'a>)> = params
+        // The divergence here from the lowerer comes from using oxidized_by_ref instead of oxidized
+        let mut ty_by_param: BTreeMap<&str, (Ty<'a>, &'a Pos<'a>)> = params
             .iter()
-            .filter_map(|param| Some((param.name?, (param.type_.type_, param.pos))))
+            .filter_map(|param| Some((param.name?, (param.type_.type_.clone(), param.pos))))
             .collect();
 
         for context_ty in context_tys {
             match context_ty.1 {
-                // Hfun_context in the AST
+                // Hfun_context in the AST.
                 Ty_::Tapply(((_, name), _)) if name.starts_with('$') => {
                     if let Some((param_ty, _)) = ty_by_param.get_mut(name) {
-                        if let Ty_::Toption(ty) = param_ty.1 {
-                            if let Some(ty) = rewrite_fun_ctx(&mut tparams, ty, name) {
-                                *param_ty = self.alloc(Ty(param_ty.0, Ty_::Toption(ty)));
+                        match param_ty.1 {
+                            Ty_::Tlike(ref mut ty) => match ty {
+                                Ty(r, Ty_::Toption(tinner)) => {
+                                    *ty = self.alloc(Ty(
+                                        r,
+                                        Ty_::Toption(self.alloc(rewrite_fun_ctx(
+                                            &mut tparams,
+                                            tinner,
+                                            name,
+                                        ))),
+                                    ))
+                                }
+                                _ => {
+                                    *ty = self.alloc(rewrite_fun_ctx(&mut tparams, ty, name));
+                                }
+                            },
+                            Ty_::Toption(ref mut ty) => {
+                                *ty = self.alloc(rewrite_fun_ctx(&mut tparams, ty, name));
                             }
-                        } else {
-                            if let Some(ty) = rewrite_fun_ctx(&mut tparams, param_ty, name) {
-                                *param_ty = ty;
+                            _ => {
+                                *param_ty = rewrite_fun_ctx(&mut tparams, param_ty, name);
                             }
                         }
                     }
                 }
                 Ty_::Taccess(&TaccessType(Ty(_, Ty_::Tapply(((_, name), _))), cst)) => {
                     if let Some((param_ty, param_pos)) = ty_by_param.get_mut(name) {
-                        if let Ty_::Toption(ty) = param_ty.1 {
-                            if let Some(ty) = rewrite_arg_ctx(
+                        let mut rewrite = |t| {
+                            rewrite_arg_ctx(
                                 &mut tparams,
                                 &mut where_constraints,
-                                ty,
+                                t,
                                 param_pos,
                                 name,
                                 context_ty.0,
                                 cst,
-                            ) {
-                                *param_ty = self.alloc(Ty(param_ty.0, Ty_::Toption(ty)));
+                            )
+                        };
+                        match param_ty.1 {
+                            Ty_::Tlike(ref mut ty) => match ty {
+                                Ty(r, Ty_::Toption(tinner)) => {
+                                    *ty =
+                                        self.alloc(Ty(r, Ty_::Toption(self.alloc(rewrite(tinner)))))
+                                }
+                                _ => {
+                                    *ty = self.alloc(rewrite(ty));
+                                }
+                            },
+                            Ty_::Toption(ref mut ty) => {
+                                *ty = self.alloc(rewrite(ty));
                             }
-                        } else {
-                            if let Some(ty) = rewrite_arg_ctx(
-                                &mut tparams,
-                                &mut where_constraints,
-                                param_ty,
-                                param_pos,
-                                name,
-                                context_ty.0,
-                                cst,
-                            ) {
-                                *param_ty = ty;
+                            _ => {
+                                *param_ty = rewrite(param_ty);
                             }
                         }
                     }
@@ -2177,15 +2193,13 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         let params = self.slice(params.iter().copied().map(|param| match param.name {
             None => param,
             Some(name) => match ty_by_param.get(name) {
-                Some(&(type_, _)) if !std::ptr::eq(param.type_.type_, type_) => {
-                    self.alloc(FunParam {
-                        type_: self.alloc(PossiblyEnforcedTy {
-                            type_,
-                            ..*param.type_
-                        }),
-                        ..*param
-                    })
-                }
+                Some((type_, _)) if param.type_.type_ != type_ => self.alloc(FunParam {
+                    type_: self.alloc(PossiblyEnforcedTy {
+                        type_: self.alloc(type_.clone()),
+                        ..*param.type_
+                    }),
+                    ..*param
+                }),
                 _ => param,
             },
         }));

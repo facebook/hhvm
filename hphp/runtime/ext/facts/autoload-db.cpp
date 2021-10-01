@@ -44,7 +44,7 @@ DBData::DBData(
 
   // Coerce DB permissions into unix owner/group/other bits
   XLOGF(
-      DBG9,
+      DBG1,
       "Coercing DB permission bits {:04o} to {:04o}",
       m_perms,
       (m_perms | 0600) & 0666);
@@ -76,7 +76,7 @@ namespace {
  */
 void setFilePerms(const folly::fs::path& path, ::gid_t gid, ::mode_t perms) {
   XLOGF(
-      DBG9,
+      DBG1,
       "Creating {} with gid={} and perms={:04o}",
       path.native(),
       gid,
@@ -716,10 +716,10 @@ struct AutoloadDBImpl final : public AutoloadDB {
 
   void insertPath(SQLiteTxn& txn, const folly::fs::path& path) override {
     assertx(path.is_relative());
-    XLOGF(DBG0, "Registering path {} in the DB", path.native());
+    XLOGF(DBG9, "Registering path {} in the DB", path.native());
     auto query = txn.query(m_pathStmts.m_insert);
     query.bindString("@path", path.native());
-    XLOGF(DBG0, "Running {}", query.sql());
+    XLOGF(DBG9, "Running {}", query.sql());
     query.step();
   }
 
@@ -735,7 +735,7 @@ struct AutoloadDBImpl final : public AutoloadDB {
     } else {
       query.bindNull("@sha1sum");
     }
-    XLOGF(DBG0, "Running {}", query.sql());
+    XLOGF(DBG9, "Running {}", query.sql());
     query.step();
   }
 
@@ -743,7 +743,7 @@ struct AutoloadDBImpl final : public AutoloadDB {
     assertx(path.is_relative());
     auto query = txn.query(m_sha1HexStmts.m_get);
     query.bindString("@path", path.native());
-    XLOGF(DBG0, "Running {}", query.sql());
+    XLOGF(DBG9, "Running {}", query.sql());
     query.step();
     return std::string{query.getString(0)};
   }
@@ -752,7 +752,7 @@ struct AutoloadDBImpl final : public AutoloadDB {
     assertx(path.is_relative());
     auto query = txn.query(m_pathStmts.m_erase);
     query.bindString("@path", path.native());
-    XLOGF(DBG0, "Running {}", query.sql());
+    XLOGF(DBG9, "Running {}", query.sql());
     query.step();
   }
 
@@ -769,7 +769,7 @@ struct AutoloadDBImpl final : public AutoloadDB {
       query.bindString("@path", path.native());
       query.bindString("@kind_of", toString(kind));
       query.bindInt("@flags", flags);
-      XLOGF(DBG0, "Running {}", query.sql());
+      XLOGF(DBG9, "Running {}", query.sql());
       query.step();
     }
   }
@@ -779,7 +779,7 @@ struct AutoloadDBImpl final : public AutoloadDB {
     auto query = txn.query(m_typeStmts.m_getTypePath);
     query.bindString("@type", type);
     std::vector<folly::fs::path> results;
-    XLOGF(DBG0, "Running {}", query.sql());
+    XLOGF(DBG9, "Running {}", query.sql());
     for (query.step(); query.row(); query.step()) {
       results.emplace_back(std::string{query.getString(0)});
     }
@@ -792,7 +792,7 @@ struct AutoloadDBImpl final : public AutoloadDB {
     auto query = txn.query(m_typeStmts.m_getPathTypes);
     query.bindString("@path", path.native());
     std::vector<std::string> types;
-    XLOGF(DBG0, "Running {}", query.sql());
+    XLOGF(DBG9, "Running {}", query.sql());
     for (query.step(); query.row(); query.step()) {
       types.emplace_back(query.getString(0));
     }
@@ -806,7 +806,7 @@ struct AutoloadDBImpl final : public AutoloadDB {
     auto query = txn.query(m_typeStmts.m_getKindAndFlags);
     query.bindString("@type", type);
     query.bindString("@path", path.native());
-    XLOGF(DBG0, "Running {}", query.sql());
+    XLOGF(DBG9, "Running {}", query.sql());
     for (query.step(); query.row(); query.step()) {
       return {toTypeKind(query.getString(0)), query.getInt(1)};
     }
@@ -825,7 +825,7 @@ struct AutoloadDBImpl final : public AutoloadDB {
     query.bindString("@derived", derived);
     query.bindInt("@kind", toDBEnum(kind));
     query.bindString("@base", base);
-    XLOGF(DBG0, "Running {}", query.sql());
+    XLOGF(DBG9, "Running {}", query.sql());
     query.step();
   }
 
@@ -840,7 +840,7 @@ struct AutoloadDBImpl final : public AutoloadDB {
     query.bindString("@path", path.native());
     query.bindInt("@kind", toDBEnum(kind));
     std::vector<std::string> types;
-    XLOGF(DBG0, "Running {}", query.sql());
+    XLOGF(DBG9, "Running {}", query.sql());
     for (query.step(); query.row(); query.step()) {
       types.emplace_back(query.getString(0));
     }
@@ -853,7 +853,7 @@ struct AutoloadDBImpl final : public AutoloadDB {
     query.bindString("@base", base);
     query.bindInt("@kind", toDBEnum(kind));
     std::vector<std::pair<folly::fs::path, std::string>> edges;
-    XLOGF(DBG0, "Running {}", query.sql());
+    XLOGF(DBG9, "Running {}", query.sql());
     for (query.step(); query.row(); query.step()) {
       edges.push_back(
           {folly::fs::path{std::string{query.getString(0)}},
@@ -883,7 +883,7 @@ struct AutoloadDBImpl final : public AutoloadDB {
       DeriveKindMask deriveKinds = kDeriveKindAll) override {
     auto query = txn.query(getTransitiveDerivedTypesStmt(kinds, deriveKinds));
     query.bindString("@base", baseType);
-    XLOGF(DBG0, "Running {}", query.sql());
+    XLOGF(DBG9, "Running {}", query.sql());
     return RowIter<DerivedTypeInfo>{
         std::move(query), [](SQLiteQuery& query) -> DerivedTypeInfo {
           return {
@@ -924,7 +924,7 @@ struct AutoloadDBImpl final : public AutoloadDB {
     query.bindString("@path", path.native());
     query.bindString("@attribute_name", attributeName);
 
-    XLOGF(DBG0, "Running {}", query.sql());
+    XLOGF(DBG9, "Running {}", query.sql());
     query.step();
   }
 
@@ -960,7 +960,7 @@ struct AutoloadDBImpl final : public AutoloadDB {
     query.bindString("@path", path.native());
     query.bindString("@attribute_name", attributeName);
 
-    XLOGF(DBG0, "Running {}", query.sql());
+    XLOGF(DBG9, "Running {}", query.sql());
     query.step();
   }
 
@@ -992,7 +992,7 @@ struct AutoloadDBImpl final : public AutoloadDB {
     query.bindString("@path", path.native());
     query.bindString("@attribute_name", attributeName);
 
-    XLOGF(DBG0, "Running {}", query.sql());
+    XLOGF(DBG9, "Running {}", query.sql());
     query.step();
   }
 
@@ -1008,7 +1008,7 @@ struct AutoloadDBImpl final : public AutoloadDB {
     query.bindString("@type", type);
     query.bindString("@path", path.native());
     std::vector<std::string> results;
-    XLOGF(DBG0, "Running {}", query.sql());
+    XLOGF(DBG9, "Running {}", query.sql());
     for (query.step(); query.row(); query.step()) {
       results.emplace_back(query.getString(0));
     }
@@ -1025,7 +1025,7 @@ struct AutoloadDBImpl final : public AutoloadDB {
     query.bindString("@method", method);
     query.bindString("@path", path.native());
     std::vector<std::string> results;
-    XLOGF(DBG0, "Running {}", query.sql());
+    XLOGF(DBG9, "Running {}", query.sql());
     for (query.step(); query.row(); query.step()) {
       results.emplace_back(query.getString(0));
     }
@@ -1037,7 +1037,7 @@ struct AutoloadDBImpl final : public AutoloadDB {
     auto query = txn.query(m_fileStmts.m_getFileAttributes);
     query.bindString("@path", path.native());
     std::vector<std::string> results;
-    XLOGF(DBG0, "Running {}", query.sql());
+    XLOGF(DBG9, "Running {}", query.sql());
     for (query.step(); query.row(); query.step()) {
       results.emplace_back(query.getString(0));
     }
@@ -1049,7 +1049,7 @@ struct AutoloadDBImpl final : public AutoloadDB {
     auto query = txn.query(m_typeStmts.m_getTypesWithAttribute);
     query.bindString("@attribute_name", attributeName);
     std::vector<TypeDeclaration> results;
-    XLOGF(DBG0, "Running {}", query.sql());
+    XLOGF(DBG9, "Running {}", query.sql());
     for (query.step(); query.row(); query.step()) {
       results.push_back(TypeDeclaration{
           .m_type = std::string{query.getString(0)},
@@ -1063,7 +1063,7 @@ struct AutoloadDBImpl final : public AutoloadDB {
     auto query = txn.query(m_typeStmts.m_getTypeAliasesWithAttribute);
     query.bindString("@attribute_name", attributeName);
     std::vector<TypeDeclaration> results;
-    XLOGF(DBG0, "Running {}", query.sql());
+    XLOGF(DBG9, "Running {}", query.sql());
     for (query.step(); query.row(); query.step()) {
       results.push_back(TypeDeclaration{
           .m_type = std::string{query.getString(0)},
@@ -1077,7 +1077,7 @@ struct AutoloadDBImpl final : public AutoloadDB {
     auto query = txn.query(m_typeStmts.m_getMethodsInPath);
     query.bindString("@path", path);
     std::vector<MethodDeclaration> results;
-    XLOGF(DBG0, "Running {}", query.sql());
+    XLOGF(DBG9, "Running {}", query.sql());
     for (query.step(); query.row(); query.step()) {
       results.push_back(MethodDeclaration{
           .m_type = std::string{query.getString(0)},
@@ -1092,7 +1092,7 @@ struct AutoloadDBImpl final : public AutoloadDB {
     auto query = txn.query(m_typeStmts.m_getMethodsWithAttribute);
     query.bindString("@attribute_name", attributeName);
     std::vector<MethodDeclaration> results;
-    XLOGF(DBG0, "Running {}", query.sql());
+    XLOGF(DBG9, "Running {}", query.sql());
     for (query.step(); query.row(); query.step()) {
       results.push_back(MethodDeclaration{
           .m_type = std::string{query.getString(0)},
@@ -1107,7 +1107,7 @@ struct AutoloadDBImpl final : public AutoloadDB {
     auto query = txn.query(m_fileStmts.m_getFilesWithAttribute);
     query.bindString("@attribute_name", attributeName);
     std::vector<folly::fs::path> results;
-    XLOGF(DBG0, "Running {}", query.sql());
+    XLOGF(DBG9, "Running {}", query.sql());
     for (query.step(); query.row(); query.step()) {
       results.push_back(folly::fs::path{std::string{query.getString(0)}});
     }
@@ -1123,7 +1123,7 @@ struct AutoloadDBImpl final : public AutoloadDB {
     query.bindString("@type", type);
     query.bindString("@path", path);
     query.bindString("@attribute_name", attributeName);
-    XLOGF(DBG0, "Running {}", query.sql());
+    XLOGF(DBG9, "Running {}", query.sql());
     std::vector<folly::dynamic> args;
     for (query.step(); query.row(); query.step()) {
       auto arg = query.getNullableString(0);
@@ -1143,7 +1143,7 @@ struct AutoloadDBImpl final : public AutoloadDB {
     query.bindString("@type", typeAlias);
     query.bindString("@path", path);
     query.bindString("@attribute_name", attributeName);
-    XLOGF(DBG0, "Running {}", query.sql());
+    XLOGF(DBG9, "Running {}", query.sql());
     std::vector<folly::dynamic> args;
     for (query.step(); query.row(); query.step()) {
       auto arg = query.getNullableString(0);
@@ -1165,7 +1165,7 @@ struct AutoloadDBImpl final : public AutoloadDB {
     query.bindString("@method", method);
     query.bindString("@path", path);
     query.bindString("@attribute_name", attributeName);
-    XLOGF(DBG0, "Running {}", query.sql());
+    XLOGF(DBG9, "Running {}", query.sql());
     std::vector<folly::dynamic> args;
     for (query.step(); query.row(); query.step()) {
       auto arg = query.getNullableString(0);
@@ -1183,7 +1183,7 @@ struct AutoloadDBImpl final : public AutoloadDB {
     auto query = txn.query(m_fileStmts.m_getFileAttributeArgs);
     query.bindString("@path", path);
     query.bindString("@attribute_name", attributeName);
-    XLOGF(DBG0, "Running {}", query.sql());
+    XLOGF(DBG9, "Running {}", query.sql());
     std::vector<folly::dynamic> args;
     for (query.step(); query.row(); query.step()) {
       auto arg = query.getNullableString(0);
@@ -1212,7 +1212,7 @@ struct AutoloadDBImpl final : public AutoloadDB {
     auto query = txn.query(m_functionStmts.m_insert);
     query.bindString("@function", function);
     query.bindString("@path", path.native());
-    XLOGF(DBG0, "Running {}", query.sql());
+    XLOGF(DBG9, "Running {}", query.sql());
     query.step();
   }
 
@@ -1220,7 +1220,7 @@ struct AutoloadDBImpl final : public AutoloadDB {
   getFunctionPath(SQLiteTxn& txn, std::string_view function) override {
     auto query = txn.query(m_functionStmts.m_getFunctionPath);
     query.bindString("@function", function);
-    XLOGF(DBG0, "Running {}", query.sql());
+    XLOGF(DBG9, "Running {}", query.sql());
     std::vector<folly::fs::path> results;
     for (query.step(); query.row(); query.step()) {
       results.emplace_back(std::string{query.getString(0)});
@@ -1234,7 +1234,7 @@ struct AutoloadDBImpl final : public AutoloadDB {
     auto query = txn.query(m_functionStmts.m_getPathFunctions);
     query.bindString("@path", path.native());
     std::vector<std::string> functions;
-    XLOGF(DBG0, "Running {}", query.sql());
+    XLOGF(DBG9, "Running {}", query.sql());
     for (query.step(); query.row(); query.step()) {
       functions.emplace_back(query.getString(0));
     }
@@ -1259,7 +1259,7 @@ struct AutoloadDBImpl final : public AutoloadDB {
     auto query = txn.query(m_constantStmts.m_insert);
     query.bindString("@constant", constant);
     query.bindString("@path", path.native());
-    XLOGF(DBG0, "Running {}", query.sql());
+    XLOGF(DBG9, "Running {}", query.sql());
     query.step();
   }
 
@@ -1268,7 +1268,7 @@ struct AutoloadDBImpl final : public AutoloadDB {
     auto query = txn.query(m_constantStmts.m_getConstantPath);
     query.bindString("@constant", constant);
     std::vector<folly::fs::path> results;
-    XLOGF(DBG0, "Running {}", query.sql());
+    XLOGF(DBG9, "Running {}", query.sql());
     for (query.step(); query.row(); query.step()) {
       results.emplace_back(std::string{query.getString(0)});
     }
@@ -1281,7 +1281,7 @@ struct AutoloadDBImpl final : public AutoloadDB {
     auto query = txn.query(m_constantStmts.m_getPathConstants);
     query.bindString("@path", path.native());
     std::vector<std::string> constants;
-    XLOGF(DBG0, "Running {}", query.sql());
+    XLOGF(DBG9, "Running {}", query.sql());
     for (query.step(); query.row(); query.step()) {
       constants.emplace_back(query.getString(0));
     }
@@ -1290,7 +1290,7 @@ struct AutoloadDBImpl final : public AutoloadDB {
 
   RowIter<PathAndHash> getAllPathsAndHashes(SQLiteTxn& txn) override {
     auto query = txn.query(m_pathStmts.m_getAll);
-    XLOGF(DBG0, "Running {}", query.sql());
+    XLOGF(DBG9, "Running {}", query.sql());
     return RowIter<PathAndHash>{
         std::move(query), [](SQLiteQuery& q) -> PathAndHash {
           return {std::string{q.getString(0)}, q.getString(1)};
@@ -1299,7 +1299,7 @@ struct AutoloadDBImpl final : public AutoloadDB {
 
   RowIter<SymbolPath> getAllTypePaths(SQLiteTxn& txn) override {
     auto query = txn.query(m_typeStmts.m_getAll);
-    XLOGF(DBG0, "Running {}", query.sql());
+    XLOGF(DBG9, "Running {}", query.sql());
     return RowIter<SymbolPath>{
         std::move(query), [](SQLiteQuery& q) -> SymbolPath {
           return {q.getString(0), {std::string{q.getString(1)}}};
@@ -1308,7 +1308,7 @@ struct AutoloadDBImpl final : public AutoloadDB {
 
   RowIter<SymbolPath> getAllFunctionPaths(SQLiteTxn& txn) override {
     auto query = txn.query(m_functionStmts.m_getAll);
-    XLOGF(DBG0, "Running {}", query.sql());
+    XLOGF(DBG9, "Running {}", query.sql());
     return RowIter<SymbolPath>{
         std::move(query), [](SQLiteQuery& q) -> SymbolPath {
           return {q.getString(0), {std::string{q.getString(1)}}};
@@ -1317,7 +1317,7 @@ struct AutoloadDBImpl final : public AutoloadDB {
 
   RowIter<SymbolPath> getAllConstantPaths(SQLiteTxn& txn) override {
     auto query = txn.query(m_constantStmts.m_getAll);
-    XLOGF(DBG0, "Running {}", query.sql());
+    XLOGF(DBG9, "Running {}", query.sql());
     return RowIter<SymbolPath>{
         std::move(query), [](SQLiteQuery& q) -> SymbolPath {
           return {q.getString(0), {std::string{q.getString(1)}}};
@@ -1328,13 +1328,13 @@ struct AutoloadDBImpl final : public AutoloadDB {
     auto query = txn.query(m_clockStmts.m_insert);
     query.bindString("@clock", clock.m_clock);
     query.bindString("@mergebase", clock.m_mergebase);
-    XLOGF(DBG0, "Running {}", query.sql());
+    XLOGF(DBG9, "Running {}", query.sql());
     query.step();
   }
 
   Clock getClock(SQLiteTxn& txn) override {
     auto query = txn.query(m_clockStmts.m_get);
-    XLOGF(DBG0, "Running {}", query.sql());
+    XLOGF(DBG9, "Running {}", query.sql());
     query.step();
     if (!query.row()) {
       return {};

@@ -1111,7 +1111,7 @@ void SymbolMap::update(
                 // current update and try again later, and there's no reason
                 // to slam stderr with a warning in this case.
                 case SQLiteExc::Code::BUSY:
-                  XLOG(DBG9)
+                  XLOG(DBG0)
                       << "Exception while updating autoload DB: " << e.what();
                   break;
                 default:
@@ -1222,11 +1222,11 @@ void SymbolMap::updateDB(
   if (since.isInitial()) {
     try {
       auto DEBUG_ONLY t0 = std::chrono::steady_clock::now();
-      XLOGF(DBG9, "Running ANALYZE on {}...", m_dbData.m_path.native());
+      XLOGF(DBG0, "Running ANALYZE on {}...", m_dbData.m_path.native());
       db.analyze();
       auto DEBUG_ONLY tf = std::chrono::steady_clock::now();
       XLOGF(
-          DBG9,
+          DBG0,
           "Finished ANALYZE on {} in {:.3} seconds.",
           m_dbData.m_path.native(),
           static_cast<double>(

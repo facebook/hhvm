@@ -814,7 +814,7 @@ struct FactsStoreImpl final
                   "Subscription result: {} paths received.",
                   files->size());
             } else {
-              XLOGF(DBG9, "Subscription result: {}", folly::toJson(*results));
+              XLOGF(DBG1, "Subscription result: {}", folly::toJson(*results));
             }
             auto sharedThis = weakThis.lock();
             if (!sharedThis) {
@@ -863,7 +863,7 @@ private:
     }
     auto query = addWatchmanSince(m_watchmanData->m_queryExpr, since);
 
-    XLOGF(DBG9, "Querying watchman ({})", folly::toJson(query));
+    XLOGF(DBG1, "Querying watchman ({})", folly::toJson(query));
     return m_watchmanData->m_watchmanClient.query(std::move(query))
         .via(&m_updateExec)
         .thenValue([this, since](
@@ -943,7 +943,7 @@ private:
           }
 
           XLOGF(
-              DBG9,
+              DBG0,
               "Facts size: {}. Altered paths size: {}",
               facts.size(),
               alteredPathsAndHashes.size());
@@ -978,7 +978,7 @@ private:
           }();
 
           XLOGF(
-              DBG9,
+              DBG0,
               "SymbolMap.update(since={}, clock={}, "
               "alteredPathsAndHashes.size()={}, deletedPaths.size()={})",
               since,

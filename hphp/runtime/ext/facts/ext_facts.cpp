@@ -650,7 +650,7 @@ WatchmanAutoloadMapFactory::getForOptions(const RepoOptions& options) {
 
   if (mapKey->m_dbData.m_rwMode == SQLite::OpenMode::ReadOnly) {
     XLOGF(
-        DBG9,
+        DBG0,
         "Loading {} from trusted Autoload DB at {}",
         mapKey->m_root.native(),
         mapKey->m_dbData.m_path.native());
@@ -748,7 +748,7 @@ Variant HHVM_FUNCTION(facts_db_path, const String& rootStr) {
   assertx(root->is_absolute());
 
   auto optionPath = *root / ".hhvmconfig.hdf";
-  XLOG(DBG9) << "Got options at " << optionPath.native();
+  XLOG(DBG0) << "Got options at " << optionPath.native();
   auto const& repoOptions = RepoOptions::forFile(optionPath.native().c_str());
 
   try {

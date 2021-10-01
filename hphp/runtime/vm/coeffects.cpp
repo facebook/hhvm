@@ -302,15 +302,14 @@ RDS_LOCAL(Optional<RuntimeCoeffects>, autoCoeffects);
 RDS_LOCAL(bool, autoCoeffectsAvailable);
 
 RuntimeCoeffects computeAutomaticCoeffects() {
+  if (!CoeffectsConfig::enabled()) return RuntimeCoeffects::none();
   // Return the coeffects corresponding to the leaf VM frame. If there is no
   // such frame, return default coeffects.
   return fromLeafUnpublished([](const ActRec* fp, const ActRec* realFp, Offset off) {
     assertx(realFp);
     auto const func = fp->func();
     if (!func->hasCoeffectsLocal()) {
-      if (func->hasCoeffectRules()) {
-        return RuntimeCoeffects::fixme();
-      }
+      assertx(!func->hasCoeffectRules());
       return func->requiredCoeffects();
     }
     auto const id = func->coeffectsLocalId();

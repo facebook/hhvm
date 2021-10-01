@@ -4,13 +4,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use facts_rust as facts;
 use hhbc_by_ref_hhbc_string_utils::without_xhp_mangling;
 use ocamlrep::{bytes_from_ocamlrep, ptr::UnsafeOcamlPtr};
 use ocamlrep_ocamlpool::ocaml_ffi;
 use oxidized::relative_path::RelativePath;
 
-use facts::facts_parser::*;
+use facts_rust::{facts::*, facts_parser::*};
 ocaml_ffi! {
     fn extract_as_json_ffi(
         flags: i32,
@@ -73,7 +72,7 @@ pub fn extract_facts_ffi0(
     filename: RelativePath,
     text: &[u8],
     _mangle_xhp: bool,
-) -> Option<facts::facts::Facts> {
+) -> Option<Facts> {
     let opts = FactsOpts {
         php5_compat_mode,
         hhvm_compat_mode,
@@ -84,4 +83,8 @@ pub fn extract_facts_ffi0(
         disallow_hash_comments,
     };
     from_text(text, opts)
+}
+
+pub fn facts_to_json_ffi(facts: Facts, text: &[u8]) -> String {
+    facts.to_json(text)
 }

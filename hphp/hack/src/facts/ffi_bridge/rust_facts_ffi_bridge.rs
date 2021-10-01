@@ -3,7 +3,7 @@
 use cxx::CxxString;
 use facts_rust::facts;
 use oxidized::relative_path::RelativePath;
-use rust_facts_ffi::{extract_facts_as_json_ffi0, extract_facts_ffi0};
+use rust_facts_ffi::{extract_facts_as_json_ffi0, extract_facts_ffi0, facts_to_json_ffi};
 use std::collections::{BTreeMap, BTreeSet};
 
 #[cxx::bridge]
@@ -85,6 +85,10 @@ mod ffi {
             source_text: &CxxString,
         ) -> FactsResult;
     }
+
+    extern "Rust" {
+        pub fn hackc_facts_to_json_cpp_ffi(facts: FactsResult, source_text: &CxxString) -> String;
+    }
 }
 
 pub fn hackc_extract_facts_as_json_cpp_ffi(
@@ -145,6 +149,12 @@ pub fn hackc_extract_facts_cpp_ffi(
         }
         None => Default::default(),
     }
+}
+
+pub fn hackc_facts_to_json_cpp_ffi(facts: ffi::FactsResult, source_text: &CxxString) -> String {
+    let facts = facts::Facts::from(facts.facts);
+    let text = source_text.as_bytes();
+    facts_to_json_ffi(facts, text)
 }
 
 fn vec_to_map<K, V, T>(v: Vec<T>) -> BTreeMap<K, V>

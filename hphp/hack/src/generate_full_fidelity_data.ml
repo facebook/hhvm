@@ -2006,6 +2006,114 @@ end
 
 (* GenerateRustDirectDeclSmartConstructors *)
 
+module GenerateRustPairSmartConstructors = struct
+  let to_constructor_methods x =
+    let args =
+      List.map x.fields ~f:(fun (name, _) ->
+          sprintf "%s: Self::R" (escape_rust_keyword name))
+    in
+    let args = String.concat ~sep:", " args in
+    let fwd_args =
+      List.map x.fields ~f:(fun (name, _) -> escape_rust_keyword name)
+    in
+    let fwd_args idx =
+      List.map fwd_args ~f:(fun name -> name ^ "." ^ idx)
+      |> String.concat ~sep:", "
+    in
+    sprintf
+      "    fn make_%s(&mut self, %s) -> Self::R {
+        Node(self.0.make_%s(%s), self.1.make_%s(%s))
+    }\n\n"
+      x.type_name
+      args
+      x.type_name
+      (fwd_args "0")
+      x.type_name
+      (fwd_args "1")
+
+  let pair_smart_constructors_template : string =
+    make_header CStyle ""
+    ^ "
+
+use parser_core_types::token_factory::TokenFactory;
+use smart_constructors::{NodeType, SmartConstructors};
+
+use crate::{PairTokenFactory, Node};
+
+#[derive(Clone)]
+pub struct PairSmartConstructors<SC0, SC1>(pub SC0, pub SC1, PairTokenFactory<SC0::TF, SC1::TF>)
+where
+    SC0: SmartConstructors,
+    SC0::R: NodeType,
+    SC1: SmartConstructors,
+    SC1::R: NodeType;
+
+impl<SC0, SC1> PairSmartConstructors<SC0, SC1>
+where
+    SC0: SmartConstructors,
+    SC0::R: NodeType,
+    SC1: SmartConstructors,
+    SC1::R: NodeType,
+{
+    pub fn new(mut sc0: SC0, mut sc1: SC1) -> Self {
+        let tf0 = sc0.token_factory_mut().clone();
+        let tf1 = sc1.token_factory_mut().clone();
+        let tf = PairTokenFactory::new(tf0, tf1);
+        Self(sc0, sc1, tf)
+    }
+}
+
+impl<SC0, SC1> SmartConstructors for PairSmartConstructors<SC0, SC1>
+where
+    SC0: SmartConstructors,
+    SC0::R: NodeType,
+    SC1: SmartConstructors,
+    SC1::R: NodeType,
+{
+    type State = Self;
+    type TF = PairTokenFactory<SC0::TF, SC1::TF>;
+    type R = Node<SC0::R, SC1::R>;
+
+    fn state_mut(&mut self) -> &mut Self {
+        self
+    }
+
+    fn into_state(self) -> Self {
+        self
+    }
+
+    fn token_factory_mut(&mut self) -> &mut Self::TF {
+        &mut self.2
+    }
+
+    fn make_missing(&mut self, offset: usize) -> Self::R {
+        Node(self.0.make_missing(offset), self.1.make_missing(offset))
+    }
+
+    fn make_token(&mut self, token: <Self::TF as TokenFactory>::Token) -> Self::R {
+        Node(self.0.make_token(token.0), self.1.make_token(token.1))
+    }
+
+    fn make_list(&mut self, items: Vec<Self::R>, offset: usize) -> Self::R {
+        let (items0, items1) = items.into_iter().map(|n| (n.0, n.1)).unzip();
+        Node(self.0.make_list(items0, offset), self.1.make_list(items1, offset))
+    }
+
+CONSTRUCTOR_METHODS}
+"
+
+  let pair_smart_constructors =
+    Full_fidelity_schema.make_template_file
+      ~transformations:
+        [{ pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods }]
+      ~filename:
+        (full_fidelity_path_prefix ^ "pair_smart_constructors_generated.rs")
+      ~template:pair_smart_constructors_template
+      ()
+end
+
+(* GenerateRustPairSmartConstructors *)
+
 module GenerateFFSmartConstructorsWrappers = struct
   let full_fidelity_smart_constructors_wrappers_template : string =
     make_header
@@ -3232,6 +3340,7 @@ let templates =
     GenerateRustFlattenSmartConstructors.flatten_smart_constructors;
     GenerateRustFactsSmartConstructors.facts_smart_constructors;
     GenerateRustDirectDeclSmartConstructors.direct_decl_smart_constructors;
+    GenerateRustPairSmartConstructors.pair_smart_constructors;
     GenerateFFSmartConstructorsWrappers
     .full_fidelity_smart_constructors_wrappers;
     GenerateFFRustSmartConstructorsWrappers

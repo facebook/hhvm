@@ -2846,6 +2846,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "pair_smart_constructors"
+version = "0.0.0"
+dependencies = [
+ "parser_core_types",
+ "smart_constructors",
+]
+
+[[package]]
 name = "parking_lot"
 version = "0.10.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"

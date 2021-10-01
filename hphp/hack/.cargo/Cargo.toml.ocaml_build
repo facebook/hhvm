@@ -153,6 +153,7 @@ members = [
     "src/parser/cargo/mode_parser",
     "src/parser/cargo/namespaces",
     "src/parser/cargo/operator",
+    "src/parser/cargo/pair_smart_constructors",
     "src/parser/cargo/positioned_by_ref_parser_ffi",
     "src/parser/cargo/positioned_smart_constructors",
     "src/parser/cargo/rust_aast_parser_types",

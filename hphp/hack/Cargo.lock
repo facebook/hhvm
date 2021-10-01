@@ -130,6 +130,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "ast_and_decl_parser"
+version = "0.0.0"
+dependencies = [
+ "aast_parser",
+ "bumpalo",
+ "cst_and_decl_parser",
+ "oxidized_by_ref",
+ "parser_core_types",
+ "rust_aast_parser_types",
+ "stack_limit",
+]
+
+[[package]]
 name = "atty"
 version = "0.2.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -156,6 +169,7 @@ name = "bench"
 version = "0.0.0"
 dependencies = [
  "aast_parser",
+ "ast_and_decl_parser",
  "bumpalo",
  "criterion",
  "cst_and_decl_parser",

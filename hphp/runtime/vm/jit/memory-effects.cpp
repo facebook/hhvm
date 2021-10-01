@@ -708,14 +708,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case VerifyParamCls:
   case VerifyParamFail:
   case VerifyParamFailHard:
-  case VerifyReifiedLocalType:
-  case VerifyReifiedReturnType:
-  case VerifyRetCallable:
-  case VerifyRetCls:
-  case VerifyRetFail:
-  case VerifyRetFailHard:
-    return may_load_store(AHeapAny, AHeapAny);
-
   case VerifyPropCls:
   case VerifyPropFail:
   case VerifyPropFailHard:
@@ -723,7 +715,13 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case VerifyPropAll:
   case VerifyPropCoerce:
   case VerifyPropCoerceAll:
-    return may_load_store(AHeapAny | livefp(inst), AHeapAny);
+  case VerifyReifiedLocalType:
+  case VerifyReifiedReturnType:
+  case VerifyRetCallable:
+  case VerifyRetCls:
+  case VerifyRetFail:
+  case VerifyRetFailHard:
+    return may_load_store(AHeapAny, AHeapAny);
 
   case ContEnter:
     {

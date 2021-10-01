@@ -1280,11 +1280,11 @@ TypedValue ExecutionContext::invokeUnit(const Unit* unit,
       invokeFunc(
         Func::lookup(s_enter_async_entry_point.get()),
         make_vec_array(Variant{it}),
-        nullptr, nullptr, RuntimeCoeffects::fixme(), false
+        nullptr, nullptr, RuntimeCoeffects::defaults(), false
       );
     } else {
       invokeFunc(it, init_null_variant, nullptr, nullptr,
-                 RuntimeCoeffects::fixme(), false);
+                 RuntimeCoeffects::defaults(), false);
     }
   }
   return make_tv<KindOfInt64>(1);
@@ -1905,7 +1905,7 @@ Variant ExecutionContext::getEvaledArg(const StringData* val,
   // Default arg values are not currently allowed to depend on class context.
   auto v = Variant::attach(
     g_context->invokeFuncFew(func, nullptr, 0, nullptr,
-                             RuntimeCoeffects::fixme(), true, true)
+                             RuntimeCoeffects::defaults(), true, true)
   );
   m_evaledArgs.set(key, *v.asTypedValue());
   return Variant::wrap(m_evaledArgs.lookup(key));
@@ -2107,7 +2107,7 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
     auto const obj = ctx && fp->hasThis() ? fp->getThis() : nullptr;
     auto const cls = ctx && fp->hasClass() ? fp->getClass() : nullptr;
     auto const arr_tv = invokeFunc(f, args.toArray(), obj, cls,
-                                   RuntimeCoeffects::fixme(), false);
+                                   RuntimeCoeffects::defaults(), false);
     assertx(isArrayLikeType(type(arr_tv)));
     assertx(val(arr_tv).parr->size() == f->numParams() + 1);
     Array arr = Array::attach(val(arr_tv).parr);

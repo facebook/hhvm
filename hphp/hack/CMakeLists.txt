@@ -125,14 +125,6 @@ invoke_dune(hack_dune all)
 
 set(CARGO_BUILD "${CMAKE_SOURCE_DIR}/hphp/hack/scripts/build_rust_to_ocaml.sh")
 
-add_custom_target(
-  hack_ffi
-  COMMAND
-   . "${CMAKE_CURRENT_BINARY_DIR}/dev_env_rust_only.sh" &&
-    ${CARGO_BUILD} decl_cpp_ffi decl_cpp_ffi
-  COMMENT "Compiling Rust FFI"
-)
-
 if(DEFINED ENV{HACKDEBUG})
   set(PROFILE "debug")
 else()
@@ -236,26 +228,18 @@ endfunction()
 build_cxx_bridge(rust_facts "src/facts/ffi_bridge")
 build_cxx_bridge(rust_parser "src/parser/ffi_bridge")
 build_cxx_bridge(rust_compile "src/hhbc/ffi_bridge")
-
-add_dependencies(hack_ffi rustc cargo)
-# Not a true dependency, but we need to make sure we don't have two cargo/rustc
-# processes building the FFI files at the same time; this leads to intermittent
-# failures, which for some reason are particularly common on our Azure MacOS
-# build jobs
-add_dependencies(hack_dune hack_ffi)
+build_cxx_bridge(rust_decl "src/decl/ffi_bridge")
 
 if (NOT LZ4_FOUND)
   add_dependencies(hack_dune lz4)
   add_dependencies(hack_dune_debug lz4)
   add_dependencies(hack_dune_test lz4)
-  add_dependencies(hack_ffi lz4)
 endif()
 
 if (NOT PC_SQLITE3_FOUND)
   add_dependencies(hack_dune sqlite3)
   add_dependencies(hack_dune_debug sqlite3)
   add_dependencies(hack_dune_test sqlite3)
-  add_dependencies(hack_ffi sqlite3)
 endif()
 
 # Intentionally not using `hack_dune_debug` as it generates output files of a
@@ -265,13 +249,6 @@ endif()
 # explicitly used
 add_custom_target(hack ALL DEPENDS hack_dune)
 add_custom_target(hack_test DEPENDS hack_dune_test)
-
-# libdecl_cpp_ffi_stubs.a needs to be exposed as a library target to cmake
-# for other targets (e.g. hhvm) to depend on.
-set(LIBRUST_DECL_PATH "${CMAKE_BINARY_DIR}/hphp/hack/libdecl_cpp_ffi_stubs.a")
-add_library(libdecl_cpp_ffi_stubs STATIC IMPORTED GLOBAL)
-add_dependencies(libdecl_cpp_ffi_stubs hack_ffi)
-set_target_properties(libdecl_cpp_ffi_stubs PROPERTIES IMPORTED_LOCATION ${LIBRUST_DECL_PATH})
 
 configure_file(dev_env.sh.in dev_env.sh ESCAPE_QUOTES @ONLY)
 configure_file(dev_env_common.sh.in dev_env_common.sh ESCAPE_QUOTES @ONLY)

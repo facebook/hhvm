@@ -506,8 +506,6 @@ module StdlibFunctions = struct
 
   let get_class = "\\get_class"
 
-  let array_map = "\\array_map"
-
   let call_user_func = "\\call_user_func"
 
   let type_structure = "\\HH\\type_structure"
@@ -533,7 +531,6 @@ module StdlibFunctions = struct
         PseudoFunctions.isset;
         PseudoFunctions.unset;
         type_structure;
-        array_map;
         PseudoFunctions.unsafe_cast;
       ]
 

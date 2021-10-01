@@ -122,7 +122,11 @@ function array_keys<Tk as arraykey>(
  * X (unknown type)      -> R = Y (other unknown type)
  */
 <<__PHPStdLib>>
-function array_map($callback, $arr1, ...$args);
+function array_map<Tk as arraykey, Tin, Tout>(
+  (function (Tin): Tout) $callback,
+  KeyedContainer<Tk, Tin> $arr,
+): KeyedContainer<Tk, Tout>;
+
 <<__PHPStdLib>>
 function array_merge_recursive($array1, ...$args)[];
 <<__PHPStdLib>>

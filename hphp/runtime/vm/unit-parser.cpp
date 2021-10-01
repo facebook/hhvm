@@ -220,7 +220,7 @@ ParseFactsResult extract_facts(
 ) {
   auto const get_facts = [&](const std::string& source_text) -> ParseFactsResult {
     try {
-      auto facts = hackc_extract_as_json_cpp_ffi(options.getFactsFlags(),
+      auto facts = hackc_extract_facts_as_json_cpp_ffi(options.getFactsFlags(),
                                                  filename,
                                                  source_text);
       return FactsJSONString { std::string(facts) };

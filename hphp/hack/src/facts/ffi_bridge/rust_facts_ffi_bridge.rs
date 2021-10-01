@@ -3,7 +3,7 @@
 use cxx::CxxString;
 use facts_rust::facts;
 use oxidized::relative_path::RelativePath;
-use rust_facts_ffi::{extract_as_json_ffi0, extract_facts_ffi0};
+use rust_facts_ffi::{extract_facts_as_json_ffi0, extract_facts_ffi0};
 use std::collections::{BTreeMap, BTreeSet};
 
 #[cxx::bridge]
@@ -71,7 +71,7 @@ mod ffi {
     }
 
     extern "Rust" {
-        pub fn hackc_extract_as_json_cpp_ffi(
+        pub fn hackc_extract_facts_as_json_cpp_ffi(
             flags: i32,
             filename: &CxxString,
             source_text: &CxxString,
@@ -87,7 +87,7 @@ mod ffi {
     }
 }
 
-pub fn hackc_extract_as_json_cpp_ffi(
+pub fn hackc_extract_facts_as_json_cpp_ffi(
     flags: i32,
     filename: &CxxString,
     source_text: &CxxString,
@@ -97,7 +97,7 @@ pub fn hackc_extract_as_json_cpp_ffi(
         oxidized::relative_path::Prefix::Dummy,
         std::path::PathBuf::from(std::ffi::OsStr::from_bytes(filename.as_bytes())),
     );
-    match extract_as_json_ffi0(
+    match extract_facts_as_json_ffi0(
         ((1 << 0) & flags) != 0, // php5_compat_mode
         ((1 << 1) & flags) != 0, // hhvm_compat_mode
         ((1 << 2) & flags) != 0, // allow_new_attribute_syntax
@@ -152,9 +152,7 @@ where
     K: std::cmp::Ord,
     T: Into<(K, V)>,
 {
-    v.into_iter()
-        .map(|x| Into::into(x))
-        .collect::<BTreeMap<K, V>>()
+    v.into_iter().map(|x| x.into()).collect::<BTreeMap<K, V>>()
 }
 
 fn map_to_vec<K, V, T>(m: BTreeMap<K, V>) -> Vec<T>

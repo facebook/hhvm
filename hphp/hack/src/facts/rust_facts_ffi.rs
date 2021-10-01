@@ -22,7 +22,7 @@ ocaml_ffi! {
         // and text_value exist. We don't call into OCaml here, so it won't.
         let text_value = unsafe { text_ptr.as_value() };
         let text = bytes_from_ocamlrep(text_value).expect("expected string");
-        extract_as_json_ffi0(
+        extract_facts_as_json_ffi0(
             ((1 << 0) & flags) != 0, // php5_compat_mode
             ((1 << 1) & flags) != 0, // hhvm_compat_mode
             ((1 << 2) & flags) != 0, // allow_new_attribute_syntax
@@ -36,7 +36,7 @@ ocaml_ffi! {
     }
 }
 
-pub fn extract_as_json_ffi0(
+pub fn extract_facts_as_json_ffi0(
     php5_compat_mode: bool,
     hhvm_compat_mode: bool,
     allow_new_attribute_syntax: bool,
@@ -47,7 +47,7 @@ pub fn extract_as_json_ffi0(
     text: &[u8],
     mangle_xhp: bool,
 ) -> Option<String> {
-    let opts = ExtractAsJsonOpts {
+    let opts = FactsOpts {
         php5_compat_mode,
         hhvm_compat_mode,
         allow_new_attribute_syntax,
@@ -74,7 +74,7 @@ pub fn extract_facts_ffi0(
     text: &[u8],
     _mangle_xhp: bool,
 ) -> Option<facts::facts::Facts> {
-    let opts = ExtractAsJsonOpts {
+    let opts = FactsOpts {
         php5_compat_mode,
         hhvm_compat_mode,
         allow_new_attribute_syntax,

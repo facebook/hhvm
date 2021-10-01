@@ -15,7 +15,7 @@ use crate::facts::*;
 use crate::facts_smart_constructors::*;
 use facts_parser;
 
-pub struct ExtractAsJsonOpts {
+pub struct FactsOpts {
     pub php5_compat_mode: bool,
     pub hhvm_compat_mode: bool,
     pub allow_new_attribute_syntax: bool,
@@ -25,12 +25,12 @@ pub struct ExtractAsJsonOpts {
     pub disallow_hash_comments: bool,
 }
 
-pub fn extract_as_json(text: &[u8], opts: ExtractAsJsonOpts) -> Option<String> {
+pub fn extract_as_json(text: &[u8], opts: FactsOpts) -> Option<String> {
     from_text(text, opts).map(|facts| facts.to_json(text))
 }
 
-pub fn from_text(text: &[u8], opts: ExtractAsJsonOpts) -> Option<Facts> {
-    let ExtractAsJsonOpts {
+pub fn from_text(text: &[u8], opts: FactsOpts) -> Option<Facts> {
+    let FactsOpts {
         php5_compat_mode,
         hhvm_compat_mode,
         allow_new_attribute_syntax,

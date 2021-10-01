@@ -36,7 +36,7 @@ fn main() {
 
 fn parse(file_path: String, parse_only: bool) {
     let path = RelativePath::make(Prefix::Dummy, PathBuf::from(file_path.clone()));
-    let opts = ExtractAsJsonOpts {
+    let opts = FactsOpts {
         php5_compat_mode: true,
         hhvm_compat_mode: true,
         allow_new_attribute_syntax: false,

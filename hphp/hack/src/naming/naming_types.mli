@@ -6,9 +6,6 @@
  *
  *)
 
-(* The types in this file duplicate what's in FileInfo.name_type, but with more structure.
-It'd be nice to unify them. *)
-
 (** In the naming table, global constants and global functions can be
 syntactically disambiguated at their use-site, and therefore can live in
 separate namespaces. However, types (such as classes) cannot be syntactically
@@ -29,3 +26,14 @@ type name_kind =
 val name_kind_to_enum : name_kind -> int
 
 val name_kind_of_enum : int -> name_kind option
+
+(* The types in this file duplicate what's in FileInfo.name_type, but with more structure.
+It'd be nice to unify them. *)
+
+val name_kind_to_name_type : name_kind -> FileInfo.name_type
+
+val type_kind_to_name_type : kind_of_type -> FileInfo.name_type
+
+val name_kind_of_name_type : FileInfo.name_type -> name_kind
+
+val type_kind_of_name_type : FileInfo.name_type -> kind_of_type option

@@ -66,6 +66,8 @@
   (name naming_types)
   (modules
     naming_types)
+  (libraries
+    file_info)
   (preprocess (pps ppx_deriving.std)))
 
 (library

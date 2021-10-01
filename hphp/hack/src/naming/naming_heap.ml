@@ -135,14 +135,9 @@ module Types = struct
     ()
 
   let get_pos db_path_opt id =
-    let map_result (path, entry_type) =
-      let name_type =
-        match entry_type with
-        | Naming_types.TClass -> FileInfo.Class
-        | Naming_types.TTypedef -> FileInfo.Typedef
-        | Naming_types.TRecordDef -> FileInfo.RecordDef
-      in
-      Some (FileInfo.File (name_type, path), entry_type)
+    let map_result (path, kind_of_type) =
+      let name_type = Naming_types.type_kind_to_name_type kind_of_type in
+      Some (FileInfo.File (name_type, path), kind_of_type)
     in
     let fallback_get_func_opt =
       Option.map db_path_opt ~f:(fun db_path hash ->

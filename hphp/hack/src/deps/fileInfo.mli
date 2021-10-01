@@ -42,10 +42,10 @@ val string_of_mode : mode -> string
 (** This type replicates what's in Naming_types.name_kind, but with less structure.
 It'd be nice to unify them. *)
 type name_type =
-  | Fun [@value 0]
-  | Class [@value 1]
+  | Fun [@value 3]
+  | Class [@value 0]
   | RecordDef [@value 2]
-  | Typedef [@value 3]
+  | Typedef [@value 1]
   | Const [@value 4]
 [@@deriving eq, show, enum, ord]
 

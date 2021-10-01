@@ -25,19 +25,15 @@ let attach_name_type (name_type : FileInfo.name_type) (x : 'a) :
 
 let remove_name_type (x : 'a * FileInfo.name_type) : 'a = fst x
 
-let kind_to_name_type (kind : Naming_types.kind_of_type) : FileInfo.name_type =
-  match kind with
-  | Naming_types.TClass -> FileInfo.Class
-  | Naming_types.TRecordDef -> FileInfo.RecordDef
-  | Naming_types.TTypedef -> FileInfo.Typedef
+let kind_to_name_type (kind_of_type : Naming_types.kind_of_type) :
+    FileInfo.name_type =
+  Naming_types.type_kind_to_name_type kind_of_type
 
 let name_type_to_kind (name_type : FileInfo.name_type) :
     Naming_types.kind_of_type =
-  match name_type with
-  | FileInfo.Class -> Naming_types.TClass
-  | FileInfo.Typedef -> Naming_types.TTypedef
-  | FileInfo.RecordDef -> Naming_types.TRecordDef
-  | (FileInfo.Const | FileInfo.Fun) as name_type ->
+  match Naming_types.type_kind_of_name_type name_type with
+  | Some kind_of_type -> kind_of_type
+  | None ->
     failwith
       (Printf.sprintf
          "Unexpected name type %s"

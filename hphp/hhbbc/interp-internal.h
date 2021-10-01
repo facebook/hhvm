@@ -388,35 +388,6 @@ Optional<Type> parentClsExact(ISS& env) {
 //////////////////////////////////////////////////////////////////////
 // folding
 
-bool canDefinitelyCallWithoutCoeffectViolation(const php::Func* caller,
-                                               const php::Func* callee) {
-  if (!caller->coeffectRules.empty() || !callee->coeffectRules.empty()) {
-    return false;
-  }
-  auto const required = callee->requiredCoeffects;
-  auto const provided =
-    RuntimeCoeffects::fromValue(caller->requiredCoeffects.value() |
-                                caller->coeffectEscapes.value());
-  return provided.canCall(required);
-}
-
-bool canDefinitelyCallWithoutReadonlyViolation(const php::Func* callee,
-                                               const FCallArgs& fca) {
-  if (fca.enforceReadonly()) {
-    for (auto i = 0; i < fca.numArgs(); ++i) {
-      if (!fca.isReadonly(i)) continue;
-      if (i >= callee->params.size() ||
-          callee->params[i].isVariadic ||
-          !callee->params[i].readonly) {
-        return false;
-      }
-    }
-  }
-  if (fca.enforceMutableReturn() && callee->isReadonlyReturn) return false;
-  if (fca.enforceReadonlyThis() && !callee->isReadonlyThis) return false;
-  return true;
-}
-
 const StaticString s___NEVER_INLINE("__NEVER_INLINE");
 bool shouldAttemptToFold(ISS& env, const php::Func* func, const FCallArgs& fca,
              Type context, bool maybeDynamic) {
@@ -452,12 +423,14 @@ bool shouldAttemptToFold(ISS& env, const php::Func* func, const FCallArgs& fca,
   if (func->isReified) return false;
 
   // Coeffect violation may raise warning or throw an exception
-  if (!canDefinitelyCallWithoutCoeffectViolation(env.ctx.func, func)) {
-    return false;
-  }
+  if (!fca.skipCoeffectsCheck()) return false;
 
   // Readonly violation may raise warning or throw an exception
-  if (!canDefinitelyCallWithoutReadonlyViolation(func, fca)) return false;
+  if (fca.enforceReadonly() ||
+      fca.enforceMutableReturn() ||
+      fca.enforceReadonlyThis()) {
+    return false;
+  }
 
   // We only fold functions when numRets == 1
   if (func->hasInOutArgs) return false;

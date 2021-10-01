@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<62e06c0c59e9ccfd572c09a240d75f6d>>
+// @generated SignedSource<<07243a70fe7bd489c5a9fa65450a8caa>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -199,7 +199,7 @@ impl Hint_ {
     pub fn mk_htuple(p0: Vec<Hint>) -> Self {
         Hint_::Htuple(p0)
     }
-    pub fn mk_happly(p0: Sid, p1: Vec<Hint>) -> Self {
+    pub fn mk_happly(p0: ClassName, p1: Vec<Hint>) -> Self {
         Hint_::Happly(p0, p1)
     }
     pub fn mk_hshape(p0: NastShapeInfo) -> Self {
@@ -445,7 +445,7 @@ impl Hint_ {
             _ => None,
         }
     }
-    pub fn as_happly(&self) -> Option<(&Sid, &Vec<Hint>)> {
+    pub fn as_happly(&self) -> Option<(&ClassName, &Vec<Hint>)> {
         match self {
             Hint_::Happly(p0, p1) => Some((p0, p1)),
             _ => None,
@@ -553,7 +553,7 @@ impl Hint_ {
             _ => None,
         }
     }
-    pub fn as_happly_mut(&mut self) -> Option<(&mut Sid, &mut Vec<Hint>)> {
+    pub fn as_happly_mut(&mut self) -> Option<(&mut ClassName, &mut Vec<Hint>)> {
         match self {
             Hint_::Happly(p0, p1) => Some((p0, p1)),
             _ => None,
@@ -661,7 +661,7 @@ impl Hint_ {
             _ => None,
         }
     }
-    pub fn as_happly_into(self) -> Option<(Sid, Vec<Hint>)> {
+    pub fn as_happly_into(self) -> Option<(ClassName, Vec<Hint>)> {
         match self {
             Hint_::Happly(p0, p1) => Some((p0, p1)),
             _ => None,

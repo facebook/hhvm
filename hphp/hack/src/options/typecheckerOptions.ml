@@ -227,3 +227,5 @@ let enforce_sealed_subclasses = GlobalOptions.tco_enforce_sealed_subclasses
 let enable_enum_supertyping = GlobalOptions.po_enable_enum_supertyping
 
 let everything_sdt = GlobalOptions.tco_everything_sdt
+
+let deferments_light = GlobalOptions.tco_deferments_light

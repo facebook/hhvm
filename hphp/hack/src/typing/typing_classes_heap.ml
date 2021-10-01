@@ -131,7 +131,10 @@ let get
     else
       make_eager_class_type ctx class_name declare_folded_class_in_file
   with
-  | Deferred_decl.Defer d ->
+  | Deferred_decl.Defer d
+    when not
+         @@ TypecheckerOptions.deferments_light (Provider_context.get_tcopt ctx)
+    ->
     Deferred_decl.add_deferment ~d;
     None
 

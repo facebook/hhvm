@@ -8,6 +8,7 @@
 
 module Hack_bucket = Bucket
 open Hh_prelude
+open Option.Monad_infix
 module Bucket = Hack_bucket
 open Typing_service_types
 open Typing_check_job
@@ -146,6 +147,19 @@ let process_files_remote_execution
   let errors' = Re.process_files re_env fns deps_mode recheck_id in
   { errors = Errors.merge errors' errors; deferred_decls = [] }
 
+let scrape_class_names ast : SSet.t =
+  let names = ref SSet.empty in
+  let visitor =
+    object
+      (* It would look less clumsy to use Aast.reduce, but would use set union which has higher complexity. *)
+      inherit [_] Aast.iter
+
+      method! on_class_name _ (_p, id) = names := SSet.add id !names
+    end
+  in
+  visitor#on_program () ast;
+  !names
+
 let process_file
     (dynamic_view_files : Relative_path.Set.t)
     (ctx : Provider_context.t)
@@ -208,7 +222,20 @@ let process_file
             tasts
             global_tvenvs;
         { errors = Errors.merge errors' errors; deferred_decls = [] }
-      | Error deferred_decls -> { errors; deferred_decls }
+      | Error deferred_decls ->
+        (match deferred_decls with
+        | Some deferred_decls -> { errors; deferred_decls }
+        | None ->
+          let deferred_decls =
+            ast
+            |> Naming.elaborate_namespaces_program
+            |> scrape_class_names
+            |> SSet.elements
+            |> List.filter_map ~f:(fun class_name ->
+                   Naming_provider.get_class_path ctx class_name >>| fun fn ->
+                   (fn, class_name))
+          in
+          { errors; deferred_decls })
     with
     | WorkerCancel.Worker_should_exit as e ->
       (* Cancellation requests must be re-raised *)

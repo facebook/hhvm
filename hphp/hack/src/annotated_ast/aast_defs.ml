@@ -43,6 +43,8 @@ and lid = pos * local_id
 
 and sid = Ast_defs.id
 
+and class_name = sid
+
 and is_reified = bool
 
 and import_flavor =
@@ -91,7 +93,7 @@ and hint_ =
   | Hlike of hint
   | Hfun of hint_fun
   | Htuple of hint list
-  | Happly of sid * hint list
+  | Happly of class_name * hint list
   | Hshape of nast_shape_info
   | Haccess of hint * sid list
       (** This represents the use of a type const. Type consts are accessed like

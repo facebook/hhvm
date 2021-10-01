@@ -45,7 +45,7 @@ type state = {
 let state : state ref =
   ref
     {
-      enabled = true;
+      enabled = false;
       deferments = Deferment_set.empty;
       counter = 0;
       declaration_threshold_opt = None;
@@ -104,14 +104,22 @@ let is_deferring () = not (get_deferments () |> List.is_empty)
 let with_deferred_decls
     ~enable ~declaration_threshold_opt ~memory_mb_threshold_opt f =
   reset ~enable ~declaration_threshold_opt ~memory_mb_threshold_opt;
-  let result = f () in
-  let result =
-    match get_deferments () with
-    | [] -> Ok result
-    | deferred_files -> Error deferred_files
+  let cleanup () =
+    reset
+      ~enable:false
+      ~declaration_threshold_opt:None
+      ~memory_mb_threshold_opt:None
   in
-  reset
-    ~enable:false
-    ~declaration_threshold_opt:None
-    ~memory_mb_threshold_opt:None;
-  result
+  try
+    let result = f () in
+    let result =
+      match get_deferments () with
+      | [] -> Ok result
+      | deferred_files -> Error (Some deferred_files)
+    in
+    cleanup ();
+    result
+  with
+  | Defer _ ->
+    cleanup ();
+    Error None

@@ -2619,13 +2619,13 @@ let global_const ctx cst =
 (* The entry point to CHECK the program, and transform the program *)
 (**************************************************************************)
 
+let elaborate_namespaces_program ast =
+  elaborate_namespaces#on_program
+    (Naming_elaborate_namespaces_endo.make_env Namespace_env.empty_with_default)
+    ast
+
 let program ctx ast =
-  let ast =
-    elaborate_namespaces#on_program
-      (Naming_elaborate_namespaces_endo.make_env
-         Namespace_env.empty_with_default)
-      ast
-  in
+  let ast = elaborate_namespaces_program ast in
   let top_level_env = ref (Env.make_top_level_env ctx) in
   let rec aux acc def =
     match def with

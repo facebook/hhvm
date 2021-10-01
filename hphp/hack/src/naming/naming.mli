@@ -28,3 +28,5 @@ val typedef : Provider_context.t -> Nast.typedef -> Nast.typedef
 val global_const : Provider_context.t -> Nast.gconst -> Nast.gconst
 
 val invalid_expr_ : Pos.t -> Nast.expr_
+
+val elaborate_namespaces_program : Nast.program -> Nast.program

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ad292d864d176032db03f7cf86d83a13>>
+// @generated SignedSource<<c1679ffd6081756b08b28a495fe7678d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -333,7 +333,7 @@ pub enum ClassId_<Ex, En> {
     /// Foop::some_meth()
     /// Foo::$prop = 1;
     /// new Foo();
-    CI(Sid),
+    CI(ClassName),
 }
 
 #[derive(
@@ -724,7 +724,7 @@ pub enum Expr_<Ex, En> {
     /// XHP expression. May contain interpolated expressions.
     ///
     /// <foo x="hello" y={$foo}>hello {$bar}</foo>
-    Xml(Box<(Sid, Vec<XhpAttribute<Ex, En>>, Vec<Expr<Ex, En>>)>),
+    Xml(Box<(ClassName, Vec<XhpAttribute<Ex, En>>, Vec<Expr<Ex, En>>)>),
     /// Include or require expression.
     ///
     /// require('foo.php')
@@ -737,7 +737,7 @@ pub enum Expr_<Ex, En> {
     /// TODO: T38184446 this is redundant with ValCollection/KeyValCollection.
     ///
     /// Vector {}
-    Collection(Box<(Sid, Option<CollectionTarg<Ex>>, Vec<Afield<Ex, En>>)>),
+    Collection(Box<(ClassName, Option<CollectionTarg<Ex>>, Vec<Afield<Ex, En>>)>),
     /// Expression tree literal. Expression trees are not evaluated at
     /// runtime, but desugared to an expression representing the code.
     ///
@@ -767,7 +767,7 @@ pub enum Expr_<Ex, En> {
     /// These examples are equivalent to:
     ///
     /// (FooClass $f, ...$args) ==> $f->some_meth(...$args)
-    MethodCaller(Box<(Sid, Pstring)>),
+    MethodCaller(Box<(ClassName, Pstring)>),
     /// Static method reference.
     ///
     /// class_meth('FooClass', 'some_static_meth')
@@ -785,7 +785,7 @@ pub enum Expr_<Ex, En> {
     /// Label used for enum classes.
     ///
     /// enum_name#label_name or #label_name
-    EnumClassLabel(Box<(Option<Sid>, String)>),
+    EnumClassLabel(Box<(Option<ClassName>, String)>),
     /// Annotation used to record failure in subtyping or coercion of an
     /// expression and calls to [unsafe_cast] or [enforced_cast].
     ///
@@ -897,7 +897,7 @@ pub enum Case<Ex, En> {
     ToOcamlRep
 )]
 #[repr(C)]
-pub struct Catch<Ex, En>(pub Sid, pub Lid, pub Block<Ex, En>);
+pub struct Catch<Ex, En>(pub ClassName, pub Lid, pub Block<Ex, En>);
 
 #[derive(
     Clone,
@@ -1291,7 +1291,7 @@ pub struct Class_<Ex, En> {
     pub is_xhp: bool,
     pub has_xhp_keyword: bool,
     pub kind: ast_defs::ClassishKind,
-    pub name: Sid,
+    pub name: ClassName,
     /// The type parameters of a class A<T> (T is the parameter)
     pub tparams: Vec<Tparam<Ex, En>>,
     pub extends: Vec<ClassHint>,

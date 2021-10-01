@@ -78,4 +78,4 @@ val with_deferred_decls :
   declaration_threshold_opt:int option ->
   memory_mb_threshold_opt:int option ->
   (unit -> 'res) ->
-  ('res, deferment list) Result.t
+  ('res, deferment list option) Result.t

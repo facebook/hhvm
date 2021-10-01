@@ -240,7 +240,7 @@ and ('ex, 'en) class_id_ =
           $d::some_meth();
           $d::$prop = 1;
           new $d(); *)
-  | CI of sid
+  | CI of class_name
       (** Explicit class name. This is the common case.
 
           Foop::some_meth()
@@ -556,7 +556,7 @@ and ('ex, 'en) expr_ =
           $x ==> $x
           (int $x): int ==> $x + $other
           ($x, $y) ==> { return $x + $y; } *)
-  | Xml of sid * ('ex, 'en) xhp_attribute list * ('ex, 'en) expr list
+  | Xml of class_name * ('ex, 'en) xhp_attribute list * ('ex, 'en) expr list
       (** XHP expression. May contain interpolated expressions.
 
           <foo x="hello" y={$foo}>hello {$bar}</foo> *)
@@ -567,7 +567,8 @@ and ('ex, 'en) expr_ =
           require_once('foo.php')
           include('foo.php')
           include_once('foo.php') *)
-  | Collection of sid * 'ex collection_targ option * ('ex, 'en) afield list
+  | Collection of
+      class_name * 'ex collection_targ option * ('ex, 'en) afield list
       (** Collection literal.
 
           TODO: T38184446 this is redundant with ValCollection/KeyValCollection.
@@ -594,7 +595,7 @@ and ('ex, 'en) expr_ =
           lowering or be removed. The emitter just sees a normal Call.
 
           inst_meth($f, 'some_meth') // equivalent: $f->some_meth<> *)
-  | Method_caller of sid * pstring
+  | Method_caller of class_name * pstring
       (** Instance method reference that can be called with an instance.
 
           meth_caller(FooClass::class, 'some_meth')
@@ -617,7 +618,7 @@ and ('ex, 'en) expr_ =
           expression tree literal (backticks).
 
           ${$foo} *)
-  | EnumClassLabel of sid option * string
+  | EnumClassLabel of class_name option * string
       (** Label used for enum classes.
 
           enum_name#label_name or #label_name *)
@@ -669,7 +670,7 @@ and ('ex, 'en) case =
   | Default of pos * ('ex, 'en) block
   | Case of ('ex, 'en) expr * ('ex, 'en) block
 
-and ('ex, 'en) catch = sid * lid * ('ex, 'en) block
+and ('ex, 'en) catch = class_name * lid * ('ex, 'en) block
 
 and ('ex, 'en) field = ('ex, 'en) expr * ('ex, 'en) expr
 
@@ -800,7 +801,7 @@ and ('ex, 'en) class_ = {
   c_is_xhp: bool;
   c_has_xhp_keyword: bool;
   c_kind: Ast_defs.classish_kind;
-  c_name: sid;
+  c_name: class_name;
   c_tparams: ('ex, 'en) tparam list;
       (** The type parameters of a class A<T> (T is the parameter) *)
   c_extends: class_hint list;

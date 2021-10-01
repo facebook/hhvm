@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<db2e2c91a95dbe1bb86ad9ab45e0304e>>
+// @generated SignedSource<<1f13eed7265275161cfef000590c0303>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -399,7 +399,7 @@ pub enum ClassId_<'a, Ex, En> {
     /// Foo::$prop = 1;
     /// new Foo();
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    CI(&'a Sid<'a>),
+    CI(&'a ClassName<'a>),
 }
 impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for ClassId_<'a, Ex, En> {}
 arena_deserializer::impl_deserialize_in_arena!(ClassId_<'arena, Ex, En>);
@@ -900,7 +900,7 @@ pub enum Expr_<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Xml(
         &'a (
-            Sid<'a>,
+            &'a ClassName<'a>,
             &'a [XhpAttribute<'a, Ex, En>],
             &'a [&'a Expr<'a, Ex, En>],
         ),
@@ -921,7 +921,7 @@ pub enum Expr_<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Collection(
         &'a (
-            Sid<'a>,
+            &'a ClassName<'a>,
             Option<CollectionTarg<'a, Ex>>,
             &'a [Afield<'a, Ex, En>],
         ),
@@ -960,7 +960,7 @@ pub enum Expr_<'a, Ex, En> {
     ///
     /// (FooClass $f, ...$args) ==> $f->some_meth(...$args)
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    MethodCaller(&'a (Sid<'a>, &'a Pstring<'a>)),
+    MethodCaller(&'a (&'a ClassName<'a>, &'a Pstring<'a>)),
     /// Static method reference.
     ///
     /// class_meth('FooClass', 'some_static_meth')
@@ -988,7 +988,7 @@ pub enum Expr_<'a, Ex, En> {
     ///
     /// enum_name#label_name or #label_name
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    EnumClassLabel(&'a (Option<Sid<'a>>, &'a str)),
+    EnumClassLabel(&'a (Option<&'a ClassName<'a>>, &'a str)),
     /// Annotation used to record failure in subtyping or coercion of an
     /// expression and calls to [unsafe_cast] or [enforced_cast].
     ///
@@ -1128,7 +1128,7 @@ arena_deserializer::impl_deserialize_in_arena!(Case<'arena, Ex, En>);
 ))]
 #[repr(C)]
 pub struct Catch<'a, Ex, En>(
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub Sid<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a ClassName<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a Lid<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a Block<'a, Ex, En>,
 );
@@ -1634,7 +1634,7 @@ pub struct Class_<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub kind: ast_defs::ClassishKind<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub name: Sid<'a>,
+    pub name: &'a ClassName<'a>,
     /// The type parameters of a class A<T> (T is the parameter)
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub tparams: &'a [&'a Tparam<'a, Ex, En>],

@@ -331,6 +331,13 @@ impl<'arena> HhasCoeffects<'arena> {
         }
     }
 
+    pub fn pure(alloc: &'arena bumpalo::Bump) -> Self {
+        Self {
+            static_coeffects: Slice::from_vec(alloc, vec![Ctx::Pure]),
+            ..HhasCoeffects::default()
+        }
+    }
+
     pub fn inherit_to_child_closure(&self, alloc: &'arena bumpalo::Bump) -> Self {
         let static_coeffects = HhasCoeffects::local_to_shallow(self.get_static_coeffects());
         if self.has_coeffect_rules() {

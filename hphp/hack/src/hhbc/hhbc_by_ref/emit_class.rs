@@ -90,7 +90,7 @@ fn make_86method<'a, 'arena, 'decl>(
     flags.set(HhasMethodFlags::IS_STATIC, is_static);
 
     let attributes = vec![];
-    let coeffects = HhasCoeffects::default();
+    let coeffects = HhasCoeffects::pure(alloc);
 
     let method_decl_vars = vec![];
     let method_return_type = None;

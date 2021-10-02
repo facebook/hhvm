@@ -47,13 +47,6 @@ Decls const* HhvmDeclProvider::getDecl(AutoloadMap::KindOf kind, char const* sym
   }
 }
 
-HhvmDeclProvider::~HhvmDeclProvider() {
-  for (auto &it: m_cache) {
-    hackc_free_decl_result(std::move(it.second.first));
-    hackc_free_arena(std::move(it.second.second));
-  }
-}
-
 Decls const* hhvm_decl_provider_get_decl( void* provider, char const* symbol) {
   return ((HhvmDeclProvider*)provider)->getDecl(HPHP::AutoloadMap::KindOf::Type/* TODO: pass correct symbol kind */, symbol);
 }

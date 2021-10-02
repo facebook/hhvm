@@ -26,7 +26,6 @@ mod decl_ffi {
         type Decls<'a>;
 
         fn hackc_create_arena() -> Box<Bump>;
-        fn hackc_free_arena(bump: Box<Bump>);
         fn hackc_create_direct_decl_parse_options(
             disable_xhp_element_mangling: bool,
             interpret_soft_types_as_like_types: bool,
@@ -41,7 +40,6 @@ mod decl_ffi {
 
         fn hackc_print_decls(decls: &Decls);
         fn hackc_print_serialized_size(bytes: &Bytes);
-        fn hackc_free_decl_result(decl_result: DeclResult);
         unsafe fn hackc_verify_deserialization(serialized: &Bytes, expected: &Decls) -> bool;
     }
 }
@@ -56,8 +54,6 @@ fn hackc_create_arena() -> Box<Bump> {
     Box::new(Bump(bumpalo::Bump::new()))
 }
 
-fn hackc_free_arena(_: Box<Bump>) {}
-
 fn hackc_print_decls<'a>(decls: &Decls<'a>) {
     println!("{:#?}", decls.0)
 }
@@ -65,8 +61,6 @@ fn hackc_print_decls<'a>(decls: &Decls<'a>) {
 fn hackc_print_serialized_size(serialized: &Bytes) {
     println!("Decl-serialized size: {:#?}", serialized.0.len);
 }
-
-fn hackc_free_decl_result<'a>(_: DeclResult<'a>) {}
 
 fn hackc_create_direct_decl_parse_options<'a>(
     disable_xhp_element_mangling: bool,

@@ -644,7 +644,7 @@ class LazyMapIterable implements \HH\Iterable {
     $this->iterable = $iterable;
     $this->fn = $fn;
   }
-  public function getIterator() {
+  public function getIterator()[] {
     return new LazyMapIterator($this->iterable->getIterator(), $this->fn);
   }
 }
@@ -687,7 +687,7 @@ class LazyMapKeyedIterable implements \HH\KeyedIterable {
     $this->iterable = $iterable;
     $this->fn = $fn;
   }
-  public function getIterator() {
+  public function getIterator()[] {
     return new LazyMapKeyedIterator($this->iterable->getIterator(), $this->fn);
   }
 }
@@ -730,7 +730,7 @@ class LazyMapWithKeyIterable implements \HH\KeyedIterable {
     $this->iterable = $iterable;
     $this->fn = $fn;
   }
-  public function getIterator() {
+  public function getIterator()[] {
     return new LazyMapWithKeyIterator($this->iterable->getIterator(),
                                       $this->fn);
   }
@@ -784,7 +784,7 @@ class LazyFilterIterable implements \HH\Iterable {
     $this->iterable = $iterable;
     $this->fn = $fn;
   }
-  public function getIterator() {
+  public function getIterator()[] {
     return new LazyFilterIterator($this->iterable->getIterator(), $this->fn);
   }
 }
@@ -837,7 +837,7 @@ class LazyFilterKeyedIterable implements \HH\KeyedIterable {
     $this->iterable = $iterable;
     $this->fn = $fn;
   }
-  public function getIterator() {
+  public function getIterator()[] {
     return
       new LazyFilterKeyedIterator($this->iterable->getIterator(), $this->fn);
   }
@@ -891,7 +891,7 @@ class LazyFilterWithKeyIterable implements \HH\KeyedIterable {
     $this->iterable = $iterable;
     $this->fn = $fn;
   }
-  public function getIterator() {
+  public function getIterator()[] {
     return
       new LazyFilterWithKeyIterator($this->iterable->getIterator(), $this->fn);
   }
@@ -938,7 +938,7 @@ class LazyZipIterable implements \HH\Iterable {
     $this->iterable1 = $iterable1;
     $this->iterable2 = $iterable2;
   }
-  public function getIterator() {
+  public function getIterator()[] {
     return new LazyZipIterator($this->iterable1->getIterator(),
                                $this->iterable2->getIterator());
   }
@@ -985,7 +985,7 @@ class LazyZipKeyedIterable implements \HH\KeyedIterable {
     $this->iterable1 = $iterable1;
     $this->iterable2 = $iterable2;
   }
-  public function getIterator() {
+  public function getIterator()[] {
     return new LazyZipKeyedIterator($this->iterable1->getIterator(),
                                     $this->iterable2->getIterator());
   }
@@ -1033,7 +1033,7 @@ class LazyTakeIterable implements \HH\Iterable {
     $this->iterable = $iterable;
     $this->n = $n;
   }
-  public function getIterator() {
+  public function getIterator()[] {
     return new LazyTakeIterator($this->iterable->getIterator(),
                                 $this->n);
   }
@@ -1081,7 +1081,7 @@ class LazyTakeKeyedIterable implements \HH\KeyedIterable {
     $this->iterable = $iterable;
     $this->n = $n;
   }
-  public function getIterator() {
+  public function getIterator()[] {
     return new LazyTakeKeyedIterator($this->iterable->getIterator(),
                                      $this->n);
   }
@@ -1129,7 +1129,7 @@ class LazyTakeWhileIterable implements \HH\Iterable {
     $this->iterable = $iterable;
     $this->fn = $fn;
   }
-  public function getIterator() {
+  public function getIterator()[] {
     return new LazyTakeWhileIterator($this->iterable->getIterator(),
                                      $this->fn);
   }
@@ -1174,7 +1174,7 @@ class LazyTakeWhileKeyedIterable implements \HH\Iterable {
     $this->iterable = $iterable;
     $this->fn = $fn;
   }
-  public function getIterator() {
+  public function getIterator()[] {
     return new LazyTakeWhileKeyedIterator($this->iterable->getIterator(),
                                           $this->fn);
   }
@@ -1228,7 +1228,7 @@ class LazySkipIterable implements \HH\Iterable {
     $this->iterable = $iterable;
     $this->n = $n;
   }
-  public function getIterator() {
+  public function getIterator()[] {
     return new LazySkipIterator($this->iterable->getIterator(),
                                 $this->n);
   }
@@ -1282,7 +1282,7 @@ class LazySkipKeyedIterable implements \HH\KeyedIterable {
     $this->iterable = $iterable;
     $this->n = $n;
   }
-  public function getIterator() {
+  public function getIterator()[] {
     return new LazySkipKeyedIterator($this->iterable->getIterator(),
                                      $this->n);
   }
@@ -1334,7 +1334,7 @@ class LazySkipWhileIterable implements \HH\Iterable {
     $this->iterable = $iterable;
     $this->fn = $fn;
   }
-  public function getIterator() {
+  public function getIterator()[] {
     return new LazySkipWhileIterator($this->iterable->getIterator(),
                                      $this->fn);
   }
@@ -1386,7 +1386,7 @@ class LazySkipWhileKeyedIterable implements \HH\Iterable {
     $this->iterable = $iterable;
     $this->fn = $fn;
   }
-  public function getIterator() {
+  public function getIterator()[] {
     return new LazySkipWhileKeyedIterator($this->iterable->getIterator(),
                                           $this->fn);
   }
@@ -1451,7 +1451,7 @@ class LazySliceIterable implements \HH\Iterable {
     $this->start = $start;
     $this->len = $len;
   }
-  public function getIterator() {
+  public function getIterator()[] {
     return new LazySliceIterator($this->iterable->getIterator(),
                                  $this->start,
                                  $this->len);
@@ -1517,7 +1517,7 @@ class LazySliceKeyedIterable implements \HH\KeyedIterable {
     $this->start = $start;
     $this->len = $len;
   }
-  public function getIterator() {
+  public function getIterator()[] {
     return new LazySliceKeyedIterator($this->iterable->getIterator(),
                                       $this->start,
                                       $this->len);
@@ -1558,7 +1558,7 @@ class LazyKeysIterable implements \HH\Iterable {
   public function __construct($iterable)[] {
     $this->iterable = $iterable;
   }
-  public function getIterator() {
+  public function getIterator()[] {
     return new LazyKeysIterator($this->iterable->getIterator());
   }
 }
@@ -1597,7 +1597,7 @@ class LazyValuesIterable implements \HH\Iterable {
   public function __construct($iterable)[] {
     $this->iterable = $iterable;
   }
-  public function getIterator() {
+  public function getIterator()[] {
     return new LazyValuesIterator($this->iterable->getIterator());
   }
 }
@@ -1636,7 +1636,7 @@ class LazyKVZipIterable implements \HH\Iterable {
   public function __construct($iterable)[] {
     $this->iterable = $iterable;
   }
-  public function getIterator() {
+  public function getIterator()[] {
     return new LazyKVZipIterator($this->iterable->getIterator());
   }
 }
@@ -1700,7 +1700,7 @@ class LazyConcatIterable implements \HH\Iterable {
     $this->iterable1 = $iterable1;
     $this->iterable2 = $iterable2;
   }
-  public function getIterator() {
+  public function getIterator()[] {
     return new LazyConcatIterator($this->iterable1->getIterator(),
                                   $this->iterable2->getIterator());
   }
@@ -1710,7 +1710,7 @@ class LazyIterableView implements \HH\Iterable {
   public $iterable;
 
   public function __construct($iterable)[] { $this->iterable = $iterable; }
-  public function getIterator() { return $this->iterable->getIterator(); }
+  public function getIterator()[] { return $this->iterable->getIterator(); }
   <<__ProvenanceSkipFrame>>
   public function toArray() {
     $arr = varray[];
@@ -1791,7 +1791,7 @@ class LazyKeyedIterableView implements \HH\KeyedIterable {
   public $iterable;
 
   public function __construct($iterable)[] { $this->iterable = $iterable; }
-  public function getIterator() { return $this->iterable->getIterator(); }
+  public function getIterator()[] { return $this->iterable->getIterator(); }
   public function toArray() {
     $arr = darray[];
     foreach ($this->iterable as $k => $v) {

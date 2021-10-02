@@ -301,7 +301,8 @@ Object ObjectData::iterableObject(bool& isIterable,
   }
   Object obj(this);
   while (obj->instanceof(SystemLib::s_IteratorAggregateClass)) {
-    auto iterator = obj->o_invoke_few_args(s_getIterator, RuntimeCoeffects::fixme(), 0);
+    auto iterator =
+      obj->o_invoke_few_args(s_getIterator, RuntimeCoeffects::automatic(), 0);
     if (!iterator.isObject()) break;
     auto o = iterator.getObjectData();
     if (o->isIterator()) {
@@ -726,7 +727,7 @@ Variant ObjectData::o_invoke(const String& s, const Variant& params,
     return Variant(Variant::NullInit());
   }
   return Variant::attach(
-    g_context->invokeFunc(ctx, params, RuntimeCoeffects::fixme())
+    g_context->invokeFunc(ctx, params, RuntimeCoeffects::automatic())
   );
 }
 
@@ -814,7 +815,7 @@ ObjectData* ObjectData::clone() {
     clone->unlockObject();
     SCOPE_EXIT { clone->lockObject(); };
     g_context->invokeMethodV(clone.get(), method, InvokeArgs{},
-                             RuntimeCoeffects::fixme());
+                             RuntimeCoeffects::automatic());
   }
   return clone.detach();
 }
@@ -1652,7 +1653,7 @@ Variant ObjectData::invokeSleep(RuntimeCoeffects provided) {
 }
 
 Variant ObjectData::invokeToDebugDisplay() {
-  return InvokeSimple(this, s___toDebugDisplay, RuntimeCoeffects::fixme());
+  return InvokeSimple(this, s___toDebugDisplay, RuntimeCoeffects::automatic());
 }
 
 Variant ObjectData::invokeWakeup(RuntimeCoeffects provided) {
@@ -1686,7 +1687,7 @@ String ObjectData::invokeToString() {
     raiseImplicitInvokeToString();
   }
   auto const tv = g_context->invokeMethod(this, method, InvokeArgs{},
-                                          RuntimeCoeffects::fixme());
+                                          RuntimeCoeffects::automatic());
   if (!isStringType(tv.m_type) &&
       !isClassType(tv.m_type) &&
       !isLazyClassType(tv.m_type)) {

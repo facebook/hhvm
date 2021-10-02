@@ -1186,7 +1186,7 @@ class DOMNodeIterator implements Iterator {
 <<__NativeData("DOMIterable")>>
 class DOMNamedNodeMap implements IteratorAggregate {
 
-  public function __construct(): void {
+  public function __construct()[]: void {
   }
 
   /**
@@ -1228,13 +1228,13 @@ class DOMNamedNodeMap implements IteratorAggregate {
   public function item(int $index): mixed;
 
   <<__Native>>
-  public function getIterator(): mixed;
+  public function getIterator()[]: mixed;
 }
 
 <<__NativeData("DOMIterable")>>
 class DOMNodeList implements IteratorAggregate {
 
-  public function __construct(): void {
+  public function __construct()[]: void {
   }
 
   /**
@@ -1252,7 +1252,7 @@ class DOMNodeList implements IteratorAggregate {
   public function item(int $index): mixed;
 
   <<__Native>>
-  public function getIterator(): mixed;
+  public function getIterator()[]: mixed;
 
   /**
    * @return array - var_dump() compat output helper.

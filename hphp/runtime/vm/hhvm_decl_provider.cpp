@@ -14,14 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/hack/src/decl/cpp_ffi/decl_ffi_types.h"
-#include "hphp/hack/src/decl/cpp_ffi/decl_ffi.h"
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/vm/hhvm_decl_provider.h"
 
 namespace HPHP {
 
-hackc::decl::decls const* HhvmDeclProvider::getDecl(AutoloadMap::KindOf kind, char const* symbol) {
+Decls const* HhvmDeclProvider::getDecl(AutoloadMap::KindOf kind, char const* symbol) {
   String sym = String(symbol, CopyStringMode::CopyString);
   Optional<String> filename_opt = AutoloadHandler::s_instance->getFile(symbol, kind);
   if (filename_opt.has_value()) {
@@ -29,36 +27,34 @@ hackc::decl::decls const* HhvmDeclProvider::getDecl(AutoloadMap::KindOf kind, ch
     auto result = m_cache.find(filename.data());
 
     if (result != m_cache.end()) {
-      return result->second.first.decl_list;
+      return &(*result->second.first.decls);
     }
 
-    hackc::decl::bump_allocator const* arena = hackc_create_arena();
-    hackc::decl::decl_parser_options const* opts = hackc_create_direct_decl_parse_options(
-        true, true);  // TODO: get correct parameters
+    ::rust::Box<Bump> arena = hackc_create_arena();
+    // TODO: get correct parameters
+    ::rust::Box<DeclParserOptions> opts = hackc_create_direct_decl_parse_options(true, true);
 
     std::ifstream s(filename.data());
     std::string text {
       std::istreambuf_iterator<char>(s), std::istreambuf_iterator<char>() };
 
-    hackc::decl::decl_result decl_result = hackc_direct_decl_parse(opts, filename.data(), text.data(), arena);
+    DeclResult decl_result = hackc_direct_decl_parse(*opts, filename.toCppString(), text, *arena);
 
-    m_cache.insert({filename.data(), std::make_pair(decl_result, arena)});
-    return decl_result.decl_list;
+    m_cache.insert({filename.data(), std::pair(std::move(decl_result), std::move(arena))});
+    return &*decl_result.decls;
   } else {
     return nullptr;
   }
 }
 
 HhvmDeclProvider::~HhvmDeclProvider() {
-  for (auto it: m_cache) {
-    hackc_free_decl_result(it.second.first);
-    hackc_free_arena(it.second.second);
+  for (auto &it: m_cache) {
+    hackc_free_decl_result(std::move(it.second.first));
+    hackc_free_arena(std::move(it.second.second));
   }
 }
 
-hackc::decl::decls const*
-  hhvm_decl_provider_get_decl(
-         void* provider, char const* symbol) {
+Decls const* hhvm_decl_provider_get_decl( void* provider, char const* symbol) {
   return ((HhvmDeclProvider*)provider)->getDecl(HPHP::AutoloadMap::KindOf::Type/* TODO: pass correct symbol kind */, symbol);
 }
 

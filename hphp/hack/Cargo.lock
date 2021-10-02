@@ -694,21 +694,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "decl_cpp_ffi"
-version = "0.0.0"
-dependencies = [
- "arena_deserializer",
- "bincode",
- "bumpalo",
- "decl_rust",
- "ffi",
- "libc",
- "no_pos_hash",
- "oxidized",
- "oxidized_by_ref",
-]
-
-[[package]]
 name = "decl_mode_parser"
 version = "0.0.0"
 dependencies = [
@@ -3273,6 +3258,22 @@ dependencies = [
  "serde_json",
  "stack_limit",
  "unified_decl_provider",
+]
+
+[[package]]
+name = "rust_decl_ffi_bridge"
+version = "0.0.0"
+dependencies = [
+ "arena_deserializer",
+ "bincode",
+ "bumpalo",
+ "cxx",
+ "cxx-build",
+ "decl_rust",
+ "ffi",
+ "no_pos_hash",
+ "oxidized",
+ "oxidized_by_ref",
 ]
 
 [[package]]

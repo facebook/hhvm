@@ -160,7 +160,7 @@ pub struct JobFailed {
     pub max_stack_size_tried: usize,
 }
 impl fmt::Display for JobFailed {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
             "{}::JobFailed: retry job would exceed maximum nonmain stack of {} KiB",

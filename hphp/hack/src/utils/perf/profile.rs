@@ -1,5 +1,3 @@
-extern crate libc;
-
 use std::mem;
 use std::time::{Duration, Instant};
 

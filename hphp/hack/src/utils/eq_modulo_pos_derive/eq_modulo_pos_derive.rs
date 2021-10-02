@@ -9,7 +9,7 @@ use synstructure::{decl_derive, Structure};
 
 decl_derive!([EqModuloPos] => derive_eq_modulo_pos);
 
-fn derive_eq_modulo_pos(s: Structure) -> TokenStream {
+fn derive_eq_modulo_pos(s: Structure<'_>) -> TokenStream {
     let body = derive_body(&s);
     s.gen_impl(quote! {
         gen impl EqModuloPos for @Self {
@@ -20,7 +20,7 @@ fn derive_eq_modulo_pos(s: Structure) -> TokenStream {
     })
 }
 
-fn derive_body(s: &Structure) -> TokenStream {
+fn derive_body(s: &Structure<'_>) -> TokenStream {
     s.each_variant(|v| {
         let mut s_rhs = s.clone();
         let v_rhs = s_rhs

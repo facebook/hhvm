@@ -73,7 +73,7 @@ pub fn decode<'a>(s: &'a [u8]) -> Vec<u8> {
         static ref ENTITY: Regex = Regex::new("&[^;&]+;").unwrap();
     }
     ENTITY
-        .replace_all(s, |caps: &Captures| match caps.get(0) {
+        .replace_all(s, |caps: &Captures<'_>| match caps.get(0) {
             None => vec![],
             Some(m) => {
                 let m = m.as_bytes();

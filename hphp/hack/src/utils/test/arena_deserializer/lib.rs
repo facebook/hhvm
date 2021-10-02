@@ -186,7 +186,7 @@ fn complex() {
     let arena = bumpalo::Bump::new();
     let dummy: &isize = &3;
 
-    let x: Set<()> = Set(None, dummy);
+    let x: Set<'_, ()> = Set(None, dummy);
     round_trip(x, &arena);
 
     let v: isize = 3;
@@ -196,9 +196,9 @@ fn complex() {
 
     let v: isize = 3;
     let n = Node(Set(None, dummy), &v, 1);
-    let x: Set<&isize> = Set(Some(&n), dummy);
+    let x: Set<'_, &isize> = Set(Some(&n), dummy);
 
     let n = Node(Set(None, dummy), &x, 1);
-    let x: Set<&Set<&isize>> = Set(Some(&n), dummy);
+    let x: Set<'_, &Set<'_, &isize>> = Set(Some(&n), dummy);
     round_trip(x, &arena);
 }

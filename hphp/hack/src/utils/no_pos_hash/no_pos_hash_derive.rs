@@ -11,7 +11,7 @@ use synstructure::decl_derive;
 
 decl_derive!([NoPosHash] => derive_no_pos_hash);
 
-fn derive_no_pos_hash(mut s: synstructure::Structure) -> TokenStream {
+fn derive_no_pos_hash(mut s: synstructure::Structure<'_>) -> TokenStream {
     // By default, if you are deriving an impl of trait Foo for generic type
     // X<T>, synstructure will add Foo as a bound not only for the type
     // parameter T, but also for every type which appears as a field in X. This
@@ -30,7 +30,7 @@ fn derive_no_pos_hash(mut s: synstructure::Structure) -> TokenStream {
     })
 }
 
-fn no_pos_hash_body(s: &synstructure::Structure) -> TokenStream {
+fn no_pos_hash_body(s: &synstructure::Structure<'_>) -> TokenStream {
     let hash = quote! { ::no_pos_hash::NoPosHash::hash };
     match &s.ast().data {
         syn::Data::Struct(_) => s.each(|bi| quote! { #hash(#bi, state); }),

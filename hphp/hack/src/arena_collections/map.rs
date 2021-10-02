@@ -681,7 +681,7 @@ mod tests_arbitrary {
         fn prop_action_seq(actions: ActionSequence<u32, u32>) -> bool {
             let ActionSequence(ref actions) = actions;
             let a = Bump::new();
-            let mut m: Map<u32, u32> = Map::empty();
+            let mut m: Map<'_, u32, u32> = Map::empty();
             let mut o: BTreeMap<u32, u32> = BTreeMap::new();
             for action in actions {
                 match action {

@@ -61,7 +61,7 @@ where
 /// * Lookups run in linear time
 /// * Entries with duplicate keys are permitted (but only observable using iterators)
 #[derive(Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
-pub struct AssocList<'a, K: 'a, V: 'a> {
+pub struct AssocList<'a, K, V> {
     entries: &'a [(K, V)],
 }
 
@@ -257,7 +257,7 @@ impl<K, V> Clone for AssocList<'_, K, V> {
 }
 
 impl<K: Debug, V: Debug> Debug for AssocList<'_, K, V> {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         fmt.debug_map().entries(self.iter()).finish()
     }
 }
@@ -275,7 +275,7 @@ impl<'a, K, V> From<AssocListMut<'a, K, V>> for AssocList<'a, K, V> {
 /// * Insertions run in constant time
 /// * Entries with duplicate keys are permitted (but only observable using iterators)
 #[derive(Clone, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub struct AssocListMut<'bump, K: 'bump, V: 'bump> {
+pub struct AssocListMut<'bump, K, V> {
     entries: bumpalo::collections::Vec<'bump, (K, V)>,
 }
 
@@ -650,7 +650,7 @@ impl<'bump, K, V> AssocListMut<'bump, K, V> {
 }
 
 impl<K: Debug, V: Debug> Debug for AssocListMut<'_, K, V> {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         fmt.debug_map().entries(self.iter()).finish()
     }
 }
@@ -687,7 +687,7 @@ where
 #[serde(bound(
     deserialize = "K: 'de + arena_deserializer::DeserializeInArena<'de>, V: 'de + arena_deserializer::DeserializeInArena<'de>"
 ))]
-pub struct SortedAssocList<'a, K: 'a, V: 'a> {
+pub struct SortedAssocList<'a, K, V> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     entries: &'a [(K, V)],
 }
@@ -927,7 +927,7 @@ impl<K, V> Default for SortedAssocList<'_, K, V> {
 }
 
 impl<K: Debug, V: Debug> Debug for SortedAssocList<'_, K, V> {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         fmt.debug_map().entries(self.iter()).finish()
     }
 }

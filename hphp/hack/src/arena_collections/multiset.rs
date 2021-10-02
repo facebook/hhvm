@@ -37,7 +37,7 @@ use crate::{AssocList, AssocListMut, SortedAssocList};
 /// * Lookups run in linear time
 /// * Duplicate elements are permitted
 #[derive(Copy, Clone, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
-pub struct MultiSet<'a, T: 'a> {
+pub struct MultiSet<'a, T> {
     list: AssocList<'a, T, ()>,
 }
 
@@ -156,7 +156,7 @@ impl<'a, T: 'a> MultiSet<'a, T> {
 impl<T> TrivialDrop for MultiSet<'_, T> {}
 
 impl<T: Debug> Debug for MultiSet<'_, T> {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         fmt.debug_set().entries(self.iter()).finish()
     }
 }
@@ -176,7 +176,7 @@ impl<'a, T> From<MultiSetMut<'a, T>> for MultiSet<'a, T> {
 /// * Insertions run in constant time
 /// * Duplicate elements are permitted
 #[derive(Clone, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub struct MultiSetMut<'bump, T: 'bump> {
+pub struct MultiSetMut<'bump, T> {
     list: AssocListMut<'bump, T, ()>,
 }
 
@@ -403,7 +403,7 @@ impl<'bump, T> MultiSetMut<'bump, T> {
 }
 
 impl<T: Debug> Debug for MultiSetMut<'_, T> {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         fmt.debug_set().entries(self.iter()).finish()
     }
 }
@@ -414,7 +414,7 @@ impl<T: Debug> Debug for MultiSetMut<'_, T> {
 /// * Duplicate elements are not permitted. When constructing a `SortedSet` from
 ///   a `MultiSetMut`, elements will be deduplicated.
 #[derive(Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
-pub struct SortedSet<'a, T: 'a> {
+pub struct SortedSet<'a, T> {
     list: SortedAssocList<'a, T, ()>,
 }
 
@@ -556,7 +556,7 @@ impl<'a, T> SortedSet<'a, T> {
 }
 
 impl<T: Debug> Debug for SortedSet<'_, T> {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         fmt.debug_set().entries(self.iter()).finish()
     }
 }

@@ -289,7 +289,7 @@ impl<'a, T> Copy for List<'a, T> {}
 impl<'a, T: TrivialDrop> TrivialDrop for List<'a, T> {}
 
 impl<T: Debug> Debug for List<'_, T> {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         fmt.debug_list().entries(self.iter()).finish()
     }
 }

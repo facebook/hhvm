@@ -21,7 +21,7 @@ fn test_size() {
     // Nil is represented with the null pointer. As a result, any List is the
     // size of a pointer.
     assert_eq!(
-        std::mem::size_of::<List<i32>>(),
+        std::mem::size_of::<List<'_, i32>>(),
         std::mem::size_of::<*const u8>()
     );
 }

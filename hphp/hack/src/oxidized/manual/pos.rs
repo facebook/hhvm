@@ -288,7 +288,7 @@ impl Pos {
         ))
     }
 
-    pub fn last_char(&self) -> Cow<Self> {
+    pub fn last_char(&self) -> Cow<'_, Self> {
         if self.is_none() {
             Cow::Borrowed(self)
         } else {
@@ -300,7 +300,7 @@ impl Pos {
         }
     }
 
-    pub fn first_char_of_line(&self) -> Cow<Self> {
+    pub fn first_char_of_line(&self) -> Cow<'_, Self> {
         if self.is_none() {
             Cow::Borrowed(self)
         } else {
@@ -397,7 +397,7 @@ impl EqModuloPos for Pos {
 impl Pos {
     /// Returns a struct implementing Display which produces the same format as
     /// `Pos.string` in OCaml.
-    pub fn string(&self) -> PosString {
+    pub fn string(&self) -> PosString<'_> {
         PosString(self)
     }
 }

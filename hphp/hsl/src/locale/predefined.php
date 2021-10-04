@@ -50,7 +50,7 @@ function bytes()[]: Locale {
  *
  * @see `set_native()`
  */
-function get_native(): Locale {
+function get_native()[read_globals]: Locale {
   return _Locale\get_request_locale();
 }
 
@@ -58,7 +58,7 @@ function get_native(): Locale {
  *
  * This is highly discouraged; see the note for `get_native()` for details.
  */
-function set_native(Locale $loc): void {
+function set_native(Locale $loc)[globals]: void {
   _Locale\set_request_locale($loc);
 }
 
@@ -70,6 +70,6 @@ function set_native(Locale $loc): void {
  * however it is useful when aiming to support diverse users in CLI
  * programs.
  */
-function from_environment(): Locale {
+function from_environment()[read_globals]: Locale {
   return _Locale\get_environment_locale();
 }

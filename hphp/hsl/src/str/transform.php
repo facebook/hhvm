@@ -27,7 +27,6 @@ function capitalize(
   if ($string === '') {
     return '';
   }
-  /* HH_FIXME[4390] missing [] */
   return _Str\uppercase_l(slice($string, 0, 1)) . slice($string, 1);
 }
 
@@ -45,7 +44,6 @@ function capitalize_words(
   ?string $delimiters = null,
 )[]: string {
   if ($delimiters === null) {
-    /* HH_FIXME[4390] missing [] */
     return _Str\titlecase_l($string, $delimiters);
   }
   /* HH_FIXME[4390] missing [] */
@@ -79,7 +77,6 @@ function format_number(
 function lowercase(
   string $string,
 )[]: string {
-  /* HH_FIXME[4390] missing [] */
   return _Str\lowercase_l($string);
 }
 
@@ -99,7 +96,6 @@ function pad_left(
   int $total_length,
   string $pad_string = ' ',
 )[]: string {
-  /* HH_FIXME[4390] missing [] */
   return _Str\pad_left_l($string, $total_length, $pad_string);
 }
 
@@ -119,7 +115,6 @@ function pad_right(
   int $total_length,
   string $pad_string = ' ',
 )[]: string {
-  /* HH_FIXME[4390] missing [] */
   return _Str\pad_right_l($string, $total_length, $pad_string);
 }
 
@@ -151,7 +146,6 @@ function replace(
   string $needle,
   string $replacement,
 )[]: string {
-  /* HH_FIXME[4390] missing [] */
   return _Str\replace_l($haystack, $needle, $replacement);
 }
 
@@ -169,7 +163,6 @@ function replace_ci(
   string $needle,
   string $replacement,
 )[rx]: string {
-  /* HH_FIXME[4390] missing [] */
   return _Str\replace_ci_l($haystack, $needle, $replacement);
 }
 
@@ -194,7 +187,6 @@ function replace_every(
   string $haystack,
   KeyedContainer<string, string> $replacements,
 )[]: string {
-  /* HH_FIXME[4390] missing [] */
   return _Str\replace_every_l($haystack, dict($replacements));
 }
 
@@ -219,7 +211,6 @@ function replace_every_ci(
   string $haystack,
   KeyedContainer<string, string> $replacements,
 )[rx]: string {
-  /* HH_FIXME[4390] missing [] */
   return _Str\replace_every_ci_l($haystack, dict($replacements));
 }
 
@@ -239,7 +230,6 @@ function replace_every_nonrecursive(
   string $haystack,
   KeyedContainer<string, string> $replacements,
 )[rx]: string {
-  /* HH_FIXME[4390] missing [] */
   return _Str\replace_every_nonrecursive_l($haystack, dict($replacements));
 }
 
@@ -266,7 +256,6 @@ function replace_every_nonrecursive_ci(
   string $haystack,
   KeyedContainer<string, string> $replacements,
 )[rx]: string {
-  /* HH_FIXME[4390] missing [] */
   return _Str\replace_every_nonrecursive_ci_l($haystack, dict($replacements));
 }
 
@@ -299,7 +288,6 @@ function splice(
   int $offset,
   ?int $length = null,
 )[]: string {
-  /* HH_FIXME[4390] missing [] */
   return _Str\splice_l($string, $replacement, $offset, $length);
 }
 
@@ -321,6 +309,5 @@ function to_int(
 function uppercase(
   string $string,
 )[]: string {
-  /* HH_FIXME[4390] missing [] */
   return _Str\uppercase_l($string);
 }

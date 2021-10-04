@@ -22,7 +22,6 @@ function compare(
   string $string1,
   string $string2,
 )[]: int {
-  /* HH_FIXME[4390] missing [] */
   return _Str\strcoll_l($string1, $string2);
 }
 
@@ -36,7 +35,6 @@ function compare_ci(
   string $string1,
   string $string2,
 )[]: int {
-  /* HH_FIXME[4390] missing [] */
   return _Str\strcasecmp_l($string1, $string2);
 }
 
@@ -112,7 +110,6 @@ function ends_with(
   string $string,
   string $suffix,
 )[]: bool {
-  /* HH_FIXME[4390] missing [] */
   return _Str\ends_with_l($string, $suffix);
 }
 
@@ -125,7 +122,6 @@ function ends_with_ci(
   string $string,
   string $suffix,
 )[]: bool {
-  /* HH_FIXME[4390] missing [] */
   return _Str\ends_with_ci_l($string, $suffix);
 }
 
@@ -150,7 +146,6 @@ function is_empty(
 function length(
   string $string,
 )[]: int {
-  /* HH_FIXME[4390] missing [] */
   return _Str\strlen_l($string);
 }
 
@@ -174,7 +169,6 @@ function search(
   string $needle,
   int $offset = 0,
 )[]: ?int {
-  /* HH_FIXME[4390] missing [] */
   $position = _Str\strpos_l($haystack, $needle, $offset);
   if ($position < 0) {
     return null;
@@ -202,7 +196,6 @@ function search_ci(
   string $needle,
   int $offset = 0,
 )[]: ?int {
-  /* HH_FIXME[4390] missing [] */
   $position = _Str\stripos_l($haystack, $needle, $offset);
   if ($position < 0) {
     return null;
@@ -230,7 +223,6 @@ function search_last(
   int $offset = 0,
 )[]: ?int {
 $haystack_length = length($haystack);
-  /* HH_FIXME[4390] missing [] */
   $position = _Str\strrpos_l($haystack, $needle, $offset);
   if ($position < 0) {
     return null;
@@ -247,7 +239,6 @@ function starts_with(
   string $string,
   string $prefix,
 )[]: bool {
-  /* HH_FIXME[4390] missing [] */
   return _Str\starts_with_l($string, $prefix);
 }
 
@@ -260,6 +251,5 @@ function starts_with_ci(
   string $string,
   string $prefix,
 )[]: bool {
-  /* HH_FIXME[4390] missing [] */
   return _Str\starts_with_ci_l($string, $prefix);
 }

@@ -21,7 +21,6 @@ function chunk(
   string $string,
   int $chunk_size = 1,
 )[]: vec<string> {
-  /* HH_FIXME[4390] missing [] */
   return _Str\chunk_l($string, $chunk_size);
 }
 
@@ -42,6 +41,5 @@ function split(
   string $delimiter,
   ?int $limit = null,
 )[]: vec<string> {
-  /* HH_FIXME[4390] missing [] */
   return vec(_Str\split_l($string, $delimiter, $limit));
 }

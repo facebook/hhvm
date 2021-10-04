@@ -22,6 +22,5 @@ function format_l(
   SprintfFormatString $format_string,
   mixed ...$format_args
 )[]: string {
-  /* HH_FIXME[4390] missing [] */
   return _Str\vsprintf_l($locale, $format_string as string, $format_args);
 }

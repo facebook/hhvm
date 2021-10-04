@@ -28,18 +28,18 @@ final class Locale {
 <<__Native>>
 function get_c_locale()[]: Locale;
 <<__Native>>
-function get_environment_locale(): Locale;
+function get_environment_locale()[read_globals]: Locale;
 <<__Native>>
-function get_request_locale(): Locale;
+function get_request_locale()[read_globals]: Locale;
 <<__Native>>
-function set_request_locale(Locale $loc): void;
+function set_request_locale(Locale $loc)[globals]: void;
 
 /** Behaves like `newlocale()`, taking a mask of categories, e.g. LC_CTYPE_MASK */
 <<__Native>>
-function newlocale_mask(int $mask, string $locale, Locale $base): Locale;
+function newlocale_mask(int $mask, string $locale, Locale $base)[read_globals]: Locale;
 /** Take a single category, e.g. `LC_TYPE` */
 <<__Native>>
-function newlocale_category(int $category, string $locale, Locale $base): Locale;
+function newlocale_category(int $category, string $locale, Locale $base)[read_globals]: Locale;
 /** Create a new locale object using the specified locale for all categories.
  *
  * This function will throw if a 'magic' locale is passed, e.g.

@@ -49,7 +49,6 @@ function capitalize_words_l(
   Locale\Locale $locale,
   string $string,
 )[]: string {
-  /* HH_FIXME[4390] missing [] */
   return _Str\titlecase_l($string, $locale);
 }
 
@@ -63,7 +62,6 @@ function lowercase_l(
   Locale\Locale $locale,
   string $string,
 )[]: string {
-  /* HH_FIXME[4390] missing [] */
   return _Str\lowercase_l($string, $locale);
 }
 
@@ -84,7 +82,6 @@ function pad_left_l(
   int $total_length,
   string $pad_string = ' ',
 )[]: string {
-  /* HH_FIXME[4390] missing [] */
   return _Str\pad_left_l($string, $total_length, $pad_string, $locale);
 }
 
@@ -105,7 +102,6 @@ function pad_right_l(
   int $total_length,
   string $pad_string = ' ',
 )[]: string {
-  /* HH_FIXME[4390] missing [] */
   return _Str\pad_right_l($string, $total_length, $pad_string, $locale);
 }
 
@@ -126,7 +122,6 @@ function replace_l(
   string $needle,
   string $replacement,
 )[]: string {
-  /* HH_FIXME[4390] missing [] */
   return _Str\replace_l($haystack, $needle, $replacement, $locale);
 }
 
@@ -149,7 +144,6 @@ function replace_ci_l(
   string $needle,
   string $replacement,
 )[rx]: string {
-  /* HH_FIXME[4390] missing [] */
   return _Str\replace_ci_l($haystack, $needle, $replacement, $locale);
 }
 
@@ -178,7 +172,6 @@ function replace_every_l(
   string $haystack,
   KeyedContainer<string, string> $replacements,
 )[]: string {
-  /* HH_FIXME[4390] missing [] */
   return _Str\replace_every_l($haystack, dict($replacements), $locale);
 }
 
@@ -209,7 +202,6 @@ function replace_every_ci_l(
   string $haystack,
   KeyedContainer<string, string> $replacements,
 )[rx]: string {
-  /* HH_FIXME[4390] missing [] */
   return _Str\replace_every_ci_l($haystack, dict($replacements), $locale);
 }
 
@@ -233,7 +225,6 @@ function replace_every_nonrecursive_l(
   string $haystack,
   KeyedContainer<string, string> $replacements,
 )[rx]: string {
-  /* HH_FIXME[4390] missing [] */
   return _Str\replace_every_nonrecursive_l($haystack, dict($replacements), $locale);
 }
 
@@ -266,7 +257,6 @@ function replace_every_nonrecursive_ci_l(
   string $haystack,
   KeyedContainer<string, string> $replacements,
 )[rx]: string {
-  /* HH_FIXME[4390] missing [] */
   return _Str\replace_every_nonrecursive_ci_l($haystack, dict($replacements), $locale);
 }
 
@@ -275,7 +265,6 @@ function replace_every_nonrecursive_ci_l(
  * @see `Str\reverse()` to reverse by bytes instead.
  */
 function reverse_l(Locale\Locale $locale, string $string)[]: string {
-  /* HH_FIXME[4390] missing [] */
   return _Str\reverse_l($string, $locale);
 }
 
@@ -294,7 +283,6 @@ function splice_l(
   int $offset,
   ?int $length = null,
 )[]: string {
-  /* HH_FIXME[4390] missing [] */
   return _Str\splice_l($string, $replacement, $offset, $length, $locale);
 }
 
@@ -308,6 +296,5 @@ function uppercase_l(
   Locale\Locale $locale,
   string $string,
 )[]: string {
-  /* HH_FIXME[4390] missing [] */
   return _Str\uppercase_l($string, $locale);
 }

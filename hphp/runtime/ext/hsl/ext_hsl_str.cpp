@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/locale.h"
 #include "hphp/runtime/ext/fb/ext_fb.h"
 #include "hphp/runtime/ext/hsl/ext_hsl_locale.h"
+#include "hphp/runtime/ext/hsl/hsl_locale_byte_ops.h"
 #include "hphp/runtime/ext/hsl/hsl_locale_ops.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/vm/native.h"
@@ -36,33 +37,46 @@
 namespace HPHP {
 namespace {
 
-THREAD_LOCAL(HSLLocale*, c_hsl_locale);
+const HSLLocale::Ops* s_byte_ops = nullptr;
+const Locale* s_bytes_locale = nullptr;
 
-const HSLLocale* get_locale(const Variant& maybe_locale) {
+ALWAYS_INLINE const Locale* get_locale(const Variant& maybe_locale) {
   if (LIKELY(maybe_locale.isNull())) {
-    // TODO:
-    // - test perf with this default
-    // - add runtime option to request vs C locale
-    // - go back to this shortly after
-    assertx(*c_hsl_locale);
-    return *c_hsl_locale;
+    assert(s_bytes_locale);
+    return s_bytes_locale; 
   }
+
   if (!maybe_locale.isObject()) {
     raise_fatal_error("Locale is not null or an object");
   }
-  return HSLLocale::fromObject(maybe_locale.asCObjRef());
+
+  return HSLLocale::fromObject(maybe_locale.asCObjRef())->get().get();
 }
 
+ALWAYS_INLINE const HSLLocale::Ops* get_ops(const Variant& maybe_locale) {
+  if (LIKELY(maybe_locale.isNull())) {
+    assert(s_byte_ops);
+    return s_byte_ops;
+  }
+
+  if (!maybe_locale.isObject()) {
+    raise_fatal_error("Locale is not null or an object");
+  }
+
+  return HSLLocale::fromObject(maybe_locale.asCObjRef())->ops();
+}
+
+
 int64_t HHVM_FUNCTION(strlen_l, const String& str, const Variant& maybe_loc) {
-  return get_locale(maybe_loc)->ops()->strlen(str);
+  return get_ops(maybe_loc)->strlen(str);
 }
 
 String HHVM_FUNCTION(uppercase_l, const String& str, const Variant& maybe_loc) {
-  return get_locale(maybe_loc)->ops()->uppercase(str);
+  return get_ops(maybe_loc)->uppercase(str);
 }
 
 String HHVM_FUNCTION(lowercase_l, const String& str, const Variant& maybe_loc) {
-  return get_locale(maybe_loc)->ops()->lowercase(str);
+  return get_ops(maybe_loc)->lowercase(str);
 }
 
 String HHVM_FUNCTION(titlecase_l, const String& str, const Variant& maybe_loc) {
@@ -72,7 +86,7 @@ String HHVM_FUNCTION(titlecase_l, const String& str, const Variant& maybe_loc) {
   }
 
   icu::Locale ctype(
-    get_locale(maybe_loc)->get()->querylocale(LocaleCategory, LC_CTYPE)
+    get_locale(maybe_loc)->querylocale(LocaleCategory, LC_CTYPE)
   );
   auto mut = icu::UnicodeString::fromUTF8(icu::StringPiece(str.data(), str.length()));
   mut.toTitle(nullptr, ctype);
@@ -82,7 +96,7 @@ String HHVM_FUNCTION(titlecase_l, const String& str, const Variant& maybe_loc) {
 }
 
 String HHVM_FUNCTION(foldcase_l, const String& str, const Variant& maybe_loc) {
-  return get_locale(maybe_loc)->ops()->foldcase(str);
+  return get_ops(maybe_loc)->foldcase(str);
 }
 
 Array HHVM_FUNCTION(chunk_l,
@@ -94,63 +108,63 @@ Array HHVM_FUNCTION(chunk_l,
       "chunk size can not be less than 1"
     );
   }
-  return get_locale(maybe_loc)->ops()->chunk(str, chunk_size);
+  return get_ops(maybe_loc)->chunk(str, chunk_size);
 }
 
 int64_t HHVM_FUNCTION(strcoll_l,
                       const String& a,
                       const String& b,
                       const Variant& maybe_loc) {
-  return get_locale(maybe_loc)->ops()->strcoll(a, b);
+  return get_ops(maybe_loc)->strcoll(a, b);
 }
 
 int64_t HHVM_FUNCTION(strcasecmp_l,
                       const String& a,
                       const String& b,
                       const Variant& maybe_loc) {
-  return get_locale(maybe_loc)->ops()->strcasecmp(a, b);
+  return get_ops(maybe_loc)->strcasecmp(a, b);
 }
 
 bool HHVM_FUNCTION(starts_with_l,
                    const String& string,
                    const String& prefix,
                    const Variant& maybe_loc) {
-  return get_locale(maybe_loc)->ops()->starts_with(string, prefix);
+  return get_ops(maybe_loc)->starts_with(string, prefix);
 }
 
 bool HHVM_FUNCTION(starts_with_ci_l,
                    const String& string,
                    const String& prefix,
                    const Variant& maybe_loc) {
-  return get_locale(maybe_loc)->ops()->starts_with_ci(string, prefix);
+  return get_ops(maybe_loc)->starts_with_ci(string, prefix);
 }
 
 bool HHVM_FUNCTION(ends_with_l,
                    const String& string,
                    const String& suffix,
                    const Variant& maybe_loc) {
-  return get_locale(maybe_loc)->ops()->ends_with(string, suffix);
+  return get_ops(maybe_loc)->ends_with(string, suffix);
 }
 
 bool HHVM_FUNCTION(ends_with_ci_l,
                    const String& string,
                    const String& suffix,
                    const Variant& maybe_loc) {
-  return get_locale(maybe_loc)->ops()->ends_with_ci(string, suffix);
+  return get_ops(maybe_loc)->ends_with_ci(string, suffix);
 }
 
 String HHVM_FUNCTION(strip_prefix_l,
                      const String& string,
                      const String& prefix,
                      const Variant& maybe_loc) {
-  return get_locale(maybe_loc)->ops()->strip_prefix(string, prefix);
+  return get_ops(maybe_loc)->strip_prefix(string, prefix);
 }
 
 String HHVM_FUNCTION(strip_suffix_l,
                      const String& string,
                      const String& suffix,
                      const Variant& maybe_loc) {
-  return get_locale(maybe_loc)->ops()->strip_suffix(string, suffix);
+  return get_ops(maybe_loc)->strip_suffix(string, suffix);
 }
 
 int64_t HHVM_FUNCTION(strpos_l,
@@ -158,7 +172,7 @@ int64_t HHVM_FUNCTION(strpos_l,
                       const String& needle,
                       int64_t offset,
                       const Variant& maybe_loc) {
-  return get_locale(maybe_loc)->ops()->strpos(haystack, needle, offset);
+  return get_ops(maybe_loc)->strpos(haystack, needle, offset);
 }
 
 int64_t HHVM_FUNCTION(stripos_l,
@@ -166,7 +180,7 @@ int64_t HHVM_FUNCTION(stripos_l,
                       const String& needle,
                       int64_t offset,
                       const Variant& maybe_loc) {
-  return get_locale(maybe_loc)->ops()->stripos(haystack, needle, offset);
+  return get_ops(maybe_loc)->stripos(haystack, needle, offset);
 }
 
 int64_t HHVM_FUNCTION(strrpos_l,
@@ -174,7 +188,7 @@ int64_t HHVM_FUNCTION(strrpos_l,
                       const String& needle,
                       int64_t offset,
                       const Variant& maybe_loc) {
-  return get_locale(maybe_loc)->ops()->strrpos(haystack, needle, offset);
+  return get_ops(maybe_loc)->strrpos(haystack, needle, offset);
 }
 
 int64_t HHVM_FUNCTION(strripos_l,
@@ -182,7 +196,7 @@ int64_t HHVM_FUNCTION(strripos_l,
                       const String& needle,
                       int64_t offset,
                       const Variant& maybe_loc) {
-  return get_locale(maybe_loc)->ops()->strripos(haystack, needle, offset);
+  return get_ops(maybe_loc)->strripos(haystack, needle, offset);
 }
 
 namespace {
@@ -200,7 +214,7 @@ String HHVM_FUNCTION(slice_l,
                      int64_t length,
                      const Variant& maybe_loc) {
   length = normalize_length(length);
-  return get_locale(maybe_loc)->ops()->slice(str, offset, length);
+  return get_ops(maybe_loc)->slice(str, offset, length);
 }
 
 String HHVM_FUNCTION(splice_l,
@@ -212,7 +226,7 @@ String HHVM_FUNCTION(splice_l,
   const int64_t int_length = normalize_length(
     length.isNull() ? StringData::MaxSize : length.asInt64Val()
   );
-  return get_locale(maybe_loc)->ops()->splice(str, replacement, offset, int_length);
+  return get_ops(maybe_loc)->splice(str, replacement, offset, int_length);
 }
 
 Array HHVM_FUNCTION(split_l,
@@ -232,7 +246,7 @@ Array HHVM_FUNCTION(split_l,
     SystemLib::throwInvalidArgumentExceptionObject("Limit must be >= 0");
   }
 
-  return get_locale(maybe_loc)->ops()->split(str, delimiter, int_limit);
+  return get_ops(maybe_loc)->split(str, delimiter, int_limit);
 }
 
 String HHVM_FUNCTION(reverse_l,
@@ -241,7 +255,7 @@ String HHVM_FUNCTION(reverse_l,
   if (str.empty()) {
     return str;
   }
-  return get_locale(maybe_loc)->ops()->reverse(str);
+  return get_ops(maybe_loc)->reverse(str);
 }
 
 String HHVM_FUNCTION(pad_left_l,
@@ -255,7 +269,7 @@ String HHVM_FUNCTION(pad_left_l,
     );
   }
   len = normalize_length(len);
-  return get_locale(maybe_loc)->ops()->pad_left(str, len, pad);
+  return get_ops(maybe_loc)->pad_left(str, len, pad);
 }
 
 String HHVM_FUNCTION(pad_right_l,
@@ -269,7 +283,7 @@ String HHVM_FUNCTION(pad_right_l,
     );
   }
   len = normalize_length(len);
-  return get_locale(maybe_loc)->ops()->pad_right(str, len, pad);
+  return get_ops(maybe_loc)->pad_right(str, len, pad);
 }
 
 String HHVM_FUNCTION(vsprintf_l,
@@ -281,8 +295,8 @@ String HHVM_FUNCTION(vsprintf_l,
   // 1. get an HSLLocale from a nullable Locale object
   // 2. get an std::shared_ptr<HPHP::Locale> from an HSL Locale
   // 3. get a locale_t from an HPHP::Locale
-  auto loc = get_locale(maybe_loc)->get()->get();
-  auto thread_loc = ::uselocale((locale_t) 0);
+  locale_t loc = get_locale(maybe_loc)->get();
+  locale_t thread_loc = ::uselocale((locale_t) 0);
   if (LIKELY(loc == thread_loc)) {
     return string_printf(fmt.data(), fmt.size(), args);
   }
@@ -300,7 +314,7 @@ String trim_impl(const String& str,
     return str;
   }
   if (what.isNull()) {
-    return get_locale(maybe_loc)->ops()->trim(str, sides);
+    return get_ops(maybe_loc)->trim(str, sides);
   }
   assertx(what.isString());
   const auto& swhat = what.asCStrRef();
@@ -308,7 +322,7 @@ String trim_impl(const String& str,
   if (swhat.empty()) {
     return str;
   }
-  return get_locale(maybe_loc)->ops()->trim(str, swhat, sides);
+  return get_ops(maybe_loc)->trim(str, swhat, sides);
 }
 } // namespace
 
@@ -341,7 +355,7 @@ String HHVM_FUNCTION(replace_l,
   if (haystack.empty() || needle.empty()) {
     return haystack;
   }
-  return get_locale(maybe_loc)->ops()->replace(haystack, needle, replacement); 
+  return get_ops(maybe_loc)->replace(haystack, needle, replacement); 
 }
 
 String HHVM_FUNCTION(replace_ci_l,
@@ -352,7 +366,7 @@ String HHVM_FUNCTION(replace_ci_l,
   if (haystack.empty() || needle.empty()) {
     return haystack;
   }
-  return get_locale(maybe_loc)->ops()->replace_ci(haystack, needle, replacement); 
+  return get_ops(maybe_loc)->replace_ci(haystack, needle, replacement); 
 }
 
 namespace {
@@ -380,7 +394,7 @@ String HHVM_FUNCTION(replace_every_l,
     return haystack;
   }
   check_replace_pairs(replacements);
-  return get_locale(maybe_loc)->ops()->replace_every(haystack, replacements);
+  return get_ops(maybe_loc)->replace_every(haystack, replacements);
 }
 
 String HHVM_FUNCTION(replace_every_ci_l,
@@ -391,7 +405,7 @@ String HHVM_FUNCTION(replace_every_ci_l,
     return haystack;
   }
   check_replace_pairs(replacements);
-  return get_locale(maybe_loc)->ops()->replace_every_ci(haystack, replacements);
+  return get_ops(maybe_loc)->replace_every_ci(haystack, replacements);
 }
 
 String HHVM_FUNCTION(replace_every_nonrecursive_l,
@@ -402,7 +416,7 @@ String HHVM_FUNCTION(replace_every_nonrecursive_l,
     return haystack;
   }
   check_replace_pairs(replacements);
-  return get_locale(maybe_loc)->ops()->replace_every_nonrecursive(haystack, replacements);
+  return get_ops(maybe_loc)->replace_every_nonrecursive(haystack, replacements);
 }
 
 String HHVM_FUNCTION(replace_every_nonrecursive_ci_l,
@@ -413,13 +427,16 @@ String HHVM_FUNCTION(replace_every_nonrecursive_ci_l,
     return haystack;
   }
   check_replace_pairs(replacements);
-  return get_locale(maybe_loc)->ops()->replace_every_nonrecursive_ci(haystack, replacements);
+  return get_ops(maybe_loc)->replace_every_nonrecursive_ci(haystack, replacements);
 }
 
 struct HSLStrExtension final : Extension {
   HSLStrExtension() : Extension("hsl_str", "0.1") {}
 
   void moduleInit() override {
+    s_byte_ops = new HSLLocaleByteOps();
+    s_bytes_locale = Locale::getCLocale().get();
+
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\strlen_l, strlen_l);
     // - clang doesn't like the HHVM_FALIAS macro with \\u
     // - \\\\ gets different results in gcc, leading to 'undefined native function'
@@ -472,10 +489,6 @@ struct HSLStrExtension final : Extension {
     HHVM_FALIAS(HH\\Lib\\_Private\\_Str\\replace_every_nonrecursive_ci_l, replace_every_nonrecursive_ci_l);
 
     loadSystemlib();
-  }
-
-  void threadInit() override {
-    *c_hsl_locale.get() = new HSLLocale(Locale::getCLocale());
   }
 } s_hsl_str_extension;
 

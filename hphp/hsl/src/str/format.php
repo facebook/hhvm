@@ -10,6 +10,8 @@
 
 namespace HH\Lib\Str;
 
+use namespace HH\Lib\_Private\_Str;
+
 /**
  * This interface describes features of a valid format string for `Str\format`
  */
@@ -67,5 +69,6 @@ function format(
   SprintfFormatString $format_string,
   mixed ...$format_args
 )[]: string {
-  return \vsprintf($format_string, $format_args);
+  /* HH_FIXME[4390] missing [] */
+  return _Str\vsprintf_l(null, $format_string as string, $format_args);
 }

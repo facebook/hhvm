@@ -341,7 +341,8 @@ std::uint32_t RepoOptions::getFactsFlags() const {
     1 << 1 |  //hhvm_compat_mode
     AllowNewAttributeSyntax   << 2 |
     EnableXHPClassModifier    << 3 |
-    DisableXHPElementMangling << 4;
+    DisableXHPElementMangling << 4 |
+    DisallowHashComments      << 5;
   return flags;
 }
 

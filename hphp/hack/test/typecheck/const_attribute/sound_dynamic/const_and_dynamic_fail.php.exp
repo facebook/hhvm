@@ -1,0 +1,2 @@
+File "const_and_dynamic_fail.php", line 21, characters 15-16:
+Cannot mutate a `__Const` property (Typing[4196])

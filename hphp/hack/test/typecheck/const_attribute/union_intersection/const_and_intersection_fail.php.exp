@@ -1,0 +1,2 @@
+File "const_and_intersection_fail.php", line 16, characters 7-8:
+Cannot mutate a `__Const` property (Typing[4196])

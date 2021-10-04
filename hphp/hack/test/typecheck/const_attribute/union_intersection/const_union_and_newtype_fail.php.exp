@@ -1,0 +1,2 @@
+File "const_union_and_newtype_fail.php", line 24, characters 7-8:
+Cannot mutate a `__Const` property (Typing[4196])

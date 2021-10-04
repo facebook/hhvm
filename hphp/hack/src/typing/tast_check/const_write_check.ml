@@ -69,26 +69,30 @@ let rec check_expr env ((_, _, e) : Tast.expr) =
     end
   | Obj_get ((cty, _, _), (_, _, Id id), _, _) ->
     let (env, cty) = Env.expand_type env cty in
-    begin
-      match get_node cty with
-      | Tclass ((_, c), _, _) -> check_prop env c id (Some cty)
-      | Tnewtype (_, _, bound)
-      | Tdependent (_, bound) ->
-        begin
-          match get_node bound with
-          | Tclass ((_, c), _, _) -> check_prop env c id (Some bound)
-          | _ -> ()
-        end
-      | Tgeneric (name, targs) ->
-        let upper_bounds = Env.get_upper_bounds env name targs in
-        let check_class bound =
-          match get_node bound with
-          | Tclass ((_, c), _, _) -> check_prop env c id (Some bound)
-          | _ -> ()
-        in
-        Typing_set.iter check_class upper_bounds
-      | _ -> ()
-    end
+    let rec check_const_cty seen cty =
+      (* we track already seen types to avoid infinite recursion
+         when dealing with Tgeneric arguments *)
+      if Typing_set.mem cty seen then
+        seen
+      else
+        let seen = Typing_set.add cty seen in
+        match get_node cty with
+        | Tunion ty_list
+        | Tintersection ty_list ->
+          List.fold ty_list ~init:seen ~f:check_const_cty
+        | Tclass ((_, c), _, _) ->
+          check_prop env c id (Some cty);
+          seen
+        | Tnewtype (_, _, bound)
+        | Tdependent (_, bound) ->
+          check_const_cty seen bound
+        | Tgeneric (name, targs) ->
+          let upper_bounds = Env.get_upper_bounds env name targs in
+          let check_class cty seen = check_const_cty seen cty in
+          Typing_set.fold check_class upper_bounds seen
+        | _ -> seen
+    in
+    ignore (check_const_cty Typing_set.empty cty)
   | Call ((_, _, Id (_, f)), _, el, None)
     when String.equal f SN.PseudoFunctions.unset ->
     let rec check_unset_exp e =

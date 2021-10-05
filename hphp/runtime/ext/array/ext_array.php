@@ -151,7 +151,7 @@ function array_flip(
  */
 <<__Native, __IsFoldable>>
 function array_key_exists(
-  mixed $key,
+  readonly mixed $key,
   readonly mixed $search,
 )[]: bool;
 

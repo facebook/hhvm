@@ -18,7 +18,7 @@
 namespace {
 
 <<__PHPStdLib>>
-function array_key_exists(mixed $key, readonly ?KeyedContainer<arraykey, mixed> $search)[]: bool;
+function array_key_exists(readonly mixed $key, readonly ?KeyedContainer<arraykey, mixed> $search)[]: bool;
 
 <<__PHPStdLib>>
 function array_sum/*<T>*/(readonly /*Container<T>*/ $input)[]/*: num*/;

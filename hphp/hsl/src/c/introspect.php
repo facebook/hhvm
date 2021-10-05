@@ -7,6 +7,7 @@
  *  LICENSE file in the hphp/hsl/ subdirectory of this source tree.
  *
  */
+<<file:__EnableUnstableFeatures('readonly')>>
 
 /**
  * C is for Containers. This file contains functions that ask
@@ -48,8 +49,8 @@ function contains<
   <<__NonDisjoint>> T1,
   <<__NonDisjoint>> T2
 >(
-  Traversable<T1> $traversable,
-  T2 $value,
+  readonly Traversable<T1> $traversable,
+  readonly T2 $value,
 )[]: bool {
   if ($traversable is keyset<_>) {
     return $value is arraykey && contains_key($traversable, $value);
@@ -73,8 +74,8 @@ function contains_key<
   <<__NonDisjoint>> Tk2 as arraykey,
   Tv
 >(
-  KeyedContainer<Tk1, Tv> $container,
-  Tk2 $key,
+  readonly KeyedContainer<Tk1, Tv> $container,
+  readonly Tk2 $key,
 )[]: bool {
   return \array_key_exists($key, $container);
 }

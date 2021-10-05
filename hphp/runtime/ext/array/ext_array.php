@@ -1155,7 +1155,7 @@ function krsort(
 function usort(
   inout mixed $array,
   mixed $cmp_function,
-)[]: bool;
+)[ctx $cmp_function]: bool;
 
 /**
  * This function sorts an array such that array indices maintain their
@@ -1174,7 +1174,7 @@ function usort(
 function uasort(
   inout mixed $array,
   mixed $cmp_function,
-)[]: bool;
+)[ctx $cmp_function]: bool;
 
 /**
  * uksort() will sort the keys of an array using a user-supplied comparison
@@ -1195,7 +1195,7 @@ function uasort(
 function uksort(
   inout mixed $array,
   mixed $cmp_function,
-)[]: bool;
+)[ctx $cmp_function]: bool;
 
 /**
  * This function implements a sort algorithm that orders alphanumeric strings

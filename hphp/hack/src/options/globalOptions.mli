@@ -159,8 +159,6 @@ type t = {
   tco_simple_pessimize: float;
   (* Enables complex coercion interactions that involve like types *)
   tco_complex_coercion: bool;
-  (* Treat partially abstract typeconsts like concrete typeconsts, disable overriding type *)
-  tco_disable_partially_abstract_typeconsts: bool;
   (* Ban definitions of partially abstract typeconsts *)
   tco_disallow_partially_abstract_typeconst_definitions: bool;
   (* Set of codes to be treated as if they were in strict mode files *)
@@ -387,7 +385,6 @@ val make :
   ?tco_like_casts:bool ->
   ?tco_simple_pessimize:float ->
   ?tco_complex_coercion:bool ->
-  ?tco_disable_partially_abstract_typeconsts:bool ->
   ?tco_disallow_partially_abstract_typeconst_definitions:bool ->
   ?error_codes_treated_strictly:ISet.t ->
   ?tco_check_xhp_attribute:bool ->
@@ -601,8 +598,6 @@ val tco_like_casts : t -> bool
 val tco_simple_pessimize : t -> float
 
 val tco_complex_coercion : t -> bool
-
-val tco_disable_partially_abstract_typeconsts : t -> bool
 
 val tco_disallow_partially_abstract_typeconst_definitions : t -> bool
 

@@ -999,9 +999,7 @@ let tconst_subsumption
     let parent_is_final =
       match parent_typeconst.ttc_kind with
       | TCConcrete _ -> true
-      | TCPartiallyAbstract _ ->
-        TypecheckerOptions.disable_partially_abstract_typeconsts
-          (Env.get_tcopt env)
+      | TCPartiallyAbstract _ -> true
       | TCAbstract _ -> false
     in
     let check env x y =

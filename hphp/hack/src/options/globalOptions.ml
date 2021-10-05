@@ -62,7 +62,6 @@ type t = {
   tco_like_casts: bool;
   tco_simple_pessimize: float;
   tco_complex_coercion: bool;
-  tco_disable_partially_abstract_typeconsts: bool;
   tco_disallow_partially_abstract_typeconst_definitions: bool;
   error_codes_treated_strictly: ISet.t;
   tco_check_xhp_attribute: bool;
@@ -264,7 +263,6 @@ let default =
     tco_like_casts = false;
     tco_simple_pessimize = 0.0;
     tco_complex_coercion = false;
-    tco_disable_partially_abstract_typeconsts = false;
     tco_disallow_partially_abstract_typeconst_definitions = true;
     error_codes_treated_strictly = ISet.of_list [];
     tco_check_xhp_attribute = false;
@@ -406,8 +404,6 @@ let make
     ?(tco_like_casts = default.tco_like_casts)
     ?(tco_simple_pessimize = default.tco_simple_pessimize)
     ?(tco_complex_coercion = default.tco_complex_coercion)
-    ?(tco_disable_partially_abstract_typeconsts =
-      default.tco_disable_partially_abstract_typeconsts)
     ?(tco_disallow_partially_abstract_typeconst_definitions =
       default.tco_disallow_partially_abstract_typeconst_definitions)
     ?(error_codes_treated_strictly = default.error_codes_treated_strictly)
@@ -561,7 +557,6 @@ let make
     tco_like_casts;
     tco_simple_pessimize;
     tco_complex_coercion;
-    tco_disable_partially_abstract_typeconsts;
     tco_disallow_partially_abstract_typeconst_definitions;
     error_codes_treated_strictly;
     tco_check_xhp_attribute;
@@ -764,9 +759,6 @@ let tco_like_casts t = t.tco_like_casts
 let tco_simple_pessimize t = t.tco_simple_pessimize
 
 let tco_complex_coercion t = t.tco_complex_coercion
-
-let tco_disable_partially_abstract_typeconsts t =
-  t.tco_disable_partially_abstract_typeconsts
 
 let tco_disallow_partially_abstract_typeconst_definitions t =
   t.tco_disallow_partially_abstract_typeconst_definitions

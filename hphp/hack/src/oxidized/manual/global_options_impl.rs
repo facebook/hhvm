@@ -62,7 +62,6 @@ impl Default for GlobalOptions {
             tco_like_casts: false,
             tco_simple_pessimize: 0.0,
             tco_complex_coercion: false,
-            tco_disable_partially_abstract_typeconsts: false,
             tco_disallow_partially_abstract_typeconst_definitions: true,
             error_codes_treated_strictly: i_set::ISet::new(),
             tco_check_xhp_attribute: false,

@@ -1,0 +1,1 @@
+{ snippet = "MyAttribute"; addendum = ["I am a comment on MyAttribute."]; pos = Some "line 7, character 3 - line 7, character 13" }

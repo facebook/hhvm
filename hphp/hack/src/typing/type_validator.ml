@@ -46,12 +46,7 @@ class virtual type_validator =
     method on_alias acc _ _ tyl ty =
       List.fold_left (ty :: tyl) ~f:this#on_type ~init:acc
 
-    (* TODO(T88552052) is_concrete is a strange pattern here. The bool is used
-     * to signal when a partially abstract type constant is directly accessed
-     * in a way that would result in the value being used instead of
-     * getting a constrained abstract type. This logic can be cleaned up by
-     * eliminating partially abstract type constants and only using ttc_kind *)
-    method on_typeconst acc _class _is_concrete typeconst =
+    method on_typeconst acc _class typeconst =
       match typeconst.ttc_kind with
       | TCConcrete { tc_type } -> this#on_type acc tc_type
       | TCAbstract { atc_as_constraint; atc_super_constraint; atc_default } ->
@@ -75,18 +70,9 @@ class virtual type_validator =
               ( Env.get_class env class_name >>= fun class_ ->
                 Decl_provider.Class.get_typeconst class_ (snd id)
                 >>= fun typeconst ->
-                let is_concrete =
-                  match typeconst.ttc_kind with
-                  | TCConcrete _ -> true
-                  | _ -> false
-                in
                 let ety_env = { acc.ety_env with this_ty = ty } in
-                Some
-                  (this#on_typeconst
-                     { acc with ety_env }
-                     class_
-                     is_concrete
-                     typeconst) )
+                Some (this#on_typeconst { acc with ety_env } class_ typeconst)
+              )
           | _ -> acc)
 
     method! on_tapply acc r (pos, name) tyl =

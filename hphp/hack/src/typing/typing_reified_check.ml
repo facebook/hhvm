@@ -49,11 +49,12 @@ let validator =
 
     method! on_tfun acc r _ = this#invalid acc r "a function type"
 
-    method! on_typeconst acc class_ is_concrete typeconst =
+    method! on_typeconst acc class_ typeconst =
       match typeconst.ttc_kind with
-      | _ when Option.is_some typeconst.ttc_reifiable || is_concrete ->
-        super#on_typeconst acc class_ is_concrete typeconst
-      | _ ->
+      | TCConcrete _ -> super#on_typeconst acc class_ typeconst
+      | TCAbstract _ when Option.is_some typeconst.ttc_reifiable ->
+        super#on_typeconst acc class_ typeconst
+      | TCAbstract _ ->
         let r = Reason.Rwitness_from_decl (fst typeconst.ttc_name) in
         let kind =
           "an abstract type constant without the __Reifiable attribute"

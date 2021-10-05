@@ -300,6 +300,7 @@ Object ObjectData::iterableObject(bool& isIterable,
     return Object(this);
   }
   Object obj(this);
+  CoeffectsAutoGuard _;
   while (obj->instanceof(SystemLib::s_IteratorAggregateClass)) {
     auto iterator =
       obj->o_invoke_few_args(s_getIterator, RuntimeCoeffects::automatic(), 0);
@@ -726,6 +727,7 @@ Variant ObjectData::o_invoke(const String& s, const Variant& params,
       (!isContainer(params) && !params.isNull())) {
     return Variant(Variant::NullInit());
   }
+  CoeffectsAutoGuard _;
   return Variant::attach(
     g_context->invokeFunc(ctx, params, RuntimeCoeffects::automatic())
   );
@@ -814,6 +816,7 @@ ObjectData* ObjectData::clone() {
     assertx(method);
     clone->unlockObject();
     SCOPE_EXIT { clone->lockObject(); };
+    CoeffectsAutoGuard _;
     g_context->invokeMethodV(clone.get(), method, InvokeArgs{},
                              RuntimeCoeffects::automatic());
   }
@@ -1653,6 +1656,7 @@ Variant ObjectData::invokeSleep(RuntimeCoeffects provided) {
 }
 
 Variant ObjectData::invokeToDebugDisplay() {
+  CoeffectsAutoGuard _;
   return InvokeSimple(this, s___toDebugDisplay, RuntimeCoeffects::automatic());
 }
 
@@ -1686,6 +1690,7 @@ String ObjectData::invokeToString() {
   if (RuntimeOption::EvalNoticeOnImplicitInvokeToString) {
     raiseImplicitInvokeToString();
   }
+  CoeffectsAutoGuard _;
   auto const tv = g_context->invokeMethod(this, method, InvokeArgs{},
                                           RuntimeCoeffects::automatic());
   if (!isStringType(tv.m_type) &&

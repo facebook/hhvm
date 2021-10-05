@@ -78,12 +78,11 @@ struct CoeffectsAutoGuard {
   CoeffectsAutoGuard();
   ~CoeffectsAutoGuard();
 
-  static Optional<RuntimeCoeffects>& savedState();
-  static bool& available();
-
 private:
   Optional<RuntimeCoeffects> savedCoeffects;
-  bool savedAvailable;
+#ifndef NDEBUG
+  int savedDepth;
+#endif
 };
 
 struct StaticCoeffects {

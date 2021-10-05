@@ -66,8 +66,6 @@ struct VMState {
   jit::TCA jitReturnAddr;
   Either<ObjectData*, Exception*> exn;
   bool unwinderSideEnter;
-  bool savedCoeffectsAvailable;
-  Optional<RuntimeCoeffects> savedAutoCoeffects;
 };
 
 enum class InclOpFlags {

@@ -299,10 +299,11 @@ RuntimeCoeffects emitCaller(RuntimeCoeffects provided) {
 }
 
 RDS_LOCAL(Optional<RuntimeCoeffects>, autoCoeffects);
-RDS_LOCAL(bool, autoCoeffectsAvailable);
+#ifndef NDEBUG
+RDS_LOCAL(size_t, coeffectGuardedDepth);
+#endif
 
 RuntimeCoeffects computeAutomaticCoeffects() {
-  if (!CoeffectsConfig::enabled()) return RuntimeCoeffects::none();
   // Return the coeffects corresponding to the leaf VM frame. If there is no
   // such frame, return default coeffects.
   return fromLeafUnpublished([](const ActRec* fp, const ActRec* realFp, Offset off) {
@@ -324,29 +325,26 @@ RuntimeCoeffects computeAutomaticCoeffects() {
 CoeffectsAutoGuard::CoeffectsAutoGuard() {
   if (!CoeffectsConfig::enabled()) return;
   savedCoeffects = *autoCoeffects;
-  savedAvailable = *autoCoeffectsAvailable;
-  *autoCoeffectsAvailable = true;
   *autoCoeffects = std::nullopt;
+#ifndef NDEBUG
+  savedDepth = *coeffectGuardedDepth;
+  *coeffectGuardedDepth = g_context->m_nesting + 1;
+#endif
 }
 
 CoeffectsAutoGuard::~CoeffectsAutoGuard() {
   if (!CoeffectsConfig::enabled()) return;
   *autoCoeffects = savedCoeffects;
-  *autoCoeffectsAvailable = savedAvailable;
-}
-
-Optional<RuntimeCoeffects>& CoeffectsAutoGuard::savedState() {
-  return *autoCoeffects;
-}
-
-bool& CoeffectsAutoGuard::available() {
-  return *autoCoeffectsAvailable;
+#ifndef NDEBUG
+  *coeffectGuardedDepth = savedDepth;
+#endif
 }
 
 RuntimeCoeffects RuntimeCoeffects::automatic() {
-  if (!*autoCoeffectsAvailable) {
-    return computeAutomaticCoeffects();
-  }
+  if (!CoeffectsConfig::enabled()) return RuntimeCoeffects::none();
+#ifndef NDEBUG
+  assertx(*coeffectGuardedDepth == g_context->m_nesting + 1);
+#endif
   if (autoCoeffects->has_value()) {
     return **autoCoeffects;
   }

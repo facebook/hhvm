@@ -162,9 +162,9 @@ let rpc_remote_execution : type a. a t -> ReEnv.t option = function
   | STATUS_REMOTE_EXECUTION (mode, _) ->
     let re_env =
       if String.equal mode "warm" then
-        Re.initialize_lease ~acquire_new_lease:false ~num_re_workers_opt:None
+        Re.initialize_lease false ~num_re_workers_opt:None
       else if String.equal mode "cold" then
-        Re.initialize_lease ~acquire_new_lease:true ~num_re_workers_opt:None
+        Re.initialize_lease true ~num_re_workers_opt:None
       else
         failwith
           "Invalid argument to --remote-execution. Please specify \"cold\" or \"warm\""

@@ -28,9 +28,7 @@ let go errors ctx =
     state_filename;
   let dep_edges =
     if dep_table_edges_added > 0 then (
-      let result =
-        Cas.upload_directory config ~timeout:3600 ~dir:(Path.make dir)
-      in
+      let result = Cas.upload_directory ~config ~timeout:3600 (Path.make dir) in
       match result with
       | Ok { Cas.digest; _ } -> Cas.to_string digest
       | Error (Cas.Parse_failure error)

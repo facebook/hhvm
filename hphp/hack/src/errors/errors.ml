@@ -3947,13 +3947,41 @@ let non_object_member
   let (claim, reasons) = non_object_member_messages kind s ty pos2 in
   on_error ~code:(Typing.err_code code) (pos1, claim) reasons
 
-let non_object_member_read_ = non_object_member_ Typing.NonObjectMemberRead
+let non_object_member_read_
+    ~(kind : [< `property | `method_ | `class_typeconst ])
+    s
+    pos1
+    ty
+    pos2
+    on_error =
+  non_object_member_ Typing.NonObjectMemberRead ~kind s pos1 ty pos2 on_error
 
-let non_object_member_write_ = non_object_member_ Typing.NonObjectMemberRead
+let non_object_member_write_
+    ~(kind : [< `property | `method_ | `class_typeconst ])
+    s
+    pos1
+    ty
+    pos2
+    on_error =
+  non_object_member_ Typing.NonObjectMemberRead ~kind s pos1 ty pos2 on_error
 
-let non_object_member_read = non_object_member Typing.NonObjectMemberRead
+let non_object_member_read
+    ~(kind : [< `property | `method_ | `class_typeconst ])
+    s
+    pos1
+    ty
+    pos2
+    on_error =
+  non_object_member Typing.NonObjectMemberRead ~kind s pos1 ty pos2 on_error
 
-let non_object_member_write = non_object_member Typing.NonObjectMemberRead
+let non_object_member_write
+    ~(kind : [< `property | `method_ | `class_typeconst ])
+    s
+    pos1
+    ty
+    pos2
+    on_error =
+  non_object_member Typing.NonObjectMemberRead ~kind s pos1 ty pos2 on_error
 
 let unknown_object_member ~is_method s pos r =
   let msg =

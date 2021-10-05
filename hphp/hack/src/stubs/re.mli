@@ -6,8 +6,7 @@
  *
  *)
 
-val initialize_lease :
-  ?num_re_workers_opt:int option -> acquire_new_lease:bool -> ReEnv.t
+val initialize_lease : ?num_re_workers_opt:int option -> bool -> ReEnv.t
 
 val process_files :
   ReEnv.t ->

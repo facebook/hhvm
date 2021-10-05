@@ -6,7 +6,7 @@
  *
  *)
 
-let initialize_lease ?num_re_workers_opt:_ ~acquire_new_lease:_ =
+let initialize_lease ?num_re_workers_opt:_ (_ : bool) =
   failwith "not implemented"
 
 let process_files

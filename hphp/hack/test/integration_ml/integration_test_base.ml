@@ -613,7 +613,7 @@ let save_state_incremental
     ?(store_decls_in_saved_state =
       ServerLocalConfig.(default.store_decls_in_saved_state))
     ~old_state_dir
-    ~new_state_dir =
+    new_state_dir =
   assert_no_errors env;
   genv :=
     {

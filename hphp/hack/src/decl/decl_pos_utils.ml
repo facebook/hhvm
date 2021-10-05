@@ -32,8 +32,6 @@ struct
 
   let pos_or_decl = ImplementPos.pos_or_decl
 
-  let string_id (p, x) = (pos p, x)
-
   let positioned_id : Typing_defs.pos_id -> Typing_defs.pos_id =
    (fun (p, x) -> (pos_or_decl p, x))
 

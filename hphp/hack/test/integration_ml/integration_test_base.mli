@@ -35,7 +35,7 @@ val save_state_incremental :
   ServerEnv.env ->
   ?store_decls_in_saved_state:bool ->
   old_state_dir:string ->
-  new_state_dir:string ->
+  string ->
   SaveStateServiceTypes.save_state_result option
 
 val save_state_with_errors : disk_changes_type -> string -> string -> unit

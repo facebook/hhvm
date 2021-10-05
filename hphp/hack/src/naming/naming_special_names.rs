@@ -724,6 +724,8 @@ pub mod fb {
 
     pub const IDX: &str = "\\HH\\idx";
 
+    pub const IDXREADONLY: &str = "\\HH\\idx_readonly";
+
     pub const TYPE_STRUCTURE: &str = "\\HH\\TypeStructure";
 
     pub const INCORRECT_TYPE: &str = "\\HH\\INCORRECT_TYPE";

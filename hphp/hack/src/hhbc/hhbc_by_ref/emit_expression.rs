@@ -3658,7 +3658,7 @@ fn emit_call_expr<'a, 'arena, 'decl>(
             emit_call_isset_exprs(e, env, pos, args)
         }
         (E_::Id(id), args, None)
-            if id.1 == fb::IDX
+            if (id.1 == fb::IDX || id.1 == fb::IDXREADONLY)
                 && !jit_enable_rename_function
                 && (args.len() == 2 || args.len() == 3) =>
         {

@@ -1,0 +1,2 @@
+File "readonly_idx_3.php", line 11, characters 3-14:
+This expression is readonly, its members cannot be modified (Parsing[1002])

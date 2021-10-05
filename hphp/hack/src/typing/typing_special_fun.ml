@@ -62,7 +62,8 @@ let transform_idx_fun_ty : decl_fun_type -> int -> decl_fun_type =
 let transform_special_fun_ty : decl_fun_type -> Aast.sid -> int -> decl_fun_type
     =
  fun fty id nargs ->
-  if String.equal (snd id) SN.FB.idx then
+  if String.equal (snd id) SN.FB.idx || String.equal (snd id) SN.Readonly.idx
+  then
     transform_idx_fun_ty fty nargs
   else
     fty

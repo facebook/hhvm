@@ -84,6 +84,7 @@ let funcs =
     "heapgraph_node";
     "heapgraph_stats";
     "idx";
+    "idx_readonly";
     "inst_meth";
     "invariant_callback_register";
     "invariant_violation";

@@ -816,6 +816,8 @@ end
 module Readonly = struct
   let prefix = "\\HH\\Readonly\\"
 
+  let idx = "\\HH\\idx_readonly"
+
   let as_mut = prefix ^ "as_mut"
 end
 

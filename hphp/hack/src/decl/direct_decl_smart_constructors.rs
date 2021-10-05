@@ -245,7 +245,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         self.const_refs = Some(arena_collections::set::Set::empty());
     }
 
-    fn accumulate_const_ref(&mut self, class_id: &'a aast::ClassId<(), ()>, value_id: &Id<'a>) {
+    fn accumulate_const_ref(&mut self, class_id: &'a aast::ClassId<'_, (), ()>, value_id: &Id<'a>) {
         // The decl for a class constant stores a list of all the scope-resolution expressions
         // it contains. For example "const C=A::X" stores A::X, and "const D=self::Y" stores self::Y.
         // (This is so we can detect cross-type circularity in constant initializers).
@@ -282,7 +282,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         self.const_refs = None;
         match const_refs {
             Some(const_refs) => {
-                let mut elements: Vec<typing_defs::ClassConstRef> =
+                let mut elements: Vec<'_, typing_defs::ClassConstRef<'_>> =
                     bumpalo::collections::Vec::with_capacity_in(const_refs.count(), self.arena);
                 elements.extend(const_refs.into_iter());
                 elements.into_bump_slice()
@@ -745,7 +745,7 @@ mod fixed_width_token {
     }
 
     impl std::fmt::Debug for FixedWidthToken {
-        fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
+        fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
             fmt.debug_struct("FixedWidthToken")
                 .field("kind", &self.kind())
                 .field("offset", &self.offset())
@@ -1439,7 +1439,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         is_method: bool,
         attributes: Node<'a>,
         header: &'a FunctionHeader<'a>,
-        body: Node,
+        body: Node<'_>,
     ) -> Option<(PosId<'a>, &'a Ty<'a>, &'a [ShallowProp<'a>])> {
         let id_opt = match (is_method, header.name) {
             (true, Node::Token(t)) if t.kind() == TokenKind::Construct => {
@@ -1739,7 +1739,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         // OCaml decl creates a capability with a hint pointing to the entire
         // type (i.e., pointing to `Rx<(function(): void)>` rather than just
         // `(function(): void)`), so we extend the hint position similarly here.
-        let extend_capability_pos = |implicit_params: &'a FunImplicitParams| {
+        let extend_capability_pos = |implicit_params: &'a FunImplicitParams<'_>| {
             let capability = match implicit_params.capability {
                 CapTy(ty) => {
                     let ty = self.alloc(Ty(self.alloc(Reason::hint(pos)), ty.1));
@@ -1920,7 +1920,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         })
     }
 
-    fn namespace_use_kind(use_kind: &Node) -> Option<NamespaceUseKind> {
+    fn namespace_use_kind(use_kind: &Node<'_>) -> Option<NamespaceUseKind> {
         match use_kind.token_kind() {
             Some(TokenKind::Const) => None,
             Some(TokenKind::Function) => None,
@@ -2009,7 +2009,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         // `Tapply "$f"`), add a type parameter named `Tctx$f`, and rewrite the
         // parameter `(function (ts)[_]: t) $f` as `(function (ts)[Tctx$f]: t) $f`
         let rewrite_fun_ctx =
-            |tparams: &mut Vec<&'a Tparam<'a>>, ty: &Ty<'a>, param_name: &str| -> Ty<'a> {
+            |tparams: &mut Vec<'_, &'a Tparam<'a>>, ty: &Ty<'a>, param_name: &str| -> Ty<'a> {
                 let ft = match ty.1 {
                     Ty_::Tfun(ft) => ft,
                     _ => return ty.clone(),
@@ -2043,8 +2043,8 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         //   - add a type parameter `T/[$g::C]`
         //   - add a where constraint `T/[$g::C] = T$g :: C`
         let rewrite_arg_ctx = |
-            tparams: &mut Vec<&'a Tparam<'a>>,
-            where_constraints: &mut Vec<&'a WhereConstraint<'a>>,
+            tparams: &mut Vec<'_, &'a Tparam<'a>>,
+            where_constraints: &mut Vec<'_, &'a WhereConstraint<'a>>,
             ty: &Ty<'a>,
             param_pos: &'a Pos<'a>,
             name: &str,
@@ -2240,7 +2240,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
     }
 }
 
-enum NodeIterHelper<'a: 'b, 'b> {
+enum NodeIterHelper<'a, 'b> {
     Empty,
     Single(&'b Node<'a>),
     Vec(std::slice::Iter<'b, Node<'a>>),

@@ -20,7 +20,7 @@ pub trait NodeImpl {
     fn use_node() -> TokenStream;
     fn use_visitor() -> TokenStream;
 
-    fn gen(ctx: &Context) -> Result<TokenStream> {
+    fn gen(ctx: &Context<'_>) -> Result<TokenStream> {
         let impls = ctx
             .non_alias_types()
             .map(|ty| {
@@ -47,7 +47,7 @@ pub trait NodeImpl {
         })
     }
 
-    fn gen_node_impl(ctx: &Context, ty_name: &str, ty_def: &syn::Item) -> Result<TokenStream> {
+    fn gen_node_impl(ctx: &Context<'_>, ty_name: &str, ty_def: &syn::Item) -> Result<TokenStream> {
         let recurse_body = Self::gen_recurse_body(ctx, ty_name, ty_def)?;
         let visit_fn = visitor_trait_generator::gen_visit_fn_name(ty_name);
         let ty_name = format_ident!("{}", ty_name);
@@ -81,12 +81,12 @@ pub trait NodeImpl {
         })
     }
 
-    fn try_simple_ty_param(ctx: &Context, ty: &syn::Type) -> Option<String> {
+    fn try_simple_ty_param(ctx: &Context<'_>, ty: &syn::Type) -> Option<String> {
         try_simple_type(ty).filter(|t| ctx.is_root_ty_param(t))
     }
 
     fn try_gen_simple_ty_param_visit_call(
-        ctx: &Context,
+        ctx: &Context<'_>,
         ty: &syn::Type,
         accessor: TokenStream,
     ) -> Option<TokenStream> {
@@ -99,7 +99,7 @@ pub trait NodeImpl {
             })
     }
 
-    fn gen_recurse_body(ctx: &Context, ty_name: &str, ty: &syn::Item) -> Result<TokenStream> {
+    fn gen_recurse_body(ctx: &Context<'_>, ty_name: &str, ty: &syn::Item) -> Result<TokenStream> {
         use syn::{Item::*, *};
         match ty {
             Struct(ItemStruct { fields, .. }) => match fields {

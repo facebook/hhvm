@@ -45,7 +45,7 @@ impl DepGraphOpener {
     }
 
     /// Open the dependency graph, or return an error description.
-    pub fn open(&self) -> Result<DepGraph, String> {
+    pub fn open(&self) -> Result<DepGraph<'_>, String> {
         DepGraph::from_mmap(&self.mmap)
     }
 }
@@ -97,7 +97,7 @@ impl<'bytes> DepGraph<'bytes> {
                         list_offset as usize..,
                         "hash list data during validation",
                     )?;
-                    let _: HashList = HashList::new(data)?;
+                    let _: HashList<'_> = HashList::new(data)?;
                 }
                 None => {}
             }

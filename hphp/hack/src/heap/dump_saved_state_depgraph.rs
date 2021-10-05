@@ -35,12 +35,12 @@ impl std::convert::From<std::io::Error> for Error {
 type Result<T> = std::result::Result<T, Error>;
 
 /// Retrieve the `key_vertex` column of a row.
-fn key_vertex(row: &rusqlite::Row) -> Result<u32> {
+fn key_vertex(row: &rusqlite::Row<'_>) -> Result<u32> {
     Ok(row.get(0)?)
 }
 
 /// Retrieve the `value_vertex` column of a row.
-fn value_vertex(row: &rusqlite::Row) -> Result<std::collections::BTreeSet<u32>> {
+fn value_vertex(row: &rusqlite::Row<'_>) -> Result<std::collections::BTreeSet<u32>> {
     let data: Vec<u8> = row.get(1)?;
     Ok(data
         .chunks_exact(std::mem::size_of::<u32>())
@@ -256,7 +256,7 @@ fn comp_depgraph32(
 /// Retrieve the adjacency list for `k` in `g`.
 ///
 /// This is the analog of `value_vertex` for 64-bit depgraphs.
-fn hashes(g: &depgraph::reader::DepGraph, k: u64) -> std::collections::BTreeSet<u64> {
+fn hashes(g: &depgraph::reader::DepGraph<'_>, k: u64) -> std::collections::BTreeSet<u64> {
     match g.hash_list_for(depgraph::dep::Dep::new(k)) {
         None => std::collections::BTreeSet::<u64>::new(),
         Some(hashes) => g.hash_list_hashes(hashes).map(|x| x.into()).collect(),

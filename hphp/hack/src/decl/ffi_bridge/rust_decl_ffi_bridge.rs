@@ -38,9 +38,9 @@ mod decl_ffi {
             bump: &'a Bump,
         ) -> DeclResult<'a>;
 
-        fn hackc_print_decls(decls: &Decls);
+        fn hackc_print_decls(decls: &Decls<'_>);
         fn hackc_print_serialized_size(bytes: &Bytes);
-        unsafe fn hackc_verify_deserialization(serialized: &Bytes, expected: &Decls) -> bool;
+        unsafe fn hackc_verify_deserialization(serialized: &Bytes, expected: &Decls<'_>) -> bool;
     }
 }
 

@@ -15,7 +15,7 @@ pub fn make_locl<'a>(
     // TODO(hrust)
     let mut substs = SMap::empty();
     for tparam in tparams {
-        let targ_ty: &Ty = match targs.next() {
+        let targ_ty: &Ty<'_> = match targs.next() {
             Some(ty) => ty,
             None => bld.any(bld.mk_rnone()),
         };

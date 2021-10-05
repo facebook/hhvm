@@ -2096,6 +2096,8 @@ void RuntimeOption::Load(
       // Debugger (part of Eval)
       Config::Bind(EnableHphpdDebugger, ini, config,
                    "Eval.Debugger.EnableDebugger");
+      Config::Bind(EnableVSDebugger, ini, config,
+                   "Eval.Debugger.VSDebugEnable", EnableVSDebugger);
       Config::Bind(EnableDebuggerColor, ini, config,
                    "Eval.Debugger.EnableDebuggerColor", true);
       Config::Bind(EnableDebuggerPrompt, ini, config,

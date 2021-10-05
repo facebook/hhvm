@@ -61,9 +61,7 @@ list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/fatal")
 
 add_subdirectory(brotli) # Required by fizz
 add_subdirectory(fizz)
-
-list(APPEND THIRD_PARTY_MODULES wangle)
-list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/wangle/src")
+add_subdirectory(wangle)
 
 list(APPEND THIRD_PARTY_MODULES proxygen)
 list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/proxygen/src")

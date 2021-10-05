@@ -1070,6 +1070,12 @@ pub fn invalid_readonly(r1: &str, r2: &str, reason: &str) -> Error {
     ))
 }
 
+pub const inout_readonly_assignment: Error =
+    Cow::Borrowed("Cannot write a readonly value to an inout parameter");
+
+pub const inout_readonly_parameter: Error =
+    Cow::Borrowed("Inout readonly parameters are not currently supported");
+
 pub const enum_class_constant_missing_initializer: Error =
     Cow::Borrowed("Concrete enum class constants must have an initial value");
 

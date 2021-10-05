@@ -10,14 +10,14 @@ use oxidized::{
     aast,
     aast_visitor::{visit_mut, AstParams, NodeMut, VisitorMut},
     ast::*,
-    local_id,
+    ast_defs, local_id,
     pos::Pos,
 };
 use parser_core_types::{
     syntax_error,
     syntax_error::{Error as ErrorMsg, SyntaxError},
 };
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 // Local environment which keeps track of how many readonly values it has
 #[derive(PartialEq, Clone)]
@@ -67,6 +67,7 @@ struct Context {
     locals: Lenv,
     readonly_return: Rty,
     this_ty: Rty,
+    inout_params: HashSet<String>,
 }
 
 impl Context {
@@ -75,11 +76,19 @@ impl Context {
             locals: Lenv::new(),
             readonly_return: readonly_ret,
             this_ty,
+            inout_params: HashSet::new(),
         }
     }
 
     pub fn add_local(&mut self, var_name: &String, rty: Rty) {
         self.locals.insert(var_name.clone(), rty);
+    }
+
+    pub fn add_param(&mut self, var_name: &String, rty: Rty, inout_param: bool) {
+        self.locals.insert(var_name.clone(), rty);
+        if inout_param {
+            self.inout_params.insert(var_name.clone());
+        }
     }
 
     pub fn get_rty(&self, var_name: &String) -> Rty {
@@ -359,6 +368,9 @@ fn check_assignment_validity(
         aast::Expr_::Lvar(id_orig) => {
             let var_name = local_id::get_name(&id_orig.1).to_string();
             let rhs_rty = rty_expr(context, &rhs);
+            if context.inout_params.contains(&var_name) && rhs_rty == Rty::Readonly {
+                checker.add_error(pos, syntax_error::inout_readonly_assignment);
+            }
             context.add_local(&var_name, rhs_rty);
         }
         // list assignment
@@ -463,10 +475,17 @@ impl<'ast> VisitorMut<'ast> for Checker {
         let mut context = Context::new(readonly_return, readonly_this);
 
         for p in m.params.iter() {
+            let is_inout = match p.callconv {
+                ast_defs::ParamKind::Pinout(_) => true,
+                _ => false,
+            };
             if let Some(_) = p.readonly {
-                context.add_local(&p.name, Rty::Readonly)
+                if is_inout {
+                    self.add_error(&p.pos, syntax_error::inout_readonly_parameter);
+                }
+                context.add_param(&p.name, Rty::Readonly, is_inout)
             } else {
-                context.add_local(&p.name, Rty::Mutable)
+                context.add_param(&p.name, Rty::Mutable, is_inout)
             }
         }
         m.recurse(&mut context, self.object())
@@ -486,10 +505,17 @@ impl<'ast> VisitorMut<'ast> for Checker {
             }
         }
         for p in f.params.iter() {
+            let is_inout = match p.callconv {
+                ast_defs::ParamKind::Pinout(_) => true,
+                _ => false,
+            };
             if let Some(_) = p.readonly {
-                new_context.add_local(&p.name, Rty::Readonly)
+                if is_inout {
+                    self.add_error(&p.pos, syntax_error::inout_readonly_parameter)
+                }
+                new_context.add_param(&p.name, Rty::Readonly, is_inout)
             } else {
-                new_context.add_local(&p.name, Rty::Mutable)
+                new_context.add_param(&p.name, Rty::Mutable, is_inout)
             }
         }
         f.recurse(&mut new_context, self.object())

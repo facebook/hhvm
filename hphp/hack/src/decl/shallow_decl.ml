@@ -133,14 +133,9 @@ let typeconst env c tc =
             atc_super_constraint = Option.map ~f:(Decl_hint.hint env) s;
             atc_default = Option.map ~f:(Decl_hint.hint env) d;
           }
+      | Aast.TCPartiallyAbstract { c_patc_constraint = _; c_patc_type = t }
       | Aast.TCConcrete { c_tc_type = t } ->
         Typing_defs.TCConcrete { tc_type = Decl_hint.hint env t }
-      | Aast.TCPartiallyAbstract { c_patc_constraint = c; c_patc_type = t } ->
-        Typing_defs.TCPartiallyAbstract
-          {
-            patc_constraint = Decl_hint.hint env c;
-            patc_type = Decl_hint.hint env t;
-          }
     in
     let attributes = tc.c_tconst_user_attributes in
     let enforceable =

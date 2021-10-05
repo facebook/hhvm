@@ -2158,20 +2158,12 @@ let handle_mode
                    Option.map default ~f:(fun ty -> "= " ^ ty_to_string ty);
                  ]
                  ~f:(fun x -> x))
-          | TCPartiallyAbstract { patc_constraint; patc_type } ->
-            String.concat
-              ~sep:" "
-              [
-                "as " ^ ty_to_string patc_constraint;
-                "= " ^ ty_to_string patc_type;
-              ]
         in
         let abstract =
           Typing_defs.(
             match ttc.ttc_kind with
             | TCConcrete _ -> ""
-            | TCAbstract _ -> "abstract "
-            | TCPartiallyAbstract _ -> "partially abstract ")
+            | TCAbstract _ -> "abstract ")
         in
         Printf.printf "  %stypeconst%s: %s %s\n" abstract from mid ty);
       ())

@@ -154,20 +154,7 @@ let add_typeconst name sig_ typeconsts =
      *
      * Then C::T == I2::T since I2::T is not abstract
      *)
-    | (TCConcrete _, TCAbstract _)
-    | (TCPartiallyAbstract _, TCAbstract _) ->
-      typeconsts
-    (* This covers the following case
-     *
-     * abstract P { const type T as arraykey = arraykey; }
-     * interface I { const type T = int; }
-     *
-     * class C extends P implements I {}
-     *
-     * Then C::T == I::T since P::T has a constraint and thus can be overridden
-     * by it's child, while I::T cannot be overridden.
-     *)
-    | (TCConcrete _, TCPartiallyAbstract _) -> typeconsts
+    | (TCConcrete _, TCAbstract _) -> typeconsts
     (* This covers the following case
      *
      * interface I {

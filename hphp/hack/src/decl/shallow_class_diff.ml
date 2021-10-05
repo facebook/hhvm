@@ -73,11 +73,9 @@ let diff_typeconst tc1 tc2 : member_change option =
     let open Typing_defs in
     match (tc1.stc_kind, tc2.stc_kind) with
     | (TCAbstract _, TCAbstract _)
-    | (TCPartiallyAbstract _, TCPartiallyAbstract _)
     | (TCConcrete _, TCConcrete _) ->
       Some Modified
-    | (_, (TCAbstract _ | TCPartiallyAbstract _ | TCConcrete _)) ->
-      Some Changed_inheritance
+    | (_, (TCAbstract _ | TCConcrete _)) -> Some Changed_inheritance
 
 let diff_prop p1 p2 : member_change option =
   let p1 = Decl_pos_utils.NormalizeSig.shallow_prop p1 in

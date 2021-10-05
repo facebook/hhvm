@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1349ab00c27f52a96d2918accca230f8>>
+// @generated SignedSource<<2ba43390283762000cb66b5dad9dbb17>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -442,24 +442,6 @@ impl<'a> Node<'a> for NegType<'a> {
         match self {
             NegType::NegPrim(ref __binding_0) => __binding_0.accept(v),
             NegType::NegClass(ref __binding_0) => __binding_0.accept(v),
-        }
-    }
-}
-impl<'a> Node<'a> for PartiallyAbstractTypeconst<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_partially_abstract_typeconst(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            PartiallyAbstractTypeconst {
-                constraint: ref __binding_0,
-                type_: ref __binding_1,
-            } => {
-                {
-                    __binding_0.accept(v)
-                }
-                { __binding_1.accept(v) }
-            }
         }
     }
 }
@@ -1072,7 +1054,6 @@ impl<'a> Node<'a> for Typeconst<'a> {
         match self {
             Typeconst::TCAbstract(ref __binding_0) => __binding_0.accept(v),
             Typeconst::TCConcrete(ref __binding_0) => __binding_0.accept(v),
-            Typeconst::TCPartiallyAbstract(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }

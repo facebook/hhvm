@@ -115,7 +115,6 @@ and partially_abstract_typeconst = {
 and typeconst =
   | TCAbstract of abstract_typeconst
   | TCConcrete of concrete_typeconst
-  | TCPartiallyAbstract of partially_abstract_typeconst
 
 and typeconst_type = {
   ttc_synthesized: bool;

@@ -48,7 +48,6 @@ let member_type env member_ce =
                 * type constants as a value *)
                match t.ttc_kind with
                | TCConcrete { tc_type = t }
-               | TCPartiallyAbstract { patc_type = t; _ }
                | TCAbstract { atc_default = Some t; _ } ->
                  Some t
                | TCAbstract { atc_default = None; _ } -> None)
@@ -143,7 +142,6 @@ let enum_class_check env tc consts const_types =
          * type constants as a value *)
         match t.ttc_kind with
         | TCConcrete { tc_type = t }
-        | TCPartiallyAbstract { patc_type = t; _ }
         | TCAbstract { atc_default = Some t; _ } ->
           Some t
         | TCAbstract { atc_default = None; _ } -> None)

@@ -1576,8 +1576,6 @@ module PrintClass = struct
     let type_info =
       match kind with
       | TCConcrete { tc_type = t } -> Printf.sprintf " = %s" (ty t)
-      | TCPartiallyAbstract { patc_constraint = c; patc_type = t } ->
-        Printf.sprintf " as %s = %s" (ty c) (ty t)
       | TCAbstract
           { atc_as_constraint = a; atc_super_constraint = s; atc_default = d }
         ->

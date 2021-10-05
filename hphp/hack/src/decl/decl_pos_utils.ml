@@ -225,9 +225,6 @@ struct
           atc_super_constraint = ty_opt atc_super_constraint;
           atc_default = ty_opt atc_default;
         }
-    | TCPartiallyAbstract { patc_constraint; patc_type } ->
-      TCPartiallyAbstract
-        { patc_constraint = ty patc_constraint; patc_type = ty patc_type }
     | TCConcrete { tc_type } -> TCConcrete { tc_type = ty tc_type }
 
   and typeconst_type tc =

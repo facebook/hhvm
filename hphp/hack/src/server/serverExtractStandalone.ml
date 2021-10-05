@@ -725,10 +725,6 @@ end = struct
                 | TCConcrete { tc_type } ->
                   add_dep ctx ~this:(Some class_name) env tc_type;
                   if not (List.is_empty tconsts) then add_cstr_dep tc_type
-                | TCPartiallyAbstract
-                    { patc_constraint = _ (* TODO *); patc_type } ->
-                  add_dep ctx ~this:(Some class_name) env patc_type;
-                  if not (List.is_empty tconsts) then add_cstr_dep patc_type
                 | TCAbstract
                     {
                       atc_as_constraint;
@@ -832,9 +828,6 @@ end = struct
               let open Typing_defs in
               (match ttc_kind with
               | TCConcrete { tc_type } -> add_dep tc_type
-              | TCPartiallyAbstract { patc_type; patc_constraint } ->
-                add_dep patc_type;
-                add_dep patc_constraint
               | TCAbstract
                   {
                     atc_default = _;

@@ -436,7 +436,6 @@ and class_decl
          * only need abstract without default and concrete type consts *)
         match t.ttc_kind with
         | TCConcrete { tc_type } -> Some tc_type
-        | TCPartiallyAbstract { patc_type; _ } -> Some patc_type
         | TCAbstract { atc_default; _ } -> atc_default)
       ~get_ancestor:(fun x -> SMap.find_opt x impl)
       consts

@@ -43,9 +43,9 @@ use oxidized_by_ref::{
     typing_defs::{
         self, AbstractTypeconst, Capability::*, ClassConstKind, ConcreteTypeconst, ConstDecl,
         Enforcement, EnumType, FunArity, FunElt, FunImplicitParams, FunParam, FunParams, FunType,
-        IfcFunDecl, ParamMode, PartiallyAbstractTypeconst, PosByteString, PosId, PosString,
-        PossiblyEnforcedTy, RecordFieldReq, ShapeFieldType, ShapeKind, TaccessType, Tparam,
-        TshapeFieldName, Ty, Ty_, Typeconst, TypedefType, WhereConstraint, XhpAttrTag,
+        IfcFunDecl, ParamMode, PosByteString, PosId, PosString, PossiblyEnforcedTy, RecordFieldReq,
+        ShapeFieldType, ShapeKind, TaccessType, Tparam, TshapeFieldName, Ty, Ty_, Typeconst,
+        TypedefType, WhereConstraint, XhpAttrTag,
     },
     typing_defs_flags::{FunParamFlags, FunTypeFlags},
     typing_reason::Reason,
@@ -5006,20 +5006,11 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             }))
         } else {
             if let Some(t) = type_ {
-                if let Some(constraint) = as_constraint {
-                    // Partially abstract type constant:
-                    //     const type T as X = Z;
-                    Typeconst::TCPartiallyAbstract(self.alloc(PartiallyAbstractTypeconst {
-                        constraint,
-                        type_: t,
-                    }))
-                } else {
-                    // Concrete type constant:
-                    //     const type T = Z;
-                    Typeconst::TCConcrete(self.alloc(ConcreteTypeconst { tc_type: t }))
-                }
+                // Concrete type constant:
+                //     const type T = Z;
+                Typeconst::TCConcrete(self.alloc(ConcreteTypeconst { tc_type: t }))
             } else {
-                // concrete or partially abstract type constant requires a value
+                // concrete or type constant requires a value
                 return Node::Ignored(SK::TypeConstDeclaration);
             }
         };

@@ -172,7 +172,6 @@ and partially_abstract_typeconst = {
 and typeconst =
   | TCAbstract of abstract_typeconst
   | TCConcrete of concrete_typeconst
-  | TCPartiallyAbstract of partially_abstract_typeconst
 
 and typeconst_type = {
   ttc_synthesized: bool;
@@ -1139,17 +1138,11 @@ let equal_abstract_typeconst at1 at2 =
        at2.atc_super_constraint
   && Option.equal equal_decl_ty at1.atc_default at2.atc_default
 
-let equal_partially_abstract_typeconst pat1 pat2 =
-  equal_decl_ty pat1.patc_constraint pat2.patc_constraint
-  && equal_decl_ty pat1.patc_type pat2.patc_type
-
 let equal_concrete_typeconst ct1 ct2 = equal_decl_ty ct1.tc_type ct2.tc_type
 
 let equal_typeconst t1 t2 =
   match (t1, t2) with
   | (TCAbstract at1, TCAbstract at2) -> equal_abstract_typeconst at1 at2
-  | (TCPartiallyAbstract pat1, TCPartiallyAbstract pat2) ->
-    equal_partially_abstract_typeconst pat1 pat2
   | (TCConcrete ct1, TCConcrete ct2) -> equal_concrete_typeconst ct1 ct2
   | _ -> false
 

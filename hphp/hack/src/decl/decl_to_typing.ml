@@ -204,9 +204,7 @@ let typeconst_structure mro class_name stc =
       CCConcrete
     | TCAbstract { atc_default = default; _ } ->
       CCAbstract (Option.is_some default)
-    | TCPartiallyAbstract _
-    | TCConcrete _ ->
-      CCConcrete
+    | TCConcrete _ -> CCConcrete
   in
   ( snd stc.stc_name,
     {

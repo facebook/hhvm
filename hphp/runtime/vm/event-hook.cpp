@@ -304,7 +304,7 @@ void runUserProfilerOnFunctionEnter(const ActRec* ar, bool isResume) {
 
   ImplicitContext::Saver s;
   g_context->invokeFunc(func, params, ctx.this_, ctx.cls,
-                        RuntimeCoeffects::none(), ctx.dynamic);
+                        RuntimeCoeffects::defaults(), ctx.dynamic);
 }
 
 void runUserProfilerOnFunctionExit(const ActRec* ar, const TypedValue* retval,
@@ -339,7 +339,7 @@ void runUserProfilerOnFunctionExit(const ActRec* ar, const TypedValue* retval,
 
   ImplicitContext::Saver s;
   g_context->invokeFunc(func, params, ctx.this_, ctx.cls,
-                        RuntimeCoeffects::none(), ctx.dynamic);
+                        RuntimeCoeffects::defaults(), ctx.dynamic);
 }
 
 static Variant call_intercept_handler(
@@ -376,7 +376,7 @@ static Variant call_intercept_handler(
   ImplicitContext::Saver s;
   auto ret = Variant::attach(
     g_context->invokeFunc(f, par.toVariant(), callCtx.this_, callCtx.cls,
-                          RuntimeCoeffects::none(), callCtx.dynamic)
+                          RuntimeCoeffects::defaults(), callCtx.dynamic)
   );
 
   auto& arr = ret.asCArrRef();
@@ -432,7 +432,7 @@ static Variant call_intercept_handler_callback(
   ImplicitContext::Saver s;
   return Variant::attach(
     g_context->invokeFunc(f, args, callCtx.this_, callCtx.cls,
-                          RuntimeCoeffects::none(),
+                          RuntimeCoeffects::defaults(),
                           callCtx.dynamic, false, false,
                           std::move(reifiedGenerics))
   );

@@ -647,6 +647,7 @@ module Typing = struct
     | ExpressionTreeNonPublicProperty [@value 4448]
     | CovariantIndexTypeMismatch [@value 4449]
     | InoutInPseudofunction [@value 4450]
+    | TraitParentConstructInconsistent [@value 4451]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

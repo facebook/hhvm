@@ -123,17 +123,20 @@ let callable body : constraint_ list =
   let env = block env body.A.fb_ast in
   env.constraints
 
-let walk_tast : Tast.program -> constraint_ list =
-  let def : T.def -> constraint_ list = function
+let walk_tast (tast : Tast.program) : constraint_ list SMap.t =
+  let def : T.def -> (string * constraint_ list) list = function
     | A.Fun fd ->
-      let A.{ f_body; _ } = fd.A.fd_fun in
-      callable f_body
-    | A.Class A.{ c_methods; _ } ->
-      let handle_method A.{ m_body; _ } = callable m_body in
-      List.concat_map ~f:handle_method c_methods
+      let A.{ f_body; f_name = (_, id); _ } = fd.A.fd_fun in
+      [(id, callable f_body)]
+    | A.Class A.{ c_methods; c_name = (_, class_name); _ } ->
+      let handle_method A.{ m_body; m_name = (_, method_name); _ } =
+        let id = class_name ^ "::" ^ method_name in
+        (id, callable m_body)
+      in
+      List.map ~f:handle_method c_methods
     | _ -> failwith "A definition is not yet handled"
   in
-  List.concat_map ~f:def
+  List.concat_map ~f:def tast |> SMap.of_list
 
 let analyse (options : options) (ctx : Provider_context.t) (tast : T.program) =
   let empty_typing_env =
@@ -149,8 +152,14 @@ let analyse (options : options) (ctx : Provider_context.t) (tast : T.program) =
     Format.printf "~Hints~\n";
     List.iter hints_to_modify ~f:log_pos
   | DumpConstraints ->
-    walk_tast tast
-    |> List.map ~f:(show_constraint_ empty_typing_env)
-    |> List.sort ~compare:String.compare
-    |> List.iter ~f:(Format.printf "%s\n")
+    let print_function_constraints
+        (id : string) (constraints : constraint_ list) : unit =
+      Format.printf "Constraints for %s:\n" id;
+      constraints
+      |> List.map ~f:(show_constraint_ empty_typing_env)
+      |> List.sort ~compare:String.compare
+      |> List.iter ~f:(Format.printf "%s\n");
+      Format.printf "\n"
+    in
+    walk_tast tast |> SMap.iter print_function_constraints
   | _ -> ()

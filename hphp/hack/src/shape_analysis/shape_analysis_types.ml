@@ -9,6 +9,6 @@
 type mode =
   | FlagTargets
   | DumpConstraints
-  | SolveConstraints
+  | SolveConstraints [@deriving eq]
 
 type options = { mode: mode }

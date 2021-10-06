@@ -12,3 +12,12 @@ type mode =
   | SolveConstraints [@deriving eq]
 
 type options = { mode: mode }
+
+type entity_ = Literal of Pos.t
+
+type entity = entity_ option
+
+type constraint_ =
+  | Exists of entity_
+  | Has_static_key of entity_ * Tast.expr_ * Typing_defs.locl_ty
+  | Has_dynamic_key of entity_

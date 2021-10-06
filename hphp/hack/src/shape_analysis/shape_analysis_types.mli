@@ -16,3 +16,15 @@ type mode =
           `shape`s along with the `shape` keys *)
 
 type options = { mode: mode }
+
+type entity_ = Literal of Pos.t
+
+type entity = entity_ option
+
+type constraint_ =
+  | Exists of entity_  (** Records existence of a dict *)
+  | Has_static_key of entity_ * Tast.expr_ * Typing_defs.locl_ty
+      (** Records the static key an entity is accessed with along with the Hack
+          type of the key *)
+  | Has_dynamic_key of entity_
+      (** Records that an entity is accessed with a dynamic key *)

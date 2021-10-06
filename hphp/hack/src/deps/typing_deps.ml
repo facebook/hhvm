@@ -127,7 +127,7 @@ module Dep = struct
 
   let extends_of_class x = x lxor 1
 
-  let compare = ( - )
+  let compare = Int.compare
 
   let extract_name : type a. a variant -> string = function
     | GConst s -> Utils.strip_ns s
@@ -258,7 +258,7 @@ end
 module DepHashKey = struct
   type t = Dep.t
 
-  let compare t1 t2 = t1 - t2
+  let compare = Int.compare
 
   let to_string t = string_of_int t
 end
@@ -523,9 +523,9 @@ module CustomGraph = struct
     type t = dep_edge
 
     let compare x y =
-      let d1 = x.idependent - y.idependent in
+      let d1 = Int.compare x.idependent y.idependent in
       if d1 = 0 then
-        x.idependency - y.idependency
+        Int.compare x.idependency y.idependency
       else
         d1
   end)

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<223a361031f0b3d0726a753205a29337>>
+// @generated SignedSource<<b717c28cd67f29252c2b6e22d99d8a00>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -824,8 +824,12 @@ pub enum Expr_<'a, Ex, En> {
     ///
     /// See also Dollardollar.
     ///
-    /// $foo |> bar() // equivalent: bar($foo)
-    /// $foo |> bar(1, $$) // equivalent: bar(1, $foo)
+    /// foo() |> bar(1, $$) // equivalent: bar(1, foo())
+    ///
+    /// $$ is not required on the RHS of pipe expressions, but it's
+    /// pretty pointless to use pipes without $$.
+    ///
+    /// foo() |> bar(); // equivalent: foo(); bar();
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Pipe(&'a (&'a Lid<'a>, &'a Expr<'a, Ex, En>, &'a Expr<'a, Ex, En>)),
     /// Ternary operator, or elvis operator.

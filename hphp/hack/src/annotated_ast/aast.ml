@@ -504,8 +504,12 @@ and ('ex, 'en) expr_ =
 
           See also Dollardollar.
 
-          $foo |> bar() // equivalent: bar($foo)
-          $foo |> bar(1, $$) // equivalent: bar(1, $foo) *)
+          foo() |> bar(1, $$) // equivalent: bar(1, foo())
+
+          $$ is not required on the RHS of pipe expressions, but it's
+          pretty pointless to use pipes without $$.
+
+          foo() |> bar(); // equivalent: foo(); bar(); *)
   | Eif of ('ex, 'en) expr * ('ex, 'en) expr option * ('ex, 'en) expr
       (** Ternary operator, or elvis operator.
 

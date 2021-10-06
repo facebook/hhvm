@@ -149,8 +149,8 @@ let analyse (options : options) (ctx : Provider_context.t) (tast : T.program) =
     Format.printf "~Hints~\n";
     List.iter hints_to_modify ~f:log_pos
   | DumpConstraints ->
-    let constraints = walk_tast tast in
-    List.iter
-      ~f:(fun c -> Format.printf "%s\n" (show_constraint_ empty_typing_env c))
-      constraints
+    walk_tast tast
+    |> List.map ~f:(show_constraint_ empty_typing_env)
+    |> List.sort ~compare:String.compare
+    |> List.iter ~f:(Format.printf "%s\n")
   | _ -> ()

@@ -1,7 +1,7 @@
 === Shape analysis results for literals.php
-[4:3-31] => b : bool
-[4:3-31] => a : int
 EX [4:3-31]
-[8:3-36] => c : string
-[8:3-36] => a : int
 EX [8:3-36]
+SK [4:3-31] => a : int
+SK [4:3-31] => b : bool
+SK [8:3-36] => a : int
+SK [8:3-36] => c : string

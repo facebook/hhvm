@@ -22,5 +22,5 @@ let show_constraint_ env =
   function
   | Exists entity -> "EX " ^ show_entity entity
   | Has_static_key (entity, key, ty) ->
-    show_entity entity ^ " => " ^ show_key key ^ " : " ^ show_ty ty
-  | Has_dynamic_key entity -> show_entity entity ^ " : dyn"
+    "SK " ^ show_entity entity ^ " => " ^ show_key key ^ " : " ^ show_ty ty
+  | Has_dynamic_key entity -> "DK " ^ show_entity entity ^ " : dyn"

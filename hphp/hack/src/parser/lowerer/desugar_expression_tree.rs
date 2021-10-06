@@ -1095,6 +1095,9 @@ fn rewrite_expr(
             let virtual_expr = Expr((), pos, ETSplice(Box::new(temp_variable)));
             (virtual_expr, desugar_expr)
         }
+        // Source: MyDsl`(...)->foo`
+        // Virtualized to: `(...)->foo`
+        // Desugared to `$0v->visitPropertyAccess(new ExprPos(...), ...), 'foo')`
         ObjGet(og) => {
             let (e1, e2, null_flavor, is_prop_call) = *og;
             if null_flavor == OgNullFlavor::OGNullsafe {
@@ -1128,7 +1131,7 @@ fn rewrite_expr(
         // Virtualized: <foo my-attr={MyDsl::stringType()}>{MyDsl::stringType()} <foo-child/> </foo>
         // Desugared:
         //   $0v->visitXhp(
-        //     newExprPos(...),
+        //     new ExprPos(...),
         //     :foo::class,
         //     dict["my-attr" => $0v->visitString(...)],
         //     vec[

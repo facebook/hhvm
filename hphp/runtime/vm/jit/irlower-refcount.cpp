@@ -553,7 +553,7 @@ void cgDecRef(IRLS& env, const IRInstruction *inst) {
           v.makeTuple({data, type}),
           v.makeTuple({rarg(0), rarg(1)})
         };
-        v << callfaststub{stub, makeFixup(inst->marker()), arg_regs(2)};
+        v << callfaststub{stub, arg_regs(2)};
       });
       return;
     }

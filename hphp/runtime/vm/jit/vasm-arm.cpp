@@ -808,7 +808,6 @@ void Vgen::emit(const callstub& i) {
 
 void Vgen::emit(const callfaststub& i) {
   emit(call{i.target, i.args});
-  emit(syncpoint{i.fix});
 }
 
 ///////////////////////////////////////////////////////////////////////////////

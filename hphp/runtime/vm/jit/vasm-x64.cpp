@@ -733,7 +733,6 @@ void Vgen<X64Asm>::emit(const callstub& i) {
 template<class X64Asm>
 void Vgen<X64Asm>::emit(const callfaststub& i) {
   emit(call{i.target, i.args});
-  emit(syncpoint{i.fix});
 }
 
 template<class X64Asm>

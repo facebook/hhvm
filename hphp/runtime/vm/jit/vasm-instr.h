@@ -113,7 +113,7 @@ struct Vunit;
   O(unstublogue, Inone, Un, Dn)\
   O(stubret, Inone, U(args), Dn)\
   O(callstub, I(target), U(args), Dn)\
-  O(callfaststub, I(fix), U(args), Dn)\
+  O(callfaststub, Inone, U(args), Dn)\
   O(tailcallstub, I(target), U(args), Dn)\
   O(tailcallstubr, Inone, U(target) U(args), Dn)\
   O(stubunwind, Inone, Un, D(d))\
@@ -708,10 +708,10 @@ struct callstub { CodeAddress target; RegSet args; };
 /*
  * Call a "fast" stub, a stub that preserves more registers than a normal call.
  *
- * It may still call C++ functions on a slow path (which is why there's a Fixup
- * operand) but it will save any required registers before doing so.
+ * It may still call C++ functions on a slow path, but it will save any required
+ * registers before doing so.
  */
-struct callfaststub { TCA target; Fixup fix; RegSet args; };
+struct callfaststub { TCA target; RegSet args; };
 
 /*
  * Make a direct tail call to another stub.

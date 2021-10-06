@@ -408,8 +408,6 @@ bool instrHasIndirectFixup(const Vinstr& inst) {
       return inst.vinvoke_.fixup.isIndirect();
     case Vinstr::syncpoint:
       return inst.syncpoint_.fix.isIndirect();
-    case Vinstr::callfaststub:
-      return inst.callfaststub_.fix.isIndirect();
     default:
       return false;
   }
@@ -431,9 +429,6 @@ void updateIndirectFixupBySpill(Vinstr& inst, size_t spillSize) {
       return;
     case Vinstr::syncpoint:
       update(inst.syncpoint_.fix);
-      return;
-    case Vinstr::callfaststub:
-      update(inst.callfaststub_.fix);
       return;
     default:
       always_assert(false);

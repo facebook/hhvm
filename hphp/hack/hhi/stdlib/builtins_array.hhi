@@ -99,27 +99,13 @@ function array_keys<Tk as arraykey>(
   KeyedContainer<Tk, mixed> $input,
 )[]: varray<Tk>;
 /**
- * array_map signature is rewritten based on the arity of the call:
+ * `array_map` previously had it's signature rewritten based on the arity of
+ * the call, to match runtime behaviors including:
+ * - Preserving the input container type
+ * - Allowing for `N` args and accepting a function of the same arity
  *
- * array_map(F, A1, A2, ..., An); becomes
- *
- * array_map<T1, ... Tn, Tr>(
- *   (function(T1, ..., Tn): Tr),
- *   Container<T1>,
- *   ...,
- *   Container<Tn>
- *): R;
- *
- * where for n > 1, R = array<Tr>
- * for n = 1, R depends on actual type of container passed at the call site:
- *
- * array                 -> R = array
- * array<X>              -> R = array<Tr>
- * array<X, Y>           -> R = array<X, Tr>
- * Vector<X>             -> R = array<Tr>
- * KeyedContainer<X, Y>  -> R = array<X, Tr>
- * Container<X>          -> R = array<arraykey, Tr>
- * X (unknown type)      -> R = Y (other unknown type)
+ * This runtime behavior still exists but this function is deprecated in favor
+ * of HSL functions like `Vec\map` or `Dict\map`.
  */
 <<__PHPStdLib>>
 function array_map<Tk as arraykey, Tin, Tout>(

@@ -23,12 +23,13 @@ val rpc_get_record_def : t -> string -> Typing_defs.record_def_type option
 
 val rpc_get_gconst : t -> string -> Typing_defs.const_decl option
 
-val rpc_get_gconst_path : t -> string -> Relative_path.t option
+val rpc_get_gconst_path :
+  t -> string -> (FileInfo.pos * FileInfo.name_type) option
 
-val rpc_get_fun_path : t -> string -> Relative_path.t option
+val rpc_get_fun_path : t -> string -> (FileInfo.pos * FileInfo.name_type) option
 
-val rpc_get_type_path_and_kind :
-  t -> string -> (Relative_path.t * Naming_types.kind_of_type) option
+val rpc_get_type_path :
+  t -> string -> (FileInfo.pos * FileInfo.name_type) option
 
 val rpc_get_fun_canon_name : t -> string -> string option
 

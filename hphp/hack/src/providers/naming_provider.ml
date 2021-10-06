@@ -130,8 +130,7 @@ let get_const_pos (ctx : Provider_context.t) (name : string) :
             |> Option.map ~f:(fun path -> (FileInfo.Const, path)))
         >>| attach_name_type_to_tuple
       | Provider_backend.Decl_service { decl; _ } ->
-        Decl_service_client.rpc_get_gconst_path decl name
-        |> Option.map ~f:(fun path -> FileInfo.(File (Const, path), Const)))
+        Decl_service_client.rpc_get_gconst_path decl name)
   >>| remove_name_type
 
 let const_exists (ctx : Provider_context.t) (name : string) : bool =
@@ -198,8 +197,7 @@ let get_fun_pos (ctx : Provider_context.t) (name : string) : FileInfo.pos option
             |> Option.map ~f:(fun path -> (FileInfo.Fun, path)))
         >>| attach_name_type_to_tuple
       | Provider_backend.Decl_service { decl; _ } ->
-        Decl_service_client.rpc_get_fun_path decl name
-        |> Option.map ~f:(fun path -> FileInfo.(File (Fun, path), Fun)))
+        Decl_service_client.rpc_get_fun_path decl name)
   >>| remove_name_type
 
 let fun_exists (ctx : Provider_context.t) (name : string) : bool =
@@ -392,14 +390,7 @@ let get_type_pos_and_kind (ctx : Provider_context.t) (name : string) :
                    (kind_to_name_type kind, path)))
         >>| fun (name_type, path) -> (FileInfo.File (name_type, path), name_type)
       | Provider_backend.Decl_service { decl; _ } ->
-        Decl_service_client.rpc_get_type_path_and_kind decl name
-        |> Option.map ~f:(fun (path, name_type) ->
-               match name_type with
-               | Naming_types.TClass -> FileInfo.(File (Class, path), Class)
-               | Naming_types.TTypedef ->
-                 FileInfo.(File (Typedef, path), Typedef)
-               | Naming_types.TRecordDef ->
-                 FileInfo.(File (RecordDef, path), RecordDef)))
+        Decl_service_client.rpc_get_type_path decl name)
   >>| fun (pos, name_type) -> (pos, name_type_to_kind name_type)
 
 let get_type_pos (ctx : Provider_context.t) (name : string) :

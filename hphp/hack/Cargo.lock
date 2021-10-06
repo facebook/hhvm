@@ -2834,6 +2834,7 @@ dependencies = [
  "ocamlrep",
  "ocamlrep_derive",
  "pretty_assertions",
+ "rusqlite",
  "serde",
  "static_assertions",
 ]

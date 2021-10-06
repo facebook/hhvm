@@ -1,0 +1,16 @@
+(library
+  (name shape_analysis)
+  (wrapped false)
+  (flags (:standard -linkall))
+  (modules
+    shape_analysis
+    shape_analysis_options
+    shape_analysis_types)
+  (libraries
+    core_kernel
+    provider_context
+    relative_path
+    tast
+    tast_provider)
+  (preprocess
+    (pps visitors.ppx ppx_deriving.std)))

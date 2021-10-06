@@ -31,6 +31,7 @@
     server_go_to
     server_highlight_refs
     server_symbol_info_service_utils
+    shape_analysis
     sys_utils
     tast
     tast_typecheck

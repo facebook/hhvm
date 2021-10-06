@@ -49,6 +49,7 @@ type mode =
   | Dump_glean_deps
   | Hover of (int * int) option
   | Apply_quickfixes
+  | Shape_analysis of string
 
 type options = {
   files: string list;
@@ -297,6 +298,12 @@ let parse_options () =
         " HHI file to parse and declare" );
       ( "--ifc",
         Arg.Tuple [Arg.String (fun m -> ifc_mode := m); Arg.String set_ifc],
+        " Run the flow analysis" );
+      ( "--shape-analysis",
+        Arg.String
+          (fun mode ->
+            batch_mode := true;
+            set_mode (Shape_analysis mode) ()),
         " Run the flow analysis" );
       ( "--deregister-attributes",
         Arg.Unit (set_bool deregister_attributes),
@@ -1594,6 +1601,48 @@ let handle_mode
   in
   let iter_over_files f : unit = List.iter filenames ~f in
   match mode with
+  | Shape_analysis mode ->
+    let opts =
+      match Shape_analysis_options.parse mode with
+      | Some options -> options
+      | None -> die "invalid shape analysis mode"
+    in
+    (* Process a single typechecked file *)
+    let process_file path info =
+      match info.FileInfo.file_mode with
+      | Some FileInfo.Mstrict ->
+        let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
+        let { Tast_provider.Compute_tast.tast; _ } =
+          Tast_provider.compute_tast_unquarantined ~ctx ~entry
+        in
+        Shape_analysis.analyse opts ctx tast
+      | _ ->
+        (* We are not interested in partial files and there is nothing in HHI
+           files to analyse *)
+        ()
+    in
+    let print_errors = List.iter ~f:(print_error ~oc:stdout error_format) in
+    (* Process a multifile that is not typechecked *)
+    let process_multifile filename =
+      Printf.printf
+        "=== Shape analysis results for %s\n%!"
+        (Relative_path.to_absolute filename);
+      let files_contents = Multifile.file_to_files filename in
+      let (parse_errors, file_info) = parse_name_and_decl ctx files_contents in
+      let error_list = Errors.get_sorted_error_list parse_errors in
+      let check_errors =
+        check_file ~verbosity ctx error_list file_info error_format max_errors
+      in
+      if not (List.is_empty check_errors) then
+        print_errors check_errors
+      else
+        Relative_path.Map.iter file_info ~f:process_file
+    in
+    let process_multifile filename =
+      Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
+          process_multifile filename)
+    in
+    iter_over_files process_multifile
   | Ifc (mode, lattice) ->
     (* Timing mode is same as check except we print out the time it takes to
        analyse the file. *)

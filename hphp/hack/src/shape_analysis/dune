@@ -4,6 +4,7 @@
   (flags (:standard -linkall))
   (modules
     shape_analysis
+    shape_analysis_env
     shape_analysis_options
     shape_analysis_pretty_printer
     shape_analysis_types)

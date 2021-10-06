@@ -12,6 +12,7 @@ open Shape_analysis_pretty_printer
 module A = Aast
 module T = Tast
 module SN = Naming_special_names
+module Env = Shape_analysis_env
 
 (* A program analysis to find shape like dicts and the static keys used in
    these dicts. *)
@@ -55,57 +56,60 @@ let collect_analysis_targets =
       this#plus accumulator (super#on_hint env hint)
   end
 
-let has_key_constraint entity ((_, _, key) : T.expr) (ty : Typing_defs.locl_ty)
-    : constraint_ list =
+let add_key_constraint
+    (env : env) entity ((_, _, key) : T.expr) (ty : Typing_defs.locl_ty) : env =
   match entity with
   | Some entity ->
-    begin
+    let constraint_ =
       match key with
-      | A.String _ -> [Has_static_key (entity, key, ty)]
-      | _ -> [Has_dynamic_key entity]
-    end
-  | None -> []
+      | A.String _ -> Has_static_key (entity, key, ty)
+      | _ -> Has_dynamic_key entity
+    in
+    Env.add_constraint env constraint_
+  | None -> env
 
-let rec expr ((ty, pos, e) : T.expr) : entity * constraint_ list =
+let rec expr (env : env) ((ty, pos, e) : T.expr) : env * entity =
   match e with
   | A.Int _
   | A.Float _
   | A.String _
   | A.True
   | A.False ->
-    (None, [])
+    (env, None)
   | A.Darray (_, key_value_pairs)
   | A.KeyValCollection (A.Dict, _, key_value_pairs) ->
     let entity_ = Literal pos in
     let entity = Some entity_ in
-    let has_key_constraint (key, ((ty, _, _) as value)) =
-      let (_key_entity, key_constraints) = expr key in
-      let (_val_entity, val_constraints) = expr value in
-      has_key_constraint entity key ty @ key_constraints @ val_constraints
+    let env = Env.add_constraint env (Exists entity_) in
+    let add_key_constraint env (key, ((ty, _, _) as value)) : env =
+      let (env, _key_entity) = expr env key in
+      let (env, _val_entity) = expr env value in
+      add_key_constraint env entity key ty
     in
-    let constraints =
-      Exists entity_ :: List.concat_map key_value_pairs ~f:has_key_constraint
-    in
-    (entity, constraints)
+    let env = List.fold ~init:env ~f:add_key_constraint key_value_pairs in
+    (env, entity)
   | A.Array_get (exp, Some ix) ->
-    let (entity_exp, constraints_exp) = expr exp in
-    let (_entity_ix, constraints_ix) = expr ix in
-    let new_constraints = has_key_constraint entity_exp ix ty in
-    let constraints = new_constraints @ constraints_exp @ constraints_ix in
-    (None, constraints)
+    let (env, entity_exp) = expr env exp in
+    let (env, _entity_ix) = expr env ix in
+    let env = add_key_constraint env entity_exp ix ty in
+    (env, None)
   | _ -> failwith "An expression is not yet handled"
 
-let expr (e : T.expr) : constraint_ list = expr e |> snd
+let expr (env : env) (e : T.expr) : env = expr env e |> fst
 
-let stmt ((_, stmt) : T.stmt) : constraint_ list =
+let stmt (env : env) ((_, stmt) : T.stmt) : env =
   match stmt with
-  | A.Expr e -> expr e
-  | A.Return (Some e) -> expr e
+  | A.Expr e
+  | A.Return (Some e) ->
+    expr env e
   | _ -> failwith "An expression is not yet handled"
 
-let block : T.block -> constraint_ list = List.concat_map ~f:stmt
+let block (env : env) : T.block -> env = List.fold ~init:env ~f:stmt
 
-let callable body : constraint_ list = block body.A.fb_ast
+let callable body : constraint_ list =
+  let env = Env.init in
+  let env = block env body.A.fb_ast in
+  env.constraints
 
 let walk_tast : Tast.program -> constraint_ list =
   let def : T.def -> constraint_ list = function

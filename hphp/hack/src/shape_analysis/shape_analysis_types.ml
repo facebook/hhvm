@@ -21,3 +21,5 @@ type constraint_ =
   | Exists of entity_
   | Has_static_key of entity_ * Tast.expr_ * Typing_defs.locl_ty
   | Has_dynamic_key of entity_
+
+type env = { constraints: constraint_ list }

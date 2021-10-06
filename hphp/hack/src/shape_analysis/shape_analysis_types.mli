@@ -28,3 +28,7 @@ type constraint_ =
           type of the key *)
   | Has_dynamic_key of entity_
       (** Records that an entity is accessed with a dynamic key *)
+
+type env = {
+  constraints: constraint_ list;  (** Append-only set of constraints *)
+}

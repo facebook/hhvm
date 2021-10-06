@@ -1,4 +1,4 @@
 === Shape analysis results for access.php
 [4:3-18] => a : #2056
-EX [4:3-18]
 [4:3-18] => a : int
+EX [4:3-18]

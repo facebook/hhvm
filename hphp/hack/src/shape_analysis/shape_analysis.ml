@@ -68,6 +68,11 @@ let add_key_constraint
     Env.add_constraint env constraint_
   | None -> env
 
+let assign (env : env) ((_, _, lval) : T.expr) (rhs : entity) : env =
+  match lval with
+  | A.Lvar (_, lid) -> Env.set_local lid rhs env
+  | _ -> failwith "An lvalue is not yet supported"
+
 let rec expr (env : env) ((ty, pos, e) : T.expr) : env * entity =
   match e with
   | A.Int _
@@ -92,6 +97,13 @@ let rec expr (env : env) ((ty, pos, e) : T.expr) : env * entity =
     let (env, entity_exp) = expr env exp in
     let (env, _entity_ix) = expr env ix in
     let env = add_key_constraint env entity_exp ix ty in
+    (env, None)
+  | A.Lvar (_, lid) ->
+    let entity = Env.get_local lid env in
+    (env, entity)
+  | A.Binop (Ast_defs.Eq None, e1, e2) ->
+    let (env, entity_rhs) = expr env e2 in
+    let env = assign env e1 entity_rhs in
     (env, None)
   | _ -> failwith "An expression is not yet handled"
 

@@ -6,6 +6,8 @@
  *
  *)
 
+module LMap = Local_id.Map
+
 type mode =
   | FlagTargets
   | DumpConstraints
@@ -22,4 +24,7 @@ type constraint_ =
   | Has_static_key of entity_ * Tast.expr_ * Typing_defs.locl_ty
   | Has_dynamic_key of entity_
 
-type env = { constraints: constraint_ list }
+type env = {
+  constraints: constraint_ list;
+  lenv: entity LMap.t;
+}

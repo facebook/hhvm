@@ -1,0 +1,3 @@
+=== Shape analysis results for dynamic_access.php
+[5:3-9] : dyn
+EX [5:3-9]

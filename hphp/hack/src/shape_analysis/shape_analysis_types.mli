@@ -6,6 +6,8 @@
  *
  *)
 
+module LMap = Local_id.Map
+
 type mode =
   | FlagTargets
       (** Flag all possible targets, e.g., `dict['k1' => 42, 'k2' =>
@@ -31,4 +33,5 @@ type constraint_ =
 
 type env = {
   constraints: constraint_ list;  (** Append-only set of constraints *)
+  lenv: entity LMap.t;  (** Local variable information *)
 }

@@ -7,8 +7,13 @@
  *)
 
 open Shape_analysis_types
+module LMap = Local_id.Map
 
-let init = { constraints = [] }
+let init = { constraints = []; lenv = LMap.empty }
 
 let add_constraint env constraint_ =
-  { constraints = constraint_ :: env.constraints }
+  { env with constraints = constraint_ :: env.constraints }
+
+let get_local lid env = LMap.find_opt lid env.lenv |> Option.join
+
+let set_local lid entity env = { env with lenv = LMap.add lid entity env.lenv }

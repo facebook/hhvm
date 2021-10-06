@@ -48,6 +48,7 @@ use oxidized_by_ref::{
         TypedefType, WhereConstraint, XhpAttrTag,
     },
     typing_defs_flags::{FunParamFlags, FunTypeFlags},
+    typing_modules::Module_,
     typing_reason::Reason,
 };
 use parser_core_types::{
@@ -966,7 +967,7 @@ struct Attributes<'a> {
     via_label: bool,
     soft: bool,
     support_dynamic_type: bool,
-    module: Option<&'a str>,
+    module: Option<&'a Module_<'a>>,
     internal: bool,
 }
 
@@ -1343,7 +1344,17 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                         attributes.module = attribute
                             .string_literal_params
                             .first()
-                            .map(|&x| self.str_from_utf8_for_bytes_in_arena(x));
+                            .map(|&x| self.str_from_utf8_for_bytes_in_arena(x))
+                            .and_then(|x| {
+                                let mut chars = x.split('.');
+                                match chars.next() {
+                                    None => None,
+                                    Some(s) => {
+                                        let rest = chars.collect::<std::vec::Vec<_>>();
+                                        Some(self.alloc(Module_(s, self.alloc(rest))))
+                                    }
+                                }
+                            });
                     }
                     "__Internal" => {
                         attributes.internal = true;

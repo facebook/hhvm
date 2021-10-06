@@ -7,9 +7,11 @@
  *)
 type module_ [@@deriving eq, show]
 
-val of_string : string -> module_
+val of_string : string -> module_ option
 
 val of_maybe_string : string option -> module_ option
+
+val name_of : module_ -> string
 
 type t = module_ option [@@deriving eq, show]
 

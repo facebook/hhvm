@@ -13,6 +13,7 @@ open Utils
 module Env = Typing_env
 module TUtils = Typing_utils
 module Cls = Decl_provider.Class
+module Module = Typing_modules
 
 (* Is a private member defined on class/trait [origin_id] visible
  * from code in class/trait [self_id]?
@@ -90,28 +91,28 @@ let is_private_visible_for_class env x self_id cid class_ =
       Some
         "Private members cannot be accessed dynamically. Did you mean to use 'self::'?"
 
-let is_internal_visible env mname =
-  match Env.get_module env with
-  | None -> Some "You cannot access internal members outside of a module"
-  | Some m ->
-    if String.equal m mname then
-      None
-    else
-      Some
-        (Printf.sprintf
-           "You cannot access internal members from module `%s` in module `%s`"
-           mname
-           m)
+let is_internal_visible env target =
+  match
+    Module.can_access ~current:(Env.get_module env) ~target:(Some target)
+  with
+  | `Yes -> None
+  | `Disjoint (current, target) ->
+    Some
+      (Printf.sprintf
+         "You cannot access internal members from module `%s` in module `%s`"
+         target
+         current)
+  | `Outside _ -> Some "You cannot access internal members outside of a module"
 
-let check_internal_access ~use_pos ~in_signature ~def_pos env internal modul =
+let check_internal_access ~use_pos ~in_signature ~def_pos env internal module_ =
   if internal then
-    let cur_module = Env.get_module env in
-    match modul with
-    | Some m when not (Option.equal String.equal modul cur_module) ->
-      Errors.module_mismatch use_pos def_pos cur_module m
-    | _ ->
+    match Module.can_access ~current:(Env.get_module env) ~target:module_ with
+    | `Yes ->
       if in_signature && not (Env.get_internal env) then
         Errors.module_hint ~use_pos ~def_pos
+    | `Disjoint (current, target) ->
+      Errors.module_mismatch use_pos def_pos (Some current) target
+    | `Outside target -> Errors.module_mismatch use_pos def_pos None target
 
 let check_classname_access ~use_pos ~in_signature env cls =
   check_internal_access

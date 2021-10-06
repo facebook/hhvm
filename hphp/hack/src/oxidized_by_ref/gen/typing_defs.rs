@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<22fbab4fad12ab45b124a99da22dcaf7>>
+// @generated SignedSource<<0d12e937d70fbecd3aeb0f91727b0844>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -178,7 +178,7 @@ pub struct FunElt<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub deprecated: Option<&'a str>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub module: Option<&'a str>,
+    pub module: &'a typing_modules::TypingModules<'a>,
     /// Top-level functions have limited visibilities
     pub internal: bool,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -291,7 +291,7 @@ arena_deserializer::impl_deserialize_in_arena!(RecordFieldReq);
 #[repr(C)]
 pub struct RecordDefType<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub module: Option<&'a str>,
+    pub module: &'a typing_modules::TypingModules<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub name: PosId<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -540,7 +540,7 @@ arena_deserializer::impl_deserialize_in_arena!(EnumType<'arena>);
 #[repr(C)]
 pub struct TypedefType<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub module: Option<&'a str>,
+    pub module: &'a typing_modules::TypingModules<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub pos: &'a pos_or_decl::PosOrDecl<'a>,
     pub vis: oxidized::aast::TypedefVisibility,

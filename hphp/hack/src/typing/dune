@@ -7,6 +7,7 @@
     typing_defs
     typing_defs_core
     typing_defs_flags
+    typing_modules
     tanySentinel
     typing_reason)
   (libraries

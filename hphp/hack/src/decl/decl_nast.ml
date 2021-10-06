@@ -83,8 +83,10 @@ and fun_decl_in_env (env : Decl_env.env) ~(is_lambda : bool) (f : Nast.fun_) :
       f.f_user_attributes
   in
   let fe_module =
-    Naming_attributes_params.get_module_attribute f.f_user_attributes
+    Typing_modules.of_maybe_string
+    @@ Naming_attributes_params.get_module_attribute f.f_user_attributes
   in
+
   let fe_internal =
     Naming_attributes_params.has_internal_attribute f.f_user_attributes
   in
@@ -162,7 +164,8 @@ let record_def_decl (ctx : Provider_context.t) (rd : Nast.record_def) :
         | None -> (id, ValueRequired))
   in
   let rdt_module =
-    Naming_attributes_params.get_module_attribute rd_user_attributes
+    Typing_modules.of_maybe_string
+    @@ Naming_attributes_params.get_module_attribute rd_user_attributes
   in
   {
     rdt_module;
@@ -207,7 +210,8 @@ and typedef_decl (ctx : Provider_context.t) (tdef : Nast.typedef) :
   let td_constraint = Option.map tcstr ~f:(Decl_hint.hint env) in
   let td_pos = Decl_env.make_decl_pos env name_pos in
   let td_module =
-    Naming_attributes_params.get_module_attribute t_user_attributes
+    Typing_modules.of_maybe_string
+    @@ Naming_attributes_params.get_module_attribute t_user_attributes
   in
   let td_vis =
     if Naming_attributes_params.has_internal_attribute t_user_attributes then

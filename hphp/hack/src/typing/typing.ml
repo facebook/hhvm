@@ -947,15 +947,16 @@ let fun_type_of_id env x tal el =
           ft
       in
       TVis.check_deprecated ~use_pos ~def_pos fe_deprecated;
-      let curr_module = Env.get_module env in
-      begin
-        match fe_module with
-        | Some m
-          when fe_internal
-               && not (Option.equal String.equal fe_module curr_module) ->
-          Errors.module_mismatch (fst x) fe_pos curr_module m
-        | _ -> ()
-      end;
+      (if fe_internal then
+        match
+          Typing_modules.can_access
+            ~current:(Env.get_module env)
+            ~target:fe_module
+        with
+        | `Yes -> ()
+        | `Disjoint (current, target) ->
+          Errors.module_mismatch (fst x) fe_pos (Some current) target
+        | `Outside target -> Errors.module_mismatch (fst x) fe_pos None target);
       (env, fty, tal)
     | _ -> failwith "Expected function type")
 
@@ -8230,9 +8231,9 @@ let stmt env st =
 let typedef_def ctx typedef =
   let env = EnvFromDef.typedef_env ~origin:Decl_counters.TopLevel ctx typedef in
   let env =
-    Env.set_module
-      env
-      (Naming_attributes_params.get_module_attribute typedef.t_user_attributes)
+    Env.set_module env
+    @@ Typing_modules.of_maybe_string
+    @@ Naming_attributes_params.get_module_attribute typedef.t_user_attributes
   in
   let env =
     Phase.localize_and_add_ast_generic_parameters_and_where_constraints

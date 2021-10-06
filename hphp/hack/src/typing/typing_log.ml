@@ -528,7 +528,11 @@ let genv_as_value env genv =
        ("this_internal", bool_as_value this_internal);
      ]
     @ (match this_module with
-      | Some this_module -> [("this_module", string_as_value this_module)]
+      | Some this_module ->
+        [
+          ( "this_module",
+            string_as_value @@ Typing_modules.show_module_ this_module );
+        ]
       | None -> [])
     @ (match parent with
       | Some (parent_id, parent_ty) ->

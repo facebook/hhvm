@@ -95,7 +95,7 @@ type class_elt = {
 
 type fun_elt = {
   fe_deprecated: string option;
-  fe_module: string option;
+  fe_module: Typing_modules.t;
   fe_internal: bool;  (** Top-level functions have limited visibilities *)
   fe_type: decl_ty;
   fe_pos: Pos_or_decl.t;
@@ -131,7 +131,7 @@ type record_field_req =
 [@@deriving show]
 
 type record_def_type = {
-  rdt_module: string option;
+  rdt_module: Typing_modules.t;
   rdt_name: pos_id;
   rdt_extends: pos_id option;
   rdt_fields: (pos_id * record_field_req) list;
@@ -210,7 +210,7 @@ and enum_type = {
 [@@deriving show]
 
 type typedef_type = {
-  td_module: string option;
+  td_module: Typing_modules.t;
   td_pos: Pos_or_decl.t;
   td_vis: Aast.typedef_visibility;
   td_tparams: decl_tparam list;

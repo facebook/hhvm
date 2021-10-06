@@ -68,7 +68,7 @@ and genv = {
   fun_is_ctor: bool;  (** Is the method a constructor? *)
   file: Relative_path.t;
       (** The file containing the top-level definition that we are checking *)
-  this_module: string option;
+  this_module: Typing_modules.t;
       (** The module of the top-level definition that we are checking *)
   this_internal: bool;
       (** Is the definition that we are checking marked <<__Internal>>? *)

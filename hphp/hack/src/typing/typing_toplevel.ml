@@ -369,9 +369,9 @@ let fun_def ctx fd :
     Typing.type_capability env f.f_ctxs f.f_unsafe_ctxs (fst f.f_name)
   in
   let env =
-    Env.set_module
-      env
-      (Naming_attributes_params.get_module_attribute f.f_user_attributes)
+    Env.set_module env
+    @@ Typing_modules.of_maybe_string
+    @@ Naming_attributes_params.get_module_attribute f.f_user_attributes
   in
   let env =
     Env.set_internal
@@ -2089,9 +2089,9 @@ let class_def ctx c =
   let env = Env.set_env_pessimize env in
   Typing_helpers.add_decl_errors (Option.bind tc ~f:Cls.decl_errors);
   let env =
-    Env.set_module
-      env
-      (Naming_attributes_params.get_module_attribute c.c_user_attributes)
+    Env.set_module env
+    @@ Typing_modules.of_maybe_string
+    @@ Naming_attributes_params.get_module_attribute c.c_user_attributes
   in
   let env =
     Env.set_internal

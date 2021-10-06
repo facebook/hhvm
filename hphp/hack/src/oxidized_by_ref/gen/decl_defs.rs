@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d3466689a21da593a6d86ae5993bd94a>>
+// @generated SignedSource<<e20de7ce1b0263f2394c93649a40cfe4>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -163,7 +163,7 @@ pub struct DeclClassType<'a> {
     pub is_xhp: bool,
     pub has_xhp_keyword: bool,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub module: Option<&'a str>,
+    pub module: &'a typing_modules::TypingModules<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub name: &'a str,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

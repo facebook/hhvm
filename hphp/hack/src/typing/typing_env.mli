@@ -243,11 +243,11 @@ val invalid_type_hint_assert_primary_pos_in_current_decl :
 
 val set_fn_kind : env -> Ast_defs.fun_kind -> env
 
-val set_module : env -> string option -> env
+val set_module : env -> Typing_modules.t -> env
 
 val set_internal : env -> bool -> env
 
-val get_module : env -> string option
+val get_module : env -> Typing_modules.t
 
 val get_internal : env -> bool
 

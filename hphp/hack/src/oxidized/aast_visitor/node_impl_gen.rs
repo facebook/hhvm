@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9214d8d7c8e198b6ceaee795b9a37086>>
+// @generated SignedSource<<44b35184334ac717e3f8f09f1b568f14>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -409,24 +409,6 @@ impl<P: Params> Node<P> for ClassId_<P::Ex, P::En> {
         }
     }
 }
-impl<P: Params> Node<P> for ClassPartiallyAbstractTypeconst {
-    fn accept<'node>(
-        &'node self,
-        c: &mut P::Context,
-        v: &mut dyn Visitor<'node, P = P>,
-    ) -> Result<(), P::Error> {
-        v.visit_class_partially_abstract_typeconst(c, self)
-    }
-    fn recurse<'node>(
-        &'node self,
-        c: &mut P::Context,
-        v: &mut dyn Visitor<'node, P = P>,
-    ) -> Result<(), P::Error> {
-        self.constraint.accept(c, v)?;
-        self.type_.accept(c, v)?;
-        Ok(())
-    }
-}
 impl<P: Params> Node<P> for ClassTypeconst {
     fn accept<'node>(
         &'node self,
@@ -446,10 +428,6 @@ impl<P: Params> Node<P> for ClassTypeconst {
                 Ok(())
             }
             ClassTypeconst::TCConcrete(a0) => {
-                a0.accept(c, v)?;
-                Ok(())
-            }
-            ClassTypeconst::TCPartiallyAbstract(a0) => {
                 a0.accept(c, v)?;
                 Ok(())
             }

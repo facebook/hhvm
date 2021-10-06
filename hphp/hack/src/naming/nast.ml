@@ -1090,9 +1090,6 @@ module Visitor_DEPRECATED = struct
           | Some d -> this#on_hint acc d
           | None -> acc)
         | TCConcrete { c_tc_type } -> this#on_hint acc c_tc_type
-        | TCPartiallyAbstract { c_patc_constraint; c_patc_type } ->
-          let acc = this#on_hint acc c_patc_constraint in
-          this#on_hint acc c_patc_type
 
       method on_class_c_const acc c_const =
         let acc =

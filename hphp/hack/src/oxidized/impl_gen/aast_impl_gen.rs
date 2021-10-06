@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6aaa66ccf75edd3963c94ea1878e273a>>
+// @generated SignedSource<<5bfb4c781ebab43cd0fb74db3c5b55ab>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2955,9 +2955,6 @@ impl ClassTypeconst {
     pub fn mk_tcconcrete(p0: ClassConcreteTypeconst) -> Self {
         ClassTypeconst::TCConcrete(p0)
     }
-    pub fn mk_tcpartially_abstract(p0: ClassPartiallyAbstractTypeconst) -> Self {
-        ClassTypeconst::TCPartiallyAbstract(p0)
-    }
     pub fn is_tcabstract(&self) -> bool {
         match self {
             ClassTypeconst::TCAbstract(..) => true,
@@ -2967,12 +2964,6 @@ impl ClassTypeconst {
     pub fn is_tcconcrete(&self) -> bool {
         match self {
             ClassTypeconst::TCConcrete(..) => true,
-            _ => false,
-        }
-    }
-    pub fn is_tcpartially_abstract(&self) -> bool {
-        match self {
-            ClassTypeconst::TCPartiallyAbstract(..) => true,
             _ => false,
         }
     }
@@ -2988,12 +2979,6 @@ impl ClassTypeconst {
             _ => None,
         }
     }
-    pub fn as_tcpartially_abstract(&self) -> Option<&ClassPartiallyAbstractTypeconst> {
-        match self {
-            ClassTypeconst::TCPartiallyAbstract(p0) => Some(p0),
-            _ => None,
-        }
-    }
     pub fn as_tcabstract_mut(&mut self) -> Option<&mut ClassAbstractTypeconst> {
         match self {
             ClassTypeconst::TCAbstract(p0) => Some(p0),
@@ -3006,12 +2991,6 @@ impl ClassTypeconst {
             _ => None,
         }
     }
-    pub fn as_tcpartially_abstract_mut(&mut self) -> Option<&mut ClassPartiallyAbstractTypeconst> {
-        match self {
-            ClassTypeconst::TCPartiallyAbstract(p0) => Some(p0),
-            _ => None,
-        }
-    }
     pub fn as_tcabstract_into(self) -> Option<ClassAbstractTypeconst> {
         match self {
             ClassTypeconst::TCAbstract(p0) => Some(p0),
@@ -3021,12 +3000,6 @@ impl ClassTypeconst {
     pub fn as_tcconcrete_into(self) -> Option<ClassConcreteTypeconst> {
         match self {
             ClassTypeconst::TCConcrete(p0) => Some(p0),
-            _ => None,
-        }
-    }
-    pub fn as_tcpartially_abstract_into(self) -> Option<ClassPartiallyAbstractTypeconst> {
-        match self {
-            ClassTypeconst::TCPartiallyAbstract(p0) => Some(p0),
             _ => None,
         }
     }

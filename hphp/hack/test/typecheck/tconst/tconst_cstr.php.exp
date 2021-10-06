@@ -1,8 +1,2 @@
 File "tconst_cstr.php", line 4, characters 14-14:
 `as` constraints are only legal on abstract type constants (NastCheck[3093])
-File "tconst_cstr.php", line 4, characters 14-14:
-Unable to satisfy constraint on this type constant (Typing[4110])
-  File "tconst_cstr.php", line 4, characters 19-26:
-  Expected `arraykey`
-  File "tconst_cstr.php", line 4, characters 30-34:
-  But got `mixed`

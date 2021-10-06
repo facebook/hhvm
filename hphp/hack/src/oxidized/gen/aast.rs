@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c1679ffd6081756b08b28a495fe7678d>>
+// @generated SignedSource<<adea97da573d701948c9fed3fcd76314>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1540,30 +1540,9 @@ pub struct ClassConcreteTypeconst {
     ToOcamlRep
 )]
 #[repr(C)]
-pub struct ClassPartiallyAbstractTypeconst {
-    pub constraint: Hint,
-    pub type_: Hint,
-}
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    FromOcamlRep,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(C)]
 pub enum ClassTypeconst {
     TCAbstract(ClassAbstractTypeconst),
     TCConcrete(ClassConcreteTypeconst),
-    TCPartiallyAbstract(ClassPartiallyAbstractTypeconst),
 }
 
 #[derive(

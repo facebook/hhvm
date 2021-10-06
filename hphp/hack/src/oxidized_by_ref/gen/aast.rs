@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1f13eed7265275161cfef000590c0303>>
+// @generated SignedSource<<223a361031f0b3d0726a753205a29337>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1925,30 +1925,6 @@ arena_deserializer::impl_deserialize_in_arena!(ClassConcreteTypeconst<'arena>);
 
 #[derive(
     Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(C)]
-pub struct ClassPartiallyAbstractTypeconst<'a> {
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub constraint: &'a Hint<'a>,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub type_: &'a Hint<'a>,
-}
-impl<'a> TrivialDrop for ClassPartiallyAbstractTypeconst<'a> {}
-arena_deserializer::impl_deserialize_in_arena!(ClassPartiallyAbstractTypeconst<'arena>);
-
-#[derive(
-    Clone,
     Copy,
     Debug,
     Deserialize,
@@ -1968,8 +1944,6 @@ pub enum ClassTypeconst<'a> {
     TCAbstract(&'a ClassAbstractTypeconst<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     TCConcrete(&'a ClassConcreteTypeconst<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    TCPartiallyAbstract(&'a ClassPartiallyAbstractTypeconst<'a>),
 }
 impl<'a> TrivialDrop for ClassTypeconst<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(ClassTypeconst<'arena>);

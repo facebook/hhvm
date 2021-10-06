@@ -217,7 +217,6 @@ let parse_options () =
   let like_casts = ref false in
   let simple_pessimize = ref 0.0 in
   let complex_coercion = ref false in
-  let disallow_partially_abstract_typeconst_definitions = ref true in
   let rust_parser_errors = ref false in
   let symbolindex_file = ref None in
   let check_xhp_attribute = ref false in
@@ -512,9 +511,6 @@ let parse_options () =
             set_float_ simple_pessimize 1.0;
             set_bool_ complex_coercion ()),
         " Enables all like types features" );
-      ( "--disallow-partially-abstract-typeconst-definitions",
-        Arg.Set disallow_partially_abstract_typeconst_definitions,
-        " Raise error when partially abstract type constant is defined" );
       ( "--rust-parser-errors",
         Arg.Bool (fun x -> rust_parser_errors := x),
         " Use rust parser error checker" );
@@ -804,8 +800,6 @@ let parse_options () =
       ~tco_like_casts:!like_casts
       ~tco_simple_pessimize:!simple_pessimize
       ~tco_complex_coercion:!complex_coercion
-      ~tco_disallow_partially_abstract_typeconst_definitions:
-        !disallow_partially_abstract_typeconst_definitions
       ~log_levels:!log_levels
       ~po_rust_parser_errors:!rust_parser_errors
       ~po_enable_class_level_where_clauses:!enable_class_level_where_clauses

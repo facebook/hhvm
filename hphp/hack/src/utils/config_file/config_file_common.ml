@@ -8,6 +8,7 @@
  *)
 
 open Hh_prelude
+open Option.Monad_infix
 
 type t = Config_file_ffi_externs.config
 
@@ -68,7 +69,38 @@ let of_list = Config_file_ffi_externs.of_list
 
 let keys = Config_file_ffi_externs.keys
 
-module Getters = struct
+module type Getters_S = sig
+  val string_opt : string -> t -> string option
+
+  val string_ : string -> default:string -> t -> string
+
+  val int_ : string -> default:int -> t -> int
+
+  val int_opt : string -> t -> int option
+
+  val float_ : string -> default:float -> t -> float
+
+  val float_opt : string -> t -> float option
+
+  val bool_ : string -> default:bool -> t -> bool
+
+  val bool_opt : string -> t -> bool option
+
+  val string_list_opt : string -> t -> string list option
+
+  val string_list : string -> default:string list -> t -> string list
+
+  val int_list_opt : string -> t -> int list option
+
+  val bool_if_min_version :
+    string ->
+    default:bool ->
+    current_version:Config_file_version.version ->
+    t ->
+    bool
+end
+
+module Getters : Getters_S = struct
   let ok_or_invalid_arg = function
     | Ok x -> x
     | Error e -> invalid_arg e
@@ -89,6 +121,10 @@ module Getters = struct
 
   let string_list_opt key config =
     Config_file_ffi_externs.get_string_list_opt config key
+
+  let int_list_opt key config : int list option =
+    try string_list_opt key config >>| List.map ~f:Int.of_string with
+    | Failure _ -> None
 
   let string_ key ~default config =
     Option.value (string_opt key config) ~default

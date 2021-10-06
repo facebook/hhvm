@@ -1111,22 +1111,23 @@ functor
           time_first_typing_error )
       in
 
+      let files_checked = files_to_check in
       (* Add new things that need to be rechecked *)
       let needs_recheck =
         Relative_path.Set.union env.needs_recheck lazy_check_later
       in
       (* Remove things that were cancelled from things we started rechecking... *)
-      let (files_to_check, needs_recheck) =
+      let (files_checked, needs_recheck) =
         List.fold
           cancelled
-          ~init:(files_to_check, needs_recheck)
-          ~f:(fun (files_to_check, needs_recheck) path ->
-            ( Relative_path.Set.remove files_to_check path,
+          ~init:(files_checked, needs_recheck)
+          ~f:(fun (files_checked, needs_recheck) path ->
+            ( Relative_path.Set.remove files_checked path,
               Relative_path.Set.add needs_recheck path ))
       in
       (* ... leaving only things that we actually checked, and which can be
        * removed from needs_recheck *)
-      let needs_recheck = Relative_path.Set.diff needs_recheck files_to_check in
+      let needs_recheck = Relative_path.Set.diff needs_recheck files_checked in
       let needs_recheck =
         if Relative_path.Set.is_empty env.remote_execution_files then
           needs_recheck
@@ -1139,7 +1140,7 @@ functor
           incremental_update
             ~old:errors
             ~new_:errorl'
-            ~rechecked:files_to_check
+            ~rechecked:files_checked
             Typing)
       in
       let (env, _future) : ServerEnv.env * string Future.t option =
@@ -1149,7 +1150,7 @@ functor
           capture_snapshot
           ~changed_files:files_to_parse
           ~cancelled_files:(Relative_path.Set.of_list cancelled)
-          ~rechecked_files:files_to_check
+          ~rechecked_files:files_checked
           ~recheck_errors:errorl'
           ~all_errors:errors
       in
@@ -1165,19 +1166,48 @@ functor
               ~full_check_done)
       in
 
-      let total_rechecked_count = Relative_path.Set.cardinal files_to_check in
+      let total_rechecked_count = Relative_path.Set.cardinal files_checked in
       {
         env;
         diag_subscribe;
         errors;
         telemetry;
         adhoc_profiling;
-        files_checked = files_to_check;
+        files_checked;
         full_check_done;
         needs_recheck;
         total_rechecked_count;
         time_first_typing_error;
       }
+
+    let quantile ~index ~count : Relative_path.Set.t -> Relative_path.Set.t =
+     fun files ->
+      let file_count_in_quantile = Relative_path.Set.cardinal files / count in
+      let (file_count_in_quantile, index) =
+        if Int.equal 0 file_count_in_quantile then
+          let count = Relative_path.Set.cardinal files in
+          let file_count_in_quantile = 1 in
+          let index =
+            if index >= count then
+              count - 1
+            else
+              index
+          in
+          (file_count_in_quantile, index)
+        else
+          (file_count_in_quantile, index)
+      in
+      (* Work with BigList-s the same way Typing_check_service does, to preserve
+         the same typechecking order within the quantile. *)
+      let files = files |> Relative_path.Set.elements |> BigList.create in
+      let rec pop_quantiles n files =
+        let (bucket, files) = BigList.split_n files file_count_in_quantile in
+        if n <= 0 then
+          bucket
+        else
+          pop_quantiles (n - 1) files
+      in
+      pop_quantiles index files |> Relative_path.Set.of_list
 
     let type_check_core genv env start_time profiling =
       let t = Unix.gettimeofday () in
@@ -1700,6 +1730,24 @@ functor
       let time_first_error =
         Option.first_some time_first_error time_erased_errors
       in
+
+      Hh_logger.log
+        "There are %d files to typecheck."
+        (Relative_path.Set.cardinal files_to_check);
+
+      let files_to_check =
+        match genv.local_config.ServerLocalConfig.workload_quantile with
+        | None -> files_to_check
+        | Some { ServerLocalConfig.index; count } ->
+          let files_to_check = quantile ~index ~count files_to_check in
+          Hh_logger.log
+            "Will typecheck %d-th %d-quantile only, containing %d files."
+            index
+            count
+            (Relative_path.Set.cardinal files_to_check);
+          files_to_check
+      in
+
       let to_recheck_count = Relative_path.Set.cardinal files_to_check in
       (* The intent of capturing the snapshot here is to increase the likelihood
           of the state-on-disk being the same as what the parser saw *)
@@ -1715,8 +1763,7 @@ functor
         ~include_in_logs:false
         "typechecking %d files"
         to_recheck_count;
-      let logstring = Printf.sprintf "typechecking %d files" in
-      Hh_logger.log "Begin %s" (logstring to_recheck_count);
+      Hh_logger.log "Begin typechecking %d files." to_recheck_count;
 
       ServerCheckpoint.process_updates files_to_check;
 
@@ -1819,6 +1866,16 @@ functor
       in
 
       (* WRAP-UP ***************************************************************)
+      let needs_recheck =
+        if Option.is_some genv.local_config.ServerLocalConfig.workload_quantile
+        then
+          (* If we were typechecking quantiles only, then artificially assume that everything
+             was typechecked. Otherwise the next recheck iteration will keep typechecking the other
+             quantiles. *)
+          Relative_path.Set.empty
+        else
+          needs_recheck
+      in
       let env =
         CheckKind.get_env_after_typing
           ~old_env:env

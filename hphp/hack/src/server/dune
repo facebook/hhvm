@@ -173,6 +173,7 @@
     typechecker_options
     typing_service_api
     typing_service_delegate
+    utils_config_file
     utils_core
     utils_www_root
     version)

@@ -28,7 +28,6 @@ namespace HPHP {
 
 struct HhvmDeclProvider {
   HhvmDeclProvider() {}
-  ~HhvmDeclProvider();
   HhvmDeclProvider(HhvmDeclProvider const&) = delete;
   HhvmDeclProvider& operator=(HhvmDeclProvider const&) = delete;
 

@@ -13,7 +13,6 @@ function main_enhanced_get_ini() {
 var_dump(ini_get("hhvm.stats.slot_duration"));
 
 // And now the collection-y type settings
-var_dump(ini_get("hhvm.server.allowed_exec_cmds"));
 var_dump(ini_get("hhvm.env_variables"));
 var_dump(ini_get("hhvm.server_variables"));
 }

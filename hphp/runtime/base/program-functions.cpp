@@ -1759,6 +1759,14 @@ static int execute_program_impl(int argc, char** argv) {
       &messages,
       scriptFilePath
     );
+    if (RuntimeOption::WhitelistExec ||
+        RuntimeOption::WhitelistExecWarningOnly ||
+        !RuntimeOption::AllowedExecCmds.empty()) {
+      fprintf(stderr, "Configurations Server.WhitelistExec, "
+             "Server.WhitelistExecWarningOnly, Server.AllowedExecCmds "
+             "are not supported.\n");
+      return 1;
+    }
     std::vector<std::string> badnodes;
     config.lint(badnodes);
     for (const auto& badnode : badnodes) {

@@ -18,8 +18,9 @@
 #include <atomic>
 #include <mutex>
 
-#include <stdlib.h>
 #include <errno.h>
+#include <signal.h>
+#include <stdlib.h>
 #include <unistd.h>
 
 #ifdef __APPLE__
@@ -283,6 +284,7 @@ void setup_low_arena(PageSpec s) {
   // Initialize mappers for the VeryLow and Low address ranges.
   auto& veryLowRange = getRange(AddrRangeClass::VeryLow);
   auto& lowRange = getRange(AddrRangeClass::Low);
+  auto& emergencyRange = getRange(AddrRangeClass::LowEmergency);
   auto veryLowMapper =
     getMapperChain(veryLowRange,
                    (s.n1GPages != 0) ? 1 : 0,
@@ -295,8 +297,11 @@ void setup_low_arena(PageSpec s) {
                    true, 0,             // 2M
                    true,                // 4K
                    numa_node_set, 1);
+  auto emergencyMapper =
+    new BumpEmergencyMapper([]{kill(getpid(), SIGTERM);}, emergencyRange);
   veryLowRange.setLowMapper(veryLowMapper);
   lowRange.setLowMapper(lowMapper);
+  emergencyRange.setLowMapper(emergencyMapper);
 
   auto veryLowColdMapper =
     new BumpNormalMapper<Direction::HighToLow>(veryLowRange, 0, numa_node_set);
@@ -308,18 +313,21 @@ void setup_low_arena(PageSpec s) {
   auto ma = LowArena::CreateAt(&g_lowArena);
   ma->appendMapper(lowMapper);
   ma->appendMapper(veryLowMapper);
+  ma->appendMapper(emergencyMapper);
   low_arena = ma->id();
   low_arena_flags = MALLOCX_ARENA(low_arena) | MALLOCX_TCACHE_NONE;
 
   ma = LowArena::CreateAt(&g_lowerArena);
   ma->appendMapper(veryLowMapper);
   ma->appendMapper(lowMapper);
+  ma->appendMapper(emergencyMapper);
   lower_arena = ma->id();
   lower_arena_flags = MALLOCX_ARENA(lower_arena) | MALLOCX_TCACHE_NONE;
 
   ma = LowArena::CreateAt(&g_lowColdArena);
   ma->appendMapper(lowColdMapper);
   ma->appendMapper(veryLowColdMapper);
+  ma->appendMapper(emergencyMapper);
   low_cold_arena = ma->id();
   low_cold_arena_flags = MALLOCX_ARENA(low_cold_arena) | MALLOCX_TCACHE_NONE;
 }

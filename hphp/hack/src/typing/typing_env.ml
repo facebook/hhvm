@@ -612,6 +612,7 @@ let empty ?origin ?(mode = FileInfo.Mstrict) ctx file ~droot =
       {
         tcopt = Provider_context.get_tcopt ctx;
         callable_pos = Pos.none;
+        readonly = false;
         return =
           {
             (* Actually should get set straight away anyway *)
@@ -942,6 +943,13 @@ let get_return env = env.genv.return
 let set_return env x =
   let genv = env.genv in
   let genv = { genv with return = x } in
+  { env with genv }
+
+let get_readonly env = env.genv.readonly
+
+let set_readonly env x =
+  let genv = env.genv in
+  let genv = { genv with readonly = x } in
   { env with genv }
 
 let get_params env = env.genv.params

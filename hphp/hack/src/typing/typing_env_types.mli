@@ -48,6 +48,8 @@ type env = {
 and genv = {
   tcopt: TypecheckerOptions.t;
   callable_pos: Pos.t;  (** position of the function/method being checked *)
+  readonly: bool;
+  (* Whether readonly analysis is needed on this function *)
   return: Typing_env_return_info.t;
       (** For each function/method parameter, its type, position, calling convention. *)
   params: (locl_ty * Pos.t * param_mode) Local_id.Map.t;

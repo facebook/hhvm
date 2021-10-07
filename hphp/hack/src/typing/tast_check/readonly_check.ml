@@ -540,19 +540,28 @@ let handler =
   object
     inherit Tast_visitor.handler_base
 
+    (* Ref updated before every function def *)
+    val fun_has_readonly = ref false
+
     method! at_method_ env m =
-      let tcopt = Tast_env.get_tcopt env in
-      if TypecheckerOptions.readonly tcopt then
+      let env = Tast_env.restore_method_env env m in
+      if Tast_env.fun_has_readonly env then (
+        fun_has_readonly := true;
         check#on_method_ env m
-      else
+      ) else (
+        fun_has_readonly := false;
         ()
+      )
 
     method! at_fun_def env f =
-      let tcopt = Tast_env.get_tcopt env in
-      if TypecheckerOptions.readonly tcopt then
+      let env = Tast_env.restore_fun_env env f.fd_fun in
+      if Tast_env.fun_has_readonly env then (
+        fun_has_readonly := true;
         check#on_fun_def env f
-      else
+      ) else (
+        fun_has_readonly := false;
         ()
+      )
 
     (*
         The following error checks are ones that need to run even if
@@ -565,11 +574,10 @@ let handler =
         and perf cost, and since this will only occur while the
         feature is unstable, we allow the extra error it for now.
       *)
-    method! at_Call env caller _tal _el _unpacked_element =
-      let tcopt = Tast_env.get_tcopt env in
+    method! at_Call _env caller _tal _el _unpacked_element =
       (* this check is already handled by the readonly analysis,
          which handles cases when there's a readonly keyword *)
-      if TypecheckerOptions.readonly tcopt then
+      if !fun_has_readonly then
         ()
       else
         let caller_pos = Tast.get_position caller in
@@ -577,11 +585,10 @@ let handler =
         check_readonly_return_call caller_pos caller_ty false
 
     method! at_expr env e =
-      let tcopt = Tast_env.get_tcopt env in
       (* this check is already handled by the readonly analysis,
          which handles cases when there's a readonly keyword *)
       let check =
-        if TypecheckerOptions.readonly tcopt then
+        if !fun_has_readonly then
           fun _e ->
         ()
         else

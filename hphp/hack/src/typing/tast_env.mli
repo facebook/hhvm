@@ -300,6 +300,8 @@ val is_enum_class : env -> string -> bool
 
 val fun_has_implicit_return : env -> bool
 
+val fun_has_readonly : env -> bool
+
 val get_const :
   env -> Decl_provider.class_decl -> string -> Typing_defs.class_const option
 

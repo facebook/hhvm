@@ -165,6 +165,10 @@ val get_return : env -> Typing_env_return_info.t
 
 val set_return : env -> Typing_env_return_info.t -> env
 
+val get_readonly : env -> bool
+
+val set_readonly : env -> bool -> env
+
 val get_params : env -> (locl_ty * Pos.t * param_mode) Local_id.Map.t
 
 val set_param : env -> Local_id.t -> locl_ty * Pos.t * param_mode -> env

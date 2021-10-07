@@ -396,8 +396,6 @@ let set_tcopt_unstable_features env { fa_user_attributes; _ } =
         match feature with
         | Aast.String s when s = SN.UnstableFeatures.ifc ->
           Env.map_tcopt ~f:TypecheckerOptions.enable_ifc env
-        | Aast.String s when s = SN.UnstableFeatures.readonly ->
-          Env.map_tcopt ~f:(fun t -> TypecheckerOptions.set_readonly t true) env
         | Aast.String s when s = SN.UnstableFeatures.modules ->
           Env.map_tcopt ~f:(fun t -> TypecheckerOptions.set_modules t true) env
         | Aast.String s when s = SN.UnstableFeatures.expression_trees ->
@@ -1787,13 +1785,18 @@ and fun_ ?(abstract = false) ?(disable = false) env return pos named_body f_kind
       let decl_env = env.decl_env in
       let is_hhi = FileInfo.(equal_mode decl_env.Decl_env.mode Mhhi) in
       let has_implicit_return = LEnv.has_next env in
+      let has_readonly = Env.get_readonly env in
       let env =
         if (not has_implicit_return) || abstract || is_hhi then
           env
         else
           fun_implicit_return env pos ret.et_type f_kind
       in
-      let env = Typing_env.set_fun_tast_info env { Tast.has_implicit_return } in
+      let env =
+        Typing_env.set_fun_tast_info
+          env
+          Tast.{ has_implicit_return; has_readonly }
+      in
       debug_last_pos := Pos.none;
       (env, tb))
 
@@ -3870,6 +3873,7 @@ and expr_
     let (env, ty) = Async.overload_extract_from_awaitable env ~p rty in
     make_result env p (Aast.Await te) ty
   | ReadonlyExpr e ->
+    let env = Env.set_readonly env true in
     let (env, te, rty) = expr ~is_using_clause ~in_readonly_expr:true env e in
     make_result env p (Aast.ReadonlyExpr te) rty
   | New ((_, pos, c), explicit_targs, el, unpacked_element, ()) ->
@@ -4851,7 +4855,10 @@ and closure_make
     else
       fun_implicit_return env lambda_pos hret f.f_fun_kind
   in
-  let env = Typing_env.set_fun_tast_info env { Tast.has_implicit_return } in
+  let has_readonly = Env.get_readonly env in
+  let env =
+    Typing_env.set_fun_tast_info env Tast.{ has_implicit_return; has_readonly }
+  in
   let (env, tparams) = List.map_env env f.f_tparams ~f:type_param in
   let (env, user_attributes) =
     List.map_env env f.f_user_attributes ~f:user_attribute

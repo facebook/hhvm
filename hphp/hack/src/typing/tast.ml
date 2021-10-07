@@ -43,6 +43,7 @@ let pp_ifc_fun_decl fmt d = Typing_defs.pp_ifc_fun_decl fmt d
     b) isn't otherwise (space-efficiently) present in the saved typing env *)
 type fun_tast_info = {
   has_implicit_return: bool;
+  has_readonly: bool;
       (** True if there are leaves of the function's imaginary CFG without a return statement *)
 }
 [@@deriving show]

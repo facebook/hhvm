@@ -499,6 +499,7 @@ let genv_as_value env genv =
   let {
     tcopt = _;
     callable_pos;
+    readonly;
     return;
     params;
     condition_types;
@@ -516,6 +517,7 @@ let genv_as_value env genv =
   in
   make_map
     ([
+       ("readonly", bool_as_value readonly);
        ("return", return_info_as_value env return);
        ("callable_pos", pos_as_value callable_pos);
        ("params", local_id_map_as_value (param_as_value env) params);
@@ -554,8 +556,12 @@ let fun_tast_info_as_map = function
   | None -> make_map []
   | Some r ->
     let open Tast in
-    let { has_implicit_return } = r in
-    make_map [("has_implicit_return", bool_as_value has_implicit_return)]
+    let { has_implicit_return; has_readonly } = r in
+    make_map
+      [
+        ("has_implicit_return", bool_as_value has_implicit_return);
+        ("has_readonly", bool_as_value has_readonly);
+      ]
 
 let env_as_value env =
   let {

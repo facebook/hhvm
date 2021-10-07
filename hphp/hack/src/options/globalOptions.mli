@@ -325,6 +325,8 @@ type t = {
   tco_enforce_sealed_subclasses: bool;
   (* All classes are implcitly marked <<__SupportDynamicType>> *)
   tco_everything_sdt: bool;
+  (* All collections and Hack arrays are treated as containing ~T *)
+  tco_pessimise_builtins: bool;
   tco_deferments_light: bool;
   tco_old_naming_table_for_redecl: bool;
 }
@@ -459,6 +461,7 @@ val make :
   ?tco_strict_value_equality:bool ->
   ?tco_enforce_sealed_subclasses:bool ->
   ?tco_everything_sdt:bool ->
+  ?tco_pessimise_builtins:bool ->
   ?tco_deferments_light:bool ->
   ?tco_old_naming_table_for_redecl:bool ->
   unit ->
@@ -755,6 +758,8 @@ val tco_strict_value_equality : t -> bool
 val tco_enforce_sealed_subclasses : t -> bool
 
 val tco_everything_sdt : t -> bool
+
+val tco_pessimise_builtins : t -> bool
 
 val tco_deferments_light : t -> bool
 

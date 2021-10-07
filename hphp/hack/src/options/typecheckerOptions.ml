@@ -222,4 +222,6 @@ let enable_enum_supertyping = GlobalOptions.po_enable_enum_supertyping
 
 let everything_sdt = GlobalOptions.tco_everything_sdt
 
+let pessimise_builtins = GlobalOptions.tco_pessimise_builtins
+
 let deferments_light = GlobalOptions.tco_deferments_light

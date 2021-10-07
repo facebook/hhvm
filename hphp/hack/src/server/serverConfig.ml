@@ -491,6 +491,7 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
       ?tco_enforce_sealed_subclasses:
         (bool_opt "enforce_sealed_subclasses" config)
       ?tco_everything_sdt:(bool_opt "everything_sdt" config)
+      ?tco_pessimise_builtins:(bool_opt "pessimise_builtins" config)
       ~tco_deferments_light:local_config.ServerLocalConfig.deferments_light
       ~tco_old_naming_table_for_redecl:
         local_config.ServerLocalConfig.old_naming_table_for_redecl

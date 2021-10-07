@@ -137,6 +137,7 @@ type t = {
   tco_strict_value_equality: bool;
   tco_enforce_sealed_subclasses: bool;
   tco_everything_sdt: bool;
+  tco_pessimise_builtins: bool;
   tco_deferments_light: bool;
   tco_old_naming_table_for_redecl: bool;
 }
@@ -337,6 +338,7 @@ let default =
     tco_strict_value_equality = false;
     tco_enforce_sealed_subclasses = false;
     tco_everything_sdt = false;
+    tco_pessimise_builtins = false;
     tco_deferments_light = false;
     tco_old_naming_table_for_redecl = false;
   }
@@ -495,6 +497,7 @@ let make
     ?(tco_strict_value_equality = default.tco_strict_value_equality)
     ?(tco_enforce_sealed_subclasses = default.tco_enforce_sealed_subclasses)
     ?(tco_everything_sdt = default.tco_everything_sdt)
+    ?(tco_pessimise_builtins = default.tco_pessimise_builtins)
     ?(tco_deferments_light = default.tco_deferments_light)
     ?(tco_old_naming_table_for_redecl = default.tco_old_naming_table_for_redecl)
     () =
@@ -628,6 +631,7 @@ let make
     tco_strict_value_equality;
     tco_enforce_sealed_subclasses;
     tco_everything_sdt;
+    tco_pessimise_builtins;
     tco_deferments_light;
     tco_old_naming_table_for_redecl;
   }
@@ -924,6 +928,8 @@ let tco_strict_value_equality t = t.tco_strict_value_equality
 let tco_enforce_sealed_subclasses t = t.tco_enforce_sealed_subclasses
 
 let tco_everything_sdt t = t.tco_everything_sdt
+
+let tco_pessimise_builtins t = t.tco_pessimise_builtins
 
 let tco_deferments_light t = t.tco_deferments_light
 

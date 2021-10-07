@@ -249,6 +249,7 @@ let () =
       ignored_flag "--strict-value-equality";
       ignored_flag "--enable-sealed-subclasses";
       ignored_flag "--enable-sound-dynamic-type";
+      ignored_flag "--pessimise-builtins";
     ]
     set_file
     usage;

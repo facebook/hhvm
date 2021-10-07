@@ -281,6 +281,7 @@ let parse_options () =
   let print_position = ref true in
   let enforce_sealed_subclasses = ref false in
   let everything_sdt = ref false in
+  let pessimise_builtins = ref false in
   let options =
     [
       ( "--no-print-position",
@@ -702,6 +703,10 @@ let parse_options () =
         Arg.Set everything_sdt,
         " Treat all classes as though they are annotated with <<__SupportDynamicType>>"
       );
+      ( "--pessimise-builtins",
+        Arg.Set pessimise_builtins,
+        " Treat built-in collections and Hack arrays as though they contain ~T"
+      );
     ]
   in
 
@@ -865,6 +870,7 @@ let parse_options () =
       ~tco_strict_value_equality:!strict_value_equality
       ~tco_enforce_sealed_subclasses:!enforce_sealed_subclasses
       ~tco_everything_sdt:!everything_sdt
+      ~tco_pessimise_builtins:!pessimise_builtins
       ()
   in
   Errors.allowed_fixme_codes_strict :=

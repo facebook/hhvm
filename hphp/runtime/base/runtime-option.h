@@ -1390,12 +1390,12 @@ struct RuntimeOption {
   /* 0 nothing, 1 warning, 2 error */                                   \
   F(uint32_t, EnableReadonlyPropertyEnforcement, 0)                     \
   /* 0 nothing, 1 warning, 2 error */                                   \
-  F(uint32_t, EnableReadonlyCallEnforcement, 0)                         \
+  F(uint32_t, EnableReadonlyCallEnforcement, 1)                         \
   /* 0 nothing, 1 notice, 2 error */                                    \
   F(uint32_t, ThrowOnIterationOverObjects, 0)                           \
   F(string, TaintConfigurationPath, std::string(""))                    \
   F(string, TaintOutputDirectory, std::string(""))                           \
-  F(bool, EnableReadonlyInEmitter, false)                               \
+  F(bool, EnableReadonlyInEmitter, true)                                \
   F(bool, DiamondTraitMethods, false)                                   \
   /* */
 

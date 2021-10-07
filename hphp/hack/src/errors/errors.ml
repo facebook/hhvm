@@ -3957,7 +3957,7 @@ let non_object_member_write_
     ty
     pos2
     on_error =
-  non_object_member_ Typing.NonObjectMemberRead ~kind s pos1 ty pos2 on_error
+  non_object_member_ Typing.NonObjectMemberWrite ~kind s pos1 ty pos2 on_error
 
 let non_object_member_read
     ~(kind : [< `property | `method_ | `class_typeconst ])
@@ -3975,7 +3975,7 @@ let non_object_member_write
     ty
     pos2
     on_error =
-  non_object_member Typing.NonObjectMemberRead ~kind s pos1 ty pos2 on_error
+  non_object_member Typing.NonObjectMemberWrite ~kind s pos1 ty pos2 on_error
 
 let unknown_object_member ~is_method s pos r =
   let msg =

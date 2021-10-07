@@ -532,10 +532,7 @@ Class::~Class() {
 
   // clean enum cache
   EnumCache::deleteValues(this);
-
-  if (auto p = m_vtableVec.get()) {
-    low_free(p);
-  }
+  if (m_vtableVec) vm_free(m_vtableVec);
 
 #ifndef NDEBUG
   validate();
@@ -3819,7 +3816,7 @@ void Class::setInterfaceVtables() {
   const size_t nVtables = maxSlot + 1;
   auto const vtableVecSz = nVtables * sizeof(VtableVecSlot);
   auto const memSz = vtableVecSz + totalMethods * sizeof(LowPtr<Func>);
-  auto const mem = static_cast<char*>(low_malloc(memSz));
+  auto const mem = static_cast<char*>(vm_malloc(memSz));
   auto cursor = mem;
 
   ITRACE(3, "Setting interface vtables for class {}. "

@@ -159,9 +159,7 @@ void cgInstanceOfIfaceVtable(IRLS& env, const IRInstruction* inst) {
     v, CC_A, sf, dst,
     [&] (Vout& v) {
       auto const vtableVec = v.makeReg();
-      emitLdLowPtr(v, rcls[Class::vtableVecOff()], vtableVec,
-                   sizeof(LowPtr<Class::VtableVecSlot>));
-
+      v << load{rcls[Class::vtableVecOff()], vtableVec};
       auto const ifaceOff = slot * sizeof(Class::VtableVecSlot) +
                             offsetof(Class::VtableVecSlot, iface);
       auto const sf = v.makeReg();

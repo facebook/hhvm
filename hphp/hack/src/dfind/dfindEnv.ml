@@ -20,7 +20,7 @@ module Time = struct
     incr counter;
     !counter
 
-  let compare = ( - )
+  let compare = Int.compare
 
   (* The beginning of times *)
   let bot = 0

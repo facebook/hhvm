@@ -431,18 +431,23 @@ let save naming_table db_name =
     save_result
   | Backed (local_changes, db_path) ->
     let t = Unix.gettimeofday () in
-    Naming_sqlite.copy_and_update
-      ~existing_db:db_path
-      ~new_db:(Naming_sqlite.Db_path db_name)
-      local_changes;
+    let save_result =
+      Naming_sqlite.copy_and_update
+        ~existing_db:db_path
+        ~new_db:(Naming_sqlite.Db_path db_name)
+        local_changes
+    in
+    Naming_sqlite.free_db_cache ();
     let (_ : float) =
+      let open Naming_sqlite in
       Hh_logger.log_duration
         (Printf.sprintf
-           "Updated a blob with %d entries"
-           (Relative_path.Map.cardinal local_changes.Naming_sqlite.file_deltas))
+           "Inserted %d symbols from %d files"
+           save_result.symbols_added
+           save_result.files_added)
         t
     in
-    { Naming_sqlite.empty_save_result with Naming_sqlite.files_added = 1 }
+    save_result
 
 (*****************************************************************************)
 (* Conversion functions *)

@@ -277,7 +277,7 @@ String HSLLocaleLibcOps::replace(const String& haystack,
                                  const String& replacement) const {
   const auto ret = HHVM_FN(str_replace)(needle, replacement, haystack);
   assertx(isStringType(ret.type()));
-  return String(ret.val().pstr);
+  return String::attach(ret.val().pstr);
 }
 
 String HSLLocaleLibcOps::replace_ci(const String& haystack,
@@ -285,7 +285,7 @@ String HSLLocaleLibcOps::replace_ci(const String& haystack,
                                     const String& replacement) const {
   const auto ret = HHVM_FN(str_ireplace)(needle, replacement, haystack);
   assertx(isStringType(ret.type()));
-  return String(ret.val().pstr);
+  return String::attach(ret.val().pstr);
 }
 
 namespace {
@@ -305,7 +305,7 @@ inline String replace_every_impl(decltype(HHVM_FN(str_replace)) impl,
 
   const auto ret = impl(keys.toArray(), values.toArray(), haystack);
   assertx(isStringType(ret.type()));
-  return String(ret.val().pstr);
+  return String::attach(ret.val().pstr);
 }
 } // namespace
 

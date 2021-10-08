@@ -867,12 +867,10 @@ void TypeConstraint::verifyParamFail(tv_lval val,
 }
 
 void TypeConstraint::verifyOutParamFail(TypedValue* c,
-                                        const Class*,
+                                        const Class* ctx,
                                         const Func* func,
                                         int paramNum) const {
-  // TODO(kshaunak): We may want to pass ctx here so that we can do coercion
-  // for the MockClass-subclass-of-ctx case for out-params.
-  if (tryCommonCoercions(c, nullptr)) return;
+  if (tryCommonCoercions(c, ctx)) return;
 
   std::string msg = folly::sformat(
       "Argument {} returned from {}() as an inout parameter must be {} "

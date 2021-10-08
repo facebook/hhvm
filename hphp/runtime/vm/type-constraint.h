@@ -412,6 +412,12 @@ struct TypeConstraint {
 private:
   void init();
 
+  // There are a few cases where a type constraint does not pass, but we don't
+  // raise an error. Some of these cases are resolved by mutating val instead.
+  //
+  // If this method returns true, we don't need to raise the type error.
+  bool tryCommonCoercions(tv_lval val, const Class* ctx) const;
+
   enum class CheckMode {
     Exact, // Do an exact check with autoloading
     ExactProp, // Do an exact prop check with autoloading

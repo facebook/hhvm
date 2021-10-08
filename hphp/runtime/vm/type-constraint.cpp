@@ -825,6 +825,30 @@ bool TypeConstraint::checkStringCompatible() const {
   return false;
 }
 
+bool TypeConstraint::tryCommonCoercions(tv_lval val, const Class* ctx) const {
+  if (ctx && isThis() && val.type() == KindOfObject) {
+    auto const cls = val.val().pobj->getVMClass();
+    if (cls->preClass()->userAttributes().count(s___MockClass.get()) &&
+        cls->parent() == ctx) {
+      return true;
+    }
+  }
+
+  if ((isClassType(val.type()) || isLazyClassType(val.type())) &&
+      checkStringCompatible()) {
+    if (RuntimeOption::EvalClassStringHintNotices) {
+      raise_notice(Strings::CLASS_TO_STRING_IMPLICIT);
+    }
+    val.val().pstr = isClassType(val.type()) ?
+      const_cast<StringData*>(val.val().pclass->name()) :
+      const_cast<StringData*>(val.val().plazyclass.name());
+    val.type() = KindOfPersistentString;
+    return true;
+  }
+
+  return false;
+}
+
 bool TypeConstraint::maybeStringCompatible() const {
   return isString() || isArrayKey() || isObject();
 }
@@ -842,38 +866,13 @@ void TypeConstraint::verifyParamFail(tv_lval val,
   );
 }
 
-namespace {
-
-template <typename F>
-void castClsMeth(tv_lval c, F make) {
-  assertx(type(c) == KindOfClsMeth);
-  auto const a = make(
-    val(c).pclsmeth->getClsStr(),
-    val(c).pclsmeth->getFuncStr()
-  ).detach();
-  val(c).parr = a;
-  type(c) = a->toDataType();
-}
-
-}
-
 void TypeConstraint::verifyOutParamFail(TypedValue* c,
                                         const Class*,
                                         const Func* func,
                                         int paramNum) const {
-  // FIXME: does this need to support mock classes with `this` tc?
-
-  if ((isClassType(c->m_type) || isLazyClassType(c->m_type)) &&
-      checkStringCompatible()) {
-    if (RuntimeOption::EvalClassStringHintNotices) {
-      raise_notice(Strings::CLASS_TO_STRING_IMPLICIT);
-    }
-    c->m_data.pstr = isClassType(c->m_type) ?
-      const_cast<StringData*>(c->m_data.pclass->name()) :
-      const_cast<StringData*>(c->m_data.plazyclass.name());
-    c->m_type = KindOfPersistentString;
-    return;
-  }
+  // TODO(kshaunak): We may want to pass ctx here so that we can do coercion
+  // for the MockClass-subclass-of-ctx case for out-params.
+  if (tryCommonCoercions(c, nullptr)) return;
 
   std::string msg = folly::sformat(
       "Argument {} returned from {}() as an inout parameter must be {} "
@@ -900,25 +899,7 @@ void TypeConstraint::verifyPropFail(const Class* thisCls,
   assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
   assertx(validForProp());
 
-  if (UNLIKELY(isThis() && val.type() == KindOfObject)) {
-    auto const valCls = val.val().pobj->getVMClass();
-    if (valCls->preClass()->userAttributes().count(s___MockClass.get()) &&
-        valCls->parent() == thisCls) {
-      return;
-    }
-  }
-
-  if ((isClassType(val.type()) || isLazyClassType(val.type())) &&
-      checkStringCompatible()) {
-    if (RuntimeOption::EvalClassStringHintNotices) {
-      raise_notice(Strings::CLASS_TO_STRING_IMPLICIT);
-    }
-    val.val().pstr = isClassType(val.type()) ?
-      const_cast<StringData*>(val.val().pclass->name()) :
-      const_cast<StringData*>(val.val().plazyclass.name());
-    val.type() = KindOfPersistentString;
-    return;
-  }
+  if (tryCommonCoercions(val, thisCls)) return;
 
   raise_property_typehint_error(
     folly::sformat(
@@ -937,28 +918,10 @@ void TypeConstraint::verifyPropFail(const Class* thisCls,
 
 void TypeConstraint::verifyFail(tv_lval c, const Class* ctx, const Func* func,
                                 int id) const {
+  if (tryCommonCoercions(c, ctx)) return;
+
   std::string name = displayName(func->cls());
   auto const givenType = describe_actual_type(c);
-
-  if (UNLIKELY(isThis() && c.type() == KindOfObject)) {
-    Class* cls = val(c).pobj->getVMClass();
-    if (cls->preClass()->userAttributes().count(s___MockClass.get()) &&
-        cls->parent() == ctx) {
-      return;
-    }
-  }
-
-  if ((isClassType(c.type()) || isLazyClassType(c.type())) &&
-      checkStringCompatible()) {
-    if (RuntimeOption::EvalClassStringHintNotices) {
-      raise_notice(Strings::CLASS_TO_STRING_IMPLICIT);
-    }
-    val(c).pstr = isClassType(c.type()) ?
-      const_cast<StringData*>(val(c).pclass->name()) : // TODO (T61651936)
-      const_cast<StringData*>(val(c).plazyclass.name());
-    c.type() = KindOfPersistentString;
-    return;
-  }
 
   // Handle return type constraint failures
   if (id == ReturnId) {

@@ -2080,12 +2080,6 @@ let interface_with_partial_typeconst tconst_pos =
     tconst_pos
     "An interface cannot contain a partially abstract type constant"
 
-let partially_abstract_typeconst_definition pos =
-  add
-    (NastCheck.err_code NastCheck.PartiallyAbstractTypeconstDefinition)
-    pos
-    "`as` constraints are only legal on abstract type constants"
-
 let mk_multiple_xhp_category pos =
   {
     code = NastCheck.err_code NastCheck.MultipleXhpCategory;
@@ -3963,7 +3957,7 @@ let non_object_member_write_
     ty
     pos2
     on_error =
-  non_object_member_ Typing.NonObjectMemberRead ~kind s pos1 ty pos2 on_error
+  non_object_member_ Typing.NonObjectMemberWrite ~kind s pos1 ty pos2 on_error
 
 let non_object_member_read
     ~(kind : [< `property | `method_ | `class_typeconst ])
@@ -3981,7 +3975,7 @@ let non_object_member_write
     ty
     pos2
     on_error =
-  non_object_member Typing.NonObjectMemberRead ~kind s pos1 ty pos2 on_error
+  non_object_member Typing.NonObjectMemberWrite ~kind s pos1 ty pos2 on_error
 
 let unknown_object_member ~is_method s pos r =
   let msg =

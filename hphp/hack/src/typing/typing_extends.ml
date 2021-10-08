@@ -52,16 +52,23 @@ let check_visibility parent_vis c_vis parent_pos pos on_error =
   | (Vprotected _, Vprotected _)
   | (Vprotected _, Vpublic) ->
     ()
-  | (Vinternal parent_m, Vinternal m) when String.equal parent_m m -> ()
-  | (Vinternal parent_m, Vinternal m) ->
-    Errors.visibility_override_internal
-      pos
-      parent_pos
-      (Some m)
-      parent_m
-      on_error
-  | (Vinternal parent_m, _) ->
-    Errors.visibility_override_internal pos parent_pos None parent_m on_error
+  | (Vinternal parent_m, m) ->
+    let current =
+      match m with
+      | Vinternal m' -> Some m'
+      | _ -> None
+    in
+    (match Typing_modules.can_access ~current ~target:(Some parent_m) with
+    | `Yes -> ()
+    | `Disjoint (current, target) ->
+      Errors.visibility_override_internal
+        pos
+        parent_pos
+        (Some current)
+        target
+        on_error
+    | `Outside target ->
+      Errors.visibility_override_internal pos parent_pos None target on_error)
   | _ ->
     let parent_vis = TUtils.string_of_visibility parent_vis in
     let vis = TUtils.string_of_visibility c_vis in

@@ -245,4 +245,16 @@ impl NastCheck {
             vec![],
         )
     }
+
+    pub fn partially_abstract_typeconst_definition(p: Pos) -> Error {
+        Error::new(
+            Self::PartiallyAbstractTypeconstDefinition as isize,
+            (
+                p,
+                "`as` constraints are only legal on abstract type constants".into(),
+            ),
+            vec![],
+            vec![],
+        )
+    }
 }

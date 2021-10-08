@@ -62,7 +62,6 @@ impl Default for GlobalOptions {
             tco_like_casts: false,
             tco_simple_pessimize: 0.0,
             tco_complex_coercion: false,
-            tco_disallow_partially_abstract_typeconst_definitions: true,
             error_codes_treated_strictly: i_set::ISet::new(),
             tco_check_xhp_attribute: false,
             tco_check_redundant_generics: false,
@@ -138,6 +137,7 @@ impl Default for GlobalOptions {
             tco_strict_value_equality: false,
             tco_enforce_sealed_subclasses: false,
             tco_everything_sdt: false,
+            tco_pessimise_builtins: false,
             tco_deferments_light: false,
             tco_old_naming_table_for_redecl: false,
         }

@@ -15,6 +15,7 @@ anyhow = "1.0"
 bumpalo = { version = "3.2.1", features = ["collections"] }
 cxx = "1.0.54"
 decl_provider = { path = "../decl_provider" }
+external_decl_provider = { path = "../hhvm_decl_provider" }
 hhbc_by_ref_compile = { path = "../hhbc_by_ref/cargo/hhbc_by_ref_compile" }
 libc = "0.2.98"
 log = { version = "0.4.8", features = ["kv_unstable"] }

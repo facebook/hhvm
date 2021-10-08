@@ -132,9 +132,6 @@ let simple_pessimize = GlobalOptions.tco_simple_pessimize
 
 let complex_coercion = GlobalOptions.tco_complex_coercion
 
-let disallow_partially_abstract_typeconst_definitions =
-  GlobalOptions.tco_disallow_partially_abstract_typeconst_definitions
-
 let check_xhp_attribute = GlobalOptions.tco_check_xhp_attribute
 
 let check_redundant_generics = GlobalOptions.tco_check_redundant_generics
@@ -224,5 +221,7 @@ let enforce_sealed_subclasses = GlobalOptions.tco_enforce_sealed_subclasses
 let enable_enum_supertyping = GlobalOptions.po_enable_enum_supertyping
 
 let everything_sdt = GlobalOptions.tco_everything_sdt
+
+let pessimise_builtins = GlobalOptions.tco_pessimise_builtins
 
 let deferments_light = GlobalOptions.tco_deferments_light

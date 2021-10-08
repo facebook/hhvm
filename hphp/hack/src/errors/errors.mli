@@ -1189,8 +1189,6 @@ val generics_not_allowed : Pos.t -> unit
 
 val interface_with_partial_typeconst : Pos.t -> unit
 
-val partially_abstract_typeconst_definition : Pos.t -> unit
-
 val multiple_xhp_category : Pos.t -> unit
 
 val mk_multiple_xhp_category : Pos.t -> error

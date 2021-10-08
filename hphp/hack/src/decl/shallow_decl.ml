@@ -133,7 +133,6 @@ let typeconst env c tc =
             atc_super_constraint = Option.map ~f:(Decl_hint.hint env) s;
             atc_default = Option.map ~f:(Decl_hint.hint env) d;
           }
-      | Aast.TCPartiallyAbstract { c_patc_constraint = _; c_patc_type = t }
       | Aast.TCConcrete { c_tc_type = t } ->
         Typing_defs.TCConcrete { tc_type = Decl_hint.hint env t }
     in
@@ -343,7 +342,8 @@ let class_ ctx c =
         ~f:(Decl_hint.aast_user_attribute_to_decl_user_attribute env)
     in
     let sc_module =
-      Naming_attributes_params.get_module_attribute c.c_user_attributes
+      Typing_modules.of_maybe_string
+      @@ Naming_attributes_params.get_module_attribute c.c_user_attributes
     in
     let where_constraints =
       List.map c.c_where_constraints ~f:(FunUtils.where_constraint env)

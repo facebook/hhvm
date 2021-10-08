@@ -49,6 +49,7 @@ type mode =
   | Dump_glean_deps
   | Hover of (int * int) option
   | Apply_quickfixes
+  | Shape_analysis of string
 
 type options = {
   files: string list;
@@ -216,7 +217,6 @@ let parse_options () =
   let like_casts = ref false in
   let simple_pessimize = ref 0.0 in
   let complex_coercion = ref false in
-  let disallow_partially_abstract_typeconst_definitions = ref true in
   let rust_parser_errors = ref false in
   let symbolindex_file = ref None in
   let check_xhp_attribute = ref false in
@@ -281,6 +281,7 @@ let parse_options () =
   let print_position = ref true in
   let enforce_sealed_subclasses = ref false in
   let everything_sdt = ref false in
+  let pessimise_builtins = ref false in
   let options =
     [
       ( "--no-print-position",
@@ -297,6 +298,12 @@ let parse_options () =
         " HHI file to parse and declare" );
       ( "--ifc",
         Arg.Tuple [Arg.String (fun m -> ifc_mode := m); Arg.String set_ifc],
+        " Run the flow analysis" );
+      ( "--shape-analysis",
+        Arg.String
+          (fun mode ->
+            batch_mode := true;
+            set_mode (Shape_analysis mode) ()),
         " Run the flow analysis" );
       ( "--deregister-attributes",
         Arg.Unit (set_bool deregister_attributes),
@@ -505,9 +512,6 @@ let parse_options () =
             set_float_ simple_pessimize 1.0;
             set_bool_ complex_coercion ()),
         " Enables all like types features" );
-      ( "--disallow-partially-abstract-typeconst-definitions",
-        Arg.Set disallow_partially_abstract_typeconst_definitions,
-        " Raise error when partially abstract type constant is defined" );
       ( "--rust-parser-errors",
         Arg.Bool (fun x -> rust_parser_errors := x),
         " Use rust parser error checker" );
@@ -699,6 +703,10 @@ let parse_options () =
         Arg.Set everything_sdt,
         " Treat all classes as though they are annotated with <<__SupportDynamicType>>"
       );
+      ( "--pessimise-builtins",
+        Arg.Set pessimise_builtins,
+        " Treat built-in collections and Hack arrays as though they contain ~T"
+      );
     ]
   in
 
@@ -797,8 +805,6 @@ let parse_options () =
       ~tco_like_casts:!like_casts
       ~tco_simple_pessimize:!simple_pessimize
       ~tco_complex_coercion:!complex_coercion
-      ~tco_disallow_partially_abstract_typeconst_definitions:
-        !disallow_partially_abstract_typeconst_definitions
       ~log_levels:!log_levels
       ~po_rust_parser_errors:!rust_parser_errors
       ~po_enable_class_level_where_clauses:!enable_class_level_where_clauses
@@ -864,6 +870,7 @@ let parse_options () =
       ~tco_strict_value_equality:!strict_value_equality
       ~tco_enforce_sealed_subclasses:!enforce_sealed_subclasses
       ~tco_everything_sdt:!everything_sdt
+      ~tco_pessimise_builtins:!pessimise_builtins
       ()
   in
   Errors.allowed_fixme_codes_strict :=
@@ -1594,6 +1601,48 @@ let handle_mode
   in
   let iter_over_files f : unit = List.iter filenames ~f in
   match mode with
+  | Shape_analysis mode ->
+    let opts =
+      match Shape_analysis_options.parse mode with
+      | Some options -> options
+      | None -> die "invalid shape analysis mode"
+    in
+    (* Process a single typechecked file *)
+    let process_file path info =
+      match info.FileInfo.file_mode with
+      | Some FileInfo.Mstrict ->
+        let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
+        let { Tast_provider.Compute_tast.tast; _ } =
+          Tast_provider.compute_tast_unquarantined ~ctx ~entry
+        in
+        Shape_analysis.analyse opts ctx tast
+      | _ ->
+        (* We are not interested in partial files and there is nothing in HHI
+           files to analyse *)
+        ()
+    in
+    let print_errors = List.iter ~f:(print_error ~oc:stdout error_format) in
+    (* Process a multifile that is not typechecked *)
+    let process_multifile filename =
+      Printf.printf
+        "=== Shape analysis results for %s\n%!"
+        (Relative_path.to_absolute filename);
+      let files_contents = Multifile.file_to_files filename in
+      let (parse_errors, file_info) = parse_name_and_decl ctx files_contents in
+      let error_list = Errors.get_sorted_error_list parse_errors in
+      let check_errors =
+        check_file ~verbosity ctx error_list file_info error_format max_errors
+      in
+      if not (List.is_empty check_errors) then
+        print_errors check_errors
+      else
+        Relative_path.Map.iter file_info ~f:process_file
+    in
+    let process_multifile filename =
+      Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
+          process_multifile filename)
+    in
+    iter_over_files process_multifile
   | Ifc (mode, lattice) ->
     (* Timing mode is same as check except we print out the time it takes to
        analyse the file. *)

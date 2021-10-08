@@ -283,9 +283,6 @@ let typeconst (env, _) tconst =
     maybe hint env c_atc_super_constraint;
     maybe hint env c_atc_default
   | TCConcrete { c_tc_type } -> hint env c_tc_type
-  | TCPartiallyAbstract { c_patc_constraint; c_patc_type } ->
-    hint env c_patc_constraint;
-    hint env c_patc_type
 
 let class_var env cv =
   let tenv =

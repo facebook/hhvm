@@ -707,18 +707,16 @@ and static_prop_decl
 
 and visibility
     (class_id : string)
-    (module_id : string option)
+    (module_ : Typing_modules.t)
     (visibility : Aast_defs.visibility) : Typing_defs.ce_visibility =
   match visibility with
   | Public -> Vpublic
   | Protected -> Vprotected class_id
   | Private -> Vprivate class_id
   | Internal ->
-    begin
-      match module_id with
-      | Some m -> Vinternal m
-      | None -> Vpublic
-    end
+    (match module_ with
+    | Some m -> Vinternal m
+    | None -> Vpublic)
 
 (* each concrete type constant T = <sometype> implicitly defines a
 class constant with the same name which is TypeStructure<sometype> *)

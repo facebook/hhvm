@@ -159,8 +159,6 @@ type t = {
   tco_simple_pessimize: float;
   (* Enables complex coercion interactions that involve like types *)
   tco_complex_coercion: bool;
-  (* Ban definitions of partially abstract typeconsts *)
-  tco_disallow_partially_abstract_typeconst_definitions: bool;
   (* Set of codes to be treated as if they were in strict mode files *)
   error_codes_treated_strictly: ISet.t;
   (* static check xhp required attribute *)
@@ -327,6 +325,8 @@ type t = {
   tco_enforce_sealed_subclasses: bool;
   (* All classes are implcitly marked <<__SupportDynamicType>> *)
   tco_everything_sdt: bool;
+  (* All collections and Hack arrays are treated as containing ~T *)
+  tco_pessimise_builtins: bool;
   tco_deferments_light: bool;
   tco_old_naming_table_for_redecl: bool;
 }
@@ -385,7 +385,6 @@ val make :
   ?tco_like_casts:bool ->
   ?tco_simple_pessimize:float ->
   ?tco_complex_coercion:bool ->
-  ?tco_disallow_partially_abstract_typeconst_definitions:bool ->
   ?error_codes_treated_strictly:ISet.t ->
   ?tco_check_xhp_attribute:bool ->
   ?tco_check_redundant_generics:bool ->
@@ -462,6 +461,7 @@ val make :
   ?tco_strict_value_equality:bool ->
   ?tco_enforce_sealed_subclasses:bool ->
   ?tco_everything_sdt:bool ->
+  ?tco_pessimise_builtins:bool ->
   ?tco_deferments_light:bool ->
   ?tco_old_naming_table_for_redecl:bool ->
   unit ->
@@ -598,8 +598,6 @@ val tco_like_casts : t -> bool
 val tco_simple_pessimize : t -> float
 
 val tco_complex_coercion : t -> bool
-
-val tco_disallow_partially_abstract_typeconst_definitions : t -> bool
 
 val error_codes_treated_strictly : t -> ISet.t
 
@@ -760,6 +758,8 @@ val tco_strict_value_equality : t -> bool
 val tco_enforce_sealed_subclasses : t -> bool
 
 val tco_everything_sdt : t -> bool
+
+val tco_pessimise_builtins : t -> bool
 
 val tco_deferments_light : t -> bool
 

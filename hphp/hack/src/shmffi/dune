@@ -1,6 +1,7 @@
 (library
   (name shmffi)
   (modules)
+  (c_library_flags -lpthread)
   (wrapped false)
   (preprocess (pps ppx_deriving.std))
   (self_build_stubs_archive (shmffi))

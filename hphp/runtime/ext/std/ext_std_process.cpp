@@ -113,45 +113,6 @@ static char **build_envp(const Array& envs, std::vector<std::string> &senvs) {
 }
 #endif
 
-// check whitelist
-static bool check_cmd(const char *cmd) {
-  const char *cmd_tmp = cmd;
-  while (true) {
-    bool allow = false;
-    while (isblank(*cmd_tmp)) cmd_tmp++;
-    const char *space = strchr(cmd_tmp, ' ');
-    unsigned int cmd_len = strlen(cmd_tmp);
-    if (space) {
-      cmd_len = space - cmd_tmp;
-    }
-    for (unsigned int i = 0; i < RuntimeOption::AllowedExecCmds.size(); i++) {
-      std::string &allowedCmd = RuntimeOption::AllowedExecCmds[i];
-      if (allowedCmd.size() != cmd_len) {
-        continue;
-      }
-      if (strncmp(allowedCmd.c_str(), cmd_tmp, allowedCmd.size()) == 0) {
-        allow = true;
-        break;
-      }
-    }
-    if (!allow) {
-      auto const file = g_context->getContainingFileName();
-      int line = g_context->getLine();
-      Logger::Warning("Command %s is not in the whitelist, called at %s:%d",
-                      cmd_tmp, file->data(), line);
-      if (!RuntimeOption::WhitelistExecWarningOnly) {
-        return false;
-      }
-    }
-    const char *bar = strchr(cmd_tmp, '|');
-    if (!bar) { // no pipe, we are done
-      return true;
-    }
-    cmd_tmp = bar + 1;
-  }
-  return false;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void StandardExtension::initProcess() {
@@ -211,9 +172,6 @@ struct ShellExecContext final {
   FILE *exec(const String& cmd_string) {
     assertx(m_proc == nullptr);
     const auto cmd = cmd_string.c_str();
-    if (RuntimeOption::WhitelistExec && !check_cmd(cmd)) {
-      return nullptr;
-    }
     if (strlen(cmd) != cmd_string.size()) {
       raise_warning("NULL byte detected. Possible attack");
       return nullptr;
@@ -699,9 +657,6 @@ HHVM_FUNCTION(proc_open, const String& cmd, const Array& descriptorspec,
               Array& pipes, const Variant& cwd /* = uninit_variant */,
               const Variant& env /* = uninit_variant */,
               const Variant& /*other_options*/ /* = uninit_variant */) {
-  if (RuntimeOption::WhitelistExec && !check_cmd(cmd.data())) {
-    return false;
-  }
   if (cmd.size() != strlen(cmd.c_str())) {
     raise_warning("NULL byte detected. Possible attack");
     return false;

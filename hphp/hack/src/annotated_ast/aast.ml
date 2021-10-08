@@ -504,8 +504,12 @@ and ('ex, 'en) expr_ =
 
           See also Dollardollar.
 
-          $foo |> bar() // equivalent: bar($foo)
-          $foo |> bar(1, $$) // equivalent: bar(1, $foo) *)
+          foo() |> bar(1, $$) // equivalent: bar(1, foo())
+
+          $$ is not required on the RHS of pipe expressions, but it's
+          pretty pointless to use pipes without $$.
+
+          foo() |> bar(); // equivalent: foo(); bar(); *)
   | Eif of ('ex, 'en) expr * ('ex, 'en) expr option * ('ex, 'en) expr
       (** Ternary operator, or elvis operator.
 
@@ -898,17 +902,9 @@ and class_abstract_typeconst = {
 
 and class_concrete_typeconst = { c_tc_type: hint }
 
-(* A partially abstract type constant always has a constraint *
- * and always has a value. *)
-and class_partially_abstract_typeconst = {
-  c_patc_constraint: hint;
-  c_patc_type: hint;
-}
-
 and class_typeconst =
   | TCAbstract of class_abstract_typeconst
   | TCConcrete of class_concrete_typeconst
-  | TCPartiallyAbstract of class_partially_abstract_typeconst
 
 and ('ex, 'en) class_typeconst_def = {
   c_tconst_user_attributes: ('ex, 'en) user_attribute list;

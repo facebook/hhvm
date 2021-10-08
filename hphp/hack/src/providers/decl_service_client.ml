@@ -38,27 +38,28 @@ module Decls =
       let capacity = 10000
     end)
 
+module Filenames =
+  SharedMem.MultiCache
+    (CacheKey)
+    (struct
+      type t = (Relative_path.t * FileInfo.name_type) option
+
+      let description = "Decl_service_client_Filenames"
+    end)
+    (struct
+      let capacity = 500
+    end)
+
 type t = {
   client: Decl_ipc_ffi_externs.decl_client;
   opts: DeclParserOptions.t;
   mutable current_file_decls: decl SymbolMap.t;
-  gconst_path_cache: Relative_path.t option String.Table.t;
-  fun_path_cache: Relative_path.t option String.Table.t;
-  type_path_and_kind_cache:
-    (Relative_path.t * Naming_types.kind_of_type) option String.Table.t;
 }
 
 let from_raw_client
     (client : Decl_ipc_ffi_externs.decl_client) (opts : DeclParserOptions.t) : t
     =
-  {
-    client;
-    opts;
-    current_file_decls = SymbolMap.empty;
-    gconst_path_cache = String.Table.create ();
-    fun_path_cache = String.Table.create ();
-    type_path_and_kind_cache = String.Table.create ();
-  }
+  { client; opts; current_file_decls = SymbolMap.empty }
 
 let get_and_cache_decl (t : t) (symbol_hash : Typing_deps.Dep.t) =
   let decl_opt = Decl_ipc_ffi_externs.get_decl t.client symbol_hash in
@@ -132,34 +133,31 @@ let rpc_get_gconst (t : t) (name : string) : Typing_defs.const_decl option =
       | Some (Const c) -> Some c
       | _ -> None))
 
-let rpc_get_gconst_path (t : t) (name : string) : Relative_path.t option =
-  match String.Table.find t.gconst_path_cache name with
-  | Some opt -> opt
-  | None ->
-    let opt = Decl_ipc_ffi_externs.get_const_path t.client name in
-    String.Table.add_exn t.gconst_path_cache ~key:name ~data:opt;
-    let key = Typing_deps.(Dep.make Mode.Hash64Bit (Dep.GConst name)) in
-    if Option.is_none opt then Decls.add key None;
-    opt
+let get_filename (t : t) (key : Typing_deps.Dep.t) :
+    (FileInfo.pos * FileInfo.name_type) option =
+  let opt =
+    match Filenames.get key with
+    | Some opt -> opt
+    | None ->
+      let r = Decl_ipc_ffi_externs.get_filename t.client key in
+      Filenames.add key r;
+      r
+  in
+  match opt with
+  | None -> None
+  | Some (path, name_type) -> Some (FileInfo.File (name_type, path), name_type)
 
-let rpc_get_fun_path (t : t) (name : string) : Relative_path.t option =
-  match String.Table.find t.fun_path_cache name with
-  | Some opt -> opt
-  | None ->
-    let opt = Decl_ipc_ffi_externs.get_fun_path t.client name in
-    String.Table.add_exn t.fun_path_cache ~key:name ~data:opt;
-    let key = Typing_deps.(Dep.make Mode.Hash64Bit (Dep.Fun name)) in
-    if Option.is_none opt then Decls.add key None;
-    opt
+let rpc_get_gconst_path t name =
+  let key = Typing_deps.(Dep.make Mode.Hash64Bit (Dep.GConst name)) in
+  get_filename t key
 
-let rpc_get_type_path_and_kind (t : t) (name : string) :
-    (Relative_path.t * Naming_types.kind_of_type) option =
-  match String.Table.find t.type_path_and_kind_cache name with
-  | Some opt -> opt
-  | None ->
-    let opt = Decl_ipc_ffi_externs.get_type_path_and_kind t.client name in
-    String.Table.add_exn t.type_path_and_kind_cache ~key:name ~data:opt;
-    opt
+let rpc_get_fun_path t name =
+  let key = Typing_deps.(Dep.make Mode.Hash64Bit (Dep.Fun name)) in
+  get_filename t key
+
+let rpc_get_type_path t name =
+  let key = Typing_deps.(Dep.make Mode.Hash64Bit (Dep.Type name)) in
+  get_filename t key
 
 let rpc_get_fun_canon_name (t : t) (name : string) : string option =
   Decl_ipc_ffi_externs.get_fun_canon_name t.client name

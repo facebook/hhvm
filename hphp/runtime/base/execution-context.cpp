@@ -648,8 +648,6 @@ void ExecutionContext::executeFunctions(ShutdownType type) {
     *ImplicitContext::activeCtx = nullptr;
   }
 
-  CoeffectsAutoGuard _;
-
   // We mustn't destroy any callbacks until we're done with all
   // of them. So hold them in tmp.
   // XXX still true in a world without destructors?
@@ -661,7 +659,8 @@ void ExecutionContext::executeFunctions(ShutdownType type) {
     IterateV(
       funcs.get(),
       [](TypedValue v) {
-        vm_call_user_func(VarNR{v}, init_null_variant);
+        vm_call_user_func(VarNR{v}, init_null_variant,
+                          RuntimeCoeffects::defaults());
         // Implicit context should not have leaked between each call
         assertx(!RO::EvalEnableImplicitContext ||
                 !(*ImplicitContext::activeCtx));
@@ -900,7 +899,8 @@ bool ExecutionContext::callUserErrorHandler(const Exception& e, int errnum,
                 (m_userErrorHandlers.back().first,
                  make_vec_array(errnum, String(e.getMessage()),
                      fileAndLine.first, fileAndLine.second, empty_dict_array(),
-                     backtrace)),
+                     backtrace),
+                 RuntimeCoeffects::defaults()),
                 false)) {
         return true;
       }
@@ -994,7 +994,8 @@ bool ExecutionContext::onUnhandledException(Object e) {
     if (!m_userExceptionHandlers.empty()) {
       if (!same(vm_call_user_func
                 (m_userExceptionHandlers.back(),
-                 make_vec_array(e)),
+                 make_vec_array(e),
+                 RuntimeCoeffects::defaults()),
                 false)) {
         return true;
       }

@@ -191,7 +191,6 @@ fn from_type_constant<'a, 'arena, 'decl>(
             default: Some(init),
             ..
         })
-        | TCPartiallyAbstract(ast::ClassPartiallyAbstractTypeconst { type_: init, .. })
         | TCConcrete(ast::ClassConcreteTypeconst { c_tc_type: init }) => {
             // TODO: Deal with the constraint
             // Type constants do not take type vars hence tparams:[]
@@ -230,7 +229,6 @@ fn from_ctx_constant<'a, 'arena>(
         TCAbstract(ast::ClassAbstractTypeconst { default: None, .. }) => {
             (Slice::empty(), Slice::empty())
         }
-        TCPartiallyAbstract(_) => (Slice::empty(), Slice::empty()), // does not parse
         TCAbstract(ast::ClassAbstractTypeconst {
             default: Some(hint),
             ..

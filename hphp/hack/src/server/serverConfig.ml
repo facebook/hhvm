@@ -391,8 +391,6 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
       ?tco_like_casts:(bool_opt "like_casts" config)
       ?tco_simple_pessimize:(float_opt "simple_pessimize" config)
       ?tco_complex_coercion:(bool_opt "complex_coercion" config)
-      ?tco_disallow_partially_abstract_typeconst_definitions:
-        (bool_opt "disallow_partially_abstract_typeconst_definitions" config)
       ~error_codes_treated_strictly:
         (prepare_error_codes_treated_strictly config)
       ?tco_check_xhp_attribute:(bool_opt "check_xhp_attribute" config)
@@ -493,6 +491,7 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
       ?tco_enforce_sealed_subclasses:
         (bool_opt "enforce_sealed_subclasses" config)
       ?tco_everything_sdt:(bool_opt "everything_sdt" config)
+      ?tco_pessimise_builtins:(bool_opt "pessimise_builtins" config)
       ~tco_deferments_light:local_config.ServerLocalConfig.deferments_light
       ~tco_old_naming_table_for_redecl:
         local_config.ServerLocalConfig.old_naming_table_for_redecl

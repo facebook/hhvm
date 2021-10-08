@@ -51,7 +51,7 @@ val save_file_infos :
   save_result
 
 val copy_and_update :
-  existing_db:db_path -> new_db:db_path -> local_changes -> unit
+  existing_db:db_path -> new_db:db_path -> local_changes -> save_result
 
 val get_local_changes : db_path -> local_changes
 

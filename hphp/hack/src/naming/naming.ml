@@ -1458,12 +1458,6 @@ and typeconst env t =
           c_atc_default = Option.map ~f:(hint env) c_atc_default;
         }
     | TCConcrete { c_tc_type } -> TCConcrete { c_tc_type = hint env c_tc_type }
-    | TCPartiallyAbstract { c_patc_constraint; c_patc_type } ->
-      TCPartiallyAbstract
-        {
-          c_patc_constraint = hint env c_patc_constraint;
-          c_patc_type = hint env c_patc_type;
-        }
   in
   let attrs = user_attributes env t.Aast.c_tconst_user_attributes in
   N.

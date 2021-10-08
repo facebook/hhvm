@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c1679ffd6081756b08b28a495fe7678d>>
+// @generated SignedSource<<69364db8fb6510a705ac803b6f51c7a0>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -666,8 +666,12 @@ pub enum Expr_<Ex, En> {
     ///
     /// See also Dollardollar.
     ///
-    /// $foo |> bar() // equivalent: bar($foo)
-    /// $foo |> bar(1, $$) // equivalent: bar(1, $foo)
+    /// foo() |> bar(1, $$) // equivalent: bar(1, foo())
+    ///
+    /// $$ is not required on the RHS of pipe expressions, but it's
+    /// pretty pointless to use pipes without $$.
+    ///
+    /// foo() |> bar(); // equivalent: foo(); bar();
     Pipe(Box<(Lid, Expr<Ex, En>, Expr<Ex, En>)>),
     /// Ternary operator, or elvis operator.
     ///
@@ -1540,30 +1544,9 @@ pub struct ClassConcreteTypeconst {
     ToOcamlRep
 )]
 #[repr(C)]
-pub struct ClassPartiallyAbstractTypeconst {
-    pub constraint: Hint,
-    pub type_: Hint,
-}
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    FromOcamlRep,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(C)]
 pub enum ClassTypeconst {
     TCAbstract(ClassAbstractTypeconst),
     TCConcrete(ClassConcreteTypeconst),
-    TCPartiallyAbstract(ClassPartiallyAbstractTypeconst),
 }
 
 #[derive(

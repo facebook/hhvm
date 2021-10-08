@@ -62,7 +62,6 @@ type t = {
   tco_like_casts: bool;
   tco_simple_pessimize: float;
   tco_complex_coercion: bool;
-  tco_disallow_partially_abstract_typeconst_definitions: bool;
   error_codes_treated_strictly: ISet.t;
   tco_check_xhp_attribute: bool;
   tco_check_redundant_generics: bool;
@@ -138,6 +137,7 @@ type t = {
   tco_strict_value_equality: bool;
   tco_enforce_sealed_subclasses: bool;
   tco_everything_sdt: bool;
+  tco_pessimise_builtins: bool;
   tco_deferments_light: bool;
   tco_old_naming_table_for_redecl: bool;
 }
@@ -263,7 +263,6 @@ let default =
     tco_like_casts = false;
     tco_simple_pessimize = 0.0;
     tco_complex_coercion = false;
-    tco_disallow_partially_abstract_typeconst_definitions = true;
     error_codes_treated_strictly = ISet.of_list [];
     tco_check_xhp_attribute = false;
     tco_check_redundant_generics = false;
@@ -339,6 +338,7 @@ let default =
     tco_strict_value_equality = false;
     tco_enforce_sealed_subclasses = false;
     tco_everything_sdt = false;
+    tco_pessimise_builtins = false;
     tco_deferments_light = false;
     tco_old_naming_table_for_redecl = false;
   }
@@ -404,8 +404,6 @@ let make
     ?(tco_like_casts = default.tco_like_casts)
     ?(tco_simple_pessimize = default.tco_simple_pessimize)
     ?(tco_complex_coercion = default.tco_complex_coercion)
-    ?(tco_disallow_partially_abstract_typeconst_definitions =
-      default.tco_disallow_partially_abstract_typeconst_definitions)
     ?(error_codes_treated_strictly = default.error_codes_treated_strictly)
     ?(tco_check_xhp_attribute = default.tco_check_xhp_attribute)
     ?(tco_check_redundant_generics = default.tco_check_redundant_generics)
@@ -499,6 +497,7 @@ let make
     ?(tco_strict_value_equality = default.tco_strict_value_equality)
     ?(tco_enforce_sealed_subclasses = default.tco_enforce_sealed_subclasses)
     ?(tco_everything_sdt = default.tco_everything_sdt)
+    ?(tco_pessimise_builtins = default.tco_pessimise_builtins)
     ?(tco_deferments_light = default.tco_deferments_light)
     ?(tco_old_naming_table_for_redecl = default.tco_old_naming_table_for_redecl)
     () =
@@ -557,7 +556,6 @@ let make
     tco_like_casts;
     tco_simple_pessimize;
     tco_complex_coercion;
-    tco_disallow_partially_abstract_typeconst_definitions;
     error_codes_treated_strictly;
     tco_check_xhp_attribute;
     tco_check_redundant_generics;
@@ -633,6 +631,7 @@ let make
     tco_strict_value_equality;
     tco_enforce_sealed_subclasses;
     tco_everything_sdt;
+    tco_pessimise_builtins;
     tco_deferments_light;
     tco_old_naming_table_for_redecl;
   }
@@ -759,9 +758,6 @@ let tco_like_casts t = t.tco_like_casts
 let tco_simple_pessimize t = t.tco_simple_pessimize
 
 let tco_complex_coercion t = t.tco_complex_coercion
-
-let tco_disallow_partially_abstract_typeconst_definitions t =
-  t.tco_disallow_partially_abstract_typeconst_definitions
 
 let error_codes_treated_strictly t = t.error_codes_treated_strictly
 
@@ -932,6 +928,8 @@ let tco_strict_value_equality t = t.tco_strict_value_equality
 let tco_enforce_sealed_subclasses t = t.tco_enforce_sealed_subclasses
 
 let tco_everything_sdt t = t.tco_everything_sdt
+
+let tco_pessimise_builtins t = t.tco_pessimise_builtins
 
 let tco_deferments_light t = t.tco_deferments_light
 

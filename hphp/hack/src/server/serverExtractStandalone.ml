@@ -2299,8 +2299,6 @@ end = struct
         Aast.(
           match c_tconst_kind with
           | TCAbstract { c_atc_as_constraint = c; _ } -> (true, None, c)
-          | TCPartiallyAbstract { c_patc_constraint = c; c_patc_type = t } ->
-            (false, Some t, Some c)
           | TCConcrete { c_tc_type = t } -> (false, Some t, None))
       in
       EltTypeConst

@@ -70,6 +70,7 @@ type env = {
 and genv = {
   tcopt: TypecheckerOptions.t;
   callable_pos: Pos.t;
+  readonly: bool;
   return: Typing_env_return_info.t;
   params: (locl_ty * Pos.t * param_mode) Local_id.Map.t;
   condition_types: decl_ty SMap.t;
@@ -80,6 +81,6 @@ and genv = {
   val_kind: Typing_defs.val_kind;
   fun_is_ctor: bool;
   file: Relative_path.t;
-  this_module: string option;
+  this_module: Typing_modules.t;
   this_internal: bool;
 }

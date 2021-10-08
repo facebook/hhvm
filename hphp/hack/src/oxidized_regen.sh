@@ -120,6 +120,7 @@ summary "Write oxidized_by_ref/gen/"
   hphp/hack/src/typing/typing_fake_members.ml                                 \
   hphp/hack/src/typing/typing_inference_env.ml                                \
   hphp/hack/src/typing/typing_kinding_defs.ml                                 \
+  hphp/hack/src/typing/typing_modules.ml                                      \
   hphp/hack/src/typing/typing_local_types.ml                                  \
   hphp/hack/src/typing/typing_per_cont_env.ml                                 \
   hphp/hack/src/typing/typing_reason.ml                                       \

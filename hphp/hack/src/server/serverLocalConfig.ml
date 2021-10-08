@@ -10,6 +10,7 @@
 open Config_file.Getters
 module Hack_bucket = Bucket
 open Hh_prelude
+open Option.Monad_infix
 module Bucket = Hack_bucket
 
 module Watchman = struct
@@ -391,6 +392,17 @@ module RecheckCapture = struct
     }
 end
 
+(** Allows to typecheck only a certain quantile of the workload. *)
+type quantile = {
+  count: int;
+      (** The number of quantiles we want.
+          If this is n, we'll divide the workload in n groups. *)
+  index: int;
+      (** The index of the subgroup we'll process.
+          If this is i, we'll typecheck group number i out of the n groups.
+          this should be in interval [0; n] *)
+}
+
 type t = {
   min_log_level: Hh_logger.Level.t;
   (* Indicates whether we attempt to fix the credentials if they're broken *)
@@ -566,6 +578,8 @@ type t = {
       (**  Alerts hh users what processes are using hh_server when hh_client is slow to connect. *)
   naming_sqlite_in_hack_64: bool;
       (** Add sqlite naming table to hack/64 ss job *)
+  workload_quantile: quantile option;
+      (** Allows to typecheck only a certain quantile of the workload. *)
 }
 
 let default =
@@ -670,6 +684,7 @@ let default =
     old_naming_table_for_redecl = false;
     log_from_client_when_slow_monitor_connections = false;
     naming_sqlite_in_hack_64 = false;
+    workload_quantile = None;
   }
 
 let path =
@@ -1303,6 +1318,18 @@ let load_ fn ~silent ~current_version overrides =
     ) else
       force_load_hot_shallow_decls
   in
+  let workload_quantile =
+    int_list_opt "workload_quantile" config >>= fun l ->
+    match l with
+    | [m; n] ->
+      if 0 <= m && m <= n then
+        Some { count = n; index = m }
+      else if 0 <= n && n <= m then
+        Some { count = m; index = n }
+      else
+        None
+    | _ -> None
+  in
   {
     min_log_level;
     attempt_fix_credentials;
@@ -1401,6 +1428,7 @@ let load_ fn ~silent ~current_version overrides =
     old_naming_table_for_redecl;
     log_from_client_when_slow_monitor_connections;
     naming_sqlite_in_hack_64;
+    workload_quantile;
   }
 
 let load ~silent ~current_version config_overrides =

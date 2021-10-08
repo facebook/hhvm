@@ -7,7 +7,7 @@ module IntKey = struct
 
   let to_string = string_of_int
 
-  let compare = ( - )
+  let compare = Int.compare
 end
 
 module Ids =

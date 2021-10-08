@@ -48,6 +48,7 @@ use oxidized_by_ref::{
         TypedefType, WhereConstraint, XhpAttrTag,
     },
     typing_defs_flags::{FunParamFlags, FunTypeFlags},
+    typing_modules::Module_,
     typing_reason::Reason,
 };
 use parser_core_types::{
@@ -966,7 +967,7 @@ struct Attributes<'a> {
     via_label: bool,
     soft: bool,
     support_dynamic_type: bool,
-    module: Option<&'a str>,
+    module: Option<&'a Module_<'a>>,
     internal: bool,
 }
 
@@ -1343,7 +1344,17 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                         attributes.module = attribute
                             .string_literal_params
                             .first()
-                            .map(|&x| self.str_from_utf8_for_bytes_in_arena(x));
+                            .map(|&x| self.str_from_utf8_for_bytes_in_arena(x))
+                            .and_then(|x| {
+                                let mut chars = x.split('.');
+                                match chars.next() {
+                                    None => None,
+                                    Some(s) => {
+                                        let rest = chars.collect::<std::vec::Vec<_>>();
+                                        Some(self.alloc(Module_(s, self.alloc(rest))))
+                                    }
+                                }
+                            });
                     }
                     "__Internal" => {
                         attributes.internal = true;
@@ -2939,7 +2950,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         self.add_record(
             name.1,
             self.alloc(typing_defs::RecordDefType {
-                module: None, // TODO: grab module from attributes
+                module: &None, // TODO: grab module from attributes
                 name: name.into(),
                 extends: self
                     .expect_name(extends_opt)
@@ -3004,7 +3015,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         let tparams = self.pop_type_params(generic_params);
         let parsed_attributes = self.to_attributes(attributes);
         let typedef = self.alloc(TypedefType {
-            module: parsed_attributes.module,
+            module: self.alloc(parsed_attributes.module),
             pos,
             vis: if parsed_attributes.internal {
                 aast::TypedefVisibility::Tinternal
@@ -3067,7 +3078,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         let tparams = self.pop_type_params(generic_params);
         let parsed_attributes = self.to_attributes(attributes);
         let typedef = self.alloc(TypedefType {
-            module: parsed_attributes.module,
+            module: self.alloc(parsed_attributes.module),
             pos,
             vis: if parsed_attributes.internal {
                 aast::TypedefVisibility::Tinternal
@@ -3317,7 +3328,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                     s.into_bump_str()
                 });
                 let fun_elt = self.alloc(FunElt {
-                    module: parsed_attributes.module,
+                    module: self.alloc(parsed_attributes.module),
                     internal: parsed_attributes.internal,
                     deprecated,
                     type_,
@@ -3901,7 +3912,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             is_xhp,
             has_xhp_keyword: xhp_keyword.is_token(TokenKind::XHP),
             kind: class_kind,
-            module,
+            module: self.alloc(module),
             name: (pos, name),
             tparams,
             where_constraints,
@@ -4289,7 +4300,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             is_xhp: false,
             has_xhp_keyword: false,
             kind: ClassishKind::Cenum,
-            module: None, // TODO: grab module from attributes
+            module: &None, // TODO: grab module from attributes
             name: id.into(),
             tparams: &[],
             where_constraints: &[],
@@ -4445,7 +4456,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             is_xhp: false,
             has_xhp_keyword: false,
             kind: class_kind,
-            module: None, // TODO: grab module from attributes
+            module: &None, // TODO: grab module from attributes
             name: name.into(),
             tparams: &[],
             where_constraints: &[],

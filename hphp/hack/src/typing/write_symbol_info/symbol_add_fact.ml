@@ -280,7 +280,6 @@ let add_type_const_defn_fact ctx source_map tc decl_id progress =
      * as a value here *)
     match tc.c_tconst_kind with
     | TCConcrete { c_tc_type = h }
-    | TCPartiallyAbstract { c_patc_type = h; _ }
     | TCAbstract { c_atc_default = Some h; _ } ->
       let ty = get_type_from_hint ctx h in
       ("type", build_type_json_nested ty) :: base_fields

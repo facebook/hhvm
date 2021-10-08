@@ -653,6 +653,8 @@ vm_decode_function(const_variant_ref function,
 }
 
 Variant vm_call_user_func(const_variant_ref function, const Variant& params,
+                          RuntimeCoeffects providedCoeffects
+                            /* = RuntimeCoeffects::fixme() */,
                           bool checkRef /* = false */,
                           bool allowDynCallNoPointer /* = false */) {
   CallCtx ctx;
@@ -660,12 +662,11 @@ Variant vm_call_user_func(const_variant_ref function, const Variant& params,
   if (ctx.func == nullptr || (!isContainer(params) && !params.isNull())) {
     return uninit_null();
   }
-  auto ret = Variant::attach(
+  return Variant::attach(
     g_context->invokeFunc(ctx.func, params, ctx.this_, ctx.cls,
-                          RuntimeCoeffects::fixme(), ctx.dynamic,
+                          providedCoeffects, ctx.dynamic,
                           checkRef, allowDynCallNoPointer)
   );
-  return ret;
 }
 
 Variant

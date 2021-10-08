@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<820e429a867b0e377b57a09e74fc37e5>>
+// @generated SignedSource<<40c7ae3771821c272e326c38b2aa733e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -145,13 +145,6 @@ pub trait Visitor<'node> {
         &mut self,
         c: &mut <Self::P as Params>::Context,
         p: &'node ClassId_<<Self::P as Params>::Ex, <Self::P as Params>::En>,
-    ) -> Result<(), <Self::P as Params>::Error> {
-        p.recurse(c, self.object())
-    }
-    fn visit_class_partially_abstract_typeconst(
-        &mut self,
-        c: &mut <Self::P as Params>::Context,
-        p: &'node ClassPartiallyAbstractTypeconst,
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }

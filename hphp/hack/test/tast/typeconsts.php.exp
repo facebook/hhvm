@@ -20,8 +20,8 @@ Errors:
         { c_tconst_user_attributes = []; c_tconst_name = ([7:23-27], "Tacd");
           c_tconst_kind = (TCAbstract { c_atc_as_constraint = (Some ([7:31-34], (Hprim Tnum))); c_atc_super_constraint = None; c_atc_default = (Some ([7:37-40], (Hprim Tint))) });
           c_tconst_span = [7:3-41]; c_tconst_doc_comment = None; c_tconst_is_ctx = false };
-        { c_tconst_user_attributes = []; c_tconst_name = ([8:14-17], "Tpa");
-          c_tconst_kind = (TCPartiallyAbstract { c_patc_constraint = ([8:21-24], (Hprim Tnum)); c_patc_type = ([8:27-30], (Hprim Tint)) }); 
+        { c_tconst_user_attributes = []; c_tconst_name = ([8:14-17], "Tpa"); 
+          c_tconst_kind = (TCConcrete { c_tc_type = ([8:27-30], (Hprim Tint)) }); 
           c_tconst_span = [8:3-31]; c_tconst_doc_comment = None; c_tconst_is_ctx = false };
         { c_tconst_user_attributes = []; c_tconst_name = ([9:14-16], "Tc"); 
           c_tconst_kind = (TCConcrete { c_tc_type = ([9:19-22], (Hprim Tint)) }); 

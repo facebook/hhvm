@@ -1,0 +1,5 @@
+=== Shape analysis results for entity_assignment2.php
+Constraints for \f:
+EX [4:8-14]
+SK [4:8-14] => a : #2062
+

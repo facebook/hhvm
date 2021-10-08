@@ -2834,6 +2834,7 @@ dependencies = [
  "ocamlrep",
  "ocamlrep_derive",
  "pretty_assertions",
+ "rusqlite",
  "serde",
  "static_assertions",
 ]
@@ -3247,6 +3248,7 @@ dependencies = [
  "cxx",
  "cxx-build",
  "decl_provider",
+ "external_decl_provider",
  "hhbc_by_ref_compile",
  "libc",
  "log",

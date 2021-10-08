@@ -152,7 +152,6 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
             c_atc_super_constraint = super;
             c_atc_default = default;
           }
-      | TCPartiallyAbstract _ -> failwith "unreachable"
 
     method! on_class_typeconst_def env tc =
       if tc.c_tconst_is_ctx then

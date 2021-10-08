@@ -136,13 +136,6 @@ module LocalChanges = struct
         "
       table_name
 
-  let update_sqlite =
-    Printf.sprintf
-      "
-          UPDATE %s SET LOCAL_CHANGES = ? WHERE ID = 0;
-        "
-      table_name
-
   let get_sqlite =
     Printf.sprintf
       "
@@ -158,23 +151,6 @@ module LocalChanges = struct
     Sqlite3.bind insert_stmt 2 (Sqlite3.Data.TEXT base_content_version)
     |> check_rc db;
     Sqlite3.step insert_stmt |> check_rc db
-
-  let update db stmt_cache (local_changes : local_changes) =
-    if Relative_path.Map.cardinal local_changes.file_deltas > 0 then
-      HackEventLogger.naming_sqlite_local_changes_nonempty "update";
-    let (local_changes_saved : blob_format) =
-      Relative_path.Map.map local_changes.file_deltas ~f:(fun delta ->
-          match delta with
-          | Modified fi -> Modified (FileInfo.to_saved fi)
-          | Deleted -> Deleted)
-    in
-    let local_changes_blob =
-      Marshal.to_string local_changes_saved [Marshal.No_sharing]
-    in
-    let update_stmt = StatementCache.make_stmt stmt_cache update_sqlite in
-    Sqlite3.bind update_stmt 1 (Sqlite3.Data.BLOB local_changes_blob)
-    |> check_rc db;
-    Sqlite3.step update_stmt |> check_rc db
 
   let get stmt_cache =
     let get_stmt = StatementCache.make_stmt stmt_cache get_sqlite in
@@ -248,6 +224,26 @@ module FileInfoTable = struct
       "
       table_name
 
+  let delete_sqlite =
+    Printf.sprintf
+      "
+        DELETE FROM %s WHERE PATH_PREFIX_TYPE = ? AND PATH_SUFFIX = ?
+      "
+      table_name
+
+  let get_file_info_id_sqlite =
+    Printf.sprintf
+      "
+        SELECT
+          FILE_INFO_ID
+        FROM
+          %s
+        WHERE
+          PATH_PREFIX_TYPE = ?
+          AND PATH_SUFFIX = ?
+      "
+      table_name
+
   let get_sqlite =
     Printf.sprintf
       "
@@ -275,6 +271,18 @@ module FileInfoTable = struct
         ORDER BY PATH_PREFIX_TYPE, PATH_SUFFIX;
       "
       table_name
+
+  let delete db stmt_cache relative_path =
+    let prefix_type =
+      Sqlite3.Data.INT
+        (Int64.of_int
+           (Relative_path.prefix_to_enum (Relative_path.prefix relative_path)))
+    in
+    let suffix = Sqlite3.Data.TEXT (Relative_path.suffix relative_path) in
+    let delete_stmt = StatementCache.make_stmt stmt_cache delete_sqlite in
+    Sqlite3.bind delete_stmt 1 prefix_type |> check_rc db;
+    Sqlite3.bind delete_stmt 2 suffix |> check_rc db;
+    Sqlite3.step delete_stmt |> check_rc db
 
   let insert
       db
@@ -397,6 +405,24 @@ module FileInfoTable = struct
       failwith
         (Printf.sprintf "Failure retrieving row: %s" (Sqlite3.Rc.to_string rc))
 
+  let get_file_info_id db stmt_cache path =
+    let get_stmt =
+      StatementCache.make_stmt stmt_cache get_file_info_id_sqlite
+    in
+    let prefix_type =
+      Relative_path.prefix_to_enum (Relative_path.prefix path)
+    in
+    let suffix = Relative_path.suffix path in
+    Sqlite3.bind get_stmt 1 (Sqlite3.Data.INT (Int64.of_int prefix_type))
+    |> check_rc db;
+    Sqlite3.bind get_stmt 2 (Sqlite3.Data.TEXT suffix) |> check_rc db;
+    match Sqlite3.step get_stmt with
+    | Sqlite3.Rc.DONE -> None
+    | Sqlite3.Rc.ROW -> Some (column_int64 get_stmt 0)
+    | rc ->
+      failwith
+        (Printf.sprintf "Failure retrieving row: %s" (Sqlite3.Rc.to_string rc))
+
   let fold stmt_cache ~init ~f =
     let iter_stmt = StatementCache.make_stmt stmt_cache iter_sqlite in
     let f iter_stmt acc =
@@ -434,6 +460,18 @@ module SymbolTable = struct
     "
       table_name
 
+  let create_temporary_index_sqlite =
+    Printf.sprintf
+      "
+    CREATE INDEX IF NOT EXISTS SYMBOLS_FILE_INFO_ID ON %s (FILE_INFO_ID);
+    "
+      table_name
+
+  let drop_temporary_index_sqlite =
+    Printf.sprintf "
+    DROP INDEX SYMBOLS_FILE_INFO_ID;
+    "
+
   let insert_sqlite =
     Printf.sprintf
       "
@@ -445,6 +483,13 @@ module SymbolTable = struct
         FILE_INFO_ID)
       VALUES (?, ?, ?, ?, ?);
     "
+      table_name
+
+  let delete_sqlite =
+    Printf.sprintf
+      "
+      DELETE FROM %s WHERE FILE_INFO_ID = ?
+      "
       table_name
 
   let (get_sqlite, get_sqlite_case_insensitive) =
@@ -464,6 +509,11 @@ module SymbolTable = struct
     in
     ( Str.global_replace (Str.regexp "{hash}") "HASH" base,
       Str.global_replace (Str.regexp "{hash}") "CANON_HASH" base )
+
+  let delete db stmt_cache file_info_id =
+    let delete_stmt = StatementCache.make_stmt stmt_cache delete_sqlite in
+    Sqlite3.bind delete_stmt 1 (Sqlite3.Data.INT file_info_id) |> check_rc db;
+    Sqlite3.step delete_stmt |> check_rc db
 
   (** Note: name parameter is used solely for debugging; it's only the hash and canon_hash that get inserted. *)
   let insert
@@ -671,14 +721,45 @@ let save_file_infos db_name file_info_map ~base_content_version =
 
 let copy_and_update
     ~(existing_db : db_path) ~(new_db : db_path) (local_changes : local_changes)
-    : unit =
+    : save_result =
   let (Db_path existing_path, Db_path new_path) = (existing_db, new_db) in
   FileUtil.cp ~force:(FileUtil.Ask (fun _ -> false)) [existing_path] new_path;
   let new_db = open_db new_db in
   let stmt_cache = StatementCache.make ~db:new_db in
-  LocalChanges.update new_db stmt_cache local_changes;
+  Sqlite3.exec new_db "BEGIN TRANSACTION;" |> check_rc new_db;
+  Sqlite3.exec new_db SymbolTable.create_temporary_index_sqlite
+  |> check_rc new_db;
+  let result =
+    Relative_path.Map.fold
+      local_changes.file_deltas
+      ~init:empty_save_result
+      ~f:(fun path file_info acc ->
+        let file_info_id =
+          FileInfoTable.get_file_info_id new_db stmt_cache path
+        in
+        if Option.is_some file_info_id then (
+          let file_info_id = Option.value_exn file_info_id in
+          SymbolTable.delete new_db stmt_cache file_info_id;
+          FileInfoTable.delete new_db stmt_cache path
+        );
+        match file_info with
+        | Deleted -> acc
+        | Modified file_info ->
+          let (symbols_added, errors) =
+            save_file_info new_db stmt_cache path file_info
+          in
+          {
+            files_added = acc.files_added + 1;
+            symbols_added = acc.symbols_added + symbols_added;
+            errors = List.rev_append acc.errors errors;
+          })
+  in
+  Sqlite3.exec new_db "END TRANSACTION;" |> check_rc new_db;
   StatementCache.close stmt_cache;
-  ()
+  Sqlite3.exec new_db SymbolTable.drop_temporary_index_sqlite |> check_rc new_db;
+  (* This reclaims space after deleting the index *)
+  Sqlite3.exec new_db "VACUUM;" |> check_rc new_db;
+  result
 
 let get_local_changes (db_path : db_path) : local_changes =
   let (_db, stmt_cache) = get_db_and_stmt_cache db_path in

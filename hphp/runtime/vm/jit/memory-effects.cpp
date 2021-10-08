@@ -374,12 +374,11 @@ GeneralEffects may_reenter(const IRInstruction& inst, GeneralEffects x) {
    * writing anyway.
    */
   auto const new_kills = [&] {
-    if (inst.marker().fixupFP() == nullptr) return AEmpty;
+    if (inst.marker().fp() == nullptr) return AEmpty;
 
     auto const offset = [&]() -> IRSPRelOffset {
-      auto const fp = canonical(inst.marker().fixupFP());
+      auto const fp = canonical(inst.marker().fp());
       if (fp->inst()->is(BeginInlining)) {
-        assertx(inst.marker().resumeMode() == ResumeMode::None);
         auto const extra = fp->inst()->extra<BeginInlining>();
         auto const fpOffset = extra->spOffset;
         auto const numSlotsInFrame = extra->func->numSlotsInFrame();

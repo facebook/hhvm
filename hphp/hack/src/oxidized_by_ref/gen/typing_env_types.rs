@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<47f8b38fca3a1aa91a10f554dbf10f57>>
+// @generated SignedSource<<a87ec0c2f88a988bc64a8e97c3be95a7>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -110,6 +110,7 @@ pub struct Genv<'a> {
     pub tcopt: &'a typechecker_options::TypecheckerOptions<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub callable_pos: &'a pos::Pos<'a>,
+    pub readonly: bool,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub return_: &'a typing_env_return_info::TypingEnvReturnInfo<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -127,7 +128,7 @@ pub struct Genv<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub file: &'a relative_path::RelativePath<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub this_module: Option<&'a str>,
+    pub this_module: &'a typing_modules::TypingModules<'a>,
     pub this_internal: bool,
 }
 impl<'a> TrivialDrop for Genv<'a> {}

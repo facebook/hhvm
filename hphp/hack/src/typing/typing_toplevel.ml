@@ -369,9 +369,9 @@ let fun_def ctx fd :
     Typing.type_capability env f.f_ctxs f.f_unsafe_ctxs (fst f.f_name)
   in
   let env =
-    Env.set_module
-      env
-      (Naming_attributes_params.get_module_attribute f.f_user_attributes)
+    Env.set_module env
+    @@ Typing_modules.of_maybe_string
+    @@ Naming_attributes_params.get_module_attribute f.f_user_attributes
   in
   let env =
     Env.set_internal
@@ -1376,18 +1376,6 @@ let typeconst_def
         | None -> env
       in
       env
-    | TCPartiallyAbstract { c_patc_constraint = cstr; c_patc_type = ty } ->
-      let (env, cstr) =
-        Phase.localize_hint_no_subst ~ignore_errors:false env cstr
-      in
-      let (env, ty) =
-        Phase.localize_hint_no_subst
-          ~ignore_errors:false
-          ~report_cycle:(pos, name)
-          env
-          ty
-      in
-      Type.sub_type pos Reason.URtypeconst_cstr env ty cstr Errors.unify_error
     | TCConcrete { c_tc_type = ty } ->
       let (env, _ty) =
         Phase.localize_hint_no_subst
@@ -1405,8 +1393,6 @@ let typeconst_def
   let env =
     match c_tconst_kind with
     | TCConcrete { c_tc_type = (pos, Hshape { nsi_field_map; _ }) }
-    | TCPartiallyAbstract
-        { c_patc_type = (pos, Hshape { nsi_field_map; _ }); _ }
     | TCAbstract { c_atc_default = Some (pos, Hshape { nsi_field_map; _ }); _ }
       ->
       let get_name sfi = sfi.sfi_name in
@@ -2103,9 +2089,9 @@ let class_def ctx c =
   let env = Env.set_env_pessimize env in
   Typing_helpers.add_decl_errors (Option.bind tc ~f:Cls.decl_errors);
   let env =
-    Env.set_module
-      env
-      (Naming_attributes_params.get_module_attribute c.c_user_attributes)
+    Env.set_module env
+    @@ Typing_modules.of_maybe_string
+    @@ Naming_attributes_params.get_module_attribute c.c_user_attributes
   in
   let env =
     Env.set_internal

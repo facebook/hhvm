@@ -52,8 +52,5 @@ let handler =
             Option.iter a ~f:on_hint;
             Option.iter s ~f:on_hint;
             Option.iter d ~f:on_hint
-          | TCConcrete { c_tc_type = t } -> on_hint t
-          | TCPartiallyAbstract { c_patc_constraint = c; c_patc_type = t } ->
-            on_hint c;
-            on_hint t)
+          | TCConcrete { c_tc_type = t } -> on_hint t)
   end

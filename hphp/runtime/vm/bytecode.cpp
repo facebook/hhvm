@@ -1012,7 +1012,8 @@ static inline Class* lookupClsRef(TypedValue* input) {
   } else if (isClassType(input->m_type)) {
     class_ = input->m_data.pclass;
   } else {
-    raise_error("Cls: Expected string or object");
+    raise_error("Cls: Expected string or object, got %s",
+                describe_actual_type(input).c_str());
   }
   return class_;
 }

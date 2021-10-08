@@ -16,7 +16,8 @@ type ce_visibility =
   | Vpublic
   | Vprivate of string
   | Vprotected of string
-  | Vinternal of string
+  (* When we construct `Vinternal`, we are guaranteed to be inside a module *)
+  | Vinternal of Typing_modules.module_
 [@@deriving eq, show]
 
 (* Represents <<__Policied()>> or <<__InferFlows>> attribute *)

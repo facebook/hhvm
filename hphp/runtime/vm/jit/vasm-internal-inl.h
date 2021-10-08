@@ -260,13 +260,13 @@ inline void Venv::record_inline_stack(TCA addr) {
   // Do not record stack if we are not inlining or the code is unreachable.
   if (frame <= 0) return;
 
-  uint32_t callOff = 0;
-  auto const sbOff = origin->marker().frameSBOff().offset;
+  auto const& marker = origin->marker();
+  assertx(marker.fp()->inst()->is(BeginInlining));
+  auto const sbOff =
+    marker.fixupSBOff().offset - marker.func()->numSlotsInFrame();
   auto const func = unit.frames[frame].func;
   auto const in_builtin = func && func->isCPPBuiltin();
-  if (origin && !in_builtin) {
-    callOff = origin->marker().bcOff();
-  }
+  uint32_t callOff = in_builtin ? 0 : marker.bcOff();
   stacks.emplace_back(addr, IStack{frame - 1, pending_frames, callOff, sbOff});
 }
 

@@ -34,6 +34,7 @@ namespace HPHP {
 extern uintptr_t lowArenaMinAddr();
 
 constexpr uintptr_t kLowArenaMaxAddr = 1ull << 32;
+constexpr size_t kLowEmergencySize = 128 << 20;
 constexpr unsigned kUncountedMaxShift = 38;
 constexpr uintptr_t kUncountedMaxAddr = 1ull << kUncountedMaxShift;
 constexpr size_t kHighColdCap = 4ull << 30;
@@ -51,7 +52,8 @@ namespace alloc {
 // List of address ranges ManagedArena can manage.
 enum AddrRangeClass : uint32_t {
   VeryLow = 0,                     // below 2G, 31-bit address
-  Low,                             // [2G, 4G), 32-bit address
+  Low,                             // [2G, 4G - kLowEmergencySize)
+  LowEmergency,                    // [4G - kLowEmergencySize, 4G)
   Uncounted,                       // [4G, kHighArenaMaxAddr)
   UncountedCold,                   // [kHighArenaMaxAddr, kUncountedMaxAddr)
 };

@@ -93,7 +93,7 @@ constexpr int8_t udt(size_t index, bool counted) {
   DT(RFunc,            udt(6,  true))  \
   DT(RClsMeth,         udt(7,  true))  \
   DT(ClsMeth,          udt(8,  false)) \
-  DT(Boolean,          udt(9, false))  \
+  DT(Boolean,          udt(9,  false)) \
   DT(Int64,            udt(10, false)) \
   DT(Double,           udt(11, false)) \
   DT(Func,             udt(12, false)) \

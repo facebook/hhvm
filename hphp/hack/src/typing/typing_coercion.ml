@@ -48,8 +48,9 @@ let coerce_type_impl
     ty_have
     ty_expect
     (on_error : Errors.error_from_reasons_callback) =
+  let is_expected_enforced = equal_enforcement ty_expect.et_enforced Enforced in
   if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then
-    if coerce_for_op then
+    if coerce_for_op && is_expected_enforced then
       (* If the coercion is for a built-in operation, then we want to allow it to apply to
          dynamic *)
       let (env, tunion) =
@@ -72,9 +73,6 @@ let coerce_type_impl
         ty_expect.et_type
         on_error
   else
-    let is_expected_enforced =
-      equal_enforcement ty_expect.et_enforced Enforced
-    in
     let complex_coercion =
       TypecheckerOptions.complex_coercion (Typing_env.get_tcopt env)
     in

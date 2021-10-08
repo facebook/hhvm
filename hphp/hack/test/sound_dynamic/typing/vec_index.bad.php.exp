@@ -1,0 +1,12 @@
+File "vec_index.bad.php", line 7, characters 5-23:
+Invalid assignment (Typing[4110])
+  File "vec_index.bad.php", line 4, characters 43-45:
+  Expected `int`
+  File "vec_index.bad.php", line 7, characters 21-23:
+  But got `string`
+File "vec_index.bad.php", line 8, characters 5-22:
+Invalid assignment (Typing[4110])
+  File "vec_index.bad.php", line 4, characters 43-45:
+  Expected `int`
+  File "vec_index.bad.php", line 6, characters 21-27:
+  But got `dynamic`

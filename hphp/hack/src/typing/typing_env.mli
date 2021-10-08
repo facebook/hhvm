@@ -165,6 +165,10 @@ val get_return : env -> Typing_env_return_info.t
 
 val set_return : env -> Typing_env_return_info.t -> env
 
+val get_readonly : env -> bool
+
+val set_readonly : env -> bool -> env
+
 val get_params : env -> (locl_ty * Pos.t * param_mode) Local_id.Map.t
 
 val set_param : env -> Local_id.t -> locl_ty * Pos.t * param_mode -> env
@@ -243,11 +247,11 @@ val invalid_type_hint_assert_primary_pos_in_current_decl :
 
 val set_fn_kind : env -> Ast_defs.fun_kind -> env
 
-val set_module : env -> string option -> env
+val set_module : env -> Typing_modules.t -> env
 
 val set_internal : env -> bool -> env
 
-val get_module : env -> string option
+val get_module : env -> Typing_modules.t
 
 val get_internal : env -> bool
 

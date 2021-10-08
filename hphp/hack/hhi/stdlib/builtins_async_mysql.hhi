@@ -107,6 +107,18 @@ class AsyncMysqlConnectionPool {
     AsyncMysqlConnectionOptions $conn_opts,
     string $caller = ""): Awaitable<AsyncMysqlConnection> { }
 
+  public function connectAndQuery(
+    Traversable<string> $queries,
+    string $host,
+    int $port,
+    string $dbname,
+    string $user,
+    string $password,
+    AsyncMysqlConnectionOptions $conn_opts,
+    string $extra_key = "",
+    dict<string, string> $query_attributes = dict[],
+  ): Awaitable<(AsyncMysqlConnectResult, Vector<AsyncMysqlQueryResult>)> { }
+
   public function getPoolStats(): darray { }
 }
 

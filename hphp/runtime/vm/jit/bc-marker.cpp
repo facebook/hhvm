@@ -21,6 +21,8 @@
 
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/resumable.h"
+#include "hphp/runtime/vm/jit/extra-data.h"
+#include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 
 namespace HPHP { namespace jit {
@@ -30,11 +32,11 @@ namespace HPHP { namespace jit {
 std::string BCMarker::show() const {
   assertx(valid());
   return folly::format(
-    "--- bc {}, fp {}, spOff {}, sbOff {} {}",
+    "--- bc {}, fp {}, fixupFP {}, spOff {}, {}",
     showShort(m_sk),
     m_fp ? folly::to<std::string>(m_fp->id()) : "_",
+    m_fixupFP ? folly::to<std::string>(m_fixupFP->id()) : "_",
     m_bcSPOff.offset,
-    m_frameStackBaseOff.offset,
     m_profTransIDs.empty()
       ? ""
       : folly::sformat(" [profTrans={}]", folly::join(',', m_profTransIDs))
@@ -46,6 +48,43 @@ bool BCMarker::valid() const {
   // instructions like idx, which can create php-level calls.
   assertx(m_profTransIDs.find(kInvalidTransID) == m_profTransIDs.end());
   return m_sk.valid();
+}
+
+SBInvOffset BCMarker::fixupSBOff() const {
+  assertx(valid());
+  if (fp() == fixupFP()) return SBInvOffset{0};
+
+  assertx(fp()->inst()->is(BeginInlining));
+  auto const fpBIData = fp()->inst()->extra<BeginInlining>();
+  auto const fpStackBaseOffset =
+    fpBIData->spOffset - fpBIData->func->numSlotsInFrame();
+
+  auto const fixupFPStackBaseOffset = [&] {
+    if (fixupFP()->inst()->is(BeginInlining)) {
+      auto const fixupFPBIData = fixupFP()->inst()->extra<BeginInlining>();
+      return fixupFPBIData->spOffset - fixupFPBIData->func->numSlotsInFrame();
+    }
+
+    assertx(fixupFP()->inst()->is(DefFP, DefFuncEntryFP));
+    auto const defSP = fp()->inst()->src(0)->inst();
+    auto const irSPOff = defSP->extra<DefStackData>()->irSPOff;
+    return SBInvOffset{0}.to<IRSPRelOffset>(irSPOff);
+  }();
+
+  return SBInvOffset{fixupFPStackBaseOffset - fpStackBaseOffset};
+}
+
+SrcKey BCMarker::fixupSk() const {
+  assertx(valid());
+  if (fp() == fixupFP()) return sk();
+
+  auto curFP = fp();
+  do {
+    assertx(curFP->inst()->is(BeginInlining));
+    auto const nextFP = curFP->inst()->src(1);
+    if (nextFP == fixupFP()) return curFP->inst()->marker().sk();
+    curFP = nextFP;
+  } while (true);
 }
 
 //////////////////////////////////////////////////////////////////////

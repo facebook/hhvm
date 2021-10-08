@@ -1549,40 +1549,9 @@ void adjust_inline_marker(IRInstruction& inst, Frames& scratch_frames,
   assertx(curFp == scratch_frames.back());
   if (curFp == fp) return;
   assertx(i + 1 < scratch_frames.size());
-  auto const fixupSk = scratch_frames[i + 1]->inst()->marker().sk();
-
-  // Compute the difference between the current and the previous stack base.
   assertx(curFp->inst()->is(BeginInlining));
-  auto const curBIData = curFp->inst()->extra<BeginInlining>();
-  auto const curStackBaseOffset =
-    curBIData->spOffset - curBIData->func->numSlotsInFrame();
-  auto const newStackBaseOffset = [&] {
-    if (fp->inst()->is(BeginInlining)) {
-      auto const newBIData = fp->inst()->extra<BeginInlining>();
-      return newBIData->spOffset - newBIData->func->numSlotsInFrame();
-    }
-    assertx(fp->inst()->is(DefFP, DefFuncEntryFP));
-    auto const defSP = curFp->inst()->src(0)->inst();
-    auto const irSPOff = defSP->extra<DefStackData>()->irSPOff;
-    return SBInvOffset{0}.to<IRSPRelOffset>(irSPOff);
-  }();
-  auto const stackBaseDelta = newStackBaseOffset - curStackBaseOffset;
-  auto const newSBOffset = [&] {
-    if (fp->inst()->is(BeginInlining)) {
-      auto const newBIData = fp->inst()->extra<BeginInlining>();
-      return newBIData->spOffset;
-    }
-    assertx(fp->inst()->is(DefFP, DefFuncEntryFP));
-    auto const defSP = curFp->inst()->src(0)->inst();
-    auto const irSPOff = defSP->extra<DefStackData>()->irSPOff;
-    return SBInvOffset{0}.to<IRSPRelOffset>(irSPOff);
-  }();
 
-  inst.marker() = inst.marker()
-    .adjustFixupFP(fp)
-    .adjustSPOff(inst.marker().bcSPOff() + stackBaseDelta)
-    .adjustFixupSK(fixupSk)
-    .adjustFrameStackBaseOff(inst.marker().frameSBOff() + (newSBOffset - curBIData->spOffset));
+  inst.marker() = inst.marker().adjustFixupFP(fp);
 }
 
 void insert_eager_sync(Global& genv, IRInstruction& endCatch) {
@@ -1705,7 +1674,8 @@ void fix_inline_frames(Global& genv) {
         InlineCallData data;
         data.spOffset = parent->extra<BeginInlining>()->spOffset;
         data.returnSk = parent->marker().sk().advanced();
-        data.returnSPOff = parent->marker().bcSPOff() - kNumActRecCells + 1;
+        data.returnSPOff = parent->marker().fixupBcSPOff()
+          - kNumActRecCells + 1;
         genv.unit.replace(&inst, InlineCall, data, parent->dst(), fp);
         // fallthrough to the InlineCall logic
       }

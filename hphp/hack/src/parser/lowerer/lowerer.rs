@@ -4439,7 +4439,7 @@ where
                 Ok(class.consts.append(&mut class_consts))
             }
             TypeConstDeclaration(c) => {
-                use ast::ClassTypeconst::{TCAbstract, TCConcrete, TCPartiallyAbstract};
+                use ast::ClassTypeconst::{TCAbstract, TCConcrete};
                 if !c.type_parameters.is_missing() {
                     Self::raise_parsing_error(node, env, &syntax_error::tparams_in_tconst);
                 }
@@ -4459,15 +4459,13 @@ where
                         default: type__,
                     })
                 } else if let Some(type_) = type__ {
-                    match as_constraint {
-                        None => TCConcrete(ast::ClassConcreteTypeconst { c_tc_type: type_ }),
-                        Some(constraint) => {
-                            TCPartiallyAbstract(ast::ClassPartiallyAbstractTypeconst {
-                                constraint,
-                                type_,
-                            })
-                        }
+                    if as_constraint.is_some() {
+                        Self::raise_hh_error(
+                            env,
+                            NastCheck::partially_abstract_typeconst_definition(name.0.clone()),
+                        );
                     }
+                    TCConcrete(ast::ClassConcreteTypeconst { c_tc_type: type_ })
                 } else {
                     Self::raise_hh_error(
                         env,

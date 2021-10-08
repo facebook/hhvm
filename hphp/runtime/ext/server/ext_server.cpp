@@ -195,7 +195,8 @@ Variant HHVM_FUNCTION(xbox_process_call_message,
   if (!args.isArray()) {
     raise_error("Error decoding xbox call message");
   }
-  return vm_call_user_func(fn, args.toArray(), false, true);
+  return vm_call_user_func(fn, args.toArray(), RuntimeCoeffects::fixme(),
+                           false, true);
 }
 
 bool HHVM_FUNCTION(server_is_stopping) {

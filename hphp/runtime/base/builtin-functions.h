@@ -186,14 +186,20 @@ bool checkMethCallerTarget(const Func* meth, const Class* ctx, bool error);
 void checkMethCaller(const Func* func, const Class* ctx);
 
 Variant vm_call_user_func(const_variant_ref function, const Variant& params,
+                          RuntimeCoeffects providedCoeffects
+                            = RuntimeCoeffects::fixme(),
                           bool checkRef = false,
                           bool allowDynCallNoPointer = false);
 template<typename T>
-Variant vm_call_user_func(T&& t, const Variant& params, bool checkRef = false,
+Variant vm_call_user_func(T&& t, const Variant& params,
+                          RuntimeCoeffects providedCoeffects
+                            = RuntimeCoeffects::fixme(),
+                          bool checkRef = false,
                           bool allowDynCallNoPointer = false) {
   const Variant function{std::forward<T>(t)};
   return vm_call_user_func(
-    const_variant_ref{function}, params, checkRef, allowDynCallNoPointer
+    const_variant_ref{function}, params, providedCoeffects,
+    checkRef, allowDynCallNoPointer
   );
 }
 

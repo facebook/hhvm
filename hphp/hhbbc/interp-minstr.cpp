@@ -2012,14 +2012,12 @@ void in(ISS& env, const bc::BaseSC& op) {
     return unreachable(env);
   }
 
-  auto mightNotBeCOW =
-    lookup.ty.couldBe(BCounted) && !lookup.ty.subtypeOf(BArrLike);
-
+  auto mightBeObj = lookup.ty.couldBe(BObj);
   auto const mightMutableThrow = op.subop4 == ReadonlyOp::Mutable &&
     (lookup.readOnly == TriBool::Maybe || lookup.readOnly == TriBool::Yes);
-  auto const mightROCOWThrow = op.subop4 == ReadonlyOp::CheckROCOW && mightNotBeCOW;
+  auto const mightROCOWThrow = op.subop4 == ReadonlyOp::CheckROCOW && mightBeObj;
   auto const mightMutROCOWThrow = op.subop4 == ReadonlyOp::CheckMutROCOW &&
-    (lookup.readOnly == TriBool::Maybe || lookup.readOnly == TriBool::Yes) && mightNotBeCOW;
+    (lookup.readOnly == TriBool::Maybe || lookup.readOnly == TriBool::Yes) && mightBeObj;
 
   auto const mightReadOnlyThrow = checkReadonlyOpMaybeThrows() &&
     (mightMutableThrow || mightROCOWThrow || mightMutROCOWThrow);
@@ -2067,7 +2065,7 @@ void in(ISS& env, const bc::BaseL& op) {
   auto throws = false;
 
   if (checkReadonlyOpMaybeThrows(ReadonlyOp::CheckROCOW, op.subop3)) {
-    if (ty.couldBe(BCounted) && !ty.subtypeOf(BArrLike)) throws = true;
+    if (ty.couldBe(BObj)) throws = true;
   }
 
   // An Uninit local base can raise a notice.

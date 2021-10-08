@@ -2319,7 +2319,7 @@ class ReflectionTypeConstant implements Reflector {
    * reflection.hhi. */
   public function getTypeStructure()[] {
     return HH\type_structure(
-      $this->getDeclaringClassname(),
+      $this->getClassname(),
       $this->getName()
     );
   }

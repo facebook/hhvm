@@ -37,5 +37,7 @@ struct HhvmDeclProvider {
   std::map<std::string, std::pair<DeclResult, ::rust::Box<Bump>>> m_cache;
 };
 
+extern "C" {
 Decls const* hhvm_decl_provider_get_decl(void* provider, char const* symbol);
+}
 }

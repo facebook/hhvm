@@ -47,8 +47,10 @@ Decls const* HhvmDeclProvider::getDecl(AutoloadMap::KindOf kind, char const* sym
   }
 }
 
-Decls const* hhvm_decl_provider_get_decl( void* provider, char const* symbol) {
+extern "C" {
+Decls const* hhvm_decl_provider_get_decl(void* provider, char const* symbol) {
   return ((HhvmDeclProvider*)provider)->getDecl(HPHP::AutoloadMap::KindOf::Type/* TODO: pass correct symbol kind */, symbol);
+}
 }
 
 }

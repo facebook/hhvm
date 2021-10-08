@@ -165,6 +165,9 @@ CompilerResult hackc_compile(
   CompileAbortMode mode
 ) {
 
+  // Mock HhvmDeclProvider. TODO: Hook up with bytecode cache logic.
+  HhvmDeclProvider decl_provider;
+
   std::uint8_t flags = make_env_flags(
     !SystemLib::s_inited,           // is_systemlib
     false,                          // is_evaled
@@ -175,7 +178,10 @@ CompilerResult hackc_compile(
   );
 
   std::string aliased_namespaces = options.getAliasedNamespacesConfig();
+
   NativeEnv const native_env{
+    reinterpret_cast<std::uint64_t>(&decl_provider),
+    reinterpret_cast<std::uint64_t>(&hhvm_decl_provider_get_decl),
     filename,
     aliased_namespaces,
     s_misc_config,

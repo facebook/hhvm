@@ -5,14 +5,17 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use cxx::CxxString;
-use decl_provider::NoDeclProvider;
+use external_decl_provider::ExternalDeclProvider;
 use hhbc_by_ref_compile::EnvFlags;
+use libc::c_char;
 use oxidized::relative_path::RelativePath;
 use parser_core_types::source_text::SourceText;
 
 #[cxx::bridge]
 mod ffi {
     pub struct NativeEnv {
+        decl_provider: u64,
+        decl_getter: u64,
         filepath: String,
         aliased_namespaces: String,
         include_roots: String,
@@ -111,6 +114,16 @@ pub fn hackc_compile_from_text_cpp_ffi<'a>(
         );
         let mut output = String::new();
         let alloc = bumpalo::Bump::new();
+        let decl_getter_ptr = env.decl_getter as *const ();
+        let hhvm_provider_ptr = env.decl_provider as *const ();
+        let c_decl_getter_fn = unsafe {
+            std::mem::transmute::<
+                *const (),
+                extern "C" fn(*const std::ffi::c_void, *const c_char) -> *const std::ffi::c_void,
+            >(decl_getter_ptr)
+        };
+        let c_hhvm_provider_ptr =
+            unsafe { std::mem::transmute::<*const (), *const std::ffi::c_void>(hhvm_provider_ptr) };
         hhbc_by_ref_compile::from_text(
             &alloc,
             &compile_env,
@@ -118,7 +131,10 @@ pub fn hackc_compile_from_text_cpp_ffi<'a>(
             &mut output,
             text,
             Some(&native_env),
-            unified_decl_provider::DeclProvider::NoDeclProvider(NoDeclProvider),
+            unified_decl_provider::DeclProvider::ExternalDeclProvider(ExternalDeclProvider::new(
+                c_decl_getter_fn,
+                c_hhvm_provider_ptr,
+            )),
         )?;
         Ok(output)
     })

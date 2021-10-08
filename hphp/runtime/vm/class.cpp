@@ -1671,7 +1671,7 @@ TypedValue Class::clsCnsGet(const StringData* clsCnsName,
                const_cast<Class*>(this),
                1,
                args,
-               RuntimeCoeffects::pure(),
+               RuntimeCoeffects::fixme(),
                false,
                false
              );

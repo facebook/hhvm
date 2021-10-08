@@ -697,6 +697,27 @@ functor
           ~init:SSet.empty
           ~f:(fun acc (_, cid, _) -> SSet.add acc cid)
 
+    let get_classes_from_old_and_new ~new_naming_table ~old_naming_table path =
+      let new_classes =
+        match Naming_table.get_file_info new_naming_table path with
+        | None -> SSet.empty
+        | Some info ->
+          List.fold
+            info.FileInfo.classes
+            ~init:SSet.empty
+            ~f:(fun acc (_, cid, _) -> SSet.add acc cid)
+      in
+      let old_classes =
+        match Naming_table.get_file_info old_naming_table path with
+        | None -> SSet.empty
+        | Some info ->
+          List.fold
+            info.FileInfo.classes
+            ~init:SSet.empty
+            ~f:(fun acc (_, cid, _) -> SSet.add acc cid)
+      in
+      SSet.union new_classes old_classes
+
     let clear_failed_parsing env errors failed_parsing =
       (* In most cases, set of files processed in a phase is a superset
        * of files from previous phase - i.e if we run decl on file A, we'll also
@@ -847,11 +868,13 @@ functor
         ~(naming_table : Naming_table.t)
         ~(oldified_defs : FileInfo.names)
         ~(profiling : CgroupProfiler.Profiling.t) : redecl_phase1_result =
-      let naming_table =
+      let get_classes =
         if genv.local_config.ServerLocalConfig.old_naming_table_for_redecl then
-          env.naming_table
+          get_classes_from_old_and_new
+            ~new_naming_table:naming_table
+            ~old_naming_table:env.naming_table
         else
-          naming_table
+          get_classes ~old_naming_table:naming_table
       in
       let bucket_size = genv.local_config.SLC.type_decl_bucket_size in
       let defs_to_redecl = get_defs fast in
@@ -869,7 +892,7 @@ functor
           ~bucket_size
           ctx
           genv.workers
-          (get_classes ~old_naming_table:naming_table)
+          get_classes
           ~previously_oldified_defs:oldified_defs
           ~defs:fast
       in
@@ -910,11 +933,13 @@ functor
         ~(oldified_defs : FileInfo.names)
         ~(to_redecl_phase2_deps : Typing_deps.DepSet.t)
         ~(profiling : CgroupProfiler.Profiling.t) : redecl_phase2_result =
-      let naming_table =
+      let get_classes =
         if genv.local_config.ServerLocalConfig.old_naming_table_for_redecl then
-          env.naming_table
+          get_classes_from_old_and_new
+            ~new_naming_table:naming_table
+            ~old_naming_table:env.naming_table
         else
-          naming_table
+          get_classes ~old_naming_table:naming_table
       in
       let ctx = Provider_utils.ctx_from_server_env env in
       let bucket_size = genv.local_config.SLC.type_decl_bucket_size in
@@ -923,7 +948,7 @@ functor
         ctx
         ~bucket_size
         genv.workers
-        (get_classes ~old_naming_table:naming_table)
+        get_classes
         ~previously_oldified_defs:oldified_defs
         ~defs:defs_to_oldify;
       let oldified_defs = FileInfo.merge_names oldified_defs defs_to_oldify in
@@ -940,7 +965,7 @@ functor
           ~bucket_size
           ctx
           genv.workers
-          (get_classes ~old_naming_table:naming_table)
+          get_classes
           ~previously_oldified_defs:oldified_defs
           ~defs:fast_redecl_phase2_now
       in

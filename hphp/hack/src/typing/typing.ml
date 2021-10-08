@@ -5747,11 +5747,7 @@ and call_parent_construct pos env el unpacked_element =
         | None ->
           Errors.parent_in_trait pos;
           default
-        | Some (c, parent_ty) ->
-          (match Cls.construct c with
-          | (_, Inconsistent) ->
-            Errors.trait_parent_construct_inconsistent pos (Cls.pos c)
-          | _ -> ());
+        | Some (_, parent_ty) ->
           check_parent_construct pos env el unpacked_element parent_ty)
       | Some _self_tc ->
         Errors.undefined_parent pos;

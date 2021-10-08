@@ -5986,14 +5986,6 @@ let internal_method_with_invalid_visibility ~attr_pos ~visibility =
   @@ md_codify
   @@ Ast_defs.show_visibility visibility
 
-let trait_parent_construct_inconsistent pos def_pos =
-  add_list
-    (Typing.err_code Typing.TraitParentConstructInconsistent)
-    ( pos,
-      "This use of `parent::__construct` requires that the parent class be marked <<__ConsistentConstruct>>"
-    )
-    [(def_pos, "Parent definition is here")]
-
 (*****************************************************************************)
 (* Printing *)
 (*****************************************************************************)

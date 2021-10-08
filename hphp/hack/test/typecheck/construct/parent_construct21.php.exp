@@ -1,4 +1,0 @@
-File "parent_construct21.php", line 16, characters 5-27:
-This use of `parent::__construct` requires that the parent class be marked <<__ConsistentConstruct>> (Typing[4451])
-  File "parent_construct21.php", line 3, characters 7-9:
-  Parent definition is here

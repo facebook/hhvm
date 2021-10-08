@@ -779,7 +779,6 @@ void Vgen<X64Asm>::emit(const contenter& i) {
 template<class X64Asm>
 void Vgen<X64Asm>::emit(const nothrow& /*i*/) {
   env.meta.catches.emplace_back(a.frontier(), nullptr);
-  env.record_inline_stack(a.frontier());
 }
 
 template<class X64Asm>

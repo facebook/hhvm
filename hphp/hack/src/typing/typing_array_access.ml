@@ -415,6 +415,22 @@ let rec array_get
         in
         (env, v, dflt_arr_res, idx_err_res)
       | Terr -> (env, err_witness env expr_pos, dflt_arr_res, Ok ty2)
+      | Tdynamic
+        when Typing_env_types.(
+               TypecheckerOptions.enable_sound_dynamic env.genv.tcopt) ->
+        let tv = Typing_make_type.dynamic r in
+        let (env, idx_err_res) =
+          Result.fold
+            ~ok:(fun env -> (env, Ok ty2))
+            ~error:(fun env -> (env, Error (ty2, tv)))
+          @@ Typing_utils.sub_type_res
+               env
+               ~coerce:(Some Typing_logic.CoerceToDynamic)
+               ty2
+               tv
+               (Errors.unify_error_at expr_pos)
+        in
+        (env, ty1, idx_err_res, dflt_arr_res)
       | Tdynamic -> (env, ty1, Ok ty2, dflt_arr_res)
       | Tany _ -> (env, TUtils.mk_tany env expr_pos, dflt_arr_res, Ok ty2)
       | Tprim Tstring ->
@@ -720,6 +736,22 @@ let assign_array_append_with_err ~array_pos ~expr_pos ur env ty1 ty2 =
         let (env, tv') = Typing_union.union env tv ty2 in
         let ty = mk (r, Tvarray tv') in
         (env, ty, Ok ty, Ok ty2)
+      | (r, Tdynamic)
+        when Typing_env_types.(
+               TypecheckerOptions.enable_sound_dynamic env.genv.tcopt) ->
+        let tv = Typing_make_type.dynamic r in
+        let (env, val_err_res) =
+          Result.fold
+            ~ok:(fun env -> (env, Ok ty2))
+            ~error:(fun env -> (env, Error (ty2, tv)))
+          @@ Typing_utils.sub_type_res
+               env
+               ~coerce:(Some Typing_logic.CoerceToDynamic)
+               ty2
+               tv
+               (Errors.unify_error_at expr_pos)
+        in
+        (env, ty1, Ok ty1, val_err_res)
       | (_, Tdynamic) -> (env, ty1, Ok ty1, Ok ty2)
       | (_, Tunapplied_alias _) ->
         Typing_defs.error_Tunapplied_alias_in_illegal_context ()
@@ -916,7 +948,29 @@ let assign_array_get_with_err
             let any = err_witness env expr_pos in
             (any, any)
         in
-        let (env, tk') = Typing_union.union env tk tkey in
+        let (env, tk') =
+          let dyn_t = MakeType.dynamic Reason.Rnone in
+          if
+            (* TODO: Remove the test for sound dynamic. It is never ok to put
+               dynamic as the key to a dict since the key must be a
+               subtype of arraykey. *)
+            Typing_env_types.(
+              TypecheckerOptions.enable_sound_dynamic env.genv.tcopt)
+            &&
+            match idx_err with
+            | Ok _ -> Typing_utils.is_sub_type_for_union env dyn_t tkey
+            | _ -> false
+          then
+            (* if there weren't any errors with the key then either it is dynamic
+               or a subtype of arraykey. If it's also a supertype of dynamic, then
+               set the keytype to arraykey, since that the only thing that hhvm won't
+               error on.
+            *)
+            let (_, p, _) = key in
+            (env, MakeType.arraykey (Reason.Ridx_dict p))
+          else
+            Typing_union.union env tk tkey
+        in
         let (env, tv') = Typing_union.union env tv ty2 in
         let ty = mk (r, Tclass (id, e, [tk'; tv'])) in
         (env, ty, Ok ty, idx_err, Ok ty2)
@@ -984,6 +1038,33 @@ let assign_array_get_with_err
         let ty = mk (r, Tvec_or_dict (tk', tv')) in
         (env, ty, Ok ty, idx_err, Ok ty2)
       | Terr -> (env, ety1, Ok ety1, Ok tkey, Ok ty2)
+      | Tdynamic
+        when Typing_env_types.(
+               TypecheckerOptions.enable_sound_dynamic env.genv.tcopt) ->
+        let tv = Typing_make_type.dynamic r in
+        let (env, idx_err_res) =
+          Result.fold
+            ~ok:(fun env -> (env, Ok tkey))
+            ~error:(fun env -> (env, Error (tkey, tv)))
+          @@ Typing_utils.sub_type_res
+               ~coerce:(Some Typing_logic.CoerceToDynamic)
+               env
+               tkey
+               tv
+               (Errors.unify_error_at expr_pos)
+        in
+        let (env, val_err_res) =
+          Result.fold
+            ~ok:(fun env -> (env, Ok ty2))
+            ~error:(fun env -> (env, Error (ty2, tv)))
+          @@ Typing_utils.sub_type_res
+               ~coerce:(Some Typing_logic.CoerceToDynamic)
+               env
+               ty2
+               tv
+               (Errors.unify_error_at expr_pos)
+        in
+        (env, ety1, Ok ety1, idx_err_res, val_err_res)
       | Tdynamic -> (env, ety1, Ok ety1, Ok tkey, Ok ty2)
       | Tany _ -> (env, ety1, Ok ety1, Ok tkey, Ok ty2)
       | Tprim Tstring ->

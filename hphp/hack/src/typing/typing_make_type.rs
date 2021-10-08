@@ -449,7 +449,7 @@ impl<'a> TypeBuilder<'a> {
 
     pub fn mk_rtype_variable_generics(
         &'a self,
-        pos: &'a Pos,
+        pos: &'a Pos<'_>,
         param_name: &'a str,
         fn_name: &'a str,
     ) -> &'a Reason<'a> {
@@ -458,13 +458,13 @@ impl<'a> TypeBuilder<'a> {
         ))
     }
 
-    pub fn mk_rwitness(&'a self, pos: &'a Pos) -> &'a Reason<'a> {
+    pub fn mk_rwitness(&'a self, pos: &'a Pos<'_>) -> &'a Reason<'a> {
         self.alloc(Reason::witness(pos))
     }
 }
 
 impl<'a> TypeBuilder<'a> {
-    pub fn pos_none(&'a self) -> &'a Pos {
+    pub fn pos_none(&'a self) -> &'a Pos<'_> {
         Pos::none()
     }
 }

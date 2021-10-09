@@ -607,7 +607,7 @@ bool HHVM_FUNCTION(clear_static_memoization,
 
 String HHVM_FUNCTION(ffp_parse_string_native, const String& str) {
   auto const file = fromCaller(
-    [] (const ActRec* fp, Offset) { return fp->unit()->filepath()->data(); }
+    [] (const BTFrame& frm) { return frm.func()->unit()->filepath()->data(); }
   );
 
   auto result =
@@ -904,7 +904,7 @@ TypedValue dynamicClassMeth(const StringData* cls, const StringData* meth) {
   }
   if (!func->isPublic() && checkVis) {
     auto const ctx = fromCaller(
-      [] (const ActRec* fp, Offset) { return fp->func()->cls(); }
+      [] (const BTFrame& frm) { return frm.func()->cls(); }
     );
     if (func->attrs() & AttrPrivate) {
       auto const fcls = func->cls();

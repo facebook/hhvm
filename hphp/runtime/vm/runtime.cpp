@@ -358,9 +358,9 @@ void raiseCoeffectsCallViolation(const Func* callee,
       return String{makeStaticString("[vm-entry]")};
     }
     String result;
-    walkStack([&] (const ActRec* fp, const ActRec*, Offset) {
-      assertx(fp);
-      auto const func = fp->func();
+    walkStack([&] (const BTFrame& frm) {
+      assertx(frm);
+      auto const func = frm.func();
       assertx(func);
       if (func->hasCoeffectRules() &&
           func->getCoeffectRules().size() == 1 &&

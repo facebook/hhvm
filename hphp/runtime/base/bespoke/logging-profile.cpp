@@ -1179,8 +1179,8 @@ SrcKey getSrcKey() {
   if (regState() != VMRegState::CLEAN || vmfp() == nullptr) {
     return SrcKey();
   }
-  return fromLeaf([&](const ActRec* ar, Offset offset) {
-    auto const result = SrcKey(ar->func(), offset, ResumeMode::None);
+  return fromLeaf([&](const BTFrame& frm) {
+    auto const result = SrcKey(frm.func(), frm.bcOff(), ResumeMode::None);
     if (!serializable(result)) return SrcKey();
     assertx(canonicalize(result) == result);
     return result;

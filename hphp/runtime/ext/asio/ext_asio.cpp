@@ -40,18 +40,18 @@ namespace {
 
 c_ResumableWaitHandle* GetResumedWaitHandle() {
   c_ResumableWaitHandle* ret = nullptr;
-  walkStack([&] (const ActRec* fp, const ActRec*, Offset) {
-    if (isResumed(fp) && fp->func()->isAsync()) {
-      if (fp->func()->isGenerator()) {
+  walkStack([&] (const BTFrame& frm) {
+    if (frm.isResumed() && frm.func()->isAsync()) {
+      if (frm.func()->isGenerator()) {
         // async generator
-        auto generator = frame_async_generator(fp);
+        auto generator = frame_async_generator(frm.fpInternal());
         if (generator->isRunning() && !generator->isEagerlyExecuted()) {
           ret = generator->getWaitHandle();
           return true;
         }
       } else {
         // async function
-        ret = frame_afwh(fp);
+        ret = frame_afwh(frm.fpInternal());
         return true;
       }
     }

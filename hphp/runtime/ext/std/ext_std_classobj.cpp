@@ -33,15 +33,15 @@ namespace HPHP {
 
 static const Class* clsFromCallerSkipBuiltins() {
   return fromCaller(
-    [] (const ActRec* fp, Offset) { return fp->func()->cls(); },
-    [] (const ActRec* fp) { return !fp->func()->isBuiltin(); }
+    [] (const BTFrame& frm) { return frm.func()->cls(); },
+    [] (const BTFrame& frm) { return !frm.func()->isBuiltin(); }
   );
 }
 
 static StrNR ctxClassName() {
   auto const ctx = fromCaller(
-    [] (const ActRec* fp, Offset) { return fp->func()->cls(); },
-    [] (const ActRec* fp) { return !fp->func()->isSkipFrame(); }
+    [] (const BTFrame& frm) { return frm.func()->cls(); },
+    [] (const BTFrame& frm) { return !frm.func()->isSkipFrame(); }
   );
   return ctx ? ctx->nameStr() : StrNR(staticEmptyString());
 }
@@ -163,7 +163,7 @@ Variant HHVM_FUNCTION(get_class_vars, const String& className) {
 
   // For visibility checks
   auto const ctx = fromCaller(
-    [] (const ActRec* fp, Offset) { return fp->func()->cls(); }
+    [] (const BTFrame& frm) { return frm.func()->cls(); }
   );
 
   DictInit arr(numDeclProps + numSProps);
@@ -242,7 +242,7 @@ Variant HHVM_FUNCTION(get_parent_class,
   if (object.isNull()) {
     logOrThrow(object);
     cls = fromCaller(
-      [] (const ActRec* fp, Offset) { return fp->func()->cls(); }
+      [] (const BTFrame& frm) { return frm.func()->cls(); }
     );
     if (!cls) return false;
   } else {

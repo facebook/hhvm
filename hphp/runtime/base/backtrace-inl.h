@@ -84,6 +84,10 @@ BTFrame initBTContextAt(BTContext& ctx, jit::CTCA ip, BTFrame frm);
 
 }
 
+inline const Func* BTFrame::func() const {
+  return m_fp->func();
+}
+
 template<class L>
 void walkStackFrom(
     L func, BTFrame initFrm, jit::CTCA ip, bool skipTop,
@@ -95,7 +99,7 @@ void walkStackFrom(
   if (skipTop) frm = getPrevActRec(ctx, frm, visitedWHs);
 
   for (; frm; frm = getPrevActRec(ctx, frm, visitedWHs)) {
-    if (ArrayData::call_helper(func, frm.fp, frm.realFp, frm.pc)) return;
+    if (ArrayData::call_helper(func, frm)) return;
   }
 }
 
@@ -109,7 +113,7 @@ void walkStack(L func, c_WaitableWaitHandle* wh, bool skipTop) {
 
   auto frm = wh != nullptr
     ? getARFromWH(wh, visitedWHs)
-    : BTFrame { vmfp(), vmfp() };
+    : BTFrame { vmfp(), vmfp(), kInvalidOffset };
 
   // If there are no VM frames, we're done.
   if (!frm || !rds::header()) return;
@@ -122,36 +126,22 @@ void walkStack(L func, bool skipTop) {
   walkStack(func, nullptr, skipTop);
 }
 
-template<typename F>
-using result_of_t_3 = std::result_of_t<F(const ActRec*, const ActRec*, Offset)>;
-
-template<typename F>
-result_of_t_3<F> fromLeafUnpublished(F f, result_of_t_3<F> def) {
-  auto ret = def;
-  walkStack([&] (const ActRec* fp, const ActRec* realFp, Offset off) {
-    ret = f(fp, realFp, off);
-    return true;
-  }, nullptr, false);
-  return ret;
-}
-
 namespace backtrace_detail {
 
 template<typename F, typename Pred>
 from_ret_t<F> fromLeafImpl(F f, Pred pred,
                            from_ret_t<F> def,
-                           c_WaitableWaitHandle* wh,
                            bool skipTop) {
   auto ret = def;
-  walkStack([&] (const ActRec* fp, const ActRec*, Offset off) {
-    if (!pred(fp)) return false;
-    ret = f(fp, off);
+  walkStack([&] (const BTFrame& frm) {
+    if (!pred(frm)) return false;
+    ret = f(frm);
     return true;
-  }, wh, skipTop);
+  }, nullptr, skipTop);
   return ret;
 }
 
-inline bool true_pred(const ActRec* fp) { return true; }
+inline bool true_pred(const BTFrame&) { return true; }
 
 }
 
@@ -160,7 +150,7 @@ backtrace_detail::from_ret_t<F> fromLeaf(
   F f, backtrace_detail::from_ret_t<F> def
 ) {
   return backtrace_detail::fromLeafImpl(
-    f, backtrace_detail::true_pred, def, nullptr, false
+    f, backtrace_detail::true_pred, def, false
   );
 }
 
@@ -169,17 +159,7 @@ backtrace_detail::from_ret_t<F> fromCaller(
   F f, backtrace_detail::from_ret_t<F> def
 ) {
   return backtrace_detail::fromLeafImpl(
-    f, backtrace_detail::true_pred, def, nullptr, true
-  );
-}
-
-template<typename F>
-backtrace_detail::from_ret_t<F> fromLeafWH(
-  c_WaitableWaitHandle* wh, F f,
-  backtrace_detail::from_ret_t<F> def
-) {
-  return backtrace_detail::fromLeafImpl(
-    f, backtrace_detail::true_pred, def, wh, false
+    f, backtrace_detail::true_pred, def, true
   );
 }
 
@@ -187,22 +167,14 @@ template<typename F, typename Pred>
 backtrace_detail::from_ret_t<F> fromLeaf(
   F f, Pred pred, backtrace_detail::from_ret_t<F> def
 ) {
-  return backtrace_detail::fromLeafImpl(f, pred, def, nullptr, false);
+  return backtrace_detail::fromLeafImpl(f, pred, def, false);
 }
 
 template<typename F, typename Pred>
 backtrace_detail::from_ret_t<F> fromCaller(
   F f, Pred pred, backtrace_detail::from_ret_t<F> def
 ) {
-  return backtrace_detail::fromLeafImpl(f, pred, def, nullptr, true);
-}
-
-template<typename F, typename Pred>
-backtrace_detail::from_ret_t<F> fromLeafWH(
-  c_WaitableWaitHandle* wh, F f, Pred pred,
-  backtrace_detail::from_ret_t<F> def
-) {
-  return backtrace_detail::fromLeafImpl(f, pred, def, wh, false);
+  return backtrace_detail::fromLeafImpl(f, pred, def, true);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1172,18 +1172,18 @@ const RepoOptions& ExecutionContext::getRepoOptionsForFrame(int frame) const {
 
   const RepoOptions* ret{nullptr};
 
-  walkStack([&] (ActRec* ar, const ActRec*, Offset) {
+  walkStack([&] (const BTFrame& frm) {
     if (frame--) {
       return false;
     }
 
-    auto const path = ar->func()->unit()->filepath();
+    auto const path = frm.func()->unit()->filepath();
     if (UNLIKELY(path->empty())) {
       // - Systemlib paths always start with `/:systemlib`
       // - we make up a bogus filename for eval()
       // - but let's assert out of paranoia as we're in a path that's not
       //   perf-sensitive
-      assertx(!ar->func()->unit()->isSystemLib());
+      assertx(!frm.func()->unit()->isSystemLib());
       ret = &getRepoOptionsForDebuggerEval();
       return true;
     }
@@ -1238,10 +1238,10 @@ int ExecutionContext::getLine() {
 
 ActRec* ExecutionContext::getFrameAtDepthForDebuggerUnsafe(int frameDepth) const {
   ActRec* ret = nullptr;
-  walkStack([&] (ActRec* fp, const ActRec*, Offset) {
+  walkStack([&] (const BTFrame& frm) {
     if (frameDepth == 0) {
-      if (fp && !fp->localsDecRefd()) {
-        ret = fp;
+      if (!frm.isInlined() && frm.localsAvailable()) {
+        ret = frm.fpInternal();
       }
       return true;
     }

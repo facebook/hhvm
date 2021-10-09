@@ -35,6 +35,7 @@ namespace HPHP {
 
 struct ActRec;
 struct Array;
+struct BTFrame;
 struct Class;
 struct Func;
 struct Resource;
@@ -68,7 +69,7 @@ struct CompactFrame final {
 
 struct CompactTraceData {
   Array extract() const;
-  void insert(const ActRec* fp, int32_t prevPc);
+  void insert(const BTFrame& frm);
   const auto& frames() const { return m_frames; }
   auto size() const { return m_frames.size(); }
 
@@ -89,8 +90,8 @@ struct CompactTrace : SweepableResourceData {
     return m_backtrace.get();
   }
 
-  void insert(const ActRec* fp, int32_t prevPc) {
-    get()->insert(fp, prevPc);
+  void insert(const BTFrame& frm) {
+    get()->insert(frm);
   }
 
   DECLARE_RESOURCE_ALLOCATION(CompactTrace)
@@ -330,11 +331,31 @@ struct IStack {
  * Everything we need to represent a frame in the backtrace.
  */
 struct BTFrame {
-  ActRec* fp{nullptr};
-  ActRec* realFp{nullptr};
-  Offset pc{kInvalidOffset};
+  BTFrame() = default;
 
-  operator bool() const { return fp != nullptr; }
+  BTFrame(ActRec* fp, ActRec* realFp, Offset bcOff)
+    : m_fp(fp), m_realFp(realFp), m_bcOff(bcOff) {}
+
+  operator bool() const { return m_fp != nullptr; }
+  Offset bcOff() const { return m_bcOff; }
+  const Func* func() const;
+  bool isInlined() const;
+  bool isResumed() const;
+  bool localsAvailable() const;
+  TypedValue* local(int n) const;
+  ObjectData* getThis() const;
+
+  // Internal helpers for getPrevActRec(). Do not use for accessing frame info,
+  // instead use the helpers above.
+  ActRec* fpInternal() const { return m_fp; }
+  ActRec* realFpInternal() const { return m_realFp; }
+  void setFpInternal(ActRec* fp) { m_fp = fp; }
+  void setBcOffInternal(Offset bcOff) { m_bcOff = bcOff; }
+
+ private:
+  ActRec* m_fp{nullptr};
+  ActRec* m_realFp{nullptr};
+  Offset m_bcOff{kInvalidOffset};
 };
 
 Array createBacktrace(const BacktraceArgs& backtraceArgs);
@@ -376,7 +397,7 @@ void walkStackFrom(
 namespace backtrace_detail {
 
 template<typename F>
-using from_ret_t = std::result_of_t<F(const ActRec*, Offset)>;
+using from_ret_t = std::result_of_t<F(const BTFrame&)>;
 
 }
 
@@ -403,16 +424,6 @@ backtrace_detail::from_ret_t<F> fromCaller(
 );
 
 /*
- * Like fromLeaf(), but with the first frame pointer and PC in the dependency
- * chain of `wh` instead of the current Hack function.
- */
-template<typename F>
-backtrace_detail::from_ret_t<F> fromLeafWH(
-  c_WaitableWaitHandle* wh, F f,
-  backtrace_detail::from_ret_t<F> def = backtrace_detail::from_ret_t<F>{}
-);
-
-/*
  * Like the above functions, but for the first function whose frame satisfies
  * `pred(fp)`.
  */
@@ -424,11 +435,6 @@ backtrace_detail::from_ret_t<F> fromLeaf(
 template<typename F, typename Pred>
 backtrace_detail::from_ret_t<F> fromCaller(
   F f, Pred pred,
-  backtrace_detail::from_ret_t<F> def = backtrace_detail::from_ret_t<F>{}
-);
-template<typename F, typename Pred>
-backtrace_detail::from_ret_t<F> fromLeafWH(
-  c_WaitableWaitHandle* wh, F f, Pred pred,
   backtrace_detail::from_ret_t<F> def = backtrace_detail::from_ret_t<F>{}
 );
 

@@ -306,18 +306,20 @@ RDS_LOCAL(size_t, coeffectGuardedDepth);
 RuntimeCoeffects computeAutomaticCoeffects() {
   // Return the coeffects corresponding to the leaf VM frame. If there is no
   // such frame, return default coeffects.
-  return fromLeafUnpublished([](const ActRec* fp, const ActRec* realFp, Offset off) {
-    assertx(realFp);
-    auto const func = fp->func();
+  return fromLeaf([](const BTFrame& frm) {
+    // Note: this means computeAutomaticCoeffects() cannot be used from surprise
+    // check handlers, as the frame may be already destroyed.
+    assertx(frm.localsAvailable());
+    auto const func = frm.func();
     if (!func->hasCoeffectsLocal()) {
       assertx(!func->hasCoeffectRules());
       return func->requiredCoeffects();
     }
     auto const id = func->coeffectsLocalId();
-    auto const tv = reinterpret_cast<const TypedValue*>(realFp) - (id + 1);
+    auto const tv = frm.local(id);
     assertx(tvIsInt(tv));
     return RuntimeCoeffects::fromValue(tv->m_data.num);
-  }, RuntimeCoeffects::defaults());
+  }, backtrace_detail::true_pred, RuntimeCoeffects::defaults());
 }
 
 } // namespace

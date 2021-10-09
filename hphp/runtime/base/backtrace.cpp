@@ -107,6 +107,31 @@ const ActRec* BTContext::clone(const BTContext& src, const ActRec* fp) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+bool BTFrame::isInlined() const {
+  return m_fp->isInlined();
+}
+
+bool BTFrame::isResumed() const {
+  return HPHP::isResumed(m_fp);
+}
+
+bool BTFrame::localsAvailable() const {
+  return m_realFp && !m_fp->localsDecRefd();
+}
+
+TypedValue* BTFrame::local(int n) const {
+  assertx(localsAvailable());
+  return frame_local(m_realFp, n);
+}
+
+ObjectData* BTFrame::getThis() const {
+  assertx(!isInlined());
+  assertx(localsAvailable());
+  return m_fp->getThis();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 namespace {
 
 c_WaitableWaitHandle* getParentWH(
@@ -191,7 +216,7 @@ BTFrame initBTContextAt(BTContext& ctx, jit::CTCA ip, BTFrame frm) {
 
     ctx.stashedFrm = frm;
 
-    auto const ar = frm.fp;
+    auto const ar = frm.fpInternal();
     auto const stackBase = Stack::anyFrameStackBase(ar);
     auto const sp = stackBase - stk->sbOff;
     FTRACE_MOD(Trace::fixup, 1, "BaseAR: {}, offset: {}, addr: {}\n", ar, stk->sbOff, sp);
@@ -201,7 +226,7 @@ BTFrame initBTContextAt(BTContext& ctx, jit::CTCA ip, BTFrame frm) {
 
   // If we don't have an inlined frame, it's always safe to use pcOff() if
   // initBTContextAt() is being called for a leaf frame.
-  if (frm.pc == kInvalidOffset) frm.pc = pcOff();
+  if (frm.bcOff() == kInvalidOffset) frm.setBcOffInternal(pcOff());
   return frm;
 }
 
@@ -209,7 +234,7 @@ BTFrame getPrevActRec(
   BTContext& ctx, BTFrame frm,
   folly::small_vector<c_WaitableWaitHandle*, 64>& visitedWHs
 ) {
-  auto const fp = frm.fp;
+  auto const fp = frm.fpInternal();
 
   // If we're already iterating over an AsyncFunctionWaitHandle's tail frames,
   // either create a fake ActRec for the next tail frame, or go to the parent
@@ -219,7 +244,7 @@ BTFrame getPrevActRec(
     assertx(fp->m_sfp == &ctx.fakeAR[0] || fp->m_sfp == &ctx.fakeAR[1]);
     assertx(fp != fp->m_sfp);
 
-    auto const wh = frame_afwh(ctx.stashedFrm.fp);
+    auto const wh = frame_afwh(ctx.stashedFrm.fpInternal());
     if (ctx.afwhTailFrameIndex < wh->lastTailFrameIndex()) {
       auto const sk = getAsyncFrame(wh->tailFrame(ctx.afwhTailFrameIndex++));
       auto const prevFP = fp->m_sfp;
@@ -245,30 +270,27 @@ BTFrame getPrevActRec(
 
     auto const ifr = jit::getInlineFrame(ctx.inlineStack.frame);
 
-    auto prev = BTFrame{};
-    prev.fp = fp->m_sfp;
-    // TODO(mcolavita): This should generate the new realFp using frame info.
-    prev.realFp = nullptr;
-    prev.fp->setFunc(ifr.func);
-    prev.fp->m_callOffAndFlags = ActRec::encodeCallOffsetAndFlags(
+    auto const prevFP = fp->m_sfp;
+    prevFP->setFunc(ifr.func);
+    prevFP->m_callOffAndFlags = ActRec::encodeCallOffsetAndFlags(
       ifr.callOff,
       // Don't attempt to read locals. Mark as inlined for skipInlined().
       (1U << ActRec::LocalsDecRefd) | (1U << ActRec::IsInlined)
     );
-    prev.pc = fp->callOffset();
 
     ctx.prevIFID = ctx.inlineStack.frame;
     ctx.inlineStack.frame = ifr.parent;
     ctx.hasInlFrames = --ctx.inlineStack.nframes > 0;
 
-    return prev;
+    // TODO(mcolavita): This should generate the new realFp using frame info.
+    return BTFrame{prevFP, nullptr, fp->callOffset()};
   }
 
   if (auto prev = ctx.stashedFrm) {
-    if (prev.pc == kInvalidOffset) {
+    if (prev.bcOff() == kInvalidOffset) {
       assertx(ctx.prevIFID != kInvalidIFrameID);
       auto const ifr = jit::getInlineFrame(ctx.prevIFID);
-      prev.pc = ifr.callOff;
+      prev.setBcOffInternal(ifr.callOff);
     }
     ctx.stashedFrm = BTFrame{};
     ctx.prevIFID = kInvalidIFrameID;
@@ -316,7 +338,7 @@ BTFrame getPrevActRec(
       auto const sk = getAsyncFrame(afwh->tailFrame(index));
 
       ctx.afwhTailFrameIndex = index + 1;
-      ctx.stashedFrm.fp = afwh->actRec();
+      ctx.stashedFrm.setFpInternal(afwh->actRec());
       auto const prevFP = &ctx.fakeAR[0];
       prevFP->setFunc(sk.func());
       prevFP->m_callOffAndFlags =
@@ -328,10 +350,13 @@ BTFrame getPrevActRec(
     auto const parent = getParentWH(wh, contextIdx, visitedWHs);
     prev = getARFromWHImpl(parent, contextIdx, visitedWHs);
   } else {
-    prev.fp = g_context->getPrevVMState(fp, &prev.pc, nullptr, nullptr, &rip);
+    Offset prevBcOff;
+    auto const prevFP =
+      g_context->getPrevVMState(fp, &prevBcOff, nullptr, nullptr, &rip);
+    prev = BTFrame{prevFP, prevFP, prevBcOff};
   }
 
-  return frm
+  return prev
     ? initBTContextAt(ctx, (jit::TCA)rip, prev)
     : prev;
 }
@@ -394,7 +419,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
     // If there are no VM frames, we're done.
     if (!rds::header() || !vmfp()) return bt;
 
-    frm.fp = vmfp();
+    frm = BTFrame{vmfp(), vmfp(), kInvalidOffset};
 
     // Get the fp and pc of the top frame (possibly skipping one frame).
 
@@ -409,7 +434,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
     }
 
     if (btArgs.m_skipInlined && RuntimeOption::EvalJit) {
-      while (frm && frm.fp->isInlined()) {
+      while (frm && frm.isInlined()) {
         frm = getPrevActRec(ctx, frm, visitedWHs);
       }
       if (!frm) return bt;
@@ -421,21 +446,21 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
     // Builtins don't have a file and line number, so find the first user frame
     BTContext ctxCopy;
     auto curFrm = BTFrame {
-      const_cast<ActRec*>(ctxCopy.clone(ctx, frm.fp)),
-      frm.realFp,
-      frm.pc
+      const_cast<ActRec*>(ctxCopy.clone(ctx, frm.fpInternal())),
+      frm.realFpInternal(),
+      frm.bcOff()
     };
-    while (curFrm && curFrm.fp->func()->isBuiltin()) {
+    while (curFrm && curFrm.func()->isBuiltin()) {
       curFrm = getPrevActRec(ctxCopy, curFrm, visitedWHs);
     }
     if (curFrm) {
-      auto const func = curFrm.fp->func();
+      auto const func = curFrm.func();
       assertx(func);
 
       StructDictInit frame(s_runtimeStruct, btArgs.m_parserFrame ? 4 : 2);
       frame.set(s_file_idx, s_file,
                 Variant{const_cast<StringData*>(func->filename())});
-      frame.set(s_line_idx, s_line, func->getLineNumber(curFrm.pc));
+      frame.set(s_line_idx, s_line, func->getLineNumber(curFrm.bcOff()));
       if (btArgs.m_parserFrame) {
         frame.set(s_function_idx, s_function, s_include);
         frame.set(s_args_idx, s_args,
@@ -450,34 +475,34 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
   for (auto prev = getPrevActRec(ctx, frm, visitedWHs);
        frm && (btArgs.m_limit == 0 || depth < btArgs.m_limit);
        frm = prev, prev = getPrevActRec(ctx, frm, visitedWHs)) {
-    auto const fp = frm.fp;
+    auto const func = frm.func();
 
     // Do not capture frame for HPHP only functions.
-    if (fp->func()->isNoInjection()) continue;
+    if (func->isNoInjection()) continue;
 
     StructDictInit frame(s_runtimeStruct, 8);
 
-    auto const curUnit = fp->func()->unit();
+    auto const curUnit = func->unit();
 
     // Builtins and generators don't have a file and line number.
-    if (prev.fp && !prev.fp->func()->isBuiltin()) {
-      auto const prevFunc = prev.fp->func();
+    if (prev && !prev.func()->isBuiltin()) {
+      auto const prevFunc = prev.func();
       auto const prevFile = prevFunc->originalFilename()
         ? prevFunc->originalFilename()
         : prevFunc->unit()->filepath();
 
       assertx(prevFile != nullptr);
       frame.set(s_file_idx, s_file, Variant{const_cast<StringData*>(prevFile)});
-      frame.set(s_line_idx, s_line, prevFunc->getLineNumber(prev.pc));
+      frame.set(s_line_idx, s_line, prevFunc->getLineNumber(prev.bcOff()));
     }
 
-    auto funcname = fp->func()->nameWithClosureName();
+    auto funcname = func->nameWithClosureName();
 
     if (RuntimeOption::EnableArgsInBacktraces &&
-        !fp->localsDecRefd() &&
-        fp->func()->hasReifiedGenerics()) {
+        frm.localsAvailable() &&
+        func->hasReifiedGenerics()) {
       // First local is always $0ReifiedGenerics which comes right after params
-      auto const generics = frame_local(fp, fp->func()->numParams());
+      auto const generics = frm.local(func->numParams());
       if (type(generics) != KindOfUninit) {
         assertx(tvIsVec(generics));
         auto const reified_generics = val(generics).parr;
@@ -489,25 +514,26 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
 
     if (!funcname.same(s_include)) {
       // Closures have an m_this but they aren't in object context.
-      auto ctx = arGetContextClass(fp);
-      if (ctx != nullptr && !fp->func()->isClosureBody()) {
+      auto const ctx = func->cls();
+      if (ctx != nullptr && !func->isClosureBody()) {
         String clsname{const_cast<StringData*>(ctx->name())};
         if (RuntimeOption::EnableArgsInBacktraces &&
-            !fp->localsDecRefd() &&
-            !fp->isInlined() &&
+            frm.localsAvailable() &&
+            !frm.isInlined() &&
             ctx->hasReifiedGenerics() &&
-            fp->hasThis()) {
-          auto const reified_generics = getClsReifiedGenericsProp(ctx, fp);
+            !func->isStatic()) {
+          auto const thiz = frm.getThis();
+          auto const reified_generics = getClsReifiedGenericsProp(ctx, thiz);
           clsname += mangleReifiedGenericsName(reified_generics);
         }
         frame.set(s_class_idx, s_class, clsname);
-        if (!fp->localsDecRefd() &&
-            !fp->isInlined() &&
-            fp->hasThis() &&
+        if (frm.localsAvailable() &&
+            !frm.isInlined() &&
+            !func->isStatic() &&
             btArgs.m_withThis) {
-          frame.set(s_object_idx, s_object, Object(fp->getThis()));
+          frame.set(s_object_idx, s_object, Object(frm.getThis()));
         }
-        frame.set(s_type_idx, s_type, fp->func()->isStatic() ? s_double_colon : s_arrow);
+        frame.set(s_type_idx, s_type, func->isStatic() ? s_double_colon : s_arrow);
       }
     }
 
@@ -519,18 +545,18 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
     } else if (funcname.same(s_include)) {
       auto filepath = const_cast<StringData*>(curUnit->filepath());
       frame.set(s_args_idx, s_args, make_vec_array(filepath));
-    } else if (fp->localsDecRefd()) {
+    } else if (!frm.localsAvailable()) {
       frame.set(s_args_idx, s_args, empty_vec_array());
     } else {
       auto args = Array::CreateVec();
-      auto const nparams = fp->func()->numNonVariadicParams();
+      auto const nparams = func->numNonVariadicParams();
 
       for (int i = 0; i < nparams; i++) {
         Variant val =
-          withValues ? Variant{variant_ref{frame_local(fp, i)}} : "";
+          withValues ? Variant{variant_ref{frm.local(i)}} : "";
 
         if (withNames) {
-          auto const argname = fp->func()->localVarName(i);
+          auto const argname = func->localVarName(i);
           args.set(String(const_cast<StringData*>(argname)), val);
         } else {
           args.append(val);
@@ -540,12 +566,10 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
       frame.set(s_args_idx, s_args, args);
     }
 
-    // TODO(mcolavita): This should determine when the real frame is available
-    // to extract metadata.
-    if (btArgs.m_withMetadata && !fp->localsDecRefd()) {
-      auto local = fp->func()->lookupVarId(s_86metadata.get());
+    if (btArgs.m_withMetadata && frm.localsAvailable()) {
+      auto local = func->lookupVarId(s_86metadata.get());
       if (local != kInvalidId) {
-        auto const val = frame_local(fp, local);
+        auto const val = frm.local(local);
         if (type(val) != KindOfUninit) {
           always_assert(tvIsPlausible(*val));
           frame.set(s_metadata_idx, s_metadata, Variant{variant_ref{val}});
@@ -564,9 +588,9 @@ Array createCrashBacktrace(BTFrame frame, jit::CTCA addr) {
   folly::small_vector<c_WaitableWaitHandle*, 64> visitedWHs;
 
   CompactTraceData trace;
-  walkStackFrom([&] (ActRec* fp, const ActRec*, Offset prevPc) {
-    if (fp->func()->isNoInjection()) return;
-    trace.insert(fp, prevPc);
+  walkStackFrom([&] (const BTFrame& frm) {
+    if (frm.func()->isNoInjection()) return;
+    trace.insert(frm);
   }, frame, addr, false, visitedWHs);
 
   return trace.extract();
@@ -612,11 +636,11 @@ int64_t createBacktraceHash(bool consider_metadata) {
   uint64_t hash = 0x9e3779b9;
   Unit* prev_unit = nullptr;
 
-  walkStack([&] (ActRec* fp, const ActRec*, Offset) {
+  walkStack([&] (const BTFrame& frm) {
     // Do not capture frame for HPHP only functions.
-    if (fp->func()->isNoInjection()) return;
+    if (frm.func()->isNoInjection()) return;
 
-    auto const curFunc = fp->func();
+    auto const curFunc = frm.func();
     auto const curUnit = curFunc->unit();
 
     // Only do a filehash if the file changed. It is very common
@@ -636,12 +660,11 @@ int64_t createBacktraceHash(bool consider_metadata) {
     auto funchash = curFunc->fullName()->hash();
     hash ^= funchash + 0x9e3779b9 + (hash << 6) + (hash >> 2);
 
-    // TODO(mcolavita): proper conditions
-    if (consider_metadata && !fp->localsDecRefd()) {
+    if (consider_metadata && frm.localsAvailable()) {
       tv_rval meta;
-      auto local = fp->func()->lookupVarId(s_86metadata.get());
+      auto local = curFunc->lookupVarId(s_86metadata.get());
       if (local != kInvalidId) {
-        auto const val = frame_local(fp, local);
+        auto const val = frm.local(local);
         if (!isNullType(type(val))) meta = val;
       }
 
@@ -657,10 +680,10 @@ int64_t createBacktraceHash(bool consider_metadata) {
 }
 
 void fillCompactBacktrace(CompactTraceData* trace, bool skipTop) {
-  walkStack([trace] (ActRec* fp, const ActRec*, Offset prevPc) {
+  walkStack([trace] (const BTFrame& frm) {
     // Do not capture frame for HPHP only functions.
-    if (fp->func()->isNoInjection()) return;
-    trace->insert(fp, prevPc);
+    if (frm.func()->isNoInjection()) return;
+    trace->insert(frm);
   }, skipTop);
 }
 
@@ -676,23 +699,23 @@ std::pair<const Func*, Offset> getCurrentFuncAndOffset() {
   BTContext ctx;
 
   auto const fp = vmfp();
-  auto frm = BTFrame { fp, fp };
+  auto frm = BTFrame { fp, fp, kInvalidOffset };
   frm = initBTContextAt(ctx, vmJitReturnAddr(), frm);
 
   // Builtins don't have a file and line number, so find the first user frame
-  while (frm && frm.fp->func()->isBuiltin()) {
+  while (frm && frm.func()->isBuiltin()) {
     frm = getPrevActRec(ctx, frm, visitedWHs);
   }
-  return std::make_pair(frm.fp ? frm.fp->func() : nullptr, frm.pc);
+  return std::make_pair(frm ? frm.func() : nullptr, frm.bcOff());
 }
 
 IMPLEMENT_RESOURCE_ALLOCATION(CompactTrace)
 
-void CompactTraceData::insert(const ActRec* fp, int32_t prevPc) {
+void CompactTraceData::insert(const BTFrame& frm) {
   m_frames.emplace_back(
-    fp->func(),
-    prevPc,
-    !fp->localsDecRefd() && fp->func()->hasThisInBody()
+    frm.func(),
+    frm.bcOff(),
+    frm.localsAvailable() && frm.func()->hasThisInBody()
   );
 }
 

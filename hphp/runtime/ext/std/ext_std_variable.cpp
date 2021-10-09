@@ -581,7 +581,7 @@ bool HHVM_FUNCTION(HH_is_late_init_prop_init,
                    const Object& obj,
                    const String& name) {
   auto const ctx = fromCaller(
-    [] (const ActRec* fp, Offset) { return fp->func()->cls(); }
+    [] (const BTFrame& frm) { return frm.func()->cls(); }
   );
   auto const val = obj->getPropIgnoreLateInit(ctx, name.get());
   if (!val) {
@@ -606,7 +606,7 @@ bool HHVM_FUNCTION(HH_is_late_init_sprop_init,
     );
   }
   auto const ctx = fromCaller(
-    [] (const ActRec* fp, Offset) { return fp->func()->cls(); }
+    [] (const BTFrame& frm) { return frm.func()->cls(); }
   );
   auto const lookup = cls->getSPropIgnoreLateInit(ctx, name.get());
   if (!lookup.val || !lookup.accessible) {

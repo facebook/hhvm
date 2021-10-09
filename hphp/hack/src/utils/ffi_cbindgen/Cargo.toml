@@ -10,7 +10,7 @@ path = "ffi_cbindgen.rs"
 
 [dependencies]
 cbindgen = "0.20.0"
-structopt = "0.3.21"
+structopt = "0.3.23"
 
 [profile.release]
 incremental = false

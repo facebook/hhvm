@@ -19,7 +19,7 @@ facts_parser = { path = "../../api/cargo/facts_parser" }
 ocamlrep = { path = "../../../ocamlrep" }
 oxidized = { path = "../../../oxidized" }
 parser_core_types = { path = "../core_types" }
-structopt = "0.3.21"
+structopt = "0.3.23"
 
 [profile.release]
 incremental = false

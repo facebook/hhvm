@@ -493,6 +493,7 @@ impl<'ast> VisitorMut<'ast> for Checker {
 
     fn visit_fun_(&mut self, context: &mut Context, f: &mut aast::Fun_<(), ()>) -> Result<(), ()> {
         // Is run on every function definition and closure definition
+
         let readonly_return = ro_kind_to_rty(f.readonly_ret);
         let readonly_this = ro_kind_to_rty(f.readonly_this);
         let mut new_context = Context::new(readonly_return, readonly_this);

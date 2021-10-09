@@ -204,7 +204,7 @@ class ReflectionParameter implements Reflector {
 
   final private function __clone();
   public static function export($function, $parameter, $return = null);
-  public function __construct($function, $parameter)[];
+  public function __construct($function, $parameter, $info = null)[];
   public function __toString()[];
   public function getName()[];
   public function isPassedByReference()[];

@@ -283,12 +283,12 @@ private:
  *            some native function                         |
  *                                                         |
  *    IStack corresponding to the TCA of the native call:  | (relative to
- *             ________________                            |  inl2->base())
- *            |                |                           |
- *            |  frame: inl2   |                           |
- *            |  nframes: 2    |                           |
- *            |  callOff ------+---------------------------+
- *            |________________|
+ *             ____________________                            |  inl2->base())
+ *            |                    |                           |
+ *            |  frame: inl2       |                           |
+ *            |  pubFrame: caller  |                           |
+ *            |  callOff ----------+---------------------------+
+ *            |____________________|
  *
  *
  * In the presence of inline frame elision, there are no ActRecs corresponding
@@ -301,26 +301,25 @@ private:
  */
 
 using IFrameID = int32_t;
-constexpr IFrameID kInvalidIFrameID = std::numeric_limits<IFrameID>::max();
+
+// Represents the frame defined by DefFP or DefFuncEntryFP.
+constexpr IFrameID kRootIFrameID = std::numeric_limits<IFrameID>::max();
 
 struct IFrame {
-  const Func* func; // callee (m_func)
-  int32_t callOff;  // caller offset (callOffset())
-  int32_t arOff;
-  IFrameID parent;  // parent frame (m_sfp)
+  const Func* func;       // callee (m_func)
+  Offset callOff;         // caller offset (callOffset())
+  int32_t sbToRootSbOff;  // offset between stack bases of root and this frame
+  IFrameID parent;        // parent frame (m_sfp)
 };
 
 struct IStack {
-  IFrameID frame; // leaf frame in this stack
-  uint32_t nframes;
-  uint32_t callOff;
-  int32_t sbOff;
+  IFrameID frame;     // leaf frame in this stack
+  IFrameID pubFrame;  // the last published frame to which vmfp() points to
+  Offset callOff;
 
   template<class SerDe> void serde(SerDe& sd) {
     sd(frame)
-      (nframes)
       (callOff)
-      (sbOff)
       ;
   }
 };
@@ -333,8 +332,13 @@ struct IStack {
 struct BTFrame {
   BTFrame() = default;
 
-  BTFrame(ActRec* fp, ActRec* realFp, Offset bcOff)
-    : m_fp(fp), m_realFp(realFp), m_bcOff(bcOff) {}
+  BTFrame(ActRec* fp, Offset bcOff)
+    : BTFrame(fp, bcOff, kRootIFrameID, kRootIFrameID) {}
+
+  BTFrame(ActRec* fp, Offset bcOff, IFrameID frameId, IFrameID pubFrameId)
+    : m_fp(fp), m_bcOff(bcOff), m_frameId(frameId), m_pubFrameId(pubFrameId) {
+    assertx(frameId == kRootIFrameID || frameId != pubFrameId);
+  }
 
   operator bool() const { return m_fp != nullptr; }
   Offset bcOff() const { return m_bcOff; }
@@ -348,14 +352,14 @@ struct BTFrame {
   // Internal helpers for getPrevActRec(). Do not use for accessing frame info,
   // instead use the helpers above.
   ActRec* fpInternal() const { return m_fp; }
-  ActRec* realFpInternal() const { return m_realFp; }
-  void setFpInternal(ActRec* fp) { m_fp = fp; }
-  void setBcOffInternal(Offset bcOff) { m_bcOff = bcOff; }
+  IFrameID frameIdInternal() const { return m_frameId; }
+  IFrameID pubFrameIdInternal() const { return m_pubFrameId; }
 
  private:
   ActRec* m_fp{nullptr};
-  ActRec* m_realFp{nullptr};
   Offset m_bcOff{kInvalidOffset};
+  IFrameID m_frameId{kRootIFrameID};
+  IFrameID m_pubFrameId{kRootIFrameID};
 };
 
 Array createBacktrace(const BacktraceArgs& backtraceArgs);

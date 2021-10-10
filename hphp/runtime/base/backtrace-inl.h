@@ -48,8 +48,6 @@ struct BTContext {
 
   const ActRec* clone(const BTContext& src, const ActRec* fp);
 
-  bool hasInlFrames{false};
-
   // To handle awaits in tail-position, we can reuse AsyncFunctionWaitHandle
   // and stuff just enough tail-frame info into them to support backtracing.
   // This field is set when iterating over these tail frames.
@@ -60,11 +58,9 @@ struct BTContext {
   // createBacktrace needs to inspect the current and previous frame pointer,
   // thus we introduce an m_sfp cycle between these frames.
   ActRec fakeAR[2];
-  IStack inlineStack;
-  IFrameID prevIFID{kInvalidIFrameID};
 
   // The frame we should resume at after unwinding the inlined stack.
-  BTFrame stashedFrm{};
+  ActRec* stashedFP{nullptr};
 };
 
 BTFrame getPrevActRec(
@@ -82,10 +78,6 @@ BTFrame getPrevActRec(
  */
 BTFrame initBTContextAt(BTContext& ctx, jit::CTCA ip, BTFrame frm);
 
-}
-
-inline const Func* BTFrame::func() const {
-  return m_fp->func();
 }
 
 template<class L>
@@ -113,7 +105,7 @@ void walkStack(L func, c_WaitableWaitHandle* wh, bool skipTop) {
 
   auto frm = wh != nullptr
     ? getARFromWH(wh, visitedWHs)
-    : BTFrame { vmfp(), vmfp(), kInvalidOffset };
+    : BTFrame { vmfp(), kInvalidOffset };
 
   // If there are no VM frames, we're done.
   if (!frm || !rds::header()) return;

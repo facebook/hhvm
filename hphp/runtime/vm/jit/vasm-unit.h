@@ -152,13 +152,13 @@ struct Vframe {
   Vframe(
     const Func* func,
     int32_t callOff,
-    int32_t arOff,
+    SBInvOffset sbToRootSbOff,
     int parent,
     int cost,
     uint64_t entry_weight
   ) : func(func)
     , callOff(callOff)
-    , arOff(arOff)
+    , sbToRootSbOff(sbToRootSbOff)
     , parent(parent)
     , entry_weight(entry_weight)
     , inclusive_cost(cost)
@@ -170,11 +170,12 @@ struct Vframe {
     size_t exclusive{0};
   };
 
-  static constexpr int Top = -1;
+  static constexpr int Root = 0;  // Frame defined by DefFP or DefFuncEntryFP
+  static constexpr int Top = -1;  // Parent of root frame
 
   LowPtr<const Func> func;
   int32_t callOff{-1};
-  int32_t arOff{-1};
+  SBInvOffset sbToRootSbOff{-1};
   int parent;
 
   uint64_t entry_weight;

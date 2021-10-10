@@ -1,0 +1,94 @@
+vec(8) {
+  dict(1) {
+    ["function"]=>
+    string(3) "baz"
+  }
+  dict(3) {
+    ["file"]=>
+    string(%d) "%s"
+    ["line"]=>
+    int(14)
+    ["function"]=>
+    string(12) "HH\Asio\join"
+  }
+  dict(3) {
+    ["file"]=>
+    string(%d) "%s"
+    ["line"]=>
+    int(19)
+    ["function"]=>
+    string(3) "bar"
+  }
+  dict(3) {
+    ["file"]=>
+    string(%d) "%s"
+    ["line"]=>
+    int(24)
+    ["function"]=>
+    string(3) "foo"
+  }
+  dict(1) {
+    ["function"]=>
+    string(4) "main"
+  }
+  dict(1) {
+    ["function"]=>
+    string(43) "Closure$__SystemLib\enter_async_entry_point"
+  }
+  dict(1) {
+    ["function"]=>
+    string(12) "HH\Asio\join"
+  }
+  dict(1) {
+    ["function"]=>
+    string(35) "__SystemLib\enter_async_entry_point"
+  }
+}
+vec(8) {
+  dict(1) {
+    ["function"]=>
+    string(3) "baz"
+  }
+  dict(3) {
+    ["file"]=>
+    string(%d) "%s"
+    ["line"]=>
+    int(14)
+    ["function"]=>
+    string(12) "HH\Asio\join"
+  }
+  dict(4) {
+    ["file"]=>
+    string(%d) "%s"
+    ["line"]=>
+    int(19)
+    ["function"]=>
+    string(3) "bar"
+    ["metadata"]=>
+    string(8) "I am bar"
+  }
+  dict(3) {
+    ["file"]=>
+    string(%d) "%s"
+    ["line"]=>
+    int(25)
+    ["function"]=>
+    string(3) "foo"
+  }
+  dict(1) {
+    ["function"]=>
+    string(4) "main"
+  }
+  dict(1) {
+    ["function"]=>
+    string(43) "Closure$__SystemLib\enter_async_entry_point"
+  }
+  dict(1) {
+    ["function"]=>
+    string(12) "HH\Asio\join"
+  }
+  dict(1) {
+    ["function"]=>
+    string(35) "__SystemLib\enter_async_entry_point"
+  }
+}

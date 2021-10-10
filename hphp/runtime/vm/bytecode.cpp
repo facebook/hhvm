@@ -751,7 +751,11 @@ TypedValue* Stack::resumableStackBase(const ActRec* fp) {
     // frame (since the ActRec, locals, and iters for this frame do not reside
     // on the VM stack).
     assertx(fp->func()->isAsync());
-    return g_context.getNoCheck()->m_nestedVMs.back().sp;
+    TypedValue* prevSp;
+    DEBUG_ONLY auto const prevFp =
+      g_context.getNoCheck()->getPrevVMState(fp, nullptr, &prevSp);
+    assertx(prevFp != nullptr);
+    return prevSp;
   }
 }
 

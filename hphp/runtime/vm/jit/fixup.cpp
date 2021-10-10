@@ -162,9 +162,9 @@ bool processFixupForVMFrame(VMFrame frame) {
   VMRegs regs;
   if (!getFrameRegs(frame, &regs)) return false;
 
-  TRACE(2, "fixup(end): func %s fp %p sp %p pc %p\n",
+  TRACE(2, "fixup(end): func %s fp %p sp %p pc %p retAddr %p\n",
       regs.fp->func()->name()->data(),
-      regs.fp, regs.sp, regs.pc);
+      regs.fp, regs.sp, regs.pc, regs.retAddr);
   auto& vmRegs = vmRegsUnsafe();
   vmRegs.fp = const_cast<ActRec*>(regs.fp);
   vmRegs.pc = reinterpret_cast<PC>(regs.pc);

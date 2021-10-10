@@ -19,6 +19,7 @@
 #include "hphp/runtime/vm/jit/dce.h"
 #include "hphp/runtime/vm/jit/irgen-control.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
+#include "hphp/runtime/vm/jit/irgen-inlining.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
@@ -116,6 +117,9 @@ SSATmp* genInstruction(IRGS& env, IRInstruction* inst) {
       if (inst->is(Call)) {
         return EndCatchData::CatchMode::CallCatch;
       }
+      if (inst->is(InterpOne, InterpOneCF)) {
+        return EndCatchData::CatchMode::InterpCatch;
+      }
       if (inst->is(ReturnHook,
                    SuspendHookAwaitEF,
                    SuspendHookAwaitEG,
@@ -156,9 +160,9 @@ SSATmp* genInstruction(IRGS& env, IRInstruction* inst) {
       IRSPRelOffsetData { offsetFromIRSP(env, inst->marker().bcSPOff()) },
       sp(env)
     );
-    gen(env, StVMFP, fp(env));
+    gen(env, StVMFP, fixupFP(env));
     gen(env, StVMSP, bcSP);
-    gen(env, StVMPC, cns(env, uintptr_t(inst->marker().sk().pc())));
+    gen(env, StVMPC, cns(env, uintptr_t(inst->marker().fixupSk().pc())));
     genStVMReturnAddr(env);
     gen(env, StVMRegState, cns(env, eagerlyCleanState()));
     auto const res = outputInst();
@@ -181,6 +185,7 @@ void checkCold(IRGS& env, TransID transId) {
 }
 
 void checkCoverage(IRGS& env) {
+  assertx(!isInlining(env));
   auto const handle = RDSHandleData { curUnit(env)->coverageDataHandle() };
   ifElse(
     env,
@@ -242,6 +247,9 @@ void endRegion(IRGS& env, SrcKey nextSk) {
     // try to go to the next part of it.
     return;
   }
+
+  spillInlinedFrames(env);
+
   auto const data = ReqBindJmpData {
     nextSk,
     spOffBCFromStackBase(env),

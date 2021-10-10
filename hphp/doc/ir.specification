@@ -1548,24 +1548,13 @@ To string conversions:
   Sets the current vmfp for an inlined call to S0, and the m_sfp of S0 to the
   previous vmfp, S1.
 
-  This instruction is primarily used to represent a frame in the IR in a way
-  that allows us to eliminate it entirely. When it cannot be eliminated (or if
-  it is pushed into an unlikely path) it performs callee-side responsibilities
-  for setting up an activation record (i.e. setting the return ip, m_func and
-  m_callOff, storing the frame pointer into D).
+  This instruction is primarily used to represent an inlined frame in the IR
+  when it cannot be eliminated during a side-exit. It performs callee-side
+  responsibilities for setting up an activation record (i.e. setting the return
+  ip, m_func and m_callOff, storing the frame pointer into D).
 
   The caller frame pointer is passed as S1. This is used to keep track of the
   call chain of inlined functions for simplification and dead code elimination.
-
-| InlineReturn<callerFPOff>, ND, S(FramePtr) S(FramePtr), NF
-
-  Unlinks a frame activated with InlineCall.  `callerFPOff' is the offset of
-  the caller's frame pointer, S1, relative to S0. Every InlineCall should be
-  post-dominated by InlineReturn instructions and terminal instructions on any
-  path that does not side exit within the callee.
-
-  The frame itself is still valid until killed by an EndInlining instruction,
-  but is no longer part of the m_sfp chain of active frames.
 
 | DefFuncEntryFP<func>,
 |   D(FramePtr),

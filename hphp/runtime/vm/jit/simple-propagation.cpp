@@ -39,11 +39,8 @@ void copyProp(IRInstruction* inst) {
   for (auto& src : inst->srcs()) {
     while (src->inst()->is(Mov)) src = src->inst()->src(0);
   }
-  auto fp = inst->marker().fixupFP();
-  while (fp && fp->inst()->is(Mov)) fp = fp->inst()->src(0);
-  if (fp != inst->marker().fixupFP()) {
-    inst->marker() = inst->marker().adjustFixupFP(fp);
-  }
+  assertx(!inst->marker().fixupFP() ||
+          !inst->marker().fixupFP()->inst()->is(Mov));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

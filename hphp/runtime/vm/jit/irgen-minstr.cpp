@@ -32,6 +32,7 @@
 #include "hphp/runtime/vm/jit/irgen-arith.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-incdec.h"
+#include "hphp/runtime/vm/jit/irgen-inlining.h"
 #include "hphp/runtime/vm/jit/irgen-interpone.h"
 #include "hphp/runtime/vm/jit/irgen-sprop-global.h"
 #include "hphp/runtime/vm/jit/irgen-types.h"
@@ -1233,6 +1234,7 @@ Block* makeCatchSet(IRGS& env, uint32_t nDiscard) {
     [&] {
       assertx(!env.irb->fs().stublogue());
       hint(env, Block::Hint::Unused);
+      spillInlinedFrames(env);
       auto const data = EndCatchData {
         spOffBCFromIRSP(env),
         EndCatchData::CatchMode::SideExit,

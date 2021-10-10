@@ -670,7 +670,6 @@ bool opcodeMayRaise(Opcode opc) {
   case InitVecElem:
   case InitVecElemLoop:
   case InlineCall:
-  case InlineReturn:
   case InstanceOf:
   case InstanceOfBitmask:
   case InstanceOfIface:

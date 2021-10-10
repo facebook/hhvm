@@ -331,12 +331,6 @@ struct Global {
   StateVector<IRInstruction,KnownRegState> vmRegsLiveness;
   uint32_t seenStoreId{0};
   bool needsReflow{false};
-  bool adjustedInlineCalls{false};
-
-  // We can't safely remove InlineReturn instructions, once we've moved or
-  // killed InlineCall instructions we handle InlineReturns in a final dataflow
-  // analysis that tracks inline frames.
-  IdSet<IRInstruction> deadInlineReturns;
 };
 
 // Block-local environment.
@@ -437,22 +431,11 @@ bool removeDead(Local& env, IRInstruction& inst, bool trash) {
     }
   }
 
-  if (inst.is(InlineCall)) env.global.adjustedInlineCalls = true;
-
   auto block = inst.block();
   auto pos = block->erase(&inst);
   if (dbgInst) {
     block->insert(pos, dbgInst);
     return false;
-  }
-  if (inst.is(InlineCall)) {
-    auto const syncFP = env.global.unit.gen(
-      StVMFP,
-      inst.bcctx(),
-      inst.src(1)
-    );
-    block->insert(pos, syncFP);
-    FTRACE(4, "      insert: {}\n", syncFP->toString());
   }
   return true;
 }
@@ -678,18 +661,8 @@ void visit(Local& env, IRInstruction& inst) {
     },
 
     [&] (PureInlineCall l) {
-      doPureStore(PureStore { l.base, l.fp });
+      store(env, l.base);
       load(env, l.actrec);
-    },
-
-    [&] (PureInlineReturn l) {
-      if (auto bit = pure_store_bit(env, l.base)) {
-        if (isDead(env, *bit)) env.global.deadInlineReturns.add(inst);
-        mayStore(env, l.base);
-        mustStore(env, *bit);
-        return;
-      }
-      mayStore(env, l.base);
     },
 
     /*
@@ -1042,17 +1015,8 @@ void optimize_block_pre(Global& genv, Block* block,
         auto const cinst = resolve_ts(genv, block, StoreKey::In, i);
         FTRACE(1, " Inserting store {}: {}\n", i, cinst->toString());
         auto const inst = genv.unit.clone(cinst);
-        if (inst->is(InlineCall)) {
-          auto const syncFP = genv.unit.gen(
-            StVMFP,
-            inst->bcctx(),
-            inst->src(0)
-          );
-          block->prepend(syncFP);
-          FTRACE(4, " insert: {}\n", syncFP->toString());
-          genv.adjustedInlineCalls = true;
-        }
         block->prepend(inst);
+        assertx(!inst->is(InlineCall));
       }
     );
   }
@@ -1480,286 +1444,6 @@ void compute_placement_possible(
     });
 }
 
-void fix_inlined_call(Global& genv, IRInstruction* call, SSATmp* fp) {
-  // Nothing to do if the frame hasn't changed.
-  if (fp == call->src(1)) return;
-
-  // Adjust the fp and callOffset to reflect the caller frame for this call.
-  assertx(call->src(1)->inst()->is(BeginInlining));
-  auto const sk = call->marker().fixupSk();
-  call->extra<Call>()->callOffset = sk.offset();
-  call->setSrc(1, fp);
-}
-
-struct FPState {
-  SrcKey catchSk;  // SrcKey at dominating BeginCatch or SrcKey{}
-  int exitDepth;   // number of live frames at end of block
-  SSATmp* entry;   // live fp at start of block
-  SSATmp* exit;    // live fp at end of block
-  SSATmp* catchFP; // live fp at dominating BeginCatch or nullptr
-};
-
-using Frames = jit::vector<SSATmp*>;
-
-SSATmp* parent_frame(SSATmp* fp) {
-  assertx(fp->inst()->is(BeginInlining));
-  return fp->inst()->src(1);
-}
-
-void populate_ancestor_frames(SSATmp* fp, Frames& frames) {
-  frames.clear();
-  while (fp) {
-    assertx(fp->isA(TFramePtr));
-    assertx(fp->inst()->is(DefFP, DefFuncEntryFP, BeginInlining));
-    frames.push_back(fp);
-    fp = fp->inst()->is(BeginInlining) ? parent_frame(fp) : nullptr;
-  }
-  std::reverse(frames.begin(), frames.end());
-}
-
-void append_inline_returns(Global& genv, Block* b, SSATmp* start, SSATmp* end) {
-  auto const it = b->backIter();
-  while (start != end) {
-    auto const next = parent_frame(start);
-    b->insert(it, genv.unit.gen(InlineReturn, it->bcctx(), start, next));
-    start = next;
-  }
-}
-
-void adjust_inline_marker(IRInstruction& inst, Frames& scratch_frames,
-                          const Frames& published_frames) {
-  // As an optimization, avoid rewriting CheckSurpriseFlags markers.
-  if (inst.is(CheckSurpriseFlags)) return;
-
-  // Find the last ancestor of this frame that's been published. This search
-  // definitely stops at the DefFP at i = 0, so it must be successful.
-  populate_ancestor_frames(inst.marker().fixupFP(), scratch_frames);
-  if (published_frames.empty() || scratch_frames.empty()) return;
-  auto i = std::min(published_frames.size(), scratch_frames.size()) - 1;
-  while (published_frames[i] != scratch_frames[i]) {
-    assertx(i > 0);
-    i--;
-  }
-
-  // If fp == curFp, then curFp is published and we're fine. Else, the frame
-  // right after fp in the scratch_frames list exists and is the first call
-  // from a published frame to an unpublished ancestor of curFp.
-  auto const fp = published_frames[i];
-  auto const curFp = inst.marker().fixupFP();
-  assertx(curFp == scratch_frames.back());
-  if (curFp == fp) return;
-  assertx(i + 1 < scratch_frames.size());
-  assertx(curFp->inst()->is(BeginInlining));
-
-  inst.marker() = inst.marker().adjustFixupFP(fp);
-}
-
-void insert_eager_sync(Global& genv, IRInstruction& endCatch) {
-  auto const block = endCatch.block();
-  auto const bcSP = genv.unit.gen(
-    LoadBCSP,
-    endCatch.bcctx(),
-    IRSPRelOffsetData { endCatch.extra<EndCatch>()->offset },
-    endCatch.src(1)
-  );
-  auto const syncFP = genv.unit.gen(
-    StVMFP,
-    endCatch.bcctx(),
-    endCatch.src(0)
-  );
-  auto const syncSP = genv.unit.gen(
-    StVMSP,
-    endCatch.bcctx(),
-    bcSP->dst()
-  );
-  auto const syncPC = genv.unit.gen(
-    StVMPC,
-    endCatch.bcctx(),
-    genv.unit.cns(uintptr_t(endCatch.bcctx().marker.sk().pc()))
-  );
-  auto const syncReturnAddr = genv.unit.gen(
-    StVMReturnAddr,
-    endCatch.bcctx(),
-    genv.unit.cns(getNextFakeReturnAddress())
-  );
-  block->insert(--block->end(), syncFP);
-  block->insert(--block->end(), bcSP);
-  block->insert(--block->end(), syncSP);
-  block->insert(--block->end(), syncPC);
-  block->insert(--block->end(), syncReturnAddr);
-}
-
-void fix_inline_frames(Global& genv) {
-  using ECM = EndCatchData::CatchMode;
-  StateVector<Block,FPState> blockState{
-    genv.unit, FPState{SrcKey{}, 0, nullptr, nullptr, nullptr}
-  };
-  const BlockList rpoBlocks{genv.poBlockList.rbegin(), genv.poBlockList.rend()};
-  auto const rpoIDs = numberBlocks(genv.unit, rpoBlocks);
-  dataflow_worklist<uint32_t> incompleteQ(rpoBlocks.size());
-  DEBUG_ONLY std::unordered_map<SSATmp*,SSATmp*> parentFPs;
-
-  for (auto rpoId = uint32_t{0}; rpoId < rpoBlocks.size(); ++rpoId) {
-    incompleteQ.push(rpoId);
-  }
-
-  // Save scratch space for the list of ancestor frame pointers needed to
-  // adjust markers as we go. As long as we don't repeatedly allocate and
-  // de-allocate these vectors, the O(inline-depth) cost should be okay.
-  Frames published_frames;
-  Frames scratch_frames;
-
-  while (!incompleteQ.empty()) {
-    auto const rpoId = incompleteQ.pop();
-    auto const blk = rpoBlocks[rpoId];
-    auto& state = blockState[blk];
-
-    state.entry = nullptr;
-    bool needFixup = false;
-    blk->forEachPred([&] (Block* pred) {
-      auto const& bs = blockState[pred];
-      needFixup |= bs.exit && state.entry && state.entry != bs.exit;
-      if (bs.catchSk.valid()) state.catchSk = bs.catchSk;
-      if (bs.catchFP) state.catchFP = bs.catchFP;
-
-      if (!bs.exit) return;
-      if (!state.entry || bs.exitDepth < state.exitDepth) {
-        state.entry = bs.exit;
-        state.exitDepth = bs.exitDepth;
-      }
-    });
-
-    // We split critical edges so it should be safe to insert InlineReturns into
-    // predecessors in this case.
-    if (needFixup) {
-      assertx(blk->numPreds() > 1);
-      blk->forEachPred([&] (Block* pred) {
-        assertx(pred->numSuccs() == 1);
-        auto& bs = blockState[pred];
-        if (bs.exitDepth > state.exitDepth) {
-          append_inline_returns(genv, pred, bs.exit, state.entry);
-          bs.exit = state.entry;
-        }
-      });
-    }
-
-    auto fp = state.entry;
-    populate_ancestor_frames(fp, published_frames);
-    assertx(published_frames.size() == state.exitDepth);
-
-    for (auto iter = blk->begin(); iter != blk->end(); iter++) {
-      auto& inst = *iter;
-      if (inst.is(InlineReturn)) {
-        if (fp == inst.src(0)) {
-          // If we didn't elide the InlineCall paired with this return we can't
-          // have removed any of its parent calls as they should each depend on
-          // each other.
-          assertx(inst.src(1) == parentFPs[fp]);
-          published_frames.pop_back();
-          fp = inst.src(1);
-          continue;
-        }
-
-        // The InlineCall was removed, we can remove the InlineReturn, determine
-        // if the InlineReturn needs to be converted to an InlineCall. This
-        // can happen when the InlineCall was killed or moved but the store for
-        // the InlineReturn is still live.
-        auto const parent = inst.src(1)->inst();
-        if (genv.deadInlineReturns[inst] || fp == parent->dst()) {
-          inst.convertToNop();
-          continue;
-        }
-        assertx(parent->is(BeginInlining));
-
-        InlineCallData data;
-        data.spOffset = parent->extra<BeginInlining>()->spOffset;
-        data.returnSk = parent->marker().sk().advanced();
-        data.returnSPOff = parent->marker().fixupBcSPOff()
-          - kNumActRecCells + 1;
-        genv.unit.replace(&inst, InlineCall, data, parent->dst(), fp);
-        // fallthrough to the InlineCall logic
-      }
-
-      if (inst.is(InlineCall)) {
-        fp = inst.src(0);
-        published_frames.push_back(fp);
-        auto const syncFP = genv.unit.gen(
-          StVMFP,
-          inst.bcctx(),
-          fp
-        );
-        auto next = iter;
-        next++;
-        auto const syncPC = genv.unit.gen(
-          StVMPC,
-          inst.bcctx(),
-          genv.unit.cns(uintptr_t(-1))
-        );
-        blk->insert(next, syncFP);
-        blk->insert(next, syncPC);
-      }
-
-      if (inst.is(DefFP, DefFuncEntryFP)) {
-        fp = inst.dst();
-        published_frames.push_back(fp);
-      }
-
-      adjust_inline_marker(inst, scratch_frames, published_frames);
-      FTRACE(1,
-        "adjust_inline_marker:\n"
-        "  inst: {}\n"
-        "  sk: {}\n"
-        "  fixupSk: {}\n",
-        inst.toString(),
-        show(inst.marker().sk()),
-        show(inst.marker().fixupSk())
-      );
-
-      if (debug && inst.is(BeginInlining)) parentFPs[inst.dst()] = inst.src(1);
-      if (inst.is(Call)) fix_inlined_call(genv, &inst, fp);
-      if (inst.is(CallBuiltin)) inst.setSrc(0, fp);
-
-      if (inst.is(StVMFP)) {
-        inst.setSrc(0, fp);
-      }
-
-      if (inst.is(StVMPC)) {
-        auto const pc = state.catchSk.valid()
-          ? state.catchSk.pc()
-          : inst.marker().fixupSk().pc();
-        inst.setSrc(0, genv.unit.cns(uintptr_t(pc)));
-      }
-
-      if (inst.is(BeginCatch)) {
-        state.catchSk = inst.marker().sk();
-        state.catchFP = fp;
-      }
-
-      if (inst.is(EndCatch)) {
-        if (state.catchFP != fp &&
-            inst.extra<EndCatch>()->mode != ECM::CallCatch) {
-          insert_eager_sync(genv, inst);
-        }
-      }
-
-      // This isn't a correctness problem but it may save us a register
-      if (inst.is(CheckSurpriseFlags) && inst.src(0)->isA(TFramePtr)) {
-        if (fp->inst()->marker().resumeMode() == ResumeMode::None) {
-          inst.setSrc(0, fp);
-        }
-      }
-    }
-
-    if (state.exit && state.exit != fp) {
-      blk->forEachSucc([&] (Block* succ) {
-        incompleteQ.push(rpoIDs[succ]);
-      });
-    }
-    state.exit = fp;
-    state.exitDepth = published_frames.size();
-  }
-}
-
 //////////////////////////////////////////////////////////////////////
 
 }
@@ -1869,10 +1553,6 @@ void optimizeStores(IRUnit& unit) {
 
   for (auto& block : poBlockList) {
     optimize_block_pre(genv, block, blockAnalysis);
-  }
-
-  if (genv.adjustedInlineCalls) {
-    fix_inline_frames(genv);
   }
 
   if (genv.needsReflow) {

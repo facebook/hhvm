@@ -120,7 +120,6 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::inlinestart:
     case Vinstr::inlineend:
     case Vinstr::pushframe:
-    case Vinstr::popframe:
     case Vinstr::recordstack:
     case Vinstr::recordbasenativesp:
     case Vinstr::unrecordbasenativesp:
@@ -152,7 +151,6 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::defvmsp:
     case Vinstr::defvmfp:
     case Vinstr::pushvmfp:
-    case Vinstr::popvmfp:
     case Vinstr::syncvmsp:
     case Vinstr::defvmretdata:
     case Vinstr::defvmrettype:

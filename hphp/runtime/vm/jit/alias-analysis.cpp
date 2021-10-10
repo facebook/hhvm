@@ -65,8 +65,7 @@ void visit_locations(const BlockList& blocks, Visit visit) {
         [&] (PureStore x)         { visit(x.dst); },
         [&] (ExitEffects x)       { visit(x.live); visit(x.kills); },
         [&] (PureInlineCall x)    { visit(x.base);
-                                    visit(x.actrec); },
-        [&] (PureInlineReturn x)  { visit(x.base); }
+                                    visit(x.actrec); }
       );
     }
   }

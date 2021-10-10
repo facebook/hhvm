@@ -49,6 +49,7 @@ struct BCMarker {
       false,
       TransIDSet{},
       nullptr,
+      nullptr,
       nullptr
     };
   }
@@ -56,13 +57,13 @@ struct BCMarker {
   BCMarker() = default;
 
   BCMarker(SrcKey sk, SBInvOffset bcSPOff, bool stublogue,
-           const TransIDSet& tids, SSATmp* fp, SSATmp* sp)
+           const TransIDSet& tids, SSATmp* fp, SSATmp* fixupFP, SSATmp* sp)
     : m_sk(sk)
     , m_bcSPOff(bcSPOff)
     , m_stublogue(stublogue)
     , m_profTransIDs{tids}
     , m_fp{fp}
-    , m_fixupFP{fp}
+    , m_fixupFP{fixupFP}
     , m_sp{sp}
   {
     assertx(valid());
@@ -130,11 +131,6 @@ struct BCMarker {
   BCMarker adjustSPOff(SBInvOffset bcSPOff) const {
     auto ret = *this;
     ret.m_bcSPOff = bcSPOff;
-    return ret;
-  }
-  BCMarker adjustFixupFP(SSATmp* fp) const {
-    auto ret = *this;
-    ret.m_fixupFP = fp;
     return ret;
   }
 

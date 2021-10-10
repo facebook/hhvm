@@ -23,15 +23,15 @@
 #include "hphp/runtime/vm/jit/target-profile.h"
 
 #include "hphp/runtime/vm/jit/irgen-exit.h"
+#include "hphp/runtime/vm/jit/irgen-inlining.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/irgen-interpone.h"
 
 namespace HPHP { namespace jit { namespace irgen {
 
 void surpriseCheck(IRGS& env) {
-  auto const ptr = resumeMode(env) != ResumeMode::None ? sp(env) : fp(env);
   auto const exit = makeExitSlow(env);
-  gen(env, CheckSurpriseFlags, exit, ptr);
+  gen(env, CheckSurpriseFlags, exit, anyStackRegister(env));
 }
 
 void surpriseCheck(IRGS& env, Offset relOffset) {
@@ -41,9 +41,8 @@ void surpriseCheck(IRGS& env, Offset relOffset) {
 }
 
 void surpriseCheckWithTarget(IRGS& env, Offset targetBcOff) {
-  auto const ptr = resumeMode(env) != ResumeMode::None ? sp(env) : fp(env);
   auto const exit = makeExitSurprise(env, SrcKey{curSrcKey(env), targetBcOff});
-  gen(env, CheckSurpriseFlags, exit, ptr);
+  gen(env, CheckSurpriseFlags, exit, anyStackRegister(env));
 }
 
 /*
@@ -199,6 +198,8 @@ void emitSwitch(IRGS& env, SwitchKind kind, int64_t base,
     targets.emplace_back(SrcKey{curSrcKey(env), bcOff(env) + offset});
   }
 
+  spillInlinedFrames(env);
+
   auto data = JmpSwitchData{};
   data.cases = iv.size();
   data.targets = &targets[0];
@@ -244,6 +245,7 @@ void emitSSwitch(IRGS& env, const ImmVector& iv) {
 
   auto const dest = gen(env, LdSSwitchDest, data, testVal);
   decRef(env, testVal);
+  spillInlinedFrames(env);
   gen(
     env,
     JmpSSwitchDest,
@@ -304,11 +306,13 @@ void emitThrow(IRGS& env) {
     auto const exn = popC(env);
     updateMarker(env);
 
+    spillInlinedFrames(env);
+
     auto const spOff = spOffBCFromIRSP(env);
     auto const bcSP = gen(env, LoadBCSP, IRSPRelOffsetData { spOff }, sp(env));
-    gen(env, StVMFP, fp(env));
+    gen(env, StVMFP, fixupFP(env));
     gen(env, StVMSP, bcSP);
-    gen(env, StVMPC, cns(env, uintptr_t(curSrcKey(env).pc())));
+    gen(env, StVMPC, cns(env, uintptr_t(fixupSrcKey(env).pc())));
     genStVMReturnAddr(env);
     gen(env, StVMRegState, cns(env, eagerlyCleanState()));
     auto const etcData = EnterTCUnwindData { spOff, true };

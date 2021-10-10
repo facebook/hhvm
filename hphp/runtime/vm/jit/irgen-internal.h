@@ -25,6 +25,7 @@
 
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/guard-constraint.h"
+#include "hphp/runtime/vm/jit/irgen-inlining.h"
 #include "hphp/runtime/vm/jit/punt.h"
 #include "hphp/runtime/vm/jit/simplify.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
@@ -43,7 +44,15 @@ TRACE_SET_MOD(hhir);
 // Convenient short-hand state accessors
 
 inline SSATmp* fp(const IRGS& env) { return env.irb->fs().fp(); }
+inline SSATmp* fixupFP(const IRGS& env) { return env.irb->fs().fixupFP(); }
 inline SSATmp* sp(const IRGS& env) { return env.irb->fs().sp(); }
+
+inline SSATmp* anyStackRegister(const IRGS& env) {
+  if (sp(env)->inst()->is(DefRegSP)) return sp(env);
+  assertx(sp(env)->inst()->is(DefFrameRelSP));
+  assertx(sp(env)->inst()->src(0)->inst()->is(DefFP));
+  return sp(env)->inst()->src(0);
+}
 
 inline Offset bcOff(const IRGS& env) {
   return env.bcState.offset();
@@ -81,6 +90,17 @@ inline SrcKey nextSrcKey(const IRGS& env) {
 
 inline Offset nextBcOff(const IRGS& env) {
   return nextSrcKey(env).offset();
+}
+
+inline SrcKey fixupSrcKey(const IRGS& env) {
+  auto curFP = fp(env);
+  auto curSK = curSrcKey(env);
+  while (curFP != fixupFP(env)) {
+    assertx(curFP->inst()->is(BeginInlining));
+    curSK = curFP->inst()->marker().sk();
+    curFP = curFP->inst()->src(1);
+  }
+  return curSK;
 }
 
 inline SSATmp* curRequiredCoeffects(IRGS& env) {
@@ -621,6 +641,7 @@ inline BCMarker makeMarker(IRGS& env, SrcKey sk) {
     env.irb->fs().stublogue(),
     env.profTransIDs,
     env.irb->fs().fp(),
+    env.irb->fs().fixupFP(),
     env.irb->fs().sp()
   };
 }
@@ -886,6 +907,12 @@ Block* create_catch_block(
 
   gen(env, BeginCatch);
   body();
+
+  // We already spilled frames prior to these opcodes.
+  if (mode != EndCatchData::CatchMode::InterpCatch) {
+    spillInlinedFrames(env);
+  }
+
   auto const stublogue = env.irb->fs().stublogue();
   auto const spOffset = mode != EndCatchData::CatchMode::CallCatch
     ? spOffBCFromIRSP(env)

@@ -1401,7 +1401,7 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
   auto const cbNumArgs = 2 + params.size() + (params.ctx ? 1 : 0);
   auto ret = jit::vector<SSATmp*>(cbNumArgs);
   auto argIdx = uint32_t{0};
-  ret[argIdx++] = fp(env);
+  ret[argIdx++] = fixupFP(env);
   ret[argIdx++] = sp(env);
   if (params.ctx) ret[argIdx++] = params.ctx;
 

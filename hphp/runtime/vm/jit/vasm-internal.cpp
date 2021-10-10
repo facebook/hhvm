@@ -323,9 +323,6 @@ void computeFrames(Vunit& unit) {
         case Vinstr::pushframe:
           pending--;
           break;
-        case Vinstr::popframe:
-          pending++;
-          break;
         default: break;
         }
       }

@@ -704,8 +704,7 @@ Flags analyze_inst(Local& env, const IRInstruction& inst) {
     [&] (PureStore m)       { flags = store(env, m.dst, m.value); },
     [&] (PureLoad m)        { flags = load(env, inst, m.src); },
 
-    [&] (PureInlineCall m)    { store(env, m.base, m.fp); },
-    [&] (PureInlineReturn m)  { store(env, m.base, m.callerFp); },
+    [&] (PureInlineCall m)  { store(env, m.base, m.fp); },
     [&] (GeneralEffects m)  { flags = handle_general_effects(env, inst, m); },
     [&] (CallEffects x)     { handle_call_effects(env, inst, x); }
   );
@@ -1034,33 +1033,6 @@ void optimize_end_catch(Global& env, IRInstruction& inst,
   block->insert(iter++, bcSP);
   block->insert(iter++, syncSP);
   env.unit.replace(&inst, EndCatch, data, inst.src(0), inst.src(1));
-  env.stackTeardownsOptimized++;
-}
-
-void optimize_enter_tc_unwind(
-  Global& env,
-  IRInstruction& inst,
-  CompactVector<std::pair<uint32_t, Type>>& locals) {
-  FTRACE(3, "Optimizing EnterTCUnwind\n{}\n", inst.marker().show());
-
-  auto const block = inst.block();
-  auto const extra = inst.extra<EnterTCUnwind>();
-  assertx(extra->teardown);
-
-  for (auto local : locals) {
-    int locId = local.first;
-    auto const type = local.second;
-    FTRACE(5, "    Emitting decref for LocalId {}\n", locId);
-    auto const loadInst =
-      env.unit.gen(LdLoc, inst.bcctx(), type,
-                   LocalId{(uint32_t)locId}, inst.marker().fixupFP());
-    block->insert(block->iteratorTo(&inst), loadInst);
-    auto const decref =
-      env.unit.gen(DecRef, inst.bcctx(), DecRefData{locId}, loadInst->dst());
-    block->insert(block->iteratorTo(&inst), decref);
-  }
-  auto const etcData = EnterTCUnwindData { extra->offset, false };
-  env.unit.replace(&inst, EnterTCUnwind, etcData, inst.src(0));
   env.stackTeardownsOptimized++;
 }
 

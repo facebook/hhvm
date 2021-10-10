@@ -134,6 +134,7 @@ bool merge_into(FrameState& dst, const FrameState& src) {
   // The only thing that can change the FP is inlining, but we can't have one
   // of the predecessors in an inlined callee while the other isn't.
   always_assert(dst.fpValue == src.fpValue);
+  always_assert(dst.fixupFPValue == src.fixupFPValue);
 
   // We must always have the same spValue.
   always_assert(dst.spValue == src.spValue);
@@ -284,8 +285,9 @@ void FrameStateMgr::update(const IRInstruction* inst) {
   assertx(checkInvariants());
 
   switch (inst->op()) {
+  case BeginInlining:  trackBeginInlining(inst); break;
+  case EndInlining:    trackEndInlining(); break;
   case InlineCall:     trackInlineCall(inst); break;
-  case InlineReturn:   trackInlineReturn(); break;
   case StFrameCtx:
     if (cur().fpValue == inst->src(0)) cur().ctx = inst->src(1);
     break;
@@ -320,10 +322,12 @@ void FrameStateMgr::update(const IRInstruction* inst) {
 
   case DefFP:
     cur().fpValue = inst->dst();
+    cur().fixupFPValue = inst->dst();
     break;
 
   case DefFuncEntryFP:
     cur().fpValue = inst->dst();
+    cur().fixupFPValue = inst->dst();
     cur().ctx = inst->src(3);
     cur().stublogue = false;
     break;
@@ -335,6 +339,7 @@ void FrameStateMgr::update(const IRInstruction* inst) {
   case RetCtrl:
     uninitStack();
     cur().fpValue = nullptr;
+    cur().fixupFPValue = nullptr;
     break;
 
   case DefFrameRelSP:
@@ -735,7 +740,7 @@ void FrameStateMgr::updateMBase(const IRInstruction* inst) {
               },
               [&](PureLoad /*m*/) {}, [&](ReturnEffects) {},
               [&](ExitEffects) {}, [&](IrrelevantEffects) {},
-              [&](PureInlineCall) {}, [&](PureInlineReturn) {},
+              [&](PureInlineCall) {},
               [&](UnknownEffects) { pessimize_mbase(); });
 }
 
@@ -996,36 +1001,34 @@ void FrameStateMgr::uninitStack() {
   cur().stack.clear();
 }
 
-void FrameStateMgr::trackInlineCall(const IRInstruction* inst) {
-  assertx(inst->src(0)->inst()->is(BeginInlining));
-  auto const extra      = inst->extra<InlineCall>();
-  auto const extraBI    = inst->src(0)->inst()->extra<BeginInlining>();
-  auto const target     = extraBI->func;
-  auto const calleeFP   = inst->src(0);
-  auto const savedSPOff =
-    extra->spOffset.to<SBInvOffset>(irSPOff()) - kNumActRecCells;
+void FrameStateMgr::trackBeginInlining(const IRInstruction* inst) {
+  assertx(inst->is(BeginInlining));
+  auto const extra = inst->extra<BeginInlining>();
+  auto const callee = extra->func;
+  auto const spOffset = extra->spOffset;
+  assertx(cur().bcSPOff == spOffset.to<SBInvOffset>(irSPOff()));
 
-  /*
-   * Push a new state for the inlined callee; saving the state we'll need to
-   * pop on return.
-   */
+  // Remove space from callee's frame from the caller's stack.
   for (auto i = uint32_t{0}; i < kNumActRecCells; ++i) {
-    setValue(stk(extra->spOffset + i), nullptr);
+    setValue(stk(spOffset + i), nullptr);
   }
-  cur().bcSPOff = savedSPOff;
+  cur().bcSPOff -= kNumActRecCells;
 
-  if (target->isCPPBuiltin()) {
-    auto const inout = target->numInOutParams();
+  if (callee->isCPPBuiltin()) {
+    auto const inout = callee->numInOutParams();
     for (auto i = uint32_t{0}; i < inout; ++i) {
-      auto const type = irgen::callOutType(target, i);
+      auto const type = irgen::callOutType(callee, i);
       setType(stk(extra->spOffset + kNumActRecCells + i), type);
     }
   }
 
-  m_stack.emplace_back(FrameState{target});
+  // Push a new state for the inlined callee; saving the state we'll need to
+  // pop on return.
+  m_stack.emplace_back(FrameState{callee});
 
   // Set up the callee's frame.
-  cur().fpValue = calleeFP;
+  cur().fpValue = inst->dst();
+  cur().fixupFPValue = caller().fixupFPValue;
 
   /*
    * Set up the callee's stack.
@@ -1034,24 +1037,26 @@ void FrameStateMgr::trackInlineCall(const IRInstruction* inst) {
    * from the new stack base. It consists of two parts:
    *
    * - the inverse offset of the new `fpValue` from the new stack base, given by
-   *   `-target->numSlotsInFrame()`
+   *   `-callee->numSlotsInFrame()`
    * - the inverse offset of `spValue` from the new `fpValue`, which is the same
    *   numeric value as a regular offset of `fpValue` from `spValue`, given by
-   *   `extra->spOffset`
+   *   `spOffset`
    *
    * The callee's stack starts empty, so `bcSPOff` is zero.
    */
-  auto const irSPOff =
-    SBInvOffset{extra->spOffset.offset - target->numSlotsInFrame()};
+  auto const irSPOff = SBInvOffset{spOffset.offset - callee->numSlotsInFrame()};
   auto const bcSPOff = SBInvOffset{0};
   initStack(caller().spValue, irSPOff, bcSPOff);
-  FTRACE(6, "InlineCall setting irSPOff: {}\n", irSPOff.offset);
+  FTRACE(6, "BeginInlining setting irSPOff: {}\n", irSPOff.offset);
 
   // Copy the type predictions.
   cur().predictedTypes = caller().predictedTypes;
 }
 
-void FrameStateMgr::trackInlineReturn() {
+void FrameStateMgr::trackEndInlining() {
+  // EndInlining is not allowed after InlineCall
+  assertx(caller().fixupFPValue == cur().fixupFPValue);
+
   // Inlining may not change spValue
   assertx(caller().spValue == cur().spValue);
 
@@ -1061,6 +1066,11 @@ void FrameStateMgr::trackInlineReturn() {
   // Pop the inlined frame.
   m_stack.pop_back();
   assertx(!m_stack.empty());
+}
+
+void FrameStateMgr::trackInlineCall(const IRInstruction* inst) {
+  assertx(cur().fixupFPValue == inst->src(1));
+  cur().fixupFPValue = inst->src(0);
 }
 
 /*

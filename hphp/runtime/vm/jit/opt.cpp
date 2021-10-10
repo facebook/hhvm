@@ -154,14 +154,6 @@ void fixBlockHints(IRUnit& unit) {
   } while (changed);
 }
 
-uint64_t count_inline_returns(const IRUnit& unit) {
-  uint64_t ret = 0;
-  forEachInst(poSortCfg(unit), [&] (const IRInstruction* inst) {
-    if (inst->is(InlineReturn)) ++ret;
-  });
-  return ret;
-}
-
 void mandatoryPropagation(IRUnit& unit) {
   forEachInst(
     rpoSortCfg(unit),
@@ -209,7 +201,6 @@ void optimize(IRUnit& unit, TransKind kind) {
     doPass(unit, gvn, DCE::Full);
   }
 
-  auto inline_returns = count_inline_returns(unit);
   while (true) {
     if (kind != TransKind::Profile && RuntimeOption::EvalHHIRMemoryOpts) {
       rqtrace::EventGuard trace{"OPT_LOAD"};
@@ -223,12 +214,8 @@ void optimize(IRUnit& unit, TransKind kind) {
       printUnit(6, unit, " after optimizeStores ");
     }
 
-    auto const prev_inline_returns = inline_returns;
-    if (inline_returns) inline_returns = count_inline_returns(unit);
-
     rqtrace::EventGuard trace{"OPT_PHI"};
     if (!doPass(unit, optimizePhis, DCE::Full)) {
-      if (prev_inline_returns != inline_returns) continue;
       break;
     }
     doPass(unit, cleanCfg, DCE::None);

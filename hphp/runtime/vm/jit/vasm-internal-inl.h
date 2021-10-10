@@ -119,13 +119,6 @@ inline bool emit(Venv& env, const pushframe&) {
   return true;
 }
 
-inline bool emit(Venv& env, const popframe&) {
-  if (env.frame == -1) return true; // unreachable block
-
-  ++env.pending_frames;
-  return true;
-}
-
 inline bool emit(Venv& env, const recordbasenativesp& i) {
   return true;
 }

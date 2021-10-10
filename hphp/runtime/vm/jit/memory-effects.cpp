@@ -676,17 +676,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       //
       // We also need to ensure that all of our parent frames have this stored
       // this information. To achieve this we also register a load on AFBasePtr,
-      // forcing them to also be published. Notice that we doin't actually
+      // forcing them to also be published. Notice that we don't actually
       // depend on this load to properly initialize m_sfp or rvmfp().
       AliasClass(AFFunc { inst.src(0) }) | AFMeta { inst.src(0) } | AFBasePtr
     };
-
-  case InlineReturn:
-    // Unlike InlineCall we don't need to explicitly require the frame be
-    // published. Unlike InlineCall, however, it is not safe to "move" an
-    // InlineReturn, it may only be killed once it has been made redundant by
-    // the removal of its associated InlineCall.
-    return PureInlineReturn { AFBasePtr, inst.src(0), inst.src(1) };
 
   case InterpOne:
     return interp_one_effects(inst);
@@ -736,17 +729,12 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
         // No outputs.
         AEmpty,
         // Locals.
-        backtrace_locals(inst) | livefp(inst.src(1))
+        backtrace_locals(inst)
       };
     }
 
   case Call:
     {
-      // If any frames in the inlined stack have metadata we need to materialize
-      // all of the frames so that debug_backtrace() can find it.
-      AliasClass ar = any_frame_has_metadata(inst.src(1))
-        ? livefp(inst.src(1))
-        : AliasClass(AActRec {inst.src(1)});
       auto const extra = inst.extra<Call>();
       return CallEffects {
         // Kills. Everything on the stack below the incoming parameters.
@@ -764,9 +752,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
           extra->spOffset + extra->numInputs() + kNumActRecCells +
             extra->numOut
         ),
-        // Locals. We intentionally leave off a dependency on AFBasePtr to allow
-        // store-elim to elide the new frame.
-        backtrace_locals(inst) | ar
+        // Locals.
+        backtrace_locals(inst)
       };
     }
 
@@ -2113,7 +2100,6 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, MemEffects me) {
                                check(x.locals); },
     [&] (PureInlineCall x)   { check(x.base);
                                check(x.actrec); },
-    [&] (PureInlineReturn x) { check(x.base); },
     [&] (ReturnEffects x)    { check(x.kills); }
   );
 
@@ -2160,7 +2146,6 @@ MemEffects memory_effects(const IRInstruction& inst) {
           [&] (PureStore)          { return fail(); },
           [&] (ExitEffects)        { return fail(); },
           [&] (PureInlineCall)     { return fail(); },
-          [&] (PureInlineReturn)   { return fail(); },
           [&] (IrrelevantEffects)  { return fail(); },
           [&] (ReturnEffects)      { return fail(); }
         );
@@ -2190,7 +2175,6 @@ MemEffects memory_effects(const IRInstruction& inst) {
       [&] (PureStore)          { return fail(); },
       [&] (ExitEffects)        { return fail(); },
       [&] (PureInlineCall)     { return fail(); },
-      [&] (PureInlineReturn)   { return fail(); },
       [&] (IrrelevantEffects)  { return fail(); },
       [&] (ReturnEffects)      { return fail(); }
     );
@@ -2236,13 +2220,6 @@ MemEffects canonicalize(MemEffects me) {
         canonicalize(x.actrec)
       };
     },
-    [&] (PureInlineReturn x) -> R {
-      return PureInlineReturn {
-        canonicalize(x.base),
-        x.calleeFp,
-        x.callerFp
-      };
-    },
     [&] (CallEffects x) -> R {
       return CallEffects {
         canonicalize(x.kills),
@@ -2285,9 +2262,6 @@ std::string show(MemEffects effects) {
         show(x.base),
         show(x.actrec)
       );
-    },
-    [&] (PureInlineReturn x) {
-      return sformat("inline_return({})", show(x.base));
     },
     [&] (CallEffects x) {
       return sformat("call({} ; {} ; {} ; {} ; {})",

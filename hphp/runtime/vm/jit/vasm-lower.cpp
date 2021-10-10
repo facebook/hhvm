@@ -347,9 +347,6 @@ void lower(VLS& env, defvmfp& inst, Vlabel b, size_t i) {
 void lower(VLS& env, pushvmfp& inst, Vlabel b, size_t i) {
   env.unit.blocks[b].code[i] = copy{inst.s, rvmfp()};
 }
-void lower(VLS& env, popvmfp& inst, Vlabel b, size_t i) {
-  env.unit.blocks[b].code[i] = copy{inst.s, rvmfp()};
-}
 void lower(VLS& env, syncvmsp& inst, Vlabel b, size_t i) {
   env.unit.blocks[b].code[i] = copy{inst.s, rvmsp()};
 }

@@ -993,31 +993,6 @@ struct ReqBindJmpData : IRExtraData {
   IRSPRelOffset irSPOff;
 };
 
-/*
- * InlineCall is present when we need to create a frame for inlining.  This
- * instruction also carries some metadata used by IRBuilder to track state
- * during an inlined call.
- */
-struct InlineCallData : IRExtraData {
-  std::string show() const {
-    return folly::to<std::string>(
-      spOffset.offset
-    );
-  }
-
-  size_t stableHash() const {
-    return std::hash<int32_t>()(spOffset.offset);
-  }
-
-  bool equals(const InlineCallData& o) const {
-    return spOffset == o.spOffset;
-  }
-
-  IRSPRelOffset spOffset; // offset from caller SP to bottom of callee's ActRec
-  SrcKey returnSk;
-  SBInvOffset returnSPOff;
-};
-
 struct StFrameMetaData : IRExtraData {
   std::string show() const {
     return folly::to<std::string>(
@@ -2260,11 +2235,14 @@ struct ProfileCallTargetData : IRExtraData {
 };
 
 struct BeginInliningData : IRExtraData {
-  BeginInliningData(IRSPRelOffset offset, const Func* func, int cost, int na)
+  BeginInliningData(IRSPRelOffset offset, const Func* func, SrcKey returnSk,
+                    SBInvOffset returnSPOff, int cost, int numArgs)
     : spOffset(offset)
     , func(func)
+    , returnSk(returnSk)
+    , returnSPOff(returnSPOff)
     , cost(cost)
-    , numArgs(na)
+    , numArgs(numArgs)
   {}
 
   std::string show() const {
@@ -2276,18 +2254,24 @@ struct BeginInliningData : IRExtraData {
     return folly::hash::hash_combine(
       std::hash<int32_t>()(spOffset.offset),
       func->stableHash(),
+      SrcKey::StableHasher()(returnSk),
+      std::hash<int32_t>()(returnSPOff.offset),
       std::hash<int>()(cost),
       std::hash<int>()(numArgs)
     );
   }
 
   bool equals(const BeginInliningData& o) const {
-    return spOffset == o.spOffset && func == o.func && cost == o.cost &&
-           numArgs == o.numArgs;
+    return
+      spOffset == o.spOffset && func == o.func &&
+      returnSk == o.returnSk && returnSPOff == o.returnSPOff &&
+      cost == o.cost && numArgs == o.numArgs;
   }
 
-  IRSPRelOffset spOffset;
-  const Func* func;
+  IRSPRelOffset spOffset;  // offset from SP to the bottom of callee's ActRec
+  const Func* func;        // inlined function
+  SrcKey returnSk;         // return SrcKey
+  SBInvOffset returnSPOff; // offset from caller's stack base to return slot
   int cost;
   int numArgs;
 };
@@ -2422,7 +2406,13 @@ struct AssertReason : IRExtraData {
 #define ASSERT_REASON AssertReason{Reason{__FILE__, __LINE__}}
 
 struct EndCatchData : IRExtraData {
-  enum class CatchMode { UnwindOnly, CallCatch, SideExit, LocalsDecRefd };
+  enum class CatchMode {
+    UnwindOnly,
+    CallCatch,
+    InterpCatch,
+    SideExit,
+    LocalsDecRefd
+  };
   enum class FrameMode { Phplogue, Stublogue };
   enum class Teardown  { NA, None, Full, OnlyThis };
 
@@ -2439,7 +2429,8 @@ struct EndCatchData : IRExtraData {
       "IRSPOff ", offset.offset, ",",
       mode == CatchMode::UnwindOnly ? "UnwindOnly" :
         mode == CatchMode::CallCatch ? "CallCatch" :
-          mode == CatchMode::SideExit ? "SideExit" : "LocalsDecRefd", ",",
+          mode == CatchMode::InterpCatch ? "InterpCatch" :
+            mode == CatchMode::SideExit ? "SideExit" : "LocalsDecRefd", ",",
       stublogue == FrameMode::Stublogue ? "Stublogue" : "Phplogue", ",",
       teardown == Teardown::NA ? "NA" :
         teardown == Teardown::None ? "None" :
@@ -2691,7 +2682,6 @@ X(DefFrameRelSP,                DefStackData);
 X(DefRegSP,                     DefStackData);
 X(LdStk,                        IRSPRelOffsetData);
 X(LdStkAddr,                    IRSPRelOffsetData);
-X(InlineCall,                   InlineCallData);
 X(StFrameMeta,                  StFrameMetaData);
 X(BeginInlining,                BeginInliningData);
 X(ReqBindJmp,                   ReqBindJmpData);

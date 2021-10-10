@@ -145,8 +145,7 @@ void suspendHook(IRGS& env, Hook hook) {
   ifThen(
     env,
     [&] (Block* taken) {
-      auto const ptr = resumeMode(env) != ResumeMode::None ? sp(env) : fp(env);
-      gen(env, CheckSurpriseFlags, taken, ptr);
+      gen(env, CheckSurpriseFlags, taken, anyStackRegister(env));
     },
     [&] {
       hint(env, Block::Hint::Unlikely);
@@ -200,7 +199,7 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset suspendOffset,
 
       return cond(env,
         [&](Block* taken) {
-          gen(env, CheckSurpriseFlags, taken, fp(env));
+          gen(env, CheckSurpriseFlags, taken, anyStackRegister(env));
           gen(env, AFWHPushTailFrame, taken, child, cns(env, tailFrameId));
         },
         [&]{
@@ -480,11 +479,12 @@ void implAwaitFailed(IRGS& env, SSATmp* child, Block* exit) {
     // There are no more catch blocks in this function, we are at the top
     // level throw
     hint(env, Block::Hint::Unlikely);
+    spillInlinedFrames(env);
     auto const spOff = spOffBCFromIRSP(env);
     auto const bcSP = gen(env, LoadBCSP, IRSPRelOffsetData { spOff }, sp(env));
-    gen(env, StVMFP, fp(env));
+    gen(env, StVMFP, fixupFP(env));
     gen(env, StVMSP, bcSP);
-    gen(env, StVMPC, cns(env, uintptr_t(curSrcKey(env).pc())));
+    gen(env, StVMPC, cns(env, uintptr_t(fixupSrcKey(env).pc())));
     genStVMReturnAddr(env);
     gen(env, StVMRegState, cns(env, eagerlyCleanState()));
     auto const etcData = EnterTCUnwindData { spOff, true };
@@ -666,6 +666,7 @@ void emitCreateCont(IRGS& env) {
   assertx(resumeMode(env) == ResumeMode::None);
   assertx(curFunc(env)->isGenerator());
   assertx(spOffBCFromStackBase(env) == spOffEmpty(env));
+  assertx(!isInlining(env));
 
   // Create the Generator object. CreateCont takes care of copying local
   // variables and iterators.
@@ -713,7 +714,7 @@ void emitContEnter(IRGS& env) {
 
   // Make sure function enter hook is called if needed.
   auto const exitSlow = makeExitSlow(env);
-  gen(env, CheckSurpriseFlags, exitSlow, fp(env));
+  gen(env, CheckSurpriseFlags, exitSlow, anyStackRegister(env));
 
   // Exit to interpreter if resume address is not known.
   resumeAddr = gen(env, CheckNonNull, exitSlow, resumeAddr);

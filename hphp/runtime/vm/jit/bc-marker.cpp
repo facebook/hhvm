@@ -30,7 +30,8 @@ namespace HPHP { namespace jit {
 //////////////////////////////////////////////////////////////////////
 
 std::string BCMarker::show() const {
-  assertx(valid());
+  if (!valid()) return "invalid BCMarker";
+
   return folly::format(
     "--- bc {}, fp {}, fixupFP {}, spOff {}, {}",
     showShort(m_sk),

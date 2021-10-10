@@ -399,11 +399,9 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::phpret:
     case Vinstr::pop:
     case Vinstr::popf:
-    case Vinstr::popframe:
     case Vinstr::popm:
     case Vinstr::popp:
     case Vinstr::poppm:
-    case Vinstr::popvmfp:
     case Vinstr::prefetch:
     case Vinstr::push:
     case Vinstr::pushf:

@@ -436,7 +436,6 @@ bool canDCE(IRInstruction* inst) {
   case NewStructDict:
   case NewBespokeStructDict:
   case Clone:
-  case InlineReturn:
   case InlineCall:
   case Call:
   case NativeImpl:
@@ -948,8 +947,7 @@ void processCatchBlock(IRUnit& unit, DceState& state, Block* block,
         return
           process_stack(x.base) ||
           process_stack(x.actrec);
-      },
-      [&] (PureInlineReturn x)   { return process_stack(x.base); }
+      }
     );
   }
 

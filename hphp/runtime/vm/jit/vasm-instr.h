@@ -89,7 +89,6 @@ struct Vunit;
   O(inlinestart, Inone, Un, Dn)\
   O(inlineend, Inone, Un, Dn)\
   O(pushframe, Inone, Un, Dn)\
-  O(popframe, Inone, Un, Dn)\
   O(recordstack, Inone, Un, Dn)\
   O(recordbasenativesp, Inone, Un, Dn)\
   O(unrecordbasenativesp, Inone, Un, Dn)\
@@ -123,7 +122,6 @@ struct Vunit;
   O(defvmsp, Inone, Un, D(d))\
   O(defvmfp, Inone, Un, D(d))\
   O(pushvmfp, I(offset), U(s), Dn)\
-  O(popvmfp, Inone, U(s), Dn)\
   O(syncvmsp, Inone, U(s), Dn)\
   O(defvmretdata, Inone, Un, D(data))\
   O(defvmrettype, Inone, Un, D(type))\
@@ -610,7 +608,6 @@ struct inlineend {};
  * chain for record keeping.
  */
 struct pushframe {};
-struct popframe {};
 
 /*
  * Record the current inline stack as though it were materialized for a call at
@@ -790,15 +787,6 @@ struct defvmfp { Vreg d; };
  * rvmfp.
  */
 struct pushvmfp { Vreg s; int32_t offset; };
-
-/*
- * Copy `s` into rvmfp().
- *
- * Used to restore the previous value of rvmfp after a pushvmfp{} was performed.
- * The value `s` does not need to be the same register used to initialize rvmfp
- * but it must contain the same value.
- */
-struct popvmfp { Vreg s; };
 
 /*
  * Copy `s' into rvmsp().

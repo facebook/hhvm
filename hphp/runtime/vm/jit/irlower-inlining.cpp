@@ -59,18 +59,18 @@ void cgBeginInlining(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgInlineCall(IRLS& env, const IRInstruction* inst) {
-  auto const extra = inst->extra<InlineCall>();
   auto const calleeFP = srcLoc(env, inst, 0).reg();
   auto const callerFP = srcLoc(env, inst, 1).reg();
+  auto const calleeFPInst = inst->src(0)->inst();
+  assertx(calleeFPInst->is(BeginInlining));
+  auto const extra = calleeFPInst->extra<BeginInlining>();
   auto& v = vmain(env);
 
   auto const off = [&] () -> int32_t {
     auto const callerFPOff = offsetOfFrame(inst->src(1));
     if (!callerFPOff) return 0;
 
-    auto const calleeFPInst = inst->src(0)->inst();
-    assertx(calleeFPInst->is(BeginInlining));
-    auto const calleeFPOff = calleeFPInst->extra<BeginInlining>()->spOffset;
+    auto const calleeFPOff = extra->spOffset;
     return *callerFPOff - calleeFPOff;
   }();
 
@@ -82,26 +82,6 @@ void cgInlineCall(IRLS& env, const IRInstruction* inst) {
   v << store{retAddr, calleeFP[AROFF(m_savedRip)]};
   v << pushvmfp{calleeFP, cellsToBytes(off)};
   v << pushframe{};
-}
-
-void cgInlineReturn(IRLS& env, const IRInstruction* inst) {
-  auto& v = vmain(env);
-  auto const callerFPOff = offsetOfFrame(inst->src(1));
-  if (!callerFPOff) {
-    // Offset to the caller's FP not known, use callerFP SSA.
-    auto const callerFP = srcLoc(env, inst, 1).reg();
-    v << popvmfp{callerFP};
-  } else {
-    // Calculate the offset to the caller's FP and use it to update FP.
-    auto const calleeFPInst = inst->src(0)->inst();
-    assertx(calleeFPInst->is(BeginInlining));
-    auto const calleeFPOff = calleeFPInst->extra<BeginInlining>()->spOffset;
-    auto const calleeFP = srcLoc(env, inst, 0).reg();
-    auto const tmp = v.makeReg();
-    v << lea{calleeFP[cellsToBytes(*callerFPOff - calleeFPOff)], tmp};
-    v << popvmfp{tmp};
-  }
-  v << popframe{};
 }
 
 void cgEndInlining(IRLS& env, const IRInstruction* inst) {

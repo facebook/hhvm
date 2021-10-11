@@ -1446,12 +1446,7 @@ class CommonTests(BarebonesTests):
 
         self.test_driver.check_cmd(
             [
-                'File "{root}xcontroller.php", line 2, characters 8-20:',
-                "When linting MyXController: The body of isDelegateOnly should "
-                "only contain `return true;` or `return false;` (Lint[5615])",
-                'File "{root}xcontroller.php", line 2, characters 8-20:',
-                "When linting MyXController: getPath method of MyXController must "
-                "be present and return a static literal for build purposes (Lint[5615])",
+                "No lint errors!",
             ],
             options=["--lint-xcontroller", "{root}in_list.txt"],
         )

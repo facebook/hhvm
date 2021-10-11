@@ -293,7 +293,7 @@ let parsing genv env to_check ~stop_at_errors profiling =
   let (fast, errors, failed_parsing) =
     CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"parsing" @@ fun () ->
     if use_direct_decl_parser ctx then
-      ( Direct_decl_service.go ctx genv.workers get_next,
+      ( Direct_decl_service.go ctx genv.workers get_next ~cache_decls:false,
         Errors.empty,
         Relative_path.Set.empty )
     else

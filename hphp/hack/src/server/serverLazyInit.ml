@@ -859,6 +859,7 @@ let initialize_naming_table
     (progress_message : string)
     ?(fnl : Relative_path.t list option = None)
     ?(do_naming : bool = false)
+    ~(cache_decls : bool)
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
     (profiling : CgroupProfiler.Profiling.t) : ServerEnv.env * float =
@@ -890,6 +891,7 @@ let initialize_naming_table
       ?count
       t
       ~trace
+      ~cache_decls
       ~profile_label:"lazy.nt.parsing"
       ~profiling
   in
@@ -918,6 +920,7 @@ let write_symbol_info_init
     (profiling : CgroupProfiler.Profiling.t) : ServerEnv.env * float =
   let (env, t) =
     initialize_naming_table
+      ~cache_decls:true
       "write symbol info initialization"
       genv
       env
@@ -1047,6 +1050,7 @@ let full_init
   let (env, t) =
     initialize_naming_table
       ~do_naming:true
+      ~cache_decls:true
       "full initialization"
       genv
       env
@@ -1084,7 +1088,12 @@ let parse_only_init
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
     (profiling : CgroupProfiler.Profiling.t) : ServerEnv.env * float =
-  initialize_naming_table "parse-only initialization" genv env profiling
+  initialize_naming_table
+    ~cache_decls:false
+    "parse-only initialization"
+    genv
+    env
+    profiling
 
 let post_saved_state_initialization
     ~(genv : ServerEnv.genv)
@@ -1209,6 +1218,7 @@ let post_saved_state_initialization
       ~count:(List.length parsing_files_list)
       t
       ~trace
+      ~cache_decls:false (* Don't overwrite old decls loaded from saved state *)
       ~profile_label:"post_ss1.parsing"
       ~profiling
   in

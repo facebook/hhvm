@@ -45,6 +45,7 @@ let parsing
     ?(count : int option)
     (t : float)
     ~(trace : bool)
+    ~(cache_decls : bool)
     ~(profile_label : string)
     ~(profiling : CgroupProfiler.Profiling.t) : ServerEnv.env * float =
   CgroupProfiler.collect_cgroup_stats ~profiling ~stage:profile_label
@@ -58,7 +59,7 @@ let parsing
   let ctx = Provider_utils.ctx_from_server_env env in
   let (fast, errorl, _failed_parsing) =
     if genv.local_config.ServerLocalConfig.use_direct_decl_parser then
-      ( Direct_decl_service.go ctx genv.workers get_next,
+      ( Direct_decl_service.go ctx genv.workers get_next ~cache_decls,
         Errors.empty,
         Relative_path.Set.empty )
     else

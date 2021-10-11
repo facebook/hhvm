@@ -79,6 +79,7 @@ let init
       ~get_next
       t
       ~trace
+      ~cache_decls:true
       ~profile_label:"eager.init.parsing"
       ~profiling
   in

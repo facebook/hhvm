@@ -73,6 +73,7 @@ let decls_to_fileinfo
 
 let parse_batch
     (ctx : Provider_context.t)
+    ~(cache_decls : bool)
     (acc : FileInfo.t Relative_path.Map.t)
     (fnl : Relative_path.t list) : FileInfo.t Relative_path.Map.t =
   let parse acc fn =
@@ -87,7 +88,8 @@ let parse_batch
           fn
       with
       | None -> acc
-      | Some decl_and_mode_and_hash ->
+      | Some ((decls, _, _, _) as decl_and_mode_and_hash) ->
+        if cache_decls then Direct_decl_utils.cache_decls ctx decls;
         Relative_path.Map.add
           acc
           ~key:fn
@@ -97,12 +99,13 @@ let parse_batch
 
 let go
     (ctx : Provider_context.t)
+    ~(cache_decls : bool)
     (workers : MultiWorker.worker list option)
     (get_next : Relative_path.t list MultiWorker.Hh_bucket.next) :
     FileInfo.t Relative_path.Map.t =
   MultiWorker.call
     workers
-    ~job:(parse_batch ctx)
+    ~job:(parse_batch ctx ~cache_decls)
     ~neutral:Relative_path.Map.empty
     ~merge:Relative_path.Map.union
     ~next:get_next

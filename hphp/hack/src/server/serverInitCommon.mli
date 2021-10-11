@@ -23,6 +23,7 @@ val parsing :
   ?count:int ->
   float ->
   trace:bool ->
+  cache_decls:bool ->
   profile_label:string ->
   profiling:CgroupProfiler.Profiling.t ->
   ServerEnv.env * float

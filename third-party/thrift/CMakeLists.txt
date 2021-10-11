@@ -10,7 +10,8 @@ else()
   set(Boost_USE_STATIC_LIBS OFF)
 endif()
 get_filename_component(BOOST_LIBRARY_DIR "${FIRST_LIB}" DIRECTORY)
-
+get_target_property(ZSTD_INCLUDE_DIR zstd INTERFACE_INCLUDE_DIRECTORIES)
+get_target_property(ZSTD_LIBRARY zstd INTERFACE_LINK_LIBRARIES)
 get_target_property(JEMALLOC_INCLUDE_DIR jemalloc INTERFACE_INCLUDE_DIRECTORIES)
 
 
@@ -51,6 +52,8 @@ ExternalProject_Add(
     "-DBOOST_LIBRARYDIR=${BOOST_LIBRARY_DIR}"
     "-DLIBGLOG_INCLUDE_DIR=${LIBGLOG_INCLUDE_DIR}"
     "-DLIBGLOG_LIBRARY=${LIBGLOG_LIBRARY}"
+    "-DZSTD_INCLUDE_DIRS=${ZSTD_INCLUDE_DIR}"
+    "-DZSTD_LIBRARIES=${ZSTD_LIBRARY}"
 
     "-Dfizz_DIR=${FIZZ_INSTALL_DIR}/lib/cmake/fizz"
     "-Dfmt_DIR=${FMT_INSTALL_DIR}/lib/cmake/fmt"
@@ -68,6 +71,7 @@ set(
   folly
   proxygen
   wangle
+  zstd
 )
 add_dependencies(bundled_thrift ${THRIFT_DEPS})
 add_library(thrift INTERFACE)

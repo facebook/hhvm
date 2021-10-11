@@ -48,6 +48,9 @@ class ClingoContext:
     min_interfaces = 1
     lower_bound = 1
     higher_bound = 10
+    min_stub_classes = 0
+    min_stub_interfaces = 0
+    degree_distribution: List[int] = []
 
     def n(self) -> Symbol:
         return Number(self.number_of_nodes)
@@ -69,6 +72,12 @@ class ClingoContext:
 
     def hb(self) -> Symbol:
         return Number(self.higher_bound)
+
+    def sc(self) -> Symbol:
+        return Number(self.min_stub_classes)
+
+    def si(self) -> Symbol:
+        return Number(self.min_stub_interfaces)
 
 
 # Helper classes to handle each dependency edge.
@@ -127,9 +136,9 @@ class FunEdgeHandler(DependencyEdgeHandler):
 def generate_logic_rules() -> List[str]:
     rules: List[str] = []
 
-    if (
-        ClingoContext.number_of_nodes > 0
-        and ClingoContext.min_depth > ClingoContext.number_of_nodes
+    if ClingoContext.number_of_nodes > 0 and (
+        ClingoContext.min_depth > ClingoContext.number_of_nodes
+        or sum(ClingoContext.degree_distribution) > ClingoContext.number_of_nodes
     ):
         raise RuntimeError("Received unreasonable parameters.")
 
@@ -150,6 +159,12 @@ def generate_logic_rules() -> List[str]:
     interval = ClingoContext.number_of_nodes // ClingoContext.min_depth or 1
     for i in range(interval, ClingoContext.number_of_nodes, interval):
         rules.append(f'extends_to("S{i-interval}", "S{i}").')
+
+    # Creating a node distribution for each degree.
+    # We separated the below part from "graph_generator.lp" to narrow down the
+    # search scope.
+    for degree, minimum_nodes in enumerate(ClingoContext.degree_distribution):
+        rules.append(f':- #count{{X : in_degree(X,{degree})}} < {minimum_nodes}.')
 
     return rules
 
@@ -254,6 +269,8 @@ def do_reasoning(additional_programs: List[str], generator: CodeGenerator) -> No
     ctl.add("base", [], "\n".join(additional_programs))
 
     ctl.ground([("base", [])], context=ClingoContext())
+    # ToDo: Hardcode the number of threads for now, change to parameter later.
+    ctl.configuration.solve.parallel_mode = 4
     logging.info("Finished grounding.")
     result: Union[clingo.solving.SolveHandle, clingo.solving.SolveResult] = ctl.solve(
         on_model=generator.on_model
@@ -285,10 +302,7 @@ def output_to_file_or_stdout(
 
 
 def main() -> int:
-    generators = {
-        "raw": CodeGenerator,
-        "hack": HackCodeGenerator,
-    }
+    generators = {"raw": CodeGenerator, "hack": HackCodeGenerator}
 
     # Parse the arguments
     parser = argparse.ArgumentParser()
@@ -300,6 +314,10 @@ def main() -> int:
     parser.add_argument("--min_depth", type=int)
     parser.add_argument("--min_classes", type=int)
     parser.add_argument("--min_interfaces", type=int)
+    parser.add_argument("--min_stub_classes", type=int)
+    parser.add_argument("--min_stub_interfaces", type=int)
+    # Parameters that narrow the search space to speed up the computation.
+    parser.add_argument("--degree_distribution", nargs="*", default=[], type=int)
     parser.add_argument("--lower_bound", type=int)
     parser.add_argument("--higher_bound", type=int)
     parser.add_argument("--log", type=str)
@@ -320,6 +338,9 @@ def main() -> int:
     ClingoContext.min_depth = args.min_depth or 1
     ClingoContext.min_classes = args.min_classes or 1
     ClingoContext.min_interfaces = args.min_interfaces or 1
+    ClingoContext.min_stub_classes = args.min_stub_classes or 0
+    ClingoContext.min_stub_interfaces = args.min_stub_interfaces or 0
+    ClingoContext.degree_distribution = args.degree_distribution or []
     ClingoContext.lower_bound = args.lower_bound or 1
     ClingoContext.higher_bound = args.higher_bound or 1
 

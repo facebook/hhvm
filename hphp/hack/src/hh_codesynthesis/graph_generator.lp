@@ -5,6 +5,8 @@
 % =============================================================================
 #const n = @n().
 #const avg_width = @w(). % 1 out of 10th scale, this means average = 0.1
+#const number_of_stub_classes = @sc().
+#const number_of_stub_interfaces = @si().
 
 
 % $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
@@ -44,19 +46,30 @@ symbols(X) :- internal_symbols(X, _).
 % $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 % Average width requirement.
 % =============================================================================
-% Calculate the degree of each symbol.
-degree(X, D) :- symbols(X), D = #count{ Y : extends_to(Y, X) }.
+% Calculate the in/out degree of each symbol.
+in_degree(X, D) :- symbols(X), D = #count{ Y : extends_to(Y, X) }.
+out_degree(X, D) :- symbols(X), D = #count{ Y : extends_to(X, Y) }.
 % One class or interface at most can have 10 extends relationship.
 % We can adjust this one later, base on the profiling from actual software.
 % We believed if a code has more than 10 extends/implements is a bad design.
 % Therefore, we added this constraint to prevent AI synthesis bad code.
-:- degree(X, D), D > 10.
+:- in_degree(X, D), D > 10.
+% Constraint on a symbol can't be extended by more than 30 other symbols.
+:- out_degree(X, D), D > 30.
+
 % Average constraint.
-:- SumOfAllDegree = #sum{D : degree(X, D), symbols(X)},
-    SumOfAllDegree * 10 < avg_width * n.
-% Notice above, we can't write SumOfAllDegree/n < avg_width, since Clingo only supports
-% integers. (a.k.a countable set, Real number is an uncountable set.)
-% Therefore the parameter average_width actually is 1 out of 10th scale.
+% Instead of computing the sum of all degrees and divided by n, we changed the
+% average degree requirement to the degree distribution in our Python interface.
+
+
+% If class X has no parent class, we consider it as a "stub" class, which could
+% be servered as a "cut" node to connet this agent with other agents.
+has_parent_class(X) :- extends_to(Y, X), class(Y), class(X).
+:- #count{X: class(X), not has_parent_class(X)} < number_of_stub_classes.
+
+% If interface X has no parent interfaces, we consider it as a "stub" interface
+% which could be servered as a "cut" node to connect this agent with others.
+:- #count{X: in_degree(X, 0), interface(X)} < number_of_stub_interfaces.
 
 
 % $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$

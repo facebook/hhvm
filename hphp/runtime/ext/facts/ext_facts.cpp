@@ -480,8 +480,7 @@ struct Facts final : Extension {
       FTRACE(3, "watchman.socket.root = {}\n", RO::WatchmanRootSocket);
     }
 
-    auto excluded = Config::GetStrVector(ini, config, "Autoload.ExcludedRepos");
-    for (auto const& repo : excluded) {
+    for (auto const& repo : RuntimeOption::AutoloadExcludedRepos) {
       try {
         m_data->m_excludedRepos.insert(folly::fs::canonical(repo).native());
       } catch (const folly::fs::filesystem_error& e) {

@@ -204,7 +204,11 @@ def extract_logic_rules(lines: List[str]) -> List[str]:
 
 
 # Take in a dependency graph and a code generator to emit code.
-def do_reasoning(additional_programs: List[str], generator: CodeGenerator) -> None:
+def do_reasoning(
+    additional_programs: List[str],
+    generator: CodeGenerator,
+    solving_context: ClingoContext = ClingoContext(),
+) -> None:
     # Logic programs for code synthesis.
 
     asp_files = "hphp/hack/src/hh_codesynthesis"
@@ -224,6 +228,7 @@ def do_reasoning(additional_programs: List[str], generator: CodeGenerator) -> No
         ctl.add("base", [], fp.read())
     # Load extra dependency graph given by the user.
     ctl.add("base", [], "\n".join(additional_programs))
+
     ctl.ground([("base", [])], context=generator.solving_context)
     # ToDo: Hardcode the number of threads for now, change to parameter later.
     # Pyre-ignore: [16] Configuration not in pyre stubs since it's dynamic
@@ -319,7 +324,7 @@ def main() -> int:
     logging.info("Extracted all rules.")
     logging.info(f"Number of depedency edges extracted: {len(combined_rules)}")
 
-    do_reasoning(combined_rules, generator)
+    do_reasoning(combined_rules, generator, solving_context)
     logging.info("Finished reasoning.")
     return output_to_file_or_stdout(generator=generator, filename=args.output_file)
 

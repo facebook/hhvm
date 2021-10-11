@@ -46,7 +46,7 @@ set(HHVM_LINK_LIBRARIES
 
 if(ENABLE_FASTCGI)
   LIST(APPEND HHVM_LINK_LIBRARIES hphp_thrift)
-  LIST(APPEND HHVM_LINK_LIBRARIES hphp_proxygen)
+  LIST(APPEND HHVM_LINK_LIBRARIES proxygen)
   include(CheckCXXSourceCompiles)
   CHECK_CXX_SOURCE_COMPILES("#include <pthread.h>
   int main() {

@@ -1,86 +1,78 @@
-set(PROXYGEN_LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/proxygen/lib")
-set(PROXYGEN_HTTPSERVER_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/proxygen/httpserver")
-set(PROXYGEN_EXTERNAL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/proxygen/external")
+include(ExternalProject)
+include(HPHPFunctions)
 
-# ported over from src/CMakeLists.txt
-set(PROXYGEN_FBCODE_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/src)
-set(PROXYGEN_GENERATED_ROOT ${CMAKE_CURRENT_BINARY_DIR}/generated)
-file(MAKE_DIRECTORY ${PROXYGEN_GENERATED_ROOT})
-
-find_program(PROXYGEN_PYTHON NAMES python3 python)
-if(NOT PROXYGEN_PYTHON)
-  message(WARNING "failed to identify python command, assuming 'python'")
-  set(PROXYGEN_PYTHON "python")
+get_target_property(BOOST_INCLUDE_DIR boost INTERFACE_INCLUDE_DIRECTORIES)
+get_target_property(BOOST_LIBRARIES boost INTERFACE_LINK_LIBRARIES)
+list(GET BOOST_LIBRARIES 0 FIRST_LIB)
+if("${FIRST_LIB}" MATCHES ".+/${CMAKE_STATIC_LIBRARY_PREFIX}boost_.+${CMAKE_STATIC_LIBRARY_SUFFIX}$")
+  set(Boost_USE_STATIC_LIBS ON)
+else()
+  set(Boost_USE_STATIC_LIBS OFF)
 endif()
+get_filename_component(BOOST_LIBRARY_DIR "${FIRST_LIB}" DIRECTORY)
 
-# ported over from src/proxygen/lib/CMakeLists.txt
-file(MAKE_DIRECTORY ${PROXYGEN_GENERATED_ROOT}/proxygen/lib/utils)
-add_custom_command(
-  OUTPUT
-    ${PROXYGEN_GENERATED_ROOT}/proxygen/lib/utils/TraceEventType.h
-    ${PROXYGEN_GENERATED_ROOT}/proxygen/lib/utils/TraceEventType.cpp
-    ${PROXYGEN_GENERATED_ROOT}/proxygen/lib/utils/TraceFieldType.h
-    ${PROXYGEN_GENERATED_ROOT}/proxygen/lib/utils/TraceFieldType.cpp
-  COMMAND
-    ${PROXYGEN_PYTHON}
-    ${PROXYGEN_LIB_DIR}/utils/gen_trace_event_constants.py
-    --output_type=cpp
-    --input_files=samples/TraceEventType.txt,samples/TraceFieldType.txt
-    --output_scope=proxygen
-    --header_path=proxygen/lib/utils
-    --install_dir=${PROXYGEN_GENERATED_ROOT}/proxygen/lib/utils
-    --fbcode_dir=${PROXYGEN_FBCODE_ROOT}
-  WORKING_DIRECTORY
-    ${PROXYGEN_LIB_DIR}/utils/
-  COMMENT "Generating TraceEventType and TraceFieldType"
+get_target_property(ZSTD_INCLUDE_DIR zstd INTERFACE_INCLUDE_DIRECTORIES)
+get_target_property(ZSTD_LIBRARY zstd INTERFACE_LINK_LIBRARIES)
+get_target_property(JEMALLOC_INCLUDE_DIR jemalloc INTERFACE_INCLUDE_DIRECTORIES)
+
+
+SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
+  PROXYGEN_SOURCE_ARGS
+  SOURCE_URL
+  "https://github.com/facebook/proxygen/releases/download/v2021.06.28.00/proxygen-v2021.06.28.00.tar.gz"
+  SOURCE_HASH
+  "SHA256=0eb7259b8f2e6bbdffb73c5b13f114fb9ae65dca9f7802780f89743ea2f6d0d8"
 )
 
-set(CXX_SOURCES)
-auto_sources(files "*.cpp" "RECURSE" "${PROXYGEN_LIB_DIR}")
-auto_sources(serverfiles "*.cpp" "RECURSE" "${PROXYGEN_HTTPSERVER_DIR}")
-list(APPEND files ${serverfiles})
-HHVM_REMOVE_MATCHES_FROM_LISTS(
-  files
-  MATCHES
-  "/samples/"
-  "/test/"
-  "/tests/"
-  "/http/codec/compress/experimental/simulator/"
-  # Quic
-  "/HQ"
-  "Quic"
+ExternalProject_Add(
+  bundled_proxygen
+  ${PROXYGEN_SOURCE_ARGS}
+  PATCH_COMMAND
+    "${CMAKE_CURRENT_SOURCE_DIR}/../apply-quilt-patches.sh"
+    "${CMAKE_CURRENT_SOURCE_DIR}/patches"
+  CMAKE_ARGS
+    "-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}"
+    -DCMAKE_MODULE_PATH=${CMAKE_SOURCE_DIR}/CMake
+    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+    -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+
+    -DBUILD_TESTS=OFF
+    -DBUILD_SAMPLES=OFF
+
+    -DOPENSSL_INCLUDE_DIR=${OPENSSL_INCLUDE_DIR}
+    -DOPENSSL_CRYPTO_LIBRARY=${OPENSSL_CRYPTO_LIBRARY}
+    -DBoost_NO_SYSTEM_PATHS=ON
+    -DBoost_NO_BOOST_CMAKE=ON
+    -DBoost_USE_STATIC_LIBS=${Boost_USE_STATIC_LIBS}
+    -DBoost_INCLUDE_DIR=${BOOST_INCLUDE_DIR}
+    "-DBOOST_LIBRARYDIR=${BOOST_LIBRARY_DIR}"
+    -DZSTD_INCLUDE_DIR=${ZSTD_INCLUDE_DIR}
+    -DZSTD_LIBRARY_RELEASE=${ZSTD_LIBRARY}
+
+    "-DFizz_DIR=${FIZZ_INSTALL_DIR}/lib/cmake/fizz"
+    "-Dfmt_DIR=${FMT_INSTALL_DIR}/lib/cmake/fmt"
+    "-Dfolly_DIR=${FOLLY_INSTALL_DIR}/lib/cmake/folly"
+    "-Dwangle_DIR=${WANGLE_INSTALL_DIR}/lib/cmake/wangle"
+
+    "-DCMAKE_CXX_FLAGS=-I${JEMALLOC_INCLUDE_DIR}"
 )
-list(APPEND CXX_SOURCES ${files})
-list(APPEND CXX_SOURCES "${PROXYGEN_EXTERNAL_DIR}/http_parser/http_parser_cpp.cpp")
-list(APPEND CXX_SOURCES "${PROXYGEN_LIB_DIR}/http/HTTPCommonHeaders.cpp")
-list(APPEND CXX_SOURCES "${PROXYGEN_LIB_DIR}/http/HTTPCommonHeaders.h")
-list(APPEND CXX_SOURCES
-  ${PROXYGEN_GENERATED_ROOT}/proxygen/lib/utils/TraceEventType.cpp
-  ${PROXYGEN_GENERATED_ROOT}/proxygen/lib/utils/TraceFieldType.cpp)
+ExternalProject_Get_property(bundled_proxygen INSTALL_DIR)
 
-FIND_PROGRAM(GPERF_EXECUTABLE NAMES gperf)
-IF(NOT GPERF_EXECUTABLE)
-  MESSAGE(FATAL_ERROR "HHVM requires gperf for proxygen")
-ENDIF()
-
-add_custom_command(
-  OUTPUT ${PROXYGEN_LIB_DIR}/http/HTTPCommonHeaders.h
-  OUTPUT ${PROXYGEN_LIB_DIR}/http/HTTPCommonHeaders.cpp
-  COMMAND ${PROXYGEN_LIB_DIR}/http/gen_HTTPCommonHeaders.sh "${PROXYGEN_LIB_DIR}/http/HTTPCommonHeaders.txt" "${CMAKE_CURRENT_SOURCE_DIR}/src" "${PROXYGEN_LIB_DIR}/http"
-  DEPENDS ${PROXYGEN_LIB_DIR}/http/HTTPCommonHeaders.txt ${PROXYGEN_LIB_DIR}/http/gen_HTTPCommonHeaders.sh
+set(
+  PROXYGEN_DEPS
+  fizz
+  fmt
+  folly
+  wangle
 )
-
-add_definitions(-DNO_LIB_GFLAGS)
-
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}/..")
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}/src")
-include_directories("${TP_DIR}/fb303/src")
-if (NOT MSVC)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-variable")
-endif()
-add_library(hphp_proxygen STATIC ${CXX_SOURCES})
-target_include_directories(hphp_proxygen PUBLIC ${PROXYGEN_GENERATED_ROOT})
-
-target_link_libraries(hphp_proxygen wangle zstd boost
-  fizz libsodium folly
-  ${LIBGLOG_LIBRARY} ${LIBPTHREAD_LIBRARIES})
+add_dependencies(bundled_proxygen ${PROXYGEN_DEPS})
+add_library(proxygen INTERFACE)
+add_dependencies(proxygen bundled_proxygen)
+target_include_directories(proxygen INTERFACE "${INSTALL_DIR}/include")
+target_link_libraries(
+  proxygen
+  INTERFACE
+  ${PROXYGEN_DEPS} ${OPENSSL_LIBRARIES}
+  "${INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}proxygen${CMAKE_STATIC_LIBRARY_SUFFIX}"
+)
+set(PROXYGEN_INSTALL_DIR "${INSTALL_DIR}" PARENT_SCOPE)

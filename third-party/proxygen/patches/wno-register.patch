@@ -1,0 +1,15 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 732b6bb8c..8724f8eb2 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -112,6 +112,10 @@ CHECK_CXX_COMPILER_FLAG(-Wdeprecated-register COMPILER_HAS_W_DEPRECATED_REGISTER
+ if (COMPILER_HAS_W_DEPRECATED_REGISTER)
+     list(APPEND _PROXYGEN_COMMON_COMPILE_OPTIONS -Wno-deprecated-register)
+ endif()
++CHECK_CXX_COMPILER_FLAG(-Wregister COMPILER_HAS_W_REGISTER)
++if (COMPILER_HAS_W_REGISTER)
++    list(APPEND _PROXYGEN_COMMON_COMPILE_OPTIONS -Wno-register)
++endif()
+ CHECK_CXX_COMPILER_FLAG(-Wunused-value COMPILER_HAS_W_UNUSED_VALUE)
+ if (COMPILER_HAS_W_UNUSED_VALUE)
+     list(APPEND _PROXYGEN_COMMON_COMPILE_OPTIONS -Wno-unused-value)

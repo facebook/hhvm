@@ -22,9 +22,6 @@
 [submodule "squangle"]
 	path = third-party/squangle/src
 	url = https://github.com/facebook/squangle.git
-[submodule "thrift"]
-	path = third-party/thrift/src
-	url = https://github.com/facebook/fbthrift.git
 [submodule "xed-mbuild"]
 	path = third-party/xed/mbuild
 	url = https://github.com/intelxed/mbuild.git

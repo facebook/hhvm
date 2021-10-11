@@ -634,21 +634,39 @@ let terr env r =
     MakeType.err r
 
 let collect_enum_class_upper_bounds env name =
-  let rec collect seen result name =
+  (* the boolean ok is here to see if we find anything at all,
+   * and prevents us to return the initial mixed value if nothing
+   * is to be found.
+   *)
+  let rec collect seen ok result name =
     let upper_bounds = Env.get_upper_bounds env name [] in
     Typing_set.fold
-      (fun lty (seen, result) ->
+      (fun lty (seen, ok, result) ->
         match get_node lty with
         | Tclass ((_, name), _, _) when Env.is_enum_class env name ->
-          (seen, SSet.add name result)
+          let result =
+            (* We build an intersection, but only care about the result
+             * if it is simplified to a singleton type, so the following
+             * reason is not useful. We could add a dedicated reason
+             * for more precise error reporting.
+             *)
+            let r = Reason.Rnone in
+            mk (r, Tintersection [result; lty])
+          in
+          (seen, true, result)
         | Tgeneric (name, _) when not (SSet.mem name seen) ->
-          collect (SSet.add name seen) result name
-        | _ -> (seen, result))
+          collect (SSet.add name seen) ok result name
+        | _ -> (seen, ok, result))
       upper_bounds
-      (seen, result)
+      (seen, ok, result)
   in
-  let (_, upper_bounds) = collect SSet.empty SSet.empty name in
-  upper_bounds
+  let mixed = MakeType.mixed Reason.Rnone in
+  let (_, ok, upper_bound) = collect SSet.empty false mixed name in
+  if ok then
+    let (env, upper_bound) = simplify_intersections env upper_bound in
+    (env, Some upper_bound)
+  else
+    (env, None)
 
 let make_locl_subst_for_class_tparams classdef tyl =
   if List.is_empty tyl then

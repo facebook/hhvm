@@ -5530,8 +5530,8 @@ let enum_class_label_as_expr pos =
   add_list
     (Typing.err_code Typing.EnumClassLabelAsExpression)
     ( pos,
-      "Enum class labels are not allowed in this position. They are only allowed "
-      ^ "in function calls)" )
+      "Not enough type information to infer the type of this enum class label."
+    )
     []
 
 let enum_class_label_invalid_argument pos ~is_proj =

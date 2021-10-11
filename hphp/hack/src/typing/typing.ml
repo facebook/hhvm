@@ -7483,48 +7483,59 @@ and call
         | param :: paraml -> (false, Some param, paraml)
         | [] -> (true, var_param, paraml)
       in
-      let compute_enum_name env lty =
+      let rec compute_enum_name env lty =
         match get_node lty with
         | Tclass ((_, enum_name), _, _) when Env.is_enum_class env enum_name ->
-          Some enum_name
+          (env, Some enum_name)
         | Tgeneric (name, _) ->
-          let upper_bounds =
+          let (env, upper_bounds) =
             Typing_utils.collect_enum_class_upper_bounds env name
           in
-          (* To avoid ambiguity, we only support the case where
-           * there is a single upper bound that is an EnumClass.
-           * We might want to relax that later (e.g. with  the
-           * support for intersections.
-           * See Typing_type_wellformedness.check_via_label_on_param.
-           *)
-          if SSet.cardinal upper_bounds = 1 then
-            let enum_name = SSet.choose upper_bounds in
-            Some enum_name
-          else
-            None
+          begin
+            match upper_bounds with
+            | None -> (env, None)
+            | Some upper_bound ->
+              (* To avoid ambiguity, we only support the case where
+               * there is a single upper bound that is an EnumClass.
+               * We might want to relax that later (e.g. with  the
+               * support for intersections.
+               * See Typing_type_wellformedness.check_via_label_on_param.
+               *)
+              begin
+                match get_node upper_bound with
+                | Tclass ((_, name), _, _) when Env.is_enum_class env name ->
+                  (env, Some name)
+                | _ -> (env, None)
+              end
+          end
         | Tvar var ->
-          (* minimal support to only deal with Tvar when it is the
-           * valueOf from BuiltinEnumClass. In this case, we know the
-           * the tvar as a single lowerbound, `this` which must be
-           * an enum class. We could relax this in the future but
+          (* minimal support to only deal with Tvar when:
+           * - it is the valueOf from BuiltinEnumClass.
+           *   In this case, we know the tvar as a single lowerbound,
+           *   `this` which must be an enum class.
+           * - it is a generic "TX::T" from a where clause. We try
+           *   to look at an upper bound, if it is an enum class, or fail.
+           *
+           * We could relax this in the future but
            * I want to avoid complex constraints for now.
            *)
           let lower_bounds = Env.get_tyvar_lower_bounds env var in
           if ITySet.cardinal lower_bounds <> 1 then
-            None
+            (env, None)
           else (
             match ITySet.choose lower_bounds with
-            | ConstraintType _ -> None
+            | ConstraintType _ -> (env, None)
             | LoclType lower ->
               (match get_node lower with
               | Tclass ((_, enum_name), _, _)
                 when Env.is_enum_class env enum_name ->
-                Some enum_name
-              | _ -> None)
+                (env, Some enum_name)
+              | Tgeneric _ -> compute_enum_name env lower
+              | _ -> (env, None))
           )
         | _ ->
           (* Already reported, see Typing_type_wellformedness *)
-          None
+          (env, None)
       in
       let check_arg env param_kind ((_, pos, arg) as e) opt_param ~is_variadic =
         match opt_param with
@@ -7550,8 +7561,8 @@ and call
                      || String.equal name SN.Classes.cEnumClassLabel ->
                 let ctor = name in
                 (match compute_enum_name env ty_enum with
-                | None -> (env, EnumClassLabelOps.ClassNotFound)
-                | Some enum_name ->
+                | (env, None) -> (env, EnumClassLabelOps.ClassNotFound)
+                | (env, Some enum_name) ->
                   EnumClassLabelOps.expand
                     pos
                     env

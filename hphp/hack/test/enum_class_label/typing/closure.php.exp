@@ -5,7 +5,7 @@ Invalid argument (Typing[4110])
   File "closure.php", line 6, characters 3-8:
   But got `string`
 File "closure.php", line 34, characters 10-14:
-Enum class labels are not allowed in this position. They are only allowed in function calls) (Typing[4396])
+Not enough type information to infer the type of this enum class label. (Typing[4396])
 File "closure.php", line 38, characters 30-31:
 An enum class label is required here. (Typing[4397])
 File "closure.php", line 40, characters 55-56:

@@ -224,11 +224,11 @@ def do_reasoning(additional_programs: List[str], generator: CodeGenerator) -> No
         ctl.add("base", [], fp.read())
     # Load extra dependency graph given by the user.
     ctl.add("base", [], "\n".join(additional_programs))
-
     ctl.ground([("base", [])], context=generator.solving_context)
     # ToDo: Hardcode the number of threads for now, change to parameter later.
     # Pyre-ignore: [16] Configuration not in pyre stubs since it's dynamic
     ctl.configuration.solve.parallel_mode = "4"
+
     logging.info("Finished grounding.")
     result: Union[clingo.solving.SolveHandle, clingo.solving.SolveResult] = ctl.solve(
         on_model=generator.on_model

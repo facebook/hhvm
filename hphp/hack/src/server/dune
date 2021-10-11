@@ -528,6 +528,7 @@
     cgroup
     coverage_level
     decl_redecl_service
+    direct_decl_service
     dfind
     fileutils
     hg

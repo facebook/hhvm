@@ -56,17 +56,21 @@ let parsing
   end;
   let quick = lazy_parse in
   let ctx = Provider_utils.ctx_from_server_env env in
-  let (fast, errorl, _) =
-    (* FIXME(jakebailey): use direct decl parser *)
-    Parsing_service.go_DEPRECATED
-      ctx
-      ~quick
-      ~show_all_errors:true
-      genv.workers
-      Relative_path.Set.empty
-      ~get_next
-      ~trace
-      env.popt
+  let (fast, errorl, _failed_parsing) =
+    if genv.local_config.ServerLocalConfig.use_direct_decl_parser then
+      ( Direct_decl_service.go ctx genv.workers get_next,
+        Errors.empty,
+        Relative_path.Set.empty )
+    else
+      Parsing_service.go_DEPRECATED
+        ctx
+        ~quick
+        ~show_all_errors:true
+        genv.workers
+        Relative_path.Set.empty
+        ~get_next
+        ~trace
+        env.popt
   in
   let naming_table = Naming_table.update_many env.naming_table fast in
   hh_log_heap ();

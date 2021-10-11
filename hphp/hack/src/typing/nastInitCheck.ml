@@ -20,6 +20,9 @@ module SN = Naming_special_names
 let shallow_decl_enabled (ctx : Provider_context.t) : bool =
   TypecheckerOptions.shallow_class_decl (Provider_context.get_tcopt ctx)
 
+let use_direct_decl_parser (ctx : Provider_context.t) : bool =
+  TypecheckerOptions.use_direct_decl_parser (Provider_context.get_tcopt ctx)
+
 module SSetWTop = struct
   type t =
     | Top
@@ -138,8 +141,12 @@ module Env = struct
     let ctx = Typing_env.get_ctx tenv in
     let (_, _, methods) = split_methods c.c_methods in
     let methods = List.fold_left ~f:method_ ~init:SMap.empty methods in
-    (* FIXME(jakebailey): Should probably use Shallow_classes_provider.get *)
-    let sc = Shallow_decl.class_DEPRECATED ctx c in
+    let sc =
+      if use_direct_decl_parser ctx then
+        Option.value_exn (Shallow_classes_provider.get ctx (snd c.c_name))
+      else
+        Shallow_decl.class_DEPRECATED ctx c
+    in
 
     (* Error when an abstract class has private properties but lacks a constructor *)
     (let open Shallow_decl_defs in

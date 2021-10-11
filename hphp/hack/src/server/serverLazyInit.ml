@@ -1043,103 +1043,42 @@ let full_init
       (Telemetry.create ()
       |> Telemetry.int_ ~key:"existing_name_count" ~value:existing_name_count)
   end;
-  let run () =
-    let (env, t) =
-      initialize_naming_table
-        ~do_naming:true
-        "full initialization"
-        genv
-        env
-        profiling
-    in
-    if not is_check_mode then
-      SearchServiceRunner.update_fileinfo_map
-        env.naming_table
-        ~source:SearchUtils.Init;
-    let fast = Naming_table.to_fast env.naming_table in
-    let failed_parsing = Errors.get_failed_files env.errorl Errors.Parsing in
-    let fast =
-      Relative_path.Set.fold
-        failed_parsing
-        ~f:(fun x m -> Relative_path.Map.remove m x)
-        ~init:fast
-    in
-    let fnl = Relative_path.Map.keys fast in
-    let env =
-      if is_check_mode then
-        start_delegate_if_needed env genv (List.length fnl) env.errorl
-      else
-        env
-    in
-    ServerInitCommon.type_check
+  Hh_logger.log "full init";
+  let (env, t) =
+    initialize_naming_table
+      ~do_naming:true
+      "full initialization"
       genv
       env
-      fnl
-      init_telemetry
-      t
-      ~profile_label:"lazy.full.type_check"
-      ~profiling
+      profiling
   in
-  let run_experiment () =
-    let ctx = Provider_utils.ctx_from_server_env env in
-    let t_full_init = Unix.gettimeofday () in
-    let fast =
-      Direct_decl_service.go
-        ctx
-        genv.workers
-        (fst
-           (ServerInitCommon.indexing
-              ~profile_label:"lazy.full.experiment.indexing"
-              genv))
-    in
-    let t = Hh_logger.log_duration "parsing decl" t_full_init in
-    let naming_table = Naming_table.update_many env.naming_table fast in
-    let t = Hh_logger.log_duration "updating naming table" t in
-    let env = { env with naming_table } in
-    let t =
-      ServerInitCommon.update_files
-        genv
-        env.naming_table
-        ctx
-        t
-        ~profile_label:"lazy.full.experiment.update"
-        ~profiling
-    in
-    let (env, t) =
-      ServerInitCommon.naming
-        env
-        t
-        ~profile_label:"lazy.full.experiment.naming"
-        ~profiling
-    in
-    let fnl = Relative_path.Map.keys fast in
-    if not is_check_mode then
-      SearchServiceRunner.update_fileinfo_map
-        env.naming_table
-        ~source:SearchUtils.Init;
-    let type_check_result =
-      ServerInitCommon.type_check
-        genv
-        env
-        fnl
-        init_telemetry
-        t
-        ~profile_label:"lazy.full.experiment.type_check"
-        ~profiling
-    in
-    Hh_logger.log_duration "full init" t_full_init |> ignore;
-    type_check_result
+  if not is_check_mode then
+    SearchServiceRunner.update_fileinfo_map
+      env.naming_table
+      ~source:SearchUtils.Init;
+  let fast = Naming_table.to_fast env.naming_table in
+  let failed_parsing = Errors.get_failed_files env.errorl Errors.Parsing in
+  let fast =
+    Relative_path.Set.fold
+      failed_parsing
+      ~f:(fun x m -> Relative_path.Map.remove m x)
+      ~init:fast
   in
-  if
-    GlobalOptions.tco_use_direct_decl_parser
-      (ServerConfig.parser_options genv.config)
-  then (
-    Hh_logger.log "full init experiment";
-    run_experiment ()
-  ) else (
-    Hh_logger.log "full init";
-    run ()
-  )
+  let fnl = Relative_path.Map.keys fast in
+  let env =
+    if is_check_mode then
+      start_delegate_if_needed env genv (List.length fnl) env.errorl
+    else
+      env
+  in
+  ServerInitCommon.type_check
+    genv
+    env
+    fnl
+    init_telemetry
+    t
+    ~profile_label:"lazy.full.type_check"
+    ~profiling
 
 let parse_only_init
     (genv : ServerEnv.genv)

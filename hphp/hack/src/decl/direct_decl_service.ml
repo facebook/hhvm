@@ -80,7 +80,7 @@ let parse_batch
       acc
     else
       match
-        Direct_decl_utils.direct_decl_parse_and_cache
+        Direct_decl_utils.direct_decl_parse
           ~file_decl_hash:true
           ~symbol_decl_hashes:true
           ctx

@@ -13,31 +13,32 @@ from hphp.hack.src.hh_codesynthesis.hh_codesynthesis import ClingoContext
 
 class GenerateLogicRulesTest(unittest.TestCase):
     def test_depth_less_than_nodes(self) -> None:
-        ClingoContext.number_of_nodes = 12
-        ClingoContext.min_depth = 3
+        solving_context = ClingoContext(number_of_nodes=12, min_depth=3)
         exp = [
-            'internal_symbols("S0", 0;"S1", 1;"S2", 2;"S3", 3;"S4", 4;"S5", 5;"S6", 6;"S7", 7;"S8", 8;"S9", 9;"S10", 10;"S11", 11).',
+            'internal_symbols("S0", 0;"S1", 1;"S2", 2;"S3", 3;"S4", 4;"S5", 5;"S6",'
+            ' 6;"S7", 7;"S8", 8;"S9", 9;"S10", 10;"S11", 11).',
             'extends_to("S0", "S4").',
             'extends_to("S4", "S8").',
         ]
-        self.assertListEqual(exp, hh_codesynthesis.generate_logic_rules())
+        self.assertListEqual(
+            exp, hh_codesynthesis.generate_logic_rules(solving_context)
+        )
 
     def test_depth_more_than_nodes(self) -> None:
         # In this case, the graph has no way to satisfy the min_depth requirement.
         # The user, or the higher level wrapper should make sure given proper
         # parameters. Otherwise, we will create the following output.
-        ClingoContext.number_of_nodes = 3
-        ClingoContext.min_depth = 5
+        solving_context = ClingoContext(number_of_nodes=3, min_depth=5)
         with self.assertRaises(
             expected_exception=RuntimeError, msg="Received unreasonable parameters."
         ):
-            hh_codesynthesis.generate_logic_rules()
+            hh_codesynthesis.generate_logic_rules(solving_context)
 
     def test_depth_equals_to_nodes(self) -> None:
-        ClingoContext.number_of_nodes = 7
-        ClingoContext.min_depth = 7
+        solving_context = ClingoContext(number_of_nodes=7, min_depth=7)
         exp = [
-            'internal_symbols("S0", 0;"S1", 1;"S2", 2;"S3", 3;"S4", 4;"S5", 5;"S6", 6).',
+            'internal_symbols("S0", 0;"S1", 1;"S2", 2;"S3", 3;"S4", 4;"S5",'
+            ' 5;"S6", 6).',
             'extends_to("S0", "S1").',
             'extends_to("S1", "S2").',
             'extends_to("S2", "S3").',
@@ -45,15 +46,19 @@ class GenerateLogicRulesTest(unittest.TestCase):
             'extends_to("S4", "S5").',
             'extends_to("S5", "S6").',
         ]
-        self.assertListEqual(exp, hh_codesynthesis.generate_logic_rules())
+        self.assertListEqual(
+            exp, hh_codesynthesis.generate_logic_rules(solving_context)
+        )
 
     def test_hack_code_gen(self) -> None:
-        ClingoContext.number_of_nodes = 12
-        ClingoContext.min_depth = 3
-        ClingoContext.min_classes = 3
-        ClingoContext.min_interfaces = 4
-        ClingoContext.lower_bound = 1
-        ClingoContext.higher_bound = 5
+        solving_context = ClingoContext(
+            number_of_nodes=12,
+            min_depth=3,
+            min_classes=3,
+            min_interfaces=4,
+            lower_bound=1,
+            higher_bound=5,
+        )
         exp = """\
 <?hh
 class S9   {}
@@ -72,18 +77,21 @@ interface S8 extends S4 {}
 
         hack_codegen = hackGenerator.HackCodeGenerator()
         hh_codesynthesis.do_reasoning(
-            additional_programs=hh_codesynthesis.generate_logic_rules(),
+            additional_programs=hh_codesynthesis.generate_logic_rules(solving_context),
             generator=hack_codegen,
+            solving_context=solving_context,
         )
         self.assertEqual(str(hack_codegen), exp)
 
     def test_hack_code_gen_with_partial_dependency_graph_given_by_user(self) -> None:
-        ClingoContext.number_of_nodes = 12
-        ClingoContext.min_depth = 3
-        ClingoContext.min_classes = 3
-        ClingoContext.min_interfaces = 4
-        ClingoContext.lower_bound = 1
-        ClingoContext.higher_bound = 5
+        solving_context = ClingoContext(
+            number_of_nodes=12,
+            min_depth=3,
+            min_classes=3,
+            min_interfaces=4,
+            lower_bound=1,
+            higher_bound=5,
+        )
         deps = """\
 Extends A -> Type B
 Extends I -> Type B
@@ -112,27 +120,30 @@ interface S8 extends S4 {}
 """
 
         hack_codegen = hackGenerator.HackCodeGenerator()
-        combined_rules = (
-            hh_codesynthesis.generate_logic_rules()
-            + hh_codesynthesis.extract_logic_rules(deps.split("\n"))
-        )
+        combined_rules = hh_codesynthesis.generate_logic_rules(
+            solving_context
+        ) + hh_codesynthesis.extract_logic_rules(deps.split("\n"))
         hh_codesynthesis.do_reasoning(
             additional_programs=combined_rules,
             generator=hack_codegen,
+            solving_context=solving_context,
         )
         self.assertEqual(str(hack_codegen), exp)
 
     def test_unsatisfiable_parameters(self) -> None:
         # Given 5 nodes, but asking for 3 classes + 4 interfaces with
-        ClingoContext.number_of_nodes = 5
-        ClingoContext.min_classes = 3
-        ClingoContext.min_interfaces = 4
+        solving_context = ClingoContext(
+            number_of_nodes=5, min_classes=3, min_interfaces=4
+        )
         hack_codegen = hackGenerator.HackCodeGenerator()
 
         with self.assertRaises(expected_exception=RuntimeError, msg="Unsatisfiable."):
             hh_codesynthesis.do_reasoning(
-                additional_programs=hh_codesynthesis.generate_logic_rules(),
+                additional_programs=hh_codesynthesis.generate_logic_rules(
+                    solving_context
+                ),
                 generator=hack_codegen,
+                solving_context=solving_context,
             )
 
 
@@ -314,11 +325,7 @@ Type I -> Type A"""
 
     def test_unsupported_type_dependency(self) -> None:
         # T94428437 Temporary skipping all built-in functions for now.
-        exp = [
-            'extends_to("A", "B").',
-            'type("A", "B").',
-            'symbols("A";"B").',
-        ]
+        exp = ['extends_to("A", "B").', 'type("A", "B").', 'symbols("A";"B").']
         deps = r"""
 Extends A -> Type B
 Type A -> Type B
@@ -361,7 +368,7 @@ class DoReasoningTest(unittest.TestCase):
     def test_type_dependency(self) -> None:
         # This one covered the 'has_method_with_parameter'.
         exp = ['class("B")', 'has_method_with_parameter("C","B")', 'interface("C")']
-        rules = ['type("B", "C").' 'symbols("B"; "C").']
+        rules = ['type("B", "C").', 'symbols("B"; "C").']
         raw_codegen = hh_codesynthesis.CodeGenerator()
         hh_codesynthesis.do_reasoning(additional_programs=rules, generator=raw_codegen)
         self.assertListEqual(sorted(str(raw_codegen).split()), exp)
@@ -377,7 +384,7 @@ class DoReasoningTest(unittest.TestCase):
             'interface("B")',
             'invokes_in_method("C","B","foo")',
         ]
-        rules = ['method("B", "foo", "C").' 'symbols("B"; "C").']
+        rules = ['method("B", "foo", "C").', 'symbols("B"; "C").']
         raw_codegen = hh_codesynthesis.CodeGenerator()
         hh_codesynthesis.do_reasoning(additional_programs=rules, generator=raw_codegen)
         self.assertListEqual(sorted(str(raw_codegen).split()), exp)
@@ -392,7 +399,7 @@ class DoReasoningTest(unittest.TestCase):
             'interface("A")',
             'invokes_static_method("C","B","foo")',
         ]
-        rules = ['static_method("B", "foo", "C").' 'symbols("A"; "B"; "C").']
+        rules = ['static_method("B", "foo", "C").', 'symbols("A"; "B"; "C").']
         raw_codegen = hh_codesynthesis.CodeGenerator()
         hh_codesynthesis.do_reasoning(additional_programs=rules, generator=raw_codegen)
         self.assertListEqual(sorted(str(raw_codegen).split()), exp)
@@ -407,7 +414,7 @@ class DoReasoningTest(unittest.TestCase):
             'interface("A")',
             'invokes_static_method("C","B","foo")',
         ]
-        rules = ['static_method("B", "foo", "C").' 'symbols("A"; "B").' 'funcs("C").']
+        rules = ['static_method("B", "foo", "C").', 'symbols("A"; "B").funcs("C").']
         raw_codegen = hh_codesynthesis.CodeGenerator()
         hh_codesynthesis.do_reasoning(additional_programs=rules, generator=raw_codegen)
         self.assertListEqual(sorted(str(raw_codegen).split()), exp)
@@ -415,10 +422,7 @@ class DoReasoningTest(unittest.TestCase):
     def test_smethod_dependency_exception(self) -> None:
         # This one covered the unsatifiable part, that we can't find an answer.
         # Here we are forcing symbol("B") to get interface("B").
-        rules = [
-            'static_method("A", "foo", "B").',
-            'interface("B").' 'symbols("A"; "B").',
-        ]
+        rules = ['static_method("A", "foo", "B").', 'interface("B").symbols("A"; "B").']
         raw_codegen = hh_codesynthesis.CodeGenerator()
         with self.assertRaises(expected_exception=RuntimeError, msg="Unsatisfiable."):
             hh_codesynthesis.do_reasoning(
@@ -452,7 +456,7 @@ class DoReasoningTest(unittest.TestCase):
             'interface("B")',
             'invokes_function("A","Fn")',
         ]
-        rules = ['invoked_by("Fn", "A").' 'symbols("A"; "B").' 'funcs("Fn").']
+        rules = ['invoked_by("Fn", "A").', 'symbols("A"; "B").', 'funcs("Fn").']
         raw_codegen = hh_codesynthesis.CodeGenerator()
         hh_codesynthesis.do_reasoning(additional_programs=rules, generator=raw_codegen)
         self.assertListEqual(sorted(str(raw_codegen).split()), exp)
@@ -467,7 +471,9 @@ class DoReasoningTest(unittest.TestCase):
             'invokes_function("FnA","FnB")',
         ]
         rules = [
-            'invoked_by("FnB", "FnA").' 'symbols("A"; "B").' 'funcs("FnA"; "FnB").'
+            'invoked_by("FnB", "FnA").',
+            'symbols("A"; "B").',
+            'funcs("FnA"; "FnB").',
         ]
         raw_codegen = hh_codesynthesis.CodeGenerator()
         hh_codesynthesis.do_reasoning(additional_programs=rules, generator=raw_codegen)
@@ -541,10 +547,10 @@ class DoReasoningTest(unittest.TestCase):
             'interface("A")',
         ]
         rules = [
-            'type("B", "Fn").'
-            'symbols("A"; "B").'
-            'funcs("Fn").'
-            'extends_to("A","B").'
+            'type("B", "Fn").',
+            'symbols("A"; "B").',
+            'funcs("Fn").',
+            'extends_to("A","B").',
         ]
         raw_codegen = hh_codesynthesis.CodeGenerator()
         hh_codesynthesis.do_reasoning(additional_programs=rules, generator=raw_codegen)
@@ -560,10 +566,10 @@ class DoReasoningTest(unittest.TestCase):
             'interface("A")',
         ]
         rules = [
-            'type("A", "Fn").'
-            'symbols("A"; "B").'
-            'funcs("Fn").'
-            'extends_to("A","B").'
+            'type("A", "Fn").',
+            'symbols("A"; "B").',
+            'funcs("Fn").',
+            'extends_to("A","B").',
         ]
         raw_codegen = hh_codesynthesis.CodeGenerator()
         hh_codesynthesis.do_reasoning(additional_programs=rules, generator=raw_codegen)

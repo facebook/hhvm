@@ -54,7 +54,6 @@ class GenerateLogicRulesTest(unittest.TestCase):
         ClingoContext.min_interfaces = 4
         ClingoContext.lower_bound = 1
         ClingoContext.higher_bound = 5
-        ClingoContext.avg_width = 0
         exp = """\
 <?hh
 class S9   {}
@@ -85,7 +84,6 @@ interface S8 extends S4 {}
         ClingoContext.min_interfaces = 4
         ClingoContext.lower_bound = 1
         ClingoContext.higher_bound = 5
-        ClingoContext.avg_width = 0
         deps = """\
 Extends A -> Type B
 Extends I -> Type B

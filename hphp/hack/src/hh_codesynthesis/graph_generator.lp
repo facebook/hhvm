@@ -4,7 +4,6 @@
 % Or "clingo generate_gen.lp -c n=10 -c avg_width=1", etc
 % =============================================================================
 #const n = @n().
-#const avg_width = @w(). % 1 out of 10th scale, this means average = 0.1
 #const number_of_stub_classes = @sc().
 #const number_of_stub_interfaces = @si().
 

@@ -55,9 +55,6 @@ class ClingoContext:
     def n(self) -> Symbol:
         return Number(self.number_of_nodes)
 
-    def w(self) -> Symbol:
-        return Number(self.avg_width)
-
     def d(self) -> Symbol:
         return Number(self.min_depth)
 
@@ -310,7 +307,6 @@ def main() -> int:
     parser.add_argument("--target_lang", type=str)
     parser.add_argument("--output_file", type=os.path.abspath)
     parser.add_argument("--n", type=int)
-    parser.add_argument("--avg_width", type=int)
     parser.add_argument("--min_depth", type=int)
     parser.add_argument("--min_classes", type=int)
     parser.add_argument("--min_interfaces", type=int)
@@ -334,7 +330,6 @@ def main() -> int:
 
     # Set graph generating parameters. (If any)
     ClingoContext.number_of_nodes = args.n or 0
-    ClingoContext.avg_width = args.avg_width or 0
     ClingoContext.min_depth = args.min_depth or 1
     ClingoContext.min_classes = args.min_classes or 1
     ClingoContext.min_interfaces = args.min_interfaces or 1

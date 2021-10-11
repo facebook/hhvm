@@ -72,7 +72,8 @@ let setup ~(sqlite : bool) (tcopt : GlobalOptions.t) : setup =
       ~deps_mode
   in
   let (file_infos, _errors, _failed_parsing) =
-    Parsing_service.go
+    (* FIXME(jakebailey): use direct decl parser *)
+    Parsing_service.go_DEPRECATED
       ctx
       None
       Relative_path.Set.empty

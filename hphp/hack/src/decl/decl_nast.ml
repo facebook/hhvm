@@ -25,8 +25,9 @@ module SN = Naming_special_names
 (* Section declaring the type of a function *)
 (*****************************************************************************)
 
-let rec fun_naming_and_decl (ctx : Provider_context.t) (f : Nast.fun_def) :
-    string * Typing_defs.fun_elt =
+let rec fun_naming_and_decl_DEPRECATED
+    (ctx : Provider_context.t) (f : Nast.fun_def) : string * Typing_defs.fun_elt
+    =
   let f = Errors.ignore_ (fun () -> Naming.fun_def ctx f) in
   let fe = fun_decl ctx f in
   (snd f.fd_fun.f_name, fe)
@@ -36,6 +37,10 @@ and fun_decl (ctx : Provider_context.t) (f : Nast.fun_def) : Typing_defs.fun_elt
   let dep = Dep.Fun (snd f.fd_fun.f_name) in
   let env = { Decl_env.mode = f.fd_mode; droot = Some dep; ctx } in
   fun_decl_in_env env ~is_lambda:false f.fd_fun
+
+and lambda_decl_in_env (env : Decl_env.env) (f : Nast.fun_) :
+    Typing_defs.fun_elt =
+  fun_decl_in_env env ~is_lambda:true f
 
 and fun_decl_in_env (env : Decl_env.env) ~(is_lambda : bool) (f : Nast.fun_) :
     Typing_defs.fun_elt =
@@ -176,8 +181,9 @@ let record_def_decl (ctx : Provider_context.t) (rd : Nast.record_def) :
     rdt_pos = Decl_env.make_decl_pos env rd_span;
   }
 
-let record_def_naming_and_decl (ctx : Provider_context.t) (rd : Nast.record_def)
-    : string * Typing_defs.record_def_type =
+let record_def_naming_and_decl_DEPRECATED
+    (ctx : Provider_context.t) (rd : Nast.record_def) :
+    string * Typing_defs.record_def_type =
   let rd = Errors.ignore_ (fun () -> Naming.record_def ctx rd) in
   let tdecl = record_def_decl ctx rd in
   (snd rd.rd_name, tdecl)
@@ -221,7 +227,8 @@ and typedef_decl (ctx : Provider_context.t) (tdef : Nast.typedef) :
   in
   { td_module; td_vis; td_tparams; td_constraint; td_type; td_pos; td_is_ctx }
 
-let typedef_naming_and_decl (ctx : Provider_context.t) (tdef : Nast.typedef) :
+let typedef_naming_and_decl_DEPRECATED
+    (ctx : Provider_context.t) (tdef : Nast.typedef) :
     string * Typing_defs.typedef_type =
   let tdef = Errors.ignore_ (fun () -> Naming.typedef ctx tdef) in
   let tdecl = typedef_decl ctx tdef in
@@ -265,7 +272,8 @@ let const_decl (ctx : Provider_context.t) (cst : Nast.gconst) :
   in
   { cd_pos = Decl_env.make_decl_pos env cst_span; cd_type }
 
-let const_naming_and_decl (ctx : Provider_context.t) (cst : Nast.gconst) :
+let const_naming_and_decl_DEPRECATED
+    (ctx : Provider_context.t) (cst : Nast.gconst) :
     string * Typing_defs.const_decl =
   let cst = Errors.ignore_ (fun () -> Naming.global_const ctx cst) in
   let hint_ty = const_decl ctx cst in

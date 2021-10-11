@@ -66,7 +66,8 @@ let write_and_parse_test_files ctx =
       Disk.mkdir_p (Path.to_string dir);
       Disk.write_file ~file:(Path.to_string fn) ~contents);
   let (file_infos, errors, failed_parsing) =
-    Parsing_service.go
+    (* FIXME(jakebailey): use direct decl parser *)
+    Parsing_service.go_DEPRECATED
       ctx
       None
       Relative_path.Set.empty

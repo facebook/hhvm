@@ -21,7 +21,8 @@ way to test if a a shallow class might contain a particular member
 (property, method, constructor, constant, or type constant). *)
 val get_member_filter : Provider_context.t -> string -> BloomFilter.t option
 
-val decl : Provider_context.t -> Nast.class_ -> shallow_class
+(** DEPRECATED: Use the direct decl parser or [get] instead. *)
+val decl_DEPRECATED : Provider_context.t -> Nast.class_ -> shallow_class
 
 val get_batch : Provider_context.t -> SSet.t -> shallow_class option SMap.t
 

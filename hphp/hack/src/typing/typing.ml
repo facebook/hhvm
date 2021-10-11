@@ -4061,9 +4061,7 @@ and expr_
     in
     (* This is the function type as declared on the lambda itself.
      * If type hints are absent then use Tany instead. *)
-    let declared_fe =
-      Decl_nast.fun_decl_in_env env.decl_env ~is_lambda:true f
-    in
+    let declared_fe = Decl_nast.lambda_decl_in_env env.decl_env f in
     let { fe_type; fe_pos; _ } = declared_fe in
     let (declared_pos, declared_ft) =
       match get_node fe_type with

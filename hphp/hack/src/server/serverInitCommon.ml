@@ -57,7 +57,8 @@ let parsing
   let quick = lazy_parse in
   let ctx = Provider_utils.ctx_from_server_env env in
   let (fast, errorl, _) =
-    Parsing_service.go
+    (* FIXME(jakebailey): use direct decl parser *)
+    Parsing_service.go_DEPRECATED
       ctx
       ~quick
       ~show_all_errors:true

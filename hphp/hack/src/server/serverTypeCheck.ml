@@ -292,7 +292,14 @@ let parsing genv env to_check ~stop_at_errors profiling =
   let ctx = Provider_utils.ctx_from_server_env env in
   let (fast, errors, failed_parsing) =
     CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"parsing" @@ fun () ->
-    Parsing_service.go ctx genv.workers ide_files ~get_next env.popt ~trace:true
+    (* FIXME(jakebailey): Use direct decl parser *)
+    Parsing_service.go_DEPRECATED
+      ctx
+      genv.workers
+      ide_files
+      ~get_next
+      env.popt
+      ~trace:true
   in
 
   SearchServiceRunner.update_fileinfo_map

@@ -221,9 +221,9 @@ let collect_legacy_decls ctx classes =
 type saved_shallow_decls = { classes: Shallow_decl_defs.shallow_class SMap.t }
 [@@deriving show]
 
-let class_naming_and_decl ctx c =
+let class_naming_and_decl_DEPRECATED ctx c =
   let c = Errors.ignore_ (fun () -> Naming.class_ ctx c) in
-  Shallow_decl.class_ ctx c
+  Shallow_decl.class_DEPRECATED ctx c
 
 let collect_shallow_decls ctx workers classnames =
   let classnames = SSet.elements classnames in
@@ -231,6 +231,8 @@ let collect_shallow_decls ctx workers classnames =
      we won't look for ancestors. *)
   let job (init : 'a SMap.t) (classnames : string list) : 'a SMap.t =
     List.fold classnames ~init ~f:(fun acc cid ->
+        (* FIXME(jakebailey): should use direct decl parser rather than
+           Ast_provider and Shallow_decl.class_DEPRECATED *)
         let ast_opt =
           match Naming_provider.get_class_path ctx cid with
           | None -> None
@@ -241,7 +243,7 @@ let collect_shallow_decls ctx workers classnames =
           Hh_logger.log "Missing shallow requested class %s" cid;
           acc
         | Some ast ->
-          let data = class_naming_and_decl ctx ast in
+          let data = class_naming_and_decl_DEPRECATED ctx ast in
           SMap.add acc ~key:cid ~data)
   in
   (* The 'classnames' came from a SSet, and therefore all elements are unique.

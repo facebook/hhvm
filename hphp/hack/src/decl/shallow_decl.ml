@@ -320,7 +320,7 @@ let xhp_enum_values props =
         SMap.add (snd prop.cv_id) xai_enum_values acc
       | None -> acc)
 
-let class_ ctx c =
+let class_DEPRECATED ctx c =
   let (errs, result) =
     Errors.do_ @@ fun () ->
     let (_, cls_name) = c.c_name in

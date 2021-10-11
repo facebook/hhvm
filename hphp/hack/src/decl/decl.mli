@@ -7,7 +7,10 @@
  *
  *)
 
-val nast_to_decls :
+(** DEPRECATED: When TypecheckerOptions.use_direct_decl_parser is enabled, parse
+    the source text using the direct decl parser (or ast_and_decl_parser, if the
+    AST is also needed) instead of transforming the AST to a decl. *)
+val nast_to_decls_DEPRECATED :
   Direct_decl_parser.decls ->
   Provider_context.t ->
   Nast.program ->

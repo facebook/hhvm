@@ -1155,13 +1155,14 @@ let add_decls_to_heap ctx files_contents =
 (** This function doesn't have side-effects. Its sole job is to return shallow decls. *)
 let get_shallow_decls ctx filename file_contents :
     Shallow_decl_defs.shallow_class SMap.t =
+  (* FIXME(jakebailey): Use the direct decl parser here *)
   Errors.ignore_ (fun () ->
       let files_contents = Relative_path.Map.singleton filename file_contents in
       let (parsed_files, _) = parse_and_name ctx files_contents in
       let parsed_file = Relative_path.Map.values parsed_files |> List.hd_exn in
       parsed_file.Parser_return.ast
       |> List.filter_map ~f:(function
-             | Aast.Class c -> Some (Shallow_decl.class_ ctx c)
+             | Aast.Class c -> Some (Shallow_decl.class_DEPRECATED ctx c)
              | _ -> None)
       |> List.fold ~init:SMap.empty ~f:(fun acc c ->
              SMap.add (snd c.Shallow_decl_defs.sc_name) c acc))

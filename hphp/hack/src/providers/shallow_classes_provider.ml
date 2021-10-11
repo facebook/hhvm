@@ -15,9 +15,9 @@ let err_not_found (file : Relative_path.t) (name : string) : 'a =
   in
   raise (Decl_defs.Decl_not_found err_str)
 
-let class_naming_and_decl ctx c =
+let class_naming_and_decl_DEPRECATED ctx c =
   let c = Errors.ignore_ (fun () -> Naming.class_ ctx c) in
-  Shallow_decl.class_ ctx c
+  Shallow_decl.class_DEPRECATED ctx c
 
 let direct_decl_parse_and_cache
     ~file_decl_hash ~symbol_decl_hashes ctx filename name =
@@ -50,12 +50,13 @@ decls, then we incidentally obtain shallow decls in the process of generating
 a folded decl, but the folded decl contains everything that one could ever need,
 and is never evicted, and nno one will ever go back to the shallow decl again,
 so keeping it around would just be a waste of memory. *)
-let decl (ctx : Provider_context.t) (class_ : Nast.class_) : shallow_class =
+let decl_DEPRECATED (ctx : Provider_context.t) (class_ : Nast.class_) :
+    shallow_class =
   let (_, name) = class_.Aast.c_name in
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis -> failwith "invalid"
   | Provider_backend.Shared_memory ->
-    let decl = class_naming_and_decl ctx class_ in
+    let decl = class_naming_and_decl_DEPRECATED ctx class_ in
     if shallow_decl_enabled ctx && not (Shallow_classes_heap.Classes.mem name)
     then (
       Shallow_classes_heap.Classes.add name decl;
@@ -66,7 +67,8 @@ let decl (ctx : Provider_context.t) (class_ : Nast.class_) : shallow_class =
       then
       Shallow_classes_heap.Classes.add name decl;
     decl
-  | Provider_backend.Local_memory _ -> class_naming_and_decl ctx class_
+  | Provider_backend.Local_memory _ ->
+    class_naming_and_decl_DEPRECATED ctx class_
   | Provider_backend.Decl_service _ ->
     failwith "shallow class decl not implemented for Decl_service"
 
@@ -97,7 +99,7 @@ let get (ctx : Provider_context.t) (name : string) : shallow_class option =
             (match Ast_provider.find_class_in_file ctx path name with
             | None -> err_not_found path name
             | Some class_ ->
-              let decl = class_naming_and_decl ctx class_ in
+              let decl = class_naming_and_decl_DEPRECATED ctx class_ in
               if shallow_decl_enabled ctx then (
                 Shallow_classes_heap.Classes.add name decl;
                 Shallow_classes_heap.MemberFilters.add decl
@@ -128,7 +130,7 @@ let get (ctx : Provider_context.t) (name : string) : shallow_class option =
             Some
               (match Ast_provider.find_class_in_file ctx path name with
               | None -> err_not_found path name
-              | Some class_ -> class_naming_and_decl ctx class_))
+              | Some class_ -> class_naming_and_decl_DEPRECATED ctx class_))
   | Provider_backend.Decl_service { decl; _ } ->
     Decl_service_client.rpc_get_class decl name
 

@@ -285,8 +285,6 @@ type t = {
   po_escape_brace: bool;
   (* Enable use of the direct decl parser for parsing type signatures. *)
   tco_use_direct_decl_parser: bool;
-  (* Direct decl parsing in type check loop fix *)
-  tco_use_direct_decl_in_tc_loop: bool;
   (* Enable ifc on the specified list of path prefixes
      (a list containing the empty string would denote all files,
      an empty list denotes no files) *)
@@ -443,7 +441,6 @@ val make :
   ?po_enable_readonly_in_emitter:bool ->
   ?po_escape_brace:bool ->
   ?tco_use_direct_decl_parser:bool ->
-  ?tco_use_direct_decl_in_tc_loop:bool ->
   ?tco_ifc_enabled:string list ->
   ?po_enable_enum_supertyping:bool ->
   ?po_interpret_soft_types_as_like_types:bool ->
@@ -718,8 +715,6 @@ val po_enable_readonly_in_emitter : t -> bool
 val po_escape_brace : t -> bool
 
 val tco_use_direct_decl_parser : t -> bool
-
-val tco_use_direct_decl_in_tc_loop : t -> bool
 
 val po_enable_enum_supertyping : t -> bool
 

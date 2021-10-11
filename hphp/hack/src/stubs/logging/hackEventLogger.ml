@@ -19,7 +19,6 @@ type rollout_flags = {
   symbolindex_search_provider: string;
   require_saved_state: bool;
   stream_errors: bool;
-  use_direct_decl_in_tc_loop: bool;
   deferments_light: bool;
   old_naming_table_for_redecl: bool;
   log_from_client_when_slow_monitor_connections: bool;

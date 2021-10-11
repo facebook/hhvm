@@ -117,7 +117,6 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     po_enable_readonly_in_emitter: false,
     po_escape_brace: false,
     tco_use_direct_decl_parser: false,
-    tco_use_direct_decl_in_tc_loop: false,
     tco_ifc_enabled: &[],
     po_enable_enum_supertyping: false,
     po_interpret_soft_types_as_like_types: false,

@@ -8,6 +8,7 @@ use hhbc_by_ref_emit_expression::{self as emit_expr, emit_await, emit_expr, LVal
 use hhbc_by_ref_emit_fatal as emit_fatal;
 use hhbc_by_ref_emit_pos::{emit_pos, emit_pos_then};
 use hhbc_by_ref_env::{emitter::Emitter, Env};
+use hhbc_by_ref_hhbc_assertion_utils::*;
 use hhbc_by_ref_hhbc_ast::*;
 use hhbc_by_ref_hhbc_id::{self as hhbc_id, Id};
 use hhbc_by_ref_instruction_sequence::{instr, Error::Unrecoverable, InstrSeq, Result};
@@ -114,8 +115,9 @@ pub fn emit_stmt<'a, 'arena, 'decl>(
                             alloc,
                             exprs
                                 .iter()
-                                // TODO(T98469681): `inout` is silently dropped here, now
-                                .map(|(_, ex)| emit_expr::emit_unset_expr(e, env, ex))
+                                .map(|ex| {
+                                    emit_expr::emit_unset_expr(e, env, expect_normal_paramkind(ex)?)
+                                })
                                 .collect::<std::result::Result<Vec<_>, _>>()?,
                         ))
                     } else {

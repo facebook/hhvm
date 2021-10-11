@@ -16,6 +16,7 @@ use hhbc_by_ref_emit_fatal as emit_fatal;
 use hhbc_by_ref_env::emitter::Emitter;
 use hhbc_by_ref_global_state::{ClosureEnclosingClassInfo, GlobalState};
 use hhbc_by_ref_hhas_coeffects::HhasCoeffects;
+use hhbc_by_ref_hhbc_assertion_utils::*;
 use hhbc_by_ref_hhbc_id as hhbc_id;
 use hhbc_by_ref_hhbc_id::class;
 use hhbc_by_ref_hhbc_string_utils as string_utils;
@@ -1287,8 +1288,9 @@ impl<'ast, 'a, 'arena> VisitorMut<'ast> for ClosureConvertVisitor<'a, 'arena> {
                 } else {
                     false
                 };
-                // TODO(T98469681): `inout` is silently dropped here, now
-                if let [(_, cexpr), (_, fexpr)] = &mut *x.2 {
+                if let [(pk_c, cexpr), (pk_f, fexpr)] = &mut *x.2 {
+                    ensure_normal_paramkind(pk_c)?;
+                    ensure_normal_paramkind(pk_f)?;
                     let mut res = make_dyn_meth_caller_lambda(&*pos, &cexpr, &fexpr, force);
                     res.recurse(env, self.object())?;
                     res
@@ -1315,8 +1317,9 @@ impl<'ast, 'a, 'arena> VisitorMut<'ast> for ClosureConvertVisitor<'a, 'arena> {
                     }
                 } =>
             {
-                // TODO(T98469681): `inout` is silently dropped here, now
-                if let [(_, Expr(_, pc, cls)), (_, Expr(_, pf, func))] = &mut *x.2 {
+                if let [(pk_cls, Expr(_, pc, cls)), (pk_f, Expr(_, pf, func))] = &mut *x.2 {
+                    ensure_normal_paramkind(pk_cls)?;
+                    ensure_normal_paramkind(pk_f)?;
                     match (&cls, func.as_string()) {
                         (Expr_::ClassConst(cc), Some(fname))
                             if string_utils::is_class(&(cc.1).1) =>
@@ -1404,8 +1407,9 @@ impl<'ast, 'a, 'arena> VisitorMut<'ast> for ClosureConvertVisitor<'a, 'arena> {
                     }
                 } =>
             {
-                // TODO(T98469681): `inout` is silently dropped here, now
-                if let [(_, Expr(_, pc, cls)), (_, Expr(_, pf, func))] = &mut *x.2 {
+                if let [(pk_cls, Expr(_, pc, cls)), (pk_f, Expr(_, pf, func))] = &mut *x.2 {
+                    ensure_normal_paramkind(pk_cls)?;
+                    ensure_normal_paramkind(pk_f)?;
                     match (&cls, func.as_string()) {
                         (Expr_::ClassConst(cc), Some(_)) if string_utils::is_class(&(cc.1).1) => {
                             let mut cls_const = cls.as_class_const_mut();

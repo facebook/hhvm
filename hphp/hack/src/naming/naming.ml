@@ -1711,7 +1711,9 @@ and stmt env (pos, st) =
             match pk with
             | Ast_defs.Pnormal -> ()
             | Ast_defs.Pinout pk_p ->
-              Errors.inout_invariant_predicate (Pos.merge pk_p p)
+              Errors.inout_in_transformed_pseudofunction
+                (Pos.merge pk_p p)
+                "invariant"
           end;
           let violation =
             ( (),
@@ -2036,8 +2038,12 @@ and expr_ env p (e : Nast.expr_) =
       | [] ->
         Errors.naming_too_few_arguments p;
         invalid_expr_ p
-      (*  TODO(T98469681): `inout` is silently dropped here, now *)
-      | (_, f) :: el ->
+      | (Ast_defs.Pnormal, f) :: el ->
+        N.Call (expr env f, targl env p tal, expr_call_args env el, None)
+      | (Ast_defs.Pinout pk_pos, ((_, f_pos, _) as f)) :: el ->
+        Errors.inout_in_transformed_pseudofunction
+          (Pos.merge pk_pos f_pos)
+          "call_user_func";
         N.Call (expr env f, targl env p tal, expr_call_args env el, None)
     end
   | Aast.Call ((_, p, Aast.Id (_, cn)), _, el, unpacked_element)

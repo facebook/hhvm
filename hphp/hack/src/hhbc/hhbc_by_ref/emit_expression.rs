@@ -12,6 +12,7 @@ use hhbc_by_ref_emit_pos::{emit_pos, emit_pos_then};
 use hhbc_by_ref_emit_symbol_refs as emit_symbol_refs;
 use hhbc_by_ref_emit_type_constant as emit_type_constant;
 use hhbc_by_ref_env::{emitter::Emitter, Env, Flags as EnvFlags};
+use hhbc_by_ref_hhbc_assertion_utils::*;
 use hhbc_by_ref_hhbc_ast::*;
 use hhbc_by_ref_hhbc_id::{class, r#const, function, method, prop, Id};
 use hhbc_by_ref_hhbc_string_utils as string_utils;
@@ -945,8 +946,7 @@ pub fn emit_await<'a, 'arena, 'decl>(
                 && args.len() == 1
                 && string_utils::strip_global_ns(&(*id.1)) == "gena") =>
         {
-            // TODO(T98469681): `inout` is silently dropped here, now
-            inline_gena_call(emitter, env, &args[0].1)
+            inline_gena_call(emitter, env, expect_normal_paramkind(&args[0])?)
         }
         _ => {
             let after_await = emitter.label_gen_mut().next_regular();
@@ -2891,16 +2891,6 @@ fn has_inout_arg(es: &[(ParamKind, ast::Expr)]) -> bool {
     es.iter().any(|(pk, _)| pk.is_pinout())
 }
 
-fn expect_normal_paramkind(arg: &(ParamKind, ast::Expr)) -> Result<&ast::Expr> {
-    match arg {
-        (ParamKind::Pnormal, e) => Ok(e),
-        (ParamKind::Pinout(pk_pos), e) => Err(emit_fatal::raise_fatal_parse(
-            &Pos::merge(pk_pos, e.pos()).map_err(Error::Unrecoverable)?,
-            "Unexpected `inout` annotation",
-        )),
-    }
-}
-
 fn emit_special_function<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
@@ -2923,12 +2913,11 @@ fn emit_special_function<'a, 'arena, 'decl>(
             alloc,
             args.iter()
                 .enumerate()
-                // TODO(T98469681): `inout` is silently dropped here, now
-                .map(|(i, (_, arg))| {
+                .map(|(i, arg)| {
                     Ok(InstrSeq::gather(
                         alloc,
                         vec![
-                            emit_expr(e, env, arg)?,
+                            emit_expr(e, env, expect_normal_paramkind(arg)?)?,
                             emit_pos(alloc, pos),
                             instr::print(alloc),
                             if i == nargs - 1 {
@@ -2985,30 +2974,31 @@ fn emit_special_function<'a, 'arena, 'decl>(
             Ok(Some(InstrSeq::gather(
                 alloc,
                 vec![
-                    // TODO(T98469681): `inout` is silently dropped here, now
-                    emit_expr(e, env, &arg1.1)?,
+                    emit_expr(e, env, expect_normal_paramkind(arg1)?)?,
                     instr::cast_string(alloc),
                     if nargs == 1 {
                         instr::true_(alloc)
                     } else {
                         InstrSeq::gather(
                             alloc,
-                            // TODO(T98469681): `inout` is silently dropped here, now
-                            vec![emit_expr(e, env, &args[1].1)?, instr::cast_bool(alloc)],
+                            vec![
+                                emit_expr(e, env, expect_normal_paramkind(&args[1])?)?,
+                                instr::cast_bool(alloc),
+                            ],
                         )
                     },
                     instr::oodeclexists(alloc, class_kind),
                 ],
             )))
         }
-        ("exit", _) | ("die", _) if nargs == 0 || nargs == 1 => {
-            // TODO(T98469681): `inout` is silently dropped here, now
-            Ok(Some(emit_exit(e, env, args.first().map(|(_, e)| e))?))
-        }
+        ("exit", _) | ("die", _) if nargs == 0 || nargs == 1 => Ok(Some(emit_exit(
+            e,
+            env,
+            args.first().map(expect_normal_paramkind).transpose()?,
+        )?)),
         ("HH\\fun", _) => {
             if fun_and_clsmeth_disabled {
                 match args {
-                    // TODO(T98469681): `inout` is silently dropped here, now
                     [(_, ast::Expr(_, _, ast::Expr_::String(func_name)))] => {
                         Err(emit_fatal::raise_fatal_parse(
                             pos,
@@ -3033,7 +3023,8 @@ fn emit_special_function<'a, 'arena, 'decl>(
                 ))
             } else {
                 match args {
-                    // TODO(T98469681): `inout` is silently dropped here, now
+                    // `inout` is dropped here, but it should be impossible to have an expression
+                    // like: `foo(inout "literal")`
                     [(_, ast::Expr(_, _, ast::Expr_::String(func_name)))] => {
                         Ok(Some(emit_hh_fun(
                             e,
@@ -3064,7 +3055,8 @@ fn emit_special_function<'a, 'arena, 'decl>(
                 ));
             }
             match args {
-                // TODO(T98469681): `inout` is silently dropped here, now
+                // `inout` is dropped here, but it should be impossible to have an expression
+                // like: `foo(inout "literal")`
                 [(_, E(_, _, E_::String(ref func_name)))] => Ok(Some(instr::resolve_meth_caller(
                     alloc,
                     (
@@ -3094,7 +3086,8 @@ fn emit_special_function<'a, 'arena, 'decl>(
                 ))
             } else {
                 match args {
-                    // TODO(T98469681): `inout` is silently dropped here, now
+                    // Calling convention is dropped here, but given this is meant for the debugger
+                    // I don't think it particularly matters.
                     [(_, E(_, _, E_::Lvar(id)))] => Ok(Some(instr::isunsetl(
                         alloc,
                         get_local(e, env, pos, id.name())?,
@@ -3108,8 +3101,10 @@ fn emit_special_function<'a, 'arena, 'decl>(
         }
         ("__SystemLib\\get_enum_member_by_label", _) if e.systemlib() => {
             let local = match args {
-                // TODO(T98469681): `inout` is silently dropped here, now
-                [(_, E(_, _, E_::Lvar(id)))] => get_local(e, env, pos, id.name()),
+                [(pk, E(_, _, E_::Lvar(id)))] => {
+                    ensure_normal_paramkind(pk)?;
+                    get_local(e, env, pos, id.name())
+                }
                 _ => Err(emit_fatal::raise_fatal_runtime(
                     pos,
                     "Argument must be the label argument",
@@ -3121,10 +3116,12 @@ fn emit_special_function<'a, 'arena, 'decl>(
             )))
         }
         ("HH\\inst_meth", _) => match args {
-            // TODO(T98469681): `inout` is silently dropped here, now
-            [(_, obj_expr), (_, method_name)] => {
-                Ok(Some(emit_inst_meth(e, env, obj_expr, method_name)?))
-            }
+            [obj_expr, method_name] => Ok(Some(emit_inst_meth(
+                e,
+                env,
+                expect_normal_paramkind(obj_expr)?,
+                expect_normal_paramkind(method_name)?,
+            )?)),
             _ => Err(emit_fatal::raise_fatal_runtime(
                 pos,
                 format!(
@@ -3137,8 +3134,7 @@ fn emit_special_function<'a, 'arena, 'decl>(
             pos,
             "`class_meth()` is disabled; switch to first-class references like `C::bar<>`",
         )),
-        // TODO(T98469681): `inout` is silently dropped here, now
-        ("HH\\class_meth", &[(_, ref cls), (_, ref meth), ..]) if nargs == 2 => {
+        ("HH\\class_meth", &[(ref pk_cls, ref cls), (ref pk_meth, ref meth), ..]) if nargs == 2 => {
             if meth.2.is_string() {
                 if cls.2.is_string()
                     || cls
@@ -3150,6 +3146,8 @@ fn emit_special_function<'a, 'arena, 'decl>(
                         .as_id()
                         .map_or(false, |ast_defs::Id(_, id)| id == pseudo_consts::G__CLASS__)
                 {
+                    ensure_normal_paramkind(pk_cls)?;
+                    ensure_normal_paramkind(pk_meth)?;
                     return Ok(Some(emit_class_meth(e, env, cls, meth)?));
                 }
             }
@@ -3170,12 +3168,11 @@ fn emit_special_function<'a, 'arena, 'decl>(
             ),
         )),
         ("HH\\global_set", _) => match *args {
-            // TODO(T98469681): `inout` is silently dropped here, now
-            [(_, ref gkey), (_, ref gvalue)] => Ok(Some(InstrSeq::gather(
+            [ref gkey, ref gvalue] => Ok(Some(InstrSeq::gather(
                 alloc,
                 vec![
-                    emit_expr(e, env, gkey)?,
-                    emit_expr(e, env, gvalue)?,
+                    emit_expr(e, env, expect_normal_paramkind(gkey)?)?,
+                    emit_expr(e, env, expect_normal_paramkind(gvalue)?)?,
                     emit_pos(alloc, pos),
                     instr::setg(alloc),
                     instr::popc(alloc),
@@ -3191,11 +3188,10 @@ fn emit_special_function<'a, 'arena, 'decl>(
             )),
         },
         ("HH\\global_unset", _) => match *args {
-            // TODO(T98469681): `inout` is silently dropped here, now
-            [(_, ref gkey)] => Ok(Some(InstrSeq::gather(
+            [ref gkey] => Ok(Some(InstrSeq::gather(
                 alloc,
                 vec![
-                    emit_expr(e, env, gkey)?,
+                    emit_expr(e, env, expect_normal_paramkind(gkey)?)?,
                     emit_pos(alloc, pos),
                     instr::unsetg(alloc),
                     instr::null(alloc),
@@ -3209,8 +3205,10 @@ fn emit_special_function<'a, 'arena, 'decl>(
                 ),
             )),
         },
-        // TODO(T98469681): `inout` is silently dropped here, now
-        ("__hhvm_internal_whresult", &[(_, E(_, _, E_::Lvar(ref param)))]) if e.systemlib() => {
+        ("__hhvm_internal_whresult", &[(ref pk, E(_, _, E_::Lvar(ref param)))])
+            if e.systemlib() =>
+        {
+            ensure_normal_paramkind(pk)?;
             Ok(Some(InstrSeq::gather(
                 alloc,
                 vec![
@@ -3233,18 +3231,20 @@ fn emit_special_function<'a, 'arena, 'decl>(
         }
         _ => Ok(
             match (args, istype_op(lower_fq_name), is_isexp_op(lower_fq_name)) {
-                // TODO(T98469681): `inout` is silently dropped here, now
-                (&[(_, ref arg_expr)], _, Some(ref h)) => {
+                (&[ref arg_expr], _, Some(ref h)) => {
                     let is_expr = emit_is(e, env, pos, &h)?;
                     Some(InstrSeq::gather(
                         alloc,
-                        vec![emit_expr(e, env, &arg_expr)?, is_expr],
+                        vec![
+                            emit_expr(e, env, expect_normal_paramkind(arg_expr)?)?,
+                            is_expr,
+                        ],
                     ))
                 }
-                // TODO(T98469681): `inout` is silently dropped here, now
-                (&[(_, E(_, _, E_::Lvar(ref arg_id)))], Some(i), _)
+                (&[(ref pk, E(_, _, E_::Lvar(ref arg_id)))], Some(i), _)
                     if superglobals::is_any_global(arg_id.name()) =>
                 {
+                    ensure_normal_paramkind(pk)?;
                     Some(InstrSeq::gather(
                         alloc,
                         vec![
@@ -3254,25 +3254,27 @@ fn emit_special_function<'a, 'arena, 'decl>(
                         ],
                     ))
                 }
-                // TODO(T98469681): `inout` is silently dropped here, now
-                (&[(_, E(_, _, E_::Lvar(ref arg_id)))], Some(i), _)
+                (&[(ref pk, E(_, _, E_::Lvar(ref arg_id)))], Some(i), _)
                     if !is_local_this(env, &arg_id.1) =>
                 {
+                    ensure_normal_paramkind(pk)?;
                     Some(instr::istypel(
                         alloc,
                         get_local(e, env, &arg_id.0, &(arg_id.1).1)?,
                         i,
                     ))
                 }
-                // TODO(T98469681): `inout` is silently dropped here, now
-                (&[(_, ref arg_expr)], Some(i), _) => Some(InstrSeq::gather(
-                    alloc,
-                    vec![
-                        emit_expr(e, env, &arg_expr)?,
-                        emit_pos(alloc, pos),
-                        instr::istypec(alloc, i),
-                    ],
-                )),
+                (&[(ref pk, ref arg_expr)], Some(i), _) => {
+                    ensure_normal_paramkind(pk)?;
+                    Some(InstrSeq::gather(
+                        alloc,
+                        vec![
+                            emit_expr(e, env, &arg_expr)?,
+                            emit_pos(alloc, pos),
+                            instr::istypec(alloc, i),
+                        ],
+                    ))
+                }
                 _ => match get_call_builtin_func_info(lower_fq_name) {
                     Some((nargs, i)) if nargs == args.len() => Some(InstrSeq::gather(
                         alloc,
@@ -3643,10 +3645,10 @@ fn emit_call_expr<'a, 'arena, 'decl>(
         .contains(HhvmFlags::JIT_ENABLE_RENAME_FUNCTION);
     use {ast::Expr as E, ast::Expr_ as E_};
     match (&expr.2, &args[..], uarg) {
-        // TODO(T98469681): `inout` is silently dropped here, now
-        (E_::Id(id), [(_, E(_, _, E_::String(data)))], None)
+        (E_::Id(id), [(pk, E(_, _, E_::String(data)))], None)
             if id.1 == special_functions::HHAS_ADATA =>
         {
+            ensure_normal_paramkind(pk)?;
             // FIXME: This is not safe--string literals are binary strings.
             // There's no guarantee that they're valid UTF-8.
             let v = TypedValue::mk_hhas_adata(
@@ -3664,14 +3666,14 @@ fn emit_call_expr<'a, 'arena, 'decl>(
         {
             emit_idx(e, env, pos, args)
         }
-        // TODO(T98469681): `inout` is silently dropped here, now
-        (E_::Id(id), [(_, arg1)], None) if id.1 == emitter_special_functions::EVAL => {
+        (E_::Id(id), [(pk, arg1)], None) if id.1 == emitter_special_functions::EVAL => {
+            ensure_normal_paramkind(pk)?;
             emit_eval(e, env, pos, arg1)
         }
-        // TODO(T98469681): `inout` is silently dropped here, now
-        (E_::Id(id), [(_, arg1)], None)
+        (E_::Id(id), [(pk, arg1)], None)
             if id.1 == emitter_special_functions::SET_FRAME_METADATA =>
         {
+            ensure_normal_paramkind(pk)?;
             Ok(InstrSeq::gather(
                 alloc,
                 vec![
@@ -3688,10 +3690,10 @@ fn emit_call_expr<'a, 'arena, 'decl>(
             let exit = emit_exit(e, env, None)?;
             Ok(emit_pos_then(alloc, pos, exit))
         }
-        // TODO(T98469681): `inout` is silently dropped here, now
-        (E_::Id(id), [(_, arg1)], None)
+        (E_::Id(id), [(pk, arg1)], None)
             if id.1 == pseudo_functions::EXIT || id.1 == pseudo_functions::DIE =>
         {
+            ensure_normal_paramkind(pk)?;
             let exit = emit_exit(e, env, Some(arg1))?;
             Ok(emit_pos_then(alloc, pos, exit))
         }
@@ -5507,16 +5509,19 @@ pub fn emit_set_range_expr<'a, 'arena, 'decl>(
         ))
     };
 
-    // TODO(T98469681): `inout` is silently dropped here, now
-    let ((_, base), (_, offset), (_, src), args) = if args.len() >= 3 {
+    // TODO(hgoldstein) Weirdly enough, we *ignore* when the first argument is `inout`
+    // unconditionally. We probably want to either _always_ require it or never require it.
+    let ((_, base), (pk_offset, offset), (pk_src, src), args) = if args.len() >= 3 {
         (&args[0], &args[1], &args[2], &args[3..])
     } else {
         return raise_fatal("expects at least 3 arguments");
     };
 
+    ensure_normal_paramkind(pk_offset)?;
+    ensure_normal_paramkind(pk_src)?;
+
     let count_instrs = match (args, kind.vec) {
-        // TODO(T98469681): `inout` is silently dropped here, now
-        ([(_, c)], true) => emit_expr(e, env, c)?,
+        ([c], true) => emit_expr(e, env, expect_normal_paramkind(c)?)?,
         ([], _) => instr::int(alloc, -1),
         (_, false) => return raise_fatal("expects no more than 3 arguments"),
         (_, true) => return raise_fatal("expects no more than 4 arguments"),

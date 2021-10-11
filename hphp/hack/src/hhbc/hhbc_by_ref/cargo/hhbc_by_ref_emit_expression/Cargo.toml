@@ -20,6 +20,7 @@ hhbc_by_ref_emit_pos = { path = "../hhbc_by_ref_emit_pos" }
 hhbc_by_ref_emit_symbol_refs = { path = "../hhbc_by_ref_emit_symbol_refs" }
 hhbc_by_ref_emit_type_constant = { path = "../hhbc_by_ref_emit_type_constant" }
 hhbc_by_ref_env = { path = "../hhbc_by_ref_env" }
+hhbc_by_ref_hhbc_assertion_utils = { path = "../hhbc_by_ref_hhbc_assertion_utils" }
 hhbc_by_ref_hhbc_ast = { path = "../hhbc_by_ref_hhbc_ast" }
 hhbc_by_ref_hhbc_id = { path = "../hhbc_by_ref_hhbc_id" }
 hhbc_by_ref_hhbc_string_utils = { path = "../hhbc_by_ref_hhbc_string_utils" }

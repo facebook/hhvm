@@ -183,9 +183,8 @@ impl<'ast, 'a> Visitor<'ast> for DeclvarVisitor<'a> {
                     }
                     _ => self.visit_expr(env, func_e)?,
                 }
-                // TODO(T98469681): `inout` is silently dropped here, now; given that in the
-                // old `Callconv` case we'd just recurse w/o inspecting the convention, this is
-                // probably fine.
+                // Calling convention doesn't matter here: we're just trying to figure out what
+                // variables are declared in this scope.
                 for (_, arg) in pos_args {
                     on_arg(self, env, arg)?
                 }

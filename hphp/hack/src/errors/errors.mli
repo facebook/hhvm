@@ -1359,7 +1359,7 @@ val missing_xhp_required_attr :
 
 val inout_argument_bad_expr : Pos.t -> unit
 
-val inout_invariant_predicate : Pos.t -> unit
+val inout_in_transformed_pseudofunction : Pos.t -> string -> unit
 
 val inout_argument_bad_type : Pos.t -> (Pos_or_decl.t * string) list -> unit
 

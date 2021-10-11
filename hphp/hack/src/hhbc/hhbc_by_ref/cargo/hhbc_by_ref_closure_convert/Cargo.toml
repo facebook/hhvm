@@ -18,6 +18,7 @@ hhbc_by_ref_emit_fatal = { path = "../hhbc_by_ref_emit_fatal" }
 hhbc_by_ref_env = { path = "../hhbc_by_ref_env" }
 hhbc_by_ref_global_state = { path = "../hhbc_by_ref_global_state" }
 hhbc_by_ref_hhas_coeffects = { path = "../hhbc_by_ref_hhas_coeffects" }
+hhbc_by_ref_hhbc_assertion_utils = { path = "../hhbc_by_ref_hhbc_assertion_utils" }
 hhbc_by_ref_hhbc_id = { path = "../hhbc_by_ref_hhbc_id" }
 hhbc_by_ref_hhbc_string_utils = { path = "../hhbc_by_ref_hhbc_string_utils" }
 hhbc_by_ref_instruction_sequence = { path = "../hhbc_by_ref_instruction_sequence" }

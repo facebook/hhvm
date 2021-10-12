@@ -2632,7 +2632,7 @@ let method_variance pos =
   add
     (Typing.err_code Typing.MethodVariance)
     pos
-    "Covariance or contravariance is not allowed in type parameter of method or function."
+    "Covariance or contravariance is not allowed in type parameters of methods or functions."
 
 let explain_constraint ~(use_pos : Pos.t) : error_from_reasons_callback =
  fun ?code:_ ?(quickfixes = []) reasons ->

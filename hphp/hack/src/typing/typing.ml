@@ -405,8 +405,13 @@ let set_tcopt_unstable_features env { fa_user_attributes; _ } =
             env
         | _ -> env)
 
-(** Do a subtype check of inferred type against expected type *)
+(** Do a subtype check of inferred type against expected type.
+   * The optional coerce_for_op parameter controls whether any arguments of type
+   * dynamic can be coerced to enforceable types because they are arguments to a
+   * built-in operator.
+ *)
 let check_expected_ty_res
+    ~(coerce_for_op : bool)
     (message : string)
     (env : env)
     (inferred_ty : locl_ty)
@@ -432,11 +437,18 @@ let check_expected_ty_res
                     Log_type ("expected_ty", ty.et_type);
                   ] );
             ]));
-    Typing_coercion.coerce_type_res p ur env inferred_ty ty Errors.unify_error
+    Typing_coercion.coerce_type_res
+      ~coerce_for_op
+      p
+      ur
+      env
+      inferred_ty
+      ty
+      Errors.unify_error
 
 let check_expected_ty message env inferred_ty expected =
   Result.fold ~ok:Fn.id ~error:Fn.id
-  @@ check_expected_ty_res message env inferred_ty expected
+  @@ check_expected_ty_res ~coerce_for_op:false message env inferred_ty expected
 
 let check_inout_return ret_pos env =
   let params = Local_id.Map.elements (Env.get_params env) in
@@ -2658,12 +2670,16 @@ and expr_
   (*
    * Given a list of types, computes their supertype. If any of the types are
    * unknown (e.g., comes from PHP), the supertype will be Typing_utils.tany env.
+   * The optional coerce_for_op parameter controls whether any arguments of type
+   * dynamic can be coerced to enforceable types because they are arguments to a
+   * built-in operator.
    *)
   let compute_supertype
       ~(expected : ExpectedTy.t option)
       ~reason
       ~use_pos
       ?bound
+      ?(coerce_for_op = false)
       ?(can_pessimise = false)
       r
       env
@@ -2686,18 +2702,45 @@ and expr_
     (* No need to check individual subtypes if expected type is mixed or any! *)
     | Tany _ -> (env, supertype, List.map tys ~f:(fun _ -> None))
     | _ ->
-      let (env, pess_supertype) =
-        if can_pessimise then
-          Typing_array_access.maybe_pessimise_type env supertype
+      let (env, expected_supertype) =
+        if coerce_for_op then
+          ( env,
+            Some
+              (ExpectedTy.make_and_allow_coercion
+                 use_pos
+                 reason
+                 { et_type = supertype; et_enforced = Enforced }) )
         else
-          (env, supertype)
+          let (env, pess_supertype) =
+            if can_pessimise then
+              Typing_array_access.maybe_pessimise_type env supertype
+            else
+              (env, supertype)
+          in
+          (env, Some (ExpectedTy.make use_pos reason pess_supertype))
       in
+      let dyn_t = MakeType.dynamic Reason.Rnone in
       let subtype_value env ty =
+        let (env, ty) =
+          if coerce_for_op && Typing_utils.is_sub_type_for_union env dyn_t ty
+          then
+            (* if we're coercing for a primop, and we're going to use the coercion
+               (because the type of the arg is a supertype of dynamic), then we want
+               to force the expected_supertype to the bound.
+            *)
+            match bound with
+            | None -> (env, ty)
+            | Some bound_ty ->
+              Typing_union.union env ty (mk (get_reason ty, get_node bound_ty))
+          else
+            (env, ty)
+        in
         check_expected_ty_res
+          ~coerce_for_op
           "Collection"
           env
           ty
-          (Some (ExpectedTy.make use_pos reason pess_supertype))
+          expected_supertype
       in
       let (env, rev_ty_err_opts) =
         List.fold_left tys ~init:(env, []) ~f:(fun (env, errs) ty ->
@@ -2725,8 +2768,9 @@ and expr_
   let compute_exprs_and_supertype
       ~(expected : ExpectedTy.t option)
       ?(reason = Reason.URarray_value)
-      ?bound
       ?(can_pessimise = false)
+      ~bound
+      ~coerce_for_op
       ~use_pos
       r
       env
@@ -2742,6 +2786,7 @@ and expr_
         ~reason
         ~use_pos
         ?bound
+        ~coerce_for_op
         ~can_pessimise
         r
         env
@@ -2818,24 +2863,26 @@ and expr_
     make_result env p Aast.Omitted ty
   | Varray (th, el)
   | ValCollection (_, th, el) ->
-    let (get_expected_kind, name, subtype_val, make_expr, make_ty) =
+    let (get_expected_kind, name, subtype_val, coerce_for_op, make_expr, make_ty)
+        =
       match e with
       | ValCollection (kind, _, _) ->
         let class_name = Nast.vc_kind_to_name kind in
-        let subtype_val =
+        let (subtype_val, coerce_for_op) =
           match kind with
           | Set
           | ImmSet
           | Keyset ->
-            arraykey_value ~add_hole:true p class_name true
+            (arraykey_value ~add_hole:true p class_name true, true)
           | Vector
           | ImmVector
           | Vec ->
-            array_value
+            (array_value, false)
         in
         ( get_vc_inst kind,
           class_name,
           subtype_val,
+          coerce_for_op,
           (fun th elements -> Aast.ValCollection (kind, th, elements)),
           fun value_ty ->
             MakeType.class_type (Reason.Rwitness p) class_name [value_ty] )
@@ -2843,6 +2890,7 @@ and expr_
         ( get_vc_inst Vec,
           "varray",
           array_value,
+          false,
           (fun th elements -> Aast.ValCollection (Vec, th, elements)),
           (fun value_ty -> MakeType.varray (Reason.Rwitness p) value_ty) )
       | _ ->
@@ -2868,12 +2916,25 @@ and expr_
           | _ -> (env, None, None)
         end
     in
+    let bound =
+      (* TODO We ought to apply the bound even when not in sound dynamic mode,
+         to avoid getting Set<dynamic> etc which are unsafe "nothing" factories. *)
+      if coerce_for_op && TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
+      then
+        Some
+          (MakeType.arraykey
+             (Reason.Rtype_variable_generics (p, "Tk", strip_ns name)))
+      else
+        None
+    in
     let (env, tel, elem_ty) =
       compute_exprs_and_supertype
         ~expected:elem_expected
         ~use_pos:p
         ~reason:Reason.URvector
         ~can_pessimise:true
+        ~coerce_for_op
+        ~bound
         (Reason.Rtype_variable_generics (p, "T", strip_ns name))
         env
         el
@@ -2932,7 +2993,8 @@ and expr_
         ~expected:kexpected
         ~use_pos:p
         ~reason:(Reason.URkey name)
-        ~bound:(MakeType.arraykey r)
+        ~bound:(Some (MakeType.arraykey r))
+        ~coerce_for_op:true
         r
         env
         kl
@@ -2944,6 +3006,8 @@ and expr_
         ~use_pos:p
         ~reason:Reason.URvalue
         ~can_pessimise:true
+        ~coerce_for_op:false
+        ~bound:None
         (Reason.Rtype_variable_generics (p, "Tv", strip_ns name))
         env
         vl
@@ -5690,6 +5754,7 @@ and arraykey_value
       let (env, err_opt) =
         Result.fold ~ok ~error:(fun env -> (env, Some (ty_actual, ty_arraykey)))
         @@ Typing_coercion.coerce_type_res
+             ~coerce_for_op:true
              p
              reason
              env
@@ -5701,6 +5766,7 @@ and arraykey_value
     else
       let env =
         Typing_coercion.coerce_type
+          ~coerce_for_op:true
           p
           reason
           env

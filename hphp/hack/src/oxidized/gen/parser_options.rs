@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5ea4a3a9e05c99a005db0f630aea246f>>
+// @generated SignedSource<<0c2d9891d49557fcd2ecd524b106afed>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -37,6 +37,7 @@ pub type ParserOptions = global_options::GlobalOptions;
 )]
 #[repr(C)]
 pub struct FfiT(
+    pub bool,
     pub bool,
     pub bool,
     pub bool,

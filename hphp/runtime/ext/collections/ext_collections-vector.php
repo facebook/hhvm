@@ -323,7 +323,7 @@ final class Vector implements \MutableVector {
    * @return varray
    */
   <<__ProvenanceSkipFrame>>
-  public function toKeysArray()[]: varray {
+  public readonly function toKeysArray()[]: varray {
     $count = $this->count();
     return $count ? varray(\range(0, $count - 1)) : varray[];
   }
@@ -1041,7 +1041,7 @@ final class ImmVector implements \ConstVector {
    * @return varray
    */
   <<__ProvenanceSkipFrame>>
-  public function toKeysArray()[]: varray {
+  public readonly function toKeysArray()[]: varray {
     $count = $this->count();
     return $count ? varray(\range(0, $count - 1)) : varray[];
   }

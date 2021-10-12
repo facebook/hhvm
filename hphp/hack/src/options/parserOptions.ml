@@ -69,6 +69,9 @@ let disallow_silence = GlobalOptions.po_disallow_silence
 
 let const_static_props = GlobalOptions.tco_const_static_props
 
+let enable_systemlib_annotations =
+  GlobalOptions.tco_enable_systemlib_annotations
+
 let with_const_static_props po b =
   { po with GlobalOptions.tco_const_static_props = b }
 
@@ -190,7 +193,8 @@ let make
     ~interpret_soft_types_as_like_types
     ~disallow_inst_meth
     ~enable_readonly_in_emitter
-    ~escape_brace =
+    ~escape_brace
+    ~enable_systemlib_annotations =
   GlobalOptions.
     {
       default with
@@ -225,11 +229,13 @@ let make
       po_disallow_inst_meth = disallow_inst_meth;
       po_enable_readonly_in_emitter = enable_readonly_in_emitter;
       po_escape_brace = escape_brace;
+      tco_enable_systemlib_annotations = enable_systemlib_annotations;
     }
 
 (* Changes here need to be synchronized with rust_parser_errors_ffi.rs *)
 type ffi_t =
   bool
+  * bool
   * bool
   * bool
   * bool
@@ -280,4 +286,5 @@ let to_rust_ffi_t po ~hhvm_compat_mode ~hhi_mode ~codegen =
     interpret_soft_types_as_like_types po,
     disallow_inst_meth po,
     enable_readonly_in_emitter po,
-    escape_brace po )
+    escape_brace po,
+    enable_systemlib_annotations po )

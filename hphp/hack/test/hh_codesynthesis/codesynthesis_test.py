@@ -81,6 +81,7 @@ interface S8 extends S4 {}
             generator=hack_codegen,
         )
         self.assertEqual(str(hack_codegen), exp)
+        self.assertTrue(hack_codegen.validate())
 
     def test_hack_code_gen_with_partial_dependency_graph_given_by_user(self) -> None:
         solving_context = ClingoContext(

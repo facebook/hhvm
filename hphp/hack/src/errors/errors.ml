@@ -957,10 +957,11 @@ let as_map : t -> error list Relative_path.Map.t =
 
 let add_error_assert_primary_pos_in_current_decl :
     current_decl_and_file:Pos_or_decl.ctx ->
+    ?quickfixes:Pos.t quickfix list ->
     error_code ->
     Pos_or_decl.t message list ->
     unit =
- fun ~current_decl_and_file code reasons ->
+ fun ~current_decl_and_file ?quickfixes code reasons ->
   match reasons with
   | [] -> ()
   | ((primary_pos, claim_) as claim) :: remaining_reasons ->
@@ -978,16 +979,17 @@ let add_error_assert_primary_pos_in_current_decl :
           claim
           reasons
     in
-    add_list code claim reasons
+    add_list ?quickfixes code claim reasons
 
 let error_assert_primary_pos_in_current_decl_callback :
     default_code:Typing.t ->
     current_decl_and_file:Pos_or_decl.ctx ->
     error_from_reasons_callback =
- fun ~default_code ~current_decl_and_file ?code ?quickfixes:_ reasons ->
+ fun ~default_code ~current_decl_and_file ?code ?quickfixes reasons ->
   let code = Option.value code ~default:(Typing.err_code default_code) in
   add_error_assert_primary_pos_in_current_decl
     ~current_decl_and_file
+    ?quickfixes
     code
     reasons
 

@@ -1626,6 +1626,13 @@ SSATmp* simplifyCmpRes(State& env, const IRInstruction* inst) {
   return (left == right) ? cns(env, 0) : nullptr;
 }
 
+SSATmp* simplifyCGetPropQ(State& env, const IRInstruction* inst) {
+  if (inst->src(0)->type().derefIfPtr() <= TNull) {
+    return cns(env, TInitNull);
+  }
+  return nullptr;
+}
+
 SSATmp* isTypeImpl(State& env, const IRInstruction* inst, const Type& srcType) {
  assertx(inst->is(IsNType,
                   IsNTypeMem,
@@ -3965,6 +3972,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(LdResolvedTypeCns)
       X(LdResolvedTypeCnsNoCheck)
       X(LdResolvedTypeCnsClsName)
+      X(CGetPropQ)
 #undef X
       default: break;
     }

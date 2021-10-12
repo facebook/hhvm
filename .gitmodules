@@ -19,9 +19,6 @@
 [submodule "re2"]
 	path = third-party/re2/src
 	url = https://github.com/google/re2.git
-[submodule "squangle"]
-	path = third-party/squangle/src
-	url = https://github.com/facebook/squangle.git
 [submodule "thrift"]
 	path = third-party/thrift/src
 	url = https://github.com/facebook/fbthrift.git

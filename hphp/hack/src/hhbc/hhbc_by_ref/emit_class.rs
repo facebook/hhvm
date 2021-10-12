@@ -79,6 +79,7 @@ fn make_86method<'a, 'arena, 'decl>(
     visibility: Visibility,
     is_abstract: bool,
     span: HhasSpan,
+    coeffects: HhasCoeffects<'arena>,
     instrs: InstrSeq<'arena>,
 ) -> Result<HhasMethod<'arena>> {
     // TODO: move this. We just know that there are no iterators in 86methods
@@ -90,8 +91,6 @@ fn make_86method<'a, 'arena, 'decl>(
     flags.set(HhasMethodFlags::IS_STATIC, is_static);
 
     let attributes = vec![];
-    let coeffects = HhasCoeffects::pure(alloc);
-
     let method_decl_vars = vec![];
     let method_return_type = None;
     let method_doc_comment = None;
@@ -535,6 +534,7 @@ fn emit_reified_init_method<'a, 'arena, 'decl>(
             Visibility::Protected,
             false, // is_abstract
             HhasSpan::from_pos(&ast_class.span),
+            HhasCoeffects::pure(alloc),
             instrs,
         )?))
     }
@@ -581,6 +581,7 @@ where
             Visibility::Private,
             false, // is_abstract
             span,
+            HhasCoeffects::pure(alloc),
             instrs,
         )?))
     } else {
@@ -879,6 +880,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
             Visibility::Private,
             is_interface, /* is_abstract */
             span,
+            HhasCoeffects::default(),
             instrs,
         )?)
     };

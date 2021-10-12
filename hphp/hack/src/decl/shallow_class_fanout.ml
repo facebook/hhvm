@@ -72,6 +72,11 @@ let add_minor_change_fanout
       (Lazy.force changed_and_descendant_class_names)
       ~init:acc
       ~f:(fun cid acc ->
+        let dep = Dep.make (hash_mode mode) (Dep.Type cid) in
+        let needs_recheck =
+          Typing_deps.add_typing_deps mode (DepSet.singleton mode dep)
+        in
+        let acc = AffectedDeps.mark_as_needing_recheck acc needs_recheck in
         AffectedDeps.mark_all_dependents_as_needing_recheck
           mode
           acc

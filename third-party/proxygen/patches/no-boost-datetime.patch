@@ -1,0 +1,24 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 3025b4216..19204b2e7 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -82,7 +82,6 @@ find_package(Boost 1.58 REQUIRED
+   COMPONENTS
+     iostreams
+     context
+-    date_time
+     filesystem
+     program_options
+     regex
+diff --git a/cmake/proxygen-config.cmake.in b/cmake/proxygen-config.cmake.in
+index c5be55ccb..6dd0ea146 100644
+--- a/cmake/proxygen-config.cmake.in
++++ b/cmake/proxygen-config.cmake.in
+@@ -35,7 +35,6 @@ find_dependency(Boost 1.58 REQUIRED
+   COMPONENTS
+     iostreams
+     context
+-    date_time
+     filesystem
+     program_options
+     regex

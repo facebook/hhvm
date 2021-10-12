@@ -73,6 +73,8 @@ ExternalProject_Get_property(bundled_wangle INSTALL_DIR)
 set(
   WANGLE_DEPS
   fizz
+  fmt
+  folly
 )
 add_dependencies(bundled_wangle ${WANGLE_DEPS})
 add_library(wangle INTERFACE)
@@ -84,3 +86,4 @@ target_link_libraries(
   ${WANGLE_DEPS} ${OPENSSL_LIBRARIES}
   "${INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}wangle${CMAKE_STATIC_LIBRARY_SUFFIX}"
 )
+set(WANGLE_INSTALL_DIR "${INSTALL_DIR}" PARENT_SCOPE)

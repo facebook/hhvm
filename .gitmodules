@@ -16,9 +16,6 @@
 [submodule "mcrouter"]
 	path = third-party/mcrouter/src
 	url = https://github.com/facebook/mcrouter
-[submodule "proxygen"]
-	path = third-party/proxygen/src
-	url = https://github.com/facebook/proxygen
 [submodule "re2"]
 	path = third-party/re2/src
 	url = https://github.com/google/re2.git

@@ -73,6 +73,7 @@ let decls_to_fileinfo
 
 let parse_batch
     (ctx : Provider_context.t)
+    ~(trace : bool)
     ~(cache_decls : bool)
     (acc : FileInfo.t Relative_path.Map.t)
     (fnl : Relative_path.t list) : FileInfo.t Relative_path.Map.t =
@@ -80,6 +81,7 @@ let parse_batch
     if not (FindUtils.path_filter fn) then
       acc
     else
+      let start_parse_time = Unix.gettimeofday () in
       match
         Direct_decl_utils.direct_decl_parse
           ~file_decl_hash:true
@@ -89,23 +91,29 @@ let parse_batch
       with
       | None -> acc
       | Some ((decls, _, _, _) as decl_and_mode_and_hash) ->
+        let end_parse_time = Unix.gettimeofday () in
         if cache_decls then Direct_decl_utils.cache_decls ctx decls;
-        Relative_path.Map.add
-          acc
-          ~key:fn
-          ~data:(decls_to_fileinfo fn decl_and_mode_and_hash)
+        let fileinfo = decls_to_fileinfo fn decl_and_mode_and_hash in
+        if trace then
+          Hh_logger.log
+            "[%.1fms] %s - %s"
+            ((end_parse_time -. start_parse_time) *. 1000.0)
+            (Relative_path.suffix fn)
+            (FileInfo.to_string fileinfo);
+        Relative_path.Map.add acc ~key:fn ~data:fileinfo
   in
   List.fold ~f:parse ~init:acc fnl
 
 let go
     (ctx : Provider_context.t)
+    ~(trace : bool)
     ~(cache_decls : bool)
     (workers : MultiWorker.worker list option)
     (get_next : Relative_path.t list MultiWorker.Hh_bucket.next) :
     FileInfo.t Relative_path.Map.t =
   MultiWorker.call
     workers
-    ~job:(parse_batch ctx ~cache_decls)
+    ~job:(parse_batch ctx ~trace ~cache_decls)
     ~neutral:Relative_path.Map.empty
     ~merge:Relative_path.Map.union
     ~next:get_next

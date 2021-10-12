@@ -9,6 +9,7 @@
 
 val go :
   Provider_context.t ->
+  trace:bool ->
   cache_decls:bool ->
   MultiWorker.worker list option ->
   Relative_path.t list MultiWorker.Hh_bucket.next ->

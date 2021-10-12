@@ -495,6 +495,8 @@ type t = {
   force_shallow_decl_fanout: bool;
   (* Always load hot shallow decls from saved state. *)
   force_load_hot_shallow_decls: bool;
+  (* Option to fetch old decls from remote decl store *)
+  fetch_remote_old_decls: bool;
   (* Skip checks on hierarchy e.g. overrides, require extend, etc.
      Set to true only for debugging purposes! *)
   skip_hierarchy_checks: bool;
@@ -638,6 +640,7 @@ let default =
     shallow_class_decl = false;
     force_shallow_decl_fanout = false;
     force_load_hot_shallow_decls = false;
+    fetch_remote_old_decls = false;
     skip_hierarchy_checks = false;
     num_local_workers = None;
     parallel_type_checking_threshold = 10;
@@ -1086,6 +1089,13 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
+  let fetch_remote_old_decls =
+    bool_if_min_version
+      "fetch_remote_old_decls"
+      ~default:default.fetch_remote_old_decls
+      ~current_version
+      config
+  in
   let skip_hierarchy_checks =
     bool_if_min_version
       "skip_hierarchy_checks"
@@ -1308,6 +1318,14 @@ let load_ fn ~silent ~current_version overrides =
     ) else
       force_load_hot_shallow_decls
   in
+  let fetch_remote_old_decls =
+    if fetch_remote_old_decls && not force_shallow_decl_fanout then (
+      Hh_logger.warn
+        "You have fetch_remote_old_decls=true but force_shallow_decl_fanout=false. This is incompatible. Turning off force_load_hot_shallow_decls";
+      false
+    ) else
+      fetch_remote_old_decls
+  in
   let workload_quantile =
     int_list_opt "workload_quantile" config >>= fun l ->
     match l with
@@ -1377,6 +1395,7 @@ let load_ fn ~silent ~current_version overrides =
     shallow_class_decl;
     force_shallow_decl_fanout;
     force_load_hot_shallow_decls;
+    fetch_remote_old_decls;
     skip_hierarchy_checks;
     num_local_workers;
     parallel_type_checking_threshold;

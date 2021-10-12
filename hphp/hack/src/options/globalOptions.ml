@@ -51,6 +51,7 @@ type t = {
   po_disable_lval_as_an_expression: bool;
   tco_shallow_class_decl: bool;
   tco_force_shallow_decl_fanout: bool;
+  tco_fetch_remote_old_decls: bool;
   tco_force_load_hot_shallow_decls: bool;
   tco_skip_hierarchy_checks: bool;
   po_rust_parser_errors: bool;
@@ -251,6 +252,7 @@ let default =
     po_disable_lval_as_an_expression = true;
     tco_shallow_class_decl = false;
     tco_force_shallow_decl_fanout = false;
+    tco_fetch_remote_old_decls = false;
     tco_force_load_hot_shallow_decls = false;
     tco_skip_hierarchy_checks = false;
     po_rust_parser_errors = false;
@@ -389,6 +391,7 @@ let make
       default.po_disable_lval_as_an_expression)
     ?(tco_shallow_class_decl = default.tco_shallow_class_decl)
     ?(tco_force_shallow_decl_fanout = default.tco_force_shallow_decl_fanout)
+    ?(tco_fetch_remote_old_decls = default.tco_fetch_remote_old_decls)
     ?(tco_force_load_hot_shallow_decls =
       default.tco_force_load_hot_shallow_decls)
     ?(tco_skip_hierarchy_checks = default.tco_skip_hierarchy_checks)
@@ -542,6 +545,7 @@ let make
     po_disable_lval_as_an_expression;
     tco_shallow_class_decl;
     tco_force_shallow_decl_fanout;
+    tco_fetch_remote_old_decls;
     tco_force_load_hot_shallow_decls;
     tco_skip_hierarchy_checks;
     po_rust_parser_errors;
@@ -727,6 +731,8 @@ let po_disable_lval_as_an_expression t = t.po_disable_lval_as_an_expression
 let tco_shallow_class_decl t = t.tco_shallow_class_decl
 
 let tco_force_shallow_decl_fanout t = t.tco_force_shallow_decl_fanout
+
+let tco_fetch_remote_old_decls t = t.tco_fetch_remote_old_decls
 
 let tco_force_load_hot_shallow_decls t = t.tco_force_load_hot_shallow_decls
 

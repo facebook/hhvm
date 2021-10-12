@@ -107,6 +107,8 @@ let shallow_class_decl = GlobalOptions.tco_shallow_class_decl
 
 let force_shallow_decl_fanout = GlobalOptions.tco_force_shallow_decl_fanout
 
+let fetch_remote_old_decls = GlobalOptions.tco_fetch_remote_old_decls
+
 let force_load_hot_shallow_decls =
   GlobalOptions.tco_force_load_hot_shallow_decls
 

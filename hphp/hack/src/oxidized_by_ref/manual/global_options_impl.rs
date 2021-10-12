@@ -50,6 +50,7 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     tco_shallow_class_decl: false,
     tco_force_shallow_decl_fanout: false,
     tco_force_load_hot_shallow_decls: false,
+    tco_fetch_remote_old_decls: false,
     tco_skip_hierarchy_checks: false,
     po_rust_parser_errors: false,
     tco_like_type_hints: false,

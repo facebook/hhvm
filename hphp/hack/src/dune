@@ -15,7 +15,9 @@
     client_find_refs_print
     client_get_definition
     client_highlight_refs
+    decl_parser_options
     default_injector_config
+    direct_decl_parser
     gen_deps
     glean_dependency_graph_convert
     hhi

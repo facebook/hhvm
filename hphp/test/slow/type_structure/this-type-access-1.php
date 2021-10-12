@@ -2,9 +2,13 @@
 
 abstract class C {
   abstract const type TData = int;
-  function f($x) {
+  function __construct() {
     var_dump(type_structure(static::class, 'TData'));
+  }
+  function f($x) {
     var_dump($x is this::TData);
+    var_dump($x is ?this::TData);
+    return $this;
   }
 }
 
@@ -15,7 +19,7 @@ class B extends C {
 
 <<__EntryPoint>>
 function main() {
-  (new A)->f('hi');
-  (new B)->f('hi');
+  (new A)->f('hi')->f(null);
+  (new B)->f('hi')->f(null);
 }
 

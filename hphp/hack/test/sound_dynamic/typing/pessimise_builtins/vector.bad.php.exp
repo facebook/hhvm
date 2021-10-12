@@ -1,0 +1,20 @@
+File "vector.bad.php", line 6, characters 3-11:
+Invalid assignment (Typing[4110])
+  File "", line 0, characters 0-0:
+  Expected `~C`
+  File "vector.bad.php", line 5, characters 19-23:
+  But got `mixed`
+File "vector.bad.php", line 7, characters 3-12:
+Invalid assignment (Typing[4110])
+  File "", line 0, characters 0-0:
+  Expected `~C`
+  File "vector.bad.php", line 5, characters 19-23:
+  But got `mixed`
+File "vector.bad.php", line 8, characters 10-26:
+Invalid return type (Typing[4110])
+  File "vector.bad.php", line 5, characters 52-52:
+  Expected `C`
+  File "vector.bad.php", line 5, characters 52-52:
+  This type argument to `Vector` must match exactly (it is invariant)
+  File "vector.bad.php", line 8, characters 17-23:
+  But got `dynamic`

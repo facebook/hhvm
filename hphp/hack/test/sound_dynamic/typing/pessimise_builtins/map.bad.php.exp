@@ -1,0 +1,14 @@
+File "map.bad.php", line 6, characters 3-12:
+Invalid assignment (Typing[4110])
+  File "", line 0, characters 0-0:
+  Expected `~C`
+  File "map.bad.php", line 5, characters 19-23:
+  But got `mixed`
+File "map.bad.php", line 7, characters 10-27:
+Invalid return type (Typing[4110])
+  File "map.bad.php", line 5, characters 54-54:
+  Expected `C`
+  File "map.bad.php", line 5, characters 54-54:
+  This type argument to `Map` must match exactly (it is invariant)
+  File "map.bad.php", line 7, characters 18-24:
+  But got `dynamic`

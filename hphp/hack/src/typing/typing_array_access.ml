@@ -192,6 +192,12 @@ let check_keyset_value = check_arraykey_index Errors.invalid_keyset_value
 
 let check_set_value = check_arraykey_index Errors.invalid_set_value
 
+let maybe_pessimise_type env ty =
+  if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
+    Typing_union.union env ty (Typing_make_type.dynamic Reason.none)
+  else
+    (env, ty)
+
 let rec array_get
     ~array_pos
     ~expr_pos
@@ -304,12 +310,12 @@ let rec array_get
       | Tclass (((_, cn) as id), _, argl)
         when String.equal cn SN.Collections.cVector
              || String.equal cn SN.Collections.cVec ->
-        let ty =
+        let (env, ty) =
           match argl with
-          | [ty] -> ty
+          | [ty] -> maybe_pessimise_type env ty
           | _ ->
             arity_error id;
-            err_witness env expr_pos
+            (env, err_witness env expr_pos)
         in
         let (_, p2, _) = e2 in
         let ty1 = MakeType.enforced (MakeType.int (Reason.Ridx_vector p2)) in
@@ -325,14 +331,16 @@ let rec array_get
           Errors.keyset_set expr_pos (Reason.to_pos r);
           (env, err_witness env expr_pos, Ok ty2, dflt_arr_res)
         ) else
-          let (k, v) =
+          let (k, (env, v)) =
             match argl with
-            | [t] when String.equal cn SN.Collections.cKeyset -> (t, t)
-            | [k; v] when String.( <> ) cn SN.Collections.cKeyset -> (k, v)
+            | [t] when String.equal cn SN.Collections.cKeyset ->
+              (t, maybe_pessimise_type env t)
+            | [k; v] when String.( <> ) cn SN.Collections.cKeyset ->
+              (k, maybe_pessimise_type env v)
             | _ ->
               arity_error id;
               let any = err_witness env expr_pos in
-              (any, any)
+              (any, (env, any))
           in
           (* dict and keyset are covariant in the key type, so subsumption
            * lets you upcast the key type beyond ty2 to arraykey.
@@ -369,13 +377,13 @@ let rec array_get
           let ty_nothing = Typing_make_type.nothing Reason.none in
           (env, ty1, Ok ty2, Error (ty1, ty_nothing))
         else
-          let (_k, v) =
+          let (_k, (env, v)) =
             match argl with
-            | [k; v] -> (k, v)
+            | [k; v] -> (k, maybe_pessimise_type env v)
             | _ ->
               arity_error id;
               let any = err_witness env expr_pos in
-              (any, any)
+              (any, (env, any))
           in
           let (env, idx_err_res) =
             check_arraykey_index_read env expr_pos ty1 ty2
@@ -385,12 +393,12 @@ let rec array_get
         when (not is_lvalue)
              && (String.equal cn SN.Collections.cConstVector
                 || String.equal cn SN.Collections.cImmVector) ->
-        let ty =
+        let (env, ty) =
           match argl with
-          | [ty] -> ty
+          | [ty] -> maybe_pessimise_type env ty
           | _ ->
             arity_error id;
-            err_witness env expr_pos
+            (env, err_witness env expr_pos)
         in
         let (_, p2, _) = e2 in
         let ty1 = MakeType.enforced (MakeType.int (Reason.Ridx (p2, r))) in
@@ -413,7 +421,8 @@ let rec array_get
         let (env, idx_err_res) =
           check_arraykey_index_read env expr_pos ty1 ty2
         in
-        (env, v, dflt_arr_res, idx_err_res)
+        let (env, tv) = maybe_pessimise_type env v in
+        (env, tv, dflt_arr_res, idx_err_res)
       | Terr -> (env, err_witness env expr_pos, dflt_arr_res, Ok ty2)
       | Tdynamic
         when Typing_env_types.(
@@ -692,6 +701,7 @@ let assign_array_append_with_err ~array_pos ~expr_pos ur env ty1 ty2 =
       | (_, Terr) -> (env, ty1, Ok ty1, Ok ty2)
       | (_, Tclass ((_, n), _, [tv])) when String.equal n SN.Collections.cVector
         ->
+        let (env, tv) = maybe_pessimise_type env tv in
         let (env, val_err_res) =
           Result.fold
             ~ok:(fun env -> (env, Ok ty2))
@@ -717,6 +727,7 @@ let assign_array_append_with_err ~array_pos ~expr_pos ur env ty1 ty2 =
         (env, ty, Ok ty, val_err_res)
       | (r, Tclass (((_, n) as id), e, [tv]))
         when String.equal n SN.Collections.cVec ->
+        let (env, tv) = maybe_pessimise_type env tv in
         let (env, tv') = Typing_union.union env tv ty2 in
         let ty = mk (r, Tclass (id, e, [tv'])) in
         (env, ty, Ok ty, Ok ty2)
@@ -857,12 +868,12 @@ let assign_array_get_with_err
         (env, ty, Ok ty, idx_err, Ok ty2)
       | Tclass (((_, cn) as id), _, argl)
         when String.equal cn SN.Collections.cVector ->
-        let tv =
+        let (env, tv) =
           match argl with
-          | [tv] -> tv
+          | [tv] -> maybe_pessimise_type env tv
           | _ ->
             arity_error id;
-            err_witness env expr_pos
+            (env, err_witness env expr_pos)
         in
         let (_, p, _) = key in
         let tk = MakeType.enforced (MakeType.int (Reason.Ridx_vector p)) in
@@ -878,12 +889,12 @@ let assign_array_get_with_err
         (env, ety1, Ok ety1, idx_err, err_res)
       | Tclass (((_, cn) as id), e, argl)
         when String.equal cn SN.Collections.cVec ->
-        let tv =
+        let (env, tv) =
           match argl with
-          | [tv] -> tv
+          | [tv] -> maybe_pessimise_type env tv
           | _ ->
             arity_error id;
-            err_witness env expr_pos
+            (env, err_witness env expr_pos)
         in
         let (_, p, _) = key in
         let tk = MakeType.enforced (MakeType.int (Reason.Ridx_vector p)) in
@@ -897,13 +908,13 @@ let assign_array_get_with_err
         let (env, idx_err1) =
           check_arraykey_index_write env expr_pos ety1 tkey
         in
-        let (tk, tv) =
+        let (tk, (env, tv)) =
           match argl with
-          | [tk; tv] -> (tk, tv)
+          | [tk; tv] -> (tk, maybe_pessimise_type env tv)
           | _ ->
             arity_error id;
             let any = err_witness env expr_pos in
-            (any, any)
+            (any, (env, any))
         in
         let tk =
           let (_, p, _) = key in
@@ -940,13 +951,13 @@ let assign_array_get_with_err
         let (env, idx_err) =
           check_arraykey_index_write env expr_pos ety1 tkey
         in
-        let (tk, tv) =
+        let (tk, (env, tv)) =
           match argl with
-          | [tk; tv] -> (tk, tv)
+          | [tk; tv] -> (tk, maybe_pessimise_type env tv)
           | _ ->
             arity_error id;
             let any = err_witness env expr_pos in
-            (any, any)
+            (any, (env, any))
         in
         let (env, tk') =
           let dyn_t = MakeType.dynamic Reason.Rnone in
@@ -1030,6 +1041,7 @@ let assign_array_get_with_err
         let ty = mk (r, Tvarray_or_darray (tk', tv')) in
         (env, ty, Ok ty, idx_err, Ok ty2)
       | Tvec_or_dict (tk, tv) ->
+        let (env, tv) = maybe_pessimise_type env tv in
         let (env, idx_err) =
           check_arraykey_index_write env expr_pos ety1 tkey
         in

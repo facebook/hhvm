@@ -2660,7 +2660,14 @@ and expr_
    * unknown (e.g., comes from PHP), the supertype will be Typing_utils.tany env.
    *)
   let compute_supertype
-      ~(expected : ExpectedTy.t option) ~reason ~use_pos ?bound r env tys =
+      ~(expected : ExpectedTy.t option)
+      ~reason
+      ~use_pos
+      ?bound
+      ?(can_pessimise = false)
+      r
+      env
+      tys =
     let (env, supertype) =
       match expected with
       | None ->
@@ -2679,12 +2686,18 @@ and expr_
     (* No need to check individual subtypes if expected type is mixed or any! *)
     | Tany _ -> (env, supertype, List.map tys ~f:(fun _ -> None))
     | _ ->
+      let (env, pess_supertype) =
+        if can_pessimise then
+          Typing_array_access.maybe_pessimise_type env supertype
+        else
+          (env, supertype)
+      in
       let subtype_value env ty =
         check_expected_ty_res
           "Collection"
           env
           ty
-          (Some (ExpectedTy.make use_pos reason supertype))
+          (Some (ExpectedTy.make use_pos reason pess_supertype))
       in
       let (env, rev_ty_err_opts) =
         List.fold_left tys ~init:(env, []) ~f:(fun (env, errs) ty ->
@@ -2713,6 +2726,7 @@ and expr_
       ~(expected : ExpectedTy.t option)
       ?(reason = Reason.URarray_value)
       ?bound
+      ?(can_pessimise = false)
       ~use_pos
       r
       env
@@ -2723,7 +2737,15 @@ and expr_
     in
     let (exprs, tys) = List.unzip exprs_and_tys in
     let (env, supertype, err_opts) =
-      compute_supertype ~expected ~reason ~use_pos ?bound r env tys
+      compute_supertype
+        ~expected
+        ~reason
+        ~use_pos
+        ?bound
+        ~can_pessimise
+        r
+        env
+        tys
     in
     ( env,
       List.map2_exn
@@ -2851,6 +2873,7 @@ and expr_
         ~expected:elem_expected
         ~use_pos:p
         ~reason:Reason.URvector
+        ~can_pessimise:true
         (Reason.Rtype_variable_generics (p, "T", strip_ns name))
         env
         el
@@ -2920,6 +2943,7 @@ and expr_
         ~expected:vexpected
         ~use_pos:p
         ~reason:Reason.URvalue
+        ~can_pessimise:true
         (Reason.Rtype_variable_generics (p, "Tv", strip_ns name))
         env
         vl

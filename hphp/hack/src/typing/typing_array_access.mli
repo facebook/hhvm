@@ -9,6 +9,11 @@
 open Aast
 open Typing_defs
 
+val maybe_pessimise_type :
+  Typing_env_types.env ->
+  Typing_defs.locl_ty ->
+  Typing_env_types.env * Typing_defs.locl_ty
+
 (* Check an array get expression returning the modified typing environment,
    the accessed type, an optional subtyping errors for the indexed expression
    and an optional subtyping error for the indexing expression *)

@@ -1,0 +1,6 @@
+File "dict.bad.php", line 6, characters 10-28:
+Invalid return type (Typing[4110])
+  File "dict.bad.php", line 5, characters 33-33:
+  Expected `C`
+  File "dict.bad.php", line 6, characters 19-25:
+  But got `dynamic`

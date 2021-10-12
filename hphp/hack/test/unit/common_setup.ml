@@ -72,14 +72,25 @@ let setup ~(sqlite : bool) (tcopt : GlobalOptions.t) : setup =
       ~deps_mode
   in
   let (file_infos, _errors, _failed_parsing) =
-    (* FIXME(jakebailey): use direct decl parser *)
-    Parsing_service.go_DEPRECATED
-      ctx
-      None
-      Relative_path.Set.empty
-      ~get_next:(MultiWorker.next None [foo_path; bar_path])
-      popt
-      ~trace:true
+    if
+      TypecheckerOptions.use_direct_decl_parser (Provider_context.get_tcopt ctx)
+    then
+      ( Direct_decl_service.go
+          ctx
+          None
+          (MultiWorker.next None [foo_path; bar_path]) (* get_next *)
+          ~trace:true
+          ~cache_decls:false,
+        Errors.empty,
+        Relative_path.Set.empty )
+    else
+      Parsing_service.go_DEPRECATED
+        ctx
+        None
+        Relative_path.Set.empty
+        ~get_next:(MultiWorker.next None [foo_path; bar_path])
+        popt
+        ~trace:true
   in
   let naming_table = Naming_table.create file_infos in
   (* Construct the reverse naming table (symbols-to-files) *)

@@ -231,20 +231,28 @@ let collect_shallow_decls ctx workers classnames =
      we won't look for ancestors. *)
   let job (init : 'a SMap.t) (classnames : string list) : 'a SMap.t =
     List.fold classnames ~init ~f:(fun acc cid ->
-        (* FIXME(jakebailey): should use direct decl parser rather than
-           Ast_provider and Shallow_decl.class_DEPRECATED *)
-        let ast_opt =
-          match Naming_provider.get_class_path ctx cid with
-          | None -> None
-          | Some file -> Ast_provider.find_class_in_file ctx file cid
-        in
-        match ast_opt with
-        | None ->
-          Hh_logger.log "Missing shallow requested class %s" cid;
-          acc
-        | Some ast ->
-          let data = class_naming_and_decl_DEPRECATED ctx ast in
-          SMap.add acc ~key:cid ~data)
+        if
+          TypecheckerOptions.use_direct_decl_parser
+            (Provider_context.get_tcopt ctx)
+        then
+          match Shallow_classes_provider.get ctx cid with
+          | None ->
+            Hh_logger.log "Missing requested shallow class %s" cid;
+            acc
+          | Some data -> SMap.add acc ~key:cid ~data
+        else
+          let ast_opt =
+            match Naming_provider.get_class_path ctx cid with
+            | None -> None
+            | Some file -> Ast_provider.find_class_in_file ctx file cid
+          in
+          match ast_opt with
+          | None ->
+            Hh_logger.log "Missing requested shallow class %s" cid;
+            acc
+          | Some ast ->
+            let data = class_naming_and_decl_DEPRECATED ctx ast in
+            SMap.add acc ~key:cid ~data)
   in
   (* The 'classnames' came from a SSet, and therefore all elements are unique.
      So we can safely assume there will be no merge collisions. *)

@@ -77,10 +77,32 @@ add_dependencies(bundled_thrift ${THRIFT_DEPS})
 add_library(thrift INTERFACE)
 add_dependencies(thrift bundled_thrift)
 target_include_directories(thrift INTERFACE "${INSTALL_DIR}/include")
-target_link_libraries(
-  thrift
-  INTERFACE
-  ${THRIFT_DEPS} ${OPENSSL_LIBRARIES}
-  "${INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}thrift${CMAKE_STATIC_LIBRARY_SUFFIX}"
-)
+target_link_libraries(thrift INTERFACE ${THRIFT_DEPS} ${OPENSSL_LIBRARIES})
 set(THRIFT_INSTALL_DIR "${INSTALL_DIR}" PARENT_SCOPE)
+
+# Usage: thrift_lib NAME [DEP1 [DEP2...]]
+macro(thrift_lib NAME)
+  foreach(DEP "${ARGN}")
+    list(APPEND DEPENDENCIES "thrift_lib_${NAME}")
+  endforeach()
+  add_library("thrift_lib_${NAME}" STATIC IMPORTED)
+  set_target_properties(
+    "thrift_lib_${NAME}"
+    PROPERTIES
+    IMPORTED_LOCATION
+    "${INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}${NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}"
+  )
+  target_link_libraries(thrift INTERFACE "thrift_lib_${NAME}")
+  target_link_libraries("thrift_lib_${NAME}" INTERFACE "${DEPENDENCIES}")
+endmacro()
+
+thrift_lib(concurrency)
+thrift_lib(rpcmetadata)
+thrift_lib(thrift-core)
+thrift_lib(thriftmetadata)
+
+thrift_lib(transport concurrency thrift-core rpcmetadata)
+thrift_lib(async concurrency transport)
+thrift_lib(thriftprotocol thrift-core)
+thrift_lib(thriftfrozen2 thriftmetadata thriftprotocol)
+thrift_lib(thriftcpp2 rpcmetadata thriftmetadata thriftfrozen2 thriftprotocol)

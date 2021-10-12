@@ -1654,6 +1654,11 @@ functor
                         Typing_deps.(
                           List.map ~f:Dep.to_hex_string
                           @@ DepSet.elements (Lazy.force to_recheck_deps)) );
+                    ( "files",
+                      array_
+                        string_
+                        Relative_path.(
+                          List.map ~f:suffix @@ Set.elements to_recheck) );
                   ]);
 
       let env =

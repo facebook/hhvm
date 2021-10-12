@@ -523,6 +523,29 @@ let names_to_deps (deps_mode : Typing_deps_mode.t) (names : FileInfo.names) :
   let deps = add_deps_of_sset (fun n -> Dep.GConstName n) n_consts deps in
   deps
 
+let log_fanout_information to_recheck_deps files_to_recheck =
+  (* we use lazy here to avoid expensive string generation when logging
+       * is not enabled *)
+  Hh_logger.log_lazy ~category:"fanout_information"
+  @@ lazy
+       Hh_json.(
+         json_to_string
+         @@ JSON_Object
+              [
+                ("tag", string_ "saved_state_init_fanout");
+                ( "hashes",
+                  array_
+                    string_
+                    Typing_deps.(
+                      List.map ~f:Dep.to_hex_string
+                      @@ DepSet.elements to_recheck_deps) );
+                ( "files",
+                  array_
+                    string_
+                    Relative_path.(
+                      List.map ~f:suffix @@ Set.elements files_to_recheck) );
+              ])
+
 (** Compare declarations loaded from the saved state to declarations based on
     the current versions of dirty files. This lets us check a smaller set of
     files than the set we'd check if old declarations were not available.
@@ -583,22 +606,7 @@ let get_files_to_undecl_and_recheck
   let to_recheck_deps = Typing_deps.DepSet.union to_recheck_deps to_recheck in
   let files_to_undecl = Naming_provider.ByHash.get_files ctx to_redecl in
   let files_to_recheck = Naming_provider.ByHash.get_files ctx to_recheck_deps in
-  (* we use lazy here to avoid expensive string generation when logging
-       * is not enabled *)
-  Hh_logger.log_lazy ~category:"fanout_information"
-  @@ lazy
-       Hh_json.(
-         json_to_string
-         @@ JSON_Object
-              [
-                ("tag", string_ "saved_state_init_fanout");
-                ( "hashes",
-                  array_
-                    string_
-                    Typing_deps.(
-                      List.map ~f:Dep.to_hex_string
-                      @@ DepSet.elements to_recheck_deps) );
-              ]);
+  log_fanout_information to_recheck_deps files_to_recheck;
 
   (files_to_undecl, files_to_recheck)
 
@@ -690,7 +698,9 @@ let type_check_dirty
           get_files_to_undecl_and_recheck dirty_local_files_changed_hash
         else
           let deps = Typing_deps.add_all_deps env.deps_mode local_deps in
-          (Relative_path.Set.empty, Naming_provider.ByHash.get_files ctx deps)
+          let files = Naming_provider.ByHash.get_files ctx deps in
+          log_fanout_information deps files;
+          (Relative_path.Set.empty, files)
       in
       ( ServerPrecheckedFiles.set
           env
@@ -711,7 +721,9 @@ let type_check_dirty
         else
           let deps = Typing_deps.DepSet.union master_deps local_deps in
           let deps = Typing_deps.add_all_deps env.deps_mode deps in
-          (Relative_path.Set.empty, Naming_provider.ByHash.get_files ctx deps)
+          let files = Naming_provider.ByHash.get_files ctx deps in
+          log_fanout_information deps files;
+          (Relative_path.Set.empty, files)
       in
       (env, to_undecl, to_recheck)
   in

@@ -91,7 +91,6 @@ class GenerateLogicRulesTest(unittest.TestCase):
         hh_codesynthesis.do_reasoning(
             additional_programs=hh_codesynthesis.generate_logic_rules(solving_context),
             generator=hack_codegen,
-            solving_context=solving_context,
         )
         self.assertTrue(hack_codegen.validate())
 
@@ -153,7 +152,6 @@ interface S8 extends S4 {}
                     solving_context
                 ),
                 generator=hack_codegen,
-                solving_context=solving_context,
             )
 
 

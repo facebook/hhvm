@@ -204,11 +204,7 @@ def extract_logic_rules(lines: List[str]) -> List[str]:
 
 
 # Take in a dependency graph and a code generator to emit code.
-def do_reasoning(
-    additional_programs: List[str],
-    generator: CodeGenerator,
-    solving_context: ClingoContext = ClingoContext(),
-) -> None:
+def do_reasoning(additional_programs: List[str], generator: CodeGenerator) -> None:
     # Logic programs for code synthesis.
 
     asp_files = "hphp/hack/src/hh_codesynthesis"
@@ -324,7 +320,7 @@ def main() -> int:
     logging.info("Extracted all rules.")
     logging.info(f"Number of depedency edges extracted: {len(combined_rules)}")
 
-    do_reasoning(combined_rules, generator, solving_context)
+    do_reasoning(combined_rules, generator)
     logging.info("Finished reasoning.")
     return output_to_file_or_stdout(generator=generator, filename=args.output_file)
 

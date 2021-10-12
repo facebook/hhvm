@@ -8,6 +8,7 @@ version = "0.0.0"
 dependencies = [
  "bumpalo",
  "decl_mode_parser",
+ "hh_autoimport_rust",
  "lowerer",
  "mode_parser",
  "namespaces_rust",

@@ -127,14 +127,21 @@ pub fn is_hh_autoimport(s: &str) -> bool {
     TYPES_MAP.contains_key(s)
 }
 
+pub fn is_hh_autoimport_fun(s: &str) -> bool {
+    FUNCS.contains(&s)
+}
+
 #[cfg(test)]
 mod tests {
     use crate::is_hh_autoimport;
+    use crate::is_hh_autoimport_fun;
 
     #[test]
     fn test_is_hh_autoimport() {
         assert_eq!(is_hh_autoimport("vec"), true);
         assert_eq!(is_hh_autoimport("KeyedIterable"), true);
         assert_eq!(is_hh_autoimport("non-exisit"), false);
+        assert_eq!(is_hh_autoimport_fun("keyset"), true);
+        assert_eq!(is_hh_autoimport_fun("KeyedIterable"), false);
     }
 }

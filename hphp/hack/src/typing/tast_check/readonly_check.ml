@@ -200,15 +200,17 @@ let rec is_safe_mut_ty env (seen : SSet.t) ty =
 
 (* Check that function calls which return readonly are wrapped in readonly *)
 let check_readonly_return_call pos caller_ty is_readonly =
-  let open Typing_defs in
-  match get_node caller_ty with
-  | Tfun fty when get_ft_returns_readonly fty ->
-    if not is_readonly then
+  if is_readonly then
+    ()
+  else
+    let open Typing_defs in
+    match get_node caller_ty with
+    | Tfun fty when get_ft_returns_readonly fty ->
       Errors.explicit_readonly_cast
         "function call"
         pos
         (Typing_defs.get_pos caller_ty)
-  | _ -> ()
+    | _ -> ()
 
 let check_readonly_property env obj get obj_ro =
   let open Typing_defs in
@@ -241,6 +243,17 @@ let is_method_caller (caller : Tast.expr) =
   match caller with
   | (_, _, ReadonlyExpr (_, _, Obj_get (_, _, _, (* is_prop_call *) false)))
   | (_, _, Obj_get (_, _, _, (* is_prop_call *) false)) ->
+    true
+  | _ -> false
+
+let is_special_builtin = function
+  (* none of these functions require readonly checks, and can take in readonly values safely *)
+  | "HH\\dict"
+  | "HH\\varray"
+  | "HH\\darray"
+  | "HH\\vec"
+  | "HH\\keyset"
+  | "hphp_array_idx" ->
     true
   | _ -> false
 
@@ -420,6 +433,11 @@ let call
   check_readonly_return_call pos caller_ty is_readonly;
   check_args caller_ty args unpacked_arg
 
+let caller_is_special_builtin caller =
+  match caller with
+  | (_, _, Id (_, name)) when is_special_builtin (Utils.strip_ns name) -> true
+  | _ -> false
+
 let check =
   object (self)
     inherit Tast_visitor.iter as super
@@ -430,30 +448,39 @@ let check =
         assign env lval rval;
         self#on_expr env rval
       | (_, _, ReadonlyExpr (_, _, Call (caller, targs, args, unpacked_arg))) ->
-        call
-          ~is_readonly:true
-          ~method_call:(is_method_caller caller)
-          env
-          (Tast.get_position caller)
-          (Tast.get_type caller)
-          (ty_expr env caller)
-          args
-          unpacked_arg;
+        let default () =
+          (* Skip the recursive step into ReadonlyExpr to avoid erroring *)
+          self#on_Call env caller targs args unpacked_arg
+        in
+        if caller_is_special_builtin caller then
+          default ()
+        else
+          call
+            ~is_readonly:true
+            ~method_call:(is_method_caller caller)
+            env
+            (Tast.get_position caller)
+            (Tast.get_type caller)
+            (ty_expr env caller)
+            args
+            unpacked_arg;
         check_special_function env caller args;
         method_call caller;
-        (* Skip the recursive step into ReadonlyExpr to avoid erroring *)
-        self#on_Call env caller targs args unpacked_arg
+        default ()
       (* Non readonly calls *)
       | (_, _, Call (caller, _, args, unpacked_arg)) ->
-        call
-          env
-          ~is_readonly:false
-          ~method_call:(is_method_caller caller)
-          (Tast.get_position caller)
-          (Tast.get_type caller)
-          (ty_expr env caller)
-          args
-          unpacked_arg;
+        if caller_is_special_builtin caller then
+          super#on_expr env e
+        else
+          call
+            env
+            ~is_readonly:false
+            ~method_call:(is_method_caller caller)
+            (Tast.get_position caller)
+            (Tast.get_type caller)
+            (ty_expr env caller)
+            args
+            unpacked_arg;
         check_special_function env caller args;
         method_call caller;
         super#on_expr env e

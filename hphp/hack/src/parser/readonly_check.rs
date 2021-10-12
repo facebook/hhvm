@@ -5,6 +5,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use aast::Expr_ as E_;
+use hh_autoimport_rust::is_hh_autoimport_fun;
 use naming_special_names_rust::special_idents;
 use oxidized::{
     aast,
@@ -239,16 +240,27 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
         Null | True | False | Omitted => Rty::Mutable,
         Int(_) | Float(_) | String(_) | String2(_) | PrefixedString(_) => Rty::Mutable,
         Id(_) => Rty::Mutable,
-        // TODO: Need to handle dollardollar with pipe expressions correctly
         Dollardollar(lid) => {
             let (id, dollardollar) = &lid.1;
             let var_name = format!("{}{}", dollardollar.clone(), id);
-            println!("{}", var_name);
             context.get_rty(&var_name)
         }
         Clone(_) => Rty::Mutable,
+        Call(c) => {
+            if let (aast::Expr(_, _, Id(i)), _, args, _) = &**c {
+                if is_special_builtin(&i.1) && args.len() >= 1 {
+                    // Take first argument
+                    let (_, expr) = &args[0];
+                    rty_expr(context, &expr)
+                } else {
+                    Rty::Mutable
+                }
+            } else {
+                Rty::Mutable
+            }
+        }
         // Mutable unless wrapped in a readonly expression
-        Call(_) | ClassGet(_) | ClassConst(_) => Rty::Mutable,
+        ClassGet(_) | ClassConst(_) => Rty::Mutable,
         FunctionPointer(_) => Rty::Mutable,
         // This is really just a statement, does not have a value
         Yield(_) => Rty::Mutable,
@@ -267,6 +279,38 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
         Import(_) | Lplaceholder(_) => Rty::Mutable,
         // More function values which are always mutable
         MethodId(_) | MethodCaller(_) | SmethodId(_) | FunId(_) => Rty::Mutable,
+    }
+}
+
+fn strip_ns(name: &str) -> &str {
+    match name.chars().next() {
+        Some('\\') => &name[1..],
+        _ => name,
+    }
+}
+
+// Special builtins that can take readonly values and return the same readonlyness back
+// These are represented as bytecodes, so do not go through regular call enforcement
+fn is_special_builtin(f_name: &str) -> bool {
+    let stripped = strip_ns(f_name);
+    let namespaced_f_name = if is_hh_autoimport_fun(stripped) {
+        format!("HH\\{}", f_name)
+    } else {
+        stripped.to_string()
+    };
+    match &namespaced_f_name[..] {
+        "HH\\dict" | "HH\\varray" | "HH\\darray" | "HH\\vec" | "hphp_array_idx" => true,
+        /* all other special builtins listed in emit_expresion.rs return mutable:
+        specifically, these:
+        "array_key_exists" => Some((2, IMisc(AKExists))),
+        "intval" => Some((1, IOp(CastInt))),
+        "boolval" => Some((1, IOp(CastBool))),
+        "strval" => Some((1, IOp(CastString))),
+        "floatval" | "doubleval" => Some((1, IOp(CastDouble))),
+        "HH\\global_get" => Some((1, IGet(CGetG))),
+        "HH\\global_isset" => Some((1, IIsset(IssetG))),
+        */
+        _ => false,
     }
 }
 

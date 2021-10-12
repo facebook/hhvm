@@ -75,11 +75,10 @@ interface S7  {}
 interface S8 extends S4 {}
 """
 
-        hack_codegen = hackGenerator.HackCodeGenerator()
+        hack_codegen = hackGenerator.HackCodeGenerator(solving_context)
         hh_codesynthesis.do_reasoning(
             additional_programs=hh_codesynthesis.generate_logic_rules(solving_context),
             generator=hack_codegen,
-            solving_context=solving_context,
         )
         self.assertEqual(str(hack_codegen), exp)
 
@@ -119,14 +118,12 @@ interface S7  {}
 interface S8 extends S4 {}
 """
 
-        hack_codegen = hackGenerator.HackCodeGenerator()
+        hack_codegen = hackGenerator.HackCodeGenerator(solving_context)
         combined_rules = hh_codesynthesis.generate_logic_rules(
             solving_context
         ) + hh_codesynthesis.extract_logic_rules(deps.split("\n"))
         hh_codesynthesis.do_reasoning(
-            additional_programs=combined_rules,
-            generator=hack_codegen,
-            solving_context=solving_context,
+            additional_programs=combined_rules, generator=hack_codegen
         )
         self.assertEqual(str(hack_codegen), exp)
 
@@ -135,7 +132,7 @@ interface S8 extends S4 {}
         solving_context = ClingoContext(
             number_of_nodes=5, min_classes=3, min_interfaces=4
         )
-        hack_codegen = hackGenerator.HackCodeGenerator()
+        hack_codegen = hackGenerator.HackCodeGenerator(solving_context)
 
         with self.assertRaises(expected_exception=RuntimeError, msg="Unsatisfiable."):
             hh_codesynthesis.do_reasoning(
@@ -143,7 +140,6 @@ interface S8 extends S4 {}
                     solving_context
                 ),
                 generator=hack_codegen,
-                solving_context=solving_context,
             )
 
 

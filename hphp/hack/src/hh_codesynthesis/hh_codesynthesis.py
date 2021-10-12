@@ -24,8 +24,7 @@ import sys
 from typing import List, Optional, Union
 
 import clingo
-from clingo import Number, Symbol
-from hphp.hack.src.hh_codesynthesis.codeGenerator import CodeGenerator
+from hphp.hack.src.hh_codesynthesis.codeGenerator import CodeGenerator, ClingoContext
 from hphp.hack.src.hh_codesynthesis.hackGenerator import HackCodeGenerator
 
 # If libfb.py library exists, we run in the internal environment.
@@ -36,56 +35,6 @@ try:
     g_internal_run = True
 except ModuleNotFoundError:
     g_internal_run = False
-
-
-class ClingoContext:
-    """Context class interact with Python and Clingo."""
-
-    def __init__(
-        self,
-        number_of_nodes: int = 0,
-        min_depth: int = 1,
-        min_classes: int = 1,
-        min_interfaces: int = 1,
-        lower_bound: int = 1,
-        higher_bound: int = 1,
-        min_stub_classes: int = 0,
-        min_stub_interfaces: int = 0,
-        degree_distribution: List[int] = [],
-    ) -> None:
-        self.number_of_nodes = number_of_nodes
-        self.min_depth = min_depth
-        self.min_classes = min_classes
-        self.min_interfaces = min_interfaces
-        self.lower_bound = lower_bound
-        self.higher_bound = higher_bound
-        self.min_stub_classes = min_stub_classes
-        self.min_stub_interfaces = min_stub_interfaces
-        self.degree_distribution = degree_distribution
-
-    def n(self) -> Symbol:
-        return Number(self.number_of_nodes)
-
-    def d(self) -> Symbol:
-        return Number(self.min_depth)
-
-    def c(self) -> Symbol:
-        return Number(self.min_classes)
-
-    def i(self) -> Symbol:
-        return Number(self.min_interfaces)
-
-    def lb(self) -> Symbol:
-        return Number(self.lower_bound)
-
-    def hb(self) -> Symbol:
-        return Number(self.higher_bound)
-
-    def sc(self) -> Symbol:
-        return Number(self.min_stub_classes)
-
-    def si(self) -> Symbol:
-        return Number(self.min_stub_interfaces)
 
 
 # Helper classes to handle each dependency edge.
@@ -255,11 +204,7 @@ def extract_logic_rules(lines: List[str]) -> List[str]:
 
 
 # Take in a dependency graph and a code generator to emit code.
-def do_reasoning(
-    additional_programs: List[str],
-    generator: CodeGenerator,
-    solving_context: ClingoContext = ClingoContext(),
-) -> None:
+def do_reasoning(additional_programs: List[str], generator: CodeGenerator) -> None:
     # Logic programs for code synthesis.
 
     asp_files = "hphp/hack/src/hh_codesynthesis"
@@ -280,7 +225,7 @@ def do_reasoning(
     # Load extra dependency graph given by the user.
     ctl.add("base", [], "\n".join(additional_programs))
 
-    ctl.ground([("base", [])], context=solving_context)
+    ctl.ground([("base", [])], context=generator.solving_context)
     # ToDo: Hardcode the number of threads for now, change to parameter later.
     ctl.configuration.solve.parallel_mode = 4
     logging.info("Finished grounding.")
@@ -366,14 +311,14 @@ def main() -> int:
     graph = "".join(lines).replace(",\n", ",").split("\n")
 
     # Output target language.
-    generator = generators.get(args.target_lang, CodeGenerator)()
+    generator = generators.get(args.target_lang, CodeGenerator)(solving_context)
 
     combined_rules = generate_logic_rules(solving_context) + extract_logic_rules(graph)
 
     logging.info("Extracted all rules.")
     logging.info(f"Number of depedency edges extracted: {len(combined_rules)}")
 
-    do_reasoning(combined_rules, generator, solving_context)
+    do_reasoning(combined_rules, generator)
     logging.info("Finished reasoning.")
     return output_to_file_or_stdout(generator=generator, filename=args.output_file)
 

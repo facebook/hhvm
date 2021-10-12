@@ -20,7 +20,7 @@
 from typing import Set, Dict, Any, Tuple, List
 
 import clingo
-from hphp.hack.src.hh_codesynthesis.codeGenerator import CodeGenerator
+from hphp.hack.src.hh_codesynthesis.codeGenerator import CodeGenerator, ClingoContext
 
 
 class _HackBaseGenerator(object):
@@ -61,13 +61,19 @@ class _HackBaseGenerator(object):
         # the user. If there is a naming conflict, simply extending it with "_".
         while dummy_name in self.methods:
             dummy_name += "_"
-        return f"\npublic function {dummy_name}({parameter_list}): void{self._print_dummy_method_body()}\n"
+        return (
+            f"\npublic function {dummy_name}({parameter_list}):"
+            f" void{self._print_dummy_method_body()}\n"
+        )
 
     def _print_method_body(self) -> str:
         return ";"
 
     def _print_method(self, method_name: str, static_keyword: str = " ") -> str:
-        return f"\npublic{static_keyword}function {method_name}(): void{self._print_method_body()}\n"
+        return (
+            f"\npublic{static_keyword}function {method_name}():"
+            f" void{self._print_method_body()}\n"
+        )
 
     def _print_methods(self) -> str:
         return "".join(list(map(self._print_method, sorted(self.methods))))
@@ -275,14 +281,17 @@ class _HackFunctionGenerator:
         )
 
     def __str__(self) -> str:
-        return f"function {self.name}({self._print_parameters()}): void {self._print_body()}"
+        return (
+            f"function {self.name}({self._print_parameters()}): void"
+            f" {self._print_body()}"
+        )
 
 
 class HackCodeGenerator(CodeGenerator):
     """A wrapper generator encapsulates each _Hack*Generator to emit Hack Code"""
 
-    def __init__(self) -> None:
-        super(HackCodeGenerator, self).__init__()
+    def __init__(self, solving_context: ClingoContext = ClingoContext()) -> None:
+        super(HackCodeGenerator, self).__init__(solving_context)
         self.class_objs: Dict[str, _HackClassGenerator] = {}
         self.interface_objs: Dict[str, _HackInterfaceGenerator] = {}
         self.function_objs: Dict[str, _HackFunctionGenerator] = {}
@@ -413,8 +422,7 @@ class HackCodeGenerator(CodeGenerator):
         for predicate in predicates:
             if predicate.name in edge_func:
                 edge_func[predicate.name](
-                    predicate.arguments[0].string,
-                    predicate.arguments[1].string,
+                    predicate.arguments[0].string, predicate.arguments[1].string
                 )
         #   Third pass creates relationships between three nodes.
         for predicate in predicates:

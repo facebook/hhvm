@@ -67,7 +67,7 @@ let add_minor_change_fanout
      where adding, removing, or changing the abstract-ness of a member causes
      some subclass which inherits a member of that name from multiple parents
      to resolve the conflict in a different way than it did previously. *)
-  let recheck_descendant_member_dependents acc make_dep =
+  let recheck_descendants_and_their_member_dependents acc make_dep =
     SSet.fold
       (Lazy.force changed_and_descendant_class_names)
       ~init:acc
@@ -89,7 +89,7 @@ let add_minor_change_fanout
         acc
         (make_dep class_name)
     else
-      recheck_descendant_member_dependents acc make_dep
+      recheck_descendants_and_their_member_dependents acc make_dep
   in
   let add_member_fanouts acc changes make_dep =
     SMap.fold changes ~init:acc ~f:(fun member_id change acc ->

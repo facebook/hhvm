@@ -31,66 +31,24 @@ let return_err x = Future.Promise.return (Error x)
 let get_shallow_decls_filename (filename : string) : string =
   filename ^ ".shallow.bin"
 
-let get_folded_decls_filename (filename : string) : string =
-  filename ^ ".folded.bin"
-
 let save_contents (output_filename : string) (contents : 'a) : unit =
   let chan = Stdlib.open_out_bin output_filename in
   Marshal.to_channel chan contents [];
   Stdlib.close_out chan
 
-let get_decls_from_file (file : Relative_path.t) (ctx : Provider_context.t) :
-    (string * Int64.t) list =
-  match
-    Direct_decl_utils.direct_decl_parse_and_cache
-      ~file_decl_hash:true
-      ~symbol_decl_hashes:true
-      ctx
-      file
-  with
-  | None -> []
-  | Some (decls, _, _, decl_hashes) ->
-    List.map
-      ~f:(fun ((name, _decl), decl_hash) -> (name, Option.value_exn decl_hash))
-      (List.zip_exn decls decl_hashes)
-
-let dump_folded_decls
-    (ctx : Provider_context.t) (dir : string) (path : Relative_path.t) : unit =
-  let decls_in_file = get_decls_from_file path ctx in
-  List.iter
-    ~f:(fun (name, decl_hash) ->
-      let folded_decls_in_file =
-        Decl_export.collect_legacy_decls ctx (SSet.singleton name)
-      in
-      let folded_decls_dir = Filename.concat dir "folded_decls" in
-      let file =
-        Filename.concat folded_decls_dir @@ Int64.to_string decl_hash
-      in
-      Sys_utils.mkdir_p (Filename.dirname file);
-      save_contents (get_folded_decls_filename file) folded_decls_in_file)
-    decls_in_file
-
-let dump_shallow_decls
-    (ctx : Provider_context.t)
-    (genv : ServerEnv.genv)
-    (dir : string)
-    (path : Relative_path.t) : unit =
-  let decls_in_file = get_decls_from_file path ctx in
-  List.iter
-    ~f:(fun (name, decl_hash) ->
-      let shallow_decls_in_file =
-        Decl_export.collect_shallow_decls
-          ctx
-          genv.ServerEnv.workers
-          (SSet.singleton name)
-      in
-      let shallow_decls_dir = Filename.concat dir "shallow_decls" in
-      let file =
-        Int64.to_string decl_hash |> Filename.concat shallow_decls_dir
-      in
-      Sys_utils.mkdir_p (Filename.dirname file);
-      save_contents (get_shallow_decls_filename file) shallow_decls_in_file)
-    decls_in_file
+let get_name_and_decl_hashes_from_decls
+    ((decls, _, _, symbol_decl_hashes) :
+      Direct_decl_parser.decls
+      * FileInfo.mode option
+      * Int64.t option
+      * Int64.t option list) : (string * Int64.t) list =
+  let add acc ((name, decl), decl_hash) =
+    match decl with
+    | Shallow_decl_defs.Class _ ->
+      List.rev_append acc [(name, Option.value_exn decl_hash)]
+    | _ -> acc
+  in
+  List.fold ~f:add ~init:[] (List.zip_exn decls symbol_decl_hashes)
 
 let get_project_metadata ~(repo : Path.t) ~ignore_hh_version :
     (string * string, string) result Future.Promise.t =
@@ -171,111 +129,74 @@ let get_project_metadata ~(repo : Path.t) ~ignore_hh_version :
   let project_metadata = Printf.sprintf "%s-%s" hhconfig_hash hh_server_hash in
   return_ok (project_metadata, hh_version)
 
-let get_changed_files_and_hh_version_since_last_saved_state
-    ~(ignore_hh_version : bool) :
-    (Relative_path.t list * string, string) result Future.Promise.t =
-  let saved_state_type =
-    Saved_state_loader.Naming_and_dep_table { is_64bit = true }
-  in
-  let root = Wwwroot.get None in
-  let project_name = Saved_state_loader.get_project_name saved_state_type in
-  get_project_metadata ~repo:root ~ignore_hh_version
-  >>= fun (project_metadata, hh_version) ->
-  let query =
-    Printf.sprintf
-      {|
-      [
-        "query",
-        "%s",
-        {
-          "fields": ["name"],
-          "fail_if_no_saved_state": true,
-          "since": {
-            "scm": {
-              "mergebase-with": "remote/master",
-              "saved-state": {
-                "storage": "manifold",
-                "config": {
-                  "project": "%s",
-                  "project-metadata": "%s"
-                }
-              }
-            }
-          }
-        }
-      ]
-    |}
-      (Path.to_string root)
-      project_name
-      project_metadata
-  in
-  let process_result =
-    let process = Process.exec ~input:query Exec_command.Watchman ["-j"] in
-    let future = FutureProcess.make process (fun str -> str) in
-    Future.continue_and_map_err future (function
-        | Ok stdout -> Ok stdout
-        | Error e -> Error (Future.error_to_string e))
-  in
-  Future.Promise.bind process_result (function
-      | Ok response ->
-        (* The text returned is huge, but let's try json parsing anyway *)
-        return_ok (Hh_json.json_of_string response)
-      | Error process_failure ->
-        let process_failure = String_utils.truncate 2048 process_failure in
-        let error =
-          Printf.sprintf "QUERY:\n%s\n\nOUTPUT:\n%s" query process_failure
-        in
-        return_err error)
-  >>= fun response_json ->
-  let response_parsed =
-    match Hh_json.Access.return response_json with
-    | Ok response -> Hh_json.Access.get_array "files" response
-    | Error _ as e -> e
-  in
-  begin
-    match response_parsed with
-    | Ok (files_json, _keytrace) ->
-      files_json
-      |> List.map ~f:(function
-             | Hh_json.JSON_String s -> Ok s
-             | _ -> Error "Non-string .files element")
-      |> Result.all
-      |> Future.Promise.return
-    | Error access_failure ->
-      "No files: " ^ Hh_json.Access.access_failure_to_string access_failure
-      |> return_err
-  end
-  >>= fun files ->
-  let changed_files =
-    List.map files ~f:(fun suffix -> Relative_path.from_root ~suffix)
-  in
-  return_ok (changed_files, hh_version)
-
-let go (env : ServerEnv.env) (genv : ServerEnv.genv) (dir : string) : unit =
+let go
+    (env : ServerEnv.env)
+    (genv : ServerEnv.genv)
+    (dir : string)
+    (workers : MultiWorker.worker list option) : unit =
   let ctx = Provider_utils.ctx_from_server_env env in
-  let (changed_files, hh_version) =
-    match
-      Future.get
-      @@ get_changed_files_and_hh_version_since_last_saved_state
-           ~ignore_hh_version:
-             (ServerArgs.ignore_hh_version genv.ServerEnv.options)
-    with
+  let repo = Wwwroot.get None in
+  let ignore_hh_version = ServerArgs.ignore_hh_version genv.ServerEnv.options in
+  let (_, hh_version) =
+    match Future.get @@ get_project_metadata ~repo ~ignore_hh_version with
     | Ok (Ok result) -> result
     | Ok (Error e) -> failwith (Printf.sprintf "%s" e)
     | Error e -> failwith (Printf.sprintf "%s" (Future.error_to_string e))
   in
-  let changed_files =
-    List.filter_map
-      ~f:(fun path ->
-        if Filename.check_suffix (Relative_path.suffix path) ".php" then
-          Some path
-        else
-          None)
-      changed_files
-  in
   let dir = Filename.concat dir hh_version in
-  List.iter
-    ~f:(fun path ->
-      dump_shallow_decls ctx genv dir path;
-      dump_folded_decls ctx dir path)
-    changed_files
+
+  let get_next =
+    ServerUtils.make_next
+      ~hhi_filter:(fun _ -> true)
+      ~indexer:(genv.ServerEnv.indexer FindUtils.file_filter)
+      ~extra_roots:(ServerConfig.extra_paths genv.ServerEnv.config)
+  in
+
+  let job (acc : Int64.t list) (fnl : Relative_path.t list) : Int64.t list =
+    List.fold_left
+      ~init:acc
+      ~f:(fun acc fn ->
+        match
+          Direct_decl_utils.direct_decl_parse
+            ~file_decl_hash:true
+            ~symbol_decl_hashes:true
+            ctx
+            fn
+        with
+        | None -> acc
+        | Some ((decls, _, _, _) as decl_and_mode_and_hash) ->
+          Direct_decl_utils.cache_decls ctx decls;
+          let names_and_decl_hashes =
+            get_name_and_decl_hashes_from_decls decl_and_mode_and_hash
+          in
+          List.fold_left
+            ~init:acc
+            ~f:(fun acc (name, decl_hash) ->
+              let shallow_decl_opt = Shallow_classes_provider.get ctx name in
+              if Option.is_some shallow_decl_opt then (
+                let shallow_decls_in_file = Option.value_exn shallow_decl_opt in
+                let shallow_decls_dir = Filename.concat dir "shallow_decls" in
+                let file =
+                  Int64.to_string decl_hash |> Filename.concat shallow_decls_dir
+                in
+                Sys_utils.mkdir_p (Filename.dirname file);
+                save_contents
+                  (get_shallow_decls_filename file)
+                  shallow_decls_in_file;
+                List.rev_append acc [decl_hash]
+              ) else
+                acc)
+            names_and_decl_hashes)
+      fnl
+  in
+
+  let results =
+    MultiWorker.call
+      workers
+      ~job
+      ~neutral:[]
+      ~merge:List.rev_append
+      ~next:get_next
+  in
+  Hh_logger.log "Processed %d decls" (List.length results);
+  ()

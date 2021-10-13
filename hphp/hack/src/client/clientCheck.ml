@@ -804,33 +804,6 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
       let%lwt (results, telemetry) = rpc args @@ Rpc.LINT_ALL code in
       ClientLint.go results args.output_json args.error_format;
       Lwt.return (Exit_status.No_error, telemetry)
-    | MODE_LINT_XCONTROLLER filename ->
-      begin
-        try
-          match Sys_utils.realpath filename with
-          | None ->
-            prerr_endlinef "Could not find file '%s'" filename;
-            raise Exit
-          | Some filename ->
-            let files =
-              Sys_utils.cat_no_fail filename
-              |> Sys_utils.split_lines
-              |> List.filter_map ~f:(fun filename ->
-                     let res = Sys_utils.realpath filename in
-                     if Option.is_none res then (
-                       prerr_endlinef "Could not find file '%s'" filename;
-                       raise Exit
-                     );
-                     res)
-            in
-            let%lwt (results, telemetry) =
-              rpc args @@ Rpc.LINT_XCONTROLLER files
-            in
-            ClientLint.go results args.output_json args.error_format;
-            Lwt.return (Exit_status.No_error, telemetry)
-        with
-        | Exit -> Lwt.return (Exit_status.Input_error, Telemetry.create ())
-      end
     | MODE_CREATE_CHECKPOINT x ->
       let%lwt ((), telemetry) = rpc args @@ Rpc.CREATE_CHECKPOINT x in
       Lwt.return (Exit_status.No_error, telemetry)

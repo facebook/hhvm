@@ -75,7 +75,6 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | LINT _ -> false
   | LINT_STDIN _ -> false
   | LINT_ALL _ -> false
-  | LINT_XCONTROLLER _ -> false
   | FORMAT _ -> false
   | DUMP_FULL_FIDELITY_PARSE _ -> false
   | IDE_AUTOCOMPLETE _ -> false

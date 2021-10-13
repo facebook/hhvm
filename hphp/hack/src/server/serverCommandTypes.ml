@@ -405,7 +405,6 @@ type _ t =
   | LINT : string list -> ServerLintTypes.result t
   | LINT_STDIN : lint_stdin_input -> ServerLintTypes.result t
   | LINT_ALL : int -> ServerLintTypes.result t
-  | LINT_XCONTROLLER : string list -> ServerLintTypes.result t
   | CREATE_CHECKPOINT : string -> unit t
   | RETRIEVE_CHECKPOINT : string -> string list option t
   | DELETE_CHECKPOINT : string -> bool t

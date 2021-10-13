@@ -1432,25 +1432,6 @@ class CommonTests(BarebonesTests):
             stdin="<?hh //strict\n function aaaa(): int { return h(); }",
         )
 
-    def test_lint_xcontroller(self) -> None:
-        self.test_driver.start_hh_server()
-
-        with open(os.path.join(self.test_driver.repo_dir, "in_list.txt"), "w") as f:
-            f.write(os.path.join(self.test_driver.repo_dir, "xcontroller.php"))
-
-        with open(os.path.join(self.test_driver.repo_dir, "xcontroller.php"), "w") as f:
-            f.write(
-                "<?hh\n class MyXController extends XControllerBase { "
-                "public function getPath() { return f(); }  }"
-            )
-
-        self.test_driver.check_cmd(
-            [
-                "No lint errors!",
-            ],
-            options=["--lint-xcontroller", "{root}in_list.txt"],
-        )
-
     def test_incremental_typecheck_same_file(self) -> None:
         self.maxDiff = None
         self.test_driver.start_hh_server()

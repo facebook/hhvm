@@ -37,7 +37,6 @@ let debug_describe_t : type a. a t -> string = function
   | LINT _ -> "LINT"
   | LINT_STDIN _ -> "LINT_STDIN"
   | LINT_ALL _ -> "LINT_ALL"
-  | LINT_XCONTROLLER _ -> "LINT_XCONTROLLER"
   | CREATE_CHECKPOINT _ -> "CREATE_CHECKPOINT"
   | RETRIEVE_CHECKPOINT _ -> "RETRIEVE_CHECKPOINT"
   | DELETE_CHECKPOINT _ -> "DELETE_CHECKPOINT"

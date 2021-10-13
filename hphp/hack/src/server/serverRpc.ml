@@ -387,7 +387,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
   | LINT_ALL code ->
     let ctx = Provider_utils.ctx_from_server_env env in
     (env, ServerLint.lint_all genv ctx code)
-  | LINT_XCONTROLLER fnl -> (env, ServerLint.go_xcontroller genv env fnl)
   | CREATE_CHECKPOINT x -> (env, ServerCheckpoint.create_checkpoint x)
   | RETRIEVE_CHECKPOINT x -> (env, ServerCheckpoint.retrieve_checkpoint x)
   | DELETE_CHECKPOINT x -> (env, ServerCheckpoint.delete_checkpoint x)

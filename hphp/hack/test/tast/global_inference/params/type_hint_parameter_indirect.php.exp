@@ -21,7 +21,7 @@ Errors:
         f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
-          [([4:3-18], (Return (Some ((nothing), [4:10-17], (Obj_get (((nothing), [4:10-12], (Lvar ([4:10-12], $x))), ((nothing), [4:14-17], (Id ([4:14-17], "foo"))), OG_nullthrows, false))))))] };
+          [([4:3-18], (Return (Some ((nothing), [4:10-17], (Obj_get (((nothing), [4:10-12], (Lvar ([4:10-12], $x))), ((nothing), [4:14-17], (Id ([4:14-17], "foo"))), OG_nullthrows, Is_prop))))))] };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       });
@@ -86,7 +86,8 @@ Errors:
                 ((mixed), [12:3-15],
                  (Binop ((Eq None),
                     ((_), [12:3-10],
-                     (Obj_get (((mixed), [12:3-5], (Hole (((mixed), [12:3-5], (Lvar ([12:3-5], $x))), (mixed), (nothing), Typing))), ((_), [12:7-10], (Id ([12:7-10], "foo"))), OG_nullthrows, false))),
+                     (Obj_get (((mixed), [12:3-5], (Hole (((mixed), [12:3-5], (Lvar ([12:3-5], $x))), (mixed), (nothing), Typing))), (
+                        (_), [12:7-10], (Id ([12:7-10], "foo"))), OG_nullthrows, Is_prop))),
                     ((mixed), [12:13-15], (Lvar ([12:13-15], $w))))))))
              ]
            };

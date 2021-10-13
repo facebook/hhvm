@@ -180,7 +180,7 @@ let test_compute_tast_counting () =
     Tast_provider.compute_tast_and_errors_unquarantined ~ctx ~entry
   in
 
-  let expected_decling_count = 50 in
+  let expected_decling_count = 49 in
   Asserter.Int_asserter.assert_equals
     expected_decling_count
     (Telemetry_test_utils.int_exn telemetry "decling.count")

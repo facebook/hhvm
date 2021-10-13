@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<654be04114c2526ac99b3b69f53c9383>>
+// @generated SignedSource<<2cb059be13ad4c51d92150cf7b1f65ce>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1700,6 +1700,25 @@ impl<P: Params> NodeMut<P> for ParamKind {
                 Ok(())
             }
             ParamKind::Pnormal => Ok(()),
+        }
+    }
+}
+impl<P: Params> NodeMut<P> for PropOrMethod {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, P = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_prop_or_method(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, P = P>,
+    ) -> Result<(), P::Error> {
+        match self {
+            PropOrMethod::IsProp => Ok(()),
+            PropOrMethod::IsMethod => Ok(()),
         }
     }
 }

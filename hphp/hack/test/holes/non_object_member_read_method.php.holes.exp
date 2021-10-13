@@ -23,7 +23,7 @@
                ((_), [5:3-11],
                 (Call (
                    ((_), [5:3-9],
-                    (Obj_get (((nonnull), [5:3-6], (Hole (((nonnull), [5:3-6], (Lvar ([5:3-6], $xs))), (nonnull), (nothing), Typing))), ((_), [5:8-9], (Id ([5:8-9], "c"))), OG_nullthrows, false))),
+                    (Obj_get (((nonnull), [5:3-6], (Hole (((nonnull), [5:3-6], (Lvar ([5:3-6], $xs))), (nonnull), (nothing), Typing))), ((_), [5:8-9], (Id ([5:8-9], "c"))), OG_nullthrows, Is_method))),
                    [], [], None)))))
             ]
           };

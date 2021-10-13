@@ -1,13 +1,13 @@
 [(Fun
     { fd_namespace =
-      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
-        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>;
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
       fd_file_attributes = []; fd_mode = Mstrict;
       fd_fun =
-      { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((), (Some ([3:17-21], (Hprim Tvoid)))); 
-        f_name = ([3:10-13], "\\foo"); f_tparams = []; f_where_constraints = []; 
+      { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = ();
+        f_readonly_ret = None; f_ret = ((), (Some ([3:17-21], (Hprim Tvoid))));
+        f_name = ([3:10-13], "\\foo"); f_tparams = []; f_where_constraints = [];
         f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
@@ -17,18 +17,18 @@
                 (Binop ((Eq None), ((), [4:3-5], (Lvar ([4:3-5], $x))),
                    ((), [4:8-53],
                     (ExpressionTree
-                       { et_hint = ([4:8-12], (Happly (([4:8-12], "\\Code"), []))); 
+                       { et_hint = ([4:8-12], (Happly (([4:8-12], "\\Code"), [])));
                          et_splices = []; et_function_pointers = [];
                          et_virtualized_expr =
                          ((), [4:13-52],
                           (Call (
                              ((), [4:13-52],
                               (Efun (
-                                 { f_span = [4:13-52]; f_readonly_this = None; 
-                                   f_annotation = (); f_readonly_ret = None; 
-                                   f_ret = ((), None); f_name = ([4:13-52], ";anonymous"); 
-                                   f_tparams = []; f_where_constraints = []; 
-                                   f_variadic = FVnonVariadic; f_params = []; 
+                                 { f_span = [4:13-52]; f_readonly_this = None;
+                                   f_annotation = (); f_readonly_ret = None;
+                                   f_ret = ((), None); f_name = ([4:13-52], ";anonymous");
+                                   f_tparams = []; f_where_constraints = [];
+                                   f_variadic = FVnonVariadic; f_params = [];
                                    f_ctxs = None; f_unsafe_ctxs = None;
                                    f_body =
                                    { fb_ast =
@@ -37,7 +37,7 @@
                                           (Some ((), [4:13-52],
                                                  (Xml (([4:14-21], "\\:foo:bar"),
                                                     [(Xhp_simple
-                                                        { xs_name = ([4:22-23], "x"); 
+                                                        { xs_name = ([4:22-23], "x");
                                                           xs_type = ();
                                                           xs_expr =
                                                           ((), [4:24-27],
@@ -49,13 +49,13 @@
                                                     ))))))
                                        ]
                                      };
-                                   f_fun_kind = FSync; f_user_attributes = []; 
+                                   f_fun_kind = FSync; f_user_attributes = [];
                                    f_external = false; f_doc_comment = None },
                                  []))),
                              [], [], None)));
                          et_runtime_expr =
                          ((), [4:13-52],
-                          (Call (((), [4:13-52], (Class_const (((), [4:13-52], (CI ([4:13-52], "\\Code"))), ([4:13-52], "makeTree")))), 
+                          (Call (((), [4:13-52], (Class_const (((), [4:13-52], (CI ([4:13-52], "\\Code"))), ([4:13-52], "makeTree")))),
                              [],
                              [(Pnormal,
                                ((), [4:13-52],
@@ -74,17 +74,17 @@
                                (Pnormal,
                                 ((), [4:13-52],
                                  (Lfun (
-                                    { f_span = [4:13-52]; f_readonly_this = None; 
-                                      f_annotation = (); f_readonly_ret = None; 
-                                      f_ret = ((), None); f_name = ([4:13-52], ";anonymous"); 
-                                      f_tparams = []; f_where_constraints = []; 
+                                    { f_span = [4:13-52]; f_readonly_this = None;
+                                      f_annotation = (); f_readonly_ret = None;
+                                      f_ret = ((), None); f_name = ([4:13-52], ";anonymous");
+                                      f_tparams = []; f_where_constraints = [];
                                       f_variadic = FVnonVariadic;
                                       f_params =
-                                      [{ param_annotation = (); param_type_hint = ((), (Some ([4:8-12], (Happly (([4:8-12], "\\Code"), []))))); 
-                                         param_is_variadic = false; param_pos = [4:8-12]; 
-                                         param_name = "$0v"; param_expr = None; 
-                                         param_readonly = None; param_callconv = Pnormal; 
-                                         param_user_attributes = []; 
+                                      [{ param_annotation = (); param_type_hint = ((), (Some ([4:8-12], (Happly (([4:8-12], "\\Code"), [])))));
+                                         param_is_variadic = false; param_pos = [4:8-12];
+                                         param_name = "$0v"; param_expr = None;
+                                         param_readonly = None; param_callconv = Pnormal;
+                                         param_user_attributes = [];
                                          param_visibility = None }
                                         ];
                                       f_ctxs = None; f_unsafe_ctxs = None;
@@ -93,7 +93,8 @@
                                         [([4:13-52],
                                           (Return
                                              (Some ((), [4:13-52],
-                                                    (Call (((), [4:13-52], (Obj_get (((), [4:13-52], (Lvar ([4:13-52], $0v))), ((), [4:13-52], (Id ([4:13-52], "visitXhp"))), OG_nullthrows, false))),
+                                                    (Call (
+                                                       ((), [4:13-52], (Obj_get (((), [4:13-52], (Lvar ([4:13-52], $0v))), ((), [4:13-52], (Id ([4:13-52], "visitXhp"))), OG_nullthrows, Is_method))),
                                                        [],
                                                        [(Pnormal,
                                                          ((), [4:13-52],
@@ -113,7 +114,7 @@
                                                                     (
                                                                     (), [4:24-27],
                                                                     (
-                                                                    Obj_get (((), [4:24-27], (Lvar ([4:24-27], $0v))), ((), [4:24-27], (Id ([4:24-27], "visitString"))), OG_nullthrows, false))), 
+                                                                    Obj_get (((), [4:24-27], (Lvar ([4:24-27], $0v))), ((), [4:24-27], (Id ([4:24-27], "visitString"))), OG_nullthrows, Is_method))),
                                                                     [],
                                                                     [(Pnormal,
                                                                     ((), [4:24-27],
@@ -133,7 +134,7 @@
                                                                 (Call (
                                                                    ((), [4:28-35],
                                                                     (
-                                                                    Obj_get (((), [4:28-35], (Lvar ([4:28-35], $0v))), ((), [4:28-35], (Id ([4:28-35], "visitXhp"))), OG_nullthrows, false))),
+                                                                    Obj_get (((), [4:28-35], (Lvar ([4:28-35], $0v))), ((), [4:28-35], (Id ([4:28-35], "visitXhp"))), OG_nullthrows, Is_method))),
                                                                    [],
                                                                    [(Pnormal,
                                                                     ((), [4:28-35],
@@ -152,7 +153,7 @@
                                                                     (
                                                                     (), [4:36-41],
                                                                     (
-                                                                    Obj_get (((), [4:36-41], (Lvar ([4:36-41], $0v))), ((), [4:36-41], (Id ([4:36-41], "visitString"))), OG_nullthrows, false))), 
+                                                                    Obj_get (((), [4:36-41], (Lvar ([4:36-41], $0v))), ((), [4:36-41], (Id ([4:36-41], "visitString"))), OG_nullthrows, Is_method))),
                                                                     [],
                                                                     [(Pnormal,
                                                                     ((), [4:36-41],
@@ -169,7 +170,7 @@
                                                        None))))))
                                           ]
                                         };
-                                      f_fun_kind = FSync; f_user_attributes = []; 
+                                      f_fun_kind = FSync; f_user_attributes = [];
                                       f_external = false; f_doc_comment = None },
                                     []))))
                                ],
@@ -178,7 +179,7 @@
                    )))))
             ]
           };
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false;
         f_doc_comment = None }
       })
   ]

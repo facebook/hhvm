@@ -1,22 +1,22 @@
 [(Fun
     { fd_namespace =
-      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
-        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>;
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
       fd_file_attributes =
       [{ fa_user_attributes = [{ ua_name = ([3:8-32], "__EnableUnstableFeatures"); ua_params = [((), [3:33-51], (String "expression_trees"))] }];
          fa_namespace =
-         { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
-           ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
-           ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+         { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+           ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>;
+           ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false;
            ns_disable_xhp_element_mangling = false }
          }
         ];
       fd_mode = Mstrict;
       fd_fun =
-      { f_span = [5:1-10:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((), (Some ([5:18-22], (Hprim Tvoid)))); 
-        f_name = ([5:10-14], "\\test"); f_tparams = []; f_where_constraints = []; 
+      { f_span = [5:1-10:2]; f_readonly_this = None; f_annotation = ();
+        f_readonly_ret = None; f_ret = ((), (Some ([5:18-22], (Hprim Tvoid))));
+        f_name = ([5:10-14], "\\test"); f_tparams = []; f_where_constraints = [];
         f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
@@ -24,18 +24,18 @@
             (Expr
                ((), [6:3-9:5],
                 (ExpressionTree
-                   { et_hint = ([6:3-7], (Happly (([6:3-7], "\\Code"), []))); 
+                   { et_hint = ([6:3-7], (Happly (([6:3-7], "\\Code"), [])));
                      et_splices = []; et_function_pointers = [];
                      et_virtualized_expr =
                      ((), [6:8-9:4],
                       (Call (
                          ((), [6:8-9:4],
                           (Efun (
-                             { f_span = [6:8-9:4]; f_readonly_this = None; 
-                               f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((), None); f_name = ([6:8-9:4], ";anonymous"); 
-                               f_tparams = []; f_where_constraints = []; 
-                               f_variadic = FVnonVariadic; f_params = []; 
+                             { f_span = [6:8-9:4]; f_readonly_this = None;
+                               f_annotation = (); f_readonly_ret = None;
+                               f_ret = ((), None); f_name = ([6:8-9:4], ";anonymous");
+                               f_tparams = []; f_where_constraints = [];
+                               f_variadic = FVnonVariadic; f_params = [];
                                f_ctxs = None; f_unsafe_ctxs = None;
                                f_body =
                                { fb_ast =
@@ -43,15 +43,15 @@
                                    (Return
                                       (Some ((), [6:8-9:4],
                                              (Lfun (
-                                                { f_span = [6:8-9:4]; 
-                                                  f_readonly_this = None; 
-                                                  f_annotation = (); 
-                                                  f_readonly_ret = None; 
-                                                  f_ret = ((), None); 
-                                                  f_name = ([6:8-9:4], ";anonymous"); 
-                                                  f_tparams = []; f_where_constraints = []; 
-                                                  f_variadic = FVnonVariadic; 
-                                                  f_params = []; f_ctxs = None; 
+                                                { f_span = [6:8-9:4];
+                                                  f_readonly_this = None;
+                                                  f_annotation = ();
+                                                  f_readonly_ret = None;
+                                                  f_ret = ((), None);
+                                                  f_name = ([6:8-9:4], ";anonymous");
+                                                  f_tparams = []; f_where_constraints = [];
+                                                  f_variadic = FVnonVariadic;
+                                                  f_params = []; f_ctxs = None;
                                                   f_unsafe_ctxs = None;
                                                   f_body =
                                                   { fb_ast =
@@ -71,20 +71,20 @@
                                                                  (Call (((), [6:8-9:4], (Class_const (((), [6:8-9:4], (CI ([6:8-9:4], "\\Code"))), ([6:8-9:4], "voidType")))), [], [], None))))))
                                                       ]
                                                     };
-                                                  f_fun_kind = FSync; 
-                                                  f_user_attributes = []; 
-                                                  f_external = false; 
+                                                  f_fun_kind = FSync;
+                                                  f_user_attributes = [];
+                                                  f_external = false;
                                                   f_doc_comment = None },
                                                 []))))))
                                    ]
                                  };
-                               f_fun_kind = FSync; f_user_attributes = []; 
+                               f_fun_kind = FSync; f_user_attributes = [];
                                f_external = false; f_doc_comment = None },
                              []))),
                          [], [], None)));
                      et_runtime_expr =
                      ((), [6:8-9:4],
-                      (Call (((), [6:8-9:4], (Class_const (((), [6:8-9:4], (CI ([6:8-9:4], "\\Code"))), ([6:8-9:4], "makeTree")))), 
+                      (Call (((), [6:8-9:4], (Class_const (((), [6:8-9:4], (CI ([6:8-9:4], "\\Code"))), ([6:8-9:4], "makeTree")))),
                          [],
                          [(Pnormal,
                            ((), [6:8-9:4],
@@ -103,16 +103,16 @@
                            (Pnormal,
                             ((), [6:8-9:4],
                              (Lfun (
-                                { f_span = [6:8-9:4]; f_readonly_this = None; 
-                                  f_annotation = (); f_readonly_ret = None; 
-                                  f_ret = ((), None); f_name = ([6:8-9:4], ";anonymous"); 
-                                  f_tparams = []; f_where_constraints = []; 
+                                { f_span = [6:8-9:4]; f_readonly_this = None;
+                                  f_annotation = (); f_readonly_ret = None;
+                                  f_ret = ((), None); f_name = ([6:8-9:4], ";anonymous");
+                                  f_tparams = []; f_where_constraints = [];
                                   f_variadic = FVnonVariadic;
                                   f_params =
-                                  [{ param_annotation = (); param_type_hint = ((), (Some ([6:3-7], (Happly (([6:3-7], "\\Code"), []))))); 
-                                     param_is_variadic = false; param_pos = [6:3-7]; 
-                                     param_name = "$0v"; param_expr = None; 
-                                     param_readonly = None; param_callconv = Pnormal; 
+                                  [{ param_annotation = (); param_type_hint = ((), (Some ([6:3-7], (Happly (([6:3-7], "\\Code"), [])))));
+                                     param_is_variadic = false; param_pos = [6:3-7];
+                                     param_name = "$0v"; param_expr = None;
+                                     param_readonly = None; param_callconv = Pnormal;
                                      param_user_attributes = []; param_visibility = None }
                                     ];
                                   f_ctxs = None; f_unsafe_ctxs = None;
@@ -121,7 +121,8 @@
                                     [([6:8-9:4],
                                       (Return
                                          (Some ((), [6:8-9:4],
-                                                (Call (((), [6:8-9:4], (Obj_get (((), [6:8-9:4], (Lvar ([6:8-9:4], $0v))), ((), [6:8-9:4], (Id ([6:8-9:4], "visitLambda"))), OG_nullthrows, false))),
+                                                (Call (
+                                                   ((), [6:8-9:4], (Obj_get (((), [6:8-9:4], (Lvar ([6:8-9:4], $0v))), ((), [6:8-9:4], (Id ([6:8-9:4], "visitLambda"))), OG_nullthrows, Is_method))),
                                                    [],
                                                    [(Pnormal,
                                                      ((), [6:8-9:4],
@@ -137,7 +138,8 @@
                                                        (ValCollection (Vec, None,
                                                           [((), [7:5-11],
                                                             (Call (
-                                                               ((), [7:5-11], (Obj_get (((), [7:5-11], (Lvar ([7:5-11], $0v))), ((), [7:5-11], (Id ([7:5-11], "visitAssign"))), OG_nullthrows, false))),
+                                                               ((), [7:5-11],
+                                                                (Obj_get (((), [7:5-11], (Lvar ([7:5-11], $0v))), ((), [7:5-11], (Id ([7:5-11], "visitAssign"))), OG_nullthrows, Is_method))),
                                                                [],
                                                                [(Pnormal,
                                                                  ((), [7:5-11],
@@ -150,7 +152,8 @@
                                                                  (Pnormal,
                                                                   ((), [7:5-7],
                                                                    (Call (
-                                                                    ((), [7:5-7], (Obj_get (((), [7:5-7], (Lvar ([7:5-7], $0v))), ((), [7:5-7], (Id ([7:5-7], "visitLocal"))), OG_nullthrows, false))),
+                                                                    ((), [7:5-7],
+                                                                    (Obj_get (((), [7:5-7], (Lvar ([7:5-7], $0v))), ((), [7:5-7], (Id ([7:5-7], "visitLocal"))), OG_nullthrows, Is_method))),
                                                                     [],
                                                                     [(Pnormal,
                                                                     ((), [7:5-7],
@@ -165,7 +168,7 @@
                                                                   ((), [7:10-11],
                                                                    (Call (
                                                                     ((), [7:10-11],
-                                                                    (Obj_get (((), [7:10-11], (Lvar ([7:10-11], $0v))), ((), [7:10-11], (Id ([7:10-11], "visitInt"))), OG_nullthrows, false))), 
+                                                                    (Obj_get (((), [7:10-11], (Lvar ([7:10-11], $0v))), ((), [7:10-11], (Id ([7:10-11], "visitInt"))), OG_nullthrows, Is_method))),
                                                                     [],
                                                                     [(Pnormal,
                                                                     ((), [7:10-11],
@@ -184,7 +187,7 @@
                                                    None))))))
                                       ]
                                     };
-                                  f_fun_kind = FSync; f_user_attributes = []; 
+                                  f_fun_kind = FSync; f_user_attributes = [];
                                   f_external = false; f_doc_comment = None },
                                 [([8:13-15], $x)]))))
                            ],
@@ -192,7 +195,7 @@
                      }))))
             ]
           };
-        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false;
         f_doc_comment = None }
       })
   ]

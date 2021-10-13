@@ -1586,7 +1586,7 @@ end = struct
       Fmt.(pair ~sep:nop pp_expr @@ brackets @@ option pp_expr)
         ppf
         (arr_expr, idx_expr_opt)
-    | Aast.(Obj_get (obj_expr, get_expr, OG_nullsafe, false)) ->
+    | Aast.(Obj_get (obj_expr, get_expr, OG_nullsafe, Is_method)) ->
       Fmt.(pair ~sep:arrow (suffix (const string "?") pp_expr) pp_expr)
         ppf
         (obj_expr, get_expr)
@@ -1595,11 +1595,11 @@ end = struct
         parens @@ pair ~sep:arrow (suffix (const string "?") pp_expr) pp_expr)
         ppf
         (obj_expr, get_expr)
-    | Aast.(Obj_get (obj_expr, get_expr, _, false)) ->
+    | Aast.(Obj_get (obj_expr, get_expr, _, Is_method)) ->
       Fmt.(pair ~sep:arrow pp_expr pp_expr) ppf (obj_expr, get_expr)
     | Aast.(Obj_get (obj_expr, get_expr, _, _)) ->
       Fmt.(parens @@ pair ~sep:arrow pp_expr pp_expr) ppf (obj_expr, get_expr)
-    | Aast.Class_get (class_id, class_get_expr, false) ->
+    | Aast.(Class_get (class_id, class_get_expr, Is_method)) ->
       Fmt.(pair ~sep:dbl_colon pp_class_id pp_class_get_expr)
         ppf
         (class_id, class_get_expr)

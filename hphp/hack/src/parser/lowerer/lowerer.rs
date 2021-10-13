@@ -87,6 +87,7 @@ pub enum ExprLocation {
     RightOfAssignmentInUsingStatement,
     RightOfReturn,
     UsingStatement,
+    CallReceiver,
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
@@ -1372,6 +1373,19 @@ where
         env: &mut Env<'a, TF>,
         parent_pos: Option<Pos>,
     ) -> Result<ast::Expr, Error> {
+        // We use location=CallReceiver to set PropOrMethod::IsMethod on ObjGet
+        // But only if it is the immediate node.
+        let location = match (location, &node.children) {
+            (
+                ExprLocation::CallReceiver,
+                MemberSelectionExpression(_)
+                | SafeMemberSelectionExpression(_)
+                | EmbeddedMemberSelectionExpression(_)
+                | ScopeResolutionExpression(_),
+            ) => location,
+            (ExprLocation::CallReceiver, _) => ExprLocation::TopLevel,
+            (_, _) => location,
+        };
         match &node.children {
             BracedExpression(c) => {
                 // Either a dynamic method lookup on a dynamic value:
@@ -1579,30 +1593,8 @@ where
             args: S<'a, T, V>,
             e: &mut Env<'a, TF>,
         | -> Result<ast::Expr_, Error> {
-            let pos_if_has_parens = match &recv.children {
-                ParenthesizedExpression(_) => Some(Self::p_pos(recv, e)),
-                _ => None,
-            };
-            let recv = Self::p_expr(recv, e)?;
-            let recv = match (&recv.2, pos_if_has_parens) {
-                (E_::ObjGet(t), Some(ref _p)) => {
-                    let (a, b, c, _false) = &**t;
-                    E::new(
-                        (),
-                        recv.1.clone(),
-                        E_::mk_obj_get(a.clone(), b.clone(), c.clone(), true),
-                    )
-                }
-                (E_::ClassGet(c), Some(ref _p)) => {
-                    let (a, b, _false) = &**c;
-                    E::new(
-                        (),
-                        recv.1.clone(),
-                        E_::mk_class_get(a.clone(), b.clone(), true),
-                    )
-                }
-                _ => recv,
-            };
+            // Mark expression as CallReceiver so that we can correctly set PropOrMethod field in ObjGet and ClassGet
+            let recv = Self::p_expr_with_loc(ExprLocation::CallReceiver, recv, e)?;
             let (args, varargs) = Self::split_args_vararg(args, e)?;
             Ok(E_::mk_call(recv, vec![], args, varargs))
         };
@@ -1618,7 +1610,15 @@ where
             let recv = Self::p_expr(recv, e)?;
             let name = Self::p_expr_with_loc(ExprLocation::MemberSelect, name, e)?;
             let op = Self::p_null_flavor(op, e)?;
-            Ok(E_::mk_obj_get(recv, name, op, false))
+            Ok(E_::mk_obj_get(
+                recv,
+                name,
+                op,
+                match location {
+                    ExprLocation::CallReceiver => ast::PropOrMethod::IsMethod,
+                    _ => ast::PropOrMethod::IsProp,
+                },
+            ))
         };
         let pos = match parent_pos {
             None => Self::p_pos(node, env),
@@ -1817,59 +1817,8 @@ where
                             _ => vec![],
                         };
 
-                        /* preserve parens on receiver of call expression
-                        to allow distinguishing between
-                        ($a->b)() // invoke on callable property
-                        $a->b()   // method call */
-                        let pos_if_has_parens = match &recv.children {
-                            ParenthesizedExpression(_) => Some(Self::p_pos(recv, env)),
-                            _ => None,
-                        };
-
-                        let recv = Self::p_expr(recv, env)?;
-                        let recv = match (&recv.2, pos_if_has_parens) {
-                            (E_::ReadonlyExpr(r), Some(ref _p)) => {
-                                let ast::Expr(_, _, inner_exp) = &**r;
-                                match inner_exp {
-                                    E_::ObjGet(t) => {
-                                        let (a, b, c, _false) = &**t;
-                                        let new_inner = E::new(
-                                            (),
-                                            r.1.clone(),
-                                            E_::mk_obj_get(a.clone(), b.clone(), c.clone(), true),
-                                        );
-                                        E::new((), recv.1.clone(), E_::mk_readonly_expr(new_inner))
-                                    }
-                                    E_::ClassGet(c) => {
-                                        let (a, b, _false) = &**c;
-                                        let new_inner = E::new(
-                                            (),
-                                            r.1.clone(),
-                                            E_::mk_class_get(a.clone(), b.clone(), true),
-                                        );
-                                        E::new((), recv.1.clone(), E_::mk_readonly_expr(new_inner))
-                                    }
-                                    _ => recv,
-                                }
-                            }
-                            (E_::ObjGet(t), Some(ref _p)) => {
-                                let (a, b, c, _false) = &**t;
-                                E::new(
-                                    (),
-                                    recv.1.clone(),
-                                    E_::mk_obj_get(a.clone(), b.clone(), c.clone(), true),
-                                )
-                            }
-                            (E_::ClassGet(c), Some(ref _p)) => {
-                                let (a, b, _false) = &**c;
-                                E::new(
-                                    (),
-                                    recv.1.clone(),
-                                    E_::mk_class_get(a.clone(), b.clone(), true),
-                                )
-                            }
-                            _ => recv,
-                        };
+                        // Mark expression as CallReceiver so that we can correctly set PropOrMethod field in ObjGet and ClassGet
+                        let recv = Self::p_expr_with_loc(ExprLocation::CallReceiver, recv, env)?;
                         let (mut args, varargs) = Self::split_args_vararg(args, env)?;
 
                         // If the function has an enum class label expression, that's
@@ -2065,7 +2014,8 @@ where
                     | (UsingStatement, _)
                     | (RightOfAssignment, _)
                     | (RightOfAssignmentInUsingStatement, _)
-                    | (RightOfReturn, _) => Ok(E_::mk_id(Self::pos_name(node, env)?)),
+                    | (RightOfReturn, _)
+                    | (CallReceiver, _) => Ok(E_::mk_id(Self::pos_name(node, env)?)),
                 }
             }
             YieldExpression(c) => {
@@ -2098,7 +2048,10 @@ where
                         Ok(E_::mk_class_get(
                             ast::ClassId((), pos, ast::ClassId_::CIexpr(qual)),
                             ast::ClassGetExpr::CGstring((p, name)),
-                            false,
+                            match location {
+                                ExprLocation::CallReceiver => ast::PropOrMethod::IsMethod,
+                                _ => ast::PropOrMethod::IsProp,
+                            },
                         ))
                     }
                     _ => {
@@ -2124,13 +2077,19 @@ where
                                 Ok(E_::mk_class_get(
                                     ast::ClassId((), pos, ast::ClassId_::CIexpr(qual)),
                                     ast::ClassGetExpr::CGstring((p, n)),
-                                    false,
+                                    match location {
+                                        ExprLocation::CallReceiver => ast::PropOrMethod::IsMethod,
+                                        _ => ast::PropOrMethod::IsProp,
+                                    },
                                 ))
                             }
                             _ => Ok(E_::mk_class_get(
                                 ast::ClassId((), pos, ast::ClassId_::CIexpr(qual)),
                                 ast::ClassGetExpr::CGexpr(E((), p, expr_)),
-                                false,
+                                match location {
+                                    ExprLocation::CallReceiver => ast::PropOrMethod::IsMethod,
+                                    _ => ast::PropOrMethod::IsProp,
+                                },
                             )),
                         }
                     }
@@ -2380,8 +2339,9 @@ where
                     let name = Self::pos_name(&c.qualifier, env)?;
                     Ok(E_::mk_enum_class_label(Some(name), label_name))
                 } else {
-                    /* This can happen during parsing in auto-complete mode */
-                    let recv = Self::p_expr(&c.qualifier, env);
+                    // This can happen during parsing in auto-complete mode
+                    // We want to treat this as a method call even though we haven't yet seen the arguments
+                    let recv = Self::p_expr_with_loc(ExprLocation::CallReceiver, &c.qualifier, env);
                     match recv {
                         Ok(recv) => {
                             let enum_class_label = E_::mk_enum_class_label(None, label_name);
@@ -2406,7 +2366,7 @@ where
         let mut raise = |s| Self::raise_parsing_error_pos(p, env, s);
         match expr_ {
             ObjGet(og) => {
-                if og.as_ref().3 {
+                if og.as_ref().3 == ast::PropOrMethod::IsMethod {
                     raise("Invalid lvalue")
                 } else {
                     match og.as_ref() {
@@ -4630,7 +4590,7 @@ where
                                     e(E_::mk_lvar(lid(special_idents::THIS))),
                                     e(E_::mk_id(ast::Id(p.clone(), cvname.to_string()))),
                                     ast::OgNullFlavor::OGNullthrows,
-                                    false,
+                                    ast::PropOrMethod::IsProp,
                                 )),
                                 e(E_::mk_lvar(lid(&param.name))),
                             ))),

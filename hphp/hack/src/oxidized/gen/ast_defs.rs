@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6ace2760d98df8ce470934958baa4045>>
+// @generated SignedSource<<aeeeaf89363dce5534775d1fbaeedf04>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -254,6 +254,31 @@ pub enum OgNullFlavor {
 }
 impl TrivialDrop for OgNullFlavor {}
 arena_deserializer::impl_deserialize_in_arena!(OgNullFlavor);
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[repr(C)]
+pub enum PropOrMethod {
+    IsProp,
+    IsMethod,
+}
+impl TrivialDrop for PropOrMethod {}
+arena_deserializer::impl_deserialize_in_arena!(PropOrMethod);
 
 #[derive(
     Clone,

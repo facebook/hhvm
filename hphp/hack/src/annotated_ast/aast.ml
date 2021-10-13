@@ -358,24 +358,32 @@ and ('ex, 'en) expr_ =
           $foo[]
           $foo[$bar] *)
   | Obj_get of
-      ('ex, 'en) expr
-      * ('ex, 'en) expr
-      * og_null_flavor
-      * (* is_prop_call *) bool
-      (** Instance property or method access.  is_prop_call is always
-          false, except when inside a call is accessing a property.
-
-          $foo->bar // (Obj_get false) property access
-          $foo->bar() // (Call (Obj_get false)) method call
-          ($foo->bar)() // (Call (Obj_get true)) call lambda stored in property
-          $foo?->bar // nullsafe access *)
+      ('ex, 'en) expr * ('ex, 'en) expr * og_null_flavor * prop_or_method
+      (** Instance property or method access.
+        * prop_or_method is
+        *   Is_prop for property access
+        *   Is_method for method call, only possible when the node is
+        *   the receiver in a Call node.
+        *
+        *   $foo->bar      // OG_nullthrows, Is_prop: access named property
+        *   $foo->bar()    // OG_nullthrows, Is_method: call named method
+        *   ($foo->bar)()  // OG_nullthrows, Is_prop: call lambda stored in named property
+        *   $foo?->bar     // OG_nullsafe,   Is_prop
+        *   $foo?->bar()   // OG_nullsafe,   Is_method
+        *   ($foo?->bar)() // OG_nullsafe,   Is_prop
+        *)
   | Class_get of
-      ('ex, 'en) class_id * ('ex, 'en) class_get_expr * (* is_prop_call *) bool
-      (** Static property access.
+      ('ex, 'en) class_id * ('ex, 'en) class_get_expr * prop_or_method
+      (** Static property or method access.
 
-          Foo::$bar
-          $some_classname::$bar
-          Foo::${$bar} // only in partial mode *)
+          Foo::$bar               // Is_prop
+          $some_classname::$bar   // Is_prop
+          Foo::${$bar}            // Is_prop, only in partial mode
+
+          Foo::bar();             // Is_method
+          Foo::$bar();            // Is_method, name stored in local $bar
+          (Foo::$bar)();          // Is_prop: call lambda stored in property Foo::$bar
+      *)
   | Class_const of ('ex, 'en) class_id * pstring
       (** Class constant or static method call. As a standalone expression,
           this is a class constant. Inside a Call node, this is a static

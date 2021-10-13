@@ -75,13 +75,34 @@ set(
   re2
 )
 add_dependencies(bundled_squangle ${SQUANGLE_DEPS})
-add_library(squangle INTERFACE)
-add_dependencies(squangle bundled_squangle)
-target_include_directories(squangle INTERFACE "${INSTALL_DIR}/include")
-target_link_libraries(
-  squangle
-  INTERFACE
-  ${SQUANGLE_DEPS} ${OPENSSL_LIBRARIES}
+
+# This is a bit messy because we need to support old cmake.
+# - if we directly declare the library as INTERFACE, the dependencies are not resolved
+#   in-order
+# - if we make `squangle` the imported target, the dependency on `bundled_squangle` is ignored
+# - so, we need 3 targets:
+#   - bundled_squangle: actually build the thing
+#   - imported_squangle: specify how to link the thing
+#   - squangle: specifies that we want to use imported_squangle, but we need to build
+#     bundled_squangle first
+#
+# This can go back to the normal squangle INTERFACE -> bundled_squangle pattern once we're
+# universally using CMake 3.11 or above.
+
+add_library(imported_squangle STATIC IMPORTED)
+add_dependencies(imported_squangle bundled_squangle)
+set_target_properties(
+  imported_squangle
+  PROPERTIES
+  IMPORTED_LOCATION
   "${INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}squangle${CMAKE_STATIC_LIBRARY_SUFFIX}"
+  INTERFACE_INCLUDE_DIRECTORIES
+  "${INSTALL_DIR}/include"
+  INTERFACE_LINK_LIBRARIES
+  "${SQUANGLE_DEPS};${OPENSSL_LIBRARIES}"
 )
 set(SQUANGLE_INSTALL_DIR "${INSTALL_DIR}" PARENT_SCOPE)
+
+add_library(squangle INTERFACE)
+add_dependencies(squangle bundled_squangle)
+target_link_libraries(squangle INTERFACE imported_squangle)

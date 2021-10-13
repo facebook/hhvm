@@ -4419,7 +4419,7 @@ where
                         default: type__,
                     })
                 } else if let Some(type_) = type__ {
-                    if as_constraint.is_some() {
+                    if env.is_typechecker() && as_constraint.is_some() {
                         Self::raise_hh_error(
                             env,
                             NastCheck::partially_abstract_typeconst_definition(name.0.clone()),

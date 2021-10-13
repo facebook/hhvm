@@ -309,13 +309,6 @@ if (APPLE)
   endif()
 endif()
 
-#find_package(BISON REQUIRED)
-#find_package(FLEX REQUIRED)
-
-#if (${FLEX_VERSION} VERSION_LESS 2.5.33)
-#  message(FATAL_ERROR "Flex is too old, found ${FLEX_VERSION} and we need 2.5.33")
-#endif()
-
 include_directories(${HPHP_HOME}/hphp)
 
 macro(hphp_link target)

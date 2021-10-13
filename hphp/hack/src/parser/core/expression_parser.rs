@@ -3092,7 +3092,7 @@ where
 
     fn parse_enum_class_label(&mut self, qualifier: S::R) -> S::R {
         let hash = self.assert_token(TokenKind::Hash);
-        let label_name = self.require_name();
+        let label_name = self.require_name_allow_all_keywords();
         S!(
             make_enum_class_label_expression,
             self,

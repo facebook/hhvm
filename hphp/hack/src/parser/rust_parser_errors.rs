@@ -3804,6 +3804,13 @@ where
                     errors::enum_class_constant_missing_initializer,
                 ))
             }
+            // prevent constants to be named `class`
+            if self.text(&e.name).eq_ignore_ascii_case("class") {
+                self.errors.push(Self::make_error_from_node(
+                    node,
+                    errors::enum_class_elem_name_is_class,
+                ))
+            }
         }
     }
 

@@ -577,6 +577,8 @@ pub fn not_allowed_in_write(what: &str) -> Error {
 }
 pub const reassign_this: Error = Cow::Borrowed("Cannot re-assign `$this`");
 pub const enum_elem_name_is_class: Error = Cow::Borrowed("Enum element cannot be named `class`");
+pub const enum_class_elem_name_is_class: Error =
+    Cow::Borrowed("Enum class members cannot be named `class`");
 pub const property_requires_visibility: Error = Cow::Borrowed(concat!(
     "Property declarations require a visibility modifier ",
     "such as `public`, `private` or `protected`.",

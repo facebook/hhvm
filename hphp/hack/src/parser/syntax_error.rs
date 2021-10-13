@@ -1093,6 +1093,3 @@ pub const throw_readonly_exception: Error = Cow::Borrowed(
 );
 pub const direct_coeffects_reference: Error =
     Cow::Borrowed("Direct references to coeffects namespaces are not allowed");
-
-pub const invalid_attribute_reserved: Error =
-    Cow::Borrowed("This attribute is reserved and cannot be used in user code.");

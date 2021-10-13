@@ -125,7 +125,7 @@ final class ImmVector<<<__RequireDynamic>> +Tv> implements \ConstVector<Tv> {
    *
    * @return - An `array` with the integer keys from the current `ImmVector`.
    */
-  public readonly function toKeysArray()[]: varray<Tv>;
+  public function toKeysArray()[]: varray<Tv>;
 
   /**
    * Returns an iterator that points to beginning of the current `ImmVector`.

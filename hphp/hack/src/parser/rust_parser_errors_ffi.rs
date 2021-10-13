@@ -21,12 +21,13 @@ use parser_core_types::{
 // leaving the rest default
 unsafe fn parser_options_from_ocaml_only_for_parser_errors(
     ocaml_opts: UnsafeOcamlPtr,
-) -> (ParserOptions, (bool, bool, bool, bool)) {
+) -> (ParserOptions, (bool, bool, bool)) {
     let ocaml_opts = ocaml_opts.as_usize() as *const usize;
 
     let hhvm_compat_mode = bool::from_ocaml(*ocaml_opts.add(0)).unwrap();
     let hhi_mode = bool::from_ocaml(*ocaml_opts.add(1)).unwrap();
     let codegen = bool::from_ocaml(*ocaml_opts.add(2)).unwrap();
+
     let mut parser_options = ParserOptions::default();
 
     let po_disable_lval_as_an_expression = bool::from_ocaml(*ocaml_opts.add(3)).unwrap();
@@ -47,8 +48,7 @@ unsafe fn parser_options_from_ocaml_only_for_parser_errors(
     let po_allow_unstable_features = bool::from_ocaml(*ocaml_opts.add(18)).unwrap();
     let po_disallow_hash_comments = bool::from_ocaml(*ocaml_opts.add(19)).unwrap();
     let po_disallow_fun_and_cls_meth_pseudo_funcs = bool::from_ocaml(*ocaml_opts.add(20)).unwrap();
-    let po_disallow_inst_meth = bool::from_ocaml(*ocaml_opts.add(22)).unwrap();
-    let tco_enable_systemlib_annotations = bool::from_ocaml(*ocaml_opts.add(25)).unwrap();
+    let po_disallow_inst_meth = bool::from_ocaml(*ocaml_opts.add(23)).unwrap();
 
     parser_options.po_disable_lval_as_an_expression = po_disable_lval_as_an_expression;
     parser_options.po_disable_legacy_soft_typehints = po_disable_legacy_soft_typehints;
@@ -70,16 +70,7 @@ unsafe fn parser_options_from_ocaml_only_for_parser_errors(
     parser_options.po_disallow_fun_and_cls_meth_pseudo_funcs =
         po_disallow_fun_and_cls_meth_pseudo_funcs;
     parser_options.po_disallow_inst_meth = po_disallow_inst_meth;
-    parser_options.tco_enable_systemlib_annotations = tco_enable_systemlib_annotations;
-    (
-        parser_options,
-        (
-            hhvm_compat_mode,
-            hhi_mode,
-            codegen,
-            tco_enable_systemlib_annotations,
-        ),
-    )
+    (parser_options, (hhvm_compat_mode, hhi_mode, codegen))
 }
 
 ocaml_ffi! {
@@ -96,7 +87,7 @@ ocaml_ffi! {
         ocaml_tree: usize,
         ocaml_parser_options: UnsafeOcamlPtr,
     ) -> Vec<SyntaxError> {
-        let (parser_options, (hhvm_compat_mode, hhi_mode, codegen, is_systemlib)) =
+        let (parser_options, (hhvm_compat_mode, hhi_mode, codegen)) =
             unsafe { parser_options_from_ocaml_only_for_parser_errors(ocaml_parser_options) };
         let (tree, _arena) = unsafe {
             // A rust pointer of (&SyntaxTree, &Arena) is passed to Ocaml in rust_parser_ffi::parse,
@@ -114,7 +105,6 @@ ocaml_ffi! {
             hhvm_compat_mode,
             hhi_mode,
             codegen,
-            is_systemlib,
         );
         errors
     }

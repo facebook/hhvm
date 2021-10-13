@@ -187,7 +187,6 @@ impl<'src> AastParser {
                 true, /* hhvm_compat_mode */
                 hhi_mode,
                 env.codegen,
-                env.is_systemlib,
             );
             errors.extend(parse_errors);
             errors.sort_by(SyntaxError::compare_offset);
@@ -197,6 +196,7 @@ impl<'src> AastParser {
             if uses_readonly
                 // enabled either by parser option or by typechecker
                 && (env.parser_options.po_enable_readonly_in_emitter || !env.codegen)
+                && !env.is_systemlib
             {
                 errors.extend(readonly_check::check_program(&mut aast));
             }

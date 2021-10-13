@@ -124,8 +124,9 @@ function idx($arr, $idx, $default=null)[] {
 
   return $default;
 }
-<<__IgnoreReadonlyLocalErrors>>
+
 function idx_readonly<Tk as arraykey, Tv>(readonly $arr, $idx, $default=null)[] : readonly Tv {
+  // readonlyness is not enforced in systemlib so we can pass it here without error
   return readonly idx($arr, $idx, $default);
 }
 

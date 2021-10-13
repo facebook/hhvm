@@ -7,7 +7,6 @@
 use aast::Expr_ as E_;
 use hh_autoimport_rust::is_hh_autoimport_fun;
 use naming_special_names_rust::special_idents;
-use naming_special_names_rust::user_attributes;
 use oxidized::{
     aast,
     aast_visitor::{visit_mut, AstParams, NodeMut, VisitorMut},
@@ -511,12 +510,6 @@ impl<'ast> VisitorMut<'ast> for Checker {
         _context: &mut Context,
         m: &mut aast::Method_<(), ()>,
     ) -> Result<(), ()> {
-        if m.user_attributes
-            .iter()
-            .any(|ua| user_attributes::ignore_readonly_local_errors(&ua.name.1))
-        {
-            return Ok(());
-        }
         let readonly_return = ro_kind_to_rty(m.readonly_ret);
         let readonly_this = if m.readonly_this {
             Rty::Readonly
@@ -544,12 +537,7 @@ impl<'ast> VisitorMut<'ast> for Checker {
 
     fn visit_fun_(&mut self, context: &mut Context, f: &mut aast::Fun_<(), ()>) -> Result<(), ()> {
         // Is run on every function definition and closure definition
-        if f.user_attributes
-            .iter()
-            .any(|ua| user_attributes::ignore_readonly_local_errors(&ua.name.1))
-        {
-            return Ok(());
-        }
+
         let readonly_return = ro_kind_to_rty(f.readonly_ret);
         let readonly_this = ro_kind_to_rty(f.readonly_this);
         let mut new_context = Context::new(readonly_return, readonly_this);

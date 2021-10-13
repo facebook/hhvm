@@ -406,7 +406,7 @@ final class Set<<<__RequireDynamic>> Tv as arraykey> implements \MutableSet<Tv> 
    * @return - The first value in the current `Set`, or `null` if the `Set` is
    *           empty.
    */
-  public readonly function firstValue()[]: ?Tv;
+  public function firstValue()[]: ?Tv;
 
   /**
    * Returns the first "key" in the current `Set`.
@@ -426,7 +426,7 @@ final class Set<<<__RequireDynamic>> Tv as arraykey> implements \MutableSet<Tv> 
    * @return - The last value in the current `Set`, or `null` if the current
    *           `Set` is empty.
    */
-  public readonly function lastValue()[]: ?Tv;
+  public function lastValue()[]: ?Tv;
 
   /**
    * Returns the last "key" in the current `Set`.

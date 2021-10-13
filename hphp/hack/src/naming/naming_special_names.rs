@@ -336,18 +336,9 @@ pub mod user_attributes {
     }
 
     // TODO(hrust) these should probably be added to the above map/fields, too
-    // These attributes are only valid in systemlib, and therefore are not passed to the typechecker
-    // or hhi files
+
     pub fn is_native(name: &str) -> bool {
         name == "__Native"
-    }
-
-    pub fn ignore_coeffect_local_errors(name: &str) -> bool {
-        name == "__IgnoreCoeffectLocalErrors"
-    }
-
-    pub fn ignore_readonly_local_errors(name: &str) -> bool {
-        name == "__IgnoreReadonlyLocalErrors"
     }
 
     pub fn is_foldable(name: &str) -> bool {

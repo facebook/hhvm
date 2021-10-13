@@ -68,7 +68,7 @@ final class Vector<<<__RequireDynamic>> Tv> implements \MutableVector<Tv> {
    *
    * @return - An `array` with the integer keys from the current `Vector`.
    */
-  public readonly function toKeysArray()[]: varray<int>;
+  public function toKeysArray()[]: varray<int>;
 
   /**
    * Returns a copy of the current `Vector`.

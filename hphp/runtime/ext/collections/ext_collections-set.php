@@ -375,7 +375,7 @@ final class Set implements \MutableSet {
    * @return mixed
    */
   <<__Native>>
-  public readonly function firstValue()[]: mixed;
+  public function firstValue()[]: mixed;
 
   /** Returns the first key from this Set, or null if this Vector is empty.
    * @return mixed
@@ -388,7 +388,7 @@ final class Set implements \MutableSet {
    * @return mixed
    */
   <<__Native>>
-  public readonly function lastValue()[]: mixed;
+  public function lastValue()[]: mixed;
 
   /** Returns the last key from this Set, or null if this Set is empty.
    * @return mixed
@@ -720,7 +720,7 @@ final class ImmSet implements \ConstSet {
    * @return mixed
    */
   <<__Native>>
-  public readonly function firstValue()[]: mixed;
+  public function firstValue()[]: mixed;
 
   /** Returns the first key from this ImmSet, or null if this ImmSet is empty.
    * @return mixed
@@ -733,7 +733,7 @@ final class ImmSet implements \ConstSet {
    * @return mixed
    */
   <<__Native>>
-  public readonly function lastValue()[]: mixed;
+  public function lastValue()[]: mixed;
 
   /** Returns the last key from this ImmSet, or null if this ImmSet is empty.
    * @return mixed

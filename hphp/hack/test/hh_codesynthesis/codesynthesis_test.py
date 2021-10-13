@@ -50,6 +50,30 @@ class GenerateLogicRulesTest(unittest.TestCase):
             exp, hh_codesynthesis.generate_logic_rules(solving_context)
         )
 
+    def test_degree_distribution(self) -> None:
+        solving_context = ClingoContext(
+            number_of_nodes=12, degree_distribution=[1, 3, 5]
+        )
+        exp = [
+            'internal_symbols("S0", 0;"S1", 1;"S2", 2;"S3", 3;"S4", 4;"S5", 5;"S6",'
+            ' 6;"S7", 7;"S8", 8;"S9", 9;"S10", 10;"S11", 11).',
+            ':- #count{X : in_degree(X, 0)} < 1.',
+            ':- #count{X : in_degree(X, 1)} < 3.',
+            ':- #count{X : in_degree(X, 2)} < 5.',
+        ]
+        self.assertListEqual(
+            exp, hh_codesynthesis.generate_logic_rules(solving_context)
+        )
+
+    def test_sum_of_degrees_greater_than_nodes(self) -> None:
+        solving_context = ClingoContext(
+            number_of_nodes=12, degree_distribution=[3, 5, 7]
+        )
+        with self.assertRaises(
+            expected_exception=RuntimeError, msg="Received unreasonable parameters."
+        ):
+            hh_codesynthesis.generate_logic_rules(solving_context)
+
     def test_hack_code_gen(self) -> None:
         solving_context = ClingoContext(
             number_of_nodes=12,
@@ -58,29 +82,16 @@ class GenerateLogicRulesTest(unittest.TestCase):
             min_interfaces=4,
             lower_bound=1,
             higher_bound=5,
+            min_stub_classes=4,
+            min_stub_interfaces=1,
+            degree_distribution=[1, 3, 5],
         )
-        exp = """\
-<?hh
-class S9   {}
-class S10   {}
-class S11   {}
-interface S0  {}
-interface S1  {}
-interface S2  {}
-interface S3  {}
-interface S4 extends S0 {}
-interface S5  {}
-interface S6  {}
-interface S7  {}
-interface S8 extends S4 {}
-"""
 
         hack_codegen = hackGenerator.HackCodeGenerator(solving_context)
         hh_codesynthesis.do_reasoning(
             additional_programs=hh_codesynthesis.generate_logic_rules(solving_context),
             generator=hack_codegen,
         )
-        self.assertEqual(str(hack_codegen), exp)
         self.assertTrue(hack_codegen.validate())
 
     def test_hack_code_gen_with_partial_dependency_graph_given_by_user(self) -> None:

@@ -179,6 +179,7 @@ let merge_saved_state_futures
         Saved_state_loader.Naming_and_dep_table_info.naming_table_path =
           deptable_naming_table_blob_path;
         dep_table_path;
+        naming_sqlite_table_path;
         legacy_hot_decls_path;
         shallow_hot_decls_path;
         errors_path;
@@ -239,6 +240,16 @@ let merge_saved_state_futures
         let dirty_naming_files = Relative_path.Set.of_list dirty_naming_files in
         let dirty_master_files = dirty_master_files in
         let dirty_local_files = dirty_local_files in
+        let naming_table_fallback_path =
+          if
+            genv.local_config.SLC.use_hack_64_naming_table
+            && Sys.file_exists (Path.to_string naming_sqlite_table_path)
+          then (
+            Hh_logger.log "Using sqlite naming table from hack/64 saved state";
+            Some (Path.to_string naming_sqlite_table_path)
+          ) else
+            naming_table_fallback_path
+        in
         Ok
           {
             naming_table_fn = Path.to_string deptable_naming_table_blob_path;

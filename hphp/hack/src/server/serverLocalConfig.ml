@@ -497,6 +497,8 @@ type t = {
   force_load_hot_shallow_decls: bool;
   (* Option to fetch old decls from remote decl store *)
   fetch_remote_old_decls: bool;
+  (* Load naming table from hack/64 saved state. *)
+  use_hack_64_naming_table: bool;
   (* Skip checks on hierarchy e.g. overrides, require extend, etc.
      Set to true only for debugging purposes! *)
   skip_hierarchy_checks: bool;
@@ -641,6 +643,7 @@ let default =
     force_shallow_decl_fanout = false;
     force_load_hot_shallow_decls = false;
     fetch_remote_old_decls = false;
+    use_hack_64_naming_table = false;
     skip_hierarchy_checks = false;
     num_local_workers = None;
     parallel_type_checking_threshold = 10;
@@ -1096,6 +1099,13 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
+  let use_hack_64_naming_table =
+    bool_if_min_version
+      "use_hack_64_naming_table"
+      ~default:default.use_hack_64_naming_table
+      ~current_version
+      config
+  in
   let skip_hierarchy_checks =
     bool_if_min_version
       "skip_hierarchy_checks"
@@ -1396,6 +1406,7 @@ let load_ fn ~silent ~current_version overrides =
     force_shallow_decl_fanout;
     force_load_hot_shallow_decls;
     fetch_remote_old_decls;
+    use_hack_64_naming_table;
     skip_hierarchy_checks;
     num_local_workers;
     parallel_type_checking_threshold;
@@ -1458,4 +1469,5 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       log_from_client_when_slow_monitor_connections =
         options.log_from_client_when_slow_monitor_connections;
       naming_sqlite_in_hack_64 = options.naming_sqlite_in_hack_64;
+      use_hack_64_naming_table = options.use_hack_64_naming_table;
     }

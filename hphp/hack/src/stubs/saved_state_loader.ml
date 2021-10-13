@@ -33,6 +33,7 @@ end
 module Naming_and_dep_table_info = struct
   type main_artifacts = {
     naming_table_path: Path.t;
+    naming_sqlite_table_path: Path.t;
     dep_table_path: Path.t;
     legacy_hot_decls_path: Path.t;
     shallow_hot_decls_path: Path.t;

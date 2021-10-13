@@ -86,6 +86,7 @@ if(NOT RE2_LIBRARY)
 else()
   add_library(re2 INTERFACE)
   target_link_libraries(re2 INTERFACE ${RE2_LIBRARY})
+  target_include_directories(re2 INTERFACE ${RE2_INCLUDE_DIR})
 endif()
 add_subdirectory(squangle)
 

@@ -12,7 +12,7 @@ file(GLOB_RECURSE SOURCES "*.cpp")
 add_library(squangle STATIC ${SOURCES})
 target_include_directories(squangle PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 
-foreach(DEP Boost fbmysqlclient)
+foreach(DEP Boost fbmysqlclient re2)
   set("${DEP}_INCLUDE_DIR" "${DEP}_INCLUDE_DIR-notfound" CACHE PATH "Path to ${DEP}'s includes")
   target_include_directories(squangle PRIVATE "${${DEP}_INCLUDE_DIR}")
 endforeach()

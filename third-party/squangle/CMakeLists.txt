@@ -12,6 +12,7 @@ endif()
 get_filename_component(BOOST_LIBRARY_DIR "${FIRST_LIB}" DIRECTORY)
 get_target_property(JEMALLOC_INCLUDE_DIR jemalloc INTERFACE_INCLUDE_DIRECTORIES)
 get_target_property(fbmysqlclient_INCLUDE_DIR fbmysqlclient INTERFACE_INCLUDE_DIRECTORIES)
+get_target_property(re2_INCLUDE_DIR re2 INTERFACE_INCLUDE_DIRECTORIES)
 
 SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
   SQUANGLE_SOURCE_ARGS
@@ -49,7 +50,6 @@ ExternalProject_Add(
     -DCMAKE_MODULE_PATH=${CMAKE_SOURCE_DIR}/CMake
     -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
     -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
-    -DCMAKE_INSTALL_INCLUDEDIR=include
 
     -DBoost_NO_SYSTEM_PATHS=ON
     -DBoost_NO_BOOST_CMAKE=ON
@@ -61,6 +61,7 @@ ExternalProject_Add(
     "-Dfolly_DIR=${FOLLY_INSTALL_DIR}/lib/cmake/folly"
 
     "-Dfbmysqlclient_INCLUDE_DIR=${fbmysqlclient_INCLUDE_DIR}"
+    "-Dre2_INCLUDE_DIR=${re2_INCLUDE_DIR}"
 
     "-DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS} -I${JEMALLOC_INCLUDE_DIR}"
 )

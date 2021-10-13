@@ -82,8 +82,9 @@ set(THRIFT_INSTALL_DIR "${INSTALL_DIR}" PARENT_SCOPE)
 
 # Usage: thrift_lib NAME [DEP1 [DEP2...]]
 macro(thrift_lib NAME)
-  foreach(DEP "${ARGN}")
-    list(APPEND DEPENDENCIES "thrift_lib_${NAME}")
+  set(DEPENDENCIES)
+  foreach(DEP ${ARGN})
+    list(APPEND DEPENDENCIES "thrift_lib_${DEP}")
   endforeach()
   add_library("thrift_lib_${NAME}" STATIC IMPORTED)
   set_target_properties(
@@ -92,8 +93,19 @@ macro(thrift_lib NAME)
     IMPORTED_LOCATION
     "${INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}${NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}"
   )
+
+  if(DEPENDENCIES)
+    # On newer versions of CMake, we can use `target_link_libraries()`, but this isn't supported
+    # on `IMPORTED` targets in the oldest versions we currently support.
+    set_target_properties(
+      "thrift_lib_${NAME}"
+      PROPERTIES
+      INTERFACE_LINK_LIBRARIES
+      "${DEPENDENCIES}"
+    )
+  endif()
+
   target_link_libraries(thrift INTERFACE "thrift_lib_${NAME}")
-  target_link_libraries("thrift_lib_${NAME}" INTERFACE "${DEPENDENCIES}")
 endmacro()
 
 thrift_lib(concurrency)
@@ -105,4 +117,4 @@ thrift_lib(transport concurrency thrift-core rpcmetadata)
 thrift_lib(async concurrency transport)
 thrift_lib(thriftprotocol thrift-core)
 thrift_lib(thriftfrozen2 thriftmetadata thriftprotocol)
-thrift_lib(thriftcpp2 rpcmetadata thriftmetadata thriftfrozen2 thriftprotocol)
+thrift_lib(thriftcpp2 rpcmetadata thriftmetadata thriftfrozen2 thriftprotocol transport async)

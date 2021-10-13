@@ -68,9 +68,12 @@ APCArray::MakeSharedImpl(ArrayData* arr, APCHandleLevel level,
         seenArrs.get() ? getMemSize(seenArrs.get()) :
         ::HPHP::getMemSize(arr, true);
       auto const uncounted_arr = MakeUncountedArray(arr, seenArrs.get());
-      auto const size = use_jemalloc ?
+      auto size = use_jemalloc ?
         tl_heap->getAllocated() - tl_heap->getDeallocated() - base_size :
         base_size;
+      // FIXME: the MemoryManager logic is not reliable, especially when
+      // Bespoke logic in MakeUncountedArray() may even free stuff
+      if (static_cast<int64_t>(size) <= 0) size = 1;
       assertx(size > 0);
       return {uncounted_arr, size + sizeof(APCTypedValue)};
     }

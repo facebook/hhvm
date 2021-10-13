@@ -706,6 +706,7 @@ void RequestInjectionData::reset() {
   m_coverage = RuntimeOption::RecordCodeCoverage;
   m_jittingDisabled = false;
   m_debuggerAttached = false;
+  m_hasDebuggerAttachedAtInit = false;
   m_debuggerIntr = false;
   m_debuggerStepIn = false;
   m_debuggerStepOut = StepOutState::None;
@@ -732,9 +733,7 @@ void RequestInjectionData::updateJit() {
     !(RuntimeOption::EvalJitDisabledByHphpd && m_debuggerAttached) &&
     !m_coverage &&
     (rl_typeProfileLocals.isNull() || !isForcedToInterpret()) &&
-    !getDebuggerForceIntr() &&
-    !(RuntimeOption::EvalJitDisabledByBps && m_debuggerAttached &&
-      (m_hasUnresolvedBreakPoint || !m_breakPointFilter.isNull()));
+    !(RuntimeOption::EvalJitDisabledByVSDebug && m_hasDebuggerAttachedAtInit);
 }
 
 void RequestInjectionData::clearFlag(SurpriseFlag flag) {

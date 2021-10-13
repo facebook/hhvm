@@ -264,6 +264,8 @@ struct RequestInjectionData {
   bool getDebuggerAttached();
   void setDebuggerAttached(bool);
 
+  void setDebuggerAttachedAtInit(bool);
+
   /*
    * Returns true if the debugger should force interrupts due to any of the
    * debugger interrupt conditions being true.
@@ -366,6 +368,7 @@ private:
   RequestTimer m_userTimeoutTimer;
 
   bool m_debuggerAttached{false};
+  bool m_hasDebuggerAttachedAtInit{false};
   bool m_coverage{false};
   bool m_jit{false};
   bool m_jittingDisabled{false};
@@ -383,7 +386,6 @@ private:
   StepOutState m_debuggerStepOut{StepOutState::None};
 
 public:
-  bool m_hasUnresolvedBreakPoint{false};
   PCFilter m_breakPointFilter;
   PCFilter m_flowFilter;
   PCFilter m_lineBreakPointFilter;

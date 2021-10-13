@@ -45,6 +45,7 @@ struct BreakContext {
 };
 
 void VSDebugHook::onRequestInit() {
+  RID().setDebuggerAttachedAtInit(true);
   BreakContext breakContext(false);
 }
 

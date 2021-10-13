@@ -336,7 +336,7 @@ void Debugger::setClientConnected(
             assertx(ri->m_breakpointInfo->m_pendingBreakpoints.empty());
             assertx(ri->m_breakpointInfo->m_unresolvedBreakpoints.empty());
           }
-          updateUnresolvedBpFlag(ri, ti);
+          updateUnresolvedBpFlag(ri);
         },
         true /* includeDummyRequest */
       );
@@ -911,12 +911,7 @@ DebuggerRequestInfo* Debugger::attachToRequest(RequestInfo* ti) {
   // Have the debugger hook update the output hook when we enter the debugger.
   requestInfo->m_flags.outputHooked = false;
 
-  // Currently we depend on this interrupt to run the top-level VM in intep mode
-  // when the debugger is attached. Preserve this behavior when JitDisabledByBps
-  // is not set.
-  if (!RuntimeOption::EvalJitDisabledByBps) {
-    ti->m_reqInjectionData.setDebuggerIntr(true);
-  }
+  ti->m_reqInjectionData.setDebuggerIntr(true);
 
   if (ti->m_executing == RequestInfo::Executing::UserFunctions ||
       ti->m_executing == RequestInfo::Executing::RuntimeFunctions) {
@@ -956,7 +951,7 @@ DebuggerRequestInfo* Debugger::attachToRequest(RequestInfo* ti) {
     );
   }
 
-  updateUnresolvedBpFlag(requestInfo, ti);
+  updateUnresolvedBpFlag(requestInfo);
   return requestInfo;
 }
 
@@ -1524,7 +1519,7 @@ void Debugger::onBreakpointAdded(int bpId) {
       }
 
       ri->m_breakpointInfo->m_pendingBreakpoints.emplace(bpId);
-      updateUnresolvedBpFlag(ri, ti);
+      updateUnresolvedBpFlag(ri);
 
       // If the program is running, the request thread will pick up and install
       // the breakpoint the next time it calls into the opcode hook, except for
@@ -1616,7 +1611,7 @@ void Debugger::tryInstallBreakpoints(DebuggerRequestInfo* ri) {
     }
   }
 
-  updateUnresolvedBpFlag(ri, &RI());
+  updateUnresolvedBpFlag(ri);
   assertx(ri->m_breakpointInfo->m_pendingBreakpoints.empty());
 }
 
@@ -1854,7 +1849,7 @@ void Debugger::onFunctionDefined(
     }
   }
 
-  updateUnresolvedBpFlag(ri, &RI());
+  updateUnresolvedBpFlag(ri);
 }
 
 void Debugger::onCompilationUnitLoaded(
@@ -1915,7 +1910,7 @@ void Debugger::onCompilationUnitLoaded(
     it++;
   }
 
-  updateUnresolvedBpFlag(ri, &RI());
+  updateUnresolvedBpFlag(ri);
 }
 
 void Debugger::onFuncIntercepted(std::string funcName) {

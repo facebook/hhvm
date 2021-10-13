@@ -60,7 +60,7 @@ bool TerminateThreadsCommand::executeImpl(DebuggerSession* /*session*/,
   if (m_requestId > 0) {
     DebuggerRequestInfo* ri = m_debugger->getRequestInfo();
     ri->m_flags.terminateRequest = true;
-    RI().m_reqInjectionData.setDebuggerIntr(true);
+    RID().setDebuggerIntr(true);
     return true;
   }
 

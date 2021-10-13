@@ -1818,3 +1818,5 @@ val not_sub_dynamic :
   string ->
   error_from_reasons_callback ->
   unit
+
+val trait_parent_construct_inconsistent : Pos.t -> Pos_or_decl.t -> unit

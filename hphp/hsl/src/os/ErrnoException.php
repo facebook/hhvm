@@ -76,9 +76,16 @@ class ErrnoException extends \Exception {
 }
 
 final class BlockingIOException extends ErrnoException {
-  use _OS\ErrnoExceptionWithMultipleErrnosTrait;
+  public function __construct(Errno $code, string $message) {
+    invariant(
+      C\contains(static::_getValidErrnos(), $code),
+      'Exception %s constructed with invalid code %s',
+      static::class,
+      $code,
+    );
+    parent::__construct($code, $message);
+  }
 
-  <<__Override>>
   public static function _getValidErrnos(): keyset<Errno> {
     return keyset[
       Errno::EAGAIN,
@@ -89,9 +96,10 @@ final class BlockingIOException extends ErrnoException {
 }
 
 final class ChildProcessException extends ErrnoException {
-  use _OS\ErrnoExceptionWithSingleErrnoTrait;
+  public function __construct(string $message) {
+    parent::__construct(static::_getValidErrno(), $message);
+  }
 
-  <<__Override>>
   public static function _getValidErrno(): Errno {
     return Errno::ECHILD;
   }
@@ -101,81 +109,102 @@ abstract class ConnectionException extends ErrnoException {
 }
 
 final class BrokenPipeException extends ConnectionException {
-  use _OS\ErrnoExceptionWithMultipleErrnosTrait;
+  public function __construct(Errno $code, string $message) {
+    invariant(
+      C\contains(static::_getValidErrnos(), $code),
+      'Exception %s constructed with invalid code %s',
+      static::class,
+      $code,
+    );
+    parent::__construct($code, $message);
+  }
 
-  <<__Override>>
   public static function _getValidErrnos(): keyset<Errno> {
     return keyset[Errno::EPIPE, Errno::ESHUTDOWN];
   }
 }
 
 final class ConnectionAbortedException extends ConnectionException {
-  use _OS\ErrnoExceptionWithSingleErrnoTrait;
+  public function __construct(string $message) {
+    parent::__construct(static::_getValidErrno(), $message);
+  }
 
-  <<__Override>>
   public static function _getValidErrno(): Errno {
     return Errno::ECONNABORTED;
   }
 }
 
 final class ConnectionRefusedException extends ConnectionException {
-  use _OS\ErrnoExceptionWithSingleErrnoTrait;
+  public function __construct(string $message) {
+    parent::__construct(static::_getValidErrno(), $message);
+  }
 
-  <<__Override>>
   public static function _getValidErrno(): Errno {
     return Errno::ECONNREFUSED;
   }
 }
 
 final class ConnectionResetException extends ConnectionException {
-  use _OS\ErrnoExceptionWithSingleErrnoTrait;
+  public function __construct(string $message) {
+    parent::__construct(static::_getValidErrno(), $message);
+  }
 
-  <<__Override>>
   public static function _getValidErrno(): Errno {
     return Errno::ECONNRESET;
   }
 }
 
 final class AlreadyExistsException extends ErrnoException {
-  use _OS\ErrnoExceptionWithSingleErrnoTrait;
+  public function __construct(string $message) {
+    parent::__construct(static::_getValidErrno(), $message);
+  }
 
-  <<__Override>>
   public static function _getValidErrno(): Errno {
     return Errno::EEXIST;
   }
 }
 
 final class NotFoundException extends ErrnoException {
-  use _OS\ErrnoExceptionWithSingleErrnoTrait;
+  public function __construct(string $message) {
+    parent::__construct(static::_getValidErrno(), $message);
+  }
 
-  <<__Override>>
   public static function _getValidErrno(): Errno {
     return Errno::ENOENT;
   }
 }
 
 final class IsADirectoryException extends ErrnoException {
-  use _OS\ErrnoExceptionWithSingleErrnoTrait;
+  public function __construct(string $message) {
+    parent::__construct(static::_getValidErrno(), $message);
+  }
 
-  <<__Override>>
   public static function _getValidErrno(): Errno {
     return Errno::EISDIR;
   }
 }
 
 final class IsNotADirectoryException extends ErrnoException {
-  use _OS\ErrnoExceptionWithSingleErrnoTrait;
+  public function __construct(string $message) {
+    parent::__construct(static::_getValidErrno(), $message);
+  }
 
-  <<__Override>>
   public static function _getValidErrno(): Errno {
     return Errno::ENOTDIR;
   }
 }
 
 final class PermissionException extends ErrnoException {
-  use _OS\ErrnoExceptionWithMultipleErrnosTrait;
+  public function __construct(Errno $code, string $message) {
+    invariant(
+      C\contains(static::_getValidErrnos(), $code),
+      'Exception %s constructed with invalid code %s',
+      static::class,
+      $code,
+    );
+    parent::__construct($code, $message);
+  }
 
-  <<__Override>>
   public static function _getValidErrnos(): keyset<Errno> {
     return keyset[
       Errno::EACCES,
@@ -185,18 +214,20 @@ final class PermissionException extends ErrnoException {
 }
 
 final class ProcessLookupException extends ErrnoException {
-  use _OS\ErrnoExceptionWithSingleErrnoTrait;
+  public function __construct(string $message) {
+    parent::__construct(static::_getValidErrno(), $message);
+  }
 
-  <<__Override>>
   public static function _getValidErrno(): Errno {
     return Errno::ESRCH;
   }
 }
 
 final class TimeoutException extends ErrnoException {
-  use _OS\ErrnoExceptionWithSingleErrnoTrait;
+  public function __construct(string $message) {
+    parent::__construct(static::_getValidErrno(), $message);
+  }
 
-  <<__Override>>
   public static function _getValidErrno(): Errno {
     return Errno::ETIMEDOUT;
   }

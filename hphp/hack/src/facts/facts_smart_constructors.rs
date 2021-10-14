@@ -49,7 +49,7 @@ impl GetName {
 }
 
 impl std::fmt::Debug for GetName {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "GetName {{ string: {}, unescape:? }}", self.to_string())
     }
 }

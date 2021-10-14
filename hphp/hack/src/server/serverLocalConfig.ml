@@ -582,6 +582,10 @@ type t = {
       (** Add sqlite naming table to hack/64 ss job *)
   workload_quantile: quantile option;
       (** Allows to typecheck only a certain quantile of the workload. *)
+  enable_disk_heap: bool;
+      (** After reading the contents of a file from the filesystem, store them
+          in shared memory. True by default. Disabling this saves memory at the
+          risk of increasing the rate of consistency errors. *)
 }
 
 let default =
@@ -688,6 +692,7 @@ let default =
     log_from_client_when_slow_monitor_connections = false;
     naming_sqlite_in_hack_64 = false;
     workload_quantile = None;
+    enable_disk_heap = true;
   }
 
 let path =
@@ -1348,6 +1353,13 @@ let load_ fn ~silent ~current_version overrides =
         None
     | _ -> None
   in
+  let enable_disk_heap =
+    bool_if_min_version
+      "enable_disk_heap"
+      ~default:default.enable_disk_heap
+      ~current_version
+      config
+  in
   {
     min_log_level;
     attempt_fix_credentials;
@@ -1448,6 +1460,7 @@ let load_ fn ~silent ~current_version overrides =
     log_from_client_when_slow_monitor_connections;
     naming_sqlite_in_hack_64;
     workload_quantile;
+    enable_disk_heap;
   }
 
 let load ~silent ~current_version config_overrides =
@@ -1470,4 +1483,5 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
         options.log_from_client_when_slow_monitor_connections;
       naming_sqlite_in_hack_64 = options.naming_sqlite_in_hack_64;
       use_hack_64_naming_table = options.use_hack_64_naming_table;
+      enable_disk_heap = options.enable_disk_heap;
     }

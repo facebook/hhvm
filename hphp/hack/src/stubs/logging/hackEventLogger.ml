@@ -24,6 +24,7 @@ type rollout_flags = {
   log_from_client_when_slow_monitor_connections: bool;
   naming_sqlite_in_hack_64: bool;
   use_hack_64_naming_table: bool;
+  enable_disk_heap: bool;
 }
 
 let flush () = ()

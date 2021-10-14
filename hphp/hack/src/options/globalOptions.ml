@@ -140,6 +140,7 @@ type t = {
   tco_pessimise_builtins: bool;
   tco_deferments_light: bool;
   tco_old_naming_table_for_redecl: bool;
+  tco_enable_disk_heap: bool;
 }
 [@@deriving eq, show]
 
@@ -341,6 +342,7 @@ let default =
     tco_pessimise_builtins = false;
     tco_deferments_light = false;
     tco_old_naming_table_for_redecl = false;
+    tco_enable_disk_heap = true;
   }
 
 let make
@@ -500,6 +502,7 @@ let make
     ?(tco_pessimise_builtins = default.tco_pessimise_builtins)
     ?(tco_deferments_light = default.tco_deferments_light)
     ?(tco_old_naming_table_for_redecl = default.tco_old_naming_table_for_redecl)
+    ?(tco_enable_disk_heap = default.tco_enable_disk_heap)
     () =
   {
     tco_experimental_features;
@@ -634,6 +637,7 @@ let make
     tco_pessimise_builtins;
     tco_deferments_light;
     tco_old_naming_table_for_redecl;
+    tco_enable_disk_heap;
   }
 
 let tco_experimental_feature_enabled t s =
@@ -934,3 +938,5 @@ let tco_pessimise_builtins t = t.tco_pessimise_builtins
 let tco_deferments_light t = t.tco_deferments_light
 
 let tco_old_naming_table_for_redecl t = t.tco_old_naming_table_for_redecl
+
+let tco_enable_disk_heap t = t.tco_enable_disk_heap

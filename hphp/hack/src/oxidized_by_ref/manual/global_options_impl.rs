@@ -138,6 +138,7 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     tco_pessimise_builtins: false,
     tco_deferments_light: false,
     tco_old_naming_table_for_redecl: false,
+    tco_enable_disk_heap: true,
 };
 
 impl GlobalOptions<'static> {

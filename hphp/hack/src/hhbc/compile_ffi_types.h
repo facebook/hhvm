@@ -8,7 +8,7 @@
 #pragma once
 
 #include <cstdint>
-#include "hphp/hack/src/decl/ffi_bridge/rust_decl_ffi_bridge.rs"
+#include "hphp/hack/src/hhbc/ffi_bridge/rust_compile_ffi_bridge.rs"
 
 namespace HPHP { namespace hackc { namespace compile {
 

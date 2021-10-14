@@ -3257,38 +3257,29 @@ name = "rust_compile_ffi_bridge"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "bumpalo",
- "cxx",
- "cxx-build",
- "decl_provider",
- "external_decl_provider",
- "hhbc_by_ref_compile",
- "libc",
- "log",
- "ocamlrep",
- "ocamlrep_derive",
- "ocamlrep_ocamlpool",
- "oxidized",
- "parser_core_types",
- "serde_json",
- "stack_limit",
- "unified_decl_provider",
-]
-
-[[package]]
-name = "rust_decl_ffi_bridge"
-version = "0.0.0"
-dependencies = [
  "arena_deserializer",
  "bincode",
  "bumpalo",
  "cxx",
  "cxx-build",
+ "decl_provider",
  "decl_rust",
+ "external_decl_provider",
  "ffi",
+ "hhbc_by_ref_compile",
+ "hhbc_by_ref_hhas_program",
+ "libc",
+ "log",
  "no_pos_hash",
+ "ocamlrep",
+ "ocamlrep_derive",
+ "ocamlrep_ocamlpool",
  "oxidized",
  "oxidized_by_ref",
+ "parser_core_types",
+ "serde_json",
+ "stack_limit",
+ "unified_decl_provider",
 ]
 
 [[package]]

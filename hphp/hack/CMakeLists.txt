@@ -228,7 +228,6 @@ endfunction()
 build_cxx_bridge(rust_facts "src/facts/ffi_bridge")
 build_cxx_bridge(rust_parser "src/parser/ffi_bridge")
 build_cxx_bridge(rust_compile "src/hhbc/ffi_bridge")
-build_cxx_bridge(rust_decl "src/decl/ffi_bridge")
 
 if (NOT LZ4_FOUND)
   add_dependencies(hack_dune lz4)

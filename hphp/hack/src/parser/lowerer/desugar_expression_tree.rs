@@ -445,7 +445,7 @@ fn v_meth_call(meth_name: &str, args: Vec<Expr>, pos: &Pos) -> Expr {
                 receiver,
                 meth,
                 OgNullFlavor::OGNullthrows,
-                ast::PropOrMethod::IsMethod,
+                false,
             ))),
         ),
         vec![],
@@ -470,7 +470,7 @@ fn meth_call(receiver: Expr, meth_name: &str, args: Vec<Expr>, pos: &Pos) -> Exp
                 receiver,
                 meth,
                 OgNullFlavor::OGNullthrows,
-                ast::PropOrMethod::IsMethod,
+                false,
             ))),
         ),
         vec![],
@@ -1030,7 +1030,7 @@ fn rewrite_expr(
                 // Source: MyDsl`$x->bar()`
                 // Virtualized: $x->bar()
                 // Desugared: $0v->visitCall($0v->visitMethodCall(new ExprPos(...), $0v->visitLocal(new ExprPos(...), '$x'), 'bar'), vec[])
-                ObjGet(og) if og.3 == ast::PropOrMethod::IsMethod => {
+                ObjGet(og) if !og.3 => {
                     let (e1, e2, null_flavor, is_prop_call) = *og;
                     if null_flavor == OgNullFlavor::OGNullsafe {
                         return Err((

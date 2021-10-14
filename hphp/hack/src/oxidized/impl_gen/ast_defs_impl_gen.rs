@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<018bd9417c398597381715d2bc93df71>>
+// @generated SignedSource<<67b9dd583f4a8ce6379d29844d3eb13e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -315,26 +315,6 @@ impl OgNullFlavor {
     pub fn is_ognullsafe(&self) -> bool {
         match self {
             OgNullFlavor::OGNullsafe => true,
-            _ => false,
-        }
-    }
-}
-impl PropOrMethod {
-    pub fn mk_is_prop() -> Self {
-        PropOrMethod::IsProp
-    }
-    pub fn mk_is_method() -> Self {
-        PropOrMethod::IsMethod
-    }
-    pub fn is_is_prop(&self) -> bool {
-        match self {
-            PropOrMethod::IsProp => true,
-            _ => false,
-        }
-    }
-    pub fn is_is_method(&self) -> bool {
-        match self {
-            PropOrMethod::IsMethod => true,
             _ => false,
         }
     }

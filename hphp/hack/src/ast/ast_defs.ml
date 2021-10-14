@@ -72,10 +72,6 @@ and og_null_flavor =
   | OG_nullthrows
   | OG_nullsafe
 
-and prop_or_method =
-  | Is_prop
-  | Is_method
-
 and fun_kind =
   | FSync
   | FAsync

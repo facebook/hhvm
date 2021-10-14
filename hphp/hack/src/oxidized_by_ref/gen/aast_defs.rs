@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<29638ba1b8f9da8edb8c3f4d45169875>>
+// @generated SignedSource<<b4c5b26085c657feca27473c58206230>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -25,7 +25,6 @@ pub use crate::ast_defs::shape_map;
 pub use ast_defs::OgNullFlavor;
 pub use ast_defs::Pos;
 pub use ast_defs::PositionedByteString;
-pub use ast_defs::PropOrMethod;
 pub use ast_defs::Pstring;
 pub use local_id::LocalId;
 pub use shape_map::ShapeMap;

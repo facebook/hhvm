@@ -29,7 +29,7 @@ let well_formed_isset_argument_check p = function
   | Call
       ( (_, _, Id (_, pseudo_func)),
         _,
-        [(_, (_, _, Obj_get (_, (_, _, Id _), _, Is_prop)))],
+        [(_, (_, _, Obj_get (_, (_, _, Id _), _, false)))],
         _ )
   (* isset($var::thing) but not isset($foo::$bar) *)
   | Call

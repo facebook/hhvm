@@ -2209,124 +2209,141 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
             // TODO: use the fact that this is a readonly call in HHVM enforcement
             emit_call_lhs_and_fcall(e, env, r, fcall_args, targs, Some(pos))
         }
-        E_::ObjGet(o) if o.as_ref().3 == ast::PropOrMethod::IsMethod => {
-            // Case $x->foo(...).
-            // TODO: utilize caller_readonly_opt here for method calls
-            let emit_id = |
-                e: &mut Emitter<'arena, 'decl>,
-                obj,
-                id,
-                null_flavor: &ast::OgNullFlavor,
-                mut fcall_args,
-            | {
-                let name: method::MethodType<'arena> =
-                    (alloc, string_utils::strip_global_ns(id)).into();
-                let obj = emit_object_expr(e, env, obj)?;
-                let generics = emit_generics(e, env, &mut fcall_args)?;
-                let null_flavor = from_ast_null_flavor(*null_flavor);
-                Ok((
-                    InstrSeq::gather(alloc, vec![obj, instr::nulluninit(alloc)]),
-                    InstrSeq::gather(
-                        alloc,
-                        vec![
-                            generics,
-                            instr::fcallobjmethodd(alloc, fcall_args, name, null_flavor),
-                        ],
-                    ),
-                ))
-            };
-            match o.as_ref() {
-                (obj, E(_, _, E_::String(id)), null_flavor, _) => {
-                    emit_id(
-                        e,
-                        obj,
-                        // FIXME: This is not safe--string literals are binary strings.
-                        // There's no guarantee that they're valid UTF-8.
-                        unsafe { std::str::from_utf8_unchecked(id.as_slice()) },
-                        null_flavor,
-                        fcall_args,
-                    )
-                }
-                (E(_, pos, E_::New(new_exp)), E(_, _, E_::Id(id)), null_flavor, _)
-                    if fcall_args.1 == 0 =>
-                {
-                    let cexpr =
-                        ClassExpr::class_id_to_class_expr(e, false, false, &env.scope, &new_exp.0);
-                    match &cexpr {
-                        ClassExpr::Id(ast_defs::Id(_, name))
-                            if string_utils::strip_global_ns(name) == "ReflectionClass" =>
-                        {
-                            let fid = match string_utils::strip_global_ns(&id.1) {
-                                "isAbstract" => Some("__SystemLib\\reflection_class_is_abstract"),
-                                "isInterface" => Some("__SystemLib\\reflection_class_is_interface"),
-                                "isFinal" => Some("__SystemLib\\reflection_class_is_final"),
-                                "getName" => Some("__SystemLib\\reflection_class_get_name"),
-                                _ => None,
-                            };
-                            match fid {
-                                None => emit_id(e, &o.as_ref().0, &id.1, null_flavor, fcall_args),
-                                Some(fid) => {
-                                    let fcall_args = FcallArgs::new(
-                                        FcallFlags::default(),
-                                        1,
-                                        Slice::empty(),
-                                        Slice::empty(),
-                                        None,
-                                        1,
-                                        None,
-                                    );
-                                    let newobj_instrs = emit_new(e, env, pos, &new_exp, true);
-                                    Ok((
-                                        InstrSeq::gather(
-                                            alloc,
-                                            vec![
-                                                instr::nulluninit(alloc),
-                                                instr::nulluninit(alloc),
-                                                newobj_instrs?,
-                                            ],
-                                        ),
-                                        InstrSeq::gather(
-                                            alloc,
-                                            vec![instr::fcallfuncd(
-                                                alloc,
-                                                fcall_args,
-                                                function::FunctionType::<'arena>::from_ast_name(
-                                                    alloc, fid,
-                                                ),
-                                            )],
-                                        ),
-                                    ))
-                                }
-                            }
-                        }
-                        _ => emit_id(e, &o.as_ref().0, &id.1, null_flavor, fcall_args),
-                    }
-                }
-                (obj, E(_, _, E_::Id(id)), null_flavor, _) => {
-                    emit_id(e, obj, &id.1, null_flavor, fcall_args)
-                }
-                (obj, method_expr, null_flavor, _) => {
+        E_::ObjGet(o) => {
+            if o.as_ref().3 {
+                // Case ($x->foo)(...).
+                let expr = E(
+                    (),
+                    pos.clone(),
+                    E_::ObjGet(Box::new((o.0.clone(), o.1.clone(), o.2.clone(), false))),
+                );
+                emit_fcall_func(e, env, &expr, fcall_args, caller_readonly_opt)
+            } else {
+                // Case $x->foo(...).
+                // TODO: utilze caller_readonly_opt here for method calls
+                let emit_id = |
+                    e: &mut Emitter<'arena, 'decl>,
+                    obj,
+                    id,
+                    null_flavor: &ast::OgNullFlavor,
+                    mut fcall_args,
+                | {
+                    let name: method::MethodType<'arena> =
+                        (alloc, string_utils::strip_global_ns(id)).into();
                     let obj = emit_object_expr(e, env, obj)?;
-                    let tmp = e.local_gen_mut().get_unnamed();
+                    let generics = emit_generics(e, env, &mut fcall_args)?;
                     let null_flavor = from_ast_null_flavor(*null_flavor);
                     Ok((
+                        InstrSeq::gather(alloc, vec![obj, instr::nulluninit(alloc)]),
                         InstrSeq::gather(
                             alloc,
                             vec![
-                                obj,
-                                instr::nulluninit(alloc),
-                                emit_expr(e, env, method_expr)?,
-                                instr::popl(alloc, tmp),
-                            ],
-                        ),
-                        InstrSeq::gather(
-                            alloc,
-                            vec![
-                                instr::pushl(alloc, tmp),
-                                instr::fcallobjmethod(alloc, fcall_args, null_flavor),
+                                generics,
+                                instr::fcallobjmethodd(alloc, fcall_args, name, null_flavor),
                             ],
                         ),
                     ))
+                };
+                match o.as_ref() {
+                    (obj, E(_, _, E_::String(id)), null_flavor, _) => {
+                        emit_id(
+                            e,
+                            obj,
+                            // FIXME: This is not safe--string literals are binary strings.
+                            // There's no guarantee that they're valid UTF-8.
+                            unsafe { std::str::from_utf8_unchecked(id.as_slice()) },
+                            null_flavor,
+                            fcall_args,
+                        )
+                    }
+                    (E(_, pos, E_::New(new_exp)), E(_, _, E_::Id(id)), null_flavor, _)
+                        if fcall_args.1 == 0 =>
+                    {
+                        let cexpr = ClassExpr::class_id_to_class_expr(
+                            e, false, false, &env.scope, &new_exp.0,
+                        );
+                        match &cexpr {
+                            ClassExpr::Id(ast_defs::Id(_, name))
+                                if string_utils::strip_global_ns(name) == "ReflectionClass" =>
+                            {
+                                let fid = match string_utils::strip_global_ns(&id.1) {
+                                    "isAbstract" => {
+                                        Some("__SystemLib\\reflection_class_is_abstract")
+                                    }
+                                    "isInterface" => {
+                                        Some("__SystemLib\\reflection_class_is_interface")
+                                    }
+                                    "isFinal" => Some("__SystemLib\\reflection_class_is_final"),
+                                    "getName" => Some("__SystemLib\\reflection_class_get_name"),
+                                    _ => None,
+                                };
+                                match fid {
+                                    None => {
+                                        emit_id(e, &o.as_ref().0, &id.1, null_flavor, fcall_args)
+                                    }
+                                    Some(fid) => {
+                                        let fcall_args = FcallArgs::new(
+                                            FcallFlags::default(),
+                                            1,
+                                            Slice::empty(),
+                                            Slice::empty(),
+                                            None,
+                                            1,
+                                            None,
+                                        );
+                                        let newobj_instrs = emit_new(e, env, pos, &new_exp, true);
+                                        Ok((
+                                            InstrSeq::gather(
+                                                alloc,
+                                                vec![
+                                                    instr::nulluninit(alloc),
+                                                    instr::nulluninit(alloc),
+                                                    newobj_instrs?,
+                                                ],
+                                            ),
+                                            InstrSeq::gather(
+                                                alloc,
+                                                vec![instr::fcallfuncd(
+                                                    alloc,
+                                                    fcall_args,
+                                                    function::FunctionType::<'arena>::from_ast_name(
+                                                        alloc, fid,
+                                                    ),
+                                                )],
+                                            ),
+                                        ))
+                                    }
+                                }
+                            }
+                            _ => emit_id(e, &o.as_ref().0, &id.1, null_flavor, fcall_args),
+                        }
+                    }
+                    (obj, E(_, _, E_::Id(id)), null_flavor, _) => {
+                        emit_id(e, obj, &id.1, null_flavor, fcall_args)
+                    }
+                    (obj, method_expr, null_flavor, _) => {
+                        let obj = emit_object_expr(e, env, obj)?;
+                        let tmp = e.local_gen_mut().get_unnamed();
+                        let null_flavor = from_ast_null_flavor(*null_flavor);
+                        Ok((
+                            InstrSeq::gather(
+                                alloc,
+                                vec![
+                                    obj,
+                                    instr::nulluninit(alloc),
+                                    emit_expr(e, env, method_expr)?,
+                                    instr::popl(alloc, tmp),
+                                ],
+                            ),
+                            InstrSeq::gather(
+                                alloc,
+                                vec![
+                                    instr::pushl(alloc, tmp),
+                                    instr::fcallobjmethod(alloc, fcall_args, null_flavor),
+                                ],
+                            ),
+                        ))
+                    }
                 }
             }
         }
@@ -2428,16 +2445,12 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
             })
         }
         E_::ClassGet(c) => {
-            if c.as_ref().2 == ast::PropOrMethod::IsProp {
+            if c.as_ref().2 {
                 // Case (Foo::$bar)(...).
                 let expr = E(
                     (),
                     pos.clone(),
-                    E_::ClassGet(Box::new((
-                        c.0.clone(),
-                        c.1.clone(),
-                        ast::PropOrMethod::IsProp,
-                    ))),
+                    E_::ClassGet(Box::new((c.0.clone(), c.1.clone(), false))),
                 );
                 emit_fcall_func(e, env, &expr, fcall_args, caller_readonly_opt)
             } else {
@@ -4213,7 +4226,7 @@ fn emit_xhp_obj_get<'a, 'arena, 'decl>(
                 E_::mk_id(ast_defs::Id(pos.clone(), "getAttribute".into())),
             ),
             nullflavor.clone(),
-            ast::PropOrMethod::IsMethod,
+            false,
         ),
     );
     let args = vec![(
@@ -5157,17 +5170,23 @@ fn emit_quiet_expr<'a, 'arena, 'decl>(
             false,
             null_coalesce_assignment,
         ),
-        ast::Expr_::ObjGet(x) if x.as_ref().3 == ast::PropOrMethod::IsProp => emit_obj_get(
-            e,
-            env,
-            pos,
-            QueryOp::CGetQuiet,
-            &x.0,
-            &x.1,
-            &x.2,
-            null_coalesce_assignment,
-            false,
-        ),
+        ast::Expr_::ObjGet(x) => {
+            if x.as_ref().3 {
+                Ok((emit_expr(e, env, expr)?, None))
+            } else {
+                emit_obj_get(
+                    e,
+                    env,
+                    pos,
+                    QueryOp::CGetQuiet,
+                    &x.0,
+                    &x.1,
+                    &x.2,
+                    null_coalesce_assignment,
+                    false,
+                )
+            }
+        }
         _ => Ok((emit_expr(e, env, expr)?, None)),
     }
 }
@@ -6032,73 +6051,78 @@ fn emit_base_<'a, 'arena, 'decl>(
                 })
             }
         },
-        E_::ObjGet(x) if x.as_ref().3 == ast::PropOrMethod::IsProp => {
-            let (base_expr, prop_expr, null_flavor, _) = &**x;
-            Ok(match prop_expr.2.as_id() {
-                Some(ast_defs::Id(_, s)) if string_utils::is_xhp(&s) => {
-                    let base_instrs = emit_xhp_obj_get(e, env, pos, base_expr, &s, null_flavor)?;
-                    emit_default(
-                        e,
-                        base_instrs,
-                        instr::empty(alloc),
-                        instr::basec(alloc, base_offset, base_mode),
-                        1,
-                        0,
-                    )
-                }
-                _ => {
-                    let prop_stack_size = emit_prop_expr(
-                        e,
-                        env,
-                        null_flavor,
-                        0,
-                        prop_expr,
-                        null_coalesce_assignment,
-                        ReadonlyOp::Any, // just getting stack size here
-                    )?
-                    .2;
-                    let (
-                        base_expr_instrs_begin,
-                        base_expr_instrs_end,
-                        base_setup_instrs,
-                        base_stack_size,
-                        cls_stack_size,
-                    ) = emit_base(
-                        e,
-                        env,
-                        base_expr,
-                        mode,
-                        true,
-                        BareThisOp::Notice,
-                        null_coalesce_assignment,
-                        base_offset + prop_stack_size,
-                        rhs_stack_size,
-                        ReadonlyOp::Mutable, // the rest of the base must be completely mutable
-                    )?;
-                    let (mk, prop_instrs, _) = emit_prop_expr(
-                        e,
-                        env,
-                        null_flavor,
-                        base_offset + cls_stack_size,
-                        prop_expr,
-                        null_coalesce_assignment,
-                        readonly_op, // use the current enforcement
-                    )?;
-                    let total_stack_size = prop_stack_size + base_stack_size;
-                    let final_instr = instr::dim(alloc, mode, mk);
-                    emit_default(
-                        e,
-                        InstrSeq::gather(alloc, vec![base_expr_instrs_begin, prop_instrs]),
-                        base_expr_instrs_end,
-                        InstrSeq::gather(alloc, vec![base_setup_instrs, final_instr]),
-                        total_stack_size,
-                        cls_stack_size,
-                    )
-                }
-            })
+        E_::ObjGet(x) => {
+            if x.as_ref().3 {
+                emit_expr_default(e, env, expr)
+            } else {
+                let (base_expr, prop_expr, null_flavor, _) = &**x;
+                Ok(match prop_expr.2.as_id() {
+                    Some(ast_defs::Id(_, s)) if string_utils::is_xhp(&s) => {
+                        let base_instrs =
+                            emit_xhp_obj_get(e, env, pos, base_expr, &s, null_flavor)?;
+                        emit_default(
+                            e,
+                            base_instrs,
+                            instr::empty(alloc),
+                            instr::basec(alloc, base_offset, base_mode),
+                            1,
+                            0,
+                        )
+                    }
+                    _ => {
+                        let prop_stack_size = emit_prop_expr(
+                            e,
+                            env,
+                            null_flavor,
+                            0,
+                            prop_expr,
+                            null_coalesce_assignment,
+                            ReadonlyOp::Any, // just getting stack size here
+                        )?
+                        .2;
+                        let (
+                            base_expr_instrs_begin,
+                            base_expr_instrs_end,
+                            base_setup_instrs,
+                            base_stack_size,
+                            cls_stack_size,
+                        ) = emit_base(
+                            e,
+                            env,
+                            base_expr,
+                            mode,
+                            true,
+                            BareThisOp::Notice,
+                            null_coalesce_assignment,
+                            base_offset + prop_stack_size,
+                            rhs_stack_size,
+                            ReadonlyOp::Mutable, // the rest of the base must be completely mutable
+                        )?;
+                        let (mk, prop_instrs, _) = emit_prop_expr(
+                            e,
+                            env,
+                            null_flavor,
+                            base_offset + cls_stack_size,
+                            prop_expr,
+                            null_coalesce_assignment,
+                            readonly_op, // use the current enforcement
+                        )?;
+                        let total_stack_size = prop_stack_size + base_stack_size;
+                        let final_instr = instr::dim(alloc, mode, mk);
+                        emit_default(
+                            e,
+                            InstrSeq::gather(alloc, vec![base_expr_instrs_begin, prop_instrs]),
+                            base_expr_instrs_end,
+                            InstrSeq::gather(alloc, vec![base_setup_instrs, final_instr]),
+                            total_stack_size,
+                            cls_stack_size,
+                        )
+                    }
+                })
+            }
         }
         E_::ClassGet(x) => {
-            if x.2 == ast::PropOrMethod::IsProp {
+            if x.2 {
                 emit_expr_default(e, env, expr)
             } else {
                 let (cid, prop, _) = &**x;
@@ -6245,8 +6269,8 @@ fn can_use_as_rhs_in_list_assignment(expr: &ast::Expr_) -> Result<bool> {
         {
             false
         }
-        E_::ObjGet(o) if o.as_ref().3 == ast::PropOrMethod::IsProp => true,
-        E_::ClassGet(c) if c.as_ref().2 == ast::PropOrMethod::IsProp => true,
+        E_::ObjGet(o) if !o.as_ref().3 => true,
+        E_::ClassGet(c) if !c.as_ref().2 => true,
         E_::Lvar(_)
         | E_::ArrayGet(_)
         | E_::Call(_)
@@ -6670,7 +6694,7 @@ pub fn emit_lval_op_nonlist_steps<'a, 'arena, 'decl>(
                     )
                 }
             },
-            E_::ObjGet(x) if x.as_ref().3 == ast::PropOrMethod::IsProp => {
+            E_::ObjGet(x) if !x.as_ref().3 => {
                 let (e1, e2, nullflavor, _) = &**x;
                 if nullflavor.eq(&ast_defs::OgNullFlavor::OGNullsafe) {
                     return Err(emit_fatal::raise_fatal_parse(
@@ -6747,7 +6771,7 @@ pub fn emit_lval_op_nonlist_steps<'a, 'arena, 'decl>(
                     InstrSeq::gather(alloc, vec![base_setup_instrs, final_instr]),
                 )
             }
-            E_::ClassGet(x) if x.as_ref().2 == ast::PropOrMethod::IsProp => {
+            E_::ClassGet(x) if !x.as_ref().2 => {
                 let (cid, prop, _) = &**x;
                 let cexpr = ClassExpr::class_id_to_class_expr(e, false, false, &env.scope, cid);
                 let final_instr_ = emit_final_static_op(alloc, cid, prop, op)?;

@@ -46,13 +46,13 @@
                                                      (Call (
                                                         ((), [4:8-14],
                                                          (Obj_get (((), [4:8-9], (Call (((), [4:8-9], (Class_const (((), [4:8-9], (CI ([4:8-9], "\\Code"))), ([4:8-9], "intType")))), [], [], None))),
-                                                            ((), [4:8-14], (Id ([4:8-14], "__plus"))), OG_nullthrows, Is_method))),
+                                                            ((), [4:8-14], (Id ([4:8-14], "__plus"))), OG_nullthrows, false))),
                                                         [],
                                                         [(Pnormal,
                                                           ((), [4:12-14], (Call (((), [4:12-14], (Class_const (((), [4:12-14], (CI ([4:12-14], "\\Code"))), ([4:12-14], "intType")))), [], [], None))))
                                                           ],
                                                         None))),
-                                                    ((), [4:8-26], (Id ([4:8-26], "__plus"))), OG_nullthrows, Is_method))),
+                                                    ((), [4:8-26], (Id ([4:8-26], "__plus"))), OG_nullthrows, false))),
                                                 [], [(Pnormal, ((), [4:17-26], (ET_Splice ((), [4:19-25], (Lvar ([4:19-25], $0splice0))))))], None))))))
                                    ]
                                  };
@@ -128,7 +128,7 @@
                                                                 (Call (
                                                                    ((), [4:8-26],
                                                                     (
-                                                                    Obj_get (((), [4:8-26], (Lvar ([4:8-26], $0v))), ((), [4:8-26], (Id ([4:8-26], "visitBinop"))), OG_nullthrows, Is_method))),
+                                                                    Obj_get (((), [4:8-26], (Lvar ([4:8-26], $0v))), ((), [4:8-26], (Id ([4:8-26], "visitBinop"))), OG_nullthrows, false))),
                                                                    [],
                                                                    [(Pnormal,
                                                                     ((), [4:8-26],
@@ -142,7 +142,7 @@
                                                                     ((), [4:8-14],
                                                                     (Call (
                                                                     ((), [4:8-14],
-                                                                    (Obj_get (((), [4:8-14], (Lvar ([4:8-14], $0v))), ((), [4:8-14], (Id ([4:8-14], "visitBinop"))), OG_nullthrows, Is_method))), 
+                                                                    (Obj_get (((), [4:8-14], (Lvar ([4:8-14], $0v))), ((), [4:8-14], (Id ([4:8-14], "visitBinop"))), OG_nullthrows, false))), 
                                                                     [],
                                                                     [(Pnormal,
                                                                     ((), [4:8-14],
@@ -155,7 +155,7 @@
                                                                     (Pnormal,
                                                                     ((), [4:8-9],
                                                                     (Call (
-                                                                    ((), [4:8-9], (Obj_get (((), [4:8-9], (Lvar ([4:8-9], $0v))), ((), [4:8-9], (Id ([4:8-9], "visitInt"))), OG_nullthrows, Is_method))),
+                                                                    ((), [4:8-9], (Obj_get (((), [4:8-9], (Lvar ([4:8-9], $0v))), ((), [4:8-9], (Id ([4:8-9], "visitInt"))), OG_nullthrows, false))),
                                                                     [],
                                                                     [(Pnormal,
                                                                     ((), [4:8-9],
@@ -171,7 +171,7 @@
                                                                     ((), [4:12-14],
                                                                     (Call (
                                                                     ((), [4:12-14],
-                                                                    (Obj_get (((), [4:12-14], (Lvar ([4:12-14], $0v))), ((), [4:12-14], (Id ([4:12-14], "visitInt"))), OG_nullthrows, Is_method))), 
+                                                                    (Obj_get (((), [4:12-14], (Lvar ([4:12-14], $0v))), ((), [4:12-14], (Id ([4:12-14], "visitInt"))), OG_nullthrows, false))), 
                                                                     [],
                                                                     [(Pnormal,
                                                                     ((), [4:12-14],
@@ -187,7 +187,7 @@
                                                                     ((), [4:17-26],
                                                                     (Call (
                                                                     ((), [4:17-26],
-                                                                    (Obj_get (((), [4:17-26], (Lvar ([4:17-26], $0v))), ((), [4:17-26], (Id ([4:17-26], "splice"))), OG_nullthrows, Is_method))), 
+                                                                    (Obj_get (((), [4:17-26], (Lvar ([4:17-26], $0v))), ((), [4:17-26], (Id ([4:17-26], "splice"))), OG_nullthrows, false))), 
                                                                     [],
                                                                     [(Pnormal,
                                                                     ((), [4:17-26],

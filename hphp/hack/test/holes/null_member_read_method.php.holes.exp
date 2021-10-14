@@ -23,7 +23,7 @@
                ((_), [5:3-11],
                 (Call (
                    ((_), [5:3-9],
-                    (Obj_get (((null), [5:3-6], (Hole (((null), [5:3-6], (Lvar ([5:3-6], $xs))), (null), (nothing), Typing))), ((_), [5:8-9], (Id ([5:8-9], "c"))), OG_nullthrows, Is_method))),
+                    (Obj_get (((null), [5:3-6], (Hole (((null), [5:3-6], (Lvar ([5:3-6], $xs))), (null), (nothing), Typing))), ((_), [5:8-9], (Id ([5:8-9], "c"))), OG_nullthrows, false))),
                    [], [], None)))))
             ]
           };
@@ -57,7 +57,7 @@
                  (Call (
                     ((_), [10:3-9],
                      (Obj_get (((?string), [10:3-6], (Hole (((?string), [10:3-6], (Lvar ([10:3-6], $xs))), (?string), (nothing), Typing))), (
-                        (_), [10:8-9], (Id ([10:8-9], "c"))), OG_nullthrows, Is_method))),
+                        (_), [10:8-9], (Id ([10:8-9], "c"))), OG_nullthrows, false))),
                     [], [], None)))))
              ]
            };
@@ -90,7 +90,7 @@
                 ((_), [15:3-11],
                  (Call (
                     ((_), [15:3-9],
-                     (Obj_get (((mixed), [15:3-6], (Hole (((mixed), [15:3-6], (Lvar ([15:3-6], $xs))), (mixed), (nothing), Typing))), ((_), [15:8-9], (Id ([15:8-9], "c"))), OG_nullthrows, Is_method))),
+                     (Obj_get (((mixed), [15:3-6], (Hole (((mixed), [15:3-6], (Lvar ([15:3-6], $xs))), (mixed), (nothing), Typing))), ((_), [15:8-9], (Id ([15:8-9], "c"))), OG_nullthrows, false))),
                     [], [], None)))))
              ]
            };

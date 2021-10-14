@@ -690,10 +690,10 @@ let visitor =
       autocomplete_lvar lid env;
       super#on_Lvar env lid
 
-    method! on_Class_get env cid mid prop_or_method =
+    method! on_Class_get env cid mid in_parens =
       match mid with
       | Aast.CGstring p -> autocomplete_static_member env cid p
-      | Aast.CGexpr _ -> super#on_Class_get env cid mid prop_or_method
+      | Aast.CGexpr _ -> super#on_Class_get env cid mid in_parens
 
     method! on_Class_const env cid mid =
       autocomplete_static_member env cid mid;

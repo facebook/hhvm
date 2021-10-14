@@ -261,24 +261,9 @@ type og_null_flavor = Ast_defs.og_null_flavor =
   | OG_nullsafe
 [@@deriving eq]
 
-type prop_or_method = Ast_defs.prop_or_method =
-  | Is_prop
-  | Is_method
-[@@deriving eq]
-
-(* Explicit pretty-printing instead of deriving show
- * to avoid "Ast_defs." qualification
- *)
 let pp_og_null_flavor fmt flavor =
   Format.pp_print_string fmt
   @@
   match flavor with
   | OG_nullthrows -> "OG_nullthrows"
   | OG_nullsafe -> "OG_nullsafe"
-
-let pp_prop_or_method fmt f =
-  Format.pp_print_string fmt
-  @@
-  match f with
-  | Is_prop -> "Is_prop"
-  | Is_method -> "Is_method"

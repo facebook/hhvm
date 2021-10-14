@@ -544,14 +544,14 @@ let visitor =
       let acc = process_global_const id in
       self#plus acc (super#on_Id env id)
 
-    method! on_Obj_get env obj ((_, _, expr_) as member) ognf prop_or_method =
+    method! on_Obj_get env obj ((_, _, expr_) as member) ognf in_parens =
       match expr_ with
       | Aast.Id _ ->
         (* Don't visit this Id, since we would record it as a gconst access. *)
         let obja = self#on_expr env obj in
         let ognfa = self#on_og_null_flavor env ognf in
         self#plus obja ognfa
-      | _ -> super#on_Obj_get env obj member ognf prop_or_method
+      | _ -> super#on_Obj_get env obj member ognf in_parens
 
     method! on_SFclass_const env cid mid =
       let ( + ) = Result_set.union in

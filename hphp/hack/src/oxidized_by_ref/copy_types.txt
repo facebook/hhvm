@@ -29,7 +29,6 @@ aast::XhpAttribute
 ast_defs::Bop
 ast_defs::ClassishKind
 ast_defs::Id
-ast_defs::PropOrMethod
 ast_defs::ParamKind
 ast_defs::ShapeFieldName
 ast_defs::XhpEnumValue
@@ -67,7 +66,6 @@ oxidized::aast::FunKind
 oxidized::aast::ImportFlavor
 oxidized::aast::KvcKind
 oxidized::aast::NsKind
-oxidized::aast::PropOrMethod
 oxidized::aast::OgNullFlavor
 oxidized::aast::ParamMutability
 oxidized::aast::ReadonlyKind
@@ -84,7 +82,6 @@ oxidized::aast::XhpChildOp
 oxidized::ast_defs::Abstraction
 oxidized::ast_defs::ConstraintKind
 oxidized::ast_defs::FunKind
-oxidized::ast_defs::PropOrMethod
 oxidized::ast_defs::OgNullFlavor
 oxidized::ast_defs::ReadonlyKind
 oxidized::ast_defs::Uop

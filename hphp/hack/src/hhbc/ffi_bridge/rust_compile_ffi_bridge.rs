@@ -19,8 +19,8 @@ use parser_core_types::source_text::SourceText;
 #[cxx::bridge]
 mod compile_ffi {
     struct NativeEnv {
-        decl_provider: u64,
-        decl_getter: u64,
+        decl_provider: usize,
+        decl_getter: usize,
         filepath: String,
         aliased_namespaces: String,
         include_roots: String,

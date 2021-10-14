@@ -1,0 +1,2 @@
+File "dollardollar_no_pipe.php", line 6, characters 11-12:
+Variable `$$` is undefined, or not always defined. (Naming[2050])

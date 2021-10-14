@@ -15,6 +15,7 @@ let make_local_server_api
     ~(root : string)
     ~(init_id : string)
     ~(ignore_hh_version : bool)
+    ~(enable_disk_heap : bool)
     ~(deps_mode : Typing_deps_mode.t) : (module LocalServerApi) =
   (module struct
     let send_progress (message : string) : unit =
@@ -100,7 +101,10 @@ let make_local_server_api
             let changed_file_path =
               Relative_path.create Relative_path.Root changed_file
             in
-            (changed_file_path, File_provider.get_contents changed_file_path))
+            ( changed_file_path,
+              File_provider.get_contents
+                ~writeback_disk_contents_in_shmem_provider:enable_disk_heap
+                changed_file_path ))
       in
       let chan = Stdlib.open_out_bin destination_path in
       Marshal.to_channel chan changed_files [];

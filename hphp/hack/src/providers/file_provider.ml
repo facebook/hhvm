@@ -58,7 +58,7 @@ let get_unsafe fn =
     failwith
       "File_provider.get_unsafe not supported with local/decl memory provider"
 
-let get_contents fn =
+let get_contents ~writeback_disk_contents_in_shmem_provider fn =
   match Provider_backend.get () with
   | Provider_backend.Analysis -> failwith "invalid"
   | Provider_backend.Shared_memory ->
@@ -70,7 +70,8 @@ let get_contents fn =
         let contents =
           Option.value (read_file_contents_from_disk fn) ~default:""
         in
-        FileHeap.add fn (Disk contents);
+        if writeback_disk_contents_in_shmem_provider then
+          FileHeap.add fn (Disk contents);
         Some contents
     end
   | Provider_backend.Local_memory _
@@ -110,10 +111,14 @@ let provide_file_for_ide fn contents =
     failwith
       "File_provider.provide_file_for_ide not supported with local/decl memory provider"
 
-let provide_file_hint fn contents =
+let provide_file_hint ~write_disk_contents_in_shmem_provider fn contents =
   match Provider_backend.get () with
   | Provider_backend.Analysis -> failwith "invalid"
-  | Provider_backend.Shared_memory -> FileHeap.add fn contents
+  | Provider_backend.Shared_memory ->
+    (match contents with
+    | Ide _ -> FileHeap.add fn contents
+    | Disk _ ->
+      if write_disk_contents_in_shmem_provider then FileHeap.add fn contents)
   | Provider_backend.Local_memory _
   | Provider_backend.Decl_service _ ->
     failwith

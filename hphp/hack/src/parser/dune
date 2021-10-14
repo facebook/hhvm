@@ -165,4 +165,5 @@
     direct_decl_parser
     heap_shared_mem
     procs_procs
-    shallow_decl_defs))
+    shallow_decl_defs
+    typechecker_options))

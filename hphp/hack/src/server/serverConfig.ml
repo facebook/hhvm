@@ -495,6 +495,7 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
       ~tco_deferments_light:local_config.ServerLocalConfig.deferments_light
       ~tco_old_naming_table_for_redecl:
         local_config.ServerLocalConfig.old_naming_table_for_redecl
+      ~tco_enable_disk_heap:local_config.ServerLocalConfig.enable_disk_heap
       ~log_levels:(prepare_log_levels config)
       ()
   in

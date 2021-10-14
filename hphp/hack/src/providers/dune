@@ -80,6 +80,7 @@
     provider_context
     relative_path
     server_command_types
+    typechecker_options
     utils_find)
   (preprocess (pps ppx_deriving.std)))
 

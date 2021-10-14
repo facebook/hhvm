@@ -115,7 +115,12 @@ let close_relative_path env path =
     | _ -> assert false
   in
   File_provider.remove_batch (Relative_path.Set.singleton path);
-  let new_contents = File_provider.get_contents path in
+  let new_contents =
+    File_provider.get_contents
+      ~writeback_disk_contents_in_shmem_provider:
+        (TypecheckerOptions.enable_disk_heap env.tcopt)
+      path
+  in
   let ide_needs_parsing =
     match new_contents with
     | Some c when String.equal c contents -> env.ide_needs_parsing

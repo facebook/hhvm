@@ -754,16 +754,22 @@ fn rewrite_expr(
                         "Expression trees do not support the unary plus operator.".into(),
                     ));
                 }
-                Uop::Uincr | Uop::Upincr => {
+                // Postfix ++
+                Uop::Upincr => "__postfixPlusPlus",
+                // Prefix ++
+                Uop::Uincr => {
                     return Err((
                         pos,
-                        "Expression trees do not support the increment operator `++`.".into(),
+                        "Expression trees only support postfix increment operator `$x++`.".into(),
                     ));
                 }
-                Uop::Udecr | Uop::Updecr => {
+                // Postfix --
+                Uop::Updecr => "__postfixMinusMinus",
+                // Prefix --
+                Uop::Udecr => {
                     return Err((
                         pos,
-                        "Expression trees do not support the decrement operator `--`.".into(),
+                        "Expression trees only support postfix decrement operator `$x--`.".into(),
                     ));
                 }
                 Uop::Usilence => {

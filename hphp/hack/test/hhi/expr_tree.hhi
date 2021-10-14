@@ -239,6 +239,8 @@ interface ExampleInt extends ExampleMixed {
   public function __lessThanLessThan(ExampleInt $_): ExampleInt;
   public function __greaterThanGreaterThan(ExampleInt $_): ExampleInt;
   public function __tilde(): ExampleInt;
+  public function __postfixPlusPlus(): void;
+  public function __postfixMinusMinus(): void;
 }
 
 interface ExampleBool extends ExampleMixed {

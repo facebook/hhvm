@@ -144,13 +144,9 @@ let test_process_file_deferring () =
     Typing_check_service.process_file dynamic_view_files ctx errors file
   in
   Counters.restore_state prev_counter_state;
-  Asserter.Int_asserter.assert_equals
-    2
-    (List.length deferred_decls)
-    "Should be this many deferred_decls";
 
-  List.iter deferred_decls ~f:(fun (deferred_file, _) ->
-      print_endline @@ Relative_path.suffix deferred_file);
+  List.iter deferred_decls ~f:(fun (deferred_file, decl_name) ->
+      Printf.printf "%s - %s\n" (Relative_path.suffix deferred_file) decl_name);
   (* Validate the declare file computation *)
   let found_declare =
     List.exists deferred_decls ~f:(fun (deferred_file, _) ->
@@ -160,6 +156,26 @@ let test_process_file_deferring () =
     true
     found_declare
     "Should have found the declare file computation";
+  let decl_names =
+    List.fold deferred_decls ~init:SSet.empty ~f:(fun s (_, id) ->
+        SSet.add id s)
+  in
+  let expected_decl_names =
+    ["A"; "B"; "D"; "Foo"; "Bar"]
+    |> List.map ~f:(Printf.sprintf "\\%s")
+    |> SSet.of_list
+  in
+  Asserter.Bool_asserter.assert_equals
+    true
+    (SSet.equal decl_names expected_decl_names)
+    (Printf.sprintf
+       "Unexpected set of deferred decls. Expected %s, got %s"
+       (SSet.show expected_decl_names)
+       (SSet.show decl_names));
+  Asserter.Int_asserter.assert_equals
+    5
+    (List.length deferred_decls)
+    "Should be this many deferred_decls";
 
   true
 
@@ -180,7 +196,7 @@ let test_compute_tast_counting () =
     Tast_provider.compute_tast_and_errors_unquarantined ~ctx ~entry
   in
 
-  let expected_decling_count = 50 in
+  let expected_decling_count = 68 in
   Asserter.Int_asserter.assert_equals
     expected_decling_count
     (Telemetry_test_utils.int_exn telemetry "decling.count")

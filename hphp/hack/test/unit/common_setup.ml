@@ -10,6 +10,9 @@ let foo_contents =
   {|<?hh //strict
   class Foo {
     public function foo (Bar $b) : int {
+      A::class;
+      new B<D>();
+      $x = Vector { 3 };
       return $b->toString();
     }
   }
@@ -20,6 +23,10 @@ let foo_contents =
 
 let bar_contents =
   {|<?hh //strict
+  class A {}
+  class B<T> {}
+  class D {}
+
   class Bar {
     public function toString() : string {
       return "bar";

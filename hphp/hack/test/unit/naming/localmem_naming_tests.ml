@@ -40,11 +40,11 @@ let test_unsaved_symbol_change ~(sqlite : bool) () =
     Tast_provider.compute_tast_and_errors_unquarantined ~ctx ~entry
   in
   Asserter.Int_asserter.assert_equals
-    3
+    6
     (Telemetry_test_utils.int_exn telemetry "get_ast.count")
     "unsaved: compute_tast(class Foo) should have this many calls to get_ast";
   Asserter.Int_asserter.assert_equals
-    1
+    4
     (Telemetry_test_utils.int_exn telemetry "disk_cat.count")
     "unsaved: compute_tast(class Foo) should have this many calls to disk_cat";
   Asserter.String_asserter.assert_list_equals

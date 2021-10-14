@@ -1,0 +1,33 @@
+(executable
+    (name localmem_naming_tests)
+    (modules localmem_naming_tests)
+    (link_flags (:standard (:include ../../../src/dune_config/ld-opts.sexp)))
+    (modes exe byte_complete)
+    (libraries
+        asserter
+        client_ide_service
+        disk
+        errors
+        global_options
+        logging
+        naming_provider
+        provider_backend
+        provider_context
+        search_utils
+        sys_utils
+        tast_provider
+        telemetry
+        test_injector_config
+        typing_deps
+        unit_test
+        unit_test_common_setup
+        utils_core))
+
+(alias
+    (name localmem_naming_tests_run)
+    (deps %{exe:localmem_naming_tests.exe})
+    (action (run %{exe:localmem_naming_tests.exe})))
+
+(alias
+    (name runtest)
+    (deps (alias localmem_naming_tests_run)))

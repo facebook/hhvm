@@ -147,7 +147,7 @@ let process_files_remote_execution
   let errors' = Re.process_files re_env fns deps_mode recheck_id in
   { errors = Errors.merge errors' errors; deferred_decls = [] }
 
-let scrape_class_names ast : SSet.t =
+let scrape_class_names (ast : Nast.program) : SSet.t =
   let names = ref SSet.empty in
   let visitor =
     object
@@ -228,7 +228,7 @@ let process_file
         | None ->
           let deferred_decls =
             ast
-            |> Naming.elaborate_namespaces_program
+            |> Naming.program ctx
             |> scrape_class_names
             |> SSet.elements
             |> List.filter_map ~f:(fun class_name ->

@@ -155,23 +155,19 @@ struct SingletonTag {};
 
 InitFiniNode s_stateInitialization(
     []() {
-      State::get()->initialize();
+      State::instance->initialize();
     },
-    InitFiniNode::When::ProcessInit);
+    InitFiniNode::When::RequestStart);
 
 InitFiniNode s_stateTeardown(
     []() {
-      State::get()->teardown();
+      State::instance->teardown();
     },
     InitFiniNode::When::RequestFini);
 
-folly::Singleton<State, SingletonTag> kSingleton{};
-
 } // namespace
 
-/* static */ std::shared_ptr<State> State::get() {
-  return kSingleton.try_get();
-}
+rds::local::RDSLocal<State, rds::local::Initialize::FirstUse> State::instance;
 
 void State::initialize() {
   FTRACE(1, "taint: initializing state\n");

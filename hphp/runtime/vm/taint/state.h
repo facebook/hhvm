@@ -87,7 +87,7 @@ struct Heap {
 };
 
 struct State {
-  static std::shared_ptr<State> get();
+  static rds::local::RDSLocal<State, rds::local::Initialize::FirstUse> instance;
 
   void initialize();
   void teardown();

@@ -732,17 +732,22 @@ let assign_array_append_with_err ~array_pos ~expr_pos ur env ty1 ty2 =
         let ty = mk (r, Tclass (id, e, [tv'])) in
         (env, ty, Ok ty, Ok ty2)
       | (r, Tclass (((_, n) as id), e, [tv]))
-        when String.equal n SN.Collections.cKeyset
-             || String.equal n SN.Collections.cSet ->
-        let (env, err_res) =
-          if String.equal n SN.Collections.cKeyset then
-            check_keyset_value env expr_pos ty1 ty2
-          else
-            check_set_value env expr_pos ty1 ty2
-        in
+        when String.equal n SN.Collections.cKeyset ->
+        let (env, err_res) = check_keyset_value env expr_pos ty1 ty2 in
         let (env, tv') = Typing_union.union env tv ty2 in
         let ty = mk (r, Tclass (id, e, [tv'])) in
         (env, ty, Ok ty, err_res)
+      | (_, Tclass ((_, n), _, [tv])) when String.equal n SN.Collections.cSet ->
+        let (env, err_res) =
+          match check_set_value env expr_pos ty1 ty2 with
+          | (_, Error _) as err_res -> err_res
+          | (env, _) ->
+            Result.fold
+              ~ok:(fun env -> (env, Ok ty2))
+              ~error:(fun env -> (env, Error (ty2, tv)))
+            @@ Typing_ops.sub_type_res expr_pos ur env ty2 tv Errors.unify_error
+        in
+        (env, ty1, Ok ty1, err_res)
       | (r, Tvarray tv) ->
         let (env, tv') = Typing_union.union env tv ty2 in
         let ty = mk (r, Tvarray tv') in

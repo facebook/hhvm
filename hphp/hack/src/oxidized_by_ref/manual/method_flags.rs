@@ -68,7 +68,7 @@ impl<'de> serde::Deserialize<'de> for MethodFlags {
         impl<'de> serde::de::Visitor<'de> for Visitor {
             type Value = MethodFlags;
 
-            fn expecting(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+            fn expecting(&self, formatter: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
                 write!(formatter, "a u8 for MethodFlags")
             }
 

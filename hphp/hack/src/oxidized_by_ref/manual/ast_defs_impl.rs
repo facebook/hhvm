@@ -17,7 +17,7 @@ impl<'a> ShapeFieldName<'a> {
         }
     }
 
-    pub fn get_pos(&self) -> &'a Pos {
+    pub fn get_pos(&self) -> &'a Pos<'_> {
         use ShapeFieldName::*;
         match self {
             SFlitInt((p, _)) | SFlitStr((p, _)) | SFclassConst((_, (p, _))) => p,
@@ -26,7 +26,7 @@ impl<'a> ShapeFieldName<'a> {
 }
 
 impl<'a> Id<'a> {
-    pub fn pos(&self) -> &'a Pos {
+    pub fn pos(&self) -> &'a Pos<'_> {
         self.0
     }
 

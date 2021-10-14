@@ -94,7 +94,7 @@ impl<'de> serde::Deserialize<'de> for FunTypeFlags {
         impl<'de> serde::de::Visitor<'de> for Visitor {
             type Value = FunTypeFlags;
 
-            fn expecting(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+            fn expecting(&self, formatter: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
                 write!(formatter, "a u16 for FunTypeFlags")
             }
             fn visit_u16<E: serde::de::Error>(self, value: u16) -> Result<Self::Value, E> {
@@ -152,7 +152,7 @@ impl<'de> serde::Deserialize<'de> for FunParamFlags {
         impl<'de> serde::de::Visitor<'de> for Visitor {
             type Value = FunParamFlags;
 
-            fn expecting(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+            fn expecting(&self, formatter: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
                 write!(formatter, "a u16 for FunParamFlags")
             }
             fn visit_u16<E: serde::de::Error>(self, value: u16) -> Result<Self::Value, E> {

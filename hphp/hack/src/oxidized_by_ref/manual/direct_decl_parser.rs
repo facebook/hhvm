@@ -115,7 +115,7 @@ impl<'a> IntoIterator for Decls<'a> {
 }
 
 impl std::fmt::Debug for Decls<'_> {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         fmt.debug_map().entries(self.iter()).finish()
     }
 }

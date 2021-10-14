@@ -196,9 +196,9 @@ T decode(const Buffer& buffer, size_t& pos) {
   }
 
   if constexpr (std::is_same<T, Op>::value) {
-    static_assert(sizeof(Op) == sizeof(uint16_t), "");
+    static_assert(sizeof(Op) <= sizeof(uint16_t), "");
     auto const byte = decode_as_bytes<uint8_t>(buffer, pos);
-    if (byte < k9BitOpShift) return Op(byte);
+    if (sizeof(Op) == sizeof(uint8_t) || byte < k9BitOpShift) return Op(byte);
     auto const next = decode_as_bytes<uint8_t>(buffer, pos);
     return Op(safe_cast<uint16_t>(next) + k9BitOpShift);
   }
@@ -324,9 +324,9 @@ void encode(Buffer& buffer, const T& data) {
     }
 
   } else if constexpr (std::is_same<T, Op>::value) {
-    static_assert(sizeof(Op) == sizeof(uint16_t), "");
+    static_assert(sizeof(Op) <= sizeof(uint16_t), "");
     auto const raw = uint16_t(data);
-    if (raw < k9BitOpShift) {
+    if (sizeof(Op) == sizeof(uint8_t) || raw < k9BitOpShift) {
       encode_as_bytes(buffer, safe_cast<uint8_t>(raw));
     } else {
       encode_as_bytes(buffer, k9BitOpShift);

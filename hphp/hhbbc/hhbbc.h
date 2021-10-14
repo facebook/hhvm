@@ -38,10 +38,10 @@
 
 namespace HPHP {
 
-enum class Op : uint16_t;
+enum class Op : uint8_t;
 struct OpHash {
   size_t operator()(Op op) const {
-    return hash_int64(static_cast<uint16_t>(op));
+    return hash_int64(static_cast<uint64_t>(op));
   }
 };
 

@@ -846,15 +846,15 @@ constexpr uint32_t kMaxConcatN = 4;
   O(MemoSet,         ONE(LAR),         ONE(CV),         ONE(CV),    NF) \
   O(MemoSetEager,    ONE(LAR),         ONE(CV),         ONE(CV),    NF)
 
-enum class Op : uint16_t {
+#define O(...) + 1
+constexpr size_t Op_count = OPCODES;
+#undef O
+
+enum class Op : std::conditional<Op_count <= 256, uint8_t, uint16_t>::type {
 #define O(name, ...) name,
   OPCODES
 #undef O
 };
-
-#define O(...) + 1
-constexpr size_t Op_count = OPCODES;
-#undef O
 
 /*
  * Also put Op* in the enclosing namespace, to avoid having to change every

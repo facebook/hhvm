@@ -58,6 +58,14 @@ inline uint8_t decode_byte(PC& pc) {
 }
 
 /*
+ * Return the encoded size of the given Op, in bytes.
+ */
+constexpr size_t encoded_op_size(Op op) {
+  return (sizeof(Op) == sizeof(uint8_t) || static_cast<size_t>(op) < 0xff)
+    ? 1 : 2;
+}
+
+/*
  * Encode the given Op, using write_byte to write a byte at a time.
  */
 template<typename F>
@@ -65,12 +73,12 @@ void encode_op(Op op, F write_byte) {
   static_assert(Op_count <= 0x1fe,
                 "Op encoding scheme doesn't support Ops >= 0x1fe");
   auto rawVal = static_cast<size_t>(op);
-  if (rawVal >= 0xff) {
+  if (encoded_op_size(op) > 1) {
     // Write a 0xff signal byte
     write_byte(static_cast<uint8_t>(0xff));
     rawVal -= 0xff;
+    assertx(rawVal < 0xff);
   }
-  assertx(rawVal < 0xff);
 
   write_byte(rawVal);
 }
@@ -82,7 +90,9 @@ void encode_op(Op op, F write_byte) {
  */
 inline Op decode_op_unchecked(PC& pc) {
   uint32_t raw = decode_byte(pc);
-  return LIKELY(raw != 0xff) ? Op(raw) : Op(decode_byte(pc) + 0xff);
+  return LIKELY(sizeof(Op) == sizeof(uint8_t) || raw != 0xff)
+    ? Op(raw)
+    : Op(decode_byte(pc) + 0xff);
 }
 
 /*
@@ -99,13 +109,6 @@ inline Op decode_op(PC& pc) {
  */
 inline Op peek_op(PC pc) {
   return decode_op(pc);
-}
-
-/*
- * Return the encoded size of the given Op, in bytes.
- */
-constexpr size_t encoded_op_size(Op op) {
-  return static_cast<size_t>(op) < 0xff ? 1 : 2;
 }
 
 //////////////////////////////////////////////////////////////////////

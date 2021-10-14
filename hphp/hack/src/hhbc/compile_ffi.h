@@ -25,37 +25,6 @@ enum env_flags {
 };
 
 extern "C" {
-HPHP::hackc::hhbc::HhasProgram const* hackc_compile_hhas_from_text_cpp_ffi(
-       bump_allocator const* alloc
-     , native_environment const* env
-     , char const* source_text
-     , error_buf_t* error_buf );
-
-void hackc_compile_hhas_free_prog_cpp_ffi(HPHP::hackc::hhbc::HhasProgram const*);
-
-bump_allocator const* hackc_compile_hhas_create_arena();
-
-void hackc_compile_hhas_free_arena(bump_allocator const*);
-} //extern"C"
-
-using hackc_compile_hhas_from_text_ptr =
-  std::unique_ptr<HPHP::hackc::hhbc::HhasProgram const, void(*)(HPHP::hackc::hhbc::HhasProgram const*)>;
-
-inline hackc_compile_hhas_from_text_ptr
-  hackc_compile_hhas_from_text(
-     bump_allocator const* alloc
-    , native_environment const* env
-    , char const* source_text
-    , error_buf_t* error_buf
-  ) {
-  hackc_compile_hhas_from_text_ptr result = hackc_compile_hhas_from_text_ptr {
-      hackc_compile_hhas_from_text_cpp_ffi(alloc, env, source_text, error_buf)
-    , hackc_compile_hhas_free_prog_cpp_ffi
-  };
-  return result;
-}
-
-extern "C" {
 char const* hackc_hhas_to_string_cpp_ffi(
   native_environment const* env,
   HPHP::hackc::hhbc::HhasProgram const* prog,

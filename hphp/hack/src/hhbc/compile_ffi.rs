@@ -5,9 +5,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use decl_provider::NoDeclProvider;
-use external_decl_provider::ExternalDeclProvider;
 use hhbc_by_ref_hhas_program::HhasProgram;
-use ocamlrep::{rc::RcOc, FromOcamlRep};
+use ocamlrep::FromOcamlRep;
 use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_ocamlpool::to_ocaml;
 use oxidized::relative_path::RelativePath;
@@ -97,130 +96,6 @@ impl CNativeEnv {
             flags: hhbc_by_ref_compile::EnvFlags::from_bits(env.flags)?,
         })
     }
-}
-
-fn decl_provider<'a, 'decl>(
-    native_env: &hhbc_by_ref_compile::NativeEnv<&'a str>,
-    cnative_env: &CNativeEnv,
-) -> unified_decl_provider::DeclProvider<'decl> {
-    if native_env
-        .flags
-        .contains(hhbc_by_ref_compile::EnvFlags::ENABLE_DECL)
-    {
-        unified_decl_provider::DeclProvider::ExternalDeclProvider(ExternalDeclProvider::new(
-            cnative_env.decl_getter,
-            cnative_env.decl_provider,
-        ))
-    } else {
-        unified_decl_provider::DeclProvider::NoDeclProvider(NoDeclProvider)
-    }
-}
-
-#[no_mangle]
-unsafe extern "C" fn hackc_compile_hhas_create_arena() -> *mut bumpalo::Bump {
-    Box::into_raw(Box::new(bumpalo::Bump::new()))
-}
-
-#[no_mangle]
-unsafe extern "C" fn hackc_compile_hhas_free_arena(arena: *mut bumpalo::Bump) {
-    let _ = Box::from_raw(arena);
-}
-
-// Compile to HHAS from source text.
-#[no_mangle]
-unsafe extern "C" fn hackc_compile_hhas_from_text_cpp_ffi(
-    alloc: *const bumpalo::Bump,
-    cnative_env: *const CNativeEnv,
-    source_text: *const c_char,
-    err_buf: *const CErrBuf,
-) -> *const HhasProgram<'static> {
-    match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-        // Safety: `alloc` came via `hackc_compile_hhas_create_arena`.
-        let alloc: &bumpalo::Bump = alloc.as_ref().unwrap();
-        // Safety: `cnative_env`is a well aligned, properly initialized
-        // `*const CNativeEnv`.
-        let cnative_env: &CNativeEnv = cnative_env.as_ref().unwrap();
-        // Safety: `err_buf` is a well aligned, properly initialized
-        // `*const CErrBuf`.
-        let err_buf: &CErrBuf = err_buf.as_ref().unwrap();
-        // Safety : `err_buf.buf` must be valid for reads and writes
-        // for `err_buf.buf_len * mem::sizeof::<u8>()` bytes.
-        let buf: &mut [u8] =
-            std::slice::from_raw_parts_mut(err_buf.buf as *mut u8, err_buf.buf_len as usize);
-        // Safety: `source_text` is a properly iniitalized
-        // nul-terminated C string.
-        let text: &[u8] = std::ffi::CStr::from_ptr(source_text).to_bytes();
-
-        match stack_limit::with_elastic_stack(
-            |stack_limit| -> Result<*const HhasProgram<'static>, anyhow::Error> {
-                let native_env = CNativeEnv::to_compile_env(cnative_env).unwrap();
-                let env = hhbc_by_ref_compile::Env::<&str> {
-                    filepath: native_env.filepath.clone(),
-                    config_jsons: vec![],
-                    config_list: vec![],
-                    flags: native_env.flags,
-                };
-                let source_text = SourceText::make(RcOc::new(env.filepath.clone()), text);
-                let compile_result = hhbc_by_ref_compile::hhas_from_text(
-                    alloc,
-                    &env,
-                    &stack_limit,
-                    source_text,
-                    Some(&native_env),
-                    decl_provider(&native_env, &cnative_env),
-                );
-                match compile_result {
-                    Ok((hhas_prog, _)) => Ok(Box::into_raw(Box::new(hhas_prog))),
-                    Err(e) => Err(anyhow!("{}", e)),
-                }
-            },
-        )
-        .map_err(|e| format!("{}", e))
-        .expect("hackc_compile_hhas_from_text_cpp_ffi: retry failed")
-        .map_err(|e| e.to_string())
-        {
-            Ok(hhas_prog) => hhas_prog,
-            Err(e) => {
-                if e.len() >= buf.len() {
-                    warn!("Provided error buffer too small.");
-                    warn!(
-                        "Expected at least {} bytes but got {}.",
-                        e.len() + 1,
-                        buf.len()
-                    );
-                } else {
-                    // Safety:
-                    //   - `e` must be valid for reads of `e.len() *
-                    //     size_of::<u8>()` bytes;
-                    //   - `buf` must be valid for writes of of `e.len() *
-                    //     size_of::<u8>()` bytes;
-                    //   - The region of memory beginning at `e` with a
-                    //     size of of `e.len() * size_of::<u8>()` bytes must
-                    //     not overlap with the region of memory beginning
-                    //     at `buf` with the same size;
-                    //   - Even if the of `e.len() * size_of::<u8>()` is
-                    //     `0`, the pointers must be non-null and properly
-                    //     aligned.
-                    std::ptr::copy_nonoverlapping(e.as_ptr(), buf.as_mut_ptr(), e.len());
-                    buf[e.len()] = 0;
-                }
-                std::ptr::null()
-            }
-        }
-    })) {
-        Ok(hhas_prog) => hhas_prog,
-        Err(_) => {
-            if std::env::var_os("HH_TEST_MODE").is_some() {
-                eprintln!("hackc_compile_hhas_from_text_cpp_ffi: panic!");
-            }
-            std::ptr::null()
-        }
-    }
-}
-
-#[no_mangle]
-unsafe extern "C" fn hackc_compile_hhas_free_prog_cpp_ffi(prog: *mut HhasProgram) {
-    let _ = Box::from_raw(prog);
 }
 
 #[no_mangle]

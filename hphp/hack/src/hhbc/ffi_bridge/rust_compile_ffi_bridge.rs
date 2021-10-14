@@ -41,6 +41,7 @@ mod compile_ffi {
         type Bytes;
         type Decls<'a>;
         type DeclParserOptions<'a>;
+        type HhasProgram<'a>;
 
         fn make_env_flags(
             is_systemlib: bool,
@@ -50,6 +51,12 @@ mod compile_ffi {
             disable_toplevel_elaboration: bool,
             enable_decl: bool,
         ) -> u8;
+
+        unsafe fn hackc_compile_hhas_from_text_cpp_ffi<'a>(
+            alloc: &'a Bump,
+            env: &NativeEnv,
+            source_text: &CxxString,
+        ) -> Result<Box<HhasProgram<'a>>>;
 
         fn hackc_compile_from_text_cpp_ffi(
             env: &NativeEnv,
@@ -79,6 +86,7 @@ struct Bump(bumpalo::Bump);
 pub struct Bytes(ffi::Bytes);
 pub struct Decls<'a>(direct_decl_parser::Decls<'a>);
 struct DeclParserOptions<'a>(decl_parser_options::DeclParserOptions<'a>);
+struct HhasProgram<'a>(hhbc_by_ref_hhas_program::HhasProgram<'a>);
 
 fn make_env_flags(
     is_systemlib: bool,
@@ -255,4 +263,53 @@ unsafe fn hackc_verify_deserialization<'a>(serialized: &Bytes, expected: &Decls<
         .unwrap();
 
     decls == expected.0
+}
+
+fn hackc_compile_hhas_from_text_cpp_ffi<'a>(
+    alloc: &'a Bump,
+    env: &compile_ffi::NativeEnv,
+    source_text: &CxxString,
+) -> Result<Box<HhasProgram<'a>>, String> {
+    stack_limit::with_elastic_stack(|stack_limit| {
+        let native_env: hhbc_by_ref_compile::NativeEnv<&str> =
+            compile_ffi::NativeEnv::to_compile_env(&env).unwrap();
+        let compile_env = hhbc_by_ref_compile::Env::<&str> {
+            filepath: native_env.filepath.clone(),
+            config_jsons: vec![],
+            config_list: vec![],
+            flags: native_env.flags,
+        };
+        let text = SourceText::make(
+            ocamlrep::rc::RcOc::new(native_env.filepath.clone()),
+            source_text.as_bytes(),
+        );
+        let decl_getter_ptr = env.decl_getter as *const ();
+        let hhvm_provider_ptr = env.decl_provider as *const ();
+        let c_decl_getter_fn = unsafe {
+            std::mem::transmute::<
+                *const (),
+                extern "C" fn(*const std::ffi::c_void, *const c_char) -> *const std::ffi::c_void,
+            >(decl_getter_ptr)
+        };
+        let c_hhvm_provider_ptr =
+            unsafe { std::mem::transmute::<*const (), *const std::ffi::c_void>(hhvm_provider_ptr) };
+        let compile_result = hhbc_by_ref_compile::hhas_from_text(
+            &alloc.0,
+            &compile_env,
+            &stack_limit,
+            text,
+            Some(&native_env),
+            unified_decl_provider::DeclProvider::ExternalDeclProvider(ExternalDeclProvider::new(
+                c_decl_getter_fn,
+                c_hhvm_provider_ptr,
+            )),
+        );
+        match compile_result {
+            Ok((hhas_prog, _)) => Ok(Box::new(HhasProgram(hhas_prog))),
+            Err(e) => Err(anyhow!("{}", e)),
+        }
+    })
+    .map_err(|e| format!("{}", e))
+    .expect("hackc_compile_hhas_from_text_cpp_ffi: retry failed")
+    .map_err(|e| e.to_string())
 }

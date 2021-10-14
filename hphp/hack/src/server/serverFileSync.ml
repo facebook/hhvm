@@ -59,7 +59,7 @@ let open_file ~predeclare env path content =
       Decl.make_env ~sh:SharedMem.Uses ctx path);
     let editor_open_files = Relative_path.Set.add env.editor_open_files path in
     File_provider.remove_batch (Relative_path.Set.singleton path);
-    File_provider.provide_file path (File_provider.Ide content);
+    File_provider.provide_file_for_ide path content;
     let (ide_needs_parsing, diag_subscribe) =
       if
         String.equal content prev_content
@@ -167,7 +167,7 @@ let edit_file ~predeclare env path (edits : File_content.text_edit list) =
     in
     let editor_open_files = Relative_path.Set.add env.editor_open_files path in
     File_provider.remove_batch (Relative_path.Set.singleton path);
-    File_provider.provide_file path (File_provider.Ide edited_file_content);
+    File_provider.provide_file_for_ide path edited_file_content;
     let ide_needs_parsing = Relative_path.Set.add env.ide_needs_parsing path in
     let disk_needs_parsing =
       Relative_path.Set.add env.disk_needs_parsing path

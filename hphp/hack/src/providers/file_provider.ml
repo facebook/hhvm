@@ -92,14 +92,23 @@ let get_ide_contents_unsafe fn =
       ("File_provider.get_ide_contents_unsafe not supported "
       ^ "with local/decl memory provider")
 
-let provide_file fn contents =
+let provide_file_for_tests fn contents =
   match Provider_backend.get () with
   | Provider_backend.Analysis -> failwith "invalid"
-  | Provider_backend.Shared_memory -> FileHeap.add fn contents
+  | Provider_backend.Shared_memory -> FileHeap.add fn (Disk contents)
   | Provider_backend.Local_memory _
   | Provider_backend.Decl_service _ ->
     failwith
-      "File_provider.provide_file not supported with local/decl memory provider"
+      "File_provider.provide_file_for_tests not supported with local/decl memory provider"
+
+let provide_file_for_ide fn contents =
+  match Provider_backend.get () with
+  | Provider_backend.Analysis -> failwith "invalid"
+  | Provider_backend.Shared_memory -> FileHeap.add fn (Ide contents)
+  | Provider_backend.Local_memory _
+  | Provider_backend.Decl_service _ ->
+    failwith
+      "File_provider.provide_file_for_ide not supported with local/decl memory provider"
 
 let provide_file_hint fn contents =
   match Provider_backend.get () with

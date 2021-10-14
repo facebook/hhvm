@@ -65,15 +65,28 @@ let write_and_parse_test_files ctx =
       let dir = Path.dirname fn in
       Disk.mkdir_p (Path.to_string dir);
       Disk.write_file ~file:(Path.to_string fn) ~contents);
+  let get_next = MultiWorker.next None (List.map files ~f:fst) in
   let (file_infos, errors, failed_parsing) =
-    (* FIXME(jakebailey): use direct decl parser *)
-    Parsing_service.go_DEPRECATED
-      ctx
-      None
-      Relative_path.Set.empty
-      ~get_next:(MultiWorker.next None (List.map files ~f:fst))
-      ParserOptions.default
-      ~trace:true
+    if
+      TypecheckerOptions.use_direct_decl_parser (Provider_context.get_tcopt ctx)
+    then
+      ( Direct_decl_service.go
+          ctx
+          None
+          ~ide_files:Relative_path.Set.empty
+          ~get_next
+          ~trace:true
+          ~cache_decls:false,
+        Errors.empty,
+        Relative_path.Set.empty )
+    else
+      Parsing_service.go_DEPRECATED
+        ctx
+        None
+        Relative_path.Set.empty
+        ~get_next
+        ParserOptions.default
+        ~trace:true
   in
   if not (Errors.is_empty errors) then (
     Errors.iter_error_list

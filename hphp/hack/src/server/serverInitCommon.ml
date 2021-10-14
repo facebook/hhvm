@@ -59,7 +59,13 @@ let parsing
   let ctx = Provider_utils.ctx_from_server_env env in
   let (fast, errorl, _failed_parsing) =
     if genv.local_config.ServerLocalConfig.use_direct_decl_parser then
-      ( Direct_decl_service.go ctx genv.workers get_next ~trace ~cache_decls,
+      ( Direct_decl_service.go
+          ctx
+          genv.workers
+          ~ide_files:Relative_path.Set.empty
+          ~get_next
+          ~trace
+          ~cache_decls,
         Errors.empty,
         Relative_path.Set.empty )
     else

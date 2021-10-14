@@ -296,7 +296,8 @@ let parsing genv env to_check ~stop_at_errors profiling =
       ( Direct_decl_service.go
           ctx
           genv.workers
-          get_next
+          ~ide_files
+          ~get_next
           ~trace:true
           ~cache_decls:false,
         Errors.empty,

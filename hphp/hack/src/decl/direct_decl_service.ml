@@ -71,49 +71,51 @@ let decls_to_fileinfo
     ~init:FileInfo.{ empty_t with hash; file_mode }
     (List.zip_exn decls symbol_decl_hashes)
 
-let parse_batch
+let parse
     (ctx : Provider_context.t)
     ~(trace : bool)
     ~(cache_decls : bool)
     (acc : FileInfo.t Relative_path.Map.t)
-    (fnl : Relative_path.t list) : FileInfo.t Relative_path.Map.t =
-  let parse acc fn =
-    if not (FindUtils.path_filter fn) then
-      acc
-    else
-      let start_parse_time = Unix.gettimeofday () in
-      match
-        Direct_decl_utils.direct_decl_parse
-          ~file_decl_hash:true
-          ~symbol_decl_hashes:true
-          ctx
-          fn
-      with
-      | None -> acc
-      | Some ((decls, _, _, _) as decl_and_mode_and_hash) ->
-        let end_parse_time = Unix.gettimeofday () in
-        if cache_decls then Direct_decl_utils.cache_decls ctx decls;
-        let fileinfo = decls_to_fileinfo fn decl_and_mode_and_hash in
-        if trace then
-          Hh_logger.log
-            "[%.1fms] %s - %s"
-            ((end_parse_time -. start_parse_time) *. 1000.0)
-            (Relative_path.suffix fn)
-            (FileInfo.to_string fileinfo);
-        Relative_path.Map.add acc ~key:fn ~data:fileinfo
-  in
-  List.fold ~f:parse ~init:acc fnl
+    (fn : Relative_path.t) : FileInfo.t Relative_path.Map.t =
+  if not (FindUtils.path_filter fn) then
+    acc
+  else
+    let start_parse_time = Unix.gettimeofday () in
+    match
+      Direct_decl_utils.direct_decl_parse
+        ~file_decl_hash:true
+        ~symbol_decl_hashes:true
+        ctx
+        fn
+    with
+    | None -> acc
+    | Some ((decls, _, _, _) as decl_and_mode_and_hash) ->
+      let end_parse_time = Unix.gettimeofday () in
+      if cache_decls then Direct_decl_utils.cache_decls ctx decls;
+      let fileinfo = decls_to_fileinfo fn decl_and_mode_and_hash in
+      if trace then
+        Hh_logger.log
+          "[%.1fms] %s - %s"
+          ((end_parse_time -. start_parse_time) *. 1000.0)
+          (Relative_path.suffix fn)
+          (FileInfo.to_string fileinfo);
+      Relative_path.Map.add acc ~key:fn ~data:fileinfo
 
 let go
     (ctx : Provider_context.t)
     ~(trace : bool)
     ~(cache_decls : bool)
     (workers : MultiWorker.worker list option)
-    (get_next : Relative_path.t list MultiWorker.Hh_bucket.next) :
+    ~(ide_files : Relative_path.Set.t)
+    ~(get_next : Relative_path.t list MultiWorker.Hh_bucket.next) :
     FileInfo.t Relative_path.Map.t =
-  MultiWorker.call
-    workers
-    ~job:(parse_batch ctx ~trace ~cache_decls)
-    ~neutral:Relative_path.Map.empty
-    ~merge:Relative_path.Map.union
-    ~next:get_next
+  let acc =
+    MultiWorker.call
+      workers
+      ~job:(fun init -> List.fold ~init ~f:(parse ctx ~trace ~cache_decls))
+      ~neutral:Relative_path.Map.empty
+      ~merge:Relative_path.Map.union
+      ~next:get_next
+  in
+  Relative_path.Set.fold ide_files ~init:acc ~f:(fun fn acc ->
+      parse ctx ~trace ~cache_decls acc fn)

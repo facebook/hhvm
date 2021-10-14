@@ -41,7 +41,7 @@ mod compile_ffi {
         type Bytes;
         type Decls<'a>;
         type DeclParserOptions<'a>;
-        type HhasProgram<'a>;
+        type HhasProgramWrapper<'a>;
 
         fn make_env_flags(
             is_systemlib: bool,
@@ -56,7 +56,7 @@ mod compile_ffi {
             alloc: &'a Bump,
             env: &NativeEnv,
             source_text: &CxxString,
-        ) -> Result<Box<HhasProgram<'a>>>;
+        ) -> Result<Box<HhasProgramWrapper<'a>>>;
 
         fn hackc_compile_from_text_cpp_ffi(
             env: &NativeEnv,
@@ -79,6 +79,10 @@ mod compile_ffi {
         fn hackc_print_decls(decls: &Decls<'_>);
         fn hackc_print_serialized_size(bytes: &Bytes);
         unsafe fn hackc_verify_deserialization(serialized: &Bytes, expected: &Decls<'_>) -> bool;
+        fn hackc_hhas_to_string_cpp_ffi(
+            env: &NativeEnv,
+            prog: &HhasProgramWrapper,
+        ) -> Result<String>;
     }
 }
 
@@ -86,7 +90,8 @@ struct Bump(bumpalo::Bump);
 pub struct Bytes(ffi::Bytes);
 pub struct Decls<'a>(direct_decl_parser::Decls<'a>);
 struct DeclParserOptions<'a>(decl_parser_options::DeclParserOptions<'a>);
-struct HhasProgram<'a>(hhbc_by_ref_hhas_program::HhasProgram<'a>);
+#[repr(C)]
+pub struct HhasProgramWrapper<'a>(hhbc_by_ref_hhas_program::HhasProgram<'a>);
 
 fn make_env_flags(
     is_systemlib: bool,
@@ -269,7 +274,7 @@ fn hackc_compile_hhas_from_text_cpp_ffi<'a>(
     alloc: &'a Bump,
     env: &compile_ffi::NativeEnv,
     source_text: &CxxString,
-) -> Result<Box<HhasProgram<'a>>, String> {
+) -> Result<Box<HhasProgramWrapper<'a>>, String> {
     stack_limit::with_elastic_stack(|stack_limit| {
         let native_env: hhbc_by_ref_compile::NativeEnv<&str> =
             compile_ffi::NativeEnv::to_compile_env(&env).unwrap();
@@ -305,11 +310,30 @@ fn hackc_compile_hhas_from_text_cpp_ffi<'a>(
             )),
         );
         match compile_result {
-            Ok((hhas_prog, _)) => Ok(Box::new(HhasProgram(hhas_prog))),
+            Ok((hhas_prog, _)) => Ok(Box::new(HhasProgramWrapper(hhas_prog))),
             Err(e) => Err(anyhow!("{}", e)),
         }
     })
     .map_err(|e| format!("{}", e))
     .expect("hackc_compile_hhas_from_text_cpp_ffi: retry failed")
     .map_err(|e| e.to_string())
+}
+
+#[no_mangle]
+pub fn hackc_hhas_to_string_cpp_ffi(
+    env: &compile_ffi::NativeEnv,
+    prog: &HhasProgramWrapper,
+) -> Result<String, String> {
+    let native_env: hhbc_by_ref_compile::NativeEnv<&str> =
+        compile_ffi::NativeEnv::to_compile_env(env).unwrap();
+    let env = hhbc_by_ref_compile::Env::<&str> {
+        filepath: native_env.filepath.clone(),
+        config_jsons: vec![],
+        config_list: vec![],
+        flags: native_env.flags,
+    };
+    let mut output = String::new();
+    hhbc_by_ref_compile::hhas_to_string(&env, Some(&native_env), &mut output, &prog.0)
+        .map(|_| output)
+        .map_err(|e| e.to_string())
 }

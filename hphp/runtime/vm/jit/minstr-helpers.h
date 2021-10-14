@@ -132,10 +132,18 @@ PROPD_OBJ_HELPER_TABLE(X)
 #undef X
 
 // NullSafe prop.
-inline tv_lval propCQ(Class* ctx, tv_rval base, StringData* key,
-                      TypedValue& tvRef, ReadonlyOp op) {
-  return nullSafeProp(tvRef, ctx, base, key, op);
+#define PROPQ_HELPER_TABLE(m)                     \
+  /* name          mode     */                    \
+  m(propQQuiet,    MOpMode::None)                 \
+  m(propQ,         MOpMode::Warn)                 \
+
+#define X(nm, mode)                                                \
+inline tv_lval nm(Class* ctx, tv_rval base, StringData* key,       \
+                      TypedValue& tvRef, ReadonlyOp op) {          \
+  return nullSafeProp<mode>(tvRef, ctx, base, key, op);            \
 }
+PROPQ_HELPER_TABLE(X)
+#undef X
 
 // NullSafe prop with object base.
 inline tv_lval propCOQ(Class* ctx, ObjectData* base, StringData* key,
@@ -191,12 +199,20 @@ CGET_OBJ_PROP_HELPER_TABLE(X)
 //////////////////////////////////////////////////////////////////////
 
 // NullSafe prop.
-inline TypedValue cGetPropSQ(Class* ctx, tv_lval base, StringData* key,
-                             ReadonlyOp op) {
-  TypedValue localTvRef;
-  auto result = nullSafeProp(localTvRef, ctx, base, key, op);
-  return cGetRefShuffle(localTvRef, result);
+#define CGET_PROPQ_HELPER_TABLE(m)      \
+  /* name            mode */            \
+  m(cGetPropQQuiet,  MOpMode::None)     \
+  m(cGetPropQ,       MOpMode::Warn)     \
+
+#define X(nm, mode)                                                \
+inline TypedValue nm(Class* ctx, tv_lval base, StringData* key,    \
+                     ReadonlyOp op) {                              \
+  TypedValue localTvRef;                                           \
+  auto result = nullSafeProp<mode>(localTvRef, ctx, base, key, op);\
+  return cGetRefShuffle(localTvRef, result);                       \
 }
+CGET_PROPQ_HELPER_TABLE(X)
+#undef X
 
 // NullSafe prop with object base.
 inline TypedValue cGetPropSOQ(Class* ctx, ObjectData* base, StringData* key,

@@ -2324,6 +2324,7 @@ tv_lval propPre(TypedValue& tvRef, tv_lval base) {
   unknownBaseType(type(base));
 }
 
+template<MOpMode mode>
 inline tv_lval nullSafeProp(TypedValue& tvRef,
                             Class* ctx,
                             tv_rval base,
@@ -2352,9 +2353,7 @@ inline tv_lval nullSafeProp(TypedValue& tvRef,
     case KindOfLazyClass:
     case KindOfClsMeth:
     case KindOfRClsMeth:
-      tvWriteNull(tvRef);
-      raise_notice("Cannot access property on non-object");
-      return &tvRef;
+      return propPreNull<mode>(tvRef);
     case KindOfObject:
       return val(base).pobj->prop(&tvRef, ctx, key, op);
   }

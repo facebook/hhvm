@@ -43,8 +43,6 @@ constexpr char CREATING_DEFAULT_OBJECT[] =
   "Creating default object from empty value";
 constexpr char SET_PROP_NON_OBJECT[] =
   "Setting a property on a non-object";
-constexpr char NULLSAFE_PROP_WRITE_ERROR[] =
-  "?-> is not allowed in write context";
 constexpr char FUNCTION_NAME_MUST_BE_STRING[] =
   "Function name must be a string";
 constexpr char METHOD_NAME_MUST_BE_STRING[] =

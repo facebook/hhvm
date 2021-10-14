@@ -2491,8 +2491,13 @@ static OPTBLD_INLINE void propQDispatch(MOpMode mode, TypedValue key, ReadonlyOp
 
   assertx(mode == MOpMode::None || mode == MOpMode::Warn);
   assertx(key.m_type == KindOfPersistentString);
-  mstate.base = nullSafeProp(mstate.tvTempBase, ctx, mstate.base,
-                             key.m_data.pstr, op);
+  if (mode == MOpMode::None) {
+    mstate.base = nullSafeProp<MOpMode::None>(mstate.tvTempBase, ctx,
+                                              mstate.base, key.m_data.pstr, op);
+  } else {
+    mstate.base = nullSafeProp<MOpMode::Warn>(mstate.tvTempBase, ctx,
+                                              mstate.base, key.m_data.pstr, op);
+  }
 }
 
 static OPTBLD_INLINE

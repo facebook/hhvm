@@ -932,19 +932,11 @@ SSATmp* extractBaseIfObj(IRGS& env) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const StaticString
-  s_NULLSAFE_PROP_WRITE_ERROR(Strings::NULLSAFE_PROP_WRITE_ERROR);
-
 SSATmp* propGenericImpl(IRGS& env, MOpMode mode, SSATmp* base, SSATmp* key,
                         bool nullsafe, ReadonlyOp rop) {
   auto const define = mode == MOpMode::Define;
-  if (define && nullsafe) {
-    gen(env, RaiseError, cns(env, s_NULLSAFE_PROP_WRITE_ERROR.get()));
-    return ptrToInitNull(env);
-  }
-
   auto const tvRef = propTvRefPtr(env, base, key);
-  if (nullsafe) return gen(env, PropQ, ReadonlyData { rop }, base, key, tvRef);
+  if (nullsafe) return gen(env, PropQ, PropData{mode, rop}, base, key, tvRef);
   auto const op = define ? PropDX : PropX;
   return gen(env, op, PropData { mode, rop }, base, key, tvRef);
 }
@@ -1213,11 +1205,8 @@ SSATmp* cGetPropImpl(IRGS& env, SSATmp* base, SSATmp* key,
     return profres;
   }
 
-  // No warning takes precedence over nullsafe.
-  if (!nullsafe || mode != MOpMode::Warn) {
-    return gen(env, CGetProp, PropData{mode, op}, base, key);
-  }
-  return gen(env, CGetPropQ, ReadonlyData{op}, base, key);
+  if (nullsafe) return gen(env, CGetPropQ, PropData{mode, op}, base, key);
+  return gen(env, CGetProp, PropData{mode, op}, base, key);
 }
 
 Block* makeCatchSet(IRGS& env, uint32_t nDiscard) {

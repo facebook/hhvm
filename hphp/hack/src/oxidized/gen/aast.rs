@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b1ad81fc4a5e853aa8a60abe208d7c8e>>
+// @generated SignedSource<<cb912e6b96ccc8372f2bc271d2f94885>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -433,6 +433,12 @@ pub struct ExpressionTree<Ex, En> {
     ///
     /// Foo::makeTree($v ==> $v->visitBinOp(...))
     pub runtime_expr: Expr<Ex, En>,
+    /// Position of the first $$ in a splice that refers
+    /// to a variable outside the Expression Tree
+    ///
+    /// $x |> Code`${ $$ }` // Pos of the $$
+    /// Code`${ $x |> foo($$) }` // None
+    pub dollardollar_pos: Option<Pos>,
 }
 
 #[derive(

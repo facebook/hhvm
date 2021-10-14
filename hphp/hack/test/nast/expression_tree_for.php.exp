@@ -392,8 +392,8 @@
                                f_fun_kind = FSync; f_user_attributes = [];
                                f_external = false; f_doc_comment = None },
                              [([4:50-53], $0fp0); ([4:50-53], $0fp0)]))),
-                         [], [], None)))
-                     }))))
+                         [], [], None)));
+                     et_dollardollar_pos = None }))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false;

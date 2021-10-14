@@ -894,6 +894,8 @@ pub mod expression_trees {
     pub const VISIT_INSTANCE_METHOD: &str = "visitInstanceMethod";
 
     pub const SPLICE: &str = "splice";
+
+    pub const DOLLARDOLLAR_TMP_VAR: &str = "$0dollardollar";
 }
 
 #[cfg(test)]

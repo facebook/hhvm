@@ -282,6 +282,12 @@ and ('ex, 'en) expression_tree = {
       (** The expression that's executed at runtime.
 
       Foo::makeTree($v ==> $v->visitBinOp(...)) *)
+  et_dollardollar_pos: pos option;
+      (** Position of the first $$ in a splice that refers
+          to a variable outside the Expression Tree
+
+          $x |> Code`${ $$ }` // Pos of the $$
+          Code`${ $x |> foo($$) }` // None *)
 }
 
 and ('ex, 'en) expr_ =

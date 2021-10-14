@@ -299,6 +299,7 @@ let visitor =
             et_splices;
             et_function_pointers;
             et_runtime_expr = _;
+            et_dollardollar_pos = _;
           } =
       (* We only want to consider completion from the hint and the
          virtualized expression, not the visitor expression. The

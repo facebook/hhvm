@@ -336,8 +336,8 @@
                                [6:7-10], $0fp2); ([8:9-12], $0fp1); (
                                [7:9-12], $0fp0)]
                              ))),
-                         [], [], None)))
-                     }))))
+                         [], [], None)));
+                     et_dollardollar_pos = None }))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

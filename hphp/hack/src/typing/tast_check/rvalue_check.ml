@@ -77,6 +77,7 @@ let visitor =
             et_function_pointers;
             et_virtualized_expr;
             et_runtime_expr;
+            et_dollardollar_pos = _;
           } ->
         this#on_hint env et_hint;
         this#on_block env et_splices;

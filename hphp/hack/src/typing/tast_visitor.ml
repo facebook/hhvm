@@ -70,6 +70,7 @@ class virtual iter =
             et_function_pointers;
             et_virtualized_expr;
             et_runtime_expr;
+            et_dollardollar_pos = _;
           } =
       self#on_hint env et_hint;
       self#on_block env et_splices;
@@ -153,6 +154,7 @@ class virtual ['state] iter_with_state =
             et_function_pointers;
             et_virtualized_expr;
             et_runtime_expr;
+            et_dollardollar_pos = _;
           } =
       self#on_hint (env, state) et_hint;
       self#on_block (env, state) et_splices;
@@ -229,6 +231,7 @@ class virtual ['a] reduce =
             et_function_pointers;
             et_virtualized_expr;
             et_runtime_expr;
+            et_dollardollar_pos = _;
           } =
       let et_hint = self#on_hint env et_hint in
       let et_splices = self#on_block env et_splices in
@@ -316,6 +319,7 @@ class virtual map =
             et_function_pointers;
             et_virtualized_expr;
             et_runtime_expr;
+            et_dollardollar_pos;
           } =
       let et_hint = self#on_hint env et_hint in
       let et_splices = self#on_block env et_splices in
@@ -335,6 +339,7 @@ class virtual map =
           et_function_pointers;
           et_virtualized_expr;
           et_runtime_expr;
+          et_dollardollar_pos;
         }
 
     method! on_ET_Splice env e =
@@ -411,6 +416,7 @@ class virtual endo =
             et_function_pointers;
             et_virtualized_expr;
             et_runtime_expr;
+            et_dollardollar_pos;
           } =
       let et_hint = self#on_hint env et_hint in
       let et_splices = self#on_block env et_splices in
@@ -430,6 +436,7 @@ class virtual endo =
           et_function_pointers;
           et_virtualized_expr;
           et_runtime_expr;
+          et_dollardollar_pos;
         }
 
     method! on_ET_Splice env e =

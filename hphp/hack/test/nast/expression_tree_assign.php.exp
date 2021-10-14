@@ -178,8 +178,8 @@
                                   f_external = false; f_doc_comment = None },
                                 []))))
                            ],
-                         None)))
-                     }))))
+                         None)));
+                     et_dollardollar_pos = None }))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false;

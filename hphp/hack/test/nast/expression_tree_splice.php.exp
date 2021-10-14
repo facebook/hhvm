@@ -214,8 +214,8 @@
                                f_fun_kind = FSync; f_user_attributes = []; 
                                f_external = false; f_doc_comment = None },
                              [([4:19-25], $0splice0); ([4:19-25], $0splice0)]))),
-                         [], [], None)))
-                     }))))
+                         [], [], None)));
+                     et_dollardollar_pos = None }))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

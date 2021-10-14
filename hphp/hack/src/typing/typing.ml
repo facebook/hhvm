@@ -838,14 +838,6 @@ let set_valid_rvalue p env x ty =
    *)
   Env.set_local_expr_id env x (Ident.tmp ())
 
-(* Produce an error if assignment is used in the scope of the |> operator, i.e.
- * if $$ is in scope *)
-let error_if_assign_in_pipe p env =
-  let dd_var = Local_id.make_unscoped SN.SpecialIdents.dollardollar in
-  let dd_defined = Env.is_local_defined env dd_var in
-  if dd_defined then
-    Errors.unimplemented_feature p "Assignment within pipe expressions"
-
 let is_hack_collection env ty =
   (* TODO(like types) This fails if a collection is used as a parameter under
    * pessimization, because ~Vector<int> </: ConstCollection<mixed>. This is the
@@ -5007,8 +4999,28 @@ and expression_tree env p et =
     et_function_pointers;
     et_virtualized_expr;
     et_runtime_expr;
+    et_dollardollar_pos;
   } =
     et
+  in
+
+  (* Slight hack to deal with |> $$ support *)
+  let env =
+    match et_dollardollar_pos with
+    | Some dd_pos ->
+      let dollardollar_var =
+        Local_id.make_unscoped SN.ExpressionTrees.dollardollarTmpVar
+      in
+      let dd_var = Local_id.make_unscoped SN.SpecialIdents.dollardollar in
+      let dd_defined = Env.is_local_defined env dd_var in
+      if not dd_defined then
+        let () = Errors.undefined dd_pos SN.SpecialIdents.dollardollar None in
+        let nothing_ty = MakeType.nothing Reason.Rnone in
+        Env.set_local env dollardollar_var nothing_ty Pos.none
+      else
+        let (dd_ty, dd_pos) = Env.get_local_pos env dd_var in
+        Env.set_local env dollardollar_var dd_ty dd_pos
+    | None -> env
   in
 
   (* Given the expression tree literal:
@@ -5065,6 +5077,7 @@ and expression_tree env p et =
          et_function_pointers = t_function_pointers;
          et_virtualized_expr = t_virtualized_expr;
          et_runtime_expr = t_runtime_expr;
+         et_dollardollar_pos;
        })
     ty_runtime_expr
 
@@ -5419,7 +5432,6 @@ and check_shape_keys_validity :
 
 (* Deal with assignment of a value of type ty2 to lvalue e1 *)
 and assign p env e1 pos2 ty2 =
-  error_if_assign_in_pipe p env;
   assign_with_subtype_err_ p Reason.URassign env e1 pos2 ty2
 
 and assign_ p ur env e1 pos2 ty2 =

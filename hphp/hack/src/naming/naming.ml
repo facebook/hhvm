@@ -2267,6 +2267,7 @@ and expr_ env p (e : Nast.expr_) =
           et_function_pointers = block env et.et_function_pointers;
           et_virtualized_expr = expr env et.et_virtualized_expr;
           et_runtime_expr = expr env et.et_runtime_expr;
+          et_dollardollar_pos = et.et_dollardollar_pos;
         }
   | Aast.ET_Splice e -> N.ET_Splice (expr env e)
   | Aast.Unop (uop, e) -> N.Unop (uop, expr env e)

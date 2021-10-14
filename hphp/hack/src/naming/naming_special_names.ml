@@ -907,4 +907,6 @@ module ExpressionTrees = struct
   let visitContinue = "visitContinue"
 
   let splice = "splice"
+
+  let dollardollarTmpVar = "$0dollardollar"
 end

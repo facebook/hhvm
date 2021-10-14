@@ -10,6 +10,7 @@ HHVM_DEFINE_EXTENSION(
     symbol-map.cpp
     thread-factory.cpp
     facts-store.cpp
+    watchman-watcher.cpp
   HEADERS
     attribute-argument-map.h
     attribute-map.h
@@ -28,6 +29,8 @@ HHVM_DEFINE_EXTENSION(
     symbol-types.h
     thread-factory.h
     facts-store.h
+    watcher.h
+    watchman-watcher.h
   SYSTEMLIB
     ext_facts.php
   DEPENDS

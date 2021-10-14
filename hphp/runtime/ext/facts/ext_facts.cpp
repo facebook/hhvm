@@ -55,6 +55,7 @@
 #include "hphp/runtime/ext/facts/facts-store.h"
 #include "hphp/runtime/ext/facts/logging.h"
 #include "hphp/runtime/ext/facts/string-ptr.h"
+#include "hphp/runtime/ext/facts/watchman-watcher.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/assertions.h"
@@ -663,11 +664,11 @@ WatchmanAutoloadMapFactory::getForOptions(const RepoOptions& options) {
   return m_maps
       .insert(
           {*mapKey,
-           make_watchman_facts(
+           make_watcher_facts(
                mapKey->m_root,
                mapKey->m_dbData,
-               mapKey->m_queryExpr,
-               get_watchman_client(mapKey->m_root),
+               make_watchman_watcher(
+                   mapKey->m_queryExpr, get_watchman_client(mapKey->m_root)),
                RuntimeOption::ServerExecutionMode(),
                mapKey->m_indexedMethodAttrs)})
       .first->second.get();

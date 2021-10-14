@@ -19,32 +19,21 @@
 #include <memory>
 
 #include <folly/dynamic.h>
-#include <folly/experimental/io/FsUtil.h>
 
-#include "hphp/runtime/base/autoload-map.h"
-#include "hphp/runtime/ext/facts/autoload-db.h"
+#include "hphp/runtime/base/watchman.h"
 #include "hphp/runtime/ext/facts/watcher.h"
 
 namespace HPHP {
 namespace Facts {
 
 /**
- * Create a FactsStore that learns about changed files from its Watcher and
- * updates the DB at `dbData.m_path` accordingly.
+ * Return a Watcher which listens to a Watchman server.
+ *
+ * `queryExpr`: A query object that follows Watchman's JSON API.
+ * `watchman`: An open connection to a Watchman server.
  */
-std::shared_ptr<FactsStore> make_watcher_facts(
-    folly::fs::path root,
-    DBData dbData,
-    std::unique_ptr<Watcher> watcher,
-    bool shouldSubscribe,
-    std::vector<std::string> indexedMethodAttributes);
-
-/**
- * Create a FactsStore that trusts the DB at `dbData.m_path` and never modifies
- * it.
- */
-std::shared_ptr<FactsStore>
-make_trusted_facts(folly::fs::path root, DBData dbData);
+std::unique_ptr<Watcher>
+make_watchman_watcher(folly::dynamic queryExpr, Watchman& watchman);
 
 } // namespace Facts
 } // namespace HPHP

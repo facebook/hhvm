@@ -330,14 +330,29 @@ struct IStack {
  * Everything we need to represent a frame in the backtrace.
  */
 struct BTFrame {
-  BTFrame() = default;
+  // No frame. End of backtrace.
+  static BTFrame none() {
+    return BTFrame{};
+  }
 
-  BTFrame(ActRec* fp, Offset bcOff)
-    : BTFrame(fp, bcOff, kRootIFrameID, kRootIFrameID) {}
+  // Regular frame pointed to by `fp`. This includes resumables.
+  // FIXME: fp may be nullptr, in which case this is an equivalent of none()
+  static BTFrame regular(ActRec* fp, Offset bcOff) {
+    return BTFrame{fp, bcOff, kRootIFrameID, kRootIFrameID};
+  }
 
-  BTFrame(ActRec* fp, Offset bcOff, IFrameID frameId, IFrameID pubFrameId)
-    : m_fp(fp), m_bcOff(bcOff), m_frameId(frameId), m_pubFrameId(pubFrameId) {
-    assertx(frameId == kRootIFrameID || frameId != pubFrameId);
+  // Inlined frame that does not have a materialized ActRec. IFrame backed by
+  // `frameID` contains the metadata necessary to reconstruct the frame.
+  // The nearest published frame `fp` is represented by `pubFrameId`.
+  static BTFrame iframe(ActRec* fp, Offset bcOff,
+                        IFrameID frameId, IFrameID pubFrameId) {
+    assertx(fp != nullptr);
+    assertx(frameId != kRootIFrameID && frameId != pubFrameId);
+    return BTFrame{fp, bcOff, frameId, pubFrameId};
+  }
+
+  BTFrame withFP(ActRec* fp) const {
+    return BTFrame{fp, m_bcOff, m_frameId, m_pubFrameId};
   }
 
   operator bool() const { return m_fp != nullptr; }
@@ -356,6 +371,10 @@ struct BTFrame {
   IFrameID pubFrameIdInternal() const { return m_pubFrameId; }
 
  private:
+  BTFrame() = default;
+  BTFrame(ActRec* fp, Offset bcOff, IFrameID frameId, IFrameID pubFrameId)
+    : m_fp(fp), m_bcOff(bcOff), m_frameId(frameId), m_pubFrameId(pubFrameId) {}
+
   ActRec* m_fp{nullptr};
   Offset m_bcOff{kInvalidOffset};
   IFrameID m_frameId{kRootIFrameID};

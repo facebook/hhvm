@@ -105,7 +105,7 @@ void walkStack(L func, c_WaitableWaitHandle* wh, bool skipTop) {
 
   auto frm = wh != nullptr
     ? getARFromWH(wh, visitedWHs)
-    : BTFrame { vmfp(), kInvalidOffset };
+    : BTFrame::regular(vmfp(), kInvalidOffset);
 
   // If there are no VM frames, we're done.
   if (!frm || !rds::header()) return;

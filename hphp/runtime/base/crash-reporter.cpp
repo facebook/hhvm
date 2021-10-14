@@ -243,7 +243,7 @@ static void bt_handler(int sigin, siginfo_t* info, void* args) {
         s_crash_report_stage = CrashReportStage::DumpTransDB;
 
         if (auto const ar = jit::findVMFrameForDebug()) {
-          auto const frame = BTFrame { ar, kInvalidOffset };
+          auto const frame = BTFrame::regular(ar, kInvalidOffset);
           auto const addr = [&] () -> jit::CTCA {
             if (sig != SIGILL && sig != SIGSEGV) return (jit::CTCA) sig_addr;
 #if defined(__x86_64__) && defined(__linux__)

@@ -174,18 +174,18 @@ BTFrame getARFromWHImpl(
     if (currentWaitHandle->getKind() == c_Awaitable::Kind::AsyncFunction) {
       auto const resumable = currentWaitHandle->asAsyncFunction()->resumable();
       auto const ar = resumable->actRec();
-      return BTFrame { ar, resumable->suspendOffset() };
+      return BTFrame::regular(ar, resumable->suspendOffset());
     }
     if (currentWaitHandle->getKind() == c_Awaitable::Kind::AsyncGenerator) {
       auto const resumable = currentWaitHandle->asAsyncGenerator()->resumable();
       auto const ar = resumable->actRec();
-      return BTFrame { ar, resumable->suspendOffset() };
+      return BTFrame::regular(ar, resumable->suspendOffset());
     }
     currentWaitHandle = getParentWH(currentWaitHandle, contextIdx, visitedWHs);
   }
   auto const fp = AsioSession::Get()->getContext(contextIdx)->getSavedFP();
   assertx(fp != nullptr && fp->func() != nullptr);
-  return BTFrame { fp, 0 };
+  return BTFrame::regular(fp, 0);
 }
 
 }
@@ -194,10 +194,10 @@ BTFrame getARFromWH(
   c_WaitableWaitHandle* currentWaitHandle,
   folly::small_vector<c_WaitableWaitHandle*, 64>& visitedWHs
 ) {
-  if (currentWaitHandle->isFinished()) return BTFrame{};
+  if (currentWaitHandle->isFinished()) return BTFrame::none();
 
   auto const contextIdx = currentWaitHandle->getContextIdx();
-  if (contextIdx == 0) return BTFrame{};
+  if (contextIdx == 0) return BTFrame::none();
 
   return getARFromWHImpl(currentWaitHandle, contextIdx, visitedWHs);
 }
@@ -213,15 +213,15 @@ BTFrame initBTContextAt(BTContext& ctx, jit::CTCA ip, BTFrame frm) {
     FTRACE_MOD(Trace::fixup, 3,
                "IStack fp={} ip={} frame={} pubFrame={} callOff={}\n",
                frm.fpInternal(), ip, stk->frame, stk->pubFrame, stk->callOff);
-    return
-      BTFrame { frm.fpInternal(), stk->callOff, stk->frame, stk->pubFrame };
+    return BTFrame::iframe(
+      frm.fpInternal(), stk->callOff, stk->frame, stk->pubFrame);
   }
 
   if (frm.bcOff() != kInvalidOffset) return frm;
 
   // If we don't have an inlined frame, it's always safe to use pcOff() if
   // initBTContextAt() is being called for a leaf frame.
-  return BTFrame { frm.fpInternal(), pcOff() };
+  return BTFrame::regular(frm.fpInternal(), pcOff());
 }
 
 BTFrame getPrevActRec(
@@ -243,7 +243,7 @@ BTFrame getPrevActRec(
       auto const sk = getAsyncFrame(wh->tailFrame(ctx.afwhTailFrameIndex++));
       auto const prevFP = fp->m_sfp;
       prevFP->setFunc(sk.func());
-      return BTFrame { prevFP, sk.offset() };
+      return BTFrame::regular(prevFP, sk.offset());
     }
 
     // We could use stashedFP->savedRip as the return TCA here, but for
@@ -266,10 +266,11 @@ BTFrame getPrevActRec(
 
     if (ifr.parent == frm.pubFrameIdInternal()) {
       // Reached published frame, continue following the FP chain.
-      return BTFrame { fp, ifr.callOff };
+      return BTFrame::regular(fp, ifr.callOff);
     }
 
-    return BTFrame { fp, ifr.callOff, ifr.parent, frm.pubFrameIdInternal() };
+    return BTFrame::iframe(
+      fp, ifr.callOff, ifr.parent, frm.pubFrameIdInternal());
   }
 
   auto const wh = [&]() -> c_WaitableWaitHandle* {
@@ -301,7 +302,7 @@ BTFrame getPrevActRec(
        * 3) this destructor gets called as part of destruction of the
        *      WaitHandleobject, which happens right before FP is adjusted
       */
-      return BTFrame{};
+      return BTFrame::none();
     }
 
     // If we merged tail frames into this AsyncFunctionWaitHandle, iterate over
@@ -318,7 +319,7 @@ BTFrame getPrevActRec(
       prevFP->setFunc(sk.func());
       prevFP->m_callOffAndFlags =
         ActRec::encodeCallOffsetAndFlags(0, 1 << ActRec::LocalsDecRefd);
-      return BTFrame { prevFP, sk.offset() };
+      return BTFrame::regular(prevFP, sk.offset());
     }
 
     auto const contextIdx = wh->getContextIdx();
@@ -328,7 +329,7 @@ BTFrame getPrevActRec(
     Offset prevBcOff;
     auto const prevFP =
       g_context->getPrevVMState(fp, &prevBcOff, nullptr, nullptr, &rip);
-    prev = BTFrame { prevFP, prevBcOff };
+    prev = BTFrame::regular(prevFP, prevBcOff);
   }
 
   return prev
@@ -383,7 +384,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
   }
 
   int depth = 0;
-  auto frm = BTFrame{};
+  auto frm = BTFrame::none();
 
   if (btArgs.m_fromWaitHandle) {
     frm = getARFromWH(btArgs.m_fromWaitHandle, visitedWHs);
@@ -394,7 +395,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
     // If there are no VM frames, we're done.
     if (!rds::header() || !vmfp()) return bt;
 
-    frm = BTFrame { vmfp(), kInvalidOffset };
+    frm = BTFrame::regular(vmfp(), kInvalidOffset);
 
     // Get the fp and pc of the top frame (possibly skipping one frame).
 
@@ -420,12 +421,8 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
   if (btArgs.m_withSelf) {
     // Builtins don't have a file and line number, so find the first user frame
     BTContext ctxCopy;
-    auto curFrm = BTFrame {
-      const_cast<ActRec*>(ctxCopy.clone(ctx, frm.fpInternal())),
-      frm.bcOff(),
-      frm.frameIdInternal(),
-      frm.pubFrameIdInternal()
-    };
+    auto curFrm = frm.withFP(
+      const_cast<ActRec*>(ctxCopy.clone(ctx, frm.fpInternal())));
     while (curFrm && curFrm.func()->isBuiltin()) {
       curFrm = getPrevActRec(ctxCopy, curFrm, visitedWHs);
     }
@@ -675,7 +672,7 @@ std::pair<const Func*, Offset> getCurrentFuncAndOffset() {
   BTContext ctx;
 
   auto const fp = vmfp();
-  auto frm = BTFrame { fp, kInvalidOffset };
+  auto frm = BTFrame::regular(fp, kInvalidOffset);
   frm = initBTContextAt(ctx, vmJitReturnAddr(), frm);
 
   // Builtins don't have a file and line number, so find the first user frame

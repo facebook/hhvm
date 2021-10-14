@@ -37,7 +37,7 @@ type DeriveFilters = shape(
  * If this returns false, any other operations in the HH\Facts namespace will
  * throw InvalidOperationException if called.
  */
-function enabled(): bool;
+function enabled()[]: bool;
 
 /**
  * Return the DB path corresponding to the given directory of Hack code.
@@ -54,7 +54,7 @@ function enabled(): bool;
  * the DB's location for that repo based on the query, path, version, and Unix
  * user.
  */
-function db_path(string $root): ?string;
+function db_path(string $root)[]: ?string;
 
 /**
  * Return the only path defining a given symbol.
@@ -64,20 +64,20 @@ function db_path(string $root): ?string;
  *
  * Throw InvalidOperationException if Facts is not enabled.
  */
-function type_to_path(string $type_name): ?string;
-function function_to_path(string $function_name): ?string;
-function constant_to_path(string $constant_name): ?string;
-function type_alias_to_path(string $type_alias_name): ?string;
+function type_to_path(string $type_name)[]: ?string;
+function function_to_path(string $function_name)[]: ?string;
+function constant_to_path(string $constant_name)[]: ?string;
+function type_alias_to_path(string $type_alias_name)[]: ?string;
 
 /**
  * Return all the symbols defined in the given path.
  *
  * Throw InvalidOperationException if Facts is not enabled.
  */
-function path_to_types(string $path): vec<classname<nonnull>>;
-function path_to_functions(string $path): vec<string>;
-function path_to_constants(string $path): vec<string>;
-function path_to_type_aliases(string $path): vec<string>;
+function path_to_types(string $path)[]: vec<classname<nonnull>>;
+function path_to_functions(string $path)[]: vec<string>;
+function path_to_constants(string $path)[]: vec<string>;
+function path_to_type_aliases(string $path)[]: vec<string>;
 
 /**
  * Resolve a string into a classname that's properly capitalized and properly
@@ -88,7 +88,7 @@ function path_to_type_aliases(string $path): vec<string>;
  *
  * Throw InvalidOperationException if Facts is not enabled.
  */
-function type_name(string $classname): ?classname<nonnull>;
+function type_name(string $classname)[]: ?classname<nonnull>;
 
 /**
  * Return a string enum representing whether the given type is, for example, a
@@ -97,17 +97,17 @@ function type_name(string $classname): ?classname<nonnull>;
  * If the given type doesn't have a unique definition or isn't a
  * `classname<mixed>`, return `null`.
  */
-function kind(classname<mixed> $type): ?TypeKind;
+function kind(classname<mixed> $type)[]: ?TypeKind;
 
 /**
  * True iff the given type cannot be constructed.
  */
-function is_abstract(classname<mixed> $type): bool;
+function is_abstract(classname<mixed> $type)[]: bool;
 
 /**
  * True iff the given type cannot be inherited.
  */
-function is_final(classname<mixed> $type): bool;
+function is_final(classname<mixed> $type)[]: bool;
 
 /**
  * Get all types which extend, implement, or use the given base type.
@@ -117,7 +117,7 @@ function is_final(classname<mixed> $type): bool;
 function subtypes<T>(
   classname<T> $base_type,
   ?DeriveFilters $filters = null,
-): vec<classname<T>>;
+)[]: vec<classname<T>>;
 
 /**
  * Return all types which transitively extend, implement, or use the given
@@ -138,7 +138,7 @@ function subtypes<T>(
 function transitive_subtypes<T>(
   classname<T> $base_type,
   ?DeriveFilters $filters = null,
-): vec<(classname<T>, string, TypeKind, bool)>;
+)[]: vec<(classname<T>, string, TypeKind, bool)>;
 
 /**
  * Get all types which the given type extends, implements, or uses.
@@ -148,7 +148,7 @@ function transitive_subtypes<T>(
 function supertypes(
   classname<mixed> $derived_type,
   ?DeriveFilters $filters = null,
-): vec<classname<mixed>>;
+)[]: vec<classname<mixed>>;
 
 /**
  * Get all types matching the given filters.
@@ -157,7 +157,7 @@ function supertypes(
  */
 function types_with_attribute(
   classname<\HH\ClassLikeAttribute> $attribute,
-): vec<classname<mixed>>;
+)[]: vec<classname<mixed>>;
 
 /**
  * Get all type aliases matching the given filters.
@@ -166,7 +166,7 @@ function types_with_attribute(
  */
 function type_aliases_with_attribute(
   classname<\HH\TypeAliasAttribute> $attribute,
-): vec<string>;
+)[]: vec<string>;
 
 /**
  * Get all methods matching the given filters.
@@ -175,7 +175,7 @@ function type_aliases_with_attribute(
  */
 function methods_with_attribute(
   classname<\HH\MethodAttribute> $attribute,
-): vec<(classname<nonnull>, string)>;
+)[]: vec<(classname<nonnull>, string)>;
 
 /**
  * Get all files matching the given filters.
@@ -184,7 +184,7 @@ function methods_with_attribute(
  */
 function files_with_attribute(
   classname<\HH\FileAttribute> $attribute,
-): vec<string>;
+)[]: vec<string>;
 
 /**
  * Get all attributes on the given type.
@@ -196,7 +196,7 @@ function files_with_attribute(
  */
 function type_attributes(
   classname<mixed> $type,
-): vec<classname<\HH\ClassLikeAttribute>>;
+)[]: vec<classname<\HH\ClassLikeAttribute>>;
 
 /**
  * Get all attributes on the given type alias.
@@ -205,7 +205,7 @@ function type_attributes(
  */
 function type_alias_attributes(
   string $type_alias,
-): vec<classname<\HH\TypeAliasAttribute>>;
+)[]: vec<classname<\HH\TypeAliasAttribute>>;
 
 /**
  * Get all attributes on the given method.
@@ -217,7 +217,7 @@ function type_alias_attributes(
 function method_attributes(
   classname<mixed> $type,
   string $method,
-): vec<classname<\HH\MethodAttribute>>;
+)[]: vec<classname<\HH\MethodAttribute>>;
 
 /**
  * Get all attributes on the given file.
@@ -226,7 +226,7 @@ function method_attributes(
  */
 function file_attributes(
   string $file,
-): vec<classname<\HH\FileAttribute>>;
+)[]: vec<classname<\HH\FileAttribute>>;
 
 /**
  * Get all parameters for the given attribute on the given type.
@@ -239,7 +239,7 @@ function file_attributes(
 function type_attribute_parameters(
   classname<mixed> $type,
   classname<\HH\ClassLikeAttribute> $attribute,
-): vec<dynamic>;
+)[]: vec<dynamic>;
 
 /**
  * Get all parameters for the given attribute on the given type alias.
@@ -252,7 +252,7 @@ function type_attribute_parameters(
 function type_alias_attribute_parameters(
   string $type_alias,
   classname<\HH\TypeAliasAttribute> $attribute,
-): vec<dynamic>;
+)[]: vec<dynamic>;
 
 /**
  * Get all parameters for the given attribute on the given method.
@@ -266,7 +266,7 @@ function method_attribute_parameters(
   classname<mixed> $type,
   string $method,
   classname<\HH\MethodAttribute> $attribute,
-): vec<dynamic>;
+)[]: vec<dynamic>;
 
 /**
  * Get all parameters for the given attribute on the given file.
@@ -279,7 +279,7 @@ function method_attribute_parameters(
 function file_attribute_parameters(
   string $file,
   classname<\HH\FileAttribute> $attribute,
-): vec<dynamic>;
+)[]: vec<dynamic>;
 
 /**
  * Return all symbols defined in the repo, as a dict mapping each symbol
@@ -288,10 +288,10 @@ function file_attribute_parameters(
  * If a symbol is defined in more than one path, one of the paths defining the
  * symbol will be chosen in an unspecified manner.
  */
-function all_types(): dict<classname<mixed>, string>;
-function all_functions(): dict<string, string>;
-function all_constants(): dict<string, string>;
-function all_type_aliases(): dict<string, string>;
+function all_types()[]: dict<classname<mixed>, string>;
+function all_functions()[]: dict<string, string>;
+function all_constants()[]: dict<string, string>;
+function all_type_aliases()[]: dict<string, string>;
 
 type AttributeData = shape(
   'name' => string,

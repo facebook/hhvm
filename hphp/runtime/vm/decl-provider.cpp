@@ -15,7 +15,7 @@
 */
 
 #include "hphp/runtime/base/autoload-handler.h"
-#include "hphp/runtime/vm/hhvm_decl_provider.h"
+#include "hphp/runtime/vm/decl-provider.h"
 
 namespace HPHP {
 

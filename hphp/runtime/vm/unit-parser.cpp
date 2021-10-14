@@ -47,7 +47,7 @@
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/vm/native.h"
-#include "hphp/runtime/vm/hhvm_decl_provider.h"
+#include "hphp/runtime/vm/decl-provider.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 #include "hphp/util/atomic-vector.h"
 #include "hphp/util/embedded-data.h"

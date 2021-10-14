@@ -329,6 +329,7 @@
     heap_global_storage
     naming
     procs_procs
+    remote_old_decl_client
     server_monitor
     shallow_decl_compare
     typing_deps
@@ -363,6 +364,22 @@
     naming_attributes_params
     shallow_decl_defs
     typing_defs)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
+  (name remote_old_decl_client)
+  (modules remote_old_decl_client)
+  (libraries
+    decl_export
+    file_info
+    naming_sqlite
+    provider_context
+    shallow_decl_defs
+    sys_utils
+    typing_defs
+    utils_config_file
+    utils_core
+    utils_www_root)
   (preprocess (pps ppx_deriving.std)))
 
 (library

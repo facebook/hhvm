@@ -37,6 +37,9 @@ let shallow_decl_enabled ctx =
 let force_shallow_decl_fanout_enabled (ctx : Provider_context.t) =
   TypecheckerOptions.force_shallow_decl_fanout (Provider_context.get_tcopt ctx)
 
+let fetch_remote_old_decls (ctx : Provider_context.t) =
+  TypecheckerOptions.fetch_remote_old_decls (Provider_context.get_tcopt ctx)
+
 let use_direct_decl_parser ctx =
   TypecheckerOptions.use_direct_decl_parser (Provider_context.get_tcopt ctx)
 
@@ -155,12 +158,39 @@ let get_batch (ctx : Provider_context.t) (names : SSet.t) :
   | Provider_backend.Decl_service _ ->
     failwith "get_batch not implemented for Decl_service"
 
-let get_old_batch (ctx : Provider_context.t) (names : SSet.t) :
+let get_old_batch
+    (ctx : Provider_context.t)
+    (names : SSet.t)
+    ~(get_remote_old_decl :
+       string -> Shallow_decl_defs.shallow_class option SMap.t option) :
     shallow_class option SMap.t =
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis -> failwith "invalid"
   | Provider_backend.Shared_memory ->
-    Shallow_classes_heap.Classes.get_old_batch names
+    let old_classes = Shallow_classes_heap.Classes.get_old_batch names in
+    if fetch_remote_old_decls ctx then
+      SSet.fold
+        begin
+          fun cid old_classes ->
+          if SMap.mem cid old_classes then
+            old_classes
+          else
+            match get_remote_old_decl cid with
+            | None -> old_classes
+            | Some remote_old_classes ->
+              remote_old_classes
+              |> SMap.merge
+                   (fun _key local_val remote_val ->
+                     if Option.is_some local_val then
+                       local_val
+                     else
+                       remote_val)
+                   old_classes
+        end
+        names
+        old_classes
+    else
+      old_classes
   | Provider_backend.Local_memory _ ->
     failwith "get_old_batch not implemented for Local_memory"
   | Provider_backend.Decl_service _ ->

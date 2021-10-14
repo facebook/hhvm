@@ -70,6 +70,8 @@ val get_path_by_64bit_dep :
   Typing_deps.Dep.t ->
   (Relative_path.t * Naming_types.name_kind) option
 
+val get_decl_hash_by_64bit_dep : db_path -> Typing_deps.Dep.t -> string option
+
 val get_type_path_by_name :
   db_path -> string -> (Relative_path.t * Naming_types.kind_of_type) option
 

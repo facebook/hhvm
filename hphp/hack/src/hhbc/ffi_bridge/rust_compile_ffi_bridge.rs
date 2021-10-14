@@ -41,7 +41,7 @@ mod compile_ffi {
         type Bytes;
         type Decls<'a>;
         type DeclParserOptions<'a>;
-        type HhasProgramWrapper<'a>;
+        type HhasProgramWrapper;
 
         fn make_env_flags(
             is_systemlib: bool,
@@ -52,11 +52,10 @@ mod compile_ffi {
             enable_decl: bool,
         ) -> u8;
 
-        unsafe fn hackc_compile_hhas_from_text_cpp_ffi<'a>(
-            alloc: &'a Bump,
+        unsafe fn hackc_compile_hhas_from_text_cpp_ffi(
             env: &NativeEnv,
             source_text: &CxxString,
-        ) -> Result<Box<HhasProgramWrapper<'a>>>;
+        ) -> Result<Box<HhasProgramWrapper>>;
 
         fn hackc_compile_from_text_cpp_ffi(
             env: &NativeEnv,
@@ -91,7 +90,10 @@ pub struct Bytes(ffi::Bytes);
 pub struct Decls<'a>(direct_decl_parser::Decls<'a>);
 struct DeclParserOptions<'a>(decl_parser_options::DeclParserOptions<'a>);
 #[repr(C)]
-pub struct HhasProgramWrapper<'a>(hhbc_by_ref_hhas_program::HhasProgram<'a>);
+pub struct HhasProgramWrapper(
+    hhbc_by_ref_hhas_program::HhasProgram<'static>,
+    bumpalo::Bump,
+);
 
 fn make_env_flags(
     is_systemlib: bool,
@@ -270,12 +272,14 @@ unsafe fn hackc_verify_deserialization<'a>(serialized: &Bytes, expected: &Decls<
     decls == expected.0
 }
 
-fn hackc_compile_hhas_from_text_cpp_ffi<'a>(
-    alloc: &'a Bump,
+fn hackc_compile_hhas_from_text_cpp_ffi(
     env: &compile_ffi::NativeEnv,
     source_text: &CxxString,
-) -> Result<Box<HhasProgramWrapper<'a>>, String> {
+) -> Result<Box<HhasProgramWrapper>, String> {
     stack_limit::with_elastic_stack(|stack_limit| {
+        let bump = bumpalo::Bump::new();
+        let alloc: &'static bumpalo::Bump =
+            unsafe { std::mem::transmute::<&'_ bumpalo::Bump, &'static bumpalo::Bump>(&bump) };
         let native_env: hhbc_by_ref_compile::NativeEnv<&str> =
             compile_ffi::NativeEnv::to_compile_env(&env).unwrap();
         let compile_env = hhbc_by_ref_compile::Env::<&str> {
@@ -299,7 +303,7 @@ fn hackc_compile_hhas_from_text_cpp_ffi<'a>(
         let c_hhvm_provider_ptr =
             unsafe { std::mem::transmute::<*const (), *const std::ffi::c_void>(hhvm_provider_ptr) };
         let compile_result = hhbc_by_ref_compile::hhas_from_text(
-            &alloc.0,
+            alloc,
             &compile_env,
             &stack_limit,
             text,
@@ -310,7 +314,7 @@ fn hackc_compile_hhas_from_text_cpp_ffi<'a>(
             )),
         );
         match compile_result {
-            Ok((hhas_prog, _)) => Ok(Box::new(HhasProgramWrapper(hhas_prog))),
+            Ok((hhas_prog, _)) => Ok(Box::new(HhasProgramWrapper(hhas_prog, bump))),
             Err(e) => Err(anyhow!("{}", e)),
         }
     })

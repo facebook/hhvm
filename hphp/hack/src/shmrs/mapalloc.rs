@@ -18,16 +18,21 @@ const CHUNK_SIZE: usize = 200 * 1024;
 /// into an actual allocator by combining it with a `FileAlloc` using
 /// `MapAlloc::new`.
 pub struct MapAllocControlData {
-    current: *mut u8,
-    end: *mut u8,
+    /// Pointer to the next free byte in the current chunk.
+    ///
+    /// Might be null if no current chunk has been initialized yet.
+    current_next: *mut u8,
+
+    /// End of the current chunk. Do not allocate past this pointer.
+    current_end: *mut u8,
 }
 
 impl MapAllocControlData {
     /// A new empty allocator. Useful as a placeholder.
     pub fn new() -> Self {
         Self {
-            current: std::ptr::null_mut(),
-            end: std::ptr::null_mut(),
+            current_next: std::ptr::null_mut(),
+            current_end: std::ptr::null_mut(),
         }
     }
 }
@@ -67,8 +72,8 @@ impl<'shm> MapAlloc<'shm> {
         let l = Layout::from_size_align(CHUNK_SIZE, 1).unwrap();
         let ptr = self.file_alloc.allocate(l)?;
         unsafe {
-            control_data.current = ptr.as_ptr() as *mut u8;
-            control_data.end = control_data.current.add(CHUNK_SIZE);
+            control_data.current_next = ptr.as_ptr() as *mut u8;
+            control_data.current_end = control_data.current_next.add(CHUNK_SIZE);
         }
         Ok(())
     }
@@ -83,18 +88,18 @@ unsafe impl<'shm> Allocator for MapAlloc<'shm> {
 
         let mut control_data = self.control_data.write().unwrap();
 
-        let align_offset = control_data.current.align_offset(l.align());
-        let mut pointer = unsafe { control_data.current.add(align_offset) };
+        let align_offset = control_data.current_next.align_offset(l.align());
+        let mut pointer = unsafe { control_data.current_next.add(align_offset) };
         let mut new_current = unsafe { pointer.add(size) };
         // We must make sure we don't produce null pointers when `size == 0`
         // and `new_current == NULL`.
-        if new_current > control_data.end || new_current.is_null() {
+        if new_current > control_data.current_end || new_current.is_null() {
             self.extend(&mut control_data)?;
-            let align_offset = control_data.current.align_offset(l.align());
-            pointer = unsafe { control_data.current.add(align_offset) };
+            let align_offset = control_data.current_next.align_offset(l.align());
+            pointer = unsafe { control_data.current_next.add(align_offset) };
             new_current = unsafe { pointer.add(size) };
         }
-        control_data.current = new_current;
+        control_data.current_next = new_current;
         let slice = unsafe { std::slice::from_raw_parts(pointer, size) };
         Ok(NonNull::from(slice))
     }

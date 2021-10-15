@@ -10,13 +10,13 @@ final class FunctionCredential {
   }
 
   <<__Native>>
-  public final function getClassName(): ?string;
+  public final function getClassName()[]: ?string;
 
   <<__Native>>
-  public final function getFunctionName(): string;
+  public final function getFunctionName()[]: string;
 
   <<__Native>>
-  public final function getFilename(): string;
+  public final function getFilename()[]: string;
 
   public final function __debugInfo(): darray {
     return darray[

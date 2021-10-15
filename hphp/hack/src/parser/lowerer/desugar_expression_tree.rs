@@ -1274,6 +1274,12 @@ fn rewrite_expr(
             );
             (virtual_expr, desugar_expr)
         }
+        ClassConst(_) => {
+            return Err((
+                pos,
+                "Expression trees do not support directly referencing class consts. Consider splicing values defined outside the scope of an Expression Tree using ${...}.".into(),
+            ));
+        }
         ExpressionTree(_) => {
             return Err((pos, "Expression trees may not be nested".into()));
         }

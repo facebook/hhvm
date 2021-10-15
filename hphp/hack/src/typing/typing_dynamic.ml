@@ -133,9 +133,13 @@ let build_dyn_fun_ty ft_ty =
       fp_flags = fp.fp_flags;
     }
   in
-
+  let make_dyn_arity ar =
+    match ar with
+    | Fvariadic vparam -> Fvariadic (make_dyn_fun_param vparam)
+    | Fstandard -> Fstandard
+  in
   {
-    ft_arity = ft_ty.ft_arity;
+    ft_arity = make_dyn_arity ft_ty.ft_arity;
     ft_tparams = [];
     ft_where_constraints = [];
     ft_params = List.map ft_ty.ft_params ~f:make_dyn_fun_param;

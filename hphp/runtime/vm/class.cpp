@@ -4847,6 +4847,9 @@ Class* Class::def(const PreClass* preClass, bool failIsFatal /* = true */) {
             (!isIntType(*enumBaseTy) && !isStringType(*enumBaseTy))) {
           return nullptr;
         }
+      }
+      // enum and enum class
+      if (preClass->attrs() & (AttrEnum|AttrEnumClass)) {
         for (auto it = preClass->includedEnums().begin();
                    it != preClass->includedEnums().end(); ++it) {
           if (!Class::get(*it, false)) return nullptr;

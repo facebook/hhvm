@@ -573,7 +573,8 @@ and build_constructor
           ~override:false
           ~dynamicallycallable:false
           ~readonly_prop:false
-          ~support_dynamic_type:false;
+          ~support_dynamic_type:false
+          ~needs_init:false;
       elt_visibility = vis;
       elt_origin = class_name;
       elt_deprecated = method_.sm_deprecated;
@@ -656,7 +657,8 @@ and prop_decl
           ~abstract:(sp_abstract sp)
           ~dynamicallycallable:false
           ~readonly_prop:(sp_readonly sp)
-          ~support_dynamic_type:false;
+          ~support_dynamic_type:false
+          ~needs_init:(sp_needs_init sp);
       elt_visibility = vis;
       elt_origin = snd c.sc_name;
       elt_deprecated = None;
@@ -694,7 +696,8 @@ and static_prop_decl
           ~synthesized:false
           ~dynamicallycallable:false
           ~readonly_prop:(sp_readonly sp)
-          ~support_dynamic_type:false;
+          ~support_dynamic_type:false
+          ~needs_init:false;
       elt_visibility = vis;
       elt_origin = snd c.sc_name;
       elt_deprecated = None;
@@ -827,7 +830,8 @@ and method_decl_acc
           ~lateinit:false
           ~dynamicallycallable:(sm_dynamicallycallable m)
           ~readonly_prop:false
-          ~support_dynamic_type;
+          ~support_dynamic_type
+          ~needs_init:false;
       elt_visibility = vis;
       elt_origin = snd c.sc_name;
       elt_deprecated = m.sm_deprecated;

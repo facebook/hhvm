@@ -448,6 +448,7 @@ val make_ce_flags :
   dynamicallycallable:bool ->
   readonly_prop:bool ->
   support_dynamic_type:bool ->
+  needs_init:bool ->
   Hh_prelude.Int.t
 
 val error_Tunapplied_alias_in_illegal_context : unit -> 'a

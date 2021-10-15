@@ -171,3 +171,31 @@ let class_ ~has_own_cstr ?(class_cache : class_cache option) decl_env c =
   | Ast_defs.Ctrait -> get_deferred_init_props decl_env c
   | Ast_defs.(Cclass _ | Cinterface | Cenum | Cenum_class _) ->
     (SSet.empty, SSet.empty)
+
+(**
+ * [parent_initialized_members decl_env c] returns all members initialized in
+ * the parents of [c], s.t. they should not be readable within [c]'s
+ * [__construct] method until _after_ [parent::__construct] has been called.
+ *)
+let parent_initialized_members ?(class_cache : class_cache option) decl_env c =
+  let parent_initialized_members_helper = function
+    | None -> SSet.empty
+    | Some { dc_props; _ } ->
+      dc_props
+      |> SMap.filter (fun _ p -> Decl_defs.get_elt_needs_init p)
+      |> SMap.keys
+      |> SSet.of_list
+  in
+  List.fold_left
+    c.sc_extends
+    ~f:
+      begin
+        fun acc parent ->
+        match get_node parent with
+        | Tapply ((_, parent), _) ->
+          Decl_env.get_class_add_dep decl_env parent ?cache:class_cache
+          |> parent_initialized_members_helper
+          |> SSet.union acc
+        | _ -> acc
+      end
+    ~init:SSet.empty

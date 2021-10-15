@@ -214,6 +214,9 @@ let get_elt_synthesized elt =
 
 let get_elt_xhp_attr elt = Typing_defs.flags_to_xhp_attr elt.elt_flags
 
+let get_elt_needs_init elt =
+  Typing_defs_flags.(is_set ce_flags_needs_init elt.elt_flags)
+
 let set_elt_synthesized elt v =
   {
     elt with

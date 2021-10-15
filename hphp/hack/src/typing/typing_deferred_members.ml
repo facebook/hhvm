@@ -83,23 +83,20 @@ let init_not_required_props c props =
       end
     ~init:props
 
+let parents env c : Shallow_decl_defs.shallow_class list =
+  List.map c.sc_extends ~f:(fun parent ->
+      match get_node parent with
+      | Tapply ((_, parent), _) ->
+        Shallow_classes_provider.get (Env.get_ctx env) parent
+      | _ -> None)
+  |> List.filter_opt
+
 let rec parent_props env c props =
   List.fold_left
-    c.sc_extends
-    ~f:
-      begin
-        fun acc parent ->
-        match get_node parent with
-        | Tapply ((_, parent), _) ->
-          begin
-            match Shallow_classes_provider.get (Env.get_ctx env) parent with
-            | None -> acc
-            | Some sc ->
-              let (_, members) = class_ env sc in
-              SSet.union members acc
-          end
-        | _ -> acc
-      end
+    (parents env c)
+    ~f:(fun acc sc ->
+      let (_, members) = class_ env sc in
+      SSet.union members acc)
     ~init:props
 
 and trait_props env c props =
@@ -142,7 +139,7 @@ and trait_props env c props =
     ~init:props
 
 (* return a tuple of the private init-requiring props of the class
- * and all init-requiring props of the class and its ancestors *)
+ * and all init-requiring props of the class and its parents *)
 and get_deferred_init_props env c =
   let (priv_props, props) =
     List.fold_left

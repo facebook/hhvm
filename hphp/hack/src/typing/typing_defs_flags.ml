@@ -94,6 +94,8 @@ let ce_flags_xa_tag_mask         = Int.bit_or ce_flags_xa_tag_required ce_flags_
 
 let ce_flags_readonly_prop            = 1 lsl 13
 
+let ce_flags_needs_init = 1 lsl 14
+
 (* fun_param flags *)
 let fp_flags_accept_disposable = 1 lsl 0
 

@@ -110,6 +110,22 @@ module S = SSetWTop
  *)
 exception InitReturn of S.t
 
+let filter_props_by_type env cls props =
+  lookup_props env cls props
+  |> SMap.filter (fun _ ty -> not (type_does_not_require_init env ty))
+  |> SMap.keys
+  |> SSet.of_list
+
+let parent_props_set_during_cstr env (c : Shallow_decl_defs.shallow_class) :
+    SSet.t =
+  match DeferredMembers.parents env c with
+  | pc :: _ ->
+    (* All properties that don't have an explicit initialiser. *)
+    let (_, parent_props) = DeferredMembers.get_deferred_init_props env pc in
+    (* Filter properties whose type means they don't need initialising. *)
+    filter_props_by_type env (snd pc.Shallow_decl_defs.sc_name) parent_props
+  | [] -> SSet.empty
+
 (* Module initializing the environment
    Originally, every class member has 2 possible states,
    Vok  ==> when it is declared as optional, it is the job of the
@@ -134,6 +150,7 @@ module Env = struct
     methods: method_status ref SMap.t;
     props: Typing_defs.decl_ty option SMap.t;
     tenv: Typing_env_types.env;
+    parent_cstr_props: SSet.t;
     init_not_required_props: SSet.t;
   }
 
@@ -176,18 +193,23 @@ module Env = struct
     let ( add_init_not_required_props,
           add_trait_props,
           add_parent_props,
-          add_parent ) =
+          add_parent,
+          add_parent_props_set_during_cstr ) =
       if shallow_decl_enabled ctx then
         ( DeferredMembers.init_not_required_props,
           DeferredMembers.trait_props tenv,
           DeferredMembers.parent_props tenv,
-          DeferredMembers.parent tenv )
+          DeferredMembers.parent tenv,
+          parent_props_set_during_cstr tenv )
       else
         let decl_env = tenv.Typing_env_types.decl_env in
         ( DICheck.init_not_required_props,
           DICheck.trait_props decl_env,
           DICheck.parent_props decl_env,
-          DICheck.parent decl_env )
+          DICheck.parent decl_env,
+          fun c ->
+            DICheck.parent_initialized_members decl_env c
+            |> filter_props_by_type tenv (snd c.Shallow_decl_defs.sc_name) )
     in
     let init_not_required_props = add_init_not_required_props sc SSet.empty in
     let props =
@@ -203,7 +225,8 @@ module Env = struct
       |> SMap.filter (fun _ ty_opt ->
              not (type_does_not_require_init tenv ty_opt))
     in
-    { methods; props; tenv; init_not_required_props }
+    let parent_cstr_props = add_parent_props_set_during_cstr sc in
+    { methods; props; parent_cstr_props; tenv; init_not_required_props }
 
   and method_ acc m =
     if not (Aast.equal_visibility m.m_visibility Private) then
@@ -441,6 +464,17 @@ and expr_ env acc p e =
     acc
   | Obj_get ((_, _, This), (_, _, Id ((_, vx) as v)), _, false) ->
     if SMap.mem vx env.props && not (S.mem vx acc) then (
+      Errors.read_before_write v;
+      acc
+    ) else if
+        SSet.mem vx env.parent_cstr_props
+        && (not (SSet.mem vx env.init_not_required_props))
+        && (not (S.mem vx acc))
+        && not (S.mem parent_init_prop acc)
+      then (
+      (* We're reading a property that's initialised in the parent
+         constructor, but we haven't called the parent constructor
+         yet. *)
       Errors.read_before_write v;
       acc
     ) else

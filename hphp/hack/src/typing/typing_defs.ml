@@ -1253,7 +1253,8 @@ let make_ce_flags
     ~lateinit
     ~dynamicallycallable
     ~readonly_prop
-    ~support_dynamic_type =
+    ~support_dynamic_type
+    ~needs_init =
   let flags = 0 in
   let flags = set_bit ce_flags_abstract abstract flags in
   let flags = set_bit ce_flags_final final flags in
@@ -1268,6 +1269,7 @@ let make_ce_flags
   let flags =
     set_bit ce_flags_support_dynamic_type support_dynamic_type flags
   in
+  let flags = set_bit ce_flags_needs_init needs_init flags in
   flags
 
 (** Tunapplied_alias is a locl phase constructor that always stands for a higher-kinded type.

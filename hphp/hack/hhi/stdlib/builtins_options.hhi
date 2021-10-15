@@ -80,11 +80,11 @@ function ini_restore(string $varname);
 <<__PHPStdLib>>
 function ini_set(string $varname, $newvalue);
 <<__PHPStdLib>>
-function memory_get_allocation();
+function memory_get_allocation()[read_globals];
 <<__PHPStdLib>>
-function memory_get_peak_usage(bool $real_usage = false);
+function memory_get_peak_usage(bool $real_usage = false)[read_globals];
 <<__PHPStdLib>>
-function memory_get_usage(bool $real_usage = false);
+function memory_get_usage(bool $real_usage = false)[read_globals];
 <<__PHPStdLib>>
 function php_ini_scanned_files();
 <<__PHPStdLib>>

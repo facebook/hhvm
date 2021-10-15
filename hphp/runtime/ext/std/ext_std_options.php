@@ -182,18 +182,18 @@ function ini_alter(string $varname,
  * script.
  */
 <<__Native>>
-function memory_get_peak_usage(bool $real_usage = false): int;
+function memory_get_peak_usage(bool $real_usage = false)[read_globals]: int;
 
 /* Returns the amount of memory, in bytes, that's currently being allocated to
  * your PHP script.
  */
 <<__Native>>
-function memory_get_usage(bool $real_usage = false): int;
+function memory_get_usage(bool $real_usage = false)[read_globals]: int;
 
 /* Returns the total memory, in bytes, that your PHP script has allocated.
  */
 <<__Native>>
-function memory_get_allocation(): int;
+function memory_get_allocation()[read_globals]: int;
 
 /* Returns the request-heap memory currently in use by the script.
  * Does not trigger OOM.

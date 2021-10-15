@@ -11,7 +11,7 @@ path = "lib.rs"
 arena_collections = { path = "../arena_collections" }
 arena_deserializer = { path = "../utils/arena_deserializer" }
 arena_trait = { path = "../arena_trait" }
-bitflags = "1.2"
+bitflags = "1.3"
 bstr = { version = "0.2", features = ["serde1"] }
 bumpalo = { version = "3.2.1", features = ["collections"] }
 eq_modulo_pos = { path = "../utils/eq_modulo_pos" }

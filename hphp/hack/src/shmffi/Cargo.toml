@@ -14,7 +14,7 @@ lz4 = "1.23.1"
 nohash-hasher = "0.2"
 ocamlrep = { path = "../ocamlrep" }
 ocamlrep_ocamlpool = { path = "../ocamlrep_ocamlpool" }
-once_cell = "1.4"
+once_cell = "1.8"
 shmrs = { path = "../shmrs" }
 
 [dev-dependencies]

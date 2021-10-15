@@ -18,7 +18,7 @@ lazy_static = "1.0"
 naming_special_names_rust = { path = "../../../naming" }
 oxidized = { path = "../../../oxidized" }
 parser_core_types = { path = "../core_types" }
-regex = "1.4.2"
+regex = "1.5.4"
 strum = "0.21"
 strum_macros = "0.21"
 

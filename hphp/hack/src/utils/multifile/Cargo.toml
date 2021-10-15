@@ -11,7 +11,7 @@ path = "../multifile.rs"
 anyhow = "1.0"
 itertools = "0.10.1"
 lazy_static = "1.0"
-regex = "1.4.2"
+regex = "1.5.4"
 
 [dev-dependencies]
 pretty_assertions = "0.6"

@@ -14,11 +14,7 @@ crate-type = ["lib", "staticlib"]
 anyhow = "1.0"
 bumpalo = { version = "3.2.1", features = ["collections"] }
 decl_provider = { path = "../../decl_provider" }
-external_decl_provider = { path = "../../hhvm_decl_provider" }
 hhbc_by_ref_compile = { path = "../../hhbc_by_ref/cargo/hhbc_by_ref_compile" }
-hhbc_by_ref_hhas_program = { path = "../../hhbc_by_ref/cargo/hhbc_by_ref_hhas_program" }
-libc = "0.2.98"
-log = { version = "0.4.8", features = ["kv_unstable"] }
 ocamlrep = { path = "../../../ocamlrep" }
 ocamlrep_derive = { path = "../../../ocamlrep_derive" }
 ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }

@@ -21,7 +21,7 @@ ocaml_helper = { path = "../../utils/ocaml_helper" }
 ocamlrep = { path = "../../ocamlrep" }
 oxidized = { path = "../../oxidized" }
 parser_core_types = { path = "../cargo/core_types" }
-regex = "1.4.2"
+regex = "1.5.4"
 rescan_trivia = { path = "../api/cargo/rescan_trivia" }
 stack_limit = { path = "../../utils/stack_limit" }
 

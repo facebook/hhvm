@@ -14,7 +14,7 @@ im-rc = { version = "14.2", features = ["serde"] }
 ocamlrep = { path = "../../../ocamlrep" }
 ocamlrep_custom = { path = "../../../ocamlrep_custom" }
 ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
-once_cell = "1.4"
+once_cell = "1.8"
 oxidized = { path = "../../../oxidized" }
 typing_deps_hash = { path = "../typing_deps_hash" }
 

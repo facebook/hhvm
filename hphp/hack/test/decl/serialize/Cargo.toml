@@ -23,7 +23,7 @@ serde = { version = "1.0.126", features = ["derive", "rc"] }
 serde_cbor = "0.11"
 serde_json = { version = "1.0", features = ["float_roundtrip", "unbounded_depth"] }
 structopt = "0.3.23"
-walkdir = "2.2.9"
+walkdir = "2.3"
 
 [profile.release]
 incremental = false

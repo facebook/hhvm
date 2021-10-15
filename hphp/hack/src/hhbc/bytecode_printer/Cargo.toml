@@ -46,7 +46,7 @@ lazy_static = "1.0"
 naming_special_names_rust = { path = "../../naming" }
 ocaml_helper = { path = "../../utils/ocaml_helper" }
 oxidized = { path = "../../oxidized" }
-regex = "1.4.2"
+regex = "1.5.4"
 thiserror = "1.0.29"
 
 [profile.release]

@@ -32,7 +32,8 @@
                 };
               ft_flags =
               (make_ft_flags FAsync ~return_disposable:false
-                ~returns_readonly:true ~readonly_this:false);
+                ~returns_readonly:true ~support_dynamic_type:false
+                ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [6:16-32]; fe_php_std_lib = false;
         fe_support_dynamic_type = false }));
@@ -57,7 +58,8 @@
                 };
               ft_flags =
               (make_ft_flags FAsync ~return_disposable:false
-                ~returns_readonly:false ~readonly_this:false);
+                ~returns_readonly:false ~support_dynamic_type:false
+                ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [10:16-30]; fe_php_std_lib = false;
         fe_support_dynamic_type = false }));
@@ -113,7 +115,8 @@
                         (Rwitness_from_decl ([17:19-30]), (Tprim Tvoid)) };
                       ft_flags =
                       (make_ft_flags FSync ~return_disposable:false
-                        ~returns_readonly:false ~readonly_this:false);
+                        ~returns_readonly:false ~support_dynamic_type:false
+                        ~readonly_this:false);
                       ft_ifc_decl = FDPolicied {PUBLIC} }));
                 sm_visibility = Public; sm_deprecated = None;
                 sm_flags = (empty) });
@@ -141,7 +144,9 @@
                               et_type = (Rhint ([22:57-61]), (Tprim Tvoid)) };
                             ft_flags =
                             (make_ft_flags FSync ~return_disposable:false
-                              ~returns_readonly:false ~readonly_this:true);
+                              ~returns_readonly:false
+                              ~support_dynamic_type:false
+                              ~readonly_this:true);
                             ft_ifc_decl = FDPolicied {PUBLIC} }))
                       };
                     fp_flags =
@@ -158,7 +163,8 @@
                    et_type = (Rhint ([22:69-73]), (Tprim Tvoid)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
-                   ~returns_readonly:false ~readonly_this:true);
+                   ~returns_readonly:false ~support_dynamic_type:false
+                   ~readonly_this:true);
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) }
           ];

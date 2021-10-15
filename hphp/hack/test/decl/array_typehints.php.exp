@@ -19,7 +19,8 @@
                };
              ft_flags =
              (make_ft_flags FSync ~return_disposable:false
-               ~returns_readonly:false ~readonly_this:false);
+               ~returns_readonly:false ~support_dynamic_type:false
+               ~readonly_this:false);
              ft_ifc_decl = FDPolicied {PUBLIC} }));
        fe_pos = [3:10-12]; fe_php_std_lib = false;
        fe_support_dynamic_type = false }));
@@ -42,7 +43,8 @@
                 };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~readonly_this:false);
+                ~returns_readonly:false ~support_dynamic_type:false
+                ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [7:10-12]; fe_php_std_lib = false;
         fe_support_dynamic_type = false }));
@@ -65,7 +67,8 @@
                 };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~readonly_this:false);
+                ~returns_readonly:false ~support_dynamic_type:false
+                ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [11:10-12]; fe_php_std_lib = false;
         fe_support_dynamic_type = false }));
@@ -89,7 +92,8 @@
                 };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~readonly_this:false);
+                ~returns_readonly:false ~support_dynamic_type:false
+                ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [15:10-12]; fe_php_std_lib = false;
         fe_support_dynamic_type = false }));
@@ -114,7 +118,8 @@
                 };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~readonly_this:false);
+                ~returns_readonly:false ~support_dynamic_type:false
+                ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [19:10-12]; fe_php_std_lib = false;
         fe_support_dynamic_type = false }));
@@ -138,7 +143,8 @@
                 };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~readonly_this:false);
+                ~returns_readonly:false ~support_dynamic_type:false
+                ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [23:10-13]; fe_php_std_lib = false;
         fe_support_dynamic_type = false }));
@@ -162,7 +168,8 @@
                 };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~readonly_this:false);
+                ~returns_readonly:false ~support_dynamic_type:false
+                ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [27:10-13]; fe_php_std_lib = false;
         fe_support_dynamic_type = false }));
@@ -185,7 +192,8 @@
                 };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~readonly_this:false);
+                ~returns_readonly:false ~support_dynamic_type:false
+                ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [31:10-13]; fe_php_std_lib = false;
         fe_support_dynamic_type = false }));
@@ -204,7 +212,8 @@
                 et_type = (Rhint ([35:17-52]), Tany) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~readonly_this:false);
+                ~returns_readonly:false ~support_dynamic_type:false
+                ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [35:10-13]; fe_php_std_lib = false;
         fe_support_dynamic_type = false }))

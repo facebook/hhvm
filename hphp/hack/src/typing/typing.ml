@@ -6901,8 +6901,7 @@ and class_get_inner
               let fty =
                 Typing_dynamic.relax_method_type
                   env
-                  (Cls.get_support_dynamic_type class_
-                  || get_ce_support_dynamic_type ce)
+                  (get_ce_support_dynamic_type ce)
                   r
                   ft
               in
@@ -8014,6 +8013,7 @@ and call
             ~return_disposable:false (* TODO: deal with disposable return *)
             ~returns_readonly:false
             ~readonly_this:false
+            ~support_dynamic_type:false
         in
         let ft_ifc_decl = Typing_defs_core.default_ifc_fun_decl in
         let fun_locl_type =

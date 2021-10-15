@@ -240,6 +240,10 @@ module Full = struct
           text "readonly "
         else
           Nothing);
+        (if get_ft_support_dynamic_type ft then
+          text "<<__SupportDynamicType>> "
+        else
+          Nothing);
         text "function";
         fun_type ~ty to_doc st penv ft;
         text ")";

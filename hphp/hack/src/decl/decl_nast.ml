@@ -112,7 +112,8 @@ and fun_decl_in_env (env : Decl_env.env) ~(is_lambda : bool) (f : Nast.fun_) :
                 f.f_fun_kind
                 ~return_disposable
                 ~returns_readonly:(Option.is_some f.f_readonly_ret)
-                ~readonly_this:ft_readonly_this;
+                ~readonly_this:ft_readonly_this
+                ~support_dynamic_type:fe_support_dynamic_type;
             (* TODO: handle const attribute *)
             ft_ifc_decl = ifc_decl;
           } )

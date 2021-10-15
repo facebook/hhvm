@@ -23,7 +23,8 @@
                   et_type = (Rhint ([4:24-28]), (Tprim Tvoid)) };
                 ft_flags =
                 (make_ft_flags FSync ~return_disposable:false
-                  ~returns_readonly:false ~readonly_this:false);
+                  ~returns_readonly:false ~support_dynamic_type:false
+                  ~readonly_this:false);
                 ft_ifc_decl = FDPolicied {PUBLIC} }));
           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) };
          { Shallow_decl_defs.sm_name = ([5:19-20], "b");
@@ -39,7 +40,8 @@
                    et_type = (Rhint ([5:24-28]), (Tprim Tvoid)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
-                   ~returns_readonly:false ~readonly_this:false);
+                   ~returns_readonly:false ~support_dynamic_type:false
+                   ~readonly_this:false);
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) }
          ];
@@ -71,7 +73,8 @@
                    et_type = (Rhint ([9:24-28]), (Tprim Tvoid)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
-                   ~returns_readonly:false ~readonly_this:false);
+                   ~returns_readonly:false ~support_dynamic_type:false
+                   ~readonly_this:false);
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) };
           { Shallow_decl_defs.sm_name = ([10:19-20], "c");
@@ -87,7 +90,8 @@
                     et_type = (Rhint ([10:24-28]), (Tprim Tvoid)) };
                   ft_flags =
                   (make_ft_flags FSync ~return_disposable:false
-                    ~returns_readonly:false ~readonly_this:false);
+                    ~returns_readonly:false ~support_dynamic_type:false
+                    ~readonly_this:false);
                   ft_ifc_decl = FDPolicied {PUBLIC} }));
             sm_visibility = Public; sm_deprecated = None; sm_flags = (empty)
             }
@@ -118,7 +122,8 @@
                    et_type = (Rhint ([14:24-28]), (Tprim Tvoid)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
-                   ~returns_readonly:false ~readonly_this:false);
+                   ~returns_readonly:false ~support_dynamic_type:false
+                   ~readonly_this:false);
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = abstract
            }
@@ -151,7 +156,8 @@
                    et_type = (Rhint ([18:24-28]), (Tprim Tvoid)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
-                   ~returns_readonly:false ~readonly_this:false);
+                   ~returns_readonly:false ~support_dynamic_type:false
+                   ~readonly_this:false);
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = abstract
            }
@@ -185,7 +191,8 @@
                    et_type = (Rhint ([22:24-28]), (Tprim Tvoid)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
-                   ~returns_readonly:false ~readonly_this:false);
+                   ~returns_readonly:false ~support_dynamic_type:false
+                   ~readonly_this:false);
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) }
           ];
@@ -220,7 +227,8 @@
                    et_type = (Rhint ([26:24-28]), (Tprim Tvoid)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
-                   ~returns_readonly:false ~readonly_this:false);
+                   ~returns_readonly:false ~support_dynamic_type:false
+                   ~readonly_this:false);
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) }
           ];

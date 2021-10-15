@@ -240,7 +240,6 @@ let check_override
     member_name
     mem_source
     ?(ignore_fun_return = false)
-    parent_class
     class_
     parent_class_elt
     class_elt
@@ -255,15 +254,12 @@ let check_override
       on_error
   in
   let check_compatible_sound_dynamic_attributes
-      member_name parent_class (class_ : Cls.t) parent_class_elt class_elt =
+      member_name parent_class_elt class_elt =
     if
       TypecheckerOptions.enable_sound_dynamic
         (Provider_context.get_tcopt (Env.get_ctx env))
-      && (Cls.get_support_dynamic_type parent_class
-         || get_ce_support_dynamic_type parent_class_elt)
-      && not
-           (Cls.get_support_dynamic_type class_
-           || get_ce_support_dynamic_type class_elt)
+      && get_ce_support_dynamic_type parent_class_elt
+      && not (get_ce_support_dynamic_type class_elt)
     then
       let (lazy pos) = class_elt.ce_pos in
       let (lazy parent_pos) = parent_class_elt.ce_pos in
@@ -367,8 +363,6 @@ let check_override
       | _ ->
         check_compatible_sound_dynamic_attributes
           member_name
-          parent_class
-          class_
           parent_class_elt
           class_elt;
         Typing_subtype_method.(
@@ -650,7 +644,6 @@ let check_members
           env
           member_name
           mem_source
-          parent_class
           class_
           parent_class_elt
           class_elt
@@ -799,7 +792,6 @@ let check_constructors env parent_class class_ psubst on_error =
           "__construct"
           `FromMethod
           ~ignore_fun_return:true
-          parent_class
           class_
           parent_cstr
           cstr

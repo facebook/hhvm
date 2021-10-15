@@ -1,6 +1,6 @@
 --- legacy
 +++ direct decl
-@@ -1,86 +1,87 @@
+@@ -1,88 +1,89 @@
  [("\\foo",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
@@ -16,7 +16,8 @@
                 et_type = (Rwitness_from_decl ([3:10-13]), Tany) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~readonly_this:false);
+                ~returns_readonly:false ~support_dynamic_type:false
+                ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [3:10-13]; fe_php_std_lib = false;
         fe_support_dynamic_type = false }));
@@ -45,7 +46,8 @@
                     et_type = (Rwitness_from_decl ([6:26-30]), Tany) };
                   ft_flags =
                   (make_ft_flags FSync ~return_disposable:false
-                    ~returns_readonly:false ~readonly_this:false);
+                    ~returns_readonly:false ~support_dynamic_type:false
+                    ~readonly_this:false);
                   ft_ifc_decl = FDPolicied {PUBLIC} }));
             sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) }
            ];

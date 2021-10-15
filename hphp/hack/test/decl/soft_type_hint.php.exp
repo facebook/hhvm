@@ -24,7 +24,8 @@
                et_type = (Rhint ([3:32-46]), (Tprim Tint)) };
              ft_flags =
              (make_ft_flags FSync ~return_disposable:false
-               ~returns_readonly:false ~readonly_this:false);
+               ~returns_readonly:false ~support_dynamic_type:false
+               ~readonly_this:false);
              ft_ifc_decl = FDPolicied {PUBLIC} }));
        fe_pos = [3:10-11]; fe_php_std_lib = false;
        fe_support_dynamic_type = false }))

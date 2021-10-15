@@ -231,7 +231,7 @@ and static_prop env cv =
         ~readonly:cv.cv_readonly;
   }
 
-let method_type env m =
+let method_type ~support_dynamic_type env m =
   let ifc_decl = FunUtils.find_policied_attribute m.m_user_attributes in
   let return_disposable =
     FunUtils.has_return_disposable_attribute m.m_user_attributes
@@ -273,11 +273,12 @@ let method_type env m =
         m.m_fun_kind
         ~return_disposable
         ~returns_readonly:(Option.is_some m.m_readonly_ret)
-        ~readonly_this:m.m_readonly_this;
+        ~readonly_this:m.m_readonly_this
+        ~support_dynamic_type;
     ft_ifc_decl = ifc_decl;
   }
 
-let method_ env m =
+let method_ ~support_dynamic_type env m =
   let override = Attrs.mem SN.UserAttributes.uaOverride m.m_user_attributes in
   let (pos, _) = Decl_env.make_decl_posed env m.m_name in
   let has_dynamicallycallable =
@@ -286,10 +287,13 @@ let method_ env m =
   let php_std_lib =
     Attrs.mem SN.UserAttributes.uaPHPStdLib m.m_user_attributes
   in
+  (* Method is regarded as SupportDynamicType if the class is or if the
+   * method is explicitly marked so *)
   let support_dynamic_type =
-    Attrs.mem SN.UserAttributes.uaSupportDynamicType m.m_user_attributes
+    support_dynamic_type
+    || Attrs.mem SN.UserAttributes.uaSupportDynamicType m.m_user_attributes
   in
-  let ft = method_type env m in
+  let ft = method_type ~support_dynamic_type env m in
   let sm_deprecated =
     Naming_attributes_params.deprecated
       ~kind:"method"
@@ -380,9 +384,11 @@ let class_DEPRECATED ctx c =
       sc_typeconsts = List.filter_map c.c_typeconsts ~f:(typeconst env c);
       sc_props = List.map ~f:(prop env) vars;
       sc_sprops = List.map ~f:(static_prop env) static_vars;
-      sc_constructor = Option.map ~f:(method_ env) constructor;
-      sc_static_methods = List.map ~f:(method_ env) statics;
-      sc_methods = List.map ~f:(method_ env) rest;
+      sc_constructor =
+        Option.map ~f:(method_ ~support_dynamic_type:false env) constructor;
+      sc_static_methods =
+        List.map ~f:(method_ ~support_dynamic_type env) statics;
+      sc_methods = List.map ~f:(method_ ~support_dynamic_type env) rest;
       sc_user_attributes;
       sc_enum_type = Option.map c.c_enum ~f:(enum_type hint);
     }

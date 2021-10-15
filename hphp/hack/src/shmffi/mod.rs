@@ -347,9 +347,9 @@ pub extern "C" fn shmffi_add(hash: u64, data: usize) -> usize {
         let compressed_size = compressed.compressed_size();
         let uncompressed_size = compressed.uncompressed_size();
         with(|cmap| {
-            cmap.write_map(&hash, |map, allocator| {
-                let heap_value = compressed.to_heap_value_in(allocator);
-                map.insert(hash, heap_value);
+            cmap.write_map(&hash, |shard| {
+                let heap_value = compressed.to_heap_value_in(shard.alloc);
+                shard.map.insert(hash, heap_value);
             })
         });
         compressed.free();
@@ -423,10 +423,10 @@ pub extern "C" fn shmffi_get_size(hash: u64) -> usize {
 #[no_mangle]
 pub extern "C" fn shmffi_move(hash1: u64, hash2: u64) {
     with(|cmap| {
-        let value = cmap.write_map(&hash1, |map1, _allocator| map1.remove(&hash1).unwrap());
-        cmap.write_map(&hash2, |map2, allocator| {
-            let cloned_value = value.clone_in(allocator);
-            map2.insert(hash2, cloned_value);
+        let value = cmap.write_map(&hash1, |shard1| shard1.map.remove(&hash1).unwrap());
+        cmap.write_map(&hash2, |shard2| {
+            let cloned_value = value.clone_in(shard2.alloc);
+            shard2.map.insert(hash2, cloned_value);
         });
     });
 }
@@ -434,8 +434,8 @@ pub extern "C" fn shmffi_move(hash1: u64, hash2: u64) {
 #[no_mangle]
 pub extern "C" fn shmffi_remove(hash: u64) -> usize {
     let size = with(|cmap| {
-        cmap.write_map(&hash, |map, _allocator| {
-            let heap_value = map.remove(&hash).unwrap();
+        cmap.write_map(&hash, |shard| {
+            let heap_value = shard.map.remove(&hash).unwrap();
             heap_value.as_slice().len()
         })
     });

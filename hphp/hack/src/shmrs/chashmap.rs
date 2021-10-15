@@ -22,6 +22,13 @@ use crate::sync::{RwLock, RwLockRef};
 const NUM_SHARDS: usize = 256;
 static_assertions::const_assert!(NUM_SHARDS.is_power_of_two());
 
+/// This struct gives access to a shard, including its hashmap and its
+/// allocators.
+pub struct Shard<'shm, 'a, K, V, S> {
+    pub map: &'a mut Map<'shm, K, V, S>,
+    pub alloc: &'a MapAlloc<'shm>,
+}
+
 /// A concurrent hash map implemented as multiple sharded non-concurrent
 /// hash maps.
 ///
@@ -217,15 +224,14 @@ impl<'shm, K: Hash, V, S: BuildHasher> CMapRef<'shm, K, V, S> {
     /// this means you can't try to hold multiple writer locks (or a write lock
     /// a read lock) at the same time, because the hasher is abstract. You have
     /// no way of knowing which map you need!
-    pub fn write_map<R>(
-        &self,
-        key: &K,
-        f: impl FnOnce(&mut Map<'shm, K, V, S>, &MapAlloc<'shm>) -> R,
-    ) -> R {
+    pub fn write_map<R>(&self, key: &K, f: impl FnOnce(Shard<'shm, '_, K, V, S>) -> R) -> R {
         let shard_index = self.shard_index_for(key);
         let mut map = self.maps[shard_index].write().unwrap();
         let alloc = &self.shard_allocs[shard_index];
-        f(&mut map, alloc)
+        f(Shard {
+            map: &mut map,
+            alloc,
+        })
     }
 
     /// Return the total number of bytes allocated.
@@ -301,8 +307,8 @@ mod integration_tests {
                         unsafe { CMap::attach(mmap_ptr, MEM_HEAP_SIZE) };
 
                     for &(key, value) in scenario.iter() {
-                        cmap.write_map(&key, |map, _alloc| {
-                            map.insert(key, value);
+                        cmap.write_map(&key, |shard| {
+                            shard.map.insert(key, value);
                             std::thread::sleep(OP_SLEEP);
                         });
                     }

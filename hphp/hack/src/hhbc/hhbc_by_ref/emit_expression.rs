@@ -150,7 +150,11 @@ mod inout_locals {
 
     // determines if value of a local 'name' that appear in parameter 'i'
     // should be saved to local because it might be overwritten later
-    pub(super) fn should_save_local_value(name: &str, i: usize, aliases: &AliasInfoMap) -> bool {
+    pub(super) fn should_save_local_value(
+        name: &str,
+        i: usize,
+        aliases: &AliasInfoMap<'_>,
+    ) -> bool {
         aliases
             .get(name)
             .map_or(false, |alias| alias.in_range(i as isize))
@@ -158,7 +162,7 @@ mod inout_locals {
 
     pub(super) fn should_move_local_value<'arena>(
         local: &Local<'arena>,
-        aliases: &AliasInfoMap,
+        aliases: &AliasInfoMap<'_>,
     ) -> bool {
         match local {
             Local::Named(name) => aliases
@@ -216,7 +220,7 @@ mod inout_locals {
 
     struct Visitor<'r, 'arena>(PhantomData<(&'arena (), &'r ())>);
 
-    pub struct Ctx<'r, 'ast: 'r, 'arena: 'r> {
+    pub struct Ctx<'r, 'ast, 'arena> {
         state: &'r mut AliasInfoMap<'ast>,
         env: &'r Env<'ast, 'arena>,
         i: usize,
@@ -656,7 +660,7 @@ fn emit_id<'a, 'arena, 'decl>(
         _ => {
             // panic!("TODO: uncomment after D19350786 lands")
             // let cid: ConstId = r#const::ConstType::from_ast_name(&s);
-            let cid: ConstId = (alloc, string_utils::strip_global_ns(&s)).into();
+            let cid: ConstId<'_> = (alloc, string_utils::strip_global_ns(&s)).into();
             emit_symbol_refs::add_constant(alloc, emitter, cid.clone());
             return Ok(emit_pos_then(alloc, p, instr::lit_const(alloc, CnsE(cid))));
         }
@@ -2098,7 +2102,7 @@ fn get_erased_tparams<'a, 'arena>(env: &'a Env<'a, 'arena>) -> Vec<&'a str> {
         .collect()
 }
 
-pub fn has_non_tparam_generics(env: &Env, hints: &[ast::Hint]) -> bool {
+pub fn has_non_tparam_generics(env: &Env<'_, '_>, hints: &[ast::Hint]) -> bool {
     let erased_tparams = get_erased_tparams(env);
     hints.iter().any(|hint| {
         hint.1
@@ -2107,7 +2111,7 @@ pub fn has_non_tparam_generics(env: &Env, hints: &[ast::Hint]) -> bool {
     })
 }
 
-fn has_non_tparam_generics_targs(env: &Env, targs: &[ast::Targ]) -> bool {
+fn has_non_tparam_generics_targs(env: &Env<'_, '_>, targs: &[ast::Targ]) -> bool {
     let erased_tparams = get_erased_tparams(env);
     targs.iter().any(|targ| {
         (targ.1)
@@ -2355,7 +2359,8 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                     cexpr = reified_var_cexpr;
                 }
             }
-            let method_id: method::MethodType = (alloc, string_utils::strip_global_ns(&id)).into();
+            let method_id: method::MethodType<'_> =
+                (alloc, string_utils::strip_global_ns(&id)).into();
             Ok(match cexpr {
                 // Statically known
                 ClassExpr::Id(ast_defs::Id(_, cname)) => {
@@ -2663,7 +2668,7 @@ fn emit_args_inout_setters<'a, 'arena, 'decl>(
         i: usize,
         pk: &ParamKind,
         arg: &ast::Expr,
-        aliases: &inout_locals::AliasInfoMap,
+        aliases: &inout_locals::AliasInfoMap<'_>,
     ) -> Result<(InstrSeq<'arena>, InstrSeq<'arena>)> {
         use ast::Expr_ as E_;
         let alloc = env.arena;
@@ -2751,7 +2756,7 @@ fn emit_args_inout_setters<'a, 'arena, 'decl>(
             _ => Ok((emit_expr(e, env, arg)?, instr::empty(alloc))),
         }
     }
-    let (instr_args, instr_setters): (Vec<InstrSeq>, Vec<InstrSeq>) = args
+    let (instr_args, instr_setters): (Vec<InstrSeq<'_>>, Vec<InstrSeq<'_>>) = args
         .iter()
         .enumerate()
         .map(|(i, (pk, arg))| emit_arg_and_inout_setter(e, env, i, pk, arg, &aliases))
@@ -4279,7 +4284,7 @@ fn emit_array_get_<'a, 'arena, 'decl>(
     elem: Option<&ast::Expr>,
     no_final: bool,
     null_coalesce_assignment: bool,
-    inout_param_info: Option<(usize, &inout_locals::AliasInfoMap)>,
+    inout_param_info: Option<(usize, &inout_locals::AliasInfoMap<'_>)>,
 ) -> Result<(ArrayGetInstr<'arena>, Option<usize>)> {
     use ast::Expr as E;
     let alloc = env.arena;
@@ -4327,7 +4332,7 @@ fn emit_array_get_<'a, 'arena, 'decl>(
                 get_elem_member_key(e, env, cls_stack_size, elem, null_coalesce_assignment)?;
             let mut querym_n_unpopped = None;
             let mut make_final =
-                |total_stack_size: StackIndex, memberkey: MemberKey<'arena>| -> InstrSeq {
+                |total_stack_size: StackIndex, memberkey: MemberKey<'arena>| -> InstrSeq<'_> {
                     if no_final {
                         instr::empty(alloc)
                     } else if null_coalesce_assignment {
@@ -4845,7 +4850,7 @@ fn emit_class_const<'a, 'arena, 'decl>(
                 emit_symbol_refs::add_class(alloc, e, cid.clone());
                 // TODO(hrust) enabel `let const_id = r#const::ConstType::from_ast_name(&id.1);`,
                 // `from_ast_name` should be able to accpet Cow<str>
-                let const_id: r#const::ConstType =
+                let const_id: r#const::ConstType<'_> =
                     (alloc, string_utils::strip_global_ns(&id.1)).into();
                 emit_pos_then(alloc, &pos, instr::clscnsd(alloc, const_id, cid))
             })
@@ -4860,7 +4865,7 @@ fn emit_class_const<'a, 'arena, 'decl>(
             } else {
                 // TODO(hrust) enabel `let const_id = r#const::ConstType::from_ast_name(&id.1);`,
                 // `from_ast_name` should be able to accpet Cow<str>
-                let const_id: r#const::ConstType =
+                let const_id: r#const::ConstType<'_> =
                     (alloc, string_utils::strip_global_ns(&id.1)).into();
                 instr::clscns(alloc, const_id)
             };
@@ -5666,7 +5671,7 @@ fn emit_base<'a, 'arena, 'decl>(
     }
 }
 
-fn is_trivial(env: &Env, is_base: bool, expr: &ast::Expr) -> bool {
+fn is_trivial(env: &Env<'_, '_>, is_base: bool, expr: &ast::Expr) -> bool {
     use ast::Expr_ as E_;
     match &expr.2 {
         E_::Int(_) | E_::String(_) => true,
@@ -5685,7 +5690,7 @@ fn is_trivial(env: &Env, is_base: bool, expr: &ast::Expr) -> bool {
 fn get_local_temp_kind<'a, 'arena>(
     env: &Env<'a, 'arena>,
     is_base: bool,
-    inout_param_info: Option<(usize, &inout_locals::AliasInfoMap)>,
+    inout_param_info: Option<(usize, &inout_locals::AliasInfoMap<'_>)>,
     expr: Option<&ast::Expr>,
 ) -> Option<StoredValueKind> {
     match (expr, inout_param_info) {
@@ -5716,7 +5721,7 @@ fn emit_base_<'a, 'arena, 'decl>(
     null_coalesce_assignment: bool,
     base_offset: StackIndex,
     rhs_stack_size: StackIndex,
-    inout_param_info: Option<(usize, &inout_locals::AliasInfoMap)>,
+    inout_param_info: Option<(usize, &inout_locals::AliasInfoMap<'_>)>,
     readonly_op: ReadonlyOp,
 ) -> Result<ArrayGetBase<'arena>> {
     let alloc = env.arena;
@@ -5764,7 +5769,7 @@ fn emit_base_<'a, 'arena, 'decl>(
         e: &mut Emitter<'arena, 'decl>,
         env: &Env<'a, 'arena>,
         inner_expr: &ast::Expr, // expression inside of readonly expression
-    | -> Option<Result<ArrayGetBase>> {
+    | -> Option<Result<ArrayGetBase<'_>>> {
         // Readonly local variable requires a CheckROCOW
         if let aast::Expr(_, _, E_::Lvar(x)) = &*inner_expr {
             if !is_local_this(env, &x.1) || env.flags.contains(EnvFlags::NEEDS_LOCAL_THIS) {
@@ -5797,7 +5802,7 @@ fn emit_base_<'a, 'arena, 'decl>(
     };
 
     let emit_expr_default =
-        |e: &mut Emitter<'arena, 'decl>, env, expr: &ast::Expr| -> Result<ArrayGetBase> {
+        |e: &mut Emitter<'arena, 'decl>, env, expr: &ast::Expr| -> Result<ArrayGetBase<'_>> {
             let base_expr_instrs = emit_expr(e, env, expr)?;
             Ok(emit_default(
                 e,

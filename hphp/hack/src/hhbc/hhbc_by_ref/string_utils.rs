@@ -3,8 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-extern crate lazy_static;
-
 use escaper::*;
 use lazy_static::lazy_static;
 use naming_special_names_rust::{classes as ns_classes, members};
@@ -44,7 +42,7 @@ impl GetName {
 }
 
 impl std::fmt::Debug for GetName {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "GetName {{ string: {}, unescape:? }}", self.to_string())
     }
 }
@@ -160,7 +158,7 @@ pub fn strip_ns(s: &str) -> &str {
 }
 
 // Remove \HH\ or HH\ preceding a string
-pub fn strip_hh_ns(s: &str) -> Cow<str> {
+pub fn strip_hh_ns(s: &str) -> Cow<'_, str> {
     HH_NS_RE.replace(&s, "")
 }
 
@@ -168,7 +166,7 @@ pub fn has_ns(s: &str) -> bool {
     NS_RE.is_match(s)
 }
 
-pub fn strip_type_list(s: &str) -> Cow<str> {
+pub fn strip_type_list(s: &str) -> Cow<'_, str> {
     TYPE_RE.replace_all(&s, "")
 }
 

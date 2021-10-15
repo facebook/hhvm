@@ -225,7 +225,7 @@ fn uls_from_ast<P, F1, F2>(
     get_param_name: F1,
     get_param_default_value: F2,
     explicit_use_set_opt: Option<&SSet>,
-    b: &AstBody,
+    b: &AstBody<'_>,
 ) -> Result<impl Iterator<Item = String>, String>
 where
     F1: Fn(&P) -> &str,
@@ -247,7 +247,7 @@ where
 
 pub fn from_ast<'arena>(
     params: &[(HhasParam<'arena>, Option<(Label, Expr)>)],
-    body: &AstBody,
+    body: &AstBody<'_>,
     explicit_use_set: &SSet,
 ) -> Result<Vec<String>, String> {
     let decl_vars = uls_from_ast(
@@ -260,7 +260,7 @@ pub fn from_ast<'arena>(
     Ok(decl_vars.collect())
 }
 
-pub fn vars_from_ast(params: &[FunParam], b: &AstBody) -> Result<HashSet<String>, String> {
+pub fn vars_from_ast(params: &[FunParam], b: &AstBody<'_>) -> Result<HashSet<String>, String> {
     let decl_vars = uls_from_ast(
         params,
         |p| &p.name,                      // get_param_name

@@ -296,7 +296,7 @@ impl<'arena> TypedValue<'arena> {
 
     // String concatenation
     pub fn concat(self, alloc: &'arena bumpalo::Bump, v2: Self) -> Option<Self> {
-        fn safe_to_cast(t: &TypedValue) -> bool {
+        fn safe_to_cast(t: &TypedValue<'_>) -> bool {
             matches!(
                 t,
                 TypedValue::Int(_) | TypedValue::String(_) | TypedValue::LazyClass(_)

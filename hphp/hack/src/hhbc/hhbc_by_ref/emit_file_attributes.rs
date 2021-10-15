@@ -6,10 +6,8 @@ use hhbc_by_ref_emit_attribute::from_asts;
 use hhbc_by_ref_env::emitter::Emitter;
 use hhbc_by_ref_hhas_attribute::HhasAttribute;
 use hhbc_by_ref_instruction_sequence::Result;
-use oxidized::ast;
-
-extern crate itertools;
 use itertools::Itertools;
+use oxidized::ast;
 
 fn emit_file_attributes<'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,

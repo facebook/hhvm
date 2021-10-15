@@ -325,7 +325,7 @@ pub fn from_text<'arena, 'decl, W, S: AsRef<str>>(
     env: &Env<S>,
     stack_limit: &StackLimit,
     writer: &mut W,
-    source_text: SourceText,
+    source_text: SourceText<'_>,
     native_env: Option<&NativeEnv<S>>,
     decl_provider: unified_decl_provider::DeclProvider<'decl>,
 ) -> anyhow::Result<Option<Profile>>
@@ -391,7 +391,7 @@ pub fn hhas_from_text<'arena, S: AsRef<str>>(
     alloc: &'arena bumpalo::Bump,
     env: &Env<S>,
     stack_limit: &StackLimit,
-    source_text: SourceText,
+    source_text: SourceText<'_>,
     native_env: Option<&NativeEnv<S>>,
     decl_provider: unified_decl_provider::DeclProvider<'arena>,
 ) -> anyhow::Result<(HhasProgram<'arena>, Option<Profile>)> {
@@ -403,7 +403,7 @@ pub fn hhas_to_string<W: std::fmt::Write, S: AsRef<str>>(
     env: &Env<S>,
     native_env: Option<&NativeEnv<S>>,
     writer: &mut W,
-    program: &HhasProgram,
+    program: &HhasProgram<'_>,
 ) -> anyhow::Result<()> {
     let mut emitter = create_emitter(
         env,
@@ -465,7 +465,7 @@ fn emit_prog_from_text<'arena, 'decl, S: AsRef<str>>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<S>,
     stack_limit: &StackLimit,
-    source_text: SourceText,
+    source_text: SourceText<'_>,
 ) -> anyhow::Result<(HhasProgram<'arena>, Option<Profile>)> {
     let log_extern_compiler_perf = emitter.options().log_extern_compiler_perf();
 
@@ -597,7 +597,7 @@ fn create_parser_options(opts: &Options) -> ParserOptions {
 fn parse_file(
     opts: &Options,
     stack_limit: &StackLimit,
-    source_text: SourceText,
+    source_text: SourceText<'_>,
     elaborate_namespaces: bool,
     namespace_env: RcOc<NamespaceEnv>,
     is_systemlib: bool,

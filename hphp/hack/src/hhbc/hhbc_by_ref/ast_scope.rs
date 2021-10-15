@@ -35,7 +35,7 @@ impl<'a, 'arena> Scope<'a, 'arena> {
         (0..self.items.len()).rev().map(move |i| &self.items[..i])
     }
 
-    pub fn get_subscope_class<'b>(sub_scope: &'b [ScopeItem<'b, 'b>]) -> Option<&'b Class> {
+    pub fn get_subscope_class<'b>(sub_scope: &'b [ScopeItem<'b, 'b>]) -> Option<&'b Class<'_>> {
         for scope_item in sub_scope.iter().rev() {
             if let ScopeItem::Class(cd) = scope_item {
                 return Some(cd);
@@ -44,7 +44,7 @@ impl<'a, 'arena> Scope<'a, 'arena> {
         None
     }
 
-    pub fn get_class(&self) -> Option<&Class> {
+    pub fn get_class(&self) -> Option<&Class<'_>> {
         Self::get_subscope_class(&self.items[..])
     }
 

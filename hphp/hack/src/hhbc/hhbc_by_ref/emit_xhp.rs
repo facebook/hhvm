@@ -46,7 +46,7 @@ pub fn from_attribute_declaration<'a, 'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
     class: &'a Class_,
-    xal: &[HhasXhpAttribute],
+    xal: &[HhasXhpAttribute<'_>],
     xual: &[Hint],
 ) -> Result<HhasMethod<'arena>> {
     let id_from_str = |s: &str| Expr_::mk_id(ast_defs::Id(Pos::make_none(), s.into()));
@@ -337,7 +337,7 @@ fn xhp_child_op_to_int(op: Option<&XhpChildOp>) -> usize {
 
 fn emit_xhp_attribute_array<'arena>(
     alloc: &'arena bumpalo::Bump,
-    xal: &[HhasXhpAttribute],
+    xal: &[HhasXhpAttribute<'_>],
 ) -> Result<Expr> {
     fn hint_to_num(id: &str) -> usize {
         match id {
@@ -398,7 +398,7 @@ fn emit_xhp_attribute_array<'arena>(
     }
     fn inner_array<'arena>(
         alloc: &'arena bumpalo::Bump,
-        xa: &HhasXhpAttribute,
+        xa: &HhasXhpAttribute<'_>,
     ) -> Result<Vec<Expr>> {
         let enum_opt = xa.maybe_enum.map(|(_, es)| es);
         let expr = match &(xa.class_var).expr {
@@ -421,7 +421,7 @@ fn emit_xhp_attribute_array<'arena>(
     }
     fn emit_xhp_attribute<'arena>(
         alloc: &'arena bumpalo::Bump,
-        xa: &HhasXhpAttribute,
+        xa: &HhasXhpAttribute<'_>,
     ) -> Result<(Expr, Expr)> {
         let k = mk_expr(Expr_::String(
             string_utils::clean(&((xa.class_var).id).1).into(),

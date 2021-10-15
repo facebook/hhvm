@@ -233,7 +233,7 @@ mod tests {
     #[test]
     fn test_add_suffix() {
         let alloc = bumpalo::Bump::new();
-        let id: prop::PropType = (&alloc, "Some").into();
+        let id: prop::PropType<'_> = (&alloc, "Some").into();
         let id = prop::PropType::add_suffix(&alloc, &id, "Property");
         assert_eq!("SomeProperty", id.to_raw_string());
     }
@@ -241,7 +241,7 @@ mod tests {
     #[test]
     fn test_from_ast_name() {
         let alloc = bumpalo::Bump::new();
-        let id: method::MethodType = method::MethodType::from_ast_name(&alloc, "meth");
+        let id = method::MethodType::from_ast_name(&alloc, "meth");
         assert_eq!("meth", id.to_raw_string());
     }
 }

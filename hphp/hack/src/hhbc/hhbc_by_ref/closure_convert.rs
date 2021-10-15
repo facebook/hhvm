@@ -310,11 +310,11 @@ impl<'arena> State<'arena> {
     }
 }
 
-fn total_class_count(env: &Env, st: &State) -> usize {
+fn total_class_count(env: &Env<'_, '_>, st: &State<'_>) -> usize {
     st.closures.len() + env.defined_class_count
 }
 
-fn should_capture_var(env: &Env, var: &str) -> bool {
+fn should_capture_var(env: &Env<'_, '_>, var: &str) -> bool {
     // variable used in lambda should be captured if is:
     // - not contained in lambda parameter list
     if let Some(true) = env
@@ -349,7 +349,7 @@ fn should_capture_var(env: &Env, var: &str) -> bool {
 }
 
 // Add a variable to the captured variables
-fn add_var(env: &Env, st: &mut State, var: &str) {
+fn add_var(env: &Env<'_, '_>, st: &mut State<'_>, var: &str) {
     // Don't bother if it's $this, as this is captured implicitly
     if var == special_idents::THIS {
         st.captured_this = true;
@@ -363,7 +363,7 @@ fn add_var(env: &Env, st: &mut State, var: &str) {
     }
 }
 
-fn add_generic(env: &mut Env, st: &mut State, var: &str) {
+fn add_generic(env: &mut Env<'_, '_>, st: &mut State<'_>, var: &str) {
     let reified_var_position = |is_fun| {
         let is_reified_var =
             |param: &Tparam| param.reified != ReifyKind::Erased && param.name.1 == var;
@@ -386,7 +386,10 @@ fn add_generic(env: &mut Env, st: &mut State, var: &str) {
     }
 }
 
-fn get_vars(params: &[FunParam], body: hhbc_by_ref_ast_body::AstBody) -> Result<HashSet<String>> {
+fn get_vars(
+    params: &[FunParam],
+    body: hhbc_by_ref_ast_body::AstBody<'_>,
+) -> Result<HashSet<String>> {
     decl_vars::vars_from_ast(params, &body).map_err(unrecoverable)
 }
 
@@ -398,11 +401,11 @@ fn strip_id(id: &Id) -> &str {
     string_utils::strip_global_ns(&id.1)
 }
 
-fn make_class_name(cd: &ast_scope::Class) -> String {
+fn make_class_name(cd: &ast_scope::Class<'_>) -> String {
     string_utils::mangle_xhp_id(strip_id(cd.get_name()).to_string())
 }
 
-fn make_scope_name(ns: &RcOc<namespace_env::Env>, scope: &ast_scope::Scope) -> String {
+fn make_scope_name(ns: &RcOc<namespace_env::Env>, scope: &ast_scope::Scope<'_, '_>) -> String {
     let mut parts: Vec<String> = vec![];
     for sub_scope in scope.iter_subscopes() {
         match sub_scope.last() {
@@ -439,7 +442,7 @@ fn make_scope_name(ns: &RcOc<namespace_env::Env>, scope: &ast_scope::Scope) -> S
     parts.join("")
 }
 
-fn make_closure_name(env: &Env, st: &State) -> String {
+fn make_closure_name(env: &Env<'_, '_>, st: &State<'_>) -> String {
     let per_fun_idx = st.closure_cnt_per_fun;
     string_utils::closures::mangle_closure(&make_scope_name(&st.namespace, &env.scope), per_fun_idx)
 }
@@ -447,8 +450,8 @@ fn make_closure_name(env: &Env, st: &State) -> String {
 fn make_closure(
     class_num: usize,
     p: Pos,
-    env: &Env,
-    st: &State,
+    env: &Env<'_, '_>,
+    st: &State<'_>,
     lambda_vars: Vec<String>,
     fun_tparams: Vec<Tparam>,
     class_tparams: Vec<Tparam>,
@@ -545,9 +548,9 @@ fn make_closure(
 // Translate special identifiers __CLASS__, __METHOD__ and __FUNCTION__ into
 // literal strings. It's necessary to do this before closure conversion
 // because the enclosing class will be changed.
-fn convert_id(env: &Env, Id(p, s): Id) -> Expr_ {
+fn convert_id(env: &Env<'_, '_>, Id(p, s): Id) -> Expr_ {
     let ret = |newstr| Expr_::mk_string(newstr);
-    let name = |c: &ast_scope::Class| {
+    let name = |c: &ast_scope::Class<'_>| {
         Expr_::mk_string(string_utils::mangle_xhp_id(strip_id(c.get_name()).to_string()).into())
     };
 
@@ -609,7 +612,7 @@ fn visit_class_id<'a, 'arena>(
     })
 }
 
-fn make_info(c: &ast_scope::Class) -> ClosureEnclosingClassInfo {
+fn make_info(c: &ast_scope::Class<'_>) -> ClosureEnclosingClassInfo {
     ClosureEnclosingClassInfo {
         kind: c.get_kind(),
         name: c.get_name().1.clone(),
@@ -814,7 +817,7 @@ fn make_fn_param(pos: Pos, lid: &LocalId, is_variadic: bool, is_inout: bool) -> 
     }
 }
 
-fn get_scope_fmode(scope: &Scope) -> Mode {
+fn get_scope_fmode(scope: &Scope<'_, '_>) -> Mode {
     scope
         .iter()
         .find_map(|item| match item {
@@ -826,15 +829,15 @@ fn get_scope_fmode(scope: &Scope) -> Mode {
 }
 
 fn convert_meth_caller_to_func_ptr(
-    env: &Env,
-    st: &mut ClosureConvertVisitor,
+    env: &Env<'_, '_>,
+    st: &mut ClosureConvertVisitor<'_, '_>,
     pos: &Pos,
     pc: &Pos,
     cls: &str,
     pf: &Pos,
     fname: &str,
 ) -> Expr_ {
-    fn get_scope_fmode(scope: &Scope) -> Mode {
+    fn get_scope_fmode(scope: &Scope<'_, '_>) -> Mode {
         scope
             .iter()
             .find_map(|item| match item {

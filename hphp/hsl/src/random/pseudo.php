@@ -31,7 +31,7 @@ function float()[defaults]: float {
 function int(
   int $min = \PHP_INT_MIN,
   int $max = \PHP_INT_MAX,
-)[defaults]: int {
+)[controlled]: int {
   invariant(
     $min <= $max,
     'Expected $min (%d) to be less than or equal to $max (%d).',

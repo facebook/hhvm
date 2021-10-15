@@ -348,7 +348,7 @@ pub extern "C" fn shmffi_add(hash: u64, data: usize) -> usize {
         let uncompressed_size = compressed.uncompressed_size();
         with(|cmap| {
             cmap.write_map(&hash, |shard| {
-                let heap_value = compressed.to_heap_value_in(shard.alloc);
+                let heap_value = compressed.to_heap_value_in(shard.alloc_non_evictable);
                 shard.map.insert(hash, heap_value);
             })
         });
@@ -425,7 +425,7 @@ pub extern "C" fn shmffi_move(hash1: u64, hash2: u64) {
     with(|cmap| {
         let value = cmap.write_map(&hash1, |shard1| shard1.map.remove(&hash1).unwrap());
         cmap.write_map(&hash2, |shard2| {
-            let cloned_value = value.clone_in(shard2.alloc);
+            let cloned_value = value.clone_in(shard2.alloc_non_evictable);
             shard2.map.insert(hash2, cloned_value);
         });
     });

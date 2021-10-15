@@ -275,8 +275,6 @@ type t = {
   tco_typecheck_sample_rate: float;
   (* Experimental implementation of a "sound" dynamic type *)
   tco_enable_sound_dynamic: bool;
-  (* Disallow #-style comments, except hashbangs(#!) *)
-  po_disallow_hash_comments: bool;
   (* Disable parsing of fun() and class_meth() *)
   po_disallow_fun_and_cls_meth_pseudo_funcs: bool;
   (* Disable parsing of inst_meth() *)
@@ -439,7 +437,6 @@ val make :
   ?tco_report_pos_from_reason:bool ->
   ?tco_typecheck_sample_rate:float ->
   ?tco_enable_sound_dynamic:bool ->
-  ?po_disallow_hash_comments:bool ->
   ?po_disallow_fun_and_cls_meth_pseudo_funcs:bool ->
   ?po_disallow_inst_meth:bool ->
   ?po_enable_readonly_in_emitter:bool ->
@@ -710,8 +707,6 @@ val tco_report_pos_from_reason : t -> bool
 val tco_typecheck_sample_rate : t -> float
 
 val tco_enable_sound_dynamic : t -> bool
-
-val po_disallow_hash_comments : t -> bool
 
 val po_disallow_fun_and_cls_meth_pseudo_funcs : t -> bool
 

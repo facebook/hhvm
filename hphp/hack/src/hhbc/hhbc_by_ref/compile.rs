@@ -110,7 +110,7 @@ bitflags! {
         const DISABLE_XHP_ELEMENT_MANGLING=1 << 11;
         const DISALLOW_FUN_AND_CLS_METH_PSEUDO_FUNCS=1 << 12;
         const DISALLOW_FUNC_PTRS_IN_CONSTANTS=1 << 13;
-        const DISALLOW_HASH_COMMENTS=1 << 14;
+        // No longer using bit 14.
         // No longer using bit 15.
         const ENABLE_ENUM_CLASSES=1 << 16;
         const ENABLE_XHP_CLASS_MODIFIER=1 << 17;
@@ -231,9 +231,6 @@ impl ParserFlags {
         }
         if self.contains(ParserFlags::DISALLOW_FUNC_PTRS_IN_CONSTANTS) {
             f |= LangFlags::DISALLOW_FUNC_PTRS_IN_CONSTANTS;
-        }
-        if self.contains(ParserFlags::DISALLOW_HASH_COMMENTS) {
-            f |= LangFlags::DISALLOW_HASH_COMMENTS;
         }
         if self.contains(ParserFlags::ENABLE_ENUM_CLASSES) {
             f |= LangFlags::ENABLE_ENUM_CLASSES;
@@ -584,7 +581,6 @@ fn create_parser_options(opts: &Options) -> ParserOptions {
         po_disable_array: hack_lang_flags(LangFlags::DISABLE_ARRAY),
         po_disable_array_typehint: hack_lang_flags(LangFlags::DISABLE_ARRAY_TYPEHINT),
         po_allow_unstable_features: hack_lang_flags(LangFlags::ALLOW_UNSTABLE_FEATURES),
-        po_disallow_hash_comments: hack_lang_flags(LangFlags::DISALLOW_HASH_COMMENTS),
         po_disallow_fun_and_cls_meth_pseudo_funcs: hack_lang_flags(
             LangFlags::DISALLOW_FUN_AND_CLS_METH_PSEUDO_FUNCS,
         ),

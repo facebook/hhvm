@@ -99,7 +99,6 @@ struct RepoOptions {
   H(bool,           DisableUnsetClassConst,           false)          \
   H(bool,           DisallowFuncPtrsInConstants,      false)          \
   H(bool,           AllowUnstableFeatures,            false)          \
-  H(bool,           DisallowHashComments,             false)          \
   H(bool,           EnableXHPClassModifier,           true)           \
   H(bool,           DisableXHPElementMangling,        true)           \
   H(bool,           DisableArray,                     true)           \

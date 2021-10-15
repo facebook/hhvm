@@ -27,7 +27,6 @@ ocaml_ffi! {
             ((1 << 2) & flags) != 0, // allow_new_attribute_syntax
             ((1 << 3) & flags) != 0, // enable_xhp_class_modifier
             ((1 << 4) & flags) != 0, // disable_xhp_element_mangling
-            ((1 << 5) & flags) != 0, // disallow_hash_comments
             filename,
             text,
             mangle_xhp,
@@ -41,7 +40,6 @@ pub fn extract_facts_as_json_ffi0(
     allow_new_attribute_syntax: bool,
     enable_xhp_class_modifier: bool,
     disable_xhp_element_mangling: bool,
-    disallow_hash_comments: bool,
     filename: RelativePath,
     text: &[u8],
     mangle_xhp: bool,
@@ -53,7 +51,6 @@ pub fn extract_facts_as_json_ffi0(
         enable_xhp_class_modifier,
         disable_xhp_element_mangling,
         filename,
-        disallow_hash_comments,
     };
     if mangle_xhp {
         extract_as_json(text, opts)
@@ -68,7 +65,6 @@ pub fn extract_facts_ffi0(
     allow_new_attribute_syntax: bool,
     enable_xhp_class_modifier: bool,
     disable_xhp_element_mangling: bool,
-    disallow_hash_comments: bool,
     filename: RelativePath,
     text: &[u8],
     _mangle_xhp: bool,
@@ -80,7 +76,6 @@ pub fn extract_facts_ffi0(
         enable_xhp_class_modifier,
         disable_xhp_element_mangling,
         filename,
-        disallow_hash_comments,
     };
     from_text(text, opts)
 }

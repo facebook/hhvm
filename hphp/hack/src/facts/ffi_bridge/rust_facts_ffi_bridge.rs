@@ -107,7 +107,6 @@ pub fn hackc_extract_facts_as_json_cpp_ffi(
         ((1 << 2) & flags) != 0, // allow_new_attribute_syntax
         ((1 << 3) & flags) != 0, // enable_xhp_class_modifier
         ((1 << 4) & flags) != 0, // disable_xhp_element_mangling
-        ((1 << 5) & flags) != 0, // disallow_hash_comments
         filepath,
         source_text.as_bytes(),
         true, // mangle_xhp
@@ -134,7 +133,6 @@ pub fn hackc_extract_facts_cpp_ffi(
         ((1 << 2) & flags) != 0, // allow_new_attribute_syntax
         ((1 << 3) & flags) != 0, // enable_xhp_class_modifier
         ((1 << 4) & flags) != 0, // disable_xhp_element_mangling
-        ((1 << 5) & flags) != 0, // disallow_hash_comments
         filepath,
         text,
         true, // mangle_xhp

@@ -256,7 +256,6 @@ impl<'src> AastParser {
                 .parser_options
                 .po_disable_xhp_children_declarations,
             disable_modes: env.parser_options.po_disable_modes,
-            disallow_hash_comments: env.parser_options.po_disallow_hash_comments,
             disallow_fun_and_cls_meth_pseudo_funcs: env
                 .parser_options
                 .po_disallow_fun_and_cls_meth_pseudo_funcs,

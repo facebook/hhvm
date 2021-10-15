@@ -297,7 +297,6 @@ ParserEnv RepoOptions::getParserEnvironment() const {
     , DisableXHPElementMangling
     , false // disable_xhp_children_declarations
     , false // disable_modes
-    , DisallowHashComments
     , DisallowFunAndClsMethPseudoFuncs
     , true  // interpret_soft_types_as_like_types
     };
@@ -341,8 +340,7 @@ std::uint32_t RepoOptions::getFactsFlags() const {
     1 << 1 |  //hhvm_compat_mode
     AllowNewAttributeSyntax   << 2 |
     EnableXHPClassModifier    << 3 |
-    DisableXHPElementMangling << 4 |
-    DisallowHashComments      << 5;
+    DisableXHPElementMangling << 4;
   return flags;
 }
 
@@ -365,7 +363,6 @@ std::uint32_t RepoOptions::getParserFlags() const {
     SETFLAGS(DisableXHPElementMangling, 11)                    \
     SETFLAGS(DisallowFunAndClsMethPseudoFuncs, 12)             \
     SETFLAGS(DisallowFuncPtrsInConstants, 13)                  \
-    SETFLAGS(DisallowHashComments, 14)                         \
     SETFLAGS(EnableEnumClasses,16)                             \
     SETFLAGS(EnableXHPClassModifier,17)                        \
     SETFLAGS(RuntimeOption::EnableClassLevelWhereClauses, 20)  \

@@ -3,7 +3,6 @@ assume_php = false
 
 allowed_fixme_codes_strict = 4110
 allowed_decl_fixme_codes = 4110
-disallow_hash_comments = true
 disallow_fun_and_cls_meth_pseudo_funcs = true
 
 auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}

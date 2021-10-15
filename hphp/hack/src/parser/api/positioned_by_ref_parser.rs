@@ -56,12 +56,7 @@ fn trivia_lexer<'a>(
     source_text: &'a SourceText<'a>,
     offset: usize,
 ) -> Lexer<'a, TokenFactoryFullTrivia<'a>> {
-    Lexer::make_at(
-        source_text,
-        offset,
-        TokenFactoryFullTrivia::new(arena),
-        false,
-    )
+    Lexer::make_at(source_text, offset, TokenFactoryFullTrivia::new(arena))
 }
 
 pub fn scan_leading_xhp_trivia<'a>(

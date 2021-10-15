@@ -260,7 +260,6 @@ prefixed_flags!(
     DISALLOW_FUN_AND_CLS_METH_PSEUDO_FUNCS,
     DISALLOW_INST_METH,
     DISALLOW_FUNC_PTRS_IN_CONSTANTS,
-    DISALLOW_HASH_COMMENTS,
     ENABLE_CLASS_LEVEL_WHERE_CLAUSES,
     ENABLE_ENUM_CLASSES,
     ENABLE_XHP_CLASS_MODIFIER,
@@ -735,9 +734,6 @@ mod tests {
   "hhvm.hack.lang.disallow_func_ptrs_in_constants": {
     "global_value": false
   },
-  "hhvm.hack.lang.disallow_hash_comments": {
-    "global_value": false
-  },
   "hhvm.hack.lang.disallow_inst_meth": {
     "global_value": false
   },
@@ -1140,7 +1136,7 @@ bitflags! {
         const DISABLE_ARRAY_TYPEHINT = 1 << 53;
         // No longer using bit 54.
         const ALLOW_UNSTABLE_FEATURES = 1 << 55;
-        const DISALLOW_HASH_COMMENTS = 1 << 56;
+        // No longer using bit 56.
         const DISALLOW_FUN_AND_CLS_METH_PSEUDO_FUNCS = 1 << 57;
         const FOLD_LAZY_CLASS_KEYS = 1 << 58;
         // No longer using bit 59.

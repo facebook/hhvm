@@ -114,7 +114,6 @@ impl Default for GlobalOptions {
             tco_report_pos_from_reason: false,
             tco_typecheck_sample_rate: 1.0,
             tco_enable_sound_dynamic: false,
-            po_disallow_hash_comments: false,
             po_disallow_fun_and_cls_meth_pseudo_funcs: false,
             po_disallow_inst_meth: false,
             po_enable_readonly_in_emitter: false,

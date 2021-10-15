@@ -260,7 +260,6 @@ let parse_options () =
   let method_call_inference = ref false in
   let report_pos_from_reason = ref false in
   let enable_sound_dynamic = ref false in
-  let disallow_hash_comments = ref false in
   let disallow_fun_and_cls_meth_pseudo_funcs = ref false in
   let disallow_inst_meth = ref false in
   let use_direct_decl_parser = ref false in
@@ -630,9 +629,6 @@ let parse_options () =
       ( "--enable-sound-dynamic-type",
         Arg.Set enable_sound_dynamic,
         " Enforce sound dynamic types.  Experimental." );
-      ( "--disallow-hash-comments",
-        Arg.Set disallow_hash_comments,
-        " Disallow #-style comments (besides hashbangs)." );
       ( "--disallow-fun-and-cls-meth-pseudo-funcs",
         Arg.Set disallow_fun_and_cls_meth_pseudo_funcs,
         " Disable parsing of fun() and class_meth()." );
@@ -844,7 +840,6 @@ let parse_options () =
       ~tco_method_call_inference:!method_call_inference
       ~tco_report_pos_from_reason:!report_pos_from_reason
       ~tco_enable_sound_dynamic:!enable_sound_dynamic
-      ~po_disallow_hash_comments:!disallow_hash_comments
       ~po_disallow_fun_and_cls_meth_pseudo_funcs:
         !disallow_fun_and_cls_meth_pseudo_funcs
       ~po_disallow_inst_meth:!disallow_inst_meth

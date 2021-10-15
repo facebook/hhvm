@@ -37,8 +37,6 @@
 
 #include "hphp/hack/src/facts/ffi_bridge/rust_facts_ffi_bridge.rs"
 #include "hphp/hack/src/hhbc/ffi_bridge/rust_compile_ffi_bridge.rs"
-#include "hphp/hack/src/hhbc/compile_ffi.h"
-#include "hphp/hack/src/hhbc/compile_ffi_types.h"
 #include "hphp/hack/src/hhbc/hhbc_by_ref/hhbc-ast.h"
 #include "hphp/hack/src/parser/ffi_bridge/rust_parser_ffi_bridge.rs"
 #include "hphp/runtime/base/autoload-map.h"

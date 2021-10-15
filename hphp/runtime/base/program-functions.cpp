@@ -3002,6 +3002,9 @@ void hphp_session_exit(Transport* transport) {
       entry->setInt("response_code", transport->getResponseCode());
       entry->setInt("uptime", f_server_uptime());
       entry->setInt("rss", ProcStatus::adjustedRssKb());
+      if (use_lowptr) {
+        entry->setInt("low_mem", alloc::getLowMapped());
+      }
       StructuredLog::log("hhvm_request_perf", *entry);
       transport->resetStructuredLogEntry();
     }

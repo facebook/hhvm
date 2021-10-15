@@ -201,6 +201,7 @@ HttpServer::HttpServer() {
       // Temporary counter that is available only during a short uptime window.
       if (uptime > RO::EvalMemTrackStart && uptime < RO::EvalMemTrackEnd) {
         counters["windowed_rss"] = ProcStatus::adjustedRssKb();
+        counters["windowed_low_mem"] = alloc::getLowMapped();
         counters["windowed_units"] = MemoryStats::Count(AllocKind::Unit);
         counters["windowed_classes"] = MemoryStats::Count(AllocKind::Class);
         counters["windowed_funcs"] = MemoryStats::Count(AllocKind::Func);

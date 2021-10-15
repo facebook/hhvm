@@ -308,6 +308,7 @@ class HackCodeGenerator(CodeGenerator):
             return self.class_objs[symbol]
         elif symbol in self.interface_objs:
             return self.interface_objs[symbol]
+        raise RuntimeError("No object with symbol name {0}".format(symbol))
 
     def _add_class(self, name: str) -> None:
         self.class_objs[name] = _HackClassGenerator(name)
@@ -434,7 +435,7 @@ class HackCodeGenerator(CodeGenerator):
     def validate_depth(self) -> None:
         # Validate the depth requirement (Union-find set).
         symbols = list(self.class_objs.keys()) + list(self.interface_objs.keys())
-        depth = dict.fromkeys(symbols, 1)
+        depth: Dict[str, int] = dict.fromkeys(symbols, 1)
 
         for symbol in symbols:
             ancestors = deque(

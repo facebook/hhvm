@@ -107,7 +107,7 @@ interface MutableSet extends ConstSet,
                              SetAccess {
 }
 
-trait StrictIterable implements \HH\Iterable {
+trait StrictIterable<+Tv> implements \HH\Iterable<Tv> {
   <<__ProvenanceSkipFrame>>
   public function toArray() {
     $arr = varray[];
@@ -138,17 +138,21 @@ trait StrictIterable implements \HH\Iterable {
   public function values() {
     return new Vector($this);
   }
-  public function map($callback) {
+  public function map<Tu>(
+    (function(Tv)[_]: Tu) $fn,
+  )[ctx $fn]: \HH\Iterable<Tu> {
     $res = Vector {};
     foreach ($this as $v) {
-      $res[] = $callback($v);
+      $res[] = $fn($v);
     }
     return $res;
   }
-  public function filter($callback) {
+  public function filter(
+    (function(Tv)[_]: bool) $fn,
+  )[ctx $fn]: \HH\Iterable<Tv> {
     $res = Vector {};
     foreach ($this as $v) {
-      if ($callback($v)) $res[] = $v;
+      if ($fn($v)) $res[] = $v;
     }
     return $res;
   }
@@ -171,7 +175,9 @@ trait StrictIterable implements \HH\Iterable {
     }
     return $res;
   }
-  public function takeWhile($fn) {
+  public function takeWhile(
+    (function(Tv)[_]: bool) $fn,
+  )[ctx $fn]: \HH\Iterable<Tv> {
     $res = Vector {};
     foreach ($this as $v) {
       if (!$fn($v)) break;
@@ -190,7 +196,9 @@ trait StrictIterable implements \HH\Iterable {
     }
     return $res;
   }
-  public function skipWhile($fn) {
+  public function skipWhile(
+    (function(Tv)[_]: bool) $fn,
+  )[ctx $fn]: \HH\Iterable<Tv> {
     $res = Vector {};
     $skip = true;
     foreach ($this as $v) {
@@ -238,7 +246,7 @@ trait StrictIterable implements \HH\Iterable {
   }
 }
 
-trait StrictKeyedIterable implements \HH\KeyedIterable {
+trait StrictKeyedIterable<Tk, +Tv> implements \HH\KeyedIterable<Tk, Tv> {
   <<__ProvenanceSkipFrame>>
   public function toArray() {
     $arr = darray[];
@@ -294,31 +302,39 @@ trait StrictKeyedIterable implements \HH\KeyedIterable {
     }
     return $res;
   }
-  public function map($callback) {
+  public function map<Tu>(
+    (function(Tv)[_]: Tu) $fn,
+  )[ctx $fn]: \HH\KeyedIterable<Tk,Tu> {
     $res = Map {};
     foreach ($this as $k => $v) {
-      $res[$k] = $callback($v);
+      $res[$k] = $fn($v);
     }
     return $res;
   }
-  public function mapWithKey($callback) {
+  public function mapWithKey<Tu>(
+    (function(Tk, Tv)[_]: Tu) $fn,
+  )[ctx $fn]: \HH\KeyedIterable<Tk,Tu> {
     $res = Map {};
     foreach ($this as $k => $v) {
-      $res[$k] = $callback($k, $v);
+      $res[$k] = $fn($k, $v);
     }
     return $res;
   }
-  public function filter($callback) {
+  public function filter(
+    (function(Tv)[_]: bool) $fn,
+  )[ctx $fn]: \HH\KeyedIterable<Tk,Tv> {
     $res = Map {};
     foreach ($this as $k => $v) {
-      if ($callback($v)) $res[$k] = $v;
+      if ($fn($v)) $res[$k] = $v;
     }
     return $res;
   }
-  public function filterWithKey($callback) {
+  public function filterWithKey(
+    (function(Tk, Tv)[_]: bool) $fn,
+  )[ctx $fn]: \HH\KeyedIterable<Tk,Tv> {
     $res = Map {};
     foreach ($this as $k => $v) {
-      if ($callback($k, $v)) $res[$k] = $v;
+      if ($fn($k, $v)) $res[$k] = $v;
     }
     return $res;
   }
@@ -341,7 +357,9 @@ trait StrictKeyedIterable implements \HH\KeyedIterable {
     }
     return $res;
   }
-  public function takeWhile($fn) {
+  public function takeWhile(
+    (function(Tv)[_]: bool) $fn,
+  )[ctx $fn]: \HH\KeyedIterable<Tk, Tv> {
     $res = Map {};
     foreach ($this as $k => $v) {
       if (!$fn($v)) break;
@@ -360,7 +378,9 @@ trait StrictKeyedIterable implements \HH\KeyedIterable {
     }
     return $res;
   }
-  public function skipWhile($fn) {
+  public function skipWhile(
+    (function(Tv)[_]: bool) $fn,
+  )[ctx $fn]: \HH\KeyedIterable<Tk, Tv> {
     $res = Map {};
     $skip = true;
     foreach ($this as $k => $v) {
@@ -419,7 +439,7 @@ trait StrictKeyedIterable implements \HH\KeyedIterable {
   }
 }
 
-trait LazyIterable implements \HH\Iterable {
+trait LazyIterable<+Tv> implements \HH\Iterable<Tv> {
   public function toArray() {
     $arr = varray[];
     foreach ($this as $v) {
@@ -448,11 +468,15 @@ trait LazyIterable implements \HH\Iterable {
   public function values() {
     return new LazyValuesIterable($this);
   }
-  public function map($callback) {
-    return new LazyMapIterable($this, $callback);
+  public function map<Tu>(
+    (function(Tv)[_]: Tu) $fn,
+  )[ctx $fn]: \HH\Iterable<Tu> {
+    return new LazyMapIterable($this, $fn);
   }
-  public function filter($callback) {
-    return new LazyFilterIterable($this, $callback);
+  public function filter(
+    (function(Tv)[_]: bool) $fn,
+  )[ctx $fn]: \HH\Iterable<Tv> {
+    return new LazyFilterIterable($this, $fn);
   }
   public function zip($iterable)[] {
     if (HH\is_any_array($iterable)) {
@@ -463,13 +487,17 @@ trait LazyIterable implements \HH\Iterable {
   public function take($n) {
     return new LazyTakeIterable($this, $n);
   }
-  public function takeWhile($fn) {
+  public function takeWhile(
+    (function(Tv)[_]: bool) $fn,
+  )[ctx $fn]: \HH\Iterable<Tv> {
     return new LazyTakeWhileIterable($this, $fn);
   }
   public function skip($n) {
     return new LazySkipIterable($this, $n);
   }
-  public function skipWhile($fn) {
+  public function skipWhile(
+    (function(Tv)[_]: bool) $fn,
+  )[ctx $fn]: \HH\Iterable<Tv> {
     return new LazySkipWhileIterable($this, $fn);
   }
   public function slice($start, $len) {
@@ -494,7 +522,7 @@ trait LazyIterable implements \HH\Iterable {
   }
 }
 
-trait LazyKeyedIterable implements \HH\KeyedIterable {
+trait LazyKeyedIterable<Tk, +Tv> implements \HH\KeyedIterable<Tk, Tv> {
   public function toArray() {
     $arr = darray[];
     foreach ($this as $k => $v) {
@@ -543,17 +571,25 @@ trait LazyKeyedIterable implements \HH\KeyedIterable {
   public function keys() {
     return new LazyKeysIterable($this);
   }
-  public function map($callback) {
-    return new LazyMapKeyedIterable($this, $callback);
+  public function map<Tu>(
+    (function(Tv)[_]: Tu) $fn,
+  )[ctx $fn]: \HH\KeyedIterable<Tk,Tu> {
+    return new LazyMapKeyedIterable($this, $fn);
   }
-  public function mapWithKey($callback) {
-    return new LazyMapWithKeyIterable($this, $callback);
+  public function mapWithKey<Tu>(
+    (function(Tk, Tv)[_]: Tu) $fn
+  )[ctx $fn]: \HH\KeyedIterable<Tk,Tu> {
+    return new LazyMapWithKeyIterable($this, $fn);
   }
-  public function filter($callback) {
-    return new LazyFilterKeyedIterable($this, $callback);
+  public function filter(
+    (function(Tv)[_]: bool) $fn,
+  )[ctx $fn]: \HH\KeyedIterable<Tk,Tv> {
+    return new LazyFilterKeyedIterable($this, $fn);
   }
-  public function filterWithKey($callback) {
-    return new LazyFilterWithKeyIterable($this, $callback);
+  public function filterWithKey(
+    (function(Tk, Tv)[_]: bool) $fn,
+  )[ctx $fn]: \HH\KeyedIterable<Tk,Tv> {
+    return new LazyFilterWithKeyIterable($this, $fn);
   }
   public function zip($iterable) {
     if (HH\is_any_array($iterable)) {
@@ -564,13 +600,17 @@ trait LazyKeyedIterable implements \HH\KeyedIterable {
   public function take($n) {
     return new LazyTakeKeyedIterable($this, $n);
   }
-  public function takeWhile($fn) {
+  public function takeWhile(
+    (function(Tv)[_]: bool) $fn,
+  )[ctx $fn]: \HH\KeyedIterable<Tk, Tv> {
     return new LazyTakeWhileKeyedIterable($this, $fn);
   }
   public function skip($n) {
     return new LazySkipKeyedIterable($this, $n);
   }
-  public function skipWhile($fn) {
+  public function skipWhile(
+    (function(Tv)[_]: bool) $fn,
+  )[ctx $fn]: \HH\KeyedIterable<Tk, Tv> {
     return new LazySkipWhileKeyedIterable($this, $fn);
   }
   public function slice($start, $len) {
@@ -1135,7 +1175,8 @@ class LazyTakeWhileIterable implements \HH\Iterable {
   }
 }
 
-class LazyTakeWhileKeyedIterator implements \HH\Iterator {
+class LazyTakeWhileKeyedIterator<Tk, +Tv>
+    implements \HH\KeyedIterator<Tk, Tv> {
   private $it;
   private $fn;
 
@@ -1164,8 +1205,8 @@ class LazyTakeWhileKeyedIterator implements \HH\Iterator {
   }
 }
 
-class LazyTakeWhileKeyedIterable implements \HH\Iterable {
-  use LazyIterable;
+class LazyTakeWhileKeyedIterable<+Tv> implements \HH\KeyedIterable<Tk, Tv> {
+  use LazyKeyedIterable;
 
   private $iterable;
   private $fn;
@@ -1340,7 +1381,8 @@ class LazySkipWhileIterable implements \HH\Iterable {
   }
 }
 
-class LazySkipWhileKeyedIterator implements \HH\Iterator {
+class LazySkipWhileKeyedIterator<Tk, +Tv>
+    implements \HH\KeyedIterator<Tk, Tv> {
   private $it;
   private $fn;
 
@@ -1376,8 +1418,9 @@ class LazySkipWhileKeyedIterator implements \HH\Iterator {
   }
 }
 
-class LazySkipWhileKeyedIterable implements \HH\Iterable {
-  use LazyIterable;
+class LazySkipWhileKeyedIterable<Tk, +Tv>
+    implements \HH\KeyedIterable<Tk, Tv> {
+  use LazyKeyedIterable;
 
   private $iterable;
   private $fn;
@@ -1706,7 +1749,7 @@ class LazyConcatIterable implements \HH\Iterable {
   }
 }
 
-class LazyIterableView implements \HH\Iterable {
+class LazyIterableView<+Tv> implements \HH\Iterable<Tv> {
   public $iterable;
 
   public function __construct($iterable)[] { $this->iterable = $iterable; }
@@ -1741,11 +1784,15 @@ class LazyIterableView implements \HH\Iterable {
   public function values() {
     return new LazyValuesIterable($this->iterable);
   }
-  public function map($callback) {
-    return new LazyMapIterable($this->iterable, $callback);
+  public function map<Tu>(
+    (function(Tv)[_]: Tu) $fn,
+  )[ctx $fn]: \HH\Iterable<Tu> {
+    return new LazyMapIterable($this->iterable, $fn);
   }
-  public function filter($callback) {
-    return new LazyFilterIterable($this->iterable, $callback);
+  public function filter(
+    (function(Tv)[_]: bool) $fn,
+  )[ctx $fn]: \HH\Iterable<Tv> {
+    return new LazyFilterIterable($this->iterable, $fn);
   }
   public function zip($iterable) {
     if (HH\is_any_array($iterable)) {
@@ -1787,7 +1834,7 @@ class LazyIterableView implements \HH\Iterable {
   }
 }
 
-class LazyKeyedIterableView implements \HH\KeyedIterable {
+class LazyKeyedIterableView<Tk, +Tv> implements \HH\KeyedIterable<Tk, Tv> {
   public $iterable;
 
   public function __construct($iterable)[] { $this->iterable = $iterable; }
@@ -1840,17 +1887,25 @@ class LazyKeyedIterableView implements \HH\KeyedIterable {
   public function keys() {
     return new LazyKeysIterable($this->iterable);
   }
-  public function map($callback) {
-    return new LazyMapKeyedIterable($this->iterable, $callback);
+  public function map<Tu>(
+    (function(Tv)[_]: Tu) $fn,
+  )[ctx $fn]: \HH\KeyedIterable<Tk, Tu> {
+    return new LazyMapKeyedIterable($this->iterable, $fn);
   }
-  public function mapWithKey($callback) {
-    return new LazyMapWithKeyIterable($this->iterable, $callback);
+  public function mapWithKey<Tu>(
+    (function(Tk, Tv)[_]: Tu) $fn
+  )[ctx $fn]: \HH\KeyedIterable<Tk, Tu> {
+    return new LazyMapWithKeyIterable($this->iterable, $fn);
   }
-  public function filter($callback) {
-    return new LazyFilterKeyedIterable($this->iterable, $callback);
+  public function filter(
+    (function(Tv)[_]: bool) $fn,
+  )[ctx $fn]: \HH\KeyedIterable<Tk, Tv> {
+    return new LazyFilterKeyedIterable($this->iterable, $fn);
   }
-  public function filterWithKey($callback) {
-    return new LazyFilterWithKeyIterable($this->iterable, $callback);
+  public function filterWithKey(
+    (function(Tk, Tv)[_]: bool) $fn
+  )[ctx $fn]: \HH\KeyedIterable<Tk, Tv> {
+    return new LazyFilterWithKeyIterable($this->iterable, $fn);
   }
   public function zip($iterable) {
     if (HH\is_any_array($iterable)) {
@@ -1861,13 +1916,17 @@ class LazyKeyedIterableView implements \HH\KeyedIterable {
   public function take($n) {
     return new LazyTakeKeyedIterable($this->iterable, $n);
   }
-  public function takeWhile($fn) {
+  public function takeWhile(
+    (function(Tv)[_]: bool) $fn,
+  )[ctx $fn]: \HH\KeyedIterable<Tk, Tv> {
     return new LazyTakeWhileKeyedIterable($this->iterable, $fn);
   }
   public function skip($n) {
     return new LazySkipKeyedIterable($this->iterable, $n);
   }
-  public function skipWhile($fn) {
+  public function skipWhile(
+    (function(Tv)[_]: bool) $fn,
+  )[ctx $fn]: \HH\KeyedIterable<Tk, Tv> {
     return new LazySkipWhileKeyedIterable($this->iterable, $fn);
   }
   public function slice($start, $len) {

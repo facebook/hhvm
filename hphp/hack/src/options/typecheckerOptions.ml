@@ -80,6 +80,9 @@ let experimental_abstract_type_const_with_default =
 let experimental_case_sensitive_inheritance =
   GlobalOptions.tco_experimental_case_sensitive_inheritance
 
+let experimental_supportdynamic_type_hint =
+  GlobalOptions.tco_experimental_supportdynamic_type_hint
+
 let experimental_all = GlobalOptions.tco_experimental_all
 
 let migration_flags_all = GlobalOptions.tco_migration_flags_all
@@ -102,6 +105,13 @@ let log_levels = GlobalOptions.log_levels
 
 let shallow_class_decl = GlobalOptions.tco_shallow_class_decl
 
+let force_shallow_decl_fanout = GlobalOptions.tco_force_shallow_decl_fanout
+
+let fetch_remote_old_decls = GlobalOptions.tco_fetch_remote_old_decls
+
+let force_load_hot_shallow_decls =
+  GlobalOptions.tco_force_load_hot_shallow_decls
+
 let skip_hierarchy_checks = GlobalOptions.tco_skip_hierarchy_checks
 
 let call_coeffects = GlobalOptions.tco_call_coeffects
@@ -123,12 +133,6 @@ let like_casts = GlobalOptions.tco_like_casts
 let simple_pessimize = GlobalOptions.tco_simple_pessimize
 
 let complex_coercion = GlobalOptions.tco_complex_coercion
-
-let disable_partially_abstract_typeconsts =
-  GlobalOptions.tco_disable_partially_abstract_typeconsts
-
-let disallow_partially_abstract_typeconst_definitions =
-  GlobalOptions.tco_disallow_partially_abstract_typeconst_definitions
 
 let check_xhp_attribute = GlobalOptions.tco_check_xhp_attribute
 
@@ -172,8 +176,6 @@ let enable_sound_dynamic = GlobalOptions.tco_enable_sound_dynamic
 
 let use_direct_decl_parser = GlobalOptions.tco_use_direct_decl_parser
 
-let use_direct_decl_in_tc_loop = GlobalOptions.tco_use_direct_decl_in_tc_loop
-
 let interpret_soft_types_as_like_types =
   GlobalOptions.po_interpret_soft_types_as_like_types
 
@@ -203,6 +205,9 @@ let math_new_code = GlobalOptions.tco_math_new_code
 let typeconst_concrete_concrete_error =
   GlobalOptions.tco_typeconst_concrete_concrete_error
 
+let enable_strict_const_semantics =
+  GlobalOptions.tco_enable_strict_const_semantics
+
 let meth_caller_only_public_visibility =
   GlobalOptions.tco_meth_caller_only_public_visibility
 
@@ -214,3 +219,11 @@ let strict_value_equality = GlobalOptions.tco_strict_value_equality
 let enforce_sealed_subclasses = GlobalOptions.tco_enforce_sealed_subclasses
 
 let enable_enum_supertyping = GlobalOptions.po_enable_enum_supertyping
+
+let everything_sdt = GlobalOptions.tco_everything_sdt
+
+let pessimise_builtins = GlobalOptions.tco_pessimise_builtins
+
+let deferments_light = GlobalOptions.tco_deferments_light
+
+let enable_disk_heap = GlobalOptions.tco_enable_disk_heap

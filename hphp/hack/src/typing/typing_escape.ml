@@ -198,8 +198,8 @@ and refresh_type renv v ty_orig =
   @@
   match deref ty with
   | ( _,
-      ( Tany _ | Terr | Tnonnull | Tdynamic | Tprim _ | Tunapplied_alias _
-      | Tneg _ ) ) ->
+      ( Tany _ | Terr | Tnonnull | Tdynamic | Tsupportdynamic | Tprim _
+      | Tunapplied_alias _ | Tneg _ ) ) ->
     (renv, ty_orig, Unchanged)
   | (r, Toption ty1) ->
     let (renv, ty1, changed) = refresh_type renv v ty1 in
@@ -381,32 +381,28 @@ let rec refresh_ctype renv v cty_orig =
     let (renv, cty, ch2) = refresh_ctype renv v cty in
     (renv, mk_constraint_type (r, TCintersection (lty, cty)), ch1 || ch2)
 
-let refresh_bounds renv v add_bound tys =
+let refresh_bounds renv v tys =
   ITySet.fold
-    (fun ity (renv, delete) ->
+    (fun ity (renv, del, add) ->
       match ity with
       | LoclType lty ->
         let (renv, lty, changed) = refresh_type renv v lty in
         begin
           match changed with
-          | Unchanged -> (renv, delete)
+          | Unchanged -> (renv, del, add)
           | Elim (pos, name) ->
-            let env = add_bound pos name renv.env (LoclType lty) in
-            let renv = { renv with env } in
-            (renv, ITySet.add ity delete)
+            (renv, ITySet.add ity del, (LoclType lty, pos, name) :: add)
         end
       | ConstraintType cty ->
         let (renv, cty, changed) = refresh_ctype renv v cty in
         begin
           match changed with
-          | Unchanged -> (renv, delete)
+          | Unchanged -> (renv, del, add)
           | Elim (pos, name) ->
-            let env = add_bound pos name renv.env (ConstraintType cty) in
-            let renv = { renv with env } in
-            (renv, ITySet.add ity delete)
+            (renv, ITySet.add ity del, (ConstraintType cty, pos, name) :: add)
         end)
     tys
-    (renv, ITySet.empty)
+    (renv, ITySet.empty, [])
 
 let refresh_tvar tv (on_error : Errors.error_from_reasons_callback) renv =
   (* restore the error context of one local variable causing us to visit
@@ -420,31 +416,33 @@ let refresh_tvar tv (on_error : Errors.error_from_reasons_callback) renv =
   let renv =
     let ubs = Env.get_tyvar_upper_bounds renv.env tv in
     let var = Ast_defs.Contravariant in
-    let add_bound pos name env ity =
+    let add_bound env (ity, pos, name) =
       TUtils.sub_type_i env tv_ity ity (elim_on_error pos name)
     in
-    let (renv, delete) = refresh_bounds renv var add_bound ubs in
-    if ITySet.is_empty delete then
+    let (renv, del, add) = refresh_bounds renv var ubs in
+    if ITySet.is_empty del && List.is_empty add then
       renv
     else
       let ubs = Env.get_tyvar_upper_bounds renv.env tv in
-      let ubs = ITySet.diff ubs delete in
+      let ubs = ITySet.diff ubs del in
       let env = Env.set_tyvar_upper_bounds renv.env tv ubs in
+      let env = List.fold ~init:env ~f:add_bound add in
       { renv with env }
   in
   let renv =
     let lbs = Env.get_tyvar_lower_bounds renv.env tv in
     let var = Ast_defs.Covariant in
-    let add_bound pos name env ity =
+    let add_bound env (ity, pos, name) =
       TUtils.sub_type_i env ity tv_ity (elim_on_error pos name)
     in
-    let (renv, delete) = refresh_bounds renv var add_bound lbs in
-    if ITySet.is_empty delete then
+    let (renv, del, add) = refresh_bounds renv var lbs in
+    if ITySet.is_empty del && List.is_empty add then
       renv
     else
       let lbs = Env.get_tyvar_lower_bounds renv.env tv in
-      let lbs = ITySet.diff lbs delete in
+      let lbs = ITySet.diff lbs del in
       let env = Env.set_tyvar_lower_bounds renv.env tv lbs in
+      let env = List.fold ~init:env ~f:add_bound add in
       { renv with env }
   in
   renv

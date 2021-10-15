@@ -7,6 +7,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  */
+<<file:__EnableUnstableFeatures("readonly")>>
 
 namespace HH {
 
@@ -32,5 +33,11 @@ function idx<Tk as arraykey, Tv>(
   ?Tk $index,
   $default = null,
 )[] {}
+
+function idx_readonly<Tk as arraykey, Tv>(
+  readonly ?KeyedContainer<Tk, Tv> $collection,
+  ?Tk $index,
+  $default = null,
+)[]: readonly Tv {}
 
 }

@@ -375,6 +375,12 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
         (ServerArgs.log_inference_constraints options)
       ~tco_migration_flags:(config_tc_migration_flags config)
       ~tco_shallow_class_decl:local_config.ServerLocalConfig.shallow_class_decl
+      ~tco_force_shallow_decl_fanout:
+        local_config.ServerLocalConfig.force_shallow_decl_fanout
+      ~tco_force_load_hot_shallow_decls:
+        local_config.ServerLocalConfig.force_load_hot_shallow_decls
+      ~tco_fetch_remote_old_decls:
+        local_config.ServerLocalConfig.fetch_remote_old_decls
       ~tco_skip_hierarchy_checks:
         local_config.ServerLocalConfig.skip_hierarchy_checks
       ~po_allow_unstable_features:
@@ -387,10 +393,6 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
       ?tco_like_casts:(bool_opt "like_casts" config)
       ?tco_simple_pessimize:(float_opt "simple_pessimize" config)
       ?tco_complex_coercion:(bool_opt "complex_coercion" config)
-      ?tco_disable_partially_abstract_typeconsts:
-        (bool_opt "disable_partially_abstract_typeconsts" config)
-      ?tco_disallow_partially_abstract_typeconst_definitions:
-        (bool_opt "disallow_partially_abstract_typeconst_definitions" config)
       ~error_codes_treated_strictly:
         (prepare_error_codes_treated_strictly config)
       ?tco_check_xhp_attribute:(bool_opt "check_xhp_attribute" config)
@@ -458,14 +460,11 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
       ?tco_typecheck_sample_rate:(float_opt "typecheck_sample_rate" config)
       ?tco_enable_sound_dynamic:(bool_opt "enable_sound_dynamic_type" config)
       ?tco_enable_modules:(bool_opt "enable_modules" config)
-      ?po_disallow_hash_comments:(bool_opt "disallow_hash_comments" config)
       ?po_disallow_fun_and_cls_meth_pseudo_funcs:
         (bool_opt "disallow_fun_and_cls_meth_pseudo_funcs" config)
       ?po_disallow_inst_meth:(bool_opt "disallow_inst_meth" config)
       ~tco_use_direct_decl_parser:
         local_config.ServerLocalConfig.use_direct_decl_parser
-      ~tco_use_direct_decl_in_tc_loop:
-        local_config.ServerLocalConfig.use_direct_decl_in_tc_loop
       ~tco_ifc_enabled:(ServerArgs.enable_ifc options)
       ?po_enable_enum_classes:(bool_opt "enable_enum_classes" config)
       ?po_enable_enum_supertyping:(bool_opt "enable_enum_supertyping" config)
@@ -481,6 +480,8 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
       ?tco_math_new_code:(bool_opt "math_new_code" config)
       ?tco_typeconst_concrete_concrete_error:
         (bool_opt "typeconst_concrete_concrete_error" config)
+      ?tco_enable_strict_const_semantics:
+        (bool_opt "enable_strict_const_semantics" config)
       ?tco_meth_caller_only_public_visibility:
         (bool_opt "meth_caller_only_public_visibility" config)
       ?tco_require_extends_implements_ancestors:
@@ -488,6 +489,12 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
       ?tco_strict_value_equality:(bool_opt "strict_value_equality" config)
       ?tco_enforce_sealed_subclasses:
         (bool_opt "enforce_sealed_subclasses" config)
+      ?tco_everything_sdt:(bool_opt "everything_sdt" config)
+      ?tco_pessimise_builtins:(bool_opt "pessimise_builtins" config)
+      ~tco_deferments_light:local_config.ServerLocalConfig.deferments_light
+      ~tco_old_naming_table_for_redecl:
+        local_config.ServerLocalConfig.old_naming_table_for_redecl
+      ~tco_enable_disk_heap:local_config.ServerLocalConfig.enable_disk_heap
       ~log_levels:(prepare_log_levels config)
       ()
   in

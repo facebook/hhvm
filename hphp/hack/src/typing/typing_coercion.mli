@@ -7,6 +7,7 @@
  *)
 
 val coerce_type :
+  ?coerce_for_op:bool ->
   Pos.t ->
   Typing_defs.Reason.ureason ->
   Typing_env_types.env ->
@@ -16,6 +17,7 @@ val coerce_type :
   Typing_env_types.env
 
 val coerce_type_res :
+  ?coerce_for_op:bool ->
   Pos.t ->
   Typing_defs.Reason.ureason ->
   Typing_env_types.env ->

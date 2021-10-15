@@ -14,7 +14,7 @@ Errors:
         f_params =
         [{ param_annotation = (int); param_type_hint = ((int), (Some ([3:25-28], (Hprim Tint)))); 
            param_is_variadic = false; param_pos = [3:29-31]; param_name = "$_"; 
-           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_expr = None; param_readonly = None; param_callconv = Pnormal; 
            param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([4:3-15], (Return (Some ((bool), [4:10-14], True))))] }; 
@@ -42,7 +42,7 @@ Errors:
                  (Binop (Barbar, ((bool), [8:7-14], (Binop (Diff2, ((int), [8:7-8], (Int "3")), ((int), [8:13-14], (Int "2"))))),
                     ((bool), [8:18-72],
                      (Call ((((function(int $_): bool)), [8:18-32], (Id ([8:18-32], "\\some_condition"))), 
-                        [], [((int), [8:33-71], (Hole (((bool), [8:65-70], False), (bool), (int), (UnsafeCast [([8:54-58], (Hprim Tbool)); ([8:60-63], (Hprim Tint))]))))], None)))
+                        [], [(Pnormal, ((int), [8:33-71], (Hole (((bool), [8:65-70], False), (bool), (int), (UnsafeCast [([8:54-58], (Hprim Tbool)); ([8:60-63], (Hprim Tint))])))))], None)))
                     ))),
                 [], [([Pos.none], Noop)])))
              ]

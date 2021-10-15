@@ -13,7 +13,7 @@ decl_derive!([ToOcamlRep] => derive_to_ocamlrep);
 decl_derive!([FromOcamlRep] => derive_from_ocamlrep);
 decl_derive!([FromOcamlRepIn] => derive_from_ocamlrep_in);
 
-fn derive_to_ocamlrep(mut s: synstructure::Structure) -> TokenStream {
+fn derive_to_ocamlrep(mut s: synstructure::Structure<'_>) -> TokenStream {
     // By default, if you are deriving an impl of trait Foo for generic type
     // X<T>, synstructure will add Foo as a bound not only for the type
     // parameter T, but also for every type which appears as a field in X. This
@@ -35,7 +35,7 @@ fn derive_to_ocamlrep(mut s: synstructure::Structure) -> TokenStream {
     })
 }
 
-fn derive_from_ocamlrep(mut s: synstructure::Structure) -> TokenStream {
+fn derive_from_ocamlrep(mut s: synstructure::Structure<'_>) -> TokenStream {
     s.add_bounds(synstructure::AddBounds::Generics);
 
     let from_body = from_ocamlrep_body(&s);
@@ -49,7 +49,7 @@ fn derive_from_ocamlrep(mut s: synstructure::Structure) -> TokenStream {
     })
 }
 
-fn derive_from_ocamlrep_in(mut s: synstructure::Structure) -> TokenStream {
+fn derive_from_ocamlrep_in(mut s: synstructure::Structure<'_>) -> TokenStream {
     s.add_bounds(synstructure::AddBounds::Generics);
 
     if s.ast().generics.lifetimes().next().is_none() {
@@ -109,7 +109,7 @@ fn derive_from_ocamlrep_in(mut s: synstructure::Structure) -> TokenStream {
     })
 }
 
-fn to_ocamlrep_body(s: &synstructure::Structure) -> TokenStream {
+fn to_ocamlrep_body(s: &synstructure::Structure<'_>) -> TokenStream {
     match &s.ast().data {
         syn::Data::Struct(struct_data) => struct_to_ocamlrep(&s, struct_data),
         syn::Data::Enum(_) => enum_to_ocamlrep(&s, collect_enum_variants(&s)),
@@ -117,7 +117,7 @@ fn to_ocamlrep_body(s: &synstructure::Structure) -> TokenStream {
     }
 }
 
-fn from_ocamlrep_body(s: &synstructure::Structure) -> TokenStream {
+fn from_ocamlrep_body(s: &synstructure::Structure<'_>) -> TokenStream {
     match &s.ast().data {
         syn::Data::Struct(struct_data) => struct_from_ocamlrep(&s, struct_data, false),
         syn::Data::Enum(_) => enum_from_ocamlrep(collect_enum_variants(&s), false),
@@ -125,7 +125,7 @@ fn from_ocamlrep_body(s: &synstructure::Structure) -> TokenStream {
     }
 }
 
-fn from_ocamlrep_in_body(s: &synstructure::Structure) -> TokenStream {
+fn from_ocamlrep_in_body(s: &synstructure::Structure<'_>) -> TokenStream {
     match &s.ast().data {
         syn::Data::Struct(struct_data) => struct_from_ocamlrep(&s, struct_data, true),
         syn::Data::Enum(_) => enum_from_ocamlrep(collect_enum_variants(&s), true),
@@ -133,7 +133,10 @@ fn from_ocamlrep_in_body(s: &synstructure::Structure) -> TokenStream {
     }
 }
 
-fn struct_to_ocamlrep(s: &synstructure::Structure, struct_data: &syn::DataStruct) -> TokenStream {
+fn struct_to_ocamlrep(
+    s: &synstructure::Structure<'_>,
+    struct_data: &syn::DataStruct,
+) -> TokenStream {
     match struct_data.fields {
         syn::Fields::Unit => {
             // Represent unit structs with unit.
@@ -153,7 +156,7 @@ fn struct_to_ocamlrep(s: &synstructure::Structure, struct_data: &syn::DataStruct
 }
 
 fn struct_from_ocamlrep(
-    s: &synstructure::Structure,
+    s: &synstructure::Structure<'_>,
     struct_data: &syn::DataStruct,
     from_in: bool,
 ) -> TokenStream {
@@ -190,7 +193,7 @@ struct EnumVariants<'a> {
     block_variants: Vec<(&'a synstructure::VariantInfo<'a>, isize)>,
 }
 
-fn collect_enum_variants<'a>(s: &'a synstructure::Structure) -> EnumVariants<'a> {
+fn collect_enum_variants<'a>(s: &'a synstructure::Structure<'_>) -> EnumVariants<'a> {
     // For tagging purposes, variant constructors of zero arguments are numbered
     // separately from variant constructors of one or more arguments, so we need
     // to count them separately to learn their tags.
@@ -216,7 +219,7 @@ fn collect_enum_variants<'a>(s: &'a synstructure::Structure) -> EnumVariants<'a>
     }
 }
 
-fn enum_to_ocamlrep(s: &synstructure::Structure, variants: EnumVariants<'_>) -> TokenStream {
+fn enum_to_ocamlrep(s: &synstructure::Structure<'_>, variants: EnumVariants<'_>) -> TokenStream {
     let EnumVariants {
         nullary_variants,
         mut block_variants,
@@ -310,7 +313,7 @@ fn enum_from_ocamlrep(variants: EnumVariants<'_>, from_in: bool) -> TokenStream 
     }
 }
 
-fn allocate_block(variant: &VariantInfo, tag: u8) -> TokenStream {
+fn allocate_block(variant: &VariantInfo<'_>, tag: u8) -> TokenStream {
     let size = variant.bindings().len();
     let mut fields = TokenStream::new();
     for (i, bi) in variant.bindings().iter().enumerate() {
@@ -325,7 +328,7 @@ fn allocate_block(variant: &VariantInfo, tag: u8) -> TokenStream {
     }
 }
 
-fn boxed_tuple_variant_to_block(bi: &BindingInfo, tag: u8, len: usize) -> TokenStream {
+fn boxed_tuple_variant_to_block(bi: &BindingInfo<'_>, tag: u8, len: usize) -> TokenStream {
     let mut fields = TokenStream::new();
     for i in 0..len {
         let idx = syn::Index::from(i);
@@ -349,7 +352,7 @@ fn field_constructor(index: usize, from_in: bool) -> TokenStream {
 }
 
 fn boxed_tuple_variant_constructor(
-    variant: &VariantInfo,
+    variant: &VariantInfo<'_>,
     len: usize,
     from_in: bool,
 ) -> TokenStream {
@@ -375,7 +378,7 @@ fn boxed_tuple_variant_constructor(
     }
 }
 
-fn get_boxed_tuple_len(variant: &VariantInfo) -> Option<usize> {
+fn get_boxed_tuple_len(variant: &VariantInfo<'_>) -> Option<usize> {
     use syn::{Fields, GenericArgument, PathArguments, Type, TypePath, TypeReference};
 
     match &variant.ast().fields {

@@ -13,6 +13,7 @@ open Utils
 module Env = Typing_env
 module TUtils = Typing_utils
 module Cls = Decl_provider.Class
+module Module = Typing_modules
 
 (* Is a private member defined on class/trait [origin_id] visible
  * from code in class/trait [self_id]?
@@ -44,23 +45,8 @@ let is_private_visible env origin_id self_id =
       None
     | _ -> Some "You cannot access this member"
 
-(* Is super_id an ancestor of sub_id, including through requires steps? *)
-let rec has_ancestor_including_req env sub_id super_id =
-  String.equal sub_id super_id
-  ||
-  match Env.get_class env sub_id with
-  | None -> false
-  | Some cls ->
-    Cls.has_ancestor cls super_id
-    ||
-    let bounds = Cls.upper_bounds_on_this cls in
-    List.exists bounds ~f:(fun ty ->
-        match get_node ty with
-        | Tapply ((_, name), _) -> has_ancestor_including_req env name super_id
-        | _ -> false)
-
 let is_protected_visible env origin_id self_id =
-  if has_ancestor_including_req env self_id origin_id then
+  if TUtils.has_ancestor_including_req_refl env self_id origin_id then
     None
   else
     match Env.get_class env origin_id with
@@ -105,28 +91,28 @@ let is_private_visible_for_class env x self_id cid class_ =
       Some
         "Private members cannot be accessed dynamically. Did you mean to use 'self::'?"
 
-let is_internal_visible env mname =
-  match Env.get_module env with
-  | None -> Some "You cannot access internal members outside of a module"
-  | Some m ->
-    if String.equal m mname then
-      None
-    else
-      Some
-        (Printf.sprintf
-           "You cannot access internal members from module `%s` in module `%s`"
-           mname
-           m)
+let is_internal_visible env target =
+  match
+    Module.can_access ~current:(Env.get_module env) ~target:(Some target)
+  with
+  | `Yes -> None
+  | `Disjoint (current, target) ->
+    Some
+      (Printf.sprintf
+         "You cannot access internal members from module `%s` in module `%s`"
+         target
+         current)
+  | `Outside _ -> Some "You cannot access internal members outside of a module"
 
-let check_internal_access ~use_pos ~in_signature ~def_pos env internal modul =
+let check_internal_access ~use_pos ~in_signature ~def_pos env internal module_ =
   if internal then
-    let cur_module = Env.get_module env in
-    match modul with
-    | Some m when not (Option.equal String.equal modul cur_module) ->
-      Errors.module_mismatch use_pos def_pos cur_module m
-    | _ ->
+    match Module.can_access ~current:(Env.get_module env) ~target:module_ with
+    | `Yes ->
       if in_signature && not (Env.get_internal env) then
         Errors.module_hint ~use_pos ~def_pos
+    | `Disjoint (current, target) ->
+      Errors.module_mismatch use_pos def_pos (Some current) target
+    | `Outside target -> Errors.module_mismatch use_pos def_pos None target
 
 let check_classname_access ~use_pos ~in_signature env cls =
   check_internal_access
@@ -235,7 +221,7 @@ let check_expression_tree_vis ~use_pos ~def_pos env vis =
   if Typing_env.is_in_expr_tree env then
     match vis with
     | Vpublic -> ()
-    | _ -> Errors.expression_tree_non_public_property ~use_pos ~def_pos
+    | _ -> Errors.expression_tree_non_public_member ~use_pos ~def_pos
 
 let check_inst_meth_access ~use_pos ~def_pos vis =
   match vis with

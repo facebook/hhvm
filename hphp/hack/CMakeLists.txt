@@ -40,7 +40,7 @@ if ("${CMAKE_CURRENT_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_BINARY_DIR}")
   set(CARGO_HOME "${DUNE_BUILD_DIR}/cargo_home")
 else()
   set(DUNE_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}")
-  set(RUST_FFI_BUILD_ROOT "${CMAKE_CURRENT_BINARY_DIR}")
+  set(RUST_FFI_BUILD_ROOT "${CMAKE_BINARY_DIR}")
   set(CARGO_HOME "${CMAKE_CURRENT_BINARY_DIR}/cargo_home")
   set(OPAM_STAMP_FILE "opam.stamp")
 endif()
@@ -125,22 +125,71 @@ invoke_dune(hack_dune all)
 
 set(CARGO_BUILD "${CMAKE_SOURCE_DIR}/hphp/hack/scripts/build_rust_to_ocaml.sh")
 
-add_custom_target(
-  hack_ffi
-  COMMAND
-   . "${CMAKE_CURRENT_BINARY_DIR}/dev_env_rust_only.sh" &&
-    ${CARGO_BUILD} compile_ffi compile_ffi &&
-    ${CARGO_BUILD} decl_cpp_ffi decl_cpp_ffi
-  COMMENT "Compiling Rust FFI"
-)
-
-# Compiling cxx entrypoints for hhvm
 if(DEFINED ENV{HACKDEBUG})
   set(PROFILE "debug")
 else()
   set(PROFILE "release")
 endif()
 
+set(HHBC_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/src/hhbc/hhbc_by_ref")
+set(HHBC_AST_SRCS
+  "hhas_adata.rs"
+  "hhas_attribute.rs"
+  "hhas_body.rs"
+  "hhas_class.rs"
+  "hhas_coeffects.rs"
+  "hhas_constant.rs"
+  "hhas_function.rs"
+  "hhas_method.rs"
+  "hhas_param.rs"
+  "hhas_pos.rs"
+  "hhas_program.rs"
+  "hhas_property.rs"
+  "hhas_record_def.rs"
+  "hhas_symbol_refs.rs"
+  "hhas_type.rs"
+  "hhas_type_const.rs"
+  "hhas_typedef.rs"
+  "hhbc_ast.rs"
+  "hhbc_id.rs"
+  "instruction_sequence.rs"
+  "label.rs"
+  "local.rs"
+  "symbol_refs_state.rs"
+  "typed_value.rs"
+)
+
+foreach(src ${HHBC_AST_SRCS})
+  string(APPEND HHBC_AST_SRC_ARG "${HHBC_PREFIX}/${src},")
+endforeach()
+
+set(HHBC_AST_HEADER "${RUST_FFI_BUILD_ROOT}/hphp/hack/src/hhbc/hhbc_by_ref/hhbc-ast.h")
+set(FFI_HEADER "${RUST_FFI_BUILD_ROOT}/hphp/hack/src/utils/ffi.h")
+add_custom_command(
+  OUTPUT ${HHBC_AST_HEADER}
+  COMMAND
+   . "${CMAKE_CURRENT_BINARY_DIR}/dev_env_rust_only.sh" &&
+    ${CARGO_BUILD} ffi_cbindgen ffi_cbindgen --exe
+      --header "${FFI_HEADER}" --srcs "${CMAKE_CURRENT_SOURCE_DIR}/src/utils/ffi/ffi.rs"
+      --namespaces "HPHP,hackc" &&
+    ${CARGO_BUILD} ffi_cbindgen ffi_cbindgen --exe
+      --header "${HHBC_AST_HEADER}" --srcs "${HHBC_AST_SRC_ARG}" --namespaces "HPHP,hackc,hhbc"
+      --includes "${FFI_HEADER}"
+  DEPENDS rustc cargo
+  COMMENT "Generating hhbc-ast.h"
+)
+
+add_custom_target(
+  "hhbc_ast_cbindgen"
+  DEPENDS ${HHBC_AST_HEADER}
+)
+
+add_library("hhbc_ast_header" INTERFACE)
+add_dependencies("hhbc_ast_header" "hhbc_ast_cbindgen")
+
+add_custom_target(hack_rust_ffi_bridge_targets)
+
+# Compiling cxx entrypoints for hhvm
 function(build_cxx_bridge NAME FFI_BRIDGE_DIR)
   set(FFI_BRIDGE_SRC "${CMAKE_CURRENT_SOURCE_DIR}/${FFI_BRIDGE_DIR}")
   set(FFI_BRIDGE_BIN "${RUST_FFI_BUILD_ROOT}/hphp/hack/${FFI_BRIDGE_DIR}")
@@ -168,6 +217,7 @@ function(build_cxx_bridge NAME FFI_BRIDGE_DIR)
 
   add_library("${NAME}_ffi_bridge" STATIC ${RUST_PART_CXX})
   add_dependencies("${NAME}_ffi_bridge" rustc cargo "${NAME}_cxx")
+  add_dependencies(hack_rust_ffi_bridge_targets "${NAME}_ffi_bridge")
   target_link_libraries("${NAME}_ffi_bridge" PUBLIC ${RUST_PART_LIB})
   # `-iquote` is like `-I` (or target_include_directories()`), except:
   # - it takes precedence over `-I`
@@ -177,26 +227,18 @@ endfunction()
 
 build_cxx_bridge(rust_facts "src/facts/ffi_bridge")
 build_cxx_bridge(rust_parser "src/parser/ffi_bridge")
-
-add_dependencies(hack_ffi rustc cargo)
-# Not a true dependency, but we need to make sure we don't have two cargo/rustc
-# processes building the FFI files at the same time; this leads to intermittent
-# failures, which for some reason are particularly common on our Azure MacOS
-# build jobs
-add_dependencies(hack_dune hack_ffi)
+build_cxx_bridge(rust_compile "src/hhbc/ffi_bridge")
 
 if (NOT LZ4_FOUND)
   add_dependencies(hack_dune lz4)
   add_dependencies(hack_dune_debug lz4)
   add_dependencies(hack_dune_test lz4)
-  add_dependencies(hack_ffi lz4)
 endif()
 
 if (NOT PC_SQLITE3_FOUND)
   add_dependencies(hack_dune sqlite3)
   add_dependencies(hack_dune_debug sqlite3)
   add_dependencies(hack_dune_test sqlite3)
-  add_dependencies(hack_ffi sqlite3)
 endif()
 
 # Intentionally not using `hack_dune_debug` as it generates output files of a
@@ -206,23 +248,6 @@ endif()
 # explicitly used
 add_custom_target(hack ALL DEPENDS hack_dune)
 add_custom_target(hack_test DEPENDS hack_dune_test)
-
-# libcompile_ffi_stubs.a and librust_parser_ffi_stubs.a need to be exposed as
-# library targets to cmake for other targets (e.g. hhvm) to depend on.
-set(LIBCOMPILE_PATH "${CMAKE_BINARY_DIR}/hphp/hack/libcompile_ffi_stubs.a")
-add_library(libcompile_ffi_stubs STATIC IMPORTED GLOBAL)
-add_dependencies(libcompile_ffi_stubs hack_ffi)
-set_target_properties(libcompile_ffi_stubs PROPERTIES IMPORTED_LOCATION ${LIBCOMPILE_PATH})
-
-set(LIBRUST_PARSER_PATH "${CMAKE_BINARY_DIR}/hphp/hack/librust_parser_ffi_stubs.a")
-add_library(librust_parser_ffi_stubs STATIC IMPORTED GLOBAL)
-add_dependencies(librust_parser_ffi_stubs hack_ffi)
-set_target_properties(librust_parser_ffi_stubs PROPERTIES IMPORTED_LOCATION ${LIBRUST_PARSER_PATH})
-
-set(LIBRUST_DECL_PATH "${CMAKE_BINARY_DIR}/hphp/hack/libdecl_cpp_ffi_stubs.a")
-add_library(libdecl_cpp_ffi_stubs STATIC IMPORTED GLOBAL)
-add_dependencies(libdecl_cpp_ffi_stubs hack_ffi)
-set_target_properties(libdecl_cpp_ffi_stubs PROPERTIES IMPORTED_LOCATION ${LIBRUST_DECL_PATH})
 
 configure_file(dev_env.sh.in dev_env.sh ESCAPE_QUOTES @ONLY)
 configure_file(dev_env_common.sh.in dev_env_common.sh ESCAPE_QUOTES @ONLY)

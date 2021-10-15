@@ -82,7 +82,9 @@ let get_class_name occurrence =
   | Some _ as res -> res
   | None ->
     (match occurrence.type_ with
-    | Class _ -> Some occurrence.name
+    | Class _
+    | Attribute _ ->
+      Some occurrence.name
     | _ -> None)
 
 let is_constructor occurrence =

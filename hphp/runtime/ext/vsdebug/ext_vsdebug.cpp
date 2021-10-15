@@ -32,10 +32,6 @@ VSDebugExtension::~VSDebugExtension() {
 }
 
 void VSDebugExtension::moduleLoad(const IniSetting::Map& ini, const Hdf hdf) {
-  // This extension is ** disabled ** by default, unless the configuration
-  // says otherwise. When !m_enabled, the other hooks in this module no-op.
-  Config::Bind(s_configEnabled, ini, hdf, "Eval.Debugger.VSDebugEnable", false);
-
   // Set up logging for the extension.
   // Note: Logging for the extension is disabled by default, unless
   // VSDebugLogFile is explicitly defined in the configuration settings.
@@ -62,8 +58,7 @@ void VSDebugExtension::moduleLoad(const IniSetting::Map& ini, const Hdf hdf) {
     "Eval.Debugger.VSDebugDomainSocketGroup",
     "");
 
-  bool commandLineEnabled = RuntimeOption::EnableVSDebugger;
-  if (!s_configEnabled && !commandLineEnabled) {
+  if (!RuntimeOption::EnableVSDebugger) {
    m_enabled = false;
    return;
   }
@@ -241,7 +236,6 @@ std::string VSDebugExtension::getDomainSocketGroup() {
 static VSDebugExtension s_vsdebug_extension;
 
 // Linkage for configuration options.
-bool VSDebugExtension::s_configEnabled {false};
 std::string VSDebugExtension::s_logFilePath {""};
 std::string VSDebugExtension::s_domainSocketGroup {""};
 int VSDebugExtension::s_attachListenPort {-1};

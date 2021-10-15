@@ -32,8 +32,6 @@ struct
 
   let pos_or_decl = ImplementPos.pos_or_decl
 
-  let string_id (p, x) = (pos p, x)
-
   let positioned_id : Typing_defs.pos_id -> Typing_defs.pos_id =
    (fun (p, x) -> (pos_or_decl p, x))
 
@@ -77,7 +75,6 @@ struct
     | Runpack_param (p1, p2, i) -> Runpack_param (pos p1, pos_or_decl p2, i)
     | Rinout_param p -> Rinout_param (pos_or_decl p)
     | Rinstantiate (r1, x, r2) -> Rinstantiate (reason r1, x, reason r2)
-    | Rarray_filter (p, r) -> Rarray_filter (pos p, reason r)
     | Rtypeconst (r1, (p, s1), s2, r2) ->
       Rtypeconst (reason r1, (pos_or_decl p, s1), s2, reason r2)
     | Rtype_access (r1, ls) ->
@@ -141,7 +138,9 @@ struct
     mk (reason p, ty_ x)
 
   and ty_ : decl_phase ty_ -> decl_phase ty_ = function
-    | (Tany _ | Tthis | Terr | Tmixed | Tnonnull | Tdynamic | Tvar _) as x -> x
+    | ( Tany _ | Tthis | Terr | Tmixed | Tnonnull | Tdynamic | Tsupportdynamic
+      | Tvar _ ) as x ->
+      x
     | Tdarray (ty1, ty2) -> Tdarray (ty ty1, ty ty2)
     | Tvarray root_ty -> Tvarray (ty root_ty)
     | Tvarray_or_darray (ty1, ty2) -> Tvarray_or_darray (ty ty1, ty ty2)
@@ -224,9 +223,6 @@ struct
           atc_super_constraint = ty_opt atc_super_constraint;
           atc_default = ty_opt atc_default;
         }
-    | TCPartiallyAbstract { patc_constraint; patc_type } ->
-      TCPartiallyAbstract
-        { patc_constraint = ty patc_constraint; patc_type = ty patc_type }
     | TCConcrete { tc_type } -> TCConcrete { tc_type = ty tc_type }
 
   and typeconst_type tc =
@@ -265,7 +261,6 @@ struct
       dc_kind = dc.dc_kind;
       dc_is_xhp = dc.dc_is_xhp;
       dc_has_xhp_keyword = dc.dc_has_xhp_keyword;
-      dc_is_disposable = dc.dc_is_disposable;
       dc_module = dc.dc_module;
       dc_name = dc.dc_name;
       dc_pos = dc.dc_pos;

@@ -17,7 +17,7 @@
         f_params =
         [{ param_annotation = (T); param_type_hint = ((T), (Some ([2:45-46], (Habstr ("T", []))))); 
            param_is_variadic = false; param_pos = [2:47-51]; param_name = "$arr"; 
-           param_expr = None; param_readonly = None; param_callconv = (Some Pinout); 
+           param_expr = None; param_readonly = None; param_callconv = (Pinout [2:39-44]); 
            param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([3:3-16], (Return (Some ((bool), [3:10-15], False))))] }; 
@@ -60,7 +60,7 @@
          f_params =
          [{ param_annotation = (T); param_type_hint = ((T), (Some ([8:39-40], (Habstr ("T", []))))); 
             param_is_variadic = false; param_pos = [8:41-45]; param_name = "$arr"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
@@ -98,7 +98,7 @@
                  ((dynamic), [15:7-22],
                   (Call ((((function<T as ?Container<nothing>, Tv>(inout nothing $arr): dynamic)), [15:7-10], (Id ([15:7-10], "\\foo"))),
                      [((nothing), ([15:7-10], (Happly (([Pos.none], "_"), [])))); ((nothing), ([15:7-10], (Happly (([Pos.none], "_"), []))))],
-                     [((dynamic), [15:11-21], (Callconv (Pinout, ((dynamic), [15:11-21], (Hole (((dynamic), [15:17-21], (Lvar ([15:17-21], $arr))), (dynamic), (nothing), Typing))))))], None))),
+                     [((Pinout [15:11-16]), ((dynamic), [15:17-21], (Hole (((dynamic), [15:17-21], (Lvar ([15:17-21], $arr))), (dynamic), (nothing), Typing))))], None))),
                  [([16:5-12], (Return None))], [([Pos.none], Noop)])));
              ([18:3-25],
               (Expr
@@ -107,7 +107,7 @@
                      ((nothing), [18:15-24],
                       (Call ((((function<T as ?Container<nothing>, Tv>(nothing $arr): nothing)), [18:15-18], (Id ([18:15-18], "\\qux"))),
                          [((nothing), ([18:15-18], (Happly (([Pos.none], "_"), [])))); ((nothing), ([18:15-18], (Happly (([Pos.none], "_"), []))))],
-                         [((nothing), [18:19-23], (Lvar ([18:19-23], $arr)))], None)))
+                         [(Pnormal, ((nothing), [18:19-23], (Lvar ([18:19-23], $arr))))], None)))
                      )))))
              ]
            };

@@ -216,28 +216,30 @@ struct HotCache {
   bool hasValue(const StringData* key) const;
 
  private:
+  // Keys stored are char*, but lookup/insert always use StringData*.
   struct EqualityTester {
-    bool operator()(const StringData* a, const StringData* b) const {
-      // AtomicHashArray magic keys are < 0; valid strings are > 0 and aligned.
-      return a == b || (reinterpret_cast<intptr_t>(a) > 0 && a->same(b));
+    bool operator()(const char* a, const StringData* b) const {
+      // AtomicHashArray magic keys are < 0; valid pointers are > 0 and aligned.
+      return reinterpret_cast<intptr_t>(a) > 0 &&
+        wordsame(a, b->data(), b->size() + 1);
     }
   };
   struct Hasher {
     size_t operator()(const StringData* a) const { return a->hash(); }
   };
+
+  // Allocates keys on successful insertion. They are never erased/freed.
   struct KeyConverter {
-    const StringData* operator()(const StringData* sd) const {
-      // We never delete items from HotMap; we only clear their values. As a
-      // result, to store a key here, we must inc-ref it to keep it live.
-      DEBUG_ONLY auto const ok = sd->persistentIncRef();
-      assertx(ok);
-      return sd;
+    const char* operator()(const StringData* sd) const {
+      if (sd->isStatic()) return sd->data();
+      auto const nbytes = sd->size() + 1;
+      auto const dst = apc_malloc(nbytes);
+      assertx((reinterpret_cast<uintptr_t>(dst) & 7) == 0);
+      memcpy(dst, sd->data(), nbytes);
+      return reinterpret_cast<const char*>(dst);
     }
   };
-
-
-  using HotMap = folly::AtomicHashArray<const StringData*,
-                                        std::atomic<APCHandle*>,
+  using HotMap = folly::AtomicHashArray<const char*, std::atomic<APCHandle*>,
                                         Hasher, EqualityTester,
                                         APCAllocator<char>,
                                         folly::AtomicHashArrayLinearProbeFcn,
@@ -335,7 +337,6 @@ bool HotCache::get(const StringData* key, Variant& value, Idx& idx) const {
 
 bool HotCache::store(Idx idx, const StringData* key,
                      APCHandle* svar, const StoreValue* sval) {
-  assertx(key->isStatic() || key->isUncounted());
   if (idx == StoreValue::kHotCacheKnownIneligible) return false;
   if (!svar || !supportedKind(svar)) return false;
   if (idx == StoreValue::kHotCacheUnknown) {
@@ -370,7 +371,8 @@ bool ConcurrentTableSharedStore::clear() {
        ++iter) {
     s_hotCache.clearValue(iter->second);
     iter->second.data()->unreferenceRoot(iter->second.dataSize);
-    DecRefUncountedString(const_cast<StringData*>(iter->first));
+    const void* vpKey = iter->first;
+    free(const_cast<void*>(vpKey));
   }
   m_vars.clear();
   return true;
@@ -378,7 +380,7 @@ bool ConcurrentTableSharedStore::clear() {
 
 bool ConcurrentTableSharedStore::eraseKey(const String& key) {
   assertx(!key.isNull());
-  return eraseImpl(key.get(), false, 0, nullptr);
+  return eraseImpl(tagStringData(key.get()), false, 0, nullptr);
 }
 
 /*
@@ -389,11 +391,12 @@ bool ConcurrentTableSharedStore::eraseKey(const String& key) {
  * The ReadLock here is to sync with clear(), which only has a WriteLock,
  * not a specific accessor.
  */
-bool ConcurrentTableSharedStore::eraseImpl(const StringData* key,
+bool ConcurrentTableSharedStore::eraseImpl(const char* key,
                                            bool expired,
                                            int64_t oldestLive,
                                            ExpSet::accessor* expAcc) {
   assertx(key);
+
   SharedMutex::ReadHolder l(m_lock);
   Map::accessor acc;
   if (!m_vars.find(acc, key)) {
@@ -411,8 +414,8 @@ bool ConcurrentTableSharedStore::eraseImpl(const StringData* key,
       // updated either by apc_extend_ttl or by setting a new value with a TTL on
       // an existing key.
       if (expAcc) {
-        auto const existing_key = acc->first;
-        m_expQueue.push({ existing_key, expiry });
+        auto ikey = intptr_t(acc->first);
+        m_expQueue.push({ ikey, expiry });
       }
     }
     return false;
@@ -454,9 +457,8 @@ bool ConcurrentTableSharedStore::eraseImpl(const StringData* key,
     var->unreferenceRoot(storeVal.dataSize);
   }
 
-  APCStats::getAPCStats().removeKey(acc->first->heapSize());
-  auto const existing_key = acc->first;
-
+  APCStats::getAPCStats().removeKey(strlen(acc->first));
+  const void* vpkey = acc->first;
   /*
    * Note that we have a delicate situation here; purgeExpired obtains
    * the ExpSet accessor, and then the Map accessor, while eraseImpl
@@ -473,17 +475,17 @@ bool ConcurrentTableSharedStore::eraseImpl(const StringData* key,
     m_expSet.erase(*expAcc);
   } else {
     /*
-     * Note that we can't just call m_expSet.erase(existing_key) here.
-     * That will remove the element and not block, even if we hold an
-     * ExpSet::accessor to the element in another thread, which would
-     * us to proceed and free existing_key below.
+     * Note that we can't just call m_expSet.erase(intptr_t(vpkey))
+     * here. That will remove the element and not block, even if
+     * we hold an ExpSet::accessor to the element in another thread,
+     * which would allow us to proceed and free vpkey.
      */
     ExpSet::accessor eAcc;
-    if (m_expSet.find(eAcc, existing_key)) {
+    if (m_expSet.find(eAcc, intptr_t(vpkey))) {
       m_expSet.erase(eAcc);
     }
   }
-  DecRefUncountedString(const_cast<StringData*>(existing_key));
+  free(const_cast<void*>(vpkey));
   return true;
 }
 
@@ -507,10 +509,9 @@ void ConcurrentTableSharedStore::purgeExpired() {
       break;
     }
     ExpSet::accessor acc;
-    auto const key = tmp.first;
-    if (m_expSet.find(acc, key)) {
-      FTRACE(3, "Expiring {}...", key);
-      if (eraseImpl(key, true, oldestLive, &acc)) {
+    if (m_expSet.find(acc, tmp.first)) {
+      FTRACE(3, "Expiring {}...", (char*)tmp.first);
+      if (eraseImpl((char*)tmp.first, true, oldestLive, &acc)) {
         FTRACE(3, "succeeded\n");
         ++i;
         continue;
@@ -524,7 +525,7 @@ void ConcurrentTableSharedStore::purgeExpired() {
 
 void ConcurrentTableSharedStore::purgeDeferred(req::vector<StringData*>&& keys) {
   for (auto const& key : keys) {
-    if (eraseImpl(key, true, 0, nullptr)) {
+    if (eraseImpl(tagStringData(key), true, 0, nullptr)) {
       FTRACE(3, "purgeDeferred: {}\n", key);
     }
   }
@@ -540,7 +541,7 @@ bool ConcurrentTableSharedStore::handlePromoteObj(const String& key,
   auto const size = pair.size;
 
   Map::accessor acc;
-  if (!m_vars.find(acc, key.get())) {
+  if (!m_vars.find(acc, tagStringData(key.get()))) {
     // There is a chance another thread deletes the key when this thread is
     // converting the object. In that case, we just bail
     converted->unreferenceRoot(size);
@@ -565,8 +566,8 @@ bool ConcurrentTableSharedStore::handlePromoteObj(const String& key,
 }
 
 bool ConcurrentTableSharedStore::checkExpire(const String& keyStr,
-                                             Map::const_accessor& acc) {
-  auto const tag = keyStr.get();
+                                                Map::const_accessor& acc) {
+  auto const tag = tagStringData(keyStr.get());
   if (!m_vars.find(acc, tag)) return true;
   auto const sval = &acc->second;
   if (sval->c_time == 0) return false;
@@ -604,7 +605,7 @@ bool ConcurrentTableSharedStore::checkExpire(const String& keyStr,
       if (sval->expireRequestIdx.compare_exchange_strong(expected, desired)) {
         FTRACE(3, "Deferred expire: {}\n", show(*sval));
         sval->expireTime.store(1, std::memory_order_release);
-        auto const key = acc->first;
+        auto const key = intptr_t(acc->first);
         // release acc so the m_expSet.erase won't deadlock with a
         // concurrent purgeExpired.
         acc.release();
@@ -675,7 +676,7 @@ bool ConcurrentTableSharedStore::get(const String& keyStr, Variant& value) {
        * updating the same key concurrently, but ConcurrentTableSharedStore's
        * per-entry lock ensures it will agree on the value.
        */
-      s_hotCache.store(hotIdx, acc->first, svar, sval);
+      s_hotCache.store(hotIdx, keyStr.get(), svar, sval);
     }
   }
 
@@ -696,7 +697,7 @@ int64_t ConcurrentTableSharedStore::inc(const String& key, int64_t step,
   SharedMutex::ReadHolder l(m_lock);
 
   Map::accessor acc;
-  if (!m_vars.find(acc, key.get())) {
+  if (!m_vars.find(acc, tagStringData(key.get()))) {
     return 0;
   }
   auto& sval = acc->second;
@@ -734,7 +735,7 @@ bool ConcurrentTableSharedStore::cas(const String& key, int64_t old,
   SharedMutex::ReadHolder l(m_lock);
 
   Map::accessor acc;
-  if (!m_vars.find(acc, key.get())) {
+  if (!m_vars.find(acc, tagStringData(key.get()))) {
     return false;
   }
 
@@ -775,7 +776,7 @@ int64_t ConcurrentTableSharedStore::size(const String& key, bool& found) {
   SharedMutex::ReadHolder l(m_lock);
 
   Map::accessor acc;
-  if (!m_vars.find(acc, key.get())) {
+  if (!m_vars.find(acc, tagStringData(key.get()))) {
     return 0;
   }
   auto* sval = &acc->second;
@@ -800,7 +801,7 @@ static int64_t apply_ttl_limit(int64_t ttl) {
 bool ConcurrentTableSharedStore::extendTTL(const String& key, int64_t new_ttl) {
   SharedMutex::ReadHolder l(m_lock);
   Map::accessor acc;
-  if (!m_vars.find(acc, key.get())) {
+  if (!m_vars.find(acc, tagStringData(key.get()))) {
     return false;
   }
   auto& sval = acc->second;
@@ -832,34 +833,30 @@ bool ConcurrentTableSharedStore::add(const String& key,
                                      const Variant& val,
                                      int64_t max_ttl,
                                      int64_t bump_ttl) {
-  auto const sd = key.get() ? key.get() : staticEmptyString();
-  return storeImpl(sd, val, max_ttl, bump_ttl, false);
+  return storeImpl(key, val, max_ttl, bump_ttl, false);
 }
 
 void ConcurrentTableSharedStore::set(const String& key,
                                      const Variant& val,
                                      int64_t max_ttl,
                                      int64_t bump_ttl) {
-  auto const sd = key.get() ? key.get() : staticEmptyString();
-  storeImpl(sd, val, max_ttl, bump_ttl, true);
+  storeImpl(key, val, max_ttl, bump_ttl, true);
 }
 
-bool ConcurrentTableSharedStore::storeImpl(const StringData* key,
+bool ConcurrentTableSharedStore::storeImpl(const String& key,
                                            const Variant& value,
                                            int64_t max_ttl,
                                            int64_t bump_ttl,
                                            bool overwrite) {
-  assertx(key);
   StoreValue *sval;
+  auto keyLen = key.size();
 
   // We need to do this before we acquire any locks. Serializing objects can
   // reenter the VM (__sleep) and certain operations may cause us to throw for
   // types that cannot be serialized to APC.
   auto svar = APCHandle::Create(value, APCHandleLevel::Outer, false);
 
-  // Make an uncounted copy of the string so that we can insert it in m_vars.
-  auto const env = MakeUncountedEnv { /*seen=*/nullptr };
-  auto const kcp = MakeUncountedString(const_cast<StringData*>(key), env);
+  char* const kcp = strdup(key.data());
 
   {
   SharedMutex::ReadHolder l(m_lock);
@@ -871,7 +868,7 @@ bool ConcurrentTableSharedStore::storeImpl(const StringData* key,
     present = !m_vars.insert(acc, kcp);
     sval = &acc->second;
     if (present) {
-      DecRefUncountedString(kcp);
+      free(kcp);
       if (!overwrite && !sval->expired()) {
         svar.handle->unreferenceRoot();
         return false;
@@ -885,7 +882,7 @@ bool ConcurrentTableSharedStore::storeImpl(const StringData* key,
       FTRACE(2, "Update {} {}\n", acc->first, show(acc->second));
     } else {
       FTRACE(2, "Add {} {}\n", acc->first, show(acc->second));
-      APCStats::getAPCStats().addKey(kcp->heapSize());
+      APCStats::getAPCStats().addKey(keyLen);
     }
 
     int64_t adjustedMaxTTL = apply_ttl_limit(max_ttl);
@@ -922,9 +919,9 @@ bool ConcurrentTableSharedStore::storeImpl(const StringData* key,
     sval->dataSize = svar.size;
     expiry = sval->queueExpire();
     if (expiry) {
-      auto const existing_key = acc->first;
-      if (m_expSet.insert({ existing_key, ExpNil{} })) {
-        m_expQueue.push({ existing_key, expiry });
+      auto ikey = intptr_t(acc->first);
+      if (m_expSet.insert({ ikey, ExpNil{} })) {
+        m_expQueue.push({ ikey, expiry });
       }
     }
   }
@@ -946,7 +943,7 @@ void ConcurrentTableSharedStore::init() {
 ///////////////////////////////////////////////////////////////////////////////
 // debugging and info/stats support
 
-EntryInfo ConcurrentTableSharedStore::makeEntryInfo(const StringData* sd,
+EntryInfo ConcurrentTableSharedStore::makeEntryInfo(const char* key,
                                                     StoreValue* sval,
                                                     int64_t curr_time) {
   auto const handle = sval->data();
@@ -961,9 +958,8 @@ EntryInfo ConcurrentTableSharedStore::makeEntryInfo(const StringData* sd,
 
   auto ttl = calcTTL(sval->rawExpire());
   auto maxTTL = calcTTL(sval->maxExpireTime.load(std::memory_order_acquire));
-  return EntryInfo(sd->data(), size, ttl, maxTTL,
-                   sval->bumpTTL.load(std::memory_order_acquire),
-                   type, sval->c_time, s_hotCache.hasValue(sd));
+  return EntryInfo(key, size, ttl, maxTTL, sval->bumpTTL.load(std::memory_order_acquire),
+                   type, sval->c_time, s_hotCache.hasValue(String(key).get()));
 }
 
 std::vector<EntryInfo> ConcurrentTableSharedStore::getEntriesInfo() {
@@ -992,8 +988,8 @@ std::vector<EntryInfo> ConcurrentTableSharedStore::getEntriesInfo() {
  * sval won't be invalidated while this is called.
  */
 static void dumpOneKeyAndValue(std::ostream &out,
-                               const StringData* key, const StoreValue *sval) {
-    out << key->data();
+                               const char *key, const StoreValue *sval) {
+    out << key;
     out << " #### ";
     if (!sval->expired()) {
       out << "INMEMORY ";
@@ -1061,7 +1057,7 @@ void ConcurrentTableSharedStore::dumpPrefix(std::ostream& out,
   uint32_t dumped = 0;
   for (auto const &iter : m_vars) {
     // dump key only if it matches the prefix
-    if (strncmp(iter.first->data(), prefix.c_str(), prefix.size()) == 0) {
+    if (strncmp(iter.first, prefix.c_str(), prefix.size()) == 0) {
       dumpOneKeyAndValue(out, iter.first, &iter.second);
       if (++dumped >= count) break;
     }
@@ -1084,7 +1080,7 @@ void ConcurrentTableSharedStore::dumpKeysWithPrefixes(
     const StoreValue& value = iter.second;
     if (value.c_time == 0) continue;
     if (value.expired()) continue;
-    auto const key = iter.first->data();
+    auto const key = iter.first;
     // We are going to use newline to separate different keys
     if (strpbrk(key, "\r\n")) continue;
     bool match = std::any_of(
@@ -1126,7 +1122,7 @@ ConcurrentTableSharedStore::sampleEntriesInfoBySize(uint32_t bytes) {
     auto const key = iter.first;
     StoreValue& value = iter.second;
     if (value.expired()) continue;
-    int size = sizeof(StoreValue) + key->size() + 1;
+    int size = sizeof(StoreValue) + strlen(key) + 1;
     size += value.dataSize;
     next -= size;
     if (next < 0) {
@@ -1138,8 +1134,10 @@ ConcurrentTableSharedStore::sampleEntriesInfoBySize(uint32_t bytes) {
   return samples;
 }
 
-bool ConcurrentTableSharedStore::Map::getRandomAPCEntry(
-    std::vector<EntryInfo>& entries) {
+template<typename Key, typename T, typename HashCompare>
+bool ConcurrentTableSharedStore
+      ::APCMap<Key,T,HashCompare>
+      ::getRandomAPCEntry(std::vector<EntryInfo>& entries) {
   assertx(!this->empty());
 #if TBB_VERSION_MAJOR >= 4
   auto current = this->range();

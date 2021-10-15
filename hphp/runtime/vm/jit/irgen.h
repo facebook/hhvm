@@ -201,15 +201,11 @@ uint16_t inlineDepth(const IRGS& env);
  *   // ... normal stuff happens ...
  *   // ... probably some StStks due to argument expressions
  *   // FCall*:
- *             BeginInlining<offset> sp
- *     fp2   = DefInlineFP<func,retBC,retSP,off> sp fp ctx
+ *     fp2   = BeginInlining<offset,func,cost,numArgs> sp fp
  *
  *         // ... callee body ...
  *
- *     InlineReturn fp2
- *
- * In DCE we attempt to remove the InlineReturn and DefInlineFP instructions if
- * they aren't needed.
+ *     EndInlining fp2
  */
 void beginInlining(IRGS& env,
                    const Func* target,

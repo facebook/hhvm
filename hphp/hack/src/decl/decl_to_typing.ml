@@ -31,18 +31,17 @@ type tagged_elt = {
   elt: Typing_defs.class_elt;
 }
 
-let base_visibility origin_class_name module_name = function
+let base_visibility origin_class_name module_ = function
   | Public -> Vpublic
   | Private -> Vprivate origin_class_name
   | Protected -> Vprotected origin_class_name
   | Internal ->
-    begin
-      match module_name with
-      | Some m -> Vinternal m
-      | None -> failwith "internal outside of a module"
-    end
+    (match module_ with
+    | Some m -> Vinternal m
+    | None -> failwith "internal outside of a module")
 
-let shallow_method_to_class_elt child_class mname mro subst meth : class_elt =
+let shallow_method_to_class_elt
+    child_class (mname : Typing_modules.t) mro subst meth : class_elt =
   let {
     sm_name = (pos, _);
     sm_type = ty;
@@ -81,6 +80,7 @@ let shallow_method_to_class_elt child_class mname mro subst meth : class_elt =
         ~dynamicallycallable:(sm_dynamicallycallable meth)
         ~readonly_prop:false
         ~support_dynamic_type:(sm_support_dynamic_type meth)
+        ~needs_init:false
       (* The readonliness of the method is on the type *);
   }
 
@@ -135,7 +135,8 @@ let shallow_prop_to_telt child_class mname mro subst prop : tagged_elt =
             ~synthesized:false
             ~dynamicallycallable:false
             ~readonly_prop:(sp_readonly prop)
-            ~support_dynamic_type:false;
+            ~support_dynamic_type:false
+            ~needs_init:false;
       };
   }
 
@@ -204,9 +205,7 @@ let typeconst_structure mro class_name stc =
       CCConcrete
     | TCAbstract { atc_default = default; _ } ->
       CCAbstract (Option.is_some default)
-    | TCPartiallyAbstract _
-    | TCConcrete _ ->
-      CCConcrete
+    | TCConcrete _ -> CCConcrete
   in
   ( snd stc.stc_name,
     {

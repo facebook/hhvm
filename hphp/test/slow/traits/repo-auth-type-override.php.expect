@@ -1,0 +1,36 @@
+================= test1 ================
+int(1)
+int(1)
+int(1)
+int(1)
+int(1)
+string(3) "abc"
+================= test2 ================
+int(1)
+int(1)
+int(1)
+int(1)
+int(1)
+string(3) "abc"
+================= test3 ================
+int(1)
+int(1)
+int(1)
+int(1)
+int(1)
+string(3) "abc"
+================= test4 ================
+int(1)
+int(1)
+string(3) "abc"
+string(3) "abc"
+================= test5 ================
+int(1)
+int(1)
+int(1)
+string(3) "abc"
+================= test6 ================
+int(1)
+int(1)
+int(1)
+string(3) "abc"

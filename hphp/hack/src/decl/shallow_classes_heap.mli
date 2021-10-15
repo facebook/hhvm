@@ -15,34 +15,24 @@ module Capacity : sig
   val capacity : int
 end
 
-module Class : sig
-  type t = shallow_class
-
-  val prefix : Prefix.t
-
-  val description : string
-end
+module Class : SharedMem.Value with type t = shallow_class
 
 module Classes :
     module type of
-      SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Class)
+      SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (StringKey)
+        (Class)
         (Capacity)
 
 module FilterCapacity : sig
   val capacity : int
 end
 
-module Filter : sig
-  type t = BloomFilter.t
-
-  val prefix : Prefix.t
-
-  val description : string
-end
+module Filter : SharedMem.Value with type t = BloomFilter.t
 
 module MemberFilters : sig
   include module type of
-      SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Filter)
+      SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (StringKey)
+        (Filter)
         (FilterCapacity)
 
   (**

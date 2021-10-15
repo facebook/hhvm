@@ -59,6 +59,7 @@ void BaseSet::addAllKeysOf(const TypedValue container) {
 void BaseSet::addAll(const Variant& t) {
   if (t.isNull()) { return; } // nothing to do
 
+  CoeffectsAutoGuard _;
   decltype(cap()) oldCap = 0;
   bool ok = IterateV(
     *t.asTypedValue(),

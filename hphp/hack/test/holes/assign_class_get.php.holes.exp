@@ -35,7 +35,7 @@
          m_params =
          [{ param_annotation = (string); param_type_hint = ((string), (Some ([9:28-34], (Hprim Tstring)))); 
             param_is_variadic = false; param_pos = [9:35-37]; param_name = "$x"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          m_ctxs = None; m_unsafe_ctxs = None;
@@ -58,7 +58,7 @@
           m_params =
           [{ param_annotation = (nothing); param_type_hint = ((nothing), (Some ([14:38-53], (Hintersection [([14:39-43], (Hprim Tbool)); ([14:46-52], (Hprim Tstring))])))); 
              param_is_variadic = false; param_pos = [14:54-56]; param_name = "$x"; 
-             param_expr = None; param_readonly = None; param_callconv = None; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
              param_user_attributes = []; param_visibility = None }
             ];
           m_ctxs = None; m_unsafe_ctxs = None;
@@ -80,7 +80,7 @@
           m_params =
           [{ param_annotation = ((int | string)); param_type_hint = (((int | string)), (Some ([19:34-48], (Hunion [([19:35-38], (Hprim Tint)); ([19:41-47], (Hprim Tstring))]))));
              param_is_variadic = false; param_pos = [19:49-51]; param_name = "$x"; 
-             param_expr = None; param_readonly = None; param_callconv = None; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
              param_user_attributes = []; param_visibility = None }
             ];
           m_ctxs = None; m_unsafe_ctxs = None;
@@ -103,7 +103,7 @@
           m_params =
           [{ param_annotation = ((int, bool)); param_type_hint = (((int, bool)), (Some ([23:33-44], (Htuple [([23:34-37], (Hprim Tint)); ([23:39-43], (Hprim Tbool))])))); 
              param_is_variadic = false; param_pos = [23:45-47]; param_name = "$x"; 
-             param_expr = None; param_readonly = None; param_callconv = None; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
              param_user_attributes = []; param_visibility = None }
             ];
           m_ctxs = None; m_unsafe_ctxs = None;
@@ -126,7 +126,7 @@
           m_params =
           [{ param_annotation = (bool); param_type_hint = ((bool), (Some ([28:35-39], (Hprim Tbool)))); 
              param_is_variadic = false; param_pos = [28:40-42]; param_name = "$x"; 
-             param_expr = None; param_readonly = None; param_callconv = None; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
              param_user_attributes = []; param_visibility = None }
             ];
           m_ctxs = None; m_unsafe_ctxs = None;
@@ -149,7 +149,7 @@
           m_params =
           [{ param_annotation = (bool); param_type_hint = ((bool), (Some ([33:37-41], (Hprim Tbool)))); 
              param_is_variadic = false; param_pos = [33:42-44]; param_name = "$x"; 
-             param_expr = None; param_readonly = None; param_callconv = None; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
              param_user_attributes = []; param_visibility = None }
             ];
           m_ctxs = None; m_unsafe_ctxs = None;
@@ -174,7 +174,7 @@
           m_params =
           [{ param_annotation = (bool); param_type_hint = ((bool), (Some ([38:37-41], (Hprim Tbool)))); 
              param_is_variadic = false; param_pos = [38:42-44]; param_name = "$x"; 
-             param_expr = None; param_readonly = None; param_callconv = None; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
              param_user_attributes = []; param_visibility = None }
             ];
           m_ctxs = None; m_unsafe_ctxs = None;

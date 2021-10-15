@@ -1,7 +1,7 @@
 <?hh // strict
 
 class C {
-  const type T as arraykey = arraykey;
+  const type T = arraykey;
   public static function isT(mixed $x): void {
     if ($x is self::T) {
       echo "arraykey\n";

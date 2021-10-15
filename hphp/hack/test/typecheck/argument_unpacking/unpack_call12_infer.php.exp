@@ -4,13 +4,13 @@ Invalid argument (Typing[4110])
   Expected `int`
   File "unpack_call12_infer.php", line 15, characters 16-20:
   But got `string`
-  File "hackarray.hhi", line 28, characters 52-52:
+  File "hackarray.hhi", line 28, characters 73-73:
     via this generic `T`
-  File "hackarray.hhi", line 19, characters 77-78:
+  File "hackarray.hhi", line 19, characters 119-120:
     via this generic `Tv`
-  File "interfaces.hhi", line 111, characters 66-67:
+  File "interfaces.hhi", line 110, characters 66-67:
     via this generic `Tv`
-  File "interfaces.hhi", line 93, characters 53-54:
+  File "interfaces.hhi", line 92, characters 53-54:
     via this generic `Tv`
   File "rx/interfaces.hhi", line 26, characters 52-53:
     via this generic `Tv`

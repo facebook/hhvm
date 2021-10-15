@@ -46,6 +46,7 @@ void RepoGlobalData::load(bool loadConstantFuncs) const {
   RO::EvalBuildMayNoticeOnMethCallerHelperIsObject =
     BuildMayNoticeOnMethCallerHelperIsObject;
   RO::EvalDiamondTraitMethods                      = DiamondTraitMethods;
+  RO::EvalCoeffectEnforcementLevels                = EvalCoeffectEnforcementLevels;
 
   if (HardGenericsUB) RO::EvalEnforceGenericsUB = 2;
 

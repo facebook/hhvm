@@ -19,6 +19,7 @@
 #include <string>
 #include <vector>
 
+#include <fmt/format.h>
 #include <folly/Format.h>
 #include <folly/dynamic.h>
 
@@ -191,3 +192,18 @@ private:
   const HPHP::Facts::Clock m_val;
 };
 } // namespace folly
+
+template <> struct fmt::formatter<HPHP::Facts::Clock> {
+
+  // We don't support any settings within the braces, so nothing to do here.
+  constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
+    return ctx.end();
+  }
+
+  template <typename FormatContext>
+  auto format(const HPHP::Facts::Clock& c, FormatContext& ctx)
+      -> decltype(ctx.out()) {
+    return format_to(
+        ctx.out(), folly::sformat("{}", c), c.m_clock, c.m_mergebase);
+  }
+};

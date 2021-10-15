@@ -3301,6 +3301,19 @@ let do_codeAction_local
   in
   Lwt.return actions
 
+let do_codeAction
+    (conn : server_conn)
+    (ref_unblocked_time : float ref)
+    (params : CodeActionRequest.params) :
+    CodeAction.command_or_action list Lwt.t =
+  let filename =
+    lsp_uri_to_path
+      params.CodeActionRequest.textDocument.TextDocumentIdentifier.uri
+  in
+  let range = lsp_range_to_ide params.CodeActionRequest.range in
+  let command = ServerCommandTypes.CODE_ACTIONS (filename, range) in
+  rpc conn ref_unblocked_time ~desc:"code_actions" command
+
 let do_signatureHelp
     (conn : server_conn)
     (ref_unblocked_time : float ref)
@@ -4357,6 +4370,12 @@ let handle_client_message
           params
       in
       respond_jsonrpc ~powered_by:Serverless_ide id (CodeActionResult result);
+      Lwt.return_some
+        { result_count = List.length result; result_extra_telemetry = None }
+    (* textDocument/codeAction request, when not in serverless IDE mode *)
+    | (Main_loop menv, None, RequestMessage (id, CodeActionRequest params)) ->
+      let%lwt result = do_codeAction menv.conn ref_unblocked_time params in
+      respond_jsonrpc ~powered_by:Hh_server id (CodeActionResult result);
       Lwt.return_some
         { result_count = List.length result; result_extra_telemetry = None }
     (* textDocument/formatting *)

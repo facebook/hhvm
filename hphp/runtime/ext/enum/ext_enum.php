@@ -77,7 +77,7 @@ namespace EnumClass {
 /**
  * Type of enum class labels
  */
-newtype Label<-TEnumClass, TType> = string;
+newtype Label<-TEnumClass, TType> = mixed;
 }
 
 
@@ -91,7 +91,7 @@ newtype Label<-TEnumClass, TType> = string;
  */
 abstract class BuiltinAbstractEnumClass {
   final public static function nameOf<TType>(EnumClass\Label<this, TType> $atom): string {
-    return $atom;
+    return \__SystemLib\unwrap_opaque_value(\__SystemLib\OpaqueValueId::EnumClassLabel, $atom);
   }
 }
 
@@ -115,7 +115,8 @@ abstract class BuiltinEnumClass<+T> extends BuiltinAbstractEnumClass {
   final public static function getValues()[write_props]: darray<string, T>;
 
   final public static function valueOf<TEnum super this, TType>(EnumClass\Label<TEnum, TType> $atom): MemberOf<TEnum, TType> {
-    return \__SystemLib\get_enum_member_by_label($atom);
+    $key = \__SystemLib\unwrap_opaque_value(\__SystemLib\OpaqueValueId::EnumClassLabel, $atom);
+    return \__SystemLib\get_enum_member_by_label($key);
   }
 }
 

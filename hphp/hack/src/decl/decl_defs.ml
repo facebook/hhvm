@@ -159,14 +159,13 @@ type decl_class_type = {
   dc_need_init: bool;
   dc_abstract: bool;
   dc_final: bool;
-  dc_is_disposable: bool;
   dc_const: bool;
   dc_internal: bool;
   dc_deferred_init_members: SSet.t;
   dc_kind: Ast_defs.classish_kind;
   dc_is_xhp: bool;
   dc_has_xhp_keyword: bool;
-  dc_module: string option;
+  dc_module: Typing_modules.t;
   dc_name: string;
   dc_pos: Pos_or_decl.t;
   dc_tparams: decl_tparam list;
@@ -214,6 +213,9 @@ let get_elt_synthesized elt =
   Typing_defs_flags.(is_set ce_flags_synthesized elt.elt_flags)
 
 let get_elt_xhp_attr elt = Typing_defs.flags_to_xhp_attr elt.elt_flags
+
+let get_elt_needs_init elt =
+  Typing_defs_flags.(is_set ce_flags_needs_init elt.elt_flags)
 
 let set_elt_synthesized elt v =
   {

@@ -1,0 +1,10 @@
+File "trait_typeconst_1.bad.php", line 15, characters 7-7:
+Class `D` does not correctly implement all required members  (Typing[4340])
+  File "trait_typeconst_1.bad.php", line 15, characters 17-17:
+  Some members are incompatible with those declared in type `C`
+  File "trait_typeconst_1.bad.php", line 12, characters 14-15:
+  The assigned type of this type constant is inconsistent with its parent
+  File "trait_typeconst_1.bad.php", line 8, characters 19-21:
+  Expected `int`
+  File "trait_typeconst_1.bad.php", line 12, characters 19-24:
+  But got `string`

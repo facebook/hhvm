@@ -75,11 +75,11 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | LINT _ -> false
   | LINT_STDIN _ -> false
   | LINT_ALL _ -> false
-  | LINT_XCONTROLLER _ -> false
   | FORMAT _ -> false
   | DUMP_FULL_FIDELITY_PARSE _ -> false
   | IDE_AUTOCOMPLETE _ -> false
   | IDE_FFP_AUTOCOMPLETE _ -> false
+  | CODE_ACTIONS _ -> false
   | SUBSCRIBE_DIAGNOSTIC _ -> false
   | UNSUBSCRIBE_DIAGNOSTIC _ -> false
   | OUTLINE _ -> false
@@ -161,9 +161,9 @@ let rpc_remote_execution : type a. a t -> ReEnv.t option = function
   | STATUS_REMOTE_EXECUTION (mode, _) ->
     let re_env =
       if String.equal mode "warm" then
-        Re.initialize_lease ~acquire_new_lease:false ~num_re_workers_opt:None
+        Re.initialize_lease false ~num_re_workers_opt:None
       else if String.equal mode "cold" then
-        Re.initialize_lease ~acquire_new_lease:true ~num_re_workers_opt:None
+        Re.initialize_lease true ~num_re_workers_opt:None
       else
         failwith
           "Invalid argument to --remote-execution. Please specify \"cold\" or \"warm\""

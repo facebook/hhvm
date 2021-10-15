@@ -51,7 +51,6 @@ type t = {
   option_disable_array: bool;
   option_disable_array_typehint: bool;
   option_allow_unstable_features: bool;
-  option_disallow_hash_comments: bool;
   option_disallow_fun_and_cls_meth_pseudo_funcs: bool;
   option_disallow_inst_meth: bool;
   option_enable_readonly_in_emitter: bool;
@@ -103,7 +102,6 @@ let default =
     option_disable_array = false;
     option_disable_array_typehint = false;
     option_allow_unstable_features = false;
-    option_disallow_hash_comments = false;
     option_disallow_fun_and_cls_meth_pseudo_funcs = false;
     option_disallow_inst_meth = false;
     option_enable_readonly_in_emitter = false;
@@ -192,8 +190,6 @@ let disable_array_typehint o = o.option_disable_array_typehint
 
 let allow_unstable_features o = o.option_allow_unstable_features
 
-let disallow_hash_comments o = o.option_disallow_hash_comments
-
 let disallow_fun_and_cls_meth_pseudo_funcs o =
   o.option_disallow_fun_and_cls_meth_pseudo_funcs
 
@@ -276,7 +272,6 @@ let to_string o =
       Printf.sprintf "disable_array: %B" @@ disable_array o;
       Printf.sprintf "disable_array_typehint: %B" @@ disable_array_typehint o;
       Printf.sprintf "allow_unstable_features: %B" @@ allow_unstable_features o;
-      Printf.sprintf "disallow_hash_comments: %B" @@ disallow_hash_comments o;
       Printf.sprintf "disallow_fun_and_cls_meth_pseudo_funcs: %B"
       @@ disallow_fun_and_cls_meth_pseudo_funcs o;
       Printf.sprintf "disallow_inst_meth: %B" @@ disallow_inst_meth o;
@@ -372,8 +367,6 @@ let set_option options name value =
     { options with option_disable_array_typehint = as_bool value }
   | "hhvm.hack.lang.allow_unstable_features" ->
     { options with option_allow_unstable_features = as_bool value }
-  | "hhvm.hack.lang.disallow_hash_comments" ->
-    { options with option_disallow_hash_comments = as_bool value }
   | "hhvm.hack.lang.disallow_fun_and_cls_meth_pseudo_funcs" ->
     {
       options with
@@ -565,8 +558,6 @@ let value_setters =
         "hhvm.hack.lang.allow_unstable_features"
         get_value_from_config_int
     @@ fun opts v -> { opts with option_allow_unstable_features = v = 1 } );
-    ( set_value "hhvm.hack.lang.disallow_hash_comments" get_value_from_config_int
-    @@ fun opts v -> { opts with option_disallow_hash_comments = v = 1 } );
     ( set_value
         "hhvm.hack.lang.disallow_fun_and_cls_meth_pseudo_funcs"
         get_value_from_config_int

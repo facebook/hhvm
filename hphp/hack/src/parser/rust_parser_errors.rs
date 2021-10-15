@@ -102,6 +102,7 @@ enum UnstableFeatures {
     AbstractEnumClass,
     ContextAliasDeclarationShort,
     MethodTraitDiamond,
+    UpcastExpression,
 }
 impl UnstableFeatures {
     // Preview features are allowed to run in prod. This function decides
@@ -121,6 +122,7 @@ impl UnstableFeatures {
             UnstableFeatures::AbstractEnumClass => Unstable,
             UnstableFeatures::ContextAliasDeclarationShort => Preview,
             UnstableFeatures::MethodTraitDiamond => Unstable,
+            UnstableFeatures::UpcastExpression => Unstable,
         }
     }
 }
@@ -303,6 +305,7 @@ struct ParserErrors<'a, Token, Value, State> {
     nested_namespaces: Vec<S<'a, Token, Value>>,
     namespace_type: NamespaceType,
     namespace_name: String,
+    uses_readonly: bool,
 }
 
 type S<'a, T, V> = &'a Syntax<'a, T, V>;
@@ -329,6 +332,7 @@ where
             is_in_concurrent_block: false,
             nested_namespaces: vec![],
             phantom: std::marker::PhantomData,
+            uses_readonly: false,
         }
     }
 
@@ -475,6 +479,11 @@ where
 
     fn check_can_use_feature(&mut self, node: S<'a, Token, Value>, feature: &UnstableFeatures) {
         let parser_options = &self.env.parser_options;
+        // This will move out of check_can_use_feature once Readonly is no longer a preview feature
+        match feature {
+            UnstableFeatures::Readonly => self.uses_readonly = true,
+            _ => {}
+        };
         let enabled = match feature {
             UnstableFeatures::UnionIntersectionTypeHints => {
                 parser_options.tco_union_intersection_type_hints
@@ -487,6 +496,7 @@ where
                     .iter()
                     .any(|prefix| file_path.find(prefix) == Some(0))
             }
+
             _ => false,
         } || self.env.context.active_unstable_features.contains(feature);
         if !enabled {
@@ -3225,7 +3235,7 @@ where
                             | (GenericTypeSpecifier(_), _) => (true, false, true),
                             _ => (true, false, false),
                         };
-                if !is_valid && self.env.is_typechecker() {
+                if !is_valid {
                     self.errors.push(Self::make_error_from_node(
                         node,
                         errors::invalid_scope_resolution_qualifier,
@@ -3792,6 +3802,13 @@ where
                 self.errors.push(Self::make_error_from_node(
                     node,
                     errors::enum_class_constant_missing_initializer,
+                ))
+            }
+            // prevent constants to be named `class`
+            if self.text(&e.name).eq_ignore_ascii_case("class") {
+                self.errors.push(Self::make_error_from_node(
+                    node,
+                    errors::enum_class_elem_name_is_class,
                 ))
             }
         }
@@ -5486,6 +5503,9 @@ where
             EnumClassLabelExpression(_) => {
                 self.check_can_use_feature(node, &UnstableFeatures::EnumClassLabel)
             }
+            UpcastExpression(_) => {
+                self.check_can_use_feature(node, &UnstableFeatures::UpcastExpression)
+            }
             OldAttributeSpecification(x) => {
                 let attributes = self.text(&x.attributes).split(',');
                 attributes.for_each(|attr| match attr.trim() {
@@ -5523,13 +5543,13 @@ where
         );
     }
 
-    fn parse_errors_impl(mut self) -> Vec<SyntaxError> {
+    fn parse_errors_impl(mut self) -> (Vec<SyntaxError>, bool) {
         if self.env.is_typechecker() {
             self.is_invalid_hack_mode();
         }
         self.fold_child_nodes(self.env.syntax_tree.root());
         self.errors.reverse();
-        self.errors
+        (self.errors, self.uses_readonly)
     }
 
     fn parse_errors(
@@ -5539,7 +5559,7 @@ where
         hhvm_compat_mode: bool,
         hhi_mode: bool,
         codegen: bool,
-    ) -> Vec<SyntaxError> {
+    ) -> (Vec<SyntaxError>, bool) {
         let env = Env {
             parser_options,
             syntax_tree: tree,
@@ -5588,7 +5608,7 @@ pub fn parse_errors<'a, State: Clone>(
     hhvm_compat_mode: bool,
     hhi_mode: bool,
     codegen: bool,
-) -> Vec<SyntaxError> {
+) -> (Vec<SyntaxError>, bool) {
     <ParserErrors<'a, PositionedToken<'a>, PositionedValue<'a>, State>>::parse_errors(
         tree,
         IndexedSourceText::new(tree.text().clone()),
@@ -5606,7 +5626,7 @@ pub fn parse_errors_with_text<'a, State: Clone>(
     hhvm_compat_mode: bool,
     hhi_mode: bool,
     codegen: bool,
-) -> Vec<SyntaxError> {
+) -> (Vec<SyntaxError>, bool) {
     <ParserErrors<'a, PositionedToken<'a>, PositionedValue<'a>, State>>::parse_errors(
         tree,
         text,

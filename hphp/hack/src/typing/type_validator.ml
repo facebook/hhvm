@@ -46,17 +46,9 @@ class virtual type_validator =
     method on_alias acc _ _ tyl ty =
       List.fold_left (ty :: tyl) ~f:this#on_type ~init:acc
 
-    (* TODO(T88552052) is_concrete is a strange pattern here. The bool is used
-     * to signal when a partially abstract type constant is directly accessed
-     * in a way that would result in the value being used instead of
-     * getting a constrained abstract type. This logic can be cleaned up by
-     * eliminating partially abstract type constants and only using ttc_kind *)
-    method on_typeconst acc _class _is_concrete typeconst =
+    method on_typeconst acc _class typeconst =
       match typeconst.ttc_kind with
       | TCConcrete { tc_type } -> this#on_type acc tc_type
-      | TCPartiallyAbstract { patc_constraint; patc_type } ->
-        let acc = this#on_type acc patc_constraint in
-        this#on_type acc patc_type
       | TCAbstract { atc_as_constraint; atc_super_constraint; atc_default } ->
         let acc = Option.fold ~f:this#on_type ~init:acc atc_as_constraint in
         let acc = Option.fold ~f:this#on_type ~init:acc atc_super_constraint in
@@ -78,23 +70,9 @@ class virtual type_validator =
               ( Env.get_class env class_name >>= fun class_ ->
                 Decl_provider.Class.get_typeconst class_ (snd id)
                 >>= fun typeconst ->
-                let is_concrete =
-                  match typeconst.ttc_kind with
-                  | TCConcrete _ -> true
-                  (* This handles the case for partially abstract type constants. In this case
-                   * we know the assigned type will be chosen if the root is the same as the
-                   * concrete supertype of the root.
-                   *)
-                  | TCPartiallyAbstract _ when phys_equal root ty -> true
-                  | _ -> false
-                in
                 let ety_env = { acc.ety_env with this_ty = ty } in
-                Some
-                  (this#on_typeconst
-                     { acc with ety_env }
-                     class_
-                     is_concrete
-                     typeconst) )
+                Some (this#on_typeconst { acc with ety_env } class_ typeconst)
+              )
           | _ -> acc)
 
     method! on_tapply acc r (pos, name) tyl =

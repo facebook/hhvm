@@ -40,7 +40,14 @@ type config = {
 (** Default configuration object *)
 val default_config : config
 
-(** Empty configuration object *)
+(** Empty configuration object.
+
+    There are places where we don't expect to write to shared memory, and doing
+    so would be a memory leak. But since shared memory is global, it's very easy
+    to accidentally call a function that will attempt such write. This config
+    initializes shared memory with zero sizes. As such, attempting to write to
+    shared memory that was initialized with this config, will make the program
+    fail immediately. *)
 val empty_config : config
 
 (** A handle to initialized shared memory. Used to connect other workers to
@@ -55,9 +62,12 @@ type handle = private {
   h_hash_table_pow_val: int;
   h_num_workers_val: int;
   h_shm_use_sharded_hashtbl: bool;
+  h_sharded_hashtbl_fd: Unix.file_descr;
 }
 
-(** Initialize shared memory. *)
+(** Initialize shared memory.
+
+    Must be called before forking. *)
 val init : config -> num_workers:int -> handle
 
 (** Connect other workers to shared memory *)
@@ -73,9 +83,6 @@ val set_allow_removes : bool -> unit
 (** Allow or disallow shared memory writes for the current process. *)
 val set_allow_hashtable_writes_by_current_process : bool -> unit
 
-(** Invoke the garbage collector. *)
-val hh_collect : unit -> unit
-
 (** Directly access the shared memory table.
 
     This can be used to provide proxying across the network *)
@@ -84,7 +91,7 @@ module RawAccess : sig
 
   val mem_raw : string -> bool
 
-  val get_raw : string -> serialized
+  val get_raw : string -> serialized option
 
   val add_raw : string -> serialized -> unit
 
@@ -206,56 +213,38 @@ module GC : sig
   val collect : [ `aggressive | `always_TEST | `gentle ] -> unit
 end
 
-(** Key in the big shared-memory table.
+(** A hasher that hashes user-defined keys. The resulting hash can be used
+    to index the big shared-memory table.
 
-    Each key is built by concatenating an optional "old" prefix, a heap-prefix
-    and an object-specific key.
+    Each hash is built by concatenating an optional "old" prefix, a heap-prefix
+    and an object-specific key, then hashing the concatenation.
 
-    The key module provides a way to convert the result of this string
-    concatenation to an MD5-hash, of which the first few bytes are used
-    to index the hashtable. *)
-module type Key = sig
+    The unique heap-prefix is automatically generated when calling `MakeKeyHasher`.
+
+    Currently we use MD5 as the hashing algorithm. Note that only the first
+    8 bytes are used to index the shared memory table. *)
+module type KeyHasher = sig
   (** The type of keys that OCaml-land callers try to insert.
 
       This key will be object-specific (unique within a heap), but might not be
       unique across heaps. *)
-  type userkey
+  type key
 
-  (** The concatenation of the heap-prefix with the object-specific [userkey].
+  (** The hash of an old or new key.
 
-     This key is unique across all heaps. *)
-  type t
+      This hash will be unique across all heaps. *)
+  type hash
 
-  (** The normal [t] key prefixed with the old-prefix.
+  val hash : key -> hash
 
-     This is used to distinguish between new and old values of the same
-     object in the same heap. *)
-  type old
+  val hash_old : key -> hash
 
-  (** The md5 of an [old] or a new [key].
-
-     We will use the first few bytes of this MD5 digest to index into
-     the hash table. *)
-  type md5
-
-  val make : Prefix.t -> userkey -> t
-
-  val make_old : Prefix.t -> userkey -> old
-
-  val to_old : t -> old
-
-  val new_from_old : old -> t
-
-  val md5 : t -> md5
-
-  val md5_old : old -> md5
-
-  (** Note that this returns the raw MD5 bytes, not its hex encoding. *)
-  val string_of_md5 : md5 -> string
+  (** Return the raw bytes of the digest. Note that this is not hex encoded. *)
+  val to_bytes : hash -> string
 end
 
 (** The interface that all keys need to implement *)
-module type UserKeyType = sig
+module type Key = sig
   type t
 
   val to_string : t -> string
@@ -264,24 +253,32 @@ module type UserKeyType = sig
 end
 
 (** Make a new key that can be stored in shared-memory. *)
-module KeyFunctor (UserKeyType : UserKeyType) :
-  Key with type userkey = UserKeyType.t
+module MakeKeyHasher (Key : Key) : KeyHasher with type key = Key.t
 
-(** Heap type that represents immediate access to the underlying hashtable. *)
-module type Raw = functor (Key : Key) (Value : Value.Type) -> sig
-  val add : Key.md5 -> Value.t -> unit
+(** The interface that all values need to implement *)
+module type Value = sig
+  type t
 
-  val mem : Key.md5 -> bool
-
-  val get : Key.md5 -> Value.t
-
-  val remove : Key.md5 -> unit
-
-  val move : Key.md5 -> Key.md5 -> unit
+  val description : string
 end
 
-(** Heap that provides immediate access to the underlying hashtable. *)
-module Immediate : Raw
+(** Module type for a shared-memory backend for a heap.
+
+    Each backend provided raw access to the underlying shared hash table. *)
+module type Backend = functor (KeyHasher : KeyHasher) (Value : Value) -> sig
+  val add : KeyHasher.hash -> Value.t -> unit
+
+  val mem : KeyHasher.hash -> bool
+
+  val get : KeyHasher.hash -> Value.t option
+
+  val remove : KeyHasher.hash -> unit
+
+  val move : KeyHasher.hash -> KeyHasher.hash -> unit
+end
+
+(** Backend that provides immediate access to the underlying hashtable. *)
+module ImmediateBackend : Backend
 
 type 'a profiled_value =
   | RawValue of 'a
@@ -290,106 +287,56 @@ type 'a profiled_value =
       write_time: float;
     }
 
-(** Heap that provides profiled access (?) to the underlying hashtable. *)
-module ProfiledImmediate : Raw
+(** Backend that provides profiled access to the underlying hashtable. *)
+module ProfiledBackend : Backend
 
-(** Heap that provides direct access to shared memory, but with a layer
-    of local changes that allows us to decide whether or not to commit
-    specific values. *)
-module WithLocalChanges (Raw : Raw) (Key : Key) (Value : Value.Type) : sig
-  include module type of Raw (Key) (Value)
+(** A heap for a user-defined type.
 
-  module LocalChanges : sig
-    val has_local_changes : unit -> bool
-
-    val push_stack : unit -> unit
-
-    val pop_stack : unit -> unit
-
-    val revert : Key.md5 -> unit
-
-    val commit : Key.md5 -> unit
-
-    val revert_all : unit -> unit
-
-    val commit_all : unit -> unit
-  end
-end
-
-(** Heap used to access "new" values (as opposed to "old" ones).
+    Each heap supports "old" and "new" values.
 
     There are several cases where we need to compare the old and the new
     representations of objects to determine what has changed.
 
     The "old" representation is the value that was bound to that key in
     the last round of type-checking. *)
-module New (Raw : Raw) (Key : Key) (Value : Value.Type) : sig
-  (** Adds a binding to the table.
-
-      Note: the table is left unchanged if the key was already bound!
-      TODO(hverr): this will no longer be true with sharded hash tables. *)
-  val add : Key.t -> Value.t -> unit
-
-  val get : Key.t -> Value.t option
-
-  val find_unsafe : Key.t -> Value.t (* may throw {!Shared_mem_not_found} *)
-
-  val remove : Key.t -> unit
-
-  val mem : Key.t -> bool
-
-  (** Marks the value bound to this key as "old".
-
-      In pratice, the value will be moved to the same key, prefixed with
-      the old-prefix. *)
-  val oldify : Key.t -> unit
-
-  module WithLocalChanges : module type of WithLocalChanges (Raw) (Key) (Value)
-end
-
-(** Same as [New] but for old values. *)
-module Old
-    (Raw : Raw)
-    (Key : Key)
-    (Value : Value.Type)
-    (_ : module type of WithLocalChanges (Raw) (Key) (Value)) : sig
-  val get : Key.old -> Value.t option
-
-  val remove : Key.old -> unit
-
-  val mem : Key.old -> bool
-
-  (** Takes an old value and moves it back to a "new" one *)
-  val revive : Key.old -> unit
-end
-
-(** A heap for a user-defined type. *)
-module type NoCache = sig
+module type Heap = sig
   type key
 
-  type t
+  type value
+
+  (** [KeyHasher] created for this heap.
+
+      A new [KeyHasher] with a unique prefix is automatically generated
+      for each heap. Normally, you shouldn't have to use the [KeyHasher]
+      directly, but Zoncolan does. *)
+  module KeyHasher : KeyHasher with type key = key
 
   module KeySet : Set.S with type elt = key
 
   module KeyMap : WrappedMap.S with type key = key
 
-  val add : key -> t -> unit
+  (** Adds a binding to the table.
 
-  val get : key -> t option
+      Note: TODO(hverr), currently the semantics of inserting a value for a key
+      that's already in the heap are unclear and depend on whether you have a
+      local-changes stack or not. *)
+  val add : key -> value -> unit
 
-  val get_old : key -> t option
+  val get : key -> value option
 
-  val get_old_batch : KeySet.t -> t option KeyMap.t
+  val get_old : key -> value option
 
-  val remove_old_batch : KeySet.t -> unit
+  val get_batch : KeySet.t -> value option KeyMap.t
 
-  val find_unsafe : key -> t (* May throw {!Shared_mem_not_found} *)
+  val get_old_batch : KeySet.t -> value option KeyMap.t
 
-  val get_batch : KeySet.t -> t option KeyMap.t
+  val remove : key -> unit
+
+  val remove_old : key -> unit
 
   val remove_batch : KeySet.t -> unit
 
-  val string_of_key : key -> string
+  val remove_old_batch : KeySet.t -> unit
 
   val mem : key -> bool
 
@@ -420,15 +367,21 @@ end
 
     Provides no worker-local caching. Directly stores to and queries from
     shared memory. *)
-module NoCache (_ : Raw) (UserKeyType : UserKeyType) (Value : Value.Type) :
-  NoCache
-    with type key = UserKeyType.t
-     and type t = Value.t
-     and module KeySet = Set.Make(UserKeyType)
-     and module KeyMap = WrappedMap.Make(UserKeyType)
+module Heap (_ : Backend) (Key : Key) (Value : Value) :
+  Heap
+    with type key = Key.t
+     and type value = Value.t
+     and module KeyHasher = MakeKeyHasher(Key)
+     and module KeySet = Set.Make(Key)
+     and module KeyMap = WrappedMap.Make(Key)
 
-(** A process-local cache type. *)
-module type CacheType = sig
+(** A worker-local cache layer.
+
+    Each local cache defines its own eviction strategy.
+    For example, we currently have [FreqCache] and [OrderedCache].
+
+    We even have one that combines the two strategies in [MultiCache]. *)
+module type LocalCacheLayer = sig
   type key
 
   type value
@@ -441,84 +394,64 @@ module type CacheType = sig
 
   val clear : unit -> unit
 
-  val string_of_key : key -> string
-
-  val get_size : unit -> int
-
   val get_telemetry_items_and_keys : unit -> Obj.t * key Seq.t
-end
-
-module type LocalHashtblConfigType = sig
-  (* The type of object we want to keep in cache *)
-  type value
-
-  (* The capacity of the cache *)
-  val capacity : int
-end
-
-module FreqCache (Key : sig
-  type t
-end)
-(LocalHashtblConfig : LocalHashtblConfigType) :
-  CacheType with type key := Key.t and type value := LocalHashtblConfig.value
-
-module OrderedCache (Key : sig
-  type t
-end)
-(LocalHashtblConfig : LocalHashtblConfigType) :
-  CacheType with type key := Key.t and type value := LocalHashtblConfig.value
-
-module type LocalCapacityType = sig
-  val capacity : int
 end
 
 (** Invalidate all worker-local caches *)
 val invalidate_local_caches : unit -> unit
 
-module type LocalCache = sig
-  type key
+(** Capacity of a worker-local cache.
 
-  type value
-
-  module L1 : CacheType with type key = key and type value = value
-
-  module L2 : CacheType with type key = key and type value = value
-
-  val add : key -> value -> unit
-
-  val get : key -> value option
-
-  val remove : key -> unit
-
-  val clear : unit -> unit
-
-  val get_telemetry : Telemetry.t -> Telemetry.t
+    In number of elements. *)
+module type Capacity = sig
+  val capacity : int
 end
 
-module LocalCache
-    (UserKeyType : UserKeyType)
-    (Value : Value.Type)
-    (_ : LocalCapacityType) :
-  LocalCache with type key = UserKeyType.t and type value = Value.t
+(** FreqCache is an LFU (Least Frequently Used) cache.
 
-(** Same as [NoCache] but provides a worker-local cache. *)
-module type WithCache = sig
-  include NoCache
+    It keeps count of how many times each item in the cache has been
+    added/replaced/fetched and, when it reaches 2*capacity, then it
+    flushes 1*capacity items and they lose their counts. This might result
+    in a lucky few early items getting to stay in the cache while newcomers
+    get evicted...
 
-  val write_around : key -> t -> unit
+    It is Hashtbl.t-based with a bounded number of elements. *)
+module FreqCache (Key : Key) (Value : Value) (_ : Capacity) :
+  LocalCacheLayer with type key = Key.t and type value = Value.t
 
-  val get_no_cache : key -> t option
+(** OrderedCache is an LRA (Least Recently Added) cache.
 
-  module Cache : LocalCache with type key = key and type value = t
+    Whenever you add an item beyond capacity, it will evict the oldest one
+    to be added.
+
+    It is Hashtbl.t-based with a bounded number of elements. *)
+module OrderedCache (Key : Key) (Value : Value) (_ : Capacity) :
+  LocalCacheLayer with type key = Key.t and type value = Value.t
+
+(** MultiCache uses both FreqCache and OrderedCache simultaneously.
+
+    It uses both caches with the hope that each one will paper over the
+    other's weaknesses. *)
+module MultiCache (Key : Key) (Value : Value) (_ : Capacity) :
+  LocalCacheLayer with type key = Key.t and type value = Value.t
+
+(** Same as [Heap] but provides a layer of worker-local caching. *)
+module HeapWithLocalCache
+    (_ : Backend)
+    (Key : Key)
+    (Value : Value)
+    (_ : Capacity) : sig
+  include
+    Heap
+      with type key = Key.t
+       and type value = Value.t
+       and module KeyHasher = MakeKeyHasher(Key)
+       and module KeySet = Set.Make(Key)
+       and module KeyMap = WrappedMap.Make(Key)
+
+  val write_around : key -> value -> unit
+
+  val get_no_cache : key -> value option
+
+  module Cache : LocalCacheLayer with type key = key and type value = value
 end
-
-module WithCache
-    (_ : Raw)
-    (UserKeyType : UserKeyType)
-    (Value : Value.Type)
-    (_ : LocalCapacityType) :
-  WithCache
-    with type key = UserKeyType.t
-     and type t = Value.t
-     and module KeySet = Set.Make(UserKeyType)
-     and module KeyMap = WrappedMap.Make(UserKeyType)

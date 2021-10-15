@@ -1,7 +1,6 @@
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
-
-function expectDyn(dynamic $_):void { }
+<<file:__EnableUnstableFeatures('upcast_expression')>>
 
 <<__SupportDynamicType>>
 class C { }
@@ -12,11 +11,11 @@ function test1(
   (function((string|dynamic),dynamic...):float) $f3,
   (function():void) $f4,
   (function():C) $f5):void {
-  expectDyn($f1);
-  expectDyn($f2);
-  expectDyn($f3);
-  expectDyn($f4);
-  expectDyn($f5);
-  expectDyn($x ==> $x+1);
-  expectDyn((dynamic $d) ==> $d->foo());
+  $f1 upcast dynamic;
+  $f2 upcast dynamic;
+  $f3 upcast dynamic;
+  $f4 upcast dynamic;
+  $f5 upcast dynamic;
+  ($x ==> $x) upcast dynamic;
+  ((dynamic $d) ==> $d->foo()) upcast dynamic;
 }

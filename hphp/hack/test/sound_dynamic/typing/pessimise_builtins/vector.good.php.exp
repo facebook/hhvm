@@ -1,0 +1,9 @@
+File "vector.good.php", line 6, characters 3-16:
+  ~C
+File "vector.good.php", line 12, characters 3-14:
+  Vector<C>
+File "vector.good.php", line 14, characters 3-14:
+  Vector<[unresolved]>
+File "vector.good.php", line 16, characters 3-14:
+  Vector<[unresolved]>
+No errors

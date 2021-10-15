@@ -45,16 +45,36 @@ let get_type capability =
 let rec validate_capability env pos ty =
   match get_node ty with
   | Tintersection tys -> List.iter ~f:(validate_capability env pos) tys
-  | Tclass ((_, n), _, _) when String.is_prefix ~prefix:SN.Capabilities.prefix n
-    ->
+  | Tapply ((_, n), _) when String.is_prefix ~prefix:SN.Coeffects.contexts n ->
     ()
-  | Tgeneric (_, []) -> (* Covered by Illegal_name_check *) ()
-  | Tunion [] -> ()
-  | Toption t ->
-    (match get_node t with
-    | Tnonnull -> ()
-    | _ -> Errors.illegal_context pos (Typing_print.full env ty))
-  | _ -> Errors.illegal_context pos (Typing_print.full env ty)
+  | Tapply ((_, n), _) ->
+    (match Env.get_class_or_typedef env n with
+    | None -> () (* unbound name error *)
+    | Some (Typing_env.TypedefResult { Typing_defs.td_is_ctx = true; _ }) -> ()
+    | _ -> Errors.illegal_context pos (Typing_print.full_decl ty))
+  | Tgeneric (name, []) when SN.Coeffects.is_generated_generic name -> ()
+  | Taccess (root, (_p, c)) ->
+    let (env, root) =
+      Typing_phase.localize_no_subst env ~ignore_errors:false root
+    in
+    let (env, candidates) =
+      Typing_utils.get_concrete_supertypes ~abstract_enum:false env root
+    in
+    let check_ctx_const t =
+      match get_node t with
+      | Tclass ((_, name), _, _) ->
+        (match Env.get_class env name with
+        | Some cls ->
+          (match Env.get_typeconst env cls c with
+          | Some tc ->
+            if not tc.Typing_defs.ttc_is_ctx then
+              Errors.illegal_context pos (Typing_print.full_decl ty)
+          | None -> () (* typeconst not found *))
+        | None -> () (* unbound name error *))
+      | _ -> ()
+    in
+    List.iter ~f:check_ctx_const candidates
+  | _ -> Errors.illegal_context pos (Typing_print.full_decl ty)
 
 let pretty env ty =
   let (env, ty) = Typing_intersection.simplify_intersections env ty in

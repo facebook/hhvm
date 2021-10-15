@@ -16,7 +16,7 @@ impl Generator for TypeParamGenerator {
         "type_params.rs".into()
     }
 
-    fn gen(&self, ctx: &Context) -> Result<TokenStream> {
+    fn gen(&self, ctx: &Context<'_>) -> Result<TokenStream> {
         let ty_params = ctx.root_ty_params_with_context();
         Ok(quote! {
             pub trait Params {

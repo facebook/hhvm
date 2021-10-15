@@ -18,6 +18,7 @@ final class StrTransformTest extends HackTest {
     return varray[
       tuple('foo', 'Foo'),
       tuple('Foo', 'Foo'),
+      tuple('foo foo', 'Foo foo'),
       tuple('123', '123'),
       tuple('-foo', '-foo'),
     ];
@@ -547,7 +548,7 @@ final class StrTransformTest extends HackTest {
         dict['h' => 'H', '' => 'W'],
       ),
     )
-      ->toThrow(InvariantException::class);
+      ->toThrow(InvalidArgumentException::class);
   }
 
   public static function provideReplaceEveryNonrecursiveCI(
@@ -666,14 +667,14 @@ final class StrTransformTest extends HackTest {
         dict['h' => 'H', '' => 'W'],
       ),
     )
-      ->toThrow(InvariantException::class, 'empty');
+      ->toThrow(InvalidArgumentException::class, 'empty');
     expect(
       () ==> Str\replace_every_nonrecursive_ci(
         'hello world',
         dict['AbCd' => 'xxx', 'abcd' => 'yyy'],
       ),
     )
-      ->toThrow(InvariantException::class, 'Duplicate');
+      ->toThrow(InvalidArgumentException::class, 'Duplicate');
   }
 
   public static function providerReverse(): vec<(string, string)> {
@@ -758,9 +759,9 @@ final class StrTransformTest extends HackTest {
 
   public function testSpliceExceptions(): void {
     expect(() ==> Str\splice('hello world', ' cruel ', -12, 1))
-      ->toThrow(InvariantException::class);
+      ->toThrow(InvalidArgumentException::class);
     expect(() ==> Str\splice('hello world', ' cruel ', 100, 1))
-      ->toThrow(InvariantException::class);
+      ->toThrow(InvalidArgumentException::class);
   }
 
   public static function provideToInt(): varray<mixed> {

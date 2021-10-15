@@ -70,7 +70,6 @@ let compute_fileinfo_for_path
           (ParserOptions.enable_xhp_class_modifier popt)
         ~disable_xhp_element_mangling:
           (ParserOptions.disable_xhp_element_mangling popt)
-        ~disallow_hash_comments:(ParserOptions.disallow_hash_comments popt)
         ~filename:path
         ~text:contents
     in
@@ -171,7 +170,11 @@ let update_naming_tables_for_changed_file
     Relative_path.is_root (Relative_path.prefix path)
     && FindUtils.path_filter path
   then begin
-    let contents = File_provider.get_contents path in
+    let contents =
+      File_provider.get_contents
+        ~writeback_disk_contents_in_shmem_provider:false
+        path
+    in
     let (new_file_info, facts) = compute_fileinfo_for_path popt contents path in
     let old_file_info = Naming_table.get_file_info naming_table path in
     log_file_info_change ~old_file_info ~new_file_info ~path;

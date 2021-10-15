@@ -71,21 +71,29 @@ let check_via_label_on_param env pos dty lty =
       Errors.via_label_invalid_generic pos name
   in
   match get_node lty with
-  (* Uncomment the next line to allow normal enums with __ViaLabel *)
-  (* | Tnewtype (enum_name, _, _) when Env.is_enum env enum_name -> () *)
   | Tnewtype (name, [ty_enum; _ty_interface], _)
     when String.equal name SN.Classes.cMemberOf ->
     (match get_node ty_enum with
-    | Tclass ((_, enum_name), _, _) when Env.is_enum_class env enum_name -> ()
+    | Tclass ((_, enum_name), _, _) when Env.is_enum_class env enum_name -> env
     | Tgeneric (name, _) ->
       let () = check_tgeneric name in
-      let upper_bounds =
+      let (env, upper_bounds) =
         Typing_utils.collect_enum_class_upper_bounds env name
       in
-      if SSet.cardinal upper_bounds <> 1 then
-        Errors.via_label_invalid_parameter_in_enum_class pos
-    | _ -> Errors.via_label_invalid_parameter_in_enum_class pos)
-  | _ -> Errors.via_label_invalid_parameter pos
+      let () =
+        match upper_bounds with
+        | Some upper_bound ->
+          if Typing_utils.is_tintersection env upper_bound then
+            Errors.via_label_invalid_parameter_in_enum_class pos
+        | None -> Errors.via_label_invalid_parameter_in_enum_class pos
+      in
+      env
+    | _ ->
+      let () = Errors.via_label_invalid_parameter_in_enum_class pos in
+      env)
+  | _ ->
+    let () = Errors.via_label_invalid_parameter pos in
+    env
 
 let check_tparams_constraints env use_pos tparams targs =
   let ety_env : expand_env =
@@ -110,8 +118,11 @@ let check_happly ?(via_label = false) unchecked_tparams env h =
   let decl_ty = Inst.instantiate subst decl_ty in
   let ety_env = { empty_expand_env with expand_visible_newtype = false } in
   let (env, locl_ty) = Phase.localize env ~ety_env decl_ty in
-  let () =
-    if via_label then check_via_label_on_param env hint_pos decl_ty locl_ty
+  let env =
+    if via_label then
+      check_via_label_on_param env hint_pos decl_ty locl_ty
+    else
+      env
   in
   match get_node locl_ty with
   | Tnewtype (type_name, targs, _cstr_ty) ->
@@ -161,6 +172,7 @@ and hint_ ~via_label ~in_signature env p h_ =
   | Haccess _
   | Habstr _
   | Hdynamic
+  | Hsupportdynamic
   | Hnothing ->
     ()
   | Hoption (_, Hprim Tnull) -> Errors.option_null p
@@ -282,9 +294,6 @@ let typeconst (env, _) tconst =
     maybe hint env c_atc_super_constraint;
     maybe hint env c_atc_default
   | TCConcrete { c_tc_type } -> hint env c_tc_type
-  | TCPartiallyAbstract { c_patc_constraint; c_patc_type } ->
-    hint env c_patc_constraint;
-    hint env c_patc_type
 
 let class_var env cv =
   let tenv =
@@ -507,9 +516,11 @@ let expr : Typing_env_types.env -> Nast.expr -> unit =
         et_function_pointers = _;
         et_virtualized_expr = _;
         et_runtime_expr = _;
+        et_dollardollar_pos = _;
       }
   | Is (_, h)
   | As (_, h, _)
+  | Upcast (_, h)
   | Cast (h, _) ->
     hint tenv h
   | Lfun (f, _)
@@ -552,7 +563,6 @@ let expr : Typing_env_types.env -> Nast.expr -> unit =
   | New _
   | Record _
   | Xml _
-  | Callconv _
   | Import _
   | Collection _
   | Lplaceholder _

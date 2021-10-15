@@ -1448,6 +1448,20 @@ let schema : schema_node list =
         ];
     };
     {
+      kind_name = "UpcastExpression";
+      type_name = "upcast_expression";
+      func_name = "upcast_expression";
+      description = "upcast_expression";
+      prefix = "upcast";
+      aggregates = [Expression; ConstructorExpression; LambdaBody];
+      fields =
+        [
+          ("left_operand", Aggregate Expression);
+          ("operator", Token);
+          ("right_operand", Aggregate Specifier);
+        ];
+    };
+    {
       kind_name = "ConditionalExpression";
       type_name = "conditional_expression";
       func_name = "conditional_expression";

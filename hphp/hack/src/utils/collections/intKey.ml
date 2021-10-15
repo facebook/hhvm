@@ -9,4 +9,4 @@
 
 type t = int
 
-let compare = ( - )
+let compare = Int.compare

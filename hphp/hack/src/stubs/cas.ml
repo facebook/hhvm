@@ -35,7 +35,7 @@ type cas_result = {
 }
 [@@deriving show]
 
-let upload_directory config ?(timeout = 500) ~(dir : Path.t) :
+let upload_directory ?(timeout = 500) ~config (dir : Path.t) :
     (cas_result, cas_failure) result =
   ignore config;
   ignore timeout;
@@ -43,7 +43,7 @@ let upload_directory config ?(timeout = 500) ~(dir : Path.t) :
   failwith "not implemented"
 
 let download_directory
-    config ?(timeout = 500) ~(dir : Path.t) ~(digest : digest) =
+    ?(timeout = 500) ~config (dir : Path.t) ~(digest : digest) =
   ignore config;
   ignore timeout;
   ignore dir;

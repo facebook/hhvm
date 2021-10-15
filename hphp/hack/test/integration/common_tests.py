@@ -2,6 +2,7 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import datetime
 import json
 import os
 import re
@@ -11,10 +12,18 @@ import subprocess
 import sys
 import tempfile
 import time
-from typing import ClassVar, List, Mapping, Optional, Tuple
+from typing import ClassVar, List, Mapping, Optional, Tuple, NamedTuple
 
 from hh_paths import hackfmt, hh_client, hh_server
 from test_case import TestCase, TestDriver
+
+
+class AllLogs(NamedTuple):
+    all_server_logs: str
+    all_monitor_logs: str
+    client_log: str
+    current_server_log: str
+    current_monitor_log: str
 
 
 class CommonTestDriver(TestDriver):
@@ -110,20 +119,6 @@ class CommonTestDriver(TestDriver):
         else:
             self.assertEqual(exit_code, 0, msg="Stopping hh_server failed")
 
-    def get_server_logs(self) -> str:
-        time.sleep(2)  # wait for logs to be written
-        log_file = self.proc_call([hh_client, "--logname", self.repo_dir])[0].strip()
-        with open(log_file) as f:
-            return f.read()
-
-    def get_monitor_logs(self) -> str:
-        time.sleep(2)  # wait for logs to be written
-        log_file = self.proc_call([hh_client, "--monitor-logname", self.repo_dir])[
-            0
-        ].strip()
-        with open(log_file) as f:
-            return f.read()
-
     def setUp(self) -> None:
         shutil.copytree(self.template_repo, self.repo_dir)
 
@@ -152,13 +147,19 @@ class CommonTestDriver(TestDriver):
         args: List[str],
         env: Optional[Mapping[str, str]] = None,
         stdin: Optional[str] = None,
+        log: bool = True,
     ) -> Tuple[str, str, int]:
         """
         Invoke a subprocess, return stdout, send stderr to our stderr (for
         debugging)
         """
         env = {} if env is None else env
-        print(" ".join(args), file=sys.stderr)
+        if log:
+            print(
+                "[%s] proc_call: %s"
+                % (datetime.datetime.now().strftime("%H:%M:%S"), " ".join(args)),
+                file=sys.stderr,
+            )
         proc = cls.proc_create(args, env)
         (stdout_data, stderr_data) = proc.communicate(stdin)
         sys.stderr.write(stderr_data)
@@ -181,6 +182,82 @@ class CommonTestDriver(TestDriver):
             else:
                 time.sleep(1)
                 waited_time += 1
+
+    @classmethod
+    def get_all_logs(cls, repo_dir: str) -> AllLogs:  # noqa: C901
+        time.sleep(2)  # wait for logs to be written
+        server_file = cls.proc_call([hh_client, "--logname", repo_dir], log=False)[
+            0
+        ].strip()
+        monitor_file = cls.proc_call(
+            [hh_client, "--monitor-logname", repo_dir], log=False
+        )[0].strip()
+        client_file = cls.proc_call(
+            [hh_client, "--client-logname", repo_dir], log=False
+        )[0].strip()
+        # Server log
+        try:
+            with open(server_file) as f:
+                current_server_log = f.read()
+                all_server_logs = "[CURRENT-SERVER-LOG] %s\n%s" % (
+                    server_file,
+                    current_server_log,
+                )
+        except IOError as err:
+            current_server_log = "[error]"
+            all_server_logs = "[CURRENT-SERVER-LOG] %s\n%s" % (server_file, format(err))
+        try:
+            with open(server_file + ".old") as f:
+                all_server_logs = "[OLD-SERVER-LOG] %s.old\n%s\n\n%s" % (
+                    server_file,
+                    f.read(),
+                    all_server_logs,
+                )
+        except Exception:
+            pass
+        # Monitor log
+        try:
+            with open(monitor_file) as f:
+                current_monitor_log = f.read()
+                all_monitor_logs = "[CURRENT-MONITOR-LOG] %s\n%s" % (
+                    monitor_file,
+                    current_monitor_log,
+                )
+        except Exception as err:
+            current_monitor_log = "[error]"
+            all_monitor_logs = "[CURRENT-MONITOR-LOG] %s\n%s" % (
+                monitor_file,
+                format(err),
+            )
+        try:
+            with open(monitor_file + ".old") as f:
+                all_monitor_logs = "[OLD-MONITOR-LOG] %s.old\n%s\n\n%s" % (
+                    monitor_file,
+                    f.read(),
+                    all_monitor_logs,
+                )
+        except Exception:
+            pass
+        # Client log
+        try:
+            with open(client_file) as f:
+                client_log = f.read()
+        except Exception as err:
+            client_log = client_file + " - " + format(err)
+        try:
+            with open(client_log + ".old") as f:
+                old_client_log = f.read()
+                client_log = "%s\n%s\n" % (old_client_log, client_log)
+        except Exception:
+            pass
+        # All together...
+        return AllLogs(
+            all_server_logs=all_server_logs,
+            all_monitor_logs=all_monitor_logs,
+            client_log=client_log,
+            current_server_log=current_server_log,
+            current_monitor_log=current_monitor_log,
+        )
 
     def run_check(
         self, stdin: Optional[str] = None, options: Optional[List[str]] = None
@@ -254,13 +331,19 @@ class CommonTestDriver(TestDriver):
         stdin: Optional[str] = None,
         options: Optional[List[str]] = None,
     ) -> None:
-        # we run the --json version first because --json --refactor doesn't
-        # change any files, but plain --refactor does (i.e. the latter isn't
-        # idempotent)
-        if options is None:
-            options = []
-        self.check_cmd(expected_json, stdin, options + ["--json"])
-        self.check_cmd(expected_output, stdin, options)
+        try:
+            # we run the --json version first because --json --refactor doesn't
+            # change any files, but plain --refactor does (i.e. the latter isn't
+            # idempotent)
+            if options is None:
+                options = []
+            self.check_cmd(expected_json, stdin, options + ["--json"])
+            self.check_cmd(expected_output, stdin, options)
+        except Exception:
+            logs = self.get_all_logs(self.repo_dir)
+            print("SERVER-LOG:\n%s\n\n" % logs.all_server_logs, file=sys.stderr)
+            print("MONITOR-LOG:\n%s\n\n" % logs.all_monitor_logs, file=sys.stderr)
+            raise
 
     def start_hh_loop_forever_assert_timeout(self) -> None:
         # create a file with 10 dependencies. Only "big" jobs, that use
@@ -887,7 +970,8 @@ class CommonTests(BarebonesTests):
         """
 
         self.test_driver.start_hh_server()
-        monitor_logs = self.test_driver.get_monitor_logs()
+        logs = self.test_driver.get_all_logs(self.test_driver.repo_dir)
+        monitor_logs = logs.current_monitor_log
         m = re.search(
             "Just started typechecker server with pid: ([0-9]+)", monitor_logs
         )
@@ -910,7 +994,8 @@ class CommonTests(BarebonesTests):
         # TYPECHECKER_EXIT event.
         attempts = 0
         while attempts < 5 * 60:
-            monitor_logs = self.test_driver.get_monitor_logs()
+            logs = self.test_driver.get_all_logs(self.test_driver.repo_dir)
+            monitor_logs = logs.current_monitor_log
             m = re.search("TYPECHECKER_EXIT", monitor_logs)
             if m is not None:
                 break
@@ -932,7 +1017,7 @@ class CommonTests(BarebonesTests):
             f.write(
                 """<?hh //partial
 
-            class Foo { // also declared in foo_3.php in setUpClass
+            class Foo { // also declared in foo_3.php, which setUp copies from the template repo "integration/data/simple_repo"
                 public static $x;
             }
             """
@@ -1345,30 +1430,6 @@ class CommonTests(BarebonesTests):
             ],
             options=["--single", "-"],
             stdin="<?hh //strict\n function aaaa(): int { return h(); }",
-        )
-
-    def test_lint_xcontroller(self) -> None:
-        self.test_driver.start_hh_server()
-
-        with open(os.path.join(self.test_driver.repo_dir, "in_list.txt"), "w") as f:
-            f.write(os.path.join(self.test_driver.repo_dir, "xcontroller.php"))
-
-        with open(os.path.join(self.test_driver.repo_dir, "xcontroller.php"), "w") as f:
-            f.write(
-                "<?hh\n class MyXController extends XControllerBase { "
-                "public function getPath() { return f(); }  }"
-            )
-
-        self.test_driver.check_cmd(
-            [
-                'File "{root}xcontroller.php", line 2, characters 8-20:',
-                "When linting MyXController: The body of isDelegateOnly should "
-                "only contain `return true;` or `return false;` (Lint[5615])",
-                'File "{root}xcontroller.php", line 2, characters 8-20:',
-                "When linting MyXController: getPath method of MyXController must "
-                "be present and return a static literal for build purposes (Lint[5615])",
-            ],
-            options=["--lint-xcontroller", "{root}in_list.txt"],
         )
 
     def test_incremental_typecheck_same_file(self) -> None:

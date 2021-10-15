@@ -1,0 +1,8 @@
+File "instance_method_protected2.php", line 8, characters 7-15:
+Too few arguments (required 1 but got 0) (Typing[4104])
+  File "instance_method_protected2.php", line 14, characters 22-24:
+  Definition is here
+File "instance_method_protected2.php", line 8, characters 11-13:
+Cannot access non-public members within expression trees. (Typing[4448])
+  File "instance_method_protected2.php", line 14, characters 22-24:
+  Member defined here

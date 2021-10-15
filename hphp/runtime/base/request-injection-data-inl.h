@@ -66,6 +66,14 @@ inline void RequestInjectionData::setJitFolding(bool flag) {
   HAC_CHECK_OPTS
 #undef HC
 
+inline bool RequestInjectionData::getSuppressClassConversionWarnings() const {
+  return m_suppressClassConversionWarnings;
+}
+
+inline void RequestInjectionData::setSuppressClassConversionWarnings(bool flag) {
+  m_suppressClassConversionWarnings = flag;
+}
+
 inline bool RequestInjectionData::getCoverage() const {
   return m_coverage;
 }
@@ -84,6 +92,11 @@ inline void RequestInjectionData::setDebuggerAttached(bool flag) {
   updateJit();
 }
 
+inline void RequestInjectionData::setDebuggerAttachedAtInit(bool flag) {
+  m_hasDebuggerAttachedAtInit = flag;
+  updateJit();
+}
+
 inline size_t RequestInjectionData::getDebuggerStackDepth() const {
   return m_activeLineBreaks.size();
 }
@@ -99,13 +112,8 @@ inline bool RequestInjectionData::getDebuggerForceIntr() const {
     m_debuggerStepOut == StepOutState::Out;
 }
 
-inline bool RequestInjectionData::getDebuggerIntr() const {
-  return m_debuggerIntr;
-}
-
 inline void RequestInjectionData::setDebuggerIntr(bool flag) {
   m_debuggerIntr = flag;
-  updateJit();
 }
 
 inline bool RequestInjectionData::getDebuggerStepIn() const {
@@ -114,7 +122,6 @@ inline bool RequestInjectionData::getDebuggerStepIn() const {
 
 inline void RequestInjectionData::setDebuggerStepIn(bool flag) {
   m_debuggerStepIn = flag;
-  updateJit();
 }
 
 inline RequestInjectionData::StepOutState
@@ -124,7 +131,6 @@ RequestInjectionData::getDebuggerStepOut() const {
 
 inline void RequestInjectionData::setDebuggerStepOut(StepOutState state) {
   m_debuggerStepOut = state;
-  updateJit();
 }
 
 inline bool RequestInjectionData::getDebuggerNext() const {
@@ -133,7 +139,6 @@ inline bool RequestInjectionData::getDebuggerNext() const {
 
 inline void RequestInjectionData::setDebuggerNext(bool flag) {
   m_debuggerNext = flag;
-  updateJit();
 }
 
 inline int RequestInjectionData::getDebuggerFlowDepth() const {
@@ -151,25 +156,21 @@ inline int RequestInjectionData::getActiveLineBreak() const {
 inline void RequestInjectionData::clearActiveLineBreak() {
   if (m_activeLineBreaks.empty()) return;
   m_activeLineBreaks.top() = -1;
-  updateJit();
 }
 
 inline void RequestInjectionData::setActiveLineBreak(int line) {
   assertx(line != -1);
   if (m_activeLineBreaks.empty()) return;
   m_activeLineBreaks.top() = line;
-  updateJit();
 }
 
 inline void RequestInjectionData::popActiveLineBreak() {
   if (m_activeLineBreaks.empty()) return;
   m_activeLineBreaks.pop();
-  updateJit();
 }
 
 inline void RequestInjectionData::pushActiveLineBreak() {
   m_activeLineBreaks.push(-1);
-  updateJit();
 }
 
 inline const std::vector<std::string>&

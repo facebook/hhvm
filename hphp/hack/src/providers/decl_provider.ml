@@ -49,12 +49,10 @@ let use_direct_decl_parser ctx =
 (** This cache caches the result of full class computations
       (the class merged with all its inherited members.)  *)
 module Cache =
-  SharedMem.LocalCache
+  SharedMem.MultiCache
     (StringKey)
     (struct
       type t = Typing_classes_heap.class_t
-
-      let prefix = Prefix.make ()
 
       let description = "Decl_Typing_ClassType"
     end)
@@ -147,12 +145,12 @@ let get_class
       let v : Typing_classes_heap.class_t = Obj.obj obj in
       Some (counter, v))
 
-let declare_fun_in_file
+let declare_fun_in_file_DEPRECATED
     (ctx : Provider_context.t) (file : Relative_path.t) (name : fun_key) :
     Typing_defs.fun_elt =
   match Ast_provider.find_fun_in_file ctx file name with
   | Some f ->
-    let (_name, decl) = Decl_nast.fun_naming_and_decl ctx f in
+    let (_name, decl) = Decl_nast.fun_naming_and_decl_DEPRECATED ctx f in
     decl
   | None -> err_not_found file name
 
@@ -185,7 +183,7 @@ let get_fun
         else
           let ft =
             Errors.run_in_decl_mode filename (fun () ->
-                declare_fun_in_file ctx filename fun_name)
+                declare_fun_in_file_DEPRECATED ctx filename fun_name)
           in
           Decl_store.((get ()).add_fun fun_name ft);
           Some ft
@@ -212,19 +210,19 @@ let get_fun
           else
             let ft =
               Errors.run_in_decl_mode filename (fun () ->
-                  declare_fun_in_file ctx filename fun_name)
+                  declare_fun_in_file_DEPRECATED ctx filename fun_name)
             in
             Some ft
         | None -> None)
   | Provider_backend.Decl_service { decl; _ } ->
     Decl_service_client.rpc_get_fun decl fun_name
 
-let declare_typedef_in_file
+let declare_typedef_in_file_DEPRECATED
     (ctx : Provider_context.t) (file : Relative_path.t) (name : type_key) :
     Typing_defs.typedef_type =
   match Ast_provider.find_typedef_in_file ctx file name with
   | Some t ->
-    let (_name, decl) = Decl_nast.typedef_naming_and_decl ctx t in
+    let (_name, decl) = Decl_nast.typedef_naming_and_decl_DEPRECATED ctx t in
     decl
   | None -> err_not_found file name
 
@@ -257,7 +255,7 @@ let get_typedef
         else
           let tdecl =
             Errors.run_in_decl_mode filename (fun () ->
-                declare_typedef_in_file ctx filename typedef_name)
+                declare_typedef_in_file_DEPRECATED ctx filename typedef_name)
           in
           Decl_store.((get ()).add_typedef typedef_name tdecl);
           Some tdecl
@@ -284,19 +282,21 @@ let get_typedef
           else
             let tdecl =
               Errors.run_in_decl_mode filename (fun () ->
-                  declare_typedef_in_file ctx filename typedef_name)
+                  declare_typedef_in_file_DEPRECATED ctx filename typedef_name)
             in
             Some tdecl
         | None -> None)
   | Provider_backend.Decl_service { decl; _ } ->
     Decl_service_client.rpc_get_typedef decl typedef_name
 
-let declare_record_def_in_file
+let declare_record_def_in_file_DEPRECATED
     (ctx : Provider_context.t) (file : Relative_path.t) (name : type_key) :
     Typing_defs.record_def_type =
   match Ast_provider.find_record_def_in_file ctx file name with
   | Some rd ->
-    let (_name, decl) = Decl_nast.record_def_naming_and_decl ctx rd in
+    let (_name, decl) =
+      Decl_nast.record_def_naming_and_decl_DEPRECATED ctx rd
+    in
     decl
   | None -> err_not_found file name
 
@@ -329,7 +329,7 @@ let get_record_def
         else
           let record_decl =
             Errors.run_in_decl_mode filename (fun () ->
-                declare_record_def_in_file ctx filename record_name)
+                declare_record_def_in_file_DEPRECATED ctx filename record_name)
           in
           Decl_store.((get ()).add_recorddef record_name record_decl);
           Some record_decl
@@ -356,19 +356,19 @@ let get_record_def
           else
             let rdecl =
               Errors.run_in_decl_mode filename (fun () ->
-                  declare_record_def_in_file ctx filename record_name)
+                  declare_record_def_in_file_DEPRECATED ctx filename record_name)
             in
             Some rdecl
         | None -> None)
   | Provider_backend.Decl_service { decl; _ } ->
     Decl_service_client.rpc_get_record_def decl record_name
 
-let declare_const_in_file
+let declare_const_in_file_DEPRECATED
     (ctx : Provider_context.t) (file : Relative_path.t) (name : gconst_key) :
     gconst_decl =
   match Ast_provider.find_gconst_in_file ctx file name with
   | Some cst ->
-    let (_name, decl) = Decl_nast.const_naming_and_decl ctx cst in
+    let (_name, decl) = Decl_nast.const_naming_and_decl_DEPRECATED ctx cst in
     decl
   | None -> err_not_found file name
 
@@ -401,7 +401,7 @@ let get_gconst
         else
           let gconst =
             Errors.run_in_decl_mode filename (fun () ->
-                declare_const_in_file ctx filename gconst_name)
+                declare_const_in_file_DEPRECATED ctx filename gconst_name)
           in
           Decl_store.((get ()).add_gconst gconst_name gconst);
           Some gconst
@@ -428,7 +428,7 @@ let get_gconst
           else
             let gconst =
               Errors.run_in_decl_mode filename (fun () ->
-                  declare_const_in_file ctx filename gconst_name)
+                  declare_const_in_file_DEPRECATED ctx filename gconst_name)
             in
             Some gconst
         | None -> None)

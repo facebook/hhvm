@@ -127,7 +127,7 @@ module Dep = struct
 
   let extends_of_class x = x lxor 1
 
-  let compare = ( - )
+  let compare = Int.compare
 
   let extract_name : type a. a variant -> string = function
     | GConst s -> Utils.strip_ns s
@@ -253,6 +253,14 @@ module CustomDepSet = struct
         let str = Printf.sprintf "%x; " x in
         pp_print_string fmt str);
     pp_print_string fmt "}"
+end
+
+module DepHashKey = struct
+  type t = Dep.t
+
+  let compare = Int.compare
+
+  let to_string t = string_of_int t
 end
 
 (** Unified interface for `SQLiteDepSet` and `CustomDepSet`
@@ -515,9 +523,9 @@ module CustomGraph = struct
     type t = dep_edge
 
     let compare x y =
-      let d1 = x.idependent - y.idependent in
+      let d1 = Int.compare x.idependent y.idependent in
       if d1 = 0 then
-        x.idependency - y.idependency
+        Int.compare x.idependency y.idependency
       else
         d1
   end)
@@ -745,101 +753,71 @@ let () = CustomGraph.hh_custom_dep_graph_register_custom_types ()
 
 let hash_mode = Typing_deps_mode.hash_mode
 
-(*****************************************************************************)
-(* Module keeping track which files contain the toplevel definitions. *)
-(*****************************************************************************)
-
-module Files = struct
-  let ifiles : (Dep.t, Relative_path.Set.t) Hashtbl.t ref =
-    ref (Hashtbl.create 23)
-
-  let get_files deps =
-    DepSet.fold
+let deps_of_file_info (mode : Mode.t) (file_info : FileInfo.t) : Dep.t list =
+  let {
+    FileInfo.funs;
+    classes;
+    record_defs;
+    typedefs;
+    consts;
+    comments = _;
+    file_mode = _;
+    hash = _;
+  } =
+    file_info
+  in
+  let hash_mode = Mode.hash_mode mode in
+  let defs =
+    List.fold_left
+      consts
       ~f:
         begin
-          fun dep acc ->
-          match Hashtbl.find_opt !ifiles dep with
-          | Some files -> Relative_path.Set.union files acc
-          | None -> acc
+          fun acc (_, const_id, _) ->
+          Dep.make hash_mode (Dep.GConst const_id) :: acc
         end
-      deps
-      ~init:Relative_path.Set.empty
-
-  let deps_of_file_info (mode : Mode.t) (file_info : FileInfo.t) : Dep.t list =
-    let {
-      FileInfo.funs;
-      classes;
-      record_defs;
-      typedefs;
-      consts;
-      comments = _;
-      file_mode = _;
-      hash = _;
-    } =
-      file_info
-    in
-    let hash_mode = Mode.hash_mode mode in
-    let defs =
-      List.fold_left
-        consts
-        ~f:
-          begin
-            fun acc (_, const_id, _) ->
-            Dep.make hash_mode (Dep.GConst const_id) :: acc
-          end
-        ~init:[]
-    in
-    let defs =
-      List.fold_left
-        funs
-        ~f:
-          begin
-            fun acc (_, fun_id, _) ->
-            Dep.make hash_mode (Dep.Fun fun_id) :: acc
-          end
-        ~init:defs
-    in
-    let defs =
-      List.fold_left
-        classes
-        ~f:
-          begin
-            fun acc (_, class_id, _) ->
-            Dep.make hash_mode (Dep.Type class_id) :: acc
-          end
-        ~init:defs
-    in
-    let defs =
-      List.fold_left
-        record_defs
-        ~f:
-          begin
-            fun acc (_, type_id, _) ->
-            Dep.make hash_mode (Dep.Type type_id) :: acc
-          end
-        ~init:defs
-    in
-    let defs =
-      List.fold_left
-        typedefs
-        ~f:
-          begin
-            fun acc (_, type_id, _) ->
-            Dep.make hash_mode (Dep.Type type_id) :: acc
-          end
-        ~init:defs
-    in
-    defs
-
-  let update_file mode filename info =
-    List.iter (deps_of_file_info mode info) ~f:(fun def ->
-        let previous =
-          match Hashtbl.find_opt !ifiles def with
-          | Some files -> files
-          | None -> Relative_path.Set.empty
-        in
-        Hashtbl.replace !ifiles def (Relative_path.Set.add previous filename))
-end
+      ~init:[]
+  in
+  let defs =
+    List.fold_left
+      funs
+      ~f:
+        begin
+          fun acc (_, fun_id, _) ->
+          Dep.make hash_mode (Dep.Fun fun_id) :: acc
+        end
+      ~init:defs
+  in
+  let defs =
+    List.fold_left
+      classes
+      ~f:
+        begin
+          fun acc (_, class_id, _) ->
+          Dep.make hash_mode (Dep.Type class_id) :: acc
+        end
+      ~init:defs
+  in
+  let defs =
+    List.fold_left
+      record_defs
+      ~f:
+        begin
+          fun acc (_, type_id, _) ->
+          Dep.make hash_mode (Dep.Type type_id) :: acc
+        end
+      ~init:defs
+  in
+  let defs =
+    List.fold_left
+      typedefs
+      ~f:
+        begin
+          fun acc (_, type_id, _) ->
+          Dep.make hash_mode (Dep.Type type_id) :: acc
+        end
+      ~init:defs
+  in
+  defs
 
 module Telemetry = struct
   let depgraph_delta_num_edges mode =

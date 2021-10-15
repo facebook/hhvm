@@ -88,30 +88,31 @@ ArrayData* debug_backtrace_jit(int64_t options) {
 Array HHVM_FUNCTION(hphp_debug_caller_info) {
   Array ret = empty_dict_array();
   bool skipped = false;
-  walkStack([&] (const ActRec* fp, Offset pc) {
-    if (!skipped && fp->func()->isSkipFrame()) return false;
+  walkStack([&] (const BTFrame& frm) {
+    auto const func = frm.func();
+    if (!skipped && func->isSkipFrame()) return false;
     if (!skipped) {
       skipped = true;
       return false;
     }
-    if (fp->func()->name()->isame(s_call_user_func.get())) return false;
-    if (fp->func()->name()->isame(s_call_user_func_array.get())) return false;
-    auto const line = fp->func()->getLineNumber(pc);
+    if (func->name()->isame(s_call_user_func.get())) return false;
+    if (func->name()->isame(s_call_user_func_array.get())) return false;
+    auto const line = func->getLineNumber(frm.bcOff());
     if (line == -1) return false;
-    auto const cls = fp->func()->cls();
-    auto const path = fp->func()->originalFilename() ?
-      fp->func()->originalFilename() : fp->func()->unit()->filepath();
-    if (cls && !fp->func()->isClosureBody()) {
+    auto const cls = func->cls();
+    auto const path = func->originalFilename() ?
+      func->originalFilename() : func->unit()->filepath();
+    if (cls && !func->isClosureBody()) {
       ret = make_dict_array(
         s_class, const_cast<StringData*>(cls->name()),
         s_file, const_cast<StringData*>(path),
-        s_function, const_cast<StringData*>(fp->func()->name()),
+        s_function, const_cast<StringData*>(func->name()),
         s_line, line
       );
     } else {
       ret = make_dict_array(
         s_file, const_cast<StringData*>(path),
-        s_function, const_cast<StringData*>(fp->func()->name()),
+        s_function, const_cast<StringData*>(func->name()),
         s_line, line
       );
     }
@@ -320,7 +321,7 @@ bool HHVM_FUNCTION(trigger_error, const String& error_msg,
   }
 
   auto const f = fromCaller(
-    [] (const ActRec* fp, Offset) { return fp->func(); }
+    [] (const BTFrame& frm) { return frm.func(); }
   );
 
   if (f && f->isBuiltin()) {

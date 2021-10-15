@@ -751,7 +751,11 @@ TypedValue* Stack::resumableStackBase(const ActRec* fp) {
     // frame (since the ActRec, locals, and iters for this frame do not reside
     // on the VM stack).
     assertx(fp->func()->isAsync());
-    return g_context.getNoCheck()->m_nestedVMs.back().sp;
+    TypedValue* prevSp;
+    DEBUG_ONLY auto const prevFp =
+      g_context.getNoCheck()->getPrevVMState(fp, nullptr, &prevSp);
+    assertx(prevFp != nullptr);
+    return prevSp;
   }
 }
 
@@ -1012,7 +1016,8 @@ static inline Class* lookupClsRef(TypedValue* input) {
   } else if (isClassType(input->m_type)) {
     class_ = input->m_data.pclass;
   } else {
-    raise_error("Cls: Expected string or object");
+    raise_error("Cls: Expected string or object, got %s",
+                describe_actual_type(input).c_str());
   }
   return class_;
 }
@@ -2155,7 +2160,7 @@ OPTBLD_INLINE void iopThrowNonExhaustiveSwitch() {
 
 OPTBLD_INLINE void iopRaiseClassStringConversionWarning() {
   if (RuntimeOption::EvalRaiseClassConversionWarning) {
-    raise_warning(Strings::CLASS_TO_STRING);
+    raise_class_to_string_conversion_warning();
   }
 }
 
@@ -2165,7 +2170,7 @@ OPTBLD_INLINE void iopResolveClass(Id id) {
   // TODO (T61651936): Disallow implicit conversion to string
   if (class_ == nullptr) {
     if (RuntimeOption::EvalRaiseClassConversionWarning) {
-      raise_warning(Strings::CLASS_TO_STRING);
+      raise_class_to_string_conversion_warning();
     }
     vmStack().pushStaticString(cname);
   }
@@ -2349,7 +2354,7 @@ OPTBLD_INLINE void iopCGetS(ReadonlyOp op) {
   }
   if (RO::EvalEnableReadonlyPropertyEnforcement &&
     ss.readonly && op == ReadonlyOp::Mutable) {
-    throw_must_be_enclosed_in_readonly(
+    throw_or_warn_must_be_enclosed_in_readonly(
       ss.cls->name()->data(), ss.name->data()
     );
   }
@@ -2359,6 +2364,7 @@ OPTBLD_INLINE void iopCGetS(ReadonlyOp op) {
 static inline void baseGImpl(tv_rval key, MOpMode mode) {
   auto& mstate = vmMInstrState();
   StringData* name;
+  mstate.roProp = false;
 
   auto const baseVal = (mode == MOpMode::Define)
     ? lookupd_gbl(vmfp(), name, key)
@@ -2417,8 +2423,8 @@ OPTBLD_INLINE void iopBaseSC(uint32_t keyIdx,
       name->data());
   }
 
-  checkReadonly(lookup.val, class_, name, lookup.readonly, op,
-                &mstate.roProp, writeMode);
+  mstate.roProp = false;
+  checkReadonly(lookup.val, class_, name, lookup.readonly, op, writeMode);
   mstate.base = tv_lval(lookup.val);
 }
 
@@ -2429,11 +2435,12 @@ OPTBLD_INLINE void baseLImpl(named_local_var loc, MOpMode mode, ReadonlyOp op) {
     raise_undefined_local(vmfp(), loc.name);
   }
 
-  if (readonlyLocalShouldThrow(*local, op, mstate.roProp)) {
+  mstate.roProp = false;
+  if (readonlyLocalShouldThrow(*local, op)) {
     assertx(loc.name < vmfp()->func()->numNamedLocals());
     assertx(vmfp()->func()->localVarName(loc.name));
     auto const name = vmfp()->func()->localVarName(loc.name);
-    throw_local_must_be_value_type(name->data());
+    throw_or_warn_local_must_be_value_type(name->data());
   }
   mstate.base = local;
 }
@@ -2445,12 +2452,14 @@ OPTBLD_INLINE void iopBaseL(named_local_var loc, MOpMode mode, ReadonlyOp op) {
 OPTBLD_INLINE void iopBaseC(uint32_t idx, MOpMode) {
   auto& mstate = vmMInstrState();
   mstate.base = vmStack().indC(idx);
+  mstate.roProp = false;
 }
 
 OPTBLD_INLINE void iopBaseH() {
   auto& mstate = vmMInstrState();
   mstate.tvTempBase = make_tv<KindOfObject>(vmfp()->getThis());
   mstate.base = &mstate.tvTempBase;
+  mstate.roProp = false;
 }
 
 static OPTBLD_INLINE void propDispatch(MOpMode mode, TypedValue key, ReadonlyOp op) {
@@ -2465,12 +2474,10 @@ static OPTBLD_INLINE void propDispatch(MOpMode mode, TypedValue key, ReadonlyOp 
         return Prop<MOpMode::Warn>(mstate.tvTempBase, ctx, mstate.base, key, op);
       case MOpMode::Define:
         return Prop<MOpMode::Define,KeyType::Any>(
-          mstate.tvTempBase, ctx, mstate.base, key, op, &mstate.roProp
+          mstate.tvTempBase, ctx, mstate.base, key, op
         );
       case MOpMode::Unset:
-        return Prop<MOpMode::Unset>(
-          mstate.tvTempBase, ctx, mstate.base, key, op, &mstate.roProp
-        );
+        return Prop<MOpMode::Unset>(mstate.tvTempBase, ctx, mstate.base, key, op);
       case MOpMode::InOut:
         always_assert_flog(false, "MOpMode::InOut can only occur on Elem");
     }
@@ -2484,8 +2491,13 @@ static OPTBLD_INLINE void propQDispatch(MOpMode mode, TypedValue key, ReadonlyOp
 
   assertx(mode == MOpMode::None || mode == MOpMode::Warn);
   assertx(key.m_type == KindOfPersistentString);
-  mstate.base = nullSafeProp(mstate.tvTempBase, ctx, mstate.base,
-                             key.m_data.pstr, op, &mstate.roProp);
+  if (mode == MOpMode::None) {
+    mstate.base = nullSafeProp<MOpMode::None>(mstate.tvTempBase, ctx,
+                                              mstate.base, key.m_data.pstr, op);
+  } else {
+    mstate.base = nullSafeProp<MOpMode::Warn>(mstate.tvTempBase, ctx,
+                                              mstate.base, key.m_data.pstr, op);
+  }
 }
 
 static OPTBLD_INLINE
@@ -2498,6 +2510,13 @@ void elemDispatch(MOpMode mode, TypedValue key) {
     return tv_lval { &mstate.tvTempBase };
   };
 
+  auto const checkDimForReadonly = [&](DataType dt) {
+    if (!RO::EvalEnableReadonlyPropertyEnforcement) return;
+    if (mstate.roProp && dt == KindOfObject) {
+      throw_or_warn_cannot_modify_readonly_collection();
+    }
+  };
+
   mstate.base = [&]{
     switch (mode) {
       case MOpMode::None:
@@ -2506,10 +2525,16 @@ void elemDispatch(MOpMode mode, TypedValue key) {
         return baseValueToLval(Elem<MOpMode::Warn>(b, key));
       case MOpMode::InOut:
         return baseValueToLval(Elem<MOpMode::InOut>(b, key));
-      case MOpMode::Define:
-        return ElemD(b, key, mstate.roProp);
-      case MOpMode::Unset:
-        return ElemU(b, key, mstate.roProp);
+      case MOpMode::Define: {
+        auto const result = ElemD(b, key);
+        checkDimForReadonly(result.type());
+        return result;
+      }
+      case MOpMode::Unset: {
+        auto const result = ElemU(b, key);
+        checkDimForReadonly(result.type());
+        return result;
+      }
     }
     always_assert(false);
   }();
@@ -3213,7 +3238,7 @@ OPTBLD_INLINE void iopSetS(ReadonlyOp op) {
 
   if (RO::EvalEnableReadonlyPropertyEnforcement && !readonly &&
     op == ReadonlyOp::Readonly) {
-    throw_must_be_readonly(cls->name()->data(), name->data());
+    throw_or_warn_must_be_readonly(cls->name()->data(), name->data());
   }
 
   if (!(visible && accessible)) {
@@ -4516,14 +4541,20 @@ OPTBLD_INLINE void iopVerifyParamType(local_var param) {
   assertx(param.index < func->numParams());
   assertx(func->numParams() == int(func->params().size()));
   const TypeConstraint& tc = func->params()[param.index].typeConstraint;
-  if (tc.isCheckable()) tc.verifyParam(param.lval, func, param.index);
+  if (tc.isCheckable()) {
+    auto const ctx = tc.isThis() ? frameStaticClass(vmfp()) : nullptr;
+    tc.verifyParam(param.lval, ctx, func, param.index);
+  }
   if (func->hasParamsWithMultiUBs()) {
     auto& ubs = const_cast<Func::ParamUBMap&>(func->paramUBs());
     auto it = ubs.find(param.index);
     if (it != ubs.end()) {
       for (auto& ub : it->second) {
         applyFlagsToUB(ub, tc);
-        if (ub.isCheckable()) ub.verifyParam(param.lval, func, param.index);
+        if (ub.isCheckable()) {
+          auto const ctx = ub.isThis() ? frameStaticClass(vmfp()) : nullptr;
+          ub.verifyParam(param.lval, ctx, func, param.index);
+        }
       }
     }
   }
@@ -4536,7 +4567,9 @@ OPTBLD_INLINE void iopVerifyParamTypeTS(local_var param) {
   auto isTypeVar = tcCouldBeReified(vmfp()->func(), param.index);
   bool warn = false;
   if ((isTypeVar || tvIsObject(param.lval)) &&
-      !verifyReifiedLocalType(cell->m_data.parr, param.lval, isTypeVar, warn)) {
+      !verifyReifiedLocalType(
+        param.lval, cell->m_data.parr, frameStaticClass(vmfp()), vmfp()->func(),
+        isTypeVar, warn)) {
     raise_reified_typehint_error(
       folly::sformat(
         "Argument {} passed to {}() must be an instance of {}, {} given",
@@ -4556,7 +4589,10 @@ OPTBLD_INLINE void iopVerifyOutType(uint32_t paramId) {
   assertx(paramId < func->numParams());
   assertx(func->numParams() == int(func->params().size()));
   auto const& tc = func->params()[paramId].typeConstraint;
-  if (tc.isCheckable()) tc.verifyOutParam(vmStack().topTV(), func, paramId);
+  if (tc.isCheckable()) {
+    auto const ctx = tc.isThis() ? frameStaticClass(vmfp()) : nullptr;
+    tc.verifyOutParam(vmStack().topTV(), ctx, func, paramId);
+  }
   if (func->hasParamsWithMultiUBs()) {
     auto& ubs = const_cast<Func::ParamUBMap&>(func->paramUBs());
     auto it = ubs.find(paramId);
@@ -4564,7 +4600,8 @@ OPTBLD_INLINE void iopVerifyOutType(uint32_t paramId) {
       for (auto& ub : it->second) {
         applyFlagsToUB(ub, tc);
         if (ub.isCheckable()) {
-          ub.verifyOutParam(vmStack().topTV(), func, paramId);
+          auto const ctx = ub.isThis() ? frameStaticClass(vmfp()) : nullptr;
+          ub.verifyOutParam(vmStack().topTV(), ctx, func, paramId);
         }
       }
     }
@@ -4576,12 +4613,18 @@ namespace {
 OPTBLD_INLINE void verifyRetTypeImpl(size_t ind) {
   const auto func = vmfp()->func();
   const auto tc = func->returnTypeConstraint();
-  if (tc.isCheckable()) tc.verifyReturn(vmStack().indC(ind), func);
+  if (tc.isCheckable()) {
+    auto const ctx = tc.isThis() ? frameStaticClass(vmfp()) : nullptr;
+    tc.verifyReturn(vmStack().indC(ind), ctx, func);
+  }
   if (func->hasReturnWithMultiUBs()) {
     auto& ubs = const_cast<Func::UpperBoundVec&>(func->returnUBs());
     for (auto& ub : ubs) {
       applyFlagsToUB(ub, tc);
-      if (ub.isCheckable()) ub.verifyReturn(vmStack().indC(ind), func);
+      if (ub.isCheckable()) {
+        auto const ctx = ub.isThis() ? frameStaticClass(vmfp()) : nullptr;
+        ub.verifyReturn(vmStack().indC(ind), ctx, func);
+      }
     }
   }
 }
@@ -4600,7 +4643,9 @@ OPTBLD_INLINE void iopVerifyRetTypeTS() {
   bool isTypeVar = tcCouldBeReified(vmfp()->func(), TypeConstraint::ReturnId);
   bool warn = false;
   if ((isTypeVar || tvIsObject(cell)) &&
-      !verifyReifiedLocalType(ts->m_data.parr, cell, isTypeVar, warn)) {
+      !verifyReifiedLocalType(
+        cell, ts->m_data.parr, frameStaticClass(vmfp()), vmfp()->func(),
+        isTypeVar, warn)) {
     raise_reified_typehint_error(
       folly::sformat(
         "Value returned from function {}() must be of type {}, {} given",
@@ -4617,7 +4662,8 @@ OPTBLD_INLINE void iopVerifyRetTypeTS() {
 OPTBLD_INLINE void iopVerifyRetNonNullC() {
   const auto func = vmfp()->func();
   const auto tc = func->returnTypeConstraint();
-  tc.verifyReturnNonNull(vmStack().topC(), func);
+  auto const ctx = tc.isThis() ? frameStaticClass(vmfp()) : nullptr;
+  tc.verifyReturnNonNull(vmStack().topC(), ctx, func);
 }
 
 OPTBLD_INLINE TCA iopNativeImpl(PC& pc) {

@@ -8,4 +8,6 @@ function foo(): void {
   bar4<int>#A(arg1, arg2);
 
   if (E#A == $x) { echo "42\n"; }
+
+  $c->get(#list);
 }

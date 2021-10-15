@@ -79,45 +79,6 @@ static char** build_envp(const Array& envs, req::vector<String> &senvs) {
   return envp;
 }
 
-// check whitelist
-static bool check_cmd(const char *cmd) {
-  const char *cmd_tmp = cmd;
-  while (true) {
-    bool allow = false;
-    while (isblank(*cmd_tmp)) cmd_tmp++;
-    const char *space = strchr(cmd_tmp, ' ');
-    auto cmd_len = strlen(cmd_tmp);
-    if (space) {
-      cmd_len = space - cmd_tmp;
-    }
-    for (unsigned int i = 0; i < RuntimeOption::AllowedExecCmds.size(); i++) {
-      std::string &allowedCmd = RuntimeOption::AllowedExecCmds[i];
-      if (allowedCmd.size() != cmd_len) {
-        continue;
-      }
-      if (strncmp(allowedCmd.c_str(), cmd_tmp, allowedCmd.size()) == 0) {
-        allow = true;
-        break;
-      }
-    }
-    if (!allow) {
-      auto const file = g_context->getContainingFileName();
-      int line = g_context->getLine();
-      Logger::Warning("Command %s is not in the whitelist, called at %s:%d",
-                      cmd_tmp, file->data(), line);
-      if (!RuntimeOption::WhitelistExecWarningOnly) {
-        return false;
-      }
-    }
-    const char *bar = strchr(cmd_tmp, '|');
-    if (!bar) { // no pipe, we are done
-      return true;
-    }
-    cmd_tmp = bar + 1;
-  }
-  return false;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // pcntl
 
@@ -236,9 +197,6 @@ void HHVM_FUNCTION(pcntl_exec,
                    const String& path,
                    const Array& args /* = null_array */,
                    const Array& envs /* = null_array */) {
-  if (RuntimeOption::WhitelistExec && !check_cmd(path.data())) {
-    return;
-  }
   if (cantPrefork()) {
     raise_error("execing is disallowed in multi-threaded mode");
     return;

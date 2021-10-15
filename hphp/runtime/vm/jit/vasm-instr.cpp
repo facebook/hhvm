@@ -120,7 +120,6 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::inlinestart:
     case Vinstr::inlineend:
     case Vinstr::pushframe:
-    case Vinstr::popframe:
     case Vinstr::recordstack:
     case Vinstr::recordbasenativesp:
     case Vinstr::unrecordbasenativesp:
@@ -152,7 +151,6 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::defvmsp:
     case Vinstr::defvmfp:
     case Vinstr::pushvmfp:
-    case Vinstr::popvmfp:
     case Vinstr::syncvmsp:
     case Vinstr::defvmretdata:
     case Vinstr::defvmrettype:
@@ -408,8 +406,6 @@ bool instrHasIndirectFixup(const Vinstr& inst) {
       return inst.vinvoke_.fixup.isIndirect();
     case Vinstr::syncpoint:
       return inst.syncpoint_.fix.isIndirect();
-    case Vinstr::callfaststub:
-      return inst.callfaststub_.fix.isIndirect();
     default:
       return false;
   }
@@ -431,9 +427,6 @@ void updateIndirectFixupBySpill(Vinstr& inst, size_t spillSize) {
       return;
     case Vinstr::syncpoint:
       update(inst.syncpoint_.fix);
-      return;
-    case Vinstr::callfaststub:
-      update(inst.callfaststub_.fix);
       return;
     default:
       always_assert(false);

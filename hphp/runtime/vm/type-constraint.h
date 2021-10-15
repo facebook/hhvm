@@ -244,9 +244,7 @@ struct TypeConstraint {
 
   bool isPrecise()  const { return metaType() == MetaType::Precise; }
   bool isMixed()    const { return m_type == Type::Mixed; }
-  bool isSelf()     const { return m_type == Type::Self; }
   bool isThis()     const { return m_type == Type::This; }
-  bool isParent()   const { return m_type == Type::Parent; }
   bool isCallable() const { return m_type == Type::Callable; }
   bool isNumber()   const { return m_type == Type::Number; }
   bool isNothing()  const { return m_type == Type::Nothing; }
@@ -268,7 +266,7 @@ struct TypeConstraint {
   AnnotType type()  const { return m_type; }
 
   bool validForProp() const {
-    return !isSelf() && !isParent() && !isCallable() && !isNothing() && !isNoReturn();
+    return !isCallable() && !isNothing() && !isNoReturn();
   }
 
   /*
@@ -291,8 +289,8 @@ struct TypeConstraint {
 
   /*
    * Format this TypeConstraint for display to the user. Context is used to
-   * optionally resolve Self, Parent, and This to their class names. Extra will
-   * cause the resolved type (if any) to be appended to the name.
+   * optionally resolve This to its class name. Extra will cause the resolved
+   * type (if any) to be appended to the name.
    */
   std::string displayName(const Class* context = nullptr,
                           bool extra = false) const;
@@ -330,7 +328,7 @@ struct TypeConstraint {
    * (using the given context). This can invoke the autoloader and is always
    * exact. This should not be used for property type-hints (which behave
    * slightly differently) and the context is required. The context determines
-   * the meaning of Self, Parent, and This type-constraints.
+   * the meaning of This type-constraint.
    */
   bool check(tv_rval val, const Class* context) const {
     return checkImpl<CheckMode::Exact>(val, context);
@@ -367,10 +365,17 @@ struct TypeConstraint {
   }
 
   // NB: Can throw if the check fails.
-  void verifyParam(tv_lval val, const Func* func, int paramNum) const;
-  void verifyReturn(TypedValue* tv, const Func* func) const;
-  void verifyReturnNonNull(TypedValue* tv, const Func* func) const;
-  void verifyOutParam(TypedValue* tv, const Func* func,
+  void verifyParam(tv_lval val,
+                   const Class* ctx,
+                   const Func* func,
+                   int paramNum) const;
+  void verifyReturn(TypedValue* tv, const Class* ctx, const Func* func) const;
+  void verifyReturnNonNull(TypedValue* tv,
+                           const Class* ctx,
+                           const Func* func) const;
+  void verifyOutParam(TypedValue* tv,
+                      const Class* ctx,
+                      const Func* func,
                       int paramNum) const;
   // TODO(T61738946): We can take a tv_rval here once we remove support for
   // coercing class_meth types.
@@ -383,12 +388,18 @@ struct TypeConstraint {
                             const Class* declCls,
                             const StringData* propName) const;
 
-  void verifyFail(const Func* func, tv_lval val, int id) const;
-  void verifyParamFail(const Func* func, tv_lval val, int paramNum) const;
-  void verifyOutParamFail(const Func* func, TypedValue* tv,
+  void verifyParamFail(tv_lval val,
+                       const Class* ctx,
+                       const Func* func,
+                       int paramNum) const;
+  void verifyOutParamFail(TypedValue* tv,
+                          const Class* ctx,
+                          const Func* func,
                           int paramNum) const;
-  void verifyReturnFail(const Func* func, TypedValue* tv) const {
-    verifyFail(func, tv, ReturnId);
+  void verifyReturnFail(TypedValue* tv,
+                        const Class* ctx,
+                        const Func* func) const {
+    verifyFail(tv, ctx, func, ReturnId);
   }
   // TODO(T61738946): We can take a tv_rval here once we remove support for
   // coercing class_meth types.
@@ -396,8 +407,16 @@ struct TypeConstraint {
                       tv_lval val, const StringData* propName,
                       bool isStatic) const;
 
+  bool maybeStringCompatible() const;
+
 private:
   void init();
+
+  // There are a few cases where a type constraint does not pass, but we don't
+  // raise an error. Some of these cases are resolved by mutating val instead.
+  //
+  // If this method returns true, we don't need to raise the type error.
+  bool tryCommonCoercions(tv_lval val, const Class* ctx) const;
 
   enum class CheckMode {
     Exact, // Do an exact check with autoloading
@@ -415,8 +434,10 @@ private:
 
   template <bool> bool checkTypeAliasImpl(const Class* type) const;
 
-  void verifyFail(const Func* func, TypedValue* tv, int id,
-                  bool useStrictTypes) const;
+  void verifyFail(tv_lval val,
+                  const Class* ctx,
+                  const Func* func,
+                  int id) const;
 
   bool checkStringCompatible() const;
 

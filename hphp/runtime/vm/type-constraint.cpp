@@ -90,53 +90,43 @@ std::string TypeConstraint::displayName(const Class* context /*= nullptr*/,
   if ((m_flags & Flags::DisplayNullable) && isExtended()) {
     name += '?';
   }
-  if (isSelf()) {
-    if (context) tn = context->name();
-    name += tn->data();
-  } else if (isParent()) {
-    if (context) {
-      if (auto const parent = context->parent()) {
-        tn = parent->name();
-      }
+
+  const char* str = tn->data();
+  auto len = tn->size();
+  if (len > 3 && tolower(str[0]) == 'h' && tolower(str[1]) == 'h' &&
+      str[2] == '\\') {
+    bool strip = false;
+    const char* stripped = str + 3;
+    switch (len - 3) {
+      case 3:
+        strip = (!strcasecmp(stripped, "int") ||
+                 !strcasecmp(stripped, "num"));
+        break;
+      case 4:
+        strip = (!strcasecmp(stripped, "bool") ||
+                 !strcasecmp(stripped, "this") ||
+                 !strcasecmp(stripped, "null"));
+        break;
+      case 5: strip = !strcasecmp(stripped, "float"); break;
+      case 6: strip = !strcasecmp(stripped, "string"); break;
+      case 7:
+        strip = (!strcasecmp(stripped, "nonnull") ||
+                 !strcasecmp(stripped, "nothing"));
+        break;
+      case 8:
+        strip = (!strcasecmp(stripped, "resource") ||
+                 !strcasecmp(stripped, "noreturn") ||
+                 !strcasecmp(stripped, "arraykey"));
+        break;
+      default:
+        break;
     }
-    name += tn->data();
-  } else {
-    const char* str = tn->data();
-    auto len = tn->size();
-    if (len > 3 && tolower(str[0]) == 'h' && tolower(str[1]) == 'h' &&
-        str[2] == '\\') {
-      bool strip = false;
-      const char* stripped = str + 3;
-      switch (len - 3) {
-        case 3:
-          strip = (!strcasecmp(stripped, "int") ||
-                   !strcasecmp(stripped, "num"));
-          break;
-        case 4:
-          strip = (!strcasecmp(stripped, "bool") ||
-                   !strcasecmp(stripped, "this") ||
-                   !strcasecmp(stripped, "null"));
-          break;
-        case 5: strip = !strcasecmp(stripped, "float"); break;
-        case 6: strip = !strcasecmp(stripped, "string"); break;
-        case 7:
-          strip = (!strcasecmp(stripped, "nonnull") ||
-                   !strcasecmp(stripped, "nothing"));
-          break;
-        case 8:
-          strip = (!strcasecmp(stripped, "resource") ||
-                   !strcasecmp(stripped, "noreturn") ||
-                   !strcasecmp(stripped, "arraykey"));
-          break;
-        default:
-          break;
-      }
-      if (strip) {
-        str = stripped;
-      }
+    if (strip) {
+      str = stripped;
     }
-    name += str;
   }
+  name += str;
+
   if (extra && m_flags & Flags::Resolved && m_type != AnnotType::Object) {
     const char* str = nullptr;
     switch (m_type) {
@@ -157,9 +147,7 @@ std::string TypeConstraint::displayName(const Class* context /*= nullptr*/,
       case AnnotType::ArrayLike: str = "AnyArray"; break;
       case AnnotType::Nonnull:  str = "nonnull"; break;
       case AnnotType::Classname: str = "classname"; break;
-      case AnnotType::Self:
       case AnnotType::This:
-      case AnnotType::Parent:
       case AnnotType::Object:
       case AnnotType::Mixed:
       case AnnotType::Callable:
@@ -171,19 +159,6 @@ std::string TypeConstraint::displayName(const Class* context /*= nullptr*/,
 }
 
 namespace {
-
-const Class* getThis() {
-  auto const ar = vmfp();
-  if (ar->func()->cls()) {
-    if (ar->hasThis()) {
-      return ar->getThis()->getVMClass();
-    } else {
-      assertx(ar->hasClass());
-      return ar->getClass();
-    }
-  }
-  return nullptr;
-}
 
 /*
  * Look up a TypeAlias for the supplied NamedEntity (which must be the
@@ -243,7 +218,7 @@ getNamedTypeWithAutoload(const NamedEntity* ne,
 }
 
 MaybeDataType TypeConstraint::underlyingDataTypeResolved() const {
-  assertx(!isSelf() && !isParent() && !isCallable());
+  assertx(!isCallable());
   assertx(IMPLIES(
     !hasConstraint() || isTypeVar() || isTypeConstant(),
     isMixed()));
@@ -362,8 +337,6 @@ bool TypeConstraint::equivalentForProp(const TypeConstraint& other) const {
         break;
       case MetaType::Nothing:
       case MetaType::NoReturn:
-      case MetaType::Self:
-      case MetaType::Parent:
       case MetaType::Callable:
       case MetaType::Mixed:
         always_assert(false);
@@ -436,7 +409,6 @@ bool TypeConstraint::checkNamedTypeNonObj(tv_rval val) const {
 
   // Common case is that we actually find the alias:
   if (td) {
-    assertx(td->type != AnnotType::Self && td->type != AnnotType::Parent);
     if (td->nullable && val.type() == KindOfNull) return true;
     auto result = annotCompat(val.type(), td->type,
                               td->klass ? td->klass->name() : nullptr);
@@ -519,11 +491,6 @@ bool TypeConstraint::checkTypeAliasImpl(const Class* type) const {
     case AnnotMetaType::ArrayLike:
     case AnnotMetaType::Classname:  // TODO: T83332251
       return false;
-    case AnnotMetaType::Self:
-    case AnnotMetaType::Parent:
-      // These should never happen, because type aliases are not allowed to use
-      // those MetaTypes
-      always_assert(false);
   }
   not_reached();
 }
@@ -562,26 +529,10 @@ bool TypeConstraint::checkImpl(tv_rval val,
       if (isPasses && c && !classHasPersistentRDS(c)) c = nullptr;
     } else {
       switch (metaType()) {
-        case MetaType::Self:
-          assertx(!isProp);
-          if (isAssert) return true;
-          if (isPasses) return false;
-          c = context;
-          break;
         case MetaType::This:
           if (isAssert) return true;
           if (isPasses) return false;
-          if (isProp) return val.val().pobj->getVMClass() == context;
-          if (auto const cls = getThis()) {
-            return val.val().pobj->getVMClass() == cls;
-          }
-          return false;
-        case MetaType::Parent:
-          assertx(!isProp);
-          if (isAssert) return true;
-          if (isPasses) return false;
-          if (context) c = context->parent();
-          break;
+          return val.val().pobj->getVMClass() == context;
         case MetaType::Callable:
           assertx(!isProp);
           if (isAssert) return true;
@@ -695,9 +646,7 @@ bool TypeConstraint::alwaysPasses(const StringData* clsName) const {
   }
 
   switch (metaType()) {
-    case MetaType::Self:
     case MetaType::This:
-    case MetaType::Parent:
     case MetaType::Callable:
     case MetaType::Precise:
     case MetaType::Nothing:
@@ -743,24 +692,28 @@ bool TypeConstraint::alwaysPasses(DataType dt) const {
 }
 
 void TypeConstraint::verifyParam(tv_lval val,
+                                 const Class* ctx,
                                  const Func* func,
                                  int paramNum) const {
-  if (UNLIKELY(!check(val, func->cls()))) {
-    verifyParamFail(func, val, paramNum);
+  if (UNLIKELY(!check(val, ctx))) {
+    verifyParamFail(val, ctx, func, paramNum);
   }
 }
 
-void TypeConstraint::verifyReturn(TypedValue* tv, const Func* func) const {
-  if (UNLIKELY(!check(tv, func->cls()))) {
-    verifyReturnFail(func, tv);
+void TypeConstraint::verifyReturn(TypedValue* tv,
+                                  const Class* ctx,
+                                  const Func* func) const {
+  if (UNLIKELY(!check(tv, ctx))) {
+    verifyReturnFail(tv, ctx, func);
   }
 }
 
 void TypeConstraint::verifyOutParam(TypedValue* tv,
+                                    const Class* ctx,
                                     const Func* func,
                                     int paramNum) const {
-  if (UNLIKELY(!check(tv, func->cls()))) {
-    verifyOutParamFail(func, tv, paramNum);
+  if (UNLIKELY(!check(tv, ctx))) {
+    verifyOutParamFail(tv, ctx, func, paramNum);
   }
 }
 
@@ -787,15 +740,16 @@ void TypeConstraint::verifyStaticProperty(tv_lval val,
 }
 
 void TypeConstraint::verifyReturnNonNull(TypedValue* tv,
+                                         const Class* ctx,
                                          const Func* func) const {
   const auto DEBUG_ONLY tc = func->returnTypeConstraint();
   assertx(!tc.isNullable());
   if (UNLIKELY(tvIsNull(tv))) {
-    verifyReturnFail(func, tv);
+    verifyReturnFail(tv, ctx, func);
   } else if (debug) {
     auto vm = &*g_context;
     always_assert_flog(
-      check(tv, func->cls()),
+      check(tv, ctx),
       "HHBBC incorrectly converted VerifyRetTypeC to VerifyRetNonNull in {}:{}",
       vm->getContainingFileName()->data(),
       vm->getLine()
@@ -871,46 +825,52 @@ bool TypeConstraint::checkStringCompatible() const {
   return false;
 }
 
-void TypeConstraint::verifyParamFail(const Func* func, tv_lval val,
-                                     int paramNums) const {
-  verifyFail(func, val, paramNums);
-  assertx(
-    isSoft() ||
-    (isThis() && couldSeeMockObject()) ||
-    (RO::EvalEnforceGenericsUB < 2 && isUpperBound()) ||
-    check(val, func->cls())
-  );
-}
+bool TypeConstraint::tryCommonCoercions(tv_lval val, const Class* ctx) const {
+  if (ctx && isThis() && val.type() == KindOfObject) {
+    auto const cls = val.val().pobj->getVMClass();
+    if (cls->preClass()->userAttributes().count(s___MockClass.get()) &&
+        cls->parent() == ctx) {
+      return true;
+    }
+  }
 
-namespace {
-
-template <typename F>
-void castClsMeth(tv_lval c, F make) {
-  assertx(type(c) == KindOfClsMeth);
-  auto const a = make(
-    val(c).pclsmeth->getClsStr(),
-    val(c).pclsmeth->getFuncStr()
-  ).detach();
-  val(c).parr = a;
-  type(c) = a->toDataType();
-}
-
-}
-
-void TypeConstraint::verifyOutParamFail(const Func* func,
-                                        TypedValue* c,
-                                        int paramNum) const {
-  if ((isClassType(c->m_type) || isLazyClassType(c->m_type)) &&
+  if ((isClassType(val.type()) || isLazyClassType(val.type())) &&
       checkStringCompatible()) {
     if (RuntimeOption::EvalClassStringHintNotices) {
       raise_notice(Strings::CLASS_TO_STRING_IMPLICIT);
     }
-    c->m_data.pstr = isClassType(c->m_type) ?
-      const_cast<StringData*>(c->m_data.pclass->name()) :
-      const_cast<StringData*>(c->m_data.plazyclass.name());
-    c->m_type = KindOfPersistentString;
-    return;
+    val.val().pstr = isClassType(val.type()) ?
+      const_cast<StringData*>(val.val().pclass->name()) :
+      const_cast<StringData*>(val.val().plazyclass.name());
+    val.type() = KindOfPersistentString;
+    return true;
   }
+
+  return false;
+}
+
+bool TypeConstraint::maybeStringCompatible() const {
+  return isString() || isArrayKey() || isObject();
+}
+
+void TypeConstraint::verifyParamFail(tv_lval val,
+                                     const Class* ctx,
+                                     const Func* func,
+                                     int paramNums) const {
+  verifyFail(val, ctx, func, paramNums);
+  assertx(
+    isSoft() ||
+    (isThis() && couldSeeMockObject()) ||
+    (RO::EvalEnforceGenericsUB < 2 && isUpperBound()) ||
+    check(val, ctx)
+  );
+}
+
+void TypeConstraint::verifyOutParamFail(TypedValue* c,
+                                        const Class* ctx,
+                                        const Func* func,
+                                        int paramNum) const {
+  if (tryCommonCoercions(c, ctx)) return;
 
   std::string msg = folly::sformat(
       "Argument {} returned from {}() as an inout parameter must be {} "
@@ -937,25 +897,7 @@ void TypeConstraint::verifyPropFail(const Class* thisCls,
   assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
   assertx(validForProp());
 
-  if (UNLIKELY(isThis() && val.type() == KindOfObject)) {
-    auto const valCls = val.val().pobj->getVMClass();
-    if (valCls->preClass()->userAttributes().count(s___MockClass.get()) &&
-        valCls->parent() == thisCls) {
-      return;
-    }
-  }
-
-  if ((isClassType(val.type()) || isLazyClassType(val.type())) &&
-      checkStringCompatible()) {
-    if (RuntimeOption::EvalClassStringHintNotices) {
-      raise_notice(Strings::CLASS_TO_STRING_IMPLICIT);
-    }
-    val.val().pstr = isClassType(val.type()) ?
-      const_cast<StringData*>(val.val().pclass->name()) :
-      const_cast<StringData*>(val.val().plazyclass.name());
-    val.type() = KindOfPersistentString;
-    return;
-  }
+  if (tryCommonCoercions(val, thisCls)) return;
 
   raise_property_typehint_error(
     folly::sformat(
@@ -972,32 +914,12 @@ void TypeConstraint::verifyPropFail(const Class* thisCls,
   );
 }
 
-void TypeConstraint::verifyFail(const Func* func, tv_lval c,
+void TypeConstraint::verifyFail(tv_lval c, const Class* ctx, const Func* func,
                                 int id) const {
-  VMRegAnchor _;
+  if (tryCommonCoercions(c, ctx)) return;
+
   std::string name = displayName(func->cls());
   auto const givenType = describe_actual_type(c);
-
-  if (UNLIKELY(isThis() && c.type() == KindOfObject)) {
-    Class* cls = val(c).pobj->getVMClass();
-    auto const thisClass = getThis();
-    if (cls->preClass()->userAttributes().count(s___MockClass.get()) &&
-        cls->parent() == thisClass) {
-      return;
-    }
-  }
-
-  if ((isClassType(c.type()) || isLazyClassType(c.type())) &&
-      checkStringCompatible()) {
-    if (RuntimeOption::EvalClassStringHintNotices) {
-      raise_notice(Strings::CLASS_TO_STRING_IMPLICIT);
-    }
-    val(c).pstr = isClassType(c.type()) ?
-      const_cast<StringData*>(val(c).pclass->name()) : // TODO (T61651936)
-      const_cast<StringData*>(val(c).plazyclass.name());
-    c.type() = KindOfPersistentString;
-    return;
-  }
 
   // Handle return type constraint failures
   if (id == ReturnId) {
@@ -1141,9 +1063,7 @@ MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint& tc) {
     case AnnotMetaType::Nothing:
     case AnnotMetaType::NoReturn:
     case AnnotMetaType::Nonnull:
-    case AnnotMetaType::Self:
     case AnnotMetaType::This:
-    case AnnotMetaType::Parent:
     case AnnotMetaType::Callable:
     case AnnotMetaType::Number:
     case AnnotMetaType::VecOrDict:

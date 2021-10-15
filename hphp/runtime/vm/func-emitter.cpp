@@ -272,22 +272,9 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   auto const hasReifiedGenerics = uait != userAttributes.end();
 
   // Returns (static coeffects, escapes)
-  auto const coeffectsInfo = [&]() -> std::pair<StaticCoeffects,
-                                               RuntimeCoeffects> {
-    if (staticCoeffects.empty()) {
-      return {StaticCoeffects::defaults(), RuntimeCoeffects::none()};
-    }
-    auto coeffects = StaticCoeffects::none();
-    auto escapes = RuntimeCoeffects::none();
-    for (auto const& name : staticCoeffects) {
-      coeffects |= CoeffectsConfig::fromName(name->toCppString());
-      escapes |= CoeffectsConfig::escapesTo(name->toCppString());
-    }
-    if (preClass && name == s_construct.get()) {
-      coeffects |= StaticCoeffects::write_this_props();
-    }
-    return {coeffects, escapes};
-  }();
+  auto const coeffectsInfo = getCoeffectsInfoFromList(
+    staticCoeffects,
+    preClass && name == s_construct.get());
   f->m_requiredCoeffects = coeffectsInfo.first.toRequired();
 
   bool const needsExtendedSharedData =

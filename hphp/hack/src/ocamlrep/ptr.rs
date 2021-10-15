@@ -43,7 +43,7 @@ impl UnsafeOcamlPtr {
 }
 
 impl fmt::Debug for UnsafeOcamlPtr {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "0x{:x}", self.0)
     }
 }
@@ -60,6 +60,12 @@ impl FromOcamlRep for UnsafeOcamlPtr {
             return Err(FromError::ExpectedBlock(value.as_int().unwrap()));
         }
         Ok(unsafe { Self::new(value.to_bits()) })
+    }
+}
+
+impl<'a> crate::FromOcamlRepIn<'a> for UnsafeOcamlPtr {
+    fn from_ocamlrep_in(value: Value<'_>, _alloc: &'a bumpalo::Bump) -> Result<Self, FromError> {
+        Self::from_ocamlrep(value)
     }
 }
 
@@ -91,7 +97,7 @@ impl<T> NakedPtr<T> {
 }
 
 impl<T> fmt::Debug for NakedPtr<T> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{:p}", self.0)
     }
 }

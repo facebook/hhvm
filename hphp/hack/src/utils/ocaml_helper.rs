@@ -157,7 +157,7 @@ pub fn int_of_str_opt(s: impl AsRef<str>) -> Option<i64> {
 
 /// ported from supercaml/share/dotopam/default/lib/ocaml/bytes.ml
 /// github link: https://github.com/ocaml/ocaml/blob/4.09.1/stdlib/bytes.ml#L170-L208
-pub fn escaped(s: &str) -> Cow<str> {
+pub fn escaped(s: &str) -> Cow<'_, str> {
     let mut n: usize = 0;
     for i in s.as_bytes() {
         n += match i {

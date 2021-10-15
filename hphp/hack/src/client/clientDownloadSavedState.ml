@@ -300,6 +300,7 @@ let main (env : env) : Exit_status.t Lwt.t =
             main_artifacts =
               {
                 Naming_and_dep_table_info.naming_table_path;
+                Naming_and_dep_table_info.naming_sqlite_table_path;
                 dep_table_path;
                 legacy_hot_decls_path;
                 shallow_hot_decls_path;
@@ -329,6 +330,8 @@ let main (env : env) : Exit_status.t Lwt.t =
             ("changed_files", changed_files_to_absolute_paths_json changed_files);
             ( "naming_table_path",
               naming_table_path |> Path.to_string |> Hh_json.string_ );
+            ( "naming_sqlite_table_path",
+              naming_sqlite_table_path |> Path.to_string |> Hh_json.string_ );
             ( "dep_table_path",
               dep_table_path |> Path.to_string |> Hh_json.string_ );
             ( "legacy_hot_decls_path",

@@ -175,6 +175,14 @@ class Code {
     throw new Exception();
   }
 
+  public function visitInstanceMethod(
+    ?ExprPos $_,
+    Code::TAst $_obj,
+    string $_method_name,
+  ): Code::TAst {
+    throw new Exception();
+  }
+
   public function splice<T>(
     ?ExprPos $_,
     string $_key,
@@ -208,44 +216,46 @@ final class ExprTree<TVisitor, TResult, +TInfer>
 
 type ExprPos = shape(...);
 
-abstract class ExampleMixed {
-  public abstract function __tripleEquals(ExampleMixed $_): ExampleBool;
-  public abstract function __notTripleEquals(ExampleMixed $_): ExampleBool;
+interface ExampleMixed {
+  public function __tripleEquals(ExampleMixed $_): ExampleBool;
+  public function __notTripleEquals(ExampleMixed $_): ExampleBool;
 }
-abstract class ExampleInt extends ExampleMixed {
-  public abstract function __plus(ExampleInt $_): ExampleInt;
-  public abstract function __minus(ExampleInt $_): ExampleInt;
-  public abstract function __star(ExampleInt $_): ExampleInt;
-  public abstract function __slash(ExampleInt $_): ExampleInt;
-  public abstract function __percent(ExampleInt $_): ExampleInt;
-  public abstract function __negate(): ExampleInt;
+interface ExampleInt extends ExampleMixed {
+  public function __plus(ExampleInt $_): ExampleInt;
+  public function __minus(ExampleInt $_): ExampleInt;
+  public function __star(ExampleInt $_): ExampleInt;
+  public function __slash(ExampleInt $_): ExampleInt;
+  public function __percent(ExampleInt $_): ExampleInt;
+  public function __negate(): ExampleInt;
 
-  public abstract function __lessThan(ExampleInt $_): ExampleBool;
-  public abstract function __lessThanEqual(ExampleInt $_): ExampleBool;
-  public abstract function __greaterThan(ExampleInt $_): ExampleBool;
-  public abstract function __greaterThanEqual(ExampleInt $_): ExampleBool;
+  public function __lessThan(ExampleInt $_): ExampleBool;
+  public function __lessThanEqual(ExampleInt $_): ExampleBool;
+  public function __greaterThan(ExampleInt $_): ExampleBool;
+  public function __greaterThanEqual(ExampleInt $_): ExampleBool;
 
-  public abstract function __amp(ExampleInt $_): ExampleInt;
-  public abstract function __bar(ExampleInt $_): ExampleInt;
-  public abstract function __caret(ExampleInt $_): ExampleInt;
-  public abstract function __lessThanLessThan(ExampleInt $_): ExampleInt;
-  public abstract function __greaterThanGreaterThan(ExampleInt $_): ExampleInt;
-  public abstract function __tilde(): ExampleInt;
-}
-
-abstract class ExampleBool extends ExampleMixed {
-  public abstract function __ampamp(ExampleBool $_): ExampleBool;
-  public abstract function __barbar(ExampleBool $_): ExampleBool;
-  public abstract function __bool(): bool;
-  public abstract function __exclamationMark(): ExampleBool;
+  public function __amp(ExampleInt $_): ExampleInt;
+  public function __bar(ExampleInt $_): ExampleInt;
+  public function __caret(ExampleInt $_): ExampleInt;
+  public function __lessThanLessThan(ExampleInt $_): ExampleInt;
+  public function __greaterThanGreaterThan(ExampleInt $_): ExampleInt;
+  public function __tilde(): ExampleInt;
+  public function __postfixPlusPlus(): void;
+  public function __postfixMinusMinus(): void;
 }
 
-abstract class ExampleString extends ExampleMixed implements XHPChild {
-  public abstract function __dot(ExampleString $_): ExampleString;
+interface ExampleBool extends ExampleMixed {
+  public function __ampamp(ExampleBool $_): ExampleBool;
+  public function __barbar(ExampleBool $_): ExampleBool;
+  public function __bool(): bool;
+  public function __exclamationMark(): ExampleBool;
 }
 
-abstract class ExampleFloat extends ExampleMixed {}
+interface ExampleString extends ExampleMixed, XHPChild {
+  public function __dot(ExampleString $_): ExampleString;
+}
+
+interface ExampleFloat extends ExampleMixed {}
 
 final class ExampleContext {}
 
-abstract class ExampleVoid {}
+interface ExampleVoid {}

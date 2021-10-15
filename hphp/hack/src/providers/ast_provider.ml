@@ -21,11 +21,9 @@ type parse_type =
   | Full
 
 module ParserHeap =
-  SharedMem.WithCache (SharedMem.ProfiledImmediate) (Relative_path.S)
+  SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (Relative_path.S)
     (struct
       type t = Nast.program * parse_type
-
-      let prefix = Prefix.make ()
 
       let description = "Ast_Parser"
     end)
@@ -34,12 +32,10 @@ module ParserHeap =
     end)
 
 module LocalParserCache =
-  SharedMem.LocalCache
+  SharedMem.MultiCache
     (Relative_path.S)
     (struct
       type t = Nast.program
-
-      let prefix = Prefix.make ()
 
       let description = "Ast_ParserLocal"
     end)
@@ -111,7 +107,11 @@ let get_from_local_cache ~full ctx file_name =
       Option.value_map
         ~default:(with_no_err [])
         ~f
-        (File_provider.get_contents file_name)
+        (File_provider.get_contents
+           file_name
+           ~writeback_disk_contents_in_shmem_provider:
+             (TypecheckerOptions.enable_disk_heap
+                (Provider_context.get_tcopt ctx)))
     in
     let ast =
       if

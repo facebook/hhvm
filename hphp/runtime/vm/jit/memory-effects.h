@@ -67,6 +67,14 @@ struct IRInstruction;
  * ReturnHook to prevent uses of the stack and frame, and for killing stack
  * slots below the re-entry depth for potentially re-entering instructions.
  *
+ * The set `inout' is used to track values that may be loaded or stored, but
+ * which would otherwise pessimize the union for loads/stores. These are
+ * primarily used for inout stack slots with CallBuiltin.
+ *
+ * `backtrace' represents the set of locals that may be accessed due to
+ * backtracing. They are currently separated out to avoid pessimizing the loads
+ * AliasClass.
+ *
  * If there is an overlap between `loads' and `kills', then `kills' takes
  * precedence for locations that are contained in both (i.e. those locations
  * should be treated as actually killed).
@@ -75,7 +83,10 @@ struct IRInstruction;
 struct GeneralEffects   { AliasClass loads;
                           AliasClass stores;
                           AliasClass moves;
-                          AliasClass kills; };
+                          AliasClass kills;
+                          AliasClass inout;
+                          AliasClass backtrace;
+                          AliasClass coeffect; };
 
 /*
  * The effect of definitely loading from an abstract location, without
@@ -108,12 +119,6 @@ struct PureStore    { AliasClass dst; SSATmp* value; SSATmp* dep; };
 struct PureInlineCall { AliasClass base; SSATmp* fp; AliasClass actrec; };
 
 /*
- * A PureInlineReturn represents the inverse operation of a PureInlineCall, it
- * undoes a call into calleeFp, returning the frame to callerFp.
- */
-struct PureInlineReturn { AliasClass base; SSATmp* calleeFp; SSATmp* callerFp;};
-
-/*
  * Calls are somewhat special enough that they get a top-level effect.
  *
  * The `kills' set are locations that cannot be read by this instruction unless
@@ -139,10 +144,9 @@ struct CallEffects    { AliasClass kills;
                         AliasClass locals; };
 
 /*
- * ReturnEffects is a return, either from the php function or an inlined
- * function.  You may assume if the instruction it came from is not an
- * InlineReturn, it is a return from the entire region.  It does not cover
- * suspending a resumable, but it covers returning from a suspended resumable.
+ * ReturnEffects is a return from the top level php function, ending the entire
+ * region. It does not cover suspending a resumable, but it covers returning
+ * from a suspended resumable.
  *
  * All locals on the returning frame may be considered dead after
  * ReturnEffects.  However, the stack is a little more complicated.  The
@@ -150,9 +154,7 @@ struct CallEffects    { AliasClass kills;
  * after the return, which is used to provide the range of stack that can be
  * considered dead.  In normal functions it will effectively be AStackAny, but
  * in generators a return may still leave part of the eval stack alive for the
- * caller.  When returning from an inlined function, the locals may all be
- * considered dead, and `kills' will contain the whole inlined function's
- * stack.
+ * caller.
  */
 struct ReturnEffects  { AliasClass kills; };
 
@@ -161,6 +163,9 @@ struct ReturnEffects  { AliasClass kills; };
  * are considered live exiting the region, and locations that will never be
  * read (unless written again) after exiting the region (`kills').  Various
  * instructions that exit regions populate these in different ways.
+ *
+ * ExitEffects instructions require inlined frames to be spilled immediatelly
+ * prior to the instruction, see spillInlinedFrames() for more details.
  */
 struct ExitEffects    { AliasClass live; AliasClass kills; };
 
@@ -181,7 +186,6 @@ using MemEffects = boost::variant< GeneralEffects
                                  , PureLoad
                                  , PureStore
                                  , PureInlineCall
-                                 , PureInlineReturn
                                  , CallEffects
                                  , ReturnEffects
                                  , ExitEffects

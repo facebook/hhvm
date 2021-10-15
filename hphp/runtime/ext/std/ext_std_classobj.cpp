@@ -33,15 +33,15 @@ namespace HPHP {
 
 static const Class* clsFromCallerSkipBuiltins() {
   return fromCaller(
-    [] (const ActRec* fp, Offset) { return fp->func()->cls(); },
-    [] (const ActRec* fp) { return !fp->func()->isBuiltin(); }
+    [] (const BTFrame& frm) { return frm.func()->cls(); },
+    [] (const BTFrame& frm) { return !frm.func()->isBuiltin(); }
   );
 }
 
 static StrNR ctxClassName() {
   auto const ctx = fromCaller(
-    [] (const ActRec* fp, Offset) { return fp->func()->cls(); },
-    [] (const ActRec* fp) { return !fp->func()->isSkipFrame(); }
+    [] (const BTFrame& frm) { return frm.func()->cls(); },
+    [] (const BTFrame& frm) { return !frm.func()->isSkipFrame(); }
   );
   return ctx ? ctx->nameStr() : StrNR(staticEmptyString());
 }
@@ -163,7 +163,7 @@ Variant HHVM_FUNCTION(get_class_vars, const String& className) {
 
   // For visibility checks
   auto const ctx = fromCaller(
-    [] (const ActRec* fp, Offset) { return fp->func()->cls(); }
+    [] (const BTFrame& frm) { return frm.func()->cls(); }
   );
 
   DictInit arr(numDeclProps + numSProps);
@@ -242,7 +242,7 @@ Variant HHVM_FUNCTION(get_parent_class,
   if (object.isNull()) {
     logOrThrow(object);
     cls = fromCaller(
-      [] (const ActRec* fp, Offset) { return fp->func()->cls(); }
+      [] (const BTFrame& frm) { return frm.func()->cls(); }
     );
     if (!cls) return false;
   } else {
@@ -362,21 +362,27 @@ Array HHVM_FUNCTION(get_object_vars, const Object& object) {
 ///////////////////////////////////////////////////////////////////////////////
 
 String HHVM_FUNCTION(HH_class_meth_get_class, TypedValue v) {
-  if (!tvIsClsMeth(v)) {
+  if (tvIsClsMeth(v)) {
+    return val(v).pclsmeth->getCls()->nameStr();
+  } else if (tvIsRClsMeth(v)) {
+    return val(v).prclsmeth->m_cls->nameStr();
+  } else {
     SystemLib::throwInvalidArgumentExceptionObject(
       folly::sformat("Argument 1 passed to {}() must be a class_meth",
       __FUNCTION__+5));
   }
-  return val(v).pclsmeth->getCls()->nameStr();
 }
 
 String HHVM_FUNCTION(HH_class_meth_get_method, TypedValue v) {
-  if (!tvIsClsMeth(v)) {
+  if (tvIsClsMeth(v)) {
+    return val(v).pclsmeth->getFunc()->nameStr();
+  } else if (tvIsRClsMeth(v)) {
+    return val(v).prclsmeth->m_func->nameStr();
+  } else {
     SystemLib::throwInvalidArgumentExceptionObject(
       folly::sformat("Argument 1 passed to {}() must be a class_meth",
       __FUNCTION__+5));
   }
-  return val(v).pclsmeth->getFunc()->nameStr();
 }
 
 String HHVM_FUNCTION(HH_class_get_class_name, TypedValue v) {

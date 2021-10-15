@@ -6,7 +6,6 @@
 use crate::emit_statement::Level;
 use crate::reified_generics_helpers as reified;
 
-use decl_provider::DeclProvider;
 use hhbc_by_ref_emit_expression as emit_expression;
 use hhbc_by_ref_emit_fatal as emit_fatal;
 use hhbc_by_ref_emit_pos::emit_pos;
@@ -119,8 +118,8 @@ pub(super) fn emit_save_label_id<'arena>(
     )
 }
 
-pub(super) fn emit_return<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
-    e: &mut Emitter<'arena, 'decl, D>,
+pub(super) fn emit_return<'a, 'arena, 'decl>(
+    e: &mut Emitter<'arena, 'decl>,
     in_finally_epilogue: bool,
     env: &mut Env<'a, 'arena>,
 ) -> Result<InstrSeq<'arena>> {
@@ -241,8 +240,8 @@ bitflags! {
     }
 }
 
-pub(super) fn emit_break_or_continue<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
-    e: &mut Emitter<'arena, 'decl, D>,
+pub(super) fn emit_break_or_continue<'a, 'arena, 'decl>(
+    e: &mut Emitter<'arena, 'decl>,
     flags: EmitBreakOrContinueFlags,
     env: &mut Env<'a, 'arena>,
     pos: &Pos,
@@ -303,15 +302,15 @@ pub(super) fn emit_break_or_continue<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     }
 }
 
-pub(super) fn emit_finally_epilogue<'a, 'b, 'arena, 'decl, D: DeclProvider<'decl>>(
-    e: &mut Emitter<'arena, 'decl, D>,
+pub(super) fn emit_finally_epilogue<'a, 'b, 'arena, 'decl>(
+    e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
     pos: &Pos,
     jump_instrs: JumpInstructions<'b, 'arena>,
     finally_end: Label,
 ) -> Result<InstrSeq<'arena>> {
-    fn emit_instr<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
-        e: &mut Emitter<'arena, 'decl, D>,
+    fn emit_instr<'a, 'arena, 'decl>(
+        e: &mut Emitter<'arena, 'decl>,
         env: &mut Env<'a, 'arena>,
         pos: &Pos,
         i: &Instruct<'arena>,

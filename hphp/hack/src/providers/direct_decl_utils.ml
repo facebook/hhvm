@@ -81,9 +81,15 @@ let get_file_contents ctx filename =
   | Some entry ->
     let source_text = Ast_provider.compute_source_text ~entry in
     Some (Full_fidelity_source_text.text source_text)
-  | None -> File_provider.get_contents filename
+  | None ->
+    let enable_disk_heap =
+      TypecheckerOptions.enable_disk_heap (Provider_context.get_tcopt ctx)
+    in
+    File_provider.get_contents
+      filename
+      ~writeback_disk_contents_in_shmem_provider:enable_disk_heap
 
-let direct_decl_parse_and_cache ~file_decl_hash ~symbol_decl_hashes ctx file =
+let direct_decl_parse ~file_decl_hash ~symbol_decl_hashes ctx file =
   match get_file_contents ctx file with
   | None -> None
   | Some contents ->
@@ -141,5 +147,11 @@ let direct_decl_parse_and_cache ~file_decl_hash ~symbol_decl_hashes ctx file =
         in
         (decls, symbol_decl_hashes)
     in
-    cache_decls ctx decls;
     Some (decls, mode, file_decl_hash, symbol_decl_hashes)
+
+let direct_decl_parse_and_cache ~file_decl_hash ~symbol_decl_hashes ctx file =
+  let result = direct_decl_parse ~file_decl_hash ~symbol_decl_hashes ctx file in
+  (match result with
+  | Some (decls, _, _, _) -> cache_decls ctx decls
+  | None -> ());
+  result

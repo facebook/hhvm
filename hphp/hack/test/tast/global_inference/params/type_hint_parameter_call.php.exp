@@ -12,11 +12,12 @@
         f_params =
         [{ param_annotation = (int); param_type_hint = ((int), None); 
            param_is_variadic = false; param_pos = [3:14-16]; param_name = "$x"; 
-           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_expr = None; param_readonly = None; param_callconv = Pnormal; 
            param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None;
-        f_body = { fb_ast = [([4:5-13], (Expr ((void), [4:5-12], (Call ((((function(int $_): void)), [4:5-8], (Id ([4:5-8], "\\bar"))), [], [((int), [4:9-11], (Lvar ([4:9-11], $x)))], None)))))] };
+        f_body =
+        { fb_ast = [([4:5-13], (Expr ((void), [4:5-12], (Call ((((function(int $_): void)), [4:5-8], (Id ([4:5-8], "\\bar"))), [], [(Pnormal, ((int), [4:9-11], (Lvar ([4:9-11], $x))))], None)))))] };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       });
@@ -35,7 +36,7 @@
          f_params =
          [{ param_annotation = (int); param_type_hint = ((int), (Some ([7:14-17], (Hprim Tint)))); 
             param_is_variadic = false; param_pos = [7:18-20]; param_name = "$_"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 

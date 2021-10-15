@@ -11,22 +11,22 @@ final class Generator implements HH\KeyedIterator {
   <<__Native("OpCodeImpl")>>
   public function key()[]: mixed;
 
-  <<__Native("OpCodeImpl")>>
+  <<__Native("OpCodeImpl"), __NEVER_INLINE>>
   public function next()[/* gen $this */]: mixed;
 
-  <<__Native("OpCodeImpl")>>
+  <<__Native("OpCodeImpl"), __NEVER_INLINE>>
   private function throw(object $ex)[/* gen $this */]: mixed;
 
-  <<__Native("OpCodeImpl")>>
+  <<__Native("OpCodeImpl"), __NEVER_INLINE>>
   public function rewind()[/* gen $this */]: mixed;
 
   <<__Native("OpCodeImpl")>>
   public function valid()[]: bool;
 
-  <<__Native("OpCodeImpl")>>
+  <<__Native("OpCodeImpl"), __NEVER_INLINE>>
   public function send(mixed $v)[/* gen $this */]: mixed;
 
-  <<__Native("OpCodeImpl")>>
+  <<__Native("OpCodeImpl"), __NEVER_INLINE>>
   public function raise(mixed $v)[/* gen $this */]: mixed;
 
   <<__Native("OpCodeImpl")>>

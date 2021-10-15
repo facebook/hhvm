@@ -19,9 +19,12 @@
 #include <thread>
 
 #include <folly/Likely.h>
+#include <folly/Synchronized.h>
+#include <folly/Unit.h>
 #include <folly/executors/CPUThreadPoolExecutor.h>
 #include <folly/futures/Future.h>
 #include <folly/futures/FutureSplitter.h>
+#include <folly/logging/xlog.h>
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
@@ -43,9 +46,6 @@
 #include "hphp/util/hash-set.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/sha1.h"
-#include "hphp/util/trace.h"
-
-TRACE_SET_MOD(facts);
 
 namespace HPHP {
 namespace Facts {
@@ -360,66 +360,6 @@ std::string curthread() {
   return s.str();
 }
 
-/**
- * Ensure the given `queryExpr` is requesting the fields we need Watchman to
- * return.
- */
-folly::dynamic addFieldsToQuery(folly::dynamic queryExpr) {
-  assertx(queryExpr.isObject());
-  queryExpr["fields"] =
-      folly::dynamic::array("name", "exists", "content.sha1hex");
-  return queryExpr;
-}
-
-/**
- * Augment `query` with a field telling Watchman to give us changes since the
- * point in time given by `clock`.
- */
-folly::dynamic addWatchmanSince(folly::dynamic query, Clock clock) {
-  if (clock.isInitial()) {
-    return query;
-  }
-
-  if (clock.m_mergebase.empty() && !clock.m_clock.empty()) {
-    // Filesystem changes since a machine-local time
-    query["since"] = std::move(clock.m_clock);
-  } else if (!clock.m_mergebase.empty() && clock.m_clock.empty()) {
-    // Repo changes since a global commit
-    query["since"] = folly::dynamic::object(
-        "scm",
-        folly::dynamic::object("mergebase-with", std::move(clock.m_mergebase)));
-  } else {
-    // Changes since a machine-local time and global commit
-    query["since"] = folly::dynamic::object("clock", std::move(clock.m_clock))(
-        "scm",
-        folly::dynamic::object("mergebase-with", std::move(clock.m_mergebase)));
-  }
-  // We're using the "since" generator, so clear all other generators
-  query.erase("suffix");
-  query.erase("glob");
-  query.erase("path");
-  return query;
-}
-
-/**
- * Return the SHA1 hash of the given file.
- *
- * If the "content.sha1hex" field of a Watchman response is a
- * string, then it is a hash of the file. If Watchman couldn't
- * find the SHA1 hash of the file, the "content.sha1hex" field
- * will instead be an object describing the error. If we didn't
- * get a hash from Watchman, it's not a huge deal. We'll just
- * reparse the file, hash it ourselves, and move on with our
- * lives.
- */
-Optional<std::string> getSha1Hash(const folly::dynamic& pathData) {
-  auto const& sha1hex = pathData["content.sha1hex"];
-  if (!sha1hex.isString()) {
-    return {};
-  }
-  return {sha1hex.asString()};
-}
-
 std::vector<folly::fs::path>
 removeHashes(std::vector<PathAndHash>&& pathsWithHashes) {
   std::vector<folly::fs::path> paths;
@@ -540,15 +480,12 @@ struct FactsStoreImpl final
   FactsStoreImpl(
       folly::fs::path root,
       DBData dbData,
-      folly::dynamic queryExpr,
-      Watchman& watchmanClient,
+      std::unique_ptr<Watcher> watcher,
       hphp_hash_set<std::string> indexedMethodAttributes)
       : m_updateExec{1, make_thread_factory("Autoload update")}
       , m_root{std::move(root)}
       , m_map{m_root, std::move(dbData), RuntimeOption::AutoloadEnforceOneDefinitionRule, std::move(indexedMethodAttributes)}
-      , m_watchmanData{
-            {.m_queryExpr = addFieldsToQuery(std::move(queryExpr)),
-             .m_watchmanClient = watchmanClient}} {
+      , m_watcher{std::move(watcher)} {
   }
 
   FactsStoreImpl(folly::fs::path root, DBData dbData)
@@ -562,9 +499,7 @@ struct FactsStoreImpl final
 
   ~FactsStoreImpl() override {
     m_closing = true;
-    if (m_watchmanData) {
-      m_watchmanData->m_updateFuture.getFuture().wait();
-    }
+    m_updateFuture.wlock()->getFuture().wait();
   }
 
   FactsStoreImpl(const FactsStoreImpl&) = delete;
@@ -580,6 +515,14 @@ struct FactsStoreImpl final
   }
 
   /**
+   * Return an object representing the last time this store was updated
+   */
+  Clock getClock() const {
+    auto version = m_map.getClock();
+    return version.isInitial() ? m_map.dbClock() : version;
+  }
+
+  /**
    * Guarantee the map is at least as up-to-date as the codebase was
    * when update() was called.
    *
@@ -588,7 +531,7 @@ struct FactsStoreImpl final
   void ensureUpdated() override {
     TimeoutSuspender suspendTimeoutsDuringUpdate;
 
-    folly::Future<folly::Unit> updateFuture = update();
+    folly::SemiFuture<folly::Unit> updateFuture = update();
     updateFuture.wait();
     auto const& res = std::move(updateFuture).result();
     if (res.hasException()) {
@@ -794,208 +737,148 @@ struct FactsStoreImpl final
    * Update whenever a file in the filesystem changes.
    */
   void subscribe() {
-    if (!m_watchmanData) {
+    if (!m_watcher) {
       return;
     }
-    auto queryExpr = m_watchmanData->m_queryExpr;
-    auto since = m_map.getClock();
-    if (since.isInitial()) {
-      since = m_map.dbClock();
-    }
-    if (!since.isInitial()) {
-      queryExpr = addWatchmanSince(std::move(queryExpr), std::move(since));
-    }
-    m_watchmanData->m_watchmanClient.subscribe(
-        queryExpr,
-        [weakThis = weak_from_this()](folly::Try<folly::dynamic>&& results) {
-          if (results.hasValue()) {
-            auto const* files = results->get_ptr("files");
-            if (files && files->isArray()) {
-              FTRACE(
-                  3, "Subscription result. {} paths received\n", files->size());
-            } else {
-              FTRACE(3, "Subscription result: {}\n", folly::toJson(*results));
-            }
-            auto sharedThis = weakThis.lock();
-            if (!sharedThis) {
-              return;
-            }
-            sharedThis->update();
-          } else if (results.hasException()) {
-            FTRACE(
-                2,
-                "Watchman subscription Error: {}\n",
-                results.exception().what());
+    m_watcher->subscribe(
+        [weakThis = weak_from_this()](Watcher::Results&& results) {
+          XLOGF(
+              INFO,
+              "Subscription result: {} paths received.",
+              results.m_files.size());
+          auto sharedThis = weakThis.lock();
+          if (!sharedThis) {
+            return;
           }
+          sharedThis->update();
         });
   }
 
-private:
   /**
-   * Query Watchman to see changed files, update our internal data structures,
-   * and resolve the returned future once the map is at least as up-to-date as
-   * the time update() was called.
+   * Query our Watcher to see changed files, update our internal data
+   * structures, and resolve the returned future once the map is at least as
+   * up-to-date as the time update() was called.
    */
-  folly::Future<folly::Unit> update() {
-    if (!m_watchmanData) {
-      return folly::makeFuture();
+  folly::SemiFuture<folly::Unit> update() {
+    if (!m_watcher) {
+      return {};
     }
-    std::unique_lock g{m_mutex};
-    m_watchmanData->m_updateFuture =
-        folly::splitFuture(std::move(m_watchmanData->m_updateFuture)
-                               .getFuture()
-                               .via(&m_updateExec)
-                               .thenTry([this](const folly::Try<folly::Unit>&) {
-                                 return updateImpl();
-                               }));
-    return m_watchmanData->m_updateFuture.getFuture();
+    auto updateFuture = m_updateFuture.wlock();
+    *updateFuture = folly::splitFuture(
+        updateFuture->getFuture()
+            .via(&m_updateExec)
+            .thenTry([this](const folly::Try<folly::Unit>&) {
+              return m_watcher->getChanges(m_updateExec, getClock());
+            })
+            .thenTry([this](folly::Try<Watcher::Results>&& results) {
+              if (results.hasValue()) {
+                return update(std::move(results.value()));
+              }
+              return folly::makeSemiFuture();
+            }));
+    return updateFuture->getFuture().semi();
   }
 
-  folly::Future<folly::Unit> updateImpl() {
+  folly::SemiFuture<folly::Unit> update(Watcher::Results&& results) {
     if (m_closing) {
       throw UpdateExc{"Shutting down"};
     }
-    if (!m_watchmanData) {
-      return folly::makeFuture();
+
+    bool isFresh = results.m_fresh;
+    Clock lastClock = *results.m_lastClock;
+    Clock newClock = results.m_newClock;
+
+    auto [alteredPathsAndHashes, deletedPaths] =
+        isFresh ? getFreshDelta(std::move(results))
+                : getIncrementalDelta(std::move(results));
+
+    // We need to update the DB if Watchman has restarted or if
+    // something's changed on the filesystem. Otherwise, there's no
+    // need to update the DB.
+    if (LIKELY(!isFresh) && LIKELY(alteredPathsAndHashes.empty()) &&
+        LIKELY(deletedPaths.empty())) {
+      return {};
     }
 
-    auto since = m_map.getClock();
-    if (since.isInitial()) {
-      since = m_map.dbClock();
+    XLOGF(
+        INFO,
+        "{} paths altered, {} paths deleted.",
+        alteredPathsAndHashes.size(),
+        deletedPaths.size());
+
+    auto alteredPathFacts =
+        LIKELY(alteredPathsAndHashes.empty())
+            ? std::vector<folly::Try<FileFacts>>{}
+            : facts_from_paths(m_root, alteredPathsAndHashes);
+
+    std::vector<FileFacts> facts;
+    facts.reserve(alteredPathFacts.size());
+    for (auto i = 0; i < alteredPathFacts.size(); i++) {
+      try {
+        facts.push_back(std::move(alteredPathFacts[i]).value());
+      } catch (FactsExtractionExc& e) {
+        XLOGF(
+            CRITICAL,
+            "Error extracting facts from {}: {}",
+            alteredPathsAndHashes.at(i).m_path.c_str(),
+            e.what());
+        // Treat a parse error as if we had deleted the path
+        deletedPaths.push_back(std::move(alteredPathsAndHashes.at(i).m_path));
+        alteredPathsAndHashes.at(i) = {folly::fs::path{}, {}};
+      }
     }
-    auto query = addWatchmanSince(m_watchmanData->m_queryExpr, since);
 
-    FTRACE(3, "Querying watchman ({})\n", folly::toJson(query));
-    return m_watchmanData->m_watchmanClient.query(std::move(query))
-        .via(&m_updateExec)
-        .thenValue([this, since](
-                       const watchman::QueryResult& wrappedResults) mutable {
-          auto const& result = wrappedResults.raw_;
-          if (result.count("error")) {
-            throw UpdateExc{folly::sformat(
-                "Got a watchman error: {}\n", folly::toJson(result))};
-          }
+    // Compact empty paths out of alteredPathsAndHashes
+    if (facts.size() < alteredPathsAndHashes.size()) {
+      alteredPathsAndHashes.erase(
+          std::remove_if(
+              alteredPathsAndHashes.begin(),
+              alteredPathsAndHashes.end(),
+              [](const PathAndHash& pathAndHash) {
+                return pathAndHash.m_path.empty();
+              }),
+          alteredPathsAndHashes.end());
+    }
 
-          // isFresh means we either didn't pass Watchman a "since" token,
-          // or it means that Watchman has restarted after the point in time
-          // that our "since" token represents.
-          bool isIncremental = [&]() {
-            if (!since.m_mergebase.empty()) {
-              // If we passed a mergebase to Watchman, our query must be
-              // incremental. Watchman's response will still contain
-              // `{"is_fresh_instance": true}`, but we should ignore it in this
-              // situation.
-              return true;
-            }
-            auto const& fresh = result["is_fresh_instance"];
-            return !fresh.isBool() || !fresh.asBool();
-          }();
+    XLOGF(
+        DBG0,
+        "Facts size: {}. Altered paths size: {}",
+        facts.size(),
+        alteredPathsAndHashes.size());
+    assertx(facts.size() == alteredPathsAndHashes.size());
 
-          auto [alteredPathsAndHashes, deletedPaths] =
-              isIncremental ? getIncrementalDelta(result)
-                            : getFreshDelta(result);
+    // Check for files with the SHA1 hash corresponding to an empty
+    // file, but with nonempty facts
+    for (auto i = 0; i < alteredPathsAndHashes.size(); ++i) {
+      auto const& fileFacts = facts.at(i);
+      auto const& pathAndHash = alteredPathsAndHashes[i];
+      if (pathAndHash.m_hash == kEmptyFileSha1Hash && !fileFacts.isEmpty()) {
+        throw FactsExtractionExc{folly::sformat(
+            "{} has a SHA1 hash corresponding to an empty file ('{}'), "
+            "but we are attempting to assign it non-empty facts: `{}`",
+            pathAndHash.m_path.native(),
+            kEmptyFileSha1Hash,
+            json_from_facts(fileFacts))};
+      }
+    }
 
-          // We need to update the DB if Watchman has restarted or if
-          // something's changed on the filesystem. Otherwise, there's no
-          // need to update the DB.
-          if (LIKELY(isIncremental) && LIKELY(alteredPathsAndHashes.empty()) &&
-              LIKELY(deletedPaths.empty())) {
-            return;
-          }
+    XLOGF(
+        DBG0,
+        "SymbolMap.update(since={}, clock={}, "
+        "alteredPathsAndHashes.size()={}, deletedPaths.size()={})",
+        lastClock,
+        newClock,
+        alteredPathsAndHashes.size(),
+        deletedPaths.size());
+    m_map.update(
+        lastClock,
+        newClock,
+        removeHashes(std::move(alteredPathsAndHashes)),
+        std::move(deletedPaths),
+        std::move(facts));
 
-          FTRACE(
-              3,
-              "{} altered, {} deleted\n",
-              alteredPathsAndHashes.size(),
-              deletedPaths.size());
-
-          auto alteredPathFacts =
-              LIKELY(alteredPathsAndHashes.empty())
-                  ? std::vector<folly::Try<FileFacts>>{}
-                  : facts_from_paths(m_root, alteredPathsAndHashes);
-
-          std::vector<FileFacts> facts;
-          facts.reserve(alteredPathFacts.size());
-          for (auto i = 0; i < alteredPathFacts.size(); i++) {
-            try {
-              facts.push_back(std::move(alteredPathFacts[i]).value());
-            } catch (FactsExtractionExc& e) {
-              Logger::Warning(
-                  "Error extracting facts from %s: %s\n",
-                  alteredPathsAndHashes.at(i).m_path.c_str(),
-                  e.what());
-              // Treat a parse error as if we had deleted the path
-              deletedPaths.push_back(
-                  std::move(alteredPathsAndHashes.at(i).m_path));
-              alteredPathsAndHashes.at(i) = {folly::fs::path{}, {}};
-            }
-          }
-
-          // Compact empty paths out of alteredPathsAndHashes
-          if (facts.size() < alteredPathsAndHashes.size()) {
-            alteredPathsAndHashes.erase(
-                std::remove_if(
-                    alteredPathsAndHashes.begin(),
-                    alteredPathsAndHashes.end(),
-                    [](const PathAndHash& pathAndHash) {
-                      return pathAndHash.m_path.empty();
-                    }),
-                alteredPathsAndHashes.end());
-          }
-
-          FTRACE(
-              3,
-              "Facts size: {}. Altered paths size: {}\n",
-              facts.size(),
-              alteredPathsAndHashes.size());
-          assertx(facts.size() == alteredPathsAndHashes.size());
-
-          // Check for files with the SHA1 hash corresponding to an empty
-          // file, but with nonempty facts
-          for (auto i = 0; i < alteredPathsAndHashes.size(); ++i) {
-            auto const& fileFacts = facts.at(i);
-            auto const& pathAndHash = alteredPathsAndHashes[i];
-            if (pathAndHash.m_hash == kEmptyFileSha1Hash &&
-                !fileFacts.isEmpty()) {
-              throw FactsExtractionExc{folly::sformat(
-                  "{} has a SHA1 hash corresponding to an empty file ('{}'), "
-                  "but we are attempting to assign it non-empty facts: `{}`",
-                  pathAndHash.m_path.native(),
-                  kEmptyFileSha1Hash,
-                  json_from_facts(fileFacts))};
-            }
-          }
-
-          auto clock = [&result]() -> Clock {
-            auto const* fullClock = result.get_ptr("clock");
-            always_assert(fullClock);
-            if (fullClock->isString()) {
-              return {.m_clock = fullClock->asString()};
-            } else {
-              auto const* localClock = fullClock->get_ptr("clock");
-              always_assert(localClock);
-              return {.m_clock = localClock->asString()};
-            }
-          }();
-
-          FTRACE(
-              3,
-              "SymbolMap.update("
-              "since={}, clock={}, alteredPathsAndHashes.size()={}, "
-              "deletedPaths.size()={})\n",
-              since,
-              clock,
-              alteredPathsAndHashes.size(),
-              deletedPaths.size());
-          m_map.update(
-              since,
-              clock,
-              removeHashes(std::move(alteredPathsAndHashes)),
-              std::move(deletedPaths),
-              std::move(facts));
-
-          FTRACE(3, "{} has finished updating\n", curthread());
-        });
+    XLOGF(INFO, "Thread {} has finished updating.", curthread());
+    return {};
   }
 
   /**
@@ -1004,31 +887,30 @@ private:
    */
 
   std::tuple<std::vector<PathAndHash>, std::vector<folly::fs::path>>
-  getFreshDelta(const folly::dynamic& result) const {
+  getFreshDelta(Watcher::Results&& result) const {
 
     auto allPaths = m_map.getAllPathsWithHashes();
-    FTRACE(
-        3,
-        "Received fresh query, checking against our list of {} paths\n",
+    XLOGF(
+        INFO,
+        "Received fresh query, checking against our list of {} paths.",
         allPaths.size());
 
     std::vector<PathAndHash> alteredPaths;
     std::vector<folly::fs::path> deletedPaths;
-    for (auto const& pathData : result["files"]) {
-      folly::fs::path path{pathData["name"].asString()};
-      assertx(path.is_relative());
-      assertx(pathData["exists"].asBool());
+    for (auto& pathData : std::move(result.m_files)) {
+      assertx(pathData.m_exists);
 
+      auto& path = pathData.m_path;
       auto pathStr = Path{path};
 
-      auto sha1hex = getSha1Hash(pathData);
+      auto sha1hex = pathData.m_hash;
 
       // Watchman is sending us all the files in the repo, regardless of
       // whether we've seen the same file before. Watchman is also
       // sending us SHA1 hashes, so compare these to determine which
       // files have actually changed.
       bool sha1HexMatches = [&]() {
-        if (!sha1hex.has_value()) {
+        if (!pathData.m_hash.has_value()) {
           return false;
         }
         auto const it = allPaths.find(pathStr);
@@ -1065,19 +947,16 @@ private:
    * update when Watchman gives us an incremental update.
    */
   std::tuple<std::vector<PathAndHash>, std::vector<folly::fs::path>>
-  getIncrementalDelta(const folly::dynamic& result) const {
+  getIncrementalDelta(Watcher::Results&& result) const {
 
     std::vector<PathAndHash> alteredPaths;
     std::vector<folly::fs::path> deletedPaths;
-    for (auto const& pathData : result["files"]) {
-      folly::fs::path path{pathData["name"].asString()};
-      assertx(path.is_relative());
-      if (!pathData["exists"].asBool()) {
-        deletedPaths.push_back(std::move(path));
-        continue;
+    for (auto& pathData : result.m_files) {
+      if (!pathData.m_exists) {
+        deletedPaths.push_back(std::move(pathData.m_path));
+      } else {
+        alteredPaths.push_back({std::move(pathData.m_path), pathData.m_hash});
       }
-
-      alteredPaths.push_back({std::move(path), getSha1Hash(pathData)});
     }
     return {std::move(alteredPaths), std::move(deletedPaths)};
   }
@@ -1160,25 +1039,14 @@ private:
     return derivedTypeVec.toArray();
   }
 
-  std::mutex m_mutex;
   folly::CPUThreadPoolExecutor m_updateExec;
 
+  folly::Synchronized<folly::FutureSplitter<folly::Unit>> m_updateFuture{
+      folly::splitFuture(folly::makeFuture())};
   std::atomic<bool> m_closing{false};
   folly::fs::path m_root;
   SymbolMap m_map;
-
-  /**
-   * Updates this AutoloadMap using Watchman to track changed files.
-   *
-   * If this is `std::nullopt`, then we will treat the AutoloadMap as static.
-   */
-  struct WatchmanData {
-    folly::dynamic m_queryExpr;
-    Watchman& m_watchmanClient;
-    folly::Future<watchman::SubscriptionPtr> m_subscribeFuture{nullptr};
-    folly::FutureSplitter<folly::Unit> m_updateFuture{folly::makeFuture()};
-  };
-  Optional<WatchmanData> m_watchmanData;
+  std::unique_ptr<Watcher> m_watcher;
 
   template <SymKind k, typename TLambda>
   Array getFileSymbols(const String& path, TLambda lambda) {
@@ -1324,11 +1192,10 @@ private:
 
 } // namespace
 
-std::shared_ptr<FactsStore> make_watchman_facts(
+std::shared_ptr<FactsStore> make_watcher_facts(
     folly::fs::path root,
     DBData dbData,
-    folly::dynamic queryExpr,
-    Watchman& watchmanClient,
+    std::unique_ptr<Watcher> watcher,
     bool shouldSubscribe,
     std::vector<std::string> indexedMethodAttrsVec) {
   hphp_hash_set<std::string> indexedMethodAttrs;
@@ -1339,8 +1206,7 @@ std::shared_ptr<FactsStore> make_watchman_facts(
   auto map = std::make_shared<FactsStoreImpl>(
       std::move(root),
       std::move(dbData),
-      std::move(queryExpr),
-      watchmanClient,
+      std::move(watcher),
       std::move(indexedMethodAttrs));
   if (shouldSubscribe) {
     map->subscribe();

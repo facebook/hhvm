@@ -327,12 +327,12 @@ impl<'a, T> BumpSliceMut<'a, T> {
     }
 
     #[inline]
-    pub fn iter(&self) -> std::slice::Iter<T> {
+    pub fn iter(&self) -> std::slice::Iter<'_, T> {
         self.as_ref().iter()
     }
 
     #[inline]
-    pub fn iter_mut(&mut self) -> std::slice::IterMut<T> {
+    pub fn iter_mut(&mut self) -> std::slice::IterMut<'_, T> {
         self.as_mut().iter_mut()
     }
 

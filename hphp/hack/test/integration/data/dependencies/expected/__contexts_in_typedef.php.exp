@@ -3,7 +3,7 @@
 type TydefWithCapabilities<T> = (
   (function(): void),
   (function()[]: void),
-  (function()[\HH\Contexts\write_props, \HH\Contexts\rx]: void),
+  (function()[write_props, rx]: void),
 );
 
 function contexts_in_typedef<T>(TydefWithCapabilities<T> $y): void {}

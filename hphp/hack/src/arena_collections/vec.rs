@@ -8,7 +8,7 @@ use std::ops::Deref;
 use std::slice;
 
 #[derive(Debug, Eq, Ord, PartialEq, PartialOrd)]
-pub struct Vec<'a, T: 'a>(BVec<'a, T>);
+pub struct Vec<'a, T>(BVec<'a, T>);
 
 #[macro_export]
 macro_rules! pvec {

@@ -246,6 +246,12 @@ struct RequestInjectionData {
 #undef HC
 
   /*
+   * Whether to suppress the emission of Class to String conversion warnings.
+   */
+  bool getSuppressClassConversionWarnings() const;
+  void setSuppressClassConversionWarnings(bool);
+
+  /*
    * Whether coverage is being collected.
    */
   bool getCoverage() const;
@@ -258,17 +264,13 @@ struct RequestInjectionData {
   bool getDebuggerAttached();
   void setDebuggerAttached(bool);
 
+  void setDebuggerAttachedAtInit(bool);
+
   /*
    * Returns true if the debugger should force interrupts due to any of the
    * debugger interrupt conditions being true.
    */
   bool getDebuggerForceIntr() const;
-
-  /*
-   * Indicating we should force interrupts for debuggers.  This is intended to
-   * be used by debuggers for forcing onOpcode events.
-   */
-  bool getDebuggerIntr() const;
   void setDebuggerIntr(bool);
 
   /*
@@ -366,6 +368,7 @@ private:
   RequestTimer m_userTimeoutTimer;
 
   bool m_debuggerAttached{false};
+  bool m_hasDebuggerAttachedAtInit{false};
   bool m_coverage{false};
   bool m_jit{false};
   bool m_jittingDisabled{false};
@@ -375,6 +378,8 @@ private:
 #define HC(Opt, ...) bool m_suppressHAC##Opt{false};
   HAC_CHECK_OPTS
 #undef HC
+
+  bool m_suppressClassConversionWarnings{false};
 
   bool m_debuggerStepIn{false};
   bool m_debuggerNext{false};

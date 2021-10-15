@@ -1330,6 +1330,10 @@ FCallArgs::Flags read_fcall_flags(AsmState& as, Op thisOpcode) {
     if (flag == "Unpack") { flags |= FCallArgs::HasUnpack; continue; }
     if (flag == "Generics") { flags |= FCallArgs::HasGenerics; continue; }
     if (flag == "SkipRepack") { flags |= FCallArgs::SkipRepack; continue; }
+    if (flag == "SkipCoeffectsCheck") {
+      flags |= FCallArgs::SkipCoeffectsCheck;
+      continue;
+    }
     if (flag == "EnforceMutableReturn") {
       flags |= FCallArgs::EnforceMutableReturn;
       continue;
@@ -1759,12 +1763,12 @@ Variant checkSize(Variant val) {
  * caller to make sure it is a legal literal.
  */
 Variant parse_php_serialized(folly::StringPiece str) {
+  SuppressClassConversionWarning suppressor;
   VariableUnserializer vu(
     str.data(),
     str.size(),
     VariableUnserializer::Type::Internal,
-    /* allowUnknownSerializableClass = */ true,
-    /* suppressClassConversionWarnings = */ true
+    /* allowUnknownSerializableClass = */ true
   );
   try {
     return checkSize(vu.unserialize());

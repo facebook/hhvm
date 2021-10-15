@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2c4c2ddd829511c406e96fe1af60a9f9>>
+// @generated SignedSource<<2ba43390283762000cb66b5dad9dbb17>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -146,19 +146,6 @@ impl<'a> Node<'a> for ClassishKind<'a> {
         }
     }
 }
-impl<'a> Node<'a> for CollectionStyle {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_collection_style(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            CollectionStyle::VecStyle => {}
-            CollectionStyle::DictStyle => {}
-            CollectionStyle::KeysetStyle => {}
-            CollectionStyle::ArraykeyStyle => {}
-        }
-    }
-}
 impl<'a> Node<'a> for ConcreteTypeconst<'a> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_concrete_typeconst(self)
@@ -235,7 +222,7 @@ impl<'a> Node<'a> for DependentType {
         }
     }
 }
-impl<'a> Node<'a> for Enforcement<'a> {
+impl<'a> Node<'a> for Enforcement {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_enforcement(self)
     }
@@ -243,7 +230,6 @@ impl<'a> Node<'a> for Enforcement<'a> {
         match self {
             Enforcement::Unenforced => {}
             Enforcement::Enforced => {}
-            Enforcement::PartiallyEnforced(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }
@@ -456,24 +442,6 @@ impl<'a> Node<'a> for NegType<'a> {
         match self {
             NegType::NegPrim(ref __binding_0) => __binding_0.accept(v),
             NegType::NegClass(ref __binding_0) => __binding_0.accept(v),
-        }
-    }
-}
-impl<'a> Node<'a> for PartiallyAbstractTypeconst<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_partially_abstract_typeconst(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            PartiallyAbstractTypeconst {
-                constraint: ref __binding_0,
-                type_: ref __binding_1,
-            } => {
-                {
-                    __binding_0.accept(v)
-                }
-                { __binding_1.accept(v) }
-            }
         }
     }
 }
@@ -899,7 +867,6 @@ impl<'a> Node<'a> for T_<'a> {
             T_::RunpackParam(ref __binding_0) => __binding_0.accept(v),
             T_::RinoutParam(ref __binding_0) => __binding_0.accept(v),
             T_::Rinstantiate(ref __binding_0) => __binding_0.accept(v),
-            T_::RarrayFilter(ref __binding_0) => __binding_0.accept(v),
             T_::Rtypeconst(ref __binding_0) => __binding_0.accept(v),
             T_::RtypeAccess(ref __binding_0) => __binding_0.accept(v),
             T_::RexprDepType(ref __binding_0) => __binding_0.accept(v),
@@ -1056,6 +1023,7 @@ impl<'a> Node<'a> for Ty_<'a> {
             Ty_::Terr => {}
             Ty_::Tnonnull => {}
             Ty_::Tdynamic => {}
+            Ty_::Tsupportdynamic => {}
             Ty_::Toption(ref __binding_0) => __binding_0.accept(v),
             Ty_::Tprim(ref __binding_0) => __binding_0.accept(v),
             Ty_::Tfun(ref __binding_0) => __binding_0.accept(v),
@@ -1086,7 +1054,6 @@ impl<'a> Node<'a> for Typeconst<'a> {
         match self {
             Typeconst::TCAbstract(ref __binding_0) => __binding_0.accept(v),
             Typeconst::TCConcrete(ref __binding_0) => __binding_0.accept(v),
-            Typeconst::TCPartiallyAbstract(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }

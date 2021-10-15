@@ -2,14 +2,14 @@
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
 <<__SupportDynamicType>>
-class C<T as dynamic> {
+class C<<<__RequireDynamic>>T as dynamic> {
   public function __construct(private T $item) { }
   public function get():T {
     return $this->item;
   }
 }
 
-function make<T as dynamic>(T $x): C<T> {
+function make<<<__RequireDynamic>>T as dynamic>(T $x): C<T> {
   return new C<T>($x);
 }
 

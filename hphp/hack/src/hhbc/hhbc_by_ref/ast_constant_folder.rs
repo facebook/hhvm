@@ -5,7 +5,6 @@
 use indexmap::IndexMap;
 use std::{collections::hash_map::RandomState, fmt};
 
-use decl_provider::DeclProvider;
 use ffi::Pair;
 use hhbc_by_ref_ast_class_expr as ast_class_expr;
 use hhbc_by_ref_ast_scope as ast_scope;
@@ -93,9 +92,9 @@ fn try_type_intlike(s: &str) -> Option<i64> {
     }
 }
 
-fn class_const_to_typed_value<'local_arena, 'arena, 'decl, D: DeclProvider<'decl>>(
+fn class_const_to_typed_value<'local_arena, 'arena, 'decl>(
     alloc: &'local_arena bumpalo::Bump,
-    emitter: &Emitter<'arena, 'decl, D>,
+    emitter: &Emitter<'arena, 'decl>,
     cid: &ast::ClassId,
     id: &ast::Pstring,
 ) -> Result<TypedValue<'local_arena>, Error> {
@@ -123,9 +122,9 @@ fn class_const_to_typed_value<'local_arena, 'arena, 'decl, D: DeclProvider<'decl
     Err(Error::UserDefinedConstant)
 }
 
-fn varray_to_typed_value<'local_arena, 'arena, 'decl, D: DeclProvider<'decl>>(
+fn varray_to_typed_value<'local_arena, 'arena, 'decl>(
     alloc: &'local_arena bumpalo::Bump,
-    emitter: &Emitter<'arena, 'decl, D>,
+    emitter: &Emitter<'arena, 'decl>,
     fields: &[ast::Expr],
 ) -> Result<TypedValue<'local_arena>, Error> {
     let tv_fields = alloc.alloc_slice_fill_iter(
@@ -138,9 +137,9 @@ fn varray_to_typed_value<'local_arena, 'arena, 'decl, D: DeclProvider<'decl>>(
     Ok(TypedValue::mk_vec(tv_fields))
 }
 
-fn darray_to_typed_value<'local_arena, 'arena, 'decl, D: DeclProvider<'decl>>(
+fn darray_to_typed_value<'local_arena, 'arena, 'decl>(
     alloc: &'local_arena bumpalo::Bump,
-    emitter: &Emitter<'arena, 'decl, D>,
+    emitter: &Emitter<'arena, 'decl>,
     fields: &[(ast::Expr, ast::Expr)],
 ) -> Result<TypedValue<'local_arena>, Error> {
     //TODO: Improve. It's a bit silly having to use a std::vector::Vec
@@ -159,9 +158,9 @@ fn darray_to_typed_value<'local_arena, 'arena, 'decl, D: DeclProvider<'decl>>(
     )))
 }
 
-fn set_afield_to_typed_value_pair<'local_arena, 'arena, 'decl, D: DeclProvider<'decl>>(
+fn set_afield_to_typed_value_pair<'local_arena, 'arena, 'decl>(
     alloc: &'local_arena bumpalo::Bump,
-    e: &Emitter<'arena, 'decl, D>,
+    e: &Emitter<'arena, 'decl>,
     afield: &ast::Afield,
 ) -> Result<(TypedValue<'local_arena>, TypedValue<'local_arena>), Error> {
     match afield {
@@ -172,18 +171,18 @@ fn set_afield_to_typed_value_pair<'local_arena, 'arena, 'decl, D: DeclProvider<'
     }
 }
 
-fn set_afield_value_to_typed_value_pair<'local_arena, 'arena, 'decl, D: DeclProvider<'decl>>(
+fn set_afield_value_to_typed_value_pair<'local_arena, 'arena, 'decl>(
     alloc: &'local_arena bumpalo::Bump,
-    e: &Emitter<'arena, 'decl, D>,
+    e: &Emitter<'arena, 'decl>,
     v: &ast::Expr,
 ) -> Result<(TypedValue<'local_arena>, TypedValue<'local_arena>), Error> {
     let tv = key_expr_to_typed_value(alloc, e, v)?;
     Ok((tv.clone(), tv))
 }
 
-fn afield_to_typed_value_pair<'local_arena, 'arena, 'decl, D: DeclProvider<'decl>>(
+fn afield_to_typed_value_pair<'local_arena, 'arena, 'decl>(
     alloc: &'local_arena bumpalo::Bump,
-    emitter: &Emitter<'arena, 'decl, D>,
+    emitter: &Emitter<'arena, 'decl>,
     afield: &ast::Afield,
 ) -> Result<(TypedValue<'local_arena>, TypedValue<'local_arena>), Error> {
     match afield {
@@ -194,9 +193,9 @@ fn afield_to_typed_value_pair<'local_arena, 'arena, 'decl, D: DeclProvider<'decl
     }
 }
 
-fn kv_to_typed_value_pair<'local_arena, 'arena, 'decl, D: DeclProvider<'decl>>(
+fn kv_to_typed_value_pair<'local_arena, 'arena, 'decl>(
     alloc: &'local_arena bumpalo::Bump,
-    emitter: &Emitter<'arena, 'decl, D>,
+    emitter: &Emitter<'arena, 'decl>,
     key: &ast::Expr,
     value: &ast::Expr,
 ) -> Result<(TypedValue<'local_arena>, TypedValue<'local_arena>), Error> {
@@ -206,9 +205,9 @@ fn kv_to_typed_value_pair<'local_arena, 'arena, 'decl, D: DeclProvider<'decl>>(
     ))
 }
 
-fn value_afield_to_typed_value<'local_arena, 'arena, 'decl, D: DeclProvider<'decl>>(
+fn value_afield_to_typed_value<'local_arena, 'arena, 'decl>(
     alloc: &'local_arena bumpalo::Bump,
-    emitter: &Emitter<'arena, 'decl, D>,
+    emitter: &Emitter<'arena, 'decl>,
     afield: &ast::Afield,
 ) -> Result<TypedValue<'local_arena>, Error> {
     match afield {
@@ -219,9 +218,9 @@ fn value_afield_to_typed_value<'local_arena, 'arena, 'decl, D: DeclProvider<'dec
     }
 }
 
-fn key_expr_to_typed_value<'local_arena, 'arena, 'decl, D: DeclProvider<'decl>>(
+fn key_expr_to_typed_value<'local_arena, 'arena, 'decl>(
     alloc: &'local_arena bumpalo::Bump,
-    emitter: &Emitter<'arena, 'decl, D>,
+    emitter: &Emitter<'arena, 'decl>,
     expr: &ast::Expr,
 ) -> Result<TypedValue<'local_arena>, Error> {
     let tv = expr_to_typed_value(alloc, emitter, expr)?;
@@ -237,9 +236,9 @@ fn key_expr_to_typed_value<'local_arena, 'arena, 'decl, D: DeclProvider<'decl>>(
     }
 }
 
-fn keyset_value_afield_to_typed_value<'local_arena, 'arena, 'decl, D: DeclProvider<'decl>>(
+fn keyset_value_afield_to_typed_value<'local_arena, 'arena, 'decl>(
     alloc: &'local_arena bumpalo::Bump,
-    emitter: &Emitter<'arena, 'decl, D>,
+    emitter: &Emitter<'arena, 'decl>,
     afield: &ast::Afield,
 ) -> Result<TypedValue<'local_arena>, Error> {
     let tv = value_afield_to_typed_value(alloc, emitter, afield)?;
@@ -255,9 +254,9 @@ fn keyset_value_afield_to_typed_value<'local_arena, 'arena, 'decl, D: DeclProvid
     }
 }
 
-fn shape_to_typed_value<'local_arena, 'arena, 'decl, D: DeclProvider<'decl>>(
+fn shape_to_typed_value<'local_arena, 'arena, 'decl>(
     alloc: &'local_arena bumpalo::Bump,
-    emitter: &Emitter<'arena, 'decl, D>,
+    emitter: &Emitter<'arena, 'decl>,
     fields: &[(ast::ShapeFieldName, ast::Expr)],
 ) -> Result<TypedValue<'local_arena>, Error> {
     let a = alloc.alloc_slice_fill_iter(
@@ -305,9 +304,9 @@ fn shape_to_typed_value<'local_arena, 'arena, 'decl, D: DeclProvider<'decl>>(
     Ok(TypedValue::mk_dict(a))
 }
 
-pub fn vec_to_typed_value<'local_arena, 'arena, 'decl, D: DeclProvider<'decl>>(
+pub fn vec_to_typed_value<'local_arena, 'arena, 'decl>(
     alloc: &'local_arena bumpalo::Bump,
-    e: &Emitter<'arena, 'decl, D>,
+    e: &Emitter<'arena, 'decl>,
     fields: &[ast::Afield],
 ) -> Result<TypedValue<'local_arena>, Error> {
     //TODO: Improve. It's a bit silly having to use a std::vector::Vec
@@ -320,9 +319,9 @@ pub fn vec_to_typed_value<'local_arena, 'arena, 'decl, D: DeclProvider<'decl>>(
     Ok(TypedValue::mk_vec(fields))
 }
 
-pub fn expr_to_typed_value<'local_arena, 'arena, 'decl, D: DeclProvider<'decl>>(
+pub fn expr_to_typed_value<'local_arena, 'arena, 'decl>(
     alloc: &'local_arena bumpalo::Bump,
-    e: &Emitter<'arena, 'decl, D>,
+    e: &Emitter<'arena, 'decl>,
     expr: &ast::Expr,
 ) -> Result<TypedValue<'local_arena>, Error> {
     expr_to_typed_value_(
@@ -331,9 +330,9 @@ pub fn expr_to_typed_value<'local_arena, 'arena, 'decl, D: DeclProvider<'decl>>(
     )
 }
 
-pub fn expr_to_typed_value_<'local_arena, 'arena, 'decl, D: DeclProvider<'decl>>(
+pub fn expr_to_typed_value_<'local_arena, 'arena, 'decl>(
     alloc: &'local_arena bumpalo::Bump,
-    emitter: &Emitter<'arena, 'decl, D>,
+    emitter: &Emitter<'arena, 'decl>,
     expr: &ast::Expr,
     allow_maps: bool,
     force_class_const: bool,
@@ -373,7 +372,7 @@ pub fn expr_to_typed_value_<'local_arena, 'arena, 'decl, D: DeclProvider<'decl>>
                 .map_or(false, |x| x.1 == special_functions::HHAS_ADATA) =>
         {
             match id.2[..] {
-                [ast::Expr(_, _, ast::Expr_::String(ref data))] => {
+                [(ast_defs::ParamKind::Pnormal, ast::Expr(_, _, ast::Expr_::String(ref data)))] => {
                     // FIXME: This is not safe--string literals are binary strings.
                     // There's no guarantee that they're valid UTF-8.
                     Ok(TypedValue::mk_hhas_adata(
@@ -602,20 +601,18 @@ fn value_to_expr_<'local_arena>(v: TypedValue<'local_arena>) -> Result<ast::Expr
     })
 }
 
-struct FolderVisitor<'a, 'local_arena, 'arena, 'decl, D: DeclProvider<'decl>> {
+struct FolderVisitor<'a, 'local_arena, 'arena, 'decl> {
     alloc: &'local_arena bumpalo::Bump,
-    emitter: &'a Emitter<'arena, 'decl, D>,
+    emitter: &'a Emitter<'arena, 'decl>,
 }
 
-impl<'a, 'local_arena, 'arena, 'decl, D: DeclProvider<'decl>>
-    FolderVisitor<'a, 'local_arena, 'arena, 'decl, D>
-{
-    fn new(alloc: &'local_arena bumpalo::Bump, emitter: &'a Emitter<'arena, 'decl, D>) -> Self {
+impl<'a, 'local_arena, 'arena, 'decl> FolderVisitor<'a, 'local_arena, 'arena, 'decl> {
+    fn new(alloc: &'local_arena bumpalo::Bump, emitter: &'a Emitter<'arena, 'decl>) -> Self {
         Self { alloc, emitter }
     }
 }
 
-impl<'ast, 'decl, D: DeclProvider<'decl>> VisitorMut<'ast> for FolderVisitor<'_, '_, '_, 'decl, D> {
+impl<'ast, 'decl> VisitorMut<'ast> for FolderVisitor<'_, '_, '_, 'decl> {
     type P = AstParams<(), Error>;
 
     fn object(&mut self) -> &mut dyn VisitorMut<'ast, P = Self::P> {
@@ -649,26 +646,26 @@ impl<'ast, 'decl, D: DeclProvider<'decl>> VisitorMut<'ast> for FolderVisitor<'_,
     }
 }
 
-pub fn fold_expr<'local_arena, 'arena, 'decl, D: DeclProvider<'decl>>(
+pub fn fold_expr<'local_arena, 'arena, 'decl>(
     expr: &mut ast::Expr,
     alloc: &'local_arena bumpalo::Bump,
-    e: &mut Emitter<'arena, 'decl, D>,
+    e: &mut Emitter<'arena, 'decl>,
 ) -> Result<(), Error> {
     visit_mut(&mut FolderVisitor::new(alloc, e), &mut (), expr)
 }
 
-pub fn fold_program<'local_arena, 'arena, 'decl, D: DeclProvider<'decl>>(
+pub fn fold_program<'local_arena, 'arena, 'decl>(
     p: &mut ast::Program,
     alloc: &'local_arena bumpalo::Bump,
-    e: &mut Emitter<'arena, 'decl, D>,
+    e: &mut Emitter<'arena, 'decl>,
 ) -> Result<(), Error> {
     visit_mut(&mut FolderVisitor::new(alloc, e), &mut (), p)
 }
 
-pub fn literals_from_exprs<'local_arena, 'arena, 'decl, D: DeclProvider<'decl>>(
+pub fn literals_from_exprs<'local_arena, 'arena, 'decl>(
     exprs: &mut [ast::Expr],
     alloc: &'local_arena bumpalo::Bump,
-    e: &mut Emitter<'arena, 'decl, D>,
+    e: &mut Emitter<'arena, 'decl>,
 ) -> Result<Vec<TypedValue<'local_arena>>, Error> {
     for expr in exprs.iter_mut() {
         fold_expr(expr, alloc, e)?;

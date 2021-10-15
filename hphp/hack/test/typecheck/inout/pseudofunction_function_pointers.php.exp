@@ -1,0 +1,38 @@
+File "pseudofunction_function_pointers.php", line 6, characters 13-20:
+literal is not allowed in write context (Parsing[1002])
+File "pseudofunction_function_pointers.php", line 6, characters 13-20:
+The argument to `fun()` must be a single-quoted, constant literal string representing a valid function name. (Naming[2024])
+File "pseudofunction_function_pointers.php", line 9, characters 19-20:
+The argument to `inst_meth()` must be an expression and a constant literal string representing a valid method name. (Naming[2025])
+File "pseudofunction_function_pointers.php", line 10, characters 13-14:
+The argument to `inst_meth()` must be an expression and a constant literal string representing a valid method name. (Naming[2025])
+File "pseudofunction_function_pointers.php", line 11, characters 19-20:
+The argument to `inst_meth()` must be an expression and a constant literal string representing a valid method name. (Naming[2025])
+File "pseudofunction_function_pointers.php", line 12, characters 3-13:
+The two arguments to `meth_caller()` must be:
+ - first: `ClassOrInterface::class`
+ - second: a single-quoted string literal containing the name of a non-static method of that class (Naming[2026])
+File "pseudofunction_function_pointers.php", line 13, characters 3-13:
+The two arguments to `meth_caller()` must be:
+ - first: `ClassOrInterface::class`
+ - second: a single-quoted string literal containing the name of a non-static method of that class (Naming[2026])
+File "pseudofunction_function_pointers.php", line 14, characters 3-13:
+The two arguments to `meth_caller()` must be:
+ - first: `ClassOrInterface::class`
+ - second: a single-quoted string literal containing the name of a non-static method of that class (Naming[2026])
+File "pseudofunction_function_pointers.php", line 15, characters 3-12:
+The two arguments to `class_meth()` must be:
+ - first: `ValidClassname::class`
+ - second: a single-quoted string literal containing the name of a static method of that class (Naming[2022])
+File "pseudofunction_function_pointers.php", line 16, characters 3-12:
+The two arguments to `class_meth()` must be:
+ - first: `ValidClassname::class`
+ - second: a single-quoted string literal containing the name of a static method of that class (Naming[2022])
+File "pseudofunction_function_pointers.php", line 17, characters 3-12:
+The two arguments to `class_meth()` must be:
+ - first: `ValidClassname::class`
+ - second: a single-quoted string literal containing the name of a static method of that class (Naming[2022])
+File "pseudofunction_function_pointers.php", line 5, characters 18-25:
+Unexpected `inout` argument for `call_user_func` (NastCheck[3096])
+File "pseudofunction_function_pointers.php", line 5, characters 3-16:
+The builtin `call_user_func` is deprecated. (Typing[4128])

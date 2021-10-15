@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<67dc0bfc6134407829a6c273f3957153>>
+// @generated SignedSource<<129bdcb54cccf1dc76575e03dcb13c5e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -49,7 +49,7 @@ pub enum CeVisibility<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Vprotected(&'a str),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Vinternal(&'a str),
+    Vinternal(&'a typing_modules::Module_<'a>),
 }
 impl<'a> TrivialDrop for CeVisibility<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(CeVisibility<'arena>);
@@ -496,40 +496,12 @@ arena_deserializer::impl_deserialize_in_arena!(WhereConstraint<'arena>);
     ToOcamlRep
 )]
 #[repr(C)]
-pub enum CollectionStyle {
-    VecStyle,
-    DictStyle,
-    KeysetStyle,
-    ArraykeyStyle,
-}
-impl TrivialDrop for CollectionStyle {}
-arena_deserializer::impl_deserialize_in_arena!(CollectionStyle);
-
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(C)]
-pub enum Enforcement<'a> {
+pub enum Enforcement {
     Unenforced,
     Enforced,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    PartiallyEnforced(&'a (CollectionStyle, PosId<'a>)),
 }
-impl<'a> TrivialDrop for Enforcement<'a> {}
-arena_deserializer::impl_deserialize_in_arena!(Enforcement<'arena>);
+impl TrivialDrop for Enforcement {}
+arena_deserializer::impl_deserialize_in_arena!(Enforcement);
 
 #[derive(
     Clone,
@@ -663,6 +635,7 @@ pub enum Ty_<'a> {
     Tany(tany_sentinel::TanySentinel),
     Terr,
     Tnonnull,
+    Tdynamic,
     /// A dynamic type is a special type which sometimes behaves as if it were a
     /// top type; roughly speaking, where a specific value of a particular type is
     /// expected and that type is dynamic, anything can be given. We call this
@@ -672,7 +645,7 @@ pub enum Ty_<'a> {
     ///
     /// it captures dynamicism within function scope.
     /// See tests in typecheck/dynamic/ for more examples.
-    Tdynamic,
+    Tsupportdynamic,
     /// Nullable, called "option" in the ML parlance.
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Toption(&'a Ty<'a>),
@@ -938,8 +911,7 @@ arena_deserializer::impl_deserialize_in_arena!(FunArity<'arena>);
 #[repr(C)]
 pub struct PossiblyEnforcedTy<'a> {
     /// True if consumer of this type enforces it at runtime
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub enforced: Enforcement<'a>,
+    pub enforced: Enforcement,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub type_: &'a Ty<'a>,
 }

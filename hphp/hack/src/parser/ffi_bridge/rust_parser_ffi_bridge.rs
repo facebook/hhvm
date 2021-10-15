@@ -15,7 +15,6 @@ mod ffi {
         disable_xhp_element_mangling: bool,
         disable_xhp_children_declarations: bool,
         disable_modes: bool,
-        disallow_hash_comments: bool,
         disallow_fun_and_cls_meth_pseudo_funcs: bool,
         interpret_soft_types_as_like_types: bool,
     }
@@ -71,7 +70,6 @@ impl ffi::ParserEnv {
             disable_xhp_element_mangling: env.disable_xhp_element_mangling,
             disable_xhp_children_declarations: env.disable_xhp_children_declarations,
             disable_modes: env.disable_modes,
-            disallow_hash_comments: env.disallow_hash_comments,
             disallow_fun_and_cls_meth_pseudo_funcs: env.disallow_fun_and_cls_meth_pseudo_funcs,
             interpret_soft_types_as_like_types: env.interpret_soft_types_as_like_types,
         }

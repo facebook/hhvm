@@ -61,10 +61,10 @@ let pp_mode fmt mode =
 (*****************************************************************************)
 
 type name_type =
-  | Fun [@value 0]
-  | Class [@value 1]
+  | Fun [@value 3]
+  | Class [@value 0]
   | RecordDef [@value 2]
-  | Typedef [@value 3]
+  | Typedef [@value 1]
   | Const [@value 4]
 [@@deriving eq, show, enum, ord]
 

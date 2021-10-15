@@ -320,8 +320,8 @@ function asio_get_running(): ResumableWaitHandle;
 
 namespace HH\Asio {
 
-async function null<T>(): Awaitable<?T> { return null; }
-async function void(): Awaitable<void> {}
+async function null<T>()[]: Awaitable<?T> { return null; }
+async function void()[]: Awaitable<void> {}
 
 /**
  * Wait for a given Awaitable to finish and return its result.
@@ -330,7 +330,7 @@ async function void(): Awaitable<void> {}
  * until the provided Awaitable is finished.
  */
 <<__Native("NoFCallBuiltin")>>
-function join<T>(Awaitable<T> $awaitable): mixed;
+function join<T>(Awaitable<T> $awaitable)[]: mixed;
 
 /**
  * Get result of an already finished Awaitable.

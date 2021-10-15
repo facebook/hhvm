@@ -38,6 +38,7 @@
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/object-iterator.h"
 #include "hphp/runtime/base/memory-manager-defs.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
 #include "hphp/runtime/ext/datetime/ext_datetime.h"
@@ -201,6 +202,12 @@ std::pair<int, double> sizeOfArray(
     FTRACE(3, "Cycle found for ArrayData*({})\n", ad);
     return std::make_pair(0, 0);
   }
+
+  if (val_stack->size() >= RuntimeOption::EvalObjProfMaxNesting) {
+    raise_warning("objprof: data structure is too deep, pruning traversal");
+    return std::make_pair(0, 0);
+  }
+
   FTRACE(3, "\n\nInserting ArrayData*({})\n", ad);
   val_stack->push_back(ad);
 
@@ -346,6 +353,12 @@ void stringsOfArray(
   if (std::find(ptr_begin, ptr_end, ad) != ptr_end) {
     return;
   }
+
+  if (val_stack->size() >= RuntimeOption::EvalObjProfMaxNesting) {
+    raise_warning("objprof: data structure is too deep, pruning traversal");
+    return;
+  }
+
   val_stack->push_back(ad);
 
   path->push_back(std::string("array()"));
@@ -668,6 +681,12 @@ std::pair<int, double> getObjSize(
     FTRACE(3, "Cycle found for {}*({})\n", obj->getClassName().data(), obj);
     return std::make_pair(0, 0);
   }
+
+  if (val_stack->size() >= RuntimeOption::EvalObjProfMaxNesting) {
+    raise_warning("objprof: data structure is too deep, pruning traversal");
+    return std::make_pair(0, 0);
+  }
+
   FTRACE(3, "\n\nInserting {}*({})\n", obj->getClassName().data(), obj);
   val_stack->push_back(obj);
 

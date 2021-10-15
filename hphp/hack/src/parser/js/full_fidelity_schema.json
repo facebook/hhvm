@@ -1,6 +1,6 @@
 { "description" :
   "@generated JSON schema of the Hack Full Fidelity Parser AST",
-  "version" : "2021-08-12-0001",
+  "version" : "2021-09-13-0001",
   "trivia" : [
     { "trivia_kind_name" : "WhiteSpace",
       "trivia_type_name" : "whitespace" },
@@ -221,6 +221,8 @@
       "token_text" : "type" },
     { "token_kind" : "Unset",
       "token_text" : "unset" },
+    { "token_kind" : "Upcast",
+      "token_text" : "upcast" },
     { "token_kind" : "Use",
       "token_text" : "use" },
     { "token_kind" : "Using",
@@ -1453,6 +1455,15 @@
       "type_name" : "nullable_as_expression",
       "description" : "nullable_as_expression",
       "prefix" : "nullable_as",
+      "fields" : [
+        { "field_name" : "left_operand" },
+        { "field_name" : "operator" },
+        { "field_name" : "right_operand" }
+      ] },
+    { "kind_name" : "UpcastExpression",
+      "type_name" : "upcast_expression",
+      "description" : "upcast_expression",
+      "prefix" : "upcast",
       "fields" : [
         { "field_name" : "left_operand" },
         { "field_name" : "operator" },

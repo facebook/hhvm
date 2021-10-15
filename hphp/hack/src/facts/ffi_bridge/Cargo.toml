@@ -6,12 +6,11 @@ edition = "2018"
 
 [lib]
 path = "rust_facts_ffi_bridge.rs"
-test = false
-doctest = false
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
 cxx = "1.0.54"
+facts_rust = { path = "../cargo/facts_rust" }
 oxidized = { path = "../../oxidized" }
 rust_facts_ffi = { path = "../ffi" }
 

@@ -487,6 +487,13 @@ struct Func {
   uint32_t minNonVariadicParams() const;
   uint32_t maxNonVariadicParams() const;
 
+  /*
+   * Coeffects
+   */
+  const RuntimeCoeffects* requiredCoeffects() const;
+  // Returns nullptr if we cant tell whether there are coeffect rules
+  const CompactVector<CoeffectRule>* coeffectRules() const;
+
   struct FuncInfo;
   struct MethTabEntryPair;
   struct FuncFamily;

@@ -15,4 +15,25 @@ type kind_of_type =
   | TClass
   | TTypedef
   | TRecordDef
-[@@deriving show, eq, enum]
+[@@deriving show, eq]
+
+type name_kind =
+  | Type_kind of kind_of_type
+  | Fun_kind
+  | Const_kind
+[@@deriving show, eq]
+
+val name_kind_to_enum : name_kind -> int
+
+val name_kind_of_enum : int -> name_kind option
+
+(* The types in this file duplicate what's in FileInfo.name_type, but with more structure.
+It'd be nice to unify them. *)
+
+val name_kind_to_name_type : name_kind -> FileInfo.name_type
+
+val type_kind_to_name_type : kind_of_type -> FileInfo.name_type
+
+val name_kind_of_name_type : FileInfo.name_type -> name_kind
+
+val type_kind_of_name_type : FileInfo.name_type -> kind_of_type option

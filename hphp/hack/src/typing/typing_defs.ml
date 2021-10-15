@@ -95,7 +95,7 @@ type class_elt = {
 
 type fun_elt = {
   fe_deprecated: string option;
-  fe_module: string option;
+  fe_module: Typing_modules.t;
   fe_internal: bool;  (** Top-level functions have limited visibilities *)
   fe_type: decl_ty;
   fe_pos: Pos_or_decl.t;
@@ -131,7 +131,7 @@ type record_field_req =
 [@@deriving show]
 
 type record_def_type = {
-  rdt_module: string option;
+  rdt_module: Typing_modules.t;
   rdt_name: pos_id;
   rdt_extends: pos_id option;
   rdt_fields: (pos_id * record_field_req) list;
@@ -172,7 +172,6 @@ and partially_abstract_typeconst = {
 and typeconst =
   | TCAbstract of abstract_typeconst
   | TCConcrete of concrete_typeconst
-  | TCPartiallyAbstract of partially_abstract_typeconst
 
 and typeconst_type = {
   ttc_synthesized: bool;
@@ -211,7 +210,7 @@ and enum_type = {
 [@@deriving show]
 
 type typedef_type = {
-  td_module: string option;
+  td_module: Typing_modules.t;
   td_pos: Pos_or_decl.t;
   td_vis: Aast.typedef_visibility;
   td_tparams: decl_tparam list;
@@ -443,6 +442,7 @@ let is_union_or_inter_type (ty : locl_ty) =
   | Tnonnull
   | Tneg _
   | Tdynamic
+  | Tsupportdynamic
   | Tany _
   | Tprim _
   | Tfun _
@@ -487,8 +487,8 @@ let arity_min ft : int =
 
 let get_param_mode callconv =
   match callconv with
-  | Some Ast_defs.Pinout -> FPinout
-  | None -> FPnormal
+  | Ast_defs.Pinout _ -> FPinout
+  | Ast_defs.Pnormal -> FPnormal
 
 module DependentKind = struct
   let to_string = function
@@ -578,6 +578,7 @@ let ty_con_ordinal_ : type a. a ty_ -> int = function
   | Tvarray_or_darray _ -> 22
   | Taccess _ -> 24
   | Tvec_or_dict _ -> 25
+  | Tsupportdynamic -> 26
   (* only locl constructors *)
   | Tunapplied_alias _ -> 200
   | Tnewtype _ -> 201
@@ -694,12 +695,13 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
     | (Tneg neg1, Tneg neg2) -> compare_neg_type neg1 neg2
     | (Tnonnull, Tnonnull) -> 0
     | (Tdynamic, Tdynamic) -> 0
+    | (Tsupportdynamic, Tsupportdynamic) -> 0
     | (Terr, Terr) -> 0
     | ( ( Tprim _ | Toption _ | Tvarray _ | Tdarray _ | Tvarray_or_darray _
         | Tvec_or_dict _ | Tfun _ | Tintersection _ | Tunion _ | Ttuple _
         | Tgeneric _ | Tnewtype _ | Tdependent _ | Tclass _ | Tshape _ | Tvar _
-        | Tunapplied_alias _ | Tnonnull | Tdynamic | Terr | Taccess _ | Tany _
-        | Tneg _ ),
+        | Tunapplied_alias _ | Tnonnull | Tdynamic | Tsupportdynamic | Terr
+        | Taccess _ | Tany _ | Tneg _ ),
         _ ) ->
       ty_con_ordinal_ ty_1 - ty_con_ordinal_ ty_2
   and shape_field_type_compare :
@@ -1136,17 +1138,11 @@ let equal_abstract_typeconst at1 at2 =
        at2.atc_super_constraint
   && Option.equal equal_decl_ty at1.atc_default at2.atc_default
 
-let equal_partially_abstract_typeconst pat1 pat2 =
-  equal_decl_ty pat1.patc_constraint pat2.patc_constraint
-  && equal_decl_ty pat1.patc_type pat2.patc_type
-
 let equal_concrete_typeconst ct1 ct2 = equal_decl_ty ct1.tc_type ct2.tc_type
 
 let equal_typeconst t1 t2 =
   match (t1, t2) with
   | (TCAbstract at1, TCAbstract at2) -> equal_abstract_typeconst at1 at2
-  | (TCPartiallyAbstract pat1, TCPartiallyAbstract pat2) ->
-    equal_partially_abstract_typeconst pat1 pat2
   | (TCConcrete ct1, TCConcrete ct2) -> equal_concrete_typeconst ct1 ct2
   | _ -> false
 
@@ -1257,7 +1253,8 @@ let make_ce_flags
     ~lateinit
     ~dynamicallycallable
     ~readonly_prop
-    ~support_dynamic_type =
+    ~support_dynamic_type
+    ~needs_init =
   let flags = 0 in
   let flags = set_bit ce_flags_abstract abstract flags in
   let flags = set_bit ce_flags_final final flags in
@@ -1272,6 +1269,7 @@ let make_ce_flags
   let flags =
     set_bit ce_flags_support_dynamic_type support_dynamic_type flags
   in
+  let flags = set_bit ce_flags_needs_init needs_init flags in
   flags
 
 (** Tunapplied_alias is a locl phase constructor that always stands for a higher-kinded type.

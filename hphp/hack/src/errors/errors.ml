@@ -957,10 +957,11 @@ let as_map : t -> error list Relative_path.Map.t =
 
 let add_error_assert_primary_pos_in_current_decl :
     current_decl_and_file:Pos_or_decl.ctx ->
+    ?quickfixes:Pos.t quickfix list ->
     error_code ->
     Pos_or_decl.t message list ->
     unit =
- fun ~current_decl_and_file code reasons ->
+ fun ~current_decl_and_file ?quickfixes code reasons ->
   match reasons with
   | [] -> ()
   | ((primary_pos, claim_) as claim) :: remaining_reasons ->
@@ -978,16 +979,17 @@ let add_error_assert_primary_pos_in_current_decl :
           claim
           reasons
     in
-    add_list code claim reasons
+    add_list ?quickfixes code claim reasons
 
 let error_assert_primary_pos_in_current_decl_callback :
     default_code:Typing.t ->
     current_decl_and_file:Pos_or_decl.ctx ->
     error_from_reasons_callback =
- fun ~default_code ~current_decl_and_file ?code ?quickfixes:_ reasons ->
+ fun ~default_code ~current_decl_and_file ?code ?quickfixes reasons ->
   let code = Option.value code ~default:(Typing.err_code default_code) in
   add_error_assert_primary_pos_in_current_decl
     ~current_decl_and_file
+    ?quickfixes
     code
     reasons
 
@@ -1733,7 +1735,7 @@ let concrete_const_interface_override
         ^ "." );
     ]
 
-let interface_const_multiple_defs
+let interface_or_trait_const_multiple_defs
     child_pos
     parent_pos
     child_origin
@@ -1746,7 +1748,7 @@ let interface_const_multiple_defs
     ~code:(Typing.err_code Typing.ConcreteConstInterfaceOverride)
     [
       ( child_pos,
-        "Non-abstract constants defined in an interface cannot conflict with other inherited constants."
+        "Non-abstract constants defined in an interface or trait cannot conflict with other inherited constants."
       );
       ( parent_pos,
         Markdown_lite.md_codify name
@@ -2080,12 +2082,6 @@ let interface_with_partial_typeconst tconst_pos =
     tconst_pos
     "An interface cannot contain a partially abstract type constant"
 
-let partially_abstract_typeconst_definition pos =
-  add
-    (NastCheck.err_code NastCheck.PartiallyAbstractTypeconstDefinition)
-    pos
-    "`as` constraints are only legal on abstract type constants"
-
 let mk_multiple_xhp_category pos =
   {
     code = NastCheck.err_code NastCheck.MultipleXhpCategory;
@@ -2284,6 +2280,12 @@ let inout_argument_bad_expr pos =
     ("Arguments for `inout` parameters must be local variables or simple "
     ^ "subscript expressions on vecs, dicts, keysets, or arrays")
 
+let inout_in_transformed_pseudofunction pos fn =
+  add
+    (NastCheck.err_code NastCheck.InoutInTransformedPsuedofunction)
+    pos
+    (Printf.sprintf "Unexpected `inout` argument for `%s`" fn)
+
 let illegal_destructor pos =
   add
     (NastCheck.err_code NastCheck.IllegalDestructor)
@@ -2303,27 +2305,6 @@ let switch_multiple_default pos =
     pos
     "There can be only one `default` case in `switch`"
 
-let context_definitions_msg () =
-  (* Notes:
-   * - needs to be a thunk because path_of_prefix resolves a reference that is populated at runtime
-   *   - points to the hh_server tmp hhi directory
-   * - magic numbers are inteded to provide a nicer IDE experience,
-   * - a pos is constructed in order to make the link to contexts.hhi clickable
-   *)
-  let path =
-    Relative_path.(
-      let path =
-        Path.concat (Path.make (path_of_prefix Hhi)) "coeffect/contexts.hhi"
-      in
-      create Hhi (Path.to_string path))
-  in
-  ( Pos.make_from_lnum_bol_cnum
-      ~pos_file:path
-      ~pos_start:(28, 0, 0)
-      ~pos_end:(28, 0, 23),
-    "Hack provides a list of supported contexts here" )
-  |> claim_as_reason
-
 let illegal_context pos name =
   add_list
     NastCheck.(err_code IllegalContext)
@@ -2332,7 +2313,7 @@ let illegal_context pos name =
       ^ (name |> Markdown_lite.md_codify)
       ^ "\nCannot use a context defined outside namespace "
       ^ Naming_special_names.Coeffects.contexts )
-    [context_definitions_msg ()]
+    []
 
 (*****************************************************************************)
 (* Nast terminality *)
@@ -2653,7 +2634,7 @@ let method_variance pos =
   add
     (Typing.err_code Typing.MethodVariance)
     pos
-    "Covariance or contravariance is not allowed in type parameter of method or function."
+    "Covariance or contravariance is not allowed in type parameters of methods or functions."
 
 let explain_constraint ~(use_pos : Pos.t) : error_from_reasons_callback =
  fun ?code:_ ?(quickfixes = []) reasons ->
@@ -3080,6 +3061,12 @@ let isset_in_strict pos =
     pos
     ("`isset` tends to hide errors due to variable typos and so is limited to dynamic checks in "
     ^ "`strict` mode")
+
+let isset_inout_arg pos =
+  add
+    (Typing.err_code Typing.InoutInPseudofunction)
+    pos
+    "`isset` does not allow arguments to be passed by `inout`"
 
 let unset_nonidx_in_strict pos msgs =
   add_list
@@ -3956,13 +3943,41 @@ let non_object_member
   let (claim, reasons) = non_object_member_messages kind s ty pos2 in
   on_error ~code:(Typing.err_code code) (pos1, claim) reasons
 
-let non_object_member_read_ = non_object_member_ Typing.NonObjectMemberRead
+let non_object_member_read_
+    ~(kind : [< `property | `method_ | `class_typeconst ])
+    s
+    pos1
+    ty
+    pos2
+    on_error =
+  non_object_member_ Typing.NonObjectMemberRead ~kind s pos1 ty pos2 on_error
 
-let non_object_member_write_ = non_object_member_ Typing.NonObjectMemberRead
+let non_object_member_write_
+    ~(kind : [< `property | `method_ | `class_typeconst ])
+    s
+    pos1
+    ty
+    pos2
+    on_error =
+  non_object_member_ Typing.NonObjectMemberWrite ~kind s pos1 ty pos2 on_error
 
-let non_object_member_read = non_object_member Typing.NonObjectMemberRead
+let non_object_member_read
+    ~(kind : [< `property | `method_ | `class_typeconst ])
+    s
+    pos1
+    ty
+    pos2
+    on_error =
+  non_object_member Typing.NonObjectMemberRead ~kind s pos1 ty pos2 on_error
 
-let non_object_member_write = non_object_member Typing.NonObjectMemberRead
+let non_object_member_write
+    ~(kind : [< `property | `method_ | `class_typeconst ])
+    s
+    pos1
+    ty
+    pos2
+    on_error =
+  non_object_member Typing.NonObjectMemberWrite ~kind s pos1 ty pos2 on_error
 
 let unknown_object_member ~is_method s pos r =
   let msg =
@@ -5357,7 +5372,6 @@ let call_coeffect_error
         "From this declaration, the context of this function body provides "
         ^ available_incl_unsafe );
       (required_pos, "But the function being called requires " ^ required);
-      context_definitions_msg ();
     ]
 
 let op_coeffect_error
@@ -5377,8 +5391,7 @@ let op_coeffect_error
        ( available_pos,
          "The local (enclosing) context provides " ^ locally_available );
      ]
-    @ suggestion
-    @ [context_definitions_msg ()])
+    @ suggestion)
 
 let abstract_function_pointer cname meth_name call_pos decl_pos =
   let cname = strip_ns cname in
@@ -5519,8 +5532,8 @@ let enum_class_label_as_expr pos =
   add_list
     (Typing.err_code Typing.EnumClassLabelAsExpression)
     ( pos,
-      "Enum class labels are not allowed in this position. They are only allowed "
-      ^ "in function calls)" )
+      "Not enough type information to infer the type of this enum class label."
+    )
     []
 
 let enum_class_label_invalid_argument pos ~is_proj =
@@ -5960,11 +5973,11 @@ let module_hint ~def_pos ~use_pos =
     (use_pos, "You cannot use this type in a public declaration.")
     [(def_pos, "It is declared as `internal` here")]
 
-let expression_tree_non_public_property ~use_pos ~def_pos =
+let expression_tree_non_public_member ~use_pos ~def_pos =
   add_list
     (Typing.err_code Typing.ExpressionTreeNonPublicProperty)
-    (use_pos, "Cannot access non-public properties within expression trees.")
-    [(def_pos, "Property defined here")]
+    (use_pos, "Cannot access non-public members within expression trees.")
+    [(def_pos, "Member defined here")]
 
 let internal_method_with_invalid_visibility ~attr_pos ~visibility =
   let open Markdown_lite in
@@ -5974,6 +5987,14 @@ let internal_method_with_invalid_visibility ~attr_pos ~visibility =
   ^ String.lowercase
   @@ md_codify
   @@ Ast_defs.show_visibility visibility
+
+let trait_parent_construct_inconsistent pos def_pos =
+  add_list
+    (Typing.err_code Typing.TraitParentConstructInconsistent)
+    ( pos,
+      "This use of `parent::__construct` requires that the parent class be marked <<__ConsistentConstruct>>"
+    )
+    [(def_pos, "Parent definition is here")]
 
 (*****************************************************************************)
 (* Printing *)
@@ -6052,6 +6073,18 @@ let try_if_no_errors f1 f2 =
     add_error err;
     result
   | None -> f2 result
+
+let not_sub_dynamic dynamic_part pos ty (on_error : error_from_reasons_callback)
+    =
+  on_error
+    ~code:(Typing.err_code Typing.UnifyError)
+    (dynamic_part
+    @ [
+        ( pos,
+          "Type "
+          ^ Markdown_lite.md_codify ty
+          ^ " is not a subtype of `dynamic` under dynamic-aware subtyping" );
+      ])
 
 (*****************************************************************************)
 (* Do. *)

@@ -1,6 +1,6 @@
 File "bad_inout_use_call4.php", line 40, characters 5-12:
 Invalid argument (Typing[4110])
-File "bad_inout_use_call4.php", line 9, characters 18-19:
-Expected `C2`
-File "bad_inout_use_call4.php", line 20, characters 18-19:
-But got `C1`
+  File "bad_inout_use_call4.php", line 9, characters 18-19:
+  Expected `C2`
+  File "bad_inout_use_call4.php", line 20, characters 18-19:
+  But got `C1`

@@ -532,10 +532,7 @@ Class::~Class() {
 
   // clean enum cache
   EnumCache::deleteValues(this);
-
-  if (auto p = m_vtableVec.get()) {
-    low_free(p);
-  }
+  if (m_vtableVec) vm_free(m_vtableVec);
 
 #ifndef NDEBUG
   validate();
@@ -861,6 +858,7 @@ void Class::initProps() const {
   auto propVec = PropInitVec::allocWithReqAllocator(m_declPropInit);
 
   VMRegAnchor _;
+  CoeffectsAutoGuard _2;
 
   initPropHandle();
   m_propDataCache.initWith(propVec);
@@ -871,7 +869,7 @@ void Class::initProps() const {
     for (auto it = m_pinitVec.rbegin(); it != m_pinitVec.rend(); ++it) {
       DEBUG_ONLY auto retval = g_context->invokeFunc(
         *it, init_null_variant, nullptr, const_cast<Class*>(this),
-        RuntimeCoeffects::fixme(), false
+        RuntimeCoeffects::pure(), false
       );
       assertx(retval.m_type == KindOfNull);
     }
@@ -972,14 +970,14 @@ void Class::initSProps() const {
     for (unsigned i = 0, n = m_sinitVec.size(); i < n; i++) {
       DEBUG_ONLY auto retval = g_context->invokeFunc(
         m_sinitVec[i], init_null_variant, nullptr, const_cast<Class*>(this),
-        RuntimeCoeffects::fixme(), false
+        RuntimeCoeffects::pure(), false
       );
       assertx(retval.m_type == KindOfNull);
     }
     for (unsigned i = 0, n = m_linitVec.size(); i < n; i++) {
       DEBUG_ONLY auto retval = g_context->invokeFunc(
         m_linitVec[i], init_null_variant, nullptr, const_cast<Class*>(this),
-        RuntimeCoeffects::fixme(), false
+        RuntimeCoeffects::pure(), false
       );
       assertx(retval.m_type == KindOfNull);
     }
@@ -3009,6 +3007,7 @@ void Class::setProperties() {
         prop.typeConstraint = tc;
 
         prop.ubs = preProp->upperBounds();
+        prop.repoAuthType = preProp->repoAuthType();
 
         if (preProp->attrs() & AttrNoImplicitNullable) {
           prop.attrs |= AttrNoImplicitNullable;
@@ -3019,6 +3018,9 @@ void Class::setProperties() {
         attrSetter(prop.attrs,
                    preProp->attrs() & AttrInitialSatisfiesTC,
                    AttrInitialSatisfiesTC);
+        attrSetter(prop.attrs,
+                   preProp->attrs() & AttrPersistent,
+                   AttrPersistent);
 
         checkPrePropVal(prop, preProp);
         auto index = slotIndex[slot];
@@ -3316,6 +3318,15 @@ void Class::importTraitInstanceProp(Prop& traitProp,
       curPropMap[serializationIdx++].serializationIdx = prevIt->second;
       serializationVisited[prevIt->second] = true;
     }
+
+    if (prevProp.cls != this) {
+      prevProp.repoAuthType = traitProp.repoAuthType;
+      attrSetter(
+        prevProp.attrs,
+        traitProp.attrs & AttrPersistent,
+        AttrPersistent
+      );
+    }
   }
 }
 
@@ -3364,6 +3375,13 @@ void Class::importTraitStaticProp(
       assertx(prevPropInd != kInvalidSlot);
 
       prevPropVal = prevSProps[prevPropInd].val;
+
+      prevProp.repoAuthType = traitProp.repoAuthType;
+      attrSetter(
+        prevProp.attrs,
+        traitProp.attrs & AttrPersistent,
+        AttrPersistent
+      );
     }
     if (((prevProp.attrs ^ traitProp.attrs) & kRedeclarePropAttrMask) ||
         (!(prevProp.attrs & AttrSystemInitialValue) &&
@@ -3374,12 +3392,6 @@ void Class::importTraitStaticProp(
     }
     prevProp.cls = this;
     prevProp.val = prevPropVal;
-
-    attrSetter(
-      prevProp.attrs,
-      traitProp.attrs & AttrPersistent,
-      AttrPersistent
-    );
 
     assertx(staticSerializationVisited.size() > prevIt->second);
     if (!staticSerializationVisited[prevIt->second]) {
@@ -3804,7 +3816,7 @@ void Class::setInterfaceVtables() {
   const size_t nVtables = maxSlot + 1;
   auto const vtableVecSz = nVtables * sizeof(VtableVecSlot);
   auto const memSz = vtableVecSz + totalMethods * sizeof(LowPtr<Func>);
-  auto const mem = static_cast<char*>(low_malloc(memSz));
+  auto const mem = static_cast<char*>(vm_malloc(memSz));
   auto cursor = mem;
 
   ITRACE(3, "Setting interface vtables for class {}. "
@@ -4835,6 +4847,9 @@ Class* Class::def(const PreClass* preClass, bool failIsFatal /* = true */) {
             (!isIntType(*enumBaseTy) && !isStringType(*enumBaseTy))) {
           return nullptr;
         }
+      }
+      // enum and enum class
+      if (preClass->attrs() & (AttrEnum|AttrEnumClass)) {
         for (auto it = preClass->includedEnums().begin();
                    it != preClass->includedEnums().end(); ++it) {
           if (!Class::get(*it, false)) return nullptr;
@@ -4935,6 +4950,7 @@ Class* Class::load(const NamedEntity* ne, const StringData* name) {
 
 Class* Class::loadMissing(const NamedEntity* ne, const StringData* name) {
   VMRegAnchor _;
+  CoeffectsAutoGuard _2;
   AutoloadHandler::s_instance->autoloadClass(
     StrNR(const_cast<StringData*>(name)));
   return Class::lookup(ne);

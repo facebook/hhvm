@@ -29,8 +29,12 @@ template <SymKind k> struct PathToSymbolsMap {
 
   using PathSymbolMap = LazyTwoWayMap<Path, Symbol<k>>;
 
-  using SymbolSet = typename PathSymbolMap::ValuesSet;
-  using PathSet = typename PathSymbolMap::KeysSet;
+  using Symbols = typename PathSymbolMap::Values;
+  using Paths = typename PathSymbolMap::Keys;
+
+  explicit PathToSymbolsMap(std::shared_ptr<PathVersions> versions)
+      : m_pathSymbolMap{std::move(versions)} {
+  }
 
   /**
    * Return information about the locations of a given symbol, or the symbols
@@ -42,34 +46,25 @@ template <SymKind k> struct PathToSymbolsMap {
    * non-const overload to get a definitive response.
    */
 
-  const PathSet* getSymbolPaths(Symbol<k> symbol) const {
+  Optional<Paths> getSymbolPaths(Symbol<k> symbol) const {
     return m_pathSymbolMap.getKeysForValue(symbol);
   }
-  const PathSet&
-  getSymbolPaths(Symbol<k> symbol, std::vector<Path> pathsFromDB) {
+  Paths getSymbolPaths(Symbol<k> symbol, std::vector<Path> pathsFromDB) {
     return m_pathSymbolMap.getKeysForValue(symbol, std::move(pathsFromDB));
   }
 
-  const SymbolSet* getPathSymbols(Path path) const {
+  Optional<Symbols> getPathSymbols(Path path) const {
     return m_pathSymbolMap.getValuesForKey(path);
   }
-  const SymbolSet&
-  getPathSymbols(Path path, std::vector<Symbol<k>> symbolsFromDB) {
+  Symbols getPathSymbols(Path path, std::vector<Symbol<k>> symbolsFromDB) {
     return m_pathSymbolMap.getValuesForKey(path, std::move(symbolsFromDB));
-  }
-
-  /**
-   * Mark the given path as no longer defined.
-   */
-  void removePath(Path path) {
-    m_pathSymbolMap.setValuesForKey(path, {});
   }
 
   /**
    * Mark the given path as containing each of the given symbols, and no other
    * symbols of this map's kind.
    */
-  void replacePathSymbols(Path path, SymbolSet symbols) {
+  void replacePathSymbols(Path path, Symbols symbols) {
     m_pathSymbolMap.setValuesForKey(path, std::move(symbols));
   }
 

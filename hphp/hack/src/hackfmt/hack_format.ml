@@ -87,6 +87,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
             | TokenKind.HeredocStringLiteralTail
             | TokenKind.NowdocStringLiteral ->
               make_string (Token.text x) (Token.width x)
+            | TokenKind.XHPStringLiteral when Env.version_gte env 2 ->
+              make_string (Token.text x) (Token.width x)
             | _ -> Text (Token.text x, Token.width x)
           end;
           transform_trailing_trivia (Token.trailing x);
@@ -1546,6 +1548,12 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           nullable_as_left_operand = left;
           nullable_as_operator = kw;
           nullable_as_right_operand = right;
+        }
+    | Syntax.UpcastExpression
+        {
+          upcast_left_operand = left;
+          upcast_operator = kw;
+          upcast_right_operand = right;
         } ->
       Concat
         [
@@ -3323,7 +3331,16 @@ and transform_keyword_expression_statement env kw expr semi =
     [
       t env kw;
       when_present expr (fun () ->
-          Concat [Space; SplitWith Cost.Moderate; Nest [t env expr]]);
+          Concat
+            [
+              Space;
+              SplitWith
+                (if Env.version_gte env 1 then
+                  Cost.Base
+                else
+                  Cost.Moderate);
+              Nest [t env expr];
+            ]);
       t env semi;
       Newline;
     ]
@@ -3375,7 +3392,11 @@ and transform_binary_expression env ~is_nested (left, operator, right) =
         Space;
         t env operator;
         Space;
-        SplitWith Cost.Moderate;
+        SplitWith
+          (if Env.version_gte env 1 then
+            Cost.Base
+          else
+            Cost.Moderate);
         Nest [t env right];
       ]
   else

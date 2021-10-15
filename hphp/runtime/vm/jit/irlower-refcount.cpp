@@ -415,8 +415,6 @@ void implDecRef(Vout& v, IRLS& env,
 
   if (!ty.maybe(TPersistent)) {
     auto const destroyedPct = decRefDestroyedPercent(v, env, inst, profile);
-    FTRACE(3, "irlower-refcount: destroyedPercent {:.2%} for {}\n",
-           destroyedPct, *inst);
     auto const unlikelyReleasePct =
       RuntimeOption::EvalJitPGOUnlikelyDecRefReleasePercent;
     auto const unlikelyDestroy = destroyedPct < unlikelyReleasePct;
@@ -525,9 +523,11 @@ void cgDecRef(IRLS& env, const IRInstruction *inst) {
   }
 
   if (Trace::moduleEnabled(Trace::irlower, 3) && profile.optimizing()) {
-    FTRACE(3, "irlower-refcount: DecRefProfile<{}, {}>: {}\n",
-           inst->marker().show(), decRefProfileKey(inst)->data(),
-           profile.data());
+    FTRACE(3, "irlower-refcount: Compiling:\nmarker: {}\ninstruction: {}\ndecRefProfileKey: {}\nDecRefProfile:\n {}\n",
+      inst->marker().show(),
+      *inst,
+      decRefProfileKey(inst)->data(),
+      profile.data());
   }
 
   if (RuntimeOption::EvalHHIROutlineGenericIncDecRef &&
@@ -553,7 +553,7 @@ void cgDecRef(IRLS& env, const IRInstruction *inst) {
           v.makeTuple({data, type}),
           v.makeTuple({rarg(0), rarg(1)})
         };
-        v << callfaststub{stub, makeFixup(inst->marker()), arg_regs(2)};
+        v << callfaststub{stub, arg_regs(2)};
       });
       return;
     }
@@ -597,6 +597,14 @@ void cgDecRefNZ(IRLS& env, const IRInstruction* inst) {
   if (profile.profiling()) {
     implDecRefProf(v, env, inst, profile);
     return;
+  }
+
+  if (Trace::moduleEnabled(Trace::irlower, 3) && profile.optimizing()) {
+    FTRACE(3, "irlower-refcount: Compiling:\nmarker: {}\ninstruction: {}\ndecRefProfileKey: {}\nDecRefProfile:\n {}\n",
+      inst->marker().show(),
+      *inst,
+      decRefProfileKey(inst)->data(),
+      profile.data());
   }
 
   auto unlikelyCounted = false;

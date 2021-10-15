@@ -1,13 +1,16 @@
 use crate::lowerer::Env;
 use bstr::BString;
-use naming_special_names_rust::{classes, expression_trees as et, pseudo_functions};
+use naming_special_names_rust::{
+    classes, expression_trees as et, pseudo_functions, special_idents,
+};
 use oxidized::{
     aast,
-    aast_visitor::{visit, AstParams, Node, Visitor},
+    aast_visitor::{visit, visit_mut, AstParams, Node, NodeMut, Visitor, VisitorMut},
     ast,
     ast::{ClassId, ClassId_, Expr, Expr_, Hint_, Sid, Stmt, Stmt_},
     ast_defs,
     ast_defs::*,
+    local_id,
     pos::Pos,
 };
 
@@ -69,6 +72,8 @@ pub fn desugar<TF>(hint: &aast::Hint, e: Expr, env: &Env<TF>) -> Result<Expr, (P
     };
     let (virtual_expr, desugar_expr) = rewrite_expr(&mut temps, e, &visitor_name)?;
 
+    let dollardollar_pos = rewrite_dollardollars(&mut temps.splices);
+
     let splice_count = temps.splices.len();
     let function_count = temps.global_function_pointers.len();
     let static_method_count = temps.static_method_pointers.len();
@@ -92,7 +97,7 @@ pub fn desugar<TF>(hint: &aast::Hint, e: Expr, env: &Env<TF>) -> Result<Expr, (P
         pos: hint.0.clone(),
         name: visitor_variable(),
         expr: None,
-        callconv: None,
+        callconv: ParamKind::Pnormal,
         readonly: None,
         user_attributes: vec![],
         visibility: None,
@@ -183,7 +188,16 @@ pub fn desugar<TF>(hint: &aast::Hint, e: Expr, env: &Env<TF>) -> Result<Expr, (P
         } else {
             vec![wrap_return(make_tree, &et_literal_pos)]
         };
-        immediately_invoked_lambda(&et_literal_pos, body)
+
+        let lambda_args = match &dollardollar_pos {
+            Some(pipe_pos) => vec![(
+                (et::DOLLARDOLLAR_TMP_VAR.to_string(), pipe_pos.clone()),
+                Expr::mk_lvar(pipe_pos, special_idents::DOLLAR_DOLLAR),
+            )],
+            _ => vec![],
+        };
+
+        immediately_invoked_lambda(&et_literal_pos, body, lambda_args)
     };
 
     Ok(Expr::new(
@@ -195,6 +209,7 @@ pub fn desugar<TF>(hint: &aast::Hint, e: Expr, env: &Env<TF>) -> Result<Expr, (P
             function_pointers,
             virtualized_expr,
             runtime_expr,
+            dollardollar_pos,
         }),
     ))
 }
@@ -225,6 +240,55 @@ fn wrap_fun_(body: ast::FuncBody, params: Vec<ast::FunParam>, pos: Pos) -> ast::
         external: false,
         doc_comment: None,
     }
+}
+
+struct DollarDollarRewriter {
+    pos: Option<Pos>,
+}
+
+impl<'ast> VisitorMut<'ast> for DollarDollarRewriter {
+    type P = AstParams<(), ()>;
+
+    fn object(&mut self) -> &mut dyn VisitorMut<'ast, P = Self::P> {
+        self
+    }
+
+    fn visit_expr(&mut self, env: &mut (), e: &mut aast::Expr<(), ()>) -> Result<(), ()> {
+        use aast::Expr_::*;
+
+        match &mut e.2 {
+            // Rewrite all occurrences to $0dollardollar
+            Lvar(l) => {
+                if local_id::get_name(&l.1) == special_idents::DOLLAR_DOLLAR {
+                    // Replace and remember the position
+                    e.2 = Lvar(Box::new(ast::Lid(
+                        e.1.clone(),
+                        local_id::make_unscoped(et::DOLLARDOLLAR_TMP_VAR),
+                    )));
+                    if self.pos.is_none() {
+                        self.pos = Some(e.1.clone());
+                    }
+                }
+                Ok(())
+            }
+            // Don't need to recurse into the new scopes of lambdas
+            Lfun(_) | Efun(_) => Ok(()),
+            // Don't recurse into Expression Trees
+            ExpressionTree(_) | ETSplice(_) => Ok(()),
+            // Only recurse into the left hand side of any pipe as the rhs has new $$
+            Pipe(p) => (&mut p.1).accept(env, self.object()),
+            // Otherwise, recurse completely on the other expressions
+            _ => e.recurse(env, self.object()),
+        }
+    }
+}
+
+fn rewrite_dollardollars(el: &mut Vec<ast::Expr>) -> Option<Pos> {
+    let mut rewriter = DollarDollarRewriter { pos: None };
+    for e in el.into_iter() {
+        visit_mut(&mut rewriter, &mut (), e).expect("DollarDollarRewriter never errors");
+    }
+    rewriter.pos
 }
 
 struct VoidReturnCheck {
@@ -358,6 +422,12 @@ fn visitor_variable() -> String {
     "$0v".to_string()
 }
 
+/// Given a list of arguments, make each a "normal" argument by annotating it with
+/// `ParamKind::Pnormal`
+fn build_args(args: Vec<Expr>) -> Vec<(ParamKind, Expr)> {
+    args.into_iter().map(|n| (ParamKind::Pnormal, n)).collect()
+}
+
 /// Build `$v->meth_name(args)`.
 fn v_meth_call(meth_name: &str, args: Vec<Expr>, pos: &Pos) -> Expr {
     let receiver = Expr::mk_lvar(pos, &visitor_variable());
@@ -379,7 +449,7 @@ fn v_meth_call(meth_name: &str, args: Vec<Expr>, pos: &Pos) -> Expr {
             ))),
         ),
         vec![],
-        args,
+        build_args(args),
         None,
     )));
     Expr::new((), pos.clone(), c)
@@ -404,7 +474,7 @@ fn meth_call(receiver: Expr, meth_name: &str, args: Vec<Expr>, pos: &Pos) -> Exp
             ))),
         ),
         vec![],
-        args,
+        build_args(args),
         None,
     )));
     Expr::new((), pos.clone(), c)
@@ -431,7 +501,7 @@ fn static_meth_call(classname: &str, meth_name: &str, args: Vec<Expr>, pos: &Pos
     Expr::new(
         (),
         pos.clone(),
-        Expr_::Call(Box::new((callee, vec![], args, None))),
+        Expr_::Call(Box::new((callee, vec![], build_args(args), None))),
     )
 }
 
@@ -748,16 +818,22 @@ fn rewrite_expr(
                         "Expression trees do not support the unary plus operator.".into(),
                     ));
                 }
-                Uop::Uincr | Uop::Upincr => {
+                // Postfix ++
+                Uop::Upincr => "__postfixPlusPlus",
+                // Prefix ++
+                Uop::Uincr => {
                     return Err((
                         pos,
-                        "Expression trees do not support the increment operator `++`.".into(),
+                        "Expression trees only support postfix increment operator `$x++`.".into(),
                     ));
                 }
-                Uop::Udecr | Uop::Updecr => {
+                // Postfix --
+                Uop::Updecr => "__postfixMinusMinus",
+                // Prefix --
+                Uop::Udecr => {
                     return Err((
                         pos,
-                        "Expression trees do not support the decrement operator `--`.".into(),
+                        "Expression trees only support postfix decrement operator `$x--`.".into(),
                     ));
                 }
                 Uop::Usilence => {
@@ -791,7 +867,7 @@ fn rewrite_expr(
             } else {
                 return Err((
                     pos,
-                    "Unsupport expression tree syntax: Elvis operator".into(),
+                    "Unsupported expression tree syntax: Elvis operator".into(),
                 ));
             };
             let (virtual_e3, desugar_e3) = rewrite_expr(temps, e3, visitor_name)?;
@@ -842,6 +918,17 @@ fn rewrite_expr(
                 _ => {}
             }
 
+            let args = args
+                .into_iter()
+                .map(|e| match e {
+                    (ParamKind::Pnormal, e) => Ok(e),
+                    (ParamKind::Pinout(_), Expr(_, p, _)) => Err((
+                        p,
+                        "Expression trees do not support `inout` function calls.".into(),
+                    )),
+                })
+                .collect::<Result<Vec<_>, _>>()?;
+
             let (virtual_args, desugar_args) = rewrite_exprs(temps, args, visitor_name)?;
 
             match recv.2 {
@@ -877,7 +964,7 @@ fn rewrite_expr(
                                 &pos,
                             ),
                             vec![],
-                            virtual_args,
+                            build_args(virtual_args),
                             None,
                         ))),
                     );
@@ -934,17 +1021,60 @@ fn rewrite_expr(
                                 &pos,
                             ),
                             vec![],
-                            virtual_args,
+                            build_args(virtual_args),
                             None,
                         ))),
                     );
                     (virtual_expr, desugar_expr)
                 }
+                // Source: MyDsl`$x->bar()`
+                // Virtualized: $x->bar()
+                // Desugared: $0v->visitCall($0v->visitMethodCall(new ExprPos(...), $0v->visitLocal(new ExprPos(...), '$x'), 'bar'), vec[])
                 ObjGet(og) if !og.3 => {
-                    return Err((
-                        pos,
-                        "Expression trees do not support calling instance methods".into(),
-                    ));
+                    let (e1, e2, null_flavor, is_prop_call) = *og;
+                    if null_flavor == OgNullFlavor::OGNullsafe {
+                        return Err((
+                            pos,
+                            "Expression Trees do not support nullsafe method calls".into(),
+                        ));
+                    }
+                    let (virtual_e1, desugar_e1) = rewrite_expr(temps, e1, visitor_name)?;
+                    let id = if let Id(id) = &e2.2 {
+                        string_literal(id.0.clone(), &id.1)
+                    } else {
+                        return Err((
+                            pos,
+                            "Expression trees only support named method calls.".into(),
+                        ));
+                    };
+                    let desugar_expr = v_meth_call(
+                        et::VISIT_CALL,
+                        vec![
+                            pos_expr.clone(),
+                            v_meth_call(
+                                et::VISIT_INSTANCE_METHOD,
+                                vec![pos_expr, desugar_e1, id],
+                                &pos,
+                            ),
+                            vec_literal(desugar_args),
+                        ],
+                        &pos,
+                    );
+                    let virtual_expr = Expr(
+                        (),
+                        pos.clone(),
+                        Call(Box::new((
+                            Expr(
+                                (),
+                                pos,
+                                ObjGet(Box::new((virtual_e1, e2, null_flavor, is_prop_call))),
+                            ),
+                            vec![],
+                            build_args(virtual_args),
+                            None,
+                        ))),
+                    );
+                    (virtual_expr, desugar_expr)
                 }
                 _ => {
                     let (virtual_recv, desugar_recv) =
@@ -957,7 +1087,12 @@ fn rewrite_expr(
                     let virtual_expr = Expr(
                         (),
                         pos,
-                        Call(Box::new((virtual_recv, vec![], virtual_args, None))),
+                        Call(Box::new((
+                            virtual_recv,
+                            vec![],
+                            build_args(virtual_args),
+                            None,
+                        ))),
                     );
                     (virtual_expr, desugar_expr)
                 }
@@ -1030,6 +1165,9 @@ fn rewrite_expr(
             let virtual_expr = Expr((), pos, ETSplice(Box::new(temp_variable)));
             (virtual_expr, desugar_expr)
         }
+        // Source: MyDsl`(...)->foo`
+        // Virtualized to: `(...)->foo`
+        // Desugared to `$0v->visitPropertyAccess(new ExprPos(...), ...), 'foo')`
         ObjGet(og) => {
             let (e1, e2, null_flavor, is_prop_call) = *og;
             if null_flavor == OgNullFlavor::OGNullsafe {
@@ -1063,7 +1201,7 @@ fn rewrite_expr(
         // Virtualized: <foo my-attr={MyDsl::stringType()}>{MyDsl::stringType()} <foo-child/> </foo>
         // Desugared:
         //   $0v->visitXhp(
-        //     newExprPos(...),
+        //     new ExprPos(...),
         //     :foo::class,
         //     dict["my-attr" => $0v->visitString(...)],
         //     vec[
@@ -1347,15 +1485,45 @@ fn hint_name(hint: &aast::Hint) -> Result<String, (Pos, String)> {
     }
 }
 
-fn immediately_invoked_lambda(pos: &Pos, stmts: Vec<Stmt>) -> Expr {
+fn immediately_invoked_lambda(
+    pos: &Pos,
+    stmts: Vec<Stmt>,
+    captured_arguments: Vec<((String, Pos), Expr)>,
+) -> Expr {
+    let (params_name_pos, call_args): (Vec<(String, Pos)>, Vec<Expr>) =
+        captured_arguments.into_iter().unzip();
+
+    let fun_params = params_name_pos
+        .into_iter()
+        .map(|(name, pos): (String, Pos)| -> ast::FunParam {
+            ast::FunParam {
+                annotation: (),
+                type_hint: ast::TypeHint((), None),
+                is_variadic: false,
+                pos,
+                name,
+                expr: None,
+                callconv: ParamKind::Pnormal,
+                readonly: None,
+                user_attributes: vec![],
+                visibility: None,
+            }
+        })
+        .collect();
+
+    let call_args = call_args
+        .into_iter()
+        .map(|e: Expr| -> (ParamKind, Expr) { (ParamKind::Pnormal, e) })
+        .collect();
+
     let func_body = ast::FuncBody { fb_ast: stmts };
-    let fun_ = wrap_fun_(func_body, vec![], pos.clone());
+    let fun_ = wrap_fun_(func_body, fun_params, pos.clone());
     let lambda_expr = Expr::new((), pos.clone(), Expr_::mk_lfun(fun_, vec![]));
 
     Expr::new(
         (),
         pos.clone(),
-        Expr_::Call(Box::new((lambda_expr, vec![], vec![], None))),
+        Expr_::Call(Box::new((lambda_expr, vec![], call_args, None))),
     )
 }
 

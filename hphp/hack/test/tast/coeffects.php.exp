@@ -26,7 +26,7 @@
                          [{ param_annotation = (mixed); param_type_hint = ((mixed), None); 
                             param_is_variadic = false; param_pos = [4:9-11]; 
                             param_name = "$i"; param_expr = None; param_readonly = None; 
-                            param_callconv = None; param_user_attributes = []; 
+                            param_callconv = Pnormal; param_user_attributes = []; 
                             param_visibility = None }
                            ];
                          f_ctxs = (Some ([4:12-16], [([4:13-15], (Happly (([4:13-15], "\\HH\\Contexts\\rx"), [])))]));

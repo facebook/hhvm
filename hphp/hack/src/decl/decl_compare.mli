@@ -36,7 +36,7 @@ val get_classes_deps :
 
 val get_funs_deps :
   ctx:Provider_context.t ->
-  Funs.t option SMap.t ->
+  Funs.value option SMap.t ->
   SSet.t ->
   (DepSet.t * DepSet.t * DepSet.t) * int
 
@@ -48,7 +48,7 @@ val get_types_deps :
 
 val get_gconsts_deps :
   ctx:Provider_context.t ->
-  GConsts.t option SMap.t ->
+  GConsts.value option SMap.t ->
   SSet.t ->
   (DepSet.t * DepSet.t * DepSet.t) * int
 

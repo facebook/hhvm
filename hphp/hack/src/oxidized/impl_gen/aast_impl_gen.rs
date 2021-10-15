@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5691f022bf2ea545a9230e30b72d9c8d>>
+// @generated SignedSource<<5bfb4c781ebab43cd0fb74db3c5b55ab>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -646,7 +646,7 @@ impl<Ex, En> ClassId_<Ex, En> {
     pub fn mk_ciexpr(p0: Expr<Ex, En>) -> Self {
         ClassId_::CIexpr(p0)
     }
-    pub fn mk_ci(p0: Sid) -> Self {
+    pub fn mk_ci(p0: ClassName) -> Self {
         ClassId_::CI(p0)
     }
     pub fn is_ciparent(&self) -> bool {
@@ -685,7 +685,7 @@ impl<Ex, En> ClassId_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_ci(&self) -> Option<&Sid> {
+    pub fn as_ci(&self) -> Option<&ClassName> {
         match self {
             ClassId_::CI(p0) => Some(p0),
             _ => None,
@@ -697,7 +697,7 @@ impl<Ex, En> ClassId_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_ci_mut(&mut self) -> Option<&mut Sid> {
+    pub fn as_ci_mut(&mut self) -> Option<&mut ClassName> {
         match self {
             ClassId_::CI(p0) => Some(p0),
             _ => None,
@@ -709,7 +709,7 @@ impl<Ex, En> ClassId_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_ci_into(self) -> Option<Sid> {
+    pub fn as_ci_into(self) -> Option<ClassName> {
         match self {
             ClassId_::CI(p0) => Some(p0),
             _ => None,
@@ -893,7 +893,7 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn mk_call(
         p0: Expr<Ex, En>,
         p1: Vec<Targ<Ex>>,
-        p2: Vec<Expr<Ex, En>>,
+        p2: Vec<(ast_defs::ParamKind, Expr<Ex, En>)>,
         p3: Option<Expr<Ex, En>>,
     ) -> Self {
         Expr_::Call(Box::new((p0, p1, p2, p3)))
@@ -952,6 +952,9 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn mk_as(p0: Expr<Ex, En>, p1: Hint, p2: bool) -> Self {
         Expr_::As(Box::new((p0, p1, p2)))
     }
+    pub fn mk_upcast(p0: Expr<Ex, En>, p1: Hint) -> Self {
+        Expr_::Upcast(Box::new((p0, p1)))
+    }
     pub fn mk_new(
         p0: ClassId<Ex, En>,
         p1: Vec<Targ<Ex>>,
@@ -970,16 +973,17 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn mk_lfun(p0: Fun_<Ex, En>, p1: Vec<Lid>) -> Self {
         Expr_::Lfun(Box::new((p0, p1)))
     }
-    pub fn mk_xml(p0: Sid, p1: Vec<XhpAttribute<Ex, En>>, p2: Vec<Expr<Ex, En>>) -> Self {
+    pub fn mk_xml(p0: ClassName, p1: Vec<XhpAttribute<Ex, En>>, p2: Vec<Expr<Ex, En>>) -> Self {
         Expr_::Xml(Box::new((p0, p1, p2)))
-    }
-    pub fn mk_callconv(p0: ast_defs::ParamKind, p1: Expr<Ex, En>) -> Self {
-        Expr_::Callconv(Box::new((p0, p1)))
     }
     pub fn mk_import(p0: ImportFlavor, p1: Expr<Ex, En>) -> Self {
         Expr_::Import(Box::new((p0, p1)))
     }
-    pub fn mk_collection(p0: Sid, p1: Option<CollectionTarg<Ex>>, p2: Vec<Afield<Ex, En>>) -> Self {
+    pub fn mk_collection(
+        p0: ClassName,
+        p1: Option<CollectionTarg<Ex>>,
+        p2: Vec<Afield<Ex, En>>,
+    ) -> Self {
         Expr_::Collection(Box::new((p0, p1, p2)))
     }
     pub fn mk_expression_tree(p0: ExpressionTree<Ex, En>) -> Self {
@@ -994,7 +998,7 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn mk_method_id(p0: Expr<Ex, En>, p1: Pstring) -> Self {
         Expr_::MethodId(Box::new((p0, p1)))
     }
-    pub fn mk_method_caller(p0: Sid, p1: Pstring) -> Self {
+    pub fn mk_method_caller(p0: ClassName, p1: Pstring) -> Self {
         Expr_::MethodCaller(Box::new((p0, p1)))
     }
     pub fn mk_smethod_id(p0: ClassId<Ex, En>, p1: Pstring) -> Self {
@@ -1006,7 +1010,7 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn mk_etsplice(p0: Expr<Ex, En>) -> Self {
         Expr_::ETSplice(Box::new(p0))
     }
-    pub fn mk_enum_class_label(p0: Option<Sid>, p1: String) -> Self {
+    pub fn mk_enum_class_label(p0: Option<ClassName>, p1: String) -> Self {
         Expr_::EnumClassLabel(Box::new((p0, p1)))
     }
     pub fn mk_hole(p0: Expr<Ex, En>, p1: Ex, p2: Ex, p3: HoleSource) -> Self {
@@ -1234,6 +1238,12 @@ impl<Ex, En> Expr_<Ex, En> {
             _ => false,
         }
     }
+    pub fn is_upcast(&self) -> bool {
+        match self {
+            Expr_::Upcast(..) => true,
+            _ => false,
+        }
+    }
     pub fn is_new(&self) -> bool {
         match self {
             Expr_::New(..) => true,
@@ -1261,12 +1271,6 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn is_xml(&self) -> bool {
         match self {
             Expr_::Xml(..) => true,
-            _ => false,
-        }
-    }
-    pub fn is_callconv(&self) -> bool {
-        match self {
-            Expr_::Callconv(..) => true,
             _ => false,
         }
     }
@@ -1432,7 +1436,7 @@ impl<Ex, En> Expr_<Ex, En> {
     ) -> Option<(
         &Expr<Ex, En>,
         &Vec<Targ<Ex>>,
-        &Vec<Expr<Ex, En>>,
+        &Vec<(ast_defs::ParamKind, Expr<Ex, En>)>,
         &Option<Expr<Ex, En>>,
     )> {
         match self {
@@ -1548,6 +1552,12 @@ impl<Ex, En> Expr_<Ex, En> {
             _ => None,
         }
     }
+    pub fn as_upcast(&self) -> Option<(&Expr<Ex, En>, &Hint)> {
+        match self {
+            Expr_::Upcast(p0) => Some((&p0.0, &p0.1)),
+            _ => None,
+        }
+    }
     pub fn as_new(
         &self,
     ) -> Option<(
@@ -1580,15 +1590,9 @@ impl<Ex, En> Expr_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_xml(&self) -> Option<(&Sid, &Vec<XhpAttribute<Ex, En>>, &Vec<Expr<Ex, En>>)> {
+    pub fn as_xml(&self) -> Option<(&ClassName, &Vec<XhpAttribute<Ex, En>>, &Vec<Expr<Ex, En>>)> {
         match self {
             Expr_::Xml(p0) => Some((&p0.0, &p0.1, &p0.2)),
-            _ => None,
-        }
-    }
-    pub fn as_callconv(&self) -> Option<(&ast_defs::ParamKind, &Expr<Ex, En>)> {
-        match self {
-            Expr_::Callconv(p0) => Some((&p0.0, &p0.1)),
             _ => None,
         }
     }
@@ -1600,7 +1604,11 @@ impl<Ex, En> Expr_<Ex, En> {
     }
     pub fn as_collection(
         &self,
-    ) -> Option<(&Sid, &Option<CollectionTarg<Ex>>, &Vec<Afield<Ex, En>>)> {
+    ) -> Option<(
+        &ClassName,
+        &Option<CollectionTarg<Ex>>,
+        &Vec<Afield<Ex, En>>,
+    )> {
         match self {
             Expr_::Collection(p0) => Some((&p0.0, &p0.1, &p0.2)),
             _ => None,
@@ -1630,7 +1638,7 @@ impl<Ex, En> Expr_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_method_caller(&self) -> Option<(&Sid, &Pstring)> {
+    pub fn as_method_caller(&self) -> Option<(&ClassName, &Pstring)> {
         match self {
             Expr_::MethodCaller(p0) => Some((&p0.0, &p0.1)),
             _ => None,
@@ -1654,7 +1662,7 @@ impl<Ex, En> Expr_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_enum_class_label(&self) -> Option<(&Option<Sid>, &String)> {
+    pub fn as_enum_class_label(&self) -> Option<(&Option<ClassName>, &String)> {
         match self {
             Expr_::EnumClassLabel(p0) => Some((&p0.0, &p0.1)),
             _ => None,
@@ -1771,7 +1779,7 @@ impl<Ex, En> Expr_<Ex, En> {
     ) -> Option<(
         &mut Expr<Ex, En>,
         &mut Vec<Targ<Ex>>,
-        &mut Vec<Expr<Ex, En>>,
+        &mut Vec<(ast_defs::ParamKind, Expr<Ex, En>)>,
         &mut Option<Expr<Ex, En>>,
     )> {
         match self {
@@ -1897,6 +1905,12 @@ impl<Ex, En> Expr_<Ex, En> {
             _ => None,
         }
     }
+    pub fn as_upcast_mut(&mut self) -> Option<(&mut Expr<Ex, En>, &mut Hint)> {
+        match self {
+            Expr_::Upcast(p0) => Some((&mut p0.0, &mut p0.1)),
+            _ => None,
+        }
+    }
     pub fn as_new_mut(
         &mut self,
     ) -> Option<(
@@ -1932,18 +1946,12 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn as_xml_mut(
         &mut self,
     ) -> Option<(
-        &mut Sid,
+        &mut ClassName,
         &mut Vec<XhpAttribute<Ex, En>>,
         &mut Vec<Expr<Ex, En>>,
     )> {
         match self {
             Expr_::Xml(p0) => Some((&mut p0.0, &mut p0.1, &mut p0.2)),
-            _ => None,
-        }
-    }
-    pub fn as_callconv_mut(&mut self) -> Option<(&mut ast_defs::ParamKind, &mut Expr<Ex, En>)> {
-        match self {
-            Expr_::Callconv(p0) => Some((&mut p0.0, &mut p0.1)),
             _ => None,
         }
     }
@@ -1956,7 +1964,7 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn as_collection_mut(
         &mut self,
     ) -> Option<(
-        &mut Sid,
+        &mut ClassName,
         &mut Option<CollectionTarg<Ex>>,
         &mut Vec<Afield<Ex, En>>,
     )> {
@@ -1989,7 +1997,7 @@ impl<Ex, En> Expr_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_method_caller_mut(&mut self) -> Option<(&mut Sid, &mut Pstring)> {
+    pub fn as_method_caller_mut(&mut self) -> Option<(&mut ClassName, &mut Pstring)> {
         match self {
             Expr_::MethodCaller(p0) => Some((&mut p0.0, &mut p0.1)),
             _ => None,
@@ -2019,7 +2027,7 @@ impl<Ex, En> Expr_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_enum_class_label_mut(&mut self) -> Option<(&mut Option<Sid>, &mut String)> {
+    pub fn as_enum_class_label_mut(&mut self) -> Option<(&mut Option<ClassName>, &mut String)> {
         match self {
             Expr_::EnumClassLabel(p0) => Some((&mut p0.0, &mut p0.1)),
             _ => None,
@@ -2123,7 +2131,7 @@ impl<Ex, En> Expr_<Ex, En> {
     ) -> Option<(
         Expr<Ex, En>,
         Vec<Targ<Ex>>,
-        Vec<Expr<Ex, En>>,
+        Vec<(ast_defs::ParamKind, Expr<Ex, En>)>,
         Option<Expr<Ex, En>>,
     )> {
         match self {
@@ -2239,6 +2247,12 @@ impl<Ex, En> Expr_<Ex, En> {
             _ => None,
         }
     }
+    pub fn as_upcast_into(self) -> Option<(Expr<Ex, En>, Hint)> {
+        match self {
+            Expr_::Upcast(p0) => Some(((*p0).0, (*p0).1)),
+            _ => None,
+        }
+    }
     pub fn as_new_into(
         self,
     ) -> Option<(
@@ -2271,15 +2285,9 @@ impl<Ex, En> Expr_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_xml_into(self) -> Option<(Sid, Vec<XhpAttribute<Ex, En>>, Vec<Expr<Ex, En>>)> {
+    pub fn as_xml_into(self) -> Option<(ClassName, Vec<XhpAttribute<Ex, En>>, Vec<Expr<Ex, En>>)> {
         match self {
             Expr_::Xml(p0) => Some(((*p0).0, (*p0).1, (*p0).2)),
-            _ => None,
-        }
-    }
-    pub fn as_callconv_into(self) -> Option<(ast_defs::ParamKind, Expr<Ex, En>)> {
-        match self {
-            Expr_::Callconv(p0) => Some(((*p0).0, (*p0).1)),
             _ => None,
         }
     }
@@ -2291,7 +2299,7 @@ impl<Ex, En> Expr_<Ex, En> {
     }
     pub fn as_collection_into(
         self,
-    ) -> Option<(Sid, Option<CollectionTarg<Ex>>, Vec<Afield<Ex, En>>)> {
+    ) -> Option<(ClassName, Option<CollectionTarg<Ex>>, Vec<Afield<Ex, En>>)> {
         match self {
             Expr_::Collection(p0) => Some(((*p0).0, (*p0).1, (*p0).2)),
             _ => None,
@@ -2321,7 +2329,7 @@ impl<Ex, En> Expr_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_method_caller_into(self) -> Option<(Sid, Pstring)> {
+    pub fn as_method_caller_into(self) -> Option<(ClassName, Pstring)> {
         match self {
             Expr_::MethodCaller(p0) => Some(((*p0).0, (*p0).1)),
             _ => None,
@@ -2347,7 +2355,7 @@ impl<Ex, En> Expr_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_enum_class_label_into(self) -> Option<(Option<Sid>, String)> {
+    pub fn as_enum_class_label_into(self) -> Option<(Option<ClassName>, String)> {
         match self {
             Expr_::EnumClassLabel(p0) => Some(((*p0).0, (*p0).1)),
             _ => None,
@@ -2947,9 +2955,6 @@ impl ClassTypeconst {
     pub fn mk_tcconcrete(p0: ClassConcreteTypeconst) -> Self {
         ClassTypeconst::TCConcrete(p0)
     }
-    pub fn mk_tcpartially_abstract(p0: ClassPartiallyAbstractTypeconst) -> Self {
-        ClassTypeconst::TCPartiallyAbstract(p0)
-    }
     pub fn is_tcabstract(&self) -> bool {
         match self {
             ClassTypeconst::TCAbstract(..) => true,
@@ -2959,12 +2964,6 @@ impl ClassTypeconst {
     pub fn is_tcconcrete(&self) -> bool {
         match self {
             ClassTypeconst::TCConcrete(..) => true,
-            _ => false,
-        }
-    }
-    pub fn is_tcpartially_abstract(&self) -> bool {
-        match self {
-            ClassTypeconst::TCPartiallyAbstract(..) => true,
             _ => false,
         }
     }
@@ -2980,12 +2979,6 @@ impl ClassTypeconst {
             _ => None,
         }
     }
-    pub fn as_tcpartially_abstract(&self) -> Option<&ClassPartiallyAbstractTypeconst> {
-        match self {
-            ClassTypeconst::TCPartiallyAbstract(p0) => Some(p0),
-            _ => None,
-        }
-    }
     pub fn as_tcabstract_mut(&mut self) -> Option<&mut ClassAbstractTypeconst> {
         match self {
             ClassTypeconst::TCAbstract(p0) => Some(p0),
@@ -2998,12 +2991,6 @@ impl ClassTypeconst {
             _ => None,
         }
     }
-    pub fn as_tcpartially_abstract_mut(&mut self) -> Option<&mut ClassPartiallyAbstractTypeconst> {
-        match self {
-            ClassTypeconst::TCPartiallyAbstract(p0) => Some(p0),
-            _ => None,
-        }
-    }
     pub fn as_tcabstract_into(self) -> Option<ClassAbstractTypeconst> {
         match self {
             ClassTypeconst::TCAbstract(p0) => Some(p0),
@@ -3013,12 +3000,6 @@ impl ClassTypeconst {
     pub fn as_tcconcrete_into(self) -> Option<ClassConcreteTypeconst> {
         match self {
             ClassTypeconst::TCConcrete(p0) => Some(p0),
-            _ => None,
-        }
-    }
-    pub fn as_tcpartially_abstract_into(self) -> Option<ClassPartiallyAbstractTypeconst> {
-        match self {
-            ClassTypeconst::TCPartiallyAbstract(p0) => Some(p0),
             _ => None,
         }
     }

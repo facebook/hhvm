@@ -502,15 +502,6 @@ inline TypedValue Elem(tv_rval base, key_type<keyType> key) {
 /**
  * ElemD when base is a bespoke array-like
  */
-inline void ElemDBespokeUpdateBase(tv_lval base, arr_lval result) {
-  auto const oldArr = base.val().parr;
-  if (result.arr != oldArr) {
-    type(base) = dt_with_rc(type(base));
-    val(base).parr = result.arr;
-    decRefArr(oldArr);
-  }
-}
-
 inline tv_lval ElemDBespokePre(tv_lval base, int64_t key) {
   return BespokeArray::ElemInt(base, key, true);
 }
@@ -723,7 +714,7 @@ inline tv_lval ElemDObject(tv_lval base, key_type<keyType> key) {
  * Intermediate elem operation for defining member instructions.
  */
 template<KeyType keyType = KeyType::Any>
-tv_lval ElemD(tv_lval base, key_type<keyType> key, bool roProp) {
+tv_lval ElemD(tv_lval base, key_type<keyType> key) {
   assertx(tvIsPlausible(base.tv()));
 
   // ElemD helpers hand out lvals to immutable_null_base in cases where we know
@@ -732,15 +723,6 @@ tv_lval ElemD(tv_lval base, key_type<keyType> key, bool roProp) {
 
   if (tvIsArrayLike(base) && !base.val().parr->isVanilla()) {
     return ElemDBespoke<keyType>(base, key);
-  }
-
-  if (RO::EvalEnableReadonlyPropertyEnforcement && roProp &&
-    !hasPersistentFlavor(base.type()) && isRefcountedType(base.type())) {
-      if (RO::EvalEnableReadonlyPropertyEnforcement == 1) {
-        raiseReadOnlyCollectionMutation();
-      } else {
-        throwReadOnlyCollectionMutation();
-      }
   }
 
   switch (base.type()) {
@@ -959,7 +941,7 @@ inline tv_lval ElemUObject(tv_lval base, key_type<keyType> key) {
  * Intermediate Elem operation for an unsetting member instruction.
  */
 template <KeyType keyType = KeyType::Any>
-tv_lval ElemU(tv_lval base, key_type<keyType> key, bool roProp) {
+tv_lval ElemU(tv_lval base, key_type<keyType> key) {
   assertx(tvIsPlausible(*base));
 
   // ElemU helpers hand out lvals to immutable_null_base in cases where we know
@@ -968,15 +950,6 @@ tv_lval ElemU(tv_lval base, key_type<keyType> key, bool roProp) {
 
   if (tvIsArrayLike(base) && !base.val().parr->isVanilla()) {
     return ElemUBespoke<keyType>(base, key);
-  }
-
-  if (RO::EvalEnableReadonlyPropertyEnforcement && roProp &&
-    (!hasPersistentFlavor(type(base)) && isRefcountedType(type(base)))) {
-    if (RO::EvalEnableReadonlyPropertyEnforcement == 1) {
-      raiseReadOnlyCollectionMutation();
-    } else {
-      throwReadOnlyCollectionMutation();
-    }
   }
 
   switch (type(base)) {
@@ -2351,12 +2324,12 @@ tv_lval propPre(TypedValue& tvRef, tv_lval base) {
   unknownBaseType(type(base));
 }
 
+template<MOpMode mode>
 inline tv_lval nullSafeProp(TypedValue& tvRef,
                             Class* ctx,
                             tv_rval base,
                             StringData* key,
-                            ReadonlyOp op,
-                            bool* roProp = nullptr) {
+                            ReadonlyOp op) {
   switch (base.type()) {
     case KindOfUninit:
     case KindOfNull:
@@ -2380,11 +2353,9 @@ inline tv_lval nullSafeProp(TypedValue& tvRef,
     case KindOfLazyClass:
     case KindOfClsMeth:
     case KindOfRClsMeth:
-      tvWriteNull(tvRef);
-      raise_notice("Cannot access property on non-object");
-      return &tvRef;
+      return propPreNull<mode>(tvRef);
     case KindOfObject:
-      return val(base).pobj->prop(&tvRef, ctx, key, op, roProp);
+      return val(base).pobj->prop(&tvRef, ctx, key, op);
   }
   not_reached();
 }
@@ -2397,13 +2368,13 @@ inline tv_lval nullSafeProp(TypedValue& tvRef,
 template<MOpMode mode, KeyType keyType = KeyType::Any>
 inline tv_lval PropObj(TypedValue& tvRef, const Class* ctx,
                        ObjectData* instance, key_type<keyType> key,
-                       ReadonlyOp op, bool* roProp = nullptr) {
+                       ReadonlyOp op) {
   auto keySD = prepareKey(key);
   SCOPE_EXIT { releaseKey<keyType>(keySD); };
 
   // Get property.
   if (mode == MOpMode::Define) {
-    return instance->propD(&tvRef, ctx, keySD, op, roProp);
+    return instance->propD(&tvRef, ctx, keySD, op);
   }
   if (mode == MOpMode::None) {
     return instance->prop(&tvRef, ctx, keySD, op);
@@ -2412,16 +2383,15 @@ inline tv_lval PropObj(TypedValue& tvRef, const Class* ctx,
     return instance->propW(&tvRef, ctx, keySD, op);
   }
   assertx(mode == MOpMode::Unset);
-  return instance->propU(&tvRef, ctx, keySD, op, roProp);
+  return instance->propU(&tvRef, ctx, keySD, op);
 }
 
 template<MOpMode mode, KeyType keyType = KeyType::Any>
 inline tv_lval Prop(TypedValue& tvRef, const Class* ctx,
-                    tv_lval base, key_type<keyType> key, ReadonlyOp op,
-                    bool* roProp = nullptr) {
+                    tv_lval base, key_type<keyType> key, ReadonlyOp op) {
   auto const result = propPre<mode>(tvRef, base);
   if (result.type() == KindOfNull) return result;
-  return PropObj<mode,keyType>(tvRef, ctx, instanceFromTv(result), key, op, roProp);
+  return PropObj<mode,keyType>(tvRef, ctx, instanceFromTv(result), key, op);
 }
 
 template <KeyType kt>

@@ -5,20 +5,14 @@ $vec = Vector {$foo};
 $vec = Vector {$foo, $bar};
 $vec = Vector {$foo, $bar};
 
-$vec = Vector {
-  $foooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo,
-};
-$vec = Vector {
-  $foooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo,
-};
-$vec = Vector {
-  $fooooooooooooooooooooooooooooo,
-  $baaaaaaaaaaaaaaaaaaaaaaaaaaaar,
-};
-$vec = Vector {
-  $fooooooooooooooooooooooooooooo,
-  $baaaaaaaaaaaaaaaaaaaaaaaaaaaar,
-};
+$vec =
+  Vector {$foooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo};
+$vec =
+  Vector {$foooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo};
+$vec =
+  Vector {$fooooooooooooooooooooooooooooo, $baaaaaaaaaaaaaaaaaaaaaaaaaaaar};
+$vec =
+  Vector {$fooooooooooooooooooooooooooooo, $baaaaaaaaaaaaaaaaaaaaaaaaaaaar};
 
 $vec = Vector {
   $foooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo,
@@ -49,12 +43,10 @@ $vec = Vector {
   ,
 };
 
-$vec = Vector {/* leading comment */
-  $fooooooooooooooooo, /* trailing comment */
-};
-$vec = Vector {/* leading comment */
-  $fooooooooooooooooo, /* trailing comment */
-};
+$vec =
+  Vector {/* leading comment */ $fooooooooooooooooo /* trailing comment */};
+$vec =
+  Vector {/* leading comment */ $fooooooooooooooooo /* trailing comment */};
 
 $vec = Vector {
   /* leading comment */

@@ -80,10 +80,10 @@ BASE_G_HELPER_TABLE(X)
   m(propCW,    MOpMode::Warn,       KeyType::Any)   \
   m(propCWS,   MOpMode::Warn,       KeyType::Str)
 
-#define X(nm, mode, kt)                                             \
-inline tv_lval nm(Class* ctx, tv_lval base, key_type<kt> key,       \
-                  TypedValue& tvRef, ReadonlyOp op, bool* roProp) { \
-  return Prop<mode,kt>(tvRef, ctx, base, key, op, roProp);          \
+#define X(nm, mode, kt)                                       \
+inline tv_lval nm(Class* ctx, tv_lval base, key_type<kt> key, \
+                  TypedValue& tvRef, ReadonlyOp op) {         \
+  return Prop<mode,kt>(tvRef, ctx, base, key, op);            \
 }
 PROP_HELPER_TABLE(X)
 #undef X
@@ -93,10 +93,10 @@ PROP_HELPER_TABLE(X)
   m(propCD,    KeyType::Any)                        \
   m(propCDS,   KeyType::Str)
 
-#define X(nm, kt)                                                     \
-inline tv_lval nm(Class* ctx, tv_lval base, key_type<kt> key,         \
-                  TypedValue& tvRef, ReadonlyOp op, bool* roProp) {   \
-  return Prop<MOpMode::Define,kt>(tvRef, ctx, base, key, op, roProp); \
+#define X(nm, kt)                                             \
+inline tv_lval nm(Class* ctx, tv_lval base, key_type<kt> key, \
+                  TypedValue& tvRef, ReadonlyOp op) {         \
+  return Prop<MOpMode::Define,kt>(tvRef, ctx, base, key, op); \
 }
 PROPD_HELPER_TABLE(X)
 #undef X
@@ -110,10 +110,10 @@ PROPD_HELPER_TABLE(X)
   m(propCWO,   MOpMode::Warn,       KeyType::Any)    \
   m(propCWOS,  MOpMode::Warn,       KeyType::Str)    \
 
-#define X(nm, mode, kt)                                             \
-inline tv_lval nm(Class* ctx, ObjectData* base, key_type<kt> key,   \
-                  TypedValue& tvRef, ReadonlyOp op, bool* roProp) { \
-  return PropObj<mode,kt>(tvRef, ctx, base, key, op, roProp);       \
+#define X(nm, mode, kt)                                           \
+inline tv_lval nm(Class* ctx, ObjectData* base, key_type<kt> key, \
+                  TypedValue& tvRef, ReadonlyOp op) {             \
+  return PropObj<mode,kt>(tvRef, ctx, base, key, op);             \
 }
 PROP_OBJ_HELPER_TABLE(X)
 #undef X
@@ -123,24 +123,32 @@ PROP_OBJ_HELPER_TABLE(X)
   m(propCDO,   KeyType::Any)                         \
   m(propCDOS,  KeyType::Str)                         \
 
-#define X(nm, kt)                                                       \
-inline tv_lval nm(Class* ctx, ObjectData* base, key_type<kt> key,       \
-                  TypedValue& tvRef, ReadonlyOp op, bool* roProp) {     \
-  return PropObj<MOpMode::Define,kt>(tvRef, ctx, base, key, op, roProp);\
+#define X(nm, kt)                                                  \
+inline tv_lval nm(Class* ctx, ObjectData* base, key_type<kt> key,  \
+                  TypedValue& tvRef, ReadonlyOp op) {              \
+  return PropObj<MOpMode::Define,kt>(tvRef, ctx, base, key, op);   \
 }
 PROPD_OBJ_HELPER_TABLE(X)
 #undef X
 
 // NullSafe prop.
-inline tv_lval propCQ(Class* ctx, tv_rval base, StringData* key,
-                      TypedValue& tvRef, ReadonlyOp op, bool* roProp) {
-  return nullSafeProp(tvRef, ctx, base, key, op, roProp);
+#define PROPQ_HELPER_TABLE(m)                     \
+  /* name          mode     */                    \
+  m(propQQuiet,    MOpMode::None)                 \
+  m(propQ,         MOpMode::Warn)                 \
+
+#define X(nm, mode)                                                \
+inline tv_lval nm(Class* ctx, tv_rval base, StringData* key,       \
+                      TypedValue& tvRef, ReadonlyOp op) {          \
+  return nullSafeProp<mode>(tvRef, ctx, base, key, op);            \
 }
+PROPQ_HELPER_TABLE(X)
+#undef X
 
 // NullSafe prop with object base.
 inline tv_lval propCOQ(Class* ctx, ObjectData* base, StringData* key,
-                       TypedValue& tvRef, ReadonlyOp op, bool* roProp) {
-  return base->prop(&tvRef, ctx, key, op, roProp);
+                       TypedValue& tvRef, ReadonlyOp op) {
+  return base->prop(&tvRef, ctx, key, op);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -191,12 +199,20 @@ CGET_OBJ_PROP_HELPER_TABLE(X)
 //////////////////////////////////////////////////////////////////////
 
 // NullSafe prop.
-inline TypedValue cGetPropSQ(Class* ctx, tv_lval base, StringData* key,
-                             ReadonlyOp op) {
-  TypedValue localTvRef;
-  auto result = nullSafeProp(localTvRef, ctx, base, key, op);
-  return cGetRefShuffle(localTvRef, result);
+#define CGET_PROPQ_HELPER_TABLE(m)      \
+  /* name            mode */            \
+  m(cGetPropQQuiet,  MOpMode::None)     \
+  m(cGetPropQ,       MOpMode::Warn)     \
+
+#define X(nm, mode)                                                \
+inline TypedValue nm(Class* ctx, tv_lval base, StringData* key,    \
+                     ReadonlyOp op) {                              \
+  TypedValue localTvRef;                                           \
+  auto result = nullSafeProp<mode>(localTvRef, ctx, base, key, op);\
+  return cGetRefShuffle(localTvRef, result);                       \
 }
+CGET_PROPQ_HELPER_TABLE(X)
+#undef X
 
 // NullSafe prop with object base.
 inline TypedValue cGetPropSOQ(Class* ctx, ObjectData* base, StringData* key,
@@ -381,9 +397,9 @@ ELEM_HELPER_TABLE(X)
   m(elemID,    KeyType::Int)  \
   m(elemSD,    KeyType::Str)  \
 
-#define X(nm, keyType)                                                \
-inline tv_lval nm(tv_lval base, key_type<keyType> key, bool roProp) { \
-  return ElemD<keyType>(base, key, roProp);                           \
+#define X(nm, keyType)                                   \
+inline tv_lval nm(tv_lval base, key_type<keyType> key) { \
+  return ElemD<keyType>(base, key);                      \
 }
 ELEMD_HELPER_TABLE(X)
 #undef X
@@ -394,9 +410,9 @@ ELEMD_HELPER_TABLE(X)
   m(elemIU,    KeyType::Int)  \
   m(elemSU,    KeyType::Str)  \
 
-#define X(nm, keyType)                                                \
-inline tv_lval nm(tv_lval base, key_type<keyType> key, bool roProp) { \
-  return ElemU<keyType>(base, key, roProp);                           \
+#define X(nm, keyType)                                   \
+inline tv_lval nm(tv_lval base, key_type<keyType> key) { \
+  return ElemU<keyType>(base, key);                      \
 }
 ELEMU_HELPER_TABLE(X)
 #undef X

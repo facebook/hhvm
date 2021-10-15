@@ -234,14 +234,12 @@ VariableUnserializer::VariableUnserializer(
   size_t len,
   Type type,
   bool allowUnknownSerializableClass,
-  bool suppressClassConversionWarnings,
   const Array& options)
     : m_type(type)
     , m_readOnly(false)
     , m_buf(str)
     , m_end(str + len)
     , m_unknownSerializable(allowUnknownSerializableClass)
-    , m_suppressClassConversionWarnings(suppressClassConversionWarnings)
     , m_options(options)
     , m_begin(str)
     , m_forceDArrays{m_options[s_force_darrays].toBoolean()}
@@ -832,9 +830,8 @@ void VariableUnserializer::unserializeVariant(
           self
         );
       } else {
-        if (!m_suppressClassConversionWarnings &&
-            RuntimeOption::EvalRaiseClassConversionWarning) {
-          raise_warning(Strings::CLASS_TO_STRING);
+        if (RuntimeOption::EvalRaiseClassConversionWarning) {
+          raise_class_to_string_conversion_warning();
         }
         tvMove(
           make_tv<KindOfPersistentString>(makeStaticString(c.get())), self

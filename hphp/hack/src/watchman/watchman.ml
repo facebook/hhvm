@@ -262,7 +262,7 @@ end = struct
       ~debug_logging ~conn:(_, oc) json =
     send_request ~debug_logging oc json
 
-  let blocking_read ~debug_logging ?(timeout = Explicit_timeout 0.) ~conn =
+  let blocking_read ~debug_logging ?(timeout = Explicit_timeout 0.) conn =
     let ready = has_input timeout @@ fst conn in
     if not ready then
       match timeout with
@@ -1025,7 +1025,7 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
     let debug_logging = env.settings.debug_logging in
     let sockname = env.settings.sockname in
     if Option.is_some env.settings.subscribe_mode then
-      Watchman_process.blocking_read ~debug_logging ?timeout ~conn:env.conn
+      Watchman_process.blocking_read ~debug_logging ?timeout env.conn
       >|= fun response ->
       let (env, result) =
         transform_asynchronous_get_changes_response env response
@@ -1108,7 +1108,7 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
         Explicit_timeout timeout
     in
     let debug_logging = env.settings.debug_logging in
-    Watchman_process.blocking_read ~debug_logging ~timeout ~conn:env.conn
+    Watchman_process.blocking_read ~debug_logging ~timeout env.conn
     >>= fun json ->
     if is_finished_flush_response json then
       Watchman_process.return (env, acc)

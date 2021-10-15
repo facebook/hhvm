@@ -658,6 +658,15 @@ function reflection_class_is_interface(
     mixed $class,
 )[]: bool;
 
+/**
+ * List of ids declared for create_opaque_value.
+ * Please do not reuse an existing or deprecated id for your new
+ * feature.
+ */
+enum OpaqueValueId : int {
+  EnumClassLabel = 0;
+}
+
 <<__Native, __NoInjection>>
 function create_opaque_value_internal(int $id, mixed $val)[]: resource;
 

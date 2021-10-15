@@ -55,6 +55,10 @@ void caml_serialize_block_1() {}
 void caml_serialize_int_8() {}
 void caml_deserialize_sint_8() {}
 void caml_deserialize_block_1() {}
+void caml_input_value_from_block() {}
+void caml_alloc_initialized_string() {}
+void caml_output_value_to_malloc() {}
+
 
 
 int ocamlpool_generation = 0;

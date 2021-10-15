@@ -36,7 +36,6 @@ pub use manual::typing_logic;
 pub use manual::typing_set;
 
 pub mod decl_visitor;
-pub mod nast_visitor;
 
 mod gen;
 
@@ -70,6 +69,7 @@ pub use gen::typing_fake_members;
 pub use gen::typing_inference_env;
 pub use gen::typing_kinding_defs;
 pub use gen::typing_local_types;
+pub use gen::typing_modules;
 pub use gen::typing_per_cont_env;
 pub use gen::typing_reason;
 pub use gen::typing_tyvar_occurrences;

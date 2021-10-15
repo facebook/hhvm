@@ -703,12 +703,9 @@ where
     ) -> Result<(ast::Hint, Option<ast::HfParamInfo>), Error> {
         match &node.children {
             ClosureParameterTypeSpecifier(c) => {
-                let kind = Self::mp_optional(Self::p_param_kind, &c.call_convention, env)?;
+                let kind = Self::p_param_kind(&c.call_convention, env)?;
                 let readonlyness = Self::mp_optional(Self::p_readonly, &c.readonly, env)?;
-                let info = match (kind, readonlyness) {
-                    (None, None) => None,
-                    _ => Some(ast::HfParamInfo { kind, readonlyness }),
-                };
+                let info = Some(ast::HfParamInfo { kind, readonlyness });
                 let hint = Self::p_hint(&c.type_, env)?;
                 Ok((hint, info))
             }
@@ -848,6 +845,18 @@ where
                     suggest(&name, special_typehints::FLOAT);
                 } else if "real".eq_ignore_ascii_case(&name) {
                     suggest(&name, special_typehints::FLOAT);
+                }
+
+                use naming_special_names_rust::coeffects::{CAPABILITIES, CONTEXTS};
+                if env.file_mode() != file_info::Mode::Mhhi && !env.codegen() {
+                    let sn = Self::strip_ns(&name);
+                    if sn.starts_with(CONTEXTS) || sn.starts_with(CAPABILITIES) {
+                        Self::raise_parsing_error(
+                            node,
+                            env,
+                            &syntax_error::direct_coeffects_reference,
+                        );
+                    }
                 }
                 Ok(Happly(ast::Id(pos, name), vec![]))
             }
@@ -1326,6 +1335,29 @@ where
         Self::p_expr_with_loc(ExprLocation::TopLevel, node, env)
     }
 
+    fn p_expr_for_function_call_arguments(
+        node: S<'a, T, V>,
+        env: &mut Env<'a, TF>,
+    ) -> Result<(ast::ParamKind, ast::Expr), Error> {
+        match &node.children {
+            DecoratedExpression(DecoratedExpressionChildren {
+                decorator,
+                expression,
+            }) if Self::token_kind(decorator) == Some(TK::Inout) => Ok((
+                ast::ParamKind::Pinout(Self::p_pos(decorator, env)),
+                Self::p_expr(expression, env)?,
+            )),
+            _ => Ok((ast::ParamKind::Pnormal, Self::p_expr(node, env)?)),
+        }
+    }
+
+    fn p_expr_for_normal_argument(
+        node: S<'a, T, V>,
+        env: &mut Env<'a, TF>,
+    ) -> Result<(ast::ParamKind, ast::Expr), Error> {
+        Ok((ast::ParamKind::Pnormal, Self::p_expr(node, env)?))
+    }
+
     fn p_expr_with_loc(
         location: ExprLocation,
         node: S<'a, T, V>,
@@ -1492,6 +1524,31 @@ where
         }
     }
 
+    fn split_args_vararg(
+        arg_list_node: S<'a, T, V>,
+        e: &mut Env<'a, TF>,
+    ) -> Result<(Vec<(ast::ParamKind, ast::Expr)>, Option<ast::Expr>), Error> {
+        let mut arg_list: Vec<_> = arg_list_node.syntax_node_to_list_skip_separator().collect();
+        if let Some(last_arg) = arg_list.last() {
+            if let DecoratedExpression(c) = &last_arg.children {
+                if Self::token_kind(&c.decorator) == Some(TK::DotDotDot) {
+                    let _ = arg_list.pop();
+                    let args: Result<Vec<_>, _> = arg_list
+                        .iter()
+                        .map(|a| Self::p_expr_for_function_call_arguments(a, e))
+                        .collect();
+                    let args = args?;
+                    let vararg = Self::p_expr(&c.expression, e)?;
+                    return Ok((args, Some(vararg)));
+                }
+            }
+        }
+        Ok((
+            Self::could_map(Self::p_expr_for_function_call_arguments, arg_list_node, e)?,
+            None,
+        ))
+    }
+
     fn p_expr_impl__(
         location: ExprLocation,
         node: S<'a, T, V>,
@@ -1500,25 +1557,6 @@ where
     ) -> Result<ast::Expr_, Error> {
         env.check_stack_limit();
         use ast::Expr as E;
-        let split_args_vararg = |
-            arg_list_node: S<'a, T, V>,
-            e: &mut Env<'a, TF>,
-        | -> Result<(Vec<ast::Expr>, Option<ast::Expr>), Error> {
-            let mut arg_list: Vec<_> = arg_list_node.syntax_node_to_list_skip_separator().collect();
-            if let Some(last_arg) = arg_list.last() {
-                if let DecoratedExpression(c) = &last_arg.children {
-                    if Self::token_kind(&c.decorator) == Some(TK::DotDotDot) {
-                        let _ = arg_list.pop();
-                        let args: Result<Vec<_>, _> =
-                            arg_list.iter().map(|a| Self::p_expr(a, e)).collect();
-                        let args = args?;
-                        let vararg = Self::p_expr(&c.expression, e)?;
-                        return Ok((args, Some(vararg)));
-                    }
-                }
-            }
-            Ok((Self::could_map(Self::p_expr, arg_list_node, e)?, None))
-        };
         let mk_lid = |p: Pos, s: String| ast::Lid(p, (0, s));
         let mk_name_lid = |name: S<'a, T, V>, env: &mut Env<'a, TF>| {
             let name = Self::pos_name(name, env)?;
@@ -1565,7 +1603,7 @@ where
                 }
                 _ => recv,
             };
-            let (args, varargs) = split_args_vararg(args, e)?;
+            let (args, varargs) = Self::split_args_vararg(args, e)?;
             Ok(E_::mk_call(recv, vec![], args, varargs))
         };
         let p_obj_get = |
@@ -1616,7 +1654,7 @@ where
                                 pos: p,
                                 name: n,
                                 expr: None,
-                                callconv: None,
+                                callconv: ast::ParamKind::Pnormal,
                                 readonly: None,
                                 user_attributes: vec![],
                                 visibility: None,
@@ -1761,7 +1799,10 @@ where
                         Ok(E_::mk_call(
                             Self::p_expr(recv, env)?,
                             vec![],
-                            vec![E::new((), literal_expression_pos, E_::String(s.into()))],
+                            vec![(
+                                ast::ParamKind::Pnormal,
+                                E::new((), literal_expression_pos, E_::String(s.into())),
+                            )],
                             None,
                         ))
                     }
@@ -1829,7 +1870,7 @@ where
                             }
                             _ => recv,
                         };
-                        let (mut args, varargs) = split_args_vararg(args, env)?;
+                        let (mut args, varargs) = Self::split_args_vararg(args, env)?;
 
                         // If the function has an enum class label expression, that's
                         // the first argument.
@@ -1847,7 +1888,7 @@ where
                                     Self::pos_name(&e.expression, env)?.1,
                                 ),
                             );
-                            args.insert(0, enum_class_label);
+                            args.insert(0, (ast::ParamKind::Pnormal, enum_class_label));
                         }
 
                         Ok(E_::mk_call(recv, targs, args, varargs))
@@ -1957,7 +1998,6 @@ where
                         Some(TK::Tilde) => mk_unop(Utild, expr),
                         Some(TK::Plus) => mk_unop(Uplus, expr),
                         Some(TK::Minus) => mk_unop(Uminus, expr),
-                        Some(TK::Inout) => Ok(E_::mk_callconv(ast::ParamKind::Pinout, expr)),
                         Some(TK::Await) => Self::lift_await(pos, expr, env, location),
                         Some(TK::Readonly) => Ok(Self::process_readonly_expr(expr)),
                         Some(TK::Clone) => Ok(E_::mk_clone(expr)),
@@ -1968,7 +2008,7 @@ where
                                 E_::mk_id(ast::Id(pos, special_functions::ECHO.into())),
                             ),
                             vec![],
-                            vec![expr],
+                            vec![(ast::ParamKind::Pnormal, expr)],
                             None,
                         )),
                         Some(TK::Dollar) => {
@@ -2140,7 +2180,7 @@ where
             )?)),
             ObjectCreationExpression(c) => Self::p_expr_impl_(location, &c.object, env, Some(pos)),
             ConstructorCall(c) => {
-                let (args, varargs) = split_args_vararg(&c.argument_list, env)?;
+                let (args, varargs) = Self::split_args_vararg(&c.argument_list, env)?;
                 let (e, hl) = match &c.type_.children {
                     GenericTypeSpecifier(c) => {
                         let name = Self::pos_name(&c.class_type, env)?;
@@ -2167,7 +2207,7 @@ where
                 Ok(E_::mk_new(
                     ast::ClassId((), pos.clone(), ast::ClassId_::CIexpr(e)),
                     hl,
-                    args,
+                    args.into_iter().map(|(_, e)| e).collect(),
                     varargs,
                     (),
                 ))
@@ -2214,6 +2254,10 @@ where
                 Self::p_expr(&c.left_operand, env)?,
                 Self::p_hint(&c.right_operand, env)?,
                 true,
+            )),
+            UpcastExpression(c) => Ok(E_::mk_upcast(
+                Self::p_expr(&c.left_operand, env)?,
+                Self::p_hint(&c.right_operand, env)?,
             )),
             AnonymousFunction(c) => {
                 let p_arg = |n: S<'a, T, V>, e: &mut Env<'a, TF>| match &n.children {
@@ -2342,7 +2386,12 @@ where
                         Ok(recv) => {
                             let enum_class_label = E_::mk_enum_class_label(None, label_name);
                             let enum_class_label = ast::Expr::new((), label_pos, enum_class_label);
-                            Ok(E_::mk_call(recv, vec![], vec![enum_class_label], None))
+                            Ok(E_::mk_call(
+                                recv,
+                                vec![],
+                                vec![(ast::ParamKind::Pnormal, enum_class_label)],
+                                None,
+                            ))
                         }
                         Err(err) => Err(err),
                     }
@@ -2384,8 +2433,8 @@ where
             Darray(_) | Varray(_) | Shape(_) | Collection(_) | Record(_) | Null | True | False
             | Id(_) | Clone(_) | ClassConst(_) | Int(_) | Float(_) | PrefixedString(_)
             | String(_) | String2(_) | Yield(_) | Await(_) | Cast(_) | Unop(_) | Binop(_)
-            | Eif(_) | New(_) | Efun(_) | Lfun(_) | Xml(_) | Import(_) | Pipe(_) | Callconv(_)
-            | Is(_) | As(_) | Call(_) => raise("Invalid lvalue"),
+            | Eif(_) | New(_) | Efun(_) | Lfun(_) | Xml(_) | Import(_) | Pipe(_) | Is(_)
+            | As(_) | Call(_) => raise("Invalid lvalue"),
             _ => {}
         }
     }
@@ -3023,7 +3072,8 @@ where
                         }
                         _ => Self::missing_syntax("id", &c.keyword, e)?,
                     };
-                    let args = Self::could_map(Self::p_expr, &c.expressions, e)?;
+                    let args =
+                        Self::could_map(Self::p_expr_for_normal_argument, &c.expressions, e)?;
                     Ok(new(
                         pos.clone(),
                         S_::mk_expr(ast::Expr::new(
@@ -3037,10 +3087,10 @@ where
             }
             UnsetStatement(c) => {
                 let f = |e: &mut Env<'a, TF>| -> Result<ast::Stmt, Error> {
-                    let args = Self::could_map(Self::p_expr, &c.variables, e)?;
+                    let args = Self::could_map(Self::p_expr_for_normal_argument, &c.variables, e)?;
                     if e.parser_options.po_disable_unset_class_const {
                         args.iter()
-                            .for_each(|arg| Self::check_mutate_class_const(arg, node, e))
+                            .for_each(|(_, arg)| Self::check_mutate_class_const(arg, node, e))
                     }
                     let unset = match &c.keyword.children {
                         QualifiedName(_) | SimpleTypeSpecifier(_) | Token(_) => {
@@ -3449,6 +3499,12 @@ where
                     Some((hint_opt, param_pos, _is_variadic)) => match hint_opt {
                         Some(_) if env.codegen() => {}
                         Some(ref mut param_hint) => match *param_hint.1 {
+                            Hint_::Hlike(ref mut h) => match *h.1 {
+                                Hint_::Hoption(ref mut hinner) => {
+                                    rewrite_fun_ctx(env, tparams, hinner, name)
+                                }
+                                _ => rewrite_fun_ctx(env, tparams, h, name),
+                            },
                             Hint_::Hoption(ref mut h) => rewrite_fun_ctx(env, tparams, h, name),
                             _ => rewrite_fun_ctx(env, tparams, param_hint, name),
                         },
@@ -3478,28 +3534,30 @@ where
                                 } else {
                                     match hint_opt {
                                         Some(_) if env.codegen() => {}
-                                        Some(ref mut param_hint) => match *param_hint.1 {
-                                            Hint_::Hoption(ref mut h) => rewrite_arg_ctx(
-                                                env,
-                                                tparams,
-                                                where_constraints,
-                                                h,
-                                                param_pos,
-                                                name,
-                                                &context_hint.0,
-                                                &csts[0],
-                                            ),
-                                            _ => rewrite_arg_ctx(
-                                                env,
-                                                tparams,
-                                                where_constraints,
-                                                param_hint,
-                                                param_pos,
-                                                name,
-                                                &context_hint.0,
-                                                &csts[0],
-                                            ),
-                                        },
+                                        Some(ref mut param_hint) => {
+                                            let mut rewrite = |h| {
+                                                rewrite_arg_ctx(
+                                                    env,
+                                                    tparams,
+                                                    where_constraints,
+                                                    h,
+                                                    param_pos,
+                                                    name,
+                                                    &context_hint.0,
+                                                    &csts[0],
+                                                )
+                                            };
+                                            match *param_hint.1 {
+                                                Hint_::Hlike(ref mut h) => match *h.1 {
+                                                    Hint_::Hoption(ref mut hinner) => {
+                                                        rewrite(hinner)
+                                                    }
+                                                    _ => rewrite(h),
+                                                },
+                                                Hint_::Hoption(ref mut h) => rewrite(h),
+                                                _ => rewrite(param_hint),
+                                            }
+                                        }
                                         None => Self::raise_parsing_error_pos(
                                             param_pos,
                                             env,
@@ -3564,7 +3622,8 @@ where
 
     fn p_param_kind(node: S<'a, T, V>, env: &mut Env<'a, TF>) -> Result<ast::ParamKind, Error> {
         match Self::token_kind(node) {
-            Some(TK::Inout) => Ok(ast::ParamKind::Pinout),
+            Some(TK::Inout) => Ok(ast::ParamKind::Pinout(Self::p_pos(node, env))),
+            None => Ok(ast::ParamKind::Pnormal),
             _ => Self::missing_syntax("param kind", node, env),
         }
     }
@@ -3585,7 +3644,7 @@ where
             pos,
             name: Self::text(node, env),
             expr: None,
-            callconv: None,
+            callconv: ast::ParamKind::Pnormal,
             readonly: None,
             user_attributes: vec![],
             visibility: None,
@@ -3644,7 +3703,7 @@ where
                     pos,
                     name,
                     expr: Self::p_fun_param_default_value(default_value, env)?,
-                    callconv: Self::mp_optional(Self::p_param_kind, call_convention, env)?,
+                    callconv: Self::p_param_kind(call_convention, env)?,
                     readonly: Self::mp_optional(Self::p_readonly, readonly, env)?,
                     /* implicit field via constructor parameter.
                      * This is always None except for constructors and the modifier
@@ -4380,7 +4439,7 @@ where
                 Ok(class.consts.append(&mut class_consts))
             }
             TypeConstDeclaration(c) => {
-                use ast::ClassTypeconst::{TCAbstract, TCConcrete, TCPartiallyAbstract};
+                use ast::ClassTypeconst::{TCAbstract, TCConcrete};
                 if !c.type_parameters.is_missing() {
                     Self::raise_parsing_error(node, env, &syntax_error::tparams_in_tconst);
                 }
@@ -4400,15 +4459,13 @@ where
                         default: type__,
                     })
                 } else if let Some(type_) = type__ {
-                    match as_constraint {
-                        None => TCConcrete(ast::ClassConcreteTypeconst { c_tc_type: type_ }),
-                        Some(constraint) => {
-                            TCPartiallyAbstract(ast::ClassPartiallyAbstractTypeconst {
-                                constraint,
-                                type_,
-                            })
-                        }
+                    if env.is_typechecker() && as_constraint.is_some() {
+                        Self::raise_hh_error(
+                            env,
+                            NastCheck::partially_abstract_typeconst_definition(name.0.clone()),
+                        );
                     }
+                    TCConcrete(ast::ClassConcreteTypeconst { c_tc_type: type_ })
                 } else {
                     Self::raise_hh_error(
                         env,
@@ -5089,13 +5146,6 @@ where
         }
     }
 
-    fn defaults_coeffect(env: &mut Env<'a, TF>, node: S<'a, T, V>) -> ast::Hint {
-        use ast::Hint_::Happly;
-        let pos = Self::p_pos(node, env);
-        let hint_ = Happly(ast::Id(pos.clone(), String::from("defaults")), vec![]);
-        ast::Hint::new(pos, hint_)
-    }
-
     fn p_def(node: S<'a, T, V>, env: &mut Env<'a, TF>) -> Result<Vec<ast::Def>, Error> {
         let doc_comment_opt = Self::extract_docblock(node, env);
         match &node.children {
@@ -5298,6 +5348,24 @@ where
                         )
                     }
                 }
+                if as_constraint.is_none() {
+                    Self::raise_parsing_error(
+                        &c.name,
+                        env,
+                        &syntax_error::user_ctx_require_as(&pos_name.1),
+                    )
+                }
+                let kind = match Self::p_context_list_to_intersection(&c.context, env)? {
+                    Some(h) => h,
+                    None => {
+                        let pos = pos_name.0.clone();
+                        let hint_ = ast::Hint_::Happly(
+                            ast::Id(pos.clone(), String::from("defaults")),
+                            vec![],
+                        );
+                        ast::Hint::new(pos, hint_)
+                    }
+                };
                 Ok(vec![ast::Def::mk_typedef(ast::Typedef {
                     annotation: (),
                     name: pos_name,
@@ -5312,10 +5380,7 @@ where
                     namespace: Self::mk_empty_ns_env(env),
                     mode: env.file_mode(),
                     vis: ast::TypedefVisibility::Opaque,
-                    kind: match Self::p_context_list_to_intersection(&c.context, env)? {
-                        Some(h) => h,
-                        None => Self::defaults_coeffect(env, &c.context),
-                    },
+                    kind,
                     span: Self::p_pos(node, env),
                     emit_id: None,
                     is_ctx: true,

@@ -7,15 +7,13 @@ module IntKey = struct
 
   let to_string = string_of_int
 
-  let compare = ( - )
+  let compare = Int.compare
 end
 
 module Ids =
-  SharedMem.NoCache (SharedMem.Immediate) (IntKey)
+  SharedMem.Heap (SharedMem.ImmediateBackend) (IntKey)
     (struct
       type t = int array
-
-      let prefix = Prefix.make ()
 
       let description = "Test_Ids"
     end)
@@ -90,8 +88,8 @@ let () =
   let all_ids_len = num_jobs * ids_per_job in
   let all_ids = Array.create ~len:all_ids_len 0 in
   for job_id = 0 to num_jobs - 1 do
-    (* Might raise {!SharedMem.Shared_mem_not_found} *)
-    let ids = Ids.find_unsafe job_id in
+    (* Might raise because of Option.value_exn *)
+    let ids = Option.value_exn (Ids.get job_id) in
     for i = 0 to ids_per_job - 1 do
       all_ids.((job_id * ids_per_job) + i) <- ids.(i)
     done

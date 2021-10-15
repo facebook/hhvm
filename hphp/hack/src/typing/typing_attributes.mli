@@ -24,7 +24,7 @@ val check_def :
   Typing_env_types.env ->
   Nast.class_id_ ->
   'b list ->
-  Nast.expr list ->
+  (Ast_defs.param_kind * Nast.expr) list ->
   'c option ->
   Typing_env_types.env * 'l * 'm * 'n * 'o * 'p * 'q * 'r) ->
   attribute_interface_name ->

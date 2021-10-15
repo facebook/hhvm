@@ -193,8 +193,8 @@ let build_signature_json ctx source_map params vararg ret_ty =
     in
     let is_inout =
       match p.param_callconv with
-      | Some Pinout -> true
-      | _ -> false
+      | Pinout _ -> true
+      | Pnormal -> false
     in
     let def_value =
       match p.param_expr with
@@ -244,7 +244,6 @@ let build_type_const_kind_json kind =
     match kind with
     | TCAbstract _ -> 0
     | TCConcrete _ -> 1
-    | TCPartiallyAbstract _ -> 2
   in
   JSON_Number (string_of_int num)
 

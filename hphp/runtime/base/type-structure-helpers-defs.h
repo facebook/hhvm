@@ -197,7 +197,8 @@ ALWAYS_INLINE bool isWildCard(const ArrayData* ts) {
 ALWAYS_INLINE
 const StringData* get_ts_this_type_access(const ArrayData* ts) {
   if (get_ts_kind(ts) != TypeStructure::Kind::T_typeaccess ||
-      !get_ts_root_name(ts)->isame(s_hh_this.get())) {
+      !get_ts_root_name(ts)->isame(s_hh_this.get()) ||
+      is_ts_nullable(ts)) {
     return nullptr;
   }
   auto const accList = get_ts_access_list(ts);

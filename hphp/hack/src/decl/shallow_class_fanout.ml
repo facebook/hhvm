@@ -12,8 +12,9 @@ open ClassDiff
 open Reordered_argument_collections
 open Typing_deps
 
-let class_names_from_deps ~mode ~get_classes_in_file deps =
-  let filenames = Typing_deps.Files.get_files deps in
+let class_names_from_deps ~ctx ~get_classes_in_file deps =
+  let mode = Provider_context.get_deps_mode ctx in
+  let filenames = Naming_provider.ByHash.get_files ctx deps in
   Relative_path.Set.fold filenames ~init:SSet.empty ~f:(fun file acc ->
       SSet.fold (get_classes_in_file file) ~init:acc ~f:(fun cid acc ->
           if DepSet.mem deps Dep.(make (hash_mode mode) (Type cid)) then
@@ -22,11 +23,12 @@ let class_names_from_deps ~mode ~get_classes_in_file deps =
             acc))
 
 let add_minor_change_fanout
-    ~(mode : Typing_deps_mode.t)
+    ~(ctx : Provider_context.t)
     ~(get_classes_in_file : Relative_path.t -> SSet.t)
     (acc : AffectedDeps.t)
     (class_name : string)
     (minor_change : ClassDiff.minor_change) : AffectedDeps.t =
+  let mode = Provider_context.get_deps_mode ctx in
   let dep = Dep.make (hash_mode mode) (Dep.Type class_name) in
   let changed = DepSet.singleton mode dep in
   let acc = AffectedDeps.mark_changed acc changed in
@@ -57,7 +59,7 @@ let add_minor_change_fanout
         let changed_and_descendants =
           Typing_deps.add_extend_deps mode changed
         in
-        class_names_from_deps ~mode ~get_classes_in_file changed_and_descendants
+        class_names_from_deps ~ctx ~get_classes_in_file changed_and_descendants
       end
   in
   (* Recheck any files with a reference to the member returned by make_dep,
@@ -65,11 +67,16 @@ let add_minor_change_fanout
      where adding, removing, or changing the abstract-ness of a member causes
      some subclass which inherits a member of that name from multiple parents
      to resolve the conflict in a different way than it did previously. *)
-  let recheck_descendant_member_dependents acc make_dep =
+  let recheck_descendants_and_their_member_dependents acc make_dep =
     SSet.fold
       (Lazy.force changed_and_descendant_class_names)
       ~init:acc
       ~f:(fun cid acc ->
+        let dep = Dep.make (hash_mode mode) (Dep.Type cid) in
+        let needs_recheck =
+          Typing_deps.add_typing_deps mode (DepSet.singleton mode dep)
+        in
+        let acc = AffectedDeps.mark_as_needing_recheck acc needs_recheck in
         AffectedDeps.mark_all_dependents_as_needing_recheck
           mode
           acc
@@ -82,7 +89,7 @@ let add_minor_change_fanout
         acc
         (make_dep class_name)
     else
-      recheck_descendant_member_dependents acc make_dep
+      recheck_descendants_and_their_member_dependents acc make_dep
   in
   let add_member_fanouts acc changes make_dep =
     SMap.fold changes ~init:acc ~f:(fun member_id change acc ->
@@ -127,33 +134,35 @@ let add_minor_change_fanout
   acc
 
 let add_maximum_fanout
-    (mode : Typing_deps_mode.t) (acc : AffectedDeps.t) (class_name : string) =
+    (ctx : Provider_context.t) (acc : AffectedDeps.t) (class_name : string) =
+  let mode = Provider_context.get_deps_mode ctx in
   AffectedDeps.add_maximum_fanout
     mode
     acc
     (Dep.make (hash_mode mode) (Dep.Type class_name))
 
 let add_fanout
-    ~(mode : Typing_deps_mode.t)
+    ~(ctx : Provider_context.t)
     ~(get_classes_in_file : Relative_path.t -> SSet.t)
     (acc : AffectedDeps.t)
     (class_name, diff) : AffectedDeps.t =
   match diff with
   | Unchanged -> acc
-  | Major_change -> add_maximum_fanout mode acc class_name
+  | Major_change -> add_maximum_fanout ctx acc class_name
   | Minor_change minor_change ->
     add_minor_change_fanout
-      ~mode
+      ~ctx
       ~get_classes_in_file
       acc
       class_name
       minor_change
 
 let fanout_of_changes
-    ~(mode : Typing_deps_mode.t)
+    ~(ctx : Provider_context.t)
     ~(get_classes_in_file : Relative_path.t -> SSet.t)
     (changes : (string * ClassDiff.t) list) : AffectedDeps.t =
+  let mode = Provider_context.get_deps_mode ctx in
   List.fold
     changes
     ~init:(AffectedDeps.empty mode)
-    ~f:(add_fanout ~mode ~get_classes_in_file)
+    ~f:(add_fanout ~ctx ~get_classes_in_file)

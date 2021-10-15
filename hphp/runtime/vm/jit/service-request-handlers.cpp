@@ -235,6 +235,7 @@ TCA handleTranslate(Offset bcOff, SBInvOffset spOff) noexcept {
   // later if we are going to use the resume helper.
   regState() = VMRegState::CLEAN;
   vmsp() = Stack::anyFrameStackBase(vmfp()) - spOff.offset;
+  vmJitReturnAddr() = nullptr;
 
   FTRACE(1, "handleTranslate {}\n", vmfp()->func()->fullName()->data());
 
@@ -249,6 +250,7 @@ TCA handleRetranslate(Offset bcOff, SBInvOffset spOff) noexcept {
   // later if we are going to use the resume helper.
   regState() = VMRegState::CLEAN;
   vmsp() = Stack::anyFrameStackBase(vmfp()) - spOff.offset;
+  vmJitReturnAddr() = nullptr;
 
   FTRACE(1, "handleRetranslate {}\n", vmfp()->func()->fullName()->data());
 
@@ -267,6 +269,7 @@ TCA handleRetranslateOpt(Offset bcOff, SBInvOffset spOff) noexcept {
   // later if we are going to use the resume helper.
   regState() = VMRegState::CLEAN;
   vmsp() = Stack::anyFrameStackBase(vmfp()) - spOff.offset;
+  vmJitReturnAddr() = nullptr;
 
   FTRACE(1, "handleRetranslateOpt {}\n", vmfp()->func()->fullName()->data());
 
@@ -295,6 +298,7 @@ TCA handlePostInterpRet(uint32_t callOffAndFlags) noexcept {
 
   // Reconstruct PC so that the subsequent logic have clean reg state.
   vmpc() = skipCall(vmfp()->func()->at(callOffset));
+  vmJitReturnAddr() = nullptr;
 
   if (isAER) {
     // When returning to the interpreted FCall, the execution continues at

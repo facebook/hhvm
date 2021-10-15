@@ -110,7 +110,60 @@ let rec consume_prehandoff_messages
     wait_on_server_restart ic;
     Error Server_died
 
-let connect_to_monitor ~tracker ~timeout config =
+let read_and_log_process_information ~timeout =
+  let process = Process.exec Exec_command.Pgrep ["hh_client"; "-a"] in
+  match Process.read_and_wait_pid process ~timeout with
+  | Ok r ->
+    (* redirecting the output of pgrep from stdout to stderr with no formatting, so users see relevant PID and paths.
+       Manually pulling out first 5 elements with string handling rather than piping the input into `head`.
+       The reason being that the use of Process.exec with Exec_command is to avoid the risk of shelling out
+       failing and throwing some exception that gets caught higher up the chain. Instead, allow pgrep to be a single chance to fail.
+       Any success can be handled in application code with postprocessing.
+    *)
+    let matching_processes =
+      r.Process_types.stdout
+      |> String.split_on_chars ~on:['\n']
+      |> (fun x -> List.take x 5)
+      |> String.concat ~sep:"\n"
+    in
+    Printf.eprintf "%s\n%!" matching_processes;
+    HackEventLogger.client_connect_to_monitor_slow_log ()
+  | Error e ->
+    let failure_msg = Process.failure_msg e in
+    Printf.eprintf "pgrep failed with reason: %s\n%!" failure_msg;
+    let telemetry =
+      match e with
+      | Process_types.Abnormal_exit { stderr; stdout; status } ->
+        let status_msg =
+          match status with
+          | Unix.WEXITED code -> Printf.sprintf "exited: code = %d" code
+          | Unix.WSIGNALED code -> Printf.sprintf "signaled: code = %d" code
+          | Unix.WSTOPPED code -> Printf.sprintf "stopped: code = %d" code
+        in
+        Telemetry.create ()
+        |> Telemetry.string_ ~key:"stderr" ~value:stderr
+        |> Telemetry.string_ ~key:"stdout" ~value:stdout
+        |> Telemetry.string_ ~key:"status" ~value:status_msg
+      | Process_types.Timed_out { stderr; stdout } ->
+        Telemetry.create ()
+        |> Telemetry.string_ ~key:"stderr" ~value:stderr
+        |> Telemetry.string_ ~key:"stdout" ~value:stdout
+      | Process_types.Overflow_stdin -> Telemetry.create ()
+    in
+    let desc = "pgrep_failed_for_monitor_connect" in
+    Hh_logger.log
+      "INVARIANT VIOLATION BUG: [%s] [%s]"
+      desc
+      (Telemetry.to_string telemetry);
+    HackEventLogger.invariant_violation_bug
+      ~desc
+      ~typechecking_is_deferring:false
+      ~path:Relative_path.default
+      ~pos:""
+      telemetry;
+    ()
+
+let connect_to_monitor ?(log_on_slow_connect = false) ~tracker ~timeout config =
   (* There are some pathological scenarios concerned with high volumes of requests.
      1. There's a finite unix pipe between monitor and server, used for handoff. When
      that pipe gets full (~30 requests), the monitor will freeze for 4s before closing
@@ -131,6 +184,7 @@ let connect_to_monitor ~tracker ~timeout config =
   let open Connection_tracker in
   let phase = ref ServerMonitorUtils.Connect_open_socket in
   let finally_close : Timeout.in_channel option ref = ref None in
+  let warn_of_busy_server_timer : Timer.t option ref = ref None in
   Utils.try_finally
     ~f:(fun () ->
       try
@@ -141,6 +195,19 @@ let connect_to_monitor ~tracker ~timeout config =
           ~do_:(fun timeout ->
             (* 1. open the socket *)
             phase := ServerMonitorUtils.Connect_open_socket;
+            if log_on_slow_connect then
+              (* Setting up a timer to fire a notice to the user when hh seems to be slower.
+                 Since connect_to_monitor allows a 60 second timeout by default, it's possible that hh appears to be hanging from a user's perspective.
+                 We can show people after some time (3 seconds arbitrarily) what processes might be slowing the response. *)
+              let callback () =
+                Printf.eprintf
+                  "The Hack server seems busy and overloaded. The following processes are making requests to hh_server (limited to first 5 shown): \n%!";
+                read_and_log_process_information ~timeout:2
+              in
+              warn_of_busy_server_timer :=
+                Some (Timer.set_timer ~interval:3.0 ~callback)
+            else
+              ();
             let sockaddr = get_sockaddr config in
             let (ic, oc) = Timeout.open_connection ~timeout sockaddr in
             finally_close := Some ic;
@@ -174,6 +241,11 @@ let connect_to_monitor ~tracker ~timeout config =
             let cstate : connection_state = from_channel_without_buffering ic in
             let tracker =
               Connection_tracker.track tracker ~key:Client_got_cstate
+            in
+            let _ =
+              match !warn_of_busy_server_timer with
+              | None -> ()
+              | Some timer -> Timer.cancel_timer timer
             in
 
             (* 4. return Ok *)
@@ -244,7 +316,8 @@ let connect_and_shut_down ~tracker root =
         Ok ServerMonitorUtils.SHUTDOWN_VERIFIED
       end
 
-let connect_once ~tracker ~timeout root handoff_options =
+let connect_once
+    ?(log_on_slow_connect = false) ~tracker ~timeout root handoff_options =
   let open Result.Monad_infix in
   let config = hh_monitor_config root in
   let t_start = Unix.gettimeofday () in
@@ -252,7 +325,8 @@ let connect_once ~tracker ~timeout root handoff_options =
     let tracker =
       Connection_tracker.(track tracker ~key:Client_start_connect ~time:t_start)
     in
-    connect_to_monitor ~tracker ~timeout config >>= fun (ic, oc, tracker) ->
+    connect_to_monitor ~tracker ~timeout ~log_on_slow_connect config
+    >>= fun (ic, oc, tracker) ->
     let tracker =
       Connection_tracker.(track tracker ~key:Client_ready_to_send_handoff)
     in

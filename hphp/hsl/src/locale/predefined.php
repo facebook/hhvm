@@ -12,14 +12,29 @@ namespace HH\Lib\Locale;
 
 use namespace HH\Lib\_Private\_Locale;
 
-/** Retrieve the constant "C" locale.
+/** DEPRECATED: Use `Locale\bytes()` instead.
  *
- * This locale is also known as `"POSIX"` or `"en_US_POSIX"`. It is *not* the
- * current libc locale.
- *
- * @see `get_native()` for the current libc locale.
+ * This function is being removed as:
+ * - there is often confusion between "the C locale" and
+ *   "the current libc locale"
+ * - HHVM implements optimizations which are a visible behavior change; for
+ *   example, `strlen("foo\0bar")` is 7 in HHVM, but 3 in libc.
  */
 function c()[]: Locale {
+  return _Locale\get_c_locale();
+}
+
+/** Retrieve a fixed locale suitable for byte-based operations.
+ *
+ * This is similar to the "C" locale, also known as the "POSIX" or "en_US_POSIX"
+ * locale; it does not vary based on user/environment/machine settings.
+ *
+ * It differs from the real "C" locale in that it is usable on strings that
+ * contain null bytes; for example, `Str\length_l(Locale\bytes(), "foo\0bar")`
+ * will return 7, instead of 3. The behavior is equivalent if the strings
+ * are well-formed.
+ */
+function bytes()[]: Locale {
   return _Locale\get_c_locale();
 }
 
@@ -35,7 +50,7 @@ function c()[]: Locale {
  *
  * @see `set_native()`
  */
-function get_native(): Locale {
+function get_native()[read_globals]: Locale {
   return _Locale\get_request_locale();
 }
 
@@ -43,7 +58,7 @@ function get_native(): Locale {
  *
  * This is highly discouraged; see the note for `get_native()` for details.
  */
-function set_native(Locale $loc): void {
+function set_native(Locale $loc)[globals]: void {
   _Locale\set_request_locale($loc);
 }
 
@@ -55,6 +70,6 @@ function set_native(Locale $loc): void {
  * however it is useful when aiming to support diverse users in CLI
  * programs.
  */
-function from_environment(): Locale {
+function from_environment()[read_globals]: Locale {
   return _Locale\get_environment_locale();
 }

@@ -405,7 +405,6 @@ type _ t =
   | LINT : string list -> ServerLintTypes.result t
   | LINT_STDIN : lint_stdin_input -> ServerLintTypes.result t
   | LINT_ALL : int -> ServerLintTypes.result t
-  | LINT_XCONTROLLER : string list -> ServerLintTypes.result t
   | CREATE_CHECKPOINT : string -> unit t
   | RETRIEVE_CHECKPOINT : string -> string list option t
   | DELETE_CHECKPOINT : string -> bool t
@@ -420,6 +419,7 @@ type _ t =
       string * position * bool
       -> AutocompleteTypes.ide_result t
   | IDE_FFP_AUTOCOMPLETE : string * position -> AutocompleteTypes.ide_result t
+  | CODE_ACTIONS : string * range -> Lsp.CodeAction.command_or_action list t
   | DISCONNECT : unit t
   | SUBSCRIBE_DIAGNOSTIC : subscribe_diagnostic -> unit t
   | UNSUBSCRIBE_DIAGNOSTIC : int -> unit t

@@ -16,9 +16,10 @@ type single_result = {
 type result = single_result list
 
 let go
-    ~(deps_mode : Typing_deps_mode.t)
+    ~(ctx : Provider_context.t)
     ~(dep_hash : Typing_deps.Dep.t)
     ~(include_extends : bool) : result =
+  let deps_mode = Provider_context.get_deps_mode ctx in
   let dep_set = Typing_deps.get_ideps_from_hash deps_mode dep_hash in
   let dep_set =
     if include_extends then
@@ -30,7 +31,8 @@ let go
   |> Typing_deps.DepSet.elements
   |> List.map ~f:(fun hash ->
          let paths =
-           Typing_deps.Files.get_files
+           Naming_provider.ByHash.get_files
+             ctx
              (Typing_deps.DepSet.singleton deps_mode hash)
          in
          { hash; paths })

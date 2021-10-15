@@ -57,6 +57,7 @@ let rec enforce_not_awaitable env p ty =
   | Ttuple _
   | Tshape _
   | Tdynamic
+  | Tsupportdynamic
   | Taccess _
   | Tneg _ ->
     ()

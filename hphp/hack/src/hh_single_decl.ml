@@ -15,7 +15,8 @@ let popt
     ~disable_xhp_element_mangling
     ~disable_enum_classes
     ~enable_enum_supertyping
-    ~interpret_soft_types_as_like_types =
+    ~interpret_soft_types_as_like_types
+    ~everything_sdt =
   let enable_enum_classes = not disable_enum_classes in
   let po = ParserOptions.default in
   let po =
@@ -36,6 +37,7 @@ let popt
       po
       interpret_soft_types_as_like_types
   in
+  let po = ParserOptions.with_everything_sdt po everything_sdt in
   po
 
 let init root popt : Provider_context.t =
@@ -75,21 +77,25 @@ let rec shallow_declare_ast ctx decls prog =
       | SetNamespaceEnv _ -> decls
       | FileAttributes _ -> decls
       | Fun f ->
-        let (name, decl) = Decl_nast.fun_naming_and_decl ctx f in
+        let (name, decl) = Decl_nast.fun_naming_and_decl_DEPRECATED ctx f in
         (name, Shallow_decl_defs.Fun decl) :: decls
       | Class c ->
-        let decl = Shallow_classes_provider.decl ctx c in
+        let decl = Shallow_classes_provider.decl_DEPRECATED ctx c in
         let (_, name) = decl.Shallow_decl_defs.sc_name in
         (name, Shallow_decl_defs.Class decl) :: decls
       | RecordDef rd ->
-        let (name, decl) = Decl_nast.record_def_naming_and_decl ctx rd in
+        let (name, decl) =
+          Decl_nast.record_def_naming_and_decl_DEPRECATED ctx rd
+        in
         (name, Shallow_decl_defs.Record decl) :: decls
       | Typedef typedef ->
-        let (name, decl) = Decl_nast.typedef_naming_and_decl ctx typedef in
+        let (name, decl) =
+          Decl_nast.typedef_naming_and_decl_DEPRECATED ctx typedef
+        in
         (name, Shallow_decl_defs.Typedef decl) :: decls
       | Stmt _ -> decls
       | Constant cst ->
-        let (name, decl) = Decl_nast.const_naming_and_decl ctx cst in
+        let (name, decl) = Decl_nast.const_naming_and_decl_DEPRECATED ctx cst in
         (name, Shallow_decl_defs.Const decl) :: decls)
 
 let compare_decls ctx fn text =
@@ -155,6 +161,7 @@ let () =
   let disable_enum_classes = ref false in
   let enable_enum_supertyping = ref false in
   let interpret_soft_types_as_like_types = ref false in
+  let everything_sdt = ref false in
   let ignored_flag flag = (flag, Arg.Unit (fun _ -> ()), "(ignored)") in
   let ignored_arg flag = (flag, Arg.String (fun _ -> ()), "(ignored)") in
   Arg.parse
@@ -191,6 +198,7 @@ let () =
       ( "--interpret-soft-types-as-like-types",
         Arg.Set interpret_soft_types_as_like_types,
         "Interpret <<__Soft>> type hints as like types" );
+      ("--everything-sdt", Arg.Set everything_sdt, "Classes have SDT");
       (* The following options do not affect the direct decl parser and can be ignored
          (they are used by hh_single_type_check, and we run hh_single_decl over all of
          the typecheck test cases). *)
@@ -239,10 +247,13 @@ let () =
       ignored_flag "--math-new-code";
       ignored_flag "--disallow-partially-abstract-typeconst-definitions";
       ignored_flag "--typeconst-concrete-concrete-error";
+      ignored_flag "--enable-strict-const-semantics";
       ignored_arg "--meth-caller-only-public-visibility";
       ignored_flag "--require-extends-implements-ancestors";
       ignored_flag "--strict-value-equality";
       ignored_flag "--enable-sealed-subclasses";
+      ignored_flag "--enable-sound-dynamic-type";
+      ignored_flag "--pessimise-builtins";
     ]
     set_file
     usage;
@@ -274,6 +285,7 @@ let () =
         let interpret_soft_types_as_like_types =
           !interpret_soft_types_as_like_types
         in
+        let everything_sdt = !everything_sdt in
         let popt =
           popt
             ~auto_namespace_map
@@ -282,6 +294,7 @@ let () =
             ~disable_enum_classes
             ~enable_enum_supertyping
             ~interpret_soft_types_as_like_types
+            ~everything_sdt
         in
         let ctx = init (Path.dirname file) popt in
         let file = Relative_path.(create Root (Path.to_string file)) in

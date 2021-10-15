@@ -5,12 +5,15 @@
 
 use crate::utils;
 use ::anyhow::anyhow;
+use decl_provider::NoDeclProvider;
 use hhbc_by_ref_compile::Profile;
 use hhbc_by_ref_options::Options;
 use multifile_rust as multifile;
+use ocamlrep::rc::RcOc;
 use oxidized::relative_path::{self, RelativePath};
+use parser_core_types::source_text::SourceText;
 use rayon::prelude::*;
-use stack_limit::{StackLimit, KI, MI};
+use stack_limit::{StackLimit, MI};
 use structopt::StructOpt;
 
 use std::{
@@ -138,6 +141,7 @@ fn process_single_file_impl(
     }
 
     let rel_path = RelativePath::make(relative_path::Prefix::Dummy, filepath.to_owned());
+    let source_text = SourceText::make(RcOc::new(rel_path.clone()), content);
     let mut output = String::new();
     let mut flags = hhbc_by_ref_compile::EnvFlags::empty();
     flags.set(
@@ -151,7 +155,15 @@ fn process_single_file_impl(
         flags,
     };
     let alloc = bumpalo::Bump::new();
-    hhbc_by_ref_compile::from_text(&alloc, &env, stack_limit, &mut output, content)?;
+    hhbc_by_ref_compile::from_text(
+        &alloc,
+        &env,
+        stack_limit,
+        &mut output,
+        source_text,
+        None,
+        unified_decl_provider::DeclProvider::NoDeclProvider(NoDeclProvider),
+    )?;
     Ok((output, None))
 }
 
@@ -161,35 +173,24 @@ fn process_single_file_with_retry(
     content: Vec<u8>,
 ) -> anyhow::Result<(String, Option<Profile>)> {
     let ctx = &Arc::new((opts.clone(), filepath, content));
-    let job_builder = move || {
+    let retryable = |stack_limit: &StackLimit, _nonmain_stack_size: Option<usize>| {
         let new_ctx = Arc::clone(ctx);
-        move |stack_limit: &StackLimit, _nonmain_stack_size: Option<usize>| {
-            let (opts, filepath, content) = new_ctx.as_ref();
-            process_single_file_impl(opts, filepath, content.as_slice(), stack_limit)
-        }
+        let (opts, filepath, content) = new_ctx.as_ref();
+        process_single_file_impl(opts, filepath, content.as_slice(), stack_limit)
     };
 
     // Assume peak is 2.5x of stack.
     // This is initial estimation, need to be improved later.
     let stack_slack = |stack_size| stack_size * 6 / 10;
 
-    let on_retry = &mut |stack_size_tried: usize| {
-        // Not always printing warning here because this would fail some HHVM tests
-        if atty::is(atty::Stream::Stderr) || std::env::var_os("HH_TEST_MODE").is_some() {
-            eprintln!(
-                "[hrust] warning: hh_compile exceeded stack of {} KiB on: {:?}",
-                (stack_size_tried - stack_slack(stack_size_tried)) / KI,
-                ctx.1,
-            );
-        }
-    };
+    let on_retry = &mut |_| ();
 
     let job = stack_limit::retry::Job {
         nonmain_stack_min: 13 * MI,
         nonmain_stack_max: None,
         ..Default::default()
     };
-    job.with_elastic_stack(job_builder, on_retry, stack_slack)?
+    job.with_elastic_stack(retryable, on_retry, stack_slack)?
 }
 
 fn process_single_file(

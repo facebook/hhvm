@@ -58,24 +58,24 @@ let get_and_cache
         | None -> None
       end)
 
-let canonize_set = SSet.map Naming_sqlite.to_canon_name_key
-
 module type ReverseNamingTable = sig
   type pos
 
+  module Position : SharedMem.Value with type t = pos
+
+  module CanonName : SharedMem.Value with type t = string
+
   val add : string -> pos -> unit
 
-  val get_pos :
-    Naming_sqlite.db_path option -> ?bypass_cache:bool -> string -> pos option
-
-  val get_filename :
-    Naming_sqlite.db_path option -> string -> Relative_path.t option
-
-  val is_defined : Naming_sqlite.db_path option -> string -> bool
+  val get_pos : Naming_sqlite.db_path option -> string -> pos option
 
   val remove_batch : Naming_sqlite.db_path option -> string list -> unit
 
-  module Position : Value.Type with type t = pos
+  val get_canon_name : Provider_context.t -> string -> string option
+
+  val hash : string -> Typing_deps.Dep.t
+
+  val canon_hash : string -> Typing_deps.Dep.t
 end
 
 (* The Types module records both class names and typedefs since they live in the
@@ -84,37 +84,37 @@ end
 module Types = struct
   type pos = FileInfo.pos * Naming_types.kind_of_type
 
-  module CanonName = struct
-    type t = string
-
-    let prefix = Prefix.make ()
-
-    let description = "Naming_TypeCanon"
-  end
-
   module Position = struct
     type t = pos
-
-    let prefix = Prefix.make ()
 
     let description = "Naming_TypePos"
   end
 
-  module TypeCanonHeap =
-    SharedMem.NoCache (SharedMem.ProfiledImmediate) (StringKey) (CanonName)
+  module CanonName = struct
+    type t = string
+
+    let description = "Naming_TypeCanon"
+  end
 
   module TypePosHeap =
-    SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Position)
+    SharedMem.HeapWithLocalCache
+      (SharedMem.ProfiledBackend)
+      (Typing_deps.DepHashKey)
+      (Position)
       (struct
         let capacity = 1000
       end)
 
+  module TypeCanonHeap =
+    SharedMem.Heap (SharedMem.ProfiledBackend) (Typing_deps.DepHashKey)
+      (CanonName)
+
   module BlockedEntries =
-    SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey)
+    SharedMem.HeapWithLocalCache
+      (SharedMem.ProfiledBackend)
+      (Typing_deps.DepHashKey)
       (struct
         type t = blocked_entry
-
-        let prefix = Prefix.make ()
 
         let description = "Naming_TypeBlocked"
       end)
@@ -122,54 +122,40 @@ module Types = struct
         let capacity = 1000
       end)
 
-  let add id type_info =
-    TypeCanonHeap.add (Naming_sqlite.to_canon_name_key id) id;
-    TypePosHeap.write_around id type_info
+  let hash name =
+    Typing_deps.Dep.Type name |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit
 
-  let get_pos db_path_opt ?(bypass_cache = false) id =
-    let get_func =
-      if bypass_cache then
-        TypePosHeap.get_no_cache
-      else
-        TypePosHeap.get
-    in
-    let map_result (path, entry_type) =
-      let name_type =
-        match entry_type with
-        | Naming_types.TClass -> FileInfo.Class
-        | Naming_types.TTypedef -> FileInfo.Typedef
-        | Naming_types.TRecordDef -> FileInfo.RecordDef
-      in
-      Some (FileInfo.File (name_type, path), entry_type)
+  let canon_hash name =
+    Typing_deps.Dep.Type (Naming_sqlite.to_canon_name_key name)
+    |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit
+
+  let add id pos =
+    TypePosHeap.write_around (hash id) pos;
+    TypeCanonHeap.add (canon_hash id) id;
+    ()
+
+  let get_pos db_path_opt id =
+    let map_result (path, kind_of_type) =
+      let name_type = Naming_types.type_kind_to_name_type kind_of_type in
+      Some (FileInfo.File (name_type, path), kind_of_type)
     in
     let fallback_get_func_opt =
-      Option.map db_path_opt ~f:Naming_sqlite.get_type_path_by_name
+      Option.map db_path_opt ~f:(fun db_path hash ->
+          match Naming_sqlite.get_path_by_64bit_dep db_path hash with
+          | None -> None
+          | Some (file, Naming_types.Type_kind type_kind) ->
+            Some (file, type_kind)
+          | Some (_, _) ->
+            failwith "passed in Type dephash, but got non-type out")
     in
     get_and_cache
       ~map_result
-      ~get_func
+      ~get_func:TypePosHeap.get
       ~check_block_func:BlockedEntries.get
       ~fallback_get_func_opt
       ~cache_func:TypePosHeap.write_around
       ~measure_name:"Reverse naming table (types) cache hit rate"
-      ~key:id
-
-  let get_kind db_path_opt id =
-    match get_pos db_path_opt id with
-    | Some (_pos, kind) -> Some kind
-    | None -> None
-
-  let get_filename_and_kind db_path_opt id =
-    match get_pos db_path_opt id with
-    | Some (pos, kind) -> Some (FileInfo.get_pos_filename pos, kind)
-    | None -> None
-
-  let get_filename db_path_opt id =
-    match get_pos db_path_opt id with
-    | None -> None
-    | Some (pos, _) -> Some (FileInfo.get_pos_filename pos)
-
-  let is_defined db_path_opt id = Option.is_some (get_pos db_path_opt id)
+      ~key:(hash id)
 
   let get_canon_name ctx id =
     let map_result (path, entry_type) =
@@ -213,7 +199,8 @@ module Types = struct
       Db_path_provider.get_naming_db_path (Provider_context.get_backend ctx)
     in
     let fallback_get_func_opt =
-      Option.map db_path_opt ~f:Naming_sqlite.get_itype_path_by_name
+      Option.map db_path_opt ~f:(fun db_path _canon_hash ->
+          Naming_sqlite.get_itype_path_by_name db_path id)
     in
     get_and_cache
       ~map_result
@@ -222,64 +209,69 @@ module Types = struct
       ~fallback_get_func_opt
       ~cache_func:TypeCanonHeap.add
       ~measure_name:"Canon naming table (types) cache hit rate"
-      ~key:id
+      ~key:(canon_hash id)
 
   let remove_batch db_path_opt types =
-    let types = SSet.of_list types in
-    let canon_key_types = canonize_set types in
-    TypeCanonHeap.remove_batch canon_key_types;
-    TypePosHeap.remove_batch types;
+    let hashes = types |> List.map ~f:hash in
+    let canon_hashes = types |> List.map ~f:canon_hash in
+    TypeCanonHeap.remove_batch (TypeCanonHeap.KeySet.of_list canon_hashes);
+    TypePosHeap.remove_batch (TypePosHeap.KeySet.of_list hashes);
     match db_path_opt with
     | None -> ()
     | Some _ ->
-      SSet.iter
-        (fun id -> BlockedEntries.add id Blocked)
-        (SSet.union types canon_key_types)
+      List.iter hashes ~f:(fun hash -> BlockedEntries.add hash Blocked);
+      List.iter canon_hashes ~f:(fun canon_hash ->
+          BlockedEntries.add canon_hash Blocked);
+      ()
 end
 
 module Funs = struct
   type pos = FileInfo.pos
 
-  module CanonName = struct
-    type t = string
-
-    let prefix = Prefix.make ()
-
-    let description = "Naming_FunCanon"
-  end
-
-  module FunCanonHeap =
-    SharedMem.NoCache (SharedMem.ProfiledImmediate) (StringKey) (CanonName)
-
   module Position = struct
     type t = pos
-
-    let prefix = Prefix.make ()
 
     let description = "Naming_FunPos"
   end
 
+  module CanonName = struct
+    type t = string
+
+    let description = "Naming_FunCanon"
+  end
+
   module FunPosHeap =
-    SharedMem.NoCache (SharedMem.ProfiledImmediate) (StringKey) (Position)
+    SharedMem.Heap (SharedMem.ProfiledBackend) (Typing_deps.DepHashKey)
+      (Position)
+  module FunCanonHeap =
+    SharedMem.Heap (SharedMem.ProfiledBackend) (Typing_deps.DepHashKey)
+      (CanonName)
 
   module BlockedEntries =
-    SharedMem.NoCache (SharedMem.ProfiledImmediate) (StringKey)
+    SharedMem.Heap (SharedMem.ProfiledBackend) (Typing_deps.DepHashKey)
       (struct
         type t = blocked_entry
-
-        let prefix = Prefix.make ()
 
         let description = "Naming_FunBlocked"
       end)
 
-  let add id pos =
-    FunCanonHeap.add (Naming_sqlite.to_canon_name_key id) id;
-    FunPosHeap.add id pos
+  let hash name =
+    Typing_deps.Dep.Fun name |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit
 
-  let get_pos db_path_opt ?bypass_cache:(_ = false) id =
+  let canon_hash name =
+    Typing_deps.Dep.Fun (Naming_sqlite.to_canon_name_key name)
+    |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit
+
+  let add id pos =
+    FunCanonHeap.add (canon_hash id) id;
+    FunPosHeap.add (hash id) pos;
+    ()
+
+  let get_pos db_path_opt (id : string) =
     let map_result path = Some (FileInfo.File (FileInfo.Fun, path)) in
     let fallback_get_func_opt =
-      Option.map db_path_opt ~f:Naming_sqlite.get_fun_path_by_name
+      Option.map db_path_opt ~f:(fun db_path dep ->
+          Naming_sqlite.get_path_by_64bit_dep db_path dep |> Option.map ~f:fst)
     in
     get_and_cache
       ~map_result
@@ -288,13 +280,7 @@ module Funs = struct
       ~fallback_get_func_opt
       ~cache_func:FunPosHeap.add
       ~measure_name:"Reverse naming table (functions) cache hit rate"
-      ~key:id
-
-  let get_filename db_path_opt id =
-    get_pos db_path_opt id
-    |> Core_kernel.Option.map ~f:FileInfo.get_pos_filename
-
-  let is_defined db_path_opt id = Option.is_some (get_pos db_path_opt id)
+      ~key:(hash id)
 
   let get_canon_name ctx name =
     let map_result path =
@@ -312,7 +298,8 @@ module Funs = struct
       Db_path_provider.get_naming_db_path (Provider_context.get_backend ctx)
     in
     let fallback_get_func_opt =
-      Option.map db_path_opt ~f:Naming_sqlite.get_ifun_path_by_name
+      Option.map db_path_opt ~f:(fun db_path _canon_hash ->
+          Naming_sqlite.get_ifun_path_by_name db_path name)
     in
     get_and_cache
       ~map_result
@@ -321,19 +308,20 @@ module Funs = struct
       ~fallback_get_func_opt
       ~cache_func:FunCanonHeap.add
       ~measure_name:"Canon naming table (functions) cache hit rate"
-      ~key:name
+      ~key:(canon_hash name)
 
   let remove_batch db_path_opt funs =
-    let funs = SSet.of_list funs in
-    let canon_key_funs = canonize_set funs in
-    FunCanonHeap.remove_batch canon_key_funs;
-    FunPosHeap.remove_batch funs;
+    let hashes = funs |> List.map ~f:hash in
+    let canon_hashes = funs |> List.map ~f:canon_hash in
+    FunCanonHeap.remove_batch (FunCanonHeap.KeySet.of_list canon_hashes);
+    FunPosHeap.remove_batch (FunPosHeap.KeySet.of_list hashes);
     match db_path_opt with
     | None -> ()
     | Some _ ->
-      SSet.iter
-        (fun id -> BlockedEntries.add id Blocked)
-        (SSet.union funs canon_key_funs)
+      List.iter hashes ~f:(fun hash -> BlockedEntries.add hash Blocked);
+      List.iter canon_hashes ~f:(fun canon_hash ->
+          BlockedEntries.add canon_hash Blocked);
+      ()
 end
 
 module Consts = struct
@@ -342,31 +330,43 @@ module Consts = struct
   module Position = struct
     type t = pos
 
-    let prefix = Prefix.make ()
-
     let description = "Naming_ConstPos"
   end
 
+  (** This module isn't actually used. It's here only for uniformity with the other ReverseNamingTables. *)
+  module CanonName = struct
+    type t = string
+
+    let description = "Naming_ConstCanon"
+  end
+
   module ConstPosHeap =
-    SharedMem.NoCache (SharedMem.ProfiledImmediate) (StringKey) (Position)
+    SharedMem.Heap (SharedMem.ProfiledBackend) (Typing_deps.DepHashKey)
+      (Position)
 
   module BlockedEntries =
-    SharedMem.NoCache (SharedMem.ProfiledImmediate) (StringKey)
+    SharedMem.Heap (SharedMem.ProfiledBackend) (Typing_deps.DepHashKey)
       (struct
         type t = blocked_entry
-
-        let prefix = Prefix.make ()
 
         let description = "Naming_ConstBlocked"
       end)
 
-  let add id pos = ConstPosHeap.add id pos
+  let hash name =
+    Typing_deps.Dep.GConst name
+    |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit
 
-  let get_pos db_path_opt ?bypass_cache:(_ = false) id =
+  let canon_hash name =
+    Typing_deps.Dep.GConst (Naming_sqlite.to_canon_name_key name)
+    |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit
+
+  let add id pos = ConstPosHeap.add (hash id) pos
+
+  let get_pos db_path_opt id =
     let map_result path = Some (FileInfo.File (FileInfo.Const, path)) in
     let fallback_get_func_opt =
-      Option.map db_path_opt ~f:(fun db_path ->
-          Naming_sqlite.get_const_path_by_name db_path)
+      Option.map db_path_opt ~f:(fun db_path hash ->
+          Naming_sqlite.get_path_by_64bit_dep db_path hash |> Option.map ~f:fst)
     in
     get_and_cache
       ~map_result
@@ -375,21 +375,81 @@ module Consts = struct
       ~fallback_get_func_opt
       ~cache_func:ConstPosHeap.add
       ~measure_name:"Reverse naming table (consts) cache hit rate"
-      ~key:id
+      ~key:(hash id)
 
-  let get_filename db_path_opt id =
-    get_pos db_path_opt id
-    |> Core_kernel.Option.map ~f:FileInfo.get_pos_filename
-
-  let is_defined db_path_opt id = Option.is_some (get_pos db_path_opt id)
+  (* This function isn't even used, because the only callers who wish to obtain canonical
+     names are "class fOo isn't defined; did you mean Foo?" and "error class Foobar differs
+     from class FooBar only in capitalization", and they don't do their checks for constants.
+     Nevertheless, we maintain consistent behavior: get_canon_name only returns a name if
+     that name is defined in the repository. *)
+  let get_canon_name ctx name =
+    let db_path_opt =
+      Db_path_provider.get_naming_db_path (Provider_context.get_backend ctx)
+    in
+    match get_pos db_path_opt name with
+    | Some _ -> Some name
+    | None -> None
 
   let remove_batch db_path_opt consts =
-    let consts = SSet.of_list consts in
-    ConstPosHeap.remove_batch consts;
+    let hashes = consts |> List.map ~f:hash in
+    ConstPosHeap.remove_batch (ConstPosHeap.KeySet.of_list hashes);
     match db_path_opt with
     | None -> ()
-    | Some _ -> SSet.iter (fun id -> BlockedEntries.add id Blocked) consts
+    | Some _ ->
+      List.iter hashes ~f:(fun hash -> BlockedEntries.add hash Blocked);
+      ()
 end
+
+let get_filename_by_hash
+    (db_path_opt : Naming_sqlite.db_path option) (hash : Typing_deps.Dep.t) :
+    Relative_path.t option =
+  (* This function embodies the complicated storage we have for names:
+     1. If the name's in TypePosHeap/FunPosHeap/ConstPosHeap, that reflects either
+     that we've cached it from sqlite or we're storing an authoritative delta;
+     2. Otherwise, if it's in BlockedEntries, then the authoritative delta
+     says that it was removed;
+     3. Otherwise, see what sqlite says.
+     The complication is that there are three separate BlockedEntries heaps, one for
+     each name_kind (Types/Funs/Consts), so we'll actually query sqlite first to
+     discover the name_kind and only afterwards check the BlockedEntries heap.
+     All this logic is complicated enought that we just won't bother writing
+     our sqlite-reads into the TypePosHeap/FunPosHeap/ConstPosHeap caches,
+     like the normal reads do. *)
+  let pos =
+    match Types.TypePosHeap.get hash with
+    | Some (pos, _type_kind) -> Some pos
+    | None ->
+      (match Funs.FunPosHeap.get hash with
+      | Some pos -> Some pos
+      | None -> Consts.ConstPosHeap.get hash)
+  in
+  match (pos, db_path_opt) with
+  | (Some pos, _) -> Some (FileInfo.get_pos_filename pos)
+  | (None, None) -> None
+  | (None, Some db_path) ->
+    (match Naming_sqlite.get_path_by_64bit_dep db_path hash with
+    | None -> None
+    | Some (file, name_kind) ->
+      let is_blocked =
+        match name_kind with
+        | Naming_types.Type_kind _ -> Types.BlockedEntries.get hash
+        | Naming_types.Fun_kind -> Funs.BlockedEntries.get hash
+        | Naming_types.Const_kind -> Consts.BlockedEntries.get hash
+      in
+      (match is_blocked with
+      | Some Blocked -> None
+      | None -> Some file))
+
+let get_filenames_by_hash
+    (db_path_opt : Naming_sqlite.db_path option) (hashes : Typing_deps.DepSet.t)
+    : Relative_path.Set.t =
+  Typing_deps.DepSet.fold
+    hashes
+    ~init:Relative_path.Set.empty
+    ~f:(fun hash files ->
+      match get_filename_by_hash db_path_opt hash with
+      | None -> files
+      | Some file -> Relative_path.Set.add files file)
 
 let push_local_changes () =
   Types.TypePosHeap.LocalChanges.push_stack ();

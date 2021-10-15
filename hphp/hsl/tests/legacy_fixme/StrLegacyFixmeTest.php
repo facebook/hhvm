@@ -43,7 +43,6 @@ final class StrLegacyFixmeTest extends HackTest {
       Str\replace_every(
         '123',
         Legacy_FIXME\coerce_possibly_invalid_str_replace_pairs(
-          /* HH_FIXME[4110] intentionally testing FIXMEd calls */
           Map {
             '1' => 'One',
             '' => 'Two',

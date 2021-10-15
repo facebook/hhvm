@@ -274,17 +274,6 @@ and class_parents_decl
   let acc = List.fold enum_includes ~f:class_type_decl ~init:acc in
   acc
 
-and is_disposable_type
-    (env : Decl_env.env) parent_cache (hint : Typing_defs.decl_ty) : bool =
-  match get_node hint with
-  | Tapply ((_, c), _) ->
-    begin
-      match Decl_env.get_class_add_dep env c ~cache:parent_cache with
-      | None -> false
-      | Some c -> c.dc_is_disposable
-    end
-  | _ -> false
-
 and class_decl_if_missing
     ~(sh : SharedMem.uses) (class_env : class_env) (class_name : string) :
     (string * Decl_store.class_entries) option =
@@ -433,26 +422,6 @@ and class_decl
   let (req_ancestors, req_ancestors_extends) =
     Decl_requirements.get_class_requirements env parents c
   in
-  (* Interfaces IDisposable and IAsyncDisposable are *disposable types*, as
-   * are any classes that implement either of these interfaces, directly or
-   * indirectly. Also treat any trait that *requires* extension or
-   * implementation of a disposable class as disposable itself.
-   *)
-  let is_disposable_class_name cls_name =
-    String.equal cls_name SN.Classes.cIDisposable
-    || String.equal cls_name SN.Classes.cIAsyncDisposable
-  in
-  let is_disposable =
-    is_disposable_class_name cls_name
-    || SMap.exists (fun n _ -> is_disposable_class_name n) impl
-    || List.exists
-         (c.sc_req_extends @ c.sc_req_implements)
-         ~f:(is_disposable_type env parents)
-  in
-  (* If this class is disposable then we require that any extended class or
-   * trait that is used, is also disposable, in order that escape analysis
-   * has been applied on the $this parameter.
-   *)
   let enum = c.sc_enum_type in
   let enum_inner_ty = SMap.find_opt SN.FB.tInner typeconsts in
   let is_enum_class = Ast_defs.is_c_enum_class c.sc_kind in
@@ -467,7 +436,6 @@ and class_decl
          * only need abstract without default and concrete type consts *)
         match t.ttc_kind with
         | TCConcrete { tc_type } -> Some tc_type
-        | TCPartiallyAbstract { patc_type; _ } -> Some patc_type
         | TCAbstract { atc_default; _ } -> atc_default)
       ~get_ancestor:(fun x -> SMap.find_opt x impl)
       consts
@@ -488,7 +456,6 @@ and class_decl
       dc_kind = c.sc_kind;
       dc_is_xhp = c.sc_is_xhp;
       dc_has_xhp_keyword = c.sc_has_xhp_keyword;
-      dc_is_disposable = is_disposable;
       dc_module = c.sc_module;
       dc_name = snd c.sc_name;
       dc_pos = fst c.sc_name;
@@ -606,7 +573,8 @@ and build_constructor
           ~override:false
           ~dynamicallycallable:false
           ~readonly_prop:false
-          ~support_dynamic_type:false;
+          ~support_dynamic_type:false
+          ~needs_init:false;
       elt_visibility = vis;
       elt_origin = class_name;
       elt_deprecated = method_.sm_deprecated;
@@ -689,7 +657,8 @@ and prop_decl
           ~abstract:(sp_abstract sp)
           ~dynamicallycallable:false
           ~readonly_prop:(sp_readonly sp)
-          ~support_dynamic_type:false;
+          ~support_dynamic_type:false
+          ~needs_init:(sp_needs_init sp);
       elt_visibility = vis;
       elt_origin = snd c.sc_name;
       elt_deprecated = None;
@@ -727,7 +696,8 @@ and static_prop_decl
           ~synthesized:false
           ~dynamicallycallable:false
           ~readonly_prop:(sp_readonly sp)
-          ~support_dynamic_type:false;
+          ~support_dynamic_type:false
+          ~needs_init:false;
       elt_visibility = vis;
       elt_origin = snd c.sc_name;
       elt_deprecated = None;
@@ -740,18 +710,16 @@ and static_prop_decl
 
 and visibility
     (class_id : string)
-    (module_id : string option)
+    (module_ : Typing_modules.t)
     (visibility : Aast_defs.visibility) : Typing_defs.ce_visibility =
   match visibility with
   | Public -> Vpublic
   | Protected -> Vprotected class_id
   | Private -> Vprivate class_id
   | Internal ->
-    begin
-      match module_id with
-      | Some m -> Vinternal m
-      | None -> Vpublic
-    end
+    (match module_ with
+    | Some m -> Vinternal m
+    | None -> Vpublic)
 
 (* each concrete type constant T = <sometype> implicitly defines a
 class constant with the same name which is TypeStructure<sometype> *)
@@ -862,7 +830,8 @@ and method_decl_acc
           ~lateinit:false
           ~dynamicallycallable:(sm_dynamicallycallable m)
           ~readonly_prop:false
-          ~support_dynamic_type;
+          ~support_dynamic_type
+          ~needs_init:false;
       elt_visibility = vis;
       elt_origin = snd c.sc_name;
       elt_deprecated = m.sm_deprecated;

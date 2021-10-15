@@ -59,8 +59,10 @@ IFrameID insertFrames(const std::vector<IFrame>& frames) {
   s_inlineFrames.ensureSize(start + frames.size());
 
   for (IFrameID i = 0; i < frames.size(); ++i) {
-    auto& f = frames[i];
-    auto newFrame = IFrame{f.func, f.callOff, f.parent + start};
+    auto const& f = frames[i];
+    auto const parent = f.parent != kRootIFrameID
+      ? f.parent + start : kRootIFrameID;
+    auto newFrame = IFrame{f.func, f.callOff, f.sbToRootSbOff, parent};
     s_inlineFrames.exchange(start + i, newFrame);
   }
 
@@ -83,10 +85,12 @@ void insertStacks(
   IFrameID start, const std::vector<std::pair<TCA,IStack>>& stacks
 ) {
   for (auto& stk : stacks) {
-    if (!stk.second.nframes) continue;
+    assertx(stk.second.frame != stk.second.pubFrame);
     auto off = stackAddrToOffset(stk.first);
     auto val = stk.second;
     val.frame += start;
+    if (val.pubFrame != kRootIFrameID) val.pubFrame += start;
+
     if (auto pos = s_inlineStacks.find(off)) {
       *pos = val;
     } else {

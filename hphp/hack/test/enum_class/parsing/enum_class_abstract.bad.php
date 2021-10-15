@@ -15,3 +15,7 @@ abstract enum class G : mixed {
 enum class G : mixed {
   final int A = 42;
 }
+
+final abstract enum class K0 : int {}
+
+abstract final enum class K1 : int {}

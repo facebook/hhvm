@@ -122,6 +122,7 @@ type t =
   | Tuple
   | Type
   | Unset
+  | Upcast
   | Use
   | Using
   | Var
@@ -336,6 +337,7 @@ let from_string keyword ~only_reserved =
   | "tuple" -> Some Tuple
   | "type" when not only_reserved -> Some Type
   | "unset" -> Some Unset
+  | "upcast" when not only_reserved -> Some Upcast
   | "use" -> Some Use
   | "using" -> Some Using
   | "var" -> Some Var
@@ -525,6 +527,7 @@ let to_string kind =
   | Tuple -> "tuple"
   | Type -> "type"
   | Unset -> "unset"
+  | Upcast -> "upcast"
   | Use -> "use"
   | Using -> "using"
   | Var -> "var"

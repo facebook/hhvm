@@ -1,8 +1,4 @@
 string(1) "2"
-vec(2) {
-  string(2) "ls"
-  string(2) "cp"
-}
 dict(3) {
   ["MYBOOL"]=>
   string(1) "1"

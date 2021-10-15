@@ -1,6 +1,6 @@
 <?hh
 
-class Box<T> {
+class Box<<<__RequireDynamic>> T> {
   public T $p;
   public function __construct(T $x) {
     $this->p = $x;

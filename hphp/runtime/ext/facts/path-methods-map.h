@@ -16,11 +16,16 @@
 
 #pragma once
 
+#include <algorithm>
+#include <memory>
+
 #include <folly/experimental/io/FsUtil.h>
 
 #include "hphp/runtime/ext/facts/autoload-db.h"
 #include "hphp/runtime/ext/facts/lazy-two-way-map.h"
+#include "hphp/runtime/ext/facts/path-versions.h"
 #include "hphp/runtime/ext/facts/symbol-types.h"
+#include "hphp/util/optional.h"
 
 namespace HPHP {
 namespace Facts {
@@ -29,8 +34,12 @@ struct PathToMethodsMap {
 
   using PathMethodMap = LazyTwoWayMap<Path, MethodDecl>;
 
-  using MethodSet = typename PathMethodMap::ValuesSet;
-  using PathSet = typename PathMethodMap::KeysSet;
+  using Methods = typename PathMethodMap::Values;
+  using Paths = typename PathMethodMap::Keys;
+
+  explicit PathToMethodsMap(std::shared_ptr<PathVersions> versions)
+      : m_pathMethodMap{std::move(versions)} {
+  }
 
   /**
    * Return information about the locations of a given method, or the methods
@@ -42,18 +51,17 @@ struct PathToMethodsMap {
    * non-const overload to get a definitive response.
    */
 
-  const PathSet* getMethodPaths(MethodDecl method) const {
+  Optional<Paths> getMethodPaths(MethodDecl method) const {
     return m_pathMethodMap.getKeysForValue(method);
   }
-  const PathSet&
-  getMethodPaths(MethodDecl method, std::vector<Path> pathsFromDB) {
+  Paths getMethodPaths(MethodDecl method, std::vector<Path> pathsFromDB) {
     return m_pathMethodMap.getKeysForValue(method, std::move(pathsFromDB));
   }
 
-  const MethodSet* getPathMethods(Path path) const {
+  Optional<Methods> getPathMethods(Path path) const {
     return m_pathMethodMap.getValuesForKey(path);
   }
-  const MethodSet& getPathMethods(
+  Methods getPathMethods(
       Path path,
       const std::vector<AutoloadDB::MethodDeclaration>& methodsFromDB) {
     std::vector<MethodDecl> decls;
@@ -68,17 +76,10 @@ struct PathToMethodsMap {
   }
 
   /**
-   * Mark the given path as no longer defined.
-   */
-  void removePath(Path path) {
-    m_pathMethodMap.setValuesForKey(path, {});
-  }
-
-  /**
    * Mark the given path as containing each of the given methods, and no other
    * methods.
    */
-  void replacePathMethods(Path path, MethodSet methods) {
+  void replacePathMethods(Path path, Methods methods) {
     m_pathMethodMap.setValuesForKey(path, std::move(methods));
   }
 

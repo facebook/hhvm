@@ -12,7 +12,7 @@
         f_params =
         [{ param_annotation = (mixed); param_type_hint = ((mixed), (Some ([3:35-40], Hmixed))); 
            param_is_variadic = false; param_pos = [3:41-44]; param_name = "$xs"; 
-           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_expr = None; param_readonly = None; param_callconv = Pnormal; 
            param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None;

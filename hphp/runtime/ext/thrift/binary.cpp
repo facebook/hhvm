@@ -32,6 +32,7 @@
 #include "hphp/runtime/ext/thrift/util.h"
 
 #include "hphp/runtime/vm/vm-regs.h"
+#include "hphp/runtime/vm/coeffects.h"
 
 #include "hphp/runtime/vm/jit/perf-counters.h"
 
@@ -653,6 +654,10 @@ void HHVM_FUNCTION(thrift_protocol_write_binary,
                    int seqid,
                    bool strict_write,
                    bool oneway) {
+  CoeffectsAutoGuard _;
+  // Suppress class-to-string conversion warnings that occur during
+  // serialization and deserialization.
+  SuppressClassConversionWarning suppressor;
 
   PHPOutputTransport transport(transportobj);
 
@@ -683,7 +688,12 @@ Object HHVM_FUNCTION(thrift_protocol_read_binary,
                      const String& obj_typename,
                      bool strict_read,
                      int options) {
-  VMRegAnchor _;
+  CoeffectsAutoGuard _;
+  // Suppress class-to-string conversion warnings that occur during
+  // serialization and deserialization.
+  SuppressClassConversionWarning suppressor;
+
+  VMRegAnchor _2;
   PHPInputTransport transport(transportobj);
   int8_t messageType = 0;
   int32_t sz = transport.readI32();
@@ -729,6 +739,10 @@ Variant HHVM_FUNCTION(thrift_protocol_read_binary_struct,
                       const Object& transportobj,
                       const String& obj_typename,
                       int options) {
+  // Suppress class-to-string conversion warnings that occur during
+  // serialization and deserialization.
+  SuppressClassConversionWarning suppressor;
+
   VMRegAnchor _;
   PHPInputTransport transport(transportobj);
   return binary_deserialize_struct(obj_typename, transport, options);

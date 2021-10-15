@@ -88,4 +88,6 @@ module Codes = struct
   let loose_unsafe_cast_upper_bound = 5637
 
   let invalid_disjointness_check = 5638
+
+  let inferred_variance = 5639
 end

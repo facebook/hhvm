@@ -15,8 +15,8 @@ path = "gen_hhi_contents.rs"
 test = false
 
 [dependencies]
-structopt = "0.3.21"
-walkdir = "2.2.9"
+structopt = "0.3.23"
+walkdir = "2.3"
 
 [profile.release]
 incremental = false

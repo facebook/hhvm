@@ -12,7 +12,7 @@
         f_params =
         [{ param_annotation = (classname<_>); param_type_hint = ((classname<_>), (Some ([4:36-48], (Happly (([4:36-45], "\\HH\\classname"), [([4:46-47], Herr)]))))); 
            param_is_variadic = false; param_pos = [4:49-54]; param_name = "$yolo"; 
-           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_expr = None; param_readonly = None; param_callconv = Pnormal; 
            param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None;

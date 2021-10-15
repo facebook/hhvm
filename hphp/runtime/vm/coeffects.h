@@ -17,6 +17,7 @@
 #pragma once
 
 #include "hphp/runtime/vm/class.h"
+#include "hphp/util/optional.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -49,6 +50,7 @@ struct RuntimeCoeffects {
     return RuntimeCoeffects::defaults();
   }
 
+  static RuntimeCoeffects automatic();
 
   uint16_t value() const { return m_data; }
 
@@ -70,6 +72,17 @@ struct RuntimeCoeffects {
 private:
   explicit RuntimeCoeffects(uint16_t data) : m_data(data) {}
   storage_t m_data;
+};
+
+struct CoeffectsAutoGuard {
+  CoeffectsAutoGuard();
+  ~CoeffectsAutoGuard();
+
+private:
+  Optional<RuntimeCoeffects> savedCoeffects;
+#ifndef NDEBUG
+  int savedDepth;
+#endif
 };
 
 struct StaticCoeffects {
@@ -111,6 +124,14 @@ private:
 
 static_assert(sizeof(StaticCoeffects) == sizeof(uint16_t), "");
 static_assert(sizeof(StaticCoeffects) == sizeof(RuntimeCoeffects), "");
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Returns the combined static coeffects and escapes from a list of coeffects
+ */
+std::pair<StaticCoeffects, RuntimeCoeffects>
+getCoeffectsInfoFromList(std::vector<LowStringPtr>, bool);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -182,10 +203,11 @@ struct CoeffectRule final {
   Optional<std::string> toString(const Func*) const;
   std::string getDirectiveString() const;
 
+  bool operator==(const CoeffectRule&) const;
+
   template<class SerDe>
   void serde(SerDe&);
 
-private:
   enum class Type {
     Invalid = 0,
 

@@ -140,10 +140,6 @@ let check_expr env ((_, p, _) as expr : ETast.expr) (gamma : gamma) : gamma =
       method! on_Pipe _env _lid _e1 _e2 = raise Not_implemented
 
       method! on_As _env _e1 _ty = raise Not_implemented
-
-      method! on_Callconv _env param_kind _expr =
-        match param_kind with
-        | Ast_defs.Pinout -> raise Not_implemented
     end
   in
   expr_checker#on_expr env expr;

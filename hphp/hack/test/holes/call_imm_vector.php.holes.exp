@@ -13,7 +13,7 @@
          m_params =
          [{ param_annotation = (ImmVector<int>); param_type_hint = ((ImmVector<int>), (Some ([4:21-35], (Happly (([4:21-30], "\\HH\\ImmVector"), [([4:31-34], (Hprim Tint))])))));
             param_is_variadic = false; param_pos = [4:36-38]; param_name = "$k"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)] }; 
@@ -43,7 +43,7 @@
          f_params =
          [{ param_annotation = (ImmVector<int>); param_type_hint = ((ImmVector<int>), (Some ([7:12-26], (Happly (([7:12-21], "\\HH\\ImmVector"), [([7:22-25], (Hprim Tint))])))));
             param_is_variadic = false; param_pos = [7:27-29]; param_name = "$k"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
@@ -65,7 +65,7 @@
          f_params =
          [{ param_annotation = (ImmVector<float>); param_type_hint = ((ImmVector<float>), (Some ([10:3-19], (Happly (([10:3-12], "\\HH\\ImmVector"), [([10:13-18], (Hprim Tfloat))])))));
             param_is_variadic = false; param_pos = [10:20-22]; param_name = "$k"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
@@ -75,7 +75,7 @@
              (Expr
                 ((void), [13:3-8],
                  (Call ((((function(ImmVector<int> $k): void)), [13:3-4], (Id ([13:3-4], "\\k"))), 
-                    [], [((ImmVector<float>), [13:5-7], (Hole (((ImmVector<float>), [13:5-7], (Lvar ([13:5-7], $k))), (ImmVector<float>), (ImmVector<int>), Typing)))], None)))));
+                    [], [(Pnormal, ((ImmVector<float>), [13:5-7], (Hole (((ImmVector<float>), [13:5-7], (Lvar ([13:5-7], $k))), (ImmVector<float>), (ImmVector<int>), Typing))))], None)))));
              ([15:3-30],
               (Expr
                  ((TestImmVector), [15:3-29],
@@ -87,7 +87,7 @@
                   (Call (
                      (((function(ImmVector<int> $k): void)), [18:3-10],
                       (Obj_get (((TestImmVector), [18:3-7], (Lvar ([18:3-7], $foo))), (((function(ImmVector<int> $k): void)), [18:9-10], (Id ([18:9-10], "k"))), OG_nullthrows, false))),
-                     [], [((ImmVector<float>), [18:11-13], (Hole (((ImmVector<float>), [18:11-13], (Lvar ([18:11-13], $k))), (ImmVector<float>), (ImmVector<int>), Typing)))], None)))))
+                     [], [(Pnormal, ((ImmVector<float>), [18:11-13], (Hole (((ImmVector<float>), [18:11-13], (Lvar ([18:11-13], $k))), (ImmVector<float>), (ImmVector<int>), Typing))))], None)))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
@@ -108,7 +108,7 @@
          f_params =
          [{ param_annotation = (ImmVector<float>); param_type_hint = ((ImmVector<float>), (Some ([22:3-19], (Happly (([22:3-12], "\\HH\\ImmVector"), [([22:13-18], (Hprim Tfloat))])))));
             param_is_variadic = false; param_pos = [22:20-22]; param_name = "$k"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
@@ -119,12 +119,13 @@
                 ((void), [25:3-64],
                  (Call ((((function(ImmVector<int> $k): void)), [25:3-4], (Id ([25:3-4], "\\k"))), 
                     [],
-                    [((ImmVector<int>), [25:5-63],
-                      (Hole (((ImmVector<float>), [25:60-62], (Lvar ([25:60-62], $k))), (ImmVector<float>), (ImmVector<int>),
-                         (UnsafeCast
-                            [([25:27-43], (Happly (([25:27-36], "\\HH\\ImmVector"), [([25:37-42], (Hprim Tfloat))])));
-                              ([25:44-58], (Happly (([25:44-53], "\\HH\\ImmVector"), [([25:54-57], (Hprim Tint))])))])
-                         )))
+                    [(Pnormal,
+                      ((ImmVector<int>), [25:5-63],
+                       (Hole (((ImmVector<float>), [25:60-62], (Lvar ([25:60-62], $k))), (ImmVector<float>), (ImmVector<int>),
+                          (UnsafeCast
+                             [([25:27-43], (Happly (([25:27-36], "\\HH\\ImmVector"), [([25:37-42], (Hprim Tfloat))])));
+                               ([25:44-58], (Happly (([25:44-53], "\\HH\\ImmVector"), [([25:54-57], (Hprim Tint))])))])
+                          ))))
                       ],
                     None)))));
              ([27:3-30],
@@ -139,12 +140,13 @@
                      (((function(ImmVector<int> $k): void)), [30:3-10],
                       (Obj_get (((TestImmVector), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(ImmVector<int> $k): void)), [30:9-10], (Id ([30:9-10], "k"))), OG_nullthrows, false))),
                      [],
-                     [((ImmVector<int>), [30:11-69],
-                       (Hole (((ImmVector<float>), [30:66-68], (Lvar ([30:66-68], $k))), (ImmVector<float>), (ImmVector<int>),
-                          (UnsafeCast
-                             [([30:33-49], (Happly (([30:33-42], "\\HH\\ImmVector"), [([30:43-48], (Hprim Tfloat))])));
-                               ([30:50-64], (Happly (([30:50-59], "\\HH\\ImmVector"), [([30:60-63], (Hprim Tint))])))])
-                          )))
+                     [(Pnormal,
+                       ((ImmVector<int>), [30:11-69],
+                        (Hole (((ImmVector<float>), [30:66-68], (Lvar ([30:66-68], $k))), (ImmVector<float>), (ImmVector<int>),
+                           (UnsafeCast
+                              [([30:33-49], (Happly (([30:33-42], "\\HH\\ImmVector"), [([30:43-48], (Hprim Tfloat))])));
+                                ([30:50-64], (Happly (([30:50-59], "\\HH\\ImmVector"), [([30:60-63], (Hprim Tint))])))])
+                           ))))
                        ],
                      None)))))
              ]

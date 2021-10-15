@@ -1,7 +1,7 @@
 module IntMap = WrappedMap.Make (struct
   type t = int
 
-  let compare x y = x - y
+  let compare = Int.compare
 end)
 
 let map_of_elements =

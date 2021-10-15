@@ -9,7 +9,6 @@ path = "../../emit_native_opcode.rs"
 
 [dependencies]
 bumpalo = { version = "3.2.1", features = ["collections"] }
-decl_provider = { path = "../../../decl_provider" }
 ffi = { path = "../../../../utils/ffi" }
 hhbc_by_ref_ast_scope = { path = "../hhbc_by_ref_ast_scope" }
 hhbc_by_ref_emit_body = { path = "../hhbc_by_ref_emit_body" }

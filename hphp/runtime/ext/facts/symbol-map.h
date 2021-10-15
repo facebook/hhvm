@@ -37,6 +37,7 @@
 #include "hphp/runtime/ext/facts/lazy-two-way-map.h"
 #include "hphp/runtime/ext/facts/path-methods-map.h"
 #include "hphp/runtime/ext/facts/path-symbols-map.h"
+#include "hphp/runtime/ext/facts/path-versions.h"
 #include "hphp/runtime/ext/facts/string-ptr.h"
 #include "hphp/runtime/ext/facts/symbol-types.h"
 #include "hphp/util/assertions.h"
@@ -389,8 +390,7 @@ struct SymbolMap {
    * so.
    */
   template <SymKind k>
-  const typename PathToSymbolsMap<k>::PathSymbolMap::ValuesSet&
-  getPathSymbols(Path path);
+  typename PathToSymbolsMap<k>::PathSymbolMap::Values getPathSymbols(Path path);
 
   void waitForDBUpdate();
 
@@ -407,12 +407,22 @@ struct SymbolMap {
   std::shared_ptr<folly::Executor> m_exec;
 
   struct Data {
+
+    Data();
+
     /**
      * A Watchman clock representing how up-to-date this map is.
      *
      * If its `m_clock` string is empty, then this map has not yet updated.
      */
     Clock m_clock;
+
+    /**
+     * Version numbers which get bumped each time a path changes. We filter out
+     * the facts in our data structures which have version numbers older than
+     * the ones in this map.
+     */
+    std::shared_ptr<PathVersions> m_versions;
 
     /**
      * Maps between symbols and the paths defining them.

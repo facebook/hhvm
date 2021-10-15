@@ -8,7 +8,7 @@ use std::borrow::Cow;
 /**
  * A\B\C -> \A\B\C
  */
-pub fn add_ns(s: &str) -> Cow<str> {
+pub fn add_ns(s: &str) -> Cow<'_, str> {
     if !s.starts_with('\\') {
         let mut new_str = String::with_capacity(1 + s.len());
         new_str.push_str("\\");
@@ -22,7 +22,7 @@ pub fn add_ns(s: &str) -> Cow<str> {
 /**
  * A\B\C -> \A\B\C
  */
-pub fn add_ns_bstr(s: &[u8]) -> Cow<[u8]> {
+pub fn add_ns_bstr(s: &[u8]) -> Cow<'_, [u8]> {
     if !s.starts_with(b"\\") {
         let mut new_str = Vec::with_capacity(1 + s.len());
         new_str.push(b'\\');

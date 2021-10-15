@@ -33,11 +33,7 @@ where
     pub fn new(source: &SourceText<'a>, env: ParserEnv, mut sc: S) -> Self {
         let source = source.clone();
         Self {
-            lexer: Lexer::make(
-                &source,
-                sc.token_factory_mut().clone(),
-                env.disallow_hash_comments,
-            ),
+            lexer: Lexer::make(&source, sc.token_factory_mut().clone()),
             errors: vec![],
             env,
             sc,

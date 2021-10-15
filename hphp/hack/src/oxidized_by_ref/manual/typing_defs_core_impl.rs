@@ -132,6 +132,7 @@ impl std::fmt::Debug for Ty_<'_> {
             Terr => write!(f, "Terr"),
             Tnonnull => write!(f, "Tnonnull"),
             Tdynamic => write!(f, "Tdynamic"),
+            Tsupportdynamic => write!(f, "Tsupportdynamic"),
             TunappliedAlias(name) => write!(f, "TunappliedAlias({:?})", name),
             Toption(ty) => f.debug_tuple("Toption").field(ty).finish(),
             Tprim(tprim) => write!(f, "Tprim({:?})", tprim),
@@ -205,11 +206,11 @@ impl<'a> InternalType<'a> {
     }
 }
 
-impl From<Option<ParamKind>> for ParamMode {
-    fn from(callconv: Option<ParamKind>) -> Self {
+impl<'a> From<ParamKind<'a>> for ParamMode {
+    fn from(callconv: ParamKind<'_>) -> Self {
         match callconv {
-            Some(ParamKind::Pinout) => ParamMode::FPinout,
-            None => ParamMode::FPnormal,
+            ParamKind::Pinout(_) => ParamMode::FPinout,
+            ParamKind::Pnormal => ParamMode::FPnormal,
         }
     }
 }

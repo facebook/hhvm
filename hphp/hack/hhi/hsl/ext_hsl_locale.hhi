@@ -16,17 +16,18 @@ namespace HH\Lib\_Private\_Locale {
 
 final class Locale {
   private function __construct() {}
+  public function __debugInfo(): dict<arraykey, mixed>;
 }
 
 function get_c_locale()[]: Locale;
-function get_environment_locale(): Locale;
-function get_request_locale(): Locale;
-function set_request_locale(Locale $loc): void;
+function get_environment_locale()[read_globals]: Locale;
+function get_request_locale()[read_globals]: Locale;
+function set_request_locale(Locale $loc)[globals]: void;
 
 /** Behaves like `newlocale()`, taking a mask of categories, e.g. LC_CTYPE_MASK */
-function newlocale_mask(int $mask, string $locale, Locale $base): Locale;
+function newlocale_mask(int $mask, string $locale, Locale $base)[read_globals]: Locale;
 /** Take a single category, e.g. `LC_TYPE` */
-function newlocale_category(int $category, string $locale, Locale $base): Locale;
+function newlocale_category(int $category, string $locale, Locale $base)[read_globals]: Locale;
 /** Create a new locale object using the specified locale for all categories.
  *
  * This function will throw if a 'magic' locale is passed, e.g.

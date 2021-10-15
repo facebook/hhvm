@@ -28,8 +28,6 @@ end
 module Class = struct
   type t = decl_class_type
 
-  let prefix = Prefix.make ()
-
   let description = "Decl_Class"
 end
 
@@ -37,15 +35,11 @@ end
 module Fun = struct
   type t = fun_elt
 
-  let prefix = Prefix.make ()
-
   let description = "Decl_Fun"
 end
 
 module RecordDef = struct
   type t = Typing_defs.record_def_type
-
-  let prefix = Prefix.make ()
 
   let description = "Decl_RecordDef"
 end
@@ -53,25 +47,22 @@ end
 module Typedef = struct
   type t = Typing_defs.typedef_type
 
-  let prefix = Prefix.make ()
-
   let description = "Decl_Typedef"
 end
 
 module GConst = struct
   type t = const_decl
 
-  let prefix = Prefix.make ()
-
   let description = "Decl_GConst"
 end
 
 module Funs =
-  SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Fun) (Capacity)
+  SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (StringKey) (Fun)
+    (Capacity)
 
 module Classes = struct
   include
-    SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Class)
+    SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (StringKey) (Class)
       (Capacity)
 
   let add class_name decl =
@@ -89,19 +80,18 @@ module Classes = struct
 end
 
 module RecordDefs =
-  SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (RecordDef)
+  SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (StringKey)
+    (RecordDef)
     (Capacity)
 module Typedefs =
-  SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Typedef)
+  SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (StringKey) (Typedef)
     (Capacity)
 module GConsts =
-  SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (GConst)
+  SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (StringKey) (GConst)
     (Capacity)
 
 module Property = struct
   type t = decl_ty
-
-  let prefix = Prefix.make ()
 
   let description = "Decl_Property"
 end
@@ -109,15 +99,11 @@ end
 module StaticProperty = struct
   type t = decl_ty
 
-  let prefix = Prefix.make ()
-
   let description = "Decl_StaticProperty"
 end
 
 module Method = struct
   type t = fun_elt
-
-  let prefix = Prefix.make ()
 
   let description = "Decl_Method"
 end
@@ -125,15 +111,11 @@ end
 module StaticMethod = struct
   type t = fun_elt
 
-  let prefix = Prefix.make ()
-
   let description = "Decl_StaticMethod"
 end
 
 module Constructor = struct
   type t = fun_elt
-
-  let prefix = Prefix.make ()
 
   let description = "Decl_Constructor"
 end
@@ -152,18 +134,22 @@ module ClassEltKey = struct
 end
 
 module Props =
-  SharedMem.WithCache (SharedMem.ProfiledImmediate) (ClassEltKey) (Property)
+  SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (ClassEltKey)
+    (Property)
     (Capacity)
 module StaticProps =
-  SharedMem.WithCache (SharedMem.ProfiledImmediate) (ClassEltKey)
+  SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (ClassEltKey)
     (StaticProperty)
     (Capacity)
 module Methods =
-  SharedMem.WithCache (SharedMem.ProfiledImmediate) (ClassEltKey) (Method)
+  SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (ClassEltKey)
+    (Method)
     (Capacity)
 module StaticMethods =
-  SharedMem.WithCache (SharedMem.ProfiledImmediate) (ClassEltKey) (StaticMethod)
+  SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (ClassEltKey)
+    (StaticMethod)
     (Capacity)
 module Constructors =
-  SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Constructor)
+  SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (StringKey)
+    (Constructor)
     (Capacity)

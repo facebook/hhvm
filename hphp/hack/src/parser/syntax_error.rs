@@ -577,6 +577,8 @@ pub fn not_allowed_in_write(what: &str) -> Error {
 }
 pub const reassign_this: Error = Cow::Borrowed("Cannot re-assign `$this`");
 pub const enum_elem_name_is_class: Error = Cow::Borrowed("Enum element cannot be named `class`");
+pub const enum_class_elem_name_is_class: Error =
+    Cow::Borrowed("Enum class members cannot be named `class`");
 pub const property_requires_visibility: Error = Cow::Borrowed(concat!(
     "Property declarations require a visibility modifier ",
     "such as `public`, `private` or `protected`.",
@@ -1046,6 +1048,14 @@ pub fn user_ctx_should_be_caps(ctx_name: &str) -> Error {
         ctx_name.to_string()
     ))
 }
+
+pub fn user_ctx_require_as(ctx_name: &str) -> Error {
+    Cow::Owned(format!(
+        "Context {} must declare a context constraint e.g. `as [write_props]`",
+        ctx_name.to_string()
+    ))
+}
+
 pub const assignment_to_readonly: Error =
     Cow::Borrowed("This expression is readonly, its members cannot be modified");
 
@@ -1062,11 +1072,19 @@ pub fn invalid_readonly(r1: &str, r2: &str, reason: &str) -> Error {
     ))
 }
 
+pub const inout_readonly_assignment: Error =
+    Cow::Borrowed("Cannot write a readonly value to an inout parameter");
+
+pub const inout_readonly_parameter: Error =
+    Cow::Borrowed("Inout readonly parameters are not currently supported");
+
 pub const enum_class_constant_missing_initializer: Error =
     Cow::Borrowed("Concrete enum class constants must have an initial value");
 
 pub const enum_class_abstract_constant_with_value: Error =
     Cow::Borrowed("Abstract enum class constants must not provide any initial value");
+
+pub const enum_with_modifiers: Error = Cow::Borrowed("Enums can't have any modifiers");
 
 pub const readonly_static_method: Error =
     Cow::Borrowed("Static methods do not need to be marked readonly");
@@ -1075,3 +1093,5 @@ pub const variadic_readonly_param: Error =
 pub const throw_readonly_exception: Error = Cow::Borrowed(
     "This exception is readonly; throwing readonly exceptions is not currently supported.",
 );
+pub const direct_coeffects_reference: Error =
+    Cow::Borrowed("Direct references to coeffects namespaces are not allowed");

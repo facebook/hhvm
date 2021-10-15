@@ -4,19 +4,21 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use aast::Expr_ as E_;
+use hh_autoimport_rust::is_hh_autoimport_fun;
 use naming_special_names_rust::special_idents;
 use oxidized::{
     aast,
     aast_visitor::{visit_mut, AstParams, NodeMut, VisitorMut},
     ast::*,
-    local_id,
+    ast_defs, local_id,
     pos::Pos,
 };
 use parser_core_types::{
     syntax_error,
     syntax_error::{Error as ErrorMsg, SyntaxError},
 };
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 // Local environment which keeps track of how many readonly values it has
 #[derive(PartialEq, Clone)]
@@ -66,6 +68,7 @@ struct Context {
     locals: Lenv,
     readonly_return: Rty,
     this_ty: Rty,
+    inout_params: HashSet<String>,
 }
 
 impl Context {
@@ -74,11 +77,19 @@ impl Context {
             locals: Lenv::new(),
             readonly_return: readonly_ret,
             this_ty,
+            inout_params: HashSet::new(),
         }
     }
 
     pub fn add_local(&mut self, var_name: &String, rty: Rty) {
         self.locals.insert(var_name.clone(), rty);
+    }
+
+    pub fn add_param(&mut self, var_name: &String, rty: Rty, inout_param: bool) {
+        self.locals.insert(var_name.clone(), rty);
+        if inout_param {
+            self.inout_params.insert(var_name.clone());
+        }
     }
 
     pub fn get_rty(&self, var_name: &String) -> Rty {
@@ -173,10 +184,6 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
             ro_expr_list2(context, &fields)
         }
         Xml(_) | Efun(_) | Lfun(_) => Rty::Mutable,
-        Callconv(c) => {
-            let (_, expr) = &**c;
-            rty_expr(context, &expr)
-        }
         Tuple(t) => ro_expr_list(context, t),
         // Only list destructuring
         List(_) => Rty::Mutable,
@@ -186,6 +193,11 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
         As(a) => {
             // Readonlyness of inner expression
             let (exp, _, _) = &**a;
+            rty_expr(context, &exp)
+        }
+        Upcast(a) => {
+            // Readonlyness of inner expression
+            let (exp, _) = &**a;
             rty_expr(context, &exp)
         }
         Eif(e) => {
@@ -228,22 +240,77 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
         Null | True | False | Omitted => Rty::Mutable,
         Int(_) | Float(_) | String(_) | String2(_) | PrefixedString(_) => Rty::Mutable,
         Id(_) => Rty::Mutable,
-        // TODO: Need to handle dollardollar with pipe expressions correctly
-        Dollardollar(_) => Rty::Mutable,
+        Dollardollar(lid) => {
+            let (id, dollardollar) = &lid.1;
+            let var_name = format!("{}{}", dollardollar.clone(), id);
+            context.get_rty(&var_name)
+        }
         Clone(_) => Rty::Mutable,
+        Call(c) => {
+            if let (aast::Expr(_, _, Id(i)), _, args, _) = &**c {
+                if is_special_builtin(&i.1) && args.len() >= 1 {
+                    // Take first argument
+                    let (_, expr) = &args[0];
+                    rty_expr(context, &expr)
+                } else {
+                    Rty::Mutable
+                }
+            } else {
+                Rty::Mutable
+            }
+        }
         // Mutable unless wrapped in a readonly expression
-        Call(_) | ClassGet(_) | ClassConst(_) => Rty::Mutable,
+        ClassGet(_) | ClassConst(_) => Rty::Mutable,
         FunctionPointer(_) => Rty::Mutable,
         // This is really just a statement, does not have a value
         Yield(_) => Rty::Mutable,
         // Operators are all primitive in result
         Unop(_) | Binop(_) => Rty::Mutable,
         // TODO: track the left side of pipe expressions' readonlyness for $$
-        Pipe(_) => Rty::Mutable,
+        Pipe(p) => {
+            let (lid, left, _) = &**p;
+            // The only time the id number matters is for Dollardollar
+            let (_, dollardollar) = &lid.1;
+            let left_rty = rty_expr(context, left);
+            context.add_local(&dollardollar, left_rty);
+            rty_expr(context, &p.2)
+        }
         ExpressionTree(_) | EnumClassLabel(_) | ETSplice(_) => Rty::Mutable,
         Import(_) | Lplaceholder(_) => Rty::Mutable,
         // More function values which are always mutable
         MethodId(_) | MethodCaller(_) | SmethodId(_) | FunId(_) => Rty::Mutable,
+    }
+}
+
+fn strip_ns(name: &str) -> &str {
+    match name.chars().next() {
+        Some('\\') => &name[1..],
+        _ => name,
+    }
+}
+
+// Special builtins that can take readonly values and return the same readonlyness back
+// These are represented as bytecodes, so do not go through regular call enforcement
+fn is_special_builtin(f_name: &str) -> bool {
+    let stripped = strip_ns(f_name);
+    let namespaced_f_name = if is_hh_autoimport_fun(stripped) {
+        format!("HH\\{}", f_name)
+    } else {
+        stripped.to_string()
+    };
+    match &namespaced_f_name[..] {
+        "HH\\dict" | "HH\\varray" | "HH\\darray" | "HH\\vec" | "hphp_array_idx" => true,
+        /* all other special builtins listed in emit_expresion.rs return mutable:
+        specifically, these:
+        "array_key_exists" => Some((2, IMisc(AKExists))),
+        "intval" => Some((1, IOp(CastInt))),
+        "boolval" => Some((1, IOp(CastBool))),
+        "strval" => Some((1, IOp(CastString))),
+        "floatval" | "doubleval" => Some((1, IOp(CastDouble))),
+        "HH\\global_get" => Some((1, IGet(CGetG))),
+        "HH\\global_isset" => Some((1, IIsset(IssetG))),
+        */
+        _ => false,
     }
 }
 
@@ -345,6 +412,9 @@ fn check_assignment_validity(
         aast::Expr_::Lvar(id_orig) => {
             let var_name = local_id::get_name(&id_orig.1).to_string();
             let rhs_rty = rty_expr(context, &rhs);
+            if context.inout_params.contains(&var_name) && rhs_rty == Rty::Readonly {
+                checker.add_error(pos, syntax_error::inout_readonly_assignment);
+            }
             context.add_local(&var_name, rhs_rty);
         }
         // list assignment
@@ -352,6 +422,14 @@ fn check_assignment_validity(
             let exprs = &mut **l;
             for e in exprs.iter_mut() {
                 check_assignment_validity(context, checker, &e.1.clone(), e, rhs);
+            }
+        }
+        // directly assigning to a class static is always valid (locally) as long as the rhs is explicit on its readonlyness
+        aast::Expr_::ClassGet(_) => {
+            let rhs_rty = rty_expr(context, &rhs);
+            match rhs_rty {
+                Rty::Readonly => explicit_readonly(rhs),
+                _ => {}
             }
         }
         _ => {
@@ -441,10 +519,17 @@ impl<'ast> VisitorMut<'ast> for Checker {
         let mut context = Context::new(readonly_return, readonly_this);
 
         for p in m.params.iter() {
+            let is_inout = match p.callconv {
+                ast_defs::ParamKind::Pinout(_) => true,
+                _ => false,
+            };
             if let Some(_) = p.readonly {
-                context.add_local(&p.name, Rty::Readonly)
+                if is_inout {
+                    self.add_error(&p.pos, syntax_error::inout_readonly_parameter);
+                }
+                context.add_param(&p.name, Rty::Readonly, is_inout)
             } else {
-                context.add_local(&p.name, Rty::Mutable)
+                context.add_param(&p.name, Rty::Mutable, is_inout)
             }
         }
         m.recurse(&mut context, self.object())
@@ -452,6 +537,7 @@ impl<'ast> VisitorMut<'ast> for Checker {
 
     fn visit_fun_(&mut self, context: &mut Context, f: &mut aast::Fun_<(), ()>) -> Result<(), ()> {
         // Is run on every function definition and closure definition
+
         let readonly_return = ro_kind_to_rty(f.readonly_ret);
         let readonly_this = ro_kind_to_rty(f.readonly_this);
         let mut new_context = Context::new(readonly_return, readonly_this);
@@ -464,10 +550,17 @@ impl<'ast> VisitorMut<'ast> for Checker {
             }
         }
         for p in f.params.iter() {
+            let is_inout = match p.callconv {
+                ast_defs::ParamKind::Pinout(_) => true,
+                _ => false,
+            };
             if let Some(_) = p.readonly {
-                new_context.add_local(&p.name, Rty::Readonly)
+                if is_inout {
+                    self.add_error(&p.pos, syntax_error::inout_readonly_parameter)
+                }
+                new_context.add_param(&p.name, Rty::Readonly, is_inout)
             } else {
-                new_context.add_local(&p.name, Rty::Mutable)
+                new_context.add_param(&p.name, Rty::Mutable, is_inout)
             }
         }
         f.recurse(&mut new_context, self.object())
@@ -497,12 +590,19 @@ impl<'ast> VisitorMut<'ast> for Checker {
                     Rty::Readonly => explicit_readonly(caller),
                     Rty::Mutable => {}
                 };
-                for param in params.iter_mut() {
+                for (_, param) in params.iter_mut() {
                     match rty_expr(context, param) {
                         Rty::Readonly => explicit_readonly(param),
                         Rty::Mutable => {}
                     }
                 }
+            }
+            aast::Expr_::Pipe(p) => {
+                let (lid, left, _) = &**p;
+                // The only time the id number matters is for Dollardollar
+                let (_, dollardollar) = &lid.1;
+                let left_rty = rty_expr(context, left);
+                context.add_local(&dollardollar, left_rty);
             }
             _ => {}
         }
@@ -589,6 +689,41 @@ impl<'ast> VisitorMut<'ast> for Checker {
             }
             aast::Stmt_::Foreach(f) => {
                 let (e, as_expr, b) = &mut **f;
+                match as_expr {
+                    aast::AsExpr::AsV(aast::Expr(_, _, E_::Lvar(id))) => {
+                        let var_name = local_id::get_name(&id.1);
+                        let rty = rty_expr(context, e);
+                        context.add_local(var_name, rty)
+                    }
+                    aast::AsExpr::AsKv(
+                        _, // key is arraykey and does not need to be readonly
+                        aast::Expr(_, _, E_::Lvar(value_id)),
+                    ) => {
+                        let var_name = local_id::get_name(&value_id.1);
+                        let rty = rty_expr(context, e);
+                        context.add_local(var_name, rty);
+                    }
+                    aast::AsExpr::AwaitAsV(_, aast::Expr(_, _, E_::Lvar(id))) => {
+                        let var_name = local_id::get_name(&id.1);
+                        let rty = rty_expr(context, e);
+                        context.add_local(var_name, rty)
+                    }
+                    aast::AsExpr::AwaitAsKv(
+                        _,
+                        _, // key is arraykey and does not need to be readonly
+                        aast::Expr(_, _, E_::Lvar(value_id)),
+                    ) => {
+                        let var_name = local_id::get_name(&value_id.1);
+                        let rty = rty_expr(context, e);
+                        context.add_local(var_name, rty);
+                    }
+                    // Any other Foreach here would mean no Lvar
+                    // where an Lvar is needed. In those cases
+                    // we will parse error, but the parse tree might still exist
+                    // so we just ignore those cases and continue our analysis
+                    // knowing that a parse error will show up
+                    _ => {}
+                };
                 e.recurse(context, self.object())?;
                 as_expr.recurse(context, self.object())?;
                 let old_lenv = context.locals.clone();

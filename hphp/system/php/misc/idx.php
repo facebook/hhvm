@@ -1,4 +1,5 @@
 <?hh // partial
+<<file: __EnableUnstableFeatures("readonly")>>
 
 namespace HH {
 
@@ -95,7 +96,7 @@ namespace HH {
  * @param ?arraykey $idx      - Index to check for.
  * @param mixed $default      - Default value to return if index is not found. By
  *                              default, this is null.
- * @return mixed                Value at array index if it exists, 
+ * @return mixed                Value at array index if it exists,
  *                              or the default value if not.
  */
 function idx($arr, $idx, $default=null)[] {
@@ -122,6 +123,11 @@ function idx($arr, $idx, $default=null)[] {
   }
 
   return $default;
+}
+
+function idx_readonly<Tk as arraykey, Tv>(readonly $arr, $idx, $default=null)[] : readonly Tv {
+  // readonlyness is not enforced in systemlib so we can pass it here without error
+  return readonly idx($arr, $idx, $default);
 }
 
 }

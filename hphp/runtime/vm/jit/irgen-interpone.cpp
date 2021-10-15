@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/jit/minstr-effects.h"
 
 #include "hphp/runtime/vm/jit/irgen-exit.h"
+#include "hphp/runtime/vm/jit/irgen-inlining.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 
 namespace HPHP { namespace jit { namespace irgen {
@@ -327,14 +328,27 @@ void interpOne(IRGS& env,
   idata.cellsPushed = pushed;
   idata.opcode = op;
 
+  spillInlinedFrames(env);
+
+  auto const cf = opcodeChangesPC(idata.opcode);
   gen(
     env,
-    opcodeChangesPC(idata.opcode) ? InterpOneCF : InterpOne,
+    cf ? InterpOneCF : InterpOne,
     outType,
     idata,
     sp(env),
     fp(env)
   );
+
+  if (!cf && isInlining(env)) {
+    // Can't continue due to spilled frames.
+    auto const rbjData = ReqBindJmpData {
+      nextSrcKey(env),
+      spOffBCFromStackBase(env),
+      spOffBCFromIRSP(env)
+    };
+    gen(env, ReqBindJmp, rbjData, sp(env), fp(env));
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

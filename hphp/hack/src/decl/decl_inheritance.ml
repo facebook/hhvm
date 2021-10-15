@@ -275,7 +275,6 @@ let consts ~target ctx child_class_name get_typeconst get_ancestor lin =
                get_typeconst Naming_special_names.FB.tInner >>= fun t ->
                match t.ttc_kind with
                | TCConcrete { tc_type } -> Some tc_type
-               | TCPartiallyAbstract { patc_type; _ } -> Some patc_type
                | TCAbstract { atc_default; _ } -> atc_default)
              ~get_ancestor) )
   in
@@ -377,7 +376,7 @@ let make_typeconst_cache class_name lin =
          *
          * Then C::T == I2::T since I2::T is not abstract.
          *)
-        | (TCAbstract _, (TCConcrete _ | TCPartiallyAbstract _)) -> ancestor_tc
+        | (TCAbstract _, TCConcrete _) -> ancestor_tc
         (* NB: The following comment (written in D1825740) claims that this arm is
            necessary to cover the example it describes. But this example does not
            exercise this arm--the interface appears earlier in the linearization
@@ -389,17 +388,6 @@ let make_typeconst_cache class_name lin =
            compared to eager decl. We are planning to remove partially-abstract
            type constants in any case, so this arm will be removed soon.
         *)
-        (* This covers the following case:
-         *
-         * abstract class P { const type T as arraykey = arraykey; }
-         * interface I { const type T = int; }
-         *
-         * class C extends P implements I {}
-         *
-         * Then C::T == I::T since P::T has a constraint and thus can be
-         * overridden by its child, while I::T cannot be overridden.
-         *)
-        | (TCPartiallyAbstract _, TCConcrete _) -> ancestor_tc
         (* This covers the following case
          *
          * interface I {
@@ -431,8 +419,7 @@ let make_typeconst_cache class_name lin =
          * and requires the user to explicitly declare T in C.
          *)
         | (TCAbstract _, TCAbstract _)
-        | (TCPartiallyAbstract _, (TCAbstract _ | TCPartiallyAbstract _))
-        | (TCConcrete _, (TCAbstract _ | TCPartiallyAbstract _)) ->
+        | (TCConcrete _, TCAbstract _) ->
           descendant_tc
         | (TCConcrete _, TCConcrete _) ->
           if descendant_tc.ttc_concretized && not ancestor_tc.ttc_concretized

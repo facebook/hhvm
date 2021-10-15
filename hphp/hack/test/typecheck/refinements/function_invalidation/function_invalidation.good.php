@@ -53,9 +53,6 @@ function refine_ok(
     new Harmless();
     takes_int($c->i);
 
-    array_map($x ==> $x, vec[]);
-    takes_int($c->i);
-
     $c->harmless();
     takes_int($c->i);
 

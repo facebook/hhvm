@@ -499,6 +499,7 @@ Variant HHVM_FUNCTION(hphp_get_static_property, const String& cls,
     raise_error("Non-existent class %s", sd->data());
   }
   VMRegAnchor _;
+  CoeffectsAutoGuard _2;
 
   auto const lookup = class_->getSPropIgnoreLateInit(
     force ? class_ : arGetContextClass(vmfp()),
@@ -529,6 +530,7 @@ void HHVM_FUNCTION(hphp_set_static_property, const String& cls,
   if (!class_) raise_error("Non-existent class %s", sd->data());
 
   VMRegAnchor _;
+  CoeffectsAutoGuard _2;
 
   auto const lookup = class_->getSPropIgnoreLateInit(
     force ? class_ : arGetContextClass(vmfp()),
@@ -564,6 +566,7 @@ const StaticString s_classname("classname");
 Array implTypeStructure(const Variant& cls_or_obj,
                         const Variant& cns_name,
                         bool no_throw) {
+  SuppressClassConversionWarning suppressor;
   auto const cns_sd = cns_name.getStringDataOrNull();
   if (!cns_sd) {
     auto name = cls_or_obj.toString();

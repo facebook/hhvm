@@ -84,6 +84,7 @@ module PropFlags = struct
       if get_lsb t then print "lsb";
       if get_needs_init t then print "needs_init";
       if get_php_std_lib t then print "php_std_lib";
+      if get_readonly t then print "readonly";
       Format.fprintf fmt "@,@]"
     )
 
@@ -204,7 +205,7 @@ type shallow_class = {
   sc_is_xhp: bool;
   sc_has_xhp_keyword: bool;
   sc_kind: Ast_defs.classish_kind;
-  sc_module: string option;
+  sc_module: Typing_modules.t;
   sc_name: Typing_defs.pos_id;
   sc_tparams: decl_tparam list;
   sc_where_constraints: decl_where_constraint list;

@@ -536,9 +536,11 @@ namespace {
  */
 bool shouldReduceToNonReifiedVerifyType(ISS& env, SArray ts) {
   if (get_ts_kind(ts) != TypeStructure::Kind::T_unresolved) return false;
-  auto const rcls = env.index.resolve_class(env.ctx, get_ts_classname(ts));
-  if (!rcls || !rcls->resolved()) return false;
-  return !rcls->cls()->hasReifiedGenerics;
+  auto const clsName = get_ts_classname(ts);
+  auto const rcls = env.index.resolve_class(env.ctx, clsName);
+  if (rcls && rcls->resolved()) return !rcls->cls()->hasReifiedGenerics;
+  // Type aliases cannot have reified generics
+  return env.index.lookup_type_alias(clsName) != nullptr;
 }
 
 }
@@ -1450,7 +1452,7 @@ bool cmpWillThrow(const Type& t1, const Type& t2) {
    // relational comparisons allow for int v dbl
   if (couldBeIntAndDbl(t1, t2) || couldBeIntAndDbl(t2, t1)) return false;
 
-  return !loosen_all(t1).couldBe(loosen_all(t2));
+  return !loosen_to_datatype(t1).couldBe(loosen_to_datatype(t2));
 }
 
 void eqImpl(ISS& env, bool eq) {
@@ -1471,10 +1473,11 @@ void eqImpl(ISS& env, bool eq) {
   });
 }
 
-bool shortCircuitRelationalComparison(ISS& env, const Type& t1, const Type& t2) {
+bool cmpThrowCheck(ISS& env, const Type& t1, const Type& t2) {
   if (!cmpWillThrow(t1, t2)) return false;
   discard(env, 2);
   push(env, TBottom);
+  unreachable(env);
   return true;
 }
 
@@ -1484,26 +1487,26 @@ void in(ISS& env, const bc::Eq&) { eqImpl(env, true); }
 void in(ISS& env, const bc::Neq&) { eqImpl(env, false); }
 
 void in(ISS& env, const bc::Lt&) {
-  if (shortCircuitRelationalComparison(env, topC(env, 0), topC(env, 1))) return;
+  if (cmpThrowCheck(env, topC(env, 0), topC(env, 1))) return;
   cmpImpl(env, static_cast<bool (*)(TypedValue, TypedValue)>(tvLess));
 }
 void in(ISS& env, const bc::Gt&) {
-  if (shortCircuitRelationalComparison(env, topC(env, 0), topC(env, 1))) return;
+  if (cmpThrowCheck(env, topC(env, 0), topC(env, 1))) return;
   cmpImpl(env, static_cast<bool (*)(TypedValue, TypedValue)>(tvGreater));
 }
 void in(ISS& env, const bc::Lte&) {
-  if (shortCircuitRelationalComparison(env, topC(env, 0), topC(env, 1))) return;
+  if (cmpThrowCheck(env, topC(env, 0), topC(env, 1))) return;
   cmpImpl(env, tvLessOrEqual);
 }
 void in(ISS& env, const bc::Gte&) {
-  if (shortCircuitRelationalComparison(env, topC(env, 0), topC(env, 1))) return;
+  if (cmpThrowCheck(env, topC(env, 0), topC(env, 1))) return;
   cmpImpl(env, tvGreaterOrEqual);
 }
 
 void in(ISS& env, const bc::Cmp&) {
   auto const t1 = topC(env, 0);
   auto const t2 = topC(env, 1);
-  if (shortCircuitRelationalComparison(env, t1, t2)) return;
+  if (cmpThrowCheck(env, t1, t2)) return;
   discard(env, 2);
   if (t1 == t2) {
     auto const v1 = tv(t1);
@@ -2233,12 +2236,12 @@ void in(ISS& env, const bc::CGetS& op) {
     return throws();
   }
 
-  if (checkReadonlyOp(ReadonlyOp::Mutable, op.subop1) &&
+  if (checkReadonlyOpThrows(ReadonlyOp::Mutable, op.subop1) &&
     lookup.readOnly == TriBool::Yes) {
     return throws();
   }
-  auto const mightReadOnlyThrow = checkReadonlyOp(ReadonlyOp::Mutable, op.subop1) &&
-    lookup.readOnly == TriBool::Maybe;
+  auto const mightReadOnlyThrow = checkReadonlyOpMaybeThrows(ReadonlyOp::Mutable, op.subop1) &&
+    (lookup.readOnly == TriBool::Yes || lookup.readOnly == TriBool::Maybe);
 
   if (lookup.found == TriBool::Yes &&
       lookup.lateInit == TriBool::No &&
@@ -3123,7 +3126,7 @@ void in(ISS& env, const bc::SetS& op) {
     val,
     true,
     false,
-    checkReadonlyOp(ReadonlyOp::Readonly, op.subop1)
+    checkReadonlyOpThrows(ReadonlyOp::Readonly, op.subop1)
   );
 
   if (merge.throws == TriBool::Yes || merge.adjusted.subtypeOf(BBottom)) {
@@ -3312,6 +3315,75 @@ bool fcallCanSkipRepack(ISS& env, const FCallArgs& fca, const res::Func& func) {
   return unpackArgs.subtypeOf(BVec);
 }
 
+bool coeffectRulesMatch(ISS& env,
+                        const FCallArgs& fca,
+                        const res::Func& func,
+                        uint32_t numExtraInputs,
+                        const CoeffectRule& caller,
+                        const CoeffectRule& callee) {
+  if (caller.m_type != callee.m_type) return false;
+  switch (caller.m_type) {
+    case CoeffectRule::Type::CCThis: {
+      if (caller.m_name != callee.m_name ||
+          caller.m_types != callee.m_types) {
+        return false;
+      }
+      if (!thisAvailable(env)) return false;
+      auto const loc = topStkEquiv(env, fca.numInputs() + numExtraInputs + 1);
+      return loc == StackThisId || (loc <= MaxLocalId && locIsThis(env, loc));
+    }
+    case CoeffectRule::Type::CCParam:
+      if (caller.m_name != callee.m_name) return false;
+      // fallthrough
+    case CoeffectRule::Type::FunParam: {
+      if (fca.hasUnpack()) return false;
+      if (fca.numArgs() <= callee.m_index) return false;
+      auto const l1 = caller.m_index;
+      auto const l2 = topStkEquiv(env, fca.numInputs() - callee.m_index - 1);
+      return l1 == l2 ||
+             (l1 <= MaxLocalId &&
+              l2 <= MaxLocalId &&
+              locsAreEquiv(env, l1, l2));
+    }
+    case CoeffectRule::Type::CCReified:
+      // TODO: optimize these
+      return false;
+    case CoeffectRule::Type::ClosureParentScope:
+    case CoeffectRule::Type::GeneratorThis:
+    case CoeffectRule::Type::Caller:
+    case CoeffectRule::Type::Invalid:
+      return false;
+  }
+  not_reached();
+}
+
+bool fcallCanSkipCoeffectsCheck(ISS& env,
+                                const FCallArgs& fca,
+                                const res::Func& func,
+                                uint32_t numExtraInputs) {
+  auto const requiredCoeffectsOpt = func.requiredCoeffects();
+  if (!requiredCoeffectsOpt) return false;
+  auto const required = *requiredCoeffectsOpt;
+  auto const provided =
+    RuntimeCoeffects::fromValue(env.ctx.func->requiredCoeffects.value() |
+                                env.ctx.func->coeffectEscapes.value());
+  if (!provided.canCall(required)) return false;
+  auto const calleeRules = func.coeffectRules();
+  // If we couldn't tell whether callee has rules or not, punt.
+  if (!calleeRules) return false;
+  if (calleeRules->empty()) return true;
+  if (calleeRules->size() == 1 && (*calleeRules)[0].isCaller()) return true;
+  auto const callerRules = env.ctx.func->coeffectRules;
+  return std::is_permutation(callerRules.begin(), callerRules.end(),
+                             calleeRules->begin(), calleeRules->end(),
+                             [&] (const CoeffectRule& a,
+                                  const CoeffectRule& b) {
+                               return coeffectRulesMatch(env, fca, func,
+                                                         numExtraInputs,
+                                                         a, b);
+                              });
+}
+
 template<typename FCallWithFCA>
 bool fcallOptimizeChecks(
   ISS& env,
@@ -3319,7 +3391,8 @@ bool fcallOptimizeChecks(
   const res::Func& func,
   FCallWithFCA fcallWithFCA,
   Optional<uint32_t> inOutNum,
-  bool maybeNullsafe
+  bool maybeNullsafe,
+  uint32_t numExtraInputs
 ) {
   // Don't optimize away in-out checks if we might use the null safe
   // operator. If we do so, we need the in-out bits to shuffle the
@@ -3418,6 +3491,12 @@ bool fcallOptimizeChecks(
 
   if (!fca.skipRepack() && fcallCanSkipRepack(env, fca, func)) {
     reduce(env, fcallWithFCA(fca.withoutRepack()));
+    return true;
+  }
+
+  if (!fca.skipCoeffectsCheck() &&
+      fcallCanSkipCoeffectsCheck(env, fca, func, numExtraInputs)) {
+    reduce(env, fcallWithFCA(fca.withoutCoeffectsCheck()));
     return true;
   }
 
@@ -3681,7 +3760,7 @@ void in(ISS& env, const bc::FCallFuncD& op) {
     ? env.index.lookup_num_inout_params(env.ctx, rfunc)
     : std::nullopt;
 
-  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut, false) ||
+  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut, false, 0) ||
       fcallTryFold(env, op.fca, rfunc, TBottom, false, 0)) {
     return;
   }
@@ -3744,7 +3823,7 @@ void fcallFuncStr(ISS& env, const bc::FCallFunc& op) {
     ? env.index.lookup_num_inout_params(env.ctx, rfunc)
     : std::nullopt;
 
-  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut, false)) {
+  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut, false, 0)) {
     return;
   }
   fcallKnownImpl(env, op.fca, rfunc, TBottom, false, 1, updateBC, numInOut);
@@ -4001,10 +4080,11 @@ void fcallObjMethodImpl(ISS& env, const Op& op, SString methName, bool dynamic,
     : std::nullopt;
 
   auto const canFold = !mayUseNullsafe && !mayThrowNonObj;
+  auto const numExtraInputs = extraInput ? 1 : 0;
   if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC,
-                          numInOut, mayUseNullsafe) ||
+                          numInOut, mayUseNullsafe, numExtraInputs) ||
       (canFold && fcallTryFold(env, op.fca, rfunc, ctxTy, dynamic,
-                               extraInput ? 1 : 0))) {
+                               numExtraInputs))) {
     return;
   }
 
@@ -4096,7 +4176,8 @@ void fcallClsMethodImpl(ISS& env, const Op& op, Type clsTy, SString methName,
     ? env.index.lookup_num_inout_params(env.ctx, rfunc)
     : std::nullopt;
 
-  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut, false) ||
+  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut, false,
+                          numExtraInputs) ||
       fcallTryFold(env, op.fca, rfunc, clsTy, dynamic, numExtraInputs)) {
     return;
   }
@@ -4196,9 +4277,11 @@ void fcallClsMethodSImpl(ISS& env, const Op& op, SString methName, bool dynamic,
     ? env.index.lookup_num_inout_params(env.ctx, rfunc)
     : std::nullopt;
 
-  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut, false) ||
+  auto const numExtraInputs = extraInput ? 1 : 0;
+  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC, numInOut, false,
+                          numExtraInputs) ||
       fcallTryFold(env, op.fca, rfunc, ctxCls(env), dynamic,
-                   extraInput ? 1 : 0)) {
+                   numExtraInputs)) {
     return;
   }
 
@@ -4401,7 +4484,7 @@ void in(ISS& env, const bc::FCallCtor& op) {
     : std::nullopt;
 
   auto const canFold = obj.subtypeOf(BObj);
-  if (fcallOptimizeChecks(env, op.fca, *rfunc, updateFCA, numInOut, false) ||
+  if (fcallOptimizeChecks(env, op.fca, *rfunc, updateFCA, numInOut, false, 0) ||
       (canFold && fcallTryFold(env, op.fca, *rfunc,
                                obj, false /* dynamic */, 0))) {
     return;

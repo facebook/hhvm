@@ -84,10 +84,10 @@ impl Env {
                     Expr(_, _, Expr_::Id(id))
                         if id.1 == sn::autoimported_functions::FUN_ && args.len() == 1 =>
                     {
-                        match &args[0] {
+                        match &args[0].1 {
                             Expr(_, p, Expr_::String(fn_name)) => {
                                 let fn_name = core_utils::add_ns_bstr(&fn_name);
-                                args[0] =
+                                args[0].1 =
                                     Expr((), p.clone(), Expr_::String(fn_name.into_owned().into()));
                             }
                             _ => {}
@@ -99,10 +99,10 @@ impl Env {
                             && args.len() == 2
                             && !self.in_codegen() =>
                     {
-                        match &args[0] {
+                        match &args[0].1 {
                             Expr(_, p, Expr_::String(cl_name)) => {
                                 let cl_name = core_utils::add_ns_bstr(&cl_name);
-                                args[0] =
+                                args[0].1 =
                                     Expr((), p.clone(), Expr_::String(cl_name.into_owned().into()));
                             }
                             _ => {}

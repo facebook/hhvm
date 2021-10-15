@@ -13,13 +13,11 @@ type key = OpaqueDigest.t
 module IntVal = struct
   type t = int
 
-  let prefix = Prefix.make ()
-
   let description = "Test_IntVal"
 end
 
 let test_add_remove
-    (module IntHeap : SharedMem.NoCache with type t = int and type key = string)
+    (module IntHeap : SharedMem.Heap with type value = int and type key = string)
     () =
   assert (SharedMem.SMTelemetry.hh_removed_count () = 0);
   IntHeap.add "a" 4;
@@ -30,7 +28,7 @@ let test_add_remove
   assert (SharedMem.SMTelemetry.hh_removed_count () = 1)
 
 module TestNoCache =
-  SharedMem.NoCache (SharedMem.Immediate) (StringKey) (IntVal)
+  SharedMem.Heap (SharedMem.ImmediateBackend) (StringKey) (IntVal)
 
 let tests () =
   let list = [("test_add_remove", test_add_remove (module TestNoCache))] in

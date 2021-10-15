@@ -492,7 +492,10 @@ val is_type_disjoint_ref :
   (Typing_env_types.env -> Typing_defs.locl_ty -> Typing_defs.locl_ty -> bool)
   ref
 
-val collect_enum_class_upper_bounds : Typing_env_types.env -> string -> SSet.t
+val collect_enum_class_upper_bounds :
+  Typing_env_types.env ->
+  string ->
+  Typing_env_types.env * Typing_defs.locl_ty option
 
 val default_fun_param : ?pos:Pos_or_decl.t -> 'a -> 'a Typing_defs.fun_param
 
@@ -514,3 +517,9 @@ val make_locl_subst_for_class_tparams :
 val is_sub_class_refl : Typing_env_types.env -> string -> string -> bool
 
 val class_has_no_params : Typing_env_types.env -> string -> bool
+
+val has_ancestor_including_req_refl :
+  Typing_env_types.env -> string -> string -> bool
+
+val has_ancestor_including_req :
+  Typing_env_types.env -> Decl_provider.Class.t -> string -> bool

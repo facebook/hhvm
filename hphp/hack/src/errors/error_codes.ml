@@ -233,6 +233,7 @@ module NastCheck = struct
     | PartiallyAbstractTypeconstDefinition [@value 3093]
     | EntryPointGenerics [@value 3094]
     | InternalProtectedOrPrivate [@value 3095]
+    | InoutInTransformedPsuedofunction [@value 3096]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum
@@ -645,6 +646,8 @@ module Typing = struct
     | MemoizeObjectWithoutGlobals [@value 4447]
     | ExpressionTreeNonPublicProperty [@value 4448]
     | CovariantIndexTypeMismatch [@value 4449]
+    | InoutInPseudofunction [@value 4450]
+    | TraitParentConstructInconsistent [@value 4451]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

@@ -272,8 +272,9 @@ void computeFrames(Vunit& unit) {
 
   auto const rpo = sortBlocks(unit);
 
+  assertx(unit.frames.size() == Vframe::Root);
   unit.frames.emplace_back(
-    topFunc, 0, Vframe::Top, 0, unit.blocks[rpo[0]].weight
+    topFunc, 0, SBInvOffset{0}, Vframe::Top, 0, unit.blocks[rpo[0]].weight
   );
   unit.blocks[rpo[0]].frame = 0;
   unit.blocks[rpo[0]].pending_frames = 0;
@@ -289,7 +290,7 @@ void computeFrames(Vunit& unit) {
       for (auto& inst : block.code) {
         auto origin = inst.origin;
         switch (inst.op) {
-        case Vinstr::inlinestart:
+        case Vinstr::inlinestart: {
           // Each inlined frame will have a single start but may have multiple
           // ends, and so we need to propagate this state here so that it only
           // happens once per frame.
@@ -298,9 +299,15 @@ void computeFrames(Vunit& unit) {
             unit.frames[f].num_inner_frames++;
           }
 
+          auto const sbToRootSbOff =
+            unit.frames[frame].sbToRootSbOff +
+            origin->marker().bcSPOff().offset +
+            inst.inlinestart_.func->numSlotsInFrame();
+
           unit.frames.emplace_back(
             inst.inlinestart_.func,
             origin->marker().bcOff(),
+            sbToRootSbOff,
             frame,
             inst.inlinestart_.cost,
             block.weight
@@ -308,15 +315,13 @@ void computeFrames(Vunit& unit) {
           frame = inst.inlinestart_.id = unit.frames.size() - 1;
           pending++;
           break;
+        }
         case Vinstr::inlineend:
           frame = unit.frames[frame].parent;
           pending--;
           break;
         case Vinstr::pushframe:
           pending--;
-          break;
-        case Vinstr::popframe:
-          pending++;
           break;
         default: break;
         }

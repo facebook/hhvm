@@ -21,6 +21,7 @@ module Phase = Typing_phase
 module SN = Naming_special_names
 module Cls = Decl_provider.Class
 module MakeType = Typing_make_type
+module TCO = TypecheckerOptions
 
 (*****************************************************************************)
 (* Helpers *)
@@ -51,16 +52,23 @@ let check_visibility parent_vis c_vis parent_pos pos on_error =
   | (Vprotected _, Vprotected _)
   | (Vprotected _, Vpublic) ->
     ()
-  | (Vinternal parent_m, Vinternal m) when String.equal parent_m m -> ()
-  | (Vinternal parent_m, Vinternal m) ->
-    Errors.visibility_override_internal
-      pos
-      parent_pos
-      (Some m)
-      parent_m
-      on_error
-  | (Vinternal parent_m, _) ->
-    Errors.visibility_override_internal pos parent_pos None parent_m on_error
+  | (Vinternal parent_m, m) ->
+    let current =
+      match m with
+      | Vinternal m' -> Some m'
+      | _ -> None
+    in
+    (match Typing_modules.can_access ~current ~target:(Some parent_m) with
+    | `Yes -> ()
+    | `Disjoint (current, target) ->
+      Errors.visibility_override_internal
+        pos
+        parent_pos
+        (Some current)
+        target
+        on_error
+    | `Outside target ->
+      Errors.visibility_override_internal pos parent_pos None target on_error)
   | _ ->
     let parent_vis = TUtils.string_of_visibility parent_vis in
     let vis = TUtils.string_of_visibility c_vis in
@@ -396,39 +404,69 @@ let check_override
 
 (* Constants and type constants with declared values in declared interfaces can never be
  * overridden by other inherited constants.
+ * Constants from traits are taken into account only if the --enable-strict-const-semantics is enabled
  * @precondition: both constants must not be synthesized
  *)
-let conflict_with_declared_interface
-    env implements parent_class class_ parent_origin origin const_name =
+let conflict_with_declared_interface_or_trait
+    ?(include_traits = true)
+    env
+    implements
+    parent_class
+    class_
+    parent_origin
+    origin
+    const_name =
+  let strict_const_semantics =
+    TCO.enable_strict_const_semantics (Env.get_tcopt env)
+  in
   let is_inherited_and_conflicts_with_parent =
     String.( <> ) origin (Cls.name class_) && String.( <> ) origin parent_origin
   in
+  let child_const_from_used_trait =
+    if strict_const_semantics && include_traits then
+      match Env.get_class env origin with
+      | Some cls -> Cls.kind cls |> Ast_defs.is_c_trait
+      | None -> false
+    else
+      false
+  in
+
   (* True if a declared interface on class_ has a concrete constant with
      the same name and origin as child constant *)
   let child_const_from_declared_interface =
     match Env.get_class env origin with
     | Some cls ->
       Cls.kind cls |> Ast_defs.is_c_interface
-      && List.fold implements ~init:false ~f:(fun acc iface ->
-             acc
-             ||
-             match Cls.get_const iface const_name with
-             | None -> false
-             | Some const -> String.( = ) const.cc_origin origin)
+      &&
+      if strict_const_semantics && include_traits then
+        true
+      else
+        List.fold implements ~init:false ~f:(fun acc iface ->
+            acc
+            ||
+            match Cls.get_const iface const_name with
+            | None -> false
+            | Some const -> String.( = ) const.cc_origin origin)
     | None -> false
   in
+
   match Cls.kind parent_class with
   | Ast_defs.Cinterface -> is_inherited_and_conflicts_with_parent
   | Ast_defs.Cclass _ ->
     is_inherited_and_conflicts_with_parent
-    && child_const_from_declared_interface
+    && (child_const_from_declared_interface || child_const_from_used_trait)
   | Ast_defs.Ctrait ->
     is_inherited_and_conflicts_with_parent
-    && child_const_from_declared_interface
+    && (child_const_from_declared_interface || child_const_from_used_trait)
     &&
-    (* constant must be declared on a trait to conflict *)
+    (* constant must be declared on a trait (or interface if include_traits == true) to conflict *)
     (match Env.get_class env parent_origin with
-    | Some cls -> Cls.kind cls |> Ast_defs.is_c_trait
+    | Some cls ->
+      if strict_const_semantics && include_traits then
+        Cls.kind cls |> fun k ->
+        Ast_defs.is_c_trait k || Ast_defs.is_c_interface k
+      else
+        Cls.kind cls |> Ast_defs.is_c_trait
     | None -> false)
   | Ast_defs.Cenum_class _
   | Ast_defs.Cenum ->
@@ -465,11 +503,11 @@ let check_const_override
       && is_concrete class_const.cc_abstract
       && is_concrete parent_class_const.cc_abstract
     in
-    let const_interface_member_not_unique =
+    let const_interface_or_trait_member_not_unique =
       (* Similar to should_check_member_unique, we check if there are multiple
          concrete implementations of class constants with no override.
       *)
-      conflict_with_declared_interface
+      conflict_with_declared_interface_or_trait
         env
         implements
         parent_class
@@ -481,8 +519,8 @@ let check_const_override
     in
     let is_bad_interface_const_override =
       (* HHVM does not support one specific case of overriding constants:
-         If the original constant was defined as non-abstract in an interface,
-         it cannot be overridden when implementing or extending that interface. *)
+         If the original constant was defined as non-abstract in an interface or trait,
+         it cannot be overridden when implementing or extending that interface or using that trait. *)
       if Ast_defs.is_c_interface parent_kind then
         both_are_non_synthetic_and_concrete
         (* Check that the constant is indeed defined in class_ *)
@@ -514,8 +552,8 @@ let check_const_override
         parent_class_const.cc_type
     in
 
-    if const_interface_member_not_unique then
-      Errors.interface_const_multiple_defs
+    if const_interface_or_trait_member_not_unique then
+      Errors.interface_or_trait_const_multiple_defs
         class_const.cc_pos
         parent_class_const.cc_pos
         class_const.cc_origin
@@ -535,6 +573,7 @@ let check_const_override
         parent_class_const.cc_pos
         `constant
         ~current_decl_and_file:(Env.get_current_decl_and_file env);
+
     Phase.sub_type_decl
       env
       class_const_type
@@ -721,7 +760,8 @@ let default_constructor_ce class_ =
         ~synthesized:true
         ~dynamicallycallable:false
         ~readonly_prop:false
-        ~support_dynamic_type:false;
+        ~support_dynamic_type:false
+        ~needs_init:false;
   }
 
 (* When an interface defines a constructor, we check that they are compatible *)
@@ -799,7 +839,7 @@ let tconst_subsumption
       parent_pos
       ~current_decl_and_file:(Env.get_current_decl_and_file env);
     env
-  | ((TCConcrete _ | TCPartiallyAbstract _), TCAbstract _) ->
+  | (TCConcrete _, TCAbstract _) ->
     (* It is valid for abstract class to extend a concrete class, but it cannot
      * redefine already concrete members as abstract.
      * See typecheck/tconst/subsume_tconst5.php test case for example. *)
@@ -868,50 +908,11 @@ let tconst_subsumption
               check_cstrs Reason.URsubsume_tconst_cstr env c_as_opt p_as_opt
             in
             check_cstrs Reason.URsubsume_tconst_cstr env p_super_opt c_super_opt
-          | TCPartiallyAbstract { patc_constraint = c_as; patc_type = c_t } ->
-            let env =
-              check_cstrs Reason.URsubsume_tconst_cstr env (Some c_as) p_as_opt
-            in
-            let env =
-              check_cstrs Reason.URtypeconst_cstr env (Some c_t) p_as_opt
-            in
-            check_cstrs Reason.URtypeconst_cstr env p_super_opt (Some c_t)
           | TCConcrete { tc_type = c_t } ->
             let env =
               check_cstrs Reason.URtypeconst_cstr env (Some c_t) p_as_opt
             in
             check_cstrs Reason.URtypeconst_cstr env p_super_opt (Some c_t)
-        end
-      | TCPartiallyAbstract { patc_constraint = p_as; _ } ->
-        (* TODO(T88552052) Can do abstract_concrete_override check here *)
-        begin
-          match child_typeconst.ttc_kind with
-          | TCPartiallyAbstract { patc_constraint = c_as; patc_type = c_t } ->
-            let env =
-              Typing_ops.sub_type_decl
-                ~on_error
-                pos
-                Reason.URsubsume_tconst_cstr
-                env
-                c_as
-                p_as
-            in
-            Typing_ops.sub_type_decl
-              ~on_error
-              pos
-              Reason.URtypeconst_cstr
-              env
-              c_t
-              p_as
-          | TCConcrete { tc_type = c_t } ->
-            Typing_ops.sub_type_decl
-              ~on_error
-              pos
-              Reason.URtypeconst_cstr
-              env
-              c_t
-              p_as
-          | _ -> env
         end
       | TCConcrete _ ->
         begin
@@ -938,9 +939,7 @@ let tconst_subsumption
     else
       match (child_typeconst.ttc_kind, parent_tconst_enforceable) with
       | (TCAbstract { atc_default = Some ty; _ }, (pos, true))
-      | ( ( TCPartiallyAbstract { patc_type = ty; _ }
-          | TCConcrete { tc_type = ty } ),
-          (pos, true) ) ->
+      | (TCConcrete { tc_type = ty }, (pos, true)) ->
         let tast_env = Tast_env.typing_env_as_tast_env env in
         let emit_error =
           Errors.invalid_enforceable_type "constant" (pos, name)
@@ -967,9 +966,6 @@ let tconst_subsumption
     let parent_is_final =
       match parent_typeconst.ttc_kind with
       | TCConcrete _ -> true
-      | TCPartiallyAbstract _ ->
-        TypecheckerOptions.disable_partially_abstract_typeconsts
-          (Env.get_tcopt env)
       | TCAbstract _ -> false
     in
     let check env x y =
@@ -993,9 +989,7 @@ let tconst_subsumption
     (* TODO(T88552052) this fetching of types is a temporary hack; this whole check will be eliminated *)
     let opt_type__LEGACY t =
       match t.ttc_kind with
-      | TCPartiallyAbstract { patc_type = t; _ }
-      | TCConcrete { tc_type = t } ->
-        Some t
+      | TCConcrete { tc_type = t } -> Some t
       | TCAbstract _ -> None
     in
     Option.value ~default:env
@@ -1057,17 +1051,16 @@ let check_typeconst_override
       | _ -> false
     in
     (match (parent_tconst.ttc_kind, tconst.ttc_kind) with
-    | ( (TCConcrete _ | TCPartiallyAbstract _),
-        (TCConcrete _ | TCPartiallyAbstract _) )
-    | ( TCAbstract { atc_default = Some _; _ },
-        (TCConcrete _ | TCPartiallyAbstract _) )
+    | (TCConcrete _, TCConcrete _)
+    | (TCAbstract { atc_default = Some _; _ }, TCConcrete _)
     | ( TCAbstract { atc_default = Some _; _ },
         TCAbstract { atc_default = Some _; _ } ) ->
       if
         (not is_context_constant)
         && (not tconst.ttc_synthesized)
         && (not parent_tconst.ttc_synthesized)
-        && conflict_with_declared_interface
+        && conflict_with_declared_interface_or_trait
+             ~include_traits:false
              env
              implements
              parent_class
@@ -1079,9 +1072,7 @@ let check_typeconst_override
         let child_is_abstract =
           match tconst.ttc_kind with
           | TCConcrete _ -> false
-          | TCAbstract _
-          | TCPartiallyAbstract _ ->
-            true
+          | TCAbstract _ -> true
         in
         Errors.interface_typeconst_multiple_defs
           pos
@@ -1185,7 +1176,8 @@ let check_class_implements
 (* The externally visible function *)
 (*****************************************************************************)
 
-let check_implements_extends_uses env ~implements ~parents (name_pos, class_) =
+let check_implements_extends_uses
+    env ~implements ~parents (name_pos, (class_ : Cls.t)) =
   let get_interfaces acc x =
     let (_, (_, name), _) = TUtils.unwrap_class_type x in
     match Env.get_class env name with

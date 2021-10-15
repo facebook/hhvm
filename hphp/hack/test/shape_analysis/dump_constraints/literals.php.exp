@@ -1,0 +1,11 @@
+=== Shape analysis results for literals.php
+Constraints for \darray_constraints:
+EX [8:3-36]
+SK [8:3-36] => a : int
+SK [8:3-36] => c : string
+
+Constraints for \dict_constraints:
+EX [4:3-31]
+SK [4:3-31] => a : int
+SK [4:3-31] => b : bool
+

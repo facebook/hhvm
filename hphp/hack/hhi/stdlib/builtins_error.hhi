@@ -28,7 +28,7 @@ function set_exception_handler($exception_handler);
 <<__PHPStdLib>>
 function hphp_set_error_page(string $page);
 <<__PHPStdLib>>
-function hphp_throw_fatal_error(string $error_msg): noreturn;
+function hphp_throw_fatal_error(string $error_msg)[]: noreturn;
 <<__PHPStdLib>>
 function hphp_clear_unflushed();
 <<__PHPStdLib>>

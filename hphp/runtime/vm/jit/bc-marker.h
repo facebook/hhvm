@@ -49,6 +49,7 @@ struct BCMarker {
       false,
       TransIDSet{},
       nullptr,
+      nullptr,
       nullptr
     };
   }
@@ -56,14 +57,14 @@ struct BCMarker {
   BCMarker() = default;
 
   BCMarker(SrcKey sk, SBInvOffset bcSPOff, bool stublogue,
-           const TransIDSet& tids, SSATmp* fp, SSATmp* sp)
+           const TransIDSet& tids, SSATmp* fp, SSATmp* fixupFP, SSATmp* sp)
     : m_sk(sk)
     , m_bcSPOff(bcSPOff)
     , m_stublogue(stublogue)
     , m_profTransIDs{tids}
     , m_fp{fp}
+    , m_fixupFP{fixupFP}
     , m_sp{sp}
-    , m_fixupSk(sk)
   {
     assertx(valid());
   }
@@ -74,6 +75,7 @@ struct BCMarker {
            b.m_stublogue == m_stublogue &&
            b.m_profTransIDs == m_profTransIDs &&
            b.m_fp == m_fp &&
+           b.m_fixupFP == m_fixupFP &&
            b.m_sp == m_sp;
   }
   bool operator!=(const BCMarker& b) const { return !operator==(b); }
@@ -90,8 +92,8 @@ struct BCMarker {
   SBInvOffset bcSPOff()   const { assertx(valid()); return m_bcSPOff;       }
   bool        stublogue() const { assertx(valid()); return m_stublogue;     }
   SSATmp*     fp()        const { assertx(valid()); return m_fp;            }
+  SSATmp*     fixupFP()   const { assertx(valid()); return m_fixupFP;       }
   SSATmp*     sp()        const { assertx(valid()); return m_sp;            }
-  SrcKey      fixupSk()   const { assertx(valid()); return m_fixupSk;       }
 
   const TransIDSet& profTransIDs() const {
     assertx(valid());
@@ -102,29 +104,33 @@ struct BCMarker {
   // ensure that the sp is tracked properly for a resumed function.
   ResumeMode resumeMode() const {
     assertx(valid());
-    return m_fixupSk.resumeMode();
-  }
-
-  const Func* fixupFunc() const {
-    assertx(valid());
-    return m_fixupSk.func();
+    return fixupSk().resumeMode();
   }
 
   Offset fixupBcOff() const {
     assertx(valid());
-    return m_fixupSk.offset();
+    return fixupSk().offset();
   }
+
+  // bcSPOff() relative to the fixupFP().
+  SBInvOffset fixupBcSPOff() const {
+    assertx(valid());
+    return fixupSBOff() + bcSPOff().offset;
+  }
+
+  // Offset of fp()'s stack base from the fixupFP()'s stack base.
+  SBInvOffset fixupSBOff() const;
+
+  // Normally, the fixup SrcKey is the same as the SrcKey for the marker,
+  // however, when inlining has dropped an inner frame the fixup SrcKey will
+  // be inside the parent frame (corresponding to the BeginInlining of the first
+  // unpublished frame) so that its offset is relative to the live ActRec.
+  SrcKey fixupSk() const;
 
   // Return a copy of this marker with an updated bcSPOff, fp, or fixupSK.
   BCMarker adjustSPOff(SBInvOffset bcSPOff) const {
-    return BCMarker { m_sk, bcSPOff, m_stublogue, m_profTransIDs, m_fp, m_sp };
-  }
-  BCMarker adjustFP(SSATmp* fp) const {
-    return BCMarker { m_sk, m_bcSPOff, m_stublogue, m_profTransIDs, fp, m_sp };
-  }
-  BCMarker adjustFixupSK(SrcKey sk) const {
     auto ret = *this;
-    ret.m_fixupSk = sk;
+    ret.m_bcSPOff = bcSPOff;
     return ret;
   }
 
@@ -135,8 +141,8 @@ struct BCMarker {
     TransIDSet emptyTransIDSet;
     m_profTransIDs.swap(emptyTransIDSet);
     m_fp = nullptr;
+    m_fixupFP = nullptr;
     m_sp = nullptr;
-    m_fixupSk = SrcKey();
   }
 
 private:
@@ -145,13 +151,8 @@ private:
   bool        m_stublogue;
   TransIDSet  m_profTransIDs;
   SSATmp*     m_fp{nullptr};
+  SSATmp*     m_fixupFP{nullptr};
   SSATmp*     m_sp{nullptr};
-
-  // Normally the fixup SrcKey is the same as the SrcKey for the marker,
-  // however, when inlining has dropped an inner frame the fixup SrcKey will
-  // be inside the parent frame so that its offset is relative to the live
-  // ActRec
-  SrcKey      m_fixupSk;
 };
 
 //////////////////////////////////////////////////////////////////////

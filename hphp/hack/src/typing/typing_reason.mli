@@ -103,7 +103,6 @@ type _ t_ =
       (** splat pos, fun def pos, number of args before splat *)
   | Rinout_param : Pos_or_decl.t -> 'phase t_
   | Rinstantiate : 'phase t_ * string * 'phase t_ -> 'phase t_
-  | Rarray_filter : Pos.t * locl_phase t_ -> locl_phase t_
   | Rtypeconst :
       'phase t_ * (Pos_or_decl.t * string) * string * 'phase t_
       -> 'phase t_

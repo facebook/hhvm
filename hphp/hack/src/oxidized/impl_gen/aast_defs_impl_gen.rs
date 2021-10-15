@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<215f713730d1139c4d1363a2ac23ac51>>
+// @generated SignedSource<<07243a70fe7bd489c5a9fa65450a8caa>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -199,7 +199,7 @@ impl Hint_ {
     pub fn mk_htuple(p0: Vec<Hint>) -> Self {
         Hint_::Htuple(p0)
     }
-    pub fn mk_happly(p0: Sid, p1: Vec<Hint>) -> Self {
+    pub fn mk_happly(p0: ClassName, p1: Vec<Hint>) -> Self {
         Hint_::Happly(p0, p1)
     }
     pub fn mk_hshape(p0: NastShapeInfo) -> Self {
@@ -246,6 +246,9 @@ impl Hint_ {
     }
     pub fn mk_hdynamic() -> Self {
         Hint_::Hdynamic
+    }
+    pub fn mk_hsupportdynamic() -> Self {
+        Hint_::Hsupportdynamic
     }
     pub fn mk_hnothing() -> Self {
         Hint_::Hnothing
@@ -382,6 +385,12 @@ impl Hint_ {
             _ => false,
         }
     }
+    pub fn is_hsupportdynamic(&self) -> bool {
+        match self {
+            Hint_::Hsupportdynamic => true,
+            _ => false,
+        }
+    }
     pub fn is_hnothing(&self) -> bool {
         match self {
             Hint_::Hnothing => true,
@@ -436,7 +445,7 @@ impl Hint_ {
             _ => None,
         }
     }
-    pub fn as_happly(&self) -> Option<(&Sid, &Vec<Hint>)> {
+    pub fn as_happly(&self) -> Option<(&ClassName, &Vec<Hint>)> {
         match self {
             Hint_::Happly(p0, p1) => Some((p0, p1)),
             _ => None,
@@ -544,7 +553,7 @@ impl Hint_ {
             _ => None,
         }
     }
-    pub fn as_happly_mut(&mut self) -> Option<(&mut Sid, &mut Vec<Hint>)> {
+    pub fn as_happly_mut(&mut self) -> Option<(&mut ClassName, &mut Vec<Hint>)> {
         match self {
             Hint_::Happly(p0, p1) => Some((p0, p1)),
             _ => None,
@@ -652,7 +661,7 @@ impl Hint_ {
             _ => None,
         }
     }
-    pub fn as_happly_into(self) -> Option<(Sid, Vec<Hint>)> {
+    pub fn as_happly_into(self) -> Option<(ClassName, Vec<Hint>)> {
         match self {
             Hint_::Happly(p0, p1) => Some((p0, p1)),
             _ => None,

@@ -4,13 +4,13 @@ Invalid return type (Typing[4110])
   Expected `int`
   File "test_foreach2.php", line 12, characters 24-29:
   But got `string`
-  File "collections/Map.hhi", line 55, characters 64-65:
+  File "collections/Map.hhi", line 55, characters 108-109:
     via this generic `Tv`
   File "collections/interfaces.hhi", line 1064, characters 63-64:
     via this generic `Tv`
   File "collections/interfaces.hhi", line 810, characters 68-69:
     via this generic `Tv`
-  File "interfaces.hhi", line 111, characters 99-100:
+  File "interfaces.hhi", line 110, characters 99-100:
     via this generic `Tv`
   File "rx/interfaces.hhi", line 35, characters 63-64:
     via this generic `Tv`

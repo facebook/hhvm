@@ -694,15 +694,9 @@ flush() when calculating its return value.
     ReadTimeout = 1000         # in ms
     WaitTimeout = -1           # in ms, -1 means "don't set"
     SlowQueryThreshold = 1000  # in ms, log slow queries as errors
-    KillOnTimeout = false
     Socket =                   # Default location to look for mysql.sock
     TypedResults = true
   }
-
-- KillOnTimeout
-
-When a query takes long time to execute on server, client has a chance to
-kill it to avoid extra server cost by turning on KillOnTimeout.
 
 - TypedResults
 

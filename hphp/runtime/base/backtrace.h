@@ -35,6 +35,7 @@ namespace HPHP {
 
 struct ActRec;
 struct Array;
+struct BTFrame;
 struct Class;
 struct Func;
 struct Resource;
@@ -68,7 +69,7 @@ struct CompactFrame final {
 
 struct CompactTraceData {
   Array extract() const;
-  void insert(const ActRec* fp, int32_t prevPc);
+  void insert(const BTFrame& frm);
   const auto& frames() const { return m_frames; }
   auto size() const { return m_frames.size(); }
 
@@ -89,8 +90,8 @@ struct CompactTrace : SweepableResourceData {
     return m_backtrace.get();
   }
 
-  void insert(const ActRec* fp, int32_t prevPc) {
-    get()->insert(fp, prevPc);
+  void insert(const BTFrame& frm) {
+    get()->insert(frm);
   }
 
   DECLARE_RESOURCE_ALLOCATION(CompactTrace)
@@ -282,12 +283,12 @@ private:
  *            some native function                         |
  *                                                         |
  *    IStack corresponding to the TCA of the native call:  | (relative to
- *             ________________                            |  inl2->base())
- *            |                |                           |
- *            |  frame: inl2   |                           |
- *            |  nframes: 2    |                           |
- *            |  callOff ------+---------------------------+
- *            |________________|
+ *             ____________________                            |  inl2->base())
+ *            |                    |                           |
+ *            |  frame: inl2       |                           |
+ *            |  pubFrame: caller  |                           |
+ *            |  callOff ----------+---------------------------+
+ *            |____________________|
  *
  *
  * In the presence of inline frame elision, there are no ActRecs corresponding
@@ -300,22 +301,24 @@ private:
  */
 
 using IFrameID = int32_t;
-constexpr IFrameID kInvalidIFrameID = std::numeric_limits<IFrameID>::max();
+
+// Represents the frame defined by DefFP or DefFuncEntryFP.
+constexpr IFrameID kRootIFrameID = std::numeric_limits<IFrameID>::max();
 
 struct IFrame {
-  const Func* func; // callee (m_func)
-  int32_t callOff;  // caller offset (callOffset())
-  IFrameID parent;  // parent frame (m_sfp)
+  const Func* func;       // callee (m_func)
+  Offset callOff;         // caller offset (callOffset())
+  int32_t sbToRootSbOff;  // offset between stack bases of root and this frame
+  IFrameID parent;        // parent frame (m_sfp)
 };
 
 struct IStack {
-  IFrameID frame; // leaf frame in this stack
-  uint32_t nframes;
-  uint32_t callOff;
+  IFrameID frame;     // leaf frame in this stack
+  IFrameID pubFrame;  // the last published frame to which vmfp() points to
+  Offset callOff;
 
   template<class SerDe> void serde(SerDe& sd) {
     sd(frame)
-      (nframes)
       (callOff)
       ;
   }
@@ -327,10 +330,79 @@ struct IStack {
  * Everything we need to represent a frame in the backtrace.
  */
 struct BTFrame {
-  ActRec* fp{nullptr};
-  Offset pc{kInvalidOffset};
+  // No frame. End of backtrace.
+  static BTFrame none() {
+    return BTFrame{};
+  }
 
-  operator bool() const { return fp != nullptr; }
+  // Regular frame pointed to by `fp`. This includes resumables.
+  // FIXME: fp may be nullptr, in which case this is an equivalent of none()
+  static BTFrame regular(ActRec* fp, Offset bcOff) {
+    return BTFrame{fp, bcOff, kInvalidAfwhTailFrameIdx};
+  }
+
+  // Inlined frame that does not have a materialized ActRec. IFrame backed by
+  // `frameID` contains the metadata necessary to reconstruct the frame.
+  // The nearest published frame `fp` is represented by `pubFrameId`.
+  static BTFrame iframe(ActRec* fp, Offset bcOff,
+                        IFrameID frameId, IFrameID pubFrameId) {
+    assertx(fp != nullptr);
+    assertx(frameId != kRootIFrameID && frameId != pubFrameId);
+    return BTFrame{fp, bcOff, frameId, pubFrameId};
+  }
+
+  static BTFrame afwhTailFrame(ActRec* fp, Offset bcOff,
+                               int8_t afwhTailFrameIdx) {
+    assertx(fp != nullptr);
+    assertx(afwhTailFrameIdx >= 0);
+    return BTFrame{fp, bcOff, afwhTailFrameIdx};
+  }
+
+  BTFrame withFP(ActRec* fp) const {
+    return BTFrame{fp, m_bcOff, m_frameId, m_pubFrameId};
+  }
+
+  operator bool() const { return m_fp != nullptr; }
+  Offset bcOff() const { return m_bcOff; }
+  const Func* func() const;
+  bool isInlined() const;
+  bool isRegularResumed() const;
+  bool localsAvailable() const;
+  TypedValue* local(int n) const;
+  ObjectData* getThis() const;
+
+  // Internal helpers for getPrevActRec(). Do not use for accessing frame info,
+  // instead use the helpers above.
+  ActRec* fpInternal() const { return m_fp; }
+  IFrameID frameIdInternal() const { return m_frameId; }
+  IFrameID pubFrameIdInternal() const {
+    assertx(m_frameId != kRootIFrameID);
+    return m_pubFrameId;
+  }
+  int8_t afwhTailFrameIdxInternal() const {
+    assertx(m_frameId == kRootIFrameID);
+    return m_afwhTailFrameIdx;
+  }
+
+  static constexpr int8_t kInvalidAfwhTailFrameIdx = -1;
+
+ private:
+  BTFrame() = default;
+  BTFrame(ActRec* fp, Offset bcOff, IFrameID frameId, IFrameID pubFrameId)
+    : m_fp(fp), m_bcOff(bcOff), m_frameId(frameId), m_pubFrameId(pubFrameId) {}
+  BTFrame(ActRec* fp, Offset bcOff, int8_t afwhTailFrameIdx)
+    : m_fp(fp), m_bcOff(bcOff), m_frameId(kRootIFrameID)
+    , m_afwhTailFrameIdx(afwhTailFrameIdx) {}
+
+  ActRec* m_fp{nullptr};
+  Offset m_bcOff{kInvalidOffset};
+  IFrameID m_frameId{kRootIFrameID};
+  union {
+    // Used if m_frameId != kRootIFrameID
+    IFrameID m_pubFrameId;
+    // Used if m_frameId == kRootIFrameID, this is afwh tail frame if >= 0
+    int8_t m_afwhTailFrameIdx;
+  };
 };
 
 Array createBacktrace(const BacktraceArgs& backtraceArgs);
@@ -372,7 +444,7 @@ void walkStackFrom(
 namespace backtrace_detail {
 
 template<typename F>
-using from_ret_t = std::result_of_t<F(const ActRec*, Offset)>;
+using from_ret_t = std::result_of_t<F(const BTFrame&)>;
 
 }
 
@@ -399,16 +471,6 @@ backtrace_detail::from_ret_t<F> fromCaller(
 );
 
 /*
- * Like fromLeaf(), but with the first frame pointer and PC in the dependency
- * chain of `wh` instead of the current Hack function.
- */
-template<typename F>
-backtrace_detail::from_ret_t<F> fromLeafWH(
-  c_WaitableWaitHandle* wh, F f,
-  backtrace_detail::from_ret_t<F> def = backtrace_detail::from_ret_t<F>{}
-);
-
-/*
  * Like the above functions, but for the first function whose frame satisfies
  * `pred(fp)`.
  */
@@ -420,11 +482,6 @@ backtrace_detail::from_ret_t<F> fromLeaf(
 template<typename F, typename Pred>
 backtrace_detail::from_ret_t<F> fromCaller(
   F f, Pred pred,
-  backtrace_detail::from_ret_t<F> def = backtrace_detail::from_ret_t<F>{}
-);
-template<typename F, typename Pred>
-backtrace_detail::from_ret_t<F> fromLeafWH(
-  c_WaitableWaitHandle* wh, F f, Pred pred,
   backtrace_detail::from_ret_t<F> def = backtrace_detail::from_ret_t<F>{}
 );
 

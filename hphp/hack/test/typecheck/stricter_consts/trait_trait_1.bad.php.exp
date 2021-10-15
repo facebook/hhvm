@@ -1,0 +1,10 @@
+File "trait_trait_1.bad.php", line 14, characters 7-7:
+Class `C` does not correctly implement all required members  (Typing[4340])
+  File "trait_trait_1.bad.php", line 15, characters 7-8:
+  Some members are incompatible with those declared in type `T1`
+  File "trait_trait_1.bad.php", line 11, characters 13-13:
+  Non-abstract constants defined in an interface or trait cannot conflict with other inherited constants.
+  File "trait_trait_1.bad.php", line 7, characters 13-13:
+  `X` inherited from `T1`
+  File "trait_trait_1.bad.php", line 11, characters 13-13:
+  conflicts with constant `X` inherited from `T2`.

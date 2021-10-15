@@ -162,13 +162,12 @@ void fixupVmfpUses(Vunit& unit) {
         fp = p.s;
         break;
       }
-      case Vinstr::contenter:
-      case Vinstr::popvmfp: {
+      case Vinstr::contenter: {
         auto const it = regchain.find(fp);
         always_assert(it != regchain.end());
         fp = it->second.first;
         regchain.erase(it);
-        if (inst.op != Vinstr::contenter) break;
+        // fallthru
       }
       default:
         FpVisit visit{unit, curFp, regchain};

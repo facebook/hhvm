@@ -17,7 +17,7 @@ pub trait VisitorTrait {
     fn use_node() -> TokenStream;
     fn node_trait_name() -> syn::Ident;
 
-    fn gen(ctx: &Context) -> Result<TokenStream> {
+    fn gen(ctx: &Context<'_>) -> Result<TokenStream> {
         let use_node = Self::use_node();
         let trait_name = Self::trait_name();
         let node_dispatcher_function = Self::gen_node_dispatcher_function(ctx)?;
@@ -49,7 +49,7 @@ pub trait VisitorTrait {
         })
     }
 
-    fn gen_visit_ty_params(ctx: &Context) -> Result<Vec<TokenStream>> {
+    fn gen_visit_ty_params(ctx: &Context<'_>) -> Result<Vec<TokenStream>> {
         let lifetime = ctx.node_lifetime_ident();
         let lifetime = make_lifetime(&lifetime);
         let ref_kind = Self::node_ref_kind(&lifetime);
@@ -68,7 +68,7 @@ pub trait VisitorTrait {
             .collect())
     }
 
-    fn gen_visit_functions(ctx: &Context) -> Result<Vec<TokenStream>> {
+    fn gen_visit_functions(ctx: &Context<'_>) -> Result<Vec<TokenStream>> {
         let lifetime = ctx.node_lifetime_ident_with_quote();
         let ref_kind = Self::node_ref_kind(&lifetime);
         let context = ctx.context_ident();
@@ -93,7 +93,7 @@ pub trait VisitorTrait {
         Ok(visit_fn)
     }
 
-    fn gen_node_dispatcher_function(ctx: &Context) -> Result<TokenStream> {
+    fn gen_node_dispatcher_function(ctx: &Context<'_>) -> Result<TokenStream> {
         let visitor_trait_name = Self::trait_name();
         let context = ctx.context_ident();
         let error = ctx.error_ident();

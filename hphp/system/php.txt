@@ -99,6 +99,7 @@ hphp/system/php/lang/ErrorException.php
 hphp/system/php/lang/fun.ns.php
 hphp/system/php/lang/invariant.ns.php
 hphp/system/php/lang/null.ns.php
+hphp/system/php/lang/readonly.ns.php
 hphp/system/php/misc/fb_autoload_map.php
 hphp/system/php/misc/idx.php
 hphp/system/php/pdo/PDOException.php

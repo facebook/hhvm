@@ -1,2 +1,2 @@
 File "elvis.php", line 7, characters 13-27:
-Unsupport expression tree syntax: Elvis operator (Parsing[1002])
+Unsupported expression tree syntax: Elvis operator (Parsing[1002])

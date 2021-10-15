@@ -42,7 +42,7 @@ type DeriveFilters = shape(
  * throw InvalidOperationException if called.
  */
 <<__Native>>
-function enabled(): bool;
+function enabled()[]: bool;
 
 /**
  * Return the DB path corresponding to the given directory of Hack code.
@@ -60,7 +60,7 @@ function enabled(): bool;
  * user.
  */
 <<__Native>>
-function db_path(string $root): ?string;
+function db_path(string $root)[]: ?string;
 
 /**
  * Return the only path defining a given symbol.
@@ -71,13 +71,13 @@ function db_path(string $root): ?string;
  * Throw InvalidOperationException if Facts is not enabled.
  */
 <<__Native>>
-function type_to_path(string $type_name): ?string;
+function type_to_path(string $type_name)[]: ?string;
 <<__Native>>
-function function_to_path(string $function_name): ?string;
+function function_to_path(string $function_name)[]: ?string;
 <<__Native>>
-function constant_to_path(string $constant_name): ?string;
+function constant_to_path(string $constant_name)[]: ?string;
 <<__Native>>
-function type_alias_to_path(string $type_alias_name): ?string;
+function type_alias_to_path(string $type_alias_name)[]: ?string;
 
 /**
  * Return all the symbols defined in the given path.
@@ -85,13 +85,13 @@ function type_alias_to_path(string $type_alias_name): ?string;
  * Throw InvalidOperationException if Facts is not enabled.
  */
 <<__Native>>
-function path_to_types(string $path): vec<string>;
+function path_to_types(string $path)[]: vec<string>;
 <<__Native>>
-function path_to_functions(string $path): vec<string>;
+function path_to_functions(string $path)[]: vec<string>;
 <<__Native>>
-function path_to_constants(string $path): vec<string>;
+function path_to_constants(string $path)[]: vec<string>;
 <<__Native>>
-function path_to_type_aliases(string $path): vec<string>;
+function path_to_type_aliases(string $path)[]: vec<string>;
 
 /**
  * Resolve a string into a classname that's properly capitalized and
@@ -103,7 +103,7 @@ function path_to_type_aliases(string $path): vec<string>;
  * Throw InvalidOperationException if Facts is not enabled.
  */
 <<__Native>>
-function type_name(string $type_name): ?string;
+function type_name(string $type_name)[]: ?string;
 
 /**
  * Return a string enum representing whether the given type is, for example, a
@@ -115,7 +115,7 @@ function type_name(string $type_name): ?string;
 <<__Native>>
 function kind(
   /* classname<nonnull> */ string $type,
-): /* ?TypeKind */ mixed;
+)[]: /* ?TypeKind */ mixed;
 
 /**
  * True iff the given type cannot be constructed.
@@ -123,7 +123,7 @@ function kind(
 <<__Native>>
 function is_abstract(
   /* classname<nonnull> */ string $type,
-): bool;
+)[]: bool;
 
 /**
  * True iff the given type cannot be inherited.
@@ -131,7 +131,7 @@ function is_abstract(
 <<__Native>>
 function is_final(
   /* classname<nonnull> */ string $type,
-): bool;
+)[]: bool;
 
 /**
  * Get all types which extend, implement, or use the given base type.
@@ -142,7 +142,7 @@ function is_final(
 function subtypes(
   /* classname<T> */ string $base_type,
   /* DeriveFilters */ ?darray<string, dynamic> $filters = null,
-): vec<string>;
+)[]: vec<string>;
 
 /**
  * Return all types which transitively extend, implement, or use the given
@@ -164,7 +164,7 @@ function subtypes(
 function transitive_subtypes(
   /* classname<T> */ string $base_type,
   /* ?DeriveFilters */ ?darray<string, dynamic> $filters = null,
-): vec<(string, string, TypeKind)> /* vec<(classname<T>, string, TypeKind)> */;
+)[]: vec<(string, string, TypeKind)> /* vec<(classname<T>, string, TypeKind)> */;
 
 /**
  * Get all types which the given type extends, implements, or uses.
@@ -175,7 +175,7 @@ function transitive_subtypes(
 function supertypes(
   /* classname<nonnull> */ string $derived_type,
   /* DeriveFilters */ ?darray<string, dynamic> $filters = null,
-): vec<string>;
+)[]: vec<string>;
 
 /**
  * Get all types matching the given filters.
@@ -185,7 +185,7 @@ function supertypes(
 <<__Native>>
 function types_with_attribute(
   /* classname<\HH\ClassLikeAttribute> */ string $attribute,
-): vec<string>; /* vec<classname<nonnull>> */
+)[]: vec<string>; /* vec<classname<nonnull>> */
 
 /**
  * Get all type aliases matching the given filters.
@@ -195,7 +195,7 @@ function types_with_attribute(
 <<__Native>>
 function type_aliases_with_attribute(
   /* classname<\HH\TypeAliasAttribute> */ string $attribute,
-): vec<string>;
+)[]: vec<string>;
 
 /**
  * Get all methods matching the given filters.
@@ -205,7 +205,7 @@ function type_aliases_with_attribute(
 <<__Native>>
 function methods_with_attribute(
   /* classname<\HH\MethodAttribute> */ string $attribute,
-): vec<string>; /* vec<(classname<nonnull>, string)> */
+)[]: vec<string>; /* vec<(classname<nonnull>, string)> */
 
 /**
  * Get all files matching the given filters.
@@ -215,7 +215,7 @@ function methods_with_attribute(
 <<__Native>>
 function files_with_attribute(
   /* classname<\HH\FileAttribute> */ string $attribute,
-): vec<string>;
+)[]: vec<string>;
 
 /**
  * Get all attributes on the given type.
@@ -225,7 +225,7 @@ function files_with_attribute(
 <<__Native>>
 function type_attributes(
   /* classname<nonnull> */ string $type,
-): vec<string>; /* vec<classname<\HH\ClassLikeAttribute>> */
+)[]: vec<string>; /* vec<classname<\HH\ClassLikeAttribute>> */
 
 /**
  * Get all attributes on the given type alias.
@@ -235,7 +235,7 @@ function type_attributes(
 <<__Native>>
 function type_alias_attributes(
   string $type_alias,
-): vec<string>; /* vec<classname<\HH\TypeAliasAttribute>> */
+)[]: vec<string>; /* vec<classname<\HH\TypeAliasAttribute>> */
 
 /**
  * Get all attributes on the given method.
@@ -248,7 +248,7 @@ function type_alias_attributes(
 function method_attributes(
   /* classname<nonnull> */ string $type,
   string $method,
-): vec<string>; /* vec<classname<\HH\MethodAttribute>> */
+)[]: vec<string>; /* vec<classname<\HH\MethodAttribute>> */
 
 /**
  * Get all attributes on the given file.
@@ -258,7 +258,7 @@ function method_attributes(
 <<__Native>>
 function file_attributes(
   string $file,
-): vec<string>; /* vec<classname<\HH\FileAttribute>> */
+)[]: vec<string>; /* vec<classname<\HH\FileAttribute>> */
 
 /**
  * Get all parameters for the given attribute on the given type.
@@ -272,7 +272,7 @@ function file_attributes(
 function type_attribute_parameters(
   /* classname<nonnull> */ string $type,
   /* classname<\HH\ClassLikeAttribute> */ string $attribute,
-): vec<dynamic>;
+)[]: vec<dynamic>;
 
 /**
  * Get all parameters for the given attribute on the given type alias.
@@ -286,7 +286,7 @@ function type_attribute_parameters(
 function type_alias_attribute_parameters(
   string $type_alias,
   /* classname<\HH\TypeAliasAttribute> */ string $attribute,
-): vec<dynamic>;
+)[]: vec<dynamic>;
 
 /**
  * Get all parameters for the given attribute on the given method.
@@ -301,7 +301,7 @@ function method_attribute_parameters(
   /* classname<nonnull> */ string $type,
   string $method,
   /* classname<\HH\MethodAttribute> */ string $attribute,
-): vec<dynamic>;
+)[]: vec<dynamic>;
 
 /**
  * Get all parameters for the given attribute on the given file.
@@ -315,7 +315,7 @@ function method_attribute_parameters(
 function file_attribute_parameters(
   string $file,
   /* classname<\HH\FileAttribute> */ string $attribute,
-): vec<dynamic>;
+)[]: vec<dynamic>;
 
 /**
  * Return all symbols defined in the repo, as a dict mapping each symbol
@@ -325,13 +325,13 @@ function file_attribute_parameters(
  * symbol will be chosen in an unspecified manner.
  */
 <<__Native>>
-function all_types(): dict<classname<nonnull>, string>;
+function all_types()[]: dict<classname<nonnull>, string>;
 <<__Native>>
-function all_functions(): dict<string, string>;
+function all_functions()[]: dict<string, string>;
 <<__Native>>
-function all_constants(): dict<string, string>;
+function all_constants()[]: dict<string, string>;
 <<__Native>>
-function all_type_aliases(): dict<string, string>;
+function all_type_aliases()[]: dict<string, string>;
 
 type AttributeData = shape(
   'name' => string,

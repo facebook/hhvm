@@ -545,8 +545,7 @@ void iterSurpriseCheck(IRGS& env, const Accessor& accessor,
                        const IterArgs& data, SSATmp* pos) {
   iterIfThen(env,
     [&](Block* taken) {
-      auto const ptr = resumeMode(env) != ResumeMode::None ? sp(env) : fp(env);
-      gen(env, CheckSurpriseFlags, taken, ptr);
+      gen(env, CheckSurpriseFlags, taken, anyStackRegister(env));
     },
     [&]{
       iterStore(env, data.valId, cns(env, TInitNull));

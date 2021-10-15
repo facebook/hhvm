@@ -1,5 +1,7 @@
 Verification Error (unit /:systemlib.php func HH\invariant_violation): statics are forbidden in Pure functions: CGetS
 
+Verification Error (unit /:systemlib.php func SplPriorityQueue::86pinit): InitProp cannot appear in Pure function
+
 Verification Error (unit %s/rx/body/warn.php func main): Print cannot appear in Rx function
 
 WARN

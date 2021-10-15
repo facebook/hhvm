@@ -2,5 +2,3 @@ File "context_alias_lambda_with_cap.php--g.php", line 9, characters 7-10:
 `echo` or `print` builtin requires the capability IO, which is not provided by the context. (Typing[4401])
   File "context_alias_lambda_with_cap.php--g.php", line 8, characters 8-14:
   The local (enclosing) context provides the capability Codegen
-  File "coeffect/contexts.hhi", line 28, characters 1-23:
-  Hack provides a list of supported contexts here

@@ -177,6 +177,7 @@ let given_text_tokens =
     make_token_node "Tuple" "tuple" ();
     make_token_node "Type" "type" ~allowed_as_identifier:true ();
     make_token_node "Unset" "unset" ();
+    make_token_node "Upcast" "upcast" ~allowed_as_identifier:true ();
     make_token_node "Use" "use" ();
     make_token_node "Using" "using" ();
     make_token_node "Var" "var" ();

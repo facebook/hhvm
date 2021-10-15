@@ -38,6 +38,25 @@ StringData* m_memokey;
 // HashMap of TypedValues and their instance keys
 req::fast_map<const StringData*, std::pair<TypedValue, TypedValue>,
               string_data_hash, string_data_same> m_map;
+
+/*
+ * RAII wrapper for saving implicit context
+ */
+struct Saver {
+  Saver() {
+    if (RO::EvalEnableImplicitContext) {
+      m_context = *ImplicitContext::activeCtx;
+      *ImplicitContext::activeCtx = nullptr;
+    }
+  }
+  ~Saver() {
+    if (RO::EvalEnableImplicitContext) *ImplicitContext::activeCtx = m_context;
+  }
+
+private:
+  ImplicitContext* m_context;
+};
+
 };
 
 } // namespace HPHP

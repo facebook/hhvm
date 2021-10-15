@@ -1,0 +1,9 @@
+File "dict.good.php", line 6, characters 3-16:
+  ~C
+File "dict.good.php", line 10, characters 3-14:
+  dict<int, C>
+File "dict.good.php", line 12, characters 3-14:
+  dict<int, nothing>
+File "dict.good.php", line 14, characters 3-14:
+  dict<int, C>
+No errors

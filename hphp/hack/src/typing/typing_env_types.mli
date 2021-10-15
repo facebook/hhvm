@@ -48,6 +48,8 @@ type env = {
 and genv = {
   tcopt: TypecheckerOptions.t;
   callable_pos: Pos.t;  (** position of the function/method being checked *)
+  readonly: bool;
+  (* Whether readonly analysis is needed on this function *)
   return: Typing_env_return_info.t;
       (** For each function/method parameter, its type, position, calling convention. *)
   params: (locl_ty * Pos.t * param_mode) Local_id.Map.t;
@@ -68,7 +70,7 @@ and genv = {
   fun_is_ctor: bool;  (** Is the method a constructor? *)
   file: Relative_path.t;
       (** The file containing the top-level definition that we are checking *)
-  this_module: string option;
+  this_module: Typing_modules.t;
       (** The module of the top-level definition that we are checking *)
   this_internal: bool;
       (** Is the definition that we are checking marked <<__Internal>>? *)

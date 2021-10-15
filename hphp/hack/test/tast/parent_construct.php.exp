@@ -13,7 +13,7 @@
          m_params =
          [{ param_annotation = (num); param_type_hint = ((num), (Some ([4:31-34], (Hprim Tnum)))); 
             param_is_variadic = false; param_pos = [4:35-37]; param_name = "$x"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)] }; 
@@ -43,7 +43,7 @@
           m_params =
           [{ param_annotation = (int); param_type_hint = ((int), (Some ([7:31-34], (Hprim Tint)))); 
              param_is_variadic = false; param_pos = [7:35-37]; param_name = "$x"; 
-             param_expr = None; param_readonly = None; param_callconv = None; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
              param_user_attributes = []; param_visibility = None }
             ];
           m_ctxs = None; m_unsafe_ctxs = None;
@@ -52,7 +52,8 @@
             [([8:5-29],
               (Expr
                  ((void), [8:5-28],
-                  (Call ((((function(num $x): void)), [8:5-24], (Class_const (((B), [8:5-11], CIparent), ([8:13-24], "__construct")))), [], [((int), [8:25-27], (Lvar ([8:25-27], $x)))], None)))))
+                  (Call ((((function(num $x): void)), [8:5-24], (Class_const (((B), [8:5-11], CIparent), ([8:13-24], "__construct")))), 
+                     [], [(Pnormal, ((int), [8:25-27], (Lvar ([8:25-27], $x))))], None)))))
               ]
             };
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 

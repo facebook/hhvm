@@ -12,24 +12,17 @@ vec(6) {
       ["line"]=>
       int(13)
     }
-    dict(4) {
+    dict(3) {
       ["file"]=>
       string(%d) "%s/test/quick/verify-param-type.php"
       ["line"]=>
       int(22)
       ["function"]=>
       string(9) "test_soft"
-      ["args"]=>
-      vec(1) {
-        float(0)
-      }
     }
-    dict(2) {
+    dict(1) {
       ["function"]=>
       string(4) "main"
-      ["args"]=>
-      vec(0) {
-      }
     }
   }
 }
@@ -49,12 +42,9 @@ vec(6) {
       ["line"]=>
       int(23)
     }
-    dict(2) {
+    dict(1) {
       ["function"]=>
       string(4) "main"
-      ["args"]=>
-      vec(0) {
-      }
     }
   }
 }

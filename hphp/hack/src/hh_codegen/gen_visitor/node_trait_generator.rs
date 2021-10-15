@@ -16,7 +16,7 @@ trait NodeTrait {
     fn visitor() -> syn::Ident;
     fn use_visitor() -> TokenStream;
 
-    fn gen(ctx: &Context) -> Result<TokenStream> {
+    fn gen(ctx: &Context<'_>) -> Result<TokenStream> {
         let trait_name = Self::trait_name();
         let node_lifetime = ctx.node_lifetime_ident();
         let receiver = Self::receiver(&node_lifetime);

@@ -10,7 +10,6 @@ path = "../../emit_expression.rs"
 [dependencies]
 bstr = { version = "0.2", features = ["serde1"] }
 bumpalo = { version = "3.2.1", features = ["collections"] }
-decl_provider = { path = "../../../decl_provider" }
 ffi = { path = "../../../../utils/ffi" }
 hash = { path = "../../../../utils/hash" }
 hhbc_by_ref_ast_class_expr = { path = "../hhbc_by_ref_ast_class_expr" }
@@ -21,6 +20,7 @@ hhbc_by_ref_emit_pos = { path = "../hhbc_by_ref_emit_pos" }
 hhbc_by_ref_emit_symbol_refs = { path = "../hhbc_by_ref_emit_symbol_refs" }
 hhbc_by_ref_emit_type_constant = { path = "../hhbc_by_ref_emit_type_constant" }
 hhbc_by_ref_env = { path = "../hhbc_by_ref_env" }
+hhbc_by_ref_hhbc_assertion_utils = { path = "../hhbc_by_ref_hhbc_assertion_utils" }
 hhbc_by_ref_hhbc_ast = { path = "../hhbc_by_ref_hhbc_ast" }
 hhbc_by_ref_hhbc_id = { path = "../hhbc_by_ref_hhbc_id" }
 hhbc_by_ref_hhbc_string_utils = { path = "../hhbc_by_ref_hhbc_string_utils" }
@@ -36,7 +36,7 @@ itertools = "0.10.1"
 lazy_static = "1.0"
 naming_special_names_rust = { path = "../../../../naming" }
 oxidized = { path = "../../../../oxidized" }
-regex = "1.4.2"
+regex = "1.5.4"
 
 [profile.release]
 incremental = false

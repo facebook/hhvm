@@ -549,7 +549,7 @@ interface ConstVector<+Tv> extends KeyedContainer<int, Tv>,
  * @guide /hack/collections/interfaces
  */
 <<__Sealed(Vector::class), __SupportDynamicType>>
-interface MutableVector<Tv> extends ConstVector<Tv>,
+interface MutableVector<<<__RequireDynamic>> Tv> extends ConstVector<Tv>,
                                     Collection<Tv>,
                                     IndexAccess<int, Tv> {
   /**
@@ -1583,7 +1583,7 @@ interface ConstSet<+Tv as arraykey> extends KeyedContainer<Tv, Tv>,
  * @guide /hack/collections/interfaces
  */
 <<__Sealed(Set::class), __SupportDynamicType>>
-interface MutableSet<Tv as arraykey> extends ConstSet<Tv>,
+  interface MutableSet<<<__RequireDynamic>> Tv as arraykey> extends ConstSet<Tv>,
                                  Collection<Tv>,
                                  SetAccess<Tv> {
   /**

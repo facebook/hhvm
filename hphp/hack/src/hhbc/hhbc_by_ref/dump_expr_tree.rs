@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{expr_to_string_lossy, parse_file, Env};
+use crate::{expr_to_string_lossy, parse_file, Env, EnvFlags};
 // use crate::compile_rust as compile;
 use hhbc_by_ref_options::{LangFlags, Options};
 use itertools::Either::*;
@@ -103,6 +103,7 @@ pub fn desugar_and_print<S: AsRef<str>>(env: &Env<S>) {
     let source_text = SourceText::make(RcOc::new(filepath), &content);
 
     let limit = StackLimit::relative(13 * MI);
+    let is_systemlib = env.flags.contains(EnvFlags::IS_SYSTEMLIB);
     let opts = Options::from_configs(&env.config_jsons, &env.config_list).expect("Invalid options");
     let ns = RcOc::new(NamespaceEnv::empty(
         opts.hhvm.aliased_namespaces_cloned().collect(),
@@ -112,7 +113,7 @@ pub fn desugar_and_print<S: AsRef<str>>(env: &Env<S>) {
             .flags
             .contains(LangFlags::DISABLE_XHP_ELEMENT_MANGLING),
     ));
-    match parse_file(&opts, &limit, source_text, false, ns) {
+    match parse_file(&opts, &limit, source_text, false, ns, is_systemlib) {
         Left((_, msg, _)) => panic!("Parsing failed: {}", msg),
         Right(ast) => {
             let old_src = String::from_utf8_lossy(&content);

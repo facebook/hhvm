@@ -824,7 +824,7 @@ pub fn bytes_to_ocamlrep<'a, A: Allocator>(s: &[u8], alloc: &'a A) -> OpaqueValu
 pub fn bytes_from_ocamlrep<'a>(value: Value<'a>) -> Result<&'a [u8], FromError> {
     let block = from::expect_block(value)?;
     from::expect_block_tag(block, block::STRING_TAG)?;
-    let block_size_in_bytes = block.size() * std::mem::size_of::<Value>();
+    let block_size_in_bytes = block.size() * std::mem::size_of::<Value<'_>>();
     let slice = unsafe {
         let ptr = block.0.as_ptr().add(1) as *const u8;
         let padding = *ptr.add(block_size_in_bytes - 1);

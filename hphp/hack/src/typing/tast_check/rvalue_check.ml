@@ -66,6 +66,10 @@ let visitor =
         this#disallow_non_returning (fun () -> this#on_expr env e1);
         this#on_expr env e2
       | List el -> List.iter el ~f:(this#on_expr env)
+      | ReadonlyExpr r ->
+        (* ReadonlyExprs can be immediately surrounding a void thing,
+           but the thing inside the expression should be checked for void *)
+        this#disallow_non_returning (fun () -> super#on_expr env r)
       | ExpressionTree
           {
             et_hint;
@@ -73,6 +77,7 @@ let visitor =
             et_function_pointers;
             et_virtualized_expr;
             et_runtime_expr;
+            et_dollardollar_pos = _;
           } ->
         this#on_hint env et_hint;
         this#on_block env et_splices;

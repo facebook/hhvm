@@ -11,7 +11,6 @@ doctest = false
 
 [dependencies]
 aast_parser = { path = "../aast_parser" }
-libc = "0.2.98"
 ocamlrep = { path = "../../../ocamlrep" }
 ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
 parser_core_types = { path = "../core_types" }

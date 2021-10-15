@@ -20,6 +20,9 @@ module SN = Naming_special_names
 let shallow_decl_enabled (ctx : Provider_context.t) : bool =
   TypecheckerOptions.shallow_class_decl (Provider_context.get_tcopt ctx)
 
+let use_direct_decl_parser (ctx : Provider_context.t) : bool =
+  TypecheckerOptions.use_direct_decl_parser (Provider_context.get_tcopt ctx)
+
 module SSetWTop = struct
   type t =
     | Top
@@ -107,6 +110,22 @@ module S = SSetWTop
  *)
 exception InitReturn of S.t
 
+let filter_props_by_type env cls props =
+  lookup_props env cls props
+  |> SMap.filter (fun _ ty -> not (type_does_not_require_init env ty))
+  |> SMap.keys
+  |> SSet.of_list
+
+let parent_props_set_during_cstr env (c : Shallow_decl_defs.shallow_class) :
+    SSet.t =
+  match DeferredMembers.parents env c with
+  | pc :: _ ->
+    (* All properties that don't have an explicit initialiser. *)
+    let (_, parent_props) = DeferredMembers.get_deferred_init_props env pc in
+    (* Filter properties whose type means they don't need initialising. *)
+    filter_props_by_type env (snd pc.Shallow_decl_defs.sc_name) parent_props
+  | [] -> SSet.empty
+
 (* Module initializing the environment
    Originally, every class member has 2 possible states,
    Vok  ==> when it is declared as optional, it is the job of the
@@ -131,6 +150,7 @@ module Env = struct
     methods: method_status ref SMap.t;
     props: Typing_defs.decl_ty option SMap.t;
     tenv: Typing_env_types.env;
+    parent_cstr_props: SSet.t;
     init_not_required_props: SSet.t;
   }
 
@@ -138,7 +158,12 @@ module Env = struct
     let ctx = Typing_env.get_ctx tenv in
     let (_, _, methods) = split_methods c.c_methods in
     let methods = List.fold_left ~f:method_ ~init:SMap.empty methods in
-    let sc = Shallow_decl.class_ ctx c in
+    let sc =
+      if use_direct_decl_parser ctx then
+        Option.value_exn (Shallow_classes_provider.get ctx (snd c.c_name))
+      else
+        Shallow_decl.class_DEPRECATED ctx c
+    in
 
     (* Error when an abstract class has private properties but lacks a constructor *)
     (let open Shallow_decl_defs in
@@ -168,18 +193,23 @@ module Env = struct
     let ( add_init_not_required_props,
           add_trait_props,
           add_parent_props,
-          add_parent ) =
+          add_parent,
+          add_parent_props_set_during_cstr ) =
       if shallow_decl_enabled ctx then
         ( DeferredMembers.init_not_required_props,
           DeferredMembers.trait_props tenv,
           DeferredMembers.parent_props tenv,
-          DeferredMembers.parent tenv )
+          DeferredMembers.parent tenv,
+          parent_props_set_during_cstr tenv )
       else
         let decl_env = tenv.Typing_env_types.decl_env in
         ( DICheck.init_not_required_props,
           DICheck.trait_props decl_env,
           DICheck.parent_props decl_env,
-          DICheck.parent decl_env )
+          DICheck.parent decl_env,
+          fun c ->
+            DICheck.parent_initialized_members decl_env c
+            |> filter_props_by_type tenv (snd c.Shallow_decl_defs.sc_name) )
     in
     let init_not_required_props = add_init_not_required_props sc SSet.empty in
     let props =
@@ -195,7 +225,8 @@ module Env = struct
       |> SMap.filter (fun _ ty_opt ->
              not (type_does_not_require_init tenv ty_opt))
     in
-    { methods; props; tenv; init_not_required_props }
+    let parent_cstr_props = add_parent_props_set_during_cstr sc in
+    { methods; props; parent_cstr_props; tenv; init_not_required_props }
 
   and method_ acc m =
     if not (Aast.equal_visibility m.m_visibility Private) then
@@ -305,6 +336,9 @@ and assign_expr env acc e1 =
   | (_, _, List el) -> List.fold_left ~f:(assign_expr env) ~init:acc el
   | _ -> acc
 
+and argument_list env acc el =
+  List.fold_left ~f:(fun acc_ (_, e) -> expr env acc_ e) ~init:acc el
+
 and stmt env acc st =
   let expr = expr env in
   let block = block env in
@@ -314,7 +348,7 @@ and stmt env acc st =
   | Expr (* only in top level!*)
       (_, _, Call ((_, _, Class_const ((_, _, CIparent), (_, m))), _, el, _uel))
     when String.equal m SN.Members.__construct ->
-    let acc = List.fold_left ~f:expr ~init:acc el in
+    let acc = argument_list env acc el in
     assign env acc DeferredMembers.parent_init_prop
   | Expr e ->
     if Typing_func_terminality.expression_exits env.tenv e then
@@ -432,6 +466,17 @@ and expr_ env acc p e =
     if SMap.mem vx env.props && not (S.mem vx acc) then (
       Errors.read_before_write v;
       acc
+    ) else if
+        SSet.mem vx env.parent_cstr_props
+        && (not (SSet.mem vx env.init_not_required_props))
+        && (not (S.mem vx acc))
+        && not (S.mem parent_init_prop acc)
+      then (
+      (* We're reading a property that's initialised in the parent
+         constructor, but we haven't called the parent constructor
+         yet. *)
+      Errors.read_before_write v;
+      acc
     ) else
       acc
   | Clone e -> expr acc e
@@ -464,7 +509,7 @@ and expr_ env acc p e =
         (* First time we encounter this private method. Let's check its
          * arguments first, and then recurse into the method body.
          *)
-        let acc = List.fold_left ~f:expr ~init:acc el in
+        let acc = argument_list env acc el in
         let acc =
           Option.value_map ~f:(expr acc) ~default:acc unpacked_element
         in
@@ -475,11 +520,11 @@ and expr_ env acc p e =
       match e with
       | (_, _, Id (_, fun_name)) when is_whitelisted fun_name ->
         List.filter el ~f:(function
-            | (_, _, This) -> false
+            | (_, (_, _, This)) -> false
             | _ -> true)
       | _ -> el
     in
-    let acc = List.fold_left ~f:expr ~init:acc el in
+    let acc = argument_list env acc el in
     let acc = Option.value_map ~f:(expr acc) ~default:acc unpacked_element in
     expr acc e
   | True
@@ -529,6 +574,7 @@ and expr_ env acc p e =
     expr acc e3
   | Is (e, _) -> expr acc e
   | As (e, _, _) -> expr acc e
+  | Upcast (e, _) -> expr acc e
   | Efun (f, _)
   | Lfun (f, _) ->
     let acc = fun_paraml acc f.f_params in
@@ -538,7 +584,6 @@ and expr_ env acc p e =
     let l = List.map l ~f:get_xhp_attr_expr in
     let acc = exprl acc l in
     exprl acc el
-  | Callconv (_, e) -> expr acc e
   | Shape fdm ->
     List.fold_left
       ~f:

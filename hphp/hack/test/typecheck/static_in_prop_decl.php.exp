@@ -6,5 +6,3 @@ File "static_in_prop_decl.php", line 6, characters 34-35:
 Reading static properties requires the capability ReadGlobals, which is not provided by the context. (Typing[4401])
   File "static_in_prop_decl.php", line 6, characters 26-35:
   The local (enclosing) context provides the capability set {}
-  File "coeffect/contexts.hhi", line 28, characters 1-23:
-  Hack provides a list of supported contexts here

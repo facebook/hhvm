@@ -26,7 +26,7 @@ let check_implements
       env ->
       Nast.class_id_ ->
       _ list ->
-      Nast.expr list ->
+      (Ast_defs.param_kind * Nast.expr) list ->
       _ option ->
       env * _ * _ * _ * _ * _ * _ * _)
     (attr_interface : attribute_interface_name)
@@ -116,7 +116,8 @@ let check_implements
             env
             (Aast.CI (Positioned.unsafe_to_raw_positioned attr_cid))
             []
-            params (* list of attr parameter literals *)
+            (List.map ~f:(fun e -> (Ast_defs.Pnormal, e)) params)
+            (* list of attr parameter literals *)
             None
           (* no variadic arguments *)
         in

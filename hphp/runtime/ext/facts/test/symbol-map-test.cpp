@@ -484,7 +484,7 @@ TEST_P(SymbolMapTest, DBFill) {
 
   // file -> symbol
   EXPECT_THAT(
-      m1.getFileTypes(path), UnorderedElementsAre("BaseClass", "SomeClass"));
+      m2.getFileTypes(path), UnorderedElementsAre("BaseClass", "SomeClass"));
   EXPECT_EQ(m2.getFileFunctions(path).at(0).slice(), "some_fn");
   EXPECT_EQ(m2.getFileConstants(path).at(0).slice(), "SOME_CONSTANT");
   EXPECT_EQ(m2.getFileTypeAliases(path).at(0).slice(), "SomeTypeAlias");
@@ -1538,27 +1538,24 @@ TEST_P(SymbolMapTest, GetSymbolsInFileFromDB) {
 
   folly::fs::path path = {"some/path1.php"};
 
+  auto testMap = [&path](auto& map) {
+    // getTypeFile() and getFileTypes() both fill in-memory maps from the DB.
+    // Make sure we never think we know all the types in a given path when we
+    // really only know some of them.
+    EXPECT_EQ(map.getTypeFile("SomeClass"), path.native());
+    EXPECT_THAT(
+        map.getFileTypes(path.native()),
+        UnorderedElementsAre("SomeClass", "OtherClass"));
+    EXPECT_EQ(map.getTypeFile("OtherClass"), path.native());
+  };
+
   update(m1, "", "1:2:3", {path}, {}, {ff});
-
-  EXPECT_EQ(m1.getTypeFile("SomeClass"), path.native());
-  EXPECT_THAT(
-      m1.getFileTypes(path.native()),
-      UnorderedElementsAre("SomeClass", "OtherClass"));
-  EXPECT_EQ(m1.getTypeFile("OtherClass"), path.native());
-
+  testMap(m1);
   waitForDB(m1, m_exec);
 
   auto& m2 = make("/var/www");
   update(m2, "1:2:3", "1:2:3", {}, {}, {});
-
-  // getTypeFile() and getFileTypes() both fill in-memory maps from the DB.
-  // Make sure we never think we know all the types in a given path when we
-  // really only know some of them.
-  EXPECT_EQ(m2.getTypeFile("SomeClass"), path.native());
-  EXPECT_THAT(
-      m2.getFileTypes(path.native()),
-      UnorderedElementsAre("SomeClass", "OtherClass"));
-  EXPECT_EQ(m2.getTypeFile("OtherClass"), path.native());
+  testMap(m2);
 }
 
 TEST_P(SymbolMapTest, ErasePathStoredInDB) {
@@ -1604,54 +1601,38 @@ TEST_P(SymbolMapTest, GetTypesAndTypeAliasesWithAttribute) {
 
   folly::fs::path p = {"some/path.php"};
 
-  update(m1, "", "1:2:3", {p}, {}, {ff});
-  EXPECT_EQ(m1.getTypeFile("SomeClass"), p.native());
-  EXPECT_THAT(
-      m1.getTypesWithAttribute("Foo"), UnorderedElementsAre("SomeClass"));
-  EXPECT_THAT(
-      m1.getTypeAliasesWithAttribute("Foo"),
-      UnorderedElementsAre("SomeTypeAlias"));
-  EXPECT_THAT(
-      m1.getTypesWithAttribute("Bar"),
-      UnorderedElementsAre("SomeClass", "OtherClass"));
-  EXPECT_THAT(
-      m1.getAttributesOfType("SomeClass"),
-      UnorderedElementsAre("Bar", "Baz", "Foo"));
-  EXPECT_THAT(
-      m1.getTypeAliasAttributeArgs("SomeTypeAlias", "Foo"),
-      ElementsAre(42, "a"));
-  EXPECT_THAT(
-      m1.getTypeAttributeArgs("SomeClass", "Foo"), ElementsAre("apple", 38));
-  EXPECT_THAT(
-      m1.getTypeAttributeArgs("SomeClass", "Bar"), ElementsAre(nullptr));
-  EXPECT_THAT(m1.getTypeAttributeArgs("SomeClass", "Baz"), IsEmpty());
-  EXPECT_THAT(m1.getAttributesOfTypeAlias("SomeTypeAlias"), ElementsAre("Foo"));
+  auto testMap = [&p](auto& map) {
+    EXPECT_EQ(map.getTypeFile("SomeClass"), p.native());
+    EXPECT_THAT(
+        map.getTypesWithAttribute("Foo"), UnorderedElementsAre("SomeClass"));
+    EXPECT_THAT(
+        map.getTypeAliasesWithAttribute("Foo"),
+        UnorderedElementsAre("SomeTypeAlias"));
+    EXPECT_THAT(
+        map.getTypesWithAttribute("Bar"),
+        UnorderedElementsAre("SomeClass", "OtherClass"));
+    EXPECT_THAT(
+        map.getAttributesOfType("SomeClass"),
+        UnorderedElementsAre("Bar", "Baz", "Foo"));
+    EXPECT_THAT(
+        map.getTypeAliasAttributeArgs("SomeTypeAlias", "Foo"),
+        ElementsAre(42, "a"));
+    EXPECT_THAT(
+        map.getTypeAttributeArgs("SomeClass", "Foo"), ElementsAre("apple", 38));
+    EXPECT_THAT(
+        map.getTypeAttributeArgs("SomeClass", "Bar"), ElementsAre(nullptr));
+    EXPECT_THAT(map.getTypeAttributeArgs("SomeClass", "Baz"), IsEmpty());
+    EXPECT_THAT(
+        map.getAttributesOfTypeAlias("SomeTypeAlias"), ElementsAre("Foo"));
+  };
 
+  update(m1, "", "1:2:3", {p}, {}, {ff});
+  testMap(m1);
   waitForDB(m1, m_exec);
 
   auto& m2 = make("/var/www", m_exec);
   update(m2, "1:2:3", "1:2:3", {}, {}, {});
-  EXPECT_THAT(
-      m2.getAttributesOfType("SomeClass"),
-      UnorderedElementsAre("Bar", "Baz", "Foo"));
-  EXPECT_EQ(m2.getTypeFile("SomeClass"), p.native());
-  EXPECT_THAT(
-      m2.getTypesWithAttribute("Foo"), UnorderedElementsAre("SomeClass"));
-  EXPECT_THAT(
-      m2.getTypeAliasesWithAttribute("Foo"),
-      UnorderedElementsAre("SomeTypeAlias"));
-  EXPECT_THAT(
-      m2.getTypeAliasAttributeArgs("SomeTypeAlias", "Foo"),
-      ElementsAre(42, "a"));
-  EXPECT_THAT(
-      m2.getTypesWithAttribute("Bar"),
-      UnorderedElementsAre("SomeClass", "OtherClass"));
-  EXPECT_THAT(
-      m1.getTypeAttributeArgs("SomeClass", "Foo"), ElementsAre("apple", 38));
-  EXPECT_THAT(
-      m1.getTypeAttributeArgs("SomeClass", "Bar"), ElementsAre(nullptr));
-  EXPECT_THAT(m1.getTypeAttributeArgs("SomeClass", "Baz"), IsEmpty());
-  EXPECT_THAT(m1.getAttributesOfType("SomeTypeAlias"), ElementsAre("Foo"));
+  testMap(m2);
 }
 
 TEST_P(SymbolMapTest, getTypesWithAttributeFiltersDuplicateDefs) {

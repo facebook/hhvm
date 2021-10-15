@@ -1,0 +1,11 @@
+<?hh
+function foobar(): void {
+  {
+    $body =
+      <fbt
+        desc=
+          "A literal which is too long to fit on a single line, so the
+          author added a line break in the middle of it.">
+      </fbt>;
+  }
+}

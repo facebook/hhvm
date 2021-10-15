@@ -1,10 +1,10 @@
 File "shapes_toarray.php", line 19, characters 4-17:
 Some type arguments violate their constraints (Typing[4323])
-  File "hackarray.hhi", line 24, characters 28-29:
+  File "hackarray.hhi", line 24, characters 49-50:
   `Tk` is a constrained type parameter
-  File "hackarray.hhi", line 24, characters 34-41:
+  File "hackarray.hhi", line 24, characters 55-62:
   This type constraint is violated
-  File "hackarray.hhi", line 24, characters 34-41:
+  File "hackarray.hhi", line 24, characters 55-62:
   Expected `arraykey`
   File "shapes_toarray.php", line 19, characters 11-12:
   But got `Tk`

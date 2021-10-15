@@ -122,6 +122,7 @@ type t =
   | IsExpression
   | AsExpression
   | NullableAsExpression
+  | UpcastExpression
   | ConditionalExpression
   | EvalExpression
   | IssetExpression
@@ -300,6 +301,7 @@ let to_string kind =
   | IsExpression -> "is_expression"
   | AsExpression -> "as_expression"
   | NullableAsExpression -> "nullable_as_expression"
+  | UpcastExpression -> "upcast_expression"
   | ConditionalExpression -> "conditional_expression"
   | EvalExpression -> "eval_expression"
   | IssetExpression -> "isset_expression"

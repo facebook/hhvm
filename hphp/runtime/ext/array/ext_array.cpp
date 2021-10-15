@@ -40,6 +40,7 @@
 #include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
+#include "hphp/runtime/vm/coeffects.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/util/logger.h"
@@ -1443,6 +1444,7 @@ static int cmp_func(const Variant& v1, const Variant& v2, const void *data) {
   if (!arr_array1.size()) {                                     \
     return tvReturn(empty_dict_array());                             \
   }                                                             \
+  CoeffectsAutoGuard _;                                         \
   auto ret = arr_array1.type(array2, intersect_params);         \
   if (ret.size()) {                                             \
     for (ArrayIter iter(vararg); iter; ++iter) {                \

@@ -34,7 +34,7 @@ const SLAB_METADATA_WORDS: usize = 3;
 // This secret number marks properly initialized slabs.
 const SLAB_MAGIC_NUMBER: usize = 0x51A851A8;
 
-const WORD_SIZE: usize = mem::size_of::<OpaqueValue>();
+const WORD_SIZE: usize = mem::size_of::<OpaqueValue<'_>>();
 
 // A contiguous memory region holding a tree of OCaml values reachable from a
 // single root value.
@@ -87,7 +87,7 @@ trait SlabTrait {
 
     fn current_address(&self) -> usize;
     fn needs_rebase(&self) -> bool;
-    fn value(&self) -> Option<Value>;
+    fn value(&self) -> Option<Value<'_>>;
     unsafe fn rebase_to(&mut self, new_base: usize);
     fn check_initialized(&self) -> Result<(), SlabIntegrityError>;
     fn check_integrity(&self) -> Result<(), SlabIntegrityError>;
@@ -160,7 +160,7 @@ impl<'a> SlabTrait for Slab<'a> {
 
     /// Return the root value stored in this slab, if the slab does not need
     /// rebasing. Otherwise, return None. Panics if the slab is not initialized.
-    fn value(&self) -> Option<Value> {
+    fn value(&self) -> Option<Value<'_>> {
         if !self.is_initialized() {
             panic!("slab not initialized");
         }
@@ -294,10 +294,10 @@ unsafe fn rebase_slab_value(slab_without_metadata: &mut [OpaqueValue<'_>], diff:
     }
 }
 
-fn debug_slab(name: &'static str, slab: &Slab<'_>, f: &mut fmt::Formatter) -> fmt::Result {
+fn debug_slab(name: &'static str, slab: &Slab<'_>, f: &mut fmt::Formatter<'_>) -> fmt::Result {
     struct DebugBlock<'a>(&'a [OpaqueValue<'a>], usize);
     impl Debug for DebugBlock<'_> {
-        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
             let offset_or_address = self.1;
             if self.0[0].as_header().tag() >= NO_SCAN_TAG {
                 let value = unsafe { Value::from_bits(&self.0[1] as *const _ as usize) };
@@ -309,7 +309,7 @@ fn debug_slab(name: &'static str, slab: &Slab<'_>, f: &mut fmt::Formatter) -> fm
     }
     struct DebugPtr(usize);
     impl Debug for DebugPtr {
-        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
             write!(f, "0x{:x}", self.0)
         }
     }
@@ -642,7 +642,7 @@ impl OwnedSlab {
 }
 
 impl Debug for OwnedSlab {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         debug_slab("OwnedSlab", &self.0, f)
     }
 }
@@ -705,7 +705,7 @@ impl<'a> SlabReader<'a> {
         unsafe { std::slice::from_raw_parts(slab.as_ptr() as *const usize, slab.len()) }
     }
 
-    pub fn value(&self) -> Option<Value> {
+    pub fn value(&self) -> Option<Value<'_>> {
         Slab::from_bytes(self.0).value()
     }
 
@@ -716,7 +716,7 @@ impl<'a> SlabReader<'a> {
 }
 
 impl Debug for SlabReader<'_> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         debug_slab("SlabReader", &Slab::from_bytes(self.0), f)
     }
 }
@@ -749,7 +749,7 @@ mod test {
         to_slab(&(42, "a".to_string())).unwrap()
     }
 
-    pub fn write_tuple_42_a(slab: &mut Slab) {
+    pub fn write_tuple_42_a(slab: &mut Slab<'_>) {
         let tuple_slab = alloc_tuple_42_a();
         // Copy everything except the last word, which is an empty padding word
         // which provides space for the slab to be realigned when embedded in a

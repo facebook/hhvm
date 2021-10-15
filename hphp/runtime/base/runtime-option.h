@@ -99,7 +99,6 @@ struct RepoOptions {
   H(bool,           DisableUnsetClassConst,           false)          \
   H(bool,           DisallowFuncPtrsInConstants,      false)          \
   H(bool,           AllowUnstableFeatures,            false)          \
-  H(bool,           DisallowHashComments,             false)          \
   H(bool,           EnableXHPClassModifier,           true)           \
   H(bool,           DisableXHPElementMangling,        true)           \
   H(bool,           DisableArray,                     true)           \
@@ -493,6 +492,8 @@ struct RuntimeOption {
   static std::string AutoloadDBPerms;
   static std::string AutoloadDBGroup;
   static std::string AutoloadLogging;
+  static std::vector<std::string> AutoloadExcludedRepos;
+  static bool AutoloadLoggingAllowPropagation;
   static bool AutoloadEnforceOneDefinitionRule;
   static bool AutoloadRethrowExceptions;
 
@@ -791,6 +792,14 @@ struct RuntimeOption {
    * 2 - Throw when incrementing or decrementing non numeric types
    */                                                                   \
   F(uint32_t, WarnOnIncDecInvalidType, 0)                               \
+  /* WarnOnImplicitCoercionOfEnumValue
+   * This flag exists to control behaviour when implicit coercion is
+   * taking place on an enum value.
+   * 0 - No warning
+   * 1 - Warning
+   * 2 - Do not do implicit coercion
+   */                                                                   \
+  F(uint32_t, WarnOnImplicitCoercionOfEnumValue, 0)                     \
   F(bool, EnableImplicitContext,       false)                           \
   F(bool, MoreAccurateMemStats,        true)                            \
   F(bool, AllowScopeBinding,           false)                           \
@@ -870,6 +879,7 @@ struct RuntimeOption {
   F(bool, TraceCommandLineRequest,     true)                            \
                                                                         \
   F(bool, JitDisabledByHphpd,          false)                           \
+  F(bool, JitDisabledByVSDebug,        true)                            \
   F(uint32_t, JitWarmupStatusBytes,    ((25 << 10) + 1))                \
   F(uint32_t, JitWarmupMaxCodeGenRate, 20000)                           \
   F(uint32_t, JitWarmupRateSeconds,    64)                              \
@@ -1127,6 +1137,7 @@ struct RuntimeOption {
   F(bool, EmitAPCBespokeArrays, true)                                   \
   /* Should we use monotypes? */                                        \
   F(bool, EmitBespokeMonotypes, false)                                  \
+  F(int64_t, ObjProfMaxNesting, 5000)                                   \
   /* Choice of layout selection algorithms:                             \
    *                                                                    \
    * 0 - Default layout selection algorithm based on profiling.         \
@@ -1379,11 +1390,12 @@ struct RuntimeOption {
   /* 0 nothing, 1 warning, 2 error */                                   \
   F(uint32_t, EnableReadonlyPropertyEnforcement, 0)                     \
   /* 0 nothing, 1 warning, 2 error */                                   \
-  F(uint32_t, EnableReadonlyCallEnforcement, 0)                         \
+  F(uint32_t, EnableReadonlyCallEnforcement, 1)                         \
   /* 0 nothing, 1 notice, 2 error */                                    \
   F(uint32_t, ThrowOnIterationOverObjects, 0)                           \
   F(string, TaintConfigurationPath, std::string(""))                    \
-  F(bool, EnableReadonlyInEmitter, false)                               \
+  F(string, TaintOutputDirectory, std::string(""))                           \
+  F(bool, EnableReadonlyInEmitter, true)                                \
   F(bool, DiamondTraitMethods, false)                                   \
   /* */
 

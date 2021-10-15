@@ -11,7 +11,6 @@ doctest = false
 
 [dependencies]
 bumpalo = { version = "3.2.1", features = ["collections"] }
-libc = "0.2.98"
 mode_parser = { path = "../mode_parser" }
 ocamlrep = { path = "../../../ocamlrep" }
 ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }

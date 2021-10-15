@@ -53,7 +53,7 @@ fn trivia_lexer<'a>(
     source_text: &SourceText<'a>,
     offset: usize,
 ) -> Lexer<'a, SimpleTokenFactoryImpl<PositionedToken>> {
-    Lexer::make_at(source_text, offset, SimpleTokenFactoryImpl::new(), false)
+    Lexer::make_at(source_text, offset, SimpleTokenFactoryImpl::new())
 }
 
 pub fn scan_leading_xhp_trivia(

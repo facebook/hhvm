@@ -60,6 +60,7 @@ extern const StaticString s_86ctor;
 extern const StaticString s_86metadata;
 extern const StaticString s_86reified_prop;
 extern const StaticString s_86reifiedinit;
+extern const StaticString s_coeffects_var;
 extern const StaticString s___MockClass;
 extern const StaticString s___Reified;
 
@@ -386,7 +387,7 @@ struct Class : AtomicCountable {
    * instance checks.
    */
   struct VtableVecSlot {
-    LowPtr<LowPtr<Func>> vtable;
+    LowPtr<Func>* vtable;
     LowPtr<Class> iface;
   };
 
@@ -1767,18 +1768,18 @@ private:
   /*
    * Vector of interfaces and their vtables.
    */
-  LowPtr<VtableVecSlot> m_vtableVec{nullptr};
-
-  /*
-   * Pointer to a function that releases object instances of this class type.
-   */
-  ObjReleaseFunc m_releaseFunc;
+  VtableVecSlot* m_vtableVec{nullptr};
 
   /*
    * Instance property metadata.  Access is analogous to access for
    * m_staticProperties.
    */
   PropMap m_declProperties;
+
+  /*
+   * Pointer to a function that releases object instances of this class type.
+   */
+  ObjReleaseFunc m_releaseFunc;
 
   /*
    * Static properties are stored in RDS.  There are three phases of sprop

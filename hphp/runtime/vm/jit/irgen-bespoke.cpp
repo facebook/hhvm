@@ -127,7 +127,7 @@ SSATmp* emitGet(IRGS& env, SSATmp* arr, SSATmp* key, Block* taken) {
 }
 
 SSATmp* emitElem(IRGS& env, SSATmp* arr, SSATmp* key, bool throwOnMissing) {
-  return gen(env, BespokeElem, arr, key, cns(env, throwOnMissing), cns(env, false));
+  return gen(env, BespokeElem, arr, key, cns(env, throwOnMissing));
 }
 
 SSATmp* emitSet(IRGS& env, SSATmp* arr, SSATmp* key, SSATmp* val) {
@@ -534,7 +534,10 @@ void emitBespokeDim(IRGS& env, MOpMode mode, MemberKey mk) {
   assertx(mcodeIsElem(mk.mcode));
 
   auto const baseType = env.irb->fs().mbase().type;
-  auto const finish = [&](SSATmp* val) { stMBase(env, val); };
+  auto const finish = [&](SSATmp* val) {
+    stMBase(env, val);
+    checkElemDimForReadonly(env);
+  };
   auto const val = bespokeElemImpl(env, mode, baseType, key, finish);
   finish(val);
 }

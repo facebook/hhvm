@@ -59,7 +59,7 @@ let open_file ~predeclare env path content =
       Decl.make_env ~sh:SharedMem.Uses ctx path);
     let editor_open_files = Relative_path.Set.add env.editor_open_files path in
     File_provider.remove_batch (Relative_path.Set.singleton path);
-    File_provider.provide_file path (File_provider.Ide content);
+    File_provider.provide_file_for_ide path content;
     let (ide_needs_parsing, diag_subscribe) =
       if
         String.equal content prev_content
@@ -115,7 +115,12 @@ let close_relative_path env path =
     | _ -> assert false
   in
   File_provider.remove_batch (Relative_path.Set.singleton path);
-  let new_contents = File_provider.get_contents path in
+  let new_contents =
+    File_provider.get_contents
+      ~writeback_disk_contents_in_shmem_provider:
+        (TypecheckerOptions.enable_disk_heap env.tcopt)
+      path
+  in
   let ide_needs_parsing =
     match new_contents with
     | Some c when String.equal c contents -> env.ide_needs_parsing
@@ -167,7 +172,7 @@ let edit_file ~predeclare env path (edits : File_content.text_edit list) =
     in
     let editor_open_files = Relative_path.Set.add env.editor_open_files path in
     File_provider.remove_batch (Relative_path.Set.singleton path);
-    File_provider.provide_file path (File_provider.Ide edited_file_content);
+    File_provider.provide_file_for_ide path edited_file_content;
     let ide_needs_parsing = Relative_path.Set.add env.ide_needs_parsing path in
     let disk_needs_parsing =
       Relative_path.Set.add env.disk_needs_parsing path

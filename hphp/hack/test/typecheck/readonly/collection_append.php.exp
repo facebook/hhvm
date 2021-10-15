@@ -1,3 +1,5 @@
+File "collection_append.php", line 12, characters 10-27:
+This expression is readonly, but the collection you're modifying is mutable, which isn't allowed. (Parsing[1002])
 File "collection_append.php", line 12, characters 3-6:
 Invalid collection modification (Typing[4411])
   File "collection_append.php", line 12, characters 10-27:

@@ -48,19 +48,19 @@
          [{ param_annotation = (dict<string, dynamic>);
             param_type_hint = ((dict<string, dynamic>), (Some ([8:14-37], (Happly (([8:14-20], "\\HH\\dict"), [([8:21-27], (Hprim Tstring)); ([8:29-36], Hdynamic)]))))); 
             param_is_variadic = false; param_pos = [8:38-49]; param_name = "$attributes"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = (Some Public) };
            { param_annotation = (vec<dynamic>); param_type_hint = ((vec<dynamic>), (Some ([9:14-29], (Happly (([9:14-20], "\\HH\\vec"), [([9:21-28], Hdynamic)]))))); 
              param_is_variadic = false; param_pos = [9:30-39]; param_name = "$children"; 
-             param_expr = None; param_readonly = None; param_callconv = None; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
              param_user_attributes = []; param_visibility = (Some Public) };
            { param_annotation = (string); param_type_hint = ((string), (Some ([10:14-20], (Hprim Tstring)))); 
              param_is_variadic = false; param_pos = [10:21-26]; param_name = "$file"; 
-             param_expr = None; param_readonly = None; param_callconv = None; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
              param_user_attributes = []; param_visibility = (Some Public) };
            { param_annotation = (int); param_type_hint = ((int), (Some ([11:14-17], (Hprim Tint)))); 
              param_is_variadic = false; param_pos = [11:18-23]; param_name = "$line"; 
-             param_expr = None; param_readonly = None; param_callconv = None; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
              param_user_attributes = []; param_visibility = (Some Public) }
            ];
          m_ctxs = None; m_unsafe_ctxs = None;
@@ -152,19 +152,19 @@
           [{ param_annotation = (dict<string, dynamic>);
              param_type_hint = ((dict<string, dynamic>), (Some ([18:14-37], (Happly (([18:14-20], "\\HH\\dict"), [([18:21-27], (Hprim Tstring)); ([18:29-36], Hdynamic)])))));
              param_is_variadic = false; param_pos = [18:38-49]; param_name = "$attributes"; 
-             param_expr = None; param_readonly = None; param_callconv = None; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
              param_user_attributes = []; param_visibility = (Some Public) };
             { param_annotation = (vec<dynamic>); param_type_hint = ((vec<dynamic>), (Some ([19:14-29], (Happly (([19:14-20], "\\HH\\vec"), [([19:21-28], Hdynamic)]))))); 
               param_is_variadic = false; param_pos = [19:30-39]; param_name = "$children"; 
-              param_expr = None; param_readonly = None; param_callconv = None; 
+              param_expr = None; param_readonly = None; param_callconv = Pnormal; 
               param_user_attributes = []; param_visibility = (Some Public) };
             { param_annotation = (string); param_type_hint = ((string), (Some ([20:14-20], (Hprim Tstring)))); 
               param_is_variadic = false; param_pos = [20:21-26]; param_name = "$file"; 
-              param_expr = None; param_readonly = None; param_callconv = None; 
+              param_expr = None; param_readonly = None; param_callconv = Pnormal; 
               param_user_attributes = []; param_visibility = (Some Public) };
             { param_annotation = (int); param_type_hint = ((int), (Some ([21:14-17], (Hprim Tint)))); 
               param_is_variadic = false; param_pos = [21:18-23]; param_name = "$line"; 
-              param_expr = None; param_readonly = None; param_callconv = None; 
+              param_expr = None; param_readonly = None; param_callconv = Pnormal; 
               param_user_attributes = []; param_visibility = (Some Public) }
             ];
           m_ctxs = None; m_unsafe_ctxs = None;
@@ -220,7 +220,7 @@
          f_params =
          [{ param_annotation = (XhpSpread\:element2); param_type_hint = ((XhpSpread\:element2), (Some ([25:33-42], (Happly (([25:33-42], "\\XhpSpread\\:element2"), []))))); 
             param_is_variadic = false; param_pos = [25:43-49]; param_name = "$props"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;

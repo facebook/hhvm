@@ -70,7 +70,7 @@ impl<'de> serde::Deserialize<'de> for PropFlags {
         impl<'de> serde::de::Visitor<'de> for Visitor {
             type Value = PropFlags;
 
-            fn expecting(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+            fn expecting(&self, formatter: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
                 write!(formatter, "a u8 for PropFlags")
             }
 

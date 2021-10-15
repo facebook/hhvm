@@ -43,6 +43,7 @@ let pp_ifc_fun_decl fmt d = Typing_defs.pp_ifc_fun_decl fmt d
     b) isn't otherwise (space-efficiently) present in the saved typing env *)
 type fun_tast_info = {
   has_implicit_return: bool;
+  has_readonly: bool;
       (** True if there are leaves of the function's imaginary CFG without a return statement *)
 }
 [@@deriving show]
@@ -164,7 +165,7 @@ let nast_converter =
           List.map ~f:(fun hint -> ((), super#on_hint () hint)) hints
         in
         let id = ((), pos, Aast.Id (pos, name)) in
-        Aast.Call (id, targs, [ex], None)
+        Aast.Call (id, targs, [(Ast_defs.Pnormal, ex)], None)
       in
       match src with
       | Aast.UnsafeCast hints ->

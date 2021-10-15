@@ -161,6 +161,7 @@ module WithToken (Token : TokenType) = struct
       | IsExpression _ -> SyntaxKind.IsExpression
       | AsExpression _ -> SyntaxKind.AsExpression
       | NullableAsExpression _ -> SyntaxKind.NullableAsExpression
+      | UpcastExpression _ -> SyntaxKind.UpcastExpression
       | ConditionalExpression _ -> SyntaxKind.ConditionalExpression
       | EvalExpression _ -> SyntaxKind.EvalExpression
       | IssetExpression _ -> SyntaxKind.IssetExpression
@@ -470,6 +471,8 @@ module WithToken (Token : TokenType) = struct
     let is_as_expression = has_kind SyntaxKind.AsExpression
 
     let is_nullable_as_expression = has_kind SyntaxKind.NullableAsExpression
+
+    let is_upcast_expression = has_kind SyntaxKind.UpcastExpression
 
     let is_conditional_expression = has_kind SyntaxKind.ConditionalExpression
 
@@ -1766,6 +1769,12 @@ module WithToken (Token : TokenType) = struct
         let acc = f acc nullable_as_left_operand in
         let acc = f acc nullable_as_operator in
         let acc = f acc nullable_as_right_operand in
+        acc
+      | UpcastExpression
+          { upcast_left_operand; upcast_operator; upcast_right_operand } ->
+        let acc = f acc upcast_left_operand in
+        let acc = f acc upcast_operator in
+        let acc = f acc upcast_right_operand in
         acc
       | ConditionalExpression
           {
@@ -3430,6 +3439,9 @@ module WithToken (Token : TokenType) = struct
           nullable_as_operator;
           nullable_as_right_operand;
         ]
+      | UpcastExpression
+          { upcast_left_operand; upcast_operator; upcast_right_operand } ->
+        [upcast_left_operand; upcast_operator; upcast_right_operand]
       | ConditionalExpression
           {
             conditional_test;
@@ -5074,6 +5086,9 @@ module WithToken (Token : TokenType) = struct
           "nullable_as_operator";
           "nullable_as_right_operand";
         ]
+      | UpcastExpression
+          { upcast_left_operand; upcast_operator; upcast_right_operand } ->
+        ["upcast_left_operand"; "upcast_operator"; "upcast_right_operand"]
       | ConditionalExpression
           {
             conditional_test;
@@ -6902,6 +6917,10 @@ module WithToken (Token : TokenType) = struct
             nullable_as_operator;
             nullable_as_right_operand;
           }
+      | ( SyntaxKind.UpcastExpression,
+          [upcast_left_operand; upcast_operator; upcast_right_operand] ) ->
+        UpcastExpression
+          { upcast_left_operand; upcast_operator; upcast_right_operand }
       | ( SyntaxKind.ConditionalExpression,
           [
             conditional_test;
@@ -9094,6 +9113,15 @@ module WithToken (Token : TokenType) = struct
               nullable_as_operator;
               nullable_as_right_operand;
             }
+        in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_upcast_expression
+          upcast_left_operand upcast_operator upcast_right_operand =
+        let syntax =
+          UpcastExpression
+            { upcast_left_operand; upcast_operator; upcast_right_operand }
         in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

@@ -6,7 +6,7 @@ File "bad_inout_use_lvalue8.php", line 15, characters 11-16:
 Arguments for `inout` parameters must be local variables or simple subscript expressions on vecs, dicts, keysets, or arrays (NastCheck[3050])
 File "bad_inout_use_lvalue8.php", line 15, characters 5-16:
 Invalid argument (Typing[4110])
-File "bad_inout_use_lvalue8.php", line 3, characters 18-20:
-Expected `int`
-File "bad_inout_use_lvalue8.php", line 15, characters 11-16:
-But got `?int` (use of `?->` operator)
+  File "bad_inout_use_lvalue8.php", line 3, characters 18-20:
+  Expected `int`
+  File "bad_inout_use_lvalue8.php", line 15, characters 11-16:
+  But got `?int` (use of `?->` operator)

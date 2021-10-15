@@ -1,0 +1,4 @@
+string(31) "Local loc must be a value type."
+
+Fatal error: Uncaught exception 'InvalidOperationException' with message 'Readonly collections cannot be modified.' in %s/basel_dim.php:15
+%A

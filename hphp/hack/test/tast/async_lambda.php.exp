@@ -12,7 +12,7 @@
         f_params =
         [{ param_annotation = (string); param_type_hint = ((string), (Some ([3:26-32], (Hprim Tstring)))); 
            param_is_variadic = false; param_pos = [3:33-35]; param_name = "$s"; 
-           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_expr = None; param_readonly = None; param_callconv = Pnormal; 
            param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([3:58-68], (Return (Some ((string), [3:65-67], (Lvar ([3:65-67], $s))))))] }; 
@@ -53,7 +53,8 @@
                                      ((string), [7:12-34],
                                       (Await
                                          ((Awaitable<string>), [7:18-34],
-                                          (Call ((((function(string $s): Awaitable<string>)), [7:18-27], (Id ([7:18-27], "\\genString"))), [], [((string), [7:28-33], (String "foo"))], None)))))
+                                          (Call ((((function(string $s): Awaitable<string>)), [7:18-27], (Id ([7:18-27], "\\genString"))), 
+                                             [], [(Pnormal, ((string), [7:28-33], (String "foo")))], None)))))
                                      )))))
                               ]
                             };
@@ -76,7 +77,7 @@
                            [{ param_annotation = (string); param_type_hint = ((string), None); 
                               param_is_variadic = false; param_pos = [9:15-17]; 
                               param_name = "$x"; param_expr = None; param_readonly = None; 
-                              param_callconv = None; param_user_attributes = []; 
+                              param_callconv = Pnormal; param_user_attributes = []; 
                               param_visibility = None }
                              ];
                            f_ctxs = None; f_unsafe_ctxs = None;
@@ -90,7 +91,7 @@
                                        (Await
                                           ((Awaitable<string>), [10:18-31],
                                            (Call ((((function(string $s): Awaitable<string>)), [10:18-27], (Id ([10:18-27], "\\genString"))), 
-                                              [], [((string), [10:28-30], (Lvar ([10:28-30], $x)))], None)))))
+                                              [], [(Pnormal, ((string), [10:28-30], (Lvar ([10:28-30], $x))))], None)))))
                                       )))))
                                ]
                              };

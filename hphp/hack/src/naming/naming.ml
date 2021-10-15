@@ -455,6 +455,7 @@ and hint_
     | N.Hprim _
     | N.Hmixed
     | N.Hnonnull
+    | N.Hsupportdynamic
     | N.Hdynamic
     | N.Hnothing ->
       if not (List.is_empty hl) then Errors.unexpected_type_arguments p
@@ -537,6 +538,7 @@ and hint_
   | Aast.Hprim _
   | Aast.Hthis
   | Aast.Hdynamic
+  | Aast.Hsupportdynamic
   | Aast.Hnothing ->
     Errors.internal_error Pos.none "Unexpected hint not present on legacy AST";
     N.Herr
@@ -615,6 +617,15 @@ and hint_id
       | x when String.equal x SN.Typehints.mixed -> N.Hmixed
       | x when String.equal x SN.Typehints.nonnull -> N.Hnonnull
       | x when String.equal x SN.Typehints.dynamic -> N.Hdynamic
+      | x when String.equal x SN.Typehints.supportdynamic ->
+        if
+          not
+            (TypecheckerOptions.experimental_feature_enabled
+               (Provider_context.get_tcopt (fst env).ctx)
+               TypecheckerOptions.experimental_supportdynamic_type_hint)
+        then
+          Errors.experimental_feature p "supportdynamic type hint";
+        N.Hsupportdynamic
       | x when String.equal x SN.Typehints.nothing -> N.Hnothing
       | x when String.equal x SN.Typehints.this && not forbid_this ->
         if not (List.is_empty hl) then Errors.this_no_argument p;
@@ -872,6 +883,17 @@ let ensure_name_not_dynamic env e =
     if Partial.should_check_error (fst env).in_mode 2078 then
       Errors.dynamic_class_name_in_strict_mode p
 
+let make_sdt ctx pos attrs =
+  if TypecheckerOptions.everything_sdt (Provider_context.get_tcopt ctx) then
+    N.
+      {
+        ua_name = (pos, SN.UserAttributes.uaSupportDynamicType);
+        ua_params = [];
+      }
+    :: attrs
+  else
+    attrs
+
 (* Naming of a class *)
 let rec class_ ctx c =
   let env = Env.make_class_env ctx c in
@@ -971,6 +993,17 @@ let rec class_ ctx c =
     match constructor with
     | None -> smethods @ methods
     | Some c -> c :: smethods @ methods
+  in
+  let attrs =
+    let open Ast_defs in
+    match c.Aast.c_kind with
+    | Cclass _
+    | Cinterface
+    | Ctrait ->
+      make_sdt ctx (fst name) attrs
+    | Cenum
+    | Cenum_class _ ->
+      attrs
   in
   {
     N.c_annotation = ();
@@ -1349,7 +1382,7 @@ and check_constant_expr env expr =
          || String.equal cn SN.AutoimportedFunctions.class_meth
          || String.equal cn SN.StdlibFunctions.array_mark_legacy ->
     arg_unpack_unexpected unpacked_element;
-    List.for_all el ~f:(check_constant_expr env)
+    List.for_all el ~f:(fun (_, e) -> check_constant_expr env e)
   | Aast.Tuple el -> List.for_all el ~f:(check_constant_expr env)
   | Aast.FunctionPointer ((Aast.FP_id _ | Aast.FP_class_const _), _) -> true
   | Aast.Collection (id, _, l) ->
@@ -1425,12 +1458,6 @@ and typeconst env t =
           c_atc_default = Option.map ~f:(hint env) c_atc_default;
         }
     | TCConcrete { c_tc_type } -> TCConcrete { c_tc_type = hint env c_tc_type }
-    | TCPartiallyAbstract { c_patc_constraint; c_patc_type } ->
-      TCPartiallyAbstract
-        {
-          c_patc_constraint = hint env c_patc_constraint;
-          c_patc_type = hint env c_patc_type;
-        }
   in
   let attrs = user_attributes env t.Aast.c_tconst_user_attributes in
   N.
@@ -1600,6 +1627,8 @@ and fun_ genv f =
   in
   let f_ctxs = Option.map ~f:(contexts env) f.Aast.f_ctxs in
   let f_unsafe_ctxs = Option.map ~f:(contexts env) f.Aast.f_unsafe_ctxs in
+  let attrs = user_attributes env f.Aast.f_user_attributes in
+  let attrs = make_sdt genv.ctx (fst f.Aast.f_name) attrs in
   let named_fun =
     {
       N.f_annotation = ();
@@ -1617,7 +1646,7 @@ and fun_ genv f =
       f_body = body;
       f_fun_kind = f_kind;
       f_variadic = variadicity;
-      f_user_attributes = user_attributes env f.Aast.f_user_attributes;
+      f_user_attributes = attrs;
       f_external = f.Aast.f_external;
       f_doc_comment = f.Aast.f_doc_comment;
     }
@@ -1677,7 +1706,15 @@ and stmt env (pos, st) =
         | [_] ->
           Errors.naming_too_few_arguments p;
           N.Expr (invalid_expr p)
-        | (_, cond_p, cond) :: el ->
+        | (pk, (_, cond_p, cond)) :: el ->
+          begin
+            match pk with
+            | Ast_defs.Pnormal -> ()
+            | Ast_defs.Pinout pk_p ->
+              Errors.inout_in_transformed_pseudofunction
+                (Pos.merge pk_p p)
+                "invariant"
+          end;
           let violation =
             ( (),
               cp,
@@ -1856,6 +1893,8 @@ and expr_obj_get_name env expr_ =
 
 and exprl env l = List.map ~f:(expr env) l
 
+and expr_call_args env = List.map ~f:(fun (pk, e) -> (pk, expr env e))
+
 and oexpr env e = Option.map e ~f:(expr env)
 
 and expr env ((), p, e) = ((), p, expr_ env p e)
@@ -1982,7 +2021,11 @@ and expr_ env p (e : Nast.expr_) =
   | Aast.Call ((_, _, Aast.Id (p, pseudo_func)), tal, el, unpacked_element)
     when String.equal pseudo_func SN.SpecialFunctions.echo ->
     arg_unpack_unexpected unpacked_element;
-    N.Call (((), p, N.Id (p, pseudo_func)), targl env p tal, exprl env el, None)
+    N.Call
+      ( ((), p, N.Id (p, pseudo_func)),
+        targl env p tal,
+        expr_call_args env el,
+        None )
   | Aast.Call ((_, p, Aast.Id (_, cn)), tal, el, _)
     when String.equal cn SN.StdlibFunctions.call_user_func ->
     Errors.deprecated_use
@@ -1995,7 +2038,13 @@ and expr_ env p (e : Nast.expr_) =
       | [] ->
         Errors.naming_too_few_arguments p;
         invalid_expr_ p
-      | f :: el -> N.Call (expr env f, targl env p tal, exprl env el, None)
+      | (Ast_defs.Pnormal, f) :: el ->
+        N.Call (expr env f, targl env p tal, expr_call_args env el, None)
+      | (Ast_defs.Pinout pk_pos, ((_, f_pos, _) as f)) :: el ->
+        Errors.inout_in_transformed_pseudofunction
+          (Pos.merge pk_pos f_pos)
+          "call_user_func";
+        N.Call (expr env f, targl env p tal, expr_call_args env el, None)
     end
   | Aast.Call ((_, p, Aast.Id (_, cn)), _, el, unpacked_element)
     when String.equal cn SN.AutoimportedFunctions.fun_ ->
@@ -2005,8 +2054,8 @@ and expr_ env p (e : Nast.expr_) =
       | [] ->
         Errors.naming_too_few_arguments p;
         invalid_expr_ p
-      | [(_, p, Aast.String x)] -> N.Fun_id (p, x)
-      | [(_, p, _)] ->
+      | [(Ast_defs.Pnormal, (_, p, Aast.String x))] -> N.Fun_id (p, x)
+      | [(_, (_, p, _))] ->
         Errors.illegal_fun p;
         invalid_expr_ p
       | _ ->
@@ -2022,9 +2071,11 @@ and expr_ env p (e : Nast.expr_) =
       | [_] ->
         Errors.naming_too_few_arguments p;
         invalid_expr_ p
-      | [instance; (_, p, Aast.String meth)] ->
+      | [
+       (Ast_defs.Pnormal, instance); (Ast_defs.Pnormal, (_, p, Aast.String meth));
+      ] ->
         N.Method_id (expr env instance, (p, meth))
-      | [(_, p, _); _] ->
+      | [(_, (_, p, _)); _] ->
         Errors.illegal_inst_meth p;
         invalid_expr_ p
       | _ ->
@@ -2040,7 +2091,7 @@ and expr_ env p (e : Nast.expr_) =
       | [_] ->
         Errors.naming_too_few_arguments p;
         invalid_expr_ p
-      | [e1; e2] ->
+      | [(Ast_defs.Pnormal, e1); (Ast_defs.Pnormal, e2)] ->
         begin
           match (expr env e1, expr env e2) with
           | ((_, pc, N.String cl), (_, pm, N.String meth)) ->
@@ -2055,6 +2106,10 @@ and expr_ env p (e : Nast.expr_) =
             Errors.illegal_meth_caller p;
             invalid_expr_ p
         end
+      | [(Ast_defs.Pinout _, _); _]
+      | [_; (Ast_defs.Pinout _, _)] ->
+        Errors.illegal_meth_caller p;
+        invalid_expr_ p
       | _ ->
         Errors.naming_too_many_arguments p;
         invalid_expr_ p
@@ -2068,7 +2123,7 @@ and expr_ env p (e : Nast.expr_) =
       | [_] ->
         Errors.naming_too_few_arguments p;
         invalid_expr_ p
-      | [e1; e2] ->
+      | [(Ast_defs.Pnormal, e1); (Ast_defs.Pnormal, e2)] ->
         begin
           match (expr env e1, expr env e2) with
           | ((_, pc, N.String cl), (_, pm, N.String meth)) ->
@@ -2125,6 +2180,10 @@ and expr_ env p (e : Nast.expr_) =
             Errors.illegal_class_meth p;
             invalid_expr_ p
         end
+      | [(Ast_defs.Pinout _, _); _]
+      | [_; (Ast_defs.Pinout _, _)] ->
+        Errors.illegal_class_meth p;
+        invalid_expr_ p
       | _ ->
         Errors.naming_too_many_arguments p;
         invalid_expr_ p
@@ -2139,7 +2198,7 @@ and expr_ env p (e : Nast.expr_) =
     N.Call
       ( ((), p, N.Id f),
         targl env p tal,
-        exprl env el,
+        expr_call_args env el,
         oexpr env unpacked_element )
   (* match *)
   (* Handle nullsafe instance method calls here. Because Obj_get is used
@@ -2157,12 +2216,15 @@ and expr_ env p (e : Nast.expr_) =
           N.Obj_get
             (expr env e1, expr_obj_get_name env e2, N.OG_nullsafe, in_parens) ),
         targl env p tal,
-        exprl env el,
+        expr_call_args env el,
         oexpr env unpacked_element )
   (* Handle all kinds of calls that weren't handled by any of the cases above *)
   | Aast.Call (e, tal, el, unpacked_element) ->
     N.Call
-      (expr env e, targl env p tal, exprl env el, oexpr env unpacked_element)
+      ( expr env e,
+        targl env p tal,
+        expr_call_args env el,
+        oexpr env unpacked_element )
   | Aast.FunctionPointer (Aast.FP_id fid, targs) ->
     N.FunctionPointer (N.FP_id fid, targl env p targs)
   | Aast.FunctionPointer
@@ -2204,6 +2266,7 @@ and expr_ env p (e : Nast.expr_) =
           et_function_pointers = block env et.et_function_pointers;
           et_virtualized_expr = expr env et.et_virtualized_expr;
           et_runtime_expr = expr env et.et_runtime_expr;
+          et_dollardollar_pos = et.et_dollardollar_pos;
         }
   | Aast.ET_Splice e -> N.ET_Splice (expr env e)
   | Aast.Unop (uop, e) -> N.Unop (uop, expr env e)
@@ -2241,6 +2304,11 @@ and expr_ env p (e : Nast.expr_) =
       ( expr env e,
         hint ~allow_wildcard:true ~allow_like:true ~ignore_hack_arr:true env h,
         b )
+  | Aast.Upcast (e, h) ->
+    N.Upcast
+      ( expr env e,
+        hint ~allow_wildcard:false ~allow_like:true ~ignore_hack_arr:true env h
+      )
   | Aast.New
       ((_, _, Aast.CIexpr (_, p, Aast.Id x)), tal, el, unpacked_element, _) ->
     N.New
@@ -2315,7 +2383,6 @@ and expr_ env p (e : Nast.expr_) =
     N.Shape shp
   | Aast.Import _ -> ignored_expr_ p
   | Aast.Omitted -> N.Omitted
-  | Aast.Callconv (kind, e) -> N.Callconv (kind, expr env e)
   | Aast.EnumClassLabel (opt_sid, x) ->
     let () = Option.iter ~f:check_name opt_sid in
     N.EnumClassLabel (opt_sid, x)
@@ -2553,13 +2620,13 @@ let global_const ctx cst =
 (* The entry point to CHECK the program, and transform the program *)
 (**************************************************************************)
 
+let elaborate_namespaces_program ast =
+  elaborate_namespaces#on_program
+    (Naming_elaborate_namespaces_endo.make_env Namespace_env.empty_with_default)
+    ast
+
 let program ctx ast =
-  let ast =
-    elaborate_namespaces#on_program
-      (Naming_elaborate_namespaces_endo.make_env
-         Namespace_env.empty_with_default)
-      ast
-  in
+  let ast = elaborate_namespaces_program ast in
   let top_level_env = ref (Env.make_top_level_env ctx) in
   let rec aux acc def =
     match def with

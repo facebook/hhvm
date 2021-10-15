@@ -30,7 +30,7 @@ mod test {
                 self
             }
 
-            fn visit_ty(&mut self, ty: &'a Ty) {
+            fn visit_ty(&mut self, ty: &'a Ty<'_>) {
                 self.0.push(ty.get_pos().unwrap());
                 if let Ty_::Tapply(&((pos, id), _)) = ty.1 {
                     self.1.push(format!("Found {} on line {}", id, pos.line()));

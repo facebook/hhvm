@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/coeffects.h"
 
 #include "hphp/runtime/base/coeffects-config.h"
+#include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/vm/blob-helper.h"
 #include "hphp/runtime/vm/runtime.h"
 
@@ -297,7 +298,78 @@ RuntimeCoeffects emitCaller(RuntimeCoeffects provided) {
   return provided;
 }
 
+RDS_LOCAL(Optional<RuntimeCoeffects>, autoCoeffects);
+#ifndef NDEBUG
+RDS_LOCAL(size_t, coeffectGuardedDepth);
+#endif
+
+RuntimeCoeffects computeAutomaticCoeffects() {
+  // Return the coeffects corresponding to the leaf VM frame. If there is no
+  // such frame, return default coeffects.
+  return fromLeaf([](const BTFrame& frm) {
+    // Note: this means computeAutomaticCoeffects() cannot be used from surprise
+    // check handlers, as the frame may be already destroyed.
+    assertx(frm.localsAvailable());
+    auto const func = frm.func();
+    if (!func->hasCoeffectsLocal()) {
+      assertx(!func->hasCoeffectRules());
+      return func->requiredCoeffects();
+    }
+    auto const id = func->coeffectsLocalId();
+    auto const tv = frm.local(id);
+    assertx(tvIsInt(tv));
+    return RuntimeCoeffects::fromValue(tv->m_data.num);
+  }, backtrace_detail::true_pred, RuntimeCoeffects::defaults());
+}
+
 } // namespace
+
+CoeffectsAutoGuard::CoeffectsAutoGuard() {
+  if (!CoeffectsConfig::enabled()) return;
+  savedCoeffects = *autoCoeffects;
+  *autoCoeffects = std::nullopt;
+#ifndef NDEBUG
+  savedDepth = *coeffectGuardedDepth;
+  *coeffectGuardedDepth = g_context->m_nesting + 1;
+#endif
+}
+
+CoeffectsAutoGuard::~CoeffectsAutoGuard() {
+  if (!CoeffectsConfig::enabled()) return;
+  *autoCoeffects = savedCoeffects;
+#ifndef NDEBUG
+  *coeffectGuardedDepth = savedDepth;
+#endif
+}
+
+RuntimeCoeffects RuntimeCoeffects::automatic() {
+  if (!CoeffectsConfig::enabled()) return RuntimeCoeffects::none();
+#ifndef NDEBUG
+  assertx(*coeffectGuardedDepth == g_context->m_nesting + 1);
+#endif
+  if (autoCoeffects->has_value()) {
+    return **autoCoeffects;
+  }
+  auto const coeffects = computeAutomaticCoeffects();
+  *autoCoeffects = coeffects;
+  return coeffects;
+}
+
+std::pair<StaticCoeffects, RuntimeCoeffects>
+getCoeffectsInfoFromList(std::vector<LowStringPtr> staticCoeffects,
+                         bool ctor) {
+  if (staticCoeffects.empty()) {
+    return {StaticCoeffects::defaults(), RuntimeCoeffects::none()};
+  }
+  auto coeffects = StaticCoeffects::none();
+  auto escapes = RuntimeCoeffects::none();
+  for (auto const& name : staticCoeffects) {
+    coeffects |= CoeffectsConfig::fromName(name->toCppString());
+    escapes |= CoeffectsConfig::escapesTo(name->toCppString());
+  }
+  if (ctor) coeffects |= StaticCoeffects::write_this_props();
+  return {coeffects, escapes};
+}
 
 RuntimeCoeffects CoeffectRule::emit(const Func* f,
                                     uint32_t numArgsInclUnpack,
@@ -369,6 +441,14 @@ std::string CoeffectRule::getDirectiveString() const {
       always_assert(false);
   }
   not_reached();
+}
+
+bool CoeffectRule::operator==(const CoeffectRule& o) const {
+  return m_type == o.m_type &&
+         m_isClass == o.m_isClass &&
+         m_index == o.m_index &&
+         m_types == o.m_types &&
+         m_name == o.m_name;
 }
 
 template<class SerDe>

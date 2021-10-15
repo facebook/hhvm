@@ -50,6 +50,9 @@ type t = {
   log_levels: int SMap.t;
   po_disable_lval_as_an_expression: bool;
   tco_shallow_class_decl: bool;
+  tco_force_shallow_decl_fanout: bool;
+  tco_fetch_remote_old_decls: bool;
+  tco_force_load_hot_shallow_decls: bool;
   tco_skip_hierarchy_checks: bool;
   po_rust_parser_errors: bool;
   tco_like_type_hints: bool;
@@ -60,8 +63,6 @@ type t = {
   tco_like_casts: bool;
   tco_simple_pessimize: float;
   tco_complex_coercion: bool;
-  tco_disable_partially_abstract_typeconsts: bool;
-  tco_disallow_partially_abstract_typeconst_definitions: bool;
   error_codes_treated_strictly: ISet.t;
   tco_check_xhp_attribute: bool;
   tco_check_redundant_generics: bool;
@@ -113,13 +114,11 @@ type t = {
   tco_report_pos_from_reason: bool;
   tco_typecheck_sample_rate: float;
   tco_enable_sound_dynamic: bool;
-  po_disallow_hash_comments: bool;
   po_disallow_fun_and_cls_meth_pseudo_funcs: bool;
   po_disallow_inst_meth: bool;
   po_enable_readonly_in_emitter: bool;
   po_escape_brace: bool;
   tco_use_direct_decl_parser: bool;
-  tco_use_direct_decl_in_tc_loop: bool;
   tco_ifc_enabled: string list;
   po_enable_enum_supertyping: bool;
   po_interpret_soft_types_as_like_types: bool;
@@ -131,10 +130,16 @@ type t = {
   tco_allowed_expression_tree_visitors: string list;
   tco_math_new_code: bool;
   tco_typeconst_concrete_concrete_error: bool;
+  tco_enable_strict_const_semantics: bool;
   tco_meth_caller_only_public_visibility: bool;
   tco_require_extends_implements_ancestors: bool;
   tco_strict_value_equality: bool;
   tco_enforce_sealed_subclasses: bool;
+  tco_everything_sdt: bool;
+  tco_pessimise_builtins: bool;
+  tco_deferments_light: bool;
+  tco_old_naming_table_for_redecl: bool;
+  tco_enable_disk_heap: bool;
 }
 [@@deriving eq, show]
 
@@ -181,6 +186,8 @@ let tco_experimental_infer_flows = "ifc_infer_flows"
 *)
 let tco_experimental_case_sensitive_inheritance = "case_sensitive_inheritance"
 
+let tco_experimental_supportdynamic_type_hint = "supportdynamic_type_hint"
+
 let tco_experimental_all =
   SSet.empty
   |> List.fold_right
@@ -192,6 +199,7 @@ let tco_experimental_all =
          tco_experimental_abstract_type_const_with_default;
          tco_experimental_infer_flows;
          tco_experimental_case_sensitive_inheritance;
+         tco_experimental_supportdynamic_type_hint;
        ]
 
 let tco_migration_flags_all =
@@ -243,6 +251,9 @@ let default =
     log_levels = SMap.empty;
     po_disable_lval_as_an_expression = true;
     tco_shallow_class_decl = false;
+    tco_force_shallow_decl_fanout = false;
+    tco_fetch_remote_old_decls = false;
+    tco_force_load_hot_shallow_decls = false;
     tco_skip_hierarchy_checks = false;
     po_rust_parser_errors = false;
     tco_like_type_hints = false;
@@ -253,8 +264,6 @@ let default =
     tco_like_casts = false;
     tco_simple_pessimize = 0.0;
     tco_complex_coercion = false;
-    tco_disable_partially_abstract_typeconsts = false;
-    tco_disallow_partially_abstract_typeconst_definitions = true;
     error_codes_treated_strictly = ISet.of_list [];
     tco_check_xhp_attribute = false;
     tco_check_redundant_generics = false;
@@ -306,13 +315,11 @@ let default =
     tco_report_pos_from_reason = false;
     tco_typecheck_sample_rate = 1.0;
     tco_enable_sound_dynamic = false;
-    po_disallow_hash_comments = false;
     po_disallow_fun_and_cls_meth_pseudo_funcs = false;
     po_disallow_inst_meth = false;
     po_enable_readonly_in_emitter = false;
     po_escape_brace = false;
     tco_use_direct_decl_parser = false;
-    tco_use_direct_decl_in_tc_loop = false;
     tco_ifc_enabled = [];
     po_enable_enum_supertyping = false;
     po_interpret_soft_types_as_like_types = false;
@@ -324,10 +331,16 @@ let default =
     tco_allowed_expression_tree_visitors = [];
     tco_math_new_code = false;
     tco_typeconst_concrete_concrete_error = false;
+    tco_enable_strict_const_semantics = false;
     tco_meth_caller_only_public_visibility = true;
     tco_require_extends_implements_ancestors = false;
     tco_strict_value_equality = false;
     tco_enforce_sealed_subclasses = false;
+    tco_everything_sdt = false;
+    tco_pessimise_builtins = false;
+    tco_deferments_light = false;
+    tco_old_naming_table_for_redecl = false;
+    tco_enable_disk_heap = true;
   }
 
 let make
@@ -377,6 +390,10 @@ let make
     ?(po_disable_lval_as_an_expression =
       default.po_disable_lval_as_an_expression)
     ?(tco_shallow_class_decl = default.tco_shallow_class_decl)
+    ?(tco_force_shallow_decl_fanout = default.tco_force_shallow_decl_fanout)
+    ?(tco_fetch_remote_old_decls = default.tco_fetch_remote_old_decls)
+    ?(tco_force_load_hot_shallow_decls =
+      default.tco_force_load_hot_shallow_decls)
     ?(tco_skip_hierarchy_checks = default.tco_skip_hierarchy_checks)
     ?(po_rust_parser_errors = default.po_rust_parser_errors)
     ?(tco_like_type_hints = default.tco_like_type_hints)
@@ -388,10 +405,6 @@ let make
     ?(tco_like_casts = default.tco_like_casts)
     ?(tco_simple_pessimize = default.tco_simple_pessimize)
     ?(tco_complex_coercion = default.tco_complex_coercion)
-    ?(tco_disable_partially_abstract_typeconsts =
-      default.tco_disable_partially_abstract_typeconsts)
-    ?(tco_disallow_partially_abstract_typeconst_definitions =
-      default.tco_disallow_partially_abstract_typeconst_definitions)
     ?(error_codes_treated_strictly = default.error_codes_treated_strictly)
     ?(tco_check_xhp_attribute = default.tco_check_xhp_attribute)
     ?(tco_check_redundant_generics = default.tco_check_redundant_generics)
@@ -453,14 +466,12 @@ let make
     ?(tco_report_pos_from_reason = default.tco_report_pos_from_reason)
     ?(tco_typecheck_sample_rate = default.tco_typecheck_sample_rate)
     ?(tco_enable_sound_dynamic = default.tco_enable_sound_dynamic)
-    ?(po_disallow_hash_comments = default.po_disallow_hash_comments)
     ?(po_disallow_fun_and_cls_meth_pseudo_funcs =
       default.po_disallow_fun_and_cls_meth_pseudo_funcs)
     ?(po_disallow_inst_meth = default.po_disallow_inst_meth)
     ?(po_enable_readonly_in_emitter = default.po_enable_readonly_in_emitter)
     ?(po_escape_brace = default.po_escape_brace)
     ?(tco_use_direct_decl_parser = default.tco_use_direct_decl_parser)
-    ?(tco_use_direct_decl_in_tc_loop = default.tco_use_direct_decl_in_tc_loop)
     ?(tco_ifc_enabled = default.tco_ifc_enabled)
     ?(po_enable_enum_supertyping = default.po_enable_enum_supertyping)
     ?(po_interpret_soft_types_as_like_types =
@@ -476,12 +487,19 @@ let make
     ?(tco_math_new_code = default.tco_math_new_code)
     ?(tco_typeconst_concrete_concrete_error =
       default.tco_typeconst_concrete_concrete_error)
+    ?(tco_enable_strict_const_semantics =
+      default.tco_enable_strict_const_semantics)
     ?(tco_meth_caller_only_public_visibility =
       default.tco_meth_caller_only_public_visibility)
     ?(tco_require_extends_implements_ancestors =
       default.tco_require_extends_implements_ancestors)
     ?(tco_strict_value_equality = default.tco_strict_value_equality)
     ?(tco_enforce_sealed_subclasses = default.tco_enforce_sealed_subclasses)
+    ?(tco_everything_sdt = default.tco_everything_sdt)
+    ?(tco_pessimise_builtins = default.tco_pessimise_builtins)
+    ?(tco_deferments_light = default.tco_deferments_light)
+    ?(tco_old_naming_table_for_redecl = default.tco_old_naming_table_for_redecl)
+    ?(tco_enable_disk_heap = default.tco_enable_disk_heap)
     () =
   {
     tco_experimental_features;
@@ -526,6 +544,9 @@ let make
     log_levels;
     po_disable_lval_as_an_expression;
     tco_shallow_class_decl;
+    tco_force_shallow_decl_fanout;
+    tco_fetch_remote_old_decls;
+    tco_force_load_hot_shallow_decls;
     tco_skip_hierarchy_checks;
     po_rust_parser_errors;
     tco_like_type_hints;
@@ -536,8 +557,6 @@ let make
     tco_like_casts;
     tco_simple_pessimize;
     tco_complex_coercion;
-    tco_disable_partially_abstract_typeconsts;
-    tco_disallow_partially_abstract_typeconst_definitions;
     error_codes_treated_strictly;
     tco_check_xhp_attribute;
     tco_check_redundant_generics;
@@ -589,13 +608,11 @@ let make
     tco_report_pos_from_reason;
     tco_typecheck_sample_rate;
     tco_enable_sound_dynamic;
-    po_disallow_hash_comments;
     po_disallow_fun_and_cls_meth_pseudo_funcs;
     po_disallow_inst_meth;
     po_enable_readonly_in_emitter;
     po_escape_brace;
     tco_use_direct_decl_parser;
-    tco_use_direct_decl_in_tc_loop;
     tco_ifc_enabled;
     po_enable_enum_supertyping;
     po_interpret_soft_types_as_like_types;
@@ -607,10 +624,16 @@ let make
     tco_allowed_expression_tree_visitors;
     tco_math_new_code;
     tco_typeconst_concrete_concrete_error;
+    tco_enable_strict_const_semantics;
     tco_meth_caller_only_public_visibility;
     tco_require_extends_implements_ancestors;
     tco_strict_value_equality;
     tco_enforce_sealed_subclasses;
+    tco_everything_sdt;
+    tco_pessimise_builtins;
+    tco_deferments_light;
+    tco_old_naming_table_for_redecl;
+    tco_enable_disk_heap;
   }
 
 let tco_experimental_feature_enabled t s =
@@ -707,6 +730,12 @@ let po_disable_lval_as_an_expression t = t.po_disable_lval_as_an_expression
 
 let tco_shallow_class_decl t = t.tco_shallow_class_decl
 
+let tco_force_shallow_decl_fanout t = t.tco_force_shallow_decl_fanout
+
+let tco_fetch_remote_old_decls t = t.tco_fetch_remote_old_decls
+
+let tco_force_load_hot_shallow_decls t = t.tco_force_load_hot_shallow_decls
+
 let tco_skip_hierarchy_checks t = t.tco_skip_hierarchy_checks
 
 let po_rust_parser_errors t = t.po_rust_parser_errors
@@ -731,12 +760,6 @@ let tco_like_casts t = t.tco_like_casts
 let tco_simple_pessimize t = t.tco_simple_pessimize
 
 let tco_complex_coercion t = t.tco_complex_coercion
-
-let tco_disable_partially_abstract_typeconsts t =
-  t.tco_disable_partially_abstract_typeconsts
-
-let tco_disallow_partially_abstract_typeconst_definitions t =
-  t.tco_disallow_partially_abstract_typeconst_definitions
 
 let error_codes_treated_strictly t = t.error_codes_treated_strictly
 
@@ -853,8 +876,6 @@ let tco_typecheck_sample_rate t = t.tco_typecheck_sample_rate
 
 let tco_enable_sound_dynamic t = t.tco_enable_sound_dynamic
 
-let po_disallow_hash_comments t = t.po_disallow_hash_comments
-
 let po_disallow_fun_and_cls_meth_pseudo_funcs t =
   t.po_disallow_fun_and_cls_meth_pseudo_funcs
 
@@ -865,8 +886,6 @@ let po_enable_readonly_in_emitter t = t.po_enable_readonly_in_emitter
 let po_escape_brace t = t.po_escape_brace
 
 let tco_use_direct_decl_parser t = t.tco_use_direct_decl_parser
-
-let tco_use_direct_decl_in_tc_loop t = t.tco_use_direct_decl_in_tc_loop
 
 let po_enable_enum_supertyping t = t.po_enable_enum_supertyping
 
@@ -894,6 +913,8 @@ let tco_math_new_code t = t.tco_math_new_code
 let tco_typeconst_concrete_concrete_error t =
   t.tco_typeconst_concrete_concrete_error
 
+let tco_enable_strict_const_semantics t = t.tco_enable_strict_const_semantics
+
 let tco_meth_caller_only_public_visibility t =
   t.tco_meth_caller_only_public_visibility
 
@@ -903,3 +924,13 @@ let tco_require_extends_implements_ancestors t =
 let tco_strict_value_equality t = t.tco_strict_value_equality
 
 let tco_enforce_sealed_subclasses t = t.tco_enforce_sealed_subclasses
+
+let tco_everything_sdt t = t.tco_everything_sdt
+
+let tco_pessimise_builtins t = t.tco_pessimise_builtins
+
+let tco_deferments_light t = t.tco_deferments_light
+
+let tco_old_naming_table_for_redecl t = t.tco_old_naming_table_for_redecl
+
+let tco_enable_disk_heap t = t.tco_enable_disk_heap

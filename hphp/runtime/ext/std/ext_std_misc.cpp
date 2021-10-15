@@ -128,14 +128,6 @@ String HHVM_FUNCTION(execution_context) {
   return RuntimeOption::ServerExecutionMode() ? s_worker : s_cli;
 }
 
-TypedValue HHVM_FUNCTION(sequence, const Array& args) {
-  if (args.empty()) return make_tv<KindOfNull>();
-  int64_t idx = args.size() - 1;
-  auto const ret = args.lookup(idx);
-  tvIncRefGen(ret);
-  return ret;
-}
-
 }
 
 void StandardExtension::threadInitMisc() {
@@ -211,7 +203,6 @@ void StandardExtension::initMisc() {
     HHVM_FALIAS(HH\\server_warmup_status_monotonic,
                 server_warmup_status_monotonic);
     HHVM_FALIAS(HH\\execution_context, execution_context);
-    HHVM_FALIAS(HH\\sequence, sequence);
     HHVM_FE(connection_aborted);
     HHVM_FE(connection_status);
     HHVM_FE(connection_timeout);

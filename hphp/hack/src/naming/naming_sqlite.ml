@@ -12,9 +12,9 @@ open Sqlite_utils
 type db_path = Db_path of string [@@deriving eq, show]
 
 type insertion_error = {
-  canon_hash: Int64.t option;
+  canon_hash: Int64.t;
   hash: Int64.t;
-  kind_of_type: Naming_types.kind_of_type option;
+  name_kind: Naming_types.name_kind;
   name: string;
   origin_exception: Exception.t;
       [@printer (fun fmt e -> fprintf fmt "%s" (Exception.get_ctor_string e))]
@@ -30,52 +30,12 @@ type save_result = {
 
 let empty_save_result = { files_added = 0; symbols_added = 0; errors = [] }
 
-let insert_safe ~name ~kind_of_type ~hash ~canon_hash f :
+let insert_safe ~name ~name_kind ~hash ~canon_hash f :
     (unit, insertion_error) result =
   try Ok (f ()) with
   | e ->
     let origin_exception = Exception.wrap e in
-    Error { canon_hash; hash; kind_of_type; name; origin_exception }
-
-let symbols_table_name = "NAMING_SYMBOLS"
-
-let create_symbols_table_sqlite =
-  (* Two things to take note of:
-     *  1) FLAGS is set to 0 for non-type things
-     *  2) CANON_HASH is simply the hash of lowercase name for consts
-  *)
-  (* Flags is set to 0 for non-type things *)
-  Printf.sprintf
-    "
-      CREATE TABLE IF NOT EXISTS %s(
-        HASH INTEGER PRIMARY KEY NOT NULL,
-        CANON_HASH INTEGER NOT NULL,
-        DECL_HASH INTEGER NOT NULL,
-        FLAGS INTEGER NOT NULL,
-        FILE_INFO_ID INTEGER NOT NULL
-      );
-    "
-    symbols_table_name
-
-let create_symbols_index_sqlite =
-  Printf.sprintf
-    "
-    CREATE INDEX IF NOT EXISTS TYPES_CANON ON %s (CANON_HASH);
-    "
-    symbols_table_name
-
-let insert_symbols_sqlite =
-  Printf.sprintf
-    "
-      INSERT INTO %s(
-        HASH,
-        CANON_HASH,
-        DECL_HASH,
-        FLAGS,
-        FILE_INFO_ID)
-      VALUES (?, ?, ?, ?, ?);
-    "
-    symbols_table_name
+    Error { canon_hash; hash; name_kind; name; origin_exception }
 
 type 'a forward_naming_table_delta =
   | Modified of 'a
@@ -176,13 +136,6 @@ module LocalChanges = struct
         "
       table_name
 
-  let update_sqlite =
-    Printf.sprintf
-      "
-          UPDATE %s SET LOCAL_CHANGES = ? WHERE ID = 0;
-        "
-      table_name
-
   let get_sqlite =
     Printf.sprintf
       "
@@ -198,23 +151,6 @@ module LocalChanges = struct
     Sqlite3.bind insert_stmt 2 (Sqlite3.Data.TEXT base_content_version)
     |> check_rc db;
     Sqlite3.step insert_stmt |> check_rc db
-
-  let update db stmt_cache (local_changes : local_changes) =
-    if Relative_path.Map.cardinal local_changes.file_deltas > 0 then
-      HackEventLogger.naming_sqlite_local_changes_nonempty "update";
-    let (local_changes_saved : blob_format) =
-      Relative_path.Map.map local_changes.file_deltas ~f:(fun delta ->
-          match delta with
-          | Modified fi -> Modified (FileInfo.to_saved fi)
-          | Deleted -> Deleted)
-    in
-    let local_changes_blob =
-      Marshal.to_string local_changes_saved [Marshal.No_sharing]
-    in
-    let update_stmt = StatementCache.make_stmt stmt_cache update_sqlite in
-    Sqlite3.bind update_stmt 1 (Sqlite3.Data.BLOB local_changes_blob)
-    |> check_rc db;
-    Sqlite3.step update_stmt |> check_rc db
 
   let get stmt_cache =
     let get_stmt = StatementCache.make_stmt stmt_cache get_sqlite in
@@ -288,6 +224,26 @@ module FileInfoTable = struct
       "
       table_name
 
+  let delete_sqlite =
+    Printf.sprintf
+      "
+        DELETE FROM %s WHERE PATH_PREFIX_TYPE = ? AND PATH_SUFFIX = ?
+      "
+      table_name
+
+  let get_file_info_id_sqlite =
+    Printf.sprintf
+      "
+        SELECT
+          FILE_INFO_ID
+        FROM
+          %s
+        WHERE
+          PATH_PREFIX_TYPE = ?
+          AND PATH_SUFFIX = ?
+      "
+      table_name
+
   let get_sqlite =
     Printf.sprintf
       "
@@ -315,6 +271,18 @@ module FileInfoTable = struct
         ORDER BY PATH_PREFIX_TYPE, PATH_SUFFIX;
       "
       table_name
+
+  let delete db stmt_cache relative_path =
+    let prefix_type =
+      Sqlite3.Data.INT
+        (Int64.of_int
+           (Relative_path.prefix_to_enum (Relative_path.prefix relative_path)))
+    in
+    let suffix = Sqlite3.Data.TEXT (Relative_path.suffix relative_path) in
+    let delete_stmt = StatementCache.make_stmt stmt_cache delete_sqlite in
+    Sqlite3.bind delete_stmt 1 prefix_type |> check_rc db;
+    Sqlite3.bind delete_stmt 2 suffix |> check_rc db;
+    Sqlite3.step delete_stmt |> check_rc db
 
   let insert
       db
@@ -437,6 +405,24 @@ module FileInfoTable = struct
       failwith
         (Printf.sprintf "Failure retrieving row: %s" (Sqlite3.Rc.to_string rc))
 
+  let get_file_info_id db stmt_cache path =
+    let get_stmt =
+      StatementCache.make_stmt stmt_cache get_file_info_id_sqlite
+    in
+    let prefix_type =
+      Relative_path.prefix_to_enum (Relative_path.prefix path)
+    in
+    let suffix = Relative_path.suffix path in
+    Sqlite3.bind get_stmt 1 (Sqlite3.Data.INT (Int64.of_int prefix_type))
+    |> check_rc db;
+    Sqlite3.bind get_stmt 2 (Sqlite3.Data.TEXT suffix) |> check_rc db;
+    match Sqlite3.step get_stmt with
+    | Sqlite3.Rc.DONE -> None
+    | Sqlite3.Rc.ROW -> Some (column_int64 get_stmt 0)
+    | rc ->
+      failwith
+        (Printf.sprintf "Failure retrieving row: %s" (Sqlite3.Rc.to_string rc))
+
   let fold stmt_cache ~init ~f =
     let iter_stmt = StatementCache.make_stmt stmt_cache iter_sqlite in
     let f iter_stmt acc =
@@ -449,32 +435,74 @@ module FileInfoTable = struct
     fold_sqlite iter_stmt ~f ~init
 end
 
-module TypesTable = struct
-  let class_flag =
-    Int64.of_int (Naming_types.kind_of_type_to_enum Naming_types.TClass)
+module SymbolTable = struct
+  let table_name = "NAMING_SYMBOLS"
 
-  let typedef_flag =
-    Int64.of_int (Naming_types.kind_of_type_to_enum Naming_types.TTypedef)
+  let create_table_sqlite =
+    (* CANON_HASH is the hash of the lowercase form of the name (even for consts which don't need it) *)
+    (* FLAGS comes from Naming_types.name_kind *)
+    Printf.sprintf
+      "
+      CREATE TABLE IF NOT EXISTS %s(
+        HASH INTEGER PRIMARY KEY NOT NULL,
+        CANON_HASH INTEGER NOT NULL,
+        DECL_HASH INTEGER NOT NULL,
+        FLAGS INTEGER NOT NULL,
+        FILE_INFO_ID INTEGER NOT NULL
+      );
+    "
+      table_name
 
-  let record_def_flag =
-    Int64.of_int (Naming_types.kind_of_type_to_enum Naming_types.TRecordDef)
+  let create_index_sqlite =
+    Printf.sprintf
+      "
+    CREATE INDEX IF NOT EXISTS TYPES_CANON ON %s (CANON_HASH);
+    "
+      table_name
 
-  let create_table_sqlite = create_symbols_table_sqlite
+  let create_temporary_index_sqlite =
+    Printf.sprintf
+      "
+    CREATE INDEX IF NOT EXISTS SYMBOLS_FILE_INFO_ID ON %s (FILE_INFO_ID);
+    "
+      table_name
 
-  let create_index_sqlite = create_symbols_index_sqlite
+  let drop_temporary_index_sqlite =
+    Printf.sprintf "
+    DROP INDEX SYMBOLS_FILE_INFO_ID;
+    "
 
-  let insert_sqlite = insert_symbols_sqlite
+  let insert_sqlite =
+    Printf.sprintf
+      "
+      INSERT INTO %s(
+        HASH,
+        CANON_HASH,
+        DECL_HASH,
+        FLAGS,
+        FILE_INFO_ID)
+      VALUES (?, ?, ?, ?, ?);
+    "
+      table_name
+
+  let delete_sqlite =
+    Printf.sprintf
+      "
+      DELETE FROM %s WHERE FILE_INFO_ID = ?
+      "
+      table_name
 
   let (get_sqlite, get_sqlite_case_insensitive) =
     let base =
       Str.global_replace
         (Str.regexp "{table_name}")
-        symbols_table_name
+        table_name
         "
         SELECT
           NAMING_FILE_INFO.PATH_PREFIX_TYPE,
           NAMING_FILE_INFO.PATH_SUFFIX,
-          {table_name}.FLAGS
+          {table_name}.FLAGS,
+          {table_name}.DECL_HASH
         FROM {table_name}
         LEFT JOIN NAMING_FILE_INFO ON
           {table_name}.FILE_INFO_ID = NAMING_FILE_INFO.FILE_INFO_ID
@@ -483,164 +511,23 @@ module TypesTable = struct
     ( Str.global_replace (Str.regexp "{hash}") "HASH" base,
       Str.global_replace (Str.regexp "{hash}") "CANON_HASH" base )
 
-  let insert db stmt_cache ~name ~flags ~file_info_id ~decl_hash :
-      (unit, insertion_error) result =
-    let hash =
-      Typing_deps.Dep.Type name
-      |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit
-      |> Typing_deps.Dep.to_int64
-    in
-    let canon_hash =
-      Typing_deps.Dep.Type (to_canon_name_key name)
-      |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit
-      |> Typing_deps.Dep.to_int64
-    in
+  let delete db stmt_cache file_info_id =
+    let delete_stmt = StatementCache.make_stmt stmt_cache delete_sqlite in
+    Sqlite3.bind delete_stmt 1 (Sqlite3.Data.INT file_info_id) |> check_rc db;
+    Sqlite3.step delete_stmt |> check_rc db
+
+  (** Note: name parameter is used solely for debugging; it's only the hash and canon_hash that get inserted. *)
+  let insert
+      db stmt_cache ~name ~hash ~canon_hash ~name_kind ~file_info_id ~decl_hash
+      : (unit, insertion_error) result =
+    let flags = name_kind |> Naming_types.name_kind_to_enum |> Int64.of_int in
     let insert_stmt = StatementCache.make_stmt stmt_cache insert_sqlite in
     Sqlite3.bind insert_stmt 1 (Sqlite3.Data.INT hash) |> check_rc db;
     Sqlite3.bind insert_stmt 2 (Sqlite3.Data.INT canon_hash) |> check_rc db;
     Sqlite3.bind insert_stmt 3 (Sqlite3.Data.INT decl_hash) |> check_rc db;
     Sqlite3.bind insert_stmt 4 (Sqlite3.Data.INT flags) |> check_rc db;
     Sqlite3.bind insert_stmt 5 (Sqlite3.Data.INT file_info_id) |> check_rc db;
-    let kind_of_type =
-      Naming_types.kind_of_type_of_enum (Option.value_exn (Int64.to_int flags))
-    in
-    insert_safe ~name ~kind_of_type ~hash ~canon_hash:(Some canon_hash)
-    @@ fun () -> Sqlite3.step insert_stmt |> check_rc db
-
-  let insert_class db stmt_cache ~name ~file_info_id ~decl_hash :
-      (unit, insertion_error) result =
-    insert db stmt_cache ~name ~flags:class_flag ~file_info_id ~decl_hash
-
-  let insert_typedef db stmt_cache ~name ~file_info_id ~decl_hash :
-      (unit, insertion_error) result =
-    insert db stmt_cache ~name ~flags:typedef_flag ~file_info_id ~decl_hash
-
-  let insert_record_def db stmt_cache ~name ~file_info_id ~decl_hash :
-      (unit, insertion_error) result =
-    insert db stmt_cache ~name ~flags:record_def_flag ~file_info_id ~decl_hash
-
-  let get db stmt_cache dep stmt =
-    let hash = dep |> Typing_deps.Dep.to_int64 in
-    let get_stmt = StatementCache.make_stmt stmt_cache stmt in
-    Sqlite3.bind get_stmt 1 (Sqlite3.Data.INT hash) |> check_rc db;
-    match Sqlite3.step get_stmt with
-    | Sqlite3.Rc.DONE -> None
-    | Sqlite3.Rc.ROW ->
-      let open Option in
-      let prefix_type = column_int64 get_stmt 0 in
-      let suffix = column_str get_stmt 1 in
-      let flags = Int64.to_int (column_int64 get_stmt 2) in
-      let class_type =
-        value_exn (flags >>= Naming_types.kind_of_type_of_enum)
-      in
-      Some (make_relative_path ~prefix_int:prefix_type ~suffix, class_type)
-    | rc ->
-      failwith
-        (Printf.sprintf "Failure retrieving row: %s" (Sqlite3.Rc.to_string rc))
-end
-
-module FunsTable = struct
-  let create_table_sqlite = create_symbols_table_sqlite
-
-  let create_index_sqlite = create_symbols_index_sqlite
-
-  let insert_sqlite = insert_symbols_sqlite
-
-  let (get_sqlite, get_sqlite_case_insensitive) =
-    let base =
-      Str.global_replace
-        (Str.regexp "{table_name}")
-        symbols_table_name
-        "
-        SELECT
-          NAMING_FILE_INFO.PATH_PREFIX_TYPE,
-          NAMING_FILE_INFO.PATH_SUFFIX
-        FROM {table_name}
-        LEFT JOIN NAMING_FILE_INFO ON
-          {table_name}.FILE_INFO_ID = NAMING_FILE_INFO.FILE_INFO_ID
-        WHERE {table_name}.{hash} = ?"
-    in
-    ( Str.global_replace (Str.regexp "{hash}") "HASH" base,
-      Str.global_replace (Str.regexp "{hash}") "CANON_HASH" base )
-
-  let insert db stmt_cache ~name ~file_info_id ~decl_hash :
-      (unit, insertion_error) result =
-    let hash =
-      Typing_deps.Dep.Fun name
-      |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit
-      |> Typing_deps.Dep.to_int64
-    in
-    let canon_hash =
-      Typing_deps.Dep.Fun (to_canon_name_key name)
-      |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit
-      |> Typing_deps.Dep.to_int64
-    in
-    let insert_stmt = StatementCache.make_stmt stmt_cache insert_sqlite in
-    let not_applicable_flag = Int64.zero in
-    Sqlite3.bind insert_stmt 1 (Sqlite3.Data.INT hash) |> check_rc db;
-    Sqlite3.bind insert_stmt 2 (Sqlite3.Data.INT canon_hash) |> check_rc db;
-    Sqlite3.bind insert_stmt 3 (Sqlite3.Data.INT decl_hash) |> check_rc db;
-    Sqlite3.bind insert_stmt 4 (Sqlite3.Data.INT not_applicable_flag)
-    |> check_rc db;
-    Sqlite3.bind insert_stmt 5 (Sqlite3.Data.INT file_info_id) |> check_rc db;
-    insert_safe ~name ~kind_of_type:None ~hash ~canon_hash:(Some canon_hash)
-    @@ fun () -> Sqlite3.step insert_stmt |> check_rc db
-
-  let get db stmt_cache dep stmt =
-    let hash = dep |> Typing_deps.Dep.to_int64 in
-    let get_stmt = StatementCache.make_stmt stmt_cache stmt in
-    Sqlite3.bind get_stmt 1 (Sqlite3.Data.INT hash) |> check_rc db;
-    match Sqlite3.step get_stmt with
-    | Sqlite3.Rc.DONE -> None
-    | Sqlite3.Rc.ROW ->
-      let prefix_type = column_int64 get_stmt 0 in
-      let suffix = column_str get_stmt 1 in
-      Some (make_relative_path ~prefix_int:prefix_type ~suffix)
-    | rc ->
-      failwith
-        (Printf.sprintf "Failure retrieving row: %s" (Sqlite3.Rc.to_string rc))
-end
-
-module ConstsTable = struct
-  let create_table_sqlite = create_symbols_table_sqlite
-
-  let create_index_sqlite = create_symbols_index_sqlite
-
-  let insert_sqlite = insert_symbols_sqlite
-
-  let get_sqlite =
-    Str.global_replace
-      (Str.regexp "{table_name}")
-      symbols_table_name
-      "
-        SELECT
-          NAMING_FILE_INFO.PATH_PREFIX_TYPE,
-          NAMING_FILE_INFO.PATH_SUFFIX
-        FROM {table_name}
-        LEFT JOIN NAMING_FILE_INFO ON
-          {table_name}.FILE_INFO_ID = NAMING_FILE_INFO.FILE_INFO_ID
-        WHERE {table_name}.HASH = ?
-      "
-
-  let insert db stmt_cache ~name ~file_info_id ~decl_hash :
-      (unit, insertion_error) result =
-    let hash =
-      Typing_deps.Dep.GConst name
-      |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit
-      |> Typing_deps.Dep.to_int64
-    in
-    let canon_hash =
-      Typing_deps.Dep.GConst (to_canon_name_key name)
-      |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit
-      |> Typing_deps.Dep.to_int64
-    in
-    let insert_stmt = StatementCache.make_stmt stmt_cache insert_sqlite in
-    Sqlite3.bind insert_stmt 1 (Sqlite3.Data.INT hash) |> check_rc db;
-    Sqlite3.bind insert_stmt 2 (Sqlite3.Data.INT canon_hash) |> check_rc db;
-    Sqlite3.bind insert_stmt 3 (Sqlite3.Data.INT decl_hash) |> check_rc db;
-    Sqlite3.bind insert_stmt 4 (Sqlite3.Data.INT Int64.zero) |> check_rc db;
-    Sqlite3.bind insert_stmt 5 (Sqlite3.Data.INT file_info_id) |> check_rc db;
-    insert_safe ~name ~kind_of_type:None ~hash ~canon_hash:None @@ fun () ->
+    insert_safe ~name ~name_kind ~hash ~canon_hash @@ fun () ->
     Sqlite3.step insert_stmt |> check_rc db
 
   let get db stmt_cache dep stmt =
@@ -652,7 +539,15 @@ module ConstsTable = struct
     | Sqlite3.Rc.ROW ->
       let prefix_type = column_int64 get_stmt 0 in
       let suffix = column_str get_stmt 1 in
-      Some (make_relative_path ~prefix_int:prefix_type ~suffix)
+      let flag = Option.value_exn (column_int64 get_stmt 2 |> Int64.to_int) in
+      let decl_hash = column_int64 get_stmt 3 |> Int64.to_string in
+      let name_kind =
+        Option.value_exn (flag |> Naming_types.name_kind_of_enum)
+      in
+      Some
+        ( make_relative_path ~prefix_int:prefix_type ~suffix,
+          name_kind,
+          decl_hash )
     | rc ->
       failwith
         (Printf.sprintf "Failure retrieving row: %s" (Sqlite3.Rc.to_string rc))
@@ -717,39 +612,79 @@ let save_file_info db stmt_cache relative_path file_info :
     | Some id -> id
     | None -> failwith "Could not get last inserted row ID"
   in
-  let insert insert_fun (symbols_inserted, errors) (_, name, decl_hash) =
+  let insert ~name_kind ~dep_ctor (symbols_inserted, errors) (_, name, decl_hash)
+      =
     let decl_hash = Option.value decl_hash ~default:Int64.zero in
-    match insert_fun db stmt_cache ~name ~file_info_id ~decl_hash with
+    let hash =
+      name
+      |> dep_ctor
+      |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit
+      |> Typing_deps.Dep.to_int64
+    in
+    let canon_hash =
+      name
+      |> to_canon_name_key
+      |> dep_ctor
+      |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit
+      |> Typing_deps.Dep.to_int64
+    in
+    match
+      SymbolTable.insert
+        db
+        stmt_cache
+        ~name
+        ~name_kind
+        ~hash
+        ~canon_hash
+        ~file_info_id
+        ~decl_hash
+    with
     | Ok () -> (symbols_inserted + 1, errors)
     | Error error -> (symbols_inserted, error :: errors)
   in
   let results = (0, []) in
   let results =
-    List.fold ~init:results ~f:(insert FunsTable.insert) file_info.FileInfo.funs
+    List.fold
+      file_info.FileInfo.funs
+      ~init:results
+      ~f:
+        (insert ~name_kind:Naming_types.Fun_kind ~dep_ctor:(fun name ->
+             Typing_deps.Dep.Fun name))
   in
   let results =
     List.fold
-      ~init:results
-      ~f:(insert TypesTable.insert_class)
       file_info.FileInfo.classes
+      ~init:results
+      ~f:
+        (insert
+           ~name_kind:Naming_types.(Type_kind TClass)
+           ~dep_ctor:(fun name -> Typing_deps.Dep.Type name))
   in
   let results =
     List.fold
-      ~init:results
-      ~f:(insert TypesTable.insert_typedef)
       file_info.FileInfo.typedefs
+      ~init:results
+      ~f:
+        (insert
+           ~name_kind:Naming_types.(Type_kind TTypedef)
+           ~dep_ctor:(fun name -> Typing_deps.Dep.Type name))
   in
   let results =
     List.fold
-      ~init:results
-      ~f:(insert TypesTable.insert_record_def)
       file_info.FileInfo.record_defs
+      ~init:results
+      ~f:
+        (insert
+           ~name_kind:Naming_types.(Type_kind TRecordDef)
+           ~dep_ctor:(fun name -> Typing_deps.Dep.Type name))
   in
   let results =
     List.fold
-      ~init:results
-      ~f:(insert ConstsTable.insert)
       file_info.FileInfo.consts
+      ~init:results
+      ~f:
+        (insert ~name_kind:Naming_types.Const_kind ~dep_ctor:(fun name ->
+             Typing_deps.Dep.GConst name))
   in
   results
 
@@ -760,9 +695,7 @@ let save_file_infos db_name file_info_map ~base_content_version =
   try
     Sqlite3.exec db LocalChanges.create_table_sqlite |> check_rc db;
     Sqlite3.exec db FileInfoTable.create_table_sqlite |> check_rc db;
-    Sqlite3.exec db ConstsTable.create_table_sqlite |> check_rc db;
-    Sqlite3.exec db TypesTable.create_table_sqlite |> check_rc db;
-    Sqlite3.exec db FunsTable.create_table_sqlite |> check_rc db;
+    Sqlite3.exec db SymbolTable.create_table_sqlite |> check_rc db;
 
     (* Incremental updates only update the single row in this table, so we need
      * to write in some dummy data to start. *)
@@ -780,9 +713,7 @@ let save_file_infos db_name file_info_map ~base_content_version =
           })
     in
     Sqlite3.exec db FileInfoTable.create_index_sqlite |> check_rc db;
-    Sqlite3.exec db TypesTable.create_index_sqlite |> check_rc db;
-    Sqlite3.exec db FunsTable.create_index_sqlite |> check_rc db;
-    Sqlite3.exec db ConstsTable.create_index_sqlite |> check_rc db;
+    Sqlite3.exec db SymbolTable.create_index_sqlite |> check_rc db;
     Sqlite3.exec db "END TRANSACTION;" |> check_rc db;
     StatementCache.close stmt_cache;
     if not @@ Sqlite3.db_close db then
@@ -795,14 +726,45 @@ let save_file_infos db_name file_info_map ~base_content_version =
 
 let copy_and_update
     ~(existing_db : db_path) ~(new_db : db_path) (local_changes : local_changes)
-    : unit =
+    : save_result =
   let (Db_path existing_path, Db_path new_path) = (existing_db, new_db) in
   FileUtil.cp ~force:(FileUtil.Ask (fun _ -> false)) [existing_path] new_path;
   let new_db = open_db new_db in
   let stmt_cache = StatementCache.make ~db:new_db in
-  LocalChanges.update new_db stmt_cache local_changes;
+  Sqlite3.exec new_db "BEGIN TRANSACTION;" |> check_rc new_db;
+  Sqlite3.exec new_db SymbolTable.create_temporary_index_sqlite
+  |> check_rc new_db;
+  let result =
+    Relative_path.Map.fold
+      local_changes.file_deltas
+      ~init:empty_save_result
+      ~f:(fun path file_info acc ->
+        let file_info_id =
+          FileInfoTable.get_file_info_id new_db stmt_cache path
+        in
+        if Option.is_some file_info_id then (
+          let file_info_id = Option.value_exn file_info_id in
+          SymbolTable.delete new_db stmt_cache file_info_id;
+          FileInfoTable.delete new_db stmt_cache path
+        );
+        match file_info with
+        | Deleted -> acc
+        | Modified file_info ->
+          let (symbols_added, errors) =
+            save_file_info new_db stmt_cache path file_info
+          in
+          {
+            files_added = acc.files_added + 1;
+            symbols_added = acc.symbols_added + symbols_added;
+            errors = List.rev_append acc.errors errors;
+          })
+  in
+  Sqlite3.exec new_db "END TRANSACTION;" |> check_rc new_db;
   StatementCache.close stmt_cache;
-  ()
+  Sqlite3.exec new_db SymbolTable.drop_temporary_index_sqlite |> check_rc new_db;
+  (* This reclaims space after deleting the index *)
+  Sqlite3.exec new_db "VACUUM;" |> check_rc new_db;
+  result
 
 let get_local_changes (db_path : db_path) : local_changes =
   let (_db, stmt_cache) = get_db_and_stmt_cache db_path in
@@ -894,63 +856,97 @@ let sqlite_exn_wrapped_get_db_and_stmt_cache db_path name =
       name;
     raise exn
 
+let get_type_wrapper
+    (result : (Relative_path.t * Naming_types.name_kind * string) option) :
+    (Relative_path.t * Naming_types.kind_of_type) option =
+  match result with
+  | None -> None
+  | Some (filename, Naming_types.Type_kind kind_of_type, _) ->
+    Some (filename, kind_of_type)
+  | Some (_, _, _) -> failwith "wrong symbol kind"
+
+let get_fun_wrapper
+    (result : (Relative_path.t * Naming_types.name_kind * string) option) :
+    Relative_path.t option =
+  match result with
+  | None -> None
+  | Some (filename, Naming_types.Fun_kind, _) -> Some filename
+  | Some (_, _, _) -> failwith "wrong symbol kind"
+
+let get_const_wrapper
+    (result : (Relative_path.t * Naming_types.name_kind * string) option) :
+    Relative_path.t option =
+  match result with
+  | None -> None
+  | Some (filename, Naming_types.Const_kind, _) -> Some filename
+  | Some (_, _, _) -> failwith "wrong symbol kind"
+
+let get_decl_hash_wrapper
+    (result : (Relative_path.t * Naming_types.name_kind * string) option) :
+    string option =
+  match result with
+  | None -> None
+  | Some (_, _, decl_hash) -> Some decl_hash
+
 let get_type_path_by_name (db_path : db_path) name =
   let (db, stmt_cache) =
     sqlite_exn_wrapped_get_db_and_stmt_cache db_path name
   in
-  TypesTable.get
+  SymbolTable.get
     db
     stmt_cache
     (Typing_deps.Dep.Type name
     |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit)
-    TypesTable.get_sqlite
+    SymbolTable.get_sqlite
+  |> get_type_wrapper
 
 let get_itype_path_by_name (db_path : db_path) name =
   let (db, stmt_cache) =
     sqlite_exn_wrapped_get_db_and_stmt_cache db_path name
   in
-  TypesTable.get
+  SymbolTable.get
     db
     stmt_cache
     (Typing_deps.Dep.Type (Caml.String.lowercase_ascii name)
     |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit)
-    TypesTable.get_sqlite_case_insensitive
-
-let get_type_path_by_64bit_dep (db_path : db_path) (dep : Typing_deps.Dep.t) :
-    (Relative_path.t * Naming_types.kind_of_type) option =
-  let (db, stmt_cache) = get_db_and_stmt_cache db_path in
-  TypesTable.get db stmt_cache dep TypesTable.get_sqlite
+    SymbolTable.get_sqlite_case_insensitive
+  |> get_type_wrapper
 
 let get_fun_path_by_name (db_path : db_path) name =
   let (db, stmt_cache) = get_db_and_stmt_cache db_path in
-  FunsTable.get
+  SymbolTable.get
     db
     stmt_cache
     (Typing_deps.Dep.Fun name |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit)
-    FunsTable.get_sqlite
+    SymbolTable.get_sqlite
+  |> get_fun_wrapper
 
 let get_ifun_path_by_name (db_path : db_path) name =
   let (db, stmt_cache) = get_db_and_stmt_cache db_path in
-  FunsTable.get
+  SymbolTable.get
     db
     stmt_cache
     (Typing_deps.Dep.Fun (Caml.String.lowercase_ascii name)
     |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit)
-    FunsTable.get_sqlite_case_insensitive
-
-let get_fun_path_by_64bit_dep (db_path : db_path) (dep : Typing_deps.Dep.t) =
-  let (db, stmt_cache) = get_db_and_stmt_cache db_path in
-  FunsTable.get db stmt_cache dep FunsTable.get_sqlite
+    SymbolTable.get_sqlite_case_insensitive
+  |> get_fun_wrapper
 
 let get_const_path_by_name (db_path : db_path) name =
   let (db, stmt_cache) = get_db_and_stmt_cache db_path in
-  ConstsTable.get
+  SymbolTable.get
     db
     stmt_cache
     (Typing_deps.Dep.GConst name
     |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit)
-    ConstsTable.get_sqlite
+    SymbolTable.get_sqlite
+  |> get_const_wrapper
 
-let get_const_path_by_64bit_dep (db_path : db_path) (dep : Typing_deps.Dep.t) =
+let get_path_by_64bit_dep (db_path : db_path) (dep : Typing_deps.Dep.t) =
   let (db, stmt_cache) = get_db_and_stmt_cache db_path in
-  ConstsTable.get db stmt_cache dep ConstsTable.get_sqlite
+  SymbolTable.get db stmt_cache dep SymbolTable.get_sqlite
+  |> Option.map ~f:(function (first, second, _) -> (first, second))
+
+let get_decl_hash_by_64bit_dep (db_path : db_path) (dep : Typing_deps.Dep.t) =
+  let (db, stmt_cache) = get_db_and_stmt_cache db_path in
+  SymbolTable.get db stmt_cache dep SymbolTable.get_sqlite
+  |> get_decl_hash_wrapper

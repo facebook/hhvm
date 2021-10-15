@@ -33,6 +33,7 @@
     file_info
     heap_shared_mem
     heap_shared_mem_hash
+    logging
     ocamlpool
     relative_path
     typing_deps_rust

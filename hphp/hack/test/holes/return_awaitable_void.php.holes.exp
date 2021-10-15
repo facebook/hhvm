@@ -12,7 +12,7 @@
         f_params =
         [{ param_annotation = (string); param_type_hint = ((string), (Some ([2:20-26], (Hprim Tstring)))); 
            param_is_variadic = false; param_pos = [2:27-29]; param_name = "$x"; 
-           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_expr = None; param_readonly = None; param_callconv = Pnormal; 
            param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
@@ -50,7 +50,7 @@
          f_params =
          [{ param_annotation = (?string); param_type_hint = ((?string), (Some ([6:18-25], (Hoption ([6:19-25], (Hprim Tstring)))))); 
             param_is_variadic = false; param_pos = [6:26-28]; param_name = "$x"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
@@ -68,7 +68,7 @@
                            ((void), [11:10-23],
                             (Await
                                ((Awaitable<void>), [11:16-23],
-                                (Call ((((function(string $x): Awaitable<void>)), [11:16-19], (Id ([11:16-19], "\\err"))), [], [((string), [11:20-22], (Lvar ([11:20-22], $x)))], None))))),
+                                (Call ((((function(string $x): Awaitable<void>)), [11:16-19], (Id ([11:16-19], "\\err"))), [], [(Pnormal, ((string), [11:20-22], (Lvar ([11:20-22], $x))))], None))))),
                            (void), (int), Typing))))))
              ]
            };

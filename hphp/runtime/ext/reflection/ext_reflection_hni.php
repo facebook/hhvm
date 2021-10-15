@@ -287,7 +287,6 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   <<__Native>>
   private function getParamInfo()[]: varray<darray<string, mixed>>;
 
-  private $params = null;
 
   /**
    * ( excerpt from
@@ -299,25 +298,16 @@ abstract class ReflectionFunctionAbstract implements Reflector {
    *
    * @return     array  The parameters, as a ReflectionParameter object.
    */
-  <<__ProvenanceSkipFrame>>
+  <<__ProvenanceSkipFrame, __Memoize>>
   public function getParameters()[]: varray<ReflectionParameter> {
     // FIXME: ReflectionParameter sh/could have native data pointing to the
     // relevant Func::ParamInfo data structure
-    if (null === $this->params) {
-      $ret = varray[];
-      foreach ($this->getParamInfo() as $idx => $info) {
-        $param = new ReflectionParameter(null, null);
-        $param->info = $info;
-        $param->name = $info['name'];
-        $param->paramTypeInfo = darray[];
-        $param->paramTypeInfo['name'] = $info['type_hint'];
-        $param->paramTypeInfo['nullable'] = $info['type_hint_nullable'];
-        $param->paramTypeInfo['builtin'] = $info['type_hint_builtin'];
-        $ret[] = $param;
-      }
-      $this->params = $ret;
+    $ret = varray[];
+    foreach ($this->getParamInfo() as $idx => $info) {
+      $param = new ReflectionParameter(null, null, $info);
+      $ret[] = $param;
     }
-    return $this->params;
+    return $ret;
   }
 
   /**
@@ -2319,7 +2309,7 @@ class ReflectionTypeConstant implements Reflector {
    * reflection.hhi. */
   public function getTypeStructure()[] {
     return HH\type_structure(
-      $this->getDeclaringClassname(),
+      $this->getClassname(),
       $this->getName()
     );
   }

@@ -1,4 +1,3 @@
-use decl_provider::DeclProvider;
 use hhbc_by_ref_emit_symbol_refs as emit_symbol_refs;
 use hhbc_by_ref_env::emitter::Emitter;
 use hhbc_by_ref_hhbc_id::{class, Id};
@@ -10,19 +9,19 @@ use oxidized::{
     pos::Pos,
 };
 
-struct RewriteXmlVisitor<'emitter, 'arena, 'decl, D> {
-    phantom: std::marker::PhantomData<(&'emitter &'arena (), &'emitter &'decl (), D)>,
+struct RewriteXmlVisitor<'emitter, 'arena, 'decl> {
+    phantom: std::marker::PhantomData<(&'emitter &'arena (), &'emitter &'decl ())>,
 }
 
-struct Ctx<'emitter, 'arena, 'decl, D: DeclProvider<'decl>> {
+struct Ctx<'emitter, 'arena, 'decl> {
     alloc: &'arena bumpalo::Bump,
-    emitter: &'emitter mut Emitter<'arena, 'decl, D>,
+    emitter: &'emitter mut Emitter<'arena, 'decl>,
 }
 
-impl<'ast, 'arena, 'emitter, 'decl, D: DeclProvider<'decl> + 'emitter> VisitorMut<'ast>
-    for RewriteXmlVisitor<'emitter, 'arena, 'decl, D>
+impl<'ast, 'arena, 'emitter, 'decl> VisitorMut<'ast>
+    for RewriteXmlVisitor<'emitter, 'arena, 'decl>
 {
-    type P = AstParams<Ctx<'emitter, 'arena, 'decl, D>, hhbc_by_ref_instruction_sequence::Error>;
+    type P = AstParams<Ctx<'emitter, 'arena, 'decl>, hhbc_by_ref_instruction_sequence::Error>;
 
     fn object(&mut self) -> &mut dyn VisitorMut<'ast, P = Self::P> {
         self
@@ -30,7 +29,7 @@ impl<'ast, 'arena, 'emitter, 'decl, D: DeclProvider<'decl> + 'emitter> VisitorMu
 
     fn visit_expr(
         &mut self,
-        c: &mut Ctx<'emitter, 'arena, 'decl, D>,
+        c: &mut Ctx<'emitter, 'arena, 'decl>,
         e: &'ast mut ast::Expr,
     ) -> Result<()> {
         let ast::Expr(_, pos, expr) = e;
@@ -44,22 +43,22 @@ impl<'ast, 'arena, 'emitter, 'decl, D: DeclProvider<'decl> + 'emitter> VisitorMu
     }
 }
 
-pub fn rewrite_xml<'p, 'arena, 'emitter, 'decl, D: DeclProvider<'decl>>(
+pub fn rewrite_xml<'p, 'arena, 'emitter, 'decl>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &'emitter mut Emitter<'arena, 'decl, D>,
+    emitter: &'emitter mut Emitter<'arena, 'decl>,
     prog: &'p mut ast::Program,
 ) -> Result<()> {
     let mut xml_visitor = RewriteXmlVisitor {
         phantom: std::marker::PhantomData,
     };
-    let mut c: Ctx<'emitter, 'arena, 'decl, D> = Ctx { alloc, emitter };
+    let mut c: Ctx<'emitter, 'arena, 'decl> = Ctx { alloc, emitter };
 
     visit_mut(&mut xml_visitor, &mut c, prog)
 }
 
-fn rewrite_xml_<'arena, 'decl, D: DeclProvider<'decl>>(
+fn rewrite_xml_<'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
-    e: &mut Emitter<'arena, 'decl, D>,
+    e: &mut Emitter<'arena, 'decl>,
     pos: &Pos,
     (id, attributes, children): (ast::Sid, Vec<ast::XhpAttribute>, Vec<ast::Expr>),
 ) -> Result<ast::Expr> {

@@ -1,0 +1,15 @@
+
+Warning: objprof: data structure is too deep, pruning traversal in %s/test/slow/objprof/deep-obj.php on line 20
+dict(1) {
+  ["C"]=>
+  dict(4) {
+    ["instances"]=>
+    int(1)
+    ["bytes"]=>
+    int(%d)
+    ["bytes_normalized"]=>
+    float(%f)
+    ["paths"]=>
+    NULL
+  }
+}

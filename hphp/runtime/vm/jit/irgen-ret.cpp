@@ -39,8 +39,7 @@ void retSurpriseCheck(IRGS& env, SSATmp* retVal, AH afterHook) {
   ifThen(
     env,
     [&] (Block* taken) {
-      auto const ptr = resumeMode(env) != ResumeMode::None ? sp(env) : fp(env);
-      gen(env, CheckSurpriseFlags, taken, ptr);
+      gen(env, CheckSurpriseFlags, taken, anyStackRegister(env));
     },
     [&] {
       // Return value is no longer on the stack. If the ReturnHook throws, it
@@ -83,6 +82,8 @@ void freeLocalsAndThis(IRGS& env) {
 
 void normalReturn(IRGS& env, SSATmp* retval, bool suspended) {
   assertx(resumeMode(env) == ResumeMode::None);
+  assertx(!isInlining(env));
+
   // If we're on the eager side of an async function, we have to zero-out the
   // TV aux of the return value, because it might be used as a flag if async
   // eager return was requested.
@@ -99,6 +100,8 @@ void normalReturn(IRGS& env, SSATmp* retval, bool suspended) {
 }
 
 void asyncFunctionReturn(IRGS& env, SSATmp* retVal, bool suspended) {
+  assertx(!isInlining(env));
+
   if (resumeMode(env) == ResumeMode::None) {
     retSurpriseCheck(env, retVal, []{});
 
@@ -144,6 +147,7 @@ void asyncFunctionReturn(IRGS& env, SSATmp* retVal, bool suspended) {
 
 void generatorReturn(IRGS& env, SSATmp* retval) {
   assertx(curFunc(env)->isGenerator());
+  assertx(!isInlining(env));
 
   retSurpriseCheck(env, retval, []{});
 
@@ -186,6 +190,7 @@ void implRet(IRGS& env, bool suspended) {
   auto const func = curFunc(env);
   assertx(!suspended || func->isAsyncFunction());
   assertx(!suspended || resumeMode(env) == ResumeMode::None);
+  assertx(!isInlining(env));
 
   freeLocalsAndThis(env);
 

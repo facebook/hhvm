@@ -17,73 +17,88 @@
 
 #pragma once
 
+#include <folly/Overload.h>
 #include <folly/io/IOBuf.h>
 #include <thrift/lib/cpp/transport/TTransportException.h>
-#include <thrift/lib/cpp2/async/StreamCallbacks.h>
 #include <thrift/lib/cpp2/async/ClientStreamBridge.h>
 #include <thrift/lib/cpp2/async/RequestCallback.h>
 #include <thrift/lib/cpp2/async/RequestChannel.h>
+#include <thrift/lib/cpp2/async/StreamCallbacks.h>
+#include <variant>
 #include <exception>
+#include <tuple>
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/type-resource.h"
+#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/ext/asio/asio-external-thread-event.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/vm/native-data.h"
 
-namespace HPHP { namespace thrift {
+namespace HPHP {
+namespace thrift {
 ///////////////////////////////////////////////////////////////////////////////
 
 extern const int64_t k_THRIFT_MARK_LEGACY_ARRAYS;
 
-void HHVM_FUNCTION(thrift_protocol_write_binary,
-                   const Object& transportobj,
-                   const String& method_name,
-                   int64_t msgtype,
-                   const Object& request_struct,
-                   int seqid,
-                   bool strict_write,
-                   bool oneway = false);
+void HHVM_FUNCTION(
+    thrift_protocol_write_binary,
+    const Object& transportobj,
+    const String& method_name,
+    int64_t msgtype,
+    const Object& request_struct,
+    int seqid,
+    bool strict_write,
+    bool oneway = false);
 
-Object HHVM_FUNCTION(thrift_protocol_read_binary,
-                     const Object& transportobj,
-                     const String& obj_typename,
-                     bool strict_read,
-                     int options);
+Object HHVM_FUNCTION(
+    thrift_protocol_read_binary,
+    const Object& transportobj,
+    const String& obj_typename,
+    bool strict_read,
+    int options);
 
-Variant HHVM_FUNCTION(thrift_protocol_read_binary_struct,
-                      const Object& transportobj,
-                      const String& obj_typename,
-                      int options);
+Variant HHVM_FUNCTION(
+    thrift_protocol_read_binary_struct,
+    const Object& transportobj,
+    const String& obj_typename,
+    int options);
 
-int64_t HHVM_FUNCTION(thrift_protocol_set_compact_version,
-                      int version);
+int64_t HHVM_FUNCTION(thrift_protocol_set_compact_version, int version);
 
-void HHVM_FUNCTION(thrift_protocol_write_compact,
-                   const Object& transportobj,
-                   const String& method_name,
-                   int64_t msgtype,
-                   const Object& request_struct,
-                   int seqid,
-                   bool oneway = false);
+void HHVM_FUNCTION(
+    thrift_protocol_write_compact,
+    const Object& transportobj,
+    const String& method_name,
+    int64_t msgtype,
+    const Object& request_struct,
+    int seqid,
+    bool oneway = false);
 
-Variant HHVM_FUNCTION(thrift_protocol_read_compact,
-                      const Object& transportobj,
-                      const String& obj_typename,
-                      int options);
+Variant HHVM_FUNCTION(
+    thrift_protocol_read_compact,
+    const Object& transportobj,
+    const String& obj_typename,
+    int options);
 
-Object HHVM_FUNCTION(thrift_protocol_read_compact_struct,
-                     const Object& transportobj,
-                     const String& obj_typename,
-                     int options);
+Object HHVM_FUNCTION(
+    thrift_protocol_read_compact_struct,
+    const Object& transportobj,
+    const String& obj_typename,
+    int options);
 
 ///////////////////////////////////////////////////////////////////////////////
 
 struct InteractionId {
-  static Object newInstance() { return Object{PhpClass()}; }
+  static Object newInstance() {
+    return Object{PhpClass()};
+  }
 
   static Class* PhpClass();
 
-  ~InteractionId() { sweep(); }
+  ~InteractionId() {
+    sweep();
+  }
 
   void sweep() {
     if (interactionId_) {
@@ -103,7 +118,7 @@ struct InteractionId {
     return interactionId_;
   }
 
-  private:
+ private:
   apache::thrift::InteractionId interactionId_;
   std::shared_ptr<apache::thrift::RequestChannel> channel_;
 };
@@ -118,7 +133,9 @@ struct RpcOptions {
     return *this;
   }
 
-  void sweep() { close(true); }
+  void sweep() {
+    close(true);
+  }
 
   void close(bool /*sweeping*/ = false) {}
 
@@ -130,7 +147,9 @@ struct RpcOptions {
     return c_RpcOptions;
   }
 
-  static Object newInstance() { return Object{PhpClass()}; }
+  static Object newInstance() {
+    return Object{PhpClass()};
+  }
 
   static RpcOptions* GetDataOrThrowException(ObjectData* object_) {
     if (object_ == nullptr) {
@@ -145,6 +164,7 @@ struct RpcOptions {
   }
 
   apache::thrift::RpcOptions rpcOptions;
+
  private:
   static Class* c_RpcOptions;
   TYPE_SCAN_IGNORE_ALL;
@@ -152,57 +172,16 @@ struct RpcOptions {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct TClientBufferedStreamError {
+struct TClientStreamError {
  public:
-  TClientBufferedStreamError() {}
-  TClientBufferedStreamError(std::unique_ptr<folly::IOBuf> encodedErrorMsg) :
-      errorMsg_(std::move(encodedErrorMsg)), isEncoded_(true) {}
-  TClientBufferedStreamError(std::string errorStr) :
-      errorMsg_(folly::IOBuf::copyBuffer(errorStr, errorStr.size())), isEncoded_(false) {}
-  std::unique_ptr<folly::IOBuf> errorMsg_;
-  bool isEncoded_;
-};
+  TClientStreamError() {}
+  TClientStreamError(std::unique_ptr<folly::IOBuf> encodedErrorMsg)
+      : errorMsg_(std::move(encodedErrorMsg)), isEncoded_(true) {}
+  TClientStreamError(std::string errorStr)
+      : errorMsg_(folly::IOBuf::copyBuffer(errorStr, errorStr.size())),
+        isEncoded_(false) {}
 
-const StaticString s_TClientBufferedStream("TClientBufferedStream");
-
-struct TClientBufferedStream {
-  TClientBufferedStream() = default;
-  TClientBufferedStream(const TClientBufferedStream&) = delete;
-  TClientBufferedStream& operator=(const TClientBufferedStream&) = delete;
-  ~TClientBufferedStream() { sweep(); }
-
-  using BufferAndErrorPair = std::pair<
-      std::vector<std::unique_ptr<folly::IOBuf>>,
-      TClientBufferedStreamError>;
-
-  void sweep() {
-    endStream();
-  }
-
-  void init(
-      apache::thrift::detail::ClientStreamBridge::ClientPtr streamBridge,
-      apache::thrift::BufferOptions bufferOptions) {
-    streamBridge_ = std::move(streamBridge);
-    bufferOptions_ = bufferOptions;
-    if (bufferOptions_.chunkSize == 0) {
-      streamBridge_->requestN(1);
-      ++bufferOptions_.chunkSize;
-    }
-    outstanding_ = bufferOptions_.chunkSize;
-    payloadDataSize_ = 0;
-  }
-
-  void endStream() {
-    streamBridge_.reset();
-  }
-
-  bool shouldRequestMore() {
-    return (outstanding_ <= bufferOptions_.chunkSize / 2) ||
-        (payloadDataSize_ >= kRequestCreditPayloadSize);
-  }
-
-  TClientBufferedStreamError getErrorMessage(
-      folly::exception_wrapper ew) {
+  static TClientStreamError create(folly::exception_wrapper ew) {
     std::unique_ptr<folly::IOBuf> msgBuffer;
     std::string msgStr = ew.what().toStdString();
     ew.handle(
@@ -242,14 +221,57 @@ struct TClientBufferedStream {
         [](...) {});
 
     if (msgBuffer) {
-      return TClientBufferedStreamError(std::move(msgBuffer));
+      return TClientStreamError(std::move(msgBuffer));
     }
-    return TClientBufferedStreamError(msgStr);
+    return TClientStreamError(msgStr);
+  }
+
+  std::unique_ptr<folly::IOBuf> errorMsg_;
+  bool isEncoded_;
+};
+
+const StaticString s_TClientBufferedStream("TClientBufferedStream");
+
+struct TClientBufferedStream {
+  TClientBufferedStream() = default;
+  TClientBufferedStream(const TClientBufferedStream&) = delete;
+  TClientBufferedStream& operator=(const TClientBufferedStream&) = delete;
+  ~TClientBufferedStream() {
+    sweep();
+  }
+
+  using BufferAndErrorPair =
+      std::pair<std::vector<std::unique_ptr<folly::IOBuf>>, TClientStreamError>;
+
+  void sweep() {
+    endStream();
+  }
+
+  void init(
+      apache::thrift::detail::ClientStreamBridge::ClientPtr streamBridge,
+      apache::thrift::BufferOptions bufferOptions) {
+    streamBridge_ = std::move(streamBridge);
+    bufferOptions_ = bufferOptions;
+    if (bufferOptions_.chunkSize == 0) {
+      streamBridge_->requestN(1);
+      ++bufferOptions_.chunkSize;
+    }
+    outstanding_ = bufferOptions_.chunkSize;
+    payloadDataSize_ = 0;
+  }
+
+  void endStream() {
+    streamBridge_.reset();
+  }
+
+  bool shouldRequestMore() {
+    return (outstanding_ <= bufferOptions_.chunkSize / 2) ||
+        (payloadDataSize_ >= kRequestCreditPayloadSize);
   }
 
   BufferAndErrorPair clientQueueToVec() {
     std::vector<std::unique_ptr<folly::IOBuf>> bufferVec;
-    TClientBufferedStreamError error;
+    TClientStreamError error;
     while (!queue_.empty()) {
       auto& payload = queue_.front();
       if (!payload.hasValue() && !payload.hasException()) {
@@ -258,7 +280,7 @@ struct TClientBufferedStream {
         break;
       }
       if (payload.hasException()) {
-        error = getErrorMessage(payload.exception());
+        error = TClientStreamError::create(payload.exception());
         queue_.pop();
         endStream();
         break;
@@ -284,7 +306,9 @@ struct TClientBufferedStream {
     return c_TClientBufferedStream;
   }
 
-  static Object newInstance() { return Object{PhpClass()}; }
+  static Object newInstance() {
+    return Object{PhpClass()};
+  }
 
   static TClientBufferedStream* GetDataOrThrowException(ObjectData* object_) {
     if (object_ == nullptr) {
@@ -311,20 +335,82 @@ struct TClientBufferedStream {
 
   static Class* c_TClientBufferedStream;
 };
-}}
 
-namespace HPHP {
-  inline String ioBufToString(const folly::IOBuf& ioBuf) {
-    auto resultStringData = StringData::Make(ioBuf.computeChainDataLength());
-    for (const auto& buf : ioBuf) {
-      auto const data = reinterpret_cast<const char*>(buf.data());
-      auto const piece = folly::StringPiece{data, buf.size()};
-      resultStringData->append(piece);
-    }
-    return String::attach(resultStringData);
+///////////////////////////////////////////////////////////////////////////////
+
+using TClientSinkCreditsOrFinalResponse =
+    std::variant<uint32_t, std::unique_ptr<folly::IOBuf>, TClientStreamError>;
+
+const StaticString s_TClientSink("TClientSink");
+
+struct TClientSink {
+  TClientSink() = default;
+  TClientSink(const TClientSink&) = delete;
+  TClientSink& operator=(const TClientSink&) = delete;
+  ~TClientSink() {
+    sweep();
   }
 
-  struct Thrift2StreamEvent final : AsioExternalThreadEvent {
+  void sweep() {
+    cancel();
+  }
+
+  void init(apache::thrift::detail::ClientSinkBridge::Ptr sinkBridge) {
+    sinkBridge_ = std::move(sinkBridge);
+  }
+
+  void endSink() {
+    sinkBridge_.reset();
+  }
+
+  void cancel() {
+    if (sinkBridge_) {
+      // TODO (T100686382) : Send cancellation payload to the server once the
+      // pinned thrift version is updated on the hhvm
+      endSink();
+    }
+  }
+
+  static Class* PhpClass() {
+    if (!c_TClientSink) {
+      c_TClientSink = Class::lookup(s_TClientSink.get());
+      assert(c_TClientSink);
+    }
+    return c_TClientSink;
+  }
+
+  static Object newInstance() {
+    return Object{PhpClass()};
+  }
+
+  static TClientSink* GetDataOrThrowException(ObjectData* object_) {
+    if (object_ == nullptr) {
+      throw_null_pointer_exception();
+      not_reached();
+    }
+    if (!object_->getVMClass()->classofNonIFace(PhpClass())) {
+      raise_error("TClientSink expected");
+      not_reached();
+    }
+    return Native::data<TClientSink>(object_);
+  }
+
+ public:
+  apache::thrift::detail::ClientSinkBridge::Ptr sinkBridge_;
+  static Class* c_TClientSink;
+};
+} // namespace thrift
+inline String ioBufToString(const folly::IOBuf& ioBuf) {
+  auto resultStringData = StringData::Make(ioBuf.computeChainDataLength());
+  for (const auto& buf : ioBuf) {
+    auto const data = reinterpret_cast<const char*>(buf.data());
+    auto const piece = folly::StringPiece{data, buf.size()};
+    resultStringData->append(piece);
+  }
+  return String::attach(resultStringData);
+}
+
+struct Thrift2StreamEvent final : AsioExternalThreadEvent {
   Thrift2StreamEvent() {}
 
   void finish(
@@ -334,7 +420,7 @@ namespace HPHP {
     markAsFinished();
   }
 
-  void error(std::unique_ptr<folly::IOBuf> err){
+  void error(std::unique_ptr<folly::IOBuf> err) {
     serverError_ = std::move(err);
     markAsFinished();
   }
@@ -384,7 +470,65 @@ namespace HPHP {
 
   // any error while processing queue, this should be returned as error message
   // along with the buffer and should be sequenced after any received payloads
-  thrift::TClientBufferedStreamError error_;
+  thrift::TClientStreamError error_;
+
+  // Unexpected server error which should be thrown immediately
+  std::unique_ptr<folly::IOBuf> serverError_;
+};
+
+struct ThriftSinkEvent final : AsioExternalThreadEvent {
+  ThriftSinkEvent() = default;
+
+  void finish(thrift::TClientSinkCreditsOrFinalResponse credits) {
+    creditsOrFinalResponse_ = std::move(credits);
+    markAsFinished();
+  }
+
+  void error(std::unique_ptr<folly::IOBuf> err) {
+    serverError_ = std::move(err);
+    markAsFinished();
+  }
+
+ protected:
+  // Called by PHP thread
+  void unserialize(TypedValue& result) final {
+    if (serverError_) {
+      throw_object(
+          "TTransportException",
+          make_vec_array(
+              ioBufToString(*serverError_),
+              0 // error code UNKNOWN
+              ));
+    }
+    auto responseStr = null_string;
+    auto errorStr = null_string;
+    uint32_t credits = 0;
+    folly::variant_match(
+        creditsOrFinalResponse_,
+        [&](const std::unique_ptr<folly::IOBuf>& finalResponse) {
+          responseStr = ioBufToString(*finalResponse);
+        },
+        [&](const thrift::TClientStreamError& finalResponseError) {
+          if (finalResponseError.errorMsg_) {
+            // Encoded stream exceptions need to be deserialized by generated
+            // code. Returning it as the response string so that it will be
+            // decoded
+            if (finalResponseError.isEncoded_) {
+              responseStr = ioBufToString(*finalResponseError.errorMsg_);
+            } else {
+              errorStr = ioBufToString(*finalResponseError.errorMsg_);
+            }
+          }
+        },
+        [&](const uint32_t& n) { credits = n; });
+    return tvCopy(
+        make_array_like_tv(
+            make_vec_array(credits, responseStr, errorStr).detach()),
+        result);
+  }
+
+ private:
+  thrift::TClientSinkCreditsOrFinalResponse creditsOrFinalResponse_;
 
   // Unexpected server error which should be thrown immediately
   std::unique_ptr<folly::IOBuf> serverError_;

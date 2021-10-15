@@ -15,7 +15,7 @@ Errors:
          m_params =
          [{ param_annotation = (Tc); param_type_hint = ((Tc), (Some ([6:21-28], (Habstr ("Tc", []))))); 
             param_is_variadic = false; param_pos = [6:29-31]; param_name = "$x"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)] }; 
@@ -45,7 +45,7 @@ Errors:
           m_params =
           [{ param_annotation = (Tc<int>); param_type_hint = ((Tc<int>), (Some ([11:21-28], (Happly (([11:21-23], "\\Tc"), [([11:24-27], (Hprim Tint))]))))); 
              param_is_variadic = false; param_pos = [11:29-31]; param_name = "$x"; 
-             param_expr = None; param_readonly = None; param_callconv = None; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
              param_user_attributes = []; param_visibility = None }
             ];
           m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)] }; 

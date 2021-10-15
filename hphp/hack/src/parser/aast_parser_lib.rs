@@ -8,5 +8,5 @@ mod aast_check;
 mod aast_parser;
 mod expression_tree_check;
 mod readonly_check;
-pub use aast_parser::{AastParser, Error};
+pub use aast_parser::{AastParser, Error, Result};
 pub use rust_aast_parser_types;

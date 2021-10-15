@@ -1,22 +1,97 @@
-cmake_minimum_required(VERSION 2.8.0)
+include(ExternalProject)
+include(HPHPFunctions)
 
-set(FIZZ_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
+get_target_property(BOOST_INCLUDE_DIR boost INTERFACE_INCLUDE_DIRECTORIES)
+get_target_property(BOOST_LIBRARIES boost INTERFACE_LINK_LIBRARIES)
+list(GET BOOST_LIBRARIES 0 FIRST_LIB)
+if("${FIRST_LIB}" MATCHES ".+/${CMAKE_STATIC_LIBRARY_PREFIX}boost_.+${CMAKE_STATIC_LIBRARY_SUFFIX}$")
+  set(Boost_USE_STATIC_LIBS ON)
+else()
+  set(Boost_USE_STATIC_LIBS OFF)
+endif()
+get_filename_component(BOOST_LIBRARY_DIR "${FIRST_LIB}" DIRECTORY)
 
-# Needed for fcntl w/ F_SETPIPE_SZ
-add_definitions("-D_GNU_SOURCE")
+get_target_property(DOUBLE_CONVERSION_INCLUDE_DIR double-conversion INTERFACE_INCLUDE_DIRECTORIES)
+get_target_property(DOUBLE_CONVERSION_LIBRARY double-conversion INTERFACE_LINK_LIBRARIES)
+get_target_property(LIBSODIUM_INCLUDE_DIR libsodium INTERFACE_INCLUDE_DIRECTORIES)
+get_target_property(LIBSODIUM_LIBRARY libsodium INTERFACE_LINK_LIBRARIES)
+get_target_property(ZSTD_INCLUDE_DIR zstd INTERFACE_INCLUDE_DIRECTORIES)
+get_target_property(ZSTD_LIBRARY zstd INTERFACE_LINK_LIBRARIES)
+get_target_property(JEMALLOC_INCLUDE_DIR jemalloc INTERFACE_INCLUDE_DIRECTORIES)
 
-add_definitions(-DNO_LIB_GFLAGS)
 
-# Main fizz library files
-auto_sources(files "*.cpp" "RECURSE" "${FIZZ_DIR}")
-auto_sources(hfiles "*.h" "RECURSE" "${FIZZ_DIR}")
+SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
+  FIZZ_SOURCE_ARGS
+  SOURCE_URL
+  "https://github.com/facebookincubator/fizz/releases/download/v2021.06.28.00/fizz-v2021.06.28.00.tar.gz"
+  SOURCE_HASH
+  "SHA256=20d91cd130455acf3879882ab90420e662a49876e6974ad8ad7641ce82e93778"
+)
 
-HHVM_REMOVE_MATCHES_FROM_LISTS(files hfiles MATCHES "/test/" "Test.cpp$" "/tool/" "/extensions/javacrypto/" "/BrotliCertificate")
+ExternalProject_Add(
+  bundled_fizz
+  ${FIZZ_SOURCE_ARGS}
+  PATCH_COMMAND
+    "${CMAKE_COMMAND}" -E copy
+    "${CMAKE_SOURCE_DIR}/CMake/FindLibSodium.cmake"
+    <SOURCE_DIR>/fizz/cmake/FindLibSodium.cmake
+    &&
+    "${CMAKE_COMMAND}" -E copy
+    "${CMAKE_SOURCE_DIR}/CMake/FindGlog.cmake"
+    <SOURCE_DIR>/fizz/cmake/FindGlog.cmake
+    &&
+    "${CMAKE_CURRENT_SOURCE_DIR}/../apply-quilt-patches.sh"
+    "${CMAKE_CURRENT_SOURCE_DIR}/patches"
+  SOURCE_SUBDIR fizz
+  CMAKE_ARGS
+    "-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}"
+    -DCMAKE_MODULE_PATH=${CMAKE_SOURCE_DIR}/CMake
+    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+    -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+    -DCMAKE_INSTALL_INCLUDEDIR=include
 
-add_library(fizz STATIC ${files} ${hfiles})
-auto_source_group(fizz "${FIZZ_DIR}" ${files} ${hfiles})
+    -DBUILD_TESTS=OFF
+    -DBUILD_EXAMPLES=OFF
 
-find_package(OpenSSL REQUIRED)
-include_directories(${OPENSSL_INCLUDE_DIR} ${FIZZ_DIR})
+    -DOPENSSL_INCLUDE_DIR=${OPENSSL_INCLUDE_DIR}
+    -DOPENSSL_CRYPTO_LIBRARY=${OPENSSL_CRYPTO_LIBRARY}
+    -DBoost_NO_SYSTEM_PATHS=ON
+    -DBoost_NO_BOOST_CMAKE=ON
+    -DBoost_USE_STATIC_LIBS=${Boost_USE_STATIC_LIBS}
+    -DBoost_INCLUDE_DIR=${BOOST_INCLUDE_DIR}
+    "-DBOOST_LIBRARYDIR=${BOOST_LIBRARY_DIR}"
+    -DDOUBLE_CONVERSION_INCLUDE_DIR=${DOUBLE_CONVERSION_INCLUDE_DIR}
+    -DDOUBLE_CONVERSION_LIBRARY=${DOUBLE_CONVERSION_LIBRARY}
+    -DLIBGGLOG_INCLUDE_DIR=${LIBGLOG_INCLUDE_DIR}
+    -DLIBGLOG_LIBRARY=${LIBGLOG_LIBRARY}
+    -DLIBSODIUM_INCLUDEDIR=${LIBSODIUM_INCLUDE_DIR}
+    -DLIBSODIUM_LIBRARIES=${LIBSODIUM_LIBRARY}
+    -DZSTD_INCLUDE_DIR=${ZSTD_INCLUDE_DIR}
+    -DZSTD_LIBRARY_RELEASE=${ZSTD_LIBRARY}
 
-target_link_libraries(fizz folly boost brotli zstd libsodium ${OPENSSL_LIBRARIES})
+    "-Dfmt_DIR=${FMT_INSTALL_DIR}/lib/cmake/fmt"
+    "-Dfolly_DIR=${FOLLY_INSTALL_DIR}/lib/cmake/folly"
+
+    "-DCMAKE_CXX_FLAGS=-I${JEMALLOC_INCLUDE_DIR}"
+)
+ExternalProject_Get_property(bundled_fizz INSTALL_DIR)
+
+set(
+  FIZZ_DEPS
+  boost
+  folly
+  jemalloc
+  libsodium
+  zstd
+)
+add_dependencies(bundled_fizz ${FIZZ_DEPS})
+add_library(fizz INTERFACE)
+add_dependencies(fizz bundled_fizz)
+target_include_directories(fizz INTERFACE "${INSTALL_DIR}/include")
+target_link_libraries(
+  fizz
+  INTERFACE
+  ${FIZZ_DEPS} ${OPENSSL_LIBRARIES}
+  "${INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}fizz${CMAKE_STATIC_LIBRARY_SUFFIX}"
+)
+set(FIZZ_INSTALL_DIR "${INSTALL_DIR}" PARENT_SCOPE)

@@ -13,8 +13,6 @@ type key = Digest.t
 module IntVal = struct
   type t = int
 
-  let prefix = Prefix.make ()
-
   let description = "Test_IntVal"
 end
 
@@ -47,7 +45,7 @@ let expect_equals ~name value expected =
     (value = expected)
 
 let test_local_changes
-    (module IntHeap : SharedMem.NoCache with type t = int and type key = string)
+    (module IntHeap : SharedMem.Heap with type value = int and type key = string)
     () =
   let expect_value ~name expected =
     expect_equals ~name (IntHeap.get name) expected;
@@ -147,75 +145,49 @@ let test_local_changes
   test ();
   IntHeap.LocalChanges.pop_stack ()
 
-module type WithVisibleCache = sig
-  include SharedMem.WithCache
+module type HeapWithLocalCache =
+    module type of
+      SharedMem.HeapWithLocalCache (SharedMem.ImmediateBackend) (StringKey)
+        (IntVal)
+        (Capacity)
 
-  module Cache : sig
-    module L1 : SharedMem.CacheType with type key := key and type value := t
-
-    module L2 : SharedMem.CacheType with type key := key and type value := t
-  end
-end
-
-let test_cache_behavior
-    (module IntHeap : WithVisibleCache with type t = int and type key = string)
-    () =
-  let expect_cache_size expected_l1 expected_l2 =
-    let actual_l1 = IntHeap.Cache.L1.get_size () in
+let test_cache_behavior (module IntHeap : HeapWithLocalCache) () =
+  let expect_cache_size expected =
+    let seq_len = Seq.fold_left (fun x _ -> x + 1) 0 in
+    let actual =
+      seq_len @@ snd @@ IntHeap.Cache.get_telemetry_items_and_keys ()
+    in
     expect
-      ~msg:
-        (Printf.sprintf
-           "Expected L1 cache size of %d, got %d"
-           expected_l1
-           actual_l1)
-      (actual_l1 = expected_l1);
-    let actual_l2 = IntHeap.Cache.L2.get_size () in
-    expect
-      ~msg:
-        (Printf.sprintf
-           "Expected L2 cache size of %d, got %d"
-           expected_l2
-           actual_l2)
-      (actual_l2 = expected_l2)
+      ~msg:(Printf.sprintf "Expected cache size of %d, got %d" expected actual)
+      (expected = actual)
   in
-  expect_cache_size 0 0;
+  expect_cache_size 0;
 
   (* Fill the L1 cache. *)
   for i = 1 to 1000 do
     IntHeap.add (Printf.sprintf "%d" i) i;
-    expect_cache_size i i
+    expect_cache_size i
   done;
 
   (* Make sure the L1 cache does not grow past capacity - L2 will. *)
   for i = 1001 to 2000 do
     IntHeap.add (Printf.sprintf "%d" i) i;
-    expect_cache_size 1000 i
-  done;
-
-  (* L2 will be collected and resized. *)
-  for i = 2001 to 3000 do
-    IntHeap.add (Printf.sprintf "%d" i) i;
-    expect_cache_size 1000 (i - 1000)
-  done;
-
-  (* Delete entries and watch both cache sizes shrink. *)
-  for i = 3000 downto 2001 do
-    IntHeap.remove_batch (IntHeap.KeySet.singleton (Printf.sprintf "%d" i));
-    expect_cache_size (max (i - 2001) 0) (max (i - 1001) 0)
+    expect_cache_size (1000 + (i - 1000))
   done
 
-(* Cannot test beyond this point. The LFU cache collection, that
-     occurred when the index hit 2000, deleted half of the keys at
-     random; we don't know which ones specifically. *)
+(* Cannot test beyond this point. We don't know how many unique keys are
+   in the combined cache. *)
 
 module TestNoCache =
-  SharedMem.NoCache (SharedMem.Immediate) (StringKey) (IntVal)
+  SharedMem.Heap (SharedMem.ImmediateBackend) (StringKey) (IntVal)
 
 (* We shall not mix compressions, so create 2 separate caches  *)
 module TestWithCacheLz4 =
-  SharedMem.WithCache (SharedMem.Immediate) (StringKey) (IntVal) (Capacity)
+  SharedMem.HeapWithLocalCache (SharedMem.ImmediateBackend) (StringKey) (IntVal)
+    (Capacity)
 module TestWithCacheZstd =
-  SharedMem.WithCache (SharedMem.Immediate) (StringKey) (IntVal) (Capacity)
+  SharedMem.HeapWithLocalCache (SharedMem.ImmediateBackend) (StringKey) (IntVal)
+    (Capacity)
 
 let tests () =
   let zstd_compression_with_default_level = 3 in

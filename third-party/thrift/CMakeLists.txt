@@ -58,11 +58,10 @@ include_directories("${CMAKE_CURRENT_SOURCE_DIR}/..")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/gen")
 include_directories("${TP_DIR}/fmt/fmt/include")
-include_directories("${TP_DIR}/fizz/src")
 include_directories("${TP_DIR}/fatal")
 include_directories("${TP_DIR}/proxygen/src")
 add_library(hphp_thrift STATIC ${CXX_SOURCES})
 
-target_link_libraries(hphp_thrift wangle boost fmt fizz hphp_proxygen
+target_link_libraries(hphp_thrift wangle boost fmt fizz proxygen
                                          ${LIBGLOG_LIBRARY}
                                          ${LIBPTHREAD_LIBRARIES})

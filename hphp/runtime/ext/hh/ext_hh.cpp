@@ -43,6 +43,7 @@
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"
 #include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
+#include "hphp/runtime/vm/coeffects.h"
 #include "hphp/runtime/vm/memo-cache.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/runtime.h"
@@ -475,24 +476,28 @@ ALWAYS_INLINE TypedValue serialize_memoize_string_top(StringData* str) {
 } // end anonymous namespace
 
 TypedValue serialize_memoize_param_arr(ArrayData* arr) {
+  CoeffectsAutoGuard _;
   StringBuffer sb;
   serialize_memoize_array(sb, 0, arr);
   return tvReturn(sb.detach());
 }
 
 TypedValue serialize_memoize_param_set(ArrayData* arr) {
+  CoeffectsAutoGuard _;
   StringBuffer sb;
   serialize_memoize_set(sb, arr);
   return tvReturn(sb.detach());
 }
 
 TypedValue serialize_memoize_param_obj(ObjectData* obj) {
+  CoeffectsAutoGuard _;
   StringBuffer sb;
   serialize_memoize_obj(sb, 0, obj);
   return tvReturn(sb.detach());
 }
 
 TypedValue serialize_memoize_param_col(ObjectData* obj) {
+  CoeffectsAutoGuard _;
   StringBuffer sb;
   serialize_memoize_col(sb, 0, obj);
   return tvReturn(sb.detach());
@@ -517,6 +522,7 @@ TypedValue serialize_memoize_param_dbl(double val) {
 TypedValue HHVM_FUNCTION(serialize_memoize_param, TypedValue param) {
   // Memoize throws in the emitter if any function parameters are references, so
   // we can just assert that the param is cell here
+  CoeffectsAutoGuard _;
   assertx(tvIsPlausible(param));
   auto const type = param.m_type;
 
@@ -601,7 +607,7 @@ bool HHVM_FUNCTION(clear_static_memoization,
 
 String HHVM_FUNCTION(ffp_parse_string_native, const String& str) {
   auto const file = fromCaller(
-    [] (const ActRec* fp, Offset) { return fp->unit()->filepath()->data(); }
+    [] (const BTFrame& frm) { return frm.func()->unit()->filepath()->data(); }
   );
 
   auto result =
@@ -898,7 +904,7 @@ TypedValue dynamicClassMeth(const StringData* cls, const StringData* meth) {
   }
   if (!func->isPublic() && checkVis) {
     auto const ctx = fromCaller(
-      [] (const ActRec* fp, Offset) { return fp->func()->cls(); }
+      [] (const BTFrame& frm) { return frm.func()->cls(); }
     );
     if (func->attrs() & AttrPrivate) {
       auto const fcls = func->cls();
@@ -1187,16 +1193,9 @@ Variant coeffects_call_helper(const Variant& function, const char* name,
 } // namespace
 
 Variant HHVM_FUNCTION(coeffects_backdoor, const Variant& function) {
-  auto const run = [&] {
-    return coeffects_call_helper(function, "HH\\Coeffects\\backdoor",
-                                 RuntimeCoeffects::defaults(), true);
-  };
-  if (!RO::EvalEnableImplicitContext) return run();
-  // Kill and restore implicit context
-  auto const prev = *ImplicitContext::activeCtx;
-  *ImplicitContext::activeCtx = nullptr;
-  SCOPE_EXIT { *ImplicitContext::activeCtx = prev; };
-  return run();
+  ImplicitContext::Saver _;
+  return coeffects_call_helper(function, "HH\\Coeffects\\backdoor",
+                               RuntimeCoeffects::defaults(), true);
 }
 
 Variant HHVM_FUNCTION(enter_policied_of, const Variant& function) {

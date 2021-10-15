@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b3b4e01946d29a2607f5094d88fec21b>>
+// @generated SignedSource<<f356e57726a89e3c3c082850b9c77afb>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -69,10 +69,10 @@ arena_deserializer::impl_deserialize_in_arena!(Mode);
 )]
 #[repr(C)]
 pub enum NameType {
-    Fun = 0,
-    Class = 1,
+    Fun = 3,
+    Class = 0,
     RecordDef = 2,
-    Typedef = 3,
+    Typedef = 1,
     Const = 4,
 }
 impl TrivialDrop for NameType {}

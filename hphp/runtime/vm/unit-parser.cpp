@@ -36,8 +36,10 @@
 #include <folly/system/ThreadName.h>
 
 #include "hphp/hack/src/facts/ffi_bridge/rust_facts_ffi_bridge.rs"
+#include "hphp/hack/src/hhbc/ffi_bridge/rust_compile_ffi_bridge.rs"
 #include "hphp/hack/src/hhbc/compile_ffi.h"
 #include "hphp/hack/src/hhbc/compile_ffi_types.h"
+#include "hphp/hack/src/hhbc/hhbc_by_ref/hhbc-ast.h"
 #include "hphp/hack/src/parser/ffi_bridge/rust_parser_ffi_bridge.rs"
 #include "hphp/runtime/base/autoload-map.h"
 #include "hphp/runtime/base/autoload-handler.h"
@@ -45,7 +47,7 @@
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/vm/native.h"
-#include "hphp/runtime/vm/hhvm_decl_provider.h"
+#include "hphp/runtime/vm/decl-provider.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 #include "hphp/util/atomic-vector.h"
 #include "hphp/util/embedded-data.h"
@@ -80,16 +82,15 @@ struct CompileException : Exception {
 }
 
 CompilerResult assemble_string_handle_errors(const char* code,
-                                             const char* hhas,
-                                             size_t hhas_size,
+                                             const std::string& hhas,
                                              const char* filename,
                                              const SHA1& sha1,
                                              const Native::FuncTable& nativeFuncs,
                                              bool& internal_error,
                                              CompileAbortMode mode) {
   try {
-    return assemble_string(hhas,
-                           hhas_size,
+    return assemble_string(hhas.c_str(),
+                           hhas.length(),
                            filename,
                            sha1,
                            nativeFuncs,
@@ -163,23 +164,27 @@ CompilerResult hackc_compile(
   const RepoOptions& options,
   CompileAbortMode mode
 ) {
-  using namespace ::HPHP::hackc::compile;
 
-  std::uint8_t flags = 0;
-  if (forDebuggerEval) flags |= FOR_DEBUGGER_EVAL;
-  if (!SystemLib::s_inited) flags |= IS_SYSTEMLIB;
-  if (RuntimeOption::EvalEnableDecl) flags |= ENABLE_DECL;
-  flags |= DUMP_SYMBOL_REFS;
-
+  // Mock HhvmDeclProvider. TODO: Hook up with bytecode cache logic.
   HhvmDeclProvider decl_provider;
+
+  std::uint8_t flags = make_env_flags(
+    !SystemLib::s_inited,           // is_systemlib
+    false,                          // is_evaled
+    forDebuggerEval,                // for_debugger_eval
+    true,                           // dump_symbol_refs
+    false,                          // disable_toplevel_elaboration
+    RuntimeOption::EvalEnableDecl   // enable_decl
+  );
+
   std::string aliased_namespaces = options.getAliasedNamespacesConfig();
 
-  native_environment const native_env{
-    &hhvm_decl_provider_get_decl,
-    &decl_provider,
+  NativeEnv const native_env{
+    reinterpret_cast<std::uint64_t>(&decl_provider),
+    reinterpret_cast<std::uint64_t>(&hhvm_decl_provider_get_decl),
     filename,
-    aliased_namespaces.data(),
-    s_misc_config.data(),
+    aliased_namespaces,
+    s_misc_config,
     RuntimeOption::EvalEmitClassPointers,
     RuntimeOption::CheckIntOverflow,
     options.getCompilerFlags(),
@@ -187,19 +192,11 @@ CompilerResult hackc_compile(
     flags
   };
 
-  output_config const output{true, nullptr};
+  auto const hhas =
+    std::string(hackc_compile_from_text_cpp_ffi(native_env, code));
 
-  std::array<char, 256> buf;
-  buf.fill(0);
-  error_buf_t error_buf {buf.data(), buf.size()};
-
-  hackc_compile_from_text_ptr hhas{
-    hackc_compile_from_text(&native_env, code, &output, &error_buf)
-  };
-  if (!hhas) throwErrno(buf.data());
   return assemble_string_handle_errors(code,
-                                       hhas.get(),
-                                       strlen(hhas.get()),
+                                       hhas,
                                        filename,
                                        sha1,
                                        nativeFuncs,
@@ -229,7 +226,7 @@ ParseFactsResult extract_facts(
 ) {
   auto const get_facts = [&](const std::string& source_text) -> ParseFactsResult {
     try {
-      auto facts = hackc_extract_as_json_cpp_ffi(options.getFactsFlags(),
+      auto facts = hackc_extract_facts_as_json_cpp_ffi(options.getFactsFlags(),
                                                  filename,
                                                  source_text);
       return FactsJSONString { std::string(facts) };

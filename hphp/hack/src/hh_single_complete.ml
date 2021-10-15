@@ -79,7 +79,6 @@ let parse_options () =
   let disable_xhp_element_mangling = ref false in
   let disable_xhp_children_declarations = ref false in
   let enable_xhp_class_modifier = ref false in
-  let disallow_hash_comments = ref false in
   let options =
     [
       ( "--extra-builtin",
@@ -102,9 +101,6 @@ let parse_options () =
         Arg.Set enable_xhp_class_modifier,
         "Enable the XHP class modifier, xhp class name {} will define an xhp class."
       );
-      ( "--disallow-hash-comments",
-        Arg.Set disallow_hash_comments,
-        "Disallow #-style comments (besides hashbangs)." );
       ( "--auto-complete",
         Arg.Unit (set_mode Autocomplete),
         " Produce autocomplete suggestions as if triggered by trigger character"
@@ -134,7 +130,6 @@ let parse_options () =
       ~po_disable_xhp_element_mangling:!disable_xhp_element_mangling
       ~po_disable_xhp_children_declarations:!disable_xhp_children_declarations
       ~po_enable_xhp_class_modifier:!enable_xhp_class_modifier
-      ~po_disallow_hash_comments:!disallow_hash_comments
       ()
   in
   (* Configure symbol index settings *)
@@ -422,7 +417,7 @@ let decl_and_run_mode
       ~init:files_contents
   in
   Relative_path.Map.iter files_contents ~f:(fun filename contents ->
-      File_provider.(provide_file filename (Disk contents)));
+      File_provider.provide_file_for_tests filename contents);
   let to_decl = files_contents_with_builtins in
   let ctx =
     Provider_context.empty_for_test

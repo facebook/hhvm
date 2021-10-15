@@ -147,7 +147,7 @@ impl Serialize for RelativePath<'_> {
     }
 }
 
-fn parse(value: &str) -> Result<RelativePath, String> {
+fn parse(value: &str) -> Result<RelativePath<'_>, String> {
     let mut split = value.splitn(2, '|');
     let prefix_str = split.next();
     let path_str = split.next();
@@ -184,11 +184,11 @@ impl<'de> Deserialize<'de> for RelativePath<'de> {
         impl<'de> serde::de::Visitor<'de> for Visitor {
             type Value = RelativePath<'de>;
 
-            fn expecting(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+            fn expecting(&self, formatter: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
                 write!(formatter, "a string for RelativePath")
             }
 
-            fn visit_borrowed_str<E>(self, value: &'de str) -> Result<RelativePath, E>
+            fn visit_borrowed_str<E>(self, value: &'de str) -> Result<RelativePath<'_>, E>
             where
                 E: serde::de::Error,
             {
@@ -215,7 +215,7 @@ impl<'arena> arena_deserializer::DeserializeInArena<'arena> for RelativePath<'ar
         impl<'arena, 'de> serde::de::Visitor<'de> for Visitor<'arena> {
             type Value = RelativePath<'arena>;
 
-            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+            fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                 formatter.write_str("[DeserializeInArena] string for RelativePath")
             }
 
@@ -273,7 +273,7 @@ mod tests {
         let mut de = serde_json::Deserializer::from_str(&se);
         let arena = bumpalo::Bump::new();
         let de = ArenaDeserializer::new(&arena, &mut de);
-        let x1 = <&RelativePath>::deserialize_in_arena(&arena, de).unwrap();
+        let x1 = <&RelativePath<'_>>::deserialize_in_arena(&arena, de).unwrap();
         assert_eq!(&x, x1);
     }
 }

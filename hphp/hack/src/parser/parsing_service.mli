@@ -6,7 +6,10 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-val go :
+
+(** DEPRECATED: When TypecheckerOptions.use_direct_decl_parser is enabled, use
+    Direct_decl_service instead. *)
+val go_DEPRECATED :
   Provider_context.t ->
   ?quick:bool ->
   ?show_all_errors:bool ->

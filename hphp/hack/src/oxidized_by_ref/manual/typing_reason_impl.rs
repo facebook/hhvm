@@ -68,7 +68,6 @@ impl<'a> Reason<'a> {
             | RunpackParam((p, _, _))
             | RinoutParam(p)
             | Rtypeconst((Rnone, (p, _), _, _))
-            | RarrayFilter((p, _))
             | RnullsafeOp(p)
             | RtconstNoCstr((p, _))
             | Rpredicated((p, _))

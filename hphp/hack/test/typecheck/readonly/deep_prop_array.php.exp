@@ -1,4 +1,4 @@
+File "deep_prop_array.php", line 12, characters 3-17:
+This expression is readonly, its members cannot be modified (Parsing[1002])
 File "deep_prop_array.php", line 10, characters 10-13:
 Was expecting a return type hint (Typing[4030])
-File "deep_prop_array.php", line 12, characters 3-4:
-This value is readonly, its properties cannot be modified (Typing[4409])

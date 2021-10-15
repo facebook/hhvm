@@ -89,9 +89,9 @@ void iopPreamble(const std::string& name) {
   auto vm_stack_size = vmStack().count();
 
   FTRACE(1, "taint: iop{}\n", name);
-  FTRACE(4, "taint: stack: {}\n", State::get()->stack.show());
+  FTRACE(4, "taint: stack: {}\n", State::instance->stack.show());
 
-  auto& stack = State::get()->stack;
+  auto& stack = State::instance->stack;
   auto shadow_stack_size = stack.size();
   if (vm_stack_size != shadow_stack_size) {
     FTRACE(
@@ -111,7 +111,7 @@ void iopPreamble(const std::string& name) {
 
 void iopConstant(const std::string& name) {
   iopPreamble(name);
-  State::get()->stack.push(std::nullopt);
+  State::instance->stack.push(std::nullopt);
 }
 
 void iopUnhandled(const std::string& name) {
@@ -151,7 +151,7 @@ void iopBreakTraceHint() {
 
 void iopPopC() {
   iopPreamble("PopC");
-  State::get()->stack.pop();
+  State::instance->stack.pop();
 }
 
 void iopPopU() {
@@ -168,7 +168,7 @@ void iopPopL(tv_lval /* to */) {
 
 void iopDup() {
   iopPreamble("Dup");
-  State::get()->stack.push(std::nullopt);
+  State::instance->stack.push(std::nullopt);
 }
 
 void iopCGetCUNop() {
@@ -514,7 +514,7 @@ void iopSSwitch(
 void iopRetC(PC& /* pc */) {
   iopPreamble("RetC");
 
-  auto& stack = State::get()->stack;
+  auto& stack = State::instance->stack;
   auto saved = stack.top();
 
   auto func = vmfp()->func();
@@ -555,7 +555,7 @@ void iopThrow(PC& /* pc */) {
 void iopCGetL(named_local_var fr) {
   iopPreamble("CGetL");
 
-  auto state = State::get();
+  auto state = State::instance;
   auto value = state->heap.get(fr.lval);
 
   FTRACE(2, "taint: getting {} (name: {}, value: {})\n", fr.lval, fr.name, value);
@@ -638,7 +638,7 @@ void iopAssertRATStk(uint32_t /* stkSlot */, RepoAuthType /* rat */) {
 void iopSetL(tv_lval to) {
   iopPreamble("SetL");
 
-  auto state = State::get();
+  auto state = State::instance;
   auto value = state->stack.top();
 
   FTRACE(2, "taint: setting {} to `{}`\n", to, value);
@@ -744,7 +744,7 @@ void iopNewObjR() {
 
 void iopNewObjD(Id /* id */) {
   iopPreamble("NewObjD");
-  State::get()->stack.push(std::nullopt);
+  State::instance->stack.push(std::nullopt);
 }
 
 void iopNewObjRD(Id /* id */) {
@@ -857,12 +857,12 @@ TCA iopFCallFuncD(
 
   const auto& sinks = Configuration::get()->sinks(name);
   for (const auto& sink : sinks) {
-    auto value = State::get()->stack.peek(fca.numArgs - 1 - sink.index);
+    auto value = State::instance->stack.peek(fca.numArgs - 1 - sink.index);
     if (!value) { continue; }
 
     FTRACE(1, "taint: tainted value flows into sink\n");
     value->hops.push_back(Hop{vmfp()->func(), func});
-    value->dump();
+    State::instance->paths.push_back(*value);
   }
 
   return nullptr;
@@ -974,7 +974,7 @@ void iopVerifyOutType(uint32_t /* paramId */) {
 void iopVerifyParamType(local_var param) {
   iopPreamble("VerifyParamType");
 
-  auto state = State::get();
+  auto state = State::instance;
   auto func = vmfp()->func();
 
   auto index = func->numParams() - (param.index + 1);
@@ -1202,7 +1202,7 @@ void iopQueryM(
 
   switch(op) {
     case QueryMOp::CGet: {
-      auto state = State::get();
+      auto state = State::instance;
       auto from = resolveMemberKey(memberKey);
       auto value = state->heap.get(from);
       FTRACE(2, "taint: getting member {}, value: `{}`\n", memberKey, value);
@@ -1218,7 +1218,7 @@ void iopQueryM(
 void iopSetM(uint32_t /* nDiscard */, MemberKey memberKey) {
   iopPreamble("SetM");
 
-  auto state = State::get();
+  auto state = State::instance;
   auto value = state->stack.top();
   auto to = resolveMemberKey(memberKey);
 

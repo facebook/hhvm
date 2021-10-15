@@ -52,11 +52,9 @@ module Api : sig
 
   val is_xhp : t -> bool
 
-  val is_disposable : t -> bool
-
   val name : t -> string
 
-  val get_module : t -> string option
+  val get_module : t -> Typing_modules.t
 
   val internal : t -> bool
 

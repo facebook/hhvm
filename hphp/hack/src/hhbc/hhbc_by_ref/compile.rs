@@ -12,7 +12,7 @@ use aast_parser::{
 use anyhow::{anyhow, *};
 use bitflags::bitflags;
 use bytecode_printer::{print_program, Context, Write};
-use decl_provider::{DeclProvider, NoDeclProvider};
+use decl_provider::NoDeclProvider;
 use hhbc_by_ref_emit_program::{self as emit_program, emit_program, FromAstFlags};
 use hhbc_by_ref_env::emitter::Emitter;
 use hhbc_by_ref_hhas_program::HhasProgram;
@@ -110,7 +110,7 @@ bitflags! {
         const DISABLE_XHP_ELEMENT_MANGLING=1 << 11;
         const DISALLOW_FUN_AND_CLS_METH_PSEUDO_FUNCS=1 << 12;
         const DISALLOW_FUNC_PTRS_IN_CONSTANTS=1 << 13;
-        const DISALLOW_HASH_COMMENTS=1 << 14;
+        // No longer using bit 14.
         // No longer using bit 15.
         const ENABLE_ENUM_CLASSES=1 << 16;
         const ENABLE_XHP_CLASS_MODIFIER=1 << 17;
@@ -232,9 +232,6 @@ impl ParserFlags {
         if self.contains(ParserFlags::DISALLOW_FUNC_PTRS_IN_CONSTANTS) {
             f |= LangFlags::DISALLOW_FUNC_PTRS_IN_CONSTANTS;
         }
-        if self.contains(ParserFlags::DISALLOW_HASH_COMMENTS) {
-            f |= LangFlags::DISALLOW_HASH_COMMENTS;
-        }
         if self.contains(ParserFlags::ENABLE_ENUM_CLASSES) {
             f |= LangFlags::ENABLE_ENUM_CLASSES;
         }
@@ -282,7 +279,7 @@ impl<S: AsRef<str>> NativeEnv<S> {
 /// (this avoids the need to read Options from OCaml, as
 /// they can be simply returned as NaNs to signal that
 /// they should _not_ be passed back as JSON to HHVM process)
-#[derive(Debug, ToOcamlRep)]
+#[derive(Debug, Default, ToOcamlRep)]
 pub struct Profile {
     pub parsing_t: f64,
     pub codegen_t: f64,
@@ -305,7 +302,7 @@ where
         opts,
         is_systemlib,
         env.flags.contains(EnvFlags::FOR_DEBUGGER_EVAL),
-        NoDeclProvider,
+        unified_decl_provider::DeclProvider::NoDeclProvider(NoDeclProvider),
     );
     let alloc = &bumpalo::Bump::new();
     let prog = emit_program::emit_fatal_program(alloc, FatalOp::Parse, &Pos::make_none(), err_msg);
@@ -323,88 +320,22 @@ where
     Ok(())
 }
 
-pub fn from_text<'arena, W, S: AsRef<str>>(
-    alloc: &'arena bumpalo::Bump,
-    env: &Env<S>,
-    stack_limit: &StackLimit,
-    writer: &mut W,
-    text: &[u8],
-) -> anyhow::Result<Option<Profile>>
-where
-    W: Write,
-    W::Error: Send + Sync + 'static, // required by anyhow::Error
-{
-    let source_text = SourceText::make(RcOc::new(env.filepath.clone()), text);
-    from_text_(
-        alloc,
-        env,
-        stack_limit,
-        writer,
-        source_text,
-        None,
-        NoDeclProvider,
-    )
-}
-
-pub fn from_text_<'arena, 'decl, W, S: AsRef<str>, D: DeclProvider<'decl>>(
+pub fn from_text<'arena, 'decl, W, S: AsRef<str>>(
     alloc: &'arena bumpalo::Bump,
     env: &Env<S>,
     stack_limit: &StackLimit,
     writer: &mut W,
     source_text: SourceText,
     native_env: Option<&NativeEnv<S>>,
-    decl_provider: D,
+    decl_provider: unified_decl_provider::DeclProvider<'decl>,
 ) -> anyhow::Result<Option<Profile>>
 where
     W: Write,
     W::Error: Send + Sync + 'static, // required by anyhow::Error
 {
-    let opts = match native_env {
-        None => Options::from_configs(&env.config_jsons, &env.config_list)
-            .map_err(anyhow::Error::msg)?,
-        Some(native_env) => NativeEnv::to_options(&native_env),
-    };
-
-    let mut emitter = Emitter::new(
-        opts,
-        env.flags.contains(EnvFlags::IS_SYSTEMLIB),
-        env.flags.contains(EnvFlags::FOR_DEBUGGER_EVAL),
-        decl_provider,
-    );
-
-    let namespace_env = RcOc::new(NamespaceEnv::empty(
-        emitter.options().hhvm.aliased_namespaces_cloned().collect(),
-        true, /* is_codegen */
-        emitter
-            .options()
-            .hhvm
-            .hack_lang
-            .flags
-            .contains(LangFlags::DISABLE_XHP_ELEMENT_MANGLING),
-    ));
-
-    let (mut parse_result, parsing_t) = time(|| {
-        parse_file(
-            emitter.options(),
-            stack_limit,
-            source_text,
-            !env.flags.contains(EnvFlags::DISABLE_TOPLEVEL_ELABORATION),
-            RcOc::clone(&namespace_env),
-        )
-    });
-    let log_extern_compiler_perf = emitter.options().log_extern_compiler_perf();
-
-    let (program, codegen_t) = match &mut parse_result {
-        Either::Right(ast) => {
-            elaborate_namespaces_visitor::elaborate_program(RcOc::clone(&namespace_env), ast);
-            let e = &mut emitter;
-            time(move || rewrite_and_emit(alloc, e, &env, namespace_env, ast))
-        }
-        Either::Left((pos, msg, is_runtime_error)) => {
-            time(|| emit_fatal(alloc, *is_runtime_error, pos, msg))
-        }
-    };
-    let program = program.map_err(|e| anyhow!("Unhandled Emitter error: {}", e))?;
+    let mut emitter = create_emitter(env, native_env, decl_provider)?;
+    let (program, profile) =
+        emit_prog_from_text(alloc, &mut emitter, env, stack_limit, source_text)?;
 
     let (print_result, printing_t) = time(|| {
         print_program(
@@ -420,20 +351,15 @@ where
     });
     print_result?;
 
-    if log_extern_compiler_perf {
-        Ok(Some(Profile {
-            parsing_t,
-            codegen_t,
-            printing_t,
-        }))
-    } else {
-        Ok(None)
-    }
+    Ok(profile.map(|mut prof| {
+        prof.printing_t = printing_t;
+        prof
+    }))
 }
 
-fn rewrite_and_emit<'p, 'arena, 'decl, D: DeclProvider<'decl>, S: AsRef<str>>(
+fn rewrite_and_emit<'p, 'arena, 'decl, S: AsRef<str>>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena, 'decl, D>,
+    emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<S>,
     namespace_env: RcOc<NamespaceEnv>,
     ast: &'p mut ast::Program,
@@ -443,7 +369,7 @@ fn rewrite_and_emit<'p, 'arena, 'decl, D: DeclProvider<'decl>, S: AsRef<str>>(
     match result {
         Ok(()) => {
             // Rewrite ok, now emit.
-            emit(alloc, emitter, &env, namespace_env, ast)
+            emit_prog_from_ast(alloc, emitter, &env, namespace_env, ast)
         }
         Err(Error::IncludeTimeFatalException(op, pos, msg)) => {
             emit_program::emit_fatal_program(alloc, op, &pos, msg)
@@ -452,73 +378,56 @@ fn rewrite_and_emit<'p, 'arena, 'decl, D: DeclProvider<'decl>, S: AsRef<str>>(
     }
 }
 
-fn rewrite<'p, 'arena, 'decl, D: DeclProvider<'decl>>(
+fn rewrite<'p, 'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena, 'decl, D>,
+    emitter: &mut Emitter<'arena, 'decl>,
     ast: &'p mut ast::Program,
     namespace_env: RcOc<NamespaceEnv>,
 ) -> Result<(), Error> {
     rewrite_program(alloc, emitter, ast, namespace_env)
 }
 
-pub fn hhas_from_text<'arena, 'decl, S: AsRef<str>, D: DeclProvider<'decl>>(
+pub fn hhas_from_text<'arena, S: AsRef<str>>(
     alloc: &'arena bumpalo::Bump,
     env: &Env<S>,
     stack_limit: &StackLimit,
     source_text: SourceText,
     native_env: Option<&NativeEnv<S>>,
-    decl_provider: D,
-) -> anyhow::Result<HhasProgram<'arena>> {
-    let opts = match native_env {
-        None => Options::from_configs(&env.config_jsons, &env.config_list)
-            .map_err(anyhow::Error::msg)?,
-        Some(native_env) => NativeEnv::to_options(&native_env),
-    };
-
-    let mut emitter = Emitter::new(
-        opts,
-        env.flags.contains(EnvFlags::IS_SYSTEMLIB),
-        env.flags.contains(EnvFlags::FOR_DEBUGGER_EVAL),
-        decl_provider,
-    );
-
-    let namespace_env = RcOc::new(NamespaceEnv::empty(
-        emitter.options().hhvm.aliased_namespaces_cloned().collect(),
-        true, /* is_codegen */
-        emitter
-            .options()
-            .hhvm
-            .hack_lang
-            .flags
-            .contains(LangFlags::DISABLE_XHP_ELEMENT_MANGLING),
-    ));
-
-    let (parse_result, _) = time(|| {
-        parse_file(
-            emitter.options(),
-            stack_limit,
-            source_text,
-            !env.flags.contains(EnvFlags::DISABLE_TOPLEVEL_ELABORATION),
-            RcOc::clone(&namespace_env),
-        )
-    });
-
-    let (program, _) = match parse_result {
-        Either::Right(mut ast) => {
-            elaborate_namespaces_visitor::elaborate_program(RcOc::clone(&namespace_env), &mut ast);
-            let e = &mut emitter;
-            time(move || rewrite_and_emit(alloc, e, &env, namespace_env, &mut ast))
-        }
-        Either::Left((pos, msg, is_runtime_error)) => {
-            time(|| emit_fatal(alloc, is_runtime_error, &pos, msg))
-        }
-    };
-    program.map_err(|e| anyhow!("Unhandled Emitter error: {}", e))
+    decl_provider: unified_decl_provider::DeclProvider<'arena>,
+) -> anyhow::Result<(HhasProgram<'arena>, Option<Profile>)> {
+    let mut emitter = create_emitter(env, native_env, decl_provider)?;
+    emit_prog_from_text(alloc, &mut emitter, env, stack_limit, source_text)
 }
 
-fn emit<'p, 'arena, 'decl, D: DeclProvider<'decl>, S: AsRef<str>>(
+pub fn hhas_to_string<W: std::fmt::Write, S: AsRef<str>>(
+    env: &Env<S>,
+    native_env: Option<&NativeEnv<S>>,
+    writer: &mut W,
+    program: &HhasProgram,
+) -> anyhow::Result<()> {
+    let mut emitter = create_emitter(
+        env,
+        native_env,
+        unified_decl_provider::DeclProvider::NoDeclProvider(NoDeclProvider),
+    )?;
+    let (print_result, _) = time(|| {
+        print_program(
+            &mut Context::new(
+                &mut emitter,
+                Some(&env.filepath),
+                env.flags.contains(EnvFlags::DUMP_SYMBOL_REFS),
+                env.flags.contains(EnvFlags::IS_SYSTEMLIB),
+            ),
+            writer,
+            program,
+        )
+    });
+    print_result.map_err(|e| anyhow!("{}", e))
+}
+
+fn emit_prog_from_ast<'p, 'arena, 'decl, S: AsRef<str>>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena, 'decl, D>,
+    emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<S>,
     namespace: RcOc<NamespaceEnv>,
     ast: &'p mut ast::Program,
@@ -551,6 +460,61 @@ fn emit<'p, 'arena, 'decl, D: DeclProvider<'decl>, S: AsRef<str>>(
     emit_program(alloc, emitter, flags, namespace, ast)
 }
 
+fn emit_prog_from_text<'arena, 'decl, S: AsRef<str>>(
+    alloc: &'arena bumpalo::Bump,
+    emitter: &mut Emitter<'arena, 'decl>,
+    env: &Env<S>,
+    stack_limit: &StackLimit,
+    source_text: SourceText,
+) -> anyhow::Result<(HhasProgram<'arena>, Option<Profile>)> {
+    let log_extern_compiler_perf = emitter.options().log_extern_compiler_perf();
+
+    let namespace_env = RcOc::new(NamespaceEnv::empty(
+        emitter.options().hhvm.aliased_namespaces_cloned().collect(),
+        true, /* is_codegen */
+        emitter
+            .options()
+            .hhvm
+            .hack_lang
+            .flags
+            .contains(LangFlags::DISABLE_XHP_ELEMENT_MANGLING),
+    ));
+
+    let (parse_result, parsing_t) = time(|| {
+        parse_file(
+            emitter.options(),
+            stack_limit,
+            source_text,
+            !env.flags.contains(EnvFlags::DISABLE_TOPLEVEL_ELABORATION),
+            RcOc::clone(&namespace_env),
+            env.flags.contains(EnvFlags::IS_SYSTEMLIB),
+        )
+    });
+
+    let (program, codegen_t) = match parse_result {
+        Either::Right(mut ast) => {
+            elaborate_namespaces_visitor::elaborate_program(RcOc::clone(&namespace_env), &mut ast);
+            time(move || rewrite_and_emit(alloc, emitter, &env, namespace_env, &mut ast))
+        }
+        Either::Left((pos, msg, is_runtime_error)) => {
+            time(|| emit_fatal(alloc, is_runtime_error, &pos, msg))
+        }
+    };
+    let profile = if log_extern_compiler_perf {
+        Some(Profile {
+            parsing_t,
+            codegen_t,
+            ..Default::default()
+        })
+    } else {
+        None
+    };
+    match program {
+        Ok(prog) => Ok((prog, profile)),
+        Err(e) => Err(anyhow!("Unhandled Emitter error: {}", e)),
+    }
+}
+
 fn emit_fatal<'arena>(
     alloc: &'arena bumpalo::Bump,
     is_runtime_error: bool,
@@ -563,6 +527,24 @@ fn emit_fatal<'arena>(
         FatalOp::Parse
     };
     emit_program::emit_fatal_program(alloc, op, pos, msg)
+}
+
+fn create_emitter<'arena, 'decl, S: AsRef<str>>(
+    env: &Env<S>,
+    native_env: Option<&NativeEnv<S>>,
+    decl_provider: unified_decl_provider::DeclProvider<'decl>,
+) -> anyhow::Result<Emitter<'arena, 'decl>> {
+    let opts = match native_env {
+        None => Options::from_configs(&env.config_jsons, &env.config_list)
+            .map_err(anyhow::Error::msg)?,
+        Some(native_env) => NativeEnv::to_options(&native_env),
+    };
+    Ok(Emitter::new(
+        opts,
+        env.flags.contains(EnvFlags::IS_SYSTEMLIB),
+        env.flags.contains(EnvFlags::FOR_DEBUGGER_EVAL),
+        decl_provider,
+    ))
 }
 
 fn create_parser_options(opts: &Options) -> ParserOptions {
@@ -599,7 +581,6 @@ fn create_parser_options(opts: &Options) -> ParserOptions {
         po_disable_array: hack_lang_flags(LangFlags::DISABLE_ARRAY),
         po_disable_array_typehint: hack_lang_flags(LangFlags::DISABLE_ARRAY_TYPEHINT),
         po_allow_unstable_features: hack_lang_flags(LangFlags::ALLOW_UNSTABLE_FEATURES),
-        po_disallow_hash_comments: hack_lang_flags(LangFlags::DISALLOW_HASH_COMMENTS),
         po_disallow_fun_and_cls_meth_pseudo_funcs: hack_lang_flags(
             LangFlags::DISALLOW_FUN_AND_CLS_METH_PSEUDO_FUNCS,
         ),
@@ -619,6 +600,7 @@ fn parse_file(
     source_text: SourceText,
     elaborate_namespaces: bool,
     namespace_env: RcOc<NamespaceEnv>,
+    is_systemlib: bool,
 ) -> Either<(Pos, String, bool), ast::Program> {
     let aast_env = AastEnv {
         codegen: true,
@@ -629,6 +611,7 @@ fn parse_file(
         //   (not (Hhbc_options.enable_uniform_variable_syntax hhbc_options))
         php5_compat_mode: !opts.php7_flags.contains(Php7Flags::UVS),
         keep_errors: false,
+        is_systemlib,
         elaborate_namespaces,
         parser_options: create_parser_options(opts),
         ..AastEnv::default()
@@ -707,7 +690,7 @@ pub fn expr_to_string_lossy<S: AsRef<str>>(env: &Env<S>, expr: &ast::Expr) -> St
         opts,
         env.flags.contains(EnvFlags::IS_SYSTEMLIB),
         env.flags.contains(EnvFlags::FOR_DEBUGGER_EVAL),
-        NoDeclProvider,
+        unified_decl_provider::DeclProvider::NoDeclProvider(NoDeclProvider),
     );
     let ctx = Context::new(
         &mut emitter,

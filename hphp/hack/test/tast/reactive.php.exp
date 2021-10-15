@@ -17,8 +17,8 @@ Errors:
                    [([4:23-46],
                      (Hfun
                         { hf_is_readonly = None; hf_param_tys = [([4:34-37], (Hprim Tint))]; 
-                          hf_param_info = [None]; hf_variadic_ty = None; 
-                          hf_ctxs = None; hf_return_ty = ([4:41-45], (Hprim Tvoid)); 
+                          hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None })]; 
+                          hf_variadic_ty = None; hf_ctxs = None; hf_return_ty = ([4:41-45], (Hprim Tvoid)); 
                           hf_is_readonly_return = None }))
                      ]
                    )))));

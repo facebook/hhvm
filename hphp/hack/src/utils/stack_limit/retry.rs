@@ -55,14 +55,12 @@ impl Job {
     /// ```
     pub fn with_elastic_stack<F, T>(
         &self,
-        make_retryable: impl Fn() -> F,
+        mut retryable: F,
         on_retry: &mut impl FnMut(usize),
         compute_stack_slack: StackSlackFunction,
     ) -> Result<T, JobFailed>
     where
-        F: FnOnce(&StackLimit, NonMainStackSize) -> T,
-        F: Send + 'static + std::panic::UnwindSafe,
-        T: Send + 'static,
+        F: FnMut(&StackLimit, NonMainStackSize) -> T,
     {
         // Eagerly validate job parameters via getters, so we can panic before executing
         let max_stack_size = self.check_nonmain_space_max();
@@ -79,14 +77,14 @@ impl Job {
                 panic!("bad compute_stack_slack (must return < stack_size)");
             }
 
-            let retryable = make_retryable();
+            let retryable = AssertSend(&mut retryable);
             let try_retryable = move || {
                 let stack_limit = StackLimit::relative(relative_stack_size);
                 stack_limit.reset();
                 let stack_limit_ref = &stack_limit;
-                match std::panic::catch_unwind(move || {
-                    retryable(stack_limit_ref, nonmain_stack_size)
-                }) {
+                match std::panic::catch_unwind(std::panic::AssertUnwindSafe(move || {
+                    AssertSend(retryable.0(stack_limit_ref, nonmain_stack_size))
+                })) {
                     Ok(result) => Some(result),
                     Err(_) if stack_limit.exceeded() => None,
                     Err(msg) => std::panic::panic_any(msg),
@@ -96,15 +94,18 @@ impl Job {
             // Call retryable on the current thread in the 1st iteration or nonmain thread otherwise.
             let result_opt = match nonmain_stack_size {
                 None => try_retryable(),
-                Some(stack_size) => std::thread::Builder::new()
-                    .stack_size(stack_size)
-                    .spawn(try_retryable)
-                    .expect("ERROR: thread::spawn")
-                    .join()
-                    .expect("ERROR: failed to wait on new thread"),
+                Some(stack_size) => crossbeam::scope(|s| {
+                    s.builder()
+                        .stack_size(stack_size)
+                        .spawn(|_| try_retryable())
+                        .expect("ERROR: thread::spawn")
+                        .join()
+                        .expect("ERROR: failed to wait on new thread")
+                })
+                .expect("ERROR: crossbeam::scope"),
             };
             if let Some(result) = result_opt {
-                return Ok(result);
+                return Ok(result.0);
             } else {
                 on_retry(stack_size)
             }
@@ -159,7 +160,7 @@ pub struct JobFailed {
     pub max_stack_size_tried: usize,
 }
 impl fmt::Display for JobFailed {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
             "{}::JobFailed: retry job would exceed maximum nonmain stack of {} KiB",
@@ -168,6 +169,13 @@ impl fmt::Display for JobFailed {
         )
     }
 }
+
+/// Since the main thread blocks until the nonmain worker thread terminates, we
+/// know there will be no concurrent access of values captured by the job
+/// closure. This means it should be safe to close over non-Send values, so we
+/// assert that the job closure is Send using this struct.
+struct AssertSend<T>(T);
+unsafe impl<T> Send for AssertSend<T> {}
 
 #[cfg(test)]
 mod tests {
@@ -187,16 +195,14 @@ mod tests {
             ..Default::default()
         };
 
-        let make_expo_grower = || {
-            Box::new(|limit: &StackLimit, _: super::NonMainStackSize| {
-                eprintln!("limit = {} B", limit.get());
-                let bounded = crate::tests::StackBounded {
-                    // Note: safe because we're not leaking bounded from the closure
-                    limit: unsafe { std::mem::transmute(limit) },
-                };
-                bounded.min_n_that_fails_ackermann(3);
-                limit.panic_if_exceeded();
-            })
+        let expo_grower = |limit: &StackLimit, _: super::NonMainStackSize| {
+            eprintln!("limit = {} B", limit.get());
+            let bounded = crate::tests::StackBounded {
+                // Note: safe because we're not leaking bounded from the closure
+                limit: unsafe { std::mem::transmute(limit) },
+            };
+            bounded.min_n_that_fails_ackermann(3);
+            limit.panic_if_exceeded();
         };
 
         let mut stack_sizes = Vec::<usize>::new();
@@ -205,7 +211,7 @@ mod tests {
         };
 
         assert!(
-            job.with_elastic_stack(&make_expo_grower, &mut on_retry, get_slack_space,)
+            job.with_elastic_stack(&expo_grower, &mut on_retry, get_slack_space,)
                 .is_err()
         );
 

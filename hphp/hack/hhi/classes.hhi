@@ -121,31 +121,31 @@ final class AsyncGenerator<Tk, +Tv, -Ts>
   ResumableWaitHandle::class,
   SleepWaitHandle::class
 ),__SupportDynamicType>>
-abstract class WaitableWaitHandle<+T> extends Awaitable<T> {
+abstract class WaitableWaitHandle<<<__RequireDynamic>> +T> extends Awaitable<T> {
 }
 <<__SupportDynamicType>>
-final class StaticWaitHandle<+T> extends Awaitable<T> {
-}
-
-<<__SupportDynamicType>>
-final class AsyncFunctionWaitHandle<+T> extends ResumableWaitHandle<T> {
+final class StaticWaitHandle<<<__RequireDynamic>> +T> extends Awaitable<T> {
 }
 
 <<__SupportDynamicType>>
-final class AsyncGeneratorWaitHandle<+Tk, +Tv>
+final class AsyncFunctionWaitHandle<<<__RequireDynamic>> +T> extends ResumableWaitHandle<T> {
+}
+
+<<__SupportDynamicType>>
+final class AsyncGeneratorWaitHandle<<<__RequireDynamic>> +Tk, <<__RequireDynamic>> +Tv>
   extends ResumableWaitHandle<?(Tk, Tv)> {
 }
 
 <<__Sealed(StaticWaitHandle::class, WaitableWaitHandle::class),
 __SupportDynamicType>>
-abstract class Awaitable<+T> {
+abstract class Awaitable<<<__RequireDynamic>> +T> {
   public static function setOnIOWaitEnterCallback(?(function(): void) $callback) {}
   public static function setOnIOWaitExitCallback(?(function(): void) $callback) {}
   public static function setOnJoinCallback(?(function(WaitableWaitHandle<mixed>): void) $callback) {}
 }
 
 <<__Sealed(AsyncFunctionWaitHandle::class, AsyncGeneratorWaitHandle::class), __SupportDynamicType>>
-abstract class ResumableWaitHandle<+T> extends WaitableWaitHandle<T> {
+abstract class ResumableWaitHandle<<<__RequireDynamic>> +T> extends WaitableWaitHandle<T> {
   public static function setOnCreateCallback(?(function(AsyncFunctionWaitHandle<mixed>, WaitableWaitHandle<mixed>): void) $callback) {}
   public static function setOnAwaitCallback(?(function(AsyncFunctionWaitHandle<mixed>, WaitableWaitHandle<mixed>): void) $callback) {}
   public static function setOnSuccessCallback(?(function(AsyncFunctionWaitHandle<mixed>, mixed): void) $callback) {}
@@ -181,7 +181,7 @@ final class AwaitAllWaitHandle extends WaitableWaitHandle<void> {
 }
 
 <<__SupportDynamicType>> // TODO: determine whether it's safe to mark this as unconditionally supporting dynamic
-final class ConditionWaitHandle< <<__NoRequireDynamic>> T> extends WaitableWaitHandle<T> {
+final class ConditionWaitHandle<T> extends WaitableWaitHandle<T> {
   public static function create(Awaitable<void> $child): ConditionWaitHandle<T> {}
   public static function setOnCreateCallback(?(function(ConditionWaitHandle<T>, WaitableWaitHandle<void>): void) $callback) {}
   public function succeed(T $result): void {}
@@ -203,7 +203,7 @@ final class SleepWaitHandle extends WaitableWaitHandle<void> {
 }
 
 <<__SupportDynamicType>>
-final class ExternalThreadEventWaitHandle<+T> extends WaitableWaitHandle<T> {
+final class ExternalThreadEventWaitHandle<<<__RequireDynamic>> +T> extends WaitableWaitHandle<T> {
   public static function setOnCreateCallback(?(function(ExternalThreadEventWaitHandle<mixed>): void) $callback) {}
   public static function setOnSuccessCallback(?(function(ExternalThreadEventWaitHandle<mixed>, mixed): void) $callback) {}
   public static function setOnFailCallback(?(function(ExternalThreadEventWaitHandle<mixed>, \Exception): void) $callback) {}

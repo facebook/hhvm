@@ -1,0 +1,66 @@
+File "supportdynamic.bad.php", line 26, characters 16-29:
+Type arguments are not expected for this type (Naming[2064])
+File "supportdynamic.bad.php", line 4, characters 3-8:
+This is not an object of type `KeyedContainer`, this is a supportdynamic value (Typing[4005])
+  File "supportdynamic.bad.php", line 3, characters 15-28:
+  Definition is here
+File "supportdynamic.bad.php", line 5, characters 3-11:
+a supportdynamic value does not allow array append (Typing[4006])
+  File "supportdynamic.bad.php", line 3, characters 15-28:
+  Definition is here
+File "supportdynamic.bad.php", line 6, characters 3-5:
+Was expecting a class, but got a supportdynamic value (Typing[4026])
+File "supportdynamic.bad.php", line 7, characters 8-8:
+You are trying to access the method `m` but this is a supportdynamic value (Typing[4062])
+  File "supportdynamic.bad.php", line 3, characters 15-28:
+  Definition is here
+File "supportdynamic.bad.php", line 8, characters 9-9:
+You are trying to access the method `m` but this is a supportdynamic value (Typing[4062])
+  File "supportdynamic.bad.php", line 3, characters 15-28:
+  Definition is here
+File "supportdynamic.bad.php", line 9, characters 3-5:
+Typing error (Typing[4062])
+  File "supportdynamic.bad.php", line 9, characters 8-8:
+  You are trying to access the property `p` but this is a supportdynamic value
+  File "supportdynamic.bad.php", line 3, characters 15-28:
+  Definition is here
+File "supportdynamic.bad.php", line 10, characters 3-5:
+Typing error (Typing[4110])
+  File "supportdynamic.bad.php", line 10, characters 3-9:
+  Expected `null` or an object with property `p` (use of `?->` operator)
+  File "supportdynamic.bad.php", line 3, characters 15-28:
+  But got `supportdynamic`
+File "supportdynamic.bad.php", line 11, characters 9-11:
+Expected an object convertible to string but got a supportdynamic value (Typing[4318])
+File "supportdynamic.bad.php", line 12, characters 3-5:
+Typing error (Typing[4110])
+  File "supportdynamic.bad.php", line 12, characters 3-9:
+  Expected `num` because this is used in an arithmetic operation
+  File "supportdynamic.bad.php", line 3, characters 15-28:
+  But got `supportdynamic`
+File "supportdynamic.bad.php", line 16, characters 12-14:
+Invalid `foreach` (Typing[4110])
+  File "supportdynamic.bad.php", line 16, characters 12-14:
+  Expected `Traversable<[unresolved]>` because this is used in a `foreach` statement
+  File "supportdynamic.bad.php", line 15, characters 21-34:
+  But got `supportdynamic`
+File "supportdynamic.bad.php", line 17, characters 12-14:
+Invalid `foreach` (Typing[4110])
+  File "supportdynamic.bad.php", line 17, characters 12-14:
+  Expected `KeyedTraversable<[unresolved], [unresolved]>` because this is used in a `foreach` statement
+  File "supportdynamic.bad.php", line 15, characters 21-34:
+  But got `supportdynamic`
+File "supportdynamic.bad.php", line 18, characters 3-11:
+`await` can only operate on an `Awaitable` (Typing[4110])
+  File "supportdynamic.bad.php", line 18, characters 3-11:
+  Expected `Awaitable<[unresolved]>`
+  File "supportdynamic.bad.php", line 15, characters 21-34:
+  But got `supportdynamic`
+File "supportdynamic.bad.php", line 23, characters 27-30:
+Invalid type hint (Typing[4062])
+  File "supportdynamic.bad.php", line 23, characters 30-30:
+  You are trying to access the type constant `C` but this is a supportdynamic value
+  File "supportdynamic.bad.php", line 23, characters 27-30:
+  Definition is here
+File "supportdynamic.bad.php", line 25, characters 6-6:
+Enums must be `int` or `string` or `arraykey`, not `supportdynamic` (Typing[4024])

@@ -60,7 +60,6 @@ struct mysqlExtension final : Extension {
   static int ReadTimeout;
   static int WaitTimeout;
   static int SlowQueryThreshold;
-  static bool KillOnTimeout;
   static int MaxRetryOpenOnFail;
   static int MaxRetryQueryOnFail;
   static std::string Socket;
@@ -73,4 +72,3 @@ struct mysqlExtension final : Extension {
 extern mysqlExtension s_mysql_extension;
 
 }
-

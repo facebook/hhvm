@@ -97,6 +97,7 @@ const Func* loadUnknownFuncHelper(const StringData* name,
                                   void (*raiser)(const StringData*,
                                                  const Class*)) {
   VMRegAnchor _;
+  CoeffectsAutoGuard _2;
   auto const func = Func::load(name);
   if (UNLIKELY(!func)) raiser(name, nullptr);
   return func;

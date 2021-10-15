@@ -3,4 +3,4 @@ Typing error (Typing[4110])
   File "as2.bad.php", line 17, characters 14-20:
   Expected `dynamic`
   File "as2.bad.php", line 16, characters 12-19:
-  But got `Box<int>`
+  Type `Box<int>` is not a subtype of `dynamic` under dynamic-aware subtyping

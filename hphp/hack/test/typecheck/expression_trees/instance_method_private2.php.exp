@@ -1,0 +1,4 @@
+File "instance_method_private2.php", line 10, characters 11-13:
+Cannot access non-public members within expression trees. (Typing[4448])
+  File "instance_method_private2.php", line 6, characters 20-22:
+  Member defined here

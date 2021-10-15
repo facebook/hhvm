@@ -55,6 +55,8 @@ fn main() {
         bench_aast_full_parse(&mut criterion, &files);
         bench_aast_quick_parse(&mut criterion, &files);
         bench_direct_decl_parse(&mut criterion, &files);
+        bench_cst_and_decl_parse(&mut criterion, &files);
+        bench_ast_and_decl_parse(&mut criterion, &files);
         bench_facts_parse(&mut criterion, &files);
     }
 
@@ -92,6 +94,45 @@ fn bench_direct_decl_parse(c: &mut Criterion, files: &[(RcOc<RelativePath>, &[u8
             for (filename, text) in files {
                 let text = SourceText::make(RcOc::clone(filename), text);
                 let _ = direct_decl_parser::parse_script(Default::default(), &text, &arena, None);
+                arena.reset();
+            }
+        })
+    });
+}
+
+fn bench_cst_and_decl_parse(c: &mut Criterion, files: &[(RcOc<RelativePath>, &[u8])]) {
+    let mut arena = Bump::with_capacity(1024 * 1024); // 1 MB
+    c.bench_function("cst_and_decl_parse", |b| {
+        b.iter(|| {
+            for (filename, text) in files {
+                let text = SourceText::make(RcOc::clone(filename), text);
+                let _ = cst_and_decl_parser::parse_script(
+                    Default::default(),
+                    Default::default(),
+                    &text,
+                    None,
+                    &arena,
+                    None,
+                );
+                arena.reset();
+            }
+        })
+    });
+}
+
+fn bench_ast_and_decl_parse(c: &mut Criterion, files: &[(RcOc<RelativePath>, &[u8])]) {
+    let mut arena = Bump::with_capacity(1024 * 1024); // 1 MB
+    c.bench_function("ast_and_decl_parse", |b| {
+        b.iter(|| {
+            for (filename, text) in files {
+                let text = SourceText::make(RcOc::clone(filename), text);
+                let indexed_source_text = IndexedSourceText::new(text.clone());
+                let _ = ast_and_decl_parser::from_text(
+                    &Default::default(),
+                    &indexed_source_text,
+                    &arena,
+                    None,
+                );
                 arena.reset();
             }
         })

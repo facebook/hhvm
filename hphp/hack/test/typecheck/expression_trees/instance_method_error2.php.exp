@@ -1,0 +1,2 @@
+File "instance_method_error2.php", line 8, characters 12-17:
+Expression trees only support named property access. (Parsing[1002])

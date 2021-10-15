@@ -131,6 +131,13 @@ type t = {
   (* Look up class members lazily from shallow declarations instead of eagerly
      computing folded declarations representing the entire class type. *)
   tco_shallow_class_decl: bool;
+  (* Use shallow decl fanout algorithm while remaining to use folded decls
+     for typechecking *)
+  tco_force_shallow_decl_fanout: bool;
+  (* Flag to fetch old decls from remote decl store *)
+  tco_fetch_remote_old_decls: bool;
+  (* Always load hot shallow decls from saved state *)
+  tco_force_load_hot_shallow_decls: bool;
   (* Skip checks on hierarchy e.g. overrides, require extend, etc.
      Set to true only for debugging purposes! *)
   tco_skip_hierarchy_checks: bool;
@@ -154,10 +161,6 @@ type t = {
   tco_simple_pessimize: float;
   (* Enables complex coercion interactions that involve like types *)
   tco_complex_coercion: bool;
-  (* Treat partially abstract typeconsts like concrete typeconsts, disable overriding type *)
-  tco_disable_partially_abstract_typeconsts: bool;
-  (* Ban definitions of partially abstract typeconsts *)
-  tco_disallow_partially_abstract_typeconst_definitions: bool;
   (* Set of codes to be treated as if they were in strict mode files *)
   error_codes_treated_strictly: ISet.t;
   (* static check xhp required attribute *)
@@ -272,8 +275,6 @@ type t = {
   tco_typecheck_sample_rate: float;
   (* Experimental implementation of a "sound" dynamic type *)
   tco_enable_sound_dynamic: bool;
-  (* Disallow #-style comments, except hashbangs(#!) *)
-  po_disallow_hash_comments: bool;
   (* Disable parsing of fun() and class_meth() *)
   po_disallow_fun_and_cls_meth_pseudo_funcs: bool;
   (* Disable parsing of inst_meth() *)
@@ -284,8 +285,6 @@ type t = {
   po_escape_brace: bool;
   (* Enable use of the direct decl parser for parsing type signatures. *)
   tco_use_direct_decl_parser: bool;
-  (* Direct decl parsing in type check loop fix *)
-  tco_use_direct_decl_in_tc_loop: bool;
   (* Enable ifc on the specified list of path prefixes
      (a list containing the empty string would denote all files,
      an empty list denotes no files) *)
@@ -312,6 +311,8 @@ type t = {
   (* Raise an error when a concrete type constant is overridden by a concrete type constant
      in a child class. *)
   tco_typeconst_concrete_concrete_error: bool;
+  (* Raise an error whenever a concrete const is defined multiple times *)
+  tco_enable_strict_const_semantics: bool;
   (* meth_caller can only reference public methods *)
   tco_meth_caller_only_public_visibility: bool;
   (* Consider `require extends` and `require implements` as ancestors when checking a class *)
@@ -320,6 +321,13 @@ type t = {
   tco_strict_value_equality: bool;
   (* All member of the __Sealed whitelist should be subclasses*)
   tco_enforce_sealed_subclasses: bool;
+  (* All classes are implcitly marked <<__SupportDynamicType>> *)
+  tco_everything_sdt: bool;
+  (* All collections and Hack arrays are treated as containing ~T *)
+  tco_pessimise_builtins: bool;
+  tco_deferments_light: bool;
+  tco_old_naming_table_for_redecl: bool;
+  tco_enable_disk_heap: bool;
 }
 [@@deriving eq, show]
 
@@ -364,6 +372,9 @@ val make :
   ?log_levels:int SMap.t ->
   ?po_disable_lval_as_an_expression:bool ->
   ?tco_shallow_class_decl:bool ->
+  ?tco_force_shallow_decl_fanout:bool ->
+  ?tco_fetch_remote_old_decls:bool ->
+  ?tco_force_load_hot_shallow_decls:bool ->
   ?tco_skip_hierarchy_checks:bool ->
   ?po_rust_parser_errors:bool ->
   ?tco_like_type_hints:bool ->
@@ -374,8 +385,6 @@ val make :
   ?tco_like_casts:bool ->
   ?tco_simple_pessimize:float ->
   ?tco_complex_coercion:bool ->
-  ?tco_disable_partially_abstract_typeconsts:bool ->
-  ?tco_disallow_partially_abstract_typeconst_definitions:bool ->
   ?error_codes_treated_strictly:ISet.t ->
   ?tco_check_xhp_attribute:bool ->
   ?tco_check_redundant_generics:bool ->
@@ -428,13 +437,11 @@ val make :
   ?tco_report_pos_from_reason:bool ->
   ?tco_typecheck_sample_rate:float ->
   ?tco_enable_sound_dynamic:bool ->
-  ?po_disallow_hash_comments:bool ->
   ?po_disallow_fun_and_cls_meth_pseudo_funcs:bool ->
   ?po_disallow_inst_meth:bool ->
   ?po_enable_readonly_in_emitter:bool ->
   ?po_escape_brace:bool ->
   ?tco_use_direct_decl_parser:bool ->
-  ?tco_use_direct_decl_in_tc_loop:bool ->
   ?tco_ifc_enabled:string list ->
   ?po_enable_enum_supertyping:bool ->
   ?po_interpret_soft_types_as_like_types:bool ->
@@ -446,10 +453,16 @@ val make :
   ?tco_allowed_expression_tree_visitors:string list ->
   ?tco_math_new_code:bool ->
   ?tco_typeconst_concrete_concrete_error:bool ->
+  ?tco_enable_strict_const_semantics:bool ->
   ?tco_meth_caller_only_public_visibility:bool ->
   ?tco_require_extends_implements_ancestors:bool ->
   ?tco_strict_value_equality:bool ->
   ?tco_enforce_sealed_subclasses:bool ->
+  ?tco_everything_sdt:bool ->
+  ?tco_pessimise_builtins:bool ->
+  ?tco_deferments_light:bool ->
+  ?tco_old_naming_table_for_redecl:bool ->
+  ?tco_enable_disk_heap:bool ->
   unit ->
   t
 
@@ -539,6 +552,8 @@ val tco_experimental_infer_flows : string
 
 val tco_experimental_case_sensitive_inheritance : string
 
+val tco_experimental_supportdynamic_type_hint : string
+
 val tco_experimental_all : SSet.t
 
 val tco_migration_flags_all : SSet.t
@@ -554,6 +569,12 @@ val log_levels : t -> int SMap.t
 val po_disable_lval_as_an_expression : t -> bool
 
 val tco_shallow_class_decl : t -> bool
+
+val tco_force_shallow_decl_fanout : t -> bool
+
+val tco_fetch_remote_old_decls : t -> bool
+
+val tco_force_load_hot_shallow_decls : t -> bool
 
 val tco_skip_hierarchy_checks : t -> bool
 
@@ -578,10 +599,6 @@ val tco_like_casts : t -> bool
 val tco_simple_pessimize : t -> float
 
 val tco_complex_coercion : t -> bool
-
-val tco_disable_partially_abstract_typeconsts : t -> bool
-
-val tco_disallow_partially_abstract_typeconst_definitions : t -> bool
 
 val error_codes_treated_strictly : t -> ISet.t
 
@@ -691,8 +708,6 @@ val tco_typecheck_sample_rate : t -> float
 
 val tco_enable_sound_dynamic : t -> bool
 
-val po_disallow_hash_comments : t -> bool
-
 val po_disallow_fun_and_cls_meth_pseudo_funcs : t -> bool
 
 val po_disallow_inst_meth : t -> bool
@@ -702,8 +717,6 @@ val po_enable_readonly_in_emitter : t -> bool
 val po_escape_brace : t -> bool
 
 val tco_use_direct_decl_parser : t -> bool
-
-val tco_use_direct_decl_in_tc_loop : t -> bool
 
 val po_enable_enum_supertyping : t -> bool
 
@@ -731,6 +744,8 @@ val tco_math_new_code : t -> bool
 
 val tco_typeconst_concrete_concrete_error : t -> bool
 
+val tco_enable_strict_const_semantics : t -> bool
+
 val tco_meth_caller_only_public_visibility : t -> bool
 
 val tco_require_extends_implements_ancestors : t -> bool
@@ -738,3 +753,13 @@ val tco_require_extends_implements_ancestors : t -> bool
 val tco_strict_value_equality : t -> bool
 
 val tco_enforce_sealed_subclasses : t -> bool
+
+val tco_everything_sdt : t -> bool
+
+val tco_pessimise_builtins : t -> bool
+
+val tco_deferments_light : t -> bool
+
+val tco_old_naming_table_for_redecl : t -> bool
+
+val tco_enable_disk_heap : t -> bool

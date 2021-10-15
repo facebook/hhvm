@@ -187,7 +187,7 @@ impl PartialOrd for FilePosSmall {
 }
 
 impl fmt::Debug for FilePosSmall {
-    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt.debug_struct("FilePosSmall")
             .field("bol", &self.beg_of_line())
             .field("line", &self.line())

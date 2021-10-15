@@ -1,0 +1,102 @@
+File "subtype_supportdynamic.bad.php", line 8, characters 5-6:
+Invalid argument (Typing[4110])
+  File "subtype_supportdynamic.bad.php", line 3, characters 12-25:
+  Expected `supportdynamic`
+  File "subtype_supportdynamic.bad.php", line 7, characters 20-24:
+  But got `mixed`
+File "subtype_supportdynamic.bad.php", line 9, characters 5-7:
+Invalid argument (Typing[4110])
+  File "subtype_supportdynamic.bad.php", line 3, characters 12-25:
+  Expected `supportdynamic`
+  File "subtype_supportdynamic.bad.php", line 7, characters 30-36:
+  But got `nonnull`
+File "subtype_supportdynamic.bad.php", line 10, characters 5-6:
+Invalid argument (Typing[4110])
+  File "subtype_supportdynamic.bad.php", line 3, characters 12-25:
+  Expected `supportdynamic`
+  File "subtype_supportdynamic.bad.php", line 7, characters 43-43:
+  But got `C`
+File "subtype_supportdynamic.bad.php", line 16, characters 5-6:
+Invalid argument (Typing[4110])
+  File "subtype_supportdynamic.bad.php", line 3, characters 12-25:
+  Expected `dynamic`
+  File "subtype_supportdynamic.bad.php", line 13, characters 32-32:
+  Type `C` is not a subtype of `dynamic` under dynamic-aware subtyping
+File "subtype_supportdynamic.bad.php", line 17, characters 5-6:
+Invalid argument (Typing[4110])
+  File "subtype_supportdynamic.bad.php", line 3, characters 12-25:
+  Expected `dynamic`
+  File "subtype_supportdynamic.bad.php", line 13, characters 43-43:
+  Type `C` is not a subtype of `dynamic` under dynamic-aware subtyping
+File "subtype_supportdynamic.bad.php", line 18, characters 5-7:
+Invalid argument (Typing[4110])
+  File "subtype_supportdynamic.bad.php", line 3, characters 12-25:
+  Expected `dynamic`
+  File "subtype_supportdynamic.bad.php", line 13, characters 63-63:
+  Type `C` is not a subtype of `dynamic` under dynamic-aware subtyping
+File "subtype_supportdynamic.bad.php", line 19, characters 5-7:
+Invalid argument (Typing[4110])
+  File "subtype_supportdynamic.bad.php", line 3, characters 12-25:
+  Expected `dynamic`
+  File "subtype_supportdynamic.bad.php", line 14, characters 40-40:
+  Type `C` is not a subtype of `dynamic` under dynamic-aware subtyping
+File "subtype_supportdynamic.bad.php", line 20, characters 5-7:
+Invalid argument (Typing[4110])
+  File "subtype_supportdynamic.bad.php", line 3, characters 12-25:
+  Expected `dynamic`
+  File "subtype_supportdynamic.bad.php", line 15, characters 30-30:
+  Type `C` is not a subtype of `dynamic` under dynamic-aware subtyping
+File "subtype_supportdynamic.bad.php", line 24, characters 5-6:
+Invalid argument (Typing[4110])
+  File "subtype_supportdynamic.bad.php", line 3, characters 12-25:
+  Expected `dynamic`
+  File "subtype_supportdynamic.bad.php", line 23, characters 47-52:
+  Type `vec<C>` is not a subtype of `dynamic` under dynamic-aware subtyping
+File "subtype_supportdynamic.bad.php", line 32, characters 5-6:
+Invalid argument (Typing[4110])
+  File "subtype_supportdynamic.bad.php", line 3, characters 12-25:
+  Expected `dynamic`
+  File "subtype_supportdynamic.bad.php", line 28, characters 37-37:
+  Type `C` is not a subtype of `dynamic` under dynamic-aware subtyping
+File "subtype_supportdynamic.bad.php", line 33, characters 5-6:
+Invalid argument (Typing[4110])
+  File "subtype_supportdynamic.bad.php", line 3, characters 12-25:
+  Expected `dynamic`
+  File "subtype_supportdynamic.bad.php", line 29, characters 43-43:
+  Type `C` is not a subtype of `dynamic` under dynamic-aware subtyping
+File "subtype_supportdynamic.bad.php", line 37, characters 5-6:
+Invalid argument (Typing[4110])
+  File "subtype_supportdynamic.bad.php", line 3, characters 12-25:
+  Expected `dynamic`
+  File "subtype_supportdynamic.bad.php", line 36, characters 55-55:
+  Type `C` is not a subtype of `dynamic` under dynamic-aware subtyping
+File "subtype_supportdynamic.bad.php", line 44, characters 5-7:
+Invalid argument (Typing[4110])
+  File "subtype_supportdynamic.bad.php", line 3, characters 12-25:
+  Expected `supportdynamic`
+  File "subtype_supportdynamic.bad.php", line 43, characters 29-35:
+  But got `V1<int>`
+File "subtype_supportdynamic.bad.php", line 45, characters 5-7:
+Invalid argument (Typing[4110])
+  File "subtype_supportdynamic.bad.php", line 3, characters 12-25:
+  Expected `supportdynamic`
+  File "subtype_supportdynamic.bad.php", line 43, characters 42-46:
+  But got `V2<C>`
+File "subtype_supportdynamic.bad.php", line 54, characters 5-6:
+Invalid argument (Typing[4110])
+  File "subtype_supportdynamic.bad.php", line 3, characters 12-25:
+  Expected `supportdynamic`
+  File "subtype_supportdynamic.bad.php", line 48, characters 29-29:
+  But got `C`
+File "subtype_supportdynamic.bad.php", line 58, characters 5-6:
+Invalid argument (Typing[4110])
+  File "subtype_supportdynamic.bad.php", line 3, characters 12-25:
+  Expected `supportdynamic`
+  File "subtype_supportdynamic.bad.php", line 57, characters 27-30:
+  But got `null`
+File "subtype_supportdynamic.bad.php", line 59, characters 5-7:
+Invalid argument (Typing[4110])
+  File "subtype_supportdynamic.bad.php", line 3, characters 12-25:
+  Expected `supportdynamic`
+  File "subtype_supportdynamic.bad.php", line 57, characters 36-39:
+  But got `?int`

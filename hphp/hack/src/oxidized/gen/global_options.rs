@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3c45a8402b07c6cb94f977e2626f5907>>
+// @generated SignedSource<<b1bc550e54c6738344b86c8117ac935a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -70,6 +70,9 @@ pub struct GlobalOptions {
     pub log_levels: s_map::SMap<isize>,
     pub po_disable_lval_as_an_expression: bool,
     pub tco_shallow_class_decl: bool,
+    pub tco_force_shallow_decl_fanout: bool,
+    pub tco_fetch_remote_old_decls: bool,
+    pub tco_force_load_hot_shallow_decls: bool,
     pub tco_skip_hierarchy_checks: bool,
     pub po_rust_parser_errors: bool,
     pub tco_like_type_hints: bool,
@@ -80,8 +83,6 @@ pub struct GlobalOptions {
     pub tco_like_casts: bool,
     pub tco_simple_pessimize: f64,
     pub tco_complex_coercion: bool,
-    pub tco_disable_partially_abstract_typeconsts: bool,
-    pub tco_disallow_partially_abstract_typeconst_definitions: bool,
     pub error_codes_treated_strictly: i_set::ISet,
     pub tco_check_xhp_attribute: bool,
     pub tco_check_redundant_generics: bool,
@@ -133,13 +134,11 @@ pub struct GlobalOptions {
     pub tco_report_pos_from_reason: bool,
     pub tco_typecheck_sample_rate: f64,
     pub tco_enable_sound_dynamic: bool,
-    pub po_disallow_hash_comments: bool,
     pub po_disallow_fun_and_cls_meth_pseudo_funcs: bool,
     pub po_disallow_inst_meth: bool,
     pub po_enable_readonly_in_emitter: bool,
     pub po_escape_brace: bool,
     pub tco_use_direct_decl_parser: bool,
-    pub tco_use_direct_decl_in_tc_loop: bool,
     pub tco_ifc_enabled: Vec<String>,
     pub po_enable_enum_supertyping: bool,
     pub po_interpret_soft_types_as_like_types: bool,
@@ -151,8 +150,14 @@ pub struct GlobalOptions {
     pub tco_allowed_expression_tree_visitors: Vec<String>,
     pub tco_math_new_code: bool,
     pub tco_typeconst_concrete_concrete_error: bool,
+    pub tco_enable_strict_const_semantics: bool,
     pub tco_meth_caller_only_public_visibility: bool,
     pub tco_require_extends_implements_ancestors: bool,
     pub tco_strict_value_equality: bool,
     pub tco_enforce_sealed_subclasses: bool,
+    pub tco_everything_sdt: bool,
+    pub tco_pessimise_builtins: bool,
+    pub tco_deferments_light: bool,
+    pub tco_old_naming_table_for_redecl: bool,
+    pub tco_enable_disk_heap: bool,
 }

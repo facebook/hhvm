@@ -1,4 +1,4 @@
 File "namespace_global_builtin2.php", line 20, characters 7-12:
 You cannot implement sealed interface `Traversable` (Typing[4238])
-  File "interfaces.hhi", line 45, characters 11-21:
+  File "interfaces.hhi", line 44, characters 11-21:
   Declaration is here

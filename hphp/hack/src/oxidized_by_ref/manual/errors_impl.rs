@@ -14,7 +14,7 @@ impl<'a> Error_<'a, Pos<'a>, PosOrDecl<'a>> {
         code: ErrorCode,
         claim: &'a Message<'a, Pos<'a>>,
         reasons: &'a [&'a Message<'a, PosOrDecl<'a>>],
-        quickfixes: &'a [&'a Quickfix<Pos<'a>>],
+        quickfixes: &'a [&'a Quickfix<'_, Pos<'a>>],
     ) -> Self {
         Error_ {
             code,

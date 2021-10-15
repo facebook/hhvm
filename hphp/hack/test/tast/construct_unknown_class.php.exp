@@ -15,7 +15,7 @@ Errors:
         f_params =
         [{ param_annotation = (vec<string>); param_type_hint = ((vec<string>), (Some ([3:15-26], (Happly (([3:15-18], "\\HH\\vec"), [([3:19-25], (Hprim Tstring))]))))); 
            param_is_variadic = false; param_pos = [3:27-29]; param_name = "$x"; 
-           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_expr = None; param_readonly = None; param_callconv = Pnormal; 
            param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None;

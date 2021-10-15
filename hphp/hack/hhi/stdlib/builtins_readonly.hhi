@@ -10,8 +10,10 @@
  */
 
 namespace HH\Readonly {
-  // Converts a readonly primitive or value type into a mutable one.
-  // Only works on non-collection value types that are not affected by readonly,
-  // like int, string, etc. Currently only enforced by the typechecker.
+  /**
+   * Converts a readonly value type into a mutable one.
+   * Value types include numerics, strings, bools, null and Hack arrays of value
+   * types.
+   */
   function as_mut<T>(readonly T $x)[]: T;
 }

@@ -1,0 +1,21 @@
+commit c4ebee75247323c5bac38c1f6ca03d99283c8f3d
+Author: Fred Emmott <fe@fb.com>
+Date:   Fri Sep 17 10:36:22 2021 -0500
+
+    Include math.h in parse_tz.c
+    
+    Needed for call to `trunc()`; seems to be transitively included on some
+    systems.
+
+diff --git a/parse_tz.c b/parse_tz.c
+index 16ba9e4..259a390 100644
+--- a/parse_tz.c
++++ b/parse_tz.c
+@@ -33,6 +33,7 @@
+ #include <fcntl.h>
+ #include <unistd.h>
+ 
++#include <math.h>
+ #include "dirent.h"
+ 
+ #else

@@ -808,7 +808,6 @@ void Vgen::emit(const callstub& i) {
 
 void Vgen::emit(const callfaststub& i) {
   emit(call{i.target, i.args});
-  emit(syncpoint{i.fix});
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -856,7 +855,6 @@ void Vgen::emit(const leavetc& /*i*/) {
 
 void Vgen::emit(const nothrow& /*i*/) {
   env.meta.catches.emplace_back(a->frontier(), nullptr);
-  env.record_inline_stack(a->frontier());
 }
 
 void Vgen::emit(const syncpoint& i) {

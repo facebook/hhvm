@@ -30,7 +30,6 @@ function slice_l(
   int $offset,
   ?int $length = null,
 )[]: string {
-  /* HH_FIXME[4390] missing [] */
   return _Str\slice_l($string, $offset, $length ?? \PHP_INT_MAX, $locale);
 }
 
@@ -46,7 +45,6 @@ function strip_prefix_l(
   string $string,
   string $prefix,
 )[]: string {
-  /* HH_FIXME[4390] missing [] */
   return _Str\strip_prefix_l($string, $prefix, $locale);
 }
 
@@ -62,7 +60,6 @@ function strip_suffix_l(
   string $string,
   string $suffix,
 )[]: string {
-  /* HH_FIXME[4390] missing [] */
   return _Str\strip_suffix_l($string, $suffix, $locale);
 }
 
@@ -80,7 +77,6 @@ function trim_l(
   string $string,
   ?string $char_mask = null,
 )[]: string {
-  /* HH_FIXME[4390] missing [] */
   return _Str\trim_l($string, $char_mask, $locale);
 }
 
@@ -98,7 +94,6 @@ function trim_left_l(
   string $string,
   ?string $char_mask = null,
 )[]: string {
-  /* HH_FIXME[4390] missing [] */
   return _Str\trim_left_l($string, $char_mask, $locale);
 }
 
@@ -116,6 +111,5 @@ function trim_right_l(
   string $string,
   ?string $char_mask = null,
 )[]: string {
-  /* HH_FIXME[4390] missing [] */
   return _Str\trim_right_l($string, $char_mask, $locale);
 }

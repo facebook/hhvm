@@ -122,7 +122,7 @@ module type WATCHMAN_PROCESS = sig
   val blocking_read :
     debug_logging:bool ->
     ?timeout:Types.timeout ->
-    conn:conn ->
+    conn ->
     Hh_json.json option result
 
   val close_connection : conn -> unit result

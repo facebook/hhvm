@@ -26,7 +26,7 @@
           m_params =
           [{ param_annotation = (this::TX); param_type_hint = ((this::TX), (Some ([7:32-40], (Haccess (([7:32-36], Hthis), [([7:38-40], "TX")]))))); 
              param_is_variadic = false; param_pos = [7:41-43]; param_name = "$x"; 
-             param_expr = None; param_readonly = None; param_callconv = None; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
              param_user_attributes = []; param_visibility = None }
             ];
           m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [] }; 
@@ -62,7 +62,7 @@
          f_params =
          [{ param_annotation = (T); param_type_hint = ((T), (Some ([10:44-45], (Habstr ("T", []))))); 
             param_is_variadic = false; param_pos = [10:46-51]; param_name = "$left"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
@@ -95,8 +95,8 @@
           (Some ([14:54-16:9],
                  (Hfun
                     { hf_is_readonly = None; hf_param_tys = [([15:3-5], (Habstr ("TR", [])))]; 
-                      hf_param_info = [None]; hf_variadic_ty = None; 
-                      hf_ctxs = None; hf_return_ty = ([16:4-8], (Hprim Tvoid)); 
+                      hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None })]; 
+                      hf_variadic_ty = None; hf_ctxs = None; hf_return_ty = ([16:4-8], (Hprim Tvoid)); 
                       hf_is_readonly_return = None }))));
          f_name = ([14:10-16], "\\my_log");
          f_tparams =
@@ -109,7 +109,7 @@
          f_params =
          [{ param_annotation = (T); param_type_hint = ((T), (Some ([14:44-45], (Habstr ("T", []))))); 
             param_is_variadic = false; param_pos = [14:46-51]; param_name = "$left"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
@@ -128,7 +128,7 @@
                             [{ param_annotation = (TR); param_type_hint = ((TR), (Some ([17:11-13], (Habstr ("TR", []))))); 
                                param_is_variadic = false; param_pos = [17:14-16]; 
                                param_name = "$x"; param_expr = None; 
-                               param_readonly = None; param_callconv = None; 
+                               param_readonly = None; param_callconv = Pnormal; 
                                param_user_attributes = []; param_visibility = None }
                               ];
                             f_ctxs = None; f_unsafe_ctxs = None;
@@ -140,7 +140,7 @@
                                           (Call (
                                              (((function(T::TX $x): void)), [17:23-33],
                                               (Obj_get (((T), [17:23-28], (Lvar ([17:23-28], $left))), (((function(T::TX $x): void)), [17:30-33], (Id ([17:30-33], "log"))), OG_nullthrows, false))),
-                                             [], [((TR), [17:34-36], (Lvar ([17:34-36], $x)))], None))))))
+                                             [], [(Pnormal, ((TR), [17:34-36], (Lvar ([17:34-36], $x))))], None))))))
                                 ]
                               };
                             f_fun_kind = FSync; f_user_attributes = []; 
@@ -166,11 +166,11 @@
          f_params =
          [{ param_annotation = (WithTypeConstant); param_type_hint = ((WithTypeConstant), (Some ([20:19-35], (Happly (([20:19-35], "\\WithTypeConstant"), []))))); 
             param_is_variadic = false; param_pos = [20:36-38]; param_name = "$x"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None };
            { param_annotation = (WithTypeConstant); param_type_hint = ((WithTypeConstant), (Some ([20:40-56], (Happly (([20:40-56], "\\WithTypeConstant"), []))))); 
              param_is_variadic = false; param_pos = [20:57-59]; param_name = "$y"; 
-             param_expr = None; param_readonly = None; param_callconv = None; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
              param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
@@ -183,7 +183,7 @@
                     ((<expr#1>::TX), [21:10-20],
                      (Call ((((function<T as WithTypeConstant, TR>(<expr#1> as WithTypeConstant $left): <expr#1>::TX)), [21:10-16], (Id ([21:10-16], "\\my_gen"))),
                         [((<expr#1> as WithTypeConstant), ([21:10-16], (Happly (([Pos.none], "_"), [])))); ((<expr#1>::TX), ([21:10-16], (Happly (([Pos.none], "_"), []))))],
-                        [((WithTypeConstant), [21:17-19], (Lvar ([21:17-19], $x)))], None)))
+                        [(Pnormal, ((WithTypeConstant), [21:17-19], (Lvar ([21:17-19], $x))))], None)))
                     )))));
              ([22:3-21],
               (Expr
@@ -192,13 +192,13 @@
                      (((function(<expr#2>::TX): void)), [22:10-20],
                       (Call ((((function<T as WithTypeConstant, TR>(<expr#2> as WithTypeConstant $left): (function(<expr#2>::TX): void))), [22:10-16], (Id ([22:10-16], "\\my_log"))),
                          [((<expr#2> as WithTypeConstant), ([22:10-16], (Happly (([Pos.none], "_"), [])))); ((<expr#2>::TX), ([22:10-16], (Happly (([Pos.none], "_"), []))))],
-                         [((WithTypeConstant), [22:17-19], (Lvar ([22:17-19], $y)))], None)))
+                         [(Pnormal, ((WithTypeConstant), [22:17-19], (Lvar ([22:17-19], $y))))], None)))
                      )))));
              ([26:3-14],
               (Expr
                  ((void), [26:3-13],
                   (Call ((((function(<expr#2>::TX): void)), [26:3-7], (Lvar ([26:3-7], $log))), 
-                     [], [((<expr#1>::TX), [26:8-12], (Hole (((<expr#1>::TX), [26:8-12], (Lvar ([26:8-12], $gen))), (<expr#1>::TX), (<expr#2>::TX), Typing)))], None)))))
+                     [], [(Pnormal, ((<expr#1>::TX), [26:8-12], (Hole (((<expr#1>::TX), [26:8-12], (Lvar ([26:8-12], $gen))), (<expr#1>::TX), (<expr#2>::TX), Typing))))], None)))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

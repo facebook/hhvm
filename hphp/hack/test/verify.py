@@ -11,6 +11,7 @@ import subprocess
 import sys
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
+from enum import Enum
 from typing import Callable, Dict, List, Optional, Tuple
 
 from hphp.hack.test.parse_errors import Error, parse_errors, sprint_errors
@@ -36,6 +37,16 @@ class Result:
     test_case: TestCase
     output: str
     is_failure: bool
+
+
+class VerifyPessimisationOptions(Enum):
+    no = "no"
+    all = "all"
+    added = "added"
+    removed = "removed"
+
+    def __str__(self) -> str:
+        return self.value
 
 
 """
@@ -127,19 +138,26 @@ def check_output(
     default_expect_regex: Optional[str],
     ignore_error_text: bool,
     only_compare_error_lines: bool,
+    verify_pessimisation: VerifyPessimisationOptions,
 ) -> Result:
     if only_compare_error_lines:
         (failed, out) = check_output_error_lines_only(case.file_path)
         return Result(test_case=case, output=out, is_failure=failed)
     else:
-        out_path = case.file_path + out_extension
+        out_path = (
+            case.file_path + out_extension
+            if verify_pessimisation == VerifyPessimisationOptions.no
+            else case.file_path + ".pess" + out_extension
+        )
         try:
             with open(out_path, "r") as f:
                 output: str = f.read()
         except FileNotFoundError:
             out_path = os.path.realpath(out_path)
             output = "Output file " + out_path + " was not found!"
-        return check_result(case, default_expect_regex, ignore_error_text, output)
+        return check_result(
+            case, default_expect_regex, ignore_error_text, verify_pessimisation, output
+        )
 
 
 def debug_cmd(cwd: str, cmd: List[str]) -> None:
@@ -159,6 +177,7 @@ def run_batch_tests(
     mode_flag: List[str],
     get_flags: Callable[[str], List[str]],
     out_extension: str,
+    verify_pessimisation: VerifyPessimisationOptions,
     only_compare_error_lines: bool = False,
 ) -> List[Result]:
     """
@@ -176,6 +195,8 @@ def run_batch_tests(
     # The contract here is that the program will write to
     # filename.out_extension for each file, and we read that
     # for the output.
+    # Remark: if verify_pessimisation is set, then the result
+    # is in filename.pess.out_extension.
     def run(test_cases: List[TestCase]) -> List[Result]:
         if not test_cases:
             raise AssertionError()
@@ -219,6 +240,7 @@ def run_batch_tests(
                 default_expect_regex=default_expect_regex,
                 ignore_error_text=ignore_error_text,
                 only_compare_error_lines=only_compare_error_lines,
+                verify_pessimisation=verify_pessimisation,
             )
             results.append(result)
         return results
@@ -252,6 +274,7 @@ def run_test_program(
     force_color: bool,
     mode_flag: List[str],
     get_flags: Callable[[str], List[str]],
+    verify_pessimisation: VerifyPessimisationOptions,
     timeout: Optional[float] = None,
 ) -> List[Result]:
 
@@ -288,7 +311,13 @@ def run_test_program(
             # we don't care about nonzero exit codes... for instance, type
             # errors cause hh_single_type_check to produce them
             output = str(e.output)
-        return check_result(test_case, default_expect_regex, ignore_error_text, output)
+        return check_result(
+            test_case,
+            default_expect_regex,
+            ignore_error_text,
+            verify_pessimisation,
+            output,
+        )
 
     executor = ThreadPoolExecutor(max_workers=max_workers)
     futures = [executor.submit(run, test_case) for test_case in test_cases]
@@ -325,11 +354,33 @@ def filter_temp_hhi_path(text: str) -> str:
     )
 
 
-def compare_expected(expected: str, out: str) -> bool:
-    if expected == "No errors\n" or out == "No errors\n":
-        return expected == out
+def strip_pess_suffix(text: str) -> str:
+    return re.sub(
+        r"_pess.php",
+        ".php",
+        text,
+    )
+
+
+def compare_expected(
+    expected: str, out: str, verify_pessimisation: VerifyPessimisationOptions
+) -> bool:
+    if (
+        verify_pessimisation == VerifyPessimisationOptions.no
+        or verify_pessimisation == VerifyPessimisationOptions.all
+    ):
+        if expected == "No errors" or out == "No errors":
+            return expected == out
+        else:
+            return True
+    elif verify_pessimisation == VerifyPessimisationOptions.added:
+        return not (expected == "No errors" and out != "No errors")
+    elif verify_pessimisation == VerifyPessimisationOptions.removed:
+        return not (expected != "No errors" and out == "No errors")
     else:
-        return True
+        raise Exception(
+            "Cannot happen: verify_pessimisation option %s" % verify_pessimisation
+        )
 
 
 # Strip leading and trailing whitespace from every line
@@ -341,6 +392,7 @@ def check_result(
     test_case: TestCase,
     default_expect_regex: Optional[str],
     ignore_error_messages: bool,
+    verify_pessimisation: VerifyPessimisationOptions,
     out: str,
 ) -> Result:
     """
@@ -349,10 +401,20 @@ def check_result(
     check that the output in :out contains the provided regex.
     """
     expected = filter_temp_hhi_path(strip_lines(test_case.expected))
-    normalized_out = filter_temp_hhi_path(strip_lines(out))
+    normalized_out = (
+        filter_temp_hhi_path(strip_lines(out))
+        if verify_pessimisation == "no"
+        else strip_pess_suffix(filter_temp_hhi_path(strip_lines(out)))
+    )
     is_ok = (
         expected == normalized_out
-        or (ignore_error_messages and compare_expected(expected, normalized_out))
+        or (
+            (
+                ignore_error_messages
+                or verify_pessimisation != VerifyPessimisationOptions.no
+            )
+            and compare_expected(expected, normalized_out, verify_pessimisation)
+        )
         or expected == filter_ocaml_stacktrace(normalized_out)
         or (
             default_expect_regex is not None
@@ -360,7 +422,6 @@ def check_result(
             and expected == ""
         )
     )
-
     return Result(test_case=test_case, output=out, is_failure=not is_ok)
 
 
@@ -406,6 +467,7 @@ def report_failures(
     out_extension: str,
     expect_extension: str,
     fallback_expect_extension: Optional[str],
+    verify_pessimisation: VerifyPessimisationOptions = VerifyPessimisationOptions.no,
     no_copy: bool = False,
     only_compare_error_lines: bool = False,
 ) -> None:
@@ -443,6 +505,8 @@ def report_failures(
             env_vars.append("EXP_EXT=%s" % expect_extension)
         if fallback_expect_extension is not None:
             env_vars.append("FALLBACK_EXP_EXT=%s " % fallback_expect_extension)
+        if verify_pessimisation != VerifyPessimisationOptions.no:
+            env_vars.append("VERIFY_PESSIMISATION=true")
         if no_copy:
             env_vars.append("UPDATE=never")
 
@@ -560,6 +624,7 @@ def run_tests(
     ignore_error_text: bool,
     no_stderr: bool,
     force_color: bool,
+    verify_pessimisation: VerifyPessimisationOptions,
     mode_flag: List[str],
     get_flags: Callable[[str], List[str]],
     timeout: Optional[float] = None,
@@ -586,6 +651,7 @@ def run_tests(
             mode_flag,
             get_flags,
             out_extension,
+            verify_pessimisation,
             only_compare_error_lines,
         )
     else:
@@ -598,6 +664,7 @@ def run_tests(
             force_color,
             mode_flag,
             get_flags,
+            verify_pessimisation,
             timeout=timeout,
         )
 
@@ -617,6 +684,7 @@ def run_tests(
             args.out_extension,
             args.expect_extension,
             args.fallback_expect_extension,
+            verify_pessimisation=verify_pessimisation,
             only_compare_error_lines=only_compare_error_lines,
         )
         sys.exit(1)  # this exit code fails the suite and lets Buck know
@@ -651,6 +719,7 @@ def run_idempotence_tests(
         False,
         mode_flag,
         get_flags,
+        VerifyPessimisationOptions.no,
     )
 
     num_idempotence_results = len(idempotence_results)
@@ -762,6 +831,13 @@ if __name__ == "__main__":
     parser.add_argument(
         "--no-hh-flags", action="store_true", help="Do not read HH_FLAGS files"
     )
+    parser.add_argument(
+        "--verify-pessimisation",
+        type=VerifyPessimisationOptions,
+        choices=list(VerifyPessimisationOptions),
+        default=VerifyPessimisationOptions.no,
+        help="Experimental test suite for hh_pessimisation",
+    )
     parser.epilog = (
         "%s looks for a file named HH_FLAGS in the same directory"
         " as the test files it is executing. If found, the "
@@ -805,6 +881,7 @@ if __name__ == "__main__":
         args.ignore_error_text,
         args.no_stderr,
         args.force_color,
+        args.verify_pessimisation,
         mode_flag,
         get_flags,
         timeout=args.timeout,

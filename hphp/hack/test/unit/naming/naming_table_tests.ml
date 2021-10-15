@@ -22,11 +22,11 @@ let hash_mode = Typing_deps_mode.hash_mode deps_mode
 module Types_pos_asserter = Asserter.Make_asserter (struct
   type t = FileInfo.pos * Naming_types.kind_of_type
 
-  let to_string (pos, type_of_type) =
+  let to_string (pos, kind_of_type) =
     Printf.sprintf
-      "(%s, %d)"
+      "(%s, %s)"
       (FileInfo.show_pos pos)
-      (Naming_types.kind_of_type_to_enum type_of_type)
+      (Naming_types.show_kind_of_type kind_of_type)
 
   let is_equal = Poly.( = )
 end)
@@ -65,14 +65,28 @@ let write_and_parse_test_files ctx =
       let dir = Path.dirname fn in
       Disk.mkdir_p (Path.to_string dir);
       Disk.write_file ~file:(Path.to_string fn) ~contents);
+  let get_next = MultiWorker.next None (List.map files ~f:fst) in
   let (file_infos, errors, failed_parsing) =
-    Parsing_service.go
-      ctx
-      None
-      Relative_path.Set.empty
-      ~get_next:(MultiWorker.next None (List.map files ~f:fst))
-      ParserOptions.default
-      ~trace:true
+    if
+      TypecheckerOptions.use_direct_decl_parser (Provider_context.get_tcopt ctx)
+    then
+      ( Direct_decl_service.go
+          ctx
+          None
+          ~ide_files:Relative_path.Set.empty
+          ~get_next
+          ~trace:true
+          ~cache_decls:false,
+        Errors.empty,
+        Relative_path.Set.empty )
+    else
+      Parsing_service.go_DEPRECATED
+        ctx
+        None
+        Relative_path.Set.empty
+        ~get_next
+        ParserOptions.default
+        ~trace:true
   in
   if not (Errors.is_empty errors) then (
     Errors.iter_error_list
@@ -577,40 +591,44 @@ let test_naming_table_query_by_dep_hash () =
         (Some (Relative_path.from_root ~suffix:"qux.php"))
         (Typing_deps.Dep.GConst "\\Qux"
         |> Typing_deps.Dep.make hash_mode
-        |> Naming_sqlite.get_const_path_by_64bit_dep db_path)
+        |> Naming_sqlite.get_path_by_64bit_dep db_path
+        |> Option.map ~f:fst)
         "Look up const by dep hash should return file path";
       Asserter.Relative_path_asserter.assert_option_equals
         None
         (Typing_deps.Dep.GConst "\\Nonexistent"
         |> Typing_deps.Dep.make hash_mode
-        |> Naming_sqlite.get_const_path_by_64bit_dep db_path)
+        |> Naming_sqlite.get_path_by_64bit_dep db_path
+        |> Option.map ~f:fst)
         "Look up non-existent const by dep hash should return nothing";
 
       Asserter.Relative_path_asserter.assert_option_equals
         (Some (Relative_path.from_root ~suffix:"bar.php"))
         (Typing_deps.Dep.Fun "\\bar"
         |> Typing_deps.Dep.make hash_mode
-        |> Naming_sqlite.get_fun_path_by_64bit_dep db_path)
+        |> Naming_sqlite.get_path_by_64bit_dep db_path
+        |> Option.map ~f:fst)
         "Look up fun by dep hash should return file path";
       Asserter.Relative_path_asserter.assert_option_equals
         None
         (Typing_deps.Dep.Fun "\\nonexistent"
         |> Typing_deps.Dep.make hash_mode
-        |> Naming_sqlite.get_fun_path_by_64bit_dep db_path)
+        |> Naming_sqlite.get_path_by_64bit_dep db_path
+        |> Option.map ~f:fst)
         "Look up non-existent fun by dep hash should return nothing";
 
       Asserter.Relative_path_asserter.assert_option_equals
         (Some (Relative_path.from_root ~suffix:"foo.php"))
         (Typing_deps.Dep.Type "\\Foo"
         |> Typing_deps.Dep.make hash_mode
-        |> Naming_sqlite.get_type_path_by_64bit_dep db_path
+        |> Naming_sqlite.get_path_by_64bit_dep db_path
         |> Option.map ~f:fst)
         "Look up class by dep hash should return file path";
       Asserter.Relative_path_asserter.assert_option_equals
         None
         (Typing_deps.Dep.Type "\\nonexistent"
         |> Typing_deps.Dep.make hash_mode
-        |> Naming_sqlite.get_type_path_by_64bit_dep db_path
+        |> Naming_sqlite.get_path_by_64bit_dep db_path
         |> Option.map ~f:fst)
         "Look up non-existent class by dep hash should return nothing";
 
@@ -618,14 +636,14 @@ let test_naming_table_query_by_dep_hash () =
         (Some (Relative_path.from_root ~suffix:"baz.php"))
         (Typing_deps.Dep.Type "\\Baz"
         |> Typing_deps.Dep.make hash_mode
-        |> Naming_sqlite.get_type_path_by_64bit_dep db_path
+        |> Naming_sqlite.get_path_by_64bit_dep db_path
         |> Option.map ~f:fst)
         "Look up class by dep hash should return file path";
       Asserter.Relative_path_asserter.assert_option_equals
         None
         (Typing_deps.Dep.Type "\\nonexistent"
         |> Typing_deps.Dep.make hash_mode
-        |> Naming_sqlite.get_type_path_by_64bit_dep db_path
+        |> Naming_sqlite.get_path_by_64bit_dep db_path
         |> Option.map ~f:fst)
         "Look up non-existent typedef by dep hash should return nothing";
 

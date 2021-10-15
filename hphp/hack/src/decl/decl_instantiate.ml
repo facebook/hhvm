@@ -71,8 +71,8 @@ and instantiate_ subst x =
     let ty1 = instantiate subst ty1 in
     let ty2 = instantiate subst ty2 in
     Tvec_or_dict (ty1, ty2)
-  | (Tthis | Tvar _ | Tmixed | Tdynamic | Tnonnull | Tany _ | Terr | Tprim _) as
-    x ->
+  | ( Tthis | Tvar _ | Tmixed | Tdynamic | Tsupportdynamic | Tnonnull | Tany _
+    | Terr | Tprim _ ) as x ->
     x
   | Ttuple tyl ->
     let tyl = List.map tyl ~f:(instantiate subst) in
@@ -166,9 +166,6 @@ let instantiate_typeconst subst = function
         atc_super_constraint = Option.map s ~f:(instantiate subst);
         atc_default = Option.map d ~f:(instantiate subst);
       }
-  | TCPartiallyAbstract { patc_constraint = a; patc_type = t } ->
-    TCPartiallyAbstract
-      { patc_constraint = instantiate subst a; patc_type = instantiate subst t }
   | TCConcrete { tc_type = t } -> TCConcrete { tc_type = instantiate subst t }
 
 let instantiate_typeconst_type subst tc =

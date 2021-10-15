@@ -89,7 +89,6 @@ struct Vunit;
   O(inlinestart, Inone, Un, Dn)\
   O(inlineend, Inone, Un, Dn)\
   O(pushframe, Inone, Un, Dn)\
-  O(popframe, Inone, Un, Dn)\
   O(recordstack, Inone, Un, Dn)\
   O(recordbasenativesp, Inone, Un, Dn)\
   O(unrecordbasenativesp, Inone, Un, Dn)\
@@ -113,7 +112,7 @@ struct Vunit;
   O(unstublogue, Inone, Un, Dn)\
   O(stubret, Inone, U(args), Dn)\
   O(callstub, I(target), U(args), Dn)\
-  O(callfaststub, I(fix), U(args), Dn)\
+  O(callfaststub, Inone, U(args), Dn)\
   O(tailcallstub, I(target), U(args), Dn)\
   O(tailcallstubr, Inone, U(target) U(args), Dn)\
   O(stubunwind, Inone, Un, D(d))\
@@ -123,7 +122,6 @@ struct Vunit;
   O(defvmsp, Inone, Un, D(d))\
   O(defvmfp, Inone, Un, D(d))\
   O(pushvmfp, I(offset), U(s), Dn)\
-  O(popvmfp, Inone, U(s), Dn)\
   O(syncvmsp, Inone, U(s), Dn)\
   O(defvmretdata, Inone, Un, D(data))\
   O(defvmrettype, Inone, Un, D(type))\
@@ -610,7 +608,6 @@ struct inlineend {};
  * chain for record keeping.
  */
 struct pushframe {};
-struct popframe {};
 
 /*
  * Record the current inline stack as though it were materialized for a call at
@@ -708,10 +705,10 @@ struct callstub { CodeAddress target; RegSet args; };
 /*
  * Call a "fast" stub, a stub that preserves more registers than a normal call.
  *
- * It may still call C++ functions on a slow path (which is why there's a Fixup
- * operand) but it will save any required registers before doing so.
+ * It may still call C++ functions on a slow path, but it will save any required
+ * registers before doing so.
  */
-struct callfaststub { TCA target; Fixup fix; RegSet args; };
+struct callfaststub { TCA target; RegSet args; };
 
 /*
  * Make a direct tail call to another stub.
@@ -790,15 +787,6 @@ struct defvmfp { Vreg d; };
  * rvmfp.
  */
 struct pushvmfp { Vreg s; int32_t offset; };
-
-/*
- * Copy `s` into rvmfp().
- *
- * Used to restore the previous value of rvmfp after a pushvmfp{} was performed.
- * The value `s` does not need to be the same register used to initialize rvmfp
- * but it must contain the same value.
- */
-struct popvmfp { Vreg s; };
 
 /*
  * Copy `s' into rvmsp().

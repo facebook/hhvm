@@ -13,7 +13,7 @@
          m_params =
          [{ param_annotation = (int); param_type_hint = ((int), (Some ([4:21-24], (Hprim Tint)))); 
             param_is_variadic = false; param_pos = [4:25-27]; param_name = "$i"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)] }; 
@@ -43,7 +43,9 @@
           m_body =
           { fb_ast =
             [([8:5-18],
-              (Expr ((void), [8:5-17], (Call ((((function(int $i): void)), [8:5-14], (Class_const (((C), [8:5-11], CIparent), ([8:13-14], "f")))), [], [((int), [8:15-16], (Int "3"))], None)))))]
+              (Expr
+                 ((void), [8:5-17], (Call ((((function(int $i): void)), [8:5-14], (Class_const (((C), [8:5-11], CIparent), ([8:13-14], "f")))), [], [(Pnormal, ((int), [8:15-16], (Int "3")))], None)))))
+              ]
             };
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
           m_ret = ((void), (Some ([7:24-28], (Hprim Tvoid)))); m_external = false; 

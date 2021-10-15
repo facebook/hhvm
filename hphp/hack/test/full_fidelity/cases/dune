@@ -59,8 +59,7 @@
     --program %{exe:../../../src/hh_parse.exe}
     --flags
     --full-fidelity-errors
-    --allow-unstable-features
-    --disallow-hash-comments)))
+    --allow-unstable-features)))
 
 (alias
     (name full_fidelity_json_test)
@@ -125,7 +124,6 @@
     --full-fidelity-json-parse-tree
     --pretty-print-json
     --allow-unstable-features
-    --disallow-hash-comments
     --ignore-missing-json)))
 
 (alias

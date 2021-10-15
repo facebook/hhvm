@@ -1,4 +1,4 @@
-File "instanceof_self.php", line 17, characters 7-17:
-  err
 File "instanceof_self.php", line 16, characters 15-18:
-Unbound name: `self` (Naming[2049])
+Encountered unexpected text `self`, was expecting a type hint. (Parsing[1002])
+File "instanceof_self.php", line 16, characters 19-19:
+A scope resolution operator `::` is expected here. (Parsing[1002])

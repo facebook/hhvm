@@ -7,7 +7,7 @@ interface T {
 }
 
 abstract class P {
-  const type Z as arraykey = arraykey;
+  const type Z = arraykey;
 }
 
 final class C extends P implements T {

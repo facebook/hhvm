@@ -56,7 +56,15 @@ and classish_kind =
       See https://docs.hhvm.com/hack/built-in-types/enum-class
   *)
 
-and param_kind = Pinout
+and param_kind =
+  | Pinout of pos
+      (**
+       * Contains the position for an entire `inout` annotated expression, e.g.:
+       *
+       *   foo(inout $bar);
+       *       ^^^^^^^^^^
+       *)
+  | Pnormal
 
 and readonly_kind = Readonly
 
@@ -245,9 +253,6 @@ let string_of_classish_kind kind =
     (match c with
     | Abstract -> "an abstract enum class"
     | Concrete -> "an enum class")
-
-let string_of_param_kind = function
-  | Pinout -> "inout"
 
 let swap_variance = function
   | Covariant -> Contravariant

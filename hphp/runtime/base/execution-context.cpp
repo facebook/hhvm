@@ -659,7 +659,8 @@ void ExecutionContext::executeFunctions(ShutdownType type) {
     IterateV(
       funcs.get(),
       [](TypedValue v) {
-        vm_call_user_func(VarNR{v}, init_null_variant);
+        vm_call_user_func(VarNR{v}, init_null_variant,
+                          RuntimeCoeffects::defaults());
         // Implicit context should not have leaked between each call
         assertx(!RO::EvalEnableImplicitContext ||
                 !(*ImplicitContext::activeCtx));
@@ -898,7 +899,8 @@ bool ExecutionContext::callUserErrorHandler(const Exception& e, int errnum,
                 (m_userErrorHandlers.back().first,
                  make_vec_array(errnum, String(e.getMessage()),
                      fileAndLine.first, fileAndLine.second, empty_dict_array(),
-                     backtrace)),
+                     backtrace),
+                 RuntimeCoeffects::defaults()),
                 false)) {
         return true;
       }
@@ -992,7 +994,8 @@ bool ExecutionContext::onUnhandledException(Object e) {
     if (!m_userExceptionHandlers.empty()) {
       if (!same(vm_call_user_func
                 (m_userExceptionHandlers.back(),
-                 make_vec_array(e)),
+                 make_vec_array(e),
+                 RuntimeCoeffects::defaults()),
                 false)) {
         return true;
       }
@@ -1169,18 +1172,18 @@ const RepoOptions& ExecutionContext::getRepoOptionsForFrame(int frame) const {
 
   const RepoOptions* ret{nullptr};
 
-  walkStack([&] (ActRec* ar, Offset) {
+  walkStack([&] (const BTFrame& frm) {
     if (frame--) {
       return false;
     }
 
-    auto const path = ar->func()->unit()->filepath();
+    auto const path = frm.func()->unit()->filepath();
     if (UNLIKELY(path->empty())) {
       // - Systemlib paths always start with `/:systemlib`
       // - we make up a bogus filename for eval()
       // - but let's assert out of paranoia as we're in a path that's not
       //   perf-sensitive
-      assertx(!ar->func()->unit()->isSystemLib());
+      assertx(!frm.func()->unit()->isSystemLib());
       ret = &getRepoOptionsForDebuggerEval();
       return true;
     }
@@ -1235,10 +1238,10 @@ int ExecutionContext::getLine() {
 
 ActRec* ExecutionContext::getFrameAtDepthForDebuggerUnsafe(int frameDepth) const {
   ActRec* ret = nullptr;
-  walkStack([&] (ActRec* fp, Offset) {
+  walkStack([&] (const BTFrame& frm) {
     if (frameDepth == 0) {
-      if (fp && !fp->localsDecRefd()) {
-        ret = fp;
+      if (!frm.isInlined() && frm.localsAvailable()) {
+        ret = frm.fpInternal();
       }
       return true;
     }
@@ -1278,11 +1281,11 @@ TypedValue ExecutionContext::invokeUnit(const Unit* unit,
       invokeFunc(
         Func::lookup(s_enter_async_entry_point.get()),
         make_vec_array(Variant{it}),
-        nullptr, nullptr, RuntimeCoeffects::fixme(), false
+        nullptr, nullptr, RuntimeCoeffects::defaults(), false
       );
     } else {
       invokeFunc(it, init_null_variant, nullptr, nullptr,
-                 RuntimeCoeffects::fixme(), false);
+                 RuntimeCoeffects::defaults(), false);
     }
   }
   return make_tv<KindOfInt64>(1);
@@ -1313,7 +1316,7 @@ void ExecutionContext::pushVMState(TypedValue* savedSP) {
       vmJitCalledFrame(),
       vmJitReturnAddr(),
       jit::g_unwind_rds->exn,
-      jit::g_unwind_rds->sideEnter
+      jit::g_unwind_rds->sideEnter,
     }
   );
   jit::g_unwind_rds->exn = nullptr;
@@ -1817,7 +1820,7 @@ ActRec* ExecutionContext::getPrevVMState(const ActRec* fp,
                                          Offset* prevPc /* = NULL */,
                                          TypedValue** prevSp /* = NULL */,
                                          bool* fromVMEntry /* = NULL */,
-                                         uint64_t* jitReturnAddr /* = NULL */) {
+                                         jit::TCA* jitReturnAddr /* = NULL */) {
   if (fp == nullptr) {
     return nullptr;
   }
@@ -1833,6 +1836,7 @@ ActRec* ExecutionContext::getPrevVMState(const ActRec* fp,
     }
     if (prevPc) *prevPc = fp->callOffset();
     if (fromVMEntry) *fromVMEntry = false;
+    if (jitReturnAddr) *jitReturnAddr = (jit::TCA)fp->m_savedRip;
     return prevFp;
   }
   // Linear search from end of m_nestedVMs. In practice, we're probably
@@ -1852,7 +1856,7 @@ ActRec* ExecutionContext::getPrevVMState(const ActRec* fp,
     *prevPc = prevFp->func()->offsetOf(vmstate.pc);
   }
   if (fromVMEntry) *fromVMEntry = true;
-  if (jitReturnAddr) *jitReturnAddr = (uint64_t)vmstate.jitReturnAddr;
+  if (jitReturnAddr) *jitReturnAddr = vmstate.jitReturnAddr;
   return prevFp;
 }
 
@@ -1897,7 +1901,7 @@ Variant ExecutionContext::getEvaledArg(const StringData* val,
   // Default arg values are not currently allowed to depend on class context.
   auto v = Variant::attach(
     g_context->invokeFuncFew(func, nullptr, 0, nullptr,
-                             RuntimeCoeffects::fixme(), true, true)
+                             RuntimeCoeffects::defaults(), true, true)
   );
   m_evaledArgs.set(key, *v.asTypedValue());
   return Variant::wrap(m_evaledArgs.lookup(key));
@@ -2099,7 +2103,7 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
     auto const obj = ctx && fp->hasThis() ? fp->getThis() : nullptr;
     auto const cls = ctx && fp->hasClass() ? fp->getClass() : nullptr;
     auto const arr_tv = invokeFunc(f, args.toArray(), obj, cls,
-                                   RuntimeCoeffects::fixme(), false);
+                                   RuntimeCoeffects::defaults(), false);
     assertx(isArrayLikeType(type(arr_tv)));
     assertx(val(arr_tv).parr->size() == f->numParams() + 1);
     Array arr = Array::attach(val(arr_tv).parr);

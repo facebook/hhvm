@@ -300,8 +300,10 @@ Object ObjectData::iterableObject(bool& isIterable,
     return Object(this);
   }
   Object obj(this);
+  CoeffectsAutoGuard _;
   while (obj->instanceof(SystemLib::s_IteratorAggregateClass)) {
-    auto iterator = obj->o_invoke_few_args(s_getIterator, RuntimeCoeffects::fixme(), 0);
+    auto iterator =
+      obj->o_invoke_few_args(s_getIterator, RuntimeCoeffects::automatic(), 0);
     if (!iterator.isObject()) break;
     auto o = iterator.getObjectData();
     if (o->isIterator()) {
@@ -725,8 +727,9 @@ Variant ObjectData::o_invoke(const String& s, const Variant& params,
       (!isContainer(params) && !params.isNull())) {
     return Variant(Variant::NullInit());
   }
+  CoeffectsAutoGuard _;
   return Variant::attach(
-    g_context->invokeFunc(ctx, params, RuntimeCoeffects::fixme())
+    g_context->invokeFunc(ctx, params, RuntimeCoeffects::automatic())
   );
 }
 
@@ -813,8 +816,9 @@ ObjectData* ObjectData::clone() {
     assertx(method);
     clone->unlockObject();
     SCOPE_EXIT { clone->lockObject(); };
+    CoeffectsAutoGuard _;
     g_context->invokeMethodV(clone.get(), method, InvokeArgs{},
-                             RuntimeCoeffects::fixme());
+                             RuntimeCoeffects::automatic());
   }
   return clone.detach();
 }
@@ -1104,59 +1108,58 @@ void ObjectData::throwMutateConstProp(Slot prop) const {
 }
 
 NEVER_INLINE
-void ObjectData::throwMustBeMutable(Slot prop) const {
-  throw_must_be_mutable(
+void ObjectData::throwOrWarnMustBeMutable(Slot prop) const {
+  throw_or_warn_must_be_mutable(
     getClassName().data(),
     m_cls->declProperties()[prop].name->data()
   );
 }
 
 NEVER_INLINE
-void ObjectData::throwMustBeEnclosedInReadonly(Slot prop) const {
-  throw_must_be_enclosed_in_readonly(
+void ObjectData::throwOrWarnMustBeEnclosedInReadonly(Slot prop) const {
+  throw_or_warn_must_be_enclosed_in_readonly(
     getClassName().data(),
     m_cls->declProperties()[prop].name->data()
   );
 }
 
 NEVER_INLINE
-void ObjectData::throwMustBeReadonly(Slot prop) const {
-  throw_must_be_readonly(
+void ObjectData::throwOrWarnMustBeReadonly(Slot prop) const {
+  throw_or_warn_must_be_readonly(
     getClassName().data(),
     m_cls->declProperties()[prop].name->data()
   );
 }
 
 NEVER_INLINE
-void ObjectData::throwMustBeValueType(Slot prop) const {
-  throw_must_be_value_type(
+void ObjectData::throwOrWarnMustBeValueType(Slot prop) const {
+  throw_or_warn_must_be_value_type(
     getClassName().data(),
     m_cls->declProperties()[prop].name->data()
   );
 }
 
 void ObjectData::checkReadonly(const PropLookup& lookup, ReadonlyOp op,
-                               bool* roProp, bool writeMode) const {
+                               bool writeMode) const {
   if (!RO::EvalEnableReadonlyPropertyEnforcement) return;
-  auto cow = !isRefcountedType(type(lookup.val)) ||
-             hasPersistentFlavor(type(lookup.val));
+  if ((op == ReadonlyOp::CheckMutROCOW && lookup.readonly) ||
+    op == ReadonlyOp::CheckROCOW) {
+    vmMInstrState().roProp = true;
+  }
   if (lookup.readonly) {
     if (op == ReadonlyOp::CheckMutROCOW || op == ReadonlyOp::CheckROCOW) {
-      if (cow) {
-        assertx(roProp);
-        *roProp = true;
-      } else {
-        throwMustBeValueType(lookup.slot);
+      if (type(lookup.val) == KindOfObject) {
+        throwOrWarnMustBeValueType(lookup.slot);
       }
     } else if (op == ReadonlyOp::Mutable) {
       if (writeMode) {
-        throwMustBeMutable(lookup.slot);
+        throwOrWarnMustBeMutable(lookup.slot);
       } else {
-        throwMustBeEnclosedInReadonly(lookup.slot);
+        throwOrWarnMustBeEnclosedInReadonly(lookup.slot);
       }
     }
   } else if (op == ReadonlyOp::Readonly || op == ReadonlyOp::CheckROCOW) {
-    throwMustBeReadonly(lookup.slot);
+    throwOrWarnMustBeReadonly(lookup.slot);
   }
 }
 
@@ -1255,8 +1258,7 @@ tv_lval ObjectData::getPropIgnoreAccessibility(const StringData* key) {
 template<ObjectData::PropMode mode>
 ALWAYS_INLINE
 tv_lval ObjectData::propImpl(TypedValue* tvRef, const Class* ctx,
-                             const StringData* key, const ReadonlyOp op,
-                             bool* roProp) {
+                             const StringData* key, const ReadonlyOp op) {
   auto constexpr write = (mode == PropMode::DimForWrite);
   auto constexpr read = (mode == PropMode::ReadNoWarn) ||
                         (mode == PropMode::ReadWarn);
@@ -1270,7 +1272,7 @@ tv_lval ObjectData::propImpl(TypedValue* tvRef, const Class* ctx,
             throwMutateConstProp(lookup.slot);
           }
         }
-        checkReadonly(lookup, op, roProp, mode == PropMode::DimForWrite);
+        checkReadonly(lookup, op, mode == PropMode::DimForWrite);
         return prop;
       };
 
@@ -1318,10 +1320,9 @@ tv_lval ObjectData::prop(
   TypedValue* tvRef,
   const Class* ctx,
   const StringData* key,
-  const ReadonlyOp op,
-  bool* roProp
+  const ReadonlyOp op
 ) {
-  return propImpl<PropMode::ReadNoWarn>(tvRef, ctx, key, op, roProp);
+  return propImpl<PropMode::ReadNoWarn>(tvRef, ctx, key, op);
 }
 
 tv_lval ObjectData::propW(
@@ -1337,20 +1338,18 @@ tv_lval ObjectData::propU(
   TypedValue* tvRef,
   const Class* ctx,
   const StringData* key,
-  const ReadonlyOp op,
-  bool* roProp
+  const ReadonlyOp op
 ) {
-  return propImpl<PropMode::DimForWrite>(tvRef, ctx, key, op, roProp);
+  return propImpl<PropMode::DimForWrite>(tvRef, ctx, key, op);
 }
 
 tv_lval ObjectData::propD(
   TypedValue* tvRef,
   const Class* ctx,
   const StringData* key,
-  const ReadonlyOp op,
-  bool* roProp
+  const ReadonlyOp op
 ) {
-  return propImpl<PropMode::DimForWrite>(tvRef, ctx, key, op, roProp);
+  return propImpl<PropMode::DimForWrite>(tvRef, ctx, key, op);
 }
 
 bool ObjectData::propIsset(const Class* ctx, const StringData* key) {
@@ -1383,7 +1382,7 @@ void ObjectData::setProp(Class* ctx, const StringData* key, TypedValue val, Read
     if (UNLIKELY(lookup.isConst) && !isBeingConstructed()) {
       throwMutateConstProp(lookup.slot);
     }
-    checkReadonly(lookup, op, nullptr, true);
+    checkReadonly(lookup, op, true);
     // TODO(T61738946): We can remove the temporary here once we no longer
     // coerce class_meth types.
     Variant tmp = tvAsVariant(&val);
@@ -1657,7 +1656,8 @@ Variant ObjectData::invokeSleep(RuntimeCoeffects provided) {
 }
 
 Variant ObjectData::invokeToDebugDisplay() {
-  return InvokeSimple(this, s___toDebugDisplay, RuntimeCoeffects::fixme());
+  CoeffectsAutoGuard _;
+  return InvokeSimple(this, s___toDebugDisplay, RuntimeCoeffects::automatic());
 }
 
 Variant ObjectData::invokeWakeup(RuntimeCoeffects provided) {
@@ -1690,8 +1690,9 @@ String ObjectData::invokeToString() {
   if (RuntimeOption::EvalNoticeOnImplicitInvokeToString) {
     raiseImplicitInvokeToString();
   }
+  CoeffectsAutoGuard _;
   auto const tv = g_context->invokeMethod(this, method, InvokeArgs{},
-                                          RuntimeCoeffects::fixme());
+                                          RuntimeCoeffects::automatic());
   if (!isStringType(tv.m_type) &&
       !isClassType(tv.m_type) &&
       !isLazyClassType(tv.m_type)) {

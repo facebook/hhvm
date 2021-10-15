@@ -143,8 +143,14 @@ struct FrameState {
 
   /*
    * VM frame pointer.
+   *
+   * - `fpValue` points to the current logical frame that may not have been
+   *   materialized (e.g. due to inlining)
+   * - `fixupFPValue` points to the last materialized frame, which is the same
+   *   as the value of the `rvmfp()` register
    */
   SSATmp* fpValue{nullptr};
+  SSATmp* fixupFPValue{nullptr};
 
   /*
    * Logical stack base.
@@ -318,6 +324,7 @@ struct FrameStateMgr final {
    * frame.
    */
   SSATmp*     fp()                const { return cur().fpValue; }
+  SSATmp*     fixupFP()           const { return cur().fixupFPValue; }
   SSATmp*     sp()                const { return cur().spValue; }
   SSATmp*     ctx()               const { return cur().ctx; }
   SBInvOffset irSPOff()           const { return cur().irSPOff; }
@@ -439,8 +446,9 @@ private:
   void updateMBase(const IRInstruction*);
   void initStack(SSATmp* sp, SBInvOffset irSPOff, SBInvOffset bcSPOff);
   void uninitStack();
+  void trackBeginInlining(const IRInstruction* inst);
+  void trackEndInlining();
   void trackInlineCall(const IRInstruction* inst);
-  void trackInlineReturn();
   void trackCall();
 
   /*

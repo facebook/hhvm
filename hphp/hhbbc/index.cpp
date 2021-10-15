@@ -98,7 +98,7 @@ constexpr bool CheckSize() { static_assert(Expected == Actual); return true; };
 static_assert(CheckSize<php::Block, 24>(), "");
 static_assert(CheckSize<php::Local, use_lowptr ? 12 : 16>(), "");
 static_assert(CheckSize<php::Param, use_lowptr ? 64 : 88>(), "");
-static_assert(CheckSize<php::Func, use_lowptr ? 184 : 216>(), "");
+static_assert(CheckSize<php::Func, use_lowptr ? 184 : 224>(), "");
 
 // Likewise, we also keep the bytecode and immediate types small.
 static_assert(CheckSize<Bytecode, use_lowptr ? 32 : 40>(), "");
@@ -1009,6 +1009,56 @@ uint32_t Func::maxNonVariadicParams() const {
         c = std::max(c, numNVArgs(*pf->second.func));
       }
       return c;
+    }
+  );
+}
+
+const RuntimeCoeffects* Func::requiredCoeffects() const {
+  auto const get = [&](const php::Func* f) { return &f->requiredCoeffects; };
+  return match<const RuntimeCoeffects*>(
+    val,
+    [&] (FuncName) { return nullptr; },
+    [&] (MethodName) { return nullptr; },
+    [&] (FuncInfo* fi) { return get(fi->func); },
+    [&] (const MethTabEntryPair* mte) { return get(mte->second.func); },
+    [&] (FuncFamily* fa) -> const RuntimeCoeffects* {
+      const RuntimeCoeffects* result = nullptr;
+      for (auto const pf : fa->possibleFuncs()) {
+        if (!result) {
+          result = get(pf->second.func);
+          continue;
+        }
+        auto const cur = get(pf->second.func);
+        assertx(cur);
+        if (result->value() != cur->value()) return nullptr;
+      }
+      return result;
+    }
+  );
+}
+
+const CompactVector<CoeffectRule>* Func::coeffectRules() const {
+  auto const get = [&](const php::Func* f) { return &f->coeffectRules; };
+  return match<const CompactVector<CoeffectRule>*>(
+    val,
+    [&] (FuncName) { return nullptr; },
+    [&] (MethodName) { return nullptr; },
+    [&] (FuncInfo* fi) { return get(fi->func); },
+    [&] (const MethTabEntryPair* mte) { return get(mte->second.func); },
+    [&] (FuncFamily* fa) -> const CompactVector<CoeffectRule>* {
+      const CompactVector<CoeffectRule>* result = nullptr;
+      for (auto const pf : fa->possibleFuncs()) {
+        if (!result) {
+          result = get(pf->second.func);
+          continue;
+        }
+        auto const cur = get(pf->second.func);
+        if (!std::is_permutation(cur->begin(), cur->end(),
+                                 result->begin(), result->end())) {
+          return nullptr;
+        }
+      }
+      return result;
     }
   );
 }
@@ -5615,12 +5665,6 @@ Index::ConstraintResolution Index::get_type_for_annotated_type(
       return unopt(candidate);
     case AnnotMetaType::This:
       if (auto s = selfCls(ctx)) return setctx(subObj(*s));
-      break;
-    case AnnotMetaType::Self:
-      if (auto s = selfCls(ctx)) return subObj(*s);
-      break;
-    case AnnotMetaType::Parent:
-      if (auto p = parentCls(ctx)) return subObj(*p);
       break;
     case AnnotMetaType::Callable:
       break;

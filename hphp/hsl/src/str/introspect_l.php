@@ -27,7 +27,6 @@ function compare_l(
   string $string1,
   string $string2,
 )[]: int {
-  /* HH_FIXME[4390] missing [] */
   return _Str\strcoll_l($string1, $string2, $locale);
 }
 
@@ -46,7 +45,6 @@ function compare_ci_l(
   string $string1,
   string $string2,
 )[]: int {
-  /* HH_FIXME[4390] missing [] */
   return _Str\strcasecmp_l($string1, $string2, $locale);
 }
 
@@ -137,7 +135,6 @@ function ends_with_l(
   string $string,
   string $suffix,
 )[]: bool {
-  /* HH_FIXME[4390] missing [] */
   return _Str\ends_with_l($string, $suffix, $locale);
 }
 
@@ -156,7 +153,6 @@ function ends_with_ci_l(
   string $string,
   string $suffix,
 )[]: bool {
-  /* HH_FIXME[4390] missing [] */
   return _Str\ends_with_ci_l($string, $suffix, $locale);
 }
 
@@ -172,7 +168,6 @@ function length_l(
   Locale\Locale $locale,
   string $string,
 )[]: int {
-  /* HH_FIXME[4390] missing [] */
   return _Str\strlen_l($string, $locale);
 }
 
@@ -195,7 +190,6 @@ function search_l(
   string $needle,
   int $offset = 0,
 )[]: ?int {
-  /* HH_FIXME[4390] missing [] */
   $position = _Str\strpos_l($haystack, $needle, $offset, $locale);
   if ($position < 0) {
     return null;
@@ -224,7 +218,6 @@ function search_ci_l(
   string $needle,
   int $offset = 0,
 )[]: ?int {
-  /* HH_FIXME[4390] missing [] */
   $position = _Str\stripos_l($haystack, $needle, $offset, $locale);
   if ($position < 0) {
     return null;
@@ -253,7 +246,6 @@ function search_last_l(
   int $offset = 0,
 )[]: ?int {
   $haystack_length = length_l($locale, $haystack);
-  /* HH_FIXME[4390] missing [] */
   $position = _Str\strrpos_l($haystack, $needle, $offset, $locale);
   if ($position < 0) {
     return null;
@@ -275,7 +267,6 @@ function starts_with_l(
   string $string,
   string $prefix,
 )[]: bool {
-  /* HH_FIXME[4390] missing [] */
   return _Str\starts_with_l($string, $prefix, $locale);
 }
 
@@ -293,6 +284,5 @@ function starts_with_ci_l(
   string $string,
   string $prefix,
 )[]: bool {
-  /* HH_FIXME[4390] missing [] */
   return _Str\starts_with_ci_l($string, $prefix, $locale);
 }

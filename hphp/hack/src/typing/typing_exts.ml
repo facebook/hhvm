@@ -193,15 +193,17 @@ let get_possibly_like_format_string_type_arg t =
   | _ -> get_format_string_type_arg t
 
 (* Specialize a function type using whatever we can tell about the args *)
-let retype_magic_func (env : env) (ft : locl_fun_type) (el : Nast.expr list) :
-    env * locl_fun_type =
-  let rec f env param_types (args : Nast.expr list) :
+let retype_magic_func
+    (env : env)
+    (ft : locl_fun_type)
+    (el : (Ast_defs.param_kind * Nast.expr) list) : env * locl_fun_type =
+  let rec f env param_types (args : (Ast_defs.param_kind * Nast.expr) list) :
       env * locl_fun_params option =
     match (param_types, args) with
-    | ([{ fp_type = { et_type; _ }; _ }], [(_, _, Null)])
+    | ([{ fp_type = { et_type; _ }; _ }], [(_, (_, _, Null))])
       when is_some (get_opt_format_string_type_arg et_type) ->
       (env, None)
-    | ([({ fp_type = { et_type; _ }; _ } as fp)], (arg : Nast.expr) :: _) ->
+    | ([({ fp_type = { et_type; _ }; _ } as fp)], (_, arg) :: _) ->
       begin
         match get_possibly_like_format_string_type_arg et_type with
         | Some type_arg ->

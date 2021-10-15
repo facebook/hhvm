@@ -485,10 +485,10 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
 
   [[noreturn]] NEVER_INLINE
   void throwMutateConstProp(Slot prop) const;
-  void throwMustBeMutable(Slot prop) const;
-  void throwMustBeEnclosedInReadonly(Slot prop) const;
-  void throwMustBeReadonly(Slot prop) const;
-  void throwMustBeValueType(Slot prop) const;
+  void throwOrWarnMustBeMutable(Slot prop) const;
+  void throwOrWarnMustBeEnclosedInReadonly(Slot prop) const;
+  void throwOrWarnMustBeReadonly(Slot prop) const;
+  void throwOrWarnMustBeValueType(Slot prop) const;
 
  public:
   // never box the lval returned from getPropLval; use propB instead
@@ -511,7 +511,7 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
     bool readonly;
   };
 
-  void checkReadonly(const PropLookup&, ReadonlyOp, bool*, bool) const;
+  void checkReadonly(const PropLookup&, ReadonlyOp, bool) const;
 
   template <bool forWrite, bool forRead, bool ignoreLateInit>
   ALWAYS_INLINE
@@ -524,15 +524,15 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   };
 
   template<PropMode mode>
-  tv_lval propImpl(TypedValue* tvRef, const Class* ctx, const StringData* key, const ReadonlyOp op = ReadonlyOp::Any, bool* roProp = nullptr);
+  tv_lval propImpl(TypedValue* tvRef, const Class* ctx, const StringData* key, const ReadonlyOp op = ReadonlyOp::Any);
 
   void setDynProp(const StringData* key, TypedValue val);
 
  public:
-  tv_lval prop(TypedValue* tvRef, const Class* ctx, const StringData* key, const ReadonlyOp op, bool* roProp = nullptr);
+  tv_lval prop(TypedValue* tvRef, const Class* ctx, const StringData* key, const ReadonlyOp op);
   tv_lval propW(TypedValue* tvRef, const Class* ctx, const StringData* key, const ReadonlyOp op);
-  tv_lval propU(TypedValue* tvRef, const Class* ctx, const StringData* key, const ReadonlyOp op, bool* roProp);
-  tv_lval propD(TypedValue* tvRef, const Class* ctx, const StringData* key, const ReadonlyOp op, bool* roProp);
+  tv_lval propU(TypedValue* tvRef, const Class* ctx, const StringData* key, const ReadonlyOp op);
+  tv_lval propD(TypedValue* tvRef, const Class* ctx, const StringData* key, const ReadonlyOp op);
 
   bool propIsset(const Class* ctx, const StringData* key);
 

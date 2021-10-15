@@ -10,7 +10,6 @@ path = "print.rs"
 [dependencies]
 bumpalo = { version = "3.2.1", features = ["collections"] }
 core_utils_rust = { path = "../../utils/core" }
-decl_provider = { path = "../decl_provider" }
 escaper = { path = "../../utils/escaper" }
 ffi = { path = "../../utils/ffi" }
 hhbc_by_ref_ast_class_expr = { path = "../hhbc_by_ref/cargo/hhbc_by_ref_ast_class_expr" }
@@ -47,7 +46,7 @@ lazy_static = "1.0"
 naming_special_names_rust = { path = "../../naming" }
 ocaml_helper = { path = "../../utils/ocaml_helper" }
 oxidized = { path = "../../oxidized" }
-regex = "1.4.2"
+regex = "1.5.4"
 thiserror = "1.0.29"
 
 [profile.release]

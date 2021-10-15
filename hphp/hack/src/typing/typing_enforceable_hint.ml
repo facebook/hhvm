@@ -34,22 +34,22 @@ let validator =
 
     method! on_tvar acc r _id = this#invalid acc r "an unknown type"
 
-    method! on_typeconst acc class_ is_concrete typeconst =
+    method! on_typeconst acc class_ typeconst =
       match typeconst.ttc_kind with
-      | _
-        when is_concrete
-             (* get_typeconst_enforceability should always return Some here, since we
+      | TCConcrete _ -> super#on_typeconst acc class_ typeconst
+      | TCAbstract _
+        when (* get_typeconst_enforceability should always return Some here, since we
                 know the typeconst exists (else we wouldn't be in this method).
                 But since we have to map it to a bool anyway, we just use
                 Option.value_map. *)
-             || Option.value_map
-                  ~f:snd
-                  ~default:false
-                  (Cls.get_typeconst_enforceability
-                     class_
-                     (snd typeconst.ttc_name)) ->
-        super#on_typeconst acc class_ is_concrete typeconst
-      | _ ->
+             Option.value_map
+               ~f:snd
+               ~default:false
+               (Cls.get_typeconst_enforceability
+                  class_
+                  (snd typeconst.ttc_name)) ->
+        super#on_typeconst acc class_ typeconst
+      | TCAbstract _ ->
         let (pos, tconst) = typeconst.ttc_name in
         let r = Reason.Rwitness_from_decl pos in
         this#invalid acc r

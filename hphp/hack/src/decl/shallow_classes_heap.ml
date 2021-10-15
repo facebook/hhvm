@@ -16,13 +16,11 @@ end
 module Class = struct
   type t = shallow_class
 
-  let prefix = Prefix.make ()
-
   let description = "Decl_ShallowClass"
 end
 
 module Classes =
-  SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Class)
+  SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (StringKey) (Class)
     (Capacity)
 
 module FilterCapacity = struct
@@ -34,14 +32,13 @@ end
 module Filter = struct
   type t = BloomFilter.t
 
-  let prefix = Prefix.make ()
-
   let description = "Decl_MemberFilter"
 end
 
 module MemberFilters = struct
   include
-    SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Filter)
+    SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (StringKey)
+      (Filter)
       (FilterCapacity)
 
   let add

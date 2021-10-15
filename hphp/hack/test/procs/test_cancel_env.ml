@@ -24,12 +24,11 @@ let make_workers n =
 module UnitVal = struct
   type t = unit
 
-  let prefix = Prefix.make ()
-
   let description = "Test_UnitVal"
 end
 
-module TestHeap = SharedMem.NoCache (SharedMem.Immediate) (StringKey) (UnitVal)
+module TestHeap =
+  SharedMem.Heap (SharedMem.ImmediateBackend) (StringKey) (UnitVal)
 
 (* The tasks will be numbers 1...num_workers_and_jobs,
  * and the job will be to sum them. Each worker will get one number at a time.

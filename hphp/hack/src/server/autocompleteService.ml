@@ -607,7 +607,9 @@ let unwrap_holes ((_, _, e_) as e : Tast.expr) : Tast.expr =
 
  *)
 let autocomplete_shape_literal_in_call
-    env (ft : Typing_defs.locl_fun_type) (args : Tast.expr list) : unit =
+    env
+    (ft : Typing_defs.locl_fun_type)
+    (args : (Ast_defs.param_kind * Tast.expr) list) : unit =
   let add_shape_key_result pos key =
     ac_env := Some env;
     autocomplete_identifier := Some (pos, key);
@@ -628,7 +630,7 @@ let autocomplete_shape_literal_in_call
     | _ -> None
   in
 
-  let args = List.map args ~f:unwrap_holes in
+  let args = List.map args ~f:(fun (_, e) -> unwrap_holes e) in
 
   List.iter
     ~f:(fun (arg, expected_ty) ->
@@ -665,7 +667,7 @@ let visitor =
 
     method! on_Call env f targs args unpack_arg =
       (match args with
-      | (_, p, Aast.EnumClassLabel (_, n)) :: _ when is_auto_complete n ->
+      | (_, (_, p, Aast.EnumClassLabel (_, n))) :: _ when is_auto_complete n ->
         let (fty, _, _) = f in
         autocomplete_enum_class_label_call env fty (p, n)
       | _ -> ());

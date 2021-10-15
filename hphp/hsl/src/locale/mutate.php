@@ -39,7 +39,7 @@ function create(string $locale)[]: Locale {
  * The empty string is not considered a valid locale in Hack; the libc behavior
  * is equivalent to `get_native()`.
  */
-function modified(Locale $orig, Category $cat, string $new): Locale {
+function modified(Locale $orig, Category $cat, string $new)[read_globals]: Locale {
   if ($new === '') {
     // '' is the magic 'fetch from environment'
     throw new InvalidLocaleException(

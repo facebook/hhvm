@@ -24,6 +24,7 @@ let rec strip_ty ty =
     | Tany _
     | Tnonnull
     | Tdynamic
+    | Tsupportdynamic
     | Terr ->
       ty
     | Tprim _ -> ty

@@ -126,9 +126,9 @@ module ClassEltDiff = struct
 
   let diff_elts
       (type t)
-      (module EltHeap : SharedMem.NoCache
+      (module EltHeap : SharedMem.Heap
         with type key = string * string
-         and type t = t)
+         and type value = t)
       ~cid
       ~elts1
       ~elts2
@@ -277,7 +277,6 @@ let class_big_diff class1 class2 =
   || class1.dc_is_xhp <> class2.dc_is_xhp
   || class1.dc_has_xhp_keyword <> class2.dc_has_xhp_keyword
   || class1.dc_const <> class2.dc_const
-  || class1.dc_is_disposable <> class2.dc_is_disposable
   || class1.dc_tparams <> class2.dc_tparams
   || SMap.compare compare_subst_context class1.dc_substs class2.dc_substs <> 0
   || SMap.compare
@@ -438,9 +437,6 @@ let get_gconsts_deps ~ctx old_gconsts gconsts =
     gconsts
     ((DepSet.make mode, DepSet.make mode, DepSet.make mode), 0)
 
-let shallow_decl_enabled (ctx : Provider_context.t) : bool =
-  TypecheckerOptions.shallow_class_decl (Provider_context.get_tcopt ctx)
-
 (*****************************************************************************)
 (* Determine which functions/classes have to be rechecked after comparing
  * the old and the new type signature of "cid" (class identifier).
@@ -455,9 +451,6 @@ let get_class_deps
     ((changed, to_redecl, to_recheck), old_classes_missing) =
   let mode = Provider_context.get_deps_mode ctx in
   match (SMap.find cid old_classes, SMap.find cid new_classes) with
-  | _ when shallow_decl_enabled ctx ->
-    ( get_all_dependencies ~mode trace cid (changed, to_redecl, to_recheck),
-      old_classes_missing )
   | (None, _)
   | (_, None) ->
     ( get_all_dependencies ~mode trace cid (changed, to_redecl, to_recheck),

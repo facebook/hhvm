@@ -1,0 +1,10 @@
+File "interface_class_interface_class_1.bad.php", line 14, characters 13-13:
+Class `B` does not correctly implement all required members  (Typing[4340])
+  File "interface_class_interface_class_1.bad.php", line 14, characters 23-23:
+  Some members are incompatible with those declared in type `A`
+  File "interface_class_interface_class_1.bad.php", line 9, characters 16-21:
+  Non-abstract constants defined in an interface or trait cannot conflict with other inherited constants.
+  File "interface_class_interface_class_1.bad.php", line 5, characters 15-20:
+  `ONCALL` inherited from `IA`
+  File "interface_class_interface_class_1.bad.php", line 9, characters 16-21:
+  conflicts with constant `ONCALL` inherited from `IB`.

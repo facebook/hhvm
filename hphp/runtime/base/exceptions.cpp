@@ -206,12 +206,6 @@ void raise_parse_error(const StringData* filename,
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {
-  DEBUG_ONLY bool vmfp_is_builtin() {
-    VMRegAnchor _;
-    auto const fp = vmfp();
-    return fp && fp->func()->isBuiltin();
-  }
-
   DEBUG_ONLY bool is_throwable(const ObjectData* throwable) {
     auto const erCls = SystemLib::s_ErrorClass;
     auto const exCls = SystemLib::s_ExceptionClass;
@@ -347,7 +341,6 @@ void throwable_init(ObjectData* throwable) {
 }
 
 void throwable_init_file_and_line_from_builtin(ObjectData* throwable) {
-  assertx(vmfp_is_builtin());
   throwable_init_file_and_line_from_trace(throwable);
 }
 

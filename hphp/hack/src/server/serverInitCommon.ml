@@ -45,6 +45,7 @@ let parsing
     ?(count : int option)
     (t : float)
     ~(trace : bool)
+    ~(cache_decls : bool)
     ~(profile_label : string)
     ~(profiling : CgroupProfiler.Profiling.t) : ServerEnv.env * float =
   CgroupProfiler.collect_cgroup_stats ~profiling ~stage:profile_label
@@ -56,16 +57,27 @@ let parsing
   end;
   let quick = lazy_parse in
   let ctx = Provider_utils.ctx_from_server_env env in
-  let (fast, errorl, _) =
-    Parsing_service.go
-      ctx
-      ~quick
-      ~show_all_errors:true
-      genv.workers
-      Relative_path.Set.empty
-      ~get_next
-      ~trace
-      env.popt
+  let (fast, errorl, _failed_parsing) =
+    if genv.local_config.ServerLocalConfig.use_direct_decl_parser then
+      ( Direct_decl_service.go
+          ctx
+          genv.workers
+          ~ide_files:Relative_path.Set.empty
+          ~get_next
+          ~trace
+          ~cache_decls,
+        Errors.empty,
+        Relative_path.Set.empty )
+    else
+      Parsing_service.go_DEPRECATED
+        ctx
+        ~quick
+        ~show_all_errors:true
+        genv.workers
+        Relative_path.Set.empty
+        ~get_next
+        ~trace
+        env.popt
   in
   let naming_table = Naming_table.update_many env.naming_table fast in
   hh_log_heap ();
@@ -98,16 +110,16 @@ let update_files
     t
   else (
     Hh_logger.log "Updating dep->filename [%s]... " profile_label;
-    let deps_mode = Provider_context.get_deps_mode ctx in
     let count = ref 0 in
     CgroupProfiler.collect_cgroup_stats ~profiling ~stage:profile_label
     @@ fun () ->
-    Naming_table.iter
-      ?warn_on_naming_costly_iter
-      naming_table
-      ~f:(fun path fi ->
-        Typing_deps.Files.update_file deps_mode path fi;
-        count := !count + 1);
+    if Naming_provider.ByHash.need_update_files ctx then
+      Naming_table.iter
+        ?warn_on_naming_costly_iter
+        naming_table
+        ~f:(fun path fi ->
+          Naming_provider.ByHash.update_file ctx path fi ~old:None;
+          count := !count + 1);
     HackEventLogger.updating_deps_end
       ~count:!count
       ~desc:profile_label
@@ -147,6 +159,7 @@ let naming
     ~desc:profile_label
     ~heap_size:(SharedMem.SMTelemetry.heap_size ())
     ~start_t:t;
+  Naming_provider.ByHash.set_failed_naming env.failed_naming;
   (env, Hh_logger.log_duration ("Naming " ^ profile_label) t)
 
 let log_type_check_end

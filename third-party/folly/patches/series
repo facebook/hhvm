@@ -5,3 +5,4 @@ folly-install-component.patch
 disable-libsnappy.patch
 without-unwind-symbolizer.patch
 folly-D27938605.patch
+do-not-export-unbuilt-targets.patch

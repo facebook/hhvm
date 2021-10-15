@@ -217,17 +217,15 @@ bool BumpFileMapper::addMappingImpl() {
 }
 
 bool BumpEmergencyMapper::addMappingImpl() {
-  // The emergency buffer should have already been mapped.
+  std::lock_guard<RangeState> _(m_state);
   auto low = m_state.low();
   auto const high = m_state.high();
-  if (m_state.low_map.compare_exchange_strong(low, high,
-                                              std::memory_order_acq_rel)) {
-    mprotect(reinterpret_cast<void*>(low), high - low,
-             PROT_READ | PROT_WRITE);
-    if (m_exit) m_exit();
-    return true;
-  }
-  return false;
+  if (low == high) return false; // another thread added this range already.
+  mprotect(reinterpret_cast<void*>(low), high - low,
+           PROT_READ | PROT_WRITE);
+  m_state.low_map.store(high, std::memory_order_release);
+  if (m_exit) m_exit();
+  return true;
 }
 
 template bool BumpNormalMapper<Direction::LowToHigh>::addMappingImpl();

@@ -1,4 +1,2 @@
-File "instance_method_error.php", line 7, characters 12-21:
-Expression trees do not support calling instance methods (Parsing[1002])
-File "instance_method_error.php", line 12, characters 33-33:
-A variable name is expected here. (Parsing[1002])
+File "instance_method_error.php", line 7, characters 12-22:
+Expression Trees do not support nullsafe method calls (Parsing[1002])

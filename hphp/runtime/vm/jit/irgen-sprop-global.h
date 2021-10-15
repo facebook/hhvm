@@ -50,8 +50,8 @@ struct LdClsPropOptions {
   bool writeMode;
 };
 
-ClsPropLookup ldClsPropAddrKnown(IRGS&, const Class*, const StringData*, bool);
-ClsPropLookup ldClsPropAddr(IRGS&, SSATmp*, SSATmp*, SSATmp*, const LdClsPropOptions&);
+ClsPropLookup ldClsPropAddrKnown(IRGS&, const Class*, const StringData*, bool, bool, ReadonlyOp);
+ClsPropLookup ldClsPropAddr(IRGS&, SSATmp*, SSATmp*, const LdClsPropOptions&);
 
 //////////////////////////////////////////////////////////////////////
 

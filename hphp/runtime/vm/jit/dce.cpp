@@ -313,6 +313,7 @@ bool canDCE(IRInstruction* inst) {
   case ConvArrLikeToKeyset:
   case ConvObjToKeyset:
   case LdOutAddr:
+  case LdOutAddrInlined:
     return !opcodeMayRaise(inst->op()) &&
       (!inst->consumesReferences() || inst->producesReference());
 
@@ -407,7 +408,6 @@ bool canDCE(IRInstruction* inst) {
   case LdInitRDSAddr:
   case LdInitPropAddr:
   case LdMROProp:
-  case LdMROPropAddr:
   case LdObjMethodD:
   case LdObjMethodS:
   case LdObjInvoke:
@@ -436,7 +436,6 @@ bool canDCE(IRInstruction* inst) {
   case NewStructDict:
   case NewBespokeStructDict:
   case Clone:
-  case InlineReturn:
   case InlineCall:
   case Call:
   case NativeImpl:
@@ -500,7 +499,6 @@ bool canDCE(IRInstruction* inst) {
   case RaiseErrorOnInvalidIsAsExpressionType:
   case RaiseWarning:
   case RaiseNotice:
-  case RaiseReadonlyPropViolation:
   case ThrowArrayIndexException:
   case ThrowArrayKeyException:
   case RaiseForbiddenDynCall:
@@ -651,10 +649,12 @@ bool canDCE(IRInstruction* inst) {
   case ThrowParameterWrongType:
   case ThrowInOutMismatch:
   case ThrowReadonlyMismatch:
-  case ThrowMustBeEnclosedInReadonly:
-  case ThrowMustBeMutableException:
-  case ThrowMustBeReadonlyException:
-  case ThrowMustBeValueTypeException:
+  case ThrowOrWarnCannotModifyReadonlyCollection:
+  case ThrowOrWarnLocalMustBeValueTypeException:
+  case ThrowOrWarnMustBeEnclosedInReadonly:
+  case ThrowOrWarnMustBeMutableException:
+  case ThrowOrWarnMustBeReadonlyException:
+  case ThrowOrWarnMustBeValueTypeException:
   case StMBase:
   case StMROProp:
   case FinishMemberOp:
@@ -934,7 +934,10 @@ void processCatchBlock(IRUnit& unit, DceState& state, Block* block,
       [&] (GeneralEffects x)     {
         return
           process_stack(x.loads) ||
+          process_stack(x.inout) ||
           process_stack(x.stores) ||
+          process_stack(x.backtrace) ||
+          process_stack(x.coeffect) ||
           process_stack(x.kills);
       },
       [&] (PureLoad x)           { return process_stack(x.src); },
@@ -944,8 +947,7 @@ void processCatchBlock(IRUnit& unit, DceState& state, Block* block,
         return
           process_stack(x.base) ||
           process_stack(x.actrec);
-      },
-      [&] (PureInlineReturn x)   { return process_stack(x.base); }
+      }
     );
   }
 

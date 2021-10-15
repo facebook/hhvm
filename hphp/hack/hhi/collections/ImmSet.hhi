@@ -44,7 +44,7 @@ namespace HH {
  * @guide /hack/collections/classes
  */
 <<__SupportDynamicType>>
-final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
+final class ImmSet<<<__RequireDynamic>> +Tv as arraykey> implements \ConstSet<Tv> {
   /**
    * Creates an `ImmSet` from the given `Traversable`, or an empty `ImmSet` if
    * `null` is passed.

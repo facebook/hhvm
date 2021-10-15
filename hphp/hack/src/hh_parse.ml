@@ -75,7 +75,6 @@ module FullFidelityParseArgs = struct
     disable_xhp_element_mangling: bool;
     allow_unstable_features: bool;
     enable_xhp_class_modifier: bool;
-    disallow_hash_comments: bool;
     disallow_fun_and_cls_meth_pseudo_funcs: bool;
     disallow_inst_meth: bool;
     ignore_missing_json: bool;
@@ -119,7 +118,6 @@ module FullFidelityParseArgs = struct
       disable_xhp_element_mangling
       allow_unstable_features
       enable_xhp_class_modifier
-      disallow_hash_comments
       disallow_fun_and_cls_meth_pseudo_funcs
       disallow_inst_meth
       ignore_missing_json =
@@ -161,7 +159,6 @@ module FullFidelityParseArgs = struct
       disable_xhp_element_mangling;
       allow_unstable_features;
       enable_xhp_class_modifier;
-      disallow_hash_comments;
       disallow_fun_and_cls_meth_pseudo_funcs;
       disallow_inst_meth;
       ignore_missing_json;
@@ -224,7 +221,6 @@ module FullFidelityParseArgs = struct
     let disable_xhp_element_mangling = ref false in
     let allow_unstable_features = ref false in
     let enable_xhp_class_modifier = ref false in
-    let disallow_hash_comments = ref false in
     let disallow_fun_and_cls_meth_pseudo_funcs = ref false in
     let disallow_inst_meth = ref false in
     let ignore_missing_json = ref false in
@@ -374,9 +370,6 @@ No errors are filtered out."
         ( "--allow-unstable-features",
           Arg.Set allow_unstable_features,
           "Enables the __EnableUnstableFeatures attribute" );
-        ( "--disallow-hash-comments",
-          Arg.Set disallow_hash_comments,
-          "Disables hash-style(#) comments (except hashbangs)" );
         ( "--disallow-fun-and-cls-meth-pseudo-funcs",
           Arg.Set disallow_fun_and_cls_meth_pseudo_funcs,
           "Disables parsing of fun() and class_meth()" );
@@ -444,7 +437,6 @@ No errors are filtered out."
       !disable_xhp_element_mangling
       !allow_unstable_features
       !enable_xhp_class_modifier
-      !disallow_hash_comments
       !disallow_fun_and_cls_meth_pseudo_funcs
       !disallow_inst_meth
       !ignore_missing_json
@@ -540,9 +532,6 @@ let handle_existing_file args filename =
       args.enable_xhp_class_modifier
   in
   let popt =
-    ParserOptions.with_disallow_hash_comments popt args.disallow_hash_comments
-  in
-  let popt =
     ParserOptions.with_disallow_fun_and_cls_meth_pseudo_funcs
       popt
       args.disallow_fun_and_cls_meth_pseudo_funcs
@@ -567,7 +556,6 @@ let handle_existing_file args filename =
         (* When print_errors is true, the leaked tree will be passed to ParserErrors,
          * which will consume it. *)
       ~leak_rust_tree:print_errors
-      ~disallow_hash_comments:args.disallow_hash_comments
       ~disallow_fun_and_cls_meth_pseudo_funcs:
         args.disallow_fun_and_cls_meth_pseudo_funcs
       ~disallow_inst_meth:args.disallow_inst_meth

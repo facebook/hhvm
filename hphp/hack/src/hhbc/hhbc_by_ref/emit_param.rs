@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use decl_provider::DeclProvider;
 use ffi::{Maybe, Nothing, Slice, Str};
 use hhbc_by_ref_ast_scope::Scope;
 use hhbc_by_ref_emit_attribute as emit_attribute;
@@ -23,7 +22,7 @@ use oxidized::{
     aast_defs::{Hint, Hint_},
     aast_visitor::{self, AstParams, Node},
     ast as a,
-    ast_defs::{Id, ParamKind, ReadonlyKind},
+    ast_defs::{Id, ReadonlyKind},
     pos::Pos,
 };
 
@@ -32,9 +31,9 @@ use naming_special_names_rust::user_attributes as ua;
 use std::collections::{BTreeMap, BTreeSet};
 use std::marker::PhantomData;
 
-pub fn from_asts<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
+pub fn from_asts<'a, 'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena, 'decl, D>,
+    emitter: &mut Emitter<'arena, 'decl>,
     tparams: &mut Vec<&str>,
     generate_defaults: bool,
     scope: &Scope<'a, 'arena>,
@@ -90,9 +89,9 @@ fn rename_params<'arena>(
     params.into_iter().collect()
 }
 
-fn from_ast<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
+fn from_ast<'a, 'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena, 'decl, D>,
+    emitter: &mut Emitter<'arena, 'decl>,
     tparams: &mut Vec<&str>,
     generate_defaults: bool,
     scope: &Scope<'a, 'arena>,
@@ -165,7 +164,6 @@ fn from_ast<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
             phantom_a: PhantomData,
             phantom_b: PhantomData,
             phantom_c: PhantomData,
-            phantom_d: PhantomData,
         },
         &mut Ctx { emitter, scope },
         &param.expr,
@@ -179,10 +177,6 @@ fn from_ast<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     } else {
         None
     };
-    let is_inout = match param.callconv {
-        Some(ParamKind::Pinout) => true,
-        _ => false,
-    };
     let is_readonly = match param.readonly {
         Some(ReadonlyKind::Readonly) => true,
         _ => false,
@@ -192,7 +186,7 @@ fn from_ast<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
         HhasParam {
             name: Str::new_str(alloc, &param.name),
             is_variadic: param.is_variadic,
-            is_inout,
+            is_inout: param.callconv.is_pinout(),
             is_readonly,
             user_attributes: Slice::new(alloc.alloc_slice_fill_iter(attrs.into_iter())).into(),
             type_info: Maybe::from(type_info),
@@ -205,8 +199,8 @@ fn from_ast<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     )))
 }
 
-pub fn emit_param_default_value_setter<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
-    emitter: &mut Emitter<'arena, 'decl, D>,
+pub fn emit_param_default_value_setter<'a, 'arena, 'decl>(
+    emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     pos: &Pos,
     params: &[(HhasParam<'arena>, Option<(Label, a::Expr)>)],
@@ -250,23 +244,20 @@ pub fn emit_param_default_value_setter<'a, 'arena, 'decl, D: DeclProvider<'decl>
     }
 }
 
-struct ResolverVisitor<'a, 'arena: 'a, 'decl: 'a, D> {
+struct ResolverVisitor<'a, 'arena: 'a, 'decl: 'a> {
     phantom_a: PhantomData<&'a ()>,
     phantom_b: PhantomData<&'arena ()>,
     phantom_c: PhantomData<&'decl ()>,
-    phantom_d: PhantomData<D>,
 }
 
 #[allow(dead_code)]
-struct Ctx<'a, 'arena: 'a, 'decl: 'a, D: DeclProvider<'decl>> {
-    emitter: &'a mut Emitter<'arena, 'decl, D>,
+struct Ctx<'a, 'arena: 'a, 'decl: 'a> {
+    emitter: &'a mut Emitter<'arena, 'decl>,
     scope: &'a Scope<'a, 'arena>,
 }
 
-impl<'ast, 'a, 'arena, 'decl, D: DeclProvider<'decl> + 'a> aast_visitor::Visitor<'ast>
-    for ResolverVisitor<'a, 'arena, 'decl, D>
-{
-    type P = AstParams<Ctx<'a, 'arena, 'decl, D>, ()>;
+impl<'ast, 'a, 'arena, 'decl> aast_visitor::Visitor<'ast> for ResolverVisitor<'a, 'arena, 'decl> {
+    type P = AstParams<Ctx<'a, 'arena, 'decl>, ()>;
 
     fn object(&mut self) -> &mut dyn aast_visitor::Visitor<'ast, P = Self::P> {
         self
@@ -274,7 +265,7 @@ impl<'ast, 'a, 'arena, 'decl, D: DeclProvider<'decl> + 'a> aast_visitor::Visitor
 
     fn visit_expr(
         &mut self,
-        c: &mut Ctx<'a, 'arena, 'decl, D>,
+        c: &mut Ctx<'a, 'arena, 'decl>,
         p: &a::Expr,
     ) -> std::result::Result<(), ()> {
         p.recurse(c, self.object())

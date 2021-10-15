@@ -183,7 +183,9 @@ impl<'ast, 'a> Visitor<'ast> for DeclvarVisitor<'a> {
                     }
                     _ => self.visit_expr(env, func_e)?,
                 }
-                for arg in pos_args {
+                // Calling convention doesn't matter here: we're just trying to figure out what
+                // variables are declared in this scope.
+                for (_, arg) in pos_args {
                     on_arg(self, env, arg)?
                 }
                 if let Some(arg) = unpacked_arg {

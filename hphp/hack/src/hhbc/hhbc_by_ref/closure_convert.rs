@@ -3,12 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::mem;
 use std::path::PathBuf;
 
 use itertools::{Either, EitherOrBoth::*, Itertools};
 
-use decl_provider::DeclProvider;
 use hash::HashSet;
 use hhbc_by_ref_ast_scope::{
     self as ast_scope, Lambda, LongLambda, Scope as AstScope, ScopeItem as AstScopeItem,
@@ -18,6 +16,7 @@ use hhbc_by_ref_emit_fatal as emit_fatal;
 use hhbc_by_ref_env::emitter::Emitter;
 use hhbc_by_ref_global_state::{ClosureEnclosingClassInfo, GlobalState};
 use hhbc_by_ref_hhas_coeffects::HhasCoeffects;
+use hhbc_by_ref_hhbc_assertion_utils::*;
 use hhbc_by_ref_hhbc_id as hhbc_id;
 use hhbc_by_ref_hhbc_id::class;
 use hhbc_by_ref_hhbc_string_utils as string_utils;
@@ -31,6 +30,7 @@ use oxidized::{
     aast_defs,
     aast_visitor::{visit_mut, AstParams, NodeMut, VisitorMut},
     ast::*,
+    ast_defs::ParamKind,
     file_info::Mode,
     local_id, namespace_env,
     relative_path::{Prefix, RelativePath},
@@ -800,13 +800,13 @@ fn make_fn_param(pos: Pos, lid: &LocalId, is_variadic: bool, is_inout: bool) -> 
         annotation: (),
         type_hint: TypeHint((), None),
         is_variadic,
-        pos,
+        pos: pos.clone(),
         name: local_id::get_name(lid).clone(),
         expr: None,
         callconv: if is_inout {
-            Some(ParamKind::Pinout)
+            ParamKind::Pinout(pos)
         } else {
-            None
+            ParamKind::Pnormal
         },
         readonly: None, // TODO
         user_attributes: vec![],
@@ -856,10 +856,9 @@ fn convert_meth_caller_to_func_ptr(
     let fun_handle: Expr_ = Expr_::mk_call(
         expr_id("\\__systemlib\\meth_caller".into()),
         vec![],
-        vec![Expr(
-            (),
-            pos(),
-            Expr_::mk_string(mangle_name.clone().into()),
+        vec![(
+            ParamKind::Pnormal,
+            Expr((), pos(), Expr_::mk_string(mangle_name.clone().into())),
         )],
         None,
     );
@@ -876,23 +875,32 @@ fn convert_meth_caller_to_func_ptr(
             expr_id("\\HH\\invariant".into()),
             vec![],
             vec![
-                Expr(
-                    (),
-                    pos(),
-                    Expr_::mk_call(
-                        expr_id("\\is_a".into()),
-                        vec![],
-                        vec![
-                            obj_lvar.clone(),
-                            Expr((), pc.clone(), Expr_::String(cls.into())),
-                        ],
-                        None,
+                (
+                    ParamKind::Pnormal,
+                    Expr(
+                        (),
+                        pos(),
+                        Expr_::mk_call(
+                            expr_id("\\is_a".into()),
+                            vec![],
+                            vec![
+                                (ParamKind::Pnormal, obj_lvar.clone()),
+                                (
+                                    ParamKind::Pnormal,
+                                    Expr((), pc.clone(), Expr_::String(cls.into())),
+                                ),
+                            ],
+                            None,
+                        ),
                     ),
                 ),
-                Expr(
-                    (),
-                    pos(),
-                    Expr_::String(format!("object must be an instance of ({})", cls).into()),
+                (
+                    ParamKind::Pnormal,
+                    Expr(
+                        (),
+                        pos(),
+                        Expr_::String(format!("object must be an instance of ({})", cls).into()),
+                    ),
                 ),
             ],
             None,
@@ -1038,10 +1046,13 @@ fn make_dyn_meth_caller_lambda(pos: &Pos, cexpr: &Expr, fexpr: &Expr, force: boo
         expr_id("\\__systemlib\\dynamic_meth_caller".into()),
         vec![],
         vec![
-            cexpr.clone(),
-            fexpr.clone(),
-            Expr((), pos(), Expr_::mk_efun(fd, vec![])),
-            Expr((), pos(), force_val),
+            (ParamKind::Pnormal, cexpr.clone()),
+            (ParamKind::Pnormal, fexpr.clone()),
+            (
+                ParamKind::Pnormal,
+                Expr((), pos(), Expr_::mk_efun(fd, vec![])),
+            ),
+            (ParamKind::Pnormal, Expr((), pos(), force_val)),
         ],
         None,
     );
@@ -1277,7 +1288,9 @@ impl<'ast, 'a, 'arena> VisitorMut<'ast> for ClosureConvertVisitor<'a, 'arena> {
                 } else {
                     false
                 };
-                if let [cexpr, fexpr] = &mut *x.2 {
+                if let [(pk_c, cexpr), (pk_f, fexpr)] = &mut *x.2 {
+                    ensure_normal_paramkind(pk_c)?;
+                    ensure_normal_paramkind(pk_f)?;
                     let mut res = make_dyn_meth_caller_lambda(&*pos, &cexpr, &fexpr, force);
                     res.recurse(env, self.object())?;
                     res
@@ -1304,7 +1317,9 @@ impl<'ast, 'a, 'arena> VisitorMut<'ast> for ClosureConvertVisitor<'a, 'arena> {
                     }
                 } =>
             {
-                if let [Expr(_, pc, cls), Expr(_, pf, func)] = &mut *x.2 {
+                if let [(pk_cls, Expr(_, pc, cls)), (pk_f, Expr(_, pf, func))] = &mut *x.2 {
+                    ensure_normal_paramkind(pk_cls)?;
+                    ensure_normal_paramkind(pk_f)?;
                     match (&cls, func.as_string()) {
                         (Expr_::ClassConst(cc), Some(fname))
                             if string_utils::is_class(&(cc.1).1) =>
@@ -1392,7 +1407,9 @@ impl<'ast, 'a, 'arena> VisitorMut<'ast> for ClosureConvertVisitor<'a, 'arena> {
                     }
                 } =>
             {
-                if let [Expr(_, pc, cls), Expr(_, pf, func)] = &mut *x.2 {
+                if let [(pk_cls, Expr(_, pc, cls)), (pk_f, Expr(_, pf, func))] = &mut *x.2 {
+                    ensure_normal_paramkind(pk_cls)?;
+                    ensure_normal_paramkind(pk_f)?;
                     match (&cls, func.as_string()) {
                         (Expr_::ClassConst(cc), Some(_)) if string_utils::is_class(&(cc.1).1) => {
                             let mut cls_const = cls.as_class_const_mut();
@@ -1451,18 +1468,6 @@ impl<'ast, 'a, 'arena> VisitorMut<'ast> for ClosureConvertVisitor<'a, 'arena> {
             {
                 add_var(env, &mut self.state, "$this");
                 let mut res = Expr_::Call(x);
-                res.recurse(env, self.object())?;
-                res
-            }
-            Expr_::Call(mut x)
-                if x.0
-                    .as_id()
-                    .map(|id| id.1.eq_ignore_ascii_case("tuple"))
-                    .unwrap_or_default() =>
-            {
-                // replace tuple with varray
-                let call_args = mem::replace(&mut x.2, vec![]);
-                let mut res = Expr_::mk_varray(None, call_args);
                 res.recurse(env, self.object())?;
                 res
             }
@@ -1574,7 +1579,12 @@ fn extract_debugger_main(
                 Stmt_::mk_expr(Expr(
                     (),
                     p(),
-                    Expr_::mk_call(id("unset"), vec![], vec![lv(&name)], None),
+                    Expr_::mk_call(
+                        id("unset"),
+                        vec![],
+                        vec![(ParamKind::Pnormal, lv(&name))],
+                        None,
+                    ),
                 )),
             );
             Stmt(
@@ -1604,7 +1614,12 @@ fn extract_debugger_main(
             let isuninit = Expr(
                 (),
                 p(),
-                Expr_::mk_call(checkfunc, vec![], vec![lv(name)], None),
+                Expr_::mk_call(
+                    checkfunc,
+                    vec![],
+                    vec![(ParamKind::Pnormal, lv(name))],
+                    None,
+                ),
             );
             let obj = Expr(
                 (),
@@ -1685,9 +1700,9 @@ fn extract_debugger_main(
     Ok(())
 }
 
-pub fn convert_toplevel_prog<'arena, 'local_arena, 'decl, D: DeclProvider<'decl>>(
+pub fn convert_toplevel_prog<'arena, 'local_arena, 'decl>(
     alloc: &'local_arena bumpalo::Bump,
-    e: &mut Emitter<'arena, 'decl, D>,
+    e: &mut Emitter<'arena, 'decl>,
     defs: &mut Program,
     namespace_env: RcOc<namespace_env::Env>,
 ) -> Result<()>

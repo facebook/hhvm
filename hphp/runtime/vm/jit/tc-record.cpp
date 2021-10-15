@@ -79,36 +79,39 @@ void recordBCInstr(uint32_t op, const TCA addr, const TCA end, bool cold) {
 std::map<std::string, ServiceData::ExportedTimeSeries*>
 buildCodeSizeCounters() {
   std::map<std::string, ServiceData::ExportedTimeSeries*> counters;
-  auto codeCounterInit = [&] (const char* name) {
-    auto counterName = folly::sformat("jit.code.{}.used", name);
-    counters[name] = ServiceData::createTimeSeries(
-        counterName,
-        {ServiceData::StatsType::RATE,
-        ServiceData::StatsType::SUM},
-        {std::chrono::seconds(RuntimeOption::EvalJitWarmupRateSeconds),
-        std::chrono::seconds(0)}
-        );
+  auto codeCounterInit =
+    [&] (const char* name,
+         const std::vector<ServiceData::StatsType>& stats) {
+      auto counterName = folly::sformat("jit.code.{}.used", name);
+      counters[name] = ServiceData::createTimeSeries(
+          counterName, stats,
+          {std::chrono::seconds(RuntimeOption::EvalJitWarmupRateSeconds),
+           std::chrono::seconds(0)}
+      );
+    };
+  auto codeCounterSumAndRateInit = [&] (const char* name) {
+    codeCounterInit(name, {ServiceData::StatsType::RATE,
+                           ServiceData::StatsType::SUM});
   };
-  CodeCache::forEachName(codeCounterInit);
-  codeCounterInit("prof.main");
-  codeCounterInit("prof.cold");
-  codeCounterInit("prof.frozen");
-  codeCounterInit("opt.main");
-  codeCounterInit("opt.cold");
-  codeCounterInit("opt.frozen");
-  codeCounterInit("live.main");
-  codeCounterInit("live.cold");
-  codeCounterInit("live.frozen");
-  codeCounterInit("anchor.main");
-  codeCounterInit("anchor.cold");
-  codeCounterInit("anchor.frozen");
-  codeCounterInit("interp.main");
-  codeCounterInit("interp.cold");
-  codeCounterInit("interp.frozen");
+  auto codeCounterSumInit = [&] (const char* name) {
+    codeCounterInit(name, {ServiceData::StatsType::SUM});
+  };
+  CodeCache::forEachName(codeCounterSumAndRateInit);
+  codeCounterSumInit("prof.main");
+  codeCounterSumInit("prof.cold");
+  codeCounterSumInit("prof.frozen");
+  codeCounterSumInit("opt.main");
+  codeCounterSumInit("opt.cold");
+  codeCounterSumInit("opt.frozen");
+  codeCounterSumInit("live.main");
+  codeCounterSumInit("live.cold");
+  codeCounterSumInit("live.frozen");
   return counters;
 }
 
 static std::map<std::string, ServiceData::ExportedTimeSeries*> s_counters;
+
+static std::atomic<uint64_t> s_trans_counters[NumTransKinds][kNumAreas];
 
 static InitFiniNode initCodeSizeCounters([] {
   s_counters = buildCodeSizeCounters();
@@ -121,6 +124,29 @@ static ServiceData::CounterCallback s_warmedUpCounter(
     counters["jit.warmed-up"] = warmupStatusString().empty() ? 1 : 0;
   }
 );
+
+/*
+ * Return the numeric index to use for the given kind for the purpose of
+ * recording the translation sizes in s_trans_counters.  This is normally the
+ * order of the given kind in the TransKind enum class, except that prologue
+ * kinds get mapped to their corresponding non-prologue kinds.
+ */
+static size_t kindIndex(TransKind kind) {
+  switch (kind) {
+    case TransKind::ProfPrologue:
+      kind = TransKind::Profile;
+      break;
+    case TransKind::LivePrologue:
+      kind = TransKind::Live;
+      break;
+    case TransKind::OptPrologue:
+      kind = TransKind::Optimize;
+      break;
+    default:
+      break;
+  }
+  return static_cast<size_t>(kind);
+}
 
 void recordTranslationSizes(const TransRec& tr) {
   const char* kindName = nullptr;
@@ -137,14 +163,9 @@ void recordTranslationSizes(const TransRec& tr) {
     case TransKind::LivePrologue:
       kindName = "live";
       break;
-    case TransKind::Anchor:
-      kindName = "anchor";
-      break;
-    case TransKind::Interp:
-      kindName = "interp";
-      break;
-    case TransKind::Invalid:
-      always_assert(0);
+    // We don't record the other, less common translation kinds.
+    default:
+      return;
   }
   auto mainCounter   = s_counters.at(folly::sformat("{}.main", kindName));
   auto coldCounter   = s_counters.at(folly::sformat("{}.cold", kindName));
@@ -152,6 +173,15 @@ void recordTranslationSizes(const TransRec& tr) {
   mainCounter->addValue(tr.aLen);
   coldCounter->addValue(tr.acoldLen);
   frozenCounter->addValue(tr.afrozenLen);
+
+  size_t kindIdx = kindIndex(tr.kind);
+  auto& trans_counter = s_trans_counters[kindIdx];
+  auto constexpr iMain   = static_cast<size_t>(AreaIndex::Main);
+  auto constexpr iCold   = static_cast<size_t>(AreaIndex::Cold);
+  auto constexpr iFrozen = static_cast<size_t>(AreaIndex::Frozen);
+  trans_counter[iMain].fetch_add(tr.aLen, std::memory_order_relaxed);
+  trans_counter[iCold].fetch_add(tr.acoldLen, std::memory_order_relaxed);
+  trans_counter[iFrozen].fetch_add(tr.afrozenLen, std::memory_order_relaxed);
 }
 
 void updateCodeSizeCounters() {
@@ -169,21 +199,21 @@ void updateCodeSizeCounters() {
 }
 
 size_t getLiveMainUsage() {
-  auto const it = s_counters.find("live.main");
-  if (it == s_counters.end()) return 0;
-  return it->second->getSum();
+  constexpr auto liveIdx = static_cast<size_t>(TransKind::Live);
+  constexpr auto mainIdx = static_cast<size_t>(AreaIndex::Main);
+  return s_trans_counters[liveIdx][mainIdx].load(std::memory_order_relaxed);
 }
 
 size_t getProfMainUsage() {
-  auto const it = s_counters.find("prof.main");
-  if (it == s_counters.end()) return 0;
-  return it->second->getSum();
+  constexpr auto profIdx = static_cast<size_t>(TransKind::Profile);
+  constexpr auto mainIdx = static_cast<size_t>(AreaIndex::Main);
+  return s_trans_counters[profIdx][mainIdx].load(std::memory_order_relaxed);
 }
 
 size_t getOptMainUsage() {
-  auto const it = s_counters.find("opt.main");
-  if (it == s_counters.end()) return 0;
-  return it->second->getSum();
+  constexpr auto optIdx = static_cast<size_t>(TransKind::Optimize);
+  constexpr auto mainIdx = static_cast<size_t>(AreaIndex::Main);
+  return s_trans_counters[optIdx][mainIdx].load(std::memory_order_relaxed);
 }
 
 /*

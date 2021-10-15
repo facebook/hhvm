@@ -1319,6 +1319,7 @@ where
                             self.parse_as_expression(term)
                         }
                         TokenKind::QuestionAs => self.parse_nullable_as_expression(term),
+                        TokenKind::Upcast => self.parse_upcast_expression(term),
                         TokenKind::QuestionMinusGreaterThan | TokenKind::MinusGreaterThan => {
                             let result = self.parse_member_selection_expression(term);
                             self.parse_remaining_expression(result)
@@ -1995,6 +1996,20 @@ where
             |p, x, y, z| S!(make_nullable_as_expression, p, x, y, z),
             left,
             TokenKind::QuestionAs,
+        )
+    }
+
+    fn parse_upcast_expression(&mut self, left: S::R) -> S::R {
+        // SPEC:
+        // upcast-expression:
+        //   upcast-subject upcast type-specifier
+        //
+        // upcast-subject:
+        //   expression
+        self.parse_is_as_helper(
+            |p, x, y, z| S!(make_upcast_expression, p, x, y, z),
+            left,
+            TokenKind::Upcast,
         )
     }
 
@@ -3077,7 +3092,7 @@ where
 
     fn parse_enum_class_label(&mut self, qualifier: S::R) -> S::R {
         let hash = self.assert_token(TokenKind::Hash);
-        let label_name = self.require_name();
+        let label_name = self.require_name_allow_all_keywords();
         S!(
             make_enum_class_label_expression,
             self,

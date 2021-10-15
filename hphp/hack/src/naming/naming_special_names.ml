@@ -329,7 +329,7 @@ module UserAttributes = struct
 
   let uaSupportDynamicType = "__SupportDynamicType"
 
-  let uaNoRequireDynamic = "__NoRequireDynamic"
+  let uaRequireDynamic = "__RequireDynamic"
 
   let uaModule = "__Module"
 
@@ -377,7 +377,7 @@ module UserAttributes = struct
           (uaCanCall, [parameter]);
           (uaViaLabel, [parameter]);
           (uaSupportDynamicType, [fn; cls; mthd]);
-          (uaNoRequireDynamic, [typeparam]);
+          (uaRequireDynamic, [typeparam]);
           (uaModule, [fn; cls; file; typealias; enum; enumcls]);
           ( uaInternal,
             [
@@ -506,10 +506,6 @@ module StdlibFunctions = struct
 
   let get_class = "\\get_class"
 
-  let array_filter = "\\array_filter"
-
-  let array_map = "\\array_map"
-
   let call_user_func = "\\call_user_func"
 
   let type_structure = "\\HH\\type_structure"
@@ -534,9 +530,7 @@ module StdlibFunctions = struct
         SpecialFunctions.echo;
         PseudoFunctions.isset;
         PseudoFunctions.unset;
-        array_filter;
         type_structure;
-        array_map;
         PseudoFunctions.unsafe_cast;
       ]
 
@@ -563,6 +557,8 @@ module Typehints = struct
   let this = "this"
 
   let dynamic = "dynamic"
+
+  let supportdynamic = "supportdynamic"
 
   let nothing = "nothing"
 
@@ -600,6 +596,7 @@ module Typehints = struct
           nonnull;
           this;
           dynamic;
+          supportdynamic;
           nothing;
           int;
           bool;
@@ -632,6 +629,7 @@ module Typehints = struct
     || String.equal x mixed
     || String.equal x arraykey
     || String.equal x dynamic
+    || String.equal x supportdynamic
     || String.equal x wildcard
     || String.equal x null
     || String.equal x nonnull
@@ -818,11 +816,15 @@ end
 module Readonly = struct
   let prefix = "\\HH\\Readonly\\"
 
+  let idx = "\\HH\\idx_readonly"
+
   let as_mut = prefix ^ "as_mut"
 end
 
 module Capabilities = struct
   let defaults = Coeffects.contexts ^ "\\defaults"
+
+  let write_props = Coeffects.contexts ^ "\\write_props"
 
   let prefix = "\\HH\\Capabilities\\"
 
@@ -905,4 +907,6 @@ module ExpressionTrees = struct
   let visitContinue = "visitContinue"
 
   let splice = "splice"
+
+  let dollardollarTmpVar = "$0dollardollar"
 end

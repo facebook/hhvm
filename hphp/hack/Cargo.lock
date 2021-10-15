@@ -8,6 +8,7 @@ version = "0.0.0"
 dependencies = [
  "bumpalo",
  "decl_mode_parser",
+ "hh_autoimport_rust",
  "lowerer",
  "mode_parser",
  "namespaces_rust",
@@ -28,7 +29,6 @@ name = "aast_parser_ffi"
 version = "0.0.0"
 dependencies = [
  "aast_parser",
- "libc",
  "ocamlrep",
  "ocamlrep_ocamlpool",
  "parser_core_types",
@@ -42,10 +42,21 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "739f4a8db6605981345c5654f3a85b056ce52f37a39d34da03f25bf2151ea16e"
 
 [[package]]
-name = "aho-corasick"
-version = "0.7.6"
+name = "ahash"
+version = "0.7.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "58fb5e95d83b38284460a5fda7d6470aa0b8844d283a0b614b8535e880800d2d"
+checksum = "43bb833f0bf979d8475d38fbf09ed3b8a55e1885fe93ad3f93239fc6a4f17b98"
+dependencies = [
+ "getrandom",
+ "once_cell",
+ "version_check",
+]
+
+[[package]]
+name = "aho-corasick"
+version = "0.7.18"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1e37cfd5e7657ada45f742d6e99ca5788580b5c529dc78faf11ece6dc702656f"
 dependencies = [
  "memchr",
 ]
@@ -75,7 +86,6 @@ dependencies = [
  "ocamlrep",
  "ocamlrep_derive",
  "quickcheck",
- "rand",
  "serde",
 ]
 
@@ -121,6 +131,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "ast_and_decl_parser"
+version = "0.0.0"
+dependencies = [
+ "aast_parser",
+ "bumpalo",
+ "cst_and_decl_parser",
+ "oxidized_by_ref",
+ "parser_core_types",
+ "rust_aast_parser_types",
+ "stack_limit",
+]
+
+[[package]]
 name = "atty"
 version = "0.2.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -147,8 +170,10 @@ name = "bench"
 version = "0.0.0"
 dependencies = [
  "aast_parser",
+ "ast_and_decl_parser",
  "bumpalo",
  "criterion",
+ "cst_and_decl_parser",
  "direct_decl_parser",
  "facts_parser",
  "ocamlrep",
@@ -168,9 +193,9 @@ dependencies = [
 
 [[package]]
 name = "bitflags"
-version = "1.2.1"
+version = "1.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cf1de2fe8c75bc145a2f577add951f8134889b4795d47466a54a5c846d691693"
+checksum = "bef38d45163c2f1dde094a7dfd33ccf595c92905c8f8f4fdc18d06fb1037718a"
 
 [[package]]
 name = "bitmaps"
@@ -232,7 +257,6 @@ version = "0.0.0"
 dependencies = [
  "bumpalo",
  "core_utils_rust",
- "decl_provider",
  "escaper",
  "ffi",
  "hhbc_by_ref_ast_class_expr",
@@ -281,9 +305,9 @@ checksum = "08c48aae112d48ed9f069b33538ea9e3e90aa263cfa3d1c24309612b1f7472de"
 
 [[package]]
 name = "bytes"
-version = "1.0.1"
+version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b700ce4376041dcd0a327fd0097c41095743c4c8af8887265942faf1100bd040"
+checksum = "c4872d67bab6358e59559027aa3b9157c53d9358c51423c17554809a8858e0f8"
 dependencies = [
  "serde",
 ]
@@ -295,6 +319,25 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4b9434b9a5aa1450faa3f9cb14ea0e8c53bb5d2b3c1bfd1ab4fc03e9f33fbfb0"
 dependencies = [
  "rustc_version",
+]
+
+[[package]]
+name = "cbindgen"
+version = "0.20.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "51e3973b165dc0f435831a9e426de67e894de532754ff7a3f307c03ee5dec7dc"
+dependencies = [
+ "clap",
+ "heck",
+ "indexmap",
+ "log",
+ "proc-macro2",
+ "quote",
+ "serde",
+ "serde_json",
+ "syn",
+ "tempfile",
+ "toml",
 ]
 
 [[package]]
@@ -356,11 +399,7 @@ dependencies = [
  "anyhow",
  "bumpalo",
  "decl_provider",
- "external_decl_provider",
  "hhbc_by_ref_compile",
- "hhbc_by_ref_hhas_program",
- "libc",
- "log",
  "ocamlrep",
  "ocamlrep_derive",
  "ocamlrep_ocamlpool",
@@ -368,6 +407,7 @@ dependencies = [
  "parser_core_types",
  "serde_json",
  "stack_limit",
+ "unified_decl_provider",
 ]
 
 [[package]]
@@ -448,13 +488,48 @@ dependencies = [
 ]
 
 [[package]]
+name = "crossbeam"
+version = "0.8.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4ae5588f6b3c3cb05239e90bd110f257254aecd01e4635400391aeae07497845"
+dependencies = [
+ "cfg-if 1.0.0",
+ "crossbeam-channel",
+ "crossbeam-deque 0.8.1",
+ "crossbeam-epoch 0.9.5",
+ "crossbeam-queue 0.3.2",
+ "crossbeam-utils 0.8.5",
+]
+
+[[package]]
+name = "crossbeam-channel"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "06ed27e177f16d65f0f0c22a213e17c696ace5dd64b14258b52f9417ccb52db4"
+dependencies = [
+ "cfg-if 1.0.0",
+ "crossbeam-utils 0.8.5",
+]
+
+[[package]]
 name = "crossbeam-deque"
 version = "0.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c3aa945d63861bfe624b55d153a39684da1e8c0bc8fba932f7ee3a3c16cea3ca"
 dependencies = [
- "crossbeam-epoch",
- "crossbeam-utils",
+ "crossbeam-epoch 0.8.0",
+ "crossbeam-utils 0.7.0",
+]
+
+[[package]]
+name = "crossbeam-deque"
+version = "0.8.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6455c0ca19f0d2fbf751b908d5c55c1f5cbc65e03c4225427254b46890bdde1e"
+dependencies = [
+ "cfg-if 1.0.0",
+ "crossbeam-epoch 0.9.5",
+ "crossbeam-utils 0.8.5",
 ]
 
 [[package]]
@@ -465,9 +540,22 @@ checksum = "5064ebdbf05ce3cb95e45c8b086f72263f4166b29b97f6baff7ef7fe047b55ac"
 dependencies = [
  "autocfg 0.1.7",
  "cfg-if 0.1.10",
- "crossbeam-utils",
+ "crossbeam-utils 0.7.0",
  "lazy_static",
- "memoffset",
+ "memoffset 0.5.3",
+ "scopeguard",
+]
+
+[[package]]
+name = "crossbeam-epoch"
+version = "0.9.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4ec02e091aa634e2c3ada4a392989e7c3116673ef0ac5b72232439094d73b7fd"
+dependencies = [
+ "cfg-if 1.0.0",
+ "crossbeam-utils 0.8.5",
+ "lazy_static",
+ "memoffset 0.6.4",
  "scopeguard",
 ]
 
@@ -478,7 +566,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c695eeca1e7173472a32221542ae469b3e9aac3a4fc81f7696bcad82029493db"
 dependencies = [
  "cfg-if 0.1.10",
- "crossbeam-utils",
+ "crossbeam-utils 0.7.0",
+]
+
+[[package]]
+name = "crossbeam-queue"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9b10ddc024425c88c2ad148c1b0fd53f4c6d38db9697c9f1588381212fa657c9"
+dependencies = [
+ "cfg-if 1.0.0",
+ "crossbeam-utils 0.8.5",
 ]
 
 [[package]]
@@ -490,6 +588,30 @@ dependencies = [
  "autocfg 0.1.7",
  "cfg-if 0.1.10",
  "lazy_static",
+]
+
+[[package]]
+name = "crossbeam-utils"
+version = "0.8.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d82cfc11ce7f2c3faef78d8a684447b40d503d9681acebed6cb728d45940c4db"
+dependencies = [
+ "cfg-if 1.0.0",
+ "lazy_static",
+]
+
+[[package]]
+name = "cst_and_decl_parser"
+version = "0.0.0"
+dependencies = [
+ "bumpalo",
+ "direct_decl_smart_constructors",
+ "oxidized_by_ref",
+ "pair_smart_constructors",
+ "parser",
+ "parser_core_types",
+ "positioned_smart_constructors",
+ "stack_limit",
 ]
 
 [[package]]
@@ -569,21 +691,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "decl_cpp_ffi"
-version = "0.0.0"
-dependencies = [
- "arena_deserializer",
- "bincode",
- "bumpalo",
- "decl_rust",
- "ffi",
- "libc",
- "no_pos_hash",
- "oxidized",
- "oxidized_by_ref",
-]
-
-[[package]]
 name = "decl_mode_parser"
 version = "0.0.0"
 dependencies = [
@@ -637,10 +744,9 @@ dependencies = [
 name = "decl_rust_ffi"
 version = "0.0.0"
 dependencies = [
- "atty",
  "bumpalo",
  "decl_rust",
- "no_pos_hash",
+ "hh_hash",
  "ocamlrep",
  "ocamlrep_caml_builtins",
  "ocamlrep_ocamlpool",
@@ -776,6 +882,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "env_logger"
+version = "0.8.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a19187fea3ac7e84da7dacf48de0c45d63c6a76f9490dae389aead16c243fce3"
+dependencies = [
+ "log",
+ "regex",
+]
+
+[[package]]
 name = "eq_modulo_pos"
 version = "0.0.0"
 dependencies = [
@@ -878,6 +994,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "ffi_cbindgen"
+version = "0.0.0"
+dependencies = [
+ "cbindgen",
+ "structopt",
+]
+
+[[package]]
 name = "find_utils"
 version = "0.0.0"
 dependencies = [
@@ -934,11 +1058,11 @@ dependencies = [
 
 [[package]]
 name = "getrandom"
-version = "0.1.14"
+version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7abc8dd8451921606d809ba32e95b6111925cd2906060d2dcc29c070220503eb"
+checksum = "7fcd999463524c52659517fe2cea98493cfe485d10565e7b0fb07dbba7ad2753"
 dependencies = [
- "cfg-if 0.1.10",
+ "cfg-if 1.0.0",
  "libc",
  "wasi",
 ]
@@ -984,7 +1108,7 @@ version = "0.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d7afe4a420e3fe79967a00898cc1f4db7c8a49a9333a29f8a4bd76a253d5cd04"
 dependencies = [
- "ahash",
+ "ahash 0.4.7",
 ]
 
 [[package]]
@@ -992,6 +1116,10 @@ name = "hashbrown"
 version = "0.11.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ab5ef0d4909ef3724cc8cce6ccc8572c5c817592e9285f5464f8e86f8bd3726e"
+dependencies = [
+ "ahash 0.7.4",
+ "serde",
+]
 
 [[package]]
 name = "heapless"
@@ -1057,8 +1185,8 @@ version = "0.0.0"
 dependencies = [
  "aast_parser",
  "anyhow",
- "atty",
  "bumpalo",
+ "decl_provider",
  "direct_decl_parser",
  "hhbc_by_ref_compile",
  "hhbc_by_ref_options",
@@ -1075,6 +1203,7 @@ dependencies = [
  "structopt",
  "strum",
  "strum_macros",
+ "unified_decl_provider",
 ]
 
 [[package]]
@@ -1084,7 +1213,7 @@ dependencies = [
  "depgraph",
  "depgraph_writer",
  "deps_rust",
- "env_logger",
+ "env_logger 0.7.1",
  "log",
  "ocamlrep_ocamlpool",
  "parking_lot",
@@ -1096,7 +1225,7 @@ name = "hh_fanout_dep_graph_is_subgraph_rust"
 version = "0.0.0"
 dependencies = [
  "depgraph",
- "env_logger",
+ "env_logger 0.7.1",
  "log",
  "ocamlrep_ocamlpool",
 ]
@@ -1106,10 +1235,18 @@ name = "hh_fanout_dep_graph_stats_rust"
 version = "0.0.0"
 dependencies = [
  "depgraph",
- "env_logger",
+ "env_logger 0.7.1",
  "json",
  "log",
  "ocamlrep_ocamlpool",
+]
+
+[[package]]
+name = "hh_hash"
+version = "0.0.0"
+dependencies = [
+ "fnv",
+ "no_pos_hash",
 ]
 
 [[package]]
@@ -1133,7 +1270,6 @@ dependencies = [
 name = "hhbc_by_ref_ast_class_expr"
 version = "0.0.0"
 dependencies = [
- "decl_provider",
  "hhbc_by_ref_ast_scope",
  "hhbc_by_ref_env",
  "hhbc_by_ref_hhbc_ast",
@@ -1148,7 +1284,6 @@ name = "hhbc_by_ref_ast_constant_folder"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "decl_provider",
  "ffi",
  "hhbc_by_ref_ast_class_expr",
  "hhbc_by_ref_ast_scope",
@@ -1178,7 +1313,6 @@ name = "hhbc_by_ref_closure_convert"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "decl_provider",
  "hash",
  "hhbc_by_ref_ast_body",
  "hhbc_by_ref_ast_constant_folder",
@@ -1188,6 +1322,7 @@ dependencies = [
  "hhbc_by_ref_env",
  "hhbc_by_ref_global_state",
  "hhbc_by_ref_hhas_coeffects",
+ "hhbc_by_ref_hhbc_assertion_utils",
  "hhbc_by_ref_hhbc_id",
  "hhbc_by_ref_hhbc_string_utils",
  "hhbc_by_ref_instruction_sequence",
@@ -1225,6 +1360,7 @@ dependencies = [
  "parser_core_types",
  "profile_rust",
  "stack_limit",
+ "unified_decl_provider",
 ]
 
 [[package]]
@@ -1247,7 +1383,6 @@ name = "hhbc_by_ref_emit_adata"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "decl_provider",
  "ffi",
  "hhbc_by_ref_adata_state",
  "hhbc_by_ref_env",
@@ -1265,7 +1400,6 @@ name = "hhbc_by_ref_emit_attribute"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "decl_provider",
  "escaper",
  "ffi",
  "hhbc_by_ref_ast_constant_folder",
@@ -1288,7 +1422,6 @@ dependencies = [
  "bstr",
  "bumpalo",
  "bytecode_printer",
- "decl_provider",
  "ffi",
  "hash",
  "hhbc_by_ref_ast_body",
@@ -1306,6 +1439,7 @@ dependencies = [
  "hhbc_by_ref_hhas_body",
  "hhbc_by_ref_hhas_param",
  "hhbc_by_ref_hhas_type",
+ "hhbc_by_ref_hhbc_assertion_utils",
  "hhbc_by_ref_hhbc_ast",
  "hhbc_by_ref_hhbc_id",
  "hhbc_by_ref_hhbc_string_utils",
@@ -1333,7 +1467,6 @@ name = "hhbc_by_ref_emit_class"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "decl_provider",
  "ffi",
  "hhbc_by_ref_emit_attribute",
  "hhbc_by_ref_emit_body",
@@ -1375,7 +1508,6 @@ name = "hhbc_by_ref_emit_constant"
 version = "0.0.0"
 dependencies = [
  "core_utils_rust",
- "decl_provider",
  "ffi",
  "hhbc_by_ref_emit_body",
  "hhbc_by_ref_emit_type_hint",
@@ -1396,7 +1528,6 @@ version = "0.0.0"
 dependencies = [
  "bstr",
  "bumpalo",
- "decl_provider",
  "ffi",
  "hash",
  "hhbc_by_ref_ast_class_expr",
@@ -1407,6 +1538,7 @@ dependencies = [
  "hhbc_by_ref_emit_symbol_refs",
  "hhbc_by_ref_emit_type_constant",
  "hhbc_by_ref_env",
+ "hhbc_by_ref_hhbc_assertion_utils",
  "hhbc_by_ref_hhbc_ast",
  "hhbc_by_ref_hhbc_id",
  "hhbc_by_ref_hhbc_string_utils",
@@ -1441,7 +1573,6 @@ name = "hhbc_by_ref_emit_file_attributes"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "decl_provider",
  "hhbc_by_ref_emit_attribute",
  "hhbc_by_ref_env",
  "hhbc_by_ref_hhas_attribute",
@@ -1455,7 +1586,6 @@ name = "hhbc_by_ref_emit_function"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "decl_provider",
  "ffi",
  "hhbc_by_ref_ast_scope",
  "hhbc_by_ref_emit_attribute",
@@ -1507,7 +1637,6 @@ version = "0.0.0"
 dependencies = [
  "bitflags",
  "bumpalo",
- "decl_provider",
  "ffi",
  "hhbc_by_ref_ast_scope",
  "hhbc_by_ref_emit_attribute",
@@ -1541,7 +1670,6 @@ name = "hhbc_by_ref_emit_method"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "decl_provider",
  "ffi",
  "hhbc_by_ref_ast_scope",
  "hhbc_by_ref_emit_attribute",
@@ -1570,7 +1698,6 @@ name = "hhbc_by_ref_emit_native_opcode"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "decl_provider",
  "ffi",
  "hhbc_by_ref_ast_scope",
  "hhbc_by_ref_emit_body",
@@ -1588,7 +1715,6 @@ name = "hhbc_by_ref_emit_param"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "decl_provider",
  "ffi",
  "hhbc_by_ref_ast_scope",
  "hhbc_by_ref_emit_attribute",
@@ -1623,7 +1749,6 @@ version = "0.0.0"
 dependencies = [
  "bitflags",
  "bumpalo",
- "decl_provider",
  "ffi",
  "hhbc_by_ref_emit_adata",
  "hhbc_by_ref_emit_class",
@@ -1647,7 +1772,6 @@ name = "hhbc_by_ref_emit_property"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "decl_provider",
  "ffi",
  "hhbc_by_ref_ast_constant_folder",
  "hhbc_by_ref_emit_attribute",
@@ -1672,7 +1796,6 @@ name = "hhbc_by_ref_emit_record_def"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "decl_provider",
  "ffi",
  "hhbc_by_ref_ast_constant_folder",
  "hhbc_by_ref_emit_fatal",
@@ -1692,7 +1815,6 @@ name = "hhbc_by_ref_emit_symbol_refs"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "decl_provider",
  "hhbc_by_ref_env",
  "hhbc_by_ref_hhbc_id",
  "hhbc_by_ref_symbol_refs_state",
@@ -1719,7 +1841,6 @@ version = "0.0.0"
 dependencies = [
  "bumpalo",
  "ffi",
- "hhbc_by_ref_emit_fatal",
  "hhbc_by_ref_hhas_type",
  "hhbc_by_ref_hhbc_id",
  "hhbc_by_ref_hhbc_string_utils",
@@ -1733,7 +1854,6 @@ name = "hhbc_by_ref_emit_typedef"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "decl_provider",
  "hhbc_by_ref_emit_attribute",
  "hhbc_by_ref_emit_body",
  "hhbc_by_ref_emit_type_constant",
@@ -1753,7 +1873,6 @@ name = "hhbc_by_ref_emit_xhp"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "decl_provider",
  "hhbc_by_ref_emit_method",
  "hhbc_by_ref_emit_property",
  "hhbc_by_ref_env",
@@ -1773,7 +1892,6 @@ version = "0.0.0"
 dependencies = [
  "bitflags",
  "bumpalo",
- "decl_provider",
  "hhbc_by_ref_adata_state",
  "hhbc_by_ref_ast_body",
  "hhbc_by_ref_ast_scope",
@@ -1786,6 +1904,7 @@ dependencies = [
  "hhbc_by_ref_symbol_refs_state",
  "ocamlrep",
  "oxidized",
+ "unified_decl_provider",
 ]
 
 [[package]]
@@ -1867,7 +1986,6 @@ dependencies = [
 name = "hhbc_by_ref_hhas_constant"
 version = "0.0.0"
 dependencies = [
- "decl_provider",
  "ffi",
  "hhbc_by_ref_ast_constant_folder",
  "hhbc_by_ref_emit_expression",
@@ -2012,6 +2130,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "hhbc_by_ref_hhbc_assertion_utils"
+version = "0.0.0"
+dependencies = [
+ "hhbc_by_ref_emit_fatal",
+ "hhbc_by_ref_instruction_sequence",
+ "oxidized",
+]
+
+[[package]]
 name = "hhbc_by_ref_hhbc_ast"
 version = "0.0.0"
 dependencies = [
@@ -2077,7 +2204,6 @@ name = "hhbc_by_ref_label_rewriter"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "decl_provider",
  "ffi",
  "hash",
  "hhbc_by_ref_env",
@@ -2126,7 +2252,6 @@ name = "hhbc_by_ref_rewrite_program"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "decl_provider",
  "hhbc_by_ref_closure_convert",
  "hhbc_by_ref_emit_fatal",
  "hhbc_by_ref_env",
@@ -2141,7 +2266,6 @@ name = "hhbc_by_ref_rewrite_xml"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "decl_provider",
  "hhbc_by_ref_emit_symbol_refs",
  "hhbc_by_ref_env",
  "hhbc_by_ref_hhbc_id",
@@ -2163,7 +2287,6 @@ name = "hhbc_by_ref_scope"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "decl_provider",
  "hhbc_by_ref_env",
  "hhbc_by_ref_instruction_sequence",
  "hhbc_by_ref_iterator",
@@ -2235,7 +2358,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "303f7e6256d546e01979071417432425f15c1891fb309a5f2d724ee908fabd6e"
 dependencies = [
  "bitmaps",
- "rand_core",
+ "rand_core 0.5.1",
  "rand_xoshiro",
  "serde",
  "sized-chunks",
@@ -2425,6 +2548,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "lz4"
+version = "1.23.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "aac20ed6991e01bf6a2e68cc73df2b389707403662a8ba89f68511fb340f724c"
+dependencies = [
+ "libc",
+ "lz4-sys",
+]
+
+[[package]]
+name = "lz4-sys"
+version = "1.9.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dca79aa95d8b3226213ad454d328369853be3a1382d89532a854f4d69640acae"
+dependencies = [
+ "cc",
+ "libc",
+]
+
+[[package]]
 name = "md-5"
 version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2437,9 +2580,9 @@ dependencies = [
 
 [[package]]
 name = "memchr"
-version = "2.2.1"
+version = "2.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "88579771288728879b57485cc7d6b07d648c9f0141eb955f8ab7f9d45394468e"
+checksum = "308cc39be01b73d0d18f82a0e7b2a3df85245f84af96fdddc5d202d27e47b86a"
 
 [[package]]
 name = "memmap"
@@ -2458,6 +2601,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "75189eb85871ea5c2e2c15abbdd541185f63b408415e5051f5cac122d8c774b9"
 dependencies = [
  "rustc_version",
+]
+
+[[package]]
+name = "memoffset"
+version = "0.6.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "59accc507f1338036a0477ef61afdae33cde60840f4dfe481319ce3ad116ddf9"
+dependencies = [
+ "autocfg 1.0.0",
 ]
 
 [[package]]
@@ -2506,6 +2658,19 @@ version = "0.0.0"
 dependencies = [
  "hash",
  "lazy_static",
+]
+
+[[package]]
+name = "nix"
+version = "0.22.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cf1e25ee6b412c2a1e3fcb6a4499a5c1bfe7f43e014bdce9a6b6666e5aa2d187"
+dependencies = [
+ "bitflags",
+ "cc",
+ "cfg-if 1.0.0",
+ "libc",
+ "memoffset 0.6.4",
 ]
 
 [[package]]
@@ -2621,9 +2786,9 @@ dependencies = [
 
 [[package]]
 name = "once_cell"
-version = "1.7.2"
+version = "1.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "af8b08b04175473088b46763e51ee54da5f9a164bc162f615b91bc179dbf15a3"
+checksum = "692fcb63b64b1758029e0a96ee63e049ce8c5948587f2f7208df04625e5f6b56"
 
 [[package]]
 name = "oorandom"
@@ -2678,6 +2843,7 @@ dependencies = [
  "ocamlrep",
  "ocamlrep_derive",
  "pretty_assertions",
+ "rusqlite",
  "serde",
  "static_assertions",
 ]
@@ -2704,6 +2870,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "pair_smart_constructors"
+version = "0.0.0"
+dependencies = [
+ "parser_core_types",
+ "smart_constructors",
+]
+
+[[package]]
 name = "parking_lot"
 version = "0.10.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2722,7 +2896,7 @@ dependencies = [
  "cfg-if 0.1.10",
  "cloudabi",
  "libc",
- "redox_syscall",
+ "redox_syscall 0.1.56",
  "smallvec",
  "winapi",
 ]
@@ -2827,9 +3001,9 @@ dependencies = [
 
 [[package]]
 name = "ppv-lite86"
-version = "0.2.6"
+version = "0.2.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "74490b50b9fbe561ac330df47c08f3f33073d2d00c150f719147d7c54522fa1b"
+checksum = "ac74c624d6b2d21f425f752262f42188365d7b8ff1aff74c82e45136510a4857"
 
 [[package]]
 name = "pretty_assertions"
@@ -2891,14 +3065,13 @@ checksum = "a1d01941d82fa2ab50be1e79e6714289dd7cde78eba4c074bc5a4374f650dfe0"
 
 [[package]]
 name = "quickcheck"
-version = "0.9.2"
+version = "1.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a44883e74aa97ad63db83c4bf8ca490f02b2fc02f92575e720c8551e843c945f"
+checksum = "588f6378e4dd99458b60ec275b4477add41ce4fa9f64dcba6f15adccb19b50d6"
 dependencies = [
- "env_logger",
+ "env_logger 0.8.4",
  "log",
  "rand",
- "rand_core",
 ]
 
 [[package]]
@@ -2912,26 +3085,24 @@ dependencies = [
 
 [[package]]
 name = "rand"
-version = "0.7.3"
+version = "0.8.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6a6b1679d49b24bbfe0c803429aa1874472f50d9b363131f0e89fc356b544d03"
+checksum = "2e7573632e6454cf6b99d7aac4ccca54be06da05aca2ef7423d22d27d4d4bcd8"
 dependencies = [
- "getrandom",
  "libc",
  "rand_chacha",
- "rand_core",
+ "rand_core 0.6.3",
  "rand_hc",
- "rand_pcg",
 ]
 
 [[package]]
 name = "rand_chacha"
-version = "0.2.2"
+version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f4c8ed856279c9737206bf725bf36935d8666ead7aa69b52be55af369d193402"
+checksum = "e6c10a63a0fa32252be49d21e7709d4d4baf8d231c2dbce1eaa8141b9b127d88"
 dependencies = [
  "ppv-lite86",
- "rand_core",
+ "rand_core 0.6.3",
 ]
 
 [[package]]
@@ -2939,26 +3110,23 @@ name = "rand_core"
 version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "90bde5296fc891b0cef12a6d03ddccc162ce7b2aff54160af9338f8d40df6d19"
+
+[[package]]
+name = "rand_core"
+version = "0.6.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d34f1408f55294453790c48b2f1ebbb1c5b4b7563eb1f418bcfcfdbb06ebb4e7"
 dependencies = [
  "getrandom",
 ]
 
 [[package]]
 name = "rand_hc"
-version = "0.2.0"
+version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ca3129af7b92a17112d59ad498c6f81eaf463253766b90396d39ea7a39d6613c"
+checksum = "d51e9f596de227fda2ea6c84607f5558e196eeaf43c986b724ba4fb8fdf497e7"
 dependencies = [
- "rand_core",
-]
-
-[[package]]
-name = "rand_pcg"
-version = "0.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "16abd0c1b639e9eb4d7c50c0b8100b0d0f849be2349829c740fe8e6eb4816429"
-dependencies = [
- "rand_core",
+ "rand_core 0.6.3",
 ]
 
 [[package]]
@@ -2967,7 +3135,7 @@ version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a9fcdd2e881d02f1d9390ae47ad8e5696a9e4be7b547a1da2afbc61973217004"
 dependencies = [
- "rand_core",
+ "rand_core 0.5.1",
 ]
 
 [[package]]
@@ -2976,7 +3144,7 @@ version = "1.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "db6ce3297f9c85e16621bb8cca38a06779ffc31bb8184e1be4bed2be4678a098"
 dependencies = [
- "crossbeam-deque",
+ "crossbeam-deque 0.7.2",
  "either",
  "rayon-core",
 ]
@@ -2987,9 +3155,9 @@ version = "1.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "08a89b46efaf957e52b18062fb2f4660f8b8a4dde1807ca002690868ef2c85a9"
 dependencies = [
- "crossbeam-deque",
- "crossbeam-queue",
- "crossbeam-utils",
+ "crossbeam-deque 0.7.2",
+ "crossbeam-queue 0.2.1",
+ "crossbeam-utils 0.7.0",
  "lazy_static",
  "num_cpus",
 ]
@@ -3001,15 +3169,23 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2439c63f3f6139d1b57529d16bc3b8bb855230c8efcc5d3a896c8bea7c3b1e84"
 
 [[package]]
-name = "regex"
-version = "1.4.2"
+name = "redox_syscall"
+version = "0.2.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "38cf2c13ed4745de91a5eb834e11c00bcc3709e773173b2ce4c56c9fbde04b9c"
+checksum = "8383f39639269cde97d255a32bdb68c047337295414940c68bdd30c2e13203ff"
+dependencies = [
+ "bitflags",
+]
+
+[[package]]
+name = "regex"
+version = "1.5.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d07a8629359eb56f1e2fb1652bb04212c072a87ba68546a04065d525673ac461"
 dependencies = [
  "aho-corasick",
  "memchr",
  "regex-syntax",
- "thread_local",
 ]
 
 [[package]]
@@ -3023,9 +3199,9 @@ dependencies = [
 
 [[package]]
 name = "regex-syntax"
-version = "0.6.21"
+version = "0.6.25"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3b181ba2dcf07aaccad5448e8ead58db5b742cf85dfe035e2227f137a539a189"
+checksum = "f497285884f3fcff424ffc933e56d7cbca511def0c9831a7f9b5f6153e3cc89b"
 
 [[package]]
 name = "remove_dir_all"
@@ -3072,6 +3248,36 @@ dependencies = [
 ]
 
 [[package]]
+name = "rust_compile_ffi_bridge"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "arena_deserializer",
+ "bincode",
+ "bumpalo",
+ "cxx",
+ "cxx-build",
+ "decl_provider",
+ "decl_rust",
+ "external_decl_provider",
+ "ffi",
+ "hhbc_by_ref_compile",
+ "hhbc_by_ref_hhas_program",
+ "libc",
+ "log",
+ "no_pos_hash",
+ "ocamlrep",
+ "ocamlrep_derive",
+ "ocamlrep_ocamlpool",
+ "oxidized",
+ "oxidized_by_ref",
+ "parser_core_types",
+ "serde_json",
+ "stack_limit",
+ "unified_decl_provider",
+]
+
+[[package]]
 name = "rust_facts_ffi"
 version = "0.0.0"
 dependencies = [
@@ -3088,6 +3294,7 @@ version = "0.0.0"
 dependencies = [
  "cxx",
  "cxx-build",
+ "facts_rust",
  "oxidized",
  "rust_facts_ffi",
 ]
@@ -3126,7 +3333,6 @@ name = "rust_parser_ffi"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "libc",
  "mode_parser",
  "ocamlrep",
  "ocamlrep_ocamlpool",
@@ -3254,6 +3460,31 @@ dependencies = [
 ]
 
 [[package]]
+name = "shmffi"
+version = "0.0.0"
+dependencies = [
+ "libc",
+ "lz4",
+ "nohash-hasher",
+ "ocamlrep",
+ "ocamlrep_ocamlpool",
+ "once_cell",
+ "rand",
+ "shmrs",
+]
+
+[[package]]
+name = "shmrs"
+version = "0.0.0"
+dependencies = [
+ "hashbrown 0.11.2",
+ "libc",
+ "nix",
+ "rand",
+ "static_assertions",
+]
+
+[[package]]
 name = "sized-chunks"
 version = "0.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3288,6 +3519,7 @@ checksum = "a8f112729512f8e442d81f95a8a7ddf2b7c6b8a1a6f509a95864142b30cab2d3"
 name = "stack_limit"
 version = "0.0.0"
 dependencies = [
+ "crossbeam",
  "thiserror",
 ]
 
@@ -3309,9 +3541,9 @@ checksum = "8ea5119cdb4c55b55d432abb513a0429384878c15dde60cc77b1c99de1a95a6a"
 
 [[package]]
 name = "structopt"
-version = "0.3.21"
+version = "0.3.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5277acd7ee46e63e5168a80734c9f6ee81b1367a7d8772a2d765df2a3705d28c"
+checksum = "bf9d950ef167e25e0bdb073cf1d68e9ad2795ac826f2f3f59647817cf23c0bfa"
 dependencies = [
  "clap",
  "lazy_static",
@@ -3320,9 +3552,9 @@ dependencies = [
 
 [[package]]
 name = "structopt-derive"
-version = "0.4.14"
+version = "0.4.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5ba9cdfda491b814720b6b06e0cac513d922fc407582032e8706e9f137976f90"
+checksum = "134d838a2c9943ac3125cf6df165eda53493451b719f3255b2a26b85f772d0ba"
 dependencies = [
  "heck",
  "proc-macro-error",
@@ -3382,14 +3614,14 @@ dependencies = [
 
 [[package]]
 name = "tempfile"
-version = "3.1.0"
+version = "3.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7a6e24d9338a0a5be79593e2fa15a648add6138caa803e2d5bc782c371732ca9"
+checksum = "dac1c663cfc93810f88aed9b8941d48cabf856a1b111c29a40439018d870eb22"
 dependencies = [
- "cfg-if 0.1.10",
+ "cfg-if 1.0.0",
  "libc",
  "rand",
- "redox_syscall",
+ "redox_syscall 0.2.10",
  "remove_dir_all",
  "winapi",
 ]
@@ -3451,15 +3683,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "thread_local"
-version = "1.0.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d40c6d1b69745a6ec6fb1ca717914848da4b44ae29d9b3080cbee91d72a69b14"
-dependencies = [
- "lazy_static",
-]
-
-[[package]]
 name = "time"
 version = "0.1.43"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3485,6 +3708,15 @@ version = "0.0.0"
 dependencies = [
  "ocamlrep",
  "parser_core_types",
+]
+
+[[package]]
+name = "toml"
+version = "0.5.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a31142970826733df8241ef35dc040ef98c679ab14d7c3e54d827099b3acecaa"
+dependencies = [
+ "serde",
 ]
 
 [[package]]
@@ -3538,6 +3770,15 @@ name = "unicode-xid"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "826e7639553986605ec5979c7dd957c7895e93eabed50ab2ffa7f6128a75097c"
+
+[[package]]
+name = "unified_decl_provider"
+version = "0.0.0"
+dependencies = [
+ "decl_provider",
+ "external_decl_provider",
+ "oxidized_by_ref",
+]
 
 [[package]]
 name = "value-bag"
@@ -3611,9 +3852,9 @@ dependencies = [
 
 [[package]]
 name = "wasi"
-version = "0.9.0+wasi-snapshot-preview1"
+version = "0.10.2+wasi-snapshot-preview1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cccddf32554fecc6acb585f82a32a72e28b48f8c4c1883ddfeeeaa96f7d8e519"
+checksum = "fd6fbd9a79829dd1ad0cc20627bf1ed606756a7f77edff7b66b7064f9cb327c6"
 
 [[package]]
 name = "wasm-bindgen"

@@ -24,11 +24,9 @@ open Provider_backend.Fixmes
 type fixme_map = Provider_backend.fixme_map
 
 module HH_FIXMES =
-  SharedMem.WithCache (SharedMem.ProfiledImmediate) (Relative_path.S)
+  SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (Relative_path.S)
     (struct
       type t = fixme_map
-
-      let prefix = Prefix.make ()
 
       let description = "Fixme_HH_FIXMES"
     end)
@@ -37,11 +35,9 @@ module HH_FIXMES =
     end)
 
 module DECL_HH_FIXMES =
-  SharedMem.WithCache (SharedMem.ProfiledImmediate) (Relative_path.S)
+  SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (Relative_path.S)
     (struct
       type t = fixme_map
-
-      let prefix = Prefix.make ()
 
       let description = "Fixme_DECL_HH_FIXMES"
     end)
@@ -50,11 +46,9 @@ module DECL_HH_FIXMES =
     end)
 
 module DISALLOWED_FIXMES =
-  SharedMem.WithCache (SharedMem.Immediate) (Relative_path.S)
+  SharedMem.HeapWithLocalCache (SharedMem.ImmediateBackend) (Relative_path.S)
     (struct
       type t = fixme_map
-
-      let prefix = Prefix.make ()
 
       let description = "Fixme_DISALLOWED_FIXMES"
     end)

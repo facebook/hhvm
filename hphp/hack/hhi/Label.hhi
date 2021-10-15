@@ -19,5 +19,5 @@ namespace HH\EnumClass {
 /**
  * Type of enum class labels
  */
-newtype Label<-TEnumClass, TType> = string;
+newtype Label<-TEnumClass, TType> = mixed;
 }

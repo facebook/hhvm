@@ -43,7 +43,7 @@ namespace HH {
  * @guide /hack/collections/classes
  */
 <<__SupportDynamicType>>
-final class ImmMap<Tk as arraykey, +Tv> implements \ConstMap<Tk, Tv> {
+  final class ImmMap<<<__RequireDynamic>> Tk as arraykey, <<__RequireDynamic>> +Tv> implements \ConstMap<Tk, Tv> {
   /**
    * Creates an `ImmMap` from the given `KeyedTraversable`, or an empty
    * `ImmMap` if `null` is passed.

@@ -58,7 +58,6 @@ struct VariableUnserializer {
     size_t len,
     Type type,
     bool allowUnknownSerializableClass = false,
-    bool suppressClassConversionWarnings = false,
     const Array& options = null_array);
 
   /*
@@ -167,7 +166,6 @@ private:
   const char* m_end;
   req::vector<tv_rval> m_refs;
   bool m_unknownSerializable;
-  bool m_suppressClassConversionWarnings;
   const Array& m_options; // e.g. classes allowed to be unserialized
   req::vector<Object> m_sleepingObjects;
   const char* const m_begin;

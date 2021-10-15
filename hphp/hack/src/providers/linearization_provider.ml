@@ -13,11 +13,9 @@ let key_to_local_key (key : string) :
   Provider_backend.Linearization_cache_entry.Linearization key
 
 module Cache =
-  SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey)
+  SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (StringKey)
     (struct
       type t = Decl_defs.lin
-
-      let prefix = Prefix.make ()
 
       let description = "Decl_Linearization"
     end)
@@ -26,12 +24,10 @@ module Cache =
     end)
 
 module DeclServiceLocalCache =
-  SharedMem.LocalCache
+  SharedMem.MultiCache
     (StringKey)
     (struct
       type t = Decl_defs.lin
-
-      let prefix = Prefix.make ()
 
       let description = "Decl_LocalLinearization"
     end)

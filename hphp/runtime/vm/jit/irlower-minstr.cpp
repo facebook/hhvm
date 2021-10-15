@@ -87,9 +87,8 @@ void implProp(IRLS& env, const IRInstruction* inst) {
 
   auto const args = propArgs(env, inst)
     .memberKeyS(1)
-    .ssa(3)
-    .imm(static_cast<int32_t>(inst->extra<PropData>()->op))
-    .ssa(2);
+    .ssa(2)
+    .imm(static_cast<int32_t>(inst->extra<PropData>()->op));
 
   auto const target = [&] {
     if (inst->is(PropDX)) {
@@ -123,16 +122,18 @@ void cgPropQ(IRLS& env, const IRInstruction* inst) {
 
   auto const args = propArgs(env, inst)
     .ssa(1)
-    .ssa(3)
-    .imm(static_cast<int32_t>(inst->extra<ReadonlyData>()->op))
-    .ssa(2);
-
-  auto helper = inst->src(0)->isA(TObj)
-    ? CallSpec::direct(propCOQ)
-    : CallSpec::direct(propCQ);
+    .ssa(2)
+    .imm(static_cast<int32_t>(inst->extra<PropData>()->op));
 
   auto& v = vmain(env);
-  cgCallHelper(v, env, helper, callDest(env, inst), SyncOptions::Sync, args);
+  if (inst->src(0)->isA(TObj)) {
+    return cgCallHelper(v, env, CallSpec::direct(propCOQ), callDest(env, inst),
+                        SyncOptions::Sync, args);
+  }
+
+  auto const mode = inst->extra<PropData>()->mode;
+  BUILD_OPTAB(PROPQ_HELPER_TABLE, mode);
+  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
 }
 
 void cgCGetProp(IRLS& env, const IRInstruction* inst) {
@@ -156,10 +157,11 @@ void cgCGetProp(IRLS& env, const IRInstruction* inst) {
 
 void cgCGetPropQ(IRLS& env, const IRInstruction* inst) {
   using namespace MInstrHelpers;
+  auto const mode = inst->extra<PropData>()->mode;
 
   auto args = propArgs(env, inst)
     .ssa(1)
-    .imm(static_cast<int32_t>(inst->extra<ReadonlyData>()->op));
+    .imm(static_cast<int32_t>(inst->extra<PropData>()->op));
 
   auto& v = vmain(env);
 
@@ -167,8 +169,9 @@ void cgCGetPropQ(IRLS& env, const IRInstruction* inst) {
     return cgCallHelper(v, env, CallSpec::direct(cGetPropSOQ),
                         callDestTV(env, inst), SyncOptions::Sync, args);
   }
-  cgCallHelper(v, env, CallSpec::direct(cGetPropSQ),
-               callDestTV(env, inst), SyncOptions::Sync, args);
+
+  BUILD_OPTAB(CGET_PROPQ_HELPER_TABLE, mode);
+  cgCallHelper(v, env, target, callDestTV(env, inst), SyncOptions::Sync, args);
 }
 
 void cgSetProp(IRLS& env, const IRInstruction* inst) {
@@ -284,7 +287,6 @@ void implElem(IRLS& env, const IRInstruction* inst) {
 
   if (inst->is(ElemDX)) {
     assertx(mode == MOpMode::Define);
-    args.ssa(2);
     BUILD_OPTAB(ELEMD_HELPER_TABLE, getKeyType(key));
     cgCallHelper(vmain(env), env, target, callDest(env, inst), sync, args);
     return;
@@ -292,7 +294,6 @@ void implElem(IRLS& env, const IRInstruction* inst) {
 
   if (inst->is(ElemUX)) {
     assertx(mode == MOpMode::Unset);
-    args.ssa(2);
     BUILD_OPTAB(ELEMU_HELPER_TABLE, getKeyType(key));
     cgCallHelper(vmain(env), env, target, callDest(env, inst), sync, args);
     return;

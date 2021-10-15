@@ -10,12 +10,11 @@ let num_jobs = 100000
 module IntVal = struct
   type t = int
 
-  let prefix = Prefix.make ()
-
   let description = "Test_IntVal"
 end
 
-module TestHeap = SharedMem.NoCache (SharedMem.Immediate) (StringKey) (IntVal)
+module TestHeap =
+  SharedMem.Heap (SharedMem.ImmediateBackend) (StringKey) (IntVal)
 
 let sum acc x = acc + x
 
@@ -81,10 +80,11 @@ let rec run_until_done fd_in workers (acc, iterations) = function
     let unfinished = List.concat unfinished in
     run_until_done fd_in workers (sum acc result, iterations + 1) unfinished
 
-(* Might raise {!SharedMem.Shared_mem_not_found} because of [find_unsafe] *)
+(* Might raise because of Option.value_exn *)
 let rec sum_memory acc = function
   | [] -> acc
-  | x :: xs -> sum_memory (acc + TestHeap.find_unsafe (string_of_int x)) xs
+  | x :: xs ->
+    sum_memory (acc + Option.value_exn (TestHeap.get (string_of_int x))) xs
 
 let multi_worker_cancel workers () =
   let work = make_work () in

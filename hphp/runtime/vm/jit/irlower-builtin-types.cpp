@@ -44,8 +44,8 @@ TRACE_SET_MOD(irlower);
 namespace {
 
 void implVerifyType(IRLS& env, const IRInstruction* inst) {
-  auto const type = inst->src(0);
-  auto const constraint = inst->src(1);
+  auto const type = inst->src(1);
+  auto const constraint = inst->src(2);
   auto& v = vmain(env);
 
   if (type->hasConstVal() && constraint->hasConstVal(TCls)) {
@@ -55,8 +55,8 @@ void implVerifyType(IRLS& env, const IRInstruction* inst) {
     return;
   }
 
-  auto const rtype = srcLoc(env, inst, 0).reg();
-  auto const rconstraint = srcLoc(env, inst, 1).reg();
+  auto const rtype = srcLoc(env, inst, 1).reg();
+  auto const rconstraint = srcLoc(env, inst, 2).reg();
   auto const sf = v.makeReg();
 
   v << cmpq{rconstraint, rtype, sf};
@@ -324,16 +324,18 @@ void cgVerifyPropCoerceAll(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgVerifyRetFail(IRLS& env, const IRInstruction* inst) {
-  auto const extra = inst->extra<ParamWithTCData>();
+  auto const extra = inst->extra<FuncParamWithTCData>();
   cgCallHelper(
     vmain(env),
     env,
     CallSpec::direct(VerifyRetTypeFail),
-    kVoidDest,
+    inst->numDsts() == 0 ? kVoidDest : callDestTV(env, inst),
     SyncOptions::Sync,
     argGroup(env, inst)
+      .typedValue(0)
+      .ssa(1)
+      .immPtr(extra->func)
       .imm(extra->paramId)
-      .ssa(0)
       .immPtr(extra->tc)
   );
 }
@@ -343,14 +345,17 @@ void cgVerifyRetFailHard(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgVerifyParamFail(IRLS& env, const IRInstruction* inst) {
-  auto const extra = inst->extra<ParamWithTCData>();
+  auto const extra = inst->extra<FuncParamWithTCData>();
   cgCallHelper(
     vmain(env),
     env,
     CallSpec::direct(VerifyParamTypeFail),
-    kVoidDest,
+    inst->numDsts() == 0 ? kVoidDest : callDestTV(env, inst),
     SyncOptions::Sync,
     argGroup(env, inst)
+      .typedValue(0)
+      .ssa(1)
+      .immPtr(extra->func)
       .imm(extra->paramId)
       .immPtr(extra->tc)
   );

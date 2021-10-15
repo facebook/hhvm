@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4705508e0eba80968f5d675eff73828b>>
+// @generated SignedSource<<b2e76d8a400f14c1375f5b7508a7ae77>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -399,7 +399,7 @@ pub enum ClassId_<'a, Ex, En> {
     /// Foo::$prop = 1;
     /// new Foo();
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    CI(&'a Sid<'a>),
+    CI(&'a ClassName<'a>),
 }
 impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for ClassId_<'a, Ex, En> {}
 arena_deserializer::impl_deserialize_in_arena!(ClassId_<'arena, Ex, En>);
@@ -532,6 +532,13 @@ pub struct ExpressionTree<'a, Ex, En> {
     /// Foo::makeTree($v ==> $v->visitBinOp(...))
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub runtime_expr: &'a Expr<'a, Ex, En>,
+    /// Position of the first $$ in a splice that refers
+    /// to a variable outside the Expression Tree
+    ///
+    /// $x |> Code`${ $$ }` // Pos of the $$
+    /// Code`${ $x |> foo($$) }` // None
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub dollardollar_pos: Option<&'a Pos<'a>>,
 }
 impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for ExpressionTree<'a, Ex, En> {}
 arena_deserializer::impl_deserialize_in_arena!(ExpressionTree<'arena, Ex, En>);
@@ -699,6 +706,8 @@ pub enum Expr_<'a, Ex, En> {
     /// $x()
     /// foo<int>(1, 2, ...$rest)
     /// $x->foo()
+    /// bar(inout $x);
+    /// foobar(inout $x[0])
     ///
     /// async { return 1; }
     /// // lowered to:
@@ -708,7 +717,7 @@ pub enum Expr_<'a, Ex, En> {
         &'a (
             &'a Expr<'a, Ex, En>,
             &'a [&'a Targ<'a, Ex>],
-            &'a [&'a Expr<'a, Ex, En>],
+            &'a [(ast_defs::ParamKind<'a>, &'a Expr<'a, Ex, En>)],
             Option<&'a Expr<'a, Ex, En>>,
         ),
     ),
@@ -822,8 +831,12 @@ pub enum Expr_<'a, Ex, En> {
     ///
     /// See also Dollardollar.
     ///
-    /// $foo |> bar() // equivalent: bar($foo)
-    /// $foo |> bar(1, $$) // equivalent: bar(1, $foo)
+    /// foo() |> bar(1, $$) // equivalent: bar(1, foo())
+    ///
+    /// $$ is not required on the RHS of pipe expressions, but it's
+    /// pretty pointless to use pipes without $$.
+    ///
+    /// foo() |> bar(); // equivalent: foo(); bar();
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Pipe(&'a (&'a Lid<'a>, &'a Expr<'a, Ex, En>, &'a Expr<'a, Ex, En>)),
     /// Ternary operator, or elvis operator.
@@ -849,6 +862,11 @@ pub enum Expr_<'a, Ex, En> {
     /// $foo ?as int
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     As(&'a (&'a Expr<'a, Ex, En>, &'a Hint<'a>, bool)),
+    /// Upcast operator.
+    ///
+    /// $foo : int
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    Upcast(&'a (&'a Expr<'a, Ex, En>, &'a Hint<'a>)),
     /// Instantiation.
     ///
     /// new Foo(1, 2);
@@ -893,18 +911,11 @@ pub enum Expr_<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Xml(
         &'a (
-            Sid<'a>,
+            &'a ClassName<'a>,
             &'a [XhpAttribute<'a, Ex, En>],
             &'a [&'a Expr<'a, Ex, En>],
         ),
     ),
-    /// Explicit calling convention, used for inout. Inout supports any lvalue.
-    ///
-    /// TODO: This could be a flag on parameters in Call.
-    ///
-    /// foo(inout $x[0])
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Callconv(&'a (oxidized::ast_defs::ParamKind, &'a Expr<'a, Ex, En>)),
     /// Include or require expression.
     ///
     /// require('foo.php')
@@ -921,7 +932,7 @@ pub enum Expr_<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Collection(
         &'a (
-            Sid<'a>,
+            &'a ClassName<'a>,
             Option<CollectionTarg<'a, Ex>>,
             &'a [Afield<'a, Ex, En>],
         ),
@@ -960,7 +971,7 @@ pub enum Expr_<'a, Ex, En> {
     ///
     /// (FooClass $f, ...$args) ==> $f->some_meth(...$args)
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    MethodCaller(&'a (Sid<'a>, &'a Pstring<'a>)),
+    MethodCaller(&'a (&'a ClassName<'a>, &'a Pstring<'a>)),
     /// Static method reference.
     ///
     /// class_meth('FooClass', 'some_static_meth')
@@ -988,7 +999,7 @@ pub enum Expr_<'a, Ex, En> {
     ///
     /// enum_name#label_name or #label_name
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    EnumClassLabel(&'a (Option<Sid<'a>>, &'a str)),
+    EnumClassLabel(&'a (Option<&'a ClassName<'a>>, &'a str)),
     /// Annotation used to record failure in subtyping or coercion of an
     /// expression and calls to [unsafe_cast] or [enforced_cast].
     ///
@@ -1128,7 +1139,7 @@ arena_deserializer::impl_deserialize_in_arena!(Case<'arena, Ex, En>);
 ))]
 #[repr(C)]
 pub struct Catch<'a, Ex, En>(
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub Sid<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a ClassName<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a Lid<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a Block<'a, Ex, En>,
 );
@@ -1279,7 +1290,8 @@ pub struct FunParam<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub expr: Option<&'a Expr<'a, Ex, En>>,
     pub readonly: Option<oxidized::ast_defs::ReadonlyKind>,
-    pub callconv: Option<oxidized::ast_defs::ParamKind>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub callconv: ast_defs::ParamKind<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub user_attributes: &'a [&'a UserAttribute<'a, Ex, En>],
     pub visibility: Option<oxidized::aast::Visibility>,
@@ -1633,7 +1645,7 @@ pub struct Class_<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub kind: ast_defs::ClassishKind<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub name: Sid<'a>,
+    pub name: &'a ClassName<'a>,
     /// The type parameters of a class A<T> (T is the parameter)
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub tparams: &'a [&'a Tparam<'a, Ex, En>],
@@ -1924,30 +1936,6 @@ arena_deserializer::impl_deserialize_in_arena!(ClassConcreteTypeconst<'arena>);
 
 #[derive(
     Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(C)]
-pub struct ClassPartiallyAbstractTypeconst<'a> {
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub constraint: &'a Hint<'a>,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub type_: &'a Hint<'a>,
-}
-impl<'a> TrivialDrop for ClassPartiallyAbstractTypeconst<'a> {}
-arena_deserializer::impl_deserialize_in_arena!(ClassPartiallyAbstractTypeconst<'arena>);
-
-#[derive(
-    Clone,
     Copy,
     Debug,
     Deserialize,
@@ -1967,8 +1955,6 @@ pub enum ClassTypeconst<'a> {
     TCAbstract(&'a ClassAbstractTypeconst<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     TCConcrete(&'a ClassConcreteTypeconst<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    TCPartiallyAbstract(&'a ClassPartiallyAbstractTypeconst<'a>),
 }
 impl<'a> TrivialDrop for ClassTypeconst<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(ClassTypeconst<'arena>);

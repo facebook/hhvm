@@ -269,7 +269,7 @@ let failure_msg (failure : Process_types.failure) : string =
 let send_input_and_form_result
     ?(input : string option)
     ~(info : Process_types.invocation_info)
-    ~(pid : int)
+    pid
     ~(stdin_parent : Unix.file_descr)
     ~(stdout_parent : Unix.file_descr)
     ~(stderr_parent : Unix.file_descr) : Process_types.t =
@@ -348,7 +348,7 @@ let exec_no_chdir
   send_input_and_form_result
     ?input
     ~info
-    ~pid
+    pid
     ~stdin_parent
     ~stdout_parent
     ~stderr_parent
@@ -391,7 +391,7 @@ let run_entry
   send_input_and_form_result
     ?input
     ~info
-    ~pid
+    pid
     ~stdin_parent
     ~stdout_parent
     ~stderr_parent

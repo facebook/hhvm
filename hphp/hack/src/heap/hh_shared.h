@@ -97,13 +97,6 @@ CAMLprim value hh_get_size(value key);
 value hh_add(value key, value data);
 /* Returns true if the key is presen in the hashtable. */
 value hh_mem(value key);
-/* Returns one of {1, -1, -2}.
- *  1 -- key exists and is associated with non-zero data
- * -1 -- key is not present in the hash table at all
- * -2 -- key is present in the hash table but associated with zero-valued data.
- *         This means that the data has been explicitly deleted.
- */
-CAMLprim value hh_mem_status(value key);
 /* The following operations are only to be performed by the master. */
 /* Moves the data associated to key1 to key2.
  * key1 must be present. key2 must be free.

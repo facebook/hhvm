@@ -191,35 +191,24 @@ void throwArrayKeyException(const ArrayData* ad, const StringData* key) {
   throwOOBArrayKeyException(key, ad);
 }
 
-void throwMustBeEnclosedInReadonly(const Class* cls, const StringData* propName) {
-  throw_must_be_enclosed_in_readonly(cls->name()->data(), propName->data());
+void throwOrWarnMustBeEnclosedInReadonlyException(const Class* cls, const StringData* propName) {
+  throw_or_warn_must_be_enclosed_in_readonly(cls->name()->data(), propName->data());
 }
 
-void throwMustBeReadonlyException(const Class* cls, const StringData* propName) {
-  throw_must_be_readonly(cls->name()->data(), propName->data());
+void throwOrWarnMustBeReadonlyException(const Class* cls, const StringData* propName) {
+  throw_or_warn_must_be_readonly(cls->name()->data(), propName->data());
 }
 
-void throwMustBeMutableException(const Class* cls, const StringData* propName) {
-  throw_must_be_mutable(cls->name()->data(), propName->data());
+void throwOrWarnMustBeMutableException(const Class* cls, const StringData* propName) {
+  throw_or_warn_must_be_mutable(cls->name()->data(), propName->data());
 }
 
-void throwMustBeValueTypeException(const StringData* locName) {
-  throw_local_must_be_value_type(locName->data());
+void throwOrWarnLocalMustBeValueTypeException(const StringData* locName) {
+  throw_or_warn_local_must_be_value_type(locName->data());
 }
 
-void raiseReadonlyViolationWarning(ReadonlyViolation rv, const Class* cls, const StringData* propName) {
-  switch (rv) {
-    case ReadonlyViolation::Readonly:
-      throw_must_be_readonly(cls->name()->data(), propName->data());
-      return;
-    case ReadonlyViolation::Mutable:
-      throw_must_be_mutable(cls->name()->data(), propName->data());
-      return;
-    case ReadonlyViolation::EnclosedInRO:
-       throw_must_be_enclosed_in_readonly(cls->name()->data(), propName->data());
-      return;
-  }
-  not_reached();
+void throwOrWarnMustBeValueTypeException(const Class* cls, const StringData* propName) {
+  throw_or_warn_must_be_value_type(cls->name()->data(), propName->data());
 }
 
 std::string formatParamInOutMismatch(const char* fname, uint32_t index,
@@ -369,9 +358,9 @@ void raiseCoeffectsCallViolation(const Func* callee,
       return String{makeStaticString("[vm-entry]")};
     }
     String result;
-    walkStack([&] (const ActRec* fp, Offset) {
-      assertx(fp);
-      auto const func = fp->func();
+    walkStack([&] (const BTFrame& frm) {
+      assertx(frm);
+      auto const func = frm.func();
       assertx(func);
       if (func->hasCoeffectRules() &&
           func->getCoeffectRules().size() == 1 &&
@@ -383,18 +372,20 @@ void raiseCoeffectsCallViolation(const Func* callee,
     });
     assertx(!result.isNull());
     return result;
-  }();
+  };
 
-  auto const errMsg = folly::sformat(
-    "Call to {}() requires [{}] coeffects but {}() provided [{}]",
-    callee->fullNameWithClosureName(),
-    required.toString(),
-    callerName,
-    provided.toString()
-  );
+  auto const errMsg = [&] {
+    return folly::sformat(
+      "Call to {}() requires [{}] coeffects but {}() provided [{}]",
+      callee->fullNameWithClosureName(),
+      required.toString(),
+      callerName(),
+      provided.toString()
+    );
+  };
 
   FTRACE_MOD(Trace::coeffects, 1, "{}\n {:016b} -> {:016b}\n",
-             errMsg, provided.value(), required.value());
+             errMsg(), provided.value(), required.value());
 
   assertx(!provided.canCall(required));
   if (provided.canCallWithWarning(required)) {
@@ -403,9 +394,9 @@ void raiseCoeffectsCallViolation(const Func* callee,
       return rate > 0 && folly::Random::rand32(rate) == 0;
     }();
     if (!coinflip) return;
-    raise_warning(errMsg);
+    raise_warning(errMsg());
   } else {
-    SystemLib::throwBadMethodCallExceptionObject(errMsg);
+    SystemLib::throwBadMethodCallExceptionObject(errMsg());
   }
 }
 

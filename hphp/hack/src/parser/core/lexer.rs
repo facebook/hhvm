@@ -81,7 +81,6 @@ where
     in_type: bool,
     token_factory: TF,
     cache: Rc<RefCell<Option<LexerCache<TF::Token>>>>,
-    disallow_hash_comments: bool,
 }
 
 #[derive(Debug, PartialEq)]
@@ -155,12 +154,7 @@ where
         }
     }
 
-    pub fn make_at(
-        source: &SourceText<'a>,
-        offset: usize,
-        token_factory: TF,
-        disallow_hash_comments: bool,
-    ) -> Self {
+    pub fn make_at(source: &SourceText<'a>, offset: usize, token_factory: TF) -> Self {
         Self {
             source: source.clone(),
             start: offset,
@@ -169,12 +163,11 @@ where
             in_type: false,
             cache: Rc::new(RefCell::new(None)),
             token_factory,
-            disallow_hash_comments,
         }
     }
 
-    pub fn make(source: &SourceText<'a>, token_factory: TF, disallow_hash_comments: bool) -> Self {
-        Self::make_at(source, 0, token_factory, disallow_hash_comments)
+    pub fn make(source: &SourceText<'a>, token_factory: TF) -> Self {
+        Self::make_at(source, 0, token_factory)
     }
 
     fn continue_from(&mut self, l: Lexer<'a, TF>) {
@@ -1692,7 +1685,7 @@ where
                 self.advance(1);
                 TokenKind::Backslash
             }
-            '#' if self.disallow_hash_comments => {
+            '#' => {
                 self.advance(1);
                 let c = self.peek_char(0);
                 // Do we have a "alpha" function somewhere ?
@@ -1781,11 +1774,6 @@ where
         }
     }
 
-    fn scan_hash_comment(&mut self) -> Trivium<TF> {
-        self.skip_to_end_of_line();
-        Trivia::<TF>::make_single_line_comment(self.start, self.width())
-    }
-
     fn scan_single_line_comment(&mut self) -> Trivium<TF> {
         // A fallthrough comment is two slashes, any amount of whitespace,
         // FALLTHROUGH, and any characters may follow.
@@ -1856,14 +1844,9 @@ where
     fn scan_php_trivium(&mut self) -> Option<Trivium<TF>> {
         match self.peek_char(0) {
             '#' => {
-                if self.disallow_hash_comments {
-                    self.start_new_lexeme();
-                    // Not trivia
-                    None
-                } else {
-                    self.start_new_lexeme();
-                    Some(self.scan_hash_comment())
-                }
+                self.start_new_lexeme();
+                // Not trivia
+                None
             }
             '/' => {
                 self.start_new_lexeme();

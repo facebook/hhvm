@@ -120,6 +120,7 @@ summary "Write oxidized_by_ref/gen/"
   hphp/hack/src/typing/typing_fake_members.ml                                 \
   hphp/hack/src/typing/typing_inference_env.ml                                \
   hphp/hack/src/typing/typing_kinding_defs.ml                                 \
+  hphp/hack/src/typing/typing_modules.ml                                      \
   hphp/hack/src/typing/typing_local_types.ml                                  \
   hphp/hack/src/typing/typing_per_cont_env.ml                                 \
   hphp/hack/src/typing/typing_reason.ml                                       \
@@ -150,19 +151,3 @@ summary "Write oxidized_by_ref/decl_visitor/"
   --extern-input "hphp/hack/src/oxidized/gen/ast_defs.rs"                     \
   --output "hphp/hack/src/oxidized_by_ref/decl_visitor/"                      \
   --root "Decls"                                                              \
-
-summary "Write oxidized_by_ref/nast_visitor/"
-"${BUILD_AND_RUN}" src/hh_codegen hh_codegen                                  \
-  --regen-cmd "$REGEN_COMMAND"                                                \
-  --rustfmt "$RUSTFMT_PATH"                                                   \
-  by-ref-nast-visitor                                                         \
-  --input "hphp/hack/src/oxidized_by_ref/gen/aast.rs"                         \
-  --input "hphp/hack/src/oxidized_by_ref/gen/aast_defs.rs"                    \
-  --input "hphp/hack/src/oxidized_by_ref/gen/ast_defs.rs"                     \
-  --input "hphp/hack/src/oxidized_by_ref/gen/namespace_env.rs"                \
-  --input "hphp/hack/src/oxidized_by_ref/manual/doc_comment.rs"               \
-  --extern-input "hphp/hack/src/oxidized/gen/aast_defs.rs"                    \
-  --extern-input "hphp/hack/src/oxidized/gen/aast.rs"                         \
-  --extern-input "hphp/hack/src/oxidized/gen/ast_defs.rs"                     \
-  --output "hphp/hack/src/oxidized_by_ref/nast_visitor/"                      \
-  --root "Program"                                                            \

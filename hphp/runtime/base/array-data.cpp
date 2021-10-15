@@ -844,10 +844,6 @@ void throwInvalidKeysetOperation() {
   SystemLib::throwInvalidOperationExceptionObject(s_InvalidKeysetOperationMsg);
 }
 
-void throwReadOnlyCollectionMutation() {
-  SystemLib::throwInvalidOperationExceptionObject(Strings::READONLY_COLLECTIONS_CANNOT_BE_MODIFIED);
-}
-
 void throwVarrayUnsetException() {
   SystemLib::throwInvalidOperationExceptionObject(s_VarrayUnsetMsg);
 }
@@ -857,10 +853,6 @@ void throwVecUnsetException() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void raiseReadOnlyCollectionMutation() {
-  raise_warning(Strings::READONLY_COLLECTIONS_CANNOT_BE_MODIFIED);
-}
 
 void raiseHackArrCompatArrHackArrCmp() {
   raise_hac_compare_notice(Strings::HACKARR_COMPAT_ARR_HACK_ARR_CMP);

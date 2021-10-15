@@ -337,7 +337,7 @@ impl std::fmt::Debug for Pos<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         fn do_fmt<P: FilePos>(
             f: &mut std::fmt::Formatter<'_>,
-            file: &RelativePath,
+            file: &RelativePath<'_>,
             start: &P,
             end: &P,
         ) -> std::fmt::Result {
@@ -378,7 +378,7 @@ impl std::fmt::Display for Pos<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         fn do_fmt<P: FilePos>(
             f: &mut std::fmt::Formatter<'_>,
-            file: &RelativePath,
+            file: &RelativePath<'_>,
             start: P,
             end: P,
         ) -> std::fmt::Result {
@@ -404,7 +404,7 @@ impl std::fmt::Display for Pos<'_> {
 
 impl Ord for Pos<'_> {
     // Intended to match the implementation of `Pos.compare` in OCaml.
-    fn cmp(&self, other: &Pos) -> Ordering {
+    fn cmp(&self, other: &Pos<'_>) -> Ordering {
         self.filename()
             .cmp(&other.filename())
             .then(self.start_cnum().cmp(&other.start_cnum()))
@@ -413,7 +413,7 @@ impl Ord for Pos<'_> {
 }
 
 impl PartialOrd for Pos<'_> {
-    fn partial_cmp(&self, other: &Pos) -> Option<Ordering> {
+    fn partial_cmp(&self, other: &Pos<'_>) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }

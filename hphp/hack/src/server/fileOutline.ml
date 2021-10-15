@@ -111,8 +111,8 @@ let modifier_of_fun_kind acc = function
   | _ -> acc
 
 let modifier_of_param_kind acc = function
-  | Some Ast_defs.Pinout -> Inout :: acc
-  | _ -> acc
+  | Ast_defs.Pinout _ -> Inout :: acc
+  | Ast_defs.Pnormal -> acc
 
 let summarize_typeconst class_name t =
   let (pos, name) = t.c_tconst_name in

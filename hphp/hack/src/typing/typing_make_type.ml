@@ -102,6 +102,8 @@ let nonnull r = mk (r, Tnonnull)
 
 let dynamic r = mk (r, Tdynamic)
 
+let supportdynamic r = mk (r, Tsupportdynamic)
+
 let like r ty = mk (r, Tlike ty)
 
 let mixed r = mk (r, Toption (nonnull r))
@@ -190,8 +192,7 @@ let simple_variadic_splat r ty =
              d_kind = SplatUnpack;
            } ))
 
-let write_property_capability r : locl_ty =
-  class_type r SN.Capabilities.writeProperty []
+let capability r name : locl_ty = class_type r name []
 
 let default_capability p : locl_ty =
   let r = Reason.Rdefault_capability p in

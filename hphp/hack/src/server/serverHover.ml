@@ -281,7 +281,12 @@ let make_hover_info ctx env_and_ty entry occurrence def_opt =
       in
       let addendum =
         match occurrence with
-        | { name; type_ = Attribute _; _ } -> make_hover_attr_docs name
+        | { name; type_ = Attribute _; _ } ->
+          List.concat
+            [
+              make_hover_attr_docs name;
+              make_hover_doc_block ctx entry occurrence def_opt;
+            ]
         | { type_ = GConst; _ } ->
           List.concat
             [

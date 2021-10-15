@@ -2,7 +2,6 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use decl_provider::DeclProvider;
 use ffi::{Maybe, Maybe::*, Slice, Str};
 use hhbc_by_ref_ast_constant_folder as constant_folder;
 use hhbc_by_ref_emit_fatal as emit_fatal;
@@ -20,9 +19,7 @@ fn valid_tc_for_record_field(tc: &constraint::Constraint) -> bool {
     match &tc.name {
         Nothing => true,
         Just(name) => {
-            !(string_utils::is_self(name)
-                || string_utils::is_parent(name)
-                || name.as_str().eq_ignore_ascii_case("hh\\this")
+            !(name.as_str().eq_ignore_ascii_case("hh\\this")
                 || name.as_str().eq_ignore_ascii_case("callable")
                 || name.as_str().eq_ignore_ascii_case("hh\\nothing")
                 || name.as_str().eq_ignore_ascii_case("hh\\noreturn"))
@@ -30,9 +27,9 @@ fn valid_tc_for_record_field(tc: &constraint::Constraint) -> bool {
     }
 }
 
-fn emit_field<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
+fn emit_field<'a, 'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &Emitter<'arena, 'decl, D>,
+    emitter: &Emitter<'arena, 'decl>,
     field: &'a (Sid, Hint, Option<Expr>),
 ) -> Result<RecordField<'arena>> {
     let (Id(pos, name), hint, expr_opt) = field;
@@ -62,9 +59,9 @@ fn emit_field<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     }
 }
 
-fn emit_record_def<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
+fn emit_record_def<'a, 'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &Emitter<'arena, 'decl, D>,
+    emitter: &Emitter<'arena, 'decl>,
     rd: &'a RecordDef,
 ) -> Result<HhasRecord<'arena>> {
     fn elaborate<'arena>(alloc: &'arena bumpalo::Bump, Id(_, name): &Id) -> RecordType<'arena> {
@@ -94,9 +91,9 @@ fn emit_record_def<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
     })
 }
 
-pub fn emit_record_defs_from_program<'a, 'arena, 'decl, D: DeclProvider<'decl>>(
+pub fn emit_record_defs_from_program<'a, 'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &Emitter<'arena, 'decl, D>,
+    emitter: &Emitter<'arena, 'decl>,
     p: &'a [Def],
 ) -> Result<Vec<HhasRecord<'arena>>> {
     p.iter()

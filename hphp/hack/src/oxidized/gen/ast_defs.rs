@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0fb061a7a63832239ff37eb2b18ba20c>>
+// @generated SignedSource<<6ace2760d98df8ce470934958baa4045>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -183,13 +183,11 @@ pub enum ClassishKind {
 
 #[derive(
     Clone,
-    Copy,
     Debug,
     Deserialize,
     Eq,
     EqModuloPos,
     FromOcamlRep,
-    FromOcamlRepIn,
     Hash,
     NoPosHash,
     Ord,
@@ -200,10 +198,13 @@ pub enum ClassishKind {
 )]
 #[repr(C)]
 pub enum ParamKind {
-    Pinout,
+    /// Contains the position for an entire `inout` annotated expression, e.g.:
+    ///
+    ///   foo(inout $bar);
+    ///       ^^^^^^^^^^
+    Pinout(Pos),
+    Pnormal,
 }
-impl TrivialDrop for ParamKind {}
-arena_deserializer::impl_deserialize_in_arena!(ParamKind);
 
 #[derive(
     Clone,

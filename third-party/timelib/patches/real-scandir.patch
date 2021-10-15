@@ -1,0 +1,32 @@
+commit f01b4a24a97916f61389adcfbfdd8b9b9624623e
+Author: Fred Emmott <fe@fb.com>
+Date:   Fri Sep 17 08:41:33 2021 -0500
+
+    Use scandir instead of php_scandir
+    
+    Not available in the HHVM build.
+    
+    This call was introduced by the Ubuntu patch.
+
+diff --git a/parse_tz.c b/parse_tz.c
+index 300e96c..69265ca 100644
+--- a/parse_tz.c
++++ b/parse_tz.c
+@@ -33,7 +33,7 @@
+ #include <fcntl.h>
+ #include <unistd.h>
+ 
+-#include "php_scandir.h"
++#include "dirent.h"
+ 
+ #else
+ #define TIMELIB_SUPPORTS_V2DATA
+@@ -850,7 +850,7 @@ static void create_zone_index(timelib_tzdb *db)
+ 		top = dirstack[--dirstack_top];
+ 		snprintf(name, sizeof name, ZONEINFO_PREFIX "/%s", top);
+ 
+-		count = php_scandir(name, &ents, index_filter, php_alphasort);
++		count = scandir(name, &ents, index_filter, alphasort);
+ 
+ 		while (count > 0) {
+ 			struct stat st;

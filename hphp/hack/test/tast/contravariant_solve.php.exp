@@ -42,11 +42,11 @@
          f_params =
          [{ param_annotation = (I<T>); param_type_hint = ((I<T>), (Some ([8:15-19], (Happly (([8:15-16], "\\I"), [([8:17-18], (Habstr ("T", [])))]))))); 
             param_is_variadic = false; param_pos = [8:20-22]; param_name = "$_"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None };
            { param_annotation = (I<T>); param_type_hint = ((I<T>), (Some ([8:24-28], (Happly (([8:24-25], "\\I"), [([8:26-27], (Habstr ("T", [])))]))))); 
              param_is_variadic = false; param_pos = [8:29-31]; param_name = "$_"; 
-             param_expr = None; param_readonly = None; param_callconv = None; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
              param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
@@ -75,7 +75,7 @@
          f_params =
          [{ param_annotation = (T); param_type_hint = ((T), (Some ([12:15-16], (Habstr ("T", []))))); 
             param_is_variadic = false; param_pos = [12:17-19]; param_name = "$_"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
@@ -110,14 +110,16 @@
                     ((I<int>), [17:8-21],
                      (Call ((((function<T>(I<int> $_, I<int> $_): I<int>)), [17:8-9], (Id ([17:8-9], "\\f"))), 
                         [((int), ([17:8-9], (Happly (([Pos.none], "_"), []))))],
-                        [((E<int>), [17:10-14],
-                          (Call ((((function<T>(int $_): E<int>)), [17:10-11], (Id ([17:10-11], "\\g"))), 
-                             [((int), ([17:10-11], (Happly (([Pos.none], "_"), []))))], 
-                             [((int), [17:12-13], (Int "1"))], None)));
-                          ((E<int>), [17:16-20],
-                           (Call ((((function<T>(int $_): E<int>)), [17:16-17], (Id ([17:16-17], "\\g"))), 
-                              [((int), ([17:16-17], (Happly (([Pos.none], "_"), []))))], 
-                              [((int), [17:18-19], (Int "2"))], None)))
+                        [(Pnormal,
+                          ((E<int>), [17:10-14],
+                           (Call ((((function<T>(int $_): E<int>)), [17:10-11], (Id ([17:10-11], "\\g"))), 
+                              [((int), ([17:10-11], (Happly (([Pos.none], "_"), []))))], 
+                              [(Pnormal, ((int), [17:12-13], (Int "1")))], None))));
+                          (Pnormal,
+                           ((E<int>), [17:16-20],
+                            (Call ((((function<T>(int $_): E<int>)), [17:16-17], (Id ([17:16-17], "\\g"))), 
+                               [((int), ([17:16-17], (Happly (([Pos.none], "_"), []))))], 
+                               [(Pnormal, ((int), [17:18-19], (Int "2")))], None))))
                           ],
                         None)))
                     )))))

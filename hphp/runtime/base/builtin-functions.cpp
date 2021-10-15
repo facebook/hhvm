@@ -653,6 +653,8 @@ vm_decode_function(const_variant_ref function,
 }
 
 Variant vm_call_user_func(const_variant_ref function, const Variant& params,
+                          RuntimeCoeffects providedCoeffects
+                            /* = RuntimeCoeffects::fixme() */,
                           bool checkRef /* = false */,
                           bool allowDynCallNoPointer /* = false */) {
   CallCtx ctx;
@@ -660,12 +662,11 @@ Variant vm_call_user_func(const_variant_ref function, const Variant& params,
   if (ctx.func == nullptr || (!isContainer(params) && !params.isNull())) {
     return uninit_null();
   }
-  auto ret = Variant::attach(
+  return Variant::attach(
     g_context->invokeFunc(ctx.func, params, ctx.this_, ctx.cls,
-                          RuntimeCoeffects::fixme(), ctx.dynamic,
+                          providedCoeffects, ctx.dynamic,
                           checkRef, allowDynCallNoPointer)
   );
-  return ret;
 }
 
 Variant
@@ -875,7 +876,7 @@ void throw_cannot_modify_static_const_prop(const char* className,
   SystemLib::throwInvalidOperationExceptionObject(msg);
 }
 
-void throw_local_must_be_value_type(const char* locName)
+void throw_or_warn_local_must_be_value_type(const char* locName)
 {
   if (RO::EvalEnableReadonlyPropertyEnforcement == 0) return;
   auto const msg = folly::sformat("Local {} must be a value type.", locName);
@@ -887,7 +888,7 @@ void throw_local_must_be_value_type(const char* locName)
 }
 
 namespace {
-void throw_readonly_violation(const char* className, const char* propName,
+void throw_or_warn_readonly_violation(const char* className, const char* propName,
                               const char* msg) {
   if (RO::EvalEnableReadonlyPropertyEnforcement == 0) return;
   if (RO::EvalEnableReadonlyPropertyEnforcement == 1) {
@@ -901,28 +902,38 @@ void throw_readonly_violation(const char* className, const char* propName,
 }
 }
 
-void throw_must_be_readonly(const char* className, const char* propName) {
-  throw_readonly_violation(className, propName, Strings::MUST_BE_READONLY);
+void throw_or_warn_must_be_readonly(const char* className, const char* propName) {
+  throw_or_warn_readonly_violation(className, propName, Strings::MUST_BE_READONLY);
 }
 
-void throw_must_be_mutable(const char* className, const char* propName) {
-  throw_readonly_violation(className, propName, Strings::MUST_BE_MUTABLE);
+void throw_or_warn_must_be_mutable(const char* className, const char* propName) {
+  throw_or_warn_readonly_violation(className, propName, Strings::MUST_BE_MUTABLE);
 }
 
-void throw_must_be_enclosed_in_readonly(const char* className, const char* propName) {
-  throw_readonly_violation(className, propName, Strings::MUST_BE_ENCLOSED_IN_READONLY);
+void throw_or_warn_must_be_enclosed_in_readonly(const char* className, const char* propName) {
+  throw_or_warn_readonly_violation(className, propName, Strings::MUST_BE_ENCLOSED_IN_READONLY);
 }
 
-void throw_must_be_value_type(const char* className, const char* propName) {
-  throw_readonly_violation(className, propName, Strings::MUST_BE_VALUE_TYPE);
+void throw_or_warn_must_be_value_type(const char* className, const char* propName) {
+  throw_or_warn_readonly_violation(className, propName, Strings::MUST_BE_VALUE_TYPE);
 }
 
-bool readonlyLocalShouldThrow(TypedValue tv, ReadonlyOp op, bool& roProp) {
+void throw_or_warn_cannot_modify_readonly_collection() {
+  if (RO::EvalEnableReadonlyPropertyEnforcement == 0) return;
+  if (RO::EvalEnableReadonlyPropertyEnforcement == 1) {
+    raise_warning(Strings::READONLY_COLLECTIONS_CANNOT_BE_MODIFIED);
+  } else {
+    SystemLib::throwInvalidOperationExceptionObject(
+      Strings::READONLY_COLLECTIONS_CANNOT_BE_MODIFIED
+    );
+  }
+}
+
+bool readonlyLocalShouldThrow(TypedValue tv, ReadonlyOp op) {
   if (!RO::EvalEnableReadonlyPropertyEnforcement) return false;
-  if (op == ReadonlyOp::CheckROCOW) {
-    auto cow = !isRefcountedType(type(tv)) || hasPersistentFlavor(type(tv));
-    if (!cow) return true;
-    roProp = true;
+  if (op == ReadonlyOp::CheckROCOW || op == ReadonlyOp::CheckMutROCOW) {
+    vmMInstrState().roProp = true;
+    if (type(tv) == KindOfObject) return true;
   }
   return false;
 }
@@ -932,27 +943,25 @@ void checkReadonly(const TypedValue* tv,
                    const StringData* name,
                    bool readonly,
                    ReadonlyOp op,
-                   bool* roProp,
                    bool writeMode) {
   if (!RO::EvalEnableReadonlyPropertyEnforcement) return;
-  auto cow = !isRefcountedType(type(tv)) || hasPersistentFlavor(type(tv));
+  if ((op == ReadonlyOp::CheckMutROCOW && readonly) || op == ReadonlyOp::CheckROCOW) {
+    vmMInstrState().roProp = true;
+  }
   if (readonly) {
     if (op == ReadonlyOp::CheckMutROCOW || op == ReadonlyOp::CheckROCOW) {
-      if (cow) {
-        assertx(roProp);
-        *roProp = true;
-      } else {
-        throw_must_be_value_type(cls->name()->data(), name->data());
+      if (type(tv) == KindOfObject) {
+        throw_or_warn_must_be_value_type(cls->name()->data(), name->data());
       }
     } else if (op == ReadonlyOp::Mutable) {
       if (writeMode) {
-        throw_must_be_mutable(cls->name()->data(), name->data());
+        throw_or_warn_must_be_mutable(cls->name()->data(), name->data());
       } else {
-        throw_must_be_enclosed_in_readonly(cls->name()->data(), name->data());
+        throw_or_warn_must_be_enclosed_in_readonly(cls->name()->data(), name->data());
       }
     }
   } else if (op == ReadonlyOp::Readonly || op == ReadonlyOp::CheckROCOW) {
-    throw_must_be_readonly(cls->name()->data(), name->data());
+    throw_or_warn_must_be_readonly(cls->name()->data(), name->data());
   }
 }
 
@@ -1105,7 +1114,6 @@ Variant unserialize_ex(const char* str, int len,
 
   VariableUnserializer vu(str, len, type,
                           /* allowUnknownSerializableClass = */ true,
-                          /* suppressClassConversionWarnings = */ false,
                           options);
   if (pure) vu.setPure();
   Variant v;

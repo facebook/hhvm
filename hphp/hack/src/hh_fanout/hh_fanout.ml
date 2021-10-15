@@ -781,8 +781,7 @@ let mode_query
   let%lwt (saved_state_result : saved_state_result) = load_saved_state ~env in
   let json =
     Query_fanout.go
-      ~deps_mode:
-        (Provider_context.get_deps_mode saved_state_result.setup_result.ctx)
+      ~ctx:saved_state_result.setup_result.ctx
       ~dep_hash
       ~include_extends
     |> Query_fanout.result_to_json
@@ -818,11 +817,9 @@ let mode_query_path
     ~(env : env) ~(source : Typing_deps.Dep.t) ~(dest : Typing_deps.Dep.t) :
     unit Lwt.t =
   let%lwt (saved_state_result : saved_state_result) = load_saved_state ~env in
-  let deps_mode =
-    Provider_context.get_deps_mode saved_state_result.setup_result.ctx
-  in
   let json =
-    Query_path.go ~deps_mode ~source ~dest |> Query_path.result_to_json
+    Query_path.go ~ctx:saved_state_result.setup_result.ctx ~source ~dest
+    |> Query_path.result_to_json
   in
   let json = Hh_json.JSON_Object [("result", json)] in
   Hh_json.json_to_multiline_output Out_channel.stdout json;

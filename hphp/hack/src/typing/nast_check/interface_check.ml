@@ -35,13 +35,6 @@ let check_interface c =
     | _ -> ()
   end;
 
-  (* make sure interfaces do not contain partially abstract type constants *)
-  List.iter c.c_typeconsts ~f:(fun tc ->
-      match tc.c_tconst_kind with
-      | TCPartiallyAbstract _ ->
-        Errors.interface_with_partial_typeconst (fst tc.c_tconst_name)
-      | _ -> ());
-
   (* make sure that interfaces only have empty public methods *)
   List.iter ~f:enforce_no_body c.c_methods
 

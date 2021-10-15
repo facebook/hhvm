@@ -1062,6 +1062,15 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     }
                 })
             },
+            UpcastExpression(x) => {
+                get_index(3).and_then(|index| { match index {
+                        0 => Some(&x.left_operand),
+                    1 => Some(&x.operator),
+                    2 => Some(&x.right_operand),
+                        _ => None,
+                    }
+                })
+            },
             ConditionalExpression(x) => {
                 get_index(5).and_then(|index| { match index {
                         0 => Some(&x.test),

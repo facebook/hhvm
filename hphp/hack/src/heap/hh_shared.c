@@ -126,6 +126,17 @@
 #ifndef NO_SQLITE3
 #include <sqlite3.h>
 
+// Some OCaml utility functions (introduced only in 4.12.0)
+//
+// TODO(hverr): Remove these when we move to 4.12.0
+value hh_shared_caml_alloc_some(value v) {
+  CAMLparam1(v);
+  value some = caml_alloc_small(1, 0);
+  Store_field(some, 0, v);
+  CAMLreturn(some);
+}
+#define Val_none Val_int(0)
+
 // global SQLite DB pointer
 static sqlite3 *g_db = NULL;
 
@@ -231,6 +242,23 @@ static int win32_getpagesize(void) {
 
 
 /*****************************************************************************/
+/* API to shmffi
+/*****************************************************************************/
+
+extern void shmffi_init(void* mmap_address, size_t file_size);
+extern void shmffi_attach(void* mmap_address, size_t file_size);
+extern value shmffi_add(uint64_t hash, value data);
+extern value shmffi_mem(uint64_t hash);
+extern value shmffi_get_and_deserialize(uint64_t hash);
+extern value shmffi_mem_status(uint64_t hash);
+extern value shmffi_get_size(uint64_t hash);
+extern void shmffi_move(uint64_t hash1, uint64_t hash2);
+extern value shmffi_remove(uint64_t hash);
+extern value shmffi_allocated_bytes();
+extern value shmffi_num_entries();
+
+
+/*****************************************************************************/
 /* Config settings (essentially constants, so they don't need to live in shared
  * memory), initialized in hh_shared_init */
 /*****************************************************************************/
@@ -292,6 +320,8 @@ typedef struct {
 #define SHARED_MEM_INIT ((char *) 0x1000000000ll)
 #else
 #define SHARED_MEM_INIT ((char *) 0x500000000000ll)
+#define SHARDED_HASHTBL_MEM_ADDR ((char *) 0x510000000000ll)
+#define SHARDED_HASHTBL_MEM_SIZE ((size_t)100 * 1024 * 1024 * 1024)
 #endif
 
 /* As a sanity check when loading from a file */
@@ -548,12 +578,16 @@ static long removed_count = 0;
 
 /* Expose so we can display diagnostics */
 CAMLprim value hh_used_heap_size(void) {
+  if (shm_use_sharded_hashtbl) {
+    return shmffi_allocated_bytes();
+  }
   return Val_long(used_heap_size());
 }
 
 /* Part of the heap not reachable from hashtable entries. Can be reclaimed with
  * hh_collect. */
 CAMLprim value hh_wasted_heap_size(void) {
+  // TODO(hverr): Support sharded hash tables
   assert(wasted_heap_size != NULL);
   return Val_long(*wasted_heap_size);
 }
@@ -568,18 +602,33 @@ CAMLprim value hh_sample_rate(void) {
 }
 
 CAMLprim value hh_hash_used_slots(void) {
+  // TODO(hverr): For some reason this returns a tuple.
+  // Fix this when the migration is complete.
   CAMLparam0();
-  CAMLlocal1(connector);
+  CAMLlocal2(connector, num_entries);
 
   connector = caml_alloc_tuple(2);
-  Store_field(connector, 0, Val_long(*hcounter_filled));
-  Store_field(connector, 1, Val_long(*hcounter));
+  if (shm_use_sharded_hashtbl) {
+    num_entries = shmffi_num_entries();
+    Store_field(connector, 0, num_entries);
+    Store_field(connector, 1, num_entries);
+  } else {
+    Store_field(connector, 0, Val_long(*hcounter_filled));
+    Store_field(connector, 1, Val_long(*hcounter));
+  }
 
   CAMLreturn(connector);
 }
 
 CAMLprim value hh_hash_slots(void) {
   CAMLparam0();
+  if (shm_use_sharded_hashtbl) {
+    // In the sharded hash table implementation, we dynamically resize
+    // the tables. As such, this doesn't really make sense. Return the
+    // number of entries for now.
+    CAMLreturn(shmffi_num_entries());
+  }
+
   CAMLreturn(Val_long(hashtbl_size));
 }
 
@@ -642,7 +691,8 @@ void memfd_init(const char *shm_dir, size_t shared_mem_size, uint64_t minimum_av
 
 #else
 
-static int memfd = -1;
+static int memfd_shared_mem = -1;
+static int memfd_shmffi = -1;
 
 static void raise_failed_anonymous_memfd_init(void) {
   static const value *exn = NULL;
@@ -671,32 +721,18 @@ void assert_avail_exceeds_minimum(const char *shm_dir, uint64_t minimum_avail) {
   }
 }
 
-/**************************************************************************
- * The memdfd_init function creates a anonymous memory file that might
- * be inherited by `Daemon.spawned` processus (contrary to a simple
- * anonymous mmap).
- *
- * The preferred mechanism is memfd_create(2) (see the upper
- * description).  Then we try shm_open(2) (on Apple OS X). As a safe fallback,
- * we use `mkstemp/unlink`.
- *
- * mkstemp is preferred over shm_open on Linux as it allows to
- * choose another directory that `/dev/shm` on system where this
- * partition is too small (e.g. the Travis containers).
- *
- * The resulting file descriptor should be mmaped with the memfd_map
- * function (see below).
- ****************************************************************************/
-void memfd_init(const char *shm_dir, size_t shared_mem_size, uint64_t minimum_avail) {
+int memfd_create_helper(const char *name, const char *shm_dir, size_t shared_mem_size, uint64_t minimum_avail) {
+  int memfd = -1;
+
   if (shm_dir == NULL) {
     // This means that we should try to use the anonymous-y system calls
 #if defined(MEMFD_CREATE)
-    memfd = memfd_create("fb_heap", 0);
+    memfd = memfd_create(name, 0);
 #endif
 #if defined(__APPLE__)
     if (memfd < 0) {
       char memname[255];
-      snprintf(memname, sizeof(memname), "/fb_heap.%d", getpid());
+      snprintf(memname, sizeof(memname), "/%s.%d", name, getpid());
       // the ftruncate below will fail with errno EINVAL if you try to
       // ftruncate the same sharedmem fd more than once. We're seeing this in
       // some tests, which might imply that two flow processes with the same
@@ -725,10 +761,12 @@ void memfd_init(const char *shm_dir, size_t shared_mem_size, uint64_t minimum_av
       raise_failed_anonymous_memfd_init();
     }
   } else {
-    assert_avail_exceeds_minimum(shm_dir, minimum_avail);
+    if (minimum_avail > 0) {
+      assert_avail_exceeds_minimum(shm_dir, minimum_avail);
+    }
     if (memfd < 0) {
       char template[1024];
-      if (!snprintf(template, 1024, "%s/fb_heap-XXXXXX", shm_dir)) {
+      if (!snprintf(template, 1024, "%s/%s-XXXXXX", shm_dir, name)) {
         uerror("snprintf", Nothing);
       };
       memfd = mkstemp(template);
@@ -740,6 +778,30 @@ void memfd_init(const char *shm_dir, size_t shared_mem_size, uint64_t minimum_av
   }
   if(ftruncate(memfd, shared_mem_size) == -1) {
     uerror("ftruncate", Nothing);
+  }
+  return memfd;
+}
+
+/**************************************************************************
+ * The memdfd_init function creates a anonymous memory file that might
+ * be inherited by `Daemon.spawned` processus (contrary to a simple
+ * anonymous mmap).
+ *
+ * The preferred mechanism is memfd_create(2) (see the upper
+ * description).  Then we try shm_open(2) (on Apple OS X). As a safe fallback,
+ * we use `mkstemp/unlink`.
+ *
+ * mkstemp is preferred over shm_open on Linux as it allows to
+ * choose another directory that `/dev/shm` on system where this
+ * partition is too small (e.g. the Travis containers).
+ *
+ * The resulting file descriptor should be mmaped with the memfd_map
+ * function (see below).
+ ****************************************************************************/
+void memfd_init(const char *shm_dir, size_t shared_mem_size, uint64_t minimum_avail) {
+  memfd_shared_mem = memfd_create_helper("fb_heap", shm_dir, shared_mem_size, minimum_avail);
+  if (shm_use_sharded_hashtbl) {
+    memfd_shmffi = memfd_create_helper("fb_sharded_hashtbl", shm_dir, SHARDED_HASHTBL_MEM_SIZE, 0);
   }
 }
 
@@ -754,14 +816,14 @@ void memfd_init(const char *shm_dir, size_t shared_mem_size, uint64_t minimum_av
 
 #ifdef _WIN32
 
-static char *memfd_map(size_t shared_mem_size) {
+static char *memfd_map(HANDLE memfd, char *mem_addr, size_t shared_mem_size) {
   char *mem = NULL;
   mem = MapViewOfFileEx(
     memfd,
     FILE_MAP_ALL_ACCESS,
     0, 0, 0,
-    (char *)SHARED_MEM_INIT);
-  if (mem != SHARED_MEM_INIT) {
+    (char *)mem_addr);
+  if (mem != mem_addr) {
     win32_maperr(GetLastError());
     uerror("MapViewOfFileEx", Nothing);
   }
@@ -770,7 +832,7 @@ static char *memfd_map(size_t shared_mem_size) {
 
 #else
 
-static char *memfd_map(size_t shared_mem_size) {
+static char *memfd_map(int memfd, char *mem_addr, size_t shared_mem_size) {
   char *mem = NULL;
   /* MAP_NORESERVE is because we want a lot more virtual memory than what
    * we are actually going to use.
@@ -778,7 +840,7 @@ static char *memfd_map(size_t shared_mem_size) {
   int flags = MAP_SHARED | MAP_NORESERVE | MAP_FIXED;
   int prot  = PROT_READ  | PROT_WRITE;
   mem =
-    (char*)mmap((void *)SHARED_MEM_INIT, shared_mem_size, prot,
+    (char*)mmap((void *)mem_addr, shared_mem_size, prot,
                 flags, memfd, 0);
   if(mem == MAP_FAILED) {
     printf("Error initializing: %s\n", strerror(errno));
@@ -819,7 +881,8 @@ static void win_reserve(char * mem, size_t sz) {
  * memfd file. Memory outside of that mmap does not need to be reserved, so we
  * don't call memfd_reserve on things like the temporary mmap used by
  * hh_collect. Instead, they use win_reserve() */
-static void memfd_reserve(char * mem, size_t sz) {
+static void memfd_reserve(int memfd, char * mem, size_t sz) {
+  (void)memfd;
   win_reserve(mem, sz);
 }
 
@@ -830,14 +893,15 @@ static void memfd_reserve(char * mem, size_t sz) {
  * however it doesn't seem to work for a shm_open fd, so this function is
  * currently a no-op. This means that our OOM handling for OSX is a little
  * weaker than the other OS's */
-static void memfd_reserve(char * mem, size_t sz) {
+static void memfd_reserve(int memfd, char * mem, size_t sz) {
+  (void)memfd;
   (void)mem;
   (void)sz;
 }
 
 #else
 
-static void memfd_reserve(char *mem, size_t sz) {
+static void memfd_reserve(int memfd, char *mem, size_t sz) {
   off_t offset = (off_t)(mem - shared_mem);
   int err;
   do {
@@ -957,8 +1021,8 @@ static void define_globals(char * shared_mem_init) {
    * required for Windows but we don't do this for Linux since it lets us run
    * more processes in parallel without running out of memory immediately
    * (though we do risk it later on) */
-  memfd_reserve((char *)global_storage, sizeof(global_storage[0]));
-  memfd_reserve((char *)heap, heap_init - (char *)heap);
+  memfd_reserve(memfd_shared_mem, (char *)global_storage, sizeof(global_storage[0]));
+  memfd_reserve(memfd_shared_mem, (char *)heap, heap_init - (char *)heap);
 #endif
 
 }
@@ -1036,7 +1100,6 @@ static void set_sizes(
 /*****************************************************************************/
 /* Must be called by the master BEFORE forking the workers! */
 /*****************************************************************************/
-
 CAMLprim value hh_shared_init(
   value config_val,
   value shm_dir_val,
@@ -1079,8 +1142,16 @@ CAMLprim value hh_shared_init(
     shared_mem_size,
     Long_val(Field(config_val, 6))
   );
-  char *shared_mem_init = memfd_map(shared_mem_size);
+  assert(memfd_shared_mem >= 0);
+  char *shared_mem_init = memfd_map(memfd_shared_mem, SHARED_MEM_INIT, shared_mem_size);
   define_globals(shared_mem_init);
+
+  if (shm_use_sharded_hashtbl) {
+    assert(memfd_shmffi >= 0);
+    assert(SHARED_MEM_INIT + shared_mem_size <= SHARDED_HASHTBL_MEM_ADDR);
+    char *mem_addr = memfd_map(memfd_shmffi, SHARDED_HASHTBL_MEM_ADDR, SHARDED_HASHTBL_MEM_SIZE);
+    shmffi_init(mem_addr, SHARDED_HASHTBL_MEM_SIZE);
+  }
 
   // Keeping the pids around to make asserts.
 #ifdef _WIN32
@@ -1111,14 +1182,15 @@ CAMLprim value hh_shared_init(
   sigaction(SIGSEGV, &sigact, NULL);
 #endif
 
-  connector = caml_alloc_tuple(7);
-  Store_field(connector, 0, Val_handle(memfd));
+  connector = caml_alloc_tuple(8);
+  Store_field(connector, 0, Val_handle(memfd_shared_mem));
   Store_field(connector, 1, config_global_size_val);
   Store_field(connector, 2, config_heap_size_val);
   Store_field(connector, 3, config_dep_table_pow_val);
   Store_field(connector, 4, config_hash_table_pow_val);
   Store_field(connector, 5, num_workers_val);
   Store_field(connector, 6, config_shm_use_sharded_hashtbl);
+  Store_field(connector, 7, Val_handle(memfd_shmffi));
 
   CAMLreturn(connector);
 }
@@ -1126,7 +1198,7 @@ CAMLprim value hh_shared_init(
 /* Must be called by every worker before any operation is performed */
 value hh_connect(value connector, value worker_id_val) {
   CAMLparam2(connector, worker_id_val);
-  memfd = Handle_val(Field(connector, 0));
+  memfd_shared_mem = Handle_val(Field(connector, 0));
   set_sizes(
     Long_val(Field(connector, 1)),
     Long_val(Field(connector, 2)),
@@ -1135,14 +1207,22 @@ value hh_connect(value connector, value worker_id_val) {
     Long_val(Field(connector, 5))
   );
   shm_use_sharded_hashtbl = Bool_val(Field(connector, 6));
+  memfd_shmffi = Handle_val(Field(connector, 7));
   worker_id = Long_val(worker_id_val);
 #ifdef _WIN32
   my_pid = 1; // Trick
 #else
   my_pid = getpid();
 #endif
-  char *shared_mem_init = memfd_map(shared_mem_size);
+  assert(memfd_shared_mem >= 0);
+  char *shared_mem_init = memfd_map(memfd_shared_mem, SHARED_MEM_INIT, shared_mem_size);
   define_globals(shared_mem_init);
+
+  if (shm_use_sharded_hashtbl) {
+    assert(memfd_shmffi >= 0);
+    char *mem_addr = memfd_map(memfd_shmffi, SHARDED_HASHTBL_MEM_ADDR, SHARDED_HASHTBL_MEM_SIZE);
+    shmffi_attach(mem_addr, SHARDED_HASHTBL_MEM_SIZE);
+  }
 
   CAMLreturn(Val_unit);
 }
@@ -1153,14 +1233,15 @@ value hh_get_handle(void) {
   CAMLlocal1(
       connector
   );
-  connector = caml_alloc_tuple(7);
-  Store_field(connector, 0, Val_handle(memfd));
+  connector = caml_alloc_tuple(8);
+  Store_field(connector, 0, Val_handle(memfd_shared_mem));
   Store_field(connector, 1, Val_long(global_size));
   Store_field(connector, 2, Val_long(heap_size));
   Store_field(connector, 3, Val_long(dep_table_pow));
   Store_field(connector, 4, Val_long(hash_table_pow));
   Store_field(connector, 5, Val_long(num_workers));
   Store_field(connector, 6, Val_bool(shm_use_sharded_hashtbl));
+  Store_field(connector, 7, Val_bool(memfd_shmffi));
 
   CAMLreturn(connector);
 }
@@ -1303,7 +1384,7 @@ void hh_shared_store(value data) {
   assert(size < global_size_b - sizeof(global_storage[0])); // Do we have enough space?
 
   global_storage[0] = size;
-  memfd_reserve((char *)&global_storage[1], size);
+  memfd_reserve(memfd_shared_mem, (char *)&global_storage[1], size);
   memcpy(&global_storage[1], &Field(data, 0), size);
 
   CAMLreturn0;
@@ -1611,6 +1692,10 @@ CAMLprim value hh_get_dep(value ocaml_key) {
 }
 
 value hh_check_heap_overflow(void) {
+  if (shm_use_sharded_hashtbl) {
+    return Val_bool(0);
+  }
+
   if (*heap >= shared_mem + shared_mem_size) {
     return Val_bool(1);
   }
@@ -1629,7 +1714,7 @@ value hh_check_heap_overflow(void) {
 
 CAMLprim value hh_collect(void) {
   if (shm_use_sharded_hashtbl != 0) {
-    raise_assertion_failure(LOCATION": shm_use_sharded_hashtbl not implemented");
+    return Val_unit;
   }
 
   // NOTE: explicitly do NOT call CAMLparam or any of the other functions/macros
@@ -1752,7 +1837,7 @@ static heap_entry_t* hh_alloc(hh_header_t header, /*out*/size_t *total_size) {
   if (chunk + slot_size > heap_max) {
     raise_heap_full();
   }
-  memfd_reserve(chunk, slot_size);
+  memfd_reserve(memfd_shared_mem, chunk, slot_size);
   ((heap_entry_t *)chunk)->header = header;
   return (heap_entry_t *)chunk;
 }
@@ -2003,11 +2088,11 @@ static void raise_hash_table_full(void) {
 /*****************************************************************************/
 value hh_add(value key, value data) {
   CAMLparam2(key, data);
+  uint64_t hash = get_hash(key);
   if (shm_use_sharded_hashtbl != 0) {
-    raise_assertion_failure(LOCATION": shm_use_sharded_hashtbl not implemented");
+    CAMLreturn(shmffi_add(hash, data));
   }
   check_should_exit();
-  uint64_t hash = get_hash(key);
   unsigned int slot = hash & (hashtbl_size - 1);
   unsigned int init_slot = slot;
   while(1) {
@@ -2189,19 +2274,7 @@ static unsigned int find_slot(value key) {
   }
 }
 
-/*
-hh_mem_inner
- 1 -- key exists and is associated with non-zero data
--1 -- key is not present in the hash table at all
--2 -- key is present in the hash table but associated with zero-valued data.
-      This means that the data has been explicitly deleted.
-
-Note that the only valid return values are {1,-1,-2}. In order to use the result
-of this function in an "if" statement an explicit test must be performed.
-*/
-int hh_mem_inner(value key) {
-  check_should_exit();
-  unsigned int slot = find_slot(key);
+_Bool hh_is_slot_taken_for_key(unsigned int slot, value key) {
   _Bool good_hash = hashtbl[slot].hash == get_hash(key);
   _Bool non_null_addr = hashtbl[slot].addr != NULL;
   if (good_hash && non_null_addr) {
@@ -2225,14 +2298,13 @@ int hh_mem_inner(value key) {
     }
     return 1;
   }
-  else if (good_hash) {
-    // if the hash matches and the key is zero
-    // then we've removed the key.
-    return -2;
-  } else {
-    // otherwise the key is simply absent
-    return -1;
-  }
+  return 0;
+}
+
+_Bool hh_mem_inner(value key) {
+  check_should_exit();
+  unsigned int slot = find_slot(key);
+  return hh_is_slot_taken_for_key(slot, key);
 }
 
 /*****************************************************************************/
@@ -2245,25 +2317,9 @@ int hh_mem_inner(value key) {
 value hh_mem(value key) {
   CAMLparam1(key);
   if (shm_use_sharded_hashtbl != 0) {
-    raise_assertion_failure(LOCATION": shm_use_sharded_hashtbl not implemented");
+    CAMLreturn(shmffi_mem(get_hash(key)));
   }
   CAMLreturn(Val_bool(hh_mem_inner(key) == 1));
-}
-
-CAMLprim value hh_mem_status(value key) {
-  CAMLparam1(key);
-  if (shm_use_sharded_hashtbl != 0) {
-    raise_assertion_failure(LOCATION": shm_use_sharded_hashtbl not implemented");
-  }
-  int res = hh_mem_inner(key);
-  switch (res) {
-    case 1:
-    case -1:
-    case -2:
-      CAMLreturn(Val_int(res));
-    default:
-      caml_failwith("Unreachable case: result must be 1 or -1 or -2");
-  }
 }
 
 /*****************************************************************************/
@@ -2307,25 +2363,28 @@ CAMLprim value hh_deserialize(heap_entry_t *elt) {
 
 /*****************************************************************************/
 /* Returns the value associated to a given key, and deserialize it. */
-/* The key MUST be present. */
+/* Returns [None] if the slot for the key is empty. */
 /*****************************************************************************/
 CAMLprim value hh_get_and_deserialize(value key) {
   CAMLparam1(key);
   check_should_exit();
-  CAMLlocal1(result);
+  CAMLlocal2(deserialized_value, result);
   if (shm_use_sharded_hashtbl != 0) {
-    raise_assertion_failure(LOCATION": shm_use_sharded_hashtbl not implemented");
+    CAMLreturn(shmffi_get_and_deserialize(get_hash(key)));
   }
 
   unsigned int slot = find_slot(key);
-  assert(hashtbl[slot].hash == get_hash(key));
-  result = hh_deserialize(hashtbl[slot].addr);
+  if (!hh_is_slot_taken_for_key(slot, key)) {
+    CAMLreturn(Val_none);
+  }
+  deserialized_value = hh_deserialize(hashtbl[slot].addr);
+  result = hh_shared_caml_alloc_some(deserialized_value);
   CAMLreturn(result);
 }
 
 /*****************************************************************************/
-/* Returns Ocaml bytes representing the raw heap_entry. Key must exist. */
-/* The key MUST be present. */
+/* Returns Ocaml bytes representing the raw heap_entry. */
+/* Returns [None] if the slot for the key is empty. */
 /*****************************************************************************/
 CAMLprim value hh_get_raw(value key) {
   CAMLparam1(key);
@@ -2333,16 +2392,19 @@ CAMLprim value hh_get_raw(value key) {
     raise_assertion_failure(LOCATION": shm_use_sharded_hashtbl not implemented");
   }
   check_should_exit();
-  CAMLlocal1(result);
+  CAMLlocal2(result, bytes);
 
   unsigned int slot = find_slot(key);
-  assert(hashtbl[slot].hash == get_hash(key));
+  if (!hh_is_slot_taken_for_key(slot, key)) {
+    CAMLreturn(Val_none);
+  }
 
   heap_entry_t *elt = hashtbl[slot].addr;
   size_t size = Heap_entry_total_size(elt->header);
   char *data = (char *)elt;
-  result = caml_alloc_string(size);
-  memcpy(Bytes_val(result), data, size);
+  bytes = caml_alloc_string(size);
+  memcpy(Bytes_val(bytes), data, size);
+  result = hh_shared_caml_alloc_some(bytes);
   CAMLreturn(result);
 }
 
@@ -2369,7 +2431,7 @@ CAMLprim value hh_deserialize_raw(value heap_entry) {
 CAMLprim value hh_get_size(value key) {
   CAMLparam1(key);
   if (shm_use_sharded_hashtbl != 0) {
-    raise_assertion_failure(LOCATION": shm_use_sharded_hashtbl not implemented");
+    CAMLreturn(shmffi_get_size(get_hash(key)));
   }
 
   unsigned int slot = find_slot(key);
@@ -2386,7 +2448,8 @@ CAMLprim value hh_get_size(value key) {
 /*****************************************************************************/
 void hh_move(value key1, value key2) {
   if (shm_use_sharded_hashtbl != 0) {
-    raise_assertion_failure(LOCATION": shm_use_sharded_hashtbl not implemented");
+    shmffi_move(get_hash(key1), get_hash(key2));
+    return;
   }
 
   unsigned int slot1 = find_slot(key1);
@@ -2415,7 +2478,7 @@ void hh_move(value key1, value key2) {
 CAMLprim value hh_remove(value key) {
   CAMLparam1(key);
   if (shm_use_sharded_hashtbl != 0) {
-    raise_assertion_failure(LOCATION": shm_use_sharded_hashtbl not implemented");
+    CAMLreturn(shmffi_remove(get_hash(key)));
   }
 
   unsigned int slot = find_slot(key);
@@ -2748,6 +2811,7 @@ void make_all_tables(sqlite3 *db) {
 }
 
 CAMLprim value hh_removed_count(value ml_unit) {
+    // TODO(hverr): Support sharded hash tables
     CAMLparam1(ml_unit);
     UNUSED(ml_unit);
     return Val_long(removed_count);

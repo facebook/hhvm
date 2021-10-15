@@ -60,13 +60,14 @@ let partition_error_files_tf
 let load_class_decls
     ~(shallow_decls : bool)
     ~(legacy_hot_decls_path : string)
-    ~(shallow_hot_decls_path : string) : unit =
+    ~(shallow_hot_decls_path : string)
+    ~(force_load_hot_shallow_decls : bool) : unit =
   let start_t = Unix.gettimeofday () in
   Hh_logger.log "Begin loading class declarations";
 
   try
     let (filename, num_classes) =
-      if shallow_decls then
+      if shallow_decls || force_load_hot_shallow_decls then
         ( shallow_hot_decls_path,
           load_contents_unsafe shallow_hot_decls_path
           |> Decl_export.restore_shallow_decls )
@@ -123,11 +124,16 @@ let load_saved_state
     else
       Marshal.from_channel (In_channel.create ~binary:true errors_path)
   in
-  if load_decls then
+  let force_load_hot_shallow_decls =
+    TypecheckerOptions.force_load_hot_shallow_decls
+      (Provider_context.get_tcopt ctx)
+  in
+  if load_decls || force_load_hot_shallow_decls then
     load_class_decls
       ~shallow_decls
       ~legacy_hot_decls_path
-      ~shallow_hot_decls_path;
+      ~shallow_hot_decls_path
+      ~force_load_hot_shallow_decls;
 
   (old_naming_table, old_errors)
 
@@ -203,11 +209,27 @@ let dump_naming_errors_decls
   in
   save_contents output_filename naming_table_saved;
 
-  if not (Sys.file_exists output_filename) then
-    failwith
-      (Printf.sprintf "Did not find file infos file '%s'" output_filename)
-  else
-    Hh_logger.log "Saved file infos to '%s'" output_filename;
+  if genv.ServerEnv.local_config.ServerLocalConfig.naming_sqlite_in_hack_64 then (
+    let naming_sql_filename = output_filename ^ "_naming.sql" in
+    let (save_result : Naming_sqlite.save_result) =
+      Naming_table.save naming_table naming_sql_filename
+    in
+    Hh_logger.log
+      "Inserted symbols into the naming table:\n%s"
+      (Naming_sqlite.show_save_result save_result);
+    Hh_logger.log
+      "Finished saving naming table with %d errors."
+      (List.length save_result.Naming_sqlite.errors);
+
+    if List.length save_result.Naming_sqlite.errors > 0 then
+      Exit.exit Exit_status.Sql_assertion_failure;
+
+    if not (Sys.file_exists output_filename) then
+      failwith
+        (Printf.sprintf "Did not find file infos file '%s'" output_filename)
+    else
+      Hh_logger.log "Saved file infos to '%s'" output_filename
+  );
 
   (* Let's not write empty error files. *)
   (if Errors.is_empty errors then

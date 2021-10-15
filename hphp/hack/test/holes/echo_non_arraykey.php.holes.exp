@@ -12,11 +12,11 @@
         f_params =
         [{ param_annotation = (mixed); param_type_hint = ((mixed), (Some ([3:28-33], Hmixed))); 
            param_is_variadic = false; param_pos = [3:34-36]; param_name = "$x"; 
-           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_expr = None; param_readonly = None; param_callconv = Pnormal; 
            param_user_attributes = []; param_visibility = None };
           { param_annotation = (bool); param_type_hint = ((bool), (Some ([3:38-42], (Hprim Tbool)))); 
             param_is_variadic = false; param_pos = [3:43-45]; param_name = "$y"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None;
@@ -24,9 +24,12 @@
         { fb_ast =
           [([5:3-12],
             (Expr
-               ((void), [5:3-12], (Call (((_), [5:3-7], (Id ([5:3-7], "echo"))), [], [((mixed), [5:8-10], (Hole (((mixed), [5:8-10], (Lvar ([5:8-10], $x))), (mixed), (arraykey), Typing)))], None)))));
+               ((void), [5:3-12],
+                (Call (((_), [5:3-7], (Id ([5:3-7], "echo"))), [], [(Pnormal, ((mixed), [5:8-10], (Hole (((mixed), [5:8-10], (Lvar ([5:8-10], $x))), (mixed), (arraykey), Typing))))], None)))));
             ([7:3-12],
-             (Expr ((void), [7:3-12], (Call (((_), [7:3-7], (Id ([7:3-7], "echo"))), [], [((bool), [7:8-10], (Hole (((bool), [7:8-10], (Lvar ([7:8-10], $y))), (bool), (arraykey), Typing)))], None)))))
+             (Expr
+                ((void), [7:3-12],
+                 (Call (((_), [7:3-7], (Id ([7:3-7], "echo"))), [], [(Pnormal, ((bool), [7:8-10], (Hole (((bool), [7:8-10], (Lvar ([7:8-10], $y))), (bool), (arraykey), Typing))))], None)))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

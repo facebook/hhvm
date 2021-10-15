@@ -23,6 +23,26 @@ impl DeclParserOptions<'_> {
             auto_namespace_map: opts.po_auto_namespace_map,
             disable_xhp_element_mangling: opts.po_disable_xhp_element_mangling,
             interpret_soft_types_as_like_types: opts.po_interpret_soft_types_as_like_types,
+            everything_sdt: opts.tco_everything_sdt,
+        }
+    }
+
+    pub fn from_oxidized_parser_options<'a>(
+        arena: &'a bumpalo::Bump,
+        opts: &'a oxidized::parser_options::ParserOptions,
+    ) -> DeclParserOptions<'a> {
+        let mut ns_map =
+            bumpalo::collections::Vec::with_capacity_in(opts.po_auto_namespace_map.len(), arena);
+        ns_map.extend(
+            opts.po_auto_namespace_map
+                .iter()
+                .map(|(a, b)| (a.as_str(), b.as_str())),
+        );
+        DeclParserOptions {
+            auto_namespace_map: ns_map.into_bump_slice(),
+            disable_xhp_element_mangling: opts.po_disable_xhp_element_mangling,
+            interpret_soft_types_as_like_types: opts.po_interpret_soft_types_as_like_types,
+            everything_sdt: opts.tco_everything_sdt,
         }
     }
 }

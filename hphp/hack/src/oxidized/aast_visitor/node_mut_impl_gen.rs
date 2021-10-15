@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<66b85d4dddf3c36ed565cc470a3055b9>>
+// @generated SignedSource<<a59295c0770a49d4e4d2f0dc8eb53635>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -409,24 +409,6 @@ impl<P: Params> NodeMut<P> for ClassId_<P::Ex, P::En> {
         }
     }
 }
-impl<P: Params> NodeMut<P> for ClassPartiallyAbstractTypeconst {
-    fn accept<'node>(
-        &'node mut self,
-        c: &mut P::Context,
-        v: &mut dyn VisitorMut<'node, P = P>,
-    ) -> Result<(), P::Error> {
-        v.visit_class_partially_abstract_typeconst(c, self)
-    }
-    fn recurse<'node>(
-        &'node mut self,
-        c: &mut P::Context,
-        v: &mut dyn VisitorMut<'node, P = P>,
-    ) -> Result<(), P::Error> {
-        self.constraint.accept(c, v)?;
-        self.type_.accept(c, v)?;
-        Ok(())
-    }
-}
 impl<P: Params> NodeMut<P> for ClassTypeconst {
     fn accept<'node>(
         &'node mut self,
@@ -446,10 +428,6 @@ impl<P: Params> NodeMut<P> for ClassTypeconst {
                 Ok(())
             }
             ClassTypeconst::TCConcrete(a0) => {
-                a0.accept(c, v)?;
-                Ok(())
-            }
-            ClassTypeconst::TCPartiallyAbstract(a0) => {
                 a0.accept(c, v)?;
                 Ok(())
             }
@@ -976,6 +954,11 @@ impl<P: Params> NodeMut<P> for Expr_<P::Ex, P::En> {
                 a.2.accept(c, v)?;
                 Ok(())
             }
+            Expr_::Upcast(a) => {
+                a.0.accept(c, v)?;
+                a.1.accept(c, v)?;
+                Ok(())
+            }
             Expr_::New(a) => {
                 a.0.accept(c, v)?;
                 a.1.accept(c, v)?;
@@ -1003,11 +986,6 @@ impl<P: Params> NodeMut<P> for Expr_<P::Ex, P::En> {
                 a.0.accept(c, v)?;
                 a.1.accept(c, v)?;
                 a.2.accept(c, v)?;
-                Ok(())
-            }
-            Expr_::Callconv(a) => {
-                a.0.accept(c, v)?;
-                a.1.accept(c, v)?;
                 Ok(())
             }
             Expr_::Import(a) => {
@@ -1091,6 +1069,7 @@ impl<P: Params> NodeMut<P> for ExpressionTree<P::Ex, P::En> {
         self.function_pointers.accept(c, v)?;
         self.virtualized_expr.accept(c, v)?;
         self.runtime_expr.accept(c, v)?;
+        self.dollardollar_pos.accept(c, v)?;
         Ok(())
     }
 }
@@ -1464,6 +1443,7 @@ impl<P: Params> NodeMut<P> for Hint_ {
             }
             Hint_::Hthis => Ok(()),
             Hint_::Hdynamic => Ok(()),
+            Hint_::Hsupportdynamic => Ok(()),
             Hint_::Hnothing => Ok(()),
             Hint_::Hunion(a0) => {
                 a0.accept(c, v)?;
@@ -1716,7 +1696,11 @@ impl<P: Params> NodeMut<P> for ParamKind {
         v: &mut dyn VisitorMut<'node, P = P>,
     ) -> Result<(), P::Error> {
         match self {
-            ParamKind::Pinout => Ok(()),
+            ParamKind::Pinout(a0) => {
+                a0.accept(c, v)?;
+                Ok(())
+            }
+            ParamKind::Pnormal => Ok(()),
         }
     }
 }

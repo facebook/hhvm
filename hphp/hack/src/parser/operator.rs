@@ -68,7 +68,9 @@ impl Operator {
             AdditionOperator | SubtractionOperator | ConcatenationOperator => 18,
             MultiplicationOperator | DivisionOperator | RemainderOperator => 19,
             LogicalNotOperator | NotOperator | UnaryPlusOperator | UnaryMinusOperator => 20,
-            InstanceofOperator | IsOperator | AsOperator | NullableAsOperator => 21,
+            InstanceofOperator | IsOperator | AsOperator | NullableAsOperator | UpcastOperator => {
+                21
+            }
             CastOperator
             | ErrorControlOperator
             | PrefixIncrementOperator
@@ -111,7 +113,7 @@ impl Operator {
             | MemberSelectionOperator | NullSafeMemberSelectionOperator
             | ScopeResolutionOperator | EnumClassLabelOperator | FunctionCallOperator | IndexingOperator
             | IncludeOperator | IncludeOnceOperator | RequireOperator
-            | RequireOnceOperator | IsOperator | AsOperator | NullableAsOperator
+            | RequireOnceOperator | IsOperator | AsOperator | NullableAsOperator | UpcastOperator
                 // eval
                 // Comma
                 // elseif
@@ -196,6 +198,7 @@ impl Operator {
             | TokenKind::Is
             | TokenKind::As
             | TokenKind::QuestionAs
+            | TokenKind::Upcast
             | TokenKind::StarStar
             | TokenKind::Equal
             | TokenKind::PlusEqual
@@ -252,6 +255,7 @@ impl Operator {
             TokenKind::Is => IsOperator,
             TokenKind::As => AsOperator,
             TokenKind::QuestionAs => NullableAsOperator,
+            TokenKind::Upcast => UpcastOperator,
             TokenKind::StarStar => ExponentOperator,
             TokenKind::Equal => AssignmentOperator,
             TokenKind::PlusEqual => AdditionAssignmentOperator,

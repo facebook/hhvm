@@ -89,6 +89,14 @@ module Dep : sig
   val variant_to_string : 'a variant -> string
 end
 
+module DepHashKey : sig
+  type t = Dep.t
+
+  val compare : t -> t -> int
+
+  val to_string : t -> string
+end
+
 module DepSet : sig
   type t
 
@@ -129,13 +137,7 @@ module VisitedSet : sig
   val make : Mode.t -> t
 end
 
-module Files : sig
-  val get_files : DepSet.t -> Relative_path.Set.t
-
-  val deps_of_file_info : Mode.t -> FileInfo.t -> Dep.t list
-
-  val update_file : Mode.t -> Relative_path.t -> FileInfo.t -> unit
-end
+val deps_of_file_info : Mode.t -> FileInfo.t -> Dep.t list
 
 type dep_edge
 

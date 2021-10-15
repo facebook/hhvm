@@ -22,9 +22,6 @@ let check_reifiable env tc attr_pos =
   in
   match tc.ttc_kind with
   | TCConcrete { tc_type } -> check_impl "type" tc_type
-  | TCPartiallyAbstract { patc_constraint; patc_type } ->
-    check_impl "type" patc_type;
-    check_impl "constraint" patc_constraint
   | TCAbstract { atc_as_constraint; atc_super_constraint; atc_default } ->
     Option.iter ~f:(check_impl "type") atc_default;
     Option.iter ~f:(check_impl "constraint") atc_as_constraint;

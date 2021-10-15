@@ -36,6 +36,12 @@ let to_int x = fst x
 
 let get_name x = to_string x
 
+let is_user_denotable (lid : t) : bool =
+  let lid_s = to_string lid in
+  (* Allow $foo or $_bar1 but not $#foo or $0bar. *)
+  let local_regexp = Str.regexp "^\\$[a-zA-z_][a-zA-Z0-9_]*$" in
+  Str.string_match local_regexp lid_s 0 || String.equal lid_s "$$"
+
 let make_scoped x = (next (), x)
 
 let make_unscoped x = (0, x)

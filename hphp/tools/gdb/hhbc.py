@@ -16,9 +16,12 @@ from lookup import lookup_litstr
 # HPHP::Op -> int16_t table helpers.
 
 def as_idx(op):
-    """Cast an HPHP::Op to a uint16_t."""
-    return op.cast(T('uint16_t'))
-
+    """Cast an HPHP::Op to an integer."""
+    if V('HPHP::Op_count') > 256:
+        return op.cast(T('uint16_t'))
+    else:
+        # This is necessary to avoid unwanted sign extension.
+        return op.cast(T('uint8_t'))
 
 @memoized
 def op_table(name):
@@ -111,12 +114,15 @@ class HHBC(object):
         pc = pc.cast(T('uint8_t').pointer())
         raw_val = (pc.dereference()).cast(T('size_t'))
 
-        if (raw_val == 0xff):
+        if raw_val == 0xff and V('HPHP::Op_count') > 256:
             pc += 1
             byte = pc.dereference()
             raw_val += byte
+            size = 2
+        else:
+            size = 1
 
-        return [raw_val.cast(T('HPHP::Op')), 2 if raw_val >= 0xff else 1]
+        return [raw_val.cast(T('HPHP::Op')), size]
 
     @staticmethod
     def decode_iva(pc):
@@ -378,7 +384,7 @@ class HHBC(object):
         else:
             table_name = 'HPHP::immSizeTable'
             if immtype >= 0:
-                size = op_table(table_name)[as_idx(immtype)]
+                size = op_table(table_name)[immtype.cast(T('size_t'))]
 
                 uint = T(uints_by_size()[int(size)])
                 imm = ptr.cast(uint.pointer()).dereference()
@@ -403,7 +409,7 @@ class HHBC(object):
     def instr_info(bc):
         op, instrlen = HHBC.decode_op(bc)
 
-        if op <= 0 or op >= V('HPHP::Op_count'):
+        if as_idx(op) >= V('HPHP::Op_count'):
             print('hhx: Invalid Op %d @ 0x%x' % (op, bc))
             return None
 

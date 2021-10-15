@@ -521,8 +521,6 @@ pub mod std_lib_functions {
 
     pub const ARRAY_FILTER: &str = "\\array_filter";
 
-    pub const ARRAY_MAP: &str = "\\array_map";
-
     pub const CALL_USER_FUNC: &str = "\\call_user_func";
 
     pub const TYPE_STRUCTURE: &str = "\\HH\\type_structure";
@@ -726,6 +724,8 @@ pub mod fb {
 
     pub const IDX: &str = "\\HH\\idx";
 
+    pub const IDXREADONLY: &str = "\\HH\\idx_readonly";
+
     pub const TYPE_STRUCTURE: &str = "\\HH\\TypeStructure";
 
     pub const INCORRECT_TYPE: &str = "\\HH\\INCORRECT_TYPE";
@@ -774,6 +774,10 @@ pub mod coeffects {
     pub const READ_GLOBALS: &str = "read_globals";
 
     pub const GLOBALS: &str = "globals";
+
+    pub const CONTEXTS: &str = "HH\\Contexts";
+
+    pub const CAPABILITIES: &str = "HH\\Capabilities";
 
     pub fn is_any_policied(x: &str) -> bool {
         lazy_static! {
@@ -887,8 +891,11 @@ pub mod expression_trees {
     pub const VISIT_CONTINUE: &str = "visitContinue";
     pub const VISIT_PROPERTY_ACCESS: &str = "visitPropertyAccess";
     pub const VISIT_XHP: &str = "visitXhp";
+    pub const VISIT_INSTANCE_METHOD: &str = "visitInstanceMethod";
 
     pub const SPLICE: &str = "splice";
+
+    pub const DOLLARDOLLAR_TMP_VAR: &str = "$0dollardollar";
 }
 
 #[cfg(test)]

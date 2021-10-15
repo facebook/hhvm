@@ -14,7 +14,7 @@
          [{ param_annotation = (Pair<int, int>);
             param_type_hint = ((Pair<int, int>), (Some ([4:21-35], (Happly (([4:21-25], "\\HH\\Pair"), [([4:26-29], (Hprim Tint)); ([4:31-34], (Hprim Tint))]))))); 
             param_is_variadic = false; param_pos = [4:36-38]; param_name = "$b"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)] }; 
@@ -45,7 +45,7 @@
          [{ param_annotation = (Pair<int, int>);
             param_type_hint = ((Pair<int, int>), (Some ([7:12-26], (Happly (([7:12-16], "\\HH\\Pair"), [([7:17-20], (Hprim Tint)); ([7:22-25], (Hprim Tint))]))))); 
             param_is_variadic = false; param_pos = [7:27-29]; param_name = "$b"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
@@ -68,12 +68,12 @@
          [{ param_annotation = (Pair<bool, int>);
             param_type_hint = ((Pair<bool, int>), (Some ([10:3-18], (Happly (([10:3-7], "\\HH\\Pair"), [([10:8-12], (Hprim Tbool)); ([10:14-17], (Hprim Tint))]))))); 
             param_is_variadic = false; param_pos = [10:19-22]; param_name = "$b1"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None };
            { param_annotation = (Pair<int, bool>);
              param_type_hint = ((Pair<int, bool>), (Some ([11:3-18], (Happly (([11:3-7], "\\HH\\Pair"), [([11:8-11], (Hprim Tint)); ([11:13-17], (Hprim Tbool))]))))); 
              param_is_variadic = false; param_pos = [11:19-22]; param_name = "$b2"; 
-             param_expr = None; param_readonly = None; param_callconv = None; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
              param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
@@ -83,12 +83,12 @@
              (Expr
                 ((void), [14:3-9],
                  (Call ((((function(Pair<int, int> $b): void)), [14:3-4], (Id ([14:3-4], "\\b"))), 
-                    [], [((Pair<bool, int>), [14:5-8], (Hole (((Pair<bool, int>), [14:5-8], (Lvar ([14:5-8], $b1))), (Pair<bool, int>), (Pair<int, int>), Typing)))], None)))));
+                    [], [(Pnormal, ((Pair<bool, int>), [14:5-8], (Hole (((Pair<bool, int>), [14:5-8], (Lvar ([14:5-8], $b1))), (Pair<bool, int>), (Pair<int, int>), Typing))))], None)))));
              ([16:3-10],
               (Expr
                  ((void), [16:3-9],
                   (Call ((((function(Pair<int, int> $b): void)), [16:3-4], (Id ([16:3-4], "\\b"))), 
-                     [], [((Pair<int, bool>), [16:5-8], (Hole (((Pair<int, bool>), [16:5-8], (Lvar ([16:5-8], $b2))), (Pair<int, bool>), (Pair<int, int>), Typing)))], None)))));
+                     [], [(Pnormal, ((Pair<int, bool>), [16:5-8], (Hole (((Pair<int, bool>), [16:5-8], (Lvar ([16:5-8], $b2))), (Pair<int, bool>), (Pair<int, int>), Typing))))], None)))));
              ([18:3-25],
               (Expr
                  ((TestPair), [18:3-24],
@@ -99,14 +99,14 @@
                   (Call (
                      (((function(Pair<int, int> $b): void)), [21:3-10],
                       (Obj_get (((TestPair), [21:3-7], (Lvar ([21:3-7], $foo))), (((function(Pair<int, int> $b): void)), [21:9-10], (Id ([21:9-10], "b"))), OG_nullthrows, false))),
-                     [], [((Pair<bool, int>), [21:11-14], (Hole (((Pair<bool, int>), [21:11-14], (Lvar ([21:11-14], $b1))), (Pair<bool, int>), (Pair<int, int>), Typing)))], None)))));
+                     [], [(Pnormal, ((Pair<bool, int>), [21:11-14], (Hole (((Pair<bool, int>), [21:11-14], (Lvar ([21:11-14], $b1))), (Pair<bool, int>), (Pair<int, int>), Typing))))], None)))));
              ([23:3-16],
               (Expr
                  ((void), [23:3-15],
                   (Call (
                      (((function(Pair<int, int> $b): void)), [23:3-10],
                       (Obj_get (((TestPair), [23:3-7], (Lvar ([23:3-7], $foo))), (((function(Pair<int, int> $b): void)), [23:9-10], (Id ([23:9-10], "b"))), OG_nullthrows, false))),
-                     [], [((Pair<int, bool>), [23:11-14], (Hole (((Pair<int, bool>), [23:11-14], (Lvar ([23:11-14], $b2))), (Pair<int, bool>), (Pair<int, int>), Typing)))], None)))))
+                     [], [(Pnormal, ((Pair<int, bool>), [23:11-14], (Hole (((Pair<int, bool>), [23:11-14], (Lvar ([23:11-14], $b2))), (Pair<int, bool>), (Pair<int, int>), Typing))))], None)))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
@@ -128,12 +128,12 @@
          [{ param_annotation = (Pair<bool, int>);
             param_type_hint = ((Pair<bool, int>), (Some ([27:3-18], (Happly (([27:3-7], "\\HH\\Pair"), [([27:8-12], (Hprim Tbool)); ([27:14-17], (Hprim Tint))]))))); 
             param_is_variadic = false; param_pos = [27:19-22]; param_name = "$b1"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None };
            { param_annotation = (Pair<int, bool>);
              param_type_hint = ((Pair<int, bool>), (Some ([28:3-18], (Happly (([28:3-7], "\\HH\\Pair"), [([28:8-11], (Hprim Tint)); ([28:13-17], (Hprim Tbool))]))))); 
              param_is_variadic = false; param_pos = [28:19-22]; param_name = "$b2"; 
-             param_expr = None; param_readonly = None; param_callconv = None; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
              param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
@@ -144,12 +144,13 @@
                 ((void), [31:3-62],
                  (Call ((((function(Pair<int, int> $b): void)), [31:3-4], (Id ([31:3-4], "\\b"))), 
                     [],
-                    [((Pair<int, int>), [31:5-61],
-                      (Hole (((Pair<bool, int>), [31:57-60], (Lvar ([31:57-60], $b1))), (Pair<bool, int>), (Pair<int, int>),
-                         (UnsafeCast
-                            [([31:27-41], (Happly (([31:27-31], "\\HH\\Pair"), [([31:32-36], (Hprim Tbool)); ([31:37-40], (Hprim Tint))])));
-                              ([31:42-55], (Happly (([31:42-46], "\\HH\\Pair"), [([31:47-50], (Hprim Tint)); ([31:51-54], (Hprim Tint))])))])
-                         )))
+                    [(Pnormal,
+                      ((Pair<int, int>), [31:5-61],
+                       (Hole (((Pair<bool, int>), [31:57-60], (Lvar ([31:57-60], $b1))), (Pair<bool, int>), (Pair<int, int>),
+                          (UnsafeCast
+                             [([31:27-41], (Happly (([31:27-31], "\\HH\\Pair"), [([31:32-36], (Hprim Tbool)); ([31:37-40], (Hprim Tint))])));
+                               ([31:42-55], (Happly (([31:42-46], "\\HH\\Pair"), [([31:47-50], (Hprim Tint)); ([31:51-54], (Hprim Tint))])))])
+                          ))))
                       ],
                     None)))));
              ([33:3-63],
@@ -157,12 +158,13 @@
                  ((void), [33:3-62],
                   (Call ((((function(Pair<int, int> $b): void)), [33:3-4], (Id ([33:3-4], "\\b"))), 
                      [],
-                     [((Pair<int, int>), [33:5-61],
-                       (Hole (((Pair<int, bool>), [33:57-60], (Lvar ([33:57-60], $b2))), (Pair<int, bool>), (Pair<int, int>),
-                          (UnsafeCast
-                             [([33:27-41], (Happly (([33:27-31], "\\HH\\Pair"), [([33:32-35], (Hprim Tint)); ([33:36-40], (Hprim Tbool))])));
-                               ([33:42-55], (Happly (([33:42-46], "\\HH\\Pair"), [([33:47-50], (Hprim Tint)); ([33:51-54], (Hprim Tint))])))])
-                          )))
+                     [(Pnormal,
+                       ((Pair<int, int>), [33:5-61],
+                        (Hole (((Pair<int, bool>), [33:57-60], (Lvar ([33:57-60], $b2))), (Pair<int, bool>), (Pair<int, int>),
+                           (UnsafeCast
+                              [([33:27-41], (Happly (([33:27-31], "\\HH\\Pair"), [([33:32-35], (Hprim Tint)); ([33:36-40], (Hprim Tbool))])));
+                                ([33:42-55], (Happly (([33:42-46], "\\HH\\Pair"), [([33:47-50], (Hprim Tint)); ([33:51-54], (Hprim Tint))])))])
+                           ))))
                        ],
                      None)))));
              ([35:3-25],
@@ -176,12 +178,13 @@
                      (((function(Pair<int, int> $b): void)), [38:3-10],
                       (Obj_get (((TestPair), [38:3-7], (Lvar ([38:3-7], $foo))), (((function(Pair<int, int> $b): void)), [38:9-10], (Id ([38:9-10], "b"))), OG_nullthrows, false))),
                      [],
-                     [((Pair<int, int>), [38:11-67],
-                       (Hole (((Pair<bool, int>), [38:63-66], (Lvar ([38:63-66], $b1))), (Pair<bool, int>), (Pair<int, int>),
-                          (UnsafeCast
-                             [([38:33-47], (Happly (([38:33-37], "\\HH\\Pair"), [([38:38-42], (Hprim Tbool)); ([38:43-46], (Hprim Tint))])));
-                               ([38:48-61], (Happly (([38:48-52], "\\HH\\Pair"), [([38:53-56], (Hprim Tint)); ([38:57-60], (Hprim Tint))])))])
-                          )))
+                     [(Pnormal,
+                       ((Pair<int, int>), [38:11-67],
+                        (Hole (((Pair<bool, int>), [38:63-66], (Lvar ([38:63-66], $b1))), (Pair<bool, int>), (Pair<int, int>),
+                           (UnsafeCast
+                              [([38:33-47], (Happly (([38:33-37], "\\HH\\Pair"), [([38:38-42], (Hprim Tbool)); ([38:43-46], (Hprim Tint))])));
+                                ([38:48-61], (Happly (([38:48-52], "\\HH\\Pair"), [([38:53-56], (Hprim Tint)); ([38:57-60], (Hprim Tint))])))])
+                           ))))
                        ],
                      None)))));
              ([40:3-69],
@@ -191,12 +194,13 @@
                      (((function(Pair<int, int> $b): void)), [40:3-10],
                       (Obj_get (((TestPair), [40:3-7], (Lvar ([40:3-7], $foo))), (((function(Pair<int, int> $b): void)), [40:9-10], (Id ([40:9-10], "b"))), OG_nullthrows, false))),
                      [],
-                     [((Pair<int, int>), [40:11-67],
-                       (Hole (((Pair<int, bool>), [40:63-66], (Lvar ([40:63-66], $b2))), (Pair<int, bool>), (Pair<int, int>),
-                          (UnsafeCast
-                             [([40:33-47], (Happly (([40:33-37], "\\HH\\Pair"), [([40:38-41], (Hprim Tint)); ([40:42-46], (Hprim Tbool))])));
-                               ([40:48-61], (Happly (([40:48-52], "\\HH\\Pair"), [([40:53-56], (Hprim Tint)); ([40:57-60], (Hprim Tint))])))])
-                          )))
+                     [(Pnormal,
+                       ((Pair<int, int>), [40:11-67],
+                        (Hole (((Pair<int, bool>), [40:63-66], (Lvar ([40:63-66], $b2))), (Pair<int, bool>), (Pair<int, int>),
+                           (UnsafeCast
+                              [([40:33-47], (Happly (([40:33-37], "\\HH\\Pair"), [([40:38-41], (Hprim Tint)); ([40:42-46], (Hprim Tbool))])));
+                                ([40:48-61], (Happly (([40:48-52], "\\HH\\Pair"), [([40:53-56], (Hprim Tint)); ([40:57-60], (Hprim Tint))])))])
+                           ))))
                        ],
                      None)))))
              ]

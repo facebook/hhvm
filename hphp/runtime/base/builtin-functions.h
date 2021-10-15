@@ -132,7 +132,7 @@ inline bool is_object(const TypedValue* c) {
 
 inline bool is_clsmeth(const TypedValue* c) {
   assertx(tvIsPlausible(*c));
-  return tvIsClsMeth(c);
+  return tvIsClsMeth(c) || tvIsRClsMeth(c);
 }
 
 inline bool is_class(const TypedValue* c) {
@@ -142,7 +142,7 @@ inline bool is_class(const TypedValue* c) {
 
 inline bool is_fun(const TypedValue* c) {
   assertx(tvIsPlausible(*c));
-  return tvIsFunc(c) && !val(c).pfunc->isMethCaller();
+  return (tvIsFunc(c) && !val(c).pfunc->isMethCaller()) || tvIsRFunc(c);
 }
 
 inline bool is_empty_string(const TypedValue* c) {
@@ -186,14 +186,20 @@ bool checkMethCallerTarget(const Func* meth, const Class* ctx, bool error);
 void checkMethCaller(const Func* func, const Class* ctx);
 
 Variant vm_call_user_func(const_variant_ref function, const Variant& params,
+                          RuntimeCoeffects providedCoeffects
+                            = RuntimeCoeffects::fixme(),
                           bool checkRef = false,
                           bool allowDynCallNoPointer = false);
 template<typename T>
-Variant vm_call_user_func(T&& t, const Variant& params, bool checkRef = false,
+Variant vm_call_user_func(T&& t, const Variant& params,
+                          RuntimeCoeffects providedCoeffects
+                            = RuntimeCoeffects::fixme(),
+                          bool checkRef = false,
                           bool allowDynCallNoPointer = false) {
   const Variant function{std::forward<T>(t)};
   return vm_call_user_func(
-    const_variant_ref{function}, params, checkRef, allowDynCallNoPointer
+    const_variant_ref{function}, params, providedCoeffects,
+    checkRef, allowDynCallNoPointer
   );
 }
 
@@ -243,14 +249,15 @@ bool is_constructor_name(const char* func);
                                              unsigned int arg_num,
                                              const StringData* type);
 
-void throw_must_be_mutable(const char* className, const char* propName);
-void throw_must_be_readonly(const char* className, const char* propName);
-void throw_must_be_enclosed_in_readonly(const char* className, const char* propName);
-void throw_must_be_value_type(const char* className, const char* propName);
-void throw_local_must_be_value_type(const char* locName);
+void throw_or_warn_must_be_mutable(const char* className, const char* propName);
+void throw_or_warn_must_be_readonly(const char* className, const char* propName);
+void throw_or_warn_must_be_enclosed_in_readonly(const char* className, const char* propName);
+void throw_or_warn_must_be_value_type(const char* className, const char* propName);
+void throw_or_warn_local_must_be_value_type(const char* locName);
+void throw_or_warn_cannot_modify_readonly_collection();
 void checkReadonly(const TypedValue* tv, const Class* cls, const StringData* name,
-                   bool readonly, ReadonlyOp op, bool* roProp, bool writeMode);
-bool readonlyLocalShouldThrow(TypedValue tv, ReadonlyOp op, bool& roProp);
+                   bool readonly, ReadonlyOp op, bool writeMode);
+bool readonlyLocalShouldThrow(TypedValue tv, ReadonlyOp op);
 
 void check_collection_cast_to_array();
 

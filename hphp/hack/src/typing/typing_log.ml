@@ -294,7 +294,6 @@ let possibly_enforced_type_as_value env et =
   Atom
     ((match et.et_enforced with
      | Enforced -> "enforced "
-     | PartiallyEnforced _ -> "partially enforced "
      | Unenforced -> "")
     ^ Typing_print.debug env et.et_type)
 
@@ -500,6 +499,7 @@ let genv_as_value env genv =
   let {
     tcopt = _;
     callable_pos;
+    readonly;
     return;
     params;
     condition_types;
@@ -517,6 +517,7 @@ let genv_as_value env genv =
   in
   make_map
     ([
+       ("readonly", bool_as_value readonly);
        ("return", return_info_as_value env return);
        ("callable_pos", pos_as_value callable_pos);
        ("params", local_id_map_as_value (param_as_value env) params);
@@ -529,7 +530,11 @@ let genv_as_value env genv =
        ("this_internal", bool_as_value this_internal);
      ]
     @ (match this_module with
-      | Some this_module -> [("this_module", string_as_value this_module)]
+      | Some this_module ->
+        [
+          ( "this_module",
+            string_as_value @@ Typing_modules.show_module_ this_module );
+        ]
       | None -> [])
     @ (match parent with
       | Some (parent_id, parent_ty) ->
@@ -551,8 +556,12 @@ let fun_tast_info_as_map = function
   | None -> make_map []
   | Some r ->
     let open Tast in
-    let { has_implicit_return } = r in
-    make_map [("has_implicit_return", bool_as_value has_implicit_return)]
+    let { has_implicit_return; has_readonly } = r in
+    make_map
+      [
+        ("has_implicit_return", bool_as_value has_implicit_return);
+        ("has_readonly", bool_as_value has_readonly);
+      ]
 
 let env_as_value env =
   let {
@@ -767,6 +776,23 @@ let log_localize ~level ety_env (decl_ty : decl_ty) (env, result_ty) =
             ] );
       ] );
   (env, result_ty)
+
+let log_pessimize_prop env pos class_name prop_name =
+  log_with_level env "pessimize" ~level:1 @@ fun () ->
+  let p = Pos_or_decl.unsafe_to_raw_pos pos in
+  let (file, line) =
+    let p = Pos.to_absolute p in
+    (Pos.filename p, Pos.line p)
+  in
+  lnewline ();
+  lprintf
+    (Normal Yellow)
+    "pessimize:\t%s:%d,prop,%s,%s"
+    file
+    line
+    class_name
+    prop_name;
+  lnewline ()
 
 let increment_feature_count env s =
   if GlobalOptions.tco_language_feature_logging (Env.get_tcopt env) then

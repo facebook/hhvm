@@ -135,12 +135,6 @@ let typeconst env c tc =
           }
       | Aast.TCConcrete { c_tc_type = t } ->
         Typing_defs.TCConcrete { tc_type = Decl_hint.hint env t }
-      | Aast.TCPartiallyAbstract { c_patc_constraint = c; c_patc_type = t } ->
-        Typing_defs.TCPartiallyAbstract
-          {
-            patc_constraint = Decl_hint.hint env c;
-            patc_type = Decl_hint.hint env t;
-          }
     in
     let attributes = tc.c_tconst_user_attributes in
     let enforceable =
@@ -326,7 +320,7 @@ let xhp_enum_values props =
         SMap.add (snd prop.cv_id) xai_enum_values acc
       | None -> acc)
 
-let class_ ctx c =
+let class_DEPRECATED ctx c =
   let (errs, result) =
     Errors.do_ @@ fun () ->
     let (_, cls_name) = c.c_name in
@@ -348,7 +342,8 @@ let class_ ctx c =
         ~f:(Decl_hint.aast_user_attribute_to_decl_user_attribute env)
     in
     let sc_module =
-      Naming_attributes_params.get_module_attribute c.c_user_attributes
+      Typing_modules.of_maybe_string
+      @@ Naming_attributes_params.get_module_attribute c.c_user_attributes
     in
     let where_constraints =
       List.map c.c_where_constraints ~f:(FunUtils.where_constraint env)

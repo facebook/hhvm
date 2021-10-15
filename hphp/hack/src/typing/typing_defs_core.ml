@@ -16,7 +16,8 @@ type ce_visibility =
   | Vpublic
   | Vprivate of string
   | Vprotected of string
-  | Vinternal of string
+  (* When we construct `Vinternal`, we are guaranteed to be inside a module *)
+  | Vinternal of Typing_modules.module_
 [@@deriving eq, show]
 
 (* Represents <<__Policied()>> or <<__InferFlows>> attribute *)
@@ -195,17 +196,9 @@ type 'ty tparam = {
 type 'ty where_constraint = 'ty * Ast_defs.constraint_kind * 'ty
 [@@deriving eq, show]
 
-type collection_style =
-  | VecStyle
-  | DictStyle
-  | KeysetStyle
-  | ArraykeyStyle
-[@@deriving eq, show, ord]
-
 type enforcement =
   | Unenforced
   | Enforced
-  | PartiallyEnforced of collection_style * pos_id
 [@@deriving eq, show, ord]
 
 type 'phase ty = 'phase Reason.t_ * 'phase ty_
@@ -272,6 +265,7 @@ and _ ty_ =
   | Terr
   | Tnonnull
   | Tdynamic
+  | Tsupportdynamic
       (** A dynamic type is a special type which sometimes behaves as if it were a
        * top type; roughly speaking, where a specific value of a particular type is
        * expected and that type is dynamic, anything can be given. We call this
@@ -549,6 +543,7 @@ module Pp = struct
     | Tthis -> Format.pp_print_string fmt "Tthis"
     | Tmixed -> Format.pp_print_string fmt "Tmixed"
     | Tdynamic -> Format.pp_print_string fmt "Tdynamic"
+    | Tsupportdynamic -> Format.pp_print_string fmt "Tsupportdynamic"
     | Tnonnull -> Format.pp_print_string fmt "Tnonnull"
     | Tapply (a0, a1) ->
       Format.fprintf fmt "(@[<2>Tapply (@,";

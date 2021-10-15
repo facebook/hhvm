@@ -496,7 +496,7 @@ val concrete_const_interface_override :
   error_from_reasons_callback ->
   unit
 
-val interface_const_multiple_defs :
+val interface_or_trait_const_multiple_defs :
   Pos_or_decl.t ->
   Pos_or_decl.t ->
   string ->
@@ -612,6 +612,8 @@ val classname_abstract_call : string -> string -> Pos.t -> Pos_or_decl.t -> unit
 val static_synthetic_method : string -> string -> Pos.t -> Pos_or_decl.t -> unit
 
 val isset_in_strict : Pos.t -> unit
+
+val isset_inout_arg : Pos.t -> unit
 
 val unset_nonidx_in_strict : Pos.t -> (Pos_or_decl.t * string) list -> unit
 
@@ -1187,8 +1189,6 @@ val generics_not_allowed : Pos.t -> unit
 
 val interface_with_partial_typeconst : Pos.t -> unit
 
-val partially_abstract_typeconst_definition : Pos.t -> unit
-
 val multiple_xhp_category : Pos.t -> unit
 
 val mk_multiple_xhp_category : Pos.t -> error
@@ -1358,6 +1358,8 @@ val missing_xhp_required_attr :
   Pos.t -> string -> (Pos_or_decl.t * string) list -> unit
 
 val inout_argument_bad_expr : Pos.t -> unit
+
+val inout_in_transformed_pseudofunction : Pos.t -> string -> unit
 
 val inout_argument_bad_type : Pos.t -> (Pos_or_decl.t * string) list -> unit
 
@@ -1804,8 +1806,17 @@ val module_mismatch : Pos.t -> Pos_or_decl.t -> string option -> string -> unit
 
 val module_hint : def_pos:Pos_or_decl.t -> use_pos:Pos.t -> unit
 
-val expression_tree_non_public_property :
+val expression_tree_non_public_member :
   use_pos:Pos.t -> def_pos:Pos_or_decl.t -> unit
 
 val internal_method_with_invalid_visibility :
   attr_pos:Pos.t -> visibility:Ast_defs.visibility -> unit
+
+val not_sub_dynamic :
+  (Pos_or_decl.t * string) list ->
+  Pos_or_decl.t ->
+  string ->
+  error_from_reasons_callback ->
+  unit
+
+val trait_parent_construct_inconsistent : Pos.t -> Pos_or_decl.t -> unit

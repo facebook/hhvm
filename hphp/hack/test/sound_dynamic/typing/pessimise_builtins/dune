@@ -1,0 +1,73 @@
+(alias
+    (name sound_dynamic_typing_pessimise_builtins_good)
+    (deps %{exe:../../../../src/hh_single_type_check.exe}
+          %{project_root}/test/verify.py
+          %{project_root}/test/review.sh
+          (glob_files %{project_root}/test/sound_dynamic/pessimise_builtins/typing/HH_FLAGS)
+          (glob_files %{project_root}/test/sound_dynamic/pessimise_builtins/typing/*.good.php)
+          (glob_files %{project_root}/test/sound_dynamic/pessimise_builtins/typing/*.good.php.exp)
+          (glob_files %{project_root}/test/sound_dynamic/pessimise_builtins/typing/*.good.php.legacy_decl.exp))
+    (action (run %{project_root}/test/verify.py %{project_root}/test/sound_dynamic/typing/pessimise_builtins
+    --program %{exe:../../../../src/hh_single_type_check.exe}
+    --in-extension .good.php
+    --out-extension .legacy_decl.out
+    --expect-extension .legacy_decl.exp
+    --fallback-expect-extension .exp
+    --flags --enable-sound-dynamic-type
+    --out-extension .legacy_decl.out
+    )))
+
+(alias
+    (name sound_dynamic_typing_pessimise_builtins_bad)
+    (deps %{exe:../../../../src/hh_single_type_check.exe}
+          %{project_root}/test/verify.py
+          %{project_root}/test/review.sh
+          (glob_files %{project_root}/test/sound_dynamic/typing/pessimise_builtins/HH_FLAGS)
+          (glob_files %{project_root}/test/sound_dynamic/typing/pessimise_builtins/*.bad.php)
+          (glob_files %{project_root}/test/sound_dynamic/typing/pessimise_builtins/*.bad.php.exp)
+          (glob_files %{project_root}/test/sound_dynamic/typing/pessimise_builtins/*.bad.php.legacy_decl.exp))
+    (action (run %{project_root}/test/verify.py %{project_root}/test/sound_dynamic/typing/pessimise_builtins
+    --program %{exe:../../../../src/hh_single_type_check.exe}
+    --in-extension .bad.php
+    --out-extension .legacy_decl.out
+    --expect-extension .legacy_decl.exp
+    --fallback-expect-extension .exp
+    --flags --enable-sound-dynamic-type
+    --out-extension .legacy_decl.out
+    --error-format raw)))
+
+(alias
+    (name sound_dynamic_typing_pessimise_builtins_shallow_decl_good)
+    (deps %{exe:../../../../src/hh_single_type_check.exe}
+          %{project_root}/test/verify.py
+          %{project_root}/test/review.sh
+          (glob_files %{project_root}/test/sound_dynamic/typing/pessimise_builtins/HH_FLAGS)
+          (glob_files %{project_root}/test/sound_dynamic/typing/pessimise_builtins/*.good.php)
+          (glob_files %{project_root}/test/sound_dynamic/typing/pessimise_builtins/*.good.php.exp))
+    (action (run %{project_root}/test/verify.py %{project_root}/test/sound_dynamic/typing/pessimise_builtins
+    --program %{exe:../../../../src/hh_single_type_check.exe}
+    --in-extension .good.php
+    --flags --enable-sound-dynamic-type
+    --shallow-class-decl
+    )))
+
+(alias
+    (name sound_dynamic_typing_pessimise_builtins_shallow_decl_bad)
+    (deps %{exe:../../../../src/hh_single_type_check.exe}
+          %{project_root}/test/verify.py
+          %{project_root}/test/review.sh
+          (glob_files %{project_root}/test/sound_dynamic/typing/pessimise_builtins/HH_FLAGS)
+          (glob_files %{project_root}/test/sound_dynamic/typing/pessimise_builtins/*.bad.php)
+          (glob_files %{project_root}/test/sound_dynamic/typing/pessimise_builtins/*.bad.php.exp))
+    (action (run %{project_root}/test/verify.py %{project_root}/test/sound_dynamic/typing/pessimise_builtins
+    --program %{exe:../../../../src/hh_single_type_check.exe}
+    --in-extension .bad.php --flags --enable-sound-dynamic-type
+    --shallow-class-decl --error-format raw)))
+
+(alias
+    (name runtest)
+    (deps
+        (alias sound_dynamic_typing_pessimise_builtins_good)
+        (alias sound_dynamic_typing_pessimise_builtins_bad)
+        (alias sound_dynamic_typing_pessimise_builtins_shallow_decl_good)
+        (alias sound_dynamic_typing_pessimise_builtins_shallow_decl_bad)))

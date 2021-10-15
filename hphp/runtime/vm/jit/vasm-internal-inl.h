@@ -119,13 +119,6 @@ inline bool emit(Venv& env, const pushframe&) {
   return true;
 }
 
-inline bool emit(Venv& env, const popframe&) {
-  if (env.frame == -1) return true; // unreachable block
-
-  ++env.pending_frames;
-  return true;
-}
-
 inline bool emit(Venv& env, const recordbasenativesp& i) {
   return true;
 }
@@ -260,13 +253,23 @@ inline void Venv::record_inline_stack(TCA addr) {
   // Do not record stack if we are not inlining or the code is unreachable.
   if (frame <= 0) return;
 
-  uint32_t callOff = 0;
-  auto const func = unit.frames[frame].func;
-  auto const in_builtin = func && func->isCPPBuiltin();
-  if (origin && !in_builtin) {
-    callOff = origin->marker().bcOff();
+  // Do not record stack if all frames are already published.
+  if (pending_frames == 0) return;
+
+  assertx(pending_frames > 0);
+  auto pubFrame = frame;
+  for (auto i = pending_frames; i > 0; --i) {
+    assertx(pubFrame != Vframe::Root);
+    pubFrame = unit.frames[pubFrame].parent;
   }
-  stacks.emplace_back(addr, IStack{frame - 1, pending_frames, callOff});
+
+  pubFrame = pubFrame != Vframe::Root
+    ? pubFrame - 1 : kRootIFrameID;
+
+  assertx(frame != pubFrame);
+  assertx(origin->marker().fp()->inst()->is(BeginInlining));
+  stacks.emplace_back(
+    addr, IStack{frame - 1, pubFrame, origin->marker().bcOff()});
 }
 
 template<class Vemit>
@@ -368,7 +371,10 @@ void vasm_emit(Vunit& unit, Vtext& text, CGMeta& fixups,
   // Register inline frames.
   for (auto& f : unit.frames) {
     if (f.parent == Vframe::Top) continue; // skip the top frame
-    fixups.inlineFrames.emplace_back(IFrame{f.func, f.callOff, f.parent - 1});
+    auto const parent = f.parent != Vframe::Root
+      ? f.parent - 1 : kRootIFrameID;
+    fixups.inlineFrames.emplace_back(
+      IFrame{f.func, f.callOff, f.sbToRootSbOff.offset, parent});
   }
 
   // Register inline stacks.

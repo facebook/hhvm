@@ -1,0 +1,4 @@
+File "record_decl_bad_type_self.php", line 4, characters 3-6:
+Encountered unexpected text `self`, was expecting a type hint. (Parsing[1002])
+File "record_decl_bad_type_self.php", line 4, characters 8-8:
+A scope resolution operator `::` is expected here. (Parsing[1002])

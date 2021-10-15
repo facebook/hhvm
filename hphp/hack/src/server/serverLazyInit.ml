@@ -179,6 +179,7 @@ let merge_saved_state_futures
         Saved_state_loader.Naming_and_dep_table_info.naming_table_path =
           deptable_naming_table_blob_path;
         dep_table_path;
+        naming_sqlite_table_path;
         legacy_hot_decls_path;
         shallow_hot_decls_path;
         errors_path;
@@ -203,7 +204,10 @@ let merge_saved_state_futures
         ~ignore_hh_version
         ~fail_if_missing;
       let load_decls = genv.local_config.SLC.load_decls_from_saved_state in
-      let shallow_decls = genv.local_config.SLC.shallow_class_decl in
+      let shallow_decls =
+        genv.local_config.SLC.shallow_class_decl
+        || genv.local_config.SLC.force_shallow_decl_fanout
+      in
       let naming_table_fallback_path =
         get_naming_table_fallback_path genv downloaded_naming_table_path
       in
@@ -236,6 +240,16 @@ let merge_saved_state_futures
         let dirty_naming_files = Relative_path.Set.of_list dirty_naming_files in
         let dirty_master_files = dirty_master_files in
         let dirty_local_files = dirty_local_files in
+        let naming_table_fallback_path =
+          if
+            genv.local_config.SLC.use_hack_64_naming_table
+            && Sys.file_exists (Path.to_string naming_sqlite_table_path)
+          then (
+            Hh_logger.log "Using sqlite naming table from hack/64 saved state";
+            Some (Path.to_string naming_sqlite_table_path)
+          ) else
+            naming_table_fallback_path
+        in
         Ok
           {
             naming_table_fn = Path.to_string deptable_naming_table_blob_path;
@@ -520,6 +534,29 @@ let names_to_deps (deps_mode : Typing_deps_mode.t) (names : FileInfo.names) :
   let deps = add_deps_of_sset (fun n -> Dep.GConstName n) n_consts deps in
   deps
 
+let log_fanout_information to_recheck_deps files_to_recheck =
+  (* we use lazy here to avoid expensive string generation when logging
+       * is not enabled *)
+  Hh_logger.log_lazy ~category:"fanout_information"
+  @@ lazy
+       Hh_json.(
+         json_to_string
+         @@ JSON_Object
+              [
+                ("tag", string_ "saved_state_init_fanout");
+                ( "hashes",
+                  array_
+                    string_
+                    Typing_deps.(
+                      List.map ~f:Dep.to_hex_string
+                      @@ DepSet.elements to_recheck_deps) );
+                ( "files",
+                  array_
+                    string_
+                    Relative_path.(
+                      List.map ~f:suffix @@ Set.elements files_to_recheck) );
+              ])
+
 (** Compare declarations loaded from the saved state to declarations based on
     the current versions of dirty files. This lets us check a smaller set of
     files than the set we'd check if old declarations were not available.
@@ -578,24 +615,9 @@ let get_files_to_undecl_and_recheck
   Decl_redecl_service.remove_old_defs ctx ~bucket_size genv.workers dirty_names;
   let to_recheck_deps = Typing_deps.add_all_deps env.deps_mode to_redecl in
   let to_recheck_deps = Typing_deps.DepSet.union to_recheck_deps to_recheck in
-  let files_to_undecl = Typing_deps.Files.get_files to_redecl in
-  let files_to_recheck = Typing_deps.Files.get_files to_recheck_deps in
-  (* we use lazy here to avoid expensive string generation when logging
-       * is not enabled *)
-  Hh_logger.log_lazy ~category:"fanout_information"
-  @@ lazy
-       Hh_json.(
-         json_to_string
-         @@ JSON_Object
-              [
-                ("tag", string_ "saved_state_init_fanout");
-                ( "hashes",
-                  array_
-                    string_
-                    Typing_deps.(
-                      List.map ~f:Dep.to_hex_string
-                      @@ DepSet.elements to_recheck_deps) );
-              ]);
+  let files_to_undecl = Naming_provider.ByHash.get_files ctx to_redecl in
+  let files_to_recheck = Naming_provider.ByHash.get_files ctx to_recheck_deps in
+  log_fanout_information to_recheck_deps files_to_recheck;
 
   (files_to_undecl, files_to_recheck)
 
@@ -687,7 +709,9 @@ let type_check_dirty
           get_files_to_undecl_and_recheck dirty_local_files_changed_hash
         else
           let deps = Typing_deps.add_all_deps env.deps_mode local_deps in
-          (Relative_path.Set.empty, Typing_deps.Files.get_files deps)
+          let files = Naming_provider.ByHash.get_files ctx deps in
+          log_fanout_information deps files;
+          (Relative_path.Set.empty, files)
       in
       ( ServerPrecheckedFiles.set
           env
@@ -708,7 +732,9 @@ let type_check_dirty
         else
           let deps = Typing_deps.DepSet.union master_deps local_deps in
           let deps = Typing_deps.add_all_deps env.deps_mode deps in
-          (Relative_path.Set.empty, Typing_deps.Files.get_files deps)
+          let files = Naming_provider.ByHash.get_files ctx deps in
+          log_fanout_information deps files;
+          (Relative_path.Set.empty, files)
       in
       (env, to_undecl, to_recheck)
   in
@@ -856,6 +882,7 @@ let initialize_naming_table
     (progress_message : string)
     ?(fnl : Relative_path.t list option = None)
     ?(do_naming : bool = false)
+    ~(cache_decls : bool)
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
     (profiling : CgroupProfiler.Profiling.t) : ServerEnv.env * float =
@@ -887,6 +914,7 @@ let initialize_naming_table
       ?count
       t
       ~trace
+      ~cache_decls
       ~profile_label:"lazy.nt.parsing"
       ~profiling
   in
@@ -915,6 +943,7 @@ let write_symbol_info_init
     (profiling : CgroupProfiler.Profiling.t) : ServerEnv.env * float =
   let (env, t) =
     initialize_naming_table
+      ~cache_decls:true
       "write symbol info initialization"
       genv
       env
@@ -1040,109 +1069,54 @@ let full_init
       (Telemetry.create ()
       |> Telemetry.int_ ~key:"existing_name_count" ~value:existing_name_count)
   end;
-  let run () =
-    let (env, t) =
-      initialize_naming_table
-        ~do_naming:true
-        "full initialization"
-        genv
-        env
-        profiling
-    in
-    if not is_check_mode then
-      SearchServiceRunner.update_fileinfo_map
-        env.naming_table
-        ~source:SearchUtils.Init;
-    let fast = Naming_table.to_fast env.naming_table in
-    let failed_parsing = Errors.get_failed_files env.errorl Errors.Parsing in
-    let fast =
-      Relative_path.Set.fold
-        failed_parsing
-        ~f:(fun x m -> Relative_path.Map.remove m x)
-        ~init:fast
-    in
-    let fnl = Relative_path.Map.keys fast in
-    let env =
-      if is_check_mode then
-        start_delegate_if_needed env genv (List.length fnl) env.errorl
-      else
-        env
-    in
-    ServerInitCommon.type_check
+  Hh_logger.log "full init";
+  let (env, t) =
+    initialize_naming_table
+      ~do_naming:true
+      ~cache_decls:true
+      "full initialization"
       genv
       env
-      fnl
-      init_telemetry
-      t
-      ~profile_label:"lazy.full.type_check"
-      ~profiling
+      profiling
   in
-  let run_experiment () =
-    let ctx = Provider_utils.ctx_from_server_env env in
-    let t_full_init = Unix.gettimeofday () in
-    let fast =
-      Direct_decl_service.go
-        ctx
-        genv.workers
-        (fst
-           (ServerInitCommon.indexing
-              ~profile_label:"lazy.full.experiment.indexing"
-              genv))
-    in
-    let t = Hh_logger.log_duration "parsing decl" t_full_init in
-    let naming_table = Naming_table.update_many env.naming_table fast in
-    let t = Hh_logger.log_duration "updating naming table" t in
-    let env = { env with naming_table } in
-    let t =
-      ServerInitCommon.update_files
-        genv
-        env.naming_table
-        ctx
-        t
-        ~profile_label:"lazy.full.experiment.update"
-        ~profiling
-    in
-    let (env, t) =
-      ServerInitCommon.naming
-        env
-        t
-        ~profile_label:"lazy.full.experiment.naming"
-        ~profiling
-    in
-    let fnl = Relative_path.Map.keys fast in
-    if not is_check_mode then
-      SearchServiceRunner.update_fileinfo_map
-        env.naming_table
-        ~source:SearchUtils.Init;
-    let type_check_result =
-      ServerInitCommon.type_check
-        genv
-        env
-        fnl
-        init_telemetry
-        t
-        ~profile_label:"lazy.full.experiment.type_check"
-        ~profiling
-    in
-    Hh_logger.log_duration "full init" t_full_init |> ignore;
-    type_check_result
+  if not is_check_mode then
+    SearchServiceRunner.update_fileinfo_map
+      env.naming_table
+      ~source:SearchUtils.Init;
+  let fast = Naming_table.to_fast env.naming_table in
+  let failed_parsing = Errors.get_failed_files env.errorl Errors.Parsing in
+  let fast =
+    Relative_path.Set.fold
+      failed_parsing
+      ~f:(fun x m -> Relative_path.Map.remove m x)
+      ~init:fast
   in
-  if
-    GlobalOptions.tco_use_direct_decl_parser
-      (ServerConfig.parser_options genv.config)
-  then (
-    Hh_logger.log "full init experiment";
-    run_experiment ()
-  ) else (
-    Hh_logger.log "full init";
-    run ()
-  )
+  let fnl = Relative_path.Map.keys fast in
+  let env =
+    if is_check_mode then
+      start_delegate_if_needed env genv (List.length fnl) env.errorl
+    else
+      env
+  in
+  ServerInitCommon.type_check
+    genv
+    env
+    fnl
+    init_telemetry
+    t
+    ~profile_label:"lazy.full.type_check"
+    ~profiling
 
 let parse_only_init
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
     (profiling : CgroupProfiler.Profiling.t) : ServerEnv.env * float =
-  initialize_naming_table "parse-only initialization" genv env profiling
+  initialize_naming_table
+    ~cache_decls:false
+    "parse-only initialization"
+    genv
+    env
+    profiling
 
 let post_saved_state_initialization
     ~(genv : ServerEnv.genv)
@@ -1267,6 +1241,7 @@ let post_saved_state_initialization
       ~count:(List.length parsing_files_list)
       t
       ~trace
+      ~cache_decls:false (* Don't overwrite old decls loaded from saved state *)
       ~profile_label:"post_ss1.parsing"
       ~profiling
   in

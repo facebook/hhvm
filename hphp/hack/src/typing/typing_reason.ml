@@ -98,7 +98,6 @@ type _ t_ =
       (** splat pos, fun def pos, number of args before splat *)
   | Rinout_param : Pos_or_decl.t -> 'phase t_
   | Rinstantiate : 'phase t_ * string * 'phase t_ -> 'phase t_
-  | Rarray_filter : Pos.t * locl_phase t_ -> locl_phase t_
   | Rtypeconst :
       'phase t_ * (Pos_or_decl.t * string) * string * 'phase t_
       -> 'phase t_
@@ -418,14 +417,6 @@ let rec to_string : type ph. string -> ph t_ -> (Pos_or_decl.t * string) list =
     ]
   | Rsolve_fail _ ->
     [(p, prefix ^ " because a type could not be determined here")]
-  | Rarray_filter (_, r) ->
-    to_string prefix r
-    @ [
-        ( p,
-          "`array_filter` converts `KeyedContainer<Tk, Tv>` to `array<Tk, Tv>`, and `Container<Tv>` to `array<arraykey, Tv>`. "
-          ^ "Single argument calls additionally remove nullability from `Tv`."
-        );
-      ]
   | Rtypeconst (Rnone, (pos, tconst), ty_str, r_root) ->
     let prefix =
       if String.equal prefix "" then
@@ -665,7 +656,6 @@ and to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
   | Runknown_class p
   | Rvar_param p
   | Runpack_param (p, _, _)
-  | Rarray_filter (p, _)
   | Rnullsafe_op p
   | Rpredicated (p, _)
   | Ris p
@@ -785,7 +775,6 @@ let to_constructor_string : type ph. ph t_ -> string = function
   | Runpack_param _ -> "Runpack_param"
   | Rinout_param _ -> "Rinout_param"
   | Rinstantiate _ -> "Rinstantiate"
-  | Rarray_filter _ -> "Rarray_filter"
   | Rtypeconst _ -> "Rtypeconst"
   | Rtype_access _ -> "Rtype_access"
   | Rexpr_dep_type _ -> "Rexpr_dep_type"

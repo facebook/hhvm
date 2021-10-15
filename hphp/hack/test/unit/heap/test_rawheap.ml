@@ -13,8 +13,6 @@ type key = Digest.t
 module IntVal = struct
   type t = int
 
-  let prefix = Prefix.make ()
-
   let description = "Test_IntVal"
 end
 
@@ -66,7 +64,7 @@ let test_add_raw_get_raw () =
   let test_key_val key value =
     let entry = SharedMem.RawAccess.serialize_raw value in
     let () = SharedMem.RawAccess.add_raw key entry in
-    let entry2 = SharedMem.RawAccess.get_raw key in
+    let entry2 = Option.get (SharedMem.RawAccess.get_raw key) in
     let value2 = SharedMem.RawAccess.deserialize_raw entry2 in
     expect ~msg:(Format.sprintf "%s add/get failed" key) (value = value2)
   in

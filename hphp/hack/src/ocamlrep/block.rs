@@ -86,11 +86,11 @@ impl<'a> Block<'a> {
         self.header().tag()
     }
 
-    pub fn as_value(&self) -> Value {
+    pub fn as_value(&self) -> Value<'_> {
         unsafe { Value::from_ptr(&self.0[1]) }
     }
 
-    pub fn as_values(&self) -> Option<&[Value]> {
+    pub fn as_values(&self) -> Option<&[Value<'_>]> {
         if self.tag() >= NO_SCAN_TAG {
             return None;
         }
@@ -142,7 +142,7 @@ impl<'a> Index<usize> for Block<'a> {
 }
 
 impl Debug for Block<'_> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if self.tag() == STRING_TAG {
             write!(f, "{:?}", self.as_value().as_str().unwrap())
         } else if self.tag() == DOUBLE_TAG {
@@ -181,7 +181,7 @@ impl Header {
 }
 
 impl Debug for Header {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Header")
             .field("size", &self.size())
             .field("tag", &self.tag())

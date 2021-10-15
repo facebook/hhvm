@@ -28,6 +28,7 @@ type env = {
   parser_options: ParserOptions.t;
   file: Relative_path.t;
   disable_global_state_mutation: bool;
+  is_systemlib: bool;
 }
 [@@deriving show]
 
@@ -42,6 +43,7 @@ let make_env
     ?(fail_open = true)
     ?(parser_options = ParserOptions.default)
     ?(disable_global_state_mutation = false)
+    ?(is_systemlib = false)
     (file : Relative_path.t) : env =
   let parser_options = ParserOptions.with_codegen parser_options codegen in
   {
@@ -56,6 +58,7 @@ let make_env
     fail_open;
     file;
     disable_global_state_mutation;
+    is_systemlib;
   }
 
 let should_surface_errors env =
@@ -135,6 +138,7 @@ let from_text_rust (env : env) (source_text : SourceText.t) :
         quick_mode = env.quick_mode;
         show_all_errors = env.show_all_errors;
         fail_open = env.fail_open;
+        is_systemlib = env.is_systemlib;
         parser_options = env.parser_options;
       }
   in

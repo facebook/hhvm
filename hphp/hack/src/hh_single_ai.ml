@@ -337,7 +337,7 @@ let decl_and_run_mode
       ~init:files_contents
   in
   Relative_path.Map.iter files_contents ~f:(fun filename contents ->
-      File_provider.(provide_file filename (Disk contents)));
+      File_provider.(provide_file_for_tests filename contents));
   (* Don't declare all the filenames in batch_errors mode *)
   let to_decl = files_contents_with_builtins in
   let ctx =

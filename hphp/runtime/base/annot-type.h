@@ -37,18 +37,16 @@ struct TypedValue;
 enum class AnnotMetaType : uint8_t {
   Precise = 0,
   Mixed = 1,
-  Self = 2,
-  Parent = 3,
-  Callable = 4,
-  Number = 5,
-  ArrayKey = 6,
-  This = 7,
-  VecOrDict = 8,
-  ArrayLike = 9,
-  Nonnull = 10,
-  NoReturn = 11,
-  Nothing = 12,
-  Classname = 13,
+  Callable = 2,
+  Number = 3,
+  ArrayKey = 4,
+  This = 5,
+  VecOrDict = 6,
+  ArrayLike = 7,
+  Nonnull = 8,
+  NoReturn = 9,
+  Nothing = 10,
+  Classname = 11,
 };
 
 enum class AnnotType : uint16_t {
@@ -65,8 +63,6 @@ enum class AnnotType : uint16_t {
   // Precise is intentionally excluded
   Mixed    = (uint16_t)AnnotMetaType::Mixed << 8        | (uint8_t)KindOfUninit,
   Nonnull  = (uint16_t)AnnotMetaType::Nonnull << 8      | (uint8_t)KindOfUninit,
-  Self     = (uint16_t)AnnotMetaType::Self << 8         | (uint8_t)KindOfUninit,
-  Parent   = (uint16_t)AnnotMetaType::Parent << 8       | (uint8_t)KindOfUninit,
   Callable = (uint16_t)AnnotMetaType::Callable << 8     | (uint8_t)KindOfUninit,
   Number   = (uint16_t)AnnotMetaType::Number << 8       | (uint8_t)KindOfUninit,
   ArrayKey = (uint16_t)AnnotMetaType::ArrayKey << 8     | (uint8_t)KindOfUninit,

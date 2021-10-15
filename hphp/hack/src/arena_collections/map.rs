@@ -571,7 +571,6 @@ mod tests_arbitrary {
     use super::*;
     use bumpalo::Bump;
     use quickcheck::*;
-    use rand::Rng;
     use std::collections::{BTreeMap, BTreeSet, HashMap};
     use std::hash::Hash;
 
@@ -608,21 +607,21 @@ mod tests_arbitrary {
     }
 
     impl<T: Arbitrary + Ord + Hash, V: Arbitrary + Eq + Hash> Arbitrary for ActionSequence<T, V> {
-        fn arbitrary<G: Gen>(g: &mut G) -> Self {
+        fn arbitrary(g: &mut Gen) -> Self {
             let size = {
                 let s = g.size();
-                g.gen_range(0, s)
+                usize::arbitrary(g) % s
             };
             let mut elements: BTreeSet<T> = BTreeSet::new();
             let mut actions: Vec<Action<T, V>> = Vec::with_capacity(size);
             for _ in 0..size {
-                let r = g.gen::<f64>();
+                let r = f64::arbitrary(g);
                 if r < 0.1 {
                     let key: T = Arbitrary::arbitrary(g);
                     elements.remove(&key);
                     actions.push(Action::Remove(key));
                 } else if !elements.is_empty() && r < 0.3 {
-                    let index = g.gen_range(0, elements.len());
+                    let index = usize::arbitrary(g) % elements.len();
                     let key: T = elements.iter().nth(index).unwrap().clone();
                     elements.remove(&key);
                     actions.push(Action::Remove(key));
@@ -682,7 +681,7 @@ mod tests_arbitrary {
         fn prop_action_seq(actions: ActionSequence<u32, u32>) -> bool {
             let ActionSequence(ref actions) = actions;
             let a = Bump::new();
-            let mut m: Map<u32, u32> = Map::empty();
+            let mut m: Map<'_, u32, u32> = Map::empty();
             let mut o: BTreeMap<u32, u32> = BTreeMap::new();
             for action in actions {
                 match action {

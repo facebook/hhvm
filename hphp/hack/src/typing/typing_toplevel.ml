@@ -369,9 +369,9 @@ let fun_def ctx fd :
     Typing.type_capability env f.f_ctxs f.f_unsafe_ctxs (fst f.f_name)
   in
   let env =
-    Env.set_module
-      env
-      (Naming_attributes_params.get_module_attribute f.f_user_attributes)
+    Env.set_module env
+    @@ Typing_modules.of_maybe_string
+    @@ Naming_attributes_params.get_module_attribute f.f_user_attributes
   in
   let env =
     Env.set_internal
@@ -423,6 +423,9 @@ let fun_def ctx fd :
       return_ty
       return_decl_ty
   in
+  let (env, _) =
+    Typing_coeffects.register_capabilities env cap_ty unsafe_cap_ty
+  in
   let sound_dynamic_check_saved_env = env in
   let (env, param_tys) =
     List.zip_exn f.f_params params_decl_ty
@@ -433,13 +436,21 @@ let fun_def ctx fd :
   let check_has_hint p t = check_param_has_hint env p t partial_callback in
   List.iter2_exn ~f:check_has_hint f.f_params param_tys;
   let params_need_immutable = get_ctx_vars f.f_ctxs in
+  let can_read_globals =
+    Typing_subtype.is_sub_type
+      env
+      cap_ty
+      (MakeType.capability (get_reason cap_ty) SN.Capabilities.accessGlobals)
+  in
   let (env, typed_params) =
     let bind_param_and_check env param =
       let name = (snd param).param_name in
       let immutable =
         List.exists ~f:(String.equal name) params_need_immutable
       in
-      let (env, fun_param) = Typing.bind_param ~immutable env param in
+      let (env, fun_param) =
+        Typing.bind_param ~immutable ~can_read_globals env param
+      in
       (env, fun_param)
     in
     List.map_env env (List.zip_exn param_tys f.f_params) ~f:bind_param_and_check
@@ -460,9 +471,6 @@ let fun_def ctx fd :
     Naming_attributes.mem
       SN.UserAttributes.uaDisableTypecheckerInternal
       f.f_user_attributes
-  in
-  let (env, _) =
-    Typing_coeffects.register_capabilities env cap_ty unsafe_cap_ty
   in
   Typing_memoize.check_function env f;
   let (env, tb) = Typing.fun_ ~disable env return pos f.f_body f.f_fun_kind in
@@ -531,7 +539,7 @@ let fun_def ctx fd :
 let method_dynamically_callable
     env cls m params_decl_ty variadicity_decl_ty ret_locl_ty =
   let env = { env with in_support_dynamic_type_method_check = true } in
-  (* Add `dynamic` lower and upper bound to any type parameters that are not marked <<__NoRequireDynamic>> *)
+  (* Add `dynamic` lower and upper bound to any type parameters that are marked <<__RequireDynamic>> *)
   let env_with_require_dynamic =
     Typing_dynamic.add_require_dynamic_bounds env cls
   in
@@ -666,7 +674,7 @@ let method_dynamically_callable
   in
   if not interface_check then method_body_check ()
 
-let method_def env cls m =
+let method_def ~is_disposable env cls m =
   Errors.run_with_span m.m_span @@ fun () ->
   with_timeout env m.m_name @@ fun env ->
   FunUtils.check_params m.m_params;
@@ -709,14 +717,10 @@ let method_def env cls m =
     | _ -> env
   in
   let env =
-    match Env.get_self_class env with
-    | None -> env
-    | Some c ->
-      (* Mark $this as a using variable if it has a disposable type *)
-      if Cls.is_disposable c then
-        Env.set_using_var env this
-      else
-        env
+    if is_disposable then
+      Env.set_using_var env this
+    else
+      env
   in
   let env = Env.clear_params env in
   let (ret_decl_ty, params_decl_ty, variadicity_decl_ty) =
@@ -769,13 +773,21 @@ let method_def env cls m =
   List.iter2_exn ~f:param_fn m.m_params param_tys;
   Typing_memoize.check_method env m;
   let params_need_immutable = get_ctx_vars m.m_ctxs in
+  let can_read_globals =
+    Typing_subtype.is_sub_type
+      env
+      cap_ty
+      (MakeType.capability (get_reason cap_ty) SN.Capabilities.accessGlobals)
+  in
   let (env, typed_params) =
     let bind_param_and_check env param =
       let name = (snd param).param_name in
       let immutable =
         List.exists ~f:(String.equal name) params_need_immutable
       in
-      let (env, fun_param) = Typing.bind_param ~immutable env param in
+      let (env, fun_param) =
+        Typing.bind_param ~immutable ~can_read_globals env param
+      in
       (env, fun_param)
     in
     List.map_env env (List.zip_exn param_tys m.m_params) ~f:bind_param_and_check
@@ -1364,18 +1376,6 @@ let typeconst_def
         | None -> env
       in
       env
-    | TCPartiallyAbstract { c_patc_constraint = cstr; c_patc_type = ty } ->
-      let (env, cstr) =
-        Phase.localize_hint_no_subst ~ignore_errors:false env cstr
-      in
-      let (env, ty) =
-        Phase.localize_hint_no_subst
-          ~ignore_errors:false
-          ~report_cycle:(pos, name)
-          env
-          ty
-      in
-      Type.sub_type pos Reason.URtypeconst_cstr env ty cstr Errors.unify_error
     | TCConcrete { c_tc_type = ty } ->
       let (env, _ty) =
         Phase.localize_hint_no_subst
@@ -1393,8 +1393,6 @@ let typeconst_def
   let env =
     match c_tconst_kind with
     | TCConcrete { c_tc_type = (pos, Hshape { nsi_field_map; _ }) }
-    | TCPartiallyAbstract
-        { c_patc_type = (pos, Hshape { nsi_field_map; _ }); _ }
     | TCAbstract { c_atc_default = Some (pos, Hshape { nsi_field_map; _ }); _ }
       ->
       let get_name sfi = sfi.sfi_name in
@@ -1507,7 +1505,7 @@ let class_const_def ~in_enum_class c env cc =
         (* Enum class constant initializers are restricted to be `write_props` *)
         let make_hint pos s = (pos, Aast.Happly ((pos, s), [])) in
         let enum_class_ctx =
-          Some (e_pos, [make_hint e_pos SN.Capabilities.writeProperty])
+          Some (e_pos, [make_hint e_pos SN.Capabilities.write_props])
         in
         Typing.type_capability env enum_class_ctx enum_class_ctx e_pos
       in
@@ -1546,9 +1544,9 @@ let class_const_def ~in_enum_class c env cc =
       },
       ty ) )
 
-let class_constr_def env cls constructor =
+let class_constr_def ~is_disposable env cls constructor =
   let env = { env with inside_constructor = true } in
-  Option.bind constructor ~f:(method_def env cls)
+  Option.bind constructor ~f:(method_def ~is_disposable env cls)
 
 (** Type-check a property declaration, with optional initializer *)
 let class_var_def ~is_static cls env cv =
@@ -1635,7 +1633,7 @@ let class_var_def ~is_static cls env cv =
       (Provider_context.get_tcopt (Env.get_ctx env))
     && Cls.get_support_dynamic_type cls
     && not (Aast.equal_visibility cv.cv_visibility Private)
-  then begin
+  then (
     let env_with_require_dynamic =
       Typing_dynamic.add_require_dynamic_bounds env cls
     in
@@ -1645,14 +1643,15 @@ let class_var_def ~is_static cls env cv =
           env_with_require_dynamic
           (Cls.name cls)
           cv.cv_id
-          ty);
+          ty
+          (Some cv_type_ty));
     Typing_dynamic.check_property_sound_for_dynamic_read
       ~on_error:Errors.property_is_not_dynamic
       env_with_require_dynamic
       (Cls.name cls)
       cv.cv_id
       cv_type_ty
-  end;
+  );
   ( env,
     ( {
         Aast.cv_final = cv.cv_final;
@@ -1718,7 +1717,7 @@ let check_generic_class_with_SupportDynamicType env c parents =
     (* Any class that extends a class or implements an interface
      * that declares <<__SupportDynamicType>> must itself declare
      * <<__SupportDynamicType>>. This is checked elsewhere. But if any generic
-     * parameters are not marked <<__NoRequireDynamic>> then we must check that the
+     * parameters are marked <<__RequireDynamic>> then we must check that the
      * conditional support for dynamic is sound.
      * We require that
      *    If t <: dynamic
@@ -1799,25 +1798,32 @@ let check_SupportDynamicType env c =
         (Cls.name parent, Cls.kind parent)
         f
     in
-    List.iter parent_names ~f:(fun name ->
-        match Env.get_class_dep env name with
-        | Some parent_type ->
-          begin
-            match Cls.kind parent_type with
-            | Ast_defs.Cclass _
-            | Ast_defs.Cinterface ->
-              (* ensure that we implement dynamic if we are a subclass/subinterface of a class/interface
-               * that implements dynamic.  Upward well-formedness checks are performed in Typing_extends *)
-              if
-                Cls.get_support_dynamic_type parent_type
-                && not support_dynamic_type
-              then
-                error_parent_support_dynamic_type
-                  parent_type
-                  support_dynamic_type
-            | Ast_defs.(Cenum | Cenum_class _ | Ctrait) -> ()
-          end
-        | None -> ())
+    match c.c_kind with
+    | Ast_defs.(Cenum | Cenum_class _) ->
+      (* Avoid parent SDT check on things that cannot be SDT themselves *)
+      ()
+    | Ast_defs.Cclass _
+    | Ast_defs.Cinterface
+    | Ast_defs.Ctrait ->
+      List.iter parent_names ~f:(fun name ->
+          match Env.get_class_dep env name with
+          | Some parent_type ->
+            begin
+              match Cls.kind parent_type with
+              | Ast_defs.Cclass _
+              | Ast_defs.Cinterface ->
+                (* ensure that we implement dynamic if we are a subclass/subinterface of a class/interface
+                 * that implements dynamic.  Upward well-formedness checks are performed in Typing_extends *)
+                if
+                  Cls.get_support_dynamic_type parent_type
+                  && not support_dynamic_type
+                then
+                  error_parent_support_dynamic_type
+                    parent_type
+                    support_dynamic_type
+              | Ast_defs.(Cenum | Cenum_class _ | Ctrait) -> ()
+            end
+          | None -> ())
 
 let class_def_ env c tc =
   let env =
@@ -1984,7 +1990,8 @@ let class_def_ env c tc =
         ~parents:(List.map impl ~f:snd)
         (fst c.c_name, tc)
   in
-  if (not (skip_hierarchy_checks ctx)) && Cls.is_disposable tc then
+  let is_disposable = Typing_disposable.is_disposable_class env tc in
+  if (not (skip_hierarchy_checks ctx)) && is_disposable then
     List.iter
       (c.c_extends @ c.c_uses)
       ~f:(Typing_disposable.enforce_is_disposable env);
@@ -1995,7 +2002,7 @@ let class_def_ env c tc =
     List.unzip typed_vars_and_global_inference_envs
   in
   let (typed_methods, methods_global_inference_envs) =
-    List.filter_map methods ~f:(method_def env tc) |> List.unzip
+    List.filter_map methods ~f:(method_def ~is_disposable env tc) |> List.unzip
   in
   let (env, typed_typeconsts) =
     List.map_env env c.c_typeconsts ~f:(typeconst_def c)
@@ -2006,7 +2013,7 @@ let class_def_ env c tc =
   in
   let (typed_consts, const_types) = List.unzip consts in
   let env = Typing_enum.enum_class_check env tc c.c_consts const_types in
-  let typed_constructor = class_constr_def env tc constructor in
+  let typed_constructor = class_constr_def ~is_disposable env tc constructor in
   let env = Env.set_static env in
   let (env, typed_static_vars_and_global_inference_envs) =
     List.map_env env static_vars ~f:(class_var_def ~is_static:true tc)
@@ -2015,7 +2022,8 @@ let class_def_ env c tc =
     List.unzip typed_static_vars_and_global_inference_envs
   in
   let (typed_static_methods, static_methods_global_inference_envs) =
-    List.filter_map static_methods ~f:(method_def env tc) |> List.unzip
+    List.filter_map static_methods ~f:(method_def ~is_disposable env tc)
+    |> List.unzip
   in
   let (methods, constr_global_inference_env) =
     match typed_constructor with
@@ -2081,9 +2089,9 @@ let class_def ctx c =
   let env = Env.set_env_pessimize env in
   Typing_helpers.add_decl_errors (Option.bind tc ~f:Cls.decl_errors);
   let env =
-    Env.set_module
-      env
-      (Naming_attributes_params.get_module_attribute c.c_user_attributes)
+    Env.set_module env
+    @@ Typing_modules.of_maybe_string
+    @@ Naming_attributes_params.get_module_attribute c.c_user_attributes
   in
   let env =
     Env.set_internal

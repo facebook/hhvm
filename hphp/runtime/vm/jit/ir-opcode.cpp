@@ -62,6 +62,7 @@ TRACE_SET_MOD(hhir);
 #define DArrLikeUnset  HasDest
 #define DArrLikeAppend HasDest
 #define DKeysetElem    HasDest
+#define DEscalateToVanilla HasDest
 #define DBespokeElemLval  HasDest
 #define DVecKey           HasDest
 #define DFirstElem        HasDest
@@ -83,8 +84,8 @@ TRACE_SET_MOD(hhir);
 #define DLvalOfPtr     HasDest
 #define DPtrIter       HasDest
 #define DPtrIterVal    HasDest
-#define DEscalateToVanilla HasDest
 #define DTypeCnsClsName HasDest
+#define DVerifyParamFail HasDest
 
 namespace {
 template<Opcode op, uint64_t flags>
@@ -159,6 +160,10 @@ OpInfo g_opInfo[] = {
 #undef DUnion
 #undef DMemoKey
 #undef DLvalOfPtr
+#undef DPtrIter
+#undef DPtrIterVal
+#undef DTypeCnsClsName
+#undef DVerifyParamFail
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -263,7 +268,8 @@ bool opcodeMayRaise(Opcode opc) {
   switch (opc) {
   case IsTypeStruct:
     return RuntimeOption::EvalIsExprEnableUnresolvedWarning ||
-           RuntimeOption::EvalIsVecNotices;
+           RuntimeOption::EvalIsVecNotices ||
+           RuntimeOption::EvalWarnOnImplicitCoercionOfEnumValue;
 
   case AddNewElemKeyset:
   case AFWHPrepareChild:
@@ -406,7 +412,6 @@ bool opcodeMayRaise(Opcode opc) {
   case RaiseErrorOnInvalidIsAsExpressionType:
   case RaiseForbiddenDynCall:
   case RaiseForbiddenDynConstruct:
-  case RaiseReadonlyPropViolation:
   case RaiseNotice:
   case RaiseStrToClassNotice:
   case RaiseTooManyArg:
@@ -447,12 +452,14 @@ bool opcodeMayRaise(Opcode opc) {
   case ThrowLateInitPropError:
   case ThrowMissingArg:
   case ThrowMissingThis:
+  case ThrowOrWarnCannotModifyReadonlyCollection:
+  case ThrowOrWarnLocalMustBeValueTypeException:
+  case ThrowOrWarnMustBeEnclosedInReadonly:
+  case ThrowOrWarnMustBeMutableException:
+  case ThrowOrWarnMustBeReadonlyException:
+  case ThrowOrWarnMustBeValueTypeException:
   case ThrowOutOfBounds:
   case ThrowParameterWrongType:
-  case ThrowMustBeEnclosedInReadonly:
-  case ThrowMustBeMutableException:
-  case ThrowMustBeReadonlyException:
-  case ThrowMustBeValueTypeException:
   case UnsetElem:
   case UnsetProp:
   case VecSet:
@@ -663,7 +670,6 @@ bool opcodeMayRaise(Opcode opc) {
   case InitVecElem:
   case InitVecElemLoop:
   case InlineCall:
-  case InlineReturn:
   case InstanceOf:
   case InstanceOfBitmask:
   case InstanceOfIface:
@@ -753,6 +759,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LdObjClass:
   case LdObjInvoke:
   case LdOutAddr:
+  case LdOutAddrInlined:
   case LdPairElem:
   case LdPropAddr:
   case LdPtrIterKey:
@@ -778,7 +785,6 @@ bool opcodeMayRaise(Opcode opc) {
   case LdMonotypeDictVal:
   case LdMonotypeVecElem:
   case LdMROProp:
-  case LdMROPropAddr:
   case LdStructDictElem:
   case LdVecElem:
   case LdVecElemAddr:

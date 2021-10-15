@@ -33,6 +33,7 @@ val stmt : Typing_env_types.env -> Nast.stmt -> Typing_env_types.env * Tast.stmt
 val bind_param :
   Typing_env_types.env ->
   ?immutable:bool ->
+  ?can_read_globals:bool ->
   Typing_defs.locl_ty * Nast.fun_param ->
   Typing_env_types.env * Tast.fun_param
 
@@ -80,10 +81,13 @@ val call :
   Pos.t ->
   Typing_env_types.env ->
   Typing_defs.locl_ty ->
-  Nast.expr list ->
+  (Ast_defs.param_kind * Nast.expr) list ->
   Nast.expr option ->
   Typing_env_types.env
-  * (Tast.expr list * Tast.expr option * Typing_defs.locl_ty * bool)
+  * ((Ast_defs.param_kind * Tast.expr) list
+    * Tast.expr option
+    * Typing_defs.locl_ty
+    * bool)
 
 val with_special_coeffects :
   Typing_env_types.env ->

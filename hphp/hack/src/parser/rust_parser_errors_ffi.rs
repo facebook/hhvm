@@ -46,7 +46,6 @@ unsafe fn parser_options_from_ocaml_only_for_parser_errors(
     let po_const_default_lambda_args = bool::from_ocaml(*ocaml_opts.add(16)).unwrap();
     let po_disable_array_typehint = bool::from_ocaml(*ocaml_opts.add(17)).unwrap();
     let po_allow_unstable_features = bool::from_ocaml(*ocaml_opts.add(18)).unwrap();
-    let po_disallow_hash_comments = bool::from_ocaml(*ocaml_opts.add(19)).unwrap();
     let po_disallow_fun_and_cls_meth_pseudo_funcs = bool::from_ocaml(*ocaml_opts.add(20)).unwrap();
     let po_disallow_inst_meth = bool::from_ocaml(*ocaml_opts.add(23)).unwrap();
 
@@ -66,7 +65,6 @@ unsafe fn parser_options_from_ocaml_only_for_parser_errors(
     parser_options.po_disable_array = po_disable_array;
     parser_options.po_disable_array_typehint = po_disable_array_typehint;
     parser_options.po_allow_unstable_features = po_allow_unstable_features;
-    parser_options.po_disallow_hash_comments = po_disallow_hash_comments;
     parser_options.po_disallow_fun_and_cls_meth_pseudo_funcs =
         po_disallow_fun_and_cls_meth_pseudo_funcs;
     parser_options.po_disallow_inst_meth = po_disallow_inst_meth;
@@ -99,7 +97,7 @@ ocaml_ffi! {
              (tree, arena)
         };
 
-        let errors = rust_parser_errors::parse_errors(
+        let (errors, _) = rust_parser_errors::parse_errors(
             &tree,
             parser_options,
             hhvm_compat_mode,

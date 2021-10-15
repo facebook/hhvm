@@ -202,7 +202,13 @@ void verifyTypeImpl(IRGS& env,
 
   if (tc.isNullable() && valType <= TInitNull) return;
 
-  auto const genFail = [&] {
+  auto const genFail = [&] (SSATmp* ctx = nullptr) {
+    if (ctx == nullptr) {
+      ctx = tc.isThis()
+        ? propCls ? propCls : ldCtxCls(env)
+        : cns(env, nullptr);
+    }
+
     // If we know there are no mock classes for the current class, it is
     // okay to fail hard.  Otherwise, mock objects may still pass, and we
     // have to be ready for execution to resume.
@@ -212,7 +218,7 @@ void verifyTypeImpl(IRGS& env,
       && !tc.isSoft()
       && (!tc.isThis() || thisFailsHard)
       && (!tc.isUpperBound() || RuntimeOption::EvalEnforceGenericsUB >= 2);
-    return fail(valType, failHard);
+    return fail(val, ctx, failHard);
   };
 
   auto const result =
@@ -314,47 +320,26 @@ void verifyTypeImpl(IRGS& env,
       },
       [&] {
         hint(env, Block::Hint::Unlikely);
-        genFail();
+        genFail(ctxCls);
       }
     );
     return;
   }
 
-  // If we reach here then valType is Obj and tc is Object, Self, or Parent
+  // If we reach here then valType is Obj and tc is Object
+  assertx(tc.isObject());
   const StringData* clsName;
   const Class* knownConstraint = nullptr;
-  if (tc.isObject()) {
-    auto const td = tc.namedEntity()->getCachedTypeAlias();
-    if (RuntimeOption::RepoAuthoritative && td &&
-        tc.namedEntity()->isPersistentTypeAlias() &&
-        td->klass) {
-      assertx(classHasPersistentRDS(td->klass));
-      clsName = td->klass->name();
-      knownConstraint = td->klass;
-    } else {
-      clsName = tc.typeName();
-    }
+  auto const td = tc.namedEntity()->getCachedTypeAlias();
+  if (RuntimeOption::RepoAuthoritative && td &&
+      tc.namedEntity()->isPersistentTypeAlias() &&
+      td->klass) {
+    assertx(classHasPersistentRDS(td->klass));
+    clsName = td->klass->name();
+    knownConstraint = td->klass;
   } else {
-    assertx(!propCls);
-    if (tc.isSelf()) {
-      knownConstraint = curFunc(env)->cls();
-    } else {
-      assertx(tc.isParent());
-      if (auto cls = curFunc(env)->cls()) knownConstraint = cls->parent();
-    }
-    if (!knownConstraint) {
-      // The hint was self or parent and there's no corresponding
-      // class for the current func. This typehint will always fail.
-      return genFail();
-    }
-    clsName = knownConstraint->preClass()->name();
+    clsName = tc.typeName();
   }
-
-  // For "self" and "parent", knownConstraint should always be
-  // non-null at this point
-  assertx(IMPLIES(tc.isSelf() || tc.isParent(), knownConstraint != nullptr));
-  assertx(IMPLIES(tc.isSelf() || tc.isParent(), clsName != nullptr));
-  assertx(IMPLIES(tc.isSelf() || tc.isParent(), !propCls));
 
   auto const checkCls = ldClassSafe(env, clsName, knownConstraint);
   auto const fastIsInstance = implInstanceCheck(env, val, clsName, checkCls);
@@ -385,7 +370,7 @@ Type typeOpToType(IsTypeOp op) {
   case IsTypeOp::Keyset:  return TKeyset;
   case IsTypeOp::Obj:     return TObj;
   case IsTypeOp::Res:     return TRes;
-  case IsTypeOp::ClsMeth: return TClsMeth;
+  case IsTypeOp::ClsMeth:
   case IsTypeOp::Func:
   case IsTypeOp::Class:
   case IsTypeOp::Vec:
@@ -454,6 +439,14 @@ SSATmp* isFuncImpl(IRGS& env, SSATmp* src) {
     auto const isMC = gen(env, FuncHasAttr, attr, func);
     return gen(env, EqBool, isMC, cns(env, false));
   });
+  mc.ifTypeThen(src, TRFunc, [&](SSATmp*) { return cns(env, true); });
+  return mc.elseDo([&]{ return cns(env, false); });
+}
+
+SSATmp* isClsMethImpl(IRGS& env, SSATmp* src) {
+  MultiCond mc{env};
+  mc.ifTypeThen(src, TClsMeth, [&](SSATmp*) { return cns(env, true); });
+  mc.ifTypeThen(src, TRClsMeth, [&](SSATmp*) { return cns(env, true); });
   return mc.elseDo([&]{ return cns(env, false); });
 }
 
@@ -1125,21 +1118,28 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
         env.irb->exceptionStackBoundary();
         return true;
       },
-      [&] (Type, bool hard) { // Check failure
+      [&] (SSATmp* val, SSATmp* ctx, bool hard) { // Check failure
         updateMarker(env);
         env.irb->exceptionStackBoundary();
-        gen(
+        auto const updated = gen(
           env,
           hard ? VerifyRetFailHard : VerifyRetFail,
-          ParamWithTCData { id, &tc },
-          ldStkAddr(env, BCSPRelOffset { ind })
+          FuncParamWithTCData { func, id, &tc },
+          val,
+          ctx
         );
+
+        if (!hard) {
+          auto const offset = offsetFromIRSP(env, BCSPRelOffset { ind });
+          gen(env, StStk, IRSPRelOffsetData{offset}, sp(env), updated);
+          env.irb->exceptionStackBoundary();
+        }
       },
       [&] (SSATmp* val) { // Callable check
         gen(
           env,
           VerifyRetCallable,
-          ParamData { id },
+          FuncParamData { func, id },
           val
         );
       },
@@ -1148,11 +1148,10 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
         gen(
           env,
           VerifyRetCls,
-          ParamData { id },
+          FuncParamWithTCData { func, id, &tc },
+          val,
           objClass,
-          checkCls,
-          cns(env, uintptr_t(&tc)),
-          val
+          checkCls
         );
       },
       [] { // Giveup
@@ -1209,30 +1208,36 @@ void verifyParamTypeImpl(IRGS& env, int32_t id) {
         stLocRaw(env, id, fp(env), str);
         return true;
       },
-      [&] (Type valType, bool hard) { // Check failure
-        gen(
+      [&] (SSATmp* val, SSATmp* ctx, bool hard) { // Check failure
+        auto const updated = gen(
           env,
           hard ? VerifyParamFailHard : VerifyParamFail,
-          ParamWithTCData { id, &tc }
+          FuncParamWithTCData { func, id, &tc },
+          val,
+          ctx
         );
+
+        if (!hard) {
+          stLocRaw(env, id, fp(env), updated);
+        }
       },
       [&] (SSATmp* val) { // Callable check
         gen(
           env,
           VerifyParamCallable,
-          val,
-          cns(env, id)
+          FuncParamData { func, id },
+          val
         );
       },
-      [&] (SSATmp*, SSATmp* objClass, SSATmp* checkCls) {
+      [&] (SSATmp* val, SSATmp* objClass, SSATmp* checkCls) {
         // Class/type-alias check
         gen(
           env,
           VerifyParamCls,
+          FuncParamWithTCData { func, id, &tc },
+          val,
           objClass,
-          checkCls,
-          cns(env, uintptr_t(&tc)),
-          cns(env, id)
+          checkCls
         );
       },
       [] { // Giveup
@@ -1297,7 +1302,7 @@ void verifyPropType(IRGS& env,
         *coerce = gen(env, LdLazyClsName, val);
         return true;
       },
-      [&] (Type, bool hard) { // Check failure
+      [&] (SSATmp*, SSATmp*, bool hard) { // Check failure
         auto const failHard =
           hard && RuntimeOption::EvalCheckPropTypeHints >= 3 &&
           (!tc->isUpperBound() || RuntimeOption::EvalEnforceGenericsUB >= 2);
@@ -1374,7 +1379,8 @@ void emitVerifyRetTypeTS(IRGS& env) {
   auto const cell = topC(env);
   auto const reified = tcCouldBeReified(curFunc(env), TypeConstraint::ReturnId);
   if (reified || cell->isA(TObj)) {
-    gen(env, VerifyReifiedReturnType, cell, ts);
+    auto const funcData = FuncData { curFunc(env) };
+    gen(env, VerifyReifiedReturnType, funcData, cell, ts, ldCtxCls(env));
   } else if (cell->type().maybe(TObj) && !reified) {
     // Meaning we did not not guard on the stack input correctly
     PUNT(VerifyRetTypeTS-UnguardedObj);
@@ -1408,7 +1414,8 @@ void emitVerifyParamTypeTS(IRGS& env, int32_t paramId) {
         return gen(env, CheckType, TDict, taken, ts);
       },
       [&] (SSATmp* dts) {
-        gen(env, VerifyReifiedLocalType, ParamData { paramId }, dts);
+        auto const fpData = FuncParamData { curFunc(env), paramId };
+        gen(env, VerifyReifiedLocalType, fpData, cell, dts, ldCtxCls(env));
         return nullptr;
       },
       [&] {
@@ -1469,6 +1476,7 @@ SSATmp* isTypeHelper(IRGS& env, IsTypeOp subop, SSATmp* val) {
     case IsTypeOp::LegacyArrLike: return isLegacyArrLikeImpl(env, val);
     case IsTypeOp::Class:         return isClassImpl(env, val);
     case IsTypeOp::Func:          return isFuncImpl(env, val);
+    case IsTypeOp::ClsMeth:       return isClsMethImpl(env, val);
     default: break;
   }
 

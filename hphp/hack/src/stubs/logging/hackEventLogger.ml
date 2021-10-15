@@ -19,7 +19,12 @@ type rollout_flags = {
   symbolindex_search_provider: string;
   require_saved_state: bool;
   stream_errors: bool;
-  use_direct_decl_in_tc_loop: bool;
+  deferments_light: bool;
+  old_naming_table_for_redecl: bool;
+  log_from_client_when_slow_monitor_connections: bool;
+  naming_sqlite_in_hack_64: bool;
+  use_hack_64_naming_table: bool;
+  enable_disk_heap: bool;
 }
 
 let flush () = ()
@@ -226,6 +231,8 @@ let client_establish_connection_exception _ = ()
 let client_connect_once ~t_start:_ = ()
 
 let client_connect_once_failure ~t_start:_ _ = ()
+
+let client_connect_to_monitor_slow_log () = ()
 
 let client_connect_autostart () = ()
 

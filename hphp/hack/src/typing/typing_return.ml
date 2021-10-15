@@ -151,12 +151,12 @@ let implicit_return env pos ~expected ~actual =
   let error = Errors.missing_return in
   let open Typing_env_types in
   if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then
-    Typing_coercion.coerce_type
-      pos
-      reason
+    Typing_utils.sub_type
       env
+      ~coerce:(Some Typing_logic.CoerceToDynamic)
       actual
-      { et_type = expected; et_enforced = Unenforced }
-      error
+      expected
+      (fun ?code ?quickfixes reasons ->
+        error ?code ?quickfixes (pos, Reason.string_of_ureason reason) reasons)
   else
     Typing_ops.sub_type pos reason env actual expected error

@@ -160,7 +160,7 @@
     experiments_config_file
     file_info
     glean_options
-    justknobs_stubs
+    server_local_config_knobs_stubs
     symbol_write_options
     parser_options
     pos
@@ -173,6 +173,7 @@
     typechecker_options
     typing_service_api
     typing_service_delegate
+    utils_config_file
     utils_core
     utils_www_root
     version)
@@ -527,8 +528,8 @@
     cgroup
     coverage_level
     decl_redecl_service
-    dfind
     direct_decl_service
+    dfind
     fileutils
     hg
     hhi
@@ -540,6 +541,9 @@
     parsing_service
     remote
     security_stubs
+    shallow_classes_provider
+    direct_decl_parser
+    direct_decl_utils
     server_api
     server_codemod_type_printer
     recli_stubs

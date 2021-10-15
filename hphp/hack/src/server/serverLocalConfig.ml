@@ -10,6 +10,7 @@
 open Config_file.Getters
 module Hack_bucket = Bucket
 open Hh_prelude
+open Option.Monad_infix
 module Bucket = Hack_bucket
 
 module Watchman = struct
@@ -391,6 +392,17 @@ module RecheckCapture = struct
     }
 end
 
+(** Allows to typecheck only a certain quantile of the workload. *)
+type quantile = {
+  count: int;
+      (** The number of quantiles we want.
+          If this is n, we'll divide the workload in n groups. *)
+  index: int;
+      (** The index of the subgroup we'll process.
+          If this is i, we'll typecheck group number i out of the n groups.
+          this should be in interval [0; n] *)
+}
+
 type t = {
   min_log_level: Hh_logger.Level.t;
   (* Indicates whether we attempt to fix the credentials if they're broken *)
@@ -478,6 +490,15 @@ type t = {
   (* Look up class members lazily from shallow declarations instead of eagerly
      computing folded declarations representing the entire class type. *)
   shallow_class_decl: bool;
+  (* Use fanout algorithm based solely on shallow decl comparison. This is the
+     default in shallow decl mode. Use this option if using folded decls. *)
+  force_shallow_decl_fanout: bool;
+  (* Always load hot shallow decls from saved state. *)
+  force_load_hot_shallow_decls: bool;
+  (* Option to fetch old decls from remote decl store *)
+  fetch_remote_old_decls: bool;
+  (* Load naming table from hack/64 saved state. *)
+  use_hack_64_naming_table: bool;
   (* Skip checks on hierarchy e.g. overrides, require extend, etc.
      Set to true only for debugging purposes! *)
   skip_hierarchy_checks: bool;
@@ -531,8 +552,6 @@ type t = {
   tico_invalidate_smart: bool;
   (* Enable use of the direct decl parser for parsing type signatures. *)
   use_direct_decl_parser: bool;
-  (* Direct decl parsing in type check loop fix *)
-  use_direct_decl_in_tc_loop: bool;
   (* If --profile-log, we'll record telemetry on typechecks that took longer than the threshold (in seconds). In case of profile_type_check_twice we judge by the second type check. *)
   profile_type_check_duration_threshold: float;
   (* If --profile-log, we'll record telemetry on any file which allocated more than this many mb on the ocaml heap. In case of profile_type_check_twice we judge by the second type check. *)
@@ -554,6 +573,19 @@ type t = {
   watchman: Watchman.t;
   (* If enabled, saves naming table into a temp folder and uploads it to the remote typechecker *)
   save_and_upload_naming_table: bool;
+  deferments_light: bool;
+      (** Stop typechecking when deferment threshold is reached and instead get decls to predeclare from names in AST. *)
+  old_naming_table_for_redecl: bool;  (** Use old naming table when redecling *)
+  log_from_client_when_slow_monitor_connections: bool;
+      (**  Alerts hh users what processes are using hh_server when hh_client is slow to connect. *)
+  naming_sqlite_in_hack_64: bool;
+      (** Add sqlite naming table to hack/64 ss job *)
+  workload_quantile: quantile option;
+      (** Allows to typecheck only a certain quantile of the workload. *)
+  enable_disk_heap: bool;
+      (** After reading the contents of a file from the filesystem, store them
+          in shared memory. True by default. Disabling this saves memory at the
+          risk of increasing the rate of consistency errors. *)
 }
 
 let default =
@@ -612,6 +644,10 @@ let default =
     load_decls_from_saved_state = false;
     idle_gc_slice = 0;
     shallow_class_decl = false;
+    force_shallow_decl_fanout = false;
+    force_load_hot_shallow_decls = false;
+    fetch_remote_old_decls = false;
+    use_hack_64_naming_table = false;
     skip_hierarchy_checks = false;
     num_local_workers = None;
     parallel_type_checking_threshold = 10;
@@ -639,7 +675,6 @@ let default =
     tico_invalidate_files = false;
     tico_invalidate_smart = false;
     use_direct_decl_parser = false;
-    use_direct_decl_in_tc_loop = false;
     profile_type_check_duration_threshold = 0.05;
     (* seconds *)
     profile_type_check_memory_threshold_mb = 100;
@@ -652,6 +687,12 @@ let default =
     stream_errors = false;
     watchman = Watchman.default;
     save_and_upload_naming_table = false;
+    deferments_light = false;
+    old_naming_table_for_redecl = false;
+    log_from_client_when_slow_monitor_connections = false;
+    naming_sqlite_in_hack_64 = false;
+    workload_quantile = None;
+    enable_disk_heap = true;
   }
 
 let path =
@@ -661,44 +702,6 @@ let path =
   in
   Filename.concat dir "hh.conf"
 
-let apply_justknobs_overrides ~silent config =
-  let hash = Unix.gethostname () in
-  let switch = Config_file.Getters.string_opt "rollout_group" config in
-  let eval key knob =
-    match JustKnobs.eval knob ~hash ?switch with
-    | Ok value -> Some (key, Bool.to_string value)
-    (* OSS builds don't have JK *)
-    | Error "Not implemented: JustKnobs.eval" -> None
-    | Error msg ->
-      (* We failed to fetch the knob (perhaps JustKnobs is broken, or perhaps a
-         developer deleted a knob they shouldn't have), so don't override anything. *)
-      Hh_logger.log "JustKnobs error: %s" msg;
-      None
-  in
-  let overrides =
-    List.filter_map
-      ~f:Fn.id
-      [
-        eval
-          "store_decls_in_saved_state"
-          "hack/config:store_decls_in_saved_state";
-        eval
-          "load_decls_from_saved_state"
-          "hack/config:load_decls_from_saved_state";
-        eval "use_direct_decl_parser" "hack/config:use_direct_decl_parser";
-      ]
-  in
-  match overrides with
-  | [] -> config
-  | overrides ->
-    (* eprintf used here rather than Hh_logger because apply_overrides also
-       prints to stderr. *)
-    if not silent then Printf.eprintf "Applying overrides from JustKnobs:\n%!";
-    Config_file.apply_overrides
-      ~silent
-      ~config
-      ~overrides:(Config_file.of_list overrides)
-
 let apply_overrides ~silent ~current_version ~config ~overrides =
   (* Override on-disk values with values from JustKnobs (if present). Allow CLI
      overrides to take precedence over JustKnobs overrides. *)
@@ -707,7 +710,7 @@ let apply_overrides ~silent ~current_version ~config ~overrides =
     if Sys_utils.is_test_mode () then
       config
     else
-      apply_justknobs_overrides ~silent config
+      ServerLocalConfigKnobs.apply_justknobs_overrides ~silent config
   in
   (* Apply the CLI overrides before experiments overrides, so that
      experiments_config settings can be specified via the CLI, even though the
@@ -1080,6 +1083,34 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
+  let force_shallow_decl_fanout =
+    bool_if_min_version
+      "force_shallow_decl_fanout"
+      ~default:default.force_shallow_decl_fanout
+      ~current_version
+      config
+  in
+  let force_load_hot_shallow_decls =
+    bool_if_min_version
+      "force_load_hot_shallow_decls"
+      ~default:default.force_load_hot_shallow_decls
+      ~current_version
+      config
+  in
+  let fetch_remote_old_decls =
+    bool_if_min_version
+      "fetch_remote_old_decls"
+      ~default:default.fetch_remote_old_decls
+      ~current_version
+      config
+  in
+  let use_hack_64_naming_table =
+    bool_if_min_version
+      "use_hack_64_naming_table"
+      ~default:default.use_hack_64_naming_table
+      ~current_version
+      config
+  in
   let skip_hierarchy_checks =
     bool_if_min_version
       "skip_hierarchy_checks"
@@ -1195,13 +1226,6 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
-  let use_direct_decl_in_tc_loop =
-    bool_if_min_version
-      "use_direct_decl_in_tc_loop"
-      ~default:default.use_direct_decl_in_tc_loop
-      ~current_version
-      config
-  in
   let profile_type_check_duration_threshold =
     float_
       "profile_type_check_duration_threshold"
@@ -1265,6 +1289,77 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
+  let deferments_light =
+    bool_if_min_version
+      "deferments_light"
+      ~default:default.deferments_light
+      ~current_version
+      config
+  in
+  let old_naming_table_for_redecl =
+    bool_if_min_version
+      "old_naming_table_for_redecl"
+      ~default:default.old_naming_table_for_redecl
+      ~current_version
+      config
+  in
+  let log_from_client_when_slow_monitor_connections =
+    bool_if_min_version
+      "log_from_client_when_slow_monitor_connections"
+      ~default:default.log_from_client_when_slow_monitor_connections
+      ~current_version
+      config
+  in
+  let naming_sqlite_in_hack_64 =
+    bool_if_min_version
+      "naming_sqlite_in_hack_64"
+      ~default:default.naming_sqlite_in_hack_64
+      ~current_version
+      config
+  in
+  let force_shallow_decl_fanout =
+    if force_shallow_decl_fanout && not use_direct_decl_parser then (
+      Hh_logger.warn
+        "You have force_shallow_decl_fanout=true but use_direct_decl_parser=false. This is incompatible. Turning off force_shallow_decl_fanout";
+      false
+    ) else
+      force_shallow_decl_fanout
+  in
+  let force_load_hot_shallow_decls =
+    if force_load_hot_shallow_decls && not force_shallow_decl_fanout then (
+      Hh_logger.warn
+        "You have force_load_hot_shallow_decls=true but force_shallow_decl_fanout=false. This is incompatible. Turning off force_load_hot_shallow_decls";
+      false
+    ) else
+      force_load_hot_shallow_decls
+  in
+  let fetch_remote_old_decls =
+    if fetch_remote_old_decls && not force_shallow_decl_fanout then (
+      Hh_logger.warn
+        "You have fetch_remote_old_decls=true but force_shallow_decl_fanout=false. This is incompatible. Turning off force_load_hot_shallow_decls";
+      false
+    ) else
+      fetch_remote_old_decls
+  in
+  let workload_quantile =
+    int_list_opt "workload_quantile" config >>= fun l ->
+    match l with
+    | [m; n] ->
+      if 0 <= m && m <= n then
+        Some { count = n; index = m }
+      else if 0 <= n && n <= m then
+        Some { count = m; index = n }
+      else
+        None
+    | _ -> None
+  in
+  let enable_disk_heap =
+    bool_if_min_version
+      "enable_disk_heap"
+      ~default:default.enable_disk_heap
+      ~current_version
+      config
+  in
   {
     min_log_level;
     attempt_fix_credentials;
@@ -1320,6 +1415,10 @@ let load_ fn ~silent ~current_version overrides =
     load_decls_from_saved_state;
     idle_gc_slice;
     shallow_class_decl;
+    force_shallow_decl_fanout;
+    force_load_hot_shallow_decls;
+    fetch_remote_old_decls;
+    use_hack_64_naming_table;
     skip_hierarchy_checks;
     num_local_workers;
     parallel_type_checking_threshold;
@@ -1344,7 +1443,6 @@ let load_ fn ~silent ~current_version overrides =
     tico_invalidate_files;
     tico_invalidate_smart;
     use_direct_decl_parser;
-    use_direct_decl_in_tc_loop;
     profile_type_check_duration_threshold;
     profile_type_check_memory_threshold_mb;
     profile_type_check_twice;
@@ -1357,6 +1455,12 @@ let load_ fn ~silent ~current_version overrides =
     watchman;
     force_remote_type_check;
     save_and_upload_naming_table;
+    deferments_light;
+    old_naming_table_for_redecl;
+    log_from_client_when_slow_monitor_connections;
+    naming_sqlite_in_hack_64;
+    workload_quantile;
+    enable_disk_heap;
   }
 
 let load ~silent ~current_version config_overrides =
@@ -1373,5 +1477,11 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       symbolindex_search_provider = options.symbolindex_search_provider;
       require_saved_state = options.require_saved_state;
       stream_errors = options.stream_errors;
-      use_direct_decl_in_tc_loop = options.use_direct_decl_in_tc_loop;
+      deferments_light = options.deferments_light;
+      old_naming_table_for_redecl = options.old_naming_table_for_redecl;
+      log_from_client_when_slow_monitor_connections =
+        options.log_from_client_when_slow_monitor_connections;
+      naming_sqlite_in_hack_64 = options.naming_sqlite_in_hack_64;
+      use_hack_64_naming_table = options.use_hack_64_naming_table;
+      enable_disk_heap = options.enable_disk_heap;
     }

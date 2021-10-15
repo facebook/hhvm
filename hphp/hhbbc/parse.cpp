@@ -660,7 +660,9 @@ void add_frame_variables(php::Func& func, const FuncEmitter& fe) {
   func.numIters = fe.numIterators();
 }
 
-const StaticString s_DynamicallyCallable("__DynamicallyCallable");
+const StaticString
+  s_construct("__construct"),
+  s_DynamicallyCallable("__DynamicallyCallable");
 
 std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
                                       php::Unit* unit,
@@ -719,6 +721,11 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
 
   // Assume true, will be updated in build_cfg().
   ret->hasCreateCl = true;
+
+  auto const coeffectsInfo = getCoeffectsInfoFromList(
+    fe.staticCoeffects, cls && fe.name == s_construct.get());
+  ret->requiredCoeffects = coeffectsInfo.first.toRequired();
+  ret->coeffectEscapes = coeffectsInfo.second;
 
   for (auto& name : fe.staticCoeffects) ret->staticCoeffects.push_back(name);
   for (auto& rule : fe.coeffectRules) ret->coeffectRules.push_back(rule);

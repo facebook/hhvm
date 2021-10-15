@@ -1017,8 +1017,7 @@ void mrinfo_step_impl(Env& env,
     [&](ReturnEffects) {}, [&](GeneralEffects) {},
     [&](UnknownEffects) { kill(ALocBits{}.set()); },
     [&](PureStore x) { do_store(x.dst, x.value); },
-    [&] (PureInlineCall) {},
-    [&] (PureInlineReturn) {},
+    [&](PureInlineCall) {},
 
     /*
      * Note that loads do not kill a location.  In fact, it's possible that the
@@ -1372,22 +1371,20 @@ bool irrelevant_inst(const IRInstruction& inst) {
     [&] (PureStore) { return true; },
     [&] (IrrelevantEffects) { return true; },
     [&] (PureInlineCall) { return true; },
-    [&] (PureInlineReturn) { return true; },
 
     // Inlining related instructions can manipulate the frame but don't
     // observe reference counts.
     [&] (GeneralEffects g) {
-      if (inst.is(BeginInlining,
-                  EndInlining,
-                  InlineCall,
-                  InlineReturn
-                 )) {
+      if (inst.is(BeginInlining, EndInlining, InlineCall)) {
         return true;
       }
       if (inst.consumesReferences()) return false;
 
       if (g.loads <= AEmpty &&
-          g.stores <= AEmpty) {
+          g.backtrace <= AEmpty &&
+          g.coeffect <= AEmpty &&
+          g.stores <= AEmpty &&
+          g.inout <= AEmpty) {
         return true;
       }
       return false;
@@ -2070,7 +2067,6 @@ void analyze_mem_effects(Env& env,
     [&] (IrrelevantEffects) {},
 
     [&] (PureInlineCall) {},
-    [&] (PureInlineReturn) {},
 
     [&] (GeneralEffects x)  {
       if (inst.is(CallBuiltin)) {
@@ -2087,14 +2083,12 @@ void analyze_mem_effects(Env& env,
       // Various inline related instructions have non-empty stores to
       // prevent store sinking, but don't actually change any
       // refcounts, so we don't need to reduce lower bounds.
-      auto const may_decref = !inst.is(BeginInlining,
-                                       EndInlining,
-                                       InlineReturn
-                                      );
-      if (may_decref && x.stores != AEmpty) {
+      auto const may_decref = !inst.is(BeginInlining, EndInlining);
+      if (may_decref && (x.stores != AEmpty || x.inout != AEmpty)) {
         observe_unbalanced_decrefs(env, state, add_node);
       }
       reduce_support(env, state, x.stores, may_decref, add_node);
+      reduce_support(env, state, x.inout, may_decref, add_node);
       // For the moves set, we have no way to track where the pointers may be
       // moved to, so we need to account for it, via unsupported_refs.
       reduce_support(env, state, x.moves, false, add_node);
@@ -2468,7 +2462,6 @@ bool can_sink_inc_through(const IRInstruction& inst) {
     case LdLoc:
     case LdStk:
     case BeginInlining:
-    case InlineReturn:
     case EndInlining:
     case InlineCall:
     case FinishMemberOp:

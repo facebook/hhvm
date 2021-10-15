@@ -1,8 +1,0 @@
-object(foo) (0) {
-}
-object(bar) (0) {
-}
-object(baz) (0) {
-}
-
-Catchable fatal error: Argument 1 passed to foo::testFoo() must be an instance of foo, stdClass given in %s/objects_022.php on line 25

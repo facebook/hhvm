@@ -604,7 +604,7 @@ end = struct
       | Aast_defs.Hshape shape_info -> aux_shape acc shape_info
       | Aast_defs.(
           ( Hany | Herr | Hmixed | Hnonnull | Hprim _ | Hthis | Hdynamic
-          | Hnothing | Hfun_context _ | Hvar _ )) ->
+          | Hsupportdynamic | Hnothing | Hfun_context _ | Hvar _ )) ->
         acc
     and auxs acc = function
       | [] -> acc
@@ -725,10 +725,6 @@ end = struct
                 | TCConcrete { tc_type } ->
                   add_dep ctx ~this:(Some class_name) env tc_type;
                   if not (List.is_empty tconsts) then add_cstr_dep tc_type
-                | TCPartiallyAbstract
-                    { patc_constraint = _ (* TODO *); patc_type } ->
-                  add_dep ctx ~this:(Some class_name) env patc_type;
-                  if not (List.is_empty tconsts) then add_cstr_dep patc_type
                 | TCAbstract
                     {
                       atc_as_constraint;
@@ -832,9 +828,6 @@ end = struct
               let open Typing_defs in
               (match ttc_kind with
               | TCConcrete { tc_type } -> add_dep tc_type
-              | TCPartiallyAbstract { patc_type; patc_constraint } ->
-                add_dep patc_type;
-                add_dep patc_constraint
               | TCAbstract
                   {
                     atc_default = _;
@@ -1264,7 +1257,8 @@ end = struct
   let pp_paramkind ppf =
     Ast_defs.(
       function
-      | Pinout -> Fmt.string ppf "inout")
+      | Pinout _ -> Fmt.string ppf "inout"
+      | Pnormal -> ())
 
   let pp_tprim ppf =
     Aast.(
@@ -1280,13 +1274,14 @@ end = struct
       | Tresource -> Fmt.string ppf "resource"
       | Tnoreturn -> Fmt.string ppf "noreturn")
 
-  let rec pp_hint ~is_ctx ppf (_, hint_) =
+  let rec pp_hint ~is_ctx ppf (pos, hint_) =
     match hint_ with
     | Aast.Hany
     | Aast.Herr ->
       Fmt.string ppf __ANY__
     | Aast.Hthis -> Fmt.string ppf "this"
     | Aast.Hdynamic -> Fmt.string ppf "dynamic"
+    | Aast.Hsupportdynamic -> Fmt.string ppf "supportdynamic"
     | Aast.Hnothing -> Fmt.string ppf "nothing"
     | Aast.Hmixed -> Fmt.string ppf "mixed"
     | Aast.Hnonnull -> Fmt.string ppf "nonnull"
@@ -1304,7 +1299,7 @@ end = struct
     | Aast.Hunion hints ->
       Fmt.(parens @@ list ~sep:vbar @@ pp_hint ~is_ctx:false) ppf hints
     | Aast.Hintersection hints when is_ctx ->
-      Fmt.(brackets @@ list ~sep:comma @@ pp_hint ~is_ctx:false) ppf hints
+      Fmt.(brackets @@ list ~sep:comma @@ pp_hint ~is_ctx:true) ppf hints
     | Aast.Hintersection hints ->
       Fmt.(parens @@ list ~sep:amp @@ pp_hint ~is_ctx:false) ppf hints
     | Aast.Hprim prim -> pp_tprim ppf prim
@@ -1351,6 +1346,8 @@ end = struct
         @@ pair ~sep:comma (pp_hint ~is_ctx:false) (pp_hint ~is_ctx:false))
         ppf
         (khint, vhint)
+    | Aast.Happly ((p, name), hs) when is_ctx ->
+      pp_hint ~is_ctx:false ppf (pos, Aast.Happly ((p, strip_ns name), hs))
     | Aast.Habstr (name, [])
     | Aast.Happly ((_, name), []) ->
       Fmt.string ppf name
@@ -1375,7 +1372,10 @@ end = struct
           }) ->
       let hf_param_kinds =
         List.map hf_param_info ~f:(fun i ->
-            Option.bind i ~f:(fun i -> i.Aast.hfparam_kind))
+            Option.bind i ~f:(fun i ->
+                match i.Aast.hfparam_kind with
+                | Ast_defs.Pnormal -> None
+                | Ast_defs.Pinout p -> Some (Ast_defs.Pinout p)))
       in
       let pp_typed_param ppf kp =
         Fmt.(
@@ -1443,7 +1443,7 @@ end = struct
       Fmt.(pair ~sep:dbl_colon string string) ppf (c, s)
 
   and pp_contexts ppf (_, ctxts) =
-    Fmt.(brackets @@ list ~sep:comma @@ pp_hint ~is_ctx:false) ppf ctxts
+    Fmt.(brackets @@ list ~sep:comma @@ pp_hint ~is_ctx:true) ppf ctxts
 
   let pp_lid ppf lid =
     Fmt.(prefix (const string "$") string) ppf @@ Local_id.get_name lid
@@ -1673,13 +1673,19 @@ end = struct
       Fmt.(pair ~sep:(const string " ?as ") pp_expr @@ pp_hint ~is_ctx:false)
         ppf
         (expr, hint)
+    | Aast.Upcast (expr, hint) ->
+      Fmt.(pair ~sep:(const string " upcast ") pp_expr @@ pp_hint ~is_ctx:false)
+        ppf
+        (expr, hint)
     | Aast.New (class_id, targs, exprs, expr_opt, _) ->
       Fmt.(
         prefix (const string "new")
         @@ pair ~sep:nop pp_class_id
         @@ pair ~sep:nop pp_targs pp_arg_exprs)
         ppf
-        (class_id, (targs, (exprs, expr_opt)))
+        ( class_id,
+          (targs, (List.map ~f:(fun e -> (Ast_defs.Pnormal, e)) exprs, expr_opt))
+        )
     | Aast.Record ((_, name), flds) ->
       Fmt.(
         pair ~sep:nop string
@@ -1688,8 +1694,6 @@ end = struct
         @@ pair ~sep:fat_arrow pp_expr pp_expr)
         ppf
         (name, flds)
-    | Aast.Callconv (param_kind, expr) ->
-      Fmt.(pair ~sep:sp pp_paramkind pp_expr) ppf (param_kind, expr)
     | Aast.Lplaceholder _ -> Fmt.string ppf "$_"
     | Aast.Fun_id (_, name) ->
       Fmt.(prefix (const string "fun") @@ quote string) ppf name
@@ -1739,10 +1743,15 @@ end = struct
         parens
         @@ pair
              ~sep:comma
-             (list ~sep:comma pp_expr)
+             (list ~sep:comma pp_arg)
              (option @@ prefix (const string "...") pp_expr))
         ppf
         (exprs, expr_opt)
+
+  and pp_arg ppf (pk, e) =
+    match pk with
+    | Ast_defs.Pnormal -> pp_expr ppf e
+    | Ast_defs.Pinout _ -> Fmt.(pair ~sep:sp pp_paramkind pp_expr) ppf (pk, e)
 
   and pp_afield ppf = function
     | Aast.AFvalue expr -> pp_expr ppf expr
@@ -1905,6 +1914,7 @@ end = struct
         | Hprim _
         | Hthis
         | Hdynamic
+        | Hsupportdynamic
         | Hnothing
         | Hunion _
         | Hintersection _
@@ -1935,7 +1945,7 @@ end = struct
         param_user_attributes
         Fmt.(option pp_visibility)
         param_visibility
-        Fmt.(option pp_paramkind)
+        pp_paramkind
         param_callconv
         (pp_type_hint ~is_ret_type:false)
         (* Type hint for parameter $f used for contextful function must be a
@@ -2289,8 +2299,6 @@ end = struct
         Aast.(
           match c_tconst_kind with
           | TCAbstract { c_atc_as_constraint = c; _ } -> (true, None, c)
-          | TCPartiallyAbstract { c_patc_constraint = c; c_patc_type = t } ->
-            (false, Some t, Some c)
           | TCConcrete { c_tc_type = t } -> (false, Some t, None))
       in
       EltTypeConst

@@ -49,6 +49,7 @@ type mode =
   | Dump_glean_deps
   | Hover of (int * int) option
   | Apply_quickfixes
+  | Shape_analysis of string
 
 type options = {
   files: string list;
@@ -216,8 +217,6 @@ let parse_options () =
   let like_casts = ref false in
   let simple_pessimize = ref 0.0 in
   let complex_coercion = ref false in
-  let disable_partially_abstract_typeconsts = ref false in
-  let disallow_partially_abstract_typeconst_definitions = ref true in
   let rust_parser_errors = ref false in
   let symbolindex_file = ref None in
   let check_xhp_attribute = ref false in
@@ -261,7 +260,6 @@ let parse_options () =
   let method_call_inference = ref false in
   let report_pos_from_reason = ref false in
   let enable_sound_dynamic = ref false in
-  let disallow_hash_comments = ref false in
   let disallow_fun_and_cls_meth_pseudo_funcs = ref false in
   let disallow_inst_meth = ref false in
   let use_direct_decl_parser = ref false in
@@ -272,6 +270,7 @@ let parse_options () =
   let ignore_unsafe_cast = ref false in
   let math_new_code = ref false in
   let typeconst_concrete_concrete_error = ref false in
+  let enable_strict_const_semantics = ref false in
   let meth_caller_only_public_visibility = ref true in
   let require_extends_implements_ancestors = ref false in
   let strict_value_equality = ref false in
@@ -280,6 +279,8 @@ let parse_options () =
   let sharedmem_config = ref SharedMem.default_config in
   let print_position = ref true in
   let enforce_sealed_subclasses = ref false in
+  let everything_sdt = ref false in
+  let pessimise_builtins = ref false in
   let options =
     [
       ( "--no-print-position",
@@ -296,6 +297,12 @@ let parse_options () =
         " HHI file to parse and declare" );
       ( "--ifc",
         Arg.Tuple [Arg.String (fun m -> ifc_mode := m); Arg.String set_ifc],
+        " Run the flow analysis" );
+      ( "--shape-analysis",
+        Arg.String
+          (fun mode ->
+            batch_mode := true;
+            set_mode (Shape_analysis mode) ()),
         " Run the flow analysis" );
       ( "--deregister-attributes",
         Arg.Unit (set_bool deregister_attributes),
@@ -504,12 +511,6 @@ let parse_options () =
             set_float_ simple_pessimize 1.0;
             set_bool_ complex_coercion ()),
         " Enables all like types features" );
-      ( "--disable-partially-abstract-typeconsts",
-        Arg.Set disable_partially_abstract_typeconsts,
-        " Treat partially abstract type constants as concrete type constants" );
-      ( "--disallow-partially-abstract-typeconst-definitions",
-        Arg.Set disallow_partially_abstract_typeconst_definitions,
-        " Raise error when partially abstract type constant is defined" );
       ( "--rust-parser-errors",
         Arg.Bool (fun x -> rust_parser_errors := x),
         " Use rust parser error checker" );
@@ -628,9 +629,6 @@ let parse_options () =
       ( "--enable-sound-dynamic-type",
         Arg.Set enable_sound_dynamic,
         " Enforce sound dynamic types.  Experimental." );
-      ( "--disallow-hash-comments",
-        Arg.Set disallow_hash_comments,
-        " Disallow #-style comments (besides hashbangs)." );
       ( "--disallow-fun-and-cls-meth-pseudo-funcs",
         Arg.Set disallow_fun_and_cls_meth_pseudo_funcs,
         " Disable parsing of fun() and class_meth()." );
@@ -665,6 +663,10 @@ let parse_options () =
         Arg.Set typeconst_concrete_concrete_error,
         " Raise an error when a concrete type constant is overridden by a concrete type constant in a child class."
       );
+      ( "--enable-strict-const-semantics",
+        Arg.Set enable_strict_const_semantics,
+        " Raise an error when a concrete constants is overridden or multiply defined"
+      );
       ( "--meth-caller-only-public-visibility",
         Arg.Bool (fun x -> meth_caller_only_public_visibility := x),
         " Controls whether meth_caller can be used on non-public methods" );
@@ -693,6 +695,14 @@ let parse_options () =
       ( "--enable-sealed-subclasses",
         Arg.Set enforce_sealed_subclasses,
         " Require all __Sealed arguments to be subclasses" );
+      ( "--everything-sdt",
+        Arg.Set everything_sdt,
+        " Treat all classes as though they are annotated with <<__SupportDynamicType>>"
+      );
+      ( "--pessimise-builtins",
+        Arg.Set pessimise_builtins,
+        " Treat built-in collections and Hack arrays as though they contain ~T"
+      );
     ]
   in
 
@@ -791,10 +801,6 @@ let parse_options () =
       ~tco_like_casts:!like_casts
       ~tco_simple_pessimize:!simple_pessimize
       ~tco_complex_coercion:!complex_coercion
-      ~tco_disable_partially_abstract_typeconsts:
-        !disable_partially_abstract_typeconsts
-      ~tco_disallow_partially_abstract_typeconst_definitions:
-        !disallow_partially_abstract_typeconst_definitions
       ~log_levels:!log_levels
       ~po_rust_parser_errors:!rust_parser_errors
       ~po_enable_class_level_where_clauses:!enable_class_level_where_clauses
@@ -834,7 +840,6 @@ let parse_options () =
       ~tco_method_call_inference:!method_call_inference
       ~tco_report_pos_from_reason:!report_pos_from_reason
       ~tco_enable_sound_dynamic:!enable_sound_dynamic
-      ~po_disallow_hash_comments:!disallow_hash_comments
       ~po_disallow_fun_and_cls_meth_pseudo_funcs:
         !disallow_fun_and_cls_meth_pseudo_funcs
       ~po_disallow_inst_meth:!disallow_inst_meth
@@ -852,12 +857,15 @@ let parse_options () =
       ~tco_ignore_unsafe_cast:!ignore_unsafe_cast
       ~tco_math_new_code:!math_new_code
       ~tco_typeconst_concrete_concrete_error:!typeconst_concrete_concrete_error
+      ~tco_enable_strict_const_semantics:!enable_strict_const_semantics
       ~tco_meth_caller_only_public_visibility:
         !meth_caller_only_public_visibility
       ~tco_require_extends_implements_ancestors:
         !require_extends_implements_ancestors
       ~tco_strict_value_equality:!strict_value_equality
       ~tco_enforce_sealed_subclasses:!enforce_sealed_subclasses
+      ~tco_everything_sdt:!everything_sdt
+      ~tco_pessimise_builtins:!pessimise_builtins
       ()
   in
   Errors.allowed_fixme_codes_strict :=
@@ -1142,16 +1150,13 @@ let add_decls_to_heap ctx files_contents =
 (** This function doesn't have side-effects. Its sole job is to return shallow decls. *)
 let get_shallow_decls ctx filename file_contents :
     Shallow_decl_defs.shallow_class SMap.t =
-  Errors.ignore_ (fun () ->
-      let files_contents = Relative_path.Map.singleton filename file_contents in
-      let (parsed_files, _) = parse_and_name ctx files_contents in
-      let parsed_file = Relative_path.Map.values parsed_files |> List.hd_exn in
-      parsed_file.Parser_return.ast
-      |> List.filter_map ~f:(function
-             | Aast.Class c -> Some (Shallow_decl.class_ ctx c)
-             | _ -> None)
-      |> List.fold ~init:SMap.empty ~f:(fun acc c ->
-             SMap.add (snd c.Shallow_decl_defs.sc_name) c acc))
+  let popt = Provider_context.get_popt ctx in
+  let opts = DeclParserOptions.from_parser_options popt in
+  Direct_decl_parser.parse_decls_ffi opts filename file_contents
+  |> List.fold ~init:SMap.empty ~f:(fun acc (name, decl) ->
+         match decl with
+         | Shallow_decl_defs.Class c -> SMap.add name c acc
+         | _ -> acc)
 
 let test_shallow_class_diff popt filename =
   let filename_after = Relative_path.to_absolute filename ^ ".after" in
@@ -1203,18 +1208,23 @@ let add_newline contents =
       ~pos:after_header
       ~len:(String.length contents - after_header)
 
-(* Might raise {!SharedMem.Shared_mem_not_found} *)
+(* Might raise because of Option.value_exn *)
 let get_decls defs =
   ( SSet.fold
-      (fun x acc -> Decl_heap.Typedefs.find_unsafe x :: acc)
+      (fun x acc ->
+        Option.value_exn ~message:"Decl not found" (Decl_heap.Typedefs.get x)
+        :: acc)
       defs.FileInfo.n_types
       [],
     SSet.fold
-      (fun x acc -> Decl_heap.Funs.find_unsafe x :: acc)
+      (fun x acc ->
+        Option.value_exn ~message:"Decl not found" (Decl_heap.Funs.get x) :: acc)
       defs.FileInfo.n_funs
       [],
     SSet.fold
-      (fun x acc -> Decl_heap.Classes.find_unsafe x :: acc)
+      (fun x acc ->
+        Option.value_exn ~message:"Decl not found" (Decl_heap.Classes.get x)
+        :: acc)
       defs.FileInfo.n_classes
       [] )
 
@@ -1583,6 +1593,48 @@ let handle_mode
   in
   let iter_over_files f : unit = List.iter filenames ~f in
   match mode with
+  | Shape_analysis mode ->
+    let opts =
+      match Shape_analysis_options.parse mode with
+      | Some options -> options
+      | None -> die "invalid shape analysis mode"
+    in
+    (* Process a single typechecked file *)
+    let process_file path info =
+      match info.FileInfo.file_mode with
+      | Some FileInfo.Mstrict ->
+        let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
+        let { Tast_provider.Compute_tast.tast; _ } =
+          Tast_provider.compute_tast_unquarantined ~ctx ~entry
+        in
+        Shape_analysis.analyse opts ctx tast
+      | _ ->
+        (* We are not interested in partial files and there is nothing in HHI
+           files to analyse *)
+        ()
+    in
+    let print_errors = List.iter ~f:(print_error ~oc:stdout error_format) in
+    (* Process a multifile that is not typechecked *)
+    let process_multifile filename =
+      Printf.printf
+        "=== Shape analysis results for %s\n%!"
+        (Relative_path.to_absolute filename);
+      let files_contents = Multifile.file_to_files filename in
+      let (parse_errors, file_info) = parse_name_and_decl ctx files_contents in
+      let error_list = Errors.get_sorted_error_list parse_errors in
+      let check_errors =
+        check_file ~verbosity ctx error_list file_info error_format max_errors
+      in
+      if not (List.is_empty check_errors) then
+        print_errors check_errors
+      else
+        Relative_path.Map.iter file_info ~f:process_file
+    in
+    let process_multifile filename =
+      Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
+          process_multifile filename)
+    in
+    iter_over_files process_multifile
   | Ifc (mode, lattice) ->
     (* Timing mode is same as check except we print out the time it takes to
        analyse the file. *)
@@ -1730,9 +1782,10 @@ let handle_mode
     dump_debug_glean_deps dbg_glean_deps
   | Dump_inheritance ->
     let open ServerCommandTypes.Method_jumps in
-    let deps_mode = Provider_context.get_deps_mode ctx in
     let naming_table = Naming_table.create files_info in
-    Naming_table.iter naming_table ~f:(Typing_deps.Files.update_file deps_mode);
+    Naming_table.iter
+      naming_table
+      ~f:(Naming_provider.ByHash.update_file ctx ~old:None);
     Naming_table.iter naming_table ~f:(fun fn fileinfo ->
         if Relative_path.Map.mem builtins fn then
           ()
@@ -1888,9 +1941,10 @@ let handle_mode
           patched)
   | Find_refs (line, column) ->
     let path = expect_single_file () in
-    let deps_mode = Provider_context.get_deps_mode ctx in
     let naming_table = Naming_table.create files_info in
-    Naming_table.iter naming_table ~f:(Typing_deps.Files.update_file deps_mode);
+    Naming_table.iter
+      naming_table
+      ~f:(Naming_provider.ByHash.update_file ctx ~old:None);
     let genv = ServerEnvBuild.default_genv in
     let init_id = Random_id.short_string () in
     let env =
@@ -1929,9 +1983,10 @@ let handle_mode
     ClientFindRefsPrint.print_ide_readable results
   | Go_to_impl (line, column) ->
     let filename = expect_single_file () in
-    let deps_mode = Provider_context.get_deps_mode ctx in
     let naming_table = Naming_table.create files_info in
-    Naming_table.iter naming_table ~f:(Typing_deps.Files.update_file deps_mode);
+    Naming_table.iter
+      naming_table
+      ~f:(Naming_provider.ByHash.update_file ctx ~old:None);
     let genv = ServerEnvBuild.default_genv in
     let init_id = Random_id.short_string () in
     let env =
@@ -1994,7 +2049,7 @@ let handle_mode
             ~f:(fun () ->
               let files_contents = Multifile.file_to_files filename in
               Relative_path.Map.iter files_contents ~f:(fun filename contents ->
-                  File_provider.(provide_file filename (Disk contents)));
+                  File_provider.(provide_file_for_tests filename contents));
               let (parse_errors, individual_file_info) =
                 parse_name_and_decl ctx files_contents
               in
@@ -2046,7 +2101,7 @@ let handle_mode
     if not (List.is_empty errors) then exit 2
   | Decl_compare ->
     let filename = expect_single_file () in
-    (* Might raise {!SharedMem.Shared_mem_not_found} *)
+    (* Might raise because of Option.value_exn *)
     test_decl_compare ctx filename builtins files_contents files_info
   | Shallow_class_diff ->
     print_errors_if_present parse_errors;
@@ -2144,20 +2199,12 @@ let handle_mode
                    Option.map default ~f:(fun ty -> "= " ^ ty_to_string ty);
                  ]
                  ~f:(fun x -> x))
-          | TCPartiallyAbstract { patc_constraint; patc_type } ->
-            String.concat
-              ~sep:" "
-              [
-                "as " ^ ty_to_string patc_constraint;
-                "= " ^ ty_to_string patc_type;
-              ]
         in
         let abstract =
           Typing_defs.(
             match ttc.ttc_kind with
             | TCConcrete _ -> ""
-            | TCAbstract _ -> "abstract "
-            | TCPartiallyAbstract _ -> "partially abstract ")
+            | TCAbstract _ -> "abstract ")
         in
         Printf.printf "  %stypeconst%s: %s %s\n" abstract from mid ty);
       ())
@@ -2391,7 +2438,7 @@ let decl_and_run_mode
       ~init:files_contents
   in
   Relative_path.Map.iter files_contents ~f:(fun filename contents ->
-      File_provider.(provide_file filename (Disk contents)));
+      File_provider.(provide_file_for_tests filename contents));
   (* Don't declare all the filenames in batch_errors mode *)
   let to_decl =
     if batch_mode then

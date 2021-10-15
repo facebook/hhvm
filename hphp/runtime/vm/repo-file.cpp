@@ -106,14 +106,14 @@ struct FD {
       auto const error = folly::errnoStr(errno);
       always_assert_flog(
         false,
-        "Failed reading {} bytes from {}: {}",
-        size, m_path, error
+        "Failed reading {} bytes from {} at {}: {}",
+        size, m_path, offset, error
       );
     }
     always_assert_flog(
       false,
-      "Partial read from {} (expected {}, actual {})",
-      m_path, size, read
+      "Partial read from {} at {} (expected {}, actual {})",
+      m_path, offset, size, read
     );
   }
 

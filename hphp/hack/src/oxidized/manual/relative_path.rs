@@ -174,7 +174,7 @@ impl<'de> Deserialize<'de> for RelativePath {
         impl<'de> serde::de::Visitor<'de> for Visitor {
             type Value = RelativePath;
 
-            fn expecting(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+            fn expecting(&self, formatter: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
                 write!(formatter, "a string for RelativePath")
             }
 

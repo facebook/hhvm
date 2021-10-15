@@ -432,6 +432,7 @@ bool handle_minstr(Local& env, const IRInstruction& inst, GeneralEffects m) {
   auto const old_val = env.state.tracked[meta->index];
   auto const effects = MInstrEffects(inst.op(), old_val.knownType & TCell);
   store(env, m.stores, nullptr);
+  store(env, m.inout, nullptr);
 
   SCOPE_ASSERT_DETAIL("handle_minstr") { return inst.toString(); };
   always_assert(!env.state.avail[meta->index]);
@@ -466,6 +467,9 @@ Flags handle_general_effects(Local& env,
   }
 
   auto handleCheck = [&](Type typeParam) -> Optional<Flags> {
+    assertx(m.inout == AEmpty);
+    assertx(m.backtrace == AEmpty);
+    assertx(m.coeffect == AEmpty);
     auto const meta = env.global.ainfo.find(canonicalize(m.loads));
     if (!meta) return std::nullopt;
 
@@ -507,6 +511,9 @@ Flags handle_general_effects(Local& env,
     break;
 
   case CheckIter: {
+    assertx(m.inout == AEmpty);
+    assertx(m.backtrace == AEmpty);
+    assertx(m.coeffect == AEmpty);
     auto const meta = env.global.ainfo.find(canonicalize(m.loads));
     if (!meta || !env.state.avail[meta->index]) break;
     auto const& type = env.state.tracked[meta->index].knownType;
@@ -565,6 +572,7 @@ Flags handle_general_effects(Local& env,
   }
 
   store(env, m.stores, nullptr);
+  store(env, m.inout, nullptr);
   store(env, m.kills, nullptr);
 
   return FNone{};
@@ -696,8 +704,7 @@ Flags analyze_inst(Local& env, const IRInstruction& inst) {
     [&] (PureStore m)       { flags = store(env, m.dst, m.value); },
     [&] (PureLoad m)        { flags = load(env, inst, m.src); },
 
-    [&] (PureInlineCall m)    { store(env, m.base, m.fp); },
-    [&] (PureInlineReturn m)  { store(env, m.base, m.callerFp); },
+    [&] (PureInlineCall m)  { store(env, m.base, m.fp); },
     [&] (GeneralEffects m)  { flags = handle_general_effects(env, inst, m); },
     [&] (CallEffects x)     { handle_call_effects(env, inst, x); }
   );
@@ -1029,33 +1036,6 @@ void optimize_end_catch(Global& env, IRInstruction& inst,
   env.stackTeardownsOptimized++;
 }
 
-void optimize_enter_tc_unwind(
-  Global& env,
-  IRInstruction& inst,
-  CompactVector<std::pair<uint32_t, Type>>& locals) {
-  FTRACE(3, "Optimizing EnterTCUnwind\n{}\n", inst.marker().show());
-
-  auto const block = inst.block();
-  auto const extra = inst.extra<EnterTCUnwind>();
-  assertx(extra->teardown);
-
-  for (auto local : locals) {
-    int locId = local.first;
-    auto const type = local.second;
-    FTRACE(5, "    Emitting decref for LocalId {}\n", locId);
-    auto const loadInst =
-      env.unit.gen(LdLoc, inst.bcctx(), type,
-                   LocalId{(uint32_t)locId}, inst.marker().fp());
-    block->insert(block->iteratorTo(&inst), loadInst);
-    auto const decref =
-      env.unit.gen(DecRef, inst.bcctx(), DecRefData{locId}, loadInst->dst());
-    block->insert(block->iteratorTo(&inst), decref);
-  }
-  auto const etcData = EnterTCUnwindData { extra->offset, false };
-  env.unit.replace(&inst, EnterTCUnwind, etcData, inst.src(0));
-  env.stackTeardownsOptimized++;
-}
-
 //////////////////////////////////////////////////////////////////////
 
 void optimize_inst(Global& env, IRInstruction& inst, Flags flags) {
@@ -1235,6 +1215,9 @@ void save_taken_state(Global& genv, const IRInstruction& inst,
     assertx(!inst.maySyncVMRegsWithSources());
     auto const effects = memory_effects(inst);
     auto const ge = boost::get<GeneralEffects>(effects);
+    assertx(ge.inout == AEmpty);
+    assertx(ge.backtrace == AEmpty);
+    assertx(ge.coeffect == AEmpty);
     auto const meta = genv.ainfo.find(canonicalize(ge.loads));
     if (auto const tloc = find_tracked(outState, meta)) {
       tloc->knownType &= TUninit;

@@ -130,3 +130,16 @@ final class TClientBufferedStream {
   <<__Native>>
   public function genNext(): Awaitable<(?vec<string>,?string)>;
 }
+
+<<__NativeData("TClientSink")>>
+final class TClientSink {
+  public function __construct(): void {}
+  public async function genSink<TSinkType, TFinalResponseType>(
+    HH\AsyncGenerator<null, TSinkType, void> $payload_generator,
+    (function(?TSinkType, ?Exception): (string, ?bool)) $payloadEncode,
+    (function(?string, ?Exception): TFinalResponseType) $finalResponseDecode,
+  ): Awaitable<TFinalResponseType> {
+    // Temporary placeholder return
+    return $finalResponseDecode(null, null);
+  }
+}

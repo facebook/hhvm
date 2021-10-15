@@ -11,7 +11,7 @@ Class `B` does not correctly implement all required members  (Typing[4340])
   File "test_consts14.php", line 15, characters 17-17:
   Some members are incompatible with those declared in type `A`
   File "test_consts14.php", line 10, characters 16-17:
-  Non-abstract constants defined in an interface cannot conflict with other inherited constants.
+  Non-abstract constants defined in an interface or trait cannot conflict with other inherited constants.
   File "test_consts14.php", line 4, characters 13-14:
   `C1` inherited from `I1`
   File "test_consts14.php", line 10, characters 16-17:

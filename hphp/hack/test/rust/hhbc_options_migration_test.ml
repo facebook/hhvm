@@ -109,9 +109,6 @@ let assert_opts_equal caml rust =
     Hhbc_options.(allow_unstable_features caml)
     Hhbc_options.(allow_unstable_features rust);
   assert_equal
-    Hhbc_options.(disallow_hash_comments caml)
-    Hhbc_options.(disallow_hash_comments rust);
-  assert_equal
     Hhbc_options.(disallow_fun_and_cls_meth_pseudo_funcs caml)
     Hhbc_options.(disallow_fun_and_cls_meth_pseudo_funcs rust);
   assert_equal
@@ -122,7 +119,6 @@ let assert_opts_equal caml rust =
 let json_override_2bools =
   "
 {
-\"hhvm.hack.lang.disallow_hash_comments\": { \"global_value\": \"1\" },
 \"hhvm.hack.lang.disable_xhp_element_mangling\": { \"global_value\": \"1\" }
 }
 "
@@ -134,13 +130,9 @@ let test_override_2bools_sanity_check _ =
       ~init:Hhbc_options.default
       (Some (Hh_json.json_of_string json_override_2bools))
   in
-  assert_equal true Hhbc_options.(disallow_hash_comments opts);
   assert_equal true Hhbc_options.(disable_xhp_element_mangling opts);
 
   (* Sanity check that we're actually overriding *)
-  assert_equal
-    Hhbc_options.(disallow_hash_comments opts)
-    (not Hhbc_options.(disallow_hash_comments default));
   assert_equal
     Hhbc_options.(disable_xhp_element_mangling opts)
     (not Hhbc_options.(disable_xhp_element_mangling default));
@@ -152,7 +144,6 @@ let test_override_2bools_configs_to_json_ffi _ =
   let opts =
     Hhbc_options.from_configs_rust ~jsons:[json_override_2bools] ~args:[]
   in
-  assert_equal true Hhbc_options.(disallow_hash_comments opts);
   assert_equal true Hhbc_options.(disable_xhp_element_mangling opts);
   ()
 
@@ -214,7 +205,6 @@ let test_json_configs_stackable _ =
       [
         "
   {
-     \"hhvm.hack.lang.disallow_hash_comments\": { \"global_value\": \"1\" },
      \"hhvm.enable_implicit_context\": { \"global_value\": \"0\" }
   }
       ";
@@ -228,8 +218,6 @@ let test_json_configs_stackable _ =
   in
   (* Sanity checks *)
   let (caml_opts, _) = caml_from_configs ~jsons ~args:[] in
-  (* set to 1 in the first JSON, so it must stay 1 *)
-  assert_equal true Hhbc_options.(disallow_hash_comments caml_opts);
 
   (* set to 1 in the second JSON, so it must stay 1 *)
   assert_equal true Hhbc_options.(disable_xhp_element_mangling caml_opts);
@@ -239,9 +227,6 @@ let test_json_configs_stackable _ =
 
   (* Verify Rust implementation behind FFI gives the same results *)
   let rust_opts = Hhbc_options.from_configs_rust ~jsons ~args:[] in
-  assert_equal
-    Hhbc_options.(disallow_hash_comments caml_opts)
-    Hhbc_options.(disallow_hash_comments rust_opts);
   assert_equal
     Hhbc_options.(disable_xhp_element_mangling caml_opts)
     Hhbc_options.(disable_xhp_element_mangling rust_opts);
@@ -306,9 +291,6 @@ let test_all_overrides_json_only _ =
     \"global_value\": true
   },
   \"hhvm.hack.lang.const_default_lambda_args\": {
-    \"global_value\": true
-  },
-  \"hhvm.hack.lang.disallow_hash_comments\": {
     \"global_value\": true
   },
   \"hhvm.hack.lang.disallow_fun_and_cls_meth_pseudo_funcs\": {
@@ -465,9 +447,6 @@ module CliArgOverrides = struct
 
   let hhvm'php7'uvs = "-vhhvm.php7.ltr_assign=true"
 
-  let hhvm'hack'lang'disallow_hash_comments =
-    "-vhhvm.hack.lang.disallow_hash_comments=true"
-
   let hhvm'hack'lang'disallow_fun_and_cls_meth_pseudo_funcs =
     "-vhhvm.hack.lang.disallow_fun_and_cls_meth_pseudo_funcs=true"
 
@@ -521,7 +500,6 @@ let test_all_overrides_cli_only _ =
       hhvm'enable_implicit_context;
       (* hhvm'server'include_search_paths; *)
       hhvm'hack'lang'const_default_lambda_args;
-      hhvm'hack'lang'disallow_hash_comments;
       hhvm'hack'lang'disallow_fun_and_cls_meth_pseudo_funcs;
       hhvm'hack'lang'disallow_inst_meth;
     ]

@@ -31,13 +31,13 @@ final class LocaleTest extends HackTest {
     expect(123)->toEqual(123);
   }
 
-  public function testCLocale(): void {
+  public function testBytesLocale(): void {
     \setlocale(\LC_ALL, "fr_FR");
     try {
       // Make sure the `\setlocale()` worked
       expect(\sprintf("%.02f", 1.23))->toEqual('1,23');
 
-      $l = Locale\c();
+      $l = Locale\bytes();
       expect(_Str\strlen_l("💩", $l))->toEqual(4);
       expect(_Str\vsprintf_l($l, "%.02f", vec[1.23]))->toEqual('1.23');
     } finally {
@@ -77,7 +77,7 @@ final class LocaleTest extends HackTest {
   }
 
   public function testModified(): void {
-    $c = Locale\c();
+    $c = Locale\bytes();
     expect(_Str\strlen_l('💩', $c))->toEqual(4);
     $c_utf8 = Locale\modified($c, Locale\Category::LC_CTYPE, 'en_US.UTF-8');
     expect(_Str\strlen_l('💩', $c_utf8))->toEqual(1);
@@ -85,5 +85,14 @@ final class LocaleTest extends HackTest {
     // as we didn't change LC_CTYPE, count bytes
     expect(_Str\strlen_l('💩', $fr_numeric))->toEqual(4);
     expect(_Str\vsprintf_l($fr_numeric, '%.02f', vec['1.23']))->toEqual('1,23');
+  }
+
+  public function testCBytesAlias(): void {
+    // Poking around in internals, but guarantees all settings match
+    /* HH_FIXME[3011] directly calling __debugInfo */
+    $c_debug = Locale\c()->__debugInfo();
+    expect($c_debug['LC_CTYPE'])->toEqual("C");
+    /* HH_FIXME[3011] directly calling __debugInfo */
+    expect($c_debug)->toEqual(Locale\bytes()->__debugInfo());
   }
 }

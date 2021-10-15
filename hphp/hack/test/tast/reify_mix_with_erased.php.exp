@@ -20,7 +20,7 @@ Errors:
         f_params =
         [{ param_annotation = (Tu); param_type_hint = ((Tu), (Some ([3:25-27], (Habstr ("Tu", []))))); 
            param_is_variadic = false; param_pos = [3:28-30]; param_name = "$f"; 
-           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_expr = None; param_readonly = None; param_callconv = Pnormal; 
            param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([4:3-13], (Return (Some ((Tu), [4:10-12], (Lvar ([4:10-12], $f))))))] }; 
@@ -46,7 +46,7 @@ Errors:
                 ((string), [8:3-21],
                  (Call ((((function<reify T, Tu>(string $f): string)), [8:3-4], (Id ([8:3-4], "\\f"))), 
                     [((int), ([8:5-8], (Hprim Tint))); ((string), ([8:10-16], (Hprim Tstring)))], 
-                    [((int), [8:18-20], (Hole (((int), [8:18-20], (Int "42")), (int), (string), Typing)))], None)))))
+                    [(Pnormal, ((int), [8:18-20], (Hole (((int), [8:18-20], (Int "42")), (int), (string), Typing))))], None)))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

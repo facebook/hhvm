@@ -121,6 +121,7 @@ pub trait SyntaxType<C>: SyntaxTypeBase<C>
     fn make_is_expression(ctx: &C, is_left_operand: Self, is_operator: Self, is_right_operand: Self) -> Self;
     fn make_as_expression(ctx: &C, as_left_operand: Self, as_operator: Self, as_right_operand: Self) -> Self;
     fn make_nullable_as_expression(ctx: &C, nullable_as_left_operand: Self, nullable_as_operator: Self, nullable_as_right_operand: Self) -> Self;
+    fn make_upcast_expression(ctx: &C, upcast_left_operand: Self, upcast_operator: Self, upcast_right_operand: Self) -> Self;
     fn make_conditional_expression(ctx: &C, conditional_test: Self, conditional_question: Self, conditional_consequence: Self, conditional_colon: Self, conditional_alternative: Self) -> Self;
     fn make_eval_expression(ctx: &C, eval_keyword: Self, eval_left_paren: Self, eval_argument: Self, eval_right_paren: Self) -> Self;
     fn make_isset_expression(ctx: &C, isset_keyword: Self, isset_left_paren: Self, isset_argument_list: Self, isset_right_paren: Self) -> Self;

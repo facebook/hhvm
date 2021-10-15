@@ -37,10 +37,6 @@ particularly the DefinlineFP. Below is an annotated version of this setup.
   BeginInlining # Sets up memory effects for the inlined frame and returns a new
                 # fp that can be used for stores into the frame.
 
-  InlineCall    # This instruction links the new frame to the old frame via the
-                # m_sfp field and loads the new frame into rvmfp(). It can be
-                # thought of as doing the work of a Call.
-
   StLoc ...     # At this point the arguments are stored back to the frame
                 # locations for their corresponding locals in the callee. N.B.
                 # that in memory these are the same addresses as the stack
@@ -56,12 +52,19 @@ value moved into the caller. The sequence for this is annotated below.
   ty := LdFrameThis     # The context is DecRef'ed
   DecRef ty
 
-  tz := LdStk     # The InlineReturn instruction will restore rvmfp() to the
-  InlineReturn    # Calling frame. The frame itself may still be used but the
-  StStk tz        # locals and context have explicitly been decrefed.
-
   EndInlining     # This instruction marks the end of the inlined region, beyond
                   # this point the frame should no longer considered to be live.
+                  # The locals and context have been explicitly decrefed.
+
+Side exits from inlined code must publish the frames using the InlineCall
+instruction.
+
+  InlineCall    # This instruction links the new frame to the old frame via the
+                # m_sfp field and loads the new frame into rvmfp(). It can be
+                # thought of as doing the work of a Call.
+
+  <exit>        # An instruction with ExitEffects, such as ReqBindJmp or
+                # EndCatch.
 
 We also support inlining of async functions. Returning from an inlined region
 is handled differently depending on whether or not the caller entered the
@@ -78,8 +81,8 @@ tCallee := DefLabel   # The callee region may suspend from multiple locations,
                       # execution of the caller at the opcode following FCall,
                       # usually an Await.
 
-InlineReturn          # The return sequence looks the same as a regular call but
-EndInlining           # rather than killing the frame it has been teleported to
+EndInlining           # The return sequence looks the same as a regular call but
+                      # rather than killing the frame it has been teleported to
                       # the heap.
 
 If a FCall with an async eager offset was followed by an Await, this HHIR
@@ -138,7 +141,6 @@ Outer:                                 | Inner:
 +-------------------+
 | ...               |
 | BeginInlining     |
-| InlineCall        |
 | StLoc             |
 | ...               |
 +-------------------+
@@ -157,17 +159,17 @@ Outer:                                 | Inner:
 | ... // aeo2       |               |                          v
 | Jmp returnTarget  |               v               +---------------------+
 +-------------------+    +---------------------+    | tb = LdStk          |
-           |             | tb = LdStk          |    | InlineReturn        |
-           v             | InlineSuspend       |    | EndInlining         |
-+-------------------+    | StStk tb            |    | StStk tb            |
-| DecRef Locals     |    | tc = LdStk          |    +---------------------+
+           |             | tb = LdStk          |    | EndInlining         |
+           v             | InlineSuspend       |    | StStk tb            |
++-------------------+    | StStk tb            |    +---------------------+
+| DecRef Locals     |    | tc = LdStk          |               |
 | DecRef This       |    | te = LdWhState tc   |               v
 | tr = LdStk        |    | JmpZero te          |--------->*Side Exit*
-| InlineReturn      |    +---------------------+
-| EndInlining       |               |
+| EndInlining       |    +---------------------+
 | StStk tr          |               |
-| CreateSSWH (*)    |               v
-+-------------------+    +---------------------+
+| CreateSSWH (*)    |               |
++-------------------+               v
+           |             +---------------------+
            |             | td = CreateAFWH tc  |
            v             | SuspendHook         |
           ...            | RetCtrl td          |
@@ -242,6 +244,7 @@ void beginInlining(IRGS& env,
   emitCalleeGenericsChecks(env, target, callFlags, fca.hasGenerics());
   emitCalleeDynamicCallChecks(env, target, callFlags);
   emitCalleeCoeffectChecks(env, target, callFlags, coeffects,
+                           fca.skipCoeffectsCheck(),
                            numArgsInclUnpack, ctx);
   emitCalleeRecordFuncCoverage(env, target);
   emitInitFuncInputs(env, target, numArgsInclUnpack);
@@ -309,24 +312,17 @@ void beginInlining(IRGS& env,
   auto const calleeFP = gen(
     env,
     BeginInlining,
-    BeginInliningData{calleeAROff, target, cost, int(numArgsInclUnpack)},
+    BeginInliningData{
+      calleeAROff,
+      target,
+      nextSrcKey(env),
+      spOffBCFromStackBase(env) - kNumActRecCells + 1,
+      cost,
+      int(numArgsInclUnpack)
+    },
     sp(env),
     fp(env)
   );
-
-  // Inline return stub doesn't support async eager return.
-  StFrameMetaData meta;
-  meta.callBCOff = callBcOffset;
-  meta.isInlined = true;
-  meta.asyncEagerReturn = false;
-
-  gen(env, StFrameMeta, meta, calleeFP);
-  gen(env, StFrameFunc, FuncData { target }, calleeFP);
-
-  InlineCallData data;
-  data.spOffset = calleeAROff;
-  data.returnSk = nextSrcKey(env);
-  data.returnSPOff = spOffBCFromStackBase(env) - kNumActRecCells + 1;
 
   assertx(startSk.func() == target &&
           startSk.offset() == target->getEntryForNumArgs(numArgsInclUnpack) &&
@@ -339,15 +335,20 @@ void beginInlining(IRGS& env,
   env.inlineState.cost += cost;
   env.inlineState.stackDepth += target->maxStackCells();
   env.bcState = startSk;
-  updateMarker(env);
-
-  gen(env, InlineCall, data, calleeFP, fp(env));
-
-  if (!(ctx->type() <= TNullptr)) gen(env, StFrameCtx, fp(env), ctx);
 
   // We have entered a new frame.
   updateMarker(env);
   env.irb->exceptionStackBoundary();
+
+  // Inline return stub doesn't support async eager return.
+  StFrameMetaData meta;
+  meta.callBCOff = callBcOffset;
+  meta.isInlined = true;
+  meta.asyncEagerReturn = false;
+
+  gen(env, StFrameMeta, meta, calleeFP);
+  gen(env, StFrameFunc, FuncData { target }, calleeFP);
+  if (!(ctx->type() <= TNullptr)) gen(env, StFrameCtx, fp(env), ctx);
 
   for (auto i = 0; i < numTotalInputs; ++i) {
     stLocRaw(env, i, calleeFP, inputs[i]);
@@ -463,11 +464,8 @@ void pushInlineFrame(IRGS& env, const InlineFrame& inlineFrame) {
 InlineFrame implInlineReturn(IRGS& env, bool suspend) {
   assertx(resumeMode(env) == ResumeMode::None);
 
-  auto const calleeFp = fp(env);
-  auto const prevFp = calleeFp->inst()->src(1);
   // Return to the caller function.
-  gen(env, InlineReturn, fp(env), prevFp);
-  gen(env, EndInlining, calleeFp);
+  gen(env, EndInlining, fp(env));
 
   return popInlineFrame(env);
 }
@@ -513,6 +511,18 @@ void implReturnBlock(IRGS& env, const RegionDesc& calleeRegion) {
   auto const callee = curFunc(env);
 
   auto const nret = callee->numInOutParams() + 1;
+  if (nret > 1 && callee->isCPPBuiltin()) {
+    auto const ret = pop(env, DataTypeGeneric);
+    implInlineReturn(env, false);
+    for (int32_t idx = 0; idx < nret - 1; ++idx) {
+      auto const off = offsetFromIRSP(env, BCSPRelOffset{idx});
+      auto const type = callOutType(callee, idx);
+      gen(env, AssertStk, type, IRSPRelOffsetData{off}, sp(env));
+    }
+    push(env, gen(env, AssertType, callReturnType(callee), ret));
+    return;
+  }
+
   jit::vector<SSATmp*> retVals{nret, nullptr};
   for (auto& v : retVals) v = pop(env, DataTypeGeneric);
 
@@ -604,9 +614,7 @@ bool endInlining(IRGS& env, const RegionDesc& calleeRegion) {
 
 bool conjureEndInlining(IRGS& env, const RegionDesc& calleeRegion,
                         bool builtin) {
-  if (!builtin) {
-    if (!endInlining(env, calleeRegion)) return false;
-  }
+  if (!endInlining(env, calleeRegion)) return false;
   gen(env, ConjureUse, pop(env));
   gen(env, EndBlock, ASSERT_REASON);
   return true;
@@ -618,6 +626,38 @@ void retFromInlined(IRGS& env) {
 
 void suspendFromInlined(IRGS& env, SSATmp* waitHandle) {
   gen(env, Jmp, env.inlineState.returnTarget.back().suspendTarget, waitHandle);
+}
+
+void spillInlinedFrames(IRGS& env) {
+  assertx(inlineDepth(env) == env.irb->fs().inlineDepth());
+
+  // Nothing to spill.
+  if (!isInlining(env)) return;
+
+  auto const inlinedFrames = [&] {
+    std::vector<SSATmp*> frames;
+    auto cur = fp(env);
+    auto const fixupFP = env.irb->fs().fixupFP();
+    while (cur != fixupFP) {
+      assertx(cur->inst()->is(BeginInlining));
+      frames.emplace_back(cur);
+      cur = cur->inst()->src(1);
+    }
+    std::reverse(frames.begin(), frames.end());
+    return frames;
+  }();
+
+  // Already spilled everything. This may happen in InterpOne's catch block.
+  if (inlinedFrames.size() == 0) return;
+
+  for (auto const fp : inlinedFrames) {
+    gen(env, InlineCall, fp, fp->inst()->src(1));
+    updateMarker(env);
+  }
+
+  gen(env, StVMFP, inlinedFrames.back());
+  gen(env, StVMPC, cns(env, uintptr_t(curSrcKey(env).pc())));
+  gen(env, StVMReturnAddr, cns(env, 0));
 }
 
 //////////////////////////////////////////////////////////////////////

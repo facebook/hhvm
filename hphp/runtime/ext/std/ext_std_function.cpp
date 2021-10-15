@@ -72,7 +72,9 @@ Variant HHVM_FUNCTION(call_user_func, const Variant& function,
      case 1:  raise_warning(warning); break;
      default: raise_error(warning);
    }
-  return vm_call_user_func(function, params, /* check ref */ true);
+  return vm_call_user_func(function, params,
+                           RuntimeCoeffects::fixme(),
+                           /* check ref */ true);
 }
 
 Variant HHVM_FUNCTION(call_user_func_array, const Variant& function,
@@ -90,7 +92,9 @@ Variant HHVM_FUNCTION(call_user_func_array, const Variant& function,
                   getDataTypeString(params.getType()).data());
     return init_null();
   }
-  return vm_call_user_func(function, params, /* check ref */ true);
+  return vm_call_user_func(function, params,
+                           RuntimeCoeffects::fixme(),
+                           /* check ref */ true);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -153,13 +157,17 @@ void StandardExtension::initFunction() {
 ///////////////////////////////////////////////////////////////////////////////
 
 String HHVM_FUNCTION(HH_fun_get_function, TypedValue v) {
-  if (!tvIsFunc(v)) {
+  if (tvIsFunc(v)) {
+    auto const f = val(v).pfunc;
+    return f->nameStr();
+  } else if (tvIsRFunc(v)) {
+    auto const f = val(v).prfunc->m_func;
+    return f->nameStr();
+  } else {
     SystemLib::throwInvalidArgumentExceptionObject(
       folly::sformat("Argument 1 passed to {}() must be a fun",
       __FUNCTION__+5));
   }
-  auto const f = val(v).pfunc;
-  return f->nameStr();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

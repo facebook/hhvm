@@ -2,6 +2,20 @@
 
 namespace {
 
+interface IExceptionWithPureGetMessage {
+  require extends Exception;
+
+  public function getMessage()[]: string;
+}
+
+class ExceptionWithPureGetMessage
+  extends Exception implements IExceptionWithPureGetMessage {
+
+  public function getMessage()[]: string {
+    return $this->message;
+  }
+}
+
 class Exception implements Throwable {
   use \__SystemLib\BaseException;
 
@@ -45,6 +59,6 @@ class Exception implements Throwable {
   }
 }
 
-class DivisionByZeroException extends Exception {}
+class DivisionByZeroException extends ExceptionWithPureGetMessage {}
 
 }

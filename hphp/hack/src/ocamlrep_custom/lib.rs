@@ -157,7 +157,7 @@ struct CustomBlockOcamlRep<T>(&'static CustomOperations, Rc<T>);
 
 const CUSTOM_BLOCK_SIZE_IN_BYTES: usize = std::mem::size_of::<CustomBlockOcamlRep<()>>();
 const CUSTOM_BLOCK_SIZE_IN_WORDS: usize =
-    CUSTOM_BLOCK_SIZE_IN_BYTES / std::mem::size_of::<OpaqueValue>();
+    CUSTOM_BLOCK_SIZE_IN_BYTES / std::mem::size_of::<OpaqueValue<'_>>();
 
 impl<T: CamlSerialize> ToOcamlRep for Custom<T> {
     fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
@@ -166,7 +166,7 @@ impl<T: CamlSerialize> ToOcamlRep for Custom<T> {
         let mut block = alloc.block_with_size_and_tag(CUSTOM_BLOCK_SIZE_IN_WORDS, CUSTOM_TAG);
 
         // Safety: we don't call any method on `alloc` after this method.
-        let block_ptr: *mut OpaqueValue = unsafe { alloc.block_ptr_mut(&mut block) };
+        let block_ptr: *mut OpaqueValue<'_> = unsafe { alloc.block_ptr_mut(&mut block) };
 
         // Safety: `alloc` guarantees that the `block_ptr` returned by
         // `block_ptr_mut` is aligend to `align_of::<OpaqueValue>()` and valid
@@ -529,7 +529,7 @@ mod test {
     fn custom_block_ocamlrep_size() {
         assert_eq!(
             size_of::<CustomBlockOcamlRep<u8>>(),
-            2 * size_of::<OpaqueValue>()
+            2 * size_of::<OpaqueValue<'_>>()
         );
     }
 
@@ -537,7 +537,7 @@ mod test {
     fn custom_block_ocamlrep_align() {
         assert_eq!(
             align_of::<CustomBlockOcamlRep<u8>>(),
-            align_of::<OpaqueValue>()
+            align_of::<OpaqueValue<'_>>()
         );
     }
 }

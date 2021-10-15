@@ -1182,6 +1182,7 @@ std::string show(const FCallArgsBase& fca, const uint8_t* inoutArgs,
   if (fca.hasGenerics()) flags.push_back("Generics");
   if (fca.lockWhileUnwinding()) flags.push_back("LockWhileUnwinding");
   if (fca.skipRepack()) flags.push_back("SkipRepack");
+  if (fca.skipCoeffectsCheck()) flags.push_back("SkipCoeffectsCheck");
   if (fca.enforceMutableReturn()) flags.push_back("EnforceMutableReturn");
   if (fca.enforceReadonlyThis()) flags.push_back("EnforceReadonlyThis");
   return folly::sformat(

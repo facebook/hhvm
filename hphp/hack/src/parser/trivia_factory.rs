@@ -6,7 +6,7 @@
 
 use crate::lexable_trivia::LexableTrivia;
 
-pub trait TriviaFactory {
+pub trait TriviaFactory: Clone {
     type Trivia: LexableTrivia;
 
     fn make(&mut self) -> Self::Trivia;

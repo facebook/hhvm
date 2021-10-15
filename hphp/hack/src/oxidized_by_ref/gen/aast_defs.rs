@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e44f2c5134ac1980cbebeaff08b041f2>>
+// @generated SignedSource<<b4c5b26085c657feca27473c58206230>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -55,6 +55,8 @@ impl<'a> TrivialDrop for Lid<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(Lid<'arena>);
 
 pub type Sid<'a> = ast_defs::Id<'a>;
+
+pub type ClassName<'a> = Sid<'a>;
 
 pub use oxidized::aast_defs::IsReified;
 
@@ -156,12 +158,13 @@ arena_deserializer::impl_deserialize_in_arena!(Contexts<'arena>);
     ToOcamlRep
 )]
 #[repr(C)]
-pub struct HfParamInfo {
-    pub kind: Option<oxidized::ast_defs::ParamKind>,
+pub struct HfParamInfo<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub kind: ast_defs::ParamKind<'a>,
     pub readonlyness: Option<oxidized::ast_defs::ReadonlyKind>,
 }
-impl TrivialDrop for HfParamInfo {}
-arena_deserializer::impl_deserialize_in_arena!(HfParamInfo);
+impl<'a> TrivialDrop for HfParamInfo<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(HfParamInfo<'arena>);
 
 #[derive(
     Clone,
@@ -184,7 +187,7 @@ pub struct HintFun<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub param_tys: &'a [&'a Hint<'a>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub param_info: &'a [Option<&'a HfParamInfo>],
+    pub param_info: &'a [Option<&'a HfParamInfo<'a>>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub variadic_ty: &'a VariadicHint<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -223,7 +226,7 @@ pub enum Hint_<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Htuple(&'a [&'a Hint<'a>]),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Happly(&'a (Sid<'a>, &'a [&'a Hint<'a>])),
+    Happly(&'a (&'a ClassName<'a>, &'a [&'a Hint<'a>])),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Hshape(&'a NastShapeInfo<'a>),
     /// This represents the use of a type const. Type consts are accessed like
@@ -268,6 +271,7 @@ pub enum Hint_<'a> {
     Hprim(&'a Tprim),
     Hthis,
     Hdynamic,
+    Hsupportdynamic,
     Hnothing,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Hunion(&'a [&'a Hint<'a>]),

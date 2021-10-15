@@ -367,7 +367,47 @@ function sodium_crypto_aead_xchacha20poly1305_ietf_encrypt(
   string $key,
 ): string;
 
+///// AEAD functions for stream
+
+<<__PHPStdLib>>
+function sodium_crypto_secretstream_xchacha20poly1305_keygen(): string;
+
+<<__PHPStdLib>>
+function sodium_crypto_secretstream_xchacha20poly1305_init_push(
+  string $key,
+): (string, string); /* state, header */
+
+<<__PHPStdLib>>
+function sodium_crypto_secretstream_xchacha20poly1305_push(
+  inout mixed $state,
+  string $plaintext,
+  string $ad,
+  int $tag,
+): string;
+
+<<__PHPStdLib>>
+function sodium_crypto_secretstream_xchacha20poly1305_init_pull(
+  string $key,
+  string $header,
+): string;
+
+<<__PHPStdLib>>
+function sodium_crypto_secretstream_xchacha20poly1305_pull(
+  inout mixed $state,
+  string $ciphertext,
+  string $ad,
+): (string, int); /* plaintext, tag */
+
+<<__PHPStdLib>>
+function sodium_crypto_secretstream_xchacha20poly1305_rekey(inout mixed $state): void;
+
 ///// Ristretto
+
+<<__PHPStdLib>>
+function sodium_crypto_core_ristretto255_from_hash(string $r): string;
+
+<<__PHPStdLib>>
+function sodium_crypto_scalarmult_ristretto255(string $n, string $p): string;
 
 <<__PHPStdLib>>
 function sodium_crypto_core_ristretto255_scalar_reduce(string $s): string;
@@ -448,6 +488,15 @@ const int SODIUM_CRYPTO_AEAD_CHACHA20POLY1305_NSECBYTES = 0;
 const int SODIUM_CRYPTO_AEAD_CHACHA20POLY1305_NPUBBYTES = 0;
 const int SODIUM_CRYPTO_AEAD_CHACHA20POLY1305_ABYTES = 0;
 
+const int SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_ABYTES = 0;
+const int SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_HEADERBYTES = 0;
+const int SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_KEYBYTES = 0;
+const int SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_MESSAGEBYTES_MAX
+   = 0;
+const int SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_TAG_MESSAGE = 0;
+const int SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_TAG_PUSH = 0;
+const int SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_TAG_REKEY = 0;
+const int SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_TAG_FINAL = 0;
 
 ///// Conditionally-defined constants (depends on libsodium build options)
 
@@ -487,5 +536,9 @@ const int SODIUM_CRYPTO_KX_SESSIONKEYBYTES = 0;
 const int SODIUM_CRYPTO_KX_SECRETKEYBYTES = 0;
 const int SODIUM_CRYPTO_KX_KEYPAIRBYTES = 0;
 
-const int SODIUM_CRYPTO_CORE_RISTRETTO255_NONREDUCEDSCALARBYTES = 0;
+const int SODIUM_CRYPTO_SCALARMULT_RISTRETTO255_BYTES = 0;
+const int SODIUM_CRYPTO_SCALARMULT_RISTRETTO255_SCALARBYTES = 0;
+const int SODIUM_CRYPTO_CORE_RISTRETTO255_BYTES = 0;
+const int SODIUM_CRYPTO_CORE_RISTRETTO255_HASHBYTES = 0;
 const int SODIUM_CRYPTO_CORE_RISTRETTO255_SCALARBYTES = 0;
+const int SODIUM_CRYPTO_CORE_RISTRETTO255_NONREDUCEDSCALARBYTES = 0;

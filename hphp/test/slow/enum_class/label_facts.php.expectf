@@ -1,0 +1,39 @@
+dict(1) {
+  ["%s/label_facts.php"]=>
+  dict(7) {
+    ["constants"]=>
+    vec(0) {
+    }
+    ["functions"]=>
+    vec(3) {
+      string(9) "afunction"
+      string(11) "my_function"
+      string(13) "main_hashbang"
+    }
+    ["md5sum0"]=>
+    int(%s)
+    ["md5sum1"]=>
+    int(%s)
+    ["sha1sum"]=>
+    string(40) "%s"
+    ["typeAliases"]=>
+    vec(0) {
+    }
+    ["types"]=>
+    vec(1) {
+      dict(4) {
+        ["baseTypes"]=>
+        vec(1) {
+          string(19) "HH\BuiltinEnumClass"
+        }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(4) "enum"
+        ["name"]=>
+        string(9) "Something"
+      }
+    }
+  }
+}
+Hello, world.

@@ -18,7 +18,7 @@ pub struct InvalidString {
 }
 
 impl fmt::Display for InvalidString {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.msg)
     }
 }
@@ -110,14 +110,14 @@ pub fn escape<'a>(s: impl Into<Cow<'a, str>>) -> Cow<'a, str> {
     escape_by(s.into(), escape_char)
 }
 
-fn cow_to_bytes(s: Cow<str>) -> Cow<[u8]> {
+fn cow_to_bytes(s: Cow<'_, str>) -> Cow<'_, [u8]> {
     match s {
         Cow::Borrowed(s) => s.as_bytes().into(),
         Cow::Owned(s) => Vec::<u8>::from(s).into(),
     }
 }
 
-pub fn escape_by<F: Fn(u8) -> Option<Cow<'static, [u8]>>>(s: Cow<str>, f: F) -> Cow<str> {
+pub fn escape_by<F: Fn(u8) -> Option<Cow<'static, [u8]>>>(s: Cow<'_, str>, f: F) -> Cow<'_, str> {
     let r = escape_byte_by(cow_to_bytes(s), f);
     match r {
         Cow::Borrowed(s) => unsafe { std::str::from_utf8_unchecked(s) }.into(),
@@ -125,7 +125,10 @@ pub fn escape_by<F: Fn(u8) -> Option<Cow<'static, [u8]>>>(s: Cow<str>, f: F) -> 
     }
 }
 
-fn escape_byte_by<F: Fn(u8) -> Option<Cow<'static, [u8]>>>(cow: Cow<[u8]>, f: F) -> Cow<[u8]> {
+fn escape_byte_by<F: Fn(u8) -> Option<Cow<'static, [u8]>>>(
+    cow: Cow<'_, [u8]>,
+    f: F,
+) -> Cow<'_, [u8]> {
     let mut c = vec![];
     let mut copied = false;
     let s = cow.as_ref();

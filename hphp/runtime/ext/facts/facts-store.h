@@ -22,21 +22,20 @@
 #include <folly/experimental/io/FsUtil.h>
 
 #include "hphp/runtime/base/autoload-map.h"
-#include "hphp/runtime/base/watchman.h"
 #include "hphp/runtime/ext/facts/autoload-db.h"
+#include "hphp/runtime/ext/facts/watcher.h"
 
 namespace HPHP {
 namespace Facts {
 
 /**
- * Create a FactsStore that learns about changed files from Watchman and
+ * Create a FactsStore that learns about changed files from its Watcher and
  * updates the DB at `dbData.m_path` accordingly.
  */
-std::shared_ptr<FactsStore> make_watchman_facts(
+std::shared_ptr<FactsStore> make_watcher_facts(
     folly::fs::path root,
     DBData dbData,
-    folly::dynamic queryExpr,
-    Watchman& watchmanClient,
+    std::unique_ptr<Watcher> watcher,
     bool shouldSubscribe,
     std::vector<std::string> indexedMethodAttributes);
 

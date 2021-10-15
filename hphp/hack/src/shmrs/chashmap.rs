@@ -22,6 +22,20 @@ use crate::sync::{RwLock, RwLockRef};
 const NUM_SHARDS: usize = 256;
 static_assertions::const_assert!(NUM_SHARDS.is_power_of_two());
 
+/// The non-evictable allocator itself allocates regions of memory in chunks.
+const NON_EVICTABLE_CHUNK_SIZE: usize = 1024 * 1024;
+
+/// The evictable allocator is of a fixed size and only allocates one chunk.
+const EVICTABLE_CHUNK_SIZE: usize = (10 * 1024 * 1024 * 1024) / NUM_SHARDS;
+
+/// This struct gives access to a shard, including its hashmap and its
+/// allocators.
+pub struct Shard<'shm, 'a, K, V, S> {
+    pub map: &'a mut Map<'shm, K, V, S>,
+    pub alloc_non_evictable: &'a MapAlloc<'shm>,
+    pub alloc_evictable: &'a MapAlloc<'shm>,
+}
+
 /// A concurrent hash map implemented as multiple sharded non-concurrent
 /// hash maps.
 ///
@@ -29,10 +43,23 @@ static_assertions::const_assert!(NUM_SHARDS.is_power_of_two());
 /// in shared memory.
 ///
 /// Use `initialize` or `attach` to get an interface into the map.
+///
+/// ## Invariants
+/// There are important invariants about this data structure. Failing to
+/// uphold these invariants might crash the program.
+///
+///   1. Each sharded hashmap has two sharded allocators: one for
+///      non-evictable items, and one for evictable items. Putting
+///      non-evictable items in the evictable shard (and vice versa)
+///      is an invariant violation.
+///   2. Each sharded hashmap can only contain pointers to values in
+///      its own sharded allocators. Pointing to a value in a different
+///      shard allocator is an invariant violation.
 pub struct CMap<'shm, K, V, S = DefaultHashBuilder> {
     hash_builder: S,
     file_alloc: FileAlloc,
-    map_allocs: [MapAllocControlData; NUM_SHARDS],
+    shard_allocs_non_evictable: [RwLock<MapAllocControlData>; NUM_SHARDS],
+    shard_allocs_evictable: [RwLock<MapAllocControlData>; NUM_SHARDS],
     maps: [RwLock<Map<'shm, K, V, S>>; NUM_SHARDS],
 }
 
@@ -44,6 +71,9 @@ pub struct CMap<'shm, K, V, S = DefaultHashBuilder> {
 /// Obtained by calling `initialize` or `attach` on `CMap`.
 pub struct CMapRef<'shm, K, V, S = DefaultHashBuilder> {
     hash_builder: S,
+    file_alloc: &'shm FileAlloc,
+    shard_allocs_non_evictable: Vec<MapAlloc<'shm>>,
+    shard_allocs_evictable: Vec<MapAlloc<'shm>>,
     maps: Vec<RwLockRef<'shm, Map<'shm, K, V, S>>>,
 }
 
@@ -89,10 +119,15 @@ impl<'shm, K, V, S: Clone> CMap<'shm, K, V, S> {
         // Initialize the memory properly.
         //
         // See MaybeUninit docs for examples.
-        let mut map_allocs: [MaybeUninit<MapAllocControlData>; NUM_SHARDS] =
+        let mut shard_allocs_non_evictable: [MaybeUninit<RwLock<MapAllocControlData>>; NUM_SHARDS] =
             MaybeUninit::uninit().assume_init();
-        for map_alloc in &mut map_allocs[..] {
-            *map_alloc = MaybeUninit::new(MapAllocControlData::new());
+        for shard_alloc in &mut shard_allocs_non_evictable[..] {
+            *shard_alloc = MaybeUninit::new(RwLock::new(MapAllocControlData::new()));
+        }
+        let mut shard_allocs_evictable: [MaybeUninit<RwLock<MapAllocControlData>>; NUM_SHARDS] =
+            MaybeUninit::uninit().assume_init();
+        for shard_alloc in &mut shard_allocs_evictable[..] {
+            *shard_alloc = MaybeUninit::new(RwLock::new(MapAllocControlData::new()));
         }
 
         let mut maps: [MaybeUninit<RwLock<Map<'shm, K, V, S>>>; NUM_SHARDS] =
@@ -104,7 +139,8 @@ impl<'shm, K, V, S: Clone> CMap<'shm, K, V, S> {
         cmap.as_mut_ptr().write(CMap {
             hash_builder,
             file_alloc: FileAlloc::new(file_start, file_size, next_free_byte),
-            map_allocs: MaybeUninit::array_assume_init(map_allocs),
+            shard_allocs_non_evictable: MaybeUninit::array_assume_init(shard_allocs_non_evictable),
+            shard_allocs_evictable: MaybeUninit::array_assume_init(shard_allocs_evictable),
             maps: MaybeUninit::array_assume_init(maps),
         });
         let cmap = cmap.assume_init_mut();
@@ -116,17 +152,40 @@ impl<'shm, K, V, S: Clone> CMap<'shm, K, V, S> {
             .map(|r| r.initialize().unwrap())
             .collect();
 
+        // Initialize shard allocator locks.
+        let mut shard_allocs_non_evictable: Vec<MapAlloc<'shm>> =
+            Vec::with_capacity(cmap.shard_allocs_non_evictable.len());
+        for lock in &mut cmap.shard_allocs_non_evictable {
+            shard_allocs_non_evictable.push(MapAlloc::new(
+                lock.initialize().unwrap(),
+                &cmap.file_alloc,
+                NON_EVICTABLE_CHUNK_SIZE,
+                false,
+            ));
+        }
+        let mut shard_allocs_evictable: Vec<MapAlloc<'shm>> =
+            Vec::with_capacity(cmap.shard_allocs_evictable.len());
+        for lock in &mut cmap.shard_allocs_evictable {
+            shard_allocs_evictable.push(MapAlloc::new(
+                lock.initialize().unwrap(),
+                &cmap.file_alloc,
+                EVICTABLE_CHUNK_SIZE,
+                true,
+            ));
+        }
+
         // Initialize maps themselves.
-        assert_eq!(maps.len(), cmap.map_allocs.len());
-        for (control_data, map) in cmap.map_allocs.iter().zip(maps.iter()) {
-            let map_alloc = MapAlloc::new(control_data, &cmap.file_alloc);
+        for map in maps.iter() {
             map.write()
                 .unwrap()
-                .reset_with_hasher(map_alloc, cmap.hash_builder.clone());
+                .reset_with_hasher(&cmap.file_alloc, cmap.hash_builder.clone());
         }
 
         CMapRef {
             hash_builder: cmap.hash_builder.clone(),
+            file_alloc: &cmap.file_alloc,
+            shard_allocs_non_evictable,
+            shard_allocs_evictable,
             maps,
         }
     }
@@ -149,8 +208,33 @@ impl<'shm, K, V, S: Clone> CMap<'shm, K, V, S> {
         // Attach to the map locks.
         let maps: Vec<RwLockRef<'shm, _>> = cmap.maps.iter_mut().map(|r| r.attach()).collect();
 
+        // Attach shard allocators.
+        let mut shard_allocs_non_evictable: Vec<MapAlloc<'shm>> =
+            Vec::with_capacity(cmap.shard_allocs_non_evictable.len());
+        for lock in &mut cmap.shard_allocs_non_evictable {
+            shard_allocs_non_evictable.push(MapAlloc::new(
+                lock.attach(),
+                &cmap.file_alloc,
+                NON_EVICTABLE_CHUNK_SIZE,
+                false,
+            ));
+        }
+        let mut shard_allocs_evictable: Vec<MapAlloc<'shm>> =
+            Vec::with_capacity(cmap.shard_allocs_evictable.len());
+        for lock in &mut cmap.shard_allocs_evictable {
+            shard_allocs_evictable.push(MapAlloc::new(
+                lock.attach(),
+                &cmap.file_alloc,
+                EVICTABLE_CHUNK_SIZE,
+                true,
+            ));
+        }
+
         CMapRef {
             hash_builder: cmap.hash_builder.clone(),
+            file_alloc: &cmap.file_alloc,
+            shard_allocs_non_evictable,
+            shard_allocs_evictable,
             maps,
         }
     }
@@ -190,7 +274,8 @@ impl<'shm, K: Hash, V, S: BuildHasher> CMapRef<'shm, K, V, S> {
         f(&map)
     }
 
-    /// Access the map that belongs to the given key for writing.
+    /// Access the map and that belongs to the given key for writing. Also provides
+    /// access to the corresponding shard allocator.
     ///
     /// Warning! May deadlock (and thus panic) when you already hold a writer lock on the
     /// queried map.
@@ -200,10 +285,35 @@ impl<'shm, K: Hash, V, S: BuildHasher> CMapRef<'shm, K, V, S> {
     /// this means you can't try to hold multiple writer locks (or a write lock
     /// a read lock) at the same time, because the hasher is abstract. You have
     /// no way of knowing which map you need!
-    pub fn write_map<R>(&self, key: &K, f: impl FnOnce(&mut Map<'shm, K, V, S>) -> R) -> R {
+    pub fn write_map<R>(&self, key: &K, f: impl FnOnce(Shard<'shm, '_, K, V, S>) -> R) -> R {
         let shard_index = self.shard_index_for(key);
         let mut map = self.maps[shard_index].write().unwrap();
-        f(&mut map)
+        let alloc_non_evictable = &self.shard_allocs_non_evictable[shard_index];
+        let alloc_evictable = &self.shard_allocs_evictable[shard_index];
+        f(Shard {
+            map: &mut map,
+            alloc_non_evictable,
+            alloc_evictable,
+        })
+    }
+
+    /// Return the total number of bytes allocated.
+    ///
+    /// Note that this might include bytes that were later free'd, as we
+    /// (currently) don't free memory to the OS.
+    pub fn allocated_bytes(&self) -> usize {
+        self.file_alloc.allocated_bytes()
+    }
+
+    /// Return the number of total entries in the hash map.
+    ///
+    /// Will loop over each shard.
+    pub fn len(&self) -> usize {
+        let mut count = 0;
+        for map in &self.maps {
+            count += map.read().unwrap().len();
+        }
+        count
     }
 }
 
@@ -260,8 +370,8 @@ mod integration_tests {
                         unsafe { CMap::attach(mmap_ptr, MEM_HEAP_SIZE) };
 
                     for &(key, value) in scenario.iter() {
-                        cmap.write_map(&key, |map| {
-                            map.insert(key, value);
+                        cmap.write_map(&key, |shard| {
+                            shard.map.insert(key, value);
                             std::thread::sleep(OP_SLEEP);
                         });
                     }

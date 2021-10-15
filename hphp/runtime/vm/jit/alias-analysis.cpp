@@ -57,14 +57,15 @@ void visit_locations(const BlockList& blocks, Visit visit) {
                                     visit(x.locals); },
         [&] (GeneralEffects x)    { visit(x.loads);
                                     visit(x.stores);
+                                    visit(x.inout);
                                     visit(x.moves);
-                                    visit(x.kills); },
+                                    visit(x.kills);
+                                    visit(x.backtrace); },
         [&] (PureLoad x)          { visit(x.src); },
         [&] (PureStore x)         { visit(x.dst); },
         [&] (ExitEffects x)       { visit(x.live); visit(x.kills); },
         [&] (PureInlineCall x)    { visit(x.base);
-                                    visit(x.actrec); },
-        [&] (PureInlineReturn x)  { visit(x.base); }
+                                    visit(x.actrec); }
       );
     }
   }
@@ -269,6 +270,7 @@ ALocBits AliasAnalysis::may_alias(AliasClass acls) const {
   if (auto const mis = acls.mis()) {
     add_single(mis, AMIStateTempBase);
     add_single(mis, AMIStateBase);
+    add_single(mis, AMIStateROProp);
   }
 
   if (auto const fbase = acls.frame_base()) {
@@ -331,9 +333,9 @@ ALocBits AliasAnalysis::expand(AliasClass acls) const {
 
   if (auto const mis = acls.mis()) {
     auto const add_mis = [&] (AliasClass cls) { add_single(mis, cls); };
-
     add_mis(AMIStateTempBase);
     add_mis(AMIStateBase);
+    add_mis(AMIStateROProp);
   }
 
   if (auto const fbase = acls.frame_base()) {

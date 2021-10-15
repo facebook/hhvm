@@ -67,7 +67,7 @@ trait ReflectionTypedAttribute {
  * The ReflectionException class.
  *
  */
-class ReflectionException extends Exception {
+class ReflectionException extends ExceptionWithPureGetMessage {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -101,11 +101,19 @@ class ReflectionParameter implements Reflector {
    *
    * @func       mixed   The function to reflect parameters from.
    * @param      mixed   The parameter.
-   *
+   * @info       mixed   Darray containing information from getParams()
    * @return     mixed   No value is returned.
    */
-  public function __construct($func, $param)[] {
+  public function __construct($func, $param, $info = null)[] {
     if (is_null($func) && is_null($param)) {
+      if ($info !== null) {
+        $this->info = $info;
+        $this->name = $info['name'];
+        $this->paramTypeInfo = darray[];
+        $this->paramTypeInfo['name'] = $info['type_hint'];
+        $this->paramTypeInfo['nullable'] = $info['type_hint_nullable'];
+        $this->paramTypeInfo['builtin'] = $info['type_hint_builtin'];
+      }
       return;
     }
 

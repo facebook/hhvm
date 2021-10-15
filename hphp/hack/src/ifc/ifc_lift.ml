@@ -155,3 +155,4 @@ let rec ty ?prefix ?lump renv (t : T.locl_ty) =
   | T.Taccess (_locl_ty, _ids) -> fail "Taccess"
   | T.Tunapplied_alias _ -> fail "Tunapplied_alias"
   | T.Tneg _ -> fail "Tneg"
+  | T.Tsupportdynamic -> fail "Tsupportdynamic"

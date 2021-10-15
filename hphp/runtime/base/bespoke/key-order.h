@@ -30,10 +30,8 @@ namespace bespoke {
 
 using KeyOrderData = std::vector<LowStringPtr>;
 
-// KeyOrder represents insertion order of static string keys. It is used during
-// profiling, and all associated data is dropped after layout selection has
-// completed. For KeyOrders that must persist after profiling, use
-// PersistentKeyOrder.
+// KeyOrder represents insertion order of static string keys. We construct
+// unique KeyOrders for profiling, but delete them all after layout selection.
 struct KeyOrder {
   using const_iterator = KeyOrderData::const_iterator;
 
@@ -62,7 +60,6 @@ struct KeyOrder {
 
 protected:
   friend struct KeyOrderHash;
-  friend struct PersistentKeyOrder;
 
   // A default KeyOrder is "invalid", for arrays with non-static-string keys.
   KeyOrder() = default;
@@ -74,35 +71,9 @@ protected:
   const KeyOrderData* m_keys = nullptr;
 };
 
-struct PersistentKeyOrder : KeyOrder {
-  static PersistentKeyOrder From(const KeyOrder&);
-  static PersistentKeyOrder Make(const KeyOrderData&);
-  static folly::Optional<PersistentKeyOrder> GetExisting(const KeyOrderData&);
-  static folly::Optional<PersistentKeyOrder> GetExisting(const KeyOrder&);
-
-private:
-  friend struct PersistentKeyOrderHash;
-  friend struct PersistentKeyOrderEqual;
-
-  explicit PersistentKeyOrder(const KeyOrderData*);
-};
-
 struct KeyOrderHash {
   size_t operator()(const KeyOrder& ko) const {
     return std::hash<const KeyOrderData*>{}(ko.m_keys);
-  }
-};
-
-struct PersistentKeyOrderHash {
-  size_t operator()(const PersistentKeyOrder& pko) const {
-    return std::hash<const KeyOrderData*>{}(pko.m_keys);
-  }
-};
-
-struct PersistentKeyOrderEqual {
-  size_t operator()(
-      const PersistentKeyOrder& a, const PersistentKeyOrder& b) const {
-    return a.m_keys == b.m_keys;
   }
 };
 

@@ -23,6 +23,7 @@ namespace HPHP { namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
 constexpr int Vframe::Top;
+constexpr int Vframe::Root;
 
 Vlabel Vunit::makeBlock(AreaIndex area, uint64_t weight) {
   auto i = blocks.size();

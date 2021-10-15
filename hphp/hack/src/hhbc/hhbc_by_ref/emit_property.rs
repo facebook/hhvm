@@ -2,7 +2,6 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use decl_provider::DeclProvider;
 use ffi::Maybe::*;
 use hhbc_by_ref_ast_constant_folder as ast_constant_folder;
 use hhbc_by_ref_emit_attribute as emit_attribute;
@@ -33,9 +32,9 @@ pub struct FromAstArgs<'ast> {
     pub is_readonly: bool,
 }
 
-pub fn from_ast<'ast, 'arena, 'decl, D: DeclProvider<'decl>>(
+pub fn from_ast<'ast, 'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
-    emitter: &mut Emitter<'arena, 'decl, D>,
+    emitter: &mut Emitter<'arena, 'decl>,
     class: &'ast ast::Class_,
     tparams: &[&str],
     class_is_const: bool,
@@ -202,9 +201,7 @@ fn valid_for_prop(tc: &constraint::Constraint) -> bool {
     match &tc.name {
         Nothing => true,
         Just(s) => {
-            !(string_utils::is_self(&s)
-                || string_utils::is_parent(&s)
-                || s.as_str().eq_ignore_ascii_case("hh\\nothing")
+            !(s.as_str().eq_ignore_ascii_case("hh\\nothing")
                 || s.as_str().eq_ignore_ascii_case("hh\\noreturn")
                 || s.as_str().eq_ignore_ascii_case("callable"))
         }

@@ -1,0 +1,15 @@
+pessimize:	prop.php:5,prop,\C,m
+pessimize:	prop.php:7,prop,\C,v
+pessimize:	prop.php:7,prop,\C,v
+File "prop.php", line 5, characters 16-17:
+Class `C` cannot support dynamic because property `m` cannot be assigned to dynamic (Typing[4402])
+  File "prop.php", line 5, characters 10-14:
+  Property `m` has type `mixed`
+File "prop.php", line 7, characters 22-23:
+Class `C` cannot support dynamic because property `v` cannot be assigned to dynamic (Typing[4402])
+  File "prop.php", line 7, characters 10-20:
+  Property `v` has type `Vector<int>`
+File "prop.php", line 7, characters 22-23:
+Class `C` cannot support dynamic because property `v` does not have an enforceable type (Typing[4402])
+  File "prop.php", line 7, characters 10-20:
+  Property `v` has type `Vector<int>`

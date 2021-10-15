@@ -297,7 +297,6 @@ ParserEnv RepoOptions::getParserEnvironment() const {
     , DisableXHPElementMangling
     , false // disable_xhp_children_declarations
     , false // disable_modes
-    , DisallowHashComments
     , DisallowFunAndClsMethPseudoFuncs
     , true  // interpret_soft_types_as_like_types
     };
@@ -364,7 +363,6 @@ std::uint32_t RepoOptions::getParserFlags() const {
     SETFLAGS(DisableXHPElementMangling, 11)                    \
     SETFLAGS(DisallowFunAndClsMethPseudoFuncs, 12)             \
     SETFLAGS(DisallowFuncPtrsInConstants, 13)                  \
-    SETFLAGS(DisallowHashComments, 14)                         \
     SETFLAGS(EnableEnumClasses,16)                             \
     SETFLAGS(EnableXHPClassModifier,17)                        \
     SETFLAGS(RuntimeOption::EnableClassLevelWhereClauses, 20)  \
@@ -861,6 +859,8 @@ std::string RuntimeOption::AutoloadDBPath;
 std::string RuntimeOption::AutoloadDBPerms{"0644"};
 std::string RuntimeOption::AutoloadDBGroup;
 std::string RuntimeOption::AutoloadLogging;
+std::vector<std::string> RuntimeOption::AutoloadExcludedRepos;
+bool RuntimeOption::AutoloadLoggingAllowPropagation;
 bool RuntimeOption::AutoloadEnforceOneDefinitionRule = true;
 bool RuntimeOption::AutoloadRethrowExceptions = true;
 std::string RuntimeOption::FileCache;
@@ -1141,10 +1141,6 @@ static inline bool pgoLayoutSplitHotColdDefault() {
 
 static inline bool layoutPrologueSplitHotColdDefault() {
   return arch() != Arch::ARM;
-}
-
-uint64_t ahotDefault() {
-  return RuntimeOption::RepoAuthoritative ? 4 << 20 : 0;
 }
 
 Optional<folly::fs::path> RuntimeOption::GetHomePath(
@@ -2094,6 +2090,8 @@ void RuntimeOption::Load(
       // Debugger (part of Eval)
       Config::Bind(EnableHphpdDebugger, ini, config,
                    "Eval.Debugger.EnableDebugger");
+      Config::Bind(EnableVSDebugger, ini, config,
+                   "Eval.Debugger.VSDebugEnable", EnableVSDebugger);
       Config::Bind(EnableDebuggerColor, ini, config,
                    "Eval.Debugger.EnableDebuggerColor", true);
       Config::Bind(EnableDebuggerPrompt, ini, config,
@@ -2121,11 +2119,9 @@ void RuntimeOption::Load(
   {
     // CodeCache
     using jit::CodeCache;
-    Config::Bind(CodeCache::AHotSize, ini, config, "Eval.JitAHotSize",
-                 ahotDefault());
+    Config::Bind(CodeCache::AHotSize, ini, config, "Eval.JitAHotSize", 0);
     Config::Bind(CodeCache::ASize, ini, config, "Eval.JitASize", 60 << 20);
-    Config::Bind(CodeCache::AProfSize, ini, config, "Eval.JitAProfSize",
-                 RuntimeOption::EvalJitPGO ? (64 << 20) : 0);
+    Config::Bind(CodeCache::AProfSize, ini, config, "Eval.JitAProfSize", 0);
     Config::Bind(CodeCache::AColdSize, ini, config, "Eval.JitAColdSize",
                  24 << 20);
     Config::Bind(CodeCache::AFrozenSize, ini, config, "Eval.JitAFrozenSize",
@@ -2462,7 +2458,11 @@ void RuntimeOption::Load(
     Config::Bind(AutoloadDBPath, ini, config, "Autoload.DB.Path");
     Config::Bind(AutoloadDBPerms, ini, config, "Autoload.DB.Perms", "0644");
     Config::Bind(AutoloadDBGroup, ini, config, "Autoload.DB.Group");
-    Config::Bind(AutoloadLogging, ini, config, "Autoload.Logging", "");
+    Config::Bind(AutoloadLogging, ini, config, "Autoload.Logging",
+      "hphp.runtime.ext.facts:=CRITICAL:slog;slog=hhvm");
+    Config::Bind(AutoloadExcludedRepos, ini, config, "Autoload.ExcludedRepos");
+    Config::Bind(AutoloadLoggingAllowPropagation, ini, config,
+                 "Autoload.AllowLoggingPropagation", false);
     Config::Bind(AutoloadEnforceOneDefinitionRule, ini, config,
                  "Autoload.EnforceOneDefinitionRule", true);
     Config::Bind(AutoloadRethrowExceptions, ini, config,

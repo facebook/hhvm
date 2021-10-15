@@ -13,6 +13,8 @@ $breakpoints = varray[
    ];
 
 $testProcess = vsDebugLaunch(__FILE__ . ".test", true, $breakpoints);
+// Skip breakpoint resolution messages.
+skipMessages(count($breakpoints[0]{'breakpoints'}));
 
 checkForOutput($testProcess, "Hello world.\n", "stdout");
 

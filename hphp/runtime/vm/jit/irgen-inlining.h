@@ -43,6 +43,12 @@ void retFromInlined(IRGS&);
  */
 void suspendFromInlined(IRGS&, SSATmp* waithandle);
 
+/*
+ * Make sure all inlined frames are written on the stack and a part of the FP
+ * chain.
+ */
+void spillInlinedFrames(IRGS& env);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}}

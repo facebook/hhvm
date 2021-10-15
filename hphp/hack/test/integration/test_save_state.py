@@ -123,7 +123,8 @@ watchman_init_timeout = 1
         self.test_driver.run_check()
         # Stop the server, ensuring that its logs get flushed
         self.test_driver.proc_call([hh_client, "stop", self.test_driver.repo_dir])
-        self.assertIn("Watchman_sig.Types.Timeout", self.test_driver.get_server_logs())
+        logs = self.test_driver.get_all_logs(self.test_driver.repo_dir)
+        self.assertIn("Watchman_sig.Types.Timeout", logs.current_server_log)
 
     def test_incrementally_generated_saved_state(self) -> None:
         old_saved_state: SaveStateResult = self.test_driver.dump_saved_state()

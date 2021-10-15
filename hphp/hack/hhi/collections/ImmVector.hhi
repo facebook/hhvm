@@ -48,7 +48,7 @@ namespace HH {
  * @guide /hack/collections/classes
  */
 <<__SupportDynamicType>>
-final class ImmVector<+Tv> implements \ConstVector<Tv> {
+final class ImmVector<<<__RequireDynamic>> +Tv> implements \ConstVector<Tv> {
   /**
    * Creates an `ImmVector` from the given `Traversable`, or an empty
    * `ImmVector` if `null` is passed.

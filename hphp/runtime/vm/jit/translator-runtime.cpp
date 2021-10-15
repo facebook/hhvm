@@ -198,16 +198,10 @@ ALWAYS_INLINE
 static bool VerifyTypeSlowImpl(const Class* cls,
                                const Class* constraint,
                                const TypeConstraint* expected) {
-  // This helper should only be called for the Object, This, Self, and Parent
-  // cases
-  assertx(expected->isObject() || expected->isSelf() || expected->isParent()
-          || expected->isThis());
-  // For the This, Self and Parent cases, we must always have a resolved class
-  // for the constraint
-  assertx(IMPLIES(
-    expected->isSelf() || expected->isParent() || expected->isThis(),
-    constraint != nullptr
-  ));
+  // This helper should only be called for the Object and This cases
+  assertx(expected->isObject() || expected->isThis());
+  // For the This case, we must always have a resolved class for the constraint
+  assertx(IMPLIES(expected->isThis(), constraint != nullptr));
   // If we have a resolved class for the constraint, all we have to do is
   // check if the value's class is compatible with it
   if (LIKELY(constraint != nullptr)) {
@@ -216,100 +210,102 @@ static bool VerifyTypeSlowImpl(const Class* cls,
     }
     return cls->classof(constraint);
   }
-  // The Self and Parent cases should never reach here because they were
-  // handled above
+  // The This case should never reach here because it was handled above
   assertx(expected->isObject());
   // Handle the case where the constraint is a type alias
   return expected->checkTypeAliasObj(cls);
 }
 
-void VerifyParamTypeSlow(const Class* cls,
+void VerifyParamTypeSlow(ObjectData* obj,
                          const Class* constraint,
-                         const TypeConstraint* expected,
-                         int param) {
-  if (!VerifyTypeSlowImpl(cls, constraint, expected)) {
-    VerifyParamTypeFail(param, expected);
+                         const Func* func,
+                         int32_t paramId,
+                         const TypeConstraint* expected) {
+  if (!VerifyTypeSlowImpl(obj->getVMClass(), constraint, expected)) {
+    assertx(expected->isObject());
+    VerifyParamTypeFail(
+      make_tv<KindOfObject>(obj), nullptr, func, paramId, expected);
   }
 }
 
-void VerifyParamTypeCallable(TypedValue value, int param) {
+void VerifyParamTypeCallable(TypedValue value, const Func* func,
+                             int32_t paramId) {
   if (UNLIKELY(!is_callable(tvAsCVarRef(&value)))) {
-    VerifyParamTypeFail(param, nullptr);
+    auto const& tc = func->params()[paramId].typeConstraint;
+    assertx(tc.isCallable());
+    VerifyParamTypeFail(value, nullptr, func, paramId, &tc);
   }
 }
 
 
-void VerifyParamTypeFail(int paramNum, const TypeConstraint* tc) {
-  VMRegAnchor _;
-  const ActRec* ar = liveFrame();
-  const Func* func = ar->func();
-  if (!tc) {
-    tc = &func->params()[paramNum].typeConstraint;
-  }
-  auto const param = frame_local(ar, paramNum);
-  assertx(!tc->check(param, func->cls()));
-  tc->verifyParamFail(func, param, paramNum);
+TypedValue VerifyParamTypeFail(TypedValue value, const Class* ctx,
+                               const Func* func, int32_t paramId,
+                               const TypeConstraint* tc) {
+  assertx(!tc->check(&value, ctx));
+  tc->verifyParamFail(&value, ctx, func, paramId);
+  return value;
 }
 
-void VerifyRetTypeSlow(int32_t id,
-                       const Class* cls,
+void VerifyRetTypeSlow(ObjectData* obj,
                        const Class* constraint,
-                       const TypeConstraint* expected,
-                       TypedValue tv) {
-  if (!VerifyTypeSlowImpl(cls, constraint, expected)) {
-    VerifyRetTypeFail(id, &tv, expected);
+                       const Func* func,
+                       int32_t retId,
+                       const TypeConstraint* expected) {
+  if (!VerifyTypeSlowImpl(obj->getVMClass(), constraint, expected)) {
+    assertx(expected->isObject());
+    VerifyRetTypeFail(
+      make_tv<KindOfObject>(obj), nullptr, func, retId, expected);
   }
 }
 
-void VerifyRetTypeCallable(int32_t id, TypedValue value) {
+void VerifyRetTypeCallable(TypedValue value, const Func* func, int32_t retId) {
   if (UNLIKELY(!is_callable(tvAsCVarRef(&value)))) {
-    VerifyRetTypeFail(id, &value, nullptr);
+    auto const& tc = retId == TypeConstraint::ReturnId
+      ? func->returnTypeConstraint()
+      : func->params()[retId].typeConstraint;
+    assertx(tc.isCallable());
+    VerifyRetTypeFail(value, nullptr, func, retId, &tc);
   }
 }
 
-void VerifyRetTypeFail(int32_t id, TypedValue* tv, const TypeConstraint* tc) {
-  VMRegAnchor _;
-  const ActRec* ar = liveFrame();
-  const Func* func = ar->func();
-  if (id == TypeConstraint::ReturnId) {
-    if (!tc) tc = &func->returnTypeConstraint();
-    assertx(!tc->check(tv, func->cls()));
-    tc->verifyReturnFail(func, tv);
+TypedValue VerifyRetTypeFail(TypedValue value, const Class* ctx,
+                             const Func* func, int32_t retId,
+                             const TypeConstraint* tc) {
+  if (retId == TypeConstraint::ReturnId) {
+    assertx(!tc->check(&value, ctx));
+    tc->verifyReturnFail(&value, ctx, func);
   } else {
-    if (!tc) tc = &func->params()[id].typeConstraint;
-    assertx(!tc->check(tv, func->cls()));
-    tc->verifyOutParamFail(func, tv, id);
+    assertx(!tc->check(&value, ctx));
+    tc->verifyOutParamFail(&value, ctx, func, retId);
   }
+  return value;
 }
 
-void VerifyReifiedLocalTypeImpl(int32_t id, ArrayData* ts) {
-  VMRegAnchor _;
-  const ActRec* ar = liveFrame();
-  const Func* func = ar->func();
-  auto const param = frame_local(ar, id);
+void VerifyReifiedLocalTypeImpl(TypedValue value, ArrayData* ts,
+                                const Class* ctx, const Func* func,
+                                int32_t paramId) {
+  auto const couldBeReified = tcCouldBeReified(func, paramId);
   bool warn = false;
-  if (verifyReifiedLocalType(ts, param, tcCouldBeReified(func, id), warn)) {
+  if (verifyReifiedLocalType(&value, ts, ctx, func, couldBeReified, warn)) {
     return;
   }
   raise_reified_typehint_error(
     folly::sformat(
       "Argument {} passed to {}() must be an instance of {}, {} given",
-      id + 1,
+      paramId + 1,
       func->fullName()->data(),
       TypeStructure::toString(ArrNR(ts),
         TypeStructure::TSDisplayType::TSDisplayTypeUser).c_str(),
-      describe_actual_type(param)
+      describe_actual_type(&value)
     ), warn
   );
 }
 
-void VerifyReifiedReturnTypeImpl(TypedValue cell, ArrayData* ts) {
-  VMRegAnchor _;
-  const ActRec* ar = liveFrame();
-  const Func* func = ar->func();
+void VerifyReifiedReturnTypeImpl(TypedValue value, ArrayData* ts,
+                                 const Class* ctx, const Func* func) {
+  auto const couldBeReified = tcCouldBeReified(func, TypeConstraint::ReturnId);
   bool warn = false;
-  if (verifyReifiedLocalType(ts, &cell,
-        tcCouldBeReified(func, TypeConstraint::ReturnId), warn)) {
+  if (verifyReifiedLocalType(&value, ts, ctx, func, couldBeReified, warn)) {
     return;
   }
   raise_reified_typehint_error(
@@ -318,7 +314,7 @@ void VerifyReifiedReturnTypeImpl(TypedValue cell, ArrayData* ts) {
       func->fullName()->data(),
       TypeStructure::toString(ArrNR(ts),
         TypeStructure::TSDisplayType::TSDisplayTypeUser).c_str(),
-      describe_actual_type(&cell)
+      describe_actual_type(&value)
     ), warn
   );
 }
@@ -406,7 +402,6 @@ TypedValue* getSPropOrNull(ReadonlyOp op,
                            const Class* cls,
                            const StringData* name,
                            Class* ctx,
-                           bool* roProp,
                            bool ignoreLateInit,
                            bool writeMode) {
   auto const lookup = ignoreLateInit
@@ -415,7 +410,7 @@ TypedValue* getSPropOrNull(ReadonlyOp op,
   if (writeMode && UNLIKELY(lookup.constant)) {
     throw_cannot_modify_static_const_prop(cls->name()->data(), name->data());
   }
-  checkReadonly(lookup.val, cls, name, lookup.readonly, op, roProp, writeMode);
+  checkReadonly(lookup.val, cls, name, lookup.readonly, op, writeMode);
   if (UNLIKELY(!lookup.val || !lookup.accessible)) return nullptr;
 
   return lookup.val;
@@ -425,11 +420,9 @@ TypedValue* getSPropOrRaise(ReadonlyOp op,
                             const Class* cls,
                             const StringData* name,
                             Class* ctx,
-                            bool* roProp,
                             bool ignoreLateInit,
                             bool writeMode) {
-  auto sprop = getSPropOrNull(op, cls, name, ctx, roProp, ignoreLateInit,
-                              writeMode);
+  auto sprop = getSPropOrNull(op, cls, name, ctx, ignoreLateInit, writeMode);
   if (UNLIKELY(!sprop)) {
     raise_error("Invalid static property access: %s::%s",
                 cls->name()->data(), name->data());

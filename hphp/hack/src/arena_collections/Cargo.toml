@@ -16,8 +16,7 @@ ocamlrep_derive = { path = "../ocamlrep_derive" }
 serde = { version = "1.0.126", features = ["derive", "rc"] }
 
 [dev-dependencies]
-quickcheck = "0.9"
-rand = { version = "0.7", features = ["small_rng"] }
+quickcheck = "1.0"
 
 [profile.release]
 incremental = false

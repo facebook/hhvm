@@ -131,6 +131,7 @@ let go ctx ast result =
     (match matching_method with
     | Some meth -> get_member_def ctx (Method, meth.ce_origin, method_name)
     | None -> None)
+  | SO.Attribute None -> summarize_class_typedef ctx result.SO.name
   | SO.Method (SO.ClassName c_name, method_name) ->
     (* Classes on typing heap have all the methods from inheritance hierarchy
        * folded together, so we will correctly identify them even if method_name
@@ -185,7 +186,6 @@ let go ctx ast result =
       | None -> None
       | Some ast -> get_local_var_def ast result.SO.name result.SO.pos
     end
-  | SO.Attribute _ -> None
   | SO.EnumClassLabel (class_name, _member_name) ->
     summarize_class_typedef ctx class_name
 

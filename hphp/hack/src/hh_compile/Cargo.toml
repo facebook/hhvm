@@ -11,8 +11,8 @@ path = "hh_compile.rs"
 [dependencies]
 aast_parser = { path = "../parser/cargo/aast_parser" }
 anyhow = "1.0"
-atty = "0.2"
 bumpalo = { version = "3.2.1", features = ["collections"] }
+decl_provider = { path = "../hhbc/decl_provider" }
 direct_decl_parser = { path = "../parser/api/cargo/direct_decl_parser" }
 hhbc_by_ref_compile = { path = "../hhbc/hhbc_by_ref/cargo/hhbc_by_ref_compile" }
 hhbc_by_ref_options = { path = "../hhbc/hhbc_by_ref/cargo/hhbc_by_ref_options" }
@@ -24,11 +24,12 @@ positioned_by_ref_parser = { path = "../parser/api/cargo/positioned_by_ref_parse
 positioned_full_trivia_parser = { path = "../parser/api/cargo/positioned_full_trivia_parser" }
 positioned_parser = { path = "../parser/api/cargo/positioned_parser" }
 rayon = "1.2"
-serde_json = { version = "1.0", features = ["float_roundtrip"] }
+serde_json = { version = "1.0", features = ["float_roundtrip", "unbounded_depth"] }
 stack_limit = { path = "../utils/stack_limit" }
-structopt = "0.3.21"
+structopt = "0.3.23"
 strum = "0.21"
 strum_macros = "0.21"
+unified_decl_provider = { path = "../hhbc/unified_decl_provider" }
 
 [profile.release]
 incremental = false

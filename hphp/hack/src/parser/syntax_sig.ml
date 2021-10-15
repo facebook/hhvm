@@ -636,6 +636,11 @@ module type Syntax_S = sig
         nullable_as_operator: t;
         nullable_as_right_operand: t;
       }
+    | UpcastExpression of {
+        upcast_left_operand: t;
+        upcast_operator: t;
+        upcast_right_operand: t;
+      }
     | ConditionalExpression of {
         conditional_test: t;
         conditional_question: t;
@@ -1292,6 +1297,8 @@ module type Syntax_S = sig
 
   val make_nullable_as_expression : t -> t -> t -> t
 
+  val make_upcast_expression : t -> t -> t -> t
+
   val make_conditional_expression : t -> t -> t -> t -> t -> t
 
   val make_eval_expression : t -> t -> t -> t -> t
@@ -1642,6 +1649,8 @@ module type Syntax_S = sig
   val is_as_expression : t -> bool
 
   val is_nullable_as_expression : t -> bool
+
+  val is_upcast_expression : t -> bool
 
   val is_conditional_expression : t -> bool
 

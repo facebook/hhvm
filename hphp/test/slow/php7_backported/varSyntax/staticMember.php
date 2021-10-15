@@ -14,8 +14,4 @@ $c_str = 'c';
 var_dump(A::$b);
 var_dump($A_str::$b);
 var_dump($A_obj::$b);
-var_dump(('A' . '')::$b);
-var_dump('A'::$b);
-//var_dump('A'[0]::$b);
-var_dump(A::$A_str::$b);
 }

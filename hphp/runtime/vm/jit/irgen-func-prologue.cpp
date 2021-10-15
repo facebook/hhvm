@@ -253,6 +253,7 @@ void emitCalleeDynamicCallChecks(IRGS& env, const Func* callee,
 
 void emitCalleeCoeffectChecks(IRGS& env, const Func* callee,
                               SSATmp* callFlags, SSATmp* providedCoeffects,
+                              bool skipCoeffectsCheck,
                               uint32_t argc, SSATmp* prologueCtx) {
   assertx(callee);
   assertx(callFlags);
@@ -271,6 +272,15 @@ void emitCalleeCoeffectChecks(IRGS& env, const Func* callee,
   if (!providedCoeffects) {
     providedCoeffects =
       gen(env, Lshr, callFlags, cns(env, CallFlags::CoeffectsStart));
+  }
+
+  if (skipCoeffectsCheck) {
+    if (callee->hasCoeffectsLocal()) {
+      push(env, providedCoeffects);
+      updateMarker(env);
+      env.irb->exceptionStackBoundary();
+    }
+    return;
   }
 
   auto const requiredCoeffects = [&] {
@@ -373,7 +383,8 @@ void emitCalleeChecks(IRGS& env, const Func* callee, uint32_t argc,
   emitCalleeGenericsChecks(env, callee, callFlags, false);
   emitCalleeArgumentArityChecks(env, callee, argc);
   emitCalleeDynamicCallChecks(env, callee, callFlags);
-  emitCalleeCoeffectChecks(env, callee, callFlags, nullptr, argc, prologueCtx);
+  emitCalleeCoeffectChecks(env, callee, callFlags, nullptr, false,
+                           argc, prologueCtx);
   emitCalleeRecordFuncCoverage(env, callee);
 
   // Emit early stack overflow check if necessary.

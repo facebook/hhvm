@@ -11,5 +11,6 @@ Type HH\Capabilities\WriteProperty -> Fun bar,
                                       Fun foo,
                                       Fun obj_only,
                                       Type A,
-                                      Type C
+                                      Type C,
+                                      Type I
 Type I -> Fun bar, Fun foo, Type C

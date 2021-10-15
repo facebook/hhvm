@@ -217,12 +217,7 @@ module Env = struct
       Naming_provider.add_fun backend name (FileInfo.File (FileInfo.Fun, fn))
 
   let new_type_skip_if_already_bound ctx fn ~kind (_p, name, _) =
-    let name_type =
-      match kind with
-      | Naming_types.TClass -> FileInfo.Class
-      | Naming_types.TTypedef -> FileInfo.Typedef
-      | Naming_types.TRecordDef -> FileInfo.RecordDef
-    in
+    let name_type = Naming_types.type_kind_to_name_type kind in
     match Naming_provider.get_type_canon_name ctx name with
     | Some _ -> ()
     | None ->

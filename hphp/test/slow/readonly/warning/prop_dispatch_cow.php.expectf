@@ -1,0 +1,3 @@
+Warning: Property ro_foo of class Bar must be mutable. in %s/prop_dispatch_cow.php on line 21
+
+Warning: Property bad_c of class Foo is readonly, and therefore must be a value type to be modified. in %s/prop_dispatch_cow.php on line 25

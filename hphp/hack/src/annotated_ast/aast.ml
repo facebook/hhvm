@@ -240,7 +240,7 @@ and ('ex, 'en) class_id_ =
           $d::some_meth();
           $d::$prop = 1;
           new $d(); *)
-  | CI of sid
+  | CI of class_name
       (** Explicit class name. This is the common case.
 
           Foop::some_meth()
@@ -282,6 +282,12 @@ and ('ex, 'en) expression_tree = {
       (** The expression that's executed at runtime.
 
       Foo::makeTree($v ==> $v->visitBinOp(...)) *)
+  et_dollardollar_pos: pos option;
+      (** Position of the first $$ in a splice that refers
+          to a variable outside the Expression Tree
+
+          $x |> Code`${ $$ }` // Pos of the $$
+          Code`${ $x |> foo($$) }` // None *)
 }
 
 and ('ex, 'en) expr_ =
@@ -397,8 +403,8 @@ and ('ex, 'en) expr_ =
       ('ex, 'en) expr
       * (* explicit type annotations *)
       'ex targ list
-      * (* positional args *)
-      ('ex, 'en) expr list
+      * (* positional args, plus their calling convention *)
+      (Ast_defs.param_kind * ('ex, 'en) expr) list
       * (* unpacked arg *)
       ('ex, 'en) expr option
       (** Function or method call.
@@ -407,6 +413,8 @@ and ('ex, 'en) expr_ =
           $x()
           foo<int>(1, 2, ...$rest)
           $x->foo()
+          bar(inout $x);
+          foobar(inout $x[0])
 
           async { return 1; }
           // lowered to:
@@ -502,8 +510,12 @@ and ('ex, 'en) expr_ =
 
           See also Dollardollar.
 
-          $foo |> bar() // equivalent: bar($foo)
-          $foo |> bar(1, $$) // equivalent: bar(1, $foo) *)
+          foo() |> bar(1, $$) // equivalent: bar(1, foo())
+
+          $$ is not required on the RHS of pipe expressions, but it's
+          pretty pointless to use pipes without $$.
+
+          foo() |> bar(); // equivalent: foo(); bar(); *)
   | Eif of ('ex, 'en) expr * ('ex, 'en) expr option * ('ex, 'en) expr
       (** Ternary operator, or elvis operator.
 
@@ -518,6 +530,10 @@ and ('ex, 'en) expr_ =
 
           $foo as int
           $foo ?as int *)
+  | Upcast of ('ex, 'en) expr * hint
+      (** Upcast operator.
+
+          $foo : int *)
   | New of
       ('ex, 'en) class_id
       * 'ex targ list
@@ -550,16 +566,10 @@ and ('ex, 'en) expr_ =
           $x ==> $x
           (int $x): int ==> $x + $other
           ($x, $y) ==> { return $x + $y; } *)
-  | Xml of sid * ('ex, 'en) xhp_attribute list * ('ex, 'en) expr list
+  | Xml of class_name * ('ex, 'en) xhp_attribute list * ('ex, 'en) expr list
       (** XHP expression. May contain interpolated expressions.
 
           <foo x="hello" y={$foo}>hello {$bar}</foo> *)
-  | Callconv of Ast_defs.param_kind * ('ex, 'en) expr
-      (** Explicit calling convention, used for inout. Inout supports any lvalue.
-
-          TODO: This could be a flag on parameters in Call.
-
-          foo(inout $x[0]) *)
   | Import of import_flavor * ('ex, 'en) expr
       (** Include or require expression.
 
@@ -567,7 +577,8 @@ and ('ex, 'en) expr_ =
           require_once('foo.php')
           include('foo.php')
           include_once('foo.php') *)
-  | Collection of sid * 'ex collection_targ option * ('ex, 'en) afield list
+  | Collection of
+      class_name * 'ex collection_targ option * ('ex, 'en) afield list
       (** Collection literal.
 
           TODO: T38184446 this is redundant with ValCollection/KeyValCollection.
@@ -594,7 +605,7 @@ and ('ex, 'en) expr_ =
           lowering or be removed. The emitter just sees a normal Call.
 
           inst_meth($f, 'some_meth') // equivalent: $f->some_meth<> *)
-  | Method_caller of sid * pstring
+  | Method_caller of class_name * pstring
       (** Instance method reference that can be called with an instance.
 
           meth_caller(FooClass::class, 'some_meth')
@@ -617,7 +628,7 @@ and ('ex, 'en) expr_ =
           expression tree literal (backticks).
 
           ${$foo} *)
-  | EnumClassLabel of sid option * string
+  | EnumClassLabel of class_name option * string
       (** Label used for enum classes.
 
           enum_name#label_name or #label_name *)
@@ -669,7 +680,7 @@ and ('ex, 'en) case =
   | Default of pos * ('ex, 'en) block
   | Case of ('ex, 'en) expr * ('ex, 'en) block
 
-and ('ex, 'en) catch = sid * lid * ('ex, 'en) block
+and ('ex, 'en) catch = class_name * lid * ('ex, 'en) block
 
 and ('ex, 'en) field = ('ex, 'en) expr * ('ex, 'en) expr
 
@@ -697,7 +708,7 @@ and ('ex, 'en) fun_param = {
   param_name: string;
   param_expr: ('ex, 'en) expr option;
   param_readonly: Ast_defs.readonly_kind option;
-  param_callconv: Ast_defs.param_kind option;
+  param_callconv: Ast_defs.param_kind;
   param_user_attributes: ('ex, 'en) user_attribute list;
   param_visibility: visibility option;
 }
@@ -800,7 +811,7 @@ and ('ex, 'en) class_ = {
   c_is_xhp: bool;
   c_has_xhp_keyword: bool;
   c_kind: Ast_defs.classish_kind;
-  c_name: sid;
+  c_name: class_name;
   c_tparams: ('ex, 'en) tparam list;
       (** The type parameters of a class A<T> (T is the parameter) *)
   c_extends: class_hint list;
@@ -897,17 +908,9 @@ and class_abstract_typeconst = {
 
 and class_concrete_typeconst = { c_tc_type: hint }
 
-(* A partially abstract type constant always has a constraint *
- * and always has a value. *)
-and class_partially_abstract_typeconst = {
-  c_patc_constraint: hint;
-  c_patc_type: hint;
-}
-
 and class_typeconst =
   | TCAbstract of class_abstract_typeconst
   | TCConcrete of class_concrete_typeconst
-  | TCPartiallyAbstract of class_partially_abstract_typeconst
 
 and ('ex, 'en) class_typeconst_def = {
   c_tconst_user_attributes: ('ex, 'en) user_attribute list;

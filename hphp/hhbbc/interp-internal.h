@@ -388,37 +388,6 @@ Optional<Type> parentClsExact(ISS& env) {
 //////////////////////////////////////////////////////////////////////
 // folding
 
-bool canDefinitelyCallWithoutCoeffectViolation(const php::Func* caller,
-                                               const php::Func* callee) {
-  if (!caller->coeffectRules.empty() || !callee->coeffectRules.empty()) {
-    return false;
-  }
-  // TODO(oulgen): We can actually be smarter here and actually check for
-  // bits matching but HHBBC currently does not know about the bit patterns
-  // and enforcement levels, so just check for coeffects matching identically
-  return std::is_permutation(caller->staticCoeffects.begin(),
-                             caller->staticCoeffects.end(),
-                             callee->staticCoeffects.begin(),
-                             callee->staticCoeffects.end());
-}
-
-bool canDefinitelyCallWithoutReadonlyViolation(const php::Func* callee,
-                                               const FCallArgs& fca) {
-  if (fca.enforceReadonly()) {
-    for (auto i = 0; i < fca.numArgs(); ++i) {
-      if (!fca.isReadonly(i)) continue;
-      if (i >= callee->params.size() ||
-          callee->params[i].isVariadic ||
-          !callee->params[i].readonly) {
-        return false;
-      }
-    }
-  }
-  if (fca.enforceMutableReturn() && callee->isReadonlyReturn) return false;
-  if (fca.enforceReadonlyThis() && !callee->isReadonlyThis) return false;
-  return true;
-}
-
 const StaticString s___NEVER_INLINE("__NEVER_INLINE");
 bool shouldAttemptToFold(ISS& env, const php::Func* func, const FCallArgs& fca,
              Type context, bool maybeDynamic) {
@@ -454,12 +423,14 @@ bool shouldAttemptToFold(ISS& env, const php::Func* func, const FCallArgs& fca,
   if (func->isReified) return false;
 
   // Coeffect violation may raise warning or throw an exception
-  if (!canDefinitelyCallWithoutCoeffectViolation(env.ctx.func, func)) {
-    return false;
-  }
+  if (!fca.skipCoeffectsCheck()) return false;
 
   // Readonly violation may raise warning or throw an exception
-  if (!canDefinitelyCallWithoutReadonlyViolation(func, fca)) return false;
+  if (fca.enforceReadonly() ||
+      fca.enforceMutableReturn() ||
+      fca.enforceReadonlyThis()) {
+    return false;
+  }
 
   // We only fold functions when numRets == 1
   if (func->hasInOutArgs) return false;
@@ -1010,11 +981,17 @@ void badPropInitialValue(ISS& env) {
   env.collect.props.setBadPropInitialValues();
 }
 
-bool checkReadonlyOp(ReadonlyOp expected = ReadonlyOp::Any,
+bool checkReadonlyOpThrows(ReadonlyOp expected = ReadonlyOp::Any,
                      ReadonlyOp actual = ReadonlyOp::Any) {
   return RO::EvalEnableReadonlyPropertyEnforcement == 2 &&
     expected == actual;
 }
+bool checkReadonlyOpMaybeThrows(ReadonlyOp expected = ReadonlyOp::Any,
+                                ReadonlyOp actual = ReadonlyOp::Any) {
+  return RO::EvalEnableReadonlyPropertyEnforcement > 0 &&
+    expected == actual;
+}
+
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif

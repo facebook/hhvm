@@ -28,7 +28,7 @@ val of_list : (string * string) list -> t
 
 val keys : t -> string list
 
-module Getters : sig
+module type Getters_S = sig
   val string_opt : string -> t -> string option
 
   val string_ : string -> default:string -> t -> string
@@ -49,6 +49,8 @@ module Getters : sig
 
   val string_list : string -> default:string list -> t -> string list
 
+  val int_list_opt : string -> t -> int list option
+
   val bool_if_min_version :
     string ->
     default:bool ->
@@ -56,3 +58,5 @@ module Getters : sig
     t ->
     bool
 end
+
+module Getters : Getters_S

@@ -102,6 +102,13 @@ AliasClass pointee(
         return AliasClass {
           AStack::at(sinst->extra<LdStkAddr>()->offset)
         };
+      } else if (sinst->is(LdOutAddrInlined)) {
+        auto const fp = sinst->src(0)->inst();
+        assertx(fp->is(BeginInlining));
+        auto const stackOff = fp->extra<BeginInlining>()->spOffset;
+        return AliasClass {
+          AStack::at(stackOff + kNumActRecCells + sinst->extra<LdOutAddrInlined>()->index)
+        };
       }
       return AStackAny;
     }
@@ -129,7 +136,7 @@ AliasClass pointee(
 
     if (type <= TMemToMISCell) {
       if (sinst->is(LdMIStateAddr)) {
-        return mis_from_offset(sinst->src(0)->intVal());
+      return mis_from_offset(sinst->src(0)->intVal());
       }
       if (ptr->hasConstVal() && ptr->rawVal() == 0) {
         // nullptr tvRef pointer, representing an instruction that doesn't use
@@ -248,7 +255,7 @@ AliasClass livefp(SSATmp* fp) {
 }
 
 AliasClass livefp(const IRInstruction& inst) {
-  return livefp(inst.marker().fp());
+  return livefp(inst.marker().fixupFP());
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -276,6 +283,15 @@ bool any_frame_has_metadata(SSATmp* fp) {
   return false;
 }
 
+AliasClass coeffect_local(const IRInstruction& inst) {
+  auto const fp = inst.marker().fp();
+  if (!fp) return ALocalAny;
+  auto const func = func_from_fp(fp);
+  auto const coeff = func->lookupVarId(s_coeffects_var.get());
+  return coeff != kInvalidId ? ALocal  { fp, (uint32_t)coeff } : AEmpty;
+}
+
+
 AliasClass backtrace_locals(const IRInstruction& inst) {
   auto eachFunc = [&] (auto fn) {
     auto ac = AEmpty;
@@ -286,19 +302,17 @@ AliasClass backtrace_locals(const IRInstruction& inst) {
     return ac;
   };
 
-  auto const add86meta = [&] (const Func* func, SSATmp* fp) -> AliasClass {
-    // The 86metadata variable can also exist in a VarEnv, but accessing that is
-    // considered a heap effect, so we can ignore it.
-    auto const local = func->lookupVarId(s_86metadata.get());
-    if (local == kInvalidId) return AEmpty;
-    return ALocal { fp, (uint32_t)local };
-  };
+  auto const addInspectable =
+    [&] (const Func* func, SSATmp* fp) -> AliasClass {
+      auto const meta = func->lookupVarId(s_86metadata.get());
+      return meta != kInvalidId ? ALocal { fp, (uint32_t)meta } : AEmpty;;
+    };
 
   // Either there's no func or no frame-pointer. Either way, be conservative and
   // assume anything can be read. This can happen in test code, for instance.
   if (!inst.marker().fp()) return ALocalAny;
 
-  if (!RuntimeOption::EnableArgsInBacktraces) return eachFunc(add86meta);
+  if (!RuntimeOption::EnableArgsInBacktraces) return eachFunc(addInspectable);
 
   return eachFunc([&] (const Func* func, SSATmp* fp) {
     auto ac = AEmpty;
@@ -316,10 +330,10 @@ AliasClass backtrace_locals(const IRInstruction& inst) {
       ac |= APropAny;
     }
 
-    if (!numParams) return add86meta(func, fp) | ac;
+    if (!numParams) return addInspectable(func, fp) | ac;
 
     AliasIdSet params{ AliasIdSet::IdRange{0, numParams} };
-    return add86meta(func, fp) | ac | ALocal { fp, params };
+    return addInspectable(func, fp) | ac | ALocal { fp, params };
   });
 }
 
@@ -365,7 +379,6 @@ GeneralEffects may_reenter(const IRInstruction& inst, GeneralEffects x) {
     auto const offset = [&]() -> IRSPRelOffset {
       auto const fp = canonical(inst.marker().fp());
       if (fp->inst()->is(BeginInlining)) {
-        assertx(inst.marker().resumeMode() == ResumeMode::None);
         auto const extra = fp->inst()->extra<BeginInlining>();
         auto const fpOffset = extra->spOffset;
         auto const numSlotsInFrame = extra->func->numSlotsInFrame();
@@ -384,31 +397,38 @@ GeneralEffects may_reenter(const IRInstruction& inst, GeneralEffects x) {
     return kills_union ? *kills_union : killed_stack;
   }();
 
+  auto const coeffects = inst.maySyncCoeffectsWithSources()
+    ? coeffect_local(inst)
+    : AEmpty;
+
   return GeneralEffects {
-    x.loads | AHeapAny | ARdsAny | AVMRegAny | AVMRegState | backtrace_locals(inst),
+    x.loads | AHeapAny | ARdsAny | AVMRegAny | AVMRegState,
     x.stores | AHeapAny | ARdsAny | AVMRegAny,
     x.moves,
-    new_kills
+    new_kills,
+    x.inout,
+    backtrace_locals(inst),
+    coeffects
   };
 }
 
 //////////////////////////////////////////////////////////////////////
 
 GeneralEffects may_load_store(AliasClass loads, AliasClass stores) {
-  return GeneralEffects { loads, stores, AEmpty, AEmpty };
+  return GeneralEffects { loads, stores, AEmpty, AEmpty, AEmpty, AEmpty, AEmpty };
 }
 
 GeneralEffects may_load_store_kill(AliasClass loads,
                                    AliasClass stores,
                                    AliasClass kill) {
-  return GeneralEffects { loads, stores, AEmpty, kill };
+  return GeneralEffects { loads, stores, AEmpty, kill, AEmpty, AEmpty, AEmpty };
 }
 
 GeneralEffects may_load_store_move(AliasClass loads,
                                    AliasClass stores,
                                    AliasClass move) {
   assertx(move <= loads);
-  return GeneralEffects { loads, stores, move, AEmpty };
+  return GeneralEffects { loads, stores, move, AEmpty, AEmpty, AEmpty, AEmpty };
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -478,9 +498,8 @@ GeneralEffects interp_one_effects(const IRInstruction& inst) {
 MemEffects minstr_with_tvref(const IRInstruction& inst) {
   auto const srcs = inst.srcs();
   assertx(srcs.back()->isA(TMemToMISCell));
-  assertx(inst.src(2)->isA(TMemToMISBool));
   auto const loads = AHeapAny | all_pointees(srcs.subpiece(0, srcs.size() - 2));
-  auto const stores = AHeapAny | all_pointees(inst);
+  auto const stores = AHeapAny | all_pointees(inst) | AMIStateROProp;
   return may_load_store(loads, stores);
 }
 
@@ -657,17 +676,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       //
       // We also need to ensure that all of our parent frames have this stored
       // this information. To achieve this we also register a load on AFBasePtr,
-      // forcing them to also be published. Notice that we doin't actually
+      // forcing them to also be published. Notice that we don't actually
       // depend on this load to properly initialize m_sfp or rvmfp().
       AliasClass(AFFunc { inst.src(0) }) | AFMeta { inst.src(0) } | AFBasePtr
     };
-
-  case InlineReturn:
-    // Unlike InlineCall we don't need to explicitly require the frame be
-    // published. Unlike InlineCall, however, it is not safe to "move" an
-    // InlineReturn, it may only be killed once it has been made redundant by
-    // the removal of its associated InlineCall.
-    return PureInlineReturn { AFBasePtr, inst.src(0), inst.src(1) };
 
   case InterpOne:
     return interp_one_effects(inst);
@@ -682,45 +694,12 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case NativeImpl:
     return UnknownEffects {};
 
-  // NB: on the failure path, these C++ helpers do a fixup and read frame
-  // locals before they throw.  They can also invoke the user error handler and
-  // go do whatever they want to non-frame locations.
-  //
-  // TODO(#5372569): if we combine dv inits into the same regions we could
-  // possibly avoid storing KindOfUninits if we modify this.
+  // These C++ helpers can invoke the user error handler and go do whatever
+  // they want to non-frame locations.
   case VerifyParamCallable:
   case VerifyParamCls:
+  case VerifyParamFail:
   case VerifyParamFailHard:
-    return may_load_store(AUnknown, AHeapAny);
-  // VerifyParamFail might coerce the parameter to the desired type rather than
-  // throwing.
-  case VerifyParamFail: {
-    auto const extra = inst.extra<ParamWithTCData>();
-    assertx(extra->paramId >= 0);
-    auto const stores =
-      AHeapAny |
-      ALocal{inst.marker().fp(), safe_cast<uint32_t>(extra->paramId)};
-    return may_load_store(AUnknown, stores);
-  }
-  case VerifyReifiedLocalType: {
-    auto const extra = inst.extra<ParamData>();
-    assertx(extra->paramId >= 0);
-    auto const stores =
-      AHeapAny |
-      ALocal{inst.marker().fp(), safe_cast<uint32_t>(extra->paramId)};
-    return may_load_store(AUnknown, stores);
-  }
-  // However the following ones can't read locals from our frame on the way
-  // out, except as a side effect of raising a warning.
-  case VerifyRetCallable:
-  case VerifyRetCls:
-  case VerifyReifiedReturnType:
-    return may_load_store(AHeapAny | livefp(inst), AHeapAny);
-
-  case VerifyRetFail:
-  case VerifyRetFailHard:
-    return may_load_store(AHeapAny | AStackAny | livefp(inst), AHeapAny);
-
   case VerifyPropCls:
   case VerifyPropFail:
   case VerifyPropFailHard:
@@ -728,7 +707,13 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case VerifyPropAll:
   case VerifyPropCoerce:
   case VerifyPropCoerceAll:
-    return may_load_store(AHeapAny | livefp(inst), AHeapAny);
+  case VerifyReifiedLocalType:
+  case VerifyReifiedReturnType:
+  case VerifyRetCallable:
+  case VerifyRetCls:
+  case VerifyRetFail:
+  case VerifyRetFailHard:
+    return may_load_store(AHeapAny, AHeapAny);
 
   case ContEnter:
     {
@@ -744,17 +729,12 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
         // No outputs.
         AEmpty,
         // Locals.
-        backtrace_locals(inst) | livefp(inst.src(1))
+        backtrace_locals(inst)
       };
     }
 
   case Call:
     {
-      // If any frames in the inlined stack have metadata we need to materialize
-      // all of the frames so that debug_backtrace() can find it.
-      AliasClass ar = any_frame_has_metadata(inst.src(1))
-        ? livefp(inst.src(1))
-        : AliasClass(AActRec {inst.src(1)});
       auto const extra = inst.extra<Call>();
       return CallEffects {
         // Kills. Everything on the stack below the incoming parameters.
@@ -772,39 +752,40 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
           extra->spOffset + extra->numInputs() + kNumActRecCells +
             extra->numOut
         ),
-        // Locals. We intentionally leave off a dependency on AFBasePtr to allow
-        // store-elim to elide the new frame.
-        backtrace_locals(inst) | ar
+        // Locals.
+        backtrace_locals(inst)
       };
     }
 
   case CallBuiltin:
     {
-      AliasClass out_stk = AEmpty;
       auto const extra = inst.extra<CallBuiltin>();
       auto const callee = extra->callee;
-      auto const stk = [&] () -> AliasClass {
-        AliasClass ret = AEmpty;
-        for (auto i = uint32_t{2}; i < inst.numSrcs(); ++i) {
+      auto const [inout, read]  = [&] {
+        auto read = AEmpty;
+        auto inout = AEmpty;
+        auto const paramOff = callee->isMethod() ? 3 : 2;
+        for (auto i = paramOff; i < inst.numSrcs(); ++i) {
           if (inst.src(i)->type() <= TPtrToCell) {
             auto const cls = pointee(inst.src(i));
-            if (cls.maybe(AStackAny)) {
-              ret = ret | cls;
-              auto const paramOff = callee->isMethod() ? 3 : 2;
-              if (i >= paramOff && callee->isInOut(i - paramOff)) {
-                out_stk = out_stk | cls;
-              }
+            if (callee->isInOut(i - paramOff)) {
+              inout = inout | cls;
+            } else {
+              read = read | cls;
             }
           }
         }
-        return ret;
+        return std::make_pair(inout, read);
       }();
       auto const foldable = callee->isFoldable() ? AEmpty : ARdsAny;
-      return may_load_store_kill(
-        stk | AHeapAny | foldable | AVMRegAny | AVMRegState,
-        out_stk | AHeapAny | foldable | AVMRegAny,
-        stack_below(extra->spOffset) | AMIStateAny
-      );
+      return GeneralEffects {
+        read | AHeapAny | foldable | AVMRegAny | AVMRegState,
+        AHeapAny | foldable | AVMRegAny,
+        AEmpty,
+        stack_below(extra->spOffset) | AMIStateAny,
+        inout,
+        AEmpty, AEmpty
+      };
     }
 
   // Resumable suspension takes everything from the frame and moves it into the
@@ -1400,8 +1381,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   /*
    * Intermediate minstr operations. In addition to a base pointer like the
-   * operations above, these may take a pointer to MInstrState::tvRef and
-   * MInstrState::roProp, which they may store to (but not read from).
+   * operations above, these may take a pointer to MInstrState::tvRef
+   * which they may store to (but not read from).
    */
   case PropX:
   case PropDX:
@@ -1497,6 +1478,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return may_load_store(AEmpty, AEmpty);
 
   case LdOutAddr:
+  case LdOutAddrInlined:
     return IrrelevantEffects{};
 
   case CheckStk:
@@ -1638,7 +1620,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvDblToInt:
   case DblAsBits:
   case LdMIStateAddr:
-  case LdMROPropAddr:
   case LdClsCns:
   case LdSubClsCns:
   case LdResolvedTypeCns:
@@ -1901,7 +1882,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdClsPropAddrOrRaise:  // raises errors, and 86{s,p}init
     return may_load_store(
       AHeapAny,
-      AHeapAny | all_pointees(inst)
+      AHeapAny | all_pointees(inst) | AMIStateROProp
     );
   case Clone:
   case ThrowArrayIndexException:
@@ -1915,7 +1896,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case RaiseForbiddenDynCall:
   case RaiseForbiddenDynConstruct:
   case RaiseStrToClassNotice:
-  case RaiseReadonlyPropViolation:
   case CheckClsMethFunc:
   case CheckClsReifiedGenericMismatch:
   case CheckFunReifiedGenericMismatch:
@@ -1987,10 +1967,12 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ThrowParameterWrongType:
   case ArrayMarkLegacyShallow:
   case ArrayMarkLegacyRecursive:
-  case ThrowMustBeEnclosedInReadonly:
-  case ThrowMustBeMutableException:
-  case ThrowMustBeReadonlyException:
-  case ThrowMustBeValueTypeException:
+  case ThrowOrWarnCannotModifyReadonlyCollection:
+  case ThrowOrWarnLocalMustBeValueTypeException:
+  case ThrowOrWarnMustBeEnclosedInReadonly:
+  case ThrowOrWarnMustBeMutableException:
+  case ThrowOrWarnMustBeReadonlyException:
+  case ThrowOrWarnMustBeValueTypeException:
   case ArrayUnmarkLegacyShallow:
   case ArrayUnmarkLegacyRecursive:
   case SetOpTV:
@@ -2032,17 +2014,20 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case DbgTrashStk:
     return GeneralEffects {
       AEmpty, AEmpty, AEmpty,
-      AStack::at(inst.extra<DbgTrashStk>()->offset)
+      AStack::at(inst.extra<DbgTrashStk>()->offset),
+      AEmpty, AEmpty, AEmpty
     };
   case DbgTrashFrame:
     return GeneralEffects {
       AEmpty, AEmpty, AEmpty,
-      actrec(inst.src(0), inst.extra<DbgTrashFrame>()->offset)
+      actrec(inst.src(0), inst.extra<DbgTrashFrame>()->offset),
+      AEmpty, AEmpty, AEmpty
     };
   case DbgTrashMem:
     return GeneralEffects {
       AEmpty, AEmpty, AEmpty,
-      pointee(inst.src(0))
+      pointee(inst.src(0)),
+      AEmpty, AEmpty, AEmpty
     };
 
   //////////////////////////////////////////////////////////////////////
@@ -2077,6 +2062,9 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, MemEffects me) {
       check(x.stores);
       check(x.moves);
       check(x.kills);
+      check(x.inout);
+      check(x.backtrace);
+      check(x.coeffect);
 
       // Locations may-moved always should also count as may-loads.
       always_assert(x.moves <= x.loads);
@@ -2096,7 +2084,7 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, MemEffects me) {
          * may_reenter right now, which will kill the stack below the re-entry
          * depth---unless the marker for `inst' doesn't have an fp set.
          */
-        always_assert(inst.marker().fp() == nullptr ||
+        always_assert(inst.marker().fixupFP() == nullptr ||
                       AStackAny.maybe(x.kills));
       }
     },
@@ -2112,7 +2100,6 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, MemEffects me) {
                                check(x.locals); },
     [&] (PureInlineCall x)   { check(x.base);
                                check(x.actrec); },
-    [&] (PureInlineReturn x) { check(x.base); },
     [&] (ReturnEffects x)    { check(x.kills); }
   );
 
@@ -2127,6 +2114,7 @@ MemEffects memory_effects(const IRInstruction& inst) {
   auto const inner = memory_effects_impl(inst);
   auto const ret = [&] () -> MemEffects {
     if (!inst.mayRaiseErrorWithSources()) {
+      assertx(!inst.maySyncCoeffectsWithSources());
       if (inst.maySyncVMRegsWithSources()) {
         auto fail = [&] {
           always_assert_flog(
@@ -2144,7 +2132,7 @@ MemEffects memory_effects(const IRInstruction& inst) {
             return GeneralEffects {
               x.loads | AVMRegAny | AVMRegState,
               x.stores | AVMRegAny,
-              x.moves, x.kills
+              x.moves, x.kills, x.inout, x.backtrace, x.coeffect
             };
           },
           [&] (CallEffects x)      { return fail(); },
@@ -2158,7 +2146,6 @@ MemEffects memory_effects(const IRInstruction& inst) {
           [&] (PureStore)          { return fail(); },
           [&] (ExitEffects)        { return fail(); },
           [&] (PureInlineCall)     { return fail(); },
-          [&] (PureInlineReturn)   { return fail(); },
           [&] (IrrelevantEffects)  { return fail(); },
           [&] (ReturnEffects)      { return fail(); }
         );
@@ -2188,7 +2175,6 @@ MemEffects memory_effects(const IRInstruction& inst) {
       [&] (PureStore)          { return fail(); },
       [&] (ExitEffects)        { return fail(); },
       [&] (PureInlineCall)     { return fail(); },
-      [&] (PureInlineReturn)   { return fail(); },
       [&] (IrrelevantEffects)  { return fail(); },
       [&] (ReturnEffects)      { return fail(); }
     );
@@ -2212,7 +2198,10 @@ MemEffects canonicalize(MemEffects me) {
         canonicalize(x.loads),
         canonicalize(x.stores),
         canonicalize(x.moves),
-        canonicalize(x.kills)
+        canonicalize(x.kills),
+        canonicalize(x.inout),
+        canonicalize(x.backtrace),
+        canonicalize(x.coeffect)
       };
     },
     [&] (PureLoad x) -> R {
@@ -2229,13 +2218,6 @@ MemEffects canonicalize(MemEffects me) {
         canonicalize(x.base),
         x.fp,
         canonicalize(x.actrec)
-      };
-    },
-    [&] (PureInlineReturn x) -> R {
-      return PureInlineReturn {
-        canonicalize(x.base),
-        x.calleeFp,
-        x.callerFp
       };
     },
     [&] (CallEffects x) -> R {
@@ -2262,11 +2244,14 @@ std::string show(MemEffects effects) {
   return match<std::string>(
     effects,
     [&] (GeneralEffects x) {
-      return sformat("mlsmk({} ; {} ; {} ; {})",
+      return sformat("mlsmkibc({} ; {} ; {} ; {} ; {} ; {}; {})",
         show(x.loads),
         show(x.stores),
         show(x.moves),
-        show(x.kills)
+        show(x.kills),
+        show(x.inout),
+        show(x.backtrace),
+        show(x.coeffect)
       );
     },
     [&] (ExitEffects x) {
@@ -2277,9 +2262,6 @@ std::string show(MemEffects effects) {
         show(x.base),
         show(x.actrec)
       );
-    },
-    [&] (PureInlineReturn x) {
-      return sformat("inline_return({})", show(x.base));
     },
     [&] (CallEffects x) {
       return sformat("call({} ; {} ; {} ; {} ; {})",
@@ -2302,7 +2284,7 @@ std::string show(MemEffects effects) {
 
 GeneralEffects general_effects_for_vmreg_liveness(
     GeneralEffects l, KnownRegState liveness) {
-  auto ret = GeneralEffects { l.loads, l.stores, l.moves, l.kills };
+  auto ret = GeneralEffects { l.loads, l.stores, l.moves, l.kills, l.inout, l.backtrace, l.coeffect };
 
   if (liveness == KnownRegState::Dead) {
     ret.loads = l.loads.exclude_vm_reg().value_or(AEmpty);

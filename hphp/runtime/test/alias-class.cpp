@@ -483,7 +483,8 @@ TEST(AliasClass, FrameUnion) {
   IRUnit unit{test_context};
   auto const bcctx = BCContext { BCMarker::Dummy(), 0 };
   auto const dsData = DefStackData { SBInvOffset { 0 }, SBInvOffset { 0 } };
-  auto const biData = BeginInliningData { IRSPRelOffset { 0 }, nullptr, 0, 0 };
+  auto const biData = BeginInliningData {
+    IRSPRelOffset { 0 }, nullptr, SrcKey {}, SBInvOffset { 0 }, 0, 0 };
   auto const SP = unit.gen(DefRegSP, bcctx, dsData)->dst();
   auto const FP1 = unit.gen(DefFP, bcctx, DefFPData { std::nullopt })->dst();
   auto const FP2 = unit.gen(BeginInlining, bcctx, biData, SP, FP1)->dst();

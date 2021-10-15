@@ -26,7 +26,7 @@ val begin_upload_directory :
   config -> dir:Path.t -> (cas_result, cas_failure) result Future.t
 
 val upload_directory :
-  config -> ?timeout:int -> dir:Path.t -> (cas_result, cas_failure) result
+  ?timeout:int -> config:config -> Path.t -> (cas_result, cas_failure) result
 
 val begin_download_directory :
   config ->
@@ -35,9 +35,9 @@ val begin_download_directory :
   (cas_result, cas_failure) result Future.t
 
 val download_directory :
-  config ->
   ?timeout:int ->
-  dir:Path.t ->
+  config:config ->
+  Path.t ->
   digest:digest ->
   (cas_result, cas_failure) result
 

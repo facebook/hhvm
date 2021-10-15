@@ -14,137 +14,83 @@ module Capacity : sig
   val capacity : int
 end
 
-module Class : sig
-  type t = decl_class_type
+module Class : SharedMem.Value with type t = decl_class_type
 
-  val prefix : Prefix.t
+module Fun : SharedMem.Value with type t = fun_elt
 
-  val description : string
-end
+module Typedef : SharedMem.Value with type t = typedef_type
 
-module Fun : sig
-  type t = fun_elt
+module RecordDef : SharedMem.Value with type t = record_def_type
 
-  val prefix : Prefix.t
+module GConst : SharedMem.Value with type t = const_decl
 
-  val description : string
-end
+module Property : SharedMem.Value with type t = decl_ty
 
-module Typedef : sig
-  type t = typedef_type
+module StaticProperty : SharedMem.Value with type t = decl_ty
 
-  val prefix : Prefix.t
+module Method : SharedMem.Value with type t = fun_elt
 
-  val description : string
-end
+module StaticMethod : SharedMem.Value with type t = fun_elt
 
-module RecordDef : sig
-  type t = record_def_type
+module Constructor : SharedMem.Value with type t = fun_elt
 
-  val prefix : Prefix.t
-
-  val description : string
-end
-
-module GConst : sig
-  type t = const_decl
-
-  val prefix : Prefix.t
-
-  val description : string
-end
-
-module Property : sig
-  type t = decl_ty
-
-  val prefix : Prefix.t
-
-  val description : string
-end
-
-module StaticProperty : sig
-  type t = decl_ty
-
-  val prefix : Prefix.t
-
-  val description : string
-end
-
-module Method : sig
-  type t = fun_elt
-
-  val prefix : Prefix.t
-
-  val description : string
-end
-
-module StaticMethod : sig
-  type t = fun_elt
-
-  val prefix : Prefix.t
-
-  val description : string
-end
-
-module Constructor : sig
-  type t = fun_elt
-
-  val prefix : Prefix.t
-
-  val description : string
-end
-
-module ClassEltKey : SharedMem.UserKeyType with type t = string * string
+module ClassEltKey : SharedMem.Key with type t = string * string
 
 module Funs :
     module type of
-      SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Fun)
+      SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (StringKey) (Fun)
         (Capacity)
 
 module Classes :
     module type of
-      SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Class)
+      SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (StringKey)
+        (Class)
         (Capacity)
 
 module RecordDefs :
     module type of
-      SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (RecordDef)
+      SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (StringKey)
+        (RecordDef)
         (Capacity)
 
 module Typedefs :
     module type of
-      SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Typedef)
+      SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (StringKey)
+        (Typedef)
         (Capacity)
 
 module GConsts :
     module type of
-      SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (GConst)
+      SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (StringKey)
+        (GConst)
         (Capacity)
 
 module Props :
     module type of
-      SharedMem.WithCache (SharedMem.ProfiledImmediate) (ClassEltKey) (Property)
+      SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (ClassEltKey)
+        (Property)
         (Capacity)
 
 module StaticProps :
     module type of
-      SharedMem.WithCache (SharedMem.ProfiledImmediate) (ClassEltKey)
+      SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (ClassEltKey)
         (StaticProperty)
         (Capacity)
 
 module Methods :
     module type of
-      SharedMem.WithCache (SharedMem.ProfiledImmediate) (ClassEltKey) (Method)
+      SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (ClassEltKey)
+        (Method)
         (Capacity)
 
 module StaticMethods :
     module type of
-      SharedMem.WithCache (SharedMem.ProfiledImmediate) (ClassEltKey)
+      SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (ClassEltKey)
         (StaticMethod)
         (Capacity)
 
 module Constructors :
     module type of
-      SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey)
+      SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (StringKey)
         (Constructor)
         (Capacity)

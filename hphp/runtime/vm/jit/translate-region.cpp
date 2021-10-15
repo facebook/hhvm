@@ -762,19 +762,13 @@ bool irGenTryInlineFCall(irgen::IRGS& irgs, const Func* callee,
     throw RetryIRGen("inline-propagate-retry");
   }
 
-  // Native calls end inlining before CallBuiltin
-  if (!callee->isCPPBuiltin()) {
-    // If the inlined region failed to contain any returns then the
-    // rest of this block is dead- we could continue but there's no
-    // benefit to inlining this call if it ends in a ReqRetranslate or
-    // ReqBind* so instead we mark it as uninlinable and retry.
-    if (!irgen::endInlining(irgs, *calleeRegion)) {
-      irgs.retryContext->inlineBlacklist.insert(psk);
-      throw RetryIRGen("inline-failed");
-    }
-  } else {
-    // For native calls we don't use a return block
-    assertx(returnBlock->empty());
+  // If the inlined region failed to contain any returns then the
+  // rest of this block is dead- we could continue but there's no
+  // benefit to inlining this call if it ends in a ReqRetranslate or
+  // ReqBind* so instead we mark it as uninlinable and retry.
+  if (!irgen::endInlining(irgs, *calleeRegion)) {
+    irgs.retryContext->inlineBlacklist.insert(psk);
+    throw RetryIRGen("inline-failed");
   }
 
   // Success.

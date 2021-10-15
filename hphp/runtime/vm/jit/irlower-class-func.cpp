@@ -99,12 +99,10 @@ void cgLdIfaceMethod(IRLS& env, const IRInstruction* inst) {
   auto const vtable_vec = v.makeReg();
   auto const vtable = v.makeReg();
 
-  emitLdLowPtr(v, cls[Class::vtableVecOff()],
-               vtable_vec, sizeof(LowPtr<Class::VtableVecSlot>));
+  v << load{cls[Class::vtableVecOff()], vtable_vec};
   auto const vtableOff = extra->vtableIdx * sizeof(Class::VtableVecSlot) +
-                         offsetof(Class::VtableVecSlot, vtable);
-  emitLdLowPtr(v, vtable_vec[vtableOff], vtable,
-               sizeof(Class::VtableVecSlot::vtable));
+    offsetof(Class::VtableVecSlot, vtable);
+  v << load{vtable_vec[vtableOff], vtable};
   emitLdLowPtr(v, vtable[extra->methodIdx * sizeof(LowPtr<Func>)],
                func, sizeof(LowPtr<Func>));
 }

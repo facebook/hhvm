@@ -40,6 +40,7 @@ pub enum Operator {
     IsOperator,
     InstanceofOperator,
     AsOperator,
+    UpcastOperator,
     UnaryPlusOperator,
     UnaryMinusOperator,
     NotOperator,

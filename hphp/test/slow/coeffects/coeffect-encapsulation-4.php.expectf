@@ -1,0 +1,6 @@
+poly called
+
+Warning: Call to poly() requires [defaults] coeffects but badpure() provided [] in %s/hphp/test/slow/coeffects/coeffect-encapsulation-4.php on line 15
+poly called
+badpure called
+done

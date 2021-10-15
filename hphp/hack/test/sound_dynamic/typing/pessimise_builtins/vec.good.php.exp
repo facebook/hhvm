@@ -1,0 +1,9 @@
+File "vec.good.php", line 6, characters 3-16:
+  ~C
+File "vec.good.php", line 12, characters 3-14:
+  vec<C>
+File "vec.good.php", line 14, characters 3-14:
+  vec<nothing>
+File "vec.good.php", line 16, characters 3-14:
+  vec<C>
+No errors

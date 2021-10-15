@@ -6,11 +6,10 @@ class Foo {
   }
 }
 
-function foo() { echo "foo\n"; return "foo"; }
 function bar() { echo "bar\n"; return "bar"; }
 function baz() { echo "baz\n"; return "baz"; }
 
 <<__EntryPoint>>
 function main() {
-  foo()::{bar()}(baz());
+  foo::{bar()}(baz());
 }

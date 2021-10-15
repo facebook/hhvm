@@ -33,7 +33,7 @@ arena_deserializer::impl_deserialize_in_arena!(DocComment<'arena>);
 impl arena_trait::TrivialDrop for DocComment<'_> {}
 
 impl<'a> DocComment<'a> {
-    pub fn new(ps: &'a Pstring) -> Self {
+    pub fn new(ps: &'a Pstring<'_>) -> Self {
         Self(ps)
     }
 }

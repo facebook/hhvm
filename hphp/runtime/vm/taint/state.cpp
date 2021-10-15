@@ -16,14 +16,19 @@
 
 #ifdef HHVM_TAINT
 
+#include <fstream>
 #include <sstream>
 
+#include <folly/dynamic.h>
 #include <folly/Singleton.h>
 
+#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/init-fini-node.h"
 
 #include "hphp/runtime/vm/taint/state.h"
+#include "hphp/runtime/vm/taint/configuration.h"
 
+#include "hphp/util/process.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP {
@@ -31,7 +36,7 @@ namespace taint {
 
 TRACE_SET_MOD(taint);
 
-void Path::dump() const {
+std::string Path::jsonLine() const {
   const Func* last = nullptr;
 
   std::stringstream stream;
@@ -54,7 +59,7 @@ void Path::dump() const {
     }
   }
   stream << "]}";
-  std::cerr << stream.str() << std::endl;
+  return stream.str();
 }
 
 std::ostream& operator<<(std::ostream& out, const HPHP::taint::Value& value) {
@@ -150,24 +155,79 @@ struct SingletonTag {};
 
 InitFiniNode s_stateInitialization(
     []() {
-      State::get()->initialize();
+      State::instance->initialize();
     },
-    InitFiniNode::When::ProcessInit);
+    InitFiniNode::When::RequestStart);
 
-folly::Singleton<State, SingletonTag> kSingleton{};
+InitFiniNode s_stateTeardown(
+    []() {
+      State::instance->teardown();
+    },
+    InitFiniNode::When::RequestFini);
 
 } // namespace
 
-/* static */ std::shared_ptr<State> State::get() {
-  return kSingleton.try_get();
-}
+rds::local::RDSLocal<State, rds::local::Initialize::FirstUse> State::instance;
 
 void State::initialize() {
+  FTRACE(1, "taint: initializing state\n");
   // Stack is initialized with 4 values before any operation happens.
   // We don't care about these values but mirroring simplifies
   // consistency checks.
   for (int i = 0; i < 4; i++) {
     stack.push(std::nullopt);
+  }
+}
+
+namespace {
+
+folly::dynamic requestMetadata() {
+  folly::dynamic metadata = folly::dynamic::object;
+  metadata["metadata"] = true;
+
+  metadata["mimeType"] = g_context->getMimeType();
+  metadata["workingDirectory"] = g_context->getCwd();
+
+  auto requestUrl = g_context->getRequestUrl();
+  metadata["requestUrl"] = requestUrl;
+
+  auto commandLine = Process::GetCommandLine(getpid());
+  metadata["commandLine"] = commandLine;
+
+  metadata["identifier"] = requestUrl != ""
+      ? folly::sformat("request-{}", std::hash<std::string>()(requestUrl))
+      : folly::sformat("script-{}", std::hash<std::string>()(commandLine));
+
+  return metadata;
+}
+
+} // namespace
+
+void State::teardown() {
+  auto metadata = requestMetadata();
+  auto identifier = metadata["identifier"].asString();
+  FTRACE(1, "taint: processed request `{}`\n", identifier);
+
+  auto outputDirectory = Configuration::get()->outputDirectory;
+  if (outputDirectory) {
+    auto outputPath = *outputDirectory + "/output-" + identifier + ".json";
+    FTRACE(1, "taint: writing results to {}\n", outputPath);
+    try {
+      std::ofstream output;
+      output.open(outputPath);
+      output << folly::toJson(metadata) << std::endl;
+      for (auto& path : paths) {
+        output << path.jsonLine() << std::endl;
+      }
+      output.close();
+    } catch (std::exception& exception) {
+      throw std::runtime_error("unable to write to `" + outputPath + "`");
+    }
+  } else {
+    // Print to stderr, useful for integration tests.
+    for (auto& path : paths) {
+      std::cerr << path.jsonLine() << std::endl;
+    }
   }
 }
 

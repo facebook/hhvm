@@ -9,6 +9,8 @@
   (wrapped false)
   (modules common_setup)
   (libraries
+    direct_decl_service
+    errors
     naming_global
     naming_table
     parsing_service

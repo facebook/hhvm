@@ -1,0 +1,54 @@
+dict(3) {
+  ["kind"]=>
+  int(15)
+  ["classname"]=>
+  string(3) "Foo"
+  ["alias"]=>
+  string(19) "FooTransparentAlias"
+}
+dict(3) {
+  ["kind"]=>
+  int(15)
+  ["classname"]=>
+  string(3) "Foo"
+  ["alias"]=>
+  string(14) "FooOpaqueAlias"
+}
+dict(2) {
+  ["kind"]=>
+  int(15)
+  ["classname"]=>
+  string(3) "Foo"
+}
+dict(2) {
+  ["kind"]=>
+  int(15)
+  ["classname"]=>
+  string(3) "Foo"
+}
+string(3) "Foo"
+string(3) "Foo"
+string(3) "Foo"
+string(3) "Foo"
+class(Foo)
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/lazyclass-suppress.php on line 21
+string(3) "Foo"
+object(Foo) (1) {
+  ["nested"]=>
+  object(NestedStruct) (1) {
+    ["str"]=>
+    string(16) "foo bar baz bang"
+  }
+}
+object(Foo) (1) {
+  ["nested"]=>
+  object(NestedStruct) (1) {
+    ["str"]=>
+    string(16) "bang baz bar foo"
+  }
+}
+class(Foo)
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/lazyclass-suppress.php on line 36
+string(3) "Foo"

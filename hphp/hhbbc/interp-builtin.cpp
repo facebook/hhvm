@@ -646,10 +646,11 @@ Optional<Type> const_fold(ISS& env,
   FTRACE(1, "invoking: {}\n", func->fullName()->data());
 
   assertx(!RuntimeOption::EvalJit);
+  // NB: Coeffects are already checked prior to here by `shouldAttemptToFold`
   return eval_cell(
     [&] {
       auto const retVal = g_context->invokeFuncFew(
-        func, cls, args.size(), args.data(), RuntimeCoeffects::fixme(),
+        func, cls, args.size(), args.data(), RuntimeCoeffects::none(),
         false, false);
       assertx(tvIsPlausible(retVal));
       return retVal;

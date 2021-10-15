@@ -2,5 +2,3 @@ File "lambda_inherits_coeffect.php--g.php", line 9, characters 7-10:
 `echo` or `print` builtin requires the capability IO, which is not provided by the context. (Typing[4401])
   File "lambda_inherits_coeffect.php--g.php", line 6, characters 17-19:
   The local (enclosing) context provides the capability Foo
-  File "coeffect/contexts.hhi", line 28, characters 1-23:
-  Hack provides a list of supported contexts here

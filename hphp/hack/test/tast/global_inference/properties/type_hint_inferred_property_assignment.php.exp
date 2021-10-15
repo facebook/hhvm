@@ -24,7 +24,7 @@
          m_params =
          [{ param_annotation = (string); param_type_hint = ((string), (Some ([7:31-37], (Hprim Tstring)))); 
             param_is_variadic = false; param_pos = [7:38-40]; param_name = "$y"; 
-            param_expr = None; param_readonly = None; param_callconv = None; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          m_ctxs = None; m_unsafe_ctxs = None;
@@ -47,7 +47,7 @@
           m_params =
           [{ param_annotation = (int); param_type_hint = ((int), (Some ([11:31-34], (Hprim Tint)))); 
              param_is_variadic = false; param_pos = [11:35-37]; param_name = "$x"; 
-             param_expr = None; param_readonly = None; param_callconv = None; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
              param_user_attributes = []; param_visibility = None }
             ];
           m_ctxs = None; m_unsafe_ctxs = None;

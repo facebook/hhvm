@@ -22,7 +22,6 @@ type lazy_class_type = {
   ancestors: decl_ty LSTable.t;  (** Types of parents, interfaces, and traits *)
   req_ancestor_names: unit LSTable.t;
   all_requirements: (Pos_or_decl.t * decl_ty) Sequence.t;
-  is_disposable: bool Lazy.t;
 }
 
 type eager_members = {
@@ -81,7 +80,6 @@ let make_lazy_class_type ctx class_name =
                ~is_canonical
                ~merge;
            all_requirements = Decl_ancestors.all_requirements ~lin_members;
-           is_disposable = Decl_ancestors.is_disposable ~lin_members;
          })
     in
     Some (Lazy (sc, remainder))
@@ -133,7 +131,10 @@ let get
     else
       make_eager_class_type ctx class_name declare_folded_class_in_file
   with
-  | Deferred_decl.Defer d ->
+  | Deferred_decl.Defer d
+    when not
+         @@ TypecheckerOptions.deferments_light (Provider_context.get_tcopt ctx)
+    ->
     Deferred_decl.add_deferment ~d;
     None
 
@@ -350,12 +351,6 @@ module ApiLazy = struct
     match t with
     | Lazy (_sc, lc) -> LSTable.mem (Lazy.force lc).req_ancestor_names ancestor
     | Eager (c, _) -> SSet.mem ancestor c.Decl_defs.dc_req_ancestors_extends
-
-  let is_disposable (decl, t) =
-    Decl_counters.count_subdecl decl Decl_counters.Is_disposable @@ fun () ->
-    match t with
-    | Lazy (_sc, lc) -> Lazy.force (Lazy.force lc).is_disposable
-    | Eager (c, _) -> c.Decl_defs.dc_is_disposable
 
   let get_const (decl, t) id =
     Decl_counters.count_subdecl decl (Decl_counters.Get_const id) @@ fun () ->

@@ -60,12 +60,8 @@ add_subdirectory(folly)
 list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/fatal")
 
 add_subdirectory(brotli) # Required by fizz
-
-list(APPEND THIRD_PARTY_MODULES fizz)
-list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/fizz/src")
-
-list(APPEND THIRD_PARTY_MODULES wangle)
-list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/wangle/src")
+add_subdirectory(fizz)
+add_subdirectory(wangle)
 
 list(APPEND THIRD_PARTY_MODULES proxygen)
 list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/proxygen/src")
@@ -87,6 +83,10 @@ find_package(RE2)
 if(NOT RE2_LIBRARY)
   message(STATUS "Building RE2 from third-party")
   add_subdirectory(re2)
+else()
+  add_library(re2 INTERFACE)
+  target_link_libraries(re2 INTERFACE ${RE2_LIBRARY})
+  target_include_directories(re2 INTERFACE ${RE2_INCLUDE_DIR})
 endif()
 add_subdirectory(squangle)
 

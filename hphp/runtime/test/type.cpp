@@ -617,6 +617,12 @@ TEST(Type, ArrayFitsSpec) {
   EXPECT_FALSE(Type::cns(dict2) <= ratType1);
   EXPECT_FALSE(Type::cns(dict2) <= ratType2);
   EXPECT_FALSE(Type::cns(dict2) <= ratType3);
+
+  EXPECT_LE(TUninit, ratType1 | TNull);
+  EXPECT_FALSE((ratType1 | TNull) <= TUninit);
+
+  EXPECT_LE(TUninit, ratType3 | TNull);
+  EXPECT_FALSE((ratType3 | TNull) <= TUninit);
 }
 
 TEST(Type, SpecializedArrays) {
@@ -722,6 +728,12 @@ TEST(Type, SpecializedClass) {
 
   EXPECT_EQ(cls, cls - subA);  // conservative
   EXPECT_EQ(subA, subA - exactA);  // conservative
+
+  EXPECT_LE(TUninit, exactA | TNull);
+  EXPECT_FALSE((exactA | TNull) <= TUninit);
+
+  EXPECT_LE(TUninit, subA | TNull);
+  EXPECT_FALSE((subA | TNull) <= TUninit);
 }
 
 TEST(Type, Const) {

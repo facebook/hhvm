@@ -1,7 +1,7 @@
 <?hh
 
 switch ($foo->color) {
-  # Red foos handled here
+  // Red foos handled here
   case FooColor::RED:
     // Red foos are best foos
     handleRedFoo($foo);

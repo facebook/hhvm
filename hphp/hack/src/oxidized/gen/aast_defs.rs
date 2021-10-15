@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d9d182cbcae040b90a4598c9ee077ee6>>
+// @generated SignedSource<<b79716a86e037ee1c9b3d8d1ae43e2a5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -49,6 +49,8 @@ pub use shape_map::ShapeMap;
 pub struct Lid(pub Pos, pub LocalId);
 
 pub type Sid = ast_defs::Id;
+
+pub type ClassName = Sid;
 
 pub type IsReified = bool;
 
@@ -183,7 +185,7 @@ pub struct Contexts(pub Pos, pub Vec<Hint>);
 )]
 #[repr(C)]
 pub struct HfParamInfo {
-    pub kind: Option<ast_defs::ParamKind>,
+    pub kind: ast_defs::ParamKind,
     pub readonlyness: Option<ast_defs::ReadonlyKind>,
 }
 
@@ -234,7 +236,7 @@ pub enum Hint_ {
     Hlike(Hint),
     Hfun(HintFun),
     Htuple(Vec<Hint>),
-    Happly(Sid, Vec<Hint>),
+    Happly(ClassName, Vec<Hint>),
     Hshape(NastShapeInfo),
     /// This represents the use of a type const. Type consts are accessed like
     /// regular consts in Hack, i.e.
@@ -270,6 +272,7 @@ pub enum Hint_ {
     Hprim(Tprim),
     Hthis,
     Hdynamic,
+    Hsupportdynamic,
     Hnothing,
     Hunion(Vec<Hint>),
     Hintersection(Vec<Hint>),

@@ -1,0 +1,9 @@
+xf called
+inner called
+xf called
+poly called
+
+Warning: Call to poly() requires [defaults] coeffects but badpure() provided [] in %s/hphp/test/slow/coeffects/coeffect-encapsulation-3.php on line 20
+xf called
+poly called
+done

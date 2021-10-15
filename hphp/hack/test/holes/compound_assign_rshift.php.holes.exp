@@ -12,7 +12,7 @@
         f_params =
         [{ param_annotation = (Vector<int>); param_type_hint = ((Vector<int>), (Some ([3:33-44], (Happly (([3:33-39], "\\HH\\Vector"), [([3:40-43], (Hprim Tint))]))))); 
            param_is_variadic = false; param_pos = [3:45-48]; param_name = "$xs"; 
-           param_expr = None; param_readonly = None; param_callconv = None; 
+           param_expr = None; param_readonly = None; param_callconv = Pnormal; 
            param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None;

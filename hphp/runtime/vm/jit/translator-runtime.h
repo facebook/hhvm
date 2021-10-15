@@ -74,22 +74,40 @@ StringData* convObjToStrHelper(ObjectData* o);
 
 void throwUndefPropException(ObjectData* base, const StringData* name);
 void throwUndefVariable(StringData* nm);
-void VerifyParamTypeSlow(const Class* cls,
+void VerifyParamTypeSlow(ObjectData* obj,
                          const Class* constraint,
-                         const TypeConstraint* expected,
-                         int param);
-void VerifyParamTypeCallable(TypedValue value, int param);
-void VerifyParamTypeFail(int param, const TypeConstraint*);
-void VerifyRetTypeSlow(int32_t id,
-                       const Class* cls,
+                         const Func* func,
+                         int32_t paramId,
+                         const TypeConstraint* expected);
+void VerifyParamTypeCallable(TypedValue value,
+                             const Func* func,
+                             int32_t paramId);
+TypedValue VerifyParamTypeFail(TypedValue value,
+                               const Class* ctx,
+                               const Func* func,
+                               int paramId,
+                               const TypeConstraint* tc);
+void VerifyRetTypeSlow(ObjectData* obj,
                        const Class* constraint,
-                       const TypeConstraint* expected,
-                       const TypedValue value);
-void VerifyRetTypeCallable(int32_t id, TypedValue value);
-void VerifyRetTypeFail(int32_t id, TypedValue* value, const TypeConstraint* tc);
+                       const Func* func,
+                       int32_t retId,
+                       const TypeConstraint* expected);
+void VerifyRetTypeCallable(TypedValue value, const Func* func, int32_t retId);
+TypedValue VerifyRetTypeFail(TypedValue value,
+                             const Class* ctx,
+                             const Func* func,
+                             int32_t retId,
+                             const TypeConstraint* tc);
 
-void VerifyReifiedLocalTypeImpl(int32_t, ArrayData*);
-void VerifyReifiedReturnTypeImpl(TypedValue, ArrayData*);
+void VerifyReifiedLocalTypeImpl(TypedValue value,
+                                ArrayData* ts,
+                                const Class* ctx,
+                                const Func* func,
+                                int32_t paramId);
+void VerifyReifiedReturnTypeImpl(TypedValue value,
+                                 ArrayData* ts,
+                                 const Class* ctx,
+                                 const Func* func);
 
 void raise_error_sd(const StringData* sd);
 
@@ -112,14 +130,12 @@ TypedValue* getSPropOrNull(ReadonlyOp op,
                            const Class* cls,
                            const StringData* name,
                            Class* ctx,
-                           bool* roProp,
                            bool ignoreLateInit,
                            bool writeMode);
 TypedValue* getSPropOrRaise(ReadonlyOp op,
                             const Class* cls,
                             const StringData* name,
                             Class* ctx,
-                            bool* roProp,
                             bool ignoreLateInit,
                             bool writeMode);
 

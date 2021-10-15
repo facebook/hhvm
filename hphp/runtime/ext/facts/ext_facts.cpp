@@ -30,6 +30,7 @@
 #include <folly/experimental/io/FsUtil.h>
 #include <folly/io/async/EventBaseThread.h>
 #include <folly/json.h>
+#include <folly/logging/xlog.h>
 
 #include <watchman/cppclient/WatchmanClient.h>
 
@@ -54,12 +55,15 @@
 #include "hphp/runtime/ext/facts/facts-store.h"
 #include "hphp/runtime/ext/facts/logging.h"
 #include "hphp/runtime/ext/facts/string-ptr.h"
+#include "hphp/runtime/ext/facts/watchman-watcher.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/assertions.h"
 #include "hphp/util/build-info.h"
 #include "hphp/util/hash-map.h"
 #include "hphp/util/hash.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/trace.h"
 #include "hphp/util/user-info.h"
 #include "hphp/zend/zend-string.h"
 
@@ -128,10 +132,11 @@ folly::fs::path getDBPath(const RepoOptions& repoOptions) {
     GroupInfo grp{RuntimeOption::AutoloadDBGroup.c_str()};
     return grp.gr->gr_gid;
   } catch (const Exception& e) {
-    Logger::Warning(folly::sformat(
+    XLOGF(
+        WARN,
         "Can't resolve {} to a gid: {}",
         RuntimeOption::AutoloadDBGroup,
-        e.what()));
+        e.what());
     return -1;
   }
 }
@@ -139,11 +144,11 @@ folly::fs::path getDBPath(const RepoOptions& repoOptions) {
 ::mode_t getDBPerms() {
   try {
     ::mode_t res = std::stoi(RuntimeOption::AutoloadDBPerms, 0, 8);
-    FTRACE(3, "Converted {} to {}\n", RuntimeOption::AutoloadDBPerms, res);
+    XLOGF(DBG0, "Converted {} to {:04o}", RuntimeOption::AutoloadDBPerms, res);
     return res;
   } catch (const std::exception& e) {
-    Logger::Warning(folly::sformat(
-        "Error running std::stoi on \"Autoload.DB.Perms\": {}", e.what()));
+    XLOG(WARN) << "Error running std::stoi on \"Autoload.DB.Perms\": "
+               << e.what();
     return 0644;
   }
 }
@@ -443,6 +448,14 @@ struct Facts final : Extension {
   }
 
   void moduleLoad(const IniSetting::Map& ini, Hdf config) override {
+    if (!RuntimeOption::AutoloadEnabled) {
+      return;
+    }
+
+    // Why are we using TRACE/Logger in moduleLoad instead of XLOG?  Because of
+    // the HHVM startup process and where moduleLoad happens within it, we can't
+    // initialize any async handlers until moduleInit() otherwise HHVM
+    // with throw an exception for having created a thread before it was ready.
 
     // Create all resources at a deterministic time to avoid SIOF
     m_data = FactsData{};
@@ -468,8 +481,7 @@ struct Facts final : Extension {
       FTRACE(3, "watchman.socket.root = {}\n", RO::WatchmanRootSocket);
     }
 
-    auto excluded = Config::GetStrVector(ini, config, "Autoload.ExcludedRepos");
-    for (auto const& repo : excluded) {
+    for (auto const& repo : RuntimeOption::AutoloadExcludedRepos) {
       try {
         m_data->m_excludedRepos.insert(folly::fs::canonical(repo).native());
       } catch (const folly::fs::filesystem_error& e) {
@@ -485,15 +497,16 @@ struct Facts final : Extension {
     // This, unfortunately, cannot be done in moduleLoad() due to the fact
     // that certain async loggers may create a new thread.  HHVM will throw
     // if any threads have been created during the moduleLoad() step.
-    if (!RuntimeOption::AutoloadLogging.empty() &&
-        RuntimeOption::AutoloadEnabled) {
-      try {
-        enableFactsLogging(
-            RuntimeOption::ServerUser, RuntimeOption::AutoloadLogging);
-      } catch (std::exception& e) {
-        Logger::FError(
-            "Caught exception while setting up logging: {}", e.what());
-      }
+    try {
+      enableFactsLogging(
+          RuntimeOption::ServerUser,
+          RuntimeOption::AutoloadLogging,
+          RuntimeOption::AutoloadLoggingAllowPropagation);
+    } catch (std::exception& e) {
+      Logger::FError(
+          "Caught exception ({}) while setting up logging with settings: {}",
+          e.what(),
+          RuntimeOption::AutoloadLogging);
     }
 
     HHVM_NAMED_FE(HH\\Facts\\enabled, HHVM_FN(facts_enabled));
@@ -555,25 +568,23 @@ struct Facts final : Extension {
     loadSystemlib();
 
     if (!RuntimeOption::AutoloadEnabled) {
-      FTRACE(
-          1,
-          "Autoload.Enabled is not true, not enabling native "
-          "autoloader.\n");
+      XLOG(INFO)
+          << "Autoload.Enabled is not true, not enabling native autoloader.";
       return;
     }
 
     if (RuntimeOption::AutoloadDBPath.empty()) {
-      FTRACE(
-          1, "Autoload.DB.Path was empty, not enabling native autoloader.\n");
+      XLOG(ERR)
+          << "Autoload.DB.Path was empty, not enabling native autoloader.";
       return;
     }
 
     if (RO::WatchmanDefaultSocket.empty()) {
-      FTRACE(2, "watchman.socket.default was not provided.\n");
+      XLOG(INFO) << "watchman.socket.default was not provided.";
     }
 
     if (RO::WatchmanRootSocket.empty()) {
-      FTRACE(2, "watchman.socket.root was not provided.\n");
+      XLOG(INFO) << "watchman.socket.root was not provided.";
     }
 
     m_data->m_mapFactory = std::make_unique<WatchmanAutoloadMapFactory>();
@@ -612,7 +623,7 @@ WatchmanAutoloadMapFactory::getForOptions(const RepoOptions& options) {
       }
       return {std::move(mk)};
     } catch (const RepoOptionsParseExc& e) {
-      Logger::Warning("%s\n", e.what());
+      XLOG(ERR) << e.what();
       return std::nullopt;
     }
   }();
@@ -638,9 +649,9 @@ WatchmanAutoloadMapFactory::getForOptions(const RepoOptions& options) {
       [this] { garbageCollectUnusedAutoloadMaps(s_ext.getExpirationTime()); });
 
   if (mapKey->m_dbData.m_rwMode == SQLite::OpenMode::ReadOnly) {
-    FTRACE(
-        3,
-        "Loading {} from trusted Autoload DB at {}\n",
+    XLOGF(
+        DBG0,
+        "Loading {} from trusted Autoload DB at {}",
         mapKey->m_root.native(),
         mapKey->m_dbData.m_path.native());
     return m_maps
@@ -653,11 +664,11 @@ WatchmanAutoloadMapFactory::getForOptions(const RepoOptions& options) {
   return m_maps
       .insert(
           {*mapKey,
-           make_watchman_facts(
+           make_watcher_facts(
                mapKey->m_root,
                mapKey->m_dbData,
-               mapKey->m_queryExpr,
-               get_watchman_client(mapKey->m_root),
+               make_watchman_watcher(
+                   mapKey->m_queryExpr, get_watchman_client(mapKey->m_root)),
                RuntimeOption::ServerExecutionMode(),
                mapKey->m_indexedMethodAttrs)})
       .first->second.get();
@@ -682,7 +693,7 @@ void WatchmanAutoloadMapFactory::garbageCollectUnusedAutoloadMaps(
     std::vector<std::shared_ptr<FactsStore>> maps;
     maps.reserve(keysToRemove.size());
     for (auto const& mapKey : keysToRemove) {
-      FTRACE(2, "Evicting WatchmanAutoloadMap: {}\n", mapKey.toString());
+      XLOG(INFO) << "Evicting WatchmanAutoloadMap: " << mapKey.toString();
       auto it = m_maps.find(mapKey);
       if (it != m_maps.end()) {
         maps.push_back(std::move(it->second));
@@ -731,13 +742,13 @@ Variant HHVM_FUNCTION(facts_db_path, const String& rootStr) {
     return folly::fs::path{requestOptions->path()}.parent_path() / maybeRoot;
   }();
   if (!root) {
-    FTRACE(2, "Error resolving {}\n", rootStr.slice());
+    XLOG(ERR) << "Error resolving " << rootStr.slice();
     return Variant{Variant::NullInit{}};
   }
   assertx(root->is_absolute());
 
   auto optionPath = *root / ".hhvmconfig.hdf";
-  FTRACE(3, "Got options at {}\n", optionPath.native());
+  XLOG(DBG0) << "Got options at " << optionPath.native();
   auto const& repoOptions = RepoOptions::forFile(optionPath.native().c_str());
 
   try {

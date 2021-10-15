@@ -202,7 +202,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         ~disable_legacy_attribute_syntax:false
         ~enable_xhp_class_modifier:false
         ~disable_xhp_element_mangling:false
-        ~disallow_hash_comments:true
         ~filename:Relative_path.default
         ~text:contents
     in
@@ -387,7 +386,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
   | LINT_ALL code ->
     let ctx = Provider_utils.ctx_from_server_env env in
     (env, ServerLint.lint_all genv ctx code)
-  | LINT_XCONTROLLER fnl -> (env, ServerLint.go_xcontroller genv env fnl)
   | CREATE_CHECKPOINT x -> (env, ServerCheckpoint.create_checkpoint x)
   | RETRIEVE_CHECKPOINT x -> (env, ServerCheckpoint.retrieve_checkpoint x)
   | DELETE_CHECKPOINT x -> (env, ServerCheckpoint.delete_checkpoint x)
@@ -458,6 +456,10 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         char_at_pos;
         is_complete = true;
       } )
+  | CODE_ACTIONS (path, range) ->
+    let (ctx, entry) = single_ctx_path env path in
+    let actions = CodeActionsService.go ~ctx ~entry ~path ~range in
+    (env, actions)
   | DISCONNECT -> (ServerFileSync.clear_sync_data env, ())
   | SUBSCRIBE_DIAGNOSTIC { id; error_limit } ->
     if TypecheckerOptions.stream_errors env.tcopt then
@@ -522,7 +524,8 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
   | NO_PRECHECKED_FILES -> (ServerPrecheckedFiles.expand_all env, ())
   | GEN_HOT_CLASSES threshold ->
     (env, ServerHotClasses.go genv.workers env threshold)
-  | GEN_PREFETCH_DIR dir -> (env, ServerGenPrefetchDir.go env genv dir)
+  | GEN_PREFETCH_DIR dir ->
+    (env, ServerGenPrefetchDir.go env genv dir genv.workers)
   | FUN_DEPS_BATCH (positions, dynamic_view) ->
     let tcopt = env.ServerEnv.tcopt in
     let tcopt = { tcopt with GlobalOptions.tco_dynamic_view = dynamic_view } in

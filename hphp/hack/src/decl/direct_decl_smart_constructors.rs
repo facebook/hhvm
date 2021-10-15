@@ -43,11 +43,12 @@ use oxidized_by_ref::{
     typing_defs::{
         self, AbstractTypeconst, Capability::*, ClassConstKind, ConcreteTypeconst, ConstDecl,
         Enforcement, EnumType, FunArity, FunElt, FunImplicitParams, FunParam, FunParams, FunType,
-        IfcFunDecl, ParamMode, PartiallyAbstractTypeconst, PosByteString, PosId, PosString,
-        PossiblyEnforcedTy, RecordFieldReq, ShapeFieldType, ShapeKind, TaccessType, Tparam,
-        TshapeFieldName, Ty, Ty_, Typeconst, TypedefType, WhereConstraint, XhpAttrTag,
+        IfcFunDecl, ParamMode, PosByteString, PosId, PosString, PossiblyEnforcedTy, RecordFieldReq,
+        ShapeFieldType, ShapeKind, TaccessType, Tparam, TshapeFieldName, Ty, Ty_, Typeconst,
+        TypedefType, WhereConstraint, XhpAttrTag,
     },
     typing_defs_flags::{FunParamFlags, FunTypeFlags},
+    typing_modules::Module_,
     typing_reason::Reason,
 };
 use parser_core_types::{
@@ -245,7 +246,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         self.const_refs = Some(arena_collections::set::Set::empty());
     }
 
-    fn accumulate_const_ref(&mut self, class_id: &'a aast::ClassId<(), ()>, value_id: &Id<'a>) {
+    fn accumulate_const_ref(&mut self, class_id: &'a aast::ClassId<'_, (), ()>, value_id: &Id<'a>) {
         // The decl for a class constant stores a list of all the scope-resolution expressions
         // it contains. For example "const C=A::X" stores A::X, and "const D=self::Y" stores self::Y.
         // (This is so we can detect cross-type circularity in constant initializers).
@@ -282,7 +283,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         self.const_refs = None;
         match const_refs {
             Some(const_refs) => {
-                let mut elements: Vec<typing_defs::ClassConstRef> =
+                let mut elements: Vec<'_, typing_defs::ClassConstRef<'_>> =
                     bumpalo::collections::Vec::with_capacity_in(const_refs.count(), self.arena);
                 elements.extend(const_refs.into_iter());
                 elements.into_bump_slice()
@@ -358,7 +359,7 @@ struct Modifiers {
     visibility: aast::Visibility,
     is_abstract: bool,
     is_final: bool,
-    is_readonly: bool, // TODO: handle readonly modifiers in direct decl
+    is_readonly: bool,
 }
 
 fn read_member_modifiers<'a: 'b, 'b>(modifiers: impl Iterator<Item = &'b Node<'a>>) -> Modifiers {
@@ -745,7 +746,7 @@ mod fixed_width_token {
     }
 
     impl std::fmt::Debug for FixedWidthToken {
-        fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
+        fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
             fmt.debug_struct("FixedWidthToken")
                 .field("kind", &self.kind())
                 .field("offset", &self.offset())
@@ -966,7 +967,7 @@ struct Attributes<'a> {
     via_label: bool,
     soft: bool,
     support_dynamic_type: bool,
-    module: Option<&'a str>,
+    module: Option<&'a Module_<'a>>,
     internal: bool,
 }
 
@@ -1137,14 +1138,14 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                         Unop(&(_op, expr)) => expr_to_ty(arena, expr),
                         Hole(&(expr, _, _, _)) => expr_to_ty(arena, expr),
 
-                        ArrayGet(_) | As(_) | Await(_) | Binop(_) | Call(_) | Callconv(_)
-                        | Cast(_) | ClassConst(_) | ClassGet(_) | Clone(_) | Collection(_)
-                        | Darray(_) | Dollardollar(_) | Efun(_) | Eif(_) | EnumClassLabel(_)
-                        | ETSplice(_) | ExpressionTree(_) | FunctionPointer(_) | FunId(_)
-                        | Id(_) | Import(_) | Is(_) | KeyValCollection(_) | Lfun(_) | List(_)
-                        | Lplaceholder(_) | Lvar(_) | MethodCaller(_) | MethodId(_) | New(_)
-                        | ObjGet(_) | Omitted | Pair(_) | Pipe(_) | ReadonlyExpr(_) | Record(_)
-                        | Shape(_) | SmethodId(_) | Tuple(_) | ValCollection(_) | Varray(_)
+                        ArrayGet(_) | As(_) | Await(_) | Binop(_) | Call(_) | Cast(_)
+                        | ClassConst(_) | ClassGet(_) | Clone(_) | Collection(_) | Darray(_)
+                        | Dollardollar(_) | Efun(_) | Eif(_) | EnumClassLabel(_) | ETSplice(_)
+                        | ExpressionTree(_) | FunctionPointer(_) | FunId(_) | Id(_) | Import(_)
+                        | Is(_) | KeyValCollection(_) | Lfun(_) | List(_) | Lplaceholder(_)
+                        | Lvar(_) | MethodCaller(_) | MethodId(_) | New(_) | ObjGet(_)
+                        | Omitted | Pair(_) | Pipe(_) | ReadonlyExpr(_) | Record(_) | Shape(_)
+                        | SmethodId(_) | Tuple(_) | Upcast(_) | ValCollection(_) | Varray(_)
                         | Xml(_) | Yield(_) => None,
                     }
                 }
@@ -1343,7 +1344,17 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                         attributes.module = attribute
                             .string_literal_params
                             .first()
-                            .map(|&x| self.str_from_utf8_for_bytes_in_arena(x));
+                            .map(|&x| self.str_from_utf8_for_bytes_in_arena(x))
+                            .and_then(|x| {
+                                let mut chars = x.split('.');
+                                match chars.next() {
+                                    None => None,
+                                    Some(s) => {
+                                        let rest = chars.collect::<std::vec::Vec<_>>();
+                                        Some(self.alloc(Module_(s, self.alloc(rest))))
+                                    }
+                                }
+                            });
                     }
                     "__Internal" => {
                         attributes.internal = true;
@@ -1439,7 +1450,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         is_method: bool,
         attributes: Node<'a>,
         header: &'a FunctionHeader<'a>,
-        body: Node,
+        body: Node<'_>,
     ) -> Option<(PosId<'a>, &'a Ty<'a>, &'a [ShallowProp<'a>])> {
         let id_opt = match (is_method, header.name) {
             (true, Node::Token(t)) if t.kind() == TokenKind::Construct => {
@@ -1578,6 +1589,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                                 flags.set(PropFlags::CONST, attributes.const_);
                                 flags.set(PropFlags::NEEDS_INIT, self.file_mode != Mode::Mhhi);
                                 flags.set(PropFlags::PHP_STD_LIB, attributes.php_std_lib);
+                                flags.set(PropFlags::READONLY, readonly);
                                 properties.push(ShallowProp {
                                     xhp_attr: None,
                                     name: (pos, name),
@@ -1738,7 +1750,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         // OCaml decl creates a capability with a hint pointing to the entire
         // type (i.e., pointing to `Rx<(function(): void)>` rather than just
         // `(function(): void)`), so we extend the hint position similarly here.
-        let extend_capability_pos = |implicit_params: &'a FunImplicitParams| {
+        let extend_capability_pos = |implicit_params: &'a FunImplicitParams<'_>| {
             let capability = match implicit_params.capability {
                 CapTy(ty) => {
                     let ty = self.alloc(Ty(self.alloc(Reason::hint(pos)), ty.1));
@@ -1919,7 +1931,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         })
     }
 
-    fn namespace_use_kind(use_kind: &Node) -> Option<NamespaceUseKind> {
+    fn namespace_use_kind(use_kind: &Node<'_>) -> Option<NamespaceUseKind> {
         match use_kind.token_kind() {
             Some(TokenKind::Const) => None,
             Some(TokenKind::Function) => None,
@@ -2007,35 +2019,32 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         // For a polymorphic context with form `ctx $f` (represented here as
         // `Tapply "$f"`), add a type parameter named `Tctx$f`, and rewrite the
         // parameter `(function (ts)[_]: t) $f` as `(function (ts)[Tctx$f]: t) $f`
-        let rewrite_fun_ctx = |
-            tparams: &mut Vec<&'a Tparam<'a>>,
-            ty: &Ty<'a>,
-            param_name: &str,
-        | -> Option<&'a Ty<'a>> {
-            let ft = match ty.1 {
-                Ty_::Tfun(ft) => ft,
-                _ => return None,
+        let rewrite_fun_ctx =
+            |tparams: &mut Vec<'_, &'a Tparam<'a>>, ty: &Ty<'a>, param_name: &str| -> Ty<'a> {
+                let ft = match ty.1 {
+                    Ty_::Tfun(ft) => ft,
+                    _ => return ty.clone(),
+                };
+                let cap_ty = match ft.implicit_params.capability {
+                    CapTy(&Ty(_, Ty_::Tintersection(&[ty]))) | CapTy(ty) => ty,
+                    _ => return ty.clone(),
+                };
+                let pos = match cap_ty.1 {
+                    Ty_::Tapply(((pos, "_"), _)) => pos,
+                    _ => return ty.clone(),
+                };
+                let name = self.ctx_generic_for_fun(param_name);
+                let tparam = tp((pos, name), &[]);
+                tparams.push(tparam);
+                let cap_ty = self.alloc(Ty(cap_ty.0, Ty_::Tgeneric(self.alloc((name, &[])))));
+                let ft = self.alloc(FunType {
+                    implicit_params: self.alloc(FunImplicitParams {
+                        capability: CapTy(cap_ty),
+                    }),
+                    ..*ft
+                });
+                Ty(ty.0, Ty_::Tfun(ft))
             };
-            let cap_ty = match ft.implicit_params.capability {
-                CapTy(&Ty(_, Ty_::Tintersection(&[ty]))) | CapTy(ty) => ty,
-                _ => return None,
-            };
-            let pos = match cap_ty.1 {
-                Ty_::Tapply(((pos, "_"), _)) => pos,
-                _ => return None,
-            };
-            let name = self.ctx_generic_for_fun(param_name);
-            let tparam = tp((pos, name), &[]);
-            tparams.push(tparam);
-            let cap_ty = self.alloc(Ty(cap_ty.0, Ty_::Tgeneric(self.alloc((name, &[])))));
-            let ft = self.alloc(FunType {
-                implicit_params: self.alloc(FunImplicitParams {
-                    capability: CapTy(cap_ty),
-                }),
-                ..*ft
-            });
-            Some(self.alloc(Ty(ty.0, Ty_::Tfun(ft))))
-        };
 
         // For a polymorphic context with form `$g::C`, if we have a function
         // parameter `$g` with type `G` (where `G` is not a type parameter),
@@ -2045,14 +2054,14 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         //   - add a type parameter `T/[$g::C]`
         //   - add a where constraint `T/[$g::C] = T$g :: C`
         let rewrite_arg_ctx = |
-            tparams: &mut Vec<&'a Tparam<'a>>,
-            where_constraints: &mut Vec<&'a WhereConstraint<'a>>,
-            ty: &'a Ty<'a>,
+            tparams: &mut Vec<'_, &'a Tparam<'a>>,
+            where_constraints: &mut Vec<'_, &'a WhereConstraint<'a>>,
+            ty: &Ty<'a>,
             param_pos: &'a Pos<'a>,
             name: &str,
             context_reason: &'a Reason<'a>,
             cst: PosId<'a>,
-        | -> Option<&'a Ty<'a>> {
+        | -> Ty<'a> {
             let rewritten_ty = match ty.1 {
                 // If the type hint for this function parameter is a type
                 // parameter introduced in this function declaration, don't add
@@ -2060,7 +2069,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                 Ty_::Tgeneric(&(type_name, _))
                     if tparams.iter().any(|tp| tp.name.1 == type_name) =>
                 {
-                    None
+                    ty.clone()
                 }
                 // Otherwise, if the parameter is `G $g`, create tparam
                 // `T$g as G` and replace $g's type hint
@@ -2068,16 +2077,17 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                     let id = (param_pos, self.concat("T/", name));
                     tparams.push(tp(
                         id,
-                        std::slice::from_ref(self.alloc((ConstraintKind::ConstraintAs, ty))),
+                        std::slice::from_ref(
+                            self.alloc((ConstraintKind::ConstraintAs, self.alloc(ty.clone()))),
+                        ),
                     ));
-                    Some(self.alloc(Ty(
+                    Ty(
                         self.alloc(Reason::hint(param_pos)),
                         Ty_::Tgeneric(self.alloc((id.1, &[]))),
-                    )))
+                    )
                 }
             };
-            let ty = rewritten_ty.unwrap_or(ty);
-            let ty = self.alloc(Ty(context_reason, ty.1));
+            let ty = self.alloc(Ty(context_reason, rewritten_ty.1));
             let right = self.alloc(Ty(
                 context_reason,
                 Ty_::Taccess(self.alloc(TaccessType(ty, cst))),
@@ -2103,52 +2113,70 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         let mut where_constraints =
             Vec::from_iter_in(where_constraints.iter().copied(), self.arena);
 
-        let mut ty_by_param: BTreeMap<&str, (&'a Ty<'a>, &'a Pos<'a>)> = params
+        // The divergence here from the lowerer comes from using oxidized_by_ref instead of oxidized
+        let mut ty_by_param: BTreeMap<&str, (Ty<'a>, &'a Pos<'a>)> = params
             .iter()
-            .filter_map(|param| Some((param.name?, (param.type_.type_, param.pos))))
+            .filter_map(|param| Some((param.name?, (param.type_.type_.clone(), param.pos))))
             .collect();
 
         for context_ty in context_tys {
             match context_ty.1 {
-                // Hfun_context in the AST
+                // Hfun_context in the AST.
                 Ty_::Tapply(((_, name), _)) if name.starts_with('$') => {
                     if let Some((param_ty, _)) = ty_by_param.get_mut(name) {
-                        if let Ty_::Toption(ty) = param_ty.1 {
-                            if let Some(ty) = rewrite_fun_ctx(&mut tparams, ty, name) {
-                                *param_ty = self.alloc(Ty(param_ty.0, Ty_::Toption(ty)));
+                        match param_ty.1 {
+                            Ty_::Tlike(ref mut ty) => match ty {
+                                Ty(r, Ty_::Toption(tinner)) => {
+                                    *ty = self.alloc(Ty(
+                                        r,
+                                        Ty_::Toption(self.alloc(rewrite_fun_ctx(
+                                            &mut tparams,
+                                            tinner,
+                                            name,
+                                        ))),
+                                    ))
+                                }
+                                _ => {
+                                    *ty = self.alloc(rewrite_fun_ctx(&mut tparams, ty, name));
+                                }
+                            },
+                            Ty_::Toption(ref mut ty) => {
+                                *ty = self.alloc(rewrite_fun_ctx(&mut tparams, ty, name));
                             }
-                        } else {
-                            if let Some(ty) = rewrite_fun_ctx(&mut tparams, param_ty, name) {
-                                *param_ty = ty;
+                            _ => {
+                                *param_ty = rewrite_fun_ctx(&mut tparams, param_ty, name);
                             }
                         }
                     }
                 }
                 Ty_::Taccess(&TaccessType(Ty(_, Ty_::Tapply(((_, name), _))), cst)) => {
                     if let Some((param_ty, param_pos)) = ty_by_param.get_mut(name) {
-                        if let Ty_::Toption(ty) = param_ty.1 {
-                            if let Some(ty) = rewrite_arg_ctx(
+                        let mut rewrite = |t| {
+                            rewrite_arg_ctx(
                                 &mut tparams,
                                 &mut where_constraints,
-                                ty,
+                                t,
                                 param_pos,
                                 name,
                                 context_ty.0,
                                 cst,
-                            ) {
-                                *param_ty = self.alloc(Ty(param_ty.0, Ty_::Toption(ty)));
+                            )
+                        };
+                        match param_ty.1 {
+                            Ty_::Tlike(ref mut ty) => match ty {
+                                Ty(r, Ty_::Toption(tinner)) => {
+                                    *ty =
+                                        self.alloc(Ty(r, Ty_::Toption(self.alloc(rewrite(tinner)))))
+                                }
+                                _ => {
+                                    *ty = self.alloc(rewrite(ty));
+                                }
+                            },
+                            Ty_::Toption(ref mut ty) => {
+                                *ty = self.alloc(rewrite(ty));
                             }
-                        } else {
-                            if let Some(ty) = rewrite_arg_ctx(
-                                &mut tparams,
-                                &mut where_constraints,
-                                param_ty,
-                                param_pos,
-                                name,
-                                context_ty.0,
-                                cst,
-                            ) {
-                                *param_ty = ty;
+                            _ => {
+                                *param_ty = rewrite(param_ty);
                             }
                         }
                     }
@@ -2176,15 +2204,13 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         let params = self.slice(params.iter().copied().map(|param| match param.name {
             None => param,
             Some(name) => match ty_by_param.get(name) {
-                Some(&(type_, _)) if !std::ptr::eq(param.type_.type_, type_) => {
-                    self.alloc(FunParam {
-                        type_: self.alloc(PossiblyEnforcedTy {
-                            type_,
-                            ..*param.type_
-                        }),
-                        ..*param
-                    })
-                }
+                Some((type_, _)) if param.type_.type_ != type_ => self.alloc(FunParam {
+                    type_: self.alloc(PossiblyEnforcedTy {
+                        type_: self.alloc(type_.clone()),
+                        ..*param.type_
+                    }),
+                    ..*param
+                }),
                 _ => param,
             },
         }));
@@ -2225,7 +2251,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
     }
 }
 
-enum NodeIterHelper<'a: 'b, 'b> {
+enum NodeIterHelper<'a, 'b> {
     Empty,
     Single(&'b Node<'a>),
     Vec(std::slice::Iter<'b, Node<'a>>),
@@ -2559,6 +2585,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             | TokenKind::Throw
             | TokenKind::Try
             | TokenKind::Unset
+            | TokenKind::Upcast
             | TokenKind::Use
             | TokenKind::Using
             | TokenKind::Var
@@ -2923,7 +2950,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         self.add_record(
             name.1,
             self.alloc(typing_defs::RecordDefType {
-                module: None, // TODO: grab module from attributes
+                module: &None, // TODO: grab module from attributes
                 name: name.into(),
                 extends: self
                     .expect_name(extends_opt)
@@ -2988,7 +3015,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         let tparams = self.pop_type_params(generic_params);
         let parsed_attributes = self.to_attributes(attributes);
         let typedef = self.alloc(TypedefType {
-            module: parsed_attributes.module,
+            module: self.alloc(parsed_attributes.module),
             pos,
             vis: if parsed_attributes.internal {
                 aast::TypedefVisibility::Tinternal
@@ -3030,7 +3057,10 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         };
         let ty = match self.node_to_ty(ctx_list) {
             Some(ty) => ty,
-            None => return Node::Ignored(SK::ContextAliasDeclaration),
+            None => self.alloc(Ty(
+                self.alloc(Reason::hint(pos)),
+                Ty_::Tapply(self.alloc(((pos, "\\HH\\Contexts\\defaults"), &[]))),
+            )),
         };
 
         // lowerer ensures there is only one as constraint
@@ -3048,7 +3078,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         let tparams = self.pop_type_params(generic_params);
         let parsed_attributes = self.to_attributes(attributes);
         let typedef = self.alloc(TypedefType {
-            module: parsed_attributes.module,
+            module: self.alloc(parsed_attributes.module),
             pos,
             vis: if parsed_attributes.internal {
                 aast::TypedefVisibility::Tinternal
@@ -3202,7 +3232,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         attributes: Self::R,
         visibility: Self::R,
         inout: Self::R,
-        readonly: Self::R, // TODO: handle readonly in declarations
+        readonly: Self::R,
         hint: Self::R,
         name: Self::R,
         initializer: Self::R,
@@ -3298,13 +3328,14 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                     s.into_bump_str()
                 });
                 let fun_elt = self.alloc(FunElt {
-                    module: parsed_attributes.module,
+                    module: self.alloc(parsed_attributes.module),
                     internal: parsed_attributes.internal,
                     deprecated,
                     type_,
                     pos,
                     php_std_lib: parsed_attributes.php_std_lib,
-                    support_dynamic_type: parsed_attributes.support_dynamic_type,
+                    support_dynamic_type: self.opts.everything_sdt
+                        || parsed_attributes.support_dynamic_type,
                 });
                 self.add_fun(name, fun_elt);
                 Node::Ignored(SK::FunctionDeclaration)
@@ -3869,7 +3900,8 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         let user_attributes = user_attributes.into_bump_slice();
         let extends = self.slice(extends.iter().filter_map(|&node| self.node_to_ty(node)));
         let implements = self.slice(implements.iter().filter_map(|&node| self.node_to_ty(node)));
-        let support_dynamic_type = class_attributes.support_dynamic_type;
+        let support_dynamic_type =
+            self.opts.everything_sdt || class_attributes.support_dynamic_type;
         // Pop the type params stack only after creating all inner types.
         let tparams = self.pop_type_params(tparams);
         let module = class_attributes.module;
@@ -3880,7 +3912,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             is_xhp,
             has_xhp_keyword: xhp_keyword.is_token(TokenKind::XHP),
             kind: class_kind,
-            module,
+            module: self.alloc(module),
             name: (pos, name),
             tparams,
             where_constraints,
@@ -4268,7 +4300,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             is_xhp: false,
             has_xhp_keyword: false,
             kind: ClassishKind::Cenum,
-            module: None, // TODO: grab module from attributes
+            module: &None, // TODO: grab module from attributes
             name: id.into(),
             tparams: &[],
             where_constraints: &[],
@@ -4424,7 +4456,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             is_xhp: false,
             has_xhp_keyword: false,
             kind: class_kind,
-            module: None, // TODO: grab module from attributes
+            module: &None, // TODO: grab module from attributes
             name: name.into(),
             tparams: &[],
             where_constraints: &[],
@@ -4985,20 +5017,11 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             }))
         } else {
             if let Some(t) = type_ {
-                if let Some(constraint) = as_constraint {
-                    // Partially abstract type constant:
-                    //     const type T as X = Z;
-                    Typeconst::TCPartiallyAbstract(self.alloc(PartiallyAbstractTypeconst {
-                        constraint,
-                        type_: t,
-                    }))
-                } else {
-                    // Concrete type constant:
-                    //     const type T = Z;
-                    Typeconst::TCConcrete(self.alloc(ConcreteTypeconst { tc_type: t }))
-                }
+                // Concrete type constant:
+                //     const type T = Z;
+                Typeconst::TCConcrete(self.alloc(ConcreteTypeconst { tc_type: t }))
             } else {
-                // concrete or partially abstract type constant requires a value
+                // concrete or type constant requires a value
                 return Node::Ignored(SK::TypeConstDeclaration);
             }
         };

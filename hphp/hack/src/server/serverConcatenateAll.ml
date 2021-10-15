@@ -149,7 +149,7 @@ let go (genv : ServerEnv.genv) (env : ServerEnv.env) (prefixes : string list) =
       in
       let deps =
         Typing_deps.add_extend_deps deps_mode classes
-        |> Typing_deps.Files.get_files
+        |> Naming_provider.ByHash.get_files ctx
         |> Relative_path.Set.filter ~f:path_filter
       in
       Relative_path.Set.remove deps path

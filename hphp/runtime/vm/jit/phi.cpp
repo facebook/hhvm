@@ -145,15 +145,6 @@ bool optimizePhis(IRUnit& unit) {
         // there are no preds that don't have the value available.
         newInst = unit.gen(phiDest, Mov, label.bcctx(), *values.begin());
       } else if (auto sink = findSinkablePhiSrc(values)) {
-        // As long as DefInlineFP exists, FramePtr SSATmps aren't truly
-        // SSA. We have to make sure the live FramePtr at the point of the
-        // DefLabel is the same as the one from the LdLocAddr, if that's the
-        // instruction we're trying to sink.
-        if (sink.inst->is(LdLocAddr) &&
-            sink.inst->marker().fp() != label.marker().fp()) {
-          continue;
-        }
-
         newInst = unit.clone(sink.inst, sink.is_lval ? nullptr : phiDest);
         newInst->marker() = label.marker();
         if (sink.is_lval) {

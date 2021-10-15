@@ -962,6 +962,14 @@ ss.serialize_field("nullable_as_operator", &self.with(operator))?;
 ss.serialize_field("nullable_as_right_operand", &self.with(right_operand))?;
       ss.end()
 } 
+SyntaxVariant::UpcastExpression (UpcastExpressionChildren{left_operand,operator,right_operand} ) => {
+      let mut ss = s.serialize_struct("", 4)?;
+      ss.serialize_field("kind", "upcast_expression")?;
+      ss.serialize_field("upcast_left_operand", &self.with(left_operand))?;
+ss.serialize_field("upcast_operator", &self.with(operator))?;
+ss.serialize_field("upcast_right_operand", &self.with(right_operand))?;
+      ss.end()
+} 
 SyntaxVariant::ConditionalExpression (ConditionalExpressionChildren{test,question,consequence,colon,alternative} ) => {
       let mut ss = s.serialize_struct("", 6)?;
       ss.serialize_field("kind", "conditional_expression")?;

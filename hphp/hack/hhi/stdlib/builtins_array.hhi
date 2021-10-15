@@ -71,21 +71,25 @@ function array_fill_keys<Tk as arraykey, Tv>(
   Container<Tk> $keys,
   Tv $value,
 )[]: darray<Tk, Tv>;
-/*
- * Calls to array_filter are rewritten depending on the type
- * of argument to have one of the following signatures:
+/**
+ * `array_filter` returns a `KeyedContainer<_, _>` with the items that match
+ * the predicate.
  *
- * function(array, ?(function(Tv):bool)): array
- * function(KeyedContainer<Tk, Tv>, ?(function(Tv):bool)): array<Tk, Tv>
- * function(Container<Tv>, ?(function(Tv):bool)): array<arraykey, Tv>
+ * This function is deprecated; please use `Dict\filter` or `Vec\filter`
+ * instead, or the respective `filter_nulls` variant.
  *
- * Single argument calls additionally remove nullability of Tv, i.e.:
+ * `array_filter` used to have special typing to indicate:
+ *   - Whether or not it preserved the input type
+ *   - How it removed nulls upon not providing a callback
  *
- * function(Container<?Tv>): array<arraykey, Tv>
- *
+ * These typing behaviors are now split into the aforementioned four Hack
+ * Standard Library functions.
  */
 <<__PHPStdLib>>
-function array_filter<Tv>(Container<Tv> $input, ?(function(Tv):bool) $callback = null);
+function array_filter<Tk as arraykey, Tv>(
+  KeyedContainer<Tk, Tv> $input,
+  ?(function(Tv): bool) $callback = null,
+): KeyedContainer<Tk, Tv>;
 <<__PHPStdLib>>
 function array_flip($trans)[];
 <<__PHPStdLib>>
@@ -95,30 +99,20 @@ function array_keys<Tk as arraykey>(
   KeyedContainer<Tk, mixed> $input,
 )[]: varray<Tk>;
 /**
- * array_map signature is rewritten based on the arity of the call:
+ * `array_map` previously had it's signature rewritten based on the arity of
+ * the call, to match runtime behaviors including:
+ * - Preserving the input container type
+ * - Allowing for `N` args and accepting a function of the same arity
  *
- * array_map(F, A1, A2, ..., An); becomes
- *
- * array_map<T1, ... Tn, Tr>(
- *   (function(T1, ..., Tn): Tr),
- *   Container<T1>,
- *   ...,
- *   Container<Tn>
- *): R;
- *
- * where for n > 1, R = array<Tr>
- * for n = 1, R depends on actual type of container passed at the call site:
- *
- * array                 -> R = array
- * array<X>              -> R = array<Tr>
- * array<X, Y>           -> R = array<X, Tr>
- * Vector<X>             -> R = array<Tr>
- * KeyedContainer<X, Y>  -> R = array<X, Tr>
- * Container<X>          -> R = array<arraykey, Tr>
- * X (unknown type)      -> R = Y (other unknown type)
+ * This runtime behavior still exists but this function is deprecated in favor
+ * of HSL functions like `Vec\map` or `Dict\map`.
  */
 <<__PHPStdLib>>
-function array_map($callback, $arr1, ...$args);
+function array_map<Tk as arraykey, Tin, Tout>(
+  (function (Tin): Tout) $callback,
+  KeyedContainer<Tk, Tin> $arr,
+): KeyedContainer<Tk, Tout>;
+
 <<__PHPStdLib>>
 function array_merge_recursive($array1, ...$args)[];
 <<__PHPStdLib>>

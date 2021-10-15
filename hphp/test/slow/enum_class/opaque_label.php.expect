@@ -1,0 +1,14 @@
+WRAPPED
+resource(4) of type (OpaqueValue)
+Resource id #4
+
+UNWRAPPED
+string(1) "A"
+A
+
+VALUEOF
+int(42)
+
+NAMEOF
+string(1) "A"
+A

@@ -1,7 +1,7 @@
 <?hh // partial
 
-# taken from an issue in GitHub
-#
+// taken from an issue in GitHub
+//
 function add_word_helper<T>((function(): T) $callback): T {
   return $callback();
 }

@@ -86,7 +86,7 @@ function get_random_port($exclude1, $exclude2) {
   return $t;
 }
 
-# Return the command line to start the server with the specified options
+// Return the command line to start the server with the specified options
 function getServerCmd($serverPort, $adminPort, $debugPort, $home, $root,
                       $customArgs = '', $serverId = null, $repoArgs = '') {
   $LOG_ROOT = ServerUtilServerTests::$LOG_ROOT;

@@ -1,13 +1,13 @@
 <?hh
-# Enable to debug test-suite meltdown
-# Should not be enabled unless you know what you are doing
+// Enable to debug test-suite meltdown
+// Should not be enabled unless you know what you are doing
 if (!defined("DEBUG")) {
     define("DEBUG", false);
 }
 
-# Path to your mongo shell. The shell is used to launch mongod If you have
-# multiple MongoDBs versions installed, you can change between the version used
-# by using the shell belonging to the version you want to test against
+// Path to your mongo shell. The shell is used to launch mongod If you have
+// multiple MongoDBs versions installed, you can change between the version used
+// by using the shell belonging to the version you want to test against
 $mongo = __DIR__.'/../bin/mongo';
 $SHELL = $mongo;
 $DBDIR = "/tmp/db/";

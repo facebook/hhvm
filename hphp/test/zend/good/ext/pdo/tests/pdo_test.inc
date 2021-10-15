@@ -1,5 +1,5 @@
 <?hh
-# PDO test framework utilities
+// PDO test framework utilities
 
 function updateEnv() {
 	if (getenv('PDOTEST_DSN') === false) {

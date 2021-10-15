@@ -1820,7 +1820,7 @@ ActRec* ExecutionContext::getPrevVMState(const ActRec* fp,
                                          Offset* prevPc /* = NULL */,
                                          TypedValue** prevSp /* = NULL */,
                                          bool* fromVMEntry /* = NULL */,
-                                         uint64_t* jitReturnAddr /* = NULL */) {
+                                         jit::TCA* jitReturnAddr /* = NULL */) {
   if (fp == nullptr) {
     return nullptr;
   }
@@ -1836,6 +1836,7 @@ ActRec* ExecutionContext::getPrevVMState(const ActRec* fp,
     }
     if (prevPc) *prevPc = fp->callOffset();
     if (fromVMEntry) *fromVMEntry = false;
+    if (jitReturnAddr) *jitReturnAddr = (jit::TCA)fp->m_savedRip;
     return prevFp;
   }
   // Linear search from end of m_nestedVMs. In practice, we're probably
@@ -1855,7 +1856,7 @@ ActRec* ExecutionContext::getPrevVMState(const ActRec* fp,
     *prevPc = prevFp->func()->offsetOf(vmstate.pc);
   }
   if (fromVMEntry) *fromVMEntry = true;
-  if (jitReturnAddr) *jitReturnAddr = (uint64_t)vmstate.jitReturnAddr;
+  if (jitReturnAddr) *jitReturnAddr = vmstate.jitReturnAddr;
   return prevFp;
 }
 

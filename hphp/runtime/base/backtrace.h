@@ -338,7 +338,7 @@ struct BTFrame {
   // Regular frame pointed to by `fp`. This includes resumables.
   // FIXME: fp may be nullptr, in which case this is an equivalent of none()
   static BTFrame regular(ActRec* fp, Offset bcOff) {
-    return BTFrame{fp, bcOff, kRootIFrameID, kRootIFrameID};
+    return BTFrame{fp, bcOff, kInvalidAfwhTailFrameIdx};
   }
 
   // Inlined frame that does not have a materialized ActRec. IFrame backed by
@@ -351,6 +351,13 @@ struct BTFrame {
     return BTFrame{fp, bcOff, frameId, pubFrameId};
   }
 
+  static BTFrame afwhTailFrame(ActRec* fp, Offset bcOff,
+                               int8_t afwhTailFrameIdx) {
+    assertx(fp != nullptr);
+    assertx(afwhTailFrameIdx >= 0);
+    return BTFrame{fp, bcOff, afwhTailFrameIdx};
+  }
+
   BTFrame withFP(ActRec* fp) const {
     return BTFrame{fp, m_bcOff, m_frameId, m_pubFrameId};
   }
@@ -359,7 +366,7 @@ struct BTFrame {
   Offset bcOff() const { return m_bcOff; }
   const Func* func() const;
   bool isInlined() const;
-  bool isResumed() const;
+  bool isRegularResumed() const;
   bool localsAvailable() const;
   TypedValue* local(int n) const;
   ObjectData* getThis() const;
@@ -368,17 +375,34 @@ struct BTFrame {
   // instead use the helpers above.
   ActRec* fpInternal() const { return m_fp; }
   IFrameID frameIdInternal() const { return m_frameId; }
-  IFrameID pubFrameIdInternal() const { return m_pubFrameId; }
+  IFrameID pubFrameIdInternal() const {
+    assertx(m_frameId != kRootIFrameID);
+    return m_pubFrameId;
+  }
+  int8_t afwhTailFrameIdxInternal() const {
+    assertx(m_frameId == kRootIFrameID);
+    return m_afwhTailFrameIdx;
+  }
+
+  static constexpr int8_t kInvalidAfwhTailFrameIdx = -1;
 
  private:
   BTFrame() = default;
   BTFrame(ActRec* fp, Offset bcOff, IFrameID frameId, IFrameID pubFrameId)
     : m_fp(fp), m_bcOff(bcOff), m_frameId(frameId), m_pubFrameId(pubFrameId) {}
+  BTFrame(ActRec* fp, Offset bcOff, int8_t afwhTailFrameIdx)
+    : m_fp(fp), m_bcOff(bcOff), m_frameId(kRootIFrameID)
+    , m_afwhTailFrameIdx(afwhTailFrameIdx) {}
 
   ActRec* m_fp{nullptr};
   Offset m_bcOff{kInvalidOffset};
   IFrameID m_frameId{kRootIFrameID};
-  IFrameID m_pubFrameId{kRootIFrameID};
+  union {
+    // Used if m_frameId != kRootIFrameID
+    IFrameID m_pubFrameId;
+    // Used if m_frameId == kRootIFrameID, this is afwh tail frame if >= 0
+    int8_t m_afwhTailFrameIdx;
+  };
 };
 
 Array createBacktrace(const BacktraceArgs& backtraceArgs);

@@ -41,7 +41,7 @@ namespace {
 c_ResumableWaitHandle* GetResumedWaitHandle() {
   c_ResumableWaitHandle* ret = nullptr;
   walkStack([&] (const BTFrame& frm) {
-    if (frm.isResumed() && frm.func()->isAsync()) {
+    if (frm.isRegularResumed() && frm.func()->isAsync()) {
       if (frm.func()->isGenerator()) {
         // async generator
         auto generator = frame_async_generator(frm.fpInternal());

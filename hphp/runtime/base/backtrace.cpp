@@ -68,76 +68,67 @@ const size_t
 
 static const StaticString s_stableIdentifier("HPHP::createBacktrace");
 }
-///////////////////////////////////////////////////////////////////////////////
-
-namespace backtrace_detail {
-
-BTContext::BTContext() {
-  // don't attempt to read locals
-  auto const flags = (1U << ActRec::LocalsDecRefd) | (1U << ActRec::IsInlined);
-  auto const handler = (intptr_t)jit::tc::ustubs().retHelper;
-  fakeAR[0].m_sfp = &fakeAR[1];
-  fakeAR[1].m_sfp = &fakeAR[0];
-  fakeAR[0].m_savedRip = fakeAR[1].m_savedRip = handler;
-  fakeAR[0].m_callOffAndFlags = fakeAR[1].m_callOffAndFlags =
-    ActRec::encodeCallOffsetAndFlags(0, flags);
-}
-
-const ActRec* BTContext::clone(const BTContext& src, const ActRec* fp) {
-  fakeAR[0].m_funcId = src.fakeAR[0].m_funcId;
-  fakeAR[1].m_funcId = src.fakeAR[1].m_funcId;
-
-  fakeAR[0].m_callOffAndFlags = src.fakeAR[0].m_callOffAndFlags;
-  fakeAR[1].m_callOffAndFlags = src.fakeAR[1].m_callOffAndFlags;
-
-  stashedFP = src.stashedFP;
-  afwhTailFrameIndex = src.afwhTailFrameIndex;
-  assertx(!!stashedFP == (fp == &src.fakeAR[0] || fp == &src.fakeAR[1]));
-
-  return
-    fp == &src.fakeAR[0] ? &fakeAR[0] :
-    fp == &src.fakeAR[1] ? &fakeAR[1] :
-    fp;
-}
-
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 
 const Func* BTFrame::func() const {
+  assertx(m_fp != nullptr);
   if (m_frameId != kRootIFrameID) return jit::getInlineFrame(m_frameId).func;
+  if (m_afwhTailFrameIdx != kInvalidAfwhTailFrameIdx) {
+    auto const afwh = frame_afwh(m_fp);
+    return getAsyncFrame(afwh->tailFrame(m_afwhTailFrameIdx)).func();
+  }
+
   return m_fp->func();
 }
 
 bool BTFrame::isInlined() const {
-  return m_frameId != kRootIFrameID || m_fp->isInlined();
+  assertx(m_fp != nullptr);
+  if (m_frameId != kRootIFrameID) return true;
+  assertx(IMPLIES(m_afwhTailFrameIdx != kInvalidAfwhTailFrameIdx,
+                  !m_fp->isInlined()));
+  return m_fp->isInlined();
 }
 
-bool BTFrame::isResumed() const {
-  return m_frameId == kRootIFrameID && HPHP::isResumed(m_fp);
+bool BTFrame::isRegularResumed() const {
+  assertx(m_fp != nullptr);
+  if (m_frameId != kRootIFrameID) return false;
+  if (m_afwhTailFrameIdx != kInvalidAfwhTailFrameIdx) return false;
+  return HPHP::isResumed(m_fp);
 }
 
 bool BTFrame::localsAvailable() const {
-  return m_frameId != kRootIFrameID || !m_fp->localsDecRefd();
+  assertx(m_fp != nullptr);
+  if (m_frameId != kRootIFrameID) return true;
+  if (m_afwhTailFrameIdx != kInvalidAfwhTailFrameIdx) return false;
+  return !m_fp->localsDecRefd();
 }
 
 TypedValue* BTFrame::local(int n) const {
+  assertx(m_fp != nullptr);
   assertx(localsAvailable());
-  if (m_frameId == kRootIFrameID) return frame_local(m_fp, n);
 
-  auto const ifr = jit::getInlineFrame(m_frameId);
-  auto const pubSB = Stack::anyFrameStackBase(m_fp);
-  auto const rootSB = m_pubFrameId != kRootIFrameID
-    ? pubSB + jit::getInlineFrame(m_pubFrameId).sbToRootSbOff
-    : pubSB;
-  auto const mySB = rootSB - ifr.sbToRootSbOff;
-  auto const fp = (ActRec*)(mySB + ifr.func->numSlotsInFrame());
-  return frame_local(fp, n);
+  if (m_frameId != kRootIFrameID) {
+    auto const ifr = jit::getInlineFrame(m_frameId);
+    auto const pubSB = Stack::anyFrameStackBase(m_fp);
+    auto const rootSB = m_pubFrameId != kRootIFrameID
+      ? pubSB + jit::getInlineFrame(m_pubFrameId).sbToRootSbOff
+      : pubSB;
+    auto const mySB = rootSB - ifr.sbToRootSbOff;
+    auto const fp = (ActRec*)(mySB + ifr.func->numSlotsInFrame());
+    return frame_local(fp, n);
+  }
+
+  assertx(m_afwhTailFrameIdx == kInvalidAfwhTailFrameIdx);
+  return frame_local(m_fp, n);
 }
 
 ObjectData* BTFrame::getThis() const {
+  assertx(m_fp != nullptr);
   assertx(!isInlined());
   assertx(localsAvailable());
+  assertx(m_frameId == kRootIFrameID);
+  assertx(m_afwhTailFrameIdx == kInvalidAfwhTailFrameIdx);
   return m_fp->getThis();
 }
 
@@ -206,7 +197,7 @@ BTFrame getARFromWH(
 
 namespace backtrace_detail {
 
-BTFrame initBTContextAt(BTContext& ctx, jit::CTCA ip, BTFrame frm) {
+BTFrame initBTFrameAt(jit::CTCA ip, BTFrame frm) {
   assertx(frm.frameIdInternal() == kRootIFrameID);
 
   if (auto const stk = jit::inlineStackAt(ip)) {
@@ -220,41 +211,16 @@ BTFrame initBTContextAt(BTContext& ctx, jit::CTCA ip, BTFrame frm) {
   if (frm.bcOff() != kInvalidOffset) return frm;
 
   // If we don't have an inlined frame, it's always safe to use pcOff() if
-  // initBTContextAt() is being called for a leaf frame.
+  // initBTFrameAt() is being called for a leaf frame.
   return BTFrame::regular(frm.fpInternal(), pcOff());
 }
 
 BTFrame getPrevActRec(
-  BTContext& ctx, BTFrame frm,
+  BTFrame frm,
   folly::small_vector<c_WaitableWaitHandle*, 64>& visitedWHs
 ) {
+  if (!frm) return BTFrame::none();
   auto const fp = frm.fpInternal();
-
-  // If we're already iterating over an AsyncFunctionWaitHandle's tail frames,
-  // either create a fake ActRec for the next tail frame, or go to the parent
-  // ActRec of the AFWH itself.
-  if (ctx.afwhTailFrameIndex) {
-    assertx(fp == &ctx.fakeAR[0] || fp == &ctx.fakeAR[1]);
-    assertx(fp->m_sfp == &ctx.fakeAR[0] || fp->m_sfp == &ctx.fakeAR[1]);
-    assertx(fp != fp->m_sfp);
-
-    auto const wh = frame_afwh(ctx.stashedFP);
-    if (ctx.afwhTailFrameIndex < wh->lastTailFrameIndex()) {
-      auto const sk = getAsyncFrame(wh->tailFrame(ctx.afwhTailFrameIndex++));
-      auto const prevFP = fp->m_sfp;
-      prevFP->setFunc(sk.func());
-      return BTFrame::regular(prevFP, sk.offset());
-    }
-
-    // We could use stashedFP->savedRip as the return TCA here, but for
-    // suspended AFWH, that will always be a pointer to an async-ret stub.
-    ctx.afwhTailFrameIndex = 0;
-    ctx.stashedFP = nullptr;
-    auto const contextIdx = wh->getContextIdx();
-    auto const parent = getParentWH(wh, contextIdx, visitedWHs);
-    auto const prev = getARFromWHImpl(parent, contextIdx, visitedWHs);
-    return initBTContextAt(ctx, (jit::TCA)0, prev);
-  }
 
   if (frm.frameIdInternal() != kRootIFrameID) {
     auto const ifr = jit::getInlineFrame(frm.frameIdInternal());
@@ -273,8 +239,24 @@ BTFrame getPrevActRec(
       fp, ifr.callOff, ifr.parent, frm.pubFrameIdInternal());
   }
 
+  // Handle AsyncFunctionWaitHandle tail frame.
+  if (frm.afwhTailFrameIdxInternal() != BTFrame::kInvalidAfwhTailFrameIdx) {
+    auto const wh = frame_afwh(fp);
+    auto const nextIdx = frm.afwhTailFrameIdxInternal() + 1;
+    if (nextIdx < wh->lastTailFrameIndex()) {
+      // Move to the next tail frame.
+      auto const sk = getAsyncFrame(wh->tailFrame(nextIdx));
+      return BTFrame::afwhTailFrame(fp, sk.offset(), nextIdx);
+    }
+
+    // Processed all tail frames, continue at the parent ActRec.
+    auto const contextIdx = wh->getContextIdx();
+    auto const parent = getParentWH(wh, contextIdx, visitedWHs);
+    return getARFromWHImpl(parent, contextIdx, visitedWHs);
+  }
+
   auto const wh = [&]() -> c_WaitableWaitHandle* {
-    if (!fp || !fp->func() || !isResumed(fp)) return nullptr;
+    if (!fp->func() || !isResumed(fp)) return nullptr;
 
     if (fp->func()->isAsyncFunction()) {
       return frame_afwh(fp);
@@ -287,10 +269,6 @@ BTFrame getPrevActRec(
     }
     return nullptr;
   }();
-
-  auto rip = fp ? fp->m_savedRip : 0;
-
-  auto prev = frm;
 
   if (wh != nullptr) {
     if (wh->isFinished()) {
@@ -312,29 +290,21 @@ BTFrame getPrevActRec(
       auto const afwh = wh->asAsyncFunction();
       auto const index = afwh->firstTailFrameIndex();
       auto const sk = getAsyncFrame(afwh->tailFrame(index));
-
-      ctx.afwhTailFrameIndex = index + 1;
-      ctx.stashedFP = afwh->actRec();
-      auto const prevFP = &ctx.fakeAR[0];
-      prevFP->setFunc(sk.func());
-      prevFP->m_callOffAndFlags =
-        ActRec::encodeCallOffsetAndFlags(0, 1 << ActRec::LocalsDecRefd);
-      return BTFrame::regular(prevFP, sk.offset());
+      return BTFrame::afwhTailFrame(fp, sk.offset(), index);
     }
 
     auto const contextIdx = wh->getContextIdx();
     auto const parent = getParentWH(wh, contextIdx, visitedWHs);
-    prev = getARFromWHImpl(parent, contextIdx, visitedWHs);
-  } else {
-    Offset prevBcOff;
-    auto const prevFP =
-      g_context->getPrevVMState(fp, &prevBcOff, nullptr, nullptr, &rip);
-    prev = BTFrame::regular(prevFP, prevBcOff);
+    return getARFromWHImpl(parent, contextIdx, visitedWHs);
   }
 
-  return prev
-    ? initBTContextAt(ctx, (jit::TCA)rip, prev)
-    : prev;
+  Offset prevBcOff;
+  jit::TCA jitReturnAddr;
+  auto const prevFP =
+    g_context->getPrevVMState(fp, &prevBcOff, nullptr, nullptr, &jitReturnAddr);
+
+  if (prevFP == nullptr) return BTFrame::none();
+  return initBTFrameAt(jitReturnAddr, BTFrame::regular(prevFP, prevBcOff));
 }
 
 }
@@ -363,8 +333,6 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
 
   auto bt = Array::CreateVec();
   folly::small_vector<c_WaitableWaitHandle*, 64> visitedWHs;
-
-  BTContext ctx;
 
   if (g_context->m_parserFrame) {
     StructDictInit frame(s_runtimeStruct, 2);
@@ -400,18 +368,18 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
     // Get the fp and pc of the top frame (possibly skipping one frame).
 
     if (!btArgs.m_skipInlined) {
-      frm = initBTContextAt(ctx, vmJitReturnAddr(), frm);
+      frm = initBTFrameAt(vmJitReturnAddr(), frm);
     }
 
     if (btArgs.m_skipTop) {
-      frm = getPrevActRec(ctx, frm, visitedWHs);
+      frm = getPrevActRec(frm, visitedWHs);
       // We skipped over the only VM frame, we're done.
       if (!frm) return bt;
     }
 
     if (btArgs.m_skipInlined && RuntimeOption::EvalJit) {
       while (frm && frm.isInlined()) {
-        frm = getPrevActRec(ctx, frm, visitedWHs);
+        frm = getPrevActRec(frm, visitedWHs);
       }
       if (!frm) return bt;
     }
@@ -420,11 +388,9 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
   // Handle the top frame.
   if (btArgs.m_withSelf) {
     // Builtins don't have a file and line number, so find the first user frame
-    BTContext ctxCopy;
-    auto curFrm = frm.withFP(
-      const_cast<ActRec*>(ctxCopy.clone(ctx, frm.fpInternal())));
+    auto curFrm = frm;
     while (curFrm && curFrm.func()->isBuiltin()) {
-      curFrm = getPrevActRec(ctxCopy, curFrm, visitedWHs);
+      curFrm = getPrevActRec(curFrm, visitedWHs);
     }
     if (curFrm) {
       auto const func = curFrm.func();
@@ -445,9 +411,9 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
   }
 
   // Handle the subsequent VM frames.
-  for (auto prev = getPrevActRec(ctx, frm, visitedWHs);
+  for (auto prev = getPrevActRec(frm, visitedWHs);
        frm && (btArgs.m_limit == 0 || depth < btArgs.m_limit);
-       frm = prev, prev = getPrevActRec(ctx, frm, visitedWHs)) {
+       frm = prev, prev = getPrevActRec(frm, visitedWHs)) {
     auto const func = frm.func();
 
     // Do not capture frame for HPHP only functions.
@@ -669,15 +635,14 @@ req::ptr<CompactTrace> createCompactBacktrace(bool skipTop) {
 std::pair<const Func*, Offset> getCurrentFuncAndOffset() {
   VMRegAnchor _;
   folly::small_vector<c_WaitableWaitHandle*, 64> visitedWHs;
-  BTContext ctx;
 
   auto const fp = vmfp();
   auto frm = BTFrame::regular(fp, kInvalidOffset);
-  frm = initBTContextAt(ctx, vmJitReturnAddr(), frm);
+  frm = initBTFrameAt(vmJitReturnAddr(), frm);
 
   // Builtins don't have a file and line number, so find the first user frame
   while (frm && frm.func()->isBuiltin()) {
-    frm = getPrevActRec(ctx, frm, visitedWHs);
+    frm = getPrevActRec(frm, visitedWHs);
   }
   return std::make_pair(frm ? frm.func() : nullptr, frm.bcOff());
 }

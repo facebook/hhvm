@@ -38,33 +38,8 @@ struct c_WaitableWaitHandle;
 
 namespace backtrace_detail {
 
-struct BTContext {
-  BTContext();
-
-  BTContext(const BTContext&) = delete;
-  BTContext(BTContext&&) = delete;
-  BTContext& operator=(const BTContext&) = delete;
-  BTContext& operator=(BTContext&&) = delete;
-
-  const ActRec* clone(const BTContext& src, const ActRec* fp);
-
-  // To handle awaits in tail-position, we can reuse AsyncFunctionWaitHandle
-  // and stuff just enough tail-frame info into them to support backtracing.
-  // This field is set when iterating over these tail frames.
-  uint8_t afwhTailFrameIndex{0};
-
-  // fakeAR is used to generate pseudo-frames representing inlined functions
-  // whose frames have been elided. The array operates like a ring buffer as
-  // createBacktrace needs to inspect the current and previous frame pointer,
-  // thus we introduce an m_sfp cycle between these frames.
-  ActRec fakeAR[2];
-
-  // The frame we should resume at after unwinding the inlined stack.
-  ActRec* stashedFP{nullptr};
-};
-
 BTFrame getPrevActRec(
-  BTContext& ctx, BTFrame frm,
+  BTFrame frm,
   folly::small_vector<c_WaitableWaitHandle*, 64>& visitedWHs
 );
 
@@ -76,7 +51,7 @@ BTFrame getPrevActRec(
  *  - Setting up virtual FCallBuiltin inline frames.
  *  - Coalescing kInvalidOffset `pc` values to `pcOff()`.
  */
-BTFrame initBTContextAt(BTContext& ctx, jit::CTCA ip, BTFrame frm);
+BTFrame initBTFrameAt(jit::CTCA ip, BTFrame frm);
 
 }
 
@@ -84,13 +59,11 @@ template<class L>
 void walkStackFrom(
     L func, BTFrame initFrm, jit::CTCA ip, bool skipTop,
     folly::small_vector<c_WaitableWaitHandle*, 64>& visitedWHs) {
-  backtrace_detail::BTContext ctx;
+  auto frm = backtrace_detail::initBTFrameAt(ip, initFrm);
 
-  auto frm = initBTContextAt(ctx, ip, initFrm);
+  if (skipTop) frm = backtrace_detail::getPrevActRec(frm, visitedWHs);
 
-  if (skipTop) frm = getPrevActRec(ctx, frm, visitedWHs);
-
-  for (; frm; frm = getPrevActRec(ctx, frm, visitedWHs)) {
+  for (; frm; frm = backtrace_detail::getPrevActRec(frm, visitedWHs)) {
     if (ArrayData::call_helper(func, frm)) return;
   }
 }

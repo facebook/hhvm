@@ -433,7 +433,7 @@ public:
                          Offset* prevPc = nullptr,
                          TypedValue** prevSp = nullptr,
                          bool* fromVMEntry = nullptr,
-                         uint64_t* jitReturnAddr = nullptr);
+                         jit::TCA* jitReturnAddr = nullptr);
   ActRec* getPrevVMStateSkipFrame(const ActRec* fp,
                                   Offset* prevPc = nullptr,
                                   TypedValue** prevSp = nullptr,

@@ -45,9 +45,10 @@ for f in "$@"; do
 
   if [ "$VERIFY_PESSIMISATION" = true ]; then
     NAME_PESS=$f".pess"
-    if [ -f "$NAME_PESS" ]; then
+    NAME_PESS_FULL_PATH="$(reconstitute_full_path "$NAME_PESS" "$SOURCE_ROOT")"
+    if [ -f "$NAME_PESS_FULL_PATH" ]; then
       echo "$(tput setaf 6)[pessimised into]$(tput setaf 7)$ARROW $NAME_PESS $(tput sgr0)"
-      nl -b a "$(reconstitute_full_path "$NAME_PESS" "$SOURCE_ROOT")"
+      nl -b a "$NAME_PESS_FULL_PATH"
     fi
   fi
 

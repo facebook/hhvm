@@ -134,7 +134,6 @@
     file_pos_small
     line_break_map
     pos
-    pos_embedded
     pos_source
     pos_span_tiny)
   (preprocess (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))

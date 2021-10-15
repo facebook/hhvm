@@ -38,7 +38,7 @@ function get_included_files();
 <<__PHPStdLib>>
 function get_required_files();
 <<__PHPStdLib>>
-function getenv(string $varname);
+function getenv(string $varname)[read_globals];
 <<__PHPStdLib>>
 function getlastmod();
 <<__PHPStdLib>>
@@ -74,7 +74,7 @@ function ini_alter(string $varname, $newvalue);
 <<__PHPStdLib>>
 function ini_get_all(string $extension = "");
 <<__PHPStdLib>>
-function ini_get(string $varname);
+function ini_get(string $varname)[read_globals];
 <<__PHPStdLib>>
 function ini_restore(string $varname);
 <<__PHPStdLib>>

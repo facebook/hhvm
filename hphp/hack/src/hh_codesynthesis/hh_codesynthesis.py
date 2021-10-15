@@ -121,7 +121,7 @@ def generate_logic_rules(solving_context: ClingoContext) -> List[str]:
     # We separated the below part from "graph_generator.lp" to narrow down the
     # search scope.
     for degree, minimum_nodes in enumerate(solving_context.degree_distribution):
-        rules.append(f':- #count{{X : in_degree(X, {degree})}} < {minimum_nodes}.')
+        rules.append(f":- #count{{X : in_degree(X, {degree})}} < {minimum_nodes}.")
 
     return rules
 

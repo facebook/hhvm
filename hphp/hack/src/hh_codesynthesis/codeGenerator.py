@@ -8,7 +8,7 @@
 # A family of code generators,
 # CodeGenerator just emitting LP code(raw Stable Model)
 # HackGenerator class extends CodeGenerator to emit its own code.
-from typing import List, Optional, Union
+from typing import List, Optional
 
 import clingo
 from clingo import Number, Symbol
@@ -70,10 +70,12 @@ class CodeGenerator(object):
     corresponding Hack/Java/C# code.
     """
 
-    def __init__(self, solving_context: ClingoContext = ClingoContext()) -> None:
+    def __init__(self, solving_context: Optional[ClingoContext] = None) -> None:
         super(CodeGenerator, self).__init__()
         self._raw_model = ""
-        self.solving_context = solving_context
+        self.solving_context = (
+            ClingoContext() if not solving_context else solving_context
+        )
 
     def __str__(self) -> str:
         return self._raw_model

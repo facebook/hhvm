@@ -57,9 +57,9 @@ class GenerateLogicRulesTest(unittest.TestCase):
         exp = [
             'internal_symbols("S0", 0;"S1", 1;"S2", 2;"S3", 3;"S4", 4;"S5", 5;"S6",'
             ' 6;"S7", 7;"S8", 8;"S9", 9;"S10", 10;"S11", 11).',
-            ':- #count{X : in_degree(X, 0)} < 1.',
-            ':- #count{X : in_degree(X, 1)} < 3.',
-            ':- #count{X : in_degree(X, 2)} < 5.',
+            ":- #count{X : in_degree(X, 0)} < 1.",
+            ":- #count{X : in_degree(X, 1)} < 3.",
+            ":- #count{X : in_degree(X, 2)} < 5.",
         ]
         self.assertListEqual(
             exp, hh_codesynthesis.generate_logic_rules(solving_context)

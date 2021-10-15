@@ -19,7 +19,7 @@
 # emit Hack code on clingo output.
 import functools
 from collections import deque
-from typing import Set, Dict, Any, Tuple, List
+from typing import Set, Dict, Any, Tuple, List, Optional
 
 import clingo
 from hphp.hack.src.hh_codesynthesis.codeGenerator import CodeGenerator, ClingoContext
@@ -297,7 +297,7 @@ class _HackFunctionGenerator:
 class HackCodeGenerator(CodeGenerator):
     """A wrapper generator encapsulates each _Hack*Generator to emit Hack Code"""
 
-    def __init__(self, solving_context: ClingoContext = ClingoContext()) -> None:
+    def __init__(self, solving_context: Optional[ClingoContext] = None) -> None:
         super(HackCodeGenerator, self).__init__(solving_context)
         self.class_objs: Dict[str, _HackClassGenerator] = {}
         self.interface_objs: Dict[str, _HackInterfaceGenerator] = {}

@@ -128,13 +128,13 @@ function clock_gettime(int $clk_id,
                        <<__OutOnly('KindOfInt64')>>
                        inout mixed $sec,
                        <<__OutOnly('KindOfInt64')>>
-                       inout mixed $nsec): bool;
+                       inout mixed $nsec)[controlled]: bool;
 
 /* Same as clock_gettime(), but returns a single integer in nanoseconds.
  * Returns -1 if invalid or non-supported clock is specified.
  */
 <<__Native>>
-function clock_gettime_ns(int $clk_id): int;
+function clock_gettime_ns(int $clk_id)[controlled]: int;
 
 /* Gets number of processors.
  */

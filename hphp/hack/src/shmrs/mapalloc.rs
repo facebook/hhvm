@@ -12,12 +12,75 @@ use crate::sync::RwLockRef;
 const LARGE_ALLOCATION: usize = 4096;
 const CHUNK_SIZE: usize = 200 * 1024;
 
+/// A pointer to a chunk.
+#[repr(transparent)]
+#[derive(Clone, Copy)]
+struct ChunkPtr(*mut u8);
+
+impl ChunkPtr {
+    fn null() -> Self {
+        ChunkPtr(std::ptr::null_mut())
+    }
+
+    fn is_null(self) -> bool {
+        self.0.is_null()
+    }
+
+    fn is_aligned(self) -> bool {
+        self.0.align_offset(std::mem::align_of::<ChunkPtr>()) == 0
+    }
+
+    fn next_chunk_ptr(self) -> *mut ChunkPtr {
+        assert!(!self.is_null());
+        assert!(self.is_aligned());
+
+        // Yes, you read that right, a pointer to a pointer!
+        let chunk_next_ptr: *mut ChunkPtr = self.0 as _;
+        chunk_next_ptr
+    }
+
+    fn get_next_chunk(self) -> ChunkPtr {
+        let chunk_next_ptr = self.next_chunk_ptr();
+
+        // Safety: ptr is (1) valid (2) aligned (3) it points to a initialized value
+        unsafe { chunk_next_ptr.read() }
+    }
+
+    fn set_next_chunk(self, value: ChunkPtr) {
+        let chunk_next_ptr = self.next_chunk_ptr();
+
+        // Safety: ptr is (1) valid (2) aligned
+        unsafe {
+            chunk_next_ptr.write(value)
+        };
+    }
+}
+
 /// Structure that contains the control data for a map allocator.
 ///
 /// This structure should be allocated in shared memory. Turn it
 /// into an actual allocator by combining it with a `FileAlloc` using
 /// `MapAlloc::new`.
 pub struct MapAllocControlData {
+    /// A linked-list of filled chunks. Might be null.
+    ///
+    /// The first word is aligned and points to the next element of the
+    /// linked list.
+    filled_chunks: ChunkPtr,
+
+    /// A linked-list of free chunks. Might be null.
+    ///
+    /// The first word is aligned and points to the next element of the
+    /// linked list.
+    free_chunks: ChunkPtr,
+
+    /// Pointer to the first byte of the current chunk.
+    ///
+    /// Note that the first word of the chunk is reserved for metadata
+    /// (i.e. a pointer that can be set if the chunk is added to the
+    /// filled or free chunks list).
+    current_start: ChunkPtr,
+
     /// Pointer to the next free byte in the current chunk.
     ///
     /// Might be null if no current chunk has been initialized yet.
@@ -31,9 +94,70 @@ impl MapAllocControlData {
     /// A new empty allocator. Useful as a placeholder.
     pub fn new() -> Self {
         Self {
+            filled_chunks: ChunkPtr::null(),
+            free_chunks: ChunkPtr::null(),
+            current_start: ChunkPtr::null(),
             current_next: std::ptr::null_mut(),
             current_end: std::ptr::null_mut(),
         }
+    }
+}
+
+impl MapAllocControlData {
+    /// Mark the current chunk as filled by adding it to the "filled chunks"
+    /// list.
+    fn mark_current_chunk_as_filled(&mut self) {
+        if self.current_start.is_null() {
+            return;
+        }
+
+        self.current_start.set_next_chunk(self.filled_chunks);
+        self.filled_chunks = self.current_start;
+
+        self.current_start = ChunkPtr::null();
+        self.current_next = std::ptr::null_mut();
+        self.current_end = std::ptr::null_mut();
+    }
+
+    /// Mark the currently filled chunks as free!
+    fn mark_filled_chunks_as_free(&mut self) {
+        // Find the last "filled chunk"
+        let mut last_filled = ChunkPtr::null();
+        let mut this_filled = self.filled_chunks;
+        while !this_filled.is_null() {
+            last_filled = this_filled;
+            this_filled = this_filled.get_next_chunk();
+        }
+        if last_filled.is_null() {
+            // Nothing to move
+            return;
+        }
+
+        // Update its next pointer.
+        last_filled.set_next_chunk(self.free_chunks);
+        self.free_chunks = self.filled_chunks;
+        self.filled_chunks = ChunkPtr::null();
+    }
+
+    fn set_current_chunk(&mut self, chunk_start: ChunkPtr) {
+        chunk_start.set_next_chunk(ChunkPtr::null());
+        self.current_start = chunk_start;
+        self.current_next = unsafe { chunk_start.0.add(std::mem::size_of::<*mut u8>()) };
+        self.current_end = unsafe { chunk_start.0.add(CHUNK_SIZE) };
+    }
+
+    /// Pop a free chunk of the free list. Update the current-chunk pointers.
+    ///
+    /// Returns true on success, false if no free chunk was available.
+    fn pop_free_chunk(&mut self) -> bool {
+        if self.free_chunks.is_null() {
+            return false;
+        }
+
+        let current_chunk = self.free_chunks;
+        self.free_chunks = current_chunk.get_next_chunk();
+        self.set_current_chunk(current_chunk);
+        true
     }
 }
 
@@ -69,13 +193,27 @@ impl<'shm> MapAlloc<'shm> {
     }
 
     fn extend(&self, control_data: &mut MapAllocControlData) -> Result<(), AllocError> {
-        let l = Layout::from_size_align(CHUNK_SIZE, 1).unwrap();
-        let ptr = self.file_alloc.allocate(l)?;
-        unsafe {
-            control_data.current_next = ptr.as_ptr() as *mut u8;
-            control_data.current_end = control_data.current_next.add(CHUNK_SIZE);
+        control_data.mark_current_chunk_as_filled();
+        if !control_data.pop_free_chunk() {
+            let l = Layout::from_size_align(CHUNK_SIZE, std::mem::align_of::<ChunkPtr>()).unwrap();
+            let ptr = self.file_alloc.allocate(l)?;
+            control_data.set_current_chunk(ChunkPtr(ptr.as_ptr() as *mut u8));
         }
         Ok(())
+    }
+
+    /// Reset the allocator.
+    ///
+    /// All previously allocated chunks will be marked as free.
+    ///
+    /// Safety:
+    ///
+    ///  - Of course, all values that were previously allocated using this
+    ///    allocator are now garbage. You shouldn't try to read them anymore!
+    pub unsafe fn reset(&self) {
+        let mut control_data = self.control_data.write().unwrap();
+        control_data.mark_current_chunk_as_filled();
+        control_data.mark_filled_chunks_as_free();
     }
 }
 

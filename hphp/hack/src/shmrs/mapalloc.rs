@@ -9,9 +9,6 @@ use std::ptr::NonNull;
 use crate::filealloc::FileAlloc;
 use crate::sync::RwLockRef;
 
-const LARGE_ALLOCATION: usize = 4096;
-const CHUNK_SIZE: usize = 200 * 1024;
-
 /// A pointer to a chunk.
 #[repr(transparent)]
 #[derive(Clone, Copy)]
@@ -139,24 +136,24 @@ impl MapAllocControlData {
         self.filled_chunks = ChunkPtr::null();
     }
 
-    fn set_current_chunk(&mut self, chunk_start: ChunkPtr) {
+    fn set_current_chunk(&mut self, chunk_start: ChunkPtr, chunk_size: usize) {
         chunk_start.set_next_chunk(ChunkPtr::null());
         self.current_start = chunk_start;
         self.current_next = unsafe { chunk_start.0.add(std::mem::size_of::<*mut u8>()) };
-        self.current_end = unsafe { chunk_start.0.add(CHUNK_SIZE) };
+        self.current_end = unsafe { chunk_start.0.add(chunk_size) };
     }
 
     /// Pop a free chunk of the free list. Update the current-chunk pointers.
     ///
     /// Returns true on success, false if no free chunk was available.
-    fn pop_free_chunk(&mut self) -> bool {
+    fn pop_free_chunk(&mut self, chunk_size: usize) -> bool {
         if self.free_chunks.is_null() {
             return false;
         }
 
         let current_chunk = self.free_chunks;
         self.free_chunks = current_chunk.get_next_chunk();
-        self.set_current_chunk(current_chunk);
+        self.set_current_chunk(current_chunk, chunk_size);
         true
     }
 }
@@ -171,20 +168,40 @@ impl MapAllocControlData {
 /// region.
 #[derive(Clone)]
 pub struct MapAlloc<'shm> {
+    /// Mutable control data.
     control_data: RwLockRef<'shm, MapAllocControlData>,
+
+    /// Underlying file allocator used to request new chunks and allocate
+    /// large chunks.
     file_alloc: &'shm FileAlloc,
+
+    /// Is the allocator of a fixed pre-allocated size? If this flag is true
+    /// the allocator will refuse to allocate stuff once it's first chunk is
+    /// full.
+    is_fixed_size: bool,
+
+    /// The chunk size that the allocator will use to allocate new chunks.
+    chunk_size: usize,
 }
 
 impl<'shm> MapAlloc<'shm> {
     /// Create a new map allocator using the given lock-protected control
     /// data and a file allocator.
+    ///
+    /// This function will fail if `chunk_size` < 64 bytes. As some of the
+    /// first bytes of a chunk are used as a header.
     pub unsafe fn new(
         control_data: RwLockRef<'shm, MapAllocControlData>,
         file_alloc: &'shm FileAlloc,
+        chunk_size: usize,
+        is_fixed_size: bool,
     ) -> Self {
+        assert!(chunk_size >= 64);
         Self {
             control_data,
             file_alloc,
+            is_fixed_size,
+            chunk_size,
         }
     }
 
@@ -194,10 +211,11 @@ impl<'shm> MapAlloc<'shm> {
 
     fn extend(&self, control_data: &mut MapAllocControlData) -> Result<(), AllocError> {
         control_data.mark_current_chunk_as_filled();
-        if !control_data.pop_free_chunk() {
-            let l = Layout::from_size_align(CHUNK_SIZE, std::mem::align_of::<ChunkPtr>()).unwrap();
+        if !control_data.pop_free_chunk(self.chunk_size) {
+            let l =
+                Layout::from_size_align(self.chunk_size, std::mem::align_of::<ChunkPtr>()).unwrap();
             let ptr = self.file_alloc.allocate(l)?;
-            control_data.set_current_chunk(ChunkPtr(ptr.as_ptr() as *mut u8));
+            control_data.set_current_chunk(ChunkPtr(ptr.as_ptr() as *mut u8), self.chunk_size);
         }
         Ok(())
     }
@@ -220,7 +238,15 @@ impl<'shm> MapAlloc<'shm> {
 unsafe impl<'shm> Allocator for MapAlloc<'shm> {
     fn allocate(&self, l: Layout) -> Result<NonNull<[u8]>, AllocError> {
         let size = l.size();
-        if size > LARGE_ALLOCATION {
+
+        // Large allocations go directly to the underlying file allocator.
+        // We'll consider an allocation as large if it is larger than 5% of
+        // the chunk size. That means, unusable memory due to internal
+        // fragmentation will be less than 5%.
+        //
+        // We don't special case large allocations when the allocator size is
+        // fixed.
+        if !self.is_fixed_size && size > self.chunk_size / 20 {
             return self.alloc_large(l);
         }
 
@@ -232,6 +258,12 @@ unsafe impl<'shm> Allocator for MapAlloc<'shm> {
         // We must make sure we don't produce null pointers when `size == 0`
         // and `new_current == NULL`.
         if new_current > control_data.current_end || new_current.is_null() {
+            // Refuse to allocate another chunk if this allocator is marked to
+            // have a fixed size
+            if self.is_fixed_size && !control_data.current_next.is_null() {
+                return Err(AllocError);
+            }
+
             self.extend(&mut control_data)?;
             let align_offset = control_data.current_next.align_offset(l.align());
             pointer = unsafe { control_data.current_next.add(align_offset) };
@@ -253,6 +285,7 @@ mod tests {
 
     use crate::sync::RwLock;
 
+    const CHUNK_SIZE: usize = 200 * 1024;
     const FILE_ALLOC_SIZE: usize = 10 * 1024 * 1024;
 
     fn with_file_alloc(f: impl FnOnce(&FileAlloc)) {
@@ -269,7 +302,7 @@ mod tests {
         with_file_alloc(|file_alloc| {
             let core_data = RwLock::new(MapAllocControlData::new());
             let core_data_ref = unsafe { core_data.initialize().unwrap() };
-            let alloc = unsafe { MapAlloc::new(core_data_ref, file_alloc) };
+            let alloc = unsafe { MapAlloc::new(core_data_ref, file_alloc, CHUNK_SIZE, false) };
 
             let layout = std::alloc::Layout::from_size_align(0, 1).unwrap();
             let _ = alloc.allocate(layout).unwrap();

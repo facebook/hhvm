@@ -22,6 +22,12 @@ use crate::sync::{RwLock, RwLockRef};
 const NUM_SHARDS: usize = 256;
 static_assertions::const_assert!(NUM_SHARDS.is_power_of_two());
 
+/// The non-evictable allocator itself allocates regions of memory in chunks.
+const NON_EVICTABLE_CHUNK_SIZE: usize = 1024 * 1024;
+
+/// The evictable allocator is of a fixed size and only allocates one chunk.
+const EVICTABLE_CHUNK_SIZE: usize = (10 * 1024 * 1024 * 1024) / NUM_SHARDS;
+
 /// This struct gives access to a shard, including its hashmap and its
 /// allocators.
 pub struct Shard<'shm, 'a, K, V, S> {
@@ -150,14 +156,22 @@ impl<'shm, K, V, S: Clone> CMap<'shm, K, V, S> {
         let mut shard_allocs_non_evictable: Vec<MapAlloc<'shm>> =
             Vec::with_capacity(cmap.shard_allocs_non_evictable.len());
         for lock in &mut cmap.shard_allocs_non_evictable {
-            shard_allocs_non_evictable
-                .push(MapAlloc::new(lock.initialize().unwrap(), &cmap.file_alloc));
+            shard_allocs_non_evictable.push(MapAlloc::new(
+                lock.initialize().unwrap(),
+                &cmap.file_alloc,
+                NON_EVICTABLE_CHUNK_SIZE,
+                false,
+            ));
         }
         let mut shard_allocs_evictable: Vec<MapAlloc<'shm>> =
             Vec::with_capacity(cmap.shard_allocs_evictable.len());
         for lock in &mut cmap.shard_allocs_evictable {
-            shard_allocs_evictable
-                .push(MapAlloc::new(lock.initialize().unwrap(), &cmap.file_alloc));
+            shard_allocs_evictable.push(MapAlloc::new(
+                lock.initialize().unwrap(),
+                &cmap.file_alloc,
+                EVICTABLE_CHUNK_SIZE,
+                true,
+            ));
         }
 
         // Initialize maps themselves.
@@ -198,12 +212,22 @@ impl<'shm, K, V, S: Clone> CMap<'shm, K, V, S> {
         let mut shard_allocs_non_evictable: Vec<MapAlloc<'shm>> =
             Vec::with_capacity(cmap.shard_allocs_non_evictable.len());
         for lock in &mut cmap.shard_allocs_non_evictable {
-            shard_allocs_non_evictable.push(MapAlloc::new(lock.attach(), &cmap.file_alloc));
+            shard_allocs_non_evictable.push(MapAlloc::new(
+                lock.attach(),
+                &cmap.file_alloc,
+                NON_EVICTABLE_CHUNK_SIZE,
+                false,
+            ));
         }
         let mut shard_allocs_evictable: Vec<MapAlloc<'shm>> =
             Vec::with_capacity(cmap.shard_allocs_evictable.len());
         for lock in &mut cmap.shard_allocs_evictable {
-            shard_allocs_evictable.push(MapAlloc::new(lock.attach(), &cmap.file_alloc));
+            shard_allocs_evictable.push(MapAlloc::new(
+                lock.attach(),
+                &cmap.file_alloc,
+                EVICTABLE_CHUNK_SIZE,
+                true,
+            ));
         }
 
         CMapRef {

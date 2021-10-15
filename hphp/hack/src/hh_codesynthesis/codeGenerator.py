@@ -27,7 +27,7 @@ class ClingoContext:
         higher_bound: int = 1,
         min_stub_classes: int = 0,
         min_stub_interfaces: int = 0,
-        degree_distribution: List[int] = [],
+        degree_distribution: Optional[List[int]] = None,
     ) -> None:
         self.number_of_nodes = number_of_nodes
         self.min_depth = min_depth
@@ -37,7 +37,9 @@ class ClingoContext:
         self.higher_bound = higher_bound
         self.min_stub_classes = min_stub_classes
         self.min_stub_interfaces = min_stub_interfaces
-        self.degree_distribution = degree_distribution
+        self.degree_distribution: List[int] = (
+            [] if not degree_distribution else degree_distribution
+        )
 
     def n(self) -> Symbol:
         return Number(self.number_of_nodes)
@@ -73,7 +75,7 @@ class CodeGenerator(object):
     def __init__(self, solving_context: Optional[ClingoContext] = None) -> None:
         super(CodeGenerator, self).__init__()
         self._raw_model = ""
-        self.solving_context = (
+        self.solving_context: ClingoContext = (
             ClingoContext() if not solving_context else solving_context
         )
 

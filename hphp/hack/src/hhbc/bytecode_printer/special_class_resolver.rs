@@ -12,11 +12,11 @@ use hhbc_by_ref_hhas_body::HhasBodyEnv;
 use oxidized::{ast, ast_defs, pos::Pos};
 
 pub trait SpecialClassResolver {
-    fn resolve<'a>(&self, env: Option<&'a HhasBodyEnv>, id: &'a str) -> Cow<'a, str>;
+    fn resolve<'a>(&self, env: Option<&'a HhasBodyEnv<'_>>, id: &'a str) -> Cow<'a, str>;
 }
 
 impl<'arena, 'decl> SpecialClassResolver for Emitter<'arena, 'decl> {
-    fn resolve<'a>(&self, env: Option<&'a HhasBodyEnv>, id: &'a str) -> Cow<'a, str> {
+    fn resolve<'a>(&self, env: Option<&'a HhasBodyEnv<'_>>, id: &'a str) -> Cow<'a, str> {
         let class_expr = match env {
             None => ClassExpr::expr_to_class_expr_(
                 self,

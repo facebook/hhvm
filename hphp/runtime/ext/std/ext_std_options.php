@@ -67,7 +67,7 @@ function get_required_files(): varray {
 }
 
 <<__Native>>
-function getenv(string $varname): mixed;
+function getenv(string $varname)[read_globals]: mixed;
 
 /* Gets the time of the last modification of the current page.  If you're
  * interested in getting the last modification time of a different file,
@@ -149,7 +149,7 @@ function cpu_get_model(): string;
 /* Returns the value of the configuration option on success.
  */
 <<__Native>>
-function ini_get(string $varname): mixed;
+function ini_get(string $varname)[read_globals]: mixed;
 
 /* Gets all configuration options
  */

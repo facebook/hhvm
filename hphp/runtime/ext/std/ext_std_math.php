@@ -595,7 +595,7 @@ function mt_srand(mixed $seed = null): void;
  *
  */
 <<__Native, __NonRx('Randomness')>>
-function mt_rand(int $min = 0, ?int $max = null): int;
+function mt_rand(int $min = 0, ?int $max = null)[controlled]: int;
 
 /**
  * lcg_value() returns a pseudo random number in the range of (0, 1). The

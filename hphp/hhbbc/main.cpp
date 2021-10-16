@@ -462,6 +462,9 @@ int main(int argc, char** argv) try {
   RepoFile::init(input_repo);
 
   auto const& gd = RepoFile::globalData();
+  // T103431933 Place here to skip warning while these two values are temporarily
+  // not always the same.
+  RO::EvalEnableReadonlyPropertyEnforcement = gd.EnableReadonlyPropertyEnforcement;
   gd.load(false);
   if (gd.InitialNamedEntityTableSize) {
     RO::EvalInitialNamedEntityTableSize  = gd.InitialNamedEntityTableSize;
@@ -482,10 +485,12 @@ int main(int argc, char** argv) try {
   }
 
   RO::Load(ini, config);
-  RO::RepoAuthoritative   = true;
-  RO::EvalJit             = false;
-  RO::EvalLowStaticArrays = false;
-  RO::RepoDebugInfo       = false;
+  // T103431933 RO::Load() loads default runtime option which might not be correct.
+  RO::EvalEnableReadonlyPropertyEnforcement = gd.EnableReadonlyPropertyEnforcement;
+  RO::RepoAuthoritative                     = true;
+  RO::EvalJit                               = false;
+  RO::EvalLowStaticArrays                   = false;
+  RO::RepoDebugInfo                         = false;
 
   register_process_init();
 
@@ -515,7 +520,6 @@ int main(int argc, char** argv) try {
   RO::StrictArrayFillKeys                       = gd.StrictArrayFillKeys;
   RO::EvalEnforceGenericsUB                     = gd.HardGenericsUB ? 2 : 1;
   RO::EvalTraitConstantInterfaceBehavior        = gd.TraitConstantInterfaceBehavior;
-  RO::EvalEnableReadonlyPropertyEnforcement     = gd.EnableReadonlyPropertyEnforcement;
   RO::EvalDiamondTraitMethods                   = gd.DiamondTraitMethods;
   RO::EvalCoeffectEnforcementLevels             = gd.EvalCoeffectEnforcementLevels;
 

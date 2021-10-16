@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/variable-unserializer.h"
+#include "hphp/util/logger.h"
 
 #include <folly/Format.h>
 
@@ -42,7 +43,6 @@ void RepoGlobalData::load(bool loadConstantFuncs) const {
   RO::EvalClassnameNotices                         = ClassnameNotices;
   RO::EvalClassIsStringNotices                     = ClassIsStringNotices;
   RO::EvalTraitConstantInterfaceBehavior           = TraitConstantInterfaceBehavior;
-  RO::EvalEnableReadonlyPropertyEnforcement        = EnableReadonlyPropertyEnforcement;
   RO::EvalBuildMayNoticeOnMethCallerHelperIsObject =
     BuildMayNoticeOnMethCallerHelperIsObject;
   RO::EvalDiamondTraitMethods                      = DiamondTraitMethods;
@@ -52,6 +52,12 @@ void RepoGlobalData::load(bool loadConstantFuncs) const {
 
   if (!RO::EvalBuildMayNoticeOnMethCallerHelperIsObject) {
     RO::EvalNoticeOnMethCallerHelperIsObject = false;
+  }
+
+  if (EnableReadonlyPropertyEnforcement != 1 &&
+    RO::EvalEnableReadonlyPropertyEnforcement != EnableReadonlyPropertyEnforcement) {
+    Logger::Warning("Readonly Property Enforcement levels incompatible\n");
+    RO::EvalEnableReadonlyPropertyEnforcement = EnableReadonlyPropertyEnforcement;
   }
 
   if (loadConstantFuncs) {

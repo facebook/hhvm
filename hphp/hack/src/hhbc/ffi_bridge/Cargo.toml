@@ -22,6 +22,7 @@ external_decl_provider = { path = "../hhvm_decl_provider" }
 ffi = { path = "../../utils/ffi" }
 hhbc_by_ref_compile = { path = "../hhbc_by_ref/cargo/hhbc_by_ref_compile" }
 hhbc_by_ref_hhas_program = { path = "../hhbc_by_ref/cargo/hhbc_by_ref_hhas_program" }
+hhbc_by_ref_options = { path = "../hhbc_by_ref/cargo/hhbc_by_ref_options" }
 libc = "0.2.98"
 log = { version = "0.4.8", features = ["kv_unstable"] }
 no_pos_hash = { path = "../../utils/no_pos_hash" }

@@ -3263,6 +3263,7 @@ dependencies = [
  "ffi",
  "hhbc_by_ref_compile",
  "hhbc_by_ref_hhas_program",
+ "hhbc_by_ref_options",
  "libc",
  "log",
  "no_pos_hash",

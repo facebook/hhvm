@@ -162,9 +162,10 @@ CompilerResult hackc_compile(
   const RepoOptions& options,
   CompileAbortMode mode
 ) {
+  std::string aliased_namespaces = options.getAliasedNamespacesConfig();
 
-  // Mock HhvmDeclProvider. TODO: Hook up with bytecode cache logic.
-  HhvmDeclProvider decl_provider;
+  // (Semi-)Mock HhvmDeclProvider. TODO: Hook up with bytecode cache logic.
+  HhvmDeclProvider decl_provider{aliased_namespaces};
 
   std::uint8_t flags = make_env_flags(
     !SystemLib::s_inited,           // is_systemlib
@@ -174,8 +175,6 @@ CompilerResult hackc_compile(
     false,                          // disable_toplevel_elaboration
     RuntimeOption::EvalEnableDecl   // enable_decl
   );
-
-  std::string aliased_namespaces = options.getAliasedNamespacesConfig();
 
   NativeEnv const native_env{
     reinterpret_cast<std::uint64_t>(&decl_provider),

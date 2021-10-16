@@ -30,9 +30,6 @@ Decls const* HhvmDeclProvider::getDecl(AutoloadMap::KindOf kind, char const* sym
       return &(*result->second.decls);
     }
 
-    // TODO: get correct parameters
-    ::rust::Box<DeclParserOptions> opts = hackc_create_direct_decl_parse_options(true, true);
-
     std::ifstream s(filename.data());
     std::string text {
       std::istreambuf_iterator<char>(s), std::istreambuf_iterator<char>() };

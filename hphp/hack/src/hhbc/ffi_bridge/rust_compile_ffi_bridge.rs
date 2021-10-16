@@ -67,10 +67,11 @@ mod compile_ffi {
         fn hackc_create_direct_decl_parse_options(
             disable_xhp_element_mangling: bool,
             interpret_soft_types_as_like_types: bool,
+            aliased_namespaces: &CxxString,
         ) -> Box<DeclParserOptions>;
 
         fn hackc_direct_decl_parse(
-            options: &'static DeclParserOptions,
+            options: &DeclParserOptions,
             filename: &CxxString,
             text: &CxxString,
         ) -> DeclResult;
@@ -91,7 +92,10 @@ mod compile_ffi {
 pub struct Bump(bumpalo::Bump);
 pub struct Bytes(ffi::Bytes);
 pub struct Decls(direct_decl_parser::Decls<'static>);
-pub struct DeclParserOptions(decl_parser_options::DeclParserOptions<'static>);
+pub struct DeclParserOptions(
+    decl_parser_options::DeclParserOptions<'static>,
+    bumpalo::Bump,
+);
 
 #[repr(C)]
 pub struct HhasProgramWrapper(
@@ -211,13 +215,38 @@ fn hackc_print_serialized_size(serialized: &Bytes) {
 fn hackc_create_direct_decl_parse_options(
     disable_xhp_element_mangling: bool,
     interpret_soft_types_as_like_types: bool,
+    aliased_namespaces: &CxxString,
 ) -> Box<DeclParserOptions> {
-    Box::new(DeclParserOptions(decl_parser_options::DeclParserOptions {
-        auto_namespace_map: &[],
+    let bump = bumpalo::Bump::new();
+    let alloc: &'static bumpalo::Bump =
+        unsafe { std::mem::transmute::<&'_ bumpalo::Bump, &'static bumpalo::Bump>(&bump) };
+    let config_opts =
+        hhbc_by_ref_options::Options::from_configs(&[aliased_namespaces.to_str().unwrap()], &[])
+            .unwrap();
+    let auto_namespace_map = match config_opts.hhvm.aliased_namespaces.get().as_map() {
+        Some(m) => bumpalo::collections::Vec::from_iter_in(
+            m.iter().map(|(k, v)| {
+                (
+                    alloc.alloc_str(k.as_str()) as &str,
+                    alloc.alloc_str(v.as_str()) as &str,
+                )
+            }),
+            alloc,
+        ),
+        None => {
+            bumpalo::vec![in alloc;]
+        }
+    }
+    .into_bump_slice();
+
+    let opts = decl_parser_options::DeclParserOptions {
+        auto_namespace_map,
         disable_xhp_element_mangling,
         interpret_soft_types_as_like_types,
         everything_sdt: false,
-    }))
+    };
+
+    Box::new(DeclParserOptions(opts, bump))
 }
 
 impl compile_ffi::DeclResult {
@@ -232,7 +261,7 @@ impl compile_ffi::DeclResult {
 }
 
 fn hackc_direct_decl_parse(
-    opts: &'static DeclParserOptions,
+    opts: &DeclParserOptions,
     filename: &CxxString,
     text: &CxxString,
 ) -> compile_ffi::DeclResult {
@@ -242,12 +271,21 @@ fn hackc_direct_decl_parse(
     let alloc: &'static bumpalo::Bump =
         unsafe { std::mem::transmute::<&'_ bumpalo::Bump, &'static bumpalo::Bump>(&bump) };
 
+    let opts: &decl_parser_options::DeclParserOptions<'static> = &opts.0;
+    let opts: &decl_parser_options::DeclParserOptions<'static> = unsafe {
+        std::mem::transmute::<
+            &'_ decl_parser_options::DeclParserOptions<'static>,
+            &'static decl_parser_options::DeclParserOptions<'static>,
+        >(opts)
+    };
+
     let text = text.as_bytes();
     let path = std::path::PathBuf::from(std::ffi::OsStr::from_bytes(filename.as_bytes()));
     let filename = RelativePath::make(Prefix::Root, path);
-    let decls = decl_rust::direct_decl_parser::parse_decls_without_reference_text(
-        &opts.0, filename, text, alloc, None,
-    );
+    let decls: direct_decl_parser::Decls<'static> =
+        decl_rust::direct_decl_parser::parse_decls_without_reference_text(
+            opts, filename, text, alloc, None,
+        );
 
     let op = bincode::config::Options::with_native_endian(bincode::options());
     let data = op

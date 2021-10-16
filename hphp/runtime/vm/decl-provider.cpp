@@ -27,10 +27,9 @@ Decls const* HhvmDeclProvider::getDecl(AutoloadMap::KindOf kind, char const* sym
     auto result = m_cache.find(filename.data());
 
     if (result != m_cache.end()) {
-      return &(*result->second.first.decls);
+      return &(*result->second.decls);
     }
 
-    ::rust::Box<Bump> arena = hackc_create_arena();
     // TODO: get correct parameters
     ::rust::Box<DeclParserOptions> opts = hackc_create_direct_decl_parse_options(true, true);
 
@@ -38,9 +37,9 @@ Decls const* HhvmDeclProvider::getDecl(AutoloadMap::KindOf kind, char const* sym
     std::string text {
       std::istreambuf_iterator<char>(s), std::istreambuf_iterator<char>() };
 
-    DeclResult decl_result = hackc_direct_decl_parse(*opts, filename.toCppString(), text, *arena);
+    DeclResult decl_result = hackc_direct_decl_parse(*opts, filename.toCppString(), text);
 
-    m_cache.insert({filename.data(), std::pair(std::move(decl_result), std::move(arena))});
+    m_cache.insert({filename.data(), std::move(decl_result)});
     return &*decl_result.decls;
   } else {
     return nullptr;

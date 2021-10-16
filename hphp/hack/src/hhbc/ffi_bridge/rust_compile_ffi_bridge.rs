@@ -30,10 +30,12 @@ mod compile_ffi {
         parser_flags: u32,
         flags: u8,
     }
+
     struct DeclResult<'a> {
         hash: u64,
         serialized: Box<Bytes>,
         decls: Box<Decls<'a>>,
+        bump: Box<Bump>,
     }
 
     extern "Rust" {
@@ -62,7 +64,6 @@ mod compile_ffi {
             source_text: &CxxString,
         ) -> Result<String>;
 
-        fn hackc_create_arena() -> Box<Bump>;
         fn hackc_create_direct_decl_parse_options(
             disable_xhp_element_mangling: bool,
             interpret_soft_types_as_like_types: bool,
@@ -72,7 +73,6 @@ mod compile_ffi {
             options: &'a DeclParserOptions<'a>,
             filename: &CxxString,
             text: &CxxString,
-            bump: &'a Bump,
         ) -> DeclResult<'a>;
 
         fn hackc_print_decls(decls: &Decls<'_>);
@@ -85,15 +85,21 @@ mod compile_ffi {
     }
 }
 
-struct Bump(bumpalo::Bump);
+///////////////////////////////////////////////////////////////////////////////////
+// Opaque to C++.
+
+pub struct Bump(bumpalo::Bump);
 pub struct Bytes(ffi::Bytes);
 pub struct Decls<'a>(direct_decl_parser::Decls<'a>);
-struct DeclParserOptions<'a>(decl_parser_options::DeclParserOptions<'a>);
+pub struct DeclParserOptions<'a>(decl_parser_options::DeclParserOptions<'a>);
+
 #[repr(C)]
 pub struct HhasProgramWrapper(
     hhbc_by_ref_hhas_program::HhasProgram<'static>,
     bumpalo::Bump,
 );
+
+///////////////////////////////////////////////////////////////////////////////////
 
 fn make_env_flags(
     is_systemlib: bool,
@@ -194,10 +200,6 @@ fn hackc_compile_from_text_cpp_ffi<'a>(
     .map_err(|e: anyhow::Error| format!("{}", e))
 }
 
-fn hackc_create_arena() -> Box<Bump> {
-    Box::new(Bump(bumpalo::Bump::new()))
-}
-
 fn hackc_print_decls<'a>(decls: &Decls<'a>) {
     println!("{:#?}", decls.0)
 }
@@ -219,11 +221,12 @@ fn hackc_create_direct_decl_parse_options<'a>(
 }
 
 impl<'a> compile_ffi::DeclResult<'a> {
-    fn new(hash: u64, serialized: Bytes, decls: Decls<'a>) -> Self {
+    fn new(hash: u64, serialized: Bytes, decls: Decls<'a>, bump: Bump) -> Self {
         Self {
             hash,
             serialized: Box::new(serialized),
             decls: Box::new(decls),
+            bump: Box::new(bump),
         }
     }
 }
@@ -232,15 +235,18 @@ fn hackc_direct_decl_parse<'a>(
     opts: &'a DeclParserOptions<'a>,
     filename: &CxxString,
     text: &CxxString,
-    bump: &'a Bump,
 ) -> compile_ffi::DeclResult<'a> {
     use std::os::unix::ffi::OsStrExt;
+
+    let bump = bumpalo::Bump::new();
+    let alloc: &'static bumpalo::Bump =
+        unsafe { std::mem::transmute::<&'_ bumpalo::Bump, &'static bumpalo::Bump>(&bump) };
 
     let text = text.as_bytes();
     let path = std::path::PathBuf::from(std::ffi::OsStr::from_bytes(filename.as_bytes()));
     let filename = RelativePath::make(Prefix::Root, path);
     let decls = decl_rust::direct_decl_parser::parse_decls_without_reference_text(
-        &opts.0, filename, text, &bump.0, None,
+        &opts.0, filename, text, alloc, None,
     );
 
     let op = bincode::config::Options::with_native_endian(bincode::options());
@@ -253,6 +259,7 @@ fn hackc_direct_decl_parse<'a>(
         position_insensitive_hash(&decls),
         Bytes(ffi::Bytes::from(data)),
         Decls(decls),
+        Bump(bump),
     )
 }
 

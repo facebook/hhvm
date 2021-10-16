@@ -34,7 +34,7 @@ struct HhvmDeclProvider {
   Decls const* getDecl(HPHP::AutoloadMap::KindOf kind, char const* symbol);
 
  private:
-  std::map<std::string, std::pair<DeclResult, ::rust::Box<Bump>>> m_cache;
+  std::map<std::string, DeclResult> m_cache;
 };
 
 extern "C" {

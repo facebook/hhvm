@@ -388,7 +388,7 @@ where
     ) -> impl DoubleEndedIterator<Item = S<'a, Token, Value>> {
         use itertools::Either::{Left, Right};
         use std::iter::{empty, once};
-        let on_list_item = move |x: &'a ListItemChildren<Token, Value>| {
+        let on_list_item = move |x: &'a ListItemChildren<'_, Token, Value>| {
             if include_separators {
                 vec![&x.item, &x.separator].into_iter()
             } else {
@@ -525,7 +525,7 @@ where
         }
     }
 
-    fn attr_constructor_call(node: S<'a, Token, Value>) -> &'a SyntaxVariant<Token, Value> {
+    fn attr_constructor_call(node: S<'a, Token, Value>) -> &'a SyntaxVariant<'_, Token, Value> {
         match &node.children {
             ConstructorCall(_) => &node.children,
             Attribute(x) => &x.attribute_name.children,

@@ -105,7 +105,7 @@ where
             // A rust pointer of (&SyntaxTree, &Arena) is passed to Ocaml,
             // Ocaml will pass it back to `rust_parser_errors::rust_parser_errors_positioned`
             // PLEASE ENSURE TYPE SAFETY MANUALLY!!!
-            let tree = Box::leak(tree) as *const SyntaxTree<_, ()> as usize;
+            let tree = Box::leak(tree) as *const SyntaxTree<'_, _, ()> as usize;
             let arena = Box::leak(Box::new(arena)) as *const Bump as usize;
             Some(Box::leak(Box::new((tree, arena))) as *const (usize, usize) as usize)
         } else {
@@ -212,25 +212,61 @@ where
 }
 
 ocaml_ffi! {
-    fn rust_parse_mode(source_text: SourceText) -> Option<file_info::Mode> {
+    fn rust_parse_mode(source_text: SourceText<'_>) -> Option<file_info::Mode> {
         let (_, mode) = parse_mode(&source_text);
         mode
     }
 
-    fn scan_leading_xhp_trivia(source_text: SourceText, offset: usize, width: usize) -> UnsafeOcamlPtr {
-        scan_trivia(source_text, offset, width, positioned_by_ref_parser::scan_leading_xhp_trivia)
+    fn scan_leading_xhp_trivia(
+        source_text: SourceText<'_>,
+        offset: usize,
+        width: usize,
+    ) -> UnsafeOcamlPtr {
+        scan_trivia(
+            source_text,
+            offset,
+            width,
+            positioned_by_ref_parser::scan_leading_xhp_trivia,
+        )
     }
 
-    fn scan_trailing_xhp_trivia(source_text: SourceText, offset: usize, width: usize) -> UnsafeOcamlPtr {
-        scan_trivia(source_text, offset, width, positioned_by_ref_parser::scan_trailing_xhp_trivia)
+    fn scan_trailing_xhp_trivia(
+        source_text: SourceText<'_>,
+        offset: usize,
+        width: usize,
+    ) -> UnsafeOcamlPtr {
+        scan_trivia(
+            source_text,
+            offset,
+            width,
+            positioned_by_ref_parser::scan_trailing_xhp_trivia,
+        )
     }
 
-    fn scan_leading_php_trivia(source_text: SourceText, offset: usize, width: usize) -> UnsafeOcamlPtr {
-        scan_trivia(source_text, offset, width, positioned_by_ref_parser::scan_leading_php_trivia)
+    fn scan_leading_php_trivia(
+        source_text: SourceText<'_>,
+        offset: usize,
+        width: usize,
+    ) -> UnsafeOcamlPtr {
+        scan_trivia(
+            source_text,
+            offset,
+            width,
+            positioned_by_ref_parser::scan_leading_php_trivia,
+        )
     }
 
-    fn scan_trailing_php_trivia(source_text: SourceText, offset: usize, width: usize) -> UnsafeOcamlPtr {
-        scan_trivia(source_text, offset, width, positioned_by_ref_parser::scan_trailing_php_trivia)
+    fn scan_trailing_php_trivia(
+        source_text: SourceText<'_>,
+        offset: usize,
+        width: usize,
+    ) -> UnsafeOcamlPtr {
+        scan_trivia(
+            source_text,
+            offset,
+            width,
+            positioned_by_ref_parser::scan_trailing_php_trivia,
+        )
     }
 
     fn trailing_from_token(token: TokenKind) -> Operator {

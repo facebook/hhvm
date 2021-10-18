@@ -44,8 +44,8 @@ pub trait LexablePositionedToken: LexableToken
 where
     Self: Debug,
 {
-    fn text<'b>(&self, source_text: &'b SourceText) -> &'b str;
-    fn text_raw<'b>(&self, source_text: &'b SourceText) -> &'b [u8];
+    fn text<'b>(&self, source_text: &'b SourceText<'_>) -> &'b str;
+    fn text_raw<'b>(&self, source_text: &'b SourceText<'_>) -> &'b [u8];
     fn clone_value(&self) -> Self;
     fn positioned_leading(&self) -> &[PositionedTrivium];
     fn positioned_trailing(&self) -> &[PositionedTrivium];

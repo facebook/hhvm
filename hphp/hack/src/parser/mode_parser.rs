@@ -21,7 +21,7 @@ pub enum Language {
     PHP,
 }
 
-fn fallback_to_file_extension(text: &SourceText) -> (Language, Option<Mode>) {
+fn fallback_to_file_extension(text: &SourceText<'_>) -> (Language, Option<Mode>) {
     if text.file_path().has_extension("php")
     /* TODO: add hhconfig option */
     {
@@ -41,7 +41,7 @@ fn fallback_to_file_extension(text: &SourceText) -> (Language, Option<Mode>) {
 // with anything other than <?hh). Correctly recognizing PHP files is important
 // for open-source projects, which may need Hack and PHP files to coexist in the
 // same directory.
-pub fn parse_mode(text: &SourceText) -> (Language, Option<Mode>) {
+pub fn parse_mode(text: &SourceText<'_>) -> (Language, Option<Mode>) {
     let bump = Bump::new();
     if let Some(header) =
         positioned_by_ref_parser::parse_header_only(ParserEnv::default(), &bump, text)

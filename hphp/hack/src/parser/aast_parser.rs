@@ -292,10 +292,10 @@ impl<'src> AastParser {
 
     fn scour_comments_and_add_fixmes<'arena>(
         env: &Env,
-        indexed_source_text: &'src IndexedSourceText,
+        indexed_source_text: &'src IndexedSourceText<'_>,
         script: &PositionedSyntax<'arena>,
     ) -> Result<ScouredComments> {
-        let scourer: ScourComment<PositionedToken<'arena>, PositionedValue<'arena>> =
+        let scourer: ScourComment<'_, PositionedToken<'arena>, PositionedValue<'arena>> =
             ScourComment {
                 phantom: std::marker::PhantomData,
                 indexed_source_text,

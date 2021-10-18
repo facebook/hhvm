@@ -118,7 +118,7 @@ pub struct FunHdr {
 }
 
 impl FunHdr {
-    fn make_empty<TF: Clone>(env: &Env<TF>) -> Self {
+    fn make_empty<TF: Clone>(env: &Env<'_, TF>) -> Self {
         Self {
             suspension_kind: SuspensionKind::SKSync,
             readonly_this: None,
@@ -270,11 +270,11 @@ impl<'a, TF: Clone> Env<'a, TF> {
         self.fail_open
     }
 
-    fn cls_generics_mut(&mut self) -> RefMut<HashMap<String, bool>> {
+    fn cls_generics_mut(&mut self) -> RefMut<'_, HashMap<String, bool>> {
         RefMut::map(self.state.borrow_mut(), |s| &mut s.cls_generics)
     }
 
-    fn fn_generics_mut(&mut self) -> RefMut<HashMap<String, bool>> {
+    fn fn_generics_mut(&mut self) -> RefMut<'_, HashMap<String, bool>> {
         RefMut::map(self.state.borrow_mut(), |s| &mut s.fn_generics)
     }
 
@@ -296,33 +296,33 @@ impl<'a, TF: Clone> Env<'a, TF> {
         }
     }
 
-    fn in_static_method(&mut self) -> RefMut<bool> {
+    fn in_static_method(&mut self) -> RefMut<'_, bool> {
         RefMut::map(self.state.borrow_mut(), |s| &mut s.in_static_method)
     }
 
-    fn parent_maybe_reified(&mut self) -> RefMut<bool> {
+    fn parent_maybe_reified(&mut self) -> RefMut<'_, bool> {
         RefMut::map(self.state.borrow_mut(), |s| &mut s.parent_maybe_reified)
     }
 
-    pub fn lowpri_errors(&mut self) -> RefMut<Vec<(Pos, String)>> {
+    pub fn lowpri_errors(&mut self) -> RefMut<'_, Vec<(Pos, String)>> {
         RefMut::map(self.state.borrow_mut(), |s| &mut s.lowpri_errors)
     }
 
-    pub fn hh_errors(&mut self) -> RefMut<Vec<HHError>> {
+    pub fn hh_errors(&mut self) -> RefMut<'_, Vec<HHError>> {
         RefMut::map(self.state.borrow_mut(), |s| &mut s.hh_errors)
     }
 
-    pub fn lint_errors(&mut self) -> RefMut<Vec<LintError>> {
+    pub fn lint_errors(&mut self) -> RefMut<'_, Vec<LintError>> {
         RefMut::map(self.state.borrow_mut(), |s| &mut s.lint_errors)
     }
 
-    fn top_docblock(&self) -> Ref<Option<DocComment>> {
+    fn top_docblock(&self) -> Ref<'_, Option<DocComment>> {
         Ref::map(self.state.borrow(), |s| {
             s.doc_comments.last().unwrap_or(&None)
         })
     }
 
-    fn exp_recursion_depth(&self) -> RefMut<usize> {
+    fn exp_recursion_depth(&self) -> RefMut<'_, usize> {
         RefMut::map(self.state.borrow_mut(), |s| &mut s.exp_recursion_depth)
     }
 
@@ -395,7 +395,7 @@ where
     V: 'a + SyntaxValueWithKind + SyntaxValueType<T>,
     Syntax<'a, T, V>: SyntaxTrait,
 {
-    fn p_pos(node: S<'a, T, V>, env: &Env<TF>) -> Pos {
+    fn p_pos(node: S<'a, T, V>, env: &Env<'_, TF>) -> Pos {
         node.position_exclusive(env.indexed_source_text)
             .unwrap_or_else(|| env.mk_none_pos())
     }
@@ -440,11 +440,11 @@ where
         Err(Error::Failwith(msg.into()))
     }
 
-    fn text(node: S<'a, T, V>, env: &Env<TF>) -> String {
+    fn text(node: S<'a, T, V>, env: &Env<'_, TF>) -> String {
         String::from(node.text(env.source_text()))
     }
 
-    fn text_str<'b>(node: S<'a, T, V>, env: &'b Env<TF>) -> &'b str {
+    fn text_str<'b>(node: S<'a, T, V>, env: &'b Env<'_, TF>) -> &'b str {
         node.text(env.source_text())
     }
 
@@ -2515,7 +2515,7 @@ where
                         let token = env
                             .token_factory
                             .concatenate(s.get_token().unwrap(), e.get_token().unwrap());
-                        let node = env.arena.alloc(<Syntax<T, V>>::make_token(token));
+                        let node = env.arena.alloc(<Syntax<'_, T, V>>::make_token(token));
                         state.2.push(node)
                     }
                     _ => {}
@@ -2625,7 +2625,7 @@ where
 
     fn p_stmt_list_(
         pos: &Pos,
-        mut nodes: Iter<S<'a, T, V>>,
+        mut nodes: Iter<'_, S<'a, T, V>>,
         env: &mut Env<'a, TF>,
     ) -> Result<Vec<ast::Stmt>, Error> {
         let mut r = vec![];
@@ -3205,7 +3205,7 @@ where
         }
     }
 
-    fn is_hashbang(node: S<'a, T, V>, env: &Env<TF>) -> bool {
+    fn is_hashbang(node: S<'a, T, V>, env: &Env<'_, TF>) -> bool {
         let text = Self::text_str(node, env);
         lazy_static! {
             static ref RE: regex::Regex = regex::Regex::new("^#!.*\n").unwrap();
@@ -3635,7 +3635,7 @@ where
         }
     }
 
-    fn param_template(node: S<'a, T, V>, env: &Env<TF>) -> ast::FunParam {
+    fn param_template(node: S<'a, T, V>, env: &Env<'_, TF>) -> ast::FunParam {
         let pos = Self::p_pos(node, env);
         ast::FunParam {
             annotation: (),
@@ -3991,7 +3991,7 @@ where
         }
     }
 
-    fn p_fun_pos(node: S<'a, T, V>, env: &Env<TF>) -> Pos {
+    fn p_fun_pos(node: S<'a, T, V>, env: &Env<'_, TF>) -> Pos {
         let get_pos = |n: S<'a, T, V>, p: Pos| -> Pos {
             if let FunctionDeclarationHeader(c1) = &n.children {
                 if !c1.keyword.is_missing() {
@@ -4024,12 +4024,12 @@ where
         }
     }
 
-    fn mk_noop(env: &Env<TF>) -> ast::Stmt {
+    fn mk_noop(env: &Env<'_, TF>) -> ast::Stmt {
         ast::Stmt::noop(env.mk_none_pos())
     }
 
     fn p_function_body(node: S<'a, T, V>, env: &mut Env<'a, TF>) -> Result<ast::Block, Error> {
-        let mk_noop_result = |e: &Env<TF>| Ok(vec![Self::mk_noop(e)]);
+        let mk_noop_result = |e: &Env<'_, TF>| Ok(vec![Self::mk_noop(e)]);
         let f = |e: &mut Env<'a, TF>| -> Result<ast::Block, Error> {
             match &node.children {
                 Missing => Ok(vec![]),
@@ -4257,11 +4257,11 @@ where
         Ok((r?, saw_yield))
     }
 
-    fn mk_empty_ns_env(env: &Env<TF>) -> RcOc<NamespaceEnv> {
+    fn mk_empty_ns_env(env: &Env<'_, TF>) -> RcOc<NamespaceEnv> {
         RcOc::clone(&env.empty_ns_env)
     }
 
-    fn extract_docblock(node: S<'a, T, V>, env: &Env<TF>) -> Option<DocComment> {
+    fn extract_docblock(node: S<'a, T, V>, env: &Env<'_, TF>) -> Option<DocComment> {
         #[derive(Copy, Clone, Eq, PartialEq)]
         enum ScanState {
             DocComment,
@@ -4380,7 +4380,7 @@ where
     ) -> Result<(), Error> {
         use ast::Visibility;
         let doc_comment_opt = Self::extract_docblock(node, env);
-        let has_fun_header = |m: &MethodishDeclarationChildren<T, V>| {
+        let has_fun_header = |m: &MethodishDeclarationChildren<'_, T, V>| {
             matches!(
                 m.function_decl_header.children,
                 FunctionDeclarationHeader(_)
@@ -4940,7 +4940,7 @@ where
         }
     }
 
-    fn contains_class_body(c: &ClassishDeclarationChildren<T, V>) -> bool {
+    fn contains_class_body(c: &ClassishDeclarationChildren<'_, T, V>) -> bool {
         matches!(&c.body.children, ClassishBody(_))
     }
 

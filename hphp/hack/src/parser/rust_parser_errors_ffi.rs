@@ -84,13 +84,13 @@ ocaml_ffi! {
     fn drop_tree_positioned(ocaml_tree: usize) {
         unsafe {
             let pair = Box::from_raw(ocaml_tree as *mut (usize, usize));
-            let _ = Box::from_raw(pair.0 as *mut SyntaxTree<PositionedSyntax, ()>);
+            let _ = Box::from_raw(pair.0 as *mut SyntaxTree<'_, PositionedSyntax<'_>, ()>);
             let _ = Box::from_raw(pair.1 as *mut Bump);
         }
     }
 
     fn rust_parser_errors_positioned(
-        source_text: SourceText,
+        source_text: SourceText<'_>,
         ocaml_tree: usize,
         ocaml_parser_options: UnsafeOcamlPtr,
     ) -> Vec<SyntaxError> {
@@ -101,9 +101,12 @@ ocaml_ffi! {
             // Ocaml passes it back here
             // PLEASE ENSURE TYPE SAFETY MANUALLY!!!
             let pair = Box::from_raw(ocaml_tree as *mut (usize, usize));
-            let tree = <SyntaxTree<PositionedSyntax, ()>>::ffi_pointer_into_boxed(pair.0, &source_text);
+            let tree = <SyntaxTree<'_, PositionedSyntax<'_>, ()>>::ffi_pointer_into_boxed(
+                pair.0,
+                &source_text,
+            );
             let arena = Box::from_raw(pair.1 as *mut Bump);
-             (tree, arena)
+            (tree, arena)
         };
 
         let (errors, _) = rust_parser_errors::parse_errors(

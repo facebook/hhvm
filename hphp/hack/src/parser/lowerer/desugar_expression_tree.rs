@@ -61,7 +61,7 @@ use oxidized::{
 /// )
 /// ```
 /// Which is the runtime representation of the Expression Tree
-pub fn desugar<TF>(hint: &aast::Hint, e: Expr, env: &Env<TF>) -> Result<Expr, (Pos, String)> {
+pub fn desugar<TF>(hint: &aast::Hint, e: Expr, env: &Env<'_, TF>) -> Result<Expr, (Pos, String)> {
     let visitor_name = hint_name(hint)?;
     let et_literal_pos = e.1.clone();
 

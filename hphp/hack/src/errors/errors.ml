@@ -2277,8 +2277,7 @@ let inout_argument_bad_expr pos =
   add
     (NastCheck.err_code NastCheck.InoutArgumentBadExpr)
     pos
-    ("Arguments for `inout` parameters must be local variables or simple "
-    ^ "subscript expressions on vecs, dicts, keysets, or arrays")
+    ("`inout` arguments may only be local variables or array indexing expressions ")
 
 let inout_in_transformed_pseudofunction pos fn =
   add

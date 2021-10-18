@@ -3,4 +3,4 @@ An expression is expected here. (Parsing[1002])
 File "bad_inout_use_byref.php", line 7, characters 11-11:
 Unbound name: `&` (a global constant) (Naming[2049])
 File "bad_inout_use_byref.php", line 7, characters 11-11:
-Arguments for `inout` parameters must be local variables or simple subscript expressions on vecs, dicts, keysets, or arrays (NastCheck[3050])
+`inout` arguments may only be local variables or array indexing expressions  (NastCheck[3050])

@@ -567,6 +567,7 @@ let invalidate_folded_classes_for_shallow_fanout
   in
   Decl_class_elements.remove_old_all (get_elems invalidated ~old:true);
   Decl_class_elements.remove_all (get_elems invalidated ~old:false);
+  Shallow_classes_provider.remove_batch ctx invalidated;
   Decl_heap.Classes.remove_old_batch invalidated;
   Decl_heap.Classes.remove_batch invalidated;
   SharedMem.GC.collect `gentle;

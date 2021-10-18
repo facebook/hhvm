@@ -575,7 +575,6 @@ type t = {
   save_and_upload_naming_table: bool;
   deferments_light: bool;
       (** Stop typechecking when deferment threshold is reached and instead get decls to predeclare from names in AST. *)
-  old_naming_table_for_redecl: bool;  (** Use old naming table when redecling *)
   log_from_client_when_slow_monitor_connections: bool;
       (**  Alerts hh users what processes are using hh_server when hh_client is slow to connect. *)
   naming_sqlite_in_hack_64: bool;
@@ -688,7 +687,6 @@ let default =
     watchman = Watchman.default;
     save_and_upload_naming_table = false;
     deferments_light = false;
-    old_naming_table_for_redecl = false;
     log_from_client_when_slow_monitor_connections = false;
     naming_sqlite_in_hack_64 = false;
     workload_quantile = None;
@@ -1296,13 +1294,6 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
-  let old_naming_table_for_redecl =
-    bool_if_min_version
-      "old_naming_table_for_redecl"
-      ~default:default.old_naming_table_for_redecl
-      ~current_version
-      config
-  in
   let log_from_client_when_slow_monitor_connections =
     bool_if_min_version
       "log_from_client_when_slow_monitor_connections"
@@ -1456,7 +1447,6 @@ let load_ fn ~silent ~current_version overrides =
     force_remote_type_check;
     save_and_upload_naming_table;
     deferments_light;
-    old_naming_table_for_redecl;
     log_from_client_when_slow_monitor_connections;
     naming_sqlite_in_hack_64;
     workload_quantile;
@@ -1478,7 +1468,7 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       require_saved_state = options.require_saved_state;
       stream_errors = options.stream_errors;
       deferments_light = options.deferments_light;
-      old_naming_table_for_redecl = options.old_naming_table_for_redecl;
+      force_shallow_decl_fanout = options.force_shallow_decl_fanout;
       log_from_client_when_slow_monitor_connections =
         options.log_from_client_when_slow_monitor_connections;
       naming_sqlite_in_hack_64 = options.naming_sqlite_in_hack_64;

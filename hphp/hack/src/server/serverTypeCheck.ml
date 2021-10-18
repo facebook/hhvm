@@ -886,7 +886,7 @@ functor
         ~(oldified_defs : FileInfo.names)
         ~(profiling : CgroupProfiler.Profiling.t) : redecl_phase1_result =
       let get_classes =
-        if genv.local_config.ServerLocalConfig.old_naming_table_for_redecl then
+        if genv.local_config.ServerLocalConfig.force_shallow_decl_fanout then
           get_classes_from_old_and_new
             ~new_naming_table:naming_table
             ~old_naming_table:env.naming_table
@@ -951,7 +951,7 @@ functor
         ~(to_redecl_phase2_deps : Typing_deps.DepSet.t)
         ~(profiling : CgroupProfiler.Profiling.t) : redecl_phase2_result =
       let get_classes =
-        if genv.local_config.ServerLocalConfig.old_naming_table_for_redecl then
+        if genv.local_config.ServerLocalConfig.force_shallow_decl_fanout then
           get_classes_from_old_and_new
             ~new_naming_table:naming_table
             ~old_naming_table:env.naming_table

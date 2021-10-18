@@ -20,7 +20,7 @@ type rollout_flags = {
   require_saved_state: bool;
   stream_errors: bool;
   deferments_light: bool;
-  old_naming_table_for_redecl: bool;
+  force_shallow_decl_fanout: bool;
   log_from_client_when_slow_monitor_connections: bool;
   naming_sqlite_in_hack_64: bool;
   use_hack_64_naming_table: bool;

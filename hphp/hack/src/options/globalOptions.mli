@@ -326,7 +326,6 @@ type t = {
   (* All collections and Hack arrays are treated as containing ~T *)
   tco_pessimise_builtins: bool;
   tco_deferments_light: bool;
-  tco_old_naming_table_for_redecl: bool;
   tco_enable_disk_heap: bool;
 }
 [@@deriving eq, show]
@@ -461,7 +460,6 @@ val make :
   ?tco_everything_sdt:bool ->
   ?tco_pessimise_builtins:bool ->
   ?tco_deferments_light:bool ->
-  ?tco_old_naming_table_for_redecl:bool ->
   ?tco_enable_disk_heap:bool ->
   unit ->
   t
@@ -759,7 +757,5 @@ val tco_everything_sdt : t -> bool
 val tco_pessimise_builtins : t -> bool
 
 val tco_deferments_light : t -> bool
-
-val tco_old_naming_table_for_redecl : t -> bool
 
 val tco_enable_disk_heap : t -> bool

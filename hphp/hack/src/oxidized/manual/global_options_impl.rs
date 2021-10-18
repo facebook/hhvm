@@ -138,7 +138,6 @@ impl Default for GlobalOptions {
             tco_everything_sdt: false,
             tco_pessimise_builtins: false,
             tco_deferments_light: false,
-            tco_old_naming_table_for_redecl: false,
             tco_enable_disk_heap: true,
         }
     }

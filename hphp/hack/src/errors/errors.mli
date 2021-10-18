@@ -448,8 +448,6 @@ val missing_typehint : Pos.t -> unit
 
 val expected_variable : Pos.t -> unit
 
-val clone_too_many_arguments : Pos.t -> unit
-
 val naming_too_few_arguments : Pos.t -> unit
 
 val naming_too_many_arguments : Pos.t -> unit

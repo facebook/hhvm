@@ -1,4 +1,4 @@
 File "bad_inout_use_arg5.php", line 11, characters 5-18:
 You cannot decorate this argument as `inout` (Parsing[1002])
 File "bad_inout_use_arg5.php", line 11, characters 11-18:
-Arguments for `inout` parameters must be local variables or simple subscript expressions on vecs, dicts, keysets, or arrays (NastCheck[3050])
+`inout` arguments may only be local variables or array indexing expressions  (NastCheck[3050])

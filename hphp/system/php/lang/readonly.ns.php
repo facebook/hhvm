@@ -9,6 +9,7 @@ namespace HH\Readonly {
  * Value types include numerics, strings, bools, null and Hack arrays of value
  * types.
  */
+<<__IgnoreReadonlyLocalErrors>>
 function as_mut<T>(readonly T $x)[]: T {
   if (is_value_type(readonly $x)) {
     return $x;
@@ -37,6 +38,7 @@ function is_value_type(readonly mixed $x)[]: bool {
  * This function takes advantage of non-enforcement of readonly is SystemLib
  * and is not safe.
  */
+<<__IgnoreReadonlyLocalErrors>>
 function as_mut_without_validation<T>(readonly T $x)[]: T {
   return $x;
 }

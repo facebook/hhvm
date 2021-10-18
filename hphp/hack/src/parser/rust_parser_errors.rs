@@ -247,6 +247,7 @@ struct Env<'a, Syntax, SyntaxTree> {
     hhvm_compat_mode: bool,
     hhi_mode: bool,
     codegen: bool,
+    systemlib: bool,
 }
 
 impl<'a, Syntax, SyntaxTree> Env<'a, Syntax, SyntaxTree> {
@@ -260,6 +261,10 @@ impl<'a, Syntax, SyntaxTree> Env<'a, Syntax, SyntaxTree> {
 
     fn is_hhi_mode(&self) -> bool {
         self.hhi_mode
+    }
+
+    fn is_systemlib(&self) -> bool {
+        self.systemlib
     }
 }
 
@@ -1587,6 +1592,20 @@ where
                     }
                     if self.is_module_attribute(n) {
                         self.check_can_use_feature(node, &UnstableFeatures::Modules)
+                    }
+                    if (sn::user_attributes::ignore_readonly_local_errors(n)
+                        || sn::user_attributes::ignore_coeffect_local_errors(n)
+                        || sn::user_attributes::is_native(n))
+                        && !self.env.is_systemlib()
+                        // The typechecker has its own implementation of this that
+                        // allows its own testing and better error messaging.
+                        // see --tco_enable_systemlib_annotations
+                        && !self.env.is_typechecker()
+                    {
+                        self.errors.push(Self::make_error_from_node(
+                            node,
+                            errors::invalid_attribute_reserved,
+                        ));
                     }
                 }
                 None => {}
@@ -5559,6 +5578,7 @@ where
         hhvm_compat_mode: bool,
         hhi_mode: bool,
         codegen: bool,
+        systemlib: bool,
     ) -> (Vec<SyntaxError>, bool) {
         let env = Env {
             parser_options,
@@ -5576,6 +5596,7 @@ where
             hhvm_compat_mode,
             hhi_mode,
             codegen,
+            systemlib,
         };
 
         match tree.required_stack_size() {
@@ -5608,6 +5629,7 @@ pub fn parse_errors<'a, State: Clone>(
     hhvm_compat_mode: bool,
     hhi_mode: bool,
     codegen: bool,
+    systemlib: bool,
 ) -> (Vec<SyntaxError>, bool) {
     <ParserErrors<'a, PositionedToken<'a>, PositionedValue<'a>, State>>::parse_errors(
         tree,
@@ -5616,6 +5638,7 @@ pub fn parse_errors<'a, State: Clone>(
         hhvm_compat_mode,
         hhi_mode,
         codegen,
+        systemlib,
     )
 }
 
@@ -5626,6 +5649,7 @@ pub fn parse_errors_with_text<'a, State: Clone>(
     hhvm_compat_mode: bool,
     hhi_mode: bool,
     codegen: bool,
+    systemlib: bool,
 ) -> (Vec<SyntaxError>, bool) {
     <ParserErrors<'a, PositionedToken<'a>, PositionedValue<'a>, State>>::parse_errors(
         tree,
@@ -5634,5 +5658,6 @@ pub fn parse_errors_with_text<'a, State: Clone>(
         hhvm_compat_mode,
         hhi_mode,
         codegen,
+        systemlib,
     )
 }

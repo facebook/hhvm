@@ -7,12 +7,13 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  */
+<<file:__EnableUnstableFeatures("readonly")>>
 
 namespace {
 <<__PHPStdLib>>
-function is_bool($var)[]: bool;
+function is_bool(readonly mixed $var)[]: bool;
 <<__PHPStdLib>>
-function is_int($var)[]: bool;
+function is_int(readonly mixed $var)[]: bool;
 <<__Deprecated('Use is_int().')>>
 function is_integer($var)[]: bool;
 <<__Deprecated('Use is_int().')>>
@@ -20,20 +21,20 @@ function is_long($var)[]: bool;
 <<__Deprecated('Use is_float().')>>
 function is_double($var)[]: bool;
 <<__PHPStdLib>>
-function is_float($var)[]: bool;
+function is_float(readonly mixed $var)[]: bool;
 <<__PHPStdLib>>
-function is_numeric($var)[]: bool;
+function is_numeric(readonly mixed $var)[]: bool;
 <<__Deprecated('Use is_float().')>>
 function is_real($var)[]: bool;
 <<__PHPStdLib>>
-function is_string($var)[]: bool;
-function is_scalar($var)[]: bool;
-function is_object($var)[]: bool;
+function is_string(readonly mixed $var)[]: bool;
+function is_scalar(readonly mixed $var)[]: bool;
+function is_object(readonly mixed $var)[]: bool;
 <<__PHPStdLib>>
-function is_resource($var)[]: bool;
-function is_null($var)[]: bool;
+function is_resource(readonly mixed $var)[]: bool;
+function is_null(readonly mixed $var)[]: bool;
 <<__PHPStdLib>>
-function gettype($v)[];
+function gettype(readonly mixed $v)[];
 <<__PHPStdLib>>
 function get_resource_type(resource $handle)[];
 <<__PHPStdLib>>
@@ -45,7 +46,7 @@ function var_export($expression, bool $ret = false);
 <<__PHPStdLib>>
 function var_export_pure($expression)[];
 <<__PHPStdLib>>
-function var_dump(<<__AcceptDisposable>> mixed $expression, mixed ...$rest);
+function var_dump(<<__AcceptDisposable>> readonly mixed $expression, mixed ...$rest);
 <<__PHPStdLib>>
 function debug_zval_dump(<<__AcceptDisposable>> $variable);
 <<__PHPStdLib>>

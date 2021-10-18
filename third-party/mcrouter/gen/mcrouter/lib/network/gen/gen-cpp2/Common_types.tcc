@@ -127,9 +127,7 @@ _readField_key:
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary, ::apache::thrift::detail::apply_indirection_fn>, ::carbon::thrift::IOBufKey>::readWithContext(*iprot, this->key, _readState);
     
   }
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   this->__isset.key = true;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -175,7 +173,6 @@ _skip:
 
 template <class Protocol_>
 uint32_t McVersionRequest::serializedSize(Protocol_ const* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McVersionRequest");
   if (!apache::thrift::StringTraits<::folly::remove_cvref_t<::folly::invoke_result_t<::apache::thrift::detail::apply_indirection_fn, carbon::Keys<folly::IOBuf> const&>>>::isEmpty(::apache::thrift::apply_indirection(this->key))) {
@@ -184,12 +181,10 @@ uint32_t McVersionRequest::serializedSize(Protocol_ const* prot_) const {
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template <class Protocol_>
 uint32_t McVersionRequest::serializedSizeZC(Protocol_ const* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McVersionRequest");
   if (!apache::thrift::StringTraits<::folly::remove_cvref_t<::folly::invoke_result_t<::apache::thrift::detail::apply_indirection_fn, carbon::Keys<folly::IOBuf> const&>>>::isEmpty(::apache::thrift::apply_indirection(this->key))) {
@@ -198,12 +193,10 @@ uint32_t McVersionRequest::serializedSizeZC(Protocol_ const* prot_) const {
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template <class Protocol_>
 uint32_t McVersionRequest::write(Protocol_* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("McVersionRequest");
   bool previousFieldHasValue = true;
@@ -219,7 +212,6 @@ uint32_t McVersionRequest::write(Protocol_* prot_) const {
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 extern template void McVersionRequest::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -255,9 +247,7 @@ _readField_result:
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::carbon::Result>::readWithContext(*iprot, this->result, _readState);
     
   }
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   this->__isset.result = true;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -271,9 +261,7 @@ _readField_value:
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, folly::IOBuf>::readWithContext(*iprot, this->value, _readState);
     
   }
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   this->__isset.value = true;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -287,9 +275,7 @@ _readField_message:
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->message, _readState);
     
   }
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   this->__isset.message = true;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -303,9 +289,7 @@ _readField_appSpecificErrorCode:
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int16_t>::readWithContext(*iprot, this->appSpecificErrorCode, _readState);
     
   }
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   this->__isset.appSpecificErrorCode = true;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -375,7 +359,6 @@ _skip:
 
 template <class Protocol_>
 uint32_t McVersionReply::serializedSize(Protocol_ const* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McVersionReply");
   if (this->result !=  ::carbon::Result::UNKNOWN) {
@@ -396,12 +379,10 @@ uint32_t McVersionReply::serializedSize(Protocol_ const* prot_) const {
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template <class Protocol_>
 uint32_t McVersionReply::serializedSizeZC(Protocol_ const* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McVersionReply");
   if (this->result !=  ::carbon::Result::UNKNOWN) {
@@ -422,12 +403,10 @@ uint32_t McVersionReply::serializedSizeZC(Protocol_ const* prot_) const {
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template <class Protocol_>
 uint32_t McVersionReply::write(Protocol_* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("McVersionReply");
   bool previousFieldHasValue = true;
@@ -470,7 +449,6 @@ uint32_t McVersionReply::write(Protocol_* prot_) const {
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 extern template void McVersionReply::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -506,9 +484,7 @@ _readField_key:
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary, ::apache::thrift::detail::apply_indirection_fn>, ::carbon::thrift::IOBufKey>::readWithContext(*iprot, this->key, _readState);
     
   }
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   this->__isset.key = true;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -554,7 +530,6 @@ _skip:
 
 template <class Protocol_>
 uint32_t McStatsRequest::serializedSize(Protocol_ const* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McStatsRequest");
   if (!apache::thrift::StringTraits<::folly::remove_cvref_t<::folly::invoke_result_t<::apache::thrift::detail::apply_indirection_fn, carbon::Keys<folly::IOBuf> const&>>>::isEmpty(::apache::thrift::apply_indirection(this->key))) {
@@ -563,12 +538,10 @@ uint32_t McStatsRequest::serializedSize(Protocol_ const* prot_) const {
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template <class Protocol_>
 uint32_t McStatsRequest::serializedSizeZC(Protocol_ const* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McStatsRequest");
   if (!apache::thrift::StringTraits<::folly::remove_cvref_t<::folly::invoke_result_t<::apache::thrift::detail::apply_indirection_fn, carbon::Keys<folly::IOBuf> const&>>>::isEmpty(::apache::thrift::apply_indirection(this->key))) {
@@ -577,12 +550,10 @@ uint32_t McStatsRequest::serializedSizeZC(Protocol_ const* prot_) const {
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template <class Protocol_>
 uint32_t McStatsRequest::write(Protocol_* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("McStatsRequest");
   bool previousFieldHasValue = true;
@@ -598,7 +569,6 @@ uint32_t McStatsRequest::write(Protocol_* prot_) const {
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 extern template void McStatsRequest::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -634,9 +604,7 @@ _readField_result:
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::carbon::Result>::readWithContext(*iprot, this->result, _readState);
     
   }
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   this->__isset.result = true;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -650,9 +618,7 @@ _readField_message:
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->message, _readState);
     
   }
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   this->__isset.message = true;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -669,9 +635,7 @@ _readField_stats:
     _readState.afterSubobject(iprot);
     
   }
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   this->__isset.stats = true;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -685,9 +649,7 @@ _readField_appSpecificErrorCode:
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int16_t>::readWithContext(*iprot, this->appSpecificErrorCode, _readState);
     
   }
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   this->__isset.appSpecificErrorCode = true;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -757,7 +719,6 @@ _skip:
 
 template <class Protocol_>
 uint32_t McStatsReply::serializedSize(Protocol_ const* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McStatsReply");
   if (this->result !=  ::carbon::Result::UNKNOWN) {
@@ -778,12 +739,10 @@ uint32_t McStatsReply::serializedSize(Protocol_ const* prot_) const {
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template <class Protocol_>
 uint32_t McStatsReply::serializedSizeZC(Protocol_ const* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McStatsReply");
   if (this->result !=  ::carbon::Result::UNKNOWN) {
@@ -804,12 +763,10 @@ uint32_t McStatsReply::serializedSizeZC(Protocol_ const* prot_) const {
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template <class Protocol_>
 uint32_t McStatsReply::write(Protocol_* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("McStatsReply");
   bool previousFieldHasValue = true;
@@ -852,7 +809,6 @@ uint32_t McStatsReply::write(Protocol_* prot_) const {
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 extern template void McStatsReply::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -888,9 +844,7 @@ _readField_key:
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary, ::apache::thrift::detail::apply_indirection_fn>, ::carbon::thrift::IOBufKey>::readWithContext(*iprot, this->key, _readState);
     
   }
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   this->__isset.key = true;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -936,7 +890,6 @@ _skip:
 
 template <class Protocol_>
 uint32_t McShutdownRequest::serializedSize(Protocol_ const* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McShutdownRequest");
   if (!apache::thrift::StringTraits<::folly::remove_cvref_t<::folly::invoke_result_t<::apache::thrift::detail::apply_indirection_fn, carbon::Keys<folly::IOBuf> const&>>>::isEmpty(::apache::thrift::apply_indirection(this->key))) {
@@ -945,12 +898,10 @@ uint32_t McShutdownRequest::serializedSize(Protocol_ const* prot_) const {
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template <class Protocol_>
 uint32_t McShutdownRequest::serializedSizeZC(Protocol_ const* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McShutdownRequest");
   if (!apache::thrift::StringTraits<::folly::remove_cvref_t<::folly::invoke_result_t<::apache::thrift::detail::apply_indirection_fn, carbon::Keys<folly::IOBuf> const&>>>::isEmpty(::apache::thrift::apply_indirection(this->key))) {
@@ -959,12 +910,10 @@ uint32_t McShutdownRequest::serializedSizeZC(Protocol_ const* prot_) const {
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template <class Protocol_>
 uint32_t McShutdownRequest::write(Protocol_* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("McShutdownRequest");
   bool previousFieldHasValue = true;
@@ -980,7 +929,6 @@ uint32_t McShutdownRequest::write(Protocol_* prot_) const {
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 extern template void McShutdownRequest::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -1016,9 +964,7 @@ _readField_result:
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::carbon::Result>::readWithContext(*iprot, this->result, _readState);
     
   }
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   this->__isset.result = true;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -1032,9 +978,7 @@ _readField_message:
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->message, _readState);
     
   }
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   this->__isset.message = true;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -1048,9 +992,7 @@ _readField_appSpecificErrorCode:
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int16_t>::readWithContext(*iprot, this->appSpecificErrorCode, _readState);
     
   }
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   this->__isset.appSpecificErrorCode = true;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -1112,7 +1054,6 @@ _skip:
 
 template <class Protocol_>
 uint32_t McShutdownReply::serializedSize(Protocol_ const* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McShutdownReply");
   if (this->result !=  ::carbon::Result::UNKNOWN) {
@@ -1129,12 +1070,10 @@ uint32_t McShutdownReply::serializedSize(Protocol_ const* prot_) const {
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template <class Protocol_>
 uint32_t McShutdownReply::serializedSizeZC(Protocol_ const* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McShutdownReply");
   if (this->result !=  ::carbon::Result::UNKNOWN) {
@@ -1151,12 +1090,10 @@ uint32_t McShutdownReply::serializedSizeZC(Protocol_ const* prot_) const {
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template <class Protocol_>
 uint32_t McShutdownReply::write(Protocol_* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("McShutdownReply");
   bool previousFieldHasValue = true;
@@ -1190,7 +1127,6 @@ uint32_t McShutdownReply::write(Protocol_* prot_) const {
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 extern template void McShutdownReply::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -1226,9 +1162,7 @@ _readField_key:
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary, ::apache::thrift::detail::apply_indirection_fn>, ::carbon::thrift::IOBufKey>::readWithContext(*iprot, this->key, _readState);
     
   }
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   this->__isset.key = true;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -1274,7 +1208,6 @@ _skip:
 
 template <class Protocol_>
 uint32_t McQuitRequest::serializedSize(Protocol_ const* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McQuitRequest");
   if (!apache::thrift::StringTraits<::folly::remove_cvref_t<::folly::invoke_result_t<::apache::thrift::detail::apply_indirection_fn, carbon::Keys<folly::IOBuf> const&>>>::isEmpty(::apache::thrift::apply_indirection(this->key))) {
@@ -1283,12 +1216,10 @@ uint32_t McQuitRequest::serializedSize(Protocol_ const* prot_) const {
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template <class Protocol_>
 uint32_t McQuitRequest::serializedSizeZC(Protocol_ const* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McQuitRequest");
   if (!apache::thrift::StringTraits<::folly::remove_cvref_t<::folly::invoke_result_t<::apache::thrift::detail::apply_indirection_fn, carbon::Keys<folly::IOBuf> const&>>>::isEmpty(::apache::thrift::apply_indirection(this->key))) {
@@ -1297,12 +1228,10 @@ uint32_t McQuitRequest::serializedSizeZC(Protocol_ const* prot_) const {
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template <class Protocol_>
 uint32_t McQuitRequest::write(Protocol_* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("McQuitRequest");
   bool previousFieldHasValue = true;
@@ -1318,7 +1247,6 @@ uint32_t McQuitRequest::write(Protocol_* prot_) const {
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 extern template void McQuitRequest::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -1354,9 +1282,7 @@ _readField_result:
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::carbon::Result>::readWithContext(*iprot, this->result, _readState);
     
   }
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   this->__isset.result = true;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -1370,9 +1296,7 @@ _readField_message:
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->message, _readState);
     
   }
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   this->__isset.message = true;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -1386,9 +1310,7 @@ _readField_appSpecificErrorCode:
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int16_t>::readWithContext(*iprot, this->appSpecificErrorCode, _readState);
     
   }
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   this->__isset.appSpecificErrorCode = true;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -1450,7 +1372,6 @@ _skip:
 
 template <class Protocol_>
 uint32_t McQuitReply::serializedSize(Protocol_ const* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McQuitReply");
   if (this->result !=  ::carbon::Result::UNKNOWN) {
@@ -1467,12 +1388,10 @@ uint32_t McQuitReply::serializedSize(Protocol_ const* prot_) const {
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template <class Protocol_>
 uint32_t McQuitReply::serializedSizeZC(Protocol_ const* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McQuitReply");
   if (this->result !=  ::carbon::Result::UNKNOWN) {
@@ -1489,12 +1408,10 @@ uint32_t McQuitReply::serializedSizeZC(Protocol_ const* prot_) const {
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template <class Protocol_>
 uint32_t McQuitReply::write(Protocol_* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("McQuitReply");
   bool previousFieldHasValue = true;
@@ -1528,7 +1445,6 @@ uint32_t McQuitReply::write(Protocol_* prot_) const {
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 extern template void McQuitReply::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -1564,9 +1480,7 @@ _readField_key:
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary, ::apache::thrift::detail::apply_indirection_fn>, ::carbon::thrift::IOBufKey>::readWithContext(*iprot, this->key, _readState);
     
   }
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   this->__isset.key = true;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -1612,7 +1526,6 @@ _skip:
 
 template <class Protocol_>
 uint32_t McExecRequest::serializedSize(Protocol_ const* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McExecRequest");
   if (!apache::thrift::StringTraits<::folly::remove_cvref_t<::folly::invoke_result_t<::apache::thrift::detail::apply_indirection_fn, carbon::Keys<folly::IOBuf> const&>>>::isEmpty(::apache::thrift::apply_indirection(this->key))) {
@@ -1621,12 +1534,10 @@ uint32_t McExecRequest::serializedSize(Protocol_ const* prot_) const {
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template <class Protocol_>
 uint32_t McExecRequest::serializedSizeZC(Protocol_ const* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McExecRequest");
   if (!apache::thrift::StringTraits<::folly::remove_cvref_t<::folly::invoke_result_t<::apache::thrift::detail::apply_indirection_fn, carbon::Keys<folly::IOBuf> const&>>>::isEmpty(::apache::thrift::apply_indirection(this->key))) {
@@ -1635,12 +1546,10 @@ uint32_t McExecRequest::serializedSizeZC(Protocol_ const* prot_) const {
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template <class Protocol_>
 uint32_t McExecRequest::write(Protocol_* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("McExecRequest");
   bool previousFieldHasValue = true;
@@ -1656,7 +1565,6 @@ uint32_t McExecRequest::write(Protocol_* prot_) const {
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 extern template void McExecRequest::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -1692,9 +1600,7 @@ _readField_result:
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::carbon::Result>::readWithContext(*iprot, this->result, _readState);
     
   }
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   this->__isset.result = true;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -1708,9 +1614,7 @@ _readField_response:
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->response, _readState);
     
   }
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   this->__isset.response = true;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -1724,9 +1628,7 @@ _readField_message:
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->message, _readState);
     
   }
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   this->__isset.message = true;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -1740,9 +1642,7 @@ _readField_appSpecificErrorCode:
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int16_t>::readWithContext(*iprot, this->appSpecificErrorCode, _readState);
     
   }
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   this->__isset.appSpecificErrorCode = true;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -1812,7 +1712,6 @@ _skip:
 
 template <class Protocol_>
 uint32_t McExecReply::serializedSize(Protocol_ const* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McExecReply");
   if (this->result !=  ::carbon::Result::UNKNOWN) {
@@ -1833,12 +1732,10 @@ uint32_t McExecReply::serializedSize(Protocol_ const* prot_) const {
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template <class Protocol_>
 uint32_t McExecReply::serializedSizeZC(Protocol_ const* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McExecReply");
   if (this->result !=  ::carbon::Result::UNKNOWN) {
@@ -1859,12 +1756,10 @@ uint32_t McExecReply::serializedSizeZC(Protocol_ const* prot_) const {
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template <class Protocol_>
 uint32_t McExecReply::write(Protocol_* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("McExecReply");
   bool previousFieldHasValue = true;
@@ -1907,7 +1802,6 @@ uint32_t McExecReply::write(Protocol_* prot_) const {
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 extern template void McExecReply::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -1966,33 +1860,27 @@ _loop:
 
 template <class Protocol_>
 uint32_t GoAwayAcknowledgement::serializedSize(Protocol_ const* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("GoAwayAcknowledgement");
   xfer += prot_->serializedSizeStop();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template <class Protocol_>
 uint32_t GoAwayAcknowledgement::serializedSizeZC(Protocol_ const* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("GoAwayAcknowledgement");
   xfer += prot_->serializedSizeStop();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template <class Protocol_>
 uint32_t GoAwayAcknowledgement::write(Protocol_* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("GoAwayAcknowledgement");
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 extern template void GoAwayAcknowledgement::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -2028,9 +1916,7 @@ _readField_result:
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::carbon::Result>::readWithContext(*iprot, this->result, _readState);
     
   }
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   this->__isset.result = true;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -2044,9 +1930,7 @@ _readField_reason:
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->reason, _readState);
     
   }
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   this->__isset.reason = true;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -2100,7 +1984,6 @@ _skip:
 
 template <class Protocol_>
 uint32_t GoAwayRequest::serializedSize(Protocol_ const* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("GoAwayRequest");
   if (this->result !=  ::carbon::Result::UNKNOWN) {
@@ -2113,12 +1996,10 @@ uint32_t GoAwayRequest::serializedSize(Protocol_ const* prot_) const {
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template <class Protocol_>
 uint32_t GoAwayRequest::serializedSizeZC(Protocol_ const* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("GoAwayRequest");
   if (this->result !=  ::carbon::Result::UNKNOWN) {
@@ -2131,12 +2012,10 @@ uint32_t GoAwayRequest::serializedSizeZC(Protocol_ const* prot_) const {
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template <class Protocol_>
 uint32_t GoAwayRequest::write(Protocol_* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("GoAwayRequest");
   bool previousFieldHasValue = true;
@@ -2161,7 +2040,6 @@ uint32_t GoAwayRequest::write(Protocol_* prot_) const {
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 extern template void GoAwayRequest::readNoXfer<>(apache::thrift::BinaryProtocolReader*);

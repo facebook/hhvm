@@ -36,22 +36,18 @@ void TccStructTraits<::apache::thrift::frozen::schema::Field>::translateFieldNam
 namespace apache { namespace thrift { namespace frozen { namespace schema {
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 Field::Field(apache::thrift::FragileConstructor, ::std::int16_t layoutId__arg, ::std::int16_t offset__arg) :
     layoutId(std::move(layoutId__arg)),
     offset(std::move(offset__arg)) {
   __isset.layoutId = true;
   __isset.offset = true;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void Field::__clear() {
   // clear all fields
   this->layoutId = 0;
   this->offset = static_cast<int16_t>(0);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool Field::operator==(const Field& rhs) const {
@@ -85,9 +81,7 @@ void swap(Field& a, Field& b) {
   using ::std::swap;
   swap(a.layoutId_ref().value(), b.layoutId_ref().value());
   swap(a.offset_ref().value(), b.offset_ref().value());
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void Field::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -126,11 +120,8 @@ void TccStructTraits<::apache::thrift::frozen::schema::Layout>::translateFieldNa
 
 namespace apache { namespace thrift { namespace frozen { namespace schema {
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 Layout::Layout(const Layout&) = default;
 Layout& Layout::operator=(const Layout&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 Layout::Layout(Layout&& other) noexcept  :
     size(std::move(other.size)),
     bits(std::move(other.bits)),
@@ -145,10 +136,8 @@ Layout& Layout::operator=(FOLLY_MAYBE_UNUSED Layout&& other) noexcept {
     __isset = other.__isset;
     return *this;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 Layout::Layout(apache::thrift::FragileConstructor, ::std::int32_t size__arg, ::std::int16_t bits__arg, folly::sorted_vector_map<::std::int16_t, ::apache::thrift::frozen::schema::Field> fields__arg, ::std::string typeName__arg) :
     size(std::move(size__arg)),
     bits(std::move(bits__arg)),
@@ -159,7 +148,6 @@ Layout::Layout(apache::thrift::FragileConstructor, ::std::int32_t size__arg, ::s
   __isset.fields = true;
   __isset.typeName = true;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void Layout::__clear() {
   // clear all fields
@@ -167,9 +155,7 @@ void Layout::__clear() {
   this->bits = static_cast<int16_t>(0);
   this->fields.clear();
   this->typeName = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool Layout::operator==(const Layout& rhs) const {
@@ -206,9 +192,7 @@ void swap(Layout& a, Layout& b) {
   swap(a.bits_ref().value(), b.bits_ref().value());
   swap(a.fields_ref().value(), b.fields_ref().value());
   swap(a.typeName_ref().value(), b.typeName_ref().value());
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void Layout::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -259,11 +243,8 @@ void TccStructTraits<::apache::thrift::frozen::schema::Schema>::translateFieldNa
 
 namespace apache { namespace thrift { namespace frozen { namespace schema {
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 Schema::Schema(const Schema&) = default;
 Schema& Schema::operator=(const Schema&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 Schema::Schema(Schema&& other) noexcept  :
     fileVersion(std::move(other.fileVersion)),
     relaxTypeChecks(std::move(other.relaxTypeChecks)),
@@ -278,10 +259,8 @@ Schema& Schema::operator=(FOLLY_MAYBE_UNUSED Schema&& other) noexcept {
     __isset = other.__isset;
     return *this;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 Schema::Schema(apache::thrift::FragileConstructor, ::std::int32_t fileVersion__arg, bool relaxTypeChecks__arg, folly::sorted_vector_map<::std::int16_t, ::apache::thrift::frozen::schema::Layout> layouts__arg, ::std::int16_t rootLayout__arg) :
     fileVersion(std::move(fileVersion__arg)),
     relaxTypeChecks(std::move(relaxTypeChecks__arg)),
@@ -292,7 +271,6 @@ Schema::Schema(apache::thrift::FragileConstructor, ::std::int32_t fileVersion__a
   __isset.layouts = true;
   __isset.rootLayout = true;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void Schema::__clear() {
   // clear all fields
@@ -300,9 +278,7 @@ void Schema::__clear() {
   this->relaxTypeChecks = 0;
   this->layouts.clear();
   this->rootLayout = static_cast<int16_t>(0);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool Schema::operator==(const Schema& rhs) const {
@@ -339,9 +315,7 @@ void swap(Schema& a, Schema& b) {
   swap(a.relaxTypeChecks_ref().value(), b.relaxTypeChecks_ref().value());
   swap(a.layouts_ref().value(), b.layouts_ref().value());
   swap(a.rootLayout_ref().value(), b.rootLayout_ref().value());
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void Schema::readNoXfer<>(apache::thrift::BinaryProtocolReader*);

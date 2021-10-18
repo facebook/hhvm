@@ -465,9 +465,7 @@ void TccStructTraits<::apache::thrift::ZlibCompressionCodecConfig>::translateFie
 namespace apache { namespace thrift {
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ZlibCompressionCodecConfig::ZlibCompressionCodecConfig(apache::thrift::FragileConstructor) {}
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void ZlibCompressionCodecConfig::__clear() {
   // clear all fields
@@ -535,9 +533,7 @@ void TccStructTraits<::apache::thrift::ZstdCompressionCodecConfig>::translateFie
 namespace apache { namespace thrift {
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ZstdCompressionCodecConfig::ZstdCompressionCodecConfig(apache::thrift::FragileConstructor) {}
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void ZstdCompressionCodecConfig::__clear() {
   // clear all fields
@@ -742,11 +738,8 @@ void TccStructTraits<::apache::thrift::CompressionConfig>::translateFieldName(
 
 namespace apache { namespace thrift {
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 CompressionConfig::CompressionConfig(const CompressionConfig&) = default;
 CompressionConfig& CompressionConfig::operator=(const CompressionConfig&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 CompressionConfig::CompressionConfig(CompressionConfig&& other) noexcept  :
     codecConfig(std::move(other.codecConfig)),
     compressionSizeLimit(std::move(other.compressionSizeLimit)),
@@ -757,25 +750,20 @@ CompressionConfig& CompressionConfig::operator=(FOLLY_MAYBE_UNUSED CompressionCo
     __isset = other.__isset;
     return *this;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 CompressionConfig::CompressionConfig(apache::thrift::FragileConstructor, ::apache::thrift::CodecConfig codecConfig__arg, ::std::int64_t compressionSizeLimit__arg) :
     codecConfig(std::move(codecConfig__arg)),
     compressionSizeLimit(std::move(compressionSizeLimit__arg)) {
   __isset.codecConfig = true;
   __isset.compressionSizeLimit = true;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void CompressionConfig::__clear() {
   // clear all fields
   this->codecConfig.__clear();
   this->compressionSizeLimit = 0;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool CompressionConfig::operator==(const CompressionConfig& rhs) const {
@@ -817,9 +805,7 @@ void swap(CompressionConfig& a, CompressionConfig& b) {
   using ::std::swap;
   swap(a.codecConfig_ref().value_unchecked(), b.codecConfig_ref().value_unchecked());
   swap(a.compressionSizeLimit_ref().value_unchecked(), b.compressionSizeLimit_ref().value_unchecked());
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void CompressionConfig::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -875,22 +861,18 @@ void TccStructTraits<::apache::thrift::NegotiationParameters>::translateFieldNam
 namespace apache { namespace thrift {
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 NegotiationParameters::NegotiationParameters(apache::thrift::FragileConstructor, std::uint64_t compressionAlgos__arg, bool useStopTLS__arg) :
     compressionAlgos(std::move(compressionAlgos__arg)),
     useStopTLS(std::move(useStopTLS__arg)) {
   __isset.compressionAlgos = true;
   __isset.useStopTLS = true;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void NegotiationParameters::__clear() {
   // clear all fields
   this->compressionAlgos = 0;
   this->useStopTLS = 0;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool NegotiationParameters::operator==(const NegotiationParameters& rhs) const {
@@ -924,9 +906,7 @@ void swap(NegotiationParameters& a, NegotiationParameters& b) {
   using ::std::swap;
   swap(a.compressionAlgos_ref().value_unchecked(), b.compressionAlgos_ref().value_unchecked());
   swap(a.useStopTLS_ref().value_unchecked(), b.useStopTLS_ref().value_unchecked());
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void NegotiationParameters::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -969,11 +949,8 @@ void TccStructTraits<::apache::thrift::InteractionCreate>::translateFieldName(
 
 namespace apache { namespace thrift {
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 InteractionCreate::InteractionCreate(const InteractionCreate&) = default;
 InteractionCreate& InteractionCreate::operator=(const InteractionCreate&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 InteractionCreate::InteractionCreate(InteractionCreate&& other) noexcept  :
     interactionId(std::move(other.interactionId)),
     interactionName(std::move(other.interactionName)),
@@ -984,25 +961,20 @@ InteractionCreate& InteractionCreate::operator=(FOLLY_MAYBE_UNUSED InteractionCr
     __isset = other.__isset;
     return *this;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 InteractionCreate::InteractionCreate(apache::thrift::FragileConstructor, ::std::int64_t interactionId__arg, ::apache::thrift::ManagedStringViewField interactionName__arg) :
     interactionId(std::move(interactionId__arg)),
     interactionName(std::move(interactionName__arg)) {
   __isset.interactionId = true;
   __isset.interactionName = true;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void InteractionCreate::__clear() {
   // clear all fields
   this->interactionId = 0;
   this->interactionName = apache::thrift::StringTraits<::apache::thrift::ManagedStringViewWithConversions>::fromStringLiteral("");
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool InteractionCreate::operator==(const InteractionCreate& rhs) const {
@@ -1036,9 +1008,7 @@ void swap(InteractionCreate& a, InteractionCreate& b) {
   using ::std::swap;
   swap(a.interactionId_ref().value(), b.interactionId_ref().value());
   swap(a.interactionName_ref().value(), b.interactionName_ref().value());
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void InteractionCreate::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -1082,19 +1052,15 @@ void TccStructTraits<::apache::thrift::InteractionTerminate>::translateFieldName
 namespace apache { namespace thrift {
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 InteractionTerminate::InteractionTerminate(apache::thrift::FragileConstructor, ::std::int64_t interactionId__arg) :
     interactionId(std::move(interactionId__arg)) {
   __isset.interactionId = true;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void InteractionTerminate::__clear() {
   // clear all fields
   this->interactionId = 0;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool InteractionTerminate::operator==(const InteractionTerminate& rhs) const {
@@ -1121,9 +1087,7 @@ bool InteractionTerminate::operator<(const InteractionTerminate& rhs) const {
 void swap(InteractionTerminate& a, InteractionTerminate& b) {
   using ::std::swap;
   swap(a.interactionId_ref().value(), b.interactionId_ref().value());
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void InteractionTerminate::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -1166,11 +1130,8 @@ void TccStructTraits<::apache::thrift::RequestRpcMetadata>::translateFieldName(
 
 namespace apache { namespace thrift {
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 RequestRpcMetadata::RequestRpcMetadata(const RequestRpcMetadata&) = default;
 RequestRpcMetadata& RequestRpcMetadata::operator=(const RequestRpcMetadata&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 RequestRpcMetadata::RequestRpcMetadata() :
       protocol( ::apache::thrift::ProtocolId::BINARY),
       kind( ::apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE),
@@ -1183,11 +1144,9 @@ RequestRpcMetadata::RequestRpcMetadata() :
       interactionId(0) {
 }
 
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 RequestRpcMetadata::~RequestRpcMetadata() {}
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 RequestRpcMetadata::RequestRpcMetadata(RequestRpcMetadata&& other) noexcept  :
     protocol(std::move(other.protocol)),
     name(std::move(other.name)),
@@ -1226,10 +1185,8 @@ RequestRpcMetadata& RequestRpcMetadata::operator=(FOLLY_MAYBE_UNUSED RequestRpcM
     __isset = other.__isset;
     return *this;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 RequestRpcMetadata::RequestRpcMetadata(apache::thrift::FragileConstructor, ::apache::thrift::ProtocolId protocol__arg, ::apache::thrift::ManagedStringViewField name__arg, ::apache::thrift::RpcKind kind__arg, ::std::int32_t seqId__arg, ::std::int32_t clientTimeoutMs__arg, ::std::int32_t queueTimeoutMs__arg, ::apache::thrift::RpcPriority priority__arg, ::std::map<::std::string, ::std::string> otherMetadata__arg, std::uint32_t crc32c__arg, ::std::string loadMetric__arg, ::apache::thrift::CompressionAlgorithm compression__arg, ::apache::thrift::CompressionConfig compressionConfig__arg, ::std::int64_t interactionId__arg, ::apache::thrift::InteractionCreate interactionCreate__arg, ::std::string clientId__arg, ::std::string serviceTraceMeta__arg) :
     protocol(std::move(protocol__arg)),
     name(std::move(name__arg)),
@@ -1264,7 +1221,6 @@ RequestRpcMetadata::RequestRpcMetadata(apache::thrift::FragileConstructor, ::apa
   __isset.clientId = true;
   __isset.serviceTraceMeta = true;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void RequestRpcMetadata::__clear() {
   // clear all fields
@@ -1284,9 +1240,7 @@ void RequestRpcMetadata::__clear() {
   this->interactionCreate.__clear();
   this->clientId = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
   this->serviceTraceMeta = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool RequestRpcMetadata::operator==(const RequestRpcMetadata& rhs) const {
@@ -1442,9 +1396,7 @@ void swap(RequestRpcMetadata& a, RequestRpcMetadata& b) {
   swap(a.interactionCreate_ref().value_unchecked(), b.interactionCreate_ref().value_unchecked());
   swap(a.clientId_ref().value_unchecked(), b.clientId_ref().value_unchecked());
   swap(a.serviceTraceMeta_ref().value_unchecked(), b.serviceTraceMeta_ref().value_unchecked());
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void RequestRpcMetadata::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -1512,7 +1464,6 @@ void TccStructTraits<::apache::thrift::ErrorClassification>::translateFieldName(
 namespace apache { namespace thrift {
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ErrorClassification::ErrorClassification(apache::thrift::FragileConstructor, ::apache::thrift::ErrorKind kind__arg, ::apache::thrift::ErrorBlame blame__arg, ::apache::thrift::ErrorSafety safety__arg) :
     kind(std::move(kind__arg)),
     blame(std::move(blame__arg)),
@@ -1521,16 +1472,13 @@ ErrorClassification::ErrorClassification(apache::thrift::FragileConstructor, ::a
   __isset.blame = true;
   __isset.safety = true;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void ErrorClassification::__clear() {
   // clear all fields
   this->kind =  ::apache::thrift::ErrorKind::UNSPECIFIED;
   this->blame =  ::apache::thrift::ErrorBlame::UNSPECIFIED;
   this->safety =  ::apache::thrift::ErrorSafety::UNSPECIFIED;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool ErrorClassification::operator==(const ErrorClassification& rhs) const {
@@ -1571,9 +1519,7 @@ void swap(ErrorClassification& a, ErrorClassification& b) {
   swap(a.kind_ref().value_unchecked(), b.kind_ref().value_unchecked());
   swap(a.blame_ref().value_unchecked(), b.blame_ref().value_unchecked());
   swap(a.safety_ref().value_unchecked(), b.safety_ref().value_unchecked());
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void ErrorClassification::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -1617,9 +1563,7 @@ void TccStructTraits<::apache::thrift::PayloadResponseMetadata>::translateFieldN
 namespace apache { namespace thrift {
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 PayloadResponseMetadata::PayloadResponseMetadata(apache::thrift::FragileConstructor) {}
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void PayloadResponseMetadata::__clear() {
   // clear all fields
@@ -1687,19 +1631,15 @@ void TccStructTraits<::apache::thrift::PayloadDeclaredExceptionMetadata>::transl
 namespace apache { namespace thrift {
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 PayloadDeclaredExceptionMetadata::PayloadDeclaredExceptionMetadata(apache::thrift::FragileConstructor, ::apache::thrift::ErrorClassification errorClassification__arg) :
     errorClassification(std::move(errorClassification__arg)) {
   __isset.errorClassification = true;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void PayloadDeclaredExceptionMetadata::__clear() {
   // clear all fields
   this->errorClassification.__clear();
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool PayloadDeclaredExceptionMetadata::operator==(const PayloadDeclaredExceptionMetadata& rhs) const {
@@ -1734,9 +1674,7 @@ const ::apache::thrift::ErrorClassification* PayloadDeclaredExceptionMetadata::g
 void swap(PayloadDeclaredExceptionMetadata& a, PayloadDeclaredExceptionMetadata& b) {
   using ::std::swap;
   swap(a.errorClassification_ref().value_unchecked(), b.errorClassification_ref().value_unchecked());
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void PayloadDeclaredExceptionMetadata::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -1792,9 +1730,7 @@ void TccStructTraits<::apache::thrift::PayloadProxyExceptionMetadata>::translate
 namespace apache { namespace thrift {
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 PayloadProxyExceptionMetadata::PayloadProxyExceptionMetadata(apache::thrift::FragileConstructor) {}
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void PayloadProxyExceptionMetadata::__clear() {
   // clear all fields
@@ -1862,9 +1798,7 @@ void TccStructTraits<::apache::thrift::PayloadProxiedExceptionMetadata>::transla
 namespace apache { namespace thrift {
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 PayloadProxiedExceptionMetadata::PayloadProxiedExceptionMetadata(apache::thrift::FragileConstructor) {}
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void PayloadProxiedExceptionMetadata::__clear() {
   // clear all fields
@@ -1932,9 +1866,7 @@ void TccStructTraits<::apache::thrift::PayloadAppClientExceptionMetadata>::trans
 namespace apache { namespace thrift {
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 PayloadAppClientExceptionMetadata::PayloadAppClientExceptionMetadata(apache::thrift::FragileConstructor) {}
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void PayloadAppClientExceptionMetadata::__clear() {
   // clear all fields
@@ -2002,9 +1934,7 @@ void TccStructTraits<::apache::thrift::PayloadAppServerExceptionMetadata>::trans
 namespace apache { namespace thrift {
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 PayloadAppServerExceptionMetadata::PayloadAppServerExceptionMetadata(apache::thrift::FragileConstructor) {}
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void PayloadAppServerExceptionMetadata::__clear() {
   // clear all fields
@@ -2072,19 +2002,15 @@ void TccStructTraits<::apache::thrift::PayloadAppUnknownExceptionMetdata>::trans
 namespace apache { namespace thrift {
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 PayloadAppUnknownExceptionMetdata::PayloadAppUnknownExceptionMetdata(apache::thrift::FragileConstructor, ::apache::thrift::ErrorClassification errorClassification__arg) :
     errorClassification(std::move(errorClassification__arg)) {
   __isset.errorClassification = true;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void PayloadAppUnknownExceptionMetdata::__clear() {
   // clear all fields
   this->errorClassification.__clear();
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool PayloadAppUnknownExceptionMetdata::operator==(const PayloadAppUnknownExceptionMetdata& rhs) const {
@@ -2119,9 +2045,7 @@ const ::apache::thrift::ErrorClassification* PayloadAppUnknownExceptionMetdata::
 void swap(PayloadAppUnknownExceptionMetdata& a, PayloadAppUnknownExceptionMetdata& b) {
   using ::std::swap;
   swap(a.errorClassification_ref().value_unchecked(), b.errorClassification_ref().value_unchecked());
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void PayloadAppUnknownExceptionMetdata::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -2390,11 +2314,8 @@ void TccStructTraits<::apache::thrift::PayloadExceptionMetadataBase>::translateF
 
 namespace apache { namespace thrift {
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 PayloadExceptionMetadataBase::PayloadExceptionMetadataBase(const PayloadExceptionMetadataBase&) = default;
 PayloadExceptionMetadataBase& PayloadExceptionMetadataBase::operator=(const PayloadExceptionMetadataBase&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 PayloadExceptionMetadataBase::PayloadExceptionMetadataBase(PayloadExceptionMetadataBase&& other) noexcept  :
     name_utf8(std::move(other.name_utf8)),
     what_utf8(std::move(other.what_utf8)),
@@ -2407,10 +2328,8 @@ PayloadExceptionMetadataBase& PayloadExceptionMetadataBase::operator=(FOLLY_MAYB
     __isset = other.__isset;
     return *this;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 PayloadExceptionMetadataBase::PayloadExceptionMetadataBase(apache::thrift::FragileConstructor, ::std::string name_utf8__arg, ::std::string what_utf8__arg, ::apache::thrift::PayloadExceptionMetadata metadata__arg) :
     name_utf8(std::move(name_utf8__arg)),
     what_utf8(std::move(what_utf8__arg)),
@@ -2419,16 +2338,13 @@ PayloadExceptionMetadataBase::PayloadExceptionMetadataBase(apache::thrift::Fragi
   __isset.what_utf8 = true;
   __isset.metadata = true;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void PayloadExceptionMetadataBase::__clear() {
   // clear all fields
   this->name_utf8 = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
   this->what_utf8 = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
   this->metadata.__clear();
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool PayloadExceptionMetadataBase::operator==(const PayloadExceptionMetadataBase& rhs) const {
@@ -2477,9 +2393,7 @@ void swap(PayloadExceptionMetadataBase& a, PayloadExceptionMetadataBase& b) {
   swap(a.name_utf8_ref().value_unchecked(), b.name_utf8_ref().value_unchecked());
   swap(a.what_utf8_ref().value_unchecked(), b.what_utf8_ref().value_unchecked());
   swap(a.metadata_ref().value_unchecked(), b.metadata_ref().value_unchecked());
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void PayloadExceptionMetadataBase::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -2673,9 +2587,7 @@ void TccStructTraits<::apache::thrift::ProxiedPayloadMetadata>::translateFieldNa
 namespace apache { namespace thrift {
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ProxiedPayloadMetadata::ProxiedPayloadMetadata(apache::thrift::FragileConstructor) {}
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void ProxiedPayloadMetadata::__clear() {
   // clear all fields
@@ -2742,11 +2654,8 @@ void TccStructTraits<::apache::thrift::ResponseRpcMetadata>::translateFieldName(
 
 namespace apache { namespace thrift {
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ResponseRpcMetadata::ResponseRpcMetadata(const ResponseRpcMetadata&) = default;
 ResponseRpcMetadata& ResponseRpcMetadata::operator=(const ResponseRpcMetadata&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ResponseRpcMetadata::ResponseRpcMetadata() :
       protocol( ::apache::thrift::ProtocolId::BINARY),
       seqId(0),
@@ -2756,11 +2665,9 @@ ResponseRpcMetadata::ResponseRpcMetadata() :
       streamId(0) {
 }
 
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 ResponseRpcMetadata::~ResponseRpcMetadata() {}
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ResponseRpcMetadata::ResponseRpcMetadata(ResponseRpcMetadata&& other) noexcept  :
     protocol(std::move(other.protocol)),
     seqId(std::move(other.seqId)),
@@ -2785,10 +2692,8 @@ ResponseRpcMetadata& ResponseRpcMetadata::operator=(FOLLY_MAYBE_UNUSED ResponseR
     __isset = other.__isset;
     return *this;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ResponseRpcMetadata::ResponseRpcMetadata(apache::thrift::FragileConstructor, ::apache::thrift::ProtocolId protocol__arg, ::std::int32_t seqId__arg, ::std::map<::std::string, ::std::string> otherMetadata__arg, ::std::int64_t load__arg, std::uint32_t crc32c__arg, ::apache::thrift::CompressionAlgorithm compression__arg, ::apache::thrift::PayloadMetadata payloadMetadata__arg, ::apache::thrift::ProxiedPayloadMetadata proxiedPayloadMetadata__arg, ::std::int32_t streamId__arg) :
     protocol(std::move(protocol__arg)),
     seqId(std::move(seqId__arg)),
@@ -2809,7 +2714,6 @@ ResponseRpcMetadata::ResponseRpcMetadata(apache::thrift::FragileConstructor, ::a
   __isset.proxiedPayloadMetadata = true;
   __isset.streamId = true;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void ResponseRpcMetadata::__clear() {
   // clear all fields
@@ -2821,9 +2725,7 @@ void ResponseRpcMetadata::__clear() {
   this->compression =  ::apache::thrift::CompressionAlgorithm::NONE;
   this->payloadMetadata.__clear();
   this->streamId = 0;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool ResponseRpcMetadata::operator==(const ResponseRpcMetadata& rhs) const {
@@ -2930,9 +2832,7 @@ void swap(ResponseRpcMetadata& a, ResponseRpcMetadata& b) {
   swap(a.payloadMetadata_ref().value_unchecked(), b.payloadMetadata_ref().value_unchecked());
   swap(a.proxiedPayloadMetadata_ref().value_unchecked(), b.proxiedPayloadMetadata_ref().value_unchecked());
   swap(a.streamId_ref().value_unchecked(), b.streamId_ref().value_unchecked());
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void ResponseRpcMetadata::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -2999,22 +2899,17 @@ void TccStructTraits<::apache::thrift::ResponseRpcError>::translateFieldName(
 
 namespace apache { namespace thrift {
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ResponseRpcError::ResponseRpcError(const ResponseRpcError&) = default;
 ResponseRpcError& ResponseRpcError::operator=(const ResponseRpcError&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ResponseRpcError::ResponseRpcError() :
       category( ::apache::thrift::ResponseRpcErrorCategory::INTERNAL_ERROR),
       code( ::apache::thrift::ResponseRpcErrorCode::UNKNOWN),
       load(0) {
 }
 
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 ResponseRpcError::~ResponseRpcError() {}
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ResponseRpcError::ResponseRpcError(ResponseRpcError&& other) noexcept  :
     name_utf8(std::move(other.name_utf8)),
     what_utf8(std::move(other.what_utf8)),
@@ -3031,10 +2926,8 @@ ResponseRpcError& ResponseRpcError::operator=(FOLLY_MAYBE_UNUSED ResponseRpcErro
     __isset = other.__isset;
     return *this;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ResponseRpcError::ResponseRpcError(apache::thrift::FragileConstructor, ::std::string name_utf8__arg, ::std::string what_utf8__arg, ::apache::thrift::ResponseRpcErrorCategory category__arg, ::apache::thrift::ResponseRpcErrorCode code__arg, ::std::int64_t load__arg) :
     name_utf8(std::move(name_utf8__arg)),
     what_utf8(std::move(what_utf8__arg)),
@@ -3047,7 +2940,6 @@ ResponseRpcError::ResponseRpcError(apache::thrift::FragileConstructor, ::std::st
   __isset.code = true;
   __isset.load = true;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void ResponseRpcError::__clear() {
   // clear all fields
@@ -3056,9 +2948,7 @@ void ResponseRpcError::__clear() {
   this->category =  ::apache::thrift::ResponseRpcErrorCategory::INTERNAL_ERROR;
   this->code =  ::apache::thrift::ResponseRpcErrorCode::UNKNOWN;
   this->load = 0;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool ResponseRpcError::operator==(const ResponseRpcError& rhs) const {
@@ -3113,9 +3003,7 @@ void swap(ResponseRpcError& a, ResponseRpcError& b) {
   swap(a.category_ref().value_unchecked(), b.category_ref().value_unchecked());
   swap(a.code_ref().value_unchecked(), b.code_ref().value_unchecked());
   swap(a.load_ref().value_unchecked(), b.load_ref().value_unchecked());
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void ResponseRpcError::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -3158,11 +3046,8 @@ void TccStructTraits<::apache::thrift::StreamRpcError>::translateFieldName(
 
 namespace apache { namespace thrift {
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 StreamRpcError::StreamRpcError(const StreamRpcError&) = default;
 StreamRpcError& StreamRpcError::operator=(const StreamRpcError&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 StreamRpcError::StreamRpcError(StreamRpcError&& other) noexcept  :
     name_utf8(std::move(other.name_utf8)),
     what_utf8(std::move(other.what_utf8)),
@@ -3175,10 +3060,8 @@ StreamRpcError& StreamRpcError::operator=(FOLLY_MAYBE_UNUSED StreamRpcError&& ot
     __isset = other.__isset;
     return *this;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 StreamRpcError::StreamRpcError(apache::thrift::FragileConstructor, ::std::string name_utf8__arg, ::std::string what_utf8__arg, ::apache::thrift::StreamRpcErrorCode code__arg) :
     name_utf8(std::move(name_utf8__arg)),
     what_utf8(std::move(what_utf8__arg)),
@@ -3187,16 +3070,13 @@ StreamRpcError::StreamRpcError(apache::thrift::FragileConstructor, ::std::string
   __isset.what_utf8 = true;
   __isset.code = true;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void StreamRpcError::__clear() {
   // clear all fields
   this->name_utf8 = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
   this->what_utf8 = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
   this->code =  ::apache::thrift::StreamRpcErrorCode::UNKNOWN;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool StreamRpcError::operator==(const StreamRpcError& rhs) const {
@@ -3237,9 +3117,7 @@ void swap(StreamRpcError& a, StreamRpcError& b) {
   swap(a.name_utf8_ref().value_unchecked(), b.name_utf8_ref().value_unchecked());
   swap(a.what_utf8_ref().value_unchecked(), b.what_utf8_ref().value_unchecked());
   swap(a.code_ref().value_unchecked(), b.code_ref().value_unchecked());
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void StreamRpcError::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -3282,11 +3160,8 @@ void TccStructTraits<::apache::thrift::StreamPayloadMetadata>::translateFieldNam
 
 namespace apache { namespace thrift {
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 StreamPayloadMetadata::StreamPayloadMetadata(const StreamPayloadMetadata&) = default;
 StreamPayloadMetadata& StreamPayloadMetadata::operator=(const StreamPayloadMetadata&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 StreamPayloadMetadata::StreamPayloadMetadata(StreamPayloadMetadata&& other) noexcept  :
     compression(std::move(other.compression)),
     otherMetadata(std::move(other.otherMetadata)),
@@ -3299,10 +3174,8 @@ StreamPayloadMetadata& StreamPayloadMetadata::operator=(FOLLY_MAYBE_UNUSED Strea
     __isset = other.__isset;
     return *this;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 StreamPayloadMetadata::StreamPayloadMetadata(apache::thrift::FragileConstructor, ::apache::thrift::CompressionAlgorithm compression__arg, ::std::map<::std::string, ::std::string> otherMetadata__arg, ::apache::thrift::PayloadMetadata payloadMetadata__arg) :
     compression(std::move(compression__arg)),
     otherMetadata(std::move(otherMetadata__arg)),
@@ -3311,16 +3184,13 @@ StreamPayloadMetadata::StreamPayloadMetadata(apache::thrift::FragileConstructor,
   __isset.otherMetadata = true;
   __isset.payloadMetadata = true;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void StreamPayloadMetadata::__clear() {
   // clear all fields
   this->compression =  ::apache::thrift::CompressionAlgorithm::NONE;
   this->otherMetadata.clear();
   this->payloadMetadata.__clear();
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool StreamPayloadMetadata::operator==(const StreamPayloadMetadata& rhs) const {
@@ -3377,9 +3247,7 @@ void swap(StreamPayloadMetadata& a, StreamPayloadMetadata& b) {
   swap(a.compression_ref().value_unchecked(), b.compression_ref().value_unchecked());
   swap(a.otherMetadata_ref().value_unchecked(), b.otherMetadata_ref().value_unchecked());
   swap(a.payloadMetadata_ref().value_unchecked(), b.payloadMetadata_ref().value_unchecked());
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void StreamPayloadMetadata::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -3434,11 +3302,8 @@ void TccStructTraits<::apache::thrift::ClientMetadata>::translateFieldName(
 
 namespace apache { namespace thrift {
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ClientMetadata::ClientMetadata(const ClientMetadata&) = default;
 ClientMetadata& ClientMetadata::operator=(const ClientMetadata&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ClientMetadata::ClientMetadata(ClientMetadata&& other) noexcept  :
     agent(std::move(other.agent)),
     hostname(std::move(other.hostname)),
@@ -3451,10 +3316,8 @@ ClientMetadata& ClientMetadata::operator=(FOLLY_MAYBE_UNUSED ClientMetadata&& ot
     __isset = other.__isset;
     return *this;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ClientMetadata::ClientMetadata(apache::thrift::FragileConstructor, ::std::string agent__arg, ::std::string hostname__arg, ::std::map<::std::string, ::std::string> otherMetadata__arg) :
     agent(std::move(agent__arg)),
     hostname(std::move(hostname__arg)),
@@ -3463,16 +3326,13 @@ ClientMetadata::ClientMetadata(apache::thrift::FragileConstructor, ::std::string
   __isset.hostname = true;
   __isset.otherMetadata = true;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void ClientMetadata::__clear() {
   // clear all fields
   this->agent = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
   this->hostname = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
   this->otherMetadata.clear();
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool ClientMetadata::operator==(const ClientMetadata& rhs) const {
@@ -3521,9 +3381,7 @@ void swap(ClientMetadata& a, ClientMetadata& b) {
   swap(a.agent_ref().value_unchecked(), b.agent_ref().value_unchecked());
   swap(a.hostname_ref().value_unchecked(), b.hostname_ref().value_unchecked());
   swap(a.otherMetadata_ref().value_unchecked(), b.otherMetadata_ref().value_unchecked());
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void ClientMetadata::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -3566,11 +3424,8 @@ void TccStructTraits<::apache::thrift::RequestSetupMetadata>::translateFieldName
 
 namespace apache { namespace thrift {
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 RequestSetupMetadata::RequestSetupMetadata(const RequestSetupMetadata&) = default;
 RequestSetupMetadata& RequestSetupMetadata::operator=(const RequestSetupMetadata&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 RequestSetupMetadata::RequestSetupMetadata() :
       interfaceKind( ::apache::thrift::InterfaceKind::USER),
       minVersion(0),
@@ -3579,11 +3434,9 @@ RequestSetupMetadata::RequestSetupMetadata() :
       markToReflect(0) {
 }
 
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 RequestSetupMetadata::~RequestSetupMetadata() {}
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 RequestSetupMetadata::RequestSetupMetadata(RequestSetupMetadata&& other) noexcept  :
     opaque(std::move(other.opaque)),
     interfaceKind(std::move(other.interfaceKind)),
@@ -3604,10 +3457,8 @@ RequestSetupMetadata& RequestSetupMetadata::operator=(FOLLY_MAYBE_UNUSED Request
     __isset = other.__isset;
     return *this;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 RequestSetupMetadata::RequestSetupMetadata(apache::thrift::FragileConstructor, apache::thrift::MetadataOpaqueMap<::std::string, ::std::string> opaque__arg, ::apache::thrift::InterfaceKind interfaceKind__arg, ::std::int32_t minVersion__arg, ::std::int32_t maxVersion__arg, ::std::int32_t dscpToReflect__arg, ::std::int32_t markToReflect__arg, ::apache::thrift::ClientMetadata clientMetadata__arg) :
     opaque(std::move(opaque__arg)),
     interfaceKind(std::move(interfaceKind__arg)),
@@ -3624,7 +3475,6 @@ RequestSetupMetadata::RequestSetupMetadata(apache::thrift::FragileConstructor, a
   __isset.markToReflect = true;
   __isset.clientMetadata = true;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void RequestSetupMetadata::__clear() {
   // clear all fields
@@ -3635,9 +3485,7 @@ void RequestSetupMetadata::__clear() {
   this->dscpToReflect = 0;
   this->markToReflect = 0;
   this->clientMetadata.__clear();
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool RequestSetupMetadata::operator==(const RequestSetupMetadata& rhs) const {
@@ -3694,9 +3542,7 @@ void swap(RequestSetupMetadata& a, RequestSetupMetadata& b) {
   swap(a.dscpToReflect_ref().value_unchecked(), b.dscpToReflect_ref().value_unchecked());
   swap(a.markToReflect_ref().value_unchecked(), b.markToReflect_ref().value_unchecked());
   swap(a.clientMetadata_ref().value_unchecked(), b.clientMetadata_ref().value_unchecked());
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void RequestSetupMetadata::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -3752,19 +3598,15 @@ void TccStructTraits<::apache::thrift::SetupResponse>::translateFieldName(
 namespace apache { namespace thrift {
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 SetupResponse::SetupResponse(apache::thrift::FragileConstructor, ::std::int32_t version__arg) :
     version(std::move(version__arg)) {
   __isset.version = true;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void SetupResponse::__clear() {
   // clear all fields
   this->version = 0;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool SetupResponse::operator==(const SetupResponse& rhs) const {
@@ -3791,9 +3633,7 @@ bool SetupResponse::operator<(const SetupResponse& rhs) const {
 void swap(SetupResponse& a, SetupResponse& b) {
   using ::std::swap;
   swap(a.version_ref().value_unchecked(), b.version_ref().value_unchecked());
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void SetupResponse::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -3836,11 +3676,8 @@ void TccStructTraits<::apache::thrift::HeadersPayloadContent>::translateFieldNam
 
 namespace apache { namespace thrift {
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 HeadersPayloadContent::HeadersPayloadContent(const HeadersPayloadContent&) = default;
 HeadersPayloadContent& HeadersPayloadContent::operator=(const HeadersPayloadContent&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 HeadersPayloadContent::HeadersPayloadContent(HeadersPayloadContent&& other) noexcept  :
     otherMetadata(std::move(other.otherMetadata)),
     __isset(other.__isset) {}
@@ -3849,22 +3686,17 @@ HeadersPayloadContent& HeadersPayloadContent::operator=(FOLLY_MAYBE_UNUSED Heade
     __isset = other.__isset;
     return *this;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 HeadersPayloadContent::HeadersPayloadContent(apache::thrift::FragileConstructor, ::std::map<::std::string, ::std::string> otherMetadata__arg) :
     otherMetadata(std::move(otherMetadata__arg)) {
   __isset.otherMetadata = true;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void HeadersPayloadContent::__clear() {
   // clear all fields
   this->otherMetadata.clear();
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool HeadersPayloadContent::operator==(const HeadersPayloadContent& rhs) const {
@@ -3899,9 +3731,7 @@ const ::std::map<::std::string, ::std::string>* HeadersPayloadContent::get_other
 void swap(HeadersPayloadContent& a, HeadersPayloadContent& b) {
   using ::std::swap;
   swap(a.otherMetadata_ref().value_unchecked(), b.otherMetadata_ref().value_unchecked());
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void HeadersPayloadContent::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -3944,11 +3774,8 @@ void TccStructTraits<::apache::thrift::StreamHeadersPush>::translateFieldName(
 
 namespace apache { namespace thrift {
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 StreamHeadersPush::StreamHeadersPush(const StreamHeadersPush&) = default;
 StreamHeadersPush& StreamHeadersPush::operator=(const StreamHeadersPush&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 StreamHeadersPush::StreamHeadersPush(StreamHeadersPush&& other) noexcept  :
     streamId(std::move(other.streamId)),
     headersPayloadContent(std::move(other.headersPayloadContent)),
@@ -3959,25 +3786,20 @@ StreamHeadersPush& StreamHeadersPush::operator=(FOLLY_MAYBE_UNUSED StreamHeaders
     __isset = other.__isset;
     return *this;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 StreamHeadersPush::StreamHeadersPush(apache::thrift::FragileConstructor, ::std::int32_t streamId__arg, ::apache::thrift::HeadersPayloadContent headersPayloadContent__arg) :
     streamId(std::move(streamId__arg)),
     headersPayloadContent(std::move(headersPayloadContent__arg)) {
   __isset.streamId = true;
   __isset.headersPayloadContent = true;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void StreamHeadersPush::__clear() {
   // clear all fields
   this->streamId = 0;
   this->headersPayloadContent.__clear();
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool StreamHeadersPush::operator==(const StreamHeadersPush& rhs) const {
@@ -4019,9 +3841,7 @@ void swap(StreamHeadersPush& a, StreamHeadersPush& b) {
   using ::std::swap;
   swap(a.streamId_ref().value_unchecked(), b.streamId_ref().value_unchecked());
   swap(a.headersPayloadContent_ref().value_unchecked(), b.headersPayloadContent_ref().value_unchecked());
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void StreamHeadersPush::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -4077,19 +3897,15 @@ void TccStructTraits<::apache::thrift::DrainCompletePush>::translateFieldName(
 namespace apache { namespace thrift {
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 DrainCompletePush::DrainCompletePush(apache::thrift::FragileConstructor, ::apache::thrift::DrainCompleteCode drainCompleteCode__arg) :
     drainCompleteCode(std::move(drainCompleteCode__arg)) {
   __isset.drainCompleteCode = true;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void DrainCompletePush::__clear() {
   // clear all fields
   this->drainCompleteCode = static_cast< ::apache::thrift::DrainCompleteCode>(0);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool DrainCompletePush::operator==(const DrainCompletePush& rhs) const {
@@ -4116,9 +3932,7 @@ bool DrainCompletePush::operator<(const DrainCompletePush& rhs) const {
 void swap(DrainCompletePush& a, DrainCompletePush& b) {
   using ::std::swap;
   swap(a.drainCompleteCode_ref().value_unchecked(), b.drainCompleteCode_ref().value_unchecked());
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void DrainCompletePush::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -4457,19 +4271,15 @@ void TccStructTraits<::apache::thrift::HeadersPayloadMetadata>::translateFieldNa
 namespace apache { namespace thrift {
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 HeadersPayloadMetadata::HeadersPayloadMetadata(apache::thrift::FragileConstructor, ::apache::thrift::CompressionAlgorithm compression__arg) :
     compression(std::move(compression__arg)) {
   __isset.compression = true;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void HeadersPayloadMetadata::__clear() {
   // clear all fields
   this->compression =  ::apache::thrift::CompressionAlgorithm::NONE;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool HeadersPayloadMetadata::operator==(const HeadersPayloadMetadata& rhs) const {
@@ -4496,9 +4306,7 @@ bool HeadersPayloadMetadata::operator<(const HeadersPayloadMetadata& rhs) const 
 void swap(HeadersPayloadMetadata& a, HeadersPayloadMetadata& b) {
   using ::std::swap;
   swap(a.compression_ref().value_unchecked(), b.compression_ref().value_unchecked());
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void HeadersPayloadMetadata::readNoXfer<>(apache::thrift::BinaryProtocolReader*);

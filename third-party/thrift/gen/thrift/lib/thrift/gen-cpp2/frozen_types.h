@@ -85,7 +85,6 @@ class Schema;
 // END typedefs
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 namespace apache { namespace thrift { namespace frozen { namespace schema {
 #ifndef SWIG
 using ::apache::thrift::detail::operator!=;
@@ -662,4 +661,3 @@ uint32_t Schema::read(Protocol_* iprot) {
 }
 
 }}}} // apache::thrift::frozen::schema
-THRIFT_IGNORE_ISSET_USE_WARNING_END

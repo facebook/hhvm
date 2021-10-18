@@ -157,7 +157,6 @@ class Schema;
 // END typedefs
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 namespace apache { namespace thrift { namespace reflection {
 #ifndef SWIG
 using ::apache::thrift::detail::operator!=;
@@ -815,4 +814,3 @@ uint32_t Schema::read(Protocol_* iprot) {
 }
 
 }}} // apache::thrift::reflection
-THRIFT_IGNORE_ISSET_USE_WARNING_END

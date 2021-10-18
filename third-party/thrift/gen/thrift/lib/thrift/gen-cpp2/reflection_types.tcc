@@ -71,9 +71,7 @@ _readField_isRequired:
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, bool>::readWithContext(*iprot, this->isRequired, _readState);
     
   }
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   this->__isset.isRequired = true;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -87,9 +85,7 @@ _readField_type:
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int64_t>::readWithContext(*iprot, this->type, _readState);
     
   }
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   this->__isset.type = true;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -103,9 +99,7 @@ _readField_name:
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->name, _readState);
     
   }
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   this->__isset.name = true;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -122,9 +116,7 @@ _readField_annotations:
     _readState.afterSubobject(iprot);
     
   }
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   this->__isset.annotations = true;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -138,9 +130,7 @@ _readField_order:
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int16_t>::readWithContext(*iprot, this->order, _readState);
     
   }
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   this->__isset.order = true;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -218,7 +208,6 @@ _skip:
 
 template <class Protocol_>
 uint32_t StructField::serializedSize(Protocol_ const* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("StructField");
   {
@@ -243,12 +232,10 @@ uint32_t StructField::serializedSize(Protocol_ const* prot_) const {
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template <class Protocol_>
 uint32_t StructField::serializedSizeZC(Protocol_ const* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("StructField");
   {
@@ -273,12 +260,10 @@ uint32_t StructField::serializedSizeZC(Protocol_ const* prot_) const {
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template <class Protocol_>
 uint32_t StructField::write(Protocol_* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("StructField");
   bool previousFieldHasValue = true;
@@ -322,7 +307,6 @@ uint32_t StructField::write(Protocol_* prot_) const {
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 extern template void StructField::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -358,9 +342,7 @@ _readField_name:
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->name, _readState);
     
   }
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   this->__isset.name = true;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -377,9 +359,7 @@ _readField_fields:
     _readState.afterSubobject(iprot);
     
   }
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   this->__isset.fields = true;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -393,9 +373,7 @@ _readField_mapKeyType:
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int64_t>::readWithContext(*iprot, this->mapKeyType, _readState);
     
   }
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   this->__isset.mapKeyType = true;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -409,9 +387,7 @@ _readField_valueType:
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int64_t>::readWithContext(*iprot, this->valueType, _readState);
     
   }
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   this->__isset.valueType = true;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -428,9 +404,7 @@ _readField_enumValues:
     _readState.afterSubobject(iprot);
     
   }
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   this->__isset.enumValues = true;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -508,7 +482,6 @@ _skip:
 
 template <class Protocol_>
 uint32_t DataType::serializedSize(Protocol_ const* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("DataType");
   {
@@ -533,12 +506,10 @@ uint32_t DataType::serializedSize(Protocol_ const* prot_) const {
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template <class Protocol_>
 uint32_t DataType::serializedSizeZC(Protocol_ const* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("DataType");
   {
@@ -563,12 +534,10 @@ uint32_t DataType::serializedSizeZC(Protocol_ const* prot_) const {
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template <class Protocol_>
 uint32_t DataType::write(Protocol_* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("DataType");
   bool previousFieldHasValue = true;
@@ -618,7 +587,6 @@ uint32_t DataType::write(Protocol_* prot_) const {
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 extern template void DataType::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -657,9 +625,7 @@ _readField_dataTypes:
     _readState.afterSubobject(iprot);
     
   }
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   this->__isset.dataTypes = true;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -676,9 +642,7 @@ _readField_names:
     _readState.afterSubobject(iprot);
     
   }
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   this->__isset.names = true;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -732,7 +696,6 @@ _skip:
 
 template <class Protocol_>
 uint32_t Schema::serializedSize(Protocol_ const* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("Schema");
   {
@@ -745,12 +708,10 @@ uint32_t Schema::serializedSize(Protocol_ const* prot_) const {
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template <class Protocol_>
 uint32_t Schema::serializedSizeZC(Protocol_ const* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("Schema");
   {
@@ -763,12 +724,10 @@ uint32_t Schema::serializedSizeZC(Protocol_ const* prot_) const {
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template <class Protocol_>
 uint32_t Schema::write(Protocol_* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("Schema");
   bool previousFieldHasValue = true;
@@ -789,7 +748,6 @@ uint32_t Schema::write(Protocol_* prot_) const {
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 extern template void Schema::readNoXfer<>(apache::thrift::BinaryProtocolReader*);

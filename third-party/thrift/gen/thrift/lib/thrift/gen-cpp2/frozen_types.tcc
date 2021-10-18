@@ -64,9 +64,7 @@ _readField_layoutId:
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int16_t>::readWithContext(*iprot, this->layoutId, _readState);
     
   }
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   this->__isset.layoutId = true;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -80,9 +78,7 @@ _readField_offset:
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int16_t>::readWithContext(*iprot, this->offset, _readState);
     
   }
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   this->__isset.offset = true;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -136,7 +132,6 @@ _skip:
 
 template <class Protocol_>
 uint32_t Field::serializedSize(Protocol_ const* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("Field");
   {
@@ -149,12 +144,10 @@ uint32_t Field::serializedSize(Protocol_ const* prot_) const {
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template <class Protocol_>
 uint32_t Field::serializedSizeZC(Protocol_ const* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("Field");
   {
@@ -167,12 +160,10 @@ uint32_t Field::serializedSizeZC(Protocol_ const* prot_) const {
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template <class Protocol_>
 uint32_t Field::write(Protocol_* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("Field");
   bool previousFieldHasValue = true;
@@ -193,7 +184,6 @@ uint32_t Field::write(Protocol_* prot_) const {
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 extern template void Field::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -229,9 +219,7 @@ _readField_size:
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::readWithContext(*iprot, this->size, _readState);
     
   }
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   this->__isset.size = true;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -245,9 +233,7 @@ _readField_bits:
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int16_t>::readWithContext(*iprot, this->bits, _readState);
     
   }
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   this->__isset.bits = true;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -264,9 +250,7 @@ _readField_fields:
     _readState.afterSubobject(iprot);
     
   }
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   this->__isset.fields = true;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -280,9 +264,7 @@ _readField_typeName:
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::readWithContext(*iprot, this->typeName, _readState);
     
   }
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   this->__isset.typeName = true;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -352,7 +334,6 @@ _skip:
 
 template <class Protocol_>
 uint32_t Layout::serializedSize(Protocol_ const* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("Layout");
   {
@@ -373,12 +354,10 @@ uint32_t Layout::serializedSize(Protocol_ const* prot_) const {
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template <class Protocol_>
 uint32_t Layout::serializedSizeZC(Protocol_ const* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("Layout");
   {
@@ -399,12 +378,10 @@ uint32_t Layout::serializedSizeZC(Protocol_ const* prot_) const {
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template <class Protocol_>
 uint32_t Layout::write(Protocol_* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("Layout");
   bool previousFieldHasValue = true;
@@ -439,7 +416,6 @@ uint32_t Layout::write(Protocol_* prot_) const {
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 extern template void Layout::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -475,9 +451,7 @@ _readField_fileVersion:
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::readWithContext(*iprot, this->fileVersion, _readState);
     
   }
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   this->__isset.fileVersion = true;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -491,9 +465,7 @@ _readField_relaxTypeChecks:
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, bool>::readWithContext(*iprot, this->relaxTypeChecks, _readState);
     
   }
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   this->__isset.relaxTypeChecks = true;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -510,9 +482,7 @@ _readField_layouts:
     _readState.afterSubobject(iprot);
     
   }
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   this->__isset.layouts = true;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -526,9 +496,7 @@ _readField_rootLayout:
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int16_t>::readWithContext(*iprot, this->rootLayout, _readState);
     
   }
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   this->__isset.rootLayout = true;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -598,7 +566,6 @@ _skip:
 
 template <class Protocol_>
 uint32_t Schema::serializedSize(Protocol_ const* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("Schema");
   {
@@ -619,12 +586,10 @@ uint32_t Schema::serializedSize(Protocol_ const* prot_) const {
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template <class Protocol_>
 uint32_t Schema::serializedSizeZC(Protocol_ const* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("Schema");
   {
@@ -645,12 +610,10 @@ uint32_t Schema::serializedSizeZC(Protocol_ const* prot_) const {
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template <class Protocol_>
 uint32_t Schema::write(Protocol_* prot_) const {
-  THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("Schema");
   bool previousFieldHasValue = true;
@@ -685,7 +648,6 @@ uint32_t Schema::write(Protocol_* prot_) const {
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
   return xfer;
-  THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 extern template void Schema::readNoXfer<>(apache::thrift::BinaryProtocolReader*);

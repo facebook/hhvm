@@ -460,7 +460,6 @@ class ThriftServiceMetadataResponse;
 // END typedefs
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 namespace apache { namespace thrift { namespace metadata {
 #ifndef SWIG
 using ::apache::thrift::detail::operator!=;
@@ -5206,7 +5205,6 @@ uint32_t ThriftServiceMetadataResponse::read(Protocol_* iprot) {
 }
 
 }}} // apache::thrift::metadata
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 namespace apache { namespace thrift {
 

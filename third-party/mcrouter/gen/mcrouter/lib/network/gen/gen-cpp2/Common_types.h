@@ -171,7 +171,6 @@ class GoAwayRequest;
 // END typedefs
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 namespace facebook { namespace memcache { namespace thrift {
 #ifndef SWIG
 using ::apache::thrift::detail::operator!=;
@@ -2196,4 +2195,3 @@ uint32_t GoAwayRequest::read(Protocol_* iprot) {
 }
 
 }}} // facebook::memcache::thrift
-THRIFT_IGNORE_ISSET_USE_WARNING_END

@@ -68,11 +68,8 @@ void TccStructTraits<::apache::thrift::metadata::ThriftStructType>::translateFie
 
 namespace apache { namespace thrift { namespace metadata {
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftStructType::ThriftStructType(const ThriftStructType&) = default;
 ThriftStructType& ThriftStructType::operator=(const ThriftStructType&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftStructType::ThriftStructType(ThriftStructType&& other) noexcept  :
     name(std::move(other.name)),
     __isset(other.__isset) {}
@@ -81,22 +78,17 @@ ThriftStructType& ThriftStructType::operator=(FOLLY_MAYBE_UNUSED ThriftStructTyp
     __isset = other.__isset;
     return *this;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftStructType::ThriftStructType(apache::thrift::FragileConstructor, ::std::string name__arg) :
     name(std::move(name__arg)) {
   __isset.name = true;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void ThriftStructType::__clear() {
   // clear all fields
   this->name = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool ThriftStructType::operator==(const ThriftStructType& rhs) const {
@@ -123,9 +115,7 @@ bool ThriftStructType::operator<(const ThriftStructType& rhs) const {
 void swap(ThriftStructType& a, ThriftStructType& b) {
   using ::std::swap;
   swap(a.name_ref().value(), b.name_ref().value());
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void ThriftStructType::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -164,11 +154,8 @@ void TccStructTraits<::apache::thrift::metadata::ThriftConstStruct>::translateFi
 
 namespace apache { namespace thrift { namespace metadata {
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftConstStruct::ThriftConstStruct(const ThriftConstStruct&) = default;
 ThriftConstStruct& ThriftConstStruct::operator=(const ThriftConstStruct&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftConstStruct::ThriftConstStruct(ThriftConstStruct&& other) noexcept  :
     type(std::move(other.type)),
     fields(std::move(other.fields)),
@@ -179,25 +166,20 @@ ThriftConstStruct& ThriftConstStruct::operator=(FOLLY_MAYBE_UNUSED ThriftConstSt
     __isset = other.__isset;
     return *this;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftConstStruct::ThriftConstStruct(apache::thrift::FragileConstructor, ::apache::thrift::metadata::ThriftStructType type__arg, ::std::map<::std::string, ::apache::thrift::metadata::ThriftConstValue> fields__arg) :
     type(std::move(type__arg)),
     fields(std::move(fields__arg)) {
   __isset.type = true;
   __isset.fields = true;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void ThriftConstStruct::__clear() {
   // clear all fields
   this->type.__clear();
   this->fields.clear();
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool ThriftConstStruct::operator==(const ThriftConstStruct& rhs) const {
@@ -247,9 +229,7 @@ void swap(ThriftConstStruct& a, ThriftConstStruct& b) {
   using ::std::swap;
   swap(a.type_ref().value(), b.type_ref().value());
   swap(a.fields_ref().value(), b.fields_ref().value());
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void ThriftConstStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -481,11 +461,8 @@ void TccStructTraits<::apache::thrift::metadata::ThriftConstValuePair>::translat
 
 namespace apache { namespace thrift { namespace metadata {
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftConstValuePair::ThriftConstValuePair(const ThriftConstValuePair&) = default;
 ThriftConstValuePair& ThriftConstValuePair::operator=(const ThriftConstValuePair&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftConstValuePair::ThriftConstValuePair(ThriftConstValuePair&& other) noexcept  :
     key(std::move(other.key)),
     value(std::move(other.value)),
@@ -496,25 +473,20 @@ ThriftConstValuePair& ThriftConstValuePair::operator=(FOLLY_MAYBE_UNUSED ThriftC
     __isset = other.__isset;
     return *this;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftConstValuePair::ThriftConstValuePair(apache::thrift::FragileConstructor, ::apache::thrift::metadata::ThriftConstValue key__arg, ::apache::thrift::metadata::ThriftConstValue value__arg) :
     key(std::move(key__arg)),
     value(std::move(value__arg)) {
   __isset.key = true;
   __isset.value = true;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void ThriftConstValuePair::__clear() {
   // clear all fields
   this->key.__clear();
   this->value.__clear();
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool ThriftConstValuePair::operator==(const ThriftConstValuePair& rhs) const {
@@ -564,9 +536,7 @@ void swap(ThriftConstValuePair& a, ThriftConstValuePair& b) {
   using ::std::swap;
   swap(a.key_ref().value(), b.key_ref().value());
   swap(a.value_ref().value(), b.value_ref().value());
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void ThriftConstValuePair::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -640,7 +610,6 @@ ThriftListType& ThriftListType::operator=(const ThriftListType& src) {
   return *this;
 }
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftListType::ThriftListType(ThriftListType&& other) noexcept  :
     valueType(std::move(other.valueType)) {}
 
@@ -648,13 +617,10 @@ ThriftListType& ThriftListType::operator=(FOLLY_MAYBE_UNUSED ThriftListType&& ot
     this->valueType = std::move(other.valueType);
     return *this;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftListType::ThriftListType(apache::thrift::FragileConstructor, ::std::unique_ptr<::apache::thrift::metadata::ThriftType> valueType__arg) :
     valueType(std::move(valueType__arg)) {}
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void ThriftListType::__clear() {
   // clear all fields
@@ -756,7 +722,6 @@ ThriftSetType& ThriftSetType::operator=(const ThriftSetType& src) {
   return *this;
 }
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftSetType::ThriftSetType(ThriftSetType&& other) noexcept  :
     valueType(std::move(other.valueType)) {}
 
@@ -764,13 +729,10 @@ ThriftSetType& ThriftSetType::operator=(FOLLY_MAYBE_UNUSED ThriftSetType&& other
     this->valueType = std::move(other.valueType);
     return *this;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftSetType::ThriftSetType(apache::thrift::FragileConstructor, ::std::unique_ptr<::apache::thrift::metadata::ThriftType> valueType__arg) :
     valueType(std::move(valueType__arg)) {}
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void ThriftSetType::__clear() {
   // clear all fields
@@ -874,7 +836,6 @@ ThriftMapType& ThriftMapType::operator=(const ThriftMapType& src) {
   return *this;
 }
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftMapType::ThriftMapType(ThriftMapType&& other) noexcept  :
     keyType(std::move(other.keyType)),
     valueType(std::move(other.valueType)) {}
@@ -884,14 +845,11 @@ ThriftMapType& ThriftMapType::operator=(FOLLY_MAYBE_UNUSED ThriftMapType&& other
     this->valueType = std::move(other.valueType);
     return *this;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftMapType::ThriftMapType(apache::thrift::FragileConstructor, ::std::unique_ptr<::apache::thrift::metadata::ThriftType> keyType__arg, ::std::unique_ptr<::apache::thrift::metadata::ThriftType> valueType__arg) :
     keyType(std::move(keyType__arg)),
     valueType(std::move(valueType__arg)) {}
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void ThriftMapType::__clear() {
   // clear all fields
@@ -1012,11 +970,8 @@ void TccStructTraits<::apache::thrift::metadata::ThriftEnumType>::translateField
 
 namespace apache { namespace thrift { namespace metadata {
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftEnumType::ThriftEnumType(const ThriftEnumType&) = default;
 ThriftEnumType& ThriftEnumType::operator=(const ThriftEnumType&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftEnumType::ThriftEnumType(ThriftEnumType&& other) noexcept  :
     name(std::move(other.name)),
     __isset(other.__isset) {}
@@ -1025,22 +980,17 @@ ThriftEnumType& ThriftEnumType::operator=(FOLLY_MAYBE_UNUSED ThriftEnumType&& ot
     __isset = other.__isset;
     return *this;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftEnumType::ThriftEnumType(apache::thrift::FragileConstructor, ::std::string name__arg) :
     name(std::move(name__arg)) {
   __isset.name = true;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void ThriftEnumType::__clear() {
   // clear all fields
   this->name = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool ThriftEnumType::operator==(const ThriftEnumType& rhs) const {
@@ -1067,9 +1017,7 @@ bool ThriftEnumType::operator<(const ThriftEnumType& rhs) const {
 void swap(ThriftEnumType& a, ThriftEnumType& b) {
   using ::std::swap;
   swap(a.name_ref().value(), b.name_ref().value());
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void ThriftEnumType::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -1108,11 +1056,8 @@ void TccStructTraits<::apache::thrift::metadata::ThriftUnionType>::translateFiel
 
 namespace apache { namespace thrift { namespace metadata {
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftUnionType::ThriftUnionType(const ThriftUnionType&) = default;
 ThriftUnionType& ThriftUnionType::operator=(const ThriftUnionType&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftUnionType::ThriftUnionType(ThriftUnionType&& other) noexcept  :
     name(std::move(other.name)),
     __isset(other.__isset) {}
@@ -1121,22 +1066,17 @@ ThriftUnionType& ThriftUnionType::operator=(FOLLY_MAYBE_UNUSED ThriftUnionType&&
     __isset = other.__isset;
     return *this;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftUnionType::ThriftUnionType(apache::thrift::FragileConstructor, ::std::string name__arg) :
     name(std::move(name__arg)) {
   __isset.name = true;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void ThriftUnionType::__clear() {
   // clear all fields
   this->name = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool ThriftUnionType::operator==(const ThriftUnionType& rhs) const {
@@ -1163,9 +1103,7 @@ bool ThriftUnionType::operator<(const ThriftUnionType& rhs) const {
 void swap(ThriftUnionType& a, ThriftUnionType& b) {
   using ::std::swap;
   swap(a.name_ref().value(), b.name_ref().value());
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void ThriftUnionType::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -1206,9 +1144,7 @@ namespace apache { namespace thrift { namespace metadata {
 
 ThriftTypedefType::ThriftTypedefType(const ThriftTypedefType& srcObj) {
   name = srcObj.name;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset.name = srcObj.__isset.name;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
   underlyingType = ::apache::thrift::detail::st::copy_field<
         ::apache::thrift::type_class::variant>(srcObj.underlyingType);
 }
@@ -1219,7 +1155,6 @@ ThriftTypedefType& ThriftTypedefType::operator=(const ThriftTypedefType& src) {
   return *this;
 }
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftTypedefType::ThriftTypedefType(ThriftTypedefType&& other) noexcept  :
     name(std::move(other.name)),
     underlyingType(std::move(other.underlyingType)),
@@ -1230,24 +1165,19 @@ ThriftTypedefType& ThriftTypedefType::operator=(FOLLY_MAYBE_UNUSED ThriftTypedef
     __isset = other.__isset;
     return *this;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftTypedefType::ThriftTypedefType(apache::thrift::FragileConstructor, ::std::string name__arg, ::std::unique_ptr<::apache::thrift::metadata::ThriftType> underlyingType__arg) :
     name(std::move(name__arg)),
     underlyingType(std::move(underlyingType__arg)) {
   __isset.name = true;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void ThriftTypedefType::__clear() {
   // clear all fields
   this->name = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
   this->underlyingType.reset();
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool ThriftTypedefType::operator==(const ThriftTypedefType& rhs) const {
@@ -1291,9 +1221,7 @@ void swap(ThriftTypedefType& a, ThriftTypedefType& b) {
   using ::std::swap;
   swap(a.name_ref().value(), b.name_ref().value());
   swap(a.underlyingType, b.underlyingType);
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void ThriftTypedefType::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -1357,7 +1285,6 @@ ThriftStreamType& ThriftStreamType::operator=(const ThriftStreamType& src) {
   return *this;
 }
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftStreamType::ThriftStreamType(ThriftStreamType&& other) noexcept  :
     elemType(std::move(other.elemType)),
     initialResponseType(std::move(other.initialResponseType)) {}
@@ -1367,14 +1294,11 @@ ThriftStreamType& ThriftStreamType::operator=(FOLLY_MAYBE_UNUSED ThriftStreamTyp
     this->initialResponseType = std::move(other.initialResponseType);
     return *this;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftStreamType::ThriftStreamType(apache::thrift::FragileConstructor, ::std::unique_ptr<::apache::thrift::metadata::ThriftType> elemType__arg, ::std::unique_ptr<::apache::thrift::metadata::ThriftType> initialResponseType__arg) :
     elemType(std::move(elemType__arg)),
     initialResponseType(std::move(initialResponseType__arg)) {}
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void ThriftStreamType::__clear() {
   // clear all fields
@@ -1510,7 +1434,6 @@ ThriftSinkType& ThriftSinkType::operator=(const ThriftSinkType& src) {
   return *this;
 }
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftSinkType::ThriftSinkType(ThriftSinkType&& other) noexcept  :
     elemType(std::move(other.elemType)),
     finalResponseType(std::move(other.finalResponseType)),
@@ -1522,15 +1445,12 @@ ThriftSinkType& ThriftSinkType::operator=(FOLLY_MAYBE_UNUSED ThriftSinkType&& ot
     this->initialResponseType = std::move(other.initialResponseType);
     return *this;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftSinkType::ThriftSinkType(apache::thrift::FragileConstructor, ::std::unique_ptr<::apache::thrift::metadata::ThriftType> elemType__arg, ::std::unique_ptr<::apache::thrift::metadata::ThriftType> finalResponseType__arg, ::std::unique_ptr<::apache::thrift::metadata::ThriftType> initialResponseType__arg) :
     elemType(std::move(elemType__arg)),
     finalResponseType(std::move(finalResponseType__arg)),
     initialResponseType(std::move(initialResponseType__arg)) {}
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void ThriftSinkType::__clear() {
   // clear all fields
@@ -1955,11 +1875,8 @@ void TccStructTraits<::apache::thrift::metadata::ThriftEnum>::translateFieldName
 
 namespace apache { namespace thrift { namespace metadata {
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftEnum::ThriftEnum(const ThriftEnum&) = default;
 ThriftEnum& ThriftEnum::operator=(const ThriftEnum&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftEnum::ThriftEnum(ThriftEnum&& other) noexcept  :
     name(std::move(other.name)),
     elements(std::move(other.elements)),
@@ -1972,10 +1889,8 @@ ThriftEnum& ThriftEnum::operator=(FOLLY_MAYBE_UNUSED ThriftEnum&& other) noexcep
     __isset = other.__isset;
     return *this;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftEnum::ThriftEnum(apache::thrift::FragileConstructor, ::std::string name__arg, ::std::map<::std::int32_t, ::std::string> elements__arg, ::std::vector<::apache::thrift::metadata::ThriftConstStruct> structured_annotations__arg) :
     name(std::move(name__arg)),
     elements(std::move(elements__arg)),
@@ -1984,16 +1899,13 @@ ThriftEnum::ThriftEnum(apache::thrift::FragileConstructor, ::std::string name__a
   __isset.elements = true;
   __isset.structured_annotations = true;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void ThriftEnum::__clear() {
   // clear all fields
   this->name = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
   this->elements.clear();
   this->structured_annotations.clear();
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool ThriftEnum::operator==(const ThriftEnum& rhs) const {
@@ -2050,9 +1962,7 @@ void swap(ThriftEnum& a, ThriftEnum& b) {
   swap(a.name_ref().value(), b.name_ref().value());
   swap(a.elements_ref().value(), b.elements_ref().value());
   swap(a.structured_annotations_ref().value(), b.structured_annotations_ref().value());
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void ThriftEnum::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -2103,21 +2013,16 @@ void TccStructTraits<::apache::thrift::metadata::ThriftField>::translateFieldNam
 
 namespace apache { namespace thrift { namespace metadata {
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftField::ThriftField(const ThriftField&) = default;
 ThriftField& ThriftField::operator=(const ThriftField&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftField::ThriftField() :
       id(0),
       is_optional(0) {
 }
 
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 ThriftField::~ThriftField() {}
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftField::ThriftField(ThriftField&& other) noexcept  :
     id(std::move(other.id)),
     type(std::move(other.type)),
@@ -2136,10 +2041,8 @@ ThriftField& ThriftField::operator=(FOLLY_MAYBE_UNUSED ThriftField&& other) noex
     __isset = other.__isset;
     return *this;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftField::ThriftField(apache::thrift::FragileConstructor, ::std::int32_t id__arg, ::apache::thrift::metadata::ThriftType type__arg, ::std::string name__arg, bool is_optional__arg, ::std::vector<::apache::thrift::metadata::ThriftConstStruct> structured_annotations__arg, ::std::map<::std::string, ::std::string> unstructured_annotations__arg) :
     id(std::move(id__arg)),
     type(std::move(type__arg)),
@@ -2154,7 +2057,6 @@ ThriftField::ThriftField(apache::thrift::FragileConstructor, ::std::int32_t id__
   __isset.structured_annotations = true;
   __isset.unstructured_annotations = true;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void ThriftField::__clear() {
   // clear all fields
@@ -2164,9 +2066,7 @@ void ThriftField::__clear() {
   this->is_optional = 0;
   this->structured_annotations.clear();
   this->unstructured_annotations.clear();
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool ThriftField::operator==(const ThriftField& rhs) const {
@@ -2252,9 +2152,7 @@ void swap(ThriftField& a, ThriftField& b) {
   swap(a.is_optional_ref().value(), b.is_optional_ref().value());
   swap(a.structured_annotations_ref().value(), b.structured_annotations_ref().value());
   swap(a.unstructured_annotations_ref().value_unchecked(), b.unstructured_annotations_ref().value_unchecked());
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void ThriftField::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -2317,11 +2215,8 @@ void TccStructTraits<::apache::thrift::metadata::ThriftStruct>::translateFieldNa
 
 namespace apache { namespace thrift { namespace metadata {
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftStruct::ThriftStruct(const ThriftStruct&) = default;
 ThriftStruct& ThriftStruct::operator=(const ThriftStruct&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftStruct::ThriftStruct(ThriftStruct&& other) noexcept  :
     name(std::move(other.name)),
     fields(std::move(other.fields)),
@@ -2336,10 +2231,8 @@ ThriftStruct& ThriftStruct::operator=(FOLLY_MAYBE_UNUSED ThriftStruct&& other) n
     __isset = other.__isset;
     return *this;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftStruct::ThriftStruct(apache::thrift::FragileConstructor, ::std::string name__arg, ::std::vector<::apache::thrift::metadata::ThriftField> fields__arg, bool is_union__arg, ::std::vector<::apache::thrift::metadata::ThriftConstStruct> structured_annotations__arg) :
     name(std::move(name__arg)),
     fields(std::move(fields__arg)),
@@ -2350,7 +2243,6 @@ ThriftStruct::ThriftStruct(apache::thrift::FragileConstructor, ::std::string nam
   __isset.is_union = true;
   __isset.structured_annotations = true;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void ThriftStruct::__clear() {
   // clear all fields
@@ -2358,9 +2250,7 @@ void ThriftStruct::__clear() {
   this->fields.clear();
   this->is_union = 0;
   this->structured_annotations.clear();
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool ThriftStruct::operator==(const ThriftStruct& rhs) const {
@@ -2424,9 +2314,7 @@ void swap(ThriftStruct& a, ThriftStruct& b) {
   swap(a.fields_ref().value(), b.fields_ref().value());
   swap(a.is_union_ref().value(), b.is_union_ref().value());
   swap(a.structured_annotations_ref().value(), b.structured_annotations_ref().value());
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void ThriftStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -2489,11 +2377,8 @@ void TccStructTraits<::apache::thrift::metadata::ThriftException>::translateFiel
 
 namespace apache { namespace thrift { namespace metadata {
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftException::ThriftException(const ThriftException&) = default;
 ThriftException& ThriftException::operator=(const ThriftException&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftException::ThriftException(ThriftException&& other) noexcept  :
     name(std::move(other.name)),
     fields(std::move(other.fields)),
@@ -2506,10 +2391,8 @@ ThriftException& ThriftException::operator=(FOLLY_MAYBE_UNUSED ThriftException&&
     __isset = other.__isset;
     return *this;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftException::ThriftException(apache::thrift::FragileConstructor, ::std::string name__arg, ::std::vector<::apache::thrift::metadata::ThriftField> fields__arg, ::std::vector<::apache::thrift::metadata::ThriftConstStruct> structured_annotations__arg) :
     name(std::move(name__arg)),
     fields(std::move(fields__arg)),
@@ -2518,16 +2401,13 @@ ThriftException::ThriftException(apache::thrift::FragileConstructor, ::std::stri
   __isset.fields = true;
   __isset.structured_annotations = true;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void ThriftException::__clear() {
   // clear all fields
   this->name = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
   this->fields.clear();
   this->structured_annotations.clear();
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool ThriftException::operator==(const ThriftException& rhs) const {
@@ -2584,9 +2464,7 @@ void swap(ThriftException& a, ThriftException& b) {
   swap(a.name_ref().value(), b.name_ref().value());
   swap(a.fields_ref().value(), b.fields_ref().value());
   swap(a.structured_annotations_ref().value(), b.structured_annotations_ref().value());
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void ThriftException::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -2649,20 +2527,15 @@ void TccStructTraits<::apache::thrift::metadata::ThriftFunction>::translateField
 
 namespace apache { namespace thrift { namespace metadata {
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftFunction::ThriftFunction(const ThriftFunction&) = default;
 ThriftFunction& ThriftFunction::operator=(const ThriftFunction&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftFunction::ThriftFunction() :
       is_oneway(0) {
 }
 
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 ThriftFunction::~ThriftFunction() {}
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftFunction::ThriftFunction(ThriftFunction&& other) noexcept  :
     name(std::move(other.name)),
     return_type(std::move(other.return_type)),
@@ -2681,10 +2554,8 @@ ThriftFunction& ThriftFunction::operator=(FOLLY_MAYBE_UNUSED ThriftFunction&& ot
     __isset = other.__isset;
     return *this;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftFunction::ThriftFunction(apache::thrift::FragileConstructor, ::std::string name__arg, ::apache::thrift::metadata::ThriftType return_type__arg, ::std::vector<::apache::thrift::metadata::ThriftField> arguments__arg, ::std::vector<::apache::thrift::metadata::ThriftField> exceptions__arg, bool is_oneway__arg, ::std::vector<::apache::thrift::metadata::ThriftConstStruct> structured_annotations__arg) :
     name(std::move(name__arg)),
     return_type(std::move(return_type__arg)),
@@ -2699,7 +2570,6 @@ ThriftFunction::ThriftFunction(apache::thrift::FragileConstructor, ::std::string
   __isset.is_oneway = true;
   __isset.structured_annotations = true;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void ThriftFunction::__clear() {
   // clear all fields
@@ -2709,9 +2579,7 @@ void ThriftFunction::__clear() {
   this->exceptions.clear();
   this->is_oneway = 0;
   this->structured_annotations.clear();
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool ThriftFunction::operator==(const ThriftFunction& rhs) const {
@@ -2805,9 +2673,7 @@ void swap(ThriftFunction& a, ThriftFunction& b) {
   swap(a.exceptions_ref().value(), b.exceptions_ref().value());
   swap(a.is_oneway_ref().value(), b.is_oneway_ref().value());
   swap(a.structured_annotations_ref().value(), b.structured_annotations_ref().value());
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void ThriftFunction::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -2894,11 +2760,8 @@ void TccStructTraits<::apache::thrift::metadata::ThriftService>::translateFieldN
 
 namespace apache { namespace thrift { namespace metadata {
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftService::ThriftService(const ThriftService&) = default;
 ThriftService& ThriftService::operator=(const ThriftService&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftService::ThriftService(ThriftService&& other) noexcept  :
     name(std::move(other.name)),
     functions(std::move(other.functions)),
@@ -2913,10 +2776,8 @@ ThriftService& ThriftService::operator=(FOLLY_MAYBE_UNUSED ThriftService&& other
     __isset = other.__isset;
     return *this;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftService::ThriftService(apache::thrift::FragileConstructor, ::std::string name__arg, ::std::vector<::apache::thrift::metadata::ThriftFunction> functions__arg, ::std::string parent__arg, ::std::vector<::apache::thrift::metadata::ThriftConstStruct> structured_annotations__arg) :
     name(std::move(name__arg)),
     functions(std::move(functions__arg)),
@@ -2927,7 +2788,6 @@ ThriftService::ThriftService(apache::thrift::FragileConstructor, ::std::string n
   __isset.parent = true;
   __isset.structured_annotations = true;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void ThriftService::__clear() {
   // clear all fields
@@ -2935,9 +2795,7 @@ void ThriftService::__clear() {
   this->functions.clear();
   this->parent = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
   this->structured_annotations.clear();
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool ThriftService::operator==(const ThriftService& rhs) const {
@@ -3001,9 +2859,7 @@ void swap(ThriftService& a, ThriftService& b) {
   swap(a.functions_ref().value(), b.functions_ref().value());
   swap(a.parent_ref().value_unchecked(), b.parent_ref().value_unchecked());
   swap(a.structured_annotations_ref().value(), b.structured_annotations_ref().value());
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void ThriftService::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -3066,11 +2922,8 @@ void TccStructTraits<::apache::thrift::metadata::ThriftModuleContext>::translate
 
 namespace apache { namespace thrift { namespace metadata {
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftModuleContext::ThriftModuleContext(const ThriftModuleContext&) = default;
 ThriftModuleContext& ThriftModuleContext::operator=(const ThriftModuleContext&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftModuleContext::ThriftModuleContext(ThriftModuleContext&& other) noexcept  :
     name(std::move(other.name)),
     __isset(other.__isset) {}
@@ -3079,22 +2932,17 @@ ThriftModuleContext& ThriftModuleContext::operator=(FOLLY_MAYBE_UNUSED ThriftMod
     __isset = other.__isset;
     return *this;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftModuleContext::ThriftModuleContext(apache::thrift::FragileConstructor, ::std::string name__arg) :
     name(std::move(name__arg)) {
   __isset.name = true;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void ThriftModuleContext::__clear() {
   // clear all fields
   this->name = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool ThriftModuleContext::operator==(const ThriftModuleContext& rhs) const {
@@ -3121,9 +2969,7 @@ bool ThriftModuleContext::operator<(const ThriftModuleContext& rhs) const {
 void swap(ThriftModuleContext& a, ThriftModuleContext& b) {
   using ::std::swap;
   swap(a.name_ref().value(), b.name_ref().value());
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void ThriftModuleContext::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -3162,11 +3008,8 @@ void TccStructTraits<::apache::thrift::metadata::ThriftServiceContext>::translat
 
 namespace apache { namespace thrift { namespace metadata {
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftServiceContext::ThriftServiceContext(const ThriftServiceContext&) = default;
 ThriftServiceContext& ThriftServiceContext::operator=(const ThriftServiceContext&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftServiceContext::ThriftServiceContext(ThriftServiceContext&& other) noexcept  :
     service_info(std::move(other.service_info)),
     module(std::move(other.module)),
@@ -3177,25 +3020,20 @@ ThriftServiceContext& ThriftServiceContext::operator=(FOLLY_MAYBE_UNUSED ThriftS
     __isset = other.__isset;
     return *this;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftServiceContext::ThriftServiceContext(apache::thrift::FragileConstructor, ::apache::thrift::metadata::ThriftService service_info__arg, ::apache::thrift::metadata::ThriftModuleContext module__arg) :
     service_info(std::move(service_info__arg)),
     module(std::move(module__arg)) {
   __isset.service_info = true;
   __isset.module = true;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void ThriftServiceContext::__clear() {
   // clear all fields
   this->service_info.__clear();
   this->module.__clear();
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool ThriftServiceContext::operator==(const ThriftServiceContext& rhs) const {
@@ -3245,9 +3083,7 @@ void swap(ThriftServiceContext& a, ThriftServiceContext& b) {
   using ::std::swap;
   swap(a.service_info_ref().value(), b.service_info_ref().value());
   swap(a.module_ref().value(), b.module_ref().value());
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void ThriftServiceContext::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -3310,11 +3146,8 @@ void TccStructTraits<::apache::thrift::metadata::ThriftMetadata>::translateField
 
 namespace apache { namespace thrift { namespace metadata {
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftMetadata::ThriftMetadata(const ThriftMetadata&) = default;
 ThriftMetadata& ThriftMetadata::operator=(const ThriftMetadata&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftMetadata::ThriftMetadata(ThriftMetadata&& other) noexcept  :
     enums(std::move(other.enums)),
     structs(std::move(other.structs)),
@@ -3329,10 +3162,8 @@ ThriftMetadata& ThriftMetadata::operator=(FOLLY_MAYBE_UNUSED ThriftMetadata&& ot
     __isset = other.__isset;
     return *this;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftMetadata::ThriftMetadata(apache::thrift::FragileConstructor, ::std::map<::std::string, ::apache::thrift::metadata::ThriftEnum> enums__arg, ::std::map<::std::string, ::apache::thrift::metadata::ThriftStruct> structs__arg, ::std::map<::std::string, ::apache::thrift::metadata::ThriftException> exceptions__arg, ::std::map<::std::string, ::apache::thrift::metadata::ThriftService> services__arg) :
     enums(std::move(enums__arg)),
     structs(std::move(structs__arg)),
@@ -3343,7 +3174,6 @@ ThriftMetadata::ThriftMetadata(apache::thrift::FragileConstructor, ::std::map<::
   __isset.exceptions = true;
   __isset.services = true;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void ThriftMetadata::__clear() {
   // clear all fields
@@ -3351,9 +3181,7 @@ void ThriftMetadata::__clear() {
   this->structs.clear();
   this->exceptions.clear();
   this->services.clear();
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool ThriftMetadata::operator==(const ThriftMetadata& rhs) const {
@@ -3433,9 +3261,7 @@ void swap(ThriftMetadata& a, ThriftMetadata& b) {
   swap(a.structs_ref().value(), b.structs_ref().value());
   swap(a.exceptions_ref().value(), b.exceptions_ref().value());
   swap(a.services_ref().value(), b.services_ref().value());
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void ThriftMetadata::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -3522,11 +3348,8 @@ void TccStructTraits<::apache::thrift::metadata::ThriftServiceMetadataResponse>:
 
 namespace apache { namespace thrift { namespace metadata {
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftServiceMetadataResponse::ThriftServiceMetadataResponse(const ThriftServiceMetadataResponse&) = default;
 ThriftServiceMetadataResponse& ThriftServiceMetadataResponse::operator=(const ThriftServiceMetadataResponse&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftServiceMetadataResponse::ThriftServiceMetadataResponse(ThriftServiceMetadataResponse&& other) noexcept  :
     context(std::move(other.context)),
     metadata(std::move(other.metadata)),
@@ -3537,25 +3360,20 @@ ThriftServiceMetadataResponse& ThriftServiceMetadataResponse::operator=(FOLLY_MA
     __isset = other.__isset;
     return *this;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ThriftServiceMetadataResponse::ThriftServiceMetadataResponse(apache::thrift::FragileConstructor, ::apache::thrift::metadata::ThriftServiceContext context__arg, ::apache::thrift::metadata::ThriftMetadata metadata__arg) :
     context(std::move(context__arg)),
     metadata(std::move(metadata__arg)) {
   __isset.context = true;
   __isset.metadata = true;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void ThriftServiceMetadataResponse::__clear() {
   // clear all fields
   this->context.__clear();
   this->metadata.__clear();
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool ThriftServiceMetadataResponse::operator==(const ThriftServiceMetadataResponse& rhs) const {
@@ -3605,9 +3423,7 @@ void swap(ThriftServiceMetadataResponse& a, ThriftServiceMetadataResponse& b) {
   using ::std::swap;
   swap(a.context_ref().value(), b.context_ref().value());
   swap(a.metadata_ref().value(), b.metadata_ref().value());
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void ThriftServiceMetadataResponse::readNoXfer<>(apache::thrift::BinaryProtocolReader*);

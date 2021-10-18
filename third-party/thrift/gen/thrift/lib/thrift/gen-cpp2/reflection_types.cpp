@@ -68,22 +68,17 @@ void TccStructTraits<::apache::thrift::reflection::StructField>::translateFieldN
 
 namespace apache { namespace thrift { namespace reflection {
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 StructField::StructField(const StructField&) = default;
 StructField& StructField::operator=(const StructField&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 StructField::StructField() :
       isRequired(0),
       type(0),
       order(0) {
 }
 
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 StructField::~StructField() {}
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 StructField::StructField(StructField&& other) noexcept  :
     isRequired(std::move(other.isRequired)),
     type(std::move(other.type)),
@@ -100,10 +95,8 @@ StructField& StructField::operator=(FOLLY_MAYBE_UNUSED StructField&& other) noex
     __isset = other.__isset;
     return *this;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 StructField::StructField(apache::thrift::FragileConstructor, bool isRequired__arg, ::std::int64_t type__arg, ::std::string name__arg, std::unordered_map<::std::string, ::std::string> annotations__arg, ::std::int16_t order__arg) :
     isRequired(std::move(isRequired__arg)),
     type(std::move(type__arg)),
@@ -116,7 +109,6 @@ StructField::StructField(apache::thrift::FragileConstructor, bool isRequired__ar
   __isset.annotations = true;
   __isset.order = true;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void StructField::__clear() {
   // clear all fields
@@ -125,9 +117,7 @@ void StructField::__clear() {
   this->name = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
   this->annotations.clear();
   this->order = 0;
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool StructField::operator==(const StructField& rhs) const {
@@ -168,9 +158,7 @@ void swap(StructField& a, StructField& b) {
   swap(a.name_ref().value(), b.name_ref().value());
   swap(a.annotations_ref().value_unchecked(), b.annotations_ref().value_unchecked());
   swap(a.order_ref().value(), b.order_ref().value());
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void StructField::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -209,21 +197,16 @@ void TccStructTraits<::apache::thrift::reflection::DataType>::translateFieldName
 
 namespace apache { namespace thrift { namespace reflection {
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 DataType::DataType(const DataType&) = default;
 DataType& DataType::operator=(const DataType&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 DataType::DataType() :
       mapKeyType(0),
       valueType(0) {
 }
 
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 DataType::~DataType() {}
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 DataType::DataType(DataType&& other) noexcept  :
     name(std::move(other.name)),
     fields(std::move(other.fields)),
@@ -240,10 +223,8 @@ DataType& DataType::operator=(FOLLY_MAYBE_UNUSED DataType&& other) noexcept {
     __isset = other.__isset;
     return *this;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 DataType::DataType(apache::thrift::FragileConstructor, ::std::string name__arg, std::unordered_map<::std::int16_t, ::apache::thrift::reflection::StructField> fields__arg, ::std::int64_t mapKeyType__arg, ::std::int64_t valueType__arg, std::unordered_map<::std::string, ::std::int32_t> enumValues__arg) :
     name(std::move(name__arg)),
     fields(std::move(fields__arg)),
@@ -256,7 +237,6 @@ DataType::DataType(apache::thrift::FragileConstructor, ::std::string name__arg, 
   __isset.valueType = true;
   __isset.enumValues = true;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void DataType::__clear() {
   // clear all fields
@@ -265,9 +245,7 @@ void DataType::__clear() {
   this->mapKeyType = 0;
   this->valueType = 0;
   this->enumValues.clear();
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool DataType::operator==(const DataType& rhs) const {
@@ -316,9 +294,7 @@ void swap(DataType& a, DataType& b) {
   swap(a.mapKeyType_ref().value_unchecked(), b.mapKeyType_ref().value_unchecked());
   swap(a.valueType_ref().value_unchecked(), b.valueType_ref().value_unchecked());
   swap(a.enumValues_ref().value_unchecked(), b.enumValues_ref().value_unchecked());
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void DataType::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -369,11 +345,8 @@ void TccStructTraits<::apache::thrift::reflection::Schema>::translateFieldName(
 
 namespace apache { namespace thrift { namespace reflection {
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 Schema::Schema(const Schema&) = default;
 Schema& Schema::operator=(const Schema&) = default;
-THRIFT_IGNORE_ISSET_USE_WARNING_END
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 Schema::Schema(Schema&& other) noexcept  :
     dataTypes(std::move(other.dataTypes)),
     names(std::move(other.names)),
@@ -384,25 +357,20 @@ Schema& Schema::operator=(FOLLY_MAYBE_UNUSED Schema&& other) noexcept {
     __isset = other.__isset;
     return *this;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 Schema::Schema(apache::thrift::FragileConstructor, std::unordered_map<::std::int64_t, ::apache::thrift::reflection::DataType> dataTypes__arg, std::unordered_map<::std::string, ::std::int64_t> names__arg) :
     dataTypes(std::move(dataTypes__arg)),
     names(std::move(names__arg)) {
   __isset.dataTypes = true;
   __isset.names = true;
 }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 void Schema::__clear() {
   // clear all fields
   this->dataTypes.clear();
   this->names.clear();
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool Schema::operator==(const Schema& rhs) const {
@@ -439,9 +407,7 @@ void swap(Schema& a, Schema& b) {
   using ::std::swap;
   swap(a.dataTypes_ref().value(), b.dataTypes_ref().value());
   swap(a.names_ref().value(), b.names_ref().value());
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
-THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void Schema::readNoXfer<>(apache::thrift::BinaryProtocolReader*);

@@ -3179,10 +3179,13 @@ let unknown_type description pos r =
   let msg = "Was expecting " ^ description ^ " but type is unknown" in
   add_list (Typing.err_code Typing.UnknownType) (pos, msg) r
 
-let not_found_suggestion orig similar =
+let not_found_suggestion orig similar kind =
   match similar with
   | (`static, pos, v) ->
-    suggestion_message ~modifier:"static method " orig v pos
+  begin match kind with
+    | `method_ -> suggestion_message ~modifier:"static method " orig v pos
+    | `property -> suggestion_message ~modifier:"static property " orig v pos
+  end
   | (`instance, pos, v) -> suggestion_message orig v pos
 
 let snot_found_suggestion orig similar =
@@ -3260,6 +3263,7 @@ let member_not_found
     reason
     (on_error : typing_error_callback) =
   let type_name = strip_ns type_name |> Markdown_lite.md_codify in
+  let kind_record = kind in
   let kind =
     match kind with
     | `method_ -> "instance method"
@@ -3276,7 +3280,7 @@ let member_not_found
     match similar with
     | None -> ([], [])
     | Some ((_, _, similar_name) as similar) ->
-      ( [not_found_suggestion member_name similar],
+      ( [not_found_suggestion member_name similar kind_record],
         [
           { title = "Change to ->" ^ similar_name; new_text = similar_name; pos };
         ] )

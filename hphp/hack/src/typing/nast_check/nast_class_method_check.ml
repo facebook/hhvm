@@ -25,13 +25,6 @@ let error_if_duplicate_method_names methods =
   in
   ()
 
-let error_if_clone_has_arguments method_ =
-  match (method_.m_name, method_.m_params) with
-  | ((pos, name), _ :: _)
-    when String.equal name Naming_special_names.Members.__clone ->
-    Errors.clone_too_many_arguments pos
-  | _ -> ()
-
 let error_if_abstract_method_is_memoized method_ =
   if method_.m_abstract && is_memoizable method_.m_user_attributes then
     Errors.abstract_method_memoize (fst method_.m_name)
@@ -43,7 +36,5 @@ let handler =
     method! at_class_ _ class_ =
       error_if_duplicate_method_names class_.c_methods
 
-    method! at_method_ _ method_ =
-      error_if_clone_has_arguments method_;
-      error_if_abstract_method_is_memoized method_
+    method! at_method_ _ method_ = error_if_abstract_method_is_memoized method_
   end

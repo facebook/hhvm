@@ -2684,8 +2684,9 @@ and expr_
           match bound with
           | None -> env
           | Some ty ->
-            SubType.sub_type env supertype ty (fun ?code ?quickfixes _ ->
-                ignore (code, quickfixes))
+            (* There can't be an error because the type is fresh *)
+            SubType.sub_type env supertype ty (fun ?code:_ ?quickfixes:_ _ ->
+                Errors.internal_error use_pos "Subtype of fresh type variable")
         in
         (env, supertype)
       | Some ExpectedTy.{ ty = { et_type = ty; _ }; _ } -> (env, ty)

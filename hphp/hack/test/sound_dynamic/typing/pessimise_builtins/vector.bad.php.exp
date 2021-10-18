@@ -1,20 +1,50 @@
-File "vector.bad.php", line 6, characters 3-11:
+File "vector.bad.php", line 6, characters 3-12:
 Invalid assignment (Typing[4110])
   File "", line 0, characters 0-0:
   Expected `~C`
   File "vector.bad.php", line 5, characters 19-23:
   But got `mixed`
-File "vector.bad.php", line 7, characters 3-12:
+File "vector.bad.php", line 7, characters 3-11:
+Invalid assignment (Typing[4110])
+  File "", line 0, characters 0-0:
+  Expected `~C`
+  File "vector.bad.php", line 7, characters 11-11:
+  But got `int`
+File "vector.bad.php", line 8, characters 3-12:
+Invalid assignment (Typing[4110])
+  File "", line 0, characters 0-0:
+  Expected `~C`
+  File "vector.bad.php", line 5, characters 44-46:
+  But got `int`
+File "vector.bad.php", line 9, characters 3-11:
 Invalid assignment (Typing[4110])
   File "", line 0, characters 0-0:
   Expected `~C`
   File "vector.bad.php", line 5, characters 19-23:
   But got `mixed`
-File "vector.bad.php", line 8, characters 10-26:
+File "vector.bad.php", line 10, characters 3-10:
+Invalid assignment (Typing[4110])
+  File "", line 0, characters 0-0:
+  Expected `~C`
+  File "vector.bad.php", line 10, characters 10-10:
+  But got `int`
+File "vector.bad.php", line 11, characters 3-11:
+Invalid assignment (Typing[4110])
+  File "", line 0, characters 0-0:
+  Expected `~C`
+  File "vector.bad.php", line 5, characters 44-46:
+  But got `int`
+File "vector.bad.php", line 12, characters 3-15:
+Some elements in this collection are incompatible (Typing[4110])
+  File "", line 0, characters 0-0:
+  Expected `~C`
+  File "vector.bad.php", line 5, characters 44-46:
+  But got `int`
+File "vector.bad.php", line 13, characters 10-26:
 Invalid return type (Typing[4110])
-  File "vector.bad.php", line 5, characters 52-52:
+  File "vector.bad.php", line 5, characters 61-61:
   Expected `C`
-  File "vector.bad.php", line 5, characters 52-52:
+  File "vector.bad.php", line 5, characters 61-61:
   This type argument to `Vector` must match exactly (it is invariant)
-  File "vector.bad.php", line 8, characters 17-23:
+  File "vector.bad.php", line 13, characters 17-23:
   But got `dynamic`

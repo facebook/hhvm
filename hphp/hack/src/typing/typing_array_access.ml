@@ -198,6 +198,18 @@ let maybe_pessimise_type env ty =
   else
     (env, ty)
 
+(* Assignment into a pessimised vec or dict should behave as though it has type
+   forall T1 T2. vec<T1> -> idx -> ~T2 -> vec<T1|T2> *)
+let pessimised_vec_dict_assign p env vec_ty arg_ty =
+  let (env, ty) = Env.fresh_type env p in
+  let (env, pess_ty) = maybe_pessimise_type env ty in
+  (* There can't be an error since the type variable is fresh *)
+  let env =
+    SubType.sub_type env arg_ty pess_ty (fun ?code:_ ?quickfixes:_ _ ->
+        Errors.internal_error p "Subtype of fresh type variable")
+  in
+  Typing_union.union env vec_ty ty
+
 let rec array_get
     ~array_pos
     ~expr_pos
@@ -727,8 +739,12 @@ let assign_array_append_with_err ~array_pos ~expr_pos ur env ty1 ty2 =
         (env, ty, Ok ty, val_err_res)
       | (r, Tclass (((_, n) as id), e, [tv]))
         when String.equal n SN.Collections.cVec ->
-        let (env, tv) = maybe_pessimise_type env tv in
-        let (env, tv') = Typing_union.union env tv ty2 in
+        let (env, tv') =
+          if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
+            pessimised_vec_dict_assign expr_pos env tv ty2
+          else
+            Typing_union.union env tv ty2
+        in
         let ty = mk (r, Tclass (id, e, [tv'])) in
         (env, ty, Ok ty, Ok ty2)
       | (r, Tclass (((_, n) as id), e, [tv]))
@@ -896,7 +912,7 @@ let assign_array_get_with_err
         when String.equal cn SN.Collections.cVec ->
         let (env, tv) =
           match argl with
-          | [tv] -> maybe_pessimise_type env tv
+          | [tv] -> (env, tv)
           | _ ->
             arity_error id;
             (env, err_witness env expr_pos)
@@ -906,7 +922,12 @@ let assign_array_get_with_err
         let (env, idx_err) =
           type_index env expr_pos tkey tk (Reason.index_class cn)
         in
-        let (env, tv') = Typing_union.union env tv ty2 in
+        let (env, tv') =
+          if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
+            pessimised_vec_dict_assign expr_pos env tv ty2
+          else
+            Typing_union.union env tv ty2
+        in
         let ty = mk (r, Tclass (id, e, [tv'])) in
         (env, ty, Ok ty, idx_err, Ok ty2)
       | Tclass (((_, cn) as id), _, argl) when cn = SN.Collections.cMap ->
@@ -956,13 +977,13 @@ let assign_array_get_with_err
         let (env, idx_err) =
           check_arraykey_index_write env expr_pos ety1 tkey
         in
-        let (tk, (env, tv)) =
+        let (tk, tv) =
           match argl with
-          | [tk; tv] -> (tk, maybe_pessimise_type env tv)
+          | [tk; tv] -> (tk, tv)
           | _ ->
             arity_error id;
             let any = err_witness env expr_pos in
-            (any, (env, any))
+            (any, any)
         in
         let (env, tk') =
           let dyn_t = MakeType.dynamic Reason.Rnone in
@@ -987,7 +1008,12 @@ let assign_array_get_with_err
           else
             Typing_union.union env tk tkey
         in
-        let (env, tv') = Typing_union.union env tv ty2 in
+        let (env, tv') =
+          if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
+            pessimised_vec_dict_assign expr_pos env tv ty2
+          else
+            Typing_union.union env tv ty2
+        in
         let ty = mk (r, Tclass (id, e, [tk'; tv'])) in
         (env, ty, Ok ty, idx_err, Ok ty2)
       | Tclass ((_, cn), _, _) when String.equal cn SN.Collections.cKeyset ->

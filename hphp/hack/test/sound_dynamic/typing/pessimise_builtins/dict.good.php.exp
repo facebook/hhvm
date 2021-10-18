@@ -1,9 +1,21 @@
-File "dict.good.php", line 6, characters 3-16:
+File "dict.good.php", line 6, characters 3-19:
   ~C
-File "dict.good.php", line 10, characters 3-14:
+File "dict.good.php", line 9, characters 3-16:
   dict<int, C>
-File "dict.good.php", line 12, characters 3-14:
+File "dict.good.php", line 11, characters 3-16:
+  dict<int, C>
+File "dict.good.php", line 13, characters 3-16:
+  dict<int, C>
+File "dict.good.php", line 16, characters 3-13:
+  dict<int, (int | C)>
+File "dict.good.php", line 19, characters 3-14:
+  dict<int, C>
+File "dict.good.php", line 21, characters 3-14:
   dict<int, nothing>
-File "dict.good.php", line 14, characters 3-14:
+File "dict.good.php", line 23, characters 3-14:
   dict<int, C>
+File "dict.good.php", line 25, characters 3-14:
+  dict<int, exact C>
+File "dict.good.php", line 27, characters 3-14:
+  dict<int, (int | exact C)>
 No errors

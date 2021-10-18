@@ -499,8 +499,10 @@ int main(int argc, char** argv) try {
   LitarrayTable::get().setWriting();
   SCOPE_EXIT { hphp_process_exit(); };
 
-  // When running hhbbc, these option is loaded from GD, and will override CLI.
-  // When running hhvm, these option is not loaded from GD, but read from CLI.
+  // When running hhbbc, these options are loaded from GD, and will override CLI.
+  // When running hhvm, these options are not loaded from GD, but read from CLI.
+  // NB: These are only needed if RepoGlobalData::load() does not currently write
+  // them which is called in hphp_process_init().
   RO::EvalForbidDynamicCallsToFunc              = gd.ForbidDynamicCallsToFunc;
   RO::EvalForbidDynamicCallsToClsMeth           = gd.ForbidDynamicCallsToClsMeth;
   RO::EvalForbidDynamicCallsToInstMeth          = gd.ForbidDynamicCallsToInstMeth;
@@ -509,19 +511,8 @@ int main(int argc, char** argv) try {
   RO::EvalLogKnownMethodsAsDynamicCalls         = gd.LogKnownMethodsAsDynamicCalls;
   RO::EvalNoticeOnBuiltinDynamicCalls           = gd.NoticeOnBuiltinDynamicCalls;
   RO::EvalHackArrCompatSerializeNotices         = gd.HackArrCompatSerializeNotices;
-  RO::EvalAbortBuildOnVerifyError               = gd.AbortBuildOnVerifyError;
-  RO::EnableArgsInBacktraces                    = gd.EnableArgsInBacktraces;
-  RO::EvalEmitClassPointers                     = gd.EmitClassPointers;
-  RO::EvalEmitClsMethPointers                   = gd.EmitClsMethPointers;
   RO::EvalIsVecNotices                          = gd.IsVecNotices;
-  RO::EvalRaiseClassConversionWarning           = gd.RaiseClassConversionWarning;
-  RO::EvalClassPassesClassname                  = gd.ClassPassesClassname;
-  RO::EvalClassnameNotices                      = gd.ClassnameNotices;
-  RO::StrictArrayFillKeys                       = gd.StrictArrayFillKeys;
   RO::EvalEnforceGenericsUB                     = gd.HardGenericsUB ? 2 : 1;
-  RO::EvalTraitConstantInterfaceBehavior        = gd.TraitConstantInterfaceBehavior;
-  RO::EvalDiamondTraitMethods                   = gd.DiamondTraitMethods;
-  RO::EvalCoeffectEnforcementLevels             = gd.EvalCoeffectEnforcementLevels;
 
   if (print_bytecode_stats_and_exit) {
     print_repo_bytecode_stats();

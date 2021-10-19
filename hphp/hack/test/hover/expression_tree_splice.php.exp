@@ -1,0 +1,1 @@
+{ snippet = "ExprTree<Code, mixed, TInfer#1>\nwhere TInfer#1 = ExampleInt, TInfer#1 = TInfer#2"; addendum = ["I am a comment associated with $one."]; pos = Some "line 9, character 24 - line 9, character 27" }

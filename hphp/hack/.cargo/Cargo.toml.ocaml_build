@@ -41,7 +41,6 @@ members = [
     "src/facts/cargo/facts_rust",
     "src/facts/cargo/facts_smart_constructors",
     "src/facts/ffi",
-    "src/facts/ffi_bridge",
     "src/heap",
     "src/hhbc/bytecode_printer",
     "src/hhbc/cargo/compile_ffi",

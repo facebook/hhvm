@@ -6,8 +6,6 @@ edition = "2018"
 
 [lib]
 path = "rust_compile_ffi_bridge.rs"
-test = false
-doctest = false
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
@@ -19,6 +17,7 @@ cxx = "1.0.54"
 decl_provider = { path = "../decl_provider" }
 decl_rust = { path = "../../decl/decl_rust" }
 external_decl_provider = { path = "../hhvm_decl_provider" }
+facts_rust = { path = "../../facts/cargo/facts_rust" }
 ffi = { path = "../../utils/ffi" }
 hhbc_by_ref_compile = { path = "../hhbc_by_ref/cargo/hhbc_by_ref_compile" }
 hhbc_by_ref_hhas_program = { path = "../hhbc_by_ref/cargo/hhbc_by_ref_hhas_program" }
@@ -32,6 +31,7 @@ ocamlrep_ocamlpool = { path = "../../ocamlrep_ocamlpool" }
 oxidized = { path = "../../oxidized" }
 oxidized_by_ref = { path = "../../oxidized_by_ref" }
 parser_core_types = { path = "../../parser/cargo/core_types" }
+rust_facts_ffi = { path = "../../facts/ffi" }
 serde_json = { version = "1.0", features = ["float_roundtrip", "unbounded_depth"] }
 stack_limit = { path = "../../utils/stack_limit" }
 unified_decl_provider = { path = "../unified_decl_provider" }

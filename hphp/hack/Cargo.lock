@@ -3260,6 +3260,7 @@ dependencies = [
  "decl_provider",
  "decl_rust",
  "external_decl_provider",
+ "facts_rust",
  "ffi",
  "hhbc_by_ref_compile",
  "hhbc_by_ref_hhas_program",
@@ -3273,6 +3274,7 @@ dependencies = [
  "oxidized",
  "oxidized_by_ref",
  "parser_core_types",
+ "rust_facts_ffi",
  "serde_json",
  "stack_limit",
  "unified_decl_provider",
@@ -3287,17 +3289,6 @@ dependencies = [
  "ocamlrep",
  "ocamlrep_ocamlpool",
  "oxidized",
-]
-
-[[package]]
-name = "rust_facts_ffi_bridge"
-version = "0.0.0"
-dependencies = [
- "cxx",
- "cxx-build",
- "facts_rust",
- "oxidized",
- "rust_facts_ffi",
 ]
 
 [[package]]

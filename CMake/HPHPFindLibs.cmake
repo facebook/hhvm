@@ -446,7 +446,6 @@ macro(hphp_link target)
   target_link_libraries(${target} ${VISIBILITY} brotli)
   target_link_libraries(${target} ${VISIBILITY} hhbc_ast_header)
   target_link_libraries(${target} ${VISIBILITY} rust_compile_ffi_bridge)
-  target_link_libraries(${target} ${VISIBILITY} rust_facts_ffi_bridge)
   target_link_libraries(${target} ${VISIBILITY} rust_parser_ffi_bridge)
 
   if (ENABLE_MCROUTER)

@@ -3,18 +3,21 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+mod rust_compile_ffi_impl;
 
 use anyhow::{anyhow, Result};
 use arena_deserializer::serde::Deserialize;
 use bincode::Options;
 use cxx::CxxString;
 use external_decl_provider::ExternalDeclProvider;
+use facts_rust::facts;
 use hhbc_by_ref_compile::EnvFlags;
 use libc::c_char;
 use no_pos_hash::position_insensitive_hash;
 use oxidized::relative_path::{Prefix, RelativePath};
 use oxidized_by_ref::{decl_parser_options, direct_decl_parser};
 use parser_core_types::source_text::SourceText;
+use rust_facts_ffi::{extract_facts_as_json_ffi0, extract_facts_ffi0, facts_to_json_ffi};
 
 #[cxx::bridge]
 mod compile_ffi {
@@ -36,6 +39,68 @@ mod compile_ffi {
         serialized: Box<Bytes>,
         decls: Box<Decls>,
         bump: Box<Bump>,
+    }
+
+    #[derive(Debug)]
+    enum TypeKind {
+        Class,
+        Record,
+        Interface,
+        Enum,
+        Trait,
+        TypeAlias,
+        Unknown,
+        Mixed,
+    }
+
+    #[derive(Debug, PartialEq)]
+    struct Attribute {
+        name: String,
+        args: Vec<String>,
+    }
+
+    #[derive(Debug, PartialEq)]
+    struct MethodFacts {
+        attributes: Vec<Attribute>,
+    }
+
+    #[derive(Debug, PartialEq)]
+    struct Method {
+        name: String,
+        methfacts: MethodFacts,
+    }
+
+    #[derive(Debug, PartialEq)]
+    pub struct TypeFacts {
+        pub base_types: Vec<String>,
+        pub kind: TypeKind,
+        pub attributes: Vec<Attribute>,
+        pub flags: isize,
+        pub require_extends: Vec<String>,
+        pub require_implements: Vec<String>,
+        pub methods: Vec<Method>,
+    }
+
+    #[derive(Debug, PartialEq)]
+    struct TypeFactsByName {
+        name: String,
+        typefacts: TypeFacts,
+    }
+
+    #[derive(Debug, Default, PartialEq)]
+    struct Facts {
+        pub types: Vec<TypeFactsByName>,
+        pub functions: Vec<String>,
+        pub constants: Vec<String>,
+        pub type_aliases: Vec<String>,
+        pub file_attributes: Vec<Attribute>,
+    }
+
+    #[derive(Debug, Default)]
+    struct FactsResult {
+        facts: Facts,
+        md5sum: String,
+        sha1sum: String,
     }
 
     extern "Rust" {
@@ -83,6 +148,20 @@ mod compile_ffi {
             env: &NativeEnv,
             prog: &HhasProgramWrapper,
         ) -> Result<String>;
+
+        fn hackc_extract_facts_as_json_cpp_ffi(
+            flags: i32,
+            filename: &CxxString,
+            source_text: &CxxString,
+        ) -> String;
+
+        fn hackc_extract_facts_cpp_ffi(
+            flags: i32,
+            filename: &CxxString,
+            source_text: &CxxString,
+        ) -> FactsResult;
+
+        fn hackc_facts_to_json_cpp_ffi(facts: FactsResult, source_text: &CxxString) -> String;
     }
 }
 
@@ -385,4 +464,71 @@ pub fn hackc_hhas_to_string_cpp_ffi(
     hhbc_by_ref_compile::hhas_to_string(&env, Some(&native_env), &mut output, &prog.0)
         .map(|_| output)
         .map_err(|e| e.to_string())
+}
+
+pub fn hackc_extract_facts_as_json_cpp_ffi(
+    flags: i32,
+    filename: &CxxString,
+    source_text: &CxxString,
+) -> String {
+    use std::os::unix::ffi::OsStrExt;
+    let filepath = RelativePath::make(
+        oxidized::relative_path::Prefix::Dummy,
+        std::path::PathBuf::from(std::ffi::OsStr::from_bytes(filename.as_bytes())),
+    );
+    match extract_facts_as_json_ffi0(
+        ((1 << 0) & flags) != 0, // php5_compat_mode
+        ((1 << 1) & flags) != 0, // hhvm_compat_mode
+        ((1 << 2) & flags) != 0, // allow_new_attribute_syntax
+        ((1 << 3) & flags) != 0, // enable_xhp_class_modifier
+        ((1 << 4) & flags) != 0, // disable_xhp_element_mangling
+        filepath,
+        source_text.as_bytes(),
+        true, // mangle_xhp
+    ) {
+        Some(s) => s,
+        None => String::new(),
+    }
+}
+
+pub fn hackc_extract_facts_cpp_ffi(
+    flags: i32,
+    filename: &CxxString,
+    source_text: &CxxString,
+) -> compile_ffi::FactsResult {
+    use std::os::unix::ffi::OsStrExt;
+    let filepath = RelativePath::make(
+        oxidized::relative_path::Prefix::Dummy,
+        std::path::PathBuf::from(std::ffi::OsStr::from_bytes(filename.as_bytes())),
+    );
+    let text = source_text.as_bytes();
+    match extract_facts_ffi0(
+        ((1 << 0) & flags) != 0, // php5_compat_mode
+        ((1 << 1) & flags) != 0, // hhvm_compat_mode
+        ((1 << 2) & flags) != 0, // allow_new_attribute_syntax
+        ((1 << 3) & flags) != 0, // enable_xhp_class_modifier
+        ((1 << 4) & flags) != 0, // disable_xhp_element_mangling
+        filepath,
+        text,
+        true, // mangle_xhp
+    ) {
+        Some(facts) => {
+            let (md5sum, sha1sum) = facts::md5_and_sha1(text);
+            compile_ffi::FactsResult {
+                facts: facts.into(),
+                md5sum,
+                sha1sum,
+            }
+        }
+        None => Default::default(),
+    }
+}
+
+pub fn hackc_facts_to_json_cpp_ffi(
+    facts: compile_ffi::FactsResult,
+    source_text: &CxxString,
+) -> String {
+    let facts = facts::Facts::from(facts.facts);
+    let text = source_text.as_bytes();
+    facts_to_json_ffi(facts, text)
 }

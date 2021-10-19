@@ -225,7 +225,6 @@ function(build_cxx_bridge NAME FFI_BRIDGE_DIR)
   target_compile_options("${NAME}_ffi_bridge" INTERFACE "-iquote" "${RUST_FFI_BUILD_ROOT}")
 endfunction()
 
-build_cxx_bridge(rust_facts "src/facts/ffi_bridge")
 build_cxx_bridge(rust_parser "src/parser/ffi_bridge")
 build_cxx_bridge(rust_compile "src/hhbc/ffi_bridge")
 

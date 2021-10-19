@@ -1,6 +1,5 @@
 <?hh //strict
 
-<<file: __EnableUnstableFeatures('readonly')>>
 class Foo {
   public function __construct(public int $prop = 3) {}
 }

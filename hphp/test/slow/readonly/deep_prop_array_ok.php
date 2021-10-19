@@ -1,7 +1,5 @@
 <?hh //strict
 
-<<file: __EnableUnstableFeatures('readonly')>>
-
 class P {
   public function __construct(public int $i, public ?P $inner = null) { }
 }
@@ -10,4 +8,5 @@ class P {
 function main() {
   $p = readonly vec[new P(5)];
   $p[0] = new P(5); // ok
+  echo "Done\n";
 }

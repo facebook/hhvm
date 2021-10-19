@@ -1,2 +1,2 @@
-Fatal error: Uncaught exception 'InvalidOperationException' with message 'Readonly collections cannot be modified.' in %s/elem_cow_unset.php:26
+Fatal error: Uncaught exception 'InvalidOperationException' with message 'Readonly collections cannot be modified.' in %s/elem_cow_unset.php:24
 %A

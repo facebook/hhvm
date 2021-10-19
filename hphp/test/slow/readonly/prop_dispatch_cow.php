@@ -1,6 +1,5 @@
 <?hh
 
-<<file: __EnableUnstableFeatures('readonly')>>
 class Foo {
   public readonly vec<int> $c = vec[vec[0], vec[1], vec[2]];
   public readonly Vector<int> $bad_c = Vector {vec[0], vec[1], vec[2]};

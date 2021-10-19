@@ -1,7 +1,5 @@
 <?hh
 
-<<file:__EnableUnstableFeatures('readonly')>>
-
 class Foo1 {
   public readonly vec<vec<int>> $b = vec[vec[0],vec[1],vec[2]];
 

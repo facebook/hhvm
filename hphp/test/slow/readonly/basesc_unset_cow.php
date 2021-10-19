@@ -1,6 +1,4 @@
 <?hh
-
-<<file: __EnableUnstableFeatures('readonly')>>
 class Foo {
   public static readonly vec<vec<vec<int>>> $c =
     vec[vec[vec[0], vec[1], vec[2]]];

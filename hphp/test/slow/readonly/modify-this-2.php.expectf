@@ -1,4 +1,4 @@
-Warning: Foo::set() modifies the instance, but the caller has a readonly instance in %s on line 22
+Warning: Foo::set() modifies the instance, but the caller has a readonly instance in %s on line 20
 
-Warning: Foo::set() modifies the instance, but the caller has a readonly instance in %s on line 24
+Warning: Foo::set() modifies the instance, but the caller has a readonly instance in %s on line 22
 Done

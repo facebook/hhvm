@@ -1,6 +1,4 @@
 <?hh
-<<file:__EnableUnstableFeatures('readonly')>>
-
 
 function get_readonly_global(string $key)[read_globals]: void {
   $y = readonly HH\global_readonly_get($key);

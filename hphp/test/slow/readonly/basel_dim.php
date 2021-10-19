@@ -1,7 +1,5 @@
 <?hh
 
-<<file: __EnableUnstableFeatures('readonly')>>
-
 <<__EntryPoint>>
 function test(): void {
   $loc = readonly Map {1 => Map {1 => 2}};

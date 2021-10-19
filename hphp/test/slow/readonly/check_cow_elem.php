@@ -1,7 +1,5 @@
 <?hh
 
-<<file: __EnableUnstableFeatures('readonly')>>
-
 class Foo {
   public static readonly vec<Vector<int>> $c = vec[Vector {1}];
   public static readonly vec<Vector<int>> $c1 = vec[Vector {1}];

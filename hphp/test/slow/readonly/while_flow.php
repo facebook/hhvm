@@ -1,5 +1,4 @@
 <?hh
-<<file:__EnableUnstableFeatures('readonly')>>
 class Foo {}
 function test_advanced(bool $b): void {
   $x = new Foo();

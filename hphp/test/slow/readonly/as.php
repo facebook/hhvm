@@ -1,7 +1,5 @@
 <?hh //strict
 
-<<file: __EnableUnstableFeatures('readonly')>>
-
 class Bar {}
 
 class Foo extends Bar {

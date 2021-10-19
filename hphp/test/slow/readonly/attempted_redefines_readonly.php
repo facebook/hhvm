@@ -10,4 +10,5 @@ class P {
 function main() {
   $p = readonly new P(1);
   $p = new P(1);
+  echo "Done\n";
 }

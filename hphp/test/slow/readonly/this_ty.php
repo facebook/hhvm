@@ -1,5 +1,4 @@
 <?hh
-<<file:__EnableUnstableFeatures("readonly")>>
 class Foo {
   public function __construct(int $prop = 4) {}
   public readonly function test(): void {

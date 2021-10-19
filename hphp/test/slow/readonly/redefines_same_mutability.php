@@ -1,7 +1,5 @@
 <?hh //strict
 
-<<file: __EnableUnstableFeatures('readonly')>>
-
 class P {
   public function __construct(public int $i) { }
 }
@@ -12,4 +10,5 @@ function main() {
   $p = readonly new P(2);
   $x = new P(3);
   $x = new P(4);
+  echo "Done\n";
 }

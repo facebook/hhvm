@@ -1,7 +1,5 @@
 <?hh //strict
 
-<<file: __EnableUnstableFeatures('readonly')>>
-
 class P {
   public function __construct(public ?P $prop = null, public readonly ?P $ro_prop = null) { }
 }
@@ -12,4 +10,5 @@ function main() {
   $y = new P();
   $y->prop = new P(); // ok, mutable to mutable property
   $y->ro_prop = new P(); // ok, mutable to readonly property
+  echo "Done\n";
 }

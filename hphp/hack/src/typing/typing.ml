@@ -4088,7 +4088,7 @@ and expr_
       TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
     in
     let (env, hint_ty) =
-      if Typing_utils.is_dynamic env hint_ty then
+      if Typing_defs.is_dynamic hint_ty then
         let env =
           if enable_sound_dynamic then
             SubType.sub_type

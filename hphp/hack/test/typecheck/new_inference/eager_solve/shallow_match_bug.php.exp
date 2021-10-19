@@ -6,5 +6,5 @@ Invalid return type (Typing[4323])
   This type constraint is violated
   File "shallow_match_bug.php", line 26, characters 29-36:
   Expected `arraykey`
-  File "shallow_match_bug.php", line 7, characters 20-28:
+  File "shallow_match_bug.php", line 7, characters 20-26:
   But got `dynamic`

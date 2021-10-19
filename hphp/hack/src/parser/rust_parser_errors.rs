@@ -482,13 +482,15 @@ where
         };
     }
 
+    fn check_can_use_readonly(&mut self, node: S<'a, Token, Value>) {
+        self.uses_readonly = true;
+        if self.env.is_typechecker() {
+            self.check_can_use_feature(node, &UnstableFeatures::Readonly)
+        }
+    }
+
     fn check_can_use_feature(&mut self, node: S<'a, Token, Value>, feature: &UnstableFeatures) {
         let parser_options = &self.env.parser_options;
-        // This will move out of check_can_use_feature once Readonly is no longer a preview feature
-        match feature {
-            UnstableFeatures::Readonly => self.uses_readonly = true,
-            _ => {}
-        };
         let enabled = match feature {
             UnstableFeatures::UnionIntersectionTypeHints => {
                 parser_options.tco_union_intersection_type_hints
@@ -1152,7 +1154,7 @@ where
             for modifier in Self::syntax_to_list_no_separators(modifiers) {
                 if let Some(kind) = Self::token_kind(modifier) {
                     if kind == TokenKind::Readonly {
-                        self.check_can_use_feature(modifier, &UnstableFeatures::Readonly)
+                        self.check_can_use_readonly(modifier)
                     }
                     if !ok(kind) {
                         self.errors.push(Self::make_error_from_node(
@@ -1668,7 +1670,7 @@ where
                 let function_parameter_list = &x.parameter_list;
                 let function_type = &x.type_;
                 if x.readonly_return.is_readonly() {
-                    self.check_can_use_feature(&x.readonly_return, &UnstableFeatures::Readonly)
+                    self.check_can_use_readonly(&x.readonly_return)
                 }
 
                 self.produce_error(
@@ -1928,7 +1930,7 @@ where
     fn check_parameter_readonly(&mut self, node: S<'a, Token, Value>) {
         if let ParameterDeclaration(x) = &node.children {
             if x.readonly.is_readonly() {
-                self.check_can_use_feature(&x.readonly, &UnstableFeatures::Readonly);
+                self.check_can_use_readonly(&x.readonly);
             }
         }
     }
@@ -3119,7 +3121,7 @@ where
                     .po_disallow_fun_and_cls_meth_pseudo_funcs;
 
                 if Self::strip_ns(self.text(recv)) == Self::strip_ns(sn::readonly::AS_MUT) {
-                    self.check_can_use_feature(recv, &UnstableFeatures::Readonly);
+                    self.check_can_use_readonly(recv);
                 }
 
                 if self.text(recv) == Self::strip_hh_ns(sn::autoimported_functions::FUN_)
@@ -3482,7 +3484,7 @@ where
             PrefixUnaryExpression(x)
                 if Self::token_kind(&x.operator) == Some(TokenKind::Readonly) =>
             {
-                self.check_can_use_feature(&x.operator, &UnstableFeatures::Readonly)
+                self.check_can_use_readonly(&x.operator)
             }
 
             // Other kinds of expressions currently produce no expr errors.

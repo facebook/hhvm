@@ -159,7 +159,6 @@ let naming
     ~desc:profile_label
     ~heap_size:(SharedMem.SMTelemetry.heap_size ())
     ~start_t:t;
-  Naming_provider.ByHash.set_failed_naming env.failed_naming;
   (env, Hh_logger.log_duration ("Naming " ^ profile_label) t)
 
 let log_type_check_end

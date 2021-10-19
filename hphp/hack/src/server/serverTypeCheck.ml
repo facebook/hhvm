@@ -1398,9 +1398,6 @@ functor
         |> Telemetry.object_ ~key:"naming" ~value:naming_telemetry
       in
 
-      (* this is a temporary debugging aid *)
-      Naming_provider.ByHash.set_failed_naming failed_naming;
-
       let (env, errors, time_errors_pushed) =
         push_and_accumulate_errors
           (env, errors)

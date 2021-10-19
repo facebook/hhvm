@@ -7,6 +7,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use digest::Digest;
+use oxidized_by_ref::{direct_decl_parser::Decls, shallow_decl_defs::Decl};
 use serde::ser::SerializeSeq;
 use serde::Serializer;
 use serde_derive::Serialize;
@@ -83,8 +84,35 @@ impl Facts {
         });
         serde_json::to_string_pretty(&json).expect("Could not serialize facts to JSON")
     }
+
     fn skip_file_attributes(&self) -> bool {
         self.file_attributes.is_empty()
+    }
+
+    pub fn facts_of_decls<'a>(decls: &Decls<'a>) -> Facts {
+        // 10/15/2021 TODO(T103413083): Fill out the implementation
+        let types: TypeFactsByName = decls
+            .iter()
+            .filter_map(|(name, decl)| match decl {
+                Decl::Class(_) => Some((
+                    String::from(name),
+                    TypeFacts {
+                        base_types: StringSet::new(),
+                        kind: TypeKind::Class,
+                        attributes: BTreeMap::new(),
+                        flags: 0,
+                        require_extends: StringSet::new(),
+                        require_implements: StringSet::new(),
+                        methods: BTreeMap::new(),
+                    },
+                )),
+                _ => None,
+            })
+            .collect::<BTreeMap<String, TypeFacts>>();
+        Facts {
+            types,
+            ..Default::default()
+        }
     }
 }
 

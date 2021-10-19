@@ -3,6 +3,9 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+
+// Module containing conversion methods between the Rust Facts and
+// Rust/C++ shared Facts (in the compile_ffi module)
 mod rust_compile_ffi_impl;
 
 use anyhow::{anyhow, Result};
@@ -162,6 +165,11 @@ mod compile_ffi {
         ) -> FactsResult;
 
         fn hackc_facts_to_json_cpp_ffi(facts: FactsResult, source_text: &CxxString) -> String;
+
+        unsafe fn hackc_decls_to_facts_cpp_ffi(
+            decls: &Decls,
+            source_text: &CxxString,
+        ) -> FactsResult;
     }
 }
 
@@ -531,4 +539,18 @@ pub fn hackc_facts_to_json_cpp_ffi(
     let facts = facts::Facts::from(facts.facts);
     let text = source_text.as_bytes();
     facts_to_json_ffi(facts, text)
+}
+
+pub fn hackc_decls_to_facts_cpp_ffi(
+    decls: &Decls,
+    source_text: &CxxString,
+) -> compile_ffi::FactsResult {
+    let text = source_text.as_bytes();
+    let (md5sum, sha1sum) = facts::md5_and_sha1(text);
+    let facts = compile_ffi::Facts::from(facts::Facts::facts_of_decls(&decls.0));
+    compile_ffi::FactsResult {
+        facts: facts.into(),
+        md5sum,
+        sha1sum,
+    }
 }

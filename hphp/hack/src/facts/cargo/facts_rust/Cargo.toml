@@ -17,6 +17,7 @@ md-5 = "0.8"
 naming_special_names_rust = { path = "../../../naming" }
 ocamlrep = { path = "../../../ocamlrep" }
 oxidized = { path = "../../../oxidized" }
+oxidized_by_ref = { path = "../../../oxidized_by_ref" }
 parser_core_types = { path = "../../../parser/cargo/core_types" }
 serde = { version = "1.0.126", features = ["derive", "rc"] }
 serde_derive = "1.0"

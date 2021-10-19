@@ -950,6 +950,7 @@ dependencies = [
  "naming_special_names_rust",
  "ocamlrep",
  "oxidized",
+ "oxidized_by_ref",
  "parser_core_types",
  "pretty_assertions",
  "serde",

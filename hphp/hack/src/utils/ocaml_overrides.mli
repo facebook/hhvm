@@ -535,6 +535,7 @@ module Unix : sig
     | SO_ACCEPTCONN
     | TCP_NODELAY
     | IPV6_ONLY
+    | SO_REUSEPORT
 
   type socket_int_option = Unix.socket_int_option =
     | SO_SNDBUF

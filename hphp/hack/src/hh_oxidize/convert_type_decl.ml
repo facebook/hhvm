@@ -308,7 +308,7 @@ let doc_comment_of_attribute { attr_name; attr_payload; _ } =
     List.find_map structure_items ~f:(fun structure_item ->
         match structure_item.pstr_desc with
         | Pstr_eval
-            ({ pexp_desc = Pexp_constant (Pconst_string (doc, _)); _ }, _) ->
+            ({ pexp_desc = Pexp_constant (Pconst_string (doc, _, _)); _ }, _) ->
           Some doc
         | _ -> None)
   | _ -> None

@@ -117,7 +117,10 @@ watchman_init_timeout = 1
             )
 
         with open(os.path.join(self.test_driver.bin_dir, "watchman"), "w") as f:
-            f.write(r"""sleep 2""")
+            f.write(
+                r"""#!/bin/sh
+sleep 2"""
+            )
             os.fchmod(f.fileno(), stat.S_IRWXU)
 
         self.test_driver.run_check()

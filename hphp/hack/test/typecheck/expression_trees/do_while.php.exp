@@ -1,0 +1,2 @@
+File "do_while.php", line 8, characters 5-49:
+Expression trees do not support `do while` loops. Consider using a `while` loop instead. (Parsing[1002])

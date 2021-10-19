@@ -1280,8 +1280,14 @@ fn rewrite_expr(
                 "Expression trees do not support directly referencing class consts. Consider splicing values defined outside the scope of an Expression Tree using ${...}.".into(),
             ));
         }
+        Efun(_) => {
+            return Err((
+                pos,
+                "Expression trees do not support PHP lambdas. Consider using Hack lambdas `() ==> {}` instead.".into(),
+            ));
+        }
         ExpressionTree(_) => {
-            return Err((pos, "Expression trees may not be nested".into()));
+            return Err((pos, "Expression trees may not be nested. Consider splicing Expression trees together using `${}`.".into()));
         }
         _ => {
             return Err((pos, "Unsupported expression tree syntax.".into()));
@@ -1470,6 +1476,25 @@ fn rewrite_stmt(
             (virtual_stmt, Some(desugar_expr))
         }
         Noop => (Stmt(pos, Noop), None),
+        // Unsupported operators
+        Do(_) => {
+            return Err((
+                pos,
+                "Expression trees do not support `do while` loops. Consider using a `while` loop instead.".into(),
+            ));
+        }
+        Switch(_) => {
+            return Err((
+                pos,
+                "Expression trees do not support `switch` statements. Consider using `if`/`else if`/`else` instead.".into(),
+            ));
+        }
+        Foreach(_) => {
+            return Err((
+                pos,
+                "Expression trees do not support `foreach` loops. Consider using a `for` loop or a `while` loop instead.".into(),
+            ));
+        }
         _ => {
             return Err((
                 pos,

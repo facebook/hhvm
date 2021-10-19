@@ -19,9 +19,6 @@
 [submodule "re2"]
 	path = third-party/re2/src
 	url = https://github.com/google/re2.git
-[submodule "thrift"]
-	path = third-party/thrift/src
-	url = https://github.com/facebook/fbthrift.git
 [submodule "xed-mbuild"]
 	path = third-party/xed/mbuild
 	url = https://github.com/intelxed/mbuild.git

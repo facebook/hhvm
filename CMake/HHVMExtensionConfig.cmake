@@ -994,6 +994,8 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
     endif()
   elseif (${libraryName} STREQUAL "squangle")
     HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(squangle)
+  elseif (${libraryName} STREQUAL "thrift")
+    HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(thrift)
   elseif (${libraryName} STREQUAL "vpx")
     find_package(LibVpx ${requiredVersion})
     if (NOT LIBVPX_INCLUDE_DIRS OR NOT LIBVPX_LIBRARIES)

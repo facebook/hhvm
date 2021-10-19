@@ -11,6 +11,8 @@ HHVM_DEFINE_EXTENSION("thrift"
     ext_thrift.h
     spec-holder.h
     transport.h
+  DEPENDS
+    libThrift
   SYSTEMLIB
     ext_thrift.php
 )

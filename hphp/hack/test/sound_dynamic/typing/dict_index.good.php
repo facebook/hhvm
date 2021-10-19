@@ -12,6 +12,7 @@ function test_dyn_index(
 
   $dt1[$d] = 1;
   $dt1[$d] = "s";
+  hh_show($dt1);
   $dt2[$d] = $d;
   $dt2[$d] = 1;
   $dt2[$d] = "s";

@@ -750,18 +750,59 @@ let assign_array_append_with_err ~array_pos ~expr_pos ur env ty1 ty2 =
       | (r, Tclass (((_, n) as id), e, [tv]))
         when String.equal n SN.Collections.cKeyset ->
         let (env, err_res) = check_keyset_value env expr_pos ty1 ty2 in
-        let (env, tv') = Typing_union.union env tv ty2 in
-        let ty = mk (r, Tclass (id, e, [tv'])) in
+        let (env, tk') =
+          let dyn_t = MakeType.dynamic Reason.Rnone in
+          if
+            (* TODO: Remove the test for sound dynamic. It is never ok to put
+               dynamic as the key to a dict since the key must be a
+               subtype of arraykey. *)
+            Typing_env_types.(
+              TypecheckerOptions.enable_sound_dynamic env.genv.tcopt)
+            &&
+            match err_res with
+            | Ok _ -> Typing_utils.is_sub_type_for_union env dyn_t ty2
+            | _ -> false
+          then
+            (* if there weren't any errors with the key then either it is dynamic
+               or a subtype of arraykey. If it's also a supertype of dynamic, then
+               set the keytype to arraykey, since that the only thing that hhvm won't
+               error on.
+            *)
+            (env, MakeType.arraykey (Reason.Rkey_value_collection_key expr_pos))
+          else
+            Typing_union.union env tv ty2
+        in
+        let ty = mk (r, Tclass (id, e, [tk'])) in
         (env, ty, Ok ty, err_res)
       | (_, Tclass ((_, n), _, [tv])) when String.equal n SN.Collections.cSet ->
         let (env, err_res) =
           match check_set_value env expr_pos ty1 ty2 with
           | (_, Error _) as err_res -> err_res
           | (env, _) ->
+            let tv' =
+              let ak_t = MakeType.arraykey (Reason.Ridx_vector expr_pos) in
+              if Typing_utils.is_sub_type_for_union env ak_t tv then
+                (* hhvm will enforce that the key is an arraykey, so if
+                   $x : Set<arraykey>, then it should be allowed to
+                   set $x[] = e where $d : dynamic. *)
+                MakeType.enforced tv
+              else
+                (* It is unsound to allow $x[] = e if $x : Set<string>
+                   since the dynamic $d might be an int and hhvm wouldn't
+                   complain.*)
+                MakeType.unenforced tv
+            in
             Result.fold
               ~ok:(fun env -> (env, Ok ty2))
               ~error:(fun env -> (env, Error (ty2, tv)))
-            @@ Typing_ops.sub_type_res expr_pos ur env ty2 tv Errors.unify_error
+            @@ Typing_coercion.coerce_type_res
+                 ~coerce_for_op:true
+                 expr_pos
+                 ur
+                 env
+                 ty2
+                 tv'
+                 Errors.unify_error
         in
         (env, ty1, Ok ty1, err_res)
       | (r, Tvarray tv) ->

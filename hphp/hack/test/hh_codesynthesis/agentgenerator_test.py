@@ -7,8 +7,8 @@
 import tempfile
 import unittest
 
-from hphp.hack.src.hh_codesynthesis import hh_codesynthesis, hackGenerator
-from hphp.hack.src.hh_codesynthesis.hh_codesynthesis import ClingoContext
+from hphp.hack.src.hh_codesynthesis import agentGenerator, hackGenerator
+from hphp.hack.src.hh_codesynthesis.agentGenerator import ClingoContext
 
 
 class GenerateLogicRulesTest(unittest.TestCase):
@@ -20,9 +20,7 @@ class GenerateLogicRulesTest(unittest.TestCase):
             'extends_to("S0", "S4").',
             'extends_to("S4", "S8").',
         ]
-        self.assertListEqual(
-            exp, hh_codesynthesis.generate_logic_rules(solving_context)
-        )
+        self.assertListEqual(exp, agentGenerator.generate_logic_rules(solving_context))
 
     def test_depth_more_than_nodes(self) -> None:
         # In this case, the graph has no way to satisfy the min_depth requirement.
@@ -32,7 +30,7 @@ class GenerateLogicRulesTest(unittest.TestCase):
         with self.assertRaises(
             expected_exception=RuntimeError, msg="Received unreasonable parameters."
         ):
-            hh_codesynthesis.generate_logic_rules(solving_context)
+            agentGenerator.generate_logic_rules(solving_context)
 
     def test_depth_equals_to_nodes(self) -> None:
         solving_context = ClingoContext(number_of_nodes=7, min_depth=7)
@@ -46,9 +44,7 @@ class GenerateLogicRulesTest(unittest.TestCase):
             'extends_to("S4", "S5").',
             'extends_to("S5", "S6").',
         ]
-        self.assertListEqual(
-            exp, hh_codesynthesis.generate_logic_rules(solving_context)
-        )
+        self.assertListEqual(exp, agentGenerator.generate_logic_rules(solving_context))
 
     def test_degree_distribution(self) -> None:
         solving_context = ClingoContext(
@@ -61,9 +57,7 @@ class GenerateLogicRulesTest(unittest.TestCase):
             ":- #count{X : in_degree(X, 1)} < 3.",
             ":- #count{X : in_degree(X, 2)} < 5.",
         ]
-        self.assertListEqual(
-            exp, hh_codesynthesis.generate_logic_rules(solving_context)
-        )
+        self.assertListEqual(exp, agentGenerator.generate_logic_rules(solving_context))
 
     def test_sum_of_degrees_greater_than_nodes(self) -> None:
         solving_context = ClingoContext(
@@ -72,7 +66,7 @@ class GenerateLogicRulesTest(unittest.TestCase):
         with self.assertRaises(
             expected_exception=RuntimeError, msg="Received unreasonable parameters."
         ):
-            hh_codesynthesis.generate_logic_rules(solving_context)
+            agentGenerator.generate_logic_rules(solving_context)
 
     def test_hack_code_gen(self) -> None:
         solving_context = ClingoContext(
@@ -88,8 +82,8 @@ class GenerateLogicRulesTest(unittest.TestCase):
         )
 
         hack_codegen = hackGenerator.HackCodeGenerator(solving_context)
-        hh_codesynthesis.do_reasoning(
-            additional_programs=hh_codesynthesis.generate_logic_rules(solving_context),
+        agentGenerator.do_reasoning(
+            additional_programs=agentGenerator.generate_logic_rules(solving_context),
             generator=hack_codegen,
         )
         self.assertTrue(hack_codegen.validate())
@@ -131,10 +125,10 @@ interface S8 extends S4 {}
 """
 
         hack_codegen = hackGenerator.HackCodeGenerator(solving_context)
-        combined_rules = hh_codesynthesis.generate_logic_rules(
+        combined_rules = agentGenerator.generate_logic_rules(
             solving_context
-        ) + hh_codesynthesis.extract_logic_rules(deps.split("\n"))
-        hh_codesynthesis.do_reasoning(
+        ) + agentGenerator.extract_logic_rules(deps.split("\n"))
+        agentGenerator.do_reasoning(
             additional_programs=combined_rules, generator=hack_codegen
         )
         self.assertEqual(str(hack_codegen), exp)
@@ -147,8 +141,8 @@ interface S8 extends S4 {}
         hack_codegen = hackGenerator.HackCodeGenerator(solving_context)
 
         with self.assertRaises(expected_exception=RuntimeError, msg="Unsatisfiable."):
-            hh_codesynthesis.do_reasoning(
-                additional_programs=hh_codesynthesis.generate_logic_rules(
+            agentGenerator.do_reasoning(
+                additional_programs=agentGenerator.generate_logic_rules(
                     solving_context
                 ),
                 generator=hack_codegen,
@@ -176,9 +170,7 @@ Method A::foo -> Type B
 Type A -> Type B
 Type I -> Type B
 Type T -> Type A, Type B"""
-        self.assertListEqual(
-            exp, hh_codesynthesis.extract_logic_rules(deps.split("\n"))
-        )
+        self.assertListEqual(exp, agentGenerator.extract_logic_rules(deps.split("\n")))
 
     def test_unexpected_rhs(self) -> None:
         deps = """\
@@ -188,7 +180,7 @@ Type A -> SMethod B::foo
             expected_exception=NotImplementedError,
             msg="Not supported SMethod on the right hand side.",
         ):
-            hh_codesynthesis.extract_logic_rules(deps.split("\n"))
+            agentGenerator.extract_logic_rules(deps.split("\n"))
 
     def test_multiple_lines(self) -> None:
         exp = [
@@ -216,9 +208,7 @@ Extends I4 -> Type C5,
                Type I12,
                Type I13,
                Type I14"""
-        self.assertListEqual(
-            exp, hh_codesynthesis.extract_logic_rules(deps.split("\n"))
-        )
+        self.assertListEqual(exp, agentGenerator.extract_logic_rules(deps.split("\n")))
 
     def test_multiple_lines_all(self) -> None:
         # T92303034 Temporary handle for the multiple lines using replace(",\n", ","),
@@ -261,7 +251,7 @@ Extends I4 -> Type C5,
                Type I14"""
         self.assertListEqual(
             exp,
-            hh_codesynthesis.extract_logic_rules(deps.replace(",\n", ",").split("\n")),
+            agentGenerator.extract_logic_rules(deps.replace(",\n", ",").split("\n")),
         )
 
     def test_extends_type_method_dependency(self) -> None:
@@ -284,9 +274,7 @@ Method A::foo -> Type B
 Type A -> Type B
 Type I -> Type B
 Type T -> Type A, Type B"""
-        self.assertListEqual(
-            exp, hh_codesynthesis.extract_logic_rules(deps.split("\n"))
-        )
+        self.assertListEqual(exp, agentGenerator.extract_logic_rules(deps.split("\n")))
 
     def test_extends_type_smethod_dependency(self) -> None:
         exp = [
@@ -306,9 +294,7 @@ Method I::bar -> Type A
 SMethod A::foo -> Fun B, Type T
 Type A -> Fun B, Type T
 Type I -> Type A"""
-        self.assertListEqual(
-            exp, hh_codesynthesis.extract_logic_rules(deps.split("\n"))
-        )
+        self.assertListEqual(exp, agentGenerator.extract_logic_rules(deps.split("\n")))
 
     def test_extends_type_fun_dependency(self) -> None:
         exp = [
@@ -327,9 +313,7 @@ Method I::bar -> Type A
 Fun F -> Type A
 Type A -> Type B, Type T
 Type I -> Type A"""
-        self.assertListEqual(
-            exp, hh_codesynthesis.extract_logic_rules(deps.split("\n"))
-        )
+        self.assertListEqual(exp, agentGenerator.extract_logic_rules(deps.split("\n")))
 
     def test_unsupported_type_dependency(self) -> None:
         # T94428437 Temporary skipping all built-in functions for now.
@@ -339,19 +323,15 @@ Extends A -> Type B
 Type A -> Type B
 Type HH\Capabilities\AccessGlobals -> Type B
 Type HH\Contexts\Unsafe\globals -> Type A"""
-        self.assertListEqual(
-            exp, hh_codesynthesis.extract_logic_rules(deps.split("\n"))
-        )
+        self.assertListEqual(exp, agentGenerator.extract_logic_rules(deps.split("\n")))
 
 
 class DoReasoningTest(unittest.TestCase):
     def test_clingo_exception(self) -> None:
         deps = ["rule_without_period(symbol1, symbol2)"]
-        raw_codegen = hh_codesynthesis.CodeGenerator()
+        raw_codegen = agentGenerator.CodeGenerator()
         with self.assertRaises(expected_exception=RuntimeError, msg="parsing failed"):
-            hh_codesynthesis.do_reasoning(
-                additional_programs=deps, generator=raw_codegen
-            )
+            agentGenerator.do_reasoning(additional_programs=deps, generator=raw_codegen)
 
     def test_extends_dependency(self) -> None:
         exp = [
@@ -369,16 +349,16 @@ class DoReasoningTest(unittest.TestCase):
             'extends_to("T", "A").',
             'symbols("A";"B";"I";"T").',
         ]
-        raw_codegen = hh_codesynthesis.CodeGenerator()
-        hh_codesynthesis.do_reasoning(additional_programs=rules, generator=raw_codegen)
+        raw_codegen = agentGenerator.CodeGenerator()
+        agentGenerator.do_reasoning(additional_programs=rules, generator=raw_codegen)
         self.assertListEqual(sorted(str(raw_codegen).split()), exp)
 
     def test_type_dependency(self) -> None:
         # This one covered the 'has_method_with_parameter'.
         exp = ['class("B")', 'has_method_with_parameter("C","B")', 'interface("C")']
         rules = ['type("B", "C").', 'symbols("B"; "C").']
-        raw_codegen = hh_codesynthesis.CodeGenerator()
-        hh_codesynthesis.do_reasoning(additional_programs=rules, generator=raw_codegen)
+        raw_codegen = agentGenerator.CodeGenerator()
+        agentGenerator.do_reasoning(additional_programs=rules, generator=raw_codegen)
         self.assertListEqual(sorted(str(raw_codegen).split()), exp)
 
     def test_method_dependency(self) -> None:
@@ -393,8 +373,8 @@ class DoReasoningTest(unittest.TestCase):
             'invokes_in_method("C","B","foo")',
         ]
         rules = ['method("B", "foo", "C").', 'symbols("B"; "C").']
-        raw_codegen = hh_codesynthesis.CodeGenerator()
-        hh_codesynthesis.do_reasoning(additional_programs=rules, generator=raw_codegen)
+        raw_codegen = agentGenerator.CodeGenerator()
+        agentGenerator.do_reasoning(additional_programs=rules, generator=raw_codegen)
         self.assertListEqual(sorted(str(raw_codegen).split()), exp)
 
     def test_smethod_type_dependencies(self) -> None:
@@ -408,8 +388,8 @@ class DoReasoningTest(unittest.TestCase):
             'invokes_static_method("C","B","foo")',
         ]
         rules = ['static_method("B", "foo", "C").', 'symbols("A"; "B"; "C").']
-        raw_codegen = hh_codesynthesis.CodeGenerator()
-        hh_codesynthesis.do_reasoning(additional_programs=rules, generator=raw_codegen)
+        raw_codegen = agentGenerator.CodeGenerator()
+        agentGenerator.do_reasoning(additional_programs=rules, generator=raw_codegen)
         self.assertListEqual(sorted(str(raw_codegen).split()), exp)
 
     def test_smethod_fun_dependencies(self) -> None:
@@ -423,17 +403,17 @@ class DoReasoningTest(unittest.TestCase):
             'invokes_static_method("C","B","foo")',
         ]
         rules = ['static_method("B", "foo", "C").', 'symbols("A"; "B").funcs("C").']
-        raw_codegen = hh_codesynthesis.CodeGenerator()
-        hh_codesynthesis.do_reasoning(additional_programs=rules, generator=raw_codegen)
+        raw_codegen = agentGenerator.CodeGenerator()
+        agentGenerator.do_reasoning(additional_programs=rules, generator=raw_codegen)
         self.assertListEqual(sorted(str(raw_codegen).split()), exp)
 
     def test_smethod_dependency_exception(self) -> None:
         # This one covered the unsatifiable part, that we can't find an answer.
         # Here we are forcing symbol("B") to get interface("B").
         rules = ['static_method("A", "foo", "B").', 'interface("B").symbols("A"; "B").']
-        raw_codegen = hh_codesynthesis.CodeGenerator()
+        raw_codegen = agentGenerator.CodeGenerator()
         with self.assertRaises(expected_exception=RuntimeError, msg="Unsatisfiable."):
-            hh_codesynthesis.do_reasoning(
+            agentGenerator.do_reasoning(
                 additional_programs=rules, generator=raw_codegen
             )
 
@@ -452,8 +432,8 @@ class DoReasoningTest(unittest.TestCase):
             'type("B", "C").',
             'symbols("B"; "C").',
         ]
-        raw_codegen = hh_codesynthesis.CodeGenerator()
-        hh_codesynthesis.do_reasoning(additional_programs=rules, generator=raw_codegen)
+        raw_codegen = agentGenerator.CodeGenerator()
+        agentGenerator.do_reasoning(additional_programs=rules, generator=raw_codegen)
         self.assertListEqual(sorted(str(raw_codegen).split()), exp)
 
     def test_fun_type_dependencies(self) -> None:
@@ -465,8 +445,8 @@ class DoReasoningTest(unittest.TestCase):
             'invokes_function("A","Fn")',
         ]
         rules = ['invoked_by("Fn", "A").', 'symbols("A"; "B").', 'funcs("Fn").']
-        raw_codegen = hh_codesynthesis.CodeGenerator()
-        hh_codesynthesis.do_reasoning(additional_programs=rules, generator=raw_codegen)
+        raw_codegen = agentGenerator.CodeGenerator()
+        agentGenerator.do_reasoning(additional_programs=rules, generator=raw_codegen)
         self.assertListEqual(sorted(str(raw_codegen).split()), exp)
 
     def test_fun_fun_dependencies(self) -> None:
@@ -483,8 +463,8 @@ class DoReasoningTest(unittest.TestCase):
             'symbols("A"; "B").',
             'funcs("FnA"; "FnB").',
         ]
-        raw_codegen = hh_codesynthesis.CodeGenerator()
-        hh_codesynthesis.do_reasoning(additional_programs=rules, generator=raw_codegen)
+        raw_codegen = agentGenerator.CodeGenerator()
+        agentGenerator.do_reasoning(additional_programs=rules, generator=raw_codegen)
         self.assertListEqual(sorted(str(raw_codegen).split()), exp)
 
     def test_fun_dependency_exception(self) -> None:
@@ -497,9 +477,9 @@ class DoReasoningTest(unittest.TestCase):
             'symbols("A"; "B").',
             'funcs("Fn").',
         ]
-        raw_codegen = hh_codesynthesis.CodeGenerator()
+        raw_codegen = agentGenerator.CodeGenerator()
         with self.assertRaises(expected_exception=RuntimeError, msg="Unsatisfiable."):
-            hh_codesynthesis.do_reasoning(
+            agentGenerator.do_reasoning(
                 additional_programs=rules, generator=raw_codegen
             )
 
@@ -520,8 +500,8 @@ class DoReasoningTest(unittest.TestCase):
             'funcs("Fn").'
             'extends_to("A","B").'
         ]
-        raw_codegen = hh_codesynthesis.CodeGenerator()
-        hh_codesynthesis.do_reasoning(additional_programs=rules, generator=raw_codegen)
+        raw_codegen = agentGenerator.CodeGenerator()
+        agentGenerator.do_reasoning(additional_programs=rules, generator=raw_codegen)
         self.assertListEqual(sorted(str(raw_codegen).split()), exp)
 
     def test_interface_method_fun_dependency(self) -> None:
@@ -541,8 +521,8 @@ class DoReasoningTest(unittest.TestCase):
             'funcs("Fn").'
             'extends_to("A","B").'
         ]
-        raw_codegen = hh_codesynthesis.CodeGenerator()
-        hh_codesynthesis.do_reasoning(additional_programs=rules, generator=raw_codegen)
+        raw_codegen = agentGenerator.CodeGenerator()
+        agentGenerator.do_reasoning(additional_programs=rules, generator=raw_codegen)
         self.assertListEqual(sorted(str(raw_codegen).split()), exp)
 
     def test_class_type_fun_dependency(self) -> None:
@@ -560,8 +540,8 @@ class DoReasoningTest(unittest.TestCase):
             'funcs("Fn").',
             'extends_to("A","B").',
         ]
-        raw_codegen = hh_codesynthesis.CodeGenerator()
-        hh_codesynthesis.do_reasoning(additional_programs=rules, generator=raw_codegen)
+        raw_codegen = agentGenerator.CodeGenerator()
+        agentGenerator.do_reasoning(additional_programs=rules, generator=raw_codegen)
         self.assertListEqual(sorted(str(raw_codegen).split()), exp)
 
     def test_interface_type_fun_dependency(self) -> None:
@@ -579,8 +559,8 @@ class DoReasoningTest(unittest.TestCase):
             'funcs("Fn").',
             'extends_to("A","B").',
         ]
-        raw_codegen = hh_codesynthesis.CodeGenerator()
-        hh_codesynthesis.do_reasoning(additional_programs=rules, generator=raw_codegen)
+        raw_codegen = agentGenerator.CodeGenerator()
+        agentGenerator.do_reasoning(additional_programs=rules, generator=raw_codegen)
         self.assertListEqual(sorted(str(raw_codegen).split()), exp)
 
     def test_extends_dependency_with_rule_extraction(self) -> None:
@@ -604,9 +584,9 @@ Type A -> Type B
 Type I -> Type B
 Type T -> Type A, Type B
 """
-        raw_codegen = hh_codesynthesis.CodeGenerator()
-        additional_programs = hh_codesynthesis.extract_logic_rules(deps.split("\n"))
-        hh_codesynthesis.do_reasoning(
+        raw_codegen = agentGenerator.CodeGenerator()
+        additional_programs = agentGenerator.extract_logic_rules(deps.split("\n"))
+        agentGenerator.do_reasoning(
             additional_programs=additional_programs, generator=raw_codegen
         )
         self.assertListEqual(sorted(str(raw_codegen).split()), exp)
@@ -614,10 +594,10 @@ Type T -> Type A, Type B
 
 class CodeEmittingTest(unittest.TestCase):
     def extract_run_and_compare(
-        self, deps: str, exp: str, generator: hh_codesynthesis.CodeGenerator
+        self, deps: str, exp: str, generator: agentGenerator.CodeGenerator
     ) -> None:
-        additional_programs = hh_codesynthesis.extract_logic_rules(deps.split("\n"))
-        hh_codesynthesis.do_reasoning(
+        additional_programs = agentGenerator.extract_logic_rules(deps.split("\n"))
+        agentGenerator.do_reasoning(
             additional_programs=additional_programs, generator=generator
         )
         self.assertEqual(str(generator), exp)
@@ -637,7 +617,7 @@ interface T  {}
             'symbols("A";"B";"I";"T").',
         ]
         hack_codegen = hackGenerator.HackCodeGenerator()
-        hh_codesynthesis.do_reasoning(additional_programs=rules, generator=hack_codegen)
+        agentGenerator.do_reasoning(additional_programs=rules, generator=hack_codegen)
         self.assertEqual(str(hack_codegen), exp)
 
     def test_extends_dependency_with_rule_extraction_hack_codegen(self) -> None:
@@ -935,16 +915,16 @@ Type T -> Type A, Type B
             fp.flush()
             self.assertListEqual(
                 exp,
-                hh_codesynthesis.extract_logic_rules(
-                    hh_codesynthesis.read_from_file_or_stdin(fp.name)
+                agentGenerator.extract_logic_rules(
+                    agentGenerator.read_from_file_or_stdin(fp.name)
                 ),
             )
 
     def test_non_exist(self) -> None:
         test_file = "non_exist.in"
         with self.assertRaises(expected_exception=FileNotFoundError):
-            hh_codesynthesis.extract_logic_rules(
-                hh_codesynthesis.read_from_file_or_stdin(test_file)
+            agentGenerator.extract_logic_rules(
+                agentGenerator.read_from_file_or_stdin(test_file)
             )
 
 
@@ -963,6 +943,6 @@ interface I1  {}
         generator._add_extend("C2", "C1")
         generator._add_implement("C2", "I1")
         with tempfile.NamedTemporaryFile("r") as fp:
-            hh_codesynthesis.output_to_file_or_stdout(generator, fp.name)
+            agentGenerator.output_to_file_or_stdout(generator, fp.name)
             lines = fp.readlines()
             self.assertEqual("".join(lines), exp)

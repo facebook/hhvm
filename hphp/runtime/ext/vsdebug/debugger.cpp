@@ -1723,11 +1723,11 @@ bool Debugger::tryResolveBreakpointInUnit(const DebuggerRequestInfo* /*ri*/, int
           func->name() != nullptr &&
           func->line1() <= lines.first &&
           func->line2() >= lines.second) {
-        std::string cls =
-          func->cls() != nullptr && func->cls()->name() != nullptr
-            ? std::string(func->cls()->name()->data()) + "::"
+        std::string clsName =
+          func->preClass() != nullptr && func->preClass()->name() != nullptr
+            ? std::string(func->preClass()->name()->data()) + "::"
             : "";
-        functionName = cls;
+        functionName = clsName;
         functionName += func->name()->data();
         function = func;
         return true;

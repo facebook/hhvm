@@ -86,6 +86,8 @@ target_include_directories(thrift INTERFACE "${INSTALL_DIR}/include")
 target_link_libraries(thrift INTERFACE ${THRIFT_DEPS} ${OPENSSL_LIBRARIES})
 set(THRIFT_INSTALL_DIR "${INSTALL_DIR}" PARENT_SCOPE)
 
+# ----- Export a single 'thrift' library target -----
+
 # Usage: thrift_lib NAME [DEP1 [DEP2...]]
 macro(thrift_lib NAME)
   set(DEPENDENCIES)
@@ -124,3 +126,13 @@ thrift_lib(async concurrency transport)
 thrift_lib(thriftprotocol thrift-core)
 thrift_lib(thriftfrozen2 thriftmetadata thriftprotocol)
 thrift_lib(thriftcpp2 rpcmetadata thriftmetadata thriftfrozen2 thriftprotocol transport async)
+
+# ----- Export the thrift compiler as a target -----
+
+add_executable(thrift1 IMPORTED GLOBAL)
+add_dependencies(thrift1 INTERFACE bundled_thrift)
+set_target_properties(
+  thrift1
+  PROPERTIES
+  IMPORTED_LOCATION "${INSTALL_DIR}/bin/thrift1${CMAKE_EXECUTABLE_SUFFIX}"
+)

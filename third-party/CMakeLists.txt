@@ -91,7 +91,6 @@ if (ENABLE_MCROUTER)
 
   list(APPEND THIRD_PARTY_MODULES mcrouter)
   list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/mcrouter/src")
-  list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/mcrouter/gen")
 endif()
 
 # Add bundled fastlz if the system one will not be used

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<cb912e6b96ccc8372f2bc271d2f94885>>
+// @generated SignedSource<<adaa178f800bd12b674bc78b5de23a9b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -761,7 +761,15 @@ pub enum Expr_<Ex, En> {
     /// runtime, but desugared to an expression representing the code.
     ///
     /// Foo`1 + bar()`
-    /// Foo`$x ==> $x * ${$value}` // splicing $value
+    /// Foo`(() ==> { while(true) {} })()` // not an infinite loop at runtime
+    ///
+    /// Splices are evaluated as normal Hack code. The following two expression trees
+    /// are equivalent. See also `ET_Splice`.
+    ///
+    /// Foo`1 + ${do_stuff()}`
+    ///
+    /// $x = do_stuff();
+    /// Foo`1 + ${$x}`
     ExpressionTree(Box<ExpressionTree<Ex, En>>),
     /// Placeholder local variable.
     ///
@@ -797,7 +805,7 @@ pub enum Expr_<Ex, En> {
     /// Pair {$foo, $bar}
     Pair(Box<(Option<(Targ<Ex>, Targ<Ex>)>, Expr<Ex, En>, Expr<Ex, En>)>),
     /// Expression tree splice expression. Only valid inside an
-    /// expression tree literal (backticks).
+    /// expression tree literal (backticks). See also `ExpressionTree`.
     ///
     /// ${$foo}
     ETSplice(Box<Expr<Ex, En>>),

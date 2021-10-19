@@ -597,7 +597,15 @@ and ('ex, 'en) expr_ =
           runtime, but desugared to an expression representing the code.
 
           Foo`1 + bar()`
-          Foo`$x ==> $x * ${$value}` // splicing $value *)
+          Foo`(() ==> { while(true) {} })()` // not an infinite loop at runtime
+
+          Splices are evaluated as normal Hack code. The following two expression trees
+          are equivalent. See also `ET_Splice`.
+
+          Foo`1 + ${do_stuff()}`
+
+          $x = do_stuff();
+          Foo`1 + ${$x}` *)
   | Lplaceholder of pos
       (** Placeholder local variable.
 
@@ -633,7 +641,7 @@ and ('ex, 'en) expr_ =
           Pair {$foo, $bar} *)
   | ET_Splice of ('ex, 'en) expr
       (** Expression tree splice expression. Only valid inside an
-          expression tree literal (backticks).
+          expression tree literal (backticks). See also `ExpressionTree`.
 
           ${$foo} *)
   | EnumClassLabel of class_name option * string

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d89c761531259814b18f58e475cd97e0>>
+// @generated SignedSource<<b4c84bf06bc6f3834f1ad408f5c7ae0a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -956,7 +956,15 @@ pub enum Expr_<'a, Ex, En> {
     /// runtime, but desugared to an expression representing the code.
     ///
     /// Foo`1 + bar()`
-    /// Foo`$x ==> $x * ${$value}` // splicing $value
+    /// Foo`(() ==> { while(true) {} })()` // not an infinite loop at runtime
+    ///
+    /// Splices are evaluated as normal Hack code. The following two expression trees
+    /// are equivalent. See also `ET_Splice`.
+    ///
+    /// Foo`1 + ${do_stuff()}`
+    ///
+    /// $x = do_stuff();
+    /// Foo`1 + ${$x}`
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     ExpressionTree(&'a ExpressionTree<'a, Ex, En>),
     /// Placeholder local variable.
@@ -1005,7 +1013,7 @@ pub enum Expr_<'a, Ex, En> {
         ),
     ),
     /// Expression tree splice expression. Only valid inside an
-    /// expression tree literal (backticks).
+    /// expression tree literal (backticks). See also `ExpressionTree`.
     ///
     /// ${$foo}
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

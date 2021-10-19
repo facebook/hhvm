@@ -820,7 +820,11 @@ module ByHash = struct
       Provider_context.get_deps_mode ctx |> Typing_deps_mode.hash_mode
     in
     match (hash_mode, Provider_context.get_backend ctx) with
-    | (Typing_deps_mode.Hash64Bit, Provider_backend.Shared_memory) -> false
+    | (Typing_deps_mode.Hash64Bit, Provider_backend.Shared_memory) ->
+      (* if we ARE using naming for dephash->filename, then we DON'T need clients to call update_files. *)
+      not
+        (GlobalOptions.tco_use_naming_for_dephash_filenames
+           (Provider_context.get_tcopt ctx))
     | (hash_mode, backend) ->
       let desc =
         Printf.sprintf

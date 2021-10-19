@@ -542,6 +542,8 @@ type t = {
   (* Enables the reverse naming table to fall back to SQLite for queries. *)
   naming_sqlite_path: string option;
   enable_naming_table_fallback: bool;
+  (* Uses the naming table for dephash->filename lookups *)
+  use_naming_for_dephash_filenames: bool;
   (* Selects a search provider for autocomplete and symbol search; see also [ide_symbolindex_search_provider] *)
   symbolindex_search_provider: string;
   symbolindex_quiet: bool;
@@ -665,6 +667,7 @@ let default =
     remote_transport_channel = None;
     naming_sqlite_path = None;
     enable_naming_table_fallback = false;
+    use_naming_for_dephash_filenames = false;
     symbolindex_search_provider = "SqliteIndex";
     (* the code actually doesn't use this default for ide_symbolindex_search_provider;
        it defaults to whatever was computed for symbolindex_search_provider. *)
@@ -1183,6 +1186,13 @@ let load_ fn ~silent ~current_version overrides =
     else
       None
   in
+  let use_naming_for_dephash_filenames =
+    bool_if_min_version
+      "use_naming_for_dephash_filenames"
+      ~default:default.use_naming_for_dephash_filenames
+      ~current_version
+      config
+  in
   let symbolindex_search_provider =
     string_
       "symbolindex_search_provider"
@@ -1428,6 +1438,7 @@ let load_ fn ~silent ~current_version overrides =
     remote_transport_channel;
     naming_sqlite_path;
     enable_naming_table_fallback;
+    use_naming_for_dephash_filenames;
     symbolindex_search_provider;
     symbolindex_quiet;
     symbolindex_file;
@@ -1474,4 +1485,6 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       naming_sqlite_in_hack_64 = options.naming_sqlite_in_hack_64;
       use_hack_64_naming_table = options.use_hack_64_naming_table;
       enable_disk_heap = options.enable_disk_heap;
+      use_naming_for_dephash_filenames =
+        options.use_naming_for_dephash_filenames;
     }

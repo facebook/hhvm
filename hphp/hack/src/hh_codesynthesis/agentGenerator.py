@@ -229,6 +229,7 @@ def do_reasoning(additional_programs: List[str], generator: CodeGenerator) -> No
     # ToDo: Hardcode the number of threads for now, change to parameter later.
     # Pyre-ignore: [16] Configuration not in pyre stubs since it's dynamic
     ctl.configuration.solve.parallel_mode = "4"
+    ctl.configuration.solve.models = generator.model_count
 
     logging.info("Finished grounding.")
     result: Union[clingo.solving.SolveHandle, clingo.solving.SolveResult] = ctl.solve(

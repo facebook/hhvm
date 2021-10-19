@@ -297,8 +297,10 @@ class _HackFunctionGenerator:
 class HackCodeGenerator(CodeGenerator):
     """A wrapper generator encapsulates each _Hack*Generator to emit Hack Code"""
 
-    def __init__(self, solving_context: Optional[ClingoContext] = None) -> None:
-        super(HackCodeGenerator, self).__init__(solving_context)
+    def __init__(
+        self, solving_context: Optional[ClingoContext] = None, model_count: int = 1
+    ) -> None:
+        super(HackCodeGenerator, self).__init__(solving_context, model_count)
         self.class_objs: Dict[str, _HackClassGenerator] = {}
         self.interface_objs: Dict[str, _HackInterfaceGenerator] = {}
         self.function_objs: Dict[str, _HackFunctionGenerator] = {}
@@ -501,7 +503,17 @@ class HackCodeGenerator(CodeGenerator):
             + "".join([str(x) + "\n" for x in self.function_objs.values()])
         )
 
-    def on_model(self, m: clingo.Model) -> None:
+    def on_model(self, m: clingo.Model) -> bool:
+        # Same set of parameters and search algorithm will produce the same
+        # result set. To make sure two different agent using the same settings
+        # can produce different output, we are counting models in the result
+        # set. The first agent using the same configuration gets first one,
+        # the second agent using the same configuration gets second one, and so
+        # on so forth.
+        self.model_count -= 1
+        if self.model_count > 0:
+            return True
+
         # Separate into 'class(?)', 'interface(?)', 'funcs(?)',
         # 'implements(?, ?)', 'extends(?, ?)', 'add_method(?, ?)',
         # 'add_static_method(?, ?)', 'has_method_with_parameter(?, ?)'
@@ -549,3 +561,4 @@ class HackCodeGenerator(CodeGenerator):
                     predicate.arguments[1].string,
                     predicate.arguments[2].string,
                 )
+        return False

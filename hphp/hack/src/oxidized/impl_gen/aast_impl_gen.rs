@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5bfb4c781ebab43cd0fb74db3c5b55ab>>
+// @generated SignedSource<<f6e0d2ca637a15b578169c6f4954f8eb>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -881,10 +881,15 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn mk_array_get(p0: Expr<Ex, En>, p1: Option<Expr<Ex, En>>) -> Self {
         Expr_::ArrayGet(Box::new((p0, p1)))
     }
-    pub fn mk_obj_get(p0: Expr<Ex, En>, p1: Expr<Ex, En>, p2: OgNullFlavor, p3: bool) -> Self {
+    pub fn mk_obj_get(
+        p0: Expr<Ex, En>,
+        p1: Expr<Ex, En>,
+        p2: OgNullFlavor,
+        p3: PropOrMethod,
+    ) -> Self {
         Expr_::ObjGet(Box::new((p0, p1, p2, p3)))
     }
-    pub fn mk_class_get(p0: ClassId<Ex, En>, p1: ClassGetExpr<Ex, En>, p2: bool) -> Self {
+    pub fn mk_class_get(p0: ClassId<Ex, En>, p1: ClassGetExpr<Ex, En>, p2: PropOrMethod) -> Self {
         Expr_::ClassGet(Box::new((p0, p1, p2)))
     }
     pub fn mk_class_const(p0: ClassId<Ex, En>, p1: Pstring) -> Self {
@@ -1413,13 +1418,15 @@ impl<Ex, En> Expr_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_obj_get(&self) -> Option<(&Expr<Ex, En>, &Expr<Ex, En>, &OgNullFlavor, &bool)> {
+    pub fn as_obj_get(
+        &self,
+    ) -> Option<(&Expr<Ex, En>, &Expr<Ex, En>, &OgNullFlavor, &PropOrMethod)> {
         match self {
             Expr_::ObjGet(p0) => Some((&p0.0, &p0.1, &p0.2, &p0.3)),
             _ => None,
         }
     }
-    pub fn as_class_get(&self) -> Option<(&ClassId<Ex, En>, &ClassGetExpr<Ex, En>, &bool)> {
+    pub fn as_class_get(&self) -> Option<(&ClassId<Ex, En>, &ClassGetExpr<Ex, En>, &PropOrMethod)> {
         match self {
             Expr_::ClassGet(p0) => Some((&p0.0, &p0.1, &p0.2)),
             _ => None,
@@ -1753,7 +1760,7 @@ impl<Ex, En> Expr_<Ex, En> {
         &mut Expr<Ex, En>,
         &mut Expr<Ex, En>,
         &mut OgNullFlavor,
-        &mut bool,
+        &mut PropOrMethod,
     )> {
         match self {
             Expr_::ObjGet(p0) => Some((&mut p0.0, &mut p0.1, &mut p0.2, &mut p0.3)),
@@ -1762,7 +1769,11 @@ impl<Ex, En> Expr_<Ex, En> {
     }
     pub fn as_class_get_mut(
         &mut self,
-    ) -> Option<(&mut ClassId<Ex, En>, &mut ClassGetExpr<Ex, En>, &mut bool)> {
+    ) -> Option<(
+        &mut ClassId<Ex, En>,
+        &mut ClassGetExpr<Ex, En>,
+        &mut PropOrMethod,
+    )> {
         match self {
             Expr_::ClassGet(p0) => Some((&mut p0.0, &mut p0.1, &mut p0.2)),
             _ => None,
@@ -2108,13 +2119,17 @@ impl<Ex, En> Expr_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_obj_get_into(self) -> Option<(Expr<Ex, En>, Expr<Ex, En>, OgNullFlavor, bool)> {
+    pub fn as_obj_get_into(
+        self,
+    ) -> Option<(Expr<Ex, En>, Expr<Ex, En>, OgNullFlavor, PropOrMethod)> {
         match self {
             Expr_::ObjGet(p0) => Some(((*p0).0, (*p0).1, (*p0).2, (*p0).3)),
             _ => None,
         }
     }
-    pub fn as_class_get_into(self) -> Option<(ClassId<Ex, En>, ClassGetExpr<Ex, En>, bool)> {
+    pub fn as_class_get_into(
+        self,
+    ) -> Option<(ClassId<Ex, En>, ClassGetExpr<Ex, En>, PropOrMethod)> {
         match self {
             Expr_::ClassGet(p0) => Some(((*p0).0, (*p0).1, (*p0).2)),
             _ => None,

@@ -331,7 +331,7 @@ and assign _env acc x = S.add x acc
 
 and assign_expr env acc e1 =
   match e1 with
-  | (_, _, Obj_get ((_, _, This), (_, _, Id (_, y)), _, false)) ->
+  | (_, _, Obj_get ((_, _, This), (_, _, Id (_, y)), _, Is_prop)) ->
     assign env acc y
   | (_, _, List el) -> List.fold_left ~f:(assign_expr env) ~init:acc el
   | _ -> acc
@@ -462,7 +462,7 @@ and expr_ env acc p e =
   | Lplaceholder _
   | Dollardollar _ ->
     acc
-  | Obj_get ((_, _, This), (_, _, Id ((_, vx) as v)), _, false) ->
+  | Obj_get ((_, _, This), (_, _, Id ((_, vx) as v)), _, Is_prop) ->
     if SMap.mem vx env.props && not (S.mem vx acc) then (
       Errors.read_before_write v;
       acc
@@ -480,10 +480,9 @@ and expr_ env acc p e =
     ) else
       acc
   | Clone e -> expr acc e
-  | Obj_get (e1, e2, _, false) ->
+  | Obj_get (e1, e2, _, _) ->
     let acc = expr acc e1 in
     expr acc e2
-  | Obj_get _ -> acc
   | Array_get (e, eo) ->
     let acc = expr acc e in
     (match eo with
@@ -493,7 +492,7 @@ and expr_ env acc p e =
   | Class_get _ ->
     acc
   | Call
-      ( (_, p, Obj_get ((_, _, This), (_, _, Id (_, f)), _, false)),
+      ( (_, p, Obj_get ((_, _, This), (_, _, Id (_, f)), _, Is_method)),
         _,
         el,
         unpacked_element ) ->

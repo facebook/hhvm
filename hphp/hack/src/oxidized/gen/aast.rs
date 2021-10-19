@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<61893b272ff8f1a7ca59476c4327a06c>>
+// @generated SignedSource<<cb912e6b96ccc8372f2bc271d2f94885>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -532,20 +532,29 @@ pub enum Expr_<Ex, En> {
     /// $foo[]
     /// $foo[$bar]
     ArrayGet(Box<(Expr<Ex, En>, Option<Expr<Ex, En>>)>),
-    /// Instance property or method access.  is_prop_call is always
-    /// false, except when inside a call is accessing a property.
+    /// Instance property or method access.
+    /// prop_or_method is
+    ///   Is_prop for property access
+    ///   Is_method for method call, only possible when the node is
+    ///   the receiver in a Call node.
     ///
-    /// $foo->bar // (Obj_get false) property access
-    /// $foo->bar() // (Call (Obj_get false)) method call
-    /// ($foo->bar)() // (Call (Obj_get true)) call lambda stored in property
-    /// $foo?->bar // nullsafe access
-    ObjGet(Box<(Expr<Ex, En>, Expr<Ex, En>, OgNullFlavor, bool)>),
-    /// Static property access.
+    ///   $foo->bar      // OG_nullthrows, Is_prop: access named property
+    ///   $foo->bar()    // OG_nullthrows, Is_method: call named method
+    ///   ($foo->bar)()  // OG_nullthrows, Is_prop: call lambda stored in named property
+    ///   $foo?->bar     // OG_nullsafe,   Is_prop
+    ///   $foo?->bar()   // OG_nullsafe,   Is_method
+    ///   ($foo?->bar)() // OG_nullsafe,   Is_prop
+    ObjGet(Box<(Expr<Ex, En>, Expr<Ex, En>, OgNullFlavor, PropOrMethod)>),
+    /// Static property or method access.
     ///
-    /// Foo::$bar
-    /// $some_classname::$bar
-    /// Foo::${$bar} // only in partial mode
-    ClassGet(Box<(ClassId<Ex, En>, ClassGetExpr<Ex, En>, bool)>),
+    /// Foo::$bar               // Is_prop
+    /// $some_classname::$bar   // Is_prop
+    /// Foo::${$bar}            // Is_prop, only in partial mode
+    ///
+    /// Foo::bar();             // Is_method
+    /// Foo::$bar();            // Is_method, name stored in local $bar
+    /// (Foo::$bar)();          // Is_prop: call lambda stored in property Foo::$bar
+    ClassGet(Box<(ClassId<Ex, En>, ClassGetExpr<Ex, En>, PropOrMethod)>),
     /// Class constant or static method call. As a standalone expression,
     /// this is a class constant. Inside a Call node, this is a static
     /// method call.

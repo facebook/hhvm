@@ -119,7 +119,7 @@ let rec ty_expr env ((_, _, expr_) : Tast.expr) : rty =
   match expr_ with
   | ReadonlyExpr _ -> Readonly
   (* Obj_get, array_get, and class_get are here for better error messages when used as lval *)
-  | Obj_get (e1, e2, _, _) ->
+  | Obj_get (e1, e2, _, Is_prop) ->
     (match ty_expr env e1 with
     | Readonly -> Readonly
     | Mut ->
@@ -129,7 +129,7 @@ let rec ty_expr env ((_, _, expr_) : Tast.expr) : rty =
         List.find ~f:Typing_defs.get_ce_readonly_prop prop_elts
       in
       Option.value_map readonly_prop ~default:Mut ~f:(fun _ -> Readonly))
-  | Class_get (class_id, expr, _is_prop_call) ->
+  | Class_get (class_id, expr, Is_prop) ->
     (* If any of the static props could be readonly, treat the expression as readonly *)
     let class_elts = get_static_prop_elts env class_id expr in
     (* Note that the empty list case (when the prop doesn't exist) returns Mut *)
@@ -241,8 +241,8 @@ let check_static_readonly_property pos env (class_ : Tast.class_id) get obj_ro =
 
 let is_method_caller (caller : Tast.expr) =
   match caller with
-  | (_, _, ReadonlyExpr (_, _, Obj_get (_, _, _, (* is_prop_call *) false)))
-  | (_, _, Obj_get (_, _, _, (* is_prop_call *) false)) ->
+  | (_, _, ReadonlyExpr (_, _, Obj_get (_, _, _, Is_method)))
+  | (_, _, Obj_get (_, _, _, Is_method)) ->
     true
   | _ -> false
 
@@ -309,13 +309,13 @@ let rec assign env lval rval =
       | (Readonly, _) -> Errors.readonly_modified (Tast.get_position array)
       | (Mut, Mut) -> ()
     end
-  | (_, _, Class_get (id, expr, _)) ->
+  | (_, _, Class_get (id, expr, Is_prop)) ->
     (match ty_expr env rval with
     | Readonly ->
       let prop_elts = get_static_prop_elts env id expr in
       check_ro_prop_assignment prop_elts
     | _ -> ())
-  | (_, _, Obj_get (obj, get, _, _)) ->
+  | (_, _, Obj_get (obj, get, _, Is_prop)) ->
     (* Here to check for nested property accesses that are accessing readonly values *)
     begin
       match ty_expr env obj with
@@ -336,7 +336,7 @@ let method_call caller =
   let open Typing_defs in
   match caller with
   (* Readonly call checks *)
-  | (ty, _, ReadonlyExpr (_, _, Obj_get (e1, _, _, false))) ->
+  | (ty, _, ReadonlyExpr (_, _, Obj_get (e1, _, _, Is_method))) ->
     (match get_node ty with
     | Tfun fty when not (get_ft_readonly_this fty) ->
       Errors.readonly_method_call (Tast.get_position e1) (get_pos ty)
@@ -628,9 +628,9 @@ let handler =
         (* Assume obj is mutable here since you can't have a readonly thing
            without readonly keyword/analysis *)
         (* Only check this for rvalues, not lvalues *)
-        | ((_, _, Obj_get (obj, get, _, _)), Typing_defs.Other) ->
+        | ((_, _, Obj_get (obj, get, _, Is_prop)), Typing_defs.Other) ->
           check_readonly_property env obj get Mut
-        | ((_, pos, Class_get (class_id, get, _)), Typing_defs.Other) ->
+        | ((_, pos, Class_get (class_id, get, Is_prop)), Typing_defs.Other) ->
           check_static_readonly_property pos env class_id get Mut
         | _ -> ()
       in

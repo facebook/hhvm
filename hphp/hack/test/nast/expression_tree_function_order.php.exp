@@ -160,7 +160,7 @@
                                                                 (Call (
                                                                    ((), [5:5-11:4],
                                                                     (
-                                                                    Obj_get (((), [5:5-11:4], (Lvar ([5:5-11:4], $0v))), ((), [5:5-11:4], (Id ([5:5-11:4], "visitCall"))), OG_nullthrows, false))),
+                                                                    Obj_get (((), [5:5-11:4], (Lvar ([5:5-11:4], $0v))), ((), [5:5-11:4], (Id ([5:5-11:4], "visitCall"))), OG_nullthrows, Is_method))),
                                                                    [],
                                                                    [(Pnormal,
                                                                     ((), [5:5-11:4],
@@ -176,7 +176,7 @@
                                                                     ((), [5:5-11:4],
                                                                     (Obj_get ((
                                                                     (), [5:5-11:4], (Lvar ([5:5-11:4], $0v))), (
-                                                                    (), [5:5-11:4], (Id ([5:5-11:4], "visitGlobalFunction"))), OG_nullthrows, false))), 
+                                                                    (), [5:5-11:4], (Id ([5:5-11:4], "visitGlobalFunction"))), OG_nullthrows, Is_method))), 
                                                                     [],
                                                                     [(Pnormal,
                                                                     ((), [5:5-11:4],
@@ -193,7 +193,7 @@
                                                                     [((), [6:7-9:8],
                                                                     (Call (
                                                                     ((), [6:7-9:8],
-                                                                    (Obj_get (((), [6:7-9:8], (Lvar ([6:7-9:8], $0v))), ((), [6:7-9:8], (Id ([6:7-9:8], "visitCall"))), OG_nullthrows, false))), 
+                                                                    (Obj_get (((), [6:7-9:8], (Lvar ([6:7-9:8], $0v))), ((), [6:7-9:8], (Id ([6:7-9:8], "visitCall"))), OG_nullthrows, Is_method))),
                                                                     [],
                                                                     [(Pnormal,
                                                                     ((), [6:7-9:8],
@@ -209,7 +209,7 @@
                                                                     ((), [6:7-9:8],
                                                                     (Obj_get ((
                                                                     (), [6:7-9:8], (Lvar ([6:7-9:8], $0v))), (
-                                                                    (), [6:7-9:8], (Id ([6:7-9:8], "visitGlobalFunction"))), OG_nullthrows, false))), 
+                                                                    (), [6:7-9:8], (Id ([6:7-9:8], "visitGlobalFunction"))), OG_nullthrows, Is_method))), 
                                                                     [],
                                                                     [(Pnormal,
                                                                     ((), [6:7-9:8],
@@ -226,7 +226,7 @@
                                                                     [((), [7:9-14],
                                                                     (Call (
                                                                     ((), [7:9-14],
-                                                                    (Obj_get (((), [7:9-14], (Lvar ([7:9-14], $0v))), ((), [7:9-14], (Id ([7:9-14], "visitCall"))), OG_nullthrows, false))), 
+                                                                    (Obj_get (((), [7:9-14], (Lvar ([7:9-14], $0v))), ((), [7:9-14], (Id ([7:9-14], "visitCall"))), OG_nullthrows, Is_method))), 
                                                                     [],
                                                                     [(Pnormal,
                                                                     ((), [7:9-14],
@@ -240,7 +240,9 @@
                                                                     ((), [7:9-14],
                                                                     (Call (
                                                                     ((), [7:9-14],
-                                                                    (Obj_get (((), [7:9-14], (Lvar ([7:9-14], $0v))), ((), [7:9-14], (Id ([7:9-14], "visitGlobalFunction"))), OG_nullthrows, false))),
+                                                                    (Obj_get ((
+                                                                    (), [7:9-14], (Lvar ([7:9-14], $0v))), (
+                                                                    (), [7:9-14], (Id ([7:9-14], "visitGlobalFunction"))), OG_nullthrows, Is_method))), 
                                                                     [],
                                                                     [(Pnormal,
                                                                     ((), [7:9-14],
@@ -255,7 +257,7 @@
                                                                     ((), [8:9-14],
                                                                     (Call (
                                                                     ((), [8:9-14],
-                                                                    (Obj_get (((), [8:9-14], (Lvar ([8:9-14], $0v))), ((), [8:9-14], (Id ([8:9-14], "visitCall"))), OG_nullthrows, false))), 
+                                                                    (Obj_get (((), [8:9-14], (Lvar ([8:9-14], $0v))), ((), [8:9-14], (Id ([8:9-14], "visitCall"))), OG_nullthrows, Is_method))), 
                                                                     [],
                                                                     [(Pnormal,
                                                                     ((), [8:9-14],
@@ -269,7 +271,9 @@
                                                                     ((), [8:9-14],
                                                                     (Call (
                                                                     ((), [8:9-14],
-                                                                    (Obj_get (((), [8:9-14], (Lvar ([8:9-14], $0v))), ((), [8:9-14], (Id ([8:9-14], "visitGlobalFunction"))), OG_nullthrows, false))),
+                                                                    (Obj_get ((
+                                                                    (), [8:9-14], (Lvar ([8:9-14], $0v))), (
+                                                                    (), [8:9-14], (Id ([8:9-14], "visitGlobalFunction"))), OG_nullthrows, Is_method))), 
                                                                     [],
                                                                     [(Pnormal,
                                                                     ((), [8:9-14],
@@ -284,7 +288,7 @@
                                                                     ((), [10:7-13],
                                                                     (Call (
                                                                     ((), [10:7-13],
-                                                                    (Obj_get (((), [10:7-13], (Lvar ([10:7-13], $0v))), ((), [10:7-13], (Id ([10:7-13], "visitCall"))), OG_nullthrows, false))), 
+                                                                    (Obj_get (((), [10:7-13], (Lvar ([10:7-13], $0v))), ((), [10:7-13], (Id ([10:7-13], "visitCall"))), OG_nullthrows, Is_method))),
                                                                     [],
                                                                     [(Pnormal,
                                                                     ((), [10:7-13],
@@ -300,7 +304,7 @@
                                                                     ((), [10:7-13],
                                                                     (Obj_get ((
                                                                     (), [10:7-13], (Lvar ([10:7-13], $0v))), (
-                                                                    (), [10:7-13], (Id ([10:7-13], "visitGlobalFunction"))), OG_nullthrows, false))), 
+                                                                    (), [10:7-13], (Id ([10:7-13], "visitGlobalFunction"))), OG_nullthrows, Is_method))), 
                                                                     [],
                                                                     [(Pnormal,
                                                                     ((), [10:7-13],

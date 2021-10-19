@@ -4,58 +4,58 @@ Errors:
   [11:46-47] This is why I think it is an object of type C
   [3:7-8] Declaration of `C` is here
 [(Class
-    { c_span = [3:1-11]; c_annotation = (); c_mode = Mstrict; c_final = false; 
-      c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
-      c_name = ([3:7-8], "\\C"); c_tparams = []; c_extends = []; c_uses = []; 
-      c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
-      c_xhp_category = None; c_reqs = []; c_implements = []; c_where_constraints = []; 
-      c_consts = []; c_typeconsts = []; c_vars = []; c_methods = []; 
+    { c_span = [3:1-11]; c_annotation = (); c_mode = Mstrict; c_final = false;
+      c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete);
+      c_name = ([3:7-8], "\\C"); c_tparams = []; c_extends = []; c_uses = [];
+      c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = [];
+      c_xhp_category = None; c_reqs = []; c_implements = []; c_where_constraints = [];
+      c_consts = []; c_typeconsts = []; c_vars = []; c_methods = [];
       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
       c_namespace =
-      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
-        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>;
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      c_user_attributes = []; c_file_attributes = []; c_enum = None; 
+      c_user_attributes = []; c_file_attributes = []; c_enum = None;
       c_doc_comment = None; c_emit_id = None });
   (Fun
      { fd_namespace =
-       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
-         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
-         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>;
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false;
          ns_disable_xhp_element_mangling = false };
        fd_file_attributes = []; fd_mode = Mstrict;
        fd_fun =
-       { f_span = [5:1-8:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([5:51-55], (Hprim Tvoid)))); 
-         f_name = ([5:11-42], "\\member_not_found_property_fixme"); f_tparams = []; 
+       { f_span = [5:1-8:2]; f_readonly_this = None; f_annotation = ();
+         f_readonly_ret = None; f_ret = ((void), (Some ([5:51-55], (Hprim Tvoid))));
+         f_name = ([5:11-42], "\\member_not_found_property_fixme"); f_tparams = [];
          f_where_constraints = []; f_variadic = FVnonVariadic;
          f_params =
-         [{ param_annotation = (C); param_type_hint = ((C), (Some ([5:43-44], (Happly (([5:43-44], "\\C"), []))))); 
-            param_is_variadic = false; param_pos = [5:45-47]; param_name = "$c"; 
-            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+         [{ param_annotation = (C); param_type_hint = ((C), (Some ([5:43-44], (Happly (([5:43-44], "\\C"), [])))));
+            param_is_variadic = false; param_pos = [5:45-47]; param_name = "$c";
+            param_expr = None; param_readonly = None; param_callconv = Pnormal;
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
-         f_body = { fb_ast = [([7:3-22], (Expr ((_), [7:3-21], (Obj_get (((C), [7:3-5], (Lvar ([7:3-5], $c))), ((_), [7:7-21], (Id ([7:7-21], "does_not_exist"))), OG_nullthrows, false)))))] };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_body = { fb_ast = [([7:3-22], (Expr ((_), [7:3-21], (Obj_get (((C), [7:3-5], (Lvar ([7:3-5], $c))), ((_), [7:7-21], (Id ([7:7-21], "does_not_exist"))), OG_nullthrows, Is_prop)))))] };
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false;
          f_doc_comment = None }
        });
   (Fun
      { fd_namespace =
-       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
-         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
-         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>;
+         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false;
          ns_disable_xhp_element_mangling = false };
        fd_file_attributes = []; fd_mode = Mstrict;
        fd_fun =
-       { f_span = [11:1-13:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([11:54-58], (Hprim Tvoid)))); 
-         f_name = ([11:11-45], "\\member_not_found_property_no_fixme"); 
+       { f_span = [11:1-13:2]; f_readonly_this = None; f_annotation = ();
+         f_readonly_ret = None; f_ret = ((void), (Some ([11:54-58], (Hprim Tvoid))));
+         f_name = ([11:11-45], "\\member_not_found_property_no_fixme");
          f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
          f_params =
-         [{ param_annotation = (C); param_type_hint = ((C), (Some ([11:46-47], (Happly (([11:46-47], "\\C"), []))))); 
-            param_is_variadic = false; param_pos = [11:48-50]; param_name = "$c"; 
-            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+         [{ param_annotation = (C); param_type_hint = ((C), (Some ([11:46-47], (Happly (([11:46-47], "\\C"), [])))));
+            param_is_variadic = false; param_pos = [11:48-50]; param_name = "$c";
+            param_expr = None; param_readonly = None; param_callconv = Pnormal;
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
@@ -64,9 +64,10 @@ Errors:
            [([12:3-22],
              (Expr
                 ((nothing), [12:3-21],
-                 (Obj_get (((C), [12:3-5], (Hole (((C), [12:3-5], (Lvar ([12:3-5], $c))), (C), (nothing), Typing))), ((nothing), [12:7-21], (Id ([12:7-21], "does_not_exist"))), OG_nullthrows, false)))))
+                 (Obj_get (((C), [12:3-5], (Hole (((C), [12:3-5], (Lvar ([12:3-5], $c))), (C), (nothing), Typing))), (
+                    (nothing), [12:7-21], (Id ([12:7-21], "does_not_exist"))), OG_nullthrows, Is_prop)))))
              ]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false;
          f_doc_comment = None }
        })

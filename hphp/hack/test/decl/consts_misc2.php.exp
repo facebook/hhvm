@@ -1,6 +1,6 @@
 --- legacy
 +++ direct decl
-@@ -1,224 +1,224 @@
+@@ -1,225 +1,225 @@
  [("\\TestC",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = true;
@@ -54,7 +54,8 @@
                    ~returns_readonly:false ~support_dynamic_type:false
                    ~readonly_this:false);
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
-           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) }
+           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+           sm_attributes = [] }
           ];
         sc_methods = []; sc_user_attributes = []; sc_enum_type = None }));
    ("\\TestE",

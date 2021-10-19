@@ -25,7 +25,8 @@
                   ~returns_readonly:false ~support_dynamic_type:false
                   ~readonly_this:false);
                 ft_ifc_decl = FDPolicied {PUBLIC} }));
-          sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) };
+          sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+          sm_attributes = [] };
          { Shallow_decl_defs.sm_name = ([11:26-31], "equal");
            sm_type =
            (Rwitness_from_decl ([11:26-31]),
@@ -70,7 +71,8 @@
                    ~returns_readonly:false ~support_dynamic_type:false
                    ~readonly_this:false);
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
-           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) }
+           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+           sm_attributes = [] }
          ];
        sc_methods = []; sc_user_attributes = []; sc_enum_type = None }))
   ]

@@ -26,7 +26,8 @@
                   ~returns_readonly:false ~support_dynamic_type:false
                   ~readonly_this:false);
                 ft_ifc_decl = FDPolicied {PUBLIC} }));
-          sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) };
+          sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+          sm_attributes = [] };
          { Shallow_decl_defs.sm_name = ([5:19-20], "b");
            sm_type =
            (Rwitness_from_decl ([5:19-20]),
@@ -43,7 +44,8 @@
                    ~returns_readonly:false ~support_dynamic_type:false
                    ~readonly_this:false);
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
-           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) }
+           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+           sm_attributes = [] }
          ];
        sc_user_attributes = []; sc_enum_type = None }));
   ("\\B",
@@ -76,7 +78,8 @@
                    ~returns_readonly:false ~support_dynamic_type:false
                    ~readonly_this:false);
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
-           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) };
+           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+           sm_attributes = [] };
           { Shallow_decl_defs.sm_name = ([10:19-20], "c");
             sm_type =
             (Rwitness_from_decl ([10:19-20]),
@@ -93,8 +96,8 @@
                     ~returns_readonly:false ~support_dynamic_type:false
                     ~readonly_this:false);
                   ft_ifc_decl = FDPolicied {PUBLIC} }));
-            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty)
-            }
+            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+            sm_attributes = [] }
           ];
         sc_user_attributes = []; sc_enum_type = None }));
   ("\\C",
@@ -125,8 +128,8 @@
                    ~returns_readonly:false ~support_dynamic_type:false
                    ~readonly_this:false);
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
-           sm_visibility = Public; sm_deprecated = None; sm_flags = abstract
-           }
+           sm_visibility = Public; sm_deprecated = None; sm_flags = abstract;
+           sm_attributes = [] }
           ];
         sc_user_attributes = []; sc_enum_type = None }));
   ("\\D",
@@ -159,8 +162,8 @@
                    ~returns_readonly:false ~support_dynamic_type:false
                    ~readonly_this:false);
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
-           sm_visibility = Public; sm_deprecated = None; sm_flags = abstract
-           }
+           sm_visibility = Public; sm_deprecated = None; sm_flags = abstract;
+           sm_attributes = [] }
           ];
         sc_user_attributes = []; sc_enum_type = None }));
   ("\\E",
@@ -194,7 +197,8 @@
                    ~returns_readonly:false ~support_dynamic_type:false
                    ~readonly_this:false);
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
-           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) }
+           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+           sm_attributes = [] }
           ];
         sc_user_attributes = []; sc_enum_type = None }));
   ("\\F",
@@ -230,7 +234,8 @@
                    ~returns_readonly:false ~support_dynamic_type:false
                    ~readonly_this:false);
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
-           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) }
+           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+           sm_attributes = [] }
           ];
         sc_user_attributes = []; sc_enum_type = None }))
   ]

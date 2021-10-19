@@ -1,6 +1,6 @@
 --- legacy
 +++ direct decl
-@@ -1,97 +1,97 @@
+@@ -1,98 +1,98 @@
  [("\\foo",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = (Some ("here", []));
@@ -50,7 +50,8 @@
                     ~returns_readonly:false ~support_dynamic_type:false
                     ~readonly_this:false);
                   ft_ifc_decl = FDPolicied {PUBLIC} }));
-            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) }
+            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+            sm_attributes = [] }
            ];
          sc_user_attributes =
          [{ Typing_defs_core.ua_name = ([9:3-11], "__Module");

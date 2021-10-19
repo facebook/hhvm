@@ -119,7 +119,7 @@
                         ~readonly_this:false);
                       ft_ifc_decl = FDPolicied {PUBLIC} }));
                 sm_visibility = Public; sm_deprecated = None;
-                sm_flags = (empty) });
+                sm_flags = (empty); sm_attributes = [] });
         sc_static_methods = [];
         sc_methods =
         [{ Shallow_decl_defs.sm_name = ([22:28-34], "getFoo");
@@ -166,7 +166,8 @@
                    ~returns_readonly:false ~support_dynamic_type:false
                    ~readonly_this:true);
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
-           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) }
+           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+           sm_attributes = [] }
           ];
         sc_user_attributes = []; sc_enum_type = None }))
   ]

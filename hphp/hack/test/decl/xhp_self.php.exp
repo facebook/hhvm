@@ -76,7 +76,7 @@
                    ~readonly_this:false);
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
            sm_visibility = Protected; sm_deprecated = None;
-           sm_flags = (empty) }
+           sm_flags = (empty); sm_attributes = [] }
           ];
         sc_user_attributes = []; sc_enum_type = None }))
   ]

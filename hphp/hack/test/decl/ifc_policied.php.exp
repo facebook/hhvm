@@ -40,7 +40,12 @@
                    ~returns_readonly:false ~support_dynamic_type:false
                    ~readonly_this:false);
                  ft_ifc_decl = FDPolicied {Test} }));
-           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) };
+           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+           sm_attributes =
+           [{ Typing_defs_core.ua_name = ([6:5-15], "__Policied");
+              ua_classname_params = [] }
+             ]
+           };
           { Shallow_decl_defs.sm_name = ([10:19-20], "g");
             sm_type =
             (Rwitness_from_decl ([10:19-20]),
@@ -57,7 +62,11 @@
                     ~returns_readonly:false ~support_dynamic_type:false
                     ~readonly_this:false);
                   ft_ifc_decl = FDPolicied {Public} }));
-            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty)
+            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+            sm_attributes =
+            [{ Typing_defs_core.ua_name = ([9:5-15], "__Policied");
+               ua_classname_params = [] }
+              ]
             };
           { Shallow_decl_defs.sm_name = ([13:19-27], "implicit");
             sm_type =
@@ -75,7 +84,11 @@
                     ~returns_readonly:false ~support_dynamic_type:false
                     ~readonly_this:false);
                   ft_ifc_decl = FDPolicied {} }));
-            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty)
+            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+            sm_attributes =
+            [{ Typing_defs_core.ua_name = ([12:5-15], "__Policied");
+               ua_classname_params = [] }
+              ]
             };
           { Shallow_decl_defs.sm_name = ([16:19-29], "inferflows");
             sm_type =
@@ -93,7 +106,11 @@
                     ~returns_readonly:false ~support_dynamic_type:false
                     ~readonly_this:false);
                   ft_ifc_decl = FDInferFlows }));
-            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty)
+            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+            sm_attributes =
+            [{ Typing_defs_core.ua_name = ([15:5-17], "__InferFlows");
+               ua_classname_params = [] }
+              ]
             };
           { Shallow_decl_defs.sm_name = ([19:19-28], "classname");
             sm_type =
@@ -111,7 +128,11 @@
                     ~returns_readonly:false ~support_dynamic_type:false
                     ~readonly_this:false);
                   ft_ifc_decl = FDPolicied {\Policy} }));
-            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty)
+            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+            sm_attributes =
+            [{ Typing_defs_core.ua_name = ([18:5-15], "__Policied");
+               ua_classname_params = ["\\Policy"] }
+              ]
             };
           { Shallow_decl_defs.sm_name = ([22:19-27], "defaults");
             sm_type =
@@ -129,8 +150,8 @@
                     ~returns_readonly:false ~support_dynamic_type:false
                     ~readonly_this:false);
                   ft_ifc_decl = FDPolicied {PUBLIC} }));
-            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty)
-            };
+            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+            sm_attributes = [] };
           { Shallow_decl_defs.sm_name = ([24:19-28], "with_args");
             sm_type =
             (Rwitness_from_decl ([24:19-28]),
@@ -189,8 +210,8 @@
                     ~returns_readonly:false ~support_dynamic_type:false
                     ~readonly_this:false);
                   ft_ifc_decl = FDPolicied {PUBLIC} }));
-            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty)
-            }
+            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+            sm_attributes = [] }
           ];
         sc_user_attributes = []; sc_enum_type = None }));
   ("\\inferflows",

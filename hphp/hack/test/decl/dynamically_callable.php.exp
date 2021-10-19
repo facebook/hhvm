@@ -28,7 +28,12 @@
                   ~readonly_this:false);
                 ft_ifc_decl = FDPolicied {PUBLIC} }));
           sm_visibility = Public; sm_deprecated = None;
-          sm_flags = dynamicallycallable }
+          sm_flags = dynamicallycallable;
+          sm_attributes =
+          [{ Typing_defs_core.ua_name = ([13:5-26], "__DynamicallyCallable");
+             ua_classname_params = [] }
+            ]
+          }
          ];
        sc_user_attributes = []; sc_enum_type = None }))
   ]

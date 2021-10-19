@@ -29,7 +29,12 @@
           sm_visibility = Public;
           sm_deprecated =
           (Some "The method foo is deprecated: use bar() instead");
-          sm_flags = (empty) };
+          sm_flags = (empty);
+          sm_attributes =
+          [{ Typing_defs_core.ua_name = ([4:5-17], "__Deprecated");
+             ua_classname_params = [] }
+            ]
+          };
          { Shallow_decl_defs.sm_name = ([8:19-22], "bar");
            sm_type =
            (Rwitness_from_decl ([8:19-22]),
@@ -46,7 +51,12 @@
                    ~returns_readonly:false ~support_dynamic_type:false
                    ~readonly_this:false);
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
-           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) };
+           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+           sm_attributes =
+           [{ Typing_defs_core.ua_name = ([7:5-17], "__Deprecated");
+              ua_classname_params = [] }
+             ]
+           };
          { Shallow_decl_defs.sm_name = ([11:19-22], "baz");
            sm_type =
            (Rwitness_from_decl ([11:19-22]),
@@ -63,7 +73,12 @@
                    ~returns_readonly:false ~support_dynamic_type:false
                    ~readonly_this:false);
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
-           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) };
+           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+           sm_attributes =
+           [{ Typing_defs_core.ua_name = ([10:5-17], "__Deprecated");
+              ua_classname_params = [] }
+             ]
+           };
          { Shallow_decl_defs.sm_name = ([14:19-23], "foo2");
            sm_type =
            (Rwitness_from_decl ([14:19-23]),
@@ -83,7 +98,12 @@
            sm_visibility = Public;
            sm_deprecated =
            (Some "The method foo2 is deprecated: use bar2() instead");
-           sm_flags = (empty) }
+           sm_flags = (empty);
+           sm_attributes =
+           [{ Typing_defs_core.ua_name = ([13:5-17], "__Deprecated");
+              ua_classname_params = [] }
+             ]
+           }
          ];
        sc_user_attributes = []; sc_enum_type = None }));
   ("\\foo",

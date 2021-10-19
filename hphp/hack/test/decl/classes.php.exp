@@ -46,7 +46,7 @@
                        ~readonly_this:false);
                      ft_ifc_decl = FDPolicied {PUBLIC} }));
                sm_visibility = Public; sm_deprecated = None;
-               sm_flags = (empty) });
+               sm_flags = (empty); sm_attributes = [] });
        sc_static_methods = [];
        sc_methods =
        [{ Shallow_decl_defs.sm_name = ([11:20-33], "privateMethod");
@@ -65,7 +65,8 @@
                   ~returns_readonly:false ~support_dynamic_type:false
                   ~readonly_this:false);
                 ft_ifc_decl = FDPolicied {PUBLIC} }));
-          sm_visibility = Private; sm_deprecated = None; sm_flags = (empty) };
+          sm_visibility = Private; sm_deprecated = None; sm_flags = (empty);
+          sm_attributes = [] };
          { Shallow_decl_defs.sm_name = ([12:19-31], "publicMethod");
            sm_type =
            (Rwitness_from_decl ([12:19-31]),
@@ -82,7 +83,8 @@
                    ~returns_readonly:false ~support_dynamic_type:false
                    ~readonly_this:false);
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
-           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) };
+           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+           sm_attributes = [] };
          { Shallow_decl_defs.sm_name = ([13:22-37], "protectedMethod");
            sm_type =
            (Rwitness_from_decl ([13:22-37]),
@@ -100,7 +102,7 @@
                    ~readonly_this:false);
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
            sm_visibility = Protected; sm_deprecated = None;
-           sm_flags = (empty) };
+           sm_flags = (empty); sm_attributes = [] };
          { Shallow_decl_defs.sm_name = ([14:25-40], "async_generator");
            sm_type =
            (Rwitness_from_decl ([14:25-40]),
@@ -146,7 +148,8 @@
                    ~returns_readonly:false ~support_dynamic_type:false
                    ~readonly_this:false);
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
-           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) }
+           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+           sm_attributes = [] }
          ];
        sc_user_attributes = []; sc_enum_type = None }));
   ("\\MyAbstractClass",
@@ -281,7 +284,7 @@
                         ~readonly_this:false);
                       ft_ifc_decl = FDPolicied {PUBLIC} }));
                 sm_visibility = Public; sm_deprecated = None;
-                sm_flags = (empty) });
+                sm_flags = (empty); sm_attributes = [] });
         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
         sc_enum_type = None }))
   ]

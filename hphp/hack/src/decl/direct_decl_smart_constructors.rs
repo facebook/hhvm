@@ -4148,7 +4148,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_methodish_declaration(
         &mut self,
-        attributes: Self::R,
+        attrs: Self::R,
         header: Self::R,
         body: Self::R,
         closer: Self::R,
@@ -4164,11 +4164,11 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         let modifiers = read_member_modifiers(header.modifiers.iter());
         let is_constructor = header.name.is_token(TokenKind::Construct);
         let is_method = true;
-        let (id, ty, properties) = match self.function_to_ty(is_method, attributes, header, body) {
+        let (id, ty, properties) = match self.function_to_ty(is_method, attrs, header, body) {
             Some(tuple) => tuple,
             None => return Node::Ignored(SK::MethodishDeclaration),
         };
-        let attributes = self.to_attributes(attributes);
+        let attributes = self.to_attributes(attrs);
         let deprecated = attributes.deprecated.map(|msg| {
             let mut s = String::new_in(self.arena);
             s.push_str("The method ");
@@ -4199,12 +4199,25 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             }
             _ => modifiers.visibility,
         };
+        let mut user_attributes = Vec::with_capacity_in(attrs.len(), self.arena);
+        for attribute in attrs.iter() {
+            match attribute {
+                Node::Attribute(attr) => user_attributes.push(self.user_attribute_to_decl(attr)),
+                _ => {}
+            }
+        }
+        // Match ordering of attributes produced by the OCaml decl parser (even
+        // though it's the reverse of the syntactic ordering).
+        user_attributes.reverse();
+        let user_attributes = user_attributes.into_bump_slice();
+
         let method = self.alloc(ShallowMethod {
             name: id,
             type_: ty,
             visibility,
             deprecated,
             flags,
+            attributes: user_attributes,
         });
         if is_constructor {
             Node::Constructor(self.alloc(ConstructorNode { method, properties }))

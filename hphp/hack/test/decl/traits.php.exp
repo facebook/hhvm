@@ -25,7 +25,8 @@
                   ~returns_readonly:false ~support_dynamic_type:false
                   ~readonly_this:false);
                 ft_ifc_decl = FDPolicied {PUBLIC} }));
-          sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) }
+          sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+          sm_attributes = [] }
          ];
        sc_user_attributes = []; sc_enum_type = None }));
   ("\\TMyTrait2",
@@ -58,7 +59,8 @@
                    ~returns_readonly:false ~support_dynamic_type:false
                    ~readonly_this:false);
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
-           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) }
+           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+           sm_attributes = [] }
           ];
         sc_user_attributes = []; sc_enum_type = None }));
   ("\\TMyTrait3",
@@ -89,7 +91,8 @@
                    ~returns_readonly:false ~support_dynamic_type:false
                    ~readonly_this:false);
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
-           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) }
+           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+           sm_attributes = [] }
           ];
         sc_user_attributes = []; sc_enum_type = None }));
   ("\\MyTraitUsingClass",

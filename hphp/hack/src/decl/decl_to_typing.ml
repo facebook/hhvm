@@ -48,6 +48,7 @@ let shallow_method_to_class_elt
     sm_visibility;
     sm_deprecated;
     sm_flags = _;
+    sm_attributes = _;
   } =
     meth
   in

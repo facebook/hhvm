@@ -301,11 +301,6 @@ let method_ ~support_dynamic_type env m =
       m.m_user_attributes
   in
   let vis = make_visibility m.m_user_attributes m.m_visibility in
-  let sm_attributes =
-    List.map
-      m.m_user_attributes
-      ~f:(Decl_hint.aast_user_attribute_to_decl_user_attribute env)
-  in
   {
     sm_name = Decl_env.make_decl_posed env m.m_name;
     sm_type = mk (Reason.Rwitness_from_decl pos, Tfun ft);
@@ -319,7 +314,7 @@ let method_ ~support_dynamic_type env m =
         ~dynamicallycallable:has_dynamicallycallable
         ~php_std_lib
         ~support_dynamic_type;
-    sm_attributes;
+    sm_attributes = [];
   }
 
 let xhp_enum_values props =

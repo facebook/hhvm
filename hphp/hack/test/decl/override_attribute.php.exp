@@ -61,11 +61,7 @@
                    ~readonly_this:false);
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = override;
-           sm_attributes =
-           [{ Typing_defs_core.ua_name = ([8:5-15], "__Override");
-              ua_classname_params = [] }
-             ]
-           }
+           sm_attributes = [] }
           ];
         sc_user_attributes = []; sc_enum_type = None }))
   ]

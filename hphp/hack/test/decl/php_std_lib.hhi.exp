@@ -62,12 +62,7 @@
                    ~readonly_this:false);
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
            sm_visibility = Public; sm_deprecated = None;
-           sm_flags = php_std_lib;
-           sm_attributes =
-           [{ Typing_defs_core.ua_name = ([17:5-16], "__PHPStdLib");
-              ua_classname_params = [] }
-             ]
-           }
+           sm_flags = php_std_lib; sm_attributes = [] }
           ];
         sc_methods =
         [{ Shallow_decl_defs.sm_name = ([15:19-20], "f");
@@ -87,12 +82,7 @@
                    ~readonly_this:false);
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
            sm_visibility = Public; sm_deprecated = None;
-           sm_flags = php_std_lib;
-           sm_attributes =
-           [{ Typing_defs_core.ua_name = ([14:5-16], "__PHPStdLib");
-              ua_classname_params = [] }
-             ]
-           }
+           sm_flags = php_std_lib; sm_attributes = [] }
           ];
         sc_user_attributes =
         [{ Typing_defs_core.ua_name = ([6:3-14], "__PHPStdLib");

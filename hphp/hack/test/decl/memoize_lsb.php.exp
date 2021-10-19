@@ -26,11 +26,7 @@
                   ~readonly_this:false);
                 ft_ifc_decl = FDPolicied {PUBLIC} }));
           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
-          sm_attributes =
-          [{ Typing_defs_core.ua_name = ([4:5-17], "__MemoizeLSB");
-             ua_classname_params = [] }
-            ]
-          }
+          sm_attributes = [] }
          ];
        sc_methods = []; sc_user_attributes = []; sc_enum_type = None }))
   ]

@@ -77,7 +77,7 @@ pub struct DirectDeclSmartConstructors<'a, 'text, S: SourceTextAllocator<'text, 
     namespace_builder: Rc<NamespaceBuilder<'a>>,
     classish_name_builder: ClassishNameBuilder<'a>,
     type_parameters: Rc<Vec<'a, SSet<'a>>>,
-
+    omit_user_attributes_irrelevant_to_typechecking: bool,
     previous_token_kind: TokenKind,
 
     source_text_allocator: S,
@@ -90,6 +90,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         file_mode: Mode,
         arena: &'a Bump,
         source_text_allocator: S,
+        omit_user_attributes_irrelevant_to_typechecking: bool,
     ) -> Self {
         let source_text = IndexedSourceText::new(src.clone());
         let path = source_text.source_text().file_path();
@@ -119,6 +120,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
             // EndOfFile.
             previous_token_kind: TokenKind::EndOfFile,
             source_text_allocator,
+            omit_user_attributes_irrelevant_to_typechecking,
         }
     }
 
@@ -4199,16 +4201,21 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             }
             _ => modifiers.visibility,
         };
-        let mut user_attributes = Vec::with_capacity_in(attrs.len(), self.arena);
-        for attribute in attrs.iter() {
-            match attribute {
-                Node::Attribute(attr) => user_attributes.push(self.user_attribute_to_decl(attr)),
-                _ => {}
+
+        let mut user_attributes = Vec::new_in(self.arena);
+        if !self.omit_user_attributes_irrelevant_to_typechecking {
+            for attribute in attrs.iter() {
+                match attribute {
+                    Node::Attribute(attr) => {
+                        user_attributes.push(self.user_attribute_to_decl(attr))
+                    }
+                    _ => {}
+                }
             }
+            // Match ordering of attributes produced by the OCaml decl parser (even
+            // though it's the reverse of the syntactic ordering).
+            user_attributes.reverse();
         }
-        // Match ordering of attributes produced by the OCaml decl parser (even
-        // though it's the reverse of the syntactic ordering).
-        user_attributes.reverse();
         let user_attributes = user_attributes.into_bump_slice();
 
         let method = self.alloc(ShallowMethod {

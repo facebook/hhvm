@@ -17,6 +17,7 @@ use parser_core_types::{
 };
 use stack_limit::StackLimit;
 
+// Parse decls for type-checking
 pub fn parse_script<'a>(
     opts: &'a DeclParserOptions<'a>,
     source: &SourceText<'a>,
@@ -28,9 +29,20 @@ pub fn parse_script<'a>(
     DirectDeclSmartConstructors<'a, 'a, NoSourceTextAllocator>,
     Option<file_info::Mode>,
 ) {
-    parse_script_with_text_allocator(opts, source, arena, stack_limit, NoSourceTextAllocator)
+    parse_script_with_text_allocator(
+        opts,
+        source,
+        arena,
+        stack_limit,
+        NoSourceTextAllocator,
+        true, // omit_user_attributes_irrelevant_to_typechecking
+    )
 }
 
+// Used for decls in compilation.
+// - Returns decls without reference to the source text to avoid
+//   keeping the source text in memory when caching decls.
+// - Preserve attributes in decls necessary for producing facts.
 pub fn parse_script_without_reference_text<'a, 'text>(
     opts: &'a DeclParserOptions<'a>,
     source: &SourceText<'text>,
@@ -48,6 +60,7 @@ pub fn parse_script_without_reference_text<'a, 'text>(
         arena,
         stack_limit,
         ArenaSourceTextAllocator(arena),
+        false, // omit_user_attributes_irrelevant_to_typechecking
     )
 }
 
@@ -57,6 +70,7 @@ fn parse_script_with_text_allocator<'a, 'text, S: SourceTextAllocator<'text, 'a>
     arena: &'a Bump,
     stack_limit: Option<&'a StackLimit>,
     source_text_allocator: S,
+    omit_user_attributes_irrelevant_to_typechecking: bool,
 ) -> (
     Node<'a>,
     Vec<SyntaxError>,
@@ -66,7 +80,14 @@ fn parse_script_with_text_allocator<'a, 'text, S: SourceTextAllocator<'text, 'a>
     let env = ParserEnv::from(opts);
     let (_, mode_opt) = parse_mode(source);
     let mode = mode_opt.unwrap_or(file_info::Mode::Mpartial);
-    let sc = DirectDeclSmartConstructors::new(opts, &source, mode, arena, source_text_allocator);
+    let sc = DirectDeclSmartConstructors::new(
+        opts,
+        &source,
+        mode,
+        arena,
+        source_text_allocator,
+        omit_user_attributes_irrelevant_to_typechecking,
+    );
     let mut parser = Parser::new(&source, env, sc);
     let root = parser.parse_script(stack_limit);
     let errors = parser.errors();

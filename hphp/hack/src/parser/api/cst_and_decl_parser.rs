@@ -41,7 +41,14 @@ pub fn parse_script<'a>(
     };
     let sc1 = {
         let mode = mode.unwrap_or(file_info::Mode::Mpartial);
-        DirectDeclSmartConstructors::new(opts, &source, mode, arena, NoSourceTextAllocator)
+        DirectDeclSmartConstructors::new(
+            opts,
+            &source,
+            mode,
+            arena,
+            NoSourceTextAllocator,
+            true, // omit_user_attributes_irrelevant_to_typechecking
+        )
     };
     let sc = PairSmartConstructors::new(sc0, sc1);
     let mut parser = Parser::new(&source, env, sc);

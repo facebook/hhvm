@@ -19,12 +19,15 @@ type entity_ = Literal of Pos.t
 
 type entity = entity_ option
 
+type shape_key = SK_string of string [@@deriving eq, ord]
+
 type constraint_ =
   | Exists of entity_
-  | Has_static_key of entity_ * Tast.expr_ * Typing_defs.locl_ty
+  | Has_static_key of entity_ * shape_key * Typing_defs.locl_ty
   | Has_dynamic_key of entity_
 
 type env = {
   constraints: constraint_ list;
   lenv: entity LMap.t;
+  saved_env: Tast.saved_env;
 }

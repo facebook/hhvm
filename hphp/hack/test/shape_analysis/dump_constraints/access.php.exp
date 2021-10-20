@@ -1,6 +1,6 @@
 === Shape analysis results for access.php
 Constraints for \f:
 EX [4:3-18]
-SK [4:3-18] => a : #2056
+SK [4:3-18] => a : int
 SK [4:3-18] => a : int
 

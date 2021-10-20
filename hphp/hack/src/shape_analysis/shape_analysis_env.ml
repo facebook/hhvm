@@ -9,7 +9,7 @@
 open Shape_analysis_types
 module LMap = Local_id.Map
 
-let init = { constraints = []; lenv = LMap.empty }
+let init saved_env = { constraints = []; lenv = LMap.empty; saved_env }
 
 let add_constraint env constraint_ =
   { env with constraints = constraint_ :: env.constraints }

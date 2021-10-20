@@ -93,6 +93,8 @@ val expand_type : t -> locl_ty -> t * locl_ty
 
 val expand_internal_type : t -> internal_type -> t * internal_type
 
+val fully_expand_type : t -> locl_ty -> t * locl_ty
+
 val get_tyvar_pos : t -> Ident.t -> Pos.t
 
 (* Get or add to bounds on type variables *)

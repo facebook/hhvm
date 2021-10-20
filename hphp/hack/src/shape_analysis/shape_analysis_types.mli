@@ -23,9 +23,11 @@ type entity_ = Literal of Pos.t
 
 type entity = entity_ option
 
+type shape_key = SK_string of string [@@deriving eq, ord]
+
 type constraint_ =
   | Exists of entity_  (** Records existence of a dict *)
-  | Has_static_key of entity_ * Tast.expr_ * Typing_defs.locl_ty
+  | Has_static_key of entity_ * shape_key * Typing_defs.locl_ty
       (** Records the static key an entity is accessed with along with the Hack
           type of the key *)
   | Has_dynamic_key of entity_
@@ -34,4 +36,6 @@ type constraint_ =
 type env = {
   constraints: constraint_ list;  (** Append-only set of constraints *)
   lenv: entity LMap.t;  (** Local variable information *)
+  saved_env: Tast.saved_env;
+      (** Environment stored in the TAST used to expand types *)
 }

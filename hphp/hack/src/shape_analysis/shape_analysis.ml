@@ -19,6 +19,12 @@ module Env = Shape_analysis_env
 
 let log_pos = Format.printf "%a\n" Pos.pp
 
+let fully_expand_type env ty =
+  let (_env, ty) =
+    Typing_inference_env.fully_expand_type env.saved_env.Tast.inference_env ty
+  in
+  ty
+
 type target_accumulator = {
   expressions_to_modify: Pos.t list;
   hints_to_modify: Pos.t list;
@@ -62,7 +68,9 @@ let add_key_constraint
   | Some entity ->
     let constraint_ =
       match key with
-      | A.String _ -> Has_static_key (entity, key, ty)
+      | A.String str ->
+        let ty = fully_expand_type env ty in
+        Has_static_key (entity, SK_string str, ty)
       | _ -> Has_dynamic_key entity
     in
     Env.add_constraint env constraint_
@@ -118,20 +126,23 @@ let stmt (env : env) ((_, stmt) : T.stmt) : env =
 
 let block (env : env) : T.block -> env = List.fold ~init:env ~f:stmt
 
-let callable body : constraint_ list =
-  let env = Env.init in
+let callable ~saved_env body : constraint_ list =
+  let env = Env.init saved_env in
   let env = block env body.A.fb_ast in
   env.constraints
 
 let walk_tast (tast : Tast.program) : constraint_ list SMap.t =
   let def : T.def -> (string * constraint_ list) list = function
     | A.Fun fd ->
-      let A.{ f_body; f_name = (_, id); _ } = fd.A.fd_fun in
-      [(id, callable f_body)]
+      let A.{ f_body; f_name = (_, id); f_annotation = saved_env; _ } =
+        fd.A.fd_fun
+      in
+      [(id, callable ~saved_env f_body)]
     | A.Class A.{ c_methods; c_name = (_, class_name); _ } ->
-      let handle_method A.{ m_body; m_name = (_, method_name); _ } =
+      let handle_method
+          A.{ m_body; m_name = (_, method_name); m_annotation = saved_env; _ } =
         let id = class_name ^ "::" ^ method_name in
-        (id, callable m_body)
+        (id, callable ~saved_env m_body)
       in
       List.map ~f:handle_method c_methods
     | _ -> failwith "A definition is not yet handled"

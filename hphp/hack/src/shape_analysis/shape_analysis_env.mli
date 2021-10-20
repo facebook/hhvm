@@ -8,7 +8,7 @@
 
 open Shape_analysis_types
 
-val init : env
+val init : Tast.saved_env -> env
 
 val add_constraint : env -> constraint_ -> env
 

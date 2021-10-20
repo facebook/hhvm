@@ -31,9 +31,6 @@ ExternalProject_Add(
     "${CMAKE_COMMAND}" -E copy
     "${CMAKE_SOURCE_DIR}/CMake/FindBoost.cmake"
     <SOURCE_DIR>/wangle/cmake/FindBoost.cmake
-    &&
-    "${CMAKE_CURRENT_SOURCE_DIR}/../apply-quilt-patches.sh"
-    "${CMAKE_CURRENT_SOURCE_DIR}/patches"
   CMAKE_ARGS
     "-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}"
     -DCMAKE_MODULE_PATH=${CMAKE_SOURCE_DIR}/CMake

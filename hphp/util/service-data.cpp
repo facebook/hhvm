@@ -315,6 +315,7 @@ struct Impl {
     }
     if (data[index] == '.') {
       sscanf(data + index + 1, "%d", &duration);
+      if (index == 0) return std::nullopt;
       --index;
     }
     // Find the StatsType from: avg, sum, pct, rate, count

@@ -122,4 +122,8 @@ TEST(ServiceDataTest, Histogram) {
   }
 }
 
+TEST(ServiceDataTest, T96703960) {
+  HPHP::ServiceData::exportCounterByKey(".123");
+}
+
 }

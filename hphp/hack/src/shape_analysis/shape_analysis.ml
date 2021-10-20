@@ -18,6 +18,8 @@ module Solver = Shape_analysis_solver
 (* A program analysis to find shape like dicts and the static keys used in
    these dicts. *)
 
+let failwithpos pos msg = failwith (Format.asprintf "%a: %s" Pos.pp pos msg)
+
 let log_pos = Format.printf "%a\n" Pos.pp
 
 let fully_expand_type env ty =
@@ -77,10 +79,10 @@ let add_key_constraint
     Env.add_constraint env constraint_
   | None -> env
 
-let assign (env : env) ((_, _, lval) : T.expr) (rhs : entity) : env =
+let assign (env : env) ((_, pos, lval) : T.expr) (rhs : entity) : env =
   match lval with
   | A.Lvar (_, lid) -> Env.set_local lid rhs env
-  | _ -> failwith "An lvalue is not yet supported"
+  | _ -> failwithpos pos "An lvalue is not yet supported"
 
 let rec expr (env : env) ((ty, pos, e) : T.expr) : env * entity =
   match e with
@@ -114,16 +116,16 @@ let rec expr (env : env) ((ty, pos, e) : T.expr) : env * entity =
     let (env, entity_rhs) = expr env e2 in
     let env = assign env e1 entity_rhs in
     (env, None)
-  | _ -> failwith "An expression is not yet handled"
+  | _ -> failwithpos pos "An expression is not yet handled"
 
 let expr (env : env) (e : T.expr) : env = expr env e |> fst
 
-let stmt (env : env) ((_, stmt) : T.stmt) : env =
+let stmt (env : env) ((pos, stmt) : T.stmt) : env =
   match stmt with
   | A.Expr e
   | A.Return (Some e) ->
     expr env e
-  | _ -> failwith "An expression is not yet handled"
+  | _ -> failwithpos pos "A statement is not yet handled"
 
 let block (env : env) : T.block -> env = List.fold ~init:env ~f:stmt
 

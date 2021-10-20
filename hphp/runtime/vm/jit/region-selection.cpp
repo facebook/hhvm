@@ -33,6 +33,7 @@
 #include "hphp/runtime/vm/jit/guard-constraint.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
+#include "hphp/runtime/vm/jit/punt.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/trans-cfg.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -849,9 +850,13 @@ RegionDescPtr selectRegion(const RegionContext& context,
         }
       }
       not_reached();
-    } catch (const std::exception& e) {
+    } catch (const FailedIRGen& e) {
       FTRACE(1, "region selector threw: {}\n", e.what());
       return RegionDescPtr{nullptr};
+    } catch (const std::exception& e) {
+      always_assert_flog(
+        false, "region selector threw unexpected: {}\n", e.what()
+      );
     }
   }();
 

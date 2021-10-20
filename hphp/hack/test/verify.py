@@ -19,6 +19,7 @@ from hphp.hack.test.parse_errors import Error, parse_errors, sprint_errors
 DEFAULT_OUT_EXT = ".out"
 DEFAULT_EXP_EXT = ".exp"
 
+flags_pessimise_unsupported = ["--like-casts", "--complex-coercion", "--like-types-all"]
 max_workers = 48
 verbose = False
 dump_on_failure = False
@@ -204,6 +205,10 @@ def run_batch_tests(
         test_dir = os.path.dirname(first_test.file_path)
         flags = get_flags(test_dir)
         test_flags = get_test_flags(first_test.file_path)
+        if verify_pessimisation != VerifyPessimisationOptions.no:
+            for flag in flags_pessimise_unsupported:
+                if flag in flags:
+                    return []
         cmd = [program]
         cmd += mode_flag
         cmd += ["--batch-files", "--out-extension", out_extension]

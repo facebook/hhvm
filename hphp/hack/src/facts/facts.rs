@@ -7,7 +7,13 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use digest::Digest;
-use oxidized_by_ref::{direct_decl_parser::Decls, shallow_decl_defs::Decl};
+use hhbc_by_ref_hhbc_string_utils::strip_global_ns;
+use oxidized_by_ref::{
+    ast_defs::{Abstraction, ClassishKind},
+    direct_decl_parser::Decls,
+    shallow_decl_defs::{ClassDecl, TypedefDecl},
+    typing_defs::{Ty, Ty_},
+};
 use serde::ser::SerializeSeq;
 use serde::Serializer;
 use serde_derive::Serialize;
@@ -91,26 +97,39 @@ impl Facts {
 
     pub fn facts_of_decls<'a>(decls: &Decls<'a>) -> Facts {
         // 10/15/2021 TODO(T103413083): Fill out the implementation
-        let types: TypeFactsByName = decls
-            .iter()
-            .filter_map(|(name, decl)| match decl {
-                Decl::Class(_) => Some((
-                    String::from(name),
-                    TypeFacts {
-                        base_types: StringSet::new(),
-                        kind: TypeKind::Class,
-                        attributes: BTreeMap::new(),
-                        flags: 0,
-                        require_extends: StringSet::new(),
-                        require_implements: StringSet::new(),
-                        methods: BTreeMap::new(),
-                    },
-                )),
-                _ => None,
+
+        let mut types = decls
+            .classes()
+            .map(|(name, decl)| (format(name), TypeFacts::of_class_decl(decl)))
+            .collect::<TypeFactsByName>();
+        let mut type_aliases = decls
+            .typedefs()
+            .map(|(name, decl)| {
+                types.insert(format(name), TypeFacts::of_typedef_decl(decl));
+                format(name)
             })
-            .collect::<BTreeMap<String, TypeFacts>>();
+            .collect::<Vec<String>>();
+        let mut functions = decls
+            .funs()
+            .map(|(name, _)| format(name))
+            .collect::<Vec<String>>();
+        let mut constants = decls
+            .consts()
+            .map(|(name, _)| format(name))
+            .collect::<Vec<String>>();
+
+        functions.reverse();
+        constants.reverse();
+        type_aliases.reverse();
+
         Facts {
             types,
+            functions,
+            constants,
+            type_aliases,
+            // TODO: file attributes
+            // TODO: attributes
+            // TODO: method facts
             ..Default::default()
         }
     }
@@ -195,6 +214,85 @@ impl TypeFacts {
     fn skip_attributes(&self) -> bool {
         self.attributes.is_empty()
     }
+
+    fn of_class_decl<'a>(decl: &'a ClassDecl<'a>) -> TypeFacts {
+        let ClassDecl {
+            kind,
+            final_,
+            req_implements,
+            req_extends,
+            uses,
+            extends,
+            implements,
+            ..
+        } = decl;
+
+        // Collect base types from uses, extends, and implements
+        let mut base_types = StringSet::new();
+        uses.iter().for_each(|ty| {
+            base_types.insert(extract_type_name(ty));
+        });
+        extends.iter().for_each(|ty| {
+            base_types.insert(extract_type_name(ty));
+        });
+        implements.iter().for_each(|ty| {
+            base_types.insert(extract_type_name(ty));
+        });
+
+        // Set flags according to modifiers - abstract, final, static (abstract + final)
+        let mut flags = Flags::default();
+        let typekind = match kind {
+            ClassishKind::Cclass(abstraction) => {
+                flags = modifiers_to_flags(flags, *final_, *abstraction);
+                TypeKind::Class
+            }
+            ClassishKind::Cinterface => {
+                flags = Flag::Abstract.as_flags();
+                TypeKind::Interface
+            }
+            ClassishKind::Ctrait => {
+                flags = Flag::Abstract.as_flags();
+                TypeKind::Trait
+            }
+            ClassishKind::Cenum => TypeKind::Enum,
+            ClassishKind::CenumClass(abstraction) => {
+                flags = modifiers_to_flags(flags, *final_, *abstraction);
+                TypeKind::Enum
+            }
+        };
+
+        // Collect the requires
+        let require_extends = req_extends
+            .into_iter()
+            .map(|ty| extract_type_name(*ty))
+            .collect::<StringSet>();
+        let require_implements = req_implements
+            .into_iter()
+            .map(|ty| extract_type_name(*ty))
+            .collect::<StringSet>();
+
+        TypeFacts {
+            base_types,
+            kind: typekind,
+            require_extends,
+            flags,
+            require_implements,
+            attributes: BTreeMap::new(),
+            methods: BTreeMap::new(),
+        }
+    }
+
+    fn of_typedef_decl<'a>(_decl: &'a TypedefDecl<'a>) -> TypeFacts {
+        TypeFacts {
+            base_types: StringSet::new(),
+            kind: TypeKind::TypeAlias,
+            attributes: BTreeMap::new(),
+            require_extends: StringSet::new(),
+            flags: Flags::default(),
+            require_implements: StringSet::new(),
+            methods: BTreeMap::new(),
+        }
+    }
 }
 
 fn hash_and_hexify<D: Digest>(mut digest: D, text: &[u8]) -> String {
@@ -204,6 +302,30 @@ fn hash_and_hexify<D: Digest>(mut digest: D, text: &[u8]) -> String {
 
 fn hex_number_to_i64(s: &str) -> i64 {
     u64::from_str_radix(s, 16).unwrap() as i64
+}
+
+// TODO: move to typing_defs_core_impl.rs once completed
+fn extract_type_name<'a>(ty: &Ty<'a>) -> String {
+    match ty.get_node() {
+        Ty_::Tapply(((_, id), _)) => strip_global_ns(*id).to_string(),
+        _ => unimplemented!(),
+    }
+}
+
+fn format<'a>(type_name: &'a str) -> String {
+    String::from(strip_global_ns(type_name))
+}
+
+fn modifiers_to_flags(flags: isize, is_final: bool, abstraction: &Abstraction) -> isize {
+    let flags = match abstraction {
+        Abstraction::Abstract => Flag::Abstract.set(flags),
+        Abstraction::Concrete => flags,
+    };
+    if is_final {
+        Flag::Final.set(flags)
+    } else {
+        flags
+    }
 }
 
 // inline tests (so stuff can remain hidden) - compiled only when tests are run (no overhead)

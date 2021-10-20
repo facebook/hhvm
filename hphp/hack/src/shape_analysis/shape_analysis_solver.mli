@@ -8,6 +8,4 @@
 
 open Shape_analysis_types
 
-val show_constraint_ : Typing_env_types.env -> constraint_ -> string
-
-val show_shape_result : Typing_env_types.env -> shape_result -> string
+val simplify : Typing_env_types.env -> constraint_ list -> shape_result list

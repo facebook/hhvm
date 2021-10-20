@@ -1,0 +1,7 @@
+=== Shape analysis results for entity_assignment.php
+Summary for \f:
+[4:8-23] :
+  shape(
+    a => int
+    b => int
+  )

@@ -13,6 +13,7 @@ module A = Aast
 module T = Tast
 module SN = Naming_special_names
 module Env = Shape_analysis_env
+module Solver = Shape_analysis_solver
 
 (* A program analysis to find shape like dicts and the static keys used in
    these dicts. *)
@@ -173,4 +174,15 @@ let analyse (options : options) (ctx : Provider_context.t) (tast : T.program) =
       Format.printf "\n"
     in
     walk_tast tast |> SMap.iter print_function_constraints
-  | _ -> ()
+  | SimplifyConstraints ->
+    let print_callable_summary (id : string) (results : shape_result list) :
+        unit =
+      Format.printf "Summary for %s:\n" id;
+      List.iter results ~f:(fun result ->
+          Format.printf "%s\n" (show_shape_result empty_typing_env result))
+    in
+    let process_callable id constraints =
+      Solver.simplify empty_typing_env constraints |> print_callable_summary id
+    in
+    walk_tast tast |> SMap.iter process_callable
+  | SolveConstraints -> ()

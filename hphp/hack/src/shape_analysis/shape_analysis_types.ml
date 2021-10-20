@@ -11,6 +11,7 @@ module LMap = Local_id.Map
 type mode =
   | FlagTargets
   | DumpConstraints
+  | SimplifyConstraints
   | SolveConstraints [@deriving eq]
 
 type options = { mode: mode }
@@ -25,6 +26,9 @@ type constraint_ =
   | Exists of entity_
   | Has_static_key of entity_ * shape_key * Typing_defs.locl_ty
   | Has_dynamic_key of entity_
+
+type shape_result =
+  | Shape_result of entity_ * (shape_key * Typing_defs.locl_ty) list
 
 type env = {
   constraints: constraint_ list;

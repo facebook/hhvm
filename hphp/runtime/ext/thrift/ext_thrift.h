@@ -365,8 +365,9 @@ struct TClientSink {
 
   void cancel() {
     if (sinkBridge_) {
-      // TODO (T100686382) : Send cancellation payload to the server once the
-      // pinned thrift version is updated on the hhvm
+      sinkBridge_->cancel(folly::Try<apache::thrift::StreamPayload>(
+          apache::thrift::rocket::RocketException(
+              apache::thrift::rocket::ErrorCode::CANCELED)));
       endSink();
     }
   }

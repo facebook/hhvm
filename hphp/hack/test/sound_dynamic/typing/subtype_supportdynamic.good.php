@@ -90,3 +90,12 @@ function test_inter(int $i, bool $b): void {
     e($i);
   }
 }
+
+<<__SupportDynamicType>>
+function foo(int $x):bool {
+  return false;
+}
+function test_function((function(~int):bool) $f): void {
+  e($f);
+  e(fun('foo'));
+}

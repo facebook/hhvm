@@ -5,6 +5,13 @@
 <<__SupportDynamicType>>
 class C { }
 
+<<__SupportDynamicType>>
+function foo(int $_):bool {
+  return false;
+}
+
+function expectFun((function(int):bool) $_):void { }
+
 function test1(
   (function(dynamic):int) $f1,
   (function(mixed, dynamic):string) $f2,
@@ -18,4 +25,6 @@ function test1(
   $f5 upcast dynamic;
   ($x ==> $x) upcast dynamic;
   ((dynamic $d) ==> $d->foo()) upcast dynamic;
+  fun('foo') upcast dynamic;
+  expectFun(fun('foo'));
 }

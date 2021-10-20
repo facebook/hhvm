@@ -91,9 +91,15 @@ let simplify (env : Typing_env_types.env) (constraints : constraint_ list) :
              List.map keys_and_tys ~f:(fun (key, tys) -> (key, fold_tys tys)) ))
   in
 
-  let shape_results : shape_result list =
+  let static_shape_results : shape_result list =
     combined_types
     |> List.map ~f:(fun (entity, keys_and_types) ->
-           Shape_result (entity, keys_and_types))
+           Shape_like_dict (entity, keys_and_types))
   in
-  shape_results
+
+  let dynamic_shape_results =
+    PosSet.elements dynamic_accesses
+    |> List.map ~f:(fun entity_ -> Dynamically_accessed_dict (Literal entity_))
+  in
+
+  static_shape_results @ dynamic_shape_results

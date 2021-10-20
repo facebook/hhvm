@@ -38,9 +38,14 @@ type constraint_ =
       (** Records that an entity is accessed with a dynamic key *)
 
 type shape_result =
-  | Shape_result of entity_ * (shape_key * Typing_defs.locl_ty) list
-      (** A particular dict that acts like a shape along with its keys and
-          types the keys point to *)
+  | Shape_like_dict of entity_ * (shape_key * Typing_defs.locl_ty) list
+      (** A dict that acts like a shape along with its keys and types the keys
+          point to *)
+  | Dynamically_accessed_dict of entity_
+      (** A dict that is accessed or used dynamically. This is important
+          in inter-procedural setting where a locally static dict calls a
+          function where the parameter is accessed dynamically. In that case,
+          the original result on static access should be invalidated. *)
 
 type env = {
   constraints: constraint_ list;  (** Append-only set of constraints *)

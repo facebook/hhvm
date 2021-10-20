@@ -28,7 +28,8 @@ type constraint_ =
   | Has_dynamic_key of entity_
 
 type shape_result =
-  | Shape_result of entity_ * (shape_key * Typing_defs.locl_ty) list
+  | Shape_like_dict of entity_ * (shape_key * Typing_defs.locl_ty) list
+  | Dynamically_accessed_dict of entity_
 
 type env = {
   constraints: constraint_ list;

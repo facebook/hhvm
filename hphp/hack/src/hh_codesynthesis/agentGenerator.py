@@ -90,7 +90,9 @@ class FunEdgeHandler(DependencyEdgeHandler):
 
 
 # Generate logic rules based on given parameters.
-def generate_logic_rules(solving_context: ClingoContext) -> List[str]:
+def generate_logic_rules(
+    solving_context: ClingoContext, agent_name: str = ""
+) -> List[str]:
     rules: List[str] = []
 
     if solving_context.number_of_nodes > 0 and (
@@ -105,7 +107,7 @@ def generate_logic_rules(solving_context: ClingoContext) -> List[str]:
         # The number part is easier for reasoning to generate the graph. We are
         # adding a "S" prefix to each symbol to construct a string. So that the
         # synthesized code will has a valid class/interface name.
-        symbols.append(f'"S{i}", {i}')
+        symbols.append(f'"{agent_name}S{i}", {i}')
     # The actual rule will be like,
     # internal_symbols("S0", 0; "S1", 1; "S2", 2).
     rules.append("internal_symbols({}).".format(";".join(symbols)))

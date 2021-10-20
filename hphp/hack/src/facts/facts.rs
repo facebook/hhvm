@@ -8,6 +8,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use digest::Digest;
 use hhbc_by_ref_hhbc_string_utils::strip_global_ns;
+use naming_special_names_rust::user_attributes;
 use oxidized_by_ref::{
     ast_defs::{Abstraction, ClassishKind},
     direct_decl_parser::Decls,
@@ -233,6 +234,7 @@ impl TypeFacts {
             uses,
             extends,
             implements,
+            user_attributes,
             ..
         } = decl;
 
@@ -280,13 +282,32 @@ impl TypeFacts {
             .map(|ty| extract_type_name(*ty))
             .collect::<StringSet>();
 
+        let attributes = user_attributes
+            .iter()
+            .filter_map(|ua| {
+                let attr_name = format(ua.name.1);
+                if user_attributes::AS_SET.contains(attr_name.as_str()) {
+                    // skip builtins
+                    None
+                } else {
+                    Some((
+                        attr_name,
+                        ua.classname_params
+                            .iter()
+                            .map(|param| String::from(*param))
+                            .collect::<Vec<String>>(),
+                    ))
+                }
+            })
+            .collect::<Attributes>();
+
         TypeFacts {
             base_types,
             kind: typekind,
             require_extends,
             flags,
             require_implements,
-            attributes: BTreeMap::new(),
+            attributes,
             methods: BTreeMap::new(),
         }
     }

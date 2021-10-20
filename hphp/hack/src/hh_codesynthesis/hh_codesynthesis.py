@@ -167,6 +167,47 @@ def main() -> None:
     )
 
     # Connecting each agent.
+    # Using the edge relationship in the agent graph, we are connecting the
+    # stub classes/interfaces in each agent to the parent agent.
+    for agent_number, edge in enumerate(agent_graph_generator.edges):
+        agent = agents[agent_number]
+        number_of_stub_classes = len(agent.generator.stub_classes)
+        number_of_stub_interfaces = len(agent.generator.stub_interfaces)
+        number_of_parent_agents = len(edge)
+
+        # If this agent is root agent, no parents exisit.
+        if number_of_parent_agents == 0:
+            continue
+
+        # We are using uniform distribution to handle the case where one agent
+        # could depend on multiple agents. This can be changed later.
+        parents = list(edge)
+        for index, stub in enumerate(agent.generator.stub_classes):
+            # Choose a class in the parent agent.
+            parent = parents[index % number_of_parent_agents]
+            parent_class = list(agents[parent].generator.class_objs)[
+                index
+                // number_of_parent_agents
+                % len(agents[parent].generator.class_objs)
+            ]
+            # Stub class extends the chosen one.
+            agent.generator._add_extend(stub, parent_class)
+        for index, stub in enumerate(agent.generator.stub_interfaces):
+            # Choose an interface in the parent agent.
+            parent = parents[index % number_of_parent_agents]
+            parent_interface = list(agents[parent].generator.interface_objs)[
+                index
+                // number_of_parent_agents
+                % len(agents[parent].generator.interface_objs)
+            ]
+            # Stub interface extends the chosen one.
+            agent.generator._add_extend(stub, parent_interface)
+
+    # Output agents to each file.
+    for agent_number, agent in enumerate(agents):
+        agentGenerator.output_to_file_or_stdout(
+            agent.generator, f"agent_{agent_number}.php"
+        )
 
 
 if __name__ == "__main__":

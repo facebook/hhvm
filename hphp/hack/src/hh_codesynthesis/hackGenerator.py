@@ -305,6 +305,10 @@ class HackCodeGenerator(CodeGenerator):
         self.interface_objs: Dict[str, _HackInterfaceGenerator] = {}
         self.function_objs: Dict[str, _HackFunctionGenerator] = {}
 
+        # Sub set of class/interface objects are stub classes/interfaces.
+        self.stub_classes: List[str] = []
+        self.stub_interfaces: List[str] = []
+
     def _look_up_object_by_symbol(self, symbol: str) -> "_HackBaseGenerator":
         if symbol in self.class_objs:
             return self.class_objs[symbol]
@@ -393,6 +397,15 @@ class HackCodeGenerator(CodeGenerator):
         if name in self.function_objs:
             self.function_objs[name].add_parameter(parameter_type, argument_type)
 
+    def _find_stubs(self) -> None:
+        for name, node in self.class_objs.items():
+            if node.extend == "":
+                self.stub_classes.append(name)
+
+        for name, node in self.interface_objs.items():
+            if len(node.extends) == 0:
+                self.stub_interfaces.append(name)
+
     def validate_nodes(self) -> None:
         # Graph validation using the constraints specified in the context.
         assert (
@@ -415,21 +428,13 @@ class HackCodeGenerator(CodeGenerator):
 
     def validate_stubs(self) -> None:
         # Check number of stub nodes.
-        stubs = 0
-        for node in self.class_objs.values():
-            if node.extend == "":
-                stubs += 1
         assert (
-            stubs >= self.solving_context.min_stub_classes
+            len(self.stub_classes) >= self.solving_context.min_stub_classes
         ), "Expected to get at least {0}, but only have {1} stub classes.".format(
             self.solving_context.min_stub_classes, stubs
         )
-        stubs = 0
-        for node in self.interface_objs.values():
-            if len(node.extends) == 0:
-                stubs += 1
         assert (
-            stubs >= self.solving_context.min_stub_interfaces
+            len(self.stub_interfaces) >= self.solving_context.min_stub_interfaces
         ), "Expected to get at least {0}, but only have {1} stub interfaces.".format(
             self.solving_context.min_stub_interfaces, stubs
         )
@@ -561,4 +566,5 @@ class HackCodeGenerator(CodeGenerator):
                     predicate.arguments[1].string,
                     predicate.arguments[2].string,
                 )
+        self._find_stubs()
         return False

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # This script processes the output of 'perf script' and prints raw data in the
 # the following format:

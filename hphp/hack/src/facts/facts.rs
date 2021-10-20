@@ -100,7 +100,16 @@ impl Facts {
 
         let mut types = decls
             .classes()
-            .map(|(name, decl)| (format(name), TypeFacts::of_class_decl(decl)))
+            .map(|(name, decl)| {
+                let name = if decl.is_xhp && !decl.has_xhp_keyword {
+                    format!("xhp_{}", strip_global_ns(name))
+                        .replace("\\", "__")
+                        .replace("-", "_")
+                } else {
+                    format(name)
+                };
+                (name, TypeFacts::of_class_decl(decl))
+            })
             .collect::<TypeFactsByName>();
         let mut type_aliases = decls
             .typedefs()

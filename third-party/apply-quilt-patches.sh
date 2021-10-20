@@ -44,6 +44,14 @@ fi
 
 set -e
 
+if [ -n "$HHVM_TP_QUILT" ]; then
+  export QUILT_PATCHES
+  echo "$0: using quilt executable: $HHVM_TP_QUILT"
+  exec "${HHVM_TP_QUILT}" --quiltrc - push -a
+fi
+
+echo "$0: applying patches in series, not using quilt."
+
 cat "$QUILT_PATCHES/series" | while read PATCH_FILE; do
   echo "Applying patch '$PATCH_FILE'..."
   if [ -e ".quilt_$PATCH_FILE.stamp" ]; then

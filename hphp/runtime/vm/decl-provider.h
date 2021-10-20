@@ -41,6 +41,6 @@ struct HhvmDeclProvider {
 };
 
 extern "C" {
-Decls const* hhvm_decl_provider_get_decl(void* provider, char const* symbol);
+  Decls const* hhvm_decl_provider_get_decl(void* provider, int kind, char const* symbol);
 }
 }

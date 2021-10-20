@@ -15,7 +15,7 @@ use cxx::CxxString;
 use external_decl_provider::ExternalDeclProvider;
 use facts_rust::facts;
 use hhbc_by_ref_compile::EnvFlags;
-use libc::c_char;
+use libc::{c_char, c_int};
 use no_pos_hash::position_insensitive_hash;
 use oxidized::relative_path::{Prefix, RelativePath};
 use oxidized_by_ref::{decl_parser_options, direct_decl_parser};
@@ -268,7 +268,11 @@ fn hackc_compile_from_text_cpp_ffi<'a>(
         let c_decl_getter_fn = unsafe {
             std::mem::transmute::<
                 *const (),
-                extern "C" fn(*const std::ffi::c_void, *const c_char) -> *const std::ffi::c_void,
+                extern "C" fn(
+                    *const std::ffi::c_void,
+                    c_int,
+                    *const c_char,
+                ) -> *const std::ffi::c_void,
             >(decl_getter_ptr)
         };
         let c_hhvm_provider_ptr =
@@ -429,7 +433,11 @@ fn hackc_compile_hhas_from_text_cpp_ffi(
         let c_decl_getter_fn = unsafe {
             std::mem::transmute::<
                 *const (),
-                extern "C" fn(*const std::ffi::c_void, *const c_char) -> *const std::ffi::c_void,
+                extern "C" fn(
+                    *const std::ffi::c_void,
+                    c_int,
+                    *const c_char,
+                ) -> *const std::ffi::c_void,
             >(decl_getter_ptr)
         };
         let c_hhvm_provider_ptr =

@@ -63,22 +63,16 @@ type format =
   | Raw
   | Highlighted
 
-type 'pos quickfix = {
-  title: string;
-  new_text: string;
-  pos: 'pos;
-}
-
 type typing_error_callback =
   ?code:int ->
-  ?quickfixes:Pos.t quickfix list ->
+  ?quickfixes:Quickfix.t list ->
   Pos.t * string ->
   (Pos_or_decl.t * string) list ->
   unit
 
 type error_from_reasons_callback =
   ?code:int ->
-  ?quickfixes:Pos.t quickfix list ->
+  ?quickfixes:Quickfix.t list ->
   (Pos_or_decl.t * string) list ->
   unit
 
@@ -134,7 +128,7 @@ val num_digits : int -> int
 
 val add_error : error -> unit
 
-val quickfixes : error -> Pos.t quickfix list
+val quickfixes : error -> Quickfix.t list
 
 (* Error codes that can be suppressed in strict mode with a FIXME based on configuration. *)
 val allowed_fixme_codes_strict : ISet.t ref
@@ -172,7 +166,7 @@ val get_severity : ('pp, 'p) error_ -> severity
 
 val make_error :
   int ->
-  ?quickfixes:Pos.t quickfix list ->
+  ?quickfixes:Quickfix.t list ->
   Pos.t * string ->
   (Pos_or_decl.t * string) list ->
   error
@@ -1084,12 +1078,7 @@ val visibility_override_internal :
   unit
 
 val member_not_implemented :
-  string ->
-  Pos_or_decl.t ->
-  Pos.t ->
-  Pos_or_decl.t ->
-  Pos.t quickfix list ->
-  unit
+  string -> Pos_or_decl.t -> Pos.t -> Pos_or_decl.t -> Quickfix.t list -> unit
 
 val bad_decl_override :
   Pos_or_decl.t ->

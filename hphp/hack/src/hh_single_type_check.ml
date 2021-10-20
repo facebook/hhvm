@@ -1393,14 +1393,6 @@ let hover_at_caret_pos (src : string) : int * int =
   | None ->
     failwith "Could not find any occurrence of ^ hover-at-caret in source code"
 
-(* Aply [quickfix] by replacing/inserting the new text in [src]. *)
-let apply_quickfix (src : string) (quickfix : Pos.t Errors.quickfix) : string =
-  let { Errors.new_text; pos; _ } = quickfix in
-  let (start_offset, end_offset) = Pos.info_raw pos in
-  let src_before = String.subo src ~len:start_offset in
-  let src_after = String.subo src ~pos:end_offset in
-  src_before ^ new_text ^ src_after
-
 (**
  * Compute TASTs for some files, then expand all type variables.
  *)
@@ -2320,24 +2312,30 @@ let handle_mode
     in
     List.iter results ~f:print
   | Apply_quickfixes ->
+    let path = expect_single_file () in
+    let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
     let (errors, _) = compute_tasts ctx files_info files_contents in
-    let filename = expect_single_file () in
-    let src = Relative_path.Map.find files_contents filename in
+    let src = Relative_path.Map.find files_contents path in
     let quickfixes =
       Errors.get_error_list errors
       |> List.map ~f:Errors.quickfixes
       |> List.concat
     in
 
-    (* Start with the quickfix that occurs last in the file, so we
-       don't affect the position of earlier code.*)
-    let pos_start_offset p = snd (Pos.info_raw p) in
-    let qf_start_offset qf = pos_start_offset qf.Errors.pos in
-    let cmp_qf x y = Int.compare (qf_start_offset x) (qf_start_offset y) in
-    let quickfixes = List.rev (List.sort ~compare:cmp_qf quickfixes) in
+    let cst = Ast_provider.compute_cst ~ctx ~entry in
+    let tree = Provider_context.PositionedSyntaxTree.root cst in
 
-    let new_src = List.fold quickfixes ~init:src ~f:apply_quickfix in
-    Printf.printf "%s" new_src
+    let classish_starts =
+      match entry.Provider_context.source_text with
+      | Some source_text ->
+        Quickfix_ffp.classish_starts
+          tree
+          source_text
+          entry.Provider_context.path
+      | None -> SMap.empty
+    in
+
+    Printf.printf "%s" (Quickfix.apply_all src classish_starts quickfixes)
 
 (*****************************************************************************)
 (* Main entry point *)

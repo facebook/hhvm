@@ -8,13 +8,14 @@ use std::cmp::Ordering;
 use crate::errors::*;
 use crate::pos::Pos;
 use crate::pos_or_decl::PosOrDecl;
+use crate::quickfix::Quickfix;
 
 impl<PP, P> Error_<PP, P> {
     pub fn new(
         code: ErrorCode,
         claim: Message<PP>,
         reasons: Vec<Message<P>>,
-        quickfixes: Vec<Quickfix<PP>>,
+        quickfixes: Vec<Quickfix>,
     ) -> Self {
         Error_ {
             code,

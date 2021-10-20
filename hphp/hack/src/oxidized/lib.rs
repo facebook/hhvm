@@ -57,6 +57,7 @@ pub use gen::nast;
 pub use gen::parser_options;
 pub use gen::pos_or_decl;
 pub use gen::prim_defs;
+pub use gen::quickfix;
 pub use gen::scoured_comments;
 pub use gen::typechecker_options;
 pub use gen::typing_deps_mode;

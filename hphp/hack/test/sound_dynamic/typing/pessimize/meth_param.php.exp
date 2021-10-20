@@ -1,0 +1,18 @@
+pessimize:	meth_param.php:14,method_param,g,$s
+pessimize:	meth_param.php:16,method_param,gg,$s
+File "meth_param.php", line 5, characters 19-19:
+Method  `f` in class `C` is not dynamically callable. (Typing[4402])
+  File "meth_param.php", line 6, characters 14-15:
+  Invalid argument
+  File "meth_param.php", line 14, characters 21-27:
+  Expected `shape()`
+  File "meth_param.php", line 5, characters 29-30:
+  But got `dynamic` because method must be callable in a dynamic context
+File "meth_param.php", line 10, characters 26-27:
+Method  `ff` in class `C` is not dynamically callable. (Typing[4402])
+  File "meth_param.php", line 11, characters 14-15:
+  Invalid argument
+  File "meth_param.php", line 16, characters 29-35:
+  Expected `shape()`
+  File "meth_param.php", line 10, characters 37-38:
+  But got `dynamic` because method must be callable in a dynamic context

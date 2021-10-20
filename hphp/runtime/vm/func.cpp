@@ -247,9 +247,9 @@ void Func::init(int numParams) {
 #ifndef NDEBUG
   m_magic = kMagic;
 #endif
+  setNewFuncId();
   // For methods, we defer setting the full name until m_cls is initialized
   if (!preClass()) {
-    setNewFuncId();
     setFullName(numParams);
   } else {
     m_fullName = nullptr;

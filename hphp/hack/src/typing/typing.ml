@@ -6011,6 +6011,11 @@ and dispatch_call
           argument_list_exprs (expr ~accept_using_var:true) env el
         in
         let arraykey_ty = MakeType.arraykey (Reason.Rwitness pos) in
+        let like_ak_ty =
+          MakeType.union
+            (Reason.Rwitness pos)
+            [MakeType.dynamic (Reason.Rwitness pos); arraykey_ty]
+        in
         let (env, rev_tel) =
           List.fold
             tel
@@ -6023,7 +6028,7 @@ and dispatch_call
                 @@ SubType.sub_type_res
                      env
                      ty
-                     arraykey_ty
+                     like_ak_ty
                      (Errors.invalid_echo_argument_at pos)
               in
               (env, (pk, hole_on_err ~err_opt te) :: tel))

@@ -1,8 +1,8 @@
-diff --git a/CMake/folly-deps.cmake b/CMake/folly-deps.cmake
-index 25b42eb4d..273448216 100644
---- a/CMake/folly-deps.cmake
-+++ b/CMake/folly-deps.cmake
-@@ -52,13 +52,18 @@ find_package(DoubleConversion MODULE REQUIRED)
+Index: folly/CMake/folly-deps.cmake
+===================================================================
+--- folly.orig/CMake/folly-deps.cmake
++++ folly/CMake/folly-deps.cmake
+@@ -52,13 +52,18 @@ find_package(DoubleConversion MODULE REQ
  list(APPEND FOLLY_LINK_LIBRARIES ${DOUBLE_CONVERSION_LIBRARY})
  list(APPEND FOLLY_INCLUDE_DIRECTORIES ${DOUBLE_CONVERSION_INCLUDE_DIR})
  

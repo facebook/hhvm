@@ -5,9 +5,8 @@ include(HPHPFunctions)
 
 SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
   WATCHMAN_DOWNLOAD_ARGS
-  # This is out of sync as there is no v2021.06.28.00 for watchman
-  SOURCE_URL "https://github.com/facebook/watchman/archive/refs/tags/v2021.06.14.00.tar.gz"
-  SOURCE_HASH "SHA256=bf8042353b72527d32fbc7f04a30af1a3b1baaad1d59756ef46fddb2f454f3b9"
+  SOURCE_URL "https://github.com/facebook/watchman/archive/refs/tags/v2021.10.11.00.tar.gz"
+  SOURCE_HASH "SHA256=d2a875617adde0eace774299e3d049f1825975cfdcdb4ad78e6b8e3f69a567ae"
   # The tarball name is just the tag name, which can conflict in the cache
   FILENAME_PREFIX "watchman-"
 )
@@ -26,8 +25,8 @@ ExternalProject_Add(
   PATCH_COMMAND
     "${CMAKE_COMMAND}" -E copy
     "${CMAKE_CURRENT_SOURCE_DIR}/cppclient-CMakeLists.txt"
-    "cppclient/CMakeLists.txt"
-  SOURCE_SUBDIR cppclient
+    "watchman/cppclient/CMakeLists.txt"
+  SOURCE_SUBDIR watchman/cppclient
   CMAKE_ARGS
     -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
     -DCMAKE_INSTALL_INCLUDEDIR=include

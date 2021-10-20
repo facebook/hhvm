@@ -1,13 +1,9 @@
-diff --git a/CMake/folly-deps.cmake b/CMake/folly-deps.cmake
-index 92b8ce7e3..e0848785a 100644
---- a/CMake/folly-deps.cmake
-+++ b/CMake/folly-deps.cmake
-@@ -168,9 +168,15 @@ find_package(Backtrace)
- 
- set(FOLLY_HAVE_BACKTRACE ${Backtrace_FOUND})
- set(FOLLY_HAVE_DWARF ${LIBDWARF_FOUND})
--if (NOT WIN32)
-+if (UNIX AND NOT APPLE)
+Index: folly/CMake/folly-deps.cmake
+===================================================================
+--- folly.orig/CMake/folly-deps.cmake
++++ folly/CMake/folly-deps.cmake
+@@ -185,6 +185,12 @@ set(FOLLY_HAVE_DWARF ${LIBDWARF_FOUND})
+ if (NOT WIN32 AND NOT APPLE)
    set(FOLLY_USE_SYMBOLIZER ON)
  endif()
 +if (NOT FOLLY_HAVE_ELF)

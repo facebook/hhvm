@@ -1,8 +1,8 @@
-diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 07afb6cf9..a9065b196 100644
---- a/CMakeLists.txt
-+++ b/CMakeLists.txt
-@@ -371,8 +371,6 @@ target_compile_definitions(folly_base
+Index: folly/CMakeLists.txt
+===================================================================
+--- folly.orig/CMakeLists.txt
++++ folly/CMakeLists.txt
+@@ -385,8 +385,6 @@ target_compile_definitions(folly_base
      $<TARGET_PROPERTY:folly_deps,INTERFACE_COMPILE_DEFINITIONS>
  )
  
@@ -11,7 +11,7 @@ index 07afb6cf9..a9065b196 100644
  option(PYTHON_EXTENSIONS
    "Build Python Bindings for Folly, requires Cython and (BUILD_SHARED_LIBS=ON)"
    OFF
-@@ -400,21 +398,31 @@ target_link_libraries(folly_test_util
+@@ -414,21 +412,31 @@ target_link_libraries(folly_test_util
      ${LIBGMOCK_LIBRARIES}
  )
  apply_folly_compile_options_to_target(folly_test_util)

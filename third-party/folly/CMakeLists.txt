@@ -3,11 +3,10 @@ include(HPHPFunctions)
 
 SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
   FOLLY_SOURCE_ARGS
-  FILENAME_PREFIX "folly-"
   SOURCE_URL
-  "https://github.com/facebook/folly/archive/refs/tags/v2021.06.28.00.tar.gz"
+  "https://github.com/facebook/folly/releases/download/v2021.10.11.00/folly-v2021.10.11.00.tar.gz"
   SOURCE_HASH
-  "SHA256=0d33e580cf701559e82f30a9c0caad90c2012f6e28f740f5c44d6b43a78a4494"
+  "SHA256=a6a8087f3a0419dd955fb9c163ac4ca120bb3a1f4cdd0c3661d20d374ced8f31"
 )
 
 get_target_property(BOOST_INCLUDE_DIR boost INTERFACE_INCLUDE_DIRECTORIES)

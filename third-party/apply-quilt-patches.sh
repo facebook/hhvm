@@ -45,8 +45,19 @@ fi
 set -e
 
 cat "$QUILT_PATCHES/series" | while read PATCH_FILE; do
-  echo "Applying patch $PATCH_FILE..."
-  patch -p1 --force < "$QUILT_PATCHES/$PATCH_FILE" || true
-  echo "... applied patch $PATCH_FILE."
+  echo "Applying patch '$PATCH_FILE'..."
+  if [ -e ".quilt_$PATCH_FILE.stamp" ]; then
+    echo "...skipping, already applied."
+  elif patch -p1 --force < "$QUILT_PATCHES/$PATCH_FILE"; then
+    touch ".quilt_$PATCH_FILE.stamp"
+    echo "... applied patch $PATCH_FILE."
+  else
+    if patch -p1 --reverse --force --dry-run < "$QUILT_PATCHES/$PATCH_FILE"; then
+      echo "Failed to apply, appears to have been merged upstream."
+    else
+      echo "Failed to apply patch '$PATCH_FILE.'"
+    fi
+    exit 1
+  fi
 done
 echo "Applied all patches!"

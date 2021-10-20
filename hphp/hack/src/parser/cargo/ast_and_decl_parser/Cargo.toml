@@ -9,7 +9,7 @@ path = "../../ast_and_decl_parser.rs"
 
 [dependencies]
 aast_parser = { path = "../aast_parser" }
-bumpalo = { version = "3.2.1", features = ["collections"] }
+bumpalo = { version = "3.8", features = ["collections"] }
 cst_and_decl_parser = { path = "../../api/cargo/cst_and_decl_parser" }
 oxidized_by_ref = { path = "../../../oxidized_by_ref" }
 parser_core_types = { path = "../core_types" }

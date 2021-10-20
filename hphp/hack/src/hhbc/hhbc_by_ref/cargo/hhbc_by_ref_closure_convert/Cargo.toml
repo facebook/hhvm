@@ -8,7 +8,7 @@ edition = "2018"
 path = "../../closure_convert.rs"
 
 [dependencies]
-bumpalo = { version = "3.2.1", features = ["collections"] }
+bumpalo = { version = "3.8", features = ["collections"] }
 hash = { path = "../../../../utils/hash" }
 hhbc_by_ref_ast_body = { path = "../hhbc_by_ref_ast_body" }
 hhbc_by_ref_ast_constant_folder = { path = "../hhbc_by_ref_ast_constant_folder" }

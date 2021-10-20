@@ -10,7 +10,7 @@ test = false
 doctest = false
 
 [dependencies]
-bumpalo = { version = "3.2.1", features = ["collections"] }
+bumpalo = { version = "3.8", features = ["collections"] }
 direct_decl_smart_constructors = { path = "../../../../decl/direct_decl_smart_constructors" }
 mode_parser = { path = "../../../cargo/mode_parser" }
 oxidized_by_ref = { path = "../../../../oxidized_by_ref" }

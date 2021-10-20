@@ -8,7 +8,7 @@ edition = "2018"
 path = "../../typed_value.rs"
 
 [dependencies]
-bumpalo = { version = "3.2.1", features = ["collections"] }
+bumpalo = { version = "3.8", features = ["collections"] }
 ffi = { path = "../../../../utils/ffi" }
 
 [profile.release]

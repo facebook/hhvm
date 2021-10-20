@@ -10,7 +10,7 @@ test = false
 doctest = false
 
 [dependencies]
-bumpalo = { version = "3.2.1", features = ["collections"] }
+bumpalo = { version = "3.8", features = ["collections"] }
 ocamlrep = { path = "../../../ocamlrep" }
 parser_core_types = { path = "../core_types" }
 smart_constructors = { path = "../smart_constructors" }

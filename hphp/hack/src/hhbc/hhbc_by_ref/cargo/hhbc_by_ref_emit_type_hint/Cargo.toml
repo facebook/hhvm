@@ -8,7 +8,7 @@ edition = "2018"
 path = "../../emit_type_hint.rs"
 
 [dependencies]
-bumpalo = { version = "3.2.1", features = ["collections"] }
+bumpalo = { version = "3.8", features = ["collections"] }
 ffi = { path = "../../../../utils/ffi" }
 hhbc_by_ref_hhas_type = { path = "../hhbc_by_ref_hhas_type" }
 hhbc_by_ref_hhbc_id = { path = "../hhbc_by_ref_hhbc_id" }

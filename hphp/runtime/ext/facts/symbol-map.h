@@ -523,7 +523,7 @@ struct SymbolMap {
      * Remove the given path from the map, along with all data associated with
      * the path.
      */
-    void removePath(AutoloadDB& db, SQLiteTxn& txn, Path path);
+    void removePath(Path path);
   };
 
 private:

@@ -431,13 +431,16 @@ void optimizeJmps(Vunit& unit, bool makeSideExits) {
         auto s = code.back().jmp_.target;
         if (npreds[s] == 1 || isOnly(unit, s, Vinstr::jcc)) {
           FTRACE(
-            4, "vasm-jumps: Rewriting jmp (B{}) -> jcc (B{}) as jcc\n",
+            4, "vasm-jumps: Rewriting jmp ({}) -> jcc ({}) as jcc\n",
             b, s
           );
           // overwrite jmp with copy of s
           auto& code2 = unit.blocks[s].code;
           code.pop_back();
           code.insert(code.end(), code2.begin(), code2.end());
+          // area_idx is from hottest to coldest
+          block.area_idx = std::max(block.area_idx, unit.blocks[s].area_idx);
+          block.weight = std::min(block.weight, unit.blocks[s].weight);
           if (--npreds[s]) {
             for (auto ss : succs(block)) {
               ++npreds[ss];

@@ -747,8 +747,8 @@ let load_state
   | (_env, ServerInit.Load_state_declined s) ->
     Printf.eprintf "> DECLINED %s\n" s;
     assert false
-  | (_env, ServerInit.Load_state_failed (s, Utils.Callstack stack)) ->
-    Printf.eprintf "> FAILED %s: %s\n" s stack;
+  | (_env, ServerInit.Load_state_failed (s, telemetry)) ->
+    Printf.eprintf "> FAILED %s: %s\n" s (Telemetry.to_string telemetry);
     assert false
 
 let diagnostics_to_string x =

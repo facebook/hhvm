@@ -803,6 +803,7 @@ struct RuntimeOption {
   F(bool, EnableImplicitContext,       false)                           \
   F(bool, MoreAccurateMemStats,        true)                            \
   F(bool, AllowScopeBinding,           false)                           \
+  F(bool, AssembleHhasProgram,         false)                           \
   F(bool, JitNoGdb,                    true)                            \
   F(bool, SpinOnCrash,                 false)                           \
   F(uint32_t, DumpRingBufferOnCrash,   0)                               \

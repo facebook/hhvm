@@ -12,10 +12,8 @@ val make : title:string -> new_text:string -> Pos.t -> t
 
 val make_classish : title:string -> new_text:string -> classish_name:string -> t
 
-val get_pos : classish_starts:Pos.t SMap.t -> t -> Pos.t
+val get_edits : classish_starts:Pos.t SMap.t -> t -> (string * Pos.t) list
 
 val get_title : t -> string
-
-val get_new_text : t -> string
 
 val apply_all : string -> Pos.t SMap.t -> t list -> string

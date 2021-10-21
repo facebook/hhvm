@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<de464a7ad71ca05d33193d6c6b541744>>
+// @generated SignedSource<<8f3fa5ad1865d12b101e8a961821f30f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -34,7 +34,7 @@ use crate::*;
     ToOcamlRep
 )]
 #[repr(C)]
-pub enum Pos {
+pub enum QfPos {
     Qpos(pos::Pos),
     QclassishStart(String),
 }
@@ -55,8 +55,25 @@ pub enum Pos {
     ToOcamlRep
 )]
 #[repr(C)]
+pub struct Edit(pub String, pub QfPos);
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[repr(C)]
 pub struct Quickfix {
     pub title: String,
-    pub new_text: String,
-    pub pos: Pos,
+    pub edits: Vec<Edit>,
 }

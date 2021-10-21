@@ -8,7 +8,7 @@
 
 open Hh_prelude
 
-type pos =
+type qf_pos =
   (* Normal position. *)
   | Qpos of Pos.t
   (* A quickfix might want to add things to an empty class declaration,
@@ -16,20 +16,21 @@ type pos =
   | Qclassish_start of string
 [@@deriving eq, ord, show]
 
+type edit = string * qf_pos [@@deriving eq, ord, show]
+
 type t = {
   title: string;
-  new_text: string;
-  pos: pos;
+  edits: edit list;
 }
 [@@deriving eq, ord, show]
 
-let make ~title ~new_text pos = { title; new_text; pos = Qpos pos }
+let make ~title ~new_text pos = { title; edits = [(new_text, Qpos pos)] }
 
 let make_classish ~title ~new_text ~classish_name =
-  { title; new_text; pos = Qclassish_start classish_name }
+  { title; edits = [(new_text, Qclassish_start classish_name)] }
 
-let get_pos ~(classish_starts : Pos.t SMap.t) (quickfix : t) : Pos.t =
-  match quickfix.pos with
+let of_qf_pos ~(classish_starts : Pos.t SMap.t) (p : qf_pos) : Pos.t =
+  match p with
   | Qpos pos -> pos
   | Qclassish_start name ->
     (match SMap.find_opt name classish_starts with
@@ -38,19 +39,52 @@ let get_pos ~(classish_starts : Pos.t SMap.t) (quickfix : t) : Pos.t =
 
 let get_title (quickfix : t) : string = quickfix.title
 
-let get_new_text (quickfix : t) : string = quickfix.new_text
+let get_edits ~(classish_starts : Pos.t SMap.t) (quickfix : t) :
+    (string * Pos.t) list =
+  List.map quickfix.edits ~f:(fun (new_text, qfp) ->
+      (new_text, of_qf_pos ~classish_starts qfp))
 
-let sort_by_pos (quickfixes : t list) : t list =
-  let pos_start_offset p = snd (Pos.info_raw p) in
-  let qf_start_offset _qf = pos_start_offset Pos.none in
-  let cmp_qf x y = Int.compare (qf_start_offset x) (qf_start_offset y) in
-  List.sort ~compare:cmp_qf quickfixes
+(* Sort [quickfixes] with their edit positions in descending
+   order. This allows us to iteratively apply the quickfixes without
+   messing up positions earlier in the file.*)
+let sort_for_application (classish_starts : Pos.t SMap.t) (quickfixes : t list)
+    : t list =
+  let first_qf_offset (quickfix : t) : int =
+    let pos =
+      match List.hd quickfix.edits with
+      | Some (_, qfp) -> of_qf_pos ~classish_starts qfp
+      | _ -> Pos.none
+    in
+    snd (Pos.info_raw pos)
+  in
+  let compare x y = Int.compare (first_qf_offset x) (first_qf_offset y) in
+  List.rev (List.sort ~compare quickfixes)
 
-let replace_at (src : string) (pos : Pos.t) (new_text : string) : string =
+let sort_edits_for_application
+    (classish_starts : Pos.t SMap.t) (edits : edit list) : edit list =
+  let offset (_, qfp) =
+    let pos = of_qf_pos ~classish_starts qfp in
+    snd (Pos.info_raw pos)
+  in
+  let compare x y = Int.compare (offset x) (offset y) in
+  List.rev (List.sort ~compare edits)
+
+(* Apply [edit] to [src], replacing the text at the position specified. *)
+let apply_edit (classish_starts : Pos.t SMap.t) (src : string) (edit : edit) :
+    string =
+  let (new_text, p) = edit in
+  let pos = of_qf_pos ~classish_starts p in
   let (start_offset, end_offset) = Pos.info_raw pos in
   let src_before = String.subo src ~len:start_offset in
   let src_after = String.subo src ~pos:end_offset in
   src_before ^ new_text ^ src_after
+
+let apply_quickfix
+    (classish_starts : Pos.t SMap.t) (src : string) (quickfix : t) : string =
+  List.fold
+    (sort_edits_for_application classish_starts quickfix.edits)
+    ~init:src
+    ~f:(apply_edit classish_starts)
 
 (** Apply all [quickfixes] by replacing/inserting the new text in [src].
     Normally this is done by the user's editor (the LSP client), but
@@ -58,9 +92,7 @@ let replace_at (src : string) (pos : Pos.t) (new_text : string) : string =
 let apply_all
     (src : string) (classish_starts : Pos.t SMap.t) (quickfixes : t list) :
     string =
-  (* Start with the quickfix that occurs last in the file, so we
-     don't affect the position of earlier code.*)
-  let quickfixes = List.rev (sort_by_pos quickfixes) in
-
-  List.fold quickfixes ~init:src ~f:(fun src qf ->
-      replace_at src (get_pos ~classish_starts qf) qf.new_text)
+  List.fold
+    (sort_for_application classish_starts quickfixes)
+    ~init:src
+    ~f:(apply_quickfix classish_starts)

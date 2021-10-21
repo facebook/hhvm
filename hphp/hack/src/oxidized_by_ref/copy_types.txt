@@ -107,7 +107,7 @@ oxidized::naming_types::NameKind
 phase_map::PhaseMap
 prim_defs::Comment
 prop_flags::PropFlags
-quickfix::Pos
+quickfix::QfPos
 relative_path::map::Map
 s_map::SMap
 s_set::SSet

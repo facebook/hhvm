@@ -20,12 +20,12 @@ let quickfix_action
     path (classish_starts : Pos.t SMap.t) (quickfix : Quickfix.t) :
     Lsp.CodeAction.command_or_action =
   let open Lsp in
-  let text_edit =
-    {
-      TextEdit.range = to_range (Quickfix.get_pos ~classish_starts quickfix);
-      newText = Quickfix.get_new_text quickfix;
-    }
+  let edits = Quickfix.get_edits ~classish_starts quickfix in
+  let text_edits =
+    List.map edits ~f:(fun (new_text, pos) ->
+        { TextEdit.range = to_range pos; newText = new_text })
   in
+
   let action =
     {
       CodeAction.title = Quickfix.get_title quickfix;
@@ -36,7 +36,7 @@ let quickfix_action
       diagnostics = [];
       action =
         CodeAction.EditOnly
-          WorkspaceEdit.{ changes = SMap.singleton path [text_edit] };
+          WorkspaceEdit.{ changes = SMap.singleton path text_edits };
     }
   in
   CodeAction.Action action

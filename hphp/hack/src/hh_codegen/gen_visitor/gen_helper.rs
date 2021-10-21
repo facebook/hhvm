@@ -35,5 +35,5 @@ pub fn single_quote() -> Punct {
 
 pub fn make_lifetime(lifetime: &Ident) -> TokenStream {
     let q = single_quote();
-    quote! {#q#lifetime}
+    quote! {#q #lifetime}
 }

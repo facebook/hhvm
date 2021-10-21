@@ -271,7 +271,6 @@ impl<'arena> TypedValue<'arena> {
     }
 
     pub fn shift_left(&self, v2: &Self) -> Option<Self> {
-        use std::convert::TryFrom;
         match (self, v2) {
             (Self::Int(i1), Self::Int(i2)) => {
                 if *i2 < 0 {
@@ -306,7 +305,6 @@ impl<'arena> TypedValue<'arena> {
             return None;
         }
 
-        use std::convert::TryInto;
         let s1: Option<std::string::String> = self.try_into().ok();
         let s2: Option<std::string::String> = v2.try_into().ok();
         match (s1, s2) {
@@ -330,12 +328,10 @@ impl<'arena> TypedValue<'arena> {
     }
 
     pub fn cast_to_string(self, alloc: &'arena bumpalo::Bump) -> Option<Self> {
-        use std::convert::TryInto;
         WithBump(alloc, self).try_into().ok().map(Self::String)
     }
 
     pub fn cast_to_int(self) -> Option<Self> {
-        use std::convert::TryInto;
         self.try_into().ok().map(Self::Int)
     }
 
@@ -344,7 +340,6 @@ impl<'arena> TypedValue<'arena> {
     }
 
     pub fn cast_to_float(self) -> Option<Self> {
-        use std::convert::TryInto;
         self.try_into().ok().map(Self::float)
     }
 
@@ -360,7 +355,6 @@ impl<'arena> TypedValue<'arena> {
 #[cfg(test)]
 mod typed_value_tests {
     use super::TypedValue;
-    use std::convert::TryInto;
 
     #[test]
     fn non_numeric_string_to_int() {

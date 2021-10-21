@@ -490,7 +490,6 @@ pub mod instr {
     }
 
     pub fn int<'a>(alloc: &'a bumpalo::Bump, i: isize) -> InstrSeq<'a> {
-        use std::convert::TryInto;
         instr(
             alloc,
             Instruct::ILitConst(InstructLitConst::Int(i.try_into().unwrap())),
@@ -1398,7 +1397,6 @@ pub mod instr {
         alloc: &'a bumpalo::Bump,
         unnamed_locals: std::vec::Vec<Local<'a>>,
     ) -> InstrSeq<'a> {
-        use std::convert::TryInto;
         use Local::Unnamed;
         match unnamed_locals.split_first() {
             None => panic!("Expected at least one await"),

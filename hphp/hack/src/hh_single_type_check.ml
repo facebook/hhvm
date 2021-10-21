@@ -63,6 +63,7 @@ type options = {
   out_extension: string;
   verbosity: int;
   should_print_position: bool;
+  custom_hhi_path: string option;
 }
 
 (** If the user passed --root, then all pathnames have to be canonicalized.
@@ -281,6 +282,7 @@ let parse_options () =
   let enforce_sealed_subclasses = ref false in
   let everything_sdt = ref false in
   let pessimise_builtins = ref false in
+  let custom_hhi_path = ref None in
   let options =
     [
       ( "--no-print-position",
@@ -703,6 +705,9 @@ let parse_options () =
         Arg.Set pessimise_builtins,
         " Treat built-in collections and Hack arrays as though they contain ~T"
       );
+      ( "--custom-hhi-path",
+        Arg.String (fun s -> custom_hhi_path := Some s),
+        " Use custom hhis" );
     ]
   in
 
@@ -909,6 +914,7 @@ let parse_options () =
       out_extension = !out_extension;
       verbosity = !verbosity;
       should_print_position = !print_position;
+      custom_hhi_path = !custom_hhi_path;
     },
     root,
     !naming_table,
@@ -2360,6 +2366,7 @@ let decl_and_run_mode
       out_extension;
       verbosity;
       should_print_position;
+      custom_hhi_path = _custom_hhi_path;
     }
     (popt : TypecheckerOptions.t)
     (hhi_root : Path.t)
@@ -2524,13 +2531,24 @@ let main_hack
   let (_handle : SharedMem.handle) =
     SharedMem.init ~num_workers:0 sharedmem_config
   in
-  Tempfile.with_tempdir (fun hhi_root ->
+  let process custom hhi_root =
+    if custom then
+      let hhi_root_s = Path.to_string hhi_root in
+      if Disk.file_exists hhi_root_s && Disk.is_directory hhi_root_s then
+        Hhi.set_custom_hhi_root hhi_root
+      else
+        die ("Custom hhi directory " ^ hhi_root_s ^ " not found")
+    else
       Hhi.set_hhi_root_for_unit_test hhi_root;
-      Relative_path.set_path_prefix Relative_path.Root root;
-      Relative_path.set_path_prefix Relative_path.Hhi hhi_root;
-      Relative_path.set_path_prefix Relative_path.Tmp (Path.make "tmp");
-      decl_and_run_mode opts tcopt hhi_root naming_table;
-      TypingLogger.flush_buffers ())
+    Relative_path.set_path_prefix Relative_path.Root root;
+    Relative_path.set_path_prefix Relative_path.Hhi hhi_root;
+    Relative_path.set_path_prefix Relative_path.Tmp (Path.make "tmp");
+    decl_and_run_mode opts tcopt hhi_root naming_table;
+    TypingLogger.flush_buffers ()
+  in
+  match opts.custom_hhi_path with
+  | Some hhi_root -> process true (Path.make hhi_root)
+  | None -> Tempfile.with_tempdir (fun hhi_root -> process false hhi_root)
 
 (* command line driver *)
 let () =

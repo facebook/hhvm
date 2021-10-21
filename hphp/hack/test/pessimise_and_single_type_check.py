@@ -47,7 +47,7 @@ if __name__ == "__main__":
     cmd: List[str] = (
         [hh_stc_path]
         + hh_stc_arguments
-        + ["--enable-sound-dynamic-type", "--like-type-hints"]
+        + ["--enable-sound-dynamic-type", "--like-type-hints", "--pessimise-builtins"]
         + pessimised_files
     )
     subprocess.run(cmd)

@@ -477,7 +477,7 @@ where
         self.next_token_with_tokenizer(|l| l.next_token_non_reserved_as_name())
     }
 
-    fn scan_header(&mut self) -> (Token<S>, Option<(Token<S>, Option<Token<S>>)>) {
+    fn scan_header(&mut self) -> (Option<Token<S>>, Option<(Token<S>, Option<Token<S>>)>) {
         self.lexer_mut().scan_header()
     }
 

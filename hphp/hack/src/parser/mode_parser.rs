@@ -22,15 +22,7 @@ pub enum Language {
 }
 
 fn fallback_to_file_extension(text: &SourceText<'_>) -> (Language, Option<Mode>) {
-    if text.file_path().has_extension("php")
-    /* TODO: add hhconfig option */
-    {
-        // File doesn't start with <?. This is valid PHP, since PHP files may
-        // contain <?, <?php, <?= in the middle or not at all.
-        // TODO: Should return None but there are currently various tests (and
-        // possibly non-tests) that depend on this broken behavior:
-        (Language::Hack, Some(Mode::Mstrict))
-    } else if text.file_path().has_extension("hackpartial") {
+    if text.file_path().has_extension("hackpartial") {
         (Language::Hack, Some(Mode::Mpartial))
     } else {
         (Language::Hack, Some(Mode::Mstrict))

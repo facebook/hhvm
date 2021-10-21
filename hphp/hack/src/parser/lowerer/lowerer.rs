@@ -3165,23 +3165,20 @@ where
         }
     }
 
-    fn is_hashbang(node: S<'a, T, V>, env: &Env<'_, TF>) -> bool {
-        let text = Self::text_str(node, env);
-        lazy_static! {
-            static ref RE: regex::Regex = regex::Regex::new("^#!.*\n").unwrap();
-        }
-        text.lines().nth(1).is_none() && // only one line
-        RE.is_match(text)
-    }
-
     fn p_markup(node: S<'a, T, V>, env: &mut Env<'a, TF>) -> Result<ast::Stmt, Error> {
         match &node.children {
             MarkupSection(c) => {
                 let markup_hashbang = &c.hashbang;
+                let markup_suffix = &c.suffix;
                 let pos = Self::p_pos(node, env);
                 let f = pos.filename();
+                let expected_suffix_offset = if markup_hashbang.is_missing() {
+                    0
+                } else {
+                    markup_hashbang.width() + 1 /* for newline */
+                };
                 if (f.has_extension("hack") || f.has_extension("hackpartial"))
-                    && !(&c.suffix.is_missing())
+                    && !(markup_suffix.is_missing())
                 {
                     let ext = f.path().extension().unwrap(); // has_extension ensures this is a Some
                     Self::raise_parsing_error(
@@ -3189,8 +3186,11 @@ where
                         env,
                         &syntax_error::error1060(&ext.to_str().unwrap()),
                     );
-                } else if markup_hashbang.width() > 0 && !Self::is_hashbang(markup_hashbang, env) {
-                    Self::raise_parsing_error(node, env, &syntax_error::error1001);
+                } else if f.has_extension("php")
+                    && !markup_suffix.is_missing()
+                    && markup_suffix.offset() != Some(expected_suffix_offset)
+                {
+                    Self::raise_parsing_error(markup_suffix, env, &syntax_error::error1001);
                 }
                 let stmt_ = ast::Stmt_::mk_markup((pos.clone(), Self::text(markup_hashbang, env)));
                 Ok(ast::Stmt::new(pos, stmt_))

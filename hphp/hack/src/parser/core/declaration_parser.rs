@@ -386,14 +386,17 @@ where
                 if file_path.has_extension("php") {
                     self.with_error(Errors::error1001);
                     None
-                } else if file_path.has_extension("hack") || file_path.has_extension("hackpartial")
-                {
-                    // a .hack or .hackpartial file with a hashbang
-                    // parse the hashbang correctly and continue
+                } else if !markup_section.is_missing() {
+                    // Anything without a `.php` or `.hackpartial` extension
+                    // should be treated like a `.hack` file (strict), which
+                    // can include a shebang (hashbang).
+                    //
+                    // parse the shebang correctly and continue
+                    //
+                    // Executables do not require an extension.
                     self.continue_from(parser1);
                     Some(markup_section)
                 } else {
-                    // Otherwise it's a non .php file with no <?
                     None
                 }
             } else {

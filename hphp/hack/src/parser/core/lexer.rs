@@ -2398,11 +2398,15 @@ where
 
     fn make_hashbang_token(&mut self) -> TF::Token {
         let leading = self.token_factory.trivia_factory_mut().make();
-        let trailing = self.token_factory.trivia_factory_mut().make();
+        self.skip_to_end_of_line();
+        let token_start = self.start;
+        let token_width = self.width();
+        let trailing = self.scan_trailing_php_trivia();
+        self.start_new_lexeme();
         self.token_factory.make(
             TokenKind::Hashbang,
-            self.start,
-            self.width(),
+            token_start,
+            token_width,
             leading,
             trailing,
         )
@@ -2412,9 +2416,8 @@ where
         &mut self,
         name_token_offset: usize,
         size: usize,
-        markup_text: TF::Token,
         less_than_question_token: TF::Token,
-    ) -> (TF::Token, Option<(TF::Token, Option<TF::Token>)>) {
+    ) -> (TF::Token, Option<TF::Token>) {
         // skip name
         self.advance(size);
         // single line comments that follow the language in leading markup_text
@@ -2425,11 +2428,10 @@ where
         let name =
             self.token_factory
                 .make(TokenKind::Name, name_token_offset, size, leading, trailing);
-        (markup_text, Some((less_than_question_token, Some(name))))
+        (less_than_question_token, Some(name))
     }
 
-    fn make_hashbang_and_suffix(&mut self) -> (TF::Token, Option<(TF::Token, Option<TF::Token>)>) {
-        let hashbang = self.make_hashbang_token();
+    fn make_markup_suffix(&mut self) -> (TF::Token, Option<TF::Token>) {
         let leading = self.token_factory.trivia_factory_mut().make();
         let trailing = self.token_factory.trivia_factory_mut().make();
         let less_than_question_token = self.token_factory.make(
@@ -2445,48 +2447,49 @@ where
         let ch0 = self.peek_char(0).to_ascii_lowercase();
         let ch1 = self.peek_char(1).to_ascii_lowercase();
         match (ch0, ch1) {
-            ('h', 'h') => {
-                self.make_long_tag(name_token_offset, 2, hashbang, less_than_question_token)
-            }
-            _ => (hashbang, Some((less_than_question_token, (None)))),
+            ('h', 'h') => self.make_long_tag(name_token_offset, 2, less_than_question_token),
+            _ => (less_than_question_token, (None)),
         }
     }
 
-    fn skip_to_end_of_header(&mut self) -> (TF::Token, Option<(TF::Token, Option<TF::Token>)>) {
-        let mut is_hashbang = false;
+    fn skip_to_end_of_header(
+        &mut self,
+    ) -> (Option<TF::Token>, Option<(TF::Token, Option<TF::Token>)>) {
         let start_offset = {
             // if leading section starts with #! - it should span the entire line
-            let index = self.offset;
-            if index != 0 {
+            if self.offset != 0 {
                 panic!("Should only try to lex header at start of document")
             };
-            if self.peek_def(index, INVALID) == '#' && self.peek_def(index + 1, INVALID) == '!' {
-                is_hashbang = true;
-                self.skip_while_to_offset(&Self::not_newline) + 1
-            } else {
-                // this should really just be `index` - but, skip whitespace as the FFP
-                // tests use magic comments in leading markup to set flags, but blank
-                // them out before parsing; the newlines are kept to provide correct line
-                // numbers in errors
-                self.skip_while_to_offset(&|x| {
-                    Self::is_newline(x) || Self::is_whitespace_no_newline(x)
-                })
-            }
+            // this should really just be `self.offset` - but, skip whitespace as the FFP
+            // tests use magic comments in leading markup to set flags, but blank
+            // them out before parsing; the newlines are kept to provide correct line
+            // numbers in errors
+            self.skip_while_to_offset(&|x| Self::is_newline(x) || Self::is_whitespace_no_newline(x))
         };
-        if self.peek(start_offset) == '<' && self.peek_def(start_offset + 1, INVALID) == '?' {
+        let hashbang = if self.peek_def(start_offset, INVALID) == '#'
+            && self.peek_def(start_offset + 1, INVALID) == '!'
+        {
             self.with_offset(start_offset);
-            self.make_hashbang_and_suffix()
-        } else if is_hashbang {
-            self.with_offset(start_offset);
-            (self.make_hashbang_token(), None)
+            Some(self.make_hashbang_token())
         } else {
-            // Makes a 0-length hashbang token with no markup
-            // TODO: remove the legacy behavior and turn this into missing syntax
-            (self.make_hashbang_token(), None)
-        }
+            None
+        };
+
+        let start_offset = self
+            .skip_while_to_offset(&|x| Self::is_newline(x) || Self::is_whitespace_no_newline(x));
+        let suffix = if self.peek_def(start_offset, INVALID) == '<'
+            && self.peek_def(start_offset + 1, INVALID) == '?'
+        {
+            self.with_offset(start_offset);
+            Some(self.make_markup_suffix())
+        } else {
+            None
+        };
+
+        (hashbang, suffix)
     }
 
-    pub fn scan_header(&mut self) -> (TF::Token, Option<(TF::Token, Option<TF::Token>)>) {
+    pub fn scan_header(&mut self) -> (Option<TF::Token>, Option<(TF::Token, Option<TF::Token>)>) {
         self.start_new_lexeme();
         self.skip_to_end_of_header()
     }

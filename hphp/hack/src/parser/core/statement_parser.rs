@@ -248,7 +248,6 @@ where
 
     pub fn parse_header(&mut self) -> (S::R, bool) {
         let (markup, suffix_opt) = self.lexer.scan_header();
-        let markup = S!(make_token, self, markup);
         let (suffix, has_suffix) = match suffix_opt {
             Some((less_than_question, language_opt)) => {
                 let less_than_question_token = S!(make_token, self, less_than_question);
@@ -270,7 +269,19 @@ where
                 (missing, false)
             }
         };
-        let s = S!(make_markup_section, self, markup, suffix,);
+        let s = match (markup, has_suffix) {
+            (Some(markup), _) => {
+                let markup = S!(make_token, self, markup);
+                S!(make_markup_section, self, markup, suffix,)
+            }
+            (None, false) => {
+                S!(make_missing, self, self.pos())
+            }
+            (None, true) => {
+                let missing = S!(make_missing, self, self.pos());
+                S!(make_markup_section, self, missing, suffix,)
+            }
+        };
         (s, has_suffix)
     }
 

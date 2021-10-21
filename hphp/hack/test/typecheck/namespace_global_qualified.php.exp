@@ -1,8 +1,4 @@
-File "namespace_global_qualified.php--N.php", line 1, characters 1-5:
+File "namespace_global_qualified.php--N.php", line 2, characters 1-4:
 A .php file must begin with `<?hh`. (Parsing[1002])
-File "namespace_global_qualified.php--N.php", line 13, characters 1-28:
-Namespace declaration statement has to be the very first statement in the script (Parsing[1002])
-File "namespace_global_qualified.php--N.php", line 13, characters 1-28:
-No code may exist outside of namespace {} (Parsing[1002])
-File "namespace_global_qualified.php--test.php", line 1, characters 1-5:
+File "namespace_global_qualified.php--test.php", line 2, characters 1-4:
 A .php file must begin with `<?hh`. (Parsing[1002])

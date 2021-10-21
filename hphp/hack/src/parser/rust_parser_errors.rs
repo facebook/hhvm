@@ -4,8 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use itertools::Itertools;
-use lazy_static::lazy_static;
-use regex::Regex;
 use std::collections::BTreeMap;
 use std::{matches, str::FromStr};
 use strum;
@@ -1835,15 +1833,6 @@ where
             }
             _ => {}
         }
-    }
-
-    fn is_hashbang(&self, node: S<'a, Token, Value>) -> bool {
-        let text = self.text(node);
-        lazy_static! {
-            static ref RE: Regex = Regex::new("^#!.*\n").unwrap();
-        }
-        text.lines().nth(1).is_none() && // only one line
-        RE.is_match(text)
     }
 
     fn is_in_construct_method(&self) -> bool {
@@ -4852,13 +4841,7 @@ where
                         is_first_decl = false;
                         for decl in Self::syntax_to_list_no_separators(syntax_list) {
                             match &decl.children {
-                                MarkupSection(x) => {
-                                    if x.hashbang.width() == 0 || self.is_hashbang(&x.hashbang) {
-                                        continue;
-                                    } else {
-                                        break;
-                                    }
-                                }
+                                MarkupSection(_) => {}
                                 NamespaceUseDeclaration(_) | FileAttributeSpecification(_) => {}
                                 NamespaceDeclaration(_) => {
                                     is_first_decl = true;
@@ -4871,9 +4854,7 @@ where
                         has_code_outside_namespace = !(x.body.is_namespace_empty_body())
                             && Self::syntax_to_list_no_separators(syntax_list).any(|decl| {
                                 match &decl.children {
-                                    MarkupSection(x) => {
-                                        !(x.hashbang.width() == 0 || self.is_hashbang(&x.hashbang))
-                                    }
+                                    MarkupSection(_) => false,
                                     NamespaceDeclaration(_)
                                     | FileAttributeSpecification(_)
                                     | EndOfFile(_)

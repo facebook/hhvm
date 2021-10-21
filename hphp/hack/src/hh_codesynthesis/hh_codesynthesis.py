@@ -171,8 +171,6 @@ def main() -> None:
     # stub classes/interfaces in each agent to the parent agent.
     for agent_number, edge in enumerate(agent_graph_generator.edges):
         agent = agents[agent_number]
-        number_of_stub_classes = len(agent.generator.stub_classes)
-        number_of_stub_interfaces = len(agent.generator.stub_interfaces)
         number_of_parent_agents = len(edge)
 
         # If this agent is root agent, no parents exisit.

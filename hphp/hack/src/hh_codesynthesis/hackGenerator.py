@@ -431,12 +431,12 @@ class HackCodeGenerator(CodeGenerator):
         assert (
             len(self.stub_classes) >= self.solving_context.min_stub_classes
         ), "Expected to get at least {0}, but only have {1} stub classes.".format(
-            self.solving_context.min_stub_classes, stubs
+            self.solving_context.min_stub_classes, len(self.stub_classes)
         )
         assert (
             len(self.stub_interfaces) >= self.solving_context.min_stub_interfaces
         ), "Expected to get at least {0}, but only have {1} stub interfaces.".format(
-            self.solving_context.min_stub_interfaces, stubs
+            self.solving_context.min_stub_interfaces, len(self.stub_interfaces)
         )
 
     def validate_depth(self) -> None:

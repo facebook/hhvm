@@ -2,7 +2,7 @@
 [package]
 name = "typing_deps_hash"
 version = "0.0.0"
-edition = "2018"
+edition = "2021"
 
 [lib]
 path = "../../typing_deps_hash.rs"

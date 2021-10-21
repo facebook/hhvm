@@ -2,7 +2,7 @@
 [package]
 name = "positioned_full_trivia_parser"
 version = "0.0.0"
-edition = "2018"
+edition = "2021"
 
 [lib]
 path = "../../positioned_full_trivia_parser.rs"

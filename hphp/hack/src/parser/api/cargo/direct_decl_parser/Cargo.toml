@@ -2,7 +2,7 @@
 [package]
 name = "direct_decl_parser"
 version = "0.0.0"
-edition = "2018"
+edition = "2021"
 
 [lib]
 path = "../../direct_decl_parser.rs"

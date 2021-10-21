@@ -2,7 +2,7 @@
 [package]
 name = "decl_rust_ffi"
 version = "0.0.0"
-edition = "2018"
+edition = "2021"
 
 [lib]
 path = "../rust_decl_ffi.rs"

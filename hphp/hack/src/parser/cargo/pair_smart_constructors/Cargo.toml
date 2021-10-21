@@ -2,7 +2,7 @@
 [package]
 name = "pair_smart_constructors"
 version = "0.0.0"
-edition = "2018"
+edition = "2021"
 
 [lib]
 path = "../../pair_smart_constructors.rs"

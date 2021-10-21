@@ -2,7 +2,7 @@
 [package]
 name = "hhbc_by_ref_hhas_symbol_refs"
 version = "0.0.0"
-edition = "2018"
+edition = "2021"
 
 [lib]
 path = "../../hhas_symbol_refs.rs"

@@ -2,7 +2,7 @@
 [package]
 name = "hhbc_by_ref_hhbc_assertion_utils"
 version = "0.0.0"
-edition = "2018"
+edition = "2021"
 
 [lib]
 path = "../../assertion_utils.rs"

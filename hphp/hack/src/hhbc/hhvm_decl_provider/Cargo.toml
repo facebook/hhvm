@@ -2,7 +2,7 @@
 [package]
 name = "external_decl_provider"
 version = "0.0.0"
-edition = "2018"
+edition = "2021"
 
 [lib]
 path = "../external_decl_provider/lib.rs"

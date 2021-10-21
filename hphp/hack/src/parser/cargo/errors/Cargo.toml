@@ -2,7 +2,7 @@
 [package]
 name = "rust_parser_errors"
 version = "0.0.0"
-edition = "2018"
+edition = "2021"
 
 [lib]
 path = "../../rust_parser_errors.rs"
@@ -14,11 +14,9 @@ escaper = { path = "../../../utils/escaper" }
 hash = { path = "../../../utils/hash" }
 hh_autoimport_rust = { path = "../hh_autoimport" }
 itertools = "0.10.1"
-lazy_static = "1.0"
 naming_special_names_rust = { path = "../../../naming" }
 oxidized = { path = "../../../oxidized" }
 parser_core_types = { path = "../core_types" }
-regex = "1.5.4"
 strum = "0.21"
 strum_macros = "0.21"
 

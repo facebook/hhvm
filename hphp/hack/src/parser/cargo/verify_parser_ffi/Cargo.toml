@@ -2,7 +2,7 @@
 [package]
 name = "verify_parser_ffi"
 version = "0.0.0"
-edition = "2018"
+edition = "2021"
 
 [lib]
 path = "../../verify_parser_ffi.rs"

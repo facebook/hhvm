@@ -2,7 +2,7 @@
 [package]
 name = "hhbc_by_ref_statement_state"
 version = "0.0.0"
-edition = "2018"
+edition = "2021"
 
 [lib]
 path = "../../statement_state.rs"

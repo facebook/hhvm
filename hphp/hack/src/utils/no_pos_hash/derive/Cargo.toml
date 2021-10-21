@@ -2,7 +2,7 @@
 [package]
 name = "no_pos_hash_derive"
 version = "0.0.0"
-edition = "2018"
+edition = "2021"
 
 [lib]
 path = "../no_pos_hash_derive.rs"

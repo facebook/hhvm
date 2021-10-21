@@ -2,7 +2,7 @@
 [package]
 name = "rust_facts_ffi"
 version = "0.0.0"
-edition = "2018"
+edition = "2021"
 
 [lib]
 path = "../rust_facts_ffi.rs"

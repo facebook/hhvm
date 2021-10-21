@@ -2,7 +2,7 @@
 [package]
 name = "tests"
 version = "0.0.0"
-edition = "2018"
+edition = "2021"
 
 [lib]
 path = "utf32_to_utf8.rs"

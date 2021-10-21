@@ -2,7 +2,7 @@
 [package]
 name = "typing_collections_rust"
 version = "0.0.0"
-edition = "2018"
+edition = "2021"
 
 [lib]
 path = "../../typing_collections_rust.rs"

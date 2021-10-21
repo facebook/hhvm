@@ -2,7 +2,7 @@
 [package]
 name = "naming_attributes_rust"
 version = "0.0.0"
-edition = "2018"
+edition = "2021"
 
 [lib]
 path = "../../naming_attributes.rs"

@@ -2,7 +2,7 @@
 [package]
 name = "arena_trait"
 version = "0.0.0"
-edition = "2018"
+edition = "2021"
 
 [lib]
 path = "lib.rs"

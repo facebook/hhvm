@@ -2,7 +2,7 @@
 [package]
 name = "rust_compile_ffi_bridge"
 version = "0.0.0"
-edition = "2018"
+edition = "2021"
 
 [lib]
 path = "rust_compile_ffi_bridge.rs"

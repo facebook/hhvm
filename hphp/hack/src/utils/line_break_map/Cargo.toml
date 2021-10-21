@@ -2,7 +2,7 @@
 [package]
 name = "line_break_map"
 version = "0.0.0"
-edition = "2018"
+edition = "2021"
 
 [lib]
 path = "../line_break_map.rs"

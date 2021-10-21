@@ -2,7 +2,7 @@
 [package]
 name = "elaborate_namespaces_visitor"
 version = "0.0.0"
-edition = "2018"
+edition = "2021"
 
 [lib]
 path = "../../elaborate_namespaces_visitor.rs"

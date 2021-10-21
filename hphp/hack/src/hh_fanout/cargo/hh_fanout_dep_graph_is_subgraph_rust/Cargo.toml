@@ -2,7 +2,7 @@
 [package]
 name = "hh_fanout_dep_graph_is_subgraph_rust"
 version = "0.0.0"
-edition = "2018"
+edition = "2021"
 
 [lib]
 path = "../../dep_graph_is_subgraph.rs"

@@ -2,7 +2,7 @@
 [package]
 name = "rust_parser_errors_ffi"
 version = "0.0.0"
-edition = "2018"
+edition = "2021"
 
 [lib]
 path = "../../../rust_parser_errors_ffi.rs"

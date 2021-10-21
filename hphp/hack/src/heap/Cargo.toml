@@ -2,7 +2,7 @@
 [package]
 name = "dump_saved_state_depgraph"
 version = "0.0.0"
-edition = "2018"
+edition = "2021"
 
 [[bin]]
 name = "dump_saved_state_depgraph"

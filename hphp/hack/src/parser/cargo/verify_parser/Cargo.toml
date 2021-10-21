@@ -2,7 +2,7 @@
 [package]
 name = "verify_smart_constructors"
 version = "0.0.0"
-edition = "2018"
+edition = "2021"
 
 [lib]
 path = "../../verify_smart_constructors.rs"

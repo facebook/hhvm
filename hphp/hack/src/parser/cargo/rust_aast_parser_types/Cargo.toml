@@ -2,7 +2,7 @@
 [package]
 name = "rust_aast_parser_types"
 version = "0.0.0"
-edition = "2018"
+edition = "2021"
 
 [lib]
 path = "../../rust_aast_parser_types.rs"

@@ -3300,11 +3300,9 @@ dependencies = [
  "hash",
  "hh_autoimport_rust",
  "itertools 0.10.1",
- "lazy_static",
  "naming_special_names_rust",
  "oxidized",
  "parser_core_types",
- "regex",
  "strum",
  "strum_macros",
 ]

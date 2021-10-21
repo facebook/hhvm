@@ -11,7 +11,7 @@
 
 include(HPHPFunctions)
 
-set(RUST_NIGHTLY_VERSION "2021-06-15")
+set(RUST_NIGHTLY_VERSION "2021-10-21")
 
 SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
   RUST_DOWNLOAD_ARGS
@@ -20,9 +20,9 @@ SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
   Darwin_URL
   "https://static.rust-lang.org/dist/${RUST_NIGHTLY_VERSION}/rust-nightly-x86_64-apple-darwin.tar.gz"
   Linux_HASH
-  "SHA512=bff0d9c6e4e718784b6fd3598b86da0053a4126979f5a4b855239ef6c66f61cae0117945dfbcafa623519e631931a98dc34d223e2e02f1942e6c12d3fefc0cf0"
+  "SHA512=84b38862809f5ff000a4ed86c8a2738ae255dc0c6ed8c9de68e5a9e8e651d046595a595641b9a8d9a5ac7711f4a04ac9f8a1cbb2723b56da6bbb972d2a844d9c"
   Darwin_HASH
-  "SHA512=1e91deac08e473330b095512b8333915052d9cb6e9101809164aac52b9f913fd451cf8b9b385240b296082a26cf97f3b3b13a96dd837d6cb8abeee5281b72363"
+  "SHA512=1ecf81b997cd200c9c11689528c507ad87a37918d5b5476129bb83c7f83b38464a9b4bb04f76b841b9a783de31b10623206fd6fdbeeb6a918df8b4d59c1f39a9"
   # The original filename doesn't contain any version information, so add the version information as a prefix to avoid cache collisions when updating later
   FILENAME_PREFIX "rustc-${RUST_NIGHTLY_VERSION}-"
 )

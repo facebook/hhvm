@@ -114,9 +114,14 @@ impl Facts {
             .collect::<TypeFactsByName>();
         let mut type_aliases = decls
             .typedefs()
-            .map(|(name, decl)| {
-                types.insert(format(name), TypeFacts::of_typedef_decl(decl));
-                format(name)
+            .filter_map(|(name, decl)| {
+                if decl.is_ctx {
+                    // ignore context aliases
+                    None
+                } else {
+                    types.insert(format(name), TypeFacts::of_typedef_decl(decl));
+                    Some(format(name))
+                }
             })
             .collect::<Vec<String>>();
         let mut functions = decls

@@ -1216,8 +1216,15 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                 } else {
                     match name {
                         "nothing" => Ty_::Tunion(&[]),
-                        "nonnull" => Ty_::Tnonnull,
+                        "nonnull" => {
+                            if self.opts.everything_sdt {
+                                Ty_::Tsupportdynamic
+                            } else {
+                                Ty_::Tnonnull
+                            }
+                        }
                         "dynamic" => Ty_::Tdynamic,
+                        "supportdynamic" => Ty_::Tsupportdynamic,
                         "varray_or_darray" | "vec_or_dict" => {
                             let key_type = self.vec_or_dict_key(pos);
                             let value_type = self.alloc(Ty(self.alloc(Reason::hint(pos)), TANY_));
@@ -2457,7 +2464,17 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             TokenKind::Num => self.prim_ty(aast::Tprim::Tnum, token_pos(self)),
             TokenKind::Bool => self.prim_ty(aast::Tprim::Tbool, token_pos(self)),
             TokenKind::Mixed => {
-                Node::Ty(self.alloc(Ty(self.alloc(Reason::hint(token_pos(self))), Ty_::Tmixed)))
+                if self.opts.everything_sdt {
+                    Node::Ty(self.alloc(Ty(
+                        self.alloc(Reason::hint(token_pos(self))),
+                        Ty_::Toption(self.alloc(Ty(
+                            self.alloc(Reason::hint(token_pos(self))),
+                            Ty_::Tsupportdynamic,
+                        ))),
+                    )))
+                } else {
+                    Node::Ty(self.alloc(Ty(self.alloc(Reason::hint(token_pos(self))), Ty_::Tmixed)))
+                }
             }
             TokenKind::Void => self.prim_ty(aast::Tprim::Tvoid, token_pos(self)),
             TokenKind::Arraykey => self.prim_ty(aast::Tprim::Tarraykey, token_pos(self)),

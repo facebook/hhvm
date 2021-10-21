@@ -614,8 +614,22 @@ and hint_id
       | x when String.equal x SN.Typehints.num -> N.Hprim N.Tnum
       | x when String.equal x SN.Typehints.resource -> N.Hprim N.Tresource
       | x when String.equal x SN.Typehints.arraykey -> N.Hprim N.Tarraykey
-      | x when String.equal x SN.Typehints.mixed -> N.Hmixed
-      | x when String.equal x SN.Typehints.nonnull -> N.Hnonnull
+      | x when String.equal x SN.Typehints.mixed ->
+        if
+          TypecheckerOptions.everything_sdt
+            (Provider_context.get_tcopt (fst env).ctx)
+        then
+          N.Hoption (p, N.Hsupportdynamic)
+        else
+          N.Hmixed
+      | x when String.equal x SN.Typehints.nonnull ->
+        if
+          TypecheckerOptions.everything_sdt
+            (Provider_context.get_tcopt (fst env).ctx)
+        then
+          N.Hsupportdynamic
+        else
+          N.Hnonnull
       | x when String.equal x SN.Typehints.dynamic -> N.Hdynamic
       | x when String.equal x SN.Typehints.supportdynamic ->
         if

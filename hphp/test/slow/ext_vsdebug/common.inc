@@ -201,7 +201,7 @@ function setBreakpoints($breakpoints, $verify = true) {
     $responseLines = darray[];
     foreach ($bpsForFile{'breakpoints'} as $bp) {
       $setBreakpointsCommand['arguments']['breakpoints'][] = darray["line" => $bp{'line'}, "condition" => $bp{'condition'}];
-      $responseBps[] = darray["id" => ++ExtVsdebugCommonInc::$bpId, "verified" => false];
+      $responseBps[] = darray["id" => ++ExtVsdebugCommonInc::$bpId, "verified" => true];
       $responseLines{ExtVsdebugCommonInc::$bpId} = $bp{'calibratedLine'};
     }
 

@@ -185,7 +185,10 @@ bool SetBreakpointsCommand::executeImpl(
 
             folly::dynamic newBreakpointInfo = folly::dynamic::object;
             newBreakpointInfo["id"] = newBpId;
-            newBreakpointInfo["verified"] = false;
+            // We cannot resolve the breakpoints when they are set because
+            // the file may not be loaded, so we set the "verified" field
+            // to true here as a hack, so that the UI does not grey it out.
+            newBreakpointInfo["verified"] = true;
             responseBps.push_back(newBreakpointInfo);
           } else {
             Breakpoint* bp = bpIt->second;

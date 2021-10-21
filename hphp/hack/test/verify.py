@@ -19,7 +19,13 @@ from hphp.hack.test.parse_errors import Error, parse_errors, sprint_errors
 DEFAULT_OUT_EXT = ".out"
 DEFAULT_EXP_EXT = ".exp"
 
-flags_pessimise_unsupported = ["--like-casts", "--complex-coercion", "--like-types-all"]
+flags_pessimise_unsupported = [
+    "--like-casts",
+    "--complex-coercion",
+    "--like-types-all",
+    "--enable-higher-kinded-types",
+    "--enable-class-level-where-clauses",
+]
 max_workers = 48
 verbose = False
 dump_on_failure = False

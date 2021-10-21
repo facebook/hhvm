@@ -337,6 +337,10 @@ module UserAttributes = struct
 
   let uaEnableMethodTraitDiamond = "__EnableMethodTraitDiamond"
 
+  let uaIgnoreReadonlyLocalErrors = "__IgnoreReadonlyLocalErrors"
+
+  let uaIgnoreCoeffectLocalErrors = "__IgnoreCoeffectLocalErrors"
+
   let as_map =
     AttributeKinds.(
       SMap.of_list
@@ -402,6 +406,8 @@ module UserAttributes = struct
           (uaIsFoldable, [fn; mthd]);
           (uaNative, [fn; mthd]);
           (uaOutOnly, [parameter]);
+          (uaIgnoreReadonlyLocalErrors, [fn; mthd]);
+          (uaIgnoreCoeffectLocalErrors, [fn; mthd]);
         ])
 
   let is_reserved name = String.is_prefix name ~prefix:"__"

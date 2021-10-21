@@ -245,7 +245,7 @@ impl SyntaxTrait for PositionedSyntax {
         self.value.start_offset()
     }
 
-    fn extract_text<'a>(&self, source_text: &'a SourceText) -> Option<&'a str> {
+    fn extract_text<'a>(&self, source_text: &'a SourceText<'_>) -> Option<&'a str> {
         Some(self.text(source_text))
     }
 }

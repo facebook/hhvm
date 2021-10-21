@@ -347,6 +347,8 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
         ServerLocalConfig.RemoteTypeCheck.(
           Some local_config.remote_type_check.num_workers)
       ~tco_stream_errors:local_config.stream_errors
+      ~tco_use_naming_for_dephash_filenames:
+        local_config.use_naming_for_dephash_filenames
       ?so_remote_version_specifier:local_config.remote_version_specifier
       ?so_remote_worker_vfs_checkout_threshold:
         ServerLocalConfig.RemoteTypeCheck.(
@@ -492,8 +494,6 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
       ?tco_everything_sdt:(bool_opt "everything_sdt" config)
       ?tco_pessimise_builtins:(bool_opt "pessimise_builtins" config)
       ~tco_deferments_light:local_config.ServerLocalConfig.deferments_light
-      ~tco_old_naming_table_for_redecl:
-        local_config.ServerLocalConfig.old_naming_table_for_redecl
       ~tco_enable_disk_heap:local_config.ServerLocalConfig.enable_disk_heap
       ~log_levels:(prepare_log_levels config)
       ()

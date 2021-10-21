@@ -1,0 +1,9 @@
+pessimize:	param.php:10,fun_param,\g,$s
+File "param.php", line 6, characters 10-10:
+Function  `f` is not dynamically callable. (Typing[4402])
+  File "param.php", line 7, characters 5-6:
+  Invalid argument
+  File "param.php", line 10, characters 12-18:
+  Expected `shape()`
+  File "param.php", line 6, characters 20-21:
+  But got `dynamic` because method must be callable in a dynamic context

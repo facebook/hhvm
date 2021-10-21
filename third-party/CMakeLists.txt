@@ -62,13 +62,8 @@ list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/fatal")
 add_subdirectory(brotli) # Required by fizz
 add_subdirectory(fizz)
 add_subdirectory(wangle)
-
-list(APPEND THIRD_PARTY_MODULES proxygen)
-list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/proxygen/src")
-
-list(APPEND THIRD_PARTY_MODULES thrift)
-list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/thrift/src")
-list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/thrift/gen")
+add_subdirectory(proxygen)
+add_subdirectory(thrift)
 
 if (NOT MSVC)
   list(APPEND THIRD_PARTY_MODULES libafdt)
@@ -96,7 +91,6 @@ if (ENABLE_MCROUTER)
 
   list(APPEND THIRD_PARTY_MODULES mcrouter)
   list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/mcrouter/src")
-  list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/mcrouter/gen")
 endif()
 
 # Add bundled fastlz if the system one will not be used

@@ -1,5 +1,4 @@
 <?hh
-<<file:__EnableUnstableFeatures('readonly')>>
 class Bar {}
 class Foo {
   public int $prop;

@@ -8,7 +8,7 @@ edition = "2018"
 path = "print.rs"
 
 [dependencies]
-bumpalo = { version = "3.2.1", features = ["collections"] }
+bumpalo = { version = "3.8", features = ["collections"] }
 core_utils_rust = { path = "../../utils/core" }
 escaper = { path = "../../utils/escaper" }
 ffi = { path = "../../utils/ffi" }

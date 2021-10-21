@@ -91,28 +91,10 @@ if [[ -f "${MINI_REPO_FETCH_SCRIPT}" && "${SKIP_MINI_REPO}" -eq 0 ]]; then
   MINI_REPO_DIR="$("${MINI_REPO_FETCH_SCRIPT}")"
   MINI_REPO_TARBALL="${MINI_REPO_DIR}.tar.gz"
   rm -rf "$MINI_REPO_DIR" ||:
-  tar xzf "$MINI_REPO_TARBALL" -C "$SOURCE_ROOT/facebook"
+  TARGET_OPAM_DIR="$SOURCE_ROOT/facebook/$(basename "$MINI_REPO_DIR")"
+  mkdir "$TARGET_OPAM_DIR"
+  tar xzf "$MINI_REPO_TARBALL" -C "$TARGET_OPAM_DIR"
   opam init --disable-sandboxing --reinit offline_clone "$MINI_REPO_DIR" --no-setup --bare
-
-  if [ -n "$OCAML_PATCH" ]; then
-    # Patching ocaml base compiler so we can pass it CFLAGS/LDFLAGS
-    # The goal is to make it use the right glibc, not the system one
-    opam switch create "$HACK_OPAM_NAME" --empty
-    pushd "$OPAMROOT/repo" || exit 1
-    tar xzf offline_clone.tar.gz
-    cd offline_clone || exit 1
-    mkdir -p base-compiler-source
-    cd base-compiler-source
-    opam source "$OCAML_COMPILER_NAME"
-    cd "$OCAML_COMPILER_NAME"
-    patchname="$OCAML_COMPILER_NAME.patch"
-    cp "$OCAML_PATCH" "$patchname"
-    patch < "$patchname"
-
-    opam pin "$OCAML_COMPILER_NAME" .
-    popd  || exit 1
-    opam switch set-invariant "$OCAML_BASE_NAME"
-  fi
 else
   opam init --disable-sandboxing --reinit --no-setup --bare
 fi

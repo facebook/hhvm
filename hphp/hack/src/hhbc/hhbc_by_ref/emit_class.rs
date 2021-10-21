@@ -235,7 +235,7 @@ fn from_ctx_constant<'a, 'arena>(
         | TCConcrete(ast::ClassConcreteTypeconst { c_tc_type: hint }) => {
             let x = HhasCoeffects::from_ctx_constant(hint);
             let p1: Slice<'arena, Ctx> = Slice::from_vec(alloc, x.0);
-            let p2: Slice<'arena, Str> =
+            let p2: Slice<'arena, Str<'_>> =
                 Slice::from_vec(alloc, x.1.iter().map(|s| Str::new_str(alloc, s)).collect());
             (p1, p2)
         }
@@ -553,7 +553,7 @@ where
 {
     if properties
         .iter()
-        .any(|p: &HhasProperty| p.initializer_instrs.is_just() && filter(p))
+        .any(|p: &HhasProperty<'_>| p.initializer_instrs.is_just() && filter(p))
     {
         let instrs = InstrSeq::gather(
             alloc,
@@ -772,9 +772,9 @@ pub fn emit_class<'a, 'arena, 'decl>(
 
     let requirements = from_class_elt_requirements(alloc, ast_class);
 
-    let pinit_filter = |p: &HhasProperty| !p.is_static();
-    let sinit_filter = |p: &HhasProperty| p.is_static() && !p.is_lsb();
-    let linit_filter = |p: &HhasProperty| p.is_static() && p.is_lsb();
+    let pinit_filter = |p: &HhasProperty<'_>| !p.is_static();
+    let sinit_filter = |p: &HhasProperty<'_>| p.is_static() && !p.is_lsb();
+    let linit_filter = |p: &HhasProperty<'_>| p.is_static() && p.is_lsb();
 
     let pinit_method =
         make_init_method(alloc, emitter, &properties, &pinit_filter, "86pinit", span)?;
@@ -905,11 +905,11 @@ pub fn emit_class<'a, 'arena, 'decl>(
     let type_constants = tconsts
         .iter()
         .map(|x| from_type_constant(alloc, emitter, x))
-        .collect::<Result<Vec<HhasTypeConstant>>>()?;
+        .collect::<Result<Vec<HhasTypeConstant<'_>>>>()?;
     let ctx_constants = ctxconsts
         .iter()
         .map(|x| from_ctx_constant(alloc, x))
-        .collect::<Result<Vec<HhasCtxConstant>>>()?;
+        .collect::<Result<Vec<HhasCtxConstant<'_>>>>()?;
     let upper_bounds = emit_body::emit_generics_upper_bounds(alloc, &ast_class.tparams, &[], false);
 
     if !no_xhp_attributes {

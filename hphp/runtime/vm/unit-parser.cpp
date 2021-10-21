@@ -35,10 +35,7 @@
 #include <folly/FileUtil.h>
 #include <folly/system/ThreadName.h>
 
-#include "hphp/hack/src/facts/ffi_bridge/rust_facts_ffi_bridge.rs"
 #include "hphp/hack/src/hhbc/ffi_bridge/rust_compile_ffi_bridge.rs"
-#include "hphp/hack/src/hhbc/compile_ffi.h"
-#include "hphp/hack/src/hhbc/compile_ffi_types.h"
 #include "hphp/hack/src/hhbc/hhbc_by_ref/hhbc-ast.h"
 #include "hphp/hack/src/parser/ffi_bridge/rust_parser_ffi_bridge.rs"
 #include "hphp/runtime/base/autoload-map.h"
@@ -48,6 +45,7 @@
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/decl-provider.h"
+#include "hphp/runtime/vm/hhas-parser.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 #include "hphp/util/atomic-vector.h"
 #include "hphp/util/embedded-data.h"
@@ -164,9 +162,10 @@ CompilerResult hackc_compile(
   const RepoOptions& options,
   CompileAbortMode mode
 ) {
+  std::string aliased_namespaces = options.getAliasedNamespacesConfig();
 
-  // Mock HhvmDeclProvider. TODO: Hook up with bytecode cache logic.
-  HhvmDeclProvider decl_provider;
+  // (Semi-)Mock HhvmDeclProvider. TODO: Hook up with bytecode cache logic.
+  HhvmDeclProvider decl_provider{aliased_namespaces};
 
   std::uint8_t flags = make_env_flags(
     !SystemLib::s_inited,           // is_systemlib
@@ -176,8 +175,6 @@ CompilerResult hackc_compile(
     false,                          // disable_toplevel_elaboration
     RuntimeOption::EvalEnableDecl   // enable_decl
   );
-
-  std::string aliased_namespaces = options.getAliasedNamespacesConfig();
 
   NativeEnv const native_env{
     reinterpret_cast<std::uint64_t>(&decl_provider),
@@ -191,6 +188,14 @@ CompilerResult hackc_compile(
     options.getParserFlags(),
     flags
   };
+
+  if (RO::EvalAssembleHhasProgram) {
+    ::rust::Box<HhasProgramWrapper> prog_wrapped =
+      hackc_compile_hhas_from_text_cpp_ffi(native_env, code);
+    const hackc::hhbc::HhasProgram* program = hackc::hhbc::hhasProgramRaw(prog_wrapped);
+    UNUSED int num_elems = program->functions.len;
+    ITRACE(2, "AssembleHhasProgram: Found {} functions. \n", num_elems);
+  }
 
   auto const hhas =
     std::string(hackc_compile_from_text_cpp_ffi(native_env, code));

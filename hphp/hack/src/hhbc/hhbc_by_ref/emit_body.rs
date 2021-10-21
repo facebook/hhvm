@@ -235,7 +235,7 @@ fn make_body_instrs<'a, 'arena, 'decl>(
     params: &[(HhasParam<'arena>, Option<(Label, ast::Expr)>)],
     tparams: &[ast::Tparam],
     decl_vars: &[String],
-    body: AstBody,
+    body: AstBody<'_>,
     is_generator: bool,
     deprecation_info: Option<&[TypedValue<'arena>]>,
     pos: &Pos,
@@ -320,7 +320,7 @@ fn make_decl_vars<'a, 'arena, 'decl>(
     scope: &Scope<'a, 'arena>,
     immediate_tparams: &[ast::Tparam],
     params: &[(HhasParam<'arena>, Option<(Label, ast::Expr)>)],
-    body: &AstBody,
+    body: &AstBody<'_>,
     arg_flags: Flags,
 ) -> Result<Vec<String>> {
     let explicit_use_set = &emitter.emit_global_state().explicit_use_set;
@@ -515,7 +515,7 @@ pub fn make_body<'a, 'arena, 'decl>(
 fn emit_ast_body<'a, 'arena, 'decl>(
     env: &mut Env<'a, 'arena>,
     e: &mut Emitter<'arena, 'decl>,
-    body: &AstBody,
+    body: &AstBody<'_>,
 ) -> Result<InstrSeq<'arena>> {
     match body {
         Either::Left(p) => emit_defs(env, e, p),
@@ -599,7 +599,7 @@ fn emit_defs<'a, 'arena, 'decl>(
 
 pub fn has_type_constraint<'a, 'arena>(
     env: &Env<'a, 'arena>,
-    ti: Option<&HhasTypeInfo>,
+    ti: Option<&HhasTypeInfo<'_>>,
     ast_param: &ast::FunParam,
 ) -> (RGH::ReificationLevel, Option<ast::Hint>) {
     use RGH::ReificationLevel as L;
@@ -1076,7 +1076,7 @@ fn set_emit_statement_state<'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     default_return_value: InstrSeq<'arena>,
     params: &[(HhasParam<'arena>, Option<(Label, ast::Expr)>)],
-    return_type_info: &HhasTypeInfo,
+    return_type_info: &HhasTypeInfo<'_>,
     return_type: Option<&ast::Hint>,
     pos: &Pos,
     default_dropthrough: Option<InstrSeq<'arena>>,

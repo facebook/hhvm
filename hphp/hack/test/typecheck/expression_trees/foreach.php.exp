@@ -1,0 +1,2 @@
+File "foreach.php", line 8, characters 5-50:
+Expression trees do not support `foreach` loops. Consider using a `for` loop or a `while` loop instead. (Parsing[1002])

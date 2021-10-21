@@ -145,9 +145,7 @@ let lazy_saved_state_init genv env root load_state_approach profiling =
     let env = post_init genv (env, t) in
     (env, Load_state_succeeded state_distance)
   | Error err ->
-    let (ServerInitTypes.
-           { message; auto_retry; stack = Utils.Callstack stack; environment }
-        as verbose_error) =
+    let ServerInitTypes.{ message; auto_retry; telemetry } =
       load_state_error_to_verbose_string err
     in
     let (next_step_descr, next_step, user_instructions) =
@@ -166,19 +164,8 @@ let lazy_saved_state_init genv env root load_state_approach profiling =
       | Some user_instructions ->
         Printf.sprintf "%s\n\n%s" user_message user_instructions
     in
-    let exception_telemetry =
-      Telemetry.create ()
-      |> Telemetry.string_ ~key:"message" ~value:message
-      |> Telemetry.string_ ~key:"stack" ~value:stack
-      |> Telemetry.string_
-           ~key:"environment"
-           ~value:(Option.value environment ~default:"N/A")
-    in
-    HackEventLogger.load_state_exn exception_telemetry;
-    Hh_logger.log
-      "Could not load saved state: %s\n%s\n"
-      (ServerInitTypes.show_load_state_verbose_error verbose_error)
-      stack;
+    HackEventLogger.load_state_exn telemetry;
+    Hh_logger.log "LOAD_STATE_EXN %s" (Telemetry.to_string telemetry);
     (match next_step with
     | Exit_status.No_error ->
       ServerProgress.send_warning (Some user_message);
@@ -189,8 +176,8 @@ let lazy_saved_state_init genv env root load_state_approach profiling =
       in
       ( CgroupProfiler.profile_memory ~event:(`Init "lazy_full_init")
         @@ fall_back_to_full_init,
-        Load_state_failed (user_message, Utils.Callstack stack) )
-    | _ -> Exit.exit ~msg:user_message ~stack next_step)
+        Load_state_failed (user_message, telemetry) )
+    | _ -> Exit.exit ~msg:user_message ~telemetry next_step)
 
 let eager_init genv env _lazy_lev profiling =
   let init_result =

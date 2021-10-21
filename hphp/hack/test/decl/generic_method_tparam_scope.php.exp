@@ -40,9 +40,11 @@
                   et_type = (Rhint ([4:33-35]), (Tgeneric ("Ta", []))) };
                 ft_flags =
                 (make_ft_flags FSync ~return_disposable:false
-                  ~returns_readonly:false ~readonly_this:false);
+                  ~returns_readonly:false ~support_dynamic_type:false
+                  ~readonly_this:false);
                 ft_ifc_decl = FDPolicied {PUBLIC} }));
-          sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) };
+          sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+          sm_attributes = [] };
          { Shallow_decl_defs.sm_name = ([8:19-20], "g");
            sm_type =
            (Rwitness_from_decl ([8:19-20]),
@@ -74,9 +76,11 @@
                    et_type = (Rhint ([8:33-35]), (Tgeneric ("Tb", []))) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
-                   ~returns_readonly:false ~readonly_this:false);
+                   ~returns_readonly:false ~support_dynamic_type:false
+                   ~readonly_this:false);
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
-           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) }
+           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+           sm_attributes = [] }
          ];
        sc_user_attributes = []; sc_enum_type = None }))
   ]

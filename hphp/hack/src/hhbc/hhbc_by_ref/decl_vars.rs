@@ -105,7 +105,7 @@ impl<'ast, 'a> Visitor<'ast> for DeclvarVisitor<'a> {
     fn visit_expr_(&mut self, env: &mut (), e: &Expr_) -> Result<(), String> {
         use aast::Expr_::*;
         match e {
-            ObjGet(x) if !x.as_ref().3 => {
+            ObjGet(x) if x.as_ref().3 == PropOrMethod::IsProp => {
                 let (receiver_e, prop_e) = (&x.0, &x.1);
                 match &receiver_e.2 {
                     Lvar(id) if id.name() == "$this" => {}
@@ -132,7 +132,9 @@ impl<'ast, 'a> Visitor<'ast> for DeclvarVisitor<'a> {
             }
 
             Lvar(x) => Ok(self.add_local(x.name())),
-            ClassGet(x) if !x.as_ref().2 => self.on_class_get(&x.0, &x.1, false),
+            ClassGet(x) if x.as_ref().2 == PropOrMethod::IsProp => {
+                self.on_class_get(&x.0, &x.1, false)
+            }
             // For an Lfun, we don't want to recurse, because it's a separate scope.
             Lfun(_) => Ok(()),
             Efun(x) => {
@@ -177,7 +179,7 @@ impl<'ast, 'a> Visitor<'ast> for DeclvarVisitor<'a> {
                     _ => self_.visit_expr(env, x),
                 };
                 match &func_e.2 {
-                    ClassGet(x) if !x.as_ref().2 => {
+                    ClassGet(x) if x.as_ref().2 == PropOrMethod::IsMethod => {
                         let (id, prop) = (&x.0, &x.1);
                         self.on_class_get(id, prop, true)?
                     }
@@ -225,7 +227,7 @@ fn uls_from_ast<P, F1, F2>(
     get_param_name: F1,
     get_param_default_value: F2,
     explicit_use_set_opt: Option<&SSet>,
-    b: &AstBody,
+    b: &AstBody<'_>,
 ) -> Result<impl Iterator<Item = String>, String>
 where
     F1: Fn(&P) -> &str,
@@ -247,7 +249,7 @@ where
 
 pub fn from_ast<'arena>(
     params: &[(HhasParam<'arena>, Option<(Label, Expr)>)],
-    body: &AstBody,
+    body: &AstBody<'_>,
     explicit_use_set: &SSet,
 ) -> Result<Vec<String>, String> {
     let decl_vars = uls_from_ast(
@@ -260,7 +262,7 @@ pub fn from_ast<'arena>(
     Ok(decl_vars.collect())
 }
 
-pub fn vars_from_ast(params: &[FunParam], b: &AstBody) -> Result<HashSet<String>, String> {
+pub fn vars_from_ast(params: &[FunParam], b: &AstBody<'_>) -> Result<HashSet<String>, String> {
     let decl_vars = uls_from_ast(
         params,
         |p| &p.name,                      // get_param_name

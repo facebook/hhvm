@@ -5,20 +5,7 @@
     "elements":[
       {
         "kind":"markup_section",
-        "markup_hashbang":{
-          "kind":"token",
-          "token":{
-            "kind":"hashbang",
-            "text":"",
-            "offset":0,
-            "leading_width":0,
-            "width":0,
-            "trailing_width":0,
-            "leading":[],
-            "trailing":[],
-            "line_number":1
-          }
-        },
+        "markup_hashbang":{"kind":"missing"},
         "markup_suffix":{
           "kind":"markup_suffix",
           "markup_suffix_less_than_question":{

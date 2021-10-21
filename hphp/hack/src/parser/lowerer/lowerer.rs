@@ -87,6 +87,7 @@ pub enum ExprLocation {
     RightOfAssignmentInUsingStatement,
     RightOfReturn,
     UsingStatement,
+    CallReceiver,
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
@@ -118,7 +119,7 @@ pub struct FunHdr {
 }
 
 impl FunHdr {
-    fn make_empty<TF: Clone>(env: &Env<TF>) -> Self {
+    fn make_empty<TF: Clone>(env: &Env<'_, TF>) -> Self {
         Self {
             suspension_kind: SuspensionKind::SKSync,
             readonly_this: None,
@@ -270,11 +271,11 @@ impl<'a, TF: Clone> Env<'a, TF> {
         self.fail_open
     }
 
-    fn cls_generics_mut(&mut self) -> RefMut<HashMap<String, bool>> {
+    fn cls_generics_mut(&mut self) -> RefMut<'_, HashMap<String, bool>> {
         RefMut::map(self.state.borrow_mut(), |s| &mut s.cls_generics)
     }
 
-    fn fn_generics_mut(&mut self) -> RefMut<HashMap<String, bool>> {
+    fn fn_generics_mut(&mut self) -> RefMut<'_, HashMap<String, bool>> {
         RefMut::map(self.state.borrow_mut(), |s| &mut s.fn_generics)
     }
 
@@ -296,33 +297,33 @@ impl<'a, TF: Clone> Env<'a, TF> {
         }
     }
 
-    fn in_static_method(&mut self) -> RefMut<bool> {
+    fn in_static_method(&mut self) -> RefMut<'_, bool> {
         RefMut::map(self.state.borrow_mut(), |s| &mut s.in_static_method)
     }
 
-    fn parent_maybe_reified(&mut self) -> RefMut<bool> {
+    fn parent_maybe_reified(&mut self) -> RefMut<'_, bool> {
         RefMut::map(self.state.borrow_mut(), |s| &mut s.parent_maybe_reified)
     }
 
-    pub fn lowpri_errors(&mut self) -> RefMut<Vec<(Pos, String)>> {
+    pub fn lowpri_errors(&mut self) -> RefMut<'_, Vec<(Pos, String)>> {
         RefMut::map(self.state.borrow_mut(), |s| &mut s.lowpri_errors)
     }
 
-    pub fn hh_errors(&mut self) -> RefMut<Vec<HHError>> {
+    pub fn hh_errors(&mut self) -> RefMut<'_, Vec<HHError>> {
         RefMut::map(self.state.borrow_mut(), |s| &mut s.hh_errors)
     }
 
-    pub fn lint_errors(&mut self) -> RefMut<Vec<LintError>> {
+    pub fn lint_errors(&mut self) -> RefMut<'_, Vec<LintError>> {
         RefMut::map(self.state.borrow_mut(), |s| &mut s.lint_errors)
     }
 
-    fn top_docblock(&self) -> Ref<Option<DocComment>> {
+    fn top_docblock(&self) -> Ref<'_, Option<DocComment>> {
         Ref::map(self.state.borrow(), |s| {
             s.doc_comments.last().unwrap_or(&None)
         })
     }
 
-    fn exp_recursion_depth(&self) -> RefMut<usize> {
+    fn exp_recursion_depth(&self) -> RefMut<'_, usize> {
         RefMut::map(self.state.borrow_mut(), |s| &mut s.exp_recursion_depth)
     }
 
@@ -395,7 +396,7 @@ where
     V: 'a + SyntaxValueWithKind + SyntaxValueType<T>,
     Syntax<'a, T, V>: SyntaxTrait,
 {
-    fn p_pos(node: S<'a, T, V>, env: &Env<TF>) -> Pos {
+    fn p_pos(node: S<'a, T, V>, env: &Env<'_, TF>) -> Pos {
         node.position_exclusive(env.indexed_source_text)
             .unwrap_or_else(|| env.mk_none_pos())
     }
@@ -440,11 +441,11 @@ where
         Err(Error::Failwith(msg.into()))
     }
 
-    fn text(node: S<'a, T, V>, env: &Env<TF>) -> String {
+    fn text(node: S<'a, T, V>, env: &Env<'_, TF>) -> String {
         String::from(node.text(env.source_text()))
     }
 
-    fn text_str<'b>(node: S<'a, T, V>, env: &'b Env<TF>) -> &'b str {
+    fn text_str<'b>(node: S<'a, T, V>, env: &'b Env<'_, TF>) -> &'b str {
         node.text(env.source_text())
     }
 
@@ -1372,6 +1373,19 @@ where
         env: &mut Env<'a, TF>,
         parent_pos: Option<Pos>,
     ) -> Result<ast::Expr, Error> {
+        // We use location=CallReceiver to set PropOrMethod::IsMethod on ObjGet
+        // But only if it is the immediate node.
+        let location = match (location, &node.children) {
+            (
+                ExprLocation::CallReceiver,
+                MemberSelectionExpression(_)
+                | SafeMemberSelectionExpression(_)
+                | EmbeddedMemberSelectionExpression(_)
+                | ScopeResolutionExpression(_),
+            ) => location,
+            (ExprLocation::CallReceiver, _) => ExprLocation::TopLevel,
+            (_, _) => location,
+        };
         match &node.children {
             BracedExpression(c) => {
                 // Either a dynamic method lookup on a dynamic value:
@@ -1579,30 +1593,8 @@ where
             args: S<'a, T, V>,
             e: &mut Env<'a, TF>,
         | -> Result<ast::Expr_, Error> {
-            let pos_if_has_parens = match &recv.children {
-                ParenthesizedExpression(_) => Some(Self::p_pos(recv, e)),
-                _ => None,
-            };
-            let recv = Self::p_expr(recv, e)?;
-            let recv = match (&recv.2, pos_if_has_parens) {
-                (E_::ObjGet(t), Some(ref _p)) => {
-                    let (a, b, c, _false) = &**t;
-                    E::new(
-                        (),
-                        recv.1.clone(),
-                        E_::mk_obj_get(a.clone(), b.clone(), c.clone(), true),
-                    )
-                }
-                (E_::ClassGet(c), Some(ref _p)) => {
-                    let (a, b, _false) = &**c;
-                    E::new(
-                        (),
-                        recv.1.clone(),
-                        E_::mk_class_get(a.clone(), b.clone(), true),
-                    )
-                }
-                _ => recv,
-            };
+            // Mark expression as CallReceiver so that we can correctly set PropOrMethod field in ObjGet and ClassGet
+            let recv = Self::p_expr_with_loc(ExprLocation::CallReceiver, recv, e)?;
             let (args, varargs) = Self::split_args_vararg(args, e)?;
             Ok(E_::mk_call(recv, vec![], args, varargs))
         };
@@ -1618,7 +1610,15 @@ where
             let recv = Self::p_expr(recv, e)?;
             let name = Self::p_expr_with_loc(ExprLocation::MemberSelect, name, e)?;
             let op = Self::p_null_flavor(op, e)?;
-            Ok(E_::mk_obj_get(recv, name, op, false))
+            Ok(E_::mk_obj_get(
+                recv,
+                name,
+                op,
+                match location {
+                    ExprLocation::CallReceiver => ast::PropOrMethod::IsMethod,
+                    _ => ast::PropOrMethod::IsProp,
+                },
+            ))
         };
         let pos = match parent_pos {
             None => Self::p_pos(node, env),
@@ -1817,59 +1817,8 @@ where
                             _ => vec![],
                         };
 
-                        /* preserve parens on receiver of call expression
-                        to allow distinguishing between
-                        ($a->b)() // invoke on callable property
-                        $a->b()   // method call */
-                        let pos_if_has_parens = match &recv.children {
-                            ParenthesizedExpression(_) => Some(Self::p_pos(recv, env)),
-                            _ => None,
-                        };
-
-                        let recv = Self::p_expr(recv, env)?;
-                        let recv = match (&recv.2, pos_if_has_parens) {
-                            (E_::ReadonlyExpr(r), Some(ref _p)) => {
-                                let ast::Expr(_, _, inner_exp) = &**r;
-                                match inner_exp {
-                                    E_::ObjGet(t) => {
-                                        let (a, b, c, _false) = &**t;
-                                        let new_inner = E::new(
-                                            (),
-                                            r.1.clone(),
-                                            E_::mk_obj_get(a.clone(), b.clone(), c.clone(), true),
-                                        );
-                                        E::new((), recv.1.clone(), E_::mk_readonly_expr(new_inner))
-                                    }
-                                    E_::ClassGet(c) => {
-                                        let (a, b, _false) = &**c;
-                                        let new_inner = E::new(
-                                            (),
-                                            r.1.clone(),
-                                            E_::mk_class_get(a.clone(), b.clone(), true),
-                                        );
-                                        E::new((), recv.1.clone(), E_::mk_readonly_expr(new_inner))
-                                    }
-                                    _ => recv,
-                                }
-                            }
-                            (E_::ObjGet(t), Some(ref _p)) => {
-                                let (a, b, c, _false) = &**t;
-                                E::new(
-                                    (),
-                                    recv.1.clone(),
-                                    E_::mk_obj_get(a.clone(), b.clone(), c.clone(), true),
-                                )
-                            }
-                            (E_::ClassGet(c), Some(ref _p)) => {
-                                let (a, b, _false) = &**c;
-                                E::new(
-                                    (),
-                                    recv.1.clone(),
-                                    E_::mk_class_get(a.clone(), b.clone(), true),
-                                )
-                            }
-                            _ => recv,
-                        };
+                        // Mark expression as CallReceiver so that we can correctly set PropOrMethod field in ObjGet and ClassGet
+                        let recv = Self::p_expr_with_loc(ExprLocation::CallReceiver, recv, env)?;
                         let (mut args, varargs) = Self::split_args_vararg(args, env)?;
 
                         // If the function has an enum class label expression, that's
@@ -2065,7 +2014,8 @@ where
                     | (UsingStatement, _)
                     | (RightOfAssignment, _)
                     | (RightOfAssignmentInUsingStatement, _)
-                    | (RightOfReturn, _) => Ok(E_::mk_id(Self::pos_name(node, env)?)),
+                    | (RightOfReturn, _)
+                    | (CallReceiver, _) => Ok(E_::mk_id(Self::pos_name(node, env)?)),
                 }
             }
             YieldExpression(c) => {
@@ -2098,7 +2048,10 @@ where
                         Ok(E_::mk_class_get(
                             ast::ClassId((), pos, ast::ClassId_::CIexpr(qual)),
                             ast::ClassGetExpr::CGstring((p, name)),
-                            false,
+                            match location {
+                                ExprLocation::CallReceiver => ast::PropOrMethod::IsMethod,
+                                _ => ast::PropOrMethod::IsProp,
+                            },
                         ))
                     }
                     _ => {
@@ -2124,13 +2077,19 @@ where
                                 Ok(E_::mk_class_get(
                                     ast::ClassId((), pos, ast::ClassId_::CIexpr(qual)),
                                     ast::ClassGetExpr::CGstring((p, n)),
-                                    false,
+                                    match location {
+                                        ExprLocation::CallReceiver => ast::PropOrMethod::IsMethod,
+                                        _ => ast::PropOrMethod::IsProp,
+                                    },
                                 ))
                             }
                             _ => Ok(E_::mk_class_get(
                                 ast::ClassId((), pos, ast::ClassId_::CIexpr(qual)),
                                 ast::ClassGetExpr::CGexpr(E((), p, expr_)),
-                                false,
+                                match location {
+                                    ExprLocation::CallReceiver => ast::PropOrMethod::IsMethod,
+                                    _ => ast::PropOrMethod::IsProp,
+                                },
                             )),
                         }
                     }
@@ -2380,8 +2339,9 @@ where
                     let name = Self::pos_name(&c.qualifier, env)?;
                     Ok(E_::mk_enum_class_label(Some(name), label_name))
                 } else {
-                    /* This can happen during parsing in auto-complete mode */
-                    let recv = Self::p_expr(&c.qualifier, env);
+                    // This can happen during parsing in auto-complete mode
+                    // We want to treat this as a method call even though we haven't yet seen the arguments
+                    let recv = Self::p_expr_with_loc(ExprLocation::CallReceiver, &c.qualifier, env);
                     match recv {
                         Ok(recv) => {
                             let enum_class_label = E_::mk_enum_class_label(None, label_name);
@@ -2406,7 +2366,7 @@ where
         let mut raise = |s| Self::raise_parsing_error_pos(p, env, s);
         match expr_ {
             ObjGet(og) => {
-                if og.as_ref().3 {
+                if og.as_ref().3 == ast::PropOrMethod::IsMethod {
                     raise("Invalid lvalue")
                 } else {
                     match og.as_ref() {
@@ -2515,7 +2475,7 @@ where
                         let token = env
                             .token_factory
                             .concatenate(s.get_token().unwrap(), e.get_token().unwrap());
-                        let node = env.arena.alloc(<Syntax<T, V>>::make_token(token));
+                        let node = env.arena.alloc(<Syntax<'_, T, V>>::make_token(token));
                         state.2.push(node)
                     }
                     _ => {}
@@ -2625,7 +2585,7 @@ where
 
     fn p_stmt_list_(
         pos: &Pos,
-        mut nodes: Iter<S<'a, T, V>>,
+        mut nodes: Iter<'_, S<'a, T, V>>,
         env: &mut Env<'a, TF>,
     ) -> Result<Vec<ast::Stmt>, Error> {
         let mut r = vec![];
@@ -3205,23 +3165,20 @@ where
         }
     }
 
-    fn is_hashbang(node: S<'a, T, V>, env: &Env<TF>) -> bool {
-        let text = Self::text_str(node, env);
-        lazy_static! {
-            static ref RE: regex::Regex = regex::Regex::new("^#!.*\n").unwrap();
-        }
-        text.lines().nth(1).is_none() && // only one line
-        RE.is_match(text)
-    }
-
     fn p_markup(node: S<'a, T, V>, env: &mut Env<'a, TF>) -> Result<ast::Stmt, Error> {
         match &node.children {
             MarkupSection(c) => {
                 let markup_hashbang = &c.hashbang;
+                let markup_suffix = &c.suffix;
                 let pos = Self::p_pos(node, env);
                 let f = pos.filename();
+                let expected_suffix_offset = if markup_hashbang.is_missing() {
+                    0
+                } else {
+                    markup_hashbang.width() + 1 /* for newline */
+                };
                 if (f.has_extension("hack") || f.has_extension("hackpartial"))
-                    && !(&c.suffix.is_missing())
+                    && !(markup_suffix.is_missing())
                 {
                     let ext = f.path().extension().unwrap(); // has_extension ensures this is a Some
                     Self::raise_parsing_error(
@@ -3229,8 +3186,11 @@ where
                         env,
                         &syntax_error::error1060(&ext.to_str().unwrap()),
                     );
-                } else if markup_hashbang.width() > 0 && !Self::is_hashbang(markup_hashbang, env) {
-                    Self::raise_parsing_error(node, env, &syntax_error::error1001);
+                } else if f.has_extension("php")
+                    && !markup_suffix.is_missing()
+                    && markup_suffix.offset() != Some(expected_suffix_offset)
+                {
+                    Self::raise_parsing_error(markup_suffix, env, &syntax_error::error1001);
                 }
                 let stmt_ = ast::Stmt_::mk_markup((pos.clone(), Self::text(markup_hashbang, env)));
                 Ok(ast::Stmt::new(pos, stmt_))
@@ -3635,7 +3595,7 @@ where
         }
     }
 
-    fn param_template(node: S<'a, T, V>, env: &Env<TF>) -> ast::FunParam {
+    fn param_template(node: S<'a, T, V>, env: &Env<'_, TF>) -> ast::FunParam {
         let pos = Self::p_pos(node, env);
         ast::FunParam {
             annotation: (),
@@ -3991,7 +3951,7 @@ where
         }
     }
 
-    fn p_fun_pos(node: S<'a, T, V>, env: &Env<TF>) -> Pos {
+    fn p_fun_pos(node: S<'a, T, V>, env: &Env<'_, TF>) -> Pos {
         let get_pos = |n: S<'a, T, V>, p: Pos| -> Pos {
             if let FunctionDeclarationHeader(c1) = &n.children {
                 if !c1.keyword.is_missing() {
@@ -4024,12 +3984,12 @@ where
         }
     }
 
-    fn mk_noop(env: &Env<TF>) -> ast::Stmt {
+    fn mk_noop(env: &Env<'_, TF>) -> ast::Stmt {
         ast::Stmt::noop(env.mk_none_pos())
     }
 
     fn p_function_body(node: S<'a, T, V>, env: &mut Env<'a, TF>) -> Result<ast::Block, Error> {
-        let mk_noop_result = |e: &Env<TF>| Ok(vec![Self::mk_noop(e)]);
+        let mk_noop_result = |e: &Env<'_, TF>| Ok(vec![Self::mk_noop(e)]);
         let f = |e: &mut Env<'a, TF>| -> Result<ast::Block, Error> {
             match &node.children {
                 Missing => Ok(vec![]),
@@ -4257,11 +4217,11 @@ where
         Ok((r?, saw_yield))
     }
 
-    fn mk_empty_ns_env(env: &Env<TF>) -> RcOc<NamespaceEnv> {
+    fn mk_empty_ns_env(env: &Env<'_, TF>) -> RcOc<NamespaceEnv> {
         RcOc::clone(&env.empty_ns_env)
     }
 
-    fn extract_docblock(node: S<'a, T, V>, env: &Env<TF>) -> Option<DocComment> {
+    fn extract_docblock(node: S<'a, T, V>, env: &Env<'_, TF>) -> Option<DocComment> {
         #[derive(Copy, Clone, Eq, PartialEq)]
         enum ScanState {
             DocComment,
@@ -4380,7 +4340,7 @@ where
     ) -> Result<(), Error> {
         use ast::Visibility;
         let doc_comment_opt = Self::extract_docblock(node, env);
-        let has_fun_header = |m: &MethodishDeclarationChildren<T, V>| {
+        let has_fun_header = |m: &MethodishDeclarationChildren<'_, T, V>| {
             matches!(
                 m.function_decl_header.children,
                 FunctionDeclarationHeader(_)
@@ -4630,7 +4590,7 @@ where
                                     e(E_::mk_lvar(lid(special_idents::THIS))),
                                     e(E_::mk_id(ast::Id(p.clone(), cvname.to_string()))),
                                     ast::OgNullFlavor::OGNullthrows,
-                                    false,
+                                    ast::PropOrMethod::IsProp,
                                 )),
                                 e(E_::mk_lvar(lid(&param.name))),
                             ))),
@@ -4940,7 +4900,7 @@ where
         }
     }
 
-    fn contains_class_body(c: &ClassishDeclarationChildren<T, V>) -> bool {
+    fn contains_class_body(c: &ClassishDeclarationChildren<'_, T, V>) -> bool {
         matches!(&c.body.children, ClassishBody(_))
     }
 

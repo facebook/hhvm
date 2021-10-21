@@ -38,7 +38,7 @@ pub fn from_ast<'ast, 'arena, 'decl>(
     class: &'ast ast::Class_,
     tparams: &[&str],
     class_is_const: bool,
-    args: FromAstArgs,
+    args: FromAstArgs<'_>,
 ) -> Result<HhasProperty<'arena>> {
     let ast_defs::Id(pos, cv_name) = args.id;
     let pid: prop::PropType<'arena> = prop::PropType::from_ast_name(alloc, cv_name);
@@ -197,7 +197,7 @@ pub fn from_ast<'ast, 'arena, 'decl>(
     })
 }
 
-fn valid_for_prop(tc: &constraint::Constraint) -> bool {
+fn valid_for_prop(tc: &constraint::Constraint<'_>) -> bool {
     match &tc.name {
         Nothing => true,
         Just(s) => {

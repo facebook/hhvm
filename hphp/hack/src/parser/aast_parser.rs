@@ -187,6 +187,7 @@ impl<'src> AastParser {
                 true, /* hhvm_compat_mode */
                 hhi_mode,
                 env.codegen,
+                env.is_systemlib,
             );
             errors.extend(parse_errors);
             errors.sort_by(SyntaxError::compare_offset);
@@ -196,7 +197,6 @@ impl<'src> AastParser {
             if uses_readonly
                 // enabled either by parser option or by typechecker
                 && (env.parser_options.po_enable_readonly_in_emitter || !env.codegen)
-                && !env.is_systemlib
             {
                 errors.extend(readonly_check::check_program(&mut aast));
             }
@@ -292,10 +292,10 @@ impl<'src> AastParser {
 
     fn scour_comments_and_add_fixmes<'arena>(
         env: &Env,
-        indexed_source_text: &'src IndexedSourceText,
+        indexed_source_text: &'src IndexedSourceText<'_>,
         script: &PositionedSyntax<'arena>,
     ) -> Result<ScouredComments> {
-        let scourer: ScourComment<PositionedToken<'arena>, PositionedValue<'arena>> =
+        let scourer: ScourComment<'_, PositionedToken<'arena>, PositionedValue<'arena>> =
             ScourComment {
                 phantom: std::marker::PhantomData,
                 indexed_source_text,

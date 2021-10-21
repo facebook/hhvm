@@ -1,4 +1,7 @@
 <?hh   /* -*- php -*- */
+
+<<file:__EnableUnstableFeatures('readonly')>>
+
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -26,7 +29,7 @@ function array_fill<T>(int $start_index, int $num, T $value)[]: varray_or_darray
 <<__PHPStdLib>>
 function chr(int $ascii)[]: string;
 <<__PHPStdLib>>
-function count(mixed $x, int $mode = COUNT_NORMAL)[]: int; // count takes Countable or array. We'll need to hardcode this...
+function count(readonly mixed $x, int $mode = COUNT_NORMAL)[]: int; // count takes Countable or array. We'll need to hardcode this...
 <<__PHPStdLib>>
 function dechex(int $number)[]: string;
 <<__PHPStdLib>>
@@ -36,15 +39,15 @@ function explode(string $delimiter, string $str, int $limit = 0x7FFFFFFF)[]: var
 }
 
 namespace HH {
-function is_vec(mixed $arg)[]: bool;
-function is_dict(mixed $arg)[]: bool;
-function is_keyset(mixed $arg)[]: bool;
+function is_vec(readonly mixed $arg)[]: bool;
+function is_dict(readonly mixed $arg)[]: bool;
+function is_keyset(readonly mixed $arg)[]: bool;
 
 /**
  * @returns True if `$arg` is a `varray`, `darray`, `dict`, `vec`, or `keyset`.
  * Otherwise returns false.
  */
-function is_any_array(mixed $arg)[]: bool;
+function is_any_array(readonly mixed $arg)[]: bool;
 }
 
 namespace {
@@ -132,10 +135,10 @@ namespace HH {
   function clear_lsb_memoization(string $cls, ?string $func = null) : bool;
   function clear_instance_memoization($obj) : bool;
 
-  function is_list_like(mixed $arg)[]: bool;
-  function is_class_meth(mixed $arg)[]: bool;
-  function is_meth_caller(mixed $arg)[]: bool;
-  function is_fun(mixed $arg)[]: bool;
+  function is_list_like(readonly mixed $arg)[]: bool;
+  function is_class_meth(readonly mixed $arg)[]: bool;
+  function is_meth_caller(readonly mixed $arg)[]: bool;
+  function is_fun(readonly mixed $arg)[]: bool;
 
   function set_frame_metadata(mixed $metadata)[]: void;
 

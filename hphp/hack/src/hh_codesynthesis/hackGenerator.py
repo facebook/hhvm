@@ -17,10 +17,12 @@
 # _HackFunctionGenerator maintains each function definition.
 # HackGenerator extends CodeGenerator combines all _Hack*Generator to
 # emit Hack code on clingo output.
-from typing import Set, Dict, Any, Tuple, List
+import functools
+from collections import deque
+from typing import Set, Dict, Any, Tuple, List, Optional
 
 import clingo
-from hphp.hack.src.hh_codesynthesis.codeGenerator import CodeGenerator
+from hphp.hack.src.hh_codesynthesis.codeGenerator import CodeGenerator, ClingoContext
 
 
 class _HackBaseGenerator(object):
@@ -39,12 +41,17 @@ class _HackBaseGenerator(object):
         self.parameter_set: Set[str] = set()
         # A set of functions to invoke in dummy method.
         self.invoke_funcs_set: Set["_HackFunctionGenerator"] = set()
+        # A set of parents this symbol had.
+        self.parents: Set[str] = set()
 
     def add_method(self, method_name: str) -> None:
         self.methods.add(method_name)
 
     def add_parameter(self, parameter_type: str) -> None:
         self.parameter_set.add(parameter_type)
+
+    def add_parent(self, parent_name: str) -> None:
+        self.parents.add(parent_name)
 
     def _print_dummy_method_body(self) -> str:
         return ";"
@@ -61,13 +68,19 @@ class _HackBaseGenerator(object):
         # the user. If there is a naming conflict, simply extending it with "_".
         while dummy_name in self.methods:
             dummy_name += "_"
-        return f"\npublic function {dummy_name}({parameter_list}): void{self._print_dummy_method_body()}\n"
+        return (
+            f"\npublic function {dummy_name}({parameter_list}):"
+            f" void{self._print_dummy_method_body()}\n"
+        )
 
     def _print_method_body(self) -> str:
         return ";"
 
     def _print_method(self, method_name: str, static_keyword: str = " ") -> str:
-        return f"\npublic{static_keyword}function {method_name}(): void{self._print_method_body()}\n"
+        return (
+            f"\npublic{static_keyword}function {method_name}():"
+            f" void{self._print_method_body()}\n"
+        )
 
     def _print_methods(self) -> str:
         return "".join(list(map(self._print_method, sorted(self.methods))))
@@ -275,17 +288,27 @@ class _HackFunctionGenerator:
         )
 
     def __str__(self) -> str:
-        return f"function {self.name}({self._print_parameters()}): void {self._print_body()}"
+        return (
+            f"function {self.name}({self._print_parameters()}): void"
+            f" {self._print_body()}"
+        )
 
 
 class HackCodeGenerator(CodeGenerator):
     """A wrapper generator encapsulates each _Hack*Generator to emit Hack Code"""
 
-    def __init__(self) -> None:
-        super(HackCodeGenerator, self).__init__()
+    def __init__(self, solving_context: Optional[ClingoContext] = None) -> None:
+        super(HackCodeGenerator, self).__init__(solving_context)
         self.class_objs: Dict[str, _HackClassGenerator] = {}
         self.interface_objs: Dict[str, _HackInterfaceGenerator] = {}
         self.function_objs: Dict[str, _HackFunctionGenerator] = {}
+
+    def _look_up_object_by_symbol(self, symbol: str) -> "_HackBaseGenerator":
+        if symbol in self.class_objs:
+            return self.class_objs[symbol]
+        elif symbol in self.interface_objs:
+            return self.interface_objs[symbol]
+        raise RuntimeError("No object with symbol name {0}".format(symbol))
 
     def _add_class(self, name: str) -> None:
         self.class_objs[name] = _HackClassGenerator(name)
@@ -299,12 +322,15 @@ class HackCodeGenerator(CodeGenerator):
     def _add_extend(self, name: str, extend: str) -> None:
         if name in self.class_objs:
             self.class_objs[name].set_extend(extend)
+            self.class_objs[name].add_parent(extend)
         if name in self.interface_objs:
             self.interface_objs[name].add_extend(extend)
+            self.interface_objs[name].add_parent(extend)
 
     def _add_implement(self, name: str, implement: str) -> None:
         if name in self.class_objs:
             self.class_objs[name].add_implement(implement)
+            self.class_objs[name].add_parent(implement)
 
     def _add_method(self, name: str, method_name: str) -> None:
         if name in self.class_objs:
@@ -365,6 +391,106 @@ class HackCodeGenerator(CodeGenerator):
         if name in self.function_objs:
             self.function_objs[name].add_parameter(parameter_type, argument_type)
 
+    def validate_nodes(self) -> None:
+        # Graph validation using the constraints specified in the context.
+        assert (
+            len(self.class_objs) >= self.solving_context.min_classes
+        ), "Expected to get at least {0}, but only have {1} classes.".format(
+            self.solving_context.min_classes, len(self.class_objs)
+        )
+        assert (
+            len(self.interface_objs) >= self.solving_context.min_interfaces
+        ), "Expected to get at least {0}, but only have {1} interfaces.".format(
+            self.solving_context.min_interfaces, len(self.interface_objs)
+        )
+        assert (
+            len(self.class_objs) + len(self.interface_objs)
+            >= self.solving_context.number_of_nodes
+        ), "Expected to get at least {0}, but only have {1} symbols.".format(
+            self.solving_context.number_of_nodes,
+            len(self.class_objs) + len(self.interface_objs),
+        )
+
+    def validate_stubs(self) -> None:
+        # Check number of stub nodes.
+        stubs = 0
+        for node in self.class_objs.values():
+            if node.extend == "":
+                stubs += 1
+        assert (
+            stubs >= self.solving_context.min_stub_classes
+        ), "Expected to get at least {0}, but only have {1} stub classes.".format(
+            self.solving_context.min_stub_classes, stubs
+        )
+        stubs = 0
+        for node in self.interface_objs.values():
+            if len(node.extends) == 0:
+                stubs += 1
+        assert (
+            stubs >= self.solving_context.min_stub_interfaces
+        ), "Expected to get at least {0}, but only have {1} stub interfaces.".format(
+            self.solving_context.min_stub_interfaces, stubs
+        )
+
+    def validate_depth(self) -> None:
+        # Validate the depth requirement (Union-find set).
+        symbols = list(self.class_objs.keys()) + list(self.interface_objs.keys())
+        depth: Dict[str, int] = dict.fromkeys(symbols, int(1))
+
+        for symbol in symbols:
+            ancestors = deque(
+                [
+                    (symbol, parent)
+                    for parent in self._look_up_object_by_symbol(symbol).parents
+                ]
+            )
+            while len(ancestors) != 0:
+                (child, ancestor) = ancestors.popleft()
+                depth[ancestor] = max(depth[ancestor], depth[child] + 1)
+                ancestors.extend(
+                    [
+                        (ancestor, parent)
+                        for parent in self._look_up_object_by_symbol(ancestor).parents
+                    ]
+                )
+        assert (
+            max(depth.values()) >= self.solving_context.min_depth
+        ), "Expected to get at least {0} depth, but the max depth is {1}.".format(
+            self.solving_context.min_depth, max(depth.values())
+        )
+
+    def validate_degree(self) -> None:
+        in_degrees = [0] * 10
+        # Iterate through class_objs and interface_objs.
+        for node in self.class_objs.values():
+            degree = len(node.implements)
+            degree += 1 if node.extend != "" else 0
+            in_degrees[degree] += 1
+        for node in self.interface_objs.values():
+            degree = len(node.extends)
+            in_degrees[degree] += 1
+
+        # Validate the degrees are greater than the specified deistribution.
+        assert functools.reduce(
+            lambda x, y: x and y,
+            map(
+                lambda actual, expected: actual >= expected,
+                in_degrees,
+                self.solving_context.degree_distribution,
+            ),
+            True,
+        ), "Expected degree distribution {0}, but got {1}".format(
+            self.solving_context.degree_distribution, in_degrees
+        )
+
+    def validate(self) -> bool:
+        self.validate_nodes()
+        self.validate_stubs()
+        self.validate_depth()
+        self.validate_degree()
+
+        return True
+
     def __str__(self) -> str:
         return (
             "<?hh\n"
@@ -413,8 +539,7 @@ class HackCodeGenerator(CodeGenerator):
         for predicate in predicates:
             if predicate.name in edge_func:
                 edge_func[predicate.name](
-                    predicate.arguments[0].string,
-                    predicate.arguments[1].string,
+                    predicate.arguments[0].string, predicate.arguments[1].string
                 )
         #   Third pass creates relationships between three nodes.
         for predicate in predicates:

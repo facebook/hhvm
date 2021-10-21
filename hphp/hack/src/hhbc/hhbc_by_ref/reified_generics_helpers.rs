@@ -47,7 +47,10 @@ pub(crate) fn has_reified_type_constraint<'a, 'arena>(
     h: &aast::Hint,
 ) -> ReificationLevel {
     use aast::*;
-    fn is_all_erased<'a>(env: &'a Env, mut h_iter: impl Iterator<Item = &'a aast::Hint>) -> bool {
+    fn is_all_erased<'a>(
+        env: &'a Env<'_, '_>,
+        mut h_iter: impl Iterator<Item = &'a aast::Hint>,
+    ) -> bool {
         let erased_tparams: HashSet<String> = get_erased_tparams(env).collect();
         h_iter.all(|h| {
             if let Hint_::Happly(Id(_, ref id), ref apply_hints) = *h.1 {

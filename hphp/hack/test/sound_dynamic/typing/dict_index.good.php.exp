@@ -2,10 +2,12 @@ File "dict_index.good.php", line 9, characters 3-13:
   int
 File "dict_index.good.php", line 11, characters 3-13:
   int
-File "dict_index.good.php", line 30, characters 5-15:
+File "dict_index.good.php", line 15, characters 3-15:
+  dict<arraykey, (int | string)>
+File "dict_index.good.php", line 31, characters 5-15:
   int
-File "dict_index.good.php", line 32, characters 5-15:
+File "dict_index.good.php", line 33, characters 5-15:
   int
-File "dict_index.good.php", line 34, characters 5-15:
+File "dict_index.good.php", line 35, characters 5-15:
   int
 No errors

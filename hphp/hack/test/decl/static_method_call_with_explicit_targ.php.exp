@@ -22,9 +22,11 @@
                   et_type = (Rhint ([4:31-34]), (Tprim Tint)) };
                 ft_flags =
                 (make_ft_flags FSync ~return_disposable:false
-                  ~returns_readonly:false ~readonly_this:false);
+                  ~returns_readonly:false ~support_dynamic_type:false
+                  ~readonly_this:false);
                 ft_ifc_decl = FDPolicied {PUBLIC} }));
-          sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) };
+          sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+          sm_attributes = [] };
          { Shallow_decl_defs.sm_name = ([11:26-31], "equal");
            sm_type =
            (Rwitness_from_decl ([11:26-31]),
@@ -66,9 +68,11 @@
                    et_type = (Rhint ([11:48-52]), (Tprim Tbool)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
-                   ~returns_readonly:false ~readonly_this:false);
+                   ~returns_readonly:false ~support_dynamic_type:false
+                   ~readonly_this:false);
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
-           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) }
+           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+           sm_attributes = [] }
          ];
        sc_methods = []; sc_user_attributes = []; sc_enum_type = None }))
   ]

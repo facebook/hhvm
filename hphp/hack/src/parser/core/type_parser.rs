@@ -100,7 +100,7 @@ where
         &mut self.sc
     }
 
-    fn drain_skipped_tokens(&mut self) -> std::vec::Drain<Token<S>> {
+    fn drain_skipped_tokens(&mut self) -> std::vec::Drain<'_, Token<S>> {
         self.context.skipped_tokens.drain(..)
     }
 
@@ -128,7 +128,7 @@ where
     {
         let mut lexer = self.lexer.clone();
         lexer.set_in_type(false);
-        let mut expression_parser: ExpressionParser<S> = ExpressionParser::make(
+        let mut expression_parser: ExpressionParser<'_, S> = ExpressionParser::make(
             lexer,
             self.env.clone(),
             self.context.clone(),
@@ -151,7 +151,7 @@ where
         let mut lexer = self.lexer.clone();
         lexer.set_in_type(false);
 
-        let mut declaration_parser: DeclarationParser<S> = DeclarationParser::make(
+        let mut declaration_parser: DeclarationParser<'_, S> = DeclarationParser::make(
             lexer,
             self.env.clone(),
             self.context.clone(),

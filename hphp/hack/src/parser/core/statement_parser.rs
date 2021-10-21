@@ -97,7 +97,7 @@ where
         &mut self.sc
     }
 
-    fn drain_skipped_tokens(&mut self) -> std::vec::Drain<Token<S>> {
+    fn drain_skipped_tokens(&mut self) -> std::vec::Drain<'_, Token<S>> {
         self.context.skipped_tokens.drain(..)
     }
 
@@ -123,7 +123,7 @@ where
     where
         F: Fn(&mut TypeParser<'a, S>) -> U,
     {
-        let mut type_parser: TypeParser<S> = TypeParser::make(
+        let mut type_parser: TypeParser<'_, S> = TypeParser::make(
             self.lexer.clone(),
             self.env.clone(),
             self.context.clone(),
@@ -143,7 +143,7 @@ where
     where
         F: Fn(&mut ExpressionParser<'a, S>) -> U,
     {
-        let mut expression_parser: ExpressionParser<S> = ExpressionParser::make(
+        let mut expression_parser: ExpressionParser<'_, S> = ExpressionParser::make(
             self.lexer.clone(),
             self.env.clone(),
             self.context.clone(),
@@ -159,7 +159,7 @@ where
     where
         F: Fn(&mut DeclarationParser<'a, S>) -> U,
     {
-        let mut decl_parser: DeclarationParser<S> = DeclarationParser::make(
+        let mut decl_parser: DeclarationParser<'_, S> = DeclarationParser::make(
             self.lexer.clone(),
             self.env.clone(),
             self.context.clone(),
@@ -248,7 +248,6 @@ where
 
     pub fn parse_header(&mut self) -> (S::R, bool) {
         let (markup, suffix_opt) = self.lexer.scan_header();
-        let markup = S!(make_token, self, markup);
         let (suffix, has_suffix) = match suffix_opt {
             Some((less_than_question, language_opt)) => {
                 let less_than_question_token = S!(make_token, self, less_than_question);
@@ -270,7 +269,19 @@ where
                 (missing, false)
             }
         };
-        let s = S!(make_markup_section, self, markup, suffix,);
+        let s = match (markup, has_suffix) {
+            (Some(markup), _) => {
+                let markup = S!(make_token, self, markup);
+                S!(make_markup_section, self, markup, suffix,)
+            }
+            (None, false) => {
+                S!(make_missing, self, self.pos())
+            }
+            (None, true) => {
+                let missing = S!(make_missing, self, self.pos());
+                S!(make_markup_section, self, missing, suffix,)
+            }
+        };
         (s, has_suffix)
     }
 

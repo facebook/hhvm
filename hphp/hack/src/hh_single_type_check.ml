@@ -63,6 +63,7 @@ type options = {
   out_extension: string;
   verbosity: int;
   should_print_position: bool;
+  custom_hhi_path: string option;
 }
 
 (** If the user passed --root, then all pathnames have to be canonicalized.
@@ -281,6 +282,7 @@ let parse_options () =
   let enforce_sealed_subclasses = ref false in
   let everything_sdt = ref false in
   let pessimise_builtins = ref false in
+  let custom_hhi_path = ref None in
   let options =
     [
       ( "--no-print-position",
@@ -703,6 +705,9 @@ let parse_options () =
         Arg.Set pessimise_builtins,
         " Treat built-in collections and Hack arrays as though they contain ~T"
       );
+      ( "--custom-hhi-path",
+        Arg.String (fun s -> custom_hhi_path := Some s),
+        " Use custom hhis" );
     ]
   in
 
@@ -909,6 +914,7 @@ let parse_options () =
       out_extension = !out_extension;
       verbosity = !verbosity;
       should_print_position = !print_position;
+      custom_hhi_path = !custom_hhi_path;
     },
     root,
     !naming_table,
@@ -1392,14 +1398,6 @@ let hover_at_caret_pos (src : string) : int * int =
     (line_num, Option.value_exn col_num + 1)
   | None ->
     failwith "Could not find any occurrence of ^ hover-at-caret in source code"
-
-(* Aply [quickfix] by replacing/inserting the new text in [src]. *)
-let apply_quickfix (src : string) (quickfix : Pos.t Errors.quickfix) : string =
-  let { Errors.new_text; pos; _ } = quickfix in
-  let (start_offset, end_offset) = Pos.info_raw pos in
-  let src_before = String.subo src ~len:start_offset in
-  let src_after = String.subo src ~pos:end_offset in
-  src_before ^ new_text ^ src_after
 
 (**
  * Compute TASTs for some files, then expand all type variables.
@@ -2315,29 +2313,41 @@ let handle_mode
         hover_at_caret_pos src
     in
     let results = ServerHover.go_quarantined ~ctx ~entry ~line ~column in
-    let print result =
-      Printf.printf "%s\n" (HoverService.string_of_result result)
+    let formatted_results =
+      List.map
+        ~f:(fun r ->
+          let open HoverService in
+          String.concat ~sep:"\n" (r.snippet :: r.addendum))
+        results
     in
-    List.iter results ~f:print
+    Printf.printf
+      "%s\n"
+      (String.concat ~sep:"\n-------------\n" formatted_results)
   | Apply_quickfixes ->
+    let path = expect_single_file () in
+    let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
     let (errors, _) = compute_tasts ctx files_info files_contents in
-    let filename = expect_single_file () in
-    let src = Relative_path.Map.find files_contents filename in
+    let src = Relative_path.Map.find files_contents path in
     let quickfixes =
       Errors.get_error_list errors
       |> List.map ~f:Errors.quickfixes
       |> List.concat
     in
 
-    (* Start with the quickfix that occurs last in the file, so we
-       don't affect the position of earlier code.*)
-    let pos_start_offset p = snd (Pos.info_raw p) in
-    let qf_start_offset qf = pos_start_offset qf.Errors.pos in
-    let cmp_qf x y = Int.compare (qf_start_offset x) (qf_start_offset y) in
-    let quickfixes = List.rev (List.sort ~compare:cmp_qf quickfixes) in
+    let cst = Ast_provider.compute_cst ~ctx ~entry in
+    let tree = Provider_context.PositionedSyntaxTree.root cst in
 
-    let new_src = List.fold quickfixes ~init:src ~f:apply_quickfix in
-    Printf.printf "%s" new_src
+    let classish_starts =
+      match entry.Provider_context.source_text with
+      | Some source_text ->
+        Quickfix_ffp.classish_starts
+          tree
+          source_text
+          entry.Provider_context.path
+      | None -> SMap.empty
+    in
+
+    Printf.printf "%s" (Quickfix.apply_all src classish_starts quickfixes)
 
 (*****************************************************************************)
 (* Main entry point *)
@@ -2356,6 +2366,7 @@ let decl_and_run_mode
       out_extension;
       verbosity;
       should_print_position;
+      custom_hhi_path = _custom_hhi_path;
     }
     (popt : TypecheckerOptions.t)
     (hhi_root : Path.t)
@@ -2520,13 +2531,24 @@ let main_hack
   let (_handle : SharedMem.handle) =
     SharedMem.init ~num_workers:0 sharedmem_config
   in
-  Tempfile.with_tempdir (fun hhi_root ->
+  let process custom hhi_root =
+    if custom then
+      let hhi_root_s = Path.to_string hhi_root in
+      if Disk.file_exists hhi_root_s && Disk.is_directory hhi_root_s then
+        Hhi.set_custom_hhi_root hhi_root
+      else
+        die ("Custom hhi directory " ^ hhi_root_s ^ " not found")
+    else
       Hhi.set_hhi_root_for_unit_test hhi_root;
-      Relative_path.set_path_prefix Relative_path.Root root;
-      Relative_path.set_path_prefix Relative_path.Hhi hhi_root;
-      Relative_path.set_path_prefix Relative_path.Tmp (Path.make "tmp");
-      decl_and_run_mode opts tcopt hhi_root naming_table;
-      TypingLogger.flush_buffers ())
+    Relative_path.set_path_prefix Relative_path.Root root;
+    Relative_path.set_path_prefix Relative_path.Hhi hhi_root;
+    Relative_path.set_path_prefix Relative_path.Tmp (Path.make "tmp");
+    decl_and_run_mode opts tcopt hhi_root naming_table;
+    TypingLogger.flush_buffers ()
+  in
+  match opts.custom_hhi_path with
+  | Some hhi_root -> process true (Path.make hhi_root)
+  | None -> Tempfile.with_tempdir (fun hhi_root -> process false hhi_root)
 
 (* command line driver *)
 let () =

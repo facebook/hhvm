@@ -67,7 +67,7 @@ function get_required_files(): varray {
 }
 
 <<__Native>>
-function getenv(string $varname): mixed;
+function getenv(string $varname)[read_globals]: mixed;
 
 /* Gets the time of the last modification of the current page.  If you're
  * interested in getting the last modification time of a different file,
@@ -128,13 +128,13 @@ function clock_gettime(int $clk_id,
                        <<__OutOnly('KindOfInt64')>>
                        inout mixed $sec,
                        <<__OutOnly('KindOfInt64')>>
-                       inout mixed $nsec): bool;
+                       inout mixed $nsec)[controlled]: bool;
 
 /* Same as clock_gettime(), but returns a single integer in nanoseconds.
  * Returns -1 if invalid or non-supported clock is specified.
  */
 <<__Native>>
-function clock_gettime_ns(int $clk_id): int;
+function clock_gettime_ns(int $clk_id)[controlled]: int;
 
 /* Gets number of processors.
  */
@@ -149,7 +149,7 @@ function cpu_get_model(): string;
 /* Returns the value of the configuration option on success.
  */
 <<__Native>>
-function ini_get(string $varname): mixed;
+function ini_get(string $varname)[read_globals]: mixed;
 
 /* Gets all configuration options
  */
@@ -182,18 +182,18 @@ function ini_alter(string $varname,
  * script.
  */
 <<__Native>>
-function memory_get_peak_usage(bool $real_usage = false): int;
+function memory_get_peak_usage(bool $real_usage = false)[read_globals]: int;
 
 /* Returns the amount of memory, in bytes, that's currently being allocated to
  * your PHP script.
  */
 <<__Native>>
-function memory_get_usage(bool $real_usage = false): int;
+function memory_get_usage(bool $real_usage = false)[read_globals]: int;
 
 /* Returns the total memory, in bytes, that your PHP script has allocated.
  */
 <<__Native>>
-function memory_get_allocation(): int;
+function memory_get_allocation()[read_globals]: int;
 
 /* Returns the request-heap memory currently in use by the script.
  * Does not trigger OOM.

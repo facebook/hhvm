@@ -6,11 +6,6 @@
  *
  *)
 
-(** If the server dies through a controlled exit, it leaves behind a "finale file" <pid>.fin
-with json-formatted data describing the detailed nature of the exit including callstack.
-This method retrieves that file, if it exists. *)
-val get_finale_data : string -> Exit.finale_data option
-
 (** This callback is typically provided for env.progress_callback; it prints data with
 a spinner to stderr. *)
 val tty_progress_reporter : unit -> string option -> unit

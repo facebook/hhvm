@@ -71,9 +71,11 @@
                   et_type = (Rhint ([8:36-40]), (Tprim Tvoid)) };
                 ft_flags =
                 (make_ft_flags FSync ~return_disposable:false
-                  ~returns_readonly:false ~readonly_this:false);
+                  ~returns_readonly:false ~support_dynamic_type:false
+                  ~readonly_this:false);
                 ft_ifc_decl = FDPolicied {PUBLIC} }));
-          sm_visibility = Public; sm_deprecated = None; sm_flags = abstract };
+          sm_visibility = Public; sm_deprecated = None; sm_flags = abstract;
+          sm_attributes = [] };
          { Shallow_decl_defs.sm_name = ([9:28-30], "f1");
            sm_type =
            (Rwitness_from_decl ([9:28-30]),
@@ -96,10 +98,11 @@
                    et_type = (Rhint ([9:52-56]), (Tprim Tvoid)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
-                   ~returns_readonly:false ~readonly_this:false);
+                   ~returns_readonly:false ~support_dynamic_type:false
+                   ~readonly_this:false);
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
-           sm_visibility = Public; sm_deprecated = None; sm_flags = abstract
-           };
+           sm_visibility = Public; sm_deprecated = None; sm_flags = abstract;
+           sm_attributes = [] };
          { Shallow_decl_defs.sm_name = ([10:28-30], "f2");
            sm_type =
            (Rwitness_from_decl ([10:28-30]),
@@ -126,10 +129,11 @@
                    et_type = (Rhint ([10:65-69]), (Tprim Tvoid)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
-                   ~returns_readonly:false ~readonly_this:false);
+                   ~returns_readonly:false ~support_dynamic_type:false
+                   ~readonly_this:false);
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
-           sm_visibility = Public; sm_deprecated = None; sm_flags = abstract
-           }
+           sm_visibility = Public; sm_deprecated = None; sm_flags = abstract;
+           sm_attributes = [] }
          ];
        sc_user_attributes = []; sc_enum_type = None }))
   ]

@@ -627,7 +627,7 @@ function shuffle(inout mixed $array): bool;
  */
 <<__Native, __IsFoldable>>
 function count(
-  mixed $var,
+  readonly mixed $var,
   int $mode = COUNT_NORMAL,
 )[]: int;
 
@@ -637,7 +637,7 @@ function count(
  */
 <<__Native, __IsFoldable>>
 function sizeof(
-  mixed $var,
+  readonly mixed $var,
 )[]: int;
 
 /**

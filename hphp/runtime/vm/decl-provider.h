@@ -27,17 +27,20 @@
 namespace HPHP {
 
 struct HhvmDeclProvider {
-  HhvmDeclProvider() {}
+  explicit HhvmDeclProvider(std::string const& aliased_namespaces)
+    : opts{hackc_create_direct_decl_parse_options(true, true, aliased_namespaces)}
+  {}
   HhvmDeclProvider(HhvmDeclProvider const&) = delete;
   HhvmDeclProvider& operator=(HhvmDeclProvider const&) = delete;
 
   Decls const* getDecl(HPHP::AutoloadMap::KindOf kind, char const* symbol);
 
  private:
-  std::map<std::string, std::pair<DeclResult, ::rust::Box<Bump>>> m_cache;
+  ::rust::Box<DeclParserOptions> opts;
+  std::map<std::string, DeclResult> m_cache;
 };
 
 extern "C" {
-Decls const* hhvm_decl_provider_get_decl(void* provider, char const* symbol);
+  Decls const* hhvm_decl_provider_get_decl(void* provider, int kind, char const* symbol);
 }
 }

@@ -421,6 +421,9 @@ module Flags = struct
 
   let get_ft_generator ft = is_set ft.ft_flags ft_flags_generator
 
+  let get_ft_support_dynamic_type ft =
+    is_set ft.ft_flags ft_flags_support_dynamic_type
+
   let get_ft_ftk ft =
     if is_set ft.ft_flags ft_flags_instantiated_targs then
       FTKinstantiated_targs
@@ -470,11 +473,19 @@ module Flags = struct
     | Ast_defs.FGenerator -> ft_flags_generator
     | Ast_defs.FAsyncGenerator -> Int.bit_or ft_flags_async ft_flags_generator
 
-  let make_ft_flags kind ~return_disposable ~returns_readonly ~readonly_this =
+  let make_ft_flags
+      kind
+      ~return_disposable
+      ~returns_readonly
+      ~readonly_this
+      ~support_dynamic_type =
     let flags = fun_kind_to_flags kind in
     let flags = set_bit ft_flags_return_disposable return_disposable flags in
     let flags = set_bit ft_flags_returns_readonly returns_readonly flags in
     let flags = set_bit ft_flags_readonly_this readonly_this flags in
+    let flags =
+      set_bit ft_flags_support_dynamic_type support_dynamic_type flags
+    in
     flags
 
   let mode_to_flags mode =
@@ -838,6 +849,11 @@ module Pp = struct
 
       Format.fprintf fmt "@[~%s:" "returns_readonly";
       Format.fprintf fmt "%B" (get_ft_returns_readonly ft);
+      Format.fprintf fmt "@]";
+      Format.fprintf fmt "@ ";
+
+      Format.fprintf fmt "@[~%s:" "support_dynamic_type";
+      Format.fprintf fmt "%B" (get_ft_support_dynamic_type ft);
       Format.fprintf fmt "@]";
       Format.fprintf fmt "@ ";
 

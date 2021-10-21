@@ -24,6 +24,7 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     tco_remote_min_batch_size: 5000,
     tco_num_remote_workers: 0,
     tco_stream_errors: false,
+    tco_use_naming_for_dephash_filenames: false,
     so_remote_version_specifier: None,
     so_remote_worker_vfs_checkout_threshold: 0,
     so_naming_sqlite_path: None,
@@ -136,7 +137,6 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     tco_everything_sdt: false,
     tco_pessimise_builtins: false,
     tco_deferments_light: false,
-    tco_old_naming_table_for_redecl: false,
     tco_enable_disk_heap: true,
 };
 

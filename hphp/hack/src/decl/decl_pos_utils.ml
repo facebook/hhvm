@@ -379,6 +379,7 @@ struct
       sm_visibility = sm.sm_visibility;
       sm_deprecated = sm.sm_deprecated;
       sm_flags = sm.sm_flags;
+      sm_attributes = sm.sm_attributes;
     }
 end
 

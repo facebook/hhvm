@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b2e76d8a400f14c1375f5b7508a7ae77>>
+// @generated SignedSource<<b4c84bf06bc6f3834f1ad408f5c7ae0a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -660,29 +660,44 @@ pub enum Expr_<'a, Ex, En> {
     /// $foo[$bar]
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     ArrayGet(&'a (&'a Expr<'a, Ex, En>, Option<&'a Expr<'a, Ex, En>>)),
-    /// Instance property or method access.  is_prop_call is always
-    /// false, except when inside a call is accessing a property.
+    /// Instance property or method access.
+    /// prop_or_method is
+    ///   Is_prop for property access
+    ///   Is_method for method call, only possible when the node is
+    ///   the receiver in a Call node.
     ///
-    /// $foo->bar // (Obj_get false) property access
-    /// $foo->bar() // (Call (Obj_get false)) method call
-    /// ($foo->bar)() // (Call (Obj_get true)) call lambda stored in property
-    /// $foo?->bar // nullsafe access
+    ///   $foo->bar      // OG_nullthrows, Is_prop: access named property
+    ///   $foo->bar()    // OG_nullthrows, Is_method: call named method
+    ///   ($foo->bar)()  // OG_nullthrows, Is_prop: call lambda stored in named property
+    ///   $foo?->bar     // OG_nullsafe,   Is_prop
+    ///   $foo?->bar()   // OG_nullsafe,   Is_method
+    ///   ($foo?->bar)() // OG_nullsafe,   Is_prop
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     ObjGet(
         &'a (
             &'a Expr<'a, Ex, En>,
             &'a Expr<'a, Ex, En>,
             oxidized::aast::OgNullFlavor,
-            bool,
+            oxidized::aast::PropOrMethod,
         ),
     ),
-    /// Static property access.
+    /// Static property or method access.
     ///
-    /// Foo::$bar
-    /// $some_classname::$bar
-    /// Foo::${$bar} // only in partial mode
+    /// Foo::$bar               // Is_prop
+    /// $some_classname::$bar   // Is_prop
+    /// Foo::${$bar}            // Is_prop, only in partial mode
+    ///
+    /// Foo::bar();             // Is_method
+    /// Foo::$bar();            // Is_method, name stored in local $bar
+    /// (Foo::$bar)();          // Is_prop: call lambda stored in property Foo::$bar
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    ClassGet(&'a (&'a ClassId<'a, Ex, En>, ClassGetExpr<'a, Ex, En>, bool)),
+    ClassGet(
+        &'a (
+            &'a ClassId<'a, Ex, En>,
+            ClassGetExpr<'a, Ex, En>,
+            oxidized::aast::PropOrMethod,
+        ),
+    ),
     /// Class constant or static method call. As a standalone expression,
     /// this is a class constant. Inside a Call node, this is a static
     /// method call.
@@ -941,7 +956,15 @@ pub enum Expr_<'a, Ex, En> {
     /// runtime, but desugared to an expression representing the code.
     ///
     /// Foo`1 + bar()`
-    /// Foo`$x ==> $x * ${$value}` // splicing $value
+    /// Foo`(() ==> { while(true) {} })()` // not an infinite loop at runtime
+    ///
+    /// Splices are evaluated as normal Hack code. The following two expression trees
+    /// are equivalent. See also `ET_Splice`.
+    ///
+    /// Foo`1 + ${do_stuff()}`
+    ///
+    /// $x = do_stuff();
+    /// Foo`1 + ${$x}`
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     ExpressionTree(&'a ExpressionTree<'a, Ex, En>),
     /// Placeholder local variable.
@@ -990,7 +1013,7 @@ pub enum Expr_<'a, Ex, En> {
         ),
     ),
     /// Expression tree splice expression. Only valid inside an
-    /// expression tree literal (backticks).
+    /// expression tree literal (backticks). See also `ExpressionTree`.
     ///
     /// ${$foo}
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

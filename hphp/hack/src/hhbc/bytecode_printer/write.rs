@@ -42,7 +42,7 @@ impl<WE: Debug> Error<WE> {
 pub trait Write {
     type Error: Debug;
     fn write(&mut self, s: impl AsRef<str>) -> Result<(), Self::Error>;
-    fn write_fmt(&mut self, fmt: Arguments) -> Result<(), Self::Error>;
+    fn write_fmt(&mut self, fmt: Arguments<'_>) -> Result<(), Self::Error>;
 
     fn write_if(&mut self, cond: bool, s: impl AsRef<str>) -> Result<(), Self::Error> {
         if cond { self.write(s) } else { Ok(()) }
@@ -55,7 +55,7 @@ impl<W: fmt::Write> Write for W {
         self.write_str(s.as_ref()).map_err(Error::WriteError)
     }
 
-    fn write_fmt(&mut self, fmt: Arguments) -> Result<(), Self::Error> {
+    fn write_fmt(&mut self, fmt: Arguments<'_>) -> Result<(), Self::Error> {
         self.write_fmt(fmt).map_err(Error::WriteError)
     }
 }
@@ -80,7 +80,7 @@ impl Write for IoWrite {
             .map_err(Error::WriteError)
     }
 
-    fn write_fmt(&mut self, fmt: Arguments) -> Result<(), Self::Error> {
+    fn write_fmt(&mut self, fmt: Arguments<'_>) -> Result<(), Self::Error> {
         self.0.write_fmt(fmt).map_err(Error::WriteError)
     }
 }

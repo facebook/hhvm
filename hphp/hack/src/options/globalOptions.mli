@@ -62,6 +62,8 @@ type t = {
   tco_num_remote_workers: int;
   tco_stream_errors: bool;
       (** Whether to send errors to the IDE as soon as they are discovered. *)
+  tco_use_naming_for_dephash_filenames: bool;
+      (** Whether to use naming table for dephash->filename lookup in Naming_provider. *)
   (* The version specifier that is used to identify the remote worker package version to install *)
   so_remote_version_specifier: string option;
   (* Above this threshold of files to check, the remote type checking worker will not use Eden *)
@@ -326,7 +328,6 @@ type t = {
   (* All collections and Hack arrays are treated as containing ~T *)
   tco_pessimise_builtins: bool;
   tco_deferments_light: bool;
-  tco_old_naming_table_for_redecl: bool;
   tco_enable_disk_heap: bool;
 }
 [@@deriving eq, show]
@@ -354,6 +355,7 @@ val make :
   ?tco_remote_min_batch_size:int ->
   ?tco_num_remote_workers:int ->
   ?tco_stream_errors:bool ->
+  ?tco_use_naming_for_dephash_filenames:bool ->
   ?so_remote_version_specifier:string ->
   ?so_remote_worker_vfs_checkout_threshold:int ->
   ?so_naming_sqlite_path:string ->
@@ -461,7 +463,6 @@ val make :
   ?tco_everything_sdt:bool ->
   ?tco_pessimise_builtins:bool ->
   ?tco_deferments_light:bool ->
-  ?tco_old_naming_table_for_redecl:bool ->
   ?tco_enable_disk_heap:bool ->
   unit ->
   t
@@ -501,6 +502,8 @@ val tco_remote_min_batch_size : t -> int
 val tco_num_remote_workers : t -> int
 
 val tco_stream_errors : t -> bool
+
+val tco_use_naming_for_dephash_filenames : t -> bool
 
 val so_remote_version_specifier : t -> string option
 
@@ -759,7 +762,5 @@ val tco_everything_sdt : t -> bool
 val tco_pessimise_builtins : t -> bool
 
 val tco_deferments_light : t -> bool
-
-val tco_old_naming_table_for_redecl : t -> bool
 
 val tco_enable_disk_heap : t -> bool

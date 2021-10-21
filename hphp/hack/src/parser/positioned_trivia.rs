@@ -27,7 +27,7 @@ impl PositionedTrivium {
         self.offset + self.width - 1
     }
 
-    pub fn text_raw<'b>(&self, source_text: &'b SourceText) -> &'b [u8] {
+    pub fn text_raw<'b>(&self, source_text: &'b SourceText<'_>) -> &'b [u8] {
         source_text.sub(self.start_offset(), self.width())
     }
 }

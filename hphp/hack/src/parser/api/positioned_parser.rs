@@ -57,25 +57,31 @@ fn trivia_lexer<'a>(
 }
 
 pub fn scan_leading_xhp_trivia(
-    source_text: &SourceText,
+    source_text: &SourceText<'_>,
     offset: usize,
     width: usize,
 ) -> Vec<PositionedTrivium> {
     trivia_lexer(&source_text, offset).scan_leading_xhp_trivia_with_width(width)
 }
 
-pub fn scan_trailing_xhp_trivia(source_text: &SourceText, offset: usize) -> Vec<PositionedTrivium> {
+pub fn scan_trailing_xhp_trivia(
+    source_text: &SourceText<'_>,
+    offset: usize,
+) -> Vec<PositionedTrivium> {
     trivia_lexer(&source_text, offset).scan_trailing_xhp_trivia()
 }
 
 pub fn scan_leading_php_trivia(
-    source_text: &SourceText,
+    source_text: &SourceText<'_>,
     offset: usize,
     width: usize,
 ) -> Vec<PositionedTrivium> {
     trivia_lexer(&source_text, offset).scan_leading_php_trivia_with_width(width)
 }
 
-pub fn scan_trailing_php_trivia(source_text: &SourceText, offset: usize) -> Vec<PositionedTrivium> {
+pub fn scan_trailing_php_trivia(
+    source_text: &SourceText<'_>,
+    offset: usize,
+) -> Vec<PositionedTrivium> {
     trivia_lexer(&source_text, offset).scan_trailing_php_trivia()
 }

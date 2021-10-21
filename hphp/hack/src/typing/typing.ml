@@ -1104,6 +1104,7 @@ let call_param
     param
     param_kind
     (((_, pos, expr_) as e : Nast.expr), arg_ty)
+    ~pessimization_info
     ~is_variadic : env * (locl_ty * locl_ty) option =
   param_modes ~is_variadic param e param_kind;
   (* When checking params, the type 'x' may be expression dependent. Since
@@ -1131,7 +1132,14 @@ let call_param
        env
        dep_ty
        param.fp_type
-       Errors.unify_error
+       (fun ?code ?quickfixes claim reasons ->
+         if env.in_support_dynamic_type_method_check then
+           Typing_log.log_pessimize_param
+             env
+             param.fp_pos
+             pessimization_info
+             param.fp_name;
+         Errors.unify_error ?code ?quickfixes claim reasons)
 
 let bad_call env p ty = Errors.bad_call p (Typing_print.error env ty)
 
@@ -2684,8 +2692,9 @@ and expr_
           match bound with
           | None -> env
           | Some ty ->
-            SubType.sub_type env supertype ty (fun ?code ?quickfixes _ ->
-                ignore (code, quickfixes))
+            (* There can't be an error because the type is fresh *)
+            SubType.sub_type env supertype ty (fun ?code:_ ?quickfixes:_ _ ->
+                Errors.internal_error use_pos "Subtype of fresh type variable")
         in
         (env, supertype)
       | Some ExpectedTy.{ ty = { et_type = ty; _ }; _ } -> (env, ty)
@@ -3735,14 +3744,19 @@ and expr_
         expr_error env (Reason.Rwitness p) outer
     end
   | Class_const (cid, mid) -> class_const env p (cid, mid)
-  | Class_get (((_, _, cid_) as cid), CGstring mid, in_parens)
+  | Class_get (((_, _, cid_) as cid), CGstring mid, prop_or_method)
     when Env.FakeMembers.is_valid_static env cid_ (snd mid) ->
     let (env, local) = Env.FakeMembers.make_static env cid_ (snd mid) p in
     let local = ((), p, Lvar (p, local)) in
     let (env, _, ty) = expr env local in
     let (env, _tal, te, _) = class_expr env [] cid in
-    make_result env p (Aast.Class_get (te, Aast.CGstring mid, in_parens)) ty
-  | Class_get (((_, _, cid_) as cid), CGstring ((ppos, _) as mid), in_parens) ->
+    make_result
+      env
+      p
+      (Aast.Class_get (te, Aast.CGstring mid, prop_or_method))
+      ty
+  | Class_get
+      (((_, _, cid_) as cid), CGstring ((ppos, _) as mid), prop_or_method) ->
     let (env, _tal, te, cty) = class_expr env [] cid in
     let env = might_throw env in
     let (env, (ty, _tal)) =
@@ -3774,13 +3788,17 @@ and expr_
                  since otherwise we would have errored in the first function *)
               ~msg:"Please enclose the static in a readonly expression")
     in
-    make_result env p (Aast.Class_get (te, Aast.CGstring mid, in_parens)) ty
+    make_result
+      env
+      p
+      (Aast.Class_get (te, Aast.CGstring mid, prop_or_method))
+      ty
   (* Fake member property access. For example:
    *   if ($x->f !== null) { ...$x->f... }
    *)
   | Class_get (_, CGexpr _, _) ->
     failwith "AST should not have any CGexprs after naming"
-  | Obj_get (e, (_, pid, Id (py, y)), nf, in_parens)
+  | Obj_get (e, (_, pid, Id (py, y)), nf, is_prop)
     when Env.FakeMembers.is_valid env e y ->
     let env = might_throw env in
     let (env, local) = Env.FakeMembers.make env e y p in
@@ -3788,9 +3806,9 @@ and expr_
     let (env, _, ty) = expr env local in
     let (env, t_lhs, _) = expr ~accept_using_var:true env e in
     let t_rhs = Tast.make_typed_expr pid ty (Aast.Id (py, y)) in
-    make_result env p (Aast.Obj_get (t_lhs, t_rhs, nf, in_parens)) ty
+    make_result env p (Aast.Obj_get (t_lhs, t_rhs, nf, is_prop)) ty
   (* Statically-known instance property access e.g. $x->f *)
-  | Obj_get (e1, (_, pm, Id m), nullflavor, in_parens) ->
+  | Obj_get (e1, (_, pm, Id m), nullflavor, prop_or_method) ->
     let nullsafe =
       match nullflavor with
       | OG_nullthrows -> None
@@ -3868,10 +3886,10 @@ and expr_
          ( hole_on_err ~err_opt te1,
            Tast.make_typed_expr pm result_ty (Aast.Id m),
            nullflavor,
-           in_parens ))
+           prop_or_method ))
       result_ty
   (* Dynamic instance property access e.g. $x->$f *)
-  | Obj_get (e1, e2, nullflavor, in_parens) ->
+  | Obj_get (e1, e2, nullflavor, prop_or_method) ->
     let (env, te1, ty1) = expr ~accept_using_var:true env e1 in
     let (env, te2, _) = expr env e2 in
     let ty =
@@ -3883,7 +3901,7 @@ and expr_
     let (_, pos, te2) = te2 in
     let env = might_throw env in
     let te2 = Tast.make_typed_expr pos ty te2 in
-    make_result env p (Aast.Obj_get (te1, te2, nullflavor, in_parens)) ty
+    make_result env p (Aast.Obj_get (te1, te2, nullflavor, prop_or_method)) ty
   | Yield af ->
     let (env, (taf, opt_key, value)) = array_field ~allow_awaitable env af in
     let Typing_env_return_info.{ return_type = expected_return; _ } =
@@ -4078,7 +4096,7 @@ and expr_
       TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
     in
     let (env, hint_ty) =
-      if Typing_utils.is_dynamic env hint_ty then
+      if Typing_defs.is_dynamic hint_ty then
         let env =
           if enable_sound_dynamic then
             SubType.sub_type
@@ -5520,7 +5538,8 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
       @@ Type.sub_type_i_res p ur env lty2 destructure_ty Errors.unify_error
     | ( _,
         pobj,
-        Obj_get (obj, (_, pm, Id ((_, member_name) as m)), nullflavor, in_parens)
+        Obj_get
+          (obj, (_, pm, Id ((_, member_name) as m)), nullflavor, prop_or_method)
       ) ->
       let lenv = env.lenv in
       let nullsafe =
@@ -5556,7 +5575,7 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
              ( hole_on_err ~err_opt:lval_err_opt tobj,
                Tast.make_typed_expr pm declared_ty (Aast.Id m),
                nullflavor,
-               in_parens ))
+               prop_or_method ))
       in
       let env = { env with lenv } in
       begin
@@ -5914,7 +5933,14 @@ and dispatch_call
     let (env, fty, tal) = fun_type_of_id env id explicit_targs el in
     check_disposable_in_return env fty;
     let (env, (tel, typed_unpack_element, ty, should_forget_fakes)) =
-      call ~expected p env fty el unpacked_element
+      call
+        ~expected
+        p
+        env
+        fty
+        el
+        unpacked_element
+        ~pessimization_info:(Typing_log.PFun (snd id))
     in
     let result =
       make_call
@@ -5971,7 +5997,14 @@ and dispatch_call
     in
     check_disposable_in_return env fty;
     let (env, (tel, typed_unpack_element, ty, should_forget_fakes)) =
-      call ~expected p env fty el unpacked_element
+      call
+        ~expected
+        p
+        env
+        fty
+        el
+        unpacked_element
+        ~pessimization_info:(Typing_log.PMethod (snd m))
     in
     let result =
       make_call
@@ -6000,6 +6033,11 @@ and dispatch_call
           argument_list_exprs (expr ~accept_using_var:true) env el
         in
         let arraykey_ty = MakeType.arraykey (Reason.Rwitness pos) in
+        let like_ak_ty =
+          MakeType.union
+            (Reason.Rwitness pos)
+            [MakeType.dynamic (Reason.Rwitness pos); arraykey_ty]
+        in
         let (env, rev_tel) =
           List.fold
             tel
@@ -6012,7 +6050,7 @@ and dispatch_call
                 @@ SubType.sub_type_res
                      env
                      ty
-                     arraykey_ty
+                     like_ak_ty
                      (Errors.invalid_echo_argument_at pos)
               in
               (env, (pk, hole_on_err ~err_opt te) :: tel))
@@ -6352,7 +6390,7 @@ and dispatch_call
       (result, s)
     | _ -> ((env, expr, ty), s))
   (* Call instance method *)
-  | Obj_get (e1, (_, pos_id, Id m), nullflavor, false)
+  | Obj_get (e1, (_, pos_id, Id m), nullflavor, Is_method)
     when not (TypecheckerOptions.method_call_inference (Env.get_tcopt env)) ->
     let (env, te1, ty1) = expr ~accept_using_var:true env e1 in
     let nullsafe =
@@ -6378,7 +6416,15 @@ and dispatch_call
     in
     check_disposable_in_return env tfty;
     let (env, (tel, typed_unpack_element, ty, should_forget_fakes)) =
-      call ~nullsafe ~expected p env tfty el unpacked_element
+      call
+        ~nullsafe
+        ~expected
+        p
+        env
+        tfty
+        el
+        unpacked_element
+        ~pessimization_info:(Typing_log.PMethod (snd m))
     in
     let result =
       make_call
@@ -6390,7 +6436,7 @@ and dispatch_call
               ( hole_on_err ~err_opt:lval_err_opt te1,
                 Tast.make_typed_expr pos_id tfty (Aast.Id m),
                 nullflavor,
-                false )))
+                Is_method )))
         tal
         tel
         typed_unpack_element
@@ -6398,7 +6444,7 @@ and dispatch_call
     in
     (result, should_forget_fakes)
   (* Call instance method using new method call inference *)
-  | Obj_get (receiver, (_, pos_id, Id meth), nullflavor, false) ->
+  | Obj_get (receiver, (_, pos_id, Id meth), nullflavor, Is_method) ->
     (*****
         Typecheck `Obj_get` by enforcing that:
         - `<instance_type>` <: `Thas_member(m, #1)`
@@ -6503,7 +6549,7 @@ and dispatch_call
               ( hole_on_err ~err_opt typed_receiver,
                 Tast.make_typed_expr pos_id method_ty (Aast.Id meth),
                 nullflavor,
-                false )))
+                Is_method )))
         typed_targs
         typed_params
         typed_unpack_element
@@ -6901,8 +6947,7 @@ and class_get_inner
               let fty =
                 Typing_dynamic.relax_method_type
                   env
-                  (Cls.get_support_dynamic_type class_
-                  || get_ce_support_dynamic_type ce)
+                  (get_ce_support_dynamic_type ce)
                   r
                   ft
               in
@@ -7387,6 +7432,7 @@ and call
     ~(expected : ExpectedTy.t option)
     ?(nullsafe : Pos.t option = None)
     ?in_await
+    ?pessimization_info
     pos
     env
     fty
@@ -7708,7 +7754,13 @@ and call
                 e
           in
           let (env, err_opt) =
-            call_param env param param_kind (e, ty) ~is_variadic
+            call_param
+              env
+              param
+              param_kind
+              (e, ty)
+              ~is_variadic
+              ~pessimization_info
           in
           (env, Some (hole_on_err ~err_opt te, ty))
         | None ->
@@ -7894,6 +7946,7 @@ and call
                         Ast_defs.Pnormal
                         (e, elt)
                         ~is_variadic:false
+                        ~pessimization_info
                     in
                     (env, err_opt :: errs))
               in
@@ -7910,12 +7963,19 @@ and call
                         Ast_defs.Pnormal
                         (e, elt)
                         ~is_variadic:false
+                        ~pessimization_info
                     in
                     (env, err_opt :: errs))
               in
               let (env, var_err_opt) =
                 Option.map2 d_variadic var_param ~f:(fun v vp ->
-                    call_param env vp Ast_defs.Pnormal (e, v) ~is_variadic:true)
+                    call_param
+                      env
+                      vp
+                      Ast_defs.Pnormal
+                      (e, v)
+                      ~is_variadic:true
+                      ~pessimization_info)
                 |> Option.value ~default:(env, None)
               in
               let subtyping_errs = (List.rev err_opts, var_err_opt) in
@@ -8014,6 +8074,7 @@ and call
             ~return_disposable:false (* TODO: deal with disposable return *)
             ~returns_readonly:false
             ~readonly_this:false
+            ~support_dynamic_type:false
         in
         let ft_ifc_decl = Typing_defs_core.default_ifc_fun_decl in
         let fun_locl_type =

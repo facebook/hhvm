@@ -4,17 +4,23 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+// Module containing conversion methods between the Rust Facts and
+// Rust/C++ shared Facts (in the compile_ffi module)
+mod rust_compile_ffi_impl;
+
 use anyhow::{anyhow, Result};
 use arena_deserializer::serde::Deserialize;
 use bincode::Options;
 use cxx::CxxString;
 use external_decl_provider::ExternalDeclProvider;
+use facts_rust::facts;
 use hhbc_by_ref_compile::EnvFlags;
-use libc::c_char;
+use libc::{c_char, c_int};
 use no_pos_hash::position_insensitive_hash;
 use oxidized::relative_path::{Prefix, RelativePath};
 use oxidized_by_ref::{decl_parser_options, direct_decl_parser};
 use parser_core_types::source_text::SourceText;
+use rust_facts_ffi::{extract_facts_as_json_ffi0, extract_facts_ffi0, facts_to_json_ffi};
 
 #[cxx::bridge]
 mod compile_ffi {
@@ -30,17 +36,81 @@ mod compile_ffi {
         parser_flags: u32,
         flags: u8,
     }
-    struct DeclResult<'a> {
+
+    struct DeclResult {
         hash: u64,
         serialized: Box<Bytes>,
-        decls: Box<Decls<'a>>,
+        decls: Box<Decls>,
+        bump: Box<Bump>,
+    }
+
+    #[derive(Debug)]
+    enum TypeKind {
+        Class,
+        Record,
+        Interface,
+        Enum,
+        Trait,
+        TypeAlias,
+        Unknown,
+        Mixed,
+    }
+
+    #[derive(Debug, PartialEq)]
+    struct Attribute {
+        name: String,
+        args: Vec<String>,
+    }
+
+    #[derive(Debug, PartialEq)]
+    struct MethodFacts {
+        attributes: Vec<Attribute>,
+    }
+
+    #[derive(Debug, PartialEq)]
+    struct Method {
+        name: String,
+        methfacts: MethodFacts,
+    }
+
+    #[derive(Debug, PartialEq)]
+    pub struct TypeFacts {
+        pub base_types: Vec<String>,
+        pub kind: TypeKind,
+        pub attributes: Vec<Attribute>,
+        pub flags: isize,
+        pub require_extends: Vec<String>,
+        pub require_implements: Vec<String>,
+        pub methods: Vec<Method>,
+    }
+
+    #[derive(Debug, PartialEq)]
+    struct TypeFactsByName {
+        name: String,
+        typefacts: TypeFacts,
+    }
+
+    #[derive(Debug, Default, PartialEq)]
+    struct Facts {
+        pub types: Vec<TypeFactsByName>,
+        pub functions: Vec<String>,
+        pub constants: Vec<String>,
+        pub type_aliases: Vec<String>,
+        pub file_attributes: Vec<Attribute>,
+    }
+
+    #[derive(Debug, Default)]
+    struct FactsResult {
+        facts: Facts,
+        md5sum: String,
+        sha1sum: String,
     }
 
     extern "Rust" {
         type Bump;
         type Bytes;
-        type Decls<'a>;
-        type DeclParserOptions<'a>;
+        type Decls;
+        type DeclParserOptions;
         type HhasProgramWrapper;
 
         fn make_env_flags(
@@ -62,38 +132,65 @@ mod compile_ffi {
             source_text: &CxxString,
         ) -> Result<String>;
 
-        fn hackc_create_arena() -> Box<Bump>;
         fn hackc_create_direct_decl_parse_options(
             disable_xhp_element_mangling: bool,
             interpret_soft_types_as_like_types: bool,
-        ) -> Box<DeclParserOptions<'static>>;
+            aliased_namespaces: &CxxString,
+        ) -> Box<DeclParserOptions>;
 
-        unsafe fn hackc_direct_decl_parse<'a>(
-            options: &'a DeclParserOptions<'a>,
+        fn hackc_direct_decl_parse(
+            options: &DeclParserOptions,
             filename: &CxxString,
             text: &CxxString,
-            bump: &'a Bump,
-        ) -> DeclResult<'a>;
+        ) -> DeclResult;
 
-        fn hackc_print_decls(decls: &Decls<'_>);
+        fn hackc_print_decls(decls: &Decls);
         fn hackc_print_serialized_size(bytes: &Bytes);
-        unsafe fn hackc_verify_deserialization(serialized: &Bytes, expected: &Decls<'_>) -> bool;
+        unsafe fn hackc_verify_deserialization(serialized: &Bytes, expected: &Decls) -> bool;
         fn hackc_hhas_to_string_cpp_ffi(
             env: &NativeEnv,
             prog: &HhasProgramWrapper,
         ) -> Result<String>;
+
+        fn hackc_extract_facts_as_json_cpp_ffi(
+            flags: i32,
+            filename: &CxxString,
+            source_text: &CxxString,
+        ) -> String;
+
+        fn hackc_extract_facts_cpp_ffi(
+            flags: i32,
+            filename: &CxxString,
+            source_text: &CxxString,
+        ) -> FactsResult;
+
+        fn hackc_facts_to_json_cpp_ffi(facts: FactsResult, source_text: &CxxString) -> String;
+
+        unsafe fn hackc_decls_to_facts_cpp_ffi(
+            decls: &Decls,
+            source_text: &CxxString,
+        ) -> FactsResult;
     }
 }
 
-struct Bump(bumpalo::Bump);
+///////////////////////////////////////////////////////////////////////////////////
+// Opaque to C++.
+
+pub struct Bump(bumpalo::Bump);
 pub struct Bytes(ffi::Bytes);
-pub struct Decls<'a>(direct_decl_parser::Decls<'a>);
-struct DeclParserOptions<'a>(decl_parser_options::DeclParserOptions<'a>);
+pub struct Decls(direct_decl_parser::Decls<'static>);
+pub struct DeclParserOptions(
+    decl_parser_options::DeclParserOptions<'static>,
+    bumpalo::Bump,
+);
+
 #[repr(C)]
 pub struct HhasProgramWrapper(
     hhbc_by_ref_hhas_program::HhasProgram<'static>,
     bumpalo::Bump,
 );
+
+///////////////////////////////////////////////////////////////////////////////////
 
 fn make_env_flags(
     is_systemlib: bool,
@@ -171,7 +268,11 @@ fn hackc_compile_from_text_cpp_ffi<'a>(
         let c_decl_getter_fn = unsafe {
             std::mem::transmute::<
                 *const (),
-                extern "C" fn(*const std::ffi::c_void, *const c_char) -> *const std::ffi::c_void,
+                extern "C" fn(
+                    *const std::ffi::c_void,
+                    c_int,
+                    *const c_char,
+                ) -> *const std::ffi::c_void,
             >(decl_getter_ptr)
         };
         let c_hhvm_provider_ptr =
@@ -194,11 +295,7 @@ fn hackc_compile_from_text_cpp_ffi<'a>(
     .map_err(|e: anyhow::Error| format!("{}", e))
 }
 
-fn hackc_create_arena() -> Box<Bump> {
-    Box::new(Bump(bumpalo::Bump::new()))
-}
-
-fn hackc_print_decls<'a>(decls: &Decls<'a>) {
+fn hackc_print_decls<'a>(decls: &Decls) {
     println!("{:#?}", decls.0)
 }
 
@@ -206,42 +303,80 @@ fn hackc_print_serialized_size(serialized: &Bytes) {
     println!("Decl-serialized size: {:#?}", serialized.0.len);
 }
 
-fn hackc_create_direct_decl_parse_options<'a>(
+fn hackc_create_direct_decl_parse_options(
     disable_xhp_element_mangling: bool,
     interpret_soft_types_as_like_types: bool,
-) -> Box<DeclParserOptions<'a>> {
-    Box::new(DeclParserOptions(decl_parser_options::DeclParserOptions {
-        auto_namespace_map: &[],
+    aliased_namespaces: &CxxString,
+) -> Box<DeclParserOptions> {
+    let bump = bumpalo::Bump::new();
+    let alloc: &'static bumpalo::Bump =
+        unsafe { std::mem::transmute::<&'_ bumpalo::Bump, &'static bumpalo::Bump>(&bump) };
+    let config_opts =
+        hhbc_by_ref_options::Options::from_configs(&[aliased_namespaces.to_str().unwrap()], &[])
+            .unwrap();
+    let auto_namespace_map = match config_opts.hhvm.aliased_namespaces.get().as_map() {
+        Some(m) => bumpalo::collections::Vec::from_iter_in(
+            m.iter().map(|(k, v)| {
+                (
+                    alloc.alloc_str(k.as_str()) as &str,
+                    alloc.alloc_str(v.as_str()) as &str,
+                )
+            }),
+            alloc,
+        ),
+        None => {
+            bumpalo::vec![in alloc;]
+        }
+    }
+    .into_bump_slice();
+
+    let opts = decl_parser_options::DeclParserOptions {
+        auto_namespace_map,
         disable_xhp_element_mangling,
         interpret_soft_types_as_like_types,
         everything_sdt: false,
-    }))
+    };
+
+    Box::new(DeclParserOptions(opts, bump))
 }
 
-impl<'a> compile_ffi::DeclResult<'a> {
-    fn new(hash: u64, serialized: Bytes, decls: Decls<'a>) -> Self {
+impl compile_ffi::DeclResult {
+    fn new(hash: u64, serialized: Bytes, decls: Decls, bump: Bump) -> Self {
         Self {
             hash,
             serialized: Box::new(serialized),
             decls: Box::new(decls),
+            bump: Box::new(bump),
         }
     }
 }
 
-fn hackc_direct_decl_parse<'a>(
-    opts: &'a DeclParserOptions<'a>,
+fn hackc_direct_decl_parse(
+    opts: &DeclParserOptions,
     filename: &CxxString,
     text: &CxxString,
-    bump: &'a Bump,
-) -> compile_ffi::DeclResult<'a> {
+) -> compile_ffi::DeclResult {
     use std::os::unix::ffi::OsStrExt;
+
+    let bump = bumpalo::Bump::new();
+    let alloc: &'static bumpalo::Bump =
+        unsafe { std::mem::transmute::<&'_ bumpalo::Bump, &'static bumpalo::Bump>(&bump) };
+
+    let opts: &decl_parser_options::DeclParserOptions<'static> = &opts.0;
+    let opts: &decl_parser_options::DeclParserOptions<'static> = unsafe {
+        std::mem::transmute::<
+            &'_ decl_parser_options::DeclParserOptions<'static>,
+            &'static decl_parser_options::DeclParserOptions<'static>,
+        >(opts)
+    };
 
     let text = text.as_bytes();
     let path = std::path::PathBuf::from(std::ffi::OsStr::from_bytes(filename.as_bytes()));
     let filename = RelativePath::make(Prefix::Root, path);
-    let decls = decl_rust::direct_decl_parser::parse_decls_without_reference_text(
-        &opts.0, filename, text, &bump.0, None,
-    );
+    let decls: direct_decl_parser::Decls<'static> =
+        decl_rust::direct_decl_parser::parse_decls_without_reference_text(
+            opts, filename, text, alloc, None,
+        );
 
     let op = bincode::config::Options::with_native_endian(bincode::options());
     let data = op
@@ -253,10 +388,11 @@ fn hackc_direct_decl_parse<'a>(
         position_insensitive_hash(&decls),
         Bytes(ffi::Bytes::from(data)),
         Decls(decls),
+        Bump(bump),
     )
 }
 
-unsafe fn hackc_verify_deserialization<'a>(serialized: &Bytes, expected: &Decls<'a>) -> bool {
+unsafe fn hackc_verify_deserialization(serialized: &Bytes, expected: &Decls) -> bool {
     let arena = bumpalo::Bump::new();
 
     let data = std::slice::from_raw_parts(serialized.0.data, serialized.0.len);
@@ -297,7 +433,11 @@ fn hackc_compile_hhas_from_text_cpp_ffi(
         let c_decl_getter_fn = unsafe {
             std::mem::transmute::<
                 *const (),
-                extern "C" fn(*const std::ffi::c_void, *const c_char) -> *const std::ffi::c_void,
+                extern "C" fn(
+                    *const std::ffi::c_void,
+                    c_int,
+                    *const c_char,
+                ) -> *const std::ffi::c_void,
             >(decl_getter_ptr)
         };
         let c_hhvm_provider_ptr =
@@ -340,4 +480,85 @@ pub fn hackc_hhas_to_string_cpp_ffi(
     hhbc_by_ref_compile::hhas_to_string(&env, Some(&native_env), &mut output, &prog.0)
         .map(|_| output)
         .map_err(|e| e.to_string())
+}
+
+pub fn hackc_extract_facts_as_json_cpp_ffi(
+    flags: i32,
+    filename: &CxxString,
+    source_text: &CxxString,
+) -> String {
+    use std::os::unix::ffi::OsStrExt;
+    let filepath = RelativePath::make(
+        oxidized::relative_path::Prefix::Dummy,
+        std::path::PathBuf::from(std::ffi::OsStr::from_bytes(filename.as_bytes())),
+    );
+    match extract_facts_as_json_ffi0(
+        ((1 << 0) & flags) != 0, // php5_compat_mode
+        ((1 << 1) & flags) != 0, // hhvm_compat_mode
+        ((1 << 2) & flags) != 0, // allow_new_attribute_syntax
+        ((1 << 3) & flags) != 0, // enable_xhp_class_modifier
+        ((1 << 4) & flags) != 0, // disable_xhp_element_mangling
+        filepath,
+        source_text.as_bytes(),
+        true, // mangle_xhp
+    ) {
+        Some(s) => s,
+        None => String::new(),
+    }
+}
+
+pub fn hackc_extract_facts_cpp_ffi(
+    flags: i32,
+    filename: &CxxString,
+    source_text: &CxxString,
+) -> compile_ffi::FactsResult {
+    use std::os::unix::ffi::OsStrExt;
+    let filepath = RelativePath::make(
+        oxidized::relative_path::Prefix::Dummy,
+        std::path::PathBuf::from(std::ffi::OsStr::from_bytes(filename.as_bytes())),
+    );
+    let text = source_text.as_bytes();
+    match extract_facts_ffi0(
+        ((1 << 0) & flags) != 0, // php5_compat_mode
+        ((1 << 1) & flags) != 0, // hhvm_compat_mode
+        ((1 << 2) & flags) != 0, // allow_new_attribute_syntax
+        ((1 << 3) & flags) != 0, // enable_xhp_class_modifier
+        ((1 << 4) & flags) != 0, // disable_xhp_element_mangling
+        filepath,
+        text,
+        true, // mangle_xhp
+    ) {
+        Some(facts) => {
+            let (md5sum, sha1sum) = facts::md5_and_sha1(text);
+            compile_ffi::FactsResult {
+                facts: facts.into(),
+                md5sum,
+                sha1sum,
+            }
+        }
+        None => Default::default(),
+    }
+}
+
+pub fn hackc_facts_to_json_cpp_ffi(
+    facts: compile_ffi::FactsResult,
+    source_text: &CxxString,
+) -> String {
+    let facts = facts::Facts::from(facts.facts);
+    let text = source_text.as_bytes();
+    facts_to_json_ffi(facts, text)
+}
+
+pub fn hackc_decls_to_facts_cpp_ffi(
+    decls: &Decls,
+    source_text: &CxxString,
+) -> compile_ffi::FactsResult {
+    let text = source_text.as_bytes();
+    let (md5sum, sha1sum) = facts::md5_and_sha1(text);
+    let facts = compile_ffi::Facts::from(facts::Facts::facts_of_decls(&decls.0));
+    compile_ffi::FactsResult {
+        facts: facts.into(),
+        md5sum,
+        sha1sum,
+    }
 }

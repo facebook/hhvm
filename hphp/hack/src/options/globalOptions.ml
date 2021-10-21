@@ -26,6 +26,7 @@ type t = {
   tco_remote_min_batch_size: int;
   tco_num_remote_workers: int;
   tco_stream_errors: bool;
+  tco_use_naming_for_dephash_filenames: bool;
   so_remote_version_specifier: string option;
   so_remote_worker_vfs_checkout_threshold: int;
   so_naming_sqlite_path: string option;
@@ -138,7 +139,6 @@ type t = {
   tco_everything_sdt: bool;
   tco_pessimise_builtins: bool;
   tco_deferments_light: bool;
-  tco_old_naming_table_for_redecl: bool;
   tco_enable_disk_heap: bool;
 }
 [@@deriving eq, show]
@@ -227,6 +227,7 @@ let default =
     tco_remote_min_batch_size = 5_000;
     tco_num_remote_workers = 4;
     tco_stream_errors = false;
+    tco_use_naming_for_dephash_filenames = false;
     so_remote_version_specifier = None;
     so_remote_worker_vfs_checkout_threshold = 10000;
     so_naming_sqlite_path = None;
@@ -339,7 +340,6 @@ let default =
     tco_everything_sdt = false;
     tco_pessimise_builtins = false;
     tco_deferments_light = false;
-    tco_old_naming_table_for_redecl = false;
     tco_enable_disk_heap = true;
   }
 
@@ -368,6 +368,8 @@ let make
     ?(tco_remote_min_batch_size = default.tco_remote_min_batch_size)
     ?(tco_num_remote_workers = default.tco_num_remote_workers)
     ?(tco_stream_errors = default.tco_stream_errors)
+    ?(tco_use_naming_for_dephash_filenames =
+      default.tco_use_naming_for_dephash_filenames)
     ?so_remote_version_specifier
     ?(so_remote_worker_vfs_checkout_threshold =
       default.so_remote_worker_vfs_checkout_threshold)
@@ -498,7 +500,6 @@ let make
     ?(tco_everything_sdt = default.tco_everything_sdt)
     ?(tco_pessimise_builtins = default.tco_pessimise_builtins)
     ?(tco_deferments_light = default.tco_deferments_light)
-    ?(tco_old_naming_table_for_redecl = default.tco_old_naming_table_for_redecl)
     ?(tco_enable_disk_heap = default.tco_enable_disk_heap)
     () =
   {
@@ -520,6 +521,7 @@ let make
     tco_remote_min_batch_size;
     tco_num_remote_workers;
     tco_stream_errors;
+    tco_use_naming_for_dephash_filenames;
     so_remote_version_specifier;
     so_remote_worker_vfs_checkout_threshold;
     so_naming_sqlite_path;
@@ -632,7 +634,6 @@ let make
     tco_everything_sdt;
     tco_pessimise_builtins;
     tco_deferments_light;
-    tco_old_naming_table_for_redecl;
     tco_enable_disk_heap;
   }
 
@@ -677,6 +678,9 @@ let tco_remote_min_batch_size t = t.tco_remote_min_batch_size
 let tco_num_remote_workers t = t.tco_num_remote_workers
 
 let tco_stream_errors t = t.tco_stream_errors
+
+let tco_use_naming_for_dephash_filenames t =
+  t.tco_use_naming_for_dephash_filenames
 
 let so_remote_version_specifier t = t.so_remote_version_specifier
 
@@ -930,7 +934,5 @@ let tco_everything_sdt t = t.tco_everything_sdt
 let tco_pessimise_builtins t = t.tco_pessimise_builtins
 
 let tco_deferments_light t = t.tco_deferments_light
-
-let tco_old_naming_table_for_redecl t = t.tco_old_naming_table_for_redecl
 
 let tco_enable_disk_heap t = t.tco_enable_disk_heap

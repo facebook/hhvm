@@ -20,11 +20,12 @@ type rollout_flags = {
   require_saved_state: bool;
   stream_errors: bool;
   deferments_light: bool;
-  old_naming_table_for_redecl: bool;
+  force_shallow_decl_fanout: bool;
   log_from_client_when_slow_monitor_connections: bool;
   naming_sqlite_in_hack_64: bool;
   use_hack_64_naming_table: bool;
   enable_disk_heap: bool;
+  use_naming_for_dephash_filenames: bool;
 }
 
 let flush () = ()
@@ -47,7 +48,8 @@ let set_hhconfig_version _ = ()
 
 let set_rollout_flags _ = ()
 
-let typechecker_exit _ _ _ ~is_oom:_ = ()
+let typechecker_exit _ _ _ ~exit_type:_ ~exit_code:_ ~exit_status:_ ~is_oom:_ =
+  ()
 
 let init
     ~root:_
@@ -96,12 +98,7 @@ let server_receipt_to_monitor_read_exn ~server_receipt_to_monitor_file:_ _ _ =
   ()
 
 let init_lazy_end
-    _
-    ~state_distance:_
-    ~approach_name:_
-    ~init_error:_
-    ~init_error_stack:_
-    ~init_type:_ =
+    _ ~state_distance:_ ~approach_name:_ ~init_error:_ ~init_type:_ =
   ()
 
 let server_is_partially_ready () = ()

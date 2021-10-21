@@ -23,12 +23,13 @@
                   et_type = (Rhint ([5:26-30]), (Tprim Tvoid)) };
                 ft_flags =
                 (make_ft_flags FSync ~return_disposable:false
-                  ~returns_readonly:false ~readonly_this:false);
+                  ~returns_readonly:false ~support_dynamic_type:false
+                  ~readonly_this:false);
                 ft_ifc_decl = FDPolicied {PUBLIC} }));
           sm_visibility = Public;
           sm_deprecated =
           (Some "The method foo is deprecated: use bar() instead");
-          sm_flags = (empty) };
+          sm_flags = (empty); sm_attributes = [] };
          { Shallow_decl_defs.sm_name = ([8:19-22], "bar");
            sm_type =
            (Rwitness_from_decl ([8:19-22]),
@@ -42,9 +43,11 @@
                    et_type = (Rhint ([8:26-30]), (Tprim Tvoid)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
-                   ~returns_readonly:false ~readonly_this:false);
+                   ~returns_readonly:false ~support_dynamic_type:false
+                   ~readonly_this:false);
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
-           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) };
+           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+           sm_attributes = [] };
          { Shallow_decl_defs.sm_name = ([11:19-22], "baz");
            sm_type =
            (Rwitness_from_decl ([11:19-22]),
@@ -58,9 +61,11 @@
                    et_type = (Rhint ([11:26-30]), (Tprim Tvoid)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
-                   ~returns_readonly:false ~readonly_this:false);
+                   ~returns_readonly:false ~support_dynamic_type:false
+                   ~readonly_this:false);
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
-           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) };
+           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+           sm_attributes = [] };
          { Shallow_decl_defs.sm_name = ([14:19-23], "foo2");
            sm_type =
            (Rwitness_from_decl ([14:19-23]),
@@ -74,12 +79,13 @@
                    et_type = (Rhint ([14:27-31]), (Tprim Tvoid)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
-                   ~returns_readonly:false ~readonly_this:false);
+                   ~returns_readonly:false ~support_dynamic_type:false
+                   ~readonly_this:false);
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
            sm_visibility = Public;
            sm_deprecated =
            (Some "The method foo2 is deprecated: use bar2() instead");
-           sm_flags = (empty) }
+           sm_flags = (empty); sm_attributes = [] }
          ];
        sc_user_attributes = []; sc_enum_type = None }));
   ("\\foo",
@@ -98,7 +104,8 @@
                 et_type = (Rhint ([18:17-21]), (Tprim Tvoid)) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~readonly_this:false);
+                ~returns_readonly:false ~support_dynamic_type:false
+                ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [18:10-13]; fe_php_std_lib = false;
         fe_support_dynamic_type = false }));
@@ -117,7 +124,8 @@
                 et_type = (Rhint ([21:17-21]), (Tprim Tvoid)) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~readonly_this:false);
+                ~returns_readonly:false ~support_dynamic_type:false
+                ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [21:10-13]; fe_php_std_lib = false;
         fe_support_dynamic_type = false }));
@@ -136,7 +144,8 @@
                 et_type = (Rhint ([24:17-21]), (Tprim Tvoid)) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~readonly_this:false);
+                ~returns_readonly:false ~support_dynamic_type:false
+                ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [24:10-13]; fe_php_std_lib = false;
         fe_support_dynamic_type = false }));
@@ -156,7 +165,8 @@
                 et_type = (Rhint ([27:18-22]), (Tprim Tvoid)) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~readonly_this:false);
+                ~returns_readonly:false ~support_dynamic_type:false
+                ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [27:10-14]; fe_php_std_lib = false;
         fe_support_dynamic_type = false }))

@@ -61,7 +61,7 @@ pub trait NodeImpl {
         let error = ctx.error_ident();
 
         Ok(quote! {
-            impl<P: Params> #node_trait_name<P> for #ty_name#ty_params {
+            impl<P: Params> #node_trait_name<P> for #ty_name #ty_params {
                 fn accept<#node_lifetime>(
                     #self_ref_kind self,
                     c: &mut P::#context,

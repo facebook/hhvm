@@ -9,7 +9,7 @@ path = "../escaper.rs"
 
 [dependencies]
 bstr = { version = "0.2", features = ["serde1"] }
-bumpalo = { version = "3.2.1", features = ["collections"] }
+bumpalo = { version = "3.8", features = ["collections"] }
 
 [dev-dependencies]
 pretty_assertions = "0.6"

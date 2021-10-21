@@ -27,6 +27,7 @@ pub fn parse_decls_and_mode<'a>(
     (state.decls, mode)
 }
 
+// Parse decls for type-checking
 pub fn parse_decls<'a>(
     opts: &'a DeclParserOptions<'a>,
     filename: RelativePath,
@@ -37,6 +38,10 @@ pub fn parse_decls<'a>(
     parse_decls_and_mode(opts, filename, text, arena, stack_limit).0
 }
 
+// Used for decls in compilation.
+// - Returns decls without reference to the source text to avoid
+//   keeping the source text in memory when caching decls.
+// - Preserve attributes in decls necessary for producing facts.
 pub fn parse_decls_without_reference_text<'a, 'text>(
     opts: &'a DeclParserOptions<'a>,
     filename: RelativePath,

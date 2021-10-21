@@ -12,7 +12,7 @@ Unexpected `inout` annotation for argument (Typing[4183])
   This is a normal parameter (does not have `inout`)
 File "pseudofunction_with_signature.php", line 11, characters 11-18:
 Unexpected `inout` annotation for argument (Typing[4183])
-  File "stdlib/builtins_variable.hhi", line 34, characters 18-21:
+  File "stdlib/builtins_variable.hhi", line 35, characters 33-36:
   This is a normal parameter (does not have `inout`)
 File "pseudofunction_with_signature.php", line 12, characters 24-31:
 Unexpected `inout` annotation for argument (Typing[4183])
@@ -20,7 +20,7 @@ Unexpected `inout` annotation for argument (Typing[4183])
   This is a normal parameter (does not have `inout`)
 File "pseudofunction_with_signature.php", line 13, characters 19-26:
 Unexpected `inout` annotation for argument (Typing[4183])
-  File "functions.hhi", line 47, characters 29-32:
+  File "functions.hhi", line 50, characters 38-41:
   This is a normal parameter (does not have `inout`)
 File "pseudofunction_with_signature.php", line 14, characters 23-30:
 Unexpected `inout` annotation for argument (Typing[4183])

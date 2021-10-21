@@ -50,10 +50,10 @@ fn main() -> ::anyhow::Result<()> {
             direct_decl_parser::parse_script(Default::default(), &source_text, &arena, None);
 
         let decl = state.decls;
-        results.push(round_trip::<Decls, Json>(&arena, path, decl));
-        results.push(round_trip::<Decls, FlexBuffer>(&arena, path, decl));
-        results.push(round_trip::<Decls, Bincode>(&arena, path, decl));
-        results.push(round_trip::<Decls, Cbor>(&arena, path, decl));
+        results.push(round_trip::<Decls<'_>, Json>(&arena, path, decl));
+        results.push(round_trip::<Decls<'_>, FlexBuffer>(&arena, path, decl));
+        results.push(round_trip::<Decls<'_>, Bincode>(&arena, path, decl));
+        results.push(round_trip::<Decls<'_>, Cbor>(&arena, path, decl));
     }
 
     let (profiles, errs) = results

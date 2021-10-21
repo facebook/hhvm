@@ -9,7 +9,7 @@ path = "lib.rs"
 
 [dependencies]
 bstr = { version = "0.2", features = ["serde1"] }
-bumpalo = { version = "3.2.1", features = ["collections"] }
+bumpalo = { version = "3.8", features = ["collections"] }
 escaper = { path = "../../utils/escaper" }
 hash = { path = "../../utils/hash" }
 html_entities = { path = "../../utils/html_entities" }

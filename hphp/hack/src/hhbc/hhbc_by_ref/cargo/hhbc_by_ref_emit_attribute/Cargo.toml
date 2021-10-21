@@ -8,7 +8,7 @@ edition = "2018"
 path = "../../emit_attribute.rs"
 
 [dependencies]
-bumpalo = { version = "3.2.1", features = ["collections"] }
+bumpalo = { version = "3.8", features = ["collections"] }
 escaper = { path = "../../../../utils/escaper" }
 ffi = { path = "../../../../utils/ffi" }
 hhbc_by_ref_ast_constant_folder = { path = "../hhbc_by_ref_ast_constant_folder" }

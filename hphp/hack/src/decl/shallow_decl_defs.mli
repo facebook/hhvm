@@ -104,6 +104,7 @@ type shallow_method = {
   sm_visibility: Ast_defs.visibility;
   sm_deprecated: string option;
   sm_flags: MethodFlags.t;
+  sm_attributes: user_attribute list;
 }
 [@@deriving eq, show]
 

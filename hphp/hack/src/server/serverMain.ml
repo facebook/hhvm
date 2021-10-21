@@ -1145,7 +1145,7 @@ let program_init genv env =
   in
   let (init_approach, approach_name) = resolve_init_approach genv in
   Hh_logger.log "Initing with approach: %s" approach_name;
-  let (env, init_type, init_error, init_error_stack, state_distance) =
+  let (env, init_type, init_error, init_error_telemetry, state_distance) =
     let (env, init_result) = ServerInit.init ~init_approach genv env in
     match init_approach with
     | ServerInit.Remote_init _ -> (env, "remote", None, None, None)
@@ -1165,8 +1165,8 @@ let program_init genv env =
             | Some _ -> "state_load_sqlite"
           in
           (env, init_type, None, None, distance)
-        | ServerInit.Load_state_failed (err, stack) ->
-          (env, "state_load_failed", Some err, Some stack, None)
+        | ServerInit.Load_state_failed (err, telemetry) ->
+          (env, "state_load_failed", Some err, Some telemetry, None)
         | ServerInit.Load_state_declined reason ->
           (env, "state_load_declined", Some reason, None, None)
       end
@@ -1189,13 +1189,15 @@ let program_init genv env =
   genv.wait_until_ready ();
   ServerStamp.touch_stamp ();
   EventLogger.set_init_type init_type;
-  let telemetry = ServerUtils.log_and_get_sharedmem_load_telemetry () in
+  let telemetry =
+    ServerUtils.log_and_get_sharedmem_load_telemetry ()
+    |> Telemetry.object_opt ~key:"init_error" ~value:init_error_telemetry
+  in
   HackEventLogger.init_lazy_end
     telemetry
     ~state_distance
     ~approach_name
     ~init_error
-    ~init_error_stack
     ~init_type;
   env
 

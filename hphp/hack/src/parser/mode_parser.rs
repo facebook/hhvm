@@ -21,16 +21,8 @@ pub enum Language {
     PHP,
 }
 
-fn fallback_to_file_extension(text: &SourceText) -> (Language, Option<Mode>) {
-    if text.file_path().has_extension("php")
-    /* TODO: add hhconfig option */
-    {
-        // File doesn't start with <?. This is valid PHP, since PHP files may
-        // contain <?, <?php, <?= in the middle or not at all.
-        // TODO: Should return None but there are currently various tests (and
-        // possibly non-tests) that depend on this broken behavior:
-        (Language::Hack, Some(Mode::Mstrict))
-    } else if text.file_path().has_extension("hackpartial") {
+fn fallback_to_file_extension(text: &SourceText<'_>) -> (Language, Option<Mode>) {
+    if text.file_path().has_extension("hackpartial") {
         (Language::Hack, Some(Mode::Mpartial))
     } else {
         (Language::Hack, Some(Mode::Mstrict))
@@ -41,7 +33,7 @@ fn fallback_to_file_extension(text: &SourceText) -> (Language, Option<Mode>) {
 // with anything other than <?hh). Correctly recognizing PHP files is important
 // for open-source projects, which may need Hack and PHP files to coexist in the
 // same directory.
-pub fn parse_mode(text: &SourceText) -> (Language, Option<Mode>) {
+pub fn parse_mode(text: &SourceText<'_>) -> (Language, Option<Mode>) {
     let bump = Bump::new();
     if let Some(header) =
         positioned_by_ref_parser::parse_header_only(ParserEnv::default(), &bump, text)

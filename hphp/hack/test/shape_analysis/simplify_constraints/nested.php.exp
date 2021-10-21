@@ -1,0 +1,10 @@
+=== Shape analysis results for nested.php
+Summary for \f:
+[4:3-31] :
+  shape(
+    a => \HH\dict<string, int>
+  )
+[4:15-30] :
+  shape(
+    b => int
+  )

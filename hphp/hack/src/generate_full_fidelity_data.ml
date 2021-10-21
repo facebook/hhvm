@@ -1697,7 +1697,7 @@ module GenerateFFRustDeclModeSmartConstructors = struct
     let fwd_args = String.concat ~sep:", " fwd_args in
     sprintf
       "    fn make_%s(&mut self, %s) -> Self::R {
-        <Self as SyntaxSmartConstructors<Self::R, Self::TF, State<Self::R>>>::make_%s(self, %s)
+        <Self as SyntaxSmartConstructors<Self::R, Self::TF, State<'_, '_, Self::R>>>::make_%s(self, %s)
     }\n\n"
       x.type_name
       args
@@ -1739,15 +1739,15 @@ where
     }
 
     fn make_missing(&mut self, o: usize) -> Self::R {
-        <Self as SyntaxSmartConstructors<Self::R, Self::TF, State<Self::R>>>::make_missing(self, o)
+        <Self as SyntaxSmartConstructors<Self::R, Self::TF, State<'_, '_, Self::R>>>::make_missing(self, o)
     }
 
     fn make_token(&mut self, token: <Self::TF as TokenFactory>::Token) -> Self::R {
-        <Self as SyntaxSmartConstructors<Self::R, Self::TF, State<Self::R>>>::make_token(self, token)
+        <Self as SyntaxSmartConstructors<Self::R, Self::TF, State<'_, '_, Self::R>>>::make_token(self, token)
     }
 
     fn make_list(&mut self, items: Vec<Self::R>, offset: usize) -> Self::R {
-        <Self as SyntaxSmartConstructors<Self::R, Self::TF, State<Self::R>>>::make_list(self, items, offset)
+        <Self as SyntaxSmartConstructors<Self::R, Self::TF, State<'_, '_, Self::R>>>::make_list(self, items, offset)
     }
 
 CONSTRUCTOR_METHODS}

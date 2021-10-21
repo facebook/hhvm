@@ -61,7 +61,7 @@ use oxidized::{
 /// )
 /// ```
 /// Which is the runtime representation of the Expression Tree
-pub fn desugar<TF>(hint: &aast::Hint, e: Expr, env: &Env<TF>) -> Result<Expr, (Pos, String)> {
+pub fn desugar<TF>(hint: &aast::Hint, e: Expr, env: &Env<'_, TF>) -> Result<Expr, (Pos, String)> {
     let visitor_name = hint_name(hint)?;
     let et_literal_pos = e.1.clone();
 
@@ -445,7 +445,7 @@ fn v_meth_call(meth_name: &str, args: Vec<Expr>, pos: &Pos) -> Expr {
                 receiver,
                 meth,
                 OgNullFlavor::OGNullthrows,
-                false,
+                ast::PropOrMethod::IsMethod,
             ))),
         ),
         vec![],
@@ -470,7 +470,7 @@ fn meth_call(receiver: Expr, meth_name: &str, args: Vec<Expr>, pos: &Pos) -> Exp
                 receiver,
                 meth,
                 OgNullFlavor::OGNullthrows,
-                false,
+                ast::PropOrMethod::IsMethod,
             ))),
         ),
         vec![],
@@ -1030,7 +1030,7 @@ fn rewrite_expr(
                 // Source: MyDsl`$x->bar()`
                 // Virtualized: $x->bar()
                 // Desugared: $0v->visitCall($0v->visitMethodCall(new ExprPos(...), $0v->visitLocal(new ExprPos(...), '$x'), 'bar'), vec[])
-                ObjGet(og) if !og.3 => {
+                ObjGet(og) if og.3 == ast::PropOrMethod::IsMethod => {
                     let (e1, e2, null_flavor, is_prop_call) = *og;
                     if null_flavor == OgNullFlavor::OGNullsafe {
                         return Err((
@@ -1274,8 +1274,20 @@ fn rewrite_expr(
             );
             (virtual_expr, desugar_expr)
         }
+        ClassConst(_) => {
+            return Err((
+                pos,
+                "Expression trees do not support directly referencing class consts. Consider splicing values defined outside the scope of an Expression Tree using ${...}.".into(),
+            ));
+        }
+        Efun(_) => {
+            return Err((
+                pos,
+                "Expression trees do not support PHP lambdas. Consider using Hack lambdas `() ==> {}` instead.".into(),
+            ));
+        }
         ExpressionTree(_) => {
-            return Err((pos, "Expression trees may not be nested".into()));
+            return Err((pos, "Expression trees may not be nested. Consider splicing Expression trees together using `${}`.".into()));
         }
         _ => {
             return Err((pos, "Unsupported expression tree syntax.".into()));
@@ -1464,6 +1476,25 @@ fn rewrite_stmt(
             (virtual_stmt, Some(desugar_expr))
         }
         Noop => (Stmt(pos, Noop), None),
+        // Unsupported operators
+        Do(_) => {
+            return Err((
+                pos,
+                "Expression trees do not support `do while` loops. Consider using a `while` loop instead.".into(),
+            ));
+        }
+        Switch(_) => {
+            return Err((
+                pos,
+                "Expression trees do not support `switch` statements. Consider using `if`/`else if`/`else` instead.".into(),
+            ));
+        }
+        Foreach(_) => {
+            return Err((
+                pos,
+                "Expression trees do not support `foreach` loops. Consider using a `for` loop or a `while` loop instead.".into(),
+            ));
+        }
         _ => {
             return Err((
                 pos,

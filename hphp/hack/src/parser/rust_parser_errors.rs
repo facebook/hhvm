@@ -4,8 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use itertools::Itertools;
-use lazy_static::lazy_static;
-use regex::Regex;
 use std::collections::BTreeMap;
 use std::{matches, str::FromStr};
 use strum;
@@ -247,6 +245,7 @@ struct Env<'a, Syntax, SyntaxTree> {
     hhvm_compat_mode: bool,
     hhi_mode: bool,
     codegen: bool,
+    systemlib: bool,
 }
 
 impl<'a, Syntax, SyntaxTree> Env<'a, Syntax, SyntaxTree> {
@@ -260,6 +259,10 @@ impl<'a, Syntax, SyntaxTree> Env<'a, Syntax, SyntaxTree> {
 
     fn is_hhi_mode(&self) -> bool {
         self.hhi_mode
+    }
+
+    fn is_systemlib(&self) -> bool {
+        self.systemlib
     }
 }
 
@@ -383,7 +386,7 @@ where
     ) -> impl DoubleEndedIterator<Item = S<'a, Token, Value>> {
         use itertools::Either::{Left, Right};
         use std::iter::{empty, once};
-        let on_list_item = move |x: &'a ListItemChildren<Token, Value>| {
+        let on_list_item = move |x: &'a ListItemChildren<'_, Token, Value>| {
             if include_separators {
                 vec![&x.item, &x.separator].into_iter()
             } else {
@@ -477,13 +480,15 @@ where
         };
     }
 
+    fn check_can_use_readonly(&mut self, node: S<'a, Token, Value>) {
+        self.uses_readonly = true;
+        if self.env.is_typechecker() {
+            self.check_can_use_feature(node, &UnstableFeatures::Readonly)
+        }
+    }
+
     fn check_can_use_feature(&mut self, node: S<'a, Token, Value>, feature: &UnstableFeatures) {
         let parser_options = &self.env.parser_options;
-        // This will move out of check_can_use_feature once Readonly is no longer a preview feature
-        match feature {
-            UnstableFeatures::Readonly => self.uses_readonly = true,
-            _ => {}
-        };
         let enabled = match feature {
             UnstableFeatures::UnionIntersectionTypeHints => {
                 parser_options.tco_union_intersection_type_hints
@@ -520,7 +525,7 @@ where
         }
     }
 
-    fn attr_constructor_call(node: S<'a, Token, Value>) -> &'a SyntaxVariant<Token, Value> {
+    fn attr_constructor_call(node: S<'a, Token, Value>) -> &'a SyntaxVariant<'_, Token, Value> {
         match &node.children {
             ConstructorCall(_) => &node.children,
             Attribute(x) => &x.attribute_name.children,
@@ -1147,7 +1152,7 @@ where
             for modifier in Self::syntax_to_list_no_separators(modifiers) {
                 if let Some(kind) = Self::token_kind(modifier) {
                     if kind == TokenKind::Readonly {
-                        self.check_can_use_feature(modifier, &UnstableFeatures::Readonly)
+                        self.check_can_use_readonly(modifier)
                     }
                     if !ok(kind) {
                         self.errors.push(Self::make_error_from_node(
@@ -1588,6 +1593,20 @@ where
                     if self.is_module_attribute(n) {
                         self.check_can_use_feature(node, &UnstableFeatures::Modules)
                     }
+                    if (sn::user_attributes::ignore_readonly_local_errors(n)
+                        || sn::user_attributes::ignore_coeffect_local_errors(n)
+                        || sn::user_attributes::is_native(n))
+                        && !self.env.is_systemlib()
+                        // The typechecker has its own implementation of this that
+                        // allows its own testing and better error messaging.
+                        // see --tco_enable_systemlib_annotations
+                        && !self.env.is_typechecker()
+                    {
+                        self.errors.push(Self::make_error_from_node(
+                            node,
+                            errors::invalid_attribute_reserved,
+                        ));
+                    }
                 }
                 None => {}
             }
@@ -1649,7 +1668,7 @@ where
                 let function_parameter_list = &x.parameter_list;
                 let function_type = &x.type_;
                 if x.readonly_return.is_readonly() {
-                    self.check_can_use_feature(&x.readonly_return, &UnstableFeatures::Readonly)
+                    self.check_can_use_readonly(&x.readonly_return)
                 }
 
                 self.produce_error(
@@ -1816,15 +1835,6 @@ where
         }
     }
 
-    fn is_hashbang(&self, node: S<'a, Token, Value>) -> bool {
-        let text = self.text(node);
-        lazy_static! {
-            static ref RE: Regex = Regex::new("^#!.*\n").unwrap();
-        }
-        text.lines().nth(1).is_none() && // only one line
-        RE.is_match(text)
-    }
-
     fn is_in_construct_method(&self) -> bool {
         if self.is_immediately_in_lambda() {
             false
@@ -1909,7 +1919,7 @@ where
     fn check_parameter_readonly(&mut self, node: S<'a, Token, Value>) {
         if let ParameterDeclaration(x) = &node.children {
             if x.readonly.is_readonly() {
-                self.check_can_use_feature(&x.readonly, &UnstableFeatures::Readonly);
+                self.check_can_use_readonly(&x.readonly);
             }
         }
     }
@@ -3100,7 +3110,7 @@ where
                     .po_disallow_fun_and_cls_meth_pseudo_funcs;
 
                 if Self::strip_ns(self.text(recv)) == Self::strip_ns(sn::readonly::AS_MUT) {
-                    self.check_can_use_feature(recv, &UnstableFeatures::Readonly);
+                    self.check_can_use_readonly(recv);
                 }
 
                 if self.text(recv) == Self::strip_hh_ns(sn::autoimported_functions::FUN_)
@@ -3463,7 +3473,7 @@ where
             PrefixUnaryExpression(x)
                 if Self::token_kind(&x.operator) == Some(TokenKind::Readonly) =>
             {
-                self.check_can_use_feature(&x.operator, &UnstableFeatures::Readonly)
+                self.check_can_use_readonly(&x.operator)
             }
 
             // Other kinds of expressions currently produce no expr errors.
@@ -4831,13 +4841,7 @@ where
                         is_first_decl = false;
                         for decl in Self::syntax_to_list_no_separators(syntax_list) {
                             match &decl.children {
-                                MarkupSection(x) => {
-                                    if x.hashbang.width() == 0 || self.is_hashbang(&x.hashbang) {
-                                        continue;
-                                    } else {
-                                        break;
-                                    }
-                                }
+                                MarkupSection(_) => {}
                                 NamespaceUseDeclaration(_) | FileAttributeSpecification(_) => {}
                                 NamespaceDeclaration(_) => {
                                     is_first_decl = true;
@@ -4850,9 +4854,7 @@ where
                         has_code_outside_namespace = !(x.body.is_namespace_empty_body())
                             && Self::syntax_to_list_no_separators(syntax_list).any(|decl| {
                                 match &decl.children {
-                                    MarkupSection(x) => {
-                                        !(x.hashbang.width() == 0 || self.is_hashbang(&x.hashbang))
-                                    }
+                                    MarkupSection(_) => false,
                                     NamespaceDeclaration(_)
                                     | FileAttributeSpecification(_)
                                     | EndOfFile(_)
@@ -5559,6 +5561,7 @@ where
         hhvm_compat_mode: bool,
         hhi_mode: bool,
         codegen: bool,
+        systemlib: bool,
     ) -> (Vec<SyntaxError>, bool) {
         let env = Env {
             parser_options,
@@ -5576,6 +5579,7 @@ where
             hhvm_compat_mode,
             hhi_mode,
             codegen,
+            systemlib,
         };
 
         match tree.required_stack_size() {
@@ -5608,6 +5612,7 @@ pub fn parse_errors<'a, State: Clone>(
     hhvm_compat_mode: bool,
     hhi_mode: bool,
     codegen: bool,
+    systemlib: bool,
 ) -> (Vec<SyntaxError>, bool) {
     <ParserErrors<'a, PositionedToken<'a>, PositionedValue<'a>, State>>::parse_errors(
         tree,
@@ -5616,6 +5621,7 @@ pub fn parse_errors<'a, State: Clone>(
         hhvm_compat_mode,
         hhi_mode,
         codegen,
+        systemlib,
     )
 }
 
@@ -5626,6 +5632,7 @@ pub fn parse_errors_with_text<'a, State: Clone>(
     hhvm_compat_mode: bool,
     hhi_mode: bool,
     codegen: bool,
+    systemlib: bool,
 ) -> (Vec<SyntaxError>, bool) {
     <ParserErrors<'a, PositionedToken<'a>, PositionedValue<'a>, State>>::parse_errors(
         tree,
@@ -5634,5 +5641,6 @@ pub fn parse_errors_with_text<'a, State: Clone>(
         hhvm_compat_mode,
         hhi_mode,
         codegen,
+        systemlib,
     )
 }

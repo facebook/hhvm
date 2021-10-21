@@ -138,7 +138,7 @@ where
     fn sc_mut(&mut self) -> &mut S;
 
     fn skipped_tokens(&self) -> &[Token<S>];
-    fn drain_skipped_tokens(&mut self) -> std::vec::Drain<Token<S>>;
+    fn drain_skipped_tokens(&mut self) -> std::vec::Drain<'_, Token<S>>;
 
     fn context_mut(&mut self) -> &mut Context<'a, Token<S>>;
     fn context(&self) -> &Context<'a, Token<S>>;
@@ -356,7 +356,7 @@ where
     }
 
     fn assert_token(&mut self, kind: TokenKind) -> S::R {
-        self.assert_token_with_tokenizer(kind, |x: &mut Lexer<S::TF>| x.next_token())
+        self.assert_token_with_tokenizer(kind, |x: &mut Lexer<'_, S::TF>| x.next_token())
     }
 
     fn token_text(&self, token: &Token<S>) -> &'a str {
@@ -477,7 +477,7 @@ where
         self.next_token_with_tokenizer(|l| l.next_token_non_reserved_as_name())
     }
 
-    fn scan_header(&mut self) -> (Token<S>, Option<(Token<S>, Option<Token<S>>)>) {
+    fn scan_header(&mut self) -> (Option<Token<S>>, Option<(Token<S>, Option<Token<S>>)>) {
         self.lexer_mut().scan_header()
     }
 

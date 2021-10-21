@@ -9,16 +9,10 @@ src/parsing/lexer.ml
 src/parsing/lexer_hack.ml
 src/parsing/parser.ml
 src/parsing/parser.mli
-*.cm*
-*.o
-.depend
-*.so
-*.annot
-*.opt
 _obuild/
 .ocp/
 hhi/**/INDEX
-facebook/opam
+facebook/redirect
 facebook/opam2-mini-repository
 facebook/opam2-mini-repository-*
 facebook/opam2-mini-repository-*.tar.gz

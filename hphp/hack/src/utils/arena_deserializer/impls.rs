@@ -103,7 +103,7 @@ impl<'arena> DeserializeInArena<'arena> for &'arena str {
         impl<'arena, 'de> Visitor<'de> for StrInArena<'arena> {
             type Value = &'arena str;
 
-            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
                 formatter.write_str("a string")
             }
 
@@ -131,7 +131,7 @@ impl<'arena> DeserializeInArena<'arena> for &'arena bstr::BStr {
         impl<'arena, 'de> Visitor<'de> for BStrVisitor<'arena> {
             type Value = &'arena bstr::BStr;
 
-            fn expecting(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            fn expecting(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
                 f.write_str("a borrowed byte string")
             }
 
@@ -193,7 +193,7 @@ where
         {
             type Value = &'arena [T];
 
-            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
                 formatter.write_str("an array")
             }
 
@@ -233,7 +233,7 @@ where
         impl<'arena, T: DeserializeInArena<'arena>> Visitor<'arena> for OptionVisitor<'arena, T> {
             type Value = Option<T>;
 
-            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
                 formatter.write_str("option")
             }
 
@@ -298,7 +298,7 @@ macro_rules! tuple_impls {
                     impl<'arena, $($name: DeserializeInArena<'arena>),+> Visitor<'arena> for TupleVisitor<$($name,)+> {
                         type Value = ($($name,)+);
 
-                        fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                        fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
                             formatter.write_str(concat!("a tuple of size ", $len))
                         }
 

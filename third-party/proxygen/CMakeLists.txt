@@ -19,9 +19,9 @@ get_target_property(JEMALLOC_INCLUDE_DIR jemalloc INTERFACE_INCLUDE_DIRECTORIES)
 SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
   PROXYGEN_SOURCE_ARGS
   SOURCE_URL
-  "https://github.com/facebook/proxygen/releases/download/v2021.06.28.00/proxygen-v2021.06.28.00.tar.gz"
+  "https://github.com/facebook/proxygen/releases/download/v2021.10.18.00/proxygen-v2021.10.18.00.tar.gz"
   SOURCE_HASH
-  "SHA256=0eb7259b8f2e6bbdffb73c5b13f114fb9ae65dca9f7802780f89743ea2f6d0d8"
+  "SHA256=7de4002ab5aa0b59343533cc9c26efbafed3401b1579b948cd2678f10fc9382e"
 )
 
 ExternalProject_Add(
@@ -31,9 +31,6 @@ ExternalProject_Add(
     "${CMAKE_COMMAND}" -E copy
     "${CMAKE_SOURCE_DIR}/CMake/FindBoost.cmake"
     <SOURCE_DIR>/wangle/cmake/FindBoost.cmake
-    &&
-    "${CMAKE_CURRENT_SOURCE_DIR}/../apply-quilt-patches.sh"
-    "${CMAKE_CURRENT_SOURCE_DIR}/patches"
   CMAKE_ARGS
     "-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}"
     -DCMAKE_MODULE_PATH=${CMAKE_SOURCE_DIR}/CMake

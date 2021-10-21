@@ -8,7 +8,7 @@ edition = "2018"
 path = "../../emit_xhp.rs"
 
 [dependencies]
-bumpalo = { version = "3.2.1", features = ["collections"] }
+bumpalo = { version = "3.8", features = ["collections"] }
 hhbc_by_ref_emit_method = { path = "../hhbc_by_ref_emit_method" }
 hhbc_by_ref_emit_property = { path = "../hhbc_by_ref_emit_property" }
 hhbc_by_ref_env = { path = "../hhbc_by_ref_env" }

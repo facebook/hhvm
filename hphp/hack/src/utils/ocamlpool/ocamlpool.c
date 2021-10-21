@@ -108,7 +108,7 @@ static void assert_out_of_section(void)
 
 #define OCAMLPOOL_SET_HEADER(v, size, tag, color) \
   *((header_t*)(((value*)(v)) - 1)) = \
-    Make_header_allocated_here(size, tag, color);
+    Make_header(size, tag, color);
 
 /* OCamlpool sections
  * ===========================================================================

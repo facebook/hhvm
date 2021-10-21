@@ -83,6 +83,7 @@ impl Job {
                 stack_limit.reset();
                 let stack_limit_ref = &stack_limit;
                 match std::panic::catch_unwind(std::panic::AssertUnwindSafe(move || {
+                    let retryable = retryable; // capture AssertSend into closure
                     AssertSend(retryable.0(stack_limit_ref, nonmain_stack_size))
                 })) {
                     Ok(result) => Some(result),

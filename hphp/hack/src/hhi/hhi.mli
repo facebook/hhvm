@@ -11,6 +11,8 @@ val get_hhi_root : ?force_write:bool -> unit -> Path.t
 
 val set_hhi_root_for_unit_test : Path.t -> unit
 
+val set_custom_hhi_root : Path.t -> unit
+
 val get_raw_hhi_contents : unit -> (string * string) array
 
 val touch : unit -> unit

@@ -50,7 +50,7 @@ where
         sc: S,
     ) -> Option<<S::R as NodeType>::R> {
         let (lexer, errors, env, sc) = Self::new(text, env, sc).into_parts();
-        let mut decl_parser: DeclarationParser<S> =
+        let mut decl_parser: DeclarationParser<'_, S> =
             DeclarationParser::make(lexer, env, Context::empty(None), errors, sc);
         decl_parser
             .parse_leading_markup_section()
@@ -58,7 +58,7 @@ where
     }
 
     pub fn parse_script(&mut self, stack_limit: Option<&'a StackLimit>) -> <S::R as NodeType>::R {
-        let mut decl_parser: DeclarationParser<S> = DeclarationParser::make(
+        let mut decl_parser: DeclarationParser<'_, S> = DeclarationParser::make(
             self.lexer.clone(),
             self.env.clone(),
             Context::empty(stack_limit),

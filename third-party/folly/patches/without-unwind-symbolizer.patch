@@ -1,7 +1,7 @@
-Index: out/CMake/folly-deps.cmake
+Index: folly/CMake/folly-deps.cmake
 ===================================================================
---- out.orig/CMake/folly-deps.cmake
-+++ out/CMake/folly-deps.cmake
+--- folly.orig/CMake/folly-deps.cmake
++++ folly/CMake/folly-deps.cmake
 @@ -164,11 +164,14 @@ if (PYTHON_EXTENSIONS)
    find_package(Cython 0.26 REQUIRED)
  endif ()
@@ -20,9 +20,9 @@ Index: out/CMake/folly-deps.cmake
 +    set(FOLLY_HAVE_LIBUNWIND ON)
 +  endif()
  endif()
- 
- cmake_push_check_state()
-@@ -176,15 +179,19 @@ set(CMAKE_REQUIRED_DEFINITIONS -D_XOPEN_
+ if (CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
+   list(APPEND FOLLY_LINK_LIBRARIES "execinfo")
+@@ -179,15 +182,18 @@ set(CMAKE_REQUIRED_DEFINITIONS -D_XOPEN_
  check_cxx_symbol_exists(swapcontext ucontext.h FOLLY_HAVE_SWAPCONTEXT)
  cmake_pop_check_state()
  
@@ -39,10 +39,9 @@ Index: out/CMake/folly-deps.cmake
  
  set(FOLLY_HAVE_BACKTRACE ${Backtrace_FOUND})
  set(FOLLY_HAVE_DWARF ${LIBDWARF_FOUND})
--if (UNIX AND NOT APPLE)
+-if (NOT WIN32 AND NOT APPLE)
 -  set(FOLLY_USE_SYMBOLIZER ON)
 -endif()
-+
  if (NOT FOLLY_HAVE_ELF)
    # Empty is falsey here, but ends up truthy in folly-config.h.cmake
    set(FOLLY_HAVE_ELF OFF)

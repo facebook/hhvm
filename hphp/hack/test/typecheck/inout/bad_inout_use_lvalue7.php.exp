@@ -3,4 +3,4 @@ You cannot decorate this argument as `inout` (Parsing[1002])
 File "bad_inout_use_lvalue7.php", line 9, characters 13-24:
 `->:` operator is not allowed in write context (Parsing[1002])
 File "bad_inout_use_lvalue7.php", line 9, characters 13-24:
-Arguments for `inout` parameters must be local variables or simple subscript expressions on vecs, dicts, keysets, or arrays (NastCheck[3050])
+`inout` arguments may only be local variables or array indexing expressions  (NastCheck[3050])

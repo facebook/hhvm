@@ -19,7 +19,7 @@ function main() {
     4,
     vec[],
     vec['foo', 'floo'],
-    new stdclass(),
+    new stdClass(),
     new C(),
     fopen("/dev/null", "w"),
   ];

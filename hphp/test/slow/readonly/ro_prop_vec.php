@@ -1,5 +1,4 @@
 <?hh
-<<file:__EnableUnstableFeatures('readonly')>>
 class Bar {
   public int $prop;
 }
@@ -28,5 +27,5 @@ function test() : void {
  $x->ro = readonly new Bar();
 
  $x->ro_vec[] = readonly new Bar();
-
+ echo "Done\n";
 }

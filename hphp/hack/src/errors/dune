@@ -4,6 +4,7 @@
   (preprocess (pps ppx_deriving.std))
   (libraries
     core_kernel
+    full_fidelity
     hh_autoimport
     logging
     pos_or_decl

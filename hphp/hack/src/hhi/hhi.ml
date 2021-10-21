@@ -59,3 +59,7 @@ let set_hhi_root_for_unit_test dir =
   root := Some dir;
   Relative_path.set_path_prefix Relative_path.Hhi dir;
   extract_hhis dir
+
+let set_custom_hhi_root dir =
+  root := Some dir;
+  Relative_path.set_path_prefix Relative_path.Hhi dir

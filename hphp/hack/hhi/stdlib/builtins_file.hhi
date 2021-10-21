@@ -203,7 +203,7 @@ function clearstatcache();
 <<__PHPStdLib>>
 function readlink(string $path);
 <<__PHPStdLib>>
-function realpath(string $path);
+function realpath(string $path)[read_globals];
 <<__PHPStdLib>>
 function pathinfo(string $path, int $opt = 15);
 <<__PHPStdLib>>

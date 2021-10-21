@@ -1,36 +1,37 @@
 <?hh // partial
+<<file:__EnableUnstableFeatures("readonly")>>
 
 namespace {
 /* Finds whether the given variable is a boolean.
  */
 <<__IsFoldable, __Native>>
-function is_bool(mixed $var)[]: bool;
+function is_bool(readonly mixed $var)[]: bool;
 
 /* Finds whether the type of the given variable is integer.  To test if a
  * variable is a number or a numeric string (such as form input, which is
  * always a string), you must use is_numeric().
  */
 <<__IsFoldable, __Native>>
-function is_int(mixed $var)[]: bool;
+function is_int(readonly mixed $var)[]: bool;
 
 <<__IsFoldable, __Native>>
-function is_integer(mixed $var)[]: bool;
+function is_integer(readonly mixed $var)[]: bool;
 
 <<__IsFoldable, __Native>>
-function is_long(mixed $var)[]: bool;
+function is_long(readonly mixed $var)[]: bool;
 
 /* Finds whether the type of the given variable is float.  To test if a
  * variable is a number or a numeric string (such as form input, which is
  * always a string), you must use is_numeric().
  */
 <<__IsFoldable, __Native>>
-function is_float(mixed $var)[]: bool;
+function is_float(readonly mixed $var)[]: bool;
 
 <<__IsFoldable, __Native>>
-function is_double(mixed $var)[]: bool;
+function is_double(readonly mixed $var)[]: bool;
 
 <<__IsFoldable, __Native>>
-function is_real(mixed $var)[]: bool;
+function is_real(readonly mixed $var)[]: bool;
 
 /* Finds whether the given variable is numeric. Numeric strings consist of
  * optional sign, any number of digits, optional decimal part and optional
@@ -39,12 +40,12 @@ function is_real(mixed $var)[]: bool;
  * exponential part.
  */
 <<__IsFoldable, __Native>>
-function is_numeric(mixed $var)[]: bool;
+function is_numeric(readonly mixed $var)[]: bool;
 
 /* Finds whether the type given variable is string.
  */
 <<__IsFoldable, __Native>>
-function is_string(mixed $var)[]: bool;
+function is_string(readonly mixed $var)[]: bool;
 
 /* Finds whether the given variable is a scalar.  Scalar variables are those
  * containing an integer, float, string or boolean. Types array, object and
@@ -54,27 +55,27 @@ function is_string(mixed $var)[]: bool;
  * it may change.
  */
 <<__IsFoldable, __Native>>
-function is_scalar(mixed $var)[]: bool;
+function is_scalar(readonly mixed $var)[]: bool;
 
 /* Finds whether the given variable is an array.
  */
 <<__IsFoldable, __Native, __Pure>>
-function is_array(<<__MaybeMutable>> mixed $var): bool;
+function is_array(<<__MaybeMutable>> readonly mixed $var): bool;
 
 /* Finds whether the given variable is an object.
  */
 <<__IsFoldable, __Native>>
-function is_object(mixed $var)[]: bool;
+function is_object(readonly mixed $var)[]: bool;
 
 /* Finds whether the given variable is a resource.
  */
 <<__IsFoldable, __Native>>
-function is_resource(mixed $var)[]: bool;
+function is_resource(readonly mixed $var)[]: bool;
 
 /* Finds whether the given variable is NULL.
  */
 <<__IsFoldable, __Native>>
-function is_null(mixed $var)[]: bool;
+function is_null(readonly mixed $var)[]: bool;
 
 /* Returns the type of the PHP variable var. Warning Never use gettype() to
  * test for a certain type, since the returned string may be subject to change
@@ -82,7 +83,7 @@ function is_null(mixed $var)[]: bool;
  * comparison. Instead, use the is_* functions.
  */
 <<__IsFoldable, __Native>>
-function gettype(mixed $v)[]: string;
+function gettype(readonly mixed $v)[]: string;
 
 /* This function gets the type of the given resource.
  */
@@ -149,7 +150,7 @@ function var_export_pure(mixed $expression)[]: mixed;
 /* Dumps a string representation of an internal zend value to output.
  */
 <<__Native("NoFCallBuiltin")>>
-function var_dump(mixed $arg1, ...$argv): void;
+function var_dump(readonly mixed $arg1, ...$argv): void;
 
 <<__Native>>
 function debug_zval_dump(mixed $variable): void;
@@ -222,45 +223,45 @@ namespace HH {
   /* Finds whether the given variable is a vec.
    */
   <<__Native, __IsFoldable>>
-  function is_vec(mixed $var)[]: bool;
+  function is_vec(readonly mixed $var)[]: bool;
 
   /* Finds whether the given variable is a dict.
    */
   <<__Native, __IsFoldable>>
-  function is_dict(mixed $var)[]: bool;
+  function is_dict(readonly mixed $var)[]: bool;
 
   /* Finds whether the given variable is a keyset.
    */
   <<__Native, __IsFoldable>>
-  function is_keyset(mixed $var)[]: bool;
+  function is_keyset(readonly mixed $var)[]: bool;
 
   <<__Native, __IsFoldable, __Pure>>
-  function is_varray(<<__MaybeMutable>> mixed $var): bool;
+  function is_varray(<<__MaybeMutable>> readonly mixed $var): bool;
 
   <<__Native, __IsFoldable, __Pure>>
-  function is_darray(<<__MaybeMutable>> mixed $var): bool;
+  function is_darray(<<__MaybeMutable>> readonly mixed $var): bool;
 
   <<__Native, __IsFoldable>>
-  function is_any_array(mixed $var)[]: bool;
+  function is_any_array(readonly mixed $var)[]: bool;
 
   <<__Native>>
-  function is_php_array(mixed $var)[]: bool;
+  function is_php_array(readonly mixed $var)[]: bool;
 
   <<__Native, __IsFoldable>>
-  function is_dict_or_darray(mixed $var)[]: bool;
+  function is_dict_or_darray(readonly mixed $var)[]: bool;
 
   <<__Native, __IsFoldable>>
-  function is_vec_or_varray(mixed $var)[]: bool;
+  function is_vec_or_varray(readonly mixed $var)[]: bool;
 
   /*
    * Check if the input is an array-like containing only integer keys running
    * from 0 to N-1, in that order.
    */
   <<__Native, __IsFoldable>>
-  function is_list_like(AnyArray $var)[]: bool;
+  function is_list_like(readonly AnyArray $var)[]: bool;
 
   <<__Native, __IsFoldable>>
-  function is_meth_caller(mixed $var)[]: bool;
+  function is_meth_caller(readonly mixed $var)[]: bool;
 
  /*
   * Behaves like serialize() but takes an optional set of options.

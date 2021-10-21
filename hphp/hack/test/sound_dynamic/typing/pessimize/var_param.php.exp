@@ -1,0 +1,9 @@
+pessimize:	var_param.php:11,fun_param,\g,$cs
+File "var_param.php", line 7, characters 10-10:
+Function  `f` is not dynamically callable. (Typing[4402])
+  File "var_param.php", line 8, characters 8-10:
+  Invalid argument
+  File "var_param.php", line 11, characters 17-19:
+  Expected `C` (variadic argument)
+  File "var_param.php", line 7, characters 19-21:
+  But got `dynamic` because method must be callable in a dynamic context

@@ -357,11 +357,11 @@ pub(crate) mod internal {
     }
 
     impl<'a, TR: TriviaRep + Clone> LexablePositionedToken for PositionedToken<'a, TR> {
-        fn text<'b>(&self, source_text: &'b SourceText) -> &'b str {
+        fn text<'b>(&self, source_text: &'b SourceText<'_>) -> &'b str {
             source_text.sub_as_str(self.0.start_offset(), self.0.width)
         }
 
-        fn text_raw<'b>(&self, source_text: &'b SourceText) -> &'b [u8] {
+        fn text_raw<'b>(&self, source_text: &'b SourceText<'_>) -> &'b [u8] {
             source_text.sub(self.0.start_offset(), self.0.width)
         }
 

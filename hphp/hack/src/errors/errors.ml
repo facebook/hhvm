@@ -54,23 +54,16 @@ type format =
   | Raw
   | Highlighted
 
-type 'pos quickfix = {
-  title: string;
-  new_text: string;
-  pos: 'pos;
-}
-[@@deriving eq, ord, show]
-
 type typing_error_callback =
   ?code:int ->
-  ?quickfixes:Pos.t quickfix list ->
+  ?quickfixes:Quickfix.t list ->
   Pos.t * string ->
   (Pos_or_decl.t * string) list ->
   unit
 
 type error_from_reasons_callback =
   ?code:int ->
-  ?quickfixes:Pos.t quickfix list ->
+  ?quickfixes:Quickfix.t list ->
   (Pos_or_decl.t * string) list ->
   unit
 
@@ -182,7 +175,7 @@ type ('prim_pos, 'pos) error_ = {
   code: error_code;
   claim: 'prim_pos message;
   reasons: 'pos message list;
-  quickfixes: 'prim_pos quickfix list;
+  quickfixes: Quickfix.t list;
 }
 [@@deriving eq, ord, show]
 
@@ -372,7 +365,7 @@ let (name_context_to_string : name_context -> string) = function
   | ClassContext -> "class"
   | RecordContext -> "record"
 
-let quickfixes (error : error) : Pos.t quickfix list = error.quickfixes
+let quickfixes (error : error) : Quickfix.t list = error.quickfixes
 
 let get_pos { claim; _ } = fst claim
 
@@ -476,13 +469,9 @@ let to_list_ : error -> Pos_or_decl.t message list =
 
 let get_messages = to_list
 
-let to_absolute_quickfix (quickfix : Pos.t quickfix) : Pos.absolute quickfix =
-  { quickfix with pos = Pos.to_absolute quickfix.pos }
-
 let to_absolute : error -> finalized_error =
  fun { code; claim; reasons; quickfixes } ->
   let claim = (fst claim |> Pos.to_absolute, snd claim) in
-  let quickfixes = List.map quickfixes ~f:to_absolute_quickfix in
   let reasons =
     List.map reasons ~f:(fun (p, s) ->
         (p |> Pos_or_decl.unsafe_to_raw_pos |> Pos.to_absolute, s))
@@ -566,7 +555,6 @@ let to_absolute_for_test : error -> finalized_error =
   in
   let claim = f @@ claim_as_reason claim in
   let reasons = List.map ~f reasons in
-  let quickfixes = List.map quickfixes ~f:to_absolute_quickfix in
   { code; claim; reasons; quickfixes }
 
 let report_pos_from_reason = ref false
@@ -957,7 +945,7 @@ let as_map : t -> error list Relative_path.Map.t =
 
 let add_error_assert_primary_pos_in_current_decl :
     current_decl_and_file:Pos_or_decl.ctx ->
-    ?quickfixes:Pos.t quickfix list ->
+    ?quickfixes:Quickfix.t list ->
     error_code ->
     Pos_or_decl.t message list ->
     unit =
@@ -1323,14 +1311,16 @@ let undefined pos var_name did_you_mean =
   let (suggestion, quickfixes) =
     match did_you_mean with
     | Some (did_you_mean, did_you_mean_pos) ->
-      let quickfixes =
-        [{ title = "Change to " ^ did_you_mean; new_text = did_you_mean; pos }]
-      in
       ( [
           suggestion_message var_name did_you_mean did_you_mean_pos
           |> claim_as_reason;
         ],
-        quickfixes )
+        [
+          Quickfix.make
+            ~title:("Change to " ^ did_you_mean)
+            ~new_text:did_you_mean
+            pos;
+        ] )
     | None -> ([], [])
   in
   add_list (Naming.err_code Naming.Undefined) ~quickfixes (pos, msg) suggestion
@@ -1555,12 +1545,6 @@ let expected_variable pos =
     (Naming.err_code Naming.ExpectedVariable)
     pos
     "Was expecting a variable name"
-
-let clone_too_many_arguments pos =
-  add
-    (Naming.err_code Naming.NamingTooManyArguments)
-    pos
-    "`__clone` method cannot take arguments"
 
 let naming_too_few_arguments pos =
   add (Naming.err_code Naming.NamingTooFewArguments) pos "Too few arguments"
@@ -1841,7 +1825,12 @@ let did_you_mean_naming pos name suggest_pos suggest_name =
   let name = strip_ns name in
   let suggest_name = strip_ns suggest_name in
   let quickfixes =
-    [{ title = "Change to " ^ suggest_name; new_text = suggest_name; pos }]
+    [
+      Quickfix.make
+        ~title:("Change to " ^ suggest_name)
+        ~new_text:suggest_name
+        pos;
+    ]
   in
   add_list
     (Naming.err_code Naming.DidYouMeanNaming)
@@ -2277,8 +2266,7 @@ let inout_argument_bad_expr pos =
   add
     (NastCheck.err_code NastCheck.InoutArgumentBadExpr)
     pos
-    ("Arguments for `inout` parameters must be local variables or simple "
-    ^ "subscript expressions on vecs, dicts, keysets, or arrays")
+    "`inout` arguments may only be local variables or array indexing expressions "
 
 let inout_in_transformed_pseudofunction pos fn =
   add
@@ -3179,10 +3167,14 @@ let unknown_type description pos r =
   let msg = "Was expecting " ^ description ^ " but type is unknown" in
   add_list (Typing.err_code Typing.UnknownType) (pos, msg) r
 
-let not_found_suggestion orig similar =
+let not_found_suggestion orig similar kind =
   match similar with
   | (`static, pos, v) ->
-    suggestion_message ~modifier:"static method " orig v pos
+    begin
+      match kind with
+      | `method_ -> suggestion_message ~modifier:"static method " orig v pos
+      | `property -> suggestion_message ~modifier:"static property " orig v pos
+    end
   | (`instance, pos, v) -> suggestion_message orig v pos
 
 let snot_found_suggestion orig similar =
@@ -3217,11 +3209,10 @@ let smember_not_found_messages pos kind (cpos, class_name) member_name similar =
         match pos with
         | Some pos ->
           [
-            {
-              title = "Change to ::" ^ similar_name;
-              new_text = similar_name;
+            Quickfix.make
+              ~title:("Change to ::" ^ similar_name)
+              ~new_text:similar_name
               pos;
-            };
           ]
         | None -> []
       in
@@ -3260,6 +3251,7 @@ let member_not_found
     reason
     (on_error : typing_error_callback) =
   let type_name = strip_ns type_name |> Markdown_lite.md_codify in
+  let kind_record = kind in
   let kind =
     match kind with
     | `method_ -> "instance method"
@@ -3276,9 +3268,12 @@ let member_not_found
     match similar with
     | None -> ([], [])
     | Some ((_, _, similar_name) as similar) ->
-      ( [not_found_suggestion member_name similar],
+      ( [not_found_suggestion member_name similar kind_record],
         [
-          { title = "Change to ->" ^ similar_name; new_text = similar_name; pos };
+          Quickfix.make
+            ~title:("Change to ->" ^ similar_name)
+            ~new_text:similar_name
+            pos;
         ] )
   in
   on_error
@@ -3696,7 +3691,7 @@ let discarded_awaitable pos1 pos2 =
 let ignore_error : error_from_reasons_callback =
  (fun ?code:_ ?quickfixes:_ _ -> ())
 
-let unify_error ?code ?(quickfixes : Pos.t quickfix list = []) claim reasons =
+let unify_error ?code ?(quickfixes : Quickfix.t list = []) claim reasons =
   add_list
     (Option.value code ~default:(Typing.err_code Typing.UnifyError))
     ~quickfixes
@@ -3722,7 +3717,7 @@ let invalid_type_hint : Pos.t -> error_from_reasons_callback =
     reasons
 
 let maybe_unify_error
-    specific_code ?code ?(quickfixes : Pos.t quickfix list = []) errl =
+    specific_code ?code ?(quickfixes : Quickfix.t list = []) errl =
   add_list
     (Option.value code ~default:(Typing.err_code specific_code))
     ~quickfixes

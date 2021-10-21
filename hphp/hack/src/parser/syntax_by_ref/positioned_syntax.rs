@@ -34,7 +34,7 @@ impl<'a> SyntaxTrait for Syntax<'a, PositionedToken<'a>, PositionedValue<'a>> {
         self.value.start_offset()
     }
 
-    fn extract_text<'src>(&self, source_text: &'src SourceText) -> Option<&'src str> {
+    fn extract_text<'src>(&self, source_text: &'src SourceText<'_>) -> Option<&'src str> {
         Some(self.text(source_text))
     }
 }

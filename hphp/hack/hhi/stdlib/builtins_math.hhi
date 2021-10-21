@@ -122,7 +122,7 @@ function mt_getrandmax()[];
 <<__PHPStdLib>>
 function mt_srand($seed = null);
 <<__PHPStdLib>>
-function mt_rand(int $min = 0, $max = -1 /* mt_getrandmax */ );
+function mt_rand(int $min = 0, $max = -1 /* mt_getrandmax */ )[controlled];
 <<__PHPStdLib>>
 function lcg_value();
 <<__PHPStdLib>>

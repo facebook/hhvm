@@ -181,12 +181,4 @@ module ByHash : sig
 
   val get_files :
     Provider_context.t -> Typing_deps.DepSet.t -> Relative_path.Set.t
-
-  (** For debugging only. Normally we'd expect that the second reverse naming table
-  should have the same entries as the primary reverse naming table, and (for the
-  time being) we alert if they differ. But there is one difference in case of
-  duplicate names, i.e. "failed naming" -- the secondary reverse naming table will
-  contain both duplicates, while the primary reverse naming table will only contain
-  the winner. This function is used to suppress alerting for that case. *)
-  val set_failed_naming : Relative_path.Set.t -> unit
 end

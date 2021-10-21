@@ -1,15 +1,15 @@
 <?hh
 
-enum class ChildEnum: stdclass extends ParentEnum {
-  stdclass Foo = new stdclass();
+enum class ChildEnum: stdClass extends ParentEnum {
+  stdClass Foo = new stdClass();
 }
 
-enum class ParentEnum: stdclass extends GrandParentEnum {
-  stdclass Bar = new stdclass();
+enum class ParentEnum: stdClass extends GrandParentEnum {
+  stdClass Bar = new stdClass();
 }
 
-enum class GrandParentEnum: stdclass {
-  stdclass Baz = new stdclass();
+enum class GrandParentEnum: stdClass {
+  stdClass Baz = new stdClass();
 }
 
 <<__EntryPoint>>

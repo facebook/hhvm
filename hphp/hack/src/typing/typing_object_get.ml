@@ -496,8 +496,7 @@ let rec obj_get_concrete_ty
                 let ft_ty1 =
                   Typing_dynamic.relax_method_type
                     env
-                    (Cls.get_support_dynamic_type class_info
-                    || get_ce_support_dynamic_type member_ce)
+                    (get_ce_support_dynamic_type member_ce)
                     r
                     ft1
                 in

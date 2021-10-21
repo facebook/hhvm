@@ -42,7 +42,6 @@ use hhbc_by_ref_options_serde::prefix_all;
 
 use lru::LruCache;
 
-extern crate bitflags;
 use bitflags::bitflags;
 
 #[macro_use]
@@ -555,7 +554,7 @@ fn deserialize_flags<'de, D: Deserializer<'de>, P: PrefixedFlags>(
     impl<'de, P: PrefixedFlags> Visitor<'de> for Phantom<P> {
         type Value = P;
 
-        fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
             formatter.write_str("flag with string global_value")
         }
 

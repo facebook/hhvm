@@ -55,13 +55,13 @@ final class Set implements \MutableSet {
   /** Returns true if the Set is empty, false otherwise.
    * @return bool
    */
-  public function isEmpty()[]: bool { return !$this->count(); }
+  public readonly function isEmpty()[]: bool { return !$this->count(); }
 
   /** Returns the number of values in the Set.
    * @return int
    */
   <<__Native>>
-  public function count()[]: int;
+  public readonly function count()[]: int;
 
   /** Returns an Iterable that produces the values from this Set.
    * @return object
@@ -375,7 +375,7 @@ final class Set implements \MutableSet {
    * @return mixed
    */
   <<__Native>>
-  public function firstValue()[]: mixed;
+  public readonly function firstValue()[]: mixed;
 
   /** Returns the first key from this Set, or null if this Vector is empty.
    * @return mixed
@@ -388,7 +388,7 @@ final class Set implements \MutableSet {
    * @return mixed
    */
   <<__Native>>
-  public function lastValue()[]: mixed;
+  public readonly function lastValue()[]: mixed;
 
   /** Returns the last key from this Set, or null if this Set is empty.
    * @return mixed
@@ -720,7 +720,7 @@ final class ImmSet implements \ConstSet {
    * @return mixed
    */
   <<__Native>>
-  public function firstValue()[]: mixed;
+  public readonly function firstValue()[]: mixed;
 
   /** Returns the first key from this ImmSet, or null if this ImmSet is empty.
    * @return mixed
@@ -733,7 +733,7 @@ final class ImmSet implements \ConstSet {
    * @return mixed
    */
   <<__Native>>
-  public function lastValue()[]: mixed;
+  public readonly function lastValue()[]: mixed;
 
   /** Returns the last key from this ImmSet, or null if this ImmSet is empty.
    * @return mixed

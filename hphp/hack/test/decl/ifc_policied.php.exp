@@ -37,9 +37,11 @@
                    et_type = (Rhint ([7:24-28]), (Tprim Tvoid)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
-                   ~returns_readonly:false ~readonly_this:false);
+                   ~returns_readonly:false ~support_dynamic_type:false
+                   ~readonly_this:false);
                  ft_ifc_decl = FDPolicied {Test} }));
-           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty) };
+           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+           sm_attributes = [] };
           { Shallow_decl_defs.sm_name = ([10:19-20], "g");
             sm_type =
             (Rwitness_from_decl ([10:19-20]),
@@ -53,10 +55,11 @@
                     et_type = (Rhint ([10:24-28]), (Tprim Tvoid)) };
                   ft_flags =
                   (make_ft_flags FSync ~return_disposable:false
-                    ~returns_readonly:false ~readonly_this:false);
+                    ~returns_readonly:false ~support_dynamic_type:false
+                    ~readonly_this:false);
                   ft_ifc_decl = FDPolicied {Public} }));
-            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty)
-            };
+            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+            sm_attributes = [] };
           { Shallow_decl_defs.sm_name = ([13:19-27], "implicit");
             sm_type =
             (Rwitness_from_decl ([13:19-27]),
@@ -70,10 +73,11 @@
                     et_type = (Rhint ([13:31-35]), (Tprim Tvoid)) };
                   ft_flags =
                   (make_ft_flags FSync ~return_disposable:false
-                    ~returns_readonly:false ~readonly_this:false);
+                    ~returns_readonly:false ~support_dynamic_type:false
+                    ~readonly_this:false);
                   ft_ifc_decl = FDPolicied {} }));
-            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty)
-            };
+            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+            sm_attributes = [] };
           { Shallow_decl_defs.sm_name = ([16:19-29], "inferflows");
             sm_type =
             (Rwitness_from_decl ([16:19-29]),
@@ -87,10 +91,11 @@
                     et_type = (Rhint ([16:33-37]), (Tprim Tvoid)) };
                   ft_flags =
                   (make_ft_flags FSync ~return_disposable:false
-                    ~returns_readonly:false ~readonly_this:false);
+                    ~returns_readonly:false ~support_dynamic_type:false
+                    ~readonly_this:false);
                   ft_ifc_decl = FDInferFlows }));
-            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty)
-            };
+            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+            sm_attributes = [] };
           { Shallow_decl_defs.sm_name = ([19:19-28], "classname");
             sm_type =
             (Rwitness_from_decl ([19:19-28]),
@@ -104,10 +109,11 @@
                     et_type = (Rhint ([19:32-36]), (Tprim Tvoid)) };
                   ft_flags =
                   (make_ft_flags FSync ~return_disposable:false
-                    ~returns_readonly:false ~readonly_this:false);
+                    ~returns_readonly:false ~support_dynamic_type:false
+                    ~readonly_this:false);
                   ft_ifc_decl = FDPolicied {\Policy} }));
-            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty)
-            };
+            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+            sm_attributes = [] };
           { Shallow_decl_defs.sm_name = ([22:19-27], "defaults");
             sm_type =
             (Rwitness_from_decl ([22:19-27]),
@@ -121,10 +127,11 @@
                     et_type = (Rhint ([22:31-35]), (Tprim Tvoid)) };
                   ft_flags =
                   (make_ft_flags FSync ~return_disposable:false
-                    ~returns_readonly:false ~readonly_this:false);
+                    ~returns_readonly:false ~support_dynamic_type:false
+                    ~readonly_this:false);
                   ft_ifc_decl = FDPolicied {PUBLIC} }));
-            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty)
-            };
+            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+            sm_attributes = [] };
           { Shallow_decl_defs.sm_name = ([24:19-28], "with_args");
             sm_type =
             (Rwitness_from_decl ([24:19-28]),
@@ -161,7 +168,9 @@
                                 };
                               ft_flags =
                               (make_ft_flags FSync ~return_disposable:false
-                                ~returns_readonly:false ~readonly_this:false);
+                                ~returns_readonly:false
+                                ~support_dynamic_type:false
+                                ~readonly_this:false);
                               ft_ifc_decl = FDPolicied {PUBLIC} }))
                         };
                       fp_flags =
@@ -178,10 +187,11 @@
                     et_type = (Rhint ([27:6-10]), (Tprim Tvoid)) };
                   ft_flags =
                   (make_ft_flags FSync ~return_disposable:false
-                    ~returns_readonly:false ~readonly_this:false);
+                    ~returns_readonly:false ~support_dynamic_type:false
+                    ~readonly_this:false);
                   ft_ifc_decl = FDPolicied {PUBLIC} }));
-            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty)
-            }
+            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+            sm_attributes = [] }
           ];
         sc_user_attributes = []; sc_enum_type = None }));
   ("\\inferflows",
@@ -199,7 +209,8 @@
                 et_type = (Rhint ([31:24-28]), (Tprim Tvoid)) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~readonly_this:false);
+                ~returns_readonly:false ~support_dynamic_type:false
+                ~readonly_this:false);
               ft_ifc_decl = FDInferFlows }));
         fe_pos = [31:10-20]; fe_php_std_lib = false;
         fe_support_dynamic_type = false }))

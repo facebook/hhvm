@@ -318,7 +318,10 @@ class local_finding_visitor =
     inherit [LocalMap.t] Nast.Visitor_DEPRECATED.visitor as _super
 
     method! on_lvar localmap (pos, name) =
-      LocalMap.add (Local_id.get_name name) pos localmap
+      if Local_id.is_user_denotable name then
+        LocalMap.add (Local_id.get_name name) pos localmap
+      else
+        localmap
 
     method! on_pipe localmap _id left right =
       (*

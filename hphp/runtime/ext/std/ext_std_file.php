@@ -1238,7 +1238,7 @@ function readlink(string $path): mixed;
  *
  */
 <<__Native>>
-function realpath(string $path): mixed;
+function realpath(string $path)[read_globals]: mixed;
 
 /**
  * pathinfo() returns an associative array containing information about path.

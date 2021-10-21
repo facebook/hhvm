@@ -4,11 +4,11 @@ function handler($err, $errstr) {
   $errstr = preg_replace('/given,.*$/','given', $errstr);
   var_dump($err, $errstr);
 }
-class y {
+class Y {
   public $foo = varray[1,2,3];
 }
-class x {
-  function __construct(<<__Soft>> y $y) {
+class X {
+  function __construct(<<__Soft>> Y $y) {
     var_dump($y->foo);
   }
 }

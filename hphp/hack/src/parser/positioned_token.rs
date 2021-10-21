@@ -184,11 +184,11 @@ impl PositionedTokenImpl {
 }
 
 impl LexablePositionedToken for PositionedToken {
-    fn text<'b>(&self, source_text: &'b SourceText) -> &'b str {
+    fn text<'b>(&self, source_text: &'b SourceText<'_>) -> &'b str {
         source_text.sub_as_str(self.start_offset(), self.width())
     }
 
-    fn text_raw<'b>(&self, source_text: &'b SourceText) -> &'b [u8] {
+    fn text_raw<'b>(&self, source_text: &'b SourceText<'_>) -> &'b [u8] {
         source_text.sub(self.start_offset(), self.width())
     }
 

@@ -119,9 +119,7 @@ let merge_saved_state_futures
         "Unhandled Future.error from state loader: %s"
         (Future.error_to_string error);
       let e = Exception.wrap_unraised (Future.error_to_exn error) in
-      let exn = Exception.to_exn e in
-      let stack = Utils.Callstack (Exception.get_backtrace_string e) in
-      Error (Load_state_unhandled_exception { exn; stack })
+      Error (Load_state_unhandled_exception e)
     | Ok (Error error) -> Error error
     | Ok (Ok deptable_result) ->
       let ( downloaded_naming_table_path,
@@ -1400,8 +1398,8 @@ let saved_state_init
         Ok (loaded_info, changed_while_parsing)
     with
     | exn ->
-      let stack = Utils.Callstack (Printexc.get_backtrace ()) in
-      Error (Load_state_unhandled_exception { exn; stack })
+      let e = Exception.wrap exn in
+      Error (Load_state_unhandled_exception e)
   in
   HackEventLogger.saved_state_download_and_load_done
     ~load_state_approach:(show_load_state_approach load_state_approach)

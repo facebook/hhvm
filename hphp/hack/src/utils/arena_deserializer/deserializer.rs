@@ -403,7 +403,7 @@ where
 {
     type Value = <V as Visitor<'arena>>::Value;
 
-    fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+    fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.delegate.expecting(formatter)
     }
 

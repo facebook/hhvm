@@ -251,7 +251,7 @@ struct ResolverVisitor<'a, 'arena: 'a, 'decl: 'a> {
 }
 
 #[allow(dead_code)]
-struct Ctx<'a, 'arena: 'a, 'decl: 'a> {
+struct Ctx<'a, 'arena, 'decl> {
     emitter: &'a mut Emitter<'arena, 'decl>,
     scope: &'a Scope<'a, 'arena>,
 }

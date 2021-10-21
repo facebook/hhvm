@@ -85,7 +85,7 @@ pub trait VisitorTrait {
             let name = gen_visit_fn_name(ty);
             let ty = format_ident!("{}", ty);
             visit_fn.push(quote! {
-                fn #name(&mut self, c: &mut <Self::P as Params>::#context, p: #ref_kind #ty#ty_args) -> Result<(), <Self::P as Params>::#error> {
+                fn #name(&mut self, c: &mut <Self::P as Params>::#context, p: #ref_kind #ty #ty_args) -> Result<(), <Self::P as Params>::#error> {
                     p.recurse(c, self.object())
                 }
             });

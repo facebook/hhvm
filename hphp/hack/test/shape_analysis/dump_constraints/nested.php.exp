@@ -1,0 +1,7 @@
+=== Shape analysis results for nested.php
+Constraints for \f:
+EX [4:15-30]
+EX [4:3-31]
+SK [4:15-30] => b : int
+SK [4:3-31] => a : \HH\dict<string, int>
+

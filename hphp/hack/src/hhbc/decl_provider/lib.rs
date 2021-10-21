@@ -12,14 +12,14 @@ pub enum Error {
 }
 
 pub trait DeclProvider<'decl> {
-    fn get_decl(&self, symbol: &str) -> Result<Decl<'decl>, Error>;
+    fn get_decl(&self, kind: i32, symbol: &str) -> Result<Decl<'decl>, Error>;
 }
 
 #[derive(Debug, Default)]
 pub struct NoDeclProvider;
 
 impl<'decl> DeclProvider<'decl> for NoDeclProvider {
-    fn get_decl(&self, _: &str) -> Result<Decl<'decl>, Error> {
+    fn get_decl(&self, _: i32, _: &str) -> Result<Decl<'decl>, Error> {
         Err(Error::NotFound)
     }
 }

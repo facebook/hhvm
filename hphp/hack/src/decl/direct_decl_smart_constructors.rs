@@ -77,7 +77,7 @@ pub struct DirectDeclSmartConstructors<'a, 'text, S: SourceTextAllocator<'text, 
     namespace_builder: Rc<NamespaceBuilder<'a>>,
     classish_name_builder: ClassishNameBuilder<'a>,
     type_parameters: Rc<Vec<'a, SSet<'a>>>,
-
+    omit_user_attributes_irrelevant_to_typechecking: bool,
     previous_token_kind: TokenKind,
 
     source_text_allocator: S,
@@ -90,6 +90,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         file_mode: Mode,
         arena: &'a Bump,
         source_text_allocator: S,
+        omit_user_attributes_irrelevant_to_typechecking: bool,
     ) -> Self {
         let source_text = IndexedSourceText::new(src.clone());
         let path = source_text.source_text().file_path();
@@ -119,6 +120,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
             // EndOfFile.
             previous_token_kind: TokenKind::EndOfFile,
             source_text_allocator,
+            omit_user_attributes_irrelevant_to_typechecking,
         }
     }
 
@@ -1214,8 +1216,15 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                 } else {
                     match name {
                         "nothing" => Ty_::Tunion(&[]),
-                        "nonnull" => Ty_::Tnonnull,
+                        "nonnull" => {
+                            if self.opts.everything_sdt {
+                                Ty_::Tsupportdynamic
+                            } else {
+                                Ty_::Tnonnull
+                            }
+                        }
                         "dynamic" => Ty_::Tdynamic,
+                        "supportdynamic" => Ty_::Tsupportdynamic,
                         "varray_or_darray" | "vec_or_dict" => {
                             let key_type = self.vec_or_dict_key(pos);
                             let value_type = self.alloc(Ty(self.alloc(Reason::hint(pos)), TANY_));
@@ -2455,7 +2464,17 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             TokenKind::Num => self.prim_ty(aast::Tprim::Tnum, token_pos(self)),
             TokenKind::Bool => self.prim_ty(aast::Tprim::Tbool, token_pos(self)),
             TokenKind::Mixed => {
-                Node::Ty(self.alloc(Ty(self.alloc(Reason::hint(token_pos(self))), Ty_::Tmixed)))
+                if self.opts.everything_sdt {
+                    Node::Ty(self.alloc(Ty(
+                        self.alloc(Reason::hint(token_pos(self))),
+                        Ty_::Toption(self.alloc(Ty(
+                            self.alloc(Reason::hint(token_pos(self))),
+                            Ty_::Tsupportdynamic,
+                        ))),
+                    )))
+                } else {
+                    Node::Ty(self.alloc(Ty(self.alloc(Reason::hint(token_pos(self))), Ty_::Tmixed)))
+                }
             }
             TokenKind::Void => self.prim_ty(aast::Tprim::Tvoid, token_pos(self)),
             TokenKind::Arraykey => self.prim_ty(aast::Tprim::Tarraykey, token_pos(self)),
@@ -4148,7 +4167,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_methodish_declaration(
         &mut self,
-        attributes: Self::R,
+        attrs: Self::R,
         header: Self::R,
         body: Self::R,
         closer: Self::R,
@@ -4164,11 +4183,11 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         let modifiers = read_member_modifiers(header.modifiers.iter());
         let is_constructor = header.name.is_token(TokenKind::Construct);
         let is_method = true;
-        let (id, ty, properties) = match self.function_to_ty(is_method, attributes, header, body) {
+        let (id, ty, properties) = match self.function_to_ty(is_method, attrs, header, body) {
             Some(tuple) => tuple,
             None => return Node::Ignored(SK::MethodishDeclaration),
         };
-        let attributes = self.to_attributes(attributes);
+        let attributes = self.to_attributes(attrs);
         let deprecated = attributes.deprecated.map(|msg| {
             let mut s = String::new_in(self.arena);
             s.push_str("The method ");
@@ -4199,12 +4218,30 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             }
             _ => modifiers.visibility,
         };
+
+        let mut user_attributes = Vec::new_in(self.arena);
+        if !self.omit_user_attributes_irrelevant_to_typechecking {
+            for attribute in attrs.iter() {
+                match attribute {
+                    Node::Attribute(attr) => {
+                        user_attributes.push(self.user_attribute_to_decl(attr))
+                    }
+                    _ => {}
+                }
+            }
+            // Match ordering of attributes produced by the OCaml decl parser (even
+            // though it's the reverse of the syntactic ordering).
+            user_attributes.reverse();
+        }
+        let user_attributes = user_attributes.into_bump_slice();
+
         let method = self.alloc(ShallowMethod {
             name: id,
             type_: ty,
             visibility,
             deprecated,
             flags,
+            attributes: user_attributes,
         });
         if is_constructor {
             Node::Constructor(self.alloc(ConstructorNode { method, properties }))

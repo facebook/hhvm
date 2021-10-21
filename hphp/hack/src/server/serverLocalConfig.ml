@@ -542,6 +542,8 @@ type t = {
   (* Enables the reverse naming table to fall back to SQLite for queries. *)
   naming_sqlite_path: string option;
   enable_naming_table_fallback: bool;
+  (* Uses the naming table for dephash->filename lookups *)
+  use_naming_for_dephash_filenames: bool;
   (* Selects a search provider for autocomplete and symbol search; see also [ide_symbolindex_search_provider] *)
   symbolindex_search_provider: string;
   symbolindex_quiet: bool;
@@ -575,7 +577,6 @@ type t = {
   save_and_upload_naming_table: bool;
   deferments_light: bool;
       (** Stop typechecking when deferment threshold is reached and instead get decls to predeclare from names in AST. *)
-  old_naming_table_for_redecl: bool;  (** Use old naming table when redecling *)
   log_from_client_when_slow_monitor_connections: bool;
       (**  Alerts hh users what processes are using hh_server when hh_client is slow to connect. *)
   naming_sqlite_in_hack_64: bool;
@@ -666,6 +667,7 @@ let default =
     remote_transport_channel = None;
     naming_sqlite_path = None;
     enable_naming_table_fallback = false;
+    use_naming_for_dephash_filenames = false;
     symbolindex_search_provider = "SqliteIndex";
     (* the code actually doesn't use this default for ide_symbolindex_search_provider;
        it defaults to whatever was computed for symbolindex_search_provider. *)
@@ -688,7 +690,6 @@ let default =
     watchman = Watchman.default;
     save_and_upload_naming_table = false;
     deferments_light = false;
-    old_naming_table_for_redecl = false;
     log_from_client_when_slow_monitor_connections = false;
     naming_sqlite_in_hack_64 = false;
     workload_quantile = None;
@@ -1185,6 +1186,13 @@ let load_ fn ~silent ~current_version overrides =
     else
       None
   in
+  let use_naming_for_dephash_filenames =
+    bool_if_min_version
+      "use_naming_for_dephash_filenames"
+      ~default:default.use_naming_for_dephash_filenames
+      ~current_version
+      config
+  in
   let symbolindex_search_provider =
     string_
       "symbolindex_search_provider"
@@ -1293,13 +1301,6 @@ let load_ fn ~silent ~current_version overrides =
     bool_if_min_version
       "deferments_light"
       ~default:default.deferments_light
-      ~current_version
-      config
-  in
-  let old_naming_table_for_redecl =
-    bool_if_min_version
-      "old_naming_table_for_redecl"
-      ~default:default.old_naming_table_for_redecl
       ~current_version
       config
   in
@@ -1437,6 +1438,7 @@ let load_ fn ~silent ~current_version overrides =
     remote_transport_channel;
     naming_sqlite_path;
     enable_naming_table_fallback;
+    use_naming_for_dephash_filenames;
     symbolindex_search_provider;
     symbolindex_quiet;
     symbolindex_file;
@@ -1456,7 +1458,6 @@ let load_ fn ~silent ~current_version overrides =
     force_remote_type_check;
     save_and_upload_naming_table;
     deferments_light;
-    old_naming_table_for_redecl;
     log_from_client_when_slow_monitor_connections;
     naming_sqlite_in_hack_64;
     workload_quantile;
@@ -1478,10 +1479,12 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       require_saved_state = options.require_saved_state;
       stream_errors = options.stream_errors;
       deferments_light = options.deferments_light;
-      old_naming_table_for_redecl = options.old_naming_table_for_redecl;
+      force_shallow_decl_fanout = options.force_shallow_decl_fanout;
       log_from_client_when_slow_monitor_connections =
         options.log_from_client_when_slow_monitor_connections;
       naming_sqlite_in_hack_64 = options.naming_sqlite_in_hack_64;
       use_hack_64_naming_table = options.use_hack_64_naming_table;
       enable_disk_heap = options.enable_disk_heap;
+      use_naming_for_dephash_filenames =
+        options.use_naming_for_dephash_filenames;
     }

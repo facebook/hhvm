@@ -8,8 +8,8 @@ use ocamlrep_ocamlpool::ocaml_ffi;
 
 ocaml_ffi! {
     fn configs_to_json_ffi(
-        jsons: Vec<compile_ffi::OcamlStr>,
-        cli_args: Vec<compile_ffi::OcamlStr>,
+        jsons: Vec<compile_ffi::OcamlStr<'_>>,
+        cli_args: Vec<compile_ffi::OcamlStr<'_>>,
     ) -> String {
         let jsons: Vec<_> = jsons.into_iter().rev().collect();
         Options::from_configs(&jsons, &cli_args)

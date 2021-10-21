@@ -1,8 +1,8 @@
-diff --git a/CMake/folly-deps.cmake b/CMake/folly-deps.cmake
-index 25b42eb4d..02b54ceaa 100644
---- a/CMake/folly-deps.cmake
-+++ b/CMake/folly-deps.cmake
-@@ -97,11 +97,14 @@ if (BZIP2_FOUND)
+Index: folly/CMake/folly-deps.cmake
+===================================================================
+--- folly.orig/CMake/folly-deps.cmake
++++ folly/CMake/folly-deps.cmake
+@@ -102,11 +102,14 @@ if (BZIP2_FOUND)
    list(APPEND FOLLY_LINK_LIBRARIES ${BZIP2_LIBRARIES})
  endif()
  

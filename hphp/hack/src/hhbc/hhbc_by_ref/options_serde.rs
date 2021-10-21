@@ -6,6 +6,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 // SOFTWARE.
 
+#[allow(unused_extern_crates)]
 extern crate proc_macro;
 
 use proc_macro::{Ident, Span, TokenStream, TokenTree};

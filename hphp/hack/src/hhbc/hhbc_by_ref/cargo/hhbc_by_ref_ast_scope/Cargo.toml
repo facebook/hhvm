@@ -8,7 +8,7 @@ edition = "2018"
 path = "../../ast_scope.rs"
 
 [dependencies]
-bumpalo = { version = "3.2.1", features = ["collections"] }
+bumpalo = { version = "3.8", features = ["collections"] }
 hhbc_by_ref_hhas_coeffects = { path = "../hhbc_by_ref_hhas_coeffects" }
 itertools = "0.10.1"
 oxidized = { path = "../../../../oxidized" }

@@ -13,11 +13,20 @@ module A = Aast
 module T = Tast
 module SN = Naming_special_names
 module Env = Shape_analysis_env
+module Solver = Shape_analysis_solver
 
 (* A program analysis to find shape like dicts and the static keys used in
    these dicts. *)
 
+let failwithpos pos msg = failwith (Format.asprintf "%a: %s" Pos.pp pos msg)
+
 let log_pos = Format.printf "%a\n" Pos.pp
+
+let fully_expand_type env ty =
+  let (_env, ty) =
+    Typing_inference_env.fully_expand_type env.saved_env.Tast.inference_env ty
+  in
+  ty
 
 type target_accumulator = {
   expressions_to_modify: Pos.t list;
@@ -62,16 +71,18 @@ let add_key_constraint
   | Some entity ->
     let constraint_ =
       match key with
-      | A.String _ -> Has_static_key (entity, key, ty)
+      | A.String str ->
+        let ty = fully_expand_type env ty in
+        Has_static_key (entity, SK_string str, ty)
       | _ -> Has_dynamic_key entity
     in
     Env.add_constraint env constraint_
   | None -> env
 
-let assign (env : env) ((_, _, lval) : T.expr) (rhs : entity) : env =
+let assign (env : env) ((_, pos, lval) : T.expr) (rhs : entity) : env =
   match lval with
   | A.Lvar (_, lid) -> Env.set_local lid rhs env
-  | _ -> failwith "An lvalue is not yet supported"
+  | _ -> failwithpos pos "An lvalue is not yet supported"
 
 let rec expr (env : env) ((ty, pos, e) : T.expr) : env * entity =
   match e with
@@ -105,33 +116,36 @@ let rec expr (env : env) ((ty, pos, e) : T.expr) : env * entity =
     let (env, entity_rhs) = expr env e2 in
     let env = assign env e1 entity_rhs in
     (env, None)
-  | _ -> failwith "An expression is not yet handled"
+  | _ -> failwithpos pos "An expression is not yet handled"
 
 let expr (env : env) (e : T.expr) : env = expr env e |> fst
 
-let stmt (env : env) ((_, stmt) : T.stmt) : env =
+let stmt (env : env) ((pos, stmt) : T.stmt) : env =
   match stmt with
   | A.Expr e
   | A.Return (Some e) ->
     expr env e
-  | _ -> failwith "An expression is not yet handled"
+  | _ -> failwithpos pos "A statement is not yet handled"
 
 let block (env : env) : T.block -> env = List.fold ~init:env ~f:stmt
 
-let callable body : constraint_ list =
-  let env = Env.init in
+let callable ~saved_env body : constraint_ list =
+  let env = Env.init saved_env in
   let env = block env body.A.fb_ast in
   env.constraints
 
 let walk_tast (tast : Tast.program) : constraint_ list SMap.t =
   let def : T.def -> (string * constraint_ list) list = function
     | A.Fun fd ->
-      let A.{ f_body; f_name = (_, id); _ } = fd.A.fd_fun in
-      [(id, callable f_body)]
+      let A.{ f_body; f_name = (_, id); f_annotation = saved_env; _ } =
+        fd.A.fd_fun
+      in
+      [(id, callable ~saved_env f_body)]
     | A.Class A.{ c_methods; c_name = (_, class_name); _ } ->
-      let handle_method A.{ m_body; m_name = (_, method_name); _ } =
+      let handle_method
+          A.{ m_body; m_name = (_, method_name); m_annotation = saved_env; _ } =
         let id = class_name ^ "::" ^ method_name in
-        (id, callable m_body)
+        (id, callable ~saved_env m_body)
       in
       List.map ~f:handle_method c_methods
     | _ -> failwith "A definition is not yet handled"
@@ -162,4 +176,15 @@ let analyse (options : options) (ctx : Provider_context.t) (tast : T.program) =
       Format.printf "\n"
     in
     walk_tast tast |> SMap.iter print_function_constraints
-  | _ -> ()
+  | SimplifyConstraints ->
+    let print_callable_summary (id : string) (results : shape_result list) :
+        unit =
+      Format.printf "Summary for %s:\n" id;
+      List.iter results ~f:(fun result ->
+          Format.printf "%s\n" (show_shape_result empty_typing_env result))
+    in
+    let process_callable id constraints =
+      Solver.simplify empty_typing_env constraints |> print_callable_summary id
+    in
+    walk_tast tast |> SMap.iter process_callable
+  | SolveConstraints -> ()

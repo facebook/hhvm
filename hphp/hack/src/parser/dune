@@ -98,7 +98,6 @@
     parser_options
     parser_schema
     parser_schema_def
-    partial_provider
     relative_path
 
     rust_parser_errors_ffi

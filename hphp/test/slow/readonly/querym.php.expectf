@@ -1,2 +1,2 @@
-Fatal error: Uncaught exception 'InvalidOperationException' with message 'Property c of class Foo is readonly, but isn't enclosed in a readonly expression.' in %s/querym.php:17
+Fatal error: Uncaught exception 'InvalidOperationException' with message 'Property c of class Foo is readonly, but isn't enclosed in a readonly expression.' in %s/querym.php:16
 %A

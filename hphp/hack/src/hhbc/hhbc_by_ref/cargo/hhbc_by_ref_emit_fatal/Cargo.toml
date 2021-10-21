@@ -8,7 +8,7 @@ edition = "2018"
 path = "../../emit_fatal.rs"
 
 [dependencies]
-bumpalo = { version = "3.2.1", features = ["collections"] }
+bumpalo = { version = "3.8", features = ["collections"] }
 hhbc_by_ref_emit_pos = { path = "../hhbc_by_ref_emit_pos" }
 hhbc_by_ref_hhbc_ast = { path = "../hhbc_by_ref_hhbc_ast" }
 hhbc_by_ref_instruction_sequence = { path = "../hhbc_by_ref_instruction_sequence" }

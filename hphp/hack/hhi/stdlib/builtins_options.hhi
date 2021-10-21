@@ -38,7 +38,7 @@ function get_included_files();
 <<__PHPStdLib>>
 function get_required_files();
 <<__PHPStdLib>>
-function getenv(string $varname);
+function getenv(string $varname)[read_globals];
 <<__PHPStdLib>>
 function getlastmod();
 <<__PHPStdLib>>
@@ -56,9 +56,9 @@ function getrusage(int $who = 0);
 <<__PHPStdLib>>
 function clock_getres(int $clk_id, inout $sec, inout $nsec);
 <<__PHPStdLib>>
-function clock_gettime(int $clk_id, inout $sec, inout $nsec);
+function clock_gettime(int $clk_id, inout $sec, inout $nsec)[controlled];
 <<__PHPStdLib>>
-function clock_gettime_ns(int $clk_id): int;
+function clock_gettime_ns(int $clk_id)[controlled]: int;
 <<__PHPStdLib>>
 function cpu_get_count();
 <<__PHPStdLib>>
@@ -74,17 +74,17 @@ function ini_alter(string $varname, $newvalue);
 <<__PHPStdLib>>
 function ini_get_all(string $extension = "");
 <<__PHPStdLib>>
-function ini_get(string $varname);
+function ini_get(string $varname)[read_globals];
 <<__PHPStdLib>>
 function ini_restore(string $varname);
 <<__PHPStdLib>>
 function ini_set(string $varname, $newvalue);
 <<__PHPStdLib>>
-function memory_get_allocation();
+function memory_get_allocation()[read_globals];
 <<__PHPStdLib>>
-function memory_get_peak_usage(bool $real_usage = false);
+function memory_get_peak_usage(bool $real_usage = false)[read_globals];
 <<__PHPStdLib>>
-function memory_get_usage(bool $real_usage = false);
+function memory_get_usage(bool $real_usage = false)[read_globals];
 <<__PHPStdLib>>
 function php_ini_scanned_files();
 <<__PHPStdLib>>

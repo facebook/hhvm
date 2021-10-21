@@ -1,7 +1,7 @@
 int(2)
-string(61) "Argument 1 to x::__construct() must be of type @y, null given"
+string(61) "Argument 1 to X::__construct() must be of type @Y, null given"
 int(8)
 string(36) "Cannot access property on non-object"
 NULL
-object(x) (0) {
+object(X) (0) {
 }

@@ -1050,7 +1050,7 @@ void SymbolMap::update(
   }
 
   for (auto const& path : deletedPaths) {
-    wlock->removePath(db, txn, Path{path});
+    wlock->removePath(Path{path});
   }
 
   wlock->m_clock = clock;
@@ -1577,7 +1577,7 @@ void SymbolMap::Data::updatePath(
   m_fileExistsMap.insert_or_assign(path, true);
 }
 
-void SymbolMap::Data::removePath(AutoloadDB& db, SQLiteTxn& txn, Path path) {
+void SymbolMap::Data::removePath(Path path) {
   m_versions->bumpVersion(path);
   m_fileExistsMap.insert_or_assign(path, false);
 }

@@ -1,4 +1,4 @@
 File "bad_inout_use_lvalue1.php", line 6, characters 11-12:
 literal is not allowed in write context (Parsing[1002])
 File "bad_inout_use_lvalue1.php", line 6, characters 11-12:
-Arguments for `inout` parameters must be local variables or simple subscript expressions on vecs, dicts, keysets, or arrays (NastCheck[3050])
+`inout` arguments may only be local variables or array indexing expressions  (NastCheck[3050])

@@ -65,7 +65,7 @@ impl<'a> State<'a> {
 }
 
 impl<'a> StateType<PositionedSyntax<'a>> for State<'a> {
-    fn next(&mut self, _inputs: &[&PositionedSyntax]) {}
+    fn next(&mut self, _inputs: &[&PositionedSyntax<'_>]) {}
 }
 
 impl<'a> HasArena<'a> for State<'a> {

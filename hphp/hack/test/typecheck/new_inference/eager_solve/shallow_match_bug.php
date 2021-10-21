@@ -4,7 +4,7 @@ function test(): void {
   reduce(
     vec<dict<string, mixed>>[],
     ($prev, $_) ==> {
-      $key = '' as ~arraykey;
+      $key = '' as dynamic;
       if (!contains_key($prev)) {
         $prev[$key] = 0;
       }

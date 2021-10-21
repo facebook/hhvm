@@ -8,7 +8,7 @@ edition = "2018"
 path = "../../aast_parser_lib.rs"
 
 [dependencies]
-bumpalo = { version = "3.2.1", features = ["collections"] }
+bumpalo = { version = "3.8", features = ["collections"] }
 decl_mode_parser = { path = "../../api/cargo/decl_mode_parser" }
 hh_autoimport_rust = { path = "../hh_autoimport" }
 lowerer = { path = "../../lowerer" }

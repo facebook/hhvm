@@ -81,6 +81,7 @@
 (executable
     (name errors_test)
     (modules errors_test)
+    (modes exe byte_complete)
     (libraries
         asserter
         errors

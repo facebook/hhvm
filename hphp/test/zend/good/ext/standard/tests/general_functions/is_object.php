@@ -55,7 +55,7 @@ class myClass {
     $this->public_var = 10;
     $this->public_var1 = new foo();
     $this->private_var = new foo();
-    $this->proected_var = new foo();
+    $this->protected_var = new foo();
   }
 }
 

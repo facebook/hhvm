@@ -100,14 +100,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
       offending text is '%s'."
            (Syntax.text node))
     | Syntax.EndOfFile x -> t env x.end_of_file_token
-    | Syntax.Script x ->
-      begin
-        match Syntax.syntax x.script_declarations with
-        | Syntax.SyntaxList (header :: declarations)
-          when Syntax.is_markup_section header ->
-          Concat [t env header; Newline; handle_list env declarations]
-        | _ -> Concat [handle_possible_list env x.script_declarations]
-      end
+    | Syntax.Script x -> Concat [handle_possible_list env x.script_declarations]
     | Syntax.LiteralExpression { literal_expression } ->
       (* Double quoted string literals can create a list *)
       let wrap_with_literal_type token transformed =
@@ -144,34 +137,11 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
       Concat [t env name; t env str]
     | Syntax.MarkupSection
         { markup_hashbang = hashbang; markup_suffix = suffix; _ } ->
-      let is_hh_script =
-        match Syntax.syntax suffix with
-        | Syntax.MarkupSuffix
-            { markup_suffix_name = Syntax.{ syntax = Token t; _ }; _ } ->
-          String.equal (Token.text t) "hh"
-        | _ -> false
-      in
-      let rec all_whitespaces s i =
-        i >= String.length s
-        ||
-        match s.[i] with
-        | ' '
-        | '\t'
-        | '\r'
-        | '\n' ->
-          all_whitespaces s (i + 1)
-        | _ -> false
-      in
-      let text_contains_only_whitespaces =
-        match Syntax.syntax hashbang with
-        | Syntax.Token t -> all_whitespaces (Token.text t) 0
-        | _ -> false
-      in
-      if is_hh_script && text_contains_only_whitespaces then
+      if Syntax.is_missing hashbang then
         t env suffix
       else
-        transform_simple env node
-    | Syntax.MarkupSuffix _
+        Concat [t env hashbang; Newline; t env suffix]
+    | Syntax.MarkupSuffix _ -> transform_simple_statement env node
     | Syntax.SimpleTypeSpecifier _
     | Syntax.VariableExpression _
     | Syntax.PipeVariableExpression _

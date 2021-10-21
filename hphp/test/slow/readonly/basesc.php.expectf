@@ -1,2 +1,2 @@
-Fatal error: Uncaught exception 'InvalidOperationException' with message 'Property c of class Foo must be mutable.' in %s/basesc.php:15
+Fatal error: Uncaught exception 'InvalidOperationException' with message 'Property c of class Foo must be mutable.' in %s/basesc.php:13
 %A

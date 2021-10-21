@@ -1,7 +1,7 @@
 File "bad_inout_use_lvalue9.php", line 6, characters 11-23:
 tuple_expression is not allowed in write context (Parsing[1002])
 File "bad_inout_use_lvalue9.php", line 6, characters 11-23:
-Arguments for `inout` parameters must be local variables or simple subscript expressions on vecs, dicts, keysets, or arrays (NastCheck[3050])
+`inout` arguments may only be local variables or array indexing expressions  (NastCheck[3050])
 File "bad_inout_use_lvalue9.php", line 6, characters 5-23:
 Invalid argument (Typing[4110])
   File "bad_inout_use_lvalue9.php", line 3, characters 18-28:

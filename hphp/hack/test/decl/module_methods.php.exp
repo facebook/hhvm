@@ -23,10 +23,11 @@
                   et_type = (Rhint ([9:24-28]), (Tprim Tvoid)) };
                 ft_flags =
                 (make_ft_flags FSync ~return_disposable:false
-                  ~returns_readonly:false ~readonly_this:false);
+                  ~returns_readonly:false ~support_dynamic_type:false
+                  ~readonly_this:false);
                 ft_ifc_decl = FDPolicied {PUBLIC} }));
-          sm_visibility = Internal; sm_deprecated = None; sm_flags = (empty)
-          }
+          sm_visibility = Internal; sm_deprecated = None; sm_flags = (empty);
+          sm_attributes = [] }
          ];
        sc_user_attributes =
        [{ Typing_defs_core.ua_name = ([6:3-11], "__Module");
@@ -48,7 +49,8 @@
                 et_type = (Rhint ([12:18-22]), (Tprim Tvoid)) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~readonly_this:false);
+                ~returns_readonly:false ~support_dynamic_type:false
+                ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [12:10-14]; fe_php_std_lib = false;
         fe_support_dynamic_type = false }))

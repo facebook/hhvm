@@ -1403,34 +1403,37 @@ and simplify_subtype_i
           let ty_dyn = MakeType.dynamic r_supportdynamic in
           simplify_dynamic_aware_subtype ~subtype_env ty ty_dyn env
         | (_, Tfun ft_sub) ->
-          (* Special case of function type subtype dynamic.
-           *   (function(ty1,...,tyn):ty <: supportdynamic)
-           *   iff
-           *   dynamic <D: ty1 & ... & dynamic <D: tyn & ty <D: dynamic
-           *)
-          let ty_dyn = MakeType.dynamic r_supportdynamic in
-          let ty_dyn_enf = { et_enforced = Unenforced; et_type = ty_dyn } in
-          env
-          (* Contravariant subtyping on parameters *)
-          |> begin
-               match ft_sub.ft_arity with
-               | Fvariadic { fp_type; _ } ->
-                 simplify_dynamic_aware_subtype
-                   ~subtype_env
-                   ty_dyn
-                   fp_type.et_type
-               | _ -> valid
-             end
-          &&& simplify_supertype_params_with_variadic
-                ~subtype_env:
-                  { subtype_env with coerce = Some TL.CoerceToDynamic }
-                ft_sub.ft_params
-                ty_dyn_enf
-          &&& (* Finally do covariant subtryping on return type *)
-          simplify_dynamic_aware_subtype
-            ~subtype_env
-            ft_sub.ft_ret.et_type
-            ty_dyn
+          if get_ft_support_dynamic_type ft_sub then
+            valid env
+          else
+            (* Special case of function type subtype dynamic.
+             *   (function(ty1,...,tyn):ty <: supportdynamic)
+             *   iff
+             *   dynamic <D: ty1 & ... & dynamic <D: tyn & ty <D: dynamic
+             *)
+            let ty_dyn = MakeType.dynamic r_supportdynamic in
+            let ty_dyn_enf = { et_enforced = Unenforced; et_type = ty_dyn } in
+            env
+            (* Contravariant subtyping on parameters *)
+            |> begin
+                 match ft_sub.ft_arity with
+                 | Fvariadic { fp_type; _ } ->
+                   simplify_dynamic_aware_subtype
+                     ~subtype_env
+                     ty_dyn
+                     fp_type.et_type
+                 | _ -> valid
+               end
+            &&& simplify_supertype_params_with_variadic
+                  ~subtype_env:
+                    { subtype_env with coerce = Some TL.CoerceToDynamic }
+                  ft_sub.ft_params
+                  ty_dyn_enf
+            &&& (* Finally do covariant subtryping on return type *)
+            simplify_dynamic_aware_subtype
+              ~subtype_env
+              ft_sub.ft_ret.et_type
+              ty_dyn
         | (_, Ttuple tyl) ->
           let ty_dyn = MakeType.dynamic r_supportdynamic in
           List.fold_left

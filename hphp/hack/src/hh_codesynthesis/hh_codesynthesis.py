@@ -24,8 +24,7 @@ import sys
 from typing import List, Optional, Union
 
 import clingo
-from clingo import Number, Symbol
-from hphp.hack.src.hh_codesynthesis.codeGenerator import CodeGenerator
+from hphp.hack.src.hh_codesynthesis.codeGenerator import CodeGenerator, ClingoContext
 from hphp.hack.src.hh_codesynthesis.hackGenerator import HackCodeGenerator
 
 # If libfb.py library exists, we run in the internal environment.
@@ -36,39 +35,6 @@ try:
     g_internal_run = True
 except ModuleNotFoundError:
     g_internal_run = False
-
-
-class ClingoContext:
-    """Context class interact with Python and Clingo."""
-
-    number_of_nodes = 0
-    avg_width = 0
-    min_depth = 1
-    min_classes = 1
-    min_interfaces = 1
-    lower_bound = 1
-    higher_bound = 10
-
-    def n(self) -> Symbol:
-        return Number(self.number_of_nodes)
-
-    def w(self) -> Symbol:
-        return Number(self.avg_width)
-
-    def d(self) -> Symbol:
-        return Number(self.min_depth)
-
-    def c(self) -> Symbol:
-        return Number(self.min_classes)
-
-    def i(self) -> Symbol:
-        return Number(self.min_interfaces)
-
-    def lb(self) -> Symbol:
-        return Number(self.lower_bound)
-
-    def hb(self) -> Symbol:
-        return Number(self.higher_bound)
 
 
 # Helper classes to handle each dependency edge.
@@ -124,18 +90,18 @@ class FunEdgeHandler(DependencyEdgeHandler):
 
 
 # Generate logic rules based on given parameters.
-def generate_logic_rules() -> List[str]:
+def generate_logic_rules(solving_context: ClingoContext) -> List[str]:
     rules: List[str] = []
 
-    if (
-        ClingoContext.number_of_nodes > 0
-        and ClingoContext.min_depth > ClingoContext.number_of_nodes
+    if solving_context.number_of_nodes > 0 and (
+        solving_context.min_depth > solving_context.number_of_nodes
+        or sum(solving_context.degree_distribution) > solving_context.number_of_nodes
     ):
         raise RuntimeError("Received unreasonable parameters.")
 
     # Creating n symbols.
     symbols = []
-    for i in range(ClingoContext.number_of_nodes):
+    for i in range(solving_context.number_of_nodes):
         # The number part is easier for reasoning to generate the graph. We are
         # adding a "S" prefix to each symbol to construct a string. So that the
         # synthesized code will has a valid class/interface name.
@@ -147,9 +113,15 @@ def generate_logic_rules() -> List[str]:
     # Creating backbone hierarchy with minimum depth using normal Distribution.
     # We separated the below part from "graph_generator.lp" to avoid "grounding bottleneck."
     # And we are using normal distrubution to create a sequence of extends_to among n nodes.
-    interval = ClingoContext.number_of_nodes // ClingoContext.min_depth or 1
-    for i in range(interval, ClingoContext.number_of_nodes, interval):
+    interval = solving_context.number_of_nodes // solving_context.min_depth or 1
+    for i in range(interval, solving_context.number_of_nodes, interval):
         rules.append(f'extends_to("S{i-interval}", "S{i}").')
+
+    # Creating a node distribution for each degree.
+    # We separated the below part from "graph_generator.lp" to narrow down the
+    # search scope.
+    for degree, minimum_nodes in enumerate(solving_context.degree_distribution):
+        rules.append(f":- #count{{X : in_degree(X, {degree})}} < {minimum_nodes}.")
 
     return rules
 
@@ -253,7 +225,10 @@ def do_reasoning(additional_programs: List[str], generator: CodeGenerator) -> No
     # Load extra dependency graph given by the user.
     ctl.add("base", [], "\n".join(additional_programs))
 
-    ctl.ground([("base", [])], context=ClingoContext())
+    ctl.ground([("base", [])], context=generator.solving_context)
+    # ToDo: Hardcode the number of threads for now, change to parameter later.
+    # Pyre-ignore: [16] Configuration not in pyre stubs since it's dynamic
+    ctl.configuration.solve.parallel_mode = "4"
     logging.info("Finished grounding.")
     result: Union[clingo.solving.SolveHandle, clingo.solving.SolveResult] = ctl.solve(
         on_model=generator.on_model
@@ -285,23 +260,23 @@ def output_to_file_or_stdout(
 
 
 def main() -> int:
-    generators = {
-        "raw": CodeGenerator,
-        "hack": HackCodeGenerator,
-    }
+    generators = {"raw": CodeGenerator, "hack": HackCodeGenerator}
 
     # Parse the arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("--input_file", type=os.path.abspath)
     parser.add_argument("--target_lang", type=str)
     parser.add_argument("--output_file", type=os.path.abspath)
-    parser.add_argument("--n", type=int)
-    parser.add_argument("--avg_width", type=int)
-    parser.add_argument("--min_depth", type=int)
-    parser.add_argument("--min_classes", type=int)
-    parser.add_argument("--min_interfaces", type=int)
-    parser.add_argument("--lower_bound", type=int)
-    parser.add_argument("--higher_bound", type=int)
+    parser.add_argument("--n", type=int, default=0)
+    parser.add_argument("--min_depth", type=int, default=1)
+    parser.add_argument("--min_classes", type=int, default=1)
+    parser.add_argument("--min_interfaces", type=int, default=1)
+    parser.add_argument("--min_stub_classes", type=int, default=0)
+    parser.add_argument("--min_stub_interfaces", type=int, default=0)
+    # Parameters that narrow the search space to speed up the computation.
+    parser.add_argument("--degree_distribution", nargs="*", default=[], type=int)
+    parser.add_argument("--lower_bound", type=int, default=1)
+    parser.add_argument("--higher_bound", type=int, default=1)
     parser.add_argument("--log", type=str)
     args: argparse.Namespace = parser.parse_args()
 
@@ -315,13 +290,17 @@ def main() -> int:
     logging.info("Started.")
 
     # Set graph generating parameters. (If any)
-    ClingoContext.number_of_nodes = args.n or 0
-    ClingoContext.avg_width = args.avg_width or 0
-    ClingoContext.min_depth = args.min_depth or 1
-    ClingoContext.min_classes = args.min_classes or 1
-    ClingoContext.min_interfaces = args.min_interfaces or 1
-    ClingoContext.lower_bound = args.lower_bound or 1
-    ClingoContext.higher_bound = args.higher_bound or 1
+    solving_context = ClingoContext(
+        number_of_nodes=args.n,
+        min_depth=args.min_depth,
+        min_classes=args.min_classes,
+        min_interfaces=args.min_interfaces,
+        min_stub_classes=args.min_stub_classes,
+        min_stub_interfaces=args.min_stub_interfaces,
+        degree_distribution=args.degree_distribution,
+        lower_bound=args.lower_bound,
+        higher_bound=args.higher_bound,
+    )
 
     # Load dependency graph.
     lines = read_from_file_or_stdin(filename=args.input_file)
@@ -333,9 +312,9 @@ def main() -> int:
     graph = "".join(lines).replace(",\n", ",").split("\n")
 
     # Output target language.
-    generator = generators.get(args.target_lang, CodeGenerator)()
+    generator = generators.get(args.target_lang, CodeGenerator)(solving_context)
 
-    combined_rules = generate_logic_rules() + extract_logic_rules(graph)
+    combined_rules = generate_logic_rules(solving_context) + extract_logic_rules(graph)
 
     logging.info("Extracted all rules.")
     logging.info(f"Number of depedency edges extracted: {len(combined_rules)}")

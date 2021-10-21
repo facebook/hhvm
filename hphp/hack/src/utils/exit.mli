@@ -18,11 +18,19 @@ type finale_data = {
       hh_server stopped. It appears in the CLI, and in HackIDE in a
       hover tooltip. It also is copied into the logs. *)
   stack: Utils.callstack;
+      (** telemetry is unstructured data, for logging, not shown to users *)
+  telemetry: Telemetry.t option;
 }
+
+(** If the server dies through a controlled exit, it leaves behind a "finale file" <pid>.fin
+with json-formatted data describing the detailed nature of the exit including callstack.
+This method retrieves that file, if it exists. *)
+val get_finale_data : string -> finale_data option
 
 (** human-readable debug output for hack developers, not for general public *)
 val show_finale_data : finale_data -> string
 
-val exit : ?msg:string -> ?stack:string -> Exit_status.t -> 'a
+val exit :
+  ?msg:string -> ?telemetry:Telemetry.t -> ?stack:string -> Exit_status.t -> 'a
 
 val add_hook_upon_clean_exit : (finale_data -> unit) -> unit

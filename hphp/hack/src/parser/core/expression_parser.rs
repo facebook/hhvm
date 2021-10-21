@@ -130,7 +130,7 @@ where
         &mut self.sc
     }
 
-    fn drain_skipped_tokens(&mut self) -> std::vec::Drain<Token<S>> {
+    fn drain_skipped_tokens(&mut self) -> std::vec::Drain<'_, Token<S>> {
         self.context.skipped_tokens.drain(..)
     }
 
@@ -175,7 +175,7 @@ where
     where
         F: Fn(&mut TypeParser<'a, S>) -> U,
     {
-        let mut type_parser: TypeParser<S> = TypeParser::make(
+        let mut type_parser: TypeParser<'_, S> = TypeParser::make(
             self.lexer.clone(),
             self.env.clone(),
             self.context.clone(),
@@ -188,7 +188,7 @@ where
     }
 
     fn parse_remaining_type_specifier(&mut self, name: S::R) -> S::R {
-        let mut type_parser: TypeParser<S> = TypeParser::make(
+        let mut type_parser: TypeParser<'_, S> = TypeParser::make(
             self.lexer.clone(),
             self.env.clone(),
             self.context.clone(),
@@ -208,7 +208,7 @@ where
     where
         F: Fn(&mut DeclarationParser<'a, S>) -> U,
     {
-        let mut decl_parser: DeclarationParser<S> = DeclarationParser::make(
+        let mut decl_parser: DeclarationParser<'_, S> = DeclarationParser::make(
             self.lexer.clone(),
             self.env.clone(),
             self.context.clone(),
@@ -224,7 +224,7 @@ where
     where
         F: Fn(&mut StatementParser<'a, S>) -> U,
     {
-        let mut statement_parser: StatementParser<S> = StatementParser::make(
+        let mut statement_parser: StatementParser<'_, S> = StatementParser::make(
             self.lexer.clone(),
             self.env.clone(),
             self.context.clone(),

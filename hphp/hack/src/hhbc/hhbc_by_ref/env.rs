@@ -172,11 +172,11 @@ impl<'a, 'arena> Env<'a, 'arena> {
     pub fn do_function<'decl, R, F>(
         &mut self,
         e: &mut Emitter<'arena, 'decl>,
-        defs: &AstBody,
+        defs: &AstBody<'_>,
         f: F,
     ) -> R
     where
-        F: FnOnce(&mut Self, &mut Emitter<'arena, 'decl>, &AstBody) -> R,
+        F: FnOnce(&mut Self, &mut Emitter<'arena, 'decl>, &AstBody<'_>) -> R,
     {
         self.jump_targets_gen.with_function();
         self.run_and_release_ids(e, |env, e| f(env, e, defs))

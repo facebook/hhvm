@@ -2755,8 +2755,6 @@ value Val_some(value v)
     CAMLreturn(some);
 }
 
-#define Some_val(v) Field(v,0)
-
 #ifndef NO_SQLITE3
 
 // ------------------------ START OF SQLITE3 SECTION --------------------------

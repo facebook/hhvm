@@ -54,12 +54,16 @@ for f in "$@"; do
 
   OUT_BASE=$(reconstitute_full_path "$f" "$OUTPUT_ROOT")
   EXP_BASE=$(reconstitute_full_path "$f" "$SOURCE_ROOT")
+
   if [ -e "$OUT_BASE$OUT_EXT" ]; then
     OUT="$OUT_BASE$OUT_EXT"
+  elif [ "$VERIFY_PESSIMISATION" = true ] && [ -e "$OUT_BASE.pess$OUT_EXT" ]; then
+    OUT="$OUT_BASE.pess$OUT_EXT"
   else
     OUT=/dev/null
   fi
   EXP_TO="$EXP_BASE$EXP_EXT"
+
   if [ -e "$EXP_BASE$EXP_EXT" ]; then
     EXP="$EXP_BASE$EXP_EXT"
   elif [ -n "${FALLBACK_EXP_EXT+x}" ] && [ -e "$EXP_BASE$FALLBACK_EXP_EXT" ]; then

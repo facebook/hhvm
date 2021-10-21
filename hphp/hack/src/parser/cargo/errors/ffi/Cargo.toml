@@ -11,7 +11,7 @@ doctest = false
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
-bumpalo = { version = "3.2.1", features = ["collections"] }
+bumpalo = { version = "3.8", features = ["collections"] }
 ocamlrep = { path = "../../../../ocamlrep" }
 ocamlrep_ocamlpool = { path = "../../../../ocamlrep_ocamlpool" }
 oxidized = { path = "../../../../oxidized" }

@@ -119,7 +119,7 @@ fn mk_impl(e: &ItemEnum) -> TokenStream {
         .map(|v| mk_as_function("_into", name, v, RefKind::Owned, is_singleton));
 
     quote! {
-        impl#generics #name#generics {
+        impl #generics #name #generics {
             #(#constrs)*
             #(#is_functions)*
             #(#as_ref_functions)*
@@ -210,7 +210,7 @@ fn mk_is_function(enum_name: &Ident, v: &Variant, is_singleton: bool) -> TokenSt
     } else {
         quote! {
             match self {
-                #enum_name::#name#field_match => true,
+                #enum_name::#name #field_match => true,
                 _ => false,
             }
         }

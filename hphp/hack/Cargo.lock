@@ -241,9 +241,9 @@ dependencies = [
 
 [[package]]
 name = "bumpalo"
-version = "3.2.1"
+version = "3.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "12ae9db68ad7fac5fe51304d20f016c911539251075a214f8e663babefa35187"
+checksum = "8f1e260c3a9040a7c19a12468758f4c16f31a81a1fe087482be9570ec864bb6c"
 
 [[package]]
 name = "byte-tools"
@@ -950,6 +950,7 @@ dependencies = [
  "naming_special_names_rust",
  "ocamlrep",
  "oxidized",
+ "oxidized_by_ref",
  "parser_core_types",
  "pretty_assertions",
  "serde",
@@ -3260,9 +3261,11 @@ dependencies = [
  "decl_provider",
  "decl_rust",
  "external_decl_provider",
+ "facts_rust",
  "ffi",
  "hhbc_by_ref_compile",
  "hhbc_by_ref_hhas_program",
+ "hhbc_by_ref_options",
  "libc",
  "log",
  "no_pos_hash",
@@ -3272,6 +3275,7 @@ dependencies = [
  "oxidized",
  "oxidized_by_ref",
  "parser_core_types",
+ "rust_facts_ffi",
  "serde_json",
  "stack_limit",
  "unified_decl_provider",
@@ -3286,17 +3290,6 @@ dependencies = [
  "ocamlrep",
  "ocamlrep_ocamlpool",
  "oxidized",
-]
-
-[[package]]
-name = "rust_facts_ffi_bridge"
-version = "0.0.0"
-dependencies = [
- "cxx",
- "cxx-build",
- "facts_rust",
- "oxidized",
- "rust_facts_ffi",
 ]
 
 [[package]]

@@ -20,7 +20,7 @@ pub trait SyntaxTrait {
     fn trailing_width(&self) -> usize;
     fn full_width(&self) -> usize;
     fn leading_start_offset(&self) -> usize;
-    fn extract_text<'a>(&self, source_text: &'a SourceText) -> Option<&'a str>;
+    fn extract_text<'a>(&self, source_text: &'a SourceText<'_>) -> Option<&'a str>;
 
     fn start_offset(&self) -> usize {
         self.leading_start_offset() + self.leading_width()
@@ -32,27 +32,27 @@ pub trait SyntaxTrait {
         self.start_offset() + w
     }
 
-    fn position_exclusive(&self, source_text: &IndexedSourceText) -> Option<Pos> {
+    fn position_exclusive(&self, source_text: &IndexedSourceText<'_>) -> Option<Pos> {
         let start_offset = self.start_offset();
         let end_offset = self.end_offset() + 1;
         Some(source_text.relative_pos(start_offset, end_offset))
     }
 
-    fn position(&self, source_text: &IndexedSourceText) -> Option<Pos> {
+    fn position(&self, source_text: &IndexedSourceText<'_>) -> Option<Pos> {
         let start_offset = self.start_offset();
         let end_offset = self.end_offset();
         Some(source_text.relative_pos(start_offset, end_offset))
     }
 
-    fn text<'a>(&self, source_text: &'a SourceText) -> &'a str {
+    fn text<'a>(&self, source_text: &'a SourceText<'_>) -> &'a str {
         source_text.sub_as_str(self.start_offset(), self.width())
     }
 
-    fn full_text<'a>(&self, source_text: &'a SourceText) -> &'a [u8] {
+    fn full_text<'a>(&self, source_text: &'a SourceText<'_>) -> &'a [u8] {
         source_text.sub(self.leading_start_offset(), self.full_width())
     }
 
-    fn leading_text<'a>(&self, source_text: &'a SourceText) -> &'a str {
+    fn leading_text<'a>(&self, source_text: &'a SourceText<'_>) -> &'a str {
         source_text.sub_as_str(self.leading_start_offset(), self.leading_width())
     }
 }

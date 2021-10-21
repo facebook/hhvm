@@ -351,7 +351,7 @@ fn emit_awaitall_multi<'a, 'arena, 'decl>(
         }
         let load_args = InstrSeq::gather(alloc, instrs);
 
-        let mut locals: Vec<Local> = vec![];
+        let mut locals: Vec<Local<'_>> = vec![];
         for (lvar, _) in el.iter() {
             locals.push(match lvar {
                 None => e.local_gen_mut().get_unnamed(),

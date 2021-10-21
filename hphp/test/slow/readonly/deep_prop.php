@@ -1,7 +1,5 @@
 <?hh //strict
 
-<<file: __EnableUnstableFeatures('readonly')>>
-
 class P {
   public function __construct(public int $i, public ?P $inner = null) { }
 }

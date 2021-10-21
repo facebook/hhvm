@@ -8,7 +8,7 @@ edition = "2018"
 path = "../../ast_constant_folder.rs"
 
 [dependencies]
-bumpalo = { version = "3.2.1", features = ["collections"] }
+bumpalo = { version = "3.8", features = ["collections"] }
 ffi = { path = "../../../../utils/ffi" }
 hhbc_by_ref_ast_class_expr = { path = "../hhbc_by_ref_ast_class_expr" }
 hhbc_by_ref_ast_scope = { path = "../hhbc_by_ref_ast_scope" }

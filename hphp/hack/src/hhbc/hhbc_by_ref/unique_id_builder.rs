@@ -20,7 +20,7 @@ pub fn get_unique_id_for_function(fun_name: &str) -> String {
     format!("|{}", fun_name)
 }
 
-pub fn get_unique_id_for_scope(scope: &Scope) -> String {
+pub fn get_unique_id_for_scope(scope: &Scope<'_, '_>) -> String {
     use ScopeItem::*;
     match scope.items.as_slice() {
         [] => get_unique_id_for_main(),

@@ -25,6 +25,7 @@ external native_hh_readdir : string -> (string * int) list = "hh_readdir"
 type dt_kind =
   | DT_REG
   | DT_DIR
+  | DT_LNK
 
 (* Sys.readdir only returns `string list`, but we need to know if we have files
  * or directories, so if we use Sys.readdir we need to do an lstat on every
@@ -42,12 +43,14 @@ let hh_readdir path : (string * dt_kind) list =
       (* values from `man dirent` *)
       | (_, 4) -> Some (name, DT_DIR)
       | (_, 8) -> Some (name, DT_REG)
+      | (_, 10) -> Some (name, DT_LNK)
       | (_, 0) ->
         Unix.(
           (* DT_UNKNOWN - filesystem does not give us the type; do it slow *)
           (match lstat_kind (Filename.concat path name) with
           | Some S_DIR -> Some (name, DT_DIR)
           | Some S_REG -> Some (name, DT_REG)
+          | Some S_LNK -> Some (name, DT_LNK)
           | _ -> None))
       | _ -> None)
 
@@ -102,7 +105,12 @@ type stack =
 
 let max_files = 1000
 
-let make_next_files ?name:_ ?(filter = (fun _ -> true)) ?(others = []) root =
+let make_next_files
+    ?(include_symlinks = false)
+    ?name:_
+    ?(filter = (fun _ -> true))
+    ?(others = [])
+    root =
   let rec process
       sz (acc : string list) (files : (string * dt_kind) list) dir stack =
     if sz >= max_files then
@@ -120,6 +128,8 @@ let make_next_files ?name:_ ?(filter = (fun _ -> true)) ?(others = []) root =
         (match kind with
         | DT_REG when filter name ->
           process (sz + 1) (name :: acc) files dir stack
+        | DT_LNK when include_symlinks && filter name ->
+          process (sz + 1) (name :: acc) files dir stack
         | DT_DIR ->
           let dirfiles = hh_readdir name in
           process sz acc dirfiles name (Dir (files, dir, stack))
@@ -136,6 +146,7 @@ let make_next_files ?name:_ ?(filter = (fun _ -> true)) ?(others = []) root =
                match lstat_kind path with
                | Some S_REG -> Some (path, DT_REG)
                | Some S_DIR -> Some (path, DT_DIR)
+               | Some S_LNK when include_symlinks -> Some (path, DT_LNK)
                | _ -> None))
     in
     ref (Dir (dirs, "", Nil))

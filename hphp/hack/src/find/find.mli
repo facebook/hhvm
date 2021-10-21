@@ -8,6 +8,7 @@
  *)
 
 val make_next_files :
+  ?include_symlinks:bool ->
   ?name:string ->
   ?filter:(string -> bool) ->
   ?others:Path.t list ->

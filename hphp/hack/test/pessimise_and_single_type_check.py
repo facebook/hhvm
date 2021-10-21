@@ -11,7 +11,7 @@ if __name__ == "__main__":
     # not want to duplicate the list here (which is long and moving fast).
     # We thus use the following ad-hoc strategy:
     #
-    # 1. extract the paths to hh_stc and hh_pessimisation from the arguments
+    # 1. extract the paths to hh_stc, hh_pessimisation, pessimised_hhi from the arguments
     # 2. delete the binary name
     # 3. extract all the *.php strings, assuming these are the files being tested
     # 4. the remaining arguments are the flags to be passed to hh_single_type_checks
@@ -24,6 +24,10 @@ if __name__ == "__main__":
     hh_pessimisation_path_index: int = arguments.index("--hh-pessimisation-path")
     hh_pessimisation_path: str = arguments.pop(hh_pessimisation_path_index + 1)
     del arguments[hh_pessimisation_path_index]
+
+    pessimised_hhi_path_index: int = arguments.index("--pessimised-hhi-path")
+    pessimised_hhi_path: str = arguments.pop(pessimised_hhi_path_index + 1)
+    del arguments[pessimised_hhi_path_index]
 
     del arguments[0]
 
@@ -48,6 +52,7 @@ if __name__ == "__main__":
         [hh_stc_path]
         + hh_stc_arguments
         + ["--enable-sound-dynamic-type", "--like-type-hints", "--pessimise-builtins"]
+        + ["--custom-hhi-path", pessimised_hhi_path]
         + pessimised_files
     )
     subprocess.run(cmd)

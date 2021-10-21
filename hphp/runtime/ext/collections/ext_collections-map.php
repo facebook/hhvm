@@ -380,7 +380,7 @@ final class Map implements \MutableMap {
    * @param Traversable $iterable
    * @return Map
    */
-  public function zip(\HH\Traversable $iterable)[]: \HH\Map {
+  public function zip(\HH\Traversable $iterable)[write_props]: \HH\Map {
     $res = dict[];
     $it = $this->getIterator();
     foreach ($iterable as $v) {

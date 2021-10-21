@@ -84,7 +84,8 @@ let monitor_daemon_main
     Sys.sigpipe
     (Sys.Signal_handle (fun i -> Hh_logger.log "SIGPIPE(%d)" i));
 
-  ignore @@ Sys_utils.setsid ();
+  (try ignore (Sys_utils.setsid ()) with
+  | Unix.Unix_error _ -> ());
   ignore (make_tmp_dir ());
   ignore (Hhi.get_hhi_root ());
   Typing_global_inference.set_path ();

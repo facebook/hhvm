@@ -1,4 +1,4 @@
-pessimize:	var_param.php:11,fun_param,\g,$cs
+pessimise:	param,var_param.php,11,$cs
 File "var_param.php", line 7, characters 10-10:
 Function  `f` is not dynamically callable. (Typing[4402])
   File "var_param.php", line 8, characters 8-10:

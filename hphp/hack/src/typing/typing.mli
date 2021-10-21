@@ -78,7 +78,6 @@ val call :
   expected:Typing_helpers.ExpectedTy.t option ->
   ?nullsafe:Pos.t option ->
   ?in_await:Typing_reason.t ->
-  ?pessimization_info:Typing_log.pessimization_info ->
   Pos.t ->
   Typing_env_types.env ->
   Typing_defs.locl_ty ->

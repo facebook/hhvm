@@ -1104,7 +1104,6 @@ let call_param
     param
     param_kind
     (((_, pos, expr_) as e : Nast.expr), arg_ty)
-    ~pessimization_info
     ~is_variadic : env * (locl_ty * locl_ty) option =
   param_modes ~is_variadic param e param_kind;
   (* When checking params, the type 'x' may be expression dependent. Since
@@ -1134,11 +1133,7 @@ let call_param
        param.fp_type
        (fun ?code ?quickfixes claim reasons ->
          if env.in_support_dynamic_type_method_check then
-           Typing_log.log_pessimize_param
-             env
-             param.fp_pos
-             pessimization_info
-             param.fp_name;
+           Typing_log.log_pessimise_param env param.fp_pos param.fp_name;
          Errors.unify_error ?code ?quickfixes claim reasons)
 
 let bad_call env p ty = Errors.bad_call p (Typing_print.error env ty)
@@ -5933,14 +5928,7 @@ and dispatch_call
     let (env, fty, tal) = fun_type_of_id env id explicit_targs el in
     check_disposable_in_return env fty;
     let (env, (tel, typed_unpack_element, ty, should_forget_fakes)) =
-      call
-        ~expected
-        p
-        env
-        fty
-        el
-        unpacked_element
-        ~pessimization_info:(Typing_log.PFun (snd id))
+      call ~expected p env fty el unpacked_element
     in
     let result =
       make_call
@@ -5997,14 +5985,7 @@ and dispatch_call
     in
     check_disposable_in_return env fty;
     let (env, (tel, typed_unpack_element, ty, should_forget_fakes)) =
-      call
-        ~expected
-        p
-        env
-        fty
-        el
-        unpacked_element
-        ~pessimization_info:(Typing_log.PMethod (snd m))
+      call ~expected p env fty el unpacked_element
     in
     let result =
       make_call
@@ -6416,15 +6397,7 @@ and dispatch_call
     in
     check_disposable_in_return env tfty;
     let (env, (tel, typed_unpack_element, ty, should_forget_fakes)) =
-      call
-        ~nullsafe
-        ~expected
-        p
-        env
-        tfty
-        el
-        unpacked_element
-        ~pessimization_info:(Typing_log.PMethod (snd m))
+      call ~nullsafe ~expected p env tfty el unpacked_element
     in
     let result =
       make_call
@@ -7432,7 +7405,6 @@ and call
     ~(expected : ExpectedTy.t option)
     ?(nullsafe : Pos.t option = None)
     ?in_await
-    ?pessimization_info
     pos
     env
     fty
@@ -7754,13 +7726,7 @@ and call
                 e
           in
           let (env, err_opt) =
-            call_param
-              env
-              param
-              param_kind
-              (e, ty)
-              ~is_variadic
-              ~pessimization_info
+            call_param env param param_kind (e, ty) ~is_variadic
           in
           (env, Some (hole_on_err ~err_opt te, ty))
         | None ->
@@ -7946,7 +7912,6 @@ and call
                         Ast_defs.Pnormal
                         (e, elt)
                         ~is_variadic:false
-                        ~pessimization_info
                     in
                     (env, err_opt :: errs))
               in
@@ -7963,19 +7928,12 @@ and call
                         Ast_defs.Pnormal
                         (e, elt)
                         ~is_variadic:false
-                        ~pessimization_info
                     in
                     (env, err_opt :: errs))
               in
               let (env, var_err_opt) =
                 Option.map2 d_variadic var_param ~f:(fun v vp ->
-                    call_param
-                      env
-                      vp
-                      Ast_defs.Pnormal
-                      (e, v)
-                      ~is_variadic:true
-                      ~pessimization_info)
+                    call_param env vp Ast_defs.Pnormal (e, v) ~is_variadic:true)
                 |> Option.value ~default:(env, None)
               in
               let subtyping_errs = (List.rev err_opts, var_err_opt) in

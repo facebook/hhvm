@@ -1,6 +1,6 @@
-pessimize:	prop.php:5,prop,\C,m
-pessimize:	prop.php:7,prop,\C,v
-pessimize:	prop.php:7,prop,\C,v
+pessimise:	prop,prop.php,5,$m
+pessimise:	prop,prop.php,7,$v
+pessimise:	prop,prop.php,7,$v
 File "prop.php", line 5, characters 16-17:
 Class `C` cannot support dynamic because property `m` cannot be assigned to dynamic (Typing[4402])
   File "prop.php", line 5, characters 10-14:

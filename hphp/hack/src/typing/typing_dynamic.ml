@@ -47,7 +47,7 @@ let check_property_sound_for_dynamic_read ~on_error env classname id ty =
          (mk (Reason.Rnone, Tdynamic)))
   then (
     let pos = get_pos ty in
-    Typing_log.log_pessimize_prop env pos classname (snd id);
+    Typing_log.log_pessimise_prop env pos (snd id);
     on_error (fst id) (snd id) classname (pos, Typing_print.full_strip_ns env ty)
   )
 
@@ -75,7 +75,7 @@ let check_property_sound_for_dynamic_write ~on_error env classname id decl_ty ty
            ty)
     then (
       let pos = get_pos decl_ty in
-      Typing_log.log_pessimize_prop env pos classname (snd id);
+      Typing_log.log_pessimise_prop env pos (snd id);
       on_error
         (fst id)
         (snd id)

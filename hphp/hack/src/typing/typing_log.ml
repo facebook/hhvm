@@ -777,49 +777,23 @@ let log_localize ~level ety_env (decl_ty : decl_ty) (env, result_ty) =
       ] );
   (env, result_ty)
 
-let log_pessimize_f env pos f =
-  log_with_level env "pessimize" ~level:1 @@ fun () ->
+let log_pessimise_ env kind pos name =
+  log_with_level env "pessimise" ~level:1 @@ fun () ->
   let p = Pos_or_decl.unsafe_to_raw_pos pos in
   let (file, line) =
     let p = Pos.to_absolute p in
     (Pos.filename p, Pos.line p)
   in
   lnewline ();
-  f file line;
+  lprintf (Normal Yellow) "pessimise:\t%s,%s,%d,%s" kind file line name;
   lnewline ()
 
-let log_pessimize_prop env pos class_name prop_name =
-  log_pessimize_f env pos (fun file line ->
-      lprintf
-        (Normal Yellow)
-        "pessimize:\t%s:%d,prop,%s,%s"
-        file
-        line
-        class_name
-        prop_name)
+let log_pessimise_prop env pos prop_name =
+  log_pessimise_ env "prop" pos ("$" ^ prop_name)
 
-type pessimization_info =
-  | PFun of string
-  | PMethod of string
-
-let log_pessimize_param env pos pessimization_info param_name =
+let log_pessimise_param env pos param_name =
   let param_name = Option.value ~default:"$$unknown_name" param_name in
-  let origin =
-    Option.value_map
-      ~default:"unknown_param"
-      ~f:(function
-        | PFun s -> Format.sprintf "fun_param,%s" s
-        | PMethod m -> Format.sprintf "method_param,%s" m)
-      pessimization_info
-  in
-  log_pessimize_f env pos (fun file line ->
-      lprintf
-        (Normal Yellow)
-        "pessimize:\t%s:%d,%s,%s"
-        file
-        line
-        origin
-        param_name)
+  log_pessimise_ env "param" pos param_name
 
 let increment_feature_count env s =
   if GlobalOptions.tco_language_feature_logging (Env.get_tcopt env) then

@@ -5020,7 +5020,7 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
           match !state with
           | Main_loop { Main_env.conn; _ }
           | In_init { In_init_env.conn; _ } ->
-            ClientConnect.get_finale_data
+            Exit.get_finale_data
               conn.server_specific_files.ServerCommandTypes.server_finale_file
           | _ -> None
         in

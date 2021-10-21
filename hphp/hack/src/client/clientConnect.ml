@@ -59,15 +59,6 @@ type conn = {
   from: string;
 }
 
-let get_finale_data (server_finale_file : string) : Exit.finale_data option =
-  try
-    let ic = Stdlib.open_in_bin server_finale_file in
-    let contents : Exit.finale_data = Marshal.from_channel ic in
-    Stdlib.close_in ic;
-    Some contents
-  with
-  | _ -> None
-
 let tty_progress_reporter () =
   let angery_reaccs_only =
     Tty.supports_emoji () && ClientMessages.angery_reaccs_only ()
@@ -231,7 +222,7 @@ let rec wait_for_server_message
     | (End_of_file | Sys_error _ | M.Monitor_failed_to_handoff) as exn ->
       let e = Exception.wrap exn in
       let finale_data =
-        get_finale_data
+        Exit.get_finale_data
           server_specific_files.ServerCommandTypes.server_finale_file
       in
       let client_exn = Exception.get_ctor_string e in

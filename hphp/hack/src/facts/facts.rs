@@ -13,7 +13,7 @@ use oxidized_by_ref::{
     ast_defs::{Abstraction, ClassishKind},
     direct_decl_parser::Decls,
     shallow_decl_defs::{ClassDecl, TypedefDecl},
-    typing_defs::{Ty, Ty_},
+    typing_defs::{Ty, Ty_, UserAttribute},
 };
 use serde::ser::SerializeSeq;
 use serde::Serializer;
@@ -114,9 +114,14 @@ impl Facts {
             .collect::<TypeFactsByName>();
         let mut type_aliases = decls
             .typedefs()
-            .map(|(name, decl)| {
-                types.insert(format(name), TypeFacts::of_typedef_decl(decl));
-                format(name)
+            .filter_map(|(name, decl)| {
+                if decl.is_ctx {
+                    // ignore context aliases
+                    None
+                } else {
+                    types.insert(format(name), TypeFacts::of_typedef_decl(decl));
+                    Some(format(name))
+                }
             })
             .collect::<Vec<String>>();
         let mut functions = decls
@@ -138,8 +143,6 @@ impl Facts {
             constants,
             type_aliases,
             // TODO: file attributes
-            // TODO: attributes
-            // TODO: method facts
             ..Default::default()
         }
     }
@@ -235,6 +238,7 @@ impl TypeFacts {
             extends,
             implements,
             user_attributes,
+            methods,
             ..
         } = decl;
 
@@ -282,24 +286,23 @@ impl TypeFacts {
             .map(|ty| extract_type_name(*ty))
             .collect::<StringSet>();
 
-        let attributes = user_attributes
+        // TODO(T101762617): modify the direct decl parser to
+        // preserve the attribute params that facts expects
+        let attributes = to_facts_attributes(user_attributes);
+
+        let methods = methods
             .iter()
-            .filter_map(|ua| {
-                let attr_name = format(ua.name.1);
-                if user_attributes::AS_SET.contains(attr_name.as_str()) {
-                    // skip builtins
+            .filter_map(|m| {
+                let attributes = to_facts_attributes(m.attributes);
+                // Add this method to the output iff it's
+                // decorated with non-builtin attributes
+                if attributes.is_empty() {
                     None
                 } else {
-                    Some((
-                        attr_name,
-                        ua.classname_params
-                            .iter()
-                            .map(|param| String::from(*param))
-                            .collect::<Vec<String>>(),
-                    ))
+                    Some((format(m.name.1), MethodFacts { attributes }))
                 }
             })
-            .collect::<Attributes>();
+            .collect::<Methods>();
 
         TypeFacts {
             base_types,
@@ -308,7 +311,7 @@ impl TypeFacts {
             flags,
             require_implements,
             attributes,
-            methods: BTreeMap::new(),
+            methods,
         }
     }
 
@@ -356,6 +359,27 @@ fn modifiers_to_flags(flags: isize, is_final: bool, abstraction: &Abstraction) -
     } else {
         flags
     }
+}
+
+fn to_facts_attributes<'a>(attributes: &'a [&'a UserAttribute<'a>]) -> Attributes {
+    attributes
+        .iter()
+        .filter_map(|ua| {
+            let attr_name = format(ua.name.1);
+            if user_attributes::AS_SET.contains(attr_name.as_str()) {
+                // skip builtins
+                None
+            } else {
+                Some((
+                    attr_name,
+                    ua.classname_params
+                        .iter()
+                        .map(|param| String::from(*param))
+                        .collect::<Vec<String>>(),
+                ))
+            }
+        })
+        .collect::<Attributes>()
 }
 
 // inline tests (so stuff can remain hidden) - compiled only when tests are run (no overhead)

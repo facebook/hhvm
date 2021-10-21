@@ -17,6 +17,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/locale.h"
+#include "hphp/runtime/base/thread-safe-setlocale.h"
 #include "hphp/runtime/ext/fb/ext_fb.h"
 #include "hphp/runtime/ext/hsl/ext_hsl_locale.h"
 #include "hphp/runtime/ext/hsl/hsl_locale_byte_ops.h"
@@ -43,7 +44,7 @@ const Locale* s_bytes_locale = nullptr;
 ALWAYS_INLINE const Locale* get_locale(const Variant& maybe_locale) {
   if (LIKELY(maybe_locale.isNull())) {
     assert(s_bytes_locale);
-    return s_bytes_locale; 
+    return s_bytes_locale;
   }
 
   if (!maybe_locale.isObject()) {
@@ -295,13 +296,24 @@ String HHVM_FUNCTION(vsprintf_l,
   // 1. get an HSLLocale from a nullable Locale object
   // 2. get an std::shared_ptr<HPHP::Locale> from an HSL Locale
   // 3. get a locale_t from an HPHP::Locale
-  locale_t loc = get_locale(maybe_loc)->get();
-  locale_t thread_loc = ::uselocale((locale_t) 0);
-  if (LIKELY(loc == thread_loc)) {
+
+  // We're doing this manually instead of using `get_locale()` as we need
+  // a shared_ptr; the cached fixed locale used by `get_locale()` is a raw
+  // pointer for performance.
+  if (!(maybe_loc.isNull() || maybe_loc.isObject())) {
+    raise_fatal_error("Locale is not null or an object");
+  }
+  auto format_loc = maybe_loc.isNull()
+    ? Locale::getCLocale()
+    : HSLLocale::fromObject(maybe_loc.asCObjRef())->get();
+  auto thread_loc = ThreadSafeLocaleHandler::getRequestLocale();
+  // Compare locale_t
+  if (LIKELY(format_loc->get() == thread_loc->get())) {
     return string_printf(fmt.data(), fmt.size(), args);
   }
-  SCOPE_EXIT { ::uselocale(thread_loc); };
-  ::uselocale(loc);
+  SCOPE_EXIT { ThreadSafeLocaleHandler::setRequestLocale(thread_loc); };
+  ThreadSafeLocaleHandler::setRequestLocale(format_loc);
+
   return string_printf(fmt.data(), fmt.size(), args);
 }
 
@@ -318,7 +330,7 @@ String trim_impl(const String& str,
   }
   assertx(what.isString());
   const auto& swhat = what.asCStrRef();
-  
+
   if (swhat.empty()) {
     return str;
   }
@@ -355,7 +367,7 @@ String HHVM_FUNCTION(replace_l,
   if (haystack.empty() || needle.empty()) {
     return haystack;
   }
-  return get_ops(maybe_loc)->replace(haystack, needle, replacement); 
+  return get_ops(maybe_loc)->replace(haystack, needle, replacement);
 }
 
 String HHVM_FUNCTION(replace_ci_l,
@@ -366,7 +378,7 @@ String HHVM_FUNCTION(replace_ci_l,
   if (haystack.empty() || needle.empty()) {
     return haystack;
   }
-  return get_ops(maybe_loc)->replace_ci(haystack, needle, replacement); 
+  return get_ops(maybe_loc)->replace_ci(haystack, needle, replacement);
 }
 
 namespace {

@@ -54,6 +54,11 @@ final class StrFormatTest extends HackTest {
     string $actual,
     string $expected,
   ): void {
-    expect($actual)->toEqual($expected);
+    try {
+      \setlocale(\LC_ALL, 'fr_FR');
+      expect($actual)->toEqual($expected);
+    } finally {
+      \setlocale(\LC_ALL, 'C');
+    }
   }
 }

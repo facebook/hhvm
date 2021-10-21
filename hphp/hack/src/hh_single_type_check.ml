@@ -2307,10 +2307,16 @@ let handle_mode
         hover_at_caret_pos src
     in
     let results = ServerHover.go_quarantined ~ctx ~entry ~line ~column in
-    let print result =
-      Printf.printf "%s\n" (HoverService.string_of_result result)
+    let formatted_results =
+      List.map
+        ~f:(fun r ->
+          let open HoverService in
+          String.concat ~sep:"\n" (r.snippet :: r.addendum))
+        results
     in
-    List.iter results ~f:print
+    Printf.printf
+      "%s\n"
+      (String.concat ~sep:"\n-------------\n" formatted_results)
   | Apply_quickfixes ->
     let path = expect_single_file () in
     let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in

@@ -652,7 +652,7 @@ struct
               true
             | _ -> Sys_utils.check_dmesg_for_oom process.pid "hh_server"
           in
-          let (exit_kind, exit_code) = Exit_status.unpack proc_stat in
+          let (exit_type, exit_code) = Exit_status.unpack proc_stat in
           let time_taken = Unix.time () -. process.start_t in
           ServerCommandTypesUtils.write_progress_file
             ~server_progress_file:
@@ -665,15 +665,46 @@ struct
                   server_warning = None;
                   server_timestamp = Unix.gettimeofday ();
                 };
-          Hh_logger.log
-            "TYPECHECKER_EXIT exit_kind=%s exit_code=%d is_oom=%b"
-            exit_kind
-            exit_code
-            is_oom;
+          let telemetry =
+            Telemetry.create ()
+            |> Telemetry.string_ ~key:"unix_exit_type" ~value:exit_type
+            |> Telemetry.int_ ~key:"unix_exit_code" ~value:exit_code
+            |> Telemetry.bool_ ~key:"is_oom" ~value:is_oom
+          in
+          let (telemetry, exit_status) =
+            match
+              Exit.get_finale_data
+                process.server_specific_files
+                  .ServerCommandTypes.server_finale_file
+            with
+            | None -> (telemetry, None)
+            | Some
+                Exit.
+                  {
+                    exit_status;
+                    msg;
+                    stack = Utils.Callstack stack;
+                    telemetry = finale_telemetry;
+                  } ->
+              let telemetry =
+                telemetry
+                |> Telemetry.string_
+                     ~key:"exit_status"
+                     ~value:(Exit_status.show exit_status)
+                |> Telemetry.string_opt ~key:"msg" ~value:msg
+                |> Telemetry.string_ ~key:"stack" ~value:stack
+                |> Telemetry.object_opt ~key:"data" ~value:finale_telemetry
+              in
+              (telemetry, Some exit_status)
+          in
+          Hh_logger.log "TYPECHECKER_EXIT %s" (Telemetry.to_string telemetry);
           HackEventLogger.typechecker_exit
+            telemetry
             time_taken
-            proc_stat
             (monitor_config.server_log_file, monitor_config.monitor_log_file)
+            ~exit_type
+            ~exit_code
+            ~exit_status
             ~is_oom;
           set_server env (Died_unexpectedly (proc_stat, is_oom)))
       | Not_yet_started

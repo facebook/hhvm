@@ -48,7 +48,8 @@ let set_hhconfig_version _ = ()
 
 let set_rollout_flags _ = ()
 
-let typechecker_exit _ _ _ ~is_oom:_ = ()
+let typechecker_exit _ _ _ ~exit_type:_ ~exit_code:_ ~exit_status:_ ~is_oom:_ =
+  ()
 
 let init
     ~root:_

@@ -5869,9 +5869,9 @@ let experimental_expression_trees pos =
   add
     (Typing.err_code Typing.ExperimentalExpressionTrees)
     pos
-    ("To enable Expression Trees for local experimentation use the "
-    ^ "`<<file:__EnableUnstableFeatures('expression_trees')>>` file attribute."
-    )
+    ("This type is not permitted as an expression tree visitor. It is not included in "
+    ^ "`allowed_expression_tree_visitors` in `.hhconfig`, and this file does not "
+    ^ "contain `<<file:__EnableUnstableFeatures('expression_trees')>>`.")
 
 let non_void_annotation_on_return_void_function is_async p =
   let (async_indicator, return_type) =

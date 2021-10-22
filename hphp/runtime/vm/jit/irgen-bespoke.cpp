@@ -999,7 +999,7 @@ void emitLoggingDiamond(
   assertx(!env.irb->guardFailBlock());
 
   auto const dropArrSpec = [&](Type type) {
-    return type <= TArrLike ? type.unspecialize() : type;
+    return type.arrSpec() ? type.unspecialize() : type;
   };
   std::vector<Type> vanillaLocalTypes;
   std::vector<Type> vanillaStackTypes;

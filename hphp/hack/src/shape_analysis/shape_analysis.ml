@@ -79,12 +79,20 @@ let add_key_constraint
     Env.add_constraint env constraint_
   | None -> env
 
-let assign (env : env) ((_, pos, lval) : T.expr) (rhs : entity) : env =
+let rec assign
+    (env : env)
+    ((_, pos, lval) : T.expr)
+    (rhs : entity)
+    (ty_rhs : Typing_defs.locl_ty) : env =
   match lval with
   | A.Lvar (_, lid) -> Env.set_local lid rhs env
+  | A.Array_get (base, Some ix) ->
+    (* TODO: keep track of assignments to statically known keys in the environment *)
+    let (env, entity) = expr env base in
+    add_key_constraint env entity ix ty_rhs
   | _ -> failwithpos pos "An lvalue is not yet supported"
 
-let rec expr (env : env) ((ty, pos, e) : T.expr) : env * entity =
+and expr (env : env) ((ty, pos, e) : T.expr) : env * entity =
   match e with
   | A.Int _
   | A.Float _
@@ -104,17 +112,17 @@ let rec expr (env : env) ((ty, pos, e) : T.expr) : env * entity =
     in
     let env = List.fold ~init:env ~f:add_key_constraint key_value_pairs in
     (env, entity)
-  | A.Array_get (exp, Some ix) ->
-    let (env, entity_exp) = expr env exp in
+  | A.Array_get (base, Some ix) ->
+    let (env, entity_exp) = expr env base in
     let (env, _entity_ix) = expr env ix in
     let env = add_key_constraint env entity_exp ix ty in
     (env, None)
   | A.Lvar (_, lid) ->
     let entity = Env.get_local lid env in
     (env, entity)
-  | A.Binop (Ast_defs.Eq None, e1, e2) ->
+  | A.Binop (Ast_defs.Eq None, e1, ((ty_rhs, _, _) as e2)) ->
     let (env, entity_rhs) = expr env e2 in
-    let env = assign env e1 entity_rhs in
+    let env = assign env e1 entity_rhs ty_rhs in
     (env, None)
   | _ -> failwithpos pos "An expression is not yet handled"
 

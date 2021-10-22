@@ -1,0 +1,8 @@
+=== Shape analysis results for array_assignment.php
+Summary for \f:
+[4:8-23] :
+  shape(
+    a => int
+    b => bool
+    c => string
+  )

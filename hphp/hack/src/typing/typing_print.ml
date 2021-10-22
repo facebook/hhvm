@@ -134,6 +134,10 @@ module Full = struct
           list "<" (tparam ~ty to_doc st penv) l ">");
         list "(" id params "):";
         Space;
+        (if get_ft_returns_readonly ft then
+          text "readonly" ^^ Space
+        else
+          Nothing);
         possibly_enforced_ty ~ty to_doc st penv ft.ft_ret;
       ]
 
@@ -155,6 +159,9 @@ module Full = struct
         (match get_fp_mode fp with
         | FPinout -> text "inout" ^^ Space
         | _ -> Nothing);
+        (match get_fp_readonly fp with
+        | true -> text "readonly" ^^ Space
+        | false -> Nothing);
         (match (fp_name, ty to_doc st penv fp_type.et_type) with
         | (None, _) -> possibly_enforced_ty ~ty to_doc st penv fp_type
         | (Some param_name, Text ("_", 1)) ->

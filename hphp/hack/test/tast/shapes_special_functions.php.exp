@@ -50,7 +50,7 @@
              ([8:3-30],
               (Expr
                  ((bool), [8:3-29],
-                  (Call ((((function(shape(...) $shape, arraykey $index): bool)), [8:3-20], (Class_const (((Shapes), [8:3-9], (CI ([8:3-9], "\\HH\\Shapes"))), ([8:11-20], "keyExists")))), 
+                  (Call ((((function(readonly shape(...) $shape, arraykey $index): bool)), [8:3-20], (Class_const (((Shapes), [8:3-9], (CI ([8:3-9], "\\HH\\Shapes"))), ([8:11-20], "keyExists")))),
                      [], [(Pnormal, ((shape('x' => int, ?'y' => int)), [8:21-23], (Lvar ([8:21-23], $p)))); (Pnormal, ((string), [8:25-28], (String "y")))], None)))));
              ([9:3-36],
               (Expr

@@ -4286,6 +4286,7 @@ and expr_
                 declared_ft.ft_params
                 expected_ft.ft_params;
             ft_implicit_params = declared_ft.ft_implicit_params;
+            ft_flags = declared_ft.ft_flags;
           }
         in
         (* Don't bother passing in `void` if there is no explicit return *)

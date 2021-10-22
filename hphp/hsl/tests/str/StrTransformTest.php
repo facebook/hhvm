@@ -61,6 +61,21 @@ final class StrTransformTest extends HackTest {
         'The_Quick brown_Fox',
       ),
       tuple(
+        'the_quick brown_Fox_',
+        '_',
+        'The_Quick brown_Fox_',
+      ),
+      tuple(
+        'the_quick brown_Fox__',
+        '_',
+        'The_Quick brown_Fox__',
+      ),
+      tuple(
+        'the_quick brown_Fox__jumped',
+        '_',
+        'The_Quick brown_Fox__Jumped',
+      ),
+      tuple(
         "\tthe_quick|brown fox\vjumped",
         " _|\t",
         "\tThe_Quick|Brown Fox\vjumped",

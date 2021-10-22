@@ -43,11 +43,33 @@ function capitalize_words(
   string $string,
   ?string $delimiters = null,
 )[]: string {
-  if ($delimiters === null) {
-    return _Str\titlecase_l($string, $delimiters);
+  if ($string === '') {
+    return $string;
   }
-  /* HH_FIXME[4390] missing [] */
-  return \ucwords($string, $delimiters);
+  if ($delimiters === null) {
+    // Delimiters are defined by the locale
+    return _Str\titlecase_l($string, /* locale = */ null);
+  }
+
+  $words = vec[];
+  $offset = 0;
+  $length = \strlen($string);
+  while ($offset < ($length - 1)) {
+    $substr_len = \strcspn($string, $delimiters, $offset);
+    $words[] = tuple(
+      \substr($string, $offset, $substr_len),
+      $offset + $substr_len < $length ? $string[$offset + $substr_len] : ''
+    );
+    $offset += $substr_len + 1;
+  }
+  $tail = $offset < $length ? \substr($string, $offset) : '';
+
+  $string = '';
+  foreach ($words as list($word, $delimiter)) {
+    $string .= namespace\capitalize($word).$delimiter;
+  }
+  $string .= $tail;
+  return $string;
 }
 
 /**

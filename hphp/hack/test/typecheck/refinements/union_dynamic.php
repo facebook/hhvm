@@ -12,6 +12,9 @@ function f(bool $b, dynamic $d, C<int> $c) : vec<int> {
     $x = $c;
   }
   $x as S<_>;
+  hh_show($x); // must not be S<int>
+  $i = $x->get();
+  hh_show($i); // must not be int
   return vec[$x->get()];
 }
 

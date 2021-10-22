@@ -106,6 +106,8 @@ let supportdynamic r = mk (r, Tsupportdynamic)
 
 let like r ty = mk (r, Tlike ty)
 
+let locl_like r ty = mk (r, Tunion [dynamic r; ty])
+
 let mixed r = mk (r, Toption (nonnull r))
 
 let resource r = prim_type r Nast.Tresource

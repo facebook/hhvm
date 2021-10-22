@@ -1,0 +1,12 @@
+File "as.bad.php", line 10, characters 18-19:
+Invalid argument (Typing[4110])
+  File "as.bad.php", line 6, characters 23-28:
+  Expected `D<int>`
+  File "as.bad.php", line 9, characters 13-16:
+  But got `(dynamic & <expr#1> as D<T#1>)` from this `is` expression test
+File "as.bad.php", line 13, characters 16-17:
+Invalid argument (Typing[4110])
+  File "as.bad.php", line 6, characters 23-28:
+  Expected `D<int>`
+  File "as.bad.php", line 12, characters 3-4:
+  But got `(dynamic & <expr#1> as D<T#3>)` from this "as" assertion

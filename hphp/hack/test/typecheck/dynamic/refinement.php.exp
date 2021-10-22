@@ -1,0 +1,6 @@
+File "refinement.php", line 21, characters 18-19:
+Invalid argument (Typing[4110])
+  File "refinement.php", line 6, characters 24-29:
+  Expected `D<int>`
+  File "refinement.php", line 20, characters 13-16:
+  But got `(dynamic & <expr#1> as D<T#1>)` from this `is` expression test

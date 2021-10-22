@@ -1,0 +1,10 @@
+File "union_dynamic.php", line 15, characters 3-13:
+  ((dynamic & S<T#1>) | S<int>)
+File "union_dynamic.php", line 17, characters 3-13:
+  (int | (dynamic & T#1))
+File "union_dynamic.php", line 18, characters 10-23:
+Some elements in this collection are incompatible (Typing[4110])
+  File "union_dynamic.php", line 8, characters 50-52:
+  Expected `int`
+  File "union_dynamic.php", line 18, characters 14-22:
+  But got `dynamic`, the result of calling a `dynamic` type as a function

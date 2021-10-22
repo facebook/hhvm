@@ -1406,7 +1406,8 @@ let rec get_instance_var env = function
   | _ -> failwith "Should only be called when is_instance_var is true"
 
 (** Transform a hint like `A<_>` to a localized type like `A<T#1>` for refinement of
-an instance variable. ivar_ty is the previous type of that instance variable. *)
+an instance variable. ivar_ty is the previous type of that instance variable. Return
+the intersection of the hint and variable. *)
 let rec class_for_refinement env p reason ivar_pos ivar_ty hint_ty =
   let (env, hint_ty) = Env.expand_type env hint_ty in
   match (get_node ivar_ty, get_node hint_ty) with
@@ -1437,6 +1438,26 @@ let rec class_for_refinement env p reason ivar_pos ivar_ty hint_ty =
     in
     (env, MakeType.tuple reason tyl)
   | _ -> (env, hint_ty)
+
+let refine_and_simplify_intersection env p reason ivar_pos ivar_ty hint_ty =
+  match get_node ivar_ty with
+  | Tunion [ty1; ty2]
+    when Typing_defs.is_dynamic ty1 || Typing_defs.is_dynamic ty2 ->
+    (* Distribute the intersection over the union *)
+    let (env, hint_ty1) =
+      class_for_refinement env p reason ivar_pos ty1 hint_ty
+    in
+    let (env, hint_ty2) =
+      class_for_refinement env p reason ivar_pos ty2 hint_ty
+    in
+    let (env, ty1) = Inter.intersect env ~r:reason ty1 hint_ty1 in
+    let (env, ty2) = Inter.intersect env ~r:reason ty2 hint_ty2 in
+    Typing_union.union env ty1 ty2
+  | _ ->
+    let (env, hint_ty) =
+      class_for_refinement env p reason ivar_pos ivar_ty hint_ty
+    in
+    Inter.intersect env ~r:reason ivar_ty hint_ty
 
 (* Refine type for is_array, is_vec, is_keyset and is_dict tests
  * `pred_name` is the function name itself (e.g. 'is_vec')
@@ -1500,7 +1521,7 @@ and safely_refine_is_array env ty p pred_name arg_expr =
           MakeType.union r [MakeType.vec r tfresh; MakeType.varray r tfresh]
       in
       let (_, arg_pos, _) = arg_expr in
-      let (env, hint_ty) =
+      let (env, refined_ty) =
         class_for_refinement env p r arg_pos arg_ty hint_ty
       in
       (* Add constraints on generic parameters that must
@@ -1520,7 +1541,7 @@ and safely_refine_is_array env ty p pred_name arg_expr =
               ty
               (Errors.unify_error_at p))
       in
-      Inter.intersect ~r env hint_ty arg_ty)
+      Inter.intersect ~r env refined_ty arg_ty)
 
 let key_exists env pos shape field =
   let field = Tast.to_nast_expr field in
@@ -4079,8 +4100,7 @@ and expr_
     let refine_type env lpos lty rty =
       let reason = Reason.Ras lpos in
       let (env, rty) = Env.expand_type env rty in
-      let (env, rty) = class_for_refinement env p reason lpos lty rty in
-      Inter.intersect env ~r:reason lty rty
+      refine_and_simplify_intersection env p reason lpos lty rty
     in
     let (env, te, expr_ty) = expr env e in
     let env = might_throw env in
@@ -8195,10 +8215,9 @@ and condition ?lhs_of_null_coalesce env tparamet ((ty, p, e) as te : Tast.expr)
     let refine_type env hint_ty =
       let (ivar_ty, ivar_pos, _) = ivar in
       let (env, ivar) = get_instance_var env (Tast.to_nast_expr ivar) in
-      let (env, hint_ty) =
-        class_for_refinement env p reason ivar_pos ivar_ty hint_ty
+      let (env, refined_ty) =
+        refine_and_simplify_intersection env p reason ivar_pos ivar_ty hint_ty
       in
-      let (env, refined_ty) = Inter.intersect env ~r:reason ivar_ty hint_ty in
       (set_local env ivar refined_ty, Local_id.Set.singleton (snd ivar))
     in
     let (env, lset) =

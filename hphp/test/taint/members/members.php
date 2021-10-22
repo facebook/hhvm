@@ -23,7 +23,15 @@ function source_through_attribute_dereferenced_in_callee(): void {
   into_sink($object);
 }
 
+function __sink_with_shape(shape('data' => int) $input): void {}
+
+function source_through_shape_into_sink(): void {
+  $shape = shape('data' => __source());
+  __sink_with_shape($shape);
+}
+
 <<__EntryPoint>> function main(): void {
   source_through_attribute_into_sink();
   source_through_attribute_dereferenced_in_callee();
+  source_through_shape_into_sink();
 }

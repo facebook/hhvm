@@ -100,7 +100,7 @@ void iopPreamble(const std::string& name) {
         "(stack size: {}, shadow stack size: {}). Adjusting...\n",
         vm_stack_size,
         shadow_stack_size);
-    for (int i = shadow_stack_size; i <= vm_stack_size; i++) {
+    for (int i = shadow_stack_size; i < vm_stack_size; i++) {
       stack.push(std::nullopt);
     }
     for (int i = shadow_stack_size; i > vm_stack_size; i--) {
@@ -227,8 +227,25 @@ void iopNewDictArray(uint32_t /* capacity */) {
   iopUnhandled("NewDictArray");
 }
 
-void iopNewStructDict(imm_array<int32_t> /* ids */) {
-  iopUnhandled("NewStructDict");
+void iopNewStructDict(imm_array<int32_t> ids) {
+  iopPreamble("NewStructDict");
+
+  auto& stack = State::instance->stack;
+  Value structValue = std::nullopt;
+
+  // We taint the whole struct if one value is tainted. This could eventually
+  // be a join operation.
+  for (uint32_t i = 0; i < ids.size; i++) {
+    auto value = stack.top();
+    stack.pop();
+    if (value) {
+      structValue = value;
+    }
+  }
+
+  FTRACE(2, "taint: new struct is `{}`\n", structValue);
+
+  stack.push(structValue);
 }
 
 void iopNewVec(uint32_t /* n */) {

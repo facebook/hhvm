@@ -85,10 +85,30 @@ TRACE_SET_MOD(taint);
 
 namespace {
 
+std::string quote(const std::string& string) {
+  return folly::sformat("`{}`", string);
+}
+
+std::string yellow(const std::string& string) {
+  return folly::sformat(
+      "{}{}{}",
+      ANSI_COLOR_YELLOW,
+      string,
+      ANSI_COLOR_END);
+}
+
+std::string gray(const std::string& string) {
+  return folly::sformat(
+      "{}{}{}",
+      ANSI_COLOR_GRAY,
+      string,
+      ANSI_COLOR_END);
+}
+
 void iopPreamble(const std::string& name) {
   auto vm_stack_size = vmStack().count();
 
-  FTRACE(1, "taint: iop{}\n", name);
+  FTRACE(1, "taint: {}\n", gray(folly::sformat("iop{}", name)));
   FTRACE(4, "taint: stack: {}\n", State::instance->stack.show());
 
   auto& stack = State::instance->stack;
@@ -117,14 +137,6 @@ void iopConstant(const std::string& name) {
 void iopUnhandled(const std::string& name) {
   iopPreamble(name);
   FTRACE(1, "taint: (WARNING) unhandled opcode\n");
-}
-
-std::string yellow(const std::string& string) {
-  return folly::sformat(
-      "{}`{}`{}",
-      ANSI_COLOR_YELLOW,
-      string,
-      ANSI_COLOR_END);
 }
 
 const Func* callee() {
@@ -538,7 +550,7 @@ void iopRetC(PC& /* pc */) {
   stack.pop(2 + func->params().size());
 
   std::string name = func->fullName()->data();
-  FTRACE(1, "taint: leaving {}\n", yellow(name));
+  FTRACE(1, "taint: leaving {}\n", yellow(quote(name)));
 
   // Check if this function is the origin of a source.
   if (Configuration::get()->isSource(name)) {
@@ -843,7 +855,7 @@ TCA iopFCallCtor(
       MethodLookupErrorOptions::RaiseOnNotFound);
   auto name = func->fullName()->data();
 
-  FTRACE(1, "taint: entering {}\n", yellow(name));
+  FTRACE(1, "taint: entering {}\n", yellow(quote(name)));
 
   return nullptr;
 }

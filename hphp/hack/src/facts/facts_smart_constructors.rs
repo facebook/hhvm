@@ -410,6 +410,20 @@ impl<'a> FlattenSmartConstructors<'a, HasScriptContent<'a>> for FactsSmartConstr
         }
     }
 
+    fn make_trait_use_conflict_resolution(
+        &mut self,
+        _keyword: Self::R,
+        names: Self::R,
+        _left_brace: Self::R,
+        _clauses: Self::R,
+        _right_brace: Self::R,
+    ) -> Self::R {
+        match names {
+            Node::Ignored => Node::Ignored,
+            _ => Node::TraitUseClause(Box::new(names)),
+        }
+    }
+
     fn make_require_clause(
         &mut self,
         _keyword: Self::R,

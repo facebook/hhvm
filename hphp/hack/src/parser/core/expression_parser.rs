@@ -461,10 +461,7 @@ where
             | TokenKind::Require_once => self.parse_inclusion_expression(),
             TokenKind::Isset => self.parse_isset_expression(),
             TokenKind::Eval => self.parse_eval_expression(),
-            TokenKind::Hash => {
-                let qualifier = S!(make_missing, self, self.pos());
-                self.parse_enum_class_label(qualifier)
-            }
+            TokenKind::Hash => self.parse_enum_class_label(),
             TokenKind::Empty => {
                 self.with_error(Errors::empty_expression_illegal);
                 let token = self.next_token_non_reserved_as_name();
@@ -1140,10 +1137,9 @@ where
                 self.parse_scope_resolution_expression(type_specifier)
             }
             TokenKind::Hash | TokenKind::LeftParen => {
-                let missing = S!(make_missing, self, self.pos());
                 let enum_class_label = match self.peek_token_kind() {
-                    TokenKind::Hash => self.parse_enum_class_label(missing),
-                    _ => missing,
+                    TokenKind::Hash => self.parse_enum_class_label(),
+                    _ => S!(make_missing, self, self.pos()),
                 };
                 let (left, args, right) = self.parse_expression_list_opt();
                 S!(
@@ -1618,7 +1614,7 @@ where
         // function-call-with-label:
         //   term '#' name '(' ... ')'
         let hash = self.assert_token(TokenKind::Hash);
-        let label_name = self.require_name();
+        let label_name = self.require_name_allow_all_keywords();
         let result = if self.peek_token_kind() == TokenKind::LeftParen {
             let missing = S!(make_missing, self, self.pos());
             let enum_class_label = S!(
@@ -3090,7 +3086,9 @@ where
         S!(make_scope_resolution_expression, self, qualifier, op, name)
     }
 
-    fn parse_enum_class_label(&mut self, qualifier: S::R) -> S::R {
+    /* Only called for the "short" version of enum labels, so qualifier is always missing */
+    fn parse_enum_class_label(&mut self) -> S::R {
+        let qualifier = S!(make_missing, self, self.pos());
         let hash = self.assert_token(TokenKind::Hash);
         let label_name = self.require_name_allow_all_keywords();
         S!(

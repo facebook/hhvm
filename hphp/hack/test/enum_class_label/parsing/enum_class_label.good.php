@@ -10,4 +10,5 @@ function foo(): void {
   if (E#A == $x) { echo "42\n"; }
 
   $c->get(#list);
+  $c->get(E#list);
 }

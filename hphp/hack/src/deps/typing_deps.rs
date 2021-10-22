@@ -14,7 +14,6 @@ use once_cell::sync::OnceCell;
 use oxidized::typing_deps_mode::{HashMode, TypingDepsMode};
 use std::cell::RefCell;
 use std::collections::{HashMap, HashSet, VecDeque};
-use std::convert::TryInto;
 use std::ffi::OsString;
 use std::io;
 use std::io::{Read, Write};

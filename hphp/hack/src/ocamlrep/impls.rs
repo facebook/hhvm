@@ -6,7 +6,6 @@
 use std::borrow::{Borrow, Cow};
 use std::cell::{Cell, RefCell};
 use std::collections::{BTreeMap, BTreeSet};
-use std::convert::TryInto;
 use std::ffi::{OsStr, OsString};
 use std::mem::size_of;
 use std::path::{Path, PathBuf};

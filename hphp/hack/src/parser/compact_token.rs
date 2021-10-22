@@ -4,8 +4,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::convert::TryInto;
-
 use crate::{
     compact_trivia::{CompactTrivia, TriviaKinds},
     lexable_token::LexableToken,

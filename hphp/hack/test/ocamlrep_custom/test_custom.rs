@@ -7,7 +7,6 @@ use ocamlrep_custom::{CamlSerialize, Custom};
 use ocamlrep_ocamlpool::ocaml_ffi;
 
 use std::cell::RefCell;
-use std::convert::TryInto;
 use std::io::Write;
 use std::rc::Rc;
 

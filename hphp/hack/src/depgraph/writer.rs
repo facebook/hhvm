@@ -5,7 +5,6 @@
 pub use depgraph::dep::Dep;
 
 use std::collections::HashMap;
-use std::convert::TryInto;
 use std::io::Write;
 
 use memmap::MmapMut;
@@ -388,7 +387,6 @@ mod tests {
 
     use std::collections::{BTreeSet, HashMap, HashSet};
     use std::fs;
-    use std::iter::FromIterator;
 
     use tempfile::NamedTempFile;
 

@@ -6,7 +6,6 @@
 use crate::byteutils;
 pub use crate::dep::Dep;
 
-use std::convert::TryInto;
 use std::ops::Deref;
 
 use im_rc::OrdSet;

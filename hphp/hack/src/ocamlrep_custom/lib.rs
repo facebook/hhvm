@@ -5,7 +5,6 @@
 
 //! Library to build `Custom_tag` OCaml values.
 
-use std::convert::TryInto;
 use std::ffi::{CStr, CString};
 use std::mem::MaybeUninit;
 use std::ops::Deref;

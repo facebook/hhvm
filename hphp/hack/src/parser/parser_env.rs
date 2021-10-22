@@ -4,8 +4,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::convert::From;
-
 use oxidized::full_fidelity_parser_env::FullFidelityParserEnv;
 use oxidized_by_ref::decl_parser_options::DeclParserOptions;
 

@@ -17,7 +17,6 @@ use oxidized::{
 };
 
 use hhbc_by_ref_unique_list::UniqueList;
-use std::iter::Iterator;
 
 struct DeclvarVisitorContext<'a> {
     explicit_use_set_opt: Option<&'a SSet>,

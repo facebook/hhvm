@@ -19,7 +19,6 @@ use structopt::StructOpt;
 use std::{
     fs::File,
     io::{self, stdout, Read, Write},
-    iter::Iterator,
     path::{Path, PathBuf},
     sync::{Arc, Mutex},
 };

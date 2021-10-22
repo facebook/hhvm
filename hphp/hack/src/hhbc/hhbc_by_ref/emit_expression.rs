@@ -45,9 +45,7 @@ use regex::Regex;
 
 use hash::HashSet;
 use indexmap::IndexSet;
-use std::{
-    collections::BTreeMap, convert::TryInto, iter, result::Result as StdResult, str::FromStr,
-};
+use std::{collections::BTreeMap, iter, result::Result as StdResult, str::FromStr};
 
 #[derive(Debug)]
 pub struct EmitJmpResult<'arena> {

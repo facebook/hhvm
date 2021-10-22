@@ -9,7 +9,6 @@ use lazy_static::lazy_static;
 use regex::bytes::Regex;
 use std::{
     ffi::OsStr,
-    iter::Iterator,
     path::{Path, PathBuf},
     str,
 };

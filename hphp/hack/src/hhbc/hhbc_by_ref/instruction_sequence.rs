@@ -1623,7 +1623,7 @@ impl<'a> InstrSeq<'a> {
     }
 
     /// Move instructions out of a container.
-    pub fn from_iter_in<T: std::iter::IntoIterator<Item = Instruct<'a>>>(
+    pub fn from_iter_in<T: IntoIterator<Item = Instruct<'a>>>(
         alloc: &'a bumpalo::Bump,
         it: T,
     ) -> InstrSeq<'a> {

@@ -5,7 +5,6 @@
 
 use hhbc_by_ref_instruction_sequence::{instr, InstrSeq};
 use oxidized::pos::Pos;
-use std::convert::TryInto;
 
 pub fn emit_pos<'a>(alloc: &'a bumpalo::Bump, pos: &Pos) -> InstrSeq<'a> {
     if !pos.is_none() {

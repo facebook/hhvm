@@ -21,7 +21,6 @@
 //! balanced tree implementation in some circumstances.
 
 use std::borrow::Borrow;
-use std::convert::From;
 use std::fmt::Debug;
 
 use bumpalo::Bump;

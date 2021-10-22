@@ -5,7 +5,6 @@
 #![feature(allocator_api)]
 
 use std::alloc::{Allocator, Layout};
-use std::convert::TryInto;
 use std::hash::BuildHasherDefault;
 use std::ptr::NonNull;
 

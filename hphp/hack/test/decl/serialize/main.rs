@@ -6,7 +6,6 @@
 use std::{
     fs::File,
     io::Read,
-    iter::Iterator,
     path::{Path, PathBuf},
 };
 

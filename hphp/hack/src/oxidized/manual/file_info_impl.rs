@@ -3,8 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::convert::From;
-
 use crate::gen::file_info::Mode;
 use crate::gen::file_info::NameType;
 use crate::gen::naming_types::KindOfType;

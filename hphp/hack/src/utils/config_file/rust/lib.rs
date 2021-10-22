@@ -106,7 +106,7 @@ impl ConfigFile {
     }
 }
 
-impl std::iter::FromIterator<(String, String)> for ConfigFile {
+impl FromIterator<(String, String)> for ConfigFile {
     fn from_iter<I: IntoIterator<Item = (String, String)>>(iter: I) -> Self {
         Self {
             map: BTreeMap::from_iter(iter),

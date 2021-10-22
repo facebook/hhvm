@@ -9,7 +9,7 @@ use crate::{
     lexable_token::LexableToken, source_text::SourceText, syntax_by_ref::syntax::Syntax,
     syntax_error::SyntaxError, syntax_trait::SyntaxTrait,
 };
-use std::{borrow::Borrow, convert::AsRef};
+use std::borrow::Borrow;
 
 pub struct SyntaxTree<'a, Syntax, State> {
     text: &'a SourceText<'a>,

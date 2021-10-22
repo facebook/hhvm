@@ -8,8 +8,7 @@
 //! for "reference counted with Ocaml-value cache".
 
 use std::cell::Cell;
-use std::cmp::{Eq, Ord, Ordering, PartialEq, PartialOrd};
-use std::convert::AsRef;
+use std::cmp::Ordering;
 use std::fmt;
 use std::hash::{Hash, Hasher};
 use std::ops::Deref;

@@ -15,7 +15,6 @@ use rayon::prelude::*;
 use stack_limit::{StackLimit, MI};
 use std::{
     io::{stdin, BufRead, BufReader},
-    iter::Iterator,
     path::PathBuf,
     sync::Arc,
 };

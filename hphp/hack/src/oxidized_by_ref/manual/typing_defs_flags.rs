@@ -3,8 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::convert::{TryFrom, TryInto};
-
 use bitflags::bitflags;
 use eq_modulo_pos::EqModuloPos;
 

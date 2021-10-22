@@ -711,7 +711,6 @@ pub struct UserAttributeNode<'a> {
 
 mod fixed_width_token {
     use parser_core_types::token_kind::TokenKind;
-    use std::convert::TryInto;
 
     #[derive(Copy, Clone)]
     pub struct FixedWidthToken(u64); // { offset: u56, kind: TokenKind }

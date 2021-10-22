@@ -5,7 +5,6 @@
 
 use crate::pos::Pos;
 use crate::{aast_defs::*, ast_defs::*};
-use std::{boxed::Box, convert::AsRef};
 
 impl Lid {
     pub fn new(p: Pos, s: String) -> Self {

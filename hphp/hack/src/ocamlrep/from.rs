@@ -6,8 +6,6 @@
 //! Helpers for implementing `FromOcamlRep::from_ocamlrep` or
 //! `FromOcamlRepIn::from_ocamlrep_in`.
 
-use std::convert::TryInto;
-
 use bumpalo::Bump;
 
 use crate::{Block, FromError, FromOcamlRep, FromOcamlRepIn, Value};

@@ -85,7 +85,7 @@ pub type CastError = ();
 
 /// Cast to an integer: the (int) operator in PHP. Return Err if we can't
 /// or won't produce the correct value
-impl<'arena> std::convert::TryFrom<TypedValue<'arena>> for i64 {
+impl<'arena> TryFrom<TypedValue<'arena>> for i64 {
     type Error = CastError;
     fn try_from(x: TypedValue<'arena>) -> std::result::Result<i64, Self::Error> {
         match x {
@@ -112,7 +112,7 @@ impl<'arena> std::convert::TryFrom<TypedValue<'arena>> for i64 {
 
 /// Cast to a float: the (float) operator in PHP. Return Err if we can't
 /// or won't produce the correct value
-impl<'arena> std::convert::TryFrom<TypedValue<'arena>> for f64 {
+impl<'arena> TryFrom<TypedValue<'arena>> for f64 {
     type Error = CastError;
     fn try_from(v: TypedValue<'arena>) -> std::result::Result<f64, Self::Error> {
         match v {
@@ -128,7 +128,7 @@ impl<'arena> std::convert::TryFrom<TypedValue<'arena>> for f64 {
 
 /// Cast to a string: the (string) operator in PHP. Return Err if we can't
 /// or won't produce the correct value *)
-impl<'arena> std::convert::TryFrom<TypedValue<'arena>> for std::string::String {
+impl<'arena> TryFrom<TypedValue<'arena>> for std::string::String {
     type Error = CastError;
     fn try_from(x: TypedValue<'arena>) -> std::result::Result<std::string::String, Self::Error> {
         match x {
@@ -146,7 +146,7 @@ impl<'arena> std::convert::TryFrom<TypedValue<'arena>> for std::string::String {
 
 struct WithBump<'arena, T>(&'arena bumpalo::Bump, T);
 
-impl<'arena> std::convert::TryFrom<WithBump<'arena, TypedValue<'arena>>> for Str<'arena> {
+impl<'arena> TryFrom<WithBump<'arena, TypedValue<'arena>>> for Str<'arena> {
     type Error = CastError;
     fn try_from(
         x: WithBump<'arena, TypedValue<'arena>>,

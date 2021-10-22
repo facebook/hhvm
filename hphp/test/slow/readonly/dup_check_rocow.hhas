@@ -90,7 +90,7 @@ L0:
   .srcloc 25:3,25:22;
   BaseL $a Define Any
   Dim Define PT:"foo" Mutable
-  Dim Define PT:"bad_c" Any
+  Dim Define PT:"bad_c" CheckMutROCOW
   Dim Define EI:0 Mutable
   SetM 0 EI:0 Any
   .srcloc 25:3,25:28;

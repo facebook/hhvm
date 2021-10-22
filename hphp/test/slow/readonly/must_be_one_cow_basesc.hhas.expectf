@@ -1,0 +1,3 @@
+Verification Error (unit %s/must_be_one_cow_basesc.hhas func test): Check(Mut)ROCOW must appear at least once for member-op sequences ending with an elem-flavored FinalOp.
+
+Verification failed for unit %s/must_be_one_cow_basesc.hhas. Re-run with HHVM_VERIFY_VERBOSE=1 to see more details.

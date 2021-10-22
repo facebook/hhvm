@@ -1,0 +1,48 @@
+.file_attributes ["__EnableUnstableFeatures"("""v:1:{s:8:\"readonly\";}""")] ;
+
+.function{} ["__EntryPoint"("""v:0:{}""")] (13,16) <"HH\\void" N  > test() {
+  .srcloc 14:8,14:9;
+  String "c"
+  String "Foo"
+  ClassGetC
+  .srcloc 14:21,14:29;
+  NewObjD "Bar"
+  Dup
+  NullUninit
+  FCallCtor <LockWhileUnwinding> 0 1 "" "" - "" ""
+  PopC
+  LockObj
+  .srcloc 14:13,14:18;
+  NewVec 1
+  ColFromArray Vector
+  .srcloc 14:3,14:9;
+  SetS Any
+  .srcloc 14:3,14:32;
+  PopC
+  .srcloc 15:8,15:9;
+  String "c"
+  String "Foo"
+  ClassGetC
+  .srcloc 15:24,15:24;
+  Int 2
+  .srcloc 15:3,15:20;
+  BaseSC 2 1 Define Any
+  Dim Define EI:0 Any
+  Dim Define PT:"bar" Any
+  SetM 2 EI:0 Any
+  .srcloc 15:3,15:25;
+  PopC
+  .srcloc 16:2,16:2;
+  Null
+  RetC
+}
+
+.class {}  Bar (4,6) {
+  .property [public readonly] <"HH\\vec<HH\\int>" "HH\\vec" extended_hint > bar =
+    """v:1:{i:1;}""";
+}
+
+.class {}  Foo (8,10) {
+  .property [public static readonly sys_initial_val] <"HH\\Vector<Bar>" "HH\\Vector" extended_hint > c =
+    """N;""";
+}

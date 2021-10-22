@@ -61,6 +61,7 @@ struct State {
   bool afterDim; // has there been a Dim in the current minstr seqence
   // has there been an instruction with CheckROCOW or CheckMutROCOW
   bool afterCheckCOW;
+  bool afterProp; // has there been a BaseSC/prop-flavored Dim
 };
 
 /**
@@ -945,6 +946,19 @@ bool FuncChecker::checkMemberKey(State* cur, PC pc, Op op) {
       break;
   }
 
+  if (op == Op::SetM || op == Op::UnsetM) {
+    if (!cur->afterCheckCOW) {
+      if (!mcodeIsProp(mcode) && cur->afterProp) {
+        ferror("Check(Mut)ROCOW must appear at least once for member-op"
+          " sequences ending with an elem-flavored FinalOp.\n");
+        return false;
+      }
+    } else if (mcodeIsProp(mcode)) {
+      ferror("Check(Mut)ROCOW must only appear on the last prop access.\n");
+      return false;
+    }
+  }
+
   if ((mcode == MemberCode::MEC || mcode == MemberCode::MPC) &&
       iva + 1 > cur->stklen) {
     MemberKey key{mcode, static_cast<int32_t>(iva), rop};
@@ -1542,19 +1556,10 @@ bool FuncChecker::readOnlyImmNotSupported(ReadonlyOp rop, Op op) {
 }
 
 bool FuncChecker::checkReadonlyOp(State* cur, PC pc, Op op) {
-  auto const isPropFlavor = [&](MemberCode mcode) {
-    switch (mcode) {
-      case MEL: case MEC: case MET: case MEI: case MW:
-        return false;
-      case MPL: case MPC: case MPT: case MQT:
-        return true;
-    }
-    not_reached();
-  };
-
   auto new_pc = pc;
   if (isMemberBaseOp(op)) {
     if (op == Op::BaseSC) {
+      cur->afterProp = true;
       decode_op(new_pc);
       decode_iva(new_pc);
       decode_iva(new_pc);
@@ -1564,6 +1569,7 @@ bool FuncChecker::checkReadonlyOp(State* cur, PC pc, Op op) {
       cur->afterCheckCOW = rop == ReadonlyOp::CheckROCOW || rop == ReadonlyOp::CheckMutROCOW;
       return true;
     } else if (op == Op::BaseL) {
+      cur->afterProp = false;
       decode_op(new_pc);
       decode_iva(new_pc);
       decode_iva(new_pc);
@@ -1575,6 +1581,7 @@ bool FuncChecker::checkReadonlyOp(State* cur, PC pc, Op op) {
       cur->afterCheckCOW = rop == ReadonlyOp::CheckROCOW;
       return true;
     } else {
+      cur->afterProp = false;
       cur->afterCheckCOW = false;
       return true;
     }
@@ -1602,7 +1609,8 @@ bool FuncChecker::checkReadonlyOp(State* cur, PC pc, Op op) {
         decode_raw<Id>(new_pc);
         break;
     }
-    auto const is_prop_flavor = isPropFlavor(mcode);
+    auto const is_prop_flavor = mcodeIsProp(mcode);
+    cur->afterProp |= is_prop_flavor;
     if (is_prop_flavor && cur->afterCheckCOW) {
       ferror("Check(Mut)ROCOW must only appear on the last prop access.\n");
       return false;
@@ -2069,6 +2077,7 @@ void FuncChecker::initState(State* s) {
   s->mbrMustContainMutableLocalOrThis = false;
   s->afterDim = false;
   s->afterCheckCOW = false;
+  s->afterProp = false;
 }
 
 void FuncChecker::copyState(State* to, const State* from) {
@@ -2084,6 +2093,7 @@ void FuncChecker::copyState(State* to, const State* from) {
   to->mbrMustContainMutableLocalOrThis = from->mbrMustContainMutableLocalOrThis;
   to->afterDim = from->afterDim;
   to->afterCheckCOW = from->afterCheckCOW;
+  to->afterProp = from->afterProp;
 }
 
 bool FuncChecker::checkExnEdge(State cur, Op op, Block* b) {

@@ -1,0 +1,96 @@
+.adata A_1073741824 = """v:3:{v:1:{i:0;}v:1:{i:1;}v:1:{i:2;}}""";
+
+.function{} ["__EntryPoint"("""v:0:{}""")] (19,25) <"HH\\void" N  > test() {
+  .declvars $b;
+  .srcloc 20:8,20:16;
+  NewObjD "Bar"
+  Dup
+  NullUninit
+  FCallCtor <LockWhileUnwinding> 0 1 "" "" - "" ""
+  PopC
+  LockObj
+  .srcloc 20:3,20:16;
+  SetL $b
+  .srcloc 20:3,20:17;
+  PopC
+  .srcloc 21:15,21:23;
+  NewObjD "Foo"
+  Dup
+  NullUninit
+  FCallCtor <LockWhileUnwinding> 0 1 "" "" - "" ""
+  PopC
+  LockObj
+  BaseL $b Define Any
+  .srcloc 21:3,21:11;
+  SetM 0 PT:"myFoo" Any
+  .srcloc 21:3,21:24;
+  PopC
+  .srcloc 22:22,22:31;
+  NewObjD "Foo1"
+  Dup
+  NullUninit
+  FCallCtor <LockWhileUnwinding> 0 1 "" "" - "" ""
+  PopC
+  LockObj
+  .srcloc 22:18,22:32;
+  NewVec 1
+  BaseL $b Define Any
+  Dim Define PT:"myFoo" Mutable
+  .srcloc 22:3,22:14;
+  SetM 0 PT:"c" Any
+  .srcloc 22:3,22:33;
+  PopC
+  .srcloc 23:9,23:32;
+  BaseL $b Unset Any
+  Dim Unset PT:"myFoo" Mutable
+  Dim Unset PT:"c" Mutable
+  Dim Unset EI:0 Any
+  Dim Unset PT:"b" CheckMutROCOW
+  Dim Unset EI:0 Any
+  UnsetM 0 EI:0 Any
+  .srcloc 24:9,24:39;
+  BaseL $b Unset Any
+  Dim Unset PT:"myFoo" Mutable
+  Dim Unset PT:"c" Mutable
+  Dim Unset EI:0 Any
+  Dim Unset PT:"bad_b" Any
+  Dim Unset EI:0 Any
+  Dim Unset EI:0 Any
+  UnsetM 0 EI:0 Any
+  .srcloc 25:2,25:2;
+  Null
+  RetC
+}
+
+.class {}  Foo1 (3,8) {
+  .property [public readonly] <"HH\\vec<HH\\vec<HH\\int>>" "HH\\vec" extended_hint > b =
+    """v:3:{v:1:{i:0;}v:1:{i:1;}v:1:{i:2;}}""";
+  .property [public deep_init readonly] <"HH\\vec<HH\\Vector<HH\\vec<HH\\int>>>" "HH\\vec" extended_hint > bad_b =
+    uninit;
+  .method{}{} [private static no_injection] (3,8) 86pinit() {
+    .coeffects_static pure;
+    .srcloc 3:1,8:170;
+    CheckProp "bad_b"
+    JmpNZ L0
+    .srcloc 7:9,7:14;
+    Vec @A_1073741824
+    ColFromArray Vector
+    .srcloc 7:5,7:40;
+    NewVec 1
+    .srcloc 3:1,8:170;
+    InitProp "bad_b" NonStatic
+  L0:
+    Null
+    RetC
+  }
+}
+
+.class {}  Foo (10,12) {
+  .property [public sys_initial_val] <"HH\\vec<Foo1>" "HH\\vec" extended_hint > c =
+    """N;""";
+}
+
+.class {}  Bar (14,16) {
+  .property [public sys_initial_val] <"Foo" "Foo" extended_hint > myFoo =
+    """N;""";
+}

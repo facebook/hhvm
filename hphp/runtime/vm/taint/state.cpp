@@ -209,25 +209,31 @@ void State::teardown() {
   FTRACE(1, "taint: processed request `{}`\n", identifier);
 
   auto outputDirectory = Configuration::get()->outputDirectory;
-  if (outputDirectory) {
-    auto outputPath = *outputDirectory + "/output-" + identifier + ".json";
-    FTRACE(1, "taint: writing results to {}\n", outputPath);
-    try {
-      std::ofstream output;
-      output.open(outputPath);
-      output << folly::toJson(metadata) << std::endl;
-      for (auto& path : paths) {
-        output << path.jsonLine() << std::endl;
-      }
-      output.close();
-    } catch (std::exception& exception) {
-      throw std::runtime_error("unable to write to `" + outputPath + "`");
-    }
-  } else {
+  if (!outputDirectory) {
     // Print to stderr, useful for integration tests.
     for (auto& path : paths) {
       std::cerr << path.jsonLine() << std::endl;
     }
+    return;
+  }
+
+  auto outputPath = *outputDirectory + "/output-" + identifier + ".json";
+  if (paths.empty()) {
+    FTRACE(1, "taint: no data flows found in request `{}`\n", identifier);
+    return;
+  }
+
+  FTRACE(1, "taint: writing results to {}\n", outputPath);
+  try {
+    std::ofstream output;
+    output.open(outputPath);
+    output << folly::toJson(metadata) << std::endl;
+    for (auto& path : paths) {
+      output << path.jsonLine() << std::endl;
+    }
+    output.close();
+  } catch (std::exception& exception) {
+    throw std::runtime_error("unable to write to `" + outputPath + "`");
   }
 }
 

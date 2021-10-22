@@ -1,4 +1,20 @@
-pessimise:	param,var_param.php,11,$cs
+# Original file
+
+     1	<?hh
+     2	
+     3	<<__SupportDynamicType>>
+     4	class C {}
+     5	
+     6	<<__SupportDynamicType>>
+     7	function f(vec<C> $cs): void {
+     8	  g(...$cs);
+     9	}
+    10	
+    11	function g(C ...$cs): void {}
+
+
+# Original errors
+
 File "var_param.php", line 7, characters 10-10:
 Function  `f` is not dynamically callable. (Typing[4402])
   File "var_param.php", line 8, characters 8-10:
@@ -7,3 +23,29 @@ Function  `f` is not dynamically callable. (Typing[4402])
   Expected `C` (variadic argument)
   File "var_param.php", line 7, characters 19-21:
   But got `dynamic` because method must be callable in a dynamic context
+
+
+# Pessimisation log
+
+pessimise:	param,var_param.php,11,$cs
+
+
+# Pessimised file
+
+     1	<?hh
+     2	
+     3	<<__SupportDynamicType>>
+     4	class C {}
+     5	
+     6	<<__SupportDynamicType>>
+     7	function f(vec<C> $cs): void {
+     8	  g(...$cs);
+     9	}
+    10	
+    11	function g(~C ...$cs): void {}
+    12	
+
+
+# Errors after pessimisation
+
+No errors

@@ -1,0 +1,75 @@
+# Original file
+
+     1	//// file1.php
+     2	<?hh
+     3	
+     4	<<__SupportDynamicType>>
+     5	function f(shape() $s): void {
+     6	  g($s);
+     7	}
+     8	
+     9	function g(shape() $s): void {}
+    10	//// file2.php
+    11	<?hh
+    12	
+    13	<<__SupportDynamicType>>
+    14	function ff(shape() $s): void {
+    15	  gg($s);
+    16	}
+    17	
+    18	function gg(shape() $s): void {}
+
+
+# Original errors
+
+File "multifile.php--file1.php", line 4, characters 10-10:
+Function  `f` is not dynamically callable. (Typing[4402])
+  File "multifile.php--file1.php", line 5, characters 5-6:
+  Invalid argument
+  File "multifile.php--file1.php", line 8, characters 12-18:
+  Expected `shape()`
+  File "multifile.php--file1.php", line 4, characters 20-21:
+  But got `dynamic` because method must be callable in a dynamic context
+File "multifile.php--file2.php", line 4, characters 10-11:
+Function  `ff` is not dynamically callable. (Typing[4402])
+  File "multifile.php--file2.php", line 5, characters 6-7:
+  Invalid argument
+  File "multifile.php--file2.php", line 8, characters 13-19:
+  Expected `shape()`
+  File "multifile.php--file2.php", line 4, characters 21-22:
+  But got `dynamic` because method must be callable in a dynamic context
+
+
+# Pessimisation log
+
+pessimise:	param,multifile.php--file1.php,8,$s
+pessimise:	param,multifile.php--file2.php,8,$s
+
+
+# Pessimised file
+
+     1	//// file1.php
+     2	<?hh
+     3	
+     4	<<__SupportDynamicType>>
+     5	function f(shape() $s): void {
+     6	  g($s);
+     7	}
+     8	
+     9	function g(~shape() $s): void {}
+    10	
+    11	//// file2.php
+    12	<?hh
+    13	
+    14	<<__SupportDynamicType>>
+    15	function ff(shape() $s): void {
+    16	  gg($s);
+    17	}
+    18	
+    19	function gg(~shape() $s): void {}
+    20	
+
+
+# Errors after pessimisation
+
+No errors

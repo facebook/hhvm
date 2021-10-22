@@ -1,4 +1,19 @@
-pessimise:	param,param.php,10,$s
+# Original file
+
+     1	<?hh
+     2	
+     3	// Using shape() because shapes are not considered enforceable, so
+     4	// $s will be dynamic in the SDT pass instead of (dynamic & shape())
+     5	<<__SupportDynamicType>>
+     6	function f(shape() $s): void {
+     7	  g($s);
+     8	}
+     9	
+    10	function g(shape() $s): void {}
+
+
+# Original errors
+
 File "param.php", line 6, characters 10-10:
 Function  `f` is not dynamically callable. (Typing[4402])
   File "param.php", line 7, characters 5-6:
@@ -7,3 +22,28 @@ Function  `f` is not dynamically callable. (Typing[4402])
   Expected `shape()`
   File "param.php", line 6, characters 20-21:
   But got `dynamic` because method must be callable in a dynamic context
+
+
+# Pessimisation log
+
+pessimise:	param,param.php,10,$s
+
+
+# Pessimised file
+
+     1	<?hh
+     2	
+     3	// Using shape() because shapes are not considered enforceable, so
+     4	// $s will be dynamic in the SDT pass instead of (dynamic & shape())
+     5	<<__SupportDynamicType>>
+     6	function f(shape() $s): void {
+     7	  g($s);
+     8	}
+     9	
+    10	function g(~shape() $s): void {}
+    11	
+
+
+# Errors after pessimisation
+
+No errors

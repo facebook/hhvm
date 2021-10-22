@@ -1200,6 +1200,9 @@ void iopQueryM(
     MemberKey memberKey) {
   iopPreamble("QueryM");
 
+  // TODO(T93491296): re-enable
+  if (true) { return; }
+
   switch(op) {
     case QueryMOp::CGet: {
       auto state = State::instance;
@@ -1217,6 +1220,9 @@ void iopQueryM(
 
 void iopSetM(uint32_t /* nDiscard */, MemberKey memberKey) {
   iopPreamble("SetM");
+
+  // TODO(T93491296): re-enable
+  if (true) { return; }
 
   auto state = State::instance;
   auto value = state->stack.top();

@@ -1,2 +1,0 @@
-{"hops": ["__source", "source_through_attribute_into_sink", "__sink"]}
-{"hops": ["__source", "source_through_attribute_dereferenced_in_callee", "into_sink", "__sink"]}

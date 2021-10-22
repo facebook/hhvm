@@ -1,2 +1,0 @@
-{"hops": ["__source", "source_through_vec_to_sink", "__sink"]}
-{"hops": ["__source", "source_through_vec_at_index_to_sink", "__sink"]}

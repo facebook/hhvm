@@ -297,11 +297,17 @@ class _HackFunctionGenerator:
 class HackCodeGenerator(CodeGenerator):
     """A wrapper generator encapsulates each _Hack*Generator to emit Hack Code"""
 
-    def __init__(self, solving_context: Optional[ClingoContext] = None) -> None:
-        super(HackCodeGenerator, self).__init__(solving_context)
+    def __init__(
+        self, solving_context: Optional[ClingoContext] = None, model_count: int = 1
+    ) -> None:
+        super(HackCodeGenerator, self).__init__(solving_context, model_count)
         self.class_objs: Dict[str, _HackClassGenerator] = {}
         self.interface_objs: Dict[str, _HackInterfaceGenerator] = {}
         self.function_objs: Dict[str, _HackFunctionGenerator] = {}
+
+        # Sub set of class/interface objects are stub classes/interfaces.
+        self.stub_classes: List[str] = []
+        self.stub_interfaces: List[str] = []
 
     def _look_up_object_by_symbol(self, symbol: str) -> "_HackBaseGenerator":
         if symbol in self.class_objs:
@@ -391,6 +397,15 @@ class HackCodeGenerator(CodeGenerator):
         if name in self.function_objs:
             self.function_objs[name].add_parameter(parameter_type, argument_type)
 
+    def _find_stubs(self) -> None:
+        for name, node in self.class_objs.items():
+            if node.extend == "":
+                self.stub_classes.append(name)
+
+        for name, node in self.interface_objs.items():
+            if len(node.extends) == 0:
+                self.stub_interfaces.append(name)
+
     def validate_nodes(self) -> None:
         # Graph validation using the constraints specified in the context.
         assert (
@@ -413,23 +428,15 @@ class HackCodeGenerator(CodeGenerator):
 
     def validate_stubs(self) -> None:
         # Check number of stub nodes.
-        stubs = 0
-        for node in self.class_objs.values():
-            if node.extend == "":
-                stubs += 1
         assert (
-            stubs >= self.solving_context.min_stub_classes
+            len(self.stub_classes) >= self.solving_context.min_stub_classes
         ), "Expected to get at least {0}, but only have {1} stub classes.".format(
-            self.solving_context.min_stub_classes, stubs
+            self.solving_context.min_stub_classes, len(self.stub_classes)
         )
-        stubs = 0
-        for node in self.interface_objs.values():
-            if len(node.extends) == 0:
-                stubs += 1
         assert (
-            stubs >= self.solving_context.min_stub_interfaces
+            len(self.stub_interfaces) >= self.solving_context.min_stub_interfaces
         ), "Expected to get at least {0}, but only have {1} stub interfaces.".format(
-            self.solving_context.min_stub_interfaces, stubs
+            self.solving_context.min_stub_interfaces, len(self.stub_interfaces)
         )
 
     def validate_depth(self) -> None:
@@ -501,7 +508,17 @@ class HackCodeGenerator(CodeGenerator):
             + "".join([str(x) + "\n" for x in self.function_objs.values()])
         )
 
-    def on_model(self, m: clingo.Model) -> None:
+    def on_model(self, m: clingo.Model) -> bool:
+        # Same set of parameters and search algorithm will produce the same
+        # result set. To make sure two different agent using the same settings
+        # can produce different output, we are counting models in the result
+        # set. The first agent using the same configuration gets first one,
+        # the second agent using the same configuration gets second one, and so
+        # on so forth.
+        self.model_count -= 1
+        if self.model_count > 0:
+            return True
+
         # Separate into 'class(?)', 'interface(?)', 'funcs(?)',
         # 'implements(?, ?)', 'extends(?, ?)', 'add_method(?, ?)',
         # 'add_static_method(?, ?)', 'has_method_with_parameter(?, ?)'
@@ -549,3 +566,5 @@ class HackCodeGenerator(CodeGenerator):
                     predicate.arguments[1].string,
                     predicate.arguments[2].string,
                 )
+        self._find_stubs()
+        return False

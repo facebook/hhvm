@@ -72,12 +72,15 @@ class CodeGenerator(object):
     corresponding Hack/Java/C# code.
     """
 
-    def __init__(self, solving_context: Optional[ClingoContext] = None) -> None:
+    def __init__(
+        self, solving_context: Optional[ClingoContext] = None, model_count: int = 1
+    ) -> None:
         super(CodeGenerator, self).__init__()
         self._raw_model = ""
         self.solving_context: ClingoContext = (
             ClingoContext() if not solving_context else solving_context
         )
+        self.model_count = model_count
 
     def __str__(self) -> str:
         return self._raw_model
@@ -86,5 +89,16 @@ class CodeGenerator(object):
     Callback function for Clingo on_model event.
     """
 
-    def on_model(self, m: clingo.Model) -> None:
+    def on_model(self, m: clingo.Model) -> bool:
+        # Same set of parameters and search algorithm will produce the same
+        # result set. To make sure two different agent using the same settings
+        # can produce different output, we are counting models in the result
+        # set. The first agent using the same configuration gets first one,
+        # the second agent using the same configuration gets second one, and so
+        # on so forth.
+        self.model_count -= 1
+        if self.model_count > 0:
+            return True
+
         self._raw_model = m.__str__()
+        return False

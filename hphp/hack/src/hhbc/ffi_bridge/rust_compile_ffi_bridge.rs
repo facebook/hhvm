@@ -17,6 +17,7 @@ use facts_rust::facts;
 use hhbc_by_ref_compile::EnvFlags;
 use libc::{c_char, c_int};
 use no_pos_hash::position_insensitive_hash;
+use oxidized::file_info::NameType;
 use oxidized::relative_path::{Prefix, RelativePath};
 use oxidized_by_ref::{decl_parser_options, direct_decl_parser};
 use parser_core_types::source_text::SourceText;
@@ -144,6 +145,11 @@ mod compile_ffi {
             text: &CxxString,
         ) -> DeclResult;
 
+        fn hackc_decl_exists(
+            decls: &Decls,
+            kind: i32, /* HPHP::AutoloadMap::KindOf */
+            symbol: &str,
+        ) -> bool;
         fn hackc_print_decls(decls: &Decls);
         fn hackc_print_serialized_size(bytes: &Bytes);
         unsafe fn hackc_verify_deserialization(serialized: &Bytes, expected: &Decls) -> bool;
@@ -293,6 +299,21 @@ fn hackc_compile_from_text_cpp_ffi<'a>(
     })
     .map_err(|e| e.to_string())?
     .map_err(|e: anyhow::Error| format!("{}", e))
+}
+
+fn hackc_decl_exists(
+    decls: &Decls,
+    kind: i32, /* HPHP::AutoloadMap::KindOf */
+    symbol: &str,
+) -> bool {
+    let kind = match kind {
+        0 => NameType::Class,
+        1 => NameType::Fun,
+        2 => NameType::Const,
+        3 => NameType::Typedef,
+        _ => panic!("Requested kind of decl is not an available option"),
+    };
+    decls.0.get(kind, symbol) != None
 }
 
 fn hackc_print_decls<'a>(decls: &Decls) {

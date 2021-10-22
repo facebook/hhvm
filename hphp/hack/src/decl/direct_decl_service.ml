@@ -91,7 +91,7 @@ let parse
     | None -> acc
     | Some ((decls, _, _, _) as decl_and_mode_and_hash) ->
       let end_parse_time = Unix.gettimeofday () in
-      if cache_decls then Direct_decl_utils.cache_decls ctx decls;
+      if cache_decls then Direct_decl_utils.cache_decls ctx fn decls;
       let fileinfo = decls_to_fileinfo fn decl_and_mode_and_hash in
       if trace then
         Hh_logger.log

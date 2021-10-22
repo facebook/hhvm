@@ -8,13 +8,44 @@
 
 open Hh_prelude
 
-let cache_decls ctx decls =
+(* If a symbol was also declared in another file, and that file was determined
+   to be the winner in the naming table, remove its decl from the list.
+
+   Do not remove decls if there is no entry for them in the naming table. This
+   ensures that this path can populate the decl heap during full inits. This may
+   result in the decl heap containing an incorrect decl in the event of a naming
+   conflict, which might be confusing. But the user will be obligated to fix the
+   naming conflict, and this behavior is limited to full inits, so maybe we can
+   live with it. *)
+let remove_naming_conflict_losers ctx file decls =
+  let open Shallow_decl_defs in
+  Sequence.filter decls ~f:(fun decl ->
+      match decl with
+      | (name, Class _)
+      | (name, Record _)
+      | (name, Typedef _) ->
+        (match Naming_provider.get_type_path ctx name with
+        | Some nfile -> Relative_path.equal nfile file
+        | None -> true)
+      | (name, Fun _) ->
+        (match Naming_provider.get_fun_path ctx name with
+        | Some nfile -> Relative_path.equal nfile file
+        | None -> true)
+      | (name, Const _) ->
+        (match Naming_provider.get_const_path ctx name with
+        | Some nfile -> Relative_path.equal nfile file
+        | None -> true))
+
+let cache_decls ctx file decls =
   let open Shallow_decl_defs in
   let open Typing_defs in
+  let decls =
+    decls |> Sequence.of_list |> remove_naming_conflict_losers ctx file
+  in
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis -> failwith "invalid"
   | Provider_backend.Shared_memory ->
-    List.iter decls ~f:(function
+    Sequence.iter decls ~f:(function
         | (name, Class decl) ->
           Shallow_classes_heap.Classes.add name decl;
           if
@@ -27,7 +58,7 @@ let cache_decls ctx decls =
         | (name, Typedef decl) -> Decl_store.((get ()).add_typedef name decl)
         | (name, Const decl) -> Decl_store.((get ()).add_gconst name decl))
   | Provider_backend.(Local_memory { decl_cache; shallow_decl_cache; _ }) ->
-    List.iter decls ~f:(function
+    Sequence.iter decls ~f:(function
         | (name, Class decl) ->
           let (_ : shallow_class option) =
             Provider_backend.Shallow_decl_cache.find_or_add
@@ -152,6 +183,6 @@ let direct_decl_parse ~file_decl_hash ~symbol_decl_hashes ctx file =
 let direct_decl_parse_and_cache ~file_decl_hash ~symbol_decl_hashes ctx file =
   let result = direct_decl_parse ~file_decl_hash ~symbol_decl_hashes ctx file in
   (match result with
-  | Some (decls, _, _, _) -> cache_decls ctx decls
+  | Some (decls, _, _, _) -> cache_decls ctx file decls
   | None -> ());
   result

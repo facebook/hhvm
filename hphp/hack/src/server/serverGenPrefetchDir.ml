@@ -165,7 +165,7 @@ let go
         with
         | None -> acc
         | Some ((decls, _, _, _) as decl_and_mode_and_hash) ->
-          Direct_decl_utils.cache_decls ctx decls;
+          Direct_decl_utils.cache_decls ctx fn decls;
           let names_and_decl_hashes =
             get_name_and_decl_hashes_from_decls decl_and_mode_and_hash
           in

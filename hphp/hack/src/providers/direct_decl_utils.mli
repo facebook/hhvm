@@ -29,4 +29,7 @@ val direct_decl_parse :
   option
 
 val cache_decls :
-  Provider_context.t -> (string * Shallow_decl_defs.decl) list -> unit
+  Provider_context.t ->
+  Relative_path.t ->
+  (string * Shallow_decl_defs.decl) list ->
+  unit

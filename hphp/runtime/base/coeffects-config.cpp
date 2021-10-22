@@ -75,6 +75,8 @@ struct Coeffects {
   static constexpr auto s_defaults = "defaults";
   static constexpr auto s_pure = "pure";
 
+  static constexpr auto s_86backdoor = "86backdoor";
+
 #define X(x) static constexpr auto s_##x = #x;
   COEFFECTS
 #undef X
@@ -349,6 +351,8 @@ StaticCoeffects CoeffectsConfig::fromName(const std::string& coeffect) {
 #undef X
   }
 
+  if (coeffect == C::s_86backdoor) return CoeffectsConfig::fromName(C::s_pure);
+
   auto const it = s_coeffects_to_capabilities.find(coeffect);
   if (it == s_coeffects_to_capabilities.end() || it->second.empty()) {
     return StaticCoeffects::defaults();
@@ -370,6 +374,7 @@ RuntimeCoeffects CoeffectsConfig::escapesTo(const std::string& coeffect) {
   if (CoeffectsConfig::policiedEnforcementLevel()) {
     if (coeffect == C::s_policied_local) return RuntimeCoeffects::defaults();
   }
+  if (coeffect == C::s_86backdoor) return RuntimeCoeffects::defaults();
   return RuntimeCoeffects::none();
 }
 

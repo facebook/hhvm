@@ -357,6 +357,10 @@ function clear_all_coverage_data(): void {
 
 namespace ImplicitContext\_Private {
 
+final class Consts {
+  const EMPTY_CONTEXT = -1;
+}
+
 /**
  * Returns the implicit context keyed by $key or null if such doesn't exist
  */
@@ -374,13 +378,6 @@ function set_implicit_context(
 )[policied]: int;
 
 /*
- * Sets the implicit context to the implicit context that is at $index
- * and return previous context's index.
- */
-<<__Native>>
-function set_implicit_context_by_index(int $index)[policied]: int;
-
-/*
  * Returns the currently implicit context hash or emptry string if
  * no implicit context is set
  */
@@ -388,10 +385,6 @@ function set_implicit_context_by_index(int $index)[policied]: int;
 function get_implicit_context_memo_key()[policied]: string;
 
 } // namespace ImplicitContext\_Private
-
-final class ImplicitContextConsts {
-  const EMPTY_CONTEXT = -1;
-}
 
 abstract class ImplicitContext {
   abstract const type T as nonnull;
@@ -575,8 +568,38 @@ namespace HH\Coeffects {
    * Creates an unsafe way to call a function by providing defaults coeffects.
    * EXTREMELY UNSAFE. USE WITH CAUTION.
    */
-  <<__Native>>
-  function backdoor((function()[defaults]: Tout) $f)[]: mixed;
+  function backdoor<Tout>(
+    (function()[defaults]: Tout) $fn
+  )[/* 86backdoor */]: Tout {
+    $prev = \HH\ImplicitContext\_Private\set_implicit_context_by_index(
+      \HH\ImplicitContext\_Private\Consts::EMPTY_CONTEXT
+    );
+    try {
+      return $fn();
+    } finally {
+      \HH\ImplicitContext\_Private\set_implicit_context_by_index($prev);
+    }
+  }
+
+  /**
+   * Creates an unsafe way to call a function by providing defaults coeffects.
+   * EXTREMELY UNSAFE. USE WITH CAUTION.
+   */
+  async function backdoor_async<Tout>(
+    (function()[defaults]: Awaitable<Tout>) $fn
+  )[/* 86backdoor */]: Awaitable<Tout> {
+    $prev = \HH\ImplicitContext\_Private\set_implicit_context_by_index(
+      \HH\ImplicitContext\_Private\Consts::EMPTY_CONTEXT
+    );
+    try {
+      $result = $fn();
+    } finally {
+      \HH\ImplicitContext\_Private\set_implicit_context_by_index($prev);
+    }
+    // Needs to be awaited here so that context dependency is established
+    // between parent/child functions
+    return await $result;
+  }
 
   namespace _Private {
 

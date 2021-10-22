@@ -338,6 +338,13 @@ impl<'arena> HhasCoeffects<'arena> {
         }
     }
 
+    pub fn with_backdoor(&self, alloc: &'arena bumpalo::Bump) -> Self {
+        Self {
+            unenforced_static_coeffects: Slice::from_vec(alloc, vec![Str::from(c::BACKDOOR)]),
+            ..self.clone()
+        }
+    }
+
     pub fn inherit_to_child_closure(&self, alloc: &'arena bumpalo::Bump) -> Self {
         let static_coeffects = HhasCoeffects::local_to_shallow(self.get_static_coeffects());
         if self.has_coeffect_rules() {

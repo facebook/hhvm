@@ -784,6 +784,8 @@ pub mod coeffects {
 
     pub const GLOBALS: &str = "globals";
 
+    pub const BACKDOOR: &str = "86backdoor";
+
     pub const CONTEXTS: &str = "HH\\Contexts";
 
     pub const CAPABILITIES: &str = "HH\\Capabilities";

@@ -3251,7 +3251,7 @@ fn emit_special_function<'a, 'arena, 'decl>(
                         ],
                     ))
                 }
-                _ => match get_call_builtin_func_info(lower_fq_name) {
+                _ => match get_call_builtin_func_info(e, lower_fq_name) {
                     Some((nargs, i)) if nargs == args.len() => Some(InstrSeq::gather(
                         alloc,
                         vec![
@@ -3421,7 +3421,10 @@ fn emit_class_meth_native<'a, 'arena, 'decl>(
     })
 }
 
-fn get_call_builtin_func_info<'arena>(id: impl AsRef<str>) -> Option<(usize, Instruct<'arena>)> {
+fn get_call_builtin_func_info<'arena, 'decl>(
+    e: &mut Emitter<'arena, 'decl>,
+    id: impl AsRef<str>,
+) -> Option<(usize, Instruct<'arena>)> {
     use {Instruct::*, InstructGet::*, InstructIsset::*, InstructMisc::*, InstructOperator::*};
     match id.as_ref() {
         "array_key_exists" => Some((2, IMisc(AKExists))),
@@ -3435,6 +3438,9 @@ fn get_call_builtin_func_info<'arena>(id: impl AsRef<str>) -> Option<(usize, Ins
         "HH\\dict" => Some((1, IOp(CastDict))),
         "HH\\varray" => Some((1, IOp(CastVec))),
         "HH\\darray" => Some((1, IOp(CastDict))),
+        "HH\\ImplicitContext\\_Private\\set_implicit_context_by_index" if e.systemlib() => {
+            Some((1, IMisc(SetImplicitContextByIndex)))
+        }
         // TODO: enforce that this returns readonly
         "HH\\global_readonly_get" => Some((1, IGet(CGetG))),
         "HH\\global_get" => Some((1, IGet(CGetG))),

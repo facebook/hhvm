@@ -5098,6 +5098,20 @@ OPTBLD_INLINE void iopWHResult() {
   not_reached();
 }
 
+OPTBLD_INLINE void iopSetImplicitContextByIndex() {
+  if (!RO::EvalEnableImplicitContext) {
+    vmStack().replaceC<KindOfInt64>(ImplicitContext::kEmptyIndex);
+    return;
+  }
+  auto const tv = vmStack().topC();
+  if (UNLIKELY(!tvIsInt(tv))) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Invalid input to SetImplicitContextByIndex");
+  }
+  auto const result = jit::setImplicitContextByIndex(tv->m_data.num);
+  vmStack().replaceC<KindOfInt64>(result);
+}
+
 OPTBLD_INLINE void iopCheckProp(const StringData* propName) {
   auto* cls = vmfp()->getClass();
   auto* propVec = cls->getPropData();

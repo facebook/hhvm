@@ -101,6 +101,11 @@ pub fn emit_function<'a, 'arena, 'decl>(
     if is_meth_caller {
         coeffects = coeffects.with_caller(alloc)
     }
+    if e.systemlib()
+        && (f.name.1 == "\\HH\\Coeffects\\backdoor" || f.name.1 == "\\HH\\Coeffects\\backdoor_async")
+    {
+        coeffects = coeffects.with_backdoor(alloc)
+    }
     let ast_body = &f.body.fb_ast;
     let deprecation_info = hhas_attribute::deprecation_info(attrs.iter());
     let (body, is_gen, is_pair_gen) = {

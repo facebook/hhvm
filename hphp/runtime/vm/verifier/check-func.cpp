@@ -1965,6 +1965,10 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op, bool pure) {
       return true;
     }
 
+    // unsafe: implicit context
+    case Op::SetImplicitContextByIndex:
+      return true;
+
     // unsafe: globals
     case Op::BaseGC:
     case Op::BaseGL:

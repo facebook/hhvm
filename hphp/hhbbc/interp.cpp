@@ -5161,6 +5161,11 @@ void in(ISS& env, const bc::AwaitAll& op) {
   push(env, TInitNull);
 }
 
+void in(ISS& env, const bc::SetImplicitContextByIndex&) {
+  popC(env);
+  push(env, TInt);
+}
+
 void in(ISS& env, const bc::Idx&) {
   auto const def = popC(env);
   auto const [key, promotion] = promote_classlike_to_key(popC(env));

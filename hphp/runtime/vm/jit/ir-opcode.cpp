@@ -423,6 +423,7 @@ bool opcodeMayRaise(Opcode opc) {
   case ReturnHook:
   case SameArrLike:
   case SetElem:
+  case SetImplicitContextByIndex:
   case SetNewElem:
   case SetNewElemDict:
   case SetNewElemKeyset:

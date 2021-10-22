@@ -1937,6 +1937,13 @@ To string conversions:
 
   Records a call to Func for a function call based code coverage report.
 
+| SetImplicitContextByIndex, D(Int), S(Int), NF
+
+  Sets the implicit context to S0 index on the g_context->m_implicitContexts
+  table and returns the index of the previous implicit context.
+  If S0 is equal to ImplicitContext::kEmptyIndex, implicit context is set to
+  null.
+
 13. Runtime helpers
 
 | VerifyParamCls<func,param,tc>, ND, S(Obj) S(Cls) S(Cls|Nullptr), NF

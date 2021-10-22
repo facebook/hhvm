@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/enum-cache.h"
 #include "hphp/runtime/base/file-util.h"
+#include "hphp/runtime/base/implicit-context.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/vm/func.h"
@@ -2434,6 +2435,21 @@ void emitSilence(IRGS& env, Id localId, SilenceOp subop) {
     }
     break;
   }
+}
+
+void emitSetImplicitContextByIndex(IRGS& env) {
+  if (!RO::EvalEnableImplicitContext) {
+    popDecRef(env);
+    push(env, cns(env, ImplicitContext::kEmptyIndex));
+    return;
+  }
+  auto const tv = topC(env);
+  if (!tv->isA(TInt)) {
+    return interpOne(env);
+  }
+  auto const result = gen(env, SetImplicitContextByIndex, tv);
+  popDecRef(env);
+  push(env, result);
 }
 
 //////////////////////////////////////////////////////////////////////

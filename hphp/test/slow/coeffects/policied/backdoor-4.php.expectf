@@ -7,3 +7,5 @@ Warning: Call to Closure$policied_of_f#2() requires [policied_of] coeffects but 
 Warning: Call to policied_of() requires [policied_of] coeffects but Closure$unknown() provided [defaults] in %s on line 24
 
 Warning: Call to unknown() requires [policied_of] coeffects but main() provided [defaults] in %s on line 32
+
+Warning: Call to Closure$unknown() requires [policied_of] coeffects but HH\Coeffects\backdoor() provided [defaults] in %s on line 24

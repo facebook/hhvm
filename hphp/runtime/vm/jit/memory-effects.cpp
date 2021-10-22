@@ -694,6 +694,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case NativeImpl:
     return UnknownEffects {};
 
+  case SetImplicitContextByIndex:
+    // throws exceptions
+    return may_load_store(AHeapAny, AHeapAny);
+
   // These C++ helpers can invoke the user error handler and go do whatever
   // they want to non-frame locations.
   case VerifyParamCallable:

@@ -1807,6 +1807,7 @@ fn print_misc<W: Write>(w: &mut W, misc: &InstructMisc<'_>) -> Result<(), W::Err
         M::CheckThis => w.write("CheckThis"),
         M::FuncNumArgs => w.write("FuncNumArgs"),
         M::ChainFaults => w.write("ChainFaults"),
+        M::SetImplicitContextByIndex => w.write("SetImplicitContextByIndex"),
         M::VerifyRetTypeC => w.write("VerifyRetTypeC"),
         M::VerifyRetTypeTS => w.write("VerifyRetTypeTS"),
         M::Self_ => w.write("Self"),

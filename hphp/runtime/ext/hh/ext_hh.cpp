@@ -1134,25 +1134,6 @@ int64_t HHVM_FUNCTION(set_implicit_context, StringArg keyarg,
   return prev ? prev->m_index : ImplicitContext::kEmptyIndex;
 }
 
-int64_t HHVM_FUNCTION(set_implicit_context_by_index, int64_t index) {
-  if (!RO::EvalEnableImplicitContext) {
-    throw_implicit_context_exception("Implicit context feature is not enabled");
-  }
-  auto const prev = *ImplicitContext::activeCtx;
-  auto const prev_index = prev ? prev->m_index : ImplicitContext::kEmptyIndex;
-  if (index == ImplicitContext::kEmptyIndex) {
-    *ImplicitContext::activeCtx = nullptr;
-    return prev_index;
-  }
-  if (index >= g_context->m_implicitContexts.size()) {
-    throw_implicit_context_exception(
-      folly::to<std::string>("Implicit context at index ", index,
-                             " does not exist"));
-  }
-  *ImplicitContext::activeCtx = g_context->m_implicitContexts[index];
-  return prev_index;
-}
-
 String HHVM_FUNCTION(get_implicit_context_memo_key) {
   if (!RO::EvalEnableImplicitContext) {
     throw_implicit_context_exception("Implicit context feature is not enabled");
@@ -1191,12 +1172,6 @@ Variant coeffects_call_helper(const Variant& function, const char* name,
 }
 
 } // namespace
-
-Variant HHVM_FUNCTION(coeffects_backdoor, const Variant& function) {
-  ImplicitContext::Saver _;
-  return coeffects_call_helper(function, "HH\\Coeffects\\backdoor",
-                               RuntimeCoeffects::defaults(), true);
-}
 
 Variant HHVM_FUNCTION(enter_policied_of, const Variant& function) {
   return coeffects_call_helper(function,
@@ -1419,12 +1394,9 @@ static struct HHExtension final : Extension {
                   HHVM_FN(get_implicit_context));
     HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\set_implicit_context,
                   HHVM_FN(set_implicit_context));
-    HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\set_implicit_context_by_index,
-                  HHVM_FN(set_implicit_context_by_index));
     HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\get_implicit_context_memo_key,
                   HHVM_FN(get_implicit_context_memo_key));
 
-    HHVM_NAMED_FE(HH\\Coeffects\\backdoor, HHVM_FN(coeffects_backdoor));
     HHVM_NAMED_FE(HH\\Coeffects\\_Private\\enter_policied_of,
                   HHVM_FN(enter_policied_of));
 

@@ -12,7 +12,7 @@ final class IntContext extends HH\ImplicitContext {
 }
 
 async function addFive()[policied_of] {
-  await HH\Coeffects\backdoor(
+  await HH\Coeffects\backdoor_async(
     async ()[defaults] ==>
       await RescheduleWaitHandle::create(RescheduleWaitHandle::QUEUE_DEFAULT,0));
   return IntContext::getContext() + 5;

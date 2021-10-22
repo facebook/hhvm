@@ -670,6 +670,7 @@ pub enum InstructMisc<'arena> {
     LockObj,
     ThrowNonExhaustiveSwitch,
     RaiseClassStringConversionWarning,
+    SetImplicitContextByIndex,
 }
 
 #[derive(Clone, Debug)]

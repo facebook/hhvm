@@ -484,6 +484,8 @@ static CallMap s_callMap {
                                         DSSA, SSync, {{SSA, 0}}},
     {RaiseErrorOnInvalidIsAsExpressionType,
       errorOnIsAsExpressionInvalidTypesHelper, DSSA, SSync, {{SSA, 0}}},
+    {SetImplicitContextByIndex, setImplicitContextByIndex,
+                                DSSA, SSync, {{SSA, 0}}},
 };
 
 CallMap::CallMap(CallInfoList infos) {

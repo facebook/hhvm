@@ -201,7 +201,11 @@ let merge_saved_state_futures
         ~deptable
         ~ignore_hh_version
         ~fail_if_missing;
-      let load_decls = genv.local_config.SLC.load_decls_from_saved_state in
+      let load_decls =
+        genv.local_config.SLC.load_decls_from_saved_state
+        || genv.local_config.SLC.force_load_hot_shallow_decls
+      in
+
       let shallow_decls =
         genv.local_config.SLC.shallow_class_decl
         || genv.local_config.SLC.force_shallow_decl_fanout
@@ -381,7 +385,10 @@ let use_precomputed_state_exn
   let changes = Relative_path.set_of_list changes in
   let naming_changes = Relative_path.set_of_list naming_changes in
   let prechecked_changes = Relative_path.set_of_list prechecked_changes in
-  let load_decls = genv.local_config.SLC.load_decls_from_saved_state in
+  let load_decls =
+    genv.local_config.SLC.load_decls_from_saved_state
+    || genv.local_config.SLC.force_load_hot_shallow_decls
+  in
   let shallow_decls = genv.local_config.SLC.shallow_class_decl in
   let naming_table_fallback_path = get_naming_table_fallback_path genv None in
   let legacy_hot_decls_path =
@@ -703,7 +710,10 @@ let type_check_dirty
     if use_prechecked_files genv then
       (* Start with dirty files and fan-out of local changes only *)
       let (to_undecl, to_recheck) =
-        if genv.local_config.SLC.load_decls_from_saved_state then
+        if
+          genv.local_config.SLC.load_decls_from_saved_state
+          || genv.local_config.SLC.force_load_hot_shallow_decls
+        then
           get_files_to_undecl_and_recheck dirty_local_files_changed_hash
         else
           let deps = Typing_deps.add_all_deps env.deps_mode local_deps in
@@ -725,7 +735,10 @@ let type_check_dirty
     else
       (* Start with full fan-out immediately *)
       let (to_undecl, to_recheck) =
-        if genv.local_config.SLC.load_decls_from_saved_state then
+        if
+          genv.local_config.SLC.load_decls_from_saved_state
+          || genv.local_config.SLC.force_load_hot_shallow_decls
+        then
           get_files_to_undecl_and_recheck dirty_files_changed_hash
         else
           let deps = Typing_deps.DepSet.union master_deps local_deps in

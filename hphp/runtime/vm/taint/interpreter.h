@@ -223,7 +223,7 @@ TCA iopFCallObjMethod(
     PC origpc,
     PC& pc,
     const FCallArgs& fca,
-    const StringData*,
+    const StringData* name,
     ObjMethodOp op);
 TCA iopFCallObjMethodD(
     bool retToJit,
@@ -232,7 +232,7 @@ TCA iopFCallObjMethodD(
     const FCallArgs& fca,
     const StringData*,
     ObjMethodOp op,
-    const StringData* methName);
+    const StringData* name);
 void iopIterInit(PC& pc, const IterArgs& ita, PC targetpc);
 void iopLIterInit(PC& pc, const IterArgs& ita, TypedValue* base, PC targetpc);
 void iopIterNext(PC& pc, const IterArgs& ita, PC targetpc);

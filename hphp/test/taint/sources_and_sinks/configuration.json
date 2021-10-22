@@ -6,6 +6,7 @@
   ],
   "sinks": [
     {"name": "__sink", "index": 0 },
-    {"name": "__sink_in_second_parameter", "index": 1 }
+    {"name": "__sink_in_second_parameter", "index": 1 },
+    {"name": ".*Logger::genLog", "index": 0 }
   ]
 }

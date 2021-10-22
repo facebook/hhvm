@@ -833,6 +833,24 @@ TCA iopFCallClsMethodSD(
   return nullptr;
 }
 
+void iopFCall(const Func* func, const FCallArgs& fca) {
+  auto name = func->fullName()->data();
+
+  FTRACE(1, "taint: entering {}\n", yellow(name));
+
+  const auto sinks = Configuration::get()->sinks(name);
+  FTRACE(3, "taint: {} sinks\n", sinks.size());
+
+  for (const auto& sink : sinks) {
+    auto value = State::instance->stack.peek(fca.numArgs - 1 - sink.index);
+    if (!value) { continue; }
+
+    FTRACE(1, "taint: tainted value flows into sink\n");
+    value->hops.push_back(Hop{vmfp()->func(), func});
+    State::instance->paths.push_back(*value);
+  }
+}
+
 TCA iopFCallCtor(
     bool /* retToJit */,
     PC /* origpc */,
@@ -853,9 +871,8 @@ TCA iopFCallCtor(
       obj->getVMClass(),
       ctx,
       MethodLookupErrorOptions::RaiseOnNotFound);
-  auto name = func->fullName()->data();
 
-  FTRACE(1, "taint: entering {}\n", yellow(quote(name)));
+  iopFCall(func, fca);
 
   return nullptr;
 }
@@ -879,19 +896,8 @@ TCA iopFCallFuncD(
 
   auto const nep = vmfp()->unit()->lookupNamedEntityPairId(id);
   auto const func = Func::load(nep.second, nep.first);
-  auto name = func->fullName()->data();
 
-  FTRACE(1, "taint: entering {}\n", yellow(name));
-
-  const auto& sinks = Configuration::get()->sinks(name);
-  for (const auto& sink : sinks) {
-    auto value = State::instance->stack.peek(fca.numArgs - 1 - sink.index);
-    if (!value) { continue; }
-
-    FTRACE(1, "taint: tainted value flows into sink\n");
-    value->hops.push_back(Hop{vmfp()->func(), func});
-    State::instance->paths.push_back(*value);
-  }
+  iopFCall(func, fca);
 
   return nullptr;
 }
@@ -901,7 +907,7 @@ TCA iopFCallObjMethod(
     PC /* origpc */,
     PC& /* pc */,
     const FCallArgs& /* fca */,
-    const StringData*,
+    const StringData* /* name */,
     ObjMethodOp /* op */) {
   iopUnhandled("FCallObjMethod");
   return nullptr;
@@ -911,11 +917,28 @@ TCA iopFCallObjMethodD(
     bool /* retToJit */,
     PC /* origpc */,
     PC& /* pc */,
-    const FCallArgs& /* fca */,
+    const FCallArgs& fca,
     const StringData*,
     ObjMethodOp /* op */,
-    const StringData* /* methName */) {
-  iopUnhandled("FCallObjMethodD");
+    const StringData* name) {
+  iopPreamble("FCallObjMethodD");
+
+  auto const obj = vmStack()
+      .indC(fca.numInputs() + (kNumActRecCells - 1))
+      ->m_data.pobj;
+
+  const Func* func;
+  auto ar = vmfp();
+  auto ctx = ar == nullptr ? nullptr : ar->func()->cls();
+  lookupObjMethod(
+      func,
+      obj->getVMClass(),
+      name,
+      ctx,
+      MethodLookupErrorOptions::RaiseOnNotFound);
+
+  iopFCall(func, fca);
+
   return nullptr;
 }
 

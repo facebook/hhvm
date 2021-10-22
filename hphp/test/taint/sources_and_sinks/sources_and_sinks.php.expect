@@ -2,3 +2,4 @@
 {"hops": ["MyClass::__source_returned_from_method", "source_returned_from_method", "__sink"]}
 {"hops": ["__source_returned_from_function", "source_to_sink_in_second_parameter", "__sink_in_second_parameter"]}
 {"hops": ["DataEntity::getField", "source_from_regex_to_sink", "__sink"]}
+{"hops": ["__source_returned_from_function", "source_to_regex_sink", "DataLogger::genLog"]}

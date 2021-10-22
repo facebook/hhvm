@@ -30,10 +30,6 @@
 namespace HPHP {
 namespace taint {
 
-bool Sink::operator==(const Sink& other) const {
-  return name == other.name && index == other.index;
-}
-
 namespace {
 
 struct SingletonTag {};
@@ -75,7 +71,10 @@ void Configuration::read(const std::string& path) {
       m_sources.insert(boost::regex(source.asString()));
     }
     for (const auto sink : parsed["sinks"]) {
-      addSink(Sink{sink["name"].asString(), sink["index"].asInt()});
+      m_sinks.push_back({
+        boost::regex(sink["name"].asString()),
+        sink["index"].asInt()
+      });
     }
   } catch (std::exception& exception) {
     throw std::invalid_argument("unable to read configuration at `" + path + "`");
@@ -92,26 +91,15 @@ bool Configuration::isSource(const std::string& name) const {
   return false;
 }
 
-void Configuration::addSink(const Sink& sink) {
-  auto sinks = m_sinks.find(sink.name);
-  if (sinks != m_sinks.end()) {
-      sinks->second.insert(sink);
+std::vector<Sink> Configuration::sinks(const std::string& name) const {
+  std::vector<Sink> sinks;
+  for (auto& sink : m_sinks) {
+    // Naive implementation similar to matching sources.
+    if (boost::regex_match(name, sink.name)) {
+      sinks.push_back(sink);
+    }
   }
-  m_sinks.insert({sink.name, SinkSet{sink}});
-}
-
-namespace {
-
-SinkSet kEmptySet = {};
-
-} // namespace
-
-const SinkSet& Configuration::sinks(const std::string& name) const {
-  auto sinks = m_sinks.find(name);
-  if (sinks != m_sinks.end()) {
-    return sinks->second;
-  }
-  return kEmptySet;
+  return sinks;
 }
 
 } // namespace taint

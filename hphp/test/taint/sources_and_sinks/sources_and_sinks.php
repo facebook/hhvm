@@ -40,10 +40,20 @@ function source_from_regex_to_sink(): void {
   __sink($entity->getField());
 }
 
-<<__EntryPoint>> function main(): void {
+class DataLogger {
+  public async function genLog(int $data): Awaitable<void> {}
+}
+
+async function source_to_regex_sink(): Awaitable<void> {
+  $logger = new DataLogger();
+  await $logger->genLog(__source_returned_from_function());
+}
+
+<<__EntryPoint>> async function main(): Awaitable<void> {
   source_returned_from_function();
   source_returned_from_method();
   source_to_sink_in_second_parameter();
   source_to_sink_not_in_second_parameter();
   source_from_regex_to_sink();
+  await source_to_regex_sink();
 }

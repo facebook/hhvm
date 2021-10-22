@@ -85,6 +85,11 @@ final class StrTransformTest extends HackTest {
         '',
         'The_quick brown_Fox',
       ),
+      tuple(
+        'a b c',
+        ' ',
+        'A B C',
+      ),
     ];
   }
 

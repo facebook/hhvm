@@ -54,7 +54,7 @@ function capitalize_words(
   $words = vec[];
   $offset = 0;
   $length = \strlen($string);
-  while ($offset < ($length - 1)) {
+  while ($offset < $length) {
     $substr_len = \strcspn($string, $delimiters, $offset);
     $words[] = tuple(
       \substr($string, $offset, $substr_len),
@@ -62,13 +62,11 @@ function capitalize_words(
     );
     $offset += $substr_len + 1;
   }
-  $tail = $offset < $length ? \substr($string, $offset) : '';
 
   $string = '';
   foreach ($words as list($word, $delimiter)) {
     $string .= namespace\capitalize($word).$delimiter;
   }
-  $string .= $tail;
   return $string;
 }
 

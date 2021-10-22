@@ -5,6 +5,7 @@
 
 use decl_provider::{self, DeclProvider};
 use libc::{c_char, c_int};
+use oxidized_by_ref::file_info::NameType;
 use oxidized_by_ref::{direct_decl_parser::Decls, shallow_decl_defs::Decl};
 
 #[derive(Debug)]
@@ -20,9 +21,17 @@ pub struct ExternalDeclProvider<'decl>(
 );
 
 impl<'decl> DeclProvider<'decl> for ExternalDeclProvider<'decl> {
-    fn get_decl(&self, kind: i32, symbol: &str) -> Result<Decl<'decl>, decl_provider::Error> {
+    fn get_decl(&self, kind: NameType, symbol: &str) -> Result<Decl<'decl>, decl_provider::Error> {
+        /* Need to convert NameType into HPHP::AutoloadMap::KindOf */
+        let code: i32 = match kind {
+            NameType::Class => 0,   // HPHP::AutoloadMap::KindOf::Type
+            NameType::Typedef => 3, // HPHP::AutoloadMap::KindOf::TypeAlias
+            NameType::Fun => 1,     // HPHP::AutoloadMap::KindOf::Function
+            NameType::Const => 2,   // HPHP::AutoloadMap::KindOf::Constant
+            NameType::RecordDef => panic!("RecordDef is not a valid HPHP::AutoloadMap::KindOf"),
+        };
         let symbol_ptr = std::ffi::CString::new(symbol).unwrap();
-        let r = unsafe { self.0(self.1, kind, symbol_ptr.as_c_str().as_ptr()) };
+        let r = unsafe { self.0(self.1, code, symbol_ptr.as_c_str().as_ptr()) };
         if r.is_null() {
             Err(decl_provider::Error::NotFound)
         } else {

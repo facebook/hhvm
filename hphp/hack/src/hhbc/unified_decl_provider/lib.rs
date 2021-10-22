@@ -4,6 +4,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use oxidized_by_ref::file_info::NameType;
 use oxidized_by_ref::shallow_decl_defs::Decl;
 
 #[derive(Debug)]
@@ -13,7 +14,7 @@ pub enum DeclProvider<'decl> {
 }
 
 impl<'decl> decl_provider::DeclProvider<'decl> for DeclProvider<'decl> {
-    fn get_decl(&self, kind: i32, sym: &str) -> Result<Decl<'decl>, decl_provider::Error> {
+    fn get_decl(&self, kind: NameType, sym: &str) -> Result<Decl<'decl>, decl_provider::Error> {
         use DeclProvider::*;
         match self {
             ExternalDeclProvider(e) => e.get_decl(kind, sym),

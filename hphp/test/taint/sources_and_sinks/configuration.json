@@ -1,7 +1,8 @@
 {
   "sources": [
       "__source_returned_from_function",
-      "MyClass::__source_returned_from_method"
+      "MyClass::__source_returned_from_method",
+      "Data.*::get.*"
   ],
   "sinks": [
     {"name": "__sink", "index": 0 },

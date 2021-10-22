@@ -60,7 +60,7 @@ folly::Singleton<Configuration, SingletonTag> kSingleton{};
 }
 
 void Configuration::read(const std::string& path) {
-  sources.clear();
+  m_sources.clear();
   m_sinks.clear();
 
   if (path == "") {
@@ -72,7 +72,7 @@ void Configuration::read(const std::string& path) {
     boost::filesystem::load_string_file(path, contents);
     auto parsed = folly::parseJson(contents);
     for (const auto source : parsed["sources"]) {
-      sources.insert(source.asString());
+      m_sources.insert(boost::regex(source.asString()));
     }
     for (const auto sink : parsed["sinks"]) {
       addSink(Sink{sink["name"].asString(), sink["index"].asInt()});
@@ -80,6 +80,16 @@ void Configuration::read(const std::string& path) {
   } catch (std::exception& exception) {
     throw std::invalid_argument("unable to read configuration at `" + path + "`");
   }
+}
+
+bool Configuration::isSource(const std::string& name) const {
+  for (auto& pattern : m_sources) {
+    // Naive implementation for now. Lots of room for optimization.
+    if (boost::regex_match(name, pattern)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 void Configuration::addSink(const Sink& sink) {

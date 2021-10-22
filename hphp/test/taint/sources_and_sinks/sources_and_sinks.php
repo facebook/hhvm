@@ -31,9 +31,19 @@ function source_to_sink_not_in_second_parameter(): void {
   __sink_in_second_parameter($data, 0);
 }
 
+class DataEntity {
+  public function getField(): int { return 1; }
+}
+
+function source_from_regex_to_sink(): void {
+  $entity = new DataEntity();
+  __sink($entity->getField());
+}
+
 <<__EntryPoint>> function main(): void {
   source_returned_from_function();
   source_returned_from_method();
   source_to_sink_in_second_parameter();
   source_to_sink_not_in_second_parameter();
+  source_from_regex_to_sink();
 }

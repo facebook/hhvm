@@ -524,8 +524,7 @@ void iopRetC(PC& /* pc */) {
   FTRACE(1, "taint: leaving {}\n", yellow(name));
 
   // Check if this function is the origin of a source.
-  auto& sources = Configuration::get()->sources;
-  if (sources.find(name) != sources.end()) {
+  if (Configuration::get()->isSource(name)) {
     FTRACE(1, "taint: function returns source\n");
     Path path;
     path.hops.push_back(Hop{func, callee()});

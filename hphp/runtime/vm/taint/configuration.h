@@ -23,6 +23,7 @@
 #include <unordered_set>
 
 #include <boost/functional/hash.hpp>
+#include <boost/regex.hpp>
 
 namespace HPHP {
 namespace taint {
@@ -56,13 +57,14 @@ struct Configuration {
 
   void read(const std::string& path);
 
-  std::set<std::string> sources;
+  bool isSource(const std::string& name) const;
 
   void addSink(const Sink& sink);
   const SinkSet& sinks(const std::string& name) const;
 
   Optional<std::string> outputDirectory;
  private:
+  std::set<boost::regex> m_sources;
   std::unordered_map<std::string, SinkSet> m_sinks;
 };
 

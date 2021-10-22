@@ -1,7 +1,7 @@
 [package]
 name = "hack_parser_ffi"
 version = "3.49.0"
-edition = "2018"
+edition = "2021"
 
 [dependencies]
 verify_parser_ffi = { path = "../cargo/verify_parser_ffi", package = "verify_parser_ffi" }

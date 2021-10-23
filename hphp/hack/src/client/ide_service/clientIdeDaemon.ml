@@ -1123,6 +1123,13 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
         in
         Lwt.return (message, is_queue_open)
       with
+      | End_of_file ->
+        (* There are two proper ways to close clientIdeDaemon: (1) by sending it a Shutdown message
+           over the FD which is handled above, or (2) by closing the FD which is handled here. Neither
+           path is considered anomalous and neither will raise an exception.
+           Note that closing the message-queue is how we tell handle_messages loop to terminate. *)
+        Lwt_message_queue.close message_queue;
+        Lwt.return (ClientIdeMessage.Shutdown (), false)
       | exn ->
         let e = Exception.wrap exn in
         Lwt_message_queue.close message_queue;

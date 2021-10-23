@@ -1111,24 +1111,30 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
     flush_event_logger ()
   in
   let rec pump_stdin (message_queue : message_queue) : unit Lwt.t =
-    try%lwt
-      let%lwt { ClientIdeMessage.tracking_id; message } =
-        Marshal_tools_lwt.from_fd_with_preamble in_fd
-      in
-      let is_queue_open =
-        Lwt_message_queue.push
-          message_queue
-          (ClientRequest { ClientIdeMessage.tracking_id; message })
-      in
-      match message with
-      | ClientIdeMessage.Shutdown () -> Lwt.return_unit
-      | _ when not is_queue_open -> Lwt.return_unit
-      | _ -> pump_stdin message_queue
-    with
-    | e ->
-      let e = Exception.wrap e in
-      Lwt_message_queue.close message_queue;
-      Exception.reraise e
+    let%lwt (message, is_queue_open) =
+      try%lwt
+        let%lwt { ClientIdeMessage.tracking_id; message } =
+          Marshal_tools_lwt.from_fd_with_preamble in_fd
+        in
+        let is_queue_open =
+          Lwt_message_queue.push
+            message_queue
+            (ClientRequest { ClientIdeMessage.tracking_id; message })
+        in
+        Lwt.return (message, is_queue_open)
+      with
+      | exn ->
+        let e = Exception.wrap exn in
+        Lwt_message_queue.close message_queue;
+        Exception.reraise e
+    in
+    match message with
+    | ClientIdeMessage.Shutdown () -> Lwt.return_unit
+    | _ when not is_queue_open -> Lwt.return_unit
+    | _ ->
+      (* Care! The following call should be tail recursive otherwise we'll get huge callstacks.
+         The [@tailcall] attribute would normally enforce this, but doesn't help the presence of lwt. *)
+      (pump_stdin [@tailcall]) message_queue
   in
   let rec handle_messages ({ message_queue; state } : t) : unit Lwt.t =
     let%lwt next_state_opt =
@@ -1147,7 +1153,10 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
     in
     match next_state_opt with
     | None -> Lwt.return_unit (* exit loop *)
-    | Some state -> handle_messages { message_queue; state }
+    | Some state ->
+      (* Care! The following call should be tail recursive otherwise we'll get huge callstacks.
+         The [@tailcall] attribute would normally enforce this, but doesn't help the presence of lwt. *)
+      (handle_messages [@tailcall]) { message_queue; state }
   in
   try%lwt
     let message_queue = Lwt_message_queue.create () in

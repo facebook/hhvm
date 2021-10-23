@@ -24,6 +24,8 @@
 
 #include "hphp/util/data-block.h"
 
+#include <folly/Random.h>
+
 #include <vector>
 
 namespace HPHP { namespace jit {
@@ -174,8 +176,13 @@ inline bool emit(Venv& env, const inlineend&) {
 
 template<class Vemit>
 void check_nop_interval(Venv& env, const Vinstr& inst,
-                        int& nop_counter, int nop_interval) {
-  if (LIKELY(nop_counter < 0)) return;
+                        uint32_t& nop_counter, uint32_t nop_interval) {
+  if (LIKELY(nop_interval == 0)) return;
+
+  if (nop_counter == 0) {
+    // Initialize start position randomly.
+    nop_counter = folly::Random::rand32(nop_interval) + 1;
+  }
 
   switch (inst.op) {
     // These instructions are for exception handling or state syncing and do
@@ -296,8 +303,8 @@ void vasm_emit(Vunit& unit, Vtext& text, CGMeta& fixups,
   // We don't want to put nops in Vunits representing stubs, and those Vunits
   // don't have a context set.
   auto const nop_interval =
-    unit.context ? RuntimeOption::EvalJitNopInterval : 0;
-  auto nop_counter = nop_interval;
+    unit.context ? RuntimeOption::EvalJitNopInterval : uint32_t{0};
+  auto nop_counter = uint32_t{0};
 
   for (int i = 0, n = labels.size(); i < n; ++i) {
     assertx(checkBlockEnd(unit, labels[i]));

@@ -831,7 +831,7 @@ struct RuntimeOption {
   F(bool, ReorderRDS,                  true)                            \
   F(double, RDSReorderThreshold,       0.0005)                          \
   F(bool, JitAlwaysInterpOne,          false)                           \
-  F(int32_t, JitNopInterval,           0)                               \
+  F(uint32_t, JitNopInterval,          0)                               \
   F(uint32_t, JitMaxTranslations,      10)                              \
   F(uint32_t, JitMaxProfileTranslations, 30)                            \
   F(uint32_t, JitTraceletLiveLocsLimit, 2000)                           \

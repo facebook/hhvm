@@ -33,3 +33,11 @@ val cache_decls :
   Relative_path.t ->
   (string * Shallow_decl_defs.decl) list ->
   unit
+
+val decls_to_fileinfo :
+  Relative_path.t ->
+  (string * Shallow_decl_defs.decl) list
+  * FileInfo.mode option
+  * Int64.t option
+  * Int64.t option list ->
+  FileInfo.t

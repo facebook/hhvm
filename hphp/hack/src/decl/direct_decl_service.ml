@@ -9,68 +9,6 @@
 
 open Hh_prelude
 
-let decls_to_fileinfo
-    fn
-    ((decls, file_mode, hash, symbol_decl_hashes) :
-      Direct_decl_parser.decls
-      * FileInfo.mode option
-      * Int64.t option
-      * Int64.t option list) : FileInfo.t =
-  let add acc ((name, decl), decl_hash) =
-    match decl with
-    | Shallow_decl_defs.Class c ->
-      {
-        acc with
-        FileInfo.classes =
-          ( FileInfo.Full
-              (fst c.Shallow_decl_defs.sc_name
-              |> Pos_or_decl.fill_in_filename fn),
-            name,
-            decl_hash )
-          :: acc.FileInfo.classes;
-      }
-    | Shallow_decl_defs.Fun f ->
-      {
-        acc with
-        FileInfo.funs =
-          ( FileInfo.Full (Pos_or_decl.fill_in_filename fn f.Typing_defs.fe_pos),
-            name,
-            decl_hash )
-          :: acc.FileInfo.funs;
-      }
-    | Shallow_decl_defs.Typedef tf ->
-      {
-        acc with
-        FileInfo.typedefs =
-          ( FileInfo.Full (Pos_or_decl.fill_in_filename fn tf.Typing_defs.td_pos),
-            name,
-            decl_hash )
-          :: acc.FileInfo.typedefs;
-      }
-    | Shallow_decl_defs.Const c ->
-      {
-        acc with
-        FileInfo.consts =
-          ( FileInfo.Full (Pos_or_decl.fill_in_filename fn c.Typing_defs.cd_pos),
-            name,
-            decl_hash )
-          :: acc.FileInfo.consts;
-      }
-    | Shallow_decl_defs.Record r ->
-      {
-        acc with
-        FileInfo.record_defs =
-          ( FileInfo.Full (Pos_or_decl.fill_in_filename fn r.Typing_defs.rdt_pos),
-            name,
-            decl_hash )
-          :: acc.FileInfo.record_defs;
-      }
-  in
-  List.fold
-    ~f:add
-    ~init:FileInfo.{ empty_t with hash; file_mode }
-    (List.zip_exn decls symbol_decl_hashes)
-
 let parse
     (ctx : Provider_context.t)
     ~(trace : bool)
@@ -92,7 +30,9 @@ let parse
     | Some ((decls, _, _, _) as decl_and_mode_and_hash) ->
       let end_parse_time = Unix.gettimeofday () in
       if cache_decls then Direct_decl_utils.cache_decls ctx fn decls;
-      let fileinfo = decls_to_fileinfo fn decl_and_mode_and_hash in
+      let fileinfo =
+        Direct_decl_utils.decls_to_fileinfo fn decl_and_mode_and_hash
+      in
       if trace then
         Hh_logger.log
           "[%.1fms] %s - %s"

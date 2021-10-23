@@ -186,3 +186,28 @@ let direct_decl_parse_and_cache ~file_decl_hash ~symbol_decl_hashes ctx file =
   | Some (decls, _, _, _) -> cache_decls ctx file decls
   | None -> ());
   result
+
+let decls_to_fileinfo fn (decls, file_mode, hash, symbol_decl_hashes) =
+  List.zip_exn decls symbol_decl_hashes
+  |> List.fold
+       ~init:FileInfo.{ empty_t with hash; file_mode }
+       ~f:(fun acc ((name, decl), decl_hash) ->
+         let pos p = FileInfo.Full (Pos_or_decl.fill_in_filename fn p) in
+         match decl with
+         | Shallow_decl_defs.Class c ->
+           let info =
+             (pos (fst c.Shallow_decl_defs.sc_name), name, decl_hash)
+           in
+           FileInfo.{ acc with classes = info :: acc.classes }
+         | Shallow_decl_defs.Fun f ->
+           let info = (pos f.Typing_defs.fe_pos, name, decl_hash) in
+           FileInfo.{ acc with funs = info :: acc.funs }
+         | Shallow_decl_defs.Typedef tf ->
+           let info = (pos tf.Typing_defs.td_pos, name, decl_hash) in
+           FileInfo.{ acc with typedefs = info :: acc.typedefs }
+         | Shallow_decl_defs.Const c ->
+           let info = (pos c.Typing_defs.cd_pos, name, decl_hash) in
+           FileInfo.{ acc with consts = info :: acc.consts }
+         | Shallow_decl_defs.Record r ->
+           let info = (pos (fst r.Typing_defs.rdt_name), name, decl_hash) in
+           FileInfo.{ acc with record_defs = info :: acc.record_defs })

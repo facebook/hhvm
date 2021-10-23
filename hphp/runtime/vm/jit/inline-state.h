@@ -41,6 +41,12 @@ struct InlineReturnTarget {
   Block* suspendTarget;
 
   /*
+   * Block that will finish the catch block, assuming the evaluation stack
+   * of the callee is empty.
+   */
+  Block* endCatchTarget;
+
+  /*
    * Offset from FCall to return control to if the callee finished eagerly.
    */
   Offset asyncEagerOffset;

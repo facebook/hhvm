@@ -26,13 +26,6 @@ struct IRGS;
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Return control from an inlined callee to the caller.
- *
- * This also does bookkeeping for `env' to pop the current inlined frame.
- */
-void implInlineReturn(IRGS& env);
-
-/*
  * Emit a return from an inlined function.
  */
 void retFromInlined(IRGS&);
@@ -42,6 +35,11 @@ void retFromInlined(IRGS&);
  * its contents must now reside in waithandle.
  */
 void suspendFromInlined(IRGS&, SSATmp* waithandle);
+
+/*
+ * Emit an EndCatch equivalent from an inlined function.
+ */
+bool endCatchFromInlined(IRGS&);
 
 /*
  * Make sure all inlined frames are written on the stack and a part of the FP

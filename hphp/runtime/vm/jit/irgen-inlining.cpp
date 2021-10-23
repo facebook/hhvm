@@ -192,6 +192,7 @@ Outer:                                 | Inner:
 
 #include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/resumable.h"
+#include "hphp/runtime/vm/unwind.h"
 
 namespace HPHP { namespace jit { namespace irgen {
 
@@ -461,7 +462,7 @@ void pushInlineFrame(IRGS& env, const InlineFrame& inlineFrame) {
   updateMarker(env);
 }
 
-InlineFrame implInlineReturn(IRGS& env, bool suspend) {
+InlineFrame implInlineReturn(IRGS& env) {
   assertx(resumeMode(env) == ResumeMode::None);
 
   // Return to the caller function.
@@ -470,9 +471,7 @@ InlineFrame implInlineReturn(IRGS& env, bool suspend) {
   return popInlineFrame(env);
 }
 
-void implReturnBlock(IRGS& env, const RegionDesc& calleeRegion) {
-  auto const rt = env.inlineState.returnTarget.back();
-
+void freeInlinedFrameLocals(IRGS& env, const RegionDesc& calleeRegion) {
   // The IR instructions should be associated with one of the return bytecodes;
   // all predecessors of this block should be valid options. Choose the hottest
   // predecessor in order to get the most-likely DecRefProfiles.
@@ -507,13 +506,21 @@ void implReturnBlock(IRGS& env, const RegionDesc& calleeRegion) {
 
   decRefLocalsInline(env);
   decRefThis(env);
+}
+
+void implReturnBlock(IRGS& env, const RegionDesc& calleeRegion) {
+  auto const rt = env.inlineState.returnTarget.back();
+  auto const didStart = env.irb->startBlock(rt.callerTarget, false);
+  always_assert(didStart);
+
+  freeInlinedFrameLocals(env, calleeRegion);
 
   auto const callee = curFunc(env);
 
   auto const nret = callee->numInOutParams() + 1;
   if (nret > 1 && callee->isCPPBuiltin()) {
     auto const ret = pop(env, DataTypeGeneric);
-    implInlineReturn(env, false);
+    implInlineReturn(env);
     for (int32_t idx = 0; idx < nret - 1; ++idx) {
       auto const off = offsetFromIRSP(env, BCSPRelOffset{idx});
       auto const type = callOutType(callee, idx);
@@ -526,7 +533,7 @@ void implReturnBlock(IRGS& env, const RegionDesc& calleeRegion) {
   jit::vector<SSATmp*> retVals{nret, nullptr};
   for (auto& v : retVals) v = pop(env, DataTypeGeneric);
 
-  implInlineReturn(env, false);
+  implInlineReturn(env);
 
   // Pop the NullUninit values from the stack.
   for (uint32_t idx = 0; idx < nret - 1; ++idx) pop(env);
@@ -561,8 +568,8 @@ void implReturnBlock(IRGS& env, const RegionDesc& calleeRegion) {
 bool implSuspendBlock(IRGS& env, bool exitOnAwait) {
   auto const rt = env.inlineState.returnTarget.back();
   // Start a new IR block to hold the remainder of this block.
-  auto const did_start = env.irb->startBlock(rt.suspendTarget, false);
-  if (!did_start) return false;
+  auto const didStart = env.irb->startBlock(rt.suspendTarget, false);
+  if (!didStart) return false;
 
   // We strive to inline regions which will mostly eagerly terminate.
   if (exitOnAwait) hint(env, Block::Hint::Unlikely);
@@ -573,7 +580,7 @@ bool implSuspendBlock(IRGS& env, bool exitOnAwait) {
   auto const wh = label->dst(0);
   retypeDests(label, &env.unit);
 
-  auto const inlineFrame = implInlineReturn(env, exitOnAwait);
+  auto const inlineFrame = implInlineReturn(env);
   SCOPE_EXIT { if (exitOnAwait) pushInlineFrame(env, inlineFrame); };
 
   push(env, wh);
@@ -587,24 +594,51 @@ bool implSuspendBlock(IRGS& env, bool exitOnAwait) {
   return true;
 }
 
-////////////////////////////////////////////////////////////////////////////////
+void implEndCatchBlock(IRGS& env, const RegionDesc& calleeRegion) {
+  auto const rt = env.inlineState.returnTarget.back();
+  auto const didStart = env.irb->startBlock(rt.endCatchTarget, false);
+  if (!didStart) return;
+
+  hint(env, Block::Hint::Unused);
+  freeInlinedFrameLocals(env, calleeRegion);
+
+  auto const inlineFrame = implInlineReturn(env);
+  SCOPE_EXIT { pushInlineFrame(env, inlineFrame); };
+
+  // If the caller is inlined as well, try to use shared EndCatch of its caller.
+  if (isInlining(env)) {
+    if (endCatchFromInlined(env)) return;
+
+    spillInlinedFrames(env);
+  }
+
+  // Tell the unwinder that we have popped stuff from the stack.
+  auto const spOff = spOffBCFromIRSP(env);
+  auto const bcSP = gen(env, LoadBCSP, IRSPRelOffsetData { spOff }, sp(env));
+  gen(env, StVMSP, bcSP);
+
+  auto const data = EndCatchData {
+    spOffBCFromIRSP(env),
+    EndCatchData::CatchMode::UnwindOnly,
+    EndCatchData::FrameMode::Phplogue,
+    EndCatchData::Teardown::Full
+  };
+  gen(env, EndCatch, data, fp(env), sp(env));
 }
 
-void implInlineReturn(IRGS& env) {
-  implInlineReturn(env, false);
+////////////////////////////////////////////////////////////////////////////////
 }
 
 bool endInlining(IRGS& env, const RegionDesc& calleeRegion) {
   auto const rt = env.inlineState.returnTarget.back();
+
+  implEndCatchBlock(env, calleeRegion);
 
   if (env.irb->canStartBlock(rt.callerTarget)) {
     implSuspendBlock(env, true);
   } else {
     return implSuspendBlock(env, false);
   }
-
-  auto const did_start = env.irb->startBlock(rt.callerTarget, false);
-  always_assert(did_start);
 
   implReturnBlock(env, calleeRegion);
 
@@ -626,6 +660,33 @@ void retFromInlined(IRGS& env) {
 
 void suspendFromInlined(IRGS& env, SSATmp* waitHandle) {
   gen(env, Jmp, env.inlineState.returnTarget.back().suspendTarget, waitHandle);
+}
+
+bool endCatchFromInlined(IRGS& env) {
+  assertx(isInlining(env));
+
+  if (findCatchHandler(curFunc(env), bcOff(env)) != kInvalidOffset) {
+    // We are not exiting the frame, as the current opcode has a catch handler.
+    // Use the standard EndCatch logic that will have to spill the frame.
+    return false;
+  }
+
+  if (fp(env) == env.irb->fs().fixupFP()) {
+    // The current frame is already spilled.
+    return false;
+  }
+
+  if (curFunc(env)->isAsync() &&
+      env.inlineState.returnTarget.back().asyncEagerOffset == kInvalidOffset) {
+    // This async function was called without associated await, the exception
+    // needs to be wrapped into an Awaitable.
+    return false;
+  }
+
+  // Clear the evaluation stack and jump to the shared EndCatch handler.
+  while (spOffBCFromStackBase(env) > spOffEmpty(env)) popDecRef(env);
+  gen(env, Jmp, env.inlineState.returnTarget.back().endCatchTarget);
+  return true;
 }
 
 void spillInlinedFrames(IRGS& env) {

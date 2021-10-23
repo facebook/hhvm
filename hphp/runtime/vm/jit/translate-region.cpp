@@ -719,13 +719,13 @@ bool irGenTryInlineFCall(irgen::IRGS& irgs, const Func* callee,
          fca.numArgs,
          show(irgs));
 
-  auto const& irb = *irgs.irb;
-  auto const returnBlock = irb.unit().defBlock(irgen::curProfCount(irgs));
-  auto const suspendRetBlock = irb.unit().defBlock(irgen::curProfCount(irgs));
+  auto const returnBlock = irgen::defBlock(irgs);
+  auto const suspendRetBlock = irgen::defBlock(irgs);
+  auto const endCatchBlock = irgen::defBlock(irgs, Block::Hint::Unused);
   auto const asyncEagerOffset = callee->supportsAsyncEagerReturn()
     ? fca.asyncEagerOffset : kInvalidOffset;
   auto const returnTarget = InlineReturnTarget {
-    returnBlock, suspendRetBlock, asyncEagerOffset
+    returnBlock, suspendRetBlock, endCatchBlock, asyncEagerOffset
   };
   auto callFuncOff = bcOff(irgs);
 
@@ -799,25 +799,24 @@ std::unique_ptr<IRUnit> irGenInlineRegion(const TransContext& ctx,
       irgs.profTransIDs.insert(mergedBlocks.begin(), mergedBlocks.end());
     }
 
-    auto& irb = *irgs.irb;
     auto const& argTypes = region.inlineInputTypes();
     auto const ctxType = region.inlineCtxType();
 
     auto const func = region.entry()->func();
 
-    auto const entry = irb.unit().entry();
-    auto returnBlock = irb.unit().defBlock();
-    auto suspendRetBlock = irb.unit().defBlock();
-    auto returnTarget = InlineReturnTarget {
-      returnBlock, suspendRetBlock, kInvalidOffset
+    auto const returnBlock = irgen::defBlock(irgs);
+    auto const suspendRetBlock = irgen::defBlock(irgs);
+    auto const endCatchBlock = irgen::defBlock(irgs, Block::Hint::Unused);
+    auto const returnTarget = InlineReturnTarget {
+      returnBlock, suspendRetBlock, endCatchBlock, kInvalidOffset
     };
 
     // Set the profCount of the entry and return blocks we just created.
-    entry->setProfCount(curProfCount(irgs));
+    unit->entry()->setProfCount(curProfCount(irgs));
     returnBlock->setProfCount(curProfCount(irgs));
 
     SCOPE_ASSERT_DETAIL("Inline-IRUnit") { return show(*unit); };
-    irb.startBlock(entry, false /* hasUnprocPred */);
+    irgs.irb->startBlock(unit->entry(), false /* hasUnprocPred */);
     irgen::conjureBeginInlining(irgs, func, region.start(),
                                 ctxType, argTypes, returnTarget);
 

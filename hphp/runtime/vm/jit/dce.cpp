@@ -1260,6 +1260,9 @@ void fullDCE(IRUnit& unit) {
 
   // Now remove instructions whose state is DEAD.
   removeDeadInstructions(unit, state);
+
+  // Kill unreachable catch blocks.
+  mandatoryDCE(unit);
 }
 
 }}

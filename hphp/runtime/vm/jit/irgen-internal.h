@@ -910,6 +910,12 @@ Block* create_catch_block(
   gen(env, BeginCatch);
   body();
 
+  // If we are unwinding from an inlined function, try a special logic that
+  // may eliminate the need to spill the current frame.
+  if (isInlining(env) && mode == EndCatchData::CatchMode::UnwindOnly) {
+    if (endCatchFromInlined(env)) return catchBlock;
+  }
+
   // We already spilled frames prior to these opcodes.
   if (mode != EndCatchData::CatchMode::InterpCatch) {
     spillInlinedFrames(env);

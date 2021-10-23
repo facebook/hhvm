@@ -168,7 +168,7 @@ void optimize(tc::FuncMetaInfo& info) {
       translator->annotations.emplace_back("TransCFG", transCFGAnnot);
     }
     FTRACE(4, "Translating {} with optIndex={}\n",
-           func->fullName(), optIndex);
+           showShort(regionSk), optIndex);
     translator->region = region;
     translator->optIndex = optIndex++;
     auto const spOff = region->entry()->initialSpOffset();

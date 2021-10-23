@@ -385,10 +385,10 @@ void cgNativeImpl(IRLS& env, const IRInstruction* inst) {
   };
 }
 
-static void traceCallback(ActRec* fp, TypedValue* sp, Offset bcOff) {
+static void traceCallback(ActRec* fp, TypedValue* sp, SrcKey::AtomicInt skInt) {
   if (Trace::moduleEnabled(Trace::hhirTracelets)) {
-    FTRACE(0, "{} {} {} {} {}\n",
-           fp->func()->fullName()->data(), bcOff, fp, sp,
+    FTRACE(0, "{} {} {} {}\n",
+           showShort(SrcKey::fromAtomicInt(skInt)), fp, sp,
            __builtin_return_address(0));
   }
   checkFrame(fp, sp, true /* fullCheck */);
@@ -400,7 +400,7 @@ void cgDbgTraceCall(IRLS& env, const IRInstruction* inst) {
   auto const args = argGroup(env, inst)
     .ssa(0)
     .addr(srcLoc(env, inst, 1).reg(), cellsToBytes(spOff.offset))
-    .imm(inst->marker().bcOff());
+    .imm(inst->marker().sk().toAtomicInt());
 
   cgCallHelper(vmain(env), env, CallSpec::direct(traceCallback),
                callDest(env, inst), SyncOptions::None, args);

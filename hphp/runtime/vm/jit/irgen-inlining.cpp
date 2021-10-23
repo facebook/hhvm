@@ -484,7 +484,7 @@ void freeInlinedFrameLocals(IRGS& env, const RegionDesc& calleeRegion) {
     }
   }
   auto const bcContext = best->bcctx();
-  env.bcState.setOffset(bcContext.marker.sk().offset());
+  env.bcState = bcContext.marker.sk();
   env.irb->setCurMarker(bcContext.marker);
 
   // At this point, env.profTransIDs and env.region are already set with the

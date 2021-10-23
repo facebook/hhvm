@@ -972,7 +972,7 @@ struct ReqBindJmpData : IRExtraData {
   std::string show() const {
     return folly::sformat(
       "{}, SBInv {}, IRSP {}",
-      target.offset(), invSPOff.offset, irSPOff.offset
+      target.printableOffset(), invSPOff.offset, irSPOff.offset
     );
   }
 

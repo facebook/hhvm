@@ -315,10 +315,10 @@ void prepareForNextHHBC(IRGS& env, SrcKey newSk) {
   always_assert_flog(curFunc(env) == newSk.func(),
                      "Tried to update current SrcKey with a different func");
 
-  FTRACE(1, "Next instruction: {}: {}\n", newSk.offset(),
+  FTRACE(1, "Next instruction: {}: {}\n", newSk.printableOffset(),
          NormalizedInstruction(newSk, curUnit(env)).toString());
 
-  env.bcState.setOffset(newSk.offset());
+  env.bcState = newSk;
   updateMarker(env);
   env.irb->exceptionStackBoundary();
   env.irb->resetCurIROff();

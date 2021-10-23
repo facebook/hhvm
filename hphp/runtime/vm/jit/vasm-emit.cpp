@@ -126,6 +126,7 @@ void emitVunit(Vunit& vunit, const IRUnit* unit,
 
   tracing::Block _{"vasm-emit", [&] { return traceProps(vunit); }};
 
+  SCOPE_ASSERT_DETAIL("hhir unit") { return unit ? show(*unit) : ""; };
   SCOPE_ASSERT_DETAIL("vasm unit") { return show(vunit); };
   tc::assertOwnsCodeLock(code);
 

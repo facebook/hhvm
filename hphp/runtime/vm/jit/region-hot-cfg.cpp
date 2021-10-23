@@ -289,7 +289,8 @@ private:
     auto tidRegion = rec->region();
     auto tidInstrs = tidRegion->instrSize();
     if (tidInstrs > m_numBCInstrs) {
-      ITRACE(5, "- visit: skipping {} due to region size\n", tid);
+      ITRACE(5, "- visit: skipping {} due to region size {} > {}\n",
+             tid, tidInstrs, m_numBCInstrs);
       if (m_truncated) *m_truncated = true;
       if (!m_inlining) {
         logLowPriPerfWarning(

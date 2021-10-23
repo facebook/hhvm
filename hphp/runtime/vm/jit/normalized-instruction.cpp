@@ -78,7 +78,7 @@ Offset NormalizedInstruction::offset() const {
 }
 
 std::string NormalizedInstruction::toString() const {
-  return instrToString(pc(), func());
+  return source.showInst();
 }
 
 SrcKey NormalizedInstruction::nextSk() const {

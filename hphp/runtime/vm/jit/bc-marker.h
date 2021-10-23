@@ -127,13 +127,6 @@ struct BCMarker {
   // unpublished frame) so that its offset is relative to the live ActRec.
   SrcKey fixupSk() const;
 
-  // Return a copy of this marker with an updated bcSPOff, fp, or fixupSK.
-  BCMarker adjustSPOff(SBInvOffset bcSPOff) const {
-    auto ret = *this;
-    ret.m_bcSPOff = bcSPOff;
-    return ret;
-  }
-
   void reset() {
     m_sk = SrcKey();
     m_bcSPOff = SBInvOffset{0};

@@ -903,7 +903,9 @@ Block* create_catch_block(
   BlockPusher bp(*env.irb, env.irb->curMarker(), catchBlock);
 
   auto const& exnState = env.irb->exceptionStackState();
-  env.irb->fs().setBCSPOff(exnState.syncedSpLevel);
+  assertx(exnState.syncedSpLevel == env.irb->curMarker().bcSPOff());
+  env.irb->fs().setBCSPOff(exnState.syncedSpLevel - offsetToAdjustSPForCall);
+  updateMarker(env);
 
   gen(env, BeginCatch);
   body();
@@ -914,25 +916,14 @@ Block* create_catch_block(
   }
 
   auto const stublogue = env.irb->fs().stublogue();
-  auto const spOffset = mode != EndCatchData::CatchMode::CallCatch
-    ? spOffBCFromIRSP(env)
-    : spOffBCFromIRSP(env) + offsetToAdjustSPForCall;
   auto const data = EndCatchData {
-    spOffset,
+    spOffBCFromIRSP(env),
     mode,
     stublogue ?
       EndCatchData::FrameMode::Stublogue : EndCatchData::FrameMode::Phplogue,
     stublogue ? EndCatchData::Teardown::NA : EndCatchData::Teardown::Full
   };
-  auto const marker = env.irb->curMarker();
-  auto const newMarker = [&] {
-    if (offsetToAdjustSPForCall == 0) return marker;
-    auto const newSPOff = marker.bcSPOff() - offsetToAdjustSPForCall;
-    return marker.adjustSPOff(newSPOff);
-  }();
-  env.irb->setCurMarker(newMarker);
   gen(env, EndCatch, data, fp(env), sp(env));
-  env.irb->setCurMarker(marker);
   return catchBlock;
 }
 

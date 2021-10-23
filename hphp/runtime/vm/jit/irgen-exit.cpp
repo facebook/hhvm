@@ -84,7 +84,7 @@ Block* implMakeExit(IRGS& env, SrcKey targetSk) {
   }
 
   auto const exit = defBlock(env, Block::Hint::Unlikely);
-  BlockPusher bp(*env.irb, makeMarker(env, targetSk), exit);
+  BlockPusher bp(*env.irb, makeMarker(env, curSrcKey(env)), exit);
   spillInlinedFrames(env);
   exitRequest(env, targetSk);
   return exit;
@@ -115,7 +115,7 @@ Block* makeExitSlow(IRGS& env) {
 
 Block* makeExitSurprise(IRGS& env, SrcKey targetSk) {
   auto const exit = defBlock(env, Block::Hint::Unlikely);
-  BlockPusher bp(*env.irb, makeMarker(env, targetSk), exit);
+  BlockPusher bp(*env.irb, makeMarker(env, curSrcKey(env)), exit);
   spillInlinedFrames(env);
   gen(env, HandleRequestSurprise);
   exitRequest(env, targetSk);

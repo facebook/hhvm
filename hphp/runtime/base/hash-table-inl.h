@@ -288,6 +288,21 @@ HashTable<ArrayType, ElmType>::findForNewInsertWarn(int32_t* table,
   }
 }
 
+template <typename ArrayType, typename ElmType>
+ArrayType*
+HashTable<ArrayType, ElmType>::InsertCheckUnbalanced(ArrayType* ad,
+                                                     int32_t* table,
+                                                     uint32_t mask,
+                                                     ElmType* iter,
+                                                     ElmType* stop) {
+  for (uint32_t i = 0; iter != stop; ++iter, ++i) {
+    auto& e = *iter;
+    if (e.isTombstone()) continue;
+    *ad->findForNewInsertWarn(table, mask, e.probe()) = i;
+  }
+  return ad;
+}
+
 // Quadratic probe is:
 //
 //   h(k, i) = (k + c1*i + c2*(i^2)) % tableSize

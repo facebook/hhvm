@@ -296,9 +296,20 @@ struct HashTable : HashTableCommon {
   }
 
   Inserter findForNewInsert(int32_t* table, size_t mask,
-                                hash_t h0) const;
+                            hash_t h0) const;
   Inserter findForNewInsertWarn(int32_t* table, size_t mask,
-                                    hash_t h0) const;
+                                hash_t h0) const;
+
+  /*
+   * Helper routine for inserting elements into a new array
+   * when Grow()ing the array, that also checks for potentially
+   * unbalanced entries because of hash collision.
+   */
+  static ArrayType* InsertCheckUnbalanced(ArrayType* ad,
+                                          int32_t* table,
+                                          uint32_t mask,
+                                          ElmType* iter,
+                                          ElmType* stop);
 
   /////////////////////////////////////////////////////////////////////////////
   // Iteration

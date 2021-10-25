@@ -493,14 +493,6 @@ private:
   VanillaDict* moveVal(TypedValue& tv, TypedValue v);
 
   /*
-   * Helper routine for inserting elements into a new array
-   * when Grow()ing the array, that also checks for potentially
-   * unbalanced entries because of hash collision.
-   */
-  static VanillaDict* InsertCheckUnbalanced(VanillaDict* ad, int32_t* table,
-                                           uint32_t mask,
-                                           Elm* iter, Elm* stop);
-  /*
    * Grow makes a copy of the array with scale = newScale. Grow rebuilds the
    * hash table, but it does not compact the elements. If copy is true, it
    * will copy elements instead of taking ownership of them.

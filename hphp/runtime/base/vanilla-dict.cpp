@@ -678,22 +678,6 @@ VanillaDict* VanillaDict::moveVal(TypedValue& tv, TypedValue v) {
   return this;
 }
 
-NEVER_INLINE VanillaDict*
-VanillaDict::InsertCheckUnbalanced(VanillaDict* ad,
-                                  int32_t* table,
-                                  uint32_t mask,
-                                  Elm* iter,
-                                  Elm* stop) {
-  for (uint32_t i = 0; iter != stop; ++iter, ++i) {
-    auto& e = *iter;
-    if (e.isTombstone()) continue;
-    *ad->findForNewInsertWarn(table,
-                              mask,
-                              e.probe()) = i;
-  }
-  return ad;
-}
-
 NEVER_INLINE
 VanillaDict* VanillaDict::SlowGrow(VanillaDict* ad, const ArrayData& old,
                                  VanillaDictElm* elm, VanillaDictElm* end) {

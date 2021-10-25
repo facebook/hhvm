@@ -778,6 +778,18 @@ impl<'ast> VisitorMut<'ast> for Checker {
                 context.locals = new_lenv;
                 Ok(())
             }
+            aast::Stmt_::Awaitall(a) => {
+                let (assignments, block) = &mut **a;
+                for i in assignments {
+                    // if there's a temp local
+                    if let Some(lid) = &i.0 {
+                        let var_name = local_id::get_name(&lid.1).to_string();
+                        let rhs_rty = rty_expr(context, &i.1);
+                        context.add_local(&var_name, rhs_rty);
+                    }
+                }
+                block.recurse(context, self.object())
+            }
             _ => s.recurse(context, self.object()),
         }
     }

@@ -281,6 +281,8 @@ let rec assign env lval rval =
     | _ -> ()
   in
   match lval with
+  (* List assignment *)
+  | (_, _, List exprs) -> List.iter exprs ~f:(fun lval -> assign env lval rval)
   | (_, _, Array_get (array, _)) ->
     begin
       match (ty_expr env array, ty_expr env rval) with

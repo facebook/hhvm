@@ -164,7 +164,8 @@ let rec is_safe_mut_ty env (seen : SSet.t) ty =
     TShapeMap.for_all (fun _k v -> is_safe_mut_ty env seen v.sft_ty) fields
   (* If it's a Tclass it's an array type by is_value_collection *)
   | Tintersection tyl -> List.exists tyl ~f:(fun l -> is_safe_mut_ty env seen l)
-  | Tunion tyl -> List.exists tyl ~f:(fun l -> is_safe_mut_ty env seen l)
+  | Tunion tyl -> List.for_all tyl ~f:(fun l -> is_safe_mut_ty env seen l)
+  | Ttuple tyl -> List.for_all tyl ~f:(fun l -> is_safe_mut_ty env seen l)
   | Tdependent (_, upper) ->
     (* check upper bounds *)
     is_safe_mut_ty env seen upper

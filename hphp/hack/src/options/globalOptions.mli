@@ -329,6 +329,9 @@ type t = {
   tco_pessimise_builtins: bool;
   tco_deferments_light: bool;
   tco_enable_disk_heap: bool;
+  (* Resolves unsoundness arising from incorrect [defaults] context generated for default
+   * constructors during __ConsistentConstruct check *)
+  tco_pure_default_consistent_constructors: bool;
 }
 [@@deriving eq, show]
 
@@ -464,6 +467,7 @@ val make :
   ?tco_pessimise_builtins:bool ->
   ?tco_deferments_light:bool ->
   ?tco_enable_disk_heap:bool ->
+  ?tco_pure_default_consistent_constructors:bool ->
   unit ->
   t
 
@@ -764,3 +768,5 @@ val tco_pessimise_builtins : t -> bool
 val tco_deferments_light : t -> bool
 
 val tco_enable_disk_heap : t -> bool
+
+val tco_pure_default_consistent_constructors : t -> bool

@@ -1,1 +1,6 @@
-No errors
+File "construct_consist2.php", line 8, characters 19-29:
+The method `__construct` is not compatible with the overridden method (Typing[4341])
+  File "construct_consist2.php", line 4, characters 7-8:
+  Expected a function that requires the capability set {}
+  File "construct_consist2.php", line 8, characters 19-29:
+  But got a function that requires the capability set {AccessGlobals, Codegen, IO, ImplicitPolicyLocal, RxLocal, System, WriteProperty}

@@ -227,3 +227,6 @@ let pessimise_builtins = GlobalOptions.tco_pessimise_builtins
 let deferments_light = GlobalOptions.tco_deferments_light
 
 let enable_disk_heap = GlobalOptions.tco_enable_disk_heap
+
+let pure_default_consistent_constructors =
+  GlobalOptions.tco_pure_default_consistent_constructors

@@ -140,6 +140,7 @@ type t = {
   tco_pessimise_builtins: bool;
   tco_deferments_light: bool;
   tco_enable_disk_heap: bool;
+  tco_pure_default_consistent_constructors: bool;
 }
 [@@deriving eq, show]
 
@@ -341,6 +342,7 @@ let default =
     tco_pessimise_builtins = false;
     tco_deferments_light = false;
     tco_enable_disk_heap = true;
+    tco_pure_default_consistent_constructors = false;
   }
 
 let make
@@ -501,6 +503,8 @@ let make
     ?(tco_pessimise_builtins = default.tco_pessimise_builtins)
     ?(tco_deferments_light = default.tco_deferments_light)
     ?(tco_enable_disk_heap = default.tco_enable_disk_heap)
+    ?(tco_pure_default_consistent_constructors =
+      default.tco_pure_default_consistent_constructors)
     () =
   {
     tco_experimental_features;
@@ -635,6 +639,7 @@ let make
     tco_pessimise_builtins;
     tco_deferments_light;
     tco_enable_disk_heap;
+    tco_pure_default_consistent_constructors;
   }
 
 let tco_experimental_feature_enabled t s =
@@ -936,3 +941,6 @@ let tco_pessimise_builtins t = t.tco_pessimise_builtins
 let tco_deferments_light t = t.tco_deferments_light
 
 let tco_enable_disk_heap t = t.tco_enable_disk_heap
+
+let tco_pure_default_consistent_constructors t =
+  t.tco_pure_default_consistent_constructors

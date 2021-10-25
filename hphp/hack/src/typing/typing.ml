@@ -6070,7 +6070,6 @@ and dispatch_call
             when TypecheckerOptions.ignore_unsafe_cast (Env.get_tcopt env) ->
             expr env original_expr
           | _ ->
-            Errors.unsafe_cast p;
             (* first type the `unsafe_cast` as a call, handling arity errors *)
             let (env, fty, tal) = fun_type_of_id env id explicit_targs el in
             check_disposable_in_return env fty;

@@ -613,7 +613,7 @@ module Typing = struct
     | StrictStrConcatTypeMismatch [@value 4414]
     | StrictStrInterpTypeMismatch [@value 4415]
     | InvalidMethCallerCallingConvention [@value 4416]
-    | UnsafeCast [@value 4417]
+    (* | UnsafeCast [@value 4417] DEPRECATED *)
     | ReadonlyException [@value 4418]
     | InvalidTypeHint [@value 4419]
     | ExperimentalExpressionTrees [@value 4420]

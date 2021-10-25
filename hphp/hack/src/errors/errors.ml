@@ -5859,12 +5859,6 @@ let readonly_closure_call pos f_pos suggestion =
     )
     [(f_pos, "Did you mean to " ^ suggestion ^ "?")]
 
-let unsafe_cast pos =
-  add
-    (Typing.err_code Typing.UnsafeCast)
-    pos
-    "This cast violates type safety and may lead to unexpected behavior at runtime."
-
 let experimental_expression_trees pos =
   add
     (Typing.err_code Typing.ExperimentalExpressionTrees)

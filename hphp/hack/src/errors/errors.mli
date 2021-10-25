@@ -1752,8 +1752,6 @@ val readonly_method_call : Pos.t -> Pos_or_decl.t -> unit
 val invalid_meth_caller_calling_convention :
   Pos.t -> Pos_or_decl.t -> string -> unit
 
-val unsafe_cast : Pos.t -> unit
-
 val readonly_exception : Pos.t -> unit
 
 val experimental_expression_trees : Pos.t -> unit

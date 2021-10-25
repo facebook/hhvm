@@ -102,7 +102,8 @@ pub fn emit_function<'a, 'arena, 'decl>(
         coeffects = coeffects.with_caller(alloc)
     }
     if e.systemlib()
-        && (f.name.1 == "\\HH\\Coeffects\\backdoor" || f.name.1 == "\\HH\\Coeffects\\backdoor_async")
+        && (f.name.1 == "\\HH\\Coeffects\\backdoor"
+            || f.name.1 == "\\HH\\Coeffects\\backdoor_async")
     {
         coeffects = coeffects.with_backdoor(alloc)
     }

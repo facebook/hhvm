@@ -89,7 +89,7 @@ class DateTime implements DateTimeInterface {
    *
    */
   <<__Native>>
-  public function getTimestamp(): int;
+  public function getTimestamp()[]: int;
 
   /**
    * Return time zone relative to given DateTime.

@@ -159,7 +159,7 @@ class DateTime implements DateTimeInterface {
   public function add(DateInterval $interval);
   public function modify(string $modify);
   public function getOffset(): int;
-  public function getTimestamp(): int;
+  public function getTimestamp()[]: int;
   public function getTimezone();
   public function setDate(int $year, int $month, int $day);
   public function setISODate(int $year, int $week, int $day = 1);
@@ -185,7 +185,7 @@ class DateTimeImmutable implements DateTimeInterface {
   public function add(DateInterval $interval): this;
   public function modify(string $modify): this;
   public function getOffset(): int;
-  public function getTimestamp(): int;
+  public function getTimestamp()[]: int;
   public function getTimezone();
   public function setDate(int $year, int $month, int $day): this;
   public function setISODate(int $year, int $week, int $day = 1): this;

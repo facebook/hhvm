@@ -155,6 +155,7 @@ let rec is_valid_mutable_subscript_expression_target env v =
     is_byval_collection_or_string_or_any_type env ty
     && (is_valid_mutable_subscript_expression_target env e
        || mutating_this_in_ctor env e)
+  | (_, _, ReadonlyExpr e) -> is_valid_mutable_subscript_expression_target env e
   | _ -> false
 
 let is_valid_append_target _env ty =

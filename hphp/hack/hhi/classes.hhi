@@ -156,25 +156,25 @@ abstract class ResumableWaitHandle<<<__RequireDynamic>> +T> extends WaitableWait
 final class AwaitAllWaitHandle extends WaitableWaitHandle<void> {
   public static function fromVArray(
     varray<Awaitable<mixed>> $deps
-  ): Awaitable<void>;
+  )[]: Awaitable<void>;
   public static function fromDArray(
     darray<arraykey, Awaitable<mixed>> $deps
-  ): Awaitable<void>;
+  )[]: Awaitable<void>;
   public static function fromDict(
     dict<arraykey, Awaitable<mixed>> $deps
-  ): Awaitable<void>;
+  )[]: Awaitable<void>;
   public static function fromMap(
     \ConstMap<arraykey, Awaitable<mixed>> $deps
-  ): Awaitable<void>;
+  )[]: Awaitable<void>;
   public static function fromVec(
     vec<Awaitable<mixed>> $deps
-  ): Awaitable<void>;
+  )[]: Awaitable<void>;
   public static function fromVector(
     \ConstVector<Awaitable<mixed>> $deps
-  ): Awaitable<void>;
+  )[]: Awaitable<void>;
   public static function fromContainer(
     Container<Awaitable<mixed>> $deps,
-  ): Awaitable<void>;
+  )[]: Awaitable<void>;
   public static function setOnCreateCallback(
     ?(function(AwaitAllWaitHandle, Vector<mixed>): void) $callback
   ): void {}

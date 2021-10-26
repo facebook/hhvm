@@ -13,10 +13,10 @@ namespace HH {
   function asio_get_running();
 }
 namespace HH\Asio {
-  function join<T>(Awaitable<T> $awaitable): T;
-  function result<T>(Awaitable<T> $awaitable): T;
-  function name(Awaitable<mixed> $awaitable): string;
-  function has_finished(Awaitable<mixed> $awaitable): bool;
+  function join<T>(Awaitable<T> $awaitable)[]: T;
+  function result<T>(Awaitable<T> $awaitable)[]: T;
+  function name(Awaitable<mixed> $awaitable)[]: string;
+  function has_finished(Awaitable<mixed> $awaitable)[]: bool;
   function cancel(Awaitable<mixed> $awaitable, \Exception $exception): bool;
   function backtrace(Awaitable<mixed> $awaitable,
                         int $options = \DEBUG_BACKTRACE_PROVIDE_OBJECT,

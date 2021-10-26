@@ -141,11 +141,18 @@ let make_param_local_ty env decl_hint param =
     match decl_hint with
     | None -> (env, mk (r, TUtils.tany env))
     | Some ty ->
-      let { et_type = ty; _ } =
+      let { et_type = ty; et_enforced } =
         Typing_enforceability.compute_enforced_and_pessimize_ty
           ~explicitly_untrusted:param.param_is_variadic
           env
           ty
+      in
+      (* If a parameter hint has the form ~t, where t is enforced,
+       * then we know that the parameter has type t after enforcement *)
+      let ty =
+        match (get_node ty, et_enforced) with
+        | (Tlike ty, Enforced) -> ty
+        | _ -> ty
       in
       Phase.localize_no_subst env ~ignore_errors:false ty
   in

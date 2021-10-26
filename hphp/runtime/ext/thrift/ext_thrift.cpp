@@ -36,6 +36,85 @@ Class* RpcOptions::c_RpcOptions = nullptr;
 Class* TClientBufferedStream::c_TClientBufferedStream = nullptr;
 Class* TClientSink::c_TClientSink = nullptr;
 
+
+Object HHVM_METHOD(
+    TClientSink,
+    genCreditsOrFinalResponse) {
+  auto data = TClientSink::GetDataOrThrowException(this_);
+  if (!data->sinkBridge_) {
+    return null_object;
+  }
+  auto event = new ThriftSinkEvent();
+
+  // Make sure event is abandoned, in case of an error
+  auto guard = folly::makeGuard([=] { event->abandon(); });
+
+  class ReadyCallback : public apache::thrift::detail::ClientSinkConsumer {
+   public:
+    explicit ReadyCallback(
+        HPHP::thrift::TClientSink* sink,
+        HPHP::ThriftSinkEvent* event)
+        : sink(sink), event(event) {}
+    void consume() override {
+      event->finish(sink->getCreditsOrFinalResponse());
+      delete this;
+    }
+
+    void canceled() override {
+      // If we reach here then that means the sink is cancelled by
+      // destroying the object. So finish
+      // the event immediately, with an error message to be safe.
+      std::string msg = "Something went wrong, queue is empty";
+      std::unique_ptr<folly::IOBuf> msgBuffer =
+          folly::IOBuf::copyBuffer(msg, msg.size());
+      event->error(std::move(msgBuffer));
+      delete this;
+    }
+
+   private:
+    HPHP::thrift::TClientSink* sink;
+    HPHP::ThriftSinkEvent* event;
+  };
+
+  auto callback = new ReadyCallback(data, event);
+  if (!data->sinkBridge_->wait(callback)) {
+    callback->consume();
+  }
+
+  guard.dismiss();
+  return Object{event->getWaitHandle()};
+}
+
+bool HHVM_METHOD(
+    TClientSink,
+    sendPayloadOrSinkComplete,
+    const Variant& payload) {
+  auto data = TClientSink::GetDataOrThrowException(this_);
+  if (!data->sinkBridge_) {
+    return false;
+  }
+  if (data->sinkBridge_->hasServerCancelled()) {
+    // If server has already cancelled, then final response is available
+    // and we should not send any more payloads
+    return false;
+  }
+
+  // we don't need to check if we have credits since this is only called
+  // if we passed some credits to php
+  if (payload.isNull()) {
+    data->sinkBridge_->push({});
+    return false;
+  } else if (payload.isString()) {
+    const String& sVal = payload.toString();
+    data->sinkBridge_->push(
+        folly::Try<apache::thrift::StreamPayload>(apache::thrift::StreamPayload(
+            folly::IOBuf::copyBuffer(sVal.c_str(), sVal.size()), {})));
+    return true;
+  } else {
+    raise_error("Payload needs to be a string");
+  }
+}
+
 Object HHVM_METHOD(TClientBufferedStream, genNext) {
   auto data = TClientBufferedStream::GetDataOrThrowException(this_);
   if (!data->streamBridge_) {
@@ -236,6 +315,8 @@ static struct ThriftExtension final : Extension {
 
     Native::registerNativeDataInfo<TClientSink>(
       s_TClientSink.get(), Native::NDIFlags::NO_COPY);
+    HHVM_ME(TClientSink, sendPayloadOrSinkComplete);
+    HHVM_ME(TClientSink, genCreditsOrFinalResponse);
 
     loadSystemlib("thrift");
   }

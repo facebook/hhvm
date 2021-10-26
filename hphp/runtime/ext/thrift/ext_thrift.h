@@ -339,7 +339,7 @@ struct TClientBufferedStream {
 ///////////////////////////////////////////////////////////////////////////////
 
 using TClientSinkCreditsOrFinalResponse =
-    std::variant<uint32_t, std::unique_ptr<folly::IOBuf>, TClientStreamError>;
+    std::variant<uint64_t, std::unique_ptr<folly::IOBuf>, TClientStreamError>;
 
 const StaticString s_TClientSink("TClientSink");
 
@@ -396,11 +396,43 @@ struct TClientSink {
     return Native::data<TClientSink>(object_);
   }
 
+  TClientSinkCreditsOrFinalResponse getCreditsOrFinalResponse() {
+    uint64_t credits = 0;
+    folly::Try<apache::thrift::StreamPayload> response;
+    bool responseAvailable = false;
+
+    auto creditsQueue_ = sinkBridge_->getMessages();
+    while (!creditsQueue_.empty() && !responseAvailable) {
+      auto& message = creditsQueue_.front();
+      folly::variant_match(
+          message,
+          [&](folly::Try<apache::thrift::StreamPayload>& payload) {
+            response = std::move(payload);
+            responseAvailable = true;
+          },
+          [&](uint64_t n) { credits += n; });
+      creditsQueue_.pop();
+    }
+    if (responseAvailable) {
+      endSink();
+      if (response.hasException()) {
+        return TClientSinkCreditsOrFinalResponse(
+            TClientStreamError::create(response.exception()));
+      }
+      if (response->payload) {
+        return TClientSinkCreditsOrFinalResponse(std::move(response->payload));
+      }
+      return TClientSinkCreditsOrFinalResponse();
+    }
+    return TClientSinkCreditsOrFinalResponse(credits);
+  }
+
  public:
   apache::thrift::detail::ClientSinkBridge::Ptr sinkBridge_;
   static Class* c_TClientSink;
 };
 } // namespace thrift
+
 inline String ioBufToString(const folly::IOBuf& ioBuf) {
   auto resultStringData = StringData::Make(ioBuf.computeChainDataLength());
   for (const auto& buf : ioBuf) {
@@ -503,7 +535,7 @@ struct ThriftSinkEvent final : AsioExternalThreadEvent {
     }
     auto responseStr = null_string;
     auto errorStr = null_string;
-    uint32_t credits = 0;
+    uint64_t credits = 0;
     folly::variant_match(
         creditsOrFinalResponse_,
         [&](const std::unique_ptr<folly::IOBuf>& finalResponse) {
@@ -521,7 +553,7 @@ struct ThriftSinkEvent final : AsioExternalThreadEvent {
             }
           }
         },
-        [&](const uint32_t& n) { credits = n; });
+        [&](const uint64_t& n) { credits = n; });
     return tvCopy(
         make_array_like_tv(
             make_vec_array(credits, responseStr, errorStr).detach()),

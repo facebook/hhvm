@@ -134,12 +134,79 @@ final class TClientBufferedStream {
 <<__NativeData("TClientSink")>>
 final class TClientSink {
   public function __construct(): void {}
+
+  public async function genCreditsOrFinalResponseHelper(
+  ): Awaitable<(int, ?string, ?Exception)> {
+    $timer = WallTimeOperation::begin();
+    try {
+      list($credits, $final_response, $exception) =
+        await $this->genCreditsOrFinalResponse();
+    } finally {
+      $timer->end();
+    }
+    if (
+      ($credits === null || $credits === 0) &&
+      $final_response === null &&
+      $exception === null
+    ) {
+      $exception = "No credits or final response received";
+    }
+    return tuple(
+      $credits,
+      $final_response,
+      $exception !== null
+        ? new TApplicationException($exception, TApplicationException::UNKNOWN)
+        : null,
+    );
+  }
+
   public async function genSink<TSinkType, TFinalResponseType>(
     HH\AsyncGenerator<null, TSinkType, void> $payload_generator,
     (function(?TSinkType, ?Exception): (string, ?bool)) $payloadEncode,
     (function(?string, ?Exception): TFinalResponseType) $finalResponseDecode,
   ): Awaitable<TFinalResponseType> {
-    // Temporary placeholder return
-    return $finalResponseDecode(null, null);
+    $shouldContinue = true;
+    while (true) {
+      list($credits, $final_response, $exception) =
+        await $this->genCreditsOrFinalResponseHelper();
+      if ($final_response !== null || $exception !== null) {
+        break;
+      }
+
+      if ($credits > 0 && $shouldContinue) {
+        try {
+          foreach ($payload_generator await as $pld) {
+            list($encoded_str, $_) = $payloadEncode($pld, null);
+            $shouldContinue = $this->sendPayloadOrSinkComplete($encoded_str);
+            $credits--;
+            if ($credits === 0 || !$shouldContinue) {
+              break;
+            }
+          }
+        } catch (Exception $ex) {
+          // If async generator throws any error,
+          // exception should be encoded and sent to server before throwing
+
+          // TODO(rashmim) : Send client exception to server
+          throw $ex;
+        }
+        // If $credits > 0 and $shouldContinue = true,
+        // then that means async generator has finished
+        // and we should send sink complete.
+        if ($credits > 0 && $shouldContinue) {
+          $this->sendPayloadOrSinkComplete(null);
+          $shouldContinue = false;
+        }
+      }
+    }
+    return $finalResponseDecode($final_response, $exception);
   }
+
+  // Returns false when server has cancelled or sink complete is sent
+  <<__Native>>
+  public function sendPayloadOrSinkComplete(?string $payload): bool;
+
+  <<__Native>>
+  public function genCreditsOrFinalResponse(
+  ): Awaitable<?(int, ?string, ?string)>;
 }

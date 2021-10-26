@@ -1186,6 +1186,10 @@ Array IniSetting::GetAll(const String& ext_name, bool details) {
       continue;
     }
 
+    if (iter.second.mode == HHVM_HDF) {
+      continue;
+    }
+
     auto value = iter.second.getCallback();
     // Cast all non-arrays to strings since that is what everything used to be
     if (!value.isArray()) {
@@ -1211,6 +1215,59 @@ Array IniSetting::GetAll(const String& ext_name, bool details) {
     }
   }
   return r;
+}
+
+namespace {
+
+void to_hdf_value(Hdf& hdf, const Variant& value) {
+  switch (value.getType()) {
+    case DataType::Null:
+    case DataType::Uninit:
+      return;
+    case DataType::String:
+    case DataType::PersistentString:
+    case DataType::Int64:
+      hdf.set(value.toString().c_str());
+      return;
+    case DataType::Boolean:
+      hdf.set(value.asBooleanVal());
+      return;
+    case DataType::Double: {
+      auto str = folly::sformat("{}", value.asDoubleVal());
+      hdf.set(str.c_str());
+      return;
+    }
+    case DataType::PersistentDict:
+    case DataType::Dict:
+    case DataType::PersistentVec:
+    case DataType::Vec:
+      for (ArrayIter iter(value.toArray()); iter; ++iter) {
+        auto inner = hdf[iter.first().toString().toCppString()];
+        to_hdf_value(inner, iter.second());
+      };
+      return;
+    default: {
+      auto type = tname(value.getType());
+      raise_error("Unable to convert DataType::%s to HDF value", type.c_str());
+      return;
+    }
+  }
+}
+
+} // namespace
+
+void IniSetting::GetAll(Hdf& config) {
+  for (auto& iter: boost::join(s_system_ini_callbacks, *s_user_callbacks)) {
+    if (shouldHideSetting(iter.first)) {
+      continue;
+    }
+    if (iter.second.mode != HHVM_HDF) {
+      continue;
+    }
+
+    auto value = config[iter.first.toCppString()];
+    to_hdf_value(value, iter.second.getCallback());
+  }
 }
 
 std::string IniSetting::GetAllAsJSON() {

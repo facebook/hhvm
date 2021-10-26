@@ -266,6 +266,7 @@ void Config::Bind(T& loc, const IniSetting::Map &ini, const Hdf& config, \
                   const T defValue /* = 0ish */, \
                   const bool prepend_hhvm /* = true */) { \
   loc = Get##METHOD(ini, config, name, defValue, prepend_hhvm); \
+  IniSetting::Bind(IniSetting::CORE, IniSetting::HHVM_HDF, name, &loc); \
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM, \
                    IniName(name, prepend_hhvm), &loc); \
 }
@@ -316,6 +317,7 @@ void Config::Bind(T& loc, const IniSetting::Map& ini, const Hdf& config, \
                   const T& defValue /* = T() */, \
                   const bool prepend_hhvm /* = true */) { \
   loc = Get##METHOD(ini, config, name, defValue, prepend_hhvm); \
+  IniSetting::Bind(IniSetting::CORE, IniSetting::HHVM_HDF, name, &loc); \
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM, \
                    IniName(name, prepend_hhvm), &loc); \
 }

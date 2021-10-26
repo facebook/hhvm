@@ -246,9 +246,12 @@ public:
     PHP_INI_ONLY   = (1u << 3),
     PHP_INI_ALL    = (1u << 4),
 
+    HHVM_HDF       = (1u << 5),
+
     PHP_INI_SET_USER   = PHP_INI_USER | PHP_INI_ALL,
     PHP_INI_SET_EVERY  = PHP_INI_ONLY | PHP_INI_SYSTEM | PHP_INI_PERDIR |
                          PHP_INI_SET_USER,
+
   };
 
 public:
@@ -266,6 +269,7 @@ public:
   static std::string Get(const String& name);
   static Array GetAll(const String& extension, bool details);
   static std::string GetAllAsJSON();
+  static void GetAll(Hdf& config);
 
   /**
    * Change an INI setting as if it was in the php.ini file

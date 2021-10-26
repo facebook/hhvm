@@ -473,6 +473,12 @@ function collect_function_coverage(): dict<string, string>;
 <<__Native>>
 function root_options(string $repo): dict<string, mixed>;
 
+<<__Native>>
+function hhvm_config_hdf(?string $path = null): string;
+
+<<__Native>>
+function hhvm_config(?string $path = null): mixed;
+
 } // HH
 
 namespace HH\Rx {

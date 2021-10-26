@@ -33,6 +33,7 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/runtime/base/implicit-context.h"
+#include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/opaque-resource.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/request-tracing.h"
@@ -50,6 +51,7 @@
 #include "hphp/runtime/vm/unit-parser.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/file.h"
+#include "hphp/util/hdf.h"
 #include "hphp/util/match.h"
 
 namespace HPHP {
@@ -1317,6 +1319,49 @@ Array HHVM_FUNCTION(collect_function_coverage) {
   return Func::GetCoverage();
 }
 
+String HHVM_FUNCTION(hhvm_config_hdf, const Variant& path) {
+  Hdf config;
+  IniSetting::GetAll(config);
+
+  if (path.isString() && !path.asCStrRef().empty()) {
+    config = config[path.asCStrRef().c_str()];
+  }
+
+  if (!config.firstChild().exists()) {
+    // It may directly have a value
+    return config.configGetString();
+  }
+
+  return String(config.toString(), CopyString); 
+}
+
+namespace {
+
+Variant to_variant(const Hdf& config) {
+  if (!config.firstChild().exists()) {
+    return config.configGetString();
+  }
+
+  auto ret = Array::CreateDict();
+  for (Hdf child = config.firstChild(); child.exists(); child = child.next()) {
+    ret.set(String(child.getName()), to_variant(child));
+  }
+  return ret;
+}
+
+} // namespace
+
+Variant HHVM_FUNCTION(hhvm_config, const Variant& path) {
+  Hdf config;
+  IniSetting::GetAll(config);
+
+  if (path.isString() && !path.asCStrRef().empty()) {
+    config = config[path.asCStrRef().c_str()];
+  }
+
+  return to_variant(config);
+}
+
 Resource HHVM_FUNCTION(create_opaque_value_internal, int64_t id,
                                                      const Variant& val) {
   return Resource(req::make<OpaqueResource>(id, val));
@@ -1374,6 +1419,8 @@ static struct HHExtension final : Extension {
     X(hphp_get_logger_request_id);
     X(enable_function_coverage);
     X(collect_function_coverage);
+    X(hhvm_config_hdf);
+    X(hhvm_config);
 #undef X
 #define X(nm) HHVM_NAMED_FE(HH\\rqtrace\\nm, HHVM_FN(nm))
     X(is_enabled);

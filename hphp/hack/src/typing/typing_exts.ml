@@ -84,7 +84,7 @@ let lookup_magic_type (env : env) use_pos (class_ : locl_ty) (fname : string) :
       | Some (env, { ft_params = pars; ft_ret = { et_type = ty; _ }; _ }) ->
         let (env, ty) = Env.expand_type env ty in
         let ty_opt =
-          match get_node ty with
+          match get_node (strip_dynamic ty) with
           | Tprim Tstring -> None
           | _ -> Some ty
         in
@@ -181,15 +181,11 @@ let get_format_string_type_arg t =
   | Tnewtype (fs, [ty], _) when SN.Classes.is_format_string fs -> Some ty
   | _ -> None
 
-let get_opt_format_string_type_arg t =
+let rec get_possibly_like_format_string_type_arg t =
   match get_node t with
-  | Toption t -> get_format_string_type_arg t
-  | _ -> None
-
-let get_possibly_like_format_string_type_arg t =
-  match get_node t with
-  | Tunion [t1; t2] when is_dynamic t1 -> get_format_string_type_arg t2
-  | Toption t -> get_format_string_type_arg t
+  | Tunion [t1; t2] when is_dynamic t1 ->
+    get_possibly_like_format_string_type_arg t2
+  | Toption t -> get_possibly_like_format_string_type_arg t
   | _ -> get_format_string_type_arg t
 
 (* Specialize a function type using whatever we can tell about the args *)
@@ -201,7 +197,7 @@ let retype_magic_func
       env * locl_fun_params option =
     match (param_types, args) with
     | ([{ fp_type = { et_type; _ }; _ }], [(_, (_, _, Null))])
-      when is_some (get_opt_format_string_type_arg et_type) ->
+      when is_some (get_possibly_like_format_string_type_arg et_type) ->
       (env, None)
     | ([({ fp_type = { et_type; _ }; _ } as fp)], (_, arg) :: _) ->
       begin

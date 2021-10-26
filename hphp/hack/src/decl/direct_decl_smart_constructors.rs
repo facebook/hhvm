@@ -185,6 +185,13 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
             Node::Name(&(name, pos)) => Id(pos, name),
             Node::XhpName(&(name, pos)) => Id(pos, name),
             Node::QualifiedName(&(parts, pos)) => self.qualified_name_from_parts(parts, pos),
+            // This is always an error; e.g. using a reserved word where a name
+            // is expected.
+            Node::Token(t) | Node::IgnoredToken(t) => {
+                let pos = self.token_pos(t);
+                let text = self.str_from_utf8(self.source_text_at_pos(pos));
+                Id(pos, text)
+            }
             _ => return None,
         };
         Some(self.namespace_builder.elaborate_defined_id(id))
@@ -199,7 +206,13 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         }
         match name {
             Node::QualifiedName(&(parts, pos)) => Some(self.qualified_name_from_parts(parts, pos)),
-            Node::Token(t) if t.kind() == TokenKind::XHP => {
+            // The IgnoredToken case is always an error; e.g. using a reserved
+            // word where a name is expected. The Token case is not an error if
+            // the token is TokenKind::XHP (which is legal to use as a name),
+            // but an error otherwise (since we expect a Name or QualifiedName
+            // here, and the Name case would have been handled in `as_id`
+            // above).
+            Node::Token(t) | Node::IgnoredToken(t) => {
                 let pos = self.token_pos(t);
                 let text = self.str_from_utf8(self.source_text_at_pos(pos));
                 Some(Id(pos, text))
@@ -774,6 +787,11 @@ pub enum Node<'a> {
     // in tracking down the reason it was ignored.
     Ignored(SyntaxKind),
 
+    // For tokens with a fixed width (like `using`), we also keep its offset in
+    // the source text, so that we can reference the text of the token if it's
+    // (erroneously) used as an identifier (e.g., `function using() {}`).
+    IgnoredToken(FixedWidthToken),
+
     List(&'a &'a [Node<'a>]),
     BracketedList(&'a (&'a Pos<'a>, &'a [Node<'a>], &'a Pos<'a>)),
     Name(&'a (&'a str, &'a Pos<'a>)),
@@ -825,11 +843,10 @@ impl<'a> smart_constructors::NodeType for Node<'a> {
     }
 
     fn is_abstract(&self) -> bool {
-        self.is_token(TokenKind::Abstract)
-            || matches!(self, Node::Ignored(SK::Token(TokenKind::Abstract)))
+        self.is_token(TokenKind::Abstract) || self.is_ignored_token_with_kind(TokenKind::Abstract)
     }
     fn is_name(&self) -> bool {
-        matches!(self, Node::Name(..)) || matches!(self, Node::Ignored(SK::Token(TokenKind::Name)))
+        matches!(self, Node::Name(..)) || self.is_ignored_token_with_kind(TokenKind::Name)
     }
     fn is_qualified_name(&self) -> bool {
         matches!(self, Node::QualifiedName(..)) || matches!(self, Node::Ignored(SK::QualifiedName))
@@ -879,6 +896,13 @@ impl<'a> Node<'a> {
         match self {
             Node::Token(token) => Some(token.kind()),
             _ => None,
+        }
+    }
+
+    fn is_ignored_token_with_kind(self, kind: TokenKind) -> bool {
+        match self {
+            Node::IgnoredToken(token) => token.kind() == kind,
+            _ => false,
         }
     }
 
@@ -941,7 +965,7 @@ impl<'a> Node<'a> {
     }
 
     fn is_ignored(&self) -> bool {
-        matches!(self, Node::Ignored(..))
+        matches!(self, Node::Ignored(..) | Node::IgnoredToken(..))
     }
 
     fn is_present(&self) -> bool {
@@ -1461,6 +1485,12 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         body: Node<'_>,
     ) -> Option<(PosId<'a>, &'a Ty<'a>, &'a [ShallowProp<'a>])> {
         let id_opt = match (is_method, header.name) {
+            // If the name is missing, we use the left paren here, just to get a
+            // position to point to.
+            (_, Node::Token(t)) if t.kind() == TokenKind::LeftParen => {
+                let pos = self.token_pos(t);
+                Some(Id(pos, ""))
+            }
             (true, Node::Token(t)) if t.kind() == TokenKind::Construct => {
                 let pos = self.token_pos(t);
                 Some(Id(pos, naming_special_names::members::__CONSTRUCT))
@@ -2555,115 +2585,21 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             | TokenKind::Required
             | TokenKind::Ctx
             | TokenKind::Readonly => Node::Token(FixedWidthToken::new(kind, token.start_offset())),
-            TokenKind::EndOfFile
-            | TokenKind::Attribute
-            | TokenKind::Await
-            | TokenKind::Binary
-            | TokenKind::Break
-            | TokenKind::Case
-            | TokenKind::Catch
-            | TokenKind::Category
-            | TokenKind::Children
-            | TokenKind::Clone
-            | TokenKind::Continue
-            | TokenKind::Default
-            | TokenKind::Define
-            | TokenKind::Do
-            | TokenKind::Echo
-            | TokenKind::Else
-            | TokenKind::Elseif
-            | TokenKind::Empty
-            | TokenKind::Endfor
-            | TokenKind::Endforeach
-            | TokenKind::Endif
-            | TokenKind::Endswitch
-            | TokenKind::Endwhile
-            | TokenKind::Eval
-            | TokenKind::Fallthrough
-            | TokenKind::File
-            | TokenKind::Finally
-            | TokenKind::For
-            | TokenKind::Foreach
-            | TokenKind::From
-            | TokenKind::Global
-            | TokenKind::Concurrent
-            | TokenKind::If
-            | TokenKind::Include
-            | TokenKind::Include_once
-            | TokenKind::Instanceof
-            | TokenKind::Insteadof
-            | TokenKind::Integer
-            | TokenKind::Is
-            | TokenKind::Isset
-            | TokenKind::List
-            | TokenKind::New
-            | TokenKind::Object
-            | TokenKind::Parent
-            | TokenKind::Print
-            | TokenKind::Real
-            | TokenKind::Record
-            | TokenKind::Require
-            | TokenKind::Require_once
-            | TokenKind::Return
-            | TokenKind::Switch
-            | TokenKind::Throw
-            | TokenKind::Try
-            | TokenKind::Unset
-            | TokenKind::Upcast
-            | TokenKind::Use
-            | TokenKind::Using
-            | TokenKind::Var
-            | TokenKind::Where
-            | TokenKind::While
-            | TokenKind::LeftBrace
-            | TokenKind::MinusGreaterThan
-            | TokenKind::Dollar
-            | TokenKind::LessThanEqualGreaterThan
-            | TokenKind::ExclamationEqual
-            | TokenKind::ExclamationEqualEqual
-            | TokenKind::Carat
-            | TokenKind::QuestionAs
-            | TokenKind::QuestionColon
-            | TokenKind::QuestionQuestionEqual
-            | TokenKind::Colon
-            | TokenKind::StarStarEqual
-            | TokenKind::StarEqual
-            | TokenKind::SlashEqual
-            | TokenKind::PercentEqual
-            | TokenKind::PlusEqual
-            | TokenKind::MinusEqual
-            | TokenKind::DotEqual
-            | TokenKind::LessThanLessThanEqual
-            | TokenKind::GreaterThanGreaterThanEqual
-            | TokenKind::AmpersandEqual
-            | TokenKind::CaratEqual
-            | TokenKind::BarEqual
-            | TokenKind::Comma
-            | TokenKind::ColonColon
-            | TokenKind::EqualGreaterThan
-            | TokenKind::EqualEqualGreaterThan
-            | TokenKind::QuestionMinusGreaterThan
-            | TokenKind::DollarDollar
-            | TokenKind::BarGreaterThan
-            | TokenKind::SlashGreaterThan
-            | TokenKind::LessThanSlash
-            | TokenKind::LessThanQuestion
-            | TokenKind::Backtick
-            | TokenKind::ErrorToken
-            | TokenKind::DoubleQuotedStringLiteralHead
-            | TokenKind::StringLiteralBody
-            | TokenKind::DoubleQuotedStringLiteralTail
-            | TokenKind::HeredocStringLiteralHead
-            | TokenKind::HeredocStringLiteralTail
-            | TokenKind::XHPCategoryName
-            | TokenKind::XHPStringLiteral
-            | TokenKind::XHPBody
-            | TokenKind::XHPComment
-            | TokenKind::Hash
-            | TokenKind::Hashbang => Node::Ignored(SK::Token(kind)),
+            _ if kind.fixed_width().is_some() => {
+                Node::IgnoredToken(FixedWidthToken::new(kind, token.start_offset()))
+            }
+            _ => Node::Ignored(SK::Token(kind)),
         };
         self.previous_token_kind = kind;
         result
+    }
+
+    fn make_error(&mut self, error: Self::R) -> Self::R {
+        // If it's a Token or IgnoredToken, we can use it for error recovery.
+        // For instance, in `function using() {}`, the `using` keyword will be a
+        // token wrapped in an error CST node, since the keyword isn't legal in
+        // that position.
+        error
     }
 
     fn make_missing(&mut self, _: usize) -> Self::R {
@@ -3462,7 +3398,14 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         where_constraints: Self::R,
     ) -> Self::R {
         // Use the position of the left paren if the name is missing.
-        let name = if name.is_ignored() { left_paren } else { name };
+        // Keep the name if it's an IgnoredToken rather than an Ignored. An
+        // IgnoredToken here should always be an error, but it's better to treat
+        // a keyword as a name than to claim the function has no name at all.
+        let name = if matches!(name, Node::Ignored(..)) {
+            left_paren
+        } else {
+            name
+        };
         Node::FunctionHeader(self.alloc(FunctionHeader {
             name,
             modifiers,

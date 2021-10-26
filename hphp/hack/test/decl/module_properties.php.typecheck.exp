@@ -1,0 +1,4 @@
+File "module_properties.php", line 13, characters 7-7:
+You cannot access internal members outside of a module (Typing[4112])
+  File "module_properties.php", line 9, characters 10-12:
+  This member is internal

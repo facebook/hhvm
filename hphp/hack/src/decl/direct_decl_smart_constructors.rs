@@ -1602,7 +1602,13 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                                     xhp_attr: None,
                                     name: (pos, name),
                                     type_: self.node_to_ty(hint),
-                                    visibility,
+                                    visibility: if attributes.internal
+                                        && visibility == aast::Visibility::Public
+                                    {
+                                        aast::Visibility::Internal
+                                    } else {
+                                        visibility
+                                    },
                                     flags,
                                 });
                             }
@@ -2965,10 +2971,11 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             Some(name) => name,
             None => return Node::Ignored(SK::RecordDeclaration),
         };
+        let parsed_attributes = self.to_attributes(attribute_spec);
         self.add_record(
             name.1,
             self.alloc(typing_defs::RecordDefType {
-                module: &None, // TODO: grab module from attributes
+                module: self.alloc(parsed_attributes.module),
                 name: name.into(),
                 extends: self
                     .expect_name(extends_opt)
@@ -4011,7 +4018,13 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                         xhp_attr: None,
                         name: (pos, name),
                         type_: ty,
-                        visibility: modifiers.visibility,
+                        visibility: if attributes.internal
+                            && modifiers.visibility == aast::Visibility::Public
+                        {
+                            aast::Visibility::Internal
+                        } else {
+                            modifiers.visibility
+                        },
                         flags,
                     })
                 }
@@ -4330,13 +4343,15 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         }
         let includes = includes.into_bump_slice();
 
+        let parsed_attributes = self.to_attributes(attributes);
+
         let cls = self.alloc(shallow_decl_defs::ShallowClass {
             mode: self.file_mode,
             final_: false,
             is_xhp: false,
             has_xhp_keyword: false,
             kind: ClassishKind::Cenum,
-            module: &None, // TODO: grab module from attributes
+            module: self.alloc(parsed_attributes.module),
             name: id.into(),
             tparams: &[],
             where_constraints: &[],

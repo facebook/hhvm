@@ -1,0 +1,190 @@
+[("\\genfun",
+  (Shallow_decl_defs.Fun
+     { Typing_defs.fe_deprecated = None; fe_module = None;
+       fe_internal = false;
+       fe_type =
+       (Rwitness_from_decl ([6:10-16]),
+        (Tfun
+           { ft_arity = (Fstandard ());
+             ft_tparams =
+             [{ Typing_defs_core.tp_variance = Invariant;
+                tp_name = ([6:17-18], "T"); tp_tparams = [];
+                tp_constraints = []; tp_reified = Erased;
+                tp_user_attributes = [] }
+               ];
+             ft_where_constraints = [];
+             ft_params =
+             [{ fp_pos = [6:23-25]; fp_name = (Some "$x");
+                fp_type =
+                { et_enforced = Typing_defs_core.Unenforced;
+                  et_type =
+                  (Rhint ([6:20-22]),
+                   (Toption (Rhint ([6:21-22]), (Tgeneric ("T", [])))))
+                  };
+                fp_flags =
+                (make_fp_flags ~accept_disposable:false ~has_default:false
+                  ~mode:Typing_defs_core.FPnormal ~ifc_external:false
+                  ~ifc_can_call:false ~via_label:false ~readonly:false);
+                 }
+               ];
+             ft_implicit_params = { capability = (CapDefaults [6:10-16]) };
+             ft_ret =
+             { et_enforced = Typing_defs_core.Unenforced;
+               et_type =
+               (Rhint ([6:27-29]),
+                (Toption (Rhint ([6:28-29]), (Tgeneric ("T", [])))))
+               };
+             ft_flags =
+             (make_ft_flags FSync ~return_disposable:false
+               ~returns_readonly:false ~support_dynamic_type:false
+               ~readonly_this:false);
+             ft_ifc_decl = FDPolicied {PUBLIC} }));
+       fe_pos = [6:10-16]; fe_php_std_lib = false;
+       fe_support_dynamic_type = false }));
+  ("\\MyList",
+   (Shallow_decl_defs.Class
+      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+        sc_is_xhp = false; sc_has_xhp_keyword = false;
+        sc_kind = (Cclass Concrete); sc_module = None;
+        sc_name = ([8:7-13], "\\MyList");
+        sc_tparams =
+        [{ Typing_defs_core.tp_variance = Invariant;
+           tp_name = ([8:14-15], "T"); tp_tparams = []; tp_constraints = [];
+           tp_reified = Erased; tp_user_attributes = [] }
+          ];
+        sc_where_constraints = []; sc_extends = []; sc_uses = [];
+        sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
+        sc_req_implements = []; sc_implements = [];
+        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+        sc_props = []; sc_sprops = []; sc_constructor = None;
+        sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
+        sc_enum_type = None }));
+  ("\\C",
+   (Shallow_decl_defs.Class
+      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+        sc_is_xhp = false; sc_has_xhp_keyword = false;
+        sc_kind = (Cclass Concrete); sc_module = (Some ("here", []));
+        sc_name = ([11:7-8], "\\C"); sc_tparams = [];
+        sc_where_constraints = []; sc_extends = []; sc_uses = [];
+        sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
+        sc_req_implements = []; sc_implements = [];
+        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+        sc_props = []; sc_sprops = []; sc_constructor = None;
+        sc_static_methods = [];
+        sc_methods =
+        [{ Shallow_decl_defs.sm_name = ([12:19-22], "bar");
+           sm_type =
+           (Rwitness_from_decl ([12:19-22]),
+            (Tfun
+               { ft_arity = (Fstandard ()); ft_tparams = [];
+                 ft_where_constraints = [];
+                 ft_params =
+                 [{ fp_pos = [12:29-31]; fp_name = (Some "$m");
+                    fp_type =
+                    { et_enforced = Typing_defs_core.Unenforced;
+                      et_type = (Rhint ([12:23-28]), Tmixed) };
+                    fp_flags =
+                    (make_fp_flags ~accept_disposable:false
+                      ~has_default:false ~mode:Typing_defs_core.FPnormal
+                      ~ifc_external:false ~ifc_can_call:false
+                      ~via_label:false ~readonly:false);
+                     }
+                   ];
+                 ft_implicit_params =
+                 { capability = (CapDefaults [12:19-22]) };
+                 ft_ret =
+                 { et_enforced = Typing_defs_core.Unenforced;
+                   et_type = (Rhint ([12:33-37]), (Tprim Tvoid)) };
+                 ft_flags =
+                 (make_ft_flags FSync ~return_disposable:false
+                   ~returns_readonly:false ~support_dynamic_type:false
+                   ~readonly_this:false);
+                 ft_ifc_decl = FDPolicied {PUBLIC} }));
+           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
+           sm_attributes = [] }
+          ];
+        sc_user_attributes =
+        [{ Typing_defs_core.ua_name = ([10:21-31], "__Internal");
+           ua_classname_params = [] };
+          { Typing_defs_core.ua_name = ([10:3-11], "__Module");
+            ua_classname_params = [] }
+          ];
+        sc_enum_type = None }));
+  ("\\D",
+   (Shallow_decl_defs.Class
+      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+        sc_is_xhp = false; sc_has_xhp_keyword = false;
+        sc_kind = (Cclass Concrete); sc_module = (Some ("there", []));
+        sc_name = ([32:7-8], "\\D"); sc_tparams = [];
+        sc_where_constraints = []; sc_extends = []; sc_uses = [];
+        sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
+        sc_req_implements = []; sc_implements = [];
+        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+        sc_props = []; sc_sprops = []; sc_constructor = None;
+        sc_static_methods = []; sc_methods = [];
+        sc_user_attributes =
+        [{ Typing_defs_core.ua_name = ([31:22-32], "__Internal");
+           ua_classname_params = [] };
+          { Typing_defs_core.ua_name = ([31:3-11], "__Module");
+            ua_classname_params = [] }
+          ];
+        sc_enum_type = None }));
+  ("\\G",
+   (Shallow_decl_defs.Class
+      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+        sc_is_xhp = false; sc_has_xhp_keyword = false;
+        sc_kind = (Cclass Concrete); sc_module = (Some ("there", []));
+        sc_name = ([35:7-8], "\\G");
+        sc_tparams =
+        [{ Typing_defs_core.tp_variance = Invariant;
+           tp_name = ([35:9-10], "T"); tp_tparams = []; tp_constraints = [];
+           tp_reified = Erased; tp_user_attributes = [] }
+          ];
+        sc_where_constraints = []; sc_extends = []; sc_uses = [];
+        sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
+        sc_req_implements = []; sc_implements = [];
+        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+        sc_props = []; sc_sprops = []; sc_constructor = None;
+        sc_static_methods = []; sc_methods = [];
+        sc_user_attributes =
+        [{ Typing_defs_core.ua_name = ([34:22-32], "__Internal");
+           ua_classname_params = [] };
+          { Typing_defs_core.ua_name = ([34:3-11], "__Module");
+            ua_classname_params = [] }
+          ];
+        sc_enum_type = None }));
+  ("\\E",
+   (Shallow_decl_defs.Class
+      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+        sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cenum;
+        sc_module = (Some ("there", [])); sc_name = ([38:6-7], "\\E");
+        sc_tparams = []; sc_where_constraints = [];
+        sc_extends =
+        [(Rhint ([38:6-7]),
+          (Tapply (([38:6-7], "\\HH\\BuiltinEnum"),
+             [(Rhint ([38:6-7]), (Tapply (([38:6-7], "\\E"), [])))])))
+          ];
+        sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+        sc_req_extends = []; sc_req_implements = []; sc_implements = [];
+        sc_support_dynamic_type = false;
+        sc_consts =
+        [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
+           scc_name = ([39:3-4], "A");
+           scc_type = (Rwitness_from_decl ([39:7-8]), (Tprim Tint));
+           scc_refs = [] }
+          ];
+        sc_typeconsts = []; sc_props = []; sc_sprops = [];
+        sc_constructor = None; sc_static_methods = []; sc_methods = [];
+        sc_user_attributes =
+        [{ Typing_defs_core.ua_name = ([37:22-32], "__Internal");
+           ua_classname_params = [] };
+          { Typing_defs_core.ua_name = ([37:3-11], "__Module");
+            ua_classname_params = [] }
+          ];
+        sc_enum_type =
+        (Some { Typing_defs.te_base = (Rhint ([38:10-13]), (Tprim Tint));
+                te_constraint = None; te_includes = [] })
+        }))
+  ]
+
+They matched!

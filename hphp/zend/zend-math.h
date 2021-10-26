@@ -73,6 +73,25 @@ double php_math_round(double value, int places, int mode = PHP_ROUND_HALF_UP);
 
 ///////////////////////////////////////////////////////////////////////////////
 
+/*
+ * This will generate a 32-bit random number using the random state stored in
+ * RDS.
+ *
+ * Note that the max return value is *larger* than RAND_MAX.
+ */
+class RDSLocalPRNG {
+ public:
+  using result_type = uint32_t;
+
+  result_type operator()();
+
+  static constexpr result_type min() { return 0; }
+
+  static constexpr result_type max() {
+    return std::numeric_limits<result_type>::max();
+  }
+};
+
 void math_mt_srand(uint32_t seed);
 int64_t math_mt_rand(int64_t min = 0, int64_t max = RAND_MAX);
 

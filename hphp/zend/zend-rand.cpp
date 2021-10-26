@@ -197,6 +197,16 @@ void lcg_seed() {
 ////////////////////////////////////////////////////////////////////////////////
 }
 
+uint32_t RDSLocalPRNG::operator()() {
+  RandData* data = s_data.get();
+
+  if (!data->seeded) {
+    math_mt_srand(math_generate_seed());
+  }
+
+  return php_mt_rand();
+}
+
 void math_mt_srand(uint32_t seed) {
   /* Seed the generator with a simple uint32 */
   php_mt_initialize(seed, s_data->state);
@@ -208,19 +218,8 @@ void math_mt_srand(uint32_t seed) {
 
 // Returns a random number from Mersenne Twister
 int64_t math_mt_rand(int64_t min /* = 0 */, int64_t max /* = RAND_MAX */) {
-  if (!s_data->seeded) {
-    math_mt_srand(math_generate_seed());
-  }
-
-  /*
-   * Melo: hmms.. randomMT() returns 32 random bits...
-   * Yet, the previous php_rand only returns 31 at most.
-   * So I put a right shift to loose the lsb. It *seems*
-   * better than clearing the msb.
-   * Update:
-   * I talked with Cokus via email and it won't ruin the algorithm
-   */
-  int64_t number = (php_mt_rand() >> 1);
+  RDSLocalPRNG rng;
+  int64_t number = rng() >> 1;
   if (min != 0 || max != RAND_MAX) {
     RAND_RANGE(number, min, max, MT_RAND_MAX);
   }

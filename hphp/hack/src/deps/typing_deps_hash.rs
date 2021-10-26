@@ -133,10 +133,10 @@ pub fn hash1(mode: HashMode, dep_type: DepType, name1: &[u8]) -> u64 {
 }
 
 /// Hash a two-argument `Typing_deps.Dep.variant`'s fields.
-pub fn hash2(mode: HashMode, dep_type: DepType, name1: &[u8], name2: &[u8]) -> u64 {
+pub fn hash2(mode: HashMode, dep_type: DepType, type_hash: u64, name2: &[u8]) -> u64 {
     let mut hasher = make_hasher();
     hasher.write_u8(get_dep_type_hash_key(dep_type));
-    hasher.write(name1);
+    hasher.write_u64(type_hash);
     hasher.write(name2);
     postprocess_hash(mode, dep_type, hasher.finish())
 }

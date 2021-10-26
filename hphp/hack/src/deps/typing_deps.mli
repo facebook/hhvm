@@ -60,10 +60,27 @@ module Dep : sig
         (** Like [GConst], but used only in conservative redecl. May not be
         necessary anymore. *)
 
+  type dep_kind =
+    | KGConst [@value 0]
+    | KFun [@value 1]
+    | KType [@value 2]
+    | KExtends [@value 3]
+    | KConst [@value 5]
+    | KConstructor [@value 6]
+    | KProp [@value 7]
+    | KSProp [@value 8]
+    | KMethod [@value 9]
+    | KSMethod [@value 10]
+    | KAllMembers [@value 11]
+    | KGConstName [@value 12]
+  [@@deriving enum]
+
   (** either 31bit or 63bit hash, depending on the mode *)
   type t
 
   val make : Mode.hash_mode -> 'a variant -> t
+
+  val make_dep_with_type_hash : Mode.hash_mode -> t -> string -> dep_kind -> t
 
   (** a 64bit representation of the 31bit/63bit hash, padded with leading 0 bits *)
   val to_int64 : t -> int64

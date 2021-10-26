@@ -36,6 +36,10 @@ let mark_all_dependents_as_needing_recheck
     (mode : Mode.t) (deps : t) (dep : Dep.dependency Dep.variant) : t =
   mark_as_needing_recheck deps (Typing_deps.get_ideps mode dep)
 
+let mark_all_dependents_as_needing_recheck_from_hash
+    (mode : Mode.t) (deps : t) (hash : Dep.t) : t =
+  mark_as_needing_recheck deps (Typing_deps.get_ideps_from_hash mode hash)
+
 let add_maximum_fanout (mode : Mode.t) (deps : t) (changed_dep : Dep.t) : t =
   let changed = DepSet.singleton mode changed_dep in
   let changed_and_descendants = Typing_deps.add_extend_deps mode changed in

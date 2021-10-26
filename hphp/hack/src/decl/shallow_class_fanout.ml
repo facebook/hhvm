@@ -24,7 +24,6 @@ let class_names_from_deps ~ctx ~get_classes_in_file deps =
 
 let add_minor_change_fanout
     ~(ctx : Provider_context.t)
-    ~(get_classes_in_file : Relative_path.t -> SSet.t)
     (acc : AffectedDeps.t)
     (class_name : string)
     (minor_change : ClassDiff.minor_change) : AffectedDeps.t =
@@ -40,6 +39,9 @@ let add_minor_change_fanout
   } =
     minor_change
   in
+  let changed_and_descendants =
+    lazy (Typing_deps.add_extend_deps mode changed)
+  in
   let acc =
     (* If positions affecting the linearization have changed, we need to update
        positions in the linearization of this class and all its descendants.
@@ -48,19 +50,10 @@ let add_minor_change_fanout
        changed, there will be no change in the fanout except in the positions
        in error messages, and we recheck all files with errors anyway. *)
     if mro_positions_changed then
-      let changed_and_descendants = Typing_deps.add_extend_deps mode changed in
+      let changed_and_descendants = Lazy.force changed_and_descendants in
       AffectedDeps.mark_mro_invalidated acc changed_and_descendants
     else
       acc
-  in
-  let changed_and_descendant_class_names =
-    lazy
-      begin
-        let changed_and_descendants =
-          Typing_deps.add_extend_deps mode changed
-        in
-        class_names_from_deps ~ctx ~get_classes_in_file changed_and_descendants
-      end
   in
   (* Recheck any files with a reference to the member returned by make_dep,
      even if the member was overridden in a subclass. This deals with the case
@@ -68,26 +61,26 @@ let add_minor_change_fanout
      some subclass which inherits a member of that name from multiple parents
      to resolve the conflict in a different way than it did previously. *)
   let recheck_descendants_and_their_member_dependents acc make_dep =
-    SSet.fold
-      (Lazy.force changed_and_descendant_class_names)
-      ~init:acc
-      ~f:(fun cid acc ->
-        let dep = Dep.make (hash_mode mode) (Dep.Type cid) in
+    let changed_and_descendants = Lazy.force changed_and_descendants in
+    DepSet.fold changed_and_descendants ~init:acc ~f:(fun dep acc ->
         let needs_recheck =
           Typing_deps.add_typing_deps mode (DepSet.singleton mode dep)
         in
         let acc = AffectedDeps.mark_as_needing_recheck acc needs_recheck in
-        AffectedDeps.mark_all_dependents_as_needing_recheck
+        AffectedDeps.mark_all_dependents_as_needing_recheck_from_hash
           mode
           acc
-          (make_dep cid))
+          (make_dep dep))
   in
   let add_member_fanout acc change make_dep =
     if not (ClassDiff.change_affects_descendants change) then
-      AffectedDeps.mark_all_dependents_as_needing_recheck
+      AffectedDeps.mark_all_dependents_as_needing_recheck_from_hash
         mode
         acc
-        (make_dep class_name)
+        (make_dep
+           (Typing_deps.Dep.make
+              (hash_mode mode)
+              (Typing_deps.Dep.Type class_name)))
     else
       recheck_descendants_and_their_member_dependents acc make_dep
   in
@@ -112,24 +105,56 @@ let add_minor_change_fanout
               (Dep.AllMembers class_name)
           | _ -> acc
         in
-        add_member_fanout acc change (fun cid -> Dep.Const (cid, name)))
+        add_member_fanout acc change (fun type_hash ->
+            Typing_deps.Dep.make_dep_with_type_hash
+              (hash_mode mode)
+              type_hash
+              name
+              Dep.KConst))
   in
   let acc =
-    add_member_fanouts acc typeconsts (fun mid cid -> Dep.Const (cid, mid))
-  in
-  let acc = add_member_fanouts acc props (fun mid cid -> Dep.Prop (cid, mid)) in
-  let acc =
-    add_member_fanouts acc sprops (fun mid cid -> Dep.Prop (cid, mid))
-  in
-  let acc =
-    add_member_fanouts acc methods (fun mid cid -> Dep.Method (cid, mid))
+    add_member_fanouts acc typeconsts (fun mid type_hash ->
+        Typing_deps.Dep.make_dep_with_type_hash
+          (hash_mode mode)
+          type_hash
+          mid
+          Dep.KConst)
   in
   let acc =
-    add_member_fanouts acc smethods (fun mid cid -> Dep.Method (cid, mid))
+    add_member_fanouts acc props (fun mid type_hash ->
+        Typing_deps.Dep.make_dep_with_type_hash
+          (hash_mode mode)
+          type_hash
+          mid
+          Dep.KProp)
+  in
+  let acc =
+    add_member_fanouts acc sprops (fun mid type_hash ->
+        Typing_deps.Dep.make_dep_with_type_hash
+          (hash_mode mode)
+          type_hash
+          mid
+          Dep.KProp)
+  in
+  let acc =
+    add_member_fanouts acc methods (fun mid type_hash ->
+        Typing_deps.Dep.make_dep_with_type_hash
+          (hash_mode mode)
+          type_hash
+          mid
+          Dep.KMethod)
+  in
+  let acc =
+    add_member_fanouts acc smethods (fun mid type_hash ->
+        Typing_deps.Dep.make_dep_with_type_hash
+          (hash_mode mode)
+          type_hash
+          mid
+          Dep.KMethod)
   in
   let acc =
     Option.value_map constructor ~default:acc ~f:(fun change ->
-        add_member_fanout acc change (fun cid -> Dep.Constructor cid))
+        add_member_fanout acc change (fun type_hash -> type_hash))
   in
   acc
 
@@ -142,27 +167,16 @@ let add_maximum_fanout
     (Dep.make (hash_mode mode) (Dep.Type class_name))
 
 let add_fanout
-    ~(ctx : Provider_context.t)
-    ~(get_classes_in_file : Relative_path.t -> SSet.t)
-    (acc : AffectedDeps.t)
-    (class_name, diff) : AffectedDeps.t =
+    ~(ctx : Provider_context.t) (acc : AffectedDeps.t) (class_name, diff) :
+    AffectedDeps.t =
   match diff with
   | Unchanged -> acc
   | Major_change -> add_maximum_fanout ctx acc class_name
   | Minor_change minor_change ->
-    add_minor_change_fanout
-      ~ctx
-      ~get_classes_in_file
-      acc
-      class_name
-      minor_change
+    add_minor_change_fanout ~ctx acc class_name minor_change
 
 let fanout_of_changes
-    ~(ctx : Provider_context.t)
-    ~(get_classes_in_file : Relative_path.t -> SSet.t)
-    (changes : (string * ClassDiff.t) list) : AffectedDeps.t =
+    ~(ctx : Provider_context.t) (changes : (string * ClassDiff.t) list) :
+    AffectedDeps.t =
   let mode = Provider_context.get_deps_mode ctx in
-  List.fold
-    changes
-    ~init:(AffectedDeps.empty mode)
-    ~f:(add_fanout ~ctx ~get_classes_in_file)
+  List.fold changes ~init:(AffectedDeps.empty mode) ~f:(add_fanout ~ctx)

@@ -130,9 +130,9 @@ void php_mt_initialize(uint32_t seed, uint32_t* state) {
      In previous versions, most significant bits (MSBs) of the seed affect
      only MSBs of the state array.  Modified 9 Jan 2002 by Makoto Matsumoto. */
 
-  register uint32_t* s = state;
-  register uint32_t* r = state;
-  register int i = 1;
+  uint32_t* s = state;
+  uint32_t* r = state;
+  int i = 1;
 
   *s++ = seed & 0xffffffffU;
   for( ; i < N; ++i ) {
@@ -145,9 +145,9 @@ void php_mt_reload() {
   /* Generate N new values in state
      Made clearer and faster by Matthew Bellew (matthew.bellew@home.com) */
 
-  register uint32_t* state = s_data->state;
-  register uint32_t* p = state;
-  register int i;
+  uint32_t* state = s_data->state;
+  uint32_t* p = state;
+  int i;
 
   for (i = N - M; i--; ++p)
     *p = twist(p[M], p[0], p[1]);
@@ -162,7 +162,7 @@ uint32_t php_mt_rand() {
   // Pull a 32-bit integer from the generator state
   // Every other access function simply transforms the numbers extracted here
 
-  register uint32_t s1;
+  uint32_t s1;
 
   if (s_data->left == 0) {
     php_mt_reload();

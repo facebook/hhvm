@@ -105,7 +105,6 @@ struct RandData {
     memset(this, 0, sizeof(*this));
   }
 
-  int left;
   uint32_t state[N];
   uint32_t* next;
 
@@ -154,7 +153,6 @@ void php_mt_reload() {
   for (i = M; --i; ++p)
     *p = twist(p[M-N], p[0], p[1]);
   *p = twist(p[M-N], p[0], state[0]);
-  s_data->left = N;
   s_data->next = state;
 }
 
@@ -164,10 +162,9 @@ uint32_t php_mt_rand() {
 
   uint32_t s1;
 
-  if (s_data->left == 0) {
+  if (s_data->next == s_data->state + N) {
     php_mt_reload();
   }
-  --s_data->left;
 
   s1 = *s_data->next++;
   s1 ^= (s1 >> 11);

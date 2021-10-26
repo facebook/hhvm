@@ -9,7 +9,7 @@
 
 val compute_class_fanout :
   Provider_context.t ->
-  get_classes_in_file:(Relative_path.t -> SSet.t) ->
+  defs:FileInfo.names Relative_path.Map.t ->
   get_remote_old_decl:
     (string -> Shallow_decl_defs.shallow_class option SMap.t option) ->
   Relative_path.t list ->

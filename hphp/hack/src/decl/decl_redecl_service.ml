@@ -631,7 +631,7 @@ let redo_type_decl
       let AffectedDeps.{ changed = changed'; mro_invalidated; needs_recheck } =
         Shallow_decl_compare.compute_class_fanout
           ctx
-          ~get_classes_in_file:get_classes
+          ~defs
           ~get_remote_old_decl:(Remote_old_decl_client.get_old_decl ~ctx)
           fnl
       in
@@ -650,7 +650,7 @@ let redo_type_decl
             { changed = changed'; mro_invalidated = _; needs_recheck } =
         Shallow_decl_compare.compute_class_fanout
           ctx
-          ~get_classes_in_file:get_classes
+          ~defs
           ~get_remote_old_decl:(Remote_old_decl_client.get_old_decl ~ctx)
           fnl
       in

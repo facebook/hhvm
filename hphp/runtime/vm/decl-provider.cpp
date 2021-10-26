@@ -19,7 +19,17 @@
 
 namespace HPHP {
 
-Decls const* HhvmDeclProvider::getDecl(AutoloadMap::KindOf kind, char const* symbol) {
+  Decls const* HhvmDeclProvider::getDecl(AutoloadMap::KindOf /*kind*/, char const* /*symbol*/) {
+  // The prototypical, indicative stub code sketched out below doesn't
+  // take into account the RDS nature of the AutoloadHandler data
+  // structures and at this time, we can't rely on calls to `getDecl`
+  // not triggering assertions due to inapproriate usage (like being
+  // called on the wrong thread for example). See D31842297 for some
+  // discussion.
+
+  return nullptr;
+
+  /*
   String sym = String(symbol, CopyStringMode::CopyString);
   Optional<String> filename_opt = AutoloadHandler::s_instance->getFile(symbol, kind);
   if (filename_opt.has_value()) {
@@ -41,6 +51,7 @@ Decls const* HhvmDeclProvider::getDecl(AutoloadMap::KindOf kind, char const* sym
   } else {
     return nullptr;
   }
+  */
 }
 
 extern "C" {

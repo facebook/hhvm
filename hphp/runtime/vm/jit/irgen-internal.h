@@ -92,17 +92,6 @@ inline Offset nextBcOff(const IRGS& env) {
   return nextSrcKey(env).offset();
 }
 
-inline SrcKey fixupSrcKey(const IRGS& env) {
-  auto curFP = fp(env);
-  auto curSK = curSrcKey(env);
-  while (curFP != fixupFP(env)) {
-    assertx(curFP->inst()->is(BeginInlining));
-    curSK = curFP->inst()->marker().sk();
-    curFP = curFP->inst()->src(1);
-  }
-  return curSK;
-}
-
 inline SSATmp* curRequiredCoeffects(IRGS& env) {
   auto const func = curFunc(env);
   assertx(func);
@@ -916,9 +905,10 @@ Block* create_catch_block(
     if (endCatchFromInlined(env)) return catchBlock;
   }
 
-  // We already spilled frames prior to these opcodes.
-  if (mode != EndCatchData::CatchMode::InterpCatch) {
-    spillInlinedFrames(env);
+  if (spillInlinedFrames(env)) {
+    gen(env, StVMFP, fp(env));
+    gen(env, StVMPC, cns(env, uintptr_t(curSrcKey(env).pc())));
+    gen(env, StVMReturnAddr, cns(env, 0));
   }
 
   auto const stublogue = env.irb->fs().stublogue();

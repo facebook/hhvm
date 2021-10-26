@@ -310,9 +310,9 @@ void emitThrow(IRGS& env) {
 
     auto const spOff = spOffBCFromIRSP(env);
     auto const bcSP = gen(env, LoadBCSP, IRSPRelOffsetData { spOff }, sp(env));
-    gen(env, StVMFP, fixupFP(env));
+    gen(env, StVMFP, fp(env));
     gen(env, StVMSP, bcSP);
-    gen(env, StVMPC, cns(env, uintptr_t(fixupSrcKey(env).pc())));
+    gen(env, StVMPC, cns(env, uintptr_t(curSrcKey(env).pc())));
     genStVMReturnAddr(env);
     gen(env, StVMRegState, cns(env, eagerlyCleanState()));
     auto const etcData = EnterTCUnwindData { spOff, true };

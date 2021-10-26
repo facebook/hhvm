@@ -1223,7 +1223,12 @@ Block* makeCatchSet(IRGS& env, uint32_t nDiscard) {
     [&] {
       assertx(!env.irb->fs().stublogue());
       hint(env, Block::Hint::Unused);
-      spillInlinedFrames(env);
+      if (spillInlinedFrames(env)) {
+        gen(env, StVMFP, fp(env));
+        gen(env, StVMPC, cns(env, uintptr_t(curSrcKey(env).pc())));
+        gen(env, StVMReturnAddr, cns(env, 0));
+      }
+
       auto const data = EndCatchData {
         spOffBCFromIRSP(env),
         EndCatchData::CatchMode::SideExit,

@@ -609,7 +609,11 @@ void implEndCatchBlock(IRGS& env, const RegionDesc& calleeRegion) {
   if (isInlining(env)) {
     if (endCatchFromInlined(env)) return;
 
-    spillInlinedFrames(env);
+    if (spillInlinedFrames(env)) {
+      gen(env, StVMFP, fp(env));
+      gen(env, StVMPC, cns(env, uintptr_t(curSrcKey(env).pc())));
+      gen(env, StVMReturnAddr, cns(env, 0));
+    }
   }
 
   // Tell the unwinder that we have popped stuff from the stack.
@@ -689,11 +693,11 @@ bool endCatchFromInlined(IRGS& env) {
   return true;
 }
 
-void spillInlinedFrames(IRGS& env) {
+bool spillInlinedFrames(IRGS& env) {
   assertx(inlineDepth(env) == env.irb->fs().inlineDepth());
 
   // Nothing to spill.
-  if (!isInlining(env)) return;
+  if (!isInlining(env)) return false;
 
   auto const inlinedFrames = [&] {
     std::vector<SSATmp*> frames;
@@ -709,16 +713,14 @@ void spillInlinedFrames(IRGS& env) {
   }();
 
   // Already spilled everything. This may happen in InterpOne's catch block.
-  if (inlinedFrames.size() == 0) return;
+  if (inlinedFrames.size() == 0) return false;
 
   for (auto const fp : inlinedFrames) {
     gen(env, InlineCall, fp, fp->inst()->src(1));
     updateMarker(env);
   }
 
-  gen(env, StVMFP, inlinedFrames.back());
-  gen(env, StVMPC, cns(env, uintptr_t(curSrcKey(env).pc())));
-  gen(env, StVMReturnAddr, cns(env, 0));
+  return true;
 }
 
 //////////////////////////////////////////////////////////////////////

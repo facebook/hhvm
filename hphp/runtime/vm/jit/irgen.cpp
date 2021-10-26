@@ -114,9 +114,6 @@ SSATmp* genInstruction(IRGS& env, IRInstruction* inst) {
       return 0;
     }();
     auto const catchMode = [&]() {
-      if (inst->is(InterpOne, InterpOneCF)) {
-        return EndCatchData::CatchMode::InterpCatch;
-      }
       if (inst->is(ReturnHook,
                    SuspendHookAwaitEF,
                    SuspendHookAwaitEG,

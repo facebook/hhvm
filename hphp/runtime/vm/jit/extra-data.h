@@ -2408,7 +2408,6 @@ struct AssertReason : IRExtraData {
 struct EndCatchData : IRExtraData {
   enum class CatchMode {
     UnwindOnly,
-    InterpCatch,
     SideExit,
     LocalsDecRefd
   };
@@ -2427,8 +2426,7 @@ struct EndCatchData : IRExtraData {
     return folly::to<std::string>(
       "IRSPOff ", offset.offset, ",",
       mode == CatchMode::UnwindOnly ? "UnwindOnly" :
-        mode == CatchMode::InterpCatch ? "InterpCatch" :
-          mode == CatchMode::SideExit ? "SideExit" : "LocalsDecRefd", ",",
+        mode == CatchMode::SideExit ? "SideExit" : "LocalsDecRefd", ",",
       stublogue == FrameMode::Stublogue ? "Stublogue" : "Phplogue", ",",
       teardown == Teardown::NA ? "NA" :
         teardown == Teardown::None ? "None" :

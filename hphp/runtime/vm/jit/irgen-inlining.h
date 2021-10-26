@@ -43,9 +43,9 @@ bool endCatchFromInlined(IRGS&);
 
 /*
  * Make sure all inlined frames are written on the stack and a part of the FP
- * chain.
+ * chain. Returns true iff any frames were spilled.
  */
-void spillInlinedFrames(IRGS& env);
+bool spillInlinedFrames(IRGS& env);
 
 ///////////////////////////////////////////////////////////////////////////////
 

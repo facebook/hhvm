@@ -18,6 +18,7 @@
     decl_parser_options
     default_injector_config
     direct_decl_parser
+    direct_decl_utils
     gen_deps
     glean_dependency_graph_convert
     hhi

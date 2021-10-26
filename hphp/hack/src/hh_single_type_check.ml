@@ -2366,7 +2366,7 @@ let decl_and_run_mode
       out_extension;
       verbosity;
       should_print_position;
-      custom_hhi_path = _custom_hhi_path;
+      custom_hhi_path;
     }
     (popt : TypecheckerOptions.t)
     (hhi_root : Path.t)
@@ -2389,6 +2389,11 @@ let decl_and_run_mode
         |> Array.of_list
       in
       let magic_builtins = Array.append magic_builtins extra_builtins in
+      let hhi_builtins =
+        match custom_hhi_path with
+        | None -> hhi_builtins
+        | Some path -> Array.of_list (Hhi_get.get_hhis_in_dir path)
+      in
       (* Check that magic_builtin filenames are unique *)
       let () =
         let n_of_builtins = Array.length magic_builtins in

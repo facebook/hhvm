@@ -52,12 +52,23 @@ let () =
   (deps (file \"hsl_generated_hhis.stamp\")))
 
 (library
+  (name hhi_get)
+  (wrapped false)
+  (modules
+    hhi_get)
+  (preprocess (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
+  )
+
+(library
   (name hhi)
   (wrapped false)
   (libraries
     global_config
+    hhi_get
     relative_path
     sys_utils)
+  (modules
+    hhi)
   (preprocessor_deps (source_tree %%{workspace_root}/hhi) (alias generate_hhis))
   (preprocess (pps ppx_gen_hhi --
     -hhi-dir \"%s/hphp/hack/hhi\"

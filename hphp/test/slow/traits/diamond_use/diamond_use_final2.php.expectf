@@ -1,0 +1,1 @@
+Fatal error: Cannot override final method C::foo() in %s/diamond_use_final2.php on line 16

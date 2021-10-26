@@ -259,14 +259,18 @@ let traits (c : Nast.class_) : (Pos.t * string) list =
       | Happly ((_, trait_name), _) -> Some (pos, trait_name)
       | _ -> None)
 
+let parent_class (c : Nast.class_) : (Pos.t * string) option =
+  match c.c_extends with
+  | [(_, Happly (pstring, _))] when is_class_kind c.c_kind -> Some pstring
+  | _ -> None
+
 (* All the traits that occur as `use Foo;` in this class, plus the
    parent class name (if we have one). *)
 let traits_and_parent (c : Nast.class_) : (Pos.t * string) list =
   let traits_used = traits c in
-  match c.c_extends with
-  | [(_, Happly (pstring, _))] when is_class_kind c.c_kind ->
-    pstring :: traits_used
-  | _ -> traits_used
+  match parent_class c with
+  | Some pstring -> pstring :: traits_used
+  | None -> traits_used
 
 (* Given a trait name, return the full list of traits it uses.
  *
@@ -320,6 +324,33 @@ let check_reuse_final_method tgenv (c : Nast.class_) : unit =
           SSet.empty)
   in
   ()
+
+(* Check reuse of trait with a final method ignoring diamond inclusion via use chains *)
+let check_reuse_final_method_allow_diamond tgenv (c : Nast.class_) : unit =
+  match parent_class c with
+  | Some (_, pstring) ->
+    let traits_with_final_methods_via_parent =
+      let trait_ancestors = all_trait_ancestors tgenv pstring in
+      List.filter ~f:(has_final_method tgenv) trait_ancestors |> SSet.of_list
+    in
+    List.iter (traits c) ~f:(fun (p, type_name) ->
+        let trait_ancestors = all_trait_ancestors tgenv type_name in
+        let traits_with_final_methods =
+          List.filter ~f:(has_final_method tgenv) trait_ancestors
+          |> SSet.of_list
+        in
+        let dupes =
+          SSet.inter
+            traits_with_final_methods_via_parent
+            traits_with_final_methods
+        in
+        if not (SSet.is_empty dupes) then
+          let cls_name = snd c.c_name in
+          let dupe = lowermost_classish tgenv (SSet.elements dupes) in
+          let using_class = find_using_class tgenv cls_name dupe in
+          let trace = relevant_positions tgenv using_class type_name dupe in
+          Errors.trait_reuse_with_final_method p dupe using_class trace)
+  | None -> ()
 
 (* check reuse of a trait with a non-overridden non-abstract method *)
 let check_reuse_method_without_override tgenv (c : Nast.class_) : unit =
@@ -381,12 +412,14 @@ let handler =
         }
       in
 
-      check_reuse_final_method tgenv c;
       if
-        not
-          (Naming_attributes.mem
-             SN.UserAttributes.uaEnableMethodTraitDiamond
-             c.c_user_attributes)
+        Naming_attributes.mem
+          SN.UserAttributes.uaEnableMethodTraitDiamond
+          c.c_user_attributes
       then
+        check_reuse_final_method_allow_diamond tgenv c
+      else begin
+        check_reuse_final_method tgenv c;
         check_reuse_method_without_override tgenv c
+      end
   end

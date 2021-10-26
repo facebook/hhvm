@@ -618,7 +618,7 @@ function str_repeat(string $input, int $multiplier)[]: string;
 <<__Native>>
 function html_entity_decode(string $str,
                             int $quote_style = ENT_COMPAT,
-                            string $charset = "UTF-8"): string;
+                            string $charset = "UTF-8")[]: string;
 
 /**
  * This function is identical to htmlspecialchars() in all ways, except with
@@ -661,7 +661,7 @@ function html_entity_decode(string $str,
 function htmlentities(string $str,
                       int $quote_style = ENT_COMPAT,
                       string $charset = "UTF-8",
-                      bool $double_encode = true): string;
+                      bool $double_encode = true)[]: string;
 
 /**
  * This function is the opposite of htmlspecialchars(). It converts special
@@ -681,7 +681,7 @@ function htmlentities(string $str,
  */
 <<__Native>>
 function htmlspecialchars_decode(string $str,
-                                 int $quote_style = ENT_COMPAT): string;
+                                 int $quote_style = ENT_COMPAT)[]: string;
 
 /**
  * Certain characters have special significance in HTML, and should be
@@ -733,7 +733,7 @@ function htmlspecialchars_decode(string $str,
 function htmlspecialchars(string $str,
                           int $quote_style = ENT_COMPAT,
                           string $charset = "UTF-8",
-                          bool $double_encode = true): string;
+                          bool $double_encode = true)[]: string;
 
 /**
  * Certain characters have special significance in HTML, and should be
@@ -1012,7 +1012,7 @@ function convert_cyr_string(string $str, string $from, string $to)[]: string;
 <<__Native>>
 function get_html_translation_table(int $table = 0,
                                     int $quote_style = ENT_COMPAT,
-                                    string $encoding = "UTF-8"): darray;
+                                    string $encoding = "UTF-8")[]: darray;
 
 /**
  * Converts logical Hebrew text to visual text.  The function tries to avoid

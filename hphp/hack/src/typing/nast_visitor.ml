@@ -30,8 +30,9 @@ class virtual iter =
     method! on_class_ env x = super#on_class_ (class_env env x) x
 
     method! on_Try env b cl fb =
-      self#on_block { env with is_finally = true } fb;
-      super#on_Try env b cl fb
+      self#on_block env b;
+      List.iter cl ~f:(fun c -> self#on_catch env c);
+      self#on_block { env with is_finally = true } fb
 
     method! on_Do env = super#on_Do { env with control_context = LoopContext }
 

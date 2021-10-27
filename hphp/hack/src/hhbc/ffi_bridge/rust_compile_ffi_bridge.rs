@@ -24,7 +24,7 @@ use parser_core_types::source_text::SourceText;
 use rust_facts_ffi::{extract_facts_as_json_ffi0, extract_facts_ffi0, facts_to_json_ffi};
 
 #[cxx::bridge]
-mod compile_ffi {
+pub mod compile_ffi {
     struct NativeEnv {
         decl_provider: usize,
         decl_getter: usize,
@@ -38,7 +38,7 @@ mod compile_ffi {
         flags: u8,
     }
 
-    struct DeclResult {
+    pub struct DeclResult {
         hash: u64,
         serialized: Box<Bytes>,
         decls: Box<Decls>,
@@ -101,7 +101,7 @@ mod compile_ffi {
     }
 
     #[derive(Debug, Default)]
-    struct FactsResult {
+    pub struct FactsResult {
         facts: Facts,
         md5sum: String,
         sha1sum: String,
@@ -324,7 +324,7 @@ fn hackc_print_serialized_size(serialized: &Bytes) {
     println!("Decl-serialized size: {:#?}", serialized.0.len);
 }
 
-fn hackc_create_direct_decl_parse_options(
+pub fn hackc_create_direct_decl_parse_options(
     disable_xhp_element_mangling: bool,
     interpret_soft_types_as_like_types: bool,
     aliased_namespaces: &CxxString,
@@ -372,7 +372,7 @@ impl compile_ffi::DeclResult {
     }
 }
 
-fn hackc_direct_decl_parse(
+pub fn hackc_direct_decl_parse(
     opts: &DeclParserOptions,
     filename: &CxxString,
     text: &CxxString,

@@ -157,7 +157,6 @@ let read_and_log_process_information ~timeout =
       (Telemetry.to_string telemetry);
     HackEventLogger.invariant_violation_bug
       ~desc
-      ~typechecking_is_deferring:false
       ~path:Relative_path.default
       ~pos:""
       telemetry;

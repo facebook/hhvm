@@ -2521,8 +2521,7 @@ and expr
   with
   | Inf.InconsistentTypeVarState _ as e ->
     (* we don't want to catch unwanted exceptions here, eg Timeouts *)
-    let typechecking_is_deferring = Deferred_decl.is_deferring () in
-    Errors.exception_occurred ~typechecking_is_deferring p (Exception.wrap e);
+    Errors.exception_occurred p (Exception.wrap e);
     make_result env p (invalid_expr_ env p) @@ err_witness env p
 
 (* Some (legacy) special functions are allowed in initializers,
@@ -2845,15 +2844,9 @@ and expr_
         env
         (Cls.tparams class_)
     | None ->
-      let typechecking_is_deferring = Deferred_decl.is_deferring () in
-      (if not typechecking_is_deferring then
-        let desc = "Missing collection decl during type parameter check" in
-        Telemetry.(create () |> string_ ~key:"class name" ~value:name)
-        |> Errors.invariant_violation
-             p
-             ~typechecking_is_deferring
-             ~desc
-             ~report_to_user:false);
+      let desc = "Missing collection decl during type parameter check" in
+      Telemetry.(create () |> string_ ~key:"class name" ~value:name)
+      |> Errors.invariant_violation p ~desc ~report_to_user:false;
       (* Continue typechecking without performing the check on a best effort
          basis. *)
       env

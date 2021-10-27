@@ -44,85 +44,40 @@ let test_dmesg_parser () =
     "hh_server"
     input
 
-let ensure_count (count : int) : unit =
-  let deferred = Deferred_decl.get_deferments () in
-  Asserter.Int_asserter.assert_equals
-    count
-    (List.length deferred)
-    "The number of deferred items should match the expected value"
-
-let test_deferred_decl_add () =
-  Deferred_decl.reset
-    ~enable:true
-    ~declaration_threshold_opt:None
-    ~memory_mb_threshold_opt:None;
-  ensure_count 0;
-
-  Deferred_decl.add_deferment
-    ~d:(Relative_path.create Relative_path.Dummy "foo", "\\Foo");
-  ensure_count 1;
-
-  Deferred_decl.add_deferment
-    ~d:(Relative_path.create Relative_path.Dummy "foo", "\\Foo");
-  ensure_count 1;
-
-  Deferred_decl.add_deferment
-    ~d:(Relative_path.create Relative_path.Dummy "bar", "\\Bar");
-  ensure_count 2;
-
-  Deferred_decl.reset
-    ~enable:true
-    ~declaration_threshold_opt:None
-    ~memory_mb_threshold_opt:None;
-  ensure_count 0;
-
-  true
-
-let ensure_threshold ~(threshold : int) ~(limit : int) ~(expected : int) : unit
-    =
-  Deferred_decl.reset
-    ~enable:true
-    ~declaration_threshold_opt:(Some threshold)
-    ~memory_mb_threshold_opt:None;
-  ensure_count 0;
-
-  let deferred_count = ref 0 in
-  for i = 1 to limit do
-    let path = Printf.sprintf "foo-%d" i in
-    let relative_path = Relative_path.create Relative_path.Dummy path in
-    try
-      Deferred_decl.raise_if_should_defer ~deferment:(relative_path, "\\Foo");
-      Deferred_decl.increment_counter ()
-    with
-    | Deferred_decl.Defer (d, _) ->
-      Asserter.Bool_asserter.assert_equals
-        (i >= threshold)
-        true
-        (Printf.sprintf
-           "We should have reached the threshold %d, i=%d"
-           threshold
-           i);
-      Asserter.String_asserter.assert_equals
-        (Relative_path.suffix d)
-        path
-        "The deferred path should be the last one we saw";
-      deferred_count := !deferred_count + 1
-  done;
-
-  Asserter.Int_asserter.assert_equals
-    expected
-    !deferred_count
-    (Printf.sprintf
-       "Unexpected deferred count; threshold: %d; limit: %d; expected: %d"
-       threshold
-       limit
-       expected)
+let ensure_threshold ~(threshold : int) ~(decl_count : int) : unit =
+  let result =
+    Deferred_decl.with_deferred_decls
+      ~enable:true
+      ~declaration_threshold_opt:(Some threshold)
+      ~memory_mb_threshold_opt:None
+    @@ fun () ->
+    for _i = 1 to decl_count do
+      Deferred_decl.raise_if_should_defer ()
+    done
+  in
+  match result with
+  | Ok () ->
+    Asserter.Bool_asserter.assert_equals
+      (threshold > decl_count)
+      true
+      (Printf.sprintf
+         "We've fetched %d decls, we should have reached the threshold %d"
+         decl_count
+         threshold)
+  | Error () ->
+    Asserter.Bool_asserter.assert_equals
+      (threshold <= decl_count)
+      true
+      (Printf.sprintf
+         "We've fetched %d decls, we should not have reached the threshold %d"
+         decl_count
+         threshold)
 
 let test_deferred_decl_should_defer () =
-  ensure_threshold ~threshold:0 ~limit:1 ~expected:1;
-  ensure_threshold ~threshold:1 ~limit:2 ~expected:1;
-  ensure_threshold ~threshold:2 ~limit:1 ~expected:0;
-  ensure_threshold ~threshold:1 ~limit:5 ~expected:4;
+  ensure_threshold ~threshold:0 ~decl_count:1;
+  ensure_threshold ~threshold:1 ~decl_count:2;
+  ensure_threshold ~threshold:2 ~decl_count:1;
+  ensure_threshold ~threshold:1 ~decl_count:5;
 
   true
 
@@ -358,7 +313,6 @@ let test_quarantine () =
 
 let tests =
   [
-    ("test_deferred_decl_add", test_deferred_decl_add);
     ("test_deferred_decl_should_defer", test_deferred_decl_should_defer);
     ("test_process_file_deferring", test_process_file_deferring);
     ("test_compute_tast_counting", test_compute_tast_counting);

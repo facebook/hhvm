@@ -835,7 +835,6 @@ module ByHash = struct
       Hh_logger.log "INVARIANT_VIOLATION_BUG [%s]" desc;
       HackEventLogger.invariant_violation_bug
         ~desc
-        ~typechecking_is_deferring:false
         ~path:Relative_path.default
         ~pos:""
         (Telemetry.create ());
@@ -890,7 +889,6 @@ module ByHash = struct
               (Relative_path.to_absolute filename);
             HackEventLogger.invariant_violation_bug
               ~desc
-              ~typechecking_is_deferring:false
               ~path:filename
               ~pos:""
               (Telemetry.create ()))

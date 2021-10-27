@@ -107,12 +107,11 @@ let make_eager_class_type ctx class_name declare_folded_class_in_file =
       match Naming_provider.get_class_path ctx class_name with
       | None -> None
       | Some file ->
-        Deferred_decl.raise_if_should_defer ~deferment:(file, class_name);
+        Deferred_decl.raise_if_should_defer ();
         (* declare_folded_class_in_file actual reads from Decl_heap.Classes.get
          * like what we do above, which makes our test redundant but cleaner.
          * It also writes into Decl_heap.Classes and other Decl_heaps. *)
         let (decl, _) = declare_folded_class_in_file ctx file class_name in
-        Deferred_decl.increment_counter ();
         Some (make_eager_class_decl decl)
     end
 
@@ -124,19 +123,10 @@ let get
    * or the [Eager] class (otherwise).
    * Note: Eager will always read+write to shmem Decl_heaps.
    * Lazy will solely go through the ctx provider. *)
-  try
-    if TypecheckerOptions.shallow_class_decl (Provider_context.get_tcopt ctx)
-    then
-      make_lazy_class_type ctx class_name
-    else
-      make_eager_class_type ctx class_name declare_folded_class_in_file
-  with
-  | Deferred_decl.Defer d
-    when not
-         @@ TypecheckerOptions.deferments_light (Provider_context.get_tcopt ctx)
-    ->
-    Deferred_decl.add_deferment ~d;
-    None
+  if TypecheckerOptions.shallow_class_decl (Provider_context.get_tcopt ctx) then
+    make_lazy_class_type ctx class_name
+  else
+    make_eager_class_type ctx class_name declare_folded_class_in_file
 
 module ApiShallow = struct
   let shallow_decl (decl, t) =

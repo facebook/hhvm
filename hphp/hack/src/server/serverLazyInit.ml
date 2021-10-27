@@ -1074,7 +1074,6 @@ let full_init
       existing_name_count;
     HackEventLogger.invariant_violation_bug
       ~desc
-      ~typechecking_is_deferring:false
       ~path:Relative_path.default
       ~pos:""
       (Telemetry.create ()

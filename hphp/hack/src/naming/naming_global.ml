@@ -146,7 +146,6 @@ let should_report_duplicate
     in
     HackEventLogger.invariant_violation_bug
       ~desc
-      ~typechecking_is_deferring:false
       ~path:(FileInfo.get_pos_filename p)
       ~pos:""
       (Telemetry.create ()

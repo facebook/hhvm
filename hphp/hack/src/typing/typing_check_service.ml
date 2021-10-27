@@ -222,20 +222,17 @@ let process_file
             tasts
             global_tvenvs;
         { errors = Errors.merge errors' errors; deferred_decls = [] }
-      | Error deferred_decls ->
-        (match deferred_decls with
-        | Some deferred_decls -> { errors; deferred_decls }
-        | None ->
-          let deferred_decls =
-            ast
-            |> Naming.program ctx
-            |> scrape_class_names
-            |> SSet.elements
-            |> List.filter_map ~f:(fun class_name ->
-                   Naming_provider.get_class_path ctx class_name >>| fun fn ->
-                   (fn, class_name))
-          in
-          { errors; deferred_decls })
+      | Error () ->
+        let deferred_decls =
+          ast
+          |> Naming.program ctx
+          |> scrape_class_names
+          |> SSet.elements
+          |> List.filter_map ~f:(fun class_name ->
+                 Naming_provider.get_class_path ctx class_name >>| fun fn ->
+                 (fn, class_name))
+        in
+        { errors; deferred_decls }
     with
     | WorkerCancel.Worker_should_exit as e ->
       (* Cancellation requests must be re-raised *)

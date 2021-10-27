@@ -1203,7 +1203,7 @@ let daemon_main
   else
     Hh_logger.Level.set_min_level_file Hh_logger.Level.Info;
 
-  Lwt_main.run (serve ~in_fd ~out_fd)
+  Lwt_utils.run_main (fun () -> serve ~in_fd ~out_fd)
 
 let daemon_entry_point : (ClientIdeMessage.daemon_args, unit, unit) Daemon.entry
     =

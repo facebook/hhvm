@@ -9,6 +9,29 @@
 
 open Hh_prelude
 
+exception WrappedException of Exception.t
+
+(** Use this instead of [Lwt_main.run] to ensure that the right engine is set, and to
+    improve stack traces. *)
+let run_main f =
+  (* TODO: Lwt defaults to libev when it's installed. Historically, it wasn't installed
+     and so we haven't tested it. Here we explicitly choose to use select instead, but
+     should test libev. *)
+  Lwt_engine.set (new Lwt_engine.select);
+  try
+    Lwt_main.run
+      (try%lwt f () with
+      | exn ->
+        (* Lwt_main.run loses backtraces when its callback errors. To work around it, we
+           catch exceptions within the callback, store their traces using Exception.wrap,
+           then re-raise them outside the Lwt_main.run.
+
+           https://github.com/ocsigen/lwt/issues/720 is tracking a more holistic fix. *)
+        let exn = Exception.wrap exn in
+        raise (WrappedException exn))
+  with
+  | WrappedException exn -> Exception.reraise exn
+
 let select
     (read_fds : Unix.file_descr list)
     (write_fds : Unix.file_descr list)

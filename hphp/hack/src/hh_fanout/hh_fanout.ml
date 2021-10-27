@@ -627,7 +627,7 @@ let calculate_subcommand =
     if Path.Set.is_empty input_files then
       Hh_logger.warn "Warning: list of input files is empty.";
 
-    Lwt_main.run @@ mode_calculate ~env ~input_files ~cursor_id
+    Lwt_utils.run_main (fun () -> mode_calculate ~env ~input_files ~cursor_id)
   in
 
   Term.
@@ -658,7 +658,8 @@ If not provided, uses the cursor corresponding to the saved-state.
   in
 
   let run env cursor_id pretty_print =
-    Lwt_main.run @@ mode_calculate_errors ~env ~cursor_id ~pretty_print
+    Lwt_utils.run_main (fun () ->
+        mode_calculate_errors ~env ~cursor_id ~pretty_print)
   in
 
   Term.
@@ -737,7 +738,7 @@ let debug_subcommand =
 
   let run env path cursor_id =
     let path = Path.make path in
-    Lwt_main.run @@ mode_debug ~env ~path ~cursor_id
+    Lwt_utils.run_main (fun () -> mode_debug ~env ~path ~cursor_id)
   in
 
   Term.
@@ -769,7 +770,9 @@ let status_subcommand =
     required & opt (some string) None & info ["cursor"] ~doc ~docv:"CURSOR"
   in
 
-  let run env cursor_id = Lwt_main.run @@ mode_status ~env ~cursor_id in
+  let run env cursor_id =
+    Lwt_utils.run_main (fun () -> mode_status ~env ~cursor_id)
+  in
 
   Term.
     ( const run $ env_t $ cursor_id,
@@ -806,7 +809,7 @@ let query_subcommand =
 
   let run env include_extends dep_hash =
     let dep_hash = Typing_deps.Dep.of_debug_string dep_hash in
-    Lwt_main.run @@ mode_query ~env ~dep_hash ~include_extends
+    Lwt_utils.run_main (fun () -> mode_query ~env ~dep_hash ~include_extends)
   in
 
   Term.
@@ -854,7 +857,7 @@ a typing-dependency edge.
   let run env source dest =
     let source = Typing_deps.Dep.of_debug_string source in
     let dest = Typing_deps.Dep.of_debug_string dest in
-    Lwt_main.run @@ mode_query_path ~env ~source ~dest
+    Lwt_utils.run_main (fun () -> mode_query_path ~env ~source ~dest)
   in
 
   Term.
@@ -921,8 +924,8 @@ to be produced by hh_server
     required & opt (some string) None & info ["output"] ~doc ~docv:"OUTPUT"
   in
   let run allow_empty incremental edges_dir delta_file output =
-    Lwt_main.run
-      (mode_build ~allow_empty ~incremental ~edges_dir ~delta_file ~output)
+    Lwt_utils.run_main (fun () ->
+        mode_build ~allow_empty ~incremental ~edges_dir ~delta_file ~output)
   in
   Term.
     ( const run $ allow_empty $ incremental $ edges_dir $ delta_file $ output,
@@ -952,7 +955,9 @@ Calculate a bunch of statistics for a given 64-bit dependency graph.
     & opt (some string) None
     & info ["dep-graph"] ~doc ~docv:"DEP_GRAPH"
   in
-  let run dep_graph = Lwt_main.run (mode_dep_graph_stats ~dep_graph) in
+  let run dep_graph =
+    Lwt_utils.run_main (fun () -> mode_dep_graph_stats ~dep_graph)
+  in
   Term.
     ( const run $ dep_graph,
       info "dep-graph-stats" ~doc ~sdocs:Manpage.s_common_options ~man ~exits )
@@ -983,7 +988,9 @@ Check whether a 64-bit dependency graph is a subgraph of an other graph.
     let doc = "Path to largest 64-bit dependency graph." in
     required & opt (some string) None & info ["super"] ~doc ~docv:"SUPER"
   in
-  let run sub super = Lwt_main.run (mode_dep_graph_is_subgraph ~sub ~super) in
+  let run sub super =
+    Lwt_utils.run_main (fun () -> mode_dep_graph_is_subgraph ~sub ~super)
+  in
   Term.
     ( const run $ dep_graph_sub $ dep_graph_super,
       info

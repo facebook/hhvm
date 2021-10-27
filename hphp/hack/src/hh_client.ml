@@ -116,15 +116,20 @@ let () =
     let exit_status =
       match command with
       | ClientCommand.CCheck check_env ->
-        Lwt_main.run
-          (ClientCheck.main check_env (Option.value_exn local_config))
-      | ClientCommand.CStart env -> Lwt_main.run (ClientStart.main env)
-      | ClientCommand.CStop env -> Lwt_main.run (ClientStop.main env)
-      | ClientCommand.CRestart env -> Lwt_main.run (ClientRestart.main env)
-      | ClientCommand.CLsp args -> Lwt_main.run (ClientLsp.main args ~init_id)
-      | ClientCommand.CRage env -> Lwt_main.run (ClientRage.main env)
+        Lwt_utils.run_main (fun () ->
+            ClientCheck.main check_env (Option.value_exn local_config))
+      | ClientCommand.CStart env ->
+        Lwt_utils.run_main (fun () -> ClientStart.main env)
+      | ClientCommand.CStop env ->
+        Lwt_utils.run_main (fun () -> ClientStop.main env)
+      | ClientCommand.CRestart env ->
+        Lwt_utils.run_main (fun () -> ClientRestart.main env)
+      | ClientCommand.CLsp args ->
+        Lwt_utils.run_main (fun () -> ClientLsp.main args ~init_id)
+      | ClientCommand.CRage env ->
+        Lwt_utils.run_main (fun () -> ClientRage.main env)
       | ClientCommand.CDownloadSavedState env ->
-        Lwt_main.run (ClientDownloadSavedState.main env)
+        Lwt_utils.run_main (fun () -> ClientDownloadSavedState.main env)
     in
     Exit.exit exit_status
   with

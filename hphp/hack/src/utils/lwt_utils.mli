@@ -1,3 +1,14 @@
+(*
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *)
+
+(** Use this instead of [Lwt_main.run] to ensure that the right engine is set, and to
+    improve stack traces. *)
+val run_main : (unit -> 'a Lwt.t) -> 'a
+
 (** Drop-in replacement for [Unix.select] that works even when the Lwt main loop
 is running (i.e. your function has [Lwt_main.run] somewhere higher up in the
 call stack).

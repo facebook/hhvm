@@ -113,6 +113,7 @@
     gen_deps
     hhi
     hh_server_monitor
+    lwt_utils
     parent
     server
     server_env

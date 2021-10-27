@@ -800,6 +800,8 @@ let expand_expected_and_get_node env (expected : ExpectedTy.t option) =
   | Some ExpectedTy.{ pos = p; reason = ur; ty = { et_type = ty; _ }; _ } ->
     let (env, ty) = Env.expand_type env ty in
     (match get_node ty with
+    | Tunion [ty1; ty2] when is_dynamic ty1 ->
+      (env, Some (p, ur, ty2, get_node ty2))
     | Tunion [ty] -> (env, Some (p, ur, ty, get_node ty))
     | Toption ty -> (env, Some (p, ur, ty, get_node ty))
     | _ -> (env, Some (p, ur, ty, get_node ty)))
@@ -4231,15 +4233,6 @@ and expr_
       (env, tefun, inferred_ty)
     in
     let (env, eexpected) = expand_expected_and_get_node env expected in
-    (* TODO: move this into the expand_expected_and_get_node function and prune its callsites
-     * Strip like type from function type hint *)
-    let eexpected =
-      match eexpected with
-      | Some (pos, ur, _, Tunion [ty1; ty2]) when is_dynamic ty1 && is_fun ty2
-        ->
-        Some (pos, ur, ty2, get_node ty2)
-      | _ -> eexpected
-    in
     begin
       match eexpected with
       | Some (_pos, _ur, ty, Tfun expected_ft) ->

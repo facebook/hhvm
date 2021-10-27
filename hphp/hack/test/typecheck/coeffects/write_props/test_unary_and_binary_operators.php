@@ -26,4 +26,8 @@ function pure_function(Foo $x)[] : void {
   $x->prop_str ??= 'default';
   $x->prop_str ??= "some text";
   $x->prop_str .= 'more text';
+  $x->prop_int++;
+  $x->prop_int--;
+  ++$x->prop_int;
+  --$x->prop_int;
 }

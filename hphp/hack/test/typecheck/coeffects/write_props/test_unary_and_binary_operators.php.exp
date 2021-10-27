@@ -28,6 +28,14 @@ File "test_unary_and_binary_operators.php", line 27, characters 3-30:
 Writing to object properties in a pure function is not allowed. (Parsing[1002])
 File "test_unary_and_binary_operators.php", line 28, characters 3-29:
 Writing to object properties in a pure function is not allowed. (Parsing[1002])
+File "test_unary_and_binary_operators.php", line 29, characters 3-16:
+Writing to object properties in a pure function is not allowed. (Parsing[1002])
+File "test_unary_and_binary_operators.php", line 30, characters 3-16:
+Writing to object properties in a pure function is not allowed. (Parsing[1002])
+File "test_unary_and_binary_operators.php", line 31, characters 3-16:
+Writing to object properties in a pure function is not allowed. (Parsing[1002])
+File "test_unary_and_binary_operators.php", line 32, characters 3-16:
+Writing to object properties in a pure function is not allowed. (Parsing[1002])
 File "test_unary_and_binary_operators.php", line 14, characters 3-14:
 This object's property is being mutated (used as an lvalue)
 Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])

@@ -42,6 +42,14 @@ fn is_pure(ctxs: &Option<ast::Contexts>) -> bool {
     }
 }
 
+fn is_mutating_unop(unop: &ast_defs::Uop) -> bool {
+    use ast_defs::Uop::*;
+    match unop {
+        Upincr | Uincr | Updecr | Udecr => true,
+        _ => false,
+    }
+}
+
 // This distinguishes between specified not-pure contexts and unspecified contexts (both of which are not pure).
 // The latter is important because for e.g. lambdas without contexts, they should inherit from enclosing functions.
 fn is_pure_with_inherited_val(c: &Context, ctxs: &Option<ast::Contexts>) -> bool {
@@ -117,6 +125,11 @@ impl Checker {
         if let Some((bop, lhs, _)) = e.2.as_binop() {
             if let ast_defs::Bop::Eq(_) = bop {
                 self.check_is_obj_property_write_expr(&e, &lhs);
+            }
+        }
+        if let Some((unop, expr)) = e.2.as_unop() {
+            if is_mutating_unop(&unop) {
+                self.check_is_obj_property_write_expr(&e, &expr);
             }
         }
     }

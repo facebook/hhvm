@@ -1158,6 +1158,10 @@ void iopCheckProp(const StringData* /* propName */) {
   iopUnhandled("CheckProp");
 }
 
+void iopSetImplicitContextByIndex() {
+  iopUnhandled("SetImplicitContextByIndex");
+}
+
 void iopInitProp(const StringData* /* propName */, InitPropOp /* propOp */) {
   iopUnhandled("InitProp");
 }

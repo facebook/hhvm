@@ -411,12 +411,13 @@ void cgReqRetranslate(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgReqRetranslateOpt(IRLS& env, const IRInstruction* inst) {
+  assertx(inst->marker().sk().funcEntry());
+  assertx(inst->marker().bcSPOff() == SBInvOffset{0});
   auto& v = vmain(env);
-  v << copy{v.cns(inst->marker().sk().offset()), rarg(0)};
-  v << copy{v.cns(inst->marker().bcSPOff().offset), rarg(1)};
+  v << copy{v.cns(inst->marker().sk().entryOffset()), rarg(0)};
   v << jmpi{
     tc::ustubs().handleRetranslateOpt,
-    leave_trace_regs() | arg_regs(2)
+    leave_trace_regs() | arg_regs(1)
   };
 }
 

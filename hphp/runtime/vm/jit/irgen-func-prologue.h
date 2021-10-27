@@ -60,6 +60,8 @@ void emitInitFuncLocals(IRGS& env, const Func* callee, SSATmp* prologueCtx);
 void emitFuncPrologue(IRGS& env, const Func* callee, uint32_t argc,
                       TransID transID);
 
+void emitFuncEntry(IRGS& env);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}}

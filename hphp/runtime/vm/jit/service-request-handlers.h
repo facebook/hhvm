@@ -35,6 +35,7 @@ namespace jit { namespace svcreq {
  * The smash targets of a translate are stored in SrcRec::m_incomingBranches.
  */
 TCA handleTranslate(Offset bcOff, SBInvOffset spOff) noexcept;
+TCA handleTranslateFuncEntry(Offset bcOff) noexcept;
 
 /*
  * Handle a request to retranslate the code at the given current location.
@@ -44,6 +45,7 @@ TCA handleTranslate(Offset bcOff, SBInvOffset spOff) noexcept;
  * The smash targets of a retranslate are stored in SrcRec::m_tailFallbackJumps.
  */
 TCA handleRetranslate(Offset bcOff, SBInvOffset spOff) noexcept;
+TCA handleRetranslateFuncEntry(Offset bcOff) noexcept;
 
 /*
  * Handle a request to retranslate the current function, leveraging profiling
@@ -51,7 +53,7 @@ TCA handleRetranslate(Offset bcOff, SBInvOffset spOff) noexcept;
  * PGO is enabled. Execution will resume at `bcOff' whether or not retranslation
  * is successful.
  */
-TCA handleRetranslateOpt(Offset bcOff, SBInvOffset spOff) noexcept;
+TCA handleRetranslateOpt(Offset bcOff) noexcept;
 
 /*
  * Handle a situation where the translated code in the TC executes a return
@@ -74,7 +76,11 @@ TCA handleBindCall(TCA toSmash, Func* func, int32_t numArgs);
  * Flags used by handleResume().
  */
 struct ResumeFlags {
-  ResumeFlags() : m_noTranslate{false}, m_interpFirst{false} {}
+  ResumeFlags()
+    : m_noTranslate{false}
+    , m_interpFirst{false}
+    , m_funcEntry{false}
+  {}
 
   /*
    * If `noTranslate` is true, no attempt to translate code will be made.
@@ -100,6 +106,16 @@ struct ResumeFlags {
     return copy;
   }
 
+  /*
+   * If `funcEntry` is true, execution will be resumed at the FuncEntry location
+   * of the current vmpc().
+   */
+  ResumeFlags funcEntry(bool funcEntry = true) const {
+    auto copy = *this;
+    copy.m_funcEntry = funcEntry;
+    return copy;
+  }
+
   std::string show() const;
 
   union {
@@ -107,6 +123,7 @@ struct ResumeFlags {
     struct {
       bool m_noTranslate : 1;
       bool m_interpFirst : 1;
+      bool m_funcEntry : 1;
     };
   };
 };
@@ -125,6 +142,6 @@ TCA handleResume(ResumeFlags flags);
 /*
  * Look up (or create) the translation for the body of func.
  */
-TCA getFuncBody(const Func* func);
+TCA getFuncEntry(const Func* func);
 
 }}}

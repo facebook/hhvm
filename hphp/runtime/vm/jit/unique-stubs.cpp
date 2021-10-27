@@ -488,7 +488,9 @@ TCA emitFCallHelperThunkImpl(CodeBlock& main, CodeBlock& cold,
     // not synced yet, but that's fine as resumeHelper operates on TLS data.
     v << stubtophp{};
     v << jmpi{
-      translate ? us.resumeHelper : us.resumeHelperNoTranslate,
+      translate
+        ? us.resumeHelperFuncEntry
+        : us.resumeHelperNoTranslateFuncEntry,
       RegSet(rvmtl())
     };
   });
@@ -725,14 +727,50 @@ TCA emitHandleServiceRequest(CodeBlock& cb, DataBlock& data, Handler handler) {
   });
 }
 
+template<class Handler>
+TCA emitHandleServiceRequestFE(CodeBlock& cb, DataBlock& data,
+                               Handler handler) {
+  alignCacheLine(cb);
+
+  return vwrap(cb, data, [&] (Vout& v) {
+    auto const bcOff = v.makeReg();
+    v << copy{rarg(0), bcOff};
+
+    storeVmfp(v);
+
+    auto const ret = v.makeReg();
+    v << vcall{
+      CallSpec::direct(handler),
+      v.makeVcallArgs({{bcOff}}),
+      v.makeTuple({ret}),
+      Fixup::none(),
+      DestType::SSA
+    };
+
+    // We did not initialize rvmsp(), but it might be needed by the next
+    // translation. Luckily, handleRetranslateOpt() synced vmsp(), so load
+    // it from there.
+    loadVmsp(v);
+
+    v << jmpr{ret, vm_regs_with_sp()};
+  });
+}
+
 TCA emitHandleTranslate(CodeBlock& cb, DataBlock& data) {
   return emitHandleServiceRequest(cb, data, svcreq::handleTranslate);
+}
+TCA emitHandleTranslateFE(CodeBlock& cb, DataBlock& data) {
+  return emitHandleServiceRequestFE(cb, data, svcreq::handleTranslateFuncEntry);
 }
 TCA emitHandleRetranslate(CodeBlock& cb, DataBlock& data) {
   return emitHandleServiceRequest(cb, data, svcreq::handleRetranslate);
 }
+TCA emitHandleRetranslateFE(CodeBlock& cb, DataBlock& data) {
+  return emitHandleServiceRequestFE(
+    cb, data, svcreq::handleRetranslateFuncEntry);
+}
 TCA emitHandleRetranslateOpt(CodeBlock& cb, DataBlock& data) {
-  return emitHandleServiceRequest(cb, data, svcreq::handleRetranslateOpt);
+  return emitHandleServiceRequestFE(cb, data, svcreq::handleRetranslateOpt);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -814,12 +852,20 @@ TCA emitResumeHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us,
 
   us.resumeHelper = rh.resumeHelper = emitOne(
     svcreq::ResumeFlags(), false);
+  us.resumeHelperFuncEntry = emitOne(
+    svcreq::ResumeFlags().funcEntry(), false);
   us.resumeHelperNoTranslate = emitOne(
     svcreq::ResumeFlags().noTranslate(), false);
+  us.resumeHelperNoTranslateFuncEntry = emitOne(
+    svcreq::ResumeFlags().noTranslate().funcEntry(), false);
   us.interpHelper = emitOne(
      svcreq::ResumeFlags().interpFirst(), true);
+  us.interpHelperFuncEntry = emitOne(
+     svcreq::ResumeFlags().interpFirst().funcEntry(), true);
   us.interpHelperNoTranslate = emitOne(
      svcreq::ResumeFlags().noTranslate().interpFirst(), true);
+  us.interpHelperNoTranslateFuncEntry = emitOne(
+     svcreq::ResumeFlags().noTranslate().interpFirst().funcEntry(), true);
 
   return handleResume;
 }
@@ -1260,7 +1306,9 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
   ADD(asyncGenRetHelper, hotView(), emitInterpGenRet<true>(hot(), data));
 
   ADD(handleTranslate, view, emitHandleTranslate(cold, data));
+  ADD(handleTranslateFuncEntry, view, emitHandleTranslateFE(cold, data));
   ADD(handleRetranslate, view, emitHandleRetranslate(cold, data));
+  ADD(handleRetranslateFuncEntry, view, emitHandleRetranslateFE(cold, data));
   ADD(handleRetranslateOpt, view, emitHandleRetranslateOpt(cold, data));
 
   ADD(immutableBindCallStub, view, emitBindCallStub(cold, data));
@@ -1384,21 +1432,29 @@ RegSet interp_one_cf_regs() {
 }
 
 void emitInterpReq(Vout& v, SrcKey sk, SBInvOffset spOff) {
+  auto const helper = sk.funcEntry()
+    ? tc::ustubs().interpHelperFuncEntry
+    : tc::ustubs().interpHelper;
+  if (sk.funcEntry()) sk.advance();
   if (sk.resumeMode() == ResumeMode::None) {
     auto const frameRelOff = spOff.offset + sk.func()->numSlotsInFrame();
     v << lea{rvmfp()[-cellsToBytes(frameRelOff)], rvmsp()};
   }
   v << store{v.cns(sk.pc()), rvmtl()[rds::kVmpcOff]};
-  v << jmpi{tc::ustubs().interpHelper, RegSet{rvmsp()}};
+  v << jmpi{helper, RegSet{rvmsp()}};
 }
 
 void emitInterpReqNoTranslate(Vout& v, SrcKey sk, SBInvOffset spOff) {
+  auto const helper = sk.funcEntry()
+    ? tc::ustubs().interpHelperNoTranslateFuncEntry
+    : tc::ustubs().interpHelperNoTranslate;
+  if (sk.funcEntry()) sk.advance();
   if (sk.resumeMode() == ResumeMode::None) {
     auto const frameRelOff = spOff.offset + sk.func()->numSlotsInFrame();
     v << lea{rvmfp()[-cellsToBytes(frameRelOff)], rvmsp()};
   }
   v << store{v.cns(sk.pc()), rvmtl()[rds::kVmpcOff]};
-  v << jmpi{tc::ustubs().interpHelperNoTranslate, RegSet{rvmsp()}};
+  v << jmpi{helper, RegSet{rvmsp()}};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

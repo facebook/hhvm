@@ -344,7 +344,7 @@ struct RegionDesc::Block {
 
 private:
   void checkInstructions() const;
-  void checkInstruction(Op op) const;
+  void checkInstruction(SrcKey sk) const;
   void checkMetadata() const;
 
 private:

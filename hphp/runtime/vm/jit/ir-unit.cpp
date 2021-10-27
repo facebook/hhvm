@@ -151,8 +151,9 @@ static bool endsUnitAtSrcKey(const Block* block, SrcKey sk) {
     // A ReqBindJmp ends a unit and it jumps to the next instruction to
     // execute.
     case ReqBindJmp: {
-      auto destOffset = inst.extra<ReqBindJmp>()->target.offset();
-      return sk.succOffsets().count(destOffset);
+      auto destSk = inst.extra<ReqBindJmp>()->target;
+      if (destSk.funcEntry()) return false;
+      return sk.succOffsets().count(destSk.offset());
     }
 
     default:

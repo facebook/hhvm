@@ -168,20 +168,7 @@ bool blockHasUnprocessedPred(
  * hold, emits such type assertions.
  */
 void emitEntryAssertions(irgen::IRGS& irgs, const Func* func, SrcKey sk) {
-  if (!func->isEntry(sk.offset())) return;
-
-  // If we're at the Func main entry point, we can't assume anything if there
-  // are DV initializers, because they can run arbitrary code before they get
-  // here (and they do, in some hhas-based builtins, and they may not even get
-  // to the Func main entry point).
-  if (sk.offset() == 0) {
-    // The assertions inserted here are only valid if the first bytecode
-    // instruction does not have unprocessed predecessors.  This invariant is
-    // ensured by the emitter using an EntryNop instruction when necessary.
-    for (auto& pinfo : func->params()) {
-      if (pinfo.hasDefaultValue()) return;
-    }
-  }
+  if (!sk.funcEntry()) return;
 
   if (func->isClosureBody()) {
     // In a closure, non-parameter locals can have types other than Uninit
@@ -229,7 +216,6 @@ void emitGuards(irgen::IRGS& irgs,
                 const RegionDesc::Block& block,
                 bool isEntry) {
   auto const sk = block.start();
-  auto const bcOff = sk.offset();
   auto& typePreConditions = block.typePreConditions();
 
   if (isEntry) {
@@ -256,7 +242,7 @@ void emitGuards(irgen::IRGS& irgs,
     if (irgs.context.kind == TransKind::Profile) {
       assertx(irgs.context.transIDs.size() == 1);
       auto const transID = *irgs.context.transIDs.begin();
-      if (block.func()->isEntry(bcOff) && !mcgen::retranslateAllEnabled()) {
+      if (sk.funcEntry() && !mcgen::retranslateAllEnabled()) {
         irgen::checkCold(irgs, transID);
       } else {
         irgen::incProfCounter(irgs, transID);
@@ -387,6 +373,8 @@ Optional<unsigned> scheduleSurprise(const RegionDesc::Block& block) {
   Optional<unsigned> checkIdx;
   auto sk = block.start();
   for (unsigned i = 0; i < block.length(); ++i, sk.advance(block.func())) {
+    if (sk.funcEntry()) continue;
+
     auto const backwards = [&]{
       auto const offsets = instrJumpOffsets(sk.pc());
       return std::any_of(
@@ -573,10 +561,10 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
       // to be translated.
       if (lastInstr) {
         if (region.isExit(blockId)) {
-          if (!inlining || !isReturnish(inst.op())) {
+          if (!inlining || inst.source.funcEntry() || !isReturnish(inst.op())) {
             irgen::endRegion(irgs);
           }
-        } else if (instrAllowsFallThru(inst.op())) {
+        } else if (inst.source.funcEntry() || instrAllowsFallThru(inst.op())) {
           irgen::endBlock(irgs, inst.nextSk());
         }
       }

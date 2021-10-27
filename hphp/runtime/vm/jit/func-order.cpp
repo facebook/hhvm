@@ -90,7 +90,7 @@ createCallGraphFromProfCode(jit::hash_map<hfsort::TargetId, FuncId>& funcID) {
       const auto trec = pd->transRec(transId);
       assertx(trec->kind() == TransKind::Profile);
       size += trec->asmSize();
-      if (trec->srcKey().offset() == 0) {
+      if (trec->srcKey().funcEntry()) {
         profCount += pd->transCounter(transId);
       }
     }

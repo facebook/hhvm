@@ -100,7 +100,7 @@ RegionDescPtr selectHotTrace(HotTransContext& ctx) {
     // DV funclets).
     if (prevId != kInvalidTransID) {
       auto const sk = rec->srcKey();
-      if (sk.offset() == 0) {
+      if (!sk.funcEntry() && sk.offset() == 0) {
         FTRACE(2, "selectHotTrace: breaking region because reached the main "
                "function body entry at Translation {} (BC offset 0)\n",
                tid);

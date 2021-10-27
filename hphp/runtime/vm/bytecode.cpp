@@ -914,12 +914,13 @@ void enterVMAtFunc(ActRec* enterFnAr, uint32_t numArgsInclUnpack) {
   assertx(vmfp()->func()->contains(vmpc()));
 
   if (RID().getJit() && !RID().getJitFolding()) {
-    jit::TCA start = jit::svcreq::getFuncBody(enterFnAr->func());
+    jit::TCA start = jit::svcreq::getFuncEntry(enterFnAr->func());
     assert_flog(jit::tc::isValidCodeAddress(start),
                 "start = {} ; func = {} ({})\n",
                 start, enterFnAr->func(), enterFnAr->func()->fullName());
     jit::enterTC(start);
   } else {
+    funcEntry();
     dispatch();
   }
 }
@@ -3414,6 +3415,9 @@ OPTBLD_INLINE void iopUnsetG() {
   vmStack().popC();
 }
 
+void funcEntry() {
+}
+
 bool doFCall(CallFlags callFlags, const Func* func, uint32_t numArgsInclUnpack,
              void* ctx, TCA retAddr) {
   TRACE(3, "FCall: pc %p func %p\n", vmpc(), vmfp()->func()->entry());
@@ -3535,8 +3539,23 @@ TCA fcallImpl(bool retToJit, PC origpc, PC& pc, const FCallArgs& fca,
     vmfp()->providedCoeffectsForCall(isCtor)
   );
 
-  doFCall(callFlags, func, numArgsInclUnpack, takeCtx(std::forward<Ctx>(ctx)),
-          jit::tc::ustubs().retHelper);
+  auto const notIntercepted = doFCall(
+    callFlags, func, numArgsInclUnpack, takeCtx(std::forward<Ctx>(ctx)),
+    jit::tc::ustubs().retHelper);
+
+  if (UNLIKELY(!notIntercepted)) {
+    // The callee was intercepted and should be skipped.
+    pc = vmpc();
+    return nullptr;
+  }
+
+  if (retToJit) {
+    // Let JIT handle FuncEntry if possible.
+    pc = vmpc();
+    return jit::tc::ustubs().resumeHelperFuncEntry;
+  }
+
+  funcEntry();
   pc = vmpc();
   return nullptr;
 }

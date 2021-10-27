@@ -200,9 +200,9 @@ void publishOptFuncCode(FuncMetaInfo& info,
       translator->publishCodeInternal();
       auto const tca = translator->entry();
       if (publishedSet) publishedSet->insert(tca);
-      if (translator->sk == SrcKey{func, 0, ResumeMode::None} &&
+      if (translator->sk == SrcKey{func, 0, SrcKey::FuncEntryTag{}} &&
           func->numRequiredParams() == func->numNonVariadicParams()) {
-        func->setFuncBody(tca);
+        func->setFuncEntry(tca);
       }
     } else {
       // If we failed to emit the prologue (e.g. the TC filled up), redirect
@@ -418,7 +418,7 @@ void invalidateFuncsProfSrcKeys() {
     invalidateFuncProfSrcKeys(func);
 
     // clear the func body and prologues
-    const_cast<Func*>(func)->resetFuncBody();
+    const_cast<Func*>(func)->resetFuncEntry();
     auto const numPrologues = func->numPrologues();
     for (int p = 0; p < numPrologues; p++) {
       const_cast<Func*>(func)->resetPrologue(p);
@@ -656,7 +656,7 @@ void RegionTranslator::gen() {
   // can cause variations in the size of code.prof.
   if (kind == TransKind::Profile &&
       !profData()->profiling(sk.funcID()) &&
-      !sk.func()->isEntry(sk.offset())) {
+      !sk.funcEntry()) {
     return;
   }
   if (!checkLimit(kind, srcRec->numTrans())) return fail();

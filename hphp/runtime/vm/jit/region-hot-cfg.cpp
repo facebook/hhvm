@@ -318,7 +318,6 @@ private:
 
     // Now check if we should add any successor to the priority queue.
     auto const termSk = rec->lastSrcKey();
-    auto const termOp = termSk.op();
     if (!breaksRegion(termSk)) {
       auto srcBlockId = tidRegion->blocks().back().get()->id();
 
@@ -326,7 +325,7 @@ private:
 
       // We have special profiling and logic to decide which arcs from a Switch
       // are eligible for inclusion in the region.
-      if (termOp == OpSwitch) {
+      if (!termSk.funcEntry() && termSk.op() == OpSwitch) {
         trimSwitchArcs(srcBlockId, *tidRegion, arcs);
       }
 

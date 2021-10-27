@@ -519,7 +519,12 @@ bool shouldInline(const irgen::IRGS& irgs,
     }
     auto const count = std::count_if(
       std::begin(region.blocks()), std::end(region.blocks()),
-      [](auto const b) { return !b->empty() && b->last().op() == OpNativeImpl; }
+      [](auto const b) {
+        return
+          !b->empty() &&
+          !b->last().funcEntry() &&
+          b->last().op() == OpNativeImpl;
+      }
     );
     switch (count) {
       case 0:  return refuse("inlinable CPP builtin without a NativeImpl");
@@ -535,7 +540,7 @@ bool shouldInline(const irgen::IRGS& irgs,
     sk = block->start();
 
     for (auto i = 0, n = block->length(); i < n; ++i, sk.advance()) {
-      auto op = sk.op();
+      if (sk.funcEntry()) continue;
 
       // We don't allow inlined functions in the region.  The client is
       // expected to disable inlining for the region it gives us to peek.
@@ -544,7 +549,7 @@ bool shouldInline(const irgen::IRGS& irgs,
       }
 
       // Detect that the region contains a return.
-      if (isReturnish(op)) {
+      if (isReturnish(sk.op())) {
         hasRet = true;
       }
 
@@ -552,7 +557,7 @@ bool shouldInline(const irgen::IRGS& irgs,
       // if no returns appeared in the region then we likely suspend on all
       // calls to the callee.
       if (block->profTransID() != kInvalidTransID) {
-        if (region.isExit(block->id()) && i + 1 == n && isAwaitish(op)) {
+        if (region.isExit(block->id()) && i + 1 == n && isAwaitish(sk.op())) {
           hasRet = true;
         }
       }
@@ -617,7 +622,7 @@ RegionDescPtr selectCalleeTracelet(const Func* callee,
   // Set up the RegionContext for the tracelet selector.
   auto const entryOff = callee->getEntryForNumArgs(argTypes.size());
   RegionContext ctx{
-    SrcKey { callee, entryOff, ResumeMode::None },
+    SrcKey { callee, entryOff, SrcKey::FuncEntryTag {} },
     SBInvOffset{0},
   };
 
@@ -657,7 +662,7 @@ TransIDSet findTransIDsForCallee(const ProfData* profData, const Func* callee,
   auto const idvec = profData->funcProfTransIDs(callee->getFuncId());
 
   auto const offset = callee->getEntryForNumArgs(argTypes.size());
-  auto const sk = SrcKey { callee, offset, ResumeMode::None };
+  auto const sk = SrcKey { callee, offset, SrcKey::FuncEntryTag {} };
   TransIDSet ret;
   FTRACE(2, "findTransIDForCallee: offset={}\n", offset);
   for (auto const id : idvec) {

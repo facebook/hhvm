@@ -325,9 +325,11 @@ void beginInlining(IRGS& env,
     fp(env)
   );
 
-  assertx(startSk.func() == target &&
-          startSk.offset() == target->getEntryForNumArgs(numArgsInclUnpack) &&
-          startSk.resumeMode() == ResumeMode::None);
+  assertx(
+    startSk.funcEntry() &&
+    startSk.func() == target &&
+    startSk.entryOffset() == target->getEntryForNumArgs(numArgsInclUnpack)
+  );
 
   env.inlineState.depth++;
   env.inlineState.costStack.emplace_back(env.inlineState.cost);

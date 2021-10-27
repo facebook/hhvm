@@ -1030,9 +1030,9 @@ public:
   /*
    * Get, set and reset the function body code pointer.
    */
-  unsigned char* getFuncBody() const;
-  void setFuncBody(unsigned char* fb);
-  void resetFuncBody();
+  jit::TCA getFuncEntry() const;
+  void setFuncEntry(jit::TCA funcEntry);
+  void resetFuncEntry();
 
   /*
    * Get and set the `index'-th function prologue.
@@ -1676,7 +1676,7 @@ private:
   // For asserts only.
   int m_magic;
 #endif
-  AtomicLowPtr<uint8_t> m_funcBody{nullptr};
+  AtomicLowPtr<uint8_t> m_funcEntry{nullptr};
 #ifndef USE_LOWPTR
   FuncId m_funcId{FuncId::Invalid};
 #endif

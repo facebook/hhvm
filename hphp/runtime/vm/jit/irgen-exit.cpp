@@ -28,6 +28,7 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 
 bool branchesToItself(SrcKey sk) {
+  if (sk.funcEntry()) return false;
   auto const pc = sk.pc();
   auto const op = peek_op(pc);
   if (!instrIsControlFlow(op)) return false;
@@ -103,6 +104,7 @@ Block* makeExit(IRGS& env, SrcKey targetSk) {
 }
 
 Block* makeExitSlow(IRGS& env) {
+  assertx(!curSrcKey(env).funcEntry());
   auto const exit = defBlock(env, Block::Hint::Unlikely);
   BlockPusher bp(*env.irb, makeMarker(env, curSrcKey(env)), exit);
   interpOne(env);

@@ -143,7 +143,9 @@ SSATmp* genInstruction(IRGS& env, IRInstruction* inst) {
    */
   auto const shouldStressEagerSync =
     debug &&
-    inst->maySyncVMRegsWithSources() && !inst->marker().prologue() &&
+    inst->maySyncVMRegsWithSources() &&
+    !inst->marker().prologue() &&
+    !inst->marker().sk().funcEntry() &&
     !inst->is(CallBuiltin, Call, ContEnter) &&
     (env.unit.numInsts() % 3 == 0);
 
@@ -228,7 +230,9 @@ void prepareEntry(IRGS& env) {
 
 void endRegion(IRGS& env) {
   auto const curSk  = curSrcKey(env);
-  if (!instrAllowsFallThru(curSk.op())) return; // nothing to do here
+  if (!curSk.funcEntry() && !instrAllowsFallThru(curSk.op())) {
+    return; // nothing to do here
+  }
 
   auto const nextSk = curSk.advanced(curFunc(env));
   endRegion(env, nextSk);

@@ -454,6 +454,7 @@ dynamic getSrcKey(const SrcKey& sk) {
   return dynamic::object("func", sk.func()->name()->slice())
                         ("unit", unit->origFilepath()->slice())
                         ("prologue", sk.prologue())
+                        ("funcEntry", sk.funcEntry())
                         ("offset", sk.printableOffset())
                         ("resumeMode", resumeModeShortName(sk.resumeMode()))
                         ("hasThis", sk.hasThis())

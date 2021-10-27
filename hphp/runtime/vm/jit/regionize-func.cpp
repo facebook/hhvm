@@ -184,18 +184,25 @@ void sortRegions(RegionVec& regions, const Func* /*func*/, const TransCFG& cfg,
   // pick the one with the largest profile weight.
   RegionDescPtr entryRegion = nullptr;
   int64_t maxEntryWeight = -1;
-  auto lowestOffset = kInvalidOffset;
+  auto lowestSk = SrcKey {};
   for (const auto& pair : regionToTransIds) {
     auto r    = pair.first;
     auto& tids = pair.second;
     auto const firstTid = tids[0];
-    auto const firstOffset = profData->transRec(firstTid)->srcKey().offset();
+    auto const firstSk = profData->transRec(firstTid)->srcKey();
     auto const weight = cfg.weight(firstTid);
-    if (lowestOffset == kInvalidOffset || firstOffset < lowestOffset ||
-        (firstOffset == lowestOffset && weight > maxEntryWeight)) {
+    auto const isBetter = [&]{
+      if (!lowestSk.valid()) return true;
+      if (firstSk == lowestSk) return weight > maxEntryWeight;
+      if (firstSk.funcEntry() && !lowestSk.funcEntry()) return true;
+      if (!firstSk.funcEntry() && lowestSk.funcEntry()) return false;
+      if (!firstSk.funcEntry()) return firstSk.offset() < lowestSk.offset();
+      return firstSk.entryOffset() < lowestSk.entryOffset();
+    }();
+    if (isBetter) {
       entryRegion = r;
       maxEntryWeight = weight;
-      lowestOffset = firstOffset;
+      lowestSk = firstSk;
     }
   }
 
@@ -314,7 +321,11 @@ RegionVec regionizeFunc(const Func* func, std::string& transCFGAnnot) {
           regionMode == PGORegionMode::HotCFG) {
         auto sk1 = profData->transRec(tid1)->srcKey();
         auto sk2 = profData->transRec(tid2)->srcKey();
-        if (sk1 != sk2) return sk1.offset() < sk2.offset();
+        if (sk1 != sk2) {
+          if (sk2.funcEntry()) return false;
+          if (sk1.funcEntry()) return true;
+          return sk1.offset() < sk2.offset();
+        }
       }
       if (cfg.weight(tid1) != cfg.weight(tid2)) {
         return cfg.weight(tid1) > cfg.weight(tid2);

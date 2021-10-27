@@ -701,7 +701,7 @@ RegionDesc::Block::Block(BlockId     id,
 }
 
 void RegionDesc::Block::addInstruction() {
-  if (m_length > 0) checkInstruction(last().op());
+  if (m_length > 0) checkInstruction(last());
   assertx((m_last.valid()) == (m_length != 0));
 
   ++m_length;
@@ -760,19 +760,21 @@ void RegionDesc::Block::checkInstructions() const {
   auto sk = start();
 
   for (int i = 1; i < length(); ++i) {
-    if (i != length() - 1) checkInstruction(sk.op());
+    if (i != length() - 1) checkInstruction(sk);
     sk.advance(func());
   }
   assertx(sk == m_last);
 }
 
-void RegionDesc::Block::checkInstruction(Op op) const {
-  if (instrFlags(op) & TF) {
+void RegionDesc::Block::checkInstruction(SrcKey sk) const {
+  if (sk.funcEntry()) return;
+
+  if (instrFlags(sk.op()) & TF) {
     FTRACE(1, "Bad block: {}\n", show(*this));
     assertx(!"Block may not contain non-fallthrough instruction unless "
            "they are last");
   }
-  if (instrIsNonCallControlFlow(op)) {
+  if (instrIsNonCallControlFlow(sk.op())) {
     FTRACE(1, "Bad block: {}\n", show(*this));
     assertx(!"Block may not contain control flow instructions unless "
            "they are last");
@@ -953,6 +955,7 @@ const StaticString
   s_rewind("rewind");
 
 bool breaksRegion(SrcKey sk) {
+  if (sk.funcEntry()) return false;
   switch (sk.op()) {
     case Op::SSwitch:
     case Op::CreateCont:

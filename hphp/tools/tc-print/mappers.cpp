@@ -30,7 +30,8 @@ namespace HPHP { namespace jit {
 
 #define EXT_OPCODES \
   EXT_OP(TraceletGuard) \
-  EXT_OP(FuncPrologue)
+  EXT_OP(FuncPrologue) \
+  EXT_OP(FuncEntry)
 
 enum ExtOp {
   ExtOpStart = Op_count + 1,
@@ -126,6 +127,7 @@ ExtOpcodeResult getExtOpcode(TCA addr, const TransRec* trec) {
     if ((bcMap[i].aStart       <= addr && bcMap[i+1].aStart       > addr) ||
         (bcMap[i].acoldStart   <= addr && bcMap[i+1].acoldStart   > addr) ||
         (bcMap[i].afrozenStart <= addr && bcMap[i+1].afrozenStart > addr)) {
+      if (bcMap[i].sk.funcEntry()) return {true, ExtOpFuncEntry};
       auto const func = bcMap[i].sk.func();
       always_assert(func);
       return {true, (ExtOpcode)func->getOp(bcMap[i].sk.offset())};
@@ -189,6 +191,7 @@ AddrToTransFragmentMapper::extractTransFragment(TCA addr, ExtOpcode opcode) {
       tfragment.afrozenLen   = trec->afrozenLen;
       break;
 
+    case ExtOpFuncEntry:
     default:
       bool found  = false;
       size_t nele = trec->bcMapping.size() - 1;

@@ -144,7 +144,8 @@ Fixup makeFixup(const BCMarker& marker, SyncOptions sync) {
   // that may need a fixup. Let it point to the first opcode of the function.
   if (marker.prologue()) return Fixup::direct(0, marker.fixupBcSPOff());
 
-  auto const bcOff = marker.fixupBcOff();
+  auto const bcOff = marker.fixupSk().funcEntry()
+    ? marker.fixupSk().entryOffset() : marker.fixupSk().offset();
   return Fixup::direct(bcOff, marker.fixupBcSPOff());
 }
 

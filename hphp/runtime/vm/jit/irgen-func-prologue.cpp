@@ -551,11 +551,12 @@ void emitJmpFuncBody(IRGS& env, const Func* callee, uint32_t argc) {
   }
 
   // Emit the bindjmp for the function body.
+  auto const entryOffset = callee->getEntryForNumArgs(argc);
   gen(
     env,
     ReqBindJmp,
     ReqBindJmpData {
-      SrcKey { callee, callee->getEntryForNumArgs(argc), ResumeMode::None },
+      SrcKey { callee, entryOffset, SrcKey::FuncEntryTag {} },
       SBInvOffset { 0 },
       spOffBCFromIRSP(env)
     },
@@ -617,6 +618,10 @@ void emitFuncPrologue(IRGS& env, const Func* callee, uint32_t argc,
   emitSpillFrame(env, callee, argc, callFlags, prologueCtx);
   emitInitFuncLocals(env, callee, prologueCtx);
   emitJmpFuncBody(env, callee, argc);
+}
+
+void emitFuncEntry(IRGS& env) {
+  assertx(curSrcKey(env).funcEntry());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

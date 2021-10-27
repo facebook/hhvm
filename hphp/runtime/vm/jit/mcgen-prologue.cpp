@@ -122,7 +122,7 @@ bool regeneratePrologue(TransID prologueTransId, tc::FuncMetaInfo& info) {
   if (nArgs < func->numNonVariadicParams()) {
     auto paramInfo = func->params()[nArgs];
     if (paramInfo.hasDefaultValue()) {
-      SrcKey funcletSK(func, paramInfo.funcletOff, ResumeMode::None);
+      SrcKey funcletSK(func, paramInfo.funcletOff, SrcKey::FuncEntryTag {});
       if (!profData()->optimized(funcletSK)) {
         auto funcletTransId = profData()->dvFuncletTransId(funcletSK);
         if (funcletTransId != kInvalidTransID) {

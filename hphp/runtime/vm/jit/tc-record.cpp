@@ -372,6 +372,7 @@ static void logFrame(const Vunit& unit, const size_t frame) {
   ent.setStr("version", "6");
   ent.setStr("trans_kind", show(unit.context->kind));
   ent.setStr("prologue", sk.prologue() ? "true" : "false");
+  ent.setStr("func_entry", sk.funcEntry() ? "true" : "false");
   ent.setStr("has_this", sk.hasThis() ? "true" : "false");
   ent.setStr("resumed", sk.resumeMode() != ResumeMode::None
                         ? "true" : "false");

@@ -766,12 +766,12 @@ Func::findEH(const Container& ehtab, Offset o) {
 ///////////////////////////////////////////////////////////////////////////////
 // JIT data.
 
-inline unsigned char* Func::getFuncBody() const {
-  return m_funcBody;
+inline jit::TCA Func::getFuncEntry() const {
+  return m_funcEntry;
 }
 
-inline void Func::setFuncBody(unsigned char* fb) {
-  m_funcBody = fb;
+inline void Func::setFuncEntry(jit::TCA funcEntry) {
+  m_funcEntry = funcEntry;
 }
 
 inline uint8_t* Func::getPrologue(int index) const {

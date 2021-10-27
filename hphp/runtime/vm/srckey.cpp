@@ -24,6 +24,7 @@ namespace HPHP {
 
 std::string SrcKey::showInst() const {
   if (prologue()) return "Prologue";
+  if (funcEntry()) return "FuncEntry";
   auto const f = func();
   return instrToString(f->at(offset()), f);
 }
@@ -35,25 +36,27 @@ std::string show(SrcKey sk) {
   if (unit->origFilepath()->data() && unit->origFilepath()->size()) {
     filepath = unit->origFilepath()->data();
   }
-  return folly::sformat("{}:{} in {}(id 0x{:#x})@{: >6}{}{}{}",
+  return folly::sformat("{}:{} in {}(id 0x{:#x})@{: >6}{}{}{}{}",
                         filepath, sk.lineNumber(),
                         func->fullName()->data(),
                         sk.funcID().toInt(), sk.printableOffset(),
                         resumeModeShortName(sk.resumeMode()),
                         sk.hasThis()  ? "t" : "",
-                        sk.prologue() ? "p" : "");
+                        sk.prologue() ? "p" : "",
+                        sk.funcEntry() ? "e" : "");
 }
 
 std::string showShort(SrcKey sk) {
   if (!sk.valid()) return "<invalid SrcKey>";
   return folly::sformat(
-    "{}(id {:#x})@{}{}{}{}",
+    "{}(id {:#x})@{}{}{}{}{}",
     sk.func()->fullName(),
     sk.funcID(),
     sk.printableOffset(),
     resumeModeShortName(sk.resumeMode()),
     sk.hasThis()  ? "t" : "",
-    sk.prologue() ? "p" : ""
+    sk.prologue() ? "p" : "",
+    sk.funcEntry() ? "e" : ""
   );
 }
 

@@ -327,6 +327,7 @@ void OfflineTransData::printTransRec(TransID transId,
     "  src.funcName = {}\n"
     "  src.resumeMode = {}\n"
     "  src.prologue = {}\n"
+    "  src.funcEntry = {}\n"
     "  src.bcStartOffset = {}\n"
     "  src.guards = {}\n",
     tRec->id,
@@ -335,6 +336,7 @@ void OfflineTransData::printTransRec(TransID transId,
     tRec->funcName,
     static_cast<int32_t>(tRec->src.resumeMode()),
     tRec->src.prologue(),
+    tRec->src.funcEntry(),
     tRec->src.printableOffset(),
     tRec->guards.size());
 

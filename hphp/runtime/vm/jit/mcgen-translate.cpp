@@ -246,7 +246,7 @@ void createSrcRecs(const Func* func) {
   auto const profData = globalProfData();
 
   auto create_one = [&] (Offset off) {
-    auto const sk = SrcKey { func, off, ResumeMode::None };
+    auto const sk = SrcKey { func, off, SrcKey::FuncEntryTag {} };
     if (off == 0 ||
         profData->dvFuncletTransId(sk) != kInvalidTransID) {
       tc::createSrcRec(sk, SBInvOffset{0});

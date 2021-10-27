@@ -143,14 +143,16 @@ bool consumeInput(Env& env, const InputInfo& input) {
  * Add the current instruction to the region.
  */
 void addInstruction(Env& env) {
-  auto prevBlocksIt = env.prevBlocks.find(env.sk.offset());
-  if (prevBlocksIt != env.prevBlocks.end()) {
-    FTRACE(2, "selectTracelet adding new block at {} after:\n{}\n",
-           showShort(env.sk), show(*env.curBlock));
-    always_assert(env.sk.func() == curFunc(env));
-    env.curBlock = env.region->addBlock(env.sk, 0, curSpOffset(env));
-    for (auto block : prevBlocksIt->second) {
-      env.region->addArc(block->id(), env.curBlock->id());
+  if (!env.sk.funcEntry()) {
+    auto prevBlocksIt = env.prevBlocks.find(env.sk.offset());
+    if (prevBlocksIt != env.prevBlocks.end()) {
+      FTRACE(2, "selectTracelet adding new block at {} after:\n{}\n",
+             showShort(env.sk), show(*env.curBlock));
+      always_assert(env.sk.func() == curFunc(env));
+      env.curBlock = env.region->addBlock(env.sk, 0, curSpOffset(env));
+      for (auto block : prevBlocksIt->second) {
+        env.region->addArc(block->id(), env.curBlock->id());
+      }
     }
   }
 
@@ -184,6 +186,11 @@ bool prepareInstruction(Env& env) {
   env.inst.~NormalizedInstruction();
   new (&env.inst) NormalizedInstruction(env.sk, curUnit(env));
   irgen::prepareForNextHHBC(env.irgs, env.sk);
+
+  if (env.sk.funcEntry()) {
+    addInstruction(env);
+    return true;
+  }
 
   auto inputInfos = getInputs(env.inst, env.irgs.irb->fs().bcSPOff());
   for (auto const loc : irgen::guardsForBespoke(env.irgs, env.sk)) {
@@ -261,6 +268,9 @@ bool prepareInstruction(Env& env) {
 }
 
 bool traceThroughJmp(Env& env) {
+  // Func entry is not a jmp.
+  if (env.sk.funcEntry()) return false;
+
   // We only trace through unconditional jumps and conditional jumps with const
   // inputs while inlining.
   if (!isUnconditionalJmp(env.inst.op()) &&
@@ -442,12 +452,15 @@ void truncateLiterals(Env& env) {
   auto endSk = sk;
   auto func = lastBlock.func();
   for (int i = 0, len = lastBlock.length(); i < len; ++i, sk.advance(func)) {
-    auto const op = sk.op();
-    if (!isLiteral(op) && !isThisSelfOrParent(op) && !isTypeAssert(op)) {
-      if (i == len - 1) return;
-      endSk = sk;
+    if (!sk.funcEntry()) {
+      auto const op = sk.op();
+      if (isLiteral(op) || isThisSelfOrParent(op) || isTypeAssert(op)) continue;
     }
+
+    if (i == len - 1) return;
+    endSk = sk;
   }
+
   // Don't truncate if we've decided we want to truncate the entire block.
   // That'll mean we'll chop off the trailing N-1 opcodes, then in the next
   // region we'll select N-1 opcodes and chop off N-2 opcodes, and so forth...
@@ -529,14 +542,24 @@ RegionDescPtr form_region(Env& env) {
 
     irgen::finishHHBC(env.irgs);
 
-    if (!instrAllowsFallThru(env.inst.op())) {
+    if (!env.sk.funcEntry() && !instrAllowsFallThru(env.inst.op())) {
       FTRACE(1, "selectTracelet: tracelet broken after instruction with no "
              "fall-through {}\n", env.inst);
       break;
     }
 
     // We successfully translated the instruction, so update env.sk.
+    assertx(env.sk.func() == curFunc(env));
     env.sk.advance(env.curBlock->func());
+
+    if (env.inst.source.funcEntry()) {
+      auto const func = curFunc(env);
+      if (func->numRequiredParams() != func->numNonVariadicParams()) {
+        FTRACE(1, "selectTracelet: tracelet broken after func entry\n");
+        break;
+      }
+      continue;
+    }
 
     if (instructionEndsRegion(env)) {
       FTRACE(1, "selectTracelet: tracelet broken after {}\n", env.inst);
@@ -544,8 +567,6 @@ RegionDescPtr form_region(Env& env) {
     } else if (isIteratorOp(env.sk.op())) {
       FTRACE(1, "selectTracelet: tracelet broken before iterator op\n");
       break;
-    } else {
-      assertx(env.sk.func() == curFunc(env));
     }
 
     if (env.irgs.irb->inUnreachableState()) {

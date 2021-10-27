@@ -218,7 +218,7 @@ Func* Func::clone(Class* cls, const StringData* name) const {
 
   f->m_cloned.flag.test_and_set();
   f->initPrologues(numParams);
-  f->m_funcBody = nullptr;
+  f->m_funcEntry = nullptr;
   if (name) f->m_name = name;
   f->m_u.setCls(cls);
   f->setFullName(numParams);
@@ -530,8 +530,8 @@ void Func::resetPrologue(int numParams) {
   m_prologueTable[numParams] = stubs.fcallHelperThunk;
 }
 
-void Func::resetFuncBody() {
-  m_funcBody = nullptr;
+void Func::resetFuncEntry() {
+  m_funcEntry = nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

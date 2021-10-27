@@ -265,7 +265,9 @@ struct UniqueStubs {
    * @context:  func body
    */
   TCA resumeHelper;
+  TCA resumeHelperFuncEntry;
   TCA resumeHelperNoTranslate;
+  TCA resumeHelperNoTranslateFuncEntry;
 
   /*
    * Like resumeHelper, but interpret a basic block first to ensure we make
@@ -278,7 +280,9 @@ struct UniqueStubs {
    * @context:  func body
    */
   TCA interpHelper;
+  TCA interpHelperFuncEntry;
   TCA interpHelperNoTranslate;
+  TCA interpHelperNoTranslateFuncEntry;
 
   /*
    * Stubs for each bytecode with the CF flag, which InterpOne the bytecode and
@@ -392,6 +396,7 @@ struct UniqueStubs {
    * @context:  func body
    */
   TCA handleTranslate;
+  TCA handleTranslateFuncEntry;
 
   /*
    * Handle a request to retranslate the code at the given current location.
@@ -401,6 +406,7 @@ struct UniqueStubs {
    * @context:  func body
    */
   TCA handleRetranslate;
+  TCA handleRetranslateFuncEntry;
 
   /*
    * Handle a request to retranslate the current function in optimized mode.

@@ -611,6 +611,7 @@ dynamic getTransRec(const TransRec* tRec,
                                      ("resumeMode", resumeMode)
                                      ("hasThis", sk.hasThis())
                                      ("prologue", sk.prologue())
+                                     ("funcEntry", sk.funcEntry())
                                      ("bcStartOffset", sk.printableOffset())
                                      ("guards", guards);
 
@@ -663,9 +664,10 @@ dynamic getTrans(TransID transId) {
   for (auto const& block : tRec->blocks) {
     std::stringstream byteInfo; // TODO(T52857125) - translate to actual data
 
-    auto const sk = block.sk;
+    auto sk = block.sk;
     if (sk.valid()) {
       assertx(!sk.prologue());
+      if (sk.funcEntry()) sk.advance();
       sk.func()->prettyPrint(
         byteInfo,
         HPHP::Func::PrintOpts()
@@ -764,7 +766,7 @@ void printTrans(TransID transId) {
     const Func* curFunc = nullptr;
     for (auto& block : tRec->blocks) {
       std::stringstream byteInfo;
-      auto const sk = block.sk;
+      auto sk = block.sk;
       if (!sk.valid()) {
         byteInfo << folly::format(
           "<<< couldn't find func in {} to print bytecode range [{},{}) >>>\n",
@@ -782,6 +784,8 @@ void printTrans(TransID transId) {
       }
 
       assertx(!sk.prologue());
+      if (sk.funcEntry()) sk.advance();
+
       curFunc->prettyPrint(
         byteInfo,
         Func::PrintOpts()

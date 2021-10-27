@@ -273,10 +273,13 @@ inline void Venv::record_inline_stack(TCA addr) {
   pubFrame = pubFrame != Vframe::Root
     ? pubFrame - 1 : kRootIFrameID;
 
+  auto const sk = origin->marker().sk();
+  auto const callOff = sk.funcEntry() ? sk.entryOffset() : sk.offset();
+
   assertx(frame != pubFrame);
   assertx(origin->marker().fp()->inst()->is(BeginInlining));
   stacks.emplace_back(
-    addr, IStack{frame - 1, pubFrame, origin->marker().bcOff()});
+    addr, IStack{frame - 1, pubFrame, callOff});
 }
 
 template<class Vemit>

@@ -54,6 +54,7 @@
 #include "hphp/runtime/vm/jit/irgen-bespoke.h"
 #include "hphp/runtime/vm/jit/irgen-control.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
+#include "hphp/runtime/vm/jit/irgen-func-prologue.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/irgen-interpone.h"
 #include "hphp/runtime/vm/jit/irgen.h"
@@ -1196,6 +1197,12 @@ Type flavorToType(FlavorDesc f) {
 
 void translateInstr(irgen::IRGS& irgs, const NormalizedInstruction& ni) {
   assertx(curSrcKey(irgs) == ni.source);
+
+  if (ni.source.funcEntry()) {
+    emitFuncEntry(irgs);
+    return;
+  }
+
   auto pc = ni.pc();
   for (auto i = 0, num = instrNumPops(pc); i < num; ++i) {
     if (isFCall(ni.op()) && instrInputFlavor(pc, i) == UV) {

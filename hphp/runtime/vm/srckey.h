@@ -56,6 +56,14 @@ struct SrcKey {
    */
   enum class PrologueTag {};
 
+  /*
+   * Used for SrcKeys corresponding to the function entry location, which
+   * precedes the function body.
+   *
+   * Used disjointly from the `resumeMode'.
+   */
+  enum class FuncEntryTag {};
+
   /////////////////////////////////////////////////////////////////////////////
 
   /*
@@ -68,6 +76,7 @@ struct SrcKey {
   SrcKey(FuncId funcId, Offset off, ResumeMode resumeMode);
 
   SrcKey(const Func* f, Offset off, PrologueTag);
+  SrcKey(const Func* f, Offset off, FuncEntryTag);
 
   SrcKey(SrcKey other, Offset off);
 
@@ -88,21 +97,27 @@ struct SrcKey {
   AtomicInt toAtomicInt() const;
 
   /*
+   * Stable hash.
+   */
+  size_t stableHash() const;
+
+  /*
    * Direct accessors.
    */
 
   FuncId funcID() const;
 
   // Offset of the bytecode represented by this SrcKey.
-  // Valid only when !prologue().
+  // Valid only when !prologue() && !funcEntry().
   Offset offset() const;
 
   // Offset of the bytecode that will be used to enter the function.
-  // Valid only when prologue().
+  // Valid only when prologue() || funcEntry().
   Offset entryOffset() const;
 
   ResumeMode resumeMode() const;
   bool prologue() const;
+  bool funcEntry() const;
   bool hasThis() const;
 
   /*
@@ -170,10 +185,11 @@ struct SrcKey {
 private:
   uint32_t encodeResumeMode(ResumeMode resumeMode);
   uint32_t encodePrologue();
+  uint32_t encodeFuncEntry();
 
   /////////////////////////////////////////////////////////////////////////////
 
-  static constexpr size_t kNumModeBits = 2;
+  static constexpr size_t kNumModeBits = 3;
   static constexpr size_t kNumOffsetBits = 32 - kNumModeBits;
 
   union {
@@ -196,13 +212,7 @@ struct SrcKey::Hasher {
 
 struct SrcKey::StableHasher {
   size_t operator()(SrcKey sk) const {
-    return folly::hash::hash_combine(
-      sk.func()->stableHash(),
-      sk.offset(),
-      sk.resumeMode(),
-      sk.prologue(),
-      sk.hasThis()
-    );
+    return sk.stableHash();
   }
 };
 

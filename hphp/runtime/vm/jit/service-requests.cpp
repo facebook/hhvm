@@ -52,13 +52,15 @@ TRACE_SET_MOD(servicereq);
 
 namespace {
 
-uint64_t toStubKey(StubType type, Offset bcOff, SBInvOffset spOff) {
+uint64_t toStubKey(StubType type, SrcKey sk, SBInvOffset spOff) {
   auto const t = static_cast<uint8_t>(type);
+  auto const bcOff = sk.funcEntry() ? sk.entryOffset() : sk.offset();
   assertx(t < (1 << 2));
-  assertx(0 <= bcOff && bcOff < (1LL << 31));
+  assertx(0 <= bcOff && bcOff < (1LL << 30));
   assertx(0 <= spOff.offset && spOff.offset < (1LL << 31));
   return
     (static_cast<uint64_t>(t) << 62) +
+    (static_cast<uint64_t>(sk.funcEntry()) << 61) +
     (static_cast<uint64_t>(bcOff) << 31) +
     (static_cast<uint64_t>(spOff.offset));
 }
@@ -69,6 +71,14 @@ TCA typeToHandler(StubType type) {
   switch (type) {
     case StubType::Translate:   return tc::ustubs().handleTranslate;
     case StubType::Retranslate: return tc::ustubs().handleRetranslate;
+    default:                    not_reached();
+  }
+}
+
+TCA typeToFuncEntryHandler(StubType type) {
+  switch (type) {
+    case StubType::Translate:   return tc::ustubs().handleTranslateFuncEntry;
+    case StubType::Retranslate: return tc::ustubs().handleRetranslateFuncEntry;
     default:                    not_reached();
   }
 }
@@ -103,13 +113,29 @@ TCA emitStub(StubType type, SrcKey sk, SBInvOffset spOff) {
   TCA coldStart = view.cold().frontier();
   TCA frozenStart = view.frozen().frontier();
 
+  auto const emit = [&] (Vout& v) {
+    assertx(!sk.funcEntry());
+    v << copy{v.cns(sk.offset()), rarg(0)};
+    v << copy{v.cns(spOff.offset), rarg(1)};
+    v << jmpi{typeToHandler(type), leave_trace_regs() | arg_regs(2)};
+  };
+
+  auto const emitFuncEntry = [&] (Vout& v) {
+    assertx(sk.funcEntry());
+    assertx(spOff == SBInvOffset{0});
+    v << copy{v.cns(sk.entryOffset()), rarg(0)};
+    v << jmpi{typeToFuncEntryHandler(type), leave_trace_regs() | arg_regs(1)};
+  };
+
   auto const start = vwrap(
     view.cold(),
     view.data(),
     [&] (Vout& v) {
-      v << copy{v.cns(sk.offset()), rarg(0)};
-      v << copy{v.cns(spOff.offset), rarg(1)};
-      v << jmpi{typeToHandler(type), leave_trace_regs() | arg_regs(2)};
+      if (!sk.funcEntry()) {
+        emit(v);
+      } else {
+        emitFuncEntry(v);
+      }
     },
     false, /* relocate */
     true   /* nullOnFull */
@@ -153,7 +179,7 @@ TCA emitStub(StubType type, SrcKey sk, SBInvOffset spOff) {
 TCA getOrEmitStub(StubType type, SrcKey sk, SBInvOffset spOff) {
   assertx(!sk.prologue());
 
-  auto const key = toStubKey(type, sk.offset(), spOff);
+  auto const key = toStubKey(type, sk, spOff);
   auto const it = s_stubMap.find(key);
   if (it != s_stubMap.end()) return it->second;
 

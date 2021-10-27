@@ -42,6 +42,15 @@ fn is_pure(ctxs: &Option<ast::Contexts>) -> bool {
     }
 }
 
+// This distinguishes between specified not-pure contexts and unspecified contexts (both of which are not pure).
+// The latter is important because for e.g. lambdas without contexts, they should inherit from enclosing functions.
+fn is_pure_with_inherited_val(c: &Context, ctxs: &Option<ast::Contexts>) -> bool {
+    match ctxs {
+        Some(_) => is_pure(ctxs),
+        None => c.is_pure,
+    }
+}
+
 fn is_constructor(s: &ast_defs::Id) -> bool {
     let ast_defs::Id(_, name) = s;
     return name == members::__CONSTRUCT;
@@ -165,15 +174,26 @@ impl<'ast> Visitor<'ast> for Checker {
         )
     }
 
+    fn visit_fun_def(&mut self, c: &mut Context, d: &aast::FunDef<(), ()>) -> Result<(), ()> {
+        d.recurse(
+            &mut Context {
+                is_pure: is_pure(&d.fun.ctxs),
+                ..*c
+            },
+            self,
+        )
+    }
+
     fn visit_fun_(&mut self, c: &mut Context, f: &aast::Fun_<(), ()>) -> Result<(), ()> {
         if f.fun_kind == ast::FunKind::FAsync {
             self.check_async_ret_hint(&f.ret);
         }
+
         f.recurse(
             &mut Context {
                 in_methodish: true,
                 in_static_methodish: c.in_static_methodish,
-                is_pure: is_pure(&f.ctxs),
+                is_pure: is_pure_with_inherited_val(c, &f.ctxs),
                 is_constructor: is_constructor(&f.name),
                 ignore_coeffect_local_errors: has_ignore_coeffect_local_errors_attr(
                     &f.user_attributes,

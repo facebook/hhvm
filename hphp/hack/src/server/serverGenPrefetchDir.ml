@@ -50,8 +50,7 @@ let get_name_and_decl_hashes_from_decls
   in
   List.fold ~f:add ~init:[] (List.zip_exn decls symbol_decl_hashes)
 
-let get_project_metadata ~(repo : Path.t) ~ignore_hh_version :
-    (string * string, string) result Future.Promise.t =
+let get_hh_version ~(repo : Path.t) : (string, string) result Future.Promise.t =
   let hhconfig_path =
     Path.to_string
       (Path.concat repo Config_file.file_path_relative_to_repo_root)
@@ -64,70 +63,16 @@ let get_project_metadata ~(repo : Path.t) ~ignore_hh_version :
       ^ hhconfig_path
     in
     return_err error)
-  >>= fun (hhconfig_hash, config) ->
-  (* Determine hh_server_hash. *)
+  >>= fun (_, config) ->
+  let version = Config_file.Getters.string_opt "version" config in
   begin
-    let derived_ignore_hh_version =
-      (* Explicitly told to ignore hh_server_hash!
-         NOTE: this enables downloading of saved states on unreleased versions
-         that do have server hashes *)
-      ignore_hh_version
-      (* Buck development build hashes are empty. *)
-      || String.equal Build_id.build_revision ""
-      (* Dune build hashes are short. *)
-      || String.length Build_id.build_revision <= 16
-    in
-    if not derived_ignore_hh_version then
-      return_ok (Build_id.build_revision, Hh_version.version)
-    else
-      let version = Config_file.Getters.string_opt "version" config in
-      begin
-        match version with
-        | None ->
-          let error =
-            Printf.sprintf
-              "Couldn't find hh_server version hash.\nbuild_revision=%s\nignore_hh_version=%b\nderived_ignore_hh_version=%b\n'version=' absent from .hhconfig"
-              Build_id.build_revision
-              ignore_hh_version
-              derived_ignore_hh_version
-          in
-          return_err error
-        | Some version ->
-          let version = "v" ^ String_utils.lstrip version "^" in
-          return_ok version
-      end
-      >>= fun hh_version ->
-      let hh_server_path =
-        Printf.sprintf
-          "/usr/local/fbprojects/packages/hack/%s/hh_server"
-          hh_version
-      in
-      let cmd = Printf.sprintf "%s --version" hh_server_path in
-      let process =
-        Process.exec (Exec_command.Hh_server hh_server_path) ["--version"]
-      in
-      let future = FutureProcess.make process (fun str -> str) in
-      let process_result =
-        Future.continue_and_map_err future (function
-            | Ok stdout -> Ok stdout
-            | Error e -> Error (Future.error_to_string e))
-      in
-      Future.Promise.bind process_result (function
-          | Ok stdout ->
-            let hash = String.slice stdout 0 40 in
-            return_ok (hash, hh_version)
-          | Error process_failure ->
-            let error =
-              Printf.sprintf
-                "Attempted to invoke hh_server to get version.\n`%s`\nRESPONSE:\n%s"
-                cmd
-                process_failure
-            in
-            return_err error)
+    match version with
+    | None -> failwith "Failed to parse hh version"
+    | Some version ->
+      let version = "v" ^ String_utils.lstrip version "^" in
+      return_ok version
   end
-  >>= fun (hh_server_hash, hh_version) ->
-  let project_metadata = Printf.sprintf "%s-%s" hhconfig_hash hh_server_hash in
-  return_ok (project_metadata, hh_version)
+  >>= fun hh_version -> return_ok hh_version
 
 let go
     (env : ServerEnv.env)
@@ -136,9 +81,8 @@ let go
     (workers : MultiWorker.worker list option) : unit =
   let ctx = Provider_utils.ctx_from_server_env env in
   let repo = Wwwroot.get None in
-  let ignore_hh_version = ServerArgs.ignore_hh_version genv.ServerEnv.options in
-  let (_, hh_version) =
-    match Future.get @@ get_project_metadata ~repo ~ignore_hh_version with
+  let hh_version =
+    match Future.get @@ get_hh_version ~repo with
     | Ok (Ok result) -> result
     | Ok (Error e) -> failwith (Printf.sprintf "%s" e)
     | Error e -> failwith (Printf.sprintf "%s" (Future.error_to_string e))
@@ -156,37 +100,47 @@ let go
     List.fold_left
       ~init:acc
       ~f:(fun acc fn ->
-        match
-          Direct_decl_utils.direct_decl_parse
-            ~file_decl_hash:true
-            ~symbol_decl_hashes:true
-            ctx
-            fn
-        with
-        | None -> acc
-        | Some ((decls, _, _, _) as decl_and_mode_and_hash) ->
-          Direct_decl_utils.cache_decls ctx fn decls;
-          let names_and_decl_hashes =
-            get_name_and_decl_hashes_from_decls decl_and_mode_and_hash
-          in
-          List.fold_left
-            ~init:acc
-            ~f:(fun acc (name, decl_hash) ->
-              let shallow_decl_opt = Shallow_classes_provider.get ctx name in
-              if Option.is_some shallow_decl_opt then (
-                let shallow_decls_in_file = Option.value_exn shallow_decl_opt in
-                let shallow_decls_dir = Filename.concat dir "shallow_decls" in
-                let file =
-                  Int64.to_string decl_hash |> Filename.concat shallow_decls_dir
-                in
-                Sys_utils.mkdir_p (Filename.dirname file);
-                save_contents
-                  (get_shallow_decls_filename file)
-                  shallow_decls_in_file;
-                List.rev_append acc [decl_hash]
-              ) else
-                acc)
-            names_and_decl_hashes)
+        (* Save 1% of decls each run *)
+        if Float.(Random.float 1.0 < 0.01) then (
+          Hh_logger.log
+            "Saving decls for prefetching: %s"
+            (Relative_path.suffix fn);
+          match
+            Direct_decl_utils.direct_decl_parse
+              ~file_decl_hash:true
+              ~symbol_decl_hashes:true
+              ctx
+              fn
+          with
+          | None -> acc
+          | Some ((decls, _, _, _) as decl_and_mode_and_hash) ->
+            Direct_decl_utils.cache_decls ctx fn decls;
+            let names_and_decl_hashes =
+              get_name_and_decl_hashes_from_decls decl_and_mode_and_hash
+            in
+            List.fold_left
+              ~init:acc
+              ~f:(fun acc (name, decl_hash) ->
+                let shallow_decl_opt = Shallow_classes_provider.get ctx name in
+                if Option.is_some shallow_decl_opt then (
+                  let shallow_decls_in_file =
+                    Option.value_exn shallow_decl_opt
+                  in
+                  let shallow_decls_dir = Filename.concat dir "shallow_decls" in
+                  let file =
+                    Int64.to_string decl_hash
+                    |> Filename.concat shallow_decls_dir
+                  in
+                  Sys_utils.mkdir_p (Filename.dirname file);
+                  save_contents
+                    (get_shallow_decls_filename file)
+                    shallow_decls_in_file;
+                  List.rev_append acc [decl_hash]
+                ) else
+                  acc)
+              names_and_decl_hashes
+        ) else
+          acc)
       fnl
   in
 

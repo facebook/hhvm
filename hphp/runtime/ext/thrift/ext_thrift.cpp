@@ -115,6 +115,47 @@ bool HHVM_METHOD(
   }
 }
 
+void HHVM_METHOD(
+    TClientSink,
+    sendClientException,
+    const String& ex_encoded_string,
+    const Variant& ex_msg) {
+  auto data = TClientSink::GetDataOrThrowException(this_);
+  if (!data->sinkBridge_) {
+    return;
+  }
+
+  if (data->sinkBridge_->hasServerCancelled()) {
+    // server has already cancelled, so we can skip sending exception
+    return;
+  }
+  auto buf = folly::IOBuf::copyBuffer(
+      ex_encoded_string.c_str(), ex_encoded_string.size());
+  apache::thrift::PayloadExceptionMetadata exceptionMetadata;
+  apache::thrift::PayloadExceptionMetadataBase exceptionMetadataBase;
+  if (ex_msg.isNull()) {
+    exceptionMetadata.set_declaredException(
+        apache::thrift::PayloadDeclaredExceptionMetadata());
+  } else if (ex_msg.isString()) {
+    exceptionMetadataBase.what_utf8_ref() = ex_msg.toString().c_str();
+    apache::thrift::PayloadAppUnknownExceptionMetdata aue;
+    aue.errorClassification_ref().ensure().blame_ref() =
+        apache::thrift::ErrorBlame::CLIENT;
+    exceptionMetadata.set_appUnknownException(std::move(aue));
+  }
+
+  exceptionMetadataBase.metadata_ref() = std::move(exceptionMetadata);
+  apache::thrift::StreamPayloadMetadata streamPayloadMetadata;
+  apache::thrift::PayloadMetadata payloadMetadata;
+  payloadMetadata.set_exceptionMetadata(std::move(exceptionMetadataBase));
+  streamPayloadMetadata.payloadMetadata_ref() = std::move(payloadMetadata);
+  data->sinkBridge_->push(folly::Try<apache::thrift::StreamPayload>(
+            folly::make_exception_wrapper<apache::thrift::detail::EncodedStreamError>(
+          apache::thrift::StreamPayload(
+              std::move(buf), std::move(streamPayloadMetadata)))));
+  data->endSink();
+}
+
 Object HHVM_METHOD(TClientBufferedStream, genNext) {
   auto data = TClientBufferedStream::GetDataOrThrowException(this_);
   if (!data->streamBridge_) {
@@ -317,6 +358,7 @@ static struct ThriftExtension final : Extension {
       s_TClientSink.get(), Native::NDIFlags::NO_COPY);
     HHVM_ME(TClientSink, sendPayloadOrSinkComplete);
     HHVM_ME(TClientSink, genCreditsOrFinalResponse);
+    HHVM_ME(TClientSink, sendClientException);
 
     loadSystemlib("thrift");
   }

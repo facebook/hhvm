@@ -172,7 +172,6 @@ final class TClientSink {
       if ($final_response !== null || $exception !== null) {
         break;
       }
-
       if ($credits > 0 && $shouldContinue) {
         try {
           foreach ($payload_generator await as $pld) {
@@ -186,8 +185,12 @@ final class TClientSink {
         } catch (Exception $ex) {
           // If async generator throws any error,
           // exception should be encoded and sent to server before throwing
-
-          // TODO(rashmim) : Send client exception to server
+          list($encoded_ex, $is_application_ex) = $payloadEncode(null, $ex);
+          $this->sendClientException(
+            $encoded_ex,
+            $is_application_ex ? $ex->getMessage() : null,
+          );
+          // send exception back to the client, don't wait for final response
           throw $ex;
         }
         // If $credits > 0 and $shouldContinue = true,
@@ -209,4 +212,10 @@ final class TClientSink {
   <<__Native>>
   public function genCreditsOrFinalResponse(
   ): Awaitable<?(int, ?string, ?string)>;
+
+  <<__Native>>
+  public function sendClientException(
+    string $ex_encoded_string,
+    ?string $ex_msg,
+  ): void;
 }

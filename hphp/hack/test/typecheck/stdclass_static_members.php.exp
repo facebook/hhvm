@@ -1,4 +1,4 @@
 File "stdclass_static_members.php", line 4, characters 13-23:
 No class variable `$staticProp` in `stdClass` (Typing[4090])
-  File "classes.hhi", line 30, characters 13-20:
+  File "classes.hhi", line 31, characters 13-20:
   Declaration of `stdClass` is here

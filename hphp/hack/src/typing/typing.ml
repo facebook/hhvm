@@ -3926,6 +3926,8 @@ and expr_
     let send =
       match get_node expected_return.et_type with
       | Tclass (_, _, _ :: _ :: send :: _) -> send
+      | Tdynamic when env.in_support_dynamic_type_method_check ->
+        expected_return.et_type
       | _ ->
         Errors.internal_error p "Return type is not a generator";
         Typing_utils.terr env (Reason.Ryield_send p)

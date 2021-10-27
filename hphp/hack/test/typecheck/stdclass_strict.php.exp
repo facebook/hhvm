@@ -2,7 +2,7 @@ File "stdclass_strict.php", line 9, characters 7-9:
 No property `foo` in `stdClass` (Typing[4053])
   File "stdclass_strict.php", line 8, characters 12-19:
   This is why I think it is an object of type stdClass
-  File "classes.hhi", line 30, characters 13-20:
+  File "classes.hhi", line 31, characters 13-20:
   Declaration of `stdClass` is here
 File "stdclass_strict.php", line 11, characters 10-11:
 Typing error (Typing[4053])
@@ -10,5 +10,5 @@ Typing error (Typing[4053])
   No property `foo` in `stdClass`
   File "stdclass_strict.php", line 8, characters 12-19:
   This is why I think it is an object of type stdClass
-  File "classes.hhi", line 30, characters 13-20:
+  File "classes.hhi", line 31, characters 13-20:
   Declaration of `stdClass` is here

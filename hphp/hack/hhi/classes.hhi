@@ -16,6 +16,7 @@
 
 namespace {
 
+<<__SupportDynamicType>>
 final class Generator<+Tk, +Tv, -Ts> implements KeyedIterator<Tk, Tv> {
   public function getOrigFuncName(): string {}
   public function current(): Tv {}

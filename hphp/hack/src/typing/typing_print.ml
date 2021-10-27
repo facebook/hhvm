@@ -240,6 +240,16 @@ module Full = struct
   let tvarray_or_darray k x y = list "varray_or_darray<" k [x; y] ">"
 
   let tfun ~ty to_doc st penv ft =
+    let sdt =
+      match penv with
+      | Loclenv env
+        when TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env) ->
+        if get_ft_support_dynamic_type ft then
+          text "<<__SupportDynamicType>> "
+        else
+          Nothing
+      | _ -> Nothing
+    in
     Concat
       [
         text "(";
@@ -247,10 +257,7 @@ module Full = struct
           text "readonly "
         else
           Nothing);
-        (if get_ft_support_dynamic_type ft then
-          text "<<__SupportDynamicType>> "
-        else
-          Nothing);
+        sdt;
         text "function";
         fun_type ~ty to_doc st penv ft;
         text ")";

@@ -6,5 +6,5 @@ Wrong type hint (Typing[4338])
     resulting from expanding the type constant `this::Ti`
   File "with_tconst_bad2.php", line 13, characters 38-45:
   But got `stdClass`
-  File "classes.hhi", line 30, characters 13-20:
+  File "classes.hhi", line 31, characters 13-20:
     via this generic `this`; implicitly defined constant `::class` is a string that contains the fully qualified name of `stdClass`

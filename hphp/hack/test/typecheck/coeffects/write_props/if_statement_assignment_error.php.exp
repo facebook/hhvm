@@ -1,0 +1,9 @@
+File "if_statement_assignment_error.php", line 19, characters 7-18:
+Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
+File "if_statement_assignment_error.php", line 19, characters 7-22:
+Writing to object properties in a pure function is not allowed. (Parsing[1002])
+File "if_statement_assignment_error.php", line 19, characters 7-18:
+This object's property is being mutated (used as an lvalue)
+Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
+  File "if_statement_assignment_error.php", line 18, characters 31-32:
+  The local (enclosing) context provides the capability set {}

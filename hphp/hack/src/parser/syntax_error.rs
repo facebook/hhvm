@@ -1098,3 +1098,6 @@ pub const direct_coeffects_reference: Error =
 
 pub const invalid_attribute_reserved: Error =
     Cow::Borrowed("This attribute is reserved and cannot be used in user code.");
+
+pub const object_property_write_in_pure_fn: Error =
+    Cow::Borrowed("Writing to object properties in a pure function is not allowed.");

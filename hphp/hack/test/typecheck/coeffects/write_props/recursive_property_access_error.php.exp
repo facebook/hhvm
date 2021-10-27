@@ -1,0 +1,7 @@
+File "recursive_property_access_error.php", line 19, characters 3-33:
+Writing to object properties in a pure function is not allowed. (Parsing[1002])
+File "recursive_property_access_error.php", line 19, characters 3-25:
+This object's property is being mutated (used as an lvalue)
+Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])
+  File "recursive_property_access_error.php", line 18, characters 31-32:
+  The local (enclosing) context provides the capability set {}

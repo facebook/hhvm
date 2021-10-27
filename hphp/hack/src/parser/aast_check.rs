@@ -4,11 +4,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use naming_special_names_rust::special_idents;
+use naming_special_names_rust::{members, special_idents, user_attributes};
 use oxidized::{
     aast,
     aast_visitor::{visit, AstParams, Node, Visitor},
-    ast,
+    ast, ast_defs,
     pos::Pos,
 };
 use parser_core_types::{
@@ -35,10 +35,35 @@ fn awaitable_type_args(hint: &ast::Hint) -> Option<&[ast::Hint]> {
     }
 }
 
+fn is_pure(ctxs: &Option<ast::Contexts>) -> bool {
+    match ctxs {
+        Some(c) => c.1.len() == 0,
+        None => false,
+    }
+}
+
+fn is_constructor(s: &ast_defs::Id) -> bool {
+    let ast_defs::Id(_, name) = s;
+    return name == members::__CONSTRUCT;
+}
+
+fn has_ignore_coeffect_local_errors_attr(attrs: &Vec<aast::UserAttribute<(), ()>>) -> bool {
+    for attr in attrs.iter() {
+        let ast_defs::Id(_, name) = &attr.name;
+        if user_attributes::ignore_coeffect_local_errors(name) {
+            return true;
+        }
+    }
+    false
+}
+
 struct Context {
     in_methodish: bool,
     in_classish: bool,
     in_static_methodish: bool,
+    is_pure: bool,
+    is_constructor: bool,
+    ignore_coeffect_local_errors: bool,
 }
 
 struct Checker {
@@ -75,6 +100,33 @@ impl Checker {
             None => {}
         }
     }
+
+    fn check_pure_fn_contexts(&mut self, c: &mut Context, e: &aast::Expr<(), ()>) {
+        if !c.is_pure || c.is_constructor || c.ignore_coeffect_local_errors {
+            return;
+        }
+        if let Some((bop, lhs, _)) = e.2.as_binop() {
+            if let ast_defs::Bop::Eq(_) = bop {
+                self.check_is_obj_property_write_expr(&e, &lhs);
+            }
+        }
+    }
+
+    fn check_is_obj_property_write_expr(
+        &mut self,
+        top_level_expr: &aast::Expr<(), ()>,
+        expr: &aast::Expr<(), ()>,
+    ) {
+        if let Some(_) = expr.2.as_obj_get() {
+            self.add_error(
+                &top_level_expr.1,
+                syntax_error::object_property_write_in_pure_fn,
+            );
+            return;
+        } else if let Some((arr, _)) = expr.2.as_array_get() {
+            self.check_is_obj_property_write_expr(top_level_expr, &arr);
+        }
+    }
 }
 
 impl<'ast> Visitor<'ast> for Checker {
@@ -102,6 +154,11 @@ impl<'ast> Visitor<'ast> for Checker {
             &mut Context {
                 in_methodish: true,
                 in_static_methodish: m.static_,
+                is_pure: is_pure(&m.ctxs),
+                is_constructor: is_constructor(&m.name),
+                ignore_coeffect_local_errors: has_ignore_coeffect_local_errors_attr(
+                    &m.user_attributes,
+                ),
                 ..*c
             },
             self,
@@ -116,6 +173,11 @@ impl<'ast> Visitor<'ast> for Checker {
             &mut Context {
                 in_methodish: true,
                 in_static_methodish: c.in_static_methodish,
+                is_pure: is_pure(&f.ctxs),
+                is_constructor: is_constructor(&f.name),
+                ignore_coeffect_local_errors: has_ignore_coeffect_local_errors_attr(
+                    &f.user_attributes,
+                ),
                 ..*c
             },
             self,
@@ -125,6 +187,9 @@ impl<'ast> Visitor<'ast> for Checker {
     fn visit_expr(&mut self, c: &mut Context, p: &aast::Expr<(), ()>) -> Result<(), ()> {
         use aast::{ClassId, ClassId_::*, Expr, Expr_::*, Lid};
 
+        if c.in_methodish {
+            self.check_pure_fn_contexts(c, &p);
+        }
         if let Await(_) = p.2 {
             if !c.in_methodish {
                 self.add_error(&p.1, syntax_error::toplevel_await_use);
@@ -150,6 +215,9 @@ pub fn check_program(program: &aast::Program<(), ()>) -> Vec<SyntaxError> {
         in_methodish: false,
         in_classish: false,
         in_static_methodish: false,
+        is_pure: false,
+        is_constructor: false,
+        ignore_coeffect_local_errors: false,
     };
     visit(&mut checker, &mut context, program).unwrap();
     checker.errors

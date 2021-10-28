@@ -5,7 +5,7 @@ This type doesn't implement the method `foo` (Typing[4054])
   File "trait_reuse_cyclic.php", line 6, characters 25-27:
   As defined here
 File "trait_reuse_cyclic.php", line 11, characters 7-17:
-Cyclic class definition : `ReusedTrait` `OtherTrait`  (Typing[4013])
+Cyclic class definition : `ReusedTrait` `OtherTrait` `MyParent` `BadClass`  (Typing[4013])
 File "trait_reuse_cyclic.php", line 19, characters 7-17:
 Traits with final methods cannot be reused, and `ReusedTrait` is already used by `MyParent`. (Typing[4186])
   File "trait_reuse_cyclic.php", line 14, characters 7-14:

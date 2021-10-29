@@ -4933,7 +4933,7 @@ let bad_xhp_attr_required_override
 let invalid_switch_case_value_type case_value_p case_value_ty scrutinee_ty =
   add (Typing.err_code Typing.InvalidSwitchCaseValueType) case_value_p
   @@ Printf.sprintf
-       "Switch statements use `==` equality, so comparing values of type %s with %s may not give the desired result."
+       "Switch statements use `===` equality. Comparing values of type %s with %s may not give the desired result."
        (case_value_ty |> Markdown_lite.md_codify)
        (scrutinee_ty |> Markdown_lite.md_codify)
 

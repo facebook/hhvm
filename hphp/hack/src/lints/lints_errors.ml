@@ -215,7 +215,7 @@ let invalid_switch_case_value_type
     (case_value_p : Ast_defs.pos) case_value_ty scrutinee_ty =
   Lints.add Codes.invalid_switch_case_value_type Lint_warning case_value_p
   @@ Printf.sprintf
-       "Switch statements use `==` equality, so comparing values of type %s with %s may not give the desired result."
+       "Switch statements use `===` equality. Comparing values of type %s with %s may not give the desired result."
        (Markdown_lite.md_codify case_value_ty)
        (Markdown_lite.md_codify scrutinee_ty)
 

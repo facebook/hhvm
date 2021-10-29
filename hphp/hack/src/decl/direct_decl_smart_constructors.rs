@@ -4784,6 +4784,24 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                 let name = self.elaborate_id(Id(pos, class_name));
                 Some(ClassNameParam { name, full_pos })
             }
+            Node::StringLiteral((name, full_pos))
+                if !self.omit_user_attributes_irrelevant_to_typechecking =>
+            {
+                Some(ClassNameParam {
+                    name: Id(Pos::none(), self.str_from_utf8_for_bytes_in_arena(*name)),
+                    full_pos,
+                })
+            }
+            Node::IntLiteral((name, full_pos))
+            | Node::FloatingLiteral((name, full_pos))
+            | Node::BooleanLiteral((name, full_pos))
+                if !self.omit_user_attributes_irrelevant_to_typechecking =>
+            {
+                Some(ClassNameParam {
+                    name: Id(Pos::none(), name),
+                    full_pos,
+                })
+            }
             _ => None,
         }));
 

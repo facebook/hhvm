@@ -12,6 +12,7 @@ use namespace HH\Lib\Async;
 
 use function HH\__Private\MiniTest\expect;
 use type HH\__Private\MiniTest\{DataProvider, HackTest};
+use type HH\Lib\Ref;
 
 final class PollTest extends HackTest {
   public async function testEmpty(): Awaitable<void> {
@@ -127,5 +128,16 @@ final class PollTest extends HackTest {
       }
     }
     expect($count)->toBePHPEqual(3);
+  }
+
+  public async function testWaitUntilEmptyAsync(): Awaitable<void> {
+    $poll = Async\Poll::create();
+    $foo = new Ref('foo');
+    $herp = new Ref('herp');
+    $poll->add(async { await \HH\Asio\later(); $foo->set('bar'); });
+    $poll->add(async { await \HH\Asio\later(); $herp->set('derp'); });
+    await $poll->waitUntilEmptyAsync();
+    expect($foo->get())->toEqual('bar');
+    expect($herp->get())->toEqual('derp');
   }
 }

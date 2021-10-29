@@ -41,4 +41,15 @@ final class Poll<Tv> extends BasePoll<mixed, Tv> implements AsyncIterator<Tv> {
   public function addMulti(Traversable<Awaitable<Tv>> $awaitables): void {
     $this->addMultiImpl(new Vector($awaitables));
   }
+
+  /** Wait for all polled `Awaitable`s, ignoring the results.
+   *
+   * This is a convenience function, for when the `Awaitable`'s side effects
+   * are needed instead of the result.
+   */
+  public async function waitUntilEmptyAsync(): Awaitable<void> {
+    foreach ($this await as $_) {
+      // do nothing
+    }
+  }
 }

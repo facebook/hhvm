@@ -23,5 +23,15 @@ namespace HH\Lib;
  * to avoid this class.
  */
 final class Ref<T> {
-  public function __construct(public T $value)[rx_shallow] {}
+  public function __construct(public T $value)[] {}
+
+  /** Retrieve the stored value */
+  public function get()[]: T {
+    return $this->value;
+  }
+
+  /** Set the new value */
+  public function set(T $new_value)[write_props]: void {
+    $this->value = $new_value;
+  }
 }

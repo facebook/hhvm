@@ -11,12 +11,12 @@ Fanout calculation on line 43
                                                   'variant': 'Type Bar'},
                                    'dependent': {'hash': '3296325908251159198',
                                                  'variant': 'Fun uses_foo'}},
-                                  {'dependency': {'hash': '-1159392632468753808',
+                                  {'dependency': {'hash': '4446127974083881620',
                                                   'variant': 'Method '
                                                              'Foo::getSomething'},
                                    'dependent': {'hash': '3296325908251159198',
                                                  'variant': 'Fun uses_foo'}},
-                                  {'dependency': {'hash': '670249962391539800',
+                                  {'dependency': {'hash': '1291813502082941278',
                                                   'variant': 'Method '
                                                              'Bar::someMethod'},
                                    'dependent': {'hash': '3296325908251159198',
@@ -56,7 +56,7 @@ Fanout calculation on line 55
                                                   'variant': 'Type Baz'},
                                    'dependent': {'hash': '3296325908251159198',
                                                  'variant': 'Fun uses_foo'}},
-                                  {'dependency': {'hash': '-1159392632468753808',
+                                  {'dependency': {'hash': '4446127974083881620',
                                                   'variant': 'Method '
                                                              'Foo::getSomething'},
                                    'dependent': {'hash': '3296325908251159198',
@@ -69,7 +69,7 @@ Fanout calculation on line 55
                                                   'variant': 'Constructor Foo'},
                                    'dependent': {'hash': '3296325908251159198',
                                                  'variant': 'Fun uses_foo'}},
-                                  {'dependency': {'hash': '4320680632481376520',
+                                  {'dependency': {'hash': '3782035724390362380',
                                                   'variant': 'Method '
                                                              'Baz::someMethod'},
                                    'dependent': {'hash': '3296325908251159198',

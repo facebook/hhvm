@@ -2688,6 +2688,13 @@ void Class::setConstants() {
   }
 
   m_constants.create(builder);
+
+  // Classes with thrift specs require extra data.
+  const static StaticString s_SPEC("SPEC");
+  auto const clsCnsInd = m_constants.findIndex(s_SPEC.get());
+  if (clsCnsInd != kInvalidSlot) {
+    allocExtraData();
+  }
 }
 
 namespace {
@@ -2819,6 +2826,11 @@ void Class::setupSProps() {
   for (unsigned i = 0; i < n; ++i) {
     new (&m_sPropCache[i]) LinkT;
   }
+}
+
+std::atomic<void*>* Class::getThriftData() const {
+  if (!m_extra) return nullptr;
+  return &m_extra->m_thriftData;
 }
 
 void Class::setProperties() {

@@ -250,28 +250,32 @@ FieldSpec FieldSpec::compile(const Array& fieldSpec, bool topLevel) {
 
 // The returned reference is valid at least while this SpecHolder is alive.
 const StructSpec& SpecHolder::getSpec(const Class* cls) {
-  static folly_concurrent_hash_map_simd<
-    const Class*,
-    // Store the pointer as non-SIMD version of folly_concurrent_hash_map_simd
-    // macro doesn't guarantee reference stability.
-    std::unique_ptr<StructSpec>
-  > s_specCacheMap(1000);
-
-  // Can only cache if the underlying Class can't be freed.
   auto const cacheable = classHasPersistentRDS(cls);
-  if (cacheable) {
-    const auto it = s_specCacheMap.find(cls);
-    if (it != s_specCacheMap.cend()) return *it->second;
+  if (!cacheable) {
+    const auto spec = get_tspec(cls);
+    m_tempSpec = compileSpec(spec, nullptr);
+    return m_tempSpec;
+  }
+
+  auto specSlot = cls->getThriftData();
+  if (specSlot != nullptr) {
+    auto const spec = specSlot->load(std::memory_order_acquire);
+    if (spec) return *static_cast<StructSpec*>(spec);
   }
 
   const auto spec = get_tspec(cls);
-  if (cacheable && spec->isStatic()) {
-    // Static specs are kept by the cache.
-    const auto [it, _] = s_specCacheMap.try_emplace(
-      cls, std::make_unique<StructSpec>(compileSpec(spec, cls)));
-    return *it->second;
+  if (spec->isStatic()) {
+    assertx(specSlot);
+    auto compiled =
+      std::make_unique<StructSpec>(compileSpec(spec, cls));
+    void* expected = nullptr;
+    if (specSlot->compare_exchange_strong(
+          expected, (void*)compiled.get(),
+          std::memory_order_release, std::memory_order_relaxed)) {
+      return *compiled.release();
+    }
+    return *static_cast<StructSpec*>(expected);
   } else {
-    // Temporary specs are kept by m_tempSpec.
     m_tempSpec = compileSpec(spec, nullptr);
     return m_tempSpec;
   }

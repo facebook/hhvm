@@ -1449,6 +1449,9 @@ public:
   static bool exists(const StringData* name,
                           bool autoload, ClassKind kind);
 
+  std::atomic<void*>* getThriftData() const;
+
+
   /////////////////////////////////////////////////////////////////////////////
   // ExtraData.
 
@@ -1556,6 +1559,10 @@ private:
      * The next memo slot to assign. This is inherited from the parent.
      */
     Slot m_nextMemoSlot{0};
+    /*
+     * The thrift spec, if present.
+     */
+    mutable std::atomic<void*> m_thriftData{nullptr};
 
     /*
      * MemoizeLSB extra data

@@ -1101,3 +1101,6 @@ pub const invalid_attribute_reserved: Error =
 
 pub const object_property_write_in_pure_fn: Error =
     Cow::Borrowed("Writing to object properties in a pure function is not allowed.");
+
+pub const readonly_on_xhp: Error =
+    Cow::Borrowed("Readonly values cannot be written to xhp attributes at this time.");

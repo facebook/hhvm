@@ -1,0 +1,2 @@
+File "readonly_xhp_interaction.php", line 12, characters 24-25:
+Readonly values cannot be written to xhp attributes at this time. (Parsing[1002])

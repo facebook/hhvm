@@ -267,7 +267,6 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
         Yield(_) => Rty::Mutable,
         // Operators are all primitive in result
         Unop(_) | Binop(_) => Rty::Mutable,
-        // TODO: track the left side of pipe expressions' readonlyness for $$
         Pipe(p) => {
             let (lid, left, _) = &**p;
             // The only time the id number matters is for Dollardollar
@@ -441,11 +440,15 @@ fn check_assignment_validity(
 
 struct Checker {
     errors: Vec<SyntaxError>,
+    is_typechecker: bool,
 }
 
 impl Checker {
-    fn new() -> Self {
-        Self { errors: vec![] }
+    fn new(typechecker: bool) -> Self {
+        Self {
+            errors: vec![],
+            is_typechecker: typechecker,
+        }
     }
 
     fn add_error(&mut self, pos: &Pos, msg: ErrorMsg) {
@@ -609,6 +612,15 @@ impl<'ast> VisitorMut<'ast> for Checker {
                     }
                 }
             }
+            aast::Expr_::New(n) if self.is_typechecker => {
+                let (_, _targs, args, _variadic, _) = &mut **n;
+                for param in args.iter_mut() {
+                    match rty_expr(context, param) {
+                        Rty::Readonly => explicit_readonly(param),
+                        Rty::Mutable => {}
+                    }
+                }
+            }
             aast::Expr_::Pipe(p) => {
                 let (lid, left, _) = &**p;
                 // The only time the id number matters is for Dollardollar
@@ -616,10 +628,24 @@ impl<'ast> VisitorMut<'ast> for Checker {
                 let left_rty = rty_expr(context, left);
                 context.add_local(&dollardollar, left_rty);
             }
+
             _ => {}
         }
 
 
+        p.recurse(context, self.object())
+    }
+
+    fn visit_xhp_simple(
+        &mut self,
+        context: &mut Context,
+        p: &mut aast::XhpSimple<(), ()>,
+    ) -> Result<(), ()> {
+        if let Rty::Readonly = rty_expr(context, &p.expr) {
+            if self.is_typechecker {
+                self.add_error(&p.expr.1, syntax_error::readonly_on_xhp);
+            }
+        }
         p.recurse(context, self.object())
     }
 
@@ -795,8 +821,11 @@ impl<'ast> VisitorMut<'ast> for Checker {
     }
 }
 
-pub fn check_program(program: &mut aast::Program<(), ()>) -> Vec<SyntaxError> {
-    let mut checker = Checker::new();
+pub fn check_program(
+    program: &mut aast::Program<(), ()>,
+    is_typechecker: bool,
+) -> Vec<SyntaxError> {
+    let mut checker = Checker::new(is_typechecker);
     let mut context = Context::new(Rty::Mutable, Rty::Mutable);
     visit_mut(&mut checker, &mut context, program).unwrap();
     checker.errors

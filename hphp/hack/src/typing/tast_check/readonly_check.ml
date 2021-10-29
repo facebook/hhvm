@@ -30,7 +30,8 @@ let pp_rty fmt rty = Format.fprintf fmt "%s" (rty_to_str rty)
 
 (* Returns true if rty_sub is a subtype of rty_sup.
 TODO: Later, we'll have to consider the regular type as well, for example
-we could allow readonly int as equivalent to an int for devX purposes *)
+we could allow readonly int as equivalent to an int for devX purposes.
+This would require TIC to handle correctly, though. *)
 let subtype_rty rty_sub rty_sup =
   match (rty_sub, rty_sup) with
   | (Readonly, Mut) -> false
@@ -96,7 +97,6 @@ let rec grab_class_elts_from_ty ~static ?(seen = SSet.empty) env ty prop_id =
   | Tdependent (_, ty) ->
     (* Dependent types have an upper bound that's a class or generic *)
     grab_class_elts_from_ty ~static ~seen env ty prop_id
-  (* TODO: Handle more complex types *)
   | _ -> []
 
 (* Return a list of possible static prop elts given a class_get expression *)
@@ -109,7 +109,7 @@ let get_static_prop_elts env class_id get =
 
 (* Return a list of possible prop elts given an obj get expression *)
 let get_prop_elts env obj get =
-  let ty = Tast.get_type obj in
+  let (env, ty) = Tast_env.expand_type env (Tast.get_type obj) in
   match get with
   | (_, _, Id prop_id) -> grab_class_elts_from_ty ~static:false env ty prop_id
   (* TODO: Handle more complex  cases *)
@@ -359,7 +359,6 @@ let check_special_function env caller args =
 
 (* Checks related to calling a function or method
    is_readonly is true when the call is allowed to return readonly
-   TODO: handle inout
 *)
 let call
     ~is_readonly
@@ -427,9 +426,18 @@ let call
         |> Option.to_list
       in
       let args = args @ unpacked_rty in
-      (* If the args are unequal length, we errored elsewhere so this does not care *)
-      let _ = List.iter2 fty.ft_params args ~f:check_arg in
-      ()
+      let rec check args params =
+        match (args, params) with
+        | (x1 :: args1, x2 :: params2) ->
+          check_arg x2 x1;
+          check args1 params2
+          (* If either is empty, it's either a type error already or a default arg that's not filled in
+             either way, no need to check readonlyness *)
+        | ([], _)
+        | (_, []) ->
+          ()
+      in
+      check args fty.ft_params
     | _ -> ()
   in
   check_readonly_closure caller_ty caller_rty;
@@ -596,13 +604,6 @@ let handler =
     (*
         The following error checks are ones that need to run even if
         readonly analysis is not enabled by the file attribute.
-
-        TODO(readonly): When the user has not enabled readonly
-        and theres a readonly keyword, this will incorrectly error
-        an extra time on top of the parsing error. Fixing this
-        extra error at this stage will require a bunch of added complexity
-        and perf cost, and since this will only occur while the
-        feature is unstable, we allow the extra error it for now.
       *)
     method! at_Call _env caller _tal _el _unpacked_element =
       (* this check is already handled by the readonly analysis,

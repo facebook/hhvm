@@ -198,7 +198,7 @@ impl<'src> AastParser {
                 // enabled either by parser option or by typechecker
                 && (env.parser_options.po_enable_readonly_in_emitter || !env.codegen)
             {
-                errors.extend(readonly_check::check_program(&mut aast));
+                errors.extend(readonly_check::check_program(&mut aast, !env.codegen));
             }
             errors.extend(aast_check::check_program(&aast));
             errors.extend(expression_tree_check::check_splices(&aast));

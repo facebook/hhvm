@@ -1,0 +1,4 @@
+File "readonly_wrapper.php", line 20, characters 27-31:
+This property returns a readonly value. It must be explicitly wrapped in a readonly expression. (Typing[4412])
+  File "readonly_wrapper.php", line 4, characters 51-56:
+  The property is defined here.

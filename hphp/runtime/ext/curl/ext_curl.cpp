@@ -467,6 +467,9 @@ Variant HHVM_FUNCTION(curl_multi_exec, const Resource& mh,
   curlm->setInExec(true);
   // T29358191: curl_multi_perform should not throw... trust but verify
   int result;
+  for (auto& handle : curlm->getEasyHandles()) {
+    handle->prepare();
+  }
   try {
     result = curl_multi_perform(curlm->get(), &running);
   } catch (...) {

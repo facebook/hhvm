@@ -87,6 +87,7 @@ struct CurlResource : SweepableResourceData {
     assertx(e && !isPhpException(e));
     return boost::get<Exception*>(*e);
   }
+  void prepare();
 
  private:
   void setDefaultOptions();
@@ -127,6 +128,9 @@ struct CurlResource : SweepableResourceData {
  private:
   friend struct CurlMultiResource;
 
+  bool useCertCache() const;
+  String cainfo(bool proxy) const;
+
   CURL *m_cp;
   TYPE_SCAN_IGNORE_FIELD(m_cp);
   CurlMultiResource* m_multi;
@@ -139,6 +143,7 @@ struct CurlResource : SweepableResourceData {
   req::shared_ptr<ToFree> m_to_free;
 
   String m_url;
+  String m_cainfo;
   String m_header;
   Array  m_opts;
 

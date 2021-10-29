@@ -15,9 +15,16 @@
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
+#include <curl/curl.h>
 #include <curl/easy.h>
 #include <curl/multi.h>
 #include <folly/portability/OpenSSL.h>
+
+#if LIBCURL_VERSION_NUM >= 0x074600
+#define CERT_CACHE_SUPPORTED 1
+#else
+#undef CERT_CACHE_SUPPORTED
+#endif
 
 #define PHP_CURL_STDOUT 0
 #define PHP_CURL_FILE   1
@@ -152,6 +159,20 @@ void CurlResource::setDefaultOptions() {
   reseat();
 }
 
+void CurlResource::prepare() {
+  if (!useCertCache()) {
+    if (auto const path = cainfo(false).get()) {
+      curl_easy_setopt(m_cp, CURLOPT_CAINFO, path->data());
+    }
+    if (auto const path = cainfo(true).get()) {
+      curl_easy_setopt(m_cp, CURLOPT_PROXY_CAINFO, path->data());
+    }
+  } else {
+    curl_easy_setopt(m_cp, CURLOPT_CAINFO, NULL);
+    curl_easy_setopt(m_cp, CURLOPT_PROXY_CAINFO, NULL);
+  }
+}
+
 Variant CurlResource::execute() {
   assertx(!m_exception);
   if (m_cp == nullptr) {
@@ -166,6 +187,8 @@ Variant CurlResource::execute() {
   m_write.content.clear();
   m_header.clear();
   memset(m_error_str, 0, sizeof(m_error_str));
+
+  prepare();
 
   {
     IOStatusHelper io("curl_easy_perform", m_url.data());
@@ -1301,6 +1324,63 @@ int CurlResource::curl_progress(void* p,
   }
 }
 
+namespace {
+hphp_fast_map<String, X509_STORE*, hphp_string_hash, hphp_string_same> s_certCache;
+folly::SharedMutex s_mutex;
+}
+
+bool CurlResource::useCertCache() const {
+#ifdef CERT_CACHE_SUPPORTED
+  auto const isNonEmpty = [&](int64_t option) {
+    if (!m_opts.exists(option)) return false;
+    Variant untyped_value = m_opts[option];
+    if (untyped_value.isString() && !untyped_value.toString().empty()) {
+      return true;
+    }
+    return false;
+  };
+
+  if (isNonEmpty(CURLOPT_PROXY) && cainfo(false) != cainfo(true)) {
+    return false;
+  }
+  if (isNonEmpty(CURLOPT_CRLFILE)) {
+    return false;
+  }
+  if (isNonEmpty(CURLOPT_CAPATH)) {
+    return false;
+  }
+
+  return true;
+#else
+  return false;
+#endif
+}
+
+String CurlResource::cainfo(bool proxy) const {
+#ifdef CERT_CACHE_SUPPORTED
+  auto const option = proxy ? CURLOPT_PROXY_CAINFO : CURLOPT_CAINFO;
+
+  static auto const defaultCainfoData = [&] () -> StringData* {
+    auto const curlInfo = curl_version_info(CURLVERSION_NOW);
+    if (!curlInfo->cainfo) return nullptr;
+    return makeStaticString(curlInfo->cainfo);
+  }();
+
+  auto const defaultCainfo = defaultCainfoData ? String{defaultCainfoData} : String{};
+  if (!m_opts.exists(int64_t(option))) return defaultCainfo;
+
+  Variant untyped_value = m_opts[int64_t(option)];
+  if (!untyped_value.isString()) return defaultCainfo;
+
+  auto const string_value = untyped_value.toString();
+  if (string_value.empty()) return defaultCainfo;
+
+  return string_value;
+#else
+  return String{};
+#endif
+}
+
 CURLcode CurlResource::ssl_ctx_callback(CURL *curl, void *sslctx, void *parm) {
   // Set defaults from config.hdf
   CURLcode r = curl_tls_workarounds_cb(curl, sslctx, parm);
@@ -1317,6 +1397,73 @@ CURLcode CurlResource::ssl_ctx_callback(CURL *curl, void *sslctx, void *parm) {
     raise_warning("supplied argument is not a valid cURL handle resource");
     return CURLE_FAILED_INIT;
   }
+
+#ifdef CERT_CACHE_SUPPORTED
+  // Load the CA from the cache.
+  if (cp->useCertCache()) {
+    auto const cainfo = cp->cainfo(false);
+    auto const store = [&] () -> X509_STORE* {
+      {
+        folly::SharedMutex::ReadHolder lock(s_mutex);
+        auto const iter = s_certCache.find(cainfo);
+        if (iter != s_certCache.end()) return iter->second;
+      }
+
+      STACK_OF(X509_INFO) *stack;
+      BIO *in;
+
+      in = BIO_new_file(cainfo.data(), "r");
+      if (!in) return nullptr;
+      stack = PEM_X509_INFO_read_bio(in, nullptr, nullptr, (void*)"");
+      BIO_free(in);
+      if (!stack) return nullptr;
+
+      auto const store = X509_STORE_new();
+      if (!store) return nullptr;
+      X509_STORE_set_flags(store, X509_V_FLAG_TRUSTED_FIRST);
+      X509_STORE_set_flags(store, X509_V_FLAG_PARTIAL_CHAIN);
+
+      unsigned count = 0;
+      for (int i = 0; i < sk_X509_INFO_num(stack); i++) {
+        X509_INFO* info;
+        info = sk_X509_INFO_value(stack, i);
+        if (info->x509) {
+          if (!X509_STORE_add_cert(store, info->x509)) {
+            X509_STORE_free(store);
+            sk_X509_INFO_pop_free(stack, X509_INFO_free);
+            return nullptr;
+          }
+          count++;
+        }
+        if (info->crl) {
+          if (!X509_STORE_add_crl(store, info->crl)) {
+            X509_STORE_free(store);
+            sk_X509_INFO_pop_free(stack, X509_INFO_free);
+            return nullptr;
+          }
+          count++;
+        }
+      }
+      sk_X509_INFO_pop_free(stack, X509_INFO_free);
+      if (count == 0) {
+        X509_STORE_free(store);
+        return nullptr;
+      }
+
+      folly::SharedMutex::WriteHolder lock(s_mutex);
+      auto const iter = s_certCache.find(cainfo);
+      if (iter != s_certCache.end()) {
+        X509_STORE_free(store);
+        return iter->second;
+      } else {
+        s_certCache.emplace(cainfo, store);
+        return store;
+      }
+    }();
+    if (!store) return CURLE_FAILED_INIT;
+    SSL_CTX_set1_cert_store(ctx, store);
+  }
+#endif
 
   // Override cipher specs if necessary.
   if (cp->m_opts.exists(int64_t(CURLOPT_FB_TLS_CIPHER_SPEC))) {

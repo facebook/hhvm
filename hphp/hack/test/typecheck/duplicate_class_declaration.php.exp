@@ -1,0 +1,12 @@
+File "duplicate_class_declaration.php", line 4, characters 7-9:
+Name already bound: `Foo` (Naming[2012])
+  File "duplicate_class_declaration.php", line 3, characters 7-9:
+  Previous definition is here
+File "duplicate_class_declaration.php", line 9, characters 9-11:
+No instance method `bar` in `Foo` (Typing[4053])
+  File "duplicate_class_declaration.php", line 3, characters 29-31:
+  Did you mean `foo` instead?
+  File "duplicate_class_declaration.php", line 7, characters 14-16:
+  This is why I think it is an object of type Foo
+  File "duplicate_class_declaration.php", line 3, characters 7-9:
+  Declaration of `Foo` is here

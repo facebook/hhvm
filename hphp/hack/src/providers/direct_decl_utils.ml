@@ -8,6 +8,36 @@
 
 open Hh_prelude
 
+(* If any decls in the list have the same name, retain only the first
+   declaration of each symbol in the sequence. *)
+let dedup_decls decls =
+  let open Shallow_decl_defs in
+  let seen_types = String.Table.create () in
+  let seen_funs = String.Table.create () in
+  let seen_consts = String.Table.create () in
+  Sequence.filter decls ~f:(fun decl ->
+      match decl with
+      | (name, Class _)
+      | (name, Record _)
+      | (name, Typedef _) ->
+        if String.Table.mem seen_types name then
+          false
+        else
+          let () = String.Table.add_exn seen_types ~key:name ~data:() in
+          true
+      | (name, Fun _) ->
+        if String.Table.mem seen_funs name then
+          false
+        else
+          let () = String.Table.add_exn seen_funs ~key:name ~data:() in
+          true
+      | (name, Const _) ->
+        if String.Table.mem seen_consts name then
+          false
+        else
+          let () = String.Table.add_exn seen_consts ~key:name ~data:() in
+          true)
+
 (* If a symbol was also declared in another file, and that file was determined
    to be the winner in the naming table, remove its decl from the list.
 
@@ -40,7 +70,11 @@ let cache_decls ctx file decls =
   let open Shallow_decl_defs in
   let open Typing_defs in
   let decls =
-    decls |> Sequence.of_list |> remove_naming_conflict_losers ctx file
+    decls
+    |> List.rev (* direct decl parser produces reverse of syntactic order *)
+    |> Sequence.of_list
+    |> dedup_decls
+    |> remove_naming_conflict_losers ctx file
   in
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis -> failwith "invalid"

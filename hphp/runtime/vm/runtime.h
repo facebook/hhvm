@@ -33,6 +33,8 @@
 
 namespace HPHP {
 
+extern RDS_LOCAL_NO_CHECK(uint64_t, rl_num_coeffect_violations);
+
 struct HhbcExtFuncInfo;
 struct HhbcExtClassInfo;
 

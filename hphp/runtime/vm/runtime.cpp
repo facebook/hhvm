@@ -347,6 +347,8 @@ void raiseTooManyArgumentsPrologue(const Func* func, ArrayData* unpackArgs) {
 
 //////////////////////////////////////////////////////////////////////
 
+RDS_LOCAL_NO_CHECK(uint64_t, rl_num_coeffect_violations){0};
+
 void raiseCoeffectsCallViolation(const Func* callee,
                                  RuntimeCoeffects provided,
                                  RuntimeCoeffects required) {
@@ -389,11 +391,13 @@ void raiseCoeffectsCallViolation(const Func* callee,
 
   assertx(!provided.canCall(required));
   if (provided.canCallWithWarning(required)) {
-    auto const coinflip = []{
+    auto const shouldWarn = []{
       auto const rate = RO::EvalCoeffectViolationWarningSampleRate;
-      return rate > 0 && folly::Random::rand32(rate) == 0;
+      if (!(rate > 0 && folly::Random::rand32(rate) == 0)) return false;
+      return *rl_num_coeffect_violations < RO::EvalCoeffectViolationWarningMax;
     }();
-    if (!coinflip) return;
+    if (!shouldWarn) return;
+    (*rl_num_coeffect_violations)++;
     raise_warning(errMsg());
   } else {
     SystemLib::throwBadMethodCallExceptionObject(errMsg());

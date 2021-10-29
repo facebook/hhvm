@@ -1411,6 +1411,8 @@ void ExecutionContext::requestInit() {
   ResourceHdr::resetMaxId();
   jit::tc::requestInit();
 
+  *rl_num_coeffect_violations = 0;
+
   if (RuntimeOption::EvalJitEnableRenameFunction) {
     assertx(SystemLib::s_anyNonPersistentBuiltins);
   }

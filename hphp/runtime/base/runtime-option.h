@@ -1278,6 +1278,7 @@ struct RuntimeOption {
   F(StringToIntMap, CoeffectEnforcementLevels, {})                      \
   F(uint32_t, CoeffectViolationWarningSampleRate, 1)                    \
   F(uint32_t, ContextConstantWarningSampleRate, 1)                      \
+  F(uint64_t, CoeffectViolationWarningMax, std::numeric_limits<uint64_t>::max()) \
   /*                                                                    \
    * 0 - Nothing                                                        \
    * 1 - Warn                                                           \

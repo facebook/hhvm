@@ -215,12 +215,12 @@ let (is_hh_fixme : (Pos.t -> error_code -> bool) ref) = ref (fun _ _ -> false)
 
 let badpos_message =
   Printf.sprintf
-    "There is an error somewhere in this file. However the type checker reports that the error is in another file. %s"
+    "Incomplete position information! Your type error is in this file, but we could only find related positions in another file. %s"
     Error_message_sentinel.please_file_a_bug_message
 
 let badpos_message_2 =
   Printf.sprintf
-    "There is an error somewhere in this definition. However the type checker reports that the error is elsewhere. %s"
+    "Incomplete position information! We couldn't find the exact line of your type error in this definition. %s"
     Error_message_sentinel.please_file_a_bug_message
 
 let try_with_result f1 (f2 : 'res -> error -> 'res) : 'res =

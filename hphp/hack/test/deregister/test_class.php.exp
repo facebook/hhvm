@@ -1,2 +1,2 @@
-File "test_class.php", line 11, characters 13-19:
-Unbound name: `Ignored` (an object type) (Naming[2049])
+File "test_class.php", line 4, characters 12-19:
+Unbound name: `MCRouter` (an object type) (Naming[2049])

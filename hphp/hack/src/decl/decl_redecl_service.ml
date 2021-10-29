@@ -572,19 +572,6 @@ let invalidate_folded_classes_for_shallow_fanout
   SharedMem.GC.collect `gentle;
   ()
 
-let invalidate_shallow_classes_for_shallow_fanout
-    ctx
-    {
-      FileInfo.n_funs = _;
-      n_classes;
-      n_record_defs = _;
-      n_types = _;
-      n_consts = _;
-    } =
-  Shallow_classes_provider.remove_batch ctx n_classes;
-  SharedMem.GC.collect `gentle;
-  ()
-
 (*****************************************************************************)
 (* The main entry point *)
 (*****************************************************************************)
@@ -661,8 +648,6 @@ let redo_type_decl
         ~bucket_size
         ~get_classes_in_file:get_classes
         changed';
-
-      invalidate_shallow_classes_for_shallow_fanout ctx all_defs;
 
       let changed = DepSet.union changed changed' in
       let to_recheck = DepSet.union to_recheck needs_recheck in

@@ -19,7 +19,9 @@ let program_name = "hh_server"
  * they are short-lived processes *)
 let gc_control = Gc.get ()
 
-let scuba_table_name = "hh_server_events"
+let scuba_table_name =
+  try Sys.getenv "HH_SCUBA_TABLE" with
+  | _ -> "hh_server_events"
 
 (* Where to write temp files *)
 let tmp_dir =

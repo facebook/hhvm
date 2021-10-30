@@ -262,7 +262,7 @@ let unbound_name env (pos, name) e =
     expr_any env pos e
 
 (* Is this type Traversable<vty> or Container<vty> for some vty? *)
-let get_value_collection_inst ty =
+let get_value_collection_inst env ty =
   match get_node ty with
   | Tclass ((_, c), _, [vty])
     when String.equal c SN.Collections.cTraversable
@@ -272,13 +272,15 @@ let get_value_collection_inst ty =
    * that the element type is mixed *)
   | Tnonnull -> Some (MakeType.mixed Reason.Rnone)
   | Tany _ -> Some ty
+  | Tdynamic when env.in_support_dynamic_type_method_check ->
+    Some ty (* interpret dynamic as Traversable<dynamic> *)
   | _ -> None
 
 (* Is this type KeyedTraversable<kty,vty>
  *           or KeyedContainer<kty,vty>
  * for some kty, vty?
  *)
-let get_key_value_collection_inst p ty =
+let get_key_value_collection_inst env p ty =
   match get_node ty with
   | Tclass ((_, c), _, [kty; vty])
     when String.equal c SN.Collections.cKeyedTraversable
@@ -291,6 +293,10 @@ let get_key_value_collection_inst p ty =
     let mixed = MakeType.mixed Reason.Rnone in
     Some (arraykey, mixed)
   | Tany _ -> Some (ty, ty)
+  | Tdynamic when env.in_support_dynamic_type_method_check ->
+    (* interpret dynamic as KeyedTraversable<arraykey, dynamic> *)
+    let arraykey = MakeType.arraykey (Reason.Rkey_value_collection_key p) in
+    Some (arraykey, ty)
   | _ -> None
 
 (* Is this type varray<vty> or a supertype for some vty? *)
@@ -310,22 +316,22 @@ let kvc_kind_to_supers kind =
   | Dict -> [SN.Collections.cDict]
 
 (* Is this type one of the value collection types with element type vty? *)
-let get_vc_inst vc_kind ty =
+let get_vc_inst env vc_kind ty =
   let classnames = vc_kind_to_supers vc_kind in
   match get_node ty with
   | Tclass ((_, c), _, [vty]) when List.exists classnames ~f:(String.equal c) ->
     Some vty
-  | _ -> get_value_collection_inst ty
+  | _ -> get_value_collection_inst env ty
 
 (* Is this type one of the three key-value collection types
  * e.g. dict<kty,vty> or a supertype for some kty and vty? *)
-let get_kvc_inst p kvc_kind ty =
+let get_kvc_inst env p kvc_kind ty =
   let classnames = kvc_kind_to_supers kvc_kind in
   match get_node ty with
   | Tclass ((_, c), _, [kty; vty])
     when List.exists classnames ~f:(String.equal c) ->
     Some (kty, vty)
-  | _ -> get_key_value_collection_inst p ty
+  | _ -> get_key_value_collection_inst env p ty
 
 (* Check whether this is a function type that (a) either returns a disposable
  * or (b) has the <<__ReturnDisposable>> attribute
@@ -2891,7 +2897,7 @@ and expr_
           | Vec ->
             (array_value, false)
         in
-        ( get_vc_inst kind,
+        ( get_vc_inst env kind,
           class_name,
           subtype_val,
           coerce_for_op,
@@ -2899,7 +2905,7 @@ and expr_
           fun value_ty ->
             MakeType.class_type (Reason.Rwitness p) class_name [value_ty] )
       | Varray _ ->
-        ( get_vc_inst Vec,
+        ( get_vc_inst env Vec,
           "varray",
           array_value,
           false,
@@ -2959,14 +2965,14 @@ and expr_
       match e with
       | KeyValCollection (kind, _, _) ->
         let class_name = Nast.kvc_kind_to_name kind in
-        ( get_kvc_inst p kind,
+        ( get_kvc_inst env p kind,
           class_name,
           (fun th pairs -> Aast.KeyValCollection (kind, th, pairs)),
           (fun k v -> MakeType.class_type (Reason.Rwitness p) class_name [k; v])
         )
       | Darray _ ->
         let name = "darray" in
-        ( get_kvc_inst p Dict,
+        ( get_kvc_inst env p Dict,
           name,
           (fun th pairs -> Aast.KeyValCollection (Dict, th, pairs)),
           (fun k v -> MakeType.darray (Reason.Rwitness p) k v) )
@@ -4235,6 +4241,29 @@ and expr_
     let (env, eexpected) = expand_expected_and_get_node env expected in
     begin
       match eexpected with
+      | Some (_pos, _ur, tdyn, Tdynamic)
+        when env.in_support_dynamic_type_method_check ->
+        let make_dynamic { et_type; et_enforced } =
+          let et_type =
+            match (get_node et_type, et_enforced) with
+            | (Tany _, _) (* lambda param without type hint *)
+            | (_, Unenforced) ->
+              tdyn
+            | (_, Enforced) ->
+              MakeType.intersection
+                (Reason.Rsupport_dynamic_type (get_pos tdyn))
+                [tdyn; et_type]
+          in
+          { et_type; et_enforced }
+        in
+        let ft_params =
+          List.map declared_ft.ft_params ~f:(function param ->
+              { param with fp_type = make_dynamic param.fp_type })
+        in
+        check_body_under_known_params
+          env
+          ~ret_ty:tdyn
+          { declared_ft with ft_params }
       | Some (_pos, _ur, ty, Tfun expected_ft) ->
         (* First check that arities match up *)
         check_lambda_arity p (get_pos ty) declared_ft expected_ft;

@@ -1,0 +1,8 @@
+File "bidirectional.bad.php", line 4, characters 10-10:
+Function  `f` is not dynamically callable. (Typing[4402])
+  File "bidirectional.bad.php", line 8, characters 17-18:
+  Invalid argument
+  File "bidirectional.bad.php", line 14, characters 22-28:
+  Expected `shape()`
+  File "bidirectional.bad.php", line 4, characters 15-45:
+  But got `dynamic` because method must be callable in a dynamic context

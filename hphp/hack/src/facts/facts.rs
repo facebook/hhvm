@@ -240,6 +240,7 @@ impl TypeFacts {
             implements,
             user_attributes,
             methods,
+            static_methods,
             ..
         } = decl;
 
@@ -293,6 +294,7 @@ impl TypeFacts {
 
         let methods = methods
             .iter()
+            .chain(static_methods.into_iter())
             .filter_map(|m| {
                 let attributes = to_facts_attributes(m.attributes);
                 // Add this method to the output iff it's

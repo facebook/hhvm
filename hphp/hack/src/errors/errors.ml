@@ -5798,7 +5798,7 @@ let readonly_invalid_as_mut pos =
   add
     (Typing.err_code Typing.ReadonlyInvalidAsMut)
     pos
-    "Only value types and arrays can be converted to mutable."
+    "Only value types and arrays can be converted to mutable. This value can never be a primitive."
 
 let readonly_exception pos =
   add

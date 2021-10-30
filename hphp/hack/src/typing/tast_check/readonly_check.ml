@@ -158,13 +158,18 @@ let is_value_collection_ty env ty =
     TODO(readonly): Update to include more complex types. *)
 let rec is_safe_mut_ty env (seen : SSet.t) ty =
   let open Typing_defs_core in
+  let (env, ty) = Tast_env.expand_type env ty in
   match get_node ty with
-  | Tshape (Open_shape, _) -> false
-  | Tshape (Closed_shape, fields) ->
+  (* Allow all primitive types *)
+  | Tprim _ -> true
+  (* Open shapes can technically have objects in them, but as long as the current fields don't have objects in them
+     we will allow you to call the function. Note that the function fails at runtime if any shape fields are objects. *)
+  | Tshape (_, fields) ->
     TShapeMap.for_all (fun _k v -> is_safe_mut_ty env seen v.sft_ty) fields
   (* If it's a Tclass it's an array type by is_value_collection *)
   | Tintersection tyl -> List.exists tyl ~f:(fun l -> is_safe_mut_ty env seen l)
-  | Tunion tyl -> List.for_all tyl ~f:(fun l -> is_safe_mut_ty env seen l)
+  (* Only error if there isn't a type that it could be that's primitive *)
+  | Tunion tyl -> List.exists tyl ~f:(fun l -> is_safe_mut_ty env seen l)
   | Ttuple tyl -> List.for_all tyl ~f:(fun l -> is_safe_mut_ty env seen l)
   | Tdependent (_, upper) ->
     (* check upper bounds *)
@@ -180,7 +185,7 @@ let rec is_safe_mut_ty env (seen : SSet.t) ty =
       let upper_bounds = Tast_env.get_upper_bounds env name tyargs in
       Typing_set.exists (fun l -> is_safe_mut_ty env new_seen l) upper_bounds
   | _ ->
-    (* Otherwise, check if it's primitive *)
+    (* Otherwise, check if there's any primitive type it could be *)
     let env = Tast_env.tast_env_as_typing_env env in
     let primitive_types =
       [
@@ -189,15 +194,19 @@ let rec is_safe_mut_ty env (seen : SSet.t) ty =
         MakeType.arraykey Reason.none;
         MakeType.string Reason.none;
         MakeType.float Reason.none;
-        MakeType.null Reason.none;
         MakeType.num Reason.none;
         (* Keysets only contain arraykeys so if they're readonly its safe to remove *)
         MakeType.keyset Reason.none (MakeType.arraykey Reason.none);
+        (* We don't put null here because we want to exclude ?Foo.
+           as_mut(null) itself is allowed by the Tprim above*)
       ]
     in
-    (* Make a union type to subtype with the ty *)
-    let union = MakeType.union Reason.none primitive_types in
-    Typing_utils.is_sub_type env ty union
+    let null = MakeType.null Reason.none in
+    (* Make sure that a primitive *could* be this type by intersecting all primitives and subtyping. *)
+    let intersection = MakeType.intersection Reason.none primitive_types in
+    let union = MakeType.union Reason.none (null :: primitive_types) in
+    Typing_utils.is_sub_type env intersection ty
+    || Typing_utils.is_sub_type env ty union
 
 (* Check that function calls which return readonly are wrapped in readonly *)
 let check_readonly_return_call pos caller_ty is_readonly =

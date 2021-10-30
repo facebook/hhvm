@@ -13,5 +13,5 @@ function passes_mutable_union_to_as_mut(
   bool $b,
 ): void {
   $union = $b ? $int : $ref;
-  HH\Readonly\as_mut($union); // not ok, $ref is not primitive
+  HH\Readonly\as_mut($union); // expect no error
 }

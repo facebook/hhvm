@@ -1,0 +1,2 @@
+
+Fatal error: Readonly values cannot be written to xhp attributes at this time. in %s on line 12

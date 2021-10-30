@@ -440,14 +440,14 @@ fn check_assignment_validity(
 
 struct Checker {
     errors: Vec<SyntaxError>,
-    is_typechecker: bool,
+    _is_typechecker: bool, // used for migration purposes
 }
 
 impl Checker {
     fn new(typechecker: bool) -> Self {
         Self {
             errors: vec![],
-            is_typechecker: typechecker,
+            _is_typechecker: typechecker,
         }
     }
 
@@ -612,7 +612,7 @@ impl<'ast> VisitorMut<'ast> for Checker {
                     }
                 }
             }
-            aast::Expr_::New(n) if self.is_typechecker => {
+            aast::Expr_::New(n) => {
                 let (_, _targs, args, _variadic, _) = &mut **n;
                 for param in args.iter_mut() {
                     match rty_expr(context, param) {
@@ -642,9 +642,7 @@ impl<'ast> VisitorMut<'ast> for Checker {
         p: &mut aast::XhpSimple<(), ()>,
     ) -> Result<(), ()> {
         if let Rty::Readonly = rty_expr(context, &p.expr) {
-            if self.is_typechecker {
-                self.add_error(&p.expr.1, syntax_error::readonly_on_xhp);
-            }
+            self.add_error(&p.expr.1, syntax_error::readonly_on_xhp);
         }
         p.recurse(context, self.object())
     }

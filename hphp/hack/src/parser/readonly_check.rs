@@ -440,14 +440,14 @@ fn check_assignment_validity(
 
 struct Checker {
     errors: Vec<SyntaxError>,
-    _is_typechecker: bool, // used for migration purposes
+    is_typechecker: bool, // used for migration purposes
 }
 
 impl Checker {
     fn new(typechecker: bool) -> Self {
         Self {
             errors: vec![],
-            _is_typechecker: typechecker,
+            is_typechecker: typechecker,
         }
     }
 
@@ -499,6 +499,18 @@ impl Checker {
         } else {
             new_lenv
         }
+    }
+    fn visit_if_typechecker(
+        &mut self,
+        context: &mut Context,
+        e: &mut aast::Expr<(), ()>,
+    ) -> std::result::Result<(), ()> {
+        if self.is_typechecker {
+            self.visit_expr(context, e)?;
+        } else {
+            e.recurse(context, self.object())?;
+        }
+        Ok(())
     }
 }
 
@@ -662,7 +674,7 @@ impl<'ast> VisitorMut<'ast> for Checker {
             aast::Stmt_::If(i) => {
                 let (condition, if_, else_) = &mut **i;
                 let old_lenv = context.locals.clone();
-                condition.recurse(context, self.object())?;
+                self.visit_if_typechecker(context, condition)?;
                 let if_lenv = self.handle_single_block(context, old_lenv.clone(), if_);
                 let else_lenv = self.handle_single_block(context, old_lenv.clone(), else_);
                 let new_lenv = merge_lenvs(&if_lenv, &else_lenv);
@@ -689,7 +701,7 @@ impl<'ast> VisitorMut<'ast> for Checker {
             }
             aast::Stmt_::Switch(s) => {
                 let (condition, cases) = &mut **s;
-                condition.recurse(context, self.object())?;
+                self.visit_if_typechecker(context, condition)?;
                 let old_lenv = context.locals.clone();
                 let result_lenv =
                     cases
@@ -698,7 +710,7 @@ impl<'ast> VisitorMut<'ast> for Checker {
                             context.locals.clone(),
                             |result_lenv, mut case| match &mut case {
                                 aast::Case::Case(exp, b) => {
-                                    let _ = exp.recurse(context, self.object());
+                                    let _ = self.visit_if_typechecker(context, exp);
                                     let case_lenv =
                                         self.handle_single_block(context, old_lenv.clone(), b);
                                     merge_lenvs(&result_lenv, &case_lenv)
@@ -760,7 +772,7 @@ impl<'ast> VisitorMut<'ast> for Checker {
                     // knowing that a parse error will show up
                     _ => {}
                 };
-                e.recurse(context, self.object())?;
+                self.visit_if_typechecker(context, e)?;
                 as_expr.recurse(context, self.object())?;
                 let old_lenv = context.locals.clone();
                 let new_lenv = self.handle_loop(context, old_lenv, b);
@@ -773,11 +785,11 @@ impl<'ast> VisitorMut<'ast> for Checker {
                 let new_lenv = self.handle_single_block(context, context.locals.clone(), b);
                 let block_lenv = self.handle_loop(context, new_lenv, b);
                 context.locals = block_lenv;
-                cond.recurse(context, self.object())
+                self.visit_if_typechecker(context, cond)
             }
             aast::Stmt_::While(w) => {
                 let (cond, b) = &mut **w;
-                cond.recurse(context, self.object())?;
+                self.visit_if_typechecker(context, cond)?;
                 let old_lenv = context.locals.clone();
                 let new_lenv = self.handle_loop(context, old_lenv, b);
                 context.locals = new_lenv;
@@ -786,16 +798,16 @@ impl<'ast> VisitorMut<'ast> for Checker {
             aast::Stmt_::For(f) => {
                 let (initializers, term, increment, b) = &mut **f;
                 for i in initializers {
-                    i.recurse(context, self.object())?;
+                    self.visit_if_typechecker(context, i)?;
                 }
                 match term {
                     Some(t) => {
-                        t.recurse(context, self.object())?;
+                        self.visit_if_typechecker(context, t)?;
                     }
                     None => {}
                 }
                 for inc in increment {
-                    inc.recurse(context, self.object())?;
+                    self.visit_if_typechecker(context, inc)?;
                 }
                 let old_lenv = context.locals.clone();
                 let new_lenv = self.handle_loop(context, old_lenv, b);

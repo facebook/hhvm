@@ -1,0 +1,24 @@
+File "readonly_immediate_call_stmt.php", line 16, characters 16-17:
+Invalid argument (Typing[4411])
+  File "readonly_immediate_call_stmt.php", line 16, characters 16-17:
+  This expression is readonly
+  File "readonly_immediate_call_stmt.php", line 4, characters 24-33:
+  It is incompatible with this parameter, which is mutable
+File "readonly_immediate_call_stmt.php", line 19, characters 19-20:
+Invalid argument (Typing[4411])
+  File "readonly_immediate_call_stmt.php", line 19, characters 19-20:
+  This expression is readonly
+  File "readonly_immediate_call_stmt.php", line 4, characters 24-33:
+  It is incompatible with this parameter, which is mutable
+File "readonly_immediate_call_stmt.php", line 23, characters 21-22:
+Invalid argument (Typing[4411])
+  File "readonly_immediate_call_stmt.php", line 23, characters 21-22:
+  This expression is readonly
+  File "readonly_immediate_call_stmt.php", line 4, characters 24-33:
+  It is incompatible with this parameter, which is mutable
+File "readonly_immediate_call_stmt.php", line 24, characters 23-24:
+Invalid argument (Typing[4411])
+  File "readonly_immediate_call_stmt.php", line 24, characters 23-24:
+  This expression is readonly
+  File "readonly_immediate_call_stmt.php", line 8, characters 27-28:
+  It is incompatible with this parameter, which is mutable

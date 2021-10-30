@@ -20,6 +20,8 @@ use serde::Serializer;
 use serde_derive::Serialize;
 use serde_json::json;
 
+use crate::facts_parser::add_or_update_classish_decl;
+
 #[derive(Debug, Clone, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub enum TypeKind {
@@ -99,19 +101,18 @@ impl Facts {
     pub fn facts_of_decls<'a>(decls: &Decls<'a>) -> Facts {
         // 10/15/2021 TODO(T103413083): Fill out the implementation
 
-        let mut types = decls
-            .classes()
-            .map(|(name, decl)| {
-                let name = if decl.is_xhp && !decl.has_xhp_keyword {
-                    format!("xhp_{}", strip_global_ns(name))
-                        .replace("\\", "__")
-                        .replace("-", "_")
-                } else {
-                    format(name)
-                };
-                (name, TypeFacts::of_class_decl(decl))
-            })
-            .collect::<TypeFactsByName>();
+        let mut types = TypeFactsByName::new();
+        decls.classes().for_each(|(name, decl)| {
+            let name = if decl.is_xhp && !decl.has_xhp_keyword {
+                format!("xhp_{}", strip_global_ns(name))
+                    .replace("\\", "__")
+                    .replace("-", "_")
+            } else {
+                format(name)
+            };
+            let type_fact = TypeFacts::of_class_decl(decl);
+            add_or_update_classish_decl(name, type_fact, &mut types);
+        });
         let mut type_aliases = decls
             .typedefs()
             .filter_map(|(name, decl)| {

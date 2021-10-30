@@ -319,7 +319,11 @@ fn class_decl_into_facts(
     }
 }
 
-fn add_or_update_classish_decl(name: String, mut delta: TypeFacts, types: &mut TypeFactsByName) {
+pub fn add_or_update_classish_decl(
+    name: String,
+    mut delta: TypeFacts,
+    types: &mut TypeFactsByName,
+) {
     types
         .entry(name)
         .and_modify(|tf| {

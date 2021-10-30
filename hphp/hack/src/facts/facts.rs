@@ -241,6 +241,7 @@ impl TypeFacts {
             user_attributes,
             methods,
             static_methods,
+            enum_type,
             ..
         } = decl;
 
@@ -271,7 +272,14 @@ impl TypeFacts {
                 flags = Flag::Abstract.as_flags();
                 TypeKind::Trait
             }
-            ClassishKind::Cenum => TypeKind::Enum,
+            ClassishKind::Cenum => {
+                if let Some(et) = enum_type {
+                    et.includes.iter().for_each(|ty| {
+                        base_types.insert(extract_type_name(ty));
+                    });
+                }
+                TypeKind::Enum
+            }
             ClassishKind::CenumClass(abstraction) => {
                 flags = modifiers_to_flags(flags, *final_, *abstraction);
                 TypeKind::Enum

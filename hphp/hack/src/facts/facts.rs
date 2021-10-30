@@ -385,7 +385,7 @@ fn to_facts_attributes<'a>(attributes: &'a [&'a UserAttribute<'a>]) -> Attribute
                     attr_name,
                     ua.classname_params
                         .iter()
-                        .map(|param| String::from(*param))
+                        .map(|param| format(*param).to_string())
                         .collect::<Vec<String>>(),
                 ))
             }

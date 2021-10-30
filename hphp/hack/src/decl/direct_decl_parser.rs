@@ -48,9 +48,9 @@ pub fn parse_decls_without_reference_text<'a, 'text>(
     text: &'text [u8],
     arena: &'a Bump,
     stack_limit: Option<&'a StackLimit>,
-) -> Decls<'a> {
+) -> (Decls<'a>, bool) {
     let text = SourceText::make(RcOc::new(filename), text);
-    let (_, _errors, state, _mode) =
+    let (_, errors, state, _mode) =
         direct_decl_parser::parse_script_without_reference_text(opts, &text, arena, stack_limit);
-    state.decls
+    (state.decls, !errors.is_empty())
 }

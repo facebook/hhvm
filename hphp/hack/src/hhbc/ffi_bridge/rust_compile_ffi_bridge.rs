@@ -43,6 +43,7 @@ pub mod compile_ffi {
         serialized: Box<Bytes>,
         decls: Box<Decls>,
         bump: Box<Bump>,
+        has_errors: bool,
     }
 
     #[derive(Debug)]
@@ -173,7 +174,7 @@ pub mod compile_ffi {
         fn hackc_facts_to_json_cpp_ffi(facts: FactsResult, source_text: &CxxString) -> String;
 
         unsafe fn hackc_decls_to_facts_cpp_ffi(
-            decls: &Decls,
+            decl_result: &DeclResult,
             source_text: &CxxString,
         ) -> FactsResult;
     }
@@ -362,12 +363,13 @@ pub fn hackc_create_direct_decl_parse_options(
 }
 
 impl compile_ffi::DeclResult {
-    fn new(hash: u64, serialized: Bytes, decls: Decls, bump: Bump) -> Self {
+    fn new(hash: u64, serialized: Bytes, decls: Decls, bump: Bump, has_errors: bool) -> Self {
         Self {
             hash,
             serialized: Box::new(serialized),
             decls: Box::new(decls),
             bump: Box::new(bump),
+            has_errors,
         }
     }
 }
@@ -394,7 +396,7 @@ pub fn hackc_direct_decl_parse(
     let text = text.as_bytes();
     let path = std::path::PathBuf::from(std::ffi::OsStr::from_bytes(filename.as_bytes()));
     let filename = RelativePath::make(Prefix::Root, path);
-    let decls: direct_decl_parser::Decls<'static> =
+    let (decls, has_errors): (direct_decl_parser::Decls<'static>, bool) =
         decl_rust::direct_decl_parser::parse_decls_without_reference_text(
             opts, filename, text, alloc, None,
         );
@@ -410,6 +412,7 @@ pub fn hackc_direct_decl_parse(
         Bytes(ffi::Bytes::from(data)),
         Decls(decls),
         Bump(bump),
+        has_errors,
     )
 }
 
@@ -571,12 +574,16 @@ pub fn hackc_facts_to_json_cpp_ffi(
 }
 
 pub fn hackc_decls_to_facts_cpp_ffi(
-    decls: &Decls,
+    decl_result: &compile_ffi::DeclResult,
     source_text: &CxxString,
 ) -> compile_ffi::FactsResult {
     let text = source_text.as_bytes();
     let (md5sum, sha1sum) = facts::md5_and_sha1(text);
-    let facts = compile_ffi::Facts::from(facts::Facts::facts_of_decls(&decls.0));
+    let facts = if decl_result.has_errors {
+        compile_ffi::Facts::default()
+    } else {
+        compile_ffi::Facts::from(facts::Facts::facts_of_decls(&(*decl_result.decls).0))
+    };
     compile_ffi::FactsResult {
         facts: facts.into(),
         md5sum,

@@ -171,15 +171,32 @@ bool checkCfg(const IRUnit& unit) {
     if (auto e = b->nextEdge())  checkEdge(e);
     if (auto e = b->takenEdge()) checkEdge(e);
   }
+
+  auto seenPred = boost::dynamic_bitset<>(unit.numBlocks());
   for (Block* b : blocks) {
     for (auto const& e : b->preds()) {
       always_assert(&e == e.inst()->takenEdge() || &e == e.inst()->nextEdge());
       always_assert(e.to() == b);
 
+      // All of a block's preds should be unique. The exception is if
+      // the pred has both a next and taken edge to this block.
+      always_assert_flog(
+        !seenPred.test(e.from()->id()) ||
+        (e.from()->back().next() &&
+         e.from()->back().taken() &&
+         e.from()->back().next()->id() == b->id() &&
+         e.from()->back().taken()->id() == b->id()),
+        "B{} has duplicate pred to B{}",
+        b->id(), e.from()->id()
+      );
+
       // Invariant #5
       always_assert_flog(reachable.test(e.from()->id()),
         "unreachable: B{}\n", e.from()->id());
+
+      seenPred.set(e.from()->id());
     }
+    seenPred.reset();
   }
 
   auto defined_set = jit::sparse_idptr_set<SSATmp>{unit.numTmps()};

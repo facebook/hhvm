@@ -351,7 +351,15 @@ inline void Block::push_back(IRInstruction* inst) {
 
 template <class Predicate>
 inline void Block::remove_if(Predicate p) {
-  m_instrs.remove_if(p);
+  auto it = begin();
+  auto const e = end();
+  while (it != e) {
+    if (!p(*it)) {
+      ++it;
+    } else {
+      it = erase(it);
+    }
+  }
 }
 
 inline InstructionList&& Block::moveInstrs() {

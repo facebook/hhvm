@@ -355,7 +355,8 @@ fn hex_number_to_i64(s: &str) -> i64 {
 fn extract_type_name<'a>(ty: &Ty<'a>) -> String {
     match ty.get_node() {
         Ty_::Tapply(((_, id), _)) => format(*id),
-        _ => unimplemented!(),
+        Ty_::Tgeneric((id, _)) => format(*id),
+        _ => unimplemented!("{:?}", ty),
     }
 }
 

@@ -133,6 +133,9 @@ struct StructLayout : public ConcreteLayout {
 
   const Field& field(Slot slot) const;
 
+  // Types come first in a StructDict payload, so this offset can be static.
+  static constexpr size_t staticTypeOffset() { return sizeof(StructDict); }
+
   size_t typeOffset() const { return typeOffsetForSlot(0); }
   size_t valueOffset() const { return valueOffsetForSlot(0); }
   size_t positionOffset() const;
@@ -140,8 +143,6 @@ struct StructLayout : public ConcreteLayout {
   // Offset of DataType and Value for 'slot' from beginning of a StructDict.
   size_t typeOffsetForSlot(Slot slot) const;
   size_t valueOffsetForSlot(Slot slot) const;
-
-  static Slot slotForTypeOffset(size_t offset);
 
   ArrayLayout appendType(Type val) const override;
   ArrayLayout removeType(Type key) const override;
@@ -155,14 +156,15 @@ struct StructLayout : public ConcreteLayout {
   // Perfect hashing implementation.
   struct PerfectHashEntry {
     LowStringPtr str;
-    uint16_t typeOffset;
     uint16_t valueOffset;
+    uint8_t slot;
+    uint8_t unused;
   };
 
   static constexpr size_t kMaxColor = 255;
   using PerfectHashTable = PerfectHashEntry[kMaxColor + 1];
 
-  static PerfectHashTable* hashTableForLayout(const Layout* layout);
+  static PerfectHashTable* hashTable(const Layout* layout);
   static PerfectHashTable* hashTableSet();
 
 private:

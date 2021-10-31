@@ -106,7 +106,7 @@ bool StructDict::checkInvariants() const {
 
 size_t StructLayout::typeOffsetForSlot(Slot slot) const {
   assertx(slot < numFields());
-  return sizeof(StructDict) + slot * sizeof(DataType);
+  return staticTypeOffset() + slot * sizeof(DataType);
 }
 
 size_t StructLayout::valueOffsetForSlot(Slot slot) const {
@@ -116,11 +116,6 @@ size_t StructLayout::valueOffsetForSlot(Slot slot) const {
 
 size_t StructLayout::positionOffset() const {
   return sizeof(StructDict) + numFields();
-}
-
-Slot StructLayout::slotForTypeOffset(size_t offset) {
-  static_assert(sizeof(DataType) == 1);
-  return offset - sizeof(StructDict);
 }
 
 // As documented in bespoke/layout.h, bespoke layout bytes are constrained to
@@ -215,33 +210,29 @@ uint32_t StructLayout::extraInitializer() const {
   return m_extra_initializer;
 }
 
-Slot StructLayout::keySlotStatic(LayoutIndex index, const StringData* key) {
-  auto const& entry = s_hashTableSet[index.raw][key->color()];
-  auto const DEBUG_ONLY layout = StructLayout::As(Layout::FromIndex(index));
-  if (entry.str == key) {
-    auto const slot = slotForTypeOffset(entry.typeOffset);
-    if (debug) {
-      auto const DEBUG_ONLY it = layout->m_key_to_slot.find(StaticKey{key});
-      assertx(it != layout->m_key_to_slot.end() && it->second == slot);
-    }
-    return slot;
-  } else {
-    assertx(layout->m_key_to_slot.find(StaticKey{key}) == layout->m_key_to_slot.end());
-    return kInvalidSlot;
-  }
-}
-
-Slot StructLayout::keySlot(const StringData* key) const {
-  if (!key->isStatic()) return keySlotNonStatic(key);
-  return keySlotStatic(index(), key);
-}
-
 Slot StructLayout::keySlot(LayoutIndex index, const StringData* key) {
   if (!key->isStatic()) {
     auto const layout = StructLayout::As(Layout::FromIndex(index));
     return layout->keySlotNonStatic(key);
   }
   return keySlotStatic(index, key);
+}
+
+Slot StructLayout::keySlotStatic(LayoutIndex index, const StringData* key) {
+  assertx(key->isStatic());
+  auto const& entry = s_hashTableSet[index.raw][key->color()];
+  auto const match = entry.str == key;
+  if (debug) {
+    auto const layout = StructLayout::As(Layout::FromIndex(index));
+    auto const slot = layout->keySlotNonStatic(key);
+    always_assert(slot == (match ? entry.slot : kInvalidSlot));
+  }
+  return match ? entry.slot : kInvalidSlot;
+}
+
+Slot StructLayout::keySlot(const StringData* key) const {
+  if (!key->isStatic()) return keySlotNonStatic(key);
+  return keySlotStatic(index(), key);
 }
 
 NEVER_INLINE
@@ -307,11 +298,9 @@ void StructLayout::createColoringHashMap() const {
     auto const color = key->color();
     assertx(color != StringData::kInvalidColor);
     assertx(table[color].str == nullptr);
-    auto const slot = keySlotNonStatic(key);
-    auto const typeOffset = safe_cast<uint16_t>(typeOffsetForSlot(slot));
+    auto const slot = safe_cast<uint8_t>(keySlotNonStatic(key));
     auto const valueOffset = safe_cast<uint16_t>(valueOffsetForSlot(slot));
-    assertx(slot != kInvalidSlot);
-    table[color] = { key, typeOffset, valueOffset };
+    table[color] = { key, valueOffset, slot, 0 };
   }
 }
 
@@ -320,8 +309,8 @@ StructLayout::PerfectHashTable* StructLayout::hashTableSet() {
   return s_hashTableSet;
 }
 
-StructLayout::PerfectHashTable* StructLayout::hashTableForLayout(
-    const Layout* layout) {
+StructLayout::PerfectHashTable* StructLayout::hashTable(const Layout* layout) {
+  assertx(StructLayout::As(layout));
   assertx(Layout::HierarchyFinalized());
   return &s_hashTableSet[layout->index().raw];
 }
@@ -527,24 +516,30 @@ TypedValue StructDict::NvGetStr(const StructDict* sad, const StringData* k) {
   static_assert(folly::isPowTwo(StructLayout::kMaxColor + 1));
   auto const color = k->color() & StructLayout::kMaxColor;
   auto const& entry = s_hashTableSet[sad->layoutIndex().raw][color];
-  if (entry.str == k) {
-    auto const type = *reinterpret_cast<const DataType*>(
-        reinterpret_cast<uintptr_t>(sad) + entry.typeOffset);
-    auto const value = *reinterpret_cast<const Value*>(
-        reinterpret_cast<uintptr_t>(sad) + entry.valueOffset);
-    if constexpr (debug) {
-      auto const DEBUG_ONLY res = NvGetStrNonStatic(sad, k);
-      assertx(res.m_type == type);
-      assertx(res.m_data.pcnt == value.pcnt);
-    }
-    return make_tv_of_type(value, type);
-  } else {
+
+  // Perfect hash table miss: k is definitely missing if it's a static string;
+  // else, we need to fall back to a hash table lookup for the non-static k.
+  if (entry.str != k) {
     if (k->isStatic()) {
       assertx(NvGetStrNonStatic(sad, k).m_type == KindOfUninit);
       return make_tv<KindOfUninit>();
     }
     return NvGetStrNonStatic(sad, k);
   }
+
+  // Perfect hash table hit: we can use the field offsets.
+  auto const typeOffset = entry.slot + StructLayout::staticTypeOffset();
+  auto const valueOffset = entry.valueOffset;
+  auto const type = *reinterpret_cast<const DataType*>(
+      reinterpret_cast<uintptr_t>(sad) + typeOffset);
+  auto const value = *reinterpret_cast<const Value*>(
+      reinterpret_cast<uintptr_t>(sad) + valueOffset);
+  if constexpr (debug) {
+    auto const result = NvGetStrNonStatic(sad, k);
+    always_assert(result.m_type == type);
+    always_assert(result.m_data.pcnt == value.pcnt);
+  }
+  return make_tv_of_type(value, type);
 }
 
 TypedValue StructDict::GetPosKey(const StructDict* sad, ssize_t pos) {

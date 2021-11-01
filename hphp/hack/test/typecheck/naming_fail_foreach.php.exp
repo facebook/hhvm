@@ -1,4 +1,0 @@
-File "naming_fail_foreach.php", line 7, characters 8-9:
-Variable `$z` is undefined, or not always defined. (Naming[2050])
-File "naming_fail_foreach.php", line 3, characters 12-13:
-Did you mean `$x` instead?

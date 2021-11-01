@@ -1,2 +1,0 @@
-File "static_polymorphism_undefined.php", line 4, characters 3-4:
-Variable `$a` is undefined, or not always defined. (Naming[2050])

@@ -1,4 +1,0 @@
-File "heredoc_token_inside_xhp.php", line 14, characters 18-18:
-A name is expected here. (Parsing[1002])
-File "heredoc_token_inside_xhp.php", line 14, characters 13-15:
-Unbound name: `:div` (an object type) (Naming[2049])

@@ -2,7 +2,7 @@ Errors:
   [4:12-13] Wrong number of type arguments (expected 2, got 0)
   [3:7-8] Definition is here
 [(Class
-    { c_span = [3:1-39]; c_annotation = (); c_mode = Mpartial; c_final = false; 
+    { c_span = [3:1-39]; c_annotation = (); c_mode = Mstrict; c_final = false; 
       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
       c_name = ([3:7-8], "\\D");
       c_tparams =
@@ -25,7 +25,7 @@ Errors:
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
          ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
          ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mpartial;
+       fd_file_attributes = []; fd_mode = Mstrict;
        fd_fun =
        { f_span = [4:1-26]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([4:19-23], (Hprim Tvoid)))); 

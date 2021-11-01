@@ -1,8 +1,9 @@
 Errors:
+  [10:10-13] Was expecting a return type hint
   [10:14-15] Wrong number of type arguments (expected 1, got 0)
   [3:7-8] Definition is here
 [(Class
-    { c_span = [3:1-8:2]; c_annotation = (); c_mode = Mpartial; c_final = false; 
+    { c_span = [3:1-8:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
       c_name = ([3:7-8], "\\C"); c_tparams = [{ tp_variance = Invariant; tp_name = ([3:9-10], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
       c_extends = []; c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; 
@@ -52,7 +53,7 @@ Errors:
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
          ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
          ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mpartial;
+       fd_file_attributes = []; fd_mode = Mstrict;
        fd_fun =
        { f_span = [10:1-12:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), None); f_name = ([10:10-13], "\\foo"); 

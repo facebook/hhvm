@@ -1,4 +1,4 @@
-<?hh //partial
+<?hh
 
 class A {
   public function __construct(public $x = 3) {}

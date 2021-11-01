@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 async function foo(int $x): Awaitable<mixed> {
   return $x;

@@ -1,12 +1,19 @@
 Errors:
+  [3:24-26] Was expecting a type hint
+  [7:24-26] Was expecting a type hint
+  [7:28-30] Was expecting a type hint
+  [11:19-21] Was expecting a type hint
+  [11:23-25] Was expecting a type hint
   [12:7-10] You are trying to access the property `foo` on a value whose class is unknown.
   [11:19-21] It is unknown
+  [15:32-34] Was expecting a type hint
+  [15:36-38] Was expecting a type hint
 [(Fun
     { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      fd_file_attributes = []; fd_mode = Mpartial;
+      fd_file_attributes = []; fd_mode = Mstrict;
       fd_fun =
       { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((int), (Some ([3:30-33], (Hprim Tint)))); 
@@ -31,7 +38,7 @@ Errors:
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
          ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
          ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mpartial;
+       fd_file_attributes = []; fd_mode = Mstrict;
        fd_fun =
        { f_span = [7:1-9:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((int), (Some ([7:34-37], (Hprim Tint)))); 
@@ -62,7 +69,7 @@ Errors:
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
          ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
          ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mpartial;
+       fd_file_attributes = []; fd_mode = Mstrict;
        fd_fun =
        { f_span = [11:1-13:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([11:29-33], (Hprim Tvoid)))); 
@@ -100,7 +107,7 @@ Errors:
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
          ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
          ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mpartial;
+       fd_file_attributes = []; fd_mode = Mstrict;
        fd_fun =
        { f_span = [15:1-17:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([15:42-46], (Hprim Tvoid)))); 

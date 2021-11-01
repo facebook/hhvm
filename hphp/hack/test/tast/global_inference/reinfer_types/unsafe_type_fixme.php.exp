@@ -20,7 +20,7 @@
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      fd_file_attributes = []; fd_mode = Mpartial;
+      fd_file_attributes = []; fd_mode = Mstrict;
       fd_fun =
       { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((string), (Some ([3:15-35], (Happly (([3:15-35], "\\UNSAFE_TYPE_HH_FIXME"), []))))); 
@@ -53,7 +53,7 @@
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      fd_file_attributes = []; fd_mode = Mpartial;
+      fd_file_attributes = []; fd_mode = Mstrict;
       fd_fun =
       { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((int), (Some ([3:15-37], (Haccess (([3:15-23], (Happly (([3:15-23], "\\HH_FIXME"), []))), [([3:25-37], "MISSING_TYPE")]))))); 

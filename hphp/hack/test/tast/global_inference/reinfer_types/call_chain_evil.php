@@ -20,7 +20,7 @@ function f3(mixed $x): mixed {
 }
 
 //// file4.php
-<?hh // partial
+<?hh
 
 function f(): dynamic {
   return f3(f2(f1("")));

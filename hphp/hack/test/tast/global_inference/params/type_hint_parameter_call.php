@@ -1,4 +1,4 @@
-<?hh //partial
+<?hh
 
 function foo($x): void {
     bar($x);

@@ -1,11 +1,16 @@
 Errors:
   [7:17-28] Unbound name: `Enforceable` (an object type)
   [7:17-28] Unrecognized user attribute: `Enforceable` does not have a class. Please declare a class for the attribute.
+  [6:10-11] Was expecting a return type hint
   [6:48-49] The type parameter `T` has the `<<__Newable>>` attribute. Newable type parameters must be constrained with `as`, and exactly one of those constraints must be a valid newable class. The class must either be final, or it must have the `<<__ConsistentConstruct>>` attribute or extend a class that has it. No constraints are valid newable classes
+  [7:10-11] Was expecting a return type hint
   [7:47-49] The type parameter `Tu` has the `<<__Newable>>` attribute. Newable type parameters must be constrained with `as`, and exactly one of those constraints must be a valid newable class. The class must either be final, or it must have the `<<__ConsistentConstruct>>` attribute or extend a class that has it. No constraints are valid newable classes
+  [8:10-11] Was expecting a return type hint
+  [9:10-11] Was expecting a return type hint
+  [11:10-12] Was expecting a return type hint
   [11:15-16] This constructor expects no argument
 [(Class
-    { c_span = [3:1-48]; c_annotation = (); c_mode = Mpartial; c_final = false; 
+    { c_span = [3:1-48]; c_annotation = (); c_mode = Mstrict; c_final = false; 
       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
       c_name = ([3:7-8], "\\A"); c_tparams = []; c_extends = []; c_uses = []; 
       c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
@@ -19,7 +24,7 @@ Errors:
       c_user_attributes = []; c_file_attributes = []; c_enum = None; 
       c_doc_comment = None; c_emit_id = None });
   (Class
-     { c_span = [4:1-48]; c_annotation = (); c_mode = Mpartial; c_final = false; 
+     { c_span = [4:1-48]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
        c_name = ([4:7-8], "\\B"); c_tparams = []; c_extends = []; c_uses = []; 
        c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
@@ -39,7 +44,7 @@ Errors:
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
          ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
          ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mpartial;
+       fd_file_attributes = []; fd_mode = Mstrict;
        fd_fun =
        { f_span = [6:1-57]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((_), None); f_name = ([6:10-11], "\\f");
@@ -60,7 +65,7 @@ Errors:
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
          ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
          ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mpartial;
+       fd_file_attributes = []; fd_mode = Mstrict;
        fd_fun =
        { f_span = [7:1-55]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((_), None); f_name = ([7:10-11], "\\g");
@@ -80,7 +85,7 @@ Errors:
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
          ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
          ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mpartial;
+       fd_file_attributes = []; fd_mode = Mstrict;
        fd_fun =
        { f_span = [8:1-24]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((_), None); f_name = ([8:10-11], "\\h");
@@ -99,7 +104,7 @@ Errors:
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
          ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
          ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mpartial;
+       fd_file_attributes = []; fd_mode = Mstrict;
        fd_fun =
        { f_span = [9:1-37]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((_), None); f_name = ([9:10-11], "\\j");
@@ -118,7 +123,7 @@ Errors:
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
          ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; 
          ns_disable_xhp_element_mangling = false };
-       fd_file_attributes = []; fd_mode = Mpartial;
+       fd_file_attributes = []; fd_mode = Mstrict;
        fd_fun =
        { f_span = [11:1-29]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((_), None); f_name = ([11:10-12], "\\ff");

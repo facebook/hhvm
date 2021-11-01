@@ -1,4 +1,4 @@
-<?hh //partial
+<?hh
 
 class C {
   public function foo(int $x) {

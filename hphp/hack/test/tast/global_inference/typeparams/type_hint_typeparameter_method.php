@@ -1,4 +1,4 @@
-<?hh //partial
+<?hh
 
 function foo(Map $x) {
   $x["int"] = 42;

@@ -1,5 +1,5 @@
 //// file1.php
-<?hh //partial
+<?hh
 
 class A {
   public static function f($x) {
@@ -8,7 +8,7 @@ class A {
 }
 
 //// file2.php
-<?hh //partial
+<?hh
 
 class B extends A {
   public static function f($x) {
@@ -16,7 +16,7 @@ class B extends A {
   }
 }
 //// file3.php
-<?hh //partial
+<?hh
 
 class C extends B {
   public static function f($x) {
@@ -25,7 +25,7 @@ class C extends B {
 }
 
 //// file4.php
-<?hh // partial
+<?hh
 
 function f() {
   return C::f(B::f(A::f("")));

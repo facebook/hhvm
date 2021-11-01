@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 function returnsTheStringFoo(): string { return 'foo'; }
 

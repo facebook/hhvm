@@ -1,5 +1,5 @@
 //// one.php
-<?hh // partial
+<?hh
 
 class One {
   public function foo() {
@@ -8,7 +8,7 @@ class One {
 }
 
 //// two.php
-<?hh // partial
+<?hh
 
 class Two extends One {
   public function foo() {
@@ -17,7 +17,7 @@ class Two extends One {
 }
 
 //// three.php
-<?hh // partial
+<?hh
 
 class Three extends Two {
   public function foo() {

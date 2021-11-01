@@ -9,7 +9,7 @@ type UNSAFE_TYPE_HH_FIXME_<T> = T;
 type UNSAFE_TYPE_HH_FIXME = UNSAFE_TYPE_HH_FIXME_;
 
 ////file3.php
-<?hh // partial
+<?hh
 
 function f(): UNSAFE_TYPE_HH_FIXME {
   return "foo";
@@ -22,7 +22,7 @@ abstract final class HH_FIXME {
 }
 
 ////file5.php
-<?hh // partial
+<?hh
 
 function g(): HH_FIXME::MISSING_TYPE {
   return 0;

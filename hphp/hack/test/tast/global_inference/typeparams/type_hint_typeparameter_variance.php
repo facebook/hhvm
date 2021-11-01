@@ -1,4 +1,4 @@
-<?hh //partial
+<?hh
 
 class C<+Tu, -Tv> {
   public function __construct(Tu $x, Tv $y) {}

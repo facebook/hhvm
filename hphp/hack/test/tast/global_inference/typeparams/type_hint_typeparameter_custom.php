@@ -1,4 +1,4 @@
-<?hh //partial
+<?hh
 
 class C<T> {
   public T $y;

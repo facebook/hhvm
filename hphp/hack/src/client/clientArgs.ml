@@ -1151,9 +1151,11 @@ invocations of `hh` faster.|}
       Printf.printf "The '--type' option is required. %s\n" valid_types_message;
       exit 2
     | Some "naming-and-dep-table" ->
-      ClientDownloadSavedState.Naming_and_dep_table { is_64bit = false }
+      ClientDownloadSavedState.Naming_and_dep_table
+        { is_64bit = false; naming_sqlite = false }
     | Some "naming-and-dep-table-64bit" ->
-      ClientDownloadSavedState.Naming_and_dep_table { is_64bit = true }
+      ClientDownloadSavedState.Naming_and_dep_table
+        { is_64bit = true; naming_sqlite = true }
     | Some "naming-table" -> ClientDownloadSavedState.Naming_table
     | Some saved_state_type ->
       Printf.printf

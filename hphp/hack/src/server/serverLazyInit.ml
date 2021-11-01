@@ -337,6 +337,8 @@ let download_and_load_state_exn
              {
                is_64bit =
                  genv.local_config.ServerLocalConfig.load_state_natively_64bit;
+               naming_sqlite =
+                 genv.local_config.ServerLocalConfig.use_hack_64_naming_table;
              })
       |> Future.with_timeout
            ~timeout:genv.local_config.SLC.load_state_natively_download_timeout

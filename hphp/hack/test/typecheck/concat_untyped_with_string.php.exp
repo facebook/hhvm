@@ -1,1 +1,2 @@
-No errors
+File "concat_untyped_with_string.php", line 3, characters 23-24:
+Was expecting a type hint (Typing[4032])

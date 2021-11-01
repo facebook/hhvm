@@ -1,7 +1,7 @@
-<?hh // partial
+<?hh
 
 class C {
-  public static async function f() {
+  public static async function f() /* : TAny */ {
     return 10;
   }
 }

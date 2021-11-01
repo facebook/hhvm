@@ -1,3 +1,9 @@
+File "function_async_partial.php", line 4, characters 16-18:
+Invalid return type (Typing[4101])
+  File "function_async_partial.php", line 4, characters 23-31:
+  This type has 0 arguments
+  File "function_async_partial.php", line 4, characters 16-18:
+  This one has 1
 File "function_async_partial.php", line 4, characters 23-31:
 Wrong number of type arguments (expected 1, got 0) (Typing[4101])
   File "classes.hhi", line 142, characters 16-24:

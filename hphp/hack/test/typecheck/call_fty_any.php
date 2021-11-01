@@ -1,8 +1,8 @@
-<?hh // partial
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class A {
-  public $foo;
+  public /* TAny */ $foo;
 
   public function test(): void {
     $x = Vector {};

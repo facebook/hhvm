@@ -1,1 +1,2 @@
-No errors
+File "any.php", line 6, characters 26-27:
+Was expecting a type hint (Typing[4032])

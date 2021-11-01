@@ -1,1 +1,2 @@
-No errors
+File "strict_call_tany1.php", line 12, characters 10-12:
+Was expecting a return type hint (Typing[4030])

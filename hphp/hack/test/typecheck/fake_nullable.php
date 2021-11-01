@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function darray_filter_falsy<Tk as arraykey, Tv as nonnull>(
@@ -14,7 +14,7 @@ async function genak<Tk as arraykey, Tv>(
 }
 interface I { }
 
-function tany() {
+function tany() /* : TAny */ {
   return null;
 }
 async function gennull():Awaitable<?I> {
@@ -22,8 +22,8 @@ async function gennull():Awaitable<?I> {
 }
 class C {
 
-  private darray $fld = darray[];
-  public async function foo() {
+  private darray<arraykey,mixed> $fld = darray[];
+  public async function foo(): Awaitable<void> {
     $this->fld = await genak<_,_>(
       async (int $id) : Awaitable<?I> ==> await gennull(),
       tany(),

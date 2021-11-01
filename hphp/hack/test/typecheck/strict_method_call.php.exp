@@ -1,1 +1,2 @@
-No errors
+File "strict_method_call.php", line 3, characters 10-12:
+Was expecting a return type hint (Typing[4030])

@@ -1,10 +1,6 @@
-//// partial.php
-<?hh // partial
+<?hh// strict
 
 function any() {}
-
-//// strict.php
-<?hh // strict
 
 function nullthrows<T>(?T $x): T {
   if ($x !== null) {

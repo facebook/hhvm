@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 async function f() {
   yield 1;

@@ -1,12 +1,8 @@
-//// file1.php
-<?hh // partial
+<?hh// strict
 
 async function foo() {
   yield 10;
 }
-
-//// file2.php
-<?hh // strict
 
 function bar(): void {
   // without the correct inference of foo as an async generator, this would

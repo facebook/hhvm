@@ -1,6 +1,6 @@
-<?hh // partial
+<?hh
 
-function main($untyped, $arr) {
+function main(/* TAny */ $untyped, /* TAny */ $arr) {
   $x = darray[];
   $x['foo'] = 0;
   $x[null] = 0;

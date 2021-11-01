@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 // Testing function
 async function right_hint(): Awaitable<int> {

@@ -1,12 +1,8 @@
-//// partial.php
-<?hh // partial
+<?hh
 
-async function any() {
+async function any() /* : TAny */ {
   return new D();
 }
-
-//// strict.php
-<?hh // strict
 
 class C {
   public function cc(): void {}

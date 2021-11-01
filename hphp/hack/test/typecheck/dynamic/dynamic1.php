@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 function expect_string(string $x): dynamic {
   return $x;
@@ -8,7 +8,7 @@ function expect_bool(bool $x): dynamic {
   return $x;
 }
 
-async function test(dynamic $x, classname<dynamic> $cx, $y): Awaitable<mixed> {
+async function test(dynamic $x, classname<dynamic> $cx, /* TAny */ $y): Awaitable<mixed> {
   $y = $x->read_property;
   hh_show($y);
   $y->write_property = 10;

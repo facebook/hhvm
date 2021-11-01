@@ -1,12 +1,5 @@
-//// partial.php
-<?hh // partial
+<?hh
 
-function any() {
-}
-
-//// strict.php
-<?hh // strict
-
-function f(): string {
-  return 'a' . any();
+function f(/* TAny */ $a): string {
+  return 'a' . $a;
 }

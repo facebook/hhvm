@@ -1,7 +1,7 @@
-<?hh // partial
+<?hh
 
 class C1 {
-  public async function f() { return 10; }
+  public async function f() /* : TAny */ { return 10; }
 }
 
 class C2 extends C1 {

@@ -1,8 +1,8 @@
-<?hh // partial
+<?hh
 
 function takes_int(int $x): void {}
 
-async function f() {
+async function f() /* : TAny */ {
   return 10;
 }
 

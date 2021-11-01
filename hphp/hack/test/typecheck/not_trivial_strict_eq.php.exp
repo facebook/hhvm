@@ -1,1 +1,2 @@
-No errors
+File "not_trivial_strict_eq.php", line 12, characters 10-10:
+Was expecting a return type hint (Typing[4030])

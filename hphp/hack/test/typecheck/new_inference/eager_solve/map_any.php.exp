@@ -1,1 +1,2 @@
-No errors
+File "map_any.php", line 11, characters 26-27:
+Was expecting a type hint (Typing[4032])

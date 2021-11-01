@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class B {
@@ -8,7 +8,7 @@ class C extends B {
   public function foo(): void {}
 }
 
-function test_tany($y): void {
+function test_tany(/* TAny */ $y): void {
   $f = $x ==> $x->foo();
   $f($y);
   $f(new C());

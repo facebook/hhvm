@@ -1,3 +1,9 @@
+File "invalid_arraykey.php", line 3, characters 10-13:
+Was expecting a return type hint (Typing[4030])
+File "invalid_arraykey.php", line 3, characters 26-33:
+Was expecting a type hint (Typing[4032])
+File "invalid_arraykey.php", line 3, characters 47-50:
+Was expecting a type hint (Typing[4032])
 File "invalid_arraykey.php", line 6, characters 3-14:
 This value is not a valid key type for this container (Typing[4371])
   File "invalid_arraykey.php", line 4, characters 8-15:

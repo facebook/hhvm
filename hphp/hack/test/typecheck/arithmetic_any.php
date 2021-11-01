@@ -1,10 +1,10 @@
 ////file1.php
-<?hh // partial
+<?hh
 
   function returnsAny() { return 5; }
 
 ////file2.php
-<?hh // strict
+<?hh// strict
 
   // ADDITION
 function doAddIntAny(int $x): void {

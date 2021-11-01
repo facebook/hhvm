@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function my_map<T1, T2>(
@@ -8,7 +8,7 @@ function my_map<T1, T2>(
   return vec[];
 }
 
-function test($v): void {
+function test(/* TAny */ $v): void {
   my_map(
     $v,
     $x ==> {

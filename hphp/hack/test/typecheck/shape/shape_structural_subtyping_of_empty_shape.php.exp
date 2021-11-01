@@ -1,6 +1,8 @@
+File "shape_structural_subtyping_of_empty_shape.php", line 3, characters 10-19:
+Was expecting a return type hint (Typing[4030])
 File "shape_structural_subtyping_of_empty_shape.php", line 8, characters 10-47:
 Invalid return type (Typing[4057])
-File "shape_structural_subtyping_of_empty_shape.php", line 7, characters 27-33:
-The field `test` is missing
-File "shape_structural_subtyping_of_empty_shape.php", line 8, characters 10-47:
-The field `test` is defined
+  File "shape_structural_subtyping_of_empty_shape.php", line 7, characters 27-33:
+  The field `test` is missing
+  File "shape_structural_subtyping_of_empty_shape.php", line 8, characters 10-47:
+  The field `test` is defined

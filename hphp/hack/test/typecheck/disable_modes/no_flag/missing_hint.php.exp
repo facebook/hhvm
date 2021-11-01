@@ -1,1 +1,2 @@
-No errors
+File "missing_hint.php", line 5, characters 19-21:
+Was expecting a return type hint (Typing[4030])

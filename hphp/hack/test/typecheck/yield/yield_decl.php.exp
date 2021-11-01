@@ -1,1 +1,2 @@
-No errors
+File "yield_decl.php", line 3, characters 16-18:
+Was expecting a return type hint (Typing[4030])

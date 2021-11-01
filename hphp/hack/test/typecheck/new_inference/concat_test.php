@@ -1,10 +1,10 @@
 ////file1.php
-<?hh // partial
+<?hh
 
-function any() { return 3; }
+function any() /* : Tany */ { return 3; }
 
 ////file2.php
-<?hh // strict
+<?hh// strict
 // Copyright 2004-present Facebook. All Rights Reserved.
 
   function testit(num $n, arraykey $ak, bool $b, dynamic $d):void {

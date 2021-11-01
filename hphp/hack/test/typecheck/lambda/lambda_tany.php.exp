@@ -1,1 +1,6 @@
-No errors
+File "lambda_tany.php", line 11, characters 31-32:
+Was expecting a type hint (Typing[4032])
+File "lambda_tany.php", line 12, characters 15-16:
+Was expecting an object but type is unknown (Typing[4297])
+  File "lambda_tany.php", line 12, characters 8-9:
+  It is unknown because the type of the lambda parameter could not be determined. Please add a type hint to the parameter

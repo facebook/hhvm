@@ -1,6 +1,6 @@
-<?hh // partial
+<?hh
 
-async function f() {
+async function f() /* : TAny */ {
   return 10;
 }
 

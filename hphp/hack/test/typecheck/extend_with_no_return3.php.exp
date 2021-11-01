@@ -1,1 +1,2 @@
-No errors
+File "extend_with_no_return3.php", line 17, characters 19-21:
+Was expecting a return type hint (Typing[4030])

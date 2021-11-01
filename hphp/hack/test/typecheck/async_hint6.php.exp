@@ -1,1 +1,2 @@
-No errors
+File "async_hint6.php", line 9, characters 16-22:
+Was expecting a return type hint (Typing[4030])

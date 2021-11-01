@@ -58,4 +58,5 @@ File "dynamic1.php", line 67, characters 3-13:
   dynamic
 File "dynamic1.php", line 71, characters 3-13:
   dynamic
-No errors
+File "dynamic1.php", line 11, characters 68-69:
+Was expecting a type hint (Typing[4032])

@@ -1,6 +1,6 @@
-<?hh // partial
+<?hh
 
-function getUntyped() {
+function getUntyped() /* : TAny */ {
   return 'test';
 }
 

@@ -1,3 +1,5 @@
+Errors:
+  [3:10-12] Was expecting a return type hint
 //// function_chain_types_PHPism_FIXME_Array.php--file1.php
 <?hh
 
@@ -5,14 +7,14 @@
  type PHPism_FIXME_Array = varray_or_darray;
 
 //// function_chain_types_PHPism_FIXME_Array.php--file2.php
-<?hh // partial
+<?hh 
 
 function fa(<<__Soft>> vec_or_dict<int, string> $x) : <<__Soft>> vec_or_dict<int, string> {
   return $x;
 }
 
 //// function_chain_types_PHPism_FIXME_Array.php--file3.php
-<?hh // partial
+<?hh 
 
 function fb(): <<__Soft>> vec_or_dict<int, string> {
   return darray[4 => "why type?"];

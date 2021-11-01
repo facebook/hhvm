@@ -1,5 +1,5 @@
 //// file1.php
-<?hh // partial
+<?hh
 
 /* HH_FIXME[4101] */
 function foo(): MyMap {

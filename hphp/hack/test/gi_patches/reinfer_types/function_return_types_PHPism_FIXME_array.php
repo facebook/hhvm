@@ -5,14 +5,14 @@
  type PHPism_FIXME_Array = varray_or_darray;
 
 //// file2.php
-<?hh // partial
+<?hh
 
 function fa(): PHPism_FIXME_Array {
   return varray[4];
 }
 
 //// file3.php
-<?hh // partial
+<?hh
 
 function fb(): PHPism_FIXME_Array {
   return darray[4 => "why type?"];

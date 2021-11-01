@@ -1,4 +1,4 @@
-<?hh //partial
+<?hh
 
 type UNSAFE_TYPE_HH_FIXME_<T> = T;
 

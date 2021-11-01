@@ -3,20 +3,20 @@
      { Typing_defs.fe_deprecated = (Some "The function f is deprecated: a");
        fe_module = None; fe_internal = false;
        fe_type =
-       (Rwitness_from_decl ([4:10-11]),
+       (Rwitness_from_decl ([5:10-11]),
         (Tfun
            { ft_arity = (Fstandard ()); ft_tparams = [];
              ft_where_constraints = []; ft_params = [];
-             ft_implicit_params = { capability = (CapDefaults [4:10-11]) };
+             ft_implicit_params = { capability = (CapDefaults [5:10-11]) };
              ft_ret =
              { et_enforced = Typing_defs_core.Unenforced;
-               et_type = (Rwitness_from_decl ([4:10-11]), Tany) };
+               et_type = (Rwitness_from_decl ([5:10-11]), Tany) };
              ft_flags =
              (make_ft_flags FSync ~return_disposable:false
                ~returns_readonly:false ~support_dynamic_type:false
                ~readonly_this:false);
              ft_ifc_decl = FDPolicied {PUBLIC} }));
-       fe_pos = [4:10-11]; fe_php_std_lib = false;
+       fe_pos = [5:10-11]; fe_php_std_lib = false;
        fe_support_dynamic_type = false }))
   ]
 

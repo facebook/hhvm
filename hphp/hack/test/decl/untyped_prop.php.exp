@@ -1,6 +1,6 @@
 [("\\Y",
   (Shallow_decl_defs.Class
-     { Shallow_decl_defs.sc_mode = Mpartial; sc_final = false;
+     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
        sc_is_xhp = false; sc_has_xhp_keyword = false;
        sc_kind = (Cclass Concrete); sc_module = None;
        sc_name = ([12:7-8], "\\Y"); sc_tparams = [];
@@ -9,7 +9,7 @@
        sc_req_implements = []; sc_implements = [];
        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
        sc_props =
-       [{ Shallow_decl_defs.sp_name = ([13:10-12], "x"); sp_xhp_attr = None;
+       [{ Shallow_decl_defs.sp_name = ([14:10-12], "x"); sp_xhp_attr = None;
           sp_type = None; sp_visibility = Public; sp_flags = (empty) }
          ];
        sc_sprops = []; sc_constructor = None; sc_static_methods = [];

@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -10,5 +10,6 @@
  */
 
 class Y {
+  /* HH_FIXME[2001] */
   public $x = false;
 }

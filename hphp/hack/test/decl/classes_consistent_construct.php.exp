@@ -1,6 +1,6 @@
 [("\\C1",
   (Shallow_decl_defs.Class
-     { Shallow_decl_defs.sc_mode = Mpartial; sc_final = false;
+     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
        sc_is_xhp = false; sc_has_xhp_keyword = false;
        sc_kind = (Cclass Concrete); sc_module = None;
        sc_name = ([4:7-9], "\\C1"); sc_tparams = [];
@@ -17,7 +17,7 @@
        sc_enum_type = None }));
   ("\\C2",
    (Shallow_decl_defs.Class
-      { Shallow_decl_defs.sc_mode = Mpartial; sc_final = false;
+      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
         sc_is_xhp = false; sc_has_xhp_keyword = false;
         sc_kind = (Cclass Concrete); sc_module = None;
         sc_name = ([6:7-9], "\\C2"); sc_tparams = [];
@@ -67,7 +67,7 @@
         sc_enum_type = None }));
   ("\\A",
    (Shallow_decl_defs.Class
-      { Shallow_decl_defs.sc_mode = Mpartial; sc_final = false;
+      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
         sc_is_xhp = false; sc_has_xhp_keyword = false;
         sc_kind = (Cclass Concrete); sc_module = None;
         sc_name = ([11:7-8], "\\A"); sc_tparams = [];

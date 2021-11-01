@@ -1,8 +1,8 @@
-<?hh // partial
+<?hh
 
 <<__Deprecated('testing \n \t \\ \''.' foo')>>
-function foo() {}
+function foo(): void {}
 
-function f() {
+function f(): void {
   foo();
 }

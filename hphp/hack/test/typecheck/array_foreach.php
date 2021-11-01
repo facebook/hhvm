@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -9,7 +9,7 @@
  *
  */
 
-function foo3(varray<string> $arr) {
+function foo3(varray<string> $arr): void {
   foreach ($arr as $v) {
     f2($v);
   }
@@ -20,14 +20,14 @@ function foo3(varray<string> $arr) {
   foo5($arr);
 }
 
-function foo4(varray<string> $arr) {
+function foo4(varray<string> $arr): void {
   foreach ($arr as $k => $v) {
     f1($k);
     f2($v);
   }
 }
 
-function foo5(darray<int, string> $arr) {
+function foo5(darray<int, string> $arr): void {
   foreach ($arr as $v) {
     f2($v);
   }
@@ -36,13 +36,13 @@ function foo5(darray<int, string> $arr) {
   foo5($arr);
 }
 
-function foo6(darray<int, string> $arr) {
+function foo6(darray<int, string> $arr): void {
   foreach ($arr as $k => $v) {
     f1($k);
     f2($v);
   }
 }
 
-function f1(int $k) {}
+function f1(int $k): void {}
 
-function f2(string $v) {}
+function f2(string $v): void {}

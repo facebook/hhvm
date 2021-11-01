@@ -1,5 +1,5 @@
-<?hh // partial
+<?hh
 
-function testDarray($x): darray<int, int> {
+function testDarray(dict<int,int> $x): darray<int, int> {
   return darray($x);
 }

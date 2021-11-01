@@ -1,11 +1,9 @@
-<?hh // partial
+<?hh
 
-function inTheFuture($x) {
+function inTheFuture(DateTime $x): bool {
   if ($x < new DateTime()) {
     return false;
-  }
-  else {
+  } else {
     return true;
   }
-
 }

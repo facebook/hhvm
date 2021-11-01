@@ -1,7 +1,7 @@
-<?hh // partial
+<?hh
 
 class A {
-  protected static $a = darray[];
+  protected static darray<string,mixed> $a = darray[];
 
   public function f(bool $b): void {
     while ($b) {

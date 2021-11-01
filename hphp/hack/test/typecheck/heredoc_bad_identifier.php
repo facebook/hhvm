@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -9,6 +9,8 @@
  *
  */
 
+function main(): void {
 $a = <<<9
    Should not work.
 9;
+}

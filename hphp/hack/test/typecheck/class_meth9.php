@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -14,11 +14,11 @@ class A {
     return 1;
   }
 
-  public static function f2() {
+  public static function f2(): (function(string): int) {
     return class_meth('A', 'f1');
   }
 
-  public static function f3() {
+  public static function f3(): (function(string): int) {
     return class_meth(A::class, 'f1');
   }
 }

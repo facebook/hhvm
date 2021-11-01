@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -9,9 +9,11 @@
  *
  */
 
-$foo = function(darray<string, mixed> $rel): darray<string, mixed> {
-  return darray[
-    'id'       => $rel['id'],
-    'relation' => $rel['relation_type'],
-  ];
-};
+function main(): void {
+  $foo = function(darray<string, mixed> $rel): darray<string, mixed> {
+    return darray[
+      'id'       => $rel['id'],
+      'relation' => $rel['relation_type'],
+    ];
+  };
+}

@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 namespace HH\Lib\Dict {
   function foo(): int {
@@ -7,7 +7,7 @@ namespace HH\Lib\Dict {
 }
 
 namespace {
-  function main() {
+  function main(): void {
     $f = fun('Dict\foo');
     expect_int($f());
 

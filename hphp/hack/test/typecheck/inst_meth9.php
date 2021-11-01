@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -13,7 +13,7 @@ class A {
   private function f1(string $s): int {
     return 1;
   }
-  public function f2() {
+  public function f2(): (function(string): int) {
     return inst_meth($this, 'f1');
   }
 }

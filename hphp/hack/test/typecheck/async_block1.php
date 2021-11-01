@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 async function g(): Awaitable<int> {
   return 1;
@@ -18,6 +18,8 @@ function h(): Awaitable<int> {
   };
 }
 
-$a = async {
-  return 1;
-};
+function main(): void {
+  $a = async {
+    return 1;
+  };
+}

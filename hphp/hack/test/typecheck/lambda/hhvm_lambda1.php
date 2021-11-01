@@ -1,6 +1,6 @@
-<?hh // partial
+<?hh
 
-function foo() {
+function foo(): void {
   $y = "asd";
   array_map(
     $k ==> {
@@ -9,4 +9,3 @@ function foo() {
     varray[1, 2, 3, 4],
   );
 }
-foo();

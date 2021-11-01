@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -20,7 +20,7 @@ abstract class CParent implements IParent {
 }
 
 abstract class Kid extends CParent {
-  protected function bar() {}
+  protected function bar(): void {}
 }
 
 trait KidTrait {

@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 abstract class Enum {
   abstract const type TInner;
@@ -14,5 +14,5 @@ class Foo extends Enum {
   const type TInner = mixed;
   const int FOO = 0;
   const string BAR = "lol";
-  const BAZ = Bar::BAZ;
+  const bool BAZ = Bar::BAZ;
 }

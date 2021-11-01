@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 interface IParent {
   const CBAR = 'bar';
@@ -11,7 +11,7 @@ abstract class CParent implements IParent {
 }
 
 abstract class Kid extends CParent {
-  protected function bar() {}
+  protected function bar(): void {}
 }
 
 trait KidTrait {
@@ -28,4 +28,7 @@ trait KidTrait {
   }
 }
 
+function takes_parent(CParent $_): void {}
+function takes_iparent(IParent $_): void {}
+function takes_kid(Kid $_): void {}
 function takes_kt(Vector<KidTrait> $kt): void {}

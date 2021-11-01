@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -13,9 +13,9 @@ function get_arr(): varray<?int> {
   return varray[1, null, 2];
 }
 
-function f(int $x) {}
+function f(int $x): void {}
 
-function test() {
+function test(): void {
   $arr = get_arr();
   foreach ($arr as $x) {
     if (!$x) {

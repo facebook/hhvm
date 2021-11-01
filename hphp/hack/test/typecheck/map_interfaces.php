@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -27,7 +27,7 @@ class D {
     $this->x = Map{};
   }
 
-  public function foo() {
+  public function foo(): void {
     $y = CNull::A;
     if (true) {
       $y = new B();

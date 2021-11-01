@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 trait X {
   public function f(): bool {
@@ -6,6 +6,6 @@ trait X {
   }
 }
 
-function test($x): bool {
+function test(mixed $x): bool {
   return $x is X;
 }

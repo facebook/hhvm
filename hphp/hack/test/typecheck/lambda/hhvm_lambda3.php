@@ -1,6 +1,6 @@
-<?hh // partial
+<?hh
 
-function main() {
+function main(): void {
   $capture1 = "yo";
   $get_func = ($x, $y) ==> {
     return $more ==> $x . $y . $capture1 . $more;
@@ -9,5 +9,3 @@ function main() {
   $f = $get_func("one ", "two ");
   echo $f("\n");
 }
-
-main();

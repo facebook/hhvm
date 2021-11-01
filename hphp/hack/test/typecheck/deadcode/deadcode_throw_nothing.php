@@ -1,6 +1,6 @@
-<?hh //partial
+<?hh
 
-function func(int $x) {
+function func(int $x): void {
   // This `hh_show` is needed. We want to make sure that the type is
   // `nothing`.
   // The previous behavior of the typechecker was to give the type `any` to

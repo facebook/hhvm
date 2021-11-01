@@ -1,6 +1,6 @@
 File "printf_crash.php--printf.php", line 5, characters 10-19:
 Invalid return type (Typing[4336])
-  File "printf_crash.php--printf.php", line 5, characters 64-69:
+  File "printf_crash.php--printf.php", line 5, characters 70-75:
   Expected `string`
   File "printf_crash.php--printf.php", line 5, characters 10-19:
   But got `void` because this function does not always return a value

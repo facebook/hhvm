@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -30,4 +30,6 @@ class Meh {
   }
 }
 
-Meh::foo(null);
+function main(): void {
+  Meh::foo(null);
+}

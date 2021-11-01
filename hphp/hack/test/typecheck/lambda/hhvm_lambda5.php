@@ -1,6 +1,6 @@
-<?hh // partial
+<?hh
 
-function foo() {
+function foo(): (function():(function():(function():int))) {
   $y = 12;
   $bar = () ==> {
     $baz = () ==> {
@@ -19,7 +19,7 @@ function foo() {
   return $bar;
 }
 
-function main() {
+function main(): void {
   $k = foo();
   var_dump($k is Closure); // true
   $y = $k();
@@ -28,5 +28,3 @@ function main() {
   var_dump($z is Closure); // true
   var_dump($z()); // 12
 }
-
-main();

@@ -1,6 +1,6 @@
-<?hh // partial
+<?hh
 
-function bar(int $a) {
+function bar(int $a): int {
   return $a + 1;
 }
 

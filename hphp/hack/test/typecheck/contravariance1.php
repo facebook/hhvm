@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 class Foo<-T> {
   public function __construct(T $x) {}
@@ -7,10 +7,10 @@ class Foo<-T> {
 class A {}
 class B extends A {}
 
-function fa(Foo<A> $x) {}
-function fb(Foo<B> $y) {}
+function fa(Foo<A> $x): void {}
+function fb(Foo<B> $y): void {}
 
-function g() {
+function g(): void {
   // $x has type B and therefore also type A
   $x = new B();
   // $y can be assigned type Foo<A> because B <: A

@@ -1,4 +1,1 @@
-File "global_const_needs_hint.php--file2.php", line 3, characters 7-7:
-Please add a type hint (Naming[2035])
-File "global_const_needs_hint.php--file2.php", line 3, characters 7-7:
-Please add a type hint `const SomeType X` (Naming[2001])
+No errors

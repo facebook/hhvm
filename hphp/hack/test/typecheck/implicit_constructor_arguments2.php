@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -11,6 +11,6 @@
 
 class A {}
 
-function f() {
+function f(): void {
   $a = new A();
 }

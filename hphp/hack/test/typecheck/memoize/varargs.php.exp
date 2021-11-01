@@ -1,4 +1,4 @@
-File "varargs.php", line 5, characters 33-34:
+File "varargs.php", line 5, characters 39-40:
 Memoized functions cannot be variadic. (NastCheck[3086])
-File "varargs.php", line 9, characters 27-28:
+File "varargs.php", line 9, characters 33-34:
 Memoized functions cannot be variadic. (NastCheck[3086])

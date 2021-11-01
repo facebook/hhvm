@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -10,7 +10,7 @@
  */
 
 abstract class A {
-  abstract protected function foo();
+  abstract protected function foo(): void;
 }
 
 abstract class B extends A {
@@ -18,7 +18,7 @@ abstract class B extends A {
   <<__Override>>
   public function foo(): void {}
 
-  abstract protected function bar();
+  abstract protected function bar(): void;
 }
 
 class C extends B {

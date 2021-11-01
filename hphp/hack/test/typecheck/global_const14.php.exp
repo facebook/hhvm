@@ -1,4 +1,4 @@
-File "global_const14.php", line 3, characters 11-17:
+File "global_const14.php", line 5, characters 13-19:
 Expected constant expression for initializer (Parsing[1002])
-File "global_const14.php", line 3, characters 11-17:
+File "global_const14.php", line 5, characters 13-19:
 Illegal constant value (Naming[2023])

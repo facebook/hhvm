@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -27,7 +27,7 @@
 //  }
 //}
 
-function foo3(Vector<string> $vec) {
+function foo3(Vector<string> $vec): void {
   foreach ($vec as $v) {
     f2($v);
   }
@@ -36,13 +36,13 @@ function foo3(Vector<string> $vec) {
   f2($vec[10]);
 }
 
-function foo4(Vector<string> $vec) {
+function foo4(Vector<string> $vec): void {
   foreach ($vec as $k => $v) {
     f1($k);
     f2($v);
   }
 }
 
-function f1(int $k) {}
+function f1(int $k): void {}
 
-function f2(string $v) {}
+function f2(string $v): void {}

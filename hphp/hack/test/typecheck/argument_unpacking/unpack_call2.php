@@ -1,6 +1,6 @@
-<?hh // partial
+<?hh
 
-function f(int $foo, ...$args): void {}
+function f(int $foo, mixed ...$args): void {}
 
 function test(): void {
   $args = varray[1, 2, 3];

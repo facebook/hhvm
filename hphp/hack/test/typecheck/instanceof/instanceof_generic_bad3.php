@@ -1,5 +1,5 @@
-<?hh // partial
+<?hh
 
-function T<T>($a): bool {
+function T<T>(mixed $a): bool {
   return $a is T;
 }

@@ -1,7 +1,7 @@
-<?hh // partial
+<?hh
 
 class A {
-  const X = 0;
+  const mixed X = 0;
 }
 
-const X = A::X;
+const mixed X = A::X;

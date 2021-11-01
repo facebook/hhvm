@@ -1,9 +1,9 @@
 //// file1.php
-<?hh // partial
+<?hh
 
-const Y = 1;
+const mixed Y = 1;
 
 //// file2.php
-<?hh // strict
+<?hh// strict
 
-const X = Y;
+const mixed X = Y;

@@ -1,6 +1,6 @@
 File "array_as_tuple_bad.php", line 13, characters 10-11:
 Invalid return type (Typing[4110])
-  File "array_as_tuple_bad.php", line 12, characters 38-53:
-  Expected `vec_or_dict<arraykey, _>`
+  File "array_as_tuple_bad.php", line 12, characters 38-66:
+  Expected `vec_or_dict<int, string>`
   File "array_as_tuple_bad.php", line 12, characters 19-31:
   But got `(int, string)`

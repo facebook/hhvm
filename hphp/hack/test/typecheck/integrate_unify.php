@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -9,7 +9,7 @@
  *
  */
 
-function f() {
+function f(): Generator<int, int, void> {
   $arr = darray[];
   foreach (varray[] as $x) {
     if (true) {
@@ -23,4 +23,4 @@ function f() {
   yield wait_forvar($arr);
 }
 
-function wait_forvar(darray<int, int> $arr) {}
+function wait_forvar(darray<int, int> $arr): int { return $arr[0]; }

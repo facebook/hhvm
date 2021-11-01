@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -10,7 +10,7 @@
  */
 
 class A {
-  public function foo() {
+  public function foo(): void {
     $x = 1;
     $y = 2;
     $this->list($x, $y) = 10;

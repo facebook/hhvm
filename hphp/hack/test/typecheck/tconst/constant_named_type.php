@@ -1,11 +1,11 @@
-<?hh // partial
+<?hh
 
 interface I {
-  abstract const type;
+  abstract const int type;
 }
 
 class C implements I {
-  const type = 0;
+  const int type = 0;
 }
 
-const type = 1;
+const int type = 1;

@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 // taken from an issue in GitHub
 //
@@ -18,4 +18,6 @@ function add_word(varray<string> $words): varray<string> {
   });
 }
 
-var_dump(add_word(varray['when', 'in', 'the', 'course', 'of', 'human']));
+function main(): void {
+  var_dump(add_word(varray['when', 'in', 'the', 'course', 'of', 'human']));
+}

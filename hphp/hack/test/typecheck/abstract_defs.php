@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -10,14 +10,14 @@
  */
 
 trait FooTrait {
-  abstract public function abstractFunc();
-  final public function doSomething() {
+  abstract public function abstractFunc(): int;
+  final public function doSomething(): int {
     return $this->abstractFunc();
   }
 }
 
 abstract class Base {
-  final public function abstractFunc() {
+  final public function abstractFunc(): int {
     return 4;
   }
 }

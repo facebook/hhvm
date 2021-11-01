@@ -1,3 +1,5 @@
-<?hh // partial
+<?hh
 
-const X = $x is A;
+class A {}
+
+const A X = $x is A;

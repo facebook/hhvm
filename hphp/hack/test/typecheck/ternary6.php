@@ -1,6 +1,6 @@
-<?hh // partial
+<?hh
 
-function takes_string(string $x) {}
+function takes_string(string $x): void {}
 
 /* HH_FIXME[4110] */
 function g(): ?string {
@@ -14,7 +14,7 @@ class Foo {
   }
 }
 
-function f($x, Foo $y) {
+function f(bool $x, Foo $y): void {
   if (true) {}
   /* We used to unify both branches of a ternary expression, then falling back
    * to creating a Tunion if unification failed; this would hide errors

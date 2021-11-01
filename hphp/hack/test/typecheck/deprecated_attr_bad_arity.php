@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 <<__Deprecated>>
-function f() {}
+function f(): void {}

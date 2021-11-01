@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -9,5 +9,7 @@
  *
  */
 
+function main(): void {
 $x = <<<END
     Here is some heredoc content.
+}

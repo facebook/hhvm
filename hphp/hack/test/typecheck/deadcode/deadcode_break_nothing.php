@@ -1,6 +1,6 @@
-<?hh //partial
+<?hh
 
-function func(int $y) {
+function func(int $y): void {
   while (true) {
     break;
     // This `hh_show` is needed. We want to make sure that the type is

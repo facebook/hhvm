@@ -1,3 +1,3 @@
-<?hh // partial
+<?hh
 
-const X = Map{};
+const mixed X = Map{};

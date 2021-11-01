@@ -1,3 +1,3 @@
-<?hh // partial
+<?hh
 
-const X = Vector{};
+const mixed X = Vector{};

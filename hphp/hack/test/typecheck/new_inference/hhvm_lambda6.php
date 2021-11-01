@@ -1,6 +1,6 @@
-<?hh // partial
+<?hh
 
-function foo() {
+function foo(): void {
   $y = 100;
   $k = () ==> {
     echo $y . "\n";
@@ -13,4 +13,3 @@ function foo() {
   echo $l(42);
   echo "\n";
 }
-foo();

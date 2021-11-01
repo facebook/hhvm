@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -9,13 +9,13 @@
  *
  */
 
-function foo2(Traversable<string> $p) {
+function foo2(Traversable<string> $p): void {
   foreach ($p as $k => $v) {
     f1($k);
     f2($v);
   }
 }
 
-function f1(int $k) {}
+function f1(int $k): void {}
 
-function f2(string $v) {}
+function f2(string $v): void {}

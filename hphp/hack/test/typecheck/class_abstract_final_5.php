@@ -1,7 +1,7 @@
-<?hh // partial
+<?hh
 
 abstract final class Foo {
-  public static function bar() {}
+  public static function bar(): void {}
 }
 
 newtype nt = Foo;

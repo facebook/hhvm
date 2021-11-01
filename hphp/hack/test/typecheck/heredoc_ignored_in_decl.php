@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -10,7 +10,7 @@
  */
 
 class Test {
-  public function f() {
+  public function f(): string {
     return <<<END
       public function testFunctionWithReturnTypeHavingAngleBrackets(): array<int> {
         return varray[];
@@ -18,4 +18,3 @@ class Test {
 END;
   }
 }
-

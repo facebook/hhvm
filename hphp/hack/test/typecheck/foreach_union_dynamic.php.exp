@@ -1,1 +1,6 @@
-No errors
+File "foreach_union_dynamic.php", line 8, characters 11-12:
+Invalid `foreach` (Typing[4110])
+  File "foreach_union_dynamic.php", line 8, characters 11-12:
+  Expected `Traversable<[unresolved]>` because this is used in a `foreach` statement
+  File "foreach_union_dynamic.php", line 4, characters 27-30:
+  But got `bool`

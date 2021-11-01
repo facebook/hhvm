@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -9,7 +9,7 @@
  *
  */
 
-function without_arg() {
+function without_arg(): void {
   foreach (varray[1, 2, 3] as $a) {
     foreach (varray[1, 2, 3, 4] as $b) {
       foreach (varray[1, 2, 3, 4] as $c) {

@@ -1,21 +1,21 @@
-<?hh // partial
+<?hh
 
-function f(int $foo, ...$args): void {}
+function f(int $foo, mixed ...$args): void {}
 
-function g(string $foo, ...$args): void {}
+function g(string $foo, mixed ...$args): void {}
 
 class C1 {
   public function __construct(
     private int $foo,
-    private ...$args
+    private mixed ...$args
   ) {}
-  public function f(int $foo, ...$args): void {}
+  public function f(int $foo, mixed ...$args): void {}
 }
 
 class C2 extends C1 {
   public function __construct(
     private int $foo,
-    private ...$args
+    private mixed ...$args
   ) {
     parent::__construct($foo, ...$args);
   }
@@ -63,7 +63,7 @@ function test_basic(): void {
   );
 }
 
-function test_limitations() {
+function test_limitations(): void {
   // fails at runtime, but we don't track array arity!
   $args = darray[];
   f(...$args);

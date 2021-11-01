@@ -1,5 +1,5 @@
-<?hh // partial
+<?hh
 
-function testVarray($x): varray<int> {
+function testVarray(vec<int> $x): varray<int> {
   return varray($x);
 }

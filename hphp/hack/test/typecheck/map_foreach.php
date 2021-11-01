@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -27,7 +27,7 @@
 //  }
 //}
 
-function foo3(Map<int, string> $map) {
+function foo3(Map<int, string> $map): void {
   foreach ($map as $v) {
     f2($v);
   }
@@ -36,13 +36,13 @@ function foo3(Map<int, string> $map) {
   f2($map[10]);
 }
 
-function foo4(Map<int, string> $map) {
+function foo4(Map<int, string> $map): void {
   foreach ($map as $k => $v) {
     f1($k);
     f2($v);
   }
 }
 
-function f1(int $k) {}
+function f1(int $k): void {}
 
-function f2(string $v) {}
+function f2(string $v): void {}

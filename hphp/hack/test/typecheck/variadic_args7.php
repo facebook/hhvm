@@ -1,7 +1,7 @@
-<?hh // partial
+<?hh
 
 function f(string ...$args,): void {}
 
-function test() {
+function test(): void {
   f('str', 'str', 20);
 }

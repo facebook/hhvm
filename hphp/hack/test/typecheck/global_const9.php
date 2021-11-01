@@ -1,3 +1,3 @@
-<?hh // partial
+<?hh
 
-const X = $x[9];
+const mixed X = $x[9];

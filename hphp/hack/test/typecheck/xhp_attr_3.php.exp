@@ -1,4 +1,4 @@
-File "xhp_attr_3.php", line 4, characters 3-12:
+File "xhp_attr_3.php", line 9, characters 3-12:
 ->: syntax is not supported for lvalues (Parsing[1002])
-File "xhp_attr_3.php", line 4, characters 3-12:
+File "xhp_attr_3.php", line 9, characters 3-12:
 `->:` operator is not allowed in write context (Parsing[1002])

@@ -1,13 +1,13 @@
-<?hh // partial
+<?hh
 
-function bar() {}
+function bar(): void {}
 
-function baz(int $x) {}
+function baz(int $x): void {}
 
 class Foo {
   public ?int $x;
 
-  public function f($y): void {
+  public function f(bool $y): void {
     if ($this->x === null) {
       return;
     }

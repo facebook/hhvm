@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -13,7 +13,7 @@ class A {}
 class B extends A {}
 class C extends A {}
 
-function test($x): darray<int, A> {
+function test(): darray<int, A> {
   $v = darray[0 => new A(), 1 => new B(), 2 => new C()];
   return $v;
 }

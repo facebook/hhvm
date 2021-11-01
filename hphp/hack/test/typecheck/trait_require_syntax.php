@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -40,11 +40,11 @@ trait Trait1 {
 trait Trait2 {
   use Trait1; // Requirements of Trait1 inherited
 
-  protected function f() {
-    return $this->foo();
+  protected function f(): void {
+    $this->foo();
   }
-  protected function g() {
-    return $this->baz();
+  protected function g(): void {
+    $this->baz();
   }
 }
 

@@ -1,9 +1,9 @@
-<?hh // partial
+<?hh
 
-function takes_int(int $x): void {}
+function takes_float(float $x): void {}
 
-function test($arg): void {
+function test(mixed $arg): void {
   if ($arg is float) {
-    takes_int($arg);
+    takes_float($arg);
   }
 }

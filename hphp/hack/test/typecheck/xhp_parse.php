@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -8,8 +8,6 @@
  *
  *
  */
-
-$x = <div> dfaf </div>;
 
 function foo(): void {
   $z = <div> this is a' " # /// try </div>;

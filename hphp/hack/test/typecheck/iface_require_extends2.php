@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 class Super {
   public function foo(): int {
@@ -19,7 +19,7 @@ interface IMarked {
   public function methodOfMarked(): int;
 }
 
-function f_marked(IMarked $inst) {
+function f_marked(IMarked $inst): void {
   $inst->methodOfSuper();
   f_super($inst);
   $inst->methodOfMarked();

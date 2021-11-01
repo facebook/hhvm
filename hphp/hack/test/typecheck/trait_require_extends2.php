@@ -1,9 +1,9 @@
-<?hh // partial
+<?hh
 
 trait T1 {
   require extends X;
   <<__Override>>
-  final protected function foo() { }
+  final protected function foo(): void { }
 }
 
 trait T2 {
@@ -11,11 +11,11 @@ trait T2 {
 }
 
 class X  {
-  protected function foo() { }
+  protected function foo(): void { }
 }
 
 class A extends X {
   use T1;
   use T2;
-  protected function foo() { }
+  protected function foo(): void { }
 }

@@ -1,15 +1,15 @@
 //// def.php
-<?hh // strict
+<?hh// strict
 
 //// printf.php
-<?hh // partial
+<?hh
 interface MyPlainSprintf {
 }
 
-function my_sprintf(\HH\FormatString<PlainSprintf> $f, ...$_): string;
+function my_sprintf(\HH\FormatString<PlainSprintf> $f, mixed ...$_): string;
 
 //// use.php
-<?hh // strict
+<?hh// strict
 
 final class Foo {
   public function f(\HH\FormatString $s): void {

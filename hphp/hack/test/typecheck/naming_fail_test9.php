@@ -1,8 +1,8 @@
-<?hh // partial
+<?hh
 
 class FooException extends Exception {}
 
-function f() {
+function f(): void {
   try {
     might_throw();
   } catch (FooException $e) {

@@ -1,3 +1,3 @@
-<?hh // partial
+<?hh
 
-const X = ~1;
+const mixed X = ~1;

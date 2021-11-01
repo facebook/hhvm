@@ -1,3 +1,3 @@
-<?hh // partial
+<?hh
 
-const X = true?1:0;
+const int X = true?1:0;

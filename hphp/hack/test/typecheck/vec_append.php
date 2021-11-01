@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 function Ref<T>(T $initial_value): Ref<T> {
   return new Ref($initial_value);
@@ -25,6 +25,6 @@ function test(): void {
   set_default($dict, 1, Ref(vec[]))->value[1]->value[] = 'bye';
 }
 
-function contains_key($_, $_): bool {
+function contains_key(mixed $_, mixed $_): bool {
   return true;
 }

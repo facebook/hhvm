@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -60,7 +60,7 @@ class A {
   private int $type = 0;
   private int $newtype = 0;
 
-  public function foo() {
+  public function foo(): void {
     $this->if = 10;
     $this->else = 10;
     $this->function = 10;

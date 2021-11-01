@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -14,5 +14,3 @@ class C {}
 function f(): int {
   return C::class;
 }
-
-f();

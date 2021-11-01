@@ -1,6 +1,6 @@
 File "string_newline2.php", line 18, characters 10-10:
 Invalid return type (Typing[4110])
-File "string_newline2.php", line 6, characters 20-25:
-Expected `string`
-File "string_newline2.php", line 18, characters 10-10:
-But got `int`
+  File "string_newline2.php", line 6, characters 27-32:
+  Expected `string`
+  File "string_newline2.php", line 18, characters 10-10:
+  But got `int`

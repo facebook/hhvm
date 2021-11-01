@@ -1,11 +1,9 @@
-<?hh // partial
+<?hh
 
-function foo($x): void {
+function foo(int $x): void {
 
   switch ($x) {
     default;
       echo "bye";
   }
 }
-
-foo(1);

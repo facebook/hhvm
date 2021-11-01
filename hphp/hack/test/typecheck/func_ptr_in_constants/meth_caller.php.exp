@@ -1,6 +1,6 @@
-File "meth_caller.php", line 10, characters 24-54:
+File "meth_caller.php", line 10, characters 45-75:
 Expected constant expression for initializer (Parsing[1002])
-File "meth_caller.php", line 14, characters 21-51:
+File "meth_caller.php", line 14, characters 42-72:
 Expected constant expression for initializer (Parsing[1002])
-File "meth_caller.php", line 14, characters 21-51:
+File "meth_caller.php", line 14, characters 42-72:
 Illegal constant value (Naming[2023])

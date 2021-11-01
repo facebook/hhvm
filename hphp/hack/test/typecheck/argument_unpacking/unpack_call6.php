@@ -1,13 +1,13 @@
-<?hh // partial
+<?hh
 
 class C1 {
   public function __construct(
     private int $foo,
-    private ...$args
+    private mixed ...$args
   ) {}
 }
 
-function test() {
+function test(): void {
   $args = 'string';
   new C1(...$args); // should be error
 }

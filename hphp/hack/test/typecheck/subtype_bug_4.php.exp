@@ -1,6 +1,6 @@
-File "subtype_bug_4.php", line 6, characters 42-43:
+File "subtype_bug_4.php", line 6, characters 48-49:
 Invalid argument (Typing[4110])
-File "subtype_bug_4.php", line 5, characters 14-31:
-Expected `ConstVector<mixed>`
-File "subtype_bug_4.php", line 6, characters 15-30:
-But got `ConstSet<string>`
+  File "subtype_bug_4.php", line 5, characters 14-31:
+  Expected `ConstVector<mixed>`
+  File "subtype_bug_4.php", line 6, characters 15-30:
+  But got `ConstSet<string>`

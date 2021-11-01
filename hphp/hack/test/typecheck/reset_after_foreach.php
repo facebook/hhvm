@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -11,7 +11,7 @@
 
 class Foo {
   private Map<string, string> $prop = Map {};
-  public function bar() {
+  public function bar(): void {
     if ($this->prop) {
     }
     $this->prop = null;

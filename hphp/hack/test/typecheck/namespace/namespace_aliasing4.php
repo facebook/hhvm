@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 namespace Dict {
   function foo(): string {
@@ -13,7 +13,7 @@ namespace HH\Lib\Dict {
 }
 
 namespace {
-  function main() {
+  function main(): void {
     expect_int(Dict\foo()); // ok
     expect_int(\Dict\foo()); // error
   }

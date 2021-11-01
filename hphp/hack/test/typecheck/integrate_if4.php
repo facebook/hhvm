@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -9,9 +9,9 @@
  *
  */
 
-function x(int $x) {}
+function x(int $x): void {}
 
-function y() {
+function y(): void {
   $x = 3;
   try {
     if (true) {
@@ -25,5 +25,3 @@ function y() {
     x($x);
   }
 }
-
-y();

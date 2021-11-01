@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 class Foo {
   public function __construct(
@@ -6,7 +6,7 @@ class Foo {
   ) {}
 }
 
-function f(int $a, int $b, int $c) {
+function f(int $a, int $b, int $c): void {
   // This checks that we are parsing it as $a && ($b++ === $c) and not ($a &&
   // $b++) === $c. I.e. the occurrence of a postfix operator should have no
   // impact on the parse of the rest of the expression. If we misparsed this,

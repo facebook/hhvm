@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -27,7 +27,7 @@ class Meh {
   //   return "hello";
   // }
 
-  public function foo() {
+  public function foo(): void {
     $b = darray["blah" => new Other()];
     print "$b[blah]$this";
   }

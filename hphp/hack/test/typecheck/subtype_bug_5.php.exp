@@ -1,6 +1,6 @@
-File "subtype_bug_5.php", line 6, characters 45-46:
+File "subtype_bug_5.php", line 6, characters 51-52:
 Invalid argument (Typing[4110])
-File "subtype_bug_5.php", line 5, characters 14-31:
-Expected `Pair<mixed, mixed>`
-File "subtype_bug_5.php", line 6, characters 15-33:
-But got `ImmMap<int, string>`
+  File "subtype_bug_5.php", line 5, characters 14-31:
+  Expected `Pair<mixed, mixed>`
+  File "subtype_bug_5.php", line 6, characters 15-33:
+  But got `ImmMap<int, string>`

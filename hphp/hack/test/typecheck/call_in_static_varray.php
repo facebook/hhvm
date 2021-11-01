@@ -1,8 +1,8 @@
-<?hh // partial
+<?hh
 
 class C {
-  public static function f() {
+  public static function f(): string {
     return "lol";
   }
-  static $x = varray[C::f()];
+  static varray<string> $x = varray[C::f()];
 }

@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -16,11 +16,10 @@
 // See also section 5.3 of the scala reference manual.
 
 class A {
-  public $y;
+  public int $y;
   // this is desugar as
   // public $x; __construct($x) { $this->x = $x; }
-  public function __construct(public $x, $y) {
+  public function __construct(public int $x, int $y) {
     $this->y = $y;
   }
-  
 }

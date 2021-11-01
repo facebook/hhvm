@@ -1,5 +1,5 @@
-<?hh // partial
+<?hh
 
-function f($x) {
+function f(dict<arraykey,mixed> $x): mixed {
   return $x{1};
 }

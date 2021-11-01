@@ -1,4 +1,4 @@
-File "suggest_method_name.php", line 13, characters 29-29:
+File "suggest_method_name.php", line 13, characters 35-35:
 A method must have a body or be marked `abstract`. (Parsing[1002])
 File "suggest_method_name.php", line 12, characters 17-17:
 Unbound name: `Y` (an object type) (Naming[2049])

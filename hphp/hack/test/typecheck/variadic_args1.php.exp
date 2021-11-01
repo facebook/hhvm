@@ -1,10 +1,10 @@
-File "variadic_args1.php--strict.php", line 18, characters 20-24:
+File "variadic_args1.php--strict.php", line 15, characters 20-24:
 Invalid argument (Typing[4110])
-  File "variadic_args1.php--strict.php", line 32, characters 34-46:
+  File "variadic_args1.php--strict.php", line 29, characters 34-46:
   Expected `dict<[unresolved], [unresolved]>`
-  File "variadic_args1.php--strict.php", line 11, characters 21-25:
+  File "variadic_args1.php--strict.php", line 8, characters 21-25:
   But got `vec<T>` (variadic argument)
-File "variadic_args1.php--strict.php", line 32, characters 34-46:
+File "variadic_args1.php--strict.php", line 29, characters 34-46:
 Some type arguments violate their constraints (Typing[4323])
   File "hackarray.hhi", line 24, characters 49-50:
   `Tk` is a constrained type parameter
@@ -12,5 +12,5 @@ Some type arguments violate their constraints (Typing[4323])
   This type constraint is violated
   File "hackarray.hhi", line 24, characters 55-62:
   Expected `arraykey`
-  File "variadic_args1.php--strict.php", line 32, characters 41-42:
+  File "variadic_args1.php--strict.php", line 29, characters 41-42:
   But got `Tk`

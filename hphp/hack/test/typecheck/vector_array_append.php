@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -9,6 +9,6 @@
  *
  */
 
-function foo1(Vector<string> $vec) {
+function foo1(Vector<string> $vec): void {
   $vec[] = 'meh';
 }

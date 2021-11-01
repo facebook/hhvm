@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -9,7 +9,7 @@
  *
  */
 
-function f() {
+function f(): void {
   $x = darray[];
   foreach (varray[1, 2, 3] as $y) {
     $z = $x['test'];

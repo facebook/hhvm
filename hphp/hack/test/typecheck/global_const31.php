@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
-const X = 10;
-const Y = -(X + (10 - 2*X));
+const int X = 10;
+const int Y = -(X + (10 - 2*X));

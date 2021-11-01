@@ -1,10 +1,10 @@
-<?hh // partial
+<?hh
 
 /**
  * Regression test: newlines in strings used to mess up line numbers in error
  * messages.
  */
-function test(?varray<int> $a) {
+function test(?varray<int> $a): void {
   $x = "
     ";
   $x = "

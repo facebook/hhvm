@@ -1,6 +1,6 @@
-<?hh // partial
+<?hh
 
-async function test($x): Awaitable<void> {
+async function test(?Awaitable<mixed> $x): Awaitable<void> {
   if ($x !== null) {
     await $x;
   }

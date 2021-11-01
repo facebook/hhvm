@@ -1,8 +1,8 @@
-<?hh // partial
+<?hh
 
-function g((int, int, string) $x) {}
+function g((int, int, string) $x): void {}
 
-function f(mixed $x) {
+function f(mixed $x): void {
   if ($x is (int, string)) {
     g($x);
   }

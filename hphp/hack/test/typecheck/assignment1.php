@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -9,7 +9,7 @@
  *
  */
 
-function main() {
+function main(): void {
   $arr = darray[];
   $arr[$arr->getLength()] = 1;
 }

@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 /**
  * Shape unification
@@ -15,7 +15,7 @@ type t = shape(
   ...
 );
 
-function test(bool $b, s $s, t $t) {
+function test(bool $b, s $s, t $t): void {
   if ($b) {
     $u = shape('x' => 4);
   } else {

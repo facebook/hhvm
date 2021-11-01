@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -9,7 +9,7 @@
  *
  */
 
-function bar(Vector<A> $x) {}
+function bar(Vector<A> $x): void {}
 
 function foo(Vector<?A> $x): Vector<A> {
   bar($x);

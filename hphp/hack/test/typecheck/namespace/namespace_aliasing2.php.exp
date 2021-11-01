@@ -2,3 +2,7 @@ File "namespace_aliasing2.php", line 11, characters 16-23:
 Unbound name: `HH\Lib\Dict\foo` (a global function) (Naming[2049])
 File "namespace_aliasing2.php", line 12, characters 16-24:
 Unbound name: `Dict\foo` (a global function) (Naming[2049])
+File "namespace_aliasing2.php", line 11, characters 16-23:
+Unbound name (typing): `HH\Lib\Dict\foo` (Typing[4107])
+File "namespace_aliasing2.php", line 12, characters 16-24:
+Unbound name (typing): `Dict\foo` (Typing[4107])

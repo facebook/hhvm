@@ -1,8 +1,8 @@
-<?hh // partial
+<?hh
 
-function f(int $foo, ...$args) {}
+function f(int $foo, mixed ...$args): void {}
 
-function test() {
+function test(): void {
   $args = 'string';
   f(...$args); // should be error
 }

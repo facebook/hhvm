@@ -1,3 +1,3 @@
-<?hh // partial
+<?hh
 
-const X = shape();
+const mixed X = shape();

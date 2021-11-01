@@ -1,5 +1,5 @@
-<?hh // partial
+<?hh
 
 namespace X {
-  const __FILE__ = 1;
+  const int __FILE__ = 1;
 }

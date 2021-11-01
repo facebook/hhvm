@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -9,13 +9,13 @@
  *
  */
 
-function foo() {
+function foo(): Generator<int, int, void> {
   yield result(0);
   $x = function() {
     return 0;
   };
 }
 
-function result(int $x) {
+function result(int $x): int {
   return $x;
 }

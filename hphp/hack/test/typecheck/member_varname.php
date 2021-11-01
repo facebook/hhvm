@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 class A {
   protected int $val = 43;
@@ -7,5 +7,3 @@ class A {
     return $this->val - 1;
   }
 }
-
-echo (new A())->b(), "\n";

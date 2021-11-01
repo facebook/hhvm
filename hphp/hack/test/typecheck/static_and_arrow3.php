@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -10,11 +10,11 @@
  */
 
 class Bar {
-  public static function f2() {
+  public static function f2(): void {
   }
 }
 class Foo extends Bar {
-  public function f1() {
+  public function f1(): void {
     $this->f2();
   }
 }

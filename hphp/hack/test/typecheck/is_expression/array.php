@@ -1,6 +1,6 @@
-<?hh // partial
+<?hh
 
-function foo(mixed $x) {
+function foo(mixed $x): void {
   if ($x is varray<_>) {
     hh_show($x);
   } else if ($x is darray<_, _>) {

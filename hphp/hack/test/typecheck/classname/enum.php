@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 abstract class Enum {
   abstract const type TInner;
@@ -10,6 +10,6 @@ class C2 extends C {}
 
 class X extends Enum {
   const type TInner = classname<C>;
-  const ONE = C1::class;
-  const TWO = C2::class;
+  const classname<C1> ONE = C1::class;
+  const classname<C2> TWO = C2::class;
 }

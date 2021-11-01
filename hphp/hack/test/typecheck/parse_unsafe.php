@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -11,7 +11,7 @@
 
 
 class Test {
-  public function bloo() {
+  public function bloo(): void {
     $b = 5;
     $map = darray[];
     {

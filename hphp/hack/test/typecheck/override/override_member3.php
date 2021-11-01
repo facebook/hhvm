@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -10,7 +10,7 @@
  */
 
 class X {
-  public $x = 0;
+  public int $x = 0;
 }
 
 class Y extends X {

@@ -1,6 +1,6 @@
-<?hh // partial
+<?hh
 
-function f(int $x, ...$_): void {}
+function f(int $x, mixed ...$_): void {}
 
 function test(): void {
   $v = 123;

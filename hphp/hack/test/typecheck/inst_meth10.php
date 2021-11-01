@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -19,7 +19,7 @@ class A {
   private function f1(string $s): int {
     return 1;
   }
-  public function f2(A $x) {
+  public function f2(A $x): (function(string): int) {
     $y = true;
     if($y) {
       $x = new B();

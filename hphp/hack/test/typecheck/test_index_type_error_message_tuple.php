@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -9,7 +9,7 @@
  *
  */
 
-function test() {
+function test(): void {
   $m = tuple(4, 'a', 100);
   $m['0'] = 100;
 }

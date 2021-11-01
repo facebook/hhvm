@@ -1,8 +1,8 @@
-<?hh // partial
+<?hh
 
-function takes_int(int $x) { }
+function takes_int(int $x): void { }
 
-function f() {
+function f(): void {
   $a = 1;
   if (true) {} // this makes $a into a Tvar mapped to a Tunion[int]
   /* We used to unify both branches of a ternary expression, then falling back

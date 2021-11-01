@@ -1,7 +1,7 @@
-<?hh // partial
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function doit(dynamic $d, $p):void {
+function doit(dynamic $d, bool $p):void {
   if ($p) {
     $d = $p;
   }

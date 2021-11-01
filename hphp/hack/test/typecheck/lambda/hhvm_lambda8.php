@@ -1,22 +1,22 @@
-<?hh // partial
+<?hh
 class C {
 
-  private static $barK = 0;
+  private static int $barK = 0;
 
-  private function bar() {
+  private function bar(): void {
     ++self::$barK;
     echo self::$barK . "\n";
     var_dump($this);
   }
-  public function foo1() {
+  public function foo1(): (function():(function():void)) {
     return () ==> () ==> $this->bar();
   }
-  public function foo2() {
+  public function foo2(): (function():(function():void)) {
     $x = $this;
     return () ==> () ==> $x->bar();
   }
 }
-function main() {
+function main(): void {
   $x = $y ==> $z ==> $y + $z;
   var_dump(($x(3))(4));
   $x = (int $y = 5): int ==> $y;
@@ -25,8 +25,8 @@ function main() {
   $x = (int $y = 7): (function(int): int) ==> (int $z): int ==> $y + $z;
   var_dump(($x(5))(9));
   $c = new C();
-  $x = (($c->foo1())())();
-  $x = (($c->foo2())())();
+  (($c->foo1())())();
+  (($c->foo2())())();
   $x = (
     string $x,
     (function(int):bool) $f,
@@ -34,4 +34,3 @@ function main() {
   ): Vector<Vector<int>> ==> $v;
   var_dump($x is Closure);
 }
-main();

@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -9,7 +9,7 @@
  *
  */
 
-function f($a): void {
+function f(mixed $a): void {
   // make sure we don't confuse the function argument for a type hint
   f(function() { return 1;});
 }

@@ -1,11 +1,11 @@
-<?hh // partial
+<?hh
 
 class X {
-  public function foo() { }
+  public function foo(): void { }
 }
 
 trait T1 {
- abstract protected function foo();
+ abstract protected function foo(): void;
 }
 
 trait T {

@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -19,7 +19,7 @@ class Base<T> {
   public function get(): T {
     return $this->data->data;
   }
-  public function set($val): this {
+  public function set(mixed $val): this {
     return $this;
   }
   public function magic(mixed ...$args): this {
@@ -40,7 +40,7 @@ final class Another<T> {
     $this->data = $data;
     return $this;
   }
-  public function magicGetter(varray ...$args): ?T {
+  public function magicGetter(mixed ...$args): ?T {
     return $this->data ? $this->data->data : null;
   }
   public static function make(Gen<T> $data): this {

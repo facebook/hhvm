@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -9,14 +9,16 @@
  *
  */
 
-$x = <<<'END'
+function f(): void {
+  $x = <<<'END'
 This is a nowdoc.
 END;
 
-print $x;
+  print $x;
 
-$interpolation = "an interpolated value";
+  $interpolation = "an interpolated value";
 
-$y = <<< 'END'
+  $y = <<< 'END'
 This is a heredoc with $interpolation.
 END;
+}

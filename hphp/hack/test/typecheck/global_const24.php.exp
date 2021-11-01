@@ -1,6 +1,6 @@
-File "global_const24.php", line 3, characters 11-13:
+File "global_const24.php", line 3, characters 17-19:
 Expected constant expression for initializer (Parsing[1002])
-File "global_const24.php", line 3, characters 13-13:
+File "global_const24.php", line 3, characters 19-19:
 Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
-File "global_const24.php", line 3, characters 11-13:
+File "global_const24.php", line 3, characters 17-19:
 Illegal constant value (Naming[2023])

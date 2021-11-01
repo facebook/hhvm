@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2018, Facebook, Inc.
  * All rights reserved.
@@ -9,6 +9,6 @@
  *
  */
 
-function as_array((int, string) $x): varray_or_darray {
+function as_array((int, string) $x): varray_or_darray<int, string> {
   return $x;
 }

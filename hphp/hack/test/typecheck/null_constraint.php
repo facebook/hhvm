@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -11,7 +11,7 @@
 
 class MyClass {
   public ?int $field = 0;
-  public function doStuff() {}
+  public function doStuff(): void {}
 }
 
 

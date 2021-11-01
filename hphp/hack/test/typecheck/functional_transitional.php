@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -9,7 +9,7 @@
  *
  */
 
-function f($x) {
+function f((int, int) $x): void {
   $x = tuple(1, 2);
-  return $x->f();
+  $x->f();
 }

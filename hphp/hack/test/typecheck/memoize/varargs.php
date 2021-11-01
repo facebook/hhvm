@@ -1,9 +1,9 @@
-<?hh // partial
+<?hh
 
 class Foo {
   <<__Memoize>>
-  public function someMethod(...$_): void {}
+  public function someMethod(mixed ...$_): void {}
 }
 
 <<__Memoize>>
-function some_function(...$_): void {}
+function some_function(mixed ...$_): void {}

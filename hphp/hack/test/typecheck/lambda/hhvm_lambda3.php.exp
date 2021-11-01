@@ -1,1 +1,2 @@
-No errors
+File "hhvm_lambda3.php", line 6, characters 12-48:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])

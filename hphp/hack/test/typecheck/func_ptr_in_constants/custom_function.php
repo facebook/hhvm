@@ -1,11 +1,11 @@
-<?hh // partial
+<?hh
 
-function foo() {}
+function foo(): int { return 42; }
 
 class A {
-  public static $arr = foo();
+  public static int $arr = foo();
 }
 
 abstract class B {
-  const const_arr = foo();
+  const int const_arr = foo();
 }

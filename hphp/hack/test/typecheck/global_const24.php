@@ -1,4 +1,3 @@
-<?hh // partial
+<?hh
 
-const X = ++X;
-
+const mixed X = ++X;

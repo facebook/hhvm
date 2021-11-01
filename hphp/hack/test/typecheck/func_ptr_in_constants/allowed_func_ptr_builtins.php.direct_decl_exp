@@ -1,6 +1,6 @@
 --- legacy
 +++ direct decl
-@@ -1,89 +1,90 @@
+@@ -1,101 +1,101 @@
  [("\\foo",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
@@ -13,7 +13,7 @@
               ft_implicit_params = { capability = (CapDefaults [3:10-13]) };
               ft_ret =
               { et_enforced = Typing_defs_core.Unenforced;
-                et_type = (Rwitness_from_decl ([3:10-13]), Tany) };
+                et_type = (Rhint ([3:17-20]), (Tprim Tint)) };
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
                 ~returns_readonly:false ~support_dynamic_type:false
@@ -23,7 +23,7 @@
         fe_support_dynamic_type = false }));
    ("\\Cls",
     (Shallow_decl_defs.Class
-       { Shallow_decl_defs.sc_mode = Mpartial; sc_final = false;
+       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
          sc_is_xhp = false; sc_has_xhp_keyword = false;
          sc_kind = (Cclass Concrete); sc_module = None;
          sc_name = ([5:7-10], "\\Cls"); sc_tparams = [];
@@ -43,7 +43,7 @@
                   { capability = (CapDefaults [6:26-30]) };
                   ft_ret =
                   { et_enforced = Typing_defs_core.Unenforced;
-                    et_type = (Rwitness_from_decl ([6:26-30]), Tany) };
+                    et_type = (Rhint ([6:34-37]), (Tprim Tint)) };
                   ft_flags =
                   (make_ft_flags FSync ~return_disposable:false
                     ~returns_readonly:false ~support_dynamic_type:false
@@ -55,7 +55,7 @@
          sc_methods = []; sc_user_attributes = []; sc_enum_type = None }));
    ("\\A",
     (Shallow_decl_defs.Class
-       { Shallow_decl_defs.sc_mode = Mpartial; sc_final = false;
+       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
          sc_is_xhp = false; sc_has_xhp_keyword = false;
          sc_kind = (Cclass Concrete); sc_module = None;
          sc_name = ([9:7-8], "\\A"); sc_tparams = [];
@@ -65,15 +65,21 @@
          sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
          sc_props = [];
          sc_sprops =
-         [{ Shallow_decl_defs.sp_name = ([10:17-21], "$arr");
-            sp_xhp_attr = None; sp_type = None; sp_visibility = Public;
-            sp_flags = (empty) }
+         [{ Shallow_decl_defs.sp_name = ([10:37-41], "$arr");
+            sp_xhp_attr = None;
+            sp_type =
+            (Some (Rhint ([10:17-36]),
+                   (Tapply (([10:17-21], "\\HH\\dict"),
+                      [(Rhint ([10:22-28]), (Tprim Tstring));
+                        (Rhint ([10:30-35]), Tmixed)]
+                      ))));
+            sp_visibility = Public; sp_flags = (empty) }
            ];
          sc_constructor = None; sc_static_methods = []; sc_methods = [];
          sc_user_attributes = []; sc_enum_type = None }));
    ("\\B",
     (Shallow_decl_defs.Class
-       { Shallow_decl_defs.sc_mode = Mpartial; sc_final = false;
+       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
          sc_is_xhp = false; sc_has_xhp_keyword = false;
          sc_kind = (Cclass Abstract); sc_module = None;
          sc_name = ([16:16-17], "\\B"); sc_tparams = [];
@@ -83,9 +89,14 @@
          sc_support_dynamic_type = false;
          sc_consts =
          [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
-            scc_name = ([17:9-18], "const_arr");
--           scc_type = (Rwitness_from_decl ([17:9-18]), Tany); scc_refs = [] }
-+           scc_type = (Rwitness_from_decl ([17:9-18]), Tany);
+            scc_name = ([17:29-38], "const_arr");
+            scc_type =
+            (Rhint ([17:9-28]),
+             (Tapply (([17:9-13], "\\HH\\dict"),
+                [(Rhint ([17:14-20]), (Tprim Tstring));
+                  (Rhint ([17:22-27]), Tmixed)]
+                )));
+-           scc_refs = [] }
 +           scc_refs = [((Typing_defs.From "\\Cls"), "class")] }
            ];
          sc_typeconsts = []; sc_props = []; sc_sprops = [];

@@ -1,7 +1,7 @@
-<?hh // partial
+<?hh
 
 class T {
-  public function f<T>($a): bool {
+  public function f<T>(mixed $a): bool {
     return $a is T;
   }
 }

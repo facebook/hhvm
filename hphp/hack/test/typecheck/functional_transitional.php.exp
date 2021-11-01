@@ -1,4 +1,4 @@
-File "functional_transitional.php", line 14, characters 14-14:
+File "functional_transitional.php", line 14, characters 7-7:
 You are trying to access the method `f` but this is a tuple of size 2 (Typing[4062])
-File "functional_transitional.php", line 13, characters 8-18:
-Definition is here
+  File "functional_transitional.php", line 13, characters 8-18:
+  Definition is here

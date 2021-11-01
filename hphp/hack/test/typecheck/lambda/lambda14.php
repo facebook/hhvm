@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -9,9 +9,9 @@
  *
  */
 
-function whatever(mixed $heyo) {}
+function whatever(mixed $heyo): void {}
 
-function function_scope() {
+function function_scope(): void {
   // Shouldn't try to capture $k
   $bar = () ==> {
     foreach (varray[1, 2, 3, 4] as $k) {
@@ -33,11 +33,9 @@ function function_scope() {
   // allocation site (in non-repo mode).  It will also give an
   // ahead-of-type error from hh about $z not being defined.
   $quux = () ==> {
-    var_dump(whatever($z));
+    whatever($z);
   };
   $z = "function scope is weird\n";
   echo "z in parent is now: $z\n";
   $quux(); // print NULL
 }
-
-function_scope();

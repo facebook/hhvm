@@ -1,9 +1,9 @@
-<?hh // partial
+<?hh
 
 class C1 {
   public function __construct(
     private int $foo,
-    private ...$args
+    private mixed ...$args
   ) {}
 }
 

@@ -1,6 +1,6 @@
-<?hh // partial
+<?hh
 
-function main() {
+function main(): void {
   try {
     $foo = 'bar';
   } catch (Exception $e) {
@@ -8,8 +8,6 @@ function main() {
   }
   var_dump($foo);
 }
-
-main();
 
 function main2(): int {
   if (true) {
@@ -20,9 +18,7 @@ function main2(): int {
   return $x;
 }
 
-main2();
-
-function main3($a): int {
+function main3(bool $a): int {
   if ($a) {
     return 1;
   } else {

@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 namespace MyNamespace;
 
@@ -9,4 +9,6 @@ function do_stuff(Foo $shape): void {
   \var_dump($herp);
 }
 
-do_stuff(shape('herp' => 'derp'));
+function main(): void {
+  do_stuff(shape('herp' => 'derp'));
+}

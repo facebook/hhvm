@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -30,7 +30,7 @@ DUCK;
 }
 
 class C {
-  static public $parent = 123;
+  static public int $parent = 123;
   public function foo(): int {
     return C::$parent + self::$parent + static::$parent;
   }

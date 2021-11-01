@@ -32,8 +32,7 @@
               "trailing_width":12,
               "leading":[],
               "trailing":[
-                {"kind":"whitespace","text":" ","offset":4,"width":1},
-                {"kind":"single_line_comment","text":"// partial","offset":5,"width":10},
+                {"kind":"whitespace","text":"           ","offset":4,"width":11},
                 {"kind":"end_of_line","text":"\n","offset":15,"width":1}
               ],
               "line_number":1

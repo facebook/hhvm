@@ -7,8 +7,9 @@ enum E : int {
 }
 
 //// file2.php
-<?hh // partial
+<?hh
 
+/* HH_FIXME[4030] */
 function getX() {
   return E::X;
 }

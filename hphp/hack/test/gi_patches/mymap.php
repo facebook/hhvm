@@ -1,7 +1,9 @@
 //// file1.php
-<?hh // partial
+<?hh
 
 /* HH_FIXME[4101] */
+/* HH_FIXME[4030] */
+/* HH_FIXME[2071] */
 function foo(MyMap $m) {
   $m->add("hey", 40);
   return $m->get("ho");

@@ -8,6 +8,8 @@ Invalid return type (Typing[4110])
   Expected `(int, int)`
   File "reason_err_messages.php", line 4, characters 10-19:
   But got `dynamic`
+File "reason_err_messages.php", line 8, characters 8-17:
+Unbound global constant (Typing) (Typing[4106])
 File "reason_err_messages.php", line 9, characters 10-11:
 Invalid return type (Typing[4110])
   File "reason_err_messages.php", line 7, characters 33-42:

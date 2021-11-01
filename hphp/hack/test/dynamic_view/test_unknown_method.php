@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 function test() : (int, int) {
   // something isn't defined

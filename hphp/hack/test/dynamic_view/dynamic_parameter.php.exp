@@ -8,6 +8,10 @@ Invalid return type (Typing[4336])
   Expected `dynamic`
   File "dynamic_parameter.php", line 3, characters 10-12:
   But got `void` because this function does not always return a value
+File "dynamic_parameter.php", line 3, characters 10-12:
+Was expecting a return type hint (Typing[4030])
+File "dynamic_parameter.php", line 3, characters 14-15:
+Was expecting a type hint (Typing[4032])
 File "dynamic_parameter.php", line 5, characters 13-14:
 Invalid argument (Typing[4110])
   File "dynamic_parameter.php", line 2, characters 20-29:

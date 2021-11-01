@@ -4,6 +4,8 @@ File "test_arrays.php", line 10, characters 31-41:
   vec<nothing>
 File "test_arrays.php", line 5, characters 19-24:
 Unbound name: `vec` (Naming[2049])
+File "test_arrays.php", line 2, characters 10-12:
+Was expecting a return type hint (Typing[4030])
 File "test_arrays.php", line 11, characters 10-11:
 Invalid return type (Typing[4110])
   File "test_arrays.php", line 8, characters 8-15:

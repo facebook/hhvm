@@ -17,8 +17,6 @@ oxidized = { path = "../../oxidized" }
 oxidized_by_ref = { path = "../../oxidized_by_ref" }
 parser_core_types = { path = "../../parser/cargo/core_types" }
 stack_limit = { path = "../../utils/stack_limit" }
-typing_collections_rust = { path = "../../typing/cargo/typing_collections_rust" }
-typing_defs_rust = { path = "../../typing/cargo/typing_defs_rust" }
 
 [profile.release]
 incremental = false

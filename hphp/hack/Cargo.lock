@@ -736,8 +736,6 @@ dependencies = [
  "oxidized_by_ref",
  "parser_core_types",
  "stack_limit",
- "typing_collections_rust",
- "typing_defs_rust",
 ]
 
 [[package]]

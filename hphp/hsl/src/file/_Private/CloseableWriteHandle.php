@@ -17,4 +17,5 @@ final class CloseableWriteHandle
   extends CloseableFileHandle
   implements File\CloseableWriteHandle {
   use _IO\FileDescriptorWriteHandleTrait;
+  use TruncateTrait;
 }

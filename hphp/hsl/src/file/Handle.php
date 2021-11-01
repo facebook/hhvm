@@ -49,6 +49,7 @@ interface ReadHandle extends Handle, IO\SeekableReadFDHandle {
 }
 
 interface WriteHandle extends Handle, IO\SeekableWriteFDHandle {
+  public function truncate(?int $length = null): void;
 }
 
 interface ReadWriteHandle extends WriteHandle, ReadHandle, IO\SeekableReadWriteFDHandle {

@@ -1,5 +1,5 @@
-<?hh // partial
+<?hh
 
-function f<T>() {
-  return T::foo;
+function f<T>(): void {
+  T::foo;
 }

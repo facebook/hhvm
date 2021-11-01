@@ -4,3 +4,5 @@ File "bad_inout_use_byref.php", line 7, characters 11-11:
 Unbound name: `&` (a global constant) (Naming[2049])
 File "bad_inout_use_byref.php", line 7, characters 11-11:
 `inout` arguments may only be local variables or array indexing expressions  (NastCheck[3050])
+File "bad_inout_use_byref.php", line 7, characters 11-11:
+Unbound global constant (Typing) (Typing[4106])

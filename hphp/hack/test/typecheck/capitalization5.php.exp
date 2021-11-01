@@ -1,8 +1,10 @@
 File "capitalization5.php", line 6, characters 10-18:
 Could not find `cAMELcASE`. (Naming[2006])
-File "capitalization5.php", line 3, characters 10-18:
-Did you mean `~~CamelCase~~` instead (which only differs by case)?
+  File "capitalization5.php", line 3, characters 10-18:
+  Did you mean `~~CamelCase~~` instead (which only differs by case)?
 File "capitalization5.php", line 6, characters 3-21:
 You cannot return a value (Typing[4084])
-File "capitalization5.php", line 5, characters 18-21:
-This is a `void` function
+  File "capitalization5.php", line 5, characters 18-21:
+  This is a `void` function
+File "capitalization5.php", line 6, characters 10-18:
+Unbound name (typing): `cAMELcASE` (Typing[4107])

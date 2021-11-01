@@ -1,7 +1,5 @@
 File "tarray.php", line 5, characters 3-13:
-  vec_or_dict<arraykey, _>
-File "tarray.php", line 9, characters 3-13:
   ~vec<int>
-File "tarray.php", line 13, characters 3-13:
+File "tarray.php", line 9, characters 3-13:
   ~dict<int, string>
 No errors

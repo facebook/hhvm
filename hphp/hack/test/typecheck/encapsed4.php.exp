@@ -2,3 +2,5 @@ File "encapsed4.php", line 7, characters 10-17:
 The `${x}` syntax is disallowed in Hack. Use `{$x}` instead. (Parsing[1002])
 File "encapsed4.php", line 7, characters 11-11:
 Unbound name: `c` (a global constant) (Naming[2049])
+File "encapsed4.php", line 7, characters 11-11:
+Unbound global constant (Typing) (Typing[4106])

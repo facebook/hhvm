@@ -1,1 +1,2 @@
-No errors
+File "dynamic_new1.php", line 16, characters 7-15:
+Cannot use dynamic `new`. (Naming[2060])

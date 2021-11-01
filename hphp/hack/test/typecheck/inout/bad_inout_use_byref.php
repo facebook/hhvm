@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 function f(inout varray<string> $v): void {}
 

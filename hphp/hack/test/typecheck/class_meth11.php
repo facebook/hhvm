@@ -1,22 +1,22 @@
-<?hh // partial
+<?hh
 
 class C {
   public static function aStaticMeth(): string {
     return 'C';
   }
 
-  public function test() {
+  public function test(): string {
     $h = class_meth(static::class, 'aStaticMeth');
     hh_show($h);
-    echo $h(), ' ';
+    return $h() . ' ';
   }
 }
 
 final class D extends C {
-  public function test2() {
+  public function test2(): string {
     $g = class_meth(self::class, 'aStaticMeth');
     hh_show($g);
-    echo $g(), ' ';
+    return $g() . ' ';
   }
 
   public static function aStaticMeth(): string {
@@ -29,11 +29,11 @@ trait MyTr {
     return 'MyTr';
   }
 
-  public function test() {
+  public function test(): string {
     // static::class is the 'use'r class at runtime
     $h = class_meth(static::class, 'aStaticMeth');
     hh_show($h);
-    echo $h(), ' ';
+    return $h() . ' ';
   }
 }
 
@@ -41,7 +41,8 @@ class E {
   use MyTr;
 }
 
-function main() {
+<<__EntryPoint>>
+function main(): void {
   $c = new C();
   echo 'C: ', $c->test(), "\n";
   $d = new D();
@@ -49,7 +50,6 @@ function main() {
   $e = new E();
   echo 'E: ', $e->test(), "\n";
 }
-main();
 
 // Expected output when executed (without hh_show's)
 // C: C C C

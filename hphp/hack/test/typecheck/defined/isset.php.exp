@@ -1,1 +1,6 @@
-No errors
+File "isset.php", line 8, characters 10-11:
+Variable `$x` is undefined, or not always defined. (Naming[2050])
+  File "isset.php", line 3, characters 20-21:
+  Did you mean `$b` instead?
+File "isset.php", line 7, characters 7-15:
+`isset` tends to hide errors due to variable typos and so is limited to dynamic checks in `strict` mode (Typing[4016])

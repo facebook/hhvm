@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -9,29 +9,31 @@
  *
  */
 
-$a = <<<END
-This is a heredoc.
+function test(): void {
+    $a = <<<END
+    This is a heredoc.
 END;
 
-print $a;
+    print $a;
 
-$interpolation = "an interpolated value";
+    $interpolation = "an interpolated value";
 
-$b = <<< END
-This is a heredoc with $interpolation.
+    $b = <<< END
+    This is a heredoc with $interpolation.
 END;
 
-$c = <<<END
-   This one has whitespace and a misleading "end".
-   END
+    $c = <<<END
+       This one has whitespace and a misleading "end".
+       END
 END;
 
-$d = <<<END
-Words
-Words
-Words
-Words
+    $d = <<<END
+    Words
+    Words
+    Words
+    Words
 END;
+}
 
 class Test {
     public string $a;
@@ -43,13 +45,14 @@ class Test {
     public function __toString(): string {
         return '<Test>';
     }
+
 }
-
-$test = new Test();
-
-print <<<identifier_with_underscores_and_like_50_characters
+function test2(): void {
+    $test = new Test();
+      print <<<identifier_with_underscores_and_like_50_characters
   $test = <Test>
   $test->a = a
   \x41 = A
 
 identifier_with_underscores_and_like_50_characters;
+}

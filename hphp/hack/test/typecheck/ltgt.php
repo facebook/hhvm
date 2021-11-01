@@ -1,7 +1,7 @@
-<?hh // partial
+<?hh
 
 function f(?int $x): void {
-  if ($x <> null) {
+  if ($x !== null) {
     expect_int($x);
   }
 }

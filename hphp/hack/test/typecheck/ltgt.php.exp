@@ -1,10 +1,1 @@
-File "ltgt.php", line 4, characters 13-13:
-An expression is expected here. (Parsing[1002])
-File "ltgt.php", line 4, characters 11-11:
-Unbound name: `>` (a global constant) (Naming[2049])
-File "ltgt.php", line 5, characters 16-17:
-Invalid argument (Typing[4110])
-File "ltgt.php", line 9, characters 21-23:
-Expected `int`
-File "ltgt.php", line 3, characters 12-15:
-But got `?int`
+No errors

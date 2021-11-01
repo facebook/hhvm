@@ -1,4 +1,6 @@
 File "class_meth_no_typedef.php", line 10, characters 21-25:
 Expected a `class` but got a type alias. (Naming[2052])
-File "class_meth_no_typedef.php", line 7, characters 6-8:
-Alias definition is here.
+  File "class_meth_no_typedef.php", line 7, characters 6-8:
+  Alias definition is here.
+File "class_meth_no_typedef.php", line 10, characters 21-25:
+Unbound name (typing): `Bar` (Typing[4107])

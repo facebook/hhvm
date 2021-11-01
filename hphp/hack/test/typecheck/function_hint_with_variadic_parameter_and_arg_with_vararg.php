@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 // This is a function of int and vararg
 function func_with_vararg(int $a, mixed ...$args): void {}

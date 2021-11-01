@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 class :foo extends SomePHPClass {
   attribute int bar;

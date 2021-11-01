@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 // Testing function
 async function wrong_hint(): int {

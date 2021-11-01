@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -12,6 +12,6 @@
 function meh_while(int $i): void {
   $x = $i;
   do {
-  	$i += $x;
+    $i += $x;
   } while($x = true);
 }

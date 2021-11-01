@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 /**
  * Structural subtyping of ad-hoc shapes

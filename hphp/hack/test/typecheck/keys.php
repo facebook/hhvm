@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 /**
  * Tuple-like arrays have integer keys

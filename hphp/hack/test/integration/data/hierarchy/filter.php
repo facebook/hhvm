@@ -1,4 +1,4 @@
-<?hh //partial
+<?hh
 
 class CFilter {
   public function cfilterMethod(): void {}

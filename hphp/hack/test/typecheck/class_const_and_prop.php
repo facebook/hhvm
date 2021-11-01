@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 class Foo {
   const bar = 0;

@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 class A<T as int> {
   public function foo(T $a): int {

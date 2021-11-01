@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 async function f(): AsyncGenerator<?int, int, void> {
   while (true) {

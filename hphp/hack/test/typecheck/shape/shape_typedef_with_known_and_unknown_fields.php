@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 type ShapeWithKnownAndUnknownFields = shape(
   'a' => int,

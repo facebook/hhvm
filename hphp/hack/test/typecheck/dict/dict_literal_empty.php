@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 function foo(): dict<string, int> {
   $x = dict[];

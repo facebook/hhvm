@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 class Foo implements IDisposable {
   public function __dispose(): void {

@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 trait T {
   public abstract function __construct();

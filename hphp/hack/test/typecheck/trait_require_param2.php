@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 abstract class Foo<T> {
   /* HH_FIXME[4110] */

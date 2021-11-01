@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 trait T {
   require extends X;

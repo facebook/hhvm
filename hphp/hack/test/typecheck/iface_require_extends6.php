@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 class Super {
   public function __construct(string $x) {}

@@ -1,5 +1,5 @@
 //// _comments
-<?hh // partial
+<?hh
 
 // Instances of an opaque type should be comparable using === .
 // Some languages have a notion of types that don't permit
@@ -7,7 +7,7 @@
 // Hacklang guarantees that checking sameness is always possible.
 
 //// newtype.php
-<?hh // strict
+<?hh// strict
 
 newtype OpaqueInt = int;
 
@@ -19,7 +19,7 @@ class Opaque {
 }
 
 //// useit.php
-<?hh // strict
+<?hh// strict
 
 class Klass {
   public bool $cmp;

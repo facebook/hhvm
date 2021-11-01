@@ -1,3 +1,3 @@
-<?hh // partial
+<?hh
 
 function f(mixed<int> $s): void {}

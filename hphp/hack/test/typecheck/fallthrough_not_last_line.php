@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 function foo(int $x): void {
   switch ($x) {

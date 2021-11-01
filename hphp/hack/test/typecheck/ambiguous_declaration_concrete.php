@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 trait T1 {
   public function foo(): void {}
 }

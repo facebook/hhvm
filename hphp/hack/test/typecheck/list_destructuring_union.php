@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function union(bool $x, dynamic $d, (int, string) $tup): void {

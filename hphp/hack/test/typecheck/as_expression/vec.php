@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 function f(mixed $x): void {
   $x as vec;

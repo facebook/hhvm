@@ -1,4 +1,4 @@
-<?hh //partial
+<?hh
 
 class One {
   public function foo() {

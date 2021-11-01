@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 trait B {}
 trait C {}

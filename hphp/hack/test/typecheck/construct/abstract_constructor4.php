@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 trait Awesome {
   abstract public function __construct();

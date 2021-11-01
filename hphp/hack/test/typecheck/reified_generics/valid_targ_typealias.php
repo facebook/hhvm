@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 class C<reify T> {}
 newtype Opaque = int;

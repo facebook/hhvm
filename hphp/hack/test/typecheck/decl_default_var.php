@@ -1,5 +1,5 @@
 //// base.php
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -15,6 +15,6 @@ abstract class Base {
 }
 
 //// derived.php
-<?hh // partial
+<?hh
 
 class Derived extends Base {}

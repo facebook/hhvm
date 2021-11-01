@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 trait Hello {}
 interface I {
   use Hello;

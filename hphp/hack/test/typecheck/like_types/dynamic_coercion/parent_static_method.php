@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 class C {
   public static function f(int $i): void {}

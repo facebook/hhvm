@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 function test(): void {
   $f = function(int $x, ...$_) {};

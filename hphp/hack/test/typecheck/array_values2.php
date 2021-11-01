@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 function test1(varray<string> $xs): varray<string> {
   return array_values($xs);

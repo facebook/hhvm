@@ -1,12 +1,12 @@
 //// _comments
-<?hh // partial
+<?hh
 
 // opaque type should not implicitly convert to string.
 // even when the type backing it does implicit convert to
 // a string ordinarily
 
 //// newtype.php
-<?hh // strict
+<?hh// strict
 
 newtype OpaqueInt = int;
 
@@ -18,7 +18,7 @@ class Opaque {
 }
 
 //// useit.php
-<?hh // strict
+<?hh// strict
 
 class Klass {
   public string $foo;

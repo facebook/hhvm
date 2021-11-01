@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 // Has mixed types
 function f(int $integral, string $str, float $flt): void {}

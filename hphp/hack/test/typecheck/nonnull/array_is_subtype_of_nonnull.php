@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 function cast_varray<Tv>(varray<Tv> $x): nonnull {
   return $x;

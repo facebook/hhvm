@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 function i(?int $x): void {}
 

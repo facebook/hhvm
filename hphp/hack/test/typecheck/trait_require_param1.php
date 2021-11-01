@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 abstract class Foo<T> {
   protected function bar(): T {

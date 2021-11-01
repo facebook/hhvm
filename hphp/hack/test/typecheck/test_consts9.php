@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 abstract class C1 {
   abstract const int X;

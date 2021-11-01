@@ -1,5 +1,5 @@
 //// file1.php
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -13,7 +13,7 @@
 newtype a<T> as T = T;
 
 //// file2.php
-<?hh // partial
+<?hh
 
 function test(a<int> $x): void {}
 function test2(a<bool> $x): void {

@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 final class :x extends XHPTest {
   public function foo(): string {
     return "";

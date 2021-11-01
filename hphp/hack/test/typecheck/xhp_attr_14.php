@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 class :foo {
   public function render(): void {

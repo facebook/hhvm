@@ -1,12 +1,12 @@
 //// f1.php
-<?hh // partial
+<?hh
 
 class CamelCase {
   final public function foo(int $x): void {}
 }
 
 //// f2.php
-<?hh // partial
+<?hh
 function foo(cAmelCase $arg): :xhp {
   expect_CamelCase($arg);
   $v = ret();

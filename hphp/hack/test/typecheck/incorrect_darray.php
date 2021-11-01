@@ -1,3 +1,3 @@
-<?hh // partial
+<?hh
 
 function foo(darray<string => int> $x) : void {}

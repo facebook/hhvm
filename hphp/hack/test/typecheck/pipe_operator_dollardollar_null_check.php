@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 interface I {
   public function get(): int;

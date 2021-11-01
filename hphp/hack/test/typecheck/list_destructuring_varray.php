@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function varrays(varray<int> $a1, varray<string> $a2): void {

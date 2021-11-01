@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 function lol(mixed $x): string {
   return 'lol';

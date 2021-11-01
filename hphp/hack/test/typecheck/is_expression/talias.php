@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 type Foo<T> = (int, T);
 

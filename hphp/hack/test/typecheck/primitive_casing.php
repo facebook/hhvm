@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 function f(Vec $arr): String {
   return 's';

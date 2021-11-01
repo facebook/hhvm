@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 class Super<T> {
   public ?T $x;

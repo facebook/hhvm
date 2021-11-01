@@ -1,5 +1,5 @@
 //// def.php
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -23,14 +23,14 @@ namespace N {
 }
 
 //// use1.php
-<?hh // partial
+<?hh
 
 function f(int $x): \N\Foo {
   return \N\bless($x);
 }
 
 //// use2.php
-<?hh // partial
+<?hh
 
 namespace N {
   function f(int $x): Foo {

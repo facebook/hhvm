@@ -1,5 +1,5 @@
 //// file1.php
-<?hh // partial
+<?hh
 
 class BarImpl {
 }
@@ -7,7 +7,7 @@ class BarImpl {
 newtype Bar = varray<BarImpl>;
 
 //// file2.php
-<?hh // partial
+<?hh
 
 <<__Memoize>>
 function some_function(Bar $i): void {}

@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 class C<T> {
   public function __construct(T $_) {}

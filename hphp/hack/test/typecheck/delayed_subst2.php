@@ -1,5 +1,5 @@
 ////file1.php
-<?hh // partial
+<?hh
 
 interface I2 { }
 interface I<T> extends I2 {}
@@ -10,7 +10,7 @@ function i(): I {
 }
 
 ////file2.php
-<?hh // strict
+<?hh// strict
 
 function test(): I2 {
   /* HH_FIXME[4029] */

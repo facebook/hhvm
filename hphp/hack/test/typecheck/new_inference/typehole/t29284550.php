@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 function launder(): bool {
   return false;

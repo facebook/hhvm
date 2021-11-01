@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 function f(): Generator<int, int, void> {
   while (true) {

@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 class C1 {
   public function foo(inout int $x): void {}

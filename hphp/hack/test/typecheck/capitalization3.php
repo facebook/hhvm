@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 class CamelCase {
   final public function foo(int $x): void {}

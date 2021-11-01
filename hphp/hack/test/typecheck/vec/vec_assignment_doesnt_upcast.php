@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 function foo(vec<string> $x): vec<string> {
   $x[0] = "hello";

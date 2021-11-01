@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 /**
  * Sets of removed fields must be compatible

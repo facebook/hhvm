@@ -1,9 +1,9 @@
 //// f1.php
-<?hh // partial
+<?hh
 
 function CamelCase(int $x): void {}
 
 //// f2.php
-<?hh // partial
+<?hh
 
 function cAmelCase(string $y): void {}

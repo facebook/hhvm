@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 newtype myshape = shape(
   'x' => int,

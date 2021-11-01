@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function test_is_array_traversable<T>(Traversable<T> $m): ?varray_or_darray<T> {

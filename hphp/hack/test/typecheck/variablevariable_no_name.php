@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 function foo(): varray<int> {
   return $$$;

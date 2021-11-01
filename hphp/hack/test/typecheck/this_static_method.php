@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 /* Check that we correctly handle static method lookups on abstract types
  * constrained by Tvars */

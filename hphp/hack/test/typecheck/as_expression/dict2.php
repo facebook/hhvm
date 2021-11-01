@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 function get_mixed(): mixed {
   return dict[];

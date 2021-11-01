@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 function test(): void {
   $args = varray["hello"];

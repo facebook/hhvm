@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 abstract class A {
   abstract const type abs_class_by_class as arraykey;
 

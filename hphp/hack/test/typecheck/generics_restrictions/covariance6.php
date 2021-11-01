@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 class X<-T> {
   public ?T $x;

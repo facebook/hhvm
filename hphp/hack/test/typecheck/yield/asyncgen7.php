@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 function f(): AsyncGenerator<string, int, void> {
   $g = async function() {

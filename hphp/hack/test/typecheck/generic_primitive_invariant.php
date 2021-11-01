@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 /*
  * We should be able to inline addone and get the same error;

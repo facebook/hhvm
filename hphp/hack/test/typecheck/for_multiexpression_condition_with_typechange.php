@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -12,6 +12,6 @@
 function meh_for(int $i): void {
   $x = $i;
   for( ; $x = 1, $x = "hello"; $i++) {
-  	$i %= $x;
+    $i %= $x;
   }
 }

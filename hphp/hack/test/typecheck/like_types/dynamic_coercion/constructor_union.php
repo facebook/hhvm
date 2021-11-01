@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 final class C {
   public function __construct(int $i) {}

@@ -1,4 +1,4 @@
-<?hh //partial
+<?hh
 
 class Three extends Two {
   public function foo() {

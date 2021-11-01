@@ -1,4 +1,4 @@
-<?hh //partial
+<?hh
 
 /*
  * This is a docblock for NoBigTrait

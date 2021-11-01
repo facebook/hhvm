@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 trait C {
   public function f(): void {}

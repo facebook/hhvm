@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 abstract class BaseClass {
   public abstract function __construct(string $x);

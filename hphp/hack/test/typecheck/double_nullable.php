@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 function bar(): darray<int, ?int> {
   return darray[123 => null, 456 => 789];

@@ -1,3 +1,3 @@
-<?hh // partial
+<?hh
 
 const int X = ($x ==> $x);

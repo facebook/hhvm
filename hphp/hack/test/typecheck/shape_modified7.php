@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 type s = shape('x' => ?int);
 

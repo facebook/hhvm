@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 class A {
   const int X = 10;

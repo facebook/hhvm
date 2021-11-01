@@ -1,12 +1,12 @@
 //// file1.php
-<?hh // partial
+<?hh
 
 newtype ID<+T> = int;
 newtype UID<+T> as ID<T> = int;
 newtype OID<+T> as ID<T> = int;
 
 //// file2.php
-<?hh // partial
+<?hh
 
 class A {}
 class B extends A {}

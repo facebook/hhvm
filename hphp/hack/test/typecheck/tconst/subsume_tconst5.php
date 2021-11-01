@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 abstract class HasConcrete {
   abstract const type T1;

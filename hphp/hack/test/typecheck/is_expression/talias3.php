@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 final class Foo<T> {}
 type Bar = Foo<string>;

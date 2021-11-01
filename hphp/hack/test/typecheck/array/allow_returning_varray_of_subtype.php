@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 function provideVarrayOfInt(): varray<int> {
   return varray[0, 1, 2, 3];

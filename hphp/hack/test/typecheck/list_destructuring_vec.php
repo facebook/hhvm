@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function vecs(Vector<int> $v1, ImmVector<float> $v2, ConstVector<string> $v3, vec<bool> $v4): void {

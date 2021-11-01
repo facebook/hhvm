@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 class MyClass {
   private const MY_CONSTA = 'a';

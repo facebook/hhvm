@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 // Regular class that is called xhp should still work
 class xhp {}

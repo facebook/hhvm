@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 // Repeated types
 function f(int $integral, int $another_integral): void {}

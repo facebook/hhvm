@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 function my_compact<T>(Vector<?T> $vector): Vector<T> {
   return Vector {};

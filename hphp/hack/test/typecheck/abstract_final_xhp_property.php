@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 abstract final class :foo {
   attribute string foobar;
 }

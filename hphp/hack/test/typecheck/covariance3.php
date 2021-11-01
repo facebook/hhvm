@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 interface Y<-T> {
   public function set(T $x): void;

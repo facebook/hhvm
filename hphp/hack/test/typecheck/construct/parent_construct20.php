@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 abstract class FooGrandParent {
   protected string $foo;

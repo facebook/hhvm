@@ -511,14 +511,19 @@ NEVER_INLINE void Collector::sweep() {
     [&](HeapObject* big, size_t /*big_size*/) { // onSlab
       ++num_slabs_;
       auto slab = Slab::fromHeader(big);
-      slab->iter_starts([&](HeapObject* h) {
+      HeapObject* h = (HeapObject*)slab->start();
+      HeapObject* end = (HeapObject*)slab->end();
+      do {
+        auto size = allocSize(h);
         ++num_small_;
         auto kind = h->kind();
         if (!isFreeKind(kind) && kind != HeaderKind::SmallMalloc &&
             !marked(h)) {
           mm.freeSmallSize(h, allocSize(h));
         }
-      });
+        h = (HeapObject*)((char*)h + size);
+      } while (h < end);
+      assertx(h == end); // otherwise, last object was truncated
     });
 }
 

@@ -66,25 +66,20 @@ struct Slab : HeapObject {
     return start();
   }
 
-  /*
-   * call fn(h) on each object in the slab, without calling allocSize(),
-   * by scanning through the start-bits alone.
-   */
-  template<class Fn> void iter_starts(Fn fn) const;
-
-  void setStart(const void* p) {
-    bitvec_set(starts_, start_index(p));
+  void setCachedStart(const void* p) {
+    bitvec_set(startsCache_, start_index(p));
   }
 
-  /*
-   * set start bits for as many objects of size class index, that fit
-   * between [start,end).
-   */
-  void setStarts(const void* start, const void* end, size_t nbytes,
-                 size_t index);
-
-  bool isStart(const void* p) const {
-    return bitvec_test(starts_, start_index(p));
+  bool isCachedStart(const void* p) const {
+    auto const i = start_index(p);
+    auto const res = bitvec_test(startsCache_, i);
+    if (debug && res) {
+      auto const obj = static_cast<const HeapObject*>(p);
+      always_assert_flog(
+        ((unsigned)obj->kind()) < NumHeaderKinds,
+        "Start bits should be unset for heap object with uninitialized header");
+    }
+    return res;
   }
 
   HeapObject* find(const void* ptr) const;
@@ -119,14 +114,9 @@ struct Slab : HeapObject {
 
   struct InitMasks;
 
-  // access whole start-bits word, for testing
-  uint64_t start_bits(const void* p) const {
-    return starts_[start_index(p) / kBitsPerStart];
-  }
-
 private:
   void clearStarts() {
-    memset(starts_, 0, sizeof(starts_));
+    memset(startsCache_, 0, sizeof(startsCache_));
   }
 
   static size_t start_index(const void* p) {
@@ -145,9 +135,12 @@ private:
   static std::array<uint8_t,kNumMasks> shifts_;
 
   // Start-bit state:
-  // 1 = a HeapObject starts at corresponding address
-  // 0 = in the middle of an object or free space
-  uint64_t starts_[kNumStarts];
+  // 1 = a HeapObject starts at corresponding address AND it has had its header
+  //     kind initialized at least once (not necessarily currently accurate but
+  //     definetly does not contain never initialized data)
+  // 0 = in the middle of an object OR free space OR a heap object with
+  //     uninitialized headers OR a heap object not created through split tail
+  uint64_t startsCache_[kNumStarts];
 };
 
 static_assert(kMaxSmallSize < kSlabSize - sizeof(Slab),
@@ -450,84 +443,51 @@ inline size_t allocSize(const HeapObject* h) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-// call fn(h) on each object in the slab, without calling allocSize()
-template<class Fn>
-void Slab::iter_starts(Fn fn) const {
-  auto ptr = (char*)this;
-  for (auto it = starts_, end = starts_ + kNumStarts; it < end; ++it) {
-    for (auto bits = *it; bits != 0; bits &= (bits - 1)) {
-      auto k = ffs64(bits);
-      auto h = (HeapObject*)(ptr + k * kSmallSizeAlign);
-      fn(h);
-    }
-    ptr += kBitsPerStart * kSmallSizeAlign;
-  }
-}
-
 /*
  * Search from ptr backwards, for a HeapObject that contains ptr.
  * Returns the HeapObject* for the containing object, else nullptr.
  */
 inline HeapObject* Slab::find(const void* ptr) const {
   auto const i = start_index(ptr);
-  if (bitvec_test(starts_, i)) {
+  if (bitvec_test(startsCache_, i)) {
     return reinterpret_cast<HeapObject*>(
         uintptr_t(ptr) & ~(kSmallSizeAlign - 1)
     );
   }
   // compute a mask with 0s at i+1 and higher
   auto const mask = ~0ull >> (kBitsPerStart - 1 - i % kBitsPerStart);
-  auto cursor = starts_ + i / kBitsPerStart;
+  auto cursor = startsCache_ + i / kBitsPerStart;
+  HeapObject* h = nullptr;
   for (auto bits = *cursor & mask;; bits = *cursor) {
     if (bits) {
       auto k = fls64(bits);
-      auto h = reinterpret_cast<HeapObject*>(
-        (char*)this + ((cursor - starts_) * kBitsPerStart + k) * kSmallSizeAlign
+      h = reinterpret_cast<HeapObject*>(
+        (char*)this +
+        ((cursor - startsCache_) * kBitsPerStart + k) * kSmallSizeAlign
       );
       auto size = allocSize(h);
       if ((char*)ptr >= (char*)h + size) break;
       return h;
     }
-    if (--cursor < starts_) break;
+    if (--cursor < startsCache_) break;
   }
-  return nullptr;
-}
 
-/*
- * Set multiple start bits. See implementation notes near Slab::InitMasks
- * in memory-manager.cpp
- */
-inline void Slab::setStarts(const void* start, const void* end,
-                            size_t nbytes, size_t index) {
-  auto const start_bit = start_index(start);
-  auto const end_bit = start_index((char*)end - kSmallSizeAlign) + 1;
-  auto const nbits = nbytes / kSmallSizeAlign;
-  if (nbits <= kBitsPerStart &&
-      start_bit / kBitsPerStart < end_bit / kBitsPerStart) {
-    assertx(index < kNumMasks);
-    auto const mask = masks_[index];
-    size_t const k = shifts_[index];
-    // initially n = how much mask should be shifted to line up with start_bit
-    auto n = start_bit % kBitsPerStart;
-    // first word (containing start_bit) |= left-shifted mask
-    auto s = &starts_[start_bit / kBitsPerStart];
-    *s++ |= mask << n;
-    // subsequently, n accumulates shifts required by the size class
-    n = (n + k) % nbits;
-    // store middle words with shifted mask, update shift amount each time
-    for (auto e = &starts_[end_bit / kBitsPerStart]; s < e;) {
-      *s++ = mask << n;
-      n = n + k >= nbits ? n + k - nbits : n + k; // n = (n+k) % nbits
+  // `ptr` is past the end of the allocation pointed to by `h`.  Walk forward
+  // until we pass `ptr` checking to see if we possibly have missing start
+  // bits we should fill in.
+  if (!h) return nullptr;
+  auto size = allocSize(h);
+  do {
+    h = (HeapObject*)((char*)h + size);
+    if ((char*)h >= end()) break;
+    const_cast<Slab*>(this)->setCachedStart(h);
+    size = allocSize(h);
+
+    if ((char*) ptr < (char*)h + size) {
+      return h;
     }
-    // last word (containing end_bit) |= mask with end_bit and higher zeroed
-    *s |= (mask << n) & ~(~0ull << end_bit % kBitsPerStart);
-  } else {
-    // Either the size class is too large to fit 1+ bits per 64bit word,
-    // or the ncontig range was too small. Set one bit at a time.
-    for (auto i = start_bit; i < end_bit; i += nbits) {
-      bitvec_set(starts_, i);
-    }
-  }
+  } while ((char*)h < (char*)ptr);
+  return nullptr;
 }
 
 template<class OnBig, class OnSlab>

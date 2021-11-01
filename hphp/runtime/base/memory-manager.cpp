@@ -455,13 +455,32 @@ void MemoryManager::initHole(void* ptr, uint32_t size) {
 void MemoryManager::initFree() {
   if ((char*)m_front < (char*)m_limit) {
     initHole(m_front, (char*)m_limit - (char*)m_front);
-    Slab::fromPtr(m_front)->setStart(m_front);
+    Slab::fromPtr(m_front)->setCachedStart(m_front);
   }
   reinitFree();
 }
 
 void MemoryManager::reinitFree() {
-  for (size_t i = 0, e = m_freelists.size(); i < e; i++) {
+  size_t i = 0;
+  for (size_t e = m_bypassSlabAlloc ? 0 : kNumSmallSizes; i < e; i++) {
+    auto size = sizeIndex2Size(i);
+    auto n = m_freelists[i].head;
+
+    for (; n; n = n->next) {
+      auto const slab = Slab::fromPtr(n);
+      if (n->kind() == HeaderKind::Free && slab->isCachedStart(n)) break;
+      n->initHeader_32(HeaderKind::Free, size);
+      slab->setCachedStart(n);
+    }
+    if (debug) {
+      // ensure the freelist tail is already initialized.
+      for (; n; n = n->next) {
+        assertx(n->kind() == HeaderKind::Free && n->size() == size);
+      }
+    }
+  }
+
+  for (size_t e = m_freelists.size(); i < e; i++) {
     auto size = sizeIndex2Size(i);
     auto n = m_freelists[i].head;
     for (; n && n->kind() != HeaderKind::Free; n = n->next) {
@@ -558,7 +577,6 @@ void MemoryManager::checkHeap(const char* phase) {
   size_t num_free_blocks = 0;
   for (auto& list : m_freelists) {
     for (auto n = list.head; n; n = n->next) {
-      assertx(free_blocks.isStart(n));
       ++num_free_blocks;
     }
   }
@@ -652,23 +670,20 @@ void storeTail(FreelistArray& freelists, void* tail, size_t tailBytes,
     assertx((fragBytes & kSmallSizeAlignMask) == 0);
     auto fragInd = MemoryManager::size2Index(fragBytes + 1) - 1;
     auto fragUsable = MemoryManager::sizeIndex2Size(fragInd);
-    auto frag = FreeNode::InitFrom((char*)rem + remBytes - fragUsable,
-                                   fragUsable, HeaderKind::Hole);
+    auto frag = (char*)rem + remBytes - fragUsable;
     FTRACE(4, "storeTail({}, {}): rem={}, remBytes={}, "
               "frag={}, fragBytes={}, fragUsable={}, fragInd={}\n", tail,
               (void*)uintptr_t(tailBytes), rem, (void*)uintptr_t(remBytes),
               frag, (void*)uintptr_t(fragBytes), (void*)uintptr_t(fragUsable),
               fragInd);
     freelists[fragInd].push(frag);
-    slab->setStart(frag);
     remBytes -= fragUsable;
   }
 }
 
 /*
  * Create split_bytes worth of contiguous regions, each of size splitUsable,
- * and store them in the appropriate freelist. In addition, initialize the
- * start-bits for the new objects.
+ * and store them in the appropriate freelist.
  */
 inline
 void splitTail(FreelistArray& freelists, void* tail, size_t tailBytes,
@@ -683,7 +698,7 @@ void splitTail(FreelistArray& freelists, void* tail, size_t tailBytes,
   auto head = freelists[index].head;
   auto rem = (char*)tail + split_bytes;
   for (auto next = rem - splitUsable; next >= tail; next -= splitUsable) {
-    auto split = FreeNode::InitFrom(next, splitUsable, HeaderKind::Hole);
+    auto split = next;
     FTRACE(4, "MemoryManager::splitTail(tail={}, tailBytes={}, tailPast={}): "
               "split={}, splitUsable={}\n", tail,
               (void*)uintptr_t(tailBytes), (void*)(uintptr_t(tail) + tailBytes),
@@ -691,9 +706,6 @@ void splitTail(FreelistArray& freelists, void* tail, size_t tailBytes,
     head = FreeNode::UninitFrom(split, head);
   }
   freelists[index].head = head;
-
-  // initialize the start-bits for each object.
-  slab->setStarts(tail, rem, splitUsable, index);
 
   auto remBytes = tailBytes - split_bytes;
   assertx(uintptr_t(rem) + remBytes == uintptr_t(tail) + tailBytes);
@@ -721,7 +733,7 @@ NEVER_INLINE void* MemoryManager::newSlab(size_t nbytes) {
   m_limit = slab->end();
   assertx(m_front <= m_limit);
   FTRACE(3, "newSlab: adding slab at {} to limit {}\n", slab_start, m_limit);
-  slab->setStart(slab_start);
+  slab->setCachedStart(slab_start);
   return slab_start;
 }
 
@@ -740,7 +752,6 @@ inline void* MemoryManager::slabAlloc(size_t nbytes, size_t index) {
   if (uintptr_t(next) <= uintptr_t(m_limit)) {
     m_front = next;
     slab = Slab::fromPtr(ptr);
-    slab->setStart(ptr);
   } else {
     if (UNLIKELY(index >= kNumSmallSizes) || UNLIKELY(m_bypassSlabAlloc)) {
       // Stats correction; mallocBigSize() updates m_stats. Add to mm_udebt
@@ -791,7 +802,6 @@ void* MemoryManager::mallocSmallSizeSlow(size_t nbytes, size_t index) {
               contigInd, i);
     if (auto p = m_freelists[i].unlikelyPop()) {
       assertx(i > index); // because freelist[index] was empty
-      assertx(Slab::fromPtr(p)->isStart(p));
       FTRACE(4, "MemoryManager::mallocSmallSizeSlow({}, {}): "
                 "contigMin={}, contigInd={}, use i={}, size={}, p={}\n",
                 nbytes, index, kContigTab[index], contigInd, i,
@@ -1049,6 +1059,7 @@ void MemoryManager::requestInit() {
   auto& profctx = tl_heap->m_profctx;
   assertx(!profctx.flag);
 
+  always_assert(tl_heap->empty());
   tl_heap->m_bypassSlabAlloc = true;
   profctx = *trigger;
   delete trigger;
@@ -1091,6 +1102,7 @@ void MemoryManager::requestShutdown() {
   mallctlWrite("prof.active", profctx.prof_active);
 #endif
 
+  always_assert(tl_heap->empty());
   tl_heap->m_bypassSlabAlloc = RuntimeOption::DisableSmallAllocator;
   tl_heap->m_memThresholdCallbackPeakUsage = SIZE_MAX;
   profctx = ReqProfContext{};
@@ -1102,6 +1114,7 @@ void MemoryManager::requestShutdown() {
 }
 
 /* static */ void MemoryManager::teardownProfiling() {
+  always_assert(tl_heap->empty());
   tl_heap->m_bypassSlabAlloc = RuntimeOption::DisableSmallAllocator;
 }
 

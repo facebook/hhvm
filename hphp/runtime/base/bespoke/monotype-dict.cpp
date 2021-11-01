@@ -275,7 +275,7 @@ tv_lval EmptyMonotypeDict::ElemInt(
 }
 tv_lval EmptyMonotypeDict::ElemStr(
     tv_lval lval, StringData* k, bool throwOnMissing) {
-  throwOOBArrayKeyException(k, lval.val().parr);
+  if (throwOnMissing) throwOOBArrayKeyException(k, lval.val().parr);
   return const_cast<TypedValue*>(&immutable_null_base);
 }
 

@@ -1506,7 +1506,7 @@ template<class Action>
 static inline void enterVM(ActRec* ar, Action action) {
   assertx(ar);
   assertx(!ar->sfp());
-  assertx(isReturnHelper(reinterpret_cast<void*>(ar->m_savedRip)));
+  assertx(isCallToExit(ar->m_savedRip));
   assertx(ar->callOffset() == 0);
 
   vmFirstAR() = ar;

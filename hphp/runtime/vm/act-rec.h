@@ -283,10 +283,11 @@ constexpr auto kArRetOff = sizeof(ActRec) - sizeof(TypedValue);
 static_assert(kArRetOff % sizeof(TypedValue) == 0, "");
 
 /*
- * Whether `address' is a helper stub that we're permitted to set
- * ActRec::m_savedRip to.
+ * Whether `address' is a return helper stub or a call to exit stub that we're
+ * permitted to set ActRec::m_savedRip to.
  */
-bool isReturnHelper(void* address);
+bool isReturnHelper(uint64_t address);
+bool isCallToExit(uint64_t address);
 
 ///////////////////////////////////////////////////////////////////////////////
 

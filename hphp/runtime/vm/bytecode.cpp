@@ -1927,17 +1927,13 @@ struct JitReturn {
 
 OPTBLD_INLINE JitReturn jitReturnPre(ActRec* fp) {
   auto savedRip = fp->m_savedRip;
-  auto const isRetHelper = isReturnHelper(reinterpret_cast<void*>(savedRip));
+  auto const isRetHelper = isReturnHelper(savedRip);
   if (isRetHelper) {
-    // This frame wasn't called from the TC, so it's ok to return using the
-    // interpreter. callToExit is special: it's a return helper but we don't
-    // treat it like one in here in order to simplify some things higher up in
-    // the pipeline.
-    if (reinterpret_cast<TCA>(savedRip) != jit::tc::ustubs().callToExit) {
-      savedRip = 0;
-    }
+    // This frame was called from the interpreter, so it's ok to also return
+    // using the interpreter.
+    savedRip = 0;
   }
-  assertx(isRetHelper || RID().getJit());
+  assertx(isRetHelper || isCallToExit(savedRip) || RID().getJit());
 
   return {savedRip, fp, fp->sfp(), fp->callOffset()};
 }

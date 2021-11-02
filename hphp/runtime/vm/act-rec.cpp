@@ -33,13 +33,16 @@ TRACE_SET_MOD(bcinterp);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool isReturnHelper(void* address) {
+bool isReturnHelper(uint64_t address) {
   auto tca = reinterpret_cast<jit::TCA>(address);
   auto& u = jit::tc::ustubs();
   return tca == u.retHelper ||
          tca == u.genRetHelper ||
-         tca == u.asyncGenRetHelper ||
-         tca == u.callToExit;
+         tca == u.asyncGenRetHelper;
+}
+
+bool isCallToExit(uint64_t address) {
+  return reinterpret_cast<jit::TCA>(address) == jit::tc::ustubs().callToExit;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -47,7 +50,7 @@ bool isReturnHelper(void* address) {
 void ActRec::setReturn(ActRec* fp, PC callPC, void* retAddr,
                        bool asyncEagerReturn) {
   assertx(fp->func()->contains(callPC));
-  assertx(isReturnHelper(retAddr));
+  assertx(isReturnHelper(reinterpret_cast<uintptr_t>(retAddr)));
   m_sfp = fp;
   m_savedRip = reinterpret_cast<uintptr_t>(retAddr);
   m_callOffAndFlags = encodeCallOffsetAndFlags(

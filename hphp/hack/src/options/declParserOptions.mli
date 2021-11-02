@@ -11,6 +11,8 @@ type t = {
   disable_xhp_element_mangling: bool;
   interpret_soft_types_as_like_types: bool;
   everything_sdt: bool;
+  global_inference: bool;
+  gi_reinfer_types: string list;
 }
 [@@deriving show]
 

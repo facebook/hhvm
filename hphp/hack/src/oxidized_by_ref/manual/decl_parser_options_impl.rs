@@ -17,6 +17,12 @@ impl Default for &DeclParserOptions<'_> {
     }
 }
 
+impl Default for DeclParserOptions<'_> {
+    fn default() -> Self {
+        DeclParserOptions::DEFAULT.clone()
+    }
+}
+
 impl DeclParserOptions<'_> {
     pub const fn from_parser_options<'a>(opts: &ParserOptions<'a>) -> DeclParserOptions<'a> {
         DeclParserOptions {
@@ -24,6 +30,8 @@ impl DeclParserOptions<'_> {
             disable_xhp_element_mangling: opts.po_disable_xhp_element_mangling,
             interpret_soft_types_as_like_types: opts.po_interpret_soft_types_as_like_types,
             everything_sdt: opts.tco_everything_sdt,
+            global_inference: opts.tco_global_inference,
+            gi_reinfer_types: opts.tco_gi_reinfer_types,
         }
     }
 
@@ -38,11 +46,16 @@ impl DeclParserOptions<'_> {
                 .iter()
                 .map(|(a, b)| (a.as_str(), b.as_str())),
         );
+        let mut reinferred_types =
+            bumpalo::collections::Vec::with_capacity_in(opts.tco_gi_reinfer_types.len(), arena);
+        reinferred_types.extend(opts.tco_gi_reinfer_types.iter().map(|s| s.as_str()));
         DeclParserOptions {
             auto_namespace_map: ns_map.into_bump_slice(),
             disable_xhp_element_mangling: opts.po_disable_xhp_element_mangling,
             interpret_soft_types_as_like_types: opts.po_interpret_soft_types_as_like_types,
             everything_sdt: opts.tco_everything_sdt,
+            global_inference: opts.tco_global_inference,
+            gi_reinfer_types: reinferred_types.into_bump_slice(),
         }
     }
 }

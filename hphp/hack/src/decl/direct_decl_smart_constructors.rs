@@ -1266,6 +1266,107 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         }
     }
 
+    fn rewrite_ty_for_global_inference(
+        &self,
+        ty: Option<&'a Ty<'a>>,
+        reason: Reason<'a>,
+    ) -> Option<&'a Ty<'a>> {
+        if !self.opts.global_inference {
+            return ty;
+        }
+        let tvar = self.alloc(Ty(self.alloc(reason), Ty_::Tvar(0)));
+        let ty = match ty {
+            None => tvar,
+            Some(ty) => {
+                fn cut_namespace<'a>(id: &'a str) -> &'a str {
+                    id.rsplit_terminator('\\').next().unwrap()
+                }
+                fn reinfer_type_to_string_opt<'a>(arena: &'a Bump, ty: Ty_<'a>) -> Option<&'a str> {
+                    match ty {
+                        Ty_::Tmixed => Some("mixed"),
+                        Ty_::Tnonnull => Some("nonnull"),
+                        Ty_::Tdynamic => Some("dynamic"),
+                        Ty_::Tunion([]) => Some("nothing"),
+                        Ty_::Tthis => Some("this"),
+                        Ty_::Tprim(prim) => Some(match prim {
+                            aast::Tprim::Tnull => "null",
+                            aast::Tprim::Tvoid => "void",
+                            aast::Tprim::Tint => "int",
+                            aast::Tprim::Tnum => "num",
+                            aast::Tprim::Tfloat => "float",
+                            aast::Tprim::Tstring => "string",
+                            aast::Tprim::Tarraykey => "arraykey",
+                            aast::Tprim::Tresource => "resource",
+                            aast::Tprim::Tnoreturn => "noreturn",
+                            aast::Tprim::Tbool => "bool",
+                        }),
+                        Ty_::Tapply(((_p, id), _tyl)) => Some(cut_namespace(id)),
+                        Ty_::Taccess(TaccessType(ty, id)) => {
+                            reinfer_type_to_string_opt(arena, ty.1).map(|s| {
+                                bumpalo::format!(in arena, "{}::{}", s, id.1).into_bump_str()
+                            })
+                        }
+                        _ => None,
+                    }
+                }
+                fn create_vars_for_reinfer_types<'a, 'text, S: SourceTextAllocator<'text, 'a>>(
+                    this: &DirectDeclSmartConstructors<'a, 'text, S>,
+                    ty: &'a Ty<'a>,
+                    tvar: &'a Ty<'a>,
+                ) -> &'a Ty<'a> {
+                    let mk = |r, ty_| this.alloc(Ty(r, ty_));
+                    let must_reinfer_type = |ty| match reinfer_type_to_string_opt(this.arena, ty) {
+                        None => false,
+                        Some(ty_str) => this.opts.gi_reinfer_types.contains(&ty_str),
+                    };
+                    match *ty {
+                        Ty(r, Ty_::Tapply(&(id, [ty1]))) if id.1 == "\\HH\\Awaitable" => {
+                            let ty1 = this.alloc(create_vars_for_reinfer_types(this, *ty1, tvar));
+                            mk(r, Ty_::Tapply(this.alloc((id, std::slice::from_ref(ty1)))))
+                        }
+                        Ty(r, Ty_::Toption(ty1)) => {
+                            let ty1 = create_vars_for_reinfer_types(this, ty1, tvar);
+                            mk(r, Ty_::Toption(ty1))
+                        }
+                        Ty(r, Ty_::Tapply(((_p, id), [])))
+                            if cut_namespace(id) == "PHPism_FIXME_Array" =>
+                        {
+                            if must_reinfer_type(ty.1) {
+                                let tvar = mk(r, Ty_::Tvar(0));
+                                mk(r, Ty_::TvarrayOrDarray(this.alloc((tvar, tvar))))
+                            } else {
+                                ty
+                            }
+                        }
+                        Ty(r, Ty_::Tvarray(ty)) => {
+                            let ty = create_vars_for_reinfer_types(this, ty, tvar);
+                            mk(r, Ty_::Tvarray(ty))
+                        }
+                        Ty(r, Ty_::Tdarray((tyk, tyv))) => {
+                            let tyk = create_vars_for_reinfer_types(this, tyk, tvar);
+                            let tyv = create_vars_for_reinfer_types(this, tyv, tvar);
+                            mk(r, Ty_::Tdarray(this.alloc((tyk, tyv))))
+                        }
+                        Ty(r, Ty_::TvarrayOrDarray((tyk, tyv))) => {
+                            let tyk = create_vars_for_reinfer_types(this, tyk, tvar);
+                            let tyv = create_vars_for_reinfer_types(this, tyv, tvar);
+                            mk(r, Ty_::TvarrayOrDarray(this.alloc((tyk, tyv))))
+                        }
+                        Ty(_r, ty_) => {
+                            if must_reinfer_type(ty_) {
+                                tvar
+                            } else {
+                                ty
+                            }
+                        }
+                    }
+                }
+                create_vars_for_reinfer_types(self, ty, tvar)
+            }
+        };
+        Some(ty)
+    }
+
     fn to_attributes(&self, node: Node<'a>) -> Attributes<'a> {
         let mut attributes = Attributes {
             deprecated: None,
@@ -1513,7 +1614,10 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                 ))
             }
             _ => self
-                .node_to_ty(header.ret_hint)
+                .rewrite_ty_for_global_inference(
+                    self.node_to_ty(header.ret_hint),
+                    Reason::RglobalFunRet(f_pos),
+                )
                 .unwrap_or_else(|| self.tany_with_pos(f_pos)),
         };
         let async_ = header
@@ -1635,7 +1739,10 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                                 properties.push(ShallowProp {
                                     xhp_attr: None,
                                     name: (pos, name),
-                                    type_: self.node_to_ty(hint),
+                                    type_: self.rewrite_ty_for_global_inference(
+                                        self.node_to_ty(hint),
+                                        Reason::RglobalFunParam(pos),
+                                    ),
                                     visibility: if attributes.internal
                                         && visibility == aast::Visibility::Public
                                     {
@@ -1647,11 +1754,12 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                                 });
                             }
 
-                            let type_ = if hint.is_ignored() {
-                                self.tany_with_pos(pos)
-                            } else {
-                                self.node_to_ty(hint)?
-                            };
+                            let type_ = self
+                                .rewrite_ty_for_global_inference(
+                                    self.node_to_ty(hint),
+                                    Reason::RglobalFunParam(pos),
+                                )
+                                .unwrap_or_else(|| self.tany_with_pos(pos));
                             // These are illegal here--they can only be used on
                             // parameters in a function type hint (see
                             // make_closure_type_specifier and unwrap_mutability).
@@ -3982,7 +4090,10 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                     } else {
                         strip_dollar_prefix(name)
                     };
-                    let ty = self.node_to_non_ret_ty(hint);
+                    let ty = self.rewrite_ty_for_global_inference(
+                        self.node_to_non_ret_ty(hint),
+                        Reason::RglobalClassProp(pos),
+                    );
                     let ty = if self.opts.interpret_soft_types_as_like_types {
                         if attributes.soft {
                             ty.map(|t| {

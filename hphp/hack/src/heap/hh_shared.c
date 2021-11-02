@@ -12,8 +12,8 @@
  * But we only lose the ability to trim the OCaml heap after a GC
  */
 #if __has_include("malloc.h")
-  #define MALLOC_TRIM
-  #include <malloc.h>
+#  define MALLOC_TRIM
+#  include <malloc.h>
 #endif
 
 /*****************************************************************************/
@@ -100,21 +100,21 @@
 #include <caml/intext.h>
 
 #ifdef _WIN32
-#include <windows.h>
+#  include <windows.h>
 #else
-#include <fcntl.h>
-#include <pthread.h>
-#include <signal.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <string.h>
-#include <sys/errno.h>
-#include <sys/mman.h>
-#include <sys/resource.h>
-#include <sys/stat.h>
-#include <sys/syscall.h>
-#include <sys/types.h>
-#include <unistd.h>
+#  include <fcntl.h>
+#  include <pthread.h>
+#  include <signal.h>
+#  include <stdint.h>
+#  include <stdio.h>
+#  include <string.h>
+#  include <sys/errno.h>
+#  include <sys/mman.h>
+#  include <sys/resource.h>
+#  include <sys/stat.h>
+#  include <sys/syscall.h>
+#  include <sys/types.h>
+#  include <unistd.h>
 #endif
 
 #include <inttypes.h>
@@ -124,7 +124,7 @@
 #include <zstd.h>
 
 #ifndef NO_SQLITE3
-#include <sqlite3.h>
+#  include <sqlite3.h>
 
 // Some OCaml utility functions (introduced only in 4.12.0)
 //
@@ -135,7 +135,7 @@ value hh_shared_caml_alloc_some(value v) {
   Store_field(some, 0, v);
   CAMLreturn(some);
 }
-#define Val_none Val_int(0)
+#  define Val_none Val_int(0)
 
 // global SQLite DB pointer
 static sqlite3 *g_db = NULL;
@@ -165,10 +165,10 @@ static sqlite3_stmt *g_get_dep_select_stmt = NULL;
 // Ideally these would live in a handle.h file but our internal build system
 // can't support that at the moment. These are shared with handle_stubs.c
 #ifdef _WIN32
-#define Val_handle(fd) (win_alloc_handle(fd))
+#  define Val_handle(fd) (win_alloc_handle(fd))
 #else
-#define Handle_val(fd) (Long_val(fd))
-#define Val_handle(fd) (Val_long(fd))
+#  define Handle_val(fd) (Long_val(fd))
+#  define Val_handle(fd) (Val_long(fd))
 #endif
 
 
@@ -188,24 +188,24 @@ static sqlite3_stmt *g_get_dep_select_stmt = NULL;
  * appeared in Linux 3.17.
  ****************************************************************************/
 #ifdef __linux__
- #define MEMFD_CREATE 1
+#  define MEMFD_CREATE 1
+   // glibc only added support for memfd_create in version 2.27.
+#  ifndef MFD_CLOEXEC
+     // Linux version for the architecture must support syscall
+     // memfd_create
+#    ifndef SYS_memfd_create
+#      if defined(__x86_64__)
+#        define SYS_memfd_create 319
+#      elif defined(__powerpc64__)
+#        define SYS_memfd_create 360
+#      elif defined(__aarch64__)
+#        define SYS_memfd_create 385
+#      else
+#        error "hh_shared.c requires an architecture that supports memfd_create"
+#      endif //#if defined(__x86_64__)
+#    endif //#ifndef SYS_memfd_create
 
- // glibc only added support for memfd_create in version 2.27.
- #ifndef MFD_CLOEXEC
-  // Linux version for the architecture must support syscall memfd_create
-  #ifndef SYS_memfd_create
-    #if defined(__x86_64__)
-      #define SYS_memfd_create 319
-    #elif defined(__powerpc64__)
-      #define SYS_memfd_create 360
-    #elif defined(__aarch64__)
-      #define SYS_memfd_create 385
-    #else
-      #error "hh_shared.c requires an architecture that supports memfd_create"
-    #endif
-  #endif
-
-  #include <asm/unistd.h>
+#    include <asm/unistd.h>
 
   /* Originally this function would call uname(), parse the linux
    * kernel release version and make a decision based on whether
@@ -216,12 +216,12 @@ static sqlite3_stmt *g_get_dep_select_stmt = NULL;
   static int memfd_create(const char *name, unsigned int flags) {
     return syscall(SYS_memfd_create, name, flags);
   }
- #endif
-#endif
+#  endif // #ifndef MFD_CLOEXEC
+#endif //#ifdef __linux__
 
 #ifndef MAP_NORESERVE
   // This flag was unimplemented in FreeBSD and then later removed
-  #define MAP_NORESERVE 0
+#  define MAP_NORESERVE 0
 #endif
 
 // The following 'typedef' won't be required anymore
@@ -237,7 +237,7 @@ static int win32_getpagesize(void) {
   GetSystemInfo(&siSysInfo);
   return siSysInfo.dwPageSize;
 }
-#define getpagesize win32_getpagesize
+#  define getpagesize win32_getpagesize
 #endif
 
 
@@ -312,16 +312,16 @@ typedef struct {
  * hashtable easily */
 #ifdef _WIN32
 /* We have to set differently our shared memory location on Windows. */
-#define SHARED_MEM_INIT ((char *) 0x48047e00000ll)
+#  define SHARED_MEM_INIT ((char *) 0x48047e00000ll)
 #elif defined __aarch64__
 /* CentOS 7.3.1611 kernel does not support a full 48-bit VA space, so choose a
  * value low enough that the 21 GB's mmapped in do not interfere with anything
  * growing down from the top. 1 << 36 works. */
-#define SHARED_MEM_INIT ((char *) 0x1000000000ll)
+#  define SHARED_MEM_INIT ((char *) 0x1000000000ll)
 #else
-#define SHARED_MEM_INIT ((char *) 0x500000000000ll)
-#define SHARDED_HASHTBL_MEM_ADDR ((char *) 0x510000000000ll)
-#define SHARDED_HASHTBL_MEM_SIZE ((size_t)100 * 1024 * 1024 * 1024)
+#  define SHARED_MEM_INIT ((char *) 0x500000000000ll)
+#  define SHARDED_HASHTBL_MEM_ADDR ((char *) 0x510000000000ll)
+#  define SHARDED_HASHTBL_MEM_SIZE ((size_t)100 * 1024 * 1024 * 1024)
 #endif
 
 /* As a sanity check when loading from a file */
@@ -925,13 +925,13 @@ static void define_globals(char * shared_mem_init) {
   // Beginning of the shared memory
   shared_mem = mem;
 
-  #ifdef MADV_DONTDUMP
+#ifdef MADV_DONTDUMP
     // We are unlikely to get much useful information out of the shared heap in
     // a core file. Moreover, it can be HUGE, and the extensive work done dumping
     // it once for each CPU can mean that the user will reboot their machine
     // before the much more useful stack gets dumped!
     madvise(shared_mem, shared_mem_size, MADV_DONTDUMP);
-  #endif
+#endif
 
   /* BEGINNING OF THE SMALL OBJECTS PAGE
    * We keep all the small objects in this page.

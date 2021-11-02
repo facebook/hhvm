@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
 function expect_darray(darray $_): void {}

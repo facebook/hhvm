@@ -1,4 +1,4 @@
-<?hh
+<?hh //partial
 
 class C {
   private function ref_test_1 ($x) {  // Should match

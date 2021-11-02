@@ -1,4 +1,4 @@
-<?hh
+<?hh //partial
 
 abstract class WebAsyncPluginController {
   protected function getFallbackURL() {

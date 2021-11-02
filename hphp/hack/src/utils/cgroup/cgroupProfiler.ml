@@ -172,24 +172,6 @@ type update_token = {
   stage: string;
 }
 
-module Results = struct
-  type t = Profiling.t SMap.t
-
-  let results : t ref = ref SMap.empty
-
-  let get ~event =
-    match SMap.find_opt event !results with
-    | None ->
-      let profiling =
-        ref Profiling.{ event; stages_rev = []; results = SMap.empty }
-      in
-      results := SMap.add event profiling !results;
-      profiling
-    | Some profiling -> profiling
-
-  let remove ~event = results := SMap.remove event !results
-end
-
 let sample_cgroup_mem ~(profiling : Profiling.t) ~(stage : string) : unit =
   let cgroup_stats = CGroup.get_stats () in
   match cgroup_stats with
@@ -221,32 +203,13 @@ let sample_cgroup_mem ~(profiling : Profiling.t) ~(stage : string) : unit =
       ~metric:"cgroup_file"
       ~value:(float file)
 
-let profile_memory ~event f =
-  let event =
-    match event with
-    | `Init init_type -> init_type
-    | `Recheck recheck_kind -> recheck_kind
+let profile_memory ~event ~log f =
+  let profiling =
+    ref Profiling.{ event; stages_rev = []; results = SMap.empty }
   in
-  let profiling = Results.get ~event in
-  f profiling
-
-let print_summary_memory_table ~event =
-  match event with
-  | `Recheck recheck_kind ->
-    let profiling_result = Results.get ~event:recheck_kind in
-    Results.remove ~event:recheck_kind;
-    Profiling.print_summary_memory_table profiling_result
-  | `Init ->
-    SMap.iter
-      (fun event result ->
-        if
-          not
-            (String.equal event "Full_check" || String.equal event "Lazy_check")
-        then (
-          Results.remove ~event;
-          Profiling.print_summary_memory_table result
-        ))
-      !Results.results
+  let result = f profiling in
+  if log then Profiling.print_summary_memory_table profiling;
+  result
 
 let log_result_to_scuba
     ~(event : string) ~(stage : string) (result : Profiling.result) : unit =

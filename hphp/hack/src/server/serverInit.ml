@@ -169,12 +169,10 @@ let lazy_saved_state_init genv env root load_state_approach profiling =
     (match next_step with
     | Exit_status.No_error ->
       ServerProgress.send_warning (Some user_message);
-      (* print the memory stats for saved-state init gathered before it failed *)
-      CgroupProfiler.print_summary_memory_table ~event:`Init;
       let fall_back_to_full_init profiling =
         ServerLazyInit.full_init genv env profiling |> post_init genv
       in
-      ( CgroupProfiler.profile_memory ~event:(`Init "lazy_full_init")
+      ( CgroupProfiler.profile_memory ~event:"lazy_full_init" ~log:true
         @@ fall_back_to_full_init,
         Load_state_failed (user_message, telemetry) )
     | _ -> Exit.exit ~msg:user_message ~telemetry next_step)
@@ -240,4 +238,4 @@ let init
     | (_, Write_symbol_info) ->
       (lazy_write_symbol_info_init genv env, "lazy_write_symbol_info_init")
   in
-  CgroupProfiler.profile_memory ~event:(`Init init_method_name) init_method
+  CgroupProfiler.profile_memory ~event:init_method_name ~log:true init_method

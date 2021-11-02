@@ -17,7 +17,4 @@ val update_cgroup_total : float -> update_token -> unit
 val collect_cgroup_stats :
   profiling:Profiling.t -> stage:string -> (update_token -> 'a) -> 'a
 
-val profile_memory :
-  event:[ `Init of string | `Recheck of string ] -> (Profiling.t -> 'a) -> 'a
-
-val print_summary_memory_table : event:[ `Init | `Recheck of string ] -> unit
+val profile_memory : event:string -> log:bool -> (Profiling.t -> 'a) -> 'a

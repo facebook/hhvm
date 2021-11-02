@@ -426,7 +426,7 @@ let rec recheck_until_no_changes_left stats genv env select_outcome :
       |> Telemetry.duration ~key:"type_check_start" ~start_time
     in
     let (env, check_stats, type_check_telemetry) =
-      CgroupProfiler.profile_memory ~event:(`Recheck check_kind_str)
+      CgroupProfiler.profile_memory ~event:check_kind_str ~log:(not lazy_check)
       @@ ServerTypeCheck.type_check genv env check_kind start_time
     in
     let telemetry =
@@ -628,8 +628,7 @@ let log_recheck_end stats ~errors ~diag_reason =
     "RECHECK_END (recheck_id %s):\n%s"
     recheck_id
     (Telemetry.to_string telemetry);
-  (* we're only interested in full check data *)
-  CgroupProfiler.print_summary_memory_table ~event:(`Recheck "Full_check")
+  ()
 
 let serve_one_iteration genv env client_provider =
   let (env, recheck_id) = generate_and_update_recheck_id env in
@@ -1515,7 +1514,6 @@ let daemon_main_exn ~informant_managed options monitor_pid in_fds =
   );
   HackEventLogger.with_id ~stage:`Init env.init_env.init_id @@ fun () ->
   let env = MainInit.go genv options (fun () -> program_init genv env) in
-  CgroupProfiler.print_summary_memory_table ~event:`Init;
   serve genv env in_fds
 
 type params = {

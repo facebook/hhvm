@@ -9,5 +9,6 @@
     core_kernel
     logging
     procfs
+    utils_core
   )
   (preprocess (pps lwt_ppx)))

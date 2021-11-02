@@ -1,3 +1,5 @@
+open Hh_prelude
+
 module Profiling = struct
   type values = {
     (* memory at the start of a stage *)
@@ -14,6 +16,8 @@ module Profiling = struct
   and profiling = {
     (* the event that is being profiled, e.g. Init, Recheck, etc. *)
     event: string;
+    (* should we log stages? *)
+    log: bool;
     (* the various stages of an event in reverse order *)
     stages_rev: string list;
     (* stage mapped to result *)
@@ -69,102 +73,12 @@ module Profiling = struct
           old_metric with
           delta = value -. old_metric.start;
           high_water_mark_delta =
-            max (value -. old_metric.start) old_metric.high_water_mark_delta;
+            Float.max
+              (value -. old_metric.start)
+              old_metric.high_water_mark_delta;
         }
       in
       set_metric ~stage ~metric new_metric profiling
-
-  let print_summary_memory_table =
-    let pretty_num ~format f =
-      let num_format = format_of_string format in
-      let abs_f = abs_float f in
-      if abs_f > 1000000000.0 then
-        Printf.sprintf (num_format ^^ "G") (f /. 1000000000.0)
-      else if abs_f > 1000000.0 then
-        Printf.sprintf (num_format ^^ "M") (f /. 1000000.0)
-      else if abs_f > 1000.0 then
-        Printf.sprintf (num_format ^^ "K") (f /. 1000.0)
-      else
-        Printf.sprintf (num_format ^^ " ") f
-    in
-    let pretty_pct num denom =
-      if denom = 0.0 then
-        "(--N/A--)"
-      else
-        let fraction = num /. denom in
-        if
-          fraction >= 10.0
-          (* e.g "( +20.4x)" fits the space whereas (+2040.0%) doesn't *)
-        then
-          Printf.sprintf "(%+6.1fx)" fraction
-        else
-          Printf.sprintf "(%+6.1f%%)" (fraction *. 100.0)
-    in
-    (* Prints a single row of the table. All but the last column have a fixed width. *)
-    let print_summary_single ~indent key result =
-      let indent = String.make indent ' ' in
-      Printf.eprintf
-        "%s        %s %s    %s %s    %s%s\n%!"
-        (pretty_num result.start ~format:"%7.2f")
-        (pretty_num result.delta ~format:"%+7.2f")
-        (pretty_pct result.delta result.start)
-        (pretty_num result.high_water_mark_delta ~format:"%+7.2f")
-        (pretty_pct result.high_water_mark_delta result.start)
-        indent
-        key
-    in
-    let header_without_section =
-      "  START                DELTA               HWM DELTA          "
-    in
-    let pre_section_whitespace =
-      String.make (String.length header_without_section) ' '
-    in
-    let print_group ~indent finished_results group_name =
-      Base.Option.iter
-        (SMap.find_opt group_name finished_results)
-        ~f:(fun group ->
-          let indent_str =
-            String.make (String.length header_without_section + indent - 2) ' '
-          in
-          Printf.eprintf "%s== %s ==\n%!" indent_str group_name;
-          SMap.iter (print_summary_single ~indent:(indent + 2)) group)
-    in
-    let print_header label =
-      let label =
-        Printf.sprintf "%s Memory Stats" (String.uppercase_ascii label)
-      in
-      let header = header_without_section ^ "SECTION" in
-      let header_len = String.length header + 8 in
-      let whitespace_len = header_len - String.length label in
-      Printf.eprintf
-        "%s%s%s\n%!"
-        (String.make ((whitespace_len + 1) / 2) '=')
-        label
-        (String.make (whitespace_len / 2) '=');
-      Printf.eprintf "%s\n%!" header;
-      Printf.eprintf "%s\n%!" (String.make header_len '-')
-    in
-    let print_finished ~indent results =
-      if not (SMap.is_empty !results.results) then (
-        let header_indent = String.make indent '=' in
-        Printf.eprintf
-          "%s%s %s %s\n%!"
-          pre_section_whitespace
-          header_indent
-          !results.event
-          header_indent;
-        let indent = indent + 2 in
-        List.iter
-          (print_group ~indent !results.results)
-          (List.rev !results.stages_rev)
-      )
-    in
-    fun memory ->
-      if SMap.cardinal !memory.results > 0 && not (Sys_utils.is_test_mode ())
-      then (
-        print_header !memory.event;
-        print_finished ~indent:2 memory
-      )
 end
 
 let sample_cgroup_mem ~(profiling : Profiling.t) ~(stage : string) : unit =
@@ -172,6 +86,9 @@ let sample_cgroup_mem ~(profiling : Profiling.t) ~(stage : string) : unit =
   match cgroup_stats with
   | Error _ -> ()
   | Ok { CGroup.total; total_swap; anon; file; shmem } ->
+    let is_end =
+      Profiling.get_stage_result_map ~stage profiling |> SMap.mem "cgroup_total"
+    in
     Profiling.record_stats
       ~profiling
       ~stage
@@ -196,7 +113,35 @@ let sample_cgroup_mem ~(profiling : Profiling.t) ~(stage : string) : unit =
       ~profiling
       ~stage
       ~metric:"cgroup_file"
-      ~value:(float file)
+      ~value:(float file);
+    let open Profiling in
+    if !profiling.log then begin
+      let pretty_num f = Printf.sprintf "%0.2fGiB" (f /. 1073741824.0) in
+      let result = SMap.find stage !profiling.results in
+      let values = SMap.find "cgroup_total" result in
+      if is_end then
+        let hwm =
+          if Float.( < ) values.delta values.high_water_mark_delta then
+            Printf.sprintf
+              "  --  high water mark %s"
+              (pretty_num (values.start +. values.high_water_mark_delta))
+          else
+            ""
+        in
+        Hh_logger.log
+          "Cgroup: %s  [%s/%s end]%s"
+          (pretty_num (values.start +. values.delta))
+          !profiling.event
+          stage
+          hwm
+      else
+        Hh_logger.log
+          "Cgroup: %s  [%s/%s...]"
+          (pretty_num values.start)
+          !profiling.event
+          stage;
+      ()
+    end
 
 type event = Profiling.t
 
@@ -206,12 +151,11 @@ type stage = {
 }
 
 let event ~event ~log f =
+  let log = log && not (Sys_utils.is_test_mode ()) in
   let profiling =
-    ref Profiling.{ event; stages_rev = []; results = SMap.empty }
+    ref Profiling.{ event; log; stages_rev = []; results = SMap.empty }
   in
-  let result = f profiling in
-  if log then Profiling.print_summary_memory_table profiling;
-  result
+  f profiling
 
 let stage profiling ~stage f =
   let i = 1 + List.length !profiling.Profiling.stages_rev in

@@ -84,7 +84,7 @@ struct Disasm {
   /* Disassemble instructions. start should be the first byte of the region to
    * disassemble and end should be the first byte past the region to
    * disassemble. */
-  void disasm(std::ostream& out, uint8_t* start, uint8_t* end);
+  void disasm(std::ostream& out, uint8_t* start, uint8_t* end, uint64_t adjust);
 
   static void ExcludedAddressRange(void* low, size_t len);
  private:
@@ -95,4 +95,3 @@ struct Disasm {
 };
 
 } // namespace HPHP
-

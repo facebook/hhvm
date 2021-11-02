@@ -113,11 +113,11 @@ void disasmRange(std::ostream& os,
                  TransKind kind,
                  TCA begin,
                  TCA end,
+                 uint64_t adjust,
                  bool useColor = false);
 
 inline void disasmRange(std::ostream& os, TransKind kind, TcaRange r) {
-  return disasmRange(os, kind, r.begin(), r.end());
+  return disasmRange(os, kind, r.begin(), r.end(), 0);
 }
 
 }}
-

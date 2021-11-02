@@ -75,7 +75,7 @@ static const xed_syntax_enum_t s_xed_syntax =
 #endif // HAVE_LIBXED
 
 void Disasm::disasm(std::ostream& out, uint8_t* codeStartAddr,
-                    uint8_t* codeEndAddr) {
+                    uint8_t* codeEndAddr, uint64_t adjust) {
 
 #ifdef HAVE_LIBXED
   auto const endClr = m_opts.m_color.empty() ? "" : ANSI_COLOR_END;
@@ -104,7 +104,7 @@ void Disasm::disasm(std::ostream& out, uint8_t* codeStartAddr,
     auto const syntax = m_opts.m_forceAttSyntax ? XED_SYNTAX_ATT
                                                 : s_xed_syntax;
     if (!xed_format_context(syntax, &xedd, codeStr,
-                            MAX_INSTR_ASM_LEN, ip, nullptr
+                            MAX_INSTR_ASM_LEN, ip - adjust, nullptr
 #if XED_ENCODE_ORDER_MAX_ENTRIES != 28 // Newer version of XED library
                             , addressToSymbol
 #endif
@@ -134,7 +134,10 @@ void Disasm::disasm(std::ostream& out, uint8_t* codeStartAddr,
     out << m_opts.m_color;
     if (m_opts.m_addresses) {
       const char* fmt = m_opts.m_relativeOffset ? "{:3x}: " : "{:#10x}: ";
-      out << folly::format(fmt, ip - (m_opts.m_relativeOffset ? codeBase : 0));
+      out << folly::format(
+        fmt,
+        m_opts.m_relativeOffset ? (ip - codeBase) : (ip - adjust)
+      );
     }
     if (m_opts.m_printEncoding) {
       // print encoding, like in objdump

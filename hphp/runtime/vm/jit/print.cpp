@@ -645,6 +645,7 @@ void disasmRange(std::ostream& os,
                  TransKind kind,
                  TCA begin,
                  TCA end,
+                 uint64_t adjust,
                  bool useColor) {
   assertx(begin <= end);
   int const indent = kIndent + 4;
@@ -656,7 +657,7 @@ void disasmRange(std::ostream& os,
       Disasm disasm(Disasm::Options().indent(indent)
                     .printEncoding(printEncoding)
                     .color(colorStr));
-      disasm.disasm(os, begin, end);
+      disasm.disasm(os, begin, end, adjust);
       return;
     }
 
@@ -860,21 +861,21 @@ void print(std::ostream& os, const Block* block, TransKind kind,
 
       const auto lastEnd = lastRange[(int)currArea].end();
 
+      auto const offset = asmInfo->instRangesForArea(currArea).offset;
       if (lastEnd && lastEnd != instRange.begin()) {
         // There may be gaps between instruction ranges that have been
         // added by the relocator, e.g. adding nops.  This check will
         // determine if the gap belongs to another instruction or not.
         // If it doesn't belong to any other instruction then print it.
-        auto const offset = asmInfo->instRangesForArea(currArea).offset;
         if (!asmInfo->instRangeExists(currArea,
                                       TcaRange(lastEnd - offset,
                                                instRange.begin() - offset))) {
-          disasmRange(os, kind, lastEnd, instRange.begin(), true);
+          disasmRange(os, kind, lastEnd, instRange.begin(), offset, true);
         } else {
           os << "\n";
         }
       }
-      disasmRange(os, kind, instRange.begin(), instRange.end(), true);
+      disasmRange(os, kind, instRange.begin(), instRange.end(), offset, true);
       lastRange[(int)currArea] = instRange;
     }
     os << "\n";

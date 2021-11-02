@@ -1373,7 +1373,7 @@ void UniqueStubs::add(const char* name,
     ONTRACE(2,
             [&]{
               std::ostringstream os;
-              disasmRange(os, TransKind::Optimize, start, end);
+              disasmRange(os, TransKind::Optimize, start, end, 0);
               FTRACE(2, "{}\n", os.str());
             }()
            );

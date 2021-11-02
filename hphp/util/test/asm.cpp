@@ -120,7 +120,7 @@ std::vector<std::string> dump_disasm(Asm& a) {
                .addresses(false)
                .forceAttSyntax(true));
   std::ostringstream sstream;
-  dis.disasm(sstream, a.base(), a.base() + a.used());
+  dis.disasm(sstream, a.base(), a.base() + a.used(), 0);
 
   std::vector<std::string> ret;
   folly::split('\n', sstream.str(), ret);

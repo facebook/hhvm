@@ -226,7 +226,21 @@ and typedef_decl (ctx : Provider_context.t) (tdef : Nast.typedef) :
     else
       td_vis
   in
-  { td_module; td_vis; td_tparams; td_constraint; td_type; td_pos; td_is_ctx }
+  let td_attributes =
+    List.map
+      t_user_attributes
+      ~f:(Decl_hint.aast_user_attribute_to_decl_user_attribute env)
+  in
+  {
+    td_module;
+    td_vis;
+    td_tparams;
+    td_constraint;
+    td_type;
+    td_pos;
+    td_is_ctx;
+    td_attributes;
+  }
 
 let typedef_naming_and_decl_DEPRECATED
     (ctx : Provider_context.t) (tdef : Nast.typedef) :

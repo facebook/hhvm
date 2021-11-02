@@ -329,11 +329,11 @@ impl TypeFacts {
         }
     }
 
-    fn of_typedef_decl<'a>(_decl: &'a TypedefDecl<'a>) -> TypeFacts {
+    fn of_typedef_decl<'a>(decl: &'a TypedefDecl<'a>) -> TypeFacts {
         TypeFacts {
             base_types: StringSet::new(),
             kind: TypeKind::TypeAlias,
-            attributes: BTreeMap::new(),
+            attributes: to_facts_attributes(decl.attributes),
             require_extends: StringSet::new(),
             flags: Flags::default(),
             require_implements: StringSet::new(),

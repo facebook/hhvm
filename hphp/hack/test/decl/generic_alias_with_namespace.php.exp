@@ -11,7 +11,7 @@
        (Rhint ([3:15-23]),
         (Tapply (([3:15-20], "\\Bar\\X"),
            [(Rhint ([3:21-22]), (Tgeneric ("T", [])))])));
-       td_is_ctx = false }))
+       td_is_ctx = false; td_attributes = [] }))
   ]
 
 They matched!

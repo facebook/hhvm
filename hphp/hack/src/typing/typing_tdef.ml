@@ -32,6 +32,7 @@ let expand_typedef_ ?(force_expand = false) ety_env env r (x : string) argl =
     td_type;
     td_constraint;
     td_is_ctx = _;
+    td_attributes = _;
   } =
     td
   in

@@ -12,7 +12,7 @@
              { sft_optional = false;
                sft_ty = (Rhint ([3:46-51]), (Tprim Tfloat)) } }
            )));
-       td_is_ctx = false }));
+       td_is_ctx = false; td_attributes = [] }));
   ("\\takes_shape",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
@@ -172,7 +172,7 @@
               { sft_optional = true;
                 sft_ty = (Rhint ([20:19-25]), (Tprim Tstring)) } }
             )));
-        td_is_ctx = false }))
+        td_is_ctx = false; td_attributes = [] }))
   ]
 
 They matched!

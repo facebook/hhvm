@@ -1,0 +1,427 @@
+--- legacy
++++ direct decl
+@@ -1,419 +1,388 @@
+ [("\\Foo",
+   (Shallow_decl_defs.Class
+      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+        sc_is_xhp = false; sc_has_xhp_keyword = false;
+        sc_kind = (Cclass Concrete); sc_module = None;
+        sc_name = ([12:7-10], "\\Foo"); sc_tparams = [];
+        sc_where_constraints = []; sc_extends = []; sc_uses = [];
+        sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
+        sc_req_implements = [];
+        sc_implements =
+        [(Rhint ([12:22-43]),
+          (Tapply (([12:22-43], "\\HH\\TypeAliasAttribute"), [])))];
+        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+        sc_props = []; sc_sprops = [];
+        sc_constructor =
+        (Some { Shallow_decl_defs.sm_name = ([12:62-73], "__construct");
+                sm_type =
+                (Rwitness_from_decl ([12:62-73]),
+                 (Tfun
+                    { ft_arity =
+                      (Fvariadic (
+                         { fp_pos = [12:81-83]; fp_name = (Some "$x");
+                           fp_type =
+                           { et_enforced = Typing_defs_core.Unenforced;
+                             et_type =
+                             (Rvar_param_from_decl ([12:81-83]), (Tprim Tint))
+                             };
+                           fp_flags =
+                           (make_fp_flags ~accept_disposable:false
+                             ~has_default:false
+                             ~mode:Typing_defs_core.FPnormal
+                             ~ifc_external:false ~ifc_can_call:false
+                             ~via_label:false ~readonly:false);
+                            }
+                         ));
+                      ft_tparams = []; ft_where_constraints = [];
+                      ft_params = [];
+                      ft_implicit_params =
+                      { capability = (CapDefaults [12:62-73]) };
+                      ft_ret =
+                      { et_enforced = Typing_defs_core.Unenforced;
+                        et_type =
+                        (Rwitness_from_decl ([12:62-73]), (Tprim Tvoid)) };
+                      ft_flags =
+                      (make_ft_flags FSync ~return_disposable:false
+                        ~returns_readonly:false ~support_dynamic_type:false
+                        ~readonly_this:false);
+                      ft_ifc_decl = FDPolicied {PUBLIC} }));
+                sm_visibility = Public; sm_deprecated = None;
+                sm_flags = (empty); sm_attributes = [] });
+        sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
+        sc_enum_type = None }));
+   ("\\Bar",
+    (Shallow_decl_defs.Class
+       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+         sc_is_xhp = false; sc_has_xhp_keyword = false;
+         sc_kind = (Cclass Concrete); sc_module = None;
+         sc_name = ([13:7-10], "\\Bar"); sc_tparams = [];
+         sc_where_constraints = []; sc_extends = []; sc_uses = [];
+         sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
+         sc_req_implements = [];
+         sc_implements =
+         [(Rhint ([13:22-43]),
+           (Tapply (([13:22-43], "\\HH\\TypeAliasAttribute"), [])))];
+         sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+         sc_props = []; sc_sprops = []; sc_constructor = None;
+         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
+         sc_enum_type = None }));
+   ("\\SingleAttribute",
+    (Shallow_decl_defs.Class
+       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+         sc_is_xhp = false; sc_has_xhp_keyword = false;
+         sc_kind = (Cclass Concrete); sc_module = None;
+         sc_name = ([14:7-22], "\\SingleAttribute"); sc_tparams = [];
+         sc_where_constraints = []; sc_extends = []; sc_uses = [];
+         sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
+         sc_req_implements = [];
+         sc_implements =
+         [(Rhint ([14:34-55]),
+           (Tapply (([14:34-55], "\\HH\\TypeAliasAttribute"), [])))];
+         sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+         sc_props = []; sc_sprops = []; sc_constructor = None;
+         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
+         sc_enum_type = None }));
+   ("\\SingleAttributeWithOneParam",
+    (Shallow_decl_defs.Class
+       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+         sc_is_xhp = false; sc_has_xhp_keyword = false;
+         sc_kind = (Cclass Concrete); sc_module = None;
+         sc_name = ([15:7-34], "\\SingleAttributeWithOneParam");
+         sc_tparams = []; sc_where_constraints = []; sc_extends = [];
+         sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+         sc_req_extends = []; sc_req_implements = [];
+         sc_implements =
+         [(Rhint ([15:46-67]),
+           (Tapply (([15:46-67], "\\HH\\TypeAliasAttribute"), [])))];
+         sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+         sc_props =
+         [{ Shallow_decl_defs.sp_name = ([15:109-111], "x");
+            sp_xhp_attr = None;
+            sp_type = (Some (Rhint ([15:105-108]), (Tprim Tint)));
+            sp_visibility = Public; sp_flags = needs_init }
+           ];
+         sc_sprops = [];
+         sc_constructor =
+         (Some { Shallow_decl_defs.sm_name = ([15:86-97], "__construct");
+                 sm_type =
+                 (Rwitness_from_decl ([15:86-97]),
+                  (Tfun
+                     { ft_arity = (Fstandard ()); ft_tparams = [];
+                       ft_where_constraints = [];
+                       ft_params =
+                       [{ fp_pos = [15:109-111]; fp_name = (Some "$x");
+                          fp_type =
+                          { et_enforced = Typing_defs_core.Unenforced;
+                            et_type = (Rhint ([15:105-108]), (Tprim Tint)) };
+                          fp_flags =
+                          (make_fp_flags ~accept_disposable:false
+                            ~has_default:false ~mode:Typing_defs_core.FPnormal
+                            ~ifc_external:false ~ifc_can_call:false
+                            ~via_label:false ~readonly:false);
+                           }
+                         ];
+                       ft_implicit_params =
+                       { capability = (CapDefaults [15:86-97]) };
+                       ft_ret =
+                       { et_enforced = Typing_defs_core.Unenforced;
+                         et_type =
+                         (Rwitness_from_decl ([15:86-97]), (Tprim Tvoid)) };
+                       ft_flags =
+                       (make_ft_flags FSync ~return_disposable:false
+                         ~returns_readonly:false ~support_dynamic_type:false
+                         ~readonly_this:false);
+                       ft_ifc_decl = FDPolicied {PUBLIC} }));
+                 sm_visibility = Public; sm_deprecated = None;
+                 sm_flags = (empty); sm_attributes = [] });
+         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
+         sc_enum_type = None }));
+   ("\\SingleAttributeWithTwoParams",
+    (Shallow_decl_defs.Class
+       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+         sc_is_xhp = false; sc_has_xhp_keyword = false;
+         sc_kind = (Cclass Concrete); sc_module = None;
+         sc_name = ([16:7-35], "\\SingleAttributeWithTwoParams");
+         sc_tparams = []; sc_where_constraints = []; sc_extends = [];
+         sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+         sc_req_extends = []; sc_req_implements = [];
+         sc_implements =
+         [(Rhint ([16:47-68]),
+           (Tapply (([16:47-68], "\\HH\\TypeAliasAttribute"), [])))];
+         sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+         sc_props =
+         [{ Shallow_decl_defs.sp_name = ([16:110-112], "x");
+            sp_xhp_attr = None;
+            sp_type = (Some (Rhint ([16:106-109]), (Tprim Tint)));
+            sp_visibility = Public; sp_flags = needs_init };
+           { Shallow_decl_defs.sp_name = ([16:125-127], "y");
+             sp_xhp_attr = None;
+             sp_type = (Some (Rhint ([16:121-124]), (Tprim Tint)));
+             sp_visibility = Public; sp_flags = needs_init }
+           ];
+         sc_sprops = [];
+         sc_constructor =
+         (Some { Shallow_decl_defs.sm_name = ([16:87-98], "__construct");
+                 sm_type =
+                 (Rwitness_from_decl ([16:87-98]),
+                  (Tfun
+                     { ft_arity = (Fstandard ()); ft_tparams = [];
+                       ft_where_constraints = [];
+                       ft_params =
+                       [{ fp_pos = [16:110-112]; fp_name = (Some "$x");
+                          fp_type =
+                          { et_enforced = Typing_defs_core.Unenforced;
+                            et_type = (Rhint ([16:106-109]), (Tprim Tint)) };
+                          fp_flags =
+                          (make_fp_flags ~accept_disposable:false
+                            ~has_default:false ~mode:Typing_defs_core.FPnormal
+                            ~ifc_external:false ~ifc_can_call:false
+                            ~via_label:false ~readonly:false);
+                           };
+                         { fp_pos = [16:125-127]; fp_name = (Some "$y");
+                           fp_type =
+                           { et_enforced = Typing_defs_core.Unenforced;
+                             et_type = (Rhint ([16:121-124]), (Tprim Tint)) };
+                           fp_flags =
+                           (make_fp_flags ~accept_disposable:false
+                             ~has_default:false
+                             ~mode:Typing_defs_core.FPnormal
+                             ~ifc_external:false ~ifc_can_call:false
+                             ~via_label:false ~readonly:false);
+                            }
+                         ];
+                       ft_implicit_params =
+                       { capability = (CapDefaults [16:87-98]) };
+                       ft_ret =
+                       { et_enforced = Typing_defs_core.Unenforced;
+                         et_type =
+                         (Rwitness_from_decl ([16:87-98]), (Tprim Tvoid)) };
+                       ft_flags =
+                       (make_ft_flags FSync ~return_disposable:false
+                         ~returns_readonly:false ~support_dynamic_type:false
+                         ~readonly_this:false);
+                       ft_ifc_decl = FDPolicied {PUBLIC} }));
+                 sm_visibility = Public; sm_deprecated = None;
+                 sm_flags = (empty); sm_attributes = [] });
+         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
+         sc_enum_type = None }));
+   ("\\Multiple",
+    (Shallow_decl_defs.Class
+       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+         sc_is_xhp = false; sc_has_xhp_keyword = false;
+         sc_kind = (Cclass Concrete); sc_module = None;
+         sc_name = ([17:7-15], "\\Multiple"); sc_tparams = [];
+         sc_where_constraints = []; sc_extends = []; sc_uses = [];
+         sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
+         sc_req_implements = [];
+         sc_implements =
+         [(Rhint ([17:27-48]),
+           (Tapply (([17:27-48], "\\HH\\TypeAliasAttribute"), [])))];
+         sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+         sc_props =
+         [{ Shallow_decl_defs.sp_name = ([17:90-92], "x"); sp_xhp_attr = None;
+            sp_type = (Some (Rhint ([17:86-89]), (Tprim Tint)));
+            sp_visibility = Public; sp_flags = needs_init }
+           ];
+         sc_sprops = [];
+         sc_constructor =
+         (Some { Shallow_decl_defs.sm_name = ([17:67-78], "__construct");
+                 sm_type =
+                 (Rwitness_from_decl ([17:67-78]),
+                  (Tfun
+                     { ft_arity = (Fstandard ()); ft_tparams = [];
+                       ft_where_constraints = [];
+                       ft_params =
+                       [{ fp_pos = [17:90-92]; fp_name = (Some "$x");
+                          fp_type =
+                          { et_enforced = Typing_defs_core.Unenforced;
+                            et_type = (Rhint ([17:86-89]), (Tprim Tint)) };
+                          fp_flags =
+                          (make_fp_flags ~accept_disposable:false
+                            ~has_default:false ~mode:Typing_defs_core.FPnormal
+                            ~ifc_external:false ~ifc_can_call:false
+                            ~via_label:false ~readonly:false);
+                           }
+                         ];
+                       ft_implicit_params =
+                       { capability = (CapDefaults [17:67-78]) };
+                       ft_ret =
+                       { et_enforced = Typing_defs_core.Unenforced;
+                         et_type =
+                         (Rwitness_from_decl ([17:67-78]), (Tprim Tvoid)) };
+                       ft_flags =
+                       (make_ft_flags FSync ~return_disposable:false
+                         ~returns_readonly:false ~support_dynamic_type:false
+                         ~readonly_this:false);
+                       ft_ifc_decl = FDPolicied {PUBLIC} }));
+                 sm_visibility = Public; sm_deprecated = None;
+                 sm_flags = (empty); sm_attributes = [] });
+         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
+         sc_enum_type = None }));
+   ("\\Attributes",
+    (Shallow_decl_defs.Class
+       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+         sc_is_xhp = false; sc_has_xhp_keyword = false;
+         sc_kind = (Cclass Concrete); sc_module = None;
+         sc_name = ([18:7-17], "\\Attributes"); sc_tparams = [];
+         sc_where_constraints = []; sc_extends = []; sc_uses = [];
+         sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
+         sc_req_implements = [];
+         sc_implements =
+         [(Rhint ([18:29-50]),
+           (Tapply (([18:29-50], "\\HH\\TypeAliasAttribute"), [])))];
+         sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+         sc_props =
+         [{ Shallow_decl_defs.sp_name = ([18:92-94], "x"); sp_xhp_attr = None;
+            sp_type = (Some (Rhint ([18:88-91]), (Tprim Tint)));
+            sp_visibility = Public; sp_flags = needs_init };
+           { Shallow_decl_defs.sp_name = ([18:107-109], "y");
+             sp_xhp_attr = None;
+             sp_type = (Some (Rhint ([18:103-106]), (Tprim Tint)));
+             sp_visibility = Public; sp_flags = needs_init }
+           ];
+         sc_sprops = [];
+         sc_constructor =
+         (Some { Shallow_decl_defs.sm_name = ([18:69-80], "__construct");
+                 sm_type =
+                 (Rwitness_from_decl ([18:69-80]),
+                  (Tfun
+                     { ft_arity = (Fstandard ()); ft_tparams = [];
+                       ft_where_constraints = [];
+                       ft_params =
+                       [{ fp_pos = [18:92-94]; fp_name = (Some "$x");
+                          fp_type =
+                          { et_enforced = Typing_defs_core.Unenforced;
+                            et_type = (Rhint ([18:88-91]), (Tprim Tint)) };
+                          fp_flags =
+                          (make_fp_flags ~accept_disposable:false
+                            ~has_default:false ~mode:Typing_defs_core.FPnormal
+                            ~ifc_external:false ~ifc_can_call:false
+                            ~via_label:false ~readonly:false);
+                           };
+                         { fp_pos = [18:107-109]; fp_name = (Some "$y");
+                           fp_type =
+                           { et_enforced = Typing_defs_core.Unenforced;
+                             et_type = (Rhint ([18:103-106]), (Tprim Tint)) };
+                           fp_flags =
+                           (make_fp_flags ~accept_disposable:false
+                             ~has_default:false
+                             ~mode:Typing_defs_core.FPnormal
+                             ~ifc_external:false ~ifc_can_call:false
+                             ~via_label:false ~readonly:false);
+                            }
+                         ];
+                       ft_implicit_params =
+                       { capability = (CapDefaults [18:69-80]) };
+                       ft_ret =
+                       { et_enforced = Typing_defs_core.Unenforced;
+                         et_type =
+                         (Rwitness_from_decl ([18:69-80]), (Tprim Tvoid)) };
+                       ft_flags =
+                       (make_ft_flags FSync ~return_disposable:false
+                         ~returns_readonly:false ~support_dynamic_type:false
+                         ~readonly_this:false);
+                       ft_ifc_decl = FDPolicied {PUBLIC} }));
+                 sm_visibility = Public; sm_deprecated = None;
+                 sm_flags = (empty); sm_attributes = [] });
+         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
+         sc_enum_type = None }));
+   ("\\T1",
+    (Shallow_decl_defs.Typedef
+       { Typing_defs.td_module = None; td_pos = [21:6-8];
+         td_vis = Transparent; td_tparams = []; td_constraint = None;
+         td_type = (Rhint ([21:11-14]), (Tprim Tint)); td_is_ctx = false;
+-        td_attributes =
+-        [{ Typing_defs_core.ua_name = ([20:15-18], "\\Bar");
+-           ua_classname_params = [] };
+-          { Typing_defs_core.ua_name = ([20:3-6], "\\Foo");
+-            ua_classname_params = [] }
+-          ]
+-        }));
++        td_attributes = [] }));
+   ("\\T2",
+    (Shallow_decl_defs.Typedef
+       { Typing_defs.td_module = None; td_pos = [24:6-8];
+         td_vis = Transparent; td_tparams = []; td_constraint = None;
+         td_type =
+         (Rhint ([24:11-18]), (Toption (Rhint ([24:12-18]), (Tprim Tstring))));
+-        td_is_ctx = false;
+-        td_attributes =
+-        [{ Typing_defs_core.ua_name = ([23:3-18], "\\SingleAttribute");
+-           ua_classname_params = [] }
+-          ]
+-        }));
++        td_is_ctx = false; td_attributes = [] }));
+   ("\\T3",
+    (Shallow_decl_defs.Typedef
+       { Typing_defs.td_module = None; td_pos = [27:9-11]; td_vis = Opaque;
+         td_tparams = [];
+         td_constraint = (Some (Rhint ([27:15-18]), (Tprim Tint)));
+         td_type = (Rhint ([27:21-24]), (Tprim Tint)); td_is_ctx = false;
+-        td_attributes =
+-        [{ Typing_defs_core.ua_name =
+-           ([26:3-30], "\\SingleAttributeWithOneParam");
+-           ua_classname_params = [] }
+-          ]
+-        }));
++        td_attributes = [] }));
+   ("\\T4",
+    (Shallow_decl_defs.Typedef
+       { Typing_defs.td_module = None; td_pos = [30:6-8];
+         td_vis = Transparent; td_tparams = []; td_constraint = None;
+         td_type =
+         (Rhint ([30:11-22]),
+          (Tapply (([30:11-17], "\\HH\\vec"),
+             [(Rhint ([30:18-21]), (Tprim Tint))])));
+-        td_is_ctx = false;
+-        td_attributes =
+-        [{ Typing_defs_core.ua_name =
+-           ([29:3-31], "\\SingleAttributeWithTwoParams");
+-           ua_classname_params = [] }
+-          ]
+-        }));
++        td_is_ctx = false; td_attributes = [] }));
+   ("\\T5",
+    (Shallow_decl_defs.Typedef
+       { Typing_defs.td_module = None; td_pos = [33:6-8];
+         td_vis = Transparent; td_tparams = []; td_constraint = None;
+         td_type =
+         (Rhint ([33:11-32]),
+          (Tfun
+             { ft_arity = (Fstandard ()); ft_tparams = [];
+               ft_where_constraints = [];
+               ft_params =
+               [{ fp_pos = [33:21-24]; fp_name = None;
+                  fp_type =
+                  { et_enforced = Typing_defs_core.Unenforced;
+                    et_type = (Rhint ([33:21-24]), (Tprim Tint)) };
+                  fp_flags =
+                  (make_fp_flags ~accept_disposable:false ~has_default:false
+                    ~mode:Typing_defs_core.FPnormal ~ifc_external:false
+                    ~ifc_can_call:false ~via_label:false ~readonly:false);
+                   }
+                 ];
+               ft_implicit_params = { capability = (CapDefaults [33:11-32]) };
+               ft_ret =
+               { et_enforced = Typing_defs_core.Unenforced;
+                 et_type = (Rhint ([33:27-31]), (Tprim Tbool)) };
+               ft_flags =
+               (make_ft_flags FSync ~return_disposable:false
+                 ~returns_readonly:false ~support_dynamic_type:false
+                 ~readonly_this:false);
+               ft_ifc_decl = FDPolicied {PUBLIC} }));
+-        td_is_ctx = false;
+-        td_attributes =
+-        [{ Typing_defs_core.ua_name = ([32:33-36], "\\Foo");
+-           ua_classname_params = [] };
+-          { Typing_defs_core.ua_name = ([32:16-26], "\\Attributes");
+-            ua_classname_params = [] };
+-          { Typing_defs_core.ua_name = ([32:3-11], "\\Multiple");
+-            ua_classname_params = [] }
+-          ]
+-        }))
++        td_is_ctx = false; td_attributes = [] }))
+   ]

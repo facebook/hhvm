@@ -142,6 +142,7 @@ type typedef_type = {
   td_constraint: decl_ty option;
   td_type: decl_ty;
   td_is_ctx: bool;
+  td_attributes: user_attribute list;
 }
 [@@deriving show]
 

@@ -1738,6 +1738,7 @@ module PrintTypedef = struct
         td_pos;
         td_module = _;
         td_vis = _;
+        td_attributes = _;
         td_tparams;
         td_constraint;
         td_type;

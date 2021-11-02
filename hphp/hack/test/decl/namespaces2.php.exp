@@ -2,7 +2,8 @@
   (Shallow_decl_defs.Typedef
      { Typing_defs.td_module = None; td_pos = [5:6-25]; td_vis = Transparent;
        td_tparams = []; td_constraint = None;
-       td_type = (Rhint ([5:28-34]), (Tprim Tstring)); td_is_ctx = false }));
+       td_type = (Rhint ([5:28-34]), (Tprim Tstring)); td_is_ctx = false;
+       td_attributes = [] }));
   ("\\MyFileNamespace\\MyClass",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;

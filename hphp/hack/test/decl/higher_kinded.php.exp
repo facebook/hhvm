@@ -7,8 +7,8 @@
           tp_reified = Erased; tp_user_attributes = [] }
          ];
        td_constraint = None;
-       td_type = (Rhint ([3:14-15]), (Tgeneric ("T", []))); td_is_ctx = false
-       }));
+       td_type = (Rhint ([3:14-15]), (Tgeneric ("T", [])));
+       td_is_ctx = false; td_attributes = [] }));
   ("\\Test1",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [5:6-11];
@@ -42,7 +42,7 @@
             [(Rhint ([5:36-39]), (Tprim Tint));
               (Rhint ([5:41-43]), (Tapply (([5:41-43], "\\ID"), [])))]
             )));
-        td_is_ctx = false }));
+        td_is_ctx = false; td_attributes = [] }));
   ("\\filter",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;

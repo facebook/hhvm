@@ -2972,9 +2972,21 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             Node::TypeConstraint(&(_kind, hint)) => self.node_to_ty(hint),
             _ => None,
         };
+
         // Pop the type params stack only after creating all inner types.
         let tparams = self.pop_type_params(generic_params);
         let parsed_attributes = self.to_attributes(attributes);
+        let user_attributes = if self.omit_user_attributes_irrelevant_to_typechecking {
+            &[][..]
+        } else {
+            self.slice(attributes.iter().rev().filter_map(|attribute| {
+                if let Node::Attribute(attr) = attribute {
+                    Some(self.user_attribute_to_decl(attr))
+                } else {
+                    None
+                }
+            }))
+        };
         let typedef = self.alloc(TypedefType {
             module: self.alloc(parsed_attributes.module),
             pos,
@@ -2991,6 +3003,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             constraint,
             type_: ty,
             is_ctx: false,
+            attributes: user_attributes,
         });
 
         self.add_typedef(name, typedef);
@@ -3038,6 +3051,17 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         // Pop the type params stack only after creating all inner types.
         let tparams = self.pop_type_params(generic_params);
         let parsed_attributes = self.to_attributes(attributes);
+        let user_attributes = if self.omit_user_attributes_irrelevant_to_typechecking {
+            &[][..]
+        } else {
+            self.slice(attributes.iter().rev().filter_map(|attribute| {
+                if let Node::Attribute(attr) = attribute {
+                    Some(self.user_attribute_to_decl(attr))
+                } else {
+                    None
+                }
+            }))
+        };
         let typedef = self.alloc(TypedefType {
             module: self.alloc(parsed_attributes.module),
             pos,
@@ -3050,6 +3074,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             constraint: as_constraint,
             type_: ty,
             is_ctx: true,
+            attributes: user_attributes,
         });
 
         self.add_typedef(name, typedef);

@@ -312,6 +312,7 @@ struct
       td_constraint = ty_opt tdef.td_constraint;
       td_type = ty tdef.td_type;
       td_is_ctx = tdef.td_is_ctx;
+      td_attributes = List.map tdef.td_attributes ~f:user_attribute;
     }
 
   and shallow_class sc =

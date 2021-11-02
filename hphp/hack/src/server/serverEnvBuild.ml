@@ -14,34 +14,6 @@ module Hh_bucket = Bucket
 open Hh_prelude
 open ServerEnv
 module SLC = ServerLocalConfig
-module J = Hh_json_helpers.AdhocJsonHelpers
-
-let hg_dirname = J.strlist ["dirname"; ".hg"]
-
-let git_dirname = J.strlist ["dirname"; ".git"]
-
-let svn_dirname = J.strlist ["dirname"; ".svn"]
-
-let watchman_expression_terms =
-  [
-    J.strlist ["type"; "f"];
-    J.pred "anyof"
-    @@ [
-         J.strlist ["name"; ".hhconfig"];
-         J.pred "anyof"
-         @@ [
-              J.strlist ["suffix"; "php"];
-              J.strlist ["suffix"; "phpt"];
-              J.strlist ["suffix"; "hack"];
-              J.strlist ["suffix"; "hackpartial"];
-              J.strlist ["suffix"; "hck"];
-              J.strlist ["suffix"; "hh"];
-              J.strlist ["suffix"; "hhi"];
-              J.strlist ["suffix"; "xhp"];
-            ];
-       ];
-    J.pred "not" @@ [J.pred "anyof" @@ [hg_dirname; git_dirname; svn_dirname]];
-  ]
 
 type changes_mode =
   | Check_mode
@@ -81,7 +53,7 @@ let make_genv options config local_config workers =
                 Some Watchman.Defer_changes
               else
                 None);
-            expression_terms = watchman_expression_terms;
+            expression_terms = FilesToIgnore.watchman_server_expression_terms;
             debug_logging =
               ServerArgs.watchman_debug_logging options || debug_logging;
             sockname;

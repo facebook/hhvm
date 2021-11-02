@@ -567,23 +567,6 @@ type t =
    * or if the informant is disabled in the hhconfig. *)
   | Resigned
 
-let watchman_expression_terms =
-  let module J = Hh_json_helpers.AdhocJsonHelpers in
-  [
-    J.pred "not"
-    @@ [
-         J.pred "anyof"
-         @@ [
-              J.strlist ["name"; ".hg"];
-              J.strlist ["dirname"; ".hg"];
-              J.strlist ["name"; ".git"];
-              J.strlist ["dirname"; ".git"];
-              J.strlist ["name"; ".svn"];
-              J.strlist ["dirname"; ".svn"];
-            ];
-       ];
-  ]
-
 let init
     {
       root;
@@ -607,7 +590,7 @@ let init
         {
           Watchman.subscribe_mode = Some Watchman.Scm_aware;
           init_timeout = Watchman.Explicit_timeout 30.;
-          expression_terms = watchman_expression_terms;
+          expression_terms = FilesToIgnore.watchman_monitor_expression_terms;
           debug_logging = watchman_debug_logging;
           (* Should also take an arg *)
           sockname = None;

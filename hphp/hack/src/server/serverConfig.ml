@@ -570,7 +570,7 @@ let formatter_override config = config.formatter_override
 
 let config_hash config = config.config_hash
 
-let ignored_paths config = config.ignored_paths
+let ignored_paths config = config.ignored_paths |> List.map ~f:Str.regexp
 
 let extra_paths config = config.extra_paths
 

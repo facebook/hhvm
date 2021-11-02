@@ -71,7 +71,6 @@ open Hh_prelude
  * Watcher.
  *)
 
-module J = Hh_json_helpers.AdhocJsonHelpers
 module Config = WatchmanEventWatcherConfig
 module Responses = Config.Responses
 
@@ -131,9 +130,6 @@ let send_to_fd env v fd =
   | Responses.Unknown
   | Responses.Mid_update ->
     Queue.enqueue env.waiting_clients fd
-
-let watchman_expression_terms =
-  [J.strlist ["type"; "f"]; J.strlist ["name"; "updatestate"]]
 
 type init_failure =
   | Failure_daemon_already_running
@@ -281,7 +277,7 @@ let init_watchman root =
       Watchman.subscribe_mode = Some Watchman.All_changes;
       init_timeout = Watchman.Explicit_timeout 30.;
       debug_logging = false;
-      expression_terms = watchman_expression_terms;
+      expression_terms = FilesToIgnore.watchman_watcher_expression_terms;
       sockname = None;
       subscription_prefix = "hh_event_watcher";
       roots = [root];

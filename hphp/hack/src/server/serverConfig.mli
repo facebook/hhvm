@@ -31,7 +31,7 @@ val is_compatible : t -> t -> bool
 
 val default_config : t
 
-val ignored_paths : t -> string list
+val ignored_paths : t -> Str.regexp list
 
 val extra_paths : t -> Path.t list
 

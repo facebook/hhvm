@@ -3,8 +3,8 @@
   (wrapped false)
   (modules filesToIgnore)
   (libraries
+    hh_json
     str
     (select filesToIgnore.ml from
       (facebook -> ../../facebook/ignore/filesToIgnore.ml)
       (-> ../../stubs/filesToIgnore.ml))))
-

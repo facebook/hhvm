@@ -62,6 +62,7 @@ module Types = struct
     | State_leave of string * Hh_json.json option
     | Changed_merge_base of string * SSet.t * clock
     | Files_changed of SSet.t
+  [@@deriving show]
 
   type changes =
     | Watchman_unavailable

@@ -1975,8 +1975,11 @@ functor
       in
 
       (* CAUTION! Lots of alerts/dashboards depend on this event, particularly start_t  *)
+      let should_log =
+        CheckKind.is_full || Float.(Unix.gettimeofday () -. start_time > 2.)
+      in
       HackEventLogger.type_check_end
-        (Option.some_if CheckKind.is_full telemetry)
+        (Option.some_if should_log telemetry)
         ~heap_size
         ~started_count:to_recheck_count
         ~count:total_rechecked_count

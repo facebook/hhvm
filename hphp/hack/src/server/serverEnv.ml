@@ -131,6 +131,7 @@ type full_check_status =
           whenever there is a command requiring full check pending, or when user
           saves a file. *)
   | Full_check_done  (** All the changes have been fully processed. *)
+[@@deriving show]
 
 let is_full_check_done = function
   | Full_check_done -> true

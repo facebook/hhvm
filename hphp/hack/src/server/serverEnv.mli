@@ -136,6 +136,7 @@ type full_check_status =
           whenever there is a command requiring full check pending, or when user
           saves a file. *)
   | Full_check_done  (** All the changes have been fully processed. *)
+[@@deriving show]
 
 type dirty_deps = {
   dirty_local_deps: Typing_deps.DepSet.t;

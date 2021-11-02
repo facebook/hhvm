@@ -12,6 +12,7 @@ use aast_parser::{
 use anyhow::{anyhow, *};
 use bitflags::bitflags;
 use bytecode_printer::{print_program, Context, Write};
+use decl_provider::DeclProvider;
 use decl_provider::NoDeclProvider;
 use hhbc_by_ref_emit_program::{self as emit_program, emit_program, FromAstFlags};
 use hhbc_by_ref_env::emitter::Emitter;
@@ -25,6 +26,7 @@ use hhbc_by_ref_rewrite_program::rewrite_program;
 use itertools::{Either, Either::*};
 use ocamlrep::{rc::RcOc, FromError, FromOcamlRep, Value};
 use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
+use oxidized::file_info::NameType;
 use oxidized::{
     ast, namespace_env::Env as NamespaceEnv, parser_options::ParserOptions, pos::Pos,
     relative_path::RelativePath,
@@ -449,13 +451,11 @@ fn emit_prog_from_ast<'p, 'arena, 'decl, S: AsRef<str>>(
     //   result to file. Why output to a file, since here we can't access
     //   HHVM's logger. REMOVE THIS AFTER FRIST DECL PROVIDER IS USED IN
     //   EMITTER.
-    /*
-    if !env.flags.contains(EnvFlags::IS_SYSTEMLIB) {
-        let foo = emitter.decl_provider.get_decl("\\DeclTest");
-        let ss = format!("{:#?}", foo);
-        std::fs::write("/tmp/hackc_compile_debug.txt", ss).unwrap();
+    if !env.flags.contains(EnvFlags::IS_SYSTEMLIB) && env.flags.contains(EnvFlags::ENABLE_DECL) {
+        let _ = emitter
+            .decl_provider
+            .get_decl(NameType::Class, "\\DeclTest");
     }
-    */
 
     emit_program(alloc, emitter, flags, namespace, ast)
 }

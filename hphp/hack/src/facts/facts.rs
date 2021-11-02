@@ -240,7 +240,6 @@ impl TypeFacts {
             methods,
             static_methods,
             enum_type,
-            is_xhp,
             ..
         } = decl;
 
@@ -250,11 +249,7 @@ impl TypeFacts {
             base_types.insert(extract_type_name(ty));
         });
         extends.iter().for_each(|ty| {
-            let mut type_name = extract_type_name(ty);
-            if *is_xhp {
-                type_name = format_xhp(&type_name);
-            }
-            base_types.insert(type_name);
+            base_types.insert(extract_type_name(ty));
         });
         implements.iter().for_each(|ty| {
             base_types.insert(extract_type_name(ty));
@@ -378,13 +373,19 @@ fn extract_type_name<'a>(ty: &Ty<'a>) -> String {
 }
 
 fn format<'a>(type_name: &'a str) -> String {
-    String::from(strip_global_ns(type_name))
+    let name = strip_global_ns(type_name);
+    let is_xhp = !name.is_empty() && name.starts_with(':');
+    if is_xhp {
+        format_xhp(name)
+    } else {
+        String::from(name)
+    }
 }
 
 fn format_xhp<'a>(name: &'a str) -> String {
-    format!("xhp_{}", strip_global_ns(name))
-        .replace("\\", "__")
-        .replace("-", "_")
+    let name = strip_global_ns(name);
+    assert!(name.starts_with(':'));
+    format!("xhp_{}", name[1..].replace(":", "__").replace("-", "_"))
 }
 
 fn modifiers_to_flags(flags: isize, is_final: bool, abstraction: &Abstraction) -> isize {

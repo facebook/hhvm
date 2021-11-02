@@ -2168,7 +2168,9 @@ let do_rageFB (state : state) : RageFB.result Lwt.t =
       state
   in
   let server_state =
-    List.map ~f:server_state_to_string !hh_server_state_log
+    !hh_server_state_log
+    |> List.sort ~compare:(fun (t1, _) (t2, _) -> Float.compare t1 t2)
+    |> List.map ~f:server_state_to_string
     |> String.concat ~sep:"\n"
   in
   let%lwt current_version_and_switch = read_hhconfig_version_and_switch () in

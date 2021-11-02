@@ -1,0 +1,49 @@
+# Original file
+
+     1	<?hh
+     2	
+     3	<<__SupportDynamicType>>
+     4	class Box<T> {
+     5	  public function __construct(private T $x) {}
+     6	  public function set(T $y): void {
+     7	    $this->x = $y;
+     8	  }
+     9	}
+
+
+# Original errors
+
+File "assign.php", line 6, characters 19-21:
+Method  `set` in class `Box` is not dynamically callable. (Typing[4402])
+  File "assign.php", line 7, characters 5-17:
+  Invalid assignment
+  File "assign.php", line 4, characters 11-11:
+  Expected `T`
+  File "assign.php", line 5, characters 39-39:
+    via this generic `T`
+  File "assign.php", line 6, characters 25-26:
+  But got `dynamic` because method must be callable in a dynamic context
+
+
+# Pessimisation log
+
+pessimise:	prop,assign.php,5,$x
+
+
+# Pessimised file
+
+     1	<?hh
+     2	
+     3	<<__SupportDynamicType>>
+     4	class Box<T> {
+     5	  public function __construct(private ~T $x) {}
+     6	  public function set(T $y): void {
+     7	    $this->x = $y;
+     8	  }
+     9	}
+    10	
+
+
+# Errors after pessimisation
+
+No errors

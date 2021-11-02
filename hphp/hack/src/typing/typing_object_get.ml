@@ -585,7 +585,11 @@ let rec obj_get_concrete_ty
                        env
                        ty
                        { et_type = member_ty; et_enforced }
-                       Errors.unify_error)
+                       (fun ?code ?quickfixes claim reasons ->
+                         let open Typing_env_types in
+                         if env.in_support_dynamic_type_method_check then
+                           Typing_log.log_pessimise_prop env mem_pos id_str;
+                         Errors.unify_error ?code ?quickfixes claim reasons))
             in
             (env, (member_ty, tal), dflt_lval_err, rval_err)
         end

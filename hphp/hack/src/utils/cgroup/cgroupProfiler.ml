@@ -162,33 +162,37 @@ let stage profiling ~stage f =
   let stage = Printf.sprintf "%02d_%s" i stage in
   (* sample memory stats before running f *)
   sample_cgroup_mem ~profiling ~stage;
-  let result = f { profiling; stage } in
-  (* sample memory stats after running f *)
-  sample_cgroup_mem ~profiling ~stage;
-  (* log the recorded stats to scuba as well *)
-  begin
-    match SMap.find_opt stage !profiling.Profiling.results with
-    | None -> ()
-    | Some result ->
-      let cgroup =
-        match ProcFS.first_cgroup_for_pid (Unix.getpid ()) with
-        | Ok cgroup -> cgroup
-        | Error err -> Printf.sprintf "Error getting cgroup: %s" err
-      in
-      let event = !profiling.Profiling.event in
-      SMap.iter
-        (fun metric value ->
-          HackEventLogger.CGroup.profile
-            ~cgroup
-            ~event
-            ~stage
-            ~metric
-            ~start:value.Profiling.start
-            ~delta:value.Profiling.delta
-            ~hwm_delta:value.Profiling.high_water_mark_delta)
-        result
-  end;
-  result
+  Utils.try_finally
+    ~f:(fun () -> f { profiling; stage })
+    ~finally:(fun () ->
+      try
+        (* sample memory stats after running f *)
+        sample_cgroup_mem ~profiling ~stage;
+        (* log the recorded stats to scuba as well *)
+        match SMap.find_opt stage !profiling.Profiling.results with
+        | None -> ()
+        | Some result ->
+          let cgroup =
+            match ProcFS.first_cgroup_for_pid (Unix.getpid ()) with
+            | Ok cgroup -> cgroup
+            | Error err -> Printf.sprintf "Error getting cgroup: %s" err
+          in
+          let event = !profiling.Profiling.event in
+          SMap.iter
+            (fun metric value ->
+              HackEventLogger.CGroup.profile
+                ~cgroup
+                ~event
+                ~stage
+                ~metric
+                ~start:value.Profiling.start
+                ~delta:value.Profiling.delta
+                ~hwm_delta:value.Profiling.high_water_mark_delta)
+            result
+      with
+      | exn ->
+        let e = Exception.wrap exn in
+        Hh_logger.log "cgroup - failed to log. %s" (Exception.to_string e))
 
 let update_cgroup_total value { profiling; stage } =
   Profiling.record_stats ~stage ~metric:"cgroup_total" ~value ~profiling

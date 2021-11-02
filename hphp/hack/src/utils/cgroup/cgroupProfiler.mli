@@ -21,6 +21,4 @@ val collect_cgroup_stats :
 val profile_memory :
   event:[ `Init of string | `Recheck of string ] -> (Profiling.t -> 'a) -> 'a
 
-val log_to_scuba : stage:string -> profiling:Profiling.t -> unit
-
 val print_summary_memory_table : event:[ `Init | `Recheck of string ] -> unit

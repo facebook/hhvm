@@ -11,11 +11,6 @@ open Hh_prelude
 module Bucket = Hack_bucket
 open ServerEnv
 
-let hh_log_heap () =
-  let to_g n = Float.of_int n /. (1024.0 *. 1024.0 *. 1024.0) in
-  let hs = SharedMem.SMTelemetry.heap_size () in
-  Hh_logger.log "Heap size: %fG" (to_g hs)
-
 let no_incremental_check (options : ServerArgs.options) : bool =
   let in_check_mode = ServerArgs.check_mode options in
   let full_init =
@@ -80,7 +75,6 @@ let parsing
         env.popt
   in
   let naming_table = Naming_table.update_many env.naming_table fast in
-  hh_log_heap ();
   let hs = SharedMem.SMTelemetry.heap_size () in
   Stats.(stats.init_parsing_heap_size <- hs);
 
@@ -153,7 +147,6 @@ let naming
         })
       ~init:env
   in
-  hh_log_heap ();
   HackEventLogger.global_naming_end
     ~count:!count
     ~desc:telemetry_label
@@ -253,7 +246,6 @@ let type_check
         ~check_info:(ServerCheckUtils.get_check_info genv env)
         ~cgroup_step:(Some cgroup_step)
     in
-    hh_log_heap ();
     let env =
       {
         env with

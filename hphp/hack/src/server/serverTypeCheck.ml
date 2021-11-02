@@ -852,7 +852,6 @@ functor
       (* final telemetry *)
       let t3 = Hh_logger.log_duration "Update_many (filename->names)" t2 in
       let heap_size = SharedMem.SMTelemetry.heap_size () in
-      Hh_logger.log "Heap size: %d" heap_size;
       HackEventLogger.naming_end ~count start_t heap_size;
       let telemetry =
         telemetry
@@ -1373,7 +1372,6 @@ functor
       in
       HackEventLogger.parsing_end_for_typecheck t hs ~parsed_count:reparse_count;
       let t = Hh_logger.log_duration logstring t in
-      Hh_logger.log "Heap size: %d" hs;
 
       (* UPDATE NAMING TABLES **************************************************)
       ServerProgress.send_progress
@@ -1486,7 +1484,6 @@ functor
       let hs = SharedMem.SMTelemetry.heap_size () in
       HackEventLogger.first_redecl_end t hs;
       let t = Hh_logger.log_duration logstring t in
-      Hh_logger.log "Heap size: %d" hs;
       let telemetry =
         telemetry
         |> Telemetry.duration ~key:"redecl1_end" ~start_time
@@ -1632,7 +1629,6 @@ functor
       let hs = SharedMem.SMTelemetry.heap_size () in
       HackEventLogger.second_redecl_end t hs;
       let t = Hh_logger.log_duration logstring t in
-      Hh_logger.log "Heap size: %d" hs;
       let telemetry =
         telemetry
         |> Telemetry.duration ~key:"redecl2_end2_merge" ~start_time
@@ -1822,7 +1818,6 @@ functor
       in
 
       let heap_size = SharedMem.SMTelemetry.heap_size () in
-      Hh_logger.log "Heap size: %d" heap_size;
 
       let logstring =
         Printf.sprintf "Typechecked %d files" total_rechecked_count

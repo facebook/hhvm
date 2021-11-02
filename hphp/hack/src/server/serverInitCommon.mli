@@ -7,8 +7,6 @@
  *
  *)
 
-val hh_log_heap : unit -> unit
-
 val indexing :
   ?hhi_filter:(string -> bool) ->
   telemetry_label:string ->

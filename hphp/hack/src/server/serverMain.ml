@@ -148,7 +148,6 @@ let finalize_init init_env typecheck_telemetry init_telemetry =
   ServerProgress.send_warning None;
   (* rest is just logging/telemetry *)
   let t' = Unix.gettimeofday () in
-  let heap_size = SharedMem.SMTelemetry.heap_size () in
   let hash_telemetry = ServerUtils.log_and_get_sharedmem_load_telemetry () in
   let telemetry =
     Telemetry.create ()
@@ -156,12 +155,13 @@ let finalize_init init_env typecheck_telemetry init_telemetry =
     |> Telemetry.object_ ~key:"init" ~value:init_telemetry
     |> Telemetry.object_ ~key:"typecheck" ~value:typecheck_telemetry
     |> Telemetry.object_ ~key:"hash" ~value:hash_telemetry
-    |> Telemetry.int_ ~key:"heap_size" ~value:heap_size
+    |> Telemetry.int_
+         ~key:"heap_size"
+         ~value:(SharedMem.SMTelemetry.heap_size ())
   in
   HackEventLogger.server_is_ready telemetry;
   Hh_logger.log
-    "SERVER_IS_READY. Heap size: %d. Took %f seconds to init. Telemetry:\n%s"
-    heap_size
+    "SERVER_IS_READY. Took %f seconds to init. Telemetry:\n%s"
     (t' -. init_env.init_start_t)
     (Telemetry.to_string telemetry);
   ()

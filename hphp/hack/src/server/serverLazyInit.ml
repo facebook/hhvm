@@ -482,8 +482,7 @@ let naming_from_saved_state
             not (Relative_path.Set.mem parsing_files k))
       in
       Naming_table.fold old_hack_names ~init:() ~f:(fun k info () ->
-          Naming_global.ndecl_file_skip_if_already_bound ctx k info);
-      ServerInitCommon.hh_log_heap ()
+          Naming_global.ndecl_file_skip_if_already_bound ctx k info)
   end;
   HackEventLogger.naming_from_saved_state_end t;
   Hh_logger.log_duration "NAMING_FROM_SAVED_STATE_END" t

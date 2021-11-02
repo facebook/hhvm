@@ -23,7 +23,7 @@ let no_incremental_check (options : ServerArgs.options) : bool =
   in
   in_check_mode && full_init
 
-let indexing ?hhi_filter ~(profile_label : string) (genv : ServerEnv.genv) :
+let indexing ?hhi_filter ~(telemetry_label : string) (genv : ServerEnv.genv) :
     Relative_path.t list Bucket.next * float =
   ServerProgress.send_progress "indexing";
   let t = Unix.gettimeofday () in
@@ -33,8 +33,8 @@ let indexing ?hhi_filter ~(profile_label : string) (genv : ServerEnv.genv) :
       ~indexer:(genv.indexer FindUtils.file_filter)
       ~extra_roots:(ServerConfig.extra_paths genv.config)
   in
-  HackEventLogger.indexing_end ~desc:profile_label t;
-  let t = Hh_logger.log_duration ("indexing " ^ profile_label) t in
+  HackEventLogger.indexing_end ~desc:telemetry_label t;
+  let t = Hh_logger.log_duration ("indexing " ^ telemetry_label) t in
   (get_next, t)
 
 let parsing
@@ -46,10 +46,10 @@ let parsing
     (t : float)
     ~(trace : bool)
     ~(cache_decls : bool)
-    ~(profile_label : string)
-    ~(profiling : CgroupProfiler.Profiling.t) : ServerEnv.env * float =
-  CgroupProfiler.collect_cgroup_stats ~profiling ~stage:profile_label
-  @@ fun _cgroup_update_token ->
+    ~(telemetry_label : string)
+    ~(cgroup_event : CgroupProfiler.event) : ServerEnv.env * float =
+  CgroupProfiler.stage cgroup_event ~stage:telemetry_label
+  @@ fun _cgroup_stage ->
   begin
     match count with
     | None -> ServerProgress.send_progress "%s" "parsing"
@@ -92,11 +92,11 @@ let parsing
     t
     hs
     ~parsed_count:count
-    ~desc:profile_label;
+    ~desc:telemetry_label;
   let env =
     { env with naming_table; errorl = Errors.merge errorl env.errorl }
   in
-  (env, Hh_logger.log_duration ("Parsing " ^ profile_label) t)
+  (env, Hh_logger.log_duration ("Parsing " ^ telemetry_label) t)
 
 let update_files
     ?(warn_on_naming_costly_iter : bool option)
@@ -104,15 +104,15 @@ let update_files
     (naming_table : Naming_table.t)
     (ctx : Provider_context.t)
     (t : float)
-    ~(profile_label : string)
-    ~(profiling : CgroupProfiler.Profiling.t) : float =
+    ~(telemetry_label : string)
+    ~(cgroup_event : CgroupProfiler.event) : float =
   if no_incremental_check genv.options then
     t
   else (
-    Hh_logger.log "Updating dep->filename [%s]... " profile_label;
+    Hh_logger.log "Updating dep->filename [%s]... " telemetry_label;
     let count = ref 0 in
-    CgroupProfiler.collect_cgroup_stats ~profiling ~stage:profile_label
-    @@ fun _cgroup_update_token ->
+    CgroupProfiler.stage cgroup_event ~stage:telemetry_label
+    @@ fun _cgroup_stage ->
     if Naming_provider.ByHash.need_update_files ctx then
       Naming_table.iter
         ?warn_on_naming_costly_iter
@@ -122,7 +122,7 @@ let update_files
           count := !count + 1);
     HackEventLogger.updating_deps_end
       ~count:!count
-      ~desc:profile_label
+      ~desc:telemetry_label
       ~start_t:t;
     Hh_logger.log_duration "Updated dep->filename" t
   )
@@ -130,10 +130,10 @@ let update_files
 let naming
     (env : ServerEnv.env)
     (t : float)
-    ~(profile_label : string)
-    ~(profiling : CgroupProfiler.Profiling.t) : ServerEnv.env * float =
-  CgroupProfiler.collect_cgroup_stats ~profiling ~stage:profile_label
-  @@ fun _cgroup_update_token ->
+    ~(telemetry_label : string)
+    ~(cgroup_event : CgroupProfiler.event) : ServerEnv.env * float =
+  CgroupProfiler.stage cgroup_event ~stage:telemetry_label
+  @@ fun _cgroup_stage ->
   ServerProgress.send_progress "resolving symbol references";
   let ctx = Provider_utils.ctx_from_server_env env in
   let count = ref 0 in
@@ -156,10 +156,10 @@ let naming
   hh_log_heap ();
   HackEventLogger.global_naming_end
     ~count:!count
-    ~desc:profile_label
+    ~desc:telemetry_label
     ~heap_size:(SharedMem.SMTelemetry.heap_size ())
     ~start_t:t;
-  (env, Hh_logger.log_duration ("Naming " ^ profile_label) t)
+  (env, Hh_logger.log_duration ("Naming " ^ telemetry_label) t)
 
 let log_type_check_end
     env
@@ -197,8 +197,8 @@ let type_check
     (files_to_check : Relative_path.t list)
     (init_telemetry : Telemetry.t)
     (t : float)
-    ~(profile_label : string)
-    ~(profiling : CgroupProfiler.Profiling.t) : ServerEnv.env * float =
+    ~(telemetry_label : string)
+    ~(cgroup_event : CgroupProfiler.event) : ServerEnv.env * float =
   (* No type checking in AI mode *)
   if Option.is_some (ServerArgs.ai_mode genv.options) then
     (env, t)
@@ -214,7 +214,9 @@ let type_check
       | _ -> false);
 
     let count = List.length files_to_check in
-    let logstring = Printf.sprintf "Filter %d files [%s]" count profile_label in
+    let logstring =
+      Printf.sprintf "Filter %d files [%s]" count telemetry_label
+    in
     Hh_logger.log "Begin %s" logstring;
 
     let (_new_t : float) = Hh_logger.log_duration logstring t in
@@ -236,8 +238,8 @@ let type_check
       in
       let remote_execution = env.ServerEnv.remote_execution in
       let ctx = Provider_utils.ctx_from_server_env env in
-      CgroupProfiler.collect_cgroup_stats ~profiling ~stage:profile_label
-      @@ fun cgroup_update_token ->
+      CgroupProfiler.stage cgroup_event ~stage:telemetry_label
+      @@ fun cgroup_stage ->
       Typing_check_service.go
         ctx
         genv.workers
@@ -249,7 +251,7 @@ let type_check
         ~longlived_workers
         ~remote_execution
         ~check_info:(ServerCheckUtils.get_check_info genv env)
-        ~cgroup_update_token:(Some cgroup_update_token)
+        ~cgroup_stage:(Some cgroup_stage)
     in
     hh_log_heap ();
     let env =
@@ -264,7 +266,7 @@ let type_check
       genv
       ~start_t:t
       ~count
-      ~desc:profile_label
+      ~desc:telemetry_label
       ~init_telemetry
       ~typecheck_telemetry
       ~adhoc_profiling;

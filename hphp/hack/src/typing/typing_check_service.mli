@@ -45,7 +45,7 @@ val go :
   longlived_workers:bool ->
   remote_execution:ReEnv.t option ->
   check_info:Typing_service_types.check_info ->
-  cgroup_update_token:CgroupProfiler.update_token option ->
+  cgroup_stage:CgroupProfiler.stage option ->
   result
 
 (** The last element returned, a list of paths, are the files which have not been
@@ -63,7 +63,7 @@ val go_with_interrupt :
   longlived_workers:bool ->
   remote_execution:ReEnv.t option ->
   check_info:Typing_service_types.check_info ->
-  cgroup_update_token:CgroupProfiler.update_token option ->
+  cgroup_stage:CgroupProfiler.stage option ->
   ('env * result) job_result
 
 module TestMocking : sig

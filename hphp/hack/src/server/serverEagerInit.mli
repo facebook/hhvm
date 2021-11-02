@@ -13,5 +13,5 @@ val init :
   ServerEnv.genv ->
   lazy_level ->
   ServerEnv.env ->
-  CgroupProfiler.Profiling.t ->
+  CgroupProfiler.event ->
   ServerEnv.env * float

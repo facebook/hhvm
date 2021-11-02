@@ -1131,8 +1131,7 @@ let go_with_interrupt
     ~(longlived_workers : bool)
     ~(remote_execution : ReEnv.t option)
     ~(check_info : check_info)
-    ~(cgroup_update_token : CgroupProfiler.update_token option) :
-    (_ * result) job_result =
+    ~(cgroup_stage : CgroupProfiler.stage option) : (_ * result) job_result =
   let opts = Provider_context.get_tcopt ctx in
   let sample_rate = GlobalOptions.tco_typecheck_sample_rate opts in
   let fnl = BigList.create fnl in
@@ -1229,7 +1228,7 @@ let go_with_interrupt
     Base.Option.value ~default:0.0 (Measure.get_max "worker_cgroup_total")
   in
   Option.iter
-    cgroup_update_token
+    cgroup_stage
     ~f:(CgroupProfiler.update_cgroup_total cgroup_total_max);
 
   if check_info.profile_log then
@@ -1268,7 +1267,7 @@ let go
     ~(longlived_workers : bool)
     ~(remote_execution : ReEnv.t option)
     ~(check_info : check_info)
-    ~(cgroup_update_token : CgroupProfiler.update_token option) : result =
+    ~(cgroup_stage : CgroupProfiler.stage option) : result =
   let interrupt = MultiThreadedCall.no_interrupt () in
   let (((), result), cancelled) =
     go_with_interrupt
@@ -1284,7 +1283,7 @@ let go
       ~longlived_workers
       ~remote_execution
       ~check_info
-      ~cgroup_update_token
+      ~cgroup_stage
   in
   assert (List.is_empty cancelled);
   result

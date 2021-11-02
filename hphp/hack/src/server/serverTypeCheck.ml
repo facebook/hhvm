@@ -247,7 +247,7 @@ let wont_do_failed_parsing
   else
     (env, fast, None)
 
-let parsing genv env to_check ~stop_at_errors profiling =
+let parsing genv env to_check ~stop_at_errors event_token =
   let (ide_files, disk_files) =
     Relative_path.Set.partition
       (Relative_path.Set.mem env.editor_open_files)
@@ -291,8 +291,7 @@ let parsing genv env to_check ~stop_at_errors profiling =
   in
   let ctx = Provider_utils.ctx_from_server_env env in
   let (fast, errors, failed_parsing) =
-    CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"parsing"
-    @@ fun _cgroup_update_token ->
+    CgroupProfiler.stage event_token ~stage:"parsing" @@ fun _cgroup_stage ->
     if use_direct_decl_parser ctx then
       ( Direct_decl_service.go
           ctx
@@ -677,7 +676,7 @@ module Make : functor (_ : CheckKindType) -> sig
     ServerEnv.genv ->
     ServerEnv.env ->
     float ->
-    CgroupProfiler.Profiling.t ->
+    CgroupProfiler.event ->
     ServerEnv.env * CheckStats.t * Telemetry.t
 end =
 functor
@@ -774,10 +773,10 @@ functor
         ~(errors : Errors.t)
         ~(files_to_parse : Relative_path.Set.t)
         ~(stop_at_errors : bool)
-        ~(profiling : CgroupProfiler.Profiling.t) :
-        ServerEnv.env * parsing_result =
+        ~(cgroup_event : CgroupProfiler.event) : ServerEnv.env * parsing_result
+        =
       let (env, fast_parsed, errorl, failed_parsing) =
-        parsing genv env files_to_parse ~stop_at_errors profiling
+        parsing genv env files_to_parse ~stop_at_errors cgroup_event
       in
       let (env, errors, time_errors_pushed) =
         push_and_accumulate_errors
@@ -818,12 +817,11 @@ functor
         (env : env)
         (ctx : Provider_context.t)
         ~(fast_parsed : FileInfo.t Relative_path.Map.t)
-        ~(profiling : CgroupProfiler.Profiling.t) : naming_result =
+        ~(cgroup_event : CgroupProfiler.event) : naming_result =
       let telemetry = Telemetry.create () in
       let start_t = Unix.gettimeofday () in
       let count = Relative_path.Map.cardinal fast_parsed in
-      CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"naming"
-      @@ fun _cgroup_update_token ->
+      CgroupProfiler.stage cgroup_event ~stage:"naming" @@ fun _cgroup_stage ->
       (* 1. Update dephash->filenames reverse naming table (global,mutable) *)
       if Naming_provider.ByHash.need_update_files ctx then
         Relative_path.Map.iter fast_parsed ~f:(fun file fi ->
@@ -885,7 +883,7 @@ functor
         ~(fast : FileInfo.names Relative_path.Map.t)
         ~(naming_table : Naming_table.t)
         ~(oldified_defs : FileInfo.names)
-        ~(profiling : CgroupProfiler.Profiling.t) : redecl_phase1_result =
+        ~(cgroup_event : CgroupProfiler.event) : redecl_phase1_result =
       let get_classes =
         if genv.local_config.ServerLocalConfig.force_shallow_decl_fanout then
           get_classes_from_old_and_new
@@ -904,8 +902,8 @@ functor
         to_recheck = to_recheck1_deps;
         old_decl_missing_count;
       } =
-        CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"redecl phase 1"
-        @@ fun _cgroup_update_token ->
+        CgroupProfiler.stage cgroup_event ~stage:"redecl phase 1"
+        @@ fun _cgroup_stage ->
         Decl_redecl_service.redo_type_decl
           ~bucket_size
           ctx
@@ -950,7 +948,7 @@ functor
         ~(lazy_decl_later : FileInfo.names Relative_path.Map.t)
         ~(oldified_defs : FileInfo.names)
         ~(to_redecl_phase2_deps : Typing_deps.DepSet.t)
-        ~(profiling : CgroupProfiler.Profiling.t) : redecl_phase2_result =
+        ~(cgroup_event : CgroupProfiler.event) : redecl_phase2_result =
       let get_classes =
         if genv.local_config.ServerLocalConfig.force_shallow_decl_fanout then
           get_classes_from_old_and_new
@@ -977,8 +975,8 @@ functor
         to_recheck = to_recheck2_deps;
         old_decl_missing_count;
       } =
-        CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"redecl phase 2"
-        @@ fun _cgroup_update_token ->
+        CgroupProfiler.stage cgroup_event ~stage:"redecl phase 2"
+        @@ fun _cgroup_stage ->
         Decl_redecl_service.redo_type_decl
           ~bucket_size
           ctx
@@ -1086,7 +1084,7 @@ functor
         ~(files_to_check : Relative_path.Set.t)
         ~(files_to_parse : Relative_path.Set.t)
         ~(lazy_check_later : Relative_path.Set.t)
-        ~(profiling : CgroupProfiler.Profiling.t) : type_checking_result =
+        ~(cgroup_event : CgroupProfiler.event) : type_checking_result =
       let telemetry = Telemetry.create () in
       if Relative_path.(Set.mem files_to_check default) then
         Hh_logger.log "WARNING: rechecking defintion in a dummy file";
@@ -1111,8 +1109,8 @@ functor
             cancelled,
             time_first_typing_error ) =
         let ctx = Provider_utils.ctx_from_server_env env in
-        CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"type check"
-        @@ fun cgroup_update_token ->
+        CgroupProfiler.stage cgroup_event ~stage:"type check"
+        @@ fun cgroup_stage ->
         let ( ( env,
                 {
                   Typing_check_service.errors = errorl;
@@ -1136,7 +1134,7 @@ functor
             ~longlived_workers
             ~remote_execution:env.ServerEnv.remote_execution
             ~check_info:(get_check_info genv env)
-            ~cgroup_update_token:(Some cgroup_update_token)
+            ~cgroup_stage:(Some cgroup_stage)
         in
         let env =
           {
@@ -1252,7 +1250,7 @@ functor
       in
       pop_quantiles index files |> Relative_path.Set.of_list
 
-    let type_check_core genv env start_time profiling =
+    let type_check_core genv env start_time cgroup_event =
       let t = Unix.gettimeofday () in
       (* `start_time` is when the recheck_loop started and includes preliminaries like
        * reading about file-change notifications and communicating with client.
@@ -1354,7 +1352,13 @@ functor
               fast_parsed;
               time_errors_pushed;
             } ) =
-        do_parsing genv env ~errors ~files_to_parse ~stop_at_errors ~profiling
+        do_parsing
+          genv
+          env
+          ~errors
+          ~files_to_parse
+          ~stop_at_errors
+          ~cgroup_event
       in
       let time_first_error =
         Option.first_some time_first_error time_errors_pushed
@@ -1387,7 +1391,7 @@ functor
         naming_table;
         telemetry = naming_telemetry;
       } =
-        do_naming env ctx ~fast_parsed ~profiling
+        do_naming env ctx ~fast_parsed ~cgroup_event
         (* Note: although do_naming updates global reverse-naming-table maps,
            the updated forward-naming-table "naming_table" only gets assigned
            into env.naming_table later on, in get_env_after_decl. *)
@@ -1461,7 +1465,13 @@ functor
         to_redecl_phase2_deps;
         old_decl_missing_count;
       } =
-        do_redecl_phase1 genv env ~fast ~naming_table ~oldified_defs ~profiling
+        do_redecl_phase1
+          genv
+          env
+          ~fast
+          ~naming_table
+          ~oldified_defs
+          ~cgroup_event
       in
       let telemetry =
         telemetry
@@ -1593,7 +1603,7 @@ functor
             ~lazy_decl_later
             ~oldified_defs
             ~to_redecl_phase2_deps
-            ~profiling
+            ~cgroup_event
       in
       let telemetry =
         telemetry
@@ -1805,7 +1815,7 @@ functor
           ~files_to_check
           ~files_to_parse
           ~lazy_check_later
-          ~profiling
+          ~cgroup_event
       in
       let time_first_error =
         Option.first_some time_first_error time_first_typing_error
@@ -2084,11 +2094,11 @@ let type_check :
     env ->
     CheckKind.t ->
     seconds ->
-    CgroupProfiler.Profiling.t ->
+    CgroupProfiler.event ->
     env * CheckStats.t * Telemetry.t =
- fun genv env kind start_time profiling ->
+ fun genv env kind start_time cgroup_event ->
   ServerUtils.with_exit_on_exception @@ fun () ->
   let type_check_result =
-    type_check_unsafe genv env kind start_time profiling
+    type_check_unsafe genv env kind start_time cgroup_event
   in
   type_check_result

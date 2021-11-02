@@ -360,7 +360,7 @@ let use_precomputed_state_exn
     (genv : ServerEnv.genv)
     (ctx : Provider_context.t)
     (info : ServerArgs.saved_state_target_info)
-    (profiling : CgroupProfiler.Profiling.t) : loaded_info =
+    (cgroup_event : CgroupProfiler.event) : loaded_info =
   let {
     ServerArgs.naming_table_path;
     corresponding_base_revision;
@@ -377,8 +377,8 @@ let use_precomputed_state_exn
   let deptable =
     deptable_with_filename ~is_64bit:deptable_is_64bit deptable_fn
   in
-  CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"load deptable"
-  @@ fun _cgroup_update_token ->
+  CgroupProfiler.stage cgroup_event ~stage:"load deptable"
+  @@ fun _cgroup_stage ->
   lock_and_load_deptable
     ~base_file_name:naming_table_path
     ~deptable
@@ -401,8 +401,8 @@ let use_precomputed_state_exn
   in
   let errors_path = ServerArgs.errors_path_for_target_info info in
   let (old_naming_table, old_errors) =
-    CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"load saved state"
-    @@ fun _cgroup_update_token ->
+    CgroupProfiler.stage cgroup_event ~stage:"load saved state"
+    @@ fun _cgroup_stage ->
     SaveStateService.load_saved_state
       ctx
       ~naming_table_path
@@ -441,11 +441,9 @@ let naming_from_saved_state
     (parsing_files : Relative_path.Set.t)
     (naming_table_fallback_fn : string option)
     (t : float)
-    ~(profiling : CgroupProfiler.Profiling.t) : float =
-  CgroupProfiler.collect_cgroup_stats
-    ~profiling
-    ~stage:"naming from saved state"
-  @@ fun _cgroup_update_token ->
+    ~(cgroup_event : CgroupProfiler.event) : float =
+  CgroupProfiler.stage cgroup_event ~stage:"naming from saved state"
+  @@ fun _cgroup_stage ->
   begin
     match naming_table_fallback_fn with
     | Some _ ->
@@ -656,7 +654,7 @@ let type_check_dirty
     ~(dirty_local_files_unchanged_hash : Relative_path.Set.t)
     ~(dirty_local_files_changed_hash : Relative_path.Set.t)
     (t : float)
-    (profiling : CgroupProfiler.Profiling.t) : ServerEnv.env * float =
+    (cgroup_event : CgroupProfiler.event) : ServerEnv.env * float =
   let start_t = Unix.gettimeofday () in
   let telemetry =
     Telemetry.create ()
@@ -851,8 +849,8 @@ let type_check_dirty
         files_to_check
         init_telemetry
         t
-        ~profile_label:"type_check_dirty"
-        ~profiling
+        ~telemetry_label:"type_check_dirty"
+        ~cgroup_event
     in
     HackEventLogger.type_check_dirty
       ~start_t
@@ -898,7 +896,7 @@ let initialize_naming_table
     ~(cache_decls : bool)
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
-    (profiling : CgroupProfiler.Profiling.t) : ServerEnv.env * float =
+    (cgroup_event : CgroupProfiler.event) : ServerEnv.env * float =
   SharedMem.DepTable.cleanup_sqlite ();
   ServerProgress.send_progress "%s" progress_message;
   let (get_next, count, t) =
@@ -909,7 +907,7 @@ let initialize_naming_table
         Unix.gettimeofday () )
     | None ->
       let (get_next, t) =
-        ServerInitCommon.indexing ~profile_label:"lazy.nt.indexing" genv
+        ServerInitCommon.indexing ~telemetry_label:"lazy.nt.indexing" genv
       in
       (get_next, None, t)
   in
@@ -928,8 +926,8 @@ let initialize_naming_table
       t
       ~trace
       ~cache_decls
-      ~profile_label:"lazy.nt.parsing"
-      ~profiling
+      ~telemetry_label:"lazy.nt.parsing"
+      ~cgroup_event
   in
   if not do_naming then
     (env, t)
@@ -941,26 +939,26 @@ let initialize_naming_table
         env.naming_table
         ctx
         t
-        ~profile_label:"lazy.nt.do_naming.update"
-        ~profiling
+        ~telemetry_label:"lazy.nt.do_naming.update"
+        ~cgroup_event
     in
     ServerInitCommon.naming
       env
       t
-      ~profile_label:"lazy.nt.do_naming.naming"
-      ~profiling
+      ~telemetry_label:"lazy.nt.do_naming.naming"
+      ~cgroup_event
 
 let write_symbol_info_init
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
-    (profiling : CgroupProfiler.Profiling.t) : ServerEnv.env * float =
+    (cgroup_event : CgroupProfiler.event) : ServerEnv.env * float =
   let (env, t) =
     initialize_naming_table
       ~cache_decls:true
       "write symbol info initialization"
       genv
       env
-      profiling
+      cgroup_event
   in
   let ctx = Provider_utils.ctx_from_server_env env in
   let t =
@@ -969,15 +967,15 @@ let write_symbol_info_init
       env.naming_table
       ctx
       t
-      ~profile_label:"write_symbol_info.update"
-      ~profiling
+      ~telemetry_label:"write_symbol_info.update"
+      ~cgroup_event
   in
   let (env, t) =
     ServerInitCommon.naming
       env
       t
-      ~profile_label:"write_symbol_info.naming"
-      ~profiling
+      ~telemetry_label:"write_symbol_info.naming"
+      ~cgroup_event
   in
   let index_paths = env.swriteopt.symbol_write_index_paths in
   let index_paths_file = env.swriteopt.symbol_write_index_paths_file in
@@ -1058,7 +1056,7 @@ let write_symbol_info_init
 let full_init
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
-    (profiling : CgroupProfiler.Profiling.t) : ServerEnv.env * float =
+    (cgroup_event : CgroupProfiler.event) : ServerEnv.env * float =
   let init_telemetry =
     Telemetry.create ()
     |> Telemetry.float_ ~key:"start_time" ~value:(Unix.gettimeofday ())
@@ -1089,7 +1087,7 @@ let full_init
       "full initialization"
       genv
       env
-      profiling
+      cgroup_event
   in
   if not is_check_mode then
     SearchServiceRunner.update_fileinfo_map
@@ -1116,25 +1114,25 @@ let full_init
     fnl
     init_telemetry
     t
-    ~profile_label:"lazy.full.type_check"
-    ~profiling
+    ~telemetry_label:"lazy.full.type_check"
+    ~cgroup_event
 
 let parse_only_init
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
-    (profiling : CgroupProfiler.Profiling.t) : ServerEnv.env * float =
+    (cgroup_event : CgroupProfiler.event) : ServerEnv.env * float =
   initialize_naming_table
     ~cache_decls:false
     "parse-only initialization"
     genv
     env
-    profiling
+    cgroup_event
 
 let post_saved_state_initialization
     ~(genv : ServerEnv.genv)
     ~(env : ServerEnv.env)
     ~(state_result : loaded_info * Relative_path.Set.t)
-    (profiling : CgroupProfiler.Profiling.t) : ServerEnv.env * float =
+    (cgroup_event : CgroupProfiler.event) : ServerEnv.env * float =
   let ((loaded_info : ServerInitTypes.loaded_info), changed_while_parsing) =
     state_result
   in
@@ -1233,8 +1231,8 @@ let post_saved_state_initialization
   let parsing_files =
     Relative_path.Set.filter dirty_files ~f:FindUtils.path_filter
   in
-  ( CgroupProfiler.collect_cgroup_stats ~stage:"remove fixmes" ~profiling
-  @@ fun _cgroup_update_token -> Fixme_provider.remove_batch parsing_files );
+  ( CgroupProfiler.stage cgroup_event ~stage:"remove fixmes"
+  @@ fun _cgroup_stage -> Fixme_provider.remove_batch parsing_files );
   let parsing_files_list = Relative_path.Set.elements parsing_files in
   (* Parse dirty files only *)
   let max_size =
@@ -1254,8 +1252,8 @@ let post_saved_state_initialization
       t
       ~trace
       ~cache_decls:false (* Don't overwrite old decls loaded from saved state *)
-      ~profile_label:"post_ss1.parsing"
-      ~profiling
+      ~telemetry_label:"post_ss1.parsing"
+      ~cgroup_event
   in
   SearchServiceRunner.update_fileinfo_map
     env.naming_table
@@ -1267,8 +1265,8 @@ let post_saved_state_initialization
       env.naming_table
       ctx
       t
-      ~profile_label:"post_ss1.update"
-      ~profiling
+      ~telemetry_label:"post_ss1.update"
+      ~cgroup_event
   in
   let t =
     naming_from_saved_state
@@ -1277,11 +1275,15 @@ let post_saved_state_initialization
       parsing_files
       naming_table_fallback_fn
       t
-      ~profiling
+      ~cgroup_event
   in
   (* Do global naming on all dirty files *)
   let (env, t) =
-    ServerInitCommon.naming env t ~profile_label:"post_ss1.naming" ~profiling
+    ServerInitCommon.naming
+      env
+      t
+      ~telemetry_label:"post_ss1.naming"
+      ~cgroup_event
   in
 
   (* Add all files from fast to the files_info object *)
@@ -1347,8 +1349,8 @@ let post_saved_state_initialization
       ctx
       t
       ~warn_on_naming_costly_iter:false
-      ~profile_label:"post_ss2.update"
-      ~profiling
+      ~telemetry_label:"post_ss2.update"
+      ~cgroup_event
   in
   type_check_dirty
     genv
@@ -1360,14 +1362,14 @@ let post_saved_state_initialization
     ~dirty_local_files_unchanged_hash
     ~dirty_local_files_changed_hash
     t
-    profiling
+    cgroup_event
 
 let saved_state_init
     ~(load_state_approach : load_state_approach)
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
     (root : Path.t)
-    (profiling : CgroupProfiler.Profiling.t) :
+    (cgroup_event : CgroupProfiler.event) :
     ( (ServerEnv.env * float) * (loaded_info * Relative_path.Set.t),
       load_state_error )
     result =
@@ -1393,11 +1395,11 @@ let saved_state_init
   let ctx = Provider_utils.ctx_from_server_env env in
   let do_ () : (loaded_info, load_state_error) result =
     let state_result =
-      CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"load saved state"
-      @@ fun _cgroup_update_token ->
+      CgroupProfiler.stage cgroup_event ~stage:"load saved state"
+      @@ fun _cgroup_stage ->
       match load_state_approach with
       | Precomputed info ->
-        Ok (use_precomputed_state_exn genv ctx info profiling)
+        Ok (use_precomputed_state_exn genv ctx info cgroup_event)
       | Load_state_natively -> download_and_load_state_exn ~genv ~ctx ~root
     in
     state_result
@@ -1430,6 +1432,6 @@ let saved_state_init
   | Ok state_result ->
     ServerProgress.send_progress "loading saved state succeeded";
     let (env, t) =
-      post_saved_state_initialization ~state_result ~env ~genv profiling
+      post_saved_state_initialization ~state_result ~env ~genv cgroup_event
     in
     Ok ((env, t), state_result)

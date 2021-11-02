@@ -167,11 +167,6 @@ module Profiling = struct
       )
 end
 
-type update_token = {
-  profiling: Profiling.t;
-  stage: string;
-}
-
 let sample_cgroup_mem ~(profiling : Profiling.t) ~(stage : string) : unit =
   let cgroup_stats = CGroup.get_stats () in
   match cgroup_stats with
@@ -203,7 +198,14 @@ let sample_cgroup_mem ~(profiling : Profiling.t) ~(stage : string) : unit =
       ~metric:"cgroup_file"
       ~value:(float file)
 
-let profile_memory ~event ~log f =
+type event = Profiling.t
+
+type stage = {
+  profiling: Profiling.t;
+  stage: string;
+}
+
+let event ~event ~log f =
   let profiling =
     ref Profiling.{ event; stages_rev = []; results = SMap.empty }
   in
@@ -211,39 +213,35 @@ let profile_memory ~event ~log f =
   if log then Profiling.print_summary_memory_table profiling;
   result
 
-let log_result_to_scuba
-    ~(event : string) ~(stage : string) (result : Profiling.result) : unit =
-  let cgroup =
-    match ProcFS.first_cgroup_for_pid (Unix.getpid ()) with
-    | Ok cgroup -> cgroup
-    | Error err -> Printf.sprintf "Error getting cgroup: %s" err
-  in
-  SMap.iter
-    (fun metric value ->
-      HackEventLogger.CGroup.profile
-        ~cgroup
-        ~event
-        ~stage
-        ~metric
-        ~start:value.Profiling.start
-        ~delta:value.Profiling.delta
-        ~hwm_delta:value.Profiling.high_water_mark_delta)
-    result
-
-let log_to_scuba ~(stage : string) ~(profiling : Profiling.t) : unit =
-  match SMap.find_opt stage !profiling.Profiling.results with
-  | None -> ()
-  | Some result ->
-    log_result_to_scuba ~event:!profiling.Profiling.event ~stage result
-
-let collect_cgroup_stats ~profiling ~stage f =
+let stage profiling ~stage f =
   (* sample memory stats before running f *)
   sample_cgroup_mem ~profiling ~stage;
   let result = f { profiling; stage } in
   (* sample memory stats after running f *)
   sample_cgroup_mem ~profiling ~stage;
   (* log the recorded stats to scuba as well *)
-  log_to_scuba ~stage ~profiling;
+  begin
+    match SMap.find_opt stage !profiling.Profiling.results with
+    | None -> ()
+    | Some result ->
+      let cgroup =
+        match ProcFS.first_cgroup_for_pid (Unix.getpid ()) with
+        | Ok cgroup -> cgroup
+        | Error err -> Printf.sprintf "Error getting cgroup: %s" err
+      in
+      let event = !profiling.Profiling.event in
+      SMap.iter
+        (fun metric value ->
+          HackEventLogger.CGroup.profile
+            ~cgroup
+            ~event
+            ~stage
+            ~metric
+            ~start:value.Profiling.start
+            ~delta:value.Profiling.delta
+            ~hwm_delta:value.Profiling.high_water_mark_delta)
+        result
+  end;
   result
 
 let update_cgroup_total value { profiling; stage } =

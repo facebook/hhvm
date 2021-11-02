@@ -54,7 +54,7 @@ let init
     (genv : ServerEnv.genv)
     (lazy_level : lazy_level)
     (env : ServerEnv.env)
-    (profiling : CgroupProfiler.Profiling.t) : ServerEnv.env * float =
+    (cgroup_event : CgroupProfiler.event) : ServerEnv.env * float =
   let init_telemetry =
     Telemetry.create ()
     |> Telemetry.float_ ~key:"start_time" ~value:(Unix.gettimeofday ())
@@ -62,7 +62,7 @@ let init
   in
   (* We don't support a saved state for eager init. *)
   let (get_next, t) =
-    ServerInitCommon.indexing ~profile_label:"eager.init.indexing" genv
+    ServerInitCommon.indexing ~telemetry_label:"eager.init.indexing" genv
   in
   let lazy_parse =
     match lazy_level with
@@ -80,8 +80,8 @@ let init
       t
       ~trace
       ~cache_decls:true
-      ~profile_label:"eager.init.parsing"
-      ~profiling
+      ~telemetry_label:"eager.init.parsing"
+      ~cgroup_event
   in
   if not (ServerArgs.check_mode genv.options) then
     SearchServiceRunner.update_fileinfo_map
@@ -94,11 +94,15 @@ let init
       env.naming_table
       ctx
       t
-      ~profile_label:"eager.init.update"
-      ~profiling
+      ~telemetry_label:"eager.init.update"
+      ~cgroup_event
   in
   let (env, t) =
-    ServerInitCommon.naming env t ~profile_label:"eager.init.naming" ~profiling
+    ServerInitCommon.naming
+      env
+      t
+      ~telemetry_label:"eager.init.naming"
+      ~cgroup_event
   in
   let fast = Naming_table.to_fast env.naming_table in
   let failed_parsing = Errors.get_failed_files env.errorl Errors.Parsing in
@@ -121,5 +125,5 @@ let init
     (Relative_path.Map.keys fast)
     init_telemetry
     t
-    ~profile_label:"eager.init.type_check"
-    ~profiling
+    ~telemetry_label:"eager.init.type_check"
+    ~cgroup_event

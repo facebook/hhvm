@@ -11,7 +11,7 @@ val hh_log_heap : unit -> unit
 
 val indexing :
   ?hhi_filter:(string -> bool) ->
-  profile_label:string ->
+  telemetry_label:string ->
   ServerEnv.genv ->
   Relative_path.t list Bucket.next * float
 
@@ -24,8 +24,8 @@ val parsing :
   float ->
   trace:bool ->
   cache_decls:bool ->
-  profile_label:string ->
-  profiling:CgroupProfiler.Profiling.t ->
+  telemetry_label:string ->
+  cgroup_event:CgroupProfiler.event ->
   ServerEnv.env * float
 
 val update_files :
@@ -34,15 +34,15 @@ val update_files :
   Naming_table.t ->
   Provider_context.t ->
   float ->
-  profile_label:string ->
-  profiling:CgroupProfiler.Profiling.t ->
+  telemetry_label:string ->
+  cgroup_event:CgroupProfiler.event ->
   float
 
 val naming :
   ServerEnv.env ->
   float ->
-  profile_label:string ->
-  profiling:CgroupProfiler.Profiling.t ->
+  telemetry_label:string ->
+  cgroup_event:CgroupProfiler.event ->
   ServerEnv.env * float
 
 val type_check :
@@ -51,6 +51,6 @@ val type_check :
   Relative_path.t list ->
   Telemetry.t ->
   float ->
-  profile_label:string ->
-  profiling:CgroupProfiler.Profiling.t ->
+  telemetry_label:string ->
+  cgroup_event:CgroupProfiler.event ->
   ServerEnv.env * float

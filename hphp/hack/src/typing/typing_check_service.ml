@@ -460,6 +460,10 @@ let process_files
       (match cgroup_stats with
       | Error _ -> ()
       | Ok { CGroup.total; _ } ->
+        (* Here each worker will measure cgroup total at the end of it processing a file.
+           We want to get the maximum measurement from any workers all back to the main server
+           process. The easiest way to do this is stick it inside "Measure", which already
+           gets marshalled appropriately back to the main process. *)
         Measure.sample "worker_cgroup_total" (float_of_int total));
       (errors, progress, tally, heap_mb, max_heap_mb)
     | fn :: fns ->
@@ -1224,12 +1228,18 @@ let go_with_interrupt
     typing_result
   in
   Typing_deps.register_discovered_dep_edges dep_edges;
-  let cgroup_total_max =
-    Base.Option.value ~default:0.0 (Measure.get_max "worker_cgroup_total")
-  in
-  Option.iter
-    cgroup_stage
-    ~f:(CgroupProfiler.update_cgroup_total cgroup_total_max);
+  (* We want to record the highest cgroup total recorded by any worker processes
+     at any stage in its execution. The laziest way to aggregate that number is by using
+     Measure, since it (1) already calculates maximum, (2) already marshals information
+     of each worker process and aggregates it here into the main process. *)
+  begin
+    match (cgroup_stage, Measure.get_max "worker_cgroup_total") with
+    | (Some cgroup_step, Some worker_cgroup_total) ->
+      CgroupProfiler.update_cgroup_total
+        (int_of_float worker_cgroup_total)
+        cgroup_step
+    | _ -> ()
+  end;
 
   if check_info.profile_log then
     Hh_logger.log

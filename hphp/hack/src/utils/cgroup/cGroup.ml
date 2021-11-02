@@ -66,16 +66,11 @@ let get_cgroup_name =
 
 type stats = {
   total: int;
-  (* The total physical memory for the cgroup *)
   total_swap: int;
-  (* The total amount of anonymous memory paged out to swap *)
-  (* anon, file, and shmem are disjoint. If you add in the memory that the kernel uses, they should
-   * sum roughly to `total` *)
   anon: int;
-  (* The amount of physical anonymous memory not used for shared memory *)
   shmem: int;
-  (* The amount of physical anonymous memory being used as shared memory *)
-  file: int; (* The amount of physical memory which is not anonymous *)
+  file: int;
+  cgroup_name: string;
 }
 
 (* Some cgroup files contain only a single integer *)
@@ -124,7 +119,7 @@ let get_stats_for_cgroup (cgroup_name : string) : (stats, string) result =
   total_swap_result >>= fun total_swap ->
   stat_contents_result >>= fun stat_contents ->
   parse_stat stat_contents >>= fun (anon, file, shmem) ->
-  Ok { total; total_swap; anon; file; shmem }
+  Ok { total; total_swap; anon; file; shmem; cgroup_name }
 
 let get_stats () =
   assert_is_using_cgroup_v2 () >>= get_cgroup_name >>= get_stats_for_cgroup

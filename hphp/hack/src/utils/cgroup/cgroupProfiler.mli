@@ -29,13 +29,15 @@ then a summary of cgroup usage at each stage will be printed
 at the end of the event. *)
 val event : event:string -> log:bool -> (event -> 'a) -> 'a
 
-(** `stage event_token ~stage:"bar" callback` indicates that stage "bar"
-will span the execution of callback. It will gather cgroup stats
-before callback, and after, and log telemetry about them. *)
+(** This records cgroup stats at a point in time *)
+val stage_single : event -> stage:string -> unit
+
+(** `stage event_token ~stage:"bar" callback` records cgroup stats immediately,
+then executes bar, then records cgroup a second time. *)
 val stage : event -> stage:string -> (stage -> 'a) -> 'a
 
 (** Sometimes for long-running stages it's not enough merely to log cgroup
 stats at at the start and end; we might also want to record the "high water mark"
 cgroup total ever reached within that stage. This method is to record a
 moment's cgroup total, in case it bumps up the high water mark. *)
-val update_cgroup_total : float -> stage -> unit
+val update_cgroup_total : int -> stage -> unit

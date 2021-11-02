@@ -12,7 +12,7 @@ use anyhow::{anyhow, Result};
 use arena_deserializer::serde::Deserialize;
 use bincode::Options;
 use cxx::CxxString;
-use external_decl_provider::ExternalDeclProvider;
+use external_decl_provider::{ExternalDeclProvider, ExternalDeclProviderResult};
 use facts_rust::facts;
 use hhbc_by_ref_compile::EnvFlags;
 use libc::{c_char, c_int};
@@ -183,9 +183,13 @@ pub mod compile_ffi {
 ///////////////////////////////////////////////////////////////////////////////////
 // Opaque to C++.
 
+#[repr(C)]
 pub struct Bump(bumpalo::Bump);
+#[repr(C)]
 pub struct Bytes(ffi::Bytes);
+#[repr(C)]
 pub struct Decls(direct_decl_parser::Decls<'static>);
+#[repr(C)]
 pub struct DeclParserOptions(
     decl_parser_options::DeclParserOptions<'static>,
     bumpalo::Bump,
@@ -279,7 +283,7 @@ fn hackc_compile_from_text_cpp_ffi<'a>(
                     *const std::ffi::c_void,
                     c_int,
                     *const c_char,
-                ) -> *const std::ffi::c_void,
+                ) -> ExternalDeclProviderResult<'static>,
             >(decl_getter_ptr)
         };
         let c_hhvm_provider_ptr =
@@ -461,7 +465,7 @@ fn hackc_compile_hhas_from_text_cpp_ffi(
                     *const std::ffi::c_void,
                     c_int,
                     *const c_char,
-                ) -> *const std::ffi::c_void,
+                ) -> ExternalDeclProviderResult<'static>,
             >(decl_getter_ptr)
         };
         let c_hhvm_provider_ptr =

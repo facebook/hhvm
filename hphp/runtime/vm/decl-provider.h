@@ -26,6 +26,26 @@
 
 namespace HPHP {
 
+// c.f. `enum ExternalDeclProviderResult` in 'hhbc/external_decl_provider/lib.rs'.
+struct DeclProviderResult {
+    enum class Tag {
+      Missing,
+      Decls,
+      Bytes,
+    };
+    struct DeclProviderDecls_Body {
+      Decls const* _0;
+    };
+    struct DeclProviderBytes_Body {
+      Bytes const* _0;
+    };
+    Tag tag;
+    union {
+      DeclProviderDecls_Body decl_provider_decls_result;
+      DeclProviderBytes_Body decl_provider_bytes_result;
+    };
+};
+
 struct HhvmDeclProvider {
   explicit HhvmDeclProvider(std::string const& aliased_namespaces)
     : opts{hackc_create_direct_decl_parse_options(true, true, aliased_namespaces)}
@@ -33,7 +53,7 @@ struct HhvmDeclProvider {
   HhvmDeclProvider(HhvmDeclProvider const&) = delete;
   HhvmDeclProvider& operator=(HhvmDeclProvider const&) = delete;
 
-  Decls const* getDecl(HPHP::AutoloadMap::KindOf kind, char const* symbol);
+  DeclProviderResult getDecl(HPHP::AutoloadMap::KindOf kind, char const* symbol);
 
  private:
   ::rust::Box<DeclParserOptions> opts;
@@ -41,6 +61,6 @@ struct HhvmDeclProvider {
 };
 
 extern "C" {
-  Decls const* hhvm_decl_provider_get_decl(void* provider, int kind, char const* symbol);
+  DeclProviderResult hhvm_decl_provider_get_decl(void* provider, int kind, char const* symbol);
 }
 }

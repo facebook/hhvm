@@ -921,6 +921,7 @@ name = "external_decl_provider"
 version = "0.0.0"
 dependencies = [
  "decl_provider",
+ "ffi",
  "libc",
  "oxidized_by_ref",
 ]

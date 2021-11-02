@@ -19,7 +19,7 @@
 
 namespace HPHP {
 
-  Decls const* HhvmDeclProvider::getDecl(AutoloadMap::KindOf /*kind*/, char const* /*symbol*/) {
+  DeclProviderResult HhvmDeclProvider::getDecl(AutoloadMap::KindOf /*kind*/, char const* /*symbol*/) {
   // The prototypical, indicative stub code sketched out below doesn't
   // take into account the RDS nature of the AutoloadHandler data
   // structures and at this time, we can't rely on calls to `getDecl`
@@ -27,7 +27,7 @@ namespace HPHP {
   // called on the wrong thread for example). See D31842297 for some
   // discussion.
 
-  return nullptr;
+    return DeclProviderResult{DeclProviderResult::Tag::Missing, {}};
 
   /*
   String sym = String(symbol, CopyStringMode::CopyString);
@@ -55,7 +55,7 @@ namespace HPHP {
 }
 
 extern "C" {
-  Decls const* hhvm_decl_provider_get_decl(void* provider, int sort, char const* symbol) {
+  DeclProviderResult hhvm_decl_provider_get_decl(void* provider, int sort, char const* symbol) {
     try {
       // Unsafe: if `sort` is out of range the result of this cast is
       // UB.
@@ -68,7 +68,7 @@ extern "C" {
     catch(...) {
     }
 
-    return nullptr;
+    return DeclProviderResult{DeclProviderResult::Tag::Missing, {}};
   }
 
 } //extern "C"

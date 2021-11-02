@@ -289,14 +289,31 @@ impl TypeFacts {
             }
         };
 
+        let check_require = match typekind {
+            TypeKind::Interface | TypeKind::Trait => true,
+            _ => false,
+        };
+
         // Collect the requires
         let require_extends = req_extends
             .into_iter()
-            .map(|ty| extract_type_name(*ty))
+            .filter_map(|&ty| {
+                if check_require {
+                    Some(extract_type_name(ty))
+                } else {
+                    None
+                }
+            })
             .collect::<StringSet>();
         let require_implements = req_implements
             .into_iter()
-            .map(|ty| extract_type_name(*ty))
+            .filter_map(|&ty| {
+                if check_require {
+                    Some(extract_type_name(ty))
+                } else {
+                    None
+                }
+            })
             .collect::<StringSet>();
 
         // TODO(T101762617): modify the direct decl parser to

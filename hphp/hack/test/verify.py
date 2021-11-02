@@ -212,6 +212,9 @@ def run_batch_tests(
         flags = get_flags(test_dir)
         test_flags = get_test_flags(first_test.file_path)
         if verify_pessimisation != VerifyPessimisationOptions.no:
+            path = os.path.join(test_dir, "NO_PESS")
+            if os.path.isfile(path):
+                return []
             for flag in flags_pessimise_unsupported:
                 if flag in flags:
                     return []

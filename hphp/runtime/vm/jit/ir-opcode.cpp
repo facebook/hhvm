@@ -167,24 +167,6 @@ OpInfo g_opInfo[] = {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const StringData* findClassName(SSATmp* cls) {
-  assertx(cls->isA(TCls));
-
-  if (cls->hasConstVal()) {
-    return cls->clsVal()->preClass()->name();
-  }
-  // Try to get the class name from a LdCls
-  IRInstruction* clsInst = cls->inst();
-  if (clsInst->op() == LdCls || clsInst->op() == LdClsCached) {
-    SSATmp* clsName = clsInst->src(0);
-    assertx(clsName->isA(TStr));
-    if (clsName->hasConstVal()) {
-      return clsName->strVal();
-    }
-  }
-  return nullptr;
-}
-
 bool isCallOp(Opcode opc) {
   // CallBuiltin doesn't count because it is not a php-level call.  (It will
   // call a C++ helper and we can push/pop around it normally.)

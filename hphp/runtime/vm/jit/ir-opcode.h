@@ -169,12 +169,6 @@ bool hasEdges(Opcode opc);
 bool opcodeHasFlags(Opcode opc, uint64_t flags);
 bool opcodeMayRaise(Opcode opc);
 
-/*
- * Given an SSATmp of type Cls, try to find the name of the class.
- * Returns nullptr if can't find it.
- */
-const StringData* findClassName(SSATmp* cls);
-
 } // namespace jit
 } // namespace HPHP
 

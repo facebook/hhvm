@@ -256,7 +256,7 @@ let parse_options () =
   let enable_sound_dynamic = ref false in
   let disallow_fun_and_cls_meth_pseudo_funcs = ref false in
   let disallow_inst_meth = ref false in
-  let use_direct_decl_parser = ref false in
+  let use_direct_decl_parser = ref true in
   let disable_enum_classes = ref false in
   let enable_enum_supertyping = ref false in
   let interpret_soft_types_as_like_types = ref false in
@@ -630,9 +630,9 @@ let parse_options () =
       ( "--disallow-inst-meth",
         Arg.Set disallow_inst_meth,
         " Disable parsing of inst_meth()." );
-      ( "--use-direct-decl-parser",
-        Arg.Set use_direct_decl_parser,
-        " Use direct decl parser" );
+      ( "--no-direct-decl-parser",
+        Arg.Clear use_direct_decl_parser,
+        " Produce decls from ASTs instead of using the direct decl parser" );
       ( "--disable-enum-classes",
         Arg.Set disable_enum_classes,
         " Disable the enum classes extension." );

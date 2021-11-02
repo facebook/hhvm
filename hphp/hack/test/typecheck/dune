@@ -60,7 +60,6 @@ let () =
   let typecheck_deps = deps files_tc in
   let cmds = [ "--flags"
              ; "--shallow-class-decl"
-             ; "--use-direct-decl-parser"
              ; "--error-format raw"
              ] in
   let cmd = String.concat " " cmds in
@@ -76,7 +75,6 @@ let () =
              ; "--fallback-expect-extension .exp"
              ; "--flags"
              ; "--out-extension .legacy_decl.out"
-             ; "--use-direct-decl-parser"
              ; "--error-format raw" ] in
   let cmd = String.concat " " cmds in
   let typecheck_legacy_decl =

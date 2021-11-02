@@ -62,7 +62,7 @@ function get_class_vars(string $class_name): mixed;
  *   omitted when inside a class, the name of that class is returned.
  */
 <<__Native>>
-function get_class(mixed $object = null)[]: mixed;
+function get_class(readonly mixed $object = null)[]: mixed;
 
 /**
  * Returns an array with the name of the defined classes

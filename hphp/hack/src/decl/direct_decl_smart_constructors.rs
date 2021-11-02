@@ -4552,9 +4552,11 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             .unwrap_or_else(|| self.tany_with_pos(name.0));
 
         let mut is_abstract = false;
+        let mut is_final = false;
         for modifier in modifiers.iter() {
             match modifier.token_kind() {
                 Some(TokenKind::Abstract) => is_abstract = true,
+                Some(TokenKind::Final) => is_final = true,
                 _ => {}
             }
         }
@@ -4616,7 +4618,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
         let cls = self.alloc(shallow_decl_defs::ShallowClass {
             mode: self.file_mode,
-            final_: false,
+            final_: is_final,
             is_xhp: false,
             has_xhp_keyword: false,
             kind: class_kind,

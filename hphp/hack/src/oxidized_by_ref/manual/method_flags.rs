@@ -16,6 +16,7 @@ bitflags! {
         const OVERRIDE            = 1 << 2;
         const DYNAMICALLYCALLABLE = 1 << 3;
         const PHP_STD_LIB         = 1 << 4;
+        const SUPPORT_DYNAMIC_TYPE = 1 << 5;
     }
 }
 

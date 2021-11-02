@@ -150,6 +150,7 @@ module MethodFlags = struct
       if get_override t then print "override";
       if get_dynamicallycallable t then print "dynamicallycallable";
       if get_php_std_lib t then print "php_std_lib";
+      if get_support_dynamic_type t then print "support_dynamic_type";
       Format.fprintf fmt "@,@]"
     )
 

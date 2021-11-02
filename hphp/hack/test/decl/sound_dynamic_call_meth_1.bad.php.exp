@@ -1,0 +1,171 @@
+[("\\A",
+  (Shallow_decl_defs.Class
+     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+       sc_is_xhp = false; sc_has_xhp_keyword = false;
+       sc_kind = (Cclass Concrete); sc_module = None;
+       sc_name = ([4:7-8], "\\A");
+       sc_tparams =
+       [{ Typing_defs_core.tp_variance = Invariant;
+          tp_name = ([4:9-10], "T"); tp_tparams = []; tp_constraints = [];
+          tp_reified = Erased; tp_user_attributes = [] }
+         ];
+       sc_where_constraints = []; sc_extends = []; sc_uses = [];
+       sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
+       sc_req_implements = []; sc_implements = [];
+       sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+       sc_props = []; sc_sprops = []; sc_constructor = None;
+       sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
+       sc_enum_type = None }));
+  ("\\C",
+   (Shallow_decl_defs.Class
+      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+        sc_is_xhp = false; sc_has_xhp_keyword = false;
+        sc_kind = (Cclass Concrete); sc_module = None;
+        sc_name = ([6:7-8], "\\C"); sc_tparams = [];
+        sc_where_constraints = []; sc_extends = []; sc_uses = [];
+        sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
+        sc_req_implements = []; sc_implements = [];
+        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+        sc_props = []; sc_sprops = []; sc_constructor = None;
+        sc_static_methods = [];
+        sc_methods =
+        [{ Shallow_decl_defs.sm_name = ([8:19-31], "expect_A_int");
+           sm_type =
+           (Rwitness_from_decl ([8:19-31]),
+            (Tfun
+               { ft_arity = (Fstandard ()); ft_tparams = [];
+                 ft_where_constraints = [];
+                 ft_params =
+                 [{ fp_pos = [8:39-42]; fp_name = (Some "$a1");
+                    fp_type =
+                    { et_enforced = Typing_defs_core.Unenforced;
+                      et_type =
+                      (Rhint ([8:32-38]),
+                       (Tapply (([8:32-33], "\\A"),
+                          [(Rhint ([8:34-37]), (Tprim Tint))])))
+                      };
+                    fp_flags =
+                    (make_fp_flags ~accept_disposable:false
+                      ~has_default:false ~mode:Typing_defs_core.FPnormal
+                      ~ifc_external:false ~ifc_can_call:false
+                      ~via_label:false ~readonly:false);
+                     };
+                   { fp_pos = [8:51-54]; fp_name = (Some "$a2");
+                     fp_type =
+                     { et_enforced = Typing_defs_core.Unenforced;
+                       et_type =
+                       (Rhint ([8:44-50]),
+                        (Tapply (([8:44-45], "\\A"),
+                           [(Rhint ([8:46-49]), (Tprim Tint))])))
+                       };
+                     fp_flags =
+                     (make_fp_flags ~accept_disposable:false
+                       ~has_default:false ~mode:Typing_defs_core.FPnormal
+                       ~ifc_external:false ~ifc_can_call:false
+                       ~via_label:false ~readonly:false);
+                      }
+                   ];
+                 ft_implicit_params =
+                 { capability = (CapDefaults [8:19-31]) };
+                 ft_ret =
+                 { et_enforced = Typing_defs_core.Unenforced;
+                   et_type = (Rhint ([8:58-62]), (Tprim Tvoid)) };
+                 ft_flags =
+                 (make_ft_flags FSync ~return_disposable:false
+                   ~returns_readonly:false ~support_dynamic_type:true
+                   ~readonly_this:false);
+                 ft_ifc_decl = FDPolicied {PUBLIC} }));
+           sm_visibility = Public; sm_deprecated = None;
+           sm_flags = support_dynamic_type; sm_attributes = [] }
+          ];
+        sc_user_attributes = []; sc_enum_type = None }));
+  ("\\Foo",
+   (Shallow_decl_defs.Class
+      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+        sc_is_xhp = false; sc_has_xhp_keyword = false;
+        sc_kind = (Cclass Concrete); sc_module = None;
+        sc_name = ([15:7-10], "\\Foo"); sc_tparams = [];
+        sc_where_constraints = []; sc_extends = []; sc_uses = [];
+        sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
+        sc_req_implements = []; sc_implements = [];
+        sc_support_dynamic_type = true; sc_consts = []; sc_typeconsts = [];
+        sc_props = []; sc_sprops = []; sc_constructor = None;
+        sc_static_methods = [];
+        sc_methods =
+        [{ Shallow_decl_defs.sm_name = ([16:19-22], "foo");
+           sm_type =
+           (Rwitness_from_decl ([16:19-22]),
+            (Tfun
+               { ft_arity = (Fstandard ()); ft_tparams = [];
+                 ft_where_constraints = [];
+                 ft_params =
+                 [{ fp_pos = [16:30-32]; fp_name = (Some "$a");
+                    fp_type =
+                    { et_enforced = Typing_defs_core.Unenforced;
+                      et_type =
+                      (Rhint ([16:23-29]),
+                       (Tapply (([16:23-24], "\\A"),
+                          [(Rhint ([16:25-28]), (Tprim Tint))])))
+                      };
+                    fp_flags =
+                    (make_fp_flags ~accept_disposable:false
+                      ~has_default:false ~mode:Typing_defs_core.FPnormal
+                      ~ifc_external:false ~ifc_can_call:false
+                      ~via_label:false ~readonly:false);
+                     }
+                   ];
+                 ft_implicit_params =
+                 { capability = (CapDefaults [16:19-22]) };
+                 ft_ret =
+                 { et_enforced = Typing_defs_core.Unenforced;
+                   et_type = (Rhint ([16:36-40]), (Tprim Tvoid)) };
+                 ft_flags =
+                 (make_ft_flags FSync ~return_disposable:false
+                   ~returns_readonly:false ~support_dynamic_type:true
+                   ~readonly_this:false);
+                 ft_ifc_decl = FDPolicied {PUBLIC} }));
+           sm_visibility = Public; sm_deprecated = None;
+           sm_flags = support_dynamic_type; sm_attributes = [] };
+          { Shallow_decl_defs.sm_name = ([19:19-22], "bar");
+            sm_type =
+            (Rwitness_from_decl ([19:19-22]),
+             (Tfun
+                { ft_arity = (Fstandard ()); ft_tparams = [];
+                  ft_where_constraints = [];
+                  ft_params =
+                  [{ fp_pos = [19:30-32]; fp_name = (Some "$a");
+                     fp_type =
+                     { et_enforced = Typing_defs_core.Unenforced;
+                       et_type =
+                       (Rhint ([19:23-29]),
+                        (Tapply (([19:23-24], "\\A"),
+                           [(Rhint ([19:25-28]), (Tprim Tint))])))
+                       };
+                     fp_flags =
+                     (make_fp_flags ~accept_disposable:false
+                       ~has_default:false ~mode:Typing_defs_core.FPnormal
+                       ~ifc_external:false ~ifc_can_call:false
+                       ~via_label:false ~readonly:false);
+                      }
+                    ];
+                  ft_implicit_params =
+                  { capability = (CapDefaults [19:19-22]) };
+                  ft_ret =
+                  { et_enforced = Typing_defs_core.Unenforced;
+                    et_type = (Rhint ([19:36-40]), (Tprim Tvoid)) };
+                  ft_flags =
+                  (make_ft_flags FSync ~return_disposable:false
+                    ~returns_readonly:false ~support_dynamic_type:true
+                    ~readonly_this:false);
+                  ft_ifc_decl = FDPolicied {PUBLIC} }));
+            sm_visibility = Public; sm_deprecated = None;
+            sm_flags = support_dynamic_type; sm_attributes = [] }
+          ];
+        sc_user_attributes =
+        [{ Typing_defs_core.ua_name = ([14:3-23], "__SupportDynamicType");
+           ua_classname_params = [] }
+          ];
+        sc_enum_type = None }))
+  ]
+
+They matched!

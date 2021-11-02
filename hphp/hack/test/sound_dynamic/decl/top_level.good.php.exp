@@ -1,25 +1,23 @@
---- legacy
-+++ direct decl
-@@ -1,21 +1,21 @@
- [("\\f",
-   (Shallow_decl_defs.Fun
-      { Typing_defs.fe_deprecated = None; fe_module = None;
-        fe_internal = false;
-        fe_type =
-        (Rwitness_from_decl ([4:10-11]),
-         (Tfun
-            { ft_arity = (Fstandard ()); ft_tparams = [];
-              ft_where_constraints = []; ft_params = [];
-              ft_implicit_params = { capability = (CapDefaults [4:10-11]) };
-              ft_ret =
-              { et_enforced = Typing_defs_core.Unenforced;
-                et_type = (Rhint ([4:15-19]), (Tprim Tvoid)) };
-              ft_flags =
-              (make_ft_flags FSync ~return_disposable:false
--               ~returns_readonly:false ~support_dynamic_type:true
-+               ~returns_readonly:false ~support_dynamic_type:false
-                ~readonly_this:false);
-              ft_ifc_decl = FDPolicied {PUBLIC} }));
-        fe_pos = [4:10-11]; fe_php_std_lib = false;
-        fe_support_dynamic_type = true }))
-   ]
+[("\\f",
+  (Shallow_decl_defs.Fun
+     { Typing_defs.fe_deprecated = None; fe_module = None;
+       fe_internal = false;
+       fe_type =
+       (Rwitness_from_decl ([4:10-11]),
+        (Tfun
+           { ft_arity = (Fstandard ()); ft_tparams = [];
+             ft_where_constraints = []; ft_params = [];
+             ft_implicit_params = { capability = (CapDefaults [4:10-11]) };
+             ft_ret =
+             { et_enforced = Typing_defs_core.Unenforced;
+               et_type = (Rhint ([4:15-19]), (Tprim Tvoid)) };
+             ft_flags =
+             (make_ft_flags FSync ~return_disposable:false
+               ~returns_readonly:false ~support_dynamic_type:true
+               ~readonly_this:false);
+             ft_ifc_decl = FDPolicied {PUBLIC} }));
+       fe_pos = [4:10-11]; fe_php_std_lib = false;
+       fe_support_dynamic_type = true }))
+  ]
+
+They matched!

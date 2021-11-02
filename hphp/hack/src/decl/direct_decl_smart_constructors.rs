@@ -973,6 +973,7 @@ impl<'a> Node<'a> {
     }
 }
 
+#[derive(Debug)]
 struct Attributes<'a> {
     deprecated: Option<&'a str>,
     reifiable: Option<&'a Pos<'a>>,
@@ -1553,6 +1554,9 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
 
         if attributes.returns_disposable {
             flags |= FunTypeFlags::RETURN_DISPOSABLE;
+        }
+        if attributes.support_dynamic_type {
+            flags |= FunTypeFlags::SUPPORT_DYNAMIC_TYPE;
         }
         if header.readonly_return.is_token(TokenKind::Readonly) {
             flags |= FunTypeFlags::RETURNS_READONLY;
@@ -3803,6 +3807,8 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         // though it's the reverse of the syntactic ordering).
         user_attributes.reverse();
 
+        let class_attributes = self.to_attributes(attributes);
+
         // xhp props go after regular props, regardless of their order in file
         let mut xhp_props = vec![];
 
@@ -3856,6 +3862,29 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                     }
                 }
                 Node::Method(&MethodNode { method, is_static }) => {
+                    // Annoyingly, the <<__SupportDynamicType>> annotation on a
+                    // class implicitly changes the decls of every method inside
+                    // it, so we have to reallocate them here.
+                    let method = if class_attributes.support_dynamic_type
+                        && !method.flags.contains(MethodFlags::SUPPORT_DYNAMIC_TYPE)
+                    {
+                        let type_ = match method.type_.1 {
+                            Ty_::Tfun(ft) => {
+                                let flags = ft.flags | FunTypeFlags::SUPPORT_DYNAMIC_TYPE;
+                                let ft = self.alloc(FunType { flags, ..*ft });
+                                self.alloc(Ty(method.type_.0, Ty_::Tfun(ft)))
+                            }
+                            _ => method.type_,
+                        };
+                        let flags = method.flags | MethodFlags::SUPPORT_DYNAMIC_TYPE;
+                        self.alloc(ShallowMethod {
+                            type_,
+                            flags,
+                            ..*method
+                        })
+                    } else {
+                        method
+                    };
                     if is_static {
                         static_methods.push(method);
                     } else {
@@ -3868,7 +3897,6 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
         props.extend(xhp_props.into_iter());
 
-        let class_attributes = self.to_attributes(attributes);
         if class_attributes.const_ {
             for prop in props.iter_mut() {
                 if !prop.flags.contains(PropFlags::CONST) {
@@ -4188,6 +4216,10 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             attributes.dynamically_callable,
         );
         flags.set(MethodFlags::PHP_STD_LIB, attributes.php_std_lib);
+        flags.set(
+            MethodFlags::SUPPORT_DYNAMIC_TYPE,
+            !is_constructor && attributes.support_dynamic_type,
+        );
         let visibility = match modifiers.visibility {
             aast::Visibility::Public => {
                 if attributes.internal {
@@ -4330,7 +4362,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             req_extends: &[],
             req_implements: &[],
             implements: &[],
-            support_dynamic_type: false,
+            support_dynamic_type: parsed_attributes.support_dynamic_type,
             consts,
             typeconsts: &[],
             props: &[],
@@ -4469,6 +4501,8 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         user_attributes.reverse();
         let user_attributes = user_attributes.into_bump_slice();
 
+        let parsed_attributes = self.to_attributes(attributes);
+
         let cls = self.alloc(shallow_decl_defs::ShallowClass {
             mode: self.file_mode,
             final_: false,
@@ -4486,7 +4520,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             req_extends: &[],
             req_implements: &[],
             implements: &[],
-            support_dynamic_type: false,
+            support_dynamic_type: parsed_attributes.support_dynamic_type,
             consts,
             typeconsts: &[],
             props: &[],

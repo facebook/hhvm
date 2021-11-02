@@ -83,16 +83,23 @@ module Watchman_process_helpers = struct
     let response =
       try
         let response = Hh_json.json_of_string output in
-        if not debug_logging then
+        (if not debug_logging then
+          let has_changed = ref false in
           (* if debug_logging, we've already logged the full watchman response, so skip
            * logging truncated one. *)
-          Hh_json.json_truncate
-            ~max_array_elt_count:max_array_elt_in_json_logging
-            response
-          |> Hh_json.json_to_string
-          |> Hh_logger.info
-               "Watchman response (arrays are truncated to max %d elements): %s"
-               max_array_elt_in_json_logging;
+          let json =
+            Hh_json.json_truncate
+              ~max_array_elt_count:max_array_elt_in_json_logging
+              ~has_changed
+              response
+          in
+          Hh_logger.info
+            "Watchman response: %s%s"
+            (if !has_changed then
+              Printf.sprintf "(truncated) "
+            else
+              "")
+            (Hh_json.json_to_string json));
         response
       with
       | e ->
@@ -138,16 +145,23 @@ end = struct
     if debug_logging then
       Hh_logger.info "Watchman request: %s" json_str
     else
+      let has_changed = ref false in
+      let json =
+        Hh_json.json_truncate
+          json
+          ~max_array_elt_count:max_array_elt_in_json_logging
+          ~has_changed
+      in
       Hh_logger.info
-        "Watchman request (arrays are truncated to max %d elements): %s"
-        max_array_elt_in_json_logging
-        (Hh_json.json_truncate
-           json
-           ~max_array_elt_count:max_array_elt_in_json_logging
-        |> Hh_json.json_to_string);
-    Out_channel.output_string oc json_str;
-    Out_channel.output_string oc "\n";
-    Out_channel.flush oc
+        "Watchman request: %s%s"
+        (if !has_changed then
+          "(truncated) "
+        else
+          "")
+        (json |> Hh_json.json_to_string);
+      Out_channel.output_string oc json_str;
+      Out_channel.output_string oc "\n";
+      Out_channel.flush oc
 
   (***************************************************************************)
   (* Handling requests and responses. *)

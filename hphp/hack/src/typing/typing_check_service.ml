@@ -1135,7 +1135,7 @@ let go_with_interrupt
     ~(longlived_workers : bool)
     ~(remote_execution : ReEnv.t option)
     ~(check_info : check_info)
-    ~(cgroup_stage : CgroupProfiler.stage option) : (_ * result) job_result =
+    ~(cgroup_step : CgroupProfiler.step option) : (_ * result) job_result =
   let opts = Provider_context.get_tcopt ctx in
   let sample_rate = GlobalOptions.tco_typecheck_sample_rate opts in
   let fnl = BigList.create fnl in
@@ -1233,7 +1233,7 @@ let go_with_interrupt
      Measure, since it (1) already calculates maximum, (2) already marshals information
      of each worker process and aggregates it here into the main process. *)
   begin
-    match (cgroup_stage, Measure.get_max "worker_cgroup_total") with
+    match (cgroup_step, Measure.get_max "worker_cgroup_total") with
     | (Some cgroup_step, Some worker_cgroup_total) ->
       CgroupProfiler.update_cgroup_total
         (int_of_float worker_cgroup_total)
@@ -1277,7 +1277,7 @@ let go
     ~(longlived_workers : bool)
     ~(remote_execution : ReEnv.t option)
     ~(check_info : check_info)
-    ~(cgroup_stage : CgroupProfiler.stage option) : result =
+    ~(cgroup_step : CgroupProfiler.step option) : result =
   let interrupt = MultiThreadedCall.no_interrupt () in
   let (((), result), cancelled) =
     go_with_interrupt
@@ -1293,7 +1293,7 @@ let go
       ~longlived_workers
       ~remote_execution
       ~check_info
-      ~cgroup_stage
+      ~cgroup_step
   in
   assert (List.is_empty cancelled);
   result

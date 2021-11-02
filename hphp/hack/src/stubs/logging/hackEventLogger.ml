@@ -465,10 +465,10 @@ end
 module CGroup = struct
   let error _ = ()
 
-  let stage
+  let step
       ~cgroup:_
-      ~phase:_
-      ~stage:_
+      ~step_group:_
+      ~step:_
       ~start_time:_
       ~total_start:_
       ~totalswap_start:_

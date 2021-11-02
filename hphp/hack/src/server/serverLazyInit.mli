@@ -12,19 +12,19 @@ open ServerInitTypes
 val full_init :
   ServerEnv.genv ->
   ServerEnv.env ->
-  CgroupProfiler.event ->
+  CgroupProfiler.step_group ->
   ServerEnv.env * float
 
 val parse_only_init :
   ServerEnv.genv ->
   ServerEnv.env ->
-  CgroupProfiler.event ->
+  CgroupProfiler.step_group ->
   ServerEnv.env * float
 
 val write_symbol_info_init :
   ServerEnv.genv ->
   ServerEnv.env ->
-  CgroupProfiler.event ->
+  CgroupProfiler.step_group ->
   ServerEnv.env * float
 
 val saved_state_init :
@@ -32,7 +32,7 @@ val saved_state_init :
   ServerEnv.genv ->
   ServerEnv.env ->
   Path.t ->
-  CgroupProfiler.event ->
+  CgroupProfiler.step_group ->
   ( (ServerEnv.env * float) * (loaded_info * files_changed_while_parsing),
     load_state_error )
   result

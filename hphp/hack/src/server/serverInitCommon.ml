@@ -47,9 +47,9 @@ let parsing
     ~(trace : bool)
     ~(cache_decls : bool)
     ~(telemetry_label : string)
-    ~(cgroup_event : CgroupProfiler.event) : ServerEnv.env * float =
-  CgroupProfiler.stage cgroup_event ~stage:telemetry_label
-  @@ fun _cgroup_stage ->
+    ~(cgroup_steps : CgroupProfiler.step_group) : ServerEnv.env * float =
+  CgroupProfiler.step_start_end cgroup_steps telemetry_label
+  @@ fun _cgroup_step ->
   begin
     match count with
     | None -> ServerProgress.send_progress "%s" "parsing"
@@ -105,14 +105,14 @@ let update_files
     (ctx : Provider_context.t)
     (t : float)
     ~(telemetry_label : string)
-    ~(cgroup_event : CgroupProfiler.event) : float =
+    ~(cgroup_steps : CgroupProfiler.step_group) : float =
   if no_incremental_check genv.options then
     t
   else (
     Hh_logger.log "Updating dep->filename [%s]... " telemetry_label;
     let count = ref 0 in
-    CgroupProfiler.stage cgroup_event ~stage:telemetry_label
-    @@ fun _cgroup_stage ->
+    CgroupProfiler.step_start_end cgroup_steps telemetry_label
+    @@ fun _cgroup_step ->
     if Naming_provider.ByHash.need_update_files ctx then
       Naming_table.iter
         ?warn_on_naming_costly_iter
@@ -131,9 +131,9 @@ let naming
     (env : ServerEnv.env)
     (t : float)
     ~(telemetry_label : string)
-    ~(cgroup_event : CgroupProfiler.event) : ServerEnv.env * float =
-  CgroupProfiler.stage cgroup_event ~stage:telemetry_label
-  @@ fun _cgroup_stage ->
+    ~(cgroup_steps : CgroupProfiler.step_group) : ServerEnv.env * float =
+  CgroupProfiler.step_start_end cgroup_steps telemetry_label
+  @@ fun _cgroup_step ->
   ServerProgress.send_progress "resolving symbol references";
   let ctx = Provider_utils.ctx_from_server_env env in
   let count = ref 0 in
@@ -198,7 +198,7 @@ let type_check
     (init_telemetry : Telemetry.t)
     (t : float)
     ~(telemetry_label : string)
-    ~(cgroup_event : CgroupProfiler.event) : ServerEnv.env * float =
+    ~(cgroup_steps : CgroupProfiler.step_group) : ServerEnv.env * float =
   (* No type checking in AI mode *)
   if Option.is_some (ServerArgs.ai_mode genv.options) then
     (env, t)
@@ -238,8 +238,8 @@ let type_check
       in
       let remote_execution = env.ServerEnv.remote_execution in
       let ctx = Provider_utils.ctx_from_server_env env in
-      CgroupProfiler.stage cgroup_event ~stage:telemetry_label
-      @@ fun cgroup_stage ->
+      CgroupProfiler.step_start_end cgroup_steps telemetry_label
+      @@ fun cgroup_step ->
       Typing_check_service.go
         ctx
         genv.workers
@@ -251,7 +251,7 @@ let type_check
         ~longlived_workers
         ~remote_execution
         ~check_info:(ServerCheckUtils.get_check_info genv env)
-        ~cgroup_stage:(Some cgroup_stage)
+        ~cgroup_step:(Some cgroup_step)
     in
     hh_log_heap ();
     let env =

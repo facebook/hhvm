@@ -54,7 +54,7 @@ let init
     (genv : ServerEnv.genv)
     (lazy_level : lazy_level)
     (env : ServerEnv.env)
-    (cgroup_event : CgroupProfiler.event) : ServerEnv.env * float =
+    (cgroup_steps : CgroupProfiler.step_group) : ServerEnv.env * float =
   let init_telemetry =
     Telemetry.create ()
     |> Telemetry.float_ ~key:"start_time" ~value:(Unix.gettimeofday ())
@@ -81,7 +81,7 @@ let init
       ~trace
       ~cache_decls:true
       ~telemetry_label:"eager.init.parsing"
-      ~cgroup_event
+      ~cgroup_steps
   in
   if not (ServerArgs.check_mode genv.options) then
     SearchServiceRunner.update_fileinfo_map
@@ -95,14 +95,14 @@ let init
       ctx
       t
       ~telemetry_label:"eager.init.update"
-      ~cgroup_event
+      ~cgroup_steps
   in
   let (env, t) =
     ServerInitCommon.naming
       env
       t
       ~telemetry_label:"eager.init.naming"
-      ~cgroup_event
+      ~cgroup_steps
   in
   let fast = Naming_table.to_fast env.naming_table in
   let failed_parsing = Errors.get_failed_files env.errorl Errors.Parsing in
@@ -126,4 +126,4 @@ let init
     init_telemetry
     t
     ~telemetry_label:"eager.init.type_check"
-    ~cgroup_event
+    ~cgroup_steps

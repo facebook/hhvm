@@ -6,7 +6,7 @@ type step_summary = {
   step_total: int;
 }
 
-type event = {
+type step_group = {
   name: string;  (** e.g. "lazy_init" *)
   step_count: int ref;
       (** used to prefix the step-names for telemetry+logging *)
@@ -20,7 +20,7 @@ type event = {
 (** We'll only bother writing to the log if the total has changed by at least this many bytes *)
 let threshold_for_logging = 100 * 1024 * 1024
 
-type stage = { total_hwm_ref: int ref }
+type step = { total_hwm_ref: int ref }
 
 (** to avoid flooding logs with errors *)
 let has_logged_error = ref SSet.empty
@@ -93,10 +93,10 @@ let log_telemetry ~step_group ~step ~start_time ~hwm ~start_cgroup ~cgroup =
       HackEventLogger.CGroup.error s
     end
   | (Some (Ok start_cgroup), Ok cgroup) ->
-    HackEventLogger.CGroup.stage
+    HackEventLogger.CGroup.step
       ~cgroup:cgroup.cgroup_name
-      ~phase:step_group.name
-      ~stage:step
+      ~step_group:step_group.name
+      ~step
       ~start_time
       ~total_start:(Some start_cgroup.total)
       ~totalswap_start:(Some start_cgroup.total_swap)
@@ -110,10 +110,10 @@ let log_telemetry ~step_group ~step ~start_time ~hwm ~start_cgroup ~cgroup =
       ~shmem:cgroup.shmem
       ~file:cgroup.file
   | (None, Ok cgroup) ->
-    HackEventLogger.CGroup.stage
+    HackEventLogger.CGroup.step
       ~cgroup:cgroup.cgroup_name
-      ~phase:step_group.name
-      ~stage:step
+      ~step_group:step_group.name
+      ~step
       ~start_time:None
       ~total_start:None
       ~totalswap_start:None
@@ -127,11 +127,11 @@ let log_telemetry ~step_group ~step ~start_time ~hwm ~start_cgroup ~cgroup =
       ~shmem:cgroup.shmem
       ~file:cgroup.file
 
-let event ~event ~log f =
+let step_group name ~log f =
   let log = log && not (Sys_utils.is_test_mode ()) in
   let profiling =
     {
-      name = event;
+      name;
       log;
       step_count = ref 0;
       last_printed_total = ref 0;
@@ -140,12 +140,12 @@ let event ~event ~log f =
   in
   f profiling
 
-let stage_single step_group ~stage =
+let step step_group name =
   if not step_group.log then
     ()
   else begin
     step_group.step_count := !(step_group.step_count) + 1;
-    let step = Printf.sprintf "%02d_%s" !(step_group.step_count) stage in
+    let step = Printf.sprintf "%02d_%s" !(step_group.step_count) name in
     let cgroup = CGroup.get_stats () in
     log_cgroup_total cgroup ~step_group ~step ~suffix:"" ~hwm:0;
     log_telemetry
@@ -157,12 +157,12 @@ let stage_single step_group ~stage =
       ~cgroup
   end
 
-let stage step_group ~stage f =
+let step_start_end step_group name f =
   if not step_group.log then
     f { total_hwm_ref = ref 0 }
   else begin
     step_group.step_count := !(step_group.step_count) + 1;
-    let step = Printf.sprintf "%02d_%s" !(step_group.step_count) stage in
+    let step = Printf.sprintf "%02d_%s" !(step_group.step_count) name in
     let start_time = Unix.gettimeofday () in
     let start_cgroup = CGroup.get_stats () in
     log_cgroup_total start_cgroup ~step_group ~step ~suffix:" start" ~hwm:0;

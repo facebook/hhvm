@@ -25,7 +25,7 @@ val parsing :
   trace:bool ->
   cache_decls:bool ->
   telemetry_label:string ->
-  cgroup_event:CgroupProfiler.event ->
+  cgroup_steps:CgroupProfiler.step_group ->
   ServerEnv.env * float
 
 val update_files :
@@ -35,14 +35,14 @@ val update_files :
   Provider_context.t ->
   float ->
   telemetry_label:string ->
-  cgroup_event:CgroupProfiler.event ->
+  cgroup_steps:CgroupProfiler.step_group ->
   float
 
 val naming :
   ServerEnv.env ->
   float ->
   telemetry_label:string ->
-  cgroup_event:CgroupProfiler.event ->
+  cgroup_steps:CgroupProfiler.step_group ->
   ServerEnv.env * float
 
 val type_check :
@@ -52,5 +52,5 @@ val type_check :
   Telemetry.t ->
   float ->
   telemetry_label:string ->
-  cgroup_event:CgroupProfiler.event ->
+  cgroup_steps:CgroupProfiler.step_group ->
   ServerEnv.env * float

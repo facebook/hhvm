@@ -719,8 +719,20 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
   }
 }
 
-bool EventHook::onFunctionCallJit(const ActRec* ar, int funcType) {
-  return EventHook::onFunctionCall(ar, funcType, EventHook::Source::Jit);
+uint64_t EventHook::onFunctionCallJit(const ActRec* ar, int funcType) {
+  auto const savedRip = ar->m_savedRip;
+  if (EventHook::onFunctionCall(ar, funcType, EventHook::Source::Jit)) {
+    // Not intercepted, no return address.
+    return 0;
+  }
+
+  // If we entered this frame from the interpreter, use the resumeHelper,
+  // as the retHelper logic has been already performed and the frame has
+  // been overwritten by the return value.
+  if (isReturnHelper(savedRip)) {
+    return reinterpret_cast<uintptr_t>(jit::tc::ustubs().resumeHelper);
+  }
+  return savedRip;
 }
 
 bool EventHook::onFunctionCall(const ActRec* ar, int funcType,

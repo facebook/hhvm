@@ -151,7 +151,7 @@ struct EventHook {
   /**
    * Event hooks -- JIT entry points.
    */
-  static bool onFunctionCallJit(const ActRec* ar, int funcType);
+  static uint64_t onFunctionCallJit(const ActRec* ar, int funcType);
   static void onFunctionSuspendAwaitEFJit(ActRec*, const ActRec*);
   static void onFunctionSuspendAwaitEGJit(ActRec*);
   static void onFunctionSuspendAwaitRJit(ActRec*, ObjectData*);

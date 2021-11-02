@@ -526,21 +526,15 @@ TCA emitFunctionEnterHelper(CodeBlock& main, CodeBlock& cold,
     v << stublogue{true};
     v << copy{rsp(), rvmfp()};
 
-    // When we call the event hook, it might tell us to skip the callee
-    // (because of fb_intercept2).  If that happens, we need to return to the
-    // caller, but the handler will have already popped the callee's frame.
-    // So, we need to save these values for later.
-    v << pushpm{ar[AROFF(m_savedRip)], ar[AROFF(m_sfp)]};
-
     auto const done = v.makeBlock();
     auto const ctch = vc.makeBlock();
-    auto const should_continue = v.makeReg();
-    bool (*hook)(const ActRec*, int) = &EventHook::onFunctionCallJit;
+    auto const interceptRip = v.makeReg();
+    uint64_t (*hook)(const ActRec*, int) = &EventHook::onFunctionCallJit;
 
     v << vinvoke{
       CallSpec::direct(hook),
       v.makeVcallArgs({{ar, v.cns(EventHook::NormalFunc)}}),
-      v.makeTuple({should_continue}),
+      v.makeTuple({interceptRip}),
       {done, ctch},
       Fixup::none(),
       DestType::SSA
@@ -548,8 +542,6 @@ TCA emitFunctionEnterHelper(CodeBlock& main, CodeBlock& cold,
 
     vc = ctch;
     emitStubCatch(vc, us, [] (Vout& v) {
-      // Skip past the stuff we saved for the intercept case.
-      v << lea{rsp()[16], rsp()};
       // Undo our stub frame, so that rvmfp() points to the parent VM frame.
       v << load{rsp()[AROFF(m_sfp)], rvmfp()};
     });
@@ -557,16 +549,13 @@ TCA emitFunctionEnterHelper(CodeBlock& main, CodeBlock& cold,
     v = done;
 
     auto const sf = v.makeReg();
-    v << testb{should_continue, should_continue, sf};
+    v << testq{interceptRip, interceptRip, sf};
 
-    unlikelyIfThen(v, vc, CC_Z, sf, [&] (Vout& v) {
-      auto const saved_rip = v.makeReg();
-
+    unlikelyIfThen(v, vc, CC_NZ, sf, [&] (Vout& v) {
       // The event hook has already cleaned up the stack and popped the
       // callee's frame, so we're ready to continue from the original call
-      // site.  We just need to grab the fp/rip of the original frame that we
-      // saved earlier, and sync rvmsp().
-      v << popp{rvmfp(), saved_rip};
+      // site.  We just need to grab the fp from the VM reg and sync rvmsp().
+      loadVmfp(v);
 
       // Drop our call frame; the stublogue{} instruction guarantees that this
       // is exactly 16 bytes.
@@ -579,11 +568,8 @@ TCA emitFunctionEnterHelper(CodeBlock& main, CodeBlock& cold,
 
       // Return to the caller.  This unbalances the return stack buffer, but if
       // we're intercepting, we probably don't care.
-      v << jmpr{saved_rip, php_return_regs()};
+      v << jmpr{interceptRip, php_return_regs()};
     });
-
-    // Skip past the stuff we saved for the intercept case.
-    v << lea{rsp()[16], rsp()};
 
     // Restore rvmfp() and return to the callee's func prologue.
     v << stubret{RegSet(), true};

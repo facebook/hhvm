@@ -212,12 +212,26 @@ let get_client_fd = function
   | Persistent_client { fd; _ } -> Some fd
   | Non_persistent_client _ -> failwith "not implemented"
 
-let track ~key ?time client =
+let track ~key ?time ?log ?msg ?long_delay_okay client =
   match client with
   | Persistent_client client ->
-    client.tracker <- Connection_tracker.track client.tracker ~key ?time
+    client.tracker <-
+      Connection_tracker.track
+        client.tracker
+        ~key
+        ?time
+        ?log
+        ?msg
+        ?long_delay_okay
   | Non_persistent_client client ->
-    client.tracker <- Connection_tracker.track client.tracker ~key ?time
+    client.tracker <-
+      Connection_tracker.track
+        client.tracker
+        ~key
+        ?time
+        ?log
+        ?msg
+        ?long_delay_okay
 
 let say_hello oc =
   let fd = Unix.descr_of_out_channel oc in

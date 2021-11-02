@@ -1998,8 +1998,9 @@ let rpc
         log_debug "hh_server rpc: [%s] [%0.3f]" msg duration;
         match result with
         | Ok ((), res, tracker) ->
-          ref_unblocked_time :=
-            Connection_tracker.get_server_unblocked_time tracker;
+          Option.iter
+            (Connection_tracker.get_server_unblocked_time tracker)
+            ~f:(fun t -> ref_unblocked_time := t);
           Lwt.return res
         | Error
             ( (),

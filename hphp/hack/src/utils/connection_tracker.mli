@@ -39,7 +39,6 @@ type key =
   | Server_done_full_recheck  (** Does another recheck if needed *)
   | Server_start_handle  (** Sent a ping; next up ServerRpc.handle *)
   | Server_end_handle  (** Has finished ServerRpc.handle *)
-  | Server_end_handle2  (** A bit more work; next up respond to client *)
   | Client_received_response  (** Received rpc response from server *)
 
 (** Create a connection tracker, which allows to record the timestamps
@@ -49,11 +48,25 @@ val create : unit -> t
 (** Get the unique ID of the tracker. *)
 val log_id : t -> string
 
-(** Add a timestampt to the tracker for event specified by [key]. *)
-val track : key:key -> ?time:float -> t -> t
+(** Add a timestamp to the tracker for event specified by [key].
+    If [log] then we'll also print this to Hh_logger.
+    If [msg] then the message will be provided to Hh_logger to.
+    Normally if this track comes a long time after the previous track then
+    we'll consider it anomalous and turn on verbose logging.
+    But in some tracks (involving the persistent connection) we'll use
+    [long_delay_okay] to indicate that a long delay is normal and shouldn't
+    activate logging. *)
+val track :
+  key:key ->
+  ?time:float ->
+  ?log:bool ->
+  ?msg:string ->
+  ?long_delay_okay:bool ->
+  t ->
+  t
 
 (** Get the timestamp corresponding to last [Server_start_handle] event. *)
-val get_server_unblocked_time : t -> float
+val get_server_unblocked_time : t -> float option
 
 (** Retrieve all the timestamps recorded so far. *)
 val get_telemetry : t -> Telemetry.t

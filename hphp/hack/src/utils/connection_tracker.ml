@@ -8,14 +8,18 @@
 
 open Hh_prelude
 
-type t = {
-  id: string;
-  telemetry: Telemetry.t;
-      (** A set of timestamps indexed by keys of type [key]. *)
-  server_unblocked_time: float;
-      (** this field is read by clientLsp: we store it explicitly
-      here so we can read it, as well as inside the write-only Telemetry.t *)
-}
+(** The deal with logging is that we normally don't want it verbose, but if something went
+wrong then we wish it already had been verbose for a while! As a compromise here's what we'll do...
+If any connection-tracker encounters an unfortunately slow track, then we'll turn on verbose
+logging for EVERY SINGLE track for the next 30 seconds.
+There's one subtlety. A tracker object is moved client -> monitor -> server -> client.
+It is therefore easy to detect whether a cross-process delay took anomalously long,
+e.g. the delay between client sending to monitor and monitor receiving it.
+But it's not easy to turn on verbose logging across ALL processes in responses to that.
+As a workaround, each tracker object itself will contain its own snapshot of its own
+process's value of [verbose_until], and as trackers move from one process to another
+then they'll share this as a high-water-mark. *)
+let ref_verbose_until = ref 0.
 
 type key =
   | Client_start_connect
@@ -46,39 +50,81 @@ type key =
   | Server_done_full_recheck
   | Server_start_handle
   | Server_end_handle
-  | Server_end_handle2
   | Client_received_response
 [@@deriving eq, show]
+
+type t = {
+  id: string;
+  rev_tracks: (key * float) list;
+      (** All the (trackname, timestamp) that have been tracked, in reverse order *)
+  verbose_until: float;
+      (** each [t] will carry around a snapshot of its process's ref_verbose_until,
+      so all the separate processes can learn about it. *)
+}
 
 let create () : t =
   {
     id = Random_id.short_string ();
-    server_unblocked_time = 0.;
-    telemetry = Telemetry.create ();
+    rev_tracks = [];
+    verbose_until = !ref_verbose_until;
   }
 
-let get_telemetry (t : t) : Telemetry.t = t.telemetry
+let get_telemetry (t : t) : Telemetry.t =
+  List.fold
+    t.rev_tracks
+    ~init:(Telemetry.create ())
+    ~f:(fun telemetry (key, value) ->
+      Telemetry.float_ telemetry ~key:(show_key key) ~value)
 
 let log_id (t : t) : string = "t#" ^ t.id
 
-let get_server_unblocked_time (t : t) : float = t.server_unblocked_time
+let get_server_unblocked_time (t : t) : float option =
+  List.find_map t.rev_tracks ~f:(fun (key, time) ->
+      Option.some_if (equal_key key Server_start_handle) time)
 
-let track ~(key : key) ?(time : float option) (t : t) : t =
+let track
+    ~(key : key)
+    ?(time : float option)
+    ?(log : bool = false)
+    ?(msg : string option)
+    ?(long_delay_okay = false)
+    (t : t) : t =
   let tnow = Unix.gettimeofday () in
   let time = Option.value time ~default:tnow in
+  ref_verbose_until := Float.max t.verbose_until !ref_verbose_until;
+  (* If it's been more than 3s since the last track, let's turn on verbose logging for 30s *)
+  begin
+    match t.rev_tracks with
+    | (_prev_key, prev_time) :: _
+      when Float.(time -. prev_time > 3.) && not long_delay_okay ->
+      ref_verbose_until := tnow +. 30.;
+      Hh_logger.log
+        "[%s] Connection_tracker unfortunately slow: %0.1fs. Verbose until %s\n%s"
+        (log_id t)
+        (time -. prev_time)
+        (Utils.timestring !ref_verbose_until)
+        (t.rev_tracks
+        |> List.rev
+        |> List.map ~f:(fun (key, time) ->
+               Printf.sprintf "   >%s %s" (Utils.timestring time) (show_key key))
+        |> String.concat ~sep:"\n")
+    | _ -> ()
+  end;
   let t =
-    if equal_key key Server_start_handle then
-      { t with server_unblocked_time = time }
-    else
-      t
+    {
+      t with
+      rev_tracks = (key, time) :: t.rev_tracks;
+      verbose_until = !ref_verbose_until;
+    }
   in
-  let key = String_utils.lstrip (show_key key) "Connection_tracker." in
-  Hh_logger.log
-    "[%s] Connection_tracker.%s%s"
-    (log_id t)
-    key
-    (if String.equal (Utils.timestring tnow) (Utils.timestring time) then
-      ""
-    else
-      ", was at " ^ Utils.timestring time);
-  { t with telemetry = Telemetry.float_ t.telemetry ~key ~value:time }
+  if log || Float.(tnow < !ref_verbose_until) then
+    Hh_logger.log
+      "[%s] %s %s%s"
+      (log_id t)
+      (show_key key)
+      (Option.value msg ~default:"")
+      (if String.equal (Utils.timestring tnow) (Utils.timestring time) then
+        ""
+      else
+        ", was at " ^ Utils.timestring time);
+  t

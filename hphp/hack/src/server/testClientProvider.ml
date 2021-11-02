@@ -174,7 +174,7 @@ let not_implemented () = failwith "not implemented"
 
 let get_client_fd _ = not_implemented ()
 
-let track ~key:_ ?time:_ _ = ()
+let track ~key:_ ?time:_ ?log:_ ?msg:_ ?long_delay_okay:_ _ = ()
 
 let accept_client _ = Non_persistent
 

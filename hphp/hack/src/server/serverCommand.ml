@@ -245,15 +245,13 @@ let actually_handle genv client msg full_recheck_needed ~is_stale env =
    * changes and we asked for an answer that requires ignoring those.
    * This is very rare. *)
   let env = full_recheck_if_needed genv env msg in
-  ClientProvider.track client ~key:Connection_tracker.Server_done_full_recheck;
+  ClientProvider.track
+    client
+    ~key:Connection_tracker.Server_done_full_recheck
+    ~long_delay_okay:true;
 
   match msg with
-  | Rpc ({ ServerCommandTypes.from; _ }, cmd) ->
-    let cmd_string = ServerCommandTypesUtils.debug_describe_t cmd in
-    Hh_logger.debug
-      "ServerCommand.actually_handle rpc %s, --from %s"
-      cmd_string
-      from;
+  | Rpc (_, cmd) ->
     ClientProvider.ping client;
     let t_start = Unix.gettimeofday () in
     ClientProvider.track
@@ -274,27 +272,13 @@ let actually_handle genv client msg full_recheck_needed ~is_stale env =
     in
 
     let parsed_files = Full_fidelity_parser_profiling.stop_profiling () in
-    ClientProvider.track client ~key:Connection_tracker.Server_end_handle;
-    let t_end = Unix.gettimeofday () in
     ClientProvider.track
       client
-      ~key:Connection_tracker.Server_end_handle2
-      ~time:t_end;
+      ~key:Connection_tracker.Server_end_handle
+      ~log:true;
     let (major_gc_time, minor_gc_time) = Sys_utils.get_gc_time () in
-    let lvl =
-      if ClientProvider.is_persistent client then
-        Hh_logger.Level.Debug
-      else
-        Hh_logger.Level.Info
-    in
-    Hh_logger.log
-      ~lvl
-      "Handled %s priority: %s [%f ms]"
-      (ClientProvider.priority_to_string client)
-      cmd_string
-      (t_end -. t_start);
     HackEventLogger.handled_command
-      cmd_string
+      (ServerCommandTypesUtils.debug_describe_t cmd)
       ~start_t:t_start
       ~major_gc_time
       ~minor_gc_time
@@ -315,11 +299,31 @@ let handle
     (env : ServerEnv.env)
     (client : ClientProvider.client) :
     ServerEnv.env ServerUtils.handle_command_result =
-  ClientProvider.track client ~key:Connection_tracker.Server_waiting_for_cmd;
+  (* In the case if LSP, it's normal that this [Server_waiting_for_cmd]
+     track happens on a per-message basis, much later than the previous
+     [Server_got_connection_type] track that happened when the persistent
+     connection was established; the flag [long_delay_okay]
+     means that the default behavior, of alarming log messages in case of delays,
+     will be suppressed. *)
+  ClientProvider.track
+    client
+    ~key:Connection_tracker.Server_waiting_for_cmd
+    ~long_delay_okay:(ClientProvider.is_persistent client);
 
   let msg = ClientProvider.read_client_msg client in
 
-  ClientProvider.track client ~key:Connection_tracker.Server_got_cmd;
+  (* Once again, it's expected that [Server_got_cmd] happens a long time
+     after we started waiting for one! *)
+  ClientProvider.track
+    client
+    ~key:Connection_tracker.Server_got_cmd
+    ~log:true
+    ~msg:
+      (Printf.sprintf
+         "%s [%s]"
+         (ServerCommandTypesUtils.debug_describe_cmd msg)
+         (ClientProvider.priority_to_string client))
+    ~long_delay_okay:(ClientProvider.is_persistent client);
   ServerProgress.send_progress
     ~include_in_logs:false
     "%s"

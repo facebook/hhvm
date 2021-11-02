@@ -53,7 +53,15 @@ module type S = sig
 
   val get_client_fd : client -> Unix.file_descr option
 
-  val track : key:Connection_tracker.key -> ?time:float -> client -> unit
+  (** See explanation in Connection_tracker.track *)
+  val track :
+    key:Connection_tracker.key ->
+    ?time:float ->
+    ?log:bool ->
+    ?msg:string ->
+    ?long_delay_okay:bool ->
+    client ->
+    unit
 
   val read_connection_type : client -> ServerCommandTypes.connection_type
 

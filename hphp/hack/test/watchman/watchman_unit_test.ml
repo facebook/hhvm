@@ -124,11 +124,7 @@ let scm_files_changed () =
   }
 |}
   with
-  | Watchman.Changed_merge_base
-      ( "a1569f320e2d7d716841e8be937b32010c6d8064",
-        files,
-        "c:1635454750:1728625:1:10436613" )
-    when SSet.mem "/path/to/root/c.php" files ->
+  | Watchman.Files_changed files when SSet.mem "/path/to/root/c.php" files ->
     true
   | r -> unexpected r
 

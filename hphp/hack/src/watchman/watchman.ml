@@ -963,57 +963,73 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
       RepoStates.leave name;
       State_leave (name, metadata)
 
+  (** returns (data.clock.scm.mergebase, data.since?.scm.mergebase).
+  The watchman docs explain: "The since field holds the fat clock that was returned
+  in the clock field from the prior subscription update. It is present as a convenience
+  for you; you can compare the mergebase fields between the two to determine that the
+  merge base changed in this update."
+  Edge cases: (1) when we send the first subscribe request, we get back an answer that
+  lacks the since property entirely, (2) the next thing we hear has an empty since.mergebase,
+  (3) the next thing we hear has a full since.mergebase. *)
   let extract_mergebase data =
-    Hh_json.Access.(
-      let accessor = return data in
-      let ret =
-        accessor >>= get_obj "clock" >>= get_string "clock"
-        >>= fun (clock, _) ->
+    let open Hh_json.Access in
+    let accessor = return data in
+    let ret =
+      accessor >>= get_obj "clock" >>= get_obj "scm" >>= get_string "mergebase"
+      >>= fun (mergebase, _) ->
+      let since_mergebase =
         accessor
-        >>= get_obj "clock"
+        >>= get_obj "since"
         >>= get_obj "scm"
         >>= get_string "mergebase"
-        >>= fun (mergebase, _) -> return (clock, mergebase)
+        |> to_option
       in
-      to_option ret)
+      return (mergebase, since_mergebase)
+    in
+    to_option ret
 
-  let make_mergebase_changed_response env data =
-    match extract_mergebase data with
-    | None -> Error "Failed to extract mergebase"
-    | Some (clock, mergebase) ->
-      let files = set_of_list @@ extract_file_names env data in
-      env.clockspec <- clock;
-      let response = Changed_merge_base (mergebase, files, clock) in
-      Ok (env, response)
+  (** watchman's data.clock property is either a slim-clock "string", or a fat-clock "{clock, scm}".
+  This function extracts either. *)
+  let extract_clock data =
+    let open Hh_json.Access in
+    let fat = return data >>= get_obj "clock" >>= get_string "clock" in
+    let slim = return data >>= get_string "clock" in
+    match (fat, slim) with
+    | (Ok (clock, _), _)
+    | (_, Ok (clock, _)) ->
+      clock
+    | _ -> failwith "watchman response lacks clock"
 
   let transform_asynchronous_get_changes_response env data =
     match data with
     | None -> (env, Files_changed SSet.empty)
     | Some data ->
-      begin
-        match make_mergebase_changed_response env data with
-        | Ok (env, response) -> (env, response)
-        | Error _ ->
-          env.clockspec <- J.get_string_val "clock" data;
-          assert_no_fresh_instance data;
+      let clock = extract_clock data in
+      env.clockspec <- clock;
+      (match extract_mergebase data with
+      | Some (mergebase, Some since_mergebase)
+        when not (String.equal mergebase since_mergebase) ->
+        let files = set_of_list @@ extract_file_names env data in
+        (env, Changed_merge_base (mergebase, files, clock))
+      | _ ->
+        assert_no_fresh_instance data;
+        (try
+           ( env,
+             make_state_change_response
+               `Enter
+               (J.get_string_val "state-enter" data)
+               data )
+         with
+        | J.Not_found ->
           (try
              ( env,
                make_state_change_response
-                 `Enter
-                 (J.get_string_val "state-enter" data)
+                 `Leave
+                 (J.get_string_val "state-leave" data)
                  data )
            with
           | J.Not_found ->
-            (try
-               ( env,
-                 make_state_change_response
-                   `Leave
-                   (J.get_string_val "state-leave" data)
-                   data )
-             with
-            | J.Not_found ->
-              (env, Files_changed (set_of_list @@ extract_file_names env data))))
-      end
+            (env, Files_changed (set_of_list @@ extract_file_names env data)))))
 
   let get_changes ?deadline instance =
     call_on_instance instance "get_changes" @@ fun env ->
@@ -1061,7 +1077,7 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
       (get_changes_since_mergebase_query env)
     >|= fun response ->
     match extract_mergebase response with
-    | Some (_clock, mergebase) -> mergebase
+    | Some (mergebase, _since_mergebase) -> mergebase
     | None -> raise (Watchman_error "Failed to extract mergebase from response")
 
   let flush_request ~(timeout : int) watch_root =

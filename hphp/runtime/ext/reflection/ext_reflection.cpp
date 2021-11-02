@@ -74,6 +74,7 @@ const StaticString
   s_prototype("prototype"),
   s_ref("ref"),
   s_inout("inout"),
+  s_readonly("readonly"),
   s_index("index"),
   s_type("type"),
   s_nullable("nullable"),
@@ -803,6 +804,9 @@ static Array get_function_param_info(const Func* func) {
     if (func->isInOut(i)) {
       param.set(s_inout, make_tv<KindOfBoolean>(true));
     }
+    if (func->isReadonly(i)) {
+      param.set(s_readonly, make_tv<KindOfBoolean>(true));
+    }
     if (fpi.isVariadic()) {
       param.set(s_is_variadic, make_tv<KindOfBoolean>(true));
     }
@@ -924,6 +928,11 @@ static Array HHVM_METHOD(ReflectionFunctionAbstract, getCoeffects) {
   return arr.toArray();
 }
 
+static bool HHVM_METHOD(ReflectionFunctionAbstract, returnsReadonly) {
+  auto const func = ReflectionFuncHandle::GetFuncFor(this_);
+  return func->attrs() & AttrReadonlyReturn;
+}
+
 ALWAYS_INLINE
 static Array get_function_user_attributes(const Func* func) {
   auto userAttrs = func->userAttributes();
@@ -998,6 +1007,11 @@ static bool HHVM_METHOD(ReflectionMethod, isStaticInPrologue) {
 static bool HHVM_METHOD(ReflectionMethod, isConstructor) {
   auto const func = ReflectionFuncHandle::GetFuncFor(this_);
   return isConstructor(func);
+}
+
+static bool HHVM_METHOD(ReflectionMethod, isReadonly) {
+  auto const func = ReflectionFuncHandle::GetFuncFor(this_);
+  return func->attrs() & AttrReadonlyThis;
 }
 
 static int HHVM_METHOD(ReflectionMethod, getModifiers) {
@@ -2084,6 +2098,20 @@ static Array HHVM_METHOD(ReflectionProperty, getAttributesNamespaced) {
   }
 }
 
+static bool HHVM_METHOD(ReflectionProperty, isReadonly) {
+  auto const data = Native::data<ReflectionPropHandle>(this_);
+  switch (data->getType()) {
+    case ReflectionPropHandle::Type::Instance:
+      return data->getProp()->attrs & AttrIsReadonly;
+    case ReflectionPropHandle::Type::Static:
+      return data->getSProp()->attrs & AttrIsReadonly;
+    case ReflectionPropHandle::Type::Dynamic:
+      return false;
+    default:
+      reflection_property_internal_error();
+  }
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // class ReflectionTypeAlias
 
@@ -2178,6 +2206,7 @@ struct ReflectionExtension final : Extension {
     HHVM_ME(ReflectionFunctionAbstract, getRetTypeInfo);
     HHVM_ME(ReflectionFunctionAbstract, getReifiedTypeParamInfo);
     HHVM_ME(ReflectionFunctionAbstract, getCoeffects);
+    HHVM_ME(ReflectionFunctionAbstract, returnsReadonly);
 
     HHVM_ME(ReflectionMethod, __init);
     HHVM_ME(ReflectionMethod, isFinal);
@@ -2188,6 +2217,7 @@ struct ReflectionExtension final : Extension {
     HHVM_ME(ReflectionMethod, isStatic);
     HHVM_ME(ReflectionMethod, isStaticInPrologue);
     HHVM_ME(ReflectionMethod, isConstructor);
+    HHVM_ME(ReflectionMethod, isReadonly);
     HHVM_ME(ReflectionMethod, getModifiers);
     HHVM_ME(ReflectionMethod, getPrototypeClassname);
     HHVM_ME(ReflectionMethod, getDeclaringClassname);
@@ -2213,6 +2243,7 @@ struct ReflectionExtension final : Extension {
     HHVM_ME(ReflectionProperty, isPrivate);
     HHVM_ME(ReflectionProperty, isStatic);
     HHVM_ME(ReflectionProperty, isDefault);
+    HHVM_ME(ReflectionProperty, isReadonly);
     HHVM_ME(ReflectionProperty, getModifiers);
     HHVM_ME(ReflectionProperty, getDocComment);
     HHVM_ME(ReflectionProperty, getTypeText);

@@ -229,6 +229,9 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   <<__Native>>
   public function getCoeffects()[]: vec;
 
+  <<__Native>>
+  public function returnsReadonly()[]: bool;
+
   /**
    * ( excerpt from
    * http://php.net/manual/en/reflectionfunctionabstract.hasreturntype.php
@@ -907,6 +910,9 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
    */
   <<__Native>>
   public function isConstructor()[]: bool;
+
+  <<__Native>>
+  public function isReadonly()[]: bool;
 
   /**
    * ( excerpt from

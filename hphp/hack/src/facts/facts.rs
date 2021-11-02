@@ -118,7 +118,8 @@ impl Facts {
                     // ignore context aliases
                     None
                 } else {
-                    types.insert(format(name), TypeFacts::of_typedef_decl(decl));
+                    let type_fact = TypeFacts::of_typedef_decl(decl);
+                    add_or_update_classish_decl(format(name), type_fact, &mut types);
                     Some(format(name))
                 }
             })

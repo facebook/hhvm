@@ -4,10 +4,10 @@ module Profiling = struct
   type values = {
     (* memory at the start of a stage *)
     start: float;
-    (* the change in memory at the end of a stage *)
-    delta: float;
-    (* the maximum change in memory throughout a stage *)
-    high_water_mark_delta: float;
+    (* memory at the end of a stage *)
+    end_: float;
+    (* the highest memory recorded during a stage *)
+    high_water_mark: float;
   }
 
   (* mapping from metrics to their corresponding values *)
@@ -57,9 +57,7 @@ module Profiling = struct
   let start_sampling
       ~(stage : string) ~(metric : string) ~(value : float) (profiling : t) :
       unit =
-    let new_metric =
-      { start = value; delta = 0.0; high_water_mark_delta = 0.0 }
-    in
+    let new_metric = { start = value; end_ = value; high_water_mark = value } in
     set_metric ~stage ~metric new_metric profiling
 
   let record_stats
@@ -71,11 +69,8 @@ module Profiling = struct
       let new_metric =
         {
           old_metric with
-          delta = value -. old_metric.start;
-          high_water_mark_delta =
-            Float.max
-              (value -. old_metric.start)
-              old_metric.high_water_mark_delta;
+          end_ = value;
+          high_water_mark = Float.max value old_metric.high_water_mark;
         }
       in
       set_metric ~stage ~metric new_metric profiling
@@ -121,16 +116,16 @@ let sample_cgroup_mem ~(profiling : Profiling.t) ~(stage : string) : unit =
       let values = SMap.find "cgroup_total" result in
       if is_end then
         let hwm =
-          if Float.( < ) values.delta values.high_water_mark_delta then
+          if Float.( < ) values.end_ values.high_water_mark then
             Printf.sprintf
               "  --  high water mark %s"
-              (pretty_num (values.start +. values.high_water_mark_delta))
+              (pretty_num values.high_water_mark)
           else
             ""
         in
         Hh_logger.log
           "Cgroup: %s  [%s/%s end]%s"
-          (pretty_num (values.start +. values.delta))
+          (pretty_num values.end_)
           !profiling.event
           stage
           hwm
@@ -186,8 +181,8 @@ let stage profiling ~stage f =
                 ~stage
                 ~metric
                 ~start:value.Profiling.start
-                ~delta:value.Profiling.delta
-                ~hwm_delta:value.Profiling.high_water_mark_delta)
+                ~end_:value.Profiling.end_
+                ~hwm:value.Profiling.high_water_mark)
             result
       with
       | exn ->

@@ -463,9 +463,7 @@ module ProfileTypeCheck = struct
 end
 
 module CGroup = struct
-  let profile
-      ~cgroup:_ ~event:_ ~stage:_ ~metric:_ ~start:_ ~delta:_ ~hwm_delta:_ =
-    ()
+  let profile ~cgroup:_ ~event:_ ~stage:_ ~metric:_ ~start:_ ~end_:_ ~hwm:_ = ()
 end
 
 module ReHulk = struct

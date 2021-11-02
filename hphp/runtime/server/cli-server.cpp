@@ -434,8 +434,14 @@ struct CLIServer final : folly::AsyncServerSocket::AcceptCallback {
   void start();
   void stop();
 
+#ifndef FOLLY_ASYNCSERVERSOCKET_ACCEPTINFO_DEFINED
   void connectionAccepted(folly::NetworkSocket fdNetworkSocket,
                           const folly::SocketAddress&) noexcept override {
+#else
+  void connectionAccepted(folly::NetworkSocket fdNetworkSocket,
+                          const folly::SocketAddress&,
+												 	AcceptInfo /* info */) noexcept override {
+#endif
     int fd = fdNetworkSocket.toFd();
 
     if (RuntimeOption::EvalUnixServerFailWhenBusy) {

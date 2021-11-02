@@ -242,7 +242,7 @@ static int win32_getpagesize(void) {
 
 
 /*****************************************************************************/
-/* API to shmffi
+/* API to shmffi */
 /*****************************************************************************/
 
 extern void shmffi_init(void* mmap_address, size_t file_size);

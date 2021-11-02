@@ -49,7 +49,7 @@ let parsing
     ~(profile_label : string)
     ~(profiling : CgroupProfiler.Profiling.t) : ServerEnv.env * float =
   CgroupProfiler.collect_cgroup_stats ~profiling ~stage:profile_label
-  @@ fun () ->
+  @@ fun _cgroup_update_token ->
   begin
     match count with
     | None -> ServerProgress.send_progress "%s" "parsing"
@@ -112,7 +112,7 @@ let update_files
     Hh_logger.log "Updating dep->filename [%s]... " profile_label;
     let count = ref 0 in
     CgroupProfiler.collect_cgroup_stats ~profiling ~stage:profile_label
-    @@ fun () ->
+    @@ fun _cgroup_update_token ->
     if Naming_provider.ByHash.need_update_files ctx then
       Naming_table.iter
         ?warn_on_naming_costly_iter
@@ -133,7 +133,7 @@ let naming
     ~(profile_label : string)
     ~(profiling : CgroupProfiler.Profiling.t) : ServerEnv.env * float =
   CgroupProfiler.collect_cgroup_stats ~profiling ~stage:profile_label
-  @@ fun () ->
+  @@ fun _cgroup_update_token ->
   ServerProgress.send_progress "resolving symbol references";
   let ctx = Provider_utils.ctx_from_server_env env in
   let count = ref 0 in
@@ -237,7 +237,7 @@ let type_check
       let remote_execution = env.ServerEnv.remote_execution in
       let ctx = Provider_utils.ctx_from_server_env env in
       CgroupProfiler.collect_cgroup_stats ~profiling ~stage:profile_label
-      @@ fun () ->
+      @@ fun cgroup_update_token ->
       Typing_check_service.go
         ctx
         genv.workers
@@ -249,6 +249,7 @@ let type_check
         ~longlived_workers
         ~remote_execution
         ~check_info:(ServerCheckUtils.get_check_info genv env)
+        ~cgroup_update_token:(Some cgroup_update_token)
     in
     hh_log_heap ();
     let env =

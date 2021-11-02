@@ -22,8 +22,6 @@ module Profiling = struct
 
   and t = profiling ref
 
-  let empty = ref { event = ""; stages_rev = []; results = SMap.empty }
-
   let get_stage_result_map ~(stage : string) (profiling : t) : result =
     match SMap.find_opt stage !profiling.results with
     | None ->
@@ -169,6 +167,11 @@ module Profiling = struct
       )
 end
 
+type update_token = {
+  profiling: Profiling.t;
+  stage: string;
+}
+
 module Results = struct
   type t = Profiling.t SMap.t
 
@@ -273,9 +276,12 @@ let log_to_scuba ~(stage : string) ~(profiling : Profiling.t) : unit =
 let collect_cgroup_stats ~profiling ~stage f =
   (* sample memory stats before running f *)
   sample_cgroup_mem ~profiling ~stage;
-  let result = f () in
+  let result = f { profiling; stage } in
   (* sample memory stats after running f *)
   sample_cgroup_mem ~profiling ~stage;
   (* log the recorded stats to scuba as well *)
   log_to_scuba ~stage ~profiling;
   result
+
+let update_cgroup_total value { profiling; stage } =
+  Profiling.record_stats ~stage ~metric:"cgroup_total" ~value ~profiling

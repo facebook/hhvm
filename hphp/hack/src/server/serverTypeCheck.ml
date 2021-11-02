@@ -291,7 +291,8 @@ let parsing genv env to_check ~stop_at_errors profiling =
   in
   let ctx = Provider_utils.ctx_from_server_env env in
   let (fast, errors, failed_parsing) =
-    CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"parsing" @@ fun () ->
+    CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"parsing"
+    @@ fun _cgroup_update_token ->
     if use_direct_decl_parser ctx then
       ( Direct_decl_service.go
           ctx
@@ -822,7 +823,7 @@ functor
       let start_t = Unix.gettimeofday () in
       let count = Relative_path.Map.cardinal fast_parsed in
       CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"naming"
-      @@ fun () ->
+      @@ fun _cgroup_update_token ->
       (* 1. Update dephash->filenames reverse naming table (global,mutable) *)
       if Naming_provider.ByHash.need_update_files ctx then
         Relative_path.Map.iter fast_parsed ~f:(fun file fi ->
@@ -904,7 +905,7 @@ functor
         old_decl_missing_count;
       } =
         CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"redecl phase 1"
-        @@ fun () ->
+        @@ fun _cgroup_update_token ->
         Decl_redecl_service.redo_type_decl
           ~bucket_size
           ctx
@@ -977,7 +978,7 @@ functor
         old_decl_missing_count;
       } =
         CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"redecl phase 2"
-        @@ fun () ->
+        @@ fun _cgroup_update_token ->
         Decl_redecl_service.redo_type_decl
           ~bucket_size
           ctx
@@ -1111,7 +1112,7 @@ functor
             time_first_typing_error ) =
         let ctx = Provider_utils.ctx_from_server_env env in
         CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"type check"
-        @@ fun () ->
+        @@ fun cgroup_update_token ->
         let ( ( env,
                 {
                   Typing_check_service.errors = errorl;
@@ -1135,7 +1136,7 @@ functor
             ~longlived_workers
             ~remote_execution:env.ServerEnv.remote_execution
             ~check_info:(get_check_info genv env)
-            ~profiling
+            ~cgroup_update_token:(Some cgroup_update_token)
         in
         let env =
           {

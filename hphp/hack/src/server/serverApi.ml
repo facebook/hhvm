@@ -234,6 +234,7 @@ let make_remote_server_api
           ~longlived_workers:false
           ~remote_execution:None
           ~check_info
+          ~cgroup_update_token:None
       in
       HackEventLogger.remote_worker_type_check_end t;
       let t = Hh_logger.log_duration "Type checked files in remote worker" t in

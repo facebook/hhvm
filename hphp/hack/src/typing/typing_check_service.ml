@@ -1131,7 +1131,8 @@ let go_with_interrupt
     ~(longlived_workers : bool)
     ~(remote_execution : ReEnv.t option)
     ~(check_info : check_info)
-    ~(profiling : CgroupProfiler.Profiling.t) : (_ * result) job_result =
+    ~(cgroup_update_token : CgroupProfiler.update_token option) :
+    (_ * result) job_result =
   let opts = Provider_context.get_tcopt ctx in
   let sample_rate = GlobalOptions.tco_typecheck_sample_rate opts in
   let fnl = BigList.create fnl in
@@ -1227,11 +1228,9 @@ let go_with_interrupt
   let cgroup_total_max =
     Base.Option.value ~default:0.0 (Measure.get_max "worker_cgroup_total")
   in
-  CgroupProfiler.Profiling.record_stats
-    ~profiling
-    ~stage:"type check"
-    ~metric:"cgroup_total"
-    ~value:cgroup_total_max;
+  Option.iter
+    cgroup_update_token
+    ~f:(CgroupProfiler.update_cgroup_total cgroup_total_max);
 
   if check_info.profile_log then
     Hh_logger.log
@@ -1259,7 +1258,6 @@ let go_with_interrupt
     cancelled_fnl )
 
 let go
-    ?(profiling : CgroupProfiler.Profiling.t = CgroupProfiler.Profiling.empty)
     (ctx : Provider_context.t)
     (workers : MultiWorker.worker list option)
     (delegate_state : Delegate.state)
@@ -1269,7 +1267,8 @@ let go
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
     ~(remote_execution : ReEnv.t option)
-    ~(check_info : check_info) : result =
+    ~(check_info : check_info)
+    ~(cgroup_update_token : CgroupProfiler.update_token option) : result =
   let interrupt = MultiThreadedCall.no_interrupt () in
   let (((), result), cancelled) =
     go_with_interrupt
@@ -1285,7 +1284,7 @@ let go
       ~longlived_workers
       ~remote_execution
       ~check_info
-      ~profiling
+      ~cgroup_update_token
   in
   assert (List.is_empty cancelled);
   result

@@ -378,7 +378,7 @@ let use_precomputed_state_exn
     deptable_with_filename ~is_64bit:deptable_is_64bit deptable_fn
   in
   CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"load deptable"
-  @@ fun () ->
+  @@ fun _cgroup_update_token ->
   lock_and_load_deptable
     ~base_file_name:naming_table_path
     ~deptable
@@ -402,7 +402,7 @@ let use_precomputed_state_exn
   let errors_path = ServerArgs.errors_path_for_target_info info in
   let (old_naming_table, old_errors) =
     CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"load saved state"
-    @@ fun () ->
+    @@ fun _cgroup_update_token ->
     SaveStateService.load_saved_state
       ctx
       ~naming_table_path
@@ -445,7 +445,7 @@ let naming_from_saved_state
   CgroupProfiler.collect_cgroup_stats
     ~profiling
     ~stage:"naming from saved state"
-  @@ fun () ->
+  @@ fun _cgroup_update_token ->
   begin
     match naming_table_fallback_fn with
     | Some _ ->
@@ -1234,7 +1234,7 @@ let post_saved_state_initialization
     Relative_path.Set.filter dirty_files ~f:FindUtils.path_filter
   in
   ( CgroupProfiler.collect_cgroup_stats ~stage:"remove fixmes" ~profiling
-  @@ fun () -> Fixme_provider.remove_batch parsing_files );
+  @@ fun _cgroup_update_token -> Fixme_provider.remove_batch parsing_files );
   let parsing_files_list = Relative_path.Set.elements parsing_files in
   (* Parse dirty files only *)
   let max_size =
@@ -1394,7 +1394,7 @@ let saved_state_init
   let do_ () : (loaded_info, load_state_error) result =
     let state_result =
       CgroupProfiler.collect_cgroup_stats ~profiling ~stage:"load saved state"
-      @@ fun () ->
+      @@ fun _cgroup_update_token ->
       match load_state_approach with
       | Precomputed info ->
         Ok (use_precomputed_state_exn genv ctx info profiling)

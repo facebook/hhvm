@@ -8,15 +8,14 @@
 
 module Profiling : sig
   type t
-
-  val empty : t
-
-  val record_stats :
-    stage:string -> metric:string -> value:float -> profiling:t -> unit
 end
 
+type update_token
+
+val update_cgroup_total : float -> update_token -> unit
+
 val collect_cgroup_stats :
-  profiling:Profiling.t -> stage:string -> (unit -> 'a) -> 'a
+  profiling:Profiling.t -> stage:string -> (update_token -> 'a) -> 'a
 
 val profile_memory :
   event:[ `Init of string | `Recheck of string ] -> (Profiling.t -> 'a) -> 'a

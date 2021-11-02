@@ -103,7 +103,7 @@ let test () =
       ~longlived_workers:false
       ~remote_execution:None
       ~check_info
-      ~profiling:CgroupProfiler.Profiling.empty
+      ~cgroup_update_token:None
   in
   assert (Option.is_none diag_pusher);
   (* Assert that we got the errors in bar2 only... *)

@@ -214,6 +214,8 @@ let event ~event ~log f =
   result
 
 let stage profiling ~stage f =
+  let i = 1 + List.length !profiling.Profiling.stages_rev in
+  let stage = Printf.sprintf "%02d_%s" i stage in
   (* sample memory stats before running f *)
   sample_cgroup_mem ~profiling ~stage;
   let result = f { profiling; stage } in

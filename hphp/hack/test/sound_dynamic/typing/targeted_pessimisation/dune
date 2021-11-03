@@ -1,0 +1,22 @@
+(alias
+    (name pessimise)
+    (deps %{exe:../../../../src/hh_single_type_check.exe}
+          %{exe:../../../../src/facebook/hh_pessimisation/hh_pessimisation.exe}
+          %{project_root}/test/verify.py
+          %{project_root}/test/review.sh
+          (glob_files %{project_root}/test/sound_dynamic/typing/targeted_pessimisation/run.sh)
+          (glob_files %{project_root}/test/sound_dynamic/typing/targeted_pessimisation/HH_FLAGS)
+          (glob_files %{project_root}/test/sound_dynamic/typing/targeted_pessimisation/*.php)
+          (glob_files %{project_root}/test/sound_dynamic/typing/targeted_pessimisation/*.php.exp))
+    (action (run %{project_root}/test/verify.py %{project_root}/test/sound_dynamic/typing/targeted_pessimisation
+    --program %{project_root}/test/sound_dynamic/typing/targeted_pessimisation/run.sh
+    --in-extension .php
+    --out-extension .out
+    --expect-extension .exp
+    --flags %{exe:../../../../src/hh_single_type_check.exe} %{exe:../../../../src/facebook/hh_pessimisation/hh_pessimisation.exe}
+)))
+
+(alias
+    (name runtest)
+    (deps
+        (alias pessimise)))

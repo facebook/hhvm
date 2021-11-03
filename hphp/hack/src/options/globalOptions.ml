@@ -26,7 +26,6 @@ type t = {
   tco_remote_min_batch_size: int;
   tco_num_remote_workers: int;
   tco_stream_errors: bool;
-  tco_use_naming_for_dephash_filenames: bool;
   so_remote_version_specifier: string option;
   so_remote_worker_vfs_checkout_threshold: int;
   so_naming_sqlite_path: string option;
@@ -228,7 +227,6 @@ let default =
     tco_remote_min_batch_size = 5_000;
     tco_num_remote_workers = 4;
     tco_stream_errors = false;
-    tco_use_naming_for_dephash_filenames = false;
     so_remote_version_specifier = None;
     so_remote_worker_vfs_checkout_threshold = 10000;
     so_naming_sqlite_path = None;
@@ -370,8 +368,6 @@ let make
     ?(tco_remote_min_batch_size = default.tco_remote_min_batch_size)
     ?(tco_num_remote_workers = default.tco_num_remote_workers)
     ?(tco_stream_errors = default.tco_stream_errors)
-    ?(tco_use_naming_for_dephash_filenames =
-      default.tco_use_naming_for_dephash_filenames)
     ?so_remote_version_specifier
     ?(so_remote_worker_vfs_checkout_threshold =
       default.so_remote_worker_vfs_checkout_threshold)
@@ -525,7 +521,6 @@ let make
     tco_remote_min_batch_size;
     tco_num_remote_workers;
     tco_stream_errors;
-    tco_use_naming_for_dephash_filenames;
     so_remote_version_specifier;
     so_remote_worker_vfs_checkout_threshold;
     so_naming_sqlite_path;
@@ -683,9 +678,6 @@ let tco_remote_min_batch_size t = t.tco_remote_min_batch_size
 let tco_num_remote_workers t = t.tco_num_remote_workers
 
 let tco_stream_errors t = t.tco_stream_errors
-
-let tco_use_naming_for_dephash_filenames t =
-  t.tco_use_naming_for_dephash_filenames
 
 let so_remote_version_specifier t = t.so_remote_version_specifier
 

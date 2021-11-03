@@ -347,8 +347,6 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
         ServerLocalConfig.RemoteTypeCheck.(
           Some local_config.remote_type_check.num_workers)
       ~tco_stream_errors:local_config.stream_errors
-      ~tco_use_naming_for_dephash_filenames:
-        local_config.use_naming_for_dephash_filenames
       ?so_remote_version_specifier:local_config.remote_version_specifier
       ?so_remote_worker_vfs_checkout_threshold:
         ServerLocalConfig.RemoteTypeCheck.(

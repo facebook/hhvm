@@ -119,12 +119,10 @@
     ast
     db_path_provider
     file_info
-    global_options
     naming_heap
     pos
     relative_path
     shallow_decl_defs
-    typechecker_options
     typing_defs)
   (preprocess (pps ppx_deriving.std)))
 

@@ -38,7 +38,6 @@ module TOG = Typing_object_get
 module Subst = Decl_subst
 module ExprDepTy = Typing_dependent_type.ExprDepTy
 module TCO = TypecheckerOptions
-module EnvFromDef = Typing_env_from_def
 module C = Typing_continuations
 module CMap = C.Map
 module Try = Typing_try
@@ -831,13 +830,6 @@ let coerce_to_throwable pos env exn_ty =
     exn_ty
     { et_type = throwable_ty; et_enforced = Unenforced }
     Errors.unify_error
-
-let shape_field_pos = function
-  | Ast_defs.SFlit_int (p, _)
-  | Ast_defs.SFlit_str (p, _) ->
-    p
-  | Ast_defs.SFclass_const ((cls_pos, _), (mem_pos, _)) ->
-    Pos.btw cls_pos mem_pos
 
 let set_valid_rvalue p env x ty =
   let env = set_local env (p, x) ty in
@@ -4561,7 +4553,9 @@ and expr_
         ~init:TShapeMap.empty
         fdm
     in
-    let env = check_shape_keys_validity env p (List.map tfdm ~f:fst) in
+    let env =
+      Typing_shapes.check_shape_keys_validity env (List.map tfdm ~f:fst)
+    in
     (* Fields are fully known, because this shape is constructed
      * using shape keyword and we know exactly what fields are set. *)
     make_result
@@ -4609,7 +4603,6 @@ and expr_
       Errors.enum_class_label_as_expr p;
       error ())
 
-(* let ty = err_witness env cst_pos in *)
 and class_const ?(incl_tc = false) env p (cid, mid) =
   let (env, _tal, ce, cty) = class_expr env [] cid in
   let env =
@@ -5408,79 +5401,6 @@ and instantiable_cid ?(exact = Nonexact) p env cid explicit_targs :
         else
           ());
   (env, tal, te, classes)
-
-and check_shape_keys_validity :
-    env -> pos -> Ast_defs.shape_field_name list -> env =
- fun env pos keys ->
-  (* If the key is a class constant, get its class name and type. *)
-  let get_field_info env key =
-    let key_pos = shape_field_pos key in
-    (* Empty strings or literals that start with numbers are not
-         permitted as shape field names. *)
-    match key with
-    | Ast_defs.SFlit_int _ -> (env, key_pos, None)
-    | Ast_defs.SFlit_str (_, key_name) ->
-      if Int.equal 0 (String.length key_name) then
-        Errors.invalid_shape_field_name_empty key_pos;
-      (env, key_pos, None)
-    | Ast_defs.SFclass_const (((p, cls) as x), y) ->
-      let (env, _te, ty) = class_const env pos (((), p, CI x), y) in
-      let r = Reason.Rwitness key_pos in
-      let env =
-        Type.sub_type
-          key_pos
-          Reason.URnone
-          env
-          ty
-          (MakeType.arraykey r)
-          (fun ?code:_ ?quickfixes:_ _ _ ->
-            Errors.invalid_shape_field_type
-              key_pos
-              (get_pos ty)
-              (Typing_print.error env ty)
-              [])
-      in
-      (env, key_pos, Some (cls, ty))
-  in
-  let check_field witness_pos witness_info env key =
-    let (env, key_pos, key_info) = get_field_info env key in
-    match (witness_info, key_info) with
-    | (Some _, None) ->
-      Errors.invalid_shape_field_literal key_pos witness_pos;
-      env
-    | (None, Some _) ->
-      Errors.invalid_shape_field_const key_pos witness_pos;
-      env
-    | (None, None) -> env
-    | (Some (cls1, ty1), Some (cls2, ty2)) ->
-      if String.( <> ) cls1 cls2 then
-        Errors.shape_field_class_mismatch
-          key_pos
-          witness_pos
-          (strip_ns cls2)
-          (strip_ns cls1);
-      if
-        not
-          (Typing_solver.is_sub_type env ty1 ty2
-          && Typing_solver.is_sub_type env ty2 ty1)
-      then
-        Errors.shape_field_type_mismatch
-          key_pos
-          witness_pos
-          (Typing_print.error env ty2)
-          (Typing_print.error env ty1);
-      env
-  in
-  (* Sort the keys by their positions since the error messages will make
-   * more sense if we take the one that appears first as canonical and if
-   * they are processed in source order. *)
-  let cmp_keys x y = Pos.compare (shape_field_pos x) (shape_field_pos y) in
-  let keys = List.sort ~compare:cmp_keys keys in
-  match keys with
-  | [] -> env
-  | witness :: rest_keys ->
-    let (env, pos, info) = get_field_info env witness in
-    List.fold_left ~f:(check_field pos info) ~init:env rest_keys
 
 (* Deal with assignment of a value of type ty2 to lvalue e1 *)
 and assign p env e1 pos2 ty2 =
@@ -8409,86 +8329,3 @@ let expr_with_pure_coeffects ?expected env e =
 
 let stmt env st =
   Typing_env.with_origin env Decl_counters.Body (fun env -> stmt env st)
-
-let typedef_def ctx typedef =
-  let env = EnvFromDef.typedef_env ~origin:Decl_counters.TopLevel ctx typedef in
-  let env =
-    Env.set_module env
-    @@ Typing_modules.of_maybe_string
-    @@ Naming_attributes_params.get_module_attribute typedef.t_user_attributes
-  in
-  let env =
-    Phase.localize_and_add_ast_generic_parameters_and_where_constraints
-      env
-      ~ignore_errors:false
-      typedef.t_tparams
-      []
-  in
-  Typing_type_wellformedness.typedef env typedef;
-  Typing_variance.typedef env typedef;
-  let {
-    t_annotation = ();
-    t_name = (t_pos, t_name);
-    t_tparams = _;
-    t_constraint = tcstr;
-    t_kind = hint;
-    t_user_attributes = _;
-    t_vis = _;
-    t_mode = _;
-    t_namespace = _;
-    t_span = _;
-    t_emit_id = _;
-    t_is_ctx = _;
-  } =
-    typedef
-  in
-  let (env, ty) =
-    Phase.localize_hint_no_subst
-      env
-      ~ignore_errors:false
-      ~report_cycle:(t_pos, t_name)
-      hint
-  in
-  let env =
-    match tcstr with
-    | Some tcstr ->
-      let (env, cstr) =
-        Phase.localize_hint_no_subst env ~ignore_errors:false tcstr
-      in
-      Typing_ops.sub_type
-        t_pos
-        Reason.URnewtype_cstr
-        env
-        ty
-        cstr
-        Errors.newtype_alias_must_satisfy_constraint
-    | _ -> env
-  in
-  let env =
-    match hint with
-    | (pos, Hshape { nsi_allows_unknown_fields = _; nsi_field_map }) ->
-      let get_name sfi = sfi.sfi_name in
-      check_shape_keys_validity env pos (List.map ~f:get_name nsi_field_map)
-    | _ -> env
-  in
-  let (env, user_attributes) =
-    attributes_check_def
-      env
-      SN.AttributeKinds.typealias
-      typedef.t_user_attributes
-  in
-  let (env, tparams) = List.map_env env typedef.t_tparams ~f:type_param in
-  {
-    Aast.t_annotation = Env.save (Env.get_tpenv env) env;
-    Aast.t_name = typedef.t_name;
-    Aast.t_mode = typedef.t_mode;
-    Aast.t_vis = typedef.t_vis;
-    Aast.t_user_attributes = user_attributes;
-    Aast.t_constraint = typedef.t_constraint;
-    Aast.t_kind = typedef.t_kind;
-    Aast.t_tparams = tparams;
-    Aast.t_namespace = typedef.t_namespace;
-    Aast.t_span = typedef.t_span;
-    Aast.t_emit_id = typedef.t_emit_id;
-    Aast.t_is_ctx = typedef.t_is_ctx;
-  }

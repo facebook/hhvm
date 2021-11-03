@@ -163,6 +163,7 @@
     typing_shapes
     typing_structure
     typing_toplevel
+    typing_typedef
     typing_try)
   (libraries
     decl_enum

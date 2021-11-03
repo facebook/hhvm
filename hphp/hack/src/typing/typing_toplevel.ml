@@ -1394,13 +1394,11 @@ let typeconst_def
    * Does this belong here at all? *)
   let env =
     match c_tconst_kind with
-    | TCConcrete { c_tc_type = (pos, Hshape { nsi_field_map; _ }) }
-    | TCAbstract { c_atc_default = Some (pos, Hshape { nsi_field_map; _ }); _ }
-      ->
+    | TCConcrete { c_tc_type = (_, Hshape { nsi_field_map; _ }) }
+    | TCAbstract { c_atc_default = Some (_, Hshape { nsi_field_map; _ }); _ } ->
       let get_name sfi = sfi.sfi_name in
-      Typing.check_shape_keys_validity
+      Typing_shapes.check_shape_keys_validity
         env
-        pos
         (List.map ~f:get_name nsi_field_map)
     | _ -> env
   in
@@ -2275,7 +2273,7 @@ let nast_to_tast_gienv ~(do_tast_checks : bool) ctx nast :
         | None -> None
       end
     | Constant gc -> Some (Aast.Constant (gconst_def ctx gc), [])
-    | Typedef td -> Some (Aast.Typedef (Typing.typedef_def ctx td), [])
+    | Typedef td -> Some (Aast.Typedef (Typing_typedef.typedef_def ctx td), [])
     | Class c ->
       begin
         match class_def ctx c with

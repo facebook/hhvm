@@ -9,8 +9,6 @@
 
 val debug_print_last_pos : 'a -> unit
 
-val typedef_def : Provider_context.t -> Nast.typedef -> Tast.typedef
-
 val expr :
   ?expected:Typing_helpers.ExpectedTy.t ->
   Typing_env_types.env ->
@@ -55,12 +53,6 @@ val file_attributes :
 
 val type_param :
   Typing_env_types.env -> Nast.tparam -> Typing_env_types.env * Tast.tparam
-
-val check_shape_keys_validity :
-  Typing_env_types.env ->
-  Pos.t ->
-  Ast_defs.shape_field_name list ->
-  Typing_env_types.env
 
 val type_capability :
   Typing_env_types.env ->

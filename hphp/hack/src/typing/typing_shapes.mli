@@ -57,3 +57,6 @@ val to_dict :
   Typing_defs.locl_ty ->
   Typing_defs.locl_phase Typing_defs.ty ->
   Type_mapper.result
+
+val check_shape_keys_validity :
+  Typing_env_types.env -> Ast_defs.shape_field_name list -> Typing_env_types.env

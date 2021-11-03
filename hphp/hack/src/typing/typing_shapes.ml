@@ -352,3 +352,100 @@ let to_dict env pos shape_ty res =
   in
   to_collection env shape_ty res (fun env r key value ->
       Typing_enforceability.make_locl_like_type env (MakeType.dict r key value))
+
+let shape_field_pos = function
+  | Ast_defs.SFlit_int (p, _)
+  | Ast_defs.SFlit_str (p, _) ->
+    p
+  | Ast_defs.SFclass_const ((cls_pos, _), (mem_pos, _)) ->
+    Pos.btw cls_pos mem_pos
+
+let check_shape_keys_validity env keys =
+  (* If the key is a class constant, get its class name and type. *)
+  let get_field_info env key =
+    let key_pos = shape_field_pos key in
+    (* Empty strings or literals that start with numbers are not
+         permitted as shape field names. *)
+    match key with
+    | Ast_defs.SFlit_int _ -> (env, key_pos, None)
+    | Ast_defs.SFlit_str (_, key_name) ->
+      if Int.equal 0 (String.length key_name) then
+        Errors.invalid_shape_field_name_empty key_pos;
+      (env, key_pos, None)
+    | Ast_defs.SFclass_const ((_p, cls), (p, y)) ->
+      begin
+        match Env.get_class env cls with
+        | None -> (env, key_pos, Some (cls, TUtils.terr env Reason.Rnone))
+        | Some cd ->
+          (match Env.get_const env cd y with
+          | None ->
+            Typing_object_get.smember_not_found
+              p
+              ~is_const:true
+              ~is_method:false
+              ~is_function_pointer:false
+              cd
+              y
+              Errors.unify_error;
+            (env, key_pos, Some (cls, TUtils.terr env Reason.Rnone))
+          | Some { cc_type; _ } ->
+            let (env, ty) =
+              Typing_phase.localize_no_subst ~ignore_errors:true env cc_type
+            in
+            let r = Reason.Rwitness key_pos in
+            let env =
+              Type.sub_type
+                key_pos
+                Reason.URnone
+                env
+                ty
+                (MakeType.arraykey r)
+                (fun ?code:_ ?quickfixes:_ _ _ ->
+                  Errors.invalid_shape_field_type
+                    key_pos
+                    (get_pos ty)
+                    (Typing_print.error env ty)
+                    [])
+            in
+            (env, key_pos, Some (cls, ty)))
+      end
+  in
+  let check_field witness_pos witness_info env key =
+    let (env, key_pos, key_info) = get_field_info env key in
+    match (witness_info, key_info) with
+    | (Some _, None) ->
+      Errors.invalid_shape_field_literal key_pos witness_pos;
+      env
+    | (None, Some _) ->
+      Errors.invalid_shape_field_const key_pos witness_pos;
+      env
+    | (None, None) -> env
+    | (Some (cls1, ty1), Some (cls2, ty2)) ->
+      if String.( <> ) cls1 cls2 then
+        Errors.shape_field_class_mismatch
+          key_pos
+          witness_pos
+          (Utils.strip_ns cls2)
+          (Utils.strip_ns cls1);
+      if
+        not
+          (Typing_solver.is_sub_type env ty1 ty2
+          && Typing_solver.is_sub_type env ty2 ty1)
+      then
+        Errors.shape_field_type_mismatch
+          key_pos
+          witness_pos
+          (Typing_print.error env ty2)
+          (Typing_print.error env ty1);
+      env
+  in
+  (* Sort the keys by their positions since the error messages will make
+   * more sense if we take the one that appears first as canonical and if
+   * they are processed in source order. *)
+  let cmp_keys x y = Pos.compare (shape_field_pos x) (shape_field_pos y) in
+  let keys = List.sort ~compare:cmp_keys keys in
+  match keys with
+  | [] -> env
+  | witness :: rest_keys ->
+    let (env, pos, info) = get_field_info env witness in
+    List.fold_left ~f:(check_field pos info) ~init:env rest_keys

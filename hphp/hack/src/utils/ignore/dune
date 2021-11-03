@@ -6,5 +6,5 @@
     hh_json
     str
     (select filesToIgnore.ml from
-      (facebook -> ../../facebook/ignore/filesToIgnore.ml)
-      (-> ../../stubs/filesToIgnore.ml))))
+      (facebook -> facebook/filesToIgnore.ml)
+      (-> filesToIgnore.stubs.ml))))

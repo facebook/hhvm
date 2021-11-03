@@ -27,7 +27,7 @@
     core_kernel
     errors
     hg
-    job_runner_stubs
+    job_runner
     relative_path
     typechecker_options
     typing_service_delegate_types

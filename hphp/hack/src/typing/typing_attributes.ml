@@ -16,19 +16,11 @@ module Cls = Decl_provider.Class
 
 type attribute_interface_name = string
 
+type new_object_checker =
+  Pos.t -> env -> Typing_defs.pos_string -> Nast.expr list -> env
+
 let check_implements
-    (check_new_object :
-      expected:_ option ->
-      check_parent:bool ->
-      check_not_abstract:bool ->
-      is_using_clause:bool ->
-      Pos.t ->
-      env ->
-      Nast.class_id_ ->
-      _ list ->
-      (Ast_defs.param_kind * Nast.expr) list ->
-      _ option ->
-      env * _ * _ * _ * _ * _ * _ * _)
+    (check_new_object : new_object_checker)
     (attr_interface : attribute_interface_name)
     ({ Aast.ua_name = (attr_pos, attr_name); ua_params = params } :
       Nast.user_attribute)
@@ -106,22 +98,7 @@ let check_implements
           (Cls.name intf_class);
         env
       ) else
-        let (env, _, _, _, _, _, _, _) =
-          check_new_object
-            ~expected:None
-            ~check_parent:false
-            ~check_not_abstract:false
-            ~is_using_clause:false
-            attr_pos
-            env
-            (Aast.CI (Positioned.unsafe_to_raw_positioned attr_cid))
-            []
-            (List.map ~f:(fun e -> (Ast_defs.Pnormal, e)) params)
-            (* list of attr parameter literals *)
-            None
-          (* no variadic arguments *)
-        in
-        env
+        check_new_object attr_pos env attr_cid params
     | _ ->
       Errors.unbound_attribute_name attr_pos attr_name;
       env
@@ -132,3 +109,16 @@ let check_def env check_new_object (kind : attribute_interface_name) attributes
     ~f:(check_implements check_new_object kind)
     attributes
     ~init:env
+
+(* TODO(coeffects) change to mixed after changing those constructors to pure *)
+let check_def env check_new_object (kind : attribute_interface_name) attributes
+    =
+  let defaults = MakeType.default_capability Pos_or_decl.none in
+  let (env, _) =
+    Typing_lenv.stash_and_do env (Typing_env.all_continuations env) (fun env ->
+        let env =
+          fst @@ Typing_coeffects.register_capabilities env defaults defaults
+        in
+        (check_def env check_new_object kind attributes, ()))
+  in
+  env

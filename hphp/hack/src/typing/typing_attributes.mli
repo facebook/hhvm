@@ -8,6 +8,13 @@
 
 type attribute_interface_name = string
 
+type new_object_checker =
+  Pos.t ->
+  Typing_env_types.env ->
+  Typing_defs.pos_string ->
+  Nast.expr list ->
+  Typing_env_types.env
+
 (** Checks a list of user attributes:
     - checks that the attributes are on the proper kind of element,
       by checking subtyping of the attribute class with the provided attribute interface
@@ -16,17 +23,7 @@ type attribute_interface_name = string
     - runs the provided function, which checks creating an instance of the attribute class. *)
 val check_def :
   Typing_env_types.env ->
-  (expected:'a option ->
-  check_parent:bool ->
-  check_not_abstract:bool ->
-  is_using_clause:bool ->
-  Pos.t ->
-  Typing_env_types.env ->
-  Nast.class_id_ ->
-  'b list ->
-  (Ast_defs.param_kind * Nast.expr) list ->
-  'c option ->
-  Typing_env_types.env * 'l * 'm * 'n * 'o * 'p * 'q * 'r) ->
+  new_object_checker ->
   attribute_interface_name ->
   Nast.user_attribute list ->
   Typing_env_types.env

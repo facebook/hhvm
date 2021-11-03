@@ -79,10 +79,11 @@ let enforce_param_not_disposable env param ty =
 let check_param_has_hint env param ty is_code_error =
   let env =
     if is_code_error 4231 then
-      Typing.attributes_check_def
-        env
-        SN.AttributeKinds.parameter
-        param.param_user_attributes
+      fst
+        (Typing.attributes_check_def
+           env
+           SN.AttributeKinds.parameter
+           param.param_user_attributes)
     else
       env
   in
@@ -368,7 +369,7 @@ let fun_def ctx fd :
   let env = Env.open_tyvars env (fst f.f_name) in
   let env = Env.set_env_callable_pos env pos in
   let env = Env.set_env_pessimize env in
-  let env =
+  let (env, user_attributes) =
     Typing.attributes_check_def env SN.AttributeKinds.fn f.f_user_attributes
   in
   let (env, file_attrs) = Typing.file_attributes env fd.fd_file_attributes in
@@ -488,9 +489,6 @@ let fun_def ctx fd :
     | Some _ -> ()
   end;
   let (env, tparams) = List.map_env env f.f_tparams ~f:Typing.type_param in
-  let (env, user_attributes) =
-    List.map_env env f.f_user_attributes ~f:Typing.user_attribute
-  in
   let env = Typing_solver.close_tyvars_and_solve env in
   let env = Typing_solver.solve_all_unsolved_tyvars env in
 
@@ -699,7 +697,7 @@ let method_def ~is_disposable env cls m =
   let env = Env.open_tyvars env (fst m.m_name) in
   let env = Env.reinitialize_locals env in
   let env = Env.set_env_callable_pos env pos in
-  let env =
+  let (env, user_attributes) =
     Typing.attributes_check_def env SN.AttributeKinds.mthd m.m_user_attributes
   in
   let (env, cap_ty, unsafe_cap_ty) =
@@ -829,9 +827,6 @@ let method_def ~is_disposable env cls m =
   in
   let m = { m with m_ret = (fst m.m_ret, type_hint') } in
   let (env, tparams) = List.map_env env m.m_tparams ~f:Typing.type_param in
-  let (env, user_attributes) =
-    List.map_env env m.m_user_attributes ~f:Typing.user_attribute
-  in
   let env = Typing_solver.close_tyvars_and_solve env in
   let env = Typing_solver.solve_all_unsolved_tyvars env in
 
@@ -1410,14 +1405,11 @@ let typeconst_def
     | _ -> env
   in
 
-  let env =
+  let (env, user_attributes) =
     Typing.attributes_check_def
       env
       SN.AttributeKinds.typeconst
       c_tconst_user_attributes
-  in
-  let (env, user_attributes) =
-    List.map_env env c_tconst_user_attributes ~f:Typing.user_attribute
   in
   ( env,
     {
@@ -1604,20 +1596,14 @@ let class_var_def ~is_static cls env cv =
       (env, Some te)
   in
 
-  let env =
-    if is_static then
-      Typing.attributes_check_def
-        env
-        SN.AttributeKinds.staticProperty
-        cv.cv_user_attributes
-    else
-      Typing.attributes_check_def
-        env
-        SN.AttributeKinds.instProperty
-        cv.cv_user_attributes
-  in
   let (env, user_attributes) =
-    List.map_env env cv.cv_user_attributes ~f:Typing.user_attribute
+    Typing.attributes_check_def
+      env
+      (if is_static then
+        SN.AttributeKinds.staticProperty
+      else
+        SN.AttributeKinds.instProperty)
+      cv.cv_user_attributes
   in
   if
     Option.is_none (hint_of_type_hint cv.cv_type)
@@ -1833,7 +1819,7 @@ let check_SupportDynamicType env c =
           | None -> ())
 
 let class_def_ env c tc =
-  let env =
+  let (env, user_attributes) =
     let kind =
       if Ast_defs.is_c_enum c.c_kind then
         SN.AttributeKinds.enum
@@ -2039,9 +2025,6 @@ let class_def_ env c tc =
       (m :: typed_static_methods @ typed_methods, [global_inference_env])
   in
   let (env, tparams) = class_type_param env c.c_tparams in
-  let (env, user_attributes) =
-    List.map_env env c.c_user_attributes ~f:Typing.user_attribute
-  in
   let env = Typing_solver.solve_all_unsolved_tyvars env in
   check_SupportDynamicType env c;
 
@@ -2263,7 +2246,7 @@ let record_def_def ctx rd =
   check_record_inheritance_cycle env rd.rd_name;
 
   let (env, attributes) =
-    List.map_env env rd.rd_user_attributes ~f:Typing.user_attribute
+    Typing.attributes_check_def env SN.AttributeKinds.cls rd.rd_user_attributes
   in
   let (_env, fields) = List.map_env env rd.rd_fields ~f:record_field in
   {

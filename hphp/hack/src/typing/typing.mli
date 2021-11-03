@@ -23,11 +23,6 @@ val expr_with_pure_coeffects :
   Nast.expr ->
   Typing_env_types.env * Tast.expr * Typing_defs.locl_ty
 
-val user_attribute :
-  Typing_env_types.env ->
-  Nast.user_attribute ->
-  Typing_env_types.env * Tast.user_attribute
-
 val stmt : Typing_env_types.env -> Nast.stmt -> Typing_env_types.env * Tast.stmt
 
 val bind_param :
@@ -51,7 +46,7 @@ val attributes_check_def :
   Typing_env_types.env ->
   string ->
   Nast.user_attribute list ->
-  Typing_env_types.env
+  Typing_env_types.env * Tast.user_attribute list
 
 val file_attributes :
   Typing_env_types.env ->

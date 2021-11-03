@@ -1765,7 +1765,10 @@ let rec bind_param
       (env, Some te, ty1)
   in
   let (env, user_attributes) =
-    List.map_env env param.param_user_attributes ~f:user_attribute
+    attributes_check_def
+      env
+      SN.AttributeKinds.parameter
+      param.param_user_attributes
   in
   let tparam =
     {
@@ -4171,10 +4174,6 @@ and expr_
       | Lfun _ -> false
       | _ -> assert false
     in
-    (* Check attributes on the lambda *)
-    let env =
-      attributes_check_def env SN.AttributeKinds.lambda f.f_user_attributes
-    in
     (* This is the function type as declared on the lambda itself.
      * If type hints are absent then use Tany instead. *)
     let declared_fe = Decl_nast.lambda_decl_in_env env.decl_env f in
@@ -4889,6 +4888,10 @@ and closure_make
       ~init:(env, [])
       (List.map ft.ft_params ~f:(fun x -> x.fp_type.et_type))
   in
+  (* Check attributes on the lambda *)
+  let (env, user_attributes) =
+    attributes_check_def env SN.AttributeKinds.lambda f.f_user_attributes
+  in
   let env = List.fold_left ~f:closure_bind_opt_param ~init:env !params in
   let env = List.fold_left ~f:closure_check_param ~init:env f.f_params in
   let env =
@@ -4989,9 +4992,6 @@ and closure_make
     Typing_env.set_fun_tast_info env Tast.{ has_implicit_return; has_readonly }
   in
   let (env, tparams) = List.map_env env f.f_tparams ~f:type_param in
-  let (env, user_attributes) =
-    List.map_env env f.f_user_attributes ~f:user_attribute
-  in
   let tfun_ =
     {
       Aast.f_annotation = Env.save local_tpenv env;
@@ -5347,16 +5347,26 @@ and new_object
     should_forget_fakes )
 
 and attributes_check_def env kind attrs =
-  (* TODO(coeffects) change to mixed after changing those constructors to pure *)
-  let defaults = MakeType.default_capability Pos_or_decl.none in
-  let (env, _) =
-    Typing_lenv.stash_and_do env (Env.all_continuations env) (fun env ->
-        let env =
-          fst @@ Typing_coeffects.register_capabilities env defaults defaults
-        in
-        (Typing_attributes.check_def env new_object kind attrs, ()))
+  let new_object attr_pos env attr_cid params =
+    let (env, _, _, _, _, _, _, _) =
+      new_object
+        ~expected:None
+        ~check_parent:false
+        ~check_not_abstract:false
+        ~is_using_clause:false
+        attr_pos
+        env
+        (Aast.CI (Positioned.unsafe_to_raw_positioned attr_cid))
+        []
+        (List.map ~f:(fun e -> (Ast_defs.Pnormal, e)) params)
+        (* list of attr parameter literals *)
+        None
+      (* no variadic arguments *)
+    in
+    env
   in
-  env
+  let env = Typing_attributes.check_def env new_object kind attrs in
+  List.map_env env attrs ~f:user_attribute
 
 (** Get class infos for a class expression (e.g. `parent`, `self` or
     regular classnames) - which might resolve to a union or intersection
@@ -8308,11 +8318,9 @@ and file_attributes env file_attrs =
   (* Disable checking of error positions, as file attributes have spans that
    * aren't subspans of the class or function into which they are copied *)
   Errors.run_with_span Pos.none @@ fun () ->
-  let uas = List.concat_map ~f:(fun fa -> fa.fa_user_attributes) file_attrs in
-  let env = attributes_check_def env SN.AttributeKinds.file uas in
   List.map_env env file_attrs ~f:(fun env fa ->
       let (env, user_attributes) =
-        List.map_env env fa.fa_user_attributes ~f:user_attribute
+        attributes_check_def env SN.AttributeKinds.file fa.fa_user_attributes
       in
       let env = set_tcopt_unstable_features env fa in
       ( env,
@@ -8322,11 +8330,8 @@ and file_attributes env file_attrs =
         } ))
 
 and type_param env t =
-  let env =
-    attributes_check_def env SN.AttributeKinds.typeparam t.tp_user_attributes
-  in
   let (env, user_attributes) =
-    List.map_env env t.tp_user_attributes ~f:user_attribute
+    attributes_check_def env SN.AttributeKinds.typeparam t.tp_user_attributes
   in
   let (env, tp_parameters) = List.map_env env t.tp_parameters ~f:type_param in
   ( env,
@@ -8466,16 +8471,13 @@ let typedef_def ctx typedef =
       check_shape_keys_validity env pos (List.map ~f:get_name nsi_field_map)
     | _ -> env
   in
-  let env =
+  let (env, user_attributes) =
     attributes_check_def
       env
       SN.AttributeKinds.typealias
       typedef.t_user_attributes
   in
   let (env, tparams) = List.map_env env typedef.t_tparams ~f:type_param in
-  let (env, user_attributes) =
-    List.map_env env typedef.t_user_attributes ~f:user_attribute
-  in
   {
     Aast.t_annotation = Env.save (Env.get_tpenv env) env;
     Aast.t_name = typedef.t_name;

@@ -455,52 +455,6 @@ let check_expected_ty message env inferred_ty expected =
   Result.fold ~ok:Fn.id ~error:Fn.id
   @@ check_expected_ty_res ~coerce_for_op:false message env inferred_ty expected
 
-let check_inout_return ret_pos env =
-  let params = Local_id.Map.elements (Env.get_params env) in
-  List.fold params ~init:env ~f:(fun env (id, (ty, param_pos, mode)) ->
-      match mode with
-      | FPinout ->
-        (* Whenever the function exits normally, we require that each local
-         * corresponding to an inout parameter be compatible with the original
-         * type for the parameter (under subtyping rules). *)
-        let (local_ty, local_pos) = Env.get_local_pos env id in
-        let (env, ety) = Env.expand_type env local_ty in
-        let pos =
-          if not (Pos.equal Pos.none local_pos) then
-            local_pos
-          else if not (Pos.equal Pos.none ret_pos) then
-            ret_pos
-          else
-            param_pos
-        in
-        let param_ty = mk (Reason.Rinout_param (get_pos ty), get_node ty) in
-        Type.sub_type
-          pos
-          Reason.URassign_inout
-          env
-          ety
-          param_ty
-          Errors.inout_return_type_mismatch
-      | _ -> env)
-
-let fun_implicit_return env pos ret = function
-  | Ast_defs.FGenerator
-  | Ast_defs.FAsyncGenerator ->
-    env
-  | Ast_defs.FSync ->
-    (* A function without a terminal block has an implicit return; the
-     * "void" type *)
-    let env = check_inout_return Pos.none env in
-    let r = Reason.Rno_return pos in
-    let rty = MakeType.void r in
-    Typing_return.implicit_return env pos ~expected:ret ~actual:rty
-  | Ast_defs.FAsync ->
-    (* An async function without a terminal block has an implicit return;
-     * the Awaitable<void> type *)
-    let r = Reason.Rno_return_async pos in
-    let rty = MakeType.awaitable r (MakeType.void r) in
-    Typing_return.implicit_return env pos ~expected:ret ~actual:rty
-
 (* Set a local; must not be already assigned if it is a using variable *)
 let set_local ?(is_using_clause = false) env (pos, x) ty =
   if Env.is_using_var env x then
@@ -1821,7 +1775,7 @@ and fun_ ?(abstract = false) ?(disable = false) env return pos named_body f_kind
         if (not has_implicit_return) || abstract || is_hhi then
           env
         else
-          fun_implicit_return env pos ret.et_type f_kind
+          Typing_return.fun_implicit_return env pos ret.et_type f_kind
       in
       let env =
         Typing_env.set_fun_tast_info
@@ -2026,7 +1980,7 @@ and stmt_ env pos st =
     (* TODO TAST: annotate with joined types *)
     (env, Aast.If (te, tb1, tb2))
   | Return None ->
-    let env = check_inout_return pos env in
+    let env = Typing_return.check_inout_return pos env in
     let rty = MakeType.void (Reason.Rwitness pos) in
     let { Typing_env_return_info.return_type = expected_return; _ } =
       Env.get_return env
@@ -2049,7 +2003,7 @@ and stmt_ env pos st =
     let env = LEnv.move_and_merge_next_in_cont env C.Exit in
     (env, Aast.Return None)
   | Return (Some e) ->
-    let env = check_inout_return pos env in
+    let env = Typing_return.check_inout_return pos env in
     let (_, expr_pos, _) = e in
     let Typing_env_return_info.
           {
@@ -4978,7 +4932,7 @@ and closure_make
     if not has_implicit_return then
       env
     else
-      fun_implicit_return env lambda_pos hret f.f_fun_kind
+      Typing_return.fun_implicit_return env lambda_pos hret f.f_fun_kind
   in
   let has_readonly = Env.get_readonly env in
   let env =

@@ -58,3 +58,8 @@ val force_return_kind :
 special functions `__construct`, otherwise we can assume type Tany *)
 val make_default_return :
   is_method:bool -> env -> Ast_defs.pos * string -> Typing_defs.locl_ty
+
+val fun_implicit_return :
+  env -> Ast_defs.pos -> Typing_defs.locl_ty -> Ast_defs.fun_kind -> env
+
+val check_inout_return : Ast_defs.pos -> env -> env

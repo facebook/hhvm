@@ -160,3 +160,49 @@ let implicit_return env pos ~expected ~actual =
         error ?code ?quickfixes (pos, Reason.string_of_ureason reason) reasons)
   else
     Typing_ops.sub_type pos reason env actual expected error
+
+let check_inout_return ret_pos env =
+  let params = Local_id.Map.elements (Env.get_params env) in
+  List.fold params ~init:env ~f:(fun env (id, (ty, param_pos, mode)) ->
+      match mode with
+      | FPinout ->
+        (* Whenever the function exits normally, we require that each local
+         * corresponding to an inout parameter be compatible with the original
+         * type for the parameter (under subtyping rules). *)
+        let (local_ty, local_pos) = Env.get_local_pos env id in
+        let (env, ety) = Env.expand_type env local_ty in
+        let pos =
+          if not (Pos.equal Pos.none local_pos) then
+            local_pos
+          else if not (Pos.equal Pos.none ret_pos) then
+            ret_pos
+          else
+            param_pos
+        in
+        let param_ty = mk (Reason.Rinout_param (get_pos ty), get_node ty) in
+        Typing_ops.sub_type
+          pos
+          Reason.URassign_inout
+          env
+          ety
+          param_ty
+          Errors.inout_return_type_mismatch
+      | _ -> env)
+
+let fun_implicit_return env pos ret = function
+  | Ast_defs.FGenerator
+  | Ast_defs.FAsyncGenerator ->
+    env
+  | Ast_defs.FSync ->
+    (* A function without a terminal block has an implicit return; the
+     * "void" type *)
+    let env = check_inout_return Pos.none env in
+    let r = Reason.Rno_return pos in
+    let rty = MakeType.void r in
+    implicit_return env pos ~expected:ret ~actual:rty
+  | Ast_defs.FAsync ->
+    (* An async function without a terminal block has an implicit return;
+     * the Awaitable<void> type *)
+    let r = Reason.Rno_return_async pos in
+    let rty = MakeType.awaitable r (MakeType.void r) in
+    implicit_return env pos ~expected:ret ~actual:rty

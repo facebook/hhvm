@@ -137,7 +137,6 @@ class RangeException extends RuntimeException {}
 class UnderflowException extends RuntimeException {}
 class UnexpectedValueException extends RuntimeException {}
 
-class InvariantException extends Exception {}
 final class TypeAssertionException extends RuntimeException {}
 class DivisionByZeroException extends ExceptionWithPureGetMessage {}
 
@@ -145,6 +144,6 @@ class DivisionByZeroException extends ExceptionWithPureGetMessage {}
 
 namespace HH {
 
-class InvariantException extends \Exception {}
+class InvariantException extends \ExceptionWithPureGetMessage {}
 
 } // namespace HH

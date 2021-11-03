@@ -106,6 +106,7 @@ pub mod compile_ffi {
         facts: Facts,
         md5sum: String,
         sha1sum: String,
+        has_errors: bool,
     }
 
     extern "Rust" {
@@ -554,15 +555,19 @@ pub fn hackc_extract_facts_cpp_ffi(
         text,
         true, // mangle_xhp
     ) {
-        Some(facts) => {
+        (Some(facts), has_errors) => {
             let (md5sum, sha1sum) = facts::md5_and_sha1(text);
             compile_ffi::FactsResult {
                 facts: facts.into(),
                 md5sum,
                 sha1sum,
+                has_errors,
             }
         }
-        None => Default::default(),
+        (None, has_errors) => compile_ffi::FactsResult {
+            has_errors,
+            ..Default::default()
+        },
     }
 }
 
@@ -581,14 +586,18 @@ pub fn hackc_decls_to_facts_cpp_ffi(
 ) -> compile_ffi::FactsResult {
     let text = source_text.as_bytes();
     let (md5sum, sha1sum) = facts::md5_and_sha1(text);
-    let facts = if decl_result.has_errors {
-        compile_ffi::Facts::default()
+    if decl_result.has_errors {
+        compile_ffi::FactsResult {
+            has_errors: true,
+            ..Default::default()
+        }
     } else {
-        compile_ffi::Facts::from(facts::Facts::facts_of_decls(&(*decl_result.decls).0))
-    };
-    compile_ffi::FactsResult {
-        facts: facts.into(),
-        md5sum,
-        sha1sum,
+        let facts = compile_ffi::Facts::from(facts::Facts::facts_of_decls(&(*decl_result.decls).0));
+        compile_ffi::FactsResult {
+            facts: facts.into(),
+            md5sum,
+            sha1sum,
+            has_errors: false,
+        }
     }
 }

@@ -25,10 +25,10 @@ pub struct FactsOpts {
 }
 
 pub fn extract_as_json(text: &[u8], opts: FactsOpts) -> Option<String> {
-    from_text(text, opts).map(|facts| facts.to_json(text))
+    from_text(text, opts).0.map(|facts| facts.to_json(text))
 }
 
-pub fn from_text(text: &[u8], opts: FactsOpts) -> Option<Facts> {
+pub fn from_text(text: &[u8], opts: FactsOpts) -> (Option<Facts>, bool) {
     let FactsOpts {
         php5_compat_mode,
         hhvm_compat_mode,
@@ -48,13 +48,17 @@ pub fn from_text(text: &[u8], opts: FactsOpts) -> Option<Facts> {
     };
     let (root, errors, has_script_content) = facts_parser::parse_script(&text, env, None);
 
-    // report errors only if result of parsing is non-empty *)
-    if has_script_content.0 && !errors.is_empty() {
+    // report errors only if result of parsing is non-empty
+    let has_errors = has_script_content.0 && !errors.is_empty();
+
+    let result = if has_errors {
         None
     } else {
         let namespaced_xhp = disable_xhp_element_mangling;
         Some(collect(("".to_owned(), Facts::default(), namespaced_xhp), root).1)
-    }
+    };
+
+    (result, has_errors)
 }
 
 // implementation details

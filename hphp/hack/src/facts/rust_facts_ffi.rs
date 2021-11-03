@@ -68,7 +68,7 @@ pub fn extract_facts_ffi0(
     filename: RelativePath,
     text: &[u8],
     _mangle_xhp: bool,
-) -> Option<Facts> {
+) -> (Option<Facts>, bool) {
     let opts = FactsOpts {
         php5_compat_mode,
         hhvm_compat_mode,

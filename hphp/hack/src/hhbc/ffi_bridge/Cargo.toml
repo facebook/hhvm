@@ -15,7 +15,7 @@ bincode = "1.3.3"
 bumpalo = { version = "3.8", features = ["collections"] }
 cxx = "1.0.54"
 decl_provider = { path = "../decl_provider" }
-decl_rust = { path = "../../decl/decl_rust" }
+direct_decl_parser = { path = "../../parser/api/cargo/direct_decl_parser" }
 external_decl_provider = { path = "../hhvm_decl_provider" }
 facts_rust = { path = "../../facts/cargo/facts_rust" }
 ffi = { path = "../../utils/ffi" }

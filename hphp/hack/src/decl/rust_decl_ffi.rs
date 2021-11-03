@@ -6,7 +6,7 @@
 
 use bumpalo::Bump;
 
-use decl_rust::direct_decl_parser::parse_decls_and_mode;
+use direct_decl_parser::parse_decls_and_mode;
 use hh_hash::{hash, position_insensitive_hash};
 use ocamlrep::{bytes_from_ocamlrep, ptr::UnsafeOcamlPtr};
 use ocamlrep_caml_builtins::Int64;

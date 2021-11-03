@@ -19,7 +19,7 @@ use libc::{c_char, c_int};
 use no_pos_hash::position_insensitive_hash;
 use oxidized::file_info::NameType;
 use oxidized::relative_path::{Prefix, RelativePath};
-use oxidized_by_ref::{decl_parser_options, direct_decl_parser};
+use oxidized_by_ref::decl_parser_options;
 use parser_core_types::source_text::SourceText;
 use rust_facts_ffi::{extract_facts_as_json_ffi0, extract_facts_ffi0, facts_to_json_ffi};
 
@@ -401,9 +401,7 @@ pub fn hackc_direct_decl_parse(
     let path = std::path::PathBuf::from(std::ffi::OsStr::from_bytes(filename.as_bytes()));
     let filename = RelativePath::make(Prefix::Root, path);
     let (decls, has_errors): (direct_decl_parser::Decls<'static>, bool) =
-        decl_rust::direct_decl_parser::parse_decls_without_reference_text(
-            opts, filename, text, alloc, None,
-        );
+        direct_decl_parser::parse_decls_without_reference_text(opts, filename, text, alloc, None);
 
     let op = bincode::config::Options::with_native_endian(bincode::options());
     let data = op

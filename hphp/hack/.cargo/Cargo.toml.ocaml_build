@@ -2,7 +2,6 @@
 members = [
     "src/arena_collections",
     "src/arena_trait",
-    "src/decl/decl_rust",
     "src/decl/direct_decl_smart_constructors",
     "src/decl/ffi",
     "src/deps/cargo/deps_rust",

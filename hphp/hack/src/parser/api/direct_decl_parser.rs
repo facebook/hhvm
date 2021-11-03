@@ -12,14 +12,14 @@ use direct_decl_smart_constructors::{
 use mode_parser::parse_mode;
 use ocamlrep::rc::RcOc;
 use oxidized::relative_path::RelativePath;
-use oxidized_by_ref::{
-    decl_parser_options::DeclParserOptions, direct_decl_parser::Decls, file_info,
-};
+use oxidized_by_ref::file_info;
 use parser::parser::Parser;
 use parser_core_types::{
     parser_env::ParserEnv, source_text::SourceText, syntax_error::SyntaxError,
 };
 use stack_limit::StackLimit;
+
+pub use oxidized_by_ref::{decl_parser_options::DeclParserOptions, direct_decl_parser::Decls};
 
 /// Parse decls for typechecking.
 /// - References the source text to avoid spending time or space copying

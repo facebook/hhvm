@@ -670,18 +670,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "decl_rust"
-version = "0.0.0"
-dependencies = [
- "direct_decl_parser",
-]
-
-[[package]]
 name = "decl_rust_ffi"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "decl_rust",
+ "direct_decl_parser",
  "hh_hash",
  "ocamlrep",
  "ocamlrep_caml_builtins",
@@ -3178,7 +3171,7 @@ dependencies = [
  "cxx",
  "cxx-build",
  "decl_provider",
- "decl_rust",
+ "direct_decl_parser",
  "external_decl_provider",
  "facts_rust",
  "ffi",

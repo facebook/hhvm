@@ -147,7 +147,8 @@ let rec core_type ?(seen_indirection = false) ct : Rust_type.t =
           | Configuration.ByRef -> "std::cell::Cell"
           | Configuration.ByBox -> "std::cell::RefCell"
         end
-      | Ldot (Lident "Int64", "t") -> "isize"
+      | Ldot (Lident "Int64", "t") ->
+        raise (Skip_type_decl "cannot convert type Int64.t")
       | id -> Convert_longident.longident_to_string id
     in
     let id =

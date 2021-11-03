@@ -187,7 +187,7 @@ let derived_traits ty =
          not (DeriveSkipLists.skip_derive ~ty ~trait))
   |> List.append (additional_derives ty)
 
-let blacklisted_types =
+let denylisted_types =
   [
     ("aast_defs", "LocalIdMap");
     ("aast_defs", "ByteString");
@@ -198,6 +198,8 @@ let blacklisted_types =
     ("errors", "Marker");
     ("errors", "MarkedMessage");
     ("errors", "PositionGroup");
+    ("file_info", "FileInfo");
+    ("file_info", "Saved");
     ("typing_defs", "ExpandEnv");
     ("typing_defs", "PhaseTy");
     ("typing_reason", "DeclPhase");
@@ -206,7 +208,7 @@ let blacklisted_types =
 
 (* HACK: ignore anything beginning with the "decl" or "locl" prefix, since the
    oxidized version of Ty does not have a phase. *)
-let blacklisted_type_prefixes =
+let denylisted_type_prefixes =
   [
     ("typing_defs", "Decl");
     ("typing_defs_core", "Decl");
@@ -286,10 +288,10 @@ let should_add_rcoc ty =
   | Configuration.ByBox ->
     List.mem add_rcoc (curr_module_name (), ty) ~equal:equal_s2
 
-let blacklisted ty_name =
+let denylisted ty_name =
   let ty = (curr_module_name (), ty_name) in
-  List.mem blacklisted_types ty ~equal:equal_s2
-  || List.exists blacklisted_type_prefixes ~f:(fun (mod_name, prefix) ->
+  List.mem denylisted_types ty ~equal:equal_s2
+  || List.exists denylisted_type_prefixes ~f:(fun (mod_name, prefix) ->
          String.equal mod_name (curr_module_name ())
          && String.is_prefix ty_name ~prefix)
 
@@ -756,8 +758,8 @@ let type_declaration td =
   let name = convert_type_name name in
   let name = rename name in
   let mod_name = curr_module_name () in
-  if blacklisted name then
-    log "Not converting type %s::%s: it was blacklisted" mod_name name
+  if denylisted name then
+    log "Not converting type %s::%s: it was denylisted" mod_name name
   else
     match Configuration.extern_type name with
     | Some extern_type ->

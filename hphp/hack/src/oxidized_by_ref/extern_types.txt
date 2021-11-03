@@ -54,7 +54,6 @@ oxidized::errors::Severity
 oxidized::file_info::Mode
 oxidized::file_info::Names
 oxidized::file_info::NameType
-oxidized::file_info::Saved
 oxidized::full_fidelity_parser_env::FullFidelityParserEnv
 oxidized::naming_types::KindOfType
 oxidized::naming_types::NameKind

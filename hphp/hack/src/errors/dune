@@ -14,4 +14,4 @@
     utils_multifile
     (select error_message_sentinel.ml from
       (facebook -> facebook/error_message_sentinel.ml)
-      (-> ../stubs/error_message_sentinel.ml))))
+      (-> error_message_sentinel.stubs.ml))))

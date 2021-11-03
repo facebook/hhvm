@@ -1495,7 +1495,6 @@ and simplify_subtype_i
                             Some ty
                           | _ -> None)
                     in
-                    let sub = tyarg in
                     let super =
                       MakeType.intersection
                         r_supportdynamic
@@ -1503,12 +1502,27 @@ and simplify_subtype_i
                     in
                     match tp.tp_variance with
                     | Ast_defs.Covariant ->
-                      simplify_dynamic_aware_subtype ~subtype_env sub super env
+                      simplify_dynamic_aware_subtype
+                        ~subtype_env
+                        tyarg
+                        super
+                        env
                     | Ast_defs.Contravariant ->
-                      simplify_dynamic_aware_subtype ~subtype_env super sub env
+                      simplify_dynamic_aware_subtype
+                        ~subtype_env
+                        super
+                        tyarg
+                        env
                     | Ast_defs.Invariant ->
-                      simplify_dynamic_aware_subtype ~subtype_env sub super env
-                      &&& simplify_dynamic_aware_subtype ~subtype_env super sub
+                      simplify_dynamic_aware_subtype
+                        ~subtype_env
+                        tyarg
+                        super
+                        env
+                      &&& simplify_dynamic_aware_subtype
+                            ~subtype_env
+                            super
+                            tyarg
                   else
                     valid env)
                   &&& subtype_args tparams tyargs

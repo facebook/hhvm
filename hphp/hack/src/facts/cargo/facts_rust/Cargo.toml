@@ -11,7 +11,7 @@ path = "../../lib.rs"
 digest = "0.8"
 facts_parser = { path = "../../../parser/api/cargo/facts_parser" }
 facts_smart_constructors = { path = "../facts_smart_constructors" }
-hex = "0.4"
+hex = "0.4.3"
 hhbc_by_ref_hhbc_string_utils = { path = "../../../hhbc/hhbc_by_ref/cargo/hhbc_by_ref_hhbc_string_utils" }
 md-5 = "0.8"
 naming_special_names_rust = { path = "../../../naming" }
@@ -21,7 +21,7 @@ oxidized_by_ref = { path = "../../../oxidized_by_ref" }
 parser_core_types = { path = "../../../parser/cargo/core_types" }
 serde = { version = "1.0.126", features = ["derive", "rc"] }
 serde_derive = "1.0"
-serde_json = { version = "1.0", features = ["float_roundtrip", "unbounded_depth"] }
+serde_json = { version = "1.0.64", features = ["float_roundtrip", "unbounded_depth"] }
 sha-1 = "0.8"
 
 [dev-dependencies]

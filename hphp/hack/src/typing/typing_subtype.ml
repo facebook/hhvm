@@ -1449,7 +1449,7 @@ and simplify_subtype_i
               res
               &&& simplify_dynamic_aware_subtype ~subtype_env sft.sft_ty ty_dyn)
             (TShapeMap.values sftl)
-        | (_, Tclass (((_, class_id) as class_name), exact, tyargs)) ->
+        | (_, Tclass ((_, class_id), _exact, tyargs)) ->
           let class_def_sub = Typing_env.get_class env class_id in
           (match class_def_sub with
           | None ->
@@ -1457,17 +1457,34 @@ and simplify_subtype_i
             valid env
           | Some class_sub ->
             if Cls.get_support_dynamic_type class_sub then
-              let rec replaceArgs tparams tyargs env =
+              (* If a class has the __SupportDynamicType annotation, then
+                 a type formed from it is a dynamic-aware subtype of dynamic if
+                 the type arguments are correctly supplied, which depends on the
+                 variance of the parameter, and whether the __RequireDynamic
+                 is on the parameter.
+              *)
+              let rec subtype_args tparams tyargs env =
                 match (tparams, tyargs) with
-                | ([], tyargs) -> tyargs
-                | (_, []) -> []
+                | ([], _)
+                | (_, []) ->
+                  valid env
                 | (tp :: tparams, tyarg :: tyargs) ->
-                  let require_dynamic =
+                  let has_require_dynamic =
                     Attributes.mem
                       SN.UserAttributes.uaRequireDynamic
                       tp.tp_user_attributes
                   in
-                  (if require_dynamic then
+                  (if has_require_dynamic then
+                    (* If the class is marked <<__SupportDynamicType>> then for any
+                       * type parameters marked <<__RequireDynamic>> then the class does not
+                       * unconditionally implement dynamic, but rather we must check that
+                       * it is a subtype of the same type whose corresponding type arguments
+                       * are replaced by dynamic, intersected with the parameter's upper bounds.
+                       *
+                       * For example, to check dict<int,float> <: supportdynamic
+                       * we check dict<int,float> <D: dict<arraykey,dynamic>
+                       * which in turn requires int <D: arraykey and float <D: dynamic.
+                    *)
                     let upper_bounds =
                       List.filter_map tp.tp_constraints ~f:(fun (c, ty) ->
                           match c with
@@ -1478,28 +1495,25 @@ and simplify_subtype_i
                             Some ty
                           | _ -> None)
                     in
-                    MakeType.intersection
-                      r_supportdynamic
-                      (MakeType.dynamic r_supportdynamic :: upper_bounds)
+                    let sub = tyarg in
+                    let super =
+                      MakeType.intersection
+                        r_supportdynamic
+                        (MakeType.dynamic r_supportdynamic :: upper_bounds)
+                    in
+                    match tp.tp_variance with
+                    | Ast_defs.Covariant ->
+                      simplify_dynamic_aware_subtype ~subtype_env sub super env
+                    | Ast_defs.Contravariant ->
+                      simplify_dynamic_aware_subtype ~subtype_env super sub env
+                    | Ast_defs.Invariant ->
+                      simplify_dynamic_aware_subtype ~subtype_env sub super env
+                      &&& simplify_dynamic_aware_subtype ~subtype_env super sub
                   else
-                    tyarg)
-                  :: replaceArgs tparams tyargs env
+                    valid env)
+                  &&& subtype_args tparams tyargs
               in
-              (* If the class is marked <<__SupportDynamicType>> then for any
-               * type parameters marked <<__RequireDynamic>> then the class does not
-               * unconditionally implement dynamic, but rather we must check that
-               * it is a subtype of the same type whose corresponding type arguments
-               * are replaced by dynamic, intersected with the parameter's upper bounds.
-               *
-               * For example, to check dict<int,float> <: supportdynamic
-               * we check dict<int,float> <D: dict<arraykey,dynamic>
-               * which in turn requires int <D: arraykey and float <D: dynamic.
-               *)
-              let superargs = replaceArgs (Cls.tparams class_sub) tyargs env in
-              let super =
-                mk (r_supportdynamic, Tclass (class_name, exact, superargs))
-              in
-              env |> simplify_dynamic_aware_subtype ~subtype_env lty_sub super
+              subtype_args (Cls.tparams class_sub) tyargs env
             else
               default_subtype env)))
     | (_, Tdynamic) ->

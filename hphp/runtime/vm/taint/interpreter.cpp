@@ -924,15 +924,16 @@ TCA iopFCallObjMethodD(
   iopPreamble("FCallObjMethodD");
 
   auto const obj = vmStack()
-      .indC(fca.numInputs() + (kNumActRecCells - 1))
-      ->m_data.pobj;
+      .indC(fca.numInputs() + (kNumActRecCells - 1));
+  if (!isObjectType(obj->m_type)) { return nullptr; }
 
-  const Func* func;
   auto ar = vmfp();
   auto ctx = ar == nullptr ? nullptr : ar->func()->cls();
+
+  const Func* func;
   lookupObjMethod(
       func,
-      obj->getVMClass(),
+      obj->m_data.pobj->getVMClass(),
       name,
       ctx,
       MethodLookupErrorOptions::RaiseOnNotFound);

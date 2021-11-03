@@ -325,7 +325,6 @@ type t = {
   tco_everything_sdt: bool;
   (* All collections and Hack arrays are treated as containing ~T *)
   tco_pessimise_builtins: bool;
-  tco_deferments_light: bool;
   tco_enable_disk_heap: bool;
   (* Resolves unsoundness arising from incorrect [defaults] context generated for default
    * constructors during __ConsistentConstruct check *)
@@ -462,7 +461,6 @@ val make :
   ?tco_enforce_sealed_subclasses:bool ->
   ?tco_everything_sdt:bool ->
   ?tco_pessimise_builtins:bool ->
-  ?tco_deferments_light:bool ->
   ?tco_enable_disk_heap:bool ->
   ?tco_pure_default_consistent_constructors:bool ->
   unit ->
@@ -759,8 +757,6 @@ val tco_enforce_sealed_subclasses : t -> bool
 val tco_everything_sdt : t -> bool
 
 val tco_pessimise_builtins : t -> bool
-
-val tco_deferments_light : t -> bool
 
 val tco_enable_disk_heap : t -> bool
 

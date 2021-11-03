@@ -137,7 +137,6 @@ type t = {
   tco_enforce_sealed_subclasses: bool;
   tco_everything_sdt: bool;
   tco_pessimise_builtins: bool;
-  tco_deferments_light: bool;
   tco_enable_disk_heap: bool;
   tco_pure_default_consistent_constructors: bool;
 }
@@ -338,7 +337,6 @@ let default =
     tco_enforce_sealed_subclasses = false;
     tco_everything_sdt = false;
     tco_pessimise_builtins = false;
-    tco_deferments_light = false;
     tco_enable_disk_heap = true;
     tco_pure_default_consistent_constructors = false;
   }
@@ -497,7 +495,6 @@ let make
     ?(tco_enforce_sealed_subclasses = default.tco_enforce_sealed_subclasses)
     ?(tco_everything_sdt = default.tco_everything_sdt)
     ?(tco_pessimise_builtins = default.tco_pessimise_builtins)
-    ?(tco_deferments_light = default.tco_deferments_light)
     ?(tco_enable_disk_heap = default.tco_enable_disk_heap)
     ?(tco_pure_default_consistent_constructors =
       default.tco_pure_default_consistent_constructors)
@@ -632,7 +629,6 @@ let make
     tco_enforce_sealed_subclasses;
     tco_everything_sdt;
     tco_pessimise_builtins;
-    tco_deferments_light;
     tco_enable_disk_heap;
     tco_pure_default_consistent_constructors;
   }
@@ -929,8 +925,6 @@ let tco_enforce_sealed_subclasses t = t.tco_enforce_sealed_subclasses
 let tco_everything_sdt t = t.tco_everything_sdt
 
 let tco_pessimise_builtins t = t.tco_pessimise_builtins
-
-let tco_deferments_light t = t.tco_deferments_light
 
 let tco_enable_disk_heap t = t.tco_enable_disk_heap
 

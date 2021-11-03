@@ -19,7 +19,6 @@ type rollout_flags = {
   symbolindex_search_provider: string;
   require_saved_state: bool;
   stream_errors: bool;
-  deferments_light: bool;
   force_shallow_decl_fanout: bool;
   log_from_client_when_slow_monitor_connections: bool;
   naming_sqlite_in_hack_64: bool;

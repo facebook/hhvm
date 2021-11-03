@@ -573,8 +573,6 @@ type t = {
   watchman: Watchman.t;
   (* If enabled, saves naming table into a temp folder and uploads it to the remote typechecker *)
   save_and_upload_naming_table: bool;
-  deferments_light: bool;
-      (** Stop typechecking when deferment threshold is reached and instead get decls to predeclare from names in AST. *)
   log_from_client_when_slow_monitor_connections: bool;
       (**  Alerts hh users what processes are using hh_server when hh_client is slow to connect. *)
   naming_sqlite_in_hack_64: bool;
@@ -686,7 +684,6 @@ let default =
     stream_errors = false;
     watchman = Watchman.default;
     save_and_upload_naming_table = false;
-    deferments_light = false;
     log_from_client_when_slow_monitor_connections = false;
     naming_sqlite_in_hack_64 = false;
     workload_quantile = None;
@@ -1287,13 +1284,6 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
-  let deferments_light =
-    bool_if_min_version
-      "deferments_light"
-      ~default:default.deferments_light
-      ~current_version
-      config
-  in
   let log_from_client_when_slow_monitor_connections =
     bool_if_min_version
       "log_from_client_when_slow_monitor_connections"
@@ -1446,7 +1436,6 @@ let load_ fn ~silent ~current_version overrides =
     watchman;
     force_remote_type_check;
     save_and_upload_naming_table;
-    deferments_light;
     log_from_client_when_slow_monitor_connections;
     naming_sqlite_in_hack_64;
     workload_quantile;
@@ -1467,7 +1456,6 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       symbolindex_search_provider = options.symbolindex_search_provider;
       require_saved_state = options.require_saved_state;
       stream_errors = options.stream_errors;
-      deferments_light = options.deferments_light;
       force_shallow_decl_fanout = options.force_shallow_decl_fanout;
       log_from_client_when_slow_monitor_connections =
         options.log_from_client_when_slow_monitor_connections;

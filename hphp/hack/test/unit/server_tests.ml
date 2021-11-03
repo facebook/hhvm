@@ -11,12 +11,7 @@
 open Hh_prelude
 
 let tcopt_with_defer =
-  GlobalOptions.
-    {
-      default with
-      tco_defer_class_declaration_threshold = Some 1;
-      tco_deferments_light = true;
-    }
+  GlobalOptions.{ default with tco_defer_class_declaration_threshold = Some 1 }
 
 let test_process_data =
   ServerProcess.

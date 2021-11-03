@@ -135,7 +135,6 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     tco_enforce_sealed_subclasses: false,
     tco_everything_sdt: false,
     tco_pessimise_builtins: false,
-    tco_deferments_light: false,
     tco_enable_disk_heap: true,
     tco_pure_default_consistent_constructors: false,
 };

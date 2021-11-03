@@ -10,58 +10,75 @@ use direct_decl_smart_constructors::{
     SourceTextAllocator,
 };
 use mode_parser::parse_mode;
-use oxidized_by_ref::{decl_parser_options::DeclParserOptions, file_info};
+use ocamlrep::rc::RcOc;
+use oxidized::relative_path::RelativePath;
+use oxidized_by_ref::{
+    decl_parser_options::DeclParserOptions, direct_decl_parser::Decls, file_info,
+};
 use parser::parser::Parser;
 use parser_core_types::{
     parser_env::ParserEnv, source_text::SourceText, syntax_error::SyntaxError,
 };
 use stack_limit::StackLimit;
 
-// Parse decls for type-checking
-pub fn parse_script<'a>(
+/// Parse decls for typechecking.
+/// - References the source text to avoid spending time or space copying
+///   identifiers into the arena (when possible).
+/// - Excludes user attributes which are irrelevant to typechecking.
+pub fn parse_decls_and_mode<'a>(
     opts: &'a DeclParserOptions<'a>,
-    source: &SourceText<'a>,
+    filename: RelativePath,
+    text: &'a [u8],
     arena: &'a Bump,
     stack_limit: Option<&'a StackLimit>,
-) -> (
-    Node<'a>,
-    Vec<SyntaxError>,
-    DirectDeclSmartConstructors<'a, 'a, NoSourceTextAllocator>,
-    Option<file_info::Mode>,
-) {
-    parse_script_with_text_allocator(
+) -> (Decls<'a>, Option<file_info::Mode>) {
+    let text = SourceText::make(RcOc::new(filename), text);
+    let (_, _errors, state, mode) = parse_script_with_text_allocator(
         opts,
-        source,
+        &text,
         arena,
         stack_limit,
         NoSourceTextAllocator,
         true, // omit_user_attributes_irrelevant_to_typechecking
-    )
+    );
+    (state.decls, mode)
 }
 
-// Used for decls in compilation.
-// - Returns decls without reference to the source text to avoid
-//   keeping the source text in memory when caching decls.
-// - Preserve attributes in decls necessary for producing facts.
-pub fn parse_script_without_reference_text<'a, 'text>(
+/// Parse decls for typechecking.
+/// - References the source text to avoid spending time or space copying
+///   identifiers into the arena (when possible).
+/// - Excludes user attributes which are irrelevant to typechecking.
+pub fn parse_decls<'a>(
     opts: &'a DeclParserOptions<'a>,
-    source: &SourceText<'text>,
+    filename: RelativePath,
+    text: &'a [u8],
     arena: &'a Bump,
     stack_limit: Option<&'a StackLimit>,
-) -> (
-    Node<'a>,
-    Vec<SyntaxError>,
-    DirectDeclSmartConstructors<'a, 'text, ArenaSourceTextAllocator<'a>>,
-    Option<file_info::Mode>,
-) {
-    parse_script_with_text_allocator(
+) -> Decls<'a> {
+    parse_decls_and_mode(opts, filename, text, arena, stack_limit).0
+}
+
+/// Parse decls for decls in compilation.
+/// - Returns decls without reference to the source text to avoid the need to
+///   keep the source text in memory when caching decls.
+/// - Preserves user attributes in decls necessary for producing facts.
+pub fn parse_decls_without_reference_text<'a, 'text>(
+    opts: &'a DeclParserOptions<'a>,
+    filename: RelativePath,
+    text: &'text [u8],
+    arena: &'a Bump,
+    stack_limit: Option<&'a StackLimit>,
+) -> (Decls<'a>, bool) {
+    let text = SourceText::make(RcOc::new(filename), text);
+    let (_, errors, state, _mode) = parse_script_with_text_allocator(
         opts,
-        source,
+        &text,
         arena,
         stack_limit,
         ArenaSourceTextAllocator(arena),
         false, // omit_user_attributes_irrelevant_to_typechecking
-    )
+    );
+    (state.decls, !errors.is_empty())
 }
 
 fn parse_script_with_text_allocator<'a, 'text, S: SourceTextAllocator<'text, 'a>>(

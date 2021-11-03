@@ -673,13 +673,7 @@ dependencies = [
 name = "decl_rust"
 version = "0.0.0"
 dependencies = [
- "bumpalo",
  "direct_decl_parser",
- "ocamlrep",
- "oxidized",
- "oxidized_by_ref",
- "parser_core_types",
- "stack_limit",
 ]
 
 [[package]]
@@ -753,6 +747,8 @@ dependencies = [
  "bumpalo",
  "direct_decl_smart_constructors",
  "mode_parser",
+ "ocamlrep",
+ "oxidized",
  "oxidized_by_ref",
  "parser",
  "parser_core_types",

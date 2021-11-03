@@ -12,8 +12,6 @@ use criterion::Criterion;
 use structopt::StructOpt;
 
 use aast_parser::rust_aast_parser_types::Env as AastParserEnv;
-use direct_decl_parser;
-use facts_parser;
 use ocamlrep::rc::RcOc;
 use oxidized::relative_path::{Prefix, RelativePath};
 use parser_core_types::{
@@ -92,8 +90,13 @@ fn bench_direct_decl_parse(c: &mut Criterion, files: &[(RcOc<RelativePath>, &[u8
     c.bench_function("direct_decl_parse", |b| {
         b.iter(|| {
             for (filename, text) in files {
-                let text = SourceText::make(RcOc::clone(filename), text);
-                let _ = direct_decl_parser::parse_script(Default::default(), &text, &arena, None);
+                let _ = direct_decl_parser::parse_decls(
+                    Default::default(),
+                    (**filename).clone(),
+                    text,
+                    &arena,
+                    None,
+                );
                 arena.reset();
             }
         })

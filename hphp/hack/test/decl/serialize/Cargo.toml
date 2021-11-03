@@ -15,10 +15,8 @@ bincode = "1.3.3"
 bumpalo = { version = "3.8", features = ["collections"] }
 direct_decl_parser = { path = "../../../src/parser/api/cargo/direct_decl_parser" }
 flexbuffers = "0.2.1"
-ocamlrep = { path = "../../../src/ocamlrep" }
 oxidized = { path = "../../../src/oxidized" }
 oxidized_by_ref = { path = "../../../src/oxidized_by_ref" }
-parser_core_types = { path = "../../../src/parser/cargo/core_types" }
 serde = { version = "1.0.126", features = ["derive", "rc"] }
 serde_cbor = "0.11"
 serde_json = { version = "1.0.64", features = ["float_roundtrip", "unbounded_depth"] }

@@ -4,53 +4,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use bumpalo::Bump;
-
-use ocamlrep::rc::RcOc;
-use oxidized::relative_path::RelativePath;
-use oxidized_by_ref::{
-    decl_parser_options::DeclParserOptions, direct_decl_parser::Decls, file_info,
+pub use direct_decl_parser::{
+    parse_decls, parse_decls_and_mode, parse_decls_without_reference_text,
 };
-use parser_core_types::source_text::SourceText;
-use stack_limit::StackLimit;
-
-pub fn parse_decls_and_mode<'a>(
-    opts: &'a DeclParserOptions<'a>,
-    filename: RelativePath,
-    text: &'a [u8],
-    arena: &'a Bump,
-    stack_limit: Option<&'a StackLimit>,
-) -> (Decls<'a>, Option<file_info::Mode>) {
-    let text = SourceText::make(RcOc::new(filename), text);
-    let (_, _errors, state, mode) =
-        direct_decl_parser::parse_script(opts, &text, arena, stack_limit);
-    (state.decls, mode)
-}
-
-// Parse decls for type-checking
-pub fn parse_decls<'a>(
-    opts: &'a DeclParserOptions<'a>,
-    filename: RelativePath,
-    text: &'a [u8],
-    arena: &'a Bump,
-    stack_limit: Option<&'a StackLimit>,
-) -> Decls<'a> {
-    parse_decls_and_mode(opts, filename, text, arena, stack_limit).0
-}
-
-// Used for decls in compilation.
-// - Returns decls without reference to the source text to avoid
-//   keeping the source text in memory when caching decls.
-// - Preserve attributes in decls necessary for producing facts.
-pub fn parse_decls_without_reference_text<'a, 'text>(
-    opts: &'a DeclParserOptions<'a>,
-    filename: RelativePath,
-    text: &'text [u8],
-    arena: &'a Bump,
-    stack_limit: Option<&'a StackLimit>,
-) -> (Decls<'a>, bool) {
-    let text = SourceText::make(RcOc::new(filename), text);
-    let (_, errors, state, _mode) =
-        direct_decl_parser::parse_script_without_reference_text(opts, &text, arena, stack_limit);
-    (state.decls, !errors.is_empty())
-}

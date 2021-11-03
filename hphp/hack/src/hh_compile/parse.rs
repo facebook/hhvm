@@ -76,7 +76,7 @@ fn parse_file(parser: Parser, filepath: PathBuf) -> anyhow::Result<()> {
             let env = ParserEnv::default();
             let (filepath, content) = new_ctx.as_ref();
             let path = RelativePath::make(relative_path::Prefix::Dummy, filepath.clone());
-            let source_text = SourceText::make(RcOc::new(path), content.as_slice());
+            let source_text = SourceText::make(RcOc::new(path.clone()), content.as_slice());
             match parser {
                 Parser::PositionedWithFullTrivia => {
                     let stdout = std::io::stdout();
@@ -107,9 +107,10 @@ fn parse_file(parser: Parser, filepath: PathBuf) -> anyhow::Result<()> {
                 }
                 Parser::DirectDecl => {
                     let arena = bumpalo::Bump::new();
-                    let (_, _, _, _) = direct_decl_parser::parse_script(
+                    let _ = direct_decl_parser::parse_decls(
                         Default::default(),
-                        &source_text,
+                        path,
+                        &content,
                         &arena,
                         Some(stack_limit),
                     );

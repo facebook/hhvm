@@ -14,10 +14,8 @@ use serde::{Deserialize, Serialize};
 use structopt::StructOpt;
 use walkdir::WalkDir;
 
-use ocamlrep::rc::RcOc;
 use oxidized::relative_path::{self, RelativePath};
 use oxidized_by_ref::direct_decl_parser::Decls;
-use parser_core_types::source_text::SourceText;
 
 #[derive(StructOpt, Clone, Debug)]
 #[structopt(no_version)] // don't consult CARGO_PKG_VERSION (Buck doesn't set it)
@@ -42,17 +40,20 @@ fn main() -> ::anyhow::Result<()> {
         let path = entry.path();
         let content = read_file(path)?;
         let relative_path = RelativePath::make(relative_path::Prefix::Dummy, path.to_path_buf());
-        let source_text = SourceText::make(RcOc::new(relative_path), content.as_slice());
 
         let arena = bumpalo::Bump::new();
-        let (_, _, state, _) =
-            direct_decl_parser::parse_script(Default::default(), &source_text, &arena, None);
+        let decls = direct_decl_parser::parse_decls(
+            Default::default(),
+            relative_path,
+            &content,
+            &arena,
+            None,
+        );
 
-        let decl = state.decls;
-        results.push(round_trip::<Decls<'_>, Json>(&arena, path, decl));
-        results.push(round_trip::<Decls<'_>, FlexBuffer>(&arena, path, decl));
-        results.push(round_trip::<Decls<'_>, Bincode>(&arena, path, decl));
-        results.push(round_trip::<Decls<'_>, Cbor>(&arena, path, decl));
+        results.push(round_trip::<Decls<'_>, Json>(&arena, path, decls));
+        results.push(round_trip::<Decls<'_>, FlexBuffer>(&arena, path, decls));
+        results.push(round_trip::<Decls<'_>, Bincode>(&arena, path, decls));
+        results.push(round_trip::<Decls<'_>, Cbor>(&arena, path, decls));
     }
 
     let (profiles, errs) = results

@@ -773,6 +773,9 @@ struct FactsStoreImpl final
             .thenTry([this](folly::Try<Watcher::Results>&& results) {
               if (results.hasValue()) {
                 return update(std::move(results.value()));
+              } else if (results.hasException()) {
+                XLOG(ERR) << "Exception while processing watcher results: "
+                          << results.exception().what();
               }
               return folly::makeSemiFuture();
             }));
@@ -797,12 +800,14 @@ struct FactsStoreImpl final
     // need to update the DB.
     if (LIKELY(!isFresh) && LIKELY(alteredPathsAndHashes.empty()) &&
         LIKELY(deletedPaths.empty())) {
+      XLOG(INFO) << "Finished: it's a a no-op incremental update.";
       return {};
     }
 
     XLOGF(
         INFO,
-        "{} paths altered, {} paths deleted.",
+        "{} update: {} paths altered, {} paths deleted.",
+        isFresh ? "Fresh" : "Incremental",
         alteredPathsAndHashes.size(),
         deletedPaths.size());
 

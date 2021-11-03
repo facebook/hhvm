@@ -100,10 +100,22 @@ parseWatchmanResults(Optional<Clock> lastClock, folly::dynamic&& result) {
     }
   }
 
+  bool mergebaseSet =
+      lastClock.has_value() && !lastClock.value().m_mergebase.empty();
+
+  XLOG(DBG0) << "parseWatchmanResults: mergebase_set = " << mergebaseSet;
+  XLOG(DBG0) << "parseWatchmanResults: is_fresh_instance = "
+             << result.at("is_fresh_instance").asBool();
+
+  std::string clock =
+      result.get_ptr("clock")->isString()
+          ? result.get_ptr("clock")->asString()
+          : result.get_ptr("clock")->get_ptr("clock")->asString();
+
   return {
       .m_lastClock = std::move(lastClock),
-      .m_newClock = Clock{.m_clock = std::move(result.at("clock")).asString()},
-      .m_fresh = result.at("is_fresh_instance").asBool(),
+      .m_newClock = Clock{.m_clock = std::move(clock)},
+      .m_fresh = !mergebaseSet && result.at("is_fresh_instance").asBool(),
       .m_files = std::move(alteredPaths)};
 }
 

@@ -68,10 +68,14 @@ interface IExceptionWithPureGetMessage {
   public function getMessage()[]: string;
 }
 
-class ExceptionWithPureGetMessage
-  extends Exception implements IExceptionWithPureGetMessage {
+trait ExceptionWithPureGetMessageTrait implements IExceptionWithPureGetMessage {
+  require extends Exception;
 
-  public function getMessage()[]: string;
+  public function getMessage()[];
+}
+
+class ExceptionWithPureGetMessage extends Exception {
+  use ExceptionWithPureGetMessageTrait;
 }
 
 class Exception implements Throwable {
@@ -104,7 +108,8 @@ class Exception implements Throwable {
   final public static function setTraceOptions($opts)[globals];
 }
 
-class ErrorException extends ExceptionWithPureGetMessage {
+class ErrorException extends Exception {
+  use ExceptionWithPureGetMessageTrait;
   public function __construct(
     $message = "",
     int $code = 0,
@@ -116,7 +121,9 @@ class ErrorException extends ExceptionWithPureGetMessage {
   public final function getSeverity()[]: int;
 }
 
-class LogicException extends ExceptionWithPureGetMessage {}
+class LogicException extends Exception {
+  use ExceptionWithPureGetMessageTrait;
+}
 class BadFunctionCallException extends LogicException {}
 class BadMethodCallException extends BadFunctionCallException {}
 class DomainException extends LogicException {}
@@ -130,7 +137,9 @@ final class UndefinedPropertyException extends LogicException {}
 final class UndefinedVariableException extends LogicException {}
 final class AccessPropertyOnNonObjectException extends LogicException {}
 
-class RuntimeException extends ExceptionWithPureGetMessage {}
+class RuntimeException extends Exception {
+  use ExceptionWithPureGetMessageTrait;
+}
 class OutOfBoundsException extends RuntimeException {}
 class OverflowException extends RuntimeException {}
 class RangeException extends RuntimeException {}
@@ -138,12 +147,16 @@ class UnderflowException extends RuntimeException {}
 class UnexpectedValueException extends RuntimeException {}
 
 final class TypeAssertionException extends RuntimeException {}
-class DivisionByZeroException extends ExceptionWithPureGetMessage {}
+class DivisionByZeroException extends Exception {
+  use ExceptionWithPureGetMessageTrait;
+}
 
 } // namespace
 
 namespace HH {
 
-class InvariantException extends \ExceptionWithPureGetMessage {}
+class InvariantException extends \Exception {
+  use \ExceptionWithPureGetMessageTrait;
+}
 
 } // namespace HH

@@ -22,7 +22,9 @@ function invariant_violation_helper($arg)[] {
 
 namespace HH {
 
-class InvariantException extends \ExceptionWithPureGetMessage {}
+class InvariantException extends \Exception {
+  use \ExceptionWithPureGetMessageTrait;
+}
 
 /**
  * Pass a function that will be called if any `invariant` fails. The callback

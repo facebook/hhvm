@@ -67,7 +67,8 @@ trait ReflectionTypedAttribute {
  * The ReflectionException class.
  *
  */
-class ReflectionException extends ExceptionWithPureGetMessage {
+class ReflectionException extends Exception {
+  use ExceptionWithPureGetMessageTrait;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

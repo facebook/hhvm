@@ -8,12 +8,16 @@ interface IExceptionWithPureGetMessage {
   public function getMessage()[]: string;
 }
 
-class ExceptionWithPureGetMessage
-  extends Exception implements IExceptionWithPureGetMessage {
+trait ExceptionWithPureGetMessageTrait implements IExceptionWithPureGetMessage {
+  require extends Exception;
 
   public function getMessage()[]: string {
     return $this->message;
   }
+}
+
+class ExceptionWithPureGetMessage extends Exception {
+  use ExceptionWithPureGetMessageTrait;
 }
 
 class Exception implements Throwable {
@@ -59,6 +63,8 @@ class Exception implements Throwable {
   }
 }
 
-class DivisionByZeroException extends ExceptionWithPureGetMessage {}
+class DivisionByZeroException extends Exception {
+  use ExceptionWithPureGetMessageTrait;
+}
 
 }

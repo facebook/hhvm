@@ -129,10 +129,9 @@
   (name job_runner_stubs)
     (wrapped false)
   (modules
-    jobRunner
-    jobRunner_sig)
+    jobRunner)
   (libraries
-    (select jobRunner_sig.ml from (-> ../remote/jobRunner_sig.ml))
+    jobRunner_sig
     core_kernel
     future
     utils_core)

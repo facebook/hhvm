@@ -569,10 +569,10 @@
     watchman_utils
     (select serverHotClassesDescription.ml from
     (facebook signed_source -> facebook/serverHotClassesDescription.ml)
-    (-> ../stubs/serverHotClassesDescription.ml))
+    (-> serverHotClassesDescription.stubs.ml))
     (select serverInvalidateUnits.ml from
     (facebook signed_source -> facebook/serverInvalidateUnits.ml)
-    (-> ../stubs/serverInvalidateUnits.ml))
+    (-> serverInvalidateUnits.stubs.ml))
   )
   (preprocess (pps lwt_ppx ppx_deriving.std)))
 
@@ -623,7 +623,7 @@
     write_symbol_info
     (select serverInitMessages.ml from
     (facebook signed_source -> facebook/serverInitMessages.ml)
-    (-> ../stubs/serverInitMessages.ml))
+    (-> serverInitMessages.stubs.ml))
   )
   (preprocess (pps lwt_ppx ppx_deriving.std)))
 

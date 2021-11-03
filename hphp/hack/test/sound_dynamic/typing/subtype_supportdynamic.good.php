@@ -58,6 +58,7 @@ function test_shape(shape('x' => int, ?'y' => vec<C>) $s): void {
 <<__SupportDynamicType>>
 class D<T> {}
 
+<<__SupportDynamicType>>
 class E {}
 
 function test_class(C $c, D<int> $di, D<E> $de): void {

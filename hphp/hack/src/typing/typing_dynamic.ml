@@ -13,20 +13,19 @@ module Env = Typing_env
 module SN = Naming_special_names
 module Reason = Typing_reason
 
-(* Add `dynamic` lower and upper bound to any type parameters that are marked <<__RequireDynamic>> *)
+(* Add `dynamic` lower and upper bound to any type parameters that are marked <<__RequireDynamic>>
+ * Just add the upper bound to others. *)
 let add_require_dynamic_bounds env cls =
   List.fold_left (Decl_provider.Class.tparams cls) ~init:env ~f:(fun env tp ->
       let require_dynamic =
         Attributes.mem SN.UserAttributes.uaRequireDynamic tp.tp_user_attributes
       in
+      let dtype =
+        Typing_make_type.dynamic (Reason.Rwitness_from_decl (fst tp.tp_name))
+      in
+      let env = Env.add_upper_bound env (snd tp.tp_name) dtype in
       if require_dynamic then
-        let dtype =
-          Typing_make_type.dynamic (Reason.Rwitness_from_decl (fst tp.tp_name))
-        in
-        Env.add_upper_bound
-          (Env.add_lower_bound env (snd tp.tp_name) dtype)
-          (snd tp.tp_name)
-          dtype
+        Env.add_lower_bound env (snd tp.tp_name) dtype
       else
         env)
 

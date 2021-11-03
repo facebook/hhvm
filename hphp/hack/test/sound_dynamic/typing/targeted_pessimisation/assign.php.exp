@@ -15,18 +15,15 @@
 
 File "assign.php", line 6, characters 19-21:
 Method  `set` in class `Box` is not dynamically callable. (Typing[4402])
-  File "assign.php", line 7, characters 5-17:
-  Invalid assignment
-  File "assign.php", line 4, characters 11-11:
-  Expected `T`
+  File "assign.php", line 7, characters 12-12:
+  Cannot write to property `x` through dynamic type because private property in `Box` does not have an enforceable type
   File "assign.php", line 5, characters 39-39:
-    via this generic `T`
-  File "assign.php", line 6, characters 25-26:
-  But got `dynamic` because method must be callable in a dynamic context
+  Property `x` has type `T`
 
 
 # Pessimisation log
 
+pessimise:	prop,assign.php,5,$x
 pessimise:	prop,assign.php,5,$x
 
 

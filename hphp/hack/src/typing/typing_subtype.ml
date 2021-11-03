@@ -1463,6 +1463,7 @@ and simplify_subtype_i
                  variance of the parameter, and whether the __RequireDynamic
                  is on the parameter.
               *)
+              let dynamic = MakeType.dynamic r_supportdynamic in
               let rec subtype_args tparams tyargs env =
                 match (tparams, tyargs) with
                 | ([], _)
@@ -1498,7 +1499,7 @@ and simplify_subtype_i
                     let super =
                       MakeType.intersection
                         r_supportdynamic
-                        (MakeType.dynamic r_supportdynamic :: upper_bounds)
+                        (dynamic :: upper_bounds)
                     in
                     match tp.tp_variance with
                     | Ast_defs.Covariant ->
@@ -1524,7 +1525,53 @@ and simplify_subtype_i
                             super
                             tyarg
                   else
-                    valid env)
+                    (* If the class is marked <<__SupportDynamicType>> then for any
+                       * type parameters not marked <<__RequireDynamic>> then the class is a
+                       * subtype of dynamic only when the arguments are also subtypes of dynamic.
+                    *)
+                    match tp.tp_variance with
+                    | Ast_defs.Covariant
+                    | Ast_defs.Invariant ->
+                      simplify_dynamic_aware_subtype
+                        ~subtype_env
+                        tyarg
+                        dynamic
+                        env
+                    | Ast_defs.Contravariant ->
+                      (* If the parameter is contra-variant, then we only need to
+                         check that the lower bounds (if present) are subtypes of
+                         dynamic. For example, given <<__SDT>> class C<-T> {...},
+                         then for any t, C<t> <: C<nothing>, and since
+                         `nothing <D: dynamic`, `C<nothing> <D: dynamic` and so
+                         `C<t> <D: dynamic`. If there are lower bounds, we can't
+                         push the argument below them. It suffices to check only
+                         them because if one of them is not <D: dynamic, then
+                         none of their supertypes are either.
+                      *)
+                      let lower_bounds =
+                        List.filter_map tp.tp_constraints ~f:(fun (c, ty) ->
+                            match c with
+                            | Ast_defs.Constraint_super ->
+                              let (_env, ty) =
+                                Phase.localize_no_subst
+                                  env
+                                  ~ignore_errors:true
+                                  ty
+                              in
+                              Some ty
+                            | _ -> None)
+                      in
+                      (match lower_bounds with
+                      | [] -> valid env
+                      | _ ->
+                        let sub =
+                          MakeType.union r_supportdynamic lower_bounds
+                        in
+                        simplify_dynamic_aware_subtype
+                          ~subtype_env
+                          sub
+                          dynamic
+                          env))
                   &&& subtype_args tparams tyargs
               in
               subtype_args (Cls.tparams class_sub) tyargs env

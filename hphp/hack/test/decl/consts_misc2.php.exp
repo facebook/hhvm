@@ -4,7 +4,7 @@
  [("\\TestC",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = true;
-        sc_is_xhp = false; sc_has_xhp_keyword = false;
+        sc_abstract = true; sc_is_xhp = false; sc_has_xhp_keyword = false;
         sc_kind = (Cclass Abstract); sc_module = None;
         sc_name = ([3:22-27], "\\TestC"); sc_tparams = [];
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
@@ -61,9 +61,9 @@
    ("\\TestE",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-         sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cenum;
-         sc_module = None; sc_name = ([7:6-11], "\\TestE"); sc_tparams = [];
-         sc_where_constraints = [];
+         sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
+         sc_kind = Cenum; sc_module = None; sc_name = ([7:6-11], "\\TestE");
+         sc_tparams = []; sc_where_constraints = [];
          sc_extends =
          [(Rhint ([7:6-11]),
            (Tapply (([7:6-11], "\\HH\\BuiltinEnum"),
@@ -93,7 +93,7 @@
    ("\\TestRefs1",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = true;
-         sc_is_xhp = false; sc_has_xhp_keyword = false;
+         sc_abstract = true; sc_is_xhp = false; sc_has_xhp_keyword = false;
          sc_kind = (Cclass Abstract); sc_module = None;
          sc_name = ([9:22-31], "\\TestRefs1"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
@@ -131,7 +131,7 @@
    ("\\TestRefs2",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-         sc_is_xhp = false; sc_has_xhp_keyword = false;
+         sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
          sc_kind = (Cenum_class Concrete); sc_module = None;
          sc_name = ([17:12-21], "\\TestRefs2"); sc_tparams = [];
          sc_where_constraints = [];

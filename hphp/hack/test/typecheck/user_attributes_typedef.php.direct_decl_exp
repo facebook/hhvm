@@ -4,7 +4,7 @@
  [("\\Foo",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-        sc_is_xhp = false; sc_has_xhp_keyword = false;
+        sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
         sc_kind = (Cclass Concrete); sc_module = None;
         sc_name = ([12:7-10], "\\Foo"); sc_tparams = [];
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
@@ -56,7 +56,7 @@
    ("\\Bar",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-         sc_is_xhp = false; sc_has_xhp_keyword = false;
+         sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
          sc_kind = (Cclass Concrete); sc_module = None;
          sc_name = ([13:7-10], "\\Bar"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
@@ -72,7 +72,7 @@
    ("\\SingleAttribute",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-         sc_is_xhp = false; sc_has_xhp_keyword = false;
+         sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
          sc_kind = (Cclass Concrete); sc_module = None;
          sc_name = ([14:7-22], "\\SingleAttribute"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
@@ -88,7 +88,7 @@
    ("\\SingleAttributeWithOneParam",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-         sc_is_xhp = false; sc_has_xhp_keyword = false;
+         sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
          sc_kind = (Cclass Concrete); sc_module = None;
          sc_name = ([15:7-34], "\\SingleAttributeWithOneParam");
          sc_tparams = []; sc_where_constraints = []; sc_extends = [];
@@ -142,7 +142,7 @@
    ("\\SingleAttributeWithTwoParams",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-         sc_is_xhp = false; sc_has_xhp_keyword = false;
+         sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
          sc_kind = (Cclass Concrete); sc_module = None;
          sc_name = ([16:7-35], "\\SingleAttributeWithTwoParams");
          sc_tparams = []; sc_where_constraints = []; sc_extends = [];
@@ -211,7 +211,7 @@
    ("\\Multiple",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-         sc_is_xhp = false; sc_has_xhp_keyword = false;
+         sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
          sc_kind = (Cclass Concrete); sc_module = None;
          sc_name = ([17:7-15], "\\Multiple"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
@@ -264,7 +264,7 @@
    ("\\Attributes",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-         sc_is_xhp = false; sc_has_xhp_keyword = false;
+         sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
          sc_kind = (Cclass Concrete); sc_module = None;
          sc_name = ([18:7-17], "\\Attributes"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];

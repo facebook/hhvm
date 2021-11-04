@@ -3801,22 +3801,27 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         };
         let is_xhp = raw_name.starts_with(':') || xhp_keyword.is_present();
 
-        let mut class_kind = match class_keyword.token_kind() {
-            Some(TokenKind::Interface) => ClassishKind::Cinterface,
-            Some(TokenKind::Trait) => ClassishKind::Ctrait,
-            _ => ClassishKind::Cclass(&Abstraction::Concrete),
-        };
         let mut final_ = false;
+        let mut abstract_ = false;
 
         for modifier in modifiers.iter() {
             match modifier.token_kind() {
                 Some(TokenKind::Abstract) => {
-                    class_kind = ClassishKind::Cclass(&Abstraction::Abstract)
+                    abstract_ = true;
                 }
                 Some(TokenKind::Final) => final_ = true,
                 _ => {}
             }
         }
+        let class_kind = match class_keyword.token_kind() {
+            Some(TokenKind::Interface) => ClassishKind::Cinterface,
+            Some(TokenKind::Trait) => ClassishKind::Ctrait,
+            _ => ClassishKind::Cclass(if abstract_ {
+                &Abstraction::Abstract
+            } else {
+                &Abstraction::Concrete
+            }),
+        };
 
         let where_constraints = self.slice(where_clause.iter().filter_map(|&x| match x {
             Node::WhereConstraint(x) => Some(x),
@@ -4038,6 +4043,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         let cls = self.alloc(shallow_decl_defs::ShallowClass {
             mode: self.file_mode,
             final_,
+            abstract_,
             is_xhp,
             has_xhp_keyword: xhp_keyword.is_token(TokenKind::XHP),
             kind: class_kind,
@@ -4459,6 +4465,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         let cls = self.alloc(shallow_decl_defs::ShallowClass {
             mode: self.file_mode,
             final_: false,
+            abstract_: false,
             is_xhp: false,
             has_xhp_keyword: false,
             kind: ClassishKind::Cenum,
@@ -4619,6 +4626,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         let cls = self.alloc(shallow_decl_defs::ShallowClass {
             mode: self.file_mode,
             final_: is_final,
+            abstract_: is_abstract,
             is_xhp: false,
             has_xhp_keyword: false,
             kind: class_kind,

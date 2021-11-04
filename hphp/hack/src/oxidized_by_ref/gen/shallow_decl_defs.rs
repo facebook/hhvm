@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c2777cb85402f379de671cc1ededce87>>
+// @generated SignedSource<<4f646e6d34873ffd1105216c05fc4879>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -166,6 +166,7 @@ arena_deserializer::impl_deserialize_in_arena!(ShallowMethod<'arena>);
 pub struct ShallowClass<'a> {
     pub mode: oxidized::file_info::Mode,
     pub final_: bool,
+    pub abstract_: bool,
     pub is_xhp: bool,
     pub has_xhp_keyword: bool,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

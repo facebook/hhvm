@@ -1,6 +1,6 @@
 --- legacy
 +++ direct decl
-@@ -1,108 +1,100 @@
+@@ -1,109 +1,101 @@
  [("\\foo",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = (Some ("here", []));
@@ -24,7 +24,7 @@
    ("\\C",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-         sc_is_xhp = false; sc_has_xhp_keyword = false;
+         sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
          sc_kind = (Cclass Concrete); sc_module = (Some ("there", []));
          sc_name = ([10:7-8], "\\C"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
@@ -72,9 +72,10 @@
    ("\\E",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-         sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cenum;
-         sc_module = (Some ("another", [])); sc_name = ([18:6-7], "\\E");
-         sc_tparams = []; sc_where_constraints = [];
+         sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
+         sc_kind = Cenum; sc_module = (Some ("another", []));
+         sc_name = ([18:6-7], "\\E"); sc_tparams = [];
+         sc_where_constraints = [];
          sc_extends =
          [(Rhint ([18:6-7]),
            (Tapply (([18:6-7], "\\HH\\BuiltinEnum"),

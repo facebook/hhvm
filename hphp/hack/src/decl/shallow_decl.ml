@@ -363,9 +363,11 @@ let class_DEPRECATED ctx c =
         te_includes = List.map e.e_includes ~f:hint;
       }
     in
+    let sc_abstract = Ast_defs.is_c_abstract c.c_kind in
     {
       sc_mode = c.c_mode;
       sc_final = c.c_final;
+      sc_abstract;
       sc_is_xhp = c.c_is_xhp;
       sc_has_xhp_keyword = c.c_has_xhp_keyword;
       sc_kind = c.c_kind;

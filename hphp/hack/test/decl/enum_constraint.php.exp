@@ -1,9 +1,9 @@
 [("\\A",
   (Shallow_decl_defs.Class
      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cenum;
-       sc_module = None; sc_name = ([3:6-7], "\\A"); sc_tparams = [];
-       sc_where_constraints = [];
+       sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
+       sc_kind = Cenum; sc_module = None; sc_name = ([3:6-7], "\\A");
+       sc_tparams = []; sc_where_constraints = [];
        sc_extends =
        [(Rhint ([3:6-7]),
          (Tapply (([3:6-7], "\\HH\\BuiltinEnum"),
@@ -29,9 +29,9 @@
   ("\\B",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-        sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cenum;
-        sc_module = None; sc_name = ([5:6-7], "\\B"); sc_tparams = [];
-        sc_where_constraints = [];
+        sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
+        sc_kind = Cenum; sc_module = None; sc_name = ([5:6-7], "\\B");
+        sc_tparams = []; sc_where_constraints = [];
         sc_extends =
         [(Rhint ([5:6-7]),
           (Tapply (([5:6-7], "\\HH\\BuiltinEnum"),
@@ -62,9 +62,9 @@
   ("\\C",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-        sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cenum;
-        sc_module = None; sc_name = ([7:6-7], "\\C"); sc_tparams = [];
-        sc_where_constraints = [];
+        sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
+        sc_kind = Cenum; sc_module = None; sc_name = ([7:6-7], "\\C");
+        sc_tparams = []; sc_where_constraints = [];
         sc_extends =
         [(Rhint ([7:6-7]),
           (Tapply (([7:6-7], "\\HH\\BuiltinEnum"),
@@ -97,9 +97,9 @@
   ("\\D",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-        sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cenum;
-        sc_module = None; sc_name = ([11:6-7], "\\D"); sc_tparams = [];
-        sc_where_constraints = [];
+        sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
+        sc_kind = Cenum; sc_module = None; sc_name = ([11:6-7], "\\D");
+        sc_tparams = []; sc_where_constraints = [];
         sc_extends =
         [(Rhint ([11:6-7]),
           (Tapply (([11:6-7], "\\HH\\BuiltinEnum"),
@@ -130,9 +130,9 @@
   ("\\E",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-        sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cenum;
-        sc_module = None; sc_name = ([13:6-7], "\\E"); sc_tparams = [];
-        sc_where_constraints = [];
+        sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
+        sc_kind = Cenum; sc_module = None; sc_name = ([13:6-7], "\\E");
+        sc_tparams = []; sc_where_constraints = [];
         sc_extends =
         [(Rhint ([13:6-7]),
           (Tapply (([13:6-7], "\\HH\\BuiltinEnum"),

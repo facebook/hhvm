@@ -1,7 +1,7 @@
 [("\\Foo",
   (Shallow_decl_defs.Class
      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-       sc_is_xhp = false; sc_has_xhp_keyword = false;
+       sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
        sc_kind = (Cclass Concrete); sc_module = None;
        sc_name = ([3:7-10], "\\Foo"); sc_tparams = [];
        sc_where_constraints = []; sc_extends = []; sc_uses = [];
@@ -14,9 +14,9 @@
   ("\\E",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-        sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cenum;
-        sc_module = None; sc_name = ([6:6-7], "\\E"); sc_tparams = [];
-        sc_where_constraints = [];
+        sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
+        sc_kind = Cenum; sc_module = None; sc_name = ([6:6-7], "\\E");
+        sc_tparams = []; sc_where_constraints = [];
         sc_extends =
         [(Rhint ([6:6-7]),
           (Tapply (([6:6-7], "\\HH\\BuiltinEnum"),

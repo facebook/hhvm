@@ -7,7 +7,7 @@
   ("\\MyFileNamespace\\MyClass",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-        sc_is_xhp = false; sc_has_xhp_keyword = false;
+        sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
         sc_kind = (Cclass Concrete); sc_module = None;
         sc_name = ([6:7-14], "\\MyFileNamespace\\MyClass"); sc_tparams = [];
         sc_where_constraints = []; sc_extends = []; sc_uses = [];

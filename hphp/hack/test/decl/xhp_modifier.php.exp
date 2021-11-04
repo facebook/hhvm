@@ -1,7 +1,7 @@
 [("\\foo",
   (Shallow_decl_defs.Class
      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-       sc_is_xhp = true; sc_has_xhp_keyword = true;
+       sc_abstract = false; sc_is_xhp = true; sc_has_xhp_keyword = true;
        sc_kind = (Cclass Concrete); sc_module = None;
        sc_name = ([3:11-14], "\\foo"); sc_tparams = [];
        sc_where_constraints = []; sc_extends = []; sc_uses = [];

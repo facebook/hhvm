@@ -44,7 +44,7 @@
   ("\\MyList",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-        sc_is_xhp = false; sc_has_xhp_keyword = false;
+        sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
         sc_kind = (Cclass Concrete); sc_module = None;
         sc_name = ([8:7-13], "\\MyList");
         sc_tparams =
@@ -62,7 +62,7 @@
   ("\\C",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-        sc_is_xhp = false; sc_has_xhp_keyword = false;
+        sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
         sc_kind = (Cclass Concrete); sc_module = (Some ("here", []));
         sc_name = ([11:7-8], "\\C"); sc_tparams = [];
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
@@ -113,7 +113,7 @@
   ("\\D",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-        sc_is_xhp = false; sc_has_xhp_keyword = false;
+        sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
         sc_kind = (Cclass Concrete); sc_module = (Some ("there", []));
         sc_name = ([32:7-8], "\\D"); sc_tparams = [];
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
@@ -132,7 +132,7 @@
   ("\\G",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-        sc_is_xhp = false; sc_has_xhp_keyword = false;
+        sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
         sc_kind = (Cclass Concrete); sc_module = (Some ("there", []));
         sc_name = ([35:7-8], "\\G");
         sc_tparams =
@@ -156,9 +156,10 @@
   ("\\E",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-        sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cenum;
-        sc_module = (Some ("there", [])); sc_name = ([38:6-7], "\\E");
-        sc_tparams = []; sc_where_constraints = [];
+        sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
+        sc_kind = Cenum; sc_module = (Some ("there", []));
+        sc_name = ([38:6-7], "\\E"); sc_tparams = [];
+        sc_where_constraints = [];
         sc_extends =
         [(Rhint ([38:6-7]),
           (Tapply (([38:6-7], "\\HH\\BuiltinEnum"),

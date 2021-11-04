@@ -1,7 +1,7 @@
 [("\\C",
   (Shallow_decl_defs.Class
      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-       sc_is_xhp = false; sc_has_xhp_keyword = false;
+       sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
        sc_kind = (Cclass Concrete); sc_module = None;
        sc_name = ([3:7-8], "\\C");
        sc_tparams =
@@ -19,7 +19,7 @@
   ("\\X",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
-        sc_is_xhp = false; sc_has_xhp_keyword = false;
+        sc_abstract = true; sc_is_xhp = false; sc_has_xhp_keyword = false;
         sc_kind = (Cclass Abstract); sc_module = None;
         sc_name = ([5:16-17], "\\X"); sc_tparams = [];
         sc_where_constraints = []; sc_extends = []; sc_uses = [];

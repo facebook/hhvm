@@ -402,9 +402,6 @@ bool shouldAttemptToFold(ISS& env, const php::Func* func, const FCallArgs& fca,
     return false;
   }
 
-  if (env.collect.unfoldableFuncs.count(std::make_pair(func, env.bid))) {
-    return false;
-  }
   if (maybeDynamic && (
       (RuntimeOption::EvalNoticeOnBuiltinDynamicCalls &&
        (func->attrs & AttrBuiltin)) ||

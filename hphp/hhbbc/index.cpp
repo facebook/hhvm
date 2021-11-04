@@ -267,24 +267,6 @@ inline MethTabEntryPair* mteFromIt(SStringToOneT<MethTabEntry>::iterator it) {
   return static_cast<MethTabEntryPair*>(&*it);
 }
 
-struct CallContextHashCompare {
-  bool equal(const CallContext& a, const CallContext& b) const {
-    return a == b;
-  }
-
-  size_t hash(const CallContext& c) const {
-    auto ret = folly::hash::hash_combine(
-      c.callee,
-      c.args.size(),
-      c.context.hash()
-    );
-    for (auto& t : c.args) {
-      ret = folly::hash::hash_combine(ret, t.hash());
-    }
-    return ret;
-  }
-};
-
 using ContextRetTyMap = tbb::concurrent_hash_map<
   CallContext,
   Type,
@@ -6063,9 +6045,9 @@ bool Index::func_depends_on_arg(const php::Func* func, int arg) const {
 }
 
 Type Index::lookup_foldable_return_type(Context ctx,
-                                        const php::Func* func,
-                                        Type ctxType,
-                                        CompactVector<Type> args) const {
+                                        const CallContext& calleeCtx) const {
+  auto const func = calleeCtx.callee;
+  auto const& ctxType = calleeCtx.context;
   constexpr auto max_interp_nexting_level = 2;
   static __thread uint32_t interp_nesting_level;
   static __thread Context base_ctx;
@@ -6078,12 +6060,6 @@ Type Index::lookup_foldable_return_type(Context ctx,
   if (finfo.effectFree && is_scalar(finfo.returnTy)) {
     return finfo.returnTy;
   }
-
-  auto const calleeCtx = CallContext {
-    func,
-    std::move(args),
-    std::move(ctxType)
-  };
 
   auto showArgs DEBUG_ONLY = [] (const CompactVector<Type>& a) {
     std::string ret, sep;

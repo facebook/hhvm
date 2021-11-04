@@ -3520,33 +3520,9 @@ bool fcallTryFold(
   assertx(!fca.hasUnpack() && !fca.hasGenerics() && fca.numRets() == 1);
   assertx(options.ConstantFoldBuiltins);
 
-  auto tried_lookup = false;
-  auto ty = [&] () {
-    if (foldableFunc->attrs & AttrBuiltin &&
-        foldableFunc->attrs & AttrIsFoldable) {
-      auto ret = const_fold(env, fca.numArgs(), numExtraInputs, *foldableFunc,
-                            false);
-      return ret ? *ret : TBottom;
-    }
-    CompactVector<Type> args(fca.numArgs());
-    auto const firstArgPos = numExtraInputs + fca.numInputs() - 1;
-    for (auto i = uint32_t{0}; i < fca.numArgs(); ++i) {
-      auto const& arg = topT(env, firstArgPos - i);
-      auto const isScalar = is_scalar(arg);
-      if (!isScalar &&
-          (env.index.func_depends_on_arg(foldableFunc, i) ||
-           !arg.subtypeOf(BInitCell))) {
-        return TBottom;
-      }
-      args[i] = isScalar ? scalarize(arg) : arg;
-    }
-
-    tried_lookup = true;
-    return env.index.lookup_foldable_return_type(
-      env.ctx, foldableFunc, context, std::move(args));
-  }();
-
-  if (auto v = tv(ty)) {
+  auto const finish = [&] (Type ty) {
+    auto const v = tv(ty);
+    if (!v) return false;
     BytecodeVec repl;
     for (uint32_t i = 0; i < numExtraInputs; ++i) repl.push_back(bc::PopC {});
     for (uint32_t i = 0; i < fca.numArgs(); ++i) repl.push_back(bc::PopC {});
@@ -3560,11 +3536,40 @@ bool fcallTryFold(
     repl.push_back(gen_constant(*v));
     reduce(env, std::move(repl));
     return true;
+  };
+
+  if (foldableFunc->attrs & AttrBuiltin &&
+      foldableFunc->attrs & AttrIsFoldable) {
+    auto ret = const_fold(env, fca.numArgs(), numExtraInputs, *foldableFunc,
+                          false);
+    if (!ret) return false;
+    return finish(std::move(*ret));
   }
 
-  if (tried_lookup) {
-    env.collect.unfoldableFuncs.emplace(foldableFunc, env.bid);
+  CompactVector<Type> args(fca.numArgs());
+  auto const firstArgPos = numExtraInputs + fca.numInputs() - 1;
+  for (auto i = uint32_t{0}; i < fca.numArgs(); ++i) {
+    auto const& arg = topT(env, firstArgPos - i);
+    auto const isScalar = is_scalar(arg);
+    if (!isScalar &&
+        (env.index.func_depends_on_arg(foldableFunc, i) ||
+         !arg.subtypeOf(BInitCell))) {
+      return false;
+    }
+    args[i] = isScalar ? scalarize(arg) : arg;
   }
+
+  auto calleeCtx = CallContext {
+    foldableFunc,
+    std::move(args),
+    std::move(context)
+  };
+  if (env.collect.unfoldableFuncs.count(calleeCtx)) return false;
+
+  if (finish(env.index.lookup_foldable_return_type(env.ctx, calleeCtx))) {
+    return true;
+  }
+  env.collect.unfoldableFuncs.emplace(std::move(calleeCtx));
   return false;
 }
 

@@ -811,9 +811,8 @@ struct Index {
    * return that constant; otherwise return TInitCell.
    */
   Type lookup_foldable_return_type(Context ctx,
-                                   const php::Func* func,
-                                   Type ctxType,
-                                   CompactVector<Type> args) const;
+                                   const CallContext& calleeCtx) const;
+
   /*
    * Return the best known return type for a resolved function, in a
    * context insensitive way.  Returns TInitCell at worst.

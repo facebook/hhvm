@@ -80,6 +80,29 @@ inline bool operator==(const CallContext& a, const CallContext& b) {
          equivalently_refined(a.context, b.context);
 }
 
+struct CallContextHasher {
+  size_t operator()(const CallContext& c) const {
+    auto ret = folly::hash::hash_combine(
+      c.callee,
+      c.args.size(),
+      c.context.hash()
+    );
+    for (auto& t : c.args) {
+      ret = folly::hash::hash_combine(ret, t.hash());
+    }
+    return ret;
+  }
+};
+
+struct CallContextHashCompare {
+  bool equal(const CallContext& a, const CallContext& b) const {
+    return a == b;
+  }
+  size_t hash(const CallContext& c) const {
+    return CallContextHasher{}(c);
+  }
+};
+
 //////////////////////////////////////////////////////////////////////
 
 /*

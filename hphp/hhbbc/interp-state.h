@@ -592,8 +592,7 @@ struct CollectedInfo {
   ClosureUseVarMap closureUseTypes;
   PropertiesInfo props;
   MethodsInfo methods;
-  hphp_fast_set<std::pair<const php::Func*, BlockId>>
-    unfoldableFuncs;
+  hphp_fast_set<CallContext, CallContextHasher> unfoldableFuncs;
   bool effectFree{true};
   bool hasInvariantIterBase{false};
   CollectionOpts opts{};

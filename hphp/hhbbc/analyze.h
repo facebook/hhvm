@@ -102,9 +102,9 @@ struct FuncAnalysisResult {
   bool hasInvariantIterBase{false};
 
   /*
-   * A set of pair of functions and their push blocks that we failed to fold.
+   * A set of call contexts that we failed to fold.
    */
-  hphp_fast_set<std::pair<const php::Func*, BlockId>> unfoldableFuncs;
+  hphp_fast_set<CallContext, CallContextHasher> unfoldableFuncs;
 
   /*
    * Bitset representing which parameters may affect the result of the

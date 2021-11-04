@@ -853,6 +853,9 @@ dependencies = [
 name = "external_decl_provider"
 version = "0.0.0"
 dependencies = [
+ "arena_deserializer",
+ "bincode",
+ "bumpalo",
  "decl_provider",
  "ffi",
  "libc",

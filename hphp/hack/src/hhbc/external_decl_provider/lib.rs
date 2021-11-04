@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use arena_deserializer::serde::Deserialize;
 use decl_provider::{self, DeclProvider};
 use libc::{c_char, c_int};
 use oxidized_by_ref::file_info::NameType;
@@ -70,7 +71,7 @@ pub struct ExternalDeclProvider<'decl>(
         *const c_char,           // The symbol
     ) -> ExternalDeclProviderResult<'decl>, // Possible payload: `*const Decl<'decl>` or, `const* Bytes`
     pub *const std::ffi::c_void,
-    pub std::marker::PhantomData<&'decl ()>,
+    &'decl bumpalo::Bump,
 );
 
 impl<'decl> DeclProvider<'decl> for ExternalDeclProvider<'decl> {
@@ -97,8 +98,24 @@ impl<'decl> DeclProvider<'decl> for ExternalDeclProvider<'decl> {
                 }
             }
             ExternalDeclProviderResult::Bytes(p) => {
-                let _bytes = unsafe { p.as_ref() }.unwrap();
-                unimplemented!()
+                let bytes: &ffi::Bytes = unsafe { p.as_ref() }.unwrap();
+                let arena = self.2;
+                let data = unsafe { std::slice::from_raw_parts(bytes.data, bytes.len) };
+                let op = bincode::config::Options::with_native_endian(bincode::options());
+                let mut de = bincode::de::Deserializer::from_slice(data, op);
+
+                let de = arena_deserializer::ArenaDeserializer::new(&arena, &mut de);
+                let decls = direct_decl_parser::Decls::deserialize(de)
+                    .map_err(|e| format!("failed to deserialize, error: {}", e))
+                    .unwrap();
+
+                let decl = decls
+                    .iter()
+                    .find_map(|(sym, decl)| if sym == symbol { Some(decl) } else { None });
+                match decl {
+                    None => Err(decl_provider::Error::NotFound),
+                    Some(decl) => Ok(decl),
+                }
             }
         }
     }
@@ -112,7 +129,8 @@ impl<'decl> ExternalDeclProvider<'decl> {
             *const c_char,
         ) -> ExternalDeclProviderResult<'decl>,
         decl_provider: *const std::ffi::c_void,
+        decl_allocator: &'decl bumpalo::Bump,
     ) -> Self {
-        Self(decl_getter, decl_provider, std::marker::PhantomData)
+        Self(decl_getter, decl_provider, decl_allocator)
     }
 }

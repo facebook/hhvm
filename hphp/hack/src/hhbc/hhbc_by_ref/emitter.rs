@@ -32,8 +32,6 @@ pub struct Emitter<'arena, 'decl> {
     pub global_state_: Option<GlobalState<'arena>>,
 
     pub decl_provider: DeclProvider<'decl>,
-
-    __phaton_data: std::marker::PhantomData<&'decl ()>,
 }
 
 impl<'arena, 'decl> Emitter<'arena, 'decl> {
@@ -57,8 +55,6 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
             statement_state_: None,
             symbol_refs_state_: None,
             global_state_: None,
-
-            __phaton_data: std::marker::PhantomData,
         }
     }
 

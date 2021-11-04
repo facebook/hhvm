@@ -289,6 +289,8 @@ fn hackc_compile_from_text_cpp_ffi<'a>(
         };
         let c_hhvm_provider_ptr =
             unsafe { std::mem::transmute::<*const (), *const std::ffi::c_void>(hhvm_provider_ptr) };
+
+        let decl_allocator = bumpalo::Bump::new();
         hhbc_by_ref_compile::from_text(
             &alloc,
             &compile_env,
@@ -299,6 +301,7 @@ fn hackc_compile_from_text_cpp_ffi<'a>(
             unified_decl_provider::DeclProvider::ExternalDeclProvider(ExternalDeclProvider::new(
                 c_decl_getter_fn,
                 c_hhvm_provider_ptr,
+                &decl_allocator,
             )),
         )?;
         Ok(output)
@@ -469,6 +472,8 @@ fn hackc_compile_hhas_from_text_cpp_ffi(
         };
         let c_hhvm_provider_ptr =
             unsafe { std::mem::transmute::<*const (), *const std::ffi::c_void>(hhvm_provider_ptr) };
+
+        let decl_allocator = bumpalo::Bump::new();
         let compile_result = hhbc_by_ref_compile::hhas_from_text(
             alloc,
             &compile_env,
@@ -478,8 +483,10 @@ fn hackc_compile_hhas_from_text_cpp_ffi(
             unified_decl_provider::DeclProvider::ExternalDeclProvider(ExternalDeclProvider::new(
                 c_decl_getter_fn,
                 c_hhvm_provider_ptr,
+                &decl_allocator,
             )),
         );
+
         match compile_result {
             Ok((hhas_prog, _)) => Ok(Box::new(HhasProgramWrapper(hhas_prog, bump))),
             Err(e) => Err(anyhow!("{}", e)),

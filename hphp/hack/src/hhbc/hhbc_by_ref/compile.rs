@@ -389,13 +389,13 @@ fn rewrite<'p, 'arena, 'decl>(
     rewrite_program(alloc, emitter, ast, namespace_env)
 }
 
-pub fn hhas_from_text<'arena, S: AsRef<str>>(
+pub fn hhas_from_text<'arena, 'decl, S: AsRef<str>>(
     alloc: &'arena bumpalo::Bump,
     env: &Env<S>,
     stack_limit: &StackLimit,
     source_text: SourceText<'_>,
     native_env: Option<&NativeEnv<S>>,
-    decl_provider: unified_decl_provider::DeclProvider<'arena>,
+    decl_provider: unified_decl_provider::DeclProvider<'decl>,
 ) -> anyhow::Result<(HhasProgram<'arena>, Option<Profile>)> {
     let mut emitter = create_emitter(env, native_env, decl_provider)?;
     emit_prog_from_text(alloc, &mut emitter, env, stack_limit, source_text)

@@ -1,8 +1,8 @@
 <?hh
 
 function f(int $i): string {
-  unsafe_cast(); // ignored
-  $j = unsafe_cast<int, string>($i); // compiles to $j = $i;
+  HH\FIXME\UNSAFE_CAST(); // ignored
+  $j = HH\FIXME\UNSAFE_CAST<int, string>($i); // compiles to $j = $i;
   return $j; // TypeHintViolation
 }
 

@@ -11,6 +11,7 @@ type env = {
   from: string;
   rageid: string option;
   desc: string;
+  lsp_log: string option;
 }
 
 let main _ = Exit.exit Exit_status.No_error

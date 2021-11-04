@@ -984,6 +984,7 @@ let parse_rage_args () =
   let from = ref "" in
   let desc = ref None in
   let rageid = ref None in
+  let lsp_log = ref None in
   let options =
     [
       Common_argspecs.from from;
@@ -991,6 +992,9 @@ let parse_rage_args () =
       ( "--rageid",
         Arg.String (fun s -> rageid := Some s),
         " (optional) use this id, and finish even if parent process dies" );
+      ( "--lsp-log",
+        Arg.String (fun s -> lsp_log := Some s),
+        " (optional) gather lsp logs from this filename" );
     ]
   in
   let args = parse_without_command options usage "rage" in
@@ -1086,7 +1090,14 @@ let parse_rage_args () =
       end;
       response
   in
-  CRage { ClientRage.root; from = !from; desc; rageid = !rageid }
+  CRage
+    {
+      ClientRage.root;
+      from = !from;
+      desc;
+      rageid = !rageid;
+      lsp_log = !lsp_log;
+    }
 
 let parse_download_saved_state_args () =
   let usage =

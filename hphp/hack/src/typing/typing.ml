@@ -4353,65 +4353,53 @@ and expr_
               FL.Lambda.non_function_typed_context;
             check_body_under_known_params env declared_ft
           | None ->
-            (* If we're in partial mode then type-check definition anyway,
-             * so treating parameters without type hints as "untyped"
-             *)
-            if not (Env.is_strict env) then (
-              Typing_log.increment_feature_count
-                env
-                FL.Lambda.non_strict_unknown_params;
-              check_body_under_known_params env declared_ft
-            ) else (
-              Typing_log.increment_feature_count
-                env
-                FL.Lambda.fresh_tyvar_params;
+            Typing_log.increment_feature_count env FL.Lambda.fresh_tyvar_params;
 
-              (* Replace uses of Tany that originated from "untyped" parameters or return type
-               * with fresh type variables *)
-              let freshen_ftype env ft =
-                let freshen_ty env pos et =
-                  match get_node et.et_type with
-                  | Tany _ ->
-                    let (env, ty) = Env.fresh_type env pos in
-                    (env, { et with et_type = ty })
-                  | Tclass (id, e, [ty])
-                    when String.equal (snd id) SN.Classes.cAwaitable
-                         && is_any ty ->
-                    let (env, t) = Env.fresh_type env pos in
-                    ( env,
-                      {
-                        et with
-                        et_type = mk (get_reason et.et_type, Tclass (id, e, [t]));
-                      } )
-                  | _ -> (env, et)
-                in
-                let freshen_untyped_param env ft_param =
-                  let (env, fp_type) =
-                    freshen_ty
-                      env
-                      (Pos_or_decl.unsafe_to_raw_pos ft_param.fp_pos)
-                      ft_param.fp_type
-                  in
-                  (env, { ft_param with fp_type })
-                in
-                let (env, ft_params) =
-                  List.map_env env ft.ft_params ~f:freshen_untyped_param
-                in
-                let (env, ft_ret) = freshen_ty env f.f_span ft.ft_ret in
-                (env, { ft with ft_params; ft_ret })
+            (* Replace uses of Tany that originated from "untyped" parameters or return type
+             * with fresh type variables *)
+            let freshen_ftype env ft =
+              let freshen_ty env pos et =
+                match get_node et.et_type with
+                | Tany _ ->
+                  let (env, ty) = Env.fresh_type env pos in
+                  (env, { et with et_type = ty })
+                | Tclass (id, e, [ty])
+                  when String.equal (snd id) SN.Classes.cAwaitable && is_any ty
+                  ->
+                  let (env, t) = Env.fresh_type env pos in
+                  ( env,
+                    {
+                      et with
+                      et_type = mk (get_reason et.et_type, Tclass (id, e, [t]));
+                    } )
+                | _ -> (env, et)
               in
-              let (env, declared_ft) = freshen_ftype env declared_ft in
-              let env =
-                Env.set_tyvar_variance env (mk (Reason.Rnone, Tfun declared_ft))
+              let freshen_untyped_param env ft_param =
+                let (env, fp_type) =
+                  freshen_ty
+                    env
+                    (Pos_or_decl.unsafe_to_raw_pos ft_param.fp_pos)
+                    ft_param.fp_type
+                in
+                (env, { ft_param with fp_type })
               in
-              (* TODO(jjwu): the declared_ft here is set to public,
-                 but is actually inferred from the surrounding context
-                 (don't think this matters in practice, since we check lambdas separately) *)
-              check_body_under_known_params
-                env
-                ~ret_ty:declared_ft.ft_ret.et_type
-                declared_ft
-            )
+              let (env, ft_params) =
+                List.map_env env ft.ft_params ~f:freshen_untyped_param
+              in
+              let (env, ft_ret) = freshen_ty env f.f_span ft.ft_ret in
+              (env, { ft with ft_params; ft_ret })
+            in
+            let (env, declared_ft) = freshen_ftype env declared_ft in
+            let env =
+              Env.set_tyvar_variance env (mk (Reason.Rnone, Tfun declared_ft))
+            in
+            (* TODO(jjwu): the declared_ft here is set to public,
+               but is actually inferred from the surrounding context
+               (don't think this matters in practice, since we check lambdas separately) *)
+            check_body_under_known_params
+              env
+              ~ret_ty:declared_ft.ft_ret.et_type
+              declared_ft
         )
     end
   | Xml (sid, attrl, el) ->

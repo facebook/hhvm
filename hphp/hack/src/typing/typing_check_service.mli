@@ -20,7 +20,6 @@ val should_enable_deferring :
   GlobalOptions.t -> Typing_service_types.check_file_computation -> bool
 
 val process_file :
-  Relative_path.Set.t ->
   Provider_context.t ->
   Errors.t ->
   Typing_service_types.check_file_computation ->
@@ -39,7 +38,6 @@ val go :
   MultiWorker.worker list option ->
   Typing_service_delegate.state ->
   Telemetry.t ->
-  Relative_path.Set.t ->
   Relative_path.t list ->
   memory_cap:int option ->
   longlived_workers:bool ->
@@ -56,7 +54,6 @@ val go_with_interrupt :
   MultiWorker.worker list option ->
   Typing_service_delegate.state ->
   Telemetry.t ->
-  Relative_path.Set.t ->
   Relative_path.t list ->
   interrupt:'env MultiWorker.interrupt_config ->
   memory_cap:int option ->

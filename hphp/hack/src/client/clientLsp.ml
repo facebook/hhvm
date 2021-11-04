@@ -34,10 +34,6 @@ let from = ref "[init]"
 (** This gets initialized in the initialize request *)
 let ref_local_config : ServerLocalConfig.t option ref = ref None
 
-(** We cache the state of the typecoverageToggle button, so that when Hack restarts,
-  dynamic view stays in sync with the button in Nuclide *)
-let cached_toggle_state = ref false
-
 (************************************************************************)
 (* Protocol orchestration & helpers                                     *)
 (************************************************************************)
@@ -1177,7 +1173,6 @@ let start_server ~(env : env) (root : Path.t) : unit =
       mini_state = None;
       save_64bit = None;
       save_human_readable_64bit_dep_map = None;
-      dynamic_view = !cached_toggle_state;
       prechecked = None;
       config = env.args.config;
       custom_telemetry_data = [];
@@ -2188,17 +2183,6 @@ let do_rageFB (state : state) : RageFB.result Lwt.t =
       server_state
   in
   Lwt.return [{ RageFB.title = None; data }]
-
-let do_toggleTypeCoverageFB
-    (conn : server_conn)
-    (ref_unblocked_time : float ref)
-    (params : ToggleTypeCoverageFB.params) : unit Lwt.t =
-  (* Currently, the only thing to do on toggling type coverage is turn on dynamic view *)
-  let command =
-    ServerCommandTypes.DYNAMIC_VIEW params.ToggleTypeCoverageFB.toggle
-  in
-  cached_toggle_state := params.ToggleTypeCoverageFB.toggle;
-  rpc conn ref_unblocked_time ~desc:"coverage" command
 
 let do_didOpen
     (conn : server_conn)
@@ -4580,14 +4564,6 @@ let handle_client_message
           result_count = List.length result.TypeCoverageFB.uncoveredRanges;
           result_extra_telemetry = None;
         }
-    (* textDocument/toggleTypeCoverage *)
-    | ( Main_loop menv,
-        _,
-        NotificationMessage (ToggleTypeCoverageNotificationFB params) ) ->
-      let%lwt () =
-        do_toggleTypeCoverageFB menv.conn ref_unblocked_time params
-      in
-      Lwt.return_none
     (* textDocument/signatureHelp notification *)
     | (Main_loop menv, _, RequestMessage (id, SignatureHelpRequest params)) ->
       let%lwt result = do_signatureHelp menv.conn ref_unblocked_time params in

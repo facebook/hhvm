@@ -228,7 +228,6 @@ let make_remote_server_api
           workers
           Typing_service_delegate.default
           (Telemetry.create ())
-          Relative_path.Set.empty
           files_to_check
           ~memory_cap:None
           ~longlived_workers:false

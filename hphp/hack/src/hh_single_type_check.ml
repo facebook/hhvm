@@ -191,7 +191,6 @@ let parse_options () =
   let deregister_attributes = ref None in
   let disallow_array_typehint = ref None in
   let disallow_array_literal = ref None in
-  let dynamic_view = ref None in
   let auto_namespace_map = ref None in
   let log_inference_constraints = ref None in
   let timeout = ref None in
@@ -432,9 +431,6 @@ let parse_options () =
       ( "--disallow-array-literal",
         Arg.Unit (set_bool disallow_array_literal),
         " Disallow usage of array literals." );
-      ( "--dynamic-view",
-        Arg.Unit (set_bool dynamic_view),
-        " Turns on dynamic view, replacing Tany with dynamic" );
       ( "--get-member",
         Arg.String
           (fun class_and_member_id ->
@@ -772,7 +768,6 @@ let parse_options () =
       ?po_deregister_php_stdlib:!deregister_attributes
       ?tco_disallow_array_typehint:!disallow_array_typehint
       ?tco_disallow_array_literal:!disallow_array_literal
-      ?tco_dynamic_view:!dynamic_view
       ?tco_log_inference_constraints:!log_inference_constraints
       ?tco_timeout:!timeout
       ?po_auto_namespace_map:!auto_namespace_map

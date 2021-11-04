@@ -21,7 +21,6 @@ type env = {
   save_64bit: string option;
   save_human_readable_64bit_dep_map: string option;
   saved_state_ignore_hhconfig: bool;
-  dynamic_view: bool;
   prechecked: bool option;
   mini_state: string option;
   config: (string * string) list;

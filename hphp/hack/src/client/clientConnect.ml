@@ -477,7 +477,6 @@ let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
               save_64bit;
               save_human_readable_64bit_dep_map;
               saved_state_ignore_hhconfig;
-              dynamic_view = false;
               prechecked;
               mini_state;
               config;

@@ -54,7 +54,6 @@ let test () =
 
   (* Local caches need to be invalidated whenever things are removed from shared
    * memory (to avoid getting cached old versions of declarations) *)
-  let empty = Relative_path.Set.empty in
   let memory_cap = None in
   let check_info =
     {
@@ -74,7 +73,6 @@ let test () =
       None
       delegate_state
       (Telemetry.create ())
-      empty
       [bar_path]
       ~memory_cap
       ~longlived_workers:false
@@ -89,7 +87,6 @@ let test () =
       None
       delegate_state
       telemetry
-      empty
       [bar_path]
       ~memory_cap
       ~longlived_workers:false
@@ -105,7 +102,6 @@ let test () =
       None
       delegate_state
       telemetry
-      empty
       [foo_path]
       ~memory_cap
       ~longlived_workers:false
@@ -120,7 +116,6 @@ let test () =
       None
       delegate_state
       telemetry
-      empty
       [foo_path]
       ~memory_cap
       ~longlived_workers:false

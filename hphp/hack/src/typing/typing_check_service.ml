@@ -161,7 +161,6 @@ let scrape_class_names (ast : Nast.program) : SSet.t =
   !names
 
 let process_file
-    (dynamic_view_files : Relative_path.Set.t)
     (ctx : Provider_context.t)
     (errors : Errors.t)
     (file : check_file_computation) : process_file_results =
@@ -170,13 +169,7 @@ let process_file
   if not (Errors.is_empty errors') then
     { errors = Errors.merge errors' errors; deferred_decls = [] }
   else
-    let opts =
-      {
-        (Provider_context.get_tcopt ctx) with
-        GlobalOptions.tco_dynamic_view =
-          Relative_path.Set.mem dynamic_view_files fn;
-      }
-    in
+    let opts = Provider_context.get_tcopt ctx in
     let (funs, classes, record_defs, typedefs, gconsts) = Nast.get_defs ast in
     let ctx = Provider_context.map_tcopt ctx ~f:(fun _tcopt -> opts) in
     let ignore_type_record_def opts fn name =
@@ -398,7 +391,6 @@ let clear_caches_and_force_gc () =
   hh_malloc_trim ()
 
 let process_files
-    (dynamic_view_files : Relative_path.Set.t)
     (ctx : Provider_context.t)
     ({
        errors;
@@ -470,9 +462,7 @@ let process_files
       let (errors, deferred, tally) =
         match fn with
         | Check file ->
-          let process_file () =
-            process_file dynamic_view_files ctx errors file
-          in
+          let process_file () = process_file ctx errors file in
           let result =
             if check_info.profile_log then (
               let start_counters = read_counters () in
@@ -627,7 +617,6 @@ let process_files
 
 let load_and_process_files
     (ctx : Provider_context.t)
-    (dynamic_view_files : Relative_path.Set.t)
     (typing_result : typing_result)
     (progress : computation_progress)
     ~(memory_cap : int option)
@@ -640,7 +629,6 @@ let load_and_process_files
     Sys.sigusr1
     (Sys.Signal_handle Typing.debug_print_last_pos);
   process_files
-    dynamic_view_files
     ctx
     typing_result
     progress
@@ -910,7 +898,6 @@ let on_cancelled
 let process_in_parallel
     ?diagnostic_pusher
     (ctx : Provider_context.t)
-    (dynamic_view_files : Relative_path.Set.t)
     (workers : MultiWorker.worker list option)
     (delegate_state : Delegate.state)
     (telemetry : Telemetry.t)
@@ -962,7 +949,6 @@ let process_in_parallel
   let job =
     load_and_process_files
       ctx
-      dynamic_view_files
       ~memory_cap
       ~longlived_workers
       ~remote_execution
@@ -1022,20 +1008,14 @@ let process_in_parallel
     (!diagnostic_pusher, !time_first_error) )
 
 let process_sequentially
-    ?diagnostic_pusher
-    ctx
-    fnl
-    dynamic_view_files
-    ~longlived_workers
-    ~remote_execution
-    ~check_info :
-    typing_result * (Diagnostic_pusher.t option * seconds_since_epoch option) =
+    ?diagnostic_pusher ctx fnl ~longlived_workers ~remote_execution ~check_info
+    : typing_result * (Diagnostic_pusher.t option * seconds_since_epoch option)
+    =
   let progress =
     { completed = []; remaining = BigList.as_list fnl; deferred = [] }
   in
   let (typing_result, progress) =
     process_files
-      dynamic_view_files
       ctx
       (neutral ())
       progress
@@ -1128,7 +1108,6 @@ let go_with_interrupt
     (workers : MultiWorker.worker list option)
     (delegate_state : Delegate.state)
     (telemetry : Telemetry.t)
-    (dynamic_view_files : Relative_path.Set.t)
     (fnl : Relative_path.t list)
     ~(interrupt : 'a MultiWorker.interrupt_config)
     ~(memory_cap : int option)
@@ -1175,7 +1154,6 @@ let go_with_interrupt
           ?diagnostic_pusher
           ctx
           fnl
-          dynamic_view_files
           ~longlived_workers
           ~remote_execution
           ~check_info
@@ -1205,7 +1183,6 @@ let go_with_interrupt
       process_in_parallel
         ?diagnostic_pusher
         ctx
-        dynamic_view_files
         workers
         delegate_state
         telemetry
@@ -1271,7 +1248,6 @@ let go
     (workers : MultiWorker.worker list option)
     (delegate_state : Delegate.state)
     (telemetry : Telemetry.t)
-    (dynamic_view_files : Relative_path.Set.t)
     (fnl : Relative_path.t list)
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
@@ -1286,7 +1262,6 @@ let go
       workers
       delegate_state
       telemetry
-      dynamic_view_files
       fnl
       ~interrupt
       ~memory_cap

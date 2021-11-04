@@ -99,7 +99,6 @@ let parse_check_args cmd =
   let autostart = ref true in
   let config = ref [] in
   let custom_telemetry_data = ref [] in
-  let dynamic_view = ref false in
   let error_format = ref Errors.Highlighted in
   let force_dormant_start = ref false in
   let format_from = ref 0 in
@@ -248,9 +247,6 @@ let parse_check_args cmd =
          *    ]
          *  Note: results list can be in any order *)
         "" );
-      ( "--dynamic-view",
-        Arg.Set dynamic_view,
-        " Replace occurrences of untyped code with dynamic" );
       ( "--error-format",
         Arg.String
           (fun s ->
@@ -805,7 +801,6 @@ let parse_check_args cmd =
       autostart = !autostart;
       config = !config;
       custom_telemetry_data = !custom_telemetry_data;
-      dynamic_view = !dynamic_view;
       error_format = !error_format;
       force_dormant_start = !force_dormant_start;
       from = !from;
@@ -909,7 +904,6 @@ let parse_start_env command =
     ClientStart.ai_mode = !ai_mode;
     config = !config;
     custom_telemetry_data = !custom_telemetry_data;
-    dynamic_view = false;
     exit_on_failure = true;
     from = !from;
     ignore_hh_version = !ignore_hh_version;

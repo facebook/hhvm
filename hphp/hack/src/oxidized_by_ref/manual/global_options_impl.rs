@@ -8,7 +8,6 @@ use crate::{gen::global_options::GlobalOptions, i_set, s_map, s_set};
 const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     tco_experimental_features: s_set::SSet::empty(),
     tco_migration_flags: s_set::SSet::empty(),
-    tco_dynamic_view: false,
     tco_num_local_workers: None,
     tco_parallel_type_checking_threshold: 10,
     tco_max_typechecker_worker_memory_mb: None,

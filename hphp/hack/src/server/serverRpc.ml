@@ -96,26 +96,19 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     let path = Relative_path.create_detect_prefix path in
     let (ctx, entry) = single_ctx env path file_input in
     (env, ServerColorFile.go_quarantined ~ctx ~entry)
-  | INFER_TYPE (file_input, line, column, dynamic_view) ->
+  | INFER_TYPE (file_input, line, column) ->
     let path =
       match file_input with
       | FileName fn -> Relative_path.create_detect_prefix fn
       | FileContent _ -> Relative_path.create_detect_prefix ""
     in
     let (ctx, entry) = single_ctx env path file_input in
-    let ctx =
-      Provider_context.map_tcopt ctx ~f:(fun tcopt ->
-          { tcopt with GlobalOptions.tco_dynamic_view = dynamic_view })
-    in
     let result =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           ServerInferType.go_ctx ~ctx ~entry ~line ~column)
     in
     (env, result)
-  | INFER_TYPE_BATCH (positions, dynamic_view) ->
-    let tcopt = env.ServerEnv.tcopt in
-    let tcopt = { tcopt with GlobalOptions.tco_dynamic_view = dynamic_view } in
-    let env = { env with tcopt } in
+  | INFER_TYPE_BATCH positions ->
     (env, ServerInferTypeBatch.go genv.workers positions env)
   | TAST_HOLES (file_input, hole_filter) ->
     let path =
@@ -499,7 +492,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       |> FileOutline.outline env.popt )
   | IDE_IDLE -> ({ env with ide_idle = true }, ())
   | RAGE -> (env, ServerRage.go genv env)
-  | DYNAMIC_VIEW toggle -> (ServerFileSync.toggle_dynamic_view env toggle, ())
   | CST_SEARCH { sort_results; input; files_to_search } ->
     begin
       try
@@ -526,10 +518,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     (env, ServerHotClasses.go genv.workers env threshold)
   | GEN_PREFETCH_DIR dir ->
     (env, ServerGenPrefetchDir.go env genv dir genv.workers)
-  | FUN_DEPS_BATCH (positions, dynamic_view) ->
-    let tcopt = env.ServerEnv.tcopt in
-    let tcopt = { tcopt with GlobalOptions.tco_dynamic_view = dynamic_view } in
-    let env = { env with tcopt } in
+  | FUN_DEPS_BATCH positions ->
     (env, ServerFunDepsBatch.go genv.workers positions env)
   | LIST_FILES_WITH_ERRORS -> (env, ServerEnv.list_files env)
   | FILE_DEPENDENTS filenames ->

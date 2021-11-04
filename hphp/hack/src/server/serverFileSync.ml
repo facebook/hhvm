@@ -226,7 +226,3 @@ let get_unsaved_changes env =
 
 let has_unsaved_changes env =
   not @@ Relative_path.Map.is_empty (get_unsaved_changes env)
-
-let toggle_dynamic_view (env : env) (t : bool) : env =
-  ServerDynamicView.toggle := t;
-  { env with ide_needs_parsing = env.editor_open_files }

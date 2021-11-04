@@ -624,14 +624,7 @@ let mk_tany env p = mk (Reason.Rwitness p, tany env)
 
 let mk_tany_ env p = mk (Reason.Rwitness_from_decl p, tany env)
 
-let terr env r =
-  let dynamic_view_enabled =
-    TypecheckerOptions.dynamic_view (Typing_env.get_tcopt env)
-  in
-  if dynamic_view_enabled then
-    MakeType.dynamic r
-  else
-    MakeType.err r
+let terr _env r = MakeType.err r
 
 let collect_enum_class_upper_bounds env name =
   (* the boolean ok is here to see if we find anything at all,

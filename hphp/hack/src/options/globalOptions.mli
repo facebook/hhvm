@@ -18,8 +18,6 @@ type t = {
   tco_experimental_features: SSet.t;
   (* Set of opt-in migration behavior flags, in lowercase. *)
   tco_migration_flags: SSet.t;
-  (* Whether to treat Tany as Tdynamic *)
-  tco_dynamic_view: bool;
   (* If set to 0, only the type check delegate's logic will be used.
      If the delegate fails to type check, the typing check service as a whole
      will fail. *)
@@ -339,7 +337,6 @@ val make :
   ?tco_log_inference_constraints:bool ->
   ?tco_experimental_features:SSet.t ->
   ?tco_migration_flags:SSet.t ->
-  ?tco_dynamic_view:bool ->
   ?tco_num_local_workers:int ->
   ?tco_parallel_type_checking_threshold:int ->
   ?tco_max_typechecker_worker_memory_mb:int ->
@@ -469,8 +466,6 @@ val make :
 val tco_experimental_feature_enabled : t -> SSet.elt -> bool
 
 val tco_migration_flag_enabled : t -> SSet.elt -> bool
-
-val tco_dynamic_view : t -> bool
 
 val tco_num_local_workers : t -> int option
 

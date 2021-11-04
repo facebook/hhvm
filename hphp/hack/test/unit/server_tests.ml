@@ -84,14 +84,13 @@ let test_process_file_deferring () =
     Common_setup.setup ~sqlite:false tcopt_with_defer
   in
   let file = Typing_service_types.{ path = foo_path; deferred_count = 0 } in
-  let dynamic_view_files = Relative_path.Set.empty in
   let errors = Errors.empty in
 
   (* Finally, this is what all the setup was for: process this file *)
   Decl_counters.set_mode Typing_service_types.DeclingTopCounts;
   let prev_counter_state = Counters.reset () in
   let { Typing_check_service.deferred_decls; _ } =
-    Typing_check_service.process_file dynamic_view_files ctx errors file
+    Typing_check_service.process_file ctx errors file
   in
   Counters.restore_state prev_counter_state;
 

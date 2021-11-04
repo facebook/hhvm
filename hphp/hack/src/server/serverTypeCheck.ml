@@ -1087,12 +1087,6 @@ functor
       let telemetry = Telemetry.create () in
       if Relative_path.(Set.mem files_to_check default) then
         Hh_logger.log "WARNING: rechecking defintion in a dummy file";
-      let dynamic_view_files =
-        if ServerDynamicView.dynamic_view_on () then
-          env.editor_open_files
-        else
-          Relative_path.Set.empty
-      in
       let interrupt = get_interrupt_config genv env in
       let memory_cap =
         genv.local_config.ServerLocalConfig.max_typechecker_worker_memory_mb
@@ -1126,7 +1120,6 @@ functor
             genv.workers
             env.typing_service.delegate_state
             telemetry
-            dynamic_view_files
             (files_to_check |> Relative_path.Set.elements)
             ~interrupt
             ~memory_cap

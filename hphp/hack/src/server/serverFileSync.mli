@@ -40,5 +40,3 @@ val has_unsaved_changes : ServerEnv.env -> bool
 (** Determine which files are different in the IDE and on disk.
     Returns a map from filename to a tuple of ide contents and disk contents. *)
 val get_unsaved_changes : ServerEnv.env -> (string * string) Relative_path.Map.t
-
-val toggle_dynamic_view : ServerEnv.env -> bool -> ServerEnv.env

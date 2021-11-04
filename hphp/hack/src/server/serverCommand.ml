@@ -85,7 +85,6 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | OUTLINE _ -> false
   | IDE_IDLE -> false
   | RAGE -> false
-  | DYNAMIC_VIEW _ -> false
   | CST_SEARCH _ -> false
   | SEARCH _ -> false
   | OPEN_FILE _ -> false

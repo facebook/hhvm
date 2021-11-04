@@ -1314,7 +1314,6 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
   Hh_logger.log "Version: %s" Hh_version.version;
   Hh_logger.log "Hostname: %s" (Unix.gethostname ());
   let root = ServerArgs.root options in
-  ServerDynamicView.toggle := ServerArgs.dynamic_view options;
 
   let deps_mode =
     match ServerArgs.save_64bit options with

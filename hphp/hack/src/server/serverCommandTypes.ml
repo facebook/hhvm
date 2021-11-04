@@ -348,9 +348,9 @@ type _ t =
       string * int option
       -> (Errors.finalized_error list * int) t
   | STATUS_MULTI_REMOTE_EXECUTION : string list -> (string * string) t
-  | INFER_TYPE : file_input * int * int * bool -> InferAtPosService.result t
+  | INFER_TYPE : file_input * int * int -> InferAtPosService.result t
   | INFER_TYPE_BATCH :
-      (string * int * int * (int * int) option) list * bool
+      (string * int * int * (int * int) option) list
       -> string list t
   | INFER_TYPE_ERROR : file_input * int * int -> InferErrorAtPosService.result t
   | TAST_HOLES : file_input * Tast_hole.filter -> TastHolesService.result t
@@ -426,12 +426,11 @@ type _ t =
   | OUTLINE : string -> Outline.outline t
   | IDE_IDLE : unit t
   | RAGE : ServerRageTypes.result t
-  | DYNAMIC_VIEW : bool -> unit t
   | CST_SEARCH : cst_search_input -> (Hh_json.json, string) result t
   | NO_PRECHECKED_FILES : unit t
   | GEN_HOT_CLASSES : int -> string t
   | GEN_PREFETCH_DIR : string -> unit t
-  | FUN_DEPS_BATCH : (string * int * int) list * bool -> string list t
+  | FUN_DEPS_BATCH : (string * int * int) list -> string list t
   | LIST_FILES_WITH_ERRORS : string list t
   | FILE_DEPENDENTS : string list -> string list t
   | IDENTIFY_TYPES : labelled_file * int * int -> (Pos.absolute * string) list t

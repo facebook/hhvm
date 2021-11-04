@@ -59,7 +59,6 @@ let debug_describe_t : type a. a t -> string = function
   | OUTLINE _ -> "OUTLINE"
   | IDE_IDLE -> "IDE_IDLE"
   | RAGE -> "RAGE"
-  | DYNAMIC_VIEW _ -> "DYNAMIC_VIEW"
   | CST_SEARCH _ -> "CST_SEARCH"
   | NO_PRECHECKED_FILES -> "NO_PRECHECKED_FILES"
   | GEN_HOT_CLASSES _ -> "GEN_HOT_CLASSES"

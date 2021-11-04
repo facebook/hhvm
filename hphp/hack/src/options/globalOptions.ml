@@ -10,7 +10,6 @@
 type t = {
   tco_experimental_features: SSet.t;
   tco_migration_flags: SSet.t;
-  tco_dynamic_view: bool;
   tco_num_local_workers: int option;
   tco_parallel_type_checking_threshold: int;
   tco_max_typechecker_worker_memory_mb: int option;
@@ -210,7 +209,6 @@ let default =
        * from hhconfig, which defaults to empty. *)
     tco_experimental_features = tco_experimental_all;
     tco_migration_flags = SSet.empty;
-    tco_dynamic_view = false;
     tco_num_local_workers = None;
     tco_parallel_type_checking_threshold = 10;
     tco_max_typechecker_worker_memory_mb = None;
@@ -349,7 +347,6 @@ let make
     ?(tco_log_inference_constraints = default.tco_log_inference_constraints)
     ?(tco_experimental_features = default.tco_experimental_features)
     ?(tco_migration_flags = default.tco_migration_flags)
-    ?(tco_dynamic_view = default.tco_dynamic_view)
     ?tco_num_local_workers
     ?(tco_parallel_type_checking_threshold =
       default.tco_parallel_type_checking_threshold)
@@ -502,7 +499,6 @@ let make
   {
     tco_experimental_features;
     tco_migration_flags;
-    tco_dynamic_view;
     tco_num_local_workers;
     tco_parallel_type_checking_threshold;
     tco_max_typechecker_worker_memory_mb;
@@ -637,8 +633,6 @@ let tco_experimental_feature_enabled t s =
   SSet.mem s t.tco_experimental_features
 
 let tco_migration_flag_enabled t s = SSet.mem s t.tco_migration_flags
-
-let tco_dynamic_view t = t.tco_dynamic_view
 
 let tco_num_local_workers t = t.tco_num_local_workers
 

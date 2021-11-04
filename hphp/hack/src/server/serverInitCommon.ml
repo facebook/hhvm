@@ -238,7 +238,6 @@ let type_check
         genv.workers
         env.typing_service.delegate_state
         (Telemetry.create ())
-        Relative_path.Set.empty
         files_to_check
         ~memory_cap
         ~longlived_workers

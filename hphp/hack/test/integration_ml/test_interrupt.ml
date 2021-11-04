@@ -96,7 +96,6 @@ let test () =
       workers
       Typing_service_delegate.default
       (Telemetry.create ())
-      Relative_path.Set.empty
       fnl
       ~interrupt
       ~memory_cap:None

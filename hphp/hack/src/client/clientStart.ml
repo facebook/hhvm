@@ -38,7 +38,6 @@ type env = {
   save_64bit: string option;
   save_human_readable_64bit_dep_map: string option;
   saved_state_ignore_hhconfig: bool;
-  dynamic_view: bool;
   prechecked: bool option;
   mini_state: string option;
   config: (string * string) list;
@@ -92,7 +91,6 @@ let start_server (env : env) =
     save_64bit;
     save_human_readable_64bit_dep_map;
     saved_state_ignore_hhconfig;
-    dynamic_view;
     prechecked;
     mini_state;
     config;
@@ -168,10 +166,7 @@ let start_server (env : env) =
         (match save_human_readable_64bit_dep_map with
         | None -> [||]
         | Some dest -> [| "--save-human-readable-64bit-dep-map"; dest |]);
-        (if dynamic_view then
-          [| "--dynamic-view" |]
-        else
-          [||]);
+        [||];
         (match prechecked with
         | Some true -> [| "--prechecked" |]
         | _ -> [||]);

@@ -44,8 +44,6 @@ module type S = sig
 
   val dump_fanout : options -> bool
 
-  val dynamic_view : options -> bool
-
   val enable_ifc : options -> string list
 
   val from : options -> string

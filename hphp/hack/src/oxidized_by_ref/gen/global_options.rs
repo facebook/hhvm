@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<900ef7ba74935f6617f3b7c88e20558d>>
+// @generated SignedSource<<e7d5d67c04f0d95f25d95e80a307ce26>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -33,7 +33,6 @@ pub struct GlobalOptions<'a> {
     pub tco_experimental_features: s_set::SSet<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub tco_migration_flags: s_set::SSet<'a>,
-    pub tco_dynamic_view: bool,
     pub tco_num_local_workers: Option<isize>,
     pub tco_parallel_type_checking_threshold: isize,
     pub tco_max_typechecker_worker_memory_mb: Option<isize>,

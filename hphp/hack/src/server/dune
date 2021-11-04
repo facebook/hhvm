@@ -492,7 +492,6 @@
     serverColorFile
     serverCoverageMetric
     serverConcatenateAll
-    serverDynamicView
     serverError
     serverExtractStandalone
     serverFileDependents

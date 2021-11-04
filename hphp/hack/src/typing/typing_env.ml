@@ -1139,12 +1139,7 @@ let unset_local env local =
   let env = { env with lenv = { per_cont_env; local_using_vars } } in
   env
 
-let tany env =
-  let dynamic_view_enabled = TypecheckerOptions.dynamic_view (get_tcopt env) in
-  if dynamic_view_enabled then
-    Tdynamic
-  else
-    Typing_defs.make_tany ()
+let tany _env = Typing_defs.make_tany ()
 
 let get_local_in_ctx env ?error_if_undef_at_pos:p x ctx_opt =
   let not_found_is_ok x ctx =

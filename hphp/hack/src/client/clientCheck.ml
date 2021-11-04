@@ -126,7 +126,6 @@ let connect ?(use_priority_pipe = false) args =
     config;
     allow_non_opt_build;
     custom_telemetry_data;
-    dynamic_view = _;
     error_format = _;
     gen_saved_ignore_type_errors = _;
     paths = _;
@@ -460,9 +459,7 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
           Printf.eprintf "Invalid position\n";
           raise Exit_status.(Exit_with Input_error)
       in
-      let%lwt (ty, telemetry) =
-        rpc args @@ Rpc.INFER_TYPE (fn, line, char, args.dynamic_view)
-      in
+      let%lwt (ty, telemetry) = rpc args @@ Rpc.INFER_TYPE (fn, line, char) in
       ClientTypeAtPos.go ty args.output_json;
       Lwt.return (Exit_status.No_error, telemetry)
     | MODE_TYPE_AT_POS_BATCH positions ->
@@ -489,7 +486,7 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
               raise Exit_status.(Exit_with Input_error))
       in
       let%lwt (responses, telemetry) =
-        rpc args @@ Rpc.INFER_TYPE_BATCH (positions, args.dynamic_view)
+        rpc args @@ Rpc.INFER_TYPE_BATCH positions
       in
       List.iter responses ~f:print_endline;
       Lwt.return (Exit_status.No_error, telemetry)
@@ -563,7 +560,7 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
     | MODE_FUN_DEPS_AT_POS_BATCH positions ->
       let positions = parse_positions positions in
       let%lwt (responses, telemetry) =
-        rpc args @@ Rpc.FUN_DEPS_BATCH (positions, args.dynamic_view)
+        rpc args @@ Rpc.FUN_DEPS_BATCH positions
       in
       List.iter responses ~f:print_endline;
       Lwt.return (Exit_status.No_error, telemetry)

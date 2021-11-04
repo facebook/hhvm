@@ -258,40 +258,6 @@ let class_id_cases =
     (("class_id.php", 12, 4), "classname<A>");
   ]
 
-let dynamic_view =
-  "<?hh
-function any() {
-  return 'any';
-}
-function foo($x) : void {
-//           ^5:14
-  $y = $x + 5;
-//^7:3
-  $z = $x + $x;
-//^9:3
-  $w = any();
-//^11:3
-  $z = $x ^ $x;
-//^13:3
-  $z = $w . '';
-//^15:3
-  $z = $x | 5;
-//^17:3
-
-}
-"
-
-let dynamic_view_cases =
-  [
-    (("dynamic_view.php", 5, 14), "dynamic");
-    (("dynamic_view.php", 7, 3), "(dynamic | int)");
-    (("dynamic_view.php", 9, 3), "dynamic");
-    (("dynamic_view.php", 11, 3), "dynamic");
-    (("dynamic_view.php", 13, 3), "dynamic");
-    (("dynamic_view.php", 15, 3), "string");
-    (("dynamic_view.php", 17, 3), "int");
-  ]
-
 let files =
   [
     ("id.php", id);
@@ -306,7 +272,6 @@ let files =
     ("multiple_type.php", multiple_type);
     ("lambda_param.php", lambda_param);
     ("class_id.php", class_id);
-    ("dynamic_view.php", dynamic_view);
   ]
 
 let cases =
@@ -329,7 +294,7 @@ let test () =
       ~hhi_files:(Hhi.get_raw_hhi_contents () |> Array.to_list)
   in
   let env = Test.setup_disk env files in
-  let test_case ~dynamic ((file, line, col), expected_type) =
+  let test_case ((file, line, col), expected_type) =
     let compare_type expected type_at =
       let ty_str =
         match type_at with
@@ -341,11 +306,7 @@ let test () =
       let fmt = Printf.sprintf "%s:%d:%d %s" file line col in
       Test.assertEqual (fmt expected) (fmt ty_str)
     in
-    let ctx =
-      Provider_utils.ctx_from_server_env env
-      |> Provider_context.map_tcopt ~f:(fun tcopt ->
-             { tcopt with GlobalOptions.tco_dynamic_view = dynamic })
-    in
+    let ctx = Provider_utils.ctx_from_server_env env in
     let (ctx, entry) =
       Provider_context.add_entry_if_missing
         ~ctx
@@ -357,5 +318,4 @@ let test () =
     let ty = ServerInferType.type_at_pos ctx tast line col in
     compare_type expected_type ty
   in
-  List.iter cases ~f:(test_case ~dynamic:false);
-  List.iter dynamic_view_cases ~f:(test_case ~dynamic:true)
+  List.iter cases ~f:test_case

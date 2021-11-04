@@ -87,8 +87,6 @@ let experimental_all = GlobalOptions.tco_experimental_all
 
 let migration_flags_all = GlobalOptions.tco_migration_flags_all
 
-let dynamic_view = GlobalOptions.tco_dynamic_view
-
 let disallow_scrutinee_case_value_type_mismatch =
   GlobalOptions.tco_disallow_scrutinee_case_value_type_mismatch
 

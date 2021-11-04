@@ -123,22 +123,23 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
      *
      *   - When that happens, exit hook sets localsDecRefd flag.
      */
-    if (!fp->localsDecRefd()) {
-      fp->setLocalsDecRefd();
-      try {
-        if (teardownStack) {
-          frame_free_locals_helper_inl(fp, func->numLocals());
-          if (fp->func()->cls() && fp->hasThis()) decRefObj(fp->getThis());
-          fp->trashThis();
-        }
-        EventHook::FunctionUnwind(fp, phpException);
-      } catch (...) {}
-    }
+    if (fp->localsDecRefd()) return false;
+    fp->setLocalsDecRefd();
+    try {
+      if (teardownStack) {
+        frame_free_locals_helper_inl(fp, func->numLocals());
+        if (fp->func()->cls() && fp->hasThis()) decRefObj(fp->getThis());
+        fp->trashThis();
+      }
+      EventHook::FunctionUnwind(fp, phpException);
+    } catch (...) {}
+    return true;
   };
 
   if (LIKELY(!isResumed(fp))) {
-    decRefLocals();
+    auto const decRefd = decRefLocals();
     if (UNLIKELY(func->isAsyncFunction()) &&
+        decRefd &&
         phpException &&
         (!fp->isAsyncEagerReturn() || func->isMemoizeImpl())) {
       // If in an eagerly executed async function without request for async

@@ -449,6 +449,19 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
   Variant* h = get_intercept_handler(func);
   if (!h) return true;
 
+  VMRegAnchor _;
+
+  SCOPE_FAIL {
+    // Callee frame already decrefd.
+    if (vmfp() != ar) return;
+
+    // Decref the locals of the callee frame, signalling to the unwinder that
+    // the frame is already being exited and exception handlers should not be
+    // invoked.
+    ar->setLocalsDecRefd();
+    frame_free_locals_no_hook(ar);
+  };
+
   /*
    * In production mode, only functions that we have assumed can be
    * intercepted during static analysis should actually be
@@ -461,8 +474,6 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
                   "in RepoAuthoritative mode", func->fullName()->data());
     }
   }
-
-  VMRegAnchor _;
 
   PC savePc = vmpc();
 

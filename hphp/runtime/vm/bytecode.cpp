@@ -3440,41 +3440,33 @@ bool doFCall(CallFlags callFlags, const Func* func, uint32_t numArgsInclUnpack,
   );
   ar->setThisOrClassAllowNull(ctx);
 
-  try {
-    prepareFuncEntry(ar, numArgsInclUnpack);
+  prepareFuncEntry(ar, numArgsInclUnpack);
 
+  try {
     return EventHook::FunctionCall(
       ar,
       EventHook::NormalFunc,
       EventHook::Source::Interpreter
     );
   } catch (...) {
-    // Manually unwind the pre-live or live frame, as we may be called from JIT
-    // and expected to enter JIT unwinder with vmfp() set to the callee.
-    assertx(vmfp() == ar || vmfp() == ar->m_sfp);
+    // Manually unwind the live frame, as we may be called from JIT and
+    // expected to enter JIT unwinder with vmfp() set to the callee.
+    assertx(vmfp() == ar);
 
     auto const func = ar->func();
     auto const numInOutParams = func->numInOutParamsForArgs(numArgsInclUnpack);
 
-    if (ar->m_sfp == vmfp()) {
-      // Unwind pre-live frame.
-      assertx(vmStack().top() <= (void*)ar);
-      while (vmStack().top() != (void*)ar) {
-        vmStack().popTV();
-      }
-      vmStack().popAR();
-    } else {
-      // Unwind live frame.
-      vmfp() = ar->m_sfp;
-      vmpc() = vmfp()->func()->entry() + ar->callOffset();
-      assertx(vmStack().top() + func->numSlotsInFrame() <= (void*)ar);
-      while (vmStack().top() + func->numSlotsInFrame() != (void*)ar) {
-        vmStack().popTV();
-      }
-      frame_free_locals_inl_no_hook(ar, func->numLocals());
-      vmStack().ndiscard(func->numSlotsInFrame());
-      vmStack().discardAR();
+    vmfp() = ar->m_sfp;
+    vmpc() = vmfp()->func()->entry() + ar->callOffset();
+    assertx(vmStack().top() + func->numSlotsInFrame() <= (void*)ar);
+    while (vmStack().top() + func->numSlotsInFrame() != (void*)ar) {
+      vmStack().popTV();
     }
+    if (!ar->localsDecRefd()) {
+      frame_free_locals_inl_no_hook(ar, func->numLocals());
+    }
+    vmStack().ndiscard(func->numSlotsInFrame());
+    vmStack().discardAR();
     vmStack().ndiscard(numInOutParams);
     throw;
   }

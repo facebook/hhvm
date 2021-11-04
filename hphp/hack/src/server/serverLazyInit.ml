@@ -293,10 +293,46 @@ let merge_saved_state_futures
   in
   wait_until_ready future
 
+(** [report update p ~other] is called because we just got a report that progress-meter [p]
+should be updated with latest information [update]. The behavior of this function
+is to (1) update progress-meter [p], and (2) report overall hh_server status,
+making a judgment-call about what message to synthesize out of the progress
+of both [p] and [other]. *)
+let report
+    (update : (Exec_command.t * string list) option)
+    (progress : (string * float) option ref)
+    ~(other : (string * float) option ref) =
+  begin
+    match update with
+    | None -> progress := None
+    | Some (cmd, _args) ->
+      progress :=
+        Some
+          (Exec_command.to_string cmd |> Filename.basename, Unix.gettimeofday ())
+  end;
+  (* To keep reporting human-understandable, we have to account for the fact that there
+     are actually two concurrent progress-meters going on, and we want to keep things
+     simple, so we only report the single longest-running of the two progress-meters' updates. *)
+  let msg =
+    match (!progress, !other) with
+    | (None, None) -> "loading saved state" (* if neither is going on *)
+    | (None, Some (msg, _time))
+    | (Some (msg, _time), None) ->
+      Printf.sprintf "waiting on %s..." msg
+    | (Some (msg1, time1), Some (_msg2, time2)) when Float.(time1 < time2) ->
+      Printf.sprintf "waiting on %s..." msg1
+    | (Some _, Some (msg2, _)) -> Printf.sprintf "waiting on %s..." msg2
+  in
+  ServerProgress.send_progress "%s" msg;
+  ()
+
 let download_and_load_state_exn
     ~(genv : ServerEnv.genv) ~(ctx : Provider_context.t) ~(root : Path.t) :
     (loaded_info, load_state_error) result =
   let ignore_hh_version = ServerArgs.ignore_hh_version genv.options in
+  let (progress_naming_table_load, progress_dep_table_load) =
+    (ref None, ref None)
+  in
   (* TODO(hverr): Support the ignore_hhconfig flag, how to do this with Watchman? *)
   let _ignore_hhconfig = ServerArgs.saved_state_ignore_hhconfig genv.options in
   let naming_table_saved_state_future =
@@ -304,7 +340,11 @@ let download_and_load_state_exn
       Hh_logger.log "Starting naming table download.";
       let loader_future =
         State_loader_futures.load
-          ~progress_callback:(fun _ -> ())
+          ~progress_callback:(fun update ->
+            report
+              update
+              progress_naming_table_load
+              ~other:progress_dep_table_load)
           ~watchman_opts:
             Saved_state_loader.Watchman_options.{ root; sockname = None }
           ~ignore_hh_version
@@ -330,7 +370,11 @@ let download_and_load_state_exn
     Hh_logger.log "Downloading dependency graph from DevX infra";
     let loader_future =
       State_loader_futures.load
-        ~progress_callback:(fun _ -> ())
+        ~progress_callback:(fun update ->
+          report
+            update
+            progress_dep_table_load
+            ~other:progress_naming_table_load)
         ~watchman_opts:
           Saved_state_loader.Watchman_options.{ root; sockname = None }
         ~ignore_hh_version

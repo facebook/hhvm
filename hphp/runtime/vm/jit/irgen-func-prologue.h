@@ -55,7 +55,9 @@ void emitCalleeRecordFuncCoverage(IRGS& env, const Func* callee);
 
 void emitInitFuncInputs(IRGS& env, const Func* callee, uint32_t argc);
 
-void emitInitFuncLocals(IRGS& env, const Func* callee, SSATmp* prologueCtx);
+void emitInitClosureLocals(IRGS& env, const Func* callee, SSATmp* prologueCtx);
+
+void emitInitRegularLocals(IRGS& env, const Func* callee);
 
 void emitFuncPrologue(IRGS& env, const Func* callee, uint32_t argc,
                       TransID transID);

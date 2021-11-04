@@ -449,14 +449,32 @@ inline Id Func::numNamedLocals() const {
   return shared()->m_localNames.size();
 }
 
-inline Id Func::coeffectsLocalId() const {
-  assertx(hasCoeffectsLocal());
-  return numParams() + (hasReifiedGenerics() ? 1 : 0);
-}
-
-inline Id Func::reifiedGenericsLocalId() const {
+inline uint32_t Func::reifiedGenericsLocalId() const {
   assertx(hasReifiedGenerics());
   return numParams();
+}
+
+inline uint32_t Func::coeffectsLocalId() const {
+  assertx(hasCoeffectsLocal());
+  auto id = numParams();
+  if (hasReifiedGenerics()) ++id;
+  return id;
+}
+
+inline uint32_t Func::firstClosureUseLocalId() const {
+  assertx(isClosureBody());
+  auto id = numParams();
+  if (hasReifiedGenerics()) ++id;
+  if (hasCoeffectsLocal()) ++id;
+  return id;
+}
+
+inline uint32_t Func::firstRegularLocalId() const {
+  auto id = numParams();
+  if (hasReifiedGenerics()) ++id;
+  if (hasCoeffectsLocal()) ++id;
+  if (isClosureBody()) id += numClosureUseLocals();
+  return id;
 }
 
 inline const StringData* Func::localVarName(Id id) const {

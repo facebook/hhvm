@@ -573,10 +573,11 @@ public:
   // Locals, iterators, and stack.                                      [const]
 
   /*
-   * Number of locals, iterators, or named locals.
+   * Number of locals, iterators, closure use locals or named locals.
    */
   int numLocals() const;
   int numIterators() const;
+  uint32_t numClosureUseLocals() const;
   Id numNamedLocals() const;
 
   /*
@@ -588,8 +589,20 @@ public:
    * Returns the ID of coeffects and reified generics locals.
    * Requires hasCoeffectRules() and hasReifiedGenerics() respectively
    */
-  Id coeffectsLocalId() const;
-  Id reifiedGenericsLocalId() const;
+  uint32_t coeffectsLocalId() const;
+  uint32_t reifiedGenericsLocalId() const;
+
+  /*
+   * Returns the ID of the first closure use local.
+   */
+  uint32_t firstClosureUseLocalId() const;
+
+  /*
+   * Returns the ID of the first regular local, i.e. a first local that is not
+   * a parameter, reified generics, coeffects or closure use local.
+   */
+  uint32_t firstRegularLocalId() const;
+
 
   /*
    * Find the name of the local with the given ID.

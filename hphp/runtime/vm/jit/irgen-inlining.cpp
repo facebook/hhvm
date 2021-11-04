@@ -356,7 +356,8 @@ void beginInlining(IRGS& env,
   for (auto i = 0; i < numTotalInputs; ++i) {
     stLocRaw(env, i, calleeFP, inputs[i]);
   }
-  emitInitFuncLocals(env, target, closure);
+  emitInitClosureLocals(env, target, closure);
+  emitInitRegularLocals(env, target);
 
   assertx(startSk.hasThis() == startSk.func()->hasThisInBody());
   assertx(

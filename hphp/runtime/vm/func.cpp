@@ -503,6 +503,12 @@ Id Func::lookupVarId(const StringData* name) const {
   return shared()->m_localNames.findIndex(name);
 }
 
+uint32_t Func::numClosureUseLocals() const {
+  assertx(isClosureBody());
+  auto const cls = implCls();
+  return cls->numDeclProperties() - (cls->hasClosureCoeffectsProp() ? 1 : 0);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Persistence.
 

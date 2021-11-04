@@ -478,7 +478,30 @@ void emitSpillFrame(IRGS& env, const Func* callee, uint32_t argc,
 /*
  * Set non-input locals to Uninit.
  */
-void emitInitFuncLocals(IRGS& env, const Func* callee, SSATmp* prologueCtx) {
+void emitInitClosureLocals(IRGS& env, const Func* callee, SSATmp* prologueCtx) {
+  if (!callee->isClosureBody()) return;
+
+  // Push the closure's use variables (stored in closure object properties).
+  auto const firstClosureUseLocal = callee->firstClosureUseLocalId();
+  auto const numUses = callee->numClosureUseLocals();
+  auto const cls = callee->implCls();
+
+  for (auto i = 0; i < numUses; ++i) {
+    auto const slot = i + (cls->hasClosureCoeffectsProp() ? 1 : 0);
+    auto const ty =
+      typeFromRAT(cls->declPropRepoAuthType(slot), callee->cls()) & TCell;
+    auto const addr = gen(env, LdPropAddr,
+                          IndexData { cls->propSlotToIndex(slot) },
+                          ty.lval(Ptr::Prop), prologueCtx);
+    auto const prop = gen(env, LdMem, ty, addr);
+    gen(env, IncRef, prop);
+    gen(env, StLoc, LocalId{firstClosureUseLocal + i}, fp(env), prop);
+  }
+
+  decRef(env, prologueCtx);
+}
+
+void emitInitRegularLocals(IRGS& env, const Func* callee) {
   /*
    * Maximum number of local initializations to unroll.
    *
@@ -490,51 +513,17 @@ void emitInitFuncLocals(IRGS& env, const Func* callee, SSATmp* prologueCtx) {
    */
   constexpr auto kMaxLocalsInitUnroll = 9;
 
-  // Parameters, generics and coeffects are already initialized.
-  auto numInited = callee->numParams();
-  if (callee->hasReifiedGenerics()) {
-    // Currently does not work with closures
-    assertx(!callee->isClosureBody());
-    assertx(callee->reifiedGenericsLocalId() == numInited);
-    ++numInited;
-  }
-  if (callee->hasCoeffectsLocal()) {
-    assertx(callee->coeffectsLocalId() == numInited);
-    ++numInited;
-  }
-
-  // Push the closure's use variables (stored in closure object properties).
-  if (callee->isClosureBody()) {
-    auto const cls = callee->implCls();
-    auto const numUses =
-      cls->numDeclProperties() - (cls->hasClosureCoeffectsProp() ? 1 : 0);
-
-    for (auto i = 0; i < numUses; ++i) {
-      auto const slot = i + (cls->hasClosureCoeffectsProp() ? 1 : 0);
-      auto const ty =
-        typeFromRAT(cls->declPropRepoAuthType(slot), callee->cls()) & TCell;
-      auto const addr = gen(env, LdPropAddr,
-                            IndexData { cls->propSlotToIndex(slot) },
-                            ty.lval(Ptr::Prop), prologueCtx);
-      auto const prop = gen(env, LdMem, ty, addr);
-      gen(env, IncRef, prop);
-      gen(env, StLoc, LocalId{numInited + i}, fp(env), prop);
-    }
-
-    decRef(env, prologueCtx);
-    numInited += numUses;
-  }
-
+  auto const firstRegularLocal = callee->firstRegularLocalId();
   auto const numLocals = callee->numLocals();
-  assertx(numInited <= numLocals);
+  assertx(firstRegularLocal <= numLocals);
 
   // Set all remaining uninitialized locals to Uninit.
-  if (numLocals - numInited <= kMaxLocalsInitUnroll) {
-    for (auto i = numInited; i < numLocals; ++i) {
+  if (numLocals - firstRegularLocal <= kMaxLocalsInitUnroll) {
+    for (auto i = firstRegularLocal; i < numLocals; ++i) {
       gen(env, StLoc, LocalId{i}, fp(env), cns(env, TUninit));
     }
   } else {
-    auto const range = LocalIdRange{numInited, (uint32_t)numLocals};
+    auto const range = LocalIdRange{firstRegularLocal, (uint32_t)numLocals};
     gen(env, StLocRange, range, fp(env), cns(env, TUninit));
   }
 }
@@ -608,7 +597,8 @@ void emitFuncPrologue(IRGS& env, const Func* callee, uint32_t argc,
   emitCalleeChecks(env, callee, argc, callFlags, prologueCtx);
   emitInitFuncInputs(env, callee, argc);
   emitSpillFrame(env, callee, argc, callFlags, prologueCtx);
-  emitInitFuncLocals(env, callee, prologueCtx);
+  emitInitClosureLocals(env, callee, prologueCtx);
+  emitInitRegularLocals(env, callee);
   emitJmpFuncBody(env, callee, argc);
 }
 

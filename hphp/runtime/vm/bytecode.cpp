@@ -863,29 +863,16 @@ static void prepareFuncEntry(ActRec *ar, uint32_t numArgsInclUnpack) {
   // +-----------------------+
 
   const Func* func = ar->func();
-  int nlocals = func->numParams();
-
-  if (ar->func()->hasReifiedGenerics()) {
-    // Currently does not work with closures
-    assertx(!func->isClosureBody());
-    assertx(func->reifiedGenericsLocalId() == nlocals);
-    nlocals++;
-  }
-
-  if (ar->func()->hasCoeffectsLocal()) {
-    assertx(func->coeffectsLocalId() == nlocals);
-    nlocals++;
-  }
 
   if (UNLIKELY(func->isClosureBody())) {
     int nuse = c_Closure::initActRecFromClosure(ar, vmStack().top());
     // initActRecFromClosure doesn't move stack
     vmStack().nalloc(nuse);
-    nlocals += nuse;
     func = ar->func();
+    assertx(nuse == func->numClosureUseLocals());
   }
 
-  pushFrameSlots(func, nlocals);
+  pushFrameSlots(func, func->firstRegularLocalId());
 
   vmfp() = ar;
   vmpc() = func->entry() + func->getEntryForNumArgs(numArgsInclUnpack);

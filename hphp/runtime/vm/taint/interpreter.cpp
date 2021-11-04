@@ -787,6 +787,24 @@ void iopLockObj() {
   iopPreamble("LockObj");
 }
 
+void iopFCall(const Func* func, const FCallArgs& fca) {
+  auto name = func->fullName()->data();
+
+  FTRACE(1, "taint: entering {}\n", yellow(name));
+
+  const auto sinks = Configuration::get()->sinks(name);
+  FTRACE(3, "taint: {} sinks\n", sinks.size());
+
+  for (const auto& sink : sinks) {
+    auto value = State::instance->stack.peek(fca.numArgs - 1 - sink.index);
+    if (!value) { continue; }
+
+    FTRACE(1, "taint: tainted value flows into sink\n");
+    value->hops.push_back(Hop{vmfp()->func(), func});
+    State::instance->paths.push_back(*value);
+  }
+}
+
 TCA iopFCallClsMethod(
     bool /* retToJit */,
     PC /* origpc */,
@@ -802,11 +820,37 @@ TCA iopFCallClsMethodD(
     bool /* retToJit */,
     PC /* origpc */,
     PC& /* pc */,
-    const FCallArgs& /* fca */,
+    const FCallArgs& fca,
     const StringData*,
-    Id /* classId */,
-    const StringData* /* methName */) {
-  iopUnhandled("FCallClsMethodD");
+    Id classId,
+    const StringData* methName) {
+  iopPreamble("FCallClsMethodD");
+
+  auto ar = vmfp();
+  auto ctx = ar == nullptr ? nullptr : ar->func()->cls();
+
+  auto const nep = ar->func()->unit()->lookupNamedEntityPairId(classId);
+  auto cls = Class::load(nep.second, nep.first);
+  if (cls == nullptr) {
+    FTRACE(2, "taint: unable to load class for method `{}`\n", methName);
+    return nullptr;
+  }
+
+  const Func* func;
+  auto const res = lookupClsMethod(
+      func,
+      cls,
+      methName,
+      nullptr,
+      ctx,
+      MethodLookupErrorOptions::None);
+  if (res == LookupResult::MethodNotFound) {
+    FTRACE(2, "taint: unable to load method `{}`\n", methName);
+    return nullptr;
+  }
+
+  iopFCall(func, fca);
+
   return nullptr;
 }
 
@@ -831,24 +875,6 @@ TCA iopFCallClsMethodSD(
     const StringData* /* methName */) {
   iopUnhandled("FCallClsMethodSD");
   return nullptr;
-}
-
-void iopFCall(const Func* func, const FCallArgs& fca) {
-  auto name = func->fullName()->data();
-
-  FTRACE(1, "taint: entering {}\n", yellow(name));
-
-  const auto sinks = Configuration::get()->sinks(name);
-  FTRACE(3, "taint: {} sinks\n", sinks.size());
-
-  for (const auto& sink : sinks) {
-    auto value = State::instance->stack.peek(fca.numArgs - 1 - sink.index);
-    if (!value) { continue; }
-
-    FTRACE(1, "taint: tainted value flows into sink\n");
-    value->hops.push_back(Hop{vmfp()->func(), func});
-    State::instance->paths.push_back(*value);
-  }
 }
 
 TCA iopFCallCtor(

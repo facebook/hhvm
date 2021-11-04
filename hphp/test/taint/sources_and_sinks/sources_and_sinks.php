@@ -41,12 +41,11 @@ function source_from_regex_to_sink(): void {
 }
 
 class DataLogger {
-  public async function genLog(int $data): Awaitable<void> {}
+  public static async function genLog(int $data): Awaitable<void> {}
 }
 
 async function source_to_regex_sink(): Awaitable<void> {
-  $logger = new DataLogger();
-  await $logger->genLog(__source_returned_from_function());
+  await DataLogger::genLog(__source_returned_from_function());
 }
 
 <<__EntryPoint>> async function main(): Awaitable<void> {

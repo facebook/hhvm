@@ -386,12 +386,14 @@ void cgNativeImpl(IRLS& env, const IRInstruction* inst) {
 }
 
 static void traceCallback(ActRec* fp, TypedValue* sp, SrcKey::AtomicInt skInt) {
+  auto const sk = SrcKey::fromAtomicInt(skInt);
   if (Trace::moduleEnabled(Trace::hhirTracelets)) {
     FTRACE(0, "{} {} {} {}\n",
-           showShort(SrcKey::fromAtomicInt(skInt)), fp, sp,
+           showShort(sk), fp, sp,
            __builtin_return_address(0));
   }
-  checkFrame(fp, sp, true /* fullCheck */);
+  // Func entries do not have all locals set up.
+  checkFrame(fp, sp, !sk.funcEntry() /* fullCheck */);
 }
 
 void cgDbgTraceCall(IRLS& env, const IRInstruction* inst) {

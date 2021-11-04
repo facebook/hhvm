@@ -501,33 +501,6 @@ void emitInitClosureLocals(IRGS& env, const Func* callee, SSATmp* prologueCtx) {
   decRef(env, prologueCtx);
 }
 
-void emitInitRegularLocals(IRGS& env, const Func* callee) {
-  /*
-   * Maximum number of local initializations to unroll.
-   *
-   * The actual crossover point in terms of code size is 6 (just like for the
-   * params init unroll limit); 9 was determined by experiment to be the
-   * optimal point in certain benchmarks.
-   *
-   * FIXME: revisit this once these stores are elidable in the func body
-   */
-  constexpr auto kMaxLocalsInitUnroll = 9;
-
-  auto const firstRegularLocal = callee->firstRegularLocalId();
-  auto const numLocals = callee->numLocals();
-  assertx(firstRegularLocal <= numLocals);
-
-  // Set all remaining uninitialized locals to Uninit.
-  if (numLocals - firstRegularLocal <= kMaxLocalsInitUnroll) {
-    for (auto i = firstRegularLocal; i < numLocals; ++i) {
-      gen(env, StLoc, LocalId{i}, fp(env), cns(env, TUninit));
-    }
-  } else {
-    auto const range = LocalIdRange{firstRegularLocal, (uint32_t)numLocals};
-    gen(env, StLocRange, range, fp(env), cns(env, TUninit));
-  }
-}
-
 namespace {
 
 void emitJmpFuncBody(IRGS& env, const Func* callee, uint32_t argc) {
@@ -598,11 +571,42 @@ void emitFuncPrologue(IRGS& env, const Func* callee, uint32_t argc,
   emitInitFuncInputs(env, callee, argc);
   emitSpillFrame(env, callee, argc, callFlags, prologueCtx);
   emitInitClosureLocals(env, callee, prologueCtx);
-  emitInitRegularLocals(env, callee);
   emitJmpFuncBody(env, callee, argc);
 }
 
 namespace {
+
+/*
+ * Set non-input locals to Uninit.
+ */
+void emitInitRegularLocals(IRGS& env, const Func* callee) {
+  /*
+   * Maximum number of local initializations to unroll.
+   *
+   * The actual crossover point in terms of code size is 6 (just like for the
+   * params init unroll limit); 9 was determined by experiment to be the
+   * optimal point in certain benchmarks.
+   *
+   * We don't limit the count in optimized translations, as we expect these
+   * stores to be elided.
+   */
+  auto constexpr kMaxLocalsInitUnroll = 9;
+
+  auto const firstRegularLocal = callee->firstRegularLocalId();
+  auto const numLocals = callee->numLocals();
+  assertx(firstRegularLocal <= numLocals);
+
+  // Set all remaining uninitialized locals to Uninit.
+  if (env.context.kind == TransKind::Optimize ||
+      numLocals - firstRegularLocal <= kMaxLocalsInitUnroll) {
+    for (auto i = firstRegularLocal; i < numLocals; ++i) {
+      gen(env, StLoc, LocalId{i}, fp(env), cns(env, TUninit));
+    }
+  } else {
+    auto const range = LocalIdRange{firstRegularLocal, (uint32_t)numLocals};
+    gen(env, StLocRange, range, fp(env), cns(env, TUninit));
+  }
+}
 
 void emitSurpriseCheck(IRGS& env, const Func* callee, uint32_t argc) {
   if (isInlining(env)) return;
@@ -623,6 +627,7 @@ void emitFuncEntry(IRGS& env) {
   auto const callee = curFunc(env);
   auto const argc = callee->getEntryNumParams(curSrcKey(env).entryOffset());
 
+  emitInitRegularLocals(env, callee);
   emitSurpriseCheck(env, callee, argc);
 }
 

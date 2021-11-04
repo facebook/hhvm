@@ -854,14 +854,6 @@ static void prepareFuncEntry(ActRec *ar, uint32_t numArgsInclUnpack) {
       + (ar->func()->hasCoeffectsLocal() ? 1U : 0U)
   );
 
-  // +- Order Of Stack-------+
-  // | arguments             |
-  // | reified generics      |
-  // | coeffects             |
-  // | closure use variables |
-  // | all other locals      |
-  // +-----------------------+
-
   const Func* func = ar->func();
 
   if (UNLIKELY(func->isClosureBody())) {
@@ -872,8 +864,7 @@ static void prepareFuncEntry(ActRec *ar, uint32_t numArgsInclUnpack) {
     assertx(nuse == func->numClosureUseLocals());
   }
 
-  pushFrameSlots(func, func->firstRegularLocalId());
-
+  vmStack().top() = reinterpret_cast<TypedValue*>(ar) - func->numSlotsInFrame();
   vmfp() = ar;
   vmpc() = func->entry() + func->getEntryForNumArgs(numArgsInclUnpack);
   vmJitReturnAddr() = nullptr;
@@ -912,20 +903,6 @@ void enterVMAtCurPC() {
     jit::enterTC(jit::tc::ustubs().resumeHelper);
   } else {
     dispatch();
-  }
-}
-
-/*
- * Helper for function entry, including pseudo-main entry.
- */
-void pushFrameSlots(const Func* func, int nparams /*= 0*/) {
-  // Push locals.
-  for (int i = nparams; i < func->numLocals(); i++) {
-    vmStack().pushUninit();
-  }
-  // Push iterators.
-  for (int i = 0; i < func->numIterators(); i++) {
-    vmStack().allocI();
   }
 }
 
@@ -3389,7 +3366,29 @@ OPTBLD_INLINE void iopUnsetG() {
   vmStack().popC();
 }
 
+namespace {
+
+void initRegularLocals() {
+  auto const ar = vmfp();
+  auto const func = ar->func();
+  auto const firstRegularLocal = func->firstRegularLocalId();
+  auto const numLocals = func->numLocals();
+  for (auto i = firstRegularLocal; i < numLocals; ++i) {
+    tvWriteUninit(frame_local(ar, i));
+  }
+}
+
+}
+
 bool funcEntry() {
+  assertx(!isResumed(vmfp()));
+  assertx(
+    reinterpret_cast<TypedValue*>(vmfp()) - vmStack().top() ==
+      vmfp()->func()->numSlotsInFrame()
+  );
+
+  initRegularLocals();
+
   // If this returns false, the callee was intercepted and should be skipped.
   return EventHook::FunctionCall(
     vmfp(), EventHook::NormalFunc, EventHook::Source::Interpreter);

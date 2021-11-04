@@ -176,7 +176,6 @@ void emitEntryAssertions(irgen::IRGS& irgs, const Func* func, SrcKey sk) {
     // on hhbbc to assert these types.
     return;
   }
-  auto const numLocs = func->numLocals();
   auto loc = func->numParams();
   if (func->hasReifiedGenerics()) {
     // The next non-parameter local contains the reified generics.
@@ -189,10 +188,6 @@ void emitEntryAssertions(irgen::IRGS& irgs, const Func* func, SrcKey sk) {
     assertx(func->coeffectsLocalId() == loc);
     irgen::assertTypeLocation(irgs, Location::Local { loc }, TInt);
     loc++;
-  }
-  for (; loc < numLocs; ++loc) {
-    auto const location = Location::Local { loc };
-    irgen::assertTypeLocation(irgs, location, TUninit);
   }
 }
 

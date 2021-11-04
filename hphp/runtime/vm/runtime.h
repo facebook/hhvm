@@ -126,7 +126,7 @@ frame_async_generator(const ActRec* fp) {
 
 void ALWAYS_INLINE
 frame_free_locals_helper_inl(ActRec* fp, int numLocals) {
-  assertx(numLocals == fp->func()->numLocals());
+  assertx(numLocals <= fp->func()->numLocals());
   // Free locals
   for (int i = numLocals - 1; i >= 0; --i) {
     TRACE_MOD(Trace::runtime, 5,
@@ -150,6 +150,7 @@ frame_free_locals_inl(ActRec* fp,
                       int numLocals,
                       TypedValue* rv,
                       EventHook::Source sourceType) {
+  assertx(numLocals == fp->func()->numLocals());
   frame_free_locals_inl_no_hook(fp, numLocals);
   EventHook::FunctionReturn(fp, *rv, sourceType);
 }
@@ -159,6 +160,7 @@ frame_free_locals_no_this_inl(ActRec* fp,
                               int numLocals,
                               TypedValue* rv,
                               EventHook::Source sourceType) {
+  assertx(numLocals == fp->func()->numLocals());
   frame_free_locals_helper_inl(fp, numLocals);
   EventHook::FunctionReturn(fp, *rv, sourceType);
 }

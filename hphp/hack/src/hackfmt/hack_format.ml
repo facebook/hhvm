@@ -355,12 +355,12 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           t env name;
           t env generic;
           Space;
-          t env type_constraint;
-          Space;
-          t env eq_kw;
-          Space;
-          SplitWith Cost.Base;
-          Nest [t env ty];
+          handle_possible_list env type_constraint;
+          when_present eq_kw (function () ->
+              Concat
+                [
+                  Space; t env eq_kw; Space; SplitWith Cost.Base; Nest [t env ty];
+                ]);
           t env semi;
           Newline;
         ]

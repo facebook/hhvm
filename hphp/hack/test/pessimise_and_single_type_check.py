@@ -42,7 +42,11 @@ if __name__ == "__main__":
 
     # invoke hh_pessimise on the all the current tests (say foo.php)
     for file in files:
-        cmd: List[str] = [hh_pessimisation_path, "--file=" + file, "--update"]
+        cmd: List[str] = [
+            hh_pessimisation_path,
+            "--file=" + file,
+            "--update",
+        ]
         subprocess.run(cmd)
 
     # identify the extra builtins used

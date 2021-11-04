@@ -186,11 +186,10 @@ Result withVMRegsForCall(CallFlags callFlags, const Func* func,
   regState() = VMRegState::CLEAN;
 
   try {
-    auto const result = handler(unsafeRegs.stack, calleeFP);
     // If we did not throw, we are going to reenter TC, so set the registers
     // as dirty.
-    regState() = VMRegState::DIRTY;
-    return result;
+    SCOPE_SUCCESS { regState() = VMRegState::DIRTY; };
+    return handler(unsafeRegs.stack, calleeFP);
   } catch (...) {
     // Manually unwind the stack to the point expected by the Call opcode as
     // defined by its fixup. Note that the callee frame must be either not
@@ -226,13 +225,13 @@ uint32_t fcallRepackHelper(CallFlags callFlags, const Func* func,
   });
 }
 
-bool fcallHelper(CallFlags callFlags, Func* func,
+void fcallHelper(CallFlags callFlags, Func* func,
                  uint32_t numArgsInclUnpack, void* ctx, TCA savedRip) {
   assert_native_stack_aligned();
   assertx(numArgsInclUnpack <= func->numNonVariadicParams() + 1);
   auto const hasUnpack = numArgsInclUnpack == func->numNonVariadicParams() + 1;
   auto const numArgs = numArgsInclUnpack - (hasUnpack ? 1 : 0);
-  return withVMRegsForCall<bool>(
+  withVMRegsForCall<void>(
       callFlags, func, numArgs, hasUnpack, savedRip,
       [&](Stack&, TypedValue* calleeFP) {
     // Check for stack overflow in the same place func prologues make their
@@ -241,9 +240,7 @@ bool fcallHelper(CallFlags callFlags, Func* func,
       throw_stack_overflow();
     }
 
-    // If doFCall() returns false, we've been asked to skip the function body
-    // due to fb_intercept2, so indicate that via the return value.
-    return doFCall(callFlags, func, numArgsInclUnpack, ctx, savedRip);
+    doFCall(callFlags, func, numArgsInclUnpack, ctx, savedRip);
   });
 }
 
@@ -456,32 +453,19 @@ TCA emitFCallHelperThunkImpl(CodeBlock& main, CodeBlock& cold,
     // Call C++ helper to perform the equivalent of the func prologue logic.
     auto const done = v.makeBlock();
     auto const ctch = vc.makeBlock();
-    auto const notIntercepted = v.makeReg();
     storeVMRegs(v);
     v << vinvoke{
       CallSpec::direct(fcallHelper),
       v.makeVcallArgs({{flags, func, numArgs, ctx, savedRip}}),
-      v.makeTuple({notIntercepted}),
+      v.makeTuple({}),
       {done, ctch},
-      Fixup::none(),
-      DestType::SSA
+      Fixup::none()
     };
 
     vc = ctch;
     emitStubCatch(vc, us, [] (Vout& v) { loadVmfp(v); });
 
     v = done;
-
-    auto const notInterceptedSF = v.makeReg();
-    v << testb{notIntercepted, notIntercepted, notInterceptedSF};
-
-    unlikelyIfThen(v, vc, CC_Z, notInterceptedSF, [&] (Vout& v) {
-      // The callee was intercepted and should be skipped. In that case, sync
-      // the registers and return to the caller.
-      loadVMRegs(v);
-      loadReturnRegs(v);
-      v << stubret{php_return_regs(), false};
-    });
 
     // Use resumeHelper stub to resume the execution. It assumes phplogue{}
     // context, so convert the context first. Note that the VM registers are
@@ -571,7 +555,7 @@ TCA emitFunctionEnterHelper(CodeBlock& main, CodeBlock& cold,
       v << jmpr{interceptRip, php_return_regs()};
     });
 
-    // Restore rvmfp() and return to the callee's func prologue.
+    // Restore rvmfp() and return to the callee's func entry.
     v << stubret{RegSet(), true};
   });
 

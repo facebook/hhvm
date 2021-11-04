@@ -312,10 +312,11 @@ TCA handlePostInterpRet(uint32_t callOffAndFlags) noexcept {
   assert_native_stack_aligned();
   regState() = VMRegState::CLEAN; // partially a lie: vmpc() isn't synced
 
-  FTRACE(3, "handlePostInterpRet to {}\n", vmfp()->func()->fullName()->data());
-
   auto const callOffset = callOffAndFlags >> ActRec::CallOffsetStart;
   auto const isAER = callOffAndFlags & (1 << ActRec::AsyncEagerRet);
+
+  FTRACE(3, "handlePostInterpRet to {}@{}{}\n",
+         vmfp()->func()->fullName()->data(), callOffset, isAER ? "a" : "");
 
   // Reconstruct PC so that the subsequent logic have clean reg state.
   vmpc() = skipCall(vmfp()->func()->at(callOffset));
@@ -430,7 +431,18 @@ TCA handleResume(ResumeFlags flags) {
     tracing::BlockNoTrace _{"dispatch-bb"};
 
     if (sk.funcEntry()) {
-      funcEntry();
+      auto const savedRip = vmfp()->m_savedRip;
+      if (!funcEntry()) {
+        FTRACE(2, "handleResume: returning to rip={} pc={} after intercept\n",
+               TCA(savedRip), vmpc());
+        // The callee was intercepted and should be skipped. In that case,
+        // return to the caller. If we entered this frame from the interpreter,
+        // use the resumeHelper, as the retHelper logic has been already
+        // performed and the frame has been overwritten by the return value.
+        regState() = VMRegState::DIRTY;
+        if (isReturnHelper(savedRip)) return jit::tc::ustubs().resumeHelper;
+        return TCA(savedRip);
+      }
       sk.advance();
     }
 

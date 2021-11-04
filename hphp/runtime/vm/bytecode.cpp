@@ -901,15 +901,6 @@ void enterVMAtFunc(ActRec* enterFnAr, uint32_t numArgsInclUnpack) {
 
   prepareFuncEntry(enterFnAr, numArgsInclUnpack);
 
-  if (
-    !EventHook::FunctionCall(
-      enterFnAr,
-      EventHook::NormalFunc,
-      EventHook::Source::Native
-    )
-  ) {
-    return;
-  }
   checkStack(vmStack(), enterFnAr->func(), 0);
   assertx(vmfp()->func()->contains(vmpc()));
 
@@ -920,7 +911,7 @@ void enterVMAtFunc(ActRec* enterFnAr, uint32_t numArgsInclUnpack) {
                 start, enterFnAr->func(), enterFnAr->func()->fullName());
     jit::enterTC(start);
   } else {
-    funcEntry();
+    if (!funcEntry()) return;
     dispatch();
   }
 }
@@ -3411,10 +3402,13 @@ OPTBLD_INLINE void iopUnsetG() {
   vmStack().popC();
 }
 
-void funcEntry() {
+bool funcEntry() {
+  // If this returns false, the callee was intercepted and should be skipped.
+  return EventHook::FunctionCall(
+    vmfp(), EventHook::NormalFunc, EventHook::Source::Interpreter);
 }
 
-bool doFCall(CallFlags callFlags, const Func* func, uint32_t numArgsInclUnpack,
+void doFCall(CallFlags callFlags, const Func* func, uint32_t numArgsInclUnpack,
              void* ctx, TCA retAddr) {
   TRACE(3, "FCall: pc %p func %p\n", vmpc(), vmfp()->func()->entry());
 
@@ -3441,35 +3435,6 @@ bool doFCall(CallFlags callFlags, const Func* func, uint32_t numArgsInclUnpack,
   ar->setThisOrClassAllowNull(ctx);
 
   prepareFuncEntry(ar, numArgsInclUnpack);
-
-  try {
-    return EventHook::FunctionCall(
-      ar,
-      EventHook::NormalFunc,
-      EventHook::Source::Interpreter
-    );
-  } catch (...) {
-    // Manually unwind the live frame, as we may be called from JIT and
-    // expected to enter JIT unwinder with vmfp() set to the callee.
-    assertx(vmfp() == ar);
-
-    auto const func = ar->func();
-    auto const numInOutParams = func->numInOutParamsForArgs(numArgsInclUnpack);
-
-    vmfp() = ar->m_sfp;
-    vmpc() = vmfp()->func()->entry() + ar->callOffset();
-    assertx(vmStack().top() + func->numSlotsInFrame() <= (void*)ar);
-    while (vmStack().top() + func->numSlotsInFrame() != (void*)ar) {
-      vmStack().popTV();
-    }
-    if (!ar->localsDecRefd()) {
-      frame_free_locals_inl_no_hook(ar, func->numLocals());
-    }
-    vmStack().ndiscard(func->numSlotsInFrame());
-    vmStack().discardAR();
-    vmStack().ndiscard(numInOutParams);
-    throw;
-  }
 }
 
 namespace {
@@ -3527,15 +3492,8 @@ TCA fcallImpl(bool retToJit, PC origpc, PC& pc, const FCallArgs& fca,
     vmfp()->providedCoeffectsForCall(isCtor)
   );
 
-  auto const notIntercepted = doFCall(
-    callFlags, func, numArgsInclUnpack, takeCtx(std::forward<Ctx>(ctx)),
-    jit::tc::ustubs().retHelper);
-
-  if (UNLIKELY(!notIntercepted)) {
-    // The callee was intercepted and should be skipped.
-    pc = vmpc();
-    return nullptr;
-  }
+  doFCall(callFlags, func, numArgsInclUnpack, takeCtx(std::forward<Ctx>(ctx)),
+          jit::tc::ustubs().retHelper);
 
   if (retToJit) {
     // Let JIT handle FuncEntry if possible.

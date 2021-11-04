@@ -542,14 +542,6 @@ void emitInitFuncLocals(IRGS& env, const Func* callee, SSATmp* prologueCtx) {
 namespace {
 
 void emitJmpFuncBody(IRGS& env, const Func* callee, uint32_t argc) {
-  // Check surprise flags in the same place as the interpreter: after setting
-  // up the callee's frame but before executing any of its code.
-  if (stack_check_kind(callee, argc) == StackCheck::Combine) {
-    gen(env, CheckSurpriseAndStack, FuncEntryData { callee, argc }, fp(env));
-  } else {
-    gen(env, CheckSurpriseFlagsEnter, FuncEntryData { callee, argc }, fp(env));
-  }
-
   // Emit the bindjmp for the function body.
   auto const entryOffset = callee->getEntryForNumArgs(argc);
   gen(
@@ -620,8 +612,28 @@ void emitFuncPrologue(IRGS& env, const Func* callee, uint32_t argc,
   emitJmpFuncBody(env, callee, argc);
 }
 
+namespace {
+
+void emitSurpriseCheck(IRGS& env, const Func* callee, uint32_t argc) {
+  if (isInlining(env)) return;
+
+  // Check surprise flags in the same place as the interpreter: after setting
+  // up the callee's frame but before executing any of its code.
+  if (stack_check_kind(callee, argc) == StackCheck::Combine) {
+    gen(env, CheckSurpriseAndStack, FuncEntryData { callee, argc }, fp(env));
+  } else {
+    gen(env, CheckSurpriseFlagsEnter, FuncEntryData { callee, argc }, fp(env));
+  }
+}
+
+}
+
 void emitFuncEntry(IRGS& env) {
   assertx(curSrcKey(env).funcEntry());
+  auto const callee = curFunc(env);
+  auto const argc = callee->getEntryNumParams(curSrcKey(env).entryOffset());
+
+  emitSurpriseCheck(env, callee, argc);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

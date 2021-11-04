@@ -83,7 +83,9 @@ let test_process_file_deferring () =
   let { Common_setup.ctx; foo_path; _ } =
     Common_setup.setup ~sqlite:false tcopt_with_defer
   in
-  let file = Typing_service_types.{ path = foo_path; deferred_count = 0 } in
+  let file =
+    Typing_service_types.{ path = foo_path; was_already_deferred = false }
+  in
   let errors = Errors.empty in
 
   (* Finally, this is what all the setup was for: process this file *)
@@ -192,42 +194,31 @@ let test_should_enable_deferring () =
     Relative_path.Root
     (Path.make @@ Common_setup.in_fake_dir "www");
 
-  let opts =
-    GlobalOptions.{ default with tco_max_times_to_defer_type_checking = Some 2 }
-  in
   let file =
     Typing_service_types.
       {
         path =
           Relative_path.create Relative_path.Root
           @@ Common_setup.in_fake_dir "www/Foo.php";
-        deferred_count = 1;
+        was_already_deferred = false;
       }
   in
   Asserter.Bool_asserter.assert_equals
     true
-    (Typing_check_service.should_enable_deferring opts file)
+    (Typing_check_service.should_enable_deferring file)
     "File should be deferred twice - below max";
 
-  let file = Typing_service_types.{ file with deferred_count = 2 } in
+  let file = Typing_service_types.{ file with was_already_deferred = true } in
   Asserter.Bool_asserter.assert_equals
     false
-    (Typing_check_service.should_enable_deferring opts file)
+    (Typing_check_service.should_enable_deferring file)
     "File should not be deferred - at max";
 
-  let file = Typing_service_types.{ file with deferred_count = 3 } in
+  let file = Typing_service_types.{ file with was_already_deferred = true } in
   Asserter.Bool_asserter.assert_equals
     false
-    (Typing_check_service.should_enable_deferring opts file)
+    (Typing_check_service.should_enable_deferring file)
     "File should not be deferred - above max";
-
-  let opts =
-    GlobalOptions.{ default with tco_max_times_to_defer_type_checking = None }
-  in
-  Asserter.Bool_asserter.assert_equals
-    true
-    (Typing_check_service.should_enable_deferring opts file)
-    "File should be deferred - max is not set";
 
   true
 

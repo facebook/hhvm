@@ -17,7 +17,7 @@ type process_file_results = {
 }
 
 val should_enable_deferring :
-  GlobalOptions.t -> Typing_service_types.check_file_computation -> bool
+  Typing_service_types.check_file_computation -> bool
 
 val process_file :
   Provider_context.t ->

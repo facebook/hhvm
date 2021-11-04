@@ -14,7 +14,6 @@ let serialize_globals () = Serialized_globals
 type rollout_flags = {
   use_direct_decl_parser: bool;
   longlived_workers: bool;
-  max_times_to_defer_type_checking: int option;
   small_buckets_for_dirty_names: bool;
   symbolindex_search_provider: string;
   require_saved_state: bool;

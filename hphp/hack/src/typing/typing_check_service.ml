@@ -125,11 +125,8 @@ type progress = job_progress
 
 let neutral : unit -> typing_result = Typing_service_types.make_typing_result
 
-let should_enable_deferring
-    (opts : GlobalOptions.t) (file : check_file_computation) =
-  match GlobalOptions.tco_max_times_to_defer_type_checking opts with
-  | Some max_times when file.deferred_count >= max_times -> false
-  | _ -> true
+let should_enable_deferring (file : check_file_computation) =
+  not file.was_already_deferred
 
 type process_file_results = {
   errors: Errors.t;
@@ -182,7 +179,7 @@ let process_file
     try
       let result =
         Deferred_decl.with_deferred_decls
-          ~enable:(should_enable_deferring opts file)
+          ~enable:(should_enable_deferring file)
           ~declaration_threshold_opt:
             (GlobalOptions.tco_defer_class_declaration_threshold opts)
           ~memory_mb_threshold_opt:
@@ -270,7 +267,7 @@ let profile_log
     Float.(deciding_time >= check_info.profile_type_check_duration_threshold)
     || end_heap_mb - start_heap_mb
        >= check_info.profile_type_check_memory_threshold_mb
-    || file.deferred_count > 0
+    || file.was_already_deferred
     || not (List.is_empty result.deferred_decls)
   in
   if should_log then begin
@@ -287,7 +284,9 @@ let profile_log
     in
     let deferment_telemetry =
       Telemetry.create ()
-      |> Telemetry.int_ ~key:"times_checked" ~value:(file.deferred_count + 1)
+      |> Telemetry.bool_
+           ~key:"has_been_deferred"
+           ~value:file.was_already_deferred
       |> Telemetry.int_
            ~key:"files_to_declare"
            ~value:(List.length result.deferred_decls)
@@ -500,7 +499,7 @@ let process_files
               []
             else
               List.map result.deferred_decls ~f:(fun fn -> Declare fn)
-              @ [Check { file with deferred_count = file.deferred_count + 1 }]
+              @ [Check { file with was_already_deferred = true }]
           in
           (result.errors, deferred, tally)
         | Declare (_path, class_name) ->
@@ -655,7 +654,7 @@ let possibly_push_new_errors_to_lsp_client :
       let rechecked =
         progress.completed
         |> List.filter_map ~f:(function
-               | Check { path; deferred_count = _ } -> Some path
+               | Check { path; was_already_deferred = _ } -> Some path
                | Declare _
                | Prefetch _ ->
                  None)
@@ -847,8 +846,8 @@ let next
               List.map stolen_jobs ~f:(fun job ->
                   Hash_set.Poly.remove files_in_progress job;
                   match job with
-                  | Check { path; deferred_count } ->
-                    Check { path; deferred_count = deferred_count + 1 }
+                  | Check { path; was_already_deferred = _ } ->
+                    Check { path; was_already_deferred = true }
                   | _ -> failwith "unexpected state")
             in
             BigList.rev_append stolen_jobs !files_to_process
@@ -1138,7 +1137,8 @@ let go_with_interrupt
       result
   in
   let fnl =
-    BigList.map fnl ~f:(fun path -> Check { path; deferred_count = 0 })
+    BigList.map fnl ~f:(fun path ->
+        Check { path; was_already_deferred = false })
   in
   Mocking.with_test_mocking fnl @@ fun fnl ->
   let ( typing_result,

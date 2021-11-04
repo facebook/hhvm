@@ -23,9 +23,6 @@ let defer_class_declaration_threshold =
 let defer_class_memory_mb_threshold =
   GlobalOptions.tco_defer_class_memory_mb_threshold
 
-let max_times_to_defer_type_checking =
-  GlobalOptions.tco_max_times_to_defer_type_checking
-
 let prefetch_deferred_files = GlobalOptions.tco_prefetch_deferred_files
 
 let remote_type_check_threshold = GlobalOptions.tco_remote_type_check_threshold

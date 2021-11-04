@@ -8,7 +8,7 @@
 
 type check_file_computation = {
   path: Relative_path.t;
-  deferred_count: int;
+  was_already_deferred: bool;
 }
 [@@deriving show]
 

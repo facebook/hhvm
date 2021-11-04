@@ -37,10 +37,6 @@ type t = {
      only after each file. It doesn't make sense to set this higher
      than [tco_max_typechecker_worker_memory_mb]. *)
   tco_defer_class_memory_mb_threshold: int option;
-  (* If set, prevents type checking of files from being deferred more than
-     the number of times greater than or equal to the threshold. If not set,
-     defers class declarations indefinitely. *)
-  tco_max_times_to_defer_type_checking: int option;
   (* Whether the Eden prefetch hook should be invoked *)
   tco_prefetch_deferred_files: bool;
   (* If set, distributes type checking to remote workers if the number of files to
@@ -342,7 +338,6 @@ val make :
   ?tco_max_typechecker_worker_memory_mb:int ->
   ?tco_defer_class_declaration_threshold:int ->
   ?tco_defer_class_memory_mb_threshold:int ->
-  ?tco_max_times_to_defer_type_checking:int ->
   ?tco_prefetch_deferred_files:bool ->
   ?tco_remote_type_check_threshold:int ->
   ?tco_remote_type_check:bool ->
@@ -476,8 +471,6 @@ val tco_max_typechecker_worker_memory_mb : t -> int option
 val tco_defer_class_declaration_threshold : t -> int option
 
 val tco_defer_class_memory_mb_threshold : t -> int option
-
-val tco_max_times_to_defer_type_checking : t -> int option
 
 val tco_prefetch_deferred_files : t -> bool
 

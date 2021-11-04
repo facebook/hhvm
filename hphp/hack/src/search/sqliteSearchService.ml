@@ -59,6 +59,7 @@ let find_saved_symbolindex ~(ignore_hh_version : bool) :
     let res =
       Future.get_exn
         (State_loader_futures.load
+           ~progress_callback:(fun _ -> ())
            ~watchman_opts:
              Saved_state_loader.Watchman_options.
                { root = repo; sockname = None }

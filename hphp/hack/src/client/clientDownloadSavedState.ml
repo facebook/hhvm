@@ -243,6 +243,7 @@ let load_saved_state :
     in
     let%lwt result =
       State_loader_lwt.load
+        ~progress_callback:(fun _ -> ())
         ~watchman_opts
         ~ignore_hh_version:false
         ~saved_state_type
@@ -267,6 +268,7 @@ let load_saved_state :
     in
     let%lwt result =
       State_loader_lwt.download_and_unpack_saved_state_from_manifold
+        ~progress_callback:(fun _ -> ())
         ~manifold_path
         ~target_path
         ~saved_state_type

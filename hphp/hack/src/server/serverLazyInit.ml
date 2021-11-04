@@ -304,6 +304,7 @@ let download_and_load_state_exn
       Hh_logger.log "Starting naming table download.";
       let loader_future =
         State_loader_futures.load
+          ~progress_callback:(fun _ -> ())
           ~watchman_opts:
             Saved_state_loader.Watchman_options.{ root; sockname = None }
           ~ignore_hh_version
@@ -329,6 +330,7 @@ let download_and_load_state_exn
     Hh_logger.log "Downloading dependency graph from DevX infra";
     let loader_future =
       State_loader_futures.load
+        ~progress_callback:(fun _ -> ())
         ~watchman_opts:
           Saved_state_loader.Watchman_options.{ root; sockname = None }
         ~ignore_hh_version

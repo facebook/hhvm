@@ -76,6 +76,7 @@ let load_saved_state ~(env : env) : saved_state_result Lwt.t =
     | None ->
       let%lwt naming_table_saved_state =
         State_loader_lwt.load
+          ~progress_callback:(fun _ -> ())
           ~watchman_opts:
             Saved_state_loader.Watchman_options.
               { root = env.root; sockname = env.watchman_sockname }
@@ -107,6 +108,7 @@ let load_saved_state ~(env : env) : saved_state_result Lwt.t =
     | None ->
       let%lwt dep_table_saved_state =
         State_loader_lwt.load
+          ~progress_callback:(fun _ -> ())
           ~watchman_opts:
             Saved_state_loader.Watchman_options.
               { root = env.root; sockname = env.watchman_sockname }

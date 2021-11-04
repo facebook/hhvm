@@ -265,6 +265,7 @@ let load_saved_state
         | None ->
           let%lwt result =
             State_loader_lwt.load
+              ~progress_callback:(fun _ -> ())
               ~watchman_opts:
                 Saved_state_loader.Watchman_options.{ root; sockname = None }
               ~ignore_hh_version:false

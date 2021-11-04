@@ -6,7 +6,11 @@
  *
  *)
 
-let load ~watchman_opts:_ ~ignore_hh_version:_ ~saved_state_type:_ =
+let load
+    ~progress_callback:_
+    ~watchman_opts:_
+    ~ignore_hh_version:_
+    ~saved_state_type:_ =
   Future.of_value (Error "Not implemented")
 
 let wait_for_finish _ = failwith "Not implemented"

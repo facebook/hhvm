@@ -403,7 +403,8 @@ Type awaitedTypeFromSSATmp(const SSATmp* awaitable) {
 
   auto const inst = awaitable->inst();
   if (inst->is(Call)) {
-    return inst->src(2)->hasConstVal(TFunc)
+    return (inst->src(2)->hasConstVal(TFunc) &&
+            !inst->extra<Call>()->asyncEagerReturn)
       ? awaitedCallReturnType(inst->src(2)->funcVal()) : TInitCell;
   }
   if (inst->is(CreateAFWH)) {

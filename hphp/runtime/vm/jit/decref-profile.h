@@ -18,6 +18,8 @@
 
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
+#include "hphp/runtime/vm/jit/type.h"
+#include "hphp/runtime/vm/jit/prof-data-serialize.h"
 
 #include <folly/dynamic.h>
 
@@ -64,6 +66,24 @@ struct DecRefProfile {
     return total ? 100.0 * value / total : 0.0;
   }
 
+  void serialize(ProfDataSerializer& ser) const {
+    write_raw(ser, total);
+    write_raw(ser, refcounted);
+    write_raw(ser, released);
+    write_raw(ser, decremented);
+
+    type.serialize(ser);
+  }
+
+  void deserialize(ProfDataDeserializer& ser) {
+    read_raw(ser, total);
+    read_raw(ser, refcounted);
+    read_raw(ser, released);
+    read_raw(ser, decremented);
+
+    type = Type::deserialize(ser);
+  }
+
   /*
    * Update the profile for a dec-ref on tv, then optionally do the dec-ref.
    */
@@ -93,6 +113,14 @@ struct DecRefProfile {
    * got a non-persistent, refcounted value with count > 1).
    */
   uint32_t decremented;
+
+  /*
+   * Union of all the types observed during profiling.
+   */
+  Type type;
+
+  // In RDS, but can't contain pointers to request-allocated data.
+  TYPE_SCAN_IGNORE_ALL;
 };
 
 const StringData* decRefProfileKey(const IRInstruction* inst);

@@ -39,6 +39,7 @@ void DecRefProfile::reduce(DecRefProfile& a, const DecRefProfile& b) {
     a.released    += b.released;
     a.decremented += b.decremented;
   }
+  a.type |= b.type;
 }
 
 void DecRefProfile::update(TypedValue tv) {
@@ -46,6 +47,7 @@ void DecRefProfile::update(TypedValue tv) {
   if (total == max) return;
 
   total++;
+  type |= typeFromTV(&tv, nullptr);
   if (!isRefcountedType(tv.type())) return;
   refcounted++;
   auto const countable = tv.val().pcnt;
@@ -71,18 +73,20 @@ folly::dynamic DecRefProfile::toDynamic() const {
                                ("percentDestroyed", percent(destroyed()))
                                ("survived", survived())
                                ("percentSurvived", percent(survived()))
+                               ("typeStr", type.toString())
                                ("profileType", "DecRefProfile");
 }
 
 std::string DecRefProfile::toString() const {
   return folly::sformat(
     "total: {:4}\n uncounted: {:4} ({:.1f}%),\n persistent: {:4} ({:.1f}%),\n"
-    " destroyed: {:4} ({:.1f}%),\n survived: {:4} ({:.1f}%)",
+    " destroyed: {:4} ({:.1f}%),\n survived: {:4} ({:.1f}%),\n typeStr: {}",
     total,
     uncounted(),  percent(uncounted()),
     persistent(), percent(persistent()),
     destroyed(),  percent(destroyed()),
-    survived(),   percent(survived())
+    survived(),   percent(survived()),
+    type.toString()
   );
 }
 

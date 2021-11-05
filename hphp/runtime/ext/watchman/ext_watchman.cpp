@@ -399,7 +399,24 @@ struct ActiveSubscription {
     if (!m_alive) { return false; }
     if (m_watchmanClient.get() && m_watchmanClient->isDead()) {
       m_alive = false;
-      m_watchmanClient.reset();
+
+      // Send our WatchmanClient reference to the EventBaseThread to be
+      // destroyed there.
+      //
+      // `m_watchmanClient`'s destructor always runs some work on the EventBase
+      // thread, because every `folly::AsyncSocket` must be destroyed on its
+      // EventBase thread. Trying to destroy `m_watchmanClient` on this thread
+      // will just block us until the EventBase thread's work is done.
+      //
+      // Because we're currently holding `s_sharedDataMutex`, and we sometimes
+      // ask the EventBase thread to acquire `s_sharedDataMutex`, we sometimes
+      // deadlocked when we blocked on the EventBase thread finishing all of
+      // its work. See D32157097 or https://github.com/facebook/hhvm/pull/8932
+      // for a description of the deadlock that sometimes occurred when we
+      // would synchronously destroy `m_watchmanClient`.
+      WatchmanThreadEventBase::Get()->getEventBase()
+        .runInEventBaseThread([deleteMe = std::move(m_watchmanClient)] {
+        });
     }
     return m_alive;
   }

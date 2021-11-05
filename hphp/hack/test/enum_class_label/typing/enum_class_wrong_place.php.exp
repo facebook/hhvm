@@ -5,6 +5,8 @@ This character is invalid. (Parsing[1002])
 File "enum_class_wrong_place.php", line 9, characters 8-8:
 Unbound name: `#` (a global constant) (Naming[2049])
 File "enum_class_wrong_place.php", line 8, characters 8-28:
-Not enough type information to infer the type of this enum class label. (Typing[4396])
+Enum class label/member mismatch (Typing[4110])
+  File "enum_class_wrong_place.php", line 8, characters 8-28:
+  Unexpected enum class label: `#label_alone_is_error`
 File "enum_class_wrong_place.php", line 9, characters 8-8:
 Unbound global constant (Typing) (Typing[4106])

@@ -1,4 +1,8 @@
 File "enum_class2.php", line 25, characters 18-21:
 An enum class label is required here, not a class constant projection. (Typing[4397])
 File "enum_class2.php", line 26, characters 8-9:
-Not enough type information to infer the type of this enum class label. (Typing[4396])
+Enum class label/member mismatch (Typing[4110])
+  File "enum_class2.php", line 13, characters 15-31:
+  Expected `HH\MemberOf<E, C>`
+  File "enum_class2.php", line 26, characters 8-9:
+  But got an enum class label: `#A`

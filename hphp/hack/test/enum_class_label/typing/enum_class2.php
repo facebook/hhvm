@@ -23,5 +23,5 @@ function main(): void {
   show(E::A);
   show_via_label(#A);
   show_via_label(E::A); // invalid
-  show(#A); // invalidd
+  show(#A); // invalid
 }

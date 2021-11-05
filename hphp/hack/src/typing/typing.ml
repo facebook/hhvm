@@ -4220,7 +4220,42 @@ and expr_
   | ET_Splice e ->
     Typing_env.with_in_expr_tree env false (fun env -> et_splice env p e)
   | EnumClassLabel (None, s) ->
-    Errors.enum_class_label_as_expr p;
+    let (env, ropt, expect_label, expect_str) =
+      match expected with
+      | Some ety ->
+        let (env, lty) = Env.expand_type env ety.ExpectedTy.ty.et_type in
+        let expect_label =
+          match get_node lty with
+          | Tnewtype (name, _, _) ->
+            String.equal SN.Classes.cEnumClassLabel name
+          | _ -> false
+        in
+        ( env,
+          Some (get_reason lty),
+          expect_label,
+          Typing_print.full_strip_ns env lty )
+      | None -> (env, None, false, "")
+    in
+    let () =
+      if expect_label then
+        Errors.enum_class_label_as_expr p
+      else
+        let reason =
+          match ropt with
+          | Some r ->
+            Reason.to_string (Format.sprintf "Expected `%s`" expect_str) r
+            @ [
+                ( Pos_or_decl.of_raw_pos p,
+                  Format.sprintf "But got an enum class label: `#%s`" s );
+              ]
+          | None ->
+            [
+              ( Pos_or_decl.of_raw_pos p,
+                Format.sprintf "Unexpected enum class label: `#%s`" s );
+            ]
+        in
+        Errors.unify_error (p, "Enum class label/member mismatch") reason
+    in
     make_result
       env
       p

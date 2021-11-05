@@ -2,20 +2,22 @@
 ; contains "external" function definition in .ml and
 ; the symbol is provided by the ocaml-rs Rust package via caml! macro
 (library
-  (name decl_rust_ffi)
+  (name rust_decl_ffi)
   (modules)
   (wrapped false)
-  (preprocess (pps ppx_deriving.std))
-  (self_build_stubs_archive (decl_rust_ffi))
+  (self_build_stubs_archive (rust_decl_ffi))
 )
+
+(data_only_dirs rust_decl_ffi) ; so dune doesn't look at rust stuff
+
 (rule
-  (targets libdecl_rust_ffi_stubs.a)
+  (targets librust_decl_ffi_stubs.a)
   (deps (source_tree %{workspace_root}/src))
   (locks /cargo)
   (action
     (run %{workspace_root}/scripts/build_rust_to_ocaml.sh
-      decl_rust_ffi
-      decl_rust_ffi
+      rust_decl_ffi
+      rust_decl_ffi
     )
   )
 )
@@ -114,7 +116,7 @@
     decl_parser_options
     shallow_decl_defs
     typing_defs
-    decl_rust_ffi)
+    rust_decl_ffi)
   (preprocess (pps ppx_deriving.std)))
 
 (library

@@ -670,21 +670,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "decl_rust_ffi"
-version = "0.0.0"
-dependencies = [
- "bumpalo",
- "direct_decl_parser",
- "hh_hash",
- "ocamlrep",
- "ocamlrep_caml_builtins",
- "ocamlrep_ocamlpool",
- "oxidized",
- "oxidized_by_ref",
- "stack_limit",
-]
-
-[[package]]
 name = "depgraph"
 version = "0.0.0"
 dependencies = [
@@ -3194,6 +3179,21 @@ dependencies = [
  "serde_json",
  "stack_limit",
  "unified_decl_provider",
+]
+
+[[package]]
+name = "rust_decl_ffi"
+version = "0.0.0"
+dependencies = [
+ "bumpalo",
+ "direct_decl_parser",
+ "hh_hash",
+ "ocamlrep",
+ "ocamlrep_caml_builtins",
+ "ocamlrep_ocamlpool",
+ "oxidized",
+ "oxidized_by_ref",
+ "stack_limit",
 ]
 
 [[package]]

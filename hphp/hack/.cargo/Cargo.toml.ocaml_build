@@ -2,8 +2,8 @@
 members = [
     "src/arena_collections",
     "src/arena_trait",
+    "src/decl/cargo/rust_decl_ffi",
     "src/decl/direct_decl_smart_constructors",
-    "src/decl/ffi",
     "src/deps/cargo/deps_rust",
     "src/deps/cargo/typing_deps_hash",
     "src/facebook/hh",

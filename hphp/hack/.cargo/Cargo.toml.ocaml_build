@@ -39,7 +39,7 @@ members = [
     "src/facebook/utils/watchman/cargo/watchman_lib",
     "src/facts/cargo/facts_rust",
     "src/facts/cargo/facts_smart_constructors",
-    "src/facts/ffi",
+    "src/facts/cargo/rust_facts_ffi",
     "src/heap",
     "src/hhbc/bytecode_printer",
     "src/hhbc/cargo/compile_ffi",

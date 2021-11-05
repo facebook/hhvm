@@ -48,6 +48,10 @@ async function source_to_regex_sink(): Awaitable<void> {
   await DataLogger::genLog(__source_returned_from_function());
 }
 
+function parameter_as_source_to_sink(int $data): void {
+  __sink($data);
+}
+
 <<__EntryPoint>> async function main(): Awaitable<void> {
   source_returned_from_function();
   source_returned_from_method();
@@ -55,4 +59,5 @@ async function source_to_regex_sink(): Awaitable<void> {
   source_to_sink_not_in_second_parameter();
   source_from_regex_to_sink();
   await source_to_regex_sink();
+  parameter_as_source_to_sink(1);
 }

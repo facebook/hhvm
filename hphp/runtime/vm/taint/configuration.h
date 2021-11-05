@@ -18,15 +18,18 @@
 
 #ifdef HHVM_TAINT
 
-#include <set>
 #include <string>
-#include <unordered_set>
 
 #include <boost/functional/hash.hpp>
 #include <boost/regex.hpp>
 
 namespace HPHP {
 namespace taint {
+
+struct Source {
+  boost::regex name;
+  Optional<int> index;  // If set indicates a parameter source.
+};
 
 struct Sink {
   boost::regex name;
@@ -38,14 +41,12 @@ struct Configuration {
 
   void read(const std::string& path);
 
-  bool isSource(const std::string& name) const;
-
-  void addSink(const Sink& sink);
+  std::vector<Source> sources(const std::string& name) const;
   std::vector<Sink> sinks(const std::string& name) const;
 
   Optional<std::string> outputDirectory;
  private:
-  std::set<boost::regex> m_sources;
+  std::vector<Source> m_sources;
   std::vector<Sink> m_sinks;
 };
 

@@ -68,7 +68,15 @@ void Configuration::read(const std::string& path) {
     boost::filesystem::load_string_file(path, contents);
     auto parsed = folly::parseJson(contents);
     for (const auto source : parsed["sources"]) {
-      m_sources.insert(boost::regex(source.asString()));
+      Optional<int> index = std::nullopt;
+      auto indexElement = source.getDefault("index");
+      if (indexElement.isInt()) {
+        index = indexElement.asInt();
+      }
+      m_sources.push_back({
+        boost::regex(source["name"].asString()),
+        index,
+      });
     }
     for (const auto sink : parsed["sinks"]) {
       m_sinks.push_back({
@@ -77,18 +85,20 @@ void Configuration::read(const std::string& path) {
       });
     }
   } catch (std::exception& exception) {
-    throw std::invalid_argument("unable to read configuration at `" + path + "`");
+    throw std::invalid_argument(
+        "unable to read configuration at `" + path + "`: " + exception.what());
   }
 }
 
-bool Configuration::isSource(const std::string& name) const {
-  for (auto& pattern : m_sources) {
+std::vector<Source> Configuration::sources(const std::string& name) const {
+  std::vector<Source> sources;
+  for (auto& source : m_sources) {
     // Naive implementation for now. Lots of room for optimization.
-    if (boost::regex_match(name, pattern)) {
-      return true;
+    if (boost::regex_match(name, source.name)) {
+      sources.push_back(source);
     }
   }
-  return false;
+  return sources;
 }
 
 std::vector<Sink> Configuration::sinks(const std::string& name) const {

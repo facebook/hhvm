@@ -552,8 +552,11 @@ void iopRetC(PC& /* pc */) {
   std::string name = func->fullName()->data();
   FTRACE(1, "taint: leaving {}\n", yellow(quote(name)));
 
-  // Check if this function is the origin of a source.
-  if (Configuration::get()->isSource(name)) {
+  const auto sources = Configuration::get()->sources(name);
+  FTRACE(3, "taint: {} sources\n", sources.size());
+
+  // Check if thisjctdkrvujthe origin of a source.
+  if (!sources.empty()) {
     FTRACE(1, "taint: function returns source\n");
     Path path;
     path.hops.push_back(Hop{func, callee()});
@@ -1055,6 +1058,7 @@ void iopVerifyParamType(local_var param) {
   auto state = State::instance;
   auto func = vmfp()->func();
 
+  // Taint propagation.
   auto index = func->numParams() - (param.index + 1);
   auto value = state->stack.peek(index);
   if (value) {
@@ -1066,6 +1070,21 @@ void iopVerifyParamType(local_var param) {
         value);
     value->hops.push_back(Hop{callee(), func});
     state->heap.set(param.lval, value);
+  }
+
+  // Taint generation.
+  auto sources = Configuration::get()->sources(func->fullName()->data());
+  for (auto source : sources) {
+    if (source.index && *source.index == param.index) {
+      FTRACE(
+          2,
+          "taint: parameter {} (index: {}) is tainted\n",
+          param.lval,
+          param.index);
+      Path path;
+      state->heap.set(param.lval, path);
+      break;
+    }
   }
 }
 

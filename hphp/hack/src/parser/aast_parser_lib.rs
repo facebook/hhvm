@@ -6,6 +6,7 @@
 
 mod aast_check;
 mod aast_parser;
+mod coeffects_check;
 mod expression_tree_check;
 mod readonly_check;
 pub use aast_parser::{AastParser, Error, Result};

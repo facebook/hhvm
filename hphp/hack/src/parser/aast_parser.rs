@@ -5,6 +5,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::aast_check;
+use crate::coeffects_check;
 use crate::expression_tree_check;
 use crate::readonly_check;
 use bumpalo::Bump;
@@ -202,6 +203,7 @@ impl<'src> AastParser {
             }
             errors.extend(aast_check::check_program(&aast));
             errors.extend(expression_tree_check::check_splices(&aast));
+            errors.extend(coeffects_check::check_program(&aast));
 
             errors
         };

@@ -585,7 +585,7 @@ bool shouldInline(const irgen::IRGS& irgs,
   // We measure the cost of inlining each callstack and stop when it exceeds a
   // certain threshold.  (Note that we do not measure the total cost of all the
   // inlined calls for a given caller---just the cost of each nested stack.)
-  const int cost = computeTranslationCost(callerSk, region, annotationsPtr);
+  const int cost = costOfInlining(callerSk, callee, region, annotationsPtr);
   if (cost <= RuntimeOption::EvalHHIRAlwaysInlineVasmCostLimit) {
     return accept(folly::sformat("cost={} within always-inline limit", cost));
   }

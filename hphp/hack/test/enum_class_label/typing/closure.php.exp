@@ -7,7 +7,7 @@ Invalid argument (Typing[4110])
 File "closure.php", line 34, characters 10-14:
 Enum class label/member mismatch (Typing[4110])
   File "closure.php", line 13, characters 17-33:
-  Expected `HH\MemberOf<E, #38018>`
+  Expected `HH\MemberOf<E, #38038>`
   File "closure.php", line 34, characters 10-14:
   But got an enum class label: `#Name`
 File "closure.php", line 38, characters 30-31:

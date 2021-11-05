@@ -1,1 +1,1 @@
-Fatal error: This character is invalid. in %s/test/slow/hash_comment.php on line 4
+Fatal error: Encountered unexpected token `#`. in %s/test/slow/hash_comment.php on line 4

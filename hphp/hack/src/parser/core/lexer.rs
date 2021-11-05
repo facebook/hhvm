@@ -1687,14 +1687,7 @@ where
             }
             '#' => {
                 self.advance(1);
-                let c = self.peek_char(0);
-                // Do we have a "alpha" function somewhere ?
-                if ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') {
-                    TokenKind::Hash
-                } else {
-                    self.with_error(Errors::error0006);
-                    TokenKind::ErrorToken
-                }
+                TokenKind::Hash
             }
             'b' if {
                 let c1 = self.peek_char(1);

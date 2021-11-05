@@ -6,5 +6,4 @@
 
 function f() : void {
   $x = #label_alone_is_error;
-  $y = # not_ok;
 }

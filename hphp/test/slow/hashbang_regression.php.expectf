@@ -1,1 +1,1 @@
-Fatal error: This character is invalid. in %s/test/slow/hashbang_regression.php on line 3
+Fatal error: Cannot use unstable feature: `enum_class_label` in %s/test/slow/hashbang_regression.php on line 3

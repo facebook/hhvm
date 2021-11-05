@@ -91,7 +91,6 @@ struct State {
 
   void initialize();
   void teardown();
-  void reset();
 
   Stack stack;
   Heap heap;

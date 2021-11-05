@@ -177,6 +177,10 @@ void State::initialize() {
   for (int i = 0; i < 4; i++) {
     stack.push(std::nullopt);
   }
+
+  stack.clear();
+  heap.clear();
+  paths.clear();
 }
 
 namespace {
@@ -235,12 +239,6 @@ void State::teardown() {
   } catch (std::exception& exception) {
     throw std::runtime_error("unable to write to `" + outputPath + "`");
   }
-}
-
-void State::reset() {
-  stack.clear();
-  heap.clear();
-  initialize();
 }
 
 } // namespace taint

@@ -5,7 +5,7 @@ version = "0.0.0"
 edition = "2021"
 
 [lib]
-path = "../../dep_graph_is_subgraph.rs"
+path = "../../hh_fanout_dep_graph_is_subgraph_rust/dep_graph_is_subgraph.rs"
 crate-type = ["lib", "staticlib"]
 
 [dependencies]

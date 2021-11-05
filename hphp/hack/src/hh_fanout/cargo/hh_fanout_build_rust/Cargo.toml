@@ -5,7 +5,7 @@ version = "0.0.0"
 edition = "2021"
 
 [lib]
-path = "../../build.rs"
+path = "../../hh_fanout_build_rust/build.rs"
 crate-type = ["lib", "staticlib"]
 
 [dependencies]

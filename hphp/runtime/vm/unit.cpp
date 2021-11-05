@@ -242,10 +242,6 @@ namespace {
 SimpleMutex unitInitLock(false /* reentrant */, RankUnitInit);
 std::atomic<uint64_t> s_loadedUnits{0};
 
-void setGlobal(StringData* name, TypedValue *value) {
-  g_context->m_globalNVTable->set(name, value);
-}
-
 bool isEvalName(const StringData* name) {
   return name->empty() || boost::ends_with(name->slice(), EVAL_FILENAME_SUFFIX);
 }

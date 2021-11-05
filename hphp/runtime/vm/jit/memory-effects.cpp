@@ -1861,18 +1861,11 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case GetMemoKeyScalar:
     return IrrelevantEffects{};
 
-  // These opcodes raise notices if we access $GLOBALS['GLOBALS'],
-  // or, due to case insensitivity, $GLOBALS['gLoBAls'], etc.
-  case BaseG:
+  case ProfileGlobal:
   case LdGblAddr:
-  case LdGblAddrDef: {
-    auto const base = inst.op() == BaseG
-      ? may_load_store(AHeapAny, AHeapAny)
-      : may_load_store(AEmpty, AEmpty);
-    auto const& key = inst.src(0)->type();
-    auto const safe = key.hasConstVal() && !s_GLOBALS.equal(key.strVal());
-    return safe ? base : may_reenter(inst, base);
-  }
+  case LdGblAddrDef:
+  case BaseG:
+    return may_load_store(AEmpty, AEmpty);
 
   case LdClsCtor:
     return may_load_store(AEmpty, AEmpty);

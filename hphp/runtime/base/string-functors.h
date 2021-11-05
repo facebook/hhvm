@@ -25,11 +25,17 @@ struct hphp_string_hash {
   size_t operator()(const String& s) const {
     return s.get()->hash();
   }
+  size_t operator()(const StringData* s) const {
+    return s->hash();
+  }
 };
 
 struct hphp_string_same {
   bool operator()(const String& s1, const String& s2) const {
     return s1.get()->same(s2.get());
+  }
+  bool operator()(const StringData* s1, const StringData* s2) const {
+    return s1->same(s2);
   }
 };
 

@@ -361,7 +361,16 @@ void cgLdGblAddr(IRLS& env, const IRInstruction* inst) {
                SyncOptions::Sync, argGroup(env, inst).ssa(0));
 }
 
+void cgProfileGlobal(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  cgCallHelper(v, env, CallSpec::direct(profileGlobal),
+               kVoidDest, SyncOptions::None,
+               argGroup(env, inst).ssa(0));
+}
+
 IMPL_OPCODE_CALL(LdGblAddrDef)
+
+///////////////////////////////////////////////////////////////////////////////
 
 void cgLdPropAddr(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);

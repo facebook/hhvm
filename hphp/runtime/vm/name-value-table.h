@@ -18,6 +18,7 @@
 
 #include <folly/Bits.h>
 
+#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/typed-value.h"
 
@@ -92,12 +93,15 @@ private:
   // Element type for the name/value hashtable.
   struct Elm {
     TypedValue        m_tv;
+    rds::Link<TypedValue, rds::Mode::Normal> m_link;
     const StringData* m_name;
+
     TYPE_SCAN_CUSTOM() {
-      // m_tv is only valid if m_name != null
+      // m_tv is only valid if m_name != null. If the link is bound,
+      // it will be scanned as part of RDS.
       if (m_name) {
         scanner.scan(m_name);
-        scanner.scan(m_tv);
+        if (!m_link.bound()) scanner.scan(m_tv);
       }
     }
   };
@@ -121,7 +125,30 @@ private:
   }
 };
 
+// Is global profiling enabled?
+bool shouldProfileGlobals();
+
+// Profile a global with the given name. Called from global accesses
+// from the TC.
+void profileGlobal(const StringData*);
+
+namespace jit {
+struct ProfDataSerializer;
+struct ProfDataDeserializer;
+struct Type;
+}
+
+// Return the assigned RDS link for this global.
+rds::Link<TypedValue, rds::Mode::Normal> linkForGlobal(const StringData*);
+// Has profiling indicated this global is almost always present? If
+// so, we'll side-exit if it is missing.
+bool globalMainlyPresent(const StringData*);
+// Return the profiled type for this global
+jit::Type predictedTypeForGlobal(const StringData*);
+
+void writeGlobalProfiles(jit::ProfDataSerializer&);
+void readGlobalProfiles(jit::ProfDataDeserializer&);
+
 //////////////////////////////////////////////////////////////////////
 
 }
-

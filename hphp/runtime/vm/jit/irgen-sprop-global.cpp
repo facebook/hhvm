@@ -419,20 +419,20 @@ void emitCGetG(IRGS& env) {
   auto const name = topC(env);
   if (!name->isA(TStr)) PUNT(CGetG-NonStrName);
 
-  auto ret = cond(
+  auto const ret = profiledGlobalAccess(
     env,
+    name,
     [&] (Block* taken) {
-      auto const ptr = gen(env, LdGblAddr, name);
-      return gen(env, CheckNonNull, taken, ptr);
+      auto const addr = gen(env, LdGblAddr, name);
+      return gen(env, CheckNonNull, taken, addr);
     },
-    [&] (SSATmp* ptr) {
-      auto tmp = gen(env, LdMem, TCell, ptr);
+    [&] (SSATmp* ptr, Type type) {
+      auto const tmp = gen(env, LdMem, type, ptr);
       gen(env, IncRef, tmp);
       return tmp;
     },
-    // Taken: LdGblAddr branched here because no global variable exists with
-    // that name.
-    [&] { return cns(env, TInitNull); }
+    [&] { return cns(env, TInitNull); },
+    true
   );
 
   destroyName(env, name);
@@ -442,8 +442,18 @@ void emitCGetG(IRGS& env) {
 void emitSetG(IRGS& env) {
   auto const name = topC(env, BCSPRelOffset{1});
   if (!name->isA(TStr)) PUNT(SetG-NameNotStr);
-  auto const value   = popC(env, DataTypeGeneric);
-  auto const ptr = gen(env, LdGblAddrDef, name);
+  auto const value = topC(env, BCSPRelOffset{0}, DataTypeGeneric);
+
+  auto const ptr = profiledGlobalAccess(
+    env,
+    name,
+    [&] (Block*) { return gen(env, LdGblAddrDef, name); },
+    [&] (SSATmp* ptr, Type) { return ptr; },
+    [&] { return gen(env, LdGblAddrDef, name); },
+    false
+  );
+
+  discard(env);
   destroyName(env, name);
   bindMem(env, ptr, value);
 }
@@ -452,19 +462,20 @@ void emitIssetG(IRGS& env) {
   auto const name = topC(env, BCSPRelOffset{0});
   if (!name->isA(TStr)) PUNT(IssetG-NameNotStr);
 
-  auto const ret = cond(
+  auto const ret = profiledGlobalAccess(
     env,
+    name,
     [&] (Block* taken) {
-      auto const ptr = gen(env, LdGblAddr, name);
-      return gen(env, CheckNonNull, taken, ptr);
+      auto const addr = gen(env, LdGblAddr, name);
+      return gen(env, CheckNonNull, taken, addr);
     },
-    [&] (SSATmp* ptr) { // Next: global exists
+    [&] (SSATmp* ptr, Type) {
       return gen(env, IsNTypeMem, TNull, ptr);
     },
-    [&] { // Taken: global doesn't exist
-      return cns(env, false);
-    }
+    [&] { return cns(env, false); },
+    false
   );
+
   destroyName(env, name);
   push(env, ret);
 }

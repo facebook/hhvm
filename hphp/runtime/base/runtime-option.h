@@ -830,6 +830,8 @@ struct RuntimeOption {
   F(string, ReorderProps,              reorderPropsDefault())           \
   F(bool, ReorderRDS,                  true)                            \
   F(double, RDSReorderThreshold,       0.0005)                          \
+  F(uint32_t, ProfileGlobalsLimit,     200)                             \
+  F(double, ProfileGlobalsSlowExitThreshold, 0.98)                      \
   F(bool, JitAlwaysInterpOne,          false)                           \
   F(uint32_t, JitNopInterval,          0)                               \
   F(uint32_t, JitMaxTranslations,      10)                              \

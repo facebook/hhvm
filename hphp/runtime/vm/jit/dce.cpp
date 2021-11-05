@@ -621,6 +621,7 @@ bool canDCE(IRInstruction* inst) {
   case ProfileCall:
   case ProfileMethod:
   case ProfileSubClsCns:
+  case ProfileGlobal:
   case CheckVecBounds:
   case BespokeElem:
   case BespokeEscalateToVanilla:

@@ -1808,6 +1808,8 @@ std::string serializeProfData(const std::string& filename) {
       serializeBespokeLayouts(ser);
     }
 
+    writeGlobalProfiles(ser);
+
     // Record the size of main profile code so we can use it to fake
     // jit.maturity if we're going to restart before running RTA.
     write_raw(ser, tc::getProfMainUsage());
@@ -1930,6 +1932,8 @@ std::string deserializeProfData(const std::string& filename,
     if (allowBespokeArrayLikes()) {
       deserializeBespokeLayouts(ser);
     }
+
+    readGlobalProfiles(ser);
 
     // If isJitSerializing() is true, we've restarted to reload the
     // profiling data. Record the size of prof before we restarted so

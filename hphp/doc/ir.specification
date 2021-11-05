@@ -1174,6 +1174,10 @@ To string conversions:
   Loads a pointer to a global with name S0, defining it to be InitNull if it
   is not already defined.
 
+| ProfileGlobal, ND, S(Str), NF
+
+  Profile an (attempted) access of a global with name S0.
+
 | LdClsPropAddrOrNull<readonly op>, D(PtrToSPropCell|Nullptr), S(Cls) S(Str)
 |                     C(Cls|Nullptr) C(Bool) C(Bool), NF
 

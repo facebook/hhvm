@@ -871,8 +871,25 @@ SimpleOp simpleCollectionOp(Type baseType, Type keyType, bool readInst,
 void baseGImpl(IRGS& env, SSATmp* name, MOpMode mode) {
   if (!name->isA(TStr)) PUNT(BaseG-non-string-name);
   auto base_mode = mode != MOpMode::Unset ? mode : MOpMode::None;
-  auto gblPtr = gen(env, BaseG, MOpModeData{base_mode}, name);
-  stMBase(env, gblPtr);
+
+  profiledGlobalAccess(
+    env,
+    name,
+    [&] (Block*) { return gen(env, BaseG, MOpModeData{base_mode}, name); },
+    [&] (SSATmp* ptr, Type) {
+      stMBase(env, ptr);
+      return cns(env, TBottom);
+    },
+    [&] {
+      auto const ptr = [&] {
+        if (base_mode == MOpMode::None) return ptrToInitNull(env);
+        return gen(env, BaseG, MOpModeData{base_mode}, name);
+      }();
+      stMBase(env, ptr);
+      return cns(env, TBottom);
+    },
+    true
+  );
   gen(env, StMROProp, cns(env, false));
 }
 

@@ -5,7 +5,7 @@ version = "0.0.0"
 edition = "2021"
 
 [lib]
-path = "../../lib.rs"
+path = "../../depgraph/lib.rs"
 crate-type = ["lib", "staticlib"]
 
 [dependencies]

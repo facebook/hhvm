@@ -5,7 +5,7 @@ version = "0.0.0"
 edition = "2021"
 
 [lib]
-path = "../../writer.rs"
+path = "../../depgraph_writer/writer.rs"
 crate-type = ["lib", "staticlib"]
 
 [dependencies]

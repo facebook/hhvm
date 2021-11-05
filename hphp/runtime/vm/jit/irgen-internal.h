@@ -444,12 +444,17 @@ struct MultiCond {
   template <typename Branch, typename Then>
   void ifThen(Branch&& branch, Then&& then) {
     assertx(!finished);
-    auto const taken = defBlock(env);
-    auto const refined = branch(taken);
-    auto const result = then(refined);
-    resultTy |= result->type();
-    gen(env, Jmp, done, result);
-    env.irb->appendBlock(taken);
+    try {
+      auto const taken = defBlock(env);
+      auto const refined = branch(taken);
+      auto const result = then(refined);
+      resultTy |= result->type();
+      gen(env, Jmp, done, result);
+      env.irb->appendBlock(taken);
+    } catch (const FailedIRGen&) {
+      finished = true;
+      throw;
+    }
   }
 
   template <typename Then>

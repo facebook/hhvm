@@ -151,6 +151,24 @@ SSATmp* implInstanceCheck(IRGS& env, SSATmp* src, const StringData* className,
     gen(env, ExtendsClass, ExtendsClassData{ knownCls }, objClass) : nullptr;
 }
 
+constexpr size_t kNumDataTypes = 17;
+constexpr std::array<DataType, kNumDataTypes> computeDataTypes() {
+  std::array<DataType, kNumDataTypes> result = {};
+  size_t index = 0;
+#define DT(name, value) {                                      \
+    auto constexpr dt = KindOf##name;                          \
+    if (dt == dt_modulo_persistence(dt)) result[index++] = dt; \
+  }
+  DATATYPES
+#undef DT
+#ifdef __clang__
+  always_assert(index == kNumDataTypes);
+#endif
+  return result;
+}
+
+constexpr std::array<DataType, kNumDataTypes> kDataTypes = computeDataTypes();
+
 /*
  * Emit a type-check for the given type-constraint. Since the details can vary
  * quite a bit depending on what the type-constraint represents, this function
@@ -195,15 +213,7 @@ void verifyTypeImpl(IRGS& env,
   if (!tc.isCheckable()) return;
   assertx(!tc.isUpperBound() || RuntimeOption::EvalEnforceGenericsUB != 0);
 
-  auto const val = getVal();
-  assertx(val->type() <= TCell);
-  auto const valType = val->type();
-
-  if (!valType.isKnownDataType()) return giveup();
-
-  if (tc.isNullable() && valType <= TInitNull) return;
-
-  auto const genFail = [&](SSATmp* ctx = nullptr) {
+  auto const genFail = [&](SSATmp* val, SSATmp* ctx = nullptr) {
     if (ctx == nullptr) {
       ctx = tc.isThis() ? propCls ? propCls : ldCtxCls(env)
                         : cns(env, nullptr);
@@ -216,119 +226,160 @@ void verifyTypeImpl(IRGS& env,
     return fail(val, ctx, failHard);
   };
 
-  auto const valDataType = valType.toDataType();
-  auto const result = annotCompat(valDataType, tc.type(), tc.typeName());
+  auto const checkOneType = [&](SSATmp* val, AnnotAction result) {
 
-  switch (result) {
-    case AnnotAction::Pass:          return;
-    case AnnotAction::Fail:          return genFail();
-    case AnnotAction::CallableCheck: return callable(val);
-    case AnnotAction::ObjectCheck:   break;
+    auto const valType = val->type();
+    assertx(valType.isKnownDataType());
+    auto const valDataType = valType.toDataType();
 
-    case AnnotAction::WarnClass:
-    case AnnotAction::ConvertClass:
-      assertx(valType <= TCls);
-      if (!classToStr(val)) return genFail();
-      if (result == AnnotAction::WarnClass) {
-        gen(env, RaiseNotice, cns(env, s_CLASS_TO_STRING_IMPLICIT.get()));
-      }
-      return;
+    switch (result) {
+      case AnnotAction::Pass:          return;
+      case AnnotAction::Fail:          return genFail(val);
+      case AnnotAction::CallableCheck: return callable(val);
+      case AnnotAction::ObjectCheck:   break;
 
-    case AnnotAction::WarnLazyClass:
-    case AnnotAction::ConvertLazyClass:
-      assertx(valType <= TLazyCls);
-      if (!lazyClassToStr(val)) return genFail();
-      if (result == AnnotAction::WarnLazyClass) {
-        gen(env, RaiseNotice, cns(env, s_CLASS_TO_STRING_IMPLICIT.get()));
-      }
-      return;
-
-    case AnnotAction::WarnClassname:
-      assertx(valType <= TCls || valType <= TLazyCls);
-      gen(env, RaiseNotice, cns(env, s_CLASS_TO_CLASSNAME.get()));
-      return;
-  }
-  assertx(result == AnnotAction::ObjectCheck);
-  if (onlyCheckNullability) return;
-
-  if (!(valType <= TObj)) {
-    if (tc.isResolved()) return genFail();
-
-    // In RepoAuth mode, we can optimize some type aliases and enum types.
-    if (tc.isObject() && RuntimeOption::RepoAuthoritative) {
-      auto const pass = [&]{
-        auto const ne = tc.namedEntity();
-        auto const td = ne->getCachedTypeAlias();
-        if (ne->isPersistentTypeAlias() && td) {
-          if (td->nullable && valType <= TNull) return true;
-          auto const cls = td->klass ? td->klass->name() : nullptr;
-          return annotCompat(valDataType, td->type, cls) == AnnotAction::Pass;
+      case AnnotAction::WarnClass:
+      case AnnotAction::ConvertClass:
+        assertx(valType <= TCls);
+        if (!classToStr(val)) return genFail(val);
+        if (result == AnnotAction::WarnClass) {
+          gen(env, RaiseNotice, cns(env, s_CLASS_TO_STRING_IMPLICIT.get()));
         }
-        auto const cls = ne->getCachedClass();
-        if (cls && classHasPersistentRDS(cls) && cls->enumBaseTy()) {
-          auto const type = enumDataTypeToAnnotType(*cls->enumBaseTy());
-          return annotCompat(valDataType, type, nullptr) == AnnotAction::Pass;
-        }
-        return false;
-      }();
-      if (pass) {
-        env.irb->constrainValue(val, DataTypeSpecific);
         return;
-      }
+
+      case AnnotAction::WarnLazyClass:
+      case AnnotAction::ConvertLazyClass:
+        assertx(valType <= TLazyCls);
+        if (!lazyClassToStr(val)) return genFail(val);
+        if (result == AnnotAction::WarnLazyClass) {
+          gen(env, RaiseNotice, cns(env, s_CLASS_TO_STRING_IMPLICIT.get()));
+        }
+        return;
+
+      case AnnotAction::WarnClassname:
+        assertx(valType <= TCls || valType <= TLazyCls);
+        gen(env, RaiseNotice, cns(env, s_CLASS_TO_CLASSNAME.get()));
+        return;
     }
-    return giveup();
-  }
+    assertx(result == AnnotAction::ObjectCheck);
+    if (onlyCheckNullability) return;
 
-  // At this point, we know that val is a TObj.
-  if (tc.isThis()) {
-    // For this type checks, the class needs to be an exact match.
-    auto const ctxCls = propCls ? propCls : ldCtxCls(env);
-    auto const objClass = gen(env, LdObjClass, val);
-    ifThen(
-      env,
-      [&] (Block* taken) {
-        gen(env, JmpZero, taken, gen(env, EqCls, ctxCls, objClass));
-      },
-      [&] {
-        hint(env, Block::Hint::Unlikely);
-        genFail(ctxCls);
+    if (!(valType <= TObj)) {
+      if (tc.isResolved()) return genFail(val);
+
+      // In RepoAuth mode, we can optimize some type aliases and enum types.
+      if (tc.isObject() && RuntimeOption::RepoAuthoritative) {
+        auto const pass = [&]{
+          auto const ne = tc.namedEntity();
+          auto const td = ne->getCachedTypeAlias();
+          if (ne->isPersistentTypeAlias() && td) {
+            if (td->nullable && valType <= TNull) return true;
+            auto const cls = td->klass ? td->klass->name() : nullptr;
+            return annotCompat(valDataType, td->type, cls) == AnnotAction::Pass;
+          }
+          auto const cls = ne->getCachedClass();
+          if (cls && classHasPersistentRDS(cls) && cls->enumBaseTy()) {
+            auto const type = enumDataTypeToAnnotType(*cls->enumBaseTy());
+            return annotCompat(valDataType, type, nullptr) == AnnotAction::Pass;
+          }
+          return false;
+        }();
+        if (pass) {
+          env.irb->constrainValue(val, DataTypeSpecific);
+          return;
+        }
       }
-    );
-    return;
+      return giveup();
+    }
+
+    // At this point, we know that val is a TObj.
+    if (tc.isThis()) {
+      // For this type checks, the class needs to be an exact match.
+      auto const ctxCls = propCls ? propCls : ldCtxCls(env);
+      auto const objClass = gen(env, LdObjClass, val);
+      ifThen(
+        env,
+        [&] (Block* taken) {
+          gen(env, JmpZero, taken, gen(env, EqCls, ctxCls, objClass));
+        },
+        [&] {
+          hint(env, Block::Hint::Unlikely);
+          genFail(val, ctxCls);
+        }
+      );
+      return;
+    }
+
+    // At this point, we know that val is a TObj and that tc is an Object.
+    assertx(tc.isObject());
+    const StringData* clsName = nullptr;
+    const Class* knownConstraint = nullptr;
+    auto const ne = tc.namedEntity();
+    auto const td = ne->getCachedTypeAlias();
+    if (RO::RepoAuthoritative && ne->isPersistentTypeAlias() &&
+        td && td->klass) {
+      assertx(classHasPersistentRDS(td->klass));
+      clsName = td->klass->name();
+      knownConstraint = td->klass;
+    } else {
+      clsName = tc.typeName();
+    }
+
+    auto const checkCls = ldClassSafe(env, clsName, knownConstraint);
+    auto const fastIsInstance = implInstanceCheck(env, val, clsName, checkCls);
+    if (fastIsInstance) {
+      ifThen(
+        env,
+        [&] (Block* taken) {
+          gen(env, JmpZero, taken, fastIsInstance);
+        },
+        [&] {
+          hint(env, Block::Hint::Unlikely);
+          genFail(val);
+        }
+      );
+      return;
+    }
+
+    verifyCls(val, gen(env, LdObjClass, val), checkCls);
+  };
+
+  auto const genericVal = getVal();
+  assertx(genericVal->type() <= TCell);
+  auto const genericValType = genericVal->type();
+
+  auto const computeAction = [&](DataType dt) {
+    if (dt == KindOfNull && tc.isNullable()) return AnnotAction::Pass;
+    return annotCompat(dt, tc.type(), tc.typeName());
+  };
+
+  if (genericValType.isKnownDataType()) {
+    auto const dt = genericValType.toDataType();
+    return checkOneType(genericVal, computeAction(dt));
   }
 
-  // At this point, we know that val is a TObj and that tc is an Object.
-  assertx(tc.isObject());
-  const StringData* clsName = nullptr;
-  const Class* knownConstraint = nullptr;
-  auto const ne = tc.namedEntity();
-  auto const td = ne->getCachedTypeAlias();
-  if (RO::RepoAuthoritative && ne->isPersistentTypeAlias() &&
-      td && td->klass) {
-    assertx(classHasPersistentRDS(td->klass));
-    clsName = td->klass->name();
-    knownConstraint = td->klass;
-  } else {
-    clsName = tc.typeName();
-  }
+  auto const options = [&]{
+    TinyVector<std::pair<DataType, AnnotAction>, kNumDataTypes> result;
+    for (auto const dt : kDataTypes) {
+      auto const type = Type(dt);
+      if (!genericValType.maybe(type)) continue;
+      auto const action = computeAction(dt);
+      if (action == AnnotAction::Fail) continue;
+      result.emplace_back(dt, action);
+    }
+    return result;
+  }();
 
-  auto const checkCls = ldClassSafe(env, clsName, knownConstraint);
-  auto const fastIsInstance = implInstanceCheck(env, val, clsName, checkCls);
-  if (fastIsInstance) {
-    ifThen(
-      env,
-      [&] (Block* taken) {
-        gen(env, JmpZero, taken, fastIsInstance);
-      },
-      [&] {
-        hint(env, Block::Hint::Unlikely);
-        genFail();
-      }
-    );
-    return;
+  // TODO(kshaunak): If we were a bit more sophisticated here, we could
+  // merge the cases for certain types, like TVec|TDict, or TArrLike.
+  MultiCond mc{env};
+  for (auto const& pair : options) {
+    mc.ifTypeThen(genericVal, Type(pair.first), [&](SSATmp* val) {
+      checkOneType(val, pair.second);
+      return cns(env, TBottom);
+    });
   }
-
-  verifyCls(val, gen(env, LdObjClass, val), checkCls);
+  mc.elseDo([&]{ genFail(genericVal); return cns(env, TBottom); });
 }
 
 Type typeOpToType(IsTypeOp op) {
@@ -1251,6 +1302,28 @@ void verifyPropType(IRGS& env,
     if (!tc || !tc->isCheckable()) return;
     assertx(tc->validForProp());
 
+    auto const giveup = [&] {
+      // Unlike the other type-hint checks, we don't punt here. We instead do
+      // the check using a runtime helper. This gives us the freedom to call
+      // verifyPropType without us worrying about it punting the whole set op.
+      // This check is fragile - which type constraints coerce?
+
+      auto const data = TypeConstraintData{tc};
+      auto const sprop = cns(env, isSProp);
+      if (coerce && (tc->isString() || (tc->isObject() && !tc->isResolved()))) {
+        *coerce = gen(env, VerifyPropCoerce, data, cls, cns(env, slot), val, sprop);
+      } else {
+        gen(env, VerifyProp, data, cls, cns(env, slot), val, sprop);
+      }
+    };
+
+    // For non-DataTypeSpecific values, verifyTypeImpl handles the different
+    // cases separately. However, our callers want a single coerced value,
+    // which we don't track, so we punt if we're going to split it up.
+    if (!val->type().isKnownDataType()) {
+      return giveup();
+    }
+
     verifyTypeImpl(
       env,
       *tc,
@@ -1302,34 +1375,7 @@ void verifyPropType(IRGS& env,
           cns(env, isSProp)
         );
       },
-      [&] {
-        // Unlike the other type-hint checks, we don't punt here. We instead do
-        // the check using a runtime helper. This gives us the freedom to call
-        // verifyPropType without us worrying about it punting the whole set op.
-        // This check is fragile - which type constraints coerce?
-
-        if (coerce && (tc->isString() || (tc->isObject() && !tc->isResolved()))) {
-          *coerce = gen(
-            env,
-            VerifyPropCoerce,
-            TypeConstraintData { tc },
-            cls,
-            cns(env, slot),
-            val,
-            cns(env, isSProp)
-          );
-        } else {
-          gen(
-            env,
-            VerifyProp,
-            TypeConstraintData { tc },
-            cls,
-            cns(env, slot),
-            val,
-            cns(env, isSProp)
-          );
-        }
-      }
+      giveup
     );
   };
   verifyFunc(tc);

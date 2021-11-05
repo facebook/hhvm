@@ -4112,296 +4112,8 @@ and expr_
         (Errors.unify_error_at p)
     in
     make_result env p (Aast.Upcast (te, hint)) hint_ty
-  | Efun (f, idl)
-  | Lfun (f, idl) ->
-    let is_anon =
-      match e with
-      | Efun _ -> true
-      | Lfun _ -> false
-      | _ -> assert false
-    in
-    (* This is the function type as declared on the lambda itself.
-     * If type hints are absent then use Tany instead. *)
-    let declared_fe = Decl_nast.lambda_decl_in_env env.decl_env f in
-    let { fe_type; fe_pos; _ } = declared_fe in
-    let (declared_pos, declared_ft) =
-      match get_node fe_type with
-      | Tfun ft -> (fe_pos, ft)
-      | _ -> failwith "Not a function"
-    in
-    let declared_ft =
-      Typing_enforceability.compute_enforced_and_pessimize_fun_type
-        env
-        declared_ft
-    in
-    (* When creating a closure, the 'this' type will mean the late bound type
-     * of the current enclosing class
-     *)
-    let ety_env =
-      empty_expand_env_with_on_error
-        (Env.invalid_type_hint_assert_primary_pos_in_current_decl env)
-    in
-    let (env, declared_ft) =
-      Phase.(
-        localize_ft
-          ~instantiation:
-            { use_name = "lambda"; use_pos = p; explicit_targs = [] }
-          ~ety_env
-          ~def_pos:declared_pos
-          env
-          declared_ft)
-    in
-    List.iter idl ~f:(check_escaping_var env);
-
-    (* Ensure lambda arity is not ellipsis in strict mode *)
-    begin
-      match declared_ft.ft_arity with
-      | Fvariadic { fp_name = None; _ }
-        when Partial.should_check_error (Env.get_mode env) 4223 ->
-        Errors.ellipsis_strict_mode ~require:`Param_name p
-      | _ -> ()
-    end;
-
-    (* Is the return type declared? *)
-    let is_explicit_ret = Option.is_some (hint_of_type_hint f.f_ret) in
-    let check_body_under_known_params env ?ret_ty ft : env * _ * locl_ty =
-      let (env, (tefun, ty, ft)) =
-        closure_make ?ret_ty env p f ft idl is_anon
-      in
-      let inferred_ty =
-        mk
-          ( Reason.Rwitness p,
-            Tfun
-              {
-                ft with
-                ft_ret =
-                  (if is_explicit_ret then
-                    declared_ft.ft_ret
-                  else
-                    MakeType.unenforced ty);
-              } )
-      in
-      (env, tefun, inferred_ty)
-    in
-    let (env, eexpected) = expand_expected_and_get_node env expected in
-    begin
-      match eexpected with
-      | Some (_pos, _ur, tdyn, Tdynamic)
-        when env.in_support_dynamic_type_method_check ->
-        let make_dynamic { et_type; et_enforced } =
-          let et_type =
-            match (get_node et_type, et_enforced) with
-            | (Tany _, _) (* lambda param without type hint *)
-            | (_, Unenforced) ->
-              tdyn
-            | (_, Enforced) ->
-              MakeType.intersection
-                (Reason.Rsupport_dynamic_type (get_pos tdyn))
-                [tdyn; et_type]
-          in
-          { et_type; et_enforced }
-        in
-        let ft_params =
-          List.map declared_ft.ft_params ~f:(function param ->
-              { param with fp_type = make_dynamic param.fp_type })
-        in
-        check_body_under_known_params
-          env
-          ~ret_ty:tdyn
-          { declared_ft with ft_params }
-      | Some (_pos, _ur, ty, Tfun expected_ft) ->
-        (* First check that arities match up *)
-        check_lambda_arity p (get_pos ty) declared_ft expected_ft;
-        (* Use declared types for parameters in preference to those determined
-         * by the context (expected parameters): they might be more general. *)
-        let rec replace_non_declared_types declared_ft_params expected_ft_params
-            =
-          match (declared_ft_params, expected_ft_params) with
-          | ( declared_ft_param :: declared_ft_params,
-              expected_ft_param :: expected_ft_params ) ->
-            let rest =
-              replace_non_declared_types declared_ft_params expected_ft_params
-            in
-            (* If the type parameter did not have a type hint, it is Tany and
-               we use the expected type instead. Otherwise, declared type takes
-               precedence. *)
-            let resolved_ft_param =
-              if TUtils.is_any env declared_ft_param.fp_type.et_type then
-                { declared_ft_param with fp_type = expected_ft_param.fp_type }
-              else
-                declared_ft_param
-            in
-            resolved_ft_param :: rest
-          | (_, []) ->
-            (* Morally, this case should match on ([],[]) because we already
-               check arity mismatch between declared and expected types. We
-               handle it more generally here to be graceful. *)
-            declared_ft_params
-          | ([], _) ->
-            (* This means the expected_ft params list can have more parameters
-             * than declared parameters in the lambda. For variadics, this is OK.
-             *)
-            expected_ft_params
-        in
-        let replace_non_declared_arity variadic declared_arity expected_arity =
-          match variadic with
-          | FVvariadicArg { param_type_hint = (_, Some _); _ } -> declared_arity
-          | FVvariadicArg _ ->
-            begin
-              match (declared_arity, expected_arity) with
-              | (Fvariadic declared, Fvariadic expected) ->
-                Fvariadic { declared with fp_type = expected.fp_type }
-              | (_, _) -> declared_arity
-            end
-          | _ -> declared_arity
-        in
-        let expected_ft =
-          {
-            expected_ft with
-            ft_arity =
-              replace_non_declared_arity
-                f.f_variadic
-                declared_ft.ft_arity
-                expected_ft.ft_arity;
-            ft_params =
-              replace_non_declared_types
-                declared_ft.ft_params
-                expected_ft.ft_params;
-            ft_implicit_params = declared_ft.ft_implicit_params;
-            ft_flags = declared_ft.ft_flags;
-          }
-        in
-        (* Don't bother passing in `void` if there is no explicit return *)
-        let ret_ty =
-          match get_node expected_ft.ft_ret.et_type with
-          | Tprim Tvoid when not is_explicit_ret -> None
-          | _ -> Some expected_ft.ft_ret.et_type
-        in
-        Typing_log.increment_feature_count env FL.Lambda.contextual_params;
-        check_body_under_known_params env ?ret_ty expected_ft
-      | _ ->
-        let explicit_variadic_param_or_non_variadic =
-          match f.f_variadic with
-          | FVvariadicArg { param_type_hint; _ } ->
-            Option.is_some (hint_of_type_hint param_type_hint)
-          | FVellipsis _ -> false
-          | _ -> true
-        in
-        (* If all parameters are annotated with explicit types, then type-check
-         * the body under those assumptions and pick up the result type *)
-        let all_explicit_params =
-          List.for_all f.f_params ~f:(fun param ->
-              Option.is_some (hint_of_type_hint param.param_type_hint))
-        in
-        if all_explicit_params && explicit_variadic_param_or_non_variadic then (
-          Typing_log.increment_feature_count
-            env
-            (if List.is_empty f.f_params then
-              FL.Lambda.no_params
-            else
-              FL.Lambda.explicit_params);
-          check_body_under_known_params env declared_ft
-        ) else (
-          match expected with
-          | Some ExpectedTy.{ ty = { et_type; _ }; _ } when is_any et_type ->
-            (* If the expected type is Tany env then we're passing a lambda to
-             * an untyped function and we just assume every parameter has type
-             * Tany.
-             * Note: we should be using 'nothing' to type the arguments. *)
-            Typing_log.increment_feature_count env FL.Lambda.untyped_context;
-            check_body_under_known_params env declared_ft
-          | Some ExpectedTy.{ ty = { et_type; _ }; _ }
-            when TUtils.is_mixed env et_type || TUtils.is_dynamic env et_type ->
-            (* If the expected type of a lambda is mixed or dynamic, we
-             * decompose the expected type into a function type where the
-             * undeclared parameters and the return type are set to the expected
-             * type of lambda, i.e., mixed or dynamic.
-             *
-             * For an expected mixed type, one could argue that the lambda
-             * doesn't even need to be checked as it can't be called (there is
-             * no downcast to function type). Thus, we should be using nothing
-             * to type the arguments. But generally users are very confused by
-             * the use of nothing and would expect the lambda body to be
-             * checked as though it could be called.
-             *)
-            let replace_non_declared_type declared_ft_param =
-              let is_undeclared =
-                TUtils.is_any env declared_ft_param.fp_type.et_type
-              in
-              if is_undeclared then
-                let enforced_ty = { et_enforced = Unenforced; et_type } in
-                { declared_ft_param with fp_type = enforced_ty }
-              else
-                declared_ft_param
-            in
-            let expected_ft =
-              let ft_params =
-                List.map ~f:replace_non_declared_type declared_ft.ft_params
-              in
-              { declared_ft with ft_params }
-            in
-            let ret_ty = et_type in
-            check_body_under_known_params env ~ret_ty expected_ft
-          | Some _ ->
-            (* If the expected type is something concrete but not a function
-             * then we should reject in strict mode. Check body anyway.
-             * Note: we should be using 'nothing' to type the arguments. *)
-            if Partial.should_check_error (Env.get_mode env) 4224 then
-              Errors.untyped_lambda_strict_mode p;
-            Typing_log.increment_feature_count
-              env
-              FL.Lambda.non_function_typed_context;
-            check_body_under_known_params env declared_ft
-          | None ->
-            Typing_log.increment_feature_count env FL.Lambda.fresh_tyvar_params;
-
-            (* Replace uses of Tany that originated from "untyped" parameters or return type
-             * with fresh type variables *)
-            let freshen_ftype env ft =
-              let freshen_ty env pos et =
-                match get_node et.et_type with
-                | Tany _ ->
-                  let (env, ty) = Env.fresh_type env pos in
-                  (env, { et with et_type = ty })
-                | Tclass (id, e, [ty])
-                  when String.equal (snd id) SN.Classes.cAwaitable && is_any ty
-                  ->
-                  let (env, t) = Env.fresh_type env pos in
-                  ( env,
-                    {
-                      et with
-                      et_type = mk (get_reason et.et_type, Tclass (id, e, [t]));
-                    } )
-                | _ -> (env, et)
-              in
-              let freshen_untyped_param env ft_param =
-                let (env, fp_type) =
-                  freshen_ty
-                    env
-                    (Pos_or_decl.unsafe_to_raw_pos ft_param.fp_pos)
-                    ft_param.fp_type
-                in
-                (env, { ft_param with fp_type })
-              in
-              let (env, ft_params) =
-                List.map_env env ft.ft_params ~f:freshen_untyped_param
-              in
-              let (env, ft_ret) = freshen_ty env f.f_span ft.ft_ret in
-              (env, { ft with ft_params; ft_ret })
-            in
-            let (env, declared_ft) = freshen_ftype env declared_ft in
-            let env =
-              Env.set_tyvar_variance env (mk (Reason.Rnone, Tfun declared_ft))
-            in
-            (* TODO(jjwu): the declared_ft here is set to public,
-               but is actually inferred from the surrounding context
-               (don't think this matters in practice, since we check lambdas separately) *)
-            check_body_under_known_params
-              env
-              ~ret_ty:declared_ft.ft_ret.et_type
-              declared_ft
-        )
-    end
+  | Efun (f, idl) -> lambda ~is_anon:true ?expected p env f idl
+  | Lfun (f, idl) -> lambda ~is_anon:false ?expected p env f idl
   | Xml (sid, attrl, el) ->
     let cid = CI sid in
     let (env, _tal, _te, classes) =
@@ -4566,6 +4278,281 @@ and class_const ?(incl_tc = false) env p (cid, mid) =
       cid
   in
   make_result env p (Aast.Class_const (ce, mid)) const_ty
+
+and lambda ~is_anon ?expected p env f idl =
+  (* This is the function type as declared on the lambda itself.
+   * If type hints are absent then use Tany instead. *)
+  let declared_fe = Decl_nast.lambda_decl_in_env env.decl_env f in
+  let { fe_type; fe_pos; _ } = declared_fe in
+  let (declared_pos, declared_ft) =
+    match get_node fe_type with
+    | Tfun ft -> (fe_pos, ft)
+    | _ -> failwith "Not a function"
+  in
+  let declared_ft =
+    Typing_enforceability.compute_enforced_and_pessimize_fun_type
+      env
+      declared_ft
+  in
+  (* When creating a closure, the 'this' type will mean the late bound type
+   * of the current enclosing class
+   *)
+  let ety_env =
+    empty_expand_env_with_on_error
+      (Env.invalid_type_hint_assert_primary_pos_in_current_decl env)
+  in
+  let (env, declared_ft) =
+    Phase.(
+      localize_ft
+        ~instantiation:{ use_name = "lambda"; use_pos = p; explicit_targs = [] }
+        ~ety_env
+        ~def_pos:declared_pos
+        env
+        declared_ft)
+  in
+  List.iter idl ~f:(check_escaping_var env);
+
+  (* Ensure lambda arity is not ellipsis in strict mode *)
+  begin
+    match declared_ft.ft_arity with
+    | Fvariadic { fp_name = None; _ }
+      when Partial.should_check_error (Env.get_mode env) 4223 ->
+      Errors.ellipsis_strict_mode ~require:`Param_name p
+    | _ -> ()
+  end;
+
+  (* Is the return type declared? *)
+  let is_explicit_ret = Option.is_some (hint_of_type_hint f.f_ret) in
+  let check_body_under_known_params env ?ret_ty ft : env * _ * locl_ty =
+    let (env, (tefun, ty, ft)) = closure_make ?ret_ty env p f ft idl is_anon in
+    let inferred_ty =
+      mk
+        ( Reason.Rwitness p,
+          Tfun
+            {
+              ft with
+              ft_ret =
+                (if is_explicit_ret then
+                  declared_ft.ft_ret
+                else
+                  MakeType.unenforced ty);
+            } )
+    in
+    (env, tefun, inferred_ty)
+  in
+  let (env, eexpected) = expand_expected_and_get_node env expected in
+  match eexpected with
+  | Some (_pos, _ur, tdyn, Tdynamic)
+    when env.in_support_dynamic_type_method_check ->
+    let make_dynamic { et_type; et_enforced } =
+      let et_type =
+        match (get_node et_type, et_enforced) with
+        | (Tany _, _) (* lambda param without type hint *)
+        | (_, Unenforced) ->
+          tdyn
+        | (_, Enforced) ->
+          MakeType.intersection
+            (Reason.Rsupport_dynamic_type (get_pos tdyn))
+            [tdyn; et_type]
+      in
+      { et_type; et_enforced }
+    in
+    let ft_params =
+      List.map declared_ft.ft_params ~f:(function param ->
+          { param with fp_type = make_dynamic param.fp_type })
+    in
+    check_body_under_known_params
+      env
+      ~ret_ty:tdyn
+      { declared_ft with ft_params }
+  | Some (_pos, _ur, ty, Tfun expected_ft) ->
+    (* First check that arities match up *)
+    check_lambda_arity p (get_pos ty) declared_ft expected_ft;
+    (* Use declared types for parameters in preference to those determined
+     * by the context (expected parameters): they might be more general. *)
+    let rec replace_non_declared_types declared_ft_params expected_ft_params =
+      match (declared_ft_params, expected_ft_params) with
+      | ( declared_ft_param :: declared_ft_params,
+          expected_ft_param :: expected_ft_params ) ->
+        let rest =
+          replace_non_declared_types declared_ft_params expected_ft_params
+        in
+        (* If the type parameter did not have a type hint, it is Tany and
+           we use the expected type instead. Otherwise, declared type takes
+           precedence. *)
+        let resolved_ft_param =
+          if TUtils.is_any env declared_ft_param.fp_type.et_type then
+            { declared_ft_param with fp_type = expected_ft_param.fp_type }
+          else
+            declared_ft_param
+        in
+        resolved_ft_param :: rest
+      | (_, []) ->
+        (* Morally, this case should match on ([],[]) because we already
+           check arity mismatch between declared and expected types. We
+           handle it more generally here to be graceful. *)
+        declared_ft_params
+      | ([], _) ->
+        (* This means the expected_ft params list can have more parameters
+         * than declared parameters in the lambda. For variadics, this is OK.
+         *)
+        expected_ft_params
+    in
+    let replace_non_declared_arity variadic declared_arity expected_arity =
+      match variadic with
+      | FVvariadicArg { param_type_hint = (_, Some _); _ } -> declared_arity
+      | FVvariadicArg _ ->
+        begin
+          match (declared_arity, expected_arity) with
+          | (Fvariadic declared, Fvariadic expected) ->
+            Fvariadic { declared with fp_type = expected.fp_type }
+          | (_, _) -> declared_arity
+        end
+      | _ -> declared_arity
+    in
+    let expected_ft =
+      {
+        expected_ft with
+        ft_arity =
+          replace_non_declared_arity
+            f.f_variadic
+            declared_ft.ft_arity
+            expected_ft.ft_arity;
+        ft_params =
+          replace_non_declared_types declared_ft.ft_params expected_ft.ft_params;
+        ft_implicit_params = declared_ft.ft_implicit_params;
+        ft_flags = declared_ft.ft_flags;
+      }
+    in
+    (* Don't bother passing in `void` if there is no explicit return *)
+    let ret_ty =
+      match get_node expected_ft.ft_ret.et_type with
+      | Tprim Tvoid when not is_explicit_ret -> None
+      | _ -> Some expected_ft.ft_ret.et_type
+    in
+    Typing_log.increment_feature_count env FL.Lambda.contextual_params;
+    check_body_under_known_params env ?ret_ty expected_ft
+  | _ ->
+    let explicit_variadic_param_or_non_variadic =
+      match f.f_variadic with
+      | FVvariadicArg { param_type_hint; _ } ->
+        Option.is_some (hint_of_type_hint param_type_hint)
+      | FVellipsis _ -> false
+      | _ -> true
+    in
+    (* If all parameters are annotated with explicit types, then type-check
+     * the body under those assumptions and pick up the result type *)
+    let all_explicit_params =
+      List.for_all f.f_params ~f:(fun param ->
+          Option.is_some (hint_of_type_hint param.param_type_hint))
+    in
+    if all_explicit_params && explicit_variadic_param_or_non_variadic then (
+      Typing_log.increment_feature_count
+        env
+        (if List.is_empty f.f_params then
+          FL.Lambda.no_params
+        else
+          FL.Lambda.explicit_params);
+      check_body_under_known_params env declared_ft
+    ) else (
+      match expected with
+      | Some ExpectedTy.{ ty = { et_type; _ }; _ } when is_any et_type ->
+        (* If the expected type is Tany env then we're passing a lambda to
+         * an untyped function and we just assume every parameter has type
+         * Tany.
+         * Note: we should be using 'nothing' to type the arguments. *)
+        Typing_log.increment_feature_count env FL.Lambda.untyped_context;
+        check_body_under_known_params env declared_ft
+      | Some ExpectedTy.{ ty = { et_type; _ }; _ }
+        when TUtils.is_mixed env et_type || TUtils.is_dynamic env et_type ->
+        (* If the expected type of a lambda is mixed or dynamic, we
+         * decompose the expected type into a function type where the
+         * undeclared parameters and the return type are set to the expected
+         * type of lambda, i.e., mixed or dynamic.
+         *
+         * For an expected mixed type, one could argue that the lambda
+         * doesn't even need to be checked as it can't be called (there is
+         * no downcast to function type). Thus, we should be using nothing
+         * to type the arguments. But generally users are very confused by
+         * the use of nothing and would expect the lambda body to be
+         * checked as though it could be called.
+         *)
+        let replace_non_declared_type declared_ft_param =
+          let is_undeclared =
+            TUtils.is_any env declared_ft_param.fp_type.et_type
+          in
+          if is_undeclared then
+            let enforced_ty = { et_enforced = Unenforced; et_type } in
+            { declared_ft_param with fp_type = enforced_ty }
+          else
+            declared_ft_param
+        in
+        let expected_ft =
+          let ft_params =
+            List.map ~f:replace_non_declared_type declared_ft.ft_params
+          in
+          { declared_ft with ft_params }
+        in
+        let ret_ty = et_type in
+        check_body_under_known_params env ~ret_ty expected_ft
+      | Some _ ->
+        (* If the expected type is something concrete but not a function
+         * then we should reject in strict mode. Check body anyway.
+         * Note: we should be using 'nothing' to type the arguments. *)
+        if Partial.should_check_error (Env.get_mode env) 4224 then
+          Errors.untyped_lambda_strict_mode p;
+        Typing_log.increment_feature_count
+          env
+          FL.Lambda.non_function_typed_context;
+        check_body_under_known_params env declared_ft
+      | None ->
+        Typing_log.increment_feature_count env FL.Lambda.fresh_tyvar_params;
+
+        (* Replace uses of Tany that originated from "untyped" parameters or return type
+         * with fresh type variables *)
+        let freshen_ftype env ft =
+          let freshen_ty env pos et =
+            match get_node et.et_type with
+            | Tany _ ->
+              let (env, ty) = Env.fresh_type env pos in
+              (env, { et with et_type = ty })
+            | Tclass (id, e, [ty])
+              when String.equal (snd id) SN.Classes.cAwaitable && is_any ty ->
+              let (env, t) = Env.fresh_type env pos in
+              ( env,
+                {
+                  et with
+                  et_type = mk (get_reason et.et_type, Tclass (id, e, [t]));
+                } )
+            | _ -> (env, et)
+          in
+          let freshen_untyped_param env ft_param =
+            let (env, fp_type) =
+              freshen_ty
+                env
+                (Pos_or_decl.unsafe_to_raw_pos ft_param.fp_pos)
+                ft_param.fp_type
+            in
+            (env, { ft_param with fp_type })
+          in
+          let (env, ft_params) =
+            List.map_env env ft.ft_params ~f:freshen_untyped_param
+          in
+          let (env, ft_ret) = freshen_ty env f.f_span ft.ft_ret in
+          (env, { ft with ft_params; ft_ret })
+        in
+        let (env, declared_ft) = freshen_ftype env declared_ft in
+        let env =
+          Env.set_tyvar_variance env (mk (Reason.Rnone, Tfun declared_ft))
+        in
+        (* TODO(jjwu): the declared_ft here is set to public,
+           but is actually inferred from the surrounding context
+           (don't think this matters in practice, since we check lambdas separately) *)
+        check_body_under_known_params
+          env
+          ~ret_ty:declared_ft.ft_ret.et_type
+          declared_ft
+    )
 
 (**
  * Process a spread operator by computing the intersection of XHP attributes

@@ -442,21 +442,8 @@ namespace {
 
 void emitSpillFrame(IRGS& env, const Func* callee, uint32_t argc,
                     SSATmp* callFlags, SSATmp* prologueCtx) {
-  auto const ctx = [&] {
-    if (!callee->isClosureBody()) return prologueCtx;
-
-    if (!callee->cls()) return cns(env, nullptr);
-    if (callee->isStatic()) {
-      return gen(env, LdClosureCls, Type::SubCls(callee->cls()), prologueCtx);
-    }
-    auto const closureThis =
-      gen(env, LdClosureThis, Type::SubObj(callee->cls()), prologueCtx);
-    gen(env, IncRef, closureThis);
-    return closureThis;
-  }();
-
   gen(env, DefFuncEntryFP, FuncData { callee },
-      fp(env), sp(env), callFlags, ctx);
+      fp(env), sp(env), callFlags, prologueCtx);
   auto const irSPOff = SBInvOffset { -callee->numSlotsInFrame() };
   auto const bcSPOff = SBInvOffset { 0 };
   gen(env, DefFrameRelSP, DefStackData { irSPOff, bcSPOff }, fp(env));
@@ -472,36 +459,6 @@ void emitSpillFrame(IRGS& env, const Func* callee, uint32_t argc,
     gen(env, IncCallCounter, fp(env));
   }
 }
-
-} // namespace
-
-/*
- * Set non-input locals to Uninit.
- */
-void emitInitClosureLocals(IRGS& env, const Func* callee, SSATmp* prologueCtx) {
-  if (!callee->isClosureBody()) return;
-
-  // Push the closure's use variables (stored in closure object properties).
-  auto const firstClosureUseLocal = callee->firstClosureUseLocalId();
-  auto const numUses = callee->numClosureUseLocals();
-  auto const cls = callee->implCls();
-
-  for (auto i = 0; i < numUses; ++i) {
-    auto const slot = i + (cls->hasClosureCoeffectsProp() ? 1 : 0);
-    auto const ty =
-      typeFromRAT(cls->declPropRepoAuthType(slot), callee->cls()) & TCell;
-    auto const addr = gen(env, LdPropAddr,
-                          IndexData { cls->propSlotToIndex(slot) },
-                          ty.lval(Ptr::Prop), prologueCtx);
-    auto const prop = gen(env, LdMem, ty, addr);
-    gen(env, IncRef, prop);
-    gen(env, StLoc, LocalId{firstClosureUseLocal + i}, fp(env), prop);
-  }
-
-  decRef(env, prologueCtx);
-}
-
-namespace {
 
 void emitJmpFuncBody(IRGS& env, const Func* callee, uint32_t argc) {
   // Emit the bindjmp for the function body.
@@ -570,11 +527,51 @@ void emitFuncPrologue(IRGS& env, const Func* callee, uint32_t argc,
   emitCalleeChecks(env, callee, argc, callFlags, prologueCtx);
   emitInitFuncInputs(env, callee, argc);
   emitSpillFrame(env, callee, argc, callFlags, prologueCtx);
-  emitInitClosureLocals(env, callee, prologueCtx);
   emitJmpFuncBody(env, callee, argc);
 }
 
 namespace {
+
+/*
+ * Unpack closure use variables into locals.
+ */
+void emitInitClosureLocals(IRGS& env, const Func* callee) {
+  if (!callee->isClosureBody()) return;
+
+  auto const closureTy = Type::ExactObj(callee->implCls());
+  auto const closure = gen(env, LdFrameThis, closureTy, fp(env));
+
+  auto const ctx = [&] {
+    if (!callee->cls()) return cns(env, nullptr);
+    if (callee->isStatic()) {
+      return gen(env, LdClosureCls, Type::SubCls(callee->cls()), closure);
+    }
+    auto const closureThis =
+      gen(env, LdClosureThis, Type::SubObj(callee->cls()), closure);
+    gen(env, IncRef, closureThis);
+    return closureThis;
+  }();
+  if (!(ctx->type() <= TNullptr)) gen(env, StFrameCtx, fp(env), ctx);
+
+  // Push the closure's use variables (stored in closure object properties).
+  auto const firstClosureUseLocal = callee->firstClosureUseLocalId();
+  auto const numUses = callee->numClosureUseLocals();
+  auto const cls = callee->implCls();
+
+  for (auto i = 0; i < numUses; ++i) {
+    auto const slot = i + (cls->hasClosureCoeffectsProp() ? 1 : 0);
+    auto const ty =
+      typeFromRAT(cls->declPropRepoAuthType(slot), callee->cls()) & TCell;
+    auto const addr = gen(env, LdPropAddr,
+                          IndexData { cls->propSlotToIndex(slot) },
+                          ty.lval(Ptr::Prop), closure);
+    auto const prop = gen(env, LdMem, ty, addr);
+    gen(env, IncRef, prop);
+    gen(env, StLoc, LocalId{firstClosureUseLocal + i}, fp(env), prop);
+  }
+
+  decRef(env, closure);
+}
 
 /*
  * Set non-input locals to Uninit.
@@ -627,6 +624,7 @@ void emitFuncEntry(IRGS& env) {
   auto const callee = curFunc(env);
   auto const argc = callee->getEntryNumParams(curSrcKey(env).entryOffset());
 
+  emitInitClosureLocals(env, callee);
   emitInitRegularLocals(env, callee);
   emitSurpriseCheck(env, callee, argc);
 }

@@ -856,14 +856,6 @@ static void prepareFuncEntry(ActRec *ar, uint32_t numArgsInclUnpack) {
 
   const Func* func = ar->func();
 
-  if (UNLIKELY(func->isClosureBody())) {
-    int nuse = c_Closure::initActRecFromClosure(ar, vmStack().top());
-    // initActRecFromClosure doesn't move stack
-    vmStack().nalloc(nuse);
-    func = ar->func();
-    assertx(nuse == func->numClosureUseLocals());
-  }
-
   vmStack().top() = reinterpret_cast<TypedValue*>(ar) - func->numSlotsInFrame();
   vmfp() = ar;
   vmpc() = func->entry() + func->getEntryForNumArgs(numArgsInclUnpack);
@@ -3368,6 +3360,12 @@ OPTBLD_INLINE void iopUnsetG() {
 
 namespace {
 
+void initClosureLocals() {
+  auto const ar = vmfp();
+  if (!ar->func()->isClosureBody()) return;
+  c_Closure::initActRecFromClosure(ar);
+}
+
 void initRegularLocals() {
   auto const ar = vmfp();
   auto const func = ar->func();
@@ -3387,6 +3385,7 @@ bool funcEntry() {
       vmfp()->func()->numSlotsInFrame()
   );
 
+  initClosureLocals();
   initRegularLocals();
 
   // If this returns false, the callee was intercepted and should be skipped.

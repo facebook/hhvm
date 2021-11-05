@@ -459,7 +459,7 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
     // the frame is already being exited and exception handlers should not be
     // invoked.
     ar->setLocalsDecRefd();
-    frame_free_locals_inl_no_hook(ar, ar->func()->firstRegularLocalId());
+    frame_free_locals_inl_no_hook(ar, ar->func()->numFuncEntryInputs());
   };
 
   /*
@@ -522,7 +522,7 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
     Stack& stack = vmStack();
     auto const trim = [&] {
       ar->setLocalsDecRefd();
-      frame_free_locals_inl_no_hook(ar, ar->func()->firstRegularLocalId());
+      frame_free_locals_inl_no_hook(ar, ar->func()->numFuncEntryInputs());
 
       // Tear down the callee frame, then push the return value.
       stack.trim((TypedValue*)(ar + 1));

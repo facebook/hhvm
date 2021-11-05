@@ -250,20 +250,9 @@ void beginInlining(IRGS& env,
   emitCalleeRecordFuncCoverage(env, target);
   emitInitFuncInputs(env, target, numArgsInclUnpack);
 
-  auto const closure = target->isClosureBody()
-    ? gen(env, AssertType, Type::ExactObj(target->implCls()), ctx)
-    : nullptr;
-
   ctx = [&] () -> SSATmp* {
     if (target->isClosureBody()) {
-      if (!target->cls()) return cns(env, nullptr);
-      if (target->isStatic()) {
-        return gen(env, LdClosureCls, Type::SubCls(target->cls()), closure);
-      }
-      auto const closureCtx =
-        gen(env, LdClosureThis, Type::SubObj(target->cls()), closure);
-      gen(env, IncRef, closureCtx);
-      return closureCtx;
+      return gen(env, AssertType, Type::ExactObj(target->implCls()), ctx);
     }
 
     if (!target->cls()) {
@@ -356,14 +345,14 @@ void beginInlining(IRGS& env,
   for (auto i = 0; i < numTotalInputs; ++i) {
     stLocRaw(env, i, calleeFP, inputs[i]);
   }
-  emitInitClosureLocals(env, target, closure);
 
   assertx(startSk.hasThis() == startSk.func()->hasThisInBody());
   assertx(
     ctx->isA(TBottom) ||
     (ctx->isA(TNullptr) && !target->cls()) ||
     (ctx->isA(TCls) && target->cls() && target->isStatic()) ||
-    (ctx->isA(TObj) && target->cls() && !target->isStatic())
+    (ctx->isA(TObj) && target->cls() && !target->isStatic()) ||
+    (ctx->isA(TObj) && target->isClosureBody())
   );
 }
 

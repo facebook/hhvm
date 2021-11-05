@@ -461,12 +461,16 @@ inline uint32_t Func::coeffectsLocalId() const {
   return id;
 }
 
-inline uint32_t Func::firstClosureUseLocalId() const {
-  assertx(isClosureBody());
+inline uint32_t Func::numFuncEntryInputs() const {
   auto id = numParams();
   if (hasReifiedGenerics()) ++id;
   if (hasCoeffectsLocal()) ++id;
   return id;
+}
+
+inline uint32_t Func::firstClosureUseLocalId() const {
+  assertx(isClosureBody());
+  return numFuncEntryInputs();
 }
 
 inline uint32_t Func::firstRegularLocalId() const {

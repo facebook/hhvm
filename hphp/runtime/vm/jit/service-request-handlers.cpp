@@ -68,7 +68,7 @@ RegionContext getContext(SrcKey sk, bool profiling) {
 
   // Track local types.
   auto const numInitedLocals = sk.funcEntry()
-    ? func->firstRegularLocalId() : func->numLocals();
+    ? func->numFuncEntryInputs() : func->numLocals();
   for (uint32_t i = 0; i < numInitedLocals; ++i) {
     addLiveType(Location::Local{i}, frame_local(fp, i));
   }

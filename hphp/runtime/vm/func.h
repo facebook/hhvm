@@ -586,6 +586,11 @@ public:
   Id lookupVarId(const StringData* name) const;
 
   /*
+   * Number of initialized locals at FuncEntry.
+   */
+  uint32_t numFuncEntryInputs() const;
+
+  /*
    * Returns the ID of coeffects and reified generics locals.
    * Requires hasCoeffectRules() and hasReifiedGenerics() respectively
    */

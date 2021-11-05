@@ -93,8 +93,6 @@ struct ClosurePropHandler: Native::BasePropHandler {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const StaticString s_uuinvoke("__invoke");
-
 void c_Closure::init(int numArgs, ActRec* ar, TypedValue* sp) {
   auto const cls = getVMClass();
   auto const invokeFunc = getInvokeFunc();
@@ -145,15 +143,17 @@ void c_Closure::init(int numArgs, ActRec* ar, TypedValue* sp) {
   });
 }
 
-int c_Closure::initActRecFromClosure(ActRec* ar, TypedValue* sp) {
+void c_Closure::initActRecFromClosure(ActRec* ar) {
+  auto const func = ar->func();
+  assertx(func->isClosureBody());
+
   // Request pointer so that we decref once we are done.
-  auto closure = req::ptr<c_Closure>::attach(
+  auto const closure = req::ptr<c_Closure>::attach(
     c_Closure::fromObject(ar->getThisInPrologue()));
+  assertx(func->implCls() == closure->getVMClass());
 
   // Put in the correct context
-  ar->setFunc(closure->getInvokeFunc());
-
-  if (ar->func()->cls()) {
+  if (func->cls()) {
     // Swap in the $this or late bound class or null if it is from a top level
     // function
     ar->setThisOrClass(closure->getThisOrClass());
@@ -165,18 +165,20 @@ int c_Closure::initActRecFromClosure(ActRec* ar, TypedValue* sp) {
     ar->trashThis();
   }
 
-  // Copy in all the use vars
-  auto const cls = closure->getVMClass();
-  auto const hasCoeffectsProp = cls->hasClosureCoeffectsProp();
-  auto const numProps = cls->numDeclProperties();
-  int n = numProps - (hasCoeffectsProp ? 1 : 0);
-  assertx(closure->props()->checkInvariants(numProps));
-  assertx(IMPLIES(hasCoeffectsProp, closure->coeffectsPropSlot() == 0));
-  closure->props()->foreach(hasCoeffectsProp ? 1 : 0, n, [&](tv_rval rval) {
-    tvDup(*rval, *--sp);
-  });
 
-  return n;
+  // Copy in all the use vars
+  auto const cls = func->implCls();
+  auto const hasCoeffectsProp = cls->hasClosureCoeffectsProp();
+  assertx(closure->props()->checkInvariants(cls->numDeclProperties()));
+  assertx(IMPLIES(hasCoeffectsProp, closure->coeffectsPropSlot() == 0));
+  assertx((hasCoeffectsProp ? 1 : 0) + func->numClosureUseLocals() ==
+          cls->numDeclProperties());
+  auto loc = reinterpret_cast<TypedValue*>(ar) - func->firstClosureUseLocalId();
+  closure->props()->foreach(
+    hasCoeffectsProp ? 1 : 0,
+    func->numClosureUseLocals(),
+    [&](tv_rval rval) { tvDup(*rval, *--loc); }
+  );
 }
 
 ///////////////////////////////////////////////////////////////////////////////

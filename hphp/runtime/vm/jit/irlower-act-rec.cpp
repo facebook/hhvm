@@ -94,7 +94,7 @@ void cgDefFuncEntryFP(IRLS& env, const IRInstruction* inst) {
   v << shrli{flagsDelta, callFlagsLow32, callOffAndFlags, v.makeReg()};
   v << storel{callOffAndFlags, newFP + AROFF(m_callOffAndFlags)};
 
-  if (func->cls()) {
+  if (func->cls() || func->isClosureBody()) {
     v << store{ctx, newFP + AROFF(m_thisUnsafe)};
   } else if (RuntimeOption::EvalHHIRGenerateAsserts) {
     emitImmStoreq(v, ActRec::kTrashedThisSlot, newFP + AROFF(m_thisUnsafe));

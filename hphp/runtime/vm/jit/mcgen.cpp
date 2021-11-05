@@ -72,7 +72,8 @@ int64_t jitInitTime() { return s_startTime; }
 
 bool dumpTCAnnotation(TransKind transKind) {
   return RuntimeOption::EvalDumpTCAnnotationsForAllTrans ||
-         transKind == TransKind::Optimize;
+         transKind == TransKind::Optimize ||
+         transKind == TransKind::OptPrologue;
 }
 
 }}}

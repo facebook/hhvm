@@ -32,9 +32,9 @@ TransRec::TransRec(SrcKey                      _src,
                    uint32_t                    _acoldLen,
                    TCA                         _afrozenStart,
                    uint32_t                    _afrozenLen,
+                   Annotations&&               _annotations,
                    RegionDescPtr               region,
                    std::vector<TransBCMapping> _bcMapping,
-                   Annotations&&               _annotations,
                    bool                        _hasLoop)
   : bcMapping(_bcMapping)
   , annotations(std::move(_annotations))

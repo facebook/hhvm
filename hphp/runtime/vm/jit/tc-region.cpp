@@ -736,7 +736,7 @@ void RegionTranslator::publishMetaImpl() {
 
   TransRec tr{sk, transId, kind, loc.mainStart(), loc.mainSize(),
       loc.coldStart(), loc.coldSize(), loc.frozenStart(), loc.frozenSize(),
-      region, fixups.bcMap, std::move(annotations), hasLoop};
+      std::move(annotations), region, fixups.bcMap, hasLoop};
   transdb::addTranslation(tr);
   FuncOrder::recordTranslation(tr);
   if (RuntimeOption::EvalJitUseVtuneAPI) {

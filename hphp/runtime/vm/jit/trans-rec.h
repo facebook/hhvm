@@ -73,11 +73,11 @@ struct TransRec {
            uint32_t                    _acoldLen,
            TCA                         _afrozenStart,
            uint32_t                    _afrozenLen,
+           Annotations&&               _annotations =
+             Annotations(),
            RegionDescPtr               region = RegionDescPtr(),
            std::vector<TransBCMapping> _bcMapping =
              std::vector<TransBCMapping>(),
-           Annotations&&               _annotations =
-             Annotations(),
            bool                        _hasLoop = false);
 
   bool isValid() const { return id != kInvalidTransID; }
@@ -98,4 +98,3 @@ private:
 };
 
 } }
-

@@ -130,17 +130,17 @@ struct TransLocMaker {
       SrcKey                      sk,
       TransID                     transID,
       TransKind                   kind,
+      Annotations&&               annot   = Annotations(),
       RegionDescPtr               region  = RegionDescPtr(),
       std::vector<TransBCMapping> bcmap   = std::vector<TransBCMapping>(),
-      Annotations&&               annot   = Annotations(),
       bool                        hasLoop = false) const {
     auto r = range();
     return TransRec(sk, transID, kind,
                     r.main.begin(), r.main.size(),
                     r.cold.begin(), r.cold.size(),
                     r.frozen.begin(), r.frozen.size(),
-                    std::move(region), std::move(bcmap),
-                    std::move(annot), hasLoop);
+                    std::move(annot), std::move(region),
+                    std::move(bcmap), hasLoop);
   }
 
   CodeCache::View view() const { return cache; }

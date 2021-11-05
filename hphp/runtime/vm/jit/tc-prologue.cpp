@@ -171,7 +171,7 @@ void PrologueTranslator::publishMetaImpl() {
   auto const& loc = transMeta->range.loc();
   TransRec tr{sk, transId, kind, loc.mainStart(), loc.mainSize(),
               loc.coldStart(), loc.coldSize(), loc.frozenStart(),
-              loc.frozenSize()};
+              loc.frozenSize(), std::move(annotations)};
   transdb::addTranslation(tr);
   FuncOrder::recordTranslation(tr);
   if (RuntimeOption::EvalJitUseVtuneAPI) {

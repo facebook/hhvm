@@ -115,6 +115,8 @@ struct Translator {
   // For OptPrologues, this holds the corresponding ProfPrologue's ID.  This is
   // used to smash the callers of the ProfPrologue.
   TransID proflogueTransId{kInvalidTransID};
+  Annotations annotations{};
+
   explicit Translator(SrcKey sk, TransKind kind = TransKind::Invalid);
   virtual ~Translator();
 
@@ -172,6 +174,10 @@ struct Translator {
     transMeta.reset();
   }
 
+  Annotations* getAnnotations() {
+    return &annotations;
+  }
+
   // The gen method is responsible for building the vunit.  It may
   // optionally set the IR unit, which was used for generation.
   // This will enable the printir functionality during vasm emit,
@@ -209,7 +215,6 @@ protected:
   Optional<TransMeta> transMeta{};
 
   virtual void computeKind() = 0;
-  virtual Annotations* getAnnotations() = 0;
   // This function is charged with producing the code to generate.
   virtual void gen() = 0;
   virtual void publishMetaImpl() = 0;

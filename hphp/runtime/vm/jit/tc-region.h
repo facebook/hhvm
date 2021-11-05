@@ -25,7 +25,6 @@ namespace HPHP { namespace jit { namespace tc {
 
 struct RegionTranslator final : Translator {
   PostConditions pconds;
-  Annotations annotations{};
   // A sequential per function index to identify optimized
   // translations in TRACE and StructuredLog output (in particular to
   // make it possible to cross reference between the two).
@@ -51,7 +50,6 @@ struct RegionTranslator final : Translator {
   void resetCached() override;
   void setCachedForProcessFail() override;
   void smashBackup() override {}
-  Annotations* getAnnotations() override { return &annotations; }
   void gen() override;
   void publishMetaImpl() override;
   void publishCodeImpl() override;

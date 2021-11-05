@@ -47,7 +47,6 @@ struct PrologueTranslator final : Translator {
   static int paramIndexHelper(const Func*, int);
 private:
   void computeKind() override;
-  Annotations* getAnnotations() override { return nullptr; }
   void gen() override;
   void publishMetaImpl() override;
   void publishCodeImpl() override;

@@ -5,7 +5,7 @@ version = "0.0.0"
 edition = "2021"
 
 [lib]
-path = "../../typing_deps.rs"
+path = "../../deps_rust/typing_deps.rs"
 crate-type = ["lib", "staticlib"]
 
 [dependencies]

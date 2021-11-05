@@ -411,22 +411,31 @@ namespace HH\ExperimentalParserUtils {
     return $result;
   }
 
-  function collect_comments(darray $shape_field)[]: vec<string> {
-    $trivia = Vector {};
-    ffp_json_dfs(
-      $shape_field,
-      false,
-      ($j) ==> {
-        if (\array_key_exists("leading", $j)) {
-          $trivia->addAll($j["leading"]);
-          $trivia->addAll($j["trailing"]);
-
-          return null; // forces traversal to continue to end
+  function collect_comments(
+    darray<arraykey, mixed> $shape_field,
+  )[]: vec<string> {
+    $trivia = vec[];
+    $stack = vec[$shape_field];
+    while ($stack) {
+      $json = $stack[\count($stack) - 1];
+      unset($stack[\count($stack) - 1]);
+      if (!\HH\is_any_array($json)) {
+        continue;
+      }
+      if (\array_key_exists("leading", $json)) {
+        foreach ($json["leading"] as $c) {
+          $trivia[] = $c;
         }
-        return null;
-      },
-      $_ ==> false,
-    );
+      }
+      if (\array_key_exists("trailing", $json)) {
+        foreach ($json["trailing"] as $c) {
+          $trivia[] = $c;
+        }
+      }
+      foreach (\array_reverse($json) as $v) {
+        $stack[] = $v;
+      }
+    }
 
     $comments = vec[];
     foreach ($trivia as $c) {
@@ -445,9 +454,9 @@ namespace HH\ExperimentalParserUtils {
   function ffp_json_dfs(
     mixed $json, // this can be any value type valid in JSON
     bool $right,
-    (function (varray_or_darray): ?varray_or_darray) $predicate,
-    (function (varray_or_darray): bool) $skip_node,
-  )[]: ?varray_or_darray {
+    (function (varray_or_darray)[_]: ?varray_or_darray) $predicate,
+    (function (varray_or_darray)[_]: bool) $skip_node,
+  )[ctx $predicate, ctx $skip_node]: ?varray_or_darray {
     if (!\HH\is_any_array($json)) {
       return null;
     }

@@ -117,7 +117,7 @@ impl UnstableFeatures {
             UnstableFeatures::Modules => Unstable,
             UnstableFeatures::ContextAliasDeclaration => Unstable,
             UnstableFeatures::ClassConstDefault => Migration,
-            UnstableFeatures::AbstractEnumClass => Unstable,
+            UnstableFeatures::AbstractEnumClass => Preview,
             UnstableFeatures::ContextAliasDeclarationShort => Preview,
             UnstableFeatures::MethodTraitDiamond => Unstable,
             UnstableFeatures::UpcastExpression => Unstable,

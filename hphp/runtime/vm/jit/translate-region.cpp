@@ -394,7 +394,8 @@ TransID canonTransID(const TransIDSet& tids) {
 
 TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
                                 const RegionDesc& region,
-                                double profFactor) {
+                                double profFactor,
+                                bool ignoresBCSize = false) {
   const Timer irGenTimer(Timer::irGenRegionAttempt);
   auto& irb = *irgs.irb;
   auto prevRegion      = irgs.region;      irgs.region      = &region;
@@ -421,9 +422,11 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
   std::string errorMsg;
   always_assert_flog(check(region, errorMsg), "{}", errorMsg);
 
-  auto regionSize = region.instrSize();
-  always_assert(regionSize <= irgs.budgetBCInstrs);
-  irgs.budgetBCInstrs -= regionSize;
+  if (!ignoresBCSize) {
+    auto regionSize = region.instrSize();
+    always_assert(regionSize <= irgs.budgetBCInstrs);
+    irgs.budgetBCInstrs -= regionSize;
+  }
 
   // Create a map from region blocks to their corresponding initial IR blocks.
   auto const inlining = isInlining(irgs);
@@ -737,7 +740,9 @@ bool irGenTryInlineFCall(irgen::IRGS& irgs, const Func* callee,
                 calleeProfFactor);
   }
 
-  auto result = irGenRegionImpl(irgs, *calleeRegion, calleeProfFactor);
+  auto const ignoreBCSize = calleeCost <= RO::EvalHHIRAlwaysInlineVasmCostLimit;
+  auto result = irGenRegionImpl(irgs, *calleeRegion, calleeProfFactor,
+                                ignoreBCSize);
   assertx(irgs.budgetBCInstrs >= 0);
 
   if (result != TranslateResult::Success) {
@@ -804,7 +809,8 @@ std::unique_ptr<IRUnit> irGenInlineRegion(const TransContext& ctx,
                                 ctxType, argTypes, returnTarget);
 
     try {
-      auto const result = irGenRegionImpl(irgs, region, 1 /* profFactor */);
+      auto const result = irGenRegionImpl(irgs, region, 1 /* profFactor */,
+                                          true /* ignore bc size */);
       if (result == TranslateResult::Retry) continue;
       assertx(result == TranslateResult::Success);
     } catch (const FailedTraceGen& e) {

@@ -590,6 +590,11 @@ bool shouldInline(const irgen::IRGS& irgs,
     return accept(folly::sformat("cost={} within always-inline limit", cost));
   }
 
+  if (region.instrSize() > irgs.budgetBCInstrs) {
+    return refuse(folly::sformat("exhausted budgetBCInstrs={}, regionSize={}",
+                                 irgs.budgetBCInstrs, region.instrSize()));
+  }
+
   int maxCost = maxTotalCost;
   if (RuntimeOption::EvalHHIRInliningUseStackedCost) {
     maxCost -= irgs.inlineState.cost;
@@ -828,7 +833,7 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
   const auto depth = inlineDepth(irgs);
   if (profData()) {
     auto region = selectCalleeCFG(sk, callee, ctxType, argTypes,
-                                  irgs.budgetBCInstrs, annotationsPtr);
+                                  RO::EvalJitMaxRegionInstrs, annotationsPtr);
     if (region &&
         shouldInline(irgs, sk, callee, *region,
                      adjustedMaxVasmCost(irgs, *region, depth))) {
@@ -838,7 +843,7 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
   }
 
   auto region = selectCalleeTracelet(callee, ctxType, argTypes,
-                                     irgs.budgetBCInstrs);
+                                     RO::EvalJitMaxRegionInstrs);
 
   if (region &&
       shouldInline(irgs, sk, callee, *region,

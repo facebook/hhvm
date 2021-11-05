@@ -5,17 +5,17 @@ version = "0.0.0"
 edition = "2021"
 
 [lib]
-path = "mod.rs"
+path = "../../shmffi/mod.rs"
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
 libc = "0.2.98"
 lz4 = "1.23.1"
 nohash-hasher = "0.2"
-ocamlrep = { path = "../ocamlrep" }
-ocamlrep_ocamlpool = { path = "../ocamlrep_ocamlpool" }
+ocamlrep = { path = "../../../ocamlrep" }
+ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
 once_cell = "1.8"
-shmrs = { path = "../shmrs" }
+shmrs = { path = "../../../shmrs" }
 
 [dev-dependencies]
 rand = { version = "0.8", features = ["small_rng"] }

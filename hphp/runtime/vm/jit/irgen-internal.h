@@ -650,7 +650,8 @@ inline void updateMarker(IRGS& env) {
 inline SSATmp* ldThis(IRGS& env) {
   assertx(hasThis(env));
   auto const func = curFunc(env);
-  auto const thisType = func ? thisTypeFromFunc(func) : TObj;
+  auto const thisType =
+    (func ? thisTypeFromFunc(func) : TObj) & env.irb->fs().ctxType();
   return gen(env, LdFrameThis, thisType, fp(env));
 }
 
@@ -659,7 +660,8 @@ inline SSATmp* ldCtx(IRGS& env) {
   if (hasThis(env))                  return ldThis(env);
 
   auto const func = curFunc(env);
-  auto const clsType = func ? Type::SubCls(func->cls()) : TCls;
+  auto const clsType =
+    (func ? Type::SubCls(func->cls()) : TCls) & env.irb->fs().ctxType();
   return gen(env, LdFrameCls, clsType, fp(env));
 }
 

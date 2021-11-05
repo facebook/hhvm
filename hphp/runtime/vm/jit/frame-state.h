@@ -178,6 +178,7 @@ struct FrameState {
    * ctx tracks the current ActRec's this/ctx field
    */
   SSATmp* ctx{nullptr};
+  Type ctxType{TObj|TCls};
 
   /*
    * stackModified is reset to false by exceptionStackBoundary() and set to
@@ -327,6 +328,7 @@ struct FrameStateMgr final {
   SSATmp*     fixupFP()           const { return cur().fixupFPValue; }
   SSATmp*     sp()                const { return cur().spValue; }
   SSATmp*     ctx()               const { return cur().ctx; }
+  Type        ctxType()           const { return cur().ctxType; }
   SBInvOffset irSPOff()           const { return cur().irSPOff; }
   SBInvOffset bcSPOff()           const { return cur().bcSPOff; }
   bool        stublogue()         const { return cur().stublogue; }

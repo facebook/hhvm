@@ -142,6 +142,12 @@ bool merge_into(FrameState& dst, const FrameState& src) {
   // We must always have the same stublogue mode.
   always_assert(dst.stublogue == src.stublogue);
 
+  if (dst.ctx != src.ctx) {
+    dst.ctx = nullptr;
+    changed = true;
+  }
+  changed |= merge_util(dst.ctxType, dst.ctxType | src.ctxType);
+
   if (dst.mbr.ptr != src.mbr.ptr) {
     dst.mbr.ptr = nullptr;
     changed = true;
@@ -289,7 +295,10 @@ void FrameStateMgr::update(const IRInstruction* inst) {
   case EndInlining:    trackEndInlining(); break;
   case InlineCall:     trackInlineCall(inst); break;
   case StFrameCtx:
-    if (cur().fpValue == inst->src(0)) cur().ctx = inst->src(1);
+    if (cur().fpValue == inst->src(0)) {
+      cur().ctx = inst->src(1);
+      cur().ctxType = inst->src(1)->type();
+    }
     break;
   case Call:
     {
@@ -329,6 +338,7 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     cur().fpValue = inst->dst();
     cur().fixupFPValue = inst->dst();
     cur().ctx = inst->src(3);
+    cur().ctxType = inst->src(3)->type();
     cur().stublogue = false;
     break;
 

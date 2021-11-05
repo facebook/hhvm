@@ -165,7 +165,12 @@ bool checkCfg(const IRUnit& unit) {
     auto checkEdge = [&] (const Edge* e) {
       always_assert(e->from() == b);
       for (auto& p : e->to()->preds()) if (&p == e) return;
-      always_assert(false); // did not find edge.
+      always_assert_flog(false,
+        "Edge {} -> {} not found in predecessor list for {}",
+        e->from()->id(),
+        e->to()->id(),
+        e->to()->id()
+      ); // did not find edge.
     };
     checkBlock(b);
     if (auto e = b->nextEdge())  checkEdge(e);
@@ -177,6 +182,7 @@ bool checkCfg(const IRUnit& unit) {
     for (auto const& e : b->preds()) {
       always_assert(&e == e.inst()->takenEdge() || &e == e.inst()->nextEdge());
       always_assert(e.to() == b);
+      always_assert(e.from() == e.inst()->block());
 
       // All of a block's preds should be unique. The exception is if
       // the pred has both a next and taken edge to this block.

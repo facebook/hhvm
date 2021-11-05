@@ -1,4 +1,0 @@
-File "codegen_unsafe.php", line 4, characters 3-6:
-`echo` or `print` builtin requires the capability IO, which is not provided by the context. (Typing[4401])
-  File "codegen_unsafe.php", line 3, characters 34-47:
-  The local (enclosing) context provides the capability set {Codegen, WriteProperty}

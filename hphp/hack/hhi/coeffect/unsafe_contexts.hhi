@@ -38,10 +38,6 @@ namespace HH\Contexts\Unsafe {
   type policied_local = \HH\Contexts\defaults;
   type policied_of<T> = mixed;
 
-  type codegen = mixed;
-  // TODO(coeffects) make this purer later
-  type codegen_unsafe = \HH\Contexts\defaults;
-
   type rx = \HH\Contexts\defaults;
   type rx_shallow = \HH\Contexts\defaults;
   type rx_local = \HH\Contexts\defaults;

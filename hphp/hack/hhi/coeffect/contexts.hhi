@@ -127,13 +127,6 @@ namespace HH\Contexts {
   type read_globals = \HH\Capabilities\ReadGlobals;
   type globals = \HH\Capabilities\AccessGlobals;
 
-  type codegen = (
-    // maybe: ( \HH\Capabilities\ReadGlobals & ... )
-    \HH\Capabilities\WriteProperty &
-    \HH\Capabilities\Codegen &
-  );
-  type codegen_unsafe = codegen;
-
   type rx = (\HH\Capabilities\Rx & \HH\Capabilities\WriteProperty);
   // type rx_shallow = (\HH\Capabilities\RxShallow & rx);
   type rx_shallow = (\HH\Capabilities\RxShallow & \HH\Capabilities\WriteProperty);

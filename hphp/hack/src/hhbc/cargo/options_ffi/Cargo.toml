@@ -5,7 +5,7 @@ version = "0.0.0"
 edition = "2021"
 
 [lib]
-path = "../../options_ffi.rs"
+path = "../../options_ffi/options_ffi.rs"
 test = false
 doctest = false
 crate-type = ["lib", "staticlib"]

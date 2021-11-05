@@ -5,7 +5,7 @@ version = "0.0.0"
 edition = "2021"
 
 [lib]
-path = "../../compile_ffi.rs"
+path = "../../compile_ffi/compile_ffi.rs"
 test = false
 doctest = false
 crate-type = ["lib", "staticlib"]

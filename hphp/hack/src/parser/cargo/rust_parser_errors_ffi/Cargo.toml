@@ -5,18 +5,18 @@ version = "0.0.0"
 edition = "2021"
 
 [lib]
-path = "../../../rust_parser_errors_ffi.rs"
+path = "../../rust_parser_errors_ffi/rust_parser_errors_ffi.rs"
 test = false
 doctest = false
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
 bumpalo = { version = "3.8", features = ["collections"] }
-ocamlrep = { path = "../../../../ocamlrep" }
-ocamlrep_ocamlpool = { path = "../../../../ocamlrep_ocamlpool" }
-oxidized = { path = "../../../../oxidized" }
-parser_core_types = { path = "../../core_types" }
-rust_parser_errors = { path = ".." }
+ocamlrep = { path = "../../../ocamlrep" }
+ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
+oxidized = { path = "../../../oxidized" }
+parser_core_types = { path = "../core_types" }
+rust_parser_errors = { path = "../errors" }
 
 [profile.release]
 incremental = false

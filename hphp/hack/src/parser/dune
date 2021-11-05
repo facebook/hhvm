@@ -1,8 +1,9 @@
+(data_only_dirs cargo ffi)
+
 (library
   (name rust_parser_ffi)
   (modules)
   (wrapped false)
-  (preprocess (pps visitors.ppx ppx_deriving.std))
   (libraries ocamlpool)
   (c_library_flags -lpthread)
   (self_build_stubs_archive (rust_parser_ffi))
@@ -24,7 +25,6 @@
   (name rust_parser_errors_ffi)
   (modules)
   (wrapped false)
-  (preprocess (pps visitors.ppx ppx_deriving.std))
   (libraries ocamlpool)
   (c_library_flags -lpthread)
   (self_build_stubs_archive (rust_parser_errors_ffi))

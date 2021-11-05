@@ -206,6 +206,8 @@ module CodeActionKind : sig
 
   val quickfix : t
 
+  val refactor : t
+
   val source : t
 end
 

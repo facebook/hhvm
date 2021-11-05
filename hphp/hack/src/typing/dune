@@ -161,6 +161,7 @@
     typing_requirements
     typing_sequencing
     typing_shapes
+    typing_skeleton
     typing_structure
     typing_toplevel
     typing_typedef

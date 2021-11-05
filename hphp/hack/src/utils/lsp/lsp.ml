@@ -316,6 +316,8 @@ module CodeActionKind = struct
   (* Some of the constants defined by the spec *)
   let quickfix = kind_of_string "quickfix"
 
+  let refactor = kind_of_string "refactor"
+
   (* Document wide code actions *)
   let source = kind_of_string "source"
 end

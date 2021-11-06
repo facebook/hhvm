@@ -192,6 +192,10 @@ void implRet(IRGS& env, bool suspended) {
   assertx(!suspended || resumeMode(env) == ResumeMode::None);
   assertx(!isInlining(env));
 
+  if (func->isAsyncFunction()) {
+    gen(env, AsyncFuncRetPrefetch, fp(env));
+  }
+
   freeLocalsAndThis(env);
 
   // Pop the return value. Since it will be teleported to its place in memory,

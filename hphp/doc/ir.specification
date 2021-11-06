@@ -1619,6 +1619,12 @@ To string conversions:
   the caller.  The `suspendingResumed' flag indicates when this instruction is
   suspending a resumable rather than performing a normal function return.
 
+| AsyncFuncRetPrefetch, ND, S(FramePtr), NF
+
+  Prefetch the WaitHandle that the current (async, resume-mode) frame's AFWH
+  is blocking. If this AFWH is blocking multiple WaitHandles, we will only
+  prefetch the first one; in any case, this IR op has no visible semantics.
+
 | AsyncFuncRet<spOff>, ND, S(StkPtr) S(FramePtr) S(Cell), T
 
   Return from a resumed async function, assuming no surprise. Ensures that

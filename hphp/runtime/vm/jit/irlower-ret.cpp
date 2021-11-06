@@ -46,6 +46,8 @@
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
+#include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
+
 #include "hphp/util/trace.h"
 
 namespace HPHP { namespace jit { namespace irlower {
@@ -164,6 +166,29 @@ void cgRetCtrl(IRLS& env, const IRInstruction* inst) {
   prepare_return_regs(v, inst->src(2), srcLoc(env, inst, 2),
                       inst->extra<RetCtrl>()->aux);
   v << phpret{fp, php_return_regs()};
+}
+
+namespace {
+using AFWH = c_AsyncFunctionWaitHandle;
+constexpr ptrdiff_t afwhToAr(ptrdiff_t off) {
+  return off - AFWH::arOff();
+}
+constexpr ptrdiff_t afwhToBl(ptrdiff_t off) {
+  return off - AFWH::childrenOff() - AFWH::Node::blockableOff();
+}
+}
+
+void cgAsyncFuncRetPrefetch(IRLS& env, const IRInstruction* inst) {
+  auto const fp = srcLoc(env, inst, 0).reg();
+  auto constexpr offset_to_parent = afwhToAr(AFWH::parentChainOff());
+  auto constexpr offset_to_blocks = AsioBlockable::bitsOff();
+  auto constexpr offset_to_return = afwhToBl(AFWH::resumeAddrOff());
+
+  auto& v = vmain(env);
+  auto const parent = v.makeReg();
+  v << load{fp[offset_to_parent], parent};
+  v << prefetch{parent[offset_to_blocks]};
+  v << prefetch{parent[offset_to_return]};
 }
 
 void cgAsyncFuncRet(IRLS& env, const IRInstruction* inst) {

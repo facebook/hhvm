@@ -587,6 +587,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       AStackAny | ALocalAny | AMIStateAny | AFBasePtr
     };
 
+  case AsyncFuncRetPrefetch:
+    return IrrelevantEffects {};
+
   case AsyncFuncRet:
   case AsyncFuncRetSlow:
   case AsyncGenRetR:

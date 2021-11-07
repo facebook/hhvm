@@ -802,6 +802,11 @@ void cgStructDictUnset(IRLS& env, const IRInstruction* inst) {
     return;
   }
 
+  // Removing a required field escalates, so we don't JIT a fast path for it.
+  auto const layout = arr->type().arrSpec().layout();
+  auto const slayout = StructLayout::As(layout.bespokeLayout());
+  if (slayout->field(*slot).required) return cgBespokeUnset(env, inst);
+
   auto const target = CallSpec::direct(StructDict::RemoveStrInSlot);
   auto const args = argGroup(env, inst).ssa(0).imm(*slot);
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None, args);

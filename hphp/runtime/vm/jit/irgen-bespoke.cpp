@@ -1176,15 +1176,18 @@ bool specializeStructSource(IRGS& env, SrcKey sk, ArrayLayout layout) {
 
   auto const imms = getImmVector(sk.pc());
   auto const size = safe_cast<uint32_t>(imms.size());
-
   auto const slayout = bespoke::StructLayout::As(layout.bespokeLayout());
 
   // Validate that the layout is compatible with the requested array.
-  // TODO(mcolavita): move to layout selection
+  // (Layout selection should choose compatible layouts, but we check anyway.)
+  auto required = slayout->numRequiredFields();
   for (auto i = 0; i < size; i++) {
     auto const key = curUnit(env)->lookupLitstrId(imms.vec32()[i]);
-    if (slayout->keySlot(key) == kInvalidSlot) return false;
+    auto const slot = slayout->keySlot(key);
+    if (slot == kInvalidSlot) return false;
+    if (slayout->field(slot).required) required--;
   }
+  if (required) return false;
 
   auto const slots = size ? new (env.unit.arena()) Slot[size] : nullptr;
   for (auto i = 0; i < size; i++) {

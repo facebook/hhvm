@@ -40,7 +40,10 @@ struct FieldVectorHash {
   size_t operator()(const StructLayout::FieldVector& fv) const {
     auto hash = size_t {0};
     for (auto const& f : fv) {
-      hash = folly::hash::hash_combine(hash, f.key->hash());
+      static_assert(sizeof(strhash_t) == 4);
+      auto const here = static_cast<uint64_t>(f.key->hash()) |
+                        static_cast<uint64_t>(f.required) << 32;
+      hash = folly::hash::hash_combine(hash, here);
     }
     return hash;
   }
@@ -62,9 +65,10 @@ uint16_t packSizeIndexAndAuxBits(uint8_t idx, uint8_t aux) {
 std::string describeStructLayout(const StructLayout::FieldVector& fv) {
   std::stringstream ss;
   for (auto i = 0; i < fv.size(); ++i) {
-    auto const& f = fv[i];
+    auto const& field = fv[i];
     if (i > 0) ss << ',';
-    ss << '"' << folly::cEscape<std::string>(f.key->data()) << '"';
+    if (!field.required) ss << '?';
+    ss << '"' << folly::cEscape<std::string>(field.key->data()) << '"';
   }
   return folly::sformat("StructDict<{}>", ss.str());
 }
@@ -178,6 +182,7 @@ StructLayout::StructLayout(LayoutIndex index, const FieldVector& fv)
   m_key_to_slot.reserve(fv.size());
   for (auto const& field : fv) {
     assertx(field.key->isStatic());
+    if (field.required) m_num_required_fields++;
     m_key_to_slot.insert({StaticKey{field.key}, i});
     m_fields[i] = field;
     i++;
@@ -332,7 +337,9 @@ StructDict* StructDict::MakeFromVanilla(ArrayData* ad,
   auto fail = false;
   auto const types = result->rawTypes();
   auto const vals = result->rawValues();
+  auto required = layout->numRequiredFields();
   auto pos = result->rawPositions();
+
   VanillaDict::IterateKV(VanillaDict::as(ad), [&](auto k, auto v) -> bool {
     if (!tvIsString(k)) {
       fail = true;
@@ -343,6 +350,8 @@ StructDict* StructDict::MakeFromVanilla(ArrayData* ad,
       fail = true;
       return true;
     }
+    if (layout->field(slot).required) required--;
+
     *pos++ = slot;
     result->m_size++;
     types[slot] = type(v);
@@ -351,7 +360,7 @@ StructDict* StructDict::MakeFromVanilla(ArrayData* ad,
     return false;
   });
 
-  if (fail) {
+  if (fail || required) {
     if (!ad->isStatic()) Release(result);
     return nullptr;
   }
@@ -700,10 +709,17 @@ ArrayData* StructDict::RemoveIntMove(StructDict* sad, int64_t) {
 
 ArrayData* StructDict::RemoveStrMove(StructDict* sadIn, const StringData* k) {
   auto const slot = StructLayout::keySlot(sadIn->layoutIndex(), k);
-  return slot == kInvalidSlot ? sadIn : RemoveStrInSlot(sadIn, slot);
+  if (slot == kInvalidSlot) return sadIn;
+  if (sadIn->layout()->field(slot).required) {
+    auto const vad = sadIn->escalateWithCapacity(sadIn->size(), __func__);
+    if (sadIn->decReleaseCheck()) Release(sadIn);
+    return VanillaDict::RemoveStrMove(vad, k);
+  }
+  return RemoveStrInSlot(sadIn, slot);
 }
 
 ArrayData* StructDict::RemoveStrInSlot(StructDict* sadIn, Slot slot) {
+  assertx(!sadIn->layout()->field(slot).required);
   auto const currType = sadIn->rawTypes()[slot];
   if (currType == KindOfUninit) return sadIn;
 
@@ -837,7 +853,11 @@ ArrayLayout StructLayout::appendType(Type val) const {
 }
 
 ArrayLayout StructLayout::removeType(Type key) const {
-  return ArrayLayout(this);
+  if (!key.hasConstVal(TStr)) return ArrayLayout::Top();
+  auto const slot = keySlot(key.strVal());
+  if (slot == kInvalidSlot) return ArrayLayout(this);
+  auto const& f = field(slot);
+  return f.required ? ArrayLayout::Vanilla() : ArrayLayout(this);
 }
 
 ArrayLayout StructLayout::setType(Type key, Type val) const {
@@ -852,7 +872,7 @@ std::pair<Type, bool> StructLayout::elemType(Type key) const {
   if (!key.hasConstVal(TStr)) return {TInitCell, false};
   auto const slot = keySlotStatic(index(), key.strVal());
   return slot == kInvalidSlot ? std::pair{TBottom, false}
-                              : std::pair{TInitCell, false};
+                              : std::pair{TInitCell, field(slot).required};
 }
 
 std::pair<Type, bool> StructLayout::firstLastType(
@@ -869,7 +889,7 @@ ArrayLayout TopStructLayout::appendType(Type val) const {
 }
 
 ArrayLayout TopStructLayout::removeType(Type key) const {
-  return ArrayLayout(this);
+  return ArrayLayout::Top();
 }
 
 ArrayLayout TopStructLayout::setType(Type key, Type val) const {

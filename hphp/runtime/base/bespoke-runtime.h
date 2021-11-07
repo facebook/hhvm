@@ -66,6 +66,10 @@ struct RuntimeStructSerde;
 struct RuntimeStruct {
   using FieldIndexVector = std::vector<std::pair<size_t, String>>;
 
+  // required will either be 0 or 1; we use an int instead of a bool so that
+  // we can do the "all required fields" check by simply summing values.
+  struct Field { Slot slot; uint8_t required; };
+
   /*
    * Creates or retrieves a RuntimeStruct corresponding to the supplied
    * stableIdentifier. If it is a new identifier, a RuntimeStruct with the
@@ -108,7 +112,7 @@ private:
   void validateFieldsMatch(const FieldIndexVector& fields) const;
 
   // NOTE: RuntimeStruct is followed in memory by an array of m_fields.size()
-  // Slot values, because we read the slots in hot code if we select a struct
+  // Fields values, because we read the slots in hot code if we select a struct
   // layout for this array source.
   //
   // These five methods are the only ones that deal with the layout logic.
@@ -116,10 +120,10 @@ private:
   static RuntimeStruct* allocate(size_t fieldsLength);
 
   LowStringPtr getKey(size_t index) const;
-  Slot getSlot(size_t index) const;
+  const Field& getField(size_t index) const;
 
   void setKey(size_t index, StringData* key);
-  void setSlot(size_t index, Slot slot);
+  void setField(size_t index, Slot slot, bool required);
 
   // Private fields, along with extra array.
 
@@ -161,9 +165,12 @@ struct StructDictInit {
   Array toArray();
 
 private:
+  ArrayData* toArrayData();
+
   ArrayData* m_arr;
   RuntimeStruct* m_struct;
   uint32_t m_escalateCapacity;
+  uint8_t m_numRequired;
   bool m_vanilla;
 };
 

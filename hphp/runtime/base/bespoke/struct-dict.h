@@ -54,6 +54,7 @@ struct StructDict : public BespokeArray {
   static ArrayData* SetStrInSlot(StructDict* adIn, Slot slot, TypedValue v);
   static void SetStrInSlotInPlace(StructDict* adIn, Slot slot, TypedValue v);
 
+  // Precondition: this slot is not a required field
   static ArrayData* RemoveStrInSlot(StructDict* adIn, Slot slot);
 
 #define X(Return, Name, Args...) static Return Name(Args);
@@ -108,8 +109,11 @@ struct StructDict : public BespokeArray {
 struct StructLayout : public ConcreteLayout {
   struct Field {
     LowStringPtr key;
+    bool required = false;
 
-    bool operator==(const Field& o) const { return key == o.key; }
+    bool operator==(const Field& o) const {
+      return key == o.key && required == o.required;
+    }
   };
 
   using FieldVector = std::vector<Field>;
@@ -124,6 +128,7 @@ struct StructLayout : public ConcreteLayout {
   size_t numFields() const;
   size_t sizeIndex() const;
   uint32_t extraInitializer() const;
+  size_t numRequiredFields() const { return m_num_required_fields; }
 
   static Slot keySlot(LayoutIndex index, const StringData* key);
   static Slot keySlotStatic(LayoutIndex index, const StringData* key);
@@ -205,6 +210,7 @@ private:
     uint32_t m_extra_initializer;
   };
   uint8_t m_size_index;
+  uint8_t m_num_required_fields = 0;
 
   folly::F14FastMap<StaticKey, Slot, Hash, Equal> m_key_to_slot;
 

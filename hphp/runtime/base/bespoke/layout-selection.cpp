@@ -148,6 +148,7 @@ Decision<DataType> selectValType(const SinkProfile& profile, double p_cutoff) {
 // Struct helpers
 
 using KeyFrequencies = folly::F14FastMap<const StringData*, int64_t>;
+using KeySet = folly::F14FastSet<const StringData*>;
 
 struct StructAnalysis {
   std::vector<KeyOrder> key_orders;
@@ -242,10 +243,8 @@ size_t countArrays(const std::vector<const LoggingProfile*>& profiles) {
   );
 }
 
-/*
- * Returns a map indicating, for each key in the KeyOrderMap, how many key
- * order instances would be invalidated by removing it.
- */
+// Returns a map indicating, for each key in the KeyOrderMap, how many key
+// order instances would be invalidated by removing it.
 KeyCountMap countKeyInstances(const KeyOrderFrequencyList& frequencyList) {
   auto keyInstances = KeyCountMap{};
   for (auto const& [keyOrder, count] : frequencyList) {
@@ -257,9 +256,11 @@ KeyCountMap countKeyInstances(const KeyOrderFrequencyList& frequencyList) {
   return keyInstances;
 }
 
+// Removes unlikely keys from the overall KeyOrderMap, until removing the next
+// key would bring the total probability remaining below the cutoff.
 KeyOrder pruneKeyOrder(
     const std::vector<const LoggingProfile*>& profiles, double cutoff) {
-  auto const keyOrderMap = [&] {
+  auto const keyOrderMap = [&]{
     auto kom = KeyOrderMap();
     for (auto const profile : profiles) {
       mergeKeyOrderMap(kom, profile->data->keyOrders);
@@ -382,6 +383,69 @@ KeyOrder pruneKeyOrder(
   return result;
 }
 
+// Computes a set of keys that are guaranteed to be present in the array at
+// construction time, or "invalid" if the source doesn't provide that info.
+KeyOrder computeRequiredKeysAtConstruction(const LoggingProfile& source) {
+  auto const vad = source.data->staticSampledArray;
+  if (vad) return KeyOrder::ForArray(vad);
+  if (source.key.op() != Op::NewStructDict) return KeyOrder::MakeInvalid();
+
+  auto result = KeyOrderData();
+  auto const unit = source.key.sk.unit();
+  auto const imms = getImmVector(source.key.sk.pc());
+  for (auto i = 0; i < imms.size(); i++) {
+    auto const key = unit->lookupLitstrId(imms.vec32()[i]);
+    assertx(key && key->isStatic());
+    result.push_back(key);
+  }
+  return KeyOrder::Make(result);
+}
+
+// Computes a set of keys that are present in all the given sources when the
+// array is initialized and that are never removed from the array.
+KeySet computeRequiredKeys(
+    const KeyOrder& keys, const std::vector<const LoggingProfile*>& profiles) {
+  auto const keyOrderMap = [&]{
+    auto kom = KeyOrderMap();
+    for (auto const profile : profiles) {
+      mergeKeyOrderMap(kom, profile->data->keyOrders);
+      kom[computeRequiredKeysAtConstruction(*profile)].value++;
+    }
+    return kom;
+  }();
+
+  assertx(keys.valid());
+  auto result = KeySet(keys.begin(), keys.end());
+  auto samples = 0;
+
+  for (auto const& pair : keyOrderMap) {
+    if (!pair.first.valid()) continue;
+    auto here = KeySet(pair.first.begin(), pair.first.end());
+    auto remove = std::vector<const StringData*>{};
+    for (auto const key : result) {
+      if (!here.contains(key)) remove.push_back(key);
+    }
+    for (auto const key : remove) {
+      result.erase(key);
+    }
+    samples++;
+  }
+
+  return samples ? result : KeySet();
+}
+
+// Computes a list of fields, with all information required - both the keys
+// and the "required" bit - that we need to construct a StructLayout.
+StructLayout::FieldVector collectFieldVector(
+    const KeyOrder& keys, const KeySet& requiredKeys) {
+  assertx(keys.valid());
+  StructLayout::FieldVector result;
+  for (auto const key : keys) {
+    result.push_back({key, requiredKeys.contains(key)});
+  }
+  return result;
+}
+
 // Returns true if we treat the given sink as a "merge point" and union the
 // sets of sinks that are incident to that merge. These points are also the
 // only ones at which we'll JIT struct access code.
@@ -457,13 +521,6 @@ void updateStructAnalysis(const SinkProfile& profile, StructAnalysis& sa) {
   sa.merge_sinks.push_back(&profile);
 }
 
-StructLayout::FieldVector collectFieldVector(const KeyOrder& ko) {
-  if (!ko.valid()) return {};
-  StructLayout::FieldVector result;
-  for (auto const key : ko) result.push_back({key});
-  return result;
-}
-
 StructAnalysisResult finishStructAnalysis(StructAnalysis& sa) {
   auto const p_cutoff = RO::EvalBespokeArraySourceSpecializationThreshold / 100;
   auto groups = std::vector<StructGroup>{};
@@ -490,21 +547,23 @@ StructAnalysisResult finishStructAnalysis(StructAnalysis& sa) {
 
   // Create potential layout set.
   for (auto& group : groups) {
-    KeyFrequencies keys;
+    KeyFrequencies frequencies;
     for (auto const source : group.profiles) {
       auto const multiplier = source->getSampleCountMultiplier();
       for (auto const& it : source->data->events) {
         auto const key = getEventStrKey(it.first);
-        if (key != nullptr) keys[key.get()] += it.second * multiplier;
+        if (key != nullptr) frequencies[key.get()] += it.second * multiplier;
       }
     }
-    auto const threshold = keyCoverageThreshold();
-    auto const& groupKO =
-      sortKeyOrder(pruneKeyOrder(group.profiles, threshold), keys);
-    auto const fields = collectFieldVector(groupKO);
-    auto const layout = StructLayout::GetLayout(fields, true);
-    group.layout = layout;
-    if (layout) layoutWeights[layout] += group.weight;
+    group.layout = [&]() -> const StructLayout* {
+      auto const pruned = pruneKeyOrder(group.profiles, keyCoverageThreshold());
+      auto const keys = sortKeyOrder(pruned, frequencies);
+      if (!keys.valid()) return nullptr;
+      auto const requiredKeys = computeRequiredKeys(keys, group.profiles);
+      auto const fields = collectFieldVector(keys, requiredKeys);
+      return StructLayout::GetLayout(fields, true);
+    }();
+    if (group.layout) layoutWeights[group.layout] += group.weight;
   }
 
   auto layoutVector =

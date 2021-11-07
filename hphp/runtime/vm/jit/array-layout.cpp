@@ -278,6 +278,7 @@ void write_field_vector(ProfDataSerializer& ser, const StructLayout* layout) {
   for (auto slot = 0; slot < num; ++slot) {
     auto const& f = layout->field(slot);
     write_string(ser, f.key);
+    write_raw(ser, f.required);
   }
 }
 
@@ -286,7 +287,8 @@ FieldVector read_field_vector(ProfDataDeserializer& des) {
   auto const num = read_raw<size_t>(des);
   for (auto i = 0; i < num; i++) {
     auto const key = read_string(des);
-    data.push_back({key});
+    auto const required = read_raw<bool>(des);
+    data.push_back({key, required});
   }
   return data;
 }

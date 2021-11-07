@@ -192,7 +192,7 @@ void implRet(IRGS& env, bool suspended) {
   assertx(!suspended || resumeMode(env) == ResumeMode::None);
   assertx(!isInlining(env));
 
-  if (func->isAsyncFunction()) {
+  if (func->isAsyncFunction() && resumeMode(env) != ResumeMode::None) {
     gen(env, AsyncFuncRetPrefetch, fp(env));
   }
 

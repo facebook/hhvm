@@ -1618,20 +1618,9 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
                                         Array&& generics /* = Array() */) {
   VMRegAnchor _;
 
-  // We must do a stack overflow check for leaf functions on re-entry,
-  // because we won't have checked that the stack is deep enough for a
-  // leaf function /after/ re-entry, and the prologue for the leaf
-  // function will not make a check.
-  if (f->isPhpLeafFn() ||
-      !(f->numParams() <= kStackCheckReenterPadding - kNumActRecCells)) {
-    // Check both the native stack and VM stack for overflow, numParams
-    // is already included in f->maxStackCells().
-    checkStack(vmStack(), f, f->numInOutParams() + kNumActRecCells);
-  } else {
-    // invokeFunc() must always check the native stack for overflow no
-    // matter what.
-    checkNativeStack();
-  }
+  // Check both the native stack and VM stack for overflow, numParams
+  // is already included in f->maxStackCells().
+  checkStack(vmStack(), f, f->numInOutParams() + kNumActRecCells);
 
   // Reserve space for inout outputs and ActRec.
   for (auto i = f->numInOutParams(); i > 0; --i) vmStack().pushUninit();
@@ -1675,12 +1664,7 @@ TypedValue ExecutionContext::invokeFuncFew(
   auto& stack = vmStack();
 
   // See comments in invokeFunc().
-  if (f->isPhpLeafFn() ||
-      !(numArgs <= kStackCheckReenterPadding - kNumActRecCells)) {
-    checkStack(stack, f, f->numInOutParams() + kNumActRecCells);
-  } else {
-    checkNativeStack();
-  }
+  checkStack(stack, f, f->numInOutParams() + kNumActRecCells);
 
   // Reserve space for inout outputs and ActRec.
   for (auto i = f->numInOutParams(); i > 0; --i) stack.pushUninit();

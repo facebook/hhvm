@@ -870,8 +870,6 @@ void enterVMAtFunc(ActRec* enterFnAr, uint32_t numArgsInclUnpack) {
   Stats::inc(Stats::VMEnter);
 
   prepareFuncEntry(enterFnAr, numArgsInclUnpack);
-
-  checkStack(vmStack(), enterFnAr->func(), 0);
   assertx(vmfp()->func()->contains(vmpc()));
 
   if (RID().getJit() && !RID().getJitFolding()) {
@@ -3453,8 +3451,6 @@ TCA fcallImpl(bool retToJit, PC origpc, PC& pc, const FCallArgs& fca,
 
   auto const numArgsInclUnpack = [&] {
     if (UNLIKELY(fca.hasUnpack())) {
-      checkStack(vmStack(), func, 0);
-
       GenericsSaver gs{fca.hasGenerics()};
       return prepareUnpackArgs(func, fca.numArgs, true);
     }

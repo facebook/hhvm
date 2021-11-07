@@ -746,7 +746,7 @@ void Debugger::enterDebuggerIfPaused(DebuggerRequestInfo* requestInfo) {
         requestInfo,
         "pause",
         nullptr,
-        true,
+        false,
         -1
       );
     }

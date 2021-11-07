@@ -68,7 +68,7 @@ struct RuntimeStruct {
 
   // required will either be 0 or 1; we use an int instead of a bool so that
   // we can do the "all required fields" check by simply summing values.
-  struct Field { Slot slot; uint8_t required; };
+  struct Field { Slot slot; uint8_t required; uint8_t type_mask; };
 
   /*
    * Creates or retrieves a RuntimeStruct corresponding to the supplied
@@ -123,7 +123,7 @@ private:
   const Field& getField(size_t index) const;
 
   void setKey(size_t index, StringData* key);
-  void setField(size_t index, Slot slot, bool required);
+  void setField(size_t index, Slot slot, bool required, uint8_t type_mask);
 
   // Private fields, along with extra array.
 

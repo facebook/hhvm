@@ -183,12 +183,14 @@ void RuntimeStruct::setKey(size_t idx, StringData* key) {
   m_fields[idx] = key;
 }
 
-void RuntimeStruct::setField(size_t idx, Slot slot, bool required) {
+void RuntimeStruct::setField(
+    size_t idx, Slot slot, bool required, uint8_t type_mask) {
   assertx(getKey(idx) != nullptr);
   assertx(getField(idx).slot == kInvalidSlot);
   auto* field = &reinterpret_cast<Field*>(this + 1)[idx];
   field->slot = slot;
   field->required = required;
+  field->type_mask = type_mask;
 }
 
 RuntimeStruct* RuntimeStruct::deserialize(
@@ -222,8 +224,12 @@ void RuntimeStruct::applyLayout(const bespoke::StructLayout* layout) {
     auto const key = getKey(i);
     if (!key) continue;
     auto const slot = layout->keySlot(key);
-    auto const required = slot != kInvalidSlot && layout->field(slot).required;
-    setField(i, slot, required);
+    if (slot == kInvalidSlot) {
+      setField(i, slot, false, 0);
+      continue;
+    }
+    auto const& field = layout->field(slot);
+    setField(i, slot, field.required, field.type_mask);
   }
   m_assignedLayout.store(layout, std::memory_order_release);
 }
@@ -287,7 +293,8 @@ void StructDictInit::set(size_t idx, StringData* key, TypedValue value) {
   assertx(m_struct->getKey(idx)->same(key));
   auto const sad = StructDict::As(m_arr);
   auto const field = m_struct->getField(idx);
-  if (field.slot == kInvalidSlot) {
+  if (field.slot == kInvalidSlot ||
+      (field.type_mask & static_cast<uint8_t>(value.type()))) {
     // We are adding a key with no corresponding slot. We escalate to vanilla
     // with the requested capacity and clear the m_struct field.
     FTRACE(2, "StructDictInit set at key {}, escalate\n", key);

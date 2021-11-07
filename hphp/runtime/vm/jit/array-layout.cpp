@@ -267,6 +267,7 @@ Type ArrayLayout::iterPosType(Type pos, bool isKey) const {
 //////////////////////////////////////////////////////////////////////////////
 
 namespace {
+
 using bespoke::LoggingProfileKey;
 using bespoke::SinkProfileKey;
 using bespoke::StructLayout;
@@ -279,6 +280,7 @@ void write_field_vector(ProfDataSerializer& ser, const StructLayout* layout) {
     auto const& f = layout->field(slot);
     write_string(ser, f.key);
     write_raw(ser, f.required);
+    write_raw(ser, f.type_mask);
   }
 }
 
@@ -288,7 +290,8 @@ FieldVector read_field_vector(ProfDataDeserializer& des) {
   for (auto i = 0; i < num; i++) {
     auto const key = read_string(des);
     auto const required = read_raw<bool>(des);
-    data.push_back({key, required});
+    auto const type_mask = read_raw<uint8_t>(des);
+    data.push_back({key, required, type_mask});
   }
   return data;
 }
@@ -360,6 +363,7 @@ bespoke::SinkLayout read_sink_layout(ProfDataDeserializer& des) {
   read_raw(des, result.sideExit);
   return result;
 }
+
 }
 
 struct RuntimeStructSerde {
@@ -393,9 +397,7 @@ struct RuntimeStructSerde {
     auto fields = RuntimeStruct::FieldKeys(fieldSize, nullptr);
     for (int i = 0; i < fieldSize; i ++) {
       auto const present = read_raw<bool>(des);
-      if (present) {
-        fields[i] = read_string(des);
-      }
+      if (present) fields[i] = read_string(des);
     }
 
     auto const runtimeStruct =

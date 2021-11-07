@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/base/bespoke/layout-selection.h"
 
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/bespoke/key-coloring.h"
 #include "hphp/runtime/base/bespoke/layout.h"
 #include "hphp/runtime/base/bespoke/monotype-dict.h"
@@ -148,6 +149,7 @@ Decision<DataType> selectValType(const SinkProfile& profile, double p_cutoff) {
 // Struct helpers
 
 using KeyFrequencies = folly::F14FastMap<const StringData*, int64_t>;
+using KeyBounds = folly::F14FastMap<const StringData*, uint8_t>;
 using KeySet = folly::F14FastSet<const StringData*>;
 
 struct StructAnalysis {
@@ -196,17 +198,19 @@ KeyOrder sortKeyOrder(const KeyOrder& ko, const KeyFrequencies& keys) {
 using KeyCountMap = folly::F14FastMap<const StringData*, size_t>;
 using KeyOrderFrequencyList = std::vector<std::pair<KeyOrder, size_t>>;
 
+bool opSetsStringKey(ArrayOp op) {
+  using AO = ArrayOp;
+  return op == AO::APCInitStr || op == AO::ConstructStr || op == AO::SetStr;
+}
+
 // Returns a map from keys to counts, indicating a conservative approximation
 // of the number of logged arrays containing (the static version of) each key.
-// We miss keys that are in uncounted arrays or set via a non-static value
 KeyCountMap arraysContainingKeys(
     const std::vector<const LoggingProfile*>& profiles, size_t bound) {
   auto arrayCounts = KeyCountMap();
   for (auto const& profile : profiles) {
-    // Count ConstructStr/SetStr keys
     for (auto const& it : profile->data->events) {
-      auto const op = getEventArrayOp(it.first);
-      if (op == ArrayOp::ConstructStr || op == ArrayOp::SetStr) {
+      if (opSetsStringKey(getEventArrayOp(it.first))) {
         auto const key = getEventStrKey(it.first);
         if (key != nullptr) {
           auto& count = arrayCounts[key.get()];
@@ -329,10 +333,8 @@ KeyOrder pruneKeyOrder(
     {
       acceptedOrders -= keyAndCount->second;
       auto const iter = arraysContainingKey.find(keyAndCount->first);
-      // If we do not have any arrays registered as containing the key, then it
-      // must be a key added during an uncounted APC logging array
-      // construction. It should therefore be in all operation key orders, so
-      // there's no need to pessimize here.
+      // If we do not have any arrays registered as containing the key, then
+      // we'll just rely on the sink-side counts to detect if it's common.
       auto const attributed =
         iter == arraysContainingKey.end() ? 0 : iter->second;
       if (attributed > acceptedArrays) break;
@@ -434,14 +436,64 @@ KeySet computeRequiredKeys(
   return samples ? result : KeySet();
 }
 
+// Computes a good bound on the type of each field of a StructDict layout that
+// covers all of the given sources. For now, we take a simple, conservative
+// approach and just union the types of all values stored to each field.
+KeyBounds computeTypeBounds(
+    const std::vector<const LoggingProfile*>& profiles) {
+  auto result = KeyBounds{};
+  for (auto const profile : profiles) {
+    if (auto const ad = profile->data->staticSampledArray) {
+      IterateKV(ad, [&](auto const key, auto const val){
+        if (!tvIsString(key)) return;
+        auto const str = key.val().pstr;
+        assertx(str->isStatic());
+        result[str] |= static_cast<uint8_t>(dt_modulo_persistence(val.type()));
+      });
+    }
+    for (auto const& it : profile->data->events) {
+      if (opSetsStringKey(getEventArrayOp(it.first))) {
+        auto const key = getEventStrKey(it.first);
+        auto const val = getEventValType(it.first);
+        if (key) result[key] |= static_cast<uint8_t>(val);
+      }
+    }
+  }
+
+  // So far, result contains the union of the bits of any types stored to this
+  // field during profiling. There are two fixes we need to make to turn it
+  // into a valid StructDict field type mask:
+  //
+  //  1. We need to negate its bits; a type mask records the bits that must
+  //     *not* be set for values of this field.
+  //
+  //  2. We need to relax it to a checkable type, which for now is one of:
+  //     a) any single DataType; b) TUncounted; c) TCell (the trivial bound).
+  //
+  for (auto& it : result) {
+    auto const fixed = [&]() -> uint8_t {
+      auto const bound = it.second;
+      if (isRealType(static_cast<DataType>(bound))) return ~bound;
+      if (!(bound & kRefCountedBit)) return kRefCountedBit;
+      return 0;
+    }();
+    it.second = fixed;
+  }
+
+  return result;
+}
+
 // Computes a list of fields, with all information required - both the keys
 // and the "required" bit - that we need to construct a StructLayout.
 StructLayout::FieldVector collectFieldVector(
-    const KeyOrder& keys, const KeySet& requiredKeys) {
+    const KeyOrder& keys, const KeySet& requiredKeys, const KeyBounds& typeBounds) {
   assertx(keys.valid());
   StructLayout::FieldVector result;
   for (auto const key : keys) {
-    result.push_back({key, requiredKeys.contains(key)});
+    auto const it = typeBounds.find(key);
+    auto const type_mask = it == typeBounds.end()
+      ? static_cast<uint8_t>(0) : it->second;
+    result.push_back({key, requiredKeys.contains(key), type_mask});
   }
   return result;
 }
@@ -559,8 +611,9 @@ StructAnalysisResult finishStructAnalysis(StructAnalysis& sa) {
       auto const pruned = pruneKeyOrder(group.profiles, keyCoverageThreshold());
       auto const keys = sortKeyOrder(pruned, frequencies);
       if (!keys.valid()) return nullptr;
+      auto const typeBounds = computeTypeBounds(group.profiles);
       auto const requiredKeys = computeRequiredKeys(keys, group.profiles);
-      auto const fields = collectFieldVector(keys, requiredKeys);
+      auto const fields = collectFieldVector(keys, requiredKeys, typeBounds);
       return StructLayout::GetLayout(fields, true);
     }();
     if (group.layout) layoutWeights[group.layout] += group.weight;

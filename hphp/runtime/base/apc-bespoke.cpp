@@ -225,6 +225,10 @@ ArrayData* implAPCBespoke(APCBespokeEnv& env, ArrayData* ain,
       vin->persistentIncRef();
       return vin;
     }();
+    IterateKV(vad, [&](auto k, auto v) {
+      tvIsString(k) ? profile->logEvent(ArrayOp::APCInitStr, val(k).pstr, v)
+                    : profile->logEvent(ArrayOp::APCInitInt, val(k).num, v);
+    });
     auto const lad = LoggingArray::MakeUncounted(vad, profile, hasApcTv);
     env.logging.push_back(lad->profile->data.get());
     return lad;

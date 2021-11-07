@@ -627,7 +627,7 @@ BespokeArray* maybeMonoify(ArrayData* ad) {
 StructLayout::FieldVector collectFieldVector(const KeyOrder& ko) {
   if (!ko.valid()) return {};
   StructLayout::FieldVector result;
-  for (auto const key : ko) result.push_back({key, false});
+  for (auto const key : ko) result.push_back({key, false, 0});
   return result;
 }
 

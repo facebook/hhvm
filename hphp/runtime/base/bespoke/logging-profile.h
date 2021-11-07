@@ -59,6 +59,8 @@ struct LoggingArray;
   X(ConstructStr,       false) \
   X(RemoveInt,          false) \
   X(RemoveStr,          false) \
+  X(APCInitInt,         true)  \
+  X(APCInitStr,         true)  \
   X(IterBegin,          true)  \
   X(IterLast,           true)  \
   X(IterEnd,            true)  \
@@ -375,6 +377,7 @@ size_t countSinks();
 // Accessors for logged events. TODO(kshaunak): Expose a better API.
 ArrayOp getEventArrayOp(uint64_t key);
 LowStringPtr getEventStrKey(uint64_t key);
+DataType getEventValType(uint64_t key);
 
 }}
 

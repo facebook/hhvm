@@ -179,6 +179,11 @@ struct alignas(8) EventKey {
     return (const StringData*)safe_cast<uintptr_t>(m_key);
   }
 
+  DataType getValType() const {
+    assertx(m_val_type != kInvalidDataType);
+    return m_val_type;
+  }
+
   std::string toString() const;
 
 private:
@@ -1228,6 +1233,10 @@ ArrayOp getEventArrayOp(uint64_t key) {
 
 LowStringPtr getEventStrKey(uint64_t key) {
   return EventKey(key).getStrKey();
+}
+
+DataType getEventValType(uint64_t key) {
+  return EventKey(key).getValType();
 }
 
 //////////////////////////////////////////////////////////////////////////////

@@ -1482,7 +1482,7 @@ To string conversions:
   the fields specified by `slots`. This instruction does not set the elements
   of the dict; use InitStructElem for that.
 
-| InitStructElem<slot,key>, ND, SStructDict S(Cell), CRc
+| InitStructElem<slot,key>, ND, SStructDict S(InitCell), CRc
 
   Initialize the element at slot `slot` corresponding to `key` in StructDict S0
   with S1. This instruction assumes that S1 has already been inc-reffed.

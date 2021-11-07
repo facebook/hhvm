@@ -51,6 +51,7 @@ struct StructDict : public BespokeArray {
   static const StructDict* As(const ArrayData* ad);
   static StructDict* As(ArrayData* ad);
 
+  // Precondition: v meets the type bound for this slot
   static ArrayData* SetStrInSlot(StructDict* adIn, Slot slot, TypedValue v);
   static void SetStrInSlotInPlace(StructDict* adIn, Slot slot, TypedValue v);
 
@@ -110,9 +111,10 @@ struct StructLayout : public ConcreteLayout {
   struct Field {
     LowStringPtr key;
     bool required = false;
+    uint8_t type_mask = 0;
 
     bool operator==(const Field& o) const {
-      return key == o.key && required == o.required;
+      return key == o.key && required == o.required && type_mask == o.type_mask;
     }
   };
 
@@ -149,6 +151,13 @@ struct StructLayout : public ConcreteLayout {
   size_t typeOffsetForSlot(Slot slot) const;
   size_t valueOffsetForSlot(Slot slot) const;
 
+  // Check the type bound on this slot, at runtime or in the JIT
+  bool checkTypeBound(Slot slot, TypedValue tv) const;
+  Type getTypeBound(Slot slot) const;
+  Type getUnionTypeBound() const;
+  static uint8_t BoundToMask(const Type& type);
+  static Type MaskToBound(uint8_t type_mask);
+
   ArrayLayout appendType(Type val) const override;
   ArrayLayout removeType(Type key) const override;
   ArrayLayout setType(Type key, Type val) const override;
@@ -162,8 +171,8 @@ struct StructLayout : public ConcreteLayout {
   struct PerfectHashEntry {
     LowStringPtr str;
     uint16_t valueOffset;
+    uint8_t typeMask;
     uint8_t slot;
-    uint8_t unused;
   };
 
   static constexpr size_t kMaxColor = 255;

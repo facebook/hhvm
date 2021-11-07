@@ -266,6 +266,25 @@ SSATmp* emitSetElem(IRGS& env, SSATmp* key, SSATmp* value) {
     return value;
   }
 
+  // Emit a type check if the base's layout places type bounds on values.
+  // Doing the check here is useful because it can save us an IncRef below.
+  //
+  // We don't want to over-constrain the type here, so we relax type bounds
+  // to either DataTypeSpecific (if applicable) or TUncounted. We also don't
+  // do the check if profiling is awry and the bound is definitely violated.
+  auto const layout = base->type().arrSpec().layout();
+  auto const bound = layout.elemType(key->type()).first;
+  auto const type = [&]{
+    if (bound.isKnownDataType()) {
+      return Type(dt_modulo_persistence(bound.toDataType()));
+    }
+    if (bound == TUncountedInit) return TUncounted;
+    return TCell;
+  }();
+  if (value->type().maybe(type) && !value->isA(type)) {
+    value = gen(env, CheckType, type, makeExitSlow(env), value);
+  }
+
   auto const newArr = emitSet(env, base, key, value);
 
   // Update the base's location with the new array.
@@ -1174,21 +1193,53 @@ bool specializeStructSource(IRGS& env, SrcKey sk, ArrayLayout layout) {
     return true;
   }
 
+  auto const gc = DataTypeGeneric;
   auto const imms = getImmVector(sk.pc());
   auto const size = safe_cast<uint32_t>(imms.size());
   auto const slayout = bespoke::StructLayout::As(layout.bespokeLayout());
 
-  // Validate that the layout is compatible with the requested array.
-  // (Layout selection should choose compatible layouts, but we check anyway.)
+  // Validate that the layout is compatible with the requested array. We must
+  // check that all required fields are set, and that all type bounds *may* be
+  // met by the provided value for that field.
+  auto guards = std::vector<std::pair<int32_t, Type>>{};
   auto required = slayout->numRequiredFields();
   for (auto i = 0; i < size; i++) {
     auto const key = curUnit(env)->lookupLitstrId(imms.vec32()[i]);
     auto const slot = slayout->keySlot(key);
     if (slot == kInvalidSlot) return false;
     if (slayout->field(slot).required) required--;
+
+    // Compute the type to check for this field. If the value cannot possibly
+    // meet this bound, profiling has gone awry and we should bail.
+    auto const offset = safe_cast<int32_t>(size - i - 1);
+    auto const known = topType(env, BCSPRelOffset{offset}, gc);
+    auto const bound = slayout->getTypeBound(slot);
+    auto const type = bound.isKnownDataType() ? bound : bound | TUninit;
+    if (!known.maybe(type)) return false;
+    if (!(known <= type)) guards.push_back({offset, type});
   }
   if (required) return false;
 
+  // Check any type bounds that are not already known to be satisfied.
+  //
+  // If we're going to do the writes inline, then we force a load here because
+  // we need to do the load below anyway. Otherwise, we check types in place.
+  if (!guards.empty()) {
+    auto const exit = makeExitSlow(env);
+    for (auto const& guard : guards) {
+      auto const soff = BCSPRelOffset{guard.first};
+      if (size > RuntimeOption::EvalHHIRMaxInlineInitStructElements) {
+        auto const data = IRSPRelOffsetData{offsetFromIRSP(env, soff)};
+        gen(env, AssertStk, TInitCell, data, sp(env));
+        gen(env, CheckStk, guard.second, data, exit, sp(env));
+      } else {
+        gen(env, CheckType, guard.second, exit, topC(env, soff, gc));
+      }
+    }
+  }
+
+  // All preconditions have been checked. Write the slots to this unit's data
+  // section, and then either emit an outlined or inline array constructor.
   auto const slots = size ? new (env.unit.arena()) Slot[size] : nullptr;
   for (auto i = 0; i < size; i++) {
     auto const key = curUnit(env)->lookupLitstrId(imms.vec32()[i]);
@@ -1214,7 +1265,7 @@ bool specializeStructSource(IRGS& env, SrcKey sk, ArrayLayout layout) {
     auto const idx = size - i - 1;
     auto const key = curUnit(env)->lookupLitstrId(imms.vec32()[idx]);
     auto const kid = KeyedIndexData { slots[idx], key };
-    gen(env, InitStructElem, kid, arr, popC(env, DataTypeGeneric));
+    gen(env, InitStructElem, kid, arr, popC(env, gc));
   }
   push(env, arr);
   return true;

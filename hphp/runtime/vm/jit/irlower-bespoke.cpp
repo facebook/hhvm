@@ -534,13 +534,16 @@ void cgInitStructPositions(IRLS& env, const IRInstruction* inst) {
 
 void cgInitStructElem(IRLS& env, const IRInstruction* inst) {
   auto const arr = inst->src(0);
+  auto const val = inst->src(1);
   auto const layout = arr->type().arrSpec().layout();
   auto const slayout = StructLayout::As(layout.bespokeLayout());
-  auto const rarr = srcLoc(env, inst, 0).reg();
   auto const slot = inst->extra<InitStructElem>()->index;
+  always_assert(val->isA(slayout->getTypeBound(slot)));
+
+  auto const rarr = srcLoc(env, inst, 0).reg();
   auto const type = rarr[slayout->typeOffsetForSlot(slot)];
   auto const data = rarr[slayout->valueOffsetForSlot(slot)];
-  storeTV(vmain(env), inst->src(1)->type(), srcLoc(env, inst, 1), type, data);
+  storeTV(vmain(env), val->type(), srcLoc(env, inst, 1), type, data);
 }
 
 void cgNewBespokeStructDict(IRLS& env, const IRInstruction* inst) {
@@ -779,14 +782,57 @@ void cgStructDictGetWithColor(IRLS& env, const IRInstruction* inst) {
 void cgStructDictSet(IRLS& env, const IRInstruction* inst) {
   auto const arr = inst->src(0);
   auto const key = inst->src(1);
+  auto const val = inst->src(2);
   auto const slot = getStructSlot(arr, key);
 
   if (!slot || (*slot == kInvalidSlot)) return cgBespokeSet(env, inst);
 
+  // Before doing a specialized set operation, we have to confirm that the
+  // type bound on this field is satisfied.
+  //
+  // We try to emit a check for this precondition at irgen time, but we may
+  // have produced this instruction late from simplifying a generic set, so
+  // we handle all cases (while still optimizing for the known-good one).
+  auto const layout = arr->type().arrSpec().layout();
+  auto const slayout = StructLayout::As(layout.bespokeLayout());
+  auto const bound = slayout->getTypeBound(*slot);
+
+  // Definitely unsatisfied; do a generic set.
+  if (!val->type().maybe(bound)) return cgBespokeSet(env, inst);
+
+  // Definitely satisfied; do a specialized set.
+  if (val->isA(bound)) {
+    auto& v = vmain(env);
+    auto const target = CallSpec::direct(StructDict::SetStrInSlot);
+    auto const args = argGroup(env, inst).ssa(0).imm(*slot).typedValue(2);
+    cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None, args);
+    return;
+  }
+
+  // We need to check, and we can do so with the field's type mask.
+  always_assert(!val->type().isKnownDataType());
   auto& v = vmain(env);
-  auto const target = CallSpec::direct(StructDict::SetStrInSlot);
-  auto const args = argGroup(env, inst).ssa(0).imm(*slot).typedValue(2);
-  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None, args);
+  auto const type = srcLoc(env, inst, 2).reg(1);
+  auto const mask = static_cast<int8_t>(slayout->field(*slot).type_mask);
+  auto const sf = v.makeReg();
+  v << testbi{mask, type, sf};
+  unlikelyCond(
+    v, vcold(env), CC_NE, sf, dstLoc(env, inst, 0).reg(),
+    [&](Vout& v) {
+      auto const dst = v.makeReg();
+      auto const target = CallSpec::direct(StructDict::SetStrMove);
+      auto const args = argGroup(env, inst).ssa(0).ssa(1).typedValue(2);
+      cgCallHelper(v, env, target, callDest(dst), SyncOptions::Sync, args);
+      return dst;
+    },
+    [&](Vout& v) {
+      auto const dst = v.makeReg();
+      auto const target = CallSpec::direct(StructDict::SetStrInSlot);
+      auto const args = argGroup(env, inst).ssa(0).imm(*slot).typedValue(2);
+      cgCallHelper(v, env, target, callDest(dst), SyncOptions::None, args);
+      return dst;
+    }
+  );
 }
 
 void cgStructDictUnset(IRLS& env, const IRInstruction* inst) {

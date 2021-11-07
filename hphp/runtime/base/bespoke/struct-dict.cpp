@@ -69,6 +69,7 @@ std::string describeStructLayout(const StructLayout::FieldVector& fv) {
     if (i > 0) ss << ',';
     if (!field.required) ss << '?';
     ss << '"' << folly::cEscape<std::string>(field.key->data()) << '"';
+    ss << ':' << StructLayout::MaskToBound(field.type_mask).toString();
   }
   return folly::sformat("StructDict<{}>", ss.str());
 }
@@ -120,6 +121,50 @@ size_t StructLayout::valueOffsetForSlot(Slot slot) const {
 
 size_t StructLayout::positionOffset() const {
   return sizeof(StructDict) + numFields();
+}
+
+bool StructLayout::checkTypeBound(Slot slot, TypedValue tv) const {
+  assertx(slot < numFields());
+  return !(static_cast<uint8_t>(tv.type()) & m_fields[slot].type_mask);
+}
+
+jit::Type StructLayout::getTypeBound(Slot slot) const {
+  assertx(slot < numFields());
+  return MaskToBound(m_fields[slot].type_mask) & jit::TInitCell;
+}
+
+jit::Type StructLayout::getUnionTypeBound() const {
+  auto result = jit::TBottom;
+  for (auto slot = 0; slot < numFields(); slot++) {
+    result |= getTypeBound(slot);
+  }
+  return result;
+}
+
+uint8_t StructLayout::BoundToMask(const Type& type) {
+  // We support three kinds of type bound on StructDict values:
+  //   1. No bound; any value is allowed
+  //   2. "uncounted"; a union of scalars like int/float/bool/null
+  //   3. A known, non-persistent-flavor DataType
+  if (type == jit::TCell) return 0;
+  if (type == jit::TUncounted) return safe_cast<uint8_t>(kRefCountedBit);
+
+  // Check that we're in case 3. Any other type_mask is invalid.
+  assertx(type.isKnownDataType());
+  auto const dt = type.toDataType();
+  assertx(type == Type(dt));
+  assertx(dt == dt_modulo_persistence(dt));
+  return ~static_cast<uint8_t>(dt);
+}
+
+jit::Type StructLayout::MaskToBound(uint8_t mask) {
+  if (mask == 0) return jit::TCell;
+  if (mask == static_cast<uint8_t>(kRefCountedBit)) return jit::TUncounted;
+
+  auto const dt = static_cast<DataType>(~mask);
+  assertx(isRealType(dt));
+  assertx(dt == dt_modulo_persistence(dt));
+  return jit::Type(dt);
 }
 
 // As documented in bespoke/layout.h, bespoke layout bytes are constrained to
@@ -182,6 +227,7 @@ StructLayout::StructLayout(LayoutIndex index, const FieldVector& fv)
   m_key_to_slot.reserve(fv.size());
   for (auto const& field : fv) {
     assertx(field.key->isStatic());
+    assertx(BoundToMask(MaskToBound(field.type_mask)) == field.type_mask);
     if (field.required) m_num_required_fields++;
     m_key_to_slot.insert({StaticKey{field.key}, i});
     m_fields[i] = field;
@@ -304,8 +350,9 @@ void StructLayout::createColoringHashMap() const {
     assertx(color != StringData::kInvalidColor);
     assertx(table[color].str == nullptr);
     auto const slot = safe_cast<uint8_t>(keySlotNonStatic(key));
+    auto const typeMask = m_fields[i].type_mask;
     auto const valueOffset = safe_cast<uint16_t>(valueOffsetForSlot(slot));
-    table[color] = { key, valueOffset, slot, 0 };
+    table[color] = { key, valueOffset, typeMask, slot };
   }
 }
 
@@ -346,7 +393,7 @@ StructDict* StructDict::MakeFromVanilla(ArrayData* ad,
       return true;
     }
     auto const slot = layout->keySlot(val(k).pstr);
-    if (slot == kInvalidSlot) {
+    if (slot == kInvalidSlot || !layout->checkTypeBound(slot, v)) {
       fail = true;
       return true;
     }
@@ -640,8 +687,39 @@ ArrayData* StructDict::SetIntMove(StructDict* sad, int64_t k, TypedValue v) {
 ArrayData* StructDict::SetStrMove(StructDict* sadIn,
                                   StringData* k,
                                   TypedValue v) {
-  auto const slot = StructLayout::keySlot(sadIn->layoutIndex(), k);
-  if (slot == kInvalidSlot) {
+  Slot slot = kInvalidSlot;
+  auto constexpr kNoMask = uint8_t{0};
+
+  auto const type_mask = [&] {
+    static_assert(folly::isPowTwo(StructLayout::kMaxColor + 1));
+    auto const color = k->color() & StructLayout::kMaxColor;
+    auto const& entry = s_hashTableSet[sadIn->layoutIndex().raw][color];
+
+    // Perfect hash table miss: k is definitely missing if it's a static string;
+    // else, we need to fall back to a hash table lookup for the non-static k.
+    if (entry.str != k) {
+      if (k->isStatic()) return kNoMask;
+      auto const layout = sadIn->layout();
+      slot = layout->keySlotNonStatic(k);
+      return slot == kInvalidSlot ? kNoMask : layout->field(slot).type_mask;
+    }
+
+    // Perfect hash table hit: we can use the slot and type bound.
+    slot = entry.slot;
+    return entry.typeMask;
+  }();
+
+  auto const present = slot != kInvalidSlot;
+  auto const checked = present && !(static_cast<uint8_t>(v.type()) & type_mask);
+
+  if (debug) {
+    auto const layout = sadIn->layout();
+    auto const checked_via_layout = present && layout->checkTypeBound(slot, v);
+    always_assert(slot == layout->keySlot(k));
+    always_assert(checked == checked_via_layout);
+  }
+
+  if (!checked) {
     auto const vad = sadIn->escalateWithCapacity(sadIn->size() + 1, __func__);
     auto const res = VanillaDict::SetStrMove(vad, k, v);
     assertx(vad == res);
@@ -655,6 +733,7 @@ ArrayData* StructDict::SetStrInSlot(StructDict* sadIn, Slot slot,
                                     TypedValue v) {
   assertx(slot != kInvalidSlot);
   assertx(slot < sadIn->numFields());
+  assertx(sadIn->layout()->checkTypeBound(slot, v));
   auto const cow = sadIn->cowCheck();
   auto const sad = cow ? sadIn->copy() : sadIn;
   StructDict::SetStrInSlotInPlace(sad, slot, v);
@@ -665,6 +744,7 @@ ArrayData* StructDict::SetStrInSlot(StructDict* sadIn, Slot slot,
 void StructDict::SetStrInSlotInPlace(StructDict* sad, Slot slot,
                                      TypedValue v) {
   assertx(sad->hasExactlyOneRef());
+  assertx(sad->layout()->checkTypeBound(slot, v));
   auto& oldType = sad->rawTypes()[slot];
   auto& oldVal = sad->rawValues()[slot];
   if (oldType == KindOfUninit) {
@@ -864,24 +944,28 @@ ArrayLayout StructLayout::setType(Type key, Type val) const {
   if (key <= TInt) return ArrayLayout::Vanilla();
   if (!key.hasConstVal(TStr)) return ArrayLayout::Top();
   auto const slot = keySlotStatic(index(), key.strVal());
-  return slot == kInvalidSlot ? ArrayLayout::Vanilla() : ArrayLayout(this);
+  if (slot == kInvalidSlot) return ArrayLayout::Vanilla();
+  if (val <= getTypeBound(slot)) return ArrayLayout(this);
+  if (!val.maybe(getTypeBound(slot))) return ArrayLayout::Vanilla();
+  return ArrayLayout::Top();
 }
 
 std::pair<Type, bool> StructLayout::elemType(Type key) const {
   if (key <= TInt) return {TBottom, false};
-  if (!key.hasConstVal(TStr)) return {TInitCell, false};
+  if (!key.hasConstVal(TStr)) return {getUnionTypeBound(), false};
   auto const slot = keySlotStatic(index(), key.strVal());
-  return slot == kInvalidSlot ? std::pair{TBottom, false}
-                              : std::pair{TInitCell, field(slot).required};
+  return slot == kInvalidSlot
+    ? std::pair{TBottom, false}
+    : std::pair{getTypeBound(slot), field(slot).required};
 }
 
 std::pair<Type, bool> StructLayout::firstLastType(
     bool isFirst, bool isKey) const {
-  return {isKey ? TStaticStr : TInitCell, false};
+  return {isKey ? TStaticStr : getUnionTypeBound(), false};
 }
 
 Type StructLayout::iterPosType(Type pos, bool isKey) const {
-  return isKey ? TStaticStr : TInitCell;
+  return isKey ? TStaticStr : getUnionTypeBound();
 }
 
 ArrayLayout TopStructLayout::appendType(Type val) const {

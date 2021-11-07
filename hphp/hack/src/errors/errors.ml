@@ -3009,9 +3009,15 @@ let parent_abstract_call meth_name call_pos decl_pos =
       ^ "; it is abstract" )
     [(decl_pos, "Declaration is here")]
 
-let self_abstract_call meth_name call_pos decl_pos =
+let self_abstract_call meth_name self_pos call_pos decl_pos =
   add_list
     (Typing.err_code Typing.AbstractCall)
+    ~quickfixes:[
+      Quickfix.make
+      ~title:("Change to -> static::" ^ meth_name)
+      ~new_text:("static")
+      self_pos;
+    ]
     ( call_pos,
       "Cannot call "
       ^ Markdown_lite.md_codify ("self::" ^ meth_name ^ "()")

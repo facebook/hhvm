@@ -597,7 +597,7 @@ val parent_outside_class : Pos.t -> unit
 
 val parent_abstract_call : string -> Pos.t -> Pos_or_decl.t -> unit
 
-val self_abstract_call : string -> Pos.t -> Pos_or_decl.t -> unit
+val self_abstract_call : string -> Pos.t -> Pos.t -> Pos_or_decl.t -> unit
 
 val classname_abstract_call : string -> string -> Pos.t -> Pos_or_decl.t -> unit
 

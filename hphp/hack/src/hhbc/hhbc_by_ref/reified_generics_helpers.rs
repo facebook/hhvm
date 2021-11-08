@@ -55,7 +55,7 @@ pub(crate) fn has_reified_type_constraint<'a, 'arena>(
         h_iter.all(|h| {
             if let Hint_::Happly(Id(_, ref id), ref apply_hints) = *h.1 {
                 if apply_hints.is_empty() {
-                    return erased_tparams.contains(id);
+                    return id == "_" || erased_tparams.contains(id);
                 }
             }
             false

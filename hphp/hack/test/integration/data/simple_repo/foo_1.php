@@ -1,5 +1,5 @@
-<?hh //partial
+<?hh
 
-        function f() {
+        function f(): int {
             return g() + 1;
         }

@@ -441,10 +441,10 @@ class BarebonesTests(TestCase[CommonTestDriver]):
         """
         with open(os.path.join(self.test_driver.repo_dir, "foo_4.php"), "w") as f:
             f.write(
-                """<?hh //partial
+                """<?hh
 
             class FOO {}
-            function H () {}
+            function H (): void {}
             """
             )
 
@@ -541,7 +541,8 @@ class CommonTests(BarebonesTests):
 
         self.test_driver.check_cmd(
             [
-                "{root}foo_1.php:4:20,20: Unbound name: `g` (a global function) (Naming[2049])"
+                "{root}foo_1.php:4:20,20: Unbound name (typing): `g` (Typing[4107])",
+                "{root}foo_1.php:4:20,20: Unbound name: `g` (a global function) (Naming[2049])",
             ]
         )
 
@@ -556,7 +557,8 @@ class CommonTests(BarebonesTests):
         os.remove(os.path.join(self.test_driver.repo_dir, "foo_2.php"))
         self.test_driver.check_cmd(
             [
-                "{root}foo_1.php:4:20,20: Unbound name: `g` (a global function) (Naming[2049])"
+                "{root}foo_1.php:4:20,20: Unbound name: `g` (a global function) (Naming[2049])",
+                "{root}foo_1.php:4:20,20: Unbound name (typing): `g` (Typing[4107])",
             ]
         )
 
@@ -791,7 +793,7 @@ class CommonTests(BarebonesTests):
         self.test_driver.start_hh_server()
 
         self.test_driver.check_cmd_and_json_cmd(
-            ["some_long_function_name (function(): _)"],
+            ["some_long_function_name (function(): void)"],
             [
                 # test the --json output because the non-json one doesn't contain
                 # the filename, and we are especially interested in testing file
@@ -799,10 +801,10 @@ class CommonTests(BarebonesTests):
                 # the doubled curly braces are because this string gets passed
                 # through format()
                 '[{{"name":"some_long_function_name",'
-                '"type":"(function(): _)",'
+                '"type":"(function(): void)",'
                 '"pos":{{"filename":"{root}foo_3.php",'
                 '"line":9,"char_start":18,"char_end":40}},'
-                '"func_details":{{"min_arity":0,"return_type":"_","params":[]}},'
+                '"func_details":{{"min_arity":0,"return_type":"void","params":[]}},'
                 '"expected_ty":false}}]'
             ],
             options=["--auto-complete"],
@@ -942,7 +944,7 @@ class CommonTests(BarebonesTests):
                 "   id: method::ClassToBeIdentified::methodToBeIdentified",
                 '   position: File "{root}foo_5.php", line 4, characters 26-45:',
                 '   span: File "{root}foo_5.php", line 4, character 3 - line 4,'
-                " character 50:",
+                " character 56:",
                 "   modifiers: public static ",
                 "   params:",
                 "",
@@ -954,7 +956,7 @@ class CommonTests(BarebonesTests):
                 '"char_start":45,"char_end":64}},"definition_pos":'
                 '{{"filename":"{root}foo_5.php","line":4,"char_start":26,'
                 '"char_end":45}},"definition_span":{{"filename":"{root}foo_5.php",'
-                '"line_start":4,"char_start":3,"line_end":4,"char_end":50}},'
+                '"line_start":4,"char_start":3,"line_end":4,"char_end":56}},'
                 '"definition_id":'
                 '"method::ClassToBeIdentified::methodToBeIdentified"}}]'
             ],
@@ -1015,20 +1017,20 @@ class CommonTests(BarebonesTests):
         """
         with open(os.path.join(self.test_driver.repo_dir, "foo_4.php"), "w") as f:
             f.write(
-                """<?hh //partial
+                """<?hh
 
             class Foo { // also declared in foo_3.php, which setUp copies from the template repo "integration/data/simple_repo"
-                public static $x;
+                public static ?int $x;
             }
             """
             )
         with open(os.path.join(self.test_driver.repo_dir, "foo_5.php"), "w") as f:
             f.write(
-                """<?hh //partial
+                """<?hh
 
             class Bar extends Foo {}
 
-            function main(Bar $a) {
+            function main(Bar $a): ?int {
                 return $a::$y;
             }
             """
@@ -1053,10 +1055,10 @@ class CommonTests(BarebonesTests):
 
         with open(os.path.join(self.test_driver.repo_dir, "foo_4.php"), "w") as f:
             f.write(
-                """<?hh //partial
+                """<?hh
 
             class Foo {
-                public static $y;
+                public static ?int $y;
             }
             """
             )
@@ -1066,15 +1068,15 @@ class CommonTests(BarebonesTests):
     def test_refactor_methods(self) -> None:
         with open(os.path.join(self.test_driver.repo_dir, "foo_4.php"), "w") as f:
             f.write(
-                """<?hh //partial
+                """<?hh
 
             class Bar extends Foo {
-                public function f() {}
-                public function g() {}
+                public function f(): void {}
+                public function g(): void {}
             }
 
             class Baz extends Bar {
-                public function g() {
+                public function g(): void {
                     $this->f();
                 }
             }
@@ -1086,9 +1088,9 @@ class CommonTests(BarebonesTests):
             ["Rewrote 1 file."],
             [
                 '[{{"filename":"{root}foo_4.php","patches":[{{'
-                '"char_start":84,"char_end":85,"line":4,"col_start":33,'
+                '"char_start":74,"char_end":75,"line":4,"col_start":33,'
                 '"col_end":33,"patch_type":"replace","replacement":"wat"}},'
-                '{{"char_start":246,"char_end":247,"line":10,"col_start":28,'
+                '{{"char_start":254,"char_end":255,"line":10,"col_start":28,'
                 '"col_end":28,"patch_type":"replace","replacement":"wat"}}]}}]'
             ],
             options=["--refactor", "Method", "Bar::f", "Bar::wat"],
@@ -1097,10 +1099,10 @@ class CommonTests(BarebonesTests):
             ["Rewrote 1 file."],
             [
                 '[{{"filename":"{root}foo_4.php","patches":[{{'
-                '"char_start":125,"char_end":126,"line":5,"col_start":33,'
+                '"char_start":121,"char_end":122,"line":5,"col_start":33,'
                 '"col_end":33,"patch_type":"replace",'
-                '"replacement":"overrideMe"}},{{"char_start":215,'
-                '"char_end":216,"line":9,"col_start":33,"col_end":33,'
+                '"replacement":"overrideMe"}},{{"char_start":217,'
+                '"char_end":218,"line":9,"col_start":33,"col_end":33,'
                 '"patch_type":"replace","replacement":"overrideMe"}}]}}]'
             ],
             options=["--refactor", "Method", "Bar::g", "Bar::overrideMe"],
@@ -1110,15 +1112,15 @@ class CommonTests(BarebonesTests):
             out = f.read()
             self.assertEqual(
                 out,
-                """<?hh //partial
+                """<?hh
 
             class Bar extends Foo {
-                public function wat() {}
-                public function overrideMe() {}
+                public function wat(): void {}
+                public function overrideMe(): void {}
             }
 
             class Baz extends Bar {
-                public function overrideMe() {
+                public function overrideMe(): void {
                     $this->wat();
                 }
             }
@@ -1128,17 +1130,17 @@ class CommonTests(BarebonesTests):
     def test_refactor_classes(self) -> None:
         with open(os.path.join(self.test_driver.repo_dir, "foo_4.php"), "w") as f:
             f.write(
-                """<?hh //partial
+                """<?hh
 
             class Bar extends Foo {
                 const int FOO = 42;
 
                 private static int $val = 0;
 
-                public function f() {}
-                public function g() {}
-                public static function h() {}
-                public static function i() {
+                public function f(): void {}
+                public function g(): void {}
+                public static function h(): void {}
+                public static function i(): void {
                     self::h();
                     self::$val = 1;
                     static::$val = 2;
@@ -1147,7 +1149,7 @@ class CommonTests(BarebonesTests):
             }
 
             class Baz extends Bar {
-                public function g() {
+                public function g(): void {
                     $this->f();
                     parent::g();
                 }
@@ -1160,12 +1162,12 @@ class CommonTests(BarebonesTests):
             ["Rewrote 2 files."],
             [
                 '[{{"filename":"{root}foo_4.php","patches":[{{'
-                '"char_start":46,"char_end":49,"line":3,"col_start":31,'
+                '"char_start":36,"char_end":39,"line":3,"col_start":31,'
                 '"col_end":33,"patch_type":"replace","replacement":"Qux"}}]}},'
                 '{{"filename":"{root}foo_3.php","patches":[{{'
-                '"char_start":96,"char_end":99,"line":7,"col_start":15,'
+                '"char_start":86,"char_end":89,"line":7,"col_start":15,'
                 '"col_end":17,"patch_type":"replace","replacement":"Qux"}},'
-                '{{"char_start":165,"char_end":168,"line":10,"col_start":17,'
+                '{{"char_start":161,"char_end":164,"line":10,"col_start":17,'
                 '"col_end":19,"patch_type":"replace","replacement":"Qux"}}]'
                 "}}]"
             ],
@@ -1175,9 +1177,9 @@ class CommonTests(BarebonesTests):
             ["Rewrote 1 file."],
             [
                 '[{{"filename":"{root}foo_4.php","patches":[{{'
-                '"char_start":34,"char_end":37,"line":3,"col_start":19,'
+                '"char_start":24,"char_end":27,"line":3,"col_start":19,'
                 '"col_end":21,"patch_type":"replace","replacement":"Quux"}},'
-                '{{"char_start":508,"char_end":511,"line":19,"col_start":31,'
+                '{{"char_start":522,"char_end":525,"line":19,"col_start":31,'
                 '"col_end":33,"patch_type":"replace","replacement":"Quux"}}]}}]'
             ],
             options=["--refactor", "Class", "Bar", "Quux"],
@@ -1187,17 +1189,17 @@ class CommonTests(BarebonesTests):
             out = f.read()
             self.assertEqual(
                 out,
-                """<?hh //partial
+                """<?hh
 
             class Quux extends Qux {
                 const int FOO = 42;
 
                 private static int $val = 0;
 
-                public function f() {}
-                public function g() {}
-                public static function h() {}
-                public static function i() {
+                public function f(): void {}
+                public function g(): void {}
+                public static function h(): void {}
+                public static function i(): void {
                     self::h();
                     self::$val = 1;
                     static::$val = 2;
@@ -1206,7 +1208,7 @@ class CommonTests(BarebonesTests):
             }
 
             class Baz extends Quux {
-                public function g() {
+                public function g(): void {
                     $this->f();
                     parent::g();
                 }
@@ -1218,7 +1220,7 @@ class CommonTests(BarebonesTests):
             out = f.read()
             self.assertEqual(
                 out,
-                """<?hh //partial
+                """<?hh
 
         function h(): string {
             return "a";
@@ -1226,7 +1228,7 @@ class CommonTests(BarebonesTests):
 
         class Qux {}
 
-        function some_long_function_name() {
+        function some_long_function_name(): void {
             new Qux();
             h();
         }
@@ -1236,14 +1238,14 @@ class CommonTests(BarebonesTests):
     def test_refactor_functions(self) -> None:
         with open(os.path.join(self.test_driver.repo_dir, "foo_4.php"), "w") as f:
             f.write(
-                """<?hh //partial
+                """<?hh
 
-            function wow() {
+            function wow(): int {
                 wat();
                 return f();
             }
 
-            function wat() {}
+            function wat(): void {}
             """
             )
         self.test_driver.start_hh_server(changed_files=["foo_4.php"])
@@ -1252,9 +1254,9 @@ class CommonTests(BarebonesTests):
             ["Rewrote 1 file."],
             [
                 '[{{"filename":"{root}foo_4.php","patches":[{{'
-                '"char_start":132,"char_end":135,"line":8,"col_start":22,'
+                '"char_start":127,"char_end":130,"line":8,"col_start":22,'
                 '"col_end":24,"patch_type":"replace","replacement":"woah"}},'
-                '{{"char_start":61,"char_end":64,"line":4,"col_start":17,'
+                '{{"char_start":56,"char_end":59,"line":4,"col_start":17,'
                 '"col_end":19,"patch_type":"replace","replacement":"woah"}}]'
                 "}}]"
             ],
@@ -1264,10 +1266,10 @@ class CommonTests(BarebonesTests):
             ["Rewrote 2 files."],
             [
                 '[{{"filename":"{root}foo_4.php","patches":[{{'
-                '"char_start":92,"char_end":93,"line":5,"col_start":24,'
+                '"char_start":87,"char_end":88,"line":5,"col_start":24,'
                 '"col_end":24,"patch_type":"replace","replacement":"fff"}}]}},'
                 '{{"filename":"{root}foo_1.php","patches":[{{'
-                '"char_start":33,"char_end":34,"line":3,"col_start":18,'
+                '"char_start":23,"char_end":24,"line":3,"col_start":18,'
                 '"col_end":18,"patch_type":"replace","replacement":"fff"}}]'
                 "}}]"
             ],
@@ -1278,14 +1280,14 @@ class CommonTests(BarebonesTests):
             out = f.read()
             self.assertEqual(
                 out,
-                """<?hh //partial
+                """<?hh
 
-            function wow() {
+            function wow(): int {
                 woah();
                 return fff();
             }
 
-            function woah() {}
+            function woah(): void {}
             """,
             )
 
@@ -1293,9 +1295,9 @@ class CommonTests(BarebonesTests):
             out = f.read()
             self.assertEqual(
                 out,
-                """<?hh //partial
+                """<?hh
 
-        function fff() {
+        function fff(): int {
             return g() + 1;
         }
 """,
@@ -1304,7 +1306,7 @@ class CommonTests(BarebonesTests):
     def test_refactor_typedefs(self) -> None:
         with open(os.path.join(self.test_driver.repo_dir, "foo_4.php"), "w") as f:
             f.write(
-                """<?hh //partial
+                """<?hh
 
             newtype NewType = int;
             type Type = int;
@@ -1322,9 +1324,9 @@ class CommonTests(BarebonesTests):
             ["Rewrote 1 file."],
             [
                 '[{{"filename":"{root}foo_4.php","patches":[{{'
-                '"char_start":36,"char_end":43,"line":3,"col_start":21,'
+                '"char_start":26,"char_end":33,"line":3,"col_start":21,'
                 '"col_end":27,"patch_type":"replace","replacement":"NewTypeX"}},'
-                '{{"char_start":158,"char_end":165,"line":7,"col_start":50,'
+                '{{"char_start":148,"char_end":155,"line":7,"col_start":50,'
                 '"col_end":56,"patch_type":"replace","replacement":"NewTypeX"}}]'
                 "}}]"
             ],
@@ -1335,9 +1337,9 @@ class CommonTests(BarebonesTests):
             ["Rewrote 1 file."],
             [
                 '[{{"filename":"{root}foo_4.php","patches":[{{'
-                '"char_start":69,"char_end":73,"line":4,"col_start":18,'
+                '"char_start":59,"char_end":63,"line":4,"col_start":18,'
                 '"col_end":21,"patch_type":"replace","replacement":"TypeX"}},'
-                '{{"char_start":149,"char_end":153,"line":7,"col_start":40,'
+                '{{"char_start":139,"char_end":143,"line":7,"col_start":40,'
                 '"col_end":43,"patch_type":"replace","replacement":"TypeX"}}]'
                 "}}]"
             ],
@@ -1348,7 +1350,7 @@ class CommonTests(BarebonesTests):
             out = f.read()
             self.assertEqual(
                 out,
-                """<?hh //partial
+                """<?hh
 
             newtype NewTypeX = int;
             type TypeX = int;
@@ -1371,9 +1373,9 @@ class CommonTests(BarebonesTests):
 
         with open(os.path.join(self.test_driver.repo_dir, "auto_ns_2.php"), "w") as f:
             f.write(
-                """<?hh //partial
+                """<?hh
 
-            function haha() {
+            function haha(): int {
                 Herp\\f();
                 return 1;
             }

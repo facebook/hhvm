@@ -1,9 +1,9 @@
-<?hh //partial
+<?hh
 
 function test_otf(mixed ...$_): void {
 }
 
-function otf_1() {
+function otf_1(): void {
   test_otf(
     '1234567890',
     '1234567890',
@@ -11,6 +11,6 @@ function otf_1() {
 }
 
 
-{}     // 12: Format on bracket-matching "{}"
 
-function otf(){}      // 13: Format on "}"
+
+function otf(): void {}      // 13: Format on "}"

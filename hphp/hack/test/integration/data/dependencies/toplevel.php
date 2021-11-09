@@ -84,7 +84,7 @@ class WithRecursiveMethods {
 }
 
 function with_mapped_namespace(): void {
-  PHP\ini_set('foo', 'bar');
+  PHP\ini_set('foo', 42);
 }
 
 function with_built_in_constant(): int {

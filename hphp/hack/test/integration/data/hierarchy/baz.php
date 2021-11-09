@@ -1,5 +1,5 @@
-<?hh //partial
+<?hh
 
 class Baz extends Bar {
-  public function g() {}
+  public function g(): void {}
 }

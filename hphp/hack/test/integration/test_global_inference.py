@@ -38,7 +38,16 @@ class TestPushOptionOutGlobalInference(TestCase[GlobalInferenceDriver]):
 
     def test(self) -> None:
         self.test_driver.start_hh_server(
-            args=["--config", "global_inference=true", "--config", "timeout=20"]
+            args=[
+                "--config",
+                "global_inference=true",
+                "--config",
+                "timeout=20",
+                "--config",
+                "allowed_fixme_codes_strict=4030",
+                "--config",
+                "allowed_decl_fixme_codes=4030",
+            ]
         )
         self.test_driver.check_cmd(["No errors!"])
 

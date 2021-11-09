@@ -105,20 +105,20 @@ mergedriver = python:scripts/mergedriver.py
         self.check_call(cmd)
 
     foo_1_start = """\
-<?hh // partial
-function f() {
+<?hh
+function f(): int {
     return 1;
 }
 """
 
     foo_1_first_append = r"""
-function returns_int() {
+function returns_int(): int {
     return 5;
 }
 """
 
     foo_1_second_append = r"""
-function returns_string() {
+function returns_string(): string {
     return "hello";
 }
 """

@@ -1,4 +1,4 @@
-<?hh //partial
-function f() {
+<?hh
+function f(): int {
     return g() + 1;
 }

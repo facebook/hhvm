@@ -1,10 +1,10 @@
 //// partial.php
-<?hh // partial
+<?hh
 
 function with_default_and_anonymous_variadic(
   float $x,
   ?string $y = \extract_standalone_make_default(),
-  ...
+  mixed ...$args
 ): void {
   throw new \Exception();
 }

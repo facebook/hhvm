@@ -6,6 +6,6 @@ newtype M as \N = nothing;
 function with_newtype_with_newtype_bound(M $_): void {}
 
 //// partial.php
-<?hh // partial
+<?hh
 
 newtype N as arraykey = int;

@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 
 
 final class :xhp:helloworld implements XHPChild

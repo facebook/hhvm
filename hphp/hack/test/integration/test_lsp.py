@@ -339,7 +339,7 @@ class TestLsp(TestCase[LspTestDriver]):
         # We want the path to the builtins directory. This is best we can do.
         (output, err, retcode) = self.test_driver.run_check(
             options=["--identify-function", "2:21", "--json"],
-            stdin="<?hh // partial\nfunction f():void {PHP_EOL;}\n",
+            stdin="<?hh\nfunction f():void {PHP_EOL;}\n",
         )
         if retcode == 7:
             self.skipTest(
@@ -4558,7 +4558,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 result=[
                     {
                         "range": {
-                            "start": {"line": 5, "character": 17},
+                            "start": {"line": 5, "character": 23},
                             "end": {"line": 9, "character": 58},
                         },
                         "newText": "{\n  test_otf(\n"
@@ -4576,26 +4576,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 method="textDocument/onTypeFormatting",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 13, "character": 1},
-                    "ch": "}",
-                    "options": {"tabSize": 2, "insertSpaces": True},
-                },
-                result=[
-                    {
-                        "range": {
-                            "start": {"line": 13, "character": 0},
-                            "end": {"line": 13, "character": 1},
-                        },
-                        "newText": "{",
-                    }
-                ],
-            )
-            .request(
-                line=line(),
-                method="textDocument/onTypeFormatting",
-                params={
-                    "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 15, "character": 16},
+                    "position": {"line": 15, "character": 23},
                     "ch": "}",
                     "options": {"tabSize": 2, "insertSpaces": True},
                 },
@@ -4603,9 +4584,9 @@ class TestLsp(TestCase[LspTestDriver]):
                     {
                         "range": {
                             "start": {"line": 15, "character": 0},
-                            "end": {"line": 15, "character": 16},
+                            "end": {"line": 15, "character": 23},
                         },
-                        "newText": "function otf() {}",
+                        "newText": "function otf(): void {}",
                     }
                 ],
             )
@@ -6383,27 +6364,8 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 method="textDocument/typeCoverage",
                 params={"textDocument": {"uri": "${php_file_uri}"}},
                 result={
-                    "coveredPercent": 0,
-                    "uncoveredRanges": [
-                        {
-                            "range": {
-                                "start": {"line": 3, "character": 12},
-                                "end": {"line": 3, "character": 17},
-                            }
-                        },
-                        {
-                            "range": {
-                                "start": {"line": 3, "character": 8},
-                                "end": {"line": 3, "character": 10},
-                            }
-                        },
-                        {
-                            "range": {
-                                "start": {"line": 3, "character": 2},
-                                "end": {"line": 3, "character": 5},
-                            }
-                        },
-                    ],
+                    "coveredPercent": 100,
+                    "uncoveredRanges": [],
                     "defaultMessage": "Un-type checked code. Consider adding type annotations.",
                 },
                 powered_by="serverless_ide",

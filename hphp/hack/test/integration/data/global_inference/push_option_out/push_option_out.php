@@ -1,6 +1,7 @@
-<?hh //partial
+<?hh
 
 abstract class WebAsyncPluginController {
+  /* HH_FIXME[4030] */
   protected function getFallbackURL() {
     throw new Exception();
   }

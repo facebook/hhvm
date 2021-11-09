@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
 function expect_darray(darray $_): void {}
@@ -9,7 +9,7 @@ function with_omitted_generics(): void {
 
 function respects_newtype_abstraction (Point $p) : void {}
 
-function with_default_and_anonymous_variadic(float $x, ?string $y = null, ...): void {}
+function with_default_and_anonymous_variadic(float $x, ?string $y = null, mixed ...$args): void {}
 
 function call_with_default_and_anonymous_variadic(string $s): void {
   with_default_and_anonymous_variadic(3.14);

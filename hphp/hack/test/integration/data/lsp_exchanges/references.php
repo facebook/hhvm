@@ -1,7 +1,7 @@
-<?hh //partial
+<?hh
 
 class C {
-  private function ref_test_1 ($x) {  // Should match
+  private function ref_test_1 (int $x): void {  // Should match
     $y = $x;           // Should not match
     //static $x = 123;
     $z = $x;           // Request ID 11: Looking for this $x // Should match
@@ -16,7 +16,7 @@ interface IRefTestRequireExtends {
   require extends C;
 }
 
-function ref_test_require_extends(IRefTestRequireExtends $req_extends_test) {
+function ref_test_require_extends(IRefTestRequireExtends $req_extends_test): void {
   $req_extends_test->ref_test_method(); // Request ID 12
 }
 

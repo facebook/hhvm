@@ -1,5 +1,5 @@
-<?hh //partial
+<?hh
 
 class ClassToBeIdentified {
-  public static function methodToBeIdentified() {}
+  public static function methodToBeIdentified(): void {}
 }

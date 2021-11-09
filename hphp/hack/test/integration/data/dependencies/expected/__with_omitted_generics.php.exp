@@ -1,5 +1,5 @@
 //// partial.php
-<?hh // partial
+<?hh
 
 function expect_darray(
   \HH\dict<EXTRACT_STANDALONE_ANY, EXTRACT_STANDALONE_ANY> $_,

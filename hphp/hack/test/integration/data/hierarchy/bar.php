@@ -1,5 +1,5 @@
-<?hh //partial
+<?hh
 
 class Bar extends Foo {
-  public function f() {}
+  public function f(): void {}
 }

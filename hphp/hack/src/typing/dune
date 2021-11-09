@@ -157,6 +157,7 @@
     typing_inheritance
     typing_lenv
     typing_memoize
+    typing_param
     typing_regex
     typing_requirements
     typing_sequencing

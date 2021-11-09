@@ -19,7 +19,6 @@ open Aast
 open Typing_defs
 open Typing_env_types
 open Typing_helpers
-open Utils
 module FunUtils = Decl_fun_utils
 module Reason = Typing_reason
 module Env = Typing_env
@@ -65,115 +64,12 @@ and get_decl_method_header tcopt cls method_id ~is_static =
   else
     None
 
-let enforce_param_not_disposable env param ty =
-  if has_accept_disposable_attribute param then
-    ()
-  else
-    let p = param.param_pos in
-    match Typing_disposable.is_disposable_type env ty with
-    | Some class_name -> Errors.invalid_disposable_hint p (strip_ns class_name)
-    | None -> ()
-
-(* In strict mode, we force you to give a type declaration on a parameter *)
-(* But the type checker is nice: it makes a suggestion :-) *)
-let check_param_has_hint env param ty is_code_error =
-  let env =
-    if is_code_error 4231 then
-      fst
-        (Typing.attributes_check_def
-           env
-           SN.AttributeKinds.parameter
-           param.param_user_attributes)
-    else
-      env
-  in
-  match hint_of_type_hint param.param_type_hint with
-  | None when param.param_is_variadic && is_code_error 4033 ->
-    Errors.expecting_type_hint_variadic param.param_pos
-  | None when is_code_error 4032 -> Errors.expecting_type_hint param.param_pos
-  | Some _ when is_code_error 4010 ->
-    (* We do not permit hints to implement IDisposable or IAsyncDisposable *)
-    enforce_param_not_disposable env param ty
-  | _ -> ()
-
-(* This function is used to determine the type of an argument.
- * When we want to type-check the body of a function, we need to
- * introduce the type of the arguments of the function in the environment
- * Let's take an example, we want to check the code of foo:
- *
- * function foo(int $x): int {
- *   // CALL TO make_param_type on (int $x)
- *   // Now we know that the type of $x is int
- *
- *   return $x; // in the environment $x is an int, the code is correct
- * }
- *
- * When we localize, we want to resolve to "static" or "$this" depending on
- * the context. Even though we are passing in CIstatic, resolve_with_class_id
- * is smart enough to know what to do. Why do this? Consider the following
- *
- * abstract class C {
- *   abstract const type T;
- *
- *   private this::T $val;
- *
- *   final public function __construct(this::T $x) {
- *     $this->val = $x;
- *   }
- *
- *   public static function create(this::T $x): this {
- *     return new static($x);
- *   }
- * }
- *
- * class D extends C { const type T = int; }
- *
- * In __construct() we want to be able to assign $x to $this->val. The type of
- * $this->val will expand to '$this::T', so we need $x to also be '$this::T'.
- * We can do this soundly because when we construct a new class such as,
- * 'new D(0)' we can determine the late static bound type (D) and resolve
- * 'this::T' to 'D::T' which is int.
- *
- * A similar line of reasoning is applied for the static method create.
- *)
-let make_param_local_ty env decl_hint param =
-  let r = Reason.Rwitness param.param_pos in
-  let (env, ty) =
-    match decl_hint with
-    | None -> (env, mk (r, TUtils.tany env))
-    | Some ty ->
-      let { et_type = ty; et_enforced } =
-        Typing_enforceability.compute_enforced_and_pessimize_ty
-          ~explicitly_untrusted:param.param_is_variadic
-          env
-          ty
-      in
-      (* If a parameter hint has the form ~t, where t is enforced,
-       * then we know that the parameter has type t after enforcement *)
-      let ty =
-        match (get_node ty, et_enforced) with
-        | (Tlike ty, Enforced) -> ty
-        | _ -> ty
-      in
-      Phase.localize_no_subst env ~ignore_errors:false ty
-  in
-  let ty =
-    match get_node ty with
-    | t when param.param_is_variadic ->
-      (* when checking the body of a function with a variadic
-       * argument, "f(C ...$args)", $args is a varray<C> *)
-      let r = Reason.Rvar_param param.param_pos in
-      let arr_values = mk (r, t) in
-      MakeType.varray r arr_values
-    | _ -> ty
-  in
-  (env, ty)
-
-let get_callable_variadicity ~partial_callback ~pos env variadicity_decl_ty =
-  function
+let get_callable_variadicity ~pos env variadicity_decl_ty = function
   | FVvariadicArg vparam ->
-    let (env, ty) = make_param_local_ty env variadicity_decl_ty vparam in
-    check_param_has_hint env vparam ty partial_callback;
+    let (env, ty) =
+      Typing_param.make_param_local_ty env variadicity_decl_ty vparam
+    in
+    Typing_param.check_param_has_hint env vparam ty;
     let (env, t_variadic) = Typing.bind_param env (ty, vparam) in
     (env, Aast.FVvariadicArg t_variadic)
   | FVellipsis p ->
@@ -281,7 +177,7 @@ let function_dynamically_callable
                    [ty; dyn_ty]
                | _ -> dyn_ty
              in
-             make_param_local_ty env (Some ty) param)
+             Typing_param.make_param_local_ty env (Some ty) param)
     in
     let params_need_immutable = Typing_coeffects.get_ctx_vars f.f_ctxs in
     let (env, _) =
@@ -319,7 +215,6 @@ let function_dynamically_callable
     let pos = fst f.f_name in
     let (env, t_variadic) =
       get_callable_variadicity
-        ~partial_callback:(Partial.should_check_error (Env.get_mode env))
         ~pos
         env
         (Some (make_dynamic @@ Pos_or_decl.of_raw_pos pos))
@@ -438,10 +333,9 @@ let fun_def ctx fd :
   let (env, param_tys) =
     List.zip_exn f.f_params params_decl_ty
     |> List.map_env env ~f:(fun env (param, hint) ->
-           make_param_local_ty env hint param)
+           Typing_param.make_param_local_ty env hint param)
   in
-  let partial_callback = Partial.should_check_error (Env.get_mode env) in
-  let check_has_hint p t = check_param_has_hint env p t partial_callback in
+  let check_has_hint p t = Typing_param.check_param_has_hint env p t in
   List.iter2_exn ~f:check_has_hint f.f_params param_tys;
   let params_need_immutable = Typing_coeffects.get_ctx_vars f.f_ctxs in
   let can_read_globals =
@@ -464,12 +358,7 @@ let fun_def ctx fd :
     List.map_env env (List.zip_exn param_tys f.f_params) ~f:bind_param_and_check
   in
   let (env, t_variadic) =
-    get_callable_variadicity
-      ~pos
-      ~partial_callback
-      env
-      variadicity_decl_ty
-      f.f_variadic
+    get_callable_variadicity ~pos env variadicity_decl_ty f.f_variadic
   in
   let env =
     set_tyvars_variance_in_callable env return_ty param_tys t_variadic
@@ -485,7 +374,8 @@ let fun_def ctx fd :
   begin
     match hint_of_type_hint f.f_ret with
     | None ->
-      if partial_callback 4030 then Errors.expecting_return_type_hint pos
+      if Partial.should_check_error (Env.get_mode env) 4030 then
+        Errors.expecting_return_type_hint pos
     | Some _ -> ()
   end;
   let (env, tparams) = List.map_env env f.f_tparams ~f:Typing.type_param in
@@ -580,7 +470,7 @@ let method_dynamically_callable
                    [ty; dyn_ty]
                | _ -> dyn_ty
              in
-             make_param_local_ty env (Some ty) param)
+             Typing_param.make_param_local_ty env (Some ty) param)
     in
     let params_need_immutable = Typing_coeffects.get_ctx_vars m.m_ctxs in
     let (env, _) =
@@ -618,7 +508,6 @@ let method_dynamically_callable
     let pos = fst m.m_name in
     let (env, t_variadic) =
       get_callable_variadicity
-        ~partial_callback:(Partial.should_check_error (Env.get_mode env))
         ~pos
         env
         (Some (make_dynamic @@ Pos_or_decl.of_raw_pos pos))
@@ -772,10 +661,9 @@ let method_def ~is_disposable env cls m =
   let (env, param_tys) =
     List.zip_exn m.m_params params_decl_ty
     |> List.map_env env ~f:(fun env (param, hint) ->
-           make_param_local_ty env hint param)
+           Typing_param.make_param_local_ty env hint param)
   in
-  let partial_callback = Partial.should_check_error (Env.get_mode env) in
-  let param_fn p t = check_param_has_hint env p t partial_callback in
+  let param_fn p t = Typing_param.check_param_has_hint env p t in
   List.iter2_exn ~f:param_fn m.m_params param_tys;
   Typing_memoize.check_method env m;
   let params_need_immutable = Typing_coeffects.get_ctx_vars m.m_ctxs in
@@ -799,12 +687,7 @@ let method_def ~is_disposable env cls m =
     List.map_env env (List.zip_exn param_tys m.m_params) ~f:bind_param_and_check
   in
   let (env, t_variadic) =
-    get_callable_variadicity
-      ~partial_callback
-      ~pos
-      env
-      variadicity_decl_ty
-      m.m_variadic
+    get_callable_variadicity ~pos env variadicity_decl_ty m.m_variadic
   in
   let env = set_tyvars_variance_in_callable env locl_ty param_tys t_variadic in
   let nb = m.m_body in
@@ -822,7 +705,8 @@ let method_def ~is_disposable env cls m =
     | None when String.equal (snd m.m_name) SN.Members.__construct ->
       Some (pos, Hprim Tvoid)
     | None ->
-      if partial_callback 4030 then Errors.expecting_return_type_hint pos;
+      if Partial.should_check_error (Env.get_mode env) 4030 then
+        Errors.expecting_return_type_hint pos;
       None
     | Some _ -> hint_of_type_hint m.m_ret
   in

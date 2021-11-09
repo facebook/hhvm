@@ -101,7 +101,7 @@ impl Checker {
         if let Some(_) = expr.2.as_obj_get() {
             self.add_error(
                 &top_level_expr.1,
-                syntax_error::object_property_write_in_pure_fn,
+                syntax_error::write_props_without_capability,
             );
             return;
         } else if let Some((arr, _)) = expr.2.as_array_get() {

@@ -1,1 +1,1 @@
-Fatal error: Writing to object properties in a pure function is not allowed. in %s on line 12
+Fatal error: Writing to object properties requires the capability WriteProperty, which is not provided by the context in %s on line 12

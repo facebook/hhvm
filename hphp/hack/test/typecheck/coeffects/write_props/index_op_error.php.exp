@@ -1,5 +1,5 @@
 File "index_op_error.php", line 12, characters 3-26:
-Writing to object properties in a pure function is not allowed. (Parsing[1002])
+Writing to object properties requires the capability WriteProperty, which is not provided by the context (Parsing[1002])
 File "index_op_error.php", line 12, characters 3-20:
 This object's property is being mutated (used as an lvalue)
 Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])

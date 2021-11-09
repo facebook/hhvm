@@ -1,11 +1,11 @@
 File "property_write.php", line 20, characters 3-17:
-Writing to object properties in a pure function is not allowed. (Parsing[1002])
+Writing to object properties requires the capability WriteProperty, which is not provided by the context (Parsing[1002])
 File "property_write.php", line 21, characters 3-14:
-Writing to object properties in a pure function is not allowed. (Parsing[1002])
+Writing to object properties requires the capability WriteProperty, which is not provided by the context (Parsing[1002])
 File "property_write.php", line 22, characters 3-18:
-Writing to object properties in a pure function is not allowed. (Parsing[1002])
+Writing to object properties requires the capability WriteProperty, which is not provided by the context (Parsing[1002])
 File "property_write.php", line 23, characters 3-16:
-Writing to object properties in a pure function is not allowed. (Parsing[1002])
+Writing to object properties requires the capability WriteProperty, which is not provided by the context (Parsing[1002])
 File "property_write.php", line 20, characters 3-13:
 This object's property is being mutated (used as an lvalue)
 Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])

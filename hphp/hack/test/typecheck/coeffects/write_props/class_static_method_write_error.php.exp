@@ -1,5 +1,5 @@
 File "class_static_method_write_error.php", line 10, characters 5-20:
-Writing to object properties in a pure function is not allowed. (Parsing[1002])
+Writing to object properties requires the capability WriteProperty, which is not provided by the context (Parsing[1002])
 File "class_static_method_write_error.php", line 10, characters 5-16:
 This object's property is being mutated (used as an lvalue)
 Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])

@@ -11,10 +11,10 @@ use structopt::StructOpt;
 #[derive(Debug, StructOpt)]
 #[structopt(no_version)] // don't consult CARGO_PKG_VERSION (buck doesn't set it)
 struct Options {
-    /// The directory containing this stamp is the directory to search for HHI
-    /// files.
+    /// Directory containing subdirectories which should be merged into the
+    /// final hhi directory.
     #[structopt(long, parse(from_os_str))]
-    hhi_stamp: PathBuf,
+    hhi_dir: PathBuf,
 
     /// The directory containing this stamp is the directory to search for HHIs
     /// generated from the HSL. These will be placed in the final hhi directory
@@ -25,15 +25,17 @@ struct Options {
 
 fn main() {
     let opts = Options::from_args();
-    let hhi_dir = opts.hhi_stamp.parent().unwrap();
     let hsl_dir = opts.hsl_stamp.parent().unwrap();
     let out_dir = std::env::var("OUT").unwrap(); // $OUT implicitly provided by buck
 
     let mut hhi_contents = vec![];
 
-    hhi_contents.extend(get_hhis_in_dir(hhi_dir));
+    for entry in std::fs::read_dir(&opts.hhi_dir).unwrap() {
+        let hhi_dir = entry.unwrap().path();
+        hhi_contents.extend(get_hhis_in_dir(&hhi_dir));
+    }
     hhi_contents.extend(
-        get_hhis_in_dir(hsl_dir)
+        get_hhis_in_dir(&hsl_dir)
             .map(|(path, contents)| (PathBuf::from("hsl_generated").join(path), contents)),
     );
 

@@ -322,7 +322,8 @@ let to_collection env shape_ty res return_type =
            * which would otherwise subsume any other inferred type due to covariance. *)
           (env, ty)
         | Tvar _
-        | Tshape _ ->
+        | Tshape _
+        | Tunion _ ->
           super#on_type env ty
         | _ -> (env, res)
     end

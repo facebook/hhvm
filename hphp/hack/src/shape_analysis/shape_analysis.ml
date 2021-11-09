@@ -134,10 +134,11 @@ let rec stmt (env : env) ((pos, stmt) : T.stmt) : env =
   | A.Return (Some e) ->
     expr env e
   | A.If (cond, then_bl, else_bl) ->
-    let env = expr env cond in
-    let then_env = block env then_bl in
-    let else_env = block env else_bl in
-    Env.merge then_env else_env
+    let parent_env = expr env cond in
+    let base_env = Env.reset_constraints parent_env in
+    let then_env = block base_env then_bl in
+    let else_env = block base_env else_bl in
+    Env.union parent_env then_env else_env
   | A.Noop
   | A.AssertEnv _
   | A.Markup _ ->

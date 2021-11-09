@@ -6,17 +6,36 @@
  *
  *)
 
+open Hh_prelude
 open Shape_analysis_types
 module LMap = Local_id.Map
+module Cont = Typing_continuations
 
-let init saved_env = { constraints = []; lenv = LMap.empty; saved_env }
+let init_lenv = Cont.Map.add Cont.Next LMap.empty Cont.Map.empty
+
+let init saved_env = { constraints = []; lenv = init_lenv; saved_env }
 
 let add_constraint env constraint_ =
   { env with constraints = constraint_ :: env.constraints }
 
-let get_local lid env = LMap.find_opt lid env.lenv |> Option.join
+let reset_constraints env = { env with constraints = [] }
 
-let set_local lid entity env = { env with lenv = LMap.add lid entity env.lenv }
+let get_local_in_continuation cont lid env =
+  let open Option.Monad_infix in
+  env.lenv |> Cont.Map.find_opt cont >>= LMap.find_opt lid |> Option.join
+
+let get_local = get_local_in_continuation Cont.Next
+
+let add_to_continuation cont lid entity lenv =
+  let update_cont = function
+    | None -> None
+    | Some lenv_per_cont -> Some (LMap.add lid entity lenv_per_cont)
+  in
+  Cont.Map.update cont update_cont lenv
+
+let set_local lid entity env =
+  let lenv = add_to_continuation Cont.Next lid entity env.lenv in
+  { env with lenv }
 
 let var_counter : int ref = ref 0
 
@@ -24,8 +43,8 @@ let fresh_var () : entity_ =
   var_counter := !var_counter + 1;
   Variable !var_counter
 
-let merge (env1 : env) (env2 : env) : env =
-  let merge_lenv_at_lid constraints _lid entity1_opt entity2_opt :
+let union (parent_env : env) (env1 : env) (env2 : env) : env =
+  let union_lenv_at_lid constraints _lid entity1_opt entity2_opt :
       constraint_ list * entity option =
     match (entity1_opt, entity2_opt) with
     | (Some (Some entity1), Some (Some entity2)) ->
@@ -41,16 +60,24 @@ let merge (env1 : env) (env2 : env) : env =
       ([], Some entity)
     | (None, None) -> ([], None)
   in
-  let merge_lenv (lenv1 : lenv) (lenv2 : lenv) : constraint_ list * lenv =
-    LMap.merge_env [] lenv1 lenv2 ~combine:merge_lenv_at_lid
+  let union_at_continuation constraints _ lenv_per_cont1 lenv_per_cont2 =
+    let (constraints, lenv) =
+      LMap.merge_env
+        constraints
+        lenv_per_cont1
+        lenv_per_cont2
+        ~combine:union_lenv_at_lid
+    in
+    (constraints, Some lenv)
   in
-  let (points_to_constraints, lenv) = merge_lenv env1.lenv env2.lenv in
-  (* Saved environment does not change within a callable, so we can pick either. *)
-  let saved_env = env1.saved_env in
-  (* TODO: The following is gross because it duplciates existing constraints
-     not just new ones. Either change to a set representation of constraints or
-     restructure the code so that we only combine new constraints. *)
+  let union_continuations lenv1 lenv2 =
+    Cont.Map.union_env [] lenv1 lenv2 ~combine:union_at_continuation
+  in
+  let (points_to_constraints, lenv) = union_continuations env1.lenv env2.lenv in
   let constraints =
-    points_to_constraints @ env1.constraints @ env2.constraints
+    points_to_constraints
+    @ env1.constraints
+    @ env2.constraints
+    @ parent_env.constraints
   in
-  { lenv; saved_env; constraints }
+  { parent_env with lenv; constraints }

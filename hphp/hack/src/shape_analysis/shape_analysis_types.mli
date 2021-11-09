@@ -7,6 +7,7 @@
  *)
 
 module LMap = Local_id.Map
+module KMap = Typing_continuations.Map
 
 type mode =
   | FlagTargets
@@ -54,7 +55,7 @@ type shape_result =
 
 (** Local variable environment. Its values are `entity`, i.e., `entity_
     option`, so that we can avoid pattern matching in constraint extraction. *)
-type lenv = entity LMap.t
+type lenv = entity LMap.t KMap.t
 
 type env = {
   constraints: constraint_ list;  (** Append-only set of constraints *)

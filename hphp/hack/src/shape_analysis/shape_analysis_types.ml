@@ -7,6 +7,7 @@
  *)
 
 module LMap = Local_id.Map
+module KMap = Typing_continuations.Map
 
 type mode =
   | FlagTargets
@@ -35,7 +36,7 @@ type shape_result =
   | Shape_like_dict of Pos.t * (shape_key * Typing_defs.locl_ty) list
   | Dynamically_accessed_dict of entity_
 
-type lenv = entity LMap.t
+type lenv = entity LMap.t KMap.t
 
 type env = {
   constraints: constraint_ list;

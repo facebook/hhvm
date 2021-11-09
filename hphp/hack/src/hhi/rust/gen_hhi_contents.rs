@@ -11,8 +11,7 @@ use structopt::StructOpt;
 #[derive(Debug, StructOpt)]
 #[structopt(no_version)] // don't consult CARGO_PKG_VERSION (buck doesn't set it)
 struct Options {
-    /// Directory containing subdirectories which should be merged into the
-    /// final hhi directory.
+    /// The directory containing HHI files.
     #[structopt(long, parse(from_os_str))]
     hhi_dir: PathBuf,
 
@@ -30,10 +29,7 @@ fn main() {
 
     let mut hhi_contents = vec![];
 
-    for entry in std::fs::read_dir(&opts.hhi_dir).unwrap() {
-        let hhi_dir = entry.unwrap().path();
-        hhi_contents.extend(get_hhis_in_dir(&hhi_dir));
-    }
+    hhi_contents.extend(get_hhis_in_dir(&opts.hhi_dir));
     hhi_contents.extend(
         get_hhis_in_dir(&hsl_dir)
             .map(|(path, contents)| (PathBuf::from("hsl_generated").join(path), contents)),

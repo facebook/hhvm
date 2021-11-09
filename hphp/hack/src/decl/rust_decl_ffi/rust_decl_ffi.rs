@@ -6,78 +6,94 @@
 
 use bumpalo::Bump;
 
-use direct_decl_parser::parse_decls_and_mode;
-use hh_hash::{hash, position_insensitive_hash};
+use direct_decl_parser;
 use ocamlrep::{bytes_from_ocamlrep, ptr::UnsafeOcamlPtr};
 use ocamlrep_caml_builtins::Int64;
 use ocamlrep_ocamlpool::ocaml_ffi_with_arena;
 use oxidized::relative_path::RelativePath;
-use oxidized_by_ref::{decl_parser_options::DeclParserOptions, direct_decl_parser::Decls};
+use oxidized_by_ref::{
+    decl_parser_options::DeclParserOptions,
+    direct_decl_parser::{Decl, Decls, ParsedFile},
+    file_info,
+};
+
+// NB: Must keep in sync with OCaml type `Direct_decl_parser.parsed_file_with_hashes`
+#[derive(ocamlrep_derive::ToOcamlRep)]
+struct ParsedFileWithHashes<'a> {
+    pub mode: Option<file_info::Mode>,
+    pub hash: Int64,
+    pub decls: Vec<(&'a str, Decl<'a>, Int64)>,
+}
 
 ocaml_ffi_with_arena! {
-    fn hh_parse_decls_and_mode_ffi<'a>(
+    fn hh_parse_decls_ffi<'a>(
         arena: &'a Bump,
         opts: &'a DeclParserOptions<'a>,
         filename: &'a oxidized_by_ref::relative_path::RelativePath<'a>,
         text: UnsafeOcamlPtr,
-        include_file_decl_hash: bool,
-        include_symbol_decl_hashes: bool,
-    ) -> UnsafeOcamlPtr {
-        // SAFETY: the OCaml garbage collector must not run as long as
-        // text_value exists. We don't call into OCaml here or anywhere in
-        // the direct decl parser smart constructors, so it won't.
-        let text_value = unsafe { text.as_value() };
+    ) -> ParsedFile<'a> {
+        // SAFETY: Borrow the contents of the source file from the value on the
+        // OCaml heap rather than copying it over. This is safe as long as we
+        // don't call into OCaml within this function scope.
+        let text_value: ocamlrep::Value<'a> = unsafe { text.as_value() };
         let text = bytes_from_ocamlrep(text_value).expect("expected string");
+        parse_decls(arena, opts, filename.to_oxidized(), text)
+    }
 
-        match stack_limit::with_elastic_stack(|stack_limit| {
-            let filename = RelativePath::make(filename.prefix(), filename.path().to_owned());
-
-            let arena = &Bump::new();
-            let (decls, mode) =
-                parse_decls_and_mode(opts, filename, text, arena, Some(stack_limit));
-
-                let symbol_decl_hashes = if include_symbol_decl_hashes {
-                    Some(
-                        decls
-                            .iter()
-                            .map(|x| Int64(hash(&x) as i64))
-                            .collect::<Vec<Int64>>(),
-                    )
-                } else {
-                    None
-                };
-            let file_decl_hash = if include_file_decl_hash {
-                Some(Int64(position_insensitive_hash(&decls) as i64))
-            } else {
-                None
-            };
-
-            // SAFETY: We immediately hand this pointer to the OCaml runtime.
-            // The use of to_ocaml is necessary here because we cannot return
-            // `decls`, since it borrows `arena`, which is destroyed at the end of
-            // this function scope. Instead, we convert the decls to OCaml
-            // ourselves, and return the pointer (the converted OCaml value does not
-            // borrow the arena).
-            unsafe {
-                UnsafeOcamlPtr::new(ocamlrep_ocamlpool::to_ocaml(&(
-                    decls,
-                    mode,
-                    file_decl_hash,
-                    symbol_decl_hashes,
-                )))
-            }
-        }) {
-            Ok(ocaml_result) => ocaml_result,
-            Err(failure) => {
-                panic!(
-                    "Rust decl parser FFI exceeded maximum allowed stack of {} KiB",
-                    failure.max_stack_size_tried / stack_limit::KI
-                );
-            }
-        }
+    fn hh_parse_and_hash_decls_ffi<'a>(
+        arena: &'a Bump,
+        opts: &'a DeclParserOptions<'a>,
+        filename: &'a oxidized_by_ref::relative_path::RelativePath<'a>,
+        text: UnsafeOcamlPtr,
+    ) -> ParsedFileWithHashes<'a> {
+        // SAFETY: Borrow the contents of the source file from the value on the
+        // OCaml heap rather than copying it over. This is safe as long as we
+        // don't call into OCaml within this function scope.
+        let text_value: ocamlrep::Value<'a> = unsafe { text.as_value() };
+        let text = bytes_from_ocamlrep(text_value).expect("expected string");
+        let parsed_file = parse_decls(arena, opts, filename.to_oxidized(), text);
+        hash_decls(parsed_file)
     }
 
     fn decls_hash<'a>(arena: &'a Bump, decls: Decls<'a>) -> Int64 {
-        Int64(position_insensitive_hash(&decls) as i64)
+        Int64(hh_hash::position_insensitive_hash(&decls) as i64)
+    }
+}
+
+fn parse_decls<'a>(
+    arena: &'a Bump,
+    opts: &'a DeclParserOptions<'a>,
+    filename: RelativePath,
+    text: &'a [u8],
+) -> ParsedFile<'a> {
+    stack_limit::with_elastic_stack(|stack_limit| {
+        direct_decl_parser::parse_decls_and_mode(
+            opts,
+            filename.clone(),
+            text,
+            arena,
+            Some(stack_limit),
+        )
+    })
+    .unwrap_or_else(|failure| {
+        panic!(
+            "Rust decl parser FFI exceeded maximum allowed stack of {} KiB",
+            failure.max_stack_size_tried / stack_limit::KI
+        );
+    })
+}
+
+fn hash_decls<'a>(parsed_file: ParsedFile<'a>) -> ParsedFileWithHashes<'a> {
+    let file_decls_hash = Int64(hh_hash::position_insensitive_hash(&parsed_file.decls) as i64);
+    let decls = Vec::from_iter(
+        parsed_file
+            .decls
+            .into_iter()
+            .map(|(name, decl)| (name, decl, Int64(hh_hash::hash(&decl) as i64))),
+    );
+    ParsedFileWithHashes {
+        mode: parsed_file.mode,
+        hash: file_decls_hash,
+        decls,
     }
 }

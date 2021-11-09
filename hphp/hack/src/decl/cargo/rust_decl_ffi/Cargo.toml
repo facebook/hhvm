@@ -16,6 +16,7 @@ direct_decl_parser = { path = "../../../parser/api/cargo/direct_decl_parser" }
 hh_hash = { path = "../../../utils/hh_hash" }
 ocamlrep = { path = "../../../ocamlrep" }
 ocamlrep_caml_builtins = { path = "../../../utils/ocamlrep_caml_builtins" }
+ocamlrep_derive = { path = "../../../ocamlrep_derive" }
 ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
 oxidized = { path = "../../../oxidized" }
 oxidized_by_ref = { path = "../../../oxidized_by_ref" }

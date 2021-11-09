@@ -12,10 +12,32 @@ use ocamlrep::slab::OwnedSlab;
 use ocamlrep_derive::{FromOcamlRepIn, ToOcamlRep};
 use oxidized::file_info::NameType;
 
-use crate::{shallow_decl_defs, typing_defs};
+use crate::{file_info, shallow_decl_defs, typing_defs};
 
 pub use shallow_decl_defs::Decl;
 
+// NB: Must keep in sync with OCaml type Direct_decl_parser.parsed_file
+#[derive(
+    Copy,
+    Clone,
+    Deserialize,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+pub struct ParsedFile<'a> {
+    pub mode: Option<file_info::Mode>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub decls: Decls<'a>,
+}
+
+// NB: Must keep in sync with OCaml type Direct_decl_parser.decls
 #[derive(
     Copy,
     Clone,
@@ -34,6 +56,8 @@ pub struct Decls<'a>(
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub  List<'a, (&'a str, Decl<'a>)>,
 );
+
+arena_deserializer::impl_deserialize_in_arena!(Decls<'arena>);
 
 impl<'a> TrivialDrop for Decls<'a> {}
 

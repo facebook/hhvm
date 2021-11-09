@@ -8,6 +8,17 @@
 
 type decls = (string * Shallow_decl_defs.decl) list [@@deriving show]
 
+type parsed_file = {
+  pf_mode: FileInfo.mode option;
+  pf_decls: decls;
+}
+
+type parsed_file_with_hashes = {
+  pfh_mode: FileInfo.mode option;
+  pfh_hash: Int64.t;
+  pfh_decls: (string * Shallow_decl_defs.decl * Int64.t) list;
+}
+
 val parse_decls_ffi : DeclParserOptions.t -> Relative_path.t -> string -> decls
 
 val decls_hash : decls -> Int64.t

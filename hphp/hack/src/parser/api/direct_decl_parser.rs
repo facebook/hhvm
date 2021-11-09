@@ -19,7 +19,10 @@ use parser_core_types::{
 };
 use stack_limit::StackLimit;
 
-pub use oxidized_by_ref::{decl_parser_options::DeclParserOptions, direct_decl_parser::Decls};
+pub use oxidized_by_ref::{
+    decl_parser_options::DeclParserOptions,
+    direct_decl_parser::{Decls, ParsedFile},
+};
 
 /// Parse decls for typechecking.
 /// - References the source text to avoid spending time or space copying
@@ -30,8 +33,8 @@ pub fn parse_decls_and_mode<'a>(
     filename: RelativePath,
     text: &'a [u8],
     arena: &'a Bump,
-    stack_limit: Option<&'a StackLimit>,
-) -> (Decls<'a>, Option<file_info::Mode>) {
+    stack_limit: Option<&StackLimit>,
+) -> ParsedFile<'a> {
     let text = SourceText::make(RcOc::new(filename), text);
     let (_, _errors, state, mode) = parse_script_with_text_allocator(
         opts,
@@ -42,7 +45,10 @@ pub fn parse_decls_and_mode<'a>(
         true,  // omit_user_attributes_irrelevant_to_typechecking
         false, // simplify_naming_for_facts
     );
-    (state.decls, mode)
+    ParsedFile {
+        mode,
+        decls: state.decls,
+    }
 }
 
 /// Parse decls for typechecking.
@@ -56,7 +62,7 @@ pub fn parse_decls<'a>(
     arena: &'a Bump,
     stack_limit: Option<&'a StackLimit>,
 ) -> Decls<'a> {
-    parse_decls_and_mode(opts, filename, text, arena, stack_limit).0
+    parse_decls_and_mode(opts, filename, text, arena, stack_limit).decls
 }
 
 /// Parse decls for decls in compilation.
@@ -87,7 +93,7 @@ fn parse_script_with_text_allocator<'a, 'text, S: SourceTextAllocator<'text, 'a>
     opts: &'a DeclParserOptions<'a>,
     source: &SourceText<'text>,
     arena: &'a Bump,
-    stack_limit: Option<&'a StackLimit>,
+    stack_limit: Option<&StackLimit>,
     source_text_allocator: S,
     omit_user_attributes_irrelevant_to_typechecking: bool,
     simplify_naming_for_facts: bool,

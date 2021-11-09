@@ -3190,6 +3190,7 @@ dependencies = [
  "hh_hash",
  "ocamlrep",
  "ocamlrep_caml_builtins",
+ "ocamlrep_derive",
  "ocamlrep_ocamlpool",
  "oxidized",
  "oxidized_by_ref",

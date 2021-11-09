@@ -22,6 +22,7 @@ use stack_limit::StackLimit;
 pub use oxidized_by_ref::{
     decl_parser_options::DeclParserOptions,
     direct_decl_parser::{Decls, ParsedFile},
+    typing_defs::UserAttribute,
 };
 
 /// Parse decls for typechecking.
@@ -36,7 +37,7 @@ pub fn parse_decls<'a>(
     stack_limit: Option<&StackLimit>,
 ) -> ParsedFile<'a> {
     let text = SourceText::make(RcOc::new(filename), text);
-    let (_, _errors, state, mode) = parse_script_with_text_allocator(
+    let (_, errors, state, mode) = parse_script_with_text_allocator(
         opts,
         &text,
         arena,
@@ -47,7 +48,13 @@ pub fn parse_decls<'a>(
     );
     ParsedFile {
         mode,
+        file_attributes: collect_file_attributes(
+            arena,
+            state.file_attributes.iter().copied(),
+            state.file_attributes.len(),
+        ),
         decls: state.decls,
+        has_first_pass_parse_errors: !errors.is_empty(),
     }
 }
 
@@ -61,9 +68,9 @@ pub fn parse_decls_without_reference_text<'a, 'text>(
     text: &'text [u8],
     arena: &'a Bump,
     stack_limit: Option<&'a StackLimit>,
-) -> (Decls<'a>, bool) {
+) -> ParsedFile<'a> {
     let text = SourceText::make(RcOc::new(filename), text);
-    let (_, errors, state, _mode) = parse_script_with_text_allocator(
+    let (_, errors, state, mode) = parse_script_with_text_allocator(
         opts,
         &text,
         arena,
@@ -72,7 +79,29 @@ pub fn parse_decls_without_reference_text<'a, 'text>(
         false, // omit_user_attributes_irrelevant_to_typechecking
         true,  // simplify_naming_for_facts
     );
-    (state.decls, !errors.is_empty())
+    ParsedFile {
+        mode,
+        file_attributes: collect_file_attributes(
+            arena,
+            state.file_attributes.iter().copied(),
+            state.file_attributes.len(),
+        ),
+        decls: state.decls,
+        has_first_pass_parse_errors: !errors.is_empty(),
+    }
+}
+
+fn collect_file_attributes<'a>(
+    arena: &'a Bump,
+    file_attributes: impl Iterator<Item = &'a UserAttribute<'a>>,
+    len: usize,
+) -> &'a [&'a UserAttribute<'a>] {
+    let mut attrs = bumpalo::collections::Vec::with_capacity_in(len, arena);
+    attrs.extend(file_attributes);
+    // Direct decl parser populates state.file_attributes in reverse of
+    // syntactic order, so reverse it.
+    attrs.reverse();
+    attrs.into_bump_slice()
 }
 
 fn parse_script_with_text_allocator<'a, 'text, S: SourceTextAllocator<'text, 'a>>(

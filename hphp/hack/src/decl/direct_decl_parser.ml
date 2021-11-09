@@ -15,7 +15,9 @@ type decls = (string * Shallow_decl_defs.decl) list [@@deriving show]
    oxidized_by_ref::direct_decl_parser::ParsedFile *)
 type parsed_file = {
   pf_mode: FileInfo.mode option;
+  pf_file_attributes: Typing_defs.user_attribute list;
   pf_decls: decls;
+  pf_has_first_pass_parse_errors: bool;
 }
 
 (* NB: Must keep in sync with Rust type rust_decl_ffi::ParsedFileWithHashes *)

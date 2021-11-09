@@ -98,7 +98,7 @@ impl Facts {
         self.file_attributes.is_empty()
     }
 
-    pub fn facts_of_decls<'a>(decls: &Decls<'a>) -> Facts {
+    pub fn facts_of_decls(decls: &Decls<'_>, file_attributes: &[&UserAttribute<'_>]) -> Facts {
         // 10/15/2021 TODO(T103413083): Fill out the implementation
 
         let mut types = TypeFactsByName::new();
@@ -142,8 +142,7 @@ impl Facts {
             functions,
             constants,
             type_aliases,
-            // TODO: file attributes
-            ..Default::default()
+            file_attributes: to_facts_attributes(file_attributes),
         }
     }
 }

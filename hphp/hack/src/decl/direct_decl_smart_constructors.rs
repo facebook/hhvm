@@ -15,7 +15,7 @@ use bumpalo::{
 use hh_autoimport_rust as hh_autoimport;
 use naming_special_names_rust as naming_special_names;
 
-use arena_collections::{AssocListMut, MultiSetMut};
+use arena_collections::{AssocListMut, List, MultiSetMut};
 use flatten_smart_constructors::{FlattenOp, FlattenSmartConstructors};
 use namespaces::ElaborateKind;
 use namespaces_rust as namespaces;
@@ -69,6 +69,7 @@ pub struct DirectDeclSmartConstructors<'a, 'text, S: SourceTextAllocator<'text, 
     pub source_text: IndexedSourceText<'text>,
     pub arena: &'a bumpalo::Bump,
     pub decls: Decls<'a>,
+    pub file_attributes: List<'a, &'a typing_defs::UserAttribute<'a>>,
     // const_refs will accumulate all scope-resolution-expressions it enconuters while it's "Some"
     const_refs: Option<arena_collections::set::Set<'a, typing_defs::ClassConstRef<'a>>>,
     opts: &'a DeclParserOptions<'a>,
@@ -108,6 +109,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
             filename: arena.alloc(filename),
             file_mode,
             decls: Decls::empty(),
+            file_attributes: List::empty(),
             const_refs: None,
             namespace_builder: Rc::new(NamespaceBuilder::new_in(
                 opts.auto_namespace_map,
@@ -5459,6 +5461,27 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_variable_expression(&mut self, _expression: Self::R) -> Self::R {
         Node::Ignored(SK::VariableExpression)
+    }
+
+    fn make_file_attribute_specification(
+        &mut self,
+        _left_double_angle: Self::R,
+        _keyword: Self::R,
+        _colon: Self::R,
+        attributes: Self::R,
+        _right_double_angle: Self::R,
+    ) -> Self::R {
+        if !self.omit_user_attributes_irrelevant_to_typechecking {
+            for attr in attributes.iter() {
+                match attr {
+                    Node::Attribute(attr) => self
+                        .file_attributes
+                        .push_front(self.user_attribute_to_decl(attr), self.arena),
+                    _ => {}
+                }
+            }
+        }
+        Node::Ignored(SK::FileAttributeSpecification)
     }
 
     fn make_subscript_expression(

@@ -42,6 +42,7 @@ pub mod compile_ffi {
         hash: u64,
         serialized: Box<Bytes>,
         decls: Box<Decls>,
+        attributes: Box<FileAttributes>,
         bump: Box<Bump>,
         has_errors: bool,
     }
@@ -115,6 +116,7 @@ pub mod compile_ffi {
         type Decls;
         type DeclParserOptions;
         type HhasProgramWrapper;
+        type FileAttributes;
 
         fn make_env_flags(
             is_systemlib: bool,
@@ -190,6 +192,8 @@ pub struct Bump(bumpalo::Bump);
 pub struct Bytes(ffi::Bytes);
 #[repr(C)]
 pub struct Decls(direct_decl_parser::Decls<'static>);
+#[repr(C)]
+pub struct FileAttributes(&'static [&'static oxidized_by_ref::typing_defs::UserAttribute<'static>]);
 #[repr(C)]
 pub struct DeclParserOptions(
     decl_parser_options::DeclParserOptions<'static>,
@@ -371,11 +375,19 @@ pub fn hackc_create_direct_decl_parse_options(
 }
 
 impl compile_ffi::DeclResult {
-    fn new(hash: u64, serialized: Bytes, decls: Decls, bump: Bump, has_errors: bool) -> Self {
+    fn new(
+        hash: u64,
+        serialized: Bytes,
+        decls: Decls,
+        attributes: FileAttributes,
+        bump: Bump,
+        has_errors: bool,
+    ) -> Self {
         Self {
             hash,
             serialized: Box::new(serialized),
             decls: Box::new(decls),
+            attributes: Box::new(attributes),
             bump: Box::new(bump),
             has_errors,
         }
@@ -404,21 +416,22 @@ pub fn hackc_direct_decl_parse(
     let text = text.as_bytes();
     let path = std::path::PathBuf::from(std::ffi::OsStr::from_bytes(filename.as_bytes()));
     let filename = RelativePath::make(Prefix::Root, path);
-    let (decls, has_errors): (direct_decl_parser::Decls<'static>, bool) =
+    let result: direct_decl_parser::ParsedFile<'static> =
         direct_decl_parser::parse_decls_without_reference_text(opts, filename, text, alloc, None);
 
     let op = bincode::config::Options::with_native_endian(bincode::options());
     let data = op
-        .serialize(&decls)
+        .serialize(&result.decls)
         .map_err(|e| format!("failed to serialize, error: {}", e))
         .unwrap();
 
     compile_ffi::DeclResult::new(
-        position_insensitive_hash(&decls),
+        position_insensitive_hash(&result.decls),
         Bytes(ffi::Bytes::from(data)),
-        Decls(decls),
+        Decls(result.decls),
+        FileAttributes(result.file_attributes),
         Bump(bump),
-        has_errors,
+        result.has_first_pass_parse_errors,
     )
 }
 
@@ -599,7 +612,10 @@ pub fn hackc_decls_to_facts_cpp_ffi(
             ..Default::default()
         }
     } else {
-        let facts = compile_ffi::Facts::from(facts::Facts::facts_of_decls(&(*decl_result.decls).0));
+        let facts = compile_ffi::Facts::from(facts::Facts::facts_of_decls(
+            &(*decl_result.decls).0,
+            &(*decl_result.attributes).0,
+        ));
         compile_ffi::FactsResult {
             facts: facts.into(),
             md5sum,

@@ -10,7 +10,9 @@ type decls = (string * Shallow_decl_defs.decl) list [@@deriving show]
 
 type parsed_file = {
   pf_mode: FileInfo.mode option;
+  pf_file_attributes: Typing_defs.user_attribute list;
   pf_decls: decls;
+  pf_has_first_pass_parse_errors: bool;
 }
 
 type parsed_file_with_hashes = {

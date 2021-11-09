@@ -34,7 +34,13 @@ pub use shallow_decl_defs::Decl;
 pub struct ParsedFile<'a> {
     pub mode: Option<file_info::Mode>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub file_attributes: &'a [&'a typing_defs::UserAttribute<'a>],
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub decls: Decls<'a>,
+    /// True if the FFP detected parse errors while parsing. Other parse errors
+    /// are detected in a second pass over the CST, and this field does not
+    /// indicate whether errors would be detected in that second pass.
+    pub has_first_pass_parse_errors: bool,
 }
 
 // NB: Must keep in sync with OCaml type Direct_decl_parser.decls

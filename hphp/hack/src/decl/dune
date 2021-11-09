@@ -115,6 +115,7 @@
   (libraries
     decl_parser_options
     shallow_decl_defs
+    pos_or_decl
     typing_defs
     rust_decl_ffi)
   (preprocess (pps ppx_deriving.std)))

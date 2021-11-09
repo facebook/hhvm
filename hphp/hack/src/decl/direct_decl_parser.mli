@@ -32,3 +32,11 @@ val parse_decls_and_mode_ffi :
   bool ->
   bool ->
   decls * FileInfo.mode option * Int64.t option * Int64.t list option
+
+val decls_to_fileinfo :
+  Relative_path.t ->
+  (string * Shallow_decl_defs.decl) list
+  * FileInfo.mode option
+  * Int64.t option
+  * Int64.t option list ->
+  FileInfo.t

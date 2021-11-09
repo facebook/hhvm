@@ -376,6 +376,16 @@ let fun_def ctx fd :
       env
       (Naming_attributes.mem SN.UserAttributes.uaInternal f.f_user_attributes)
   in
+  let env =
+    if
+      Naming_attributes.mem
+        SN.UserAttributes.uaSupportDynamicType
+        f.f_user_attributes
+    then
+      Env.set_support_dynamic_type env true
+    else
+      env
+  in
   Typing_type_wellformedness.fun_ env f;
   let env =
     Phase.localize_and_add_ast_generic_parameters_and_where_constraints
@@ -481,16 +491,10 @@ let fun_def ctx fd :
   let (env, tparams) = List.map_env env f.f_tparams ~f:Typing.type_param in
   let env = Typing_solver.close_tyvars_and_solve env in
   let env = Typing_solver.solve_all_unsolved_tyvars env in
-
-  let check_support_dynamic_type =
-    Naming_attributes.mem
-      SN.UserAttributes.uaSupportDynamicType
-      f.f_user_attributes
-  in
   if
     TypecheckerOptions.enable_sound_dynamic
       (Provider_context.get_tcopt (Env.get_ctx env))
-    && check_support_dynamic_type
+    && Env.get_support_dynamic_type env
   then
     function_dynamically_callable
       sound_dynamic_check_saved_env
@@ -660,10 +664,7 @@ let method_dynamically_callable
           pos
           (snd m.m_name)
           (Cls.name cls)
-          (Naming_attributes.mem
-             SN.UserAttributes.uaSupportDynamicType
-             m.m_user_attributes
-          || Cls.get_support_dynamic_type cls)
+          (Env.get_support_dynamic_type env)
           None
           (Some error))
   in
@@ -689,6 +690,16 @@ let method_def ~is_disposable env cls m =
   let env = Env.set_env_callable_pos env pos in
   let (env, user_attributes) =
     Typing.attributes_check_def env SN.AttributeKinds.mthd m.m_user_attributes
+  in
+  let env =
+    if
+      Naming_attributes.mem
+        SN.UserAttributes.uaSupportDynamicType
+        m.m_user_attributes
+    then
+      Env.set_support_dynamic_type env true
+    else
+      env
   in
   let (env, cap_ty, unsafe_cap_ty) =
     Typing_coeffects.type_capability env m.m_ctxs m.m_unsafe_ctxs (fst m.m_name)
@@ -820,15 +831,12 @@ let method_def ~is_disposable env cls m =
   let env = Typing_solver.close_tyvars_and_solve env in
   let env = Typing_solver.solve_all_unsolved_tyvars env in
 
-  (* if the enclosing class implements dynamic, or the method is annotated with
+  (* if the enclosing class method is annotated with
    * <<__SupportDynamicType>>, check that the method is dynamically callable *)
   let check_support_dynamic_type =
     (not env.inside_constructor)
-    && (Cls.get_support_dynamic_type cls
-        && not (Aast.equal_visibility m.m_visibility Private)
-       || Naming_attributes.mem
-            SN.UserAttributes.uaSupportDynamicType
-            m.m_user_attributes)
+    && Env.get_support_dynamic_type env
+    && not (Aast.equal_visibility m.m_visibility Private)
   in
   if
     TypecheckerOptions.enable_sound_dynamic
@@ -2075,6 +2083,13 @@ let class_def ctx c =
     Env.set_internal
       env
       (Naming_attributes.mem SN.UserAttributes.uaInternal c.c_user_attributes)
+  in
+  let env =
+    Env.set_support_dynamic_type
+      env
+      (Naming_attributes.mem
+         SN.UserAttributes.uaSupportDynamicType
+         c.c_user_attributes)
   in
   Typing_type_wellformedness.class_ env c;
   NastInitCheck.class_ env c;

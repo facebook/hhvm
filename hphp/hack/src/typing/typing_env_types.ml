@@ -83,4 +83,5 @@ and genv = {
   file: Relative_path.t;
   this_module: Typing_modules.t;
   this_internal: bool;
+  this_support_dynamic_type: bool;
 }

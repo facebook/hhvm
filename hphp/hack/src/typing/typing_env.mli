@@ -251,9 +251,13 @@ val set_module : env -> Typing_modules.t -> env
 
 val set_internal : env -> bool -> env
 
+val set_support_dynamic_type : env -> bool -> env
+
 val get_module : env -> Typing_modules.t
 
 val get_internal : env -> bool
+
+val get_support_dynamic_type : env -> bool
 
 val set_self : env -> string -> locl_ty -> env
 

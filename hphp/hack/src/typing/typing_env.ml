@@ -636,6 +636,7 @@ let empty ?origin ?(mode = FileInfo.Mstrict) ctx file ~droot =
         file;
         this_module = None;
         this_internal = false;
+        this_support_dynamic_type = false;
       };
     tpenv = TPEnv.empty;
     log_levels = TypecheckerOptions.log_levels (Provider_context.get_tcopt ctx);
@@ -1042,6 +1043,11 @@ let get_module env = env.genv.this_module
 let set_internal env b = { env with genv = { env.genv with this_internal = b } }
 
 let get_internal env = env.genv.this_internal
+
+let set_support_dynamic_type env b =
+  { env with genv = { env.genv with this_support_dynamic_type = b } }
+
+let get_support_dynamic_type env = env.genv.this_support_dynamic_type
 
 let set_self env self_id self_ty =
   let genv = env.genv in

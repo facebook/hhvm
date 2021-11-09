@@ -512,6 +512,7 @@ let genv_as_value env genv =
     file = _;
     this_module;
     this_internal;
+    this_support_dynamic_type;
   } =
     genv
   in
@@ -528,6 +529,7 @@ let genv_as_value env genv =
        ("fun_kind", string_as_value (fun_kind_to_string fun_kind));
        ("fun_is_ctor", bool_as_value fun_is_ctor);
        ("this_internal", bool_as_value this_internal);
+       ("this_support_dynamic_type", bool_as_value this_support_dynamic_type);
      ]
     @ (match this_module with
       | Some this_module ->

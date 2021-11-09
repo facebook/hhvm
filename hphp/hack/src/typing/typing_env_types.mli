@@ -74,4 +74,6 @@ and genv = {
       (** The module of the top-level definition that we are checking *)
   this_internal: bool;
       (** Is the definition that we are checking marked <<__Internal>>? *)
+  this_support_dynamic_type: bool;
+      (** Is the definition that we are checking marked <<__SupportDynamicType>>? *)
 }

@@ -380,7 +380,7 @@ module UserAttributes = struct
           (uaExternal, [parameter]);
           (uaCanCall, [parameter]);
           (uaViaLabel, [parameter]);
-          (uaSupportDynamicType, [fn; cls; mthd]);
+          (uaSupportDynamicType, [fn; cls; mthd; lambda]);
           (uaRequireDynamic, [typeparam]);
           (uaModule, [fn; cls; file; typealias; enum; enumcls]);
           ( uaInternal,

@@ -1,0 +1,6 @@
+File "instance_property_as_class_constant.php", line 17, characters 17-19:
+No class constant `foo` in `X` (Typing[4090])
+  File "instance_property_as_class_constant.php", line 13, characters 12-18:
+  Did you mean instance property `foo` instead?
+  File "instance_property_as_class_constant.php", line 12, characters 7-7:
+  Declaration of `X` is here

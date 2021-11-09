@@ -710,6 +710,8 @@ int RuntimeOption::ServerHighQueueingThreshold = 60;
 bool RuntimeOption::ServerLegacyBehavior = true;
 int RuntimeOption::ServerHugeThreadCount = 0;
 int RuntimeOption::ServerHugeStackKb = 384;
+int RuntimeOption::ServerSchedPolicy = -1;
+int RuntimeOption::ServerSchedPriority = 0;
 uint32_t RuntimeOption::ServerLoopSampleRate = 0;
 int RuntimeOption::ServerWarmupThrottleRequestCount = 0;
 int RuntimeOption::ServerWarmupThrottleThreadCount = 0;
@@ -2223,6 +2225,10 @@ void RuntimeOption::Load(
     Config::Bind(ServerHugeThreadCount, ini, config,
                  "Server.HugeThreadCount", 0);
     Config::Bind(ServerHugeStackKb, ini, config, "Server.HugeStackSizeKb", 384);
+    ServerSchedPolicy =
+      Config::GetInt32(ini, config, "Server.SchedPolicy", ServerSchedPolicy);
+    ServerSchedPriority =
+      Config::GetInt32(ini, config, "Server.SchedPriority", ServerSchedPriority);
     Config::Bind(ServerLoopSampleRate, ini, config,
                  "Server.LoopSampleRate", 0);
     Config::Bind(ServerWarmupThrottleRequestCount, ini, config,

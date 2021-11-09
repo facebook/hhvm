@@ -916,6 +916,31 @@ static void pagein_self(void) {
     }
   }
 
+#ifdef __linux__
+  if (RO::ServerSchedPolicy >= 0 && RO::ServerSchedPolicy <= SCHED_BATCH) {
+    sched_param param{};
+    if (RO::ServerSchedPolicy == SCHED_RR) {
+      param.sched_priority =
+        std::max(0, sched_get_priority_min(RO::ServerSchedPolicy));
+    }
+    auto const ret = sched_setscheduler(0, RO::ServerSchedPolicy, &param);
+    if (ret) {
+      Logger::Error("failed to adjust scheduling priority: " +
+                    folly::errnoStr(errno));
+    } else {
+      Logger::Info("successfully adjusted scheduling priority to %d",
+                   RO::ServerSchedPolicy);
+    }
+  }
+  if (RO::ServerSchedPriority) {
+    auto const ret = setpriority(PRIO_PROCESS, 0, RO::ServerSchedPriority);
+    if (ret) {
+      Logger::FError("failed to setpriority to {}: {}", RO::ServerSchedPriority,
+                     folly::errnoStr(errno));
+    }
+  }
+#endif
+
   auto mapped_huge = false;
 #ifdef __linux__
   auto const try_map_huge =

@@ -138,7 +138,10 @@ let rec stmt (env : env) ((pos, stmt) : T.stmt) : env =
     let then_env = block env then_bl in
     let else_env = block env else_bl in
     Env.merge then_env else_env
-  | A.Noop -> env
+  | A.Noop
+  | A.AssertEnv _
+  | A.Markup _ ->
+    env
   | _ -> failwithpos pos "A statement is not yet handled"
 
 and block (env : env) : T.block -> env = List.fold ~init:env ~f:stmt

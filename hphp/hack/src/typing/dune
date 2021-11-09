@@ -65,7 +65,6 @@
     typing_enforceability
     typing_enforceable_hint
     typing_enum
-    typing_env
     typing_env_from_def
     typing_equality_check
     typing_expand
@@ -114,7 +113,7 @@
     type_mapper_generic
     typing_ast
     typing_defs
-    typing_env_types
+    typing_env
     typing_heap
     global_config)
   (preprocess (pps ppx_deriving.std)))
@@ -196,6 +195,16 @@
     type_mapper_generic
     typing_defs)
   (preprocess (pps ppx_deriving.std)))
+
+(library
+  (name typing_env)
+  (wrapped false)
+  (modules
+    typing_env)
+  (libraries
+    decl_provider
+    provider_context
+    typing_env_types))
 
 (library
   (name typing_env_types)

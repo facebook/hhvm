@@ -2,11 +2,11 @@
 
 async function printImplicit() {
   var_dump(IntContext::getContext());
+  return 0;
 }
 
 async function addFive() {
-  return HH\Lib\Legacy_FIXME\cast_for_arithmetic(IntContext::getContext())
-    + HH\Lib\Legacy_FIXME\cast_for_arithmetic(await IntContext::genStart(4, printImplicit<>));
+  return IntContext::getContext() + await IntContext::genStart(4, printImplicit<>);
 }
 
 <<__EntryPoint>>

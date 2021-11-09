@@ -57,9 +57,7 @@
     typing_async
     typing_coeffects
     typing_coercion
-    typing_cont_key
     typing_const_reifiable
-    typing_continuations
     typing_deferred_members
     typing_dependent_type
     typing_disposable
@@ -69,15 +67,11 @@
     typing_enum
     typing_env
     typing_env_from_def
-    typing_env_return_info
-    typing_env_types
     typing_equality_check
     typing_expand
-    typing_fake_members
     typing_generic_constraint
     typing_generic_rules
     typing_local_ops
-    typing_local_types
     typing_intersection
     typing_kinding
     typing_log
@@ -85,7 +79,6 @@
     typing_object_get
     typing_ordered_solver
     typing_ops
-    typing_per_cont_env
     typing_per_cont_ops
     typing_phase
     typing_print
@@ -121,6 +114,7 @@
     type_mapper_generic
     typing_ast
     typing_defs
+    typing_env_types
     typing_heap
     global_config)
   (preprocess (pps ppx_deriving.std)))
@@ -201,6 +195,24 @@
     core_kernel
     type_mapper_generic
     typing_defs)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
+  (name typing_env_types)
+  (wrapped false)
+  (modules
+    typing_cont_key
+    typing_continuations
+    typing_env_return_info
+    typing_env_types
+    typing_fake_members
+    typing_local_types
+    typing_per_cont_env
+    )
+  (libraries
+    decl
+    decl_counters
+    typing_ast)
   (preprocess (pps ppx_deriving.std)))
 
 (library

@@ -283,7 +283,11 @@ let make
   for n = 1 to nbr_procs do
     let (controller_fd, child_fd) = setup_controller_fd () in
     let name =
-      Printf.sprintf "worker process %d/%d for server %d" n nbr_procs pid
+      Printf.sprintf
+        "worker_process_%d_out_of_%d_for_server_pid_%d"
+        n
+        nbr_procs
+        pid
     in
     made_workers :=
       make_one ?call_wrapper controller_fd (spawn n name child_fd) n

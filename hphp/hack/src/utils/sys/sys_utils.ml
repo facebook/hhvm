@@ -390,7 +390,6 @@ let mkdir_p ?(skip_mocking = false) =
   else
     Disk.mkdir_p
 
-(* Emulate "mkdir -p", i.e., no error if already exists. *)
 let mkdir_no_fail dir =
   with_umask 0 (fun () ->
       (* Don't set sticky bit since the socket opening code wants to remove any

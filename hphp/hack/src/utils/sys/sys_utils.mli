@@ -126,6 +126,7 @@ val write_strings_to_file : file:string -> string list -> unit
 
 val mkdir_p : ?skip_mocking:bool -> string -> unit
 
+(** Emulate "mkdir -p", i.e., no error if already exists. *)
 val mkdir_no_fail : string -> unit
 
 val unlink_no_fail : string -> unit

@@ -11,8 +11,6 @@
 (* Handling where our temporary files go *)
 (*****************************************************************************)
 
-(* The missing counterpart to Filename.temp_file. Put in a random location
- * under get_dir() above. *)
 let temp_dir parent_dir prefix =
   Sys_utils.mkdir_no_fail parent_dir;
   let tmpdir =
@@ -22,3 +20,9 @@ let temp_dir parent_dir prefix =
   in
   Sys_utils.mkdir_no_fail tmpdir;
   tmpdir
+
+let hh_server_tmp_dir =
+  try Sys.getenv "HH_TMPDIR" with
+  | _ ->
+    Path.to_string
+    @@ Path.concat (Path.make Sys_utils.temp_dir_name) "hh_server"

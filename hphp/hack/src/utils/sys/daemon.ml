@@ -83,6 +83,7 @@ module Entry : sig
 
   val set_context :
     ('param, 'input, 'output) t ->
+    name:string ->
     'param ->
     Unix.file_descr * Unix.file_descr ->
     unit
@@ -120,19 +121,43 @@ end = struct
     | Some entry -> Obj.obj entry
     | None -> Printf.ksprintf failwith "Unknown entry point %S" name
 
-  let set_context entry param (ic, oc) =
-    let data = (ic, oc, param) in
+  (** If OCAML_LANDMARKS is set, then set output file for Landmarks to a file specific to
+      the process which is about to be spawned. *)
+  let set_ocaml_landmarks process_name =
+    let var_name = "OCAML_LANDMARKS" in
+    try
+      let value = Unix.getenv var_name in
+      let landmarks_file =
+        let profiling_dir_name =
+          Filename.concat Tmp.hh_server_tmp_dir "profiling"
+        in
+        Sys_utils.mkdir_no_fail profiling_dir_name;
+        Filename.temp_file
+          ~temp_dir:profiling_dir_name
+          (Printf.sprintf "%s." process_name)
+          ".landmarks"
+      in
+      Unix.putenv var_name (Printf.sprintf "%s,output=%s" value landmarks_file)
+    with
+    | Not_found -> ()
+
+  let set_context entry ~name param (ic, oc) =
     Unix.putenv "HH_SERVER_DAEMON" entry;
-    let (file, oc) =
+
+    let (file, param_oc) =
       Filename.open_temp_file
         ~mode:[Open_binary]
         ~temp_dir:Sys_utils.temp_dir_name
         "daemon_param"
         ".bin"
     in
-    Marshal.to_channel oc data [Marshal.Closures];
-    close_out oc;
-    Unix.putenv "HH_SERVER_DAEMON_PARAM" file
+    Marshal.to_channel param_oc (ic, oc, param) [Marshal.Closures];
+    close_out param_oc;
+    Unix.putenv "HH_SERVER_DAEMON_PARAM" file;
+
+    set_ocaml_landmarks name;
+
+    ()
 
   exception Context_not_found
 
@@ -283,9 +308,9 @@ let spawn
   let ((parent_in, child_out), (child_in, parent_out)) =
     setup_channels channel_mode
   in
-  Entry.set_context entry param (child_in, child_out);
-  let exe = Sys_utils.executable_path () in
   let name = Option.value ~default:(Entry.name_of_entry entry) name in
+  Entry.set_context entry ~name param (child_in, child_out);
+  let exe = Sys_utils.executable_path () in
   let pid = Unix.create_process exe [| exe; name |] stdin stdout stderr in
   Entry.clear_context ();
   Unix.close child_in;

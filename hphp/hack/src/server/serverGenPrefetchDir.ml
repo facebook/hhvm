@@ -36,19 +36,11 @@ let save_contents (output_filename : string) (contents : 'a) : unit =
   Marshal.to_channel chan contents [];
   Stdlib.close_out chan
 
-let get_name_and_decl_hashes_from_decls
-    ((decls, _, _, symbol_decl_hashes) :
-      Direct_decl_parser.decls
-      * FileInfo.mode option
-      * Int64.t option
-      * Int64.t option list) : (string * Int64.t) list =
-  let add acc ((name, decl), decl_hash) =
-    match decl with
-    | Shallow_decl_defs.Class _ ->
-      List.rev_append acc [(name, Option.value_exn decl_hash)]
-    | _ -> acc
-  in
-  List.fold ~f:add ~init:[] (List.zip_exn decls symbol_decl_hashes)
+let get_name_and_decl_hashes_from_decls decls : (string * Int64.t) list =
+  List.filter_map decls ~f:(fun (name, decl, decl_hash) ->
+      match decl with
+      | Shallow_decl_defs.Class _ -> Some (name, decl_hash)
+      | _ -> None)
 
 let get_hh_version ~(repo : Path.t) : (string, string) result Future.Promise.t =
   let hhconfig_path =
@@ -105,18 +97,13 @@ let go
           Hh_logger.log
             "Saving decls for prefetching: %s"
             (Relative_path.suffix fn);
-          match
-            Direct_decl_utils.direct_decl_parse
-              ~file_decl_hash:true
-              ~symbol_decl_hashes:true
-              ctx
-              fn
-          with
+          match Direct_decl_utils.direct_decl_parse ctx fn with
           | None -> acc
-          | Some ((decls, _, _, _) as decl_and_mode_and_hash) ->
+          | Some parsed_file ->
+            let decls = parsed_file.Direct_decl_parser.pfh_decls in
             Direct_decl_utils.cache_decls ctx fn decls;
             let names_and_decl_hashes =
-              get_name_and_decl_hashes_from_decls decl_and_mode_and_hash
+              get_name_and_decl_hashes_from_decls decls
             in
             List.fold_left
               ~init:acc

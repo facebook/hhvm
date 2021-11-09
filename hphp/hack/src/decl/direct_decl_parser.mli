@@ -21,22 +21,12 @@ type parsed_file_with_hashes = {
   pfh_decls: (string * Shallow_decl_defs.decl * Int64.t) list;
 }
 
-val parse_decls_ffi : DeclParserOptions.t -> Relative_path.t -> string -> decls
+val parse_decls :
+  DeclParserOptions.t -> Relative_path.t -> string -> parsed_file
+
+val parse_and_hash_decls :
+  DeclParserOptions.t -> Relative_path.t -> string -> parsed_file_with_hashes
 
 val decls_hash : decls -> Int64.t
 
-val parse_decls_and_mode_ffi :
-  DeclParserOptions.t ->
-  Relative_path.t ->
-  string ->
-  bool ->
-  bool ->
-  decls * FileInfo.mode option * Int64.t option * Int64.t list option
-
-val decls_to_fileinfo :
-  Relative_path.t ->
-  (string * Shallow_decl_defs.decl) list
-  * FileInfo.mode option
-  * Int64.t option
-  * Int64.t option list ->
-  FileInfo.t
+val decls_to_fileinfo : Relative_path.t -> parsed_file_with_hashes -> FileInfo.t

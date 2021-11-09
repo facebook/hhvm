@@ -1093,16 +1093,9 @@ let parse_and_name ctx files_contents =
             { parsed_file with Parser_return.ast })
       in
       if TypecheckerOptions.use_direct_decl_parser tcopt then
-        match
-          Direct_decl_utils.direct_decl_parse
-            ~file_decl_hash:true
-            ~symbol_decl_hashes:true
-            ctx
-            fn
-        with
+        match Direct_decl_utils.direct_decl_parse ctx fn with
         | None -> failwith "no file contents"
-        | Some decl_and_mode_and_hash ->
-          Direct_decl_utils.decls_to_fileinfo fn decl_and_mode_and_hash
+        | Some decls -> Direct_decl_utils.decls_to_fileinfo fn decls
       else
         let { Parser_return.file_mode; comments; ast; _ } = parsed_file in
         (* If the feature is turned on, deregister functions with attribute
@@ -1153,7 +1146,8 @@ let get_shallow_decls ctx filename file_contents :
     Shallow_decl_defs.shallow_class SMap.t =
   let popt = Provider_context.get_popt ctx in
   let opts = DeclParserOptions.from_parser_options popt in
-  Direct_decl_parser.parse_decls_ffi opts filename file_contents
+  (Direct_decl_parser.parse_decls opts filename file_contents)
+    .Direct_decl_parser.pf_decls
   |> List.fold ~init:SMap.empty ~f:(fun acc (name, decl) ->
          match decl with
          | Shallow_decl_defs.Class c -> SMap.add name c acc

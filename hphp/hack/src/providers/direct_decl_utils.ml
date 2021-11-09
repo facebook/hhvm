@@ -8,6 +8,12 @@
 
 open Hh_prelude
 
+type parsed_file_with_hashes = Direct_decl_parser.parsed_file_with_hashes = {
+  pfh_mode: FileInfo.mode option;
+  pfh_hash: Int64.t;
+  pfh_decls: (string * Shallow_decl_defs.decl * Int64.t) list;
+}
+
 (* If any decls in the list have the same name, retain only the first
    declaration of each symbol in the sequence. *)
 let dedup_decls decls =
@@ -71,7 +77,8 @@ let cache_decls ctx file decls =
   let open Typing_defs in
   let decls =
     decls
-    |> List.rev (* direct decl parser produces reverse of syntactic order *)
+    |> List.rev_map (* direct decl parser produces reverse of syntactic order *)
+         ~f:(fun (name, decl, _hash) -> (name, decl))
     |> Sequence.of_list
     |> dedup_decls
     |> remove_naming_conflict_losers ctx file
@@ -154,19 +161,14 @@ let get_file_contents ctx filename =
       filename
       ~writeback_disk_contents_in_shmem_provider:enable_disk_heap
 
-let direct_decl_parse ~file_decl_hash ~symbol_decl_hashes ctx file =
+let direct_decl_parse ctx file =
   match get_file_contents ctx file with
   | None -> None
   | Some contents ->
     let popt = Provider_context.get_popt ctx in
     let opts = DeclParserOptions.from_parser_options popt in
-    let (decls, mode, file_decl_hash, symbol_decl_hashes) =
-      Direct_decl_parser.parse_decls_and_mode_ffi
-        opts
-        file
-        contents
-        file_decl_hash
-        symbol_decl_hashes
+    let parsed_file =
+      Direct_decl_parser.parse_and_hash_decls opts file contents
     in
     let deregister_php_stdlib =
       Relative_path.is_hhi (Relative_path.prefix file)
@@ -179,21 +181,16 @@ let direct_decl_parse ~file_decl_hash ~symbol_decl_hashes ctx file =
             Naming_special_names.UserAttributes.uaPHPStdLib
             (snd a.Typing_defs_core.ua_name))
     in
-    let symbol_decl_hashes =
-      match symbol_decl_hashes with
-      | Some hashes -> List.map ~f:(fun hash -> Some hash) hashes
-      | None -> List.map ~f:(fun _ -> None) decls
-    in
-    let (decls, symbol_decl_hashes) =
+    let parsed_file =
       if not deregister_php_stdlib then
-        (decls, symbol_decl_hashes)
+        parsed_file
       else
         let open Shallow_decl_defs in
-        let (decls, symbol_decl_hashes) =
-          List.filter_map (List.zip_exn decls symbol_decl_hashes) ~f:(function
-              | ((_, Fun f), _) when is_stdlib_fun f -> None
-              | ((_, Class c), _) when is_stdlib_class c -> None
-              | ((name, Class c), hash) ->
+        let decls =
+          List.filter_map parsed_file.pfh_decls ~f:(function
+              | (_, Fun f, _) when is_stdlib_fun f -> None
+              | (_, Class c, _) when is_stdlib_class c -> None
+              | (name, Class c, hash) ->
                 let keep_prop sp = not (sp_php_std_lib sp) in
                 let keep_meth sm = not (sm_php_std_lib sm) in
                 let c =
@@ -206,18 +203,17 @@ let direct_decl_parse ~file_decl_hash ~symbol_decl_hashes ctx file =
                       List.filter c.sc_static_methods ~f:keep_meth;
                   }
                 in
-                Some ((name, Class c), hash)
-              | (name_and_decl, hash) -> Some (name_and_decl, hash))
-          |> List.unzip
+                Some (name, Class c, hash)
+              | name_decl_and_hash -> Some name_decl_and_hash)
         in
-        (decls, symbol_decl_hashes)
+        { parsed_file with pfh_decls = decls }
     in
-    Some (decls, mode, file_decl_hash, symbol_decl_hashes)
+    Some parsed_file
 
-let direct_decl_parse_and_cache ~file_decl_hash ~symbol_decl_hashes ctx file =
-  let result = direct_decl_parse ~file_decl_hash ~symbol_decl_hashes ctx file in
+let direct_decl_parse_and_cache ctx file =
+  let result = direct_decl_parse ctx file in
   (match result with
-  | Some (decls, _, _, _) -> cache_decls ctx file decls
+  | Some parsed_file -> cache_decls ctx file parsed_file.pfh_decls
   | None -> ());
   result
 

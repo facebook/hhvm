@@ -19,20 +19,16 @@ let parse
     acc
   else
     let start_parse_time = Unix.gettimeofday () in
-    match
-      Direct_decl_utils.direct_decl_parse
-        ~file_decl_hash:true
-        ~symbol_decl_hashes:true
-        ctx
-        fn
-    with
+    match Direct_decl_utils.direct_decl_parse ctx fn with
     | None -> acc
-    | Some ((decls, _, _, _) as decl_and_mode_and_hash) ->
+    | Some parsed_file ->
       let end_parse_time = Unix.gettimeofday () in
-      if cache_decls then Direct_decl_utils.cache_decls ctx fn decls;
-      let fileinfo =
-        Direct_decl_utils.decls_to_fileinfo fn decl_and_mode_and_hash
-      in
+      if cache_decls then
+        Direct_decl_utils.cache_decls
+          ctx
+          fn
+          parsed_file.Direct_decl_utils.pfh_decls;
+      let fileinfo = Direct_decl_utils.decls_to_fileinfo fn parsed_file in
       if trace then
         Hh_logger.log
           "[%.1fms] %s - %s"

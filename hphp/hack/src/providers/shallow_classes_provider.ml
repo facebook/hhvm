@@ -19,17 +19,10 @@ let class_naming_and_decl_DEPRECATED ctx c =
   let c = Errors.ignore_ (fun () -> Naming.class_ ctx c) in
   Shallow_decl.class_DEPRECATED ctx c
 
-let direct_decl_parse_and_cache
-    ~file_decl_hash ~symbol_decl_hashes ctx filename name =
-  match
-    Direct_decl_utils.direct_decl_parse_and_cache
-      ~file_decl_hash
-      ~symbol_decl_hashes
-      ctx
-      filename
-  with
+let direct_decl_parse_and_cache ctx filename name =
+  match Direct_decl_utils.direct_decl_parse_and_cache ctx filename with
   | None -> err_not_found filename name
-  | Some (decls, _mode, _hash, _symbol_decl_hashes) -> decls
+  | Some parsed_file -> parsed_file.Direct_decl_utils.pfh_decls
 
 let shallow_decl_enabled ctx =
   TypecheckerOptions.shallow_class_decl (Provider_context.get_tcopt ctx)
@@ -87,14 +80,10 @@ let get (ctx : Provider_context.t) (name : string) : shallow_class option =
       | None -> None
       | Some path ->
         if use_direct_decl_parser ctx then
-          direct_decl_parse_and_cache
-            ~file_decl_hash:false
-            ~symbol_decl_hashes:false
-            ctx
-            path
-            name
+          direct_decl_parse_and_cache ctx path name
           |> List.find_map ~f:(function
-                 | (n, Shallow_decl_defs.Class decl) when String.equal name n ->
+                 | (n, Shallow_decl_defs.Class decl, _) when String.equal name n
+                   ->
                    Some decl
                  | _ -> None)
         else
@@ -118,15 +107,10 @@ let get (ctx : Provider_context.t) (name : string) : shallow_class option =
         | None -> None
         | Some path ->
           if use_direct_decl_parser ctx then
-            direct_decl_parse_and_cache
-              ~file_decl_hash:false
-              ~symbol_decl_hashes:false
-              ctx
-              path
-              name
+            direct_decl_parse_and_cache ctx path name
             |> List.find_map ~f:(function
-                   | (n, Shallow_decl_defs.Class decl) when String.equal name n
-                     ->
+                   | (n, Shallow_decl_defs.Class decl, _)
+                     when String.equal name n ->
                      Some decl
                    | _ -> None)
           else

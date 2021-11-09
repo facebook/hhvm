@@ -107,9 +107,9 @@ let compare_decls ctx fn text =
   let legacy_decls = shallow_declare_ast ctx [] ast in
   let legacy_decls_str = show_decls (List.rev legacy_decls) ^ "\n" in
   let popt = Provider_context.get_popt ctx in
-  let decls =
-    parse_decls_ffi (DeclParserOptions.from_parser_options popt) fn text
-  in
+  let opts = DeclParserOptions.from_parser_options popt in
+  let parsed_file = parse_decls opts fn text in
+  let decls = parsed_file.pf_decls in
   let decls_str = show_decls (List.rev decls) ^ "\n" in
   let matched = String.equal decls_str legacy_decls_str in
   if matched then

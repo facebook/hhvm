@@ -167,7 +167,8 @@ let rpc_get_type_canon_name (t : t) (name : string) : string option =
 
 let parse_and_cache_decls_in
     (t : t) (filename : Relative_path.t) (contents : string) : unit =
-  let decls = Direct_decl_parser.parse_decls_ffi t.opts filename contents in
+  let file = Direct_decl_parser.parse_decls t.opts filename contents in
+  let decls = file.Direct_decl_parser.pf_decls in
   let hash dep = Typing_deps.(Dep.make Mode.Hash64Bit dep) in
   t.current_file_decls <-
     List.fold decls ~init:SymbolMap.empty ~f:(fun map (name, decl) ->

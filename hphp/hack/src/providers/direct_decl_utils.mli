@@ -6,38 +6,27 @@
  *
  *)
 
+type parsed_file_with_hashes = Direct_decl_parser.parsed_file_with_hashes = {
+  pfh_mode: FileInfo.mode option;
+  pfh_hash: Int64.t;
+  pfh_decls: (string * Shallow_decl_defs.decl * Int64.t) list;
+}
+
 val direct_decl_parse_and_cache :
-  file_decl_hash:bool ->
-  symbol_decl_hashes:bool ->
   Provider_context.t ->
   Relative_path.t ->
-  ((string * Shallow_decl_defs.decl) list
-  * FileInfo.mode option
-  * Int64.t option
-  * Int64.t option list)
-  option
+  Direct_decl_parser.parsed_file_with_hashes option
 
 val direct_decl_parse :
-  file_decl_hash:bool ->
-  symbol_decl_hashes:bool ->
   Provider_context.t ->
   Relative_path.t ->
-  ((string * Shallow_decl_defs.decl) list
-  * FileInfo.mode option
-  * Int64.t option
-  * Int64.t option list)
-  option
+  Direct_decl_parser.parsed_file_with_hashes option
 
 val cache_decls :
   Provider_context.t ->
   Relative_path.t ->
-  (string * Shallow_decl_defs.decl) list ->
+  (string * Shallow_decl_defs.decl * Int64.t) list ->
   unit
 
 val decls_to_fileinfo :
-  Relative_path.t ->
-  (string * Shallow_decl_defs.decl) list
-  * FileInfo.mode option
-  * Int64.t option
-  * Int64.t option list ->
-  FileInfo.t
+  Relative_path.t -> Direct_decl_parser.parsed_file_with_hashes -> FileInfo.t

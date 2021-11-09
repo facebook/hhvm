@@ -7,9 +7,14 @@
  *
  *)
 
-open Typing_defs_core
 open Hh_prelude
+open Aast
+open Common
+open Typing_defs
+open Typing_env_types
 module Env = Typing_env
+module Phase = Typing_phase
+module MakeType = Typing_make_type
 module SN = Naming_special_names
 
 let capability_id = Local_id.make_unscoped SN.Coeffects.capability
@@ -82,3 +87,41 @@ let pretty env ty =
 
 let is_generated_generic =
   String.is_prefix ~prefix:SN.Coeffects.generated_generic_prefix
+
+let type_capability env ctxs unsafe_ctxs default_pos =
+  (* No need to repeat the following check (saves time) for unsafe_ctx
+     because it's synthetic and well-kinded by construction *)
+  Option.iter ctxs ~f:(fun (_pos, hl) ->
+      List.iter
+        hl
+        ~f:
+          (Typing_kinding.Simple.check_well_kinded_context_hint
+             ~in_signature:false
+             env));
+
+  let cc = Decl_hint.aast_contexts_to_decl_capability in
+  let (decl_pos, cap) = cc env.decl_env ctxs default_pos in
+  let (env, cap_ty) =
+    match cap with
+    | CapTy ty ->
+      if TypecheckerOptions.strict_contexts (Env.get_tcopt env) then
+        validate_capability env decl_pos ty;
+      Phase.localize_no_subst env ~ignore_errors:false ty
+    | CapDefaults p -> (env, MakeType.default_capability p)
+  in
+  let (env, unsafe_cap_ty) =
+    match snd @@ cc env.decl_env unsafe_ctxs default_pos with
+    | CapTy ty -> Phase.localize_no_subst env ~ignore_errors:false ty
+    | CapDefaults p -> (env, MakeType.default_capability_unsafe p)
+  in
+  (env, cap_ty, unsafe_cap_ty)
+
+(* Checking this with List.exists will be a single op in the vast majority of cases (empty) *)
+let get_ctx_vars ctxs =
+  Option.value_map
+    ~f:(fun (_, cs) ->
+      List.filter_map cs ~f:(function
+          | (_, Haccess ((_, Hvar n), _)) -> Some n
+          | _ -> None))
+    ~default:[]
+    ctxs

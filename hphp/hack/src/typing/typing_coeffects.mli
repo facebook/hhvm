@@ -24,3 +24,12 @@ val validate_capability :
 val pretty : Typing_env_types.env -> Typing_defs.locl_ty -> string
 
 val is_generated_generic : string -> bool
+
+val type_capability :
+  Typing_env_types.env ->
+  Aast.contexts option ->
+  Aast.contexts option ->
+  Pos.t ->
+  Typing_env_types.env * Typing_defs.locl_ty * Typing_defs.locl_ty
+
+val get_ctx_vars : Aast.contexts option -> string list

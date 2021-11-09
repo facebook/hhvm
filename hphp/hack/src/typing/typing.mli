@@ -54,13 +54,6 @@ val file_attributes :
 val type_param :
   Typing_env_types.env -> Nast.tparam -> Typing_env_types.env * Tast.tparam
 
-val type_capability :
-  Typing_env_types.env ->
-  Aast.contexts option ->
-  Aast.contexts option ->
-  Pos.t ->
-  Typing_env_types.env * Typing_defs.locl_ty * Typing_defs.locl_ty
-
 val call :
   expected:Typing_helpers.ExpectedTy.t option ->
   ?nullsafe:Pos.t option ->

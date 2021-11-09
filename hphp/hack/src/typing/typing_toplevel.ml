@@ -240,16 +240,6 @@ let merge_decl_header_with_hints ~params ~ret ~variadic decl_header env =
   in
   (ret_decl_ty, params_decl_ty, variadicity_decl_ty)
 
-(* Checking this with List.exists will be a single op in the vast majority of cases (empty) *)
-let get_ctx_vars ctxs =
-  Option.value_map
-    ~f:(fun (_, cs) ->
-      List.filter_map cs ~f:(function
-          | (_, Haccess ((_, Hvar n), _)) -> Some n
-          | _ -> None))
-    ~default:[]
-    ctxs
-
 let function_dynamically_callable
     env f params_decl_ty variadicity_decl_ty ret_locl_ty =
   let env = { env with in_support_dynamic_type_method_check = true } in
@@ -293,7 +283,7 @@ let function_dynamically_callable
              in
              make_param_local_ty env (Some ty) param)
     in
-    let params_need_immutable = get_ctx_vars f.f_ctxs in
+    let params_need_immutable = Typing_coeffects.get_ctx_vars f.f_ctxs in
     let (env, _) =
       (* In this pass, bind_param_and_check receives a pair where the lhs is
        * either Tdynamic or TInstersection of the original type and TDynamic,
@@ -374,7 +364,7 @@ let fun_def ctx fd :
   in
   let (env, file_attrs) = Typing.file_attributes env fd.fd_file_attributes in
   let (env, cap_ty, unsafe_cap_ty) =
-    Typing.type_capability env f.f_ctxs f.f_unsafe_ctxs (fst f.f_name)
+    Typing_coeffects.type_capability env f.f_ctxs f.f_unsafe_ctxs (fst f.f_name)
   in
   let env =
     Env.set_module env
@@ -443,7 +433,7 @@ let fun_def ctx fd :
   let partial_callback = Partial.should_check_error (Env.get_mode env) in
   let check_has_hint p t = check_param_has_hint env p t partial_callback in
   List.iter2_exn ~f:check_has_hint f.f_params param_tys;
-  let params_need_immutable = get_ctx_vars f.f_ctxs in
+  let params_need_immutable = Typing_coeffects.get_ctx_vars f.f_ctxs in
   let can_read_globals =
     Typing_subtype.is_sub_type
       env
@@ -588,7 +578,7 @@ let method_dynamically_callable
              in
              make_param_local_ty env (Some ty) param)
     in
-    let params_need_immutable = get_ctx_vars m.m_ctxs in
+    let params_need_immutable = Typing_coeffects.get_ctx_vars m.m_ctxs in
     let (env, _) =
       (* In this pass, bind_param_and_check receives a pair where the lhs is
        * either Tdynamic or TInstersection of the original type and TDynamic,
@@ -701,7 +691,7 @@ let method_def ~is_disposable env cls m =
     Typing.attributes_check_def env SN.AttributeKinds.mthd m.m_user_attributes
   in
   let (env, cap_ty, unsafe_cap_ty) =
-    Typing.type_capability env m.m_ctxs m.m_unsafe_ctxs (fst m.m_name)
+    Typing_coeffects.type_capability env m.m_ctxs m.m_unsafe_ctxs (fst m.m_name)
   in
   let (env, _) =
     Typing_coeffects.register_capabilities env cap_ty unsafe_cap_ty
@@ -777,7 +767,7 @@ let method_def ~is_disposable env cls m =
   let param_fn p t = check_param_has_hint env p t partial_callback in
   List.iter2_exn ~f:param_fn m.m_params param_tys;
   Typing_memoize.check_method env m;
-  let params_need_immutable = get_ctx_vars m.m_ctxs in
+  let params_need_immutable = Typing_coeffects.get_ctx_vars m.m_ctxs in
   let can_read_globals =
     Typing_subtype.is_sub_type
       env
@@ -1504,7 +1494,7 @@ let class_const_def ~in_enum_class c env cc =
         let enum_class_ctx =
           Some (e_pos, [make_hint e_pos SN.Capabilities.write_props])
         in
-        Typing.type_capability env enum_class_ctx enum_class_ctx e_pos
+        Typing_coeffects.type_capability env enum_class_ctx enum_class_ctx e_pos
       in
       let (env, (te, ty')) =
         Typing.(

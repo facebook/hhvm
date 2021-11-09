@@ -712,34 +712,6 @@ let stash_conts_for_closure env p is_anon captured f =
       in
       f env)
 
-let type_capability env ctxs unsafe_ctxs default_pos =
-  (* No need to repeat the following check (saves time) for unsafe_ctx
-     because it's synthetic and well-kinded by construction *)
-  Option.iter ctxs ~f:(fun (_pos, hl) ->
-      List.iter
-        hl
-        ~f:
-          (Typing_kinding.Simple.check_well_kinded_context_hint
-             ~in_signature:false
-             env));
-
-  let cc = Decl_hint.aast_contexts_to_decl_capability in
-  let (decl_pos, cap) = cc env.decl_env ctxs default_pos in
-  let (env, cap_ty) =
-    match cap with
-    | CapTy ty ->
-      if TypecheckerOptions.strict_contexts (Env.get_tcopt env) then
-        Typing_coeffects.validate_capability env decl_pos ty;
-      Phase.localize_no_subst env ~ignore_errors:false ty
-    | CapDefaults p -> (env, MakeType.default_capability p)
-  in
-  let (env, unsafe_cap_ty) =
-    match snd @@ cc env.decl_env unsafe_ctxs default_pos with
-    | CapTy ty -> Phase.localize_no_subst env ~ignore_errors:false ty
-    | CapDefaults p -> (env, MakeType.default_capability_unsafe p)
-  in
-  (env, cap_ty, unsafe_cap_ty)
-
 let requires_consistent_construct = function
   | CIstatic -> true
   | CIexpr _ -> true
@@ -4796,7 +4768,11 @@ and closure_make
       (env, Env.get_local env Typing_coeffects.local_capability_id)
     | (_, _) ->
       let (env, cap_ty, unsafe_cap_ty) =
-        type_capability env f.f_ctxs f.f_unsafe_ctxs (fst f.f_name)
+        Typing_coeffects.type_capability
+          env
+          f.f_ctxs
+          f.f_unsafe_ctxs
+          (fst f.f_name)
       in
       let (env, _) =
         Typing_coeffects.register_capabilities env cap_ty unsafe_cap_ty

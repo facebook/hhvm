@@ -63,10 +63,6 @@ type env = {
       (** Environment stored in the TAST used to expand types *)
 }
 
-module PointsTo : sig
-  type t = entity_ * entity_
+module PointsToSet : Set.S with type elt = entity_ * entity_
 
-  val compare : t -> t -> int
-end
-
-module PointsToSet : Set.S with type elt = PointsTo.t
+module ShapeKeyMap : Map.S with type key = shape_key

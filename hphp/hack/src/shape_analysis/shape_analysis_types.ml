@@ -43,13 +43,17 @@ type env = {
   saved_env: Tast.saved_env;
 }
 
-module PointsTo = struct
+module PointsToSet = Set.Make (struct
   type t = entity_ * entity_
 
   let compare (a, b) (c, d) =
     match compare_entity_ a c with
     | 0 -> compare_entity_ b d
     | x -> x
-end
+end)
 
-module PointsToSet = Set.Make (PointsTo)
+module ShapeKeyMap = Map.Make (struct
+  type t = shape_key
+
+  let compare = compare_shape_key
+end)

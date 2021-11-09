@@ -34,9 +34,12 @@ let show_shape_result env = function
     let show_key_and_type (key, ty) =
       Format.asprintf "    %s => %s" (show_key key) (show_ty ty)
     in
-    Format.asprintf
-      "%s :\n  shape(\n%s\n  )"
-      (Format.asprintf "%a" Pos.pp pos)
-      (String.concat ~sep:"\n" (List.map keys_and_types ~f:show_key_and_type))
+    if List.is_empty keys_and_types then
+      Format.asprintf "%s : shape()" (Format.asprintf "%a" Pos.pp pos)
+    else
+      Format.asprintf
+        "%s :\n  shape(\n%s\n  )"
+        (Format.asprintf "%a" Pos.pp pos)
+        (String.concat ~sep:"\n" (List.map keys_and_types ~f:show_key_and_type))
   | Dynamically_accessed_dict entity ->
     Format.asprintf "%s : dynamic" (show_entity entity)

@@ -8,7 +8,6 @@
 
 open Hh_prelude
 open Shape_analysis_types
-module PosSet = Caml.Set.Make (Pos)
 
 type constraints = {
   exists: entity_ list;
@@ -36,27 +35,26 @@ let rec transitive_closure (set : PointsToSet.t) : PointsToSet.t =
   else
     transitive_closure new_set
 
+let partition_constraint constraints = function
+  | Exists entity -> { constraints with exists = entity :: constraints.exists }
+  | Has_static_key (entity, key, ty) ->
+    {
+      constraints with
+      static_accesses = (entity, key, ty) :: constraints.static_accesses;
+    }
+  | Has_dynamic_key entity ->
+    {
+      constraints with
+      dynamic_accesses = entity :: constraints.dynamic_accesses;
+    }
+  | Points_to (pointer_entity, pointed_entity) ->
+    {
+      constraints with
+      points_tos = (pointer_entity, pointed_entity) :: constraints.points_tos;
+    }
+
 let simplify (env : Typing_env_types.env) (constraints : constraint_ list) :
     shape_result list =
-  let partition_constraint constraints = function
-    | Exists entity ->
-      { constraints with exists = entity :: constraints.exists }
-    | Has_static_key (entity, key, ty) ->
-      {
-        constraints with
-        static_accesses = (entity, key, ty) :: constraints.static_accesses;
-      }
-    | Has_dynamic_key entity ->
-      {
-        constraints with
-        dynamic_accesses = entity :: constraints.dynamic_accesses;
-      }
-    | Points_to (pointer_entity, pointed_entity) ->
-      {
-        constraints with
-        points_tos = (pointer_entity, pointed_entity) :: constraints.points_tos;
-      }
-  in
   let { exists; static_accesses; dynamic_accesses; points_tos } =
     List.fold ~init:constraints_init ~f:partition_constraint constraints
   in
@@ -65,7 +63,7 @@ let simplify (env : Typing_env_types.env) (constraints : constraint_ list) :
     let add_pointer_to_literal points_to map =
       match points_to with
       | (Variable pointer, Literal pointed) ->
-        IMap.add pointer (PosSet.singleton pointed) map ~combine:PosSet.union
+        IMap.add pointer (Pos.Set.singleton pointed) map ~combine:Pos.Set.union
       | _ -> map
     in
     PointsToSet.of_list points_tos |> transitive_closure |> fun points_to_set ->
@@ -77,7 +75,7 @@ let simplify (env : Typing_env_types.env) (constraints : constraint_ list) :
     | Variable var ->
       begin
         match IMap.find_opt var variable_to_literal_map with
-        | Some poss -> PosSet.elements poss
+        | Some poss -> Pos.Set.elements poss
         | None ->
           failwith
             (Format.sprintf "Could not find which entity %d points to" var)
@@ -90,81 +88,52 @@ let simplify (env : Typing_env_types.env) (constraints : constraint_ list) :
       static_accesses
   in
 
-  (* Eliminate static access constraints for entities that aren't `dict`s *)
-  let exists = exists |> List.concat_map ~f:poss_of_entity |> PosSet.of_list in
-  let static_accesses =
-    List.filter static_accesses ~f:(fun (pos, _, _) -> PosSet.mem pos exists)
+  (* Start collecting shape results starting with empty shapes of candidates *)
+  let static_shape_results : Typing_defs.locl_ty ShapeKeyMap.t Pos.Map.t =
+    exists
+    |> List.concat_map ~f:poss_of_entity
+    |> List.fold
+         ~f:(fun map pos -> Pos.Map.add pos ShapeKeyMap.empty map)
+         ~init:Pos.Map.empty
   in
 
-  (* Eliminate static access constraints for entities that are dynamically
-     accessed *)
+  (* Invalidate candidates that are observed to experience dynamic access *)
   let dynamic_accesses =
-    dynamic_accesses |> List.concat_map ~f:poss_of_entity |> PosSet.of_list
+    dynamic_accesses |> List.concat_map ~f:poss_of_entity |> Pos.Set.of_list
   in
-  let static_accesses =
-    List.filter static_accesses ~f:(fun (pos, _, _) ->
-        not @@ PosSet.mem pos dynamic_accesses)
+  let static_shape_results : Typing_defs.locl_ty ShapeKeyMap.t Pos.Map.t =
+    static_shape_results
+    |> Pos.Map.filter (fun pos _ -> not @@ Pos.Set.mem pos dynamic_accesses)
   in
 
-  (* Group static access constraints to determine the shape type *)
-  let sorted_accesses : (Pos.t * shape_key * Tast.ty) list =
+  (* Add known keys *)
+  let static_shape_results : Typing_defs.locl_ty ShapeKeyMap.t Pos.Map.t =
+    let update_shape_key ty = function
+      | None -> Some ty
+      | Some ty' ->
+        let (_env, ty) = Typing_union.union env ty ty' in
+        Some ty
+    in
+    let update_entity key ty = function
+      | None -> None
+      | Some shape_key_map ->
+        Some (ShapeKeyMap.update key (update_shape_key ty) shape_key_map)
+    in
     static_accesses
-    |> List.sort ~compare:(fun (pos1, key1, _) (pos2, key2, _) ->
-           match Pos.compare pos1 pos2 with
-           | 0 -> compare_shape_key key1 key2
-           | n -> n)
-  in
-  let accesses_grouped_by_entity : (Pos.t * (shape_key * Tast.ty) list) list =
-    let group_by_entity group =
-      let (pos, _, _) = List.hd_exn group in
-      let keys_and_tys : (shape_key * Tast.ty) list =
-        List.map group ~f:(fun (_, key, ty) -> (key, ty))
-      in
-      (pos, keys_and_tys)
-    in
-    sorted_accesses
-    |> List.group ~break:(fun (pos1, _, _) (pos2, _, _) ->
-           not @@ Pos.equal pos1 pos2)
-    |> List.map ~f:group_by_entity
-  in
-  let accesses_grouped_by_key : (Pos.t * (shape_key * Tast.ty list) list) list =
-    let group_by_key (pos, group) =
-      let group =
-        group
-        |> List.group ~break:(fun (key1, _) (key2, _) ->
-               not @@ equal_shape_key key1 key2)
-        |> List.map ~f:(fun group ->
-               let (key, _) = List.hd_exn group in
-               let tys = List.map ~f:snd group in
-               (key, tys))
-      in
-      (pos, group)
-    in
-    accesses_grouped_by_entity |> List.map ~f:group_by_key
+    |> List.fold ~init:static_shape_results ~f:(fun pos_map (pos, key, ty) ->
+           Pos.Map.update pos (update_entity key ty) pos_map)
   in
 
-  let combined_types : (Pos.t * (shape_key * Tast.ty) list) list =
-    let fold_tys tys =
-      snd
-      @@ List.fold
-           ~f:(fun (env, ty1) ty2 -> Typing_union.union env ty1 ty2)
-           ~init:(env, Typing_make_type.nothing Typing_reason.Rnone)
-           tys
-    in
-    accesses_grouped_by_key
-    |> List.map ~f:(fun (pos, keys_and_tys) ->
-           ( pos,
-             List.map keys_and_tys ~f:(fun (key, tys) -> (key, fold_tys tys)) ))
-  in
-
+  (* Convert to individual statically accessed dict results *)
   let static_shape_results : shape_result list =
-    combined_types
+    static_shape_results
+    |> Pos.Map.bindings
     |> List.map ~f:(fun (pos, keys_and_types) ->
-           Shape_like_dict (pos, keys_and_types))
+           Shape_like_dict (pos, ShapeKeyMap.bindings keys_and_types))
   in
 
   let dynamic_shape_results =
-    PosSet.elements dynamic_accesses
+    Pos.Set.elements dynamic_accesses
     |> List.map ~f:(fun entity_ -> Dynamically_accessed_dict (Literal entity_))
   in
 

@@ -151,6 +151,8 @@ module Map : WrappedMap.S with type key = t
 
 module AbsolutePosMap : WrappedMap.S with type key = absolute
 
+module Set : Set.S with type elt = t
+
 val print_verbose_absolute : absolute -> string
 
 val print_verbose_relative : t -> string

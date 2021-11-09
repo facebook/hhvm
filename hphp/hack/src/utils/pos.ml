@@ -683,7 +683,7 @@ let print_verbose_absolute p =
 
 let print_verbose_relative p = print_verbose_absolute (to_absolute p)
 
-module Map = WrappedMap.Make (struct
+module Pos = struct
   type path = t
 
   (* The definition below needs to refer to the t in the outer scope, but WrappedMap
@@ -691,10 +691,14 @@ module Map = WrappedMap.Make (struct
   type t = path
 
   let compare = compare
-end)
+end
+
+module Map = WrappedMap.Make (Pos)
 
 module AbsolutePosMap = WrappedMap.Make (struct
   type t = absolute
 
   let compare = compare_absolute
 end)
+
+module Set = Caml.Set.Make (Pos)

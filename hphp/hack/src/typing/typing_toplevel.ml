@@ -1857,11 +1857,12 @@ let class_def_ env c tc =
     if skip_hierarchy_checks ctx then
       env
     else
+      let (c_name_pos, c_name) = c.c_name in
       Typing_extends.check_implements_extends_uses
         env
         ~implements:(List.map implements ~f:snd)
         ~parents:(List.map impl ~f:snd)
-        (fst c.c_name, tc)
+        (c_name, c_name_pos, tc)
   in
   let is_disposable = Typing_disposable.is_disposable_class env tc in
   if (not (skip_hierarchy_checks ctx)) && is_disposable then

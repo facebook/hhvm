@@ -74,10 +74,13 @@ let apply_edit (classish_starts : Pos.t SMap.t) (src : string) (edit : edit) :
     string =
   let (new_text, p) = edit in
   let pos = of_qf_pos ~classish_starts p in
-  let (start_offset, end_offset) = Pos.info_raw pos in
-  let src_before = String.subo src ~len:start_offset in
-  let src_after = String.subo src ~pos:end_offset in
-  src_before ^ new_text ^ src_after
+  if Pos.equal pos Pos.none then
+    src
+  else
+    let (start_offset, end_offset) = Pos.info_raw pos in
+    let src_before = String.subo src ~len:start_offset in
+    let src_after = String.subo src ~pos:end_offset in
+    src_before ^ new_text ^ src_after
 
 let apply_quickfix
     (classish_starts : Pos.t SMap.t) (src : string) (quickfix : t) : string =

@@ -81,9 +81,23 @@ let check_class_elt_visibility parent_class_elt class_elt on_error =
   let (lazy pos) = class_elt.ce_pos in
   check_visibility parent_vis c_vis parent_pos pos on_error
 
+let stub_meth_quickfix
+    (class_name : string)
+    (parent_name : string)
+    (meth_name : string)
+    (meth : class_elt) : Quickfix.t =
+  let title = Printf.sprintf "Add stub method %s::%s" parent_name meth_name in
+  let new_text = Typing_skeleton.of_method meth_name meth in
+  Quickfix.make_classish ~title ~new_text ~classish_name:class_name
+
 (* Check that all the required members are implemented *)
 let check_members_implemented
-    check_private parent_reason reason (_, parent_members, get_member) =
+    class_name
+    parent_name
+    check_private
+    parent_reason
+    reason
+    (_, parent_members, get_member) =
   List.iter parent_members ~f:(fun (member_name, class_elt) ->
       match class_elt.ce_visibility with
       | Vprivate _ when not check_private -> ()
@@ -102,7 +116,7 @@ let check_members_implemented
           parent_reason
           reason
           defn_pos
-          []
+          [stub_meth_quickfix class_name parent_name member_name class_elt]
       | _ -> ())
 
 (* An abstract member can be declared in multiple ancestors. Sometimes these
@@ -1153,7 +1167,7 @@ let check_consts env implements parent_class (name_pos, class_) psubst on_error
  * message pointing at the class being checked.
  *)
 let check_class_implements
-    env implements parent_class (name_pos, class_) on_error =
+    env implements parent_class (name, name_pos, class_) on_error =
   let env =
     check_typeconsts env implements parent_class (name_pos, class_) on_error
   in
@@ -1167,7 +1181,13 @@ let check_class_implements
   let check_privates : bool = Ast_defs.is_c_trait (Cls.kind parent_class) in
   List.iter
     memberl
-    ~f:(check_members_implemented check_privates parent_pos name_pos);
+    ~f:
+      (check_members_implemented
+         name
+         (Cls.name parent_class)
+         check_privates
+         parent_pos
+         name_pos);
   List.fold ~init:env memberl ~f:(fun env ->
       check_members
         check_privates
@@ -1181,7 +1201,7 @@ let check_class_implements
 (*****************************************************************************)
 
 let check_implements_extends_uses
-    env ~implements ~parents (name_pos, (class_ : Cls.t)) =
+    env ~implements ~parents (c_name, name_pos, class_) =
   let get_interfaces acc x =
     let (_, (_, name), _) = TUtils.unwrap_class_type x in
     match Env.get_class env name with
@@ -1204,7 +1224,7 @@ let check_implements_extends_uses
           env
           implements
           parent_class
-          (name_pos, class_)
+          (c_name, name_pos, class_)
           (fun ?code:_ ?quickfixes:_ reasons ->
             (* sadly, enum error reporting requires this to keep the error in the file
                with the enum *)

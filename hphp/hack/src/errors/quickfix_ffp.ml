@@ -9,14 +9,6 @@
 open Hh_prelude
 module Syntax = Full_fidelity_positioned_syntax
 
-let token_name (s : Syntax.t) : string option =
-  let open Syntax in
-  match s.syntax with
-  | Token t ->
-    let name = t.Token.source_text.Token.SourceText.text in
-    Some name
-  | _ -> None
-
 let classish_body_brace_offset s : int option =
   let open Syntax in
   match s.syntax with
@@ -27,23 +19,63 @@ let classish_body_brace_offset s : int option =
     | _ -> None)
   | _ -> None
 
+let namespace_name (s : Syntax.t) : string option =
+  let open Syntax in
+  match s.syntax with
+  | Syntax.NamespaceDeclarationHeader h ->
+    let name_token = h.namespace_name in
+    (match name_token.syntax with
+    | Syntax.Token _ -> Some (text name_token)
+    | _ ->
+      (* Anonymous namespace: namespace { ... } *)
+      None)
+  | _ -> None
+
+(* Covnert ["Foo"; "Bar"] to \Foo\Bar. *)
+let name_from_parts (parts : string list) : string =
+  String.concat (List.map parts ~f:(fun p -> "\\" ^ p))
+
 let classish_start_offsets (s : Syntax.t) : int SMap.t =
   let open Syntax in
-  let rec aux (acc : int SMap.t) (s : Syntax.t) =
+  let rec aux (acc : int SMap.t * string list) (s : Syntax.t) =
+    let (offsets, namespace) = acc in
     match s.syntax with
     | Syntax.Script s -> aux acc s.script_declarations
     | Syntax.SyntaxList sl -> List.fold sl ~init:acc ~f:aux
-    | Syntax.NamespaceDeclaration n -> aux acc n.namespace_body
+    | Syntax.NamespaceDeclaration n ->
+      let b = n.namespace_body in
+      (match b.syntax with
+      | Syntax.NamespaceBody nb ->
+        (* We're looking at: namespace Foo { ... } *)
+        let inner_namespace =
+          match namespace_name n.namespace_header with
+          | Some name -> name :: namespace
+          | None -> namespace
+        in
+        let (offsets, _) =
+          aux (offsets, inner_namespace) nb.namespace_declarations
+        in
+        (offsets, namespace)
+      | Syntax.NamespaceEmptyBody _ ->
+        (* We're looking at: namespace Foo; *)
+        let namespace =
+          match namespace_name n.namespace_header with
+          | Some name -> name :: namespace
+          | None -> namespace
+        in
+        (offsets, namespace)
+      | _ -> acc)
     | Syntax.ClassishDeclaration c ->
-      (match
-         (token_name c.classish_name, classish_body_brace_offset c.classish_body)
-       with
-      | (Some name, Some offset) -> SMap.add name offset acc
+      (match classish_body_brace_offset c.classish_body with
+      | Some offset ->
+        let name = name_from_parts (namespace @ [text c.classish_name]) in
+        let offsets = SMap.add name offset offsets in
+        (offsets, namespace)
       | _ -> acc)
     | _ -> acc
   in
 
-  aux SMap.empty s
+  fst (aux (SMap.empty, []) s)
 
 (** Return the position of the start "{" in every classish in this
     file. *)

@@ -149,6 +149,7 @@ fn elaborate_raw_id<'a>(
     nsenv: &impl NamespaceEnv,
     kind: ElaborateKind,
     id: &'a str,
+    simplify_naming_for_facts: bool,
 ) -> Cow<'a, str> {
     let id = if kind == ElaborateKind::Class && nsenv.disable_xhp_element_mangling() {
         elaborate_xhp_namespace(id).map_or(Cow::Borrowed(id), Cow::Owned)
@@ -190,10 +191,18 @@ fn elaborate_raw_id<'a>(
     };
 
     if has_bslash && prefix == "namespace" {
-        return Cow::Owned(elaborate_into_current_ns(
-            nsenv,
-            id.trim_start_matches("namespace\\"),
-        ));
+        if simplify_naming_for_facts {
+            return Cow::Owned(id.trim_start_matches("namespace\\").to_string());
+        } else {
+            return Cow::Owned(elaborate_into_current_ns(
+                nsenv,
+                id.trim_start_matches("namespace\\"),
+            ));
+        }
+    }
+
+    if simplify_naming_for_facts {
+        return Cow::Owned(elaborate_into_current_ns(nsenv, id));
     }
 
     match nsenv.get_imported_name(kind, prefix, has_bslash) {
@@ -209,7 +218,10 @@ fn elaborate_raw_id<'a>(
 }
 
 pub fn elaborate_id(nsenv: &namespace_env::Env, kind: ElaborateKind, Id(p, id): &Id) -> Id {
-    Id(p.clone(), elaborate_raw_id(nsenv, kind, id).into_owned())
+    Id(
+        p.clone(),
+        elaborate_raw_id(nsenv, kind, id, false).into_owned(),
+    )
 }
 
 pub fn elaborate_raw_id_in<'a>(
@@ -217,8 +229,9 @@ pub fn elaborate_raw_id_in<'a>(
     nsenv: &oxidized_by_ref::namespace_env::Env<'a>,
     kind: ElaborateKind,
     id: &'a str,
+    simplify_naming_for_facts: bool,
 ) -> &'a str {
-    match elaborate_raw_id(nsenv, kind, id) {
+    match elaborate_raw_id(nsenv, kind, id, simplify_naming_for_facts) {
         Cow::Owned(s) => arena.alloc_str(&s),
         Cow::Borrowed(s) => s,
     }

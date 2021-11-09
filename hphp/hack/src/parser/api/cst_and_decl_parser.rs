@@ -47,7 +47,8 @@ pub fn parse_script<'a>(
             mode,
             arena,
             NoSourceTextAllocator,
-            true, // omit_user_attributes_irrelevant_to_typechecking
+            true,  // omit_user_attributes_irrelevant_to_typechecking
+            false, // simplify_naming_for_facts
         )
     };
     let sc = PairSmartConstructors::new(sc0, sc1);

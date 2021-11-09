@@ -39,7 +39,8 @@ pub fn parse_decls_and_mode<'a>(
         arena,
         stack_limit,
         NoSourceTextAllocator,
-        true, // omit_user_attributes_irrelevant_to_typechecking
+        true,  // omit_user_attributes_irrelevant_to_typechecking
+        false, // simplify_naming_for_facts
     );
     (state.decls, mode)
 }
@@ -77,6 +78,7 @@ pub fn parse_decls_without_reference_text<'a, 'text>(
         stack_limit,
         ArenaSourceTextAllocator(arena),
         false, // omit_user_attributes_irrelevant_to_typechecking
+        true,  // simplify_naming_for_facts
     );
     (state.decls, !errors.is_empty())
 }
@@ -88,6 +90,7 @@ fn parse_script_with_text_allocator<'a, 'text, S: SourceTextAllocator<'text, 'a>
     stack_limit: Option<&'a StackLimit>,
     source_text_allocator: S,
     omit_user_attributes_irrelevant_to_typechecking: bool,
+    simplify_naming_for_facts: bool,
 ) -> (
     Node<'a>,
     Vec<SyntaxError>,
@@ -104,6 +107,7 @@ fn parse_script_with_text_allocator<'a, 'text, S: SourceTextAllocator<'text, 'a>
         arena,
         source_text_allocator,
         omit_user_attributes_irrelevant_to_typechecking,
+        simplify_naming_for_facts,
     );
     let mut parser = Parser::new(&source, env, sc);
     let root = parser.parse_script(stack_limit);

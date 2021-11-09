@@ -14,21 +14,21 @@ module Test = Integration_test_base
 
 let foo_name = "foo.php"
 
-let foo_no_errors = "<?hh // partial
-function foo() {
+let foo_no_errors = "<?hh
+function foo(): void {
 
 }
 "
 
-let foo_with_errors = "<?hh // partial
+let foo_with_errors = "<?hh
 {"
 
 let bar_name = "bar.php"
 
-let foo2_definition = "function foo2() {}\n"
+let foo2_definition = "function foo2(): void {}\n"
 
-let bar_contents = "<?hh // partial
-function test() {
+let bar_contents = "<?hh
+function test(): void {
   fo
 }
 "

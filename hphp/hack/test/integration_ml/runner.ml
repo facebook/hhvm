@@ -63,7 +63,6 @@ let tests =
     ("interrupt2", run Test_interrupt2.test);
     ("interrupt", run Test_interrupt.test);
     ("lazy_decl_idempotence", run Test_lazy_decl_idempotence.test);
-    ("mixed_hack_hackpartial", run Test_mixed_hack_hackpartial.test);
     ("modify_file", run Test_modify_file.test);
     ("new_file", run Test_new_file.test);
     ("property_initializer", run Test_property_initializer.test);

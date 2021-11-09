@@ -357,11 +357,8 @@ RegionVec regionizeFunc(const Func* func, std::string& transCFGAnnot) {
         coveredNodes.insert(node);
         auto const& inArcs = cfg.inArcs(node);
         coveredArcs.insert(inArcs.begin(), inArcs.end());
-        for (auto outArc : cfg.outArcs(node)) {
-          if (heads.count(outArc->dst())) {
-            coveredArcs.insert(outArc);
-          }
-        }
+        auto const& outArcs = cfg.outArcs(node);
+        coveredArcs.insert(outArcs.begin(), outArcs.end());
         continue;
       }
       FTRACE(6, "regionizeFunc: selecting trace to cover node {}\n", newHead);

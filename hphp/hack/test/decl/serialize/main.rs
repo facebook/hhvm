@@ -42,13 +42,14 @@ fn main() -> ::anyhow::Result<()> {
         let relative_path = RelativePath::make(relative_path::Prefix::Dummy, path.to_path_buf());
 
         let arena = bumpalo::Bump::new();
-        let decls = direct_decl_parser::parse_decls(
+        let parsed_file = direct_decl_parser::parse_decls(
             Default::default(),
             relative_path,
             &content,
             &arena,
             None,
         );
+        let decls = parsed_file.decls;
 
         results.push(round_trip::<Decls<'_>, Json>(&arena, path, decls));
         results.push(round_trip::<Decls<'_>, FlexBuffer>(&arena, path, decls));

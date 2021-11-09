@@ -67,13 +67,7 @@ fn parse_decls<'a>(
     text: &'a [u8],
 ) -> ParsedFile<'a> {
     stack_limit::with_elastic_stack(|stack_limit| {
-        direct_decl_parser::parse_decls_and_mode(
-            opts,
-            filename.clone(),
-            text,
-            arena,
-            Some(stack_limit),
-        )
+        direct_decl_parser::parse_decls(opts, filename.clone(), text, arena, Some(stack_limit))
     })
     .unwrap_or_else(|failure| {
         panic!(

@@ -28,7 +28,7 @@ pub use oxidized_by_ref::{
 /// - References the source text to avoid spending time or space copying
 ///   identifiers into the arena (when possible).
 /// - Excludes user attributes which are irrelevant to typechecking.
-pub fn parse_decls_and_mode<'a>(
+pub fn parse_decls<'a>(
     opts: &'a DeclParserOptions<'a>,
     filename: RelativePath,
     text: &'a [u8],
@@ -49,20 +49,6 @@ pub fn parse_decls_and_mode<'a>(
         mode,
         decls: state.decls,
     }
-}
-
-/// Parse decls for typechecking.
-/// - References the source text to avoid spending time or space copying
-///   identifiers into the arena (when possible).
-/// - Excludes user attributes which are irrelevant to typechecking.
-pub fn parse_decls<'a>(
-    opts: &'a DeclParserOptions<'a>,
-    filename: RelativePath,
-    text: &'a [u8],
-    arena: &'a Bump,
-    stack_limit: Option<&'a StackLimit>,
-) -> Decls<'a> {
-    parse_decls_and_mode(opts, filename, text, arena, stack_limit).decls
 }
 
 /// Parse decls for decls in compilation.

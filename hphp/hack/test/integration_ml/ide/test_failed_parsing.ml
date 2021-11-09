@@ -31,13 +31,16 @@ function bar() : void {
   foo();
 }"
 
-let parse_error = "<?hh // partial
+let parse_error = "<?hh
 
 {"
 
 let bar_parse_error_diagnostics =
   "
 /bar.php:
+File \"/bar.php\", line 3, characters 1-1:
+Toplevel statements are not allowed. Use `__EntryPoint` attribute instead (Parsing[1002])
+
 File \"/bar.php\", line 3, characters 2-2:
 A right brace `}` is expected here. (Parsing[1002])
 "

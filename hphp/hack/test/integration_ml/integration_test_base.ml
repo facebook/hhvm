@@ -277,10 +277,11 @@ let assert_errors_in_phase
     fail (Printf.sprintf "Expected %d" expected_count);
   env
 
+let error_strings err_list =
+  List.map ~f:(fun x -> Errors.(to_string (to_absolute x))) err_list
+
 let assertSingleError expected err_list =
-  let error_strings =
-    List.map ~f:(fun x -> Errors.(to_string (to_absolute x))) err_list
-  in
+  let error_strings = error_strings err_list in
   match error_strings with
   | [x] -> assertEqual expected x
   | _ ->

@@ -9,6 +9,7 @@
  *)
 
 open ServerEnv
+open Hh_prelude
 module Test = Integration_test_base
 
 let foo_name = "foo.php"
@@ -44,20 +45,29 @@ Invalid argument (Typing[4110])
   But got `int`
 "
 
-let foo_ide_contents = "<?hh // partial
+let foo_ide_contents = "<?hh
 
 {
 "
 
 let foo_ide_errors =
-  "
+  [
+    "
 File \"/foo.php\", line 3, characters 2-2:
 A right brace `}` is expected here. (Parsing[1002])
-"
+";
+    "
+File \"/foo.php\", line 3, characters 1-1:
+Toplevel statements are not allowed. Use `__EntryPoint` attribute instead (Parsing[1002])
+";
+  ]
 
 let foo_ide_diagnostics =
   "
 /foo.php:
+File \"/foo.php\", line 3, characters 1-1:
+Toplevel statements are not allowed. Use `__EntryPoint` attribute instead (Parsing[1002])
+
 File \"/foo.php\", line 3, characters 2-2:
 A right brace `}` is expected here. (Parsing[1002])
 "
@@ -77,7 +87,15 @@ let test () =
   let (env, loop_output) = Test.(run_loop_once env default_loop_input) in
   (* Force update to global error list *)
   let (env, _) = Test.status env in
-  Test.assertSingleError foo_ide_errors (Errors.get_error_list env.errorl);
+  begin
+    match List.zip foo_ide_errors (Errors.get_error_list env.errorl) with
+    | List.Or_unequal_lengths.Ok errs ->
+      List.iter
+        ~f:(fun (expected, err) -> Test.assertSingleError expected [err])
+        errs
+    | List.Or_unequal_lengths.Unequal_lengths ->
+      Test.fail "Expected 2 errors.\n"
+  end;
   Test.assert_diagnostics loop_output foo_ide_diagnostics;
 
   (* Close the file and check that error lists are back to reflecting disk

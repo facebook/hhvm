@@ -6,35 +6,35 @@
 *)
 open Integration_test_base_types
 open ServerEnv
+open Hh_prelude
 module Test = Integration_test_base
 
-let foo_contents =
-  "<?hh // partial
+let foo_contents = "<?hh
     class Foo {
-        public static $x;
+        public static ?int $x;
     }
 "
 
 let qux_contents =
-  "<?hh // partial
+  "<?hh
 function h(): string {
     return 'a';
 }
 
 class Foo {}
 
-function setUpClass() {
+function setUpClass(): void {
     new Foo();
     h();
 }
 "
 
 let bar_contents =
-  "<?hh // partial
+  "<?hh
       class Bar extends Foo {}
 
-      function main(Bar $a) {
-          return $a::$y;
+      function main(Bar $a): void {
+          $a::$y;
       }
 "
 
@@ -57,9 +57,9 @@ let test () =
   if not loop_output.did_read_disk_changes then
     Test.fail "Expected the server to process disk updates";
   let bar_error =
-    "File \"/bar.php\", line 5, characters 22-23:\n"
+    "File \"/bar.php\", line 5, characters 15-16:\n"
     ^ "No class variable `$y` in `Bar` (Typing[4090])\n"
-    ^ "  File \"/foo.php\", line 3, characters 23-24:\n"
+    ^ "  File \"/foo.php\", line 3, characters 23-26:\n"
     ^ "  Did you mean `$x` instead?\n"
     ^ "  File \"/bar.php\", line 2, characters 13-15:\n"
     ^ "  Declaration of `Bar` is here\n"
@@ -75,4 +75,7 @@ let test () =
   | [x; y] ->
     Test.assertSingleError qux_error [y];
     Test.assertSingleError bar_error [x]
-  | _ -> Test.fail "Expected exactly two errors"
+  | errs ->
+    Test.fail
+    @@ "Expected exactly two errors, but got:\n"
+    ^ String.concat ~sep:"\n" (Test.error_strings errs)

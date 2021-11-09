@@ -197,3 +197,5 @@ val assert_ide_refactor :
 val assert_needs_recheck : ServerEnv.env -> string -> unit
 
 val assert_needs_no_recheck : ServerEnv.env -> string -> unit
+
+val error_strings : Errors.error list -> string list

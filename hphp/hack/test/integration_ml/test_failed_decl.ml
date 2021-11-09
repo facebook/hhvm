@@ -12,20 +12,20 @@ open Integration_test_base_types
 open ServerEnv
 module Test = Integration_test_base
 
-let foo_contents = "<?hh // partial
+let foo_contents = "<?hh
 interface I {}
 class Foo extends I {
 
 }
 "
 
-let baz_contents = "<?hh // partial
+let baz_contents = "<?hh
 class Baz extends Foo {
 
 }
 "
 
-let qux_contents = "<?hh // partial
+let qux_contents = "<?hh
 class Qux {
 
 }

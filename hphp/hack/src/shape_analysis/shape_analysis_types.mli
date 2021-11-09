@@ -23,7 +23,10 @@ type mode =
 
 type options = { mode: mode }
 
-type entity_ = Literal of Pos.t
+type entity_ =
+  | Literal of Pos.t
+  | Variable of int
+[@@deriving eq, ord]
 
 type entity = entity_ option
 
@@ -36,9 +39,11 @@ type constraint_ =
           type of the key *)
   | Has_dynamic_key of entity_
       (** Records that an entity is accessed with a dynamic key *)
+  | Points_to of entity_ * entity_
+      (** Records that the first entity points to the second one *)
 
 type shape_result =
-  | Shape_like_dict of entity_ * (shape_key * Typing_defs.locl_ty) list
+  | Shape_like_dict of Pos.t * (shape_key * Typing_defs.locl_ty) list
       (** A dict that acts like a shape along with its keys and types the keys
           point to *)
   | Dynamically_accessed_dict of entity_
@@ -47,9 +52,21 @@ type shape_result =
           function where the parameter is accessed dynamically. In that case,
           the original result on static access should be invalidated. *)
 
+(** Local variable environment. Its values are `entity`, i.e., `entity_
+    option`, so that we can avoid pattern matching in constraint extraction. *)
+type lenv = entity LMap.t
+
 type env = {
   constraints: constraint_ list;  (** Append-only set of constraints *)
-  lenv: entity LMap.t;  (** Local variable information *)
+  lenv: lenv;  (** Local variable information *)
   saved_env: Tast.saved_env;
       (** Environment stored in the TAST used to expand types *)
 }
+
+module PointsTo : sig
+  type t = entity_ * entity_
+
+  val compare : t -> t -> int
+end
+
+module PointsToSet : Set.S with type elt = PointsTo.t

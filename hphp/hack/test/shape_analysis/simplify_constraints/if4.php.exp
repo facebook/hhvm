@@ -1,0 +1,27 @@
+=== Shape analysis results for if4.php
+Summary for \f:
+[7:12-27] :
+  shape(
+    a => int
+    f => int
+  )
+[9:12-29] :
+  shape(
+    b => float
+    f => int
+  )
+[13:12-29] :
+  shape(
+    c => bool
+    f => int
+  )
+[16:14-32] :
+  shape(
+    d => bool
+    f => int
+  )
+[18:14-29] :
+  shape(
+    e => int
+    f => int
+  )

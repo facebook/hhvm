@@ -15,3 +15,5 @@ val add_constraint : env -> constraint_ -> env
 val get_local : Local_id.t -> env -> entity
 
 val set_local : Local_id.t -> entity -> env -> env
+
+val merge : env -> env -> env

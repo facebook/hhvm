@@ -16,7 +16,10 @@ type mode =
 
 type options = { mode: mode }
 
-type entity_ = Literal of Pos.t
+type entity_ =
+  | Literal of Pos.t
+  | Variable of int
+[@@deriving eq, ord]
 
 type entity = entity_ option
 
@@ -26,13 +29,27 @@ type constraint_ =
   | Exists of entity_
   | Has_static_key of entity_ * shape_key * Typing_defs.locl_ty
   | Has_dynamic_key of entity_
+  | Points_to of entity_ * entity_
 
 type shape_result =
-  | Shape_like_dict of entity_ * (shape_key * Typing_defs.locl_ty) list
+  | Shape_like_dict of Pos.t * (shape_key * Typing_defs.locl_ty) list
   | Dynamically_accessed_dict of entity_
+
+type lenv = entity LMap.t
 
 type env = {
   constraints: constraint_ list;
-  lenv: entity LMap.t;
+  lenv: lenv;
   saved_env: Tast.saved_env;
 }
+
+module PointsTo = struct
+  type t = entity_ * entity_
+
+  let compare (a, b) (c, d) =
+    match compare_entity_ a c with
+    | 0 -> compare_entity_ b d
+    | x -> x
+end
+
+module PointsToSet = Set.Make (PointsTo)

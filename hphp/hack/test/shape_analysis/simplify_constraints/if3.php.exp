@@ -1,0 +1,12 @@
+=== Shape analysis results for if3.php
+Summary for \f:
+[6:10-25] :
+  shape(
+    a => int
+    c => string
+  )
+[8:10-27] :
+  shape(
+    b => bool
+    c => string
+  )

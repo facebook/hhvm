@@ -128,14 +128,20 @@ and expr (env : env) ((ty, pos, e) : T.expr) : env * entity =
 
 let expr (env : env) (e : T.expr) : env = expr env e |> fst
 
-let stmt (env : env) ((pos, stmt) : T.stmt) : env =
+let rec stmt (env : env) ((pos, stmt) : T.stmt) : env =
   match stmt with
   | A.Expr e
   | A.Return (Some e) ->
     expr env e
+  | A.If (cond, then_bl, else_bl) ->
+    let env = expr env cond in
+    let then_env = block env then_bl in
+    let else_env = block env else_bl in
+    Env.merge then_env else_env
+  | A.Noop -> env
   | _ -> failwithpos pos "A statement is not yet handled"
 
-let block (env : env) : T.block -> env = List.fold ~init:env ~f:stmt
+and block (env : env) : T.block -> env = List.fold ~init:env ~f:stmt
 
 let callable ~saved_env body : constraint_ list =
   let env = Env.init saved_env in

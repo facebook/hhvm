@@ -1,0 +1,8 @@
+=== Shape analysis results for if2.php
+Summary for \f:
+[4:8-23] :
+  shape(
+    a => int
+    b => string
+    c => bool
+  )

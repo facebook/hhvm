@@ -2930,6 +2930,74 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         expr
     }
 
+    fn make_keyset_intrinsic_expression(
+        &mut self,
+        _keyset_intrinsic_keyword: Self::R,
+        _type: Self::R,
+        _left_bracket: Self::R,
+        expr: Self::R,
+        _right_bracket: Self::R,
+    ) -> Self::R {
+        if self.omit_user_attributes_irrelevant_to_typechecking {
+            Node::Ignored(SK::KeysetIntrinsicExpression)
+        } else if let Node::List([node]) = expr {
+            *node
+        } else {
+            expr
+        }
+    }
+
+    fn make_varray_intrinsic_expression(
+        &mut self,
+        _varray_intrinsic_keyword: Self::R,
+        _type: Self::R,
+        _left_bracket: Self::R,
+        expr: Self::R,
+        _right_bracket: Self::R,
+    ) -> Self::R {
+        if self.omit_user_attributes_irrelevant_to_typechecking {
+            Node::Ignored(SK::VarrayIntrinsicExpression)
+        } else if let Node::List([node]) = expr {
+            *node
+        } else {
+            expr
+        }
+    }
+
+    fn make_darray_intrinsic_expression(
+        &mut self,
+        _varray_intrinsic_keyword: Self::R,
+        _type: Self::R,
+        _left_bracket: Self::R,
+        expr: Self::R,
+        _right_bracket: Self::R,
+    ) -> Self::R {
+        if self.omit_user_attributes_irrelevant_to_typechecking {
+            Node::Ignored(SK::DarrayIntrinsicExpression)
+        } else if let Node::List([node]) = expr {
+            *node
+        } else {
+            expr
+        }
+    }
+
+    fn make_vector_intrinsic_expression(
+        &mut self,
+        _vector_intrinsic_keyword: Self::R,
+        _type: Self::R,
+        _left_bracket: Self::R,
+        expr: Self::R,
+        _right_bracket: Self::R,
+    ) -> Self::R {
+        if self.omit_user_attributes_irrelevant_to_typechecking {
+            Node::Ignored(SK::VectorIntrinsicExpression)
+        } else if let Node::List([node]) = expr {
+            *node
+        } else {
+            expr
+        }
+    }
+
     fn make_list_item(&mut self, item: Self::R, sep: Self::R) -> Self::R {
         match (item.is_ignored(), sep.is_ignored()) {
             (true, true) => Node::Ignored(SK::ListItem),
@@ -4993,8 +5061,6 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                 })
             }
             Node::IntLiteral((name, full_pos))
-            | Node::FloatingLiteral((name, full_pos))
-            | Node::BooleanLiteral((name, full_pos))
                 if !self.omit_user_attributes_irrelevant_to_typechecking =>
             {
                 Some(ClassNameParam {

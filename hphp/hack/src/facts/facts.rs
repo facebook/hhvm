@@ -382,7 +382,7 @@ fn extract_type_name<'a>(ty: &Ty<'a>) -> String {
 fn format<'a>(type_name: &'a str) -> String {
     let name = strip_global_ns(type_name);
     let is_xhp = !name.is_empty() && name.starts_with(':');
-    if is_xhp {
+    if type_name.starts_with('\\') && is_xhp {
         format_xhp(name)
     } else {
         String::from(name)

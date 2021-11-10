@@ -649,6 +649,8 @@ module Typing = struct
     | CovariantIndexTypeMismatch [@value 4449]
     | InoutInPseudofunction [@value 4450]
     | TraitParentConstructInconsistent [@value 4451]
+    | HHExpectEquivalentFailure [@value 4452]
+    | HHExpectFailure [@value 4453]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

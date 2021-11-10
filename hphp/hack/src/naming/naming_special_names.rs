@@ -479,6 +479,10 @@ pub mod pseudo_functions {
 
     pub const HH_SHOW: &str = "\\hh_show";
 
+    pub const HH_EXPECT: &str = "\\hh_expect";
+
+    pub const HH_EXPECT_EQUIVALENT: &str = "\\hh_expect_equivalent";
+
     pub const HH_SHOW_ENV: &str = "\\hh_show_env";
 
     pub const HH_LOG_LEVEL: &str = "\\hh_log_level";
@@ -501,6 +505,8 @@ pub mod pseudo_functions {
         ISSET,
         UNSET,
         HH_SHOW,
+        HH_EXPECT,
+        HH_EXPECT_EQUIVALENT,
         HH_SHOW_ENV,
         HH_LOG_LEVEL,
         HH_FORCE_SOLVE,

@@ -1801,3 +1801,5 @@ val not_sub_dynamic :
 val trait_parent_construct_inconsistent : Pos.t -> Pos_or_decl.t -> unit
 
 val explicit_consistent_constructor : Ast_defs.classish_kind -> Pos.t -> unit
+
+val hh_expect_error : equivalent:bool -> Pos.t -> error_from_reasons_callback

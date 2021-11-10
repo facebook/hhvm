@@ -1,0 +1,30 @@
+File "hh_expect.php", line 6, characters 3-24:
+hh_expect type mismatch (Typing[4453])
+  File "hh_expect.php", line 6, characters 13-19:
+  Expected `nothing`
+  File "hh_expect.php", line 3, characters 12-14:
+  But got `int`
+File "hh_expect.php", line 7, characters 3-23:
+hh_expect type mismatch (Typing[4453])
+  File "hh_expect.php", line 7, characters 13-18:
+  Expected `string`
+  File "hh_expect.php", line 3, characters 12-14:
+  But got `int`
+File "hh_expect.php", line 11, characters 3-33:
+hh_expect_equivalent type mismatch (Typing[4452])
+  File "hh_expect.php", line 3, characters 12-14:
+  Expected `int`
+  File "hh_expect.php", line 11, characters 24-28:
+  But got `mixed`
+File "hh_expect.php", line 12, characters 3-35:
+hh_expect_equivalent type mismatch (Typing[4452])
+  File "hh_expect.php", line 12, characters 24-30:
+  Expected `nothing`
+  File "hh_expect.php", line 3, characters 12-14:
+  But got `int`
+File "hh_expect.php", line 13, characters 3-34:
+hh_expect_equivalent type mismatch (Typing[4452])
+  File "hh_expect.php", line 13, characters 24-29:
+  Expected `string`
+  File "hh_expect.php", line 3, characters 12-14:
+  But got `int`

@@ -5987,6 +5987,20 @@ let explicit_consistent_constructor ck pos =
     ^ "is marked <<__ConsistentConstruct>>, so it must declare a constructor explicitly"
     )
 
+let hh_expect_error
+    ~equivalent pos ?code ?(quickfixes : Quickfix.t list = []) reasons =
+  let (msg, error_code) =
+    if equivalent then
+      ("hh_expect_equivalent type mismatch", Typing.HHExpectEquivalentFailure)
+    else
+      ("hh_expect type mismatch", Typing.HHExpectFailure)
+  in
+  add_list
+    (Option.value code ~default:(Typing.err_code error_code))
+    ~quickfixes
+    (pos, msg)
+    reasons
+
 (*****************************************************************************)
 (* Printing *)
 (*****************************************************************************)

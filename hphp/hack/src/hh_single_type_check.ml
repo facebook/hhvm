@@ -84,6 +84,8 @@ let magic_builtins =
       "<?hh\n"
       ^ "namespace {\n"
       ^ "function hh_show<T>(<<__AcceptDisposable>> T $val):T {}\n"
+      ^ "function hh_expect<T>(<<__AcceptDisposable>> T $val):T {}\n"
+      ^ "function hh_expect_equivalent<T>(<<__AcceptDisposable>> T $val):T {}\n"
       ^ "function hh_show_env():void {}\n"
       ^ "function hh_log_level(string $key, int $level):void {}\n"
       ^ "function hh_force_solve():void {}"

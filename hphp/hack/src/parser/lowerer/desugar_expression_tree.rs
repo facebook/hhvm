@@ -1562,6 +1562,8 @@ fn immediately_invoked_lambda(
 /// shouldn't be desugared?
 fn is_typechecker_fun_name(name: &str) -> bool {
     strip_ns(name) == strip_ns(pseudo_functions::HH_SHOW)
+        || strip_ns(name) == strip_ns(pseudo_functions::HH_EXPECT)
+        || strip_ns(name) == strip_ns(pseudo_functions::HH_EXPECT_EQUIVALENT)
         || strip_ns(name) == strip_ns(pseudo_functions::HH_SHOW_ENV)
 }
 

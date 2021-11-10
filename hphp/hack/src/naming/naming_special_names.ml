@@ -467,6 +467,10 @@ module PseudoFunctions = struct
 
   let hh_show = "\\hh_show"
 
+  let hh_expect = "\\hh_expect"
+
+  let hh_expect_equivalent = "\\hh_expect_equivalent"
+
   let hh_show_env = "\\hh_show_env"
 
   let hh_log_level = "\\hh_log_level"
@@ -493,6 +497,8 @@ module PseudoFunctions = struct
         isset;
         unset;
         hh_show;
+        hh_expect;
+        hh_expect_equivalent;
         hh_show_env;
         hh_log_level;
         hh_force_solve;

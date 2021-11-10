@@ -573,7 +573,46 @@ let typing_env_pseudofunctions =
   SN.PseudoFunctions.(
     String.Hash_set.of_list
       ~growth_allowed:false
-      [hh_show; hh_show_env; hh_log_level; hh_force_solve; hh_loop_forever])
+      [
+        hh_show;
+        hh_expect;
+        hh_expect_equivalent;
+        hh_show_env;
+        hh_log_level;
+        hh_force_solve;
+        hh_loop_forever;
+      ])
+
+let do_hh_expect ~equivalent env use_pos explicit_targs p tys =
+  match explicit_targs with
+  | [targ] ->
+    let (env, expected_ty) =
+      Phase.localize_targ ~check_well_kinded:true env (snd targ)
+    in
+    (match tys with
+    | [expr_ty] ->
+      let res =
+        SubType.sub_type_res
+          env
+          expr_ty
+          (fst expected_ty)
+          (Errors.hh_expect_error ~equivalent p)
+      in
+      (match res with
+      | Ok env ->
+        if equivalent then
+          SubType.sub_type
+            env
+            (fst expected_ty)
+            expr_ty
+            (Errors.hh_expect_error ~equivalent p)
+        else
+          env
+      | Error env -> env)
+    | _ -> env)
+  | _ ->
+    Errors.expected_tparam ~definition_pos:Pos_or_decl.none ~use_pos 1 None;
+    env
 
 let loop_forever env =
   (* forever = up to 10 minutes, to avoid accidentally stuck processes *)
@@ -3440,13 +3479,24 @@ and expr_
          ( hole_on_err ~err_opt:arr_err_opt te1,
            Some (hole_on_err ~err_opt:key_err_opt te2) ))
       ty
-  | Call ((_, pos_id, Id ((_, s) as id)), [], el, None)
+  | Call ((_, pos_id, Id ((_, s) as id)), explicit_targs, el, None)
     when Hash_set.mem typing_env_pseudofunctions s ->
     let (env, tel, tys) =
       argument_list_exprs (expr ~accept_using_var:true) env el
     in
     let env =
-      if String.equal s SN.PseudoFunctions.hh_show then (
+      if String.equal s SN.PseudoFunctions.hh_expect then
+        do_hh_expect ~equivalent:false env pos_id explicit_targs p tys
+      else if String.equal s SN.PseudoFunctions.hh_expect_equivalent then
+        do_hh_expect ~equivalent:true env pos_id explicit_targs p tys
+      else if not (List.is_empty explicit_targs) then (
+        Errors.expected_tparam
+          ~definition_pos:Pos_or_decl.none
+          ~use_pos:pos_id
+          0
+          None;
+        env
+      ) else if String.equal s SN.PseudoFunctions.hh_show then (
         List.iter tys ~f:(Typing_log.hh_show p env);
         env
       ) else if String.equal s SN.PseudoFunctions.hh_show_env then (

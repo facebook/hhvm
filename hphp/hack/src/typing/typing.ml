@@ -4336,6 +4336,123 @@ and class_const ?(incl_tc = false) env p (cid, mid) =
   in
   make_result env p (Aast.Class_const (ce, mid)) const_ty
 
+and get_callable_variadicity ~pos env variadicity_decl_ty = function
+  | FVvariadicArg vparam ->
+    let (env, ty) =
+      Typing_param.make_param_local_ty env variadicity_decl_ty vparam
+    in
+    let (env, t_variadic) = bind_param env (ty, vparam) in
+    (env, Aast.FVvariadicArg t_variadic)
+  | FVellipsis p ->
+    if Partial.should_check_error (Env.get_mode env) 4223 then
+      Errors.ellipsis_strict_mode ~require:`Type_and_param_name pos;
+    (env, Aast.FVellipsis p)
+  | FVnonVariadic -> (env, Aast.FVnonVariadic)
+
+and function_dynamically_callable
+    env f params_decl_ty variadicity_decl_ty ret_locl_ty =
+  let env = { env with in_support_dynamic_type_method_check = true } in
+  let interface_check =
+    Typing_dynamic.sound_dynamic_interface_check
+      env
+      (variadicity_decl_ty :: params_decl_ty)
+      ret_locl_ty
+  in
+  let function_body_check () =
+    (* Here the body of the function is typechecked again to ensure it is safe
+     * to call it from a dynamic context (eg. under dyn..dyn->dyn assumptions).
+     * The code below must be kept in sync with with the fun_def checks.
+     *)
+    let make_dynamic pos =
+      Typing_make_type.dynamic (Reason.Rsupport_dynamic_type pos)
+    in
+    let dynamic_return_ty = make_dynamic (get_pos ret_locl_ty) in
+    let dynamic_return_info =
+      Typing_env_return_info.
+        {
+          return_type = MakeType.unenforced dynamic_return_ty;
+          return_disposable = false;
+          return_explicit = true;
+          return_dynamically_callable = true;
+        }
+    in
+    let (env, param_tys) =
+      List.zip_exn f.f_params params_decl_ty
+      |> List.map_env env ~f:(fun env (param, hint) ->
+             let dyn_ty =
+               make_dynamic @@ Pos_or_decl.of_raw_pos param.param_pos
+             in
+             let ty =
+               match hint with
+               | Some ty when Typing_enforceability.is_enforceable env ty ->
+                 Typing_make_type.intersection
+                   (Reason.Rsupport_dynamic_type Pos_or_decl.none)
+                   [ty; dyn_ty]
+               | _ -> dyn_ty
+             in
+             Typing_param.make_param_local_ty env (Some ty) param)
+    in
+    let params_need_immutable = Typing_coeffects.get_ctx_vars f.f_ctxs in
+    let (env, _) =
+      (* In this pass, bind_param_and_check receives a pair where the lhs is
+       * either Tdynamic or TInstersection of the original type and TDynamic,
+       * but the fun_param is still referencing the source hint. We amend
+       * the source hint to keep in in sync before calling bind_param
+       * so the right enforcement is computed.
+       *)
+      let bind_param_and_check env lty_and_param =
+        let (ty, param) = lty_and_param in
+        let name = param.param_name in
+        let (hi, hopt) = param.param_type_hint in
+        let hopt =
+          Option.map hopt ~f:(fun (p, h) ->
+              if Typing_utils.is_tintersection env ty then
+                (p, Hintersection [(p, h); (p, Hdynamic)])
+              else
+                (p, Hdynamic))
+        in
+        let param_type_hint = (hi, hopt) in
+        let param = (ty, { param with param_type_hint }) in
+        let immutable =
+          List.exists ~f:(String.equal name) params_need_immutable
+        in
+        let (env, fun_param) = bind_param ~immutable env param in
+        (env, fun_param)
+      in
+      List.map_env
+        env
+        (List.zip_exn param_tys f.f_params)
+        ~f:bind_param_and_check
+    in
+
+    let pos = fst f.f_name in
+    let (env, t_variadic) =
+      get_callable_variadicity
+        ~pos
+        env
+        (Some (make_dynamic @@ Pos_or_decl.of_raw_pos pos))
+        f.f_variadic
+    in
+    let env =
+      set_tyvars_variance_in_callable env dynamic_return_ty param_tys t_variadic
+    in
+    let disable =
+      Naming_attributes.mem
+        SN.UserAttributes.uaDisableTypecheckerInternal
+        f.f_user_attributes
+    in
+
+    Errors.try_
+      (fun () ->
+        let (_ : env * Tast.stmt list) =
+          fun_ ~disable env dynamic_return_info pos f.f_body f.f_fun_kind
+        in
+        ())
+      (fun error ->
+        Errors.function_is_not_dynamically_callable pos (snd f.f_name) error)
+  in
+  if not interface_check then function_body_check ()
+
 and lambda ~is_anon ?expected p env f idl =
   (* This is the function type as declared on the lambda itself.
    * If type hints are absent then use Tany instead. *)
@@ -4346,7 +4463,7 @@ and lambda ~is_anon ?expected p env f idl =
     | Tfun ft -> (fe_pos, ft)
     | _ -> failwith "Not a function"
   in
-  let declared_ft =
+  let declared_decl_ft =
     Typing_enforceability.compute_enforced_and_pessimize_fun_type
       env
       declared_ft
@@ -4365,7 +4482,7 @@ and lambda ~is_anon ?expected p env f idl =
         ~ety_env
         ~def_pos:declared_pos
         env
-        declared_ft)
+        declared_decl_ft)
   in
   List.iter idl ~f:(check_escaping_var env);
 
@@ -4381,7 +4498,9 @@ and lambda ~is_anon ?expected p env f idl =
   (* Is the return type declared? *)
   let is_explicit_ret = Option.is_some (hint_of_type_hint f.f_ret) in
   let check_body_under_known_params env ?ret_ty ft : env * _ * locl_ty =
-    let (env, (tefun, ty, ft)) = closure_make ?ret_ty env p f ft idl is_anon in
+    let (env, (tefun, ty, ft)) =
+      closure_make ?ret_ty env p declared_decl_ft f ft idl is_anon
+    in
     let inferred_ty =
       mk
         ( Reason.Rwitness p,
@@ -4772,7 +4891,8 @@ and closure_bind_opt_param env param : env =
 (* Here ret_ty should include Awaitable wrapper *)
 (* TODO: ?el is never set; so we need to fix variadic use of lambda *)
 and closure_make
-    ?el ?ret_ty ?(check_escapes = true) env lambda_pos f ft idl is_anon =
+    ?el ?ret_ty ?(check_escapes = true) env lambda_pos decl_ft f ft idl is_anon
+    =
   let type_closure f =
     (* Wrap the function f so that it can freely clobber function-specific
        parts of the environment; the clobbered parts are restored before
@@ -4875,6 +4995,10 @@ and closure_make
   let (env, user_attributes) =
     attributes_check_def env SN.AttributeKinds.lambda f.f_user_attributes
   in
+  let support_dynamic_type =
+    Naming_attributes.mem SN.UserAttributes.uaSupportDynamicType user_attributes
+    || Env.get_support_dynamic_type env
+  in
   let env = List.fold_left ~f:closure_bind_opt_param ~init:env !params in
   let env = List.fold_left ~f:closure_check_param ~init:env f.f_params in
   let env =
@@ -4942,7 +5066,17 @@ and closure_make
   let (env, hret) =
     Typing_return.force_return_kind ~is_toplevel:false env ret_pos hret
   in
-  let ft = { ft with ft_ret = { ft.ft_ret with et_type = hret } } in
+  let ft =
+    {
+      ft with
+      ft_ret = { ft.ft_ret with et_type = hret };
+      ft_flags =
+        Typing_defs_flags.set_bit
+          Typing_defs_flags.ft_flags_support_dynamic_type
+          support_dynamic_type
+          ft.ft_flags;
+    }
+  in
   let env =
     Env.set_return
       env
@@ -4975,6 +5109,34 @@ and closure_make
     Typing_env.set_fun_tast_info env Tast.{ has_implicit_return; has_readonly }
   in
   let (env, tparams) = List.map_env env f.f_tparams ~f:type_param in
+  let sound_dynamic_check_saved_env = env in
+  let params_decl_ty =
+    List.map decl_ft.ft_params ~f:(fun { fp_type = { et_type; _ }; _ } ->
+        match get_node et_type with
+        | Tany _ -> None
+        | _ -> Some et_type)
+  in
+  let variadicity_decl_ty =
+    match decl_ft.ft_arity with
+    | Fvariadic { fp_type = { et_type; _ }; _ } ->
+      begin
+        match get_node et_type with
+        | Tany _ -> None
+        | _ -> Some et_type
+      end
+    | _ -> None
+  in
+  if
+    TypecheckerOptions.enable_sound_dynamic
+      (Provider_context.get_tcopt (Env.get_ctx env))
+    && support_dynamic_type
+  then
+    function_dynamically_callable
+      sound_dynamic_check_saved_env
+      f
+      params_decl_ty
+      variadicity_decl_ty
+      hret;
   let tfun_ =
     {
       Aast.f_annotation = Env.save local_tpenv env;

@@ -78,3 +78,11 @@ val with_special_coeffects :
 
 val triple_to_pair :
   Typing_env_types.env * 'a * 'b -> Typing_env_types.env * ('a * 'b)
+
+val function_dynamically_callable :
+  Typing_env_types.env ->
+  Nast.fun_ ->
+  Typing_defs.decl_ty option list ->
+  Typing_defs.decl_ty option ->
+  Typing_defs.locl_ty ->
+  unit

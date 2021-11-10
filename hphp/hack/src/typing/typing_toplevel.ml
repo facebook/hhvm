@@ -136,110 +136,6 @@ let merge_decl_header_with_hints ~params ~ret ~variadic decl_header env =
   in
   (ret_decl_ty, params_decl_ty, variadicity_decl_ty)
 
-let function_dynamically_callable
-    env f params_decl_ty variadicity_decl_ty ret_locl_ty =
-  let env = { env with in_support_dynamic_type_method_check = true } in
-  let interface_check =
-    Typing_dynamic.sound_dynamic_interface_check
-      env
-      (variadicity_decl_ty :: params_decl_ty)
-      ret_locl_ty
-  in
-  let function_body_check () =
-    (* Here the body of the function is typechecked again to ensure it is safe
-     * to call it from a dynamic context (eg. under dyn..dyn->dyn assumptions).
-     * The code below must be kept in sync with with the fun_def checks.
-     *)
-    let make_dynamic pos =
-      Typing_make_type.dynamic (Reason.Rsupport_dynamic_type pos)
-    in
-    let dynamic_return_ty = make_dynamic (get_pos ret_locl_ty) in
-    let dynamic_return_info =
-      Typing_env_return_info.
-        {
-          return_type = MakeType.unenforced dynamic_return_ty;
-          return_disposable = false;
-          return_explicit = true;
-          return_dynamically_callable = true;
-        }
-    in
-    let (env, param_tys) =
-      List.zip_exn f.f_params params_decl_ty
-      |> List.map_env env ~f:(fun env (param, hint) ->
-             let dyn_ty =
-               make_dynamic @@ Pos_or_decl.of_raw_pos param.param_pos
-             in
-             let ty =
-               match hint with
-               | Some ty when Typing_enforceability.is_enforceable env ty ->
-                 Typing_make_type.intersection
-                   (Reason.Rsupport_dynamic_type Pos_or_decl.none)
-                   [ty; dyn_ty]
-               | _ -> dyn_ty
-             in
-             Typing_param.make_param_local_ty env (Some ty) param)
-    in
-    let params_need_immutable = Typing_coeffects.get_ctx_vars f.f_ctxs in
-    let (env, _) =
-      (* In this pass, bind_param_and_check receives a pair where the lhs is
-       * either Tdynamic or TInstersection of the original type and TDynamic,
-       * but the fun_param is still referencing the source hint. We amend
-       * the source hint to keep in in sync before calling bind_param
-       * so the right enforcement is computed.
-       *)
-      let bind_param_and_check env lty_and_param =
-        let (ty, param) = lty_and_param in
-        let name = param.param_name in
-        let (hi, hopt) = param.param_type_hint in
-        let hopt =
-          Option.map hopt ~f:(fun (p, h) ->
-              if Typing_utils.is_tintersection env ty then
-                (p, Hintersection [(p, h); (p, Hdynamic)])
-              else
-                (p, Hdynamic))
-        in
-        let param_type_hint = (hi, hopt) in
-        let param = (ty, { param with param_type_hint }) in
-        let immutable =
-          List.exists ~f:(String.equal name) params_need_immutable
-        in
-        let (env, fun_param) = Typing.bind_param ~immutable env param in
-        (env, fun_param)
-      in
-      List.map_env
-        env
-        (List.zip_exn param_tys f.f_params)
-        ~f:bind_param_and_check
-    in
-
-    let pos = fst f.f_name in
-    let (env, t_variadic) =
-      get_callable_variadicity
-        ~pos
-        env
-        (Some (make_dynamic @@ Pos_or_decl.of_raw_pos pos))
-        f.f_variadic
-    in
-    let env =
-      set_tyvars_variance_in_callable env dynamic_return_ty param_tys t_variadic
-    in
-    let disable =
-      Naming_attributes.mem
-        SN.UserAttributes.uaDisableTypecheckerInternal
-        f.f_user_attributes
-    in
-
-    Errors.try_
-      (fun () ->
-        let (_ : env * Tast.stmt list) =
-          Typing.fun_ ~disable env dynamic_return_info pos f.f_body f.f_fun_kind
-        in
-        ())
-      (fun error ->
-        Errors.function_is_not_dynamically_callable pos (snd f.f_name) error)
-  in
-  if not interface_check then function_body_check ()
-
 let fun_def ctx fd :
     (Tast.fun_def * Typing_inference_env.t_global_with_pos) option =
   let f = fd.fd_fun in
@@ -386,7 +282,7 @@ let fun_def ctx fd :
       (Provider_context.get_tcopt (Env.get_ctx env))
     && Env.get_support_dynamic_type env
   then
-    function_dynamically_callable
+    Typing.function_dynamically_callable
       sound_dynamic_check_saved_env
       f
       params_decl_ty

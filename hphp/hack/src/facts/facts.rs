@@ -126,7 +126,14 @@ impl Facts {
             .collect::<Vec<String>>();
         let mut functions = decls
             .funs()
-            .map(|(name, _)| format(name))
+            .filter_map(|(name, _)| {
+                let name = format(name);
+                if name.eq("__construct") {
+                    None
+                } else {
+                    Some(name)
+                }
+            })
             .collect::<Vec<String>>();
         let mut constants = decls
             .consts()

@@ -17,6 +17,10 @@ function safe_realpath(string $path): string {
   return realpath($path) as string;
 }
 
+function safe_implode(string $delim, mixed $strs): string {
+  return implode($delim, $strs) as string;
+}
+
 // NOTE: The "HPHP_HOME" environment variable can be set (to ".../fbcode"), to
 // define "hphp_home()" and (indirectly) "test_dir()".  Otherwise, we will use
 // "__DIR__" as "test_dir()", and its grandparent directory for "hphp_home()"
@@ -53,7 +57,10 @@ function test_dir(): string {
   return __DIR__;
 }
 
-function get_expect_file_and_type($test, $options) {
+function get_expect_file_and_type(
+  string $test,
+  dict<string, mixed> $options,
+): vec<?string> {
   $types = vec[
     'expect',
     'expectf',
@@ -85,28 +92,30 @@ function get_expect_file_and_type($test, $options) {
   return vec[null, null];
 }
 
-function multi_request_modes() {
+function multi_request_modes(): vec<string> {
   return vec['retranslate-all',
                'recycle-tc',
                'jit-serialize',
                'cli-server'];
 }
 
-function has_multi_request_mode($options) {
+function has_multi_request_mode(dict<string, mixed> $options): bool {
   foreach (multi_request_modes() as $option) {
     if (isset($options[$option])) return true;
   }
   return false;
 }
 
-function test_repo($options, $test) {
+function test_repo(dict<string, mixed> $options, string $test): string {
   if (isset($options['repo-out'])) {
     return $options['repo-out'] . '/' . str_replace('/', '.', $test) . '.repo';
   }
   return Status::getTestTmpPath($test, 'repo');
 }
 
-function jit_serialize_option(string $cmd, $test, $options, $serialize) {
+function jit_serialize_option(
+  string $cmd, string $test, dict<string, mixed> $options, bool $serialize,
+): string {
   $serialized = test_repo($options, $test) . "/jit.dump";
   $cmds = explode(' -- ', $cmd, 2);
   $cmds[0] .=
@@ -117,7 +126,7 @@ function jit_serialize_option(string $cmd, $test, $options, $serialize) {
   if (isset($options['jitsample']) && $serialize) {
     $cmds[0] .= ' -vDeploymentId="' . $options['jitsample'] . '-serialize"';
   }
-  return implode(' -- ', $cmds);
+  return safe_implode(' -- ', $cmds);
 }
 
 function usage(): string {
@@ -195,18 +204,18 @@ Examples:
   # serialized state and run retranslate-all before starting the test.
   % {$argv[0]} --jit-serialize  2 -r quick
 EOT;
+
   return usage().$help;
 }
 
-function error($message): noreturn {
-  $message ??= "";
+function error(string $message): noreturn {
   print "$message\n";
   exit(1);
 }
 
-function success($message): noreturn {
-  $message ??= "";
-  print "$message\n";
+function success(): noreturn {
+  // ISSUE: Is this newline important?
+  print "\n";
   exit(0);
 }
 
@@ -222,7 +231,8 @@ function check_executable(string $path): string {
   $output = vec[];
   $return_var = -1;
   exec($rpath . " --version 2> /dev/null", inout $output, inout $return_var);
-  if (strpos(implode($output), "HipHop ") !== 0) {
+  // ISSUE: Should just use "starts_with".
+  if (strpos(safe_implode("", $output), "HipHop ") !== 0) {
     error("Provided file ($rpath) is not an HHVM executable.\n" .
           "If using HHVM_BIN, make sure that is set correctly.");
   }
@@ -367,8 +377,8 @@ function read_opts_file(?string $file): string {
   if ($file is null || !file_exists($file)) {
     return "";
   }
-
   $fp = fopen($file, "r");
+  invariant($fp is resource, __METHOD__);
 
   $contents = "";
   while ($line = fgets($fp)) {
@@ -416,7 +426,7 @@ function rel_path(string $to): string {
     $relPath[] = $to[$d];
     $d++;
   }
-  return implode('/', $relPath);
+  return safe_implode('/', $relPath);
 }
 
 function get_options(
@@ -515,7 +525,8 @@ function get_options(
       }
 
       if (!$found) {
-        error(sprintf("Invalid argument: '%s'\nSee {$argv[0]} --help", $arg));
+        $msg = sprintf("Invalid argument: '%s'\nSee {$argv[0]} --help", $arg);
+        error($msg as string);
       }
     } else {
       $files[] = $arg;
@@ -524,9 +535,10 @@ function get_options(
 
   \HH\global_set('recorded_options', $recorded);
 
-  if (isset($options['repo-out']) && !is_dir($options['repo-out'])) {
-    if (!mkdir($options['repo-out']) && !is_dir($options['repo-out'])) {
-      echo "Unable to create repo-out dir " . $options['repo-out'] . "\n";
+  $repo_out = $options['repo-out'] ?? null;
+  if ($repo_out is string && !is_dir($repo_out)) {
+    if (!mkdir($repo_out) && !is_dir($repo_out)) {
+      echo "Unable to create repo-out dir " . $repo_out . "\n";
       exit(1);
     }
   }
@@ -581,7 +593,7 @@ function get_options(
                                         return isset($options[$x]);
                                       });
   if (count($multi_request_modes) > 1) {
-    echo "The options\n -", implode("\n -", $multi_request_modes),
+    echo "The options\n -", safe_implode("\n -", $multi_request_modes),
          "\nare mutually exclusive options\n";
     exit(1);
   }
@@ -597,7 +609,7 @@ function get_options(
  * Return the path to $test relative to $base, or false if $base does not
  * contain test.
  */
-function canonical_path_from_base($test, $base) {
+function canonical_path_from_base(string $test, string $base): mixed {
   $full = safe_realpath($test);
   if (substr($full, 0, strlen($base)) === $base) {
     return substr($full, strlen($base) + 1);
@@ -614,10 +626,12 @@ function canonical_path_from_base($test, $base) {
   return false;
 }
 
-function canonical_path($test) {
+// ISSUE: This should probably return string.
+function canonical_path(string $test): mixed {
   $attempt = canonical_path_from_base($test, test_dir());
   if ($attempt === false) {
-   return canonical_path_from_base($test, hphp_home());
+    // ISSUE: What if this is false?
+    return canonical_path_from_base($test, hphp_home());
   } else {
    return $attempt;
   }
@@ -627,7 +641,7 @@ function canonical_path($test) {
  * We support some 'special' file names, that just know where the test
  * suites are, to avoid typing 'hphp/test/foo'.
  */
-function find_test_files($file) {
+function find_test_files(string $file): vec<string>{
   $mappage = dict[
     'quick'    => 'hphp/test/quick',
     'slow'     => 'hphp/test/slow',
@@ -685,10 +699,10 @@ function serial_only_tests(vec<string> $tests): vec<string> {
 // NOTE: If "files" is very long, then the shell may reject the desired
 // "find" command (especially because "escapeshellarg()" adds two single
 // quote characters to each file), so we split "files" into chunks below.
-function exec_find(mixed $files, string $extra): mixed {
+function exec_find(vec<string> $files, string $extra): vec<string> {
   $results = vec[];
   foreach (array_chunk($files, 500) as $chunk) {
-    $efa = implode(' ', array_map(escapeshellarg<>, $chunk));
+    $efa = safe_implode(' ', array_map(escapeshellarg<>, $chunk));
     $output = shell_exec("find $efa $extra");
     foreach (explode("\n", $output) as $result) {
       // Collect the (non-empty) results, which should all be file paths.
@@ -698,7 +712,10 @@ function exec_find(mixed $files, string $extra): mixed {
   return $results;
 }
 
-function find_tests($files, dict $options = null): vec<string> {
+function find_tests(
+  vec<string> $files,
+  dict<string, mixed> $options,
+): vec<string> {
   if (!$files) {
     $files = vec['quick'];
   }
@@ -712,14 +729,14 @@ function find_tests($files, dict $options = null): vec<string> {
   foreach ($files as $file) {
     $ft = array_merge($ft, find_test_files($file));
   }
-  $files = $ft;
-  foreach ($files as $idx => $file) {
+  $files = vec[];
+  foreach ($ft as $file) {
     if (!@stat($file)) {
       error("Not valid file or directory: '$file'");
     }
     $file = preg_replace(',//+,', '/', safe_realpath($file));
     $file = preg_replace(',^'.getcwd().'/,', '', $file);
-    $files[$idx] = $file;
+    $files[] = $file;
   }
   $tests = exec_find(
     $files,
@@ -776,8 +793,8 @@ function find_tests($files, dict $options = null): vec<string> {
   return $tests;
 }
 
-function list_tests($files, $options): void {
-  $args = implode(' ', \HH\global_get('recorded_options'));
+function list_tests(vec<string> $files, dict<string, mixed> $options): void {
+  $args = safe_implode(' ', \HH\global_get('recorded_options'));
 
   // Disable escaping of test info when listing. We check if the environment
   // variable is set so we can make the change in a backwards compatible way.
@@ -827,7 +844,7 @@ function find_file_for_dir(string $dir, string $name): ?string {
   return null;
 }
 
-function find_debug_config($test, $name): string {
+function find_debug_config(string $test, $name): string {
   $debug_config = find_file_for_dir(dirname($test), $name);
   if ($debug_config is nonnull) {
     return "-m debug --debug-config ".$debug_config;
@@ -835,7 +852,7 @@ function find_debug_config($test, $name): string {
   return "";
 }
 
-function mode_cmd($options): vec<string> {
+function mode_cmd(dict<string, mixed> $options): vec<string> {
   $repo_args = '';
   if (!isset($options['repo'])) {
     $repo_args = "-vUnitFileCache.Path=".unit_cache_file();
@@ -856,7 +873,7 @@ function mode_cmd($options): vec<string> {
   }
 }
 
-function extra_args($options): string {
+function extra_args(dict<string, mixed> $options): string {
   $args = $options['args'] ?? '';
 
   $vendor = $options['vendor'] ?? null;
@@ -872,12 +889,12 @@ function extra_args($options): string {
   return $args;
 }
 
-function extra_compiler_args($options): string {
+function extra_compiler_args(dict<string, mixed> $options): string {
   return $options['compiler-args'] ?? '';
 }
 
 function hhvm_cmd_impl(
-  $options,
+  dict<string, mixed> $options,
   $config,
   $autoload_db_prefix,
   ...$extra_args
@@ -914,7 +931,8 @@ function hhvm_cmd_impl(
     ];
 
     if ($autoload_db_prefix is nonnull) {
-      $args[] = '-vAutoload.DB.Path='.escapeshellarg("$autoload_db_prefix.$mode_num");
+      $args[] =
+        '-vAutoload.DB.Path='.escapeshellarg("$autoload_db_prefix.$mode_num");
     }
 
     if (isset($options['retranslate-all'])) {
@@ -961,22 +979,22 @@ function hhvm_cmd_impl(
       $args[] = '-vServer.APC.MemModelTreadmill=true';
     }
 
-    $cmds[] = implode(' ', array_merge($args, $extra_args));
+    $cmds[] = safe_implode(' ', array_merge($args, $extra_args));
   }
   return $cmds;
 }
 
-function repo_separate($options, $test) {
+function repo_separate(dict<string, mixed> $options, string $test) {
   return isset($options['repo-separate']) &&
          !file_exists($test . ".hhbbc_opts");
 }
 
 // Return the command and the env to run it in.
 function hhvm_cmd(
-  $options,
-  $test,
-  $test_run = null,
-  $is_temp_file = false
+  dict<string, mixed> $options,
+  string $test,
+  ?string $test_run = null,
+  bool $is_temp_file = false
 ): (vec<string>, dict<string, mixed>) {
   $test_run ??= $test;
   // hdf support is only temporary until we fully migrate to ini
@@ -1009,7 +1027,9 @@ function hhvm_cmd(
 
   if (isset($options['cli-server'])) {
     $config = find_file_for_dir(dirname($test), 'config.ini');
-    $socket = $options['servers']['configs'][$config]->server['cli-socket'];
+    /* HH_FIXME[4063] ... the container could be null */
+    $ref = $options['servers']['configs'][$config] as ServerRef;
+    $socket = $ref->server['cli-socket'] as string;
     $cmd .= ' -vEval.UseRemoteUnixServer=only';
     $cmd .= ' -vEval.UnixServerPath='.$socket;
     $cmd .= ' --count=3';
@@ -1041,7 +1061,8 @@ function hhvm_cmd(
     $repo_suffix = repo_separate($options, $test) ? 'hhbbc' : 'hhbc';
 
     $program = "hhvm";
-    $hhbbc_repo = '"' . test_repo($options, $test) . "/$program.$repo_suffix\"";
+    $hhbbc_repo =
+      "\"" . test_repo($options, $test) . "/$program.$repo_suffix\"";
     $cmd .= ' -vRepo.Authoritative=true';
     $cmd .= " -vRepo.Path=$hhbbc_repo";
   }
@@ -1057,7 +1078,7 @@ function hhvm_cmd(
   $env = $_ENV;
   $env['LC_ALL'] = 'C';
 
-  // Apply the --env option
+  // Apply the --env option.
   if (isset($options['env'])) {
     foreach (explode(",", $options['env']) as $arg) {
       $i = strpos($arg, '=');
@@ -1088,9 +1109,14 @@ function hhvm_cmd(
   return tuple($cmds, $env);
 }
 
-function hphp_cmd($options, $test, $program): string {
+function hphp_cmd(
+  dict<string, mixed> $options,
+  string $test,
+  string $program,
+): string {
   // Transform extra_args like "-vName=Value" into "-vRuntime.Name=Value".
-  $extra_args = preg_replace("/(^-v|\s+-v)\s*/", "$1Runtime.", extra_args($options));
+  $extra_args =
+    preg_replace("/(^-v|\s+-v)\s*/", "$1Runtime.", extra_args($options));
 
   $compiler_args = extra_compiler_args($options);
 
@@ -1109,7 +1135,7 @@ function hphp_cmd($options, $test, $program): string {
     }
   }
 
-  return implode(" ", vec[
+  return safe_implode(" ", vec[
     hphpc_path($options),
     '--hphp',
     '-vUseHHBBC='. (repo_separate($options, $test) ? 'false' : 'true'),
@@ -1131,7 +1157,7 @@ function hphp_cmd($options, $test, $program): string {
   ]);
 }
 
-function hphpc_path($options): string {
+function hphpc_path(dict<string, mixed> $options): string {
   if (isset($options['split-hphpc'])) {
     $file = "";
     $file = bin_root().'/hphpc';
@@ -1145,9 +1171,11 @@ function hphpc_path($options): string {
   }
 }
 
-function hhbbc_cmd($options, $test, $program) {
+function hhbbc_cmd(
+  dict<string, mixed> $options, string $test, string $program,
+): string {
   $test_repo = test_repo($options, $test);
-  return implode(" ", vec[
+  return safe_implode(" ", vec[
     hphpc_path($options),
     '--hhbbc',
     '--no-logging',
@@ -1160,8 +1188,8 @@ function hhbbc_cmd($options, $test, $program) {
 }
 
 // Execute $cmd and return its output, including any stacktrace.log
-// file it generated.
-function exec_with_stack($cmd) {
+// file it generated.  Can also return true!
+function exec_with_stack(string $cmd) {
   $pipes = null;
   $proc = proc_open($cmd,
                     dict[0 => vec['pipe', 'r'],
@@ -1191,10 +1219,8 @@ function exec_with_stack($cmd) {
     }
     $all_selects_failed=false;
     if ($available === 0) continue;
-    // var_dump($read);
     foreach ($read as $pipe) {
       $t = fread($pipe, 4096);
-      // var_dump($t);
       if ($t === false) continue;
       $s .= $t;
     }
@@ -1238,7 +1264,9 @@ function exec_with_stack($cmd) {
   return "Running `$cmd' failed (".$status['exitcode']."):\n\n$s";
 }
 
-function repo_mode_compile($options, $test, $program) {
+function repo_mode_compile(
+  dict<string, mixed> $options, string $test, string $program,
+): bool {
   $hphp = hphp_cmd($options, $test, $program);
   $result = exec_with_stack($hphp);
   if ($result === true && repo_separate($options, $test)) {
@@ -1247,6 +1275,7 @@ function repo_mode_compile($options, $test, $program) {
   }
   if ($result === true) return true;
   Status::writeDiff($test, $result);
+  return false;
 }
 
 
@@ -1581,19 +1610,19 @@ final class Status {
     return $is_now_empty;
   }
 
-  public static function setMode($mode) {
+  public static function setMode(int $mode): void {
     self::$mode = $mode;
   }
 
-  public static function getMode() {
+  public static function getMode(): int {
     return self::$mode;
   }
 
-  public static function setUseColor($use) {
+  public static function setUseColor(bool $use): void {
     self::$use_color = $use;
   }
 
-  public static function addTestTimesSerial($results) {
+  public static function addTestTimesSerial($results): float {
     $time = 0.0;
     foreach ($results as $result) {
       $time += $result['time'];
@@ -1609,12 +1638,12 @@ final class Status {
     return self::$overall_end_time;
   }
 
-  public static function started() {
+  public static function started(): void {
     self::send(self::MSG_STARTED, null);
     self::$overall_start_time = mtime();
   }
 
-  public static function finished(int $return_value) {
+  public static function finished(int $return_value): void {
     self::$overall_end_time = mtime();
     self::$return_value = $return_value;
     self::send(self::MSG_FINISHED, null);
@@ -1646,7 +1675,7 @@ final class Status {
     self::destroy();
   }
 
-  public static function registerCleanup(bool $no_clean) {
+  public static function registerCleanup(bool $no_clean): void {
     if (self::getMode() === self::MODE_TESTPILOT ||
         self::getMode() === self::MODE_RECORD_FAILURES) {
       self::$temp_dir_remove = TempDirRemove::ALWAYS;
@@ -1660,11 +1689,13 @@ final class Status {
     pcntl_signal(SIGINT, self::destroyFromSignal<>);
   }
 
-  public static function serverRestarted() {
+  public static function serverRestarted(): void {
     self::send(self::MSG_SERVER_RESTARTED, null);
   }
 
-  public static function pass($test, $time, $stime, $etime) {
+  public static function pass(
+    string $test, float $time, int $stime, int $etime,
+  ): void {
     self::$results[] = dict['name' => $test,
                              'status' => 'passed',
                              'start_time' => $stime,
@@ -1673,7 +1704,9 @@ final class Status {
     self::send(self::MSG_TEST_PASS, vec[$test, $time, $stime, $etime]);
   }
 
-  public static function skip($test, $reason, $time, $stime, $etime) {
+  public static function skip(
+    string $test, string $reason, float $time, int $stime, int $etime,
+  ): void {
     self::$results[] = dict[
       'name' => $test,
       /* testpilot needs a positive response for every test run, report
@@ -1689,7 +1722,9 @@ final class Status {
                vec[$test, $reason, $time, $stime, $etime]);
   }
 
-  public static function fail($test, $time, $stime, $etime, $diff) {
+  public static function fail(
+    string $test, float $time, int $stime, int $etime, string $diff,
+  ): void {
     self::$results[] = dict[
       'name' => $test,
       'status' => 'failed',
@@ -1701,7 +1736,7 @@ final class Status {
     self::send(self::MSG_TEST_FAIL, vec[$test, $time, $stime, $etime]);
   }
 
-  public static function handle_message($type, $message) {
+  public static function handle_message(int $type, mixed $message): bool {
     switch ($type) {
       case Status::MSG_STARTED:
         break;
@@ -1718,6 +1753,7 @@ final class Status {
             break;
 
           case Status::MODE_VERBOSE:
+            // FIXME: There is no "$test" variable here.
             Status::sayColor("$test ", Status::YELLOW, "failed",
                              " to talk to server\n");
             break;
@@ -1729,6 +1765,7 @@ final class Status {
             break;
         }
         // ISSUE: This falls through, seemingly incorrectly.
+        // I suspect that the "restarted" logic has bit-rotted.
 
       case Status::MSG_TEST_PASS:
         self::$passed++;
@@ -1818,7 +1855,7 @@ final class Status {
     return true;
   }
 
-  private static function send($type, $msg) {
+  private static function send(int $type, $msg): void {
     if (self::$killed) {
       return;
     }
@@ -1834,7 +1871,7 @@ final class Status {
    * and any one of the arguments is preceded by an integer (see the color
    * constants above), that argument will be given the indicated color.
    */
-  public static function sayColor(...$args) {
+  public static function sayColor(...$args): void {
     $n = count($args);
     for ($i = 0; $i < $n;) {
       $color = null;
@@ -1857,7 +1894,9 @@ final class Status {
     }
   }
 
-  public static function sayTestpilot($test, $status, $stime, $etime, $time) {
+  public static function sayTestpilot(
+      string $test, string $status, int $stime, int $etime, float $time,
+  ): void {
     $start = dict['op' => 'start', 'test' => $test];
     $end = dict['op' => 'test_done', 'test' => $test, 'status' => $status,
                  'start_time' => $stime, 'end_time' => $etime, 'time' => $time];
@@ -1872,15 +1911,15 @@ final class Status {
   }
 
   /** Output is in the format expected by JsonTestRunner. */
-  public static function say(...$args) {
+  public static function say(...$args): void {
     $data = array_map(
       $row ==> self::jsonEncode($row) . "\n",
       $args
     );
-    fwrite(STDERR, implode("", $data));
+    fwrite(STDERR, safe_implode("", $data));
   }
 
-  public static function hasCursorControl() {
+  public static function hasCursorControl(): bool {
     // for runs on hudson-ci.org (aka jenkins).
     if (getenv("HUDSON_URL")) {
       return false;
@@ -1897,7 +1936,7 @@ final class Status {
   }
 
   <<__Memoize>>
-  public static function getSTTY() {
+  public static function getSTTY(): string {
     $descriptorspec = dict[1 => vec["pipe", "w"], 2 => vec["pipe", "w"]];
     $pipes = null;
     $process = proc_open(
@@ -1909,7 +1948,7 @@ final class Status {
     return $stty;
   }
 
-  public static function utf8Sanitize($str) {
+  public static function utf8Sanitize($str): string {
     if (!is_string($str)) {
       // We sometimes get called with the
       // return value of file_get_contents()
@@ -1920,7 +1959,7 @@ final class Status {
     return UConverter::transcode($str, 'UTF-8', 'UTF-8');
   }
 
-  public static function jsonEncode($data) {
+  public static function jsonEncode($data): string {
     // JSON_UNESCAPED_SLASHES is Zend 5.4+.
     if (defined("JSON_UNESCAPED_SLASHES")) {
       return json_encode($data, JSON_UNESCAPED_SLASHES);
@@ -1939,7 +1978,9 @@ final class Status {
   }
 }
 
-function clean_intermediate_files($test, $options) {
+function clean_intermediate_files(
+  string $test, dict<string, mixed> $options,
+): void {
   if (isset($options['no-clean'])) {
     return;
   }
@@ -2001,7 +2042,8 @@ function child_main(
   foreach ($tests as $test) {
     run_and_log_test($options, $test);
   }
-  file_put_contents($json_results_file, json_encode(Status::getResults()));
+  $results = Status::getResults();
+  file_put_contents($json_results_file, json_encode($results));
   foreach (Status::getResults() as $result) {
     if ($result['status'] === 'failed') {
       return 1;
@@ -2046,7 +2088,8 @@ type RunifResult = shape(
   ?'skip_reason' => string, // if !match, the skip reason to use
 );
 
-<<__Memoize>> function runif_canonical_os(): string {
+<<__Memoize>>
+function runif_canonical_os(): string {
   if (PHP_OS === 'Linux' || PHP_OS === 'Darwin') return PHP_OS;
   if (substr(PHP_OS, 0, 3) === 'WIN') return 'WIN';
   invariant_violation('add proper canonicalization for your OS');
@@ -2084,7 +2127,7 @@ function runif_os_matches(vec<string> $words): RunifResult {
   return shape(
     'valid' => true,
     'match' => false,
-    'skip_reason' => 'skip-runif-os-' . implode('-', $words)
+    'skip_reason' => 'skip-runif-os-' . safe_implode('-', $words)
   );
 }
 
@@ -2168,7 +2211,7 @@ function runif_euid_matches(
   return shape(
     'valid' => true,
     'match' => false,
-    'skip_reason' => 'skip-runif-euid-' . implode('-', $words)
+    'skip_reason' => 'skip-runif-euid-' . safe_implode('-', $words)
   );
 }
 
@@ -2275,7 +2318,7 @@ function runif_locale_matches(
   if (!preg_match('/^LC_[A-Z]+$/', $category)) {
     return shape('valid' => false, 'error' => "bad locale category '$category'");
   }
-  $locale_args = implode(', ', array_map($word ==> "'$word'", $words));
+  $locale_args = safe_implode(', ', array_map($word ==> "'$word'", $words));
   $matches = runif_test_for_feature(
     $options,
     $test,
@@ -2472,16 +2515,18 @@ function skipif_should_skip_test(
   return shape('valid' => false, 'error' => "invalid skipif output '$output'");
 }
 
-function comp_line($l1, $l2, $is_reg) {
+function comp_line(string $l1, string $l2, bool $is_reg): bool {
   if ($is_reg) {
-    return preg_match('/^'. $l1 . '$/s', $l2);
+    return (bool)preg_match('/^'. $l1 . '$/s', $l2);
   } else {
     return !strcmp($l1, $l2);
   }
 }
 
-function count_array_diff($ar1, $ar2, $is_reg, $idx1, $idx2, $cnt1, $cnt2,
-                          $steps) {
+function count_array_diff(
+  vec<string> $ar1, vec<string> $ar2, bool $is_reg,
+  int $idx1, int $idx2, int $cnt1, int $cnt2, num $steps,
+): int {
   $equal = 0;
 
   while ($idx1 < $cnt1 && $idx2 < $cnt2 && comp_line($ar1[$idx1], $ar2[$idx2],
@@ -2525,7 +2570,12 @@ function count_array_diff($ar1, $ar2, $is_reg, $idx1, $idx2, $cnt1, $cnt2,
   return $equal;
 }
 
-function generate_array_diff($ar1, $ar2, $is_reg, $w) {
+function generate_array_diff(
+  vec<string> $ar1,
+  vec<string> $ar2,
+  bool $is_reg,
+  $w,
+): vec<string> {
   $idx1 = 0; $cnt1 = @count($ar1);
   $idx2 = 0; $cnt2 = @count($ar2);
   $old1 = dict[];
@@ -2597,8 +2647,7 @@ function generate_array_diff($ar1, $ar2, $is_reg, $w) {
   return $diff;
 }
 
-function generate_diff($wanted, $wanted_re, $output)
-{
+function generate_diff($wanted, $wanted_re, $output): string {
   $m = null;
   $w = explode("\n", $wanted);
   $o = explode("\n", $output);
@@ -2624,11 +2673,13 @@ function generate_diff($wanted, $wanted_re, $output)
   }
   $diff = generate_array_diff($r, $o, !is_null($wanted_re), $w);
 
-  return implode("\r\n", $diff);
+  return safe_implode("\r\n", $diff);
 }
 
-function dump_hhas_cmd(string $hhvm_cmd, $test, $hhas_file) {
-  $dump_flags = implode(' ', vec[
+function dump_hhas_cmd(
+  string $hhvm_cmd, string $test, string $hhas_file,
+): string {
+  $dump_flags = safe_implode(' ', vec[
     '-vEval.AllowHhas=true',
     '-vEval.DumpHhas=1',
     '-vEval.DumpHhasToFile='.escapeshellarg($hhas_file),
@@ -2639,7 +2690,8 @@ function dump_hhas_cmd(string $hhvm_cmd, $test, $hhas_file) {
   return $cmd;
 }
 
-function dump_hhas_to_temp(string $hhvm_cmd, $test) {
+// ISSUE: Return "?string" or "(string | bool)".
+function dump_hhas_to_temp(string $hhvm_cmd, string $test): mixed {
   $temp_file = Status::getTestTmpPath($test, 'round_trip.hhas');
   $cmd = dump_hhas_cmd($hhvm_cmd, $test, $temp_file);
   $ret = -1;
@@ -2658,7 +2710,7 @@ const vec<string> SERVER_EXCLUDE_PATHS = vec[
 
 const string HHAS_EXT = '.hhas';
 
-function can_run_server_test($test, $options) {
+function can_run_server_test(string $test, dict<string, mixed> $options): bool {
   // explicitly disabled
   if (is_file("$test.noserver") ||
       (is_file("$test.nowebserver") && isset($options['server']))) {
@@ -2690,7 +2742,7 @@ function can_run_server_test($test, $options) {
 
 const int SERVER_TIMEOUT = 45;
 
-function run_config_server($options, $test) {
+function run_config_server(dict<string, mixed> $options, string $test): mixed {
   invariant(
     can_run_server_test($test, $options),
     'should_skip_test_simple should have skipped this',
@@ -2714,12 +2766,13 @@ function run_config_server($options, $test) {
   return run_config_post(vec[$output, ''], $test, $options);
 }
 
+// Returns (string, string) or false.
 function run_config_cli(
-  $options,
-  $test,
+  dict<string, mixed> $options,
+  string $test,
   string $cmd,
   dict<string, mixed> $cmd_env,
-) {
+): mixed {
   $cmd = timeout_prefix() . $cmd;
 
   if (isset($options['repo']) && !isset($options['repo-out'])) {
@@ -2759,7 +2812,7 @@ function run_config_cli(
   return vec[$output, $stderr];
 }
 
-function replace_object_resource_ids($str, $replacement) {
+function replace_object_resource_ids(string $str, string $replacement): string {
   $str = preg_replace(
     '/(object\([^)]+\)#)\d+/', '\1'.$replacement, $str
   );
@@ -2768,7 +2821,12 @@ function replace_object_resource_ids($str, $replacement) {
   );
 }
 
-function run_config_post($outputs, $test, $options) {
+// NOTE: Returns "(string | bool)".
+function run_config_post(
+  vec<string> $outputs,
+  string $test,
+  dict<string, mixed> $options,
+): mixed {
   $output = $outputs[0];
   $stderr = $outputs[1];
   file_put_contents(Status::getTestOutputPath($test, 'out'), $output);
@@ -2933,7 +2991,7 @@ function run_config_post($outputs, $test, $options) {
   return false;
 }
 
-function timeout_prefix() {
+function timeout_prefix(): string {
   if (is_executable('/usr/bin/timeout')) {
     return '/usr/bin/timeout ' . TIMEOUT_SECONDS . ' ';
   } else {
@@ -2941,13 +2999,15 @@ function timeout_prefix() {
   }
 }
 
+// NOTE: Returns "(string | bool)".
 function run_foreach_config(
-  $options,
-  $test,
+  dict<string, mixed> $options,
+  string $test,
   vec<string> $cmds,
   dict<string, mixed> $cmd_env,
-) {
+): mixed {
   invariant(count($cmds) > 0, "run_foreach_config: no modes");
+  $result = false;
   foreach ($cmds as $cmd) {
     $outputs = run_config_cli($options, $test, $cmd, $cmd_env);
     if ($outputs === false) return false;
@@ -2957,7 +3017,7 @@ function run_foreach_config(
   return $result;
 }
 
-function run_and_log_test($options, $test) {
+function run_and_log_test(dict<string, mixed> $options, string $test): void {
   $stime = time();
   $time = mtime();
   $status = run_test($options, $test);
@@ -2985,7 +3045,8 @@ function run_and_log_test($options, $test) {
   }
 }
 
-function run_test($options, $test) {
+// NOTE: Returns "(string | bool)".
+function run_test(dict<string, mixed> $options, string $test): mixed {
   $skip_reason = should_skip_test_simple($options, $test);
   if ($skip_reason is nonnull) return $skip_reason;
 
@@ -3167,11 +3228,14 @@ function num_cpus(): int {
   return 2; // default when we don't know how to detect.
 }
 
-function make_header($str): string {
+function make_header(string $str): string {
   return "\n\033[0;33m".$str."\033[0m\n";
 }
 
-function print_commands($tests, $options): void {
+function print_commands(
+  vec<string> $tests,
+  dict<string, mixed> $options,
+): void {
   if (isset($options['verbose'])) {
     print make_header("Run these by hand:");
   } else {
@@ -3200,6 +3264,7 @@ function print_commands($tests, $options): void {
           $hhbbc_cmds .=
             $c." -vEval.DumpHhas=1 > $test.before.round_trip.hhas\n";
         }
+        // FIXME: There is no "$test_repo" variable here!
         $hhbbc_cmds .=
           "mv $test_repo/$program.hhbbc $test_repo/$program.hhbc\n";
         $hhbbc_cmds .= $hhbbc_cmd;
@@ -3228,22 +3293,21 @@ function print_commands($tests, $options): void {
 
 // This runs only in the "printer" child.
 function msg_loop(int $num_tests, Queue $queue): void {
+  $cols = null;
   $do_progress =
     (
       Status::getMode() === Status::MODE_NORMAL ||
       Status::getMode() === Status::MODE_RECORD_FAILURES
     ) &&
     Status::hasCursorControl();
-
   if ($do_progress) {
     $stty = strtolower(Status::getSTTY());
     $matches = null;
     if (preg_match_with_matches("/columns ([0-9]+);/", $stty, inout $matches) ||
         // because BSD has to be different
         preg_match_with_matches("/([0-9]+) columns;/", $stty, inout $matches)) {
-      $cols = $matches[1];
-    } else {
-      $do_progress = false;
+      /* HH_FIXME[4063] ... the container could be null */
+      $cols = (int)$matches[1];
     }
   }
 
@@ -3251,22 +3315,21 @@ function msg_loop(int $num_tests, Queue $queue): void {
     list($pid, $type, $message) = $queue->receiveMessage();
     if (!Status::handle_message($type, $message)) break;
 
-    if ($do_progress) {
+    if ($cols is nonnull) {
       $total_run = (Status::$skipped + Status::$failed + Status::$passed);
-      $bar_cols = ((int)$cols - 45);
+      $bar_cols = $cols - 45;
 
-      $passed_ticks  = round($bar_cols * (Status::$passed  / $num_tests));
-      $skipped_ticks = round($bar_cols * (Status::$skipped / $num_tests));
-      $failed_ticks  = round($bar_cols * (Status::$failed  / $num_tests));
+      $passed_ticks  = (int)round($bar_cols * (Status::$passed / $num_tests));
+      $skipped_ticks = (int)round($bar_cols * (Status::$skipped / $num_tests));
+      $failed_ticks  = (int)round($bar_cols * (Status::$failed / $num_tests));
 
       $fill = $bar_cols - ($passed_ticks + $skipped_ticks + $failed_ticks);
       if ($fill < 0) $fill = 0;
 
+      $passed_ticks = str_repeat('#', $passed_ticks);
+      $skipped_ticks = str_repeat('#', $skipped_ticks);
+      $failed_ticks = str_repeat('#', $failed_ticks);
       $fill = str_repeat('-', (int)$fill);
-
-      $passed_ticks = str_repeat('#',  (int)$passed_ticks);
-      $skipped_ticks = str_repeat('#', (int)$skipped_ticks);
-      $failed_ticks = str_repeat('#',  (int)$failed_ticks);
 
       echo
         "\033[2K\033[1G[",
@@ -3278,7 +3341,7 @@ function msg_loop(int $num_tests, Queue $queue): void {
     }
   }
 
-  if ($do_progress) {
+  if ($cols is nonnull) {
     print "\033[2K\033[1G";
     if (Status::$skipped > 0) {
       print Status::$skipped ." tests \033[1;33mskipped\033[0m\n";
@@ -3292,7 +3355,11 @@ function msg_loop(int $num_tests, Queue $queue): void {
   }
 }
 
-function print_success($tests, $results, $options): void {
+function print_success(
+  vec<string> $tests,
+  dict<string, dict<string, mixed>> $results,
+  dict<string, mixed> $options,
+): void {
   // We didn't run any tests, not even skipped. Clowntown!
   if (!$tests) {
     print "\nCLOWNTOWN: No tests!\n";
@@ -3330,7 +3397,11 @@ function print_success($tests, $results, $options): void {
   }
 }
 
-function print_failure(vec<string> $argv, $results, $options): void {
+function print_failure(
+  vec<string> $argv,
+  dict<string, dict<string, mixed>> $results,
+  dict<string, mixed> $options,
+): void {
   $failed = vec[];
   $passed = vec[];
   foreach ($results as $result) {
@@ -3346,12 +3417,12 @@ function print_failure(vec<string> $argv, $results, $options): void {
   $failing_tests_file = ($options['failure-file'] ?? false)
     ? $options['failure-file']
     : Status::getRunTmpDir() . '/test-failures';
-  file_put_contents($failing_tests_file, implode("\n", $failed)."\n");
+  file_put_contents($failing_tests_file, safe_implode("\n", $failed)."\n");
   if ($passed) {
     $passing_tests_file = ($options['success-file'] ?? false)
       ? $options['success-file']
       : Status::getRunTmpDir() . '/tests-passed';
-    file_put_contents($passing_tests_file, implode("\n", $passed)."\n");
+    file_put_contents($passing_tests_file, safe_implode("\n", $passed)."\n");
   }
 
   print "\n".count($failed)." tests failed\n";
@@ -3400,11 +3471,11 @@ function print_failure(vec<string> $argv, $results, $options): void {
   print
     make_header("Re-run just the failing tests:") .
     str_replace("run.php", "run", $argv[0]) . ' ' .
-    implode(' ', \HH\global_get('recorded_options')) .
+    safe_implode(' ', \HH\global_get('recorded_options')) .
     sprintf(' $(cat %s)%s', $failing_tests_file, "\n");
 }
 
-function port_is_listening($port): bool {
+function port_is_listening(int $port): bool {
   $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
   return @socket_connect($socket, 'localhost', $port);
 }
@@ -3418,14 +3489,18 @@ function find_open_port(): int {
   error("Couldn't find an open port");
 }
 
-function start_server_proc($options, $config, $port) {
+function start_server_proc(
+  dict<string, mixed> $options,
+  string $config,
+  int $port,
+): dict<string, mixed> {
   if (isset($options['cli-server'])) {
     $cli_sock = tempnam(sys_get_temp_dir(), 'hhvm-cli-');
   } else {
     // still want to test that an unwritable socket works...
     $cli_sock = '/var/run/hhvm-cli.sock';
   }
-  $threads = get_num_threads($options, PHP_INT_MAX);
+  $threads = get_num_threads($options);
   $thread_option = isset($options['cli-server'])
     ? '-vEval.UnixServerWorkers='.$threads
     : '-vServer.ThreadCount='.$threads;
@@ -3484,6 +3559,7 @@ function start_server_proc($options, $config, $port) {
   if (!$proc) {
     error("Failed to start server process");
   }
+  // NOTE: This is a "dict<string, mixed>".
   $status = proc_get_status($proc);
   $status['proc'] = $proc;
   $status['port'] = $port;
@@ -3493,16 +3569,18 @@ function start_server_proc($options, $config, $port) {
 }
 
 final class ServerRef {
-  public function __construct(public $server) {
+  public function __construct(public dict<string, mixed> $server) {
   }
 }
 
-/*
- * For each config file in $configs, start up a server on a randomly-determined
- * port. Return value is an array mapping pids and config files to arrays of
- * information about the server.
- */
-function start_servers($options, $configs) {
+// For each config file in $configs, start up a server on a randomly-determined
+// port. Return value is a dict mapping "pids" to a dict from pid (an int) to
+// ServerRef, and "configs" to a dict from config (a string) to ServerRef.
+// ISSUE: Returning two separate properly typed dicts might be cleaner.
+function start_servers(
+  dict<string, mixed> $options,
+  keyset<string> $configs,
+): dict<string, dict<arraykey, ServerRef>> {
   if (isset($options['server'])) {
     $prelude = <<<'EOT'
 <?hh
@@ -3529,7 +3607,12 @@ EOT;
     $still_starting = vec[];
 
     foreach ($starting as $server) {
-      $new_status = proc_get_status($server['proc']);
+      $config = $server['config'] as string;
+      $pid = $server['pid'] as int;
+      $port = $server['port'] as int;
+      $proc = $server['proc'] as resource;
+
+      $new_status = proc_get_status($proc);
 
       if (!$new_status['running']) {
         if ($new_status['exitcode'] === 0) {
@@ -3540,14 +3623,14 @@ EOT;
         if (getenv('HHVM_TEST_SERVER_LOG')) {
           echo "\n\nLost connection race on port $port. Trying another.\n\n";
         }
-        $still_starting[] =
-          start_server_proc($options, $server['config'], find_open_port());
-      } else if (!port_is_listening($server['port'])) {
+        $port = find_open_port();
+        $still_starting[] = start_server_proc($options, $config, $port);
+      } else if (!port_is_listening($port)) {
         $still_starting[] = $server;
       } else {
         $ref = new ServerRef($server);
-        $servers['pids'][$server['pid']] = $ref;
-        $servers['configs'][$server['config']] = $ref;
+        $servers['pids'][$pid] = $ref;
+        $servers['configs'][$config] = $ref;
       }
     }
 
@@ -3566,7 +3649,7 @@ EOT;
   return $servers;
 }
 
-function get_num_threads($options, $tests): int {
+function get_num_threads(dict<string, mixed> $options): int {
   if (isset($options['threads'])) {
     $threads = (int)$options['threads'];
     if ((string)$threads !== $options['threads'] || $threads < 1) {
@@ -3576,11 +3659,11 @@ function get_num_threads($options, $tests): int {
     $threads = isset($options['server']) || isset($options['cli-server'])
       ? num_cpus() * 2 : num_cpus();
   }
-  return min(count($tests), $threads);
+  return $threads;
 }
 
 function runner_precheck(): void {
-  // basic checking for runner.
+  // Basic checking for runner.
   if (!((bool)$_SERVER ?? false) || !((bool)$_ENV ?? false)) {
     echo "Warning: \$_SERVER/\$_ENV variables not available, please check \n" .
          "your ini setting: variables_order, it should have both 'E' and 'S'\n";
@@ -3597,7 +3680,8 @@ function main(vec<string> $argv): int {
     error(help());
   }
   if (isset($options['list-tests'])) {
-    success(list_tests($files, $options));
+    list_tests($files, $options);
+    success();
   }
 
   $tests = find_tests($files, $options);
@@ -3653,6 +3737,7 @@ function main(vec<string> $argv): int {
             "mode. (".count($configs)." required)");
     }
 
+    // ISSUE: This might be the only non-string stored in "$options".
     $servers = start_servers($options, $configs);
     $options['servers'] = $servers;
   }
@@ -3666,7 +3751,7 @@ function main(vec<string> $argv): int {
   // threads for the test running. If we have some, we save one thread for
   // the serial bucket. However if we only have one thread, we don't split
   // out serial tests.
-  $parallel_threads = get_num_threads($options, $tests);
+  $parallel_threads = min(get_num_threads($options), \count($tests)) as int;
   if ($parallel_threads === 1) {
     $test_buckets = vec[$tests];
   } else {
@@ -3755,6 +3840,7 @@ function main(vec<string> $argv): int {
       } else if ($pid) {
         $children[$pid] = $pid;
       } else {
+        invariant($test_bucket is vec<_>, __METHOD__);
         exit(child_main($options, $test_bucket, $json_results_file));
       }
     }
@@ -3782,12 +3868,14 @@ function main(vec<string> $argv): int {
         }
         Status::serverRestarted();
         $ref = $servers['pids'][$pid];
-        $ref->server =
-          start_server_proc($options, $ref->server['config'], $ref->server['port']);
+        $config = $ref->server['config'] as string;
+        $port = $ref->server['port'] as int;
+        $ref->server = start_server_proc($options, $config, $port);
 
         // Unset the old $pid entry and insert the new one.
         unset($servers['pids'][$pid]);
-        $servers['pids'][$ref->server['pid']] = $ref;
+        $pid = $ref->server['pid'] as int;
+        $servers['pids'][$pid] = $ref;
       } elseif (isset($children[$pid])) {
         unset($children[$pid]);
         $return_value |= pcntl_wexitstatus($status);
@@ -3801,6 +3889,7 @@ function main(vec<string> $argv): int {
   if (!Status::$nofork && $printer_pid !== 0) {
     $status = 0;
     $pid = pcntl_waitpid($printer_pid, inout $status);
+    $status = $status as int;
     if (!pcntl_wifexited($status) && !pcntl_wifsignaled($status)) {
       error("Unexpected exit status from child");
     }
@@ -3809,26 +3898,28 @@ function main(vec<string> $argv): int {
   // Kill the servers.
   if ($servers) {
     foreach ($servers['pids'] as $ref) {
-      proc_terminate($ref->server['proc']);
-      proc_close($ref->server['proc']);
+      $proc = $ref->server['proc'] as resource;
+      proc_terminate($proc);
+      proc_close($proc);
     }
   }
 
-  // aggregate results
+  // Aggregate results.
   $results = dict[];
   foreach ($json_results_files as $json_results_file) {
-    $json = json_decode(file_get_contents($json_results_file), true);
+    $contents = file_get_contents($json_results_file);
+    $json = json_decode($contents, true);
     if (!is_array($json)) {
       error(
         "\nNo JSON output was received from a test thread. ".
-        "Either you killed it, or it might be a bug in the test script."
+        "Either you killed it, or it might be a bug in the test script.",
       );
     }
     $results = array_merge($results, $json);
     unlink($json_results_file);
   }
 
-  // print results
+  // Print results.
   if (isset($options['record-failures'])) {
     $fail_file = $options['record-failures'];
     $failed_tests = vec[];
@@ -3857,7 +3948,7 @@ function main(vec<string> $argv): int {
       count($failed_tests), $new_fails, $new_passes
     );
     sort(inout $failed_tests);
-    file_put_contents($fail_file, implode("\n", $failed_tests));
+    file_put_contents($fail_file, safe_implode("\n", $failed_tests));
   } else if (isset($options['testpilot'])) {
     Status::say(dict['op' => 'all_done', 'results' => $results]);
     return $return_value;
@@ -3884,7 +3975,6 @@ function main(vec<string> $argv): int {
 function run_main(): void {
   exit(main(get_argv()));
 }
-
 
 // NOTE: Inline ASCII art moved to end-of-file to avoid confusing emacs.
 

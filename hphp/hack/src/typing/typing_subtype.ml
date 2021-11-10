@@ -1323,8 +1323,8 @@ and simplify_subtype_i
                   ( Tint | Tbool | Tfloat | Tstring | Tresource | Tnum
                   | Tarraykey | Tnoreturn ))
             | Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tclass _ | Tvarray _
-            | Tdarray _ | Tvarray_or_darray _ | Tvec_or_dict _ | Taccess _ ) )
-          ->
+            | Tsupportdynamic | Tdarray _ | Tvarray_or_darray _ | Tvec_or_dict _
+            | Taccess _ ) ) ->
           valid env
         (* negations always contain null *)
         | (_, Tneg _) -> invalid_env env

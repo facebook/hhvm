@@ -1,6 +1,10 @@
 <?hh
 
-function e(supportdynamic $sd): void {}
+function expectNonNull(nonnull $nn):void { }
+
+function e(supportdynamic $sd): void {
+  expectNonNull($sd);
+}
 
 <<__SupportDynamicType>>
 class C {}

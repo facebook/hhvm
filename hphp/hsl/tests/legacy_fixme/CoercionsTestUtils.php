@@ -407,7 +407,7 @@ class CoercionsTestDateTime1 implements \DateTimeInterface {
   public function __construct(int $timestamp) {
     $this->timestamp = $timestamp;
   }
-  public function getTimestamp(): mixed {
+  public function getTimestamp()[]: mixed {
     if ($this->timestamp <= 0) {
       throw new \Exception('sneaky');
     }
@@ -420,7 +420,7 @@ class CoercionsTestDateTime1 implements \DateTimeInterface {
 }
 
 class CoercionsTestDateTime2 implements \DateTimeInterface {
-  public function getTimestamp(): int {
+  public function getTimestamp()[]: int {
     return 100;
   }
   public function diff(mixed $dt, mixed $absolute = null): void {}

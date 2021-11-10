@@ -355,7 +355,7 @@ class SwitchCoercionsTestDateTime implements DateTimeInterface {
   public function __construct(public int $timestamp) {
     $this->timestamp = $timestamp;
   }
-  public function getTimestamp(): int {
+  public function getTimestamp()[]: int {
     if ($this->timestamp <= 0) {
       throw new Exception('sneaky');
     }

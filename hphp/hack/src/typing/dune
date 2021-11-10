@@ -141,11 +141,12 @@
     decl_nast
     logging
     naming_special_names
+    nast_check
     pcre
     procs_procs
     tast
     tast_check
-    nast_check)
+    type_mapper)
   (preprocess (pps ppx_deriving.std)))
 
 (library
@@ -175,7 +176,6 @@
   (name typing_algebra)
   (wrapped false)
   (modules
-    type_mapper
     typing_algebra
     typing_coeffects
     typing_coercion
@@ -200,8 +200,18 @@
     typing_utils
     typing_visibility)
   (libraries
+    type_mapper
     typing_env
     typing_log)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
+  (name type_mapper)
+  (wrapped false)
+  (modules
+    type_mapper)
+  (libraries
+    typing_env)
   (preprocess (pps ppx_deriving.std)))
 
 (library

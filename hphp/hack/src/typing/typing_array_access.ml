@@ -550,7 +550,7 @@ let rec array_get
                     in
                     Errors.array_get_with_optional_field
                       p
-                      (Env.get_shape_field_name_pos declared_field)
+                      (Typing_defs.TShapeField.pos declared_field)
                       (TUtils.get_printable_shape_field_name field);
                     (env, err_witness env p, dflt_arr_res, Ok ty2)
                   ) else

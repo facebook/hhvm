@@ -23,7 +23,7 @@ let fun_env ?origin ctx fd =
   let f = fd.fd_fun in
   let file = Pos.filename (fst f.f_name) in
   let droot = Some (Typing_deps.Dep.Fun (snd f.f_name)) in
-  let env = Env.empty ?origin ctx file ~mode:fd.fd_mode ~droot in
+  let env = Typing_env_types.empty ?origin ctx file ~mode:fd.fd_mode ~droot in
   env
 
 (* Given a class definition construct a type consisting of the
@@ -42,7 +42,7 @@ let get_self_from_c c =
 let class_env ?origin ctx c =
   let file = Pos.filename (fst c.c_name) in
   let droot = Some (Typing_deps.Dep.Type (snd c.c_name)) in
-  let env = Env.empty ?origin ctx file ~mode:c.c_mode ~droot in
+  let env = Typing_env_types.empty ?origin ctx file ~mode:c.c_mode ~droot in
   (* Set up self identifier and type *)
   let self_id = snd c.c_name in
   let self = get_self_from_c c in
@@ -91,17 +91,17 @@ let class_env ?origin ctx c =
 let record_def_env ?origin ctx rd =
   let file = Pos.filename (fst rd.rd_name) in
   let droot = Some (Typing_deps.Dep.Type (snd rd.rd_name)) in
-  let env = Env.empty ?origin ctx file ~droot in
+  let env = Typing_env_types.empty ?origin ctx file ~droot in
   env
 
 let typedef_env ?origin ctx t =
   let file = Pos.filename (fst t.t_kind) in
   let droot = Some (Typing_deps.Dep.Type (snd t.t_name)) in
-  let env = Env.empty ?origin ctx file ~mode:t.t_mode ~droot in
+  let env = Typing_env_types.empty ?origin ctx file ~mode:t.t_mode ~droot in
   env
 
 let gconst_env ?origin ctx cst =
   let file = Pos.filename (fst cst.cst_name) in
   let droot = Some (Typing_deps.Dep.GConst (snd cst.cst_name)) in
-  let env = Env.empty ?origin ctx file ~mode:cst.cst_mode ~droot in
+  let env = Typing_env_types.empty ?origin ctx file ~mode:cst.cst_mode ~droot in
   env

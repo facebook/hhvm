@@ -512,7 +512,7 @@ let rec get_base_type env ty =
     end
   | _ -> ty
 
-let get_printable_shape_field_name = Env.get_shape_field_name
+let get_printable_shape_field_name = Typing_defs.TShapeField.name
 
 let shape_field_name_ this field =
   Aast.(

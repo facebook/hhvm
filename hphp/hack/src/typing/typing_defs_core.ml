@@ -93,6 +93,12 @@ module TShapeField = struct
     | TSFclass_const ((cls_pos, _), (mem_pos, _)) ->
       Pos_or_decl.btw cls_pos mem_pos
 
+  let name = function
+    | TSFlit_int (_, s)
+    | TSFlit_str (_, s) ->
+      s
+    | TSFclass_const ((_, s1), (_, s2)) -> s1 ^ "::" ^ s2
+
   let of_ast : (Pos.t -> Pos_or_decl.t) -> Ast_defs.shape_field_name -> t =
    fun convert_pos -> function
     | Ast_defs.SFlit_int (p, s) -> TSFlit_int (convert_pos p, s)

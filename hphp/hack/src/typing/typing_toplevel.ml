@@ -2176,7 +2176,7 @@ let nast_to_tast_gienv ~(do_tast_checks : bool) ctx nast :
      * so just create the minimal env for us to construct a Stmt.
      *)
     | Stmt s ->
-      let env = Env.empty ctx Relative_path.default ~droot:None in
+      let env = Typing_env_types.empty ctx Relative_path.default ~droot:None in
       Some (Aast.Stmt (snd (Typing.stmt env s)), [])
     | Namespace _
     | NamespaceUse _

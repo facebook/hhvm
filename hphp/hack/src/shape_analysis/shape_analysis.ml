@@ -172,7 +172,7 @@ let walk_tast (tast : Tast.program) : constraint_ list SMap.t =
 
 let analyse (options : options) (ctx : Provider_context.t) (tast : T.program) =
   let empty_typing_env =
-    Typing_env.empty ~droot:None ctx Relative_path.default
+    Typing_env_types.empty ~droot:None ctx Relative_path.default
   in
   match options.mode with
   | FlagTargets ->

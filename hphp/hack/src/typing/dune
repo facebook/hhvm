@@ -50,52 +50,26 @@
     nast_visitor
     nast_check_env
     stateful_aast_visitor
-    type_mapper
     type_parameter_env_ops
     type_validator
-    typing_algebra
     typing_async
-    typing_coeffects
-    typing_coercion
     typing_const_reifiable
     typing_deferred_members
-    typing_dependent_type
-    typing_disposable
-    typing_dynamic
-    typing_enforceability
     typing_enforceable_hint
-    typing_enum
     typing_env_from_def
     typing_equality_check
     typing_expand
-    typing_generic_constraint
     typing_generic_rules
     typing_local_ops
-    typing_intersection
-    typing_kinding
-    typing_log
-    typing_logic_helpers
-    typing_object_get
     typing_ordered_solver
-    typing_ops
     typing_per_cont_ops
-    typing_phase
-    typing_print
     typing_reified_check
-    typing_return
-    typing_solver
-    typing_solver_utils
     typing_special_fun
     typing_substring
-    typing_subtype
     typing_subtype_method
-    typing_subtype_tconst
     typing_taccess
     typing_tdef
-    typing_union
-    typing_utils
     typing_variance
-    typing_visibility
     typing_global_inference
     typing_xhp)
   (libraries
@@ -114,6 +88,7 @@
     typing_ast
     typing_defs
     typing_env
+    typing_algebra
     typing_heap
     global_config)
   (preprocess (pps ppx_deriving.std)))
@@ -197,6 +172,61 @@
   (preprocess (pps ppx_deriving.std)))
 
 (library
+  (name typing_algebra)
+  (wrapped false)
+  (modules
+    type_mapper
+    typing_algebra
+    typing_coeffects
+    typing_coercion
+    typing_dependent_type
+    typing_disposable
+    typing_dynamic
+    typing_enforceability
+    typing_enum
+    typing_intersection
+    typing_generic_constraint
+    typing_kinding
+    typing_logic_helpers
+    typing_object_get
+    typing_ops
+    typing_phase
+    typing_return
+    typing_solver
+    typing_solver_utils
+    typing_subtype
+    typing_subtype_tconst
+    typing_union
+    typing_utils
+    typing_visibility)
+  (libraries
+    typing_env
+    typing_log)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
+  (name typing_log)
+  (wrapped false)
+  (modules
+    typing_log
+    typing_print)
+  (libraries
+    decl_provider
+    hackfmt
+    typing_logic
+    typing_env_types)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
+  (name typing_logic)
+  (wrapped false)
+  (modules
+    typing_logic)
+  (libraries
+    typing_defs)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
   (name typing_env)
   (wrapped false)
   (modules
@@ -204,7 +234,9 @@
   (libraries
     decl_provider
     provider_context
-    typing_env_types))
+    typing_env_types
+    typing_log)
+  (preprocess (pps ppx_deriving.std)))
 
 (library
   (name typing_env_types)
@@ -232,10 +264,9 @@
     tast
     typing_kinding_defs
     type_parameter_env
-    typing_log_value
-    typing_logic
     typing_set
     typing_inference_env
+    typing_log_value
     typing_make_type
     typing_tyvar_occurrences
     type_visitor)
@@ -249,6 +280,7 @@
     nast
     type_mapper_forget
     typing_defs
+    typing_logic
     typechecker_options)
   (preprocess (pps ppx_deriving.std)))
 

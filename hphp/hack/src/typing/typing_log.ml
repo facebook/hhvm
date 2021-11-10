@@ -10,7 +10,6 @@
 open Hh_prelude
 open Typing_defs
 open Typing_env_types
-module Env = Typing_env
 module Inf = Typing_inference_env
 module Pr = Typing_print
 module TPEnv = Type_parameter_env
@@ -71,7 +70,7 @@ let indentEnv ?(color = Normal Yellow) message f =
 (* Most recent environment. We only display diffs *)
 let lastenv =
   ref
-    (Env.empty
+    (Typing_env_types.empty
        (Provider_context.empty_for_debugging
           ~popt:ParserOptions.default
           ~tcopt:TypecheckerOptions.default
@@ -627,10 +626,6 @@ let hh_show_full_env p env =
   in
   log_env_diff p empty_env env
 
-let _ =
-  Env.set_env_log_function (fun pos name old_env env ->
-      log_env_diff pos ~function_name:name old_env env)
-
 (* Log the type of an expression *)
 let hh_show p env ty =
   let s1 = Pr.with_blank_tyvars (fun () -> Pr.debug env ty) in
@@ -648,7 +643,7 @@ type log_structure =
   | Log_type_i of string * Typing_defs.internal_type
 
 let log_with_level env key ~level log_f =
-  if Env.get_log_level env key >= level then
+  if Typing_env_types.get_log_level env key >= level then
     log_f ()
   else
     ()
@@ -798,7 +793,7 @@ let log_pessimise_param env pos param_name =
   log_pessimise_ env "param" pos param_name
 
 let increment_feature_count env s =
-  if GlobalOptions.tco_language_feature_logging (Env.get_tcopt env) then
+  if GlobalOptions.tco_language_feature_logging env.genv.tcopt then
     Measure.sample s 1.0
 
 module GlobalInference = struct

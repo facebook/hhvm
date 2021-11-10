@@ -77,3 +77,31 @@ and genv = {
   this_support_dynamic_type: bool;
       (** Is the definition that we are checking marked <<__SupportDynamicType>>? *)
 }
+
+val empty :
+  ?origin:Decl_counters.origin ->
+  ?mode:FileInfo.mode ->
+  Provider_context.t ->
+  Relative_path.t ->
+  droot:Typing_deps.Dep.dependent Typing_deps.Dep.variant option ->
+  env
+
+val get_log_level : env -> string -> int
+
+val next_cont_opt : env -> Typing_per_cont_env.per_cont_entry option
+
+val get_tpenv : env -> Type_parameter_env.t
+
+val get_pos_and_kind_of_generic :
+  env -> string -> (Pos_or_decl.t * Typing_kinding_defs.kind) option
+
+val get_lower_bounds :
+  env -> string -> locl_ty list -> Type_parameter_env.tparam_bounds
+
+val get_upper_bounds :
+  env -> string -> locl_ty list -> Type_parameter_env.tparam_bounds
+
+val get_equal_bounds :
+  env -> string -> locl_ty list -> Type_parameter_env.tparam_bounds
+
+val get_tparams_in_ty_and_acc : env -> SSet.t -> locl_ty -> SSet.t

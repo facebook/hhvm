@@ -14,7 +14,7 @@ let empty_env =
       ~tcopt:TypecheckerOptions.default
       ~backend:Provider_backend.Shared_memory
   in
-  Typing_env.empty ctx Relative_path.default ~droot:None
+  Typing_env_types.empty ctx Relative_path.default ~droot:None
 
 let typing_print_ffi_debug (ty : locl_ty) = Typing_print.debug empty_env ty
 

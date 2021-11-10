@@ -12,6 +12,7 @@
 (*****************************************************************************)
 
 open Hh_prelude
+open Option.Monad_infix
 open Typing_defs
 open Typing_env_types
 open Typing_logic
@@ -41,7 +42,6 @@ let shallow_decl_enabled (ctx : Provider_context.t) : bool =
 (*****************************************************************************)
 
 module Full = struct
-  module Env = Typing_env
   open Doc
 
   let format_env = Format_env.{ default with line_width = 60 }
@@ -54,7 +54,7 @@ module Full = struct
 
   let show_verbose penv =
     match penv with
-    | Loclenv env -> Env.get_log_level env "show" > 1
+    | Loclenv env -> Typing_env_types.get_log_level env "show" > 1
     | Declenv -> false
 
   let blank_tyvars = ref false
@@ -95,7 +95,9 @@ module Full = struct
 
   let shape_map fdm f_field =
     let compare (k1, _) (k2, _) =
-      String.compare (Env.get_shape_field_name k1) (Env.get_shape_field_name k2)
+      String.compare
+        (Typing_defs.TShapeField.name k1)
+        (Typing_defs.TShapeField.name k2)
     in
     let fields = List.sort ~compare (TShapeMap.bindings fdm) in
     List.map fields ~f:f_field
@@ -242,8 +244,8 @@ module Full = struct
   let tfun ~ty to_doc st penv ft =
     let sdt =
       match penv with
-      | Loclenv env
-        when TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env) ->
+      | Loclenv env when TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
+        ->
         if get_ft_support_dynamic_type ft then
           text "<<__SupportDynamicType>> "
         else
@@ -280,7 +282,7 @@ module Full = struct
             else
               Nothing);
             key_delim;
-            to_doc (Env.get_shape_field_name shape_map_key);
+            to_doc (Typing_defs.TShapeField.name shape_map_key);
             key_delim;
             Space;
             text "=>";
@@ -376,7 +378,7 @@ module Full = struct
 
   (* For a given type parameter, construct a list of its constraints *)
   let get_constraints_on_tparam penv tparam =
-    let kind_opt = Env.get_pos_and_kind_of_generic penv tparam in
+    let kind_opt = Typing_env_types.get_pos_and_kind_of_generic penv tparam in
     match kind_opt with
     | None -> []
     | Some (_pos, kind) ->
@@ -387,9 +389,9 @@ module Full = struct
         List.map param_names ~f:(fun name ->
             Typing_make_type.generic Reason.none name)
       in
-      let lower = Env.get_lower_bounds penv tparam params in
-      let upper = Env.get_upper_bounds penv tparam params in
-      let equ = Env.get_equal_bounds penv tparam params in
+      let lower = Typing_env_types.get_lower_bounds penv tparam params in
+      let upper = Typing_env_types.get_upper_bounds penv tparam params in
+      let equ = Typing_env_types.get_equal_bounds penv tparam params in
       (* If we have an equality we can ignore the other bounds *)
       if not (TySet.is_empty equ) then
         List.map (TySet.elements equ) ~f:(fun ty ->
@@ -436,7 +438,7 @@ module Full = struct
         match deref ty with
         | (_, Tnonnull) -> text "mixed"
         | (r, Tunion tyl)
-          when TypecheckerOptions.like_type_hints (Env.get_tcopt env)
+          when TypecheckerOptions.like_type_hints env.genv.tcopt
                && List.exists ~f:is_dynamic tyl ->
           (* Unions with null become Toption, which leads to the awkward ?~...
            * The Tunion case can better handle this *)
@@ -447,7 +449,11 @@ module Full = struct
     | Tneg (Neg_prim x) -> Concat [text "not "; tprim x]
     | Tneg (Neg_class c) -> Concat [text "not "; to_doc (snd c)]
     | Tvar n ->
-      let (_, ety) = Env.expand_type env (mk (Reason.Rnone, Tvar n)) in
+      let (_, ety) =
+        Typing_inference_env.expand_type
+          env.inference_env
+          (mk (Reason.Rnone, Tvar n))
+      in
       begin
         match deref ety with
         (* For unsolved type variables, always show the type variable *)
@@ -511,7 +517,7 @@ module Full = struct
       *)
     | Ttuple tyl -> ttuple k tyl
     | Tunion [] -> text "nothing"
-    | Tunion tyl when TypecheckerOptions.like_type_hints (Env.get_tcopt env) ->
+    | Tunion tyl when TypecheckerOptions.like_type_hints env.genv.tcopt ->
       let tyl =
         List.fold_right tyl ~init:Typing_set.empty ~f:Typing_set.add
         |> Typing_set.elements
@@ -669,11 +675,14 @@ module Full = struct
    * represent this as `as t` or `super t`, otherwise use full `where` syntax
    *)
   let constraints_for_type to_doc env typ =
-    let tparams = SSet.elements (Env.get_tparams env typ) in
+    let tparams =
+      SSet.elements
+        (Typing_env_types.get_tparams_in_ty_and_acc env SSet.empty typ)
+    in
     let constraints =
       List.concat_map tparams ~f:(get_constraints_on_tparam env)
     in
-    let (_, typ) = Env.expand_type env typ in
+    let (_, typ) = Typing_inference_env.expand_type env.inference_env typ in
     let penv = Loclenv env in
     match (get_node typ, constraints) with
     | (_, []) -> Nothing
@@ -782,8 +791,6 @@ let with_blank_tyvars f =
 (*****************************************************************************)
 
 module ErrorString = struct
-  module Env = Typing_env
-
   let tprim = function
     | Nast.Tnull -> "null"
     | Nast.Tvoid -> "void"
@@ -913,7 +920,7 @@ module ErrorString = struct
       | Ast_defs.Concrete -> "an enum class")
 
   and to_string ?(ignore_dynamic = false) env ty =
-    let (_, ety) = Env.expand_type env ty in
+    let (_, ety) = Typing_inference_env.expand_type env.inference_env ty in
     type_ ~ignore_dynamic env (get_node ety)
 end
 
@@ -970,7 +977,11 @@ module Json = struct
     let as_type ty = [("as", from_type env ty)] in
     match (get_pos ty, get_node ty) with
     | (_, Tvar n) ->
-      let (_, ty) = Typing_env.expand_type env (mk (get_reason ty, Tvar n)) in
+      let (_, ty) =
+        Typing_inference_env.expand_type
+          env.inference_env
+          (mk (get_reason ty, Tvar n))
+      in
       begin
         match (get_pos ty, get_node ty) with
         | (p, Tvar _) -> obj @@ kind p "var"
@@ -986,7 +997,10 @@ module Json = struct
     | (p, Tgeneric (s, tyargs)) ->
       obj @@ kind p "generic" @ is_array true @ name s @ args tyargs
     | (p, Tunapplied_alias s) -> obj @@ kind p "unapplied_alias" @ name s
-    | (p, Tnewtype (s, _, ty)) when Typing_env.is_enum env s ->
+    | (p, Tnewtype (s, _, ty))
+      when Decl_provider.get_class env.decl_env.Decl_env.ctx s
+           >>| Cls.enum_type
+           |> Option.is_some ->
       obj @@ kind p "enum" @ name s @ as_type ty
     | (p, Tnewtype (s, tys, ty)) ->
       obj @@ kind p "newtype" @ name s @ args tys @ as_type ty
@@ -1475,6 +1489,15 @@ let json_to_locl_ty = Json.to_locl_ty
  *)
 (*****************************************************************************)
 
+let deferred_member_inits_ref :
+    (Typing_env_types.env -> Shallow_decl_defs.shallow_class -> SSet.t * SSet.t)
+    ref =
+  ref (fun _ _ -> failwith "deferred_member_inits_ref not initialized!")
+
+let set_deferred_member_inits f = deferred_member_inits_ref := f
+
+let deferred_member_inits x y = !deferred_member_inits_ref x y
+
 module PrintClass = struct
   let indent = "    "
 
@@ -1653,7 +1676,7 @@ module PrintClass = struct
         acc ^ Full.to_string_decl x ^ ", ")
 
   let class_type ctx c =
-    let tenv = Typing_env.empty ctx Relative_path.default ~droot:None in
+    let tenv = Typing_env_types.empty ctx Relative_path.default ~droot:None in
     let tc_need_init = bool (Cls.need_init c) in
     let tc_abstract = bool (Cls.abstract c) in
     let tc_deferred_init_members =
@@ -1661,7 +1684,7 @@ module PrintClass = struct
       @@
       if shallow_decl_enabled ctx then
         match Shallow_classes_provider.get ctx (Cls.name c) with
-        | Some cls -> snd (Typing_deferred_members.class_ tenv cls)
+        | Some cls -> snd (deferred_member_inits tenv cls)
         | None -> SSet.empty
       else
         Cls.deferred_init_members c
@@ -1869,7 +1892,8 @@ let coeffects env ty =
       (* We are interested in the upper bounds because coeffects are parameters (contravariant).
        * Similar to Typing_subtype.describe_ty_super, we ignore Tvars appearing in bounds *)
       let upper_bounds =
-        ITySet.elements (Typing_env.get_tyvar_upper_bounds env v)
+        ITySet.elements
+          (Typing_inference_env.get_tyvar_upper_bounds env.inference_env v)
         |> List.filter_map ~f:(function
                | LoclType lty ->
                  (match deref lty with
@@ -1894,14 +1918,17 @@ let coeffects env ty =
   in
 
   try
-    let (env, ty) = Typing_env.expand_type env ty in
+    let (inference_env, ty) =
+      Typing_inference_env.expand_type env.inference_env ty
+    in
     let ty =
       match deref ty with
       | (r, Tvar v) ->
         (* We are interested in the upper bounds because coeffects are parameters (contravariant).
          * Similar to Typing_subtype.describe_ty_super, we ignore Tvars appearing in bounds *)
         let upper_bounds =
-          ITySet.elements (Typing_env.get_tyvar_upper_bounds env v)
+          ITySet.elements
+            (Typing_inference_env.get_tyvar_upper_bounds inference_env v)
           |> List.filter_map ~f:(function
                  | LoclType lty ->
                    (match deref lty with

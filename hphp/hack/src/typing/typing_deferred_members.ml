@@ -171,3 +171,5 @@ and class_ env c =
     | Ast_defs.Ctrait -> get_deferred_init_props env c
     | Ast_defs.(Cclass _ | Cinterface | Cenum | Cenum_class _) ->
       (SSet.empty, SSet.empty))
+
+let () = Typing_print.set_deferred_member_inits class_

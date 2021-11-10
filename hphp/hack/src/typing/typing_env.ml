@@ -13,7 +13,6 @@ open Decl_env
 open Typing_env_types
 open Typing_defs
 open Aast
-open Typing_env_return_info
 module Dep = Typing_deps.Dep
 module Inf = Typing_inference_env
 module LID = Local_id
@@ -73,24 +72,21 @@ let get_tracing_info env = env.tracing_info
 let set_log_level env key log_level =
   { env with log_levels = SMap.add key log_level env.log_levels }
 
-let get_log_level env key =
-  Option.value (SMap.find_opt key env.log_levels) ~default:0
-
-let env_log_function = ref (fun _pos _name _old_env _new_env -> ())
-
-let set_env_log_function f = env_log_function := f
+let get_log_level = Typing_env_types.get_log_level
 
 let log_env_change_ :
     type res. string -> ?level:int -> env -> env * res -> env * res =
- fun name ?(level = 1) old_env (new_env, res) ->
-  (if get_log_level new_env name >= 1 || get_log_level new_env "env" >= level
+ fun function_name ?(level = 1) old_env (new_env, res) ->
+  (if
+   get_log_level new_env function_name >= 1
+   || get_log_level new_env "env" >= level
   then
     let pos =
       Option.value
         (Inf.get_current_pos_from_tyvar_stack old_env.inference_env)
         ~default:old_env.genv.callable_pos
     in
-    !env_log_function pos name old_env new_env);
+    Typing_log.log_env_diff pos ~function_name old_env new_env);
   (new_env, res)
 
 let log_env_change name ?(level = 1) old_env new_env =
@@ -327,45 +323,22 @@ let extract_global_inference_env env =
 let wrap_ty_in_var env r ty =
   wrap_inference_env_call env (fun env -> Inf.wrap_ty_in_var env r ty)
 
-let get_shape_field_name = function
-  | Typing_defs.TSFlit_int (_, s)
-  | Typing_defs.TSFlit_str (_, s) ->
-    s
-  | Typing_defs.TSFclass_const ((_, s1), (_, s2)) -> s1 ^ "::" ^ s2
-
-let get_shape_field_name_pos = function
-  | Typing_defs.TSFlit_int (p, _)
-  | Typing_defs.TSFlit_str (p, _)
-  | Typing_defs.TSFclass_const ((p, _), _) ->
-    p
-
-let next_cont_opt env = LEnvC.get_cont_option C.Next env.lenv.per_cont_env
+let next_cont_opt = Typing_env_types.next_cont_opt
 
 let all_continuations env = LEnvC.all_continuations env.lenv.per_cont_env
 
-let get_tpenv env =
-  match next_cont_opt env with
-  | None -> TPEnv.empty
-  | Some entry -> entry.Typing_per_cont_env.tpenv
+let get_tpenv = Typing_env_types.get_tpenv
 
 let get_global_tpenv env = env.tpenv
 
-let get_pos_and_kind_of_generic env name =
-  match TPEnv.get_with_pos name (get_tpenv env) with
-  | Some r -> Some r
-  | None -> TPEnv.get_with_pos name env.tpenv
+let get_pos_and_kind_of_generic = Typing_env_types.get_pos_and_kind_of_generic
 
-let get_lower_bounds env name tyargs =
-  let tpenv = get_tpenv env in
-  let local = TPEnv.get_lower_bounds tpenv name tyargs in
-  let global = TPEnv.get_lower_bounds env.tpenv name tyargs in
-  TySet.union local global
+let get_lower_bounds = Typing_env_types.get_lower_bounds
 
-let get_upper_bounds env name tyargs =
-  let tpenv = get_tpenv env in
-  let local = TPEnv.get_upper_bounds tpenv name tyargs in
-  let global = TPEnv.get_upper_bounds env.tpenv name tyargs in
-  TySet.union local global
+let get_upper_bounds = Typing_env_types.get_upper_bounds
+
+(* Get bounds that are both an upper and lower of a given generic *)
+let get_equal_bounds = Typing_env_types.get_equal_bounds
 
 let get_reified env name =
   let tpenv = get_tpenv env in
@@ -397,12 +370,6 @@ let get_require_dynamic env name =
   let local = TPEnv.get_require_dynamic tpenv name in
   let global = TPEnv.get_require_dynamic env.tpenv name in
   local || global
-
-(* Get bounds that are both an upper and lower of a given generic *)
-let get_equal_bounds env name tyargs =
-  let lower = get_lower_bounds env name tyargs in
-  let upper = get_upper_bounds env name tyargs in
-  TySet.inter lower upper
 
 let env_with_tpenv env tpenv =
   {
@@ -526,31 +493,9 @@ let add_fresh_generic_parameter env pos prefix ~reified ~enforceable ~newable =
 let is_fresh_generic_parameter name =
   String.contains name '#' && not (DependentKind.is_generic_dep_ty name)
 
-let tparams_visitor env =
-  object (this)
-    inherit [SSet.t] Type_visitor.locl_type_visitor
+let get_tparams_in_ty_and_acc = Typing_env_types.get_tparams_in_ty_and_acc
 
-    method! on_tgeneric acc _ s _ =
-      (* as for tnewtype: not traversing args, although they may contain Tgenerics *)
-      SSet.add s acc
-
-    (* Perserving behavior but this seems incorrect to me since a newtype may
-     * contain type arguments with generics
-     *)
-    method! on_tdependent acc _ _ _ = acc
-
-    method! on_tnewtype acc _ _ _ _ = acc
-
-    method! on_tvar acc r ix =
-      let (_env, ty) = expand_var env r ix in
-      match get_node ty with
-      | Tvar _ -> acc
-      | _ -> this#on_type acc ty
-  end
-
-let get_tparams_aux env acc ty = (tparams_visitor env)#on_type acc ty
-
-let get_tparams env ty = get_tparams_aux env SSet.empty ty
+let get_tparams env ty = get_tparams_in_ty_and_acc env SSet.empty ty
 
 let get_tpenv_tparams env =
   TPEnv.fold
@@ -572,7 +517,7 @@ let get_tpenv_tparams env =
         let (_env, ty) = expand_type env ty in
         match get_node ty with
         | Tgeneric _ -> acc
-        | _ -> get_tparams_aux env acc ty
+        | _ -> get_tparams_in_ty_and_acc env acc ty
       in
       TySet.fold folder lower_bounds @@ TySet.fold folder upper_bounds acc
     end
@@ -588,64 +533,6 @@ let reinitialize_locals env =
   env_with_locals
     env
     LEnvC.(initial_locals { empty_entry with tpenv = get_tpenv env })
-
-let initial_local tpenv =
-  {
-    per_cont_env = LEnvC.(initial_locals { empty_entry with tpenv });
-    local_using_vars = LID.Set.empty;
-  }
-
-let empty ?origin ?(mode = FileInfo.Mstrict) ctx file ~droot =
-  {
-    fresh_typarams = SSet.empty;
-    lenv = initial_local TPEnv.empty;
-    in_loop = false;
-    in_try = false;
-    in_case = false;
-    in_expr_tree = false;
-    inside_constructor = false;
-    in_support_dynamic_type_method_check = false;
-    decl_env = { mode; droot; ctx };
-    tracing_info =
-      Option.map origin ~f:(fun origin -> { Decl_counters.origin; file });
-    genv =
-      {
-        tcopt = Provider_context.get_tcopt ctx;
-        callable_pos = Pos.none;
-        readonly = false;
-        return =
-          {
-            (* Actually should get set straight away anyway *)
-            return_type =
-              {
-                et_type = mk (Reason.Rnone, Tunion []);
-                et_enforced = Unenforced;
-              };
-            return_disposable = false;
-            return_explicit = false;
-            return_dynamically_callable = false;
-          };
-        params = LID.Map.empty;
-        condition_types = SMap.empty;
-        self = None;
-        static = false;
-        val_kind = Other;
-        parent = None;
-        fun_kind = Ast_defs.FSync;
-        fun_is_ctor = false;
-        file;
-        this_module = None;
-        this_internal = false;
-        this_support_dynamic_type = false;
-      };
-    tpenv = TPEnv.empty;
-    log_levels = TypecheckerOptions.log_levels (Provider_context.get_tcopt ctx);
-    inference_env = Inf.empty_inference_env;
-    allow_wildcards = false;
-    big_envs = ref [];
-    pessimize = false;
-    fun_tast_info = None;
-  }
 
 let set_env_pessimize env =
   let pessimize_coefficient =

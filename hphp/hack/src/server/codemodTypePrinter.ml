@@ -115,7 +115,7 @@ and print_shape_field_exn (name, { sft_optional; sft_ty; _ }) =
     (print_ty_exn sft_ty)
 
 and print_shape_field_name name =
-  let s = Typing_env.get_shape_field_name name in
+  let s = Typing_defs.TShapeField.name name in
   match name with
   | Typing_defs.TSFlit_str _ -> "'" ^ s ^ "'"
   | _ -> s

@@ -199,7 +199,7 @@ let referenced_typeconsts env root ids =
   let ety_env = Typing_defs.empty_expand_env in
   Typing_taccess.referenced_typeconsts env ety_env (root, ids)
 
-let empty ctx = Typing_env.empty ctx Relative_path.default ~droot:None
+let empty ctx = Typing_env_types.empty ctx Relative_path.default ~droot:None
 
 let restore_saved_env env saved_env =
   let module Env = Typing_env_types in

@@ -92,18 +92,6 @@ val expand_type : env -> locl_ty -> env * locl_ty
 
 val expand_internal_type : env -> internal_type -> env * internal_type
 
-val get_shape_field_name : tshape_field_name -> string
-
-val get_shape_field_name_pos : tshape_field_name -> Pos_or_decl.t
-
-val empty :
-  ?origin:Decl_counters.origin ->
-  ?mode:FileInfo.mode ->
-  Provider_context.t ->
-  Relative_path.t ->
-  droot:Typing_deps.Dep.dependent Typing_deps.Dep.variant option ->
-  env
-
 val is_typedef : env -> type_key -> bool
 
 val is_typedef_visible :
@@ -176,8 +164,6 @@ val set_param : env -> Local_id.t -> locl_ty * Pos.t * param_mode -> env
 val set_log_level : env -> string -> int -> env
 
 val get_log_level : env -> string -> int
-
-val set_env_log_function : (Pos.t -> string -> env -> env -> unit) -> unit
 
 val log_env_change_ : string -> ?level:int -> env -> env * 'res -> env * 'res
 
@@ -350,6 +336,8 @@ val get_lower_bounds : env -> string -> locl_ty list -> TPEnv.tparam_bounds
 
 val get_upper_bounds : env -> string -> locl_ty list -> TPEnv.tparam_bounds
 
+val get_equal_bounds : env -> string -> locl_ty list -> TPEnv.tparam_bounds
+
 val get_reified : env -> string -> Aast.reify_kind
 
 val get_enforceable : env -> string -> bool
@@ -371,8 +359,6 @@ val add_lower_bound :
   string ->
   locl_ty ->
   env
-
-val get_equal_bounds : env -> string -> locl_ty list -> TPEnv.tparam_bounds
 
 val get_tparams : env -> locl_ty -> SSet.t
 

@@ -957,7 +957,7 @@ let print_global_inference_envs ctx ~verbosity gienvs =
       in
       file_relevant && (not @@ List.is_empty @@ Inf.get_vars_g gienv)
     in
-    let env = Typing_env.empty ctx Relative_path.default ~droot:None in
+    let env = Typing_env_types.empty ctx Relative_path.default ~droot:None in
 
     List.filter gienvs ~f:should_log
     |> List.iter ~f:(fun (pos, gienv) ->
@@ -1447,7 +1447,7 @@ let print_tasts ~should_print_position tasts ctx =
         Typing_ast_print.print_tast_without_position ctx tast)
 
 let typecheck_tasts tasts tcopt (filename : Relative_path.t) =
-  let env = Typing_env.empty tcopt filename ~droot:None in
+  let env = Typing_env_types.empty tcopt filename ~droot:None in
   let tasts = Relative_path.Map.values tasts in
   let typecheck_tast tast =
     Errors.get_sorted_error_list (Tast_typecheck.check env tast)
@@ -2115,7 +2115,9 @@ let handle_mode
     | None -> Printf.printf "No class named %s\n" cid
     | Some cls ->
       let ty_to_string ty =
-        let env = Typing_env.empty ctx Relative_path.default ~droot:None in
+        let env =
+          Typing_env_types.empty ctx Relative_path.default ~droot:None
+        in
         Typing_print.full_strip_ns_decl env ty
       in
       let print_class_element member_type get mid =
@@ -2230,7 +2232,7 @@ let handle_mode
             let display mro =
               let name = Utils.strip_ns mro.Decl_defs.mro_name in
               let env =
-                Typing_env.empty ctx Relative_path.default ~droot:None
+                Typing_env_types.empty ctx Relative_path.default ~droot:None
               in
               let targs =
                 List.map

@@ -268,7 +268,7 @@ module StateConstraintGraph = struct
         ~init:Pos.AbsolutePosMap.empty
     in
     let subgraphs = List.concat subgraphs in
-    let env = Typing_env.empty ctx Relative_path.default ~droot:None in
+    let env = Typing_env_types.empty ctx Relative_path.default ~droot:None in
     let errors = StateErrors.mk_empty () in
     if is_ordered_solving env then
       let env = Typing_ordered_solver.merge_graphs env subgraphs in

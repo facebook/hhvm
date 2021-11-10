@@ -90,6 +90,8 @@ module TShapeField : sig
 
   val pos : t -> Pos_or_decl.t
 
+  val name : t -> string
+
   val of_ast : (Pos.t -> Pos_or_decl.t) -> Ast_defs.shape_field_name -> t
 end
 

@@ -2,5 +2,5 @@
 
 function test(dynamic $d, Set<arraykey> $s) : void {
   $s[] = $d;
-  hh_show($s);
+  hh_expect_equivalent<Set<arraykey>>($s);
 }

@@ -12,15 +12,15 @@ function test_dyn_array<Tk as arraykey>(
   arraykey $ak,
 ): void {
   $a = $d[$i];
-  hh_show($a);
+  hh_expect_equivalent<dynamic>($a);
   $a = $d[$s];
-  hh_show($a);
+  hh_expect_equivalent<dynamic>($a);
   $a = $d[$d];
-  hh_show($a);
+  hh_expect_equivalent<dynamic>($a);
   $a = $d[$tk];
-  hh_show($a);
+  hh_expect_equivalent<dynamic>($a);
   $a = $d[$ak];
-  hh_show($a);
+  hh_expect_equivalent<dynamic>($a);
 
   $d[$i] = $c;
   $d[$s] = $c;

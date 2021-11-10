@@ -6,9 +6,9 @@ function test_dyn_index(
   keyset<arraykey> $ks2,
 ) : void {
   $a = $ks1[$d];
-  hh_show($a);
+  hh_expect_equivalent<int>($a);
   $a = $ks2[$d];
-  hh_show($a);
+  hh_expect_equivalent<arraykey>($a);
 }
 
 class C<Tk as arraykey> {
@@ -20,10 +20,10 @@ class C<Tk as arraykey> {
 
   public function f(dynamic $d): void {
     $a = $this->ks1[$d];
-    hh_show($a);
+    hh_expect_equivalent<Tk>($a);
     $a = $this->ks2[$d];
-    hh_show($a);
+    hh_expect_equivalent<arraykey>($a);
     $a = $this->ks3[$d];
-    hh_show($a);
+    hh_expect_equivalent<int>($a);
   }
 }

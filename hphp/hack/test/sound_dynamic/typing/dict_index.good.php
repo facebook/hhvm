@@ -6,13 +6,13 @@ function test_dyn_index(
   dict<arraykey, int> $dt2,
 ) : void {
   $a = $dt1[$d];
-  hh_show($a);
+  hh_expect_equivalent<int>($a);
   $a = $dt2[$d];
-  hh_show($a);
+  hh_expect_equivalent<int>($a);
 
   $dt1[$d] = 1;
   $dt1[$d] = "s";
-  hh_show($dt1);
+  hh_expect_equivalent<dict<arraykey, (int|string)>>($dt1);
   $dt2[$d] = $d;
   $dt2[$d] = 1;
   $dt2[$d] = "s";
@@ -28,11 +28,11 @@ class C<Tk as arraykey> {
 
   public function f(dynamic $d): void {
     $a = $this->dt1[$d];
-    hh_show($a);
+    hh_expect_equivalent<int>($a);
     $a = $this->dt2[$d];
-    hh_show($a);
+    hh_expect_equivalent<int>($a);
     $a = $this->dt3[$d];
-    hh_show($a);
+    hh_expect_equivalent<int>($a);
 
     $this->dt2[$d] = 1;
   }

@@ -1,5 +1,3 @@
-File "set_append.bad.php", line 5, characters 3-13:
-  Set<int>
 File "set_append.bad.php", line 4, characters 3-11:
 Invalid assignment (Typing[4110])
   File "set_append.bad.php", line 3, characters 31-33:

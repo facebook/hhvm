@@ -197,12 +197,22 @@
     typing_subtype
     typing_subtype_tconst
     typing_union
-    typing_utils
     typing_visibility)
   (libraries
     type_mapper
     typing_env
-    typing_log)
+    typing_log
+    typing_utils)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
+  (name typing_utils)
+  (wrapped false)
+  (modules
+    typing_utils)
+  (libraries
+    typing_env
+    typing_logic)
   (preprocess (pps ppx_deriving.std)))
 
 (library

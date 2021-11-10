@@ -976,6 +976,20 @@ let rec class_ ctx c =
     && not (Ast_defs.is_c_trait c.Aast.c_kind)
   then
     Errors.invalid_req_implements (fst (List.hd_exn c_req_implements));
+  let e =
+    TypecheckerOptions.explicit_consistent_constructors
+      (Provider_context.get_tcopt ctx)
+  in
+  if e > 0 && Option.is_none constructor then
+    Option.iter
+      (Naming_attributes.mem_pos SN.UserAttributes.uaConsistentConstruct attrs)
+      ~f:(fun pos ->
+        match c.Aast.c_kind with
+        | Ast_defs.Ctrait ->
+          Errors.explicit_consistent_constructor c.Aast.c_kind pos
+        | _ when e > 1 ->
+          Errors.explicit_consistent_constructor c.Aast.c_kind pos
+        | _ -> ());
   let req_implements = List.map ~f:(hint env) c_req_implements in
   let req_implements = List.map ~f:(fun h -> (h, false)) req_implements in
   if

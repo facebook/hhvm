@@ -1,0 +1,2 @@
+File "trait.php", line 3, characters 3-23:
+This trait is marked <<__ConsistentConstruct>>, so it must declare a constructor explicitly (Naming[2118])

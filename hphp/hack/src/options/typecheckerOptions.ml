@@ -223,3 +223,6 @@ let enable_disk_heap = GlobalOptions.tco_enable_disk_heap
 
 let pure_default_consistent_constructors =
   GlobalOptions.tco_pure_default_consistent_constructors
+
+let explicit_consistent_constructors =
+  GlobalOptions.tco_explicit_consistent_constructors

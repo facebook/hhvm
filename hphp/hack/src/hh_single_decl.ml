@@ -254,6 +254,7 @@ let () =
       ignored_flag "--enable-sealed-subclasses";
       ignored_flag "--enable-sound-dynamic-type";
       ignored_flag "--pessimise-builtins";
+      ignored_arg "--explicit-consistent-constructors";
     ]
     set_file
     usage;

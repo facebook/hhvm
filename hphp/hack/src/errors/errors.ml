@@ -5565,19 +5565,18 @@ let override_method_support_dynamic_type
       (parent_pos, "Overridden method is defined here.");
     ]
 
+let classish_kind_to_string = function
+  | Ast_defs.Cclass _ -> "class "
+  | Ast_defs.Ctrait -> "trait "
+  | Ast_defs.Cinterface -> "interface "
+  | Ast_defs.Cenum_class _ -> "enum class "
+  | Ast_defs.Cenum -> "enum "
+
 let parent_support_dynamic_type
     pos
     (child_name, child_kind)
     (parent_name, parent_kind)
     child_support_dynamic_type =
-  let kind_to_string = function
-    | Ast_defs.Cclass _ -> "class "
-    | Ast_defs.Ctrait -> "trait "
-    | Ast_defs.Cinterface -> "interface "
-    | Ast_defs.Cenum_class _
-    | Ast_defs.Cenum ->
-      (* cannot happen *) ""
-  in
   let kinds_to_use child_kind parent_kind =
     match (child_kind, parent_kind) with
     | (_, Ast_defs.Cclass _) -> "extends "
@@ -5589,9 +5588,9 @@ let parent_support_dynamic_type
       ""
   in
   let child_name = Markdown_lite.md_codify (strip_ns child_name) in
-  let child_kind_s = kind_to_string child_kind in
+  let child_kind_s = classish_kind_to_string child_kind in
   let parent_name = Markdown_lite.md_codify (strip_ns parent_name) in
-  let parent_kind_s = kind_to_string parent_kind in
+  let parent_kind_s = classish_kind_to_string parent_kind in
   add
     (Typing.err_code Typing.ImplementsDynamic)
     pos
@@ -5978,6 +5977,15 @@ let trait_parent_construct_inconsistent pos def_pos =
       "This use of `parent::__construct` requires that the parent class be marked <<__ConsistentConstruct>>"
     )
     [(def_pos, "Parent definition is here")]
+
+let explicit_consistent_constructor ck pos =
+  add
+    (Naming.err_code Naming.ExplicitConsistentConstructor)
+    pos
+    ("This "
+    ^ classish_kind_to_string ck
+    ^ "is marked <<__ConsistentConstruct>>, so it must declare a constructor explicitly"
+    )
 
 (*****************************************************************************)
 (* Printing *)

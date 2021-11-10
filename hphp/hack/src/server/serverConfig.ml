@@ -492,6 +492,8 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
       ~tco_enable_disk_heap:local_config.ServerLocalConfig.enable_disk_heap
       ?tco_pure_default_consistent_constructors:
         (bool_opt "pure_default_consistent_constructors" config)
+      ?tco_explicit_consistent_constructors:
+        (int_opt "explicit_consistent_constructors" config)
       ~log_levels:(prepare_log_levels config)
       ()
   in

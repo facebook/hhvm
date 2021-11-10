@@ -1799,3 +1799,5 @@ val not_sub_dynamic :
   unit
 
 val trait_parent_construct_inconsistent : Pos.t -> Pos_or_decl.t -> unit
+
+val explicit_consistent_constructor : Ast_defs.classish_kind -> Pos.t -> unit

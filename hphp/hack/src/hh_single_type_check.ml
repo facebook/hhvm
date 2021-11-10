@@ -275,6 +275,7 @@ let parse_options () =
   let everything_sdt = ref false in
   let pessimise_builtins = ref false in
   let custom_hhi_path = ref None in
+  let explicit_consistent_constructors = ref 0 in
   let options =
     [
       ( "--no-print-position",
@@ -697,6 +698,10 @@ let parse_options () =
       ( "--custom-hhi-path",
         Arg.String (fun s -> custom_hhi_path := Some s),
         " Use custom hhis" );
+      ( "--explicit-consistent-constructors",
+        Arg.Int (( := ) explicit_consistent_constructors),
+        " Raise an error for <<__ConsistentConstruct>> without an explicit constructor; 1 for traits, 2 for all "
+      );
     ]
   in
 
@@ -860,6 +865,7 @@ let parse_options () =
       ~tco_everything_sdt:!everything_sdt
       ~tco_pessimise_builtins:!pessimise_builtins
       ~tco_pure_default_consistent_constructors:true
+      ~tco_explicit_consistent_constructors:!explicit_consistent_constructors
       ()
   in
   Errors.allowed_fixme_codes_strict :=

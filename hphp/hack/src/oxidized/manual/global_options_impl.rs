@@ -137,6 +137,7 @@ impl Default for GlobalOptions {
             tco_pessimise_builtins: false,
             tco_enable_disk_heap: true,
             tco_pure_default_consistent_constructors: false,
+            tco_explicit_consistent_constructors: 0,
         }
     }
 }

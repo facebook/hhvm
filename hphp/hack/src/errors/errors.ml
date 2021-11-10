@@ -3177,10 +3177,19 @@ let not_found_suggestion orig similar kind =
     end
   | (`instance, pos, v) -> suggestion_message orig v pos
 
-let snot_found_suggestion orig similar =
+let snot_found_suggestion orig similar kind =
   match similar with
   | (`instance, pos, v) ->
-    suggestion_message ~modifier:"instance method " orig v pos
+    begin
+      match kind with
+      | `static_method ->
+        suggestion_message ~modifier:"instance method " orig v pos
+      | `class_constant ->
+        suggestion_message ~modifier:"instance property " orig v pos
+      | `class_variable
+      | `class_typeconst ->
+        suggestion_message orig v pos
+    end
   | (`static, pos, v) -> suggestion_message orig v pos
 
 let string_of_class_member_kind = function
@@ -3192,6 +3201,7 @@ let string_of_class_member_kind = function
   | `property -> "property"
 
 let smember_not_found_messages pos kind (cpos, class_name) member_name similar =
+  let kind_record = kind in
   let kind = string_of_class_member_kind kind in
   let class_name = strip_ns class_name in
   let msg =
@@ -3216,7 +3226,7 @@ let smember_not_found_messages pos kind (cpos, class_name) member_name similar =
           ]
         | None -> []
       in
-      ([snot_found_suggestion member_name similar], quickfixes)
+      ([snot_found_suggestion member_name similar kind_record], quickfixes)
   in
   ( Typing.err_code Typing.SmemberNotFound,
     quickfixes,

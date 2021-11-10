@@ -179,8 +179,6 @@
     typing_algebra
     typing_coeffects
     typing_coercion
-    typing_dependent_type
-    typing_disposable
     typing_dynamic
     typing_enforceability
     typing_enum
@@ -196,12 +194,41 @@
     typing_solver_utils
     typing_subtype
     typing_subtype_tconst
-    typing_union
-    typing_visibility)
+    typing_union)
   (libraries
     type_mapper
+    typing_dependent_type
+    typing_disposable
     typing_env
     typing_log
+    typing_utils
+    typing_visibility)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
+  (name typing_visibility)
+  (wrapped false)
+  (modules
+    typing_visibility)
+  (libraries
+    typing_utils)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
+  (name typing_disposable)
+  (wrapped false)
+  (modules
+    typing_disposable)
+  (libraries
+    typing_utils)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
+  (name typing_dependent_type)
+  (wrapped false)
+  (modules
+    typing_dependent_type)
+  (libraries
     typing_utils)
   (preprocess (pps ppx_deriving.std)))
 

@@ -87,7 +87,7 @@ function contains_key<
  * Space complexity: O(1)
  */
 function count(
-  Container<mixed> $container,
+  readonly Container<mixed> $container,
 )[]: int {
   return \count($container);
 }
@@ -122,7 +122,7 @@ function every<T>(
  * Space complexity: O(1)
  */
 function is_empty<T>(
-  Container<T> $container,
+  readonly Container<T> $container,
 )[]: bool {
   if ($container is \ConstCollection<_>) {
     return $container->isEmpty();

@@ -1,11 +1,12 @@
 <?hh // partial
+<<file:__EnableUnstableFeatures('readonly')>>
 
 namespace {
 
 <<__Sealed(\HH\Collection::class, ConstMap::class, ConstSet::class, ConstVector::class)>>
 interface ConstCollection extends HH\Rx\Countable {
-  public function isEmpty()[];
-  public function count()[];
+  public readonly function isEmpty()[];
+  public readonly function count()[];
   public function items()[];
 }
 

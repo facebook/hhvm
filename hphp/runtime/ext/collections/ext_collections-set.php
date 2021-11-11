@@ -466,13 +466,13 @@ final class ImmSet implements \ConstSet {
   /** Returns true if the ImmSet is empty, false otherwise.
    * @return bool
    */
-  public function isEmpty()[]: bool { return !$this->count(); }
+  public readonly function isEmpty()[]: bool { return !$this->count(); }
 
   /** Returns the number of values in the ImmSet.
    * @return int
    */
   <<__Native>>
-  public function count()[]: int;
+  public readonly function count()[]: int;
 
   /** Returns an Iterable that produces the values from this ImmSet.
    * @return object

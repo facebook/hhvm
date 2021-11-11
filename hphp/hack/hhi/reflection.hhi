@@ -128,6 +128,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   public function isInternal()[]: bool;
   public function isClosure()[]: bool;
   public function isGenerator()[]: bool;
+  public function returnsReadonly()[]: bool;
   public function isAsync()[]: bool;
   public function isVariadic()[]: bool;
   public function isUserDefined()[]: bool;
@@ -190,6 +191,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract implements Reflector {
   public function isAbstract()[];
   public function isFinal()[];
   public function isStatic()[];
+  public function isReadonly()[];
   public function isConstructor()[];
   public function getClosure($object);
   public function getModifiers()[];
@@ -211,6 +213,7 @@ class ReflectionParameter implements Reflector {
   public function getName()[];
   public function isPassedByReference()[];
   public function isInOut()[]: bool;
+  public function isReadonly()[]: bool;
   public function canBePassedByValue()[];
   public function getDeclaringFunction()[];
   public function getDeclaringClass()[];
@@ -256,6 +259,7 @@ class ReflectionProperty implements Reflector {
   public function isPrivate()[];
   public function isProtected()[];
   public function isStatic()[];
+  public function isReadonly()[];
   public function isDefault()[];
   public function getModifiers()[];
   public function getDeclaringClass()[];

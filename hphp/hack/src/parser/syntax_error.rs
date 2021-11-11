@@ -444,8 +444,6 @@ pub const collection_intrinsic_generic: Error =
     Cow::Borrowed("Cannot initialize collection builtins with type parameters");
 pub const collection_intrinsic_many_typeargs: Error =
     Cow::Borrowed("Collection expression must have less than three type arguments");
-pub const invalid_hack_mode: Error =
-    Cow::Borrowed("Incorrect comment; possible values include `strict`, `partial`, or empty");
 pub const pair_initializer_needed: Error = Cow::Borrowed("Initializer needed for Pair object");
 pub const pair_initializer_arity: Error =
     Cow::Borrowed("Pair objects must have exactly 2 elements");

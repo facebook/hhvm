@@ -5060,14 +5060,6 @@ where
         return self.namespace_name.clone();
     }
 
-    fn is_invalid_hack_mode(&mut self) {
-        if self.env.syntax_tree.mode().is_none() {
-            let root = self.env.syntax_tree.root();
-            let e = Self::make_error_from_node(root, errors::invalid_hack_mode);
-            self.errors.push(e);
-        }
-    }
-
     fn disabled_legacy_soft_typehint_errors(&mut self, node: S<'a, Token, Value>) {
         if let SoftTypeSpecifier(_) = node.children {
             if self.env.parser_options.po_disable_legacy_soft_typehints {
@@ -5546,9 +5538,6 @@ where
     }
 
     fn parse_errors_impl(mut self) -> (Vec<SyntaxError>, bool) {
-        if self.env.is_typechecker() {
-            self.is_invalid_hack_mode();
-        }
         self.fold_child_nodes(self.env.syntax_tree.root());
         self.errors.reverse();
         (self.errors, self.uses_readonly)

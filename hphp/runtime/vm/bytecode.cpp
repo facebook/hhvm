@@ -5044,7 +5044,7 @@ OPTBLD_INLINE void iopWHResult() {
   not_reached();
 }
 
-OPTBLD_INLINE void iopSetImplicitContextByIndex() {
+OPTBLD_INLINE void iopSetImplicitContextByValue() {
   if (!RO::EvalEnableImplicitContext) {
     vmStack().replaceC<KindOfInt64>(ImplicitContext::kEmptyIndex);
     return;
@@ -5052,9 +5052,9 @@ OPTBLD_INLINE void iopSetImplicitContextByIndex() {
   auto const tv = vmStack().topC();
   if (UNLIKELY(!tvIsInt(tv))) {
     SystemLib::throwInvalidArgumentExceptionObject(
-      "Invalid input to SetImplicitContextByIndex");
+      "Invalid input to SetImplicitContextByValue");
   }
-  auto const result = jit::setImplicitContextByIndex(tv->m_data.num);
+  auto const result = jit::setImplicitContextByValue(tv->m_data.num);
   vmStack().replaceC<KindOfInt64>(result);
 }
 

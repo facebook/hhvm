@@ -2437,7 +2437,7 @@ void emitSilence(IRGS& env, Id localId, SilenceOp subop) {
   }
 }
 
-void emitSetImplicitContextByIndex(IRGS& env) {
+void emitSetImplicitContextByValue(IRGS& env) {
   if (!RO::EvalEnableImplicitContext) {
     popDecRef(env);
     push(env, cns(env, ImplicitContext::kEmptyIndex));
@@ -2447,7 +2447,7 @@ void emitSetImplicitContextByIndex(IRGS& env) {
   if (!tv->isA(TInt)) {
     return interpOne(env);
   }
-  auto const result = gen(env, SetImplicitContextByIndex, tv);
+  auto const result = gen(env, SetImplicitContextByValue, tv);
   popDecRef(env);
   push(env, result);
 }

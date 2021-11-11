@@ -803,7 +803,7 @@ constexpr uint32_t kMaxConcatN = 4;
   O(ContCurrent,     NA,               NOV,             ONE(CV),    NF) \
   O(ContGetReturn,   NA,               NOV,             ONE(CV),    NF) \
   O(WHResult,        NA,               ONE(CV),         ONE(CV),    NF) \
-  O(SetImplicitContextByIndex,                                          \
+  O(SetImplicitContextByValue,                                          \
                      NA,               ONE(CV),         ONE(CV),    NF) \
   O(Await,           NA,               ONE(CV),         ONE(CV),    CF) \
   O(AwaitAll,        ONE(LAR),         NOV,             ONE(CV),    CF) \

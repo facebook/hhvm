@@ -697,7 +697,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case NativeImpl:
     return UnknownEffects {};
 
-  case SetImplicitContextByIndex:
+  case SetImplicitContextByValue:
     // throws exceptions
     return may_load_store(AHeapAny, AHeapAny);
 

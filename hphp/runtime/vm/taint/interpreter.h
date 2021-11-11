@@ -281,7 +281,7 @@ void iopArrayIdx();
 void iopArrayMarkLegacy();
 void iopArrayUnmarkLegacy();
 void iopCheckProp(const StringData* propName);
-void iopSetImplicitContextByIndex();
+void iopSetImplicitContextByValue();
 void iopInitProp(const StringData* propName, InitPropOp propOp);
 void iopSilence(tv_lval loc, SilenceOp subop);
 void iopThrowNonExhaustiveSwitch();

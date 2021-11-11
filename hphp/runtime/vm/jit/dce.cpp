@@ -701,7 +701,7 @@ bool canDCE(IRInstruction* inst) {
   case ProfileArrLikeProps:
   case CheckFuncNeedsCoverage:
   case RecordFuncCall:
-  case SetImplicitContextByIndex:
+  case SetImplicitContextByValue:
     return false;
 
   case IsTypeStruct:

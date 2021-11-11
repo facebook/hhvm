@@ -362,7 +362,7 @@ static const struct {
 
   // TODO (T61651936): ResolveClass may return a classptr or a string
   { OpResolveClass,{None,             Stack1,       OutUnknown      }},
-  { OpSetImplicitContextByIndex,
+  { OpSetImplicitContextByValue,
                    {Stack1,           Stack1,       OutInt64        }},
 
   /*** 14. Generator instructions ***/
@@ -1059,7 +1059,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::Select:
   case Op::LockObj:
   case Op::ClsCnsL:
-  case Op::SetImplicitContextByIndex:
+  case Op::SetImplicitContextByValue:
     return false;
 
   // These are instructions that are always interp-one'd, or are always no-ops.

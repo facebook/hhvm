@@ -484,7 +484,7 @@ static CallMap s_callMap {
                                         DSSA, SSync, {{SSA, 0}}},
     {RaiseErrorOnInvalidIsAsExpressionType,
       errorOnIsAsExpressionInvalidTypesHelper, DSSA, SSync, {{SSA, 0}}},
-    {SetImplicitContextByIndex, setImplicitContextByIndex,
+    {SetImplicitContextByValue, setImplicitContextByValue,
                                 DSSA, SSync, {{SSA, 0}}},
 };
 

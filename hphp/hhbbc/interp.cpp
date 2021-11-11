@@ -5166,7 +5166,7 @@ void in(ISS& env, const bc::AwaitAll& op) {
   push(env, TInitNull);
 }
 
-void in(ISS& env, const bc::SetImplicitContextByIndex&) {
+void in(ISS& env, const bc::SetImplicitContextByValue&) {
   popC(env);
   push(env, TInt);
 }

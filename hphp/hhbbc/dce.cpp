@@ -1661,7 +1661,7 @@ void dce(Env& env, const bc::ResolveMethCaller& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ResolveRFunc& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ResolveClass& op) { no_dce(env, op); }
 void dce(Env& env, const bc::Select& op) { no_dce(env, op); }
-void dce(Env& env, const bc::SetImplicitContextByIndex& op) { no_dce(env, op); }
+void dce(Env& env, const bc::SetImplicitContextByValue& op) { no_dce(env, op); }
 void dce(Env& env, const bc::SetG& op) { no_dce(env, op); }
 void dce(Env& env, const bc::SetOpG& op) { no_dce(env, op); }
 void dce(Env& env, const bc::SetOpS& op) { no_dce(env, op); }

@@ -626,7 +626,7 @@ StringData* loadClsTypeCnsClsNameHelper(const Class* cls,
   return val(classname).pstr;
 }
 
-int64_t setImplicitContextByIndex(int64_t index) {
+int64_t setImplicitContextByValue(int64_t index) {
   assertx(RO::EvalEnableImplicitContext);
   auto const prev = *ImplicitContext::activeCtx;
   auto const prev_index = prev ? prev->m_index : ImplicitContext::kEmptyIndex;

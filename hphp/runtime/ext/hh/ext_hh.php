@@ -400,7 +400,7 @@ abstract class ImplicitContext {
     try {
       $result = $f();
     } finally {
-      ImplicitContext\_Private\set_implicit_context_by_index($prev);
+      ImplicitContext\_Private\set_implicit_context_by_value($prev);
     }
     // Needs to be awaited here so that context dependency is established
     // between parent/child functions
@@ -418,7 +418,7 @@ abstract class ImplicitContext {
     try {
       return $f();
     } finally {
-      ImplicitContext\_Private\set_implicit_context_by_index($prev);
+      ImplicitContext\_Private\set_implicit_context_by_value($prev);
     }
   }
 
@@ -571,13 +571,13 @@ namespace HH\Coeffects {
   function backdoor<Tout>(
     (function()[defaults]: Tout) $fn
   )[/* 86backdoor */]: Tout {
-    $prev = \HH\ImplicitContext\_Private\set_implicit_context_by_index(
+    $prev = \HH\ImplicitContext\_Private\set_implicit_context_by_value(
       \HH\ImplicitContext\_Private\Consts::EMPTY_CONTEXT
     );
     try {
       return $fn();
     } finally {
-      \HH\ImplicitContext\_Private\set_implicit_context_by_index($prev);
+      \HH\ImplicitContext\_Private\set_implicit_context_by_value($prev);
     }
   }
 
@@ -588,13 +588,13 @@ namespace HH\Coeffects {
   async function backdoor_async<Tout>(
     (function()[defaults]: Awaitable<Tout>) $fn
   )[/* 86backdoor */]: Awaitable<Tout> {
-    $prev = \HH\ImplicitContext\_Private\set_implicit_context_by_index(
+    $prev = \HH\ImplicitContext\_Private\set_implicit_context_by_value(
       \HH\ImplicitContext\_Private\Consts::EMPTY_CONTEXT
     );
     try {
       $result = $fn();
     } finally {
-      \HH\ImplicitContext\_Private\set_implicit_context_by_index($prev);
+      \HH\ImplicitContext\_Private\set_implicit_context_by_value($prev);
     }
     // Needs to be awaited here so that context dependency is established
     // between parent/child functions

@@ -3438,8 +3438,8 @@ fn get_call_builtin_func_info<'arena, 'decl>(
         "HH\\dict" => Some((1, IOp(CastDict))),
         "HH\\varray" => Some((1, IOp(CastVec))),
         "HH\\darray" => Some((1, IOp(CastDict))),
-        "HH\\ImplicitContext\\_Private\\set_implicit_context_by_index" if e.systemlib() => {
-            Some((1, IMisc(SetImplicitContextByIndex)))
+        "HH\\ImplicitContext\\_Private\\set_implicit_context_by_value" if e.systemlib() => {
+            Some((1, IMisc(SetImplicitContextByValue)))
         }
         // TODO: enforce that this returns readonly
         "HH\\global_readonly_get" => Some((1, IGet(CGetG))),

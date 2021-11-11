@@ -139,6 +139,10 @@ struct c_Awaitable : ObjectData {
     assertx(isSucceeded());
     return m_resultOrException;
   }
+  tv_lval getResultAsLval() {
+    assertx(isSucceeded());
+    return &m_resultOrException;
+  }
   ObjectData* getException() const {
     assertx(isFailed());
     return m_resultOrException.m_data.pobj;

@@ -26,6 +26,7 @@ namespace HPHP { namespace bespoke {
 bool IsStructDict(const ArrayData* ad);
 TypedValue GetStructDictKey(const ArrayData* ad, int64_t pos);
 TypedValue GetStructDictVal(const ArrayData* ad, int64_t pos);
+tv_lval GetStructDictLval(ArrayData* ad, int64_t pos);
 
 // TODO(kshaunak): Optimize this case further when we decide where the keys
 // array is going to go. (Right now, it's in the layout, but it may move.)
@@ -47,6 +48,16 @@ void StructDictIterateV(const ArrayData* ad, Fn fn) {
     if (ArrayData::call_helper(fn, val)) break;
   }
 }
+
+template <typename Fn>
+void StructDictIterateLvals(ArrayData* ad, Fn fn) {
+  auto const size = ad->size();
+  for (auto pos = int64_t{0}; pos < size; pos++) {
+    auto const val = GetStructDictLval(ad, pos);
+    if (ArrayData::call_helper(fn, val)) break;
+  }
+}
+
 
 }}
 

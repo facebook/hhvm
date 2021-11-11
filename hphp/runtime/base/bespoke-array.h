@@ -72,7 +72,7 @@ struct SinkProfile;
 
 // Maybe wrap this array in a LoggingArray, based on runtime options.
 ArrayData* maybeMakeLoggingArray(ArrayData*);
-const ArrayData* maybeMakeLoggingArray(const ArrayData*);
+ArrayData* makeArrayOfSelectedLayout(ArrayData*);
 ArrayData* maybeMakeLoggingArray(ArrayData*, RuntimeStruct*);
 ArrayData* maybeMakeLoggingArray(ArrayData*, LoggingProfile*);
 ArrayData* makeBespokeForTesting(ArrayData*, LoggingProfile*);

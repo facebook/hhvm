@@ -121,8 +121,31 @@ ArrayData* maybeMakeLoggingArray(ArrayData* ad) {
   return profile ? maybeMakeLoggingArray(ad, profile) : ad;
 }
 
-const ArrayData* maybeMakeLoggingArray(const ArrayData* ad) {
-  return maybeMakeLoggingArray(const_cast<ArrayData*>(ad));
+ArrayData* makeArrayOfSelectedLayout(ArrayData* ad) {
+  if (!allowBespokeArrayLikes()) return ad;
+
+  auto const profile = getLoggingProfile(getSrcKey());
+  if (!profile) return ad;
+
+  auto const cached = profile->getStaticBespokeArray();
+  if (cached) {
+    ad->decReleaseCheck();
+    return cached;
+  }
+
+  auto const layout = profile->getLayout().bespokeLayout();
+  if (!layout) return ad;
+
+  FTRACE_MOD(Trace::sib, 2, "  Trying layout: {}\n", layout->describe());
+  auto const bespoke = layout->coerce(ad);
+  if (!bespoke) {
+    // XXX: Perhaps we should stop inline interp here since the bespoke profile
+    // appears not to fit well.
+    FTRACE_MOD(Trace::sib, 2, "  Coercion to layout failed.\n");
+    return ad;
+  }
+  ad->decReleaseCheck();
+  return bespoke;
 }
 
 ArrayData* maybeMakeLoggingArray(ArrayData* ad, RuntimeStruct* structHandle) {

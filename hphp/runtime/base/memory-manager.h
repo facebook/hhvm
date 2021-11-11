@@ -640,6 +640,7 @@ struct MemoryManager {
   void* mallocSmallIndexSize(size_t index, size_t bytes);
   void freeSmallSize(void* p, size_t size);
 
+  void freeOveralloc(void* base, size_t bytes);
   /*
    * Allocate/deallocate memory that is too big for the small size classes.
    *

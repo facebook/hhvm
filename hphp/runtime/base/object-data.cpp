@@ -113,6 +113,10 @@ bool ObjectData::assertTypeHint(tv_rval prop, Slot slot) const {
   assertx(slot < m_cls->numDeclProperties());
   auto const& propDecl = m_cls->declProperties()[slot];
 
+  if (prop.type() == KindOfResource && g_context->doingInlineInterp()) {
+    return true;
+  }
+
   if (debug && RuntimeOption::RepoAuthoritative) {
     // The fact that uninitialized LateInit props are uninint isn't
     // reflected in the repo-auth-type.

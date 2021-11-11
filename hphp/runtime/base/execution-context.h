@@ -608,6 +608,14 @@ public:
   TYPE_SCAN_IGNORE_FIELD(m_nestedVMs); // handled explicitly in heap-scan.h
   int m_nesting;
   bool m_dbgNoBreak;
+  // Once we've started inline-interp, set it to BLOCK to throw on re-entry.
+  enum class InlineInterpState { NONE, START, BLOCK };
+  InlineInterpState m_inlineInterpState;
+
+  bool doingInlineInterp() const {
+    return m_inlineInterpState != InlineInterpState::NONE;
+  }
+
 private:
   Array m_evaledArgs;
   String m_lastErrorPath;

@@ -60,6 +60,11 @@ constexpr int64_t kInvalidRequestIdx = -1;
 int64_t requestIdx();
 
 /*
+ * Return the current thread's session kind.
+ */
+SessionKind sessionKind();
+
+/*
  * The Treadmill allows us to defer work until all currently
  * outstanding requests have finished.  We hook request start and
  * finish to know when these events happen.

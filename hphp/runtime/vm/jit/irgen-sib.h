@@ -13,61 +13,32 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#pragma once
 
-#ifndef TYPE_PROFILE_H_
-#define TYPE_PROFILE_H_
-
-#include "hphp/util/rds-local.h"
+#include <vector>
 
 namespace HPHP {
 
-//////////////////////////////////////////////////////////////////////
+struct ROMData;
 
-enum class RequestKind {
-  Warmup,
-  NonVM,
-  Standard,
-};
+namespace jit {
+
+struct SSATmp;
+struct Block;
+
+namespace irgen {
+
+struct IRGS;
 
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Used to indicate that the current thread should be ignored for profiling
- * purposes, usually because it is a JIT worker thread and not processing real
- * requests.
+ * Perform irgen for a ROM to build its heap and create a return value.
  */
-struct ProfileNonVMThread {
-  ProfileNonVMThread();
-  ~ProfileNonVMThread();
-private:
-  bool m_saved;
-};
-
-void profileWarmupStart();
-void profileWarmupEnd();
-void profileRequestStart();
-void profileRequestEnd();
-
-uint64_t requestCount();
-
-struct TypeProfileLocals {
-  RequestKind requestKind = RequestKind::Warmup;
-  bool forceInterpret = false;
-  bool nonVMThread = false;
-};
-
-extern RDS_LOCAL_NO_CHECK(TypeProfileLocals, rl_typeProfileLocals);
-
-inline bool isStandardRequest() {
-  return rl_typeProfileLocals->requestKind == RequestKind::Standard;
-}
-
-inline bool isForcedToInterpret() {
-  return rl_typeProfileLocals->forceInterpret;
-}
+std::vector<SSATmp*> irgenROM(IRGS& env, const ROMData& rom, SSATmp* ctx,
+                              const std::vector<SSATmp*>& args, Block* fail);
 
 //////////////////////////////////////////////////////////////////////
 
-}
+}}}
 
-#endif

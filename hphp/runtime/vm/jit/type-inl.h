@@ -142,6 +142,7 @@ inline Type for_const(const Class*)  { return TCls; }
 inline Type for_const(LazyClassData) { return TLazyCls; }
 inline Type for_const(ClsMethDataRef) { return TClsMeth; }
 inline Type for_const(TCA)           { return TTCA; }
+inline Type for_const(void*)         { return TVoidPtr; }
 ///////////////////////////////////////////////////////////////////////////////
 }
 
@@ -324,13 +325,17 @@ inline Optional<Type> Type::tryCns(TypedValue tv) {
         return type_detail::for_const(tv.m_data.parr);
       case KindOfLazyClass:
         return type_detail::for_const(tv.m_data.plazyclass);
+      // TODO (T29639296)
+      case KindOfFunc:
+        return type_detail::for_const(tv.m_data.pfunc);
+      case KindOfClass:
+        return type_detail::for_const(tv.m_data.pclass);
+      case KindOfClsMeth:
+        return type_detail::for_const(tv.m_data.pclsmeth);
+
       case KindOfObject:
       case KindOfResource:
       case KindOfRFunc:
-      // TODO (T29639296)
-      case KindOfFunc:
-      case KindOfClass:
-      case KindOfClsMeth:
       case KindOfRClsMeth:
         return std::nullopt;
     }
@@ -400,6 +405,7 @@ IMPLEMENT_CNS_VAL(TCls,        cls,  const Class*)
 IMPLEMENT_CNS_VAL(TLazyCls,    lcls,  LazyClassData)
 IMPLEMENT_CNS_VAL(TClsMeth,    clsmeth,  ClsMethDataRef)
 IMPLEMENT_CNS_VAL(TTCA,        tca,  jit::TCA)
+IMPLEMENT_CNS_VAL(TVoidPtr,    voidPtr, void*)
 IMPLEMENT_CNS_VAL(TRDSHandle,  rdsHandle,  rds::Handle)
 IMPLEMENT_CNS_VAL(TMemToCell,  ptr, const TypedValue*)
 

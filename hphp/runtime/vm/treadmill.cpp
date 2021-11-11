@@ -326,6 +326,11 @@ int64_t getRequestGenCount() {
   return s_inflightRequests[requestIdx].startTime;
 }
 
+SessionKind sessionKind() {
+  if (*rl_thisRequestIdx == kInvalidRequestIdx) return SessionKind::None;
+  return s_inflightRequests[*rl_thisRequestIdx].sessionKind;
+}
+
 void deferredFree(void* p) {
   enqueue([p] { free(p); });
 }

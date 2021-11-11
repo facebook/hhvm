@@ -957,10 +957,7 @@ std::pair<ArrayData*, std::string> read_litarray(AsmState& as) {
   return {adata, std::move(name)};
 }
 
-RepoAuthType read_repo_auth_type(AsmState& as) {
-  auto const str = read_opcode_arg<std::string>(as);
-  folly::StringPiece parse(str);
-
+RepoAuthType read_repo_auth_type(folly::StringPiece parse, AsmState* as) {
   /*
    * Note: no support for reading array types.  (The assembler only
    * emits a single unit, so it can't really be involved in creating a
@@ -975,9 +972,9 @@ RepoAuthType read_repo_auth_type(AsmState& as) {
 #define Y(what, tag)                                  \
   if (parse.startsWith(what)) {                       \
     parse.removePrefix(what);                         \
-    auto const name = makeStaticString(parse.data());  \
-    as.ue->mergeLitstr(name);                          \
-    return RepoAuthType{tag, name};                    \
+    auto const name = makeStaticString(parse.data()); \
+    if (as) as->ue->mergeLitstr(name);                \
+    return RepoAuthType{tag, name};                   \
   }
 
   Y("Obj=",     T::ExactObj);
@@ -1147,8 +1144,15 @@ RepoAuthType read_repo_auth_type(AsmState& as) {
     break;
   }
 
-  as.error("unrecognized RepoAuthType format");
+  auto const msg = folly::sformat("Unknown RepoAuthType: {}", parse);
+  if (as) as->error(msg);
+  throw std::runtime_error(msg);
   not_reached();
+}
+
+RepoAuthType read_repo_auth_type(AsmState& as) {
+  auto const str = read_opcode_arg<std::string>(as);
+  return read_repo_auth_type(str, &as);
 }
 
 // Read a vector of IVAs, with format <int, int, int, ...>, the vector may be
@@ -3707,6 +3711,10 @@ std::unique_ptr<UnitEmitter> assemble_string(
   }
 
   return ue;
+}
+
+void ParseRepoAuthType(folly::StringPiece input, RepoAuthType& output) {
+  output = read_repo_auth_type(input, nullptr);
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -135,8 +135,6 @@ Vreg zeroExtendIfBool(Vout& v, Type ty, Vreg reg) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace {
-
 void storeTVVal(Vout& v, Type type, Vloc srcLoc, Vptr valPtr) {
   // We ignore the values of statically nullish types.
   if (type <= TNull || type <= TNullptr) return;
@@ -152,6 +150,17 @@ void storeTVVal(Vout& v, Type type, Vloc srcLoc, Vptr valPtr) {
   }
 }
 
+void storeTVType(Vout& v, Type type, Vloc srcLoc, Vptr typePtr, bool aux) {
+  if (type.needsReg() || aux) {
+    assertx(srcLoc.hasReg(1));
+    if (aux) {
+      v << store{srcLoc.reg(1), typePtr};
+    } else {
+      v << storeb{srcLoc.reg(1), typePtr};
+    }
+  } else {
+    v << storeb{v.cns(type.toDataType()), typePtr};
+  }
 }
 
 void storeTV(Vout& v, Vptr dst, Vloc srcLoc, const SSATmp* src,
@@ -169,18 +178,7 @@ void storeTV(Vout& v, Type type, Vloc srcLoc,
     v << storeups{srcLoc.reg(), valPtr};
     return;
   }
-
-  if (type.needsReg() || aux) {
-    assertx(srcLoc.hasReg(1));
-    if (aux) {
-      v << store{srcLoc.reg(1), typePtr};
-    } else {
-      v << storeb{srcLoc.reg(1), typePtr};
-    }
-  } else {
-    v << storeb{v.cns(type.toDataType()), typePtr};
-  }
-
+  storeTVType(v, type, srcLoc, typePtr, aux);
   storeTVVal(v, type, srcLoc, valPtr);
 }
 

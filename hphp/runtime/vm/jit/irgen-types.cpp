@@ -21,6 +21,7 @@
 
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/super-inlining-bros.h"
 
 #include "hphp/runtime/vm/jit/is-type-struct-profile.h"
 #include "hphp/runtime/vm/jit/guard-constraint.h"
@@ -190,7 +191,7 @@ constexpr std::array<DataType, kNumDataTypes> kDataTypes = computeDataTypes();
  * runtime class of the object the property belongs to.
  */
 template <typename GetVal,
-          typename FuncToStr,
+          typename GetCtx,
           typename ClassToStr,
           typename LazyClassToStr,
           typename Fail,
@@ -202,7 +203,7 @@ void verifyTypeImpl(IRGS& env,
                     bool onlyCheckNullability,
                     SSATmp* propCls,
                     GetVal getVal,
-                    FuncToStr funcToStr,
+                    GetCtx getCtx,
                     ClassToStr classToStr,
                     LazyClassToStr lazyClassToStr,
                     Fail fail,
@@ -215,7 +216,7 @@ void verifyTypeImpl(IRGS& env,
 
   auto const genFail = [&](SSATmp* val, SSATmp* ctx = nullptr) {
     if (ctx == nullptr) {
-      ctx = tc.isThis() ? propCls ? propCls : ldCtxCls(env)
+      ctx = tc.isThis() ? propCls ? propCls : getCtx()
                         : cns(env, nullptr);
     }
 
@@ -295,7 +296,7 @@ void verifyTypeImpl(IRGS& env,
     // At this point, we know that val is a TObj.
     if (tc.isThis()) {
       // For this type checks, the class needs to be an exact match.
-      auto const ctxCls = propCls ? propCls : ldCtxCls(env);
+      auto const ctxCls = propCls ? propCls : getCtx();
       auto const objClass = gen(env, LdObjClass, val);
       ifThen(
         env,
@@ -1119,12 +1120,8 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
       [&] { // Get value to test
         return topC(env, BCSPRelOffset { ind });
       },
-      [&] (SSATmp* val) { // func to string conversions
-        auto const str = gen(env, LdFuncName, val);
-        auto const offset = offsetFromIRSP(env, BCSPRelOffset { ind });
-        gen(env, StStk, IRSPRelOffsetData{offset}, sp(env), str);
-        env.irb->exceptionStackBoundary();
-        return true;
+      [&] { // Get the context class
+        return ldCtxCls(env);
       },
       [&] (SSATmp* val) { // class to string conversions
         auto const str = gen(env, LdClsName, val);
@@ -1215,10 +1212,8 @@ void verifyParamTypeImpl(IRGS& env, int32_t id) {
       [&] { // Get value to test
         return ldLoc(env, id, DataTypeSpecific);
       },
-      [&] (SSATmp* val) { // func to string conversions
-        auto const str = gen(env, LdFuncName, val);
-        stLocRaw(env, id, fp(env), str);
-        return true;
+      [&] { // Get the context class
+        return ldCtxCls(env);
       },
       [&] (SSATmp* val) { // class to string conversions
         auto const str = gen(env, LdClsName, val);
@@ -1333,7 +1328,9 @@ void verifyPropType(IRGS& env,
         env.irb->constrainValue(val, DataTypeSpecific);
         return val;
       },
-      [&] (SSATmp*) { return false; }, // No func to string automatic conversions
+      [&] { // Get the context class
+        return ldCtxCls(env);
+      },
       [&] (SSATmp*) {  // class to string automatic conversions
         if (!coerce) return false;
         if (RO::EvalCheckPropTypeHints < 3) return false;
@@ -1384,6 +1381,48 @@ void verifyPropType(IRGS& env,
       verifyFunc(&ub);
     }
   }
+}
+
+void verifyMysteryBoxConstraint(IRGS& env, const MysteryBoxConstraint& c,
+                                SSATmp* val, Block* fail) {
+  auto const genFail = [&] {
+    gen(env, Jmp, fail);
+  };
+  UNUSED auto const& valType = val->type();
+
+  FTRACE_MOD(Trace::sib, 3, "Verifying constraint {} {}\n", valType.toString(),
+             c.tc.fullName());
+
+  verifyTypeImpl(
+    env,
+    c.tc,
+    false,
+    c.propDecl ? cns(env, c.propDecl) : nullptr,
+    [&] { // Get value to test
+      return val;
+    },
+    [&] { // Get the context class
+      return c.ctx ? cns(env, c.ctx) : cns(env, nullptr);
+    },
+    [&] (SSATmp*) { // class to string conversions
+      return false;
+    },
+    [&] (SSATmp*) { // lazy class to string conversions
+      return false;
+    },
+    [&] (SSATmp*, SSATmp*, bool) { // Check failure
+      genFail();
+    },
+    [&] (SSATmp*) { // Callable check
+      genFail();
+    },
+    [&] (SSATmp*, SSATmp*, SSATmp*) {
+      genFail();
+    },
+    [&] { // Giveup
+      genFail();
+    }
+  );
 }
 
 void emitVerifyRetTypeC(IRGS& env) {

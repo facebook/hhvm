@@ -650,6 +650,9 @@ visitStackElems(const ActRec* const fp, TV* const stackTop, TVFun tvFun) {
 
 void resetCoverageCounters();
 
+// Resolve a Static / Self / Parent class reference to a class.
+Class* specialClsRefToCls(SpecialClsRef ref);
+
 // The interpOne*() methods implement individual opcode handlers.
 using InterpOneFunc = jit::TCA (*) (ActRec*, TypedValue*, Offset);
 extern InterpOneFunc interpOneEntryPoints[];

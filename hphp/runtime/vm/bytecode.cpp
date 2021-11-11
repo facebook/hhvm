@@ -118,6 +118,7 @@
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/srckey.h"
+#include "hphp/runtime/vm/super-inlining-bros.h"
 #include "hphp/runtime/vm/taint/interpreter.h"
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/type-profile.h"
@@ -1093,25 +1094,52 @@ OPTBLD_INLINE void iopString(const StringData* s) {
   vmStack().pushStaticString(s);
 }
 
+namespace {
+
+void profileArrLikePropsForInterp(ObjectData* obj) {
+  if (g_context->doingInlineInterp()) return;
+  bespoke::profileArrLikeProps(obj);
+}
+
+ArrayData* maybeMakeBespokeArray(ArrayData* ad) {
+  return g_context->doingInlineInterp()
+    ? bespoke::makeArrayOfSelectedLayout(ad)
+    : bespoke::maybeMakeLoggingArray(ad);
+}
+
+const ArrayData* maybeMakeBespokeArray(const ArrayData* ad) {
+  return maybeMakeBespokeArray(const_cast<ArrayData*>(ad));
+}
+
+void maybeMakeBespokeArrayAfterCast(TypedValue* tv) {
+  auto const oldArr = val(tv).parr;
+  auto const newArr = maybeMakeBespokeArray(oldArr);
+  if (newArr == oldArr) return;
+  val(tv).parr = newArr;
+  type(tv) = dt_with_rc(type(tv));
+}
+
+}
+
 OPTBLD_INLINE void iopVec(const ArrayData* a) {
   assertx(a->isVecType());
-  vmStack().pushStaticVec(bespoke::maybeMakeLoggingArray(a));
+  vmStack().pushStaticVec(maybeMakeBespokeArray(a));
 }
 
 OPTBLD_INLINE void iopDict(const ArrayData* a) {
   assertx(a->isDictType());
-  vmStack().pushStaticDict(bespoke::maybeMakeLoggingArray(a));
+  vmStack().pushStaticDict(maybeMakeBespokeArray(a));
 }
 
 OPTBLD_INLINE void iopKeyset(const ArrayData* a) {
   assertx(a->isKeysetType());
-  vmStack().pushStaticKeyset(bespoke::maybeMakeLoggingArray(a));
+  vmStack().pushStaticKeyset(maybeMakeBespokeArray(a));
 }
 
 OPTBLD_INLINE void iopNewDictArray(uint32_t capacity) {
   auto const ad = capacity ? VanillaDict::MakeReserveDict(capacity)
                            : ArrayData::CreateDict();
-  vmStack().pushDictNoRc(bespoke::maybeMakeLoggingArray(ad));
+  vmStack().pushDictNoRc(maybeMakeBespokeArray(ad));
 }
 
 namespace {
@@ -1138,21 +1166,21 @@ ArrayData* newStructArrayImpl(imm_array<int32_t> ids, F f) {
 
 OPTBLD_INLINE void iopNewStructDict(imm_array<int32_t> ids) {
   auto const ad = newStructArrayImpl(ids, VanillaDict::MakeStructDict);
-  vmStack().pushDictNoRc(bespoke::maybeMakeLoggingArray(ad));
+  vmStack().pushDictNoRc(maybeMakeBespokeArray(ad));
 }
 
 OPTBLD_INLINE void iopNewVec(uint32_t n) {
   // This constructor moves values, no inc/decref is necessary.
   auto const ad = VanillaVec::MakeVec(n, vmStack().topC());
   vmStack().ndiscard(n);
-  vmStack().pushVecNoRc(bespoke::maybeMakeLoggingArray(ad));
+  vmStack().pushVecNoRc(maybeMakeBespokeArray(ad));
 }
 
 OPTBLD_INLINE void iopNewKeysetArray(uint32_t n) {
   // This constructor moves values, no inc/decref is necessary.
   auto const ad = VanillaKeyset::MakeSet(n, vmStack().topC());
   vmStack().ndiscard(n);
-  vmStack().pushKeysetNoRc(bespoke::maybeMakeLoggingArray(ad));
+  vmStack().pushKeysetNoRc(maybeMakeBespokeArray(ad));
 }
 
 OPTBLD_INLINE void iopAddElemC() {
@@ -1480,35 +1508,25 @@ OPTBLD_INLINE void iopCastString() {
   tvCastToStringInPlace(c1);
 }
 
-namespace {
-void maybeMakeLoggingArrayAfterCast(TypedValue* tv) {
-  auto const oldArr = val(tv).parr;
-  auto const newArr = bespoke::maybeMakeLoggingArray(oldArr);
-  if (newArr == oldArr) return;
-  val(tv).parr = newArr;
-  type(tv) = dt_with_rc(type(tv));
-}
-}
-
 OPTBLD_INLINE void iopCastVec() {
   TypedValue* c1 = vmStack().topC();
   if (tvIsVec(c1)) return;
   tvCastToVecInPlace(c1);
-  maybeMakeLoggingArrayAfterCast(c1);
+  maybeMakeBespokeArrayAfterCast(c1);
 }
 
 OPTBLD_INLINE void iopCastDict() {
   TypedValue* c1 = vmStack().topC();
   if (tvIsDict(c1)) return;
   tvCastToDictInPlace(c1);
-  maybeMakeLoggingArrayAfterCast(c1);
+  maybeMakeBespokeArrayAfterCast(c1);
 }
 
 OPTBLD_INLINE void iopCastKeyset() {
   TypedValue* c1 = vmStack().topC();
   if (tvIsKeyset(c1)) return;
   tvCastToKeysetInPlace(c1);
-  maybeMakeLoggingArrayAfterCast(c1);
+  maybeMakeBespokeArrayAfterCast(c1);
 }
 
 OPTBLD_INLINE void iopDblAsBits() {
@@ -3854,8 +3872,6 @@ iopFCallObjMethodD(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
   return fcallObjMethodImpl<false>(retToJit, origpc, pc, fca, methNameC);
 }
 
-namespace {
-
 Class* specialClsRefToCls(SpecialClsRef ref) {
   switch (ref) {
     case SpecialClsRef::Static:
@@ -3873,6 +3889,8 @@ Class* specialClsRefToCls(SpecialClsRef ref) {
   }
   always_assert(false);
 }
+
+namespace {
 
 const Func* resolveClsMethodFunc(Class* cls, const StringData* methName) {
   const Func* func;
@@ -4108,7 +4126,7 @@ ObjectData* newObjImpl(Class* cls, ArrayData* reified_types) {
     : ObjectData::newInstance<true>(cls);
   TRACE(2, "NewObj: just new'ed an instance of class %s: %p\n",
         cls->name()->data(), this_);
-  bespoke::profileArrLikeProps(this_);
+  profileArrLikePropsForInterp(this_);
   return this_;
 }
 
@@ -5520,7 +5538,22 @@ TCA dispatchImpl() {
       : vmfp() && vmfp()->unit()->isCoverageEnabled();
   };
   bool collectCoverage = checkCoverage();
-  if (cti_enabled()) {
+
+  auto const inlineInterp = [&]{
+    using IIS = ExecutionContext::InlineInterpState;
+    auto const state = g_context->m_inlineInterpState;
+    assertx(IMPLIES(breakOnCtlFlow, state == IIS::NONE));
+    if constexpr (breakOnCtlFlow) return false;
+
+    switch (state) {
+      case IIS::NONE:  return false;
+      case IIS::START: g_context->m_inlineInterpState = IIS::BLOCK; return true;
+      case IIS::BLOCK: throw Exception("Re-entry during inline interp");
+      default: always_assert(false);
+    }
+  }();
+
+  if (cti_enabled() && !inlineInterp) {
     return dispatchThreaded<breakOnCtlFlow>(collectCoverage);
   }
 
@@ -5596,8 +5629,17 @@ TCA dispatchImpl() {
     if (breakOnCtlFlow && Stats::enableInstrCount()) {        \
       Stats::inc(Stats::Instr_InterpBB##name);                \
     }                                                         \
+    if (inlineInterp) {                                       \
+      switch (callInlineInterpHook()) {                       \
+        case InlineInterpHookResult::NONE: break;             \
+        case InlineInterpHookResult::SKIP:                    \
+          pc = vmpc(); goto name##Done;                       \
+        case InlineInterpHookResult::STOP: return nullptr;    \
+      }                                                       \
+    }                                                         \
     retAddr = iopWrap##name<breakOnCtlFlow>(pc);              \
     vmpc() = pc;                                              \
+name##Done:                                                   \
     if (isFCallFunc(Op::name) ||                              \
         Op::name == Op::NativeImpl) {                         \
       collectCoverage = checkCoverage();                      \

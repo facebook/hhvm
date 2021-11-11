@@ -154,6 +154,9 @@ std::string Type::constValString() const {
     }
     return folly::format("TCA: {}({})", m_tcaVal, boost::trim_copy(name)).str();
   }
+  if (*this <= TVoidPtr) {
+    return folly::format("VoidPtr({})", m_voidPtrVal).str();
+  }
   if (*this <= TRDSHandle) {
     return folly::format("rds::Handle({:#x})", m_rdsHandleVal).str();
   }
@@ -590,6 +593,14 @@ DataType Type::toDataType() const {
   if (*this <= TRFunc)       return KindOfRFunc;
   if (*this <= TRClsMeth)    return KindOfRClsMeth;
   always_assert_flog(false, "Bad Type {} in Type::toDataType()", *this);
+}
+
+Optional<TypedValue> Type::tv() const {
+  if (!(admitsSingleVal() && *this <= TCell)) return std::nullopt;
+  TypedValue result;
+  result.m_type = toDataType();
+  if (hasConstVal()) result.m_data.num = rawVal();
+  return result;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

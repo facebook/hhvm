@@ -101,6 +101,10 @@ void storeTV(Vout& v, Type type, Vloc srcLoc,
 void storeTVWithAux(Vout& v, Vptr dst, Vloc srcLoc,
                     const SSATmp* src, AuxUnion aux);
 
+void storeTVVal(Vout& v, Type type, Vloc srcLoc, Vptr valPtr);
+void storeTVType(Vout& v, Type type, Vloc srcLoc,
+                 Vptr typePtr, bool aux = false);
+
 /*
  * Load `src' into `loc', the registers representing `dst'.
  *

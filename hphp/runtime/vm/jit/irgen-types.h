@@ -20,6 +20,7 @@
 
 namespace HPHP {
 
+struct MysteryBoxConstraint;
 struct RepoAuthType;
 struct StringData;
 struct TypeConstraint;
@@ -45,6 +46,9 @@ void verifyPropType(IRGS& env,
                     SSATmp* name,
                     bool isSProp,
                     SSATmp** coerce = nullptr);
+
+void verifyMysteryBoxConstraint(IRGS& env, const MysteryBoxConstraint& c,
+                                SSATmp* val, Block* fail);
 
 void raiseClsmethCompatTypeHint(
   IRGS& env, int32_t id, const Func* func, const TypeConstraint& tc);

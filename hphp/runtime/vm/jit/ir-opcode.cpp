@@ -477,6 +477,7 @@ bool opcodeMayRaise(Opcode opc) {
   case AKExistsDict:
   case AKExistsKeyset:
   case AllocBespokeStructDict:
+  case AllocInitROM:
   case AllocStructDict:
   case AllocVec:
   case AndInt:
@@ -657,6 +658,7 @@ bool opcodeMayRaise(Opcode opc) {
   case InstanceOfBitmask:
   case InstanceOfIface:
   case InstanceOfIfaceVtable:
+  case IntAsDataType:
   case InterfaceSupportsArrLike:
   case InterfaceSupportsDbl:
   case InterfaceSupportsInt:
@@ -890,10 +892,12 @@ bool opcodeMayRaise(Opcode opc) {
   case StructDictSet:
   case StructDictUnset:
   case StMROProp:
+  case StTypeAt:
   case StStk:
   case StStkRange:
   case StVMRegState:
   case StTVInRDS:
+  case StValAt:
   case SubDbl:
   case SubInt:
   case SubIntO:

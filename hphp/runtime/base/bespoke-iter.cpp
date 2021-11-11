@@ -34,4 +34,10 @@ TypedValue GetStructDictVal(const ArrayData* ad, int64_t pos) {
   return StructDict::GetPosVal(StructDict::As(ad), pos);
 }
 
+tv_lval GetStructDictLval(ArrayData* ad, int64_t pos) {
+  auto const sd = StructDict::As(ad);
+  auto const slot = sd->rawPositions()[pos];
+  return tv_lval{&sd->rawTypes()[slot], &sd->rawValues()[slot]};
+}
+
 }}

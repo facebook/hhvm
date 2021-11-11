@@ -1506,6 +1506,23 @@ struct NewStructData : IRExtraData {
   StringData** keys;
 };
 
+struct AllocInitROMData : IRExtraData {
+  std::string show() const {
+    return "";  // TODO
+  }
+
+  size_t stableHash() const {
+    return size; // TODO(michaelofarrell): fixme
+  }
+
+  bool equals(const AllocInitROMData& o) const {
+    return rom == o.rom && size == o.size;
+  }
+
+  const uint8_t* rom;
+  size_t size;
+};
+
 struct ArrayLayoutData : IRExtraData {
   explicit ArrayLayoutData(ArrayLayout layout) : layout(layout) {}
 
@@ -2739,6 +2756,7 @@ X(RBTraceMsg,                   RBMsgData);
 X(OODeclExists,                 ClassKindData);
 X(NewStructDict,                NewStructData);
 X(AllocStructDict,              NewStructData);
+X(AllocInitROM,                 AllocInitROMData);
 X(AllocBespokeStructDict,       ArrayLayoutData);
 X(InitStructPositions,          InitStructPositionsData);
 X(NewBespokeStructDict,         NewBespokeStructData);

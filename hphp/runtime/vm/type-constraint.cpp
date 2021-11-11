@@ -33,6 +33,7 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/super-inlining-bros.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/unit-util.h"
 #include "hphp/runtime/vm/vm-regs.h"
@@ -825,7 +826,8 @@ bool TypeConstraint::checkStringCompatible() const {
   return false;
 }
 
-bool TypeConstraint::tryCommonCoercions(tv_lval val, const Class* ctx) const {
+bool TypeConstraint::tryCommonCoercions(tv_lval val, const Class* ctx,
+                                        const Class* propDecl) const {
   if (ctx && isThis() && val.type() == KindOfObject) {
     auto const cls = val.val().pobj->getVMClass();
     if (cls->preClass()->userAttributes().count(s___MockClass.get()) &&
@@ -846,7 +848,7 @@ bool TypeConstraint::tryCommonCoercions(tv_lval val, const Class* ctx) const {
     return true;
   }
 
-  return false;
+  return MysteryBox::TryConstrain(val, *this, ctx, propDecl);
 }
 
 bool TypeConstraint::maybeStringCompatible() const {
@@ -862,6 +864,7 @@ void TypeConstraint::verifyParamFail(tv_lval val,
     isSoft() ||
     (isThis() && couldSeeMockObject()) ||
     (RO::EvalEnforceGenericsUB < 2 && isUpperBound()) ||
+    MysteryBox::IsMysteryBox(*val) ||
     check(val, ctx)
   );
 }
@@ -870,7 +873,7 @@ void TypeConstraint::verifyOutParamFail(TypedValue* c,
                                         const Class* ctx,
                                         const Func* func,
                                         int paramNum) const {
-  if (tryCommonCoercions(c, ctx)) return;
+  if (tryCommonCoercions(c, ctx, nullptr)) return;
 
   std::string msg = folly::sformat(
       "Argument {} returned from {}() as an inout parameter must be {} "
@@ -897,7 +900,7 @@ void TypeConstraint::verifyPropFail(const Class* thisCls,
   assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
   assertx(validForProp());
 
-  if (tryCommonCoercions(val, thisCls)) return;
+  if (tryCommonCoercions(val, thisCls, declCls)) return;
 
   raise_property_typehint_error(
     folly::sformat(
@@ -916,7 +919,7 @@ void TypeConstraint::verifyPropFail(const Class* thisCls,
 
 void TypeConstraint::verifyFail(tv_lval c, const Class* ctx, const Func* func,
                                 int id) const {
-  if (tryCommonCoercions(c, ctx)) return;
+  if (tryCommonCoercions(c, ctx, nullptr)) return;
 
   std::string name = displayName(func->cls());
   auto const givenType = describe_actual_type(c);

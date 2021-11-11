@@ -468,6 +468,9 @@ To string conversions:
 
   Convert S0 to an equivalent lval.
 
+| IntAsDataType<T>,            DParam(Cell), S(Int),                      NF
+
+  Take Int S0 and convert it to heap type TParam.
 
 4. Boolean predicates
 
@@ -1328,6 +1331,11 @@ To string conversions:
 
 7. Allocation
 
+| AllocInitROM<rom>, D(Int), NA, NF
+
+  Allocate a block of memory for `rom`, and initialize it's contents with the
+  ROM data.  Dest is the base of the newly allocated block.
+
 | AllocObj, DAllocObj, S(Cls), PRc
 
   Allocates a new object of class S1.
@@ -1688,6 +1696,14 @@ To string conversions:
   call.
 
 9. Stores
+
+| StValAt, ND, S(Int) S(Cell), NF
+
+  Store the value of S1 to pointer S0.
+
+| StTypeAt, ND, S(Int) S(Cell), NF
+
+  Store the type of S1 to pointer S0.
 
 | StClsInitElem<idx>, ND, S(PtrToClsInitCell) S(Cell), NF
 

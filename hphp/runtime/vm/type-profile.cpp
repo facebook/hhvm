@@ -50,12 +50,12 @@ std::atomic<uint64_t> numRequests;
 }
 
 ProfileNonVMThread::ProfileNonVMThread() {
-  always_assert(!rl_typeProfileLocals->nonVMThread);
+  m_saved = rl_typeProfileLocals->nonVMThread;
   rl_typeProfileLocals->nonVMThread = true;
 }
 
 ProfileNonVMThread::~ProfileNonVMThread() {
-  rl_typeProfileLocals->nonVMThread = false;
+  rl_typeProfileLocals->nonVMThread =  m_saved;
 }
 
 void profileWarmupStart() {

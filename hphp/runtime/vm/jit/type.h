@@ -325,6 +325,7 @@ constexpr bool operator>(Mem a, Mem b) {
   IRT(RDSHandle,   bits_t::bit<kRuntime+6>()) /* rds::Handle */         \
   IRT(Nullptr,     bits_t::bit<kRuntime+7>())                           \
   IRT(Smashable,   bits_t::bit<kRuntime+8>()) /* Smashable uint64_t */  \
+  IRT(VoidPtr,     bits_t::bit<kRuntime+9>()) /* Arbitrary pointer */   \
   /* bits above this are unused */
 
 /*
@@ -379,7 +380,7 @@ constexpr bool operator>(Mem a, Mem b) {
 struct Type {
 private:
   static constexpr size_t kRuntime = 27;
-  static constexpr size_t numRuntime = 9;
+  static constexpr size_t numRuntime = 10;
   using bits_t = BitSet<kRuntime + numRuntime>;
 
 public:
@@ -653,6 +654,12 @@ public:
   uint64_t rawVal() const;
 
   /*
+   * Returns a TypedValue if admitsSingleVal() is true and if this type is a
+   * subtype of TCell. Otherwise, returns std::nullopt.
+   */
+  Optional<TypedValue> tv() const;
+
+  /*
    * Return the const value for a const Type.
    *
    * @requires: hasConstVal(Type::T)
@@ -673,6 +680,7 @@ public:
   ClsMethDataRef clsmethVal() const;
   rds::Handle rdsHandleVal() const;
   jit::TCA tcaVal() const;
+  void* voidPtrVal() const;
   const TypedValue* ptrVal() const;
 
 
@@ -867,6 +875,7 @@ private:
     ClsMethDataRef m_clsmethVal;
     LazyClassData m_lclsVal;
     jit::TCA m_tcaVal;
+    void* m_voidPtrVal;
     rds::Handle m_rdsHandleVal;
     TypedValue* m_ptrVal;
 

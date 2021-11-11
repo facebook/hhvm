@@ -1444,6 +1444,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvDblToStr:
   case ConvIntToStr:
   case InitStructPositions:
+  case AllocInitROM:
+  case StValAt:
+  case StTypeAt:
+  case IntAsDataType:
     return IrrelevantEffects {};
 
   case AllocObj:

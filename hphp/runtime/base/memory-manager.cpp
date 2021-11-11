@@ -713,6 +713,12 @@ void splitTail(FreelistArray& freelists, void* tail, size_t tailBytes,
 }
 }
 
+void MemoryManager::freeOveralloc(void* base, size_t bytes) {
+  if (!bytes) return;
+  m_stats.mm_udebt += bytes;
+  storeTail(m_freelists, base, bytes, Slab::fromPtr(base));
+}
+
 /*
  * Get a new slab, then allocate nbytes from it and install it in our
  * slab list.  Return the newly allocated nbytes-sized block.

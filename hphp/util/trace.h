@@ -183,6 +183,7 @@ namespace Trace {
       TM(ringbuffer)    \
       TM(runtime)       \
       TM(servicereq)    \
+      TM(sib)           \
       TM(simplify)      \
       TM(stat)          \
       TM(statgroups)    \

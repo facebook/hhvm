@@ -20,10 +20,13 @@
 #include <stdexcept>
 #include <string>
 
+#include <folly/Range.h>
+
 namespace HPHP {
 
 struct UnitEmitter;
 struct FuncEmitter;
+struct RepoAuthType;
 struct SHA1;
 
 namespace Native {
@@ -60,6 +63,9 @@ struct AssemblerError : std::runtime_error {
 struct AssemblerUnserializationError : AssemblerError {
   using AssemblerError::AssemblerError;
 };
+
+// Sets output on success; throws on failure.
+void ParseRepoAuthType(folly::StringPiece input, RepoAuthType& output);
 
 //////////////////////////////////////////////////////////////////////
 

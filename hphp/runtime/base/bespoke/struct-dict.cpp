@@ -374,7 +374,7 @@ const StructLayout* StructLayout::As(const Layout* l) {
 
 StructDict* StructDict::MakeFromVanilla(ArrayData* ad,
                                         const StructLayout* layout) {
-  if (!ad->isVanillaDict()) return nullptr;;
+  if (!ad->isVanillaDict()) return nullptr;
 
   assertx(layout);
   auto const result = ad->isStatic()

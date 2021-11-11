@@ -283,6 +283,8 @@ bool canDCE(IRInstruction* inst) {
   case LoadBCSP:
   case LdResolvedTypeCnsNoCheck:
   case LdResolvedTypeCnsClsName:
+  case AllocInitROM:
+  case IntAsDataType:
     assertx(!inst->isControlFlow());
     return true;
 
@@ -462,6 +464,8 @@ bool canDCE(IRInstruction* inst) {
   case StVMReturnAddr:
   case StVMRegState:
   case StTVInRDS:
+  case StTypeAt:
+  case StValAt:
   case ReqBindJmp:
   case ReqInterpBBNoTranslate:
   case ReqRetranslate:

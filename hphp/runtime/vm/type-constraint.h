@@ -327,11 +327,14 @@ struct TypeConstraint {
    * Normal check if this type-constraint is compatible with the given value
    * (using the given context). This can invoke the autoloader and is always
    * exact. This should not be used for property type-hints (which behave
-   * slightly differently) and the context is required. The context determines
-   * the meaning of This type-constraint.
+   * slightly differently) and the context is required.  Instead use checkProp.
+   * The context determines the meaning of This type-constraint.
    */
   bool check(tv_rval val, const Class* context) const {
     return checkImpl<CheckMode::Exact>(val, context);
+  }
+  bool checkProp(tv_rval val, const Class* context) const {
+    return checkImpl<CheckMode::ExactProp>(val, context);
   }
 
   /*
@@ -416,7 +419,8 @@ private:
   // raise an error. Some of these cases are resolved by mutating val instead.
   //
   // If this method returns true, we don't need to raise the type error.
-  bool tryCommonCoercions(tv_lval val, const Class* ctx) const;
+  bool tryCommonCoercions(tv_lval val, const Class* ctx,
+                          const Class* propDecl) const;
 
   enum class CheckMode {
     Exact, // Do an exact check with autoloading

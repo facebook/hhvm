@@ -11,6 +11,6 @@ interface DateTimeInterface {
   );
   public function format(/* string */ $format);
   public function getOffset();
-  public function getTimestamp();
+  public function getTimestamp()[];
   public function getTimezone();
 }

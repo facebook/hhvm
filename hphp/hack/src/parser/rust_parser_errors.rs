@@ -480,11 +480,8 @@ where
         };
     }
 
-    fn check_can_use_readonly(&mut self, node: S<'a, Token, Value>) {
+    fn mark_uses_readonly(&mut self) {
         self.uses_readonly = true;
-        if self.env.is_typechecker() {
-            self.check_can_use_feature(node, &UnstableFeatures::Readonly)
-        }
     }
 
     fn check_can_use_feature(&mut self, node: S<'a, Token, Value>, feature: &UnstableFeatures) {
@@ -1152,7 +1149,7 @@ where
             for modifier in Self::syntax_to_list_no_separators(modifiers) {
                 if let Some(kind) = Self::token_kind(modifier) {
                     if kind == TokenKind::Readonly {
-                        self.check_can_use_readonly(modifier)
+                        self.mark_uses_readonly()
                     }
                     if !ok(kind) {
                         self.errors.push(Self::make_error_from_node(
@@ -1668,7 +1665,7 @@ where
                 let function_parameter_list = &x.parameter_list;
                 let function_type = &x.type_;
                 if x.readonly_return.is_readonly() {
-                    self.check_can_use_readonly(&x.readonly_return)
+                    self.mark_uses_readonly()
                 }
 
                 self.produce_error(
@@ -1919,7 +1916,7 @@ where
     fn check_parameter_readonly(&mut self, node: S<'a, Token, Value>) {
         if let ParameterDeclaration(x) = &node.children {
             if x.readonly.is_readonly() {
-                self.check_can_use_readonly(&x.readonly);
+                self.mark_uses_readonly()
             }
         }
     }
@@ -3110,7 +3107,7 @@ where
                     .po_disallow_fun_and_cls_meth_pseudo_funcs;
 
                 if Self::strip_ns(self.text(recv)) == Self::strip_ns(sn::readonly::AS_MUT) {
-                    self.check_can_use_readonly(recv);
+                    self.mark_uses_readonly()
                 }
 
                 if self.text(recv) == Self::strip_hh_ns(sn::autoimported_functions::FUN_)
@@ -3473,7 +3470,7 @@ where
             PrefixUnaryExpression(x)
                 if Self::token_kind(&x.operator) == Some(TokenKind::Readonly) =>
             {
-                self.check_can_use_readonly(&x.operator)
+                self.mark_uses_readonly()
             }
 
             // Other kinds of expressions currently produce no expr errors.

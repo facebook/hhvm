@@ -5,8 +5,10 @@ class C {}
 function expect_map_c(Map<int, C> $m) : void {}
 function expect_map_c_or_int(Map<int, (C | int)> $m) : void {}
 
-function test_Map(~C $lc, dynamic $d, Map<int,C> $m, ~int $i) : Map<int,C> {
-  hh_show($m[0]);
+function test_Map(vec<~C> $vlc, dynamic $d, Map<int,C> $m, vec<~int> $vi) : Map<int,C> {
+  $lc = $vlc[0];
+  $i = $vi[0];
+  hh_expect_equivalent<~C>($m[0]);
 
   $m[0] = new C();
   $m[0] = $d;

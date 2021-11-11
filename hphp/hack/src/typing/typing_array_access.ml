@@ -363,6 +363,7 @@ let rec array_get
           let (env, idx_err_res) =
             if String.equal cn SN.Collections.cMap then
               let (env, k) = Env.expand_type env k in
+              let (env, k) = maybe_pessimise_type env k in
               type_index
                 env
                 expr_pos
@@ -983,20 +984,21 @@ let assign_array_get_with_err
             let any = err_witness env expr_pos in
             (any, (env, any))
         in
-        let tk =
+        let (env, tk) =
           let (_, p, _) = key in
           let ak_t = MakeType.arraykey (Reason.Ridx_vector p) in
+          let (env, tk) = maybe_pessimise_type env tk in
           if Typing_utils.is_sub_type_for_union env ak_t tk then
             (* hhvm will enforce that the key is an arraykey, so if
                $x : Map<arraykey, t>, then it should be allowed to
                set $x[$d] = e where $d : dynamic. NB above, we don't need
                to check that tk <: arraykey, because the Map ensures that. *)
-            MakeType.enforced tk
+            (env, MakeType.enforced tk)
           else
             (* It is unsound to allow $x[$d] = e if $x : Map<string, t>
                since the dynamic $d might be an int and hhvm wouldn't
                complain.*)
-            MakeType.unenforced tk
+            (env, MakeType.unenforced tk)
         in
         let (env, idx_err2) =
           type_index env expr_pos tkey tk (Reason.index_class cn)
@@ -1044,8 +1046,11 @@ let assign_array_get_with_err
                set the keytype to arraykey, since that the only thing that hhvm won't
                error on.
             *)
-            let (_, p, _) = key in
-            (env, MakeType.arraykey (Reason.Ridx_dict p))
+            if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
+              pessimised_vec_dict_assign expr_pos env tk tkey
+            else
+              let (_, p, _) = key in
+              (env, MakeType.arraykey (Reason.Ridx_dict p))
           else
             Typing_union.union env tk tkey
         in

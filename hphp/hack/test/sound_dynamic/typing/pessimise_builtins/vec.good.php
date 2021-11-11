@@ -2,39 +2,42 @@
 
 <<__SupportDynamicType>> class C {}
 
-function test_vec(~C $lc, dynamic $d, vec<C> $v, ~int $i) : vec<C> {
-  hh_show($v[0]);
+function test_vec(vec<~C> $vlc, dynamic $d, vec<C> $v, vec<~int> $vi, C $c) : vec<C> {
+  $lc = $vlc[0];
+  $i = $vi[0];
+
+  hh_expect_equivalent<~C>($v[0]);
 
   $v[0] = new C();
-  hh_show($v);
+  hh_expect_equivalent<vec<C>>($v);
   $v[0] = $d;
-  hh_show($v);
+  hh_expect_equivalent<vec<C>>($v);
   $v[0] = $lc;
-  hh_show($v);
+  hh_expect_equivalent<vec<C>>($v);
   $w = $v;
   $w[0] = $i;
-  hh_show($w);
+  hh_expect_equivalent<vec<(int | C)>>($w);
 
 
   $v[] = new C();
-  hh_show($v);
+  hh_expect_equivalent<vec<C>>($v);
   $v[] = $d;
-  hh_show($v);
+  hh_expect_equivalent<vec<C>>($v);
   $v[] = $lc;
-  hh_show($v);
+  hh_expect_equivalent<vec<C>>($v);
   $w = $v;
   $w[] = $i;
-  hh_show($w);
+  hh_expect_equivalent<vec<(int | C)>>($w);
 
   $w1 = vec<C>[$d];
-  hh_show($w1);
+  hh_expect_equivalent<vec<C>>($w1);
   $w2 = vec[$d];
-  hh_show($w2);
+  hh_expect_equivalent<vec<nothing>>($w2);
   $w3 = vec[$lc];
-  hh_show($w3);
-  $w4 = vec[new C()];
-  hh_show($w4);
-  $w5 = vec[new C(), $i, $d];
-  hh_show($w5);
+  hh_expect_equivalent<vec<C>>($w3);
+  $w4 = vec[$c];
+  hh_expect_equivalent<vec<C>>($w4);
+  $w5 = vec[$c, $i, $d];
+  hh_expect_equivalent<vec<(int | C)>>($w5);
   return vec[$d];
 }

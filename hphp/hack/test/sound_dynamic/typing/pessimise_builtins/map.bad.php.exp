@@ -1,32 +1,32 @@
-File "map.bad.php", line 6, characters 3-12:
+File "map.bad.php", line 7, characters 3-12:
 Invalid assignment (Typing[4110])
   File "", line 0, characters 0-0:
   Expected `~C`
   File "map.bad.php", line 5, characters 19-23:
   But got `mixed`
-File "map.bad.php", line 7, characters 3-11:
+File "map.bad.php", line 8, characters 3-11:
 Invalid assignment (Typing[4110])
   File "", line 0, characters 0-0:
   Expected `~C`
-  File "map.bad.php", line 7, characters 11-11:
+  File "map.bad.php", line 8, characters 11-11:
   But got `int`
-File "map.bad.php", line 8, characters 3-12:
+File "map.bad.php", line 9, characters 3-12:
 Invalid assignment (Typing[4110])
   File "", line 0, characters 0-0:
   Expected `~C`
-  File "map.bad.php", line 5, characters 45-47:
+  File "map.bad.php", line 5, characters 49-51:
   But got `int`
-File "map.bad.php", line 9, characters 3-20:
+File "map.bad.php", line 10, characters 3-20:
 The values of this `Map` are incompatible (Typing[4110])
   File "", line 0, characters 0-0:
   Expected `~C`
-  File "map.bad.php", line 5, characters 45-47:
+  File "map.bad.php", line 5, characters 49-51:
   But got `int`
-File "map.bad.php", line 10, characters 10-27:
+File "map.bad.php", line 11, characters 10-27:
 Invalid return type (Typing[4110])
-  File "map.bad.php", line 5, characters 63-63:
+  File "map.bad.php", line 5, characters 69-69:
   Expected `C`
-  File "map.bad.php", line 5, characters 63-63:
+  File "map.bad.php", line 5, characters 69-69:
   This type argument to `Map` must match exactly (it is invariant)
-  File "map.bad.php", line 10, characters 18-24:
+  File "map.bad.php", line 11, characters 18-24:
   But got `dynamic`

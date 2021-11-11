@@ -1,0 +1,24 @@
+File "dict_key.bad.php", line 5, characters 3-10:
+This value is not a valid key type for this container (Typing[4298])
+  File "dict_key.bad.php", line 3, characters 42-55:
+  This container is an object of type dict<int, int>
+  File "dict_key.bad.php", line 3, characters 28-33:
+  A dynamic value or a float cannot be used as a key for an object of type dict<int, int>
+File "dict_key.bad.php", line 6, characters 3-14:
+This value is not a valid key type for this container (Typing[4371])
+  File "dict_key.bad.php", line 3, characters 42-55:
+  This container is an object of type dict<int, int>
+  File "dict_key.bad.php", line 3, characters 28-33:
+  A dynamic value or a float cannot be used as a key for an object of type dict<int, int>
+File "dict_key.bad.php", line 7, characters 3-16:
+Invalid index type for this dict (Typing[4110])
+  File "dict_key.bad.php", line 7, characters 8-10:
+  Expected `arraykey` because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset`
+  File "dict_key.bad.php", line 3, characters 29-33:
+  But got `float`
+File "dict_key.bad.php", line 7, characters 3-16:
+The keys of this dict are incompatible (Typing[4110])
+  File "", line 0, characters 0-0:
+  Expected `~[unresolved]`
+  File "dict_key.bad.php", line 3, characters 29-33:
+  But got `float`

@@ -1132,3 +1132,10 @@ let deref_constraint_type p = p
 let get_reason_i : internal_type -> Reason.t = function
   | LoclType lty -> get_reason lty
   | ConstraintType (r, _) -> r
+
+(** Hack keyword for this visibility *)
+let string_of_visibility : ce_visibility -> string = function
+  | Vpublic -> "public"
+  | Vprivate _ -> "private"
+  | Vprotected _ -> "protected"
+  | Vinternal _ -> "internal"

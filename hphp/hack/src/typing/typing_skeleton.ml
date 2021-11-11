@@ -129,7 +129,6 @@ let params_source (arity : decl_ty fun_arity) (params : decl_ty fun_params) :
   in
   String.concat ~sep:", " (explicit_params @ varaidic_params)
 
-(* Generate source code for a method skeleton that matches [meth]. *)
 let of_method (name : string) (meth : class_elt) : string =
   let (_, ty_) = deref (Lazy.force meth.ce_type) in
   let (params, return_ty) =
@@ -141,7 +140,7 @@ let of_method (name : string) (meth : class_elt) : string =
 
   Printf.sprintf
     "\n  %s function %s(%s): %s {}\n\n"
-    (Typing_utils.string_of_visibility meth.ce_visibility)
+    (Typing_defs.string_of_visibility meth.ce_visibility)
     name
     params
     return_ty

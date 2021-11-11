@@ -6,4 +6,5 @@
  *
  *)
 
+(** [of_method name meth] generates source code for a method skeleton that matches [meth]. *)
 val of_method : string -> Typing_defs.class_elt -> string

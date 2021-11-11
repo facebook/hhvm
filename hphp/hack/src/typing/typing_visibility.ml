@@ -208,7 +208,7 @@ let is_visible env (vis, lsb) cid class_ =
   Option.is_none msg_opt
 
 let visibility_error p msg (p_vis, vis) =
-  let s = TUtils.string_of_visibility vis in
+  let s = Typing_defs.string_of_visibility vis in
   let msg_vis = "This member is " ^ s in
   Errors.visibility p msg p_vis msg_vis
 

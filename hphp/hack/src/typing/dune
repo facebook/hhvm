@@ -115,26 +115,21 @@
     typing_arithmetic
     typing_array_access
     typing_attributes
-    typing_type_wellformedness
     typing_debug
     typing_escape
-    typing_extends
     typing_exts
     typing_func_terminality
     typing_helpers
-    typing_inheritance
     typing_lenv
     typing_memoize
     typing_param
     typing_regex
-    typing_requirements
     typing_sequencing
     typing_shapes
-    typing_skeleton
     typing_structure
     typing_toplevel
-    typing_typedef
-    typing_try)
+    typing_try
+    typing_typedef)
   (libraries
     decl_enum
     decl_init_check
@@ -146,7 +141,31 @@
     procs_procs
     tast
     tast_check
-    type_mapper)
+    type_mapper
+    typing_wellformedness)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
+  (name typing_skeleton)
+  (wrapped false)
+  (modules
+    typing_skeleton)
+  (libraries
+    typing_defs)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
+  (name typing_wellformedness)
+  (wrapped false)
+  (modules
+    typing_extends
+    typing_inheritance
+    typing_requirements
+    typing_type_wellformedness)
+  (libraries
+    tast
+    typing_algebra
+    typing_skeleton)
   (preprocess (pps ppx_deriving.std)))
 
 (library

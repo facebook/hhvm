@@ -70,8 +70,8 @@ let check_visibility parent_vis c_vis parent_pos pos on_error =
     | `Outside target ->
       Errors.visibility_override_internal pos parent_pos None target on_error)
   | _ ->
-    let parent_vis = TUtils.string_of_visibility parent_vis in
-    let vis = TUtils.string_of_visibility c_vis in
+    let parent_vis = Typing_defs.string_of_visibility parent_vis in
+    let vis = Typing_defs.string_of_visibility c_vis in
     Errors.visibility_extends vis pos parent_pos parent_vis on_error
 
 let check_class_elt_visibility parent_class_elt class_elt on_error =

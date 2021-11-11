@@ -550,12 +550,6 @@ let shape_field_name : env -> Nast.expr -> Ast_defs.shape_field_name option =
 (* Class types *)
 (*****************************************************************************)
 
-let string_of_visibility = function
-  | Vpublic -> "public"
-  | Vprivate _ -> "private"
-  | Vprotected _ -> "protected"
-  | Vinternal _ -> "internal"
-
 let unwrap_class_type ty =
   match deref ty with
   | (r, Tapply (name, tparaml)) -> (r, name, tparaml)

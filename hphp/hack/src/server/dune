@@ -365,7 +365,7 @@
     pos
     provider_context
     tast_provider
-    typing
+    typing_skeleton
     utils_core)
   (preprocess (pps lwt_ppx ppx_deriving.std)))
 

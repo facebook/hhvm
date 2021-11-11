@@ -439,7 +439,7 @@ let rec obj_get_concrete_ty
                     id_pos
                     id_str
                     (get_pos member_)
-                    (TUtils.string_of_visibility old_vis)
+                    (Typing_defs.string_of_visibility old_vis)
                     (get_pos old_member)
                     self_id
                     (snd x)

@@ -1386,7 +1386,7 @@ let class_var_def ~is_static cls env cv =
     && Partial.should_check_error (Env.get_mode env) 2001
   then
     Errors.prop_without_typehint
-      (string_of_visibility cv.cv_visibility)
+      (Aast.string_of_visibility cv.cv_visibility)
       cv.cv_id;
   let (env, global_inference_env) = Env.extract_global_inference_env env in
   let ((cv_type_ty, _) as cv_type) =

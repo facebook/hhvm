@@ -41,6 +41,10 @@ struct Watcher {
     folly::fs::path m_path;
     bool m_exists{false};
     Optional<std::string> m_hash;
+
+    bool operator==(const ResultFile& o) const {
+      return m_path == o.m_path && m_exists == o.m_exists && m_hash == o.m_hash;
+    }
   };
 
   struct Results {

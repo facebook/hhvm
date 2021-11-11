@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include <functional>
 #include <memory>
 #include <string>
 #include <utility>
@@ -107,10 +108,26 @@ parseWatchmanResults(Optional<Clock> lastClock, folly::dynamic&& result) {
   XLOG(DBG0) << "parseWatchmanResults: is_fresh_instance = "
              << result.at("is_fresh_instance").asBool();
 
-  std::string clock =
-      result.get_ptr("clock")->isString()
-          ? result.get_ptr("clock")->asString()
-          : result.get_ptr("clock")->get_ptr("clock")->asString();
+  std::string clock = [&] {
+    auto* clockPtr = result.get_ptr("clock");
+    if (!clockPtr) {
+      throw UpdateExc{folly::sformat(
+          R"-(Malformed watchman output: no "clock" field in "{}")-",
+          folly::toJson(result))};
+    }
+
+    if (clockPtr->isString()) {
+      return clockPtr->asString();
+    }
+
+    auto* nestedClockPtr = clockPtr->get_ptr("clock");
+    if (!nestedClockPtr || !nestedClockPtr->isString()) {
+      throw UpdateExc{folly::sformat(
+          R"-(Malformed watchman output: malformed "clock" field in "{}")-",
+          folly::toJson(result))};
+    }
+    return nestedClockPtr->asString();
+  }();
 
   return {
       .m_lastClock = std::move(lastClock),

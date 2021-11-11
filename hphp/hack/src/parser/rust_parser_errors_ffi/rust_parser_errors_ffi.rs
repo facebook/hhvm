@@ -41,17 +41,16 @@ unsafe fn parser_options_from_ocaml_only_for_parser_errors(
     let po_disable_xhp_element_mangling = bool::from_ocaml(*ocaml_opts.add(11)).unwrap();
     let po_disable_xhp_children_declarations = bool::from_ocaml(*ocaml_opts.add(12)).unwrap();
     let po_enable_enum_classes = bool::from_ocaml(*ocaml_opts.add(13)).unwrap();
-    let po_disable_modes = bool::from_ocaml(*ocaml_opts.add(14)).unwrap();
-    let po_disable_array = bool::from_ocaml(*ocaml_opts.add(15)).unwrap();
-    let po_const_default_lambda_args = bool::from_ocaml(*ocaml_opts.add(16)).unwrap();
-    let po_disable_array_typehint = bool::from_ocaml(*ocaml_opts.add(17)).unwrap();
-    let po_allow_unstable_features = bool::from_ocaml(*ocaml_opts.add(18)).unwrap();
-    let po_disallow_fun_and_cls_meth_pseudo_funcs = bool::from_ocaml(*ocaml_opts.add(19)).unwrap();
-    let po_interpret_soft_types_as_like_types = bool::from_ocaml(*ocaml_opts.add(20)).unwrap();
-    let po_disallow_inst_meth = bool::from_ocaml(*ocaml_opts.add(21)).unwrap();
-    let po_enable_readonly_in_emitter = bool::from_ocaml(*ocaml_opts.add(22)).unwrap();
-    let po_escape_brace = bool::from_ocaml(*ocaml_opts.add(23)).unwrap();
-    let tco_enable_systemlib_annotations = bool::from_ocaml(*ocaml_opts.add(24)).unwrap();
+    let po_disable_array = bool::from_ocaml(*ocaml_opts.add(14)).unwrap();
+    let po_const_default_lambda_args = bool::from_ocaml(*ocaml_opts.add(15)).unwrap();
+    let po_disable_array_typehint = bool::from_ocaml(*ocaml_opts.add(16)).unwrap();
+    let po_allow_unstable_features = bool::from_ocaml(*ocaml_opts.add(17)).unwrap();
+    let po_disallow_fun_and_cls_meth_pseudo_funcs = bool::from_ocaml(*ocaml_opts.add(18)).unwrap();
+    let po_interpret_soft_types_as_like_types = bool::from_ocaml(*ocaml_opts.add(19)).unwrap();
+    let po_disallow_inst_meth = bool::from_ocaml(*ocaml_opts.add(20)).unwrap();
+    let po_enable_readonly_in_emitter = bool::from_ocaml(*ocaml_opts.add(21)).unwrap();
+    let po_escape_brace = bool::from_ocaml(*ocaml_opts.add(22)).unwrap();
+    let tco_enable_systemlib_annotations = bool::from_ocaml(*ocaml_opts.add(23)).unwrap();
 
     parser_options.po_disable_lval_as_an_expression = po_disable_lval_as_an_expression;
     parser_options.po_disable_legacy_soft_typehints = po_disable_legacy_soft_typehints;
@@ -64,7 +63,6 @@ unsafe fn parser_options_from_ocaml_only_for_parser_errors(
     parser_options.po_disable_xhp_element_mangling = po_disable_xhp_element_mangling;
     parser_options.po_disable_xhp_children_declarations = po_disable_xhp_children_declarations;
     parser_options.po_enable_enum_classes = po_enable_enum_classes;
-    parser_options.po_disable_modes = po_disable_modes;
     parser_options.po_disable_array = po_disable_array;
     parser_options.po_const_default_lambda_args = po_const_default_lambda_args;
     parser_options.po_disable_array_typehint = po_disable_array_typehint;

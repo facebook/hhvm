@@ -102,7 +102,6 @@ impl Default for GlobalOptions {
             symbol_write_include_hhi: true,
             symbol_write_index_paths_file_output: None,
             po_enable_enum_classes: true,
-            po_disable_modes: false,
             po_disable_hh_ignore_error: false,
             po_disable_array: false,
             po_disable_array_typehint: false,

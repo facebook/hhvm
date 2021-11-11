@@ -244,7 +244,7 @@ impl<'src> AastParser {
         source_text: &'src SourceText<'src>,
     ) -> Result<(Language, Option<Mode>, ParserEnv)> {
         let (language, mut mode) = parse_mode(source_text);
-        if mode == Some(Mode::Mpartial) && env.parser_options.po_disable_modes {
+        if mode == Some(Mode::Mpartial) {
             mode = Some(Mode::Mstrict);
         }
         let parser_env = ParserEnv {
@@ -257,7 +257,6 @@ impl<'src> AastParser {
             disable_xhp_children_declarations: env
                 .parser_options
                 .po_disable_xhp_children_declarations,
-            disable_modes: env.parser_options.po_disable_modes,
             disallow_fun_and_cls_meth_pseudo_funcs: env
                 .parser_options
                 .po_disallow_fun_and_cls_meth_pseudo_funcs,

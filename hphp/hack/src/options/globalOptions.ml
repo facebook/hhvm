@@ -102,7 +102,6 @@ type t = {
   po_disable_xhp_element_mangling: bool;
   po_disable_xhp_children_declarations: bool;
   po_enable_enum_classes: bool;
-  po_disable_modes: bool;
   po_disable_hh_ignore_error: bool;
   po_disable_array: bool;
   po_disable_array_typehint: bool;
@@ -301,7 +300,6 @@ let default =
     po_disable_xhp_element_mangling = true;
     po_disable_xhp_children_declarations = true;
     po_enable_enum_classes = true;
-    po_disable_modes = false;
     po_disable_hh_ignore_error = false;
     po_disable_array = true;
     po_disable_array_typehint = true;
@@ -448,7 +446,6 @@ let make
     ?(po_disable_xhp_children_declarations =
       default.po_disable_xhp_children_declarations)
     ?(po_enable_enum_classes = default.po_enable_enum_classes)
-    ?(po_disable_modes = default.po_disable_modes)
     ?(po_disable_hh_ignore_error = default.po_disable_hh_ignore_error)
     ?(po_disable_array = default.po_disable_array)
     ?(po_disable_array_typehint = default.po_disable_array_typehint)
@@ -592,7 +589,6 @@ let make
     po_disable_xhp_element_mangling;
     po_disable_xhp_children_declarations;
     po_enable_enum_classes;
-    po_disable_modes;
     po_disable_hh_ignore_error;
     po_disable_array;
     po_disable_array_typehint;
@@ -844,8 +840,6 @@ let po_disable_xhp_children_declarations t =
   t.po_disable_xhp_children_declarations
 
 let po_enable_enum_classes t = t.po_enable_enum_classes
-
-let po_disable_modes t = t.po_disable_modes
 
 let po_disable_hh_ignore_error t = t.po_disable_hh_ignore_error
 

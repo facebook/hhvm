@@ -122,8 +122,6 @@ let with_enable_enum_classes po b =
 let with_enable_enum_supertyping po b =
   { po with GlobalOptions.po_enable_enum_supertyping = b }
 
-let disable_modes = GlobalOptions.po_disable_modes
-
 let disable_hh_ignore_error = GlobalOptions.po_disable_hh_ignore_error
 
 let disable_array = GlobalOptions.po_disable_array
@@ -179,7 +177,6 @@ let make
     ~allow_unstable_features
     ~disable_xhp_children_declarations
     ~enable_enum_classes
-    ~disable_modes
     ~disable_hh_ignore_error
     ~disable_array
     ~disable_array_typehint
@@ -212,7 +209,6 @@ let make
       po_allow_unstable_features = allow_unstable_features;
       po_disable_xhp_children_declarations = disable_xhp_children_declarations;
       po_enable_enum_classes = enable_enum_classes;
-      po_disable_modes = disable_modes;
       po_disable_hh_ignore_error = disable_hh_ignore_error;
       po_disable_array = disable_array;
       po_disable_array_typehint = disable_array_typehint;
@@ -228,7 +224,6 @@ let make
 (* Changes here need to be synchronized with rust_parser_errors_ffi.rs *)
 type ffi_t =
   bool
-  * bool
   * bool
   * bool
   * bool
@@ -268,7 +263,6 @@ let to_rust_ffi_t po ~hhvm_compat_mode ~hhi_mode ~codegen =
     disable_xhp_element_mangling po,
     disable_xhp_children_declarations po,
     enable_enum_classes po,
-    disable_modes po,
     disable_array po,
     const_default_lambda_args po,
     disable_array_typehint po,

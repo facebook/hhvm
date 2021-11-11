@@ -22,7 +22,6 @@ type t = {
   enable_xhp_class_modifier: bool;
   disable_xhp_element_mangling: bool;
   disable_xhp_children_declarations: bool;
-  disable_modes: bool;
   disallow_fun_and_cls_meth_pseudo_funcs: bool;
   disallow_inst_meth: bool;
   interpret_soft_types_as_like_types: bool;
@@ -46,7 +45,6 @@ let default =
     enable_xhp_class_modifier = false;
     disable_xhp_element_mangling = false;
     disable_xhp_children_declarations = false;
-    disable_modes = false;
     disallow_fun_and_cls_meth_pseudo_funcs = false;
     disallow_inst_meth = false;
     interpret_soft_types_as_like_types = false;
@@ -72,7 +70,6 @@ let make
     ?(disable_xhp_element_mangling = default.disable_xhp_element_mangling)
     ?(disable_xhp_children_declarations =
       default.disable_xhp_children_declarations)
-    ?(disable_modes = default.disable_modes)
     ?(disallow_fun_and_cls_meth_pseudo_funcs =
       default.disallow_fun_and_cls_meth_pseudo_funcs)
     ?(disallow_inst_meth = default.disallow_inst_meth)
@@ -95,7 +92,6 @@ let make
     enable_xhp_class_modifier;
     disable_xhp_element_mangling;
     disable_xhp_children_declarations;
-    disable_modes;
     disallow_fun_and_cls_meth_pseudo_funcs;
     disallow_inst_meth;
     interpret_soft_types_as_like_types;
@@ -131,8 +127,6 @@ let enable_xhp_class_modifier e = e.enable_xhp_class_modifier
 let disable_xhp_element_mangling e = e.disable_xhp_element_mangling
 
 let disable_xhp_children_declarations e = e.disable_xhp_children_declarations
-
-let disable_modes e = e.disable_modes
 
 let disallow_fun_and_cls_meth_pseudo_funcs e =
   e.disallow_fun_and_cls_meth_pseudo_funcs

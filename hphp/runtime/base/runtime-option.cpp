@@ -296,7 +296,6 @@ ParserEnv RepoOptions::getParserEnvironment() const {
     , EnableXHPClassModifier
     , DisableXHPElementMangling
     , false // disable_xhp_children_declarations
-    , false // disable_modes
     , DisallowFunAndClsMethPseudoFuncs
     , true  // interpret_soft_types_as_like_types
     };

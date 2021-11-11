@@ -273,10 +273,6 @@ Instruction set
   Returns S0, with Nullptr removed from its type. This instruction currently
   supports a very limited range of types but can be expanded if needed.
 
-| CheckImplicitContextNull, ND, NA, B
-
-  If the implicit context on RDS is null, branch to block B.
-
 | CheckSmashableClass, ND, S(Smashable) S(Cls), B
 
   If the lower 32 bits of S0 does not match class pointer S1, branch to block B.

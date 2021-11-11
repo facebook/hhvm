@@ -334,7 +334,6 @@ bool canDCE(IRInstruction* inst) {
   case AssertLoc:
   case AssertStk:
   case AssertMBase:
-  case CheckImplicitContextNull:
   case CheckInit:
   case CheckInitMem:
   case CheckCold:

@@ -506,7 +506,6 @@ bool opcodeMayRaise(Opcode opc) {
   case CheckDictKeys:
   case CheckDictOffset:
   case CheckFuncNeedsCoverage:
-  case CheckImplicitContextNull:
   case CheckInit:
   case CheckInitMem:
   case CheckIter:

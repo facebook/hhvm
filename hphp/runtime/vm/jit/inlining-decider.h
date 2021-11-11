@@ -108,11 +108,15 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
 
 void setBaseInliningProfCount(uint64_t value);
 
+///////////////////////////////////////////////////////////////////////////////
+
 /*
  * Clear all cached inlining costs.
  */
 void clearCachedInliningCost();
 
+void serializeCachedInliningCost(ProfDataSerializer&);
+void deserializeCachedInliningCost(ProfDataDeserializer&);
+
 ///////////////////////////////////////////////////////////////////////////////
 }}
-

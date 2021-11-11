@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/inlining-decider.h"
 
+#include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/ext/asio/ext_async-generator.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
@@ -40,6 +41,8 @@
 #include "hphp/util/arch.h"
 #include "hphp/util/struct-log.h"
 #include "hphp/util/trace.h"
+
+#include "hphp/zend/zend-strtod.h"
 
 #include <folly/Synchronized.h>
 #include <cmath>
@@ -238,6 +241,13 @@ bool isInlinableCPPBuiltin(const Func* f) {
 }
 
 struct InlineRegionKey {
+  InlineRegionKey(SrcKey entryKey,
+                  Type ctxType,
+                  TinyVector<Type, 4> argTypes)
+    : entryKey{std::move(entryKey)}
+    , ctxType{std::move(ctxType)}
+    , argTypes(std::move(argTypes)) {}
+
   explicit InlineRegionKey(const RegionDesc& region)
     : entryKey(region.entry()->start())
     , ctxType(region.inlineCtxType())
@@ -859,8 +869,47 @@ void setBaseInliningProfCount(uint64_t value) {
   FTRACE(1, "setBaseInliningProfCount: {}\n", value);
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
 void clearCachedInliningCost() {
   s_inlCostCache->clear();
+}
+
+void serializeCachedInliningCost(ProfDataSerializer& ser) {
+  tl_heap.getCheck()->init();
+  zend_get_bigint_data();
+
+  SYNCHRONIZED_CONST(s_inlCostCache) {
+    write_raw(ser, safe_cast<uint32_t>(s_inlCostCache.size()));
+    for (auto const& p : s_inlCostCache) {
+      write_srckey(ser, p.first.entryKey);
+      p.first.ctxType.serialize(ser);
+      write_raw(ser, safe_cast<uint32_t>(p.first.argTypes.size()));
+      for (auto const& arg : p.first.argTypes) arg.serialize(ser);
+      write_raw(ser, safe_cast<uint32_t>(p.second));
+    }
+  }
+}
+
+void deserializeCachedInliningCost(ProfDataDeserializer& ser) {
+  SYNCHRONIZED(s_inlCostCache) {
+    auto const numEntries = read_raw<uint32_t>(ser);
+    for (uint32_t i = 0; i < numEntries; ++i) {
+      auto srcKey = read_srckey(ser);
+      auto ctxType = Type::deserialize(ser);
+      auto const numArgs = read_raw<uint32_t>(ser);
+      TinyVector<Type, 4> args;
+      for (int64_t j = 0; j < numArgs; j++) {
+        args.emplace_back(Type::deserialize(ser));
+      }
+      auto const cost = read_raw<uint32_t>(ser);
+
+      s_inlCostCache.emplace(
+        InlineRegionKey{std::move(srcKey), std::move(ctxType), std::move(args)},
+        cost
+      );
+    }
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1842,6 +1842,8 @@ std::string serializeOptProfData(const std::string& filename) {
     // Serialize the vasm block counters.
     VasmBlockCounters::serialize(ser);
 
+    serializeCachedInliningCost(ser);
+
     ser.finalize();
 
     return "";
@@ -1945,6 +1947,7 @@ std::string deserializeProfData(const std::string& filename,
       // We have profile data for the optimized code, so deserialize it too.
       FuncOrder::deserialize(ser);
       VasmBlockCounters::deserialize(ser);
+      deserializeCachedInliningCost(ser);
     }
 
     if (s_preload_dispatcher) {

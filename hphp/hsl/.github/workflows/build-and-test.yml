@@ -1,0 +1,27 @@
+name: Continuous Integration
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '42 15 * * *'
+jobs:
+  build:
+    name: HHVM ${{matrix.hhvm}} - ${{matrix.os}}
+    strategy:
+      # Run tests on all OS's and HHVM versions, even if one fails
+      fail-fast: false
+      matrix:
+        os: [ ubuntu ]
+        hhvm:
+          - '4.108'
+          - latest
+          - nightly
+    runs-on: ${{matrix.os}}-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Create branch for version alias
+        run: git checkout -b CI_current_pull_request
+      - uses: hhvm/actions/hack-lint-test@master
+        with:
+          hhvm: ${{matrix.hhvm}}
+          skip_lint: true

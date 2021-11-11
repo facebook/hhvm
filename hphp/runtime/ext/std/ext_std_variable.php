@@ -298,7 +298,7 @@ namespace HH {
    * accessed). Throws InvalidArgumentException if the property does not exist
    * or is inaccessible in the current context.
    */
-  <<__Native>>
+  <<__Native, NoDoc>>
   function is_late_init_prop_init(object $obj, string $prop): bool;
 
   /*
@@ -308,7 +308,7 @@ namespace HH {
    * classname, if the static property does not exist, or if the static property
    * is inaccessible in the current context.
    */
-  <<__Native>>
+  <<__Native, NoDoc>>
   function is_late_init_sprop_init(string $cls, string $prop): bool;
 
   /*

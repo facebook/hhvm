@@ -207,7 +207,6 @@ let default_capability p : locl_ty =
         class_type r rxLocal [];
         class_type r system [];
         class_type r implicitPolicyLocal [];
-        class_type r codegen [];
         class_type r io [];
       ]
 

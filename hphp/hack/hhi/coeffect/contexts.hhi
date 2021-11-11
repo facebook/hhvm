@@ -78,7 +78,6 @@ namespace HH\Contexts {
     \HH\Capabilities\RxLocal &
     \HH\Capabilities\System &
     \HH\Capabilities\ImplicitPolicyLocal &
-    \HH\Capabilities\Codegen &
     \HH\Capabilities\IO &
   );
 

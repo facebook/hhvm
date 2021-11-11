@@ -21,8 +21,6 @@ Analyzing \simple:
       HH\Capabilities\WriteProperty < HH\Capabilities\System'1,
       HH\Capabilities\ImplicitPolicyLocal_lump'1 = HH\Capabilities\WriteProperty_lump,
       HH\Capabilities\WriteProperty < HH\Capabilities\ImplicitPolicyLocal'1,
-      HH\Capabilities\Codegen_lump'1 = HH\Capabilities\WriteProperty_lump,
-      HH\Capabilities\WriteProperty < HH\Capabilities\Codegen'1,
       HH\Capabilities\IO_lump'1 = HH\Capabilities\WriteProperty_lump,
       HH\Capabilities\WriteProperty < HH\Capabilities\IO'1,
       HH\Capabilities\WriteProperty_lump'2 = HH\Capabilities\WriteProperty_lump'3,
@@ -35,8 +33,6 @@ Analyzing \simple:
       HH\Capabilities\WriteProperty'2 < HH\Capabilities\System'3,
       HH\Capabilities\ImplicitPolicyLocal_lump'3 = HH\Capabilities\WriteProperty_lump'2,
       HH\Capabilities\WriteProperty'2 < HH\Capabilities\ImplicitPolicyLocal'3,
-      HH\Capabilities\Codegen_lump'3 = HH\Capabilities\WriteProperty_lump'2,
-      HH\Capabilities\WriteProperty'2 < HH\Capabilities\Codegen'3,
       HH\Capabilities\IO_lump'3 = HH\Capabilities\WriteProperty_lump'2,
       HH\Capabilities\WriteProperty'2 < HH\Capabilities\IO'3, $b < $b'1,
       $s1 < $s1'1, $s2 < $s2'1, $x < $x'1,
@@ -49,8 +45,6 @@ Analyzing \simple:
       HH\Capabilities\WriteProperty'1 < HH\Capabilities\System'1,
       HH\Capabilities\ImplicitPolicyLocal_lump'1 = HH\Capabilities\WriteProperty_lump'1,
       HH\Capabilities\WriteProperty'1 < HH\Capabilities\ImplicitPolicyLocal'1,
-      HH\Capabilities\Codegen_lump'1 = HH\Capabilities\WriteProperty_lump'1,
-      HH\Capabilities\WriteProperty'1 < HH\Capabilities\Codegen'1,
       HH\Capabilities\IO_lump'1 = HH\Capabilities\WriteProperty_lump'1,
       HH\Capabilities\WriteProperty'1 < HH\Capabilities\IO'1,
       HH\Capabilities\WriteProperty_lump'3 = HH\Capabilities\WriteProperty_lump'3,
@@ -62,8 +56,6 @@ Analyzing \simple:
       HH\Capabilities\WriteProperty'3 < HH\Capabilities\System'3,
       HH\Capabilities\ImplicitPolicyLocal_lump'3 = HH\Capabilities\WriteProperty_lump'3,
       HH\Capabilities\WriteProperty'3 < HH\Capabilities\ImplicitPolicyLocal'3,
-      HH\Capabilities\Codegen_lump'3 = HH\Capabilities\WriteProperty_lump'3,
-      HH\Capabilities\WriteProperty'3 < HH\Capabilities\Codegen'3,
       HH\Capabilities\IO_lump'3 = HH\Capabilities\WriteProperty_lump'3,
       HH\Capabilities\WriteProperty'3 < HH\Capabilities\IO'3, $x'3 < $x'1
     [7:5-14] $b'1 < $x'2, $s1'1 < $x'2
@@ -81,8 +73,6 @@ Analyzing \simple:
                                    HH\Capabilities\System_lump'1> &
          \HH\Capabilities\ImplicitPolicyLocal<HH\Capabilities\ImplicitPolicyLocal'1,
                                                 HH\Capabilities\ImplicitPolicyLocal_lump'1> &
-         \HH\Capabilities\Codegen<HH\Capabilities\Codegen'1,
-                                    HH\Capabilities\Codegen_lump'1> &
          \HH\Capabilities\IO<HH\Capabilities\IO'1, HH\Capabilities\IO_lump'1>);
       $#local_capability ->
       (\HH\Capabilities\WriteProperty<HH\Capabilities\WriteProperty'3,
@@ -95,8 +85,6 @@ Analyzing \simple:
                                    HH\Capabilities\System_lump'3> &
          \HH\Capabilities\ImplicitPolicyLocal<HH\Capabilities\ImplicitPolicyLocal'3,
                                                 HH\Capabilities\ImplicitPolicyLocal_lump'3> &
-         \HH\Capabilities\Codegen<HH\Capabilities\Codegen'3,
-                                    HH\Capabilities\Codegen_lump'3> &
          \HH\Capabilities\IO<HH\Capabilities\IO'3, HH\Capabilities\IO_lump'3>);
       $b -> <$b'1>;
       $s1 -> <$s1'1>;
@@ -125,8 +113,6 @@ Analyzing \union:
       HH\Capabilities\WriteProperty < HH\Capabilities\System'1,
       HH\Capabilities\ImplicitPolicyLocal_lump'1 = HH\Capabilities\WriteProperty_lump,
       HH\Capabilities\WriteProperty < HH\Capabilities\ImplicitPolicyLocal'1,
-      HH\Capabilities\Codegen_lump'1 = HH\Capabilities\WriteProperty_lump,
-      HH\Capabilities\WriteProperty < HH\Capabilities\Codegen'1,
       HH\Capabilities\IO_lump'1 = HH\Capabilities\WriteProperty_lump,
       HH\Capabilities\WriteProperty < HH\Capabilities\IO'1,
       HH\Capabilities\WriteProperty_lump'2 = HH\Capabilities\WriteProperty_lump'3,
@@ -139,8 +125,6 @@ Analyzing \union:
       HH\Capabilities\WriteProperty'2 < HH\Capabilities\System'3,
       HH\Capabilities\ImplicitPolicyLocal_lump'3 = HH\Capabilities\WriteProperty_lump'2,
       HH\Capabilities\WriteProperty'2 < HH\Capabilities\ImplicitPolicyLocal'3,
-      HH\Capabilities\Codegen_lump'3 = HH\Capabilities\WriteProperty_lump'2,
-      HH\Capabilities\WriteProperty'2 < HH\Capabilities\Codegen'3,
       HH\Capabilities\IO_lump'3 = HH\Capabilities\WriteProperty_lump'2,
       HH\Capabilities\WriteProperty'2 < HH\Capabilities\IO'3, $b < $b'1,
       $i < $i'1, $s1 < $s1'1, $s2 < $s2'1, $x < $x'1,
@@ -153,8 +137,6 @@ Analyzing \union:
       HH\Capabilities\WriteProperty'1 < HH\Capabilities\System'1,
       HH\Capabilities\ImplicitPolicyLocal_lump'1 = HH\Capabilities\WriteProperty_lump'1,
       HH\Capabilities\WriteProperty'1 < HH\Capabilities\ImplicitPolicyLocal'1,
-      HH\Capabilities\Codegen_lump'1 = HH\Capabilities\WriteProperty_lump'1,
-      HH\Capabilities\WriteProperty'1 < HH\Capabilities\Codegen'1,
       HH\Capabilities\IO_lump'1 = HH\Capabilities\WriteProperty_lump'1,
       HH\Capabilities\WriteProperty'1 < HH\Capabilities\IO'1,
       HH\Capabilities\WriteProperty_lump'3 = HH\Capabilities\WriteProperty_lump'3,
@@ -166,8 +148,6 @@ Analyzing \union:
       HH\Capabilities\WriteProperty'3 < HH\Capabilities\System'3,
       HH\Capabilities\ImplicitPolicyLocal_lump'3 = HH\Capabilities\WriteProperty_lump'3,
       HH\Capabilities\WriteProperty'3 < HH\Capabilities\ImplicitPolicyLocal'3,
-      HH\Capabilities\Codegen_lump'3 = HH\Capabilities\WriteProperty_lump'3,
-      HH\Capabilities\WriteProperty'3 < HH\Capabilities\Codegen'3,
       HH\Capabilities\IO_lump'3 = HH\Capabilities\WriteProperty_lump'3,
       HH\Capabilities\WriteProperty'3 < HH\Capabilities\IO'3, $x'4 < $x'1
     [17:5-14] $b'1 < $x'3, $s1'1 < $x'3
@@ -185,8 +165,6 @@ Analyzing \union:
                                    HH\Capabilities\System_lump'1> &
          \HH\Capabilities\ImplicitPolicyLocal<HH\Capabilities\ImplicitPolicyLocal'1,
                                                 HH\Capabilities\ImplicitPolicyLocal_lump'1> &
-         \HH\Capabilities\Codegen<HH\Capabilities\Codegen'1,
-                                    HH\Capabilities\Codegen_lump'1> &
          \HH\Capabilities\IO<HH\Capabilities\IO'1, HH\Capabilities\IO_lump'1>);
       $#local_capability ->
       (\HH\Capabilities\WriteProperty<HH\Capabilities\WriteProperty'3,
@@ -199,8 +177,6 @@ Analyzing \union:
                                    HH\Capabilities\System_lump'3> &
          \HH\Capabilities\ImplicitPolicyLocal<HH\Capabilities\ImplicitPolicyLocal'3,
                                                 HH\Capabilities\ImplicitPolicyLocal_lump'3> &
-         \HH\Capabilities\Codegen<HH\Capabilities\Codegen'3,
-                                    HH\Capabilities\Codegen_lump'3> &
          \HH\Capabilities\IO<HH\Capabilities\IO'3, HH\Capabilities\IO_lump'3>);
       $b -> <$b'1>;
       $i -> <$i'1>;
@@ -230,8 +206,6 @@ Analyzing \breaks:
       HH\Capabilities\WriteProperty < HH\Capabilities\System'1,
       HH\Capabilities\ImplicitPolicyLocal_lump'1 = HH\Capabilities\WriteProperty_lump,
       HH\Capabilities\WriteProperty < HH\Capabilities\ImplicitPolicyLocal'1,
-      HH\Capabilities\Codegen_lump'1 = HH\Capabilities\WriteProperty_lump,
-      HH\Capabilities\WriteProperty < HH\Capabilities\Codegen'1,
       HH\Capabilities\IO_lump'1 = HH\Capabilities\WriteProperty_lump,
       HH\Capabilities\WriteProperty < HH\Capabilities\IO'1,
       HH\Capabilities\WriteProperty_lump'2 = HH\Capabilities\WriteProperty_lump'3,
@@ -244,8 +218,6 @@ Analyzing \breaks:
       HH\Capabilities\WriteProperty'2 < HH\Capabilities\System'3,
       HH\Capabilities\ImplicitPolicyLocal_lump'3 = HH\Capabilities\WriteProperty_lump'2,
       HH\Capabilities\WriteProperty'2 < HH\Capabilities\ImplicitPolicyLocal'3,
-      HH\Capabilities\Codegen_lump'3 = HH\Capabilities\WriteProperty_lump'2,
-      HH\Capabilities\WriteProperty'2 < HH\Capabilities\Codegen'3,
       HH\Capabilities\IO_lump'3 = HH\Capabilities\WriteProperty_lump'2,
       HH\Capabilities\WriteProperty'2 < HH\Capabilities\IO'3, $b < $b'1,
       $i < $i'1, $s1 < $s1'1, $s2 < $s2'1, $x < $x'1,
@@ -258,8 +230,6 @@ Analyzing \breaks:
       HH\Capabilities\WriteProperty'1 < HH\Capabilities\System'1,
       HH\Capabilities\ImplicitPolicyLocal_lump'1 = HH\Capabilities\WriteProperty_lump'1,
       HH\Capabilities\WriteProperty'1 < HH\Capabilities\ImplicitPolicyLocal'1,
-      HH\Capabilities\Codegen_lump'1 = HH\Capabilities\WriteProperty_lump'1,
-      HH\Capabilities\WriteProperty'1 < HH\Capabilities\Codegen'1,
       HH\Capabilities\IO_lump'1 = HH\Capabilities\WriteProperty_lump'1,
       HH\Capabilities\WriteProperty'1 < HH\Capabilities\IO'1,
       HH\Capabilities\WriteProperty_lump'3 = HH\Capabilities\WriteProperty_lump'3,
@@ -271,8 +241,6 @@ Analyzing \breaks:
       HH\Capabilities\WriteProperty'3 < HH\Capabilities\System'3,
       HH\Capabilities\ImplicitPolicyLocal_lump'3 = HH\Capabilities\WriteProperty_lump'3,
       HH\Capabilities\WriteProperty'3 < HH\Capabilities\ImplicitPolicyLocal'3,
-      HH\Capabilities\Codegen_lump'3 = HH\Capabilities\WriteProperty_lump'3,
-      HH\Capabilities\WriteProperty'3 < HH\Capabilities\Codegen'3,
       HH\Capabilities\IO_lump'3 = HH\Capabilities\WriteProperty_lump'3,
       HH\Capabilities\WriteProperty'3 < HH\Capabilities\IO'3, $x'4 < $x'1
     [27:5-14] $b'1 < $x'3, $s1'1 < $x'3
@@ -290,8 +258,6 @@ Analyzing \breaks:
                                    HH\Capabilities\System_lump'1> &
          \HH\Capabilities\ImplicitPolicyLocal<HH\Capabilities\ImplicitPolicyLocal'1,
                                                 HH\Capabilities\ImplicitPolicyLocal_lump'1> &
-         \HH\Capabilities\Codegen<HH\Capabilities\Codegen'1,
-                                    HH\Capabilities\Codegen_lump'1> &
          \HH\Capabilities\IO<HH\Capabilities\IO'1, HH\Capabilities\IO_lump'1>);
       $#local_capability ->
       (\HH\Capabilities\WriteProperty<HH\Capabilities\WriteProperty'3,
@@ -304,8 +270,6 @@ Analyzing \breaks:
                                    HH\Capabilities\System_lump'3> &
          \HH\Capabilities\ImplicitPolicyLocal<HH\Capabilities\ImplicitPolicyLocal'3,
                                                 HH\Capabilities\ImplicitPolicyLocal_lump'3> &
-         \HH\Capabilities\Codegen<HH\Capabilities\Codegen'3,
-                                    HH\Capabilities\Codegen_lump'3> &
          \HH\Capabilities\IO<HH\Capabilities\IO'3, HH\Capabilities\IO_lump'3>);
       $b -> <$b'1>;
       $i -> <$i'1>;
@@ -335,8 +299,6 @@ Analyzing \continues:
       HH\Capabilities\WriteProperty < HH\Capabilities\System'1,
       HH\Capabilities\ImplicitPolicyLocal_lump'1 = HH\Capabilities\WriteProperty_lump,
       HH\Capabilities\WriteProperty < HH\Capabilities\ImplicitPolicyLocal'1,
-      HH\Capabilities\Codegen_lump'1 = HH\Capabilities\WriteProperty_lump,
-      HH\Capabilities\WriteProperty < HH\Capabilities\Codegen'1,
       HH\Capabilities\IO_lump'1 = HH\Capabilities\WriteProperty_lump,
       HH\Capabilities\WriteProperty < HH\Capabilities\IO'1,
       HH\Capabilities\WriteProperty_lump'2 = HH\Capabilities\WriteProperty_lump'3,
@@ -349,8 +311,6 @@ Analyzing \continues:
       HH\Capabilities\WriteProperty'2 < HH\Capabilities\System'3,
       HH\Capabilities\ImplicitPolicyLocal_lump'3 = HH\Capabilities\WriteProperty_lump'2,
       HH\Capabilities\WriteProperty'2 < HH\Capabilities\ImplicitPolicyLocal'3,
-      HH\Capabilities\Codegen_lump'3 = HH\Capabilities\WriteProperty_lump'2,
-      HH\Capabilities\WriteProperty'2 < HH\Capabilities\Codegen'3,
       HH\Capabilities\IO_lump'3 = HH\Capabilities\WriteProperty_lump'2,
       HH\Capabilities\WriteProperty'2 < HH\Capabilities\IO'3, $b < $b'1,
       $i < $i'1, $s1 < $s1'1, $s2 < $s2'1, $x < $x'1,
@@ -363,8 +323,6 @@ Analyzing \continues:
       HH\Capabilities\WriteProperty'1 < HH\Capabilities\System'1,
       HH\Capabilities\ImplicitPolicyLocal_lump'1 = HH\Capabilities\WriteProperty_lump'1,
       HH\Capabilities\WriteProperty'1 < HH\Capabilities\ImplicitPolicyLocal'1,
-      HH\Capabilities\Codegen_lump'1 = HH\Capabilities\WriteProperty_lump'1,
-      HH\Capabilities\WriteProperty'1 < HH\Capabilities\Codegen'1,
       HH\Capabilities\IO_lump'1 = HH\Capabilities\WriteProperty_lump'1,
       HH\Capabilities\WriteProperty'1 < HH\Capabilities\IO'1,
       HH\Capabilities\WriteProperty_lump'3 = HH\Capabilities\WriteProperty_lump'3,
@@ -376,8 +334,6 @@ Analyzing \continues:
       HH\Capabilities\WriteProperty'3 < HH\Capabilities\System'3,
       HH\Capabilities\ImplicitPolicyLocal_lump'3 = HH\Capabilities\WriteProperty_lump'3,
       HH\Capabilities\WriteProperty'3 < HH\Capabilities\ImplicitPolicyLocal'3,
-      HH\Capabilities\Codegen_lump'3 = HH\Capabilities\WriteProperty_lump'3,
-      HH\Capabilities\WriteProperty'3 < HH\Capabilities\Codegen'3,
       HH\Capabilities\IO_lump'3 = HH\Capabilities\WriteProperty_lump'3,
       HH\Capabilities\WriteProperty'3 < HH\Capabilities\IO'3, $x'3 < $x'1,
       $x'4 < $x'1
@@ -396,8 +352,6 @@ Analyzing \continues:
                                    HH\Capabilities\System_lump'1> &
          \HH\Capabilities\ImplicitPolicyLocal<HH\Capabilities\ImplicitPolicyLocal'1,
                                                 HH\Capabilities\ImplicitPolicyLocal_lump'1> &
-         \HH\Capabilities\Codegen<HH\Capabilities\Codegen'1,
-                                    HH\Capabilities\Codegen_lump'1> &
          \HH\Capabilities\IO<HH\Capabilities\IO'1, HH\Capabilities\IO_lump'1>);
       $#local_capability ->
       (\HH\Capabilities\WriteProperty<HH\Capabilities\WriteProperty'3,
@@ -410,8 +364,6 @@ Analyzing \continues:
                                    HH\Capabilities\System_lump'3> &
          \HH\Capabilities\ImplicitPolicyLocal<HH\Capabilities\ImplicitPolicyLocal'3,
                                                 HH\Capabilities\ImplicitPolicyLocal_lump'3> &
-         \HH\Capabilities\Codegen<HH\Capabilities\Codegen'3,
-                                    HH\Capabilities\Codegen_lump'3> &
          \HH\Capabilities\IO<HH\Capabilities\IO'3, HH\Capabilities\IO_lump'3>);
       $b -> <$b'1>;
       $i -> <$i'1>;

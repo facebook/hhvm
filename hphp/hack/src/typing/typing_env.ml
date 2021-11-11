@@ -965,7 +965,7 @@ let get_mode env = env.decl_env.mode
 
 let is_strict env = FileInfo.is_strict (get_mode env)
 
-let is_hhi env = FileInfo.(equal_mode (get_mode env) Mhhi)
+let is_hhi env = FileInfo.is_hhi (get_mode env)
 
 let get_allow_solve_globals env =
   wrap_inference_env_call_res env Inf.get_allow_solve_globals

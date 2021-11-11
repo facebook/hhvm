@@ -44,7 +44,6 @@ module Try = Typing_try
 module FL = FeatureLogging
 module MakeType = Typing_make_type
 module Cls = Decl_provider.Class
-module Partial = Partial_provider
 module Fake = Typing_fake_members
 module ExpectedTy = Typing_helpers.ExpectedTy
 module ITySet = Internal_type_set
@@ -248,17 +247,11 @@ let expr_any env p e =
   (env, with_type ty Tast.dummy_saved_env e, ty)
 
 let unbound_name env (pos, name) e =
-  let strictish = Partial.should_check_error (Env.get_mode env) 4107 in
   match Env.get_mode env with
   | FileInfo.Mstrict ->
     Errors.unbound_name_typing pos name;
     expr_error env (Reason.Rwitness pos) e
-  | FileInfo.Mpartial when strictish ->
-    Errors.unbound_name_typing pos name;
-    expr_error env (Reason.Rwitness pos) e
-  | FileInfo.Mhhi
-  | FileInfo.Mpartial ->
-    expr_any env pos e
+  | FileInfo.Mhhi -> expr_any env pos e
 
 (* Is this type Traversable<vty> or Container<vty> for some vty? *)
 let get_value_collection_inst env ty =
@@ -1778,12 +1771,10 @@ and fun_ ?(abstract = false) ?(disable = false) env return pos named_body f_kind
       let { Typing_env_return_info.return_type = ret; _ } =
         Env.get_return env
       in
-      let decl_env = env.decl_env in
-      let is_hhi = FileInfo.(equal_mode decl_env.Decl_env.mode Mhhi) in
       let has_implicit_return = LEnv.has_next env in
       let has_readonly = Env.get_readonly env in
       let env =
-        if (not has_implicit_return) || abstract || is_hhi then
+        if (not has_implicit_return) || abstract || Env.is_hhi env then
           env
         else
           Typing_return.fun_implicit_return env pos ret.et_type f_kind
@@ -3088,11 +3079,10 @@ and expr_
     make_result env p (Aast.Fun_id x) fty
   | Id ((cst_pos, cst_name) as id) ->
     (match Env.get_gconst env cst_name with
-    | None when Partial.should_check_error (Env.get_mode env) 4106 ->
+    | None ->
       Errors.unbound_global cst_pos;
       let ty = err_witness env cst_pos in
       make_result env cst_pos (Aast.Id id) ty
-    | None -> make_result env p (Aast.Id id) (Typing_utils.mk_tany env cst_pos)
     | Some const ->
       let (env, ty) =
         Phase.localize_no_subst env ~ignore_errors:true const.cd_type
@@ -4344,8 +4334,7 @@ and get_callable_variadicity ~pos env variadicity_decl_ty = function
     let (env, t_variadic) = bind_param env (ty, vparam) in
     (env, Aast.FVvariadicArg t_variadic)
   | FVellipsis p ->
-    if Partial.should_check_error (Env.get_mode env) 4223 then
-      Errors.ellipsis_strict_mode ~require:`Type_and_param_name pos;
+    Errors.ellipsis_strict_mode ~require:`Type_and_param_name pos;
     (env, Aast.FVellipsis p)
   | FVnonVariadic -> (env, Aast.FVnonVariadic)
 
@@ -4489,8 +4478,7 @@ and lambda ~is_anon ?expected p env f idl =
   (* Ensure lambda arity is not ellipsis in strict mode *)
   begin
     match declared_ft.ft_arity with
-    | Fvariadic { fp_name = None; _ }
-      when Partial.should_check_error (Env.get_mode env) 4223 ->
+    | Fvariadic { fp_name = None; _ } ->
       Errors.ellipsis_strict_mode ~require:`Param_name p
     | _ -> ()
   end;
@@ -4675,8 +4663,7 @@ and lambda ~is_anon ?expected p env f idl =
         (* If the expected type is something concrete but not a function
          * then we should reject in strict mode. Check body anyway.
          * Note: we should be using 'nothing' to type the arguments. *)
-        if Partial.should_check_error (Env.get_mode env) 4224 then
-          Errors.untyped_lambda_strict_mode p;
+        Errors.untyped_lambda_strict_mode p;
         Typing_log.increment_feature_count
           env
           FL.Lambda.non_function_typed_context;
@@ -6215,21 +6202,14 @@ and dispatch_call
         if Option.is_some unpacked_element then
           Errors.unpacking_disallowed_builtin_function p unset;
         let env = Typing_local_ops.check_unset_target env tel in
-        let checked_unset_error =
-          if Partial.should_check_error (Env.get_mode env) 4135 then
-            Errors.unset_nonidx_in_strict
-          else
-            fun _ _ ->
-          ()
-        in
+        let checked_unset_error = Errors.unset_nonidx_in_strict in
         let env =
           match (el, unpacked_element) with
           | ( [
                 ( Ast_defs.Pnormal,
                   (_, _, Array_get ((_, _, Class_const _), Some _)) );
               ],
-              None )
-            when Partial.should_check_error (Env.get_mode env) 4011 ->
+              None ) ->
             Errors.const_mutation p Pos_or_decl.none "";
             env
           | ([(Ast_defs.Pnormal, (_, _, Array_get (ea, Some _)))], None) ->
@@ -7438,7 +7418,7 @@ and call_construct p env class_ params el unpacked_element cid cid_ty =
   | None ->
     if
       ((not (List.is_empty el)) || Option.is_some unpacked_element)
-      && (FileInfo.is_strict mode || FileInfo.(equal_mode mode Mpartial))
+      && FileInfo.is_strict mode
     then
       Errors.constructor_no_args p;
     let (env, tel, _tyl) =

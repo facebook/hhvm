@@ -15,7 +15,6 @@ module ETast = Tast
 module Nast = Aast
 module C = Typing_continuations
 module Phase = Typing_phase
-module Partial = Partial_provider
 
 exception Cant_check
 
@@ -233,22 +232,19 @@ let gamma_from_params env (params : ETast.fun_param list) =
 
 let check_fun env (fd : ETast.fun_def) =
   let f = fd.fd_fun in
-  if not (Partial.should_check_error fd.fd_mode 4291) then
-    ()
+  let gamma = gamma_from_params env f.f_params in
+  if
+    (not (List.is_empty f.f_tparams))
+    || (not (List.is_empty f.f_where_constraints))
+    ||
+    match f.f_variadic with
+    | FVnonVariadic -> false
+    | _ -> true
+  then
+    raise Not_implemented
   else
-    let gamma = gamma_from_params env f.f_params in
-    if
-      (not (List.is_empty f.f_tparams))
-      || (not (List.is_empty f.f_where_constraints))
-      ||
-      match f.f_variadic with
-      | FVnonVariadic -> false
-      | _ -> true
-    then
-      raise Not_implemented
-    else
-      (* TODO check return type *)
-      check_func_body env f.f_body gamma
+    (* TODO check return type *)
+    check_func_body env f.f_body gamma
 
 let check_def env (def : ETast.def) =
   try

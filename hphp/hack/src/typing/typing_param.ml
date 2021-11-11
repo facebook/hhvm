@@ -15,7 +15,6 @@ module Reason = Typing_reason
 module MakeType = Typing_make_type
 module Phase = Typing_phase
 module TUtils = Typing_utils
-module Partial = Partial_provider
 module Env = Typing_env
 
 (* This function is used to determine the type of an argument.
@@ -104,13 +103,12 @@ let enforce_param_not_disposable env param ty =
 (* In strict mode, we force you to give a type declaration on a parameter *)
 (* But the type checker is nice: it makes a suggestion :-) *)
 let check_param_has_hint env param ty =
-  let mode = Env.get_mode env in
   match hint_of_type_hint param.param_type_hint with
-  | None when param.param_is_variadic && Partial.should_check_error mode 4033 ->
+  | None when param.param_is_variadic && not (Env.is_hhi env) ->
     Errors.expecting_type_hint_variadic param.param_pos
-  | None when Partial.should_check_error mode 4032 ->
+  | None when not @@ Env.is_hhi env ->
     Errors.expecting_type_hint param.param_pos
-  | Some _ when Partial.should_check_error mode 4010 ->
+  | Some _ when not @@ Env.is_hhi env ->
     (* We do not permit hints to implement IDisposable or IAsyncDisposable *)
     enforce_param_not_disposable env param ty
   | _ -> ()

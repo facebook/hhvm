@@ -129,7 +129,7 @@ impl<'src> AastParser {
             Language::Hack => {}
             _ => return Err(Error::NotAHackFile()),
         }
-        let mode = mode.unwrap_or(Mode::Mpartial);
+        let mode = mode.unwrap_or(Mode::Mstrict);
         let scoured_comments =
             Self::scour_comments_and_add_fixmes(env, indexed_source_text, &tree.root())?;
         let mut lowerer_env = lowerer::Env::make(
@@ -243,10 +243,7 @@ impl<'src> AastParser {
         env: &Env,
         source_text: &'src SourceText<'src>,
     ) -> Result<(Language, Option<Mode>, ParserEnv)> {
-        let (language, mut mode) = parse_mode(source_text);
-        if mode == Some(Mode::Mpartial) {
-            mode = Some(Mode::Mstrict);
-        }
+        let (language, mode) = parse_mode(source_text);
         let parser_env = ParserEnv {
             codegen: env.codegen,
             hhvm_compat_mode: env.codegen,

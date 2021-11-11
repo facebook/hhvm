@@ -305,17 +305,8 @@ module Simple = struct
       (nkinds : Simple.named_kind list) =
     let exp_len = List.length nkinds in
     let act_len = List.length tyargs in
-    let arity_mistmach_okay =
-      Int.equal act_len 0
-      && (allow_missing_targs
-         || (* 4101 is Error_codes.Typing.TypeArityMismatch error code *)
-         (not (Partial_provider.should_check_error (Env.get_mode env) 4101))
-         && not
-              (TypecheckerOptions.experimental_feature_enabled
-                 (Env.get_tcopt env)
-                 TypecheckerOptions.experimental_generics_arity))
-    in
-    if Int.( <> ) exp_len act_len && not arity_mistmach_okay then
+    let arity_mistmatch_okay = Int.equal act_len 0 && allow_missing_targs in
+    if Int.( <> ) exp_len act_len && not arity_mistmatch_okay then
       Errors.type_arity use_pos def_pos ~expected:exp_len ~actual:act_len;
     let length = min exp_len act_len in
     let (tyargs, nkinds) = (List.take tyargs length, List.take nkinds length) in

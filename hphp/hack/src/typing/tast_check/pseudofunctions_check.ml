@@ -10,7 +10,6 @@
 open Aast
 module Env = Tast_env
 module SN = Naming_special_names
-module Partial = Partial_provider
 
 let disallow_isset_inout_args_check p = function
   | Call ((_, _, Id (_, pseudo_func)), _, el, _)
@@ -45,8 +44,7 @@ let handler =
   object
     inherit Tast_visitor.handler_base
 
-    method! at_expr env (_, p, x) =
+    method! at_expr _env (_, p, x) =
       disallow_isset_inout_args_check p x;
-      if Partial.should_check_error (Env.get_mode env) 4016 then
-        well_formed_isset_argument_check p x
+      well_formed_isset_argument_check p x
   end

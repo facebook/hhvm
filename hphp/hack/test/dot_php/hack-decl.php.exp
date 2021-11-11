@@ -1,2 +1,4 @@
-File "hack-decl.php", line 1, characters 1-33:
-Incorrect comment; possible values include `strict`, `partial`, or empty (Parsing[1002])
+File "hack-decl.php", line 3, characters 10-12:
+Was expecting a return type hint (Typing[4030])
+File "hack-decl.php", line 3, characters 14-17:
+Was expecting a type hint (Typing[4032])

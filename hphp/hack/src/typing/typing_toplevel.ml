@@ -27,7 +27,6 @@ module Type = Typing_ops
 module Phase = Typing_phase
 module Subst = Decl_subst
 module EnvFromDef = Typing_env_from_def
-module Partial = Partial_provider
 module TUtils = Typing_utils
 module TCO = TypecheckerOptions
 module Cls = Decl_provider.Class
@@ -73,8 +72,7 @@ let get_callable_variadicity ~pos env variadicity_decl_ty = function
     let (env, t_variadic) = Typing.bind_param env (ty, vparam) in
     (env, Aast.FVvariadicArg t_variadic)
   | FVellipsis p ->
-    if Partial.should_check_error (Env.get_mode env) 4223 then
-      Errors.ellipsis_strict_mode ~require:`Type_and_param_name pos;
+    Errors.ellipsis_strict_mode ~require:`Type_and_param_name pos;
     (env, Aast.FVellipsis p)
   | FVnonVariadic -> (env, Aast.FVnonVariadic)
 
@@ -270,8 +268,7 @@ let fun_def ctx fd :
   begin
     match hint_of_type_hint f.f_ret with
     | None ->
-      if Partial.should_check_error (Env.get_mode env) 4030 then
-        Errors.expecting_return_type_hint pos
+      if not @@ Env.is_hhi env then Errors.expecting_return_type_hint pos
     | Some _ -> ()
   end;
   let (env, tparams) = List.map_env env f.f_tparams ~f:Typing.type_param in
@@ -601,8 +598,7 @@ let method_def ~is_disposable env cls m =
     | None when String.equal (snd m.m_name) SN.Members.__construct ->
       Some (pos, Hprim Tvoid)
     | None ->
-      if Partial.should_check_error (Env.get_mode env) 4030 then
-        Errors.expecting_return_type_hint pos;
+      if not @@ Env.is_hhi env then Errors.expecting_return_type_hint pos;
       None
     | Some _ -> hint_of_type_hint m.m_ret
   in
@@ -1224,8 +1220,8 @@ let class_const_def ~in_enum_class c env cc =
         | CCConcrete e ->
           if
             (not (is_literal_expr e))
-            && Partial.should_check_error c.c_mode 2035
-            && not (is_enum_or_enum_class c.c_kind)
+            && (not (is_enum_or_enum_class c.c_kind))
+            && not (Env.is_hhi env)
           then
             Errors.missing_typehint (fst id)
       end;
@@ -1381,9 +1377,8 @@ let class_var_def ~is_static cls env cv =
         SN.AttributeKinds.instProperty)
       cv.cv_user_attributes
   in
-  if
-    Option.is_none (hint_of_type_hint cv.cv_type)
-    && Partial.should_check_error (Env.get_mode env) 2001
+
+  if (not (Env.is_hhi env)) && Option.is_none (hint_of_type_hint cv.cv_type)
   then
     Errors.prop_without_typehint
       (Aast.string_of_visibility cv.cv_visibility)
@@ -1932,10 +1927,7 @@ let gconst_def ctx cst =
       in
       (te, env)
     | None ->
-      if
-        (not (is_literal_expr value))
-        && Partial.should_check_error cst.cst_mode 2035
-      then
+      if (not (is_literal_expr value)) && not (Env.is_hhi env) then
         Errors.missing_typehint (fst cst.cst_name);
       let (env, te, _value_type) = Typing.expr_with_pure_coeffects env value in
       (te, env)

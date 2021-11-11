@@ -26,10 +26,11 @@ open Prim_defs
 type mode =
   | Mhhi (* just declare signatures, don't check anything *)
   | Mstrict (* check everything! *)
-  | Mpartial (* Don't fail if you see a function/class you don't know *)
 [@@deriving eq, show, enum]
 
 val is_strict : mode -> bool
+
+val is_hhi : mode -> bool
 
 val parse_mode : string -> mode option
 

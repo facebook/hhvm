@@ -36,7 +36,6 @@ module Env = Typing_env
 module Reason = Typing_reason
 module Print = Typing_print
 module SN = Naming_special_names
-module Partial = Partial_provider
 
 let magic_method_name input =
   match input with
@@ -219,8 +218,7 @@ let retype_magic_func
                  }
                  :: argl) )
           | (env, Left pos) ->
-            if Partial.should_check_error (Env.get_mode env) 4027 then
-              Errors.expected_literal_format_string pos;
+            Errors.expected_literal_format_string pos;
             (env, None))
         | None -> (env, None)
       end

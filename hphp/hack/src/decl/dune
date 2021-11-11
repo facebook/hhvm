@@ -248,7 +248,6 @@
   (libraries
     decl_defs
     decl_env
-    partial_provider
     typing_defs)
   (preprocess (pps ppx_deriving.std)))
 

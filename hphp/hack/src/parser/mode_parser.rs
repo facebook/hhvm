@@ -13,20 +13,11 @@ use parser_core_types::{
         syntax::Syntax,
         syntax_variant_generated::{self as syntax, SyntaxVariant},
     },
-    syntax_trait::SyntaxTrait,
 };
 
 pub enum Language {
     Hack,
     PHP,
-}
-
-fn fallback_to_file_extension(text: &SourceText<'_>) -> (Language, Option<Mode>) {
-    if text.file_path().has_extension("hackpartial") {
-        (Language::Hack, Some(Mode::Mpartial))
-    } else {
-        (Language::Hack, Some(Mode::Mstrict))
-    }
 }
 
 // Returns Language::PHP if text is a PHP file (has .php extension and starts
@@ -42,7 +33,6 @@ pub fn parse_mode(text: &SourceText<'_>) -> (Language, Option<Mode>) {
             SyntaxVariant::MarkupSection(section_children) => {
                 match section_children {
                     syntax::MarkupSectionChildren {
-                        hashbang,
                         suffix:
                             Syntax {
                                 children: SyntaxVariant::MarkupSuffix(suffix_children),
@@ -50,53 +40,20 @@ pub fn parse_mode(text: &SourceText<'_>) -> (Language, Option<Mode>) {
                             },
                         ..
                     } => {
-                        let syntax::MarkupSuffixChildren {
-                            less_than_question: ltq,
-                            name,
-                        } = *suffix_children;
+                        let syntax::MarkupSuffixChildren { name, .. } = *suffix_children;
                         match &name.children {
                             // <?, <?php or <?anything_else except <?hh
                             SyntaxVariant::Missing => (Language::PHP, None),
-                            // <?hh optionally followed by // mode
+                            // <?hh
                             _ => {
                                 if text.file_path().has_extension("hhi") {
                                     (Language::Hack, Some(Mode::Mhhi))
                                 } else {
-                                    let skip_length = hashbang.full_width()
-                                        + ltq.full_width()
-                                        + name.leading_width()
-                                        + name.width();
-                                    let s =
-                                        text.sub_as_str(skip_length, name.trailing_width()).trim();
-
-                                    let mut chars = s.chars();
-                                    let c0 = chars.next();
-                                    let c1 = chars.next();
-
-                                    let mode = if c0 != Some('/') || c1 != Some('/') {
-                                        return (Language::Hack, Mode::from_string(""));
-                                    } else {
-                                        chars.as_str()
-                                    };
-
-                                    let mode = match mode.trim().split_whitespace().next() {
-                                        None => "",
-                                        Some(mode) => mode,
-                                    };
-                                    (Language::Hack, Mode::from_string(mode))
+                                    (Language::Hack, Some(Mode::Mstrict))
                                 }
                             }
                         }
                     }
-                    // Parsed a hashbang, but no <? markup. Use file extension here.
-                    syntax::MarkupSectionChildren {
-                        suffix:
-                            Syntax {
-                                children: SyntaxVariant::Missing,
-                                ..
-                            },
-                        ..
-                    } => fallback_to_file_extension(text),
                     _ => {
                         // unreachable (parser either returns a value that matches
                         // the above expressions, or None)
@@ -109,6 +66,6 @@ pub fn parse_mode(text: &SourceText<'_>) -> (Language, Option<Mode>) {
             _ => (Language::Hack, Some(Mode::Mstrict)),
         }
     } else {
-        fallback_to_file_extension(text)
+        (Language::Hack, Some(Mode::Mstrict))
     }
 }

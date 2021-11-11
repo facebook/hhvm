@@ -136,7 +136,6 @@
     logging
     namespace_env
     nast
-    partial_provider
     rust_parser_ffi
     typing_ast
     utils_lint

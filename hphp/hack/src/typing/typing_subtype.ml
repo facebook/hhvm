@@ -23,7 +23,6 @@ module TL = Typing_logic
 module Cls = Decl_provider.Class
 module ITySet = Internal_type_set
 module MakeType = Typing_make_type
-module Partial = Partial_provider
 module Nast = Aast
 
 (* We maintain a "visited" set for subtype goals. We do this only
@@ -1797,8 +1796,7 @@ and simplify_subtype_i
             | Tvarray_or_darray _ | Tprim _ ) ) ->
           valid env
         | _ -> default_subtype env))
-    | (r_super, Tclass (((_, class_name) as x_super), exact_super, tyl_super))
-      ->
+    | (_, Tclass (((_, class_name) as x_super), exact_super, tyl_super)) ->
       (match ety_sub with
       | ConstraintType _ -> default_subtype env
       | LoclType ty_sub ->
@@ -1852,63 +1850,44 @@ and simplify_subtype_i
               in
               if not (exact_match || is_final) then
                 invalid_env env
-              else
+              else if
                 (* We handle the case where a generic A<T> is used as A *)
-                let tyl_super =
-                  if
-                    List.is_empty tyl_super
-                    && not (Partial.should_check_error (Env.get_mode env) 4101)
-                  then
-                    List.map tyl_sub ~f:(fun _ ->
-                        mk (r_super, Typing_defs.make_tany ()))
+                Int.( <> ) (List.length tyl_sub) (List.length tyl_super)
+              then
+                let n_sub = String_utils.soi (List.length tyl_sub) in
+                let n_super = String_utils.soi (List.length tyl_super) in
+                invalid_env_with env (fun () ->
+                    Errors.type_arity_mismatch
+                      (fst x_super)
+                      n_super
+                      (fst x_sub)
+                      n_sub
+                      subtype_env.on_error)
+              else
+                let variance_reifiedl =
+                  if List.is_empty tyl_sub then
+                    []
                   else
-                    tyl_super
+                    match class_def_sub with
+                    | None ->
+                      List.map tyl_sub ~f:(fun _ ->
+                          (Ast_defs.Invariant, Aast.Erased))
+                    | Some class_sub ->
+                      List.map (Cls.tparams class_sub) ~f:(fun t ->
+                          (t.tp_variance, t.tp_reified))
                 in
-                let tyl_sub =
-                  if
-                    List.is_empty tyl_sub
-                    && not (Partial.should_check_error (Env.get_mode env) 4101)
-                  then
-                    List.map tyl_super ~f:(fun _ ->
-                        mk (r_super, Typing_defs.make_tany ()))
-                  else
-                    tyl_sub
-                in
-                if Int.( <> ) (List.length tyl_sub) (List.length tyl_super) then
-                  let n_sub = String_utils.soi (List.length tyl_sub) in
-                  let n_super = String_utils.soi (List.length tyl_super) in
-                  invalid_env_with env (fun () ->
-                      Errors.type_arity_mismatch
-                        (fst x_super)
-                        n_super
-                        (fst x_sub)
-                        n_sub
-                        subtype_env.on_error)
-                else
-                  let variance_reifiedl =
-                    if List.is_empty tyl_sub then
-                      []
-                    else
-                      match class_def_sub with
-                      | None ->
-                        List.map tyl_sub ~f:(fun _ ->
-                            (Ast_defs.Invariant, Aast.Erased))
-                      | Some class_sub ->
-                        List.map (Cls.tparams class_sub) ~f:(fun t ->
-                            (t.tp_variance, t.tp_reified))
-                  in
-                  (* C<t1, .., tn> <: C<u1, .., un> iff
-                   *   t1 <:v1> u1 /\ ... /\ tn <:vn> un
-                   * where vi is the variance of the i'th generic parameter of C,
-                   * and <:v denotes the appropriate direction of subtyping for variance v
-                   *)
-                  simplify_subtype_variance
-                    ~subtype_env
-                    cid_sub
-                    variance_reifiedl
-                    tyl_sub
-                    tyl_super
-                    env
+                (* C<t1, .., tn> <: C<u1, .., un> iff
+                 *   t1 <:v1> u1 /\ ... /\ tn <:vn> un
+                 * where vi is the variance of the i'th generic parameter of C,
+                 * and <:v denotes the appropriate direction of subtyping for variance v
+                 *)
+                simplify_subtype_variance
+                  ~subtype_env
+                  cid_sub
+                  variance_reifiedl
+                  tyl_sub
+                  tyl_super
+                  env
           else if not exact_match then
             invalid_env env
           else
@@ -1919,16 +1898,6 @@ and simplify_subtype_i
               valid env
             | Some class_sub ->
               (* We handle the case where a generic A<T> is used as A *)
-              let tyl_sub =
-                if
-                  List.is_empty tyl_sub
-                  && not (Partial.should_check_error (Env.get_mode env) 4029)
-                then
-                  List.map (Cls.tparams class_sub) ~f:(fun _ ->
-                      mk (r_sub, Typing_defs.make_tany ()))
-                else
-                  tyl_sub
-              in
               let ety_env =
                 {
                   empty_expand_env with

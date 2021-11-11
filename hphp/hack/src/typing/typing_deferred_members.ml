@@ -35,7 +35,7 @@ let add_parent_construct env c props parent_ty =
   | _ -> props
 
 let parent env c acc =
-  if FileInfo.(equal_mode c.sc_mode Mhhi) then
+  if FileInfo.is_hhi c.sc_mode then
     acc
   else if Ast_defs.is_c_trait c.sc_kind then
     List.fold_left c.sc_req_extends ~f:(add_parent_construct env c) ~init:acc

@@ -35,26 +35,20 @@ let handle_unbound_name env (pos, name) kind =
   (* We've already errored in naming if we get *Unknown* class *)
   if String.equal name Naming_special_names.Classes.cUnknown then
     ()
-  else
-    match env.mode with
-    | FileInfo.Mstrict
-    | FileInfo.Mpartial
-    | FileInfo.Mhhi ->
-      Errors.unbound_name pos name kind;
-      (* In addition to reporting errors, we also add to the global dependency table *)
-      let dep =
-        match kind with
-        | Errors.FunctionNamespace -> Typing_deps.Dep.Fun name
-        | Errors.TypeNamespace -> Typing_deps.Dep.Type name
-        | Errors.ConstantNamespace -> Typing_deps.Dep.GConst name
-        | Errors.TraitContext -> Typing_deps.Dep.Type name
-        | Errors.RecordContext -> Typing_deps.Dep.Type name
-        | Errors.ClassContext -> Typing_deps.Dep.Type name
-      in
-      Typing_deps.add_idep
-        (Provider_context.get_deps_mode env.ctx)
-        env.droot
-        dep
+  else begin
+    Errors.unbound_name pos name kind;
+    (* In addition to reporting errors, we also add to the global dependency table *)
+    let dep =
+      match kind with
+      | Errors.FunctionNamespace -> Typing_deps.Dep.Fun name
+      | Errors.TypeNamespace -> Typing_deps.Dep.Type name
+      | Errors.ConstantNamespace -> Typing_deps.Dep.GConst name
+      | Errors.TraitContext -> Typing_deps.Dep.Type name
+      | Errors.RecordContext -> Typing_deps.Dep.Type name
+      | Errors.ClassContext -> Typing_deps.Dep.Type name
+    in
+    Typing_deps.add_idep (Provider_context.get_deps_mode env.ctx) env.droot dep
+  end
 
 let has_canon_name env get_name get_pos (pos, name) =
   match get_name env.ctx name with
@@ -156,7 +150,7 @@ let handler ctx =
     (* The following are all setting the environments / context correctly *)
     method initial_state =
       {
-        mode = FileInfo.Mpartial;
+        mode = FileInfo.Mstrict;
         droot = Typing_deps.Dep.Fun "";
         ctx;
         type_params = SMap.empty;

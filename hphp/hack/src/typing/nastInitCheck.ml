@@ -633,7 +633,7 @@ and fun_param env acc param =
 and fun_paraml env acc l = List.fold_left ~f:(fun_param env) ~init:acc l
 
 let class_ tenv c =
-  if not FileInfo.(equal_mode c.c_mode Mhhi) then
+  if not (FileInfo.is_hhi c.c_mode) then
     List.iter c.c_vars ~f:(fun cv ->
         match cv.cv_expr with
         | Some _ when is_lateinit cv ->
@@ -656,7 +656,7 @@ let class_ tenv c =
   let (c_constructor, _, _) = split_methods c.c_methods in
   match c_constructor with
   | _ when Ast_defs.is_c_interface c.c_kind -> ()
-  | Some _ when FileInfo.(equal_mode c.c_mode Mhhi) -> ()
+  | Some _ when FileInfo.is_hhi c.c_mode -> ()
   | _ ->
     let p =
       match c_constructor with

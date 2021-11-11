@@ -21,7 +21,6 @@ open String_utils
 module N = Aast
 module SN = Naming_special_names
 module NS = Namespaces
-module Partial = Partial_provider
 module GEnv = Naming_global.GEnv
 
 (*****************************************************************************)
@@ -36,7 +35,7 @@ type positioned_ident = Pos.t * Local_id.t
 type is_final = bool
 
 type genv = {
-  (* strict? decl? partial? *)
+  (* strict? decl?  *)
   in_mode: FileInfo.mode;
   (* various options that control the strictness of the typechecker *)
   ctx: Provider_context.t;
@@ -174,7 +173,7 @@ end = struct
 
   let make_top_level_genv ctx =
     {
-      in_mode = FileInfo.Mpartial;
+      in_mode = FileInfo.Mstrict;
       ctx;
       type_params = SSet.empty;
       current_cls = None;
@@ -244,16 +243,10 @@ end = struct
   (* Function used to name a local variable *)
   let lvar (genv, env) (p, x) =
     let (p, ident) =
-      if
-        SN.Superglobals.is_superglobal x
-        && FileInfo.equal_mode genv.in_mode FileInfo.Mpartial
-      then
-        (p, Local_id.make_unscoped x)
-      else
-        let lcl = SMap.find_opt x !(env.locals) in
-        match lcl with
-        | Some lcl -> (p, snd lcl)
-        | None -> handle_undefined_variable (genv, env) (p, x)
+      let lcl = SMap.find_opt x !(env.locals) in
+      match lcl with
+      | Some lcl -> (p, snd lcl)
+      | None -> handle_undefined_variable (genv, env) (p, x)
     in
     (p, ident)
 
@@ -723,14 +716,15 @@ and try_castable_hint
       Some
         (match hl with
         | [] ->
-          if Partial.should_check_error (fst env).in_mode 2071 then
+          if not @@ FileInfo.is_hhi (fst env).in_mode then
             Errors.too_few_type_arguments p;
           if not ignore_hack_arr then
             N.Happly ((p, SN.Collections.cDict), [(p, N.Hany); (p, N.Hany)])
           else
             N.Hdarray ((p, N.Hany), (p, N.Hany))
         | [_] ->
-          Errors.too_few_type_arguments p;
+          if not @@ FileInfo.is_hhi (fst env).in_mode then
+            Errors.too_few_type_arguments p;
           N.Hany
         | [key_; val_] ->
           if not ignore_hack_arr then
@@ -744,7 +738,7 @@ and try_castable_hint
       Some
         (match hl with
         | [] ->
-          if Partial.should_check_error (fst env).in_mode 2071 then
+          if not @@ FileInfo.is_hhi (fst env).in_mode then
             Errors.too_few_type_arguments p;
           if not ignore_hack_arr then
             N.Happly ((p, SN.Collections.cVec), [(p, N.Hany)])
@@ -762,7 +756,7 @@ and try_castable_hint
       Some
         (match hl with
         | [] ->
-          if Partial.should_check_error (fst env).in_mode 2071 then
+          if not @@ FileInfo.is_hhi (fst env).in_mode then
             Errors.too_few_type_arguments p;
 
           if not ignore_hack_arr then
@@ -789,7 +783,7 @@ and try_castable_hint
       Some
         (match hl with
         | [] ->
-          if Partial.should_check_error (fst env).in_mode 2071 then
+          if not @@ FileInfo.is_hhi (fst env).in_mode then
             Errors.too_few_type_arguments p;
 
           N.Hvec_or_dict (None, (p, N.Hany))
@@ -890,12 +884,10 @@ let interface c constructor methods smethods =
     let smethods = add_abstractl smethods in
     (constructor, methods, smethods)
 
-let ensure_name_not_dynamic env e =
+let ensure_name_not_dynamic e =
   match e with
   | (_, _, (Aast.Id _ | Aast.Lvar _)) -> ()
-  | (_, p, _) ->
-    if Partial.should_check_error (fst env).in_mode 2078 then
-      Errors.dynamic_class_name_in_strict_mode p
+  | (_, p, _) -> Errors.dynamic_class_name_in_strict_mode p
 
 let make_sdt ctx pos attrs =
   if TypecheckerOptions.everything_sdt (Provider_context.get_tcopt ctx) then
@@ -1287,9 +1279,7 @@ and type_where_constraints env locl_cstrl =
 and class_prop_expr_is_xhp env cv =
   let expr = Option.map cv.Aast.cv_expr ~f:(expr env) in
   let expr =
-    if
-      FileInfo.equal_mode (fst env).in_mode FileInfo.Mhhi && Option.is_none expr
-    then
+    if FileInfo.is_hhi (fst env).in_mode && Option.is_none expr then
       let pos = fst cv.Aast.cv_id in
       Some ((), pos, ignored_expr_ (fst cv.Aast.cv_id))
     else
@@ -1513,8 +1503,7 @@ and method_ genv m =
   let body =
     match genv.in_mode with
     | FileInfo.Mhhi -> { N.fb_ast = [] }
-    | FileInfo.Mstrict
-    | FileInfo.Mpartial ->
+    | FileInfo.Mstrict ->
       let env = List.fold_left ~f:Env.add_param m.N.m_params ~init:env in
       let env =
         match m.N.m_variadic with
@@ -1640,8 +1629,7 @@ and fun_ genv f =
   let body =
     match genv.in_mode with
     | FileInfo.Mhhi -> { N.fb_ast = [] }
-    | FileInfo.Mstrict
-    | FileInfo.Mpartial ->
+    | FileInfo.Mstrict ->
       let env = List.fold_left ~f:Env.add_param paraml ~init:env in
       let env =
         match variadicity with
@@ -2030,11 +2018,11 @@ and expr_ env p (e : Nast.expr_) =
     let x1 = (p, Local_id.to_string lid) in
     N.Class_get (make_class_id env x1, N.CGstring x2, prop_or_method)
   | Aast.Class_get ((_, _, Aast.CIexpr x1), Aast.CGstring _, _) ->
-    ensure_name_not_dynamic env x1;
+    ensure_name_not_dynamic x1;
     ignored_expr_ p
   | Aast.Class_get ((_, _, Aast.CIexpr x1), Aast.CGexpr x2, _) ->
-    ensure_name_not_dynamic env x1;
-    ensure_name_not_dynamic env x2;
+    ensure_name_not_dynamic x1;
+    ensure_name_not_dynamic x2;
     ignored_expr_ p
   | Aast.Class_get _ -> failwith "Error in Ast_to_nast module for Class_get"
   | Aast.Class_const ((_, _, Aast.CIexpr (_, _, Aast.Id x1)), ((_, str) as x2))
@@ -2359,8 +2347,7 @@ and expr_ env p (e : Nast.expr_) =
         oexpr env unpacked_element,
         p )
   | Aast.New ((_, _, Aast.CIexpr (_, p, _e)), tal, el, unpacked_element, _) ->
-    if Partial.should_check_error (fst env).in_mode 2060 then
-      Errors.dynamic_new_in_strict_mode p;
+    Errors.dynamic_new_in_strict_mode p;
     N.New
       ( make_class_id env (p, SN.Classes.cUnknown),
         targl env p tal,

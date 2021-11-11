@@ -127,14 +127,6 @@
   (preprocess (pps ppx_deriving.std)))
 
 (library
-  (name partial_provider)
-  (modules partial_provider)
-  (libraries
-    errors
-    file_info)
-  (preprocess (pps ppx_deriving.std)))
-
-(library
   (name provider_utils)
   (modules provider_utils)
   (libraries

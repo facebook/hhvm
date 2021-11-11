@@ -5665,14 +5665,7 @@ where
                     _ => {
                         use file_info::Mode::*;
                         let mode = env.file_mode();
-                        env.keep_errors
-                            && env.is_typechecker()
-                            && (mode == Mstrict
-                                || (mode == Mpartial
-                                    && env
-                                        .parser_options
-                                        .error_codes_treated_strictly
-                                        .contains(&1002)))
+                        env.keep_errors && env.is_typechecker() && (mode == Mstrict)
                     }
                 };
                 if raise_error {

@@ -22,7 +22,6 @@ module TVis = Typing_visibility
 module Phase = Typing_phase
 module MakeType = Typing_make_type
 module Cls = Decl_provider.Class
-module Partial = Partial_provider
 
 let err_witness env p = TUtils.terr env (Reason.Rwitness p)
 
@@ -322,12 +321,6 @@ let rec obj_get_concrete_ty
     begin
       match Env.get_class env (snd x) with
       | None -> default ()
-      | Some class_info
-        when (not is_method)
-             && (not (Env.is_strict env))
-             && (not (Partial.should_check_error (Env.get_mode env) 4053))
-             && String.equal (Cls.name class_info) SN.Classes.cStdClass ->
-        default ()
       | Some class_info ->
         let paraml =
           if List.is_empty paraml then

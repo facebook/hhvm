@@ -9,11 +9,9 @@
 open Hh_prelude
 open Aast
 
-let error_if_no_typehint gconst =
-  if Partial_provider.should_check_error gconst.cst_mode 2001 then
-    match gconst.cst_type with
-    | None -> Errors.const_without_typehint gconst.cst_name
-    | _ -> ()
+let error_if_no_typehint { cst_mode; cst_type; cst_name; _ } =
+  if (not (FileInfo.is_hhi cst_mode)) && Option.is_none cst_type then
+    Errors.const_without_typehint cst_name
 
 let error_if_pseudo_constant gconst =
   if Option.is_some gconst.cst_namespace.Namespace_env.ns_name then

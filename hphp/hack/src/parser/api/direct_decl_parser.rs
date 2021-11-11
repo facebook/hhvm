@@ -120,7 +120,7 @@ fn parse_script_with_text_allocator<'a, 'text, S: SourceTextAllocator<'text, 'a>
 ) {
     let env = ParserEnv::from(opts);
     let (_, mode_opt) = parse_mode(source);
-    let mode = mode_opt.unwrap_or(file_info::Mode::Mpartial);
+    let mode = mode_opt.unwrap_or(file_info::Mode::Mstrict);
     let sc = DirectDeclSmartConstructors::new(
         opts,
         &source,

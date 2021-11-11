@@ -27,26 +27,25 @@ open Prim_defs
 type mode =
   | Mhhi  (** just declare signatures, don't check anything *)
   | Mstrict  (** check everything! *)
-  | Mpartial  (** Don't fail if you see a function/class you don't know *)
 [@@deriving eq, show, enum]
 
 let parse_mode = function
   | "strict"
   | "" ->
     Some Mstrict
-  | "partial" -> Some Mpartial
   | _ -> None
 
 let is_strict = function
   | Mstrict -> true
-  | Mhhi
-  | Mpartial ->
-    false
+  | Mhhi -> false
+
+let is_hhi = function
+  | Mstrict -> false
+  | Mhhi -> true
 
 let string_of_mode = function
   | Mhhi -> "hhi"
   | Mstrict -> "strict"
-  | Mpartial -> "partial"
 
 let pp_mode fmt mode =
   Format.pp_print_string fmt
@@ -54,7 +53,6 @@ let pp_mode fmt mode =
   match mode with
   | Mhhi -> "Mhhi"
   | Mstrict -> "Mstrict"
-  | Mpartial -> "Mpartial"
 
 (*****************************************************************************)
 (* Positions of names in a file *)

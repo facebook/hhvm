@@ -40,7 +40,7 @@ pub fn parse_script<'a>(
         CstSmartConstructors::new(state, tf)
     };
     let sc1 = {
-        let mode = mode.unwrap_or(file_info::Mode::Mpartial);
+        let mode = mode.unwrap_or(file_info::Mode::Mstrict);
         DirectDeclSmartConstructors::new(
             opts,
             &source,

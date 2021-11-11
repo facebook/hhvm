@@ -45,8 +45,6 @@ let __UNKNOWN_FILE__ = "__unknown__.php"
 
 let __HH_HEADER_PREFIX__ = "<?hh"
 
-let __HH_HEADER_SUFFIX_PARTIAL__ = "// partial"
-
 (* -- Format helpers -------------------------------------------------------- *)
 module Fmt = struct
   let pf fmt = Format.fprintf fmt
@@ -3042,21 +3040,13 @@ end = struct
   let pp_header ppf name =
     Fmt.(hbox @@ pair ~sep:sp string string) ppf (__FILE_PREFIX__, name)
 
-  let pp_mode ppf = function
-    | FileInfo.Mpartial ->
-      Fmt.(hbox @@ pair ~sep:sp string string)
-        ppf
-        (__HH_HEADER_PREFIX__, __HH_HEADER_SUFFIX_PARTIAL__)
-    | _ -> Fmt.string ppf __HH_HEADER_PREFIX__
-
-  let to_string ~is_multifile { mode; content; name; _ } =
-    let body = Hackfmt.format @@ Fmt.to_to_string Namespaced.pp content
-    and mode = Fmt.to_to_string pp_mode mode in
+  let to_string ~is_multifile { content; name; _ } =
+    let body = Hackfmt.format @@ Fmt.to_to_string Namespaced.pp content in
     if is_multifile then
       let header = Fmt.to_to_string pp_header name in
-      Format.sprintf "%s\n%s\n%s" header mode body
+      Format.sprintf "%s\n%s\n%s" header __HH_HEADER_PREFIX__ body
     else
-      Format.sprintf "%s\n%s" mode body
+      Format.sprintf "%s\n%s" __HH_HEADER_PREFIX__ body
 
   let pp ~is_multifile = Fmt.of_to_string (to_string ~is_multifile)
 end

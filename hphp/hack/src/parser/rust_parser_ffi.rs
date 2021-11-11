@@ -10,7 +10,6 @@ use mode_parser::parse_mode;
 use ocamlrep::{ptr::UnsafeOcamlPtr, Allocator, FromOcamlRep, ToOcamlRep};
 use ocamlrep_ocamlpool::{ocaml_ffi, to_ocaml, Pool};
 use operator::{Assoc, Operator};
-use oxidized::file_info::Mode;
 use oxidized::{file_info, full_fidelity_parser_env::FullFidelityParserEnv};
 use parser_core_types::{
     parser_env::ParserEnv, source_text::SourceText,
@@ -89,10 +88,7 @@ where
         let ocaml_errors = pool.add(&errors);
         let ocaml_state = pool.add(&state);
         let tree = if leak_rust_tree {
-            let (_, mut mode) = parse_mode(&source_text);
-            if mode == Some(Mode::Mpartial) {
-                mode = Some(Mode::Mstrict);
-            }
+            let (_, mode) = parse_mode(&source_text);
             let tree = Box::new(SyntaxTree::build(
                 &source_text,
                 root,

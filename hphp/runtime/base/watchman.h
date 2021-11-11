@@ -17,35 +17,24 @@
 #pragma once
 
 #include <memory>
-#include <vector>
+#include <string>
 
-#include "hphp/util/hash-map.h"
 #include "hphp/util/optional.h"
 
 #include <folly/dynamic.h>
-#include <folly/executors/IOThreadPoolExecutor.h>
 #include <folly/experimental/io/FsUtil.h>
 #include <folly/futures/Future.h>
-#include <folly/futures/FutureSplitter.h>
 #include <watchman/cppclient/WatchmanClient.h>
 
 namespace HPHP {
 
 /**
- * Result of connecting and watching
+ * Singleton to interact with Watchman for a given root.
  */
-struct WatchData {
-  std::shared_ptr<watchman::WatchmanClient> m_client;
-  watchman::WatchPathPtr m_watchPath;
-};
-
-/**
- * Singleton to interact with Watchman within the WatchmanAutoloadMap
- * for a given root.
- */
-class Watchman : public std::enable_shared_from_this<Watchman> {
-
+class Watchman {
 public:
+  virtual ~Watchman();
+
   /**
    * Return the Watchman singleton for the chosen root.
    */
@@ -53,81 +42,23 @@ public:
   get(const folly::fs::path& path, const Optional<std::string>& sockPath);
 
   /**
-   * Public for make_shared only, use Watchman::get instead
-   */
-  Watchman(folly::fs::path path, Optional<std::string> sockPath);
-
-  Watchman(const Watchman&) = delete;
-  Watchman(Watchman&&) noexcept = delete;
-  Watchman& operator=(const Watchman&) = delete;
-  Watchman& operator=(Watchman&&) noexcept = delete;
-  ~Watchman();
-
-  /**
    * Return information about the altered and deleted paths matching
    * the given Watchman query.
    */
-  folly::SemiFuture<folly::dynamic> query(folly::dynamic query);
+  virtual folly::SemiFuture<folly::dynamic> query(folly::dynamic query) = 0;
 
   /*
    * Return the current watchman clock.
    */
-  folly::SemiFuture<watchman::Clock> getClock();
+  virtual folly::SemiFuture<watchman::Clock> getClock() = 0;
 
   /**
    * Invoke the given callback whenever the given Watchman query
    * returns new results.
    */
-  void subscribe(
+  virtual void subscribe(
       const folly::dynamic& queryObj,
-      watchman::SubscriptionCallback&& callback);
-
-private:
-  /**
-   * Return information about the altered and deleted paths matching
-   * the given Watchman query.
-   *
-   * nReconnects: If Watchman throws an exception to us, try
-   * reconnecting this many times before rethrowing the exception.
-   */
-  folly::SemiFuture<folly::dynamic>
-  query(folly::dynamic query, int nReconnects);
-
-  folly::SemiFuture<watchman::Clock> getClock(int nReconnects);
-
-  /**
-   * Initialize a client from scratch and watch the given root.
-   */
-  folly::Future<WatchData> reconnect();
-
-  /**
-   * Tell the WatchmanClient to subscribe to a given query.
-   */
-  folly::SemiFuture<watchman::SubscriptionPtr> clientSubscribe(
-      watchman::WatchmanClient& client,
-      watchman::WatchPathPtr path,
-      const folly::dynamic& queryObj);
-
-  /**
-   * When Watchman gives us results as part of a subscription, pass
-   * the results on to everyone who subscribed to us.
-   */
-  void runCallbacks(
-      const folly::dynamic& queryObj, folly::Try<folly::dynamic>&& results);
-
-  folly::IOThreadPoolExecutor m_exec{1};
-
-  const folly::fs::path m_path;
-  const Optional<std::string> m_sockPath;
-
-  struct Data {
-    // This future must complete before you can perform query() or subscribe()
-    // operations on the given repo.
-    folly::FutureSplitter<WatchData> m_watchFuture;
-    hphp_hash_map<folly::dynamic, std::vector<watchman::SubscriptionCallback>>
-        m_callbacks;
-  };
-  folly::Synchronized<Data, std::mutex> m_data;
+      watchman::SubscriptionCallback&& callback) = 0;
 };
 
 } // namespace HPHP

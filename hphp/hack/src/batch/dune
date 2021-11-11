@@ -29,5 +29,6 @@
     relative_path
     tast
     typechecker_options
+    typing_global_inference
     utils_core
     utils_exit))

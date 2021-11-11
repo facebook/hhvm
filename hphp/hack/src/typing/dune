@@ -61,7 +61,6 @@
     typing_expand
     typing_generic_rules
     typing_local_ops
-    typing_ordered_solver
     typing_per_cont_ops
     typing_reified_check
     typing_special_fun
@@ -70,7 +69,6 @@
     typing_taccess
     typing_tdef
     typing_variance
-    typing_global_inference
     typing_xhp)
   (libraries
     common
@@ -91,6 +89,17 @@
     typing_algebra
     typing_heap
     global_config)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
+  (name typing_global_inference)
+  (wrapped false)
+  (modules
+    typing_ordered_solver
+    typing_global_inference)
+  (libraries
+    tast
+    typing_algebra)
   (preprocess (pps ppx_deriving.std)))
 
 (library
@@ -404,6 +413,7 @@
     typing_defs
     typing_deps
     typing_check_job
+    typing_global_inference
     typing_service_api
     typing_service_delegate
     vfs)

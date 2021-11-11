@@ -1174,11 +1174,6 @@ let rec condition_nullity ~nonnull (env : env) te =
     in
     refine_lvalue_type env te ~refine
 
-let rec condition_isset env = function
-  | (_, _, Aast.Array_get (x, _)) -> condition_isset env x
-  | (_, _, Aast.Hole (x, _, _, _)) -> condition_isset env x
-  | v -> condition_nullity ~nonnull:true env v
-
 (** If we are dealing with a refinement like
       $x is MyClass<A, B>
     then class_info is the class info of MyClass and hint_tyl corresponds
@@ -7353,9 +7348,6 @@ and class_expr
         in
         (env, ty, err)
       | (_, Tdynamic) -> (env, base_ty, Ok base_ty)
-      | (_, (Tany _ | Tprim Tstring)) when not (Env.is_strict env) ->
-        let ty = Typing_utils.mk_tany env p in
-        (env, ty, Ok ty)
       | (_, Terr) ->
         let ty = err_witness env p in
         (env, ty, Ok ty)
@@ -7413,13 +7405,9 @@ and call_construct p env class_ params el unpacked_element cid cid_ty =
       (Cls.where_constraints class_)
   in
   let cstr = Env.get_construct env class_ in
-  let mode = Env.get_mode env in
   match fst cstr with
   | None ->
-    if
-      ((not (List.is_empty el)) || Option.is_some unpacked_element)
-      && FileInfo.is_strict mode
-    then
+    if (not (List.is_empty el)) || Option.is_some unpacked_element then
       Errors.constructor_no_args p;
     let (env, tel, _tyl) =
       argument_list_exprs (expr ~allow_awaitable:false) env el
@@ -8197,11 +8185,6 @@ and condition ?lhs_of_null_coalesce env tparamet ((ty, p, e) as te : Tast.expr)
   | Aast.True when not tparamet ->
     (LEnv.drop_cont env C.Next, Local_id.Set.empty)
   | Aast.False when tparamet -> (LEnv.drop_cont env C.Next, Local_id.Set.empty)
-  | Aast.Call ((_, _, Aast.Id (_, func)), _, [(_, param)], None)
-    when String.equal SN.PseudoFunctions.isset func
-         && tparamet
-         && not (Env.is_strict env) ->
-    condition_isset env param
   | Aast.Call ((_, _, Aast.Id (_, func)), _, [(_, te)], None)
     when String.equal SN.StdlibFunctions.is_null func ->
     condition_nullity ~nonnull:(not tparamet) env te

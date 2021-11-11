@@ -32,8 +32,6 @@ val is_strict : mode -> bool
 
 val is_hhi : mode -> bool
 
-val parse_mode : string -> mode option
-
 val string_of_mode : mode -> string
 
 (*****************************************************************************)

@@ -29,12 +29,6 @@ type mode =
   | Mstrict  (** check everything! *)
 [@@deriving eq, show, enum]
 
-let parse_mode = function
-  | "strict"
-  | "" ->
-    Some Mstrict
-  | _ -> None
-
 let is_strict = function
   | Mstrict -> true
   | Mhhi -> false

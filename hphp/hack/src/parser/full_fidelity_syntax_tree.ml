@@ -108,8 +108,8 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
 
     let is_strict tree =
       match tree.mode with
-      | Some mode -> FileInfo.is_strict mode
-      | None -> false
+      | Some FileInfo.Mstrict -> true
+      | _ -> false
 
     let is_hhi tree =
       match tree.mode with

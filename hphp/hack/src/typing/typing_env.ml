@@ -16,8 +16,6 @@ open Aast
 module Dep = Typing_deps.Dep
 module Inf = Typing_inference_env
 module LID = Local_id
-module SN = Naming_special_names
-module SG = SN.Superglobals
 module LEnvC = Typing_per_cont_env
 module C = Typing_continuations
 module Cls = Decl_provider.Class
@@ -1034,13 +1032,8 @@ let unset_local env local =
 
 let tany _env = Typing_defs.make_tany ()
 
-let get_local_in_ctx env ?error_if_undef_at_pos:p x ctx_opt =
-  let not_found_is_ok x ctx =
-    let xstr = LID.to_string x in
-    (String.equal xstr SG.globals || SG.is_superglobal xstr)
-    && not (is_strict env)
-    || Fake.is_valid ctx.LEnvC.fake_members x
-  in
+let get_local_in_ctx ?error_if_undef_at_pos:p x ctx_opt =
+  let not_found_is_ok x ctx = Fake.is_valid ctx.LEnvC.fake_members x in
   let error_if_pos_provided posopt ctx =
     match posopt with
     | Some p ->
@@ -1084,7 +1077,7 @@ let get_local_in_ctx env ?error_if_undef_at_pos:p x ctx_opt =
     lcl
 
 let get_local_ty_in_ctx env ?error_if_undef_at_pos x ctx_opt =
-  match get_local_in_ctx env ?error_if_undef_at_pos x ctx_opt with
+  match get_local_in_ctx ?error_if_undef_at_pos x ctx_opt with
   | None -> (false, mk (Reason.Rnone, tany env), Pos.none)
   | Some (x, pos, _) -> (true, x, pos)
 
@@ -1107,7 +1100,7 @@ let get_local_pos env x =
 let get_locals env plids =
   let next_cont = next_cont_opt env in
   List.fold plids ~init:LID.Map.empty ~f:(fun locals (p, lid) ->
-      match get_local_in_ctx env ~error_if_undef_at_pos:p lid next_cont with
+      match get_local_in_ctx ~error_if_undef_at_pos:p lid next_cont with
       | None -> locals
       | Some ty_eid -> LID.Map.add lid ty_eid locals)
 

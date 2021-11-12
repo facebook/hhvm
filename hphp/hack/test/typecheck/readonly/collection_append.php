@@ -1,5 +1,4 @@
 <?hh
-<<file: __EnableUnstableFeatures("readonly")>>
 class Foo {
   public readonly static ?Foo $x = null;
   public function __construct(public int $prop = 4) {}

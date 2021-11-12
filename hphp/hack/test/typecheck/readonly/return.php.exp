@@ -1,2 +1,2 @@
-File "return.php", line 15, characters 10-27:
+File "return.php", line 14, characters 10-27:
 This expression is readonly, but we expected a mutable value because this function does not return readonly. Please mark it to return readonly if needed. (Parsing[1002])

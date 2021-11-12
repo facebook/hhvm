@@ -1,8 +1,8 @@
-File "explicit_ro_cast.php", line 24, characters 9-24:
+File "explicit_ro_cast.php", line 23, characters 9-24:
 This function call returns a readonly value. It must be explicitly wrapped in a readonly expression. (Typing[4412])
-  File "explicit_ro_cast.php", line 17, characters 10-25:
+  File "explicit_ro_cast.php", line 16, characters 10-25:
   The function call is defined here.
-File "explicit_ro_cast.php", line 25, characters 9-28:
+File "explicit_ro_cast.php", line 24, characters 9-28:
 This function call returns a readonly value. It must be explicitly wrapped in a readonly expression. (Typing[4412])
-  File "explicit_ro_cast.php", line 8, characters 28-43:
+  File "explicit_ro_cast.php", line 7, characters 28-43:
   The function call is defined here.

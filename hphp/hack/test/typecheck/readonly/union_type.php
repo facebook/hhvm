@@ -1,5 +1,4 @@
 <?hh
-<<file:__EnableUnstableFeatures("readonly")>>
 class Baz {
   public int $prop = 1;
 }

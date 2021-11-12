@@ -1,4 +1,4 @@
-File "as_mut_collections.php", line 25, characters 3-20:
+File "as_mut_collections.php", line 24, characters 3-20:
 Only value types and arrays can be converted to mutable. This value can never be a primitive. (Typing[4434])
-File "as_mut_collections.php", line 37, characters 3-20:
+File "as_mut_collections.php", line 36, characters 3-20:
 Only value types and arrays can be converted to mutable. This value can never be a primitive. (Typing[4434])

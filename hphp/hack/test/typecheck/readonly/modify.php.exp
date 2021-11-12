@@ -1,8 +1,8 @@
-File "modify.php", line 12, characters 3-14:
+File "modify.php", line 11, characters 3-14:
 This expression is readonly, its members cannot be modified (Parsing[1002])
-File "modify.php", line 18, characters 3-14:
+File "modify.php", line 17, characters 3-14:
+This expression is readonly, its members cannot be modified (Parsing[1002])
+File "modify.php", line 26, characters 3-14:
 This expression is readonly, its members cannot be modified (Parsing[1002])
 File "modify.php", line 27, characters 3-14:
-This expression is readonly, its members cannot be modified (Parsing[1002])
-File "modify.php", line 28, characters 3-14:
 This expression is readonly, its members cannot be modified (Parsing[1002])

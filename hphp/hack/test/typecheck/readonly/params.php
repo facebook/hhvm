@@ -1,5 +1,4 @@
 <?hh
-<<file:__EnableUnstableFeatures('readonly')>>
 class Foo {
   public int $prop;
   public function __construct() {

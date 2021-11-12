@@ -1,5 +1,4 @@
 <?hh // strict
-<<file:__EnableUnstableFeatures('readonly')>>
 class Foo {
 }
 

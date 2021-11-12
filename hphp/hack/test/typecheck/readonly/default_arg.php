@@ -1,6 +1,5 @@
 //// file1.php
 <?hh
-<<file:__EnableUnstableFeatures('readonly')>>
 
 class Foo<T> {
 

@@ -1,12 +1,12 @@
-File "constfuns.php", line 25, characters 5-16:
+File "constfuns.php", line 24, characters 5-16:
 This expression is readonly, its members cannot be modified (Parsing[1002])
-File "constfuns.php", line 30, characters 5-16:
+File "constfuns.php", line 29, characters 5-16:
 This expression is readonly, its members cannot be modified (Parsing[1002])
-File "constfuns.php", line 40, characters 23-24:
+File "constfuns.php", line 39, characters 23-24:
 Invalid argument (Typing[4411])
-  File "constfuns.php", line 34, characters 8-70:
+  File "constfuns.php", line 33, characters 8-70:
   Function readonly mismatch
-  File "constfuns.php", line 34, characters 8-70:
+  File "constfuns.php", line 33, characters 8-70:
   This function is not marked readonly
-  File "constfuns.php", line 15, characters 33-65:
+  File "constfuns.php", line 14, characters 33-65:
   This function is marked readonly

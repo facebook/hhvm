@@ -1,12 +1,12 @@
-File "collection_literal.php", line 26, characters 3-14:
+File "collection_literal.php", line 25, characters 3-14:
 This expression is readonly, its members cannot be modified (Parsing[1002])
-File "collection_literal.php", line 28, characters 3-14:
+File "collection_literal.php", line 27, characters 3-14:
 This expression is readonly, its members cannot be modified (Parsing[1002])
-File "collection_literal.php", line 32, characters 3-14:
+File "collection_literal.php", line 31, characters 3-14:
 This expression is readonly, its members cannot be modified (Parsing[1002])
-File "collection_literal.php", line 34, characters 3-14:
+File "collection_literal.php", line 33, characters 3-14:
 This expression is readonly, its members cannot be modified (Parsing[1002])
-File "collection_literal.php", line 39, characters 3-14:
+File "collection_literal.php", line 38, characters 3-14:
 This expression is readonly, its members cannot be modified (Parsing[1002])
-File "collection_literal.php", line 41, characters 3-14:
+File "collection_literal.php", line 40, characters 3-14:
 This expression is readonly, its members cannot be modified (Parsing[1002])

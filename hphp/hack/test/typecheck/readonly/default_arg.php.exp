@@ -1,6 +1,6 @@
-File "default_arg.php--file1.php", line 11, characters 33-41:
+File "default_arg.php--file1.php", line 10, characters 33-41:
 Invalid argument (Typing[4411])
-  File "default_arg.php--file1.php", line 11, characters 33-41:
+  File "default_arg.php--file1.php", line 10, characters 33-41:
   This expression is readonly
   File "default_arg.php--file2.php", line 3, characters 40-48:
   It is incompatible with this parameter, which is mutable

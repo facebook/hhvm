@@ -1,6 +1,6 @@
-File "dollardollar.php", line 27, characters 28-29:
+File "dollardollar.php", line 26, characters 28-29:
 Invalid argument (Typing[4411])
-  File "dollardollar.php", line 27, characters 28-29:
+  File "dollardollar.php", line 26, characters 28-29:
   This expression is readonly
-  File "dollardollar.php", line 19, characters 28-29:
+  File "dollardollar.php", line 18, characters 28-29:
   It is incompatible with this parameter, which is mutable

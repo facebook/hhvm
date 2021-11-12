@@ -1,7 +1,6 @@
 <?hh
 //// def.php
 // definition is in separate file
-<<file:__EnableUnstableFeatures('readonly')>>
 class Foo {
   public function __construct(
     public int $prop,

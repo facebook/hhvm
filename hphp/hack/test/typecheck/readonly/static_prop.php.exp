@@ -1,14 +1,14 @@
-File "static_prop.php", line 31, characters 5-16:
+File "static_prop.php", line 30, characters 5-16:
 This expression is readonly, its members cannot be modified (Parsing[1002])
-File "static_prop.php", line 16, characters 5-21:
+File "static_prop.php", line 15, characters 5-21:
 Invalid property assignment (Typing[4411])
-  File "static_prop.php", line 16, characters 25-42:
+  File "static_prop.php", line 15, characters 25-42:
   This expression is readonly
-  File "static_prop.php", line 9, characters 22-32:
+  File "static_prop.php", line 8, characters 22-32:
   But it's being assigned to a mutable property
-File "static_prop.php", line 22, characters 3-18:
+File "static_prop.php", line 21, characters 3-18:
 Invalid property assignment (Typing[4411])
-  File "static_prop.php", line 22, characters 22-39:
+  File "static_prop.php", line 21, characters 22-39:
   This expression is readonly
-  File "static_prop.php", line 9, characters 22-32:
+  File "static_prop.php", line 8, characters 22-32:
   But it's being assigned to a mutable property

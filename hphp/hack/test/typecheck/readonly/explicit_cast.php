@@ -1,6 +1,5 @@
 //// file1.php
 <?hh
-<<file:__EnableUnstableFeatures('readonly')>>
 class Bar {}
 class Foo {
   public function __construct(public readonly Bar $bar) {}

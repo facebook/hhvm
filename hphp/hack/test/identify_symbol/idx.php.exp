@@ -3,26 +3,26 @@ definition:
  HH\idx
    kind: function
    id: function::HH\idx
-   position: line 31, characters 10-12
-   span: line 31, character 1 - line 35, character 6
+   position: line 30, characters 10-12
+   span: line 30, character 1 - line 34, character 6
    modifiers: 
    params:
      $collection
        kind: param
-       position: line 32, characters 27-37
-       span: line 32, character 3 - line 32, character 37
+       position: line 31, characters 27-37
+       span: line 31, character 3 - line 31, character 37
        modifiers: 
 
      $index
        kind: param
-       position: line 33, characters 7-12
-       span: line 33, character 3 - line 33, character 12
+       position: line 32, characters 7-12
+       span: line 32, character 3 - line 32, character 12
        modifiers: 
 
      $default
        kind: param
-       position: line 34, characters 3-10
-       span: line 34, character 3 - line 34, character 17
+       position: line 33, characters 3-10
+       span: line 33, character 3 - line 33, character 17
        modifiers: 
 
 

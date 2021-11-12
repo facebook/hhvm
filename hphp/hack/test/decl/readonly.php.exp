@@ -3,7 +3,7 @@
      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
        sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
        sc_kind = (Cclass Concrete); sc_module = None;
-       sc_name = ([3:7-10], "\\Foo"); sc_tparams = [];
+       sc_name = ([2:7-10], "\\Foo"); sc_tparams = [];
        sc_where_constraints = []; sc_extends = []; sc_uses = [];
        sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
        sc_req_implements = []; sc_implements = [];
@@ -16,17 +16,17 @@
       { Typing_defs.fe_deprecated = None; fe_module = None;
         fe_internal = false;
         fe_type =
-        (Rwitness_from_decl ([6:16-32]),
+        (Rwitness_from_decl ([5:16-32]),
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
-              ft_implicit_params = { capability = (CapDefaults [6:16-32]) };
+              ft_implicit_params = { capability = (CapDefaults [5:16-32]) };
               ft_ret =
               { et_enforced = Typing_defs_core.Unenforced;
                 et_type =
-                (Rhint ([6:46-60]),
-                 (Tapply (([6:46-55], "\\HH\\Awaitable"),
-                    [(Rhint ([6:56-59]), (Tapply (([6:56-59], "\\Foo"), [])))
+                (Rhint ([5:46-60]),
+                 (Tapply (([5:46-55], "\\HH\\Awaitable"),
+                    [(Rhint ([5:56-59]), (Tapply (([5:56-59], "\\Foo"), [])))
                       ]
                     )))
                 };
@@ -35,25 +35,25 @@
                 ~returns_readonly:true ~support_dynamic_type:false
                 ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
-        fe_pos = [6:16-32]; fe_php_std_lib = false;
+        fe_pos = [5:16-32]; fe_php_std_lib = false;
         fe_support_dynamic_type = false }));
   ("\\returns_normal",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
         fe_internal = false;
         fe_type =
-        (Rwitness_from_decl ([10:16-30]),
+        (Rwitness_from_decl ([9:16-30]),
          (Tfun
             { ft_arity = (Fstandard ()); ft_tparams = [];
               ft_where_constraints = []; ft_params = [];
-              ft_implicit_params = { capability = (CapDefaults [10:16-30]) };
+              ft_implicit_params = { capability = (CapDefaults [9:16-30]) };
               ft_ret =
               { et_enforced = Typing_defs_core.Unenforced;
                 et_type =
-                (Rhint ([10:34-48]),
-                 (Tapply (([10:34-43], "\\HH\\Awaitable"),
-                    [(Rhint ([10:44-47]),
-                      (Tapply (([10:44-47], "\\Foo"), [])))]
+                (Rhint ([9:34-48]),
+                 (Tapply (([9:34-43], "\\HH\\Awaitable"),
+                    [(Rhint ([9:44-47]), (Tapply (([9:44-47], "\\Foo"), [])))
+                      ]
                     )))
                 };
               ft_flags =
@@ -61,44 +61,44 @@
                 ~returns_readonly:false ~support_dynamic_type:false
                 ~readonly_this:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
-        fe_pos = [10:16-30]; fe_php_std_lib = false;
+        fe_pos = [9:16-30]; fe_php_std_lib = false;
         fe_support_dynamic_type = false }));
   ("\\Bar",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
         sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
         sc_kind = (Cclass Concrete); sc_module = None;
-        sc_name = ([14:7-10], "\\Bar"); sc_tparams = [];
+        sc_name = ([13:7-10], "\\Bar"); sc_tparams = [];
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
         sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
         sc_req_implements = []; sc_implements = [];
         sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
         sc_props =
-        [{ Shallow_decl_defs.sp_name = ([15:23-25], "x"); sp_xhp_attr = None;
+        [{ Shallow_decl_defs.sp_name = ([14:23-25], "x"); sp_xhp_attr = None;
            sp_type =
-           (Some (Rhint ([15:19-22]), (Tapply (([15:19-22], "\\Foo"), []))));
+           (Some (Rhint ([14:19-22]), (Tapply (([14:19-22], "\\Foo"), []))));
            sp_visibility = Public; sp_flags = needs_init | readonly };
-          { Shallow_decl_defs.sp_name = ([18:25-27], "y");
+          { Shallow_decl_defs.sp_name = ([17:25-27], "y");
             sp_xhp_attr = None;
             sp_type =
-            (Some (Rhint ([18:21-24]), (Tapply (([18:21-24], "\\Foo"), []))));
+            (Some (Rhint ([17:21-24]), (Tapply (([17:21-24], "\\Foo"), []))));
             sp_visibility = Public; sp_flags = needs_init | readonly }
           ];
         sc_sprops = [];
         sc_constructor =
-        (Some { Shallow_decl_defs.sm_name = ([17:19-30], "__construct");
+        (Some { Shallow_decl_defs.sm_name = ([16:19-30], "__construct");
                 sm_type =
-                (Rwitness_from_decl ([17:19-30]),
+                (Rwitness_from_decl ([16:19-30]),
                  (Tfun
                     { ft_arity = (Fstandard ()); ft_tparams = [];
                       ft_where_constraints = [];
                       ft_params =
-                      [{ fp_pos = [18:25-27]; fp_name = (Some "$y");
+                      [{ fp_pos = [17:25-27]; fp_name = (Some "$y");
                          fp_type =
                          { et_enforced = Typing_defs_core.Unenforced;
                            et_type =
-                           (Rhint ([18:21-24]),
-                            (Tapply (([18:21-24], "\\Foo"), [])))
+                           (Rhint ([17:21-24]),
+                            (Tapply (([17:21-24], "\\Foo"), [])))
                            };
                          fp_flags =
                          (make_fp_flags ~accept_disposable:false
@@ -108,11 +108,11 @@
                           }
                         ];
                       ft_implicit_params =
-                      { capability = (CapDefaults [17:19-30]) };
+                      { capability = (CapDefaults [16:19-30]) };
                       ft_ret =
                       { et_enforced = Typing_defs_core.Unenforced;
                         et_type =
-                        (Rwitness_from_decl ([17:19-30]), (Tprim Tvoid)) };
+                        (Rwitness_from_decl ([16:19-30]), (Tprim Tvoid)) };
                       ft_flags =
                       (make_ft_flags FSync ~return_disposable:false
                         ~returns_readonly:false ~support_dynamic_type:false
@@ -122,26 +122,26 @@
                 sm_flags = (empty); sm_attributes = [] });
         sc_static_methods = [];
         sc_methods =
-        [{ Shallow_decl_defs.sm_name = ([22:28-34], "getFoo");
+        [{ Shallow_decl_defs.sm_name = ([21:28-34], "getFoo");
            sm_type =
-           (Rwitness_from_decl ([22:28-34]),
+           (Rwitness_from_decl ([21:28-34]),
             (Tfun
                { ft_arity = (Fstandard ()); ft_tparams = [];
                  ft_where_constraints = [];
                  ft_params =
-                 [{ fp_pos = [22:63-65]; fp_name = (Some "$v");
+                 [{ fp_pos = [21:63-65]; fp_name = (Some "$v");
                     fp_type =
                     { et_enforced = Typing_defs_core.Unenforced;
                       et_type =
-                      (Rhint ([22:35-62]),
+                      (Rhint ([21:35-62]),
                        (Tfun
                           { ft_arity = (Fstandard ()); ft_tparams = [];
                             ft_where_constraints = []; ft_params = [];
                             ft_implicit_params =
-                            { capability = (CapDefaults [22:35-62]) };
+                            { capability = (CapDefaults [21:35-62]) };
                             ft_ret =
                             { et_enforced = Typing_defs_core.Unenforced;
-                              et_type = (Rhint ([22:57-61]), (Tprim Tvoid)) };
+                              et_type = (Rhint ([21:57-61]), (Tprim Tvoid)) };
                             ft_flags =
                             (make_ft_flags FSync ~return_disposable:false
                               ~returns_readonly:false
@@ -157,10 +157,10 @@
                      }
                    ];
                  ft_implicit_params =
-                 { capability = (CapDefaults [22:28-34]) };
+                 { capability = (CapDefaults [21:28-34]) };
                  ft_ret =
                  { et_enforced = Typing_defs_core.Unenforced;
-                   et_type = (Rhint ([22:69-73]), (Tprim Tvoid)) };
+                   et_type = (Rhint ([21:69-73]), (Tprim Tvoid)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~support_dynamic_type:false

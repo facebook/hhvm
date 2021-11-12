@@ -1,6 +1,6 @@
-File "constructor_call.php", line 11, characters 11-12:
+File "constructor_call.php", line 10, characters 11-12:
 Invalid argument (Typing[4411])
-  File "constructor_call.php", line 11, characters 11-12:
+  File "constructor_call.php", line 10, characters 11-12:
   This expression is readonly
-  File "constructor_call.php", line 5, characters 44-47:
+  File "constructor_call.php", line 4, characters 44-47:
   It is incompatible with this parameter, which is mutable

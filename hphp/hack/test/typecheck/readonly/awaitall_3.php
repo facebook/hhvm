@@ -1,5 +1,4 @@
 <?hh
-<<file:__EnableUnstableFeatures("readonly")>>
 class Bar {
   public readonly int $ro_prop = 3;
   public int $prop = 3;

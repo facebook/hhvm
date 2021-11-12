@@ -1,12 +1,12 @@
-File "args.php", line 29, characters 17-18:
+File "args.php", line 28, characters 17-18:
 Invalid argument (Typing[4411])
-  File "args.php", line 29, characters 17-18:
+  File "args.php", line 28, characters 17-18:
   This expression is readonly
-  File "args.php", line 18, characters 28-29:
+  File "args.php", line 17, characters 28-29:
   It is incompatible with this parameter, which is mutable
-File "args.php", line 30, characters 21-22:
+File "args.php", line 29, characters 21-22:
 Invalid argument (Typing[4411])
-  File "args.php", line 30, characters 21-22:
+  File "args.php", line 29, characters 21-22:
   This expression is readonly
-  File "args.php", line 9, characters 46-51:
+  File "args.php", line 8, characters 46-51:
   It is incompatible with this parameter, which is mutable

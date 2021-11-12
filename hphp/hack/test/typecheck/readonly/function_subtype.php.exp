@@ -1,56 +1,56 @@
-File "function_subtype.php", line 31, characters 19-21:
+File "function_subtype.php", line 30, characters 19-21:
 The method `get` is not compatible with the overridden method (Typing[4341])
-  File "function_subtype.php", line 31, characters 19-21:
+  File "function_subtype.php", line 30, characters 19-21:
   Function readonly mismatch
-  File "function_subtype.php", line 31, characters 19-21:
+  File "function_subtype.php", line 30, characters 19-21:
   This function is not marked readonly
-  File "function_subtype.php", line 10, characters 28-30:
+  File "function_subtype.php", line 9, characters 28-30:
   This function is marked readonly
-File "function_subtype.php", line 36, characters 19-27:
+File "function_subtype.php", line 35, characters 19-27:
 The method `return_ro` is not compatible with the overridden method (Typing[4341])
-  File "function_subtype.php", line 36, characters 19-27:
+  File "function_subtype.php", line 35, characters 19-27:
   Function readonly return mismatch
-  File "function_subtype.php", line 36, characters 19-27:
+  File "function_subtype.php", line 35, characters 19-27:
   This function returns a readonly value
-  File "function_subtype.php", line 14, characters 19-27:
+  File "function_subtype.php", line 13, characters 19-27:
   This function does not return a readonly value
-File "function_subtype.php", line 40, characters 19-27:
+File "function_subtype.php", line 39, characters 19-27:
 The method `setParams` is not compatible with the overridden method (Typing[4341])
-  File "function_subtype.php", line 23, characters 50-51:
+  File "function_subtype.php", line 22, characters 50-51:
   Mismatched parameter readonlyness
-  File "function_subtype.php", line 23, characters 50-51:
+  File "function_subtype.php", line 22, characters 50-51:
   This parameter is mutable
-  File "function_subtype.php", line 41, characters 17-18:
+  File "function_subtype.php", line 40, characters 17-18:
   But this parameter is readonly
-File "function_subtype.php", line 46, characters 19-29:
+File "function_subtype.php", line 45, characters 19-29:
 The method `readonlyFun` is not compatible with the overridden method (Typing[4341])
-  File "function_subtype.php", line 19, characters 5-30:
+  File "function_subtype.php", line 18, characters 5-30:
   Function readonly mismatch
-  File "function_subtype.php", line 19, characters 5-30:
+  File "function_subtype.php", line 18, characters 5-30:
   This function is not marked readonly
-  File "function_subtype.php", line 47, characters 5-39:
+  File "function_subtype.php", line 46, characters 5-39:
   This function is marked readonly
-File "function_subtype.php", line 63, characters 11-12:
+File "function_subtype.php", line 62, characters 11-12:
 Invalid argument (Typing[4411])
-  File "function_subtype.php", line 55, characters 22-26:
+  File "function_subtype.php", line 54, characters 22-26:
   Mismatched parameter readonlyness
-  File "function_subtype.php", line 55, characters 22-26:
+  File "function_subtype.php", line 54, characters 22-26:
   This parameter is mutable
-  File "function_subtype.php", line 59, characters 23-24:
+  File "function_subtype.php", line 58, characters 23-24:
   But this parameter is readonly
-File "function_subtype.php", line 65, characters 11-13:
+File "function_subtype.php", line 64, characters 11-13:
 Invalid argument (Typing[4411])
-  File "function_subtype.php", line 56, characters 3-46:
+  File "function_subtype.php", line 55, characters 3-46:
   Function readonly return mismatch
-  File "function_subtype.php", line 56, characters 3-46:
+  File "function_subtype.php", line 55, characters 3-46:
   This function returns a readonly value
-  File "function_subtype.php", line 55, characters 3-36:
+  File "function_subtype.php", line 54, characters 3-36:
   This function does not return a readonly value
-File "function_subtype.php", line 87, characters 15-16:
+File "function_subtype.php", line 86, characters 15-16:
 Invalid argument (Typing[4411])
-  File "function_subtype.php", line 84, characters 8-26:
+  File "function_subtype.php", line 83, characters 8-26:
   Function readonly mismatch
-  File "function_subtype.php", line 84, characters 8-26:
+  File "function_subtype.php", line 83, characters 8-26:
   This function is not marked readonly
-  File "function_subtype.php", line 79, characters 31-57:
+  File "function_subtype.php", line 78, characters 31-57:
   This function is marked readonly

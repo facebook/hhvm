@@ -1,7 +1,6 @@
 //// file1.php
 <?hh // strict
 
-<<file:__EnableUnstableFeatures("readonly")>>
 
 class C {
   public readonly int $p1 = 0;

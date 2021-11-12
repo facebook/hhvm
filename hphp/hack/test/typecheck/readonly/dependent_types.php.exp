@@ -1,14 +1,14 @@
-File "dependent_types.php", line 14, characters 5-14:
+File "dependent_types.php", line 13, characters 5-14:
 This value is readonly, its properties cannot be modified (Typing[4409])
-File "dependent_types.php", line 14, characters 5-19:
+File "dependent_types.php", line 13, characters 5-19:
 Invalid property assignment (Typing[4411])
-  File "dependent_types.php", line 14, characters 23-40:
+  File "dependent_types.php", line 13, characters 23-40:
   This expression is readonly
-  File "dependent_types.php", line 9, characters 16-19:
+  File "dependent_types.php", line 8, characters 16-19:
   But it's being assigned to a mutable property
-File "dependent_types.php", line 16, characters 5-11:
+File "dependent_types.php", line 15, characters 5-11:
 Invalid property assignment (Typing[4411])
-  File "dependent_types.php", line 16, characters 15-32:
+  File "dependent_types.php", line 15, characters 15-32:
   This expression is readonly
-  File "dependent_types.php", line 9, characters 16-19:
+  File "dependent_types.php", line 8, characters 16-19:
   But it's being assigned to a mutable property

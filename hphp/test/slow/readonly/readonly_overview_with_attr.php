@@ -1,5 +1,5 @@
 <?hh
-<<file:__EnableUnstableFeatures("readonly")>>
+
 class Foo {
   public int $prop = 2;
 }

@@ -7,7 +7,6 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  */
-<<file:__EnableUnstableFeatures('readonly')>>
 
 /**
  * This file provides type information for some of PHP's predefined functions

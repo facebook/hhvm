@@ -1,5 +1,4 @@
 <?hh
-<<file:__EnableUnstableFeatures("readonly")>>
 function foo(int $x, (function(int): int) $f): int {
   return $f($x);
 }

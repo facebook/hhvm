@@ -1,6 +1,5 @@
 <?hh   /* -*- php -*- */
 
-<<file:__EnableUnstableFeatures('readonly')>>
 
 /**
  * Copyright (c) 2014, Facebook, Inc.

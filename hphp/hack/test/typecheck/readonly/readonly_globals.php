@@ -1,6 +1,4 @@
 <?hh
-<<file:__EnableUnstableFeatures('readonly')>>
-
 
 function get_readonly_global(string $key)[policied]: void {
   // can't call from policied context

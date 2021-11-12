@@ -89,10 +89,12 @@ find_package(fmt REQUIRED)
 find_package(FBThrift REQUIRED)
 find_package(wangle REQUIRED)
 
+find_path(JEMALLOC_INCLUDE_DIR NAMES jemalloc/jemalloc.h REQUIRED)
+
 include(mcrouter-thrift-codegen.cmake)
 
 target_link_libraries(mcrouter mcrouter_thrift_lib Folly::folly boost fizz fmt)
-target_include_directories(mcrouter PUBLIC "${CMAKE_CURRENT_BINARY_DIR}")
+target_include_directories(mcrouter PUBLIC "${CMAKE_CURRENT_BINARY_DIR}" "${JEMALLOC_INCLUDE_DIR}")
 
 install(
   TARGETS mcrouter

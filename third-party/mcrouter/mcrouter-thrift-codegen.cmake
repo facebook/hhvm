@@ -67,3 +67,8 @@ add_library(mcrouter_thrift_lib STATIC EXCLUDE_FROM_ALL ${CODEGEN_SOURCES})
 add_dependencies(mcrouter_thrift_lib mcrouter_thrift1_codegen)
 target_link_libraries(mcrouter_thrift_lib PUBLIC FBThrift::thriftcpp2)
 target_include_directories(mcrouter_thrift_lib PUBLIC ${CODEGEN_SOURCES_DIR} "${JEMALLOC_INCLUDE_DIR}")
+
+install(
+  TARGETS mcrouter_thrift_lib
+  LIBRARY ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
+)

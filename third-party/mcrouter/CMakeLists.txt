@@ -72,5 +72,6 @@ target_link_libraries(
   mcrouter
   INTERFACE
   "${INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}mcrouter${CMAKE_STATIC_LIBRARY_SUFFIX}"
+  "${INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}mcrouter_thrift_lib${CMAKE_STATIC_LIBRARY_SUFFIX}"
   mcrouter_deps
 )

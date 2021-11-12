@@ -11,8 +11,20 @@ SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
   FILENAME_PREFIX "mcrouter-"
 )
 
-set(MCROUTER_LIBRARY_DEPS folly boost fmt thrift fizz jemalloc wangle)
-set(MCROUTER_DEPS ${MCROUTER_LIBRARY_DEPS} ragel)
+
+add_library(mcrouter_deps INTERFACE)
+target_link_libraries(
+  mcrouter_deps
+  INTERFACE
+  boost
+  fizz
+  fmt
+  folly
+  jemalloc
+  thrift
+  wangle
+)
+add_dependencies(mcrouter_deps ragel)
 
 ExternalProject_Add(
   bundled_mcrouter
@@ -50,7 +62,7 @@ ExternalProject_Add(
     "-Dfizz_DIR=${FIZZ_INSTALL_DIR}/lib/cmake/fizz"
     "-DFBThrift_DIR=${THRIFT_INSTALL_DIR}/lib/cmake/fbthrift"
     "-Dwangle_DIR=${WANGLE_INSTALL_DIR}/lib/cmake/wangle"
-  DEPENDS ${MCROUTER_LIBRARY_DEPS}
+  DEPENDS mcrouter_deps
   EXCLUDE_FROM_ALL
 )
 
@@ -65,9 +77,6 @@ target_include_directories(
   "${BINARY_DIR}"
   "${BINARY_DIR}/thrift-gen/src"
 )
-add_library(mcrouter_deps INTERFACE)
-target_link_libraries(mcrouter_deps INTERFACE ${MCROUTER_LIBRARY_DEPS})
-add_dependencies(bundled_mcrouter ${MCROUTER_DEPS})
 target_link_libraries(
   mcrouter
   INTERFACE

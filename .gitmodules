@@ -13,9 +13,6 @@
 [submodule "libafdt"]
 	path = third-party/libafdt/src
 	url = https://github.com/facebook/libafdt
-[submodule "re2"]
-	path = third-party/re2/src
-	url = https://github.com/google/re2.git
 [submodule "xed-mbuild"]
 	path = third-party/xed/mbuild
 	url = https://github.com/intelxed/mbuild.git

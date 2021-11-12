@@ -73,16 +73,8 @@ endif()
 add_subdirectory(lz4)
 
 # fb-mysql must go after lz4 and zstd because it needs to know its <INSTALL_DIR>
+add_subdirectory(re2)
 add_subdirectory(fb-mysql)
-find_package(RE2)
-if(NOT RE2_LIBRARY)
-  message(STATUS "Building RE2 from third-party")
-  add_subdirectory(re2)
-else()
-  add_library(re2 INTERFACE)
-  target_link_libraries(re2 INTERFACE ${RE2_LIBRARY})
-  target_include_directories(re2 INTERFACE ${RE2_INCLUDE_DIR})
-endif()
 add_subdirectory(squangle)
 
 if (ENABLE_MCROUTER)

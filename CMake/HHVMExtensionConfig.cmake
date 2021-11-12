@@ -639,7 +639,6 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
     ${libraryName} STREQUAL "folly" OR
     ${libraryName} STREQUAL "lz4" OR
     ${libraryName} STREQUAL "mbfl" OR
-    ${libraryName} STREQUAL "mcrouter" OR
     ${libraryName} STREQUAL "oniguruma" OR
     ${libraryName} STREQUAL "openssl" OR
     ${libraryName} STREQUAL "pcre" OR
@@ -1039,10 +1038,20 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
       endif()
     endif()
   elseif (TARGET "${dependencyName}")
+    # If we have libfoo, resolve as libfoo
     message(STATUS "Resolving extension '${HHVM_EXTENSION_${extensionID}_NAME}' dependency '${dependencyName}' as CMake target")
     if (${addPaths})
       HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${dependencyName})
       get_target_property(DEPENDENCY_TARGET_INCLUDE_DIR ${dependencyName} INTERFACE_INCLUDE_DIRECTORIES)
+      HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS("${DEPENDENCY_TARGET_INCLUDE_DIR}")
+    endif ()
+  elseif (TARGET "${originalLibraryName}")
+    # If we have libfoo, resolve as 'foo'; the `lib` prefix is needed for our cmake to consider it to be a
+    # library dependency, so either case is valid :(
+    message(STATUS "Resolving extension '${HHVM_EXTENSION_${extensionID}_NAME}' dependency '${dependencyName}' as CMake target '${originalLibraryName}'")
+    if (${addPaths})
+      HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${originalLibraryName})
+      get_target_property(DEPENDENCY_TARGET_INCLUDE_DIR ${originalLibraryName} INTERFACE_INCLUDE_DIRECTORIES)
       HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS("${DEPENDENCY_TARGET_INCLUDE_DIR}")
     endif ()
   else()

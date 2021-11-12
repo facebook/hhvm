@@ -38,13 +38,11 @@ Overall process:
 4. Update the hashes in `third-party/foo/CMakeLists.txt` to match `openssl dgst -sha256 *.tar.gz`
 5. **Requires FB employee**: update our CI caches - this can be done on your laptop, it does not need a devserver.
    `for file in *; do manifold put $file hhvm_opensource_dependency_cache/flat/$file; done`
-6. Update any submodules to a compatible commit from the same day. As of 2021-10-14, this is only needed for mcrouter.
-7. Try to build; fix any patches/build issues
-8. Create pull request and (requires FB employee) diff
-9. If you were working in Ubuntu, pull onto MacOS and do a local test build. If you were working in MacOS, pull into Ubuntu and do a test build
-10. Land once everything's good :) Don't do this on a Friday.
-11. Check nightly build results the next day. Fix any portability issues that weren't caught by CI.
-
+6. Try to build; fix any patches/build issues
+7. Create pull request and (requires FB employee) diff
+8. If you were working in Ubuntu, pull onto MacOS and do a local test build. If you were working in MacOS, pull into Ubuntu and do a test build
+9. Land once everything's good :) Don't do this on a Friday.
+10. Check nightly build results the next day. Fix any portability issues that weren't caught by CI.
 
 LICENSING
 ---------

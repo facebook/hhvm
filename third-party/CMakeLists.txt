@@ -89,8 +89,7 @@ if (ENABLE_MCROUTER)
   # Ragel is only used at build time to generate some files for MCRouter.
   list(APPEND THIRD_PARTY_MODULES forks/ragel)
 
-  list(APPEND THIRD_PARTY_MODULES mcrouter)
-  list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/mcrouter/src")
+  add_subdirectory(mcrouter)
 endif()
 
 # Add bundled fastlz if the system one will not be used

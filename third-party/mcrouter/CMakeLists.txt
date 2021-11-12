@@ -1,93 +1,77 @@
-include(mcrouter-thrift-codegen.cmake)
-set(C_SOURCES)
-auto_sources(files "*.c" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}/mcrouter")
+add_library(mcrouter INTERFACE)
 
-foreach (file ${files})
-  if (${file} MATCHES "/(test|tools|examples?)/")
-    list(REMOVE_ITEM files ${file})
-  endif()
-  if (${file} MATCHES "/mc_fbtrace_info.c$")
-    list(REMOVE_ITEM files ${file})
-  endif()
+include(ExternalProject)
+include(HPHPFunctions)
 
-endforeach()
-list(APPEND C_SOURCES ${files})
-
-set(CXX_SOURCES)
-auto_sources(src_files "*.cpp" RECURSE "${CMAKE_CURRENT_SOURCE_DIR}/mcrouter")
-set(files ${src_files})
-foreach (file ${files})
-  if (${file} MATCHES "(/(test|tools|examples?)/|(StandaloneUtils|Test(Main)?|main).cpp$)")
-    list(REMOVE_ITEM files ${file})
-  endif()
-endforeach()
-add_custom_command(
-  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/mcrouter/lib/network/McAsciiParser-gen.cpp
-  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/mcrouter/lib/network/McAsciiParser.rl
-  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/mcrouter/lib/network
-  COMMAND ragel -G1 -o ${CMAKE_CURRENT_BINARY_DIR}/mcrouter/lib/network/McAsciiParser-gen.cpp ${CMAKE_CURRENT_SOURCE_DIR}/mcrouter/lib/network/McAsciiParser.rl
-  COMMENT "Generating McAsciiParser-gen.cpp")
-list(APPEND CXX_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/mcrouter/lib/network/McAsciiParser-gen.cpp")
-add_custom_command(
-  OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/mcrouter/RouterRegistry.h"
-  DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/mcrouter/RouterRegistry-impl.h"
-  COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/mcrouter"
-  COMMAND ${CMAKE_COMMAND} -E create_symlink
-    "${CMAKE_CURRENT_SOURCE_DIR}/mcrouter/RouterRegistry-impl.h"
-    "${CMAKE_CURRENT_BINARY_DIR}/mcrouter/RouterRegistry.h"
-  COMMENT "Creating RouterRegistry.h symlink"
+SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
+  MCROUTER_DOWNLOAD_ARGS
+  SOURCE_URL "https://github.com/facebook/mcrouter/archive/refs/tags/v2021.10.18.00.tar.gz"
+  SOURCE_HASH "SHA256=ba38a89ef3b1b358d53e0485a9fa146fcecf4422e142edf566f955b2447b79e5"
+  # The tarball name is just the tag name, which can conflict in the cache
+  FILENAME_PREFIX "mcrouter-"
 )
-add_custom_command(
-  OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/mcrouter/ThriftAcceptor.h"
-  DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/mcrouter/ThriftAcceptor-impl.h"
-  COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/mcrouter"
-  COMMAND ${CMAKE_COMMAND} -E create_symlink
-    "${CMAKE_CURRENT_SOURCE_DIR}/mcrouter/ThriftAcceptor-impl.h"
-    "${CMAKE_CURRENT_BINARY_DIR}/mcrouter/ThriftAcceptor.h"
-  COMMENT "Creating ThriftAcceptor.h symlink"
+
+set(MCROUTER_LIBRARY_DEPS folly boost fmt thrift fizz jemalloc wangle)
+set(MCROUTER_DEPS ${MCROUTER_LIBRARY_DEPS} ragel)
+
+ExternalProject_Add(
+  bundled_mcrouter
+  ${MCROUTER_DOWNLOAD_ARGS}
+  PATCH_COMMAND
+    "${CMAKE_COMMAND}" -E create_symlink 
+    "${CMAKE_CURRENT_SOURCE_DIR}/mcrouter-CMakeLists.txt"
+    "CMakeLists.txt"
+    &&
+    "${CMAKE_COMMAND}" -E create_symlink 
+    "${CMAKE_CURRENT_SOURCE_DIR}/mcrouter-thrift-codegen.cmake"
+    "mcrouter-thrift-codegen.cmake"
+    &&
+    "${CMAKE_COMMAND}" -E copy 
+    "${CMAKE_CURRENT_SOURCE_DIR}/config.h"
+    "mcrouter/"
+    &&
+    "${CMAKE_COMMAND}" -E copy 
+    "${CMAKE_CURRENT_SOURCE_DIR}/config-impl.h"
+    "mcrouter/"
+  CMAKE_ARGS
+    -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+    -DCMAKE_INSTALL_INCLUDEDIR=include
+    -DCMAKE_INSTALL_LIBDIR=lib
+    "-DCMAKE_OSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET}"
+    "-DBOOST_INCLUDE_DIR=$<TARGET_PROPERTY:boost,INTERFACE_INCLUDE_DIRECTORIES>"
+    "-DGLOG_INCLUDE_DIR=${LIBGLOG_INCLUDE_DIR}"
+    "-DJEMALLOC_INCLUDE_DIR=$<TARGET_PROPERTY:jemalloc,INTERFACE_INCLUDE_DIRECTORIES>"
+    "-DLIBEVENT_INCLUDE_DIR=${LIBEVENT_INCLUDE_DIR}"
+    "-DOPENSSL_INCLUDE_DIR=${OPENSSL_INCLUDE_DIR}"
+
+    "-Dragel_EXECUTABLE=$<TARGET_FILE:ragel>"
+
+    "-Dfmt_DIR=${FMT_INSTALL_DIR}/lib/cmake/fmt"
+    "-Dfolly_DIR=${FOLLY_INSTALL_DIR}/lib/cmake/folly"
+    "-Dfizz_DIR=${FIZZ_INSTALL_DIR}/lib/cmake/fizz"
+    "-DFBThrift_DIR=${THRIFT_INSTALL_DIR}/lib/cmake/fbthrift"
+    "-Dwangle_DIR=${WANGLE_INSTALL_DIR}/lib/cmake/wangle"
+  DEPENDS ${MCROUTER_LIBRARY_DEPS}
+  EXCLUDE_FROM_ALL
 )
-add_custom_command(
-  OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/mcrouter/mcrouter_sr_deps.h"
-  DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/mcrouter/mcrouter_sr_deps-impl.h"
-  COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/mcrouter"
-  COMMAND ${CMAKE_COMMAND} -E create_symlink
-    "${CMAKE_CURRENT_SOURCE_DIR}/mcrouter/mcrouter_sr_deps-impl.h"
-    "${CMAKE_CURRENT_BINARY_DIR}/mcrouter/mcrouter_sr_deps.h"
-  COMMENT "Creating mcrouter_sr_deps.h symlink"
+
+add_dependencies(mcrouter bundled_mcrouter)
+ExternalProject_Get_Property(bundled_mcrouter INSTALL_DIR)
+ExternalProject_Get_Property(bundled_mcrouter SOURCE_DIR)
+ExternalProject_Get_Property(bundled_mcrouter BINARY_DIR)
+target_include_directories(
+  mcrouter
+  INTERFACE
+  "${SOURCE_DIR}"
+  "${BINARY_DIR}"
+  "${BINARY_DIR}/thrift-gen/src"
 )
-list(APPEND CXX_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/mcrouter/RouterRegistry.h")
-list(APPEND CXX_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/mcrouter/ThriftAcceptor.h")
-list(APPEND CXX_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/mcrouter/mcrouter_sr_deps.h")
-list(APPEND CXX_SOURCES ${files})
-
-# We need to make sure several files are the same
-macro(WRITE_IMPL_FILE dirName sourceName)
-  # These were previously symlinks, causing issues when trying to
-  # install the headers, so, if it's either a symlink, or it doesn't
-  # exist, create it.
-  if (IS_SYMLINK "${dirName}/${sourceName}.h")
-    file(REMOVE "${dirName}/${sourceName}.h")
-  endif()
-  if (NOT EXISTS "${dirName}/${sourceName}.h")
-    file(WRITE "${dirName}/${sourceName}.h" "#include \"${sourceName}Impl.h\"")
-  endif()
-endmacro()
-WRITE_IMPL_FILE("${CMAKE_CURRENT_SOURCE_DIR}/mcrouter/lib/network/" "CaretSerializedMessage")
-WRITE_IMPL_FILE("${CMAKE_CURRENT_SOURCE_DIR}/mcrouter/" "ServerOnRequest")
-
-add_definitions(-DNO_LIB_GFLAGS)
-add_definitions(-DLIBMC_FBTRACE_DISABLE)
-add_definitions(-DHAVE_CONFIG_H)
-
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}/..")
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}/gen/")
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
-include_directories("${CMAKE_CURRENT_BINARY_DIR}")
-include_directories("${TP_DIR}/thrift/src")
-include_directories("${TP_DIR}/thrift/gen")
-include_directories("${TP_DIR}/fmt/fmt/include")
-#include_directories("${HPHP_HOME}/third-party/mcrouter/mcrouter/lib/fbi")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-variable")
-add_library(mcrouter STATIC ${C_SOURCES} ${CXX_SOURCES})
-target_link_libraries(mcrouter mcrouter_thrift_lib folly thrift boost fizz fmt)
-target_include_directories(mcrouter PUBLIC "${CMAKE_CURRENT_BINARY_DIR}")
+add_library(mcrouter_deps INTERFACE)
+target_link_libraries(mcrouter_deps INTERFACE ${MCROUTER_LIBRARY_DEPS})
+add_dependencies(bundled_mcrouter ${MCROUTER_DEPS})
+target_link_libraries(
+  mcrouter
+  INTERFACE
+  "${INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}mcrouter${CMAKE_STATIC_LIBRARY_SUFFIX}"
+  mcrouter_deps
+)

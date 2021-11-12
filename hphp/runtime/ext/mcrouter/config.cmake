@@ -8,6 +8,6 @@ HHVM_DEFINE_EXTENSION("mcrouter"
   SYSTEMLIB
     ext_mcrouter.php
   DEPENDS
-    libMCRouter
+    libmcrouter
     varENABLE_MCROUTER
 )

@@ -12,7 +12,7 @@
  *
  */
 <<__Native, __NonRx('Randomness')>>
-function random_bytes(int $length): string;
+function random_bytes(int $length)[controlled]: string;
 
 /**
  * Generates cryptographic random integers that are suitable for use where
@@ -28,4 +28,4 @@ function random_bytes(int $length): string;
  *
  */
 <<__Native, __NonRx('Randomness')>>
-function random_int(int $min, int $max): int;
+function random_int(int $min, int $max)[controlled]: int;

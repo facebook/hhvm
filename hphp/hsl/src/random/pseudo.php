@@ -18,7 +18,7 @@ use namespace HH\Lib\{_Private, Math, SecureRandom};
  *
  * For secure random floats, see `SecureRandom\float`.
  */
-function float()[defaults]: float {
+function float()[controlled]: float {
   return (float)(namespace\int(0, Math\INT53_MAX - 1) / Math\INT53_MAX);
 }
 
@@ -51,7 +51,7 @@ function int(
 function string(
   int $length,
   ?string $alphabet = null,
-)[defaults]: string {
+)[controlled]: string {
   // This is a temporary alias. You should never, ever depend on this function
   // being cryptographically secure.
   return SecureRandom\string($length, $alphabet);

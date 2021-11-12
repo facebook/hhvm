@@ -18,4 +18,5 @@ final class CloseableReadWriteHandle
   implements File\CloseableReadWriteHandle {
   use _IO\FileDescriptorReadHandleTrait;
   use _IO\FileDescriptorWriteHandleTrait;
+  use TruncateTrait;
 }

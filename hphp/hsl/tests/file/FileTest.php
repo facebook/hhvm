@@ -104,7 +104,7 @@ final class FileTest extends HackTest {
     }
   }
 
-  public async function testTruncate(): Awaitable<void> {
+  public async function testOpenWithTruncate(): Awaitable<void> {
     using $tf = File\temporary_file();
     $f = $tf->getHandle();
     await $f->writeAllowPartialSuccessAsync('Hello, world');
@@ -178,5 +178,22 @@ final class FileTest extends HackTest {
     // Expectations:
     // - the lock's __dispose didn't throw
     // - the temporary file's __dispose didn't throw
+  }
+
+  public async function testTruncate(): Awaitable<void> {
+    $filename = sys_get_temp_dir().'/'.bin2hex(random_bytes(16));
+    $f = File\open_write_only($filename);
+    using ($f->closeWhenDisposed()) {
+      await $f->writeAllAsync('Hello, World!');
+    }
+    $f = File\open_read_write($filename);
+    using ($f->closeWhenDisposed()) {
+      $f->truncate(5);
+      expect(await $f->readAllAsync())->toEqual('Hello');
+      $f->truncate(2);
+      expect($f->readImpl())->toEqual('');
+      $f->seek(0);
+      expect(await $f->readAllAsync())->toEqual('He');
+    }
   }
 }

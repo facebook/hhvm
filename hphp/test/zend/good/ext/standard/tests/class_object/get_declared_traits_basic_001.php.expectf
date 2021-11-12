@@ -8,6 +8,7 @@ vec(13) {
   string(14) "StrictIterable"
   string(50) "HH\Lib\_Private\_IO\FileDescriptorWriteHandleTrait"
   string(17) "LazyKeyedIterable"
+  string(35) "HH\Lib\_Private\_File\TruncateTrait"
   string(49) "HH\Lib\_Private\_IO\FileDescriptorReadHandleTrait"
   string(32) "ExceptionWithPureGetMessageTrait"
   string(43) "HH\Lib\IO\ReadHandleConvenienceMethodsTrait"

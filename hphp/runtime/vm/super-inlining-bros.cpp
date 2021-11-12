@@ -1190,7 +1190,7 @@ bool mayReadOrWriteGlobals(Op op) {
     case Op::MemoGetEager:
     case Op::MemoSet:
     case Op::MemoSetEager:
-    case Op::SetImplicitContextByIndex:
+    case Op::SetImplicitContextByValue:
       return true;
 
     case Op::Nop:

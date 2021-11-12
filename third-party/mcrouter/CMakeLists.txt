@@ -11,11 +11,8 @@ SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
   FILENAME_PREFIX "mcrouter-"
 )
 
-
-add_library(mcrouter_deps INTERFACE)
-target_link_libraries(
-  mcrouter_deps
-  INTERFACE
+set(
+  MCROUTER_DEPS
   boost
   fizz
   fmt
@@ -24,6 +21,8 @@ target_link_libraries(
   thrift
   wangle
 )
+add_library(mcrouter_deps INTERFACE)
+target_link_libraries(mcrouter_deps INTERFACE ${MCROUTER_DEPS})
 add_dependencies(mcrouter_deps ragel)
 
 ExternalProject_Add(
@@ -62,7 +61,7 @@ ExternalProject_Add(
     "-Dfizz_DIR=${FIZZ_INSTALL_DIR}/lib/cmake/fizz"
     "-DFBThrift_DIR=${THRIFT_INSTALL_DIR}/lib/cmake/fbthrift"
     "-Dwangle_DIR=${WANGLE_INSTALL_DIR}/lib/cmake/wangle"
-  DEPENDS mcrouter_deps
+  DEPENDS ${MCROUTER_DEPS} ragel
   EXCLUDE_FROM_ALL
 )
 

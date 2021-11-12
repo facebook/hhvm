@@ -1,0 +1,23 @@
+diff --git a/watchman/cppclient/WatchmanConnection.cpp b/watchman/cppclient/WatchmanConnection.cpp
+index 382dbc2a..8dc67ca1 100644
+--- a/watchman/cppclient/WatchmanConnection.cpp
++++ b/watchman/cppclient/WatchmanConnection.cpp
+@@ -99,7 +99,17 @@ folly::Future<std::string> WatchmanConnection::getSockPath() {
+           out_pair.second)};
+     }
+     auto result = parseBser(out_pair.first);
+-    return result["unix_domain"].asString();
++
++    // Recent versions of watchman include both `unix_domain` and `sockname`
++    // fields, however older versions - such as v4.9.0, included in Ubuntu
++    // 20.04 - only define `sockname`.
++    //
++    // Prefer the newer, more specific 'unix_domain', but fall back to
++    // 'sockname'.
++    if (result.count("unix_domain")) {
++      return result["unix_domain"].asString();
++    }
++    return result["sockname"].asString();
+   });
+ }
+

@@ -290,7 +290,9 @@ Clusterizer::Clusterizer(Vunit& unit, const Scale& scale)
     , m_scale(scale)
     , m_blocks(sortBlocks(unit)) {
   initClusters();
-  if (RuntimeOption::EvalJitLayoutExtTSP) {
+  auto const isProlog = unit.context && isPrologue(unit.context->kind);
+  if ((RO::EvalJitLayoutExtTSP && !isProlog) ||
+      (RO::EvalJitLayoutExtTSPForPrologues && isProlog)) {
     clusterizeExtTSP();
   } else {
     clusterizeGreedy();

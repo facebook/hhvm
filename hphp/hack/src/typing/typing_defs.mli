@@ -229,6 +229,11 @@ val is_constraint_type_union : constraint_type -> bool
 
 val is_has_member : constraint_type -> bool
 
+(** Can the type be written down in a Hack program?
+  - [false] result is sound but potentially incomplete;
+  - [true] result is complete but potentially unsound.  *)
+val is_denotable : locl_ty -> bool
+
 val show_phase_ty : 'a -> string
 
 val pp_phase_ty : 'a -> 'b -> Base.unit

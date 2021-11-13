@@ -47,7 +47,7 @@ pub fn parse_script<'a>(
             mode,
             arena,
             NoSourceTextAllocator,
-            true,  // omit_user_attributes_irrelevant_to_typechecking
+            false, // retain_or_omit_user_attributes_for_facts
             false, // simplify_naming_for_facts
         )
     };

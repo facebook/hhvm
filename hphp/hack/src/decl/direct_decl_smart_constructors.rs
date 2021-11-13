@@ -78,7 +78,7 @@ pub struct DirectDeclSmartConstructors<'a, 'text, S: SourceTextAllocator<'text, 
     namespace_builder: Rc<NamespaceBuilder<'a>>,
     classish_name_builder: ClassishNameBuilder<'a>,
     type_parameters: Rc<Vec<'a, SSet<'a>>>,
-    omit_user_attributes_irrelevant_to_typechecking: bool,
+    retain_or_omit_user_attributes_for_facts: bool,
     simplify_naming_for_facts: bool,
     previous_token_kind: TokenKind,
 
@@ -92,7 +92,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         file_mode: Mode,
         arena: &'a Bump,
         source_text_allocator: S,
-        omit_user_attributes_irrelevant_to_typechecking: bool,
+        retain_or_omit_user_attributes_for_facts: bool,
         simplify_naming_for_facts: bool,
     ) -> Self {
         let source_text = IndexedSourceText::new(src.clone());
@@ -125,7 +125,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
             // EndOfFile.
             previous_token_kind: TokenKind::EndOfFile,
             source_text_allocator,
-            omit_user_attributes_irrelevant_to_typechecking,
+            retain_or_omit_user_attributes_for_facts,
             simplify_naming_for_facts,
         }
     }
@@ -2585,7 +2585,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                 self.str_from_utf8(escaper::unquote_slice(self.token_bytes(&token))),
                 self.arena,
             ) {
-                Ok(text) if self.omit_user_attributes_irrelevant_to_typechecking => {
+                Ok(text) if !self.retain_or_omit_user_attributes_for_facts => {
                     Node::StringLiteral(self.alloc((text.into(), token_pos(self))))
                 }
                 _ => Node::Ignored(SK::Token(kind)),
@@ -2594,7 +2594,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                 self.str_from_utf8(escaper::unquote_slice(self.token_bytes(&token))),
                 self.arena,
             ) {
-                Ok(text) if self.omit_user_attributes_irrelevant_to_typechecking => {
+                Ok(text) if !self.retain_or_omit_user_attributes_for_facts => {
                     Node::StringLiteral(self.alloc((text.into(), token_pos(self))))
                 }
                 _ => Node::Ignored(SK::Token(kind)),
@@ -2931,10 +2931,10 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         expr: Self::R,
         _rparen: Self::R,
     ) -> Self::R {
-        if self.omit_user_attributes_irrelevant_to_typechecking {
-            expr
-        } else {
+        if self.retain_or_omit_user_attributes_for_facts {
             Node::Ignored(SK::ParenthesizedExpression)
+        } else {
+            expr
         }
     }
 
@@ -2946,7 +2946,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         expr: Self::R,
         _right_bracket: Self::R,
     ) -> Self::R {
-        if self.omit_user_attributes_irrelevant_to_typechecking {
+        if !self.retain_or_omit_user_attributes_for_facts {
             Node::Ignored(SK::KeysetIntrinsicExpression)
         } else if let Node::List([node]) = expr {
             *node
@@ -2963,7 +2963,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         expr: Self::R,
         _right_bracket: Self::R,
     ) -> Self::R {
-        if self.omit_user_attributes_irrelevant_to_typechecking {
+        if !self.retain_or_omit_user_attributes_for_facts {
             Node::Ignored(SK::VarrayIntrinsicExpression)
         } else if let Node::List([node]) = expr {
             *node
@@ -2980,7 +2980,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         expr: Self::R,
         _right_bracket: Self::R,
     ) -> Self::R {
-        if self.omit_user_attributes_irrelevant_to_typechecking {
+        if !self.retain_or_omit_user_attributes_for_facts {
             Node::Ignored(SK::DarrayIntrinsicExpression)
         } else if let Node::List([node]) = expr {
             *node
@@ -2997,7 +2997,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         expr: Self::R,
         _right_bracket: Self::R,
     ) -> Self::R {
-        if self.omit_user_attributes_irrelevant_to_typechecking {
+        if !self.retain_or_omit_user_attributes_for_facts {
             Node::Ignored(SK::VectorIntrinsicExpression)
         } else if let Node::List([node]) = expr {
             *node
@@ -3177,9 +3177,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         // Pop the type params stack only after creating all inner types.
         let tparams = self.pop_type_params(generic_params);
         let parsed_attributes = self.to_attributes(attributes);
-        let user_attributes = if self.omit_user_attributes_irrelevant_to_typechecking {
-            &[][..]
-        } else {
+        let user_attributes = if self.retain_or_omit_user_attributes_for_facts {
             self.slice(attributes.iter().rev().filter_map(|attribute| {
                 if let Node::Attribute(attr) = attribute {
                     Some(self.user_attribute_to_decl(attr))
@@ -3187,6 +3185,8 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                     None
                 }
             }))
+        } else {
+            &[][..]
         };
         let typedef = self.alloc(TypedefType {
             module: self.alloc(parsed_attributes.module),
@@ -3252,9 +3252,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         // Pop the type params stack only after creating all inner types.
         let tparams = self.pop_type_params(generic_params);
         let parsed_attributes = self.to_attributes(attributes);
-        let user_attributes = if self.omit_user_attributes_irrelevant_to_typechecking {
-            &[][..]
-        } else {
+        let user_attributes = if self.retain_or_omit_user_attributes_for_facts {
             self.slice(attributes.iter().rev().filter_map(|attribute| {
                 if let Node::Attribute(attr) = attribute {
                     Some(self.user_attribute_to_decl(attr))
@@ -3262,6 +3260,8 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                     None
                 }
             }))
+        } else {
+            &[][..]
         };
         let typedef = self.alloc(TypedefType {
             module: self.alloc(parsed_attributes.module),
@@ -4438,7 +4438,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         };
 
         let mut user_attributes = Vec::new_in(self.arena);
-        if !self.omit_user_attributes_irrelevant_to_typechecking {
+        if self.retain_or_omit_user_attributes_for_facts {
             for attribute in attrs.iter() {
                 match attribute {
                     Node::Attribute(attr) => {
@@ -5061,16 +5061,14 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                 Some(ClassNameParam { name, full_pos })
             }
             Node::StringLiteral((name, full_pos))
-                if !self.omit_user_attributes_irrelevant_to_typechecking =>
+                if self.retain_or_omit_user_attributes_for_facts =>
             {
                 Some(ClassNameParam {
                     name: Id(Pos::none(), self.str_from_utf8_for_bytes_in_arena(*name)),
                     full_pos,
                 })
             }
-            Node::IntLiteral((name, full_pos))
-                if !self.omit_user_attributes_irrelevant_to_typechecking =>
-            {
+            Node::IntLiteral((name, full_pos)) if self.retain_or_omit_user_attributes_for_facts => {
                 Some(ClassNameParam {
                     name: Id(Pos::none(), name),
                     full_pos,
@@ -5545,7 +5543,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         attributes: Self::R,
         _right_double_angle: Self::R,
     ) -> Self::R {
-        if !self.omit_user_attributes_irrelevant_to_typechecking {
+        if self.retain_or_omit_user_attributes_for_facts {
             for attr in attributes.iter() {
                 match attr {
                     Node::Attribute(attr) => self

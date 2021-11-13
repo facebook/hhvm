@@ -63,6 +63,6 @@ function pseudorandom_seed(int $seed): void;
  *
  */
 <<__Native>>
-function random_int(int $min = \PHP_INT_MIN, int $max = \PHP_INT_MAX): int;
+function random_int(int $min = \PHP_INT_MIN, int $max = \PHP_INT_MAX)[controlled]: int;
 
 }

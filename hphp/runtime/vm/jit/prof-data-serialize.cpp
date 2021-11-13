@@ -1310,7 +1310,7 @@ void write_raw_string(ProfDataSerializer& ser, const StringData* str) {
 StringData* read_raw_string(ProfDataDeserializer& ser,
                             bool skip /* = false */) {
   auto const sz = read_raw<uint32_t>(ser);
-  constexpr uint32_t kMaxStringLen = 2 << 20;
+  constexpr uint32_t kMaxStringLen = StringData::MaxSize;
   if (sz > kMaxStringLen) {
     throw std::runtime_error("string too long, likely corrupt");
   }

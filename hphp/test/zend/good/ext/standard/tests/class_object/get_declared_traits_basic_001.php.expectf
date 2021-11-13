@@ -1,7 +1,7 @@
 *** Testing get_declared_traits() : basic functionality ***
 
 -- Testing get_declared_traits() function with Zero arguments --
-vec(13) {
+vec(14) {
   string(44) "HH\Lib\IO\WriteHandleConvenienceMethodsTrait"
   string(24) "ReflectionTypedAttribute"
   string(19) "StrictKeyedIterable"

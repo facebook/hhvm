@@ -63,6 +63,7 @@ pub struct Opts {
     #[structopt(long)]
     disable_toplevel_elaboration: bool,
 
+    /// Number of parallel worker threads. By default, or if set to 0 or 1, use num-cpu threads.
     #[structopt(long)]
     thread_num: Option<usize>,
 }
@@ -91,7 +92,7 @@ pub fn run(opts: Opts) -> anyhow::Result<()> {
                 opts.filename
                     .as_ref()
                     .cloned()
-                    .ok_or_else(|| anyhow! {"TODO(hrust) support stdin"})?,
+                    .ok_or_else(|| anyhow!("TODO(hrust) support stdin"))?,
             ],
         };
 

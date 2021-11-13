@@ -36,9 +36,11 @@ pub fn to_files<'p, 't>(
         if contents.len() + 1 == delims.len() {
             contents.push(vec![]);
         } else if contents.len() != delims.len() {
-            return Err(
-                anyhow! {"delims len {} and content len {} mismatch.", delims.len(), contents.len()},
-            );
+            return Err(anyhow!(
+                "delims len {} and content len {} mismatch.",
+                delims.len(),
+                contents.len()
+            ));
         }
         Ok(delims
             .iter()

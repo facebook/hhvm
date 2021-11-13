@@ -2585,15 +2585,19 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                 self.str_from_utf8(escaper::unquote_slice(self.token_bytes(&token))),
                 self.arena,
             ) {
-                Ok(text) => Node::StringLiteral(self.alloc((text.into(), token_pos(self)))),
-                Err(_) => Node::Ignored(SK::Token(kind)),
+                Ok(text) if self.omit_user_attributes_irrelevant_to_typechecking => {
+                    Node::StringLiteral(self.alloc((text.into(), token_pos(self))))
+                }
+                _ => Node::Ignored(SK::Token(kind)),
             },
             TokenKind::NowdocStringLiteral => match escaper::unescape_nowdoc_in(
                 self.str_from_utf8(escaper::unquote_slice(self.token_bytes(&token))),
                 self.arena,
             ) {
-                Ok(text) => Node::StringLiteral(self.alloc((text.into(), token_pos(self)))),
-                Err(_) => Node::Ignored(SK::Token(kind)),
+                Ok(text) if self.omit_user_attributes_irrelevant_to_typechecking => {
+                    Node::StringLiteral(self.alloc((text.into(), token_pos(self))))
+                }
+                _ => Node::Ignored(SK::Token(kind)),
             },
             TokenKind::DecimalLiteral
             | TokenKind::OctalLiteral
@@ -2927,7 +2931,11 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         expr: Self::R,
         _rparen: Self::R,
     ) -> Self::R {
-        expr
+        if self.omit_user_attributes_irrelevant_to_typechecking {
+            expr
+        } else {
+            Node::Ignored(SK::ParenthesizedExpression)
+        }
     }
 
     fn make_keyset_intrinsic_expression(

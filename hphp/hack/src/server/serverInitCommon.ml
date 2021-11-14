@@ -93,7 +93,6 @@ let parsing
   (env, Hh_logger.log_duration ("Parsing " ^ telemetry_label) t)
 
 let update_files
-    ?(warn_on_naming_costly_iter : bool option)
     (genv : ServerEnv.genv)
     (naming_table : Naming_table.t)
     (ctx : Provider_context.t)
@@ -108,10 +107,7 @@ let update_files
     CgroupProfiler.step_start_end cgroup_steps telemetry_label
     @@ fun _cgroup_step ->
     if Naming_provider.ByHash.need_update_files ctx then
-      Naming_table.iter
-        ?warn_on_naming_costly_iter
-        naming_table
-        ~f:(fun path fi ->
+      Naming_table.iter naming_table ~f:(fun path fi ->
           Naming_provider.ByHash.update_file ctx path fi ~old:None;
           count := !count + 1);
     HackEventLogger.updating_deps_end

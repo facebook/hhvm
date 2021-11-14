@@ -770,12 +770,7 @@ let get_local_changes (db_path : db_path) : local_changes =
   let (_db, stmt_cache) = get_db_and_stmt_cache db_path in
   LocalChanges.get stmt_cache
 
-let fold
-    ~(warn_on_naming_costly_iter : bool)
-    ~(db_path : db_path)
-    ~init
-    ~f
-    ~file_deltas =
+let fold ~(db_path : db_path) ~init ~f ~file_deltas =
   let start_t = Unix.gettimeofday () in
   (* We depend on [Relative_path.Map.bindings] returning results in increasing
    * order here. *)
@@ -833,12 +828,10 @@ let fold
       ~init:acc
       remaining_changes
   in
-  if warn_on_naming_costly_iter then begin
-    Hh_logger.log
-      "NAMING_COSTLY_ITER\n%s"
-      (Exception.get_current_callstack_string 99 |> Exception.clean_stack);
-    HackEventLogger.naming_costly_iter ~start_t
-  end;
+  Hh_logger.log
+    "NAMING_COSTLY_ITER\n%s"
+    (Exception.get_current_callstack_string 99 |> Exception.clean_stack);
+  HackEventLogger.naming_costly_iter ~start_t;
   acc
 
 let get_file_info (db_path : db_path) path =

@@ -7,4 +7,4 @@
  *)
 
 val check_reifiable :
-  Tast_env.env -> Typing_defs.typeconst_type -> Pos_or_decl.t -> unit
+  Typing_env_types.env -> Typing_defs.typeconst_type -> Pos_or_decl.t -> unit

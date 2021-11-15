@@ -9,7 +9,7 @@
 
 open Hh_prelude
 open Typing_defs
-module Env = Tast_env
+module Env = Typing_env
 module Reason = Typing_reason
 module Cls = Decl_provider.Class
 module SN = Naming_special_names
@@ -72,9 +72,7 @@ let validator =
         this#invalid acc r "a `newtype`"
 
     method! on_tlike acc r ty =
-      if
-        TypecheckerOptions.like_casts
-          (Tast_env.get_tcopt acc.Type_validator.env)
+      if TypecheckerOptions.like_casts (Env.get_tcopt acc.Type_validator.env)
       then
         super#on_tlike { acc with Type_validator.like_context = true } r ty
       else
@@ -111,7 +109,7 @@ let validator =
                         let error_message =
                           if
                             TypecheckerOptions.like_casts
-                              (Tast_env.get_tcopt acc.Type_validator.env)
+                              (Env.get_tcopt acc.Type_validator.env)
                           then
                             error_message
                             ^ ", except in a like cast when the corresponding type parameter is covariant"

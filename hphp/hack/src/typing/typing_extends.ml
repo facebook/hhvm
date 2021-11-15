@@ -958,12 +958,11 @@ let tconst_subsumption
       match (child_typeconst.ttc_kind, parent_tconst_enforceable) with
       | (TCAbstract { atc_default = Some ty; _ }, (pos, true))
       | (TCConcrete { tc_type = ty }, (pos, true)) ->
-        let tast_env = Tast_env.typing_env_as_tast_env env in
         let emit_error =
           Errors.invalid_enforceable_type "constant" (pos, name)
         in
         Typing_enforceable_hint.validate_type
-          tast_env
+          env
           (fst child_typeconst.ttc_name |> Pos_or_decl.unsafe_to_raw_pos)
           ty
           emit_error
@@ -973,8 +972,7 @@ let tconst_subsumption
         (match parent_typeconst.ttc_reifiable with
         | None -> ()
         | Some pos ->
-          let tast_env = Tast_env.typing_env_as_tast_env env in
-          Typing_const_reifiable.check_reifiable tast_env child_typeconst pos));
+          Typing_const_reifiable.check_reifiable env child_typeconst pos));
 
     (* If the parent cannot be overridden, we unify the types otherwise we ensure
      * the child's assigned type is compatible with the parent's

@@ -50,13 +50,15 @@ let handler =
                   in
                   if enforceable then
                     Typing_enforceable_hint.validate_type
-                      env
+                      (Tast_env.tast_env_as_typing_env env)
                       (fst tc.ttc_name |> Pos_or_decl.unsafe_to_raw_pos)
                       ty
                       (Errors.invalid_enforceable_type "constant" (pos, name))
                 | _ -> ()
               end;
               if String.equal tc.ttc_origin (Cls.name cls) then
-                Option.iter tc.ttc_reifiable ~f:(check_reifiable env tc)
+                Option.iter
+                  tc.ttc_reifiable
+                  ~f:(check_reifiable (Tast_env.tast_env_as_typing_env env) tc)
           end)
   end

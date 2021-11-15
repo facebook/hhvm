@@ -13,7 +13,7 @@
     core_kernel
     provider_context
     relative_path
-    tast
+    tast_env
     tast_provider)
   (preprocess
     (pps visitors.ppx ppx_deriving.std)))

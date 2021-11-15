@@ -602,4 +602,13 @@ module Api = struct
     match t with
     | Lazy _ -> failwith "shallow_class_decl is enabled"
     | Eager (c, _) -> c.Decl_defs.dc_deferred_init_members
+
+  let valid_newable_class cls =
+    if Ast_defs.is_c_class (kind cls) then
+      final cls
+      || not (equal_consistent_kind (snd (construct cls)) Inconsistent)
+    (* There is currently a bug with interfaces that allows constructors to change
+     * their signature, so they are not considered here. TODO: T41093452 *)
+    else
+      false
 end

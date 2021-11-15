@@ -270,12 +270,3 @@ let rec find_sketchy_types env acc ty =
     acc
 
 let find_sketchy_types env ty = find_sketchy_types env [] ty
-
-let valid_newable_class cls =
-  if Ast_defs.is_c_class (Cls.kind cls) then
-    Cls.final cls
-    || not (equal_consistent_kind (snd (Cls.construct cls)) Inconsistent)
-  (* There is currently a bug with interfaces that allows constructors to change
-   * their signature, so they are not considered here. TODO: T41093452 *)
-  else
-    false

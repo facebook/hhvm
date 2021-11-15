@@ -170,4 +170,6 @@ module Api : sig
       To be used only when {!ServerLocalConfig.shallow_class_decl} is enabled.
       Raises [Failure] if used when shallow_class_decl is not enabled. *)
   val shallow_decl : t -> Shallow_decl_defs.shallow_class
+
+  val valid_newable_class : t -> bool
 end

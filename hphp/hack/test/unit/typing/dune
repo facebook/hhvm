@@ -12,7 +12,7 @@
     ounit2
     pos
     relative_path
-    tast
+    typing_misc
     typechecker_options
     typing_ast
     typing_defs

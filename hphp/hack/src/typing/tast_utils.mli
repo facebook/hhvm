@@ -8,8 +8,6 @@
 
 val type_non_nullable : Tast_env.env -> Tast.ty -> bool
 
-val valid_newable_class : Decl_provider.Class.t -> bool
-
 type truthiness =
   | Unknown
   | Always_truthy

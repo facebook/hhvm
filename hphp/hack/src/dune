@@ -36,7 +36,7 @@
     server_symbol_info_service_utils
     shape_analysis
     sys_utils
-    tast
+    typing_misc
     tast_typecheck
     temp_file
     typing
@@ -54,7 +54,7 @@
     default_injector_config
     hhi
     sys_utils
-    tast
+    typing_misc
     tast_typecheck
     temp_file
     typing
@@ -96,7 +96,7 @@
     server
     server_env
     sys_utils
-    tast
+    typing_misc
     typing
     utils_core))
 
@@ -118,7 +118,7 @@
     server
     server_env
     sys_utils
-    tast
+    typing_misc
     typing
     utils_core
     utils_exit))

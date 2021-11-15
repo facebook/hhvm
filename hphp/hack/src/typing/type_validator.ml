@@ -8,7 +8,7 @@
 
 open Hh_prelude
 open Typing_defs
-module Env = Tast_env
+module Env = Typing_env
 module MakeType = Typing_make_type
 module Reason = Typing_reason
 
@@ -22,7 +22,7 @@ type reification =
   | Unresolved
 
 type validation_state = {
-  env: Env.env;
+  env: Typing_env_types.env;
   ety_env: expand_env;
   validity: validity;
   like_context: bool;
@@ -56,9 +56,11 @@ class virtual type_validator =
         acc
 
     method! on_taccess acc _r (root, id) =
-      let (env, root) = Env.localize acc.env acc.ety_env root in
+      let (env, root) =
+        Typing_phase.localize acc.env ~ety_env:acc.ety_env root
+      in
       let (env, tyl) =
-        Env.get_concrete_supertypes ~abstract_enum:true env root
+        Typing_utils.get_concrete_supertypes ~abstract_enum:true env root
       in
       List.fold tyl ~init:acc ~f:(fun acc ty ->
           let (env, ty) = Env.expand_type env ty in
@@ -145,11 +147,11 @@ class virtual type_validator =
       | Valid -> ()
 
     method validate_hint
-        (env : Env.env)
+        (env : Typing_env_types.env)
         (hint : Aast.hint)
         ?(reification : reification = Unresolved)
         (emit_error : error_emitter) : unit =
-      let hint_ty = Env.hint_to_ty env hint in
+      let hint_ty = Decl_hint.hint env.Typing_env_types.decl_env hint in
       this#validate_type env (fst hint) hint_ty ~reification emit_error
 
     (* Takes in and accumulates a list of reasons *)

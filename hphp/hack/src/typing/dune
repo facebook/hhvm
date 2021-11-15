@@ -40,13 +40,21 @@
   (preprocess (pps ppx_deriving.std)))
 
 (library
-  (name tast)
+  (name tast_env)
   (wrapped false)
   (modules
     tast_env
     tast_expand
     tast_utils
-    tast_visitor
+    tast_visitor)
+  (libraries
+    typing)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
+  (name typing_misc)
+  (wrapped false)
+  (modules
     nast_visitor
     nast_check_env
     stateful_aast_visitor
@@ -98,7 +106,7 @@
     typing_ordered_solver
     typing_global_inference)
   (libraries
-    tast
+    tast_env
     typing_algebra)
   (preprocess (pps ppx_deriving.std)))
 
@@ -110,7 +118,7 @@
   (libraries
     core_kernel
     full_fidelity
-    tast)
+    tast_env)
   (preprocess (pps ppx_deriving.std)))
 
 (library
@@ -136,7 +144,6 @@
     typing_sequencing
     typing_shapes
     typing_structure
-    typing_toplevel
     typing_try
     typing_typedef)
   (libraries
@@ -148,8 +155,7 @@
     nast_check
     pcre
     procs_procs
-    tast
-    tast_check
+    typing_misc
     type_mapper
     typing_wellformedness)
   (preprocess (pps ppx_deriving.std)))
@@ -164,6 +170,15 @@
   (preprocess (pps ppx_deriving.std)))
 
 (library
+  (name typing_toplevel)
+  (wrapped false)
+  (modules
+    typing_toplevel)
+  (libraries
+    tast_check
+    typing))
+
+(library
   (name typing_wellformedness)
   (wrapped false)
   (modules
@@ -172,8 +187,8 @@
     typing_requirements
     typing_type_wellformedness)
   (libraries
-    tast
     typing_algebra
+    typing_misc
     typing_skeleton)
   (preprocess (pps ppx_deriving.std)))
 
@@ -367,7 +382,7 @@
   (libraries
     core_kernel
     ide_rpc_api_types
-    tast
+    tast_env
     typing_defs)
   (preprocess (pps ppx_deriving.std)))
 
@@ -384,8 +399,8 @@
     nast
     heap_global_storage
     re_stubs
-    typing
-    typing_deps)
+    typing_deps
+    typing_toplevel)
   (preprocess (pps ppx_deriving.std)))
 
 (library
@@ -427,7 +442,7 @@
     tast_typecheck)
   (libraries
     core_kernel
-    tast
+    typing_misc
     typing
     utils_core)
   (preprocess (pps ppx_deriving.std)))

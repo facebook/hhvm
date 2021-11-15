@@ -17,6 +17,7 @@
    linting
    linting_visitors
    other_visitors
+   tast_check
    typing_check_job))
 
 (library
@@ -65,4 +66,5 @@
    decl_provider
    linting_visitors
    lints_errors
+   tast_env
    utils_core))

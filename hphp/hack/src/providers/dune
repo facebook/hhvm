@@ -171,9 +171,9 @@
     decl_counters
     decl_provider
     provider_utils
-    tast
-    typing
-    typing_service_api)
+    tast_env
+    typing_service_api
+    typing_toplevel)
   (preprocess (pps ppx_deriving.std)))
 
 (library

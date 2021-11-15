@@ -7,6 +7,6 @@
     core_kernel
     ifc_lib
     nast
-    tast
+    tast_env
     utils_core)
   (preprocess (pps ppx_deriving.std)))

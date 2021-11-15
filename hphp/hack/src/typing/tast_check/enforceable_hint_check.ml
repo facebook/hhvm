@@ -22,7 +22,7 @@ let handler =
     method! at_expr env (_, _, e) =
       let validate hint op =
         Typing_enforceable_hint.validate_hint
-          env
+          (Tast_env.tast_env_as_typing_env env)
           hint
           (Errors.invalid_is_as_expression_hint op)
       in

@@ -7130,7 +7130,7 @@ and class_id_for_new
             | ((_, _, Aast.CI (_, c)), ty) when is_generic_equal_to c ty ->
               (* Only have this choosing behavior for new T(), not all generic types
                * i.e. new classname<T>, TODO: T41190512 *)
-              if Tast_utils.valid_newable_class class_info then
+              if Cls.valid_newable_class class_info then
                 get_info (`Class (sid, class_info, ty) :: res) tyl
               else
                 get_info res tyl

@@ -19,7 +19,7 @@
     provider_context
     relative_path
     sys_utils
-    tast
+    typing_misc
     tast_provider
     typechecker_options
     typing_defs
@@ -60,7 +60,7 @@
     provider_context
     relative_path
     sys_utils
-    tast
+    typing_misc
     typechecker_options
     typing_defs
     typing_heap

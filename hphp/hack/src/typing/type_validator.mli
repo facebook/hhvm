@@ -13,7 +13,7 @@ type reification =
   | Unresolved
 
 type validation_state = {
-  env: Tast_env.env;
+  env: Typing_env_types.env;
   ety_env: Typing_defs.expand_env;
   validity: validity;
   like_context: bool;
@@ -78,14 +78,14 @@ class virtual type_validator :
       validation_state
 
     method validate_hint :
-      Tast_env.env ->
+      Typing_env_types.env ->
       Aast.hint ->
       ?reification:reification ->
       error_emitter ->
       unit
 
     method validate_type :
-      Tast_env.env ->
+      Typing_env_types.env ->
       Pos.t ->
       Typing_defs.decl_ty ->
       ?reification:reification ->

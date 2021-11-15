@@ -9,7 +9,7 @@
 
 open Hh_prelude
 open Typing_defs
-module Env = Tast_env
+module Env = Typing_env
 module SN = Naming_special_names
 module UA = SN.UserAttributes
 module Cls = Decl_provider.Class
@@ -26,7 +26,7 @@ let validator =
         this#invalid acc r "a classname"
       else if
         String.equal h SN.Typehints.wildcard
-        && not (Env.get_allow_wildcards acc.Type_validator.env)
+        && not acc.Type_validator.env.Typing_env_types.allow_wildcards
       then
         this#invalid acc r "a wildcard"
       else

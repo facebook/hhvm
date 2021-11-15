@@ -5,7 +5,7 @@
     serverPos)
   (libraries
     naming_provider
-    tast)
+    tast_env)
   (preprocess (pps lwt_ppx ppx_deriving.std)))
 
 (library
@@ -28,7 +28,7 @@
  (modules codemodTypePrinter)
  (libraries
     typing_defs
-    tast
+    tast_env
     utils_core
  )
  (preprocess (pps lwt_ppx ppx_deriving.std)))
@@ -40,7 +40,7 @@
   (libraries
     full_fidelity
     server_codemod_type_printer
-    tast
+    typing_misc
     tast_type_collector
     typing_defs
     typing_global_inference
@@ -365,6 +365,7 @@
     lsp
     pos
     provider_context
+    tast_env
     tast_provider
     typing_skeleton
     utils_core)
@@ -428,7 +429,7 @@
     pos
     provider_context
     server_command_types
-    tast
+    tast_env
     tast_provider
     typing
     utils_core)
@@ -472,7 +473,7 @@
     server_infer_type
     server_services
     symbol
-    tast
+    typing_misc
     tast_provider
     typing
     utils_core

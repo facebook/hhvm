@@ -50,9 +50,7 @@ let verify_has_consistent_bound env (tparam : Tast.tparam) =
         | Tclass ((_, class_id), _, _) -> Env.get_class env class_id
         | _ -> None)
   in
-  let valid_classes =
-    List.filter bound_classes ~f:Tast_utils.valid_newable_class
-  in
+  let valid_classes = List.filter bound_classes ~f:Cls.valid_newable_class in
   if Int.( <> ) 1 (List.length valid_classes) then
     let cbs = List.map ~f:Cls.name valid_classes in
     Errors.invalid_newable_type_param_constraints tparam.tp_name cbs
@@ -81,12 +79,16 @@ let verify_targ_valid env reification tparam targ =
     | Nast.Reified
     | Nast.SoftReified ->
       let emit_error = Errors.invalid_reified_argument tparam.tp_name in
-      validator#validate_hint env (snd targ) ~reification emit_error
+      validator#validate_hint
+        (Tast_env.tast_env_as_typing_env env)
+        (snd targ)
+        ~reification
+        emit_error
     | Nast.Erased -> ());
 
   if Attributes.mem UA.uaEnforceable tparam.tp_user_attributes then
     Typing_enforceable_hint.validate_hint
-      env
+      (Tast_env.tast_env_as_typing_env env)
       (snd targ)
       (Errors.invalid_enforceable_type "parameter" tparam.tp_name);
 

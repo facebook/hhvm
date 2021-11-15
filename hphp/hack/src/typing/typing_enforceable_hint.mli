@@ -7,10 +7,10 @@
  *)
 
 val validate_hint :
-  Tast_env.t -> Aast.hint -> Type_validator.error_emitter -> unit
+  Typing_env_types.env -> Aast.hint -> Type_validator.error_emitter -> unit
 
 val validate_type :
-  Tast_env.t ->
+  Typing_env_types.env ->
   Pos.t ->
   Typing_defs.decl_ty ->
   Type_validator.error_emitter ->

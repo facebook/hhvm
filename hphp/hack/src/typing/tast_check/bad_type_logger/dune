@@ -9,7 +9,7 @@
     bad_type_logger_common
     bad_type_logger_scuba
     core_kernel
-    tast
+    tast_env
     utils_core)
   (preprocess (pps ppx_deriving.std)))
 
@@ -22,6 +22,6 @@
   (libraries
     ast
     core_kernel
-    tast
+    tast_env
     utils_core)
   (preprocess (pps ppx_deriving.std)))

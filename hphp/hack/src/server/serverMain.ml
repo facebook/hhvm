@@ -1542,9 +1542,19 @@ let daemon_main
   (* Restore the root directory and other global states from monitor *)
   ServerGlobalState.restore state ~worker_id:0;
 
-  (* Restore hhi files every time the server restarts
-     in case the tmp folder changes *)
-  ignore (Hhi.get_hhi_root ());
+  (match ServerArgs.custom_hhi_path options with
+  | None ->
+    (* Restore hhi files every time the server restarts
+       in case the tmp folder changes *)
+    ignore (Hhi.get_hhi_root ())
+  | Some path ->
+    if Disk.file_exists path && Disk.is_directory path then (
+      Hh_logger.log "Custom hhi directory set to %s." path;
+      Hhi.set_custom_hhi_root (Path.make path)
+    ) else (
+      Hh_logger.log "Custom hhi directory %s not found." path;
+      Exit.exit Exit_status.Input_error
+    ));
 
   ServerUtils.with_exit_on_exception @@ fun () ->
   daemon_main_exn

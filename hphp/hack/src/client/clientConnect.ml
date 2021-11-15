@@ -42,6 +42,7 @@ type env = {
   use_priority_pipe: bool;
   prechecked: bool option;
   config: (string * string) list;
+  custom_hhi_path: string option;
   custom_telemetry_data: (string * string) list;
   allow_non_opt_build: bool;
 }
@@ -455,6 +456,7 @@ let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
           prechecked;
           mini_state;
           config;
+          custom_hhi_path;
           custom_telemetry_data;
           allow_non_opt_build;
         } =
@@ -480,6 +482,7 @@ let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
               prechecked;
               mini_state;
               config;
+              custom_hhi_path;
               custom_telemetry_data;
               allow_non_opt_build;
             });

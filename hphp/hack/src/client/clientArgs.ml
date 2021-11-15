@@ -20,6 +20,11 @@ module Common_argspecs = struct
       " override arbitrary value from hh.conf and .hhconfig (format: <key>=<value>)"
     )
 
+  let custom_hhi_path value_ref =
+    ( "--custom-hhi-path",
+      Arg.String (fun s -> value_ref := Some s),
+      " use custom hhi files" )
+
   let custom_telemetry_data value_ref =
     ( "--custom-telemetry-data",
       Arg.String
@@ -99,6 +104,7 @@ let parse_check_args cmd =
   let autostart = ref true in
   let config = ref [] in
   let custom_telemetry_data = ref [] in
+  let custom_hhi_path = ref None in
   let error_format = ref Errors.Highlighted in
   let force_dormant_start = ref false in
   let format_from = ref 0 in
@@ -226,6 +232,7 @@ let parse_check_args cmd =
           end,
         " Run CST search on this set of files,"
         ^ " rather than all the files in the codebase." );
+      Common_argspecs.custom_hhi_path custom_hhi_path;
       Common_argspecs.custom_telemetry_data custom_telemetry_data;
       (* Delete an existing checkpoint.
        * Exitcode will be non-zero if no checkpoint is found *)
@@ -800,6 +807,7 @@ let parse_check_args cmd =
       ai_mode = !ai_mode;
       autostart = !autostart;
       config = !config;
+      custom_hhi_path = !custom_hhi_path;
       custom_telemetry_data = !custom_telemetry_data;
       error_format = !error_format;
       force_dormant_start = !force_dormant_start;
@@ -853,6 +861,7 @@ let parse_start_env command =
   let mini_state = ref None in
   let from = ref "" in
   let config = ref [] in
+  let custom_hhi_path = ref None in
   let custom_telemetry_data = ref [] in
   let allow_non_opt_build = ref false in
   let wait_deprecation_msg () =
@@ -865,6 +874,7 @@ let parse_start_env command =
       ("--ai", Arg.String (fun x -> ai_mode := Some x), " run ai with options ");
       Common_argspecs.allow_non_opt_build allow_non_opt_build;
       Common_argspecs.config config;
+      Common_argspecs.custom_hhi_path custom_hhi_path;
       Common_argspecs.custom_telemetry_data custom_telemetry_data;
       Common_argspecs.from from;
       ( "--ignore-hh-version",
@@ -903,6 +913,7 @@ let parse_start_env command =
   {
     ClientStart.ai_mode = !ai_mode;
     config = !config;
+    custom_hhi_path = !custom_hhi_path;
     custom_telemetry_data = !custom_telemetry_data;
     exit_on_failure = true;
     from = !from;

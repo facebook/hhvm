@@ -24,6 +24,7 @@ type env = {
   prechecked: bool option;
   mini_state: string option;
   config: (string * string) list;
+  custom_hhi_path: string option;
   custom_telemetry_data: (string * string) list;
   allow_non_opt_build: bool;
 }

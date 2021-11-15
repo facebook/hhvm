@@ -76,6 +76,7 @@ type client_check_env = {
   ai_mode: string option;
   autostart: bool;
   config: (string * string) list;
+  custom_hhi_path: string option;
   custom_telemetry_data: (string * string) list;
   error_format: Errors.format;
   force_dormant_start: bool;

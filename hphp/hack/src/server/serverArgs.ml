@@ -21,6 +21,7 @@ type options = {
   check_mode: bool;
   concatenate_prefix: string option;
   config: (string * string) list;
+  custom_hhi_path: string option;
   custom_telemetry_data: (string * string) list;
   dump_fanout: bool;
   from: string;
@@ -66,6 +67,8 @@ module Messages = struct
   let concatenate_prefix = " combine multiple hack files"
 
   let config = " override arbitrary value from hh.conf (format: <key>=<value>)"
+
+  let custom_hhi_path = " use custom hhi files"
 
   let daemon = " detach process"
 
@@ -142,6 +145,7 @@ let parse_options () : options =
   let check_mode = ref false in
   let concatenate_prefix = ref None in
   let config = ref [] in
+  let custom_hhi_path = ref None in
   let custom_telemetry_data = ref [] in
   let dump_fanout = ref false in
   let enable_ifc = ref [] in
@@ -191,6 +195,9 @@ let parse_options () : options =
       ( "--config",
         Arg.String (fun s -> config := String_utils.split2_exn '=' s :: !config),
         Messages.config );
+      ( "--custom-hhi-path",
+        Arg.String (fun s -> custom_hhi_path := Some s),
+        Messages.custom_hhi_path );
       ( "--custom-telemetry-data",
         Arg.String
           (fun s ->
@@ -295,6 +302,7 @@ let parse_options () : options =
     check_mode;
     concatenate_prefix = !concatenate_prefix;
     config = !config;
+    custom_hhi_path = !custom_hhi_path;
     custom_telemetry_data = !custom_telemetry_data;
     dump_fanout = !dump_fanout;
     enable_ifc = !enable_ifc;
@@ -329,6 +337,7 @@ let default_options ~root =
     check_mode = false;
     concatenate_prefix = None;
     config = [];
+    custom_hhi_path = None;
     custom_telemetry_data = [];
     dump_fanout = false;
     enable_ifc = [];
@@ -372,6 +381,8 @@ let check_mode options = options.check_mode
 let concatenate_prefix options = options.concatenate_prefix
 
 let config options = options.config
+
+let custom_hhi_path options = options.custom_hhi_path
 
 let custom_telemetry_data options = options.custom_telemetry_data
 
@@ -455,6 +466,7 @@ let to_string
       check_mode;
       concatenate_prefix;
       config;
+      custom_hhi_path;
       custom_telemetry_data;
       dump_fanout;
       enable_ifc;
@@ -498,6 +510,11 @@ let to_string
   in
   let concatenate_prefix_str =
     match concatenate_prefix with
+    | None -> "<>"
+    | Some path -> path
+  in
+  let custom_hhi_path_str =
+    match custom_hhi_path with
     | None -> "<>"
     | Some path -> path
   in
@@ -566,6 +583,8 @@ let to_string
     ", ";
     "config: ";
     config_str;
+    "custom_hhi_path: ";
+    custom_hhi_path_str;
     "custom_telemetry_data: ";
     custom_telemetry_data_str;
     "dump_fanout: ";

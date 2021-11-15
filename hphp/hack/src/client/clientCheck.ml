@@ -125,6 +125,7 @@ let connect ?(use_priority_pipe = false) args =
     mini_state;
     config;
     allow_non_opt_build;
+    custom_hhi_path;
     custom_telemetry_data;
     error_format = _;
     gen_saved_ignore_type_errors = _;
@@ -164,6 +165,7 @@ let connect ?(use_priority_pipe = false) args =
         prechecked;
         mini_state;
         config;
+        custom_hhi_path;
         custom_telemetry_data;
         allow_non_opt_build;
       })

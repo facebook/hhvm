@@ -34,6 +34,7 @@ type env = {
   use_priority_pipe: bool;
   prechecked: bool option;
   config: (string * string) list;
+  custom_hhi_path: string option;
   custom_telemetry_data: (string * string) list;
   allow_non_opt_build: bool;
 }

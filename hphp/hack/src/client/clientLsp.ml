@@ -1175,6 +1175,7 @@ let start_server ~(env : env) (root : Path.t) : unit =
       save_human_readable_64bit_dep_map = None;
       prechecked = None;
       config = env.args.config;
+      custom_hhi_path = None;
       custom_telemetry_data = [];
       allow_non_opt_build = false;
     }
@@ -1225,6 +1226,7 @@ let rec connect_client ~(env : env) (root : Path.t) ~(autostart : bool) :
       use_priority_pipe = not env.use_serverless_ide;
       prechecked = None;
       config = env.args.config;
+      custom_hhi_path = None;
       custom_telemetry_data = [];
       allow_non_opt_build = false;
     }

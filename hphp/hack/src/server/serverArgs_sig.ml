@@ -40,6 +40,8 @@ module type S = sig
 
   val config : options -> (string * string) list
 
+  val custom_hhi_path : options -> string option
+
   val custom_telemetry_data : options -> (string * string) list
 
   val dump_fanout : options -> bool

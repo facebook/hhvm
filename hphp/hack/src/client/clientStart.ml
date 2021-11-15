@@ -41,6 +41,7 @@ type env = {
   prechecked: bool option;
   mini_state: string option;
   config: (string * string) list;
+  custom_hhi_path: string option;
   custom_telemetry_data: (string * string) list;
   allow_non_opt_build: bool;
 }
@@ -94,6 +95,7 @@ let start_server (env : env) =
     prechecked;
     mini_state;
     config;
+    custom_hhi_path;
     custom_telemetry_data;
     allow_non_opt_build;
   } =
@@ -174,6 +176,9 @@ let start_server (env : env) =
         | Some false -> [| "--no-prechecked" |]
         | _ -> [||]);
         serialize_key_value_options "--config" config;
+        (match custom_hhi_path with
+        | None -> [||]
+        | Some dest -> [| "--custom-hhi-path"; dest |]);
         serialize_key_value_options
           "--custom-telemetry-data"
           custom_telemetry_data;

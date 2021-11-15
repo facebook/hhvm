@@ -189,7 +189,35 @@ let check_inout_return ret_pos env =
           Errors.inout_return_type_mismatch
       | _ -> env)
 
-let fun_implicit_return env pos ret = function
+let rec remove_like_for_return ty =
+  match get_node ty with
+  | Tunion [ty1; ty2] when is_dynamic ty1 -> ty2
+  | Tunion [ty1; ty2] when is_dynamic ty2 ->
+    (* We do not expect this case to catch like types because fun_implicit_return is 
+     * called on a type constructed directly from a decl ty, which for a ~T would have 
+     * the shape (dynamic | T). *)
+    ty1
+  | Tclass ((p, class_name), exact, [ty])
+    when String.equal class_name Naming_special_names.Classes.cAwaitable ->
+    mk
+      ( get_reason ty,
+        Tclass ((p, class_name), exact, [remove_like_for_return ty]) )
+  | _ -> ty
+
+let fun_implicit_return env pos ret =
+  let ret =
+    let open Typing_env_types in
+    if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then
+      (* Under sound dynamic, void <D: dynamic, which means that it void <D: ~T for any T.
+       * However, for ergonomic reasons, it should not be the case that a function
+       * erroring about a missing `return` statement would stop if the return type were
+       * pessimised. This preserves the behavior that a function explicitly returning dynamic
+       * can have an implicit return, while requiring an explicit return for like types. *)
+      remove_like_for_return ret
+    else
+      ret
+  in
+  function
   | Ast_defs.FGenerator
   | Ast_defs.FAsyncGenerator ->
     env

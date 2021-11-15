@@ -1,0 +1,12 @@
+File "implicit_return.bad.php", line 3, characters 10-10:
+Invalid return type (Typing[4336])
+  File "implicit_return.bad.php", line 3, characters 16-18:
+  Expected `int`
+  File "implicit_return.bad.php", line 3, characters 10-10:
+  But got `void` because this function does not always return a value
+File "implicit_return.bad.php", line 5, characters 16-17:
+Invalid return type (Typing[4336])
+  File "implicit_return.bad.php", line 5, characters 33-35:
+  Expected `int`
+  File "implicit_return.bad.php", line 5, characters 16-17:
+  But got `void` because this function does not always return a value

@@ -4,7 +4,9 @@
   (libraries
     ast
     core_kernel
+    decl_provider
+    naming_provider
     nast
     nast_eval
-    utils_core
-    typing_misc))
+    nast_visitor
+    utils_core))

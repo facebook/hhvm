@@ -52,12 +52,21 @@
   (preprocess (pps ppx_deriving.std)))
 
 (library
+  (name nast_visitor)
+  (wrapped false)
+  (modules
+    nast_check_env
+    nast_visitor
+    stateful_aast_visitor)
+  (libraries
+    nast
+    provider_context)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
   (name typing_misc)
   (wrapped false)
   (modules
-    nast_visitor
-    nast_check_env
-    stateful_aast_visitor
     type_parameter_env_ops
     type_validator
     typing_async

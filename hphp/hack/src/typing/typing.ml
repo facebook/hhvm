@@ -2746,8 +2746,22 @@ and expr_
       env
       l
       extract_expr_and_ty =
+    let (env, pess_expected) =
+      if can_pessimise then
+        match expected with
+        | None -> (env, None)
+        | Some ety ->
+          let (env, ty) =
+            Typing_array_access.maybe_pessimise_type
+              env
+              ety.ExpectedTy.ty.et_type
+          in
+          (env, Some ExpectedTy.(make ety.pos ety.reason ty))
+      else
+        (env, expected)
+    in
     let (env, exprs_and_tys) =
-      List.map_env env l ~f:(extract_expr_and_ty ~expected)
+      List.map_env env l ~f:(extract_expr_and_ty ~expected:pess_expected)
     in
     let (exprs, tys) = List.unzip exprs_and_tys in
     let (env, supertype, err_opts) =

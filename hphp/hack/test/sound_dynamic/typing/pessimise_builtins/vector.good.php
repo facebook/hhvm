@@ -2,8 +2,9 @@
 
 class C {}
 
-function expect_vector_c(Vector<C> $v) : void {}
-function expect_vector_c_or_int(Vector<(C | int)> $v) : void {}
+function f() : ~string {
+  return "1";
+}
 
 function test_Vector(vec<~C> $vlc, dynamic $d, Vector<C> $v, vec<~int> $vi) : Vector<C> {
   $lc = $vlc[0];
@@ -18,15 +19,17 @@ function test_Vector(vec<~C> $vlc, dynamic $d, Vector<C> $v, vec<~int> $vi) : Ve
   $v[] = $d;
   $v[] = $lc;
 
+  Vector<string>{ f() };
+
   $w1 = Vector<C>{$d};
-  expect_vector_c($w1);
+  hh_expect<Vector<C>>($w1);
   $w2 = Vector{$d};
-  expect_vector_c($w2);
+  hh_expect<Vector<C>>($w2);
   $w3 = Vector{$lc};
-  expect_vector_c($w3);
+  hh_expect<Vector<C>>($w3);
   $w4 = Vector{new C()};
-  expect_vector_c($w4);
+  hh_expect<Vector<C>>($w4);
   $w5 = Vector{$d, $i, $lc};
-  expect_vector_c_or_int($w5);
+  hh_expect<Vector<(C|int)>>($w5);
   return Vector{$d};
 }

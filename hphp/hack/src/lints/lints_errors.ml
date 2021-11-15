@@ -368,7 +368,7 @@ let duplicate_property pos ~class_name ~prop_name ~class_names =
 
 let loose_unsafe_cast_lower_bound p ty_str_opt =
   let msg =
-    "HH_FIXME input type annotation is too loose, please use a more specific type."
+    "HH\\FIXME\\UNSAFE_CAST input type annotation is too loose, please use a more specific type."
   in
   let msg =
     match ty_str_opt with
@@ -386,4 +386,4 @@ let loose_unsafe_cast_upper_bound p =
     Codes.loose_unsafe_cast_upper_bound
     Lint_error
     p
-    "HH_FIXME output type annotation is too loose, please use a more specific type."
+    "HH\\FIXME\\UNSAFE_CAST output type annotation is too loose, please use a more specific type."

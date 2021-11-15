@@ -21,7 +21,7 @@ class DateTime implements DateTimeInterface {
 
   <<__Native>>
   public function __construct(string $time = "now",
-                       ?DateTimeZone $timezone = null): void;
+                       ?DateTimeZone $timezone = null)[controlled]: void;
 
   /**
    * Parse a date according to a format and create a DateTime object

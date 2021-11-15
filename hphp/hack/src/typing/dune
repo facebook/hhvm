@@ -46,7 +46,9 @@
     tast_env
     tast_expand
     tast_utils
-    tast_visitor)
+    tast_visitor
+    typing_env_from_def
+    typing_equality_check)
   (libraries
     typing)
   (preprocess (pps ppx_deriving.std)))
@@ -64,29 +66,15 @@
   (preprocess (pps ppx_deriving.std)))
 
 (library
-  (name typing_misc)
+  (name typing_common)
   (wrapped false)
   (modules
-    type_parameter_env_ops
     type_validator
-    typing_async
     typing_const_reifiable
-    typing_deferred_members
     typing_enforceable_hint
-    typing_env_from_def
-    typing_equality_check
-    typing_expand
-    typing_generic_rules
-    typing_local_ops
-    typing_per_cont_ops
     typing_reified_check
-    typing_special_fun
-    typing_substring
-    typing_subtype_method
-    typing_taccess
     typing_tdef
-    typing_variance
-    typing_xhp)
+    typing_variance)
   (libraries
     common
     decl
@@ -135,26 +123,33 @@
   (wrapped false)
   (modules
     nastInitCheck
-    typing
+    type_parameter_env_ops
     typing_alias
     typing_ast_print
     typing_arithmetic
     typing_array_access
+    typing_async
     typing_attributes
     typing_debug
+    typing_deferred_members
     typing_escape
+    typing_expand
     typing_exts
     typing_func_terminality
+    typing_generic_rules
     typing_helpers
     typing_lenv
-    typing_memoize
+    typing_local_ops
     typing_param
+    typing_per_cont_ops
     typing_regex
     typing_sequencing
     typing_shapes
+    typing_special_fun
     typing_structure
+    typing_substring
     typing_try
-    typing_typedef)
+    typing_xhp)
   (libraries
     decl_enum
     decl_init_check
@@ -164,9 +159,8 @@
     nast_check
     pcre
     procs_procs
-    typing_misc
-    type_mapper
-    typing_wellformedness)
+    typing_common
+    type_mapper)
   (preprocess (pps ppx_deriving.std)))
 
 (library
@@ -182,10 +176,14 @@
   (name typing_toplevel)
   (wrapped false)
   (modules
-    typing_toplevel)
+    typing
+    typing_memoize
+    typing_toplevel
+    typing_typedef)
   (libraries
     tast_check
-    typing))
+    typing
+    typing_wellformedness))
 
 (library
   (name typing_wellformedness)
@@ -194,10 +192,11 @@
     typing_extends
     typing_inheritance
     typing_requirements
+    typing_subtype_method
     typing_type_wellformedness)
   (libraries
     typing_algebra
-    typing_misc
+    typing_common
     typing_skeleton)
   (preprocess (pps ppx_deriving.std)))
 
@@ -246,6 +245,7 @@
     typing_solver_utils
     typing_subtype
     typing_subtype_tconst
+    typing_taccess
     typing_union)
   (libraries
     type_mapper

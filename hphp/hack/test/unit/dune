@@ -29,6 +29,7 @@
     decl
     decl_counters
     default_injector_config
+    deferred_decl
     parsing_service
     provider_utils
     server_monitor

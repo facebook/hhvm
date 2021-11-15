@@ -3,7 +3,6 @@
   (wrapped false)
   (modules
     coverage_level_defs
-    deferred_decl
     typing_defs
     typing_defs_core
     typing_defs_flags
@@ -24,6 +23,16 @@
   (preprocess (pps ppx_deriving.std)))
 
 (library
+  (name deferred_decl)
+  (wrapped false)
+  (modules
+    deferred_decl)
+  (libraries
+    relative_path
+    utils_core)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
   (name typing_heap)
   (wrapped false)
   (modules
@@ -34,6 +43,7 @@
     decl_ancestors
     decl_counters
     decl_inheritance
+    deferred_decl
     naming_provider
     shallow_decl_defs
     typing_defs)
@@ -403,6 +413,7 @@
     typing_check_utils)
   (libraries
     core_kernel
+    deferred_decl
     errors
     file_info
     nast
@@ -423,6 +434,7 @@
     core_kernel
     decl_counters
     decl_service
+    deferred_decl
     diagnostic_pusher
     errors
     file_info

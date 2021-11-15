@@ -17,6 +17,7 @@ export HACK_OPAM_DEPS=(
   lwt.5.4.0
   lwt_log.1.1.1
   lwt_ppx.2.0.2
+  memtrace.0.2.1.2
   merlin.4.3.1-412
   mtime.1.2.0
   ocp-indent.1.8.1

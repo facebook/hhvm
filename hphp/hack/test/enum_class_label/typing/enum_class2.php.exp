@@ -3,6 +3,6 @@ An enum class label is required here, not a class constant projection. (Typing[4
 File "enum_class2.php", line 26, characters 8-9:
 Enum class label/member mismatch (Typing[4110])
   File "enum_class2.php", line 13, characters 15-31:
-  Expected `HH\MemberOf<E, C>`
+  Expected a value of type HH\MemberOf<E, C>
   File "enum_class2.php", line 26, characters 8-9:
   But got an enum class label: `#A`

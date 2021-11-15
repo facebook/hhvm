@@ -149,6 +149,7 @@
   (name shallow_classes_provider)
   (modules shallow_classes_provider)
   (libraries
+    bloom_filter
     decl_service_client
     direct_decl_utils
     provider_backend

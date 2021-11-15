@@ -255,6 +255,7 @@
   (name decl_inheritance)
   (modules decl_inheritance)
   (libraries
+    bloom_filter
     decl_defs
     decl_enum
     decl_instantiate
@@ -412,6 +413,7 @@
   (name shallow_classes_heap)
   (modules shallow_classes_heap)
   (libraries
+    bloom_filter
     decl_defs
     heap_shared_mem
     naming

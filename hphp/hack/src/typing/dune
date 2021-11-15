@@ -451,7 +451,6 @@
     tast_typecheck)
   (libraries
     core_kernel
-    typing_misc
     typing
     utils_core)
   (preprocess (pps ppx_deriving.std)))

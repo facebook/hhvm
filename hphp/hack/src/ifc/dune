@@ -19,7 +19,6 @@
     provider_context
     relative_path
     sys_utils
-    typing_misc
     tast_provider
     typechecker_options
     typing_defs
@@ -60,10 +59,11 @@
     provider_context
     relative_path
     sys_utils
-    typing_misc
     typechecker_options
     typing_defs
+    typing_env_types
     typing_heap
+    typing_utils
     version)
   (preprocess
     (pps visitors.ppx ppx_deriving.std)))

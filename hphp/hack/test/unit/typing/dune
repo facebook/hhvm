@@ -12,8 +12,8 @@
     ounit2
     pos
     relative_path
-    typing_misc
     typechecker_options
+    typing_algebra
     typing_ast
     typing_defs
     utils_core))

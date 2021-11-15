@@ -27,7 +27,6 @@
     naming
     procs_entry_point
     relative_path
-    typing_misc
     typechecker_options
     typing_global_inference
     utils_core

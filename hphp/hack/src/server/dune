@@ -40,7 +40,6 @@
   (libraries
     full_fidelity
     server_codemod_type_printer
-    typing_misc
     tast_type_collector
     typing_defs
     typing_global_inference
@@ -473,7 +472,6 @@
     server_infer_type
     server_services
     symbol
-    typing_misc
     tast_provider
     typing
     utils_core

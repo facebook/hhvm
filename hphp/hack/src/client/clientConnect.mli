@@ -21,6 +21,7 @@ type env = {
   no_load: bool;
   watchman_debug_logging: bool;
   log_inference_constraints: bool;
+  log_on_slow_monitor_connect: bool;
   profile_log: bool;
   remote: bool;
   ai_mode: string option;

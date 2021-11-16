@@ -139,18 +139,22 @@ let connect ?(use_priority_pipe = false) args =
   } =
     args
   in
+  let local_config = Option.value_exn !ref_local_config in
   ClientConnect.(
     connect
       {
         root;
         from;
-        local_config = Option.value_exn !ref_local_config;
+        local_config;
         autostart;
         force_dormant_start;
         deadline;
         no_load;
         watchman_debug_logging;
         log_inference_constraints;
+        log_on_slow_monitor_connect =
+          local_config
+            .ServerLocalConfig.log_from_client_when_slow_monitor_connections;
         profile_log;
         remote;
         ai_mode;

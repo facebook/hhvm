@@ -29,6 +29,7 @@ type env = {
   no_load: bool;
   watchman_debug_logging: bool;
   log_inference_constraints: bool;
+  log_on_slow_monitor_connect: bool;
   profile_log: bool;
   remote: bool;
   ai_mode: string option;
@@ -344,9 +345,7 @@ let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
     timeout;
   let conn =
     MonitorConnection.connect_once
-      ~log_on_slow_connect:
-        env.local_config
-          .ServerLocalConfig.log_from_client_when_slow_monitor_connections
+      ~log_on_slow_connect:env.log_on_slow_monitor_connect
       ~tracker
       ~timeout
       env.root
@@ -443,6 +442,7 @@ let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
           no_load;
           watchman_debug_logging;
           log_inference_constraints;
+          log_on_slow_monitor_connect = _;
           profile_log;
           remote = _;
           ai_mode;

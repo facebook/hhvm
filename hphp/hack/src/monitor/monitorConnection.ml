@@ -119,13 +119,23 @@ let read_and_log_process_information ~timeout =
        The reason being that the use of Process.exec with Exec_command is to avoid the risk of shelling out
        failing and throwing some exception that gets caught higher up the chain. Instead, allow pgrep to be a single chance to fail.
        Any success can be handled in application code with postprocessing.
+
+       Currently we filter out Scuba-related entries from the process list. They should not contribute to notable hh interaction issues, and create noisy logs.
     *)
-    let matching_processes =
+    let exclude_scuba_entry =
+      List.filter ~f:(fun x -> String_utils.substring_index "scuba" x = -1)
+    in
+    let process_list =
       r.Process_types.stdout
       |> String.split_on_chars ~on:['\n']
-      |> (fun x -> List.take x 5)
-      |> String.concat ~sep:"\n"
+      |> exclude_scuba_entry
     in
+    let matching_processes =
+      process_list |> (fun x -> List.take x 5) |> String.concat ~sep:"\n"
+    in
+    Hh_logger.error
+      "[monitorConnection] found %d processes when hh took more than 3 seconds to connect to monitor"
+      (List.length process_list);
     Printf.eprintf "%s\n%!" matching_processes;
     HackEventLogger.client_connect_to_monitor_slow_log ()
   | Error e ->
@@ -194,7 +204,18 @@ let connect_to_monitor ?(log_on_slow_connect = false) ~tracker ~timeout config =
           ~do_:(fun timeout ->
             (* 1. open the socket *)
             phase := ServerMonitorUtils.Connect_open_socket;
-            if log_on_slow_connect then
+            let monitor_daemon_is_running =
+              match
+                Process.read_and_wait_pid
+                  (Process.exec
+                     Exec_command.Pgrep
+                     ["-af"; "monitor_daemon_main"])
+                  ~timeout:2
+              with
+              | Ok _ -> true
+              | Error _ -> false
+            in
+            if log_on_slow_connect && monitor_daemon_is_running then
               (* Setting up a timer to fire a notice to the user when hh seems to be slower.
                  Since connect_to_monitor allows a 60 second timeout by default, it's possible that hh appears to be hanging from a user's perspective.
                  We can show people after some time (3 seconds arbitrarily) what processes might be slowing the response. *)

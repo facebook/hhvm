@@ -18,6 +18,7 @@
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/irgen-interpone.h"
+#include "hphp/runtime/vm/jit/irgen-minstr.h"
 #include "hphp/runtime/vm/jit/irgen-state.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 
@@ -100,13 +101,8 @@ SSATmp* emitCCReified(IRGS& env, const Func* f,
               f->cls()->hasReifiedGenerics());
       auto const slot = f->cls()->lookupReifiedInitProp();
       assertx(slot != kInvalidSlot);
-      auto const addr = gen(
-        env,
-        LdPropAddr,
-        IndexData { f->cls()->propSlotToIndex(slot) },
-        TLvalToPropVec,
-        prologueCtx
-      );
+      auto const addr = ldPropAddr(
+          env, prologueCtx, nullptr, f->cls(), slot, TVec);
       return gen(env, LdMem, TVec, addr);
     }
     assertx(f->hasReifiedGenerics());
@@ -187,10 +183,10 @@ SSATmp* emitFunParam(IRGS& env, const Func* f, uint32_t numArgsInclUnpack,
   auto const objSuccess = [&](SSATmp* obj) {
     auto const getClsOrMethod = [&](bool is_cls, bool is_dyn) {
       auto const cls = is_dyn
-        ? SystemLib::s_DynMethCallerHelperClass : SystemLib::s_MethCallerHelperClass;
-      auto const idx = cls->propSlotToIndex(is_cls ? Slot{0} : Slot{1});
-      auto const prop = gen(
-        env, LdPropAddr, IndexData{idx}, TStr.lval(Ptr::Prop), obj);
+        ? SystemLib::s_DynMethCallerHelperClass
+        : SystemLib::s_MethCallerHelperClass;
+      auto const slot = is_cls ? Slot{0} : Slot{1};
+      auto const prop = ldPropAddr(env, obj, nullptr, cls, slot, TStr);
       auto const ret = gen(env, LdMem, TStr, prop);
       gen(env, IncRef, ret);
       return ret;
@@ -302,9 +298,7 @@ SSATmp* emitClosureParentScope(IRGS& env, const Func* f, SSATmp* prologueCtx) {
   auto const cls = f->implCls();
   assertx(cls);
   auto const slot = cls->getCoeffectsProp();
-  auto const addr = gen(env, LdPropAddr,
-                        IndexData { cls->propSlotToIndex(slot) },
-                        TInt.lval(Ptr::Prop), prologueCtx);
+  auto const addr = ldPropAddr(env, prologueCtx, nullptr, cls, slot, TInt);
   return gen(env, LdMem, TInt, addr);
 }
 

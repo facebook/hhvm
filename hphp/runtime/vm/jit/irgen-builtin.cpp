@@ -897,9 +897,7 @@ SSATmp* meth_caller_get_name(IRGS& env, SSATmp *value) {
   if (value->isA(TObj)) {
     auto loadProp = [&] (Class* cls, bool isGetCls, SSATmp* obj) {
       auto const slot = isGetCls ? s_cls_idx : s_meth_idx;
-      auto const idx = cls->propSlotToIndex(slot);
-      auto const prop = gen(
-        env, LdPropAddr, IndexData{idx}, TStr.lval(Ptr::Prop), obj);
+      auto const prop = ldPropAddr(env, obj, nullptr, cls, slot, TStr);
       auto const ret = gen(env, LdMem, TStr, prop);
       gen(env, IncRef, ret);
       return ret;

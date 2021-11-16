@@ -34,6 +34,7 @@
 #include "hphp/runtime/vm/jit/irgen-control.h"
 #include "hphp/runtime/vm/jit/irgen-create.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
+#include "hphp/runtime/vm/jit/irgen-minstr.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/irgen-interpone.h"
 #include "hphp/runtime/vm/jit/irgen-types.h"
@@ -1387,13 +1388,7 @@ void emitNewObjS(IRGS& env, SpecialClsRef ref) {
   }
 
   auto const this_ = checkAndLoadThis(env);
-  auto const addr = gen(
-    env,
-    LdPropAddr,
-    IndexData { curClass(env)->propSlotToIndex(*slot) },
-    TLvalToPropVec,
-    this_
-  );
+  auto const addr = ldPropAddr(env, this_, nullptr, curClass(env), *slot, TVec);
   auto const reified_generic = gen(env, LdMem, TVec, addr);
   push(env, gen(env, AllocObjReified, cls, reified_generic));
 }

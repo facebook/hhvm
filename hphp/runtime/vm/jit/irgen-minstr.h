@@ -56,6 +56,16 @@ void annotArrayAccessProfile(IRGS& env,
                              const ArrayAccessProfile::Result& result);
 
 /*
+ * Load a pointer to the property at the given physical index of some object.
+ * The caller must know that the property exists on the object.
+ *
+ * "taken" may be nullptr. If taken is provided, we will check that the prop
+ * is initialized and branch to taken if it is uninit.
+ */
+SSATmp* ldPropAddr(IRGS& env, SSATmp* obj, Block* taken,
+                   const Class* cls, Slot slot, const Type& type);
+
+/*
  * If the op and operand types are a supported combination, return the modified
  * value. Otherwise, return nullptr. The returned value always has an uncounted
  * type.

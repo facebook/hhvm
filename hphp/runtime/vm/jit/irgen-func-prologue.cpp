@@ -36,6 +36,7 @@
 #include "hphp/runtime/vm/jit/irgen.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
+#include "hphp/runtime/vm/jit/irgen-minstr.h"
 #include "hphp/runtime/vm/jit/irgen-state.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
@@ -560,12 +561,10 @@ void emitInitClosureLocals(IRGS& env, const Func* callee) {
 
   for (auto i = 0; i < numUses; ++i) {
     auto const slot = i + (cls->hasClosureCoeffectsProp() ? 1 : 0);
-    auto const ty =
+    auto const type =
       typeFromRAT(cls->declPropRepoAuthType(slot), callee->cls()) & TCell;
-    auto const addr = gen(env, LdPropAddr,
-                          IndexData { cls->propSlotToIndex(slot) },
-                          ty.lval(Ptr::Prop), closure);
-    auto const prop = gen(env, LdMem, ty, addr);
+    auto const addr = ldPropAddr(env, closure, nullptr, cls, slot, type);
+    auto const prop = gen(env, LdMem, type, addr);
     gen(env, IncRef, prop);
     gen(env, StLoc, LocalId{firstClosureUseLocal + i}, fp(env), prop);
   }

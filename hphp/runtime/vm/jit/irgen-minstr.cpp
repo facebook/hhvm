@@ -402,13 +402,8 @@ std::pair<SSATmp*, SSATmp*> emitPropSpecialized(
   auto const getAddr = [&] (SSATmp* obj) {
     if (!propInfo.lateInitCheck) {
       assertx(!propInfo.lateInit || mode == MOpMode::Define);
-      auto const addr = gen(
-        env,
-        LdPropAddr,
-        IndexData { propInfo.index },
-        propInfo.knownType.lval(Ptr::Prop),
-        obj
-      );
+      auto const addr = ldPropAddr(env, obj, nullptr, propInfo.propClass,
+                                   propInfo.slot, propInfo.knownType);
       return !propInfo.lateInit
         ? checkInitProp(env, obj, addr, key, doWarn)
         : addr;
@@ -418,14 +413,8 @@ std::pair<SSATmp*, SSATmp*> emitPropSpecialized(
     return cond(
       env,
       [&] (Block* taken) {
-        return gen(
-          env,
-          LdInitPropAddr,
-          IndexData { propInfo.index },
-          taken,
-          propInfo.knownType.lval(Ptr::Prop),
-          obj
-        );
+        return ldPropAddr(env, obj, taken, propInfo.propClass,
+                          propInfo.slot, propInfo.knownType);
       },
       [&] (SSATmp* addr) { return addr; },
       [&] {
@@ -1537,6 +1526,19 @@ SSATmp* memberKey(IRGS& env, MemberKey mk) {
 }
 
 //////////////////////////////////////////////////////////////////////
+
+SSATmp* ldPropAddr(IRGS& env, SSATmp* obj, Block* taken,
+                   const Class* cls, Slot slot, const Type& type) {
+  assert(type <= TCell);
+  assert(cls != nullptr);
+  assertx(slot != kInvalidSlot);
+
+  auto const lval = type.lval(Ptr::Prop);
+  auto const data = IndexData { cls->propSlotToIndex(slot) };
+
+  return taken ? gen(env, LdInitPropAddr, taken, data, lval, obj)
+               : gen(env, LdPropAddr, data, lval, obj);
+}
 
 SSATmp* ptrToInitNull(IRGS& env) {
   // Nothing is allowed to write anything to the init null variant, so this

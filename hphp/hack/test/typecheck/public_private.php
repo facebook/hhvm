@@ -10,6 +10,6 @@
  */
 
 class Foo {
-  final public static private function bar(): void {
+  public static private function bar(): void {
   }
 }

@@ -183,7 +183,7 @@ trait BaseException {
     return $res;
   }
 
-  final private function __clone() {
+  private function __clone() {
     \trigger_error("Trying to clone an uncloneable object of class " .
                    \get_class($this), \E_USER_ERROR);
   }

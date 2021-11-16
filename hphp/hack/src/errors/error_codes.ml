@@ -235,6 +235,7 @@ module NastCheck = struct
     | EntryPointGenerics [@value 3094]
     | InternalProtectedOrPrivate [@value 3095]
     | InoutInTransformedPsuedofunction [@value 3096]
+    | PrivateAndFinal [@value 3097]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

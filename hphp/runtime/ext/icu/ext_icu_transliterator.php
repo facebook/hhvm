@@ -10,13 +10,13 @@ class Transliterator {
   /**
    * This class may only be instantiated by ::create or ::createFromRules
    */
-  private final function __construct() {}
+  private function __construct() {}
 
   /**
    * Setup internal transliterator object
    */
   <<__Native>>
-  private final function __init(string $idOrRules,
+  private function __init(string $idOrRules,
                                 int $direction,
                                 bool $rules): bool;
 
@@ -64,7 +64,7 @@ class Transliterator {
    * Helper for ->createInverse()
    */
   <<__Native>>
-  private final function __createInverse(): ?Transliterator;
+  private function __createInverse(): ?Transliterator;
 
   /**
    * Create an inverse transliterator

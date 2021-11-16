@@ -146,7 +146,6 @@ finish_class() {
   DEBUG_ONLY auto const ctor = cls->getCtor();
   assertx(ctor == wh->getCtor());
   assertx(ctor->attrs() & AttrPrivate);
-  assertx(ctor->attrs() & AttrFinal);
 
   cls->allocExtraData();
   assertx(!cls->m_extra->m_nativeDataInfo);

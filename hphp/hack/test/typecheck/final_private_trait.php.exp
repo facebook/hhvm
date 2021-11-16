@@ -1,0 +1,4 @@
+File "final_private_trait.php", line 10, characters 20-22:
+You cannot override this method (Typing[4070])
+  File "final_private_trait.php", line 5, characters 26-28:
+  It was declared as final

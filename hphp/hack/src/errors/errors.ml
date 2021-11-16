@@ -2081,6 +2081,12 @@ let mk_multiple_xhp_category pos =
 
 let multiple_xhp_category pos = add_error (mk_multiple_xhp_category pos)
 
+let private_and_final p =
+  add
+    (NastCheck.err_code NastCheck.PrivateAndFinal)
+    p
+    "Class methods cannot be both `private` and `final`."
+
 let return_in_gen p =
   add
     (NastCheck.err_code NastCheck.ReturnInGen)

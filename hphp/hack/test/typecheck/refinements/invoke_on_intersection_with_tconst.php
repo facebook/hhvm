@@ -3,7 +3,7 @@
 
 abstract class C {
   const type TID = int;
-  final private function __construct(
+  private function __construct(
     private this::TID $id,
   ) {}
   final public function getID(): this::TID {

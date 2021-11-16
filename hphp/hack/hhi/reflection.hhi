@@ -148,7 +148,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   public function isDeprecated()[]: bool;
   public function getExtension()[];
   public function getExtensionName()[];
-  final private function __clone();
+  private function __clone();
   public function hasReturnType()[]: bool;
   public function getReturnType()[]: ?ReflectionType;
   public function getReifiedTypeParamInfo()[]: varray<darray<string, bool>>;
@@ -206,7 +206,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract implements Reflector {
 class ReflectionParameter implements Reflector {
   public $name = '';
 
-  final private function __clone();
+  private function __clone();
   public static function export($function, $parameter, $return = null);
   public function __construct($function, $parameter, $info = null)[];
   public function __toString()[];
@@ -248,7 +248,7 @@ class ReflectionProperty implements Reflector {
   public $name = '';
   public $class = '';
 
-  final private function __clone();
+  private function __clone();
   public static function export($class, $name, $return = null);
   public function __construct($class, string $name)[];
   public function __toString()[];
@@ -275,7 +275,7 @@ class ReflectionExtension implements Reflector {
 
   public $name = '';
 
-  final private function __clone();
+  private function __clone();
   public static function export($name, $return = false);
   public function __construct($name)[];
   public function __toString()[];
@@ -291,7 +291,7 @@ class ReflectionExtension implements Reflector {
 
 class ReflectionTypeConstant implements Reflector {
 
-  final private function __clone();
+  private function __clone();
   public static function export($class, string $name, $return = null);
   public function __construct($class, string $name)[];
   public function __toString()[]: string;
@@ -304,7 +304,7 @@ class ReflectionTypeConstant implements Reflector {
 }
 
 class ReflectionTypeAlias implements Reflector {
-  final private function __clone();
+  private function __clone();
   final public function __construct(string $name)[];
   public function __toString()[]: string;
   public function getTypeStructure()[]: darray;
@@ -320,7 +320,7 @@ class ReflectionTypeAlias implements Reflector {
 }
 
 class ReflectionType {
-  final private function __clone();
+  private function __clone();
   public function __construct(?Reflector $param_or_ret = null,
                               darray $type_hint_info = darray[]);
   public function allowsNull()[]: bool;
@@ -329,7 +329,7 @@ class ReflectionType {
 }
 
 class ReflectionFile implements Reflector {
-  final private function __clone();
+  private function __clone();
   final public function __construct(string $name)[];
   public function __toString()[]: string;
   public function getName()[]: string;

@@ -13,7 +13,7 @@
   * but you almost certainly should NOT be attempting to construct this object
   */
 final class FunctionCredential {
-  private final function __construct() {}
+  private function __construct() {}
 
   public final function getClassName()[]: ?string;
 

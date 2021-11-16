@@ -7,7 +7,7 @@ namespace HH {
 <<__Sealed(StaticWaitHandle::class, WaitableWaitHandle::class)>>
 abstract class Awaitable {
 
-  final private function __construct() {
+  private function __construct() {
     throw new \InvalidOperationException(
       \get_class($this) . "s cannot be constructed directly"
     );

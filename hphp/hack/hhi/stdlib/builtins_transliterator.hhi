@@ -8,8 +8,8 @@ class Transliterator {
 
   public string $id = '';
 
-  private final function __construct();
-  private final function __init(string $idOrRules,
+  private function __construct();
+  private function __init(string $idOrRules,
                                 int $direction,
                                 bool $rules): bool;
   public static function create(
@@ -20,7 +20,7 @@ class Transliterator {
     string $rules,
     int $direction = self::FORWARD,
   ): ?Transliterator;
-  private final function __createInverse(): ?Transliterator;
+  private function __createInverse(): ?Transliterator;
   public function createInverse(): ?Transliterator;
   public function getErrorCode(): int;
   public function getErrorMessage(): string;

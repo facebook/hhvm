@@ -3,7 +3,7 @@
 abstract class X {
   abstract const type T as arraykey = string;
 
-  final private function __construct(private this::T $val) {}
+  private function __construct(private this::T $val) {}
 
   public function get(): this::T {
     return $this->val;

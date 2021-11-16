@@ -12,7 +12,7 @@ abstract class TypedJSModule
   protected ?this::TExports $rawExports = null;
   abstract const type TExports as shape(...);
 
-  final private function getFallbackExportsIfExist(): ?this::TExports {
+  private function getFallbackExportsIfExist(): ?this::TExports {
     if (
       $this is ITypedJSModuleWithFallback
     ) {

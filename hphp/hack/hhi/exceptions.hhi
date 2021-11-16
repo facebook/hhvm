@@ -52,7 +52,7 @@ class Error implements Throwable {
   final public function getTraceAsString()[]: string;
   public function __toString(): string;
   public function toString(): string;
-  final private function __clone(): void;
+  private function __clone(): void;
 }
 
 class ArithmeticError extends Error {}
@@ -102,7 +102,7 @@ class Exception implements Throwable {
   final public function getTraceAsString()[]: string;
   public function __toString(): string;
   public function toString(): string;
-  final private function __clone(): void;
+  private function __clone(): void;
 
   final public static function getTraceOptions()[read_globals];
   final public static function setTraceOptions($opts)[globals];

@@ -15,7 +15,7 @@ abstract class A1 {
 }
 
 final class A2 extends A1 {
-  final private static function query(): A3 {
+  private static function query(): A3 {
     invariant_violation('_');
   }
 

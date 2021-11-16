@@ -3,7 +3,7 @@
 
 trait MyTrait {
 
-  final private function createBuildID(): string {
+  private function createBuildID(): string {
     return "foo";
   }
 

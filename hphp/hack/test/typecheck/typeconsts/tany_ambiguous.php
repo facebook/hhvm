@@ -7,7 +7,7 @@ type TANY = ANY;
 abstract class Base {
   const type TData = TANY;
 
-  final private function __construct(protected this::TData $data) {}
+  private function __construct(protected this::TData $data) {}
 
   final protected function getData(): this::TData {
     return $this->data;

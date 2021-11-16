@@ -52,7 +52,7 @@ class SplPriorityQueue implements \HH\Iterator, Countable {
   private $flags = self::EXTR_DATA;
   private $heap;
 
-  final private function getHeap() {
+  private function getHeap() {
     if ($this->heap === null) {
       $this->heap = new _SplPriorityQueueHeap($this);
     }

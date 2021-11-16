@@ -19,7 +19,7 @@ class IntlIterator implements Iterator {
   /**
    * Only for internal use
    */
-  private final function __construct(): void {}
+  private function __construct(): void {}
 
   /**
    * Get the current element

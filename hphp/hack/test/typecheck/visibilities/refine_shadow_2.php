@@ -3,7 +3,7 @@
 
 final class EN {
   use TR;
-  final private function asEN(): EN {
+  private function asEN(): EN {
     return $this;
   }
 

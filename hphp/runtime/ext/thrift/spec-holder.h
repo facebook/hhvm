@@ -47,6 +47,7 @@ struct FieldSpec {
     return StrNR(className_);
   }
   Class* adapter{};
+  Class* field_adapter{};
   bool noTypeCheck{}; // If this field doesn't need type checking
                       // (conservatively).
   static FieldSpec compile(const Array& fieldSpec, bool topLevel);

@@ -23,6 +23,7 @@
 #include "hphp/runtime/ext/collections/ext_collections-set.h"
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/ext/thrift/adapter.h"
+#include "hphp/runtime/ext/thrift/field_adapter.h"
 #include "hphp/runtime/ext/thrift/util.h"
 #include "hphp/util/hash-map.h"
 
@@ -245,6 +246,7 @@ FieldSpec FieldSpec::compile(const Array& fieldSpec, bool topLevel) {
     break;
   }
   field.adapter = getAdapter(fieldSpec);
+  field.field_adapter = getFieldAdapter(fieldSpec);
   return field;
 }
 

@@ -28,6 +28,7 @@
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/ext/reflection/ext_reflection.h"
 #include "hphp/runtime/ext/thrift/adapter.h"
+#include "hphp/runtime/ext/thrift/field_adapter.h"
 #include "hphp/runtime/ext/thrift/spec-holder.h"
 #include "hphp/runtime/ext/thrift/transport.h"
 #include "hphp/runtime/ext/thrift/util.h"
@@ -244,7 +245,12 @@ struct CompactWriter {
     void writeSlow(const FieldSpec& field, const Object& obj) {
       INC_TPC(thrift_write_slow);
       StrNR fieldName(field.name);
-      Variant fieldVal = obj->o_get(fieldName, true, obj->getClassName());
+      Variant fieldVal;
+      if (field.field_adapter) {
+        fieldVal = getThriftType(obj, fieldName);
+      } else {
+        fieldVal = obj->o_get(fieldName, true, obj->getClassName());
+      }
       if (!fieldVal.isNull()) {
         TType fieldType = field.type;
         writeFieldBegin(field.fieldNum, fieldType);
@@ -285,7 +291,13 @@ struct CompactWriter {
             fieldInfo.cls = cls;
             fieldInfo.prop = &prop[slot];
             fieldInfo.fieldNum = fields[slot].fieldNum;
-            writeField(fieldVal, fields[slot], fieldType, fieldInfo);
+
+            if (fields[slot].field_adapter) {
+              auto value = getThriftType(obj, StrNR(fields[slot].name));
+              writeField(value, fields[slot], fieldType, fieldInfo);
+            } else {
+              writeField(fieldVal, fields[slot], fieldType, fieldInfo);
+            }
             writeFieldEnd();
           } else if (UNLIKELY(fieldVal.is(KindOfUninit)) &&
                      (prop[slot].attrs & AttrLateInit)) {
@@ -654,8 +666,12 @@ struct CompactReader {
           if (typesAreCompatible(fieldType, fieldSpec->type)) {
             readComplete = true;
             Variant fieldValue = readField(*fieldSpec, fieldType);
-            dest->o_set(
-              StrNR(fieldSpec->name), fieldValue, dest->getClassName());
+            if (fieldSpec->field_adapter) {
+              setThriftType(fieldValue, dest, StrNR(fieldSpec->name));
+            } else {
+              dest->o_set(
+                StrNR(fieldSpec->name), fieldValue, dest->getClassName());
+            }
             if (fieldSpec->isUnion) {
               dest->o_set(s__type, Variant(fieldNum), dest->getClassName());
             }
@@ -715,8 +731,12 @@ struct CompactReader {
           }
         }
         auto index = cls->propSlotToIndex(slot);
-        tvSet(*readField(fields[slot], fieldType).asTypedValue(),
-              objProp->at(index));
+        auto value = readField(fields[slot], fieldType);
+        if (fields[slot].field_adapter) {
+          setThriftType(value, dest, StrNR(fields[slot].name));
+        } else {
+          tvSet(*value.asTypedValue(), objProp->at(index));
+        }
         if (!fields[slot].noTypeCheck) {
           dest->verifyPropTypeHint(slot);
           if (fields[slot].isUnion) dest->verifyPropTypeHint(numFields);

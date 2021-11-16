@@ -26,6 +26,7 @@
 #include "hphp/runtime/ext/reflection/ext_reflection.h"
 #include "hphp/runtime/ext/std/ext_std_classobj.h"
 #include "hphp/runtime/ext/thrift/adapter.h"
+#include "hphp/runtime/ext/thrift/field_adapter.h"
 #include "hphp/runtime/ext/thrift/ext_thrift.h"
 #include "hphp/runtime/ext/thrift/spec-holder.h"
 #include "hphp/runtime/ext/thrift/transport.h"
@@ -409,7 +410,11 @@ void binary_deserialize_slow(const Object& zthis,
     if (const auto* fieldspec = getFieldSlow(spec, fieldno)) {
       if (ttypes_are_compatible(ttype, fieldspec->type)) {
         Variant rv = binary_deserialize(ttype, transport, *fieldspec, options);
-        zthis->o_set(StrNR(fieldspec->name), rv, zthis->getClassName());
+        if (fieldspec->field_adapter) {
+          setThriftType(rv, zthis, StrNR(fieldspec->name));
+        } else {
+          zthis->o_set(StrNR(fieldspec->name), rv, zthis->getClassName());
+        }
         if (fieldspec->isUnion) {
           zthis->o_set(s__type, Variant(fieldno), zthis->getClassName());
         }
@@ -474,9 +479,12 @@ Object binary_deserialize_struct(const String& clsName,
       }
     }
     auto index = cls->propSlotToIndex(i);
-    tvSet(*binary_deserialize(fieldType, transport, fields[i], options)
-             .asTypedValue(),
-          objProps->at(index));
+    auto value = binary_deserialize(fieldType, transport, fields[i], options);
+    if (fields[i].field_adapter) {
+      setThriftType(value, dest, StrNR(fields[i].name));
+    } else {
+      tvSet(*value.asTypedValue(), objProps->at(index));
+    }
 
     if (!fields[i].noTypeCheck) {
       dest->verifyPropTypeHint(i);
@@ -606,7 +614,12 @@ void binary_serialize_slow(const FieldSpec& field,
                            PHPOutputTransport& transport) {
   INC_TPC(thrift_write_slow);
   StrNR fieldName(field.name);
-  Variant fieldVal = obj->o_get(fieldName, true, obj->getClassName());
+  Variant fieldVal;
+  if (field.field_adapter) {
+    fieldVal = getThriftType(obj, fieldName);
+  } else {
+     fieldVal = obj->o_get(fieldName, true, obj->getClassName());
+  }
   if (!fieldVal.isNull()) {
     TType fieldType = field.type;
     transport.writeI8(fieldType);
@@ -629,7 +642,12 @@ void binary_serialize_struct(const Object& obj, PHPOutputTransport& transport) {
     if (slot < numProps && fields[slot].name == prop[slot].name) {
       auto index = cls->propSlotToIndex(slot);
       VarNR fieldWrapper(objProps->at(index).tv());
-      const Variant& fieldVal = fieldWrapper;
+      Variant fieldVal;
+      if (fields[slot].field_adapter) {
+        fieldVal = getThriftType(obj, StrNR(fields[slot].name));
+      } else {
+        fieldVal = fieldWrapper;
+      }
       if (!fieldVal.isNull()) {
         TType fieldType = fields[slot].type;
         transport.writeI8(fieldType);

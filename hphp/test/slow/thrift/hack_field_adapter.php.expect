@@ -1,0 +1,16 @@
+--- binary ---
+----OuterStruct----
+		 value = 42
+string(32) "26cc06895b4bb7b431b2580f9443bb12"
+----OuterStruct----
+		 value = 42
+----OuterStructNoAdapter----
+		 value = 42
+--- compact ---
+----OuterStruct----
+		 value = 42
+string(32) "633119f2b60fec192ff10759cf557234"
+----OuterStruct----
+		 value = 42
+----OuterStructNoAdapter----
+		 value = 42

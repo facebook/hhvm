@@ -249,12 +249,14 @@ function preg_quote(string $str,
  *   returned, otherwise subject will be returned unchanged.
  */
 <<__Native>>
-function preg_replace_callback(mixed $pattern,
-                               mixed $callback,
-                               mixed $subject,
-                               int $limit,
-                               <<__OutOnly("KindOfInt64")>>
-                               inout ?int $count)[defaults]: mixed;
+function preg_replace_callback(
+  mixed $pattern,
+  (function(darray<arraykey, string>)[_]: string) $callback,
+  mixed $subject,
+  int $limit,
+  <<__OutOnly("KindOfInt64")>>
+  inout ?int $count,
+)[ctx $callback]: mixed;
 
 /**
  * preg_replace_callback, but populates $error in case of error.
@@ -266,13 +268,13 @@ function preg_replace_callback(mixed $pattern,
 <<__Native>>
 function preg_replace_callback_with_error(
   mixed $pattern,
-  mixed $callback,
+  (function(darray<arraykey, string>)[_]: string) $callback,
   mixed $subject,
   int $limit,
   <<__OutOnly("KindOfInt64")>>
   inout ?int $count,
   inout ?int $error,
-)[defaults]: mixed;
+)[ctx $callback]: mixed;
 
 /**
  * Perform a regular expression search and replace using an associative array of

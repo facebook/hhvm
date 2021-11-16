@@ -1377,10 +1377,12 @@ and simplify_subtype_i
         | (_, Tsupportdynamic)
         | (_, Tany _)
         | (_, Terr)
-        | (_, Tprim (Tint | Tbool | Tfloat | Tstring | Tnum | Tarraykey | Tvoid))
-          ->
+        | ( _,
+            Tprim
+              ( Tint | Tbool | Tfloat | Tstring | Tnum | Tarraykey | Tvoid
+              | Tnoreturn ) ) ->
           valid env
-        | (_, Tprim (Tnull | Tresource | Tnoreturn))
+        | (_, Tprim (Tnull | Tresource))
         | (_, Toption _)
         | (_, Tdynamic)
         | (_, Tnonnull)

@@ -83,23 +83,31 @@ let infer_variance_class env class_name class_type =
     in
     let (positive, negative) = res in
     List.iter tparams ~f:(fun t ->
-        let (pos, name) = t.tp_name in
-        let pos = Naming_provider.resolve_position (Tast_env.get_ctx env) pos in
-        match
-          ( t.tp_variance,
-            SMap.find_opt name positive,
-            SMap.find_opt name negative )
-        with
-        | (Ast_defs.Invariant, None, None) ->
-          Lints_errors.inferred_variance
-            pos
-            "covariant or contravariant"
-            "`+` or `-`"
-        | (Ast_defs.Invariant, Some _, None) ->
-          Lints_errors.inferred_variance pos "covariant" "`+`"
-        | (Ast_defs.Invariant, None, Some _) ->
-          Lints_errors.inferred_variance pos "contravariant" "`-`"
-        | _ -> ())
+        match t.tp_reified with
+        (* Reified type parameters can't be marked with a variance *)
+        | SoftReified
+        | Reified ->
+          ()
+        | Erased ->
+          let (pos, name) = t.tp_name in
+          let pos =
+            Naming_provider.resolve_position (Tast_env.get_ctx env) pos
+          in
+          (match
+             ( t.tp_variance,
+               SMap.find_opt name positive,
+               SMap.find_opt name negative )
+           with
+          | (Ast_defs.Invariant, None, None) ->
+            Lints_errors.inferred_variance
+              pos
+              "covariant or contravariant"
+              "`+` or `-`"
+          | (Ast_defs.Invariant, Some _, None) ->
+            Lints_errors.inferred_variance pos "covariant" "`+`"
+          | (Ast_defs.Invariant, None, Some _) ->
+            Lints_errors.inferred_variance pos "contravariant" "`-`"
+          | _ -> ()))
 
 let handler =
   object

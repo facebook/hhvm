@@ -1,0 +1,102 @@
+cmake_minimum_required(VERSION 3.10)
+project(watchman CXX C)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+
+set(C_SOURCES)
+
+# TODO when Ubuntu 18.04 support is dropped:
+# - use CONFIGURE_DEPENDS in these globs
+# - use file(CREATE_DIRECTORY and file(CREATE_LINK instead of the `watchman_include_dir_symlink` target
+file(GLOB_RECURSE files "*.c")
+
+foreach (file ${files})
+  if (${file} MATCHES "/(test|tools|examples?)/")
+    list(REMOVE_ITEM files ${file})
+  endif()
+  if (${file} MATCHES "/mc_fbtrace_info.c$")
+    list(REMOVE_ITEM files ${file})
+  endif()
+
+endforeach()
+list(APPEND C_SOURCES ${files})
+
+set(CXX_SOURCES)
+file(GLOB_RECURSE src_files "*.cpp")
+set(files ${src_files})
+foreach (file ${files})
+  if (${file} MATCHES "(/(test|tools|examples?)/|(StandaloneUtils|Test(Main)?|main).cpp$)")
+    list(REMOVE_ITEM files ${file})
+  endif()
+endforeach()
+
+find_program(ragel_EXECUTABLE ragel REQUIRED)
+
+add_custom_command(
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/mcrouter/lib/network/McAsciiParser-gen.cpp
+  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/mcrouter/lib/network/McAsciiParser.rl
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/mcrouter/lib/network
+  COMMAND ${ragel_EXECUTABLE} -G1 -o ${CMAKE_CURRENT_BINARY_DIR}/mcrouter/lib/network/McAsciiParser-gen.cpp ${CMAKE_CURRENT_SOURCE_DIR}/mcrouter/lib/network/McAsciiParser.rl
+  COMMENT "Generating McAsciiParser-gen.cpp")
+list(APPEND CXX_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/mcrouter/lib/network/McAsciiParser-gen.cpp")
+add_custom_command(
+  OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/mcrouter/RouterRegistry.h"
+  DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/mcrouter/RouterRegistry-impl.h"
+  COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/mcrouter"
+  COMMAND ${CMAKE_COMMAND} -E create_symlink
+    "${CMAKE_CURRENT_SOURCE_DIR}/mcrouter/RouterRegistry-impl.h"
+    "${CMAKE_CURRENT_BINARY_DIR}/mcrouter/RouterRegistry.h"
+  COMMENT "Creating RouterRegistry.h symlink"
+)
+add_custom_command(
+  OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/mcrouter/ThriftAcceptor.h"
+  DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/mcrouter/ThriftAcceptor-impl.h"
+  COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/mcrouter"
+  COMMAND ${CMAKE_COMMAND} -E create_symlink
+    "${CMAKE_CURRENT_SOURCE_DIR}/mcrouter/ThriftAcceptor-impl.h"
+    "${CMAKE_CURRENT_BINARY_DIR}/mcrouter/ThriftAcceptor.h"
+  COMMENT "Creating ThriftAcceptor.h symlink"
+)
+add_custom_command(
+  OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/mcrouter/mcrouter_sr_deps.h"
+  DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/mcrouter/mcrouter_sr_deps-impl.h"
+  COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/mcrouter"
+  COMMAND ${CMAKE_COMMAND} -E create_symlink
+    "${CMAKE_CURRENT_SOURCE_DIR}/mcrouter/mcrouter_sr_deps-impl.h"
+    "${CMAKE_CURRENT_BINARY_DIR}/mcrouter/mcrouter_sr_deps.h"
+  COMMENT "Creating mcrouter_sr_deps.h symlink"
+)
+list(APPEND CXX_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/mcrouter/RouterRegistry.h")
+list(APPEND CXX_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/mcrouter/ThriftAcceptor.h")
+list(APPEND CXX_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/mcrouter/mcrouter_sr_deps.h")
+list(APPEND CXX_SOURCES ${files})
+
+add_definitions(-DNO_LIB_GFLAGS)
+add_definitions(-DLIBMC_FBTRACE_DISABLE)
+add_definitions(-DHAVE_CONFIG_H)
+
+include_directories("${CMAKE_SOURCE_DIR}")
+include_directories("${CMAKE_BINARY_DIR}")
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-variable")
+add_library(mcrouter STATIC ${C_SOURCES} ${CXX_SOURCES})
+
+find_package(fizz REQUIRED)
+find_package(folly REQUIRED)
+find_package(fmt REQUIRED)
+find_package(FBThrift REQUIRED)
+find_package(wangle REQUIRED)
+
+find_path(JEMALLOC_INCLUDE_DIR NAMES jemalloc/jemalloc.h REQUIRED)
+
+include(mcrouter-thrift-codegen.cmake)
+
+target_link_libraries(mcrouter mcrouter_thrift_lib Folly::folly boost fizz fmt)
+target_include_directories(mcrouter PUBLIC "${CMAKE_CURRENT_BINARY_DIR}" "${JEMALLOC_INCLUDE_DIR}")
+
+install(
+  TARGETS mcrouter
+  LIBRARY ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
+)

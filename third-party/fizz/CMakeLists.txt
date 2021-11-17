@@ -28,6 +28,17 @@ SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
   "SHA256=7e0fa33a8329e692f23309a331f4fe3a6d698a9a1cdfdee634293a6d40fe7724"
 )
 
+set(
+  FIZZ_DEPS
+  boost
+  folly
+  jemalloc
+  libsodium
+  zstd
+)
+add_library(fizz_deps INTERFACE)
+target_link_libraries(fizz_deps INTERFACE ${FIZZ_DEPS} ${OPENSSL_LIBRARIES})
+
 ExternalProject_Add(
   bundled_fizz
   ${FIZZ_SOURCE_ARGS}
@@ -73,25 +84,17 @@ ExternalProject_Add(
     "-Dfolly_DIR=${FOLLY_INSTALL_DIR}/lib/cmake/folly"
 
     "-DCMAKE_CXX_FLAGS=-I${JEMALLOC_INCLUDE_DIR}"
+  DEPENDS ${FIZZ_DEPS}
 )
 ExternalProject_Get_property(bundled_fizz INSTALL_DIR)
 
-set(
-  FIZZ_DEPS
-  boost
-  folly
-  jemalloc
-  libsodium
-  zstd
-)
-add_dependencies(bundled_fizz ${FIZZ_DEPS})
 add_library(fizz INTERFACE)
 add_dependencies(fizz bundled_fizz)
 target_include_directories(fizz INTERFACE "${INSTALL_DIR}/include")
 target_link_libraries(
   fizz
   INTERFACE
-  ${FIZZ_DEPS} ${OPENSSL_LIBRARIES}
   "${INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}fizz${CMAKE_STATIC_LIBRARY_SUFFIX}"
+  fizz_deps
 )
 set(FIZZ_INSTALL_DIR "${INSTALL_DIR}" PARENT_SCOPE)

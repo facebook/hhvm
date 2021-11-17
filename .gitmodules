@@ -13,9 +13,6 @@
 [submodule "libafdt"]
 	path = third-party/libafdt/src
 	url = https://github.com/facebook/libafdt
-[submodule "mcrouter"]
-	path = third-party/mcrouter/src
-	url = https://github.com/facebook/mcrouter
 [submodule "re2"]
 	path = third-party/re2/src
 	url = https://github.com/google/re2.git

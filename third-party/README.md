@@ -38,13 +38,30 @@ Overall process:
 4. Update the hashes in `third-party/foo/CMakeLists.txt` to match `openssl dgst -sha256 *.tar.gz`
 5. **Requires FB employee**: update our CI caches - this can be done on your laptop, it does not need a devserver.
    `for file in *; do manifold put $file hhvm_opensource_dependency_cache/flat/$file; done`
-6. Update any submodules to a compatible commit from the same day. As of 2021-10-14, this is only needed for mcrouter.
-7. Try to build; fix any patches/build issues
-8. Create pull request and (requires FB employee) diff
-9. If you were working in Ubuntu, pull onto MacOS and do a local test build. If you were working in MacOS, pull into Ubuntu and do a test build
-10. Land once everything's good :) Don't do this on a Friday.
-11. Check nightly build results the next day. Fix any portability issues that weren't caught by CI.
+6. Try to build; fix any patches/build issues
+7. Create pull request and (requires FB employee) diff
+8. If you were working in Ubuntu, pull onto MacOS and do a local test build. If you were working in MacOS, pull into Ubuntu and do a test build
+9. Land once everything's good :) Don't do this on a Friday.
+10. Check nightly build results the next day. Fix any portability issues that weren't caught by CI.
 
+Common Patterns/Targets
+-----------------------
+
+Most things here have 3 targets:
+- `foo`
+- `foo_deps`
+- `bundled_foo`
+
+If `bundled_foo` is used, `foo` depends on `bundled_foo`; for some projects (like folly), this is always the case, but for others (like boost), the system version of the library will be used instead if possible, and the `foo` target will be configured to point to it.
+
+`foo_deps` is a fake target, that defines all of the direct dependencies; `foo` will always depend on `foo_deps`. This target is required because if `myapp` depends on `foo` and `foo` depends on `bar`, link order matters: the linker must know that `foo` depends on `bar`. `myapp` -> [`foo`, `bar`] is not sufficient.
+
+Finally, we also frequently have a `FOO_DEPS` variable in addition to the `foo_deps` target; this is because:
+
+- `foo_deps` is an `INTERFACE` library in cmake; this means that the target is fake (`.PHONY` in gmake terms) - there is no .a/.so/.dylib output. it just tracks dependency information
+- `bundled_foo` is also a special target (defined by `ExternalProject_Add`); if given an INTERFACE dependency, it makes it part of its' own interface dependencies, but doesn't actually build-depend on it.
+- `INTERFACE` targets are only allowed `INTERFACE` libraries; in particular, `PUBLIC` are not permitted by CMake, which is what would be correct here
+- so, we make `bundled_foo` depend directly on `${FOO_DEPS}`, rather than the interface `foo_deps`, even though they're otherwise equivalent.
 
 LICENSING
 ---------

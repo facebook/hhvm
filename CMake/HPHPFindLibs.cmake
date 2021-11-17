@@ -441,10 +441,6 @@ macro(hphp_link target)
   target_link_libraries(${target} ${VISIBILITY} rust_compile_ffi_bridge)
   target_link_libraries(${target} ${VISIBILITY} rust_parser_ffi_bridge)
 
-  if (ENABLE_MCROUTER)
-    target_link_libraries(${target} ${VISIBILITY} mcrouter)
-  endif()
-
   if (NOT MSVC)
     target_link_libraries(${target} ${VISIBILITY} afdt)
   endif()

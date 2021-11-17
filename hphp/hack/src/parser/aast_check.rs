@@ -4,11 +4,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use naming_special_names_rust::coeffects;
 use naming_special_names_rust::special_idents;
+
 use oxidized::{
     aast,
     aast_visitor::{visit, AstParams, Node, Visitor},
-    ast,
+    ast, ast_defs,
     pos::Pos,
 };
 use parser_core_types::{
@@ -35,10 +37,28 @@ fn awaitable_type_args(hint: &ast::Hint) -> Option<&[ast::Hint]> {
     }
 }
 
+fn is_policied_local(ctxs: &Option<ast::Contexts>) -> bool {
+    match ctxs {
+        Some(c) => {
+            for hint in &c.1 {
+                if let aast::Hint_::Happly(ast_defs::Id(_, id), _) = &*hint.1 {
+                    if id.as_str() == coeffects::POLICIED_LOCAL {
+                        return true;
+                    }
+                }
+            }
+            false
+        }
+        None => false,
+    }
+}
+
 struct Context {
     in_methodish: bool,
     in_classish: bool,
     in_static_methodish: bool,
+    is_policied_local_fun: bool,
+    is_typechecker: bool,
 }
 
 struct Checker {
@@ -102,6 +122,7 @@ impl<'ast> Visitor<'ast> for Checker {
             &mut Context {
                 in_methodish: true,
                 in_static_methodish: m.static_,
+                is_policied_local_fun: is_policied_local(&m.ctxs),
                 ..*c
             },
             self,
@@ -117,6 +138,7 @@ impl<'ast> Visitor<'ast> for Checker {
             &mut Context {
                 in_methodish: true,
                 in_static_methodish: c.in_static_methodish,
+                is_policied_local_fun: is_policied_local(&f.ctxs),
                 ..*c
             },
             self,
@@ -140,17 +162,33 @@ impl<'ast> Visitor<'ast> for Checker {
             if Self::name_eq_this_and_in_static_method(c, name) {
                 self.add_error(pos, syntax_error::this_in_static);
             }
+        } else if let Some((f, ..)) = p.2.as_efun() {
+            match f.ctxs {
+                None if c.is_policied_local_fun && c.is_typechecker => {
+                    self.add_error(&f.span, syntax_error::closure_in_local_context)
+                }
+                _ => {}
+            }
+        } else if let Some((f, ..)) = p.2.as_lfun() {
+            match f.ctxs {
+                None if c.is_policied_local_fun && c.is_typechecker => {
+                    self.add_error(&f.span, syntax_error::closure_in_local_context)
+                }
+                _ => {}
+            }
         }
         p.recurse(c, self)
     }
 }
 
-pub fn check_program(program: &aast::Program<(), ()>) -> Vec<SyntaxError> {
+pub fn check_program(program: &aast::Program<(), ()>, is_typechecker: bool) -> Vec<SyntaxError> {
     let mut checker = Checker::new();
     let mut context = Context {
         in_methodish: false,
         in_classish: false,
         in_static_methodish: false,
+        is_policied_local_fun: false,
+        is_typechecker,
     };
     visit(&mut checker, &mut context, program).unwrap();
     checker.errors

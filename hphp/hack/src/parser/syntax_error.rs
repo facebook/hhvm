@@ -1103,3 +1103,7 @@ pub const readonly_on_xhp: Error =
 pub const write_props_without_capability: Error = Cow::Borrowed(
     "Writing to object properties requires the capability WriteProperty, which is not provided by the context",
 );
+
+pub const closure_in_local_context: Error = Cow::Borrowed(
+    "Closures in policied local contexts require explicit annotation. Consider adding [policied_local] or [defaults].",
+);

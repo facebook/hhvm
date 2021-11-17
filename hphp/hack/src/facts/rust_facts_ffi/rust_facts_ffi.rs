@@ -9,7 +9,11 @@ use ocamlrep::{bytes_from_ocamlrep, ptr::UnsafeOcamlPtr};
 use ocamlrep_ocamlpool::ocaml_ffi;
 use oxidized::relative_path::RelativePath;
 
-use facts_rust::{facts::*, facts_parser::*};
+use facts_rust::{
+    facts::Facts,
+    facts_parser::{extract_as_json, from_text, FactsOpts},
+};
+
 ocaml_ffi! {
     fn extract_as_json_ffi(
         flags: i32,

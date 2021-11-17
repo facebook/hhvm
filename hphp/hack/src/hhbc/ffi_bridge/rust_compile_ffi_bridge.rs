@@ -13,7 +13,7 @@ use arena_deserializer::serde::Deserialize;
 use bincode::Options;
 use cxx::CxxString;
 use external_decl_provider::{ExternalDeclProvider, ExternalDeclProviderResult};
-use facts_rust::facts;
+use facts_rust::{facts, facts_parser};
 use hhbc_by_ref_compile::EnvFlags;
 use libc::{c_char, c_int};
 use no_pos_hash::position_insensitive_hash;
@@ -21,7 +21,6 @@ use oxidized::file_info::NameType;
 use oxidized::relative_path::{Prefix, RelativePath};
 use oxidized_by_ref::decl_parser_options;
 use parser_core_types::source_text::SourceText;
-use rust_facts_ffi::{extract_facts_as_json_ffi0, extract_facts_ffi0, facts_to_json_ffi};
 
 #[cxx::bridge]
 pub mod compile_ffi {
@@ -539,16 +538,15 @@ pub fn hackc_extract_facts_as_json_cpp_ffi(
         oxidized::relative_path::Prefix::Dummy,
         std::path::PathBuf::from(std::ffi::OsStr::from_bytes(filename.as_bytes())),
     );
-    match extract_facts_as_json_ffi0(
-        ((1 << 0) & flags) != 0, // php5_compat_mode
-        ((1 << 1) & flags) != 0, // hhvm_compat_mode
-        ((1 << 2) & flags) != 0, // allow_new_attribute_syntax
-        ((1 << 3) & flags) != 0, // enable_xhp_class_modifier
-        ((1 << 4) & flags) != 0, // disable_xhp_element_mangling
-        filepath,
-        source_text.as_bytes(),
-        true, // mangle_xhp
-    ) {
+    let opts = facts_parser::FactsOpts {
+        php5_compat_mode: ((1 << 0) & flags) != 0,
+        hhvm_compat_mode: ((1 << 1) & flags) != 0,
+        allow_new_attribute_syntax: ((1 << 2) & flags) != 0,
+        enable_xhp_class_modifier: ((1 << 3) & flags) != 0,
+        disable_xhp_element_mangling: ((1 << 4) & flags) != 0,
+        filename: filepath,
+    };
+    match facts_parser::extract_as_json(source_text.as_bytes(), opts) {
         Some(s) => s,
         None => String::new(),
     }
@@ -564,17 +562,16 @@ pub fn hackc_extract_facts_cpp_ffi(
         oxidized::relative_path::Prefix::Dummy,
         std::path::PathBuf::from(std::ffi::OsStr::from_bytes(filename.as_bytes())),
     );
+    let opts = facts_parser::FactsOpts {
+        php5_compat_mode: ((1 << 0) & flags) != 0,
+        hhvm_compat_mode: ((1 << 1) & flags) != 0,
+        allow_new_attribute_syntax: ((1 << 2) & flags) != 0,
+        enable_xhp_class_modifier: ((1 << 3) & flags) != 0,
+        disable_xhp_element_mangling: ((1 << 4) & flags) != 0,
+        filename: filepath,
+    };
     let text = source_text.as_bytes();
-    match extract_facts_ffi0(
-        ((1 << 0) & flags) != 0, // php5_compat_mode
-        ((1 << 1) & flags) != 0, // hhvm_compat_mode
-        ((1 << 2) & flags) != 0, // allow_new_attribute_syntax
-        ((1 << 3) & flags) != 0, // enable_xhp_class_modifier
-        ((1 << 4) & flags) != 0, // disable_xhp_element_mangling
-        filepath,
-        text,
-        true, // mangle_xhp
-    ) {
+    match facts_parser::from_text(text, opts) {
         (Some(facts), has_errors) => {
             let (md5sum, sha1sum) = facts::md5_and_sha1(text);
             compile_ffi::FactsResult {
@@ -597,7 +594,7 @@ pub fn hackc_facts_to_json_cpp_ffi(
 ) -> String {
     let facts = facts::Facts::from(facts.facts);
     let text = source_text.as_bytes();
-    facts_to_json_ffi(facts, text)
+    facts.to_json(text)
 }
 
 pub fn hackc_decls_to_facts_cpp_ffi(

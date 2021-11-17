@@ -58,6 +58,16 @@ let refine_shape field_name pos env shape =
     shape
     (mk (Reason.Rnone, Tshape (Open_shape, TShapeMap.singleton field_name sft)))
 
+let make_locl_like_type env ty =
+  if
+    env.Typing_env_types.pessimize
+    || TypecheckerOptions.pessimise_builtins (Env.get_tcopt env)
+  then
+    let dyn = MakeType.dynamic (Reason.Renforceable (get_pos ty)) in
+    Typing_union.union env dyn ty
+  else
+    (env, ty)
+
 (*****************************************************************************)
 (* Remove a field from all the shapes found in a given type.
  * The function leaves all the other types (non-shapes) unchanged.
@@ -170,6 +180,16 @@ let make_idx_fake_super_shape shape_pos fun_name field_name field_ty =
  *     ----------------------------
  *     Shapes::idx(e1, sfn, e2) : t
  *
+ *  Typing rules when the shape has a like type:
+ *
+ *     e : ~?shape(?sfn => t, ...)
+ *     ----------------------------
+ *     Shapes::idx(e, sfn) : ~?t
+ *
+ *     e1 : ~?shape(?sfn => t, ...)
+ *     e2 : t
+ *     ----------------------------
+ *     Shapes::idx(e1, sfn, e2) : ~t
  *)
 let idx
     env
@@ -196,7 +216,17 @@ let idx
       let nullable_super_shape =
         mk (Reason.Rnone, Toption fake_super_shape_ty)
       in
-
+      let super_shape =
+        if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
+          let like_nullable_super_shape =
+            mk
+              ( Reason.Rnone,
+                Tunion [mk (Reason.Rnone, Tdynamic); nullable_super_shape] )
+          in
+          like_nullable_super_shape
+        else
+          nullable_super_shape
+      in
       (match default with
       | None ->
         let env =
@@ -205,7 +235,7 @@ let idx
             Reason.URparam
             env
             shape_ty
-            { et_type = nullable_super_shape; et_enforced = Unenforced }
+            { et_type = super_shape; et_enforced = Unenforced }
             Errors.unify_error
         in
         TUtils.union env res (MakeType.null fun_pos)
@@ -216,7 +246,7 @@ let idx
             Reason.URparam
             env
             shape_ty
-            { et_type = nullable_super_shape; et_enforced = Unenforced }
+            { et_type = super_shape; et_enforced = Unenforced }
             Errors.unify_error
         in
         let env =
@@ -230,7 +260,7 @@ let idx
         in
         (env, res))
   in
-  Typing_enforceability.make_locl_like_type env res
+  make_locl_like_type env res
 
 let at env ~expr_pos ~shape_pos shape_ty ((_, field_p, _) as field) =
   let (env, shape_ty) = Env.expand_type env shape_ty in
@@ -247,18 +277,29 @@ let at env ~expr_pos ~shape_pos shape_ty ((_, field_p, _) as field) =
           field_name
           { sft_optional = true; sft_ty = res }
       in
+      let like_fake_super_shape_ty =
+        mk
+          ( Reason.Rnone,
+            Tunion [mk (Reason.Rnone, Tdynamic); fake_super_shape_ty] )
+      in
+      let super_shape_ty =
+        if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
+          like_fake_super_shape_ty
+        else
+          fake_super_shape_ty
+      in
       let env =
         Typing_coercion.coerce_type
           shape_pos
           Reason.URparam
           env
           shape_ty
-          { et_type = fake_super_shape_ty; et_enforced = Unenforced }
+          { et_type = super_shape_ty; et_enforced = Unenforced }
           Errors.unify_error
       in
       (env, res)
   in
-  Typing_enforceability.make_locl_like_type env res
+  make_locl_like_type env res
 
 let remove_key p env shape_ty ((_, field_p, _) as field) =
   match TUtils.shape_field_name env field with
@@ -339,9 +380,7 @@ let to_array env pos shape_ty res =
       shape_ty
   in
   to_collection env shape_ty res (fun env r key value ->
-      Typing_enforceability.make_locl_like_type
-        env
-        (MakeType.darray r key value))
+      make_locl_like_type env (MakeType.darray r key value))
 
 let to_dict env pos shape_ty res =
   let (env, shape_ty) =
@@ -352,7 +391,7 @@ let to_dict env pos shape_ty res =
       shape_ty
   in
   to_collection env shape_ty res (fun env r key value ->
-      Typing_enforceability.make_locl_like_type env (MakeType.dict r key value))
+      make_locl_like_type env (MakeType.dict r key value))
 
 let shape_field_pos = function
   | Ast_defs.SFlit_int (p, _)

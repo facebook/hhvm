@@ -135,13 +135,6 @@ let is_enforceable (env : env) (ty : decl_ty) =
   | Enforced -> true
   | Unenforced -> false
 
-let make_locl_like_type env ty =
-  if env.Typing_env_types.pessimize then
-    let dyn = MakeType.dynamic (Reason.Renforceable (get_pos ty)) in
-    Typing_union.union env dyn ty
-  else
-    (env, ty)
-
 (* We don't trust that hhvm will enforce things consistent with the .hhi file,
    outside of hsl *)
 let unenforced_hhi pos_or_decl =

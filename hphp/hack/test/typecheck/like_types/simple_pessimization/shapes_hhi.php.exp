@@ -14,4 +14,7 @@ File "shapes_hhi.php", line 15, characters 3-30:
   dynamic
 File "shapes_hhi.php", line 16, characters 3-29:
   dynamic
-No errors
+File "shapes_hhi.php", line 6, characters 11-36:
+This `Shapes::keyExists()` check is always true (Typing[4249])
+  File "shapes_hhi.php", line 4, characters 28-30:
+  The field `a` exists because of this definition

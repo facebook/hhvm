@@ -349,7 +349,7 @@ function explode(string $delimiter,
  *
  */
 <<__IsFoldable, __Native>>
-function implode(mixed $arg1, mixed $arg2 = null)[]: string;
+function implode(readonly mixed $arg1, readonly mixed $arg2 = null)[]: string;
 
 /**
  * An alias for implode().

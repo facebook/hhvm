@@ -15,6 +15,7 @@ use oxidized::{
 use std::fmt;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
+#[repr(C)]
 pub enum Ctx {
     Defaults,
 

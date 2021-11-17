@@ -277,17 +277,8 @@ let parsing genv env to_check ~stop_at_errors cgroup_steps =
     }
   in
   SharedMem.GC.collect `gentle;
-  let max_size =
-    if genv.local_config.ServerLocalConfig.small_buckets_for_dirty_names then
-      Some 1
-    else
-      None
-  in
   let get_next =
-    MultiWorker.next
-      genv.workers
-      (Relative_path.Set.elements disk_files)
-      ?max_size
+    MultiWorker.next genv.workers (Relative_path.Set.elements disk_files)
   in
   let ctx = Provider_utils.ctx_from_server_env env in
   let (fast, errors, failed_parsing) =

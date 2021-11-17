@@ -1,294 +1,245 @@
 (library
-  (name ai_stubs)
-  (wrapped false)
-  (modules
-    ai)
-  (libraries
-    ai_options
-    errors)
-  (preprocess
-    (pps lwt_ppx ppx_deriving.std)))
+ (name ai_stubs)
+ (wrapped false)
+ (modules ai)
+ (libraries ai_options errors)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
 
 (library
-  (name ai_options_stubs)
-  (wrapped false)
-  (modules
-    ai_options)
-  (libraries
-    errors)
-  (preprocess
-    (pps lwt_ppx ppx_deriving.std)))
+ (name ai_options_stubs)
+ (wrapped false)
+ (modules ai_options)
+ (libraries errors)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
 
 (library
-  (name artifact_store_stubs)
-  (wrapped false)
-  (modules
-    artifactStore)
-  (libraries
-    errors)
-  (preprocess
-    (pps lwt_ppx ppx_deriving.std)))
+ (name artifact_store_stubs)
+ (wrapped false)
+ (modules artifactStore)
+ (libraries errors)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
 
 (library
-  (name build)
-  (wrapped false)
-  (modules
-    buildMain)
-  (preprocess
-    (pps lwt_ppx ppx_deriving.std)))
+ (name build)
+ (wrapped false)
+ (modules buildMain)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
 
 (library
-  (name rust_ffi_stubs)
-  (wrapped false)
-  (modules)
-  (preprocess
-    (pps lwt_ppx ppx_deriving.std)))
+ (name rust_ffi_stubs)
+ (wrapped false)
+ (modules)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
 
 (library
-  (name server_local_config_knobs_stubs)
-  (wrapped false)
-  (modules serverLocalConfigKnobs)
-  (preprocess
-    (pps lwt_ppx ppx_deriving.std)))
+ (name server_local_config_knobs_stubs)
+ (wrapped false)
+ (modules serverLocalConfigKnobs)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
 
 (library
-  (name linting_stubs)
-  (wrapped false)
-  (modules
-    linting_service)
-  (preprocess
-    (pps lwt_ppx ppx_deriving.std)))
+ (name linting_stubs)
+ (wrapped false)
+ (modules linting_service)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
 
 (library
-  (name load_script_stubs)
-  (wrapped false)
-  (modules
-    load_script
-    loadScriptConfig
-    loadScriptUtils)
-  (preprocess
-    (pps lwt_ppx ppx_deriving.std)))
+ (name load_script_stubs)
+ (wrapped false)
+ (modules load_script loadScriptConfig loadScriptUtils)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
 
 (library
-  (name messages_stubs)
-  (wrapped false)
-  (modules
-    clientMessages)
-  (preprocess
-    (pps lwt_ppx ppx_deriving.std)))
+ (name messages_stubs)
+ (wrapped false)
+ (modules clientMessages)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
 
 (library
-  (name vfs_stubs)
-  (wrapped false)
-  (modules
-    vfs)
-  (libraries
-    relative_path)
-  (preprocess
-    (pps lwt_ppx ppx_deriving.std)))
-
+ (name vfs_stubs)
+ (wrapped false)
+ (modules vfs)
+ (libraries relative_path)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
 
 (library
-  (name typing_service_delegate_types_stubs)
-  (wrapped false)
-  (modules
-    typing_service_delegate_types)
-  (preprocess
-    (pps lwt_ppx ppx_deriving.std)))
-
+ (name typing_service_delegate_types_stubs)
+ (wrapped false)
+ (modules typing_service_delegate_types)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
 
 (library
-  (name typing_service_delegate_stubs)
-  (wrapped false)
-  (modules
-    typing_service_delegate)
-  (libraries
-    typing_service_delegate_types_stubs
-    typing_service_api)
-  (preprocess
-    (pps lwt_ppx ppx_deriving.std)))
+ (name typing_service_delegate_stubs)
+ (wrapped false)
+ (modules typing_service_delegate)
+ (libraries typing_service_delegate_types_stubs typing_service_api)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
 
 (library
-  (name remote_stubs)
-  (wrapped false)
-  (modules
-    remoteWorker)
-  (libraries
-    artifact_store_stubs
-    ci_util_stubs
-    errors
-    file_info
-    future
-    naming
-    relative_path
-    sys_utils)
-  (preprocess
-    (pps lwt_ppx ppx_deriving.std)))
+ (name remote_stubs)
+ (wrapped false)
+ (modules remoteWorker)
+ (libraries
+  artifact_store_stubs
+  ci_util_stubs
+  errors
+  file_info
+  future
+  naming
+  relative_path
+  sys_utils)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
 
 (library
-  (name job_runner_stubs)
-    (wrapped false)
-  (modules
-    jobRunner)
-  (libraries
-    jobRunner_sig
-    core_kernel
-    future
-    utils_core)
-  (preprocess
-    (pps lwt_ppx ppx_deriving.std)))
+ (name job_runner_stubs)
+ (wrapped false)
+ (modules jobRunner)
+ (libraries jobRunner_sig core_kernel future utils_core)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
 
 (library
-  (name state_loader_stubs)
-  (wrapped false)
-  (modules
-    saved_state_loader
-    state_loader_futures
-    state_loader_lwt
-    xdb)
-  (libraries
-    artifact_store_stubs
-    hg
-    server_monitor)
-  (preprocess
-    (pps lwt_ppx ppx_deriving.std)))
+ (name state_loader_stubs)
+ (wrapped false)
+ (modules saved_state_loader state_loader_futures state_loader_lwt xdb)
+ (libraries artifact_store_stubs hg server_monitor)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
 
 (library
-  (name decl_ipc_ffi_externs)
-  (wrapped false)
-  (modules
-    decl_ipc_ffi_externs)
-  (preprocess
-    (pps lwt_ppx ppx_deriving.std)))
+ (name decl_ipc_ffi_externs)
+ (wrapped false)
+ (modules decl_ipc_ffi_externs)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
 
 (library
-  (name re_stubs)
-  (wrapped false)
-  (modules re reEnv)
-  (libraries errors relative_path typing_deps)
-  (preprocess
-    (pps lwt_ppx ppx_deriving.std)))
+ (name re_stubs)
+ (wrapped false)
+ (modules re reEnv)
+ (libraries errors relative_path typing_deps)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
 
 (library
-  (name experiments_config_file_stubs)
-  (wrapped false)
-  (modules
-    experiments_config_file)
-  (preprocess
-    (pps lwt_ppx ppx_deriving.std)))
+ (name experiments_config_file_stubs)
+ (wrapped false)
+ (modules experiments_config_file)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
 
 (library
-  (name recli_stubs)
-  (wrapped false)
-  (modules cas)
-  (libraries errors relative_path typing_deps future)
-  (preprocess
-    (pps lwt_ppx ppx_deriving.std)))
+ (name recli_stubs)
+ (wrapped false)
+ (modules cas)
+ (libraries errors relative_path typing_deps future)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
 
 (library
-  (name ci_util_stubs)
-  (wrapped false)
-  (modules
-    ci_util)
-  (libraries
-    future)
-  (preprocess
-    (pps lwt_ppx ppx_deriving.std)))
+ (name ci_util_stubs)
+ (wrapped false)
+ (modules ci_util)
+ (libraries future)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
 
 (library
-  (name glean_dependency_graph_convert_stubs)
-  (wrapped false)
-  (modules
-    glean_dependency_graph_convert)
-  (libraries
-    hh_json
-    collections)
-  (preprocess
-    (pps lwt_ppx ppx_deriving.std)))
+ (name glean_dependency_graph_convert_stubs)
+ (wrapped false)
+ (modules glean_dependency_graph_convert)
+ (libraries hh_json collections)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
 
 (library
-  (name glean_dependency_graph_stubs)
-  (wrapped false)
-  (modules
-    glean_dependency_graph)
-  (libraries
-    hh_json
-    collections)
-  (preprocess
-    (pps lwt_ppx ppx_deriving.std)))
+ (name glean_dependency_graph_stubs)
+ (wrapped false)
+ (modules glean_dependency_graph)
+ (libraries hh_json collections)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
 
 (library
-  (name exec_command_stubs)
-  (wrapped false)
-  (modules exec_command)
-  (preprocess
-    (pps lwt_ppx ppx_deriving.std)))
+ (name exec_command_stubs)
+ (wrapped false)
+ (modules exec_command)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
 
 (library
-  (name clowder_paste_stubs)
-  (wrapped false)
-  (modules clowder_paste)
-  (preprocess
-    (pps lwt_ppx ppx_deriving.std)))
+ (name clowder_paste_stubs)
+ (wrapped false)
+ (modules clowder_paste)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
 
 (library
-  (name flytrap_stubs)
-  (wrapped false)
-  (modules flytrap)
-  (preprocess
-    (pps lwt_ppx ppx_deriving.std)))
+ (name flytrap_stubs)
+ (wrapped false)
+ (modules flytrap)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
 
 (library
-  (name rage_stubs)
-  (wrapped false)
-  (modules clientRage)
-  (libraries
-    utils_exit
-    utils_core)
-  (preprocess
-    (pps lwt_ppx ppx_deriving.std)))
+ (name rage_stubs)
+ (wrapped false)
+ (modules clientRage)
+ (libraries utils_exit utils_core)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
 
 (library
-  (name security_stubs)
-  (wrapped false)
-  (modules security)
-  (preprocess
-    (pps lwt_ppx ppx_deriving.std)))
+ (name security_stubs)
+ (wrapped false)
+ (modules security)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
 
 (library
-  (name server_remote_utils_stubs)
-  (wrapped false)
-  (modules serverRemoteUtils)
-  (preprocess
-    (pps lwt_ppx ppx_deriving.std)))
+ (name server_remote_utils_stubs)
+ (wrapped false)
+ (modules serverRemoteUtils)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
 
 (library
-  (name folly_stubs)
-  (wrapped false)
-  (modules folly)
-  (preprocess
-    (pps lwt_ppx ppx_deriving.std)))
+ (name folly_stubs)
+ (wrapped false)
+ (modules folly)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
 
 (library
-  (name startup_initializer_stubs)
-  (wrapped false)
-  (modules
-    startup_initializer)
-  (preprocess
-    (pps lwt_ppx ppx_deriving.std)))
+ (name startup_initializer_stubs)
+ (wrapped false)
+ (modules startup_initializer)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
 
 (library
-  (name formatting_stubs)
-  (wrapped false)
-  (modules
-    formatting)
-  (preprocess
-    (pps lwt_ppx ppx_deriving.std)))
+ (name formatting_stubs)
+ (wrapped false)
+ (modules formatting)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
 
 (library
-  (name bad_type_logger_scuba_stubs)
-  (wrapped false)
-  (modules
-    bad_type_logger_scuba)
-  (preprocess
-    (pps lwt_ppx ppx_deriving.std)))
+ (name bad_type_logger_scuba_stubs)
+ (wrapped false)
+ (modules bad_type_logger_scuba)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))

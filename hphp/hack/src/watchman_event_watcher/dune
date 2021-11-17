@@ -1,36 +1,26 @@
 (library
-  (name watchman_config)
-  (wrapped false)
-  (modules watchmanEventWatcherConfig)
-  (libraries
-    injector_config
-    server_utils))
+ (name watchman_config)
+ (wrapped false)
+ (modules watchmanEventWatcherConfig)
+ (libraries injector_config server_utils))
 
 (library
-  (name watchman_lib)
-  (wrapped false)
-  (modules watchmanEventWatcher)
-  (libraries
-    watchman_config
-    watchman_utils))
+ (name watchman_lib)
+ (wrapped false)
+ (modules watchmanEventWatcher)
+ (libraries watchman_config watchman_utils))
 
 (executable
-  (name watcher_bin)
-  (modules watcher_bin)
-  (link_flags (:standard (:include ../dune_config/ld-opts.sexp)))
-  (modes exe byte_complete)
-  (libraries
-    default_injector_config
-    folly_stubs
-    watchman_config
-    watchman_lib))
+ (name watcher_bin)
+ (modules watcher_bin)
+ (link_flags
+  (:standard
+   (:include ../dune_config/ld-opts.sexp)))
+ (modes exe byte_complete)
+ (libraries default_injector_config folly_stubs watchman_config watchman_lib))
 
 (library
-  (name watchman_client)
-  (wrapped false)
-  (modules
-    watchmanEventWatcherClient
-    watchmanEventWatcherClient_sig)
-  (libraries
-    watchman_config
-    server_utils))
+ (name watchman_client)
+ (wrapped false)
+ (modules watchmanEventWatcherClient watchmanEventWatcherClient_sig)
+ (libraries watchman_config server_utils))

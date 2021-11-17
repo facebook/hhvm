@@ -1,10 +1,6 @@
 (library
-  (name ppx_gen_hhi)
-  (wrapped false)
-  (modules
-    ppx_gen_hhi)
-  (kind ppx_rewriter)
-  (libraries
-    hhi_get
-    ocaml-compiler-libs.common
-    ppxlib))
+ (name ppx_gen_hhi)
+ (wrapped false)
+ (modules ppx_gen_hhi)
+ (kind ppx_rewriter)
+ (libraries hhi_get ocaml-compiler-libs.common ppxlib))

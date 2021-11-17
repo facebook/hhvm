@@ -1,21 +1,16 @@
 (data_only_dirs shmffi cargo)
 
 (library
-  (name shmffi)
-  (modules)
-  (c_library_flags -lpthread)
-  (wrapped false)
-  (foreign_archives shmffi)
-)
+ (name shmffi)
+ (modules)
+ (c_library_flags -lpthread)
+ (wrapped false)
+ (foreign_archives shmffi))
 
 (rule
-  (targets libshmffi.a)
-  (deps (source_tree %{workspace_root}/src))
-  (locks /cargo)
-  (action
-    (run %{workspace_root}/scripts/build_rust_to_ocaml.sh
-      shmffi
-      shmffi
-    )
-  )
-)
+ (targets libshmffi.a)
+ (deps
+  (source_tree %{workspace_root}/src))
+ (locks /cargo)
+ (action
+  (run %{workspace_root}/scripts/build_rust_to_ocaml.sh shmffi shmffi)))

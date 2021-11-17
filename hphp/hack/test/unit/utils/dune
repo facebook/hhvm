@@ -1,103 +1,97 @@
 (library
-    (name config_file_test)
-    (wrapped false)
-    (modules config_file_test)
-    (libraries
-        asserter
-        collections
-        test_injector_config
-        unit_test
-        utils_config_file))
+ (name config_file_test)
+ (wrapped false)
+ (modules config_file_test)
+ (libraries
+  asserter
+  collections
+  test_injector_config
+  unit_test
+  utils_config_file))
 
 (library
-    (name timeout_test)
-    (wrapped false)
-    (modules timeout_test)
-    (libraries
-        sys_utils
-        default_injector_config
-        unit_test))
+ (name timeout_test)
+ (wrapped false)
+ (modules timeout_test)
+ (libraries sys_utils default_injector_config unit_test))
 
 (library
-    (name timer_test)
-    (wrapped false)
-    (modules timer_test)
-    (libraries
-        asserter
-        default_injector_config
-        sys_utils
-        unit_test))
+ (name timer_test)
+ (wrapped false)
+ (modules timer_test)
+ (libraries asserter default_injector_config sys_utils unit_test))
 
 (library
-    (name findUtils_test)
-    (wrapped false)
-    (modules findUtils_test)
-    (libraries
-        test_injector_config
-        unit_test
-        utils_find))
+ (name findUtils_test)
+ (wrapped false)
+ (modules findUtils_test)
+ (libraries test_injector_config unit_test utils_find))
 
 (library
-    (name hh_json_test)
-    (wrapped false)
-    (modules hh_json_test)
-    (libraries
-        asserter
-        hh_json
-        string
-        test_injector_config
-        unit_test
-        utils_core))
+ (name hh_json_test)
+ (wrapped false)
+ (modules hh_json_test)
+ (libraries
+  asserter
+  hh_json
+  string
+  test_injector_config
+  unit_test
+  utils_core))
 
 (library
-    (name sys_utils_test)
-    (wrapped false)
-    (modules sys_utils_test)
-    (libraries
-        asserter
-        string
-        test_injector_config
-        sys_utils
-        temp_file
-        unit_test))
+ (name sys_utils_test)
+ (wrapped false)
+ (modules sys_utils_test)
+ (libraries
+  asserter
+  string
+  test_injector_config
+  sys_utils
+  temp_file
+  unit_test))
 
 (executable
-    (name diagnostic_subscription_test)
-    (modules diagnostic_subscription_test)
-    (link_flags (:standard (:include ../../../src/dune_config/ld-opts.sexp)))
-    (modes exe byte_complete)
-    (libraries
-        asserter
-        diagnostic_subscription
-        errors
-        logging
-        naming
-        sys_utils
-        test_injector_config
-        typing_deps
-        unit_test
-        utils_core))
+ (name diagnostic_subscription_test)
+ (modules diagnostic_subscription_test)
+ (link_flags
+  (:standard
+   (:include ../../../src/dune_config/ld-opts.sexp)))
+ (modes exe byte_complete)
+ (libraries
+  asserter
+  diagnostic_subscription
+  errors
+  logging
+  naming
+  sys_utils
+  test_injector_config
+  typing_deps
+  unit_test
+  utils_core))
 
 (executable
-    (name errors_test)
-    (modules errors_test)
-    (modes exe byte_complete)
-    (libraries
-        asserter
-        errors
-        pos
-        pos_or_decl
-        relative_path
-        sys_utils
-        test_injector_config
-        unit_test
-        utils_core))
+ (name errors_test)
+ (modules errors_test)
+ (modes exe byte_complete)
+ (libraries
+  asserter
+  errors
+  pos
+  pos_or_decl
+  relative_path
+  sys_utils
+  test_injector_config
+  unit_test
+  utils_core))
 
 (rule
-    (alias diagnostic_subscription_test_run)
-    (deps %{exe:diagnostic_subscription_test.exe})
-    (action (run %{exe:diagnostic_subscription_test.exe})))
+ (alias diagnostic_subscription_test_run)
+ (deps %{exe:diagnostic_subscription_test.exe})
+ (action
+  (run %{exe:diagnostic_subscription_test.exe})))
 
 (alias
-    (name runtest)
-    (deps (alias diagnostic_subscription_test_run)))
+ (name runtest)
+ (deps
+  (alias diagnostic_subscription_test_run)))

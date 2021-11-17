@@ -1,82 +1,77 @@
 (library
-  (name global_options)
-  (wrapped false)
-  (modules
-    globalOptions)
-  (libraries
-    collections
-    utils_find)
-  (preprocess (pps ppx_deriving.std)))
+ (name global_options)
+ (wrapped false)
+ (modules globalOptions)
+ (libraries collections utils_find)
+ (preprocess
+  (pps ppx_deriving.std)))
 
 (executable
-  (name discover)
-  (modules discover)
-  (libraries dune.configurator)
-  (preprocess (pps ppx_deriving.std)))
+ (name discover)
+ (modules discover)
+ (libraries dune.configurator)
+ (preprocess
+  (pps ppx_deriving.std)))
 
 (rule
-  (targets buildOptions.generated.ml)
-  (action (run ./discover.exe))
-)
+ (targets buildOptions.generated.ml)
+ (action
+  (run ./discover.exe)))
 
 (rule
-  (target buildOptions.fb.ml)
-  (action (copy# facebook/buildOptions.ml buildOptions.fb.ml))
-)
+ (target buildOptions.fb.ml)
+ (action
+  (copy# facebook/buildOptions.ml buildOptions.fb.ml)))
 
 (library
-  (name build_options)
-  (wrapped false)
-  (modules buildOptions)
-  (libraries (select buildOptions.ml from
-    (facebook -> buildOptions.fb.ml)
-    (-> buildOptions.generated.ml))
-  )
-  (preprocess (pps ppx_deriving.std))
-)
+ (name build_options)
+ (wrapped false)
+ (modules buildOptions)
+ (libraries
+  (select
+   buildOptions.ml
+   from
+   (facebook -> buildOptions.fb.ml)
+   (-> buildOptions.generated.ml)))
+ (preprocess
+  (pps ppx_deriving.std)))
 
 (library
-  (name glean_options)
-  (wrapped false)
-  (modules
-    gleanOptions)
-  (libraries
-    global_options)
-  (preprocess (pps ppx_deriving.std)))
+ (name glean_options)
+ (wrapped false)
+ (modules gleanOptions)
+ (libraries global_options)
+ (preprocess
+  (pps ppx_deriving.std)))
 
 (library
-  (name parser_options)
-  (wrapped false)
-  (modules
-    parserOptions)
-  (libraries
-    global_options)
-  (preprocess (pps ppx_deriving.std)))
+ (name parser_options)
+ (wrapped false)
+ (modules parserOptions)
+ (libraries global_options)
+ (preprocess
+  (pps ppx_deriving.std)))
 
 (library
-  (name decl_parser_options)
-  (wrapped false)
-  (modules
-    declParserOptions)
-  (libraries
-    global_options
-    parser_options)
-  (preprocess (pps ppx_deriving.std)))
+ (name decl_parser_options)
+ (wrapped false)
+ (modules declParserOptions)
+ (libraries global_options parser_options)
+ (preprocess
+  (pps ppx_deriving.std)))
 
 (library
-  (name symbol_write_options)
-  (wrapped false)
-  (modules
-    symbolWriteOptions)
-  (libraries
-    global_options)
-  (preprocess (pps ppx_deriving.std)))
+ (name symbol_write_options)
+ (wrapped false)
+ (modules symbolWriteOptions)
+ (libraries global_options)
+ (preprocess
+  (pps ppx_deriving.std)))
 
 (library
-  (name typechecker_options)
-  (wrapped false)
-  (modules
-    typecheckerOptions)
-  (libraries
-    global_options)
-  (preprocess (pps ppx_deriving.std)))
+ (name typechecker_options)
+ (wrapped false)
+ (modules typecheckerOptions)
+ (libraries global_options)
+ (preprocess
+  (pps ppx_deriving.std)))

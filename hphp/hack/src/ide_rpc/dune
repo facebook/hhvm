@@ -1,22 +1,15 @@
 (library
-  (name ide_rpc_api_types)
-  (wrapped false)
-  (modules
-    ide_api_types)
-  (preprocess (pps ppx_deriving.std))
-  (libraries
-    core_kernel
-    file_content
-    pos))
+ (name ide_rpc_api_types)
+ (wrapped false)
+ (modules ide_api_types)
+ (preprocess
+  (pps ppx_deriving.std))
+ (libraries core_kernel file_content pos))
 
 (library
-  (name nuclide_rpc_message_printer)
-  (wrapped false)
-  (modules
-    nuclide_rpc_message_printer)
-  (preprocess (pps ppx_deriving.std))
-  (libraries
-    coverage_level
-    pos
-    symbol
-    utils_core))
+ (name nuclide_rpc_message_printer)
+ (wrapped false)
+ (modules nuclide_rpc_message_printer)
+ (preprocess
+  (pps ppx_deriving.std))
+ (libraries coverage_level pos symbol utils_core))

@@ -1,5 +1,7 @@
 (library
-  (name ocamlpool)
-  (wrapped false)
-  (modules )
-  (foreign_stubs (language c) (names ocamlpool)))
+ (name ocamlpool)
+ (wrapped false)
+ (modules)
+ (foreign_stubs
+  (language c)
+  (names ocamlpool)))

@@ -1,6 +1,4 @@
 (library
-  (name hh_json)
-  (wrapped false)
-  (libraries
-    collections
-    core_kernel))
+ (name hh_json)
+ (wrapped false)
+ (libraries collections core_kernel))

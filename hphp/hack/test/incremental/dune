@@ -1,44 +1,51 @@
 (executable
-  (name test_method_override)
-  (link_flags (:standard (:include ../../src/dune_config/ld-opts.sexp)))
-  (modules test_method_override)
-  (modes exe byte_complete)
-  (libraries
-    integration_test_base))
+ (name test_method_override)
+ (link_flags
+  (:standard
+   (:include ../../src/dune_config/ld-opts.sexp)))
+ (modules test_method_override)
+ (modes exe byte_complete)
+ (libraries integration_test_base))
 
 (rule
-  (alias method_override)
-  (deps test_method_override.exe)
-  (action (run ./test_method_override.exe)))
+ (alias method_override)
+ (deps test_method_override.exe)
+ (action
+  (run ./test_method_override.exe)))
 
 (executable
-  (name test_inconsistent_state)
-  (link_flags (:standard (:include ../../src/dune_config/ld-opts.sexp)))
-  (modules test_inconsistent_state)
-  (modes exe byte_complete)
-  (libraries
-    integration_test_base))
+ (name test_inconsistent_state)
+ (link_flags
+  (:standard
+   (:include ../../src/dune_config/ld-opts.sexp)))
+ (modules test_inconsistent_state)
+ (modes exe byte_complete)
+ (libraries integration_test_base))
 
 (rule
-  (alias inconsistent_state)
-  (deps test_inconsistent_state.exe)
-  (action (run ./test_inconsistent_state.exe)))
+ (alias inconsistent_state)
+ (deps test_inconsistent_state.exe)
+ (action
+  (run ./test_inconsistent_state.exe)))
 
 (executable
-  (name test_enum_exhaustiveness)
-  (link_flags (:standard (:include ../../src/dune_config/ld-opts.sexp)))
-  (modules test_enum_exhaustiveness)
-  (modes exe byte_complete)
-  (libraries
-    integration_test_base))
+ (name test_enum_exhaustiveness)
+ (link_flags
+  (:standard
+   (:include ../../src/dune_config/ld-opts.sexp)))
+ (modules test_enum_exhaustiveness)
+ (modes exe byte_complete)
+ (libraries integration_test_base))
 
 (rule
-  (alias enum_exhaustiveness)
-  (deps test_enum_exhaustiveness.exe)
-  (action (run ./test_enum_exhaustiveness.exe)))
+ (alias enum_exhaustiveness)
+ (deps test_enum_exhaustiveness.exe)
+ (action
+  (run ./test_enum_exhaustiveness.exe)))
 
 (alias
-  (name runtest)
-  (deps (alias method_override)
-    (alias inconsistent_state)
-    (alias enum_exhaustiveness)))
+ (name runtest)
+ (deps
+  (alias method_override)
+  (alias inconsistent_state)
+  (alias enum_exhaustiveness)))

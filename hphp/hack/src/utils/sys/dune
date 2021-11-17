@@ -1,25 +1,20 @@
 (library
-  (name sys_utils)
-  (wrapped false)
-  (flags (:standard -safe-string))
-  (libraries
-    collections
-    disk
-    exec_command
-    str
-    unix
-    utils_core)
-  (foreign_stubs (language c)
-    (names files
-      gc_profiling
-      getrusage
-      handle_stubs
-      nproc
-      priorities
-      processor_info
-      realpath
-      sysinfo
-    )
-  )
-  (preprocess
-    (pps lwt_ppx ppx_deriving.std)))
+ (name sys_utils)
+ (wrapped false)
+ (flags
+  (:standard -safe-string))
+ (libraries collections disk exec_command str unix utils_core)
+ (foreign_stubs
+  (language c)
+  (names
+   files
+   gc_profiling
+   getrusage
+   handle_stubs
+   nproc
+   priorities
+   processor_info
+   realpath
+   sysinfo))
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))

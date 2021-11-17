@@ -1,74 +1,68 @@
 (library
-  (name utils_config_file_common)
-  (wrapped false)
-  (modules
-    config_file_common
-    config_file_version)
-  (libraries
-    config_file_ffi_externs
-    core_kernel
-    sys_utils
-    utils_core
-    utils_hash)
-  (preprocess (pps lwt_ppx))
-)
+ (name utils_config_file_common)
+ (wrapped false)
+ (modules config_file_common config_file_version)
+ (libraries
+  config_file_ffi_externs
+  core_kernel
+  sys_utils
+  utils_core
+  utils_hash)
+ (preprocess
+  (pps lwt_ppx)))
 
 (library
-  (name utils_config_file)
-  (wrapped false)
-  (modules
-    config_file)
-  (libraries
-    core_kernel
-    sys_utils
-    utils_config_file_common
-    utils_core
-    utils_exit
-    utils_hash)
-  (preprocess (pps lwt_ppx))
-)
+ (name utils_config_file)
+ (wrapped false)
+ (modules config_file)
+ (libraries
+  core_kernel
+  sys_utils
+  utils_config_file_common
+  utils_core
+  utils_exit
+  utils_hash)
+ (preprocess
+  (pps lwt_ppx)))
 
 (library
-  (name utils_config_file_lwt)
-  (wrapped false)
-  (modules
-    config_file_lwt)
-  (libraries
-    core_kernel
-    lwt
-    lwt.unix
-    lwt_utils
-    sys_utils
-    utils_config_file_common
-    utils_core
-    utils_hash)
-  (preprocess (pps lwt_ppx))
-)
+ (name utils_config_file_lwt)
+ (wrapped false)
+ (modules config_file_lwt)
+ (libraries
+  core_kernel
+  lwt
+  lwt.unix
+  lwt_utils
+  sys_utils
+  utils_config_file_common
+  utils_core
+  utils_hash)
+ (preprocess
+  (pps lwt_ppx)))
 
 (data_only_dirs rust)
 
 (library
-  (name config_file_ffi)
-  (modules)
-  (wrapped false)
-  (foreign_archives config_file_ffi)
-)
+ (name config_file_ffi)
+ (modules)
+ (wrapped false)
+ (foreign_archives config_file_ffi))
 
 (rule
-  (targets libconfig_file_ffi.a)
-  (deps (source_tree %{workspace_root}/src))
-  (locks /cargo)
-  (action
-    (run %{workspace_root}/scripts/build_rust_to_ocaml.sh
-      config_file_ffi
-      config_file_ffi
-    )
-  )
-)
+ (targets libconfig_file_ffi.a)
+ (deps
+  (source_tree %{workspace_root}/src))
+ (locks /cargo)
+ (action
+  (run
+   %{workspace_root}/scripts/build_rust_to_ocaml.sh
+   config_file_ffi
+   config_file_ffi)))
 
 (library
-  (name config_file_ffi_externs)
-  (modules config_file_ffi_externs)
-  (libraries
-    config_file_ffi)
-  (preprocess (pps lwt_ppx)))
+ (name config_file_ffi_externs)
+ (modules config_file_ffi_externs)
+ (libraries config_file_ffi)
+ (preprocess
+  (pps lwt_ppx)))

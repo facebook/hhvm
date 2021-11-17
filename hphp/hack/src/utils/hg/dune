@@ -1,25 +1,18 @@
 (library
-  (name hg)
-  (wrapped false)
-  (modules
-    hg
-    hg_sig)
-  (libraries
-    exec_command
-    injector_config
-    process
-    process_types
-    future)
-  (preprocess
-    (pps lwt_ppx ppx_deriving.std)))
+ (name hg)
+ (wrapped false)
+ (modules hg hg_sig)
+ (libraries exec_command injector_config process process_types future)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
 
 (executable
-  (name hg_runner)
-  (modules hg_runner)
-  (link_flags (:standard (:include ../../dune_config/ld-opts.sexp)))
-  (modes exe byte_complete)
-  (libraries
-    hg
-    default_injector_config)
-  (preprocess
-    (pps lwt_ppx ppx_deriving.std)))
+ (name hg_runner)
+ (modules hg_runner)
+ (link_flags
+  (:standard
+   (:include ../../dune_config/ld-opts.sexp)))
+ (modes exe byte_complete)
+ (libraries hg default_injector_config)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))

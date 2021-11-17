@@ -1,12 +1,12 @@
 (library
-  (name nast_check)
-  (wrapped false)
-  (libraries
-    ast
-    core_kernel
-    decl_provider
-    naming_provider
-    nast
-    nast_eval
-    nast_visitor
-    utils_core))
+ (name nast_check)
+ (wrapped false)
+ (libraries
+  ast
+  core_kernel
+  decl_provider
+  naming_provider
+  nast
+  nast_eval
+  nast_visitor
+  utils_core))

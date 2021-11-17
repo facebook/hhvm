@@ -1,23 +1,27 @@
-
 (executable
-  (name hh_oxidize)
-  (link_flags (:standard (:include ../dune_config/ld-opts.sexp)))
-  (modes exe byte_complete)
-  (modules
-    configuration
-    convert_longident
-    convert_toplevel_phrase
-    convert_type
-    convert_type_decl
-    output
-    hh_oxidize
-    oxidized_module
-    rust_type
-    state
-    stringify
-    utils)
-  (preprocess (pps ppx_deriving.std))
-  (libraries
-    core_kernel
-    core_kernel.caml_unix
-    signed_source collections ocaml-compiler-libs.common))
+ (name hh_oxidize)
+ (link_flags
+  (:standard
+   (:include ../dune_config/ld-opts.sexp)))
+ (modes exe byte_complete)
+ (modules
+  configuration
+  convert_longident
+  convert_toplevel_phrase
+  convert_type
+  convert_type_decl
+  output
+  hh_oxidize
+  oxidized_module
+  rust_type
+  state
+  stringify
+  utils)
+ (preprocess
+  (pps ppx_deriving.std))
+ (libraries
+  core_kernel
+  core_kernel.caml_unix
+  signed_source
+  collections
+  ocaml-compiler-libs.common))

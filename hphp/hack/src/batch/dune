@@ -1,33 +1,31 @@
 (library
-  (name batch_global_state)
-  (wrapped false)
-  (modules
-    batch_global_state)
-  (libraries
-    collections
-    errors
-    hhi
-    ignore
-    relative_path
-    sys_utils
-    typing_deps))
+ (name batch_global_state)
+ (wrapped false)
+ (modules batch_global_state)
+ (libraries
+  collections
+  errors
+  hhi
+  ignore
+  relative_path
+  sys_utils
+  typing_deps))
 
 (library
-  (name batch_init)
-  (modules
-    batch_init)
-  (wrapped false)
-  (libraries
-    batch_global_state
-    decl
-    file_provider
-    global_config
-    heap_shared_mem
-    hhi
-    naming
-    procs_entry_point
-    relative_path
-    typechecker_options
-    typing_global_inference
-    utils_core
-    utils_exit))
+ (name batch_init)
+ (modules batch_init)
+ (wrapped false)
+ (libraries
+  batch_global_state
+  decl
+  file_provider
+  global_config
+  heap_shared_mem
+  hhi
+  naming
+  procs_entry_point
+  relative_path
+  typechecker_options
+  typing_global_inference
+  utils_core
+  utils_exit))

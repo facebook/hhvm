@@ -1,250 +1,239 @@
 (env
-  (_ (flags (:standard -w @a-4-29-35-41-42-44-45-48-50 \ -strict-sequence))))
+ (_
+  (flags
+   (:standard -w @a-4-29-35-41-42-44-45-48-50 \ -strict-sequence))))
 
 (executable
-  (name hh_single_type_check)
-  (modules
-    hh_single_type_check)
-  (modes exe byte_complete)
-  (link_flags (:standard (:include dune_config/ld-opts.sexp)))
-  (libraries
-    ifc
-    ifc_lib
-    client_color_file
-    client_coverage_metric
-    client_find_refs_print
-    client_get_definition
-    client_highlight_refs
-    decl_parser_options
-    default_injector_config
-    direct_decl_parser
-    direct_decl_utils
-    gen_deps
-    glean_dependency_graph_convert
-    hhi
-    naming_ast_print
-    parent
-    server_coverage_metric_utils
-    server_color_file
-    server_env
-    server_env_build
-    server_file_outline
-    server_find_refs
-    server_global_inference
-    server_go_to
-    server_highlight_refs
-    server_symbol_info_service_utils
-    shape_analysis
-    sys_utils
-    tast_typecheck
-    temp_file
-    typing
-    utils_core
-    utils_multifile))
+ (name hh_single_type_check)
+ (modules hh_single_type_check)
+ (modes exe byte_complete)
+ (link_flags
+  (:standard
+   (:include dune_config/ld-opts.sexp)))
+ (libraries
+  ifc
+  ifc_lib
+  client_color_file
+  client_coverage_metric
+  client_find_refs_print
+  client_get_definition
+  client_highlight_refs
+  decl_parser_options
+  default_injector_config
+  direct_decl_parser
+  direct_decl_utils
+  gen_deps
+  glean_dependency_graph_convert
+  hhi
+  naming_ast_print
+  parent
+  server_coverage_metric_utils
+  server_color_file
+  server_env
+  server_env_build
+  server_file_outline
+  server_find_refs
+  server_global_inference
+  server_go_to
+  server_highlight_refs
+  server_symbol_info_service_utils
+  shape_analysis
+  sys_utils
+  tast_typecheck
+  temp_file
+  typing
+  utils_core
+  utils_multifile))
 
 (executable
-  (name hh_single_ai)
-  (modules
-    hh_single_ai)
-  (modes exe byte_complete)
-  (link_flags (:standard (:include dune_config/ld-opts.sexp)))
-  (libraries
-    ai
-    default_injector_config
-    hhi
-    sys_utils
-    tast_typecheck
-    temp_file
-    typing
-    utils_core
-    utils_multifile))
+ (name hh_single_ai)
+ (modules hh_single_ai)
+ (modes exe byte_complete)
+ (link_flags
+  (:standard
+   (:include dune_config/ld-opts.sexp)))
+ (libraries
+  ai
+  default_injector_config
+  hhi
+  sys_utils
+  tast_typecheck
+  temp_file
+  typing
+  utils_core
+  utils_multifile))
 
 (executable
-  (name hh_single_complete)
-  (modules
-    hh_single_complete)
-  (modes exe byte_complete)
-  (link_flags (:standard (:include dune_config/ld-opts.sexp)))
-  (libraries
-    default_injector_config
-    file_content
-    hhi
-    search
-    server_autocomplete_services
-    string
-    sys_utils
-    utils_core
-  )
-  )
+ (name hh_single_complete)
+ (modules hh_single_complete)
+ (modes exe byte_complete)
+ (link_flags
+  (:standard
+   (:include dune_config/ld-opts.sexp)))
+ (libraries
+  default_injector_config
+  file_content
+  hhi
+  search
+  server_autocomplete_services
+  string
+  sys_utils
+  utils_core))
 
 (executable
-  (name hh_server)
-  (modules
-    hh_server)
-  (modes exe byte_complete)
-  (link_flags (:standard (:include dune_config/ld-opts.sexp)))
-  (libraries
-    client
-    default_injector_config
-    file_content
-    gen_deps
-    hhi
-    hh_server_monitor
-    parent
-    server
-    server_env
-    sys_utils
-    typing
-    utils_core))
+ (name hh_server)
+ (modules hh_server)
+ (modes exe byte_complete)
+ (link_flags
+  (:standard
+   (:include dune_config/ld-opts.sexp)))
+ (libraries
+  client
+  default_injector_config
+  file_content
+  gen_deps
+  hhi
+  hh_server_monitor
+  parent
+  server
+  server_env
+  sys_utils
+  typing
+  utils_core))
 
 (executable
-  (name hh_client)
-  (modules
-    hh_client)
-  (modes exe byte_complete)
-  (link_flags (:standard (:include dune_config/ld-opts.sexp)))
-  (libraries
-    client
-    default_injector_config
-    file_content
-    gen_deps
-    hhi
-    hh_server_monitor
-    lwt_utils
-    parent
-    server
-    server_env
-    sys_utils
-    typing
-    utils_core
-    utils_exit))
+ (name hh_client)
+ (modules hh_client)
+ (modes exe byte_complete)
+ (link_flags
+  (:standard
+   (:include dune_config/ld-opts.sexp)))
+ (libraries
+  client
+  default_injector_config
+  file_content
+  gen_deps
+  hhi
+  hh_server_monitor
+  lwt_utils
+  parent
+  server
+  server_env
+  sys_utils
+  typing
+  utils_core
+  utils_exit))
 
 (executable
-  (name hh_single_compile)
-  (modules
-    hh_single_compile)
-  (modes exe byte_complete)
-  (libraries
-    compile_ffi
-    compiler_id
-    default_injector_config
-    facts
-    global_config
-    global_options
-    hhbc
-    hhi
-    heap_ident
-    logging
-    utils_multifile
-    naming
-    naming_elaborate_namespaces_endo
-    memory_stats)
-  (link_flags (:standard (:include dune_config/ld-opts.sexp))))
+ (name hh_single_compile)
+ (modules hh_single_compile)
+ (modes exe byte_complete)
+ (libraries
+  compile_ffi
+  compiler_id
+  default_injector_config
+  facts
+  global_config
+  global_options
+  hhbc
+  hhi
+  heap_ident
+  logging
+  utils_multifile
+  naming
+  naming_elaborate_namespaces_endo
+  memory_stats)
+ (link_flags
+  (:standard
+   (:include dune_config/ld-opts.sexp))))
 
 (executable
-  (name hh_parse)
-  (modes exe byte_complete)
-  (modules
-    hh_parse
-    generate_hhi)
-  (link_flags (:standard (:include dune_config/ld-opts.sexp)))
-  (libraries
-    default_injector_config
-    global_config
-    hackfmt
-    parser
-    utils_core))
+ (name hh_parse)
+ (modes exe byte_complete)
+ (modules hh_parse generate_hhi)
+ (link_flags
+  (:standard
+   (:include dune_config/ld-opts.sexp)))
+ (libraries default_injector_config global_config hackfmt parser utils_core))
 
 (executable
-  (name hh_single_decl)
-  (modes exe byte_complete)
-  (modules hh_single_decl)
-  (link_flags (:standard (:include dune_config/ld-opts.sexp)))
-  (libraries
-    decl_parser_options
-    decl_provider
-    default_injector_config
-    direct_decl_parser
-    file_provider
-    ppxlib.print_diff
-    provider_context
-    provider_utils
-    server_env
-    utils_core))
+ (name hh_single_decl)
+ (modes exe byte_complete)
+ (modules hh_single_decl)
+ (link_flags
+  (:standard
+   (:include dune_config/ld-opts.sexp)))
+ (libraries
+  decl_parser_options
+  decl_provider
+  default_injector_config
+  direct_decl_parser
+  file_provider
+  ppxlib.print_diff
+  provider_context
+  provider_utils
+  server_env
+  utils_core))
 
 (executable
-  (name hackfmt)
-  (modules
-    hackfmt)
-  (modes exe byte_complete)
-  (link_flags (:standard (:include dune_config/ld-opts.sexp)))
-  (libraries
-    default_injector_config
-    folly_stubs
-    hackfmt
-    hackfmt_debug
-    utils_config_file
-    utils_ocaml_overrides))
+ (name hackfmt)
+ (modules hackfmt)
+ (modes exe byte_complete)
+ (link_flags
+  (:standard
+   (:include dune_config/ld-opts.sexp)))
+ (libraries
+  default_injector_config
+  folly_stubs
+  hackfmt
+  hackfmt_debug
+  utils_config_file
+  utils_ocaml_overrides))
 
 (executable
-  (name generate_full_fidelity)
-  (modules
-    generate_full_fidelity
-    generate_full_fidelity_data)
-  (link_flags (:standard (:include dune_config/ld-opts.sexp)))
-  (libraries
-    core_kernel
-    str
-    parser_schema
-    collections
-    utils_core))
+ (name generate_full_fidelity)
+ (modules generate_full_fidelity generate_full_fidelity_data)
+ (link_flags
+  (:standard
+   (:include dune_config/ld-opts.sexp)))
+ (libraries core_kernel str parser_schema collections utils_core))
 
 (alias
-  (name exe)
-  (deps
-    hackfmt.exe
-    hh_client.exe
-    hh_fanout/hh_fanout.exe
-    hh_parse.exe
-    hh_server.exe
-    hh_single_compile.exe
-    hh_single_decl.exe
-    hh_single_type_check.exe
-    hh_single_complete.exe
-    hh_single_ai.exe
-    ai/zoncolan.exe
-    ))
+ (name exe)
+ (deps
+  hackfmt.exe
+  hh_client.exe
+  hh_fanout/hh_fanout.exe
+  hh_parse.exe
+  hh_server.exe
+  hh_single_compile.exe
+  hh_single_decl.exe
+  hh_single_type_check.exe
+  hh_single_complete.exe
+  hh_single_ai.exe
+  ai/zoncolan.exe))
 
 (alias
-  (name hh)
-  (deps
-    hh_server.exe
-    hh_client.exe))
+ (name hh)
+ (deps hh_server.exe hh_client.exe))
 
 (alias
-  (name single)
-  (deps
-    hh_single_type_check.exe
-    hh_single_compile.exe
-    ))
+ (name single)
+ (deps hh_single_type_check.exe hh_single_compile.exe))
 
 (alias
-  (name debug-single)
-  (deps
-    hh_single_type_check.bc.exe
-    hh_single_compile.bc.exe
-    ))
+ (name debug-single)
+ (deps hh_single_type_check.bc.exe hh_single_compile.bc.exe))
 
 (alias
-  (name debug)
-  (deps
-    hackfmt.bc.exe
-    hh_client.bc.exe
-    hh_fanout/hh_fanout.bc.exe
-    hh_parse.bc.exe
-    hh_server.bc.exe
-    hh_single_compile.bc.exe
-    hh_single_type_check.bc.exe
-    hh_single_complete.bc.exe
-    hh_single_ai.bc.exe
-    ))
+ (name debug)
+ (deps
+  hackfmt.bc.exe
+  hh_client.bc.exe
+  hh_fanout/hh_fanout.bc.exe
+  hh_parse.bc.exe
+  hh_server.bc.exe
+  hh_single_compile.bc.exe
+  hh_single_type_check.bc.exe
+  hh_single_complete.bc.exe
+  hh_single_ai.bc.exe))

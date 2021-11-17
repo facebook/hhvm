@@ -1,227 +1,196 @@
 ; splitted utils:utils
-(library
-  (name trie)
-  (wrapped false)
-  (modules
-    trie)
-  (preprocess (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
-  (libraries
-    utils_core))
 
 (library
-  (name utils_find)
-  (wrapped false)
-  (modules
-    findUtils)
-  (preprocess (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
-  (libraries
-    ignore
-    relative_path))
+ (name trie)
+ (wrapped false)
+ (modules trie)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
+ (libraries utils_core))
 
 (library
-  (name utils_multifile)
-  (wrapped false)
-  (modules
-    multifile)
-  (preprocess (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
-  (libraries
-    relative_path
-    sys_utils))
+ (name utils_find)
+ (wrapped false)
+ (modules findUtils)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
+ (libraries ignore relative_path))
 
 (library
-  (name utils_php_escape)
-  (wrapped false)
-  (preprocess (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
-  (modules
-    php_escaping)
-  (libraries
-    collections
-    sys_utils))
+ (name utils_multifile)
+ (wrapped false)
+ (modules multifile)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
+ (libraries relative_path sys_utils))
 
 (library
-  (name utils_www_root)
-  (wrapped false)
-  (modules
-    wwwroot)
-  (preprocess (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
-  (libraries
-    sys_utils))
+ (name utils_php_escape)
+ (wrapped false)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
+ (modules php_escaping)
+ (libraries collections sys_utils))
 
 (library
-  (name utils_exit)
-  (wrapped false)
-  (modules
-    exit)
-  (preprocess (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
-  (libraries
-    global_config
-    utils_core))
+ (name utils_www_root)
+ (wrapped false)
+ (modules wwwroot)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
+ (libraries sys_utils))
 
 (library
-  (name temp_file)
-  (wrapped false)
-  (modules
-    tempfile)
-  (preprocess (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
-  (libraries
-    sys_utils))
+ (name utils_exit)
+ (wrapped false)
+ (modules exit)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
+ (libraries global_config utils_core))
 
 (library
-  (name temp_file_lwt)
-  (wrapped false)
-  (modules
-    tempfile_lwt)
-  (preprocess (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
-  (libraries
-    lwt_utils
-    sys_utils))
+ (name temp_file)
+ (wrapped false)
+ (modules tempfile)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
+ (libraries sys_utils))
+
+(library
+ (name temp_file_lwt)
+ (wrapped false)
+ (modules tempfile_lwt)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
+ (libraries lwt_utils sys_utils))
+
 ; end of splitted utils:utils
 
 (library
-  (name mutable_accumulator)
-  (wrapped false)
-  (preprocess (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
-  (modules
-    mutable_accumulator))
+ (name mutable_accumulator)
+ (wrapped false)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
+ (modules mutable_accumulator))
 
 (library
-  (name counters)
-  (wrapped false)
-  (preprocess (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
-  (modules
-    counters)
-  (libraries
-    collections
-    utils_core))
+ (name counters)
+ (wrapped false)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
+ (modules counters)
+ (libraries collections utils_core))
 
 (library
-  (name relative_path)
-  (wrapped false)
-  (modules
-    relative_path)
-  (libraries
-    collections
-    sys_utils)
-  (preprocess (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
-)
+ (name relative_path)
+ (wrapped false)
+ (modules relative_path)
+ (libraries collections sys_utils)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std ppx_deriving.enum)))
 
 (library
-  (name cli_args)
-  (wrapped false)
-  (modules
-    cli_args
-    cli_args_sig)
-  (preprocess (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
-  (libraries
-    collections
-    hh_json
-    relative_path
-    sys_utils
-    utils_core))
+ (name cli_args)
+ (wrapped false)
+ (modules cli_args cli_args_sig)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
+ (libraries collections hh_json relative_path sys_utils utils_core))
 
 (library
-  (name decl_reference)
-  (wrapped false)
-  (modules
-    decl_reference)
-  (preprocess (pps lwt_ppx ppx_deriving.std ppx_deriving.enum)))
+ (name decl_reference)
+ (wrapped false)
+ (modules decl_reference)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std ppx_deriving.enum)))
 
 (library
-  (name pos)
-  (wrapped false)
-  (modules
-    file_pos_large
-    file_pos_small
-    line_break_map
-    pos
-    pos_source
-    pos_span_tiny)
-  (preprocess (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
-  (libraries
-    relative_path))
+ (name pos)
+ (wrapped false)
+ (modules
+  file_pos_large
+  file_pos_small
+  line_break_map
+  pos
+  pos_source
+  pos_span_tiny)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
+ (libraries relative_path))
 
 (library
-  (name stack_utils)
-  (wrapped false)
-  (preprocess (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
-  (modules
-    stack_utils))
+ (name stack_utils)
+ (wrapped false)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
+ (modules stack_utils))
 
 (library
-  (name utils_ocaml_overrides)
-  (wrapped false)
-  (modules
-    ocaml_overrides)
-  (preprocess (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
-  (libraries
-    disk))
+ (name utils_ocaml_overrides)
+ (wrapped false)
+ (modules ocaml_overrides)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
+ (libraries disk))
 
 (library
-  (name symbol)
-  (wrapped false)
-  (modules
-    symbolDefinition
-    symbolOccurrence)
-  (preprocess (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
-  (libraries
-    naming_special_names
-    pos))
+ (name symbol)
+ (wrapped false)
+ (modules symbolDefinition symbolOccurrence)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
+ (libraries naming_special_names pos))
 
 (library
-  (name server_load_flag)
-  (wrapped false)
-  (preprocess (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
-  (modules
-    serverLoadFlag))
+ (name server_load_flag)
+ (wrapped false)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
+ (modules serverLoadFlag))
 
 (library
-  (name promise)
-  (wrapped false)
-  (preprocess (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
-  (modules
-    promise))
+ (name promise)
+ (wrapped false)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
+ (modules promise))
 
 (library
-  (name signed_source)
-  (wrapped false)
-  (preprocess (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
-  (libraries utils_core)
-  (modules signed_source))
+ (name signed_source)
+ (wrapped false)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
+ (libraries utils_core)
+ (modules signed_source))
 
 (library
-  (name lwt_utils)
-  (wrapped false)
-  (modules
-    lwt_message_queue
-    lwt_utils)
-  (libraries
-    core_kernel
-    exec_command
-    lwt
-    lwt.unix
-    process
-    promise
-    utils_core)
-  (preprocess
-    (pps lwt_ppx ppx_deriving.std ppx_deriving.enum)))
+ (name lwt_utils)
+ (wrapped false)
+ (modules lwt_message_queue lwt_utils)
+ (libraries core_kernel exec_command lwt lwt.unix process promise utils_core)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std ppx_deriving.enum)))
 
 (library
-  (name connection_tracker)
-  (wrapped false)
-  (preprocess (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
-  (libraries utils_core)
-  (modules connection_tracker))
+ (name connection_tracker)
+ (wrapped false)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
+ (libraries utils_core)
+ (modules connection_tracker))
 
 (library
-  (name biglist)
-  (wrapped false)
-  (preprocess (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
-  (libraries utils_core)
-  (modules bigList))
+ (name biglist)
+ (wrapped false)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
+ (libraries utils_core)
+ (modules bigList))
 
 (library
-  (name memory_stats)
-  (wrapped false)
-  (preprocess (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
-  (libraries utils_core sys_utils)
-  (modules memory_stats))
+ (name memory_stats)
+ (wrapped false)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
+ (libraries utils_core sys_utils)
+ (modules memory_stats))

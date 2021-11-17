@@ -1,9 +1,8 @@
 (library
-  (name libancillary_c)
-  (wrapped false)
-  (foreign_stubs
-    (language c)
-    (names fd_recv fd_send)
-    (flags (:standard -I%{env:CMAKE_SOURCE_DIR=xxx}))
-  )
-)
+ (name libancillary_c)
+ (wrapped false)
+ (foreign_stubs
+  (language c)
+  (names fd_recv fd_send)
+  (flags
+   (:standard -I%{env:CMAKE_SOURCE_DIR=xxx}))))

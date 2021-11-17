@@ -1,19 +1,20 @@
 (library
-  (name shape_analysis)
-  (wrapped false)
-  (flags (:standard -linkall))
-  (modules
-    shape_analysis
-    shape_analysis_env
-    shape_analysis_options
-    shape_analysis_pretty_printer
-    shape_analysis_solver
-    shape_analysis_types)
-  (libraries
-    core_kernel
-    provider_context
-    relative_path
-    tast_env
-    tast_provider)
-  (preprocess
-    (pps visitors.ppx ppx_deriving.std)))
+ (name shape_analysis)
+ (wrapped false)
+ (flags
+  (:standard -linkall))
+ (modules
+  shape_analysis
+  shape_analysis_env
+  shape_analysis_options
+  shape_analysis_pretty_printer
+  shape_analysis_solver
+  shape_analysis_types)
+ (libraries
+  core_kernel
+  provider_context
+  relative_path
+  tast_env
+  tast_provider)
+ (preprocess
+  (pps visitors.ppx ppx_deriving.std)))

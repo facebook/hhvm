@@ -1,9 +1,5 @@
 (library
-  (name socket)
-  (wrapped false)
-  (modules
-    socket)
-  (libraries
-    opaque_digest
-    sys_utils
-    utils_exit))
+ (name socket)
+ (wrapped false)
+ (modules socket)
+ (libraries opaque_digest sys_utils utils_exit))

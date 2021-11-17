@@ -1,204 +1,232 @@
 (library
-  (name test_all_ide)
-  (wrapped false)
-  (modules
-    test_added_parent_ide
-    test_auto_ns_aliasing
-    test_diagnostics_in_closed_file
-    test_error_pos
-    test_error_throttling
-    test_error_throttling_open_file
-    test_exception_handling
-    test_failed_naming_ide
-    test_failed_parsing
-    test_hhi_phpstdlib
-    test_ide_check
-    test_ide_close
-    test_ide_consistency
-    test_ide_diagnostic_subscription
-    test_ide_disk
-    test_ide_file_sync
-    test_identify_symbol
-    test_ide_parsing_errors
-    test_ide_redecl
-    test_ide_status
-    test_ide_typing_deps
-    test_max_errors
-    test_naming_errors
-    test_override
-    test_remove_function
-    test_remove_parent
-    test_status_single
-    test_unsaved_changes)
-  (libraries integration_test_base))
+ (name test_all_ide)
+ (wrapped false)
+ (modules
+  test_added_parent_ide
+  test_auto_ns_aliasing
+  test_diagnostics_in_closed_file
+  test_error_pos
+  test_error_throttling
+  test_error_throttling_open_file
+  test_exception_handling
+  test_failed_naming_ide
+  test_failed_parsing
+  test_hhi_phpstdlib
+  test_ide_check
+  test_ide_close
+  test_ide_consistency
+  test_ide_diagnostic_subscription
+  test_ide_disk
+  test_ide_file_sync
+  test_identify_symbol
+  test_ide_parsing_errors
+  test_ide_redecl
+  test_ide_status
+  test_ide_typing_deps
+  test_max_errors
+  test_naming_errors
+  test_override
+  test_remove_function
+  test_remove_parent
+  test_status_single
+  test_unsaved_changes)
+ (libraries integration_test_base))
 
 (rule
-  (alias identify_symbol)
-  (deps ../test_all.exe)
-  (action (run ../test_all.exe ide/identify_symbol)))
+ (alias identify_symbol)
+ (deps ../test_all.exe)
+ (action
+  (run ../test_all.exe ide/identify_symbol)))
 
 (rule
-  (alias ide_file_sync)
-  (deps ../test_all.exe)
-  (action (run ../test_all.exe ide/ide_file_sync)))
+ (alias ide_file_sync)
+ (deps ../test_all.exe)
+ (action
+  (run ../test_all.exe ide/ide_file_sync)))
 
 (rule
-  (alias ide_consistency)
-  (deps ../test_all.exe)
-  (action (run ../test_all.exe ide/ide_consistency)))
+ (alias ide_consistency)
+ (deps ../test_all.exe)
+ (action
+  (run ../test_all.exe ide/ide_consistency)))
 
 (rule
-  (alias ide_disk)
-  (deps ../test_all.exe)
-  (action (run ../test_all.exe ide/ide_disk)))
+ (alias ide_disk)
+ (deps ../test_all.exe)
+ (action
+  (run ../test_all.exe ide/ide_disk)))
 
 (rule
-  (alias ide_diagnostic_subscription)
-  (deps ../test_all.exe)
-  (action (run ../test_all.exe ide/ide_diagnostic_subscription)))
+ (alias ide_diagnostic_subscription)
+ (deps ../test_all.exe)
+ (action
+  (run ../test_all.exe ide/ide_diagnostic_subscription)))
 
 (rule
-  (alias ide_check)
-  (deps ../test_all.exe)
-  (action (run ../test_all.exe ide/ide_check)))
+ (alias ide_check)
+ (deps ../test_all.exe)
+ (action
+  (run ../test_all.exe ide/ide_check)))
 
 (rule
-  (alias ide_status)
-  (deps ../test_all.exe)
-  (action (run ../test_all.exe ide/ide_status)))
+ (alias ide_status)
+ (deps ../test_all.exe)
+ (action
+  (run ../test_all.exe ide/ide_status)))
 
 (rule
-  (alias ide_parsing_errors)
-  (deps ../test_all.exe)
-  (action (run ../test_all.exe ide/ide_parsing_errors)))
+ (alias ide_parsing_errors)
+ (deps ../test_all.exe)
+ (action
+  (run ../test_all.exe ide/ide_parsing_errors)))
 
 (rule
-  (alias ide_close)
-  (deps ../test_all.exe)
-  (action (run ../test_all.exe ide/ide_close)))
+ (alias ide_close)
+ (deps ../test_all.exe)
+ (action
+  (run ../test_all.exe ide/ide_close)))
 
 (rule
-  (alias ide_typing_deps)
-  (deps ../test_all.exe)
-  (action (run ../test_all.exe ide/ide_typing_deps)))
+ (alias ide_typing_deps)
+ (deps ../test_all.exe)
+ (action
+  (run ../test_all.exe ide/ide_typing_deps)))
 
 (rule
-  (alias added_parent)
-  (deps ../test_all.exe)
-  (action (run ../test_all.exe ide/added_parent)))
+ (alias added_parent)
+ (deps ../test_all.exe)
+ (action
+  (run ../test_all.exe ide/added_parent)))
 
 (rule
-  (alias auto_ns_aliasing)
-  (deps ../test_all.exe)
-  (action (run ../test_all.exe ide/auto_ns_aliasing)))
+ (alias auto_ns_aliasing)
+ (deps ../test_all.exe)
+ (action
+  (run ../test_all.exe ide/auto_ns_aliasing)))
 
 (rule
-  (alias remove_function)
-  (deps ../test_all.exe)
-  (action (run ../test_all.exe ide/remove_function)))
+ (alias remove_function)
+ (deps ../test_all.exe)
+ (action
+  (run ../test_all.exe ide/remove_function)))
 
 (rule
-  (alias diagnostics_in_closed_file)
-  (deps ../test_all.exe)
-  (action (run ../test_all.exe ide/diagnostics_in_closed_file)))
+ (alias diagnostics_in_closed_file)
+ (deps ../test_all.exe)
+ (action
+  (run ../test_all.exe ide/diagnostics_in_closed_file)))
 
 (rule
-  (alias error_throttling)
-  (deps ../test_all.exe)
-  (action (run ../test_all.exe ide/error_throttling)))
+ (alias error_throttling)
+ (deps ../test_all.exe)
+ (action
+  (run ../test_all.exe ide/error_throttling)))
 
 (rule
-  (alias max_errors)
-  (deps ../test_all.exe)
-  (action (run ../test_all.exe ide/max_errors)))
+ (alias max_errors)
+ (deps ../test_all.exe)
+ (action
+  (run ../test_all.exe ide/max_errors)))
 
 (rule
-  (alias naming_errors)
-  (deps ../test_all.exe)
-  (action (run ../test_all.exe ide/naming_errors)))
+ (alias naming_errors)
+ (deps ../test_all.exe)
+ (action
+  (run ../test_all.exe ide/naming_errors)))
 
 (rule
-  (alias override)
-  (deps ../test_all.exe)
-  (action (run ../test_all.exe ide/override)))
+ (alias override)
+ (deps ../test_all.exe)
+ (action
+  (run ../test_all.exe ide/override)))
 
 (rule
-  (alias remove_parent)
-  (deps ../test_all.exe)
-  (action (run ../test_all.exe ide/remove_parent)))
+ (alias remove_parent)
+ (deps ../test_all.exe)
+ (action
+  (run ../test_all.exe ide/remove_parent)))
 
 (rule
-  (alias failed_parsing)
-  (deps ../test_all.exe)
-  (action (run ../test_all.exe ide/failed_parsing)))
+ (alias failed_parsing)
+ (deps ../test_all.exe)
+ (action
+  (run ../test_all.exe ide/failed_parsing)))
 
 (rule
-  (alias failed_naming)
-  (deps ../test_all.exe)
-  (action (run ../test_all.exe ide/failed_naming)))
+ (alias failed_naming)
+ (deps ../test_all.exe)
+ (action
+  (run ../test_all.exe ide/failed_naming)))
 
 (rule
-  (alias unsaved_changes)
-  (deps ../test_all.exe)
-  (action (run ../test_all.exe ide/unsaved_changes)))
+ (alias unsaved_changes)
+ (deps ../test_all.exe)
+ (action
+  (run ../test_all.exe ide/unsaved_changes)))
 
 (rule
-  (alias hhi_phpstdlib)
-  (deps ../test_all.exe)
-  (action (run ../test_all.exe ide/hhi_phpstdlib)))
+ (alias hhi_phpstdlib)
+ (deps ../test_all.exe)
+ (action
+  (run ../test_all.exe ide/hhi_phpstdlib)))
 
 (rule
-  (alias ide_redecl)
-  (deps ../test_all.exe)
-  (action (run ../test_all.exe ide/ide_redecl)))
+ (alias ide_redecl)
+ (deps ../test_all.exe)
+ (action
+  (run ../test_all.exe ide/ide_redecl)))
 
 (rule
-  (alias error_throttling_open_file)
-  (deps ../test_all.exe)
-  (action (run ../test_all.exe ide/error_throttling_open_file)))
+ (alias error_throttling_open_file)
+ (deps ../test_all.exe)
+ (action
+  (run ../test_all.exe ide/error_throttling_open_file)))
 
 (rule
-  (alias error_pos)
-  (deps ../test_all.exe)
-  (action (run ../test_all.exe ide/error_pos)))
+ (alias error_pos)
+ (deps ../test_all.exe)
+ (action
+  (run ../test_all.exe ide/error_pos)))
 
 (rule
-  (alias exception_handling)
-  (deps ../test_all.exe)
-  (action (run ../test_all.exe ide/exception_handling)))
+ (alias exception_handling)
+ (deps ../test_all.exe)
+ (action
+  (run ../test_all.exe ide/exception_handling)))
 
 (rule
-  (alias status_single)
-  (deps ../test_all.exe)
-  (action (run ../test_all.exe ide/status_single)))
+ (alias status_single)
+ (deps ../test_all.exe)
+ (action
+  (run ../test_all.exe ide/status_single)))
 
 (alias
-  (name runtest)
-  (deps
-   (alias identify_symbol)
-   (alias ide_file_sync)
-   (alias ide_consistency)
-   (alias ide_disk)
-   (alias ide_diagnostic_subscription)
-   (alias ide_check)
-   (alias ide_status)
-   (alias ide_parsing_errors)
-   (alias ide_close)
-   (alias ide_typing_deps)
-   (alias added_parent)
-   (alias auto_ns_aliasing)
-   (alias remove_function)
-   (alias diagnostics_in_closed_file)
-   (alias error_throttling)
-   (alias naming_errors)
-   (alias override)
-   (alias remove_parent)
-   (alias failed_parsing)
-   (alias failed_naming)
-   (alias unsaved_changes)
-   (alias hhi_phpstdlib)
-   (alias ide_redecl)
-   (alias error_throttling_open_file)
-   (alias error_pos)
-   (alias exception_handling)
-   (alias status_single)))
+ (name runtest)
+ (deps
+  (alias identify_symbol)
+  (alias ide_file_sync)
+  (alias ide_consistency)
+  (alias ide_disk)
+  (alias ide_diagnostic_subscription)
+  (alias ide_check)
+  (alias ide_status)
+  (alias ide_parsing_errors)
+  (alias ide_close)
+  (alias ide_typing_deps)
+  (alias added_parent)
+  (alias auto_ns_aliasing)
+  (alias remove_function)
+  (alias diagnostics_in_closed_file)
+  (alias error_throttling)
+  (alias naming_errors)
+  (alias override)
+  (alias remove_parent)
+  (alias failed_parsing)
+  (alias failed_naming)
+  (alias unsaved_changes)
+  (alias hhi_phpstdlib)
+  (alias ide_redecl)
+  (alias error_throttling_open_file)
+  (alias error_pos)
+  (alias exception_handling)
+  (alias status_single)))

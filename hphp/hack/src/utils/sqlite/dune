@@ -1,6 +1,4 @@
 (library
-  (name sqlite_utils)
-  (wrapped false)
-  (libraries
-    core_kernel
-    sqlite3))
+ (name sqlite_utils)
+ (wrapped false)
+ (libraries core_kernel sqlite3))

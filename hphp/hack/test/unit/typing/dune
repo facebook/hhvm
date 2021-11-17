@@ -1,48 +1,53 @@
 (test
-  (name typeSimplifierTest)
-  (flags (:standard -w @a-4-27-44-48))
-  (modes exe byte_complete)
-  (link_flags (:standard (:include ../../../src/dune_config/ld-opts.sexp)))
-  (modules typeSimplifierTest)
-  (libraries
-    collections
-    core_kernel
-    default_injector_config
-    heap_ident
-    ounit2
-    pos
-    relative_path
-    typechecker_options
-    typing_algebra
-    typing_ast
-    typing_defs
-    utils_core))
+ (name typeSimplifierTest)
+ (flags
+  (:standard -w @a-4-27-44-48))
+ (modes exe byte_complete)
+ (link_flags
+  (:standard
+   (:include ../../../src/dune_config/ld-opts.sexp)))
+ (modules typeSimplifierTest)
+ (libraries
+  collections
+  core_kernel
+  default_injector_config
+  heap_ident
+  ounit2
+  pos
+  relative_path
+  typechecker_options
+  typing_algebra
+  typing_ast
+  typing_defs
+  utils_core))
 
 (test
-  (name writeSymbolInfoTest)
-  (flags (:standard -w @a-4-27-44-48))
-  (modes exe byte_complete)
-  (link_flags (:standard (:include ../../../src/dune_config/ld-opts.sexp)))
-  (modules writeSymbolInfoTest)
-  (libraries
-    asserter
-    collections
-    default_injector_config
-    hh_json
-    ounit2
-    pos
-    relative_path
-    utils_core
-    write_symbol_info))
+ (name writeSymbolInfoTest)
+ (flags
+  (:standard -w @a-4-27-44-48))
+ (modes exe byte_complete)
+ (link_flags
+  (:standard
+   (:include ../../../src/dune_config/ld-opts.sexp)))
+ (modules writeSymbolInfoTest)
+ (libraries
+  asserter
+  collections
+  default_injector_config
+  hh_json
+  ounit2
+  pos
+  relative_path
+  utils_core
+  write_symbol_info))
 
 (test
-  (name posSpanTinyTest)
-  (flags (:standard -w @a-4-27-44-48))
-  (modes exe byte_complete)
-  (link_flags (:standard (:include ../../../src/dune_config/ld-opts.sexp)))
-  (modules posSpanTinyTest)
-  (libraries
-    default_injector_config
-    ounit2
-    pos
-    utils_core))
+ (name posSpanTinyTest)
+ (flags
+  (:standard -w @a-4-27-44-48))
+ (modes exe byte_complete)
+ (link_flags
+  (:standard
+   (:include ../../../src/dune_config/ld-opts.sexp)))
+ (modules posSpanTinyTest)
+ (libraries default_injector_config ounit2 pos utils_core))

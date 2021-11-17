@@ -1,50 +1,57 @@
 (executable
-  (name test_early)
-  (link_flags (:standard (:include ../../src/dune_config/ld-opts.sexp)))
-  (modes exe byte_complete)
-  (modules test_early)
-  (libraries
-    heap_ident
-    heap_libc
-    test_injector_config))
+ (name test_early)
+ (link_flags
+  (:standard
+   (:include ../../src/dune_config/ld-opts.sexp)))
+ (modes exe byte_complete)
+ (modules test_early)
+ (libraries heap_ident heap_libc test_injector_config))
 
 (rule
-  (alias early)
-  (deps test_early.exe)
-  (action (run ./test_early.exe)))
+ (alias early)
+ (deps test_early.exe)
+ (action
+  (run ./test_early.exe)))
 
 (executable
-  (name test_handoff)
-  (link_flags (:standard (:include ../../src/dune_config/ld-opts.sexp)))
-  (modes exe byte_complete)
-  (modules test_handoff)
-  (libraries
-    heap_ident
-    heap_shared_mem
-    test_injector_config))
+ (name test_handoff)
+ (link_flags
+  (:standard
+   (:include ../../src/dune_config/ld-opts.sexp)))
+ (modes exe byte_complete)
+ (modules test_handoff)
+ (libraries heap_ident heap_shared_mem test_injector_config))
 
 (rule
-  (alias handoff)
-  (deps test_handoff.exe)
-  (action (run ./test_handoff.exe)))
+ (alias handoff)
+ (deps test_handoff.exe)
+ (action
+  (run ./test_handoff.exe)))
 
 (executable
-  (name test_workers)
-  (link_flags (:standard (:include ../../src/dune_config/ld-opts.sexp)))
-  (modes exe byte_complete)
-  (modules test_workers)
-  (libraries
-    core_kernel
-    heap_ident
-    heap_shared_mem
-    procs_entry_point
-    test_injector_config))
+ (name test_workers)
+ (link_flags
+  (:standard
+   (:include ../../src/dune_config/ld-opts.sexp)))
+ (modes exe byte_complete)
+ (modules test_workers)
+ (libraries
+  core_kernel
+  heap_ident
+  heap_shared_mem
+  procs_entry_point
+  test_injector_config))
 
 (rule
-  (alias workers)
-  (deps test_workers.exe)
-  (action (ignore-stdout (run ./test_workers.exe))))
+ (alias workers)
+ (deps test_workers.exe)
+ (action
+  (ignore-stdout
+   (run ./test_workers.exe))))
 
 (alias
-  (name runtest)
-  (deps (alias early) (alias handoff) (alias workers)))
+ (name runtest)
+ (deps
+  (alias early)
+  (alias handoff)
+  (alias workers)))

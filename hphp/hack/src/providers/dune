@@ -1,215 +1,214 @@
 (library
-  (name provider_backend)
-  (modules provider_backend)
-  (libraries
-    collections
-    decl_service_client
-    heap_shared_mem
-    lru_cache
-    naming_sqlite
-    naming_types
-    pos
-    relative_path
-    shallow_decl_defs
-    typing_defs)
-  (preprocess (pps ppx_deriving.std)))
+ (name provider_backend)
+ (modules provider_backend)
+ (libraries
+  collections
+  decl_service_client
+  heap_shared_mem
+  lru_cache
+  naming_sqlite
+  naming_types
+  pos
+  relative_path
+  shallow_decl_defs
+  typing_defs)
+ (preprocess
+  (pps ppx_deriving.std)))
 
 (library
-  (name provider_context)
-  (modules provider_context)
-  (libraries
-    ast
-    collections
-    nast
-    parser
-    provider_backend
-    server_command_types
-    typing_ast
-    typing_deps
-    relative_path)
-  (preprocess (pps ppx_deriving.std)))
+ (name provider_context)
+ (modules provider_context)
+ (libraries
+  ast
+  collections
+  nast
+  parser
+  provider_backend
+  server_command_types
+  typing_ast
+  typing_deps
+  relative_path)
+ (preprocess
+  (pps ppx_deriving.std)))
 
 (library
-  (name lru_cache)
-  (modules lru_cache)
-  (libraries
-    core_kernel
-    utils_core)
-  (preprocess (pps ppx_deriving.std)))
+ (name lru_cache)
+ (modules lru_cache)
+ (libraries core_kernel utils_core)
+ (preprocess
+  (pps ppx_deriving.std)))
 
 (library
-  (name decl_service_client)
-  (modules decl_service_client)
-  (libraries
-    collections
-    core_kernel
-    decl_ipc_ffi_externs
-    decl_parser_options
-    direct_decl_parser
-    heap_shared_mem
-    marshal_tools
-    naming_types
-    relative_path
-    typing_defs
-    utils_core
-    shallow_decl_defs
-    typing_deps
-    sys_utils)
-  (preprocess (pps ppx_deriving.std)))
+ (name decl_service_client)
+ (modules decl_service_client)
+ (libraries
+  collections
+  core_kernel
+  decl_ipc_ffi_externs
+  decl_parser_options
+  direct_decl_parser
+  heap_shared_mem
+  marshal_tools
+  naming_types
+  relative_path
+  typing_defs
+  utils_core
+  shallow_decl_defs
+  typing_deps
+  sys_utils)
+ (preprocess
+  (pps ppx_deriving.std)))
 
 (library
-  (name file_provider)
-  (modules file_provider)
-  (libraries
-    ast
-    provider_backend
-    relative_path
-    sys_utils)
-  (preprocess (pps ppx_deriving.std)))
+ (name file_provider)
+ (modules file_provider)
+ (libraries ast provider_backend relative_path sys_utils)
+ (preprocess
+  (pps ppx_deriving.std)))
 
 (library
-  (name ast_provider)
-  (modules ast_provider)
-  (libraries
-    ast
-    counters
-    file_provider
-    heap_shared_mem
-    nast
-    parser
-    provider_context
-    relative_path
-    server_command_types
-    typechecker_options
-    utils_find)
-  (preprocess (pps ppx_deriving.std)))
+ (name ast_provider)
+ (modules ast_provider)
+ (libraries
+  ast
+  counters
+  file_provider
+  heap_shared_mem
+  nast
+  parser
+  provider_context
+  relative_path
+  server_command_types
+  typechecker_options
+  utils_find)
+ (preprocess
+  (pps ppx_deriving.std)))
 
 (library
-  (name decl_provider)
-  (modules
-    decl_provider)
-  (libraries
-    counters
-    decl_counters
-    decl_class
-    decl_service_client
-    direct_decl_utils
-    provider_backend
-    shallow_classes_provider
-    shallow_decl_defs
-    linearization_provider
-    typing_heap)
-  (preprocess (pps ppx_deriving.std)))
+ (name decl_provider)
+ (modules decl_provider)
+ (libraries
+  counters
+  decl_counters
+  decl_class
+  decl_service_client
+  direct_decl_utils
+  provider_backend
+  shallow_classes_provider
+  shallow_decl_defs
+  linearization_provider
+  typing_heap)
+ (preprocess
+  (pps ppx_deriving.std)))
 
 (library
-  (name fixme_provider)
-  (modules fixme_provider)
-  (libraries
-    collections
-    errors
-    heap_shared_mem
-    provider_backend)
-  (preprocess (pps ppx_deriving.std)))
+ (name fixme_provider)
+ (modules fixme_provider)
+ (libraries collections errors heap_shared_mem provider_backend)
+ (preprocess
+  (pps ppx_deriving.std)))
 
 (library
-  (name naming_provider)
-  (modules naming_provider)
-  (libraries
-    annotated_ast
-    ast
-    db_path_provider
-    file_info
-    naming_heap
-    pos
-    relative_path
-    shallow_decl_defs
-    typing_defs)
-  (preprocess (pps ppx_deriving.std)))
+ (name naming_provider)
+ (modules naming_provider)
+ (libraries
+  annotated_ast
+  ast
+  db_path_provider
+  file_info
+  naming_heap
+  pos
+  relative_path
+  shallow_decl_defs
+  typing_defs)
+ (preprocess
+  (pps ppx_deriving.std)))
 
 (library
-  (name provider_utils)
-  (modules provider_utils)
-  (libraries
-    ast_provider
-    collections
-    errors
-    naming
-    nast
-    parser
-    provider_context
-    relative_path
-    server_command_types
-    server_env
-    counters
-    typechecker_options
-    typing)
-  (preprocess (pps ppx_deriving.std)))
+ (name provider_utils)
+ (modules provider_utils)
+ (libraries
+  ast_provider
+  collections
+  errors
+  naming
+  nast
+  parser
+  provider_context
+  relative_path
+  server_command_types
+  server_env
+  counters
+  typechecker_options
+  typing)
+ (preprocess
+  (pps ppx_deriving.std)))
 
 (library
-  (name shallow_classes_provider)
-  (modules shallow_classes_provider)
-  (libraries
-    bloom_filter
-    decl_service_client
-    direct_decl_utils
-    provider_backend
-    provider_context
-    shallow_classes_heap)
-  (preprocess (pps ppx_deriving.std)))
+ (name shallow_classes_provider)
+ (modules shallow_classes_provider)
+ (libraries
+  bloom_filter
+  decl_service_client
+  direct_decl_utils
+  provider_backend
+  provider_context
+  shallow_classes_heap)
+ (preprocess
+  (pps ppx_deriving.std)))
 
 (library
-  (name linearization_provider)
-  (modules linearization_provider)
-  (libraries
-    provider_backend
-    provider_context)
-  (preprocess (pps ppx_deriving.std)))
+ (name linearization_provider)
+ (modules linearization_provider)
+ (libraries provider_backend provider_context)
+ (preprocess
+  (pps ppx_deriving.std)))
 
 (library
-  (name tast_provider)
-  (modules tast_provider)
-  (libraries
-    decl_counters
-    decl_provider
-    provider_utils
-    tast_env
-    typing_service_api
-    typing_toplevel)
-  (preprocess (pps ppx_deriving.std)))
+ (name tast_provider)
+ (modules tast_provider)
+ (libraries
+  decl_counters
+  decl_provider
+  provider_utils
+  tast_env
+  typing_service_api
+  typing_toplevel)
+ (preprocess
+  (pps ppx_deriving.std)))
 
 (library
-  (name db_path_provider)
-  (modules db_path_provider)
-  (libraries
-    naming_sqlite
-    provider_backend
-    provider_context)
-  (preprocess (pps ppx_deriving.std)))
+ (name db_path_provider)
+ (modules db_path_provider)
+ (libraries naming_sqlite provider_backend provider_context)
+ (preprocess
+  (pps ppx_deriving.std)))
 
 (library
-  (name direct_decl_utils)
-  (modules direct_decl_utils)
-  (libraries
-    annotated_ast
-    ast_provider
-    collections
-    decl_defs
-    decl_store
-    decl_parser_options
-    direct_decl_parser
-    errors
-    file_provider
-    full_fidelity
-    heap_shared_mem
-    naming
-    naming_provider
-    nast
-    parser
-    parser_options
-    provider_backend
-    provider_context
-    relative_path
-    shallow_classes_heap
-    shallow_decl_defs
-    typechecker_options)
-  (preprocess (pps ppx_deriving.std)))
+ (name direct_decl_utils)
+ (modules direct_decl_utils)
+ (libraries
+  annotated_ast
+  ast_provider
+  collections
+  decl_defs
+  decl_store
+  decl_parser_options
+  direct_decl_parser
+  errors
+  file_provider
+  full_fidelity
+  heap_shared_mem
+  naming
+  naming_provider
+  nast
+  parser
+  parser_options
+  provider_backend
+  provider_context
+  relative_path
+  shallow_classes_heap
+  shallow_decl_defs
+  typechecker_options)
+ (preprocess
+  (pps ppx_deriving.std)))

@@ -1,17 +1,17 @@
 (library
-  (name index_builder)
-  (wrapped false)
-  (libraries
-    core_kernel
-    facts
-    folly_stubs
-    heap_shared_mem_hash
-    hhbc
-    hhi
-    parser
-    process
-    process_types
-    procs_entry_point
-    search_utils
-    sqlite_utils
-    utils_hash))
+ (name index_builder)
+ (wrapped false)
+ (libraries
+  core_kernel
+  facts
+  folly_stubs
+  heap_shared_mem_hash
+  hhbc
+  hhi
+  parser
+  process
+  process_types
+  procs_entry_point
+  search_utils
+  sqlite_utils
+  utils_hash))

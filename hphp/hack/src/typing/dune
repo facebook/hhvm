@@ -1,468 +1,416 @@
 (library
-  (name typing_defs)
-  (wrapped false)
-  (modules
-    coverage_level_defs
-    typing_defs
-    typing_defs_core
-    typing_defs_flags
-    typing_modules
-    tanySentinel
-    typing_reason)
-  (libraries
-    ast
-    core_kernel
-    heap_ident
-    hh_autoimport
-    ide_rpc_api_types
-    nast
-    pos
-    pos_or_decl
-    relative_path
-    utils_core)
-  (preprocess (pps ppx_deriving.std)))
+ (name typing_defs)
+ (wrapped false)
+ (modules
+  coverage_level_defs
+  typing_defs
+  typing_defs_core
+  typing_defs_flags
+  typing_modules
+  tanySentinel
+  typing_reason)
+ (libraries
+  ast
+  core_kernel
+  heap_ident
+  hh_autoimport
+  ide_rpc_api_types
+  nast
+  pos
+  pos_or_decl
+  relative_path
+  utils_core)
+ (preprocess
+  (pps ppx_deriving.std)))
 
 (library
-  (name deferred_decl)
-  (wrapped false)
-  (modules
-    deferred_decl)
-  (libraries
-    relative_path
-    utils_core)
-  (preprocess (pps ppx_deriving.std)))
+ (name deferred_decl)
+ (wrapped false)
+ (modules deferred_decl)
+ (libraries relative_path utils_core)
+ (preprocess
+  (pps ppx_deriving.std)))
 
 (library
-  (name typing_heap)
-  (wrapped false)
-  (modules
-    typing_classes_heap)
-  (libraries
-    core_kernel
-    decl
-    decl_ancestors
-    decl_counters
-    decl_inheritance
-    deferred_decl
-    naming_provider
-    shallow_decl_defs
-    typing_defs)
-  (preprocess (pps ppx_deriving.std)))
+ (name typing_heap)
+ (wrapped false)
+ (modules typing_classes_heap)
+ (libraries
+  core_kernel
+  decl
+  decl_ancestors
+  decl_counters
+  decl_inheritance
+  deferred_decl
+  naming_provider
+  shallow_decl_defs
+  typing_defs)
+ (preprocess
+  (pps ppx_deriving.std)))
 
 (library
-  (name tast_env)
-  (wrapped false)
-  (modules
-    tast_env
-    tast_expand
-    tast_utils
-    tast_visitor
-    typing_env_from_def
-    typing_equality_check)
-  (libraries
-    typing)
-  (preprocess (pps ppx_deriving.std)))
+ (name tast_env)
+ (wrapped false)
+ (modules
+  tast_env
+  tast_expand
+  tast_utils
+  tast_visitor
+  typing_env_from_def
+  typing_equality_check)
+ (libraries typing)
+ (preprocess
+  (pps ppx_deriving.std)))
 
 (library
-  (name nast_visitor)
-  (wrapped false)
-  (modules
-    nast_check_env
-    nast_visitor
-    stateful_aast_visitor)
-  (libraries
-    nast
-    provider_context)
-  (preprocess (pps ppx_deriving.std)))
+ (name nast_visitor)
+ (wrapped false)
+ (modules nast_check_env nast_visitor stateful_aast_visitor)
+ (libraries nast provider_context)
+ (preprocess
+  (pps ppx_deriving.std)))
 
 (library
-  (name typing_common)
-  (wrapped false)
-  (modules
-    type_validator
-    typing_const_reifiable
-    typing_enforceable_hint
-    typing_reified_check
-    typing_tdef
-    typing_variance)
-  (libraries
-    common
-    decl
-    decl_provider
-    hackfmt_doc
-    hackfmt_env
-    hackfmt
-    logging
-    naming_attributes
-    naming
-    symbol
-    typechecker_options
-    type_mapper_generic
-    typing_ast
-    typing_defs
-    typing_env
-    typing_algebra
-    typing_heap
-    global_config)
-  (preprocess (pps ppx_deriving.std)))
+ (name typing_common)
+ (wrapped false)
+ (modules
+  type_validator
+  typing_const_reifiable
+  typing_enforceable_hint
+  typing_reified_check
+  typing_tdef
+  typing_variance)
+ (libraries
+  common
+  decl
+  decl_provider
+  hackfmt_doc
+  hackfmt_env
+  hackfmt
+  logging
+  naming_attributes
+  naming
+  symbol
+  typechecker_options
+  type_mapper_generic
+  typing_ast
+  typing_defs
+  typing_env
+  typing_algebra
+  typing_heap
+  global_config)
+ (preprocess
+  (pps ppx_deriving.std)))
 
 (library
-  (name typing_global_inference)
-  (wrapped false)
-  (modules
-    typing_ordered_solver
-    typing_global_inference)
-  (libraries
-    tast_env
-    typing_algebra)
-  (preprocess (pps ppx_deriving.std)))
+ (name typing_global_inference)
+ (wrapped false)
+ (modules typing_ordered_solver typing_global_inference)
+ (libraries tast_env typing_algebra)
+ (preprocess
+  (pps ppx_deriving.std)))
 
 (library
-  (name tast_type_collector)
-  (wrapped false)
-  (modules
-    tast_type_collector)
-  (libraries
-    core_kernel
-    full_fidelity
-    tast_env)
-  (preprocess (pps ppx_deriving.std)))
+ (name tast_type_collector)
+ (wrapped false)
+ (modules tast_type_collector)
+ (libraries core_kernel full_fidelity tast_env)
+ (preprocess
+  (pps ppx_deriving.std)))
 
 (library
-  (name typing)
-  (wrapped false)
-  (modules
-    nastInitCheck
-    type_parameter_env_ops
-    typing_alias
-    typing_ast_print
-    typing_arithmetic
-    typing_array_access
-    typing_async
-    typing_attributes
-    typing_debug
-    typing_deferred_members
-    typing_escape
-    typing_expand
-    typing_exts
-    typing_func_terminality
-    typing_generic_rules
-    typing_helpers
-    typing_lenv
-    typing_local_ops
-    typing_param
-    typing_per_cont_ops
-    typing_regex
-    typing_sequencing
-    typing_shapes
-    typing_special_fun
-    typing_structure
-    typing_substring
-    typing_try
-    typing_xhp)
-  (libraries
-    decl_enum
-    decl_init_check
-    decl_nast
-    logging
-    naming_special_names
-    nast_check
-    pcre
-    procs_procs
-    typing_common
-    type_mapper)
-  (preprocess (pps ppx_deriving.std)))
+ (name typing)
+ (wrapped false)
+ (modules
+  nastInitCheck
+  type_parameter_env_ops
+  typing_alias
+  typing_ast_print
+  typing_arithmetic
+  typing_array_access
+  typing_async
+  typing_attributes
+  typing_debug
+  typing_deferred_members
+  typing_escape
+  typing_expand
+  typing_exts
+  typing_func_terminality
+  typing_generic_rules
+  typing_helpers
+  typing_lenv
+  typing_local_ops
+  typing_param
+  typing_per_cont_ops
+  typing_regex
+  typing_sequencing
+  typing_shapes
+  typing_special_fun
+  typing_structure
+  typing_substring
+  typing_try
+  typing_xhp)
+ (libraries
+  decl_enum
+  decl_init_check
+  decl_nast
+  logging
+  naming_special_names
+  nast_check
+  pcre
+  procs_procs
+  typing_common
+  type_mapper)
+ (preprocess
+  (pps ppx_deriving.std)))
 
 (library
-  (name typing_skeleton)
-  (wrapped false)
-  (modules
-    typing_skeleton)
-  (libraries
-    typing_defs)
-  (preprocess (pps ppx_deriving.std)))
+ (name typing_skeleton)
+ (wrapped false)
+ (modules typing_skeleton)
+ (libraries typing_defs)
+ (preprocess
+  (pps ppx_deriving.std)))
 
 (library
-  (name typing_toplevel)
-  (wrapped false)
-  (modules
-    typing
-    typing_memoize
-    typing_toplevel
-    typing_typedef)
-  (libraries
-    tast_check
-    typing
-    typing_wellformedness))
+ (name typing_toplevel)
+ (wrapped false)
+ (modules typing typing_memoize typing_toplevel typing_typedef)
+ (libraries tast_check typing typing_wellformedness))
 
 (library
-  (name typing_wellformedness)
-  (wrapped false)
-  (modules
-    typing_extends
-    typing_inheritance
-    typing_requirements
-    typing_subtype_method
-    typing_type_wellformedness)
-  (libraries
-    typing_algebra
-    typing_common
-    typing_skeleton)
-  (preprocess (pps ppx_deriving.std)))
+ (name typing_wellformedness)
+ (wrapped false)
+ (modules
+  typing_extends
+  typing_inheritance
+  typing_requirements
+  typing_subtype_method
+  typing_type_wellformedness)
+ (libraries typing_algebra typing_common typing_skeleton)
+ (preprocess
+  (pps ppx_deriving.std)))
 
 (library
-  (name type_mapper_generic)
-  (wrapped false)
-  (modules
-    type_mapper_generic)
-  (libraries
-    common
-    core_kernel
-    typing_defs)
-  (preprocess (pps ppx_deriving.std)))
+ (name type_mapper_generic)
+ (wrapped false)
+ (modules type_mapper_generic)
+ (libraries common core_kernel typing_defs)
+ (preprocess
+  (pps ppx_deriving.std)))
 
 (library
-  (name type_mapper_forget)
-  (wrapped false)
-  (modules
-    type_mapper_forget)
-  (libraries
-    common
-    core_kernel
-    type_mapper_generic
-    typing_defs)
-  (preprocess (pps ppx_deriving.std)))
+ (name type_mapper_forget)
+ (wrapped false)
+ (modules type_mapper_forget)
+ (libraries common core_kernel type_mapper_generic typing_defs)
+ (preprocess
+  (pps ppx_deriving.std)))
 
 (library
-  (name typing_algebra)
-  (wrapped false)
-  (modules
-    typing_algebra
-    typing_coeffects
-    typing_coercion
-    typing_dynamic
-    typing_enforceability
-    typing_enum
-    typing_intersection
-    typing_generic_constraint
-    typing_kinding
-    typing_logic_helpers
-    typing_object_get
-    typing_ops
-    typing_phase
-    typing_return
-    typing_solver
-    typing_solver_utils
-    typing_subtype
-    typing_subtype_tconst
-    typing_taccess
-    typing_union)
-  (libraries
-    type_mapper
-    typing_dependent_type
-    typing_disposable
-    typing_env
-    typing_log
-    typing_utils
-    typing_visibility)
-  (preprocess (pps ppx_deriving.std)))
+ (name typing_algebra)
+ (wrapped false)
+ (modules
+  typing_algebra
+  typing_coeffects
+  typing_coercion
+  typing_dynamic
+  typing_enforceability
+  typing_enum
+  typing_intersection
+  typing_generic_constraint
+  typing_kinding
+  typing_logic_helpers
+  typing_object_get
+  typing_ops
+  typing_phase
+  typing_return
+  typing_solver
+  typing_solver_utils
+  typing_subtype
+  typing_subtype_tconst
+  typing_taccess
+  typing_union)
+ (libraries
+  type_mapper
+  typing_dependent_type
+  typing_disposable
+  typing_env
+  typing_log
+  typing_utils
+  typing_visibility)
+ (preprocess
+  (pps ppx_deriving.std)))
 
 (library
-  (name typing_visibility)
-  (wrapped false)
-  (modules
-    typing_visibility)
-  (libraries
-    typing_utils)
-  (preprocess (pps ppx_deriving.std)))
+ (name typing_visibility)
+ (wrapped false)
+ (modules typing_visibility)
+ (libraries typing_utils)
+ (preprocess
+  (pps ppx_deriving.std)))
 
 (library
-  (name typing_disposable)
-  (wrapped false)
-  (modules
-    typing_disposable)
-  (libraries
-    typing_utils)
-  (preprocess (pps ppx_deriving.std)))
+ (name typing_disposable)
+ (wrapped false)
+ (modules typing_disposable)
+ (libraries typing_utils)
+ (preprocess
+  (pps ppx_deriving.std)))
 
 (library
-  (name typing_dependent_type)
-  (wrapped false)
-  (modules
-    typing_dependent_type)
-  (libraries
-    typing_utils)
-  (preprocess (pps ppx_deriving.std)))
+ (name typing_dependent_type)
+ (wrapped false)
+ (modules typing_dependent_type)
+ (libraries typing_utils)
+ (preprocess
+  (pps ppx_deriving.std)))
 
 (library
-  (name typing_utils)
-  (wrapped false)
-  (modules
-    typing_utils)
-  (libraries
-    typing_env
-    typing_logic)
-  (preprocess (pps ppx_deriving.std)))
+ (name typing_utils)
+ (wrapped false)
+ (modules typing_utils)
+ (libraries typing_env typing_logic)
+ (preprocess
+  (pps ppx_deriving.std)))
 
 (library
-  (name type_mapper)
-  (wrapped false)
-  (modules
-    type_mapper)
-  (libraries
-    typing_env)
-  (preprocess (pps ppx_deriving.std)))
+ (name type_mapper)
+ (wrapped false)
+ (modules type_mapper)
+ (libraries typing_env)
+ (preprocess
+  (pps ppx_deriving.std)))
 
 (library
-  (name typing_log)
-  (wrapped false)
-  (modules
-    typing_log
-    typing_print)
-  (libraries
-    decl_provider
-    hackfmt
-    typing_logic
-    typing_env_types)
-  (preprocess (pps ppx_deriving.std)))
+ (name typing_log)
+ (wrapped false)
+ (modules typing_log typing_print)
+ (libraries decl_provider hackfmt typing_logic typing_env_types)
+ (preprocess
+  (pps ppx_deriving.std)))
 
 (library
-  (name typing_logic)
-  (wrapped false)
-  (modules
-    typing_logic)
-  (libraries
-    typing_defs)
-  (preprocess (pps ppx_deriving.std)))
+ (name typing_logic)
+ (wrapped false)
+ (modules typing_logic)
+ (libraries typing_defs)
+ (preprocess
+  (pps ppx_deriving.std)))
 
 (library
-  (name typing_env)
-  (wrapped false)
-  (modules
-    typing_env)
-  (libraries
-    decl_provider
-    provider_context
-    typing_env_types
-    typing_log)
-  (preprocess (pps ppx_deriving.std)))
+ (name typing_env)
+ (wrapped false)
+ (modules typing_env)
+ (libraries decl_provider provider_context typing_env_types typing_log)
+ (preprocess
+  (pps ppx_deriving.std)))
 
 (library
-  (name typing_env_types)
-  (wrapped false)
-  (modules
-    typing_cont_key
-    typing_continuations
-    typing_env_return_info
-    typing_env_types
-    typing_fake_members
-    typing_local_types
-    typing_per_cont_env
-    )
-  (libraries
-    decl
-    decl_counters
-    typing_ast)
-  (preprocess (pps ppx_deriving.std)))
+ (name typing_env_types)
+ (wrapped false)
+ (modules
+  typing_cont_key
+  typing_continuations
+  typing_env_return_info
+  typing_env_types
+  typing_fake_members
+  typing_local_types
+  typing_per_cont_env)
+ (libraries decl decl_counters typing_ast)
+ (preprocess
+  (pps ppx_deriving.std)))
 
 (library
-  (name typing_ast)
-  (wrapped false)
-  (modules
-    internal_type_set
-    tast
-    typing_kinding_defs
-    type_parameter_env
-    typing_set
-    typing_inference_env
-    typing_log_value
-    typing_make_type
-    typing_tyvar_occurrences
-    type_visitor)
-  (libraries
-    annotated_ast
-    ast
-    common
-    core_kernel
-    errors
-    naming_attributes
-    nast
-    type_mapper_forget
-    typing_defs
-    typing_logic
-    typechecker_options)
-  (preprocess (pps ppx_deriving.std)))
+ (name typing_ast)
+ (wrapped false)
+ (modules
+  internal_type_set
+  tast
+  typing_kinding_defs
+  type_parameter_env
+  typing_set
+  typing_inference_env
+  typing_log_value
+  typing_make_type
+  typing_tyvar_occurrences
+  type_visitor)
+ (libraries
+  annotated_ast
+  ast
+  common
+  core_kernel
+  errors
+  naming_attributes
+  nast
+  type_mapper_forget
+  typing_defs
+  typing_logic
+  typechecker_options)
+ (preprocess
+  (pps ppx_deriving.std)))
 
 (library
-  (name coverage_level)
-  (wrapped false)
-  (modules
-    coverage_level)
-  (libraries
-    core_kernel
-    ide_rpc_api_types
-    tast_env
-    typing_defs)
-  (preprocess (pps ppx_deriving.std)))
+ (name coverage_level)
+ (wrapped false)
+ (modules coverage_level)
+ (libraries core_kernel ide_rpc_api_types tast_env typing_defs)
+ (preprocess
+  (pps ppx_deriving.std)))
 
 (library
-  (name typing_check_job)
-  (wrapped false)
-  (modules
-    typing_check_job
-    typing_check_utils)
-  (libraries
-    core_kernel
-    deferred_decl
-    errors
-    file_info
-    nast
-    heap_global_storage
-    re_stubs
-    typing_deps
-    typing_toplevel)
-  (preprocess (pps ppx_deriving.std)))
+ (name typing_check_job)
+ (wrapped false)
+ (modules typing_check_job typing_check_utils)
+ (libraries
+  core_kernel
+  deferred_decl
+  errors
+  file_info
+  nast
+  heap_global_storage
+  re_stubs
+  typing_deps
+  typing_toplevel)
+ (preprocess
+  (pps ppx_deriving.std)))
 
 (library
-  (name typing_check)
-  (wrapped false)
-  (modules
-    typing_check_service)
-  (libraries
-    biglist
-    cgroup
-    core_kernel
-    decl_counters
-    decl_service
-    deferred_decl
-    diagnostic_pusher
-    errors
-    file_info
-    nast
-    global_options
-    heap_global_storage
-    procs_bucket
-    server_monitor
-    counters
-    re_stubs
-    typing
-    typing_defs
-    typing_deps
-    typing_check_job
-    typing_global_inference
-    typing_service_api
-    typing_service_delegate
-    vfs)
-  (preprocess (pps ppx_deriving.std)))
+ (name typing_check)
+ (wrapped false)
+ (modules typing_check_service)
+ (libraries
+  biglist
+  cgroup
+  core_kernel
+  decl_counters
+  decl_service
+  deferred_decl
+  diagnostic_pusher
+  errors
+  file_info
+  nast
+  global_options
+  heap_global_storage
+  procs_bucket
+  server_monitor
+  counters
+  re_stubs
+  typing
+  typing_defs
+  typing_deps
+  typing_check_job
+  typing_global_inference
+  typing_service_api
+  typing_service_delegate
+  vfs)
+ (preprocess
+  (pps ppx_deriving.std)))
 
 (library
-  (name tast_typecheck)
-  (wrapped false)
-  (modules
-    delta
-    tast_typecheck)
-  (libraries
-    core_kernel
-    typing
-    utils_core)
-  (preprocess (pps ppx_deriving.std)))
+ (name tast_typecheck)
+ (wrapped false)
+ (modules delta tast_typecheck)
+ (libraries core_kernel typing utils_core)
+ (preprocess
+  (pps ppx_deriving.std)))

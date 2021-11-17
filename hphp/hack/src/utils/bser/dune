@@ -1,16 +1,14 @@
 (library
-  (name bser)
-  (modules bser)
-  (wrapped false)
-  (libraries
-    hh_json
-    sys_utils))
+ (name bser)
+ (modules bser)
+ (wrapped false)
+ (libraries hh_json sys_utils))
 
 (executable
-  (name bser_main_test)
-  (modules bser_main_test)
-  (modes exe byte_complete)
-  (link_flags (:standard (:include ../../dune_config/ld-opts.sexp)))
-  (libraries
-    bser
-    default_injector_config))
+ (name bser_main_test)
+ (modules bser_main_test)
+ (modes exe byte_complete)
+ (link_flags
+  (:standard
+   (:include ../../dune_config/ld-opts.sexp)))
+ (libraries bser default_injector_config))

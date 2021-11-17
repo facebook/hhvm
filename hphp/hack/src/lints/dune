@@ -2,69 +2,74 @@
  (name lints_core)
  (wrapped false)
  (modules lints_core)
- (preprocess (pps ppx_deriving.std))
- (libraries
-   errors
-   pos))
+ (preprocess
+  (pps ppx_deriving.std))
+ (libraries errors pos))
 
 (library
  (name linting_main)
  (wrapped false)
- (preprocess (pps ppx_deriving.std))
+ (preprocess
+  (pps ppx_deriving.std))
  (modules linting_main)
  (libraries
-   provider_context
-   linting
-   linting_visitors
-   other_visitors
-   tast_check
-   typing_check_job))
+  provider_context
+  linting
+  linting_visitors
+  other_visitors
+  tast_check
+  typing_check_job))
 
 (library
  (name lints_codes)
  (wrapped false)
- (preprocess (pps ppx_deriving.std))
+ (preprocess
+  (pps ppx_deriving.std))
  (modules lints_codes))
 
 (library
  (name lints_errors)
  (wrapped false)
  (modules lints_errors)
- (preprocess (pps ppx_deriving.std))
- (libraries
-   lints_core
-   lints_codes
-   utils_core))
+ (preprocess
+  (pps ppx_deriving.std))
+ (libraries lints_core lints_codes utils_core))
 
 (library
  (name linting_visitors)
  (wrapped false)
- (modules
-   linting_visitors)
- (preprocess (pps ppx_deriving.std))
+ (modules linting_visitors)
+ (preprocess
+  (pps ppx_deriving.std))
  (libraries
-   annotated_ast
-   errors
-   naming
-   nast
-   typechecker_options
-   parser
-   typing
-   utils_core
-   pos
-   relative_path))
+  annotated_ast
+  errors
+  naming
+  nast
+  typechecker_options
+  parser
+  typing
+  utils_core
+  pos
+  relative_path))
 
 (library
  (name other_visitors)
- (preprocess (pps ppx_deriving.std))
+ (preprocess
+  (pps ppx_deriving.std))
  (wrapped false)
  (modules
   (:standard
-  \ lints_core linting_main lints_codes lints_errors linting_visitors))
- (libraries
-   decl
-   decl_provider
-   linting_visitors
+   \
+   lints_core
+   linting_main
+   lints_codes
    lints_errors
-   tast_env
-   utils_core))
+   linting_visitors))
+ (libraries
+  decl
+  decl_provider
+  linting_visitors
+  lints_errors
+  tast_env
+  utils_core))

@@ -1,10 +1,4 @@
 (library
-  (name gen_deps)
-  (wrapped false)
-  (libraries
-    ast
-    naming
-    full_fidelity
-    parser_options
-    procs_procs
-    typing_deps))
+ (name gen_deps)
+ (wrapped false)
+ (libraries ast naming full_fidelity parser_options procs_procs typing_deps))

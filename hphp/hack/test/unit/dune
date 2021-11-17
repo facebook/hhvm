@@ -1,44 +1,46 @@
 (library
-  (name unit_test)
-  (wrapped false)
-  (modules unit_test)
-  (libraries utils_core))
+ (name unit_test)
+ (wrapped false)
+ (modules unit_test)
+ (libraries utils_core))
 
 (library
-  (name unit_test_common_setup)
-  (wrapped false)
-  (modules common_setup)
-  (libraries
-    direct_decl_service
-    errors
-    naming_global
-    naming_table
-    parsing_service
-    provider_context
-    tast_provider)
-)
+ (name unit_test_common_setup)
+ (wrapped false)
+ (modules common_setup)
+ (libraries
+  direct_decl_service
+  errors
+  naming_global
+  naming_table
+  parsing_service
+  provider_context
+  tast_provider))
 
 (executable
-  (name server_tests)
-  (modules server_tests)
-  (link_flags (:standard (:include ../../src/dune_config/ld-opts.sexp)))
-  (modes exe byte_complete)
-  (libraries
-    asserter
-    unit_test_common_setup
-    decl
-    decl_counters
-    default_injector_config
-    deferred_decl
-    parsing_service
-    provider_utils
-    server_monitor
-    telemetry
-    typing_check
-    typing_service_api
-    unit_test))
+ (name server_tests)
+ (modules server_tests)
+ (link_flags
+  (:standard
+   (:include ../../src/dune_config/ld-opts.sexp)))
+ (modes exe byte_complete)
+ (libraries
+  asserter
+  unit_test_common_setup
+  decl
+  decl_counters
+  default_injector_config
+  deferred_decl
+  parsing_service
+  provider_utils
+  server_monitor
+  telemetry
+  typing_check
+  typing_service_api
+  unit_test))
 
 (rule
-  (alias server_tests)
-  (deps %{exe:server_tests.exe})
-  (action (run %{exe:server_tests.exe})))
+ (alias server_tests)
+ (deps %{exe:server_tests.exe})
+ (action
+  (run %{exe:server_tests.exe})))

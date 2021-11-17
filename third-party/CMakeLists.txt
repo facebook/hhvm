@@ -99,12 +99,6 @@ if(NOT FASTLZ_LIBRARY)
   list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/fastlz/src")
 endif()
 
-# Add bundled libsqlite3 if the system one will not be used
-if(NOT LIBSQLITE3_LIBRARY)
-  list(APPEND THIRD_PARTY_MODULES forks/libsqlite3)
-  list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/forks/libsqlite3")
-endif()
-
 # Add bundled PCRE if the system one will not be used
 find_package(PCRE)
 if(NOT PCRE_LIBRARY)

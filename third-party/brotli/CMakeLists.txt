@@ -1,13 +1,19 @@
 add_library(brotli INTERFACE)
 include(ExternalProject)
 
-# Latest release is 1.0.7, and we need somthing newer (2.x? 1.1.x?), so use
-# a specific git hash. This also means that we *always* need to use the bundled
-# version.
+include(HPHPFunctions)
+SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
+  BROTLI_SOURCE_ARGS
+  SOURCE_URL
+  "https://github.com/google/brotli/archive/refs/tags/v1.0.9.tar.gz"
+  SOURCE_HASH
+  "SHA256=f9e8d81d0405ba66d181529af42a3354f838c939095ff99930da6aa9cdf6fe46"
+  FILENAME_PREFIX "brotli-"
+)
+
 ExternalProject_Add(
   bundled_brotli
-  GIT_REPOSITORY https://github.com/google/brotli
-  GIT_TAG 4b5771bee7995d3d606221caa455c044d80434df
+  ${BROTLI_SOURCE_ARGS}
   CMAKE_ARGS
     -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
     -DCMAKE_INSTALL_INCLUDEDIR=include

@@ -479,6 +479,16 @@
   (preprocess (pps lwt_ppx ppx_deriving.std))
 )
 
+(rule
+  (target serverHotClassesDescription.fb.ml)
+  (action (copy# facebook/serverHotClassesDescription.ml serverHotClassesDescription.fb.ml))
+)
+
+(rule
+  (target serverInvalidateUnits.fb.ml)
+  (action (copy# facebook/serverInvalidateUnits.ml serverInvalidateUnits.fb.ml))
+)
+
 (library
   (name server)
   (wrapped false)
@@ -567,13 +577,18 @@
     version
     watchman_utils
     (select serverHotClassesDescription.ml from
-    (facebook signed_source -> facebook/serverHotClassesDescription.ml)
+    (facebook signed_source -> serverHotClassesDescription.fb.ml)
     (-> serverHotClassesDescription.stubs.ml))
     (select serverInvalidateUnits.ml from
-    (facebook signed_source -> facebook/serverInvalidateUnits.ml)
+    (facebook signed_source -> serverInvalidateUnits.fb.ml)
     (-> serverInvalidateUnits.stubs.ml))
   )
   (preprocess (pps lwt_ppx ppx_deriving.std)))
+
+(rule
+  (target serverInitMessages.fb.ml)
+  (action (copy# facebook/serverInitMessages.ml serverInitMessages.fb.ml))
+)
 
 (library
   (name hh_server_monitor)
@@ -621,7 +636,7 @@
     watchman_client
     write_symbol_info
     (select serverInitMessages.ml from
-    (facebook signed_source -> facebook/serverInitMessages.ml)
+    (facebook signed_source -> serverInitMessages.fb.ml)
     (-> serverInitMessages.stubs.ml))
   )
   (preprocess (pps lwt_ppx ppx_deriving.std)))

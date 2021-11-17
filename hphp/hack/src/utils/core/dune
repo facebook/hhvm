@@ -3,11 +3,11 @@
 (library
   (name utils_core)
   (wrapped false)
-  (c_names
-    get_build_id
-    get_build_id_gen)
-  (c_flags (:standard
-    (:include config/build-timestamp-opt)))
+  (foreign_stubs
+    (language c)
+    (names get_build_id get_build_id_gen)
+    (flags (:standard (:include config/build-timestamp-opt)))
+  )
   (libraries
     base
     core_kernel.caml_unix

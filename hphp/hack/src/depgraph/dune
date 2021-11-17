@@ -1,14 +1,14 @@
+(data_only_dirs cargo depgraph depgraph_writer)
 
 (library
   (name depgraph)
   (modules)
   (wrapped false)
-  (preprocess (pps ppx_deriving.std))
-  (self_build_stubs_archive (depgraph))
+  (foreign_archives depgraph)
 )
 
 (rule
-  (targets libdepgraph_stubs.a)
+  (targets libdepgraph.a)
   (deps (source_tree %{workspace_root}/src))
   (locks /cargo)
   (action

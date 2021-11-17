@@ -4,23 +4,23 @@
   (libraries
     integration_test_base))
 
-(alias
-  (name coverage_levels_multi)
+(rule
+  (alias coverage_levels_multi)
   (deps ../test_all.exe)
   (action (run ../test_all.exe coverage_levels_multi)))
 
-(alias
-  (name coverage_levels_checked)
+(rule
+  (alias coverage_levels_checked)
   (deps ../test_all.exe)
   (action (run ../test_all.exe coverage_levels_checked)))
 
-(alias
-  (name coverage_levels_unchecked)
+(rule
+  (alias coverage_levels_unchecked)
   (deps ../test_all.exe)
   (action (run ../test_all.exe coverage_levels_unchecked)))
 
-(alias
-  (name coverage_levels_partial)
+(rule
+  (alias coverage_levels_partial)
   (deps ../test_all.exe)
   (action (run ../test_all.exe coverage_levels_partial)))
 

@@ -1,5 +1,5 @@
-(alias
-    (name enum_class_label)
+(rule
+    (alias enum_class_label)
     (deps %{exe:../../../src/hh_single_type_check.exe}
           %{project_root}/test/verify.py
           %{project_root}/test/review.sh
@@ -16,8 +16,8 @@
     --error-format raw
     )))
 
-(alias
-    (name enum_class_label_shallow_decl)
+(rule
+    (alias enum_class_label_shallow_decl)
     (deps %{exe:../../../src/hh_single_type_check.exe}
           %{project_root}/test/verify.py
           %{project_root}/test/review.sh
@@ -32,8 +32,8 @@
     --error-format raw
     )))
 
-(alias
-    (name enum_class_label_lint)
+(rule
+    (alias enum_class_label_lint)
     (deps %{exe:../../../src/hh_single_type_check.exe}
           %{project_root}/test/verify.py
           %{project_root}/test/review.sh

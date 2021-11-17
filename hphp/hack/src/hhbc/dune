@@ -1,3 +1,15 @@
+(data_only_dirs
+  bytecode_printer
+  compile_ffi
+  decl_provider
+  external_decl_provider
+  facebook
+  ffi_bridge
+  hhbc_by_ref
+  options_ffi
+  unified_decl_provider
+)
+
 (library
   (name hhbc)
   (wrapped false)
@@ -15,12 +27,12 @@
 (library
   (name options_ffi)
   (modules)
-  (preprocess (pps ppx_deriving.std))
   (wrapped false)
-  (self_build_stubs_archive (options_ffi))
+  (foreign_archives options_ffi)
 )
+
 (rule
-  (targets liboptions_ffi_stubs.a)
+  (targets liboptions_ffi.a)
   (deps (source_tree %{workspace_root}/src))
   (locks /cargo)
   (action
@@ -34,12 +46,12 @@
 (library
   (name compile_ffi)
   (modules)
-  (preprocess (pps ppx_deriving.std))
   (wrapped false)
-  (self_build_stubs_archive (compile_ffi))
+  (foreign_archives compile_ffi)
 )
+
 (rule
-  (targets libcompile_ffi_stubs.a)
+  (targets libcompile_ffi.a)
   (deps (source_tree %{workspace_root}/src))
   (locks /cargo)
   (action

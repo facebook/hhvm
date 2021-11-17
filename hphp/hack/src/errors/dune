@@ -1,7 +1,13 @@
+(rule
+  (target error_message_sentinel.fb.ml)
+  (action (copy# facebook/error_message_sentinel.ml error_message_sentinel.fb.ml))
+)
+
 (library
   (name errors)
   (wrapped false)
   (preprocess (pps ppx_deriving.std))
+  (modules (:standard error_message_sentinel))
   (libraries
     core_kernel
     full_fidelity
@@ -13,5 +19,8 @@
     utils_exit
     utils_multifile
     (select error_message_sentinel.ml from
-      (facebook -> facebook/error_message_sentinel.ml)
-      (-> error_message_sentinel.stubs.ml))))
+      (facebook -> error_message_sentinel.fb.ml)
+      (-> error_message_sentinel.stubs.ml)
+    )
+  )
+)

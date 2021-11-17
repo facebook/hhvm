@@ -32,143 +32,143 @@
     test_unsaved_changes)
   (libraries integration_test_base))
 
-(alias
-  (name identify_symbol)
+(rule
+  (alias identify_symbol)
   (deps ../test_all.exe)
   (action (run ../test_all.exe ide/identify_symbol)))
 
-(alias
-  (name ide_file_sync)
+(rule
+  (alias ide_file_sync)
   (deps ../test_all.exe)
   (action (run ../test_all.exe ide/ide_file_sync)))
 
-(alias
-  (name ide_consistency)
+(rule
+  (alias ide_consistency)
   (deps ../test_all.exe)
   (action (run ../test_all.exe ide/ide_consistency)))
 
-(alias
-  (name ide_disk)
+(rule
+  (alias ide_disk)
   (deps ../test_all.exe)
   (action (run ../test_all.exe ide/ide_disk)))
 
-(alias
-  (name ide_diagnostic_subscription)
+(rule
+  (alias ide_diagnostic_subscription)
   (deps ../test_all.exe)
   (action (run ../test_all.exe ide/ide_diagnostic_subscription)))
 
-(alias
-  (name ide_check)
+(rule
+  (alias ide_check)
   (deps ../test_all.exe)
   (action (run ../test_all.exe ide/ide_check)))
 
-(alias
-  (name ide_status)
+(rule
+  (alias ide_status)
   (deps ../test_all.exe)
   (action (run ../test_all.exe ide/ide_status)))
 
-(alias
-  (name ide_parsing_errors)
+(rule
+  (alias ide_parsing_errors)
   (deps ../test_all.exe)
   (action (run ../test_all.exe ide/ide_parsing_errors)))
 
-(alias
-  (name ide_close)
+(rule
+  (alias ide_close)
   (deps ../test_all.exe)
   (action (run ../test_all.exe ide/ide_close)))
 
-(alias
-  (name ide_typing_deps)
+(rule
+  (alias ide_typing_deps)
   (deps ../test_all.exe)
   (action (run ../test_all.exe ide/ide_typing_deps)))
 
-(alias
-  (name added_parent)
+(rule
+  (alias added_parent)
   (deps ../test_all.exe)
   (action (run ../test_all.exe ide/added_parent)))
 
-(alias
-  (name auto_ns_aliasing)
+(rule
+  (alias auto_ns_aliasing)
   (deps ../test_all.exe)
   (action (run ../test_all.exe ide/auto_ns_aliasing)))
 
-(alias
-  (name remove_function)
+(rule
+  (alias remove_function)
   (deps ../test_all.exe)
   (action (run ../test_all.exe ide/remove_function)))
 
-(alias
-  (name diagnostics_in_closed_file)
+(rule
+  (alias diagnostics_in_closed_file)
   (deps ../test_all.exe)
   (action (run ../test_all.exe ide/diagnostics_in_closed_file)))
 
-(alias
-  (name error_throttling)
+(rule
+  (alias error_throttling)
   (deps ../test_all.exe)
   (action (run ../test_all.exe ide/error_throttling)))
 
-(alias
-  (name max_errors)
+(rule
+  (alias max_errors)
   (deps ../test_all.exe)
   (action (run ../test_all.exe ide/max_errors)))
 
-(alias
-  (name naming_errors)
+(rule
+  (alias naming_errors)
   (deps ../test_all.exe)
   (action (run ../test_all.exe ide/naming_errors)))
 
-(alias
-  (name override)
+(rule
+  (alias override)
   (deps ../test_all.exe)
   (action (run ../test_all.exe ide/override)))
 
-(alias
-  (name remove_parent)
+(rule
+  (alias remove_parent)
   (deps ../test_all.exe)
   (action (run ../test_all.exe ide/remove_parent)))
 
-(alias
-  (name failed_parsing)
+(rule
+  (alias failed_parsing)
   (deps ../test_all.exe)
   (action (run ../test_all.exe ide/failed_parsing)))
 
-(alias
-  (name failed_naming)
+(rule
+  (alias failed_naming)
   (deps ../test_all.exe)
   (action (run ../test_all.exe ide/failed_naming)))
 
-(alias
-  (name unsaved_changes)
+(rule
+  (alias unsaved_changes)
   (deps ../test_all.exe)
   (action (run ../test_all.exe ide/unsaved_changes)))
 
-(alias
-  (name hhi_phpstdlib)
+(rule
+  (alias hhi_phpstdlib)
   (deps ../test_all.exe)
   (action (run ../test_all.exe ide/hhi_phpstdlib)))
 
-(alias
-  (name ide_redecl)
+(rule
+  (alias ide_redecl)
   (deps ../test_all.exe)
   (action (run ../test_all.exe ide/ide_redecl)))
 
-(alias
-  (name error_throttling_open_file)
+(rule
+  (alias error_throttling_open_file)
   (deps ../test_all.exe)
   (action (run ../test_all.exe ide/error_throttling_open_file)))
 
-(alias
-  (name error_pos)
+(rule
+  (alias error_pos)
   (deps ../test_all.exe)
   (action (run ../test_all.exe ide/error_pos)))
 
-(alias
-  (name exception_handling)
+(rule
+  (alias exception_handling)
   (deps ../test_all.exe)
   (action (run ../test_all.exe ide/exception_handling)))
 
-(alias
-  (name status_single)
+(rule
+  (alias status_single)
   (deps ../test_all.exe)
   (action (run ../test_all.exe ide/status_single)))
 

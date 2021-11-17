@@ -8,8 +8,8 @@
     hackfmt
     ounit))
 
-(alias
-  (name range)
+(rule
+  (alias range)
   (deps %{exe:hackfmt_range_unit_test.exe})
   (action (run %{exe:hackfmt_range_unit_test.exe})))
 
@@ -25,8 +25,8 @@
     ounit
     full_fidelity))
 
-(alias
-  (name node)
+(rule
+  (alias node)
   (deps %{exe:hackfmt_node_unit_test.exe})
   (action (run %{exe:hackfmt_node_unit_test.exe})))
 

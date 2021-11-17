@@ -45,15 +45,17 @@
   (preprocess (pps lwt_ppx))
 )
 
+(data_only_dirs rust)
+
 (library
   (name config_file_ffi)
   (modules)
   (wrapped false)
-  (preprocess (pps lwt_ppx))
-  (self_build_stubs_archive (config_file_ffi))
+  (foreign_archives config_file_ffi)
 )
+
 (rule
-  (targets libconfig_file_ffi_stubs.a)
+  (targets libconfig_file_ffi.a)
   (deps (source_tree %{workspace_root}/src))
   (locks /cargo)
   (action

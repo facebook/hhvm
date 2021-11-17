@@ -40,16 +40,17 @@
     worker_cancel)
   (preprocess (pps ppx_deriving.std)))
 
+(data_only_dirs cargo deps_rust)
+
 (library
   (name typing_deps_rust)
   (modules)
   (wrapped false)
-  (preprocess (pps ppx_deriving.std))
-  (self_build_stubs_archive (deps_rust))
+  (foreign_archives deps_rust)
 )
 
 (rule
-  (targets libdeps_rust_stubs.a)
+  (targets libdeps_rust.a)
   (deps (source_tree %{workspace_root}/src))
   (locks /cargo)
   (action

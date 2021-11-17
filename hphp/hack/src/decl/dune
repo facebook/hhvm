@@ -1,17 +1,18 @@
 ; FFI OCaml to Rust (../../target/*/librust_decl_ffi.a)
 ; contains "external" function definition in .ml and
 ; the symbol is provided by the ocaml-rs Rust package via caml! macro
+
+(data_only_dirs cargo rust_decl_ffi direct_decl_smart_constructors) ; so dune doesn't look at rust stuff
+
 (library
   (name rust_decl_ffi)
   (modules)
   (wrapped false)
-  (self_build_stubs_archive (rust_decl_ffi))
+  (foreign_archives rust_decl_ffi)
 )
 
-(data_only_dirs rust_decl_ffi) ; so dune doesn't look at rust stuff
-
 (rule
-  (targets librust_decl_ffi_stubs.a)
+  (targets librust_decl_ffi.a)
   (deps (source_tree %{workspace_root}/src))
   (locks /cargo)
   (action

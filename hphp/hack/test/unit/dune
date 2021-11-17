@@ -38,7 +38,7 @@
     typing_service_api
     unit_test))
 
-(alias
-  (name server_tests)
+(rule
+  (alias server_tests)
   (deps %{exe:server_tests.exe})
   (action (run %{exe:server_tests.exe})))

@@ -72,73 +72,73 @@
   (targets test_all.bc.exe)
   (action (copy runner.bc.exe test_all.bc.exe)))
 
-(alias
-  (name server_config_overrides)
+(rule
+  (alias server_config_overrides)
   (deps test_all.exe)
   (action (run ./test_all.exe server_config_overrides)))
 
-(alias
-  (name ignore_fixme_hhi)
+(rule
+  (alias ignore_fixme_hhi)
   (deps test_all.exe)
   (action (run ./test_all.exe ignore_fixme_hhi)))
 
-(alias
-  (name coverage_counts)
+(rule
+  (alias coverage_counts)
   (deps test_all.exe)
   (action (run ./test_all.exe coverage_counts)))
 
-(alias
-  (name new_file)
+(rule
+  (alias new_file)
   (deps test_all.exe)
   (action (run ./test_all.exe new_file)))
 
-(alias
-  (name property_initializer)
+(rule
+  (alias property_initializer)
   (deps test_all.exe)
   (action (run ./test_all.exe property_initializer)))
 
-(alias
-  (name property_initializer2)
+(rule
+  (alias property_initializer2)
   (deps test_all.exe)
   (action (run ./test_all.exe property_initializer2)))
 
-(alias
-  (name capitalization)
+(rule
+  (alias capitalization)
   (deps test_all.exe)
   (action (run ./test_all.exe capitalization)))
 
-(alias
-  (name modify_file)
+(rule
+  (alias modify_file)
   (deps test_all.exe)
   (action (run ./test_all.exe modify_file)))
 
-(alias
-  (name delete_file)
+(rule
+  (alias delete_file)
   (deps test_all.exe)
   (action (run ./test_all.exe delete_file)))
 
-(alias
-  (name duplicated_file)
+(rule
+  (alias duplicated_file)
   (deps test_all.exe)
   (action (run ./test_all.exe duplicated_file)))
 
-(alias
-  (name failed_decl)
+(rule
+  (alias failed_decl)
   (deps test_all.exe)
   (action (run ./test_all.exe failed_decl)))
 
-(alias
-  (name duplicate_parent)
+(rule
+  (alias duplicate_parent)
   (deps test_all.exe)
   (action (run ./test_all.exe duplicate_parent)))
 
-(alias
-  (name added_parent)
+(rule
+  (alias added_parent)
   (deps test_all.exe)
   (action (run ./test_all.exe added_parent)))
 
-(alias
-  (name get_dependent_classes)
+(rule
+  (alias get_dependent_classes)
   (deps test_all.exe)
   (action (run ./test_all.exe get_dependent_classes)))
 
@@ -153,8 +153,8 @@
 ;         "//hphp/hack/src/utils/collections:collections",
 ;
 
-(alias
-  (name infer_type)
+(rule
+  (alias infer_type)
   (deps test_all.exe)
   (action (run ./test_all.exe infer_type)))
 
@@ -173,28 +173,28 @@
 ;         "//hphp/hack/src/utils/core:core",
 ;         "//hphp/hack/src/utils/collections:collections",
 
-(alias
-  (name getfundeps)
+(rule
+  (alias getfundeps)
   (deps test_all.exe)
   (action (run ./test_all.exe getfundeps)))
 
-(alias
-  (name coeffects)
+(rule
+  (alias coeffects)
   (deps test_all.exe)
   (action (run ./test_all.exe coeffects)))
 
-(alias
-  (name identify)
+(rule
+  (alias identify)
   (deps test_all.exe)
   (action (run ./test_all.exe identify)))
 
-(alias
-  (name server_hover)
+(rule
+  (alias server_hover)
   (deps test_all.exe)
   (action (run ./test_all.exe server_hover)))
 
-(alias
-  (name failed_naming)
+(rule
+  (alias failed_naming)
   (deps test_all.exe)
   (action (run ./test_all.exe failed_naming)))
 
@@ -202,8 +202,8 @@
 ;         "//hphp/hack/src/errors:errors",
 ;         "//hphp/hack/src/server:server_env",
 
-(alias
-  (name gconst_file)
+(rule
+  (alias gconst_file)
   (deps test_all.exe)
   (action (run ./test_all.exe gconst_file)))
 
@@ -220,8 +220,8 @@
 ;         "//hphp/hack/src/utils/core:core",
 ;         "//hphp/hack/src/utils/collections:collections",
 
-(alias
-  (name unbound_name)
+(rule
+  (alias unbound_name)
   (deps test_all.exe)
   (action (run ./test_all.exe unbound_name)))
 
@@ -229,8 +229,8 @@
 ;         "//hphp/hack/src/errors:errors",
 ;         "//hphp/hack/src/server:server_env",
 
-(alias
-  (name decl_decl)
+(rule
+  (alias decl_decl)
   (deps test_all.exe)
   (action (run ./test_all.exe decl_decl)))
 
@@ -241,8 +241,8 @@
 ;         "//hphp/hack/src/utils/core:core",
 ;         "//hphp/hack/src/utils/collections:collections",
 
-(alias
-  (name lazy_decl_idempotence)
+(rule
+  (alias lazy_decl_idempotence)
   (deps test_all.exe)
   (action (run ./test_all.exe lazy_decl_idempotence)))
 
@@ -261,8 +261,8 @@
 ;         "//hphp/hack/src/utils:relative_path",
 ;         "//hphp/hack/src/utils/collections:collections",
 
-(alias
-  (name interrupt)
+(rule
+  (alias interrupt)
   (deps test_all.exe)
   (action (run ./test_all.exe interrupt)))
 
@@ -284,8 +284,8 @@
 ;         "//hphp/hack/src/utils:relative_path",
 ;         "//hphp/hack/src/utils/collections:collections",
 
-(alias
-  (name interrupt2)
+(rule
+  (alias interrupt2)
   (deps test_all.exe)
   (action (run ./test_all.exe interrupt2)))
 
@@ -330,7 +330,7 @@
     (alias decl_decl)
     (alias property_initializer)
     (alias property_initializer2)
-   (alias lazy_decl_idempotence)
+    (alias lazy_decl_idempotence)
     (alias ignore_fixme_hhi)
     (alias interrupt)
     (alias interrupt2)))

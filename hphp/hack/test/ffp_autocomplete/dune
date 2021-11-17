@@ -51,8 +51,8 @@ let () =
           %s)" (String.concat "\n          " files) in
   let ffp_autocomplete =
     Printf.sprintf "; in %s
-(alias
-    (name ffp_autocomplete)
+(rule
+    (alias ffp_autocomplete)
     %s
     %s)" test_dir (deps files) command in
   let dune_file = Printf.sprintf "%s

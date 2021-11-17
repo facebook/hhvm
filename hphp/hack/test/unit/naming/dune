@@ -23,8 +23,8 @@
         unit_test_common_setup
         utils_core))
 
-(alias
-    (name localmem_naming_tests_run)
+(rule
+    (alias localmem_naming_tests_run)
     (deps %{exe:localmem_naming_tests.exe})
     (action (run %{exe:localmem_naming_tests.exe})))
 

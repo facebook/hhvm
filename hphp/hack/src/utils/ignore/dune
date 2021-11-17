@@ -1,10 +1,17 @@
+(rule
+  (target filesToIgnore.fb.ml)
+  (action (copy# facebook/filesToIgnore.ml filesToIgnore.fb.ml))
+)
+
 (library
   (name ignore)
   (wrapped false)
-  (modules filesToIgnore)
   (libraries
     hh_json
     str
     (select filesToIgnore.ml from
-      (facebook -> facebook/filesToIgnore.ml)
-      (-> filesToIgnore.stubs.ml))))
+      (facebook -> filesToIgnore.fb.ml)
+      (-> filesToIgnore.stubs.ml)
+    )
+  )
+)

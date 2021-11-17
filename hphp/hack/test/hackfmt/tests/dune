@@ -1,5 +1,5 @@
-(alias
-    (name verify)
+(rule
+    (alias verify)
     (deps %{exe:../../../src/hackfmt.exe}
           %{project_root}/test/verify.py
           %{project_root}/test/review.sh

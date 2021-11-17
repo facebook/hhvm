@@ -63,8 +63,8 @@ let command flags =
 let make_target name ~dep_files flags =
   Printf.sprintf
     "
-(alias
-    (name %s)
+(rule
+    (alias %s)
     %s
     %s)
 "

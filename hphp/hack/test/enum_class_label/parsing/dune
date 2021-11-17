@@ -1,5 +1,5 @@
-(alias
-    (name enum_class_label_parsing)
+(rule
+    (alias enum_class_label_parsing)
     (deps %{exe:../../../src/hh_parse.exe}
           %{project_root}/test/verify.py
           %{project_root}/test/review.sh

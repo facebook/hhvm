@@ -1,14 +1,15 @@
+(data_only_dirs shmffi cargo)
+
 (library
   (name shmffi)
   (modules)
   (c_library_flags -lpthread)
   (wrapped false)
-  (preprocess (pps ppx_deriving.std))
-  (self_build_stubs_archive (shmffi))
+  (foreign_archives shmffi)
 )
 
 (rule
-  (targets libshmffi_stubs.a)
+  (targets libshmffi.a)
   (deps (source_tree %{workspace_root}/src))
   (locks /cargo)
   (action

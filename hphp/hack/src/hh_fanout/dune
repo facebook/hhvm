@@ -24,16 +24,22 @@
   (preprocess
     (pps lwt_ppx ppx_let)))
 
+(data_only_dirs
+  cargo
+  hh_fanout_build_rust
+  hh_fanout_dep_graph_is_subgraph_rust
+  hh_fanout_dep_graph_stats_rust
+)
+
 (library
   (name hh_fanout_build_rust)
   (modules)
   (wrapped false)
-  (preprocess (pps lwt_ppx ppx_let))
-  (self_build_stubs_archive (hh_fanout_build_rust))
+  (foreign_archives hh_fanout_build_rust)
 )
 
 (rule
-  (targets libhh_fanout_build_rust_stubs.a)
+  (targets libhh_fanout_build_rust.a)
   (deps (source_tree %{workspace_root}/src))
   (locks /cargo)
   (action
@@ -48,12 +54,11 @@
   (name hh_fanout_dep_graph_is_subgraph_rust)
   (modules)
   (wrapped false)
-  (preprocess (pps lwt_ppx ppx_let))
-  (self_build_stubs_archive (hh_fanout_dep_graph_is_subgraph_rust))
+  (foreign_archives hh_fanout_dep_graph_is_subgraph_rust)
 )
 
 (rule
-  (targets libhh_fanout_dep_graph_is_subgraph_rust_stubs.a)
+  (targets libhh_fanout_dep_graph_is_subgraph_rust.a)
   (deps (source_tree %{workspace_root}/src))
   (locks /cargo)
   (action
@@ -68,12 +73,11 @@
   (name hh_fanout_dep_graph_stats_rust)
   (modules)
   (wrapped false)
-  (preprocess (pps lwt_ppx ppx_let))
-  (self_build_stubs_archive (hh_fanout_dep_graph_stats_rust))
+  (foreign_archives hh_fanout_dep_graph_stats_rust)
 )
 
 (rule
-  (targets libhh_fanout_dep_graph_stats_rust_stubs.a)
+  (targets libhh_fanout_dep_graph_stats_rust.a)
   (deps (source_tree %{workspace_root}/src))
   (locks /cargo)
   (action

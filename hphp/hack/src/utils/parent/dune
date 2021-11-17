@@ -2,13 +2,11 @@
   (name parentimpl)
   (wrapped false)
   (modules)
-  (c_names
-    stubparentimpl))
+  (foreign_stubs (language c) (names stubparentimpl)))
 
 (library
   (name parent)
   (wrapped false)
-  (c_names
-    libparent)
+  (foreign_stubs (language c) (names libparent))
   (libraries
     parentimpl))

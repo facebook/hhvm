@@ -1,5 +1,5 @@
-(alias
-    (name enum_class_parsing_good)
+(rule
+    (alias enum_class_parsing_good)
     (deps %{exe:../../../src/hh_parse.exe}
           %{project_root}/test/verify.py
           %{project_root}/test/review.sh
@@ -13,8 +13,8 @@
     --full-fidelity-json-parse-tree
     --pretty-print-json)))
 
-(alias
-    (name enum_class_parsing_bad)
+(rule
+    (alias enum_class_parsing_bad)
     (deps %{exe:../../../src/hh_parse.exe}
           %{project_root}/test/verify.py
           %{project_root}/test/review.sh

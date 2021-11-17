@@ -1,5 +1,5 @@
-(alias
-    (name find_refs)
+(rule
+    (alias find_refs)
     (deps %{exe:../../src/hh_single_type_check.exe}
           %{project_root}/test/verify.py
           %{project_root}/test/review.sh

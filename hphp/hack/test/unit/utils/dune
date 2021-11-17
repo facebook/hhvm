@@ -93,8 +93,8 @@
         unit_test
         utils_core))
 
-(alias
-    (name diagnostic_subscription_test_run)
+(rule
+    (alias diagnostic_subscription_test_run)
     (deps %{exe:diagnostic_subscription_test.exe})
     (action (run %{exe:diagnostic_subscription_test.exe})))
 

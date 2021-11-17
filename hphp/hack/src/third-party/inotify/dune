@@ -1,5 +1,5 @@
 (library
   (name inotify)
   (wrapped false)
-  (c_names
-    inotify_stubs))
+  (foreign_stubs (language c) (names inotify_stubs))
+)

@@ -5,7 +5,9 @@
   (wrapped false)
   (modules
     compiler_id)
-  (c_names
-    compiler_id_impl
-    build-id)
-  (c_flags (:standard -I%{env:CMAKE_SOURCE_DIR=xxx})))
+  (foreign_stubs
+    (language c)
+    (names compiler_id_impl build-id)
+    (flags (:standard -I%{env:CMAKE_SOURCE_DIR=xxx}))
+  )
+)

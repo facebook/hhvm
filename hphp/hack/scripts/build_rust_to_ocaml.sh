@@ -76,5 +76,5 @@ then
 fi) &&
 if [ -z "$exe" ]
 then
-  cp "${TARGET_DIR}/$profile/lib$lib.a" "lib${lib}_stubs.a"
+  cp "${TARGET_DIR}/$profile/lib$lib.a" "lib${lib}.a"
 fi

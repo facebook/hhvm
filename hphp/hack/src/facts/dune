@@ -2,15 +2,17 @@
 ; FFI OCaml to Rust (../../target/*/librust_facts_ffi.a)
 ; contains "external" function definition in .ml and
 ; the symbol is provided by the ocaml-rs Rust package via caml! macro
+(data_only_dirs cargo rust_facts_ffi)
+
 (library
   (name rust_facts_ffi)
   (modules)
   (wrapped false)
-  (preprocess (pps ppx_deriving.std))
-  (self_build_stubs_archive (rust_facts_ffi))
+  (foreign_archives rust_facts_ffi)
 )
+
 (rule
-  (targets librust_facts_ffi_stubs.a)
+  (targets librust_facts_ffi.a)
   (deps (source_tree %{workspace_root}/src))
   (locks /cargo)
   (action
@@ -20,6 +22,8 @@
     )
   )
 )
+
+(copy_files ffi/rust_facts_ffi.ml)
 
 (library
   (name facts)
@@ -33,8 +37,5 @@
     hhbc
     parser
     rust_facts_ffi
-    (select rust_facts_ffi.ml from
-      (-> ffi/rust_facts_ffi.ml)
-    )
     utils_hash)
   (preprocess (pps ppx_deriving.std)))

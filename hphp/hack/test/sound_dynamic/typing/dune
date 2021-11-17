@@ -1,5 +1,5 @@
-(alias
-    (name sound_dynamic_typing_good)
+(rule
+    (alias sound_dynamic_typing_good)
     (deps %{exe:../../../src/hh_single_type_check.exe}
           %{project_root}/test/verify.py
           %{project_root}/test/review.sh
@@ -17,8 +17,8 @@
     --out-extension .legacy_decl.out
     )))
 
-(alias
-    (name sound_dynamic_typing_bad)
+(rule
+    (alias sound_dynamic_typing_bad)
     (deps %{exe:../../../src/hh_single_type_check.exe}
           %{project_root}/test/verify.py
           %{project_root}/test/review.sh
@@ -36,8 +36,8 @@
     --out-extension .legacy_decl.out
     --error-format raw)))
 
-(alias
-    (name sound_dynamic_typing_shallow_decl_good)
+(rule
+    (alias sound_dynamic_typing_shallow_decl_good)
     (deps %{exe:../../../src/hh_single_type_check.exe}
           %{project_root}/test/verify.py
           %{project_root}/test/review.sh
@@ -51,8 +51,8 @@
     --shallow-class-decl
     )))
 
-(alias
-    (name sound_dynamic_typing_shallow_decl_bad)
+(rule
+    (alias sound_dynamic_typing_shallow_decl_bad)
     (deps %{exe:../../../src/hh_single_type_check.exe}
           %{project_root}/test/verify.py
           %{project_root}/test/review.sh

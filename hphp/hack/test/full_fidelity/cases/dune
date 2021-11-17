@@ -1,5 +1,5 @@
-(alias
-    (name full_fidelity_errors_test)
+(rule
+    (alias full_fidelity_errors_test)
     (deps %{exe:../../../src/hh_parse.exe}
           %{project_root}/test/verify.py
           %{project_root}/test/review.sh
@@ -61,8 +61,8 @@
     --full-fidelity-errors
     --allow-unstable-features)))
 
-(alias
-    (name full_fidelity_json_test)
+(rule
+    (alias full_fidelity_json_test)
     (deps %{exe:../../../src/hh_parse.exe}
           %{project_root}/test/verify.py
           %{project_root}/test/review.sh

@@ -1,5 +1,5 @@
-(alias
-    (name tast)
+(rule
+    (alias tast)
     (deps %{exe:../../src/hh_single_type_check.exe}
           %{project_root}/test/verify.py
           %{project_root}/test/review.sh
@@ -37,8 +37,8 @@
     (action (run %{project_root}/test/verify.py %{project_root}/test/tast
     --program %{exe:../../src/hh_single_type_check.exe})))
 
-(alias
-    (name tast_ordered_solving)
+(rule
+    (alias tast_ordered_solving)
     (deps %{exe:../../src/hh_single_type_check.exe}
           %{project_root}/test/verify.py
           %{project_root}/test/review.sh

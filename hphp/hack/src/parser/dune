@@ -1,4 +1,16 @@
-(data_only_dirs cargo ffi)
+(data_only_dirs
+  api
+  cargo
+  core
+  ffi
+  ffi_bridge
+  lowerer
+  bench
+  js
+  smart_constructors
+  syntax_by_ref
+  rust_parser_errors_ffi
+)
 
 (library
   (name rust_parser_ffi)
@@ -6,11 +18,11 @@
   (wrapped false)
   (libraries ocamlpool)
   (c_library_flags -lpthread)
-  (self_build_stubs_archive (rust_parser_ffi))
+  (foreign_archives rust_parser_ffi)
 )
 
 (rule
-  (targets librust_parser_ffi_stubs.a)
+  (targets librust_parser_ffi.a)
   (deps (source_tree %{workspace_root}/src))
   (locks /cargo)
   (action
@@ -27,11 +39,11 @@
   (wrapped false)
   (libraries ocamlpool)
   (c_library_flags -lpthread)
-  (self_build_stubs_archive (rust_parser_errors_ffi))
+  (foreign_archives rust_parser_errors_ffi)
 )
 
 (rule
-  (targets librust_parser_errors_ffi_stubs.a)
+  (targets librust_parser_errors_ffi.a)
   (deps (source_tree %{workspace_root}/src))
   (locks /cargo)
   (action
@@ -42,7 +54,9 @@
   )
 )
 
-(copy_files smart_constructors/*.ml)
+(copy_files (files smart_constructors/*.ml))
+
+(copy_files (files ffi/*.ml))
 
 (library
   (name full_fidelity)
@@ -102,12 +116,6 @@
 
     rust_parser_errors_ffi
     rust_parser_ffi
-    (select rust_lazy_trivia_ffi.ml from
-      (-> ffi/rust_lazy_trivia_ffi.ml)
-    )
-    (select rust_parser_ffi.ml from
-      (-> ffi/rust_parser_ffi.ml)
-    )
   )
   (preprocess (pps visitors.ppx ppx_deriving.std)))
 

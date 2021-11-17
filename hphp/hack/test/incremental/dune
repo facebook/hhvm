@@ -6,8 +6,8 @@
   (libraries
     integration_test_base))
 
-(alias
-  (name method_override)
+(rule
+  (alias method_override)
   (deps test_method_override.exe)
   (action (run ./test_method_override.exe)))
 
@@ -19,8 +19,8 @@
   (libraries
     integration_test_base))
 
-(alias
-  (name inconsistent_state)
+(rule
+  (alias inconsistent_state)
   (deps test_inconsistent_state.exe)
   (action (run ./test_inconsistent_state.exe)))
 
@@ -32,8 +32,8 @@
   (libraries
     integration_test_base))
 
-(alias
-  (name enum_exhaustiveness)
+(rule
+  (alias enum_exhaustiveness)
   (deps test_enum_exhaustiveness.exe)
   (action (run ./test_enum_exhaustiveness.exe)))
 

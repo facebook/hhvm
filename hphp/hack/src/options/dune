@@ -15,17 +15,25 @@
   (preprocess (pps ppx_deriving.std)))
 
 (rule
-  (targets generated_buildOptions.ml)
-  (action (run ./discover.exe)))
+  (targets buildOptions.generated.ml)
+  (action (run ./discover.exe))
+)
+
+(rule
+  (target buildOptions.fb.ml)
+  (action (copy# facebook/buildOptions.ml buildOptions.fb.ml))
+)
 
 (library
   (name build_options)
   (wrapped false)
   (modules buildOptions)
   (libraries (select buildOptions.ml from
-    (facebook -> facebook/buildOptions.ml)
-    (-> generated_buildOptions.ml)))
-  (preprocess (pps ppx_deriving.std)))
+    (facebook -> buildOptions.fb.ml)
+    (-> buildOptions.generated.ml))
+  )
+  (preprocess (pps ppx_deriving.std))
+)
 
 (library
   (name glean_options)

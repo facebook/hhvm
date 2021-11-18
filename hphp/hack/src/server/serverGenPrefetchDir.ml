@@ -28,14 +28,6 @@ let return_ok x = Future.Promise.return (Ok x)
 
 let return_err x = Future.Promise.return (Error x)
 
-let get_shallow_decls_filename (filename : string) : string =
-  filename ^ ".shallow.bin"
-
-let save_contents (output_filename : string) (contents : 'a) : unit =
-  let chan = Stdlib.open_out_bin output_filename in
-  Marshal.to_channel chan contents [];
-  Stdlib.close_out chan
-
 let get_name_and_decl_hashes_from_decls decls : (string * Int64.t) list =
   List.filter_map decls ~f:(fun (name, decl, decl_hash) ->
       match decl with
@@ -79,6 +71,12 @@ let go
     | Ok (Error e) -> failwith (Printf.sprintf "%s" e)
     | Error e -> failwith (Printf.sprintf "%s" (Future.error_to_string e))
   in
+  let cmd =
+    "manifold mkdirs hack_decl_prefetching/tree/prefetch/"
+    ^ hh_version
+    ^ "/shallow_decls"
+  in
+  ignore (Sys.command cmd);
   let dir = Filename.concat dir hh_version in
 
   let get_next =
@@ -88,12 +86,12 @@ let go
       ~extra_roots:(ServerConfig.extra_paths genv.ServerEnv.config)
   in
 
-  let job (acc : Int64.t list) (fnl : Relative_path.t list) : Int64.t list =
-    List.fold_left
-      ~init:acc
-      ~f:(fun acc fn ->
-        (* Save 1% of decls each run *)
-        if Float.(Random.float 1.0 < 0.01) then (
+  let job (acc : (string * string) list) (fnl : Relative_path.t list) :
+      (string * string) list =
+    let acc =
+      List.fold_left
+        ~init:acc
+        ~f:(fun acc fn ->
           Hh_logger.log
             "Saving decls for prefetching: %s"
             (Relative_path.suffix fn);
@@ -121,16 +119,18 @@ let go
                     |> Filename.concat shallow_decls_dir
                   in
                   Sys_utils.mkdir_p (Filename.dirname file);
-                  save_contents
-                    (get_shallow_decls_filename file)
-                    shallow_decls_in_file;
-                  List.rev_append acc [decl_hash]
+                  List.rev_append
+                    acc
+                    [
+                      ( Int64.to_string decl_hash,
+                        Marshal.to_string shallow_decls_in_file [] );
+                    ]
                 ) else
                   acc)
-              names_and_decl_hashes
-        ) else
-          acc)
-      fnl
+              names_and_decl_hashes)
+        fnl
+    in
+    acc
   in
 
   let results =
@@ -141,5 +141,7 @@ let go
       ~merge:List.rev_append
       ~next:get_next
   in
+
+  let _ = Remote_old_decls_ffi.put_decls hh_version results in
   Hh_logger.log "Processed %d decls" (List.length results);
   ()

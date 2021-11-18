@@ -192,22 +192,29 @@ let check_keyset_value = check_arraykey_index Errors.invalid_keyset_value
 
 let check_set_value = check_arraykey_index Errors.invalid_set_value
 
+let pessimise_type env ty =
+  Typing_union.union env ty (Typing_make_type.dynamic Reason.none)
+
 let maybe_pessimise_type env ty =
   if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
-    Typing_union.union env ty (Typing_make_type.dynamic Reason.none)
+    pessimise_type env ty
   else
     (env, ty)
 
-(* Assignment into a pessimised vec or dict should behave as though it has type
-   forall T1 T2. vec<T1> -> idx -> ~T2 -> vec<T1|T2> *)
-let pessimised_vec_dict_assign p env vec_ty arg_ty =
+let pessimised_tup_assign p env arg_ty =
   let (env, ty) = Env.fresh_type env p in
-  let (env, pess_ty) = maybe_pessimise_type env ty in
+  let (env, pess_ty) = pessimise_type env ty in
   (* There can't be an error since the type variable is fresh *)
   let env =
     SubType.sub_type env arg_ty pess_ty (fun ?code:_ ?quickfixes:_ _ ->
         Errors.internal_error p "Subtype of fresh type variable")
   in
+  (env, ty)
+
+(* Assignment into a pessimised vec or dict should behave as though it has type
+   forall T1 T2. vec<T1> -> idx -> ~T2 -> vec<T1|T2> *)
+let pessimised_vec_dict_assign p env vec_ty arg_ty =
+  let (env, ty) = pessimised_tup_assign p env arg_ty in
   Typing_union.union env vec_ty ty
 
 let rec array_get
@@ -469,7 +476,9 @@ let rec array_get
         | (_, p, Int n) ->
           let idx = int_of_string_opt n in
           (match Option.bind idx ~f:(List.nth tyl) with
-          | Some nth -> (env, nth, dflt_arr_res, Ok ty2)
+          | Some nth ->
+            let (env, pess_ty) = maybe_pessimise_type env nth in
+            (env, pess_ty, dflt_arr_res, Ok ty2)
           | None ->
             Errors.typing_error p (Reason.string_of_ureason Reason.index_tuple);
             (env, err_witness env p, dflt_arr_res, Ok ty2))
@@ -1182,8 +1191,15 @@ let assign_array_get_with_err
             let idx = int_of_string_opt n in
             (match Option.map ~f:(List.split_n tyl) idx with
             | Some (tyl', _ :: tyl'') ->
+              let (env, pess_ty2) =
+                if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env)
+                then
+                  pessimised_tup_assign expr_pos env ty2
+                else
+                  (env, ty2)
+              in
               ( env,
-                MakeType.tuple r (tyl' @ ty2 :: tyl''),
+                MakeType.tuple r (tyl' @ pess_ty2 :: tyl''),
                 Ok ety1,
                 Ok tkey,
                 Ok ty2 )

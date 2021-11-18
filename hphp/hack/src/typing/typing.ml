@@ -3377,10 +3377,22 @@ and expr_
     let (env, tel, tyl) =
       match expected with
       | Some (pos, ur, _, Ttuple expected_tyl) ->
-        exprs_expected (pos, ur, expected_tyl) env el
+        let (env, pess_expected_tyl) =
+          if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
+            List.map_env env expected_tyl ~f:Typing_array_access.pessimise_type
+          else
+            (env, expected_tyl)
+        in
+        exprs_expected (pos, ur, pess_expected_tyl) env el
       | _ -> exprs env el
     in
-    let ty = MakeType.tuple (Reason.Rwitness p) tyl in
+    let (env, pess_tyl) =
+      if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
+        List.map_env env tyl ~f:(Typing_array_access.pessimised_tup_assign p)
+      else
+        (env, tyl)
+    in
+    let ty = MakeType.tuple (Reason.Rwitness p) pess_tyl in
     make_result env p (Aast.Tuple tel) ty
   | List el ->
     let (env, tel, tyl) =

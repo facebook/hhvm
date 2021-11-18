@@ -132,15 +132,16 @@ let read_and_process_job ic oc : job_outcome =
         in
         if len > 30 * 1024 * 1024 (* 30 MiB *) then (
           Hh_logger.log
-            ("WARNING: you are sending quite a lot of data (%d bytes), "
-            ^^ "which may have an adverse performance impact. "
+            ("WARNING(WORKER_LARGE_DATA_SEND): you are sending quite a lot of "
+            ^^ "data (%d bytes), which may have an adverse performance impact. "
             ^^ "If you are sending closures, double-check to ensure that "
             ^^ "they have not captured large values in their environment.")
             len;
-          Printf.eprintf
-            "%s"
-            (Caml.Printexc.raw_backtrace_to_string
-               (Caml.Printexc.get_callstack 100))
+          HackEventLogger.invariant_violation_bug
+            ~path:Relative_path.default
+            ~pos:""
+            ~desc:"WORKER_LARGE_DATA_SEND"
+            (Telemetry.create () |> Telemetry.int_ ~key:"len" ~value:len)
         );
 
         Measure.sample "worker_response_len" (float len);

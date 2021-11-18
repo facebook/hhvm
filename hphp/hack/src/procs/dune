@@ -15,6 +15,7 @@
   marshal_tools
   procs_bucket
   procfs
+  relative_path
   sys_utils
   utils_exit
   worker_cancel))

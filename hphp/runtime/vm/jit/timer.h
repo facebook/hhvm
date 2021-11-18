@@ -30,6 +30,7 @@
   TIMER_NAME(optimize_realxGuards)              \
   TIMER_NAME(optimize_refcountOpts)             \
   TIMER_NAME(optimize_reoptimize)               \
+  TIMER_NAME(optimize_reorderCheckTypes)        \
   TIMER_NAME(optimize_loads)                    \
   TIMER_NAME(optimize_stores)                   \
   TIMER_NAME(optimize_gvn)                      \
@@ -123,4 +124,3 @@ struct Timer {
 };
 
 } }
-

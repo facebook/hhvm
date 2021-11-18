@@ -185,6 +185,11 @@ void optimize(IRUnit& unit, TransKind kind) {
   printUnit(6, unit, " after initial DCE ");
   assertx(checkEverything(unit));
 
+  if (RuntimeOption::EvalHHIRReorderCheckTypes) {
+    rqtrace::EventGuard trace{"OPT_REORDER_CHECK_TYPES"};
+    doPass(unit, reorderCheckTypes, DCE::None);
+  }
+
   if (RuntimeOption::EvalHHIRPredictionOpts) {
     rqtrace::EventGuard trace{"OPT_PRED"};
     doPass(unit, optimizePredictions, DCE::None);

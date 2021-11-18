@@ -39,6 +39,7 @@ void optimizeStores(IRUnit&);
 void optimizeVanillaChecks(IRUnit&);
 void cleanCfg(IRUnit&);
 bool optimizePhis(IRUnit&);
+void reorderCheckTypes(IRUnit&);
 
 /*
  * For debugging, we can run this pass, which inserts various sanity checking
@@ -54,4 +55,3 @@ void optimize(IRUnit& unit, TransKind kind);
 //////////////////////////////////////////////////////////////////////
 
 }}
-

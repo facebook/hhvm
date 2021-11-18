@@ -929,6 +929,7 @@ struct RuntimeOption {
   F(bool, HHIRDeadCodeElim,            true)                            \
   F(bool, HHIRGlobalValueNumbering,    true)                            \
   F(bool, HHIRPredictionOpts,          true)                            \
+  F(bool, HHIRReorderCheckTypes,       true)                            \
   F(bool, HHIRMemoryOpts,              true)                            \
   F(bool, AssemblerFoldDefaultValues,  true)                            \
   F(uint64_t, AssemblerMaxScalarSize,  2147483648) /* 2GB */            \

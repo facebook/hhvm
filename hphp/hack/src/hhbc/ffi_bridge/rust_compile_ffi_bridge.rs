@@ -139,6 +139,7 @@ pub mod compile_ffi {
         fn hackc_create_direct_decl_parse_options(
             disable_xhp_element_mangling: bool,
             interpret_soft_types_as_like_types: bool,
+            allow_new_attribute_syntax: bool,
             aliased_namespaces: &CxxString,
         ) -> Box<DeclParserOptions>;
 
@@ -339,6 +340,7 @@ fn hackc_print_serialized_size(serialized: &Bytes) {
 pub fn hackc_create_direct_decl_parse_options(
     disable_xhp_element_mangling: bool,
     interpret_soft_types_as_like_types: bool,
+    allow_new_attribute_syntax: bool,
     aliased_namespaces: &CxxString,
 ) -> Box<DeclParserOptions> {
     let bump = bumpalo::Bump::new();
@@ -367,6 +369,7 @@ pub fn hackc_create_direct_decl_parse_options(
         auto_namespace_map,
         disable_xhp_element_mangling,
         interpret_soft_types_as_like_types,
+        allow_new_attribute_syntax,
         ..Default::default()
     };
 

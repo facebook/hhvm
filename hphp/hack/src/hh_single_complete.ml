@@ -170,8 +170,11 @@ let parse_options () =
 (** This is an almost-pure function which returns what we get out of parsing.
 The only side-effect it has is on the global errors list. *)
 let parse_and_name ctx files_contents =
-  let parsed_files =
-    Relative_path.Map.mapi files_contents ~f:(fun fn contents ->
+  Relative_path.Map.mapi files_contents ~f:(fun fn contents ->
+      let tcopt = Provider_context.get_tcopt ctx in
+      (* Get parse errors. Hold on to the AST, since we'll convert it to
+         fileinfo below if direct decl is disabled. *)
+      let parsed_file =
         Errors.run_in_context fn Errors.Parsing (fun () ->
             let popt = Provider_context.get_tcopt ctx in
             let parsed_file =
@@ -185,33 +188,30 @@ let parse_and_name ctx files_contents =
                 ast
             in
             Ast_provider.provide_ast_hint fn ast Ast_provider.Full;
-            { parsed_file with Parser_return.ast }))
-  in
-  let files_info =
-    Relative_path.Map.mapi
-      ~f:
-        begin
-          fun _fn parsed_file ->
-          let { Parser_return.file_mode; comments; ast; _ } = parsed_file in
-          (* If the feature is turned on, deregister functions with attribute
-             __PHPStdLib. This does it for all functions, not just hhi files *)
-          let (funs, classes, record_defs, typedefs, consts) =
-            Nast.get_defs ast
-          in
-          {
-            FileInfo.file_mode;
-            funs;
-            classes;
-            record_defs;
-            typedefs;
-            consts;
-            comments = Some comments;
-            hash = None;
-          }
-        end
-      parsed_files
-  in
-  (parsed_files, files_info)
+            { parsed_file with Parser_return.ast })
+      in
+      if TypecheckerOptions.use_direct_decl_parser tcopt then
+        match Direct_decl_utils.direct_decl_parse ctx fn with
+        | None -> failwith "no file contents"
+        | Some decl_and_mode_and_hash ->
+          Direct_decl_utils.decls_to_fileinfo fn decl_and_mode_and_hash
+      else
+        let { Parser_return.file_mode; comments; ast; _ } = parsed_file in
+        (* If the feature is turned on, deregister functions with attribute
+           __PHPStdLib. This does it for all functions, not just hhi files *)
+        let (funs, classes, record_defs, typedefs, consts) =
+          Nast.get_defs ast
+        in
+        {
+          FileInfo.file_mode;
+          funs;
+          classes;
+          record_defs;
+          typedefs;
+          consts;
+          comments = Some comments;
+          hash = None;
+        })
 
 (** This function is used for gathering naming and parsing errors,
 and the side-effect of updating the global reverse naming table (and
@@ -220,7 +220,7 @@ of updating the decl heap (and picking up decling errors along the way). *)
 let parse_name_and_decl ctx files_contents =
   Errors.do_ (fun () ->
       (* parse_and_name has side effect of reporting errors *)
-      let (parsed_files, files_info) = parse_and_name ctx files_contents in
+      let files_info = parse_and_name ctx files_contents in
       (* ndecl_file has side effect of updating the global reverse naming-table,
          and reporting errors. *)
       Relative_path.Map.iter files_info ~f:(fun fn fileinfo ->
@@ -230,7 +230,7 @@ let parse_name_and_decl ctx files_contents =
           Errors.merge_into_current errors);
       (* Decl.make_env has the side effect of updating the decl heap, and
          reporting errors. *)
-      Relative_path.Map.iter parsed_files ~f:(fun fn _ ->
+      Relative_path.Map.iter files_info ~f:(fun fn _ ->
           Errors.run_in_context fn Errors.Decl (fun () ->
               Decl.make_env ~sh:SharedMem.Uses ctx fn));
       files_info)
@@ -240,7 +240,7 @@ let scan_files_for_symbol_index
     (sienv : SearchUtils.si_env)
     (ctx : Provider_context.t) : SearchUtils.si_env =
   let files_contents = Multifile.file_to_files filename in
-  let (_, individual_file_info) =
+  let individual_file_info =
     Errors.ignore_ (fun () -> parse_and_name ctx files_contents)
   in
   let fileinfo_list = Relative_path.Map.values individual_file_info in

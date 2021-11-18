@@ -127,6 +127,14 @@
   (pps lwt_ppx ppx_deriving.std)))
 
 (library
+  (name remote_old_decls_ffi)
+  (wrapped false)
+  (modules
+    remote_old_decls_ffi)
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std)))
+
+(library
  (name re_stubs)
  (wrapped false)
  (modules re reEnv)

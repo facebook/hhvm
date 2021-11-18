@@ -1,4 +1,4 @@
-val get_old_decl :
+val fetch_old_decls :
   ctx:Provider_context.t ->
-  string ->
-  Shallow_decl_defs.shallow_class option SMap.t option
+  string list ->
+  Shallow_decl_defs.shallow_class option SMap.t

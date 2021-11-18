@@ -145,34 +145,33 @@ let get_batch (ctx : Provider_context.t) (names : SSet.t) :
 let get_old_batch
     (ctx : Provider_context.t)
     (names : SSet.t)
-    ~(get_remote_old_decl :
-       string -> Shallow_decl_defs.shallow_class option SMap.t option) :
+    ~(fetch_old_decls :
+       string list -> Shallow_decl_defs.shallow_class option SMap.t) :
     shallow_class option SMap.t =
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis -> failwith "invalid"
   | Provider_backend.Shared_memory ->
     let old_classes = Shallow_classes_heap.Classes.get_old_batch names in
     if fetch_remote_old_decls ctx then
-      SSet.fold
-        begin
-          fun cid old_classes ->
-          if SMap.mem cid old_classes then
-            old_classes
+      let missing_old_classes =
+        SMap.fold
+          (fun cid decl_opt missing_classes ->
+            if Option.is_some decl_opt then
+              missing_classes
+            else
+              cid :: missing_classes)
+          old_classes
+          []
+      in
+      let remote_old_classes = fetch_old_decls missing_old_classes in
+      SMap.fold
+        (fun a b acc ->
+          if Option.is_some b || not (SMap.mem a remote_old_classes) then
+            SMap.add a b acc
           else
-            match get_remote_old_decl cid with
-            | None -> old_classes
-            | Some remote_old_classes ->
-              remote_old_classes
-              |> SMap.merge
-                   (fun _key local_val remote_val ->
-                     if Option.is_some local_val then
-                       local_val
-                     else
-                       remote_val)
-                   old_classes
-        end
-        names
+            SMap.add a (SMap.find a remote_old_classes) acc)
         old_classes
+        SMap.empty
     else
       old_classes
   | Provider_backend.Local_memory _ ->

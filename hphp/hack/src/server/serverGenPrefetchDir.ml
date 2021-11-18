@@ -110,8 +110,10 @@ let go
               ~f:(fun acc (name, decl_hash) ->
                 let shallow_decl_opt = Shallow_classes_provider.get ctx name in
                 if Option.is_some shallow_decl_opt then (
+                  let shallow_decl = Option.value_exn shallow_decl_opt in
+                  let shallow_decls_in_file = SMap.empty in
                   let shallow_decls_in_file =
-                    Option.value_exn shallow_decl_opt
+                    SMap.add name shallow_decl shallow_decls_in_file
                   in
                   let shallow_decls_dir = Filename.concat dir "shallow_decls" in
                   let file =

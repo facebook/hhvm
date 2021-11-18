@@ -332,6 +332,7 @@
   shallow_decl_defs
   sys_utils
   typing_defs
+  remote_old_decls_ffi
   utils_config_file
   utils_core
   utils_www_root)

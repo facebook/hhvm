@@ -501,6 +501,7 @@
   hg
   hhi
   ide_rpc_api_types
+  remote_old_decls_ffi
   linting
   linting_main
   lints_core

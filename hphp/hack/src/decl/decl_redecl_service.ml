@@ -619,7 +619,7 @@ let redo_type_decl
         Shallow_decl_compare.compute_class_fanout
           ctx
           ~defs
-          ~get_remote_old_decl:(Remote_old_decl_client.get_old_decl ~ctx)
+          ~fetch_old_decls:(Remote_old_decl_client.fetch_old_decls ~ctx)
           fnl
       in
       let changed = DepSet.union changed changed' in
@@ -638,7 +638,7 @@ let redo_type_decl
         Shallow_decl_compare.compute_class_fanout
           ctx
           ~defs
-          ~get_remote_old_decl:(Remote_old_decl_client.get_old_decl ~ctx)
+          ~fetch_old_decls:(Remote_old_decl_client.fetch_old_decls ~ctx)
           fnl
       in
 

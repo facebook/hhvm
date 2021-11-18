@@ -755,9 +755,16 @@ static_assert(sizeof(DceFlags) == 1, "sizeof(DceFlags) should be 1 byte");
 // DCE state indexed by instr->id().
 typedef StateVector<IRInstruction, DceFlags> DceState;
 typedef StateVector<SSATmp, uint32_t> UseCounts;
-typedef jit::vector<IRInstruction*> WorkList;
+// Set of live DefLabel operands (keyed by DefLabel and index)
+typedef jit::fast_set<std::pair<IRInstruction*, size_t>> DefLabelLiveness;
+// Worklist is instruction to process. If the instruction is a
+// DefLabel, the second item is the index of the operand (DefLabel is
+// treated separately for each operand).
+typedef jit::vector<std::pair<IRInstruction*, size_t>> WorkList;
 
-void removeDeadInstructions(IRUnit& unit, const DceState& state) {
+void removeDeadInstructions(IRUnit& unit,
+                            const DceState& state,
+                            const DefLabelLiveness& defLabelLive) {
   postorderWalk(
     unit,
     [&](Block* block) {
@@ -765,6 +772,10 @@ void removeDeadInstructions(IRUnit& unit, const DceState& state) {
       auto const bcctx = block->back().bcctx();
       block->remove_if(
         [&] (const IRInstruction& inst) {
+          // Don't attempt to remove a Jmp feeding a DefLabel. It will
+          // be dealt with below.
+          if (inst.is(Jmp) && inst.numSrcs() > 0) return false;
+
           ONTRACE(
             4,
             if (state[inst].isDead()) {
@@ -777,6 +788,56 @@ void removeDeadInstructions(IRUnit& unit, const DceState& state) {
           return dead;
         }
       );
+
+      if (!block->empty()) {
+        auto& front = block->front();
+        if (front.is(DefLabel)) {
+          // If the DefLabel was completely dead, it would have been
+          // removed above.
+          assertx(!state[&front].isDead());
+          // Remove any dead individual operands
+          auto dstIdx = 0;
+          auto const numDsts = front.numDsts();
+          for (auto i = 0; i < numDsts; ++i) {
+            if (!defLabelLive.count(std::make_pair(&front, i))) {
+              FTRACE(1, "Removing dead DefLabel dst {}: {}\n",
+                     i, front.toString());
+              front.deleteDst(dstIdx);
+            } else {
+              ++dstIdx;
+            }
+          }
+          assertx(front.numDsts() > 0);
+        }
+
+        auto& back = block->back();
+        if (back.is(Jmp) && back.numSrcs() > 0) {
+          if (state[&back].isDead()) {
+            // If the Jmp's operands are completely dead, we can't
+            // remove it (because it's control flow), but we can turn
+            // it into a normal Jmp.
+            FTRACE(1, "Removing dead instruction {}\n", back.toString());
+            back.setSrcs(0, nullptr);
+          } else {
+            // Otherwise, similarily to the DefLabel, remove
+            // individual dead operands.
+            auto srcIdx = 0;
+            auto const numSrcs = back.numSrcs();
+            for (auto i = 0; i < numSrcs; ++i) {
+              auto& defLabel = block->taken()->front();
+              assertx(defLabel.is(DefLabel));
+              if (!defLabelLive.count(std::make_pair(&defLabel, i))) {
+                FTRACE(1, "Removing dead Jmp src {}: {}\n",
+                       i, back.toString());
+                back.deleteSrc(srcIdx);
+              } else {
+                ++srcIdx;
+              }
+            }
+          }
+        }
+      }
+
       if (block->empty() || !block->back().isBlockEnd()) {
         assertx(next);
         block->push_back(unit.gen(Jmp, bcctx, next));
@@ -818,9 +879,14 @@ WorkList initInstructions(const IRUnit& unit, const BlockList& blocks,
   WorkList wl;
   wl.reserve(unit.numInsts());
   forEachInst(blocks, [&] (IRInstruction* inst) {
-    if (!canDCE(inst)) {
+    // Instructions that cannot be removed are automatically live. The
+    // exception is DefLabels and Jmps that feed a DefLabel. There
+    // aren't normally DCEable, but will be dealt with specially.
+    if (!canDCE(inst) &&
+        !inst->is(DefLabel) &&
+        !(inst->is(Jmp) && inst->numSrcs() > 0)) {
       state[inst].setLive();
-      wl.push_back(inst);
+      wl.push_back(std::make_pair(inst, 0));
     }
   });
   TRACE(1, "DCE:^^^^^^^^^^^^^^^^^^^^\n");
@@ -1218,17 +1284,24 @@ void fullDCE(IRUnit& unit) {
 
   UseCounts uses(unit, 0);
   jit::fast_map<IRInstruction*, TrackedInstr> rcInsts;
+  DefLabelLiveness defLabelLive;
   jit::vector<IRInstruction*> concats;
 
   // process the worklist
   while (!wl.empty()) {
-    auto* inst = wl.back();
+    auto const [inst, defLabelIdx] = wl.back();
     wl.pop_back();
-    for (uint32_t ix = 0; ix < inst->numSrcs(); ++ix) {
+    assertx(!state[inst].isDead());
+    // Jmps which feed a DefLabel are dealt with as part of processing
+    // the DefLabel. They should never appear on the worklist.
+    assertx(IMPLIES(inst->is(Jmp), inst->numSrcs() == 0));
+    assertx(IMPLIES(!inst->is(DefLabel), defLabelIdx == 0));
+
+    auto const process = [&] (IRInstruction* inst, uint32_t ix) {
       if (inst->is(ConcatStrStr)) concats.emplace_back(inst);
       auto const src = inst->src(ix);
       IRInstruction* srcInst = src->inst();
-      if (srcInst->op() == DefConst) continue;
+      if (srcInst->op() == DefConst) return;
 
       if (srcInst->producesReference() && canDCE(srcInst)) {
         ++uses[src];
@@ -1240,11 +1313,44 @@ void fullDCE(IRUnit& unit) {
         }
       }
 
-      if (state[srcInst].isDead()) {
+      if (srcInst->is(DefLabel)) {
+        // If the source instruction is a DefLabel, figure out which
+        // operand this SSATmp corresponds to, and schedule that
+        // particular operand.
+        auto dstIdx = 0;
+        for (; dstIdx < srcInst->numDsts(); dstIdx++) {
+          if (src == srcInst->dst(dstIdx)) break;
+        }
+        assertx(dstIdx != srcInst->numDsts());
+        // If the operand isn't already live, schedule it.
+        if (defLabelLive.emplace(std::make_pair(srcInst, dstIdx)).second) {
+          state[srcInst].setLive();
+          wl.push_back(std::make_pair(srcInst, dstIdx));
+        }
+      } else if (state[srcInst].isDead()) {
         state[srcInst].setLive();
-        wl.push_back(srcInst);
+        wl.push_back(std::make_pair(srcInst, 0));
       }
+    };
+
+    if (inst->is(DefLabel)) {
+      // For a DefLabel operand, look "through" each corresponding Jmp
+      // and process the source as if we were processing that Jmp.
+      assertx(defLabelIdx < inst->numDsts());
+      assertx(defLabelLive.count(std::make_pair(inst, defLabelIdx)));
+      inst->block()->forEachPred(
+        [&, inst = inst, defLabelIdx = defLabelIdx] (Block* pred) {
+          auto& jmp = pred->back();
+          assertx(jmp.is(Jmp));
+          assertx(jmp.numSrcs() == inst->numDsts());
+          state[&jmp].setLive();
+          process(&jmp, defLabelIdx);
+        }
+      );
+      continue;
     }
+    // For a normal instruction, just process each source
+    for (uint32_t ix = 0; ix < inst->numSrcs(); ++ix) process(inst, ix);
   }
 
   optimizeCatchBlocks(blocks, state, unit, uses, rcInsts);
@@ -1264,7 +1370,7 @@ void fullDCE(IRUnit& unit) {
   }
 
   // Now remove instructions whose state is DEAD.
-  removeDeadInstructions(unit, state);
+  removeDeadInstructions(unit, state, defLabelLive);
 
   // Kill unreachable catch blocks.
   mandatoryDCE(unit);

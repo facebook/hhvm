@@ -373,6 +373,20 @@ struct ImmFolder {
   void fold(loadzlq& in, Vinstr& /*out*/) { foldVptr(in.s); }
   void fold(loadtqb& in, Vinstr& /*out*/) { foldVptr(in.s); }
   void fold(loadtql& in, Vinstr& /*out*/) { foldVptr(in.s); }
+
+  void fold(testbim& in, Vinstr&) { foldVptr(in.s1); }
+  void fold(testwim& in, Vinstr&) { foldVptr(in.s1); }
+  void fold(testlim& in, Vinstr&) { foldVptr(in.s1); }
+  void fold(testqim& in, Vinstr&) { foldVptr(in.s1); }
+  void fold(testbm& in, Vinstr&) { foldVptr(in.s1); }
+  void fold(testwm& in, Vinstr&) { foldVptr(in.s1); }
+  void fold(testlm& in, Vinstr&) { foldVptr(in.s1); }
+  void fold(testqm& in, Vinstr&) { foldVptr(in.s1); }
+
+  void fold(cmpbim& in, Vinstr&) { foldVptr(in.s1); }
+  void fold(cmpwim& in, Vinstr&) { foldVptr(in.s1); }
+  void fold(cmplim& in, Vinstr&) { foldVptr(in.s1); }
+  void fold(cmpqim& in, Vinstr&) { foldVptr(in.s1); }
 };
 } // namespace x64
 

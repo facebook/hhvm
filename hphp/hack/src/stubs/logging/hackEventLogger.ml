@@ -523,6 +523,7 @@ module Rage = struct
   let rage
       ~rageid:_
       ~desc:_
+      ~vscode_bugid:_
       ~root:_
       ~from:_
       ~hhconfig_version:_

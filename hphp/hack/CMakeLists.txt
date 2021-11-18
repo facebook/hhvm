@@ -101,7 +101,7 @@ function(invoke_dune name target)
       ${name}
       COMMAND
         . "${CMAKE_CURRENT_BINARY_DIR}/dev_env.sh" &&
-        opam config exec --
+        opam exec --
         $(MAKE) --makefile=Makefile.dune ${target}
         BYTECODE="${EMIT_OCAML_BYTECODE}"
       WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"

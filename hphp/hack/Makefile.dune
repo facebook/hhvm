@@ -2,6 +2,13 @@ BYTECODE=
 
 ROOT=$(shell pwd)
 
+# Dune creates read-only files as of https://github.com/ocaml/dune/pull/3092
+#
+# We later copy these executables into the `bin/` dir; if we just use `cp`,
+# this will only succeed once: a second build will fail as `cp` will refuse
+# to overwrite files that do not have write permissions.
+COPY_EXE := install -m 755
+
 ################################################################################
 #                                    Rules                                     #
 ################################################################################
@@ -33,16 +40,17 @@ build-hack$(2):
 		src/hh_parse.$(1) \
 		src/generate_full_fidelity.$(1) \
 		src/hh_fanout/hh_fanout.$(1)
-		
+
+
 copy-hack$(2)-files: build-hack$(2)
 	mkdir -p "$(HACK_BIN_DIR)"
-	cp "$(DUNE_BUILD_DIR)/default/src/hh_server.$(1)" "$(HACK_BIN_DIR)/hh_server$(ext)"
-	cp "$(DUNE_BUILD_DIR)/default/src/hh_client.$(1)" "$(HACK_BIN_DIR)/hh_client$(ext)"
-	cp "$(DUNE_BUILD_DIR)/default/src/hh_single_type_check.$(1)" "$(HACK_BIN_DIR)/hh_single_type_check$(ext)"
-	cp "$(DUNE_BUILD_DIR)/default/src/hackfmt.$(1)" "$(HACK_BIN_DIR)/hackfmt$(ext)"
-	cp "$(DUNE_BUILD_DIR)/default/src/hh_parse.$(1)" "$(HACK_BIN_DIR)/hh_parse$(ext)"
-	cp "$(DUNE_BUILD_DIR)/default/src/generate_full_fidelity.$(1)" "$(HACK_BIN_DIR)/generate_full_fidelity$(ext)"
-	cp "$(DUNE_BUILD_DIR)/default/src/hh_fanout/hh_fanout.$(1)" "$(HACK_BIN_DIR)/hh_fanout$(ext)"	
+	${COPY_EXE} "$(DUNE_BUILD_DIR)/default/src/hh_server.$(1)" "$(HACK_BIN_DIR)/hh_server$(ext)"
+	${COPY_EXE} "$(DUNE_BUILD_DIR)/default/src/hh_client.$(1)" "$(HACK_BIN_DIR)/hh_client$(ext)"
+	${COPY_EXE} "$(DUNE_BUILD_DIR)/default/src/hh_single_type_check.$(1)" "$(HACK_BIN_DIR)/hh_single_type_check$(ext)"
+	${COPY_EXE} "$(DUNE_BUILD_DIR)/default/src/hackfmt.$(1)" "$(HACK_BIN_DIR)/hackfmt$(ext)"
+	${COPY_EXE} "$(DUNE_BUILD_DIR)/default/src/hh_parse.$(1)" "$(HACK_BIN_DIR)/hh_parse$(ext)"
+	${COPY_EXE} "$(DUNE_BUILD_DIR)/default/src/generate_full_fidelity.$(1)" "$(HACK_BIN_DIR)/generate_full_fidelity$(ext)"
+	${COPY_EXE} "$(DUNE_BUILD_DIR)/default/src/hh_fanout/hh_fanout.$(1)" "$(HACK_BIN_DIR)/hh_fanout$(ext)"
 endef
 
 # Define rules for normal build / debug build

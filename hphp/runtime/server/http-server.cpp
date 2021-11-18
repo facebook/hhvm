@@ -57,7 +57,11 @@
 #ifdef __linux__
 void DisableFork() __attribute__((__weak__));
 void EnableForkLogging() __attribute__((__weak__));
+// GCC GCOV API
 extern "C" void __gcov_flush() __attribute__((__weak__));
+// LLVM/clang API. See llvm-project/compiler-rt/lib/profile/InstrProfiling.h
+extern "C" void __llvm_profile_write_file() __attribute__((__weak__));
+extern "C" void __llvm_profile_set_filename(const char* filename) __attribute__((__weak__));
 #endif
 
 namespace HPHP {
@@ -515,6 +519,11 @@ void HttpServer::ProfileFlush() {
   if (__gcov_flush) {
     Logger::Info("Flushing profile");
     __gcov_flush();
+  }
+  if (__llvm_profile_write_file) {
+    Logger::Info("Flushing profile");
+    __llvm_profile_write_file();
+    __llvm_profile_set_filename("/dev/null");
   }
   #endif
 }

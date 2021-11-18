@@ -349,7 +349,10 @@ void scheduleSerializeOptProf() {
 }
 
 #ifdef __linux__
+  // GCC GCOV API
   extern "C" void __gcov_reset() __attribute__((__weak__));
+  // LLVM/clang API. See llvm-project/compiler-rt/lib/profile/InstrProfiling.h
+  extern "C" void __llvm_profile_reset_counters() __attribute__((__weak__));
 #endif
 
 /*
@@ -496,6 +499,13 @@ void retranslateAll(bool skipSerialize) {
       Logger::Info("Calling __gcov_reset (retranslateAll finished)");
     }
     __gcov_reset();
+  }
+  if (__llvm_profile_reset_counters) {
+    if (serverMode) {
+      Logger::Info("Calling __llvm_profile_reset_counters (retranslateAll "
+                   "finished)");
+    }
+    __llvm_profile_reset_counters();
   }
 #endif
 

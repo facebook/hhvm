@@ -142,10 +142,13 @@ SSATmp* profiledArrayAccess(IRGS& env, SSATmp* arr, SSATmp* key, MOpMode mode,
   auto const cow_check = mode == MOpMode::Define || mode == MOpMode::Unset;
   assertx(is_dict || arr->isA(TKeyset));
 
-  // If the base and key are static, the access will likely get simplified away.
-  // Likewise, if the base is a non-darray PHP array, we can't optimize it.
-  if (arr->hasConstVal() && key->hasConstVal()) {
-    return generic(key, SizeHintData{});
+  // If the base and key are constants, the access will likely get
+  // simplified away. Empty arrays will likely get optimized away
+  // regardless of the key.
+  if (arr->hasConstVal()) {
+    if (arr->arrLikeVal()->empty() || key->hasConstVal()) {
+      return generic(key, SizeHintData{});
+    }
   }
 
   static const StaticString s_DictAccess{"DictAccess"};

@@ -2015,8 +2015,8 @@ void emitIdx(IRGS& env) {
 }
 
 void emitAKExists(IRGS& env) {
-  auto const arr = popC(env);
-  auto const origKey = popC(env);
+  auto const arr = topC(env);
+  auto const origKey = topC(env, BCSPRelOffset{ 1 });
   if (!origKey->type().isKnownDataType()) PUNT(AKExists-KeyNotKnown);
   auto const key = convertClassKey(env, origKey);
   if (key->isA(TFunc)) PUNT(AKExists_func_key);
@@ -2024,9 +2024,10 @@ void emitAKExists(IRGS& env) {
     PUNT(AKExists_unknown_array_or_obj_type);
   }
 
-  auto throwBadKey = [&] {
+  auto const throwBadKey = [&] {
     // TODO(T11019533): Fix the underlying issue with unreachable code rather
     // than papering over it by pushing an unused value here.
+    discard(env, 2);
     push(env, cns(env, false));
     decRef(env, arr);
     decRef(env, key);
@@ -2037,6 +2038,7 @@ void emitAKExists(IRGS& env) {
 
   if (arr->isA(TVec)) {
     if (key->isA(TStr)) {
+      discard(env, 2);
       push(env, cns(env, false));
       decRef(env, arr);
       decRef(env, key);
@@ -2051,6 +2053,7 @@ void emitAKExists(IRGS& env) {
         [&] { return cns(env, true); },
         [&] { return cns(env, false); }
       );
+      discard(env, 2);
       push(env, result);
       decRef(env, arr);
       return;
@@ -2062,9 +2065,18 @@ void emitAKExists(IRGS& env) {
     if (!key->type().subtypeOfAny(TInt, TStr)) {
       return throwBadKey();
     }
-    auto const op = arr->isA(TKeyset) ? AKExistsKeyset : AKExistsDict;
-    auto const val = gen(env, op, arr, key);
-    push(env, val);
+
+    auto const present = profiledArrayAccess(
+      env, arr, key, MOpMode::None,
+      [&] (SSATmp*, SSATmp*, SSATmp*) { return cns(env, true); },
+      [&] (SSATmp*) { return cns(env, false); },
+      [&] (SSATmp* key, SizeHintData) {
+        auto const op = arr->isA(TKeyset) ? AKExistsKeyset : AKExistsDict;
+        return gen(env, op, arr, key);
+      }
+    );
+    discard(env, 2);
+    push(env, present);
     decRef(env, arr);
     decRef(env, key);
     return;
@@ -2077,12 +2089,14 @@ void emitAKExists(IRGS& env) {
                           CollectionType::ImmVector)) {
     auto const val =
       gen(env, CheckRange, key, gen(env, CountCollection, arr));
+    discard(env, 2);
     push(env, val);
     decRef(env, arr);
     return;
   }
 
   auto const val = gen(env, AKExistsObj, arr, key);
+  discard(env, 2);
   push(env, val);
   decRef(env, arr);
   decRef(env, key);

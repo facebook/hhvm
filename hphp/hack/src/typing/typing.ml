@@ -809,7 +809,7 @@ let is_hack_collection env ty =
     ty
     (MakeType.const_collection Reason.Rnone (MakeType.mixed Reason.Rnone))
 
-let check_class_get env p def_pos cid mid ce e function_pointer =
+let check_class_get env p def_pos cid mid ce (_, _cid_pos, e) function_pointer =
   match e with
   | CIself when get_ce_abstract ce ->
     begin
@@ -829,12 +829,12 @@ let check_class_get env p def_pos cid mid ce e function_pointer =
              * implementation. *)
             (match Decl_provider.get_class (Env.get_ctx env) ce.ce_origin with
             | Some meth_cls when Ast_defs.is_c_trait (Cls.kind meth_cls) ->
-              Errors.self_abstract_call mid p def_pos
+              Errors.self_abstract_call mid _cid_pos p def_pos
             | _ -> ())
           | _ ->
             (* Ban self::some_abstract_method() in a class. This will
              *  always error. *)
-            Errors.self_abstract_call mid p def_pos
+            Errors.self_abstract_call mid _cid_pos p def_pos
         end
       | None -> ()
     end
@@ -6993,7 +6993,7 @@ and class_get_inner
             cid_
             class_;
           TVis.check_deprecated ~use_pos:p ~def_pos ce_deprecated;
-          check_class_get env p def_pos c mid ce cid_ is_function_pointer;
+          check_class_get env p def_pos c mid ce cid is_function_pointer;
           let (env, member_ty, et_enforced, tal) =
             match deref member_decl_ty with
             (* We special case Tfun here to allow passing in explicit tparams to localize_ft. *)

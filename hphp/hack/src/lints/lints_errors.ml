@@ -128,13 +128,9 @@ let is_always_false p lhs_class rhs_class =
     Lint_warning
     p
     (Printf.sprintf
-       "This `is` check is always `false`. The expression on the left is an instance of %s. It can never be an instance of %s because both %s and %s are classes and neither %s derives from %s nor %s derives from %s."
+       "This `is` check is always `false`. The expression on the left is an instance of %s. It can never be an instance of %s because there is no class that is both %s and %s."
        lhs_class
        rhs_class
-       lhs_class
-       rhs_class
-       rhs_class
-       lhs_class
        lhs_class
        rhs_class)
 
@@ -160,13 +156,9 @@ let as_always_fails p lhs_class rhs_class =
     Lint_warning
     p
     (Printf.sprintf
-       "This `as` assertion will always fail. The expression on the left is an instance of %s. It can never be an instance of %s because both %s and %s are classes and neither %s derives from %s nor %s derives from %s."
+       "This `as` assertion will always fail. The expression on the left is an instance of %s. It can never be an instance of %s because there is no class that is both %s and %s."
        lhs_class
        rhs_class
-       lhs_class
-       rhs_class
-       rhs_class
-       lhs_class
        lhs_class
        rhs_class)
 

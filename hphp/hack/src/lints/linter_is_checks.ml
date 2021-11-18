@@ -37,6 +37,7 @@ let trivial_check
       | (Some lhs_cls, Some _)
         when String.equal lhs_cn rhs_cn || Cls.has_ancestor lhs_cls rhs_cn ->
         always_subtype pos (strip_ns lhs_cn) (strip_ns rhs_cn)
+      (* Cheap test, should be subsumed by disjointness test below *)
       | (Some lhs_cls, Some rhs_cls)
         when let lhs_kind = Cls.kind lhs_cls in
              let rhs_kind = Cls.kind rhs_cls in
@@ -45,7 +46,10 @@ let trivial_check
              && (not (String.equal lhs_cn rhs_cn))
              && not (Cls.has_ancestor rhs_cls lhs_cn) ->
         never_subtype pos (strip_ns lhs_cn) (strip_ns rhs_cn)
-      | _ -> ()
+      | _ ->
+        let tenv = Tast_env.tast_env_as_typing_env env in
+        if Typing_utils.is_type_disjoint tenv lhs_ty rhs_ty then
+          never_subtype pos (strip_ns lhs_cn) (strip_ns rhs_cn)
     end
   | _ -> ()
 

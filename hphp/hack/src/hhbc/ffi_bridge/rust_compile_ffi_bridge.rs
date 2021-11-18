@@ -595,9 +595,13 @@ pub fn hackc_facts_to_json_cpp_ffi(
     facts: compile_ffi::FactsResult,
     source_text: &CxxString,
 ) -> String {
-    let facts = facts::Facts::from(facts.facts);
-    let text = source_text.as_bytes();
-    facts.to_json(text)
+    if facts.has_errors {
+        String::new()
+    } else {
+        let facts = facts::Facts::from(facts.facts);
+        let text = source_text.as_bytes();
+        facts.to_json(text)
+    }
 }
 
 pub fn hackc_decls_to_facts_cpp_ffi(

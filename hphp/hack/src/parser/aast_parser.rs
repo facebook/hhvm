@@ -30,7 +30,7 @@ use parser_core_types::{
     syntax_error::SyntaxError,
     syntax_tree::SyntaxTree,
 };
-use rust_aast_parser_types::{Env, Result as ParserResult};
+pub use rust_aast_parser_types::{Env, Result as ParserResult};
 use rust_parser_errors::parse_errors_with_text;
 use smart_constructors::NoState;
 use stack_limit::StackLimit;
@@ -58,7 +58,7 @@ impl<'src> AastParser {
     pub fn from_text(
         env: &Env,
         indexed_source_text: &'src IndexedSourceText<'src>,
-        stack_limit: Option<&'src StackLimit>,
+        stack_limit: Option<&StackLimit>,
     ) -> Result<ParserResult> {
         let ns = NamespaceEnv::empty(
             env.parser_options.po_auto_namespace_map.clone(),
@@ -72,7 +72,7 @@ impl<'src> AastParser {
         env: &Env,
         ns: RcOc<NamespaceEnv>,
         indexed_source_text: &'src IndexedSourceText<'src>,
-        stack_limit: Option<&'src StackLimit>,
+        stack_limit: Option<&StackLimit>,
     ) -> Result<ParserResult> {
         let arena = Bump::new();
         let (language, mode, tree) =
@@ -92,7 +92,7 @@ impl<'src> AastParser {
     pub fn from_tree<'arena>(
         env: &Env,
         indexed_source_text: &'src IndexedSourceText<'src>,
-        stack_limit: Option<&'src StackLimit>,
+        stack_limit: Option<&StackLimit>,
         arena: &'arena Bump,
         language: Language,
         mode: Option<Mode>,
@@ -119,7 +119,7 @@ impl<'src> AastParser {
         env: &Env,
         ns: RcOc<NamespaceEnv>,
         indexed_source_text: &'src IndexedSourceText<'src>,
-        stack_limit: Option<&'src StackLimit>,
+        stack_limit: Option<&StackLimit>,
         arena: &'arena Bump,
         language: Language,
         mode: Option<Mode>,
@@ -231,10 +231,10 @@ impl<'src> AastParser {
         arena: &'arena Bump,
         env: &Env,
         indexed_source_text: &'src IndexedSourceText<'src>,
-        stack_limit: Option<&'src StackLimit>,
+        stack_limit: Option<&StackLimit>,
     ) -> Result<(Language, Option<Mode>, PositionedSyntaxTree<'src, 'arena>)> {
         let source_text = indexed_source_text.source_text();
-        let (language, mode, parser_env) = Self::make_parser_env(env, source_text)?;
+        let (language, mode, parser_env) = Self::make_parser_env(env, source_text);
         let tree = Self::parse(arena, env, parser_env, source_text, mode, stack_limit)?;
         Ok((language, mode, tree))
     }
@@ -242,7 +242,7 @@ impl<'src> AastParser {
     pub fn make_parser_env<'arena>(
         env: &Env,
         source_text: &'src SourceText<'src>,
-    ) -> Result<(Language, Option<Mode>, ParserEnv)> {
+    ) -> (Language, Option<Mode>, ParserEnv) {
         let (language, mode) = parse_mode(source_text);
         let parser_env = ParserEnv {
             codegen: env.codegen,
@@ -261,7 +261,7 @@ impl<'src> AastParser {
                 .parser_options
                 .po_interpret_soft_types_as_like_types,
         };
-        Ok((language, mode, parser_env))
+        (language, mode, parser_env)
     }
 
     fn parse<'arena>(
@@ -270,7 +270,7 @@ impl<'src> AastParser {
         parser_env: ParserEnv,
         source_text: &'src SourceText<'src>,
         mode: Option<Mode>,
-        stack_limit: Option<&'src StackLimit>,
+        stack_limit: Option<&StackLimit>,
     ) -> Result<PositionedSyntaxTree<'src, 'arena>> {
         let quick_mode = match mode {
             None | Some(Mode::Mhhi) => !env.codegen,

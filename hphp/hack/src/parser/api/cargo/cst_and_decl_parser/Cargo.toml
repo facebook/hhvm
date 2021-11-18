@@ -11,6 +11,7 @@ doctest = false
 
 [dependencies]
 bumpalo = { version = "3.8", features = ["collections"] }
+direct_decl_parser = { path = "../direct_decl_parser" }
 direct_decl_smart_constructors = { path = "../../../../decl/direct_decl_smart_constructors" }
 oxidized_by_ref = { path = "../../../../oxidized_by_ref" }
 pair_smart_constructors = { path = "../../../cargo/pair_smart_constructors" }

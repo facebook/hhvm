@@ -549,6 +549,7 @@ name = "cst_and_decl_parser"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
+ "direct_decl_parser",
  "direct_decl_smart_constructors",
  "oxidized_by_ref",
  "pair_smart_constructors",
@@ -3182,6 +3183,7 @@ dependencies = [
 name = "rust_decl_ffi"
 version = "0.0.0"
 dependencies = [
+ "ast_and_decl_parser",
  "bumpalo",
  "direct_decl_parser",
  "hh_hash",
@@ -3191,6 +3193,7 @@ dependencies = [
  "ocamlrep_ocamlpool",
  "oxidized",
  "oxidized_by_ref",
+ "parser_core_types",
  "stack_limit",
 ]
 

@@ -115,6 +115,12 @@ external rust_from_text_ffi :
   (Rust_aast_parser_types.result, Rust_aast_parser_types.error) result
   = "from_text"
 
+external parse_ast_and_decls_ffi :
+  Rust_aast_parser_types.env ->
+  SourceText.t ->
+  (Rust_aast_parser_types.result, Rust_aast_parser_types.error) result
+  * Direct_decl_parser.parsed_file_with_hashes = "hh_parse_ast_and_decls_ffi"
+
 let process_syntax_errors
     (env : env)
     (source_text : SourceText.t)
@@ -125,29 +131,43 @@ let process_syntax_errors
   in
   List.iter ~f:report_error errors
 
-let from_text_rust (env : env) (source_text : SourceText.t) :
+let make_rust_env (env : env) : Rust_aast_parser_types.env =
+  Rust_aast_parser_types.
+    {
+      codegen = env.codegen;
+      elaborate_namespaces = env.elaborate_namespaces;
+      php5_compat_mode = env.php5_compat_mode;
+      include_line_comments = env.include_line_comments;
+      keep_errors = env.keep_errors;
+      quick_mode = env.quick_mode;
+      show_all_errors = env.show_all_errors;
+      fail_open = env.fail_open;
+      is_systemlib = env.is_systemlib;
+      parser_options = env.parser_options;
+    }
+
+let unwrap_rust_parser_result
+    (rust_result :
+      (Rust_aast_parser_types.result, Rust_aast_parser_types.error) result) :
     Rust_aast_parser_types.result =
-  let rust_env =
-    Rust_aast_parser_types.
-      {
-        codegen = env.codegen;
-        elaborate_namespaces = env.elaborate_namespaces;
-        php5_compat_mode = env.php5_compat_mode;
-        include_line_comments = env.include_line_comments;
-        keep_errors = env.keep_errors;
-        quick_mode = env.quick_mode;
-        show_all_errors = env.show_all_errors;
-        fail_open = env.fail_open;
-        is_systemlib = env.is_systemlib;
-        parser_options = env.parser_options;
-      }
-  in
-  match rust_from_text_ffi rust_env source_text with
+  match rust_result with
   | Ok r -> r
   | Error Rust_aast_parser_types.NotAHackFile -> failwith "Not a Hack file"
   | Error (Rust_aast_parser_types.ParserFatal (e, p)) ->
     raise @@ SyntaxError.ParserFatal (e, p)
   | Error (Rust_aast_parser_types.Other msg) -> failwith msg
+
+let from_text_rust (env : env) (source_text : SourceText.t) :
+    Rust_aast_parser_types.result =
+  let rust_env = make_rust_env env in
+  unwrap_rust_parser_result (rust_from_text_ffi rust_env source_text)
+
+let ast_and_decls_from_text_rust (env : env) (source_text : SourceText.t) :
+    Rust_aast_parser_types.result * Direct_decl_parser.parsed_file_with_hashes =
+  let rust_env = make_rust_env env in
+  let (ast_result, decls) = parse_ast_and_decls_ffi rust_env source_text in
+  let ast_result = unwrap_rust_parser_result ast_result in
+  (ast_result, decls)
 
 let process_lowerer_result
     (env : env) (source_text : SourceText.t) (r : Rust_aast_parser_types.result)
@@ -176,6 +196,12 @@ let process_lowerer_result
 
 let from_text (env : env) (source_text : SourceText.t) : aast_result =
   process_lowerer_result env source_text (from_text_rust env source_text)
+
+let ast_and_decls_from_text (env : env) (source_text : SourceText.t) :
+    aast_result * Direct_decl_parser.parsed_file_with_hashes =
+  let (ast_result, decls) = ast_and_decls_from_text_rust env source_text in
+  let ast_result = process_lowerer_result env source_text ast_result in
+  (ast_result, decls)
 
 let from_file (env : env) : aast_result =
   let source_text = SourceText.from_file env.file in
@@ -223,6 +249,12 @@ let legacy (x : aast_result) : Parser_return.t =
 let from_source_text_with_legacy
     (env : env) (source_text : Full_fidelity_source_text.t) : Parser_return.t =
   legacy @@ from_text env source_text
+
+let ast_and_decls_from_source_text_with_legacy
+    (env : env) (source_text : Full_fidelity_source_text.t) :
+    Parser_return.t * Direct_decl_parser.parsed_file_with_hashes =
+  let (ast_result, decls) = ast_and_decls_from_text env source_text in
+  (legacy ast_result, decls)
 
 let from_text_with_legacy (env : env) (content : string) : Parser_return.t =
   let source_text = SourceText.make env.file content in
@@ -292,3 +324,49 @@ let defensive_from_file ?quick ?show_all_errors popt fn =
     | _ -> ""
   in
   defensive_program ?quick ?show_all_errors popt fn content
+
+let ast_and_decls_from_file
+    ?(quick = false) ?(show_all_errors = false) parser_options fn =
+  let content =
+    try Sys_utils.cat (Relative_path.to_absolute fn) with
+    | _ -> ""
+  in
+  try
+    let source = Full_fidelity_source_text.make fn content in
+    let env =
+      make_env
+        ~fail_open:false
+        ~quick_mode:quick
+        ~show_all_errors
+        ~elaborate_namespaces:true
+        ~keep_errors:true
+        ~parser_options
+        ~include_line_comments:false
+        fn
+    in
+    ast_and_decls_from_source_text_with_legacy env source
+  with
+  | e ->
+    (* If we fail to lower, try to just make a source text and get the file mode *)
+    (* If even THAT fails, we just have to give up and return an empty php file*)
+    let mode =
+      try
+        let source = Full_fidelity_source_text.make fn content in
+        Full_fidelity_parser.parse_mode source
+      with
+      | _ -> None
+    in
+    let err = Exn.to_string e in
+    let fn = Relative_path.suffix fn in
+    (* If we've already found a parsing error, it's okay for lowering to fail *)
+    if not (Errors.currently_has_errors ()) then
+      Hh_logger.log "Warning, lowering failed for %s\n  - error: %s\n" fn err;
+
+    ( {
+        Parser_return.file_mode = mode;
+        Parser_return.comments = [];
+        Parser_return.ast = [];
+        Parser_return.content;
+      },
+      Direct_decl_parser.
+        { pfh_mode = mode; pfh_hash = Int64.zero; pfh_decls = [] } )

@@ -167,3 +167,15 @@
   procs_procs
   shallow_decl_defs
   typechecker_options))
+
+(library
+ (name ast_and_decl_service)
+ (modules ast_and_decl_service)
+ (preprocess
+  (pps ppx_deriving.std))
+ (libraries
+  decl
+  parser
+  procs_procs
+  rust_decl_ffi
+  utils_core))

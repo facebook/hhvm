@@ -38,6 +38,7 @@ let parsing
     (env : ServerEnv.env)
     ~(get_next : Relative_path.t list Bucket.next)
     ?(count : int option)
+    ?(always_cache_asts : bool = false)
     (t : float)
     ~(trace : bool)
     ~(cache_decls : bool)
@@ -54,15 +55,26 @@ let parsing
   let ctx = Provider_utils.ctx_from_server_env env in
   let (fast, errorl, _failed_parsing) =
     if genv.local_config.ServerLocalConfig.use_direct_decl_parser then
-      ( Direct_decl_service.go
+      if always_cache_asts then
+        Ast_and_decl_service.go
           ctx
+          ~quick
+          ~show_all_errors:true
           genv.workers
-          ~ide_files:Relative_path.Set.empty
           ~get_next
           ~trace
-          ~cache_decls,
-        Errors.empty,
-        Relative_path.Set.empty )
+          ~cache_decls
+          env.popt
+      else
+        ( Direct_decl_service.go
+            ctx
+            genv.workers
+            ~ide_files:Relative_path.Set.empty
+            ~get_next
+            ~trace
+            ~cache_decls,
+          Errors.empty,
+          Relative_path.Set.empty )
     else
       Parsing_service.go_DEPRECATED
         ctx

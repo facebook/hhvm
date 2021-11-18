@@ -574,6 +574,7 @@
   serverRemoteInit
   serverRpc)
  (libraries
+  ast_and_decl_service
   build
   ci_util
   cgroup

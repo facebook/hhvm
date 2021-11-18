@@ -16,6 +16,7 @@ use oxidized_by_ref::{
     direct_decl_parser::{Decl, Decls, ParsedFile},
     file_info,
 };
+use parser_core_types::indexed_source_text::IndexedSourceText;
 
 // NB: Must keep in sync with OCaml type `Direct_decl_parser.parsed_file_with_hashes`
 #[derive(ocamlrep_derive::ToOcamlRep)]
@@ -60,6 +61,29 @@ ocaml_ffi_with_arena! {
     }
 }
 
+#[no_mangle]
+unsafe extern "C" fn hh_parse_ast_and_decls_ffi(env: usize, source_text: usize) -> usize {
+    fn inner(env: usize, source_text: usize) -> usize {
+        use ast_and_decl_parser::Env;
+        use ocamlrep::FromOcamlRep;
+        use ocamlrep_ocamlpool::to_ocaml;
+        use parser_core_types::source_text::SourceText;
+
+        // SAFETY: We can't call into OCaml while these values created via
+        // `from_ocaml` exist.
+        let env = unsafe { Env::from_ocaml(env).unwrap() };
+        let source_text = unsafe { SourceText::from_ocaml(source_text).unwrap() };
+        let indexed_source_text = IndexedSourceText::new(source_text);
+
+        let arena = &Bump::new();
+        let (ast_result, decls) = parse_ast_and_decls(arena, &env, &indexed_source_text);
+        let decls = hash_decls(decls);
+        // SAFETY: Requires no concurrent interaction with the OCaml runtime
+        unsafe { to_ocaml(&(ast_result, decls)) }
+    }
+    ocamlrep_ocamlpool::catch_unwind(|| inner(env, source_text))
+}
+
 fn parse_decls<'a>(
     arena: &'a Bump,
     opts: &'a DeclParserOptions<'a>,
@@ -75,6 +99,20 @@ fn parse_decls<'a>(
             failure.max_stack_size_tried / stack_limit::KI
         );
     })
+}
+
+fn parse_ast_and_decls<'a>(
+    arena: &'a Bump,
+    env: &'a ast_and_decl_parser::Env,
+    indexed_source_text: &'a IndexedSourceText<'a>,
+) -> (
+    ast_and_decl_parser::AastResult<ast_and_decl_parser::ParserResult>,
+    ParsedFile<'a>,
+) {
+    stack_limit::with_elastic_stack(|stack_limit| {
+        ast_and_decl_parser::from_text(&env, &indexed_source_text, arena, Some(stack_limit))
+    })
+    .expect("Expression recursion limit reached")
 }
 
 fn hash_decls<'a>(parsed_file: ParsedFile<'a>) -> ParsedFileWithHashes<'a> {

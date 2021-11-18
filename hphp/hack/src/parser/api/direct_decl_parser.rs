@@ -67,7 +67,7 @@ pub fn parse_decls_without_reference_text<'a, 'text>(
     filename: RelativePath,
     text: &'text [u8],
     arena: &'a Bump,
-    stack_limit: Option<&'a StackLimit>,
+    stack_limit: Option<&StackLimit>,
 ) -> ParsedFile<'a> {
     let text = SourceText::make(RcOc::new(filename), text);
     let (_, errors, state, mode) = parse_script_with_text_allocator(

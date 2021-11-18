@@ -82,6 +82,8 @@ TRACE_SET_MOD(hhir);
 #define DTypeCnsClsName HasDest
 #define DVerifyParamFail HasDest
 #define DPropLval      HasDest
+#define DElemLval      HasDest
+#define DElemLvalPos   HasDest
 
 namespace {
 template<Opcode op, uint64_t flags>
@@ -156,6 +158,8 @@ OpInfo g_opInfo[] = {
 #undef DTypeCnsClsName
 #undef DVerifyParamFail
 #undef DPropLval
+#undef DElemLval
+#undef DElemLvalPos
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -305,7 +309,6 @@ bool opcodeMayRaise(Opcode opc) {
   case ElemDictD:
   case ElemDictU:
   case ElemDX:
-  case ElemKeysetU:
   case ElemUX:
   case ElemVecD:
   case ElemVecU:
@@ -506,6 +509,7 @@ bool opcodeMayRaise(Opcode opc) {
   case CheckLoc:
   case CheckMBase:
   case CheckMissingKeyInArrLike:
+  case CheckMROProp:
   case CheckNonNull:
   case CheckNullptr:
   case CheckRange:
@@ -761,7 +765,6 @@ bool opcodeMayRaise(Opcode opc) {
   case LdMonotypeDictKey:
   case LdMonotypeDictVal:
   case LdMonotypeVecElem:
-  case LdMROProp:
   case LdStructDictElem:
   case LdVecElem:
   case LdVecElemAddr:

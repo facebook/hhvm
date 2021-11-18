@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/iter.h"
 #include "hphp/runtime/vm/srckey.h"
 
+#include "hphp/runtime/vm/jit/alias-class.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
@@ -637,6 +638,32 @@ struct RDSHandleData : IRExtraData {
   }
 
   rds::Handle handle;
+};
+
+struct RDSHandleAndType : RDSHandleData {
+  RDSHandleAndType(rds::Handle handle, Type type)
+    : RDSHandleData{handle}, type{type} { assertx(type <= TCell); }
+
+  std::string show() const {
+    return folly::sformat("{},{}", handle, type);
+  }
+  bool equals(const RDSHandleAndType& o) const {
+    return handle == o.handle && type == o.type;
+  }
+  size_t hash() const {
+    return folly::hash::hash_combine(
+      RDSHandleData::hash(),
+      type.hash()
+    );
+  }
+  size_t stableHash() const {
+    return folly::hash::hash_combine(
+      RDSHandleData::stableHash(),
+      type.stableHash()
+    );
+  }
+
+  Type type;
 };
 
 struct TVInRDSHandleData : RDSHandleData {
@@ -2632,6 +2659,18 @@ struct ConvNoticeData : IRExtraData {
   union { const StringData* reason; int64_t reasonIntVal; };
 };
 
+struct AliasClassData : IRExtraData {
+  explicit AliasClassData(AliasClass acls) : acls{acls} {}
+
+  std::string show() const { return jit::show(acls); }
+
+  bool equals(const AliasClassData& o) const {
+    return acls == o.acls;
+  }
+
+  AliasClass acls;
+};
+
 //////////////////////////////////////////////////////////////////////
 
 #define X(op, data)                                                   \
@@ -2776,11 +2815,11 @@ X(ProfileType,                  RDSHandleData);
 X(ProfileCall,                  ProfileCallTargetData);
 X(ProfileMethod,                ProfileCallTargetData);
 X(ProfileIsTypeStruct,          RDSHandleData);
-X(LdRDSAddr,                    RDSHandleData);
 X(CheckRDSInitialized,          RDSHandleData);
 X(MarkRDSInitialized,           RDSHandleData);
 X(MarkRDSAccess,                RDSHandleData);
-X(LdInitRDSAddr,                RDSHandleData);
+X(LdRDSAddr,                    RDSHandleAndType);
+X(LdInitRDSAddr,                RDSHandleAndType);
 X(LdTVFromRDS,                  TVInRDSHandleData);
 X(StTVInRDS,                    TVInRDSHandleData);
 X(BaseG,                        MOpModeData);
@@ -2863,6 +2902,7 @@ X(CheckFuncNeedsCoverage,       FuncData);
 X(RecordFuncCall,               FuncData);
 X(LdClsPropAddrOrNull,          ReadonlyData);
 X(LdClsPropAddrOrRaise,         ReadonlyData);
+X(LdMBase,                      AliasClassData);
 X(ThrowOrWarnMustBeEnclosedInReadonly,
                                 ClassData);
 X(ThrowOrWarnMustBeMutableException,

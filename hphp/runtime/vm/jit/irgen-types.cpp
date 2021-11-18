@@ -642,17 +642,18 @@ SSATmp* resolveTypeStructureAndCacheInRDS(
   bool typeStructureCouldBeNonStatic
 ) {
   if (typeStructureCouldBeNonStatic) return resolveTypeStruct();
-  auto const handle = RDSHandleData { rds::alloc<TypedValue>().handle() };
-  auto const addr = gen(env, LdRDSAddr, handle, TPtrToOther);
+  auto const handle = rds::alloc<TypedValue>().handle();
+  auto const data = RDSHandleAndType { handle, TDict };
+  auto const addr = gen(env, LdRDSAddr, data, TPtrToOther);
   ifThen(
     env,
     [&] (Block* taken) {
-      gen(env, CheckRDSInitialized, taken, handle);
+      gen(env, CheckRDSInitialized, taken, RDSHandleData { handle });
     },
     [&] {
       hint(env, Block::Hint::Unlikely);
       gen(env, StMem, addr, resolveTypeStruct());
-      gen(env, MarkRDSInitialized, handle);
+      gen(env, MarkRDSInitialized, RDSHandleData { handle });
     }
   );
   return gen(env, LdMem, TDict, addr);

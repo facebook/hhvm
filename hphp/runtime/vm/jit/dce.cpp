@@ -408,7 +408,6 @@ bool canDCE(IRInstruction* inst) {
   case LdClsPropAddrOrRaise:
   case LdInitRDSAddr:
   case LdInitPropAddr:
-  case LdMROProp:
   case LdObjMethodD:
   case LdObjMethodS:
   case LdObjInvoke:
@@ -587,7 +586,6 @@ bool canDCE(IRInstruction* inst) {
   case ElemDictD:
   case ElemDictU:
   case ElemDictK:
-  case ElemKeysetU:
   case ElemKeysetK:
   case ElemDX:
   case ElemUX:
@@ -662,6 +660,7 @@ bool canDCE(IRInstruction* inst) {
   case ThrowOrWarnMustBeValueTypeException:
   case StMBase:
   case StMROProp:
+  case CheckMROProp:
   case FinishMemberOp:
   case BeginInlining:
   case EndInlining:

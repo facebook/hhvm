@@ -295,6 +295,7 @@ bool refinable_load_eligible(const IRInstruction& inst) {
     case LdLoc:
     case LdStk:
     case LdMem:
+    case LdMBase:
     case LdIterPos:
     case LdIterEnd:
       assertx(inst.hasTypeParam());
@@ -526,6 +527,9 @@ Flags handle_general_effects(Local& env,
 
       case CheckInitMem:
         return handleCheck(TInitCell);
+
+      case CheckMROProp:
+        return handleCheck(Type::cns(true));
 
       case CheckIter: {
         assertx(m.inout == AEmpty);
@@ -1253,8 +1257,10 @@ void save_taken_state(Global& genv, const IRInstruction& inst,
 
   auto& outState = genv.blockInfo[inst.block()].stateOutTaken = state;
 
-  // CheckInitMem's pointee is TUninit on the taken branch, so update outState.
-  if (inst.is(CheckInitMem)) {
+  // CheckInitMem's pointee is TUninit on the taken branch, so update
+  // outState. Like, CheckMROProp's taken branch means the bit is set
+  // to false.
+  if (inst.is(CheckInitMem, CheckMROProp)) {
     assertx(!inst.maySyncVMRegsWithSources());
     auto const effects = memory_effects(inst);
     auto const ge = boost::get<GeneralEffects>(effects);
@@ -1262,12 +1268,13 @@ void save_taken_state(Global& genv, const IRInstruction& inst,
     assertx(ge.backtrace == AEmpty);
     assertx(ge.coeffect == AEmpty);
     auto const meta = genv.ainfo.find(canonicalize(ge.loads));
+    auto const newType = inst.is(CheckInitMem) ? TUninit : Type::cns(false);
     if (auto const tloc = find_tracked(outState, meta)) {
-      tloc->knownType &= TUninit;
+      tloc->knownType &= newType;
     } else if (meta) {
       auto tloc = &outState.tracked[meta->index];
       tloc->knownValue = nullptr;
-      tloc->knownType = TUninit;
+      tloc->knownType = newType;
       outState.avail.set(meta->index);
     }
   }

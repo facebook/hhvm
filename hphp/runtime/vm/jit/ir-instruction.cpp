@@ -341,6 +341,48 @@ Type bespokeElemReturn(const IRInstruction* inst, bool present) {
   return knownPresent ? resultType.first : (resultType.first | TUninit);
 }
 
+Type elemLval(const IRInstruction* inst) {
+  assertx(inst->is(ElemVecD, ElemVecU, ElemDictD, ElemDictU, BespokeElem));
+  assertx(inst->typeParam() <= TArrLike);
+
+  auto const elem = arrLikeElemType(
+    inst->typeParam(),
+    inst->src(1)->type(),
+    inst->ctx()
+  );
+  auto lval = (elem.first <= TBottom) ? TBottom : TLvalToElem;
+
+  if (!elem.second) {
+    if (inst->is(ElemVecU, ElemDictU) ||
+        (inst->is(BespokeElem) && !inst->src(2)->boolVal())) {
+      lval |= TLvalToConst;
+    }
+  }
+  return lval;
+}
+
+Type elemLvalPos(const IRInstruction* inst) {
+  assertx(inst->is(ElemDictK, ElemKeysetK, LdVecElemAddr));
+
+  auto const elem = [&] {
+    if (inst->is(ElemDictK, ElemKeysetK)) {
+      return arrLikePosType(
+        inst->src(0)->type(),
+        inst->src(2)->type(),
+        false,
+        inst->ctx()
+      );
+    }
+    return arrLikeElemType(
+      inst->src(0)->type(),
+      inst->src(1)->type(),
+      inst->ctx()
+    ).first;
+  }();
+  if (elem <= TBottom) return TBottom;
+  return TLvalToElem;
+}
+
 Type bespokePosReturn(const IRInstruction* inst, bool isKey) {
   assertx(inst->src(0)->type() <= TArrLike);
 
@@ -389,12 +431,7 @@ Type keysetElemReturn(const IRInstruction* inst) {
 
 Type setElemReturn(const IRInstruction* inst) {
   assertx(inst->op() == SetElem);
-  auto const baseType = [&] {
-    assertx(inst->hasTypeParam());
-    auto const base = inst->src(0);
-    if (base->isA(TLval)) return inst->typeParam();
-    return base->type();
-  }();
+  auto const baseType = inst->typeParam();
 
   // If the base is a Str, the result will always be a StaticStr (or
   // an exception). If the base might be a str, the result wil be
@@ -490,7 +527,8 @@ Type structDictReturn(const IRInstruction* inst) {
 }
 
 Type arrLikeSetReturn(const IRInstruction* inst) {
-  assertx(inst->is(BespokeSet, StructDictSet));
+  assertx(inst->is(BespokeSet, StructDictSet,
+                   VecSet, DictSet));
   auto const arr = inst->src(0)->type();
   auto const key = inst->src(1)->type();
   auto const val = inst->src(2)->type();
@@ -675,6 +713,8 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #define DTypeCnsClsName return typeCnsClsName(inst);
 #define DVerifyParamFail return verifyParamFailReturn(inst);
 #define DPropLval       return propLval(inst);
+#define DElemLval       return elemLval(inst);
+#define DElemLvalPos    return elemLvalPos(inst);
 
 #define O(name, dstinfo, srcinfo, flags) case name: dstinfo not_reached();
 
@@ -720,6 +760,8 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #undef DTypeCnsClsName
 #undef DVerifyParamFail
 #undef DPropLval
+#undef DElemLval
+#undef DElemLvalPos
 }
 
 bool IRInstruction::maySyncVMRegsWithSources() const {

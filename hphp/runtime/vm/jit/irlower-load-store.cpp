@@ -321,9 +321,12 @@ void cgStMBase(IRLS& env, const IRInstruction* inst) {
   vmain(env) << store{srcLoc.reg(1), rvmtl()[off + sizeof(intptr_t)]};
 }
 
-void cgLdMROProp(IRLS& env, const IRInstruction* inst) {
+void cgCheckMROProp(IRLS& env, const IRInstruction* inst) {
   auto const off = rds::kVmMInstrStateOff + offsetof(MInstrState, roProp);
-  vmain(env) << loadb{rvmtl()[off], dstLoc(env, inst, 0).reg()};
+  auto& v = vmain(env);
+  auto const sf = v.makeReg();
+  v << cmpbim{0, rvmtl()[off], sf};
+  v << jcc{CC_Z, sf, {label(env, inst->next()), label(env, inst->taken())}};
 }
 
 void cgStMROProp(IRLS& env, const IRInstruction* inst) {

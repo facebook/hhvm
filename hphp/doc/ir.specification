@@ -229,11 +229,6 @@ Instruction set
   This is similar to a CheckMBase except that it does not imply a runtime check
   and cannot cause control flow.
 
-  These instructions convert either a Cell or a Str to a primitive type (Bool,
-  Int, Dbl) and return the resulting value. They may throw an exception upon
-  failed type coercion. They are encoded along with callee Func, fn, and the
-  integer position of the argument, argNum, being coerced.
-
 | CheckInit, ND, S(Cell), B
 
   If S0's type is Uninit, branch to block B.
@@ -2691,9 +2686,9 @@ To string conversions:
   instruction other than StMBase or InterpOne (when interpreting a member
   instruction) to modify the member base register.
 
-| LdMROProp, D(Bool), NA, NF
+| CheckMROProp, ND, NA, B
 
-  Load the current value of the roProp field of MInstrState
+  If the roProp field of MInstrState is false, branch.
 
 | StMROProp, ND, S(Bool), NF
 
@@ -2832,31 +2827,26 @@ fields of that struct for holding intermediate values.
   If S1 may be present, branches to block B. If we branch here, the key may or
   may not be present.
 
-| ElemVecD, D(LvalToElem), S(Lval) S(Int), NF
+| ElemVecD, DElemLval, S(Lval) S(Int), NF
 
-| ElemVecU, D(LvalToElemOrConst), S(Lval) S(Int), NF
+| ElemVecU, DElemLval, S(Lval) S(Int), NF
 
   Similar to ElemX, but the base S0 is a vec and the key S1 is an int. ElemVecD
   is for Define member instrs and ElemVecU is for Unset. (Other variations can
   be implemented without special IR instructions).
 
-| ElemDictD, D(LvalToElem), S(Lval) S(Int,Str), NF
+| ElemDictD, DElemLval, S(Lval) S(Int,Str), NF
 
-| ElemDictU, D(LvalToElemOrConst), S(Lval) S(Int,Str), NF
+| ElemDictU, DElemLval, S(Lval) S(Int,Str), NF
 
   Similar to ElemDX and ElemUX, but specialized for when the base S0 is a
   dict and the key S1 is an int/str.
 
-| ElemDictK, D(LvalToElem), S(Dict) S(Int,Str) S(Int), NF
+| ElemDictK, DElemLvalPos, S(Dict) S(Int,Str) S(Int), NF
 
   Returns an lval to the element of dict S0 at the known position S2 in S1.
 
-| ElemKeysetU, D(LvalToElemOrConst), S(Lval) S(Int,Str), NF
-
-  Similar to ElemUX, but specialized for when the base S0 is a keyset and the
-  key S1 is an int/str. Keysets do not support the define syntax.
-
-| ElemKeysetK, D(LvalToElem), S(Keyset) S(Int,Str) S(Int), NF
+| ElemKeysetK, DElemLvalPos, S(Keyset) S(Int,Str) S(Int), NF
 
   Returns an lval to the element of keyset S0 at the known position S2 in S1.
 
@@ -2995,12 +2985,12 @@ fields of that struct for holding intermediate values.
 
   Initialize the memoization instance slots for object S0 of the given class.
 
-| VecSet, DModified(0), S(Vec) S(Int) S(InitCell), PRc|CRc
+| VecSet, DArrLikeSet, S(Vec) S(Int) S(InitCell), PRc|CRc
 
   Set element with key S1 in S0 to S2. The dest will be a new Vec that should
   replace S0; this op produces a ref on the test and consumes one on S0.
 
-| DictSet, DModified(0), S(Dict) S(Int,Str) S(InitCell), PRc|CRc
+| DictSet, DArrLikeSet, S(Dict) S(Int,Str) S(InitCell), PRc|CRc
 
   Set element with key S1 in S0 to S2. The dest will be a new Dict that should
   replace S0.
@@ -3015,7 +3005,7 @@ fields of that struct for holding intermediate values.
   Get element with key S1 in the array S0, which may have an arbitrary layout.
   This op throws if the key is not in the array.
 
-| BespokeElem, D(LvalToElem), S(Lval) S(Int,Str) C(Bool), LA
+| BespokeElem, DElemLval, S(Lval) S(Int,Str) C(Bool), LA
 
   Get a half-lval to an element of type T with key S1 in the array S0, which
   may have an arbitrary layout. The op will copy or escalate the S0 as needed,
@@ -3289,7 +3279,7 @@ fields of that struct for holding intermediate values.
   Checks that the index in S1 is within the bounds of the packed array or
   vector array in S0. Branches to B if the index is out of bounds.
 
-| LdVecElemAddr, D(LvalToElem), S(Vec) S(Int), NF
+| LdVecElemAddr, DElemLvalPos, S(Vec) S(Int), NF
 
   Loads the address of the element at index S1 of the vec array in S0. This
   instruction assumes the array actually contains an element at that offset

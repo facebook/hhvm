@@ -932,6 +932,12 @@ Block* create_catch_block(
 
 //////////////////////////////////////////////////////////////////////
 
+inline SSATmp* ldMBase(IRGS& env) {
+  return gen(env, LdMBase, TLval, AliasClassData{ AUnknownTV });
+}
+
+//////////////////////////////////////////////////////////////////////
+
 // If the current function doesn't have a $this, emit a fatal. Otherwise, load
 // $this and return it.
 SSATmp* checkAndLoadThis(IRGS& env);

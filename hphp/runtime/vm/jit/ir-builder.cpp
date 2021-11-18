@@ -28,6 +28,7 @@
 #include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/guard-constraint.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
+#include "hphp/runtime/vm/jit/memory-effects.h"
 #include "hphp/runtime/vm/jit/mutation.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/punt.h"
@@ -62,13 +63,6 @@ SSATmp* fwdGuardSource(IRInstruction* inst) {
   return nullptr;
 }
 
-bool isMBaseLoad(const IRInstruction* inst) {
-  if (!inst->is(LdMem)) return false;
-  auto src = inst->src(0)->inst();
-  while (src->isPassthrough()) src = src->getPassthroughValue()->inst();
-  return src->is(LdMBase);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 }
@@ -93,6 +87,11 @@ void IRBuilder::enableConstrainGuards() {
 
 bool IRBuilder::shouldConstrainGuards() const {
   return m_constrainGuards;
+}
+
+bool IRBuilder::isMBaseLoad(const IRInstruction* inst) const {
+  if (!inst->is(LdMem)) return false;
+  return m_state.isMBase(inst->src(0)) == TriBool::Yes;
 }
 
 void IRBuilder::appendInstruction(IRInstruction* inst) {
@@ -176,20 +175,33 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
 ///////////////////////////////////////////////////////////////////////////////
 
 SSATmp* IRBuilder::preOptimizeCheckLocation(IRInstruction* inst, Location l) {
+  auto const oldType = typeOf(l, DataTypeGeneric);
   if (auto const prevValue = valueOf(l, DataTypeGeneric)) {
-    gen(CheckType, inst->typeParam(), inst->taken(), prevValue);
-    inst->convertToNop();
-    return nullptr;
+    auto const v = [&] {
+      assertx(oldType <= prevValue->type());
+      if (oldType < prevValue->type()) {
+        return gen(AssertType, oldType, prevValue);
+      }
+      return prevValue;
+    }();
+    gen(CheckType, inst->typeParam(), inst->taken(), v);
+    return fwdGuardSource(inst);
   }
 
-  auto const oldType = typeOf(l, DataTypeGeneric);
-  auto const newType = oldType & inst->typeParam();
+  if (!oldType.maybe(inst->typeParam()) ||
+      inst->next() == inst->taken() ||
+      (inst->next() && inst->next()->isUnreachable())) {
+    gen(Jmp, inst->taken());
+    return fwdGuardSource(inst);
+  }
 
+  auto const newType = oldType & inst->typeParam();
   if (oldType <= newType) {
     // The type of the src is the same or more refined than type, so the guard
     // is unnecessary.
     return fwdGuardSource(inst);
   }
+
   return nullptr;
 }
 
@@ -243,6 +255,8 @@ SSATmp* IRBuilder::preOptimizeAssertTypeOp(IRInstruction* inst,
       return m_unit.cns(TBottom);
     }
     if (oldType <= newType) return fwdGuardSource(inst);
+    inst->setTypeParam(newType);
+    retypeDests(inst, &m_unit);
   }
 
   return nullptr;
@@ -250,16 +264,19 @@ SSATmp* IRBuilder::preOptimizeAssertTypeOp(IRInstruction* inst,
 
 SSATmp* IRBuilder::preOptimizeAssertLocation(IRInstruction* inst,
                                              Location l) {
+  auto const prevType = typeOf(l, DataTypeGeneric);
   if (auto const prevValue = valueOf(l, DataTypeGeneric)) {
-    gen(AssertType, inst->typeParam(), prevValue);
+    auto toAssert = inst->typeParam();
+    if (!shouldConstrainGuards()) toAssert &= prevType;
+    gen(AssertType, toAssert, prevValue);
     inst->convertToNop();
     return nullptr;
   }
 
   return preOptimizeAssertTypeOp(
     inst,
-    typeOf(l, DataTypeGeneric),
-    valueOf(l, DataTypeGeneric),
+    prevType,
+    nullptr,
     nullptr
   );
 }
@@ -277,26 +294,30 @@ SSATmp* IRBuilder::preOptimizeAssertStk(IRInstruction* inst) {
   return preOptimizeAssertLocation(inst, stk(inst->extra<AssertStk>()->offset));
 }
 
-SSATmp* IRBuilder::preOptimizeLdLocation(IRInstruction* inst, Location l) {
-  if (auto tmp = valueOf(l, DataTypeGeneric)) return tmp;
+SSATmp* IRBuilder::preOptimizeAssertMBase(IRInstruction* inst) {
+  return preOptimizeAssertLocation(inst, Location::MBase{});
+}
 
-  auto const type = typeOf(l, DataTypeGeneric);
+SSATmp* IRBuilder::preOptimizeLdLocation(IRInstruction* inst, Location l) {
+  auto const type = typeOf(l, DataTypeGeneric) & inst->typeParam();
 
   // The types may not be compatible in the presence of unreachable code.
   // Don't try to optimize the code in this case, and just let dead code
   // elimination take care of it later.
-  if (!type.maybe(inst->typeParam())) {
+  if (type <= TBottom) {
     inst->setTypeParam(TBottom);
+    retypeDests(inst, &m_unit);
     return nullptr;
   }
 
-  if (l.tag() == LTag::Local) {
-    // If FrameStateMgr's type for a local isn't as good as the type param,
-    // we're missing information in the IR.
-    assertx(inst->typeParam() >= type);
+  if (auto const tmp = valueOf(l, DataTypeGeneric)) {
+    assertx(type <= tmp->type());
+    if (type < tmp->type()) return gen(AssertType, type, tmp);
+    return tmp;
   }
-  inst->setTypeParam(std::min(type, inst->typeParam()));
 
+  inst->setTypeParam(type);
+  retypeDests(inst, &m_unit);
   return nullptr;
 }
 
@@ -308,17 +329,271 @@ SSATmp* IRBuilder::preOptimizeLdStk(IRInstruction* inst) {
   return preOptimizeLdLocation(inst, stk(inst->extra<LdStk>()->offset));
 }
 
-SSATmp* IRBuilder::preOptimizeLdMem(IRInstruction* inst) {
-  auto const mbr = isMBaseLoad(inst) || inst->src(0) == m_state.mbr().ptr;
-  return mbr ? preOptimizeLdLocation(inst, Location::MBase{}) : nullptr;
-}
-
 SSATmp* IRBuilder::preOptimizeLdMBase(IRInstruction* inst) {
-  inst->setTypeParam(inst->typeParam() & m_state.mbr().ptrType);
+  auto const type = m_state.mbr().ptrType & inst->typeParam();
+
+  if (type <= TBottom) {
+    inst->setTypeParam(TBottom);
+    retypeDests(inst, &m_unit);
+    return nullptr;
+  }
 
   if (auto const ptr = m_state.mbr().ptr) {
-    if (ptr->isA(inst->typeParam())) return ptr;
-    return gen(AssertType, inst->typeParam(), ptr);
+    assertx(type <= ptr->type());
+    if (type < ptr->type()) return gen(AssertType, type, ptr);
+    return ptr;
+  }
+
+  inst->setTypeParam(type);
+  retypeDests(inst, &m_unit);
+
+  auto const& mbrPointee = m_state.mbr().pointee;
+  auto& acls = inst->extra<LdMBase>()->acls;
+  if (mbrPointee < acls) {
+    acls = mbrPointee;
+  } else {
+    auto const fromPtrType = pointee(inst->typeParam());
+    if (fromPtrType < acls) acls = fromPtrType;
+  }
+
+  // If we know the pointee of the MBR, we might be able to
+  // rematerialize the MBase ptr directly without a load. We only do
+  // this for trivial address calculations.
+  auto const ptr = [&] () -> SSATmp* {
+    if (!acls.isSingleLocation()) return nullptr;
+    if (auto const l = acls.is_local()) {
+      return gen(LdLocAddr, LocalId { l->ids.singleValue() }, m_state.fp());
+    } else if (auto const s = acls.is_stack()) {
+      if (m_state.validStackOffset(s->low)) {
+        return gen(LdStkAddr, IRSPRelOffsetData { s->low }, m_state.sp());
+      }
+    } else if (auto const r = acls.is_rds()) {
+      return gen(
+        LdRDSAddr,
+        RDSHandleAndType { r->handle, m_state.mbase().type },
+        inst->typeParam().lvalToPtr()
+      );
+    } else if (acls <= AMIStateTempBase) {
+      return gen(LdMIStateTempBaseAddr);
+    }
+    return nullptr;
+  }();
+  if (ptr) return gen(ConvPtrToLval, ptr);
+  return nullptr;
+}
+
+SSATmp* IRBuilder::preOptimizeLdMem(IRInstruction* inst) {
+  auto const ptr = inst->src(0);
+  assertx(ptr->isA(TMem));
+
+  auto const type =
+    m_state.typeOfPointee(ptr, inst->typeParam()) & inst->typeParam();
+
+  // The types may not be compatible in the presence of unreachable code.
+  // Don't try to optimize the code in this case, and just let dead code
+  // elimination take care of it later.
+  if (type <= TBottom) {
+    inst->setTypeParam(TBottom);
+    retypeDests(inst, &m_unit);
+    return nullptr;
+  }
+
+  if (auto const val = m_state.valueOfPointee(ptr)) {
+    assertx(type <= val->type());
+    if (type < val->type()) return gen(AssertType, type, val);
+    return val;
+  }
+
+  // Try to convert the pointer load to a load directly from
+  // locals/stack.
+  auto const acls = canonicalize(pointee(ptr));
+  if (acls.isSingleLocation()) {
+    if (auto const l = acls.is_local()) {
+      return gen(LdLoc, type, LocalId { l->ids.singleValue() }, m_state.fp());
+    } else if (auto const s = acls.is_stack()) {
+      if (m_state.validStackOffset(s->low)) {
+        return gen(LdStk, type, IRSPRelOffsetData { s->low }, m_state.sp());
+      }
+    }
+  }
+
+  inst->setTypeParam(type);
+  retypeDests(inst, &m_unit);
+  return nullptr;
+}
+
+SSATmp* IRBuilder::preOptimizeStMem(IRInstruction* inst) {
+  auto const ptr = inst->src(0);
+  assertx(ptr->isA(TMem));
+
+  // Try to convert the pointer store to a store directly to
+  // locals/stack.
+  auto const acls = canonicalize(pointee(ptr));
+  if (acls.isSingleLocation()) {
+    if (auto const l = acls.is_local()) {
+      gen(
+        StLoc, LocalId { l->ids.singleValue() }, m_state.fp(), inst->src(1)
+      );
+      inst->convertToNop();
+    } else if (auto const s = acls.is_stack()) {
+      if (m_state.validStackOffset(s->low)) {
+        gen(StStk, IRSPRelOffsetData { s->low }, m_state.sp(), inst->src(1));
+        inst->convertToNop();
+      }
+    }
+  }
+
+  return nullptr;
+}
+
+SSATmp* IRBuilder::preOptimizeCheckTypeMem(IRInstruction* inst) {
+  auto const ptr = inst->src(0);
+  assertx(ptr->isA(TMem));
+
+  auto const oldType = m_state.typeOfPointee(ptr);
+  if (auto const prevValue = m_state.valueOfPointee(ptr)) {
+    auto const v = [&] {
+      assertx(oldType <= prevValue->type());
+      if (oldType < prevValue->type()) {
+        return gen(AssertType, oldType, prevValue);
+      }
+      return prevValue;
+    }();
+    gen(CheckType, inst->typeParam(), inst->taken(), v);
+    inst->convertToNop();
+    return nullptr;
+  }
+
+  if (!oldType.maybe(inst->typeParam()) ||
+      inst->next() == inst->taken() ||
+      (inst->next() && inst->next()->isUnreachable())) {
+    gen(Jmp, inst->taken());
+    inst->convertToNop();
+    return nullptr;
+  }
+
+  auto const newType = oldType & inst->typeParam();
+  if (oldType <= newType) {
+    inst->convertToNop();
+    return nullptr;
+  }
+
+  // Try to convert the memory type check to a type check directly on
+  // local/stack.
+  auto const acls = canonicalize(pointee(ptr));
+  if (acls.isSingleLocation()) {
+    if (auto const l = acls.is_local()) {
+      gen(
+        CheckLoc,
+        LocalId { l->ids.singleValue() },
+        inst->typeParam(),
+        inst->taken()
+      );
+      inst->convertToNop();
+    } else if (auto const s = acls.is_stack()) {
+      if (m_state.validStackOffset(s->low)) {
+        gen(
+          CheckStk,
+          IRSPRelOffsetData { s->low },
+          inst->typeParam(),
+          inst->taken(),
+          m_state.sp()
+        );
+        inst->convertToNop();
+      }
+    }
+  }
+
+  return nullptr;
+}
+
+SSATmp* IRBuilder::preOptimizeCheckInitMem(IRInstruction* inst) {
+  auto const ptr = inst->src(0);
+  assertx(ptr->isA(TMem));
+
+  auto const type = m_state.typeOfPointee(ptr);
+  if (!type.maybe(TUninit)) {
+    inst->convertToNop();
+    return nullptr;
+  }
+  if (type <= TUninit) {
+    gen(Jmp, inst->taken());
+    inst->convertToNop();
+    return nullptr;
+  }
+
+  return nullptr;
+}
+
+SSATmp* IRBuilder::preOptimizeIsTypeMem(IRInstruction* inst) {
+  assertx(inst->is(IsTypeMem, IsNTypeMem));
+  auto const ptr = inst->src(0);
+  assertx(ptr->isA(TMem));
+
+  auto const trueSense = inst->is(IsTypeMem);
+
+  auto const oldType = m_state.typeOfPointee(ptr);
+  if (auto const prevValue = m_state.valueOfPointee(ptr)) {
+    auto const v = [&] {
+      assertx(oldType <= prevValue->type());
+      if (oldType < prevValue->type()) {
+        return gen(AssertType, oldType, prevValue);
+      }
+      return prevValue;
+    }();
+    return gen(trueSense ? IsType : IsNType, inst->typeParam(), v);
+  }
+  if (!oldType.maybe(inst->typeParam())) return m_unit.cns(!trueSense);
+  if (oldType <= inst->typeParam())      return m_unit.cns(trueSense);
+  return nullptr;
+}
+
+SSATmp* IRBuilder::preOptimizeIsNTypeMem(IRInstruction* inst) {
+  return preOptimizeIsTypeMem(inst);
+}
+
+SSATmp* IRBuilder::preOptimizeBaseTypeParam(IRInstruction* inst) {
+  auto const ptr = inst->src(0);
+  assertx(ptr->isA(TMem));
+  auto const type = m_state.typeOfPointee(ptr);
+  inst->setTypeParam(type & inst->typeParam());
+  retypeDests(inst, &m_unit);
+  return nullptr;
+}
+SSATmp* IRBuilder::preOptimizeElemVecD(IRInstruction* inst) {
+  return preOptimizeBaseTypeParam(inst);
+}
+SSATmp* IRBuilder::preOptimizeElemDictD(IRInstruction* inst) {
+  return preOptimizeBaseTypeParam(inst);
+}
+SSATmp* IRBuilder::preOptimizeElemVecU(IRInstruction* inst) {
+  return preOptimizeBaseTypeParam(inst);
+}
+SSATmp* IRBuilder::preOptimizeElemDictU(IRInstruction* inst) {
+  return preOptimizeBaseTypeParam(inst);
+}
+SSATmp* IRBuilder::preOptimizeBespokeElem(IRInstruction* inst) {
+  return preOptimizeBaseTypeParam(inst);
+}
+SSATmp* IRBuilder::preOptimizeSetElem(IRInstruction* inst) {
+  if (auto const i = preOptimizeBaseTypeParam(inst)) return i;
+  if (!inst->is(SetElem)) return nullptr;
+
+  auto const baseType = inst->typeParam();
+  if (baseType <= TVec || baseType <= TDict) {
+    auto const basePtr = inst->src(0);
+    auto const key = inst->src(1);
+    auto const value = inst->src(2);
+
+    if (!key->isA(TInt | TStr)) return nullptr;
+    if (baseType <= TVec && !key->isA(TInt)) return nullptr;
+
+    auto const base = gen(LdMem, baseType, basePtr);
+    auto const newArr =
+      gen(baseType <= TVec ? VecSet : DictSet, inst->taken(), base, key, value);
+    gen(StMem, basePtr, newArr);
+    gen(IncRef, value);
+    return value;
   }
   return nullptr;
 }
@@ -328,11 +603,9 @@ SSATmp* IRBuilder::preOptimizeLdClosureCtx(IRInstruction* inst) {
   if (!closure->inst()->is(ConstructClosure)) return nullptr;
   return gen(AssertType, inst->typeParam(), closure->inst()->src(0));
 }
-
 SSATmp* IRBuilder::preOptimizeLdClosureCls(IRInstruction* inst) {
   return preOptimizeLdClosureCtx(inst);
 }
-
 SSATmp* IRBuilder::preOptimizeLdClosureThis(IRInstruction* inst) {
   return preOptimizeLdClosureCtx(inst);
 }
@@ -363,21 +636,45 @@ SSATmp* IRBuilder::preOptimizeLdFrameCtx(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* IRBuilder::preOptimizeLdObjClass(IRInstruction* inst) {
-  if (auto const spec = inst->src(0)->type().clsSpec()) {
-    if (spec.exact() || spec.cls()->attrs() & AttrNoOverride) {
-      return m_unit.cns(spec.cls());
-    }
-  }
-  return nullptr;
-}
-
 SSATmp* IRBuilder::preOptimizeLdFrameThis(IRInstruction* inst) {
   return preOptimizeLdFrameCtx(inst);
 }
-
 SSATmp* IRBuilder::preOptimizeLdFrameCls(IRInstruction* inst) {
   return preOptimizeLdFrameCtx(inst);
+}
+
+SSATmp* IRBuilder::preOptimizeStMROProp(IRInstruction* inst) {
+  // Simple store-elim. If the store is redundant because it won't
+  // change the known value, drop it.
+  if (!inst->src(0)->hasConstVal(TBool)) return nullptr;
+  auto const redundant = [&] {
+    switch (m_state.mROProp()) {
+      case TriBool::Yes:
+        return inst->src(0)->boolVal();
+      case TriBool::No:
+        return !inst->src(0)->boolVal();
+      case TriBool::Maybe:
+        return false;
+    }
+    not_reached();
+  }();
+  if (redundant) inst->convertToNop();
+  return nullptr;
+}
+
+SSATmp* IRBuilder::preOptimizeCheckMROProp(IRInstruction* inst) {
+  switch (m_state.mROProp()) {
+    case TriBool::Yes:
+      inst->convertToNop();
+      break;
+    case TriBool::No:
+      gen(Jmp, inst->taken());
+      inst->convertToNop();
+      break;
+    case TriBool::Maybe:
+      break;
+  }
+  return nullptr;
 }
 
 SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
@@ -386,18 +683,31 @@ SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
   X(AssertType)
   X(AssertLoc)
   X(AssertStk)
+  X(AssertMBase)
   X(CheckLoc)
   X(CheckStk)
   X(CheckMBase)
   X(LdLoc)
   X(LdStk)
-  X(LdMem)
   X(LdMBase)
+  X(LdMem)
   X(LdClosureCls)
   X(LdClosureThis)
   X(LdFrameCls)
   X(LdFrameThis)
-  X(LdObjClass)
+  X(StMem)
+  X(CheckTypeMem)
+  X(CheckInitMem)
+  X(IsTypeMem)
+  X(IsNTypeMem)
+  X(StMROProp)
+  X(CheckMROProp)
+  X(ElemVecD)
+  X(ElemDictD)
+  X(ElemVecU)
+  X(ElemDictU)
+  X(BespokeElem)
+  X(SetElem)
   default: break;
   }
 #undef X
@@ -803,7 +1113,7 @@ bool IRBuilder::startBlock(Block* block, bool hasUnprocessedPred) {
   always_assert(m_state.sp() != nullptr);
   always_assert(m_state.fp() != nullptr);
 
-  FTRACE(2, "IRBuilder switching to block B{}: {}\n", block->id(),
+  FTRACE(2, "IRBuilder switching to block B{}:\n{}\n", block->id(),
          m_state.show());
   return true;
 }

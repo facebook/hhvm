@@ -96,4 +96,51 @@ Optional<IRSPRelOffset> offsetOfFrame(SSATmp *fp);
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * Visit all instructions responsible for defining the given SSATmp,
+ * skipping through passthrough instructions and DefLabels.
+ *
+ * The given callable is called with the instruction, and the SSATmp
+ * it defines (but before any canonicalization). If the callable
+ * returns false, visitation stops.
+ */
+template <typename V>
+bool visitEveryDefiningInst(
+  const SSATmp* t,
+  V v,
+  jit::fast_set<const IRInstruction*>* visited = nullptr
+) {
+  if (t->isA(TBottom)) return true;
+  auto const canonT = canonical(t);
+  auto const inst = canonT->inst();
+
+  if (!inst->is(DefLabel)) return v(inst, t);
+  if (visited && visited->count(inst)) return true;
+
+  auto const dsts = inst->dsts();
+  auto const dstIdx =
+    std::find(dsts.begin(), dsts.end(), canonT) - dsts.begin();
+  always_assert(dstIdx >= 0 && dstIdx < inst->numDsts());
+
+  Optional<jit::fast_set<const IRInstruction*>> visitedStorage;
+  if (!visited) {
+    visitedStorage.emplace();
+    visited = &visitedStorage.value();
+  }
+  visited->emplace(inst);
+
+  auto stop = false;
+  inst->block()->forEachSrc(
+    dstIdx,
+    [&] (const IRInstruction*, const SSATmp* s) {
+      if (stop) return;
+      if (!visitEveryDefiningInst(s, v, visited)) stop = true;
+    }
+  );
+
+  return !stop;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 }}

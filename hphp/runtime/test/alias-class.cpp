@@ -523,13 +523,9 @@ TEST(AliasClass, FrameUnion) {
 TEST(AliasClass, Pointees) {
   IRUnit unit{test_context};
   auto const bcctx = BCContext { BCMarker::Dummy(), 0 };
-  auto ptr = unit.gen(LdMBase, bcctx, TLval)->dst();
+  auto ptr = unit.gen(LdMBase, bcctx, TLval, AliasClassData{ ALocalAny | APropAny })->dst();
   auto const acls = pointee(ptr);
-  EXPECT_EQ(
-    AHeapAny | ALocalAny | AStackAny | AMIStateTempBase |
-    ARdsAny | APropAny | AElemAny | AOther,
-    acls
-  );
+  EXPECT_EQ(ALocalAny | APropAny, acls);
 }
 
 //////////////////////////////////////////////////////////////////////

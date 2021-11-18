@@ -97,7 +97,7 @@ struct ProfDataDeserializer;
   f(SProp,    1U << 6, __VA_ARGS__)                         \
   f(MISTemp,  1U << 7, __VA_ARGS__)                         \
   f(Other,    1U << 8, __VA_ARGS__)                         \
-  f(Const,    1U << 9, __VA_ARGS__)                        \
+  f(Const,    1U << 9, __VA_ARGS__)                         \
   // Keep the last bit in sync with PtrLocation::All below
 
 #define PTR_LOCATION_TYPES(f, ...)                          \
@@ -720,9 +720,10 @@ public:
 
   /*
    * Convert the TPtr branch of the Type (if any) into its equivalent
-   * TLval form.
+   * TLval form, or vice-versa.
    */
   Type ptrToLval() const;
+  Type lvalToPtr() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Internal methods.

@@ -1799,17 +1799,6 @@ SSATmp* isTypeImpl(State& env, const IRInstruction* inst, const Type& srcType) {
   assertx(IMPLIES(type <= TDict, type == TDict));
   assertx(IMPLIES(type <= TKeyset, type == TKeyset));
 
-  // Specially handle checking if an uninit var's type is null. The Type class
-  // doesn't fully correctly handle the fact that the earlier stages of the
-  // compiler consider null to be either initalized or uninitalized, so we need
-  // to do this check first. Right here is really the only place in the backend
-  // it seems to matter, especially since manipulating an uninit is kind of
-  // weird; as of this writing, "$uninitalized_variable ?? 42" is the only
-  // place it really comes up.
-  if (srcType <= TUninit && type <= TNull) {
-    return cns(env, trueSense);
-  }
-
   // The types are disjoint; the result must be false.
   if (!srcType.maybe(type)) {
     return cns(env, !trueSense);

@@ -23,6 +23,8 @@
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/type-source.h"
 
+#include "hphp/util/tribool.h"
+
 #include <boost/dynamic_bitset.hpp>
 
 #include <memory>
@@ -111,8 +113,16 @@ using StackStateMap = jit::hash_map<SBInvOffset,StackState,SBInvOffset::Hash>;
  */
 struct MBRState {
   SSATmp* ptr{nullptr};
-  AliasClass pointee{AEmpty}; // defaults to "invalid", not "Top"
+  AliasClass pointee{AUnknownTV};
   Type ptrType{TLval};
+};
+
+/*
+ * Track the known value and type of the MInstrTempBase.
+ */
+struct MTempBaseState {
+  SSATmp* value{nullptr};
+  Type type{TCell};
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -124,6 +134,9 @@ struct MBRState {
 struct FrameState {
   explicit FrameState(const Func* func);
   bool checkInvariants() const;
+  bool checkMInstrStateDead() const;
+
+  std::string show() const;
 
   /*
    * Function, instructions are emitted on behalf of. This may be different from
@@ -198,10 +211,26 @@ struct FrameState {
   LocalStateMap locals;
 
   /*
-   * Values and types of the member base register and its pointee.
+   * Values and types of the member base register, its pointee, the
+   * temp base, or the read-only prop bool.
    */
   MBRState mbr;
   MBaseState mbase;
+  MTempBaseState mTempBase;
+  TriBool mROProp{TriBool::Maybe};
+
+  /*
+   * More specific types for the mbase if the mbase points at the
+   * stack/locals/temp-base. These should always be a subtype of the
+   * general mbase type.
+   *
+   * Tracking these allows for more precise analysis in
+   * handleConservative() (we can avoid dropping these types if we
+   * know these locations aren't affected).
+   */
+  Type mbaseStackType{TCell};
+  Type mbaseLocalType{TCell};
+  Type mbaseTempType{TCell};
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -357,6 +386,13 @@ struct FrameStateMgr final {
   bool tracked(Location l) const;
 
   /*
+   * Return whether the given stack offset is valid for the current
+   * frame (stack offsets from AliasClass might refer to outer frames,
+   * which frame-state cannot currently handle).
+   */
+  bool validStackOffset(IRSPRelOffset off) const;
+
+  /*
    * Return whether the state of the locals have even been cleared since the
    * unit's entry.
    */
@@ -372,15 +408,25 @@ struct FrameStateMgr final {
   /*
    * Return tracked state for the member base register.
    */
-  const MBRState& mbr()     const { return cur().mbr; }
-  const MBaseState& mbase() const { return cur().mbase; }
+  const MBRState& mbr()             const { return cur().mbr; }
+  const MBaseState& mbase()         const { return cur().mbase; }
+  const MTempBaseState& mTempBase() const { return cur().mTempBase; }
+  TriBool mROProp()                 const { return cur().mROProp; }
 
   /*
-   * Set the value and type for mbase() or mbr().
+   * Check if a given TMem could be the current mbase.
    */
-  void setMemberBase(SSATmp* base);
-  void setMemberBaseType(Type);
-  void setMBR(SSATmp* base);
+  TriBool isMBase(SSATmp*) const;
+
+  /*
+   * Return the best known type, or known SSATmp* for the pointee of a
+   * given TMem.
+   *
+   * The type calculation will potentially short-cut if the calculated
+   * type exceeds `limit`.
+   */
+  SSATmp* valueOfPointee(SSATmp*) const;
+  Type typeOfPointee(SSATmp*, Type limit = TCell) const;
 
   /*
    * Debug stringification.
@@ -411,7 +457,12 @@ private:
    * LocationState access helpers.
    */
   Location loc(uint32_t) const;
+  Location stk(SBInvOffset) const;
   Location stk(IRSPRelOffset) const;
+
+  // Returns std::nullopt if offset is not valid for the current frame
+  Optional<Location> optStk(SBInvOffset) const;
+  Optional<Location> optStk(IRSPRelOffset) const;
 
   LocalState& localState(uint32_t);
   LocalState& localState(Location l); // @requires: l.tag() == LTag::Local
@@ -419,18 +470,24 @@ private:
   StackState& stackState(SBInvOffset);
   StackState& stackState(Location l); // @requires: l.tag() == LTag::Stack
 
+  AliasClass locationToAliasClass(Location) const;
+
   /*
    * Helpers for update().
    */
   bool checkInvariants() const;
-  void updateMInstr(const IRInstruction*);
-  void updateMBase(const IRInstruction*);
+  void handleConservatively(const IRInstruction*);
+  void handleMInstr(const IRInstruction*);
   void initStack(SSATmp* sp, SBInvOffset irSPOff, SBInvOffset bcSPOff);
   void uninitStack();
   void trackBeginInlining(const IRInstruction* inst);
   void trackEndInlining();
   void trackInlineCall(const IRInstruction* inst);
   void trackCall();
+
+  void pointerLoad(SSATmp*, SSATmp*);
+  void pointerStore(SSATmp*, SSATmp*);
+  void pointerRefine(SSATmp*, Type);
 
   /*
    * Per-block state helpers.
@@ -444,18 +501,43 @@ private:
   void setValue(Location l, SSATmp* value);
   void setType(Location l, Type type);
   void widenType(Location l, Type type);
-  void refineType(Location l, Type type, TypeSource typeSrc);
+  void refineType(Location l, Type type, Optional<TypeSource> typeSrc);
+
+  void setValue(const AliasClass&, SSATmp*);
+  void refineType(const AliasClass&, Type, Optional<TypeSource>);
+
+  void setValueAndSyncMBase(Location, SSATmp*, bool);
+  void refineTypeAndSyncMBase(Location, Type, TypeSource);
 
   template<LTag tag>
-  void refineValue(LocationState<tag>& state, SSATmp* oldVal, SSATmp* newVal);
-
-  template<LTag tag>
-  void setValueImpl(Location l, LocationState<tag>& state, SSATmp* value);
+  bool refineValue(LocationState<tag>& state, SSATmp* oldVal, SSATmp* newVal);
+  void refineMBaseValue(SSATmp*, SSATmp*);
 
   /*
    * Local state update helpers.
    */
   void clearLocals();
+
+  /*
+   * MTempBase update helpers.
+   */
+  void setMTempBase(SSATmp*);
+  void setMTempBaseType(Type);
+  void widenMTempBase(Type);
+  void refineMTempBase(Type);
+
+  /*
+   * MBR update helpers.
+   */
+  void setMBR(SSATmp*, bool);
+  void clearMInstr();
+  TriBool isMBase(SSATmp*, const AliasClass&) const;
+
+  /*
+   * Helpers for working wth pointers
+   */
+  Type typeOfPointeeFromDefs(SSATmp*, Type) const;
+  Type typeFromAliasClass(const AliasClass&) const;
 
 private:
   struct BlockState {

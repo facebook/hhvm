@@ -308,6 +308,7 @@ private:
   SSATmp* preOptimizeAssertLocation(IRInstruction*, Location);
   SSATmp* preOptimizeAssertLoc(IRInstruction*);
   SSATmp* preOptimizeAssertStk(IRInstruction*);
+  SSATmp* preOptimizeAssertMBase(IRInstruction*);
   SSATmp* preOptimizeLdLocation(IRInstruction*, Location);
   SSATmp* preOptimizeLdLoc(IRInstruction*);
   SSATmp* preOptimizeLdStk(IRInstruction*);
@@ -319,7 +320,20 @@ private:
   SSATmp* preOptimizeLdFrameCtx(IRInstruction*);
   SSATmp* preOptimizeLdFrameThis(IRInstruction*);
   SSATmp* preOptimizeLdFrameCls(IRInstruction*);
-  SSATmp* preOptimizeLdObjClass(IRInstruction*);
+  SSATmp* preOptimizeStMem(IRInstruction*);
+  SSATmp* preOptimizeCheckTypeMem(IRInstruction*);
+  SSATmp* preOptimizeCheckInitMem(IRInstruction*);
+  SSATmp* preOptimizeIsTypeMem(IRInstruction*);
+  SSATmp* preOptimizeIsNTypeMem(IRInstruction*);
+  SSATmp* preOptimizeStMROProp(IRInstruction*);
+  SSATmp* preOptimizeCheckMROProp(IRInstruction*);
+  SSATmp* preOptimizeBaseTypeParam(IRInstruction*);
+  SSATmp* preOptimizeElemVecD(IRInstruction*);
+  SSATmp* preOptimizeElemDictD(IRInstruction*);
+  SSATmp* preOptimizeElemVecU(IRInstruction*);
+  SSATmp* preOptimizeElemDictU(IRInstruction*);
+  SSATmp* preOptimizeBespokeElem(IRInstruction*);
+  SSATmp* preOptimizeSetElem(IRInstruction*);
   SSATmp* preOptimize(IRInstruction*);
 
   void appendInstruction(IRInstruction* inst);
@@ -336,6 +350,8 @@ private:
                        Optional<Type> knownType = std::nullopt);
   bool constrainTypeSrc(TypeSource typeSrc, GuardConstraint gc);
   bool shouldConstrainGuards() const;
+
+  bool isMBaseLoad(const IRInstruction*) const;
 
   /////////////////////////////////////////////////////////////////////////////
 

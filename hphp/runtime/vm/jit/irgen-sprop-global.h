@@ -126,16 +126,18 @@ SSATmp* profiledGlobalAccess(IRGS& env, SSATmp* name,
   if (!name->hasConstVal(TStr) || profiling) return normal();
   auto const link = linkForGlobal(name->strVal());
   if (!link.bound()) return normal();
-
-  auto const data = RDSHandleData { link.handle() };
+  auto const handle = link.handle();
 
   return cond(
     env,
     [&] (Block* taken) {
       // Load from RDS:
-      gen(env, CheckRDSInitialized, taken, data);
-      auto const ptr = gen(env, LdRDSAddr, data, TPtrToGbl);
-      auto const lval = gen(env, ConvPtrToLval, ptr);
+      gen(env, CheckRDSInitialized, taken, RDSHandleData { handle });
+      auto const lval = gen(
+        env,
+        ConvPtrToLval,
+        gen(env, LdRDSAddr, RDSHandleAndType { handle, TCell }, TPtrToGbl)
+      );
 
       if (checkType) {
         // If the caller asked for refined type, do a check against
@@ -144,7 +146,17 @@ SSATmp* profiledGlobalAccess(IRGS& env, SSATmp* name,
         auto const type = predictedTypeForGlobal(name->strVal());
         if (type < TCell) {
           gen(env, CheckTypeMem, type, makeExitSlow(env), lval);
-          return success(lval, type);
+          // Recalculate the RDS addr. This may seem wasteful, but
+          // LdRDSAddr can be compiled away in most cases, and it lets
+          // us provide a more refined type for pointer analysis.
+          return success(
+            gen(
+              env,
+              ConvPtrToLval,
+              gen(env, LdRDSAddr, RDSHandleAndType { handle, type }, TPtrToGbl)
+            ),
+            type
+          );
         }
       }
       // No type-check, it's just a TCell.

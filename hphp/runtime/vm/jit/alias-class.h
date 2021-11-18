@@ -375,6 +375,7 @@ struct AliasClass {
    * Returns whether this alias class is a non-strict-subset of another one.
    */
   bool operator<=(AliasClass) const;
+  bool operator<(AliasClass o) const { return *this <= o && *this != o; }
 
   /*
    * Returns whether an alias class could possibly refer to the same concrete

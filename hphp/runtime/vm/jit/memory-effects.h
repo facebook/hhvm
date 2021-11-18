@@ -210,9 +210,10 @@ MemEffects canonicalize(MemEffects);
 
 /*
  * Return an alias class representing the pointee of the given value, which
- * must be <= TMemToCell.
+ * must be <= TMem.
  */
 AliasClass pointee(const SSATmp*);
+AliasClass pointee(const Type&);
 
 /*
  * Produces a string about some MemEffects for debug-printing.

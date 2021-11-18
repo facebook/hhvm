@@ -35,161 +35,6 @@ uint32_t iterId(const IRInstruction& inst) {
   return inst.extra<IterId>()->iterId;
 }
 
-AliasClass pointee(
-  const SSATmp* ptr,
-  jit::flat_set<const IRInstruction*>* visited_labels
-) {
-  auto const type = ptr->type();
-  always_assert(type <= TMem);
-  auto const canonPtr = canonical(ptr);
-  if (!canonPtr->isA(TMem)) {
-    // This can happen when ptr is TBottom from a passthrough instruction with
-    // a src that isn't TBottom. The most common cause of this is something
-    // like "t5:Bottom = CheckType<Str> t2:Int". It means ptr isn't really a
-    // pointer, so return AEmpty to avoid unnecessarily pessimizing any
-    // optimizations.
-    always_assert(ptr->isA(TBottom));
-    return AEmpty;
-  }
-
-  auto const sinst = canonPtr->inst();
-
-  if (sinst->is(LdRDSAddr, LdInitRDSAddr)) {
-    return ARds { sinst->extra<RDSHandleData>()->handle };
-  }
-
-  // For phis, union all incoming values, taking care to not recurse infinitely
-  // in the presence of loops.
-  if (sinst->is(DefLabel)) {
-    if (visited_labels && visited_labels->count(sinst)) {
-      return AEmpty;
-    }
-
-    auto const dsts = sinst->dsts();
-    auto const dstIdx =
-      std::find(dsts.begin(), dsts.end(), canonPtr) - dsts.begin();
-    always_assert(dstIdx >= 0 && dstIdx < sinst->numDsts());
-
-    Optional<jit::flat_set<const IRInstruction*>> label_set;
-    if (visited_labels == nullptr) {
-      label_set.emplace();
-      visited_labels = &label_set.value();
-    }
-    visited_labels->insert(sinst);
-
-    auto ret = AEmpty;
-    sinst->block()->forEachSrc(
-      dstIdx, [&](const IRInstruction* /*jmp*/, const SSATmp* thePtr) {
-        ret = ret | pointee(thePtr, visited_labels);
-      });
-    return ret;
-  }
-
-  auto const specific = [&] () -> Optional<AliasClass> {
-    if (type <= TBottom) return AEmpty;
-
-    if (type <= TMemToFrame) {
-      if (sinst->is(LdLocAddr)) {
-        return AliasClass {
-          ALocal { sinst->src(0), sinst->extra<LdLocAddr>()->locId }
-        };
-      }
-      return ALocalAny;
-    }
-
-    if (type <= TMemToStk) {
-      if (sinst->is(LdStkAddr)) {
-        return AliasClass {
-          AStack::at(sinst->extra<LdStkAddr>()->offset)
-        };
-      } else if (sinst->is(LdOutAddrInlined)) {
-        auto const fp = sinst->src(0)->inst();
-        assertx(fp->is(BeginInlining));
-        auto const stackOff = fp->extra<BeginInlining>()->spOffset;
-        return AliasClass {
-          AStack::at(
-            stackOff + kNumActRecCells + sinst->extra<LdOutAddrInlined>()->index
-          )
-        };
-      }
-      return AStackAny;
-    }
-
-    if (type <= TMemToProp) {
-      if (sinst->is(LdPropAddr, LdInitPropAddr)) {
-        return AliasClass {
-          AProp {
-            sinst->src(0),
-            safe_cast<uint16_t>(sinst->extra<IndexData>()->index)
-          }
-        };
-      }
-      return APropAny;
-    }
-
-    auto const elem = [&] () -> AliasClass {
-      auto base = sinst->src(0);
-      auto key  = sinst->src(1);
-
-      always_assert(base->isA(TArrLike));
-
-      if (key->isA(TInt)) {
-        if (key->hasConstVal()) return AElemI { base, key->intVal() };
-        return AElemIAny;
-      }
-      if (key->hasConstVal(TStr)) {
-        assertx(!base->isA(TVec));
-        return AElemS { base, key->strVal() };
-      }
-      return AElemAny;
-    };
-
-    if (type <= TMemToElem) {
-      if (sinst->is(LdVecElemAddr)) return elem();
-      return AElemAny;
-    }
-
-    return std::nullopt;
-  }();
-
-  if (specific) {
-    // A pointer has to point at *something*, so we should not get
-    // AEmpty here. The only exception if this pointer is not
-    // realizable (IE, it's a Bottom).
-    assertx(type <= TBottom || *specific != AEmpty);
-    // We don't currently ever form pointers to something that's not a
-    // TypedValue.
-    assertx(*specific <= AUnknownTV);
-    return *specific;
-  }
-
-  /*
-   * None of the above worked, so try to make the smallest union we can based
-   * on the pointer type.
-   */
-  auto ret = AEmpty;
-  if (type.maybe(TMemToStk))     ret = ret | AStackAny;
-  if (type.maybe(TMemToFrame))   ret = ret | ALocalAny;
-  if (type.maybe(TMemToProp))    ret = ret | APropAny;
-  if (type.maybe(TMemToElem))    ret = ret | AElemAny;
-  if (type.maybe(TMemToMISTemp)) ret = ret | AMIStateTempBase;
-  if (type.maybe(TMemToClsInit)) ret = ret | AHeapAny;
-  if (type.maybe(TMemToSProp))   ret = ret | ARdsAny;
-  if (type.maybe(TMemToGbl))     ret = ret | AOther | ARdsAny;
-  if (type.maybe(TMemToOther))   ret = ret | AOther | ARdsAny;
-  if (type.maybe(TMemToConst))   ret = ret | AOther;
-
-  // The pointer type should lie completely within the above
-  // locations.
-  assertx(type <= (TMemToStk|TMemToFrame|TMemToProp|TMemToElem|
-                   TMemToMISTemp|TMemToClsInit|TMemToSProp|TMemToGbl|
-                   TMemToOther|TMemToConst));
-  assertx(ret != AEmpty);
-  assertx(ret <= AUnknownTV);
-
-  return ret;
-}
-
 //////////////////////////////////////////////////////////////////////
 
 AliasClass all_pointees(folly::Range<SSATmp**> srcs) {
@@ -956,8 +801,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case StMROProp:
     return PureStore { AMIStateROProp, inst.src(0), nullptr };
 
-  case LdMROProp:
-    return PureLoad { AMIStateROProp };
+  case CheckMROProp:
+    return may_load_store(AMIStateROProp, AEmpty);
 
   case FinishMemberOp:
     return may_load_store_kill(AEmpty, AEmpty, AMIStateAny);
@@ -1313,7 +1158,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ElemVecU:
   case ElemDictD:
   case ElemDictU:
-  case ElemKeysetU:
   case BespokeElem:
   case ElemDX:
   case ElemUX:
@@ -2002,14 +1846,17 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, MemEffects me) {
     return folly::sformat("  inst: {}\n  effects: {}\n", inst, show(me));
   };
 
-  auto check_obj = [&] (SSATmp* obj) {
+  auto const check_obj = [&] (SSATmp* obj) {
+    // canonicalize() may have replaced the SSATmp with a less refined
+    // one, so we cannot assert <= TObj.
     always_assert_flog(
-      obj->type() <= TObj,
+      obj->type() <= TBottom ||
+      obj->type().maybe(TObj),
       "Non obj pointer in memory effects"
     );
   };
 
-  auto check = [&] (AliasClass a) {
+  auto const check = [&] (AliasClass a) {
     if (auto const pr = a.prop())  check_obj(pr->obj);
   };
 
@@ -2142,7 +1989,129 @@ MemEffects memory_effects(const IRInstruction& inst) {
 }
 
 AliasClass pointee(const SSATmp* tmp) {
-  return pointee(tmp, nullptr);
+  auto acls = AEmpty;
+  auto const visit = [&] (const IRInstruction* sinst, const SSATmp* ptr) {
+    acls |= [&] () -> AliasClass {
+      auto const type = ptr->type();
+      always_assert(type <= TMem && type != TBottom);
+
+      if (sinst->is(LdMBase)) return sinst->extra<LdMBase>()->acls;
+      if (sinst->is(LdRDSAddr, LdInitRDSAddr)) {
+        return ARds { sinst->extra<RDSHandleData>()->handle };
+      }
+
+      auto const specific = [&] () -> Optional<AliasClass> {
+        if (type <= TMemToFrame) {
+          if (sinst->is(LdLocAddr)) {
+            return AliasClass {
+              ALocal { sinst->src(0), sinst->extra<LdLocAddr>()->locId }
+            };
+          }
+          return ALocalAny;
+        }
+
+        if (type <= TMemToStk) {
+          if (sinst->is(LdStkAddr)) {
+            return AliasClass {
+              AStack::at(sinst->extra<LdStkAddr>()->offset)
+            };
+          } else if (sinst->is(LdOutAddrInlined)) {
+            auto const fp = sinst->src(0)->inst();
+            assertx(fp->is(BeginInlining));
+            auto const stackOff = fp->extra<BeginInlining>()->spOffset;
+            return AliasClass {
+              AStack::at(
+                stackOff +
+                kNumActRecCells +
+                sinst->extra<LdOutAddrInlined>()->index
+              )
+            };
+          }
+          return AStackAny;
+        }
+
+        if (type <= TMemToProp) {
+          if (sinst->is(LdPropAddr, LdInitPropAddr)) {
+            return AliasClass {
+              AProp {
+                sinst->src(0),
+                safe_cast<uint16_t>(sinst->extra<IndexData>()->index)
+              }
+            };
+          }
+          return APropAny;
+        }
+
+        auto const elem = [&] () -> AliasClass {
+          auto const base = sinst->src(0);
+          auto const key  = sinst->src(1);
+          always_assert(base->isA(TArrLike));
+
+          if (key->isA(TInt)) {
+            if (key->hasConstVal()) return AElemI { base, key->intVal() };
+            return AElemIAny;
+          }
+          if (key->isA(TStr)) {
+            assertx(!base->isA(TVec));
+            if (key->hasConstVal()) return AElemS { base, key->strVal() };
+            return AElemSAny;
+          }
+          return AElemAny;
+        };
+
+        if (type <= TMemToElem) {
+          if (sinst->is(LdVecElemAddr, ElemDictK, ElemKeysetK)) return elem();
+          return AElemAny;
+        }
+
+        return std::nullopt;
+      }();
+
+      if (specific) {
+        // A pointer has to point at *something*, so we should not get
+        // AEmpty here.
+        assertx(*specific != AEmpty);
+        // We don't currently ever form pointers to something that's not a
+        // TypedValue.
+        assertx(*specific <= AUnknownTV);
+        return *specific;
+      }
+
+      /*
+       * None of the above worked, so try to make the smallest union
+       * we can based on the pointer type.
+       */
+      return pointee(type);
+    }();
+    return true;
+  };
+  visitEveryDefiningInst(tmp, visit);
+  return acls;
+}
+
+AliasClass pointee(const Type& type) {
+  assertx(type.maybe(TMem));
+
+  auto ret = AEmpty;
+  if (type.maybe(TMemToStk))     ret = ret | AStackAny;
+  if (type.maybe(TMemToFrame))   ret = ret | ALocalAny;
+  if (type.maybe(TMemToProp))    ret = ret | APropAny;
+  if (type.maybe(TMemToElem))    ret = ret | AElemAny;
+  if (type.maybe(TMemToMISTemp)) ret = ret | AMIStateTempBase;
+  if (type.maybe(TMemToClsInit)) ret = ret | AHeapAny;
+  if (type.maybe(TMemToSProp))   ret = ret | ARdsAny;
+  if (type.maybe(TMemToGbl))     ret = ret | AOther | ARdsAny;
+  if (type.maybe(TMemToOther))   ret = ret | AOther | ARdsAny;
+  if (type.maybe(TMemToConst))   ret = ret | AOther;
+
+  // The pointer type should lie completely within the above
+  // locations.
+  assertx(type <= (TMemToStk|TMemToFrame|TMemToProp|TMemToElem|
+                   TMemToMISTemp|TMemToClsInit|TMemToSProp|TMemToGbl|
+                   TMemToOther|TMemToConst));
+  assertx(ret != AEmpty);
+  assertx(ret <= AUnknownTV);
+  return ret;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -2263,7 +2232,6 @@ bool hasMInstrBaseEffects(const IRInstruction& inst) {
     case BespokeElem:
     case ElemVecU:
     case ElemDictU:
-    case ElemKeysetU:
     case ElemUX:
     case SetElem:
     case UnsetElem:
@@ -2298,7 +2266,6 @@ Optional<Type> mInstrBaseEffects(const IRInstruction& inst, Type old) {
         : std::nullopt;
     case ElemVecU:
     case ElemDictU:
-    case ElemKeysetU:
     case ElemUX:
     case UnsetElem:
       // Might COW arrays (depending if key is present), leaves strings alone

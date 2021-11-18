@@ -209,7 +209,7 @@ SSATmp* emitFunParam(IRGS& env, const Func* f, uint32_t numArgsInclUnpack,
           },
           [&] {
             // Rules
-            auto const addr = gen(env, LdPropAddr, IndexData { 0 }, obj);
+            auto const addr = gen(env, LdPropAddr, IndexData { 0 }, TInt, obj);
             return gen(env, LdMem, TInt, addr);
           },
           [&] {

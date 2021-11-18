@@ -126,16 +126,9 @@ SSATmp* emitGet(IRGS& env, SSATmp* arr, SSATmp* key, Block* taken) {
   return emitProfiledGet(env, arr, key, taken, [&](SSATmp*) {}, false);
 }
 
-template <typename Finish>
-void emitElem(IRGS& env, SSATmp* arrLval, SSATmp* key, SSATmp* base,
-              bool throwOnMissing, Finish finish) {
-  auto resultType = arrLikeElemType(base->type(), key->type(), curClass(env));
-  if (!throwOnMissing && !resultType.second) resultType.first |= TInitNull;
-  finish(
-    gen(env, BespokeElem, arrLval, key, cns(env, throwOnMissing)),
-    nullptr,
-    resultType.first
-  );
+SSATmp* emitElem(IRGS& env, SSATmp* arrLval, Type baseType, SSATmp* key,
+                 bool throwOnMissing) {
+  return gen(env, BespokeElem, baseType, arrLval, key, cns(env, throwOnMissing));
 }
 
 SSATmp* emitSet(IRGS& env, SSATmp* arr, SSATmp* key, SSATmp* val) {
@@ -172,10 +165,7 @@ SSATmp* emitEscalateToVanilla(
 }
 
 SSATmp* extractBase(IRGS& env) {
-  auto const& mbase = env.irb->fs().mbase();
-  if (mbase.value) return mbase.value;
-  auto const mbaseLval = gen(env, LdMBase, TLval);
-  return gen(env, LdMem, mbase.type, mbaseLval);
+  return gen(env, LdMem, TCell, ldMBase(env));
 }
 
 SSATmp* classConvertPuntOnRaise(IRGS& env, SSATmp* key) {
@@ -234,16 +224,12 @@ SSATmp* emitSetNewElem(IRGS& env, SSATmp* origValue) {
     return value;
   }
 
-  auto const baseLoc = gen(env, LdMBase, TLval);
-  if (!canUpdateCanonicalBase(baseLoc)) {
-    gen(env, SetNewElem, baseLoc, value);
-    return value;
-  }
+  auto const baseLoc = ldMBase(env);
 
   auto const newArr = emitAppend(env, base, value);
 
   // Update the base's location with the new array.
-  updateCanonicalBase(env, baseLoc, newArr);
+  gen(env, StMem, baseLoc, newArr);
   gen(env, IncRef, value);
   return value;
 }
@@ -262,11 +248,7 @@ SSATmp* emitSetElem(IRGS& env, SSATmp* key, SSATmp* value) {
     return cns(env, TBottom);
   }
 
-  auto const baseLoc = gen(env, LdMBase, TLval);
-  if (!canUpdateCanonicalBase(baseLoc)) {
-    gen(env, SetElem, baseType, baseLoc, key, value);
-    return value;
-  }
+  auto const baseLoc = ldMBase(env);
 
   // Emit a type check if the base's layout places type bounds on values.
   // Doing the check here is useful because it can save us an IncRef below.
@@ -290,7 +272,7 @@ SSATmp* emitSetElem(IRGS& env, SSATmp* key, SSATmp* value) {
   auto const newArr = emitSet(env, base, key, value);
 
   // Update the base's location with the new array.
-  updateCanonicalBase(env, baseLoc, newArr);
+  gen(env, StMem, baseLoc, newArr);
   gen(env, IncRef, value);
   return value;
 }
@@ -321,13 +303,9 @@ void emitBespokeUnsetM(IRGS& env, int32_t nDiscard, MemberKey mk) {
   if (!key->isA(TInt | TStr)) {
     gen(env, ThrowInvalidArrayKey, arr, key);
   } else {
-    auto const baseLoc = gen(env, LdMBase, TLval);
-    if (!canUpdateCanonicalBase(baseLoc)) {
-      gen(env, UnsetElem, baseLoc, key);
-    } else {
-      auto const newArr = gen(env, BespokeUnset, arr, key);
-      updateCanonicalBase(env, baseLoc, newArr);
-    }
+    auto const baseLoc = ldMBase(env);
+    auto const newArr = gen(env, BespokeUnset, arr, key);
+    gen(env, StMem, baseLoc, newArr);
   }
 
   mFinalImpl(env, nDiscard, nullptr);
@@ -504,50 +482,50 @@ SSATmp* baseValueToLval(IRGS& env, SSATmp* base) {
 }
 
 template <typename Finish>
-void bespokeElemImpl(IRGS& env, MOpMode mode,
-                     Type baseType, SSATmp* key,
-                     Finish finish) {
-  auto const base = extractBase(env);
-  auto const baseLval = gen(env, LdMBase, TLval);
+SSATmp* bespokeElemImpl(IRGS& env, MOpMode mode,
+                        Type baseType, SSATmp* key,
+                        Finish finish) {
   auto const needsLval = mode == MOpMode::Unset || mode == MOpMode::Define;
   auto const shouldThrow = mode == MOpMode::Warn || mode == MOpMode::InOut ||
                            mode == MOpMode::Define;
 
   auto const invalid_key = [&] {
     gen(env, ThrowInvalidArrayKey, extractBase(env), key);
-    finish(cns(env, TBottom));
+    return cns(env, TBottom);
   };
 
   if ((baseType <= TVec) && key->isA(TStr)) {
     if (shouldThrow) return invalid_key();
-    return finish(ptrToInitNull(env), cns(env, TInitNull));
+    return ptrToInitNull(env);
   }
   if (!key->isA(TInt | TStr)) return invalid_key();
 
   if (baseType <= TKeyset && needsLval) {
     gen(env, ThrowInvalidOperation,
         cns(env, s_InvalidKeysetOperationMsg.get()));
-    return finish(cns(env, TBottom));
+    return cns(env, TBottom);
   }
 
   if (needsLval) {
-    return emitElem(env, baseLval, key, base, shouldThrow, finish);
+    auto const baseLval = ldMBase(env);
+    return emitElem(env, baseLval, baseType, key, shouldThrow);
   } else if (shouldThrow) {
+    auto const base = extractBase(env);
     auto const val = emitProfiledGetThrow(env, base, key, [&](SSATmp* val) {
-      finish(baseValueToLval(env, val), val);
+      finish(baseValueToLval(env, val));
     });
-    return finish(baseValueToLval(env, val), val);
+    return baseValueToLval(env, val);
   } else {
-    ifThen(
+    return cond(
       env,
       [&](Block* taken) {
-        auto const val = emitProfiledGet(
-          env, base, key, taken,
-          [&](SSATmp* val) { finish(baseValueToLval(env, val), val); }
-        );
-        finish(baseValueToLval(env, val), val);
+        auto const base = extractBase(env);
+        return emitProfiledGet(env, base, key, taken, [&](SSATmp* val) {
+          finish(baseValueToLval(env, val));
+        });
       },
-      [&] { finish(ptrToInitNull(env), cns(env, TInitNull)); }
+      [&](SSATmp* val) { return baseValueToLval(env, val); },
+      [&] { return ptrToInitNull(env); }
     );
   }
 }
@@ -558,23 +536,15 @@ void emitBespokeDim(IRGS& env, MOpMode mode, MemberKey mk) {
   if (mcodeIsProp(mk.mcode)) PUNT(BespokeDimProp);
   assertx(mcodeIsElem(mk.mcode));
 
-  auto const finish = [&] (SSATmp* basePtr,
-                           SSATmp* base = nullptr,
-                           Type baseType = TCell) {
-    if (basePtr->isA(TPtr)) basePtr = gen(env, ConvPtrToLval, basePtr);
-    assert_flog(basePtr->isA(TLval), "Unexpected mbase: {}", *basePtr->inst());
-    gen(env, StMBase, basePtr);
-    if (base) {
-      env.irb->fs().setMemberBase(base);
-    } else {
-      env.irb->fs().setMemberBaseType(baseType);
-    }
-
+  auto const baseType = env.irb->fs().mbase().type;
+  auto const finish = [&](SSATmp* base) {
+    if (base->isA(TPtr)) base = gen(env, ConvPtrToLval, base);
+    assert_flog(base->isA(TLval), "Unexpected mbase: {}", *base->inst());
+    gen(env, StMBase, base);
     checkElemDimForReadonly(env);
   };
-
-  auto const baseType = env.irb->fs().mbase().type;
-  bespokeElemImpl(env, mode, baseType, key, finish);
+  auto const base = bespokeElemImpl(env, mode, baseType, key, finish);
+  finish(base);
 }
 
 void emitBespokeAddElemC(IRGS& env) {
@@ -1082,29 +1052,29 @@ void emitLoggingDiamond(
         throw;
       }
 
-      // For layout-sensitive bytecodes, opcodeChangesPC implies that
-      // opcodeBreaksBB and we are at the end of the tracelet. Therefore we
-      // don't need to worry about control flow after the InterpOneCF.
-      auto const DEBUG_ONLY op = curFunc(env)->getOp(bcOff(env));
-      auto const DEBUG_ONLY opChangePC = opcodeChangesPC(op);
-      assertx(IMPLIES(opChangePC, opcodeBreaksBB(op, false)));
+      if (debug) {
+        // For layout-sensitive bytecodes, opcodeChangesPC implies that
+        // opcodeBreaksBB and we are at the end of the tracelet. Therefore we
+        // don't need to worry about control flow after the InterpOneCF.
+        auto const op = curFunc(env)->getOp(bcOff(env));
+        auto const opChangePC = opcodeChangesPC(op);
+        always_assert(IMPLIES(opChangePC, opcodeBreaksBB(op, false)));
 
-      for (uint32_t i = 0; i < vanillaLocalTypes.size(); i ++) {
-        SCOPE_ASSERT_DETAIL("lost type info") {
-          return folly::sformat(
+        for (uint32_t i = 0; i < vanillaLocalTypes.size(); i ++) {
+          always_assert_flog(
+            env.irb->fs().local(i).type <= vanillaLocalTypes[i],
             "Local {}: expected type: {}, inferred type: {}",
-            i, vanillaLocalTypes[i], env.irb->fs().local(i).type);
-        };
-        assertx(env.irb->fs().local(i).type <= vanillaLocalTypes[i]);
-      }
-      for (int32_t i = 0; i < vanillaStackTypes.size(); i ++) {
-        auto const offset = offsetFromIRSP(env, BCSPRelOffset{-i});
-        SCOPE_ASSERT_DETAIL("lost type info") {
-          return folly::sformat(
+            i, vanillaLocalTypes[i], env.irb->fs().local(i).type
+          );
+        }
+        for (int32_t i = 0; i < vanillaStackTypes.size(); i ++) {
+          auto const offset = offsetFromIRSP(env, BCSPRelOffset{-i});
+          always_assert_flog(
+            env.irb->fs().stack(offset).type <= vanillaStackTypes[i],
             "Stack {}: expected type: {}, inferred type: {}",
-            i, vanillaStackTypes[i], env.irb->fs().stack(offset).type);
-        };
-        assertx(env.irb->fs().stack(offset).type <= vanillaStackTypes[i]);
+            i, vanillaStackTypes[i], env.irb->fs().stack(offset).type
+          );
+        }
       }
     }
   );
@@ -1158,7 +1128,7 @@ void profileArrLikeProps(IRGS& env) {
       cns(env, tv.val().parr)
     );
     auto const data = IndexData(index);
-    auto const addr = gen(env, LdPropAddr, data, obj);
+    auto const addr = gen(env, LdPropAddr, data, TCell, obj);
     gen(env, StMem, addr, arr);
   }
 }

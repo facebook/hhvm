@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
+#include "hphp/runtime/vm/jit/memory-effects.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/reg-alloc.h"
@@ -578,6 +579,8 @@ using TypeNames::TCA;
 #define DTypeCnsClsName
 #define DVerifyParamFail
 #define DPropLval
+#define DElemLval
+#define DElemLvalPos
 
 #define O(opcode, dstinfo, srcinfo, flags) \
   case opcode: dstinfo srcinfo countCheck(); return true;
@@ -643,6 +646,21 @@ using TypeNames::TCA;
 #undef DTypeCnsClsName
 #undef DVerifyParamFail
 #undef DPropLval
+#undef DElemLval
+#undef DElemLvalPos
+
+  if (inst->is(LdMBase)) {
+    auto const& acls = inst->extra<LdMBase>()->acls;
+    always_assert(acls <= AUnknownTV);
+    always_assert(acls <= canonicalize(pointee(inst->typeParam())));
+  }
+  if (inst->is(LdPropAddr, LdInitPropAddr,
+               LdClsPropAddrOrNull, LdClsPropAddrOrRaise)) {
+    always_assert(inst->typeParam() <= TCell);
+  }
+  if (inst->is(ElemVecD, ElemDictD, ElemVecU, ElemDictU, BespokeElem)) {
+    always_assert(inst->typeParam() <= TArrLike);
+  }
   return true;
 }
 
@@ -651,7 +669,7 @@ bool checkEverything(const IRUnit& unit) {
   if (debug) {
     checkTmpsSpanningCalls(unit);
     forEachInst(rpoSortCfg(unit), [&](IRInstruction* inst) {
-      assertx(checkOperandTypes(inst, &unit));
+      always_assert(checkOperandTypes(inst, &unit));
     });
   }
   return true;

@@ -27,6 +27,7 @@
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/type-array-elem.h"
 #include "hphp/runtime/vm/resumable.h"
 
 #include "hphp/util/dataflow-worklist.h"
@@ -70,6 +71,34 @@ bool merge_into(TypeSourceSet& dst, const TypeSourceSet& src) {
   return changed;
 }
 
+Type bound_type(Type type, Type limit) {
+  type &= limit;
+  if (!(type <= limit)) type = limit;
+  return type;
+}
+
+// Merge a SSATmp and Type pair, which are meant to stay in sync
+bool merge_value_and_type(SSATmp*& dstValue, SSATmp* srcValue,
+                          Type& dstType, const Type& srcType) {
+  auto changed = false;
+
+  changed |= merge_util(dstType, dstType | srcType);
+
+  // Get the least common ancestor across both states.
+  changed |= merge_util(dstValue, least_common_ancestor(dstValue, srcValue));
+
+  // Certain unions of types (involving interfaces) may widen the type
+  // beyond that of the known value. Clamp the type to the known value
+  // in that case. Alternately, we could drop the known value, but
+  // that's usually more valuable.
+  if (dstValue != nullptr && !(dstType <= dstValue->type())) {
+    dstType = bound_type(dstType, dstValue->type());
+    changed = true;
+  }
+
+  return changed;
+}
+
 /*
  * Merge LocationStates, returning whether anything changed.
  */
@@ -77,18 +106,7 @@ template<LTag lt, LTag rt>
 bool merge_into(LocationState<lt>& dst, const LocationState<rt>& src) {
   auto changed = false;
 
-  changed |= merge_util(dst.type, dst.type | src.type);
-
-  // Get the least common ancestor across both states.
-  changed |= merge_util(dst.value, least_common_ancestor(dst.value, src.value));
-
-  // We may have changed either dst.value or dst.type in a way that could fail
-  // to preserve LocationState invariants.  So check if we can't keep the value.
-  if (dst.value != nullptr && dst.value->type() != dst.type) {
-    dst.value = nullptr;
-    changed = true;
-  }
-
+  changed |= merge_value_and_type(dst.value, src.value, dst.type, src.type);
   changed |= merge_into(dst.typeSrcs, src.typeSrcs);
 
   if (!dst.maybeChanged && src.maybeChanged) {
@@ -139,20 +157,46 @@ bool merge_into(FrameState& dst, const FrameState& src) {
   // We must always have the same stublogue mode.
   always_assert(dst.stublogue == src.stublogue);
 
-  if (dst.ctx != src.ctx) {
-    dst.ctx = nullptr;
-    changed = true;
-  }
-  changed |= merge_util(dst.ctxType, dst.ctxType | src.ctxType);
+  changed |= merge_value_and_type(
+    dst.ctx, src.ctx,
+    dst.ctxType, src.ctxType
+  );
 
-  if (dst.mbr.ptr != src.mbr.ptr) {
-    dst.mbr.ptr = nullptr;
-    changed = true;
-  }
+  changed |= merge_value_and_type(
+    dst.mbr.ptr, src.mbr.ptr,
+    dst.mbr.ptrType, src.mbr.ptrType
+  );
   changed |= merge_util(dst.mbr.pointee, dst.mbr.pointee | src.mbr.pointee);
-  changed |= merge_util(dst.mbr.ptrType, dst.mbr.ptrType | src.mbr.ptrType);
 
   changed |= merge_into(dst.mbase, src.mbase);
+
+  changed |= merge_value_and_type(
+    dst.mTempBase.value, src.mTempBase.value,
+    dst.mTempBase.type, src.mTempBase.type
+  );
+
+  changed |= merge_util(dst.mROProp, dst.mROProp | src.mROProp);
+
+  changed |= merge_util(dst.mbaseLocalType,
+                        dst.mbaseLocalType | src.mbaseLocalType);
+  changed |= merge_util(dst.mbaseStackType,
+                        dst.mbaseStackType | src.mbaseStackType);
+  changed |= merge_util(dst.mbaseTempType,
+                        dst.mbaseTempType | src.mbaseTempType);
+  // If we clamped the mbase type above, we might need to clamp the
+  // location specific types as well.
+  if (!(dst.mbaseLocalType <= dst.mbase.type)) {
+    dst.mbaseLocalType = bound_type(dst.mbaseLocalType, dst.mbase.type);
+    changed = true;
+  }
+  if (!(dst.mbaseStackType <= dst.mbase.type)) {
+    dst.mbaseStackType = bound_type(dst.mbaseStackType, dst.mbase.type);
+    changed = true;
+  }
+  if (!(dst.mbaseTempType <= dst.mbase.type)) {
+    dst.mbaseTempType = bound_type(dst.mbaseTempType, dst.mbase.type);
+    changed = true;
+  }
 
   // Throw away any local information only known at dst.
   for (auto& it : dst.locals) {
@@ -181,6 +225,7 @@ bool merge_into(FrameState& dst, const FrameState& src) {
   // Eval stack depth should be the same at merge points.
   always_assert(dst.bcSPOff == src.bcSPOff);
 
+  assertx(dst.checkInvariants());
   return changed;
 }
 
@@ -202,6 +247,8 @@ bool merge_into(jit::vector<FrameState>& dst,
 
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
 FrameState::FrameState(const Func* func)
   : curFunc(func)
 {}
@@ -215,6 +262,11 @@ void FrameStateMgr::update(const IRInstruction* inst) {
   Indent _i;
 
   if (auto const taken = inst->taken()) {
+    // If CheckMROProp fails, we know the bit is false, so propagate
+    // that to the taken edge.
+    auto const oldMROProp = cur().mROProp;
+    if (inst->is(CheckMROProp)) cur().mROProp = TriBool::No;
+
     /*
      * TODO(#4323657): we should make this assertion for all non-empty blocks
      * (exits in addition to catches).  It would fail right now for exit
@@ -240,15 +292,17 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     // state doesn't have this problem during optimization passes,
     // because we'll always process the jump before the target block.
     if (taken->empty()) save(taken);
+
+    // Restore the original value since we're going to process the
+    // next edge now.
+    cur().mROProp = oldMROProp;
   }
 
   auto killIterLocals = [&](const std::initializer_list<uint32_t>& ids) {
     for (auto id : ids) {
-      setValue(loc(id), nullptr);
+      setValueAndSyncMBase(loc(id), nullptr, false);
     }
   };
-
-  assertx(checkInvariants());
 
   switch (inst->op()) {
   case BeginInlining:  trackBeginInlining(inst); break;
@@ -262,6 +316,7 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     break;
   case Call:
     {
+      assertx(cur().checkMInstrStateDead());
       auto const extra = inst->extra<Call>();
       // Remove tracked state for the slots for args and the actrec.
       uint32_t numCells = kNumActRecCells + extra->numInputs();
@@ -286,6 +341,7 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     break;
 
   case ContEnter:
+    assertx(cur().checkMInstrStateDead());
     trackCall();
     break;
 
@@ -320,83 +376,114 @@ void FrameStateMgr::update(const IRInstruction* inst) {
   }
 
   case LdMem:
-    if (inst->src(0) == cur().mbr.ptr) {
-      setValue(Location::MBase{}, inst->dst());
-    }
+    pointerLoad(inst->src(0), inst->dst());
     break;
 
   case StMem:
-    // If we ever start using StMem to store to pointers that might be
-    // stack/locals, we have to update tracked state here.
-    if (!canonical(inst->src(0))->inst()->is(LdOutAddrInlined)) {
-      always_assert(!inst->src(0)->type().maybe(TMemToFrame));
-      always_assert(!inst->src(0)->type().maybe(TMemToStk));
-    }
+    pointerStore(inst->src(0), inst->src(1));
     break;
 
-  case LdStk:
-    {
-      auto const offset = inst->extra<LdStk>()->offset;
-      // Nearly all callers of setValue() for stack slots represent a
-      // modification of the stack, so it sets stackModified. LdStk is the one
-      // exception, so we compensate for that here.
-      auto oldModified = cur().stackModified;
-      setValue(stk(offset), inst->dst());
-      cur().stackModified = oldModified;
-    }
+  case LdStk: {
+    auto const offset = inst->extra<LdStk>()->offset;
+    // Nearly all callers of setValue() for stack slots represent a
+    // modification of the stack, so it sets stackModified. LdStk is the one
+    // exception, so we compensate for that here.
+    auto const oldModified = cur().stackModified;
+    setValueAndSyncMBase(stk(offset), inst->dst(), true);
+    cur().stackModified = oldModified;
     break;
+  }
 
   case StStk:
-    setValue(stk(inst->extra<StStk>()->offset), inst->src(1));
+    setValueAndSyncMBase(
+      stk(inst->extra<StStk>()->offset),
+      inst->src(1),
+      false
+    );
     break;
 
   case CheckType:
-  case AssertType:
+  case AssertType: {
+    auto const oldVal = inst->src(0);
+    auto const newVal = inst->dst();
     for (auto& frame : m_stack) {
       for (auto& it : frame.locals) {
-        refineValue(it.second, inst->src(0), inst->dst());
+        refineValue(it.second, oldVal, newVal);
       }
       for (auto& it : frame.stack) {
-        refineValue(it.second, inst->src(0), inst->dst());
+        refineValue(it.second, oldVal, newVal);
       }
     }
     // MInstrState can only be live for the current frame.
-    refineValue(cur().mbase, inst->src(0), inst->dst());
-    if (inst->src(0) == cur().mbr.ptr) {
-      setMBR(inst->dst());
+    refineMBaseValue(oldVal, newVal);
+    auto const canonOldVal = canonical(oldVal);
+    if (cur().mTempBase.value &&
+        canonOldVal == canonical(cur().mTempBase.value)) {
+      setMTempBase(newVal);
     }
+    if (cur().mbr.ptr && canonOldVal == canonical(cur().mbr.ptr)) {
+      setMBR(newVal, true);
+    }
+    break;
+  }
+
+  case CheckTypeMem:
+    pointerRefine(inst->src(0), inst->typeParam());
+    break;
+  case CheckInitMem:
+    pointerRefine(inst->src(0), TInitCell);
     break;
 
   case AssertLoc:
   case CheckLoc: {
     auto const id = inst->extra<LocalId>()->locId;
-    refineType(loc(id), inst->typeParam(), TypeSource::makeGuard(inst));
+    refineTypeAndSyncMBase(
+      loc(id),
+      inst->typeParam(),
+      TypeSource::makeGuard(inst)
+    );
     break;
   }
 
   case AssertStk:
   case CheckStk:
-    refineType(stk(inst->extra<IRSPRelOffsetData>()->offset),
-               inst->typeParam(),
-               TypeSource::makeGuard(inst));
+    refineTypeAndSyncMBase(
+      stk(inst->extra<IRSPRelOffsetData>()->offset),
+      inst->typeParam(),
+      TypeSource::makeGuard(inst)
+    );
     break;
 
   case AssertMBase:
+    refineTypeAndSyncMBase(
+      Location::MBase{},
+      inst->typeParam(),
+      TypeSource::makeGuard(inst)
+    );
+    break;
+
   case CheckMBase:
-    refineType(Location::MBase{}, inst->typeParam(),
-               TypeSource::makeGuard(inst));
+    setMBR(inst->src(0), true);
+    refineTypeAndSyncMBase(
+      Location::MBase{},
+      inst->typeParam(),
+      TypeSource::makeGuard(inst)
+    );
     break;
 
   case StLoc:
-    setValue(loc(inst->extra<LocalId>()->locId), inst->src(1));
+    setValueAndSyncMBase(
+      loc(inst->extra<LocalId>()->locId),
+      inst->src(1),
+      false
+    );
     break;
 
-  case LdLoc:
-    {
-      auto const id = inst->extra<LdLoc>()->locId;
-      setValue(loc(id), inst->dst());
-    }
+  case LdLoc: {
+    auto const id = inst->extra<LdLoc>()->locId;
+    setValueAndSyncMBase(loc(id), inst->dst(), true);
     break;
+  }
 
   case EndCatch:
     /*
@@ -463,12 +550,8 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     cur().bcSPOff += extra.cellsPushed;
     cur().bcSPOff -= extra.cellsPopped;
 
-    if (isMemberBaseOp(extra.opcode) ||
-        isMemberDimOp(extra.opcode) ||
-        isMemberFinalOp(extra.opcode)) {
-      cur().mbr = MBRState{};
-      cur().mbase = MBaseState{};
-    }
+    // Be conservative and drop minstr state
+    clearMInstr();
     break;
   }
 
@@ -494,204 +577,192 @@ void FrameStateMgr::update(const IRInstruction* inst) {
   }
 
   case LdMBase:
-    setMBR(inst->dst());
+    setMBR(inst->dst(), true);
     break;
 
-  case StMBase: {
-    auto const mbr = inst->src(0);
-    setMBR(mbr);
-    setValue(Location::MBase{}, nullptr);
-  } break;
+  case StMBase:
+    setMBR(inst->src(0), false);
+    break;
+
+  case StMROProp:
+    cur().mROProp = inst->src(0)->hasConstVal()
+      ? yesOrNo(inst->src(0)->boolVal())
+      : TriBool::Maybe;
+    break;
+
+  case CheckMROProp:
+    cur().mROProp = TriBool::Yes;
+    break;
 
   case FinishMemberOp:
-    cur().mbr = MBRState{};
-    setValue(Location::MBase{}, nullptr);
+    clearMInstr();
+    break;
+
+  case CallBuiltin:
+    // CallBuiltin uses the same memory as mTempBase, so it had better
+    // be dead.
+    assertx(cur().checkMInstrStateDead());
+    break;
+
+  case PropX:
+  case PropDX:
+  case PropQ:
+    cur().mROProp |= TriBool::Yes;
+    if (!inst->src(2)->isA(TNullptr)) {
+      assertx(inst->src(2)->isA(TPtrToMISTemp));
+      pointerStore(inst->src(2), nullptr);
+    }
     break;
 
   default:
     // Use precise Minstr effects if we can
     if (hasMInstrBaseEffects(*inst)) {
-      updateMInstr(inst);
+      handleMInstr(inst);
     } else {
-      // Handle everything else conservatively
-      updateMBase(inst);
+      // Handle everything else conservatively according to its memory
+      // effects
+      handleConservatively(inst);
     }
-      break;
+    break;
   }
+
+  assertx(checkInvariants());
 }
 
-void FrameStateMgr::updateMInstr(const IRInstruction* inst) {
+// Handle instructions which modify tracked state in a way we can
+// track more precisely than handleConservatively.
+void FrameStateMgr::handleMInstr(const IRInstruction* inst) {
   auto const basePtr = inst->src(0);
   assertx(basePtr->isA(TLval));
 
-  auto const base = canonicalize(pointee(basePtr));
-  auto const mbase = cur().mbr.pointee;
+  auto const acls = canonicalize(pointee(basePtr));
 
-  // If we don't know exactly where the base is, we have to be conservative and
-  // apply the operation to all locals/stack slots that could be affected.
-  auto const apply = [&] (Location l) {
-    auto const oldType = typeOf(l);
-    auto const maxType = [&] {
-      switch (l.tag()) {
-        case LTag::Local: return LocalState::default_type();
-        case LTag::Stack: return StackState::default_type();
-        case LTag::MBase: return MBaseState::default_type();
-      }
-      not_reached();
-    }();
+  ITRACE(4, "FrameStateMgr::handleMInstr: {}\n", jit::show(acls));
+  Indent _i;
 
-    if (maxType <= oldType) {
-      // Drop the value and don't bother with precise effects.
-      return setType(l, oldType);
-    }
+  // mInstrBaseEffects tells us what the base will become after this
+  // instruction. We need to apply it to any tracked location which
+  // might intersect with the Lval passed to the instruction:
 
-    if (auto const n = mInstrBaseEffects(*inst, oldType)) {
-      widenType(l, oldType | *n);
+  auto const update = [&] (Location l, bool widen) {
+    if (auto const u = mInstrBaseEffects(*inst, typeOf(l))) {
+      widen ? widenType(l, *u) : setType(l, *u);
     }
   };
 
-  if (base.isSingleLocation()) {
-    // When the member base register refers to a single known memory
-    // location `l', we apply the effect of `inst' only to `l'.
-    auto const apply_one = [&] (Location l) {
-      if (auto const n = mInstrBaseEffects(*inst, typeOf(l))) {
-        setType(l, *n);
-      }
+  if (auto const updateMBase = isMBase(basePtr, acls);
+      updateMBase != TriBool::No) {
+    auto const widen = updateMBase == TriBool::Maybe;
+    update(Location::MBase{}, widen);
+
+    // Adjust the mbase location specific types as well:
+    auto const spec = [&] (Type& t) {
+      auto const u = mInstrBaseEffects(*inst, t);
+      if (!u) return;
+      t = widen ? (t | *u) : *u;
     };
-
-    if (auto const blocal = base.local()) {
-      auto const l = loc(blocal->ids.singleValue());
-      apply_one(l);
-    }
-    if (auto const bstack = base.stack()) {
-      assertx(bstack->size() == 1);
-      auto const l = stk(bstack->low);
-      apply_one(l);
-    }
-
-    if (base.maybe(mbase)) {
-      if (mbase.isSingleLocation()) {
-        apply_one(Location::MBase{});
-      } else {
-        apply(Location::MBase{});
-      }
-    }
-
-    // We don't track anything else.
-    return;
+    if (acls.maybe(ALocalAny))        spec(cur().mbaseLocalType);
+    if (acls.maybe(AStackAny))        spec(cur().mbaseStackType);
+    if (acls.maybe(AMIStateTempBase)) spec(cur().mbaseTempType);
   }
 
-  if (base.maybe(ALocalAny)) {
-    for (auto& l : cur().locals) {
-      auto const id = l.first;
-      if (base.maybe(ALocal { fp(), id })) {
-        apply(loc(id));
+  // If it's a single location, we can change the known type to that
+  // type precisely.
+  if (acls.isSingleLocation()) {
+    if (auto const l = acls.is_local()) {
+      update(loc(l->ids.singleValue()), false);
+    } else if (auto const s = acls.is_stack()) {
+      assertx(s->size() == 1);
+      if (auto const l = optStk(s->low)) update(*l, false);
+    } else if (acls <= AMIStateTempBase) {
+      if (auto const u = mInstrBaseEffects(*inst, mTempBase().type)) {
+        setMTempBaseType(*u);
       }
     }
-    // This instruction could also affect locals that aren't being tracked.
-    // Be conservative and assume that they could be affected.
-    cur().localsCleared = true;
-  }
-  if (base.maybe(AStackAny)) {
-    for (auto& it : cur().stack) {
-      // The SBInvOffset of the stack slot is just its 1-indexed slot.
-      auto const sbRel = it.first;
-      auto const spRel = sbRel.to<IRSPRelOffset>(irSPOff());
-      if (base.maybe(AStack::at(spRel))) {
-        apply(stk(spRel));
+  } else {
+    // Otherwise it might be one of multiple locations, so we need to
+    // widen in the type (not replace).
+    if (acls.maybe(ALocalAny)) {
+      for (auto const& local : cur().locals) {
+        if (!acls.maybe(ALocal{fp(), local.first})) continue;
+        update(loc(local.first), true);
+      }
+      // This instruction could also affect locals that aren't being
+      // tracked. Be conservative and assume that they could be
+      // affected.
+      cur().localsCleared = true;
+    }
+    if (acls.maybe(AStackAny)) {
+      for (auto const& stack : cur().stack) {
+        auto const offset = stack.first.to<IRSPRelOffset>(irSPOff());
+        if (!acls.maybe(AStack::at(offset))) continue;
+        update(stk(stack.first), true);
       }
     }
-  }
-  if (base.maybe(mbase)) {
-    apply(Location::MBase{});
+    if (acls.maybe(AMIStateTempBase)) {
+      if (auto const u = mInstrBaseEffects(*inst, mTempBase().type)) {
+        widenMTempBase(*u);
+      }
+    }
   }
 }
 
-void FrameStateMgr::updateMBase(const IRInstruction* inst) {
-  auto const base = cur().mbr.pointee;
-
-  auto const pessimize_mbase = [&] {
-    setValue(Location::MBase{}, nullptr);
-  };
-
-  auto const handle_stores = [&] (AliasClass stores) {
-    if (!base.maybe(stores)) return;
-
-#define UNTRACKED_ALIAS_CLASSES \
-    X(Iter)     \
-    X(Prop)     \
-    X(ElemI)    \
-    X(ElemS)    \
-    X(MIState)
-#define X(Mem)  \
-    (base.maybe(A##Mem##Any) && stores.maybe(A##Mem##Any)) ||
-
-    if (UNTRACKED_ALIAS_CLASSES false) {
-      // AliasClass doesn't support intersection yet, so if `base' and `stores'
-      // might intersect outside of frame locals and stack slots, we pessimize.
-      // FrameState only tracks type information for ALocal and AStack anyway,
-      // so we aren't actually losing any information.
-      return pessimize_mbase();
+// Update tracked state conservatively according to the instruction's
+// memory effects.
+void FrameStateMgr::handleConservatively(const IRInstruction* inst) {
+  auto const store = [&] (const AliasClass& stores) {
+    if (stores.maybe(AMIStateBase)) {
+      setMBR(nullptr, false);
+    } else if (isMBase(nullptr, stores) != TriBool::No) {
+      setValue(Location::MBase{}, nullptr);
+      if (stores.maybe(ALocalAny))        cur().mbaseLocalType = TCell;
+      if (stores.maybe(AStackAny))        cur().mbaseStackType = TCell;
+      if (stores.maybe(AMIStateTempBase)) cur().mbaseTempType  = TCell;
     }
 
-#undef X
-#undef UNTRACKED_ALIAS_CLASSES
-
-    auto updated = false;
-
-    if (base.maybe(ALocalAny) && stores.maybe(ALocalAny)) {
-      for (uint32_t i = 0; i < cur().curFunc->numLocals(); ++i) {
-        auto const aloc = ALocal { fp(), i };
-        if (base.maybe(aloc) && stores.maybe(aloc)) {
-          if (!updated) {
-            cur().mbase = local(i);
-            cur().mbase.maybeChanged = true;
-            updated = true;
-          } else {
-            merge_into(cur().mbase, local(i));
-          }
-        }
+    if (stores.maybe(ALocalAny)) {
+      for (auto const& local : cur().locals) {
+        if (!stores.maybe(ALocal{fp(), local.first})) continue;
+        setValue(loc(local.first), nullptr);
+      }
+      // This instruction could also affect locals that aren't being
+      // tracked. Be conservative and assume that they could be
+      // affected.
+      cur().localsCleared = true;
+    }
+    if (stores.maybe(AStackAny)) {
+      for (auto const& stack : cur().stack) {
+        auto const offset = stack.first.to<IRSPRelOffset>(irSPOff());
+        if (!stores.maybe(AStack::at(offset))) continue;
+        setValue(stk(stack.first), nullptr);
       }
     }
-
-    if (base.maybe(AStackAny) && stores.maybe(AStackAny)) {
-      for (auto sbRel = bcSPOff(); sbRel > SBInvOffset{0}; sbRel--) {
-        auto const spRel = sbRel.to<IRSPRelOffset>(irSPOff());
-        auto const astk = AStack::at(spRel);
-
-        if (base.maybe(astk) && stores.maybe(astk)) {
-          if (!updated) {
-            cur().mbase = stack(sbRel);
-            cur().mbase.maybeChanged = true;
-            updated = true;
-          } else {
-            merge_into(cur().mbase, stack(sbRel));
-          }
-        }
-      }
-    }
+    if (stores.maybe(AMIStateTempBase)) setMTempBase(nullptr);
+    if (stores.maybe(AMIStateROProp))   cur().mROProp = TriBool::Maybe;
   };
 
   auto const effects = memory_effects(*inst);
+
+  ITRACE(4, "FrameStateMgr::handleConservatively: {}\n", jit::show(effects));
+  Indent _i;
+
   match<void>(
     effects,
-    [&](GeneralEffects m) {
-      handle_stores(m.stores);
-      handle_stores(m.inout);
+    [&] (GeneralEffects x) {
+      store(x.stores);
+      store(x.inout);
     },
-    [&](PureStore m) { handle_stores(m.dst); },
-    [&](CallEffects x) {
-      handle_stores(x.kills);
-      handle_stores(x.inputs);
-      handle_stores(x.actrec);
-      handle_stores(x.outputs);
+    [&] (CallEffects x) {
+      store(x.actrec);
+      store(x.outputs);
     },
-    [&](PureLoad) {},
-    [&](ReturnEffects) {},
-    [&](ExitEffects) {},
-    [&](IrrelevantEffects) {},
-    [&](PureInlineCall) {},
-    [&](UnknownEffects) { pessimize_mbase(); }
+    [&] (PureStore x)       { store(x.dst); },
+    [&] (PureInlineCall x)  { store(x.base); },
+    [&] (UnknownEffects)    { store(AUnknown); },
+    [&] (ReturnEffects x)   {},
+    [&] (ExitEffects x)     {},
+    [&] (PureLoad)          {},
+    [&] (IrrelevantEffects) {}
   );
 }
 
@@ -713,7 +784,7 @@ PostConditions FrameStateMgr::collectPostConds() {
       auto const changed = state.maybeChanged;
 
       if (changed || type < TCell) {
-        FTRACE(1, "Stack({}, {}): {} ({})\n",
+        ITRACE(1, "Stack({}, {}): {} ({})\n",
                sbRel.to<BCSPRelOffset>(bcSPOff()).offset, sbRel.offset,
                type, changed ? "changed" : "refined");
         auto& vec = changed ? postConds.changed : postConds.refined;
@@ -729,7 +800,7 @@ PostConditions FrameStateMgr::collectPostConds() {
       auto const type = state.type;
       auto const changed = state.maybeChanged;
       if (changed || type < TCell) {
-        FTRACE(1, "Local {}: {} ({})\n", id, type.toString(),
+        ITRACE(1, "Local {}: {} ({})\n", id, type.toString(),
                changed ? "changed" : "refined");
         auto& vec = changed ? postConds.changed : postConds.refined;
         vec.push_back({ Location::Local{id}, type });
@@ -740,7 +811,7 @@ PostConditions FrameStateMgr::collectPostConds() {
   auto const ty = mbase().type;
   auto const changed = mbase().maybeChanged;
   if (changed || ty < TCell) {
-    FTRACE(1, "MBase{{}}: {} ({})\n", ty, changed ? "changed" : "refined");
+    ITRACE(1, "MBase{{}}: {} ({})\n", ty, changed ? "changed" : "refined");
     auto& vec = changed ? postConds.changed : postConds.refined;
     vec.push_back({ Location::MBase{}, ty });
   }
@@ -763,13 +834,15 @@ void FrameStateMgr::startBlock(Block* block, bool hasUnprocessedPred) {
   if (it != end) {
     always_assert_flog(
       block->empty(),
-      "tried to startBlock a non-empty block while building\n"
+      "tried to startBlock a non-empty block while building"
     );
-    ITRACE(4, "Loading state for B{}: {}\n", block->id(), show());
+    ITRACE(4, "Loading state for B{}:\n{}\n", block->id(), show());
     m_stack = it->second.in;
-    if (m_stack.empty()) {
-      always_assert_flog(0, "invalid startBlock for B{}", block->id());
-    }
+    always_assert_flog(
+      !m_stack.empty(),
+      "invalid startBlock for B{}",
+      block->id()
+    );
   } else if (debug) {
     // NOTE: Highly suspect; different debug vs. non-debug behavior.
     save(block, nullptr);
@@ -781,6 +854,15 @@ void FrameStateMgr::startBlock(Block* block, bool hasUnprocessedPred) {
     Indent _;
     ITRACE(4, "B{} is a loop header; resetting state\n", block->id());
     clearForUnprocessedPred();
+
+    // pointee() won't do the right thing if a DefLabel isn't fully
+    // formed
+    always_assert_flog(
+      block->empty() || !block->front().is(DefLabel),
+      "B{} has a DefLabel with an unprocessed pred. Frame-state can't "
+      "handle this, and it shouldn't happen with how we do irgen.",
+      block->id()
+    );
   }
 }
 
@@ -789,7 +871,7 @@ bool FrameStateMgr::finishBlock(Block* block) {
 
   if (block->isExitNoThrow()) {
     m_exitPostConds[block] = collectPostConds();
-    FTRACE(2, "PostConditions for exit Block {}:\n{}\n",
+    ITRACE(2, "PostConditions for exit Block {}:\n{}\n",
            block->id(), jit::show(m_exitPostConds[block]));
   }
 
@@ -851,7 +933,7 @@ const PostConditions& FrameStateMgr::postConds(Block* exitBlock) const {
  * one.  Otherwise merge the current state into the existing snapshot.
  */
 bool FrameStateMgr::save(Block* block, Block* pred) {
-  ITRACE(4, "Saving current state to B{}: {}\n", block->id(), show());
+  ITRACE(4, "Saving current state to B{}:\n{}\n", block->id(), show());
 
   // If the destination block is unreachable, there's no need to merge in the
   // frame state.
@@ -862,7 +944,7 @@ bool FrameStateMgr::save(Block* block, Block* pred) {
 
   if (it != m_states.end()) {
     changed = merge_into(it->second.in, m_stack);
-    ITRACE(4, "Merged state: {}\n", show());
+    ITRACE(4, "Merged state:\n{}\n", show());
   } else {
     if (pred) {
       assertx(hasStateFor(pred));
@@ -887,7 +969,7 @@ bool FrameStateMgr::save(Block* block, Block* pred) {
  * points at the bytecode or due to retranslated blocks).
  */
 void FrameStateMgr::clearForUnprocessedPred() {
-  FTRACE(1, "clearForUnprocessedPred\n");
+  ITRACE(1, "clearForUnprocessedPred\n");
 
   // Forget any information about stack values in memory.
   for (auto& it : cur().stack) {
@@ -895,10 +977,8 @@ void FrameStateMgr::clearForUnprocessedPred() {
   }
 
   // These values must go toward their conservative state.
-  cur().mbr = MBRState{};
-  cur().mbase = MBaseState{};
-
   clearLocals();
+  clearMInstr();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -920,6 +1000,8 @@ void FrameStateMgr::uninitStack() {
 
 void FrameStateMgr::trackBeginInlining(const IRInstruction* inst) {
   assertx(inst->is(BeginInlining));
+  assertx(cur().checkMInstrStateDead());
+
   auto const extra = inst->extra<BeginInlining>();
   auto const callee = extra->func;
   auto const spOffset = extra->spOffset;
@@ -964,7 +1046,7 @@ void FrameStateMgr::trackBeginInlining(const IRInstruction* inst) {
   auto const irSPOff = SBInvOffset{spOffset.offset - callee->numSlotsInFrame()};
   auto const bcSPOff = SBInvOffset{0};
   initStack(caller().spValue, irSPOff, bcSPOff);
-  FTRACE(6, "BeginInlining setting irSPOff: {}\n", irSPOff.offset);
+  ITRACE(6, "BeginInlining setting irSPOff: {}\n", irSPOff.offset);
 }
 
 void FrameStateMgr::trackEndInlining() {
@@ -977,6 +1059,7 @@ void FrameStateMgr::trackEndInlining() {
   // Pop the inlined frame.
   m_stack.pop_back();
   assertx(!m_stack.empty());
+  assertx(cur().checkMInstrStateDead());
 }
 
 void FrameStateMgr::trackInlineCall(const IRInstruction* inst) {
@@ -1008,16 +1091,154 @@ void FrameStateMgr::trackCall() {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool FrameState::checkInvariants() const {
-  for (auto& it : locals) {
+  for (auto const& it : locals) {
     auto const id = it.first;
     auto const& local = it.second;
-
     always_assert_flog(
-      local.value == nullptr || local.value->type() == local.type,
-      "local {} had type {}, but value {}\n",
+      local.value == nullptr || local.type <= local.value->type(),
+      "local {} had incompatible type {} with value {}",
       id,
       local.type,
       local.value->toString()
+    );
+  }
+  for (auto const& it : stack) {
+    auto const id = it.first;
+    auto const& stk = it.second;
+    always_assert_flog(
+      stk.value == nullptr || stk.type <= stk.value->type(),
+      "stack {} had incompatible type {} with value {}",
+      id.offset,
+      stk.type,
+      stk.value->toString()
+    );
+  }
+  always_assert_flog(
+    mbase.value == nullptr || mbase.type <= mbase.value->type(),
+    "mbase had incompatible type {} with value {}",
+    mbase.type,
+    mbase.value->toString()
+  );
+  always_assert_flog(
+    mbr.ptr == nullptr || mbr.ptrType <= mbr.ptr->type(),
+    "MBR had incompatible type {} with value {}",
+    mbr.ptrType,
+    mbr.ptr->toString()
+  );
+  always_assert_flog(
+    mbr.ptrType <= TLval,
+    "MBR contains a {}, not a Lval like it should",
+    mbr.ptrType
+  );
+  always_assert_flog(
+    mbr.pointee <= AUnknownTV,
+    "MBR's pointee {} is wider than AUnknownTV",
+    jit::show(mbr.pointee)
+  );
+  always_assert_flog(
+    mbr.ptr == nullptr || mbr.pointee <= canonicalize(pointee(mbr.ptr->type())),
+    "MBR's pointee {} is wider than it's ptr implies {}",
+    jit::show(mbr.pointee),
+    jit::show(canonicalize(pointee(mbr.ptr->type())))
+  );
+  always_assert_flog(
+    mbaseStackType <= mbase.type,
+    "mbase's stack-only type {} is wider than it's general type {}",
+    mbaseStackType,
+    mbase.type
+  );
+  always_assert_flog(
+    mbaseLocalType <= mbase.type,
+    "mbase's local-only type {} is wider than it's general type {}",
+    mbaseLocalType,
+    mbase.type
+  );
+  always_assert_flog(
+    mbaseTempType <= mbase.type,
+    "mbase's temp-base-only type {} is wider than it's general type {}",
+    mbaseTempType,
+    mbase.type
+  );
+  always_assert_flog(
+    IMPLIES(!mbr.pointee.maybe(AStackAny), mbaseStackType == TBottom),
+    "mbase has a stack-only type {} when it can't be the stack",
+    mbaseStackType
+  );
+  always_assert_flog(
+    IMPLIES(!mbr.pointee.maybe(ALocalAny), mbaseLocalType == TBottom),
+    "mbase has a local-only type {} when it can't be a local",
+    mbaseLocalType
+  );
+  always_assert_flog(
+    IMPLIES(!mbr.pointee.maybe(AMIStateTempBase), mbaseTempType == TBottom),
+    "mbase has a temp-base-only type {} when it can't be the MTempBase",
+    mbaseTempType
+  );
+
+  if (auto const l = mbr.pointee.is_local()) {
+    if (l->ids.hasSingleValue()) {
+      auto const localId = l->ids.singleValue();
+      if (auto const it = locals.find(localId); it != locals.end()) {
+        auto const& state = it->second;
+        always_assert_flog(
+          mbase.value == state.value &&
+          mbase.type == state.type,
+          "MBase and local {} do not agree on state ({} {} != {} {})",
+          localId,
+          mbase.value ? mbase.value->toString() : "<>",
+          mbase.type,
+          state.value ? state.value->toString() : "<>",
+          state.type
+        );
+        always_assert_flog(
+          mbase.type == mbaseLocalType,
+          "mbase has an incompatible local-only type ({} and {}) "
+          "when it must be a local",
+          mbase.type,
+          mbaseLocalType
+        );
+      }
+    }
+  } else if (auto const s = mbr.pointee.is_stack()) {
+    if (s->size() == 1) {
+      auto const offset = s->low.to<SBInvOffset>(irSPOff);
+      if (auto const it = stack.find(offset); it != stack.end()) {
+        auto const& state = it->second;
+        always_assert_flog(
+          mbase.value == state.value &&
+          mbase.type == state.type,
+          "MBase and stack {} do not agree on state ({} {} != {} {})",
+          offset.offset,
+          mbase.value ? mbase.value->toString() : "<>",
+          mbase.type,
+          state.value ? state.value->toString() : "<>",
+          state.type
+        );
+        always_assert_flog(
+          mbase.type == mbaseStackType,
+          "mbase has an incompatible stack-only type ({} and {}) "
+          "when it must be a stack slot",
+          mbase.type,
+          mbaseStackType
+        );
+      }
+    }
+  } else if (mbr.pointee <= AMIStateTempBase) {
+    always_assert_flog(
+      mbase.value == mTempBase.value &&
+      mbase.type == mTempBase.type,
+      "MBase and MTempBase do not agree on state ({} {} != {} {})",
+      mbase.value ? mbase.value->toString() : "<>",
+      mbase.type,
+      mTempBase.value ? mTempBase.value->toString() : "<>",
+      mTempBase.type
+    );
+    always_assert_flog(
+      mbase.type == mbaseTempType,
+      "mbase has an incompatible temp-base-only type ({} and {}) "
+      "when it must be the MTempBase",
+      mbase.type,
+      mbaseTempType
     );
   }
 
@@ -1031,9 +1252,49 @@ bool FrameState::checkInvariants() const {
 }
 
 bool FrameStateMgr::checkInvariants() const {
-  for (auto& state : m_stack) {
+  for (auto const& state : m_stack) {
+    // Every state except the current one should have a dead minstr
+    // state.
+    if (&state != &m_stack.back()) always_assert(state.checkMInstrStateDead());
     always_assert(state.checkInvariants());
   }
+  return true;
+}
+
+bool FrameState::checkMInstrStateDead() const {
+  always_assert_flog(
+    !mbr.ptr && mbr.ptrType == TLval && !(mbr.pointee < AUnknownTV),
+    "MBR is not dead when it should be ({} {} {})",
+    mbr.ptr ? mbr.ptr->toString() : "<>",
+    mbr.ptrType.toString(),
+    jit::show(mbr.pointee)
+  );
+  always_assert_flog(
+    !mbase.value && mbase.type == TCell,
+    "MBase is not dead when it should be ({} {})",
+    mbase.value ? mbase.value->toString() : "<>",
+    mbase.type.toString()
+  );
+  always_assert_flog(
+    !mTempBase.value && mTempBase.type == TCell,
+    "MTempBase is not dead when it should be ({} {})",
+    mTempBase.value ? mTempBase.value->toString() : "<>",
+    mTempBase.type.toString()
+  );
+  always_assert_flog(
+    mbaseStackType == TCell &&
+    mbaseLocalType == TCell &&
+    mbaseTempType == TCell,
+    "MBase has location specific types ({} {} {}) when it should be dead",
+    mbaseStackType,
+    mbaseLocalType,
+    mbaseTempType
+  );
+  always_assert_flog(
+    mROProp == TriBool::Maybe,
+    "MROProp has a known value {} when it should be dead",
+    HPHP::show(mROProp)
+  );
   return true;
 }
 
@@ -1045,17 +1306,25 @@ bool FrameStateMgr::checkInvariants() const {
 Location FrameStateMgr::loc(uint32_t id) const {
   return Location::Local { id };
 }
+Location FrameStateMgr::stk(SBInvOffset off) const {
+  return Location::Stack { off };
+}
 Location FrameStateMgr::stk(IRSPRelOffset off) const {
   auto const sbRel = off.to<SBInvOffset>(irSPOff());
   return Location::Stack { sbRel };
 }
 
+Optional<Location> FrameStateMgr::optStk(IRSPRelOffset off) const {
+  return optStk(off.to<SBInvOffset>(irSPOff()));
+}
+Optional<Location> FrameStateMgr::optStk(SBInvOffset off) const {
+  if (off.offset < 1) return std::nullopt;
+  return Location::Stack { off };
+}
+
 LocalState& FrameStateMgr::localState(uint32_t id) {
   assertx(id < cur().curFunc->numLocals());
-  auto& ret = cur().locals[id];
-
-  assertx(ret.value == nullptr || ret.value->type() == ret.type);
-  return ret;
+  return cur().locals[id];
 }
 
 LocalState& FrameStateMgr::localState(Location l) {
@@ -1075,10 +1344,7 @@ StackState& FrameStateMgr::stackState(SBInvOffset sbRel) {
     cur().irSPOff.offset,
     sbRel.offset
   );
-
-  auto& ret = cur().stack[sbRel];
-  assertx(ret.value == nullptr || ret.value->type() == ret.type);
-  return ret;
+  return cur().stack[sbRel];
 }
 
 StackState& FrameStateMgr::stackState(Location l) {
@@ -1104,6 +1370,10 @@ bool FrameStateMgr::tracked(Location l) const {
       return true;
   }
   not_reached();
+}
+
+bool FrameStateMgr::validStackOffset(IRSPRelOffset off) const {
+  return optStk(off).has_value();
 }
 
 /*
@@ -1141,11 +1411,355 @@ IMPL_MEMBER_OF(TypeSourceSet, typeSrcs)
 
 ///////////////////////////////////////////////////////////////////////////////
 
+/*
+ * Conservatively calculate the type of a location solely from the
+ * AliasClass.
+ */
+Type FrameStateMgr::typeFromAliasClass(const AliasClass& acls) const {
+  // If it's a single one of our tracked locations, we can use what we
+  // know of that location.
+  if (auto const l = acls.is_local()) {
+    if (l->ids.hasSingleValue()) return typeOf(loc(l->ids.singleValue()));
+  } else if (auto const s = acls.is_stack()) {
+    if (s->size() == 1) {
+      if (auto const l = optStk(s->low)) return typeOf(*l);
+    }
+  } else if (acls <= AMIStateTempBase) {
+    return cur().mTempBase.type;
+  }
+  // Otherwise we don't know
+  return TCell;
+}
+
+/*
+ * Calculate the type off a pointer's pointee using it's
+ * definitions. If the calculated type exceeds `limit`, stop and
+ * return the type so far.
+ */
+Type FrameStateMgr::typeOfPointeeFromDefs(SSATmp* ptr, Type limit) const {
+  assertx(ptr->isA(TMem));
+
+  // Visit every defining instruction, and use what we know of that
+  // particular instruction to calculate the type. They all get
+  // unioned together.
+  auto t = TBottom;
+  auto const visit = [&] (const IRInstruction* inst, const SSATmp*) {
+    t |= [&] {
+      switch (inst->op()) {
+      // Use our tracked state for these:
+      case LdLocAddr:
+        return typeOf(loc(inst->extra<LdLocAddr>()->locId));
+      case LdStkAddr:
+        return typeOf(stk(inst->extra<LdStkAddr>()->offset));
+      case LdMIStateTempBaseAddr:
+        return cur().mTempBase.type;
+      case LdMBase:
+        // Laundering the pointer through the MBR destroys our def
+        // information. Be conservative and use what we know from the
+        // alias classes.
+        return typeFromAliasClass(inst->extra<LdMBase>()->acls);
+      case DefConst: {
+        auto const constTy = inst->typeParam();
+        assertx(constTy.hasConstVal(TMem));
+        auto const p = constTy.ptrVal();
+        // It's tempting to just dereference the constant ptr and get
+        // it's type. However there's no guarantee it's type is
+        // constant, nor even that the pointer is even
+        // dereferencable. Instead compare the address with known
+        // constants.
+        if (p == &immutable_null_base)   return TInitNull;
+        if (p == &immutable_uninit_base) return TUninit;
+        return TCell;
+      }
+      case LdPropAddr:
+      case LdInitPropAddr:
+      case LdClsPropAddrOrNull:
+      case LdClsPropAddrOrRaise:
+        // These types are invariant and calculated when the IR op is
+        // emitted.
+        assertx(inst->typeParam() <= TCell);
+        return inst->typeParam();
+      case LdRDSAddr:
+      case LdInitRDSAddr:
+        // These too are calculated when emitted (and won't change).
+        return inst->extra<RDSHandleAndType>()->type;
+      case ElemVecD:
+      case ElemDictD:
+      case ElemVecU:
+      case ElemDictU:
+      case BespokeElem: {
+        // These can be calculated depending on the inputs. The type
+        // param tells us the known type of the base (which is
+        // provided via pointer).
+        assertx(inst->typeParam() <= TArrLike);
+        auto elem = arrLikeElemType(
+          inst->typeParam(),
+          inst->src(1)->type(),
+          inst->ctx()
+        );
+        if (!elem.second) {
+          if (inst->is(ElemVecU, ElemDictU) ||
+              (inst->is(BespokeElem) && !inst->src(2)->boolVal())) {
+            elem.first |= TInitNull;
+          }
+        }
+        assertx(elem.first != TBottom);
+        return elem.first;
+      }
+      case ElemDictK:
+      case ElemKeysetK:
+        // These require no type params as there's no pointers
+        // involved.
+        return arrLikePosType(
+          inst->src(0)->type(),
+          inst->src(2)->type(),
+          false,
+          inst->ctx()
+        );
+      case LdVecElemAddr:
+        return arrLikeElemType(
+          inst->src(0)->type(),
+          inst->src(1)->type(),
+          inst->ctx()
+        ).first;
+
+      default:
+        // Otherwise something we can't say anything about.
+        return TCell;
+      }
+    }();
+    return t < limit;
+  };
+  visitEveryDefiningInst(ptr, visit);
+  // Anything other than a Bottom should point at something, and thus
+  // we should get some type for it.
+  assertx(ptr->isA(TBottom) || t != TBottom);
+  return t;
+}
+
+Type FrameStateMgr::typeOfPointee(SSATmp* ptr, Type limit) const {
+  assertx(ptr->isA(TMem));
+  auto const acls = canonicalize(pointee(ptr));
+  if (isMBase(ptr, acls) == TriBool::Yes) return mbase().type;
+  return typeOfPointeeFromDefs(ptr, limit);
+}
+
+/*
+ * Return any SSATmp representing the value of the given pointer's
+ * pointee.
+ */
+SSATmp* FrameStateMgr::valueOfPointee(SSATmp* ptr) const {
+  assertx(ptr->isA(TMem));
+  auto const acls = canonicalize(pointee(ptr));
+  if (isMBase(ptr, acls) == TriBool::Yes) return mbase().value;
+
+  if (!acls.isSingleLocation()) return nullptr;
+  if (auto const l = acls.is_local()) {
+    assertx(l->ids.hasSingleValue());
+    return valueOf(loc(l->ids.singleValue()));
+  } else if (auto const s = acls.is_stack()) {
+    assertx(s->size() == 1);
+    if (auto const l = optStk(s->low)) return valueOf(*l);
+  } else if (acls <= AMIStateTempBase) {
+    return cur().mTempBase.value;
+  }
+  return nullptr;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+AliasClass FrameStateMgr::locationToAliasClass(Location l) const {
+  switch (l.tag()) {
+    case LTag::Local:
+      return ALocal{canonical(fp()), l.localId()};
+    case LTag::Stack:
+      return AStack::at(l.stackIdx().to<IRSPRelOffset>(irSPOff()));
+    case LTag::MBase:
+      return AMIStateTempBase;
+  }
+  not_reached();
+}
+
+// Determine if the given TMem/AliasClass might be the current
+// MBase. Ptr is optional. If given we can do more precise (and
+// faster) checks.
+TriBool FrameStateMgr::isMBase(SSATmp* ptr, const AliasClass& acls) const {
+  if (ptr) {
+    // If the ptr is the known mbr, then it obviously is the mbase. If
+    // the two pointers aren't even compatible, it can't be.
+    assertx(ptr->isA(TMem));
+    if (canonical(ptr) == canonical(mbr().ptr)) return TriBool::Yes;
+    // NB: One could be a Ptr and the other a Lval, so don't use type
+    // comparison. Compare the locations directly.
+    if (!ptr_location_t(ptr->type().ptrLocation() &
+                        mbr().ptrType.ptrLocation())) {
+      return TriBool::No;
+    }
+  }
+  // If their known alias classes don't even overlap, they can't be
+  // the same.
+  if (!acls.maybe(mbr().pointee)) return TriBool::No;
+
+  // If the known types at both locations are disjoint, they can't be
+  // the same.
+  auto const knownType = [&] {
+    if (ptr) return typeOfPointeeFromDefs(ptr, TCell);
+    return typeFromAliasClass(acls);
+  }();
+  auto const mbrType = [&] {
+    if (acls <= (ALocalAny|AStackAny|AMIStateTempBase)) {
+      auto ty = TBottom;
+      if (acls.maybe(ALocalAny))        ty |= cur().mbaseLocalType;
+      if (acls.maybe(AStackAny))        ty |= cur().mbaseStackType;
+      if (acls.maybe(AMIStateTempBase)) ty |= cur().mbaseTempType;
+      return ty;
+    }
+    return cur().mbase.type;
+  }();
+  if (!knownType.maybe(mbrType)) return TriBool::No;
+
+  // If either represents multiple locations, we can't say for sure.
+  if (!acls.isSingleLocation() || !mbr().pointee.isSingleLocation()) {
+    return TriBool::Maybe;
+  }
+  // The alias classes are the same, and they're both single
+  // locations, so it's a definite match.
+  if (acls == mbr().pointee) return TriBool::Yes;
+  // If not, however, they still might be. There's alias classes which
+  // can be single locations, and not equal to each other, but still
+  // might be each other (props, for example).
+  return TriBool::Maybe;
+}
+
+TriBool FrameStateMgr::isMBase(SSATmp* ptr) const {
+  assertx(ptr->isA(TMem));
+  return isMBase(ptr, canonicalize(pointee(ptr)));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+// Update tracked state to reflect a load (into dst) through the given
+// pointer.
+void FrameStateMgr::pointerLoad(SSATmp* ptr, SSATmp* dst) {
+  assertx(ptr->isA(TMem));
+  auto const acls = canonicalize(pointee(ptr));
+  // These updates are optional, since they are only used to give us a
+  // known SSATmp for the location. We can only update them if we know
+  // for sure what location is being affected.
+  if (isMBase(ptr, acls) == TriBool::Yes) {
+    setValue(Location::MBase{}, dst);
+    if (acls.maybe(ALocalAny))        cur().mbaseLocalType = dst->type();
+    if (acls.maybe(AStackAny))        cur().mbaseStackType = dst->type();
+    if (acls.maybe(AMIStateTempBase)) cur().mbaseTempType  = dst->type();
+  }
+  if (acls.isSingleLocation()) {
+    auto const oldModified = cur().stackModified;
+    setValue(acls, dst);
+    cur().stackModified = oldModified;
+  }
+}
+
+// Update tracked state to reflect a store of the given value through
+// the given pointer.
+void FrameStateMgr::pointerStore(SSATmp* ptr, SSATmp* value) {
+  assertx(ptr->isA(TMem));
+
+  auto const acls = canonicalize(pointee(ptr));
+
+  // First sync mbase state. If the pointer might point at the mbase,
+  // update it's known value/type.
+  auto prevLocalType = TCell;
+  auto prevStackType = TCell;
+  auto prevTempType = TCell;
+  switch (isMBase(ptr, acls)) {
+    case TriBool::Yes: {
+      prevLocalType = cur().mbaseLocalType;
+      prevStackType = cur().mbaseStackType;
+      prevTempType  = cur().mbaseTempType;
+      setValue(Location::MBase{}, value);
+      auto const type = value ? value->type() : TCell;
+      if (acls.maybe(ALocalAny))        cur().mbaseLocalType = type;
+      if (acls.maybe(AStackAny))        cur().mbaseStackType = type;
+      if (acls.maybe(AMIStateTempBase)) cur().mbaseTempType  = type;
+      break;
+    }
+    case TriBool::Maybe:
+      prevLocalType = prevStackType = prevTempType =
+        typeOfPointeeFromDefs(ptr, TCell);
+      if (value) {
+        widenType(Location::MBase{}, value->type());
+        if (acls.maybe(ALocalAny))        cur().mbaseLocalType |= value->type();
+        if (acls.maybe(AStackAny))        cur().mbaseStackType |= value->type();
+        if (acls.maybe(AMIStateTempBase)) cur().mbaseTempType  |= value->type();
+      } else {
+        setValue(Location::MBase{}, nullptr);
+        if (acls.maybe(ALocalAny))        cur().mbaseLocalType = TCell;
+        if (acls.maybe(AStackAny))        cur().mbaseStackType = TCell;
+        if (acls.maybe(AMIStateTempBase)) cur().mbaseTempType  = TCell;
+      }
+      break;
+    case TriBool::No:
+      prevLocalType = prevStackType = prevTempType =
+        typeOfPointeeFromDefs(ptr, TCell);
+      break;
+  }
+
+  // If the alias class is a single location, we can precisely change
+  // the state.
+  if (acls.isSingleLocation()) {
+    setValue(acls, value);
+  } else {
+    // Otherwise union in the state with anything it might be
+    if (acls.maybe(ALocalAny)) {
+      for (auto const& local : cur().locals) {
+        if (!prevLocalType.maybe(local.second.type)) continue;
+        if (!acls.maybe(ALocal{fp(), local.first})) continue;
+        value
+          ? widenType(loc(local.first), value->type())
+          : setValue(loc(local.first), nullptr);
+      }
+      // This instruction could also affect locals that aren't being
+      // tracked. Be conservative and assume that they could be
+      // affected.
+      cur().localsCleared = true;
+    }
+    if (acls.maybe(AStackAny)) {
+      for (auto const& stack : cur().stack) {
+        if (!prevStackType.maybe(stack.second.type)) continue;
+        auto const offset = stack.first.to<IRSPRelOffset>(irSPOff());
+        if (!acls.maybe(AStack::at(offset))) continue;
+        value
+          ? widenType(stk(stack.first), value->type())
+          : setValue(stk(stack.first), nullptr);
+      }
+    }
+    if (acls.maybe(AMIStateTempBase)) {
+      if (prevTempType.maybe(cur().mTempBase.type)) {
+        value ? widenMTempBase(value->type()) : setMTempBase(nullptr);
+      }
+    }
+  }
+}
+
+void FrameStateMgr::pointerRefine(SSATmp* ptr, Type type) {
+  assertx(ptr->isA(TMem));
+  auto const acls = canonicalize(pointee(ptr));
+  if (isMBase(ptr, acls) == TriBool::Yes) {
+    refineType(Location::MBase{}, type, std::nullopt);
+    cur().mbaseStackType &= type;
+    cur().mbaseLocalType &= type;
+    cur().mbaseTempType  &= type;
+  }
+  if (acls.isSingleLocation()) refineType(acls, type, std::nullopt);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 template<LTag tag>
-void FrameStateMgr::setValueImpl(Location l,
-                                 LocationState<tag>& state,
-                                 SSATmp* value) {
-  FTRACE(2, "{} := {}\n", jit::show(l), value ? value->toString() : "<>");
+static void setValueImpl(Location l,
+                         LocationState<tag>& state,
+                         SSATmp* value) {
+  ITRACE(2, "{} := {}\n", jit::show(l), value ? value->toString() : "<>");
   state.value = value;
   state.type = value ? value->type() : LocationState<tag>::default_type();
   state.maybeChanged = true;
@@ -1172,9 +1786,61 @@ void FrameStateMgr::setValue(Location l, SSATmp* value) {
   not_reached();
 }
 
+void FrameStateMgr::setValue(const AliasClass& pointee, SSATmp* value) {
+  assertx(pointee.isSingleLocation());
+
+  if (auto const l = pointee.is_local()) {
+    setValue(loc(l->ids.singleValue()), value);
+  } else if (auto const s = pointee.is_stack()) {
+    assertx(s->size() == 1);
+    if (auto const l = optStk(s->low)) setValue(*l, value);
+  } else if (pointee <= AMIStateTempBase) {
+    setMTempBase(value);
+  }
+}
+
+/*
+ * Like setValue, but also updates the MBase state appropriately if
+ * the MBase might be the given location.
+ */
+void FrameStateMgr::setValueAndSyncMBase(Location l,
+                                         SSATmp* value,
+                                         bool forLoad) {
+  assertx(l.tag() != LTag::MBase);
+  switch (isMBase(nullptr, locationToAliasClass(l))) {
+    case TriBool::No:
+      break;
+    case TriBool::Yes:
+      setValue(Location::MBase{}, value);
+      if (l.tag() == LTag::Stack) {
+        cur().mbaseStackType = value ? value->type() : TCell;
+      } else if (l.tag() == LTag::Local) {
+        cur().mbaseLocalType = value ? value->type() : TCell;
+      }
+      break;
+    case TriBool::Maybe:
+      if (forLoad) break;
+      if (value) {
+        widenType(Location::MBase{}, value->type());
+      } else {
+        setValue(Location::MBase{}, nullptr);
+      }
+      if (l.tag() == LTag::Stack) {
+        cur().mbaseStackType |= value ? value->type() : TCell;
+      } else if (l.tag() == LTag::Local) {
+        cur().mbaseLocalType |= value ? value->type() : TCell;
+      }
+      break;
+  }
+
+  // NB: Do this after the mbase check, since it might consult the
+  // type in the location being modified.
+  setValue(l, value);
+}
+
 template<LTag tag>
 static void setTypeImpl(Location l, LocationState<tag>& state, Type type) {
-  FTRACE(2, "{} :: {} -> {}\n", jit::show(l), state.type, type);
+  ITRACE(2, "{} :: {} -> {}\n", jit::show(l), state.type, type);
   state.value = nullptr;
   state.type = type;
   state.maybeChanged = true;
@@ -1203,9 +1869,9 @@ void FrameStateMgr::setType(Location l, Type type) {
 
 template<LTag tag>
 static void widenTypeImpl(Location l, LocationState<tag>& state, Type type) {
-  FTRACE(2, "{} :: {} -> {}\n", jit::show(l), state.type, type);
+  ITRACE(2, "{} :: {} -> {}\n", jit::show(l), state.type, state.type | type);
   state.value = nullptr;
-  state.type = type;
+  state.type |= type;
   state.maybeChanged = true;
 }
 
@@ -1231,18 +1897,14 @@ void FrameStateMgr::widenType(Location l, Type type) {
 
 template<LTag tag>
 static void refineTypeImpl(Location l, LocationState<tag>& state,
-                           Type type, TypeSource typeSrc) {
+                           Type type, Optional<TypeSource> typeSrc) {
   auto const refined = state.type & type;
-  FTRACE(2, "{} :: {} -> {} (via {})\n",
+  ITRACE(2, "{} :: {} -> {} (via {})\n",
          jit::show(l), state.type, refined, type);
 
-  // If the type gets more refined, we need to forget the old value, or else we
-  // may end up using a value with a more general type than is known about the
-  // stack slot.
-  if (refined != state.type) state.value = nullptr;
   state.type = refined;
   state.typeSrcs.clear();
-  state.typeSrcs.insert(typeSrc);
+  if (typeSrc) state.typeSrcs.insert(*typeSrc);
 }
 
 /*
@@ -1252,7 +1914,9 @@ static void refineTypeImpl(Location l, LocationState<tag>& state,
  * A type refinement does /not/ indicate a change in value, so the various
  * changed flags are not touched.
  */
-void FrameStateMgr::refineType(Location l, Type type, TypeSource typeSrc) {
+void FrameStateMgr::refineType(Location l,
+                               Type type,
+                               Optional<TypeSource> typeSrc) {
   switch (l.tag()) {
     case LTag::Local: return refineTypeImpl(l, localState(l), type, typeSrc);
     case LTag::Stack: return refineTypeImpl(l, stackState(l), type, typeSrc);
@@ -1261,21 +1925,86 @@ void FrameStateMgr::refineType(Location l, Type type, TypeSource typeSrc) {
   not_reached();
 }
 
+void FrameStateMgr::refineType(const AliasClass& pointee, Type type,
+                               Optional<TypeSource> typeSrc) {
+  assertx(pointee.isSingleLocation());
+
+  if (auto const l = pointee.is_local()) {
+    refineType(loc(l->ids.singleValue()), type, typeSrc);
+  } else if (auto const s = pointee.is_stack()) {
+    assertx(s->size() == 1);
+    if (auto const l = optStk(s->low)) refineType(*l, type, typeSrc);
+  } else if (pointee <= AMIStateTempBase) {
+    refineMTempBase(type);
+  }
+}
+
+/*
+ * Like refineType, but also keeps state synced between the MBase and
+ * the location it might represent.
+ */
+void FrameStateMgr::refineTypeAndSyncMBase(Location l,
+                                           Type type,
+                                           TypeSource typeSrc) {
+  if (l.tag() == LTag::MBase) {
+    // We're updating the MBase. Try to find what tracked locations
+    // the MBase might be and update those too. We only do this if we
+    // definitely know the location.
+    auto const& p = cur().mbr.pointee;
+    if (auto const local = p.is_local()) {
+      if (local->ids.hasSingleValue()) {
+        refineType(loc(local->ids.singleValue()), type, typeSrc);
+      }
+    } else if (auto const stack = p.is_stack()) {
+      if (stack->size() == 1) {
+        if (auto const os = optStk(stack->low)) refineType(*os, type, typeSrc);
+      }
+    } else if (p <= AMIStateTempBase) {
+      refineMTempBase(type);
+    }
+
+    cur().mbaseStackType &= type;
+    cur().mbaseLocalType &= type;
+    cur().mbaseTempType &= type;
+  } else {
+    // Only refine the MBase if it's definitely this location
+    auto const acls = locationToAliasClass(l);
+    if (isMBase(nullptr, acls) == TriBool::Yes) {
+      refineType(Location::MBase{}, type, typeSrc);
+      if (l.tag() == LTag::Stack) {
+        cur().mbaseStackType &= type;
+      } else if (l.tag() == LTag::Local) {
+        cur().mbaseLocalType &= type;
+      }
+    }
+  }
+
+  refineType(l, type, typeSrc);
+}
+
 /*
  * Refine the value for `state' to `newVal' if it was set to `oldVal'.
  */
 template<LTag tag>
-void FrameStateMgr::refineValue(LocationState<tag>& state,
+bool FrameStateMgr::refineValue(LocationState<tag>& state,
                                 SSATmp* oldVal, SSATmp* newVal) {
   if (!state.value || canonical(state.value) != canonical(oldVal)) {
-    return;
+    return false;
   }
-  FTRACE(2, "refining value: {} -> {}\n", *state.value, *newVal);
+  ITRACE(2, "refining value: {} -> {}\n", *state.value, *newVal);
 
   state.value = newVal;
   state.type = newVal->type();
   state.typeSrcs.clear();
   state.typeSrcs.insert(TypeSource::makeValue(newVal));
+  return true;
+}
+
+void FrameStateMgr::refineMBaseValue(SSATmp* oldVal, SSATmp* newVal) {
+  if (!refineValue(cur().mbase, oldVal, newVal)) return;
+  cur().mbaseStackType &= newVal->type();
+  cur().mbaseLocalType &= newVal->type();
+  cur().mbaseTempType  &= newVal->type();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1287,36 +2016,212 @@ void FrameStateMgr::clearLocals() {
     setValue(loc(id), nullptr);
   }
   cur().localsCleared = true;
+
+  if (mbr().pointee.maybe(ALocalAny)) {
+    setValue(Location::MBase{}, nullptr);
+    cur().mbaseLocalType = TCell;
+  }
+}
+
+void FrameStateMgr::clearMInstr() {
+  ITRACE(2, "clearMInstr\n");
+  auto& c = cur();
+  c.mbr = MBRState{};
+  c.mbase = MBaseState{};
+  c.mTempBase = MTempBaseState{};
+  c.mROProp = TriBool::Maybe;
+  c.mbaseStackType = TCell;
+  c.mbaseLocalType = TCell;
+  c.mbaseTempType = TCell;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void FrameStateMgr::setMemberBase(SSATmp* base) {
-  setValueImpl(Location::MBase{}, cur().mbase, base);
-}
+void FrameStateMgr::setMBR(SSATmp* mbr, bool forLoad) {
+  assertx(!mbr || mbr->isA(TMem));
+  if (mbr && mbr == cur().mbr.ptr) return;
 
-void FrameStateMgr::setMemberBaseType(Type t) {
-  setTypeImpl(Location::MBase{}, cur().mbase, t);
-}
+  auto const mbrPointee = mbr ? canonicalize(pointee(mbr)) : AUnknownTV;
+  assertx(mbrPointee <= AUnknownTV);
+  assertx(!mbr || mbrPointee <= canonicalize(pointee(mbr->type())));
 
-void FrameStateMgr::setMBR(SSATmp* mbr) {
+  ITRACE(2, "MBR := {}\n", mbr ? mbr->toString() : "<>");
   cur().mbr.ptr = mbr;
-  cur().mbr.pointee = pointee(mbr);
-  cur().mbr.ptrType = mbr->type();
-}
+  cur().mbr.ptrType = mbr ? mbr->type() : TLval;
+  cur().mbr.pointee = mbrPointee;
 
-///////////////////////////////////////////////////////////////////////////////
+  if (forLoad) return;
 
-std::string FrameStateMgr::show() const {
-  auto const funcName = cur().curFunc->fullName();
-  if (sp() == nullptr) {
-    return folly::sformat("func: {}, stack uninit", funcName);
+  // Since we changed the MBR, the MBase might be a different location
+  // now. Try to find the new location and sync the MBase state to
+  // match it. We only do this if we definitely know the location.
+
+  auto const set = [&] (SSATmp* val, Type type) {
+    ITRACE(2, "MBase := {} ({})\n", val ? val->toString() : "<>", type);
+    cur().mbase.value = val;
+    cur().mbase.type = type;
+    cur().mbase.maybeChanged = true;
+    cur().mbase.typeSrcs.clear();
+  };
+
+  cur().mbaseLocalType = TBottom;
+  cur().mbaseStackType = TBottom;
+  cur().mbaseTempType = TBottom;
+
+  if (auto const l = mbrPointee.is_local()) {
+    if (l->ids.hasSingleValue()) {
+      auto const& state = localState(l->ids.singleValue());
+      cur().mbaseLocalType = state.type;
+      return set(state.value, state.type);
+    }
+  } else if (auto const s = mbrPointee.is_stack()) {
+    if (s->size() == 1) {
+      if (auto const l = optStk(s->low)) {
+        auto const& state = stackState(*l);
+        cur().mbaseStackType = state.type;
+        return set(state.value, state.type);
+      }
+    }
+  } else if (mbrPointee <= AMIStateTempBase) {
+    cur().mbaseTempType = cur().mTempBase.type;
+    return set(cur().mTempBase.value, cur().mTempBase.type);
   }
 
-  return folly::sformat(
-    "func: {}, irSPOff: {}, bcSPOff: {}",
-    funcName, irSPOff().offset, bcSPOff().offset
+  // It isn't known to be one of our tracked locations. Try to
+  // calculate the type from it's definitions.
+  auto const type = mbr ? typeOfPointeeFromDefs(mbr, TCell) : TCell;
+  if (mbrPointee.maybe(ALocalAny))        cur().mbaseLocalType = type;
+  if (mbrPointee.maybe(AStackAny))        cur().mbaseStackType = type;
+  if (mbrPointee.maybe(AMIStateTempBase)) cur().mbaseTempType  = type;
+  set(nullptr, type);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void FrameStateMgr::setMTempBase(SSATmp* value) {
+  ITRACE(2, "MTempBase := {}\n", value ? value->toString() : "<>");
+  cur().mTempBase.value = value;
+  cur().mTempBase.type = value ? value->type() : TCell;
+}
+
+void FrameStateMgr::setMTempBaseType(Type type) {
+  ITRACE(2, "MTempBase :: {} -> {}\n", cur().mTempBase.type, type);
+  cur().mTempBase.value = nullptr;
+  cur().mTempBase.type = type;
+}
+
+void FrameStateMgr::widenMTempBase(Type type) {
+  ITRACE(2, "MTempBase :: {} -> {}\n",
+         cur().mTempBase.type, cur().mTempBase.type | type);
+  cur().mTempBase.value = nullptr;
+  cur().mTempBase.type |= type;
+}
+
+void FrameStateMgr::refineMTempBase(Type type) {
+  auto const refined = cur().mTempBase.type & type;
+  ITRACE(2, "MTempBase :: {} -> {} (via {})\n",
+         cur().mTempBase.type, refined, type);
+  cur().mTempBase.type = refined;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+std::string FrameState::show() const {
+  auto const optTmp = [] (SSATmp* t) -> std::string {
+    if (t) return t->toString();
+    return "<>";
+  };
+
+  std::string out;
+
+  folly::format(
+    &out,
+    "Func: {}\n"
+    "  fp: {}, sp: {}, ctx: {}, fpFixup: {}\n"
+    "  irSPOff: {}, bcSPOff: {}, stublogue: {}\n"
+    "  stack modified: {}, locals cleared: {}\n"
+    "  read-only prop: {}\n",
+    curFunc->fullName(),
+    optTmp(fpValue),
+    optTmp(spValue),
+    optTmp(ctx),
+    optTmp(fixupFPValue),
+    irSPOff.offset,
+    bcSPOff.offset,
+    stublogue ? "yes" : "no",
+    stackModified ? "yes" : "no",
+    localsCleared ? "yes" : "no",
+    HPHP::show(mROProp)
   );
+  if (!locals.empty()) {
+    folly::format(&out, "{:-^70}\n", "");
+    for (auto const& local : locals) {
+      folly::format(
+        &out, "  Local #{}: {} {}{}\n",
+        local.first,
+        optTmp(local.second.value),
+        local.second.type,
+        local.second.maybeChanged ? " (changed)" : ""
+      );
+    }
+  }
+  if (!stack.empty()) {
+    folly::format(&out, "{:-^70}\n", "");
+    for (auto const& stk : stack) {
+      folly::format(
+        &out, "  Stack #{}: {} {}{}\n",
+        stk.first.offset,
+        optTmp(stk.second.value),
+        stk.second.type,
+        stk.second.maybeChanged ? " (changed)" : ""
+      );
+    }
+  }
+  if (mTempBase.value || mTempBase.type < TCell) {
+    folly::format(
+      &out, "{:-^70}\n  MTempBase: {} {}\n",
+      "",
+      optTmp(mTempBase.value),
+      mTempBase.type
+    );
+  }
+  if (mbr.ptr || mbr.ptrType < TLval ||
+      mbr.pointee < AUnknownTV) {
+    folly::format(
+      &out, "{:-^70}\n  MBR: {} {} {}\n",
+      "",
+      optTmp(mbr.ptr),
+      mbr.ptrType,
+      jit::show(mbr.pointee)
+    );
+  }
+  if (mbase.value ||
+      mbase.type < TCell ||
+      mbaseStackType < TCell ||
+      mbaseLocalType < TCell ||
+      mbaseTempType < TCell) {
+    folly::format(
+      &out, "{:-^70}\n  MBase: {} {}{} [L:{}, S:{}, T:{}]\n",
+      "",
+      optTmp(mbase.value),
+      mbase.type,
+      mbase.maybeChanged ? " (changed)" : "",
+      mbaseLocalType,
+      mbaseStackType,
+      mbaseTempType
+    );
+  }
+
+  return out;
+}
+
+std::string FrameStateMgr::show() const {
+  std::string out;
+  for (auto const& state : m_stack) {
+    folly::format(&out, "{:=^70}\n{}", "", state.show());
+  }
+  folly::format(&out, "{:=^70}\n", "");
+  return out;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

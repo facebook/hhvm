@@ -68,6 +68,7 @@ void initThrowable(IRGS& env, const Class* cls, SSATmp* throwable) {
       env,
       LdPropAddr,
       IndexData { rootCls->propSlotToIndex(slot) },
+      TCell,
       throwable
     );
   };
@@ -229,6 +230,7 @@ void initObjProps(IRGS& env, const Class* cls, SSATmp* obj) {
         env,
         LdPropAddr,
         IndexData { cls->propSlotToIndex(slot) },
+        TCell,
         obj
       );
       gen(env, StMem, addr, val);

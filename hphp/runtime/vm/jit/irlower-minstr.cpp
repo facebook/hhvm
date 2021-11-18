@@ -1003,16 +1003,6 @@ void implKeysetGet(IRLS& env, const IRInstruction* inst) {
 
 }
 
-void cgElemKeysetU(IRLS& env, const IRInstruction* inst) {
-  auto const key = inst->src(1);
-  BUILD_OPTAB(ELEM_KEYSET_U_HELPER_TABLE, getKeyType(key));
-
-  auto args = argGroup(env, inst).ssa(0).ssa(1);
-
-  auto& v = vmain(env);
-  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
-}
-
 void cgElemKeysetK(IRLS& env, const IRInstruction* inst) {
   auto const keyset = srcLoc(env, inst, 0).reg();
   auto const dst = dstLoc(env, inst, 0);

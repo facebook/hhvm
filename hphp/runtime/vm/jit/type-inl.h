@@ -543,6 +543,15 @@ inline Type Type::ptrToLval() const {
   return temp;
 }
 
+inline Type Type::lvalToPtr() const {
+  auto temp = *this;
+  if (temp.m_bits & kLval) {
+    temp.m_bits &= ~kLval;
+    temp.m_bits |= kPtr;
+  }
+  return temp;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Private constructors.
 

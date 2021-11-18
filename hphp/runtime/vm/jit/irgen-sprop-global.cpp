@@ -130,7 +130,12 @@ ClsPropLookup ldClsPropAddrKnown(IRGS& env,
 
   auto const addr = [&]{
     if (!(prop.attrs & AttrLateInit) || ignoreLateInit) {
-      return gen(env, LdRDSAddr, RDSHandleData { handle }, TPtrToSProp);
+      return gen(
+        env,
+        LdRDSAddr,
+        RDSHandleAndType { handle, knownType },
+        TPtrToSProp
+      );
     }
 
     return cond(
@@ -139,7 +144,7 @@ ClsPropLookup ldClsPropAddrKnown(IRGS& env,
         return gen(
           env,
           LdInitRDSAddr,
-          RDSHandleData { handle },
+          RDSHandleAndType { handle, knownType },
           taken,
           TPtrToSProp
         );
@@ -213,10 +218,12 @@ ClsPropLookup ldClsPropAddr(IRGS& env, SSATmp* ssaCls, SSATmp* ssaName,
   auto const ctxClass = curClass(env);
   auto const ctxTmp = ctxClass ? cns(env, ctxClass) : cns(env, nullptr);
   auto const data = ReadonlyData{ opts.readOnlyCheck };
+  auto const knownType = opts.ignoreLateInit ? TCell : TInitCell;
   auto const propAddr = gen(
     env,
     opts.raise ? LdClsPropAddrOrRaise : LdClsPropAddrOrNull,
     data,
+    knownType,
     ssaCls,
     ssaName,
     ctxTmp,
@@ -225,7 +232,7 @@ ClsPropLookup ldClsPropAddr(IRGS& env, SSATmp* ssaCls, SSATmp* ssaName,
   );
   return {
     propAddr,
-    opts.ignoreLateInit ? TCell : TInitCell,
+    knownType,
     nullptr,
     nullptr,
     kInvalidSlot
@@ -538,7 +545,7 @@ void emitInitProp(IRGS& env, const StringData* propName, InitPropOp op) {
       auto const base = gen(
         env,
         LdRDSAddr,
-        RDSHandleData { handle },
+        RDSHandleAndType { handle, TCell },
         TPtrToSProp
       );
       gen(env, StMem, base, val);

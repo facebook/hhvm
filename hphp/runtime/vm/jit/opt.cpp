@@ -231,6 +231,8 @@ void optimize(IRUnit& unit, TransKind kind) {
     rqtrace::EventGuard trace{"OPT_REFS"};
     doPass(unit, optimizeRefcounts, DCE::Full);
     printUnit(6, unit, " after optimizeRefCounts ");
+    doPass(unit, optimizePhis, DCE::Full);
+    printUnit(6, unit, " after optimizePhis ");
   }
 
   doPass(unit, simplifyOrdStrIdx, DCE::Minimal);

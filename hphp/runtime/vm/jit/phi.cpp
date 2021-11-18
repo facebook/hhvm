@@ -111,6 +111,45 @@ bool optimizePhis(IRUnit& unit) {
     auto it = b->begin();
     auto& label = *it;
     if (!label.is(DefLabel)) return;
+
+    // If the DefLabel has multiple defs with all the same sources,
+    // collapse those to a single def (and move that to the other
+    // SSATmps).
+    if (label.numDsts() > 1) {
+      jit::vector<jit::vector<SSATmp*>> allSrcs;
+      jit::vector<std::pair<unsigned int, unsigned int>> rewrites;
+
+      allSrcs.resize(label.numDsts());
+      for (unsigned int i = 0; i < label.numDsts(); ++i) {
+        auto& srcs = allSrcs[i];
+        assertx(srcs.empty());
+        b->forEachSrc(
+          i,
+          [&] (IRInstruction* jmp, SSATmp*) {
+            copyProp(jmp);
+            srcs.emplace_back(jmp->src(i));
+          }
+        );
+        assertx(!srcs.empty());
+
+        for (unsigned int j = 0; j < i; ++j) {
+          auto const& otherSrcs = allSrcs[j];
+          if (otherSrcs != srcs) continue;
+          srcs.clear();
+
+          auto insertAfter = b->iteratorTo(&label);
+          auto const dst = label.dst(i);
+          auto const src = label.dst(j);
+          auto const newInst = unit.gen(dst, Mov, label.bcctx(), src);
+          deletePhiDest(&label, i);
+          b->insert(std::next(insertAfter), newInst);
+          changed = repeat = true;
+          --i;
+          break;
+        }
+      }
+    }
+
     // Look for blocks of the form t = DefLabel; Jmp[N]Zero t
     // We're interested in the case that all inputs are constants,
     // so that we can redirect the phijmps.
@@ -231,7 +270,7 @@ bool optimizePhis(IRUnit& unit) {
     }
   } while (repeat);
 
-  return false;
+  return changed;
 }
 
 }}

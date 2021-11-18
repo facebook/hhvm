@@ -135,6 +135,17 @@ Vreg zeroExtendIfBool(Vout& v, Type ty, Vreg reg) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+Vreg materializeConstVal(Vout& v, Type ty) {
+  if (ty <= TNull) return v.cns(Vconst::Quad);
+  if (ty <= TNullptr) return v.cns(0);
+  if (!ty.hasConstVal()) return InvalidReg;
+  if (ty <= TBool) return v.cns(ty.boolVal());
+  if (ty <= TDbl) return v.cns(ty.dblVal());
+  return v.cns(ty.rawVal());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 void storeTVVal(Vout& v, Type type, Vloc srcLoc, Vptr valPtr) {
   // We ignore the values of statically nullish types.
   if (type <= TNull || type <= TNullptr) return;

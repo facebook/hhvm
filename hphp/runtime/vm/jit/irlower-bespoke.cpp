@@ -603,6 +603,16 @@ void cgStructDictGetWithColor(IRLS& env, const IRInstruction* inst) {
 
   auto& v = vmain(env);
 
+  // If the return type is always Uninit, this lookup will always
+  // fail, so just return a constant,
+  if (inst->dst()->type() <= TUninit) {
+    assertx(!dst.hasReg(1));
+    auto const val = materializeConstVal(v, inst->dst()->type());
+    assertx(val != InvalidReg);
+    v << copy{val, dst.reg(0)};
+    return;
+  }
+
   auto const makeNonstaticCall =
     [&](Vout& v, const Vreg& value, const Vreg& type) {
       auto const target = CallSpec::direct(StructDict::NvGetStrNonStatic);
@@ -726,29 +736,127 @@ void cgStructDictGetWithColor(IRLS& env, const IRInstruction* inst) {
   auto const valPtr = std::get<1>(tuple);
   auto const slotPtr = std::get<2>(tuple);
 
-  // 3) Retrieve the string pointer from the perfect hash table.
-  auto const hashStr = v.makeReg();
-  static_assert(strHashSize == sizeof(LowStringPtr));
-  emitLdLowPtr(v, strPtr, hashStr, sizeof(LowStringPtr));
+  // Check if the string pointer hash matches that in the hash table.
+  auto const checkHash = [&] (Vreg sf) {
+    static_assert(strHashSize == sizeof(LowStringPtr));
+    auto const hashStr = v.makeReg();
+    emitLdLowPtr(v, strPtr, hashStr, sizeof(LowStringPtr));
+    v << cmpq{rkey, hashStr, sf};
+  };
 
-  // 4) Check if the string pointer matches.
+  // Load the value out of the hash table, and store it in value/type
+  // registers. Type may be InvalidReg if we don't have a type
+  // register.
+  auto const loadFromHashTable = [&] (Vreg value, Vreg type, bool check) {
+    if (debug && check) {
+      // In debug builds, let's check if the string pointer hash
+      // actually matches.
+      auto const sf = v.makeReg();
+      checkHash(sf);
+      unlikelyIfThen(
+        v, vcold(env), CC_NE, sf,
+        [&] (Vout& v) { v << trap{TRAP_REASON}; }
+      );
+    }
+
+    static_assert(valHashSize == 2);
+    static_assert(slotHashSize == 1);
+
+    auto const typeOff = StructLayout::staticTypeOffset();
+
+    auto const dstType = inst->dst()->type();
+    assertx(IMPLIES(dstType.needsReg(), type != InvalidReg));
+
+    auto const constVal = materializeConstVal(v, dstType);
+
+    Vreg valueOff;
+    if (constVal == InvalidReg) {
+      valueOff = v.makeReg();
+      v << loadzwq{valPtr, valueOff};
+    }
+
+    Vreg slotValue;
+    if (dstType.needsReg()) {
+      slotValue = v.makeReg();
+      v << loadzbq{slotPtr, slotValue};
+    }
+
+    // If the value is statically known (which we can happen if
+    // dstType is Null, for example), we can avoid loading it.
+    if (constVal == InvalidReg) {
+      v << load{rarr[valueOff], value};
+    } else {
+      v << copy{constVal, value};
+    }
+
+    // If we don't know the type's datatype statically, we need to
+    // load it regardless. If we do, we can materialize a constant if
+    // we have a type register. If we don't have a type register, we
+    // don't need to do anything.
+    if (dstType.needsReg()) {
+      v << loadb{rarr[slotValue + typeOff], type};
+    } else if (type != InvalidReg) {
+      v << copy{v.cns(dstType.toDataType()), type};
+    }
+  };
+
+  // If the return type does not include Uninit, then the lookup will
+  // always succeed. We can use this knowledge to produce more
+  // efficient code.
+  if (!inst->dst()->type().maybe(TUninit)) {
+    if (key->type() <= TStaticStr) {
+      // If the key is a static string, we can load from the hash
+      // table without checking.
+      loadFromHashTable(dst.reg(0), dst.reg(1), true);
+      return;
+    }
+
+    // Otherwise we need to check if it's a static or not,
+    auto const sf = emitCmpRefCount(v, StaticValue, rkey);
+    auto const dstTuple = dst.hasReg(1)
+      ? v.makeTuple({dst.reg(0), dst.reg(1)})
+      : v.makeTuple({dst.reg(0)});
+    cond(
+      v, v, CC_E, sf, dstTuple,
+      [&] (Vout& v) {
+        // Static. As above, load from the hash table without
+        // checking.
+        auto const value = v.makeReg();
+        auto const type = dst.hasReg(1) ? v.makeReg() : Vreg{};
+        loadFromHashTable(value, type, true);
+        if (dst.hasReg(1)) return v.makeTuple({value, type});
+        return v.makeTuple({value});
+      },
+      [&] (Vout& v) {
+        // Non-static. Call the C++ function.
+        auto const value = v.makeReg();
+        auto const type = v.makeReg();
+        makeNonstaticCall(v, value, type);
+        if (dst.hasReg(1)) return v.makeTuple({value, type});
+        return v.makeTuple({value});
+      },
+      StringTag{}
+    );
+    return;
+  }
+
+  // If we get here, the return type includes Uninit, which implies
+  // the type is not statically known, which means we should always
+  // have a register for the type.
+  assertx(dst.hasReg(1));
+
+  // 3) Retrieve the string pointer from the perfect hash table and
+  // check if the string pointer matches.
   auto const sf = v.makeReg();
-  v << cmpq{rkey, hashStr, sf};
+  checkHash(sf);
+
   cond(v, v, CC_E, sf, v.makeTuple({dst.reg(0), dst.reg(1)}),
     [&] (Vout& v) {
       // 4a) The string matched! Load the value and type offsets out of the
       // perfect hash table, and use them to index into the struct.
-      static_assert(valHashSize == 2);
-      static_assert(slotHashSize == 1);
-      auto const valueOff = v.makeReg();
-      auto const slotValue = v.makeReg();
-      auto const typeOff = StructLayout::staticTypeOffset();
-      v << loadzwq{valPtr, valueOff};
-      v << loadzbq{slotPtr, slotValue};
       auto const value = v.makeReg();
       auto const type = v.makeReg();
-      v << load{rarr[valueOff], value};
-      v << loadb{rarr[slotValue + typeOff], type};
+      loadFromHashTable(value, type, false);
       return v.makeTuple({value, type});
     },
     [&] (Vout& v) {
@@ -756,14 +864,16 @@ void cgStructDictGetWithColor(IRLS& env, const IRInstruction* inst) {
       // field is absent. If the key is non-static, we fall back to the
       // non-static lookup routine.
       if (key->type() <= TStaticStr) {
-        return v.makeTuple({v.cns(0), v.cns(KindOfUninit)});
+        auto const val = materializeConstVal(v, TUninit);
+        return v.makeTuple({val, v.cns(KindOfUninit)});
       }
       auto const value = v.makeReg();
       auto const type = v.makeReg();
       auto const sf = emitCmpRefCount(v, StaticValue, rkey);
       cond(v, v, CC_E, sf, v.makeTuple({value, type}),
         [&] (Vout& v) {
-          return v.makeTuple({v.cns(0), v.cns(KindOfUninit)});
+          auto const val = materializeConstVal(v, TUninit);
+          return v.makeTuple({val, v.cns(KindOfUninit)});
         },
         [&] (Vout& v) {
           auto const callValue = v.makeReg();

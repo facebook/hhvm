@@ -135,6 +135,12 @@ void trashFullTV(Vout& v, Vptr ptr, char byte);
 void trashTV(Vout& v, Vptr typePtr, Vptr valPtr, char byte);
 
 /*
+ * If the given type represents a statically known value, return
+ * it. Return InvalidReg otherwise.
+ */
+Vreg materializeConstVal(Vout& v, Type ty);
+
+/*
  * Compare an object's reference count with an immediate value, return the
  * status flags used for the comparison.
  */

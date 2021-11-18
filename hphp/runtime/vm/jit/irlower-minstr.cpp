@@ -71,12 +71,13 @@ namespace {
 /*
  * Make an ArgGroup for prop instructions that takes:
  *    1/ the context Class*
- *    2/ the ObjectData* (or pointer to a KindOfObject TV)
+ *    2/ the ObjectData* or a TypedValue, depending on the base type
  */
 ArgGroup propArgs(IRLS& env, const IRInstruction* inst) {
-  return argGroup(env, inst)
-    .immPtr(inst->marker().func()->cls())
-    .ssa(0);
+  auto const base = inst->src(0);
+  auto args = argGroup(env, inst).immPtr(inst->marker().func()->cls());
+  if (base->isA(TObj)) return args.ssa(0);
+  return args.typedValue(0);
 }
 
 void implProp(IRLS& env, const IRInstruction* inst) {
@@ -274,9 +275,14 @@ namespace {
  *       the type is known
  */
 ArgGroup elemArgs(IRLS& env, const IRInstruction* inst) {
-  return argGroup(env, inst)
-    .ssa(0)
-    .memberKeyIS(1);
+  auto args = argGroup(env, inst);
+  if (inst->src(0)->isA(TMem)) {
+    args.ssa(0);
+  } else {
+    args.typedValue(0);
+  }
+  args.memberKeyIS(1);
+  return args;
 }
 
 void implElem(IRLS& env, const IRInstruction* inst) {

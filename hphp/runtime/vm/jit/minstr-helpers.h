@@ -81,7 +81,7 @@ BASE_G_HELPER_TABLE(X)
   m(propCWS,   MOpMode::Warn,       KeyType::Str)
 
 #define X(nm, mode, kt)                                       \
-inline tv_lval nm(Class* ctx, tv_lval base, key_type<kt> key, \
+inline tv_lval nm(Class* ctx, TypedValue base, key_type<kt> key,\
                   TypedValue& tvRef, ReadonlyOp op) {         \
   return Prop<mode,kt>(tvRef, ctx, base, key, op);            \
 }
@@ -94,7 +94,7 @@ PROP_HELPER_TABLE(X)
   m(propCDS,   KeyType::Str)
 
 #define X(nm, kt)                                             \
-inline tv_lval nm(Class* ctx, tv_lval base, key_type<kt> key, \
+inline tv_lval nm(Class* ctx, TypedValue base, key_type<kt> key,\
                   TypedValue& tvRef, ReadonlyOp op) {         \
   return Prop<MOpMode::Define,kt>(tvRef, ctx, base, key, op); \
 }
@@ -138,7 +138,7 @@ PROPD_OBJ_HELPER_TABLE(X)
   m(propQ,         MOpMode::Warn)                 \
 
 #define X(nm, mode)                                                \
-inline tv_lval nm(Class* ctx, tv_rval base, StringData* key,       \
+inline tv_lval nm(Class* ctx, TypedValue base, StringData* key,    \
                       TypedValue& tvRef, ReadonlyOp op) {          \
   return nullSafeProp<mode>(tvRef, ctx, base, key, op);            \
 }
@@ -170,7 +170,7 @@ inline TypedValue cGetRefShuffle(const TypedValue& localTvRef,
   m(cGetPropS,       KeyType::Str, MOpMode::Warn)      \
 
 #define X(nm, kt, mode)                                               \
-inline TypedValue nm(Class* ctx, tv_lval base, key_type<kt> key,      \
+inline TypedValue nm(Class* ctx, TypedValue base, key_type<kt> key,   \
                      ReadonlyOp op) {                                 \
   TypedValue localTvRef;                                              \
   auto result = Prop<mode,kt>(localTvRef, ctx, base, key, op);        \
@@ -205,7 +205,7 @@ CGET_OBJ_PROP_HELPER_TABLE(X)
   m(cGetPropQ,       MOpMode::Warn)     \
 
 #define X(nm, mode)                                                \
-inline TypedValue nm(Class* ctx, tv_lval base, StringData* key,    \
+inline TypedValue nm(Class* ctx, TypedValue base, StringData* key, \
                      ReadonlyOp op) {                              \
   TypedValue localTvRef;                                           \
   auto result = nullSafeProp<mode>(localTvRef, ctx, base, key, op);\
@@ -230,9 +230,9 @@ inline TypedValue cGetPropSOQ(Class* ctx, ObjectData* base, StringData* key,
   m(setPropCS,   KeyType::Str)           \
 
 #define X(nm, kt)                                                            \
-inline void nm(Class* ctx, tv_lval base, key_type<kt> key, TypedValue val,   \
+inline void nm(Class* ctx, TypedValue base, key_type<kt> key, TypedValue val,\
                ReadonlyOp op) {                                              \
-  HPHP::SetProp<false, kt>(ctx, base, key, &val, op);                        \
+  HPHP::SetProp<kt>(ctx, base, key, val, op);                                \
 }
 SETPROP_HELPER_TABLE(X)
 #undef X
@@ -245,14 +245,14 @@ SETPROP_HELPER_TABLE(X)
 #define X(nm, kt)                                                              \
 inline void nm(Class* ctx, ObjectData* base, key_type<kt> key, TypedValue val, \
                ReadonlyOp op) {                                                \
-  HPHP::SetPropObj<kt>(ctx, base, key, &val, op);                              \
+  HPHP::SetPropObj<kt>(ctx, base, key, val, op);                               \
 }
 SETPROP_OBJ_HELPER_TABLE(X)
 #undef X
 
 //////////////////////////////////////////////////////////////////////
 
-inline void unsetPropC(Class* ctx, tv_lval base, TypedValue key) {
+inline void unsetPropC(Class* ctx, TypedValue base, TypedValue key) {
   HPHP::UnsetProp(ctx, base, key);
 }
 
@@ -262,7 +262,7 @@ inline void unsetPropCO(Class* ctx, ObjectData* base, TypedValue key) {
 
 //////////////////////////////////////////////////////////////////////
 
-inline TypedValue setOpPropC(Class* ctx, tv_lval base, TypedValue key,
+inline TypedValue setOpPropC(Class* ctx, TypedValue base, TypedValue key,
                              TypedValue val, SetOpOp op) {
   TypedValue localTvRef;
   auto result = HPHP::SetOpProp(localTvRef, ctx, op, base, key, &val);
@@ -278,7 +278,7 @@ inline TypedValue setOpPropCO(Class* ctx, ObjectData* base, TypedValue key,
 
 //////////////////////////////////////////////////////////////////////
 
-inline TypedValue incDecPropC(Class* ctx, tv_lval base, TypedValue key,
+inline TypedValue incDecPropC(Class* ctx, TypedValue base, TypedValue key,
                               IncDecOp op) {
   return HPHP::IncDecProp(ctx, op, base, key);
 }
@@ -297,7 +297,7 @@ inline TypedValue incDecPropCO(Class* ctx, ObjectData* base, TypedValue key,
 
 #define X(nm, kt)                                                   \
 /* This returns uint64_t to ensure all 64 bits of rax are valid. */ \
-inline uint64_t nm(Class* ctx, tv_lval base, key_type<kt> key) {    \
+inline uint64_t nm(Class* ctx, TypedValue base, key_type<kt> key) { \
   return HPHP::IssetProp<kt>(ctx, base, key);                       \
 }
 ISSET_PROP_HELPER_TABLE(X)
@@ -382,9 +382,9 @@ PROFILE_KEYSET_ACCESS_HELPER_TABLE(X)
   m(elemSW,    KeyType::Str,   MOpMode::Warn)   \
   m(elemSIO,   KeyType::Str,   MOpMode::InOut)  \
 
-#define X(nm, keyType, mode)                                \
-inline TypedValue nm(tv_lval base, key_type<keyType> key) { \
-  return Elem<mode, keyType>(base, key);                    \
+#define X(nm, keyType, mode)                                   \
+inline TypedValue nm(TypedValue base, key_type<keyType> key) { \
+  return Elem<mode, keyType>(base, key);                       \
 }
 ELEM_HELPER_TABLE(X)
 #undef X
@@ -495,7 +495,7 @@ KEYSETGET_HELPER_TABLE(X)
 //////////////////////////////////////////////////////////////////////
 
 template <KeyType keyType, MOpMode mode>
-TypedValue cGetElemImpl(tv_lval base, key_type<keyType> key) {
+TypedValue cGetElemImpl(TypedValue base, key_type<keyType> key) {
   auto const result = Elem<mode, keyType>(base, key);
   tvIncRefGen(result);
   return result;
@@ -513,9 +513,9 @@ TypedValue cGetElemImpl(tv_lval base, key_type<keyType> key) {
   m(cGetElemIIO,     KeyType::Int, MOpMode::InOut)  \
   m(cGetElemSIO,     KeyType::Str, MOpMode::InOut)  \
 
-#define X(nm, kt, mode)                                 \
-inline TypedValue nm(tv_lval base, key_type<kt> key) {  \
-  return cGetElemImpl<kt, mode>(base, key);             \
+#define X(nm, kt, mode)                                    \
+inline TypedValue nm(TypedValue base, key_type<kt> key) {  \
+  return cGetElemImpl<kt, mode>(base, key);                \
 }
 CGETELEM_HELPER_TABLE(X)
 #undef X
@@ -660,9 +660,9 @@ UNSET_ELEM_HELPER_TABLE(X)
   m(issetElemI, KeyType::Int)      \
   m(issetElemS, KeyType::Str)      \
 
-#define X(nm, kt)                                    \
-inline uint64_t nm(tv_lval base, key_type<kt> key) { \
-  return HPHP::IssetElem<kt>(base, key);             \
+#define X(nm, kt)                                       \
+inline uint64_t nm(TypedValue base, key_type<kt> key) { \
+  return HPHP::IssetElem<kt>(base, key);                \
 }
 ISSET_ELEM_HELPER_TABLE(X)
 #undef X

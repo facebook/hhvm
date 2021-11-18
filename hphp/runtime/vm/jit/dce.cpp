@@ -221,7 +221,7 @@ bool canDCE(IRInstruction* inst) {
   case LdWHResult:
   case LdWHNotDone:
   case LdAFWHActRec:
-  case LdMIStateAddr:
+  case LdMIStateTempBaseAddr:
   case StringIsset:
   case ColIsEmpty:
   case ColIsNEmpty:

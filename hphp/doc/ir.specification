@@ -146,16 +146,6 @@ P (Passthrough)
   differs only in the type of the variable, or some other property that doesn't
   affect the value of the variable itself.
 
-MProp (MInstrProp)
-
-  The instruction may affect the type and/or value of its base operand,
-  operating on object properties.
-
-MElem (MInstrElem)
-
-  The instruction may affect the type and/or value of its base operand,
-  operating on array elements.
-
 LA (Layout-Agnostic)
 
   The instruction is generic over array-like inputs and outputs. Most ops that
@@ -2687,10 +2677,9 @@ To string conversions:
 
 17. Member instruction support
 
-| LdMIStateAddr, D(PtrToMIS), C(Int), NF
+| LdMIStateTempBaseAddr, D(PtrToMISTemp), NA, NF
 
-  Load an MInstrState address. Returns a pointer to offset S0 within the
-  current MInstrState.
+  Returns a pointer to the tvTempBase field within the current MInstrState.
 
 | LdMBase, DParam(Lval), NA, NF
 
@@ -2752,56 +2741,56 @@ SetProp will fail if the base is not a subtype of {Obj|Null}.
 Any instructions that take a pointer to an MInstrState struct use the various
 fields of that struct for holding intermediate values.
 
-| BaseG, D(LvalToMemb), S(Str), NF
+| BaseG, D(LvalToGbl|LvalToConst), S(Str), NF
 
   Get a base from global named S0. If it is not a defining BaseG it can also
-  return the init_null_variant, so for now it returns a LvalToMemb.
+  return the init_null_variant
 
-| PropX, D(LvalToMemb), S(Obj,Lval) S(Cell) S(PtrToMIS), NF
+| PropX, DPropLval, S(Cell) S(Cell) S(PtrToMISTemp|Nullptr), NF
 
   Lookup intermediate property in S0, with key S1. An exception is thrown if
   the property is Readonly when it was required to be Mutable.
 
-| PropQ, D(LvalToMemb), S(Obj,Lval) S(StaticStr) S(PtrToMIS), NF
+| PropQ, DPropLval, S(Cell) S(StaticStr) S(PtrToMISTemp|Nullptr), NF
 
   A nullsafe version of PropX, returns null if the base S0 is null. An exception
   is thrown if the property is Readonly when it was required to be Mutable.
 
-| PropDX, D(LvalToMemb), S(Obj,Lval) S(Cell) S(PtrToMIS), MProp
+| PropDX, DPropLval, S(Cell) S(Cell) S(PtrToMISTemp|Nullptr), NF
 
   Like PropX, but used for intermediate element lookups that may modify the
   base. An exception is thrown if the property is Readonly when it was
   required to be Mutable.
 
-| CGetProp, D(InitCell), S(Obj,Lval) S(Cell), PRc
+| CGetProp, D(InitCell), S(Cell) S(Cell), PRc
 
   Get property with key S1 from S0.
 
-| CGetPropQ, D(InitCell), S(Obj,Lval) S(StaticStr), PRc
+| CGetPropQ, D(InitCell), S(Cell) S(StaticStr), PRc
 
   A nullsafe version of CGetProp, returns null if the base S0 is null.
 
-| SetProp, ND, S(Obj,Lval) S(Cell) S(Cell), MProp
+| SetProp, ND, S(Cell) S(Cell) S(Cell), NF
 
   Set property with key S1 in S0 to S2.
 
-| UnsetProp, ND, S(Obj,Lval) S(Cell), NF
+| UnsetProp, ND, S(Cell) S(Cell), NF
 
   Unset an object property.
 
-| SetOpProp<op>, D(InitCell), S(Obj,Lval) S(Cell) S(Cell), MProp|PRc
+| SetOpProp<op>, D(InitCell), S(Cell) S(Cell) S(Cell), PRc
 
   Set op propery with key S1 in base S0, using S2 as the right hand side.
 
-| IncDecProp<op>, D(InitCell), S(Obj,Lval) S(Cell), MProp|PRc
+| IncDecProp<op>, D(InitCell), S(Cell) S(Cell), PRc
 
   Increment/decrement property with key S1 in base S0.
 
-| IssetProp, D(Bool), S(Obj,Lval) S(Cell), NF
+| IssetProp, D(Bool), S(Cell) S(Cell), NF
 
   Returns true iff the property with key S1 in base S0 is set.
 
-| ElemX, D(InitCell), S(Lval) S(Cell), NF
+| ElemX, D(InitCell), S(Cell) S(Cell), NF
 
   Get intermediate element with key S1 from base S0. The base will not be
   modified and the result will not be inc-ref-ed.
@@ -2843,17 +2832,17 @@ fields of that struct for holding intermediate values.
   If S1 may be present, branches to block B. If we branch here, the key may or
   may not be present.
 
-| ElemVecD, D(LvalToElem), S(Lval) S(Int), MElem
+| ElemVecD, D(LvalToElem), S(Lval) S(Int), NF
 
-| ElemVecU, D(LvalToMemb), S(Lval) S(Int), MElem
+| ElemVecU, D(LvalToElemOrConst), S(Lval) S(Int), NF
 
   Similar to ElemX, but the base S0 is a vec and the key S1 is an int. ElemVecD
   is for Define member instrs and ElemVecU is for Unset. (Other variations can
   be implemented without special IR instructions).
 
-| ElemDictD, D(LvalToElem), S(Lval) S(Int,Str), MElem
+| ElemDictD, D(LvalToElem), S(Lval) S(Int,Str), NF
 
-| ElemDictU, D(LvalToMemb), S(Lval) S(Int,Str), MElem
+| ElemDictU, D(LvalToElemOrConst), S(Lval) S(Int,Str), NF
 
   Similar to ElemDX and ElemUX, but specialized for when the base S0 is a
   dict and the key S1 is an int/str.
@@ -2862,7 +2851,7 @@ fields of that struct for holding intermediate values.
 
   Returns an lval to the element of dict S0 at the known position S2 in S1.
 
-| ElemKeysetU, D(LvalToMemb), S(Lval) S(Int,Str), MElem
+| ElemKeysetU, D(LvalToElemOrConst), S(Lval) S(Int,Str), NF
 
   Similar to ElemUX, but specialized for when the base S0 is a keyset and the
   key S1 is an int/str. Keysets do not support the define syntax.
@@ -2871,12 +2860,12 @@ fields of that struct for holding intermediate values.
 
   Returns an lval to the element of keyset S0 at the known position S2 in S1.
 
-| ElemDX, D(LvalToMemb), S(Lval) S(Cell), MElem
+| ElemDX, D(LvalToElemOrConst), S(Lval) S(Cell), NF
 
   Like ElemX, but used for intermediate element lookups that may modify the
   base.
 
-| ElemUX, D(LvalToMemb), S(Lval) S(Cell), MElem
+| ElemUX, D(LvalToElemOrConst), S(Lval) S(Cell), NF
 
   Like ElemX, but used for intermediate element lookups that may modify the
   base as part of an unset operation.
@@ -2916,7 +2905,7 @@ fields of that struct for holding intermediate values.
 
   Get element with key S1 from base S0.
 
-| CGetElem, D(InitCell), S(Lval) S(Cell), PRc
+| CGetElem, D(InitCell), S(Cell) S(Cell), PRc
 
   Get element with key S1 from S0.
 
@@ -3026,7 +3015,7 @@ fields of that struct for holding intermediate values.
   Get element with key S1 in the array S0, which may have an arbitrary layout.
   This op throws if the key is not in the array.
 
-| BespokeElem, D(LvalToElem), S(Lval) S(Int,Str) C(Bool), LA|MElem
+| BespokeElem, D(LvalToElem), S(Lval) S(Int,Str) C(Bool), LA
 
   Get a half-lval to an element of type T with key S1 in the array S0, which
   may have an arbitrary layout. The op will copy or escalate the S0 as needed,
@@ -3127,7 +3116,7 @@ fields of that struct for holding intermediate values.
 
   Set element with key S1 in S0 to S2.
 
-| SetElem<T>, DSetElem, S(Lval) S(Cell) S(InitCell), MElem
+| SetElem<T>, DSetElem, S(Lval) S(Cell) S(InitCell), NF
 
   Set element with key S1 in S0 to S2. SetElem returns a Nullptr in the common
   case, where the logical result of the hhbc SetM is its right hand side. In
@@ -3139,34 +3128,34 @@ fields of that struct for holding intermediate values.
   Furthermore, in the case of "invalid offsets", SetElem may throw an
   InvalidSetMException (see discussion above).
 
-| SetRange, ND, S(Lval) S(Int) S(Cell) S(Int) S(Int), MElem
+| SetRange, ND, S(Lval) S(Int) S(Cell) S(Int) S(Int), NF
 
-| SetRangeRev, ND, S(Lval) S(Int) S(Cell) S(Int) S(Int), MElem
+| SetRangeRev, ND, S(Lval) S(Int) S(Cell) S(Int) S(Int), NF
 
   Perform a range set or reverse range set operation, with the same arguments
   and semantics as the RangeSet bytecode instruction.
 
-| UnsetElem, ND, S(Lval) S(Cell), MElem
+| UnsetElem, ND, S(Lval) S(Cell), NF
 
   Unsets the element at key S1 in the base S0.
 
-| SetOpElem<op>, D(InitCell), S(Lval) S(Cell) S(Cell),  MElem|PRc
+| SetOpElem<op>, D(InitCell), S(Lval) S(Cell) S(Cell), PRc
 
   Set op elem with key S1 in base S0, using S2 as the right hand side.
 
-| IncDecElem, D(InitCell), S(Lval) S(Cell), MElem|PRc
+| IncDecElem, D(InitCell), S(Lval) S(Cell), PRc
 
   Increment/decrement element with key S1 in base S0.
 
-| SetNewElem, ND, S(Lval) S(InitCell), MElem
+| SetNewElem, ND, S(Lval) S(InitCell), NF
 
   Append the value in S1 to S0.
 
-| SetNewElemDict,   ND, S(Lval) S(InitCell),  MElem
+| SetNewElemDict,   ND, S(Lval) S(InitCell), NF
 
-| SetNewElemVec,    ND, S(Lval)  S(InitCell),  MElem
+| SetNewElemVec,    ND, S(Lval) S(InitCell), NF
 
-| SetNewElemKeyset, ND, S(Lval) S(Int,Str), MElem
+| SetNewElemKeyset, ND, S(Lval) S(Int,Str), NF
 
   Specializations of SetNewElem for pointers to dicts, vecs, and keysets.
 
@@ -3194,7 +3183,7 @@ fields of that struct for holding intermediate values.
 
   Returns true iff the element at key S1 in the base S0 is set.
 
-| IssetElem, D(Bool), S(Lval) S(Cell), NF
+| IssetElem, D(Bool), S(Cell) S(Cell), NF
 
   Returns true iff the element at key S1 in S0 is set.
 

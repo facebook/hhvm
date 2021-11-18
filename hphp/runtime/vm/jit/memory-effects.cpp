@@ -85,7 +85,7 @@ AliasClass pointee(
     return ret;
   }
 
-  auto specific = [&] () -> Optional<AliasClass> {
+  auto const specific = [&] () -> Optional<AliasClass> {
     if (type <= TBottom) return AEmpty;
 
     if (type <= TMemToFrame) {
@@ -107,7 +107,9 @@ AliasClass pointee(
         assertx(fp->is(BeginInlining));
         auto const stackOff = fp->extra<BeginInlining>()->spOffset;
         return AliasClass {
-          AStack::at(stackOff + kNumActRecCells + sinst->extra<LdOutAddrInlined>()->index)
+          AStack::at(
+            stackOff + kNumActRecCells + sinst->extra<LdOutAddrInlined>()->index
+          )
         };
       }
       return AStackAny;
@@ -125,19 +127,7 @@ AliasClass pointee(
       return APropAny;
     }
 
-    if (type <= TMemToMIS) {
-      if (sinst->is(LdMIStateAddr)) {
-        return mis_from_offset(sinst->src(0)->intVal());
-      }
-      if (ptr->hasConstVal() && ptr->rawVal() == 0) {
-        // nullptr tvRef pointer, representing an instruction that doesn't use
-        // it.
-        return AEmpty;
-      }
-      return AMIStateTempBase;
-    }
-
-    auto elem = [&] () -> AliasClass {
+    auto const elem = [&] () -> AliasClass {
       auto base = sinst->src(0);
       auto key  = sinst->src(1);
 
@@ -159,37 +149,19 @@ AliasClass pointee(
       return AElemAny;
     }
 
-    // The result of ElemArray{,W,U} is either the address of an array element,
-    // or &immutable_null_base.
-    if (type <= TMemToMemb) {
-      // Takes a PtrToCell as its first operand, so we can't easily grab an
-      // array base.
-      if (sinst->is(ElemVecU, ElemDictU, ElemKeysetU)) {
-        return AElemAny;
-      }
-
-      // These instructions can only get at tvRef when given it as a
-      // src. Otherwise they can only return pointers to properties or
-      // &immutable_null_base.
-      if (sinst->is(PropX, PropDX, PropQ)) {
-        assertx(sinst->srcs().back()->isA(TMemToMIS));
-        auto const src = sinst->srcs().back();
-        return APropAny | pointee(src, visited_labels);
-      }
-
-      // Like the Prop* instructions, but for array elements. These ops could
-      // pointers to collection elements, which we don't have AliasClasses for.
-      if (sinst->is(ElemDX, ElemUX)) {
-        return AElemAny;
-      }
-
-      return std::nullopt;
-    }
-
     return std::nullopt;
   }();
 
-  if (specific) return *specific;
+  if (specific) {
+    // A pointer has to point at *something*, so we should not get
+    // AEmpty here. The only exception if this pointer is not
+    // realizable (IE, it's a Bottom).
+    assertx(type <= TBottom || *specific != AEmpty);
+    // We don't currently ever form pointers to something that's not a
+    // TypedValue.
+    assertx(*specific <= AUnknownTV);
+    return *specific;
+  }
 
   /*
    * None of the above worked, so try to make the smallest union we can based
@@ -200,10 +172,21 @@ AliasClass pointee(
   if (type.maybe(TMemToFrame))   ret = ret | ALocalAny;
   if (type.maybe(TMemToProp))    ret = ret | APropAny;
   if (type.maybe(TMemToElem))    ret = ret | AElemAny;
-  if (type.maybe(TMemToMIS))     ret = ret | AMIStateTempBase | AMIStateROProp;
+  if (type.maybe(TMemToMISTemp)) ret = ret | AMIStateTempBase;
   if (type.maybe(TMemToClsInit)) ret = ret | AHeapAny;
-  if (type.maybe(TMemToClsCns))  ret = ret | AHeapAny;
   if (type.maybe(TMemToSProp))   ret = ret | ARdsAny;
+  if (type.maybe(TMemToGbl))     ret = ret | AOther | ARdsAny;
+  if (type.maybe(TMemToOther))   ret = ret | AOther | ARdsAny;
+  if (type.maybe(TMemToConst))   ret = ret | AOther;
+
+  // The pointer type should lie completely within the above
+  // locations.
+  assertx(type <= (TMemToStk|TMemToFrame|TMemToProp|TMemToElem|
+                   TMemToMISTemp|TMemToClsInit|TMemToSProp|TMemToGbl|
+                   TMemToOther|TMemToConst));
+  assertx(ret != AEmpty);
+  assertx(ret <= AUnknownTV);
+
   return ret;
 }
 
@@ -485,11 +468,11 @@ GeneralEffects interp_one_effects(const IRInstruction& inst) {
  * These instructions never load tvRef or roProp, but they might store to it.
  */
 MemEffects minstr_with_tvref(const IRInstruction& inst) {
-  auto const srcs = inst.srcs();
-  assertx(srcs.back()->isA(TMemToMIS));
-  auto const loads = AHeapAny | all_pointees(srcs.subpiece(0, srcs.size() - 2));
-  auto const stores = AHeapAny | all_pointees(inst) | AMIStateROProp;
-  return may_load_store(loads, stores);
+  auto const tvRef = inst.src(2);
+  assertx(tvRef->isA(TMemToMISTemp) || tvRef->isA(TNullptr));
+  auto stores = AHeapAny | AMIStateROProp;
+  if (!tvRef->isA(TNullptr)) stores |= pointee(tvRef);
+  return may_load_store(AHeapAny, stores);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -605,7 +588,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     auto const stack_kills = stack_below(inst.extra<EndCatch>()->offset);
     return ExitEffects {
       AUnknown,
-      stack_kills | AMIStateTempBase | AMIStateBase | AMIStateROProp
+      stack_kills | AMIStateAny
     };
   }
 
@@ -613,7 +596,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     auto const stack_kills = stack_below(inst.extra<EnterTCUnwind>()->offset);
     return ExitEffects {
       AUnknown,
-      stack_kills | AMIStateTempBase | AMIStateBase | AMIStateROProp
+      stack_kills | AMIStateAny
     };
   }
 
@@ -1313,54 +1296,29 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return may_load_store(pointee(inst.src(0)), AEmpty);
 
   /*
-   * Various minstr opcodes that take a PtrToGen in src 0, which may or may not
+   * Various minstr opcodes that take a Lval in src 0, which may or may not
    * point to a frame local or the evaluation stack. Some may read or write to
    * that pointer while some only read. They can all re-enter the VM and access
    * arbitrary heap locations.
    */
-  case CGetElem:
-  case IssetElem:
-  case CGetProp:
-  case CGetPropQ:
-  case IssetProp:
-    return may_load_store(
-      AHeapAny | all_pointees(inst),
-      AHeapAny
-    );
-
-  /*
-   * SetRange behaves like a simpler version of SetElem.
-   */
-  case SetRange:
-  case SetRangeRev:
-    return may_load_store(
-      AHeapAny | all_pointees(inst),
-      AHeapAny | pointee(inst.src(0))
-    );
-
   case IncDecElem:
-  case IncDecProp:
   case SetElem:
   case SetNewElem:
   case SetOpElem:
-  case SetOpProp:
-  case SetProp:
   case SetNewElemDict:
   case SetNewElemVec:
   case SetNewElemKeyset:
   case UnsetElem:
-  case BespokeUnset:
-  case StructDictUnset:
   case ElemVecD:
   case ElemVecU:
   case ElemDictD:
   case ElemDictU:
   case ElemKeysetU:
   case BespokeElem:
-  case ElemX:
   case ElemDX:
   case ElemUX:
-  case UnsetProp:
+  case SetRange:
+  case SetRangeRev:
     // These member ops will load and store from the base lval which they
     // take as their first argument, which may point anywhere in the heap.
     return may_load_store(
@@ -1368,6 +1326,16 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       AHeapAny | all_pointees(inst)
     );
 
+  case CGetElem:
+  case IssetElem:
+  case ElemX:
+  case CGetProp:
+  case CGetPropQ:
+  case SetProp:
+  case UnsetProp:
+  case IssetProp:
+  case IncDecProp:
+  case SetOpProp:
   case ReserveVecNewElem:
     return may_load_store(AHeapAny, AHeapAny);
 
@@ -1614,7 +1582,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvDblToBool:
   case ConvDblToInt:
   case DblAsBits:
-  case LdMIStateAddr:
+  case LdMIStateTempBaseAddr:
   case LdClsCns:
   case LdSubClsCns:
   case LdResolvedTypeCns:
@@ -1925,7 +1893,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case DictSet:
   case BespokeSet:
   case BespokeAppend:
+  case BespokeUnset:
   case StructDictSet:
+  case StructDictUnset:
   case ConcatStrStr:
   case PrintStr:
   case PrintBool:
@@ -2282,5 +2252,93 @@ GeneralEffects general_effects_for_vmreg_liveness(
 
   return ret;
 }
+
+//////////////////////////////////////////////////////////////////////
+
+bool hasMInstrBaseEffects(const IRInstruction& inst) {
+  switch (inst.op()) {
+    case ElemVecD:
+    case ElemDictD:
+    case ElemDX:
+    case BespokeElem:
+    case ElemVecU:
+    case ElemDictU:
+    case ElemKeysetU:
+    case ElemUX:
+    case SetElem:
+    case UnsetElem:
+    case SetOpElem:
+    case IncDecElem:
+    case SetNewElem:
+    case SetNewElemVec:
+    case SetNewElemDict:
+    case SetNewElemKeyset:
+    case SetRange:
+    case SetRangeRev:
+      return true;
+    default:
+      return false;
+  }
+}
+
+Optional<Type> mInstrBaseEffects(const IRInstruction& inst, Type old) {
+  assertx(hasMInstrBaseEffects(inst));
+
+  switch (inst.op()) {
+    case ElemVecD:
+    case ElemDictD:
+    case ElemDX:
+    case SetOpElem:
+    case IncDecElem:
+      // Always COWs arrays, leaves strings alone
+      return old.maybe(TArrLike)
+        ? make_optional(
+          ((old & TArrLike).modified() & TCounted) | (old - TArrLike)
+        )
+        : std::nullopt;
+    case ElemVecU:
+    case ElemDictU:
+    case ElemKeysetU:
+    case ElemUX:
+    case UnsetElem:
+      // Might COW arrays (depending if key is present), leaves strings alone
+      return old.maybe(TArrLike)
+        ? make_optional(((old & TArrLike).modified() & TCounted) | old)
+        : std::nullopt;
+    case SetElem:
+      // COWs both arrays and strings
+      return old.maybe(TArrLike | TStr)
+        ? make_optional(old.modified() & TCounted)
+        : std::nullopt;
+    case SetNewElem:
+    case SetNewElemVec:
+    case SetNewElemDict:
+    case SetNewElemKeyset: {
+      // Vecs and keysets will always COW. Dicts will COW in almost
+      // all situations except if the "next key" hits the limit.
+      if (!old.maybe(TArrLike)) return std::nullopt;
+      return
+        ((old & TArrLike).modified() & TCounted) | (old - (TVec | TKeyset));
+    }
+    case SetRange:
+    case SetRangeRev:
+      // Always COWs strings
+      return old.maybe(TStr)
+        ? make_optional(((old & TStr).modified() & TCounted) | (old - TStr))
+        : std::nullopt;
+    case BespokeElem: {
+      // Behaves like define if S2 is true, unset if false
+      if (!old.maybe(TArrLike)) return std::nullopt;
+      auto const t = (old & TArrLike).modified() & TCounted;
+      return inst.src(2)->boolVal()
+        ? t | (old - TArrLike)
+        : t | old;
+    }
+    default:
+      not_reached();
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
 
 }}

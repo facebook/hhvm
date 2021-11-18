@@ -62,7 +62,7 @@ SinkableInst findSinkablePhiSrc(
       val = val->inst()->src(0);
       is_lval = true;
     }
-    if (!val->inst()->is(LdLocAddr, LdStkAddr, LdMIStateAddr)) {
+    if (!val->inst()->is(LdLocAddr, LdStkAddr, LdMIStateTempBaseAddr)) {
       return {};
     }
     assertx(val->inst()->numSrcs() <= 1);

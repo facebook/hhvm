@@ -46,7 +46,7 @@ std::string bit_str(AliasClass::rep bits, AliasClass::rep skip) {
   case A::BElem:           return "Elem";
   case A::BMIState:        return "Mis";
   case A::BActRec:         return "ActRec";
-  case A::BVMReg:          return "VmRegAny"; break;
+  case A::BVMReg:          return "VmRegAny";
   case A::BLocal:          break;
   case A::BIter:           break;
   case A::BProp:           break;
@@ -66,6 +66,7 @@ std::string bit_str(AliasClass::rep bits, AliasClass::rep skip) {
   case A::BVMSP:           break;
   case A::BVMPC:           break;
   case A::BVMRetAddr:      break;
+  case A::BOther:          break;
   }
 
   auto ret = std::string{};
@@ -101,6 +102,7 @@ std::string bit_str(AliasClass::rep bits, AliasClass::rep skip) {
     case A::BVMSP:           ret += "Vmsp"; break;
     case A::BVMPC:           ret += "Vmpc"; break;
     case A::BVMRetAddr:      ret += "VmRetAddr"; break;
+    case A::BOther:          ret += "Other"; break;
     }
   }
   return ret;
@@ -806,18 +808,6 @@ bool AliasClass::isSingleLocation() const {
   }
   // All other specializations currently have exactly one location.
   return true;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-AliasClass mis_from_offset(size_t offset) {
-  if (offset == offsetof(MInstrState, tvTempBase)) {
-    return AliasClass{AliasClass::BMITempBase};
-  }
-  if (offset == offsetof(MInstrState, base)) {
-    return AliasClass{AliasClass::BMIBase};
-  }
-  always_assert(false);
 }
 
 //////////////////////////////////////////////////////////////////////

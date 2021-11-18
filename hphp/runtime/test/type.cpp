@@ -249,15 +249,15 @@ TEST(Type, ToString) {
   EXPECT_EQ("Lval", TLval.toString());
   EXPECT_EQ("Mem", TMem.toString());
 
-  EXPECT_EQ("PtrTo{Prop|MIS|MMisc|Other|Field}",
-            (TPtrToMemb - TPtrToElem).toString());
-  EXPECT_EQ("LvalTo{Prop|MIS|MMisc|Other|Field}",
-            (TLvalToMemb - TLvalToElem).toString());
-  EXPECT_EQ("MemTo{Prop|MIS|MMisc|Other|Field}",
-            (TMemToMemb - TMemToElem).toString());
-  EXPECT_EQ("PtrToMemb", TPtrToMemb.toString());
-  EXPECT_EQ("LvalToMemb", TLvalToMemb.toString());
-  EXPECT_EQ("MemToMemb", TMemToMemb.toString());
+  EXPECT_EQ("PtrToConst",
+            (TPtrToElemOrConst - TPtrToElem).toString());
+  EXPECT_EQ("LvalToConst",
+            (TLvalToElemOrConst - TLvalToElem).toString());
+  EXPECT_EQ("MemToConst",
+            (TMemToElemOrConst - TMemToElem).toString());
+  EXPECT_EQ("PtrToElemOrConst", TPtrToElemOrConst.toString());
+  EXPECT_EQ("LvalToElemOrConst", TLvalToElemOrConst.toString());
+  EXPECT_EQ("MemToElemOrConst", TMemToElemOrConst.toString());
   EXPECT_EQ("MemToElem", TMemToElem.toString());
   EXPECT_EQ("LvalToElem", TLvalToElem.toString());
   EXPECT_EQ("LvalTo{Frame|Gbl}", (TLvalToFrame | TLvalToGbl).toString());
@@ -282,8 +282,8 @@ TEST(Type, ToString) {
   EXPECT_EQ("PtrToFrame", TPtrToFrame.toString());
   EXPECT_EQ("LvalToFrame", TLvalToFrame.toString());
 
-  auto const ptrCns = Type::cns((TypedValue*)0xba5eba11, TPtrToMemb);
-  EXPECT_EQ("PtrToMemb<TV: 0xba5eba11>", ptrCns.toString());
+  auto const ptrCns = Type::cns((TypedValue*)0xba5eba11, TPtrToConst);
+  EXPECT_EQ("PtrToConst<TV: 0xba5eba11>", ptrCns.toString());
   EXPECT_EQ("TV: 0xba5eba11", ptrCns.constValString());
 }
 
@@ -303,9 +303,9 @@ TEST(Type, Ptr) {
   EXPECT_EQ(TPtrToFrame, TPtrToFrame - TPtrToElem);
   EXPECT_EQ(TBottom, TPtrToElem & TLazyCls);
 
-  auto const ptrCns = Type::cns((TypedValue*)0xba5eba11, TPtrToMemb);
+  auto const ptrCns = Type::cns((TypedValue*)0xba5eba11, TPtrToConst);
   EXPECT_TRUE(ptrCns.hasConstVal());
-  EXPECT_TRUE(ptrCns <= TPtrToMemb);
+  EXPECT_TRUE(ptrCns <= TPtrToConst);
   EXPECT_FALSE(ptrCns <= TPtrToElem);
 }
 
@@ -1129,10 +1129,10 @@ TEST(Type, PtrKinds) {
   EXPECT_EQ("PtrToStk", TPtrToStk.toString());
   EXPECT_EQ("Nullptr|PtrToProp",
     (TPtrToProp|TNullptr).toString());
-  EXPECT_EQ("Nullptr|PtrToField",
-    (TPtrToField|TNullptr).toString());
+  EXPECT_EQ("Nullptr|PtrToElem",
+    (TPtrToElem|TNullptr).toString());
 
-  EXPECT_EQ(PtrLocation::Frame, TPtrToFrame.ptrLocation());
+  EXPECT_EQ(PtrLocation::Elem, TPtrToElem.ptrLocation());
 
   EXPECT_TRUE(TPtrToFrame <= TPtr);
   EXPECT_TRUE(TPtrToFrame.maybe(TPtr));
@@ -1146,10 +1146,10 @@ TEST(Type, PtrKinds) {
             (TPtrToProp|TNullptr).ptrLocation());
   EXPECT_EQ(TPtrToProp,
             (TPtrToProp|TNullptr) - TNullptr);
-  EXPECT_EQ(PtrLocation::Field,
-            (TPtrToField|TNullptr).ptrLocation());
-  EXPECT_EQ(TPtrToField,
-            (TPtrToField|TNullptr) - TNullptr);
+  EXPECT_EQ(PtrLocation::Elem,
+            (TPtrToElem|TNullptr).ptrLocation());
+  EXPECT_EQ(TPtrToElem,
+            (TPtrToElem|TNullptr) - TNullptr);
 
   auto const a1 = TPtrToFrame | TInt | TStr;
   auto const a2 = TPtrToStk | TInt | TStr;

@@ -24,7 +24,6 @@
 #include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/array-access-profile.h"
 #include "hphp/runtime/vm/jit/guard-constraint.h"
-#include "hphp/runtime/vm/jit/minstr-effects.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/runtime/vm/jit/type-array-elem.h"
 #include "hphp/runtime/vm/jit/type.h"
@@ -291,19 +290,19 @@ void stMBase(IRGS& env, SSATmp* basePtr, SSATmp* base, Type baseType = TCell) {
  * are created on the fly during a member operation sequence.
  */
 SSATmp* tvTempBasePtr(IRGS& env) {
-  return gen(env, LdMIStateAddr, cns(env, offsetof(MInstrState, tvTempBase)));
+  return gen(env, LdMIStateTempBaseAddr);
 }
 
 SSATmp* propTvRefPtr(IRGS& env, SSATmp* base, const SSATmp* key) {
   return prop_ignores_tvref(env, base, key)
-    ? cns(env, Type::cns(nullptr, TPtrToMIS))
+    ? cns(env, TNullptr)
     : tvTempBasePtr(env);
 }
 
 SSATmp* ptrToUninit(IRGS& env) {
   // Nothing can write to the uninit null variant either, so the inner type
   // here is also always true.
-  return cns(env, Type::cns(&immutable_uninit_base, TLvalToOther));
+  return cns(env, Type::cns(&immutable_uninit_base, TLvalToConst));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -325,16 +324,9 @@ void specializeObjBase(IRGS& env, SSATmp* base) {
 
 Optional<PropInfo>
 getCurrentPropertyOffset(IRGS& env, SSATmp* base, Type keyType,
-                         Type baseType, bool ignoreLateInit) {
-  // We allow the use of classes from nullable objects because
-  // emitPropSpecialized() explicitly checks for null (when needed) before
-  // doing the property access.
-
-  if (!(baseType < (TObj | TInitNull) && baseType.clsSpec())) {
-    return std::nullopt;
-  }
-
-  auto const baseCls = baseType.clsSpec().cls();
+                         bool ignoreLateInit) {
+  if (!(base->isA(TObj) && base->type().clsSpec())) return std::nullopt;
+  auto const baseCls = base->type().clsSpec().cls();
   auto const info = getPropertyOffset(env, baseCls, keyType, ignoreLateInit);
   if (!info) return info;
   specializeObjBase(env, base);
@@ -388,22 +380,20 @@ std::pair<SSATmp*, SSATmp*> emitPropSpecialized(
   SSATmp* key,
   bool nullsafe,
   MOpMode mode,
-  PropInfo propInfo,
-  Type baseType
+  PropInfo propInfo
 ) {
+  assertx(base->isA(TObj));
+
   auto const doWarn   = mode == MOpMode::Warn;
-  auto const doDefine = mode == MOpMode::Define || mode == MOpMode::Unset;
+  auto const doDefine = mode == MOpMode::Define;
 
-  auto const initNull = ptrToInitNull(env);
-  auto const baseTmpType = base->type();
-
-  auto const getAddr = [&] (SSATmp* obj) {
+  auto const addr = [&] {
     if (!propInfo.lateInitCheck) {
       assertx(!propInfo.lateInit || mode == MOpMode::Define);
-      auto const addr = ldPropAddr(env, obj, nullptr, propInfo.propClass,
+      auto const addr = ldPropAddr(env, base, nullptr, propInfo.propClass,
                                    propInfo.slot, propInfo.knownType);
       return !propInfo.lateInit
-        ? checkInitProp(env, obj, addr, key, propInfo.knownType, doWarn)
+        ? checkInitProp(env, base, addr, key, propInfo.knownType, doWarn)
         : addr;
     }
 
@@ -411,7 +401,7 @@ std::pair<SSATmp*, SSATmp*> emitPropSpecialized(
     return cond(
       env,
       [&] (Block* taken) {
-        return ldPropAddr(env, obj, taken, propInfo.propClass,
+        return ldPropAddr(env, base, taken, propInfo.propClass,
                           propInfo.slot, propInfo.knownType);
       },
       [&] (SSATmp* addr) { return addr; },
@@ -427,86 +417,9 @@ std::pair<SSATmp*, SSATmp*> emitPropSpecialized(
         return cns(env, TBottom);
       }
     );
-  };
+  }();
 
-  /*
-   * Normal case, where the base is an object (and not a pointer to
-   * something)---just do a lea with the type information we got from static
-   * analysis.  The caller of this function will use it to know whether it can
-   * avoid a generic incref, etc.
-   */
-  if (baseTmpType <= TObj) {
-    return {
-      getAddr(base),
-      mode == MOpMode::Define ? base : nullptr
-    };
-  }
-
-  /*
-   * We also support nullable objects for the base.  This is a frequent result
-   * of static analysis on multi-dim property accesses ($foo->bar->baz), since
-   * hhbbc doesn't try to prove __construct must be run or that sort of thing
-   * (so every object-holding object property can also be null).
-   *
-   * After a null check, if it's actually an object we can just do LdPropAddr,
-   * otherwise we just give out &immutable_null_base (after raising the
-   * appropriate warnings).
-   */
-
-  SSATmp* obj = nullptr;
-  auto const prop = cond(
-    env,
-    [&] (Block* taken) {
-      gen(env, CheckTypeMem, TObj, taken, base);
-    },
-    [&] {
-      // Next: Base is an object. Load property and check for uninit.
-      obj = gen(env, LdMem, baseType & TObj, base);
-      return getAddr(obj);
-    },
-    [&] { // Taken: Base is Null. Raise warnings/errors and return InitNull.
-      hint(env, Block::Hint::Unlikely);
-      if (!nullsafe && doWarn) {
-        auto const msg = makeStaticString(
-            "Cannot access property on non-object");
-        gen(env, RaiseNotice, cns(env, msg));
-      }
-      if (doDefine) {
-        /*
-         * This case is where we're logically supposed to do stdClass
-         * promotion.  However, it's impossible that we're going to be asked to
-         * do this with the way type inference works ahead of time right now:
-         *
-         *   o In defining minstrs, the only way hhbbc will know that an object
-         *     type is nullable and also specialized is if the only type it can
-         *     be is ?Obj=stdClass.  (This is because it does object property
-         *     inference in a control flow insensitive way, so if null is
-         *     possible stdClass must be added to the type, and there are no
-         *     unions of multiple specialized object types.)
-         *
-         *   o On the other hand, if the type was really ?Obj=stdClass, we
-         *     wouldn't have gotten a known property offset for any properties,
-         *     because stdClass has no declared properties, so we can't be
-         *     here.
-         *
-         * We could punt, but it's better to assert for now because if we
-         * change this in hhbbc it will be on-purpose...
-         */
-        always_assert_flog(
-          false,
-          "Static analysis error: we would've needed to generate "
-          "stdClass-promotion code in the JIT, which is unexpected."
-        );
-      }
-      return initNull;
-    }
-  );
-
-  // Note that normally using obj here is unsafe, as its only defined on one
-  // side of the cond(). However, for MOpMode::Define, we'll assert if we emit
-  // an actual branch, so its okay.
-  assertx(mode != MOpMode::Define || obj);
-  return { prop, mode == MOpMode::Define ? obj : nullptr };
+  return { addr, doDefine ? base : nullptr };
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -716,16 +629,14 @@ SSATmp* emitKeysetIsset(IRGS& env, SSATmp* base, SSATmp* key) {
 //////////////////////////////////////////////////////////////////////
 
 SSATmp* emitIncDecProp(IRGS& env, IncDecOp op, SSATmp* base, SSATmp* key) {
-  auto const baseType = env.irb->fs().mbase().type;
   auto const propInfo =
-    getCurrentPropertyOffset(env, base, key->type(), baseType, false);
+    getCurrentPropertyOffset(env, base, key->type(), false);
 
   if (propInfo && !propInfo->isConst) {
     // Special case for when the property is known to be an int.
-    if (base->isA(TObj) && propInfo->knownType <= TInt) {
+    if (propInfo->knownType <= TInt) {
       base = emitPropSpecialized(env, base, key, false,
-                                 MOpMode::Define, *propInfo,
-                                 base->type()).first;
+                                 MOpMode::Define, *propInfo).first;
       auto const prop = gen(env, LdMem, TInt, base);
       auto const result = incDec(env, op, prop);
       // No need for a property type-check because the input is an Int and the
@@ -786,7 +697,7 @@ SSATmp* emitCGetElemQuiet(IRGS& env, SSATmp* base, SSATmp* key,
     case SimpleOp::Map:
       assertx(mode != MOpMode::InOut);
     case SimpleOp::None:
-      return gen(env, CGetElem, MOpModeData{mode}, ldMBase(env), key);
+      return gen(env, CGetElem, MOpModeData{mode}, base, key);
   }
   always_assert(false);
 }
@@ -927,15 +838,6 @@ SSATmp* extractBase(IRGS& env) {
  */
 void constrainBase(IRGS& env) { extractBase(env); }
 
-/*
- * Return the extracted object base if the predicted type is TObj, else just
- * return the base pointer.
- */
-SSATmp* extractBaseIfObj(IRGS& env) {
-  auto const baseType = env.irb->fs().mbase().type;
-  return baseType <= TObj ? extractBase(env) : ldMBase(env);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 struct DimResult {
@@ -970,17 +872,14 @@ DimResult propGenericImpl(IRGS& env, MOpMode mode, SSATmp* base, SSATmp* key,
 }
 
 DimResult propImpl(IRGS& env, MOpMode mode, SSATmp* key, bool nullsafe, ReadonlyOp op) {
-  auto const baseType = env.irb->fs().mbase().type;
+  auto const base = extractBase(env);
 
-  if (mode == MOpMode::Unset && !baseType.maybe(TObj)) {
-    constrainBase(env);
+  if (mode == MOpMode::Unset && !base->type().maybe(TObj)) {
     return DimResult{ptrToInitNull(env), cns(env, TInitNull)};
   }
 
-  auto const base = extractBaseIfObj(env);
-
   auto const propInfo =
-    getCurrentPropertyOffset(env, base, key->type(), baseType, false);
+    getCurrentPropertyOffset(env, base, key->type(), false);
   if (!propInfo || propInfo->isConst || mode == MOpMode::Unset) {
     return propGenericImpl(env, mode, base, key, nullsafe, op);
   }
@@ -1012,8 +911,7 @@ DimResult propImpl(IRGS& env, MOpMode mode, SSATmp* key, bool nullsafe, Readonly
     key,
     nullsafe,
     mode,
-    *propInfo,
-    baseType
+    *propInfo
   );
 
   if (op == ReadonlyOp::CheckROCOW ||
@@ -1222,25 +1120,23 @@ DimResult elemImpl(IRGS& env, MOpMode mode, SSATmp* key) {
     }
   }
 
-  auto const base = ldMBase(env);
   auto const data = MOpModeData { mode };
   if (define || unset) {
     auto const op = define ? ElemDX : ElemUX;
     return DimResult{
-      gen(env, op, data, base, key),
+      gen(env, op, data, ldMBase(env), key),
       nullptr
     };
   }
-  auto const value = gen(env, ElemX, data, base, key);
+  auto const value = gen(env, ElemX, data, extractBase(env), key);
   return DimResult{baseValueToLval(env, value), value};
 }
 
 template<class Finish>
 SSATmp* cGetPropImpl(IRGS& env, SSATmp* base, SSATmp* key,
                      MOpMode mode, bool nullsafe, Finish finish, ReadonlyOp op) {
-  auto const baseType = env.irb->fs().mbase().type;
   auto const propInfo =
-    getCurrentPropertyOffset(env, base, key->type(), baseType, false);
+    getCurrentPropertyOffset(env, base, key->type(), false);
   if (propInfo) {
     if (RO::EvalEnableReadonlyPropertyEnforcement && propInfo->readOnly &&
       op == ReadonlyOp::Mutable) {
@@ -1250,10 +1146,8 @@ SSATmp* cGetPropImpl(IRGS& env, SSATmp* base, SSATmp* key,
         return cns(env, TBottom);
       }
     }
-    auto propAddr = emitPropSpecialized(
-      env, base, key, nullsafe, mode, *propInfo,
-      baseType
-    ).first;
+    auto propAddr =
+      emitPropSpecialized(env, base, key, nullsafe, mode, *propInfo).first;
     auto const result = gen(env, LdMem, propInfo->knownType, propAddr);
     auto const profres = profiledType(env, result, [&] {
       gen(env, IncRef, result);
@@ -1320,12 +1214,11 @@ Block* makeCatchSet(IRGS& env, uint32_t nDiscard) {
 SSATmp* setPropImpl(IRGS& env, uint32_t nDiscard, SSATmp* key, ReadonlyOp op) {
   auto const value = topC(env, BCSPRelOffset{0}, DataTypeGeneric);
 
-  auto const baseType = env.irb->fs().mbase().type;
-  auto const base = extractBaseIfObj(env);
+  auto const base = extractBase(env);
 
   auto const mode = MOpMode::Define;
   auto const propInfo =
-    getCurrentPropertyOffset(env, base, key->type(), baseType, true);
+    getCurrentPropertyOffset(env, base, key->type(), true);
 
   if (propInfo && !propInfo->isConst) {
     if (RO::EvalEnableReadonlyPropertyEnforcement && !propInfo->readOnly &&
@@ -1344,8 +1237,7 @@ SSATmp* setPropImpl(IRGS& env, uint32_t nDiscard, SSATmp* key, ReadonlyOp op) {
       key,
       false,
       mode,
-      *propInfo,
-      baseType
+      *propInfo
     );
 
     SSATmp* newVal = nullptr;
@@ -1595,7 +1487,7 @@ SSATmp* ldPropAddr(IRGS& env, SSATmp* obj, Block* taken,
 SSATmp* ptrToInitNull(IRGS& env) {
   // Nothing is allowed to write anything to the init null variant, so this
   // inner type is always true.
-  return cns(env, Type::cns(&immutable_null_base, TLvalToOther));
+  return cns(env, Type::cns(&immutable_null_base, TLvalToConst));
 }
 
 bool canUpdateCanonicalBase(SSATmp* baseLoc) {
@@ -1764,12 +1656,6 @@ void emitQueryM(IRGS& env, uint32_t nDiscard, QueryMOp query, MemberKey mk) {
     }
   }
 
-  auto const maybeExtractBase = [simpleOp] (IRGS& environment) {
-    return simpleOp == SimpleOp::None
-      ? ldMBase(environment)
-      : extractBase(environment);
-  };
-
   auto const result = [&]() -> SSATmp* {
     switch (query) {
       case QueryMOp::InOut:
@@ -1780,11 +1666,11 @@ void emitQueryM(IRGS& env, uint32_t nDiscard, QueryMOp query, MemberKey mk) {
           "QueryOp InOut can only be used with Elem codes"
         );
         return mcodeIsProp(mk.mcode)
-          ? cGetPropImpl(env, extractBaseIfObj(env), key,
+          ? cGetPropImpl(env, extractBase(env), key,
                          mode, mk.mcode == MQT,
                          [&](SSATmp* el) { mFinalImpl(env, nDiscard, el); },
                          mk.rop)
-          : emitCGetElem(env, maybeExtractBase(env), key, mode, simpleOp,
+          : emitCGetElem(env, extractBase(env), key, mode, simpleOp,
                          [&](SSATmp* el) { mFinalImpl(env, nDiscard, el); });
       }
 
@@ -1792,17 +1678,17 @@ void emitQueryM(IRGS& env, uint32_t nDiscard, QueryMOp query, MemberKey mk) {
         auto const mode = getQueryMOpMode(query);
         return mcodeIsProp(mk.mcode)
           ? cGetPropImpl(
-              env, extractBaseIfObj(env), key, mode, mk.mcode == MQT,
+              env, extractBase(env), key, mode, mk.mcode == MQT,
               [&](SSATmp* el) { mFinalImpl(env, nDiscard, el); }, mk.rop)
           : emitCGetElemQuiet(
-              env, maybeExtractBase(env), key, mode, simpleOp,
+              env, extractBase(env), key, mode, simpleOp,
               [&](SSATmp* el) { mFinalImpl(env, nDiscard, el); });
       }
 
       case QueryMOp::Isset:
         return mcodeIsProp(mk.mcode)
-          ? gen(env, IssetProp, extractBaseIfObj(env), key)
-          : emitIssetElem(env, maybeExtractBase(env), key, simpleOp);
+          ? gen(env, IssetProp, extractBase(env), key)
+          : emitIssetElem(env, extractBase(env), key, simpleOp);
     }
     not_reached();
   }();
@@ -1846,7 +1732,7 @@ void emitIncDecM(IRGS& env, uint32_t nDiscard, IncDecOp incDec, MemberKey mk) {
 
   auto const result = [&] {
     if (mcodeIsProp(mk.mcode)) {
-      return emitIncDecProp(env, incDec, extractBaseIfObj(env), key);
+      return emitIncDecProp(env, incDec, extractBase(env), key);
     }
     if (mcodeIsElem(mk.mcode)) {
       auto const base = ldMBase(env);
@@ -1899,9 +1785,8 @@ SSATmp* inlineSetOp(IRGS& env, SetOpOp op, SSATmp* lhs, SSATmp* rhs) {
 template<class Finish>
 SSATmp* setOpPropImpl(IRGS& env, SetOpOp op, SSATmp* base,
                       SSATmp* key, SSATmp* rhs, Finish finish) {
-  auto const baseType = env.irb->fs().mbase().type;
   auto const propInfo =
-    getCurrentPropertyOffset(env, base, key->type(), baseType, false);
+    getCurrentPropertyOffset(env, base, key->type(), false);
 
   if (propInfo && !propInfo->isConst) {
     SSATmp* propPtr;
@@ -1912,8 +1797,7 @@ SSATmp* setOpPropImpl(IRGS& env, SetOpOp op, SSATmp* base,
       key,
       false,
       MOpMode::Define,
-      *propInfo,
-      baseType
+      *propInfo
     );
     assertx(obj != nullptr);
 
@@ -1999,7 +1883,7 @@ void emitSetOpM(IRGS& env, uint32_t nDiscard, SetOpOp op, MemberKey mk) {
   };
   auto const result = [&] {
     if (mcodeIsProp(mk.mcode)) {
-      return setOpPropImpl(env, op, extractBaseIfObj(env), key, rhs, finish);
+      return setOpPropImpl(env, op, extractBase(env), key, rhs, finish);
     }
     if (mcodeIsElem(mk.mcode)) {
       auto const base = ldMBase(env);
@@ -2015,7 +1899,7 @@ void emitUnsetM(IRGS& env, uint32_t nDiscard, MemberKey mk) {
   auto key = memberKey(env, mk);
 
   if (mcodeIsProp(mk.mcode)) {
-    gen(env, UnsetProp, extractBaseIfObj(env), key);
+    gen(env, UnsetProp, extractBase(env), key);
   } else {
     assertx(mcodeIsElem(mk.mcode));
     gen(env, UnsetElem, ldMBase(env), key);

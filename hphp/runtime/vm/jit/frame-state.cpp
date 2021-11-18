@@ -23,7 +23,6 @@
 #include "hphp/runtime/vm/jit/irgen-call.h"
 #include "hphp/runtime/vm/jit/location.h"
 #include "hphp/runtime/vm/jit/memory-effects.h"
-#include "hphp/runtime/vm/jit/minstr-effects.h"
 #include "hphp/runtime/vm/jit/simplify.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
@@ -510,35 +509,23 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     break;
 
   default:
-    break;
-  }
-
-  if (MInstrEffects::supported(inst)) {
-    updateMInstr(inst);
-  } else {
-    // Update the mbase state according to the memory effects of `inst'.  We
-    // only call this for instructions without minstr effects; those are
-    // handled more precisely as part of updateMInstr().
-    updateMBase(inst);
+    // Use precise Minstr effects if we can
+    if (hasMInstrBaseEffects(*inst)) {
+      updateMInstr(inst);
+    } else {
+      // Handle everything else conservatively
+      updateMBase(inst);
+    }
+      break;
   }
 }
 
 void FrameStateMgr::updateMInstr(const IRInstruction* inst) {
-  // We don't update tracked local types for pseudomains, but we do care about
-  // stack types.
-  auto const baseTmp = inst->src(minstrBaseIdx(inst->op()));
-  if (!baseTmp->type().maybe(TLval)) return;
+  auto const basePtr = inst->src(0);
+  assertx(basePtr->isA(TLval));
 
-  auto const base = pointee(baseTmp);
+  auto const base = canonicalize(pointee(basePtr));
   auto const mbase = cur().mbr.pointee;
-
-  auto const effect_on = [&] (Type ty) -> Optional<Type> {
-    auto const effects = MInstrEffects(inst->op(), ty);
-    if (effects.baseTypeChanged || effects.baseValChanged) {
-      return effects.baseType;
-    }
-    return std::nullopt;
-  };
 
   // If we don't know exactly where the base is, we have to be conservative and
   // apply the operation to all locals/stack slots that could be affected.
@@ -558,20 +545,17 @@ void FrameStateMgr::updateMInstr(const IRInstruction* inst) {
       return setType(l, oldType);
     }
 
-    if (auto const baseType = effect_on(oldType)) {
-      widenType(l, oldType | *baseType);
+    if (auto const n = mInstrBaseEffects(*inst, oldType)) {
+      widenType(l, oldType | *n);
     }
   };
 
   if (base.isSingleLocation()) {
-    // When the member base register refers to a single known memory location
-    // `l' (with corresponding Ptr type `kind'), we apply the effect of `inst'
-    // only to `l'.  Returns the base value type if `inst' had an effect.
+    // When the member base register refers to a single known memory
+    // location `l', we apply the effect of `inst' only to `l'.
     auto const apply_one = [&] (Location l) {
-      auto const oldTy = typeOf(l);
-      if (auto const updatedTy = effect_on(oldTy)) {
-        assertx(*updatedTy <= TCell);
-        setType(l, *updatedTy);
+      if (auto const n = mInstrBaseEffects(*inst, typeOf(l))) {
+        setType(l, *n);
       }
     };
 

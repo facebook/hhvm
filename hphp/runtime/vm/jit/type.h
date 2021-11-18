@@ -89,26 +89,24 @@ struct ProfDataDeserializer;
 
 #define PTR_LOCATION_PRIMITIVE(f,...)                       \
   f(ClsInit,  1U << 0, __VA_ARGS__)                         \
-  f(ClsCns,   1U << 1, __VA_ARGS__)                         \
-  f(Frame,    1U << 2, __VA_ARGS__)                         \
-  f(Stk,      1U << 3, __VA_ARGS__)                         \
-  f(Gbl,      1U << 4, __VA_ARGS__)                         \
-  f(Prop,     1U << 5, __VA_ARGS__)                         \
-  f(Elem,     1U << 6, __VA_ARGS__)                         \
-  f(SProp,    1U << 7, __VA_ARGS__)                         \
-  f(MIS,      1U << 8, __VA_ARGS__)                         \
-  f(MMisc,    1U << 9, __VA_ARGS__)                         \
-  f(Other,    1U << 10, __VA_ARGS__)                        \
-  f(Field,    1U << 11, __VA_ARGS__)
+  f(Frame,    1U << 1, __VA_ARGS__)                         \
+  f(Stk,      1U << 2, __VA_ARGS__)                         \
+  f(Gbl,      1U << 3, __VA_ARGS__)                         \
+  f(Prop,     1U << 4, __VA_ARGS__)                         \
+  f(Elem,     1U << 5, __VA_ARGS__)                         \
+  f(SProp,    1U << 6, __VA_ARGS__)                         \
+  f(MISTemp,  1U << 7, __VA_ARGS__)                         \
+  f(Other,    1U << 8, __VA_ARGS__)                         \
+  f(Const,    1U << 9, __VA_ARGS__)                        \
   // Keep the last bit in sync with PtrLocation::All below
 
 #define PTR_LOCATION_TYPES(f, ...)                          \
   PTR_LOCATION_PRIMITIVE(f, __VA_ARGS__)                    \
-  f(Memb, Prop | Elem | MIS | MMisc | Other | Field, __VA_ARGS__)
+  f(ElemOrConst, Elem | Const, __VA_ARGS__)
 
 enum class PtrLocation : uint16_t {
   Bottom = 0,           // Nothing. Only valid if type is not a Ptr
-  All    = (1U << 12) - 1,
+  All    = (1U << 10) - 1,
 #define PTRT(name, bits, ...) name = (bits),
   PTR_LOCATION_TYPES(PTRT)
 #undef PTRT

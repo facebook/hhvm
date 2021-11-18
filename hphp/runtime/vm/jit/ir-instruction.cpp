@@ -32,7 +32,6 @@
 #include "hphp/runtime/vm/jit/irgen-call.h"
 #include "hphp/runtime/vm/jit/ir-instr-table.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
-#include "hphp/runtime/vm/jit/minstr-effects.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/simplify.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
@@ -524,8 +523,8 @@ Type arrLikeAppendReturn(const IRInstruction* inst) {
 
   assertx(arr <= TArrLike);
   assertx(arr.isKnownDataType());
-  auto const base = arr <= TKeyset
-    ? (arr | TCountedKeyset)
+  auto const base = arr <= TDict
+    ? (arr | TCountedDict)
     : (arr.modified() & TCounted);
   auto const layout = arr.arrSpec().layout().appendType(val);
   return base.narrowToLayout(layout);
@@ -579,6 +578,13 @@ Type verifyParamFailReturn(const IRInstruction* inst) {
     dstTy |= TPersistentStr;
   }
   return dstTy;
+}
+
+Type propLval(const IRInstruction* inst) {
+  assertx(inst->is(PropX, PropDX, PropQ));
+  auto const tvRef = inst->src(2);
+  if (tvRef->isA(TNullptr)) return TLvalToProp|TLvalToConst;
+  return TLvalToProp|TLvalToConst|TLvalToMISTemp;
 }
 
 // Is this instruction an array cast that always modifies the type of the
@@ -668,6 +674,7 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #define DLvalOfPtr      return ptrToLvalReturn(inst);
 #define DTypeCnsClsName return typeCnsClsName(inst);
 #define DVerifyParamFail return verifyParamFailReturn(inst);
+#define DPropLval       return propLval(inst);
 
 #define O(name, dstinfo, srcinfo, flags) case name: dstinfo not_reached();
 
@@ -712,6 +719,7 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #undef DLvalOfPtr
 #undef DTypeCnsClsName
 #undef DVerifyParamFail
+#undef DPropLval
 }
 
 bool IRInstruction::maySyncVMRegsWithSources() const {

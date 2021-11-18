@@ -302,8 +302,8 @@ void cgStClsInitElem(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void cgLdMIStateAddr(IRLS& env, const IRInstruction* inst) {
-  auto const off = rds::kVmMInstrStateOff + inst->src(0)->intVal();
+void cgLdMIStateTempBaseAddr(IRLS& env, const IRInstruction* inst) {
+  auto const off = rds::kVmMInstrStateOff + offsetof(MInstrState, tvTempBase);
   vmain(env) << lea{rvmtl()[off], dstLoc(env, inst, 0).reg()};
 }
 

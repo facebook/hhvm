@@ -577,6 +577,7 @@ using TypeNames::TCA;
 #define DLvalOfPtr
 #define DTypeCnsClsName
 #define DVerifyParamFail
+#define DPropLval
 
 #define O(opcode, dstinfo, srcinfo, flags) \
   case opcode: dstinfo srcinfo countCheck(); return true;
@@ -641,6 +642,7 @@ using TypeNames::TCA;
 #undef DLvalOfPtr
 #undef DTypeCnsClsName
 #undef DVerifyParamFail
+#undef DPropLval
   return true;
 }
 

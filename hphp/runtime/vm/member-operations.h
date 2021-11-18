@@ -137,11 +137,6 @@ inline void failOnNonCollectionObjArrayAccess(ObjectData* obj) {
   }
 }
 
-inline ObjectData* instanceFromTv(tv_rval tv) {
-  assertx(tvIsObject(tv));
-  return val(tv).pobj;
-}
-
 [[noreturn]] void throw_cannot_use_newelem_for_lval_read_col();
 [[noreturn]] void throw_cannot_use_newelem_for_lval_read(const ArrayData*);
 [[noreturn]] void throw_cannot_use_newelem_for_lval_read_clsmeth();
@@ -368,8 +363,8 @@ inline TypedValue ElemScalar() {
 /**
  * Elem when base is a Boolean
  */
-inline TypedValue ElemBoolean(tv_rval base) {
-  return base.val().num ? ElemScalar() : ElemEmptyish();
+inline TypedValue ElemBoolean(TypedValue base) {
+  return val(base).num ? ElemScalar() : ElemEmptyish();
 }
 
 inline int64_t ElemStringPre(int64_t key) {
@@ -431,8 +426,8 @@ inline TypedValue ElemObject(ObjectData* base, key_type<keyType> key) {
  * $result = $base[$key];
  */
 template<MOpMode mode, KeyType keyType>
-NEVER_INLINE TypedValue ElemSlow(tv_rval base, key_type<keyType> key) {
-  assertx(tvIsPlausible(*base));
+NEVER_INLINE TypedValue ElemSlow(TypedValue base, key_type<keyType> key) {
+  assertx(tvIsPlausible(base));
 
   switch (base.type()) {
     case KindOfUninit:
@@ -449,15 +444,15 @@ NEVER_INLINE TypedValue ElemSlow(tv_rval base, key_type<keyType> key) {
       return ElemScalar();
     case KindOfClass:
       return ElemString<mode, keyType>(
-        classToStringHelper(base.val().pclass), key
+        classToStringHelper(val(base).pclass), key
       );
     case KindOfLazyClass:
       return ElemString<mode, keyType>(
-        lazyClassToStringHelper(base.val().plazyclass), key
+        lazyClassToStringHelper(val(base).plazyclass), key
       );
     case KindOfPersistentString:
     case KindOfString:
-      return ElemString<mode, keyType>(base.val().pstr, key);
+      return ElemString<mode, keyType>(val(base).pstr, key);
 
     // These types are handled in Elem.
     case KindOfPersistentVec:
@@ -469,7 +464,7 @@ NEVER_INLINE TypedValue ElemSlow(tv_rval base, key_type<keyType> key) {
       always_assert(false);
 
     case KindOfObject:
-      return ElemObject<mode, keyType>(base.val().pobj, key);
+      return ElemObject<mode, keyType>(val(base).pobj, key);
 
     case KindOfClsMeth:
       return ElemScalar();
@@ -478,12 +473,12 @@ NEVER_INLINE TypedValue ElemSlow(tv_rval base, key_type<keyType> key) {
 }
 
 template<MOpMode mode, KeyType keyType = KeyType::Any>
-inline TypedValue Elem(tv_rval base, key_type<keyType> key) {
+inline TypedValue Elem(TypedValue base, key_type<keyType> key) {
   assertx(mode != MOpMode::Define && mode != MOpMode::Unset);
-  assertx(tvIsPlausible(base.tv()));
+  assertx(tvIsPlausible(base));
 
   if (tvIsArrayLike(base)) {
-    auto const ad = base.val().parr;
+    auto const ad = val(base).parr;
     if (!ad->isVanilla()) {
       return ElemBespoke<mode, keyType>(ad, key);
     } else if (ad->isVanillaVec()) {
@@ -503,11 +498,17 @@ inline TypedValue Elem(tv_rval base, key_type<keyType> key) {
  * ElemD when base is a bespoke array-like
  */
 inline tv_lval ElemDBespokePre(tv_lval base, int64_t key) {
-  return BespokeArray::ElemInt(base, key, true);
+  auto ret = BespokeArray::ElemInt(base, key, true);
+  assertx(tvIsArrayLike(base));
+  assertx(base.val().parr->hasExactlyOneRef());
+  return ret;
 }
 
 inline tv_lval ElemDBespokePre(tv_lval base, StringData* key) {
-  return BespokeArray::ElemStr(base, key, true);
+  auto ret = BespokeArray::ElemStr(base, key, true);
+  assertx(tvIsArrayLike(base));
+  assertx(base.val().parr->hasExactlyOneRef());
+  return ret;
 }
 
 inline tv_lval ElemDBespokePre(tv_lval base, TypedValue key) {
@@ -537,6 +538,7 @@ inline tv_lval ElemDVecPre(tv_lval base, int64_t key) {
   auto const oldArr = base.val().parr;
   auto const lval = VanillaVec::LvalInt(oldArr, key);
 
+  assertx(lval.arr->hasExactlyOneRef());
   if (lval.arr != oldArr) {
     base.type() = dt_with_rc(base.type());
     base.val().parr = lval.arr;
@@ -584,6 +586,7 @@ inline tv_lval ElemDDictPre(tv_lval base, int64_t key) {
     throwOOBArrayKeyException(key, oldArr);
   }
 
+  assertx(lval.arr->hasExactlyOneRef());
   if (lval.arr != oldArr) {
     base.type() = dt_with_rc(base.type());
     base.val().parr = lval.arr;
@@ -603,6 +606,7 @@ inline tv_lval ElemDDictPre(tv_lval base, StringData* key) {
     throwOOBArrayKeyException(key, oldArr);
   }
 
+  assertx(lval.arr->hasExactlyOneRef());
   if (lval.arr != oldArr) {
     base.type() = dt_with_rc(base.type());
     base.val().parr = lval.arr;
@@ -1221,6 +1225,7 @@ inline void SetElemObject(tv_lval base, key_type<keyType> key,
  */
 ALWAYS_INLINE
 void arraySetUpdateBase(ArrayData* newData, tv_lval base) {
+  assertx(newData->hasExactlyOneRef());
   assertx(isArrayLikeType(type(base)));
   type(base) = dt_with_rc(type(base));
   val(base).parr = newData;
@@ -2200,8 +2205,8 @@ bool IssetElemClsMeth(ClsMethDataRef base, key_type<keyType> key) {
  * isset($base[$key])
  */
 template <KeyType keyType>
-NEVER_INLINE bool IssetElemSlow(tv_rval base, key_type<keyType> key) {
-  assertx(tvIsPlausible(*base));
+NEVER_INLINE bool IssetElemSlow(TypedValue base, key_type<keyType> key) {
+  assertx(tvIsPlausible(base));
 
   switch (type(base)) {
     case KindOfUninit:
@@ -2248,8 +2253,8 @@ NEVER_INLINE bool IssetElemSlow(tv_rval base, key_type<keyType> key) {
 }
 
 template <KeyType keyType = KeyType::Any>
-bool IssetElem(tv_rval base, key_type<keyType> key) {
-  assertx(tvIsPlausible(*base));
+bool IssetElem(TypedValue base, key_type<keyType> key) {
+  assertx(tvIsPlausible(base));
 
   if (tvIsArrayLike(base)) {
     auto const ad = val(base).parr;
@@ -2284,50 +2289,9 @@ tv_lval propPreStdclass(TypedValue& tvRef) {
 }
 
 template<MOpMode mode>
-tv_lval propPre(TypedValue& tvRef, tv_lval base) {
-  switch (base.type()) {
-    case KindOfUninit:
-    case KindOfNull:
-      return propPreStdclass<mode>(tvRef);
-
-    case KindOfBoolean:
-      return base.val().num ? propPreNull<mode>(tvRef)
-                            : propPreStdclass<mode>(tvRef);
-
-    case KindOfInt64:
-    case KindOfDouble:
-    case KindOfResource:
-    case KindOfRFunc:
-    case KindOfFunc:
-    case KindOfClass:
-    case KindOfLazyClass:
-      return propPreNull<mode>(tvRef);
-
-    case KindOfPersistentString:
-    case KindOfString:
-      return base.val().pstr->size() ? propPreNull<mode>(tvRef)
-                                     : propPreStdclass<mode>(tvRef);
-
-    case KindOfPersistentVec:
-    case KindOfVec:
-    case KindOfPersistentDict:
-    case KindOfDict:
-    case KindOfPersistentKeyset:
-    case KindOfKeyset:
-    case KindOfClsMeth:
-    case KindOfRClsMeth:
-      return propPreNull<mode>(tvRef);
-
-    case KindOfObject:
-      return base;
-  }
-  unknownBaseType(type(base));
-}
-
-template<MOpMode mode>
 inline tv_lval nullSafeProp(TypedValue& tvRef,
                             Class* ctx,
-                            tv_rval base,
+                            TypedValue base,
                             StringData* key,
                             ReadonlyOp op) {
   switch (base.type()) {
@@ -2388,10 +2352,48 @@ inline tv_lval PropObj(TypedValue& tvRef, const Class* ctx,
 
 template<MOpMode mode, KeyType keyType = KeyType::Any>
 inline tv_lval Prop(TypedValue& tvRef, const Class* ctx,
-                    tv_lval base, key_type<keyType> key, ReadonlyOp op) {
-  auto const result = propPre<mode>(tvRef, base);
-  if (result.type() == KindOfNull) return result;
-  return PropObj<mode,keyType>(tvRef, ctx, instanceFromTv(result), key, op);
+                    TypedValue base, key_type<keyType> key, ReadonlyOp op) {
+  if (LIKELY(type(base) == KindOfObject)) {
+    return PropObj<mode,keyType>(tvRef, ctx, val(base).pobj, key, op);
+  }
+
+  switch (base.type()) {
+    case KindOfUninit:
+    case KindOfNull:
+      return propPreStdclass<mode>(tvRef);
+
+    case KindOfBoolean:
+      return base.val().num ? propPreNull<mode>(tvRef)
+                            : propPreStdclass<mode>(tvRef);
+
+    case KindOfInt64:
+    case KindOfDouble:
+    case KindOfResource:
+    case KindOfRFunc:
+    case KindOfFunc:
+    case KindOfClass:
+    case KindOfLazyClass:
+      return propPreNull<mode>(tvRef);
+
+    case KindOfPersistentString:
+    case KindOfString:
+      return base.val().pstr->size() ? propPreNull<mode>(tvRef)
+                                     : propPreStdclass<mode>(tvRef);
+
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
+    case KindOfClsMeth:
+    case KindOfRClsMeth:
+      return propPreNull<mode>(tvRef);
+
+    case KindOfObject:
+      always_assert(false);
+  }
+  unknownBaseType(type(base));
 }
 
 template <KeyType kt>
@@ -2403,45 +2405,40 @@ inline bool IssetPropObj(Class* ctx, ObjectData* instance, key_type<kt> key) {
 }
 
 template <KeyType kt = KeyType::Any>
-bool IssetProp(Class* ctx, tv_lval base, key_type<kt> key) {
+bool IssetProp(Class* ctx, TypedValue base, key_type<kt> key) {
   if (LIKELY(type(base) == KindOfObject)) {
-    return IssetPropObj<kt>(ctx, instanceFromTv(base), key);
+    return IssetPropObj<kt>(ctx, val(base).pobj, key);
   }
   return false;
 }
 
-template <bool setResult>
-inline void SetPropNull(TypedValue* val) {
+[[noreturn]]
+inline void SetPropNull() {
   raise_warning("Cannot access property on non-object");
-  if (setResult) {
-    tvDecRefGen(val);
-    tvWriteNull(*val);
-  } else {
-    throw InvalidSetMException(make_tv<KindOfNull>());
-  }
+  throw InvalidSetMException(make_tv<KindOfNull>());
 }
 
 template <KeyType keyType>
 inline void SetPropObj(Class* ctx, ObjectData* instance, key_type<keyType> key,
-                       TypedValue* val, ReadonlyOp op) {
+                       TypedValue val, ReadonlyOp op) {
   StringData* keySD = prepareKey(key);
   SCOPE_EXIT { releaseKey<keyType>(keySD); };
 
   // Set property.
-  instance->setProp(ctx, keySD, *val, op);
+  instance->setProp(ctx, keySD, val, op);
 }
 
 // $base->$key = $val
-template <bool setResult, KeyType keyType = KeyType::Any>
-inline void SetProp(Class* ctx, tv_lval base, key_type<keyType> key,
-                    TypedValue* val, ReadonlyOp op) {
+template <KeyType keyType = KeyType::Any>
+inline void SetProp(Class* ctx, TypedValue base, key_type<keyType> key,
+                    TypedValue val, ReadonlyOp op) {
   switch (type(base)) {
     case KindOfUninit:
     case KindOfNull:
       return detail::raiseEmptyObject();
 
     case KindOfBoolean:
-      return HPHP::val(base).num ? SetPropNull<setResult>(val)
+      return HPHP::val(base).num ? SetPropNull()
                                  : detail::raiseEmptyObject();
 
     case KindOfInt64:
@@ -2459,11 +2456,11 @@ inline void SetProp(Class* ctx, tv_lval base, key_type<keyType> key,
     case KindOfLazyClass:
     case KindOfClsMeth:
     case KindOfRClsMeth:
-      return SetPropNull<setResult>(val);
+      return SetPropNull();
 
     case KindOfPersistentString:
     case KindOfString:
-      return HPHP::val(base).pstr->size() ? SetPropNull<setResult>(val)
+      return HPHP::val(base).pstr->size() ? SetPropNull()
                                           : detail::raiseEmptyObject();
 
     case KindOfObject:
@@ -2489,7 +2486,7 @@ inline tv_lval SetOpPropObj(TypedValue& tvRef, Class* ctx,
 // $base->$key <op>= $rhs
 inline tv_lval SetOpProp(TypedValue& tvRef,
                          Class* ctx, SetOpOp op,
-                         tv_lval base, TypedValue key,
+                         TypedValue base, TypedValue key,
                          TypedValue* rhs) {
   switch (type(base)) {
     case KindOfUninit:
@@ -2526,7 +2523,7 @@ inline tv_lval SetOpProp(TypedValue& tvRef,
       not_reached();
 
     case KindOfObject:
-      return SetOpPropObj(tvRef, ctx, op, instanceFromTv(base), key, rhs);
+      return SetOpPropObj(tvRef, ctx, op, val(base).pobj, key, rhs);
   }
   unknownBaseType(type(base));
 }
@@ -2548,7 +2545,7 @@ inline TypedValue IncDecPropObj(Class* ctx,
 inline TypedValue IncDecProp(
   Class* ctx,
   IncDecOp op,
-  tv_lval base,
+  TypedValue base,
   TypedValue key
 ) {
   switch (type(base)) {
@@ -2586,7 +2583,7 @@ inline TypedValue IncDecProp(
       not_reached();
 
     case KindOfObject:
-      return IncDecPropObj(ctx, op, instanceFromTv(base), key);
+      return IncDecPropObj(ctx, op, val(base).pobj, key);
   }
   unknownBaseType(type(base));
 }
@@ -2599,10 +2596,10 @@ inline void UnsetPropObj(Class* ctx, ObjectData* instance, TypedValue key) {
   instance->unsetProp(ctx, keySD);
 }
 
-inline void UnsetProp(Class* ctx, tv_lval base, TypedValue key) {
+inline void UnsetProp(Class* ctx, TypedValue base, TypedValue key) {
   // Validate base.
   if (LIKELY(type(base) == KindOfObject)) {
-    UnsetPropObj(ctx, instanceFromTv(base), key);
+    UnsetPropObj(ctx, val(base).pobj, key);
   }
 }
 

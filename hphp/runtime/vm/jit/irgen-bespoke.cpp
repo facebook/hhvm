@@ -494,7 +494,7 @@ void emitBespokeAKExists(IRGS& env) {
 }
 
 SSATmp* tvTempBasePtr(IRGS& env) {
-  return gen(env, LdMIStateAddr, cns(env, offsetof(MInstrState, tvTempBase)));
+  return gen(env, LdMIStateTempBaseAddr);
 }
 
 SSATmp* baseValueToLval(IRGS& env, SSATmp* base) {

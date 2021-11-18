@@ -42,7 +42,6 @@
 #include "hphp/runtime/vm/jit/extra-data.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/memory-effects.h"
-#include "hphp/runtime/vm/jit/minstr-effects.h"
 #include "hphp/runtime/vm/jit/mutation.h"
 #include "hphp/runtime/vm/jit/pass-tracer.h"
 #include "hphp/runtime/vm/jit/simplify.h"
@@ -419,28 +418,25 @@ Flags store(Local& env, AliasClass acls, SSATmp* value) {
 }
 
 bool handle_minstr(Local& env, const IRInstruction& inst, GeneralEffects m) {
-  if (!MInstrEffects::supported(&inst)) return false;
-  auto const base = inst.src(minstrBaseIdx(inst.op()));
-  if (!base->isA(TLval)) return false;
+  if (!hasMInstrBaseEffects(inst)) return false;
+
+  auto const base = inst.src(0);
+  assertx(base->isA(TLval));
   auto const acls = canonicalize(pointee(base));
   auto const meta = env.global.ainfo.find(acls);
   if (!meta || !env.state.avail[meta->index]) return false;
 
-  // We may not have any type info for old_val, but since base is an
-  // Lval that points to this location, we can at least narrow it to a
-  // Cell.
   auto const old_val = env.state.tracked[meta->index];
-  auto const effects = MInstrEffects(inst.op(), old_val.knownType & TCell);
   store(env, m.stores, nullptr);
   store(env, m.inout, nullptr);
 
   SCOPE_ASSERT_DETAIL("handle_minstr") { return inst.toString(); };
   always_assert(!env.state.avail[meta->index]);
   auto& new_val = env.state.tracked[meta->index];
-  if (effects.baseValChanged) {
+  if (auto const n = mInstrBaseEffects(inst, old_val.knownType)) {
     new_val.knownValue = nullptr;
-    new_val.knownType  = effects.baseType;
-    FTRACE(5, "      Base changed. New type: {}\n", effects.baseType);
+    new_val.knownType  = *n;
+    FTRACE(5, "      Base changed. New type: {}\n", new_val.knownType);
   } else {
     new_val.knownValue = old_val.knownValue;
     new_val.knownType  = old_val.knownType;
@@ -596,15 +592,6 @@ Flags handle_general_effects(Local& env,
             if (type <= inst.typeParam()) return inst.is(IsTypeMem);
             if (!type.maybe(inst.typeParam())) return !inst.is(IsTypeMem);
             return std::nullopt;
-          }
-        );
-
-      case CGetPropQ:
-        return reduceToConstantFromPtr(
-          inst.src(0),
-          [&] (Type type) -> Optional<Type> {
-            if (!(type <= TNull)) return std::nullopt;
-            return TInitNull;
           }
         );
 

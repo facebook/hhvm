@@ -39,8 +39,6 @@ TRACE_SET_MOD(hhir);
 #define T      Terminal
 #define B      Branch
 #define P      Passthrough
-#define MProp  MInstrProp
-#define MElem  MInstrElem
 #define LA     LayoutAgnostic
 #define LP     (LayoutPreserving|LayoutAgnostic)
 
@@ -83,6 +81,7 @@ TRACE_SET_MOD(hhir);
 #define DLvalOfPtr     HasDest
 #define DTypeCnsClsName HasDest
 #define DVerifyParamFail HasDest
+#define DPropLval      HasDest
 
 namespace {
 template<Opcode op, uint64_t flags>
@@ -116,8 +115,6 @@ OpInfo g_opInfo[] = {
 #undef B
 #undef P
 #undef K
-#undef MProp
-#undef MElem
 
 #undef ND
 #undef D
@@ -158,6 +155,7 @@ OpInfo g_opInfo[] = {
 #undef DLvalOfPtr
 #undef DTypeCnsClsName
 #undef DVerifyParamFail
+#undef DPropLval
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -734,7 +732,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LdMBase:
   case LdMem:
   case LdMethCallerName:
-  case LdMIStateAddr:
+  case LdMIStateTempBaseAddr:
   case LdObjClass:
   case LdObjInvoke:
   case LdOutAddr:

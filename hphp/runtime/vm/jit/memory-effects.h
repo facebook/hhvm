@@ -230,4 +230,19 @@ GeneralEffects general_effects_for_vmreg_liveness(
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * Calculate more precise effects on the minstr base than just
+ * memory-effects would give.
+ *
+ * An instruction is supported if hasMInstrBaseEffects returns true.
+ *
+ * Given the current base type and an instruction, return a new type
+ * reflecting the changed base. If std::nullopt is returned, the
+ * instruction will not modify the base.
+ */
+bool hasMInstrBaseEffects(const IRInstruction& inst);
+Optional<Type> mInstrBaseEffects(const IRInstruction& inst, Type old);
+
+///////////////////////////////////////////////////////////////////////////////
+
 }}

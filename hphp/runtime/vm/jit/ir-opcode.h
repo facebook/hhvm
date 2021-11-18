@@ -106,8 +106,6 @@ struct SSATmp;
  *      T     isTerminal
  *      B     isBranch
  *      P     passthrough
- *      MProp MInstrProp
- *      MElem MInstrElem
  */
 
 // The IR opcode table is generated from lines that start with | in
@@ -155,14 +153,12 @@ enum OpcodeFlag : uint64_t {
   Branch           = 1ULL << 1,
   ConsumesRC       = 1ULL << 2,
   ProducesRC       = 1ULL << 3,
-  MInstrProp       = 1ULL << 4,
-  MInstrElem       = 1ULL << 5,
-  Terminal         = 1ULL << 6, // has no next instruction
-  NaryDest         = 1ULL << 7, // has 0 or more destinations
-  HasExtra         = 1ULL << 8,
-  Passthrough      = 1ULL << 9,
-  LayoutAgnostic   = 1ULL << 10,
-  LayoutPreserving = 1ULL << 11,
+  Terminal         = 1ULL << 4, // has no next instruction
+  NaryDest         = 1ULL << 5, // has 0 or more destinations
+  HasExtra         = 1ULL << 6,
+  Passthrough      = 1ULL << 7,
+  LayoutAgnostic   = 1ULL << 8,
+  LayoutPreserving = 1ULL << 9,
 };
 
 bool hasEdges(Opcode opc);

@@ -56,10 +56,10 @@ struct SSATmp;
  *                    |
  *                    |
  *      +---------+---+---------------+-------------------+----------+
- *      |         |                   |                   |          |
- *      |         |                   |                   |          |
- *      |         |                   |                   |       RdsAny
- *      |         |                   |                   |          |
+ *      |         |                   |           |       |          |
+ *      |         |                   |           |       |          |
+ *      |         |                   |           |       |       RdsAny
+ *      |         |                   |         Other     |          |
  *      |         |                HeapAny*               |         ...
  *      |         |                   |                   |
  *      |         |            +------+------+            |
@@ -302,6 +302,7 @@ struct AliasClass {
     BVMPC       = 1U << 16,
     BVMRetAddr  = 1U << 17,
     BVMRegState = 1U << 18,
+    BOther      = 1U << 19,
 
     BVMReg     = BVMFP | BVMSP | BVMPC | BVMRetAddr,
     BElem      = BElemI | BElemS,
@@ -518,13 +519,10 @@ auto const AVMRetAddr         = AliasClass{AliasClass::BVMRetAddr};
 auto const AVMRegAny          = AliasClass{AliasClass::BVMReg};
 auto const AVMRegState        = AliasClass{AliasClass::BVMRegState};
 
+/* For misc things which we don't care to distinguish */
+auto const AOther             = AliasClass{AliasClass::BOther};
 
 //////////////////////////////////////////////////////////////////////
-
-/*
- * Creates an AliasClass given an offset into MInstrState.
- */
-AliasClass mis_from_offset(size_t);
 
 /*
  * Replace any SSATmps in an AliasClass with their canonical name (chasing

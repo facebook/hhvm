@@ -73,14 +73,6 @@ std::string show(const IRGS& irgs) {
     } else {
       elemStr = stkTy.toString();
     }
-
-    auto const irSPRel = BCSPRelOffset{i}
-      .to<SBInvOffset>(irgs.irb->fs().bcSPOff());
-    auto const predicted = predictedType(irgs, Location::Stack { irSPRel });
-
-    if (predicted < stkTy) {
-      elemStr += folly::sformat(" (predict: {})", predicted);
-    }
     elem(elemStr);
     ++i;
   }
@@ -95,8 +87,6 @@ std::string show(const IRGS& irgs) {
                                     : irgs.irb->local(i, DataTypeGeneric).type;
     auto str = localValue ? localValue->inst()->toString()
                           : localTy.toString();
-    auto const predicted = irgs.irb->fs().local(i).predictedType;
-    if (predicted < localTy) str += folly::sformat(" (predict: {})", predicted);
 
     out << folly::format("| {:<100} |\n",
                          folly::format("{:>2}: {}", i, str));

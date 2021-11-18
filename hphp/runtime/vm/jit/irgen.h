@@ -266,10 +266,9 @@ bool conjureEndInlining(IRGS& env,
 Type publicTopType(const IRGS& env, BCSPRelOffset);
 
 /*
- * Return the proven or predicted Type for the given location.
+ * Return the proven Type for the given location.
  */
 Type provenType(const IRGS&, const Location&);
-Type predictedType(const IRGS&, const Location&);
 
 ///////////////////////////////////////////////////////////////////////////////
 /*

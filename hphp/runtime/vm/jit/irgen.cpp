@@ -267,20 +267,6 @@ Type publicTopType(const IRGS& env, BCSPRelOffset idx) {
   return topType(const_cast<IRGS&>(env), idx, DataTypeGeneric);
 }
 
-Type predictedType(const IRGS& env, const Location& loc) {
-  auto& fs = env.irb->fs();
-
-  switch (loc.tag()) {
-    case LTag::Stack:
-      return fs.stack(offsetFromIRSP(env, loc.stackIdx())).predictedType;
-    case LTag::Local:
-      return fs.local(loc.localId()).predictedType;
-    case LTag::MBase:
-      return fs.mbase().predictedType;
-  }
-  not_reached();
-}
-
 Type provenType(const IRGS& env, const Location& loc) {
   auto& fs = env.irb->fs();
 

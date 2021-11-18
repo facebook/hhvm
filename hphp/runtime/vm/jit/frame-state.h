@@ -59,7 +59,6 @@ struct LocationState {
   LocationState<tag>& operator=(const LocationState<other>& o) {
     value = o.value;
     type = o.type;
-    predictedType = o.predictedType;
     typeSrcs = o.typeSrcs;
     maybeChanged = o.maybeChanged;
     return *this;
@@ -80,14 +79,6 @@ struct LocationState {
    * `type' field.
    */
   Type type{LocationState::default_type()};
-
-  /*
-   * Prediction for the type at the location, if it's boxed or if we're in a
-   * pseudomain.  Otherwise it will be the same as `type'.
-   *
-   * @requires: predictedType <= type
-   */
-  Type predictedType{LocationState::default_type()};
 
   /*
    * The sources of the currently known type, which may be values.
@@ -211,13 +202,6 @@ struct FrameState {
    */
   MBRState mbr;
   MBaseState mbase;
-
-  /*
-   * Predicted types for values that lived in a local or stack slot at one
-   * point. Used to preserve predictions for values that move between different
-   * slots.
-   */
-  jit::fast_map<SSATmp*, Type> predictedTypes;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -383,7 +367,6 @@ struct FrameStateMgr final {
    */
   SSATmp* valueOf(Location l) const;
   Type typeOf(Location l) const;
-  Type predictedTypeOf(Location l) const;
   TypeSourceSet typeSrcsOf(Location l) const;
 
   /*
@@ -398,11 +381,6 @@ struct FrameStateMgr final {
   void setMemberBase(SSATmp* base);
   void setMemberBaseType(Type);
   void setMBR(SSATmp* base);
-
-  /*
-   * Update the predicted type for `l'.
-   */
-  void refinePredictedType(Location l, Type type);
 
   /*
    * Debug stringification.
@@ -467,24 +445,16 @@ private:
   void setType(Location l, Type type);
   void widenType(Location l, Type type);
   void refineType(Location l, Type type, TypeSource typeSrc);
-  void refinePredictedTmpType(SSATmp*, Type);
 
   template<LTag tag>
   void refineValue(LocationState<tag>& state, SSATmp* oldVal, SSATmp* newVal);
 
   template<LTag tag>
-  void setValueImpl(Location l, LocationState<tag>& state, SSATmp* value,
-                    Optional<Type> predicted = std::nullopt);
-  template<LTag tag>
-  void refinePredictedTypeImpl(LocationState<tag>& state, Type type);
-
-  template<LTag tag> void syncPrediction(LocationState<tag>&);
+  void setValueImpl(Location l, LocationState<tag>& state, SSATmp* value);
 
   /*
    * Local state update helpers.
    */
-  void setLocalPredictedType(uint32_t id, Type type);
-  void killLocalsForCall(bool);
   void clearLocals();
 
 private:

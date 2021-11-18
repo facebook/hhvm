@@ -386,6 +386,7 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     break;
 
   case StMem:
+  case StMemMeta:
     pointerStore(inst->src(0), inst->src(1));
     break;
 
@@ -401,8 +402,9 @@ void FrameStateMgr::update(const IRInstruction* inst) {
   }
 
   case StStk:
+  case StStkMeta:
     setValueAndSyncMBase(
-      stk(inst->extra<StStk>()->offset),
+      stk(inst->extra<IRSPRelOffsetData>()->offset),
       inst->src(1),
       false
     );
@@ -482,6 +484,7 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     break;
 
   case StLoc:
+  case StLocMeta:
     setValueAndSyncMBase(
       loc(inst->extra<LocalId>()->locId),
       inst->src(1),
@@ -1493,9 +1496,7 @@ Type FrameStateMgr::typeOfPointeeFromDefs(SSATmp* ptr, Type limit) const {
       case LdInitRDSAddr:
         // These too are calculated when emitted (and won't change).
         return inst->extra<RDSHandleAndType>()->type;
-      case ElemVecD:
       case ElemDictD:
-      case ElemVecU:
       case ElemDictU:
       case BespokeElem: {
         // These can be calculated depending on the inputs. The type
@@ -1508,7 +1509,7 @@ Type FrameStateMgr::typeOfPointeeFromDefs(SSATmp* ptr, Type limit) const {
           inst->ctx()
         );
         if (!elem.second) {
-          if (inst->is(ElemVecU, ElemDictU) ||
+          if (inst->is(ElemDictU) ||
               (inst->is(BespokeElem) && !inst->src(2)->boolVal())) {
             elem.first |= TInitNull;
           }
@@ -1517,18 +1518,17 @@ Type FrameStateMgr::typeOfPointeeFromDefs(SSATmp* ptr, Type limit) const {
         return elem.first;
       }
       case ElemDictK:
-      case ElemKeysetK:
         // These require no type params as there's no pointers
         // involved.
         return arrLikePosType(
-          inst->src(0)->type(),
+          inst->src(3)->type(),
           inst->src(2)->type(),
           false,
           inst->ctx()
         );
       case LdVecElemAddr:
         return arrLikeElemType(
-          inst->src(0)->type(),
+          inst->src(2)->type(),
           inst->src(1)->type(),
           inst->ctx()
         ).first;

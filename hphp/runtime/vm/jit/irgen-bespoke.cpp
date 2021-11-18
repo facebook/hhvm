@@ -224,31 +224,43 @@ SSATmp* emitSetNewElem(IRGS& env, SSATmp* origValue) {
     return value;
   }
 
-  auto const baseLoc = ldMBase(env);
-
   auto const newArr = emitAppend(env, base, value);
 
   // Update the base's location with the new array.
-  gen(env, StMem, baseLoc, newArr);
+  gen(env, StMem, ldMBase(env), newArr);
   gen(env, IncRef, value);
   return value;
 }
 
+bool keyCheckForSet(IRGS& env, SSATmp* key) {
+  assertx(key->type().isKnownDataType());
+
+  auto const baseType = env.irb->fs().mbase().type;
+  if (baseType <= TVec) {
+    if (!key->isA(TInt)) {
+      gen(env, ThrowInvalidArrayKey, extractBase(env), key);
+      return false;
+    }
+  } else if (baseType <= TDict) {
+    if (!key->isA(TInt | TStr)) {
+      gen(env, ThrowInvalidArrayKey, extractBase(env), key);
+      return false;
+    }
+  } else if (baseType <= TKeyset) {
+    gen(
+      env,
+      ThrowInvalidOperation,
+      cns(env, s_InvalidKeysetOperationMsg.get())
+    );
+    return false;
+  }
+  return true;
+}
+
 SSATmp* emitSetElem(IRGS& env, SSATmp* key, SSATmp* value) {
   assertx(key->type().isKnownDataType());
-  auto const baseType = env.irb->fs().mbase().type;
+  if (!keyCheckForSet(env, key)) return cns(env, TBottom);
   auto const base = extractBase(env);
-  if (((baseType <= TVec) && !key->isA(TInt)) ||
-      ((baseType <= TDict) && !key->isA(TInt | TStr))) {
-    gen(env, ThrowInvalidArrayKey, base, key);
-    return cns(env, TBottom);
-  } else if (baseType <= TKeyset) {
-    auto const message = cns(env, s_InvalidKeysetOperationMsg.get());
-    gen(env, ThrowInvalidOperation, message);
-    return cns(env, TBottom);
-  }
-
-  auto const baseLoc = ldMBase(env);
 
   // Emit a type check if the base's layout places type bounds on values.
   // Doing the check here is useful because it can save us an IncRef below.
@@ -270,9 +282,8 @@ SSATmp* emitSetElem(IRGS& env, SSATmp* key, SSATmp* value) {
   }
 
   auto const newArr = emitSet(env, base, key, value);
-
   // Update the base's location with the new array.
-  gen(env, StMem, baseLoc, newArr);
+  gen(env, StMem, ldMBase(env), newArr);
   gen(env, IncRef, value);
   return value;
 }
@@ -303,12 +314,33 @@ void emitBespokeUnsetM(IRGS& env, int32_t nDiscard, MemberKey mk) {
   if (!key->isA(TInt | TStr)) {
     gen(env, ThrowInvalidArrayKey, arr, key);
   } else {
-    auto const baseLoc = ldMBase(env);
     auto const newArr = gen(env, BespokeUnset, arr, key);
-    gen(env, StMem, baseLoc, newArr);
+    gen(env, StMem, ldMBase(env), newArr);
   }
 
   mFinalImpl(env, nDiscard, nullptr);
+}
+
+void emitBespokeIncDecM(IRGS& env, int32_t nDiscard, IncDecOp incDec,
+                        MemberKey mk) {
+  auto const result = [&] {
+    if (!mcodeIsElem(mk.mcode)) PUNT(BespokeIncDecM);
+    auto const key = memberKey(env, mk);
+    if (!keyCheckForSet(env, key)) return cns(env, TBottom);
+    return gen(env, IncDecElem, IncDecData{incDec}, ldMBase(env), key);
+  }();
+  mFinalImpl(env, nDiscard, result);
+}
+
+void emitBespokeSetOpM(IRGS& env, int32_t nDiscard, SetOpOp op, MemberKey mk) {
+  auto const result = [&] {
+    if (!mcodeIsElem(mk.mcode)) PUNT(BespokeSetOpM);
+    auto const key = memberKey(env, mk);
+    if (!keyCheckForSet(env, key)) return cns(env, TBottom);
+    return gen(env, SetOpElem, SetOpData{op}, ldMBase(env), key, topC(env));
+  }();
+  popDecRef(env);
+  mFinalImpl(env, nDiscard, result);
 }
 
 SSATmp* emitIsset(IRGS& env, SSATmp* key) {
@@ -812,6 +844,14 @@ void translateDispatchBespoke(IRGS& env, const NormalizedInstruction& ni) {
     case Op::UnsetM:
       emitBespokeUnsetM(env, ni.imm[0].u_IVA, ni.imm[1].u_KA);
       return;
+    case Op::IncDecM:
+      emitBespokeIncDecM(env, ni.imm[0].u_IVA, (IncDecOp)ni.imm[1].u_OA,
+                         ni.imm[2].u_KA);
+      return;
+    case Op::SetOpM:
+      emitBespokeSetOpM(env, ni.imm[0].u_IVA, (SetOpOp)ni.imm[1].u_OA,
+                        ni.imm[2].u_KA);
+      return;
     case Op::Idx:
     case Op::ArrayIdx:
       emitBespokeIdx(env);
@@ -854,7 +894,7 @@ Optional<Location> getVanillaLocation(const IRGS& env, SrcKey sk) {
   auto const op = sk.op();
   auto const soff = env.irb->fs().bcSPOff();
 
-  if (isMemberDimOp(op) || (op == Op::QueryM || op == Op::SetM || op == Op::UnsetM)) {
+  if (isMemberDimOp(op) || (isMemberFinalOp(op) && op != Op::SetRangeM)) {
     return {Location::MBase{}};
   }
 
@@ -1067,13 +1107,19 @@ void emitLoggingDiamond(
             i, vanillaLocalTypes[i], env.irb->fs().local(i).type
           );
         }
-        for (int32_t i = 0; i < vanillaStackTypes.size(); i ++) {
-          auto const offset = offsetFromIRSP(env, BCSPRelOffset{-i});
-          always_assert_flog(
-            env.irb->fs().stack(offset).type <= vanillaStackTypes[i],
-            "Stack {}: expected type: {}, inferred type: {}",
-            i, vanillaStackTypes[i], env.irb->fs().stack(offset).type
-          );
+
+        // IncDecM and SetOpM might produce worse stack types right
+        // now, as irgen-minstr optimizes certain cases while
+        // irgen-bespoke does not yet.
+        if (ni.op() != Op::IncDecM && ni.op() != Op::SetOpM) {
+          for (int32_t i = 0; i < vanillaStackTypes.size(); i ++) {
+            auto const offset = offsetFromIRSP(env, BCSPRelOffset{-i});
+            always_assert_flog(
+              env.irb->fs().stack(offset).type <= vanillaStackTypes[i],
+              "Stack {}: expected type: {}, inferred type: {}",
+              i, vanillaStackTypes[i], env.irb->fs().stack(offset).type
+            );
+          }
         }
       }
     }

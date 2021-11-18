@@ -175,7 +175,6 @@ bool consumesRefImpl(const IRInstruction* inst, int srcNo) {
       // Consume the value being stored, not the thing it's being stored into
       return srcNo == 1;
 
-    case VecSet:
     case DictSet:
     case BespokeSet:
     case StructDictSet:
@@ -342,7 +341,7 @@ Type bespokeElemReturn(const IRInstruction* inst, bool present) {
 }
 
 Type elemLval(const IRInstruction* inst) {
-  assertx(inst->is(ElemVecD, ElemVecU, ElemDictD, ElemDictU, BespokeElem));
+  assertx(inst->is(ElemDictD, ElemDictU, BespokeElem));
   assertx(inst->typeParam() <= TArrLike);
 
   auto const elem = arrLikeElemType(
@@ -353,7 +352,7 @@ Type elemLval(const IRInstruction* inst) {
   auto lval = (elem.first <= TBottom) ? TBottom : TLvalToElem;
 
   if (!elem.second) {
-    if (inst->is(ElemVecU, ElemDictU) ||
+    if (inst->is(ElemDictU) ||
         (inst->is(BespokeElem) && !inst->src(2)->boolVal())) {
       lval |= TLvalToConst;
     }
@@ -362,19 +361,19 @@ Type elemLval(const IRInstruction* inst) {
 }
 
 Type elemLvalPos(const IRInstruction* inst) {
-  assertx(inst->is(ElemDictK, ElemKeysetK, LdVecElemAddr));
+  assertx(inst->is(ElemDictK, LdVecElemAddr));
 
   auto const elem = [&] {
-    if (inst->is(ElemDictK, ElemKeysetK)) {
+    if (inst->is(ElemDictK)){
       return arrLikePosType(
-        inst->src(0)->type(),
+        inst->src(3)->type(),
         inst->src(2)->type(),
         false,
         inst->ctx()
       );
     }
     return arrLikeElemType(
-      inst->src(0)->type(),
+      inst->src(2)->type(),
       inst->src(1)->type(),
       inst->ctx()
     ).first;
@@ -387,7 +386,11 @@ Type bespokePosReturn(const IRInstruction* inst, bool isKey) {
   assertx(inst->src(0)->type() <= TArrLike);
 
   auto resultType = arrLikePosType(
-      inst->src(0)->type(), inst->src(1)->type(), isKey, inst->ctx());
+    inst->src(0)->type(),
+    inst->src(1)->type(),
+    isKey,
+    inst->ctx()
+  );
   return resultType;
 }
 
@@ -406,8 +409,23 @@ Type dictElemReturn(const IRInstruction* inst) {
   assertx(inst->src(0)->isA(TDict));
   assertx(inst->src(1)->isA(TInt | TStr));
 
-  auto elem =
-    arrLikeElemType(inst->src(0)->type(), inst->src(1)->type(), inst->ctx());
+  auto elem = [&] {
+    if (inst->is(DictGetK)) {
+      auto const type = arrLikePosType(
+        inst->src(0)->type(),
+        inst->src(2)->type(),
+        false,
+        inst->ctx()
+      );
+      return std::make_pair(type, true);
+    }
+    return arrLikeElemType(
+      inst->src(0)->type(),
+      inst->src(1)->type(),
+      inst->ctx()
+    );
+  }();
+
   if (!elem.second) {
     if (inst->is(DictGetQuiet)) elem.first |= TInitNull;
     if (inst->is(DictIdx)) elem.first |= inst->src(2)->type();
@@ -420,8 +438,23 @@ Type keysetElemReturn(const IRInstruction* inst) {
   assertx(inst->src(0)->isA(TKeyset));
   assertx(inst->src(1)->isA(TInt | TStr));
 
-  auto elem =
-    arrLikeElemType(inst->src(0)->type(), inst->src(1)->type(), inst->ctx());
+  auto elem = [&] {
+    if (inst->is(KeysetGetK)) {
+      auto const type = arrLikePosType(
+        inst->src(0)->type(),
+        inst->src(2)->type(),
+        false,
+        inst->ctx()
+      );
+      return std::make_pair(type, true);
+    }
+    return arrLikeElemType(
+      inst->src(0)->type(),
+      inst->src(1)->type(),
+      inst->ctx()
+    );
+  }();
+
   if (!elem.second) {
     if (inst->is(KeysetGetQuiet)) elem.first |= TInitNull;
     if (inst->is(KeysetIdx)) elem.first |= inst->src(2)->type();
@@ -527,8 +560,7 @@ Type structDictReturn(const IRInstruction* inst) {
 }
 
 Type arrLikeSetReturn(const IRInstruction* inst) {
-  assertx(inst->is(BespokeSet, StructDictSet,
-                   VecSet, DictSet));
+  assertx(inst->is(BespokeSet, StructDictSet, DictSet));
   auto const arr = inst->src(0)->type();
   auto const key = inst->src(1)->type();
   auto const val = inst->src(2)->type();
@@ -625,6 +657,14 @@ Type propLval(const IRInstruction* inst) {
   return TLvalToProp|TLvalToConst|TLvalToMISTemp;
 }
 
+Type cowReturn(const IRInstruction* inst) {
+  assertx(inst->is(CopyArray, CheckArrayCOW));
+  auto const arr = inst->src(0)->type();
+  assertx(arr <= TArrLike);
+  auto const modified = arr.modified() & TCounted;
+  return modified.narrowToLayout(arr.arrSpec().layout());
+}
+
 // Is this instruction an array cast that always modifies the type of the
 // input array? Such casts are guaranteed to return vanilla arrays.
 bool isNontrivialArrayCast(const IRInstruction* inst) {
@@ -715,6 +755,7 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #define DPropLval       return propLval(inst);
 #define DElemLval       return elemLval(inst);
 #define DElemLvalPos    return elemLvalPos(inst);
+#define DCOW            return cowReturn(inst);
 
 #define O(name, dstinfo, srcinfo, flags) case name: dstinfo not_reached();
 
@@ -762,6 +803,8 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #undef DPropLval
 #undef DElemLval
 #undef DElemLvalPos
+#undef DCOW
+
 }
 
 bool IRInstruction::maySyncVMRegsWithSources() const {

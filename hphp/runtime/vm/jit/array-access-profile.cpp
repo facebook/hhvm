@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/base/vanilla-keyset.h"
 #include "hphp/runtime/vm/member-operations.h"
+#include "hphp/runtime/vm/jit/decref-profile.h"
 
 #include "hphp/util/safe-cast.h"
 
@@ -64,10 +65,11 @@ static std::string actionString(ArrayAccessProfile::Action action) {
 }
 
 std::string ArrayAccessProfile::Result::toString() const {
-  return folly::sformat("offset={}({}) empty={} missing={}",
+  return folly::sformat("offset={}({}) empty={} missing={} nocow={}",
                         actionString(offset.first), offset.second,
                         actionString(empty),
-                        actionString(missing));
+                        actionString(missing),
+                        actionString(nocow));
 }
 
 std::string ArrayAccessProfile::toString() const {
@@ -85,9 +87,11 @@ std::string ArrayAccessProfile::toString() const {
   }
   out << folly::format(
     "untracked:{}({:.1f}%),small:{}({:.1f}%),"
-    "empty:{}({:.1f}%),missing:{}({:.1f}%)",
+    "empty:{}({:.1f}%),missing:{}({:.1f}%),"
+    "nocow:{}({:.1f}%)",
     m_untracked, pct(m_untracked), m_small, pct(m_small),
-    m_empty, pct(m_empty), m_missing, pct(m_missing)
+    m_empty, pct(m_empty), m_missing, pct(m_missing),
+    m_nocow, pct(m_nocow)
   );
   return out.str();
 }
@@ -108,6 +112,7 @@ folly::dynamic ArrayAccessProfile::toDynamic() const {
                         ("small", m_small)
                         ("empty", m_empty)
                         ("missing", m_missing)
+                        ("nocow", m_nocow)
                         ("total", total)
                         ("profileType", "ArrayAccessProfile");
 }
@@ -149,7 +154,8 @@ ArrayAccessProfile::Result ArrayAccessProfile::choose() const {
                          ? SizeHintData::SmallStatic : SizeHintData::Default;
   auto const empty = pickAction(m_empty, missing_threshold);
   auto const missing = pickAction(m_missing, missing_threshold);
-  return Result{offset, SizeHintData(size_hint), empty, missing};
+  auto const nocow = pickAction(m_nocow, RO::EvalHHIRCOWArrayProfileThreshold);
+  return Result{offset, SizeHintData(size_hint), empty, missing, nocow};
 }
 
 bool ArrayAccessProfile::update(int32_t pos, uint32_t count) {
@@ -174,26 +180,29 @@ bool ArrayAccessProfile::update(int32_t pos, uint32_t count) {
   return false;
 }
 
-void ArrayAccessProfile::update(const ArrayData* ad, int64_t i, bool cowCheck) {
-  // Don't count accesses that would require a COW, as we can't optimize them.
+void ArrayAccessProfile::update(const ArrayData* ad,
+                                int64_t i,
+                                DecRefProfile* decRefProfile) {
   auto const h = hash_int64(i);
   auto const pos =
-    cowCheck && ad->cowCheck() ? -1 :
     ad->isVanillaDict() ? VanillaDict::as(ad)->find(i, h) :
     ad->isVanillaKeyset() ? VanillaKeyset::asSet(ad)->find(i, h) :
     -1;
   if (!update(pos, 1)) m_untracked++;
   if (isSmallStaticArray(ad)) m_small++;
   if (ad->size() == 0) m_empty++;
+  if (!ad->cowCheck()) m_nocow++;
+  if (decRefProfile && validPos(pos)) {
+    decRefProfile->update(ad->nvGetVal(pos));
+  }
 }
 
-void ArrayAccessProfile::update(const ArrayData* ad, const StringData* sd,
-                                bool cowCheck) {
-  // Don't count accesses that would require a COW, as we can't optimize them.
-  // Additionally, only count cases where the string keys compare equal as
-  // pointers (checked within findStringKey).
+void ArrayAccessProfile::update(const ArrayData* ad,
+                                const StringData* sd,
+                                DecRefProfile* decRefProfile) {
+  // Only count cases where the string keys compare equal as pointers
+  // (checked within findStringKey).
   auto const pos =
-    cowCheck && ad->cowCheck() ? -1 :
     ad->isVanillaDict() ? findStringKey(VanillaDict::as(ad), sd) :
     ad->isVanillaKeyset() ? findStringKey(VanillaKeyset::asSet(ad), sd) :
     -1;
@@ -202,6 +211,10 @@ void ArrayAccessProfile::update(const ArrayData* ad, const StringData* sd,
   if (ad->size() == 0) m_empty++;
   if (ad->hasStrKeyTable() && !ad->missingKeySideTable().mayContain(sd)) {
     m_missing++;
+  }
+  if (!ad->cowCheck()) m_nocow++;
+  if (decRefProfile && validPos(pos)) {
+    decRefProfile->update(ad->nvGetVal(pos));
   }
 }
 
@@ -229,6 +242,7 @@ void ArrayAccessProfile::reduce(ArrayAccessProfile& l,
   l.m_small += r.m_small;
   l.m_empty += r.m_empty;
   l.m_missing += r.m_missing;
+  l.m_nocow += r.m_nocow;
 
   if (n == 0) return;
   assertx(n <= kNumTrackedSamples);

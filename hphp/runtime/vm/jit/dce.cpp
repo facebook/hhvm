@@ -285,6 +285,7 @@ bool canDCE(IRInstruction* inst) {
   case LdResolvedTypeCnsClsName:
   case AllocInitROM:
   case IntAsDataType:
+  case CopyArray:
     assertx(!inst->isControlFlow());
     return true;
 
@@ -322,6 +323,7 @@ bool canDCE(IRInstruction* inst) {
   case DbgTraceCall:
   case AKExistsObj:
   case StStk:
+  case StStkMeta:
   case StStkRange:
   case StOutValue:
   case CheckIter:
@@ -450,12 +452,14 @@ bool canDCE(IRInstruction* inst) {
   case GenericRetDecRefs:
   case StClsInitElem:
   case StMem:
+  case StMemMeta:
   case StImplicitContext:
   case StIterBase:
   case StIterType:
   case StIterEnd:
   case StIterPos:
   case StLoc:
+  case StLocMeta:
   case StLocRange:
   case StVMFP:
   case StVMSP:
@@ -581,12 +585,10 @@ bool canDCE(IRInstruction* inst) {
   case CheckDictOffset:
   case ProfileKeysetAccess:
   case CheckKeysetOffset:
-  case ElemVecD:
-  case ElemVecU:
+  case ProfileArrayCOW:
   case ElemDictD:
   case ElemDictU:
   case ElemDictK:
-  case ElemKeysetK:
   case ElemDX:
   case ElemUX:
   case DictGet:
@@ -595,7 +597,6 @@ bool canDCE(IRInstruction* inst) {
   case OrdStrIdx:
   case MapGet:
   case CGetElem:
-  case VecSet:
   case DictSet:
   case MapSet:
   case VectorSet:
@@ -970,7 +971,7 @@ void processCatchBlock(IRUnit& unit, DceState& state, Block* block,
 
   auto const do_store =
     [&] (const AliasClass& cls, IRInstruction* store) {
-      if (!store->is(StStk)) return false;
+      if (!store->is(StStk, StStkMeta)) return false;
       auto const stk = cls.is_stack();
       if (!stk) return process_stack(cls);
       auto const r = range(cls);

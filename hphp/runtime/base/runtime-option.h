@@ -943,10 +943,11 @@ struct RuntimeOption {
   F(uint32_t, HHIRMaxInlineInitMixedElements,  4)                       \
   F(uint32_t, HHIRMaxInlineInitStructElements, 8)                       \
   F(double, HHIROffsetArrayProfileThreshold, 0.85)                      \
+  F(double, HHIRCOWArrayProfileThreshold, 0.85)                         \
   F(double, HHIRSmallArrayProfileThreshold, 0.8)                        \
   F(double, HHIRMissingArrayProfileThreshold, 0.8)                      \
   F(double, HHIRExitArrayProfileThreshold, 0.98)                        \
-  F(double, HHIROffsetExitArrayProfileThreshold, 1.2)  /* disabled */   \
+  F(double, HHIROffsetExitArrayProfileThreshold, 0.98)                  \
   F(double, HHIRIsTypeStructProfileThreshold, 0.95)                     \
   /* Register allocation flags */                                       \
   F(bool, HHIREnablePreColoring,       true)                            \

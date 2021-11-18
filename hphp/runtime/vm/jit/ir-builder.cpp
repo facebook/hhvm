@@ -446,6 +446,32 @@ SSATmp* IRBuilder::preOptimizeStMem(IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* IRBuilder::preOptimizeStMemMeta(IRInstruction* inst) {
+  auto const ptr = inst->src(0);
+  assertx(ptr->isA(TMem));
+
+  // Try to convert the pointer store to a store directly to
+  // locals/stack.
+  auto const acls = canonicalize(pointee(ptr));
+  if (acls.isSingleLocation()) {
+    if (auto const l = acls.is_local()) {
+      gen(
+        StLocMeta, LocalId { l->ids.singleValue() }, m_state.fp(), inst->src(1)
+      );
+      inst->convertToNop();
+    } else if (auto const s = acls.is_stack()) {
+      if (m_state.validStackOffset(s->low)) {
+        gen(
+          StStkMeta, IRSPRelOffsetData { s->low }, m_state.sp(), inst->src(1)
+        );
+        inst->convertToNop();
+      }
+    }
+  }
+
+  return nullptr;
+}
+
 SSATmp* IRBuilder::preOptimizeCheckTypeMem(IRInstruction* inst) {
   auto const ptr = inst->src(0);
   assertx(ptr->isA(TMem));
@@ -560,13 +586,7 @@ SSATmp* IRBuilder::preOptimizeBaseTypeParam(IRInstruction* inst) {
   retypeDests(inst, &m_unit);
   return nullptr;
 }
-SSATmp* IRBuilder::preOptimizeElemVecD(IRInstruction* inst) {
-  return preOptimizeBaseTypeParam(inst);
-}
 SSATmp* IRBuilder::preOptimizeElemDictD(IRInstruction* inst) {
-  return preOptimizeBaseTypeParam(inst);
-}
-SSATmp* IRBuilder::preOptimizeElemVecU(IRInstruction* inst) {
   return preOptimizeBaseTypeParam(inst);
 }
 SSATmp* IRBuilder::preOptimizeElemDictU(IRInstruction* inst) {
@@ -580,17 +600,13 @@ SSATmp* IRBuilder::preOptimizeSetElem(IRInstruction* inst) {
   if (!inst->is(SetElem)) return nullptr;
 
   auto const baseType = inst->typeParam();
-  if (baseType <= TVec || baseType <= TDict) {
+  if (baseType <= TDict) {
     auto const basePtr = inst->src(0);
     auto const key = inst->src(1);
     auto const value = inst->src(2);
-
     if (!key->isA(TInt | TStr)) return nullptr;
-    if (baseType <= TVec && !key->isA(TInt)) return nullptr;
-
     auto const base = gen(LdMem, baseType, basePtr);
-    auto const newArr =
-      gen(baseType <= TVec ? VecSet : DictSet, inst->taken(), base, key, value);
+    auto const newArr = gen(DictSet, inst->taken(), base, key, value);
     gen(StMem, basePtr, newArr);
     gen(IncRef, value);
     return value;
@@ -695,15 +711,14 @@ SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
   X(LdFrameCls)
   X(LdFrameThis)
   X(StMem)
+  X(StMemMeta)
   X(CheckTypeMem)
   X(CheckInitMem)
   X(IsTypeMem)
   X(IsNTypeMem)
   X(StMROProp)
   X(CheckMROProp)
-  X(ElemVecD)
   X(ElemDictD)
-  X(ElemVecU)
   X(ElemDictU)
   X(BespokeElem)
   X(SetElem)

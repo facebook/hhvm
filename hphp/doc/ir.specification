@@ -1695,6 +1695,11 @@ To string conversions:
 
   Store S1 into the location pointed to by S0.
 
+| StMemMeta, ND, S(Mem) S(Cell), NF
+
+  Logically store S1 into the location pointer to by S0. This is like StMem,
+  but emits no code. It exists to update frame state tracking.
+
 | StTVInRDS<RDSHandle,includeAux>, ND, S(InitCell), NF
 
   Store the TypedValue in S0 into the specified RDS handle. Must store the aux
@@ -1707,6 +1712,12 @@ To string conversions:
 | StLoc<localId>, ND, S(FramePtr) S(Cell), NF
 
   Store S1 to local number localId on the frame pointed to by S0.
+
+| StLocMeta<localId>, ND, S(FramePtr) S(Cell), NF
+
+  Logically store S1 to local number localId on the frame pointed to by
+  S0. This is like StLoc, but emits no code. It exists to update frame state
+  tracking.
 
 | StLocRange<localIds>, ND, S(FramePtr) S(Cell), NF
 
@@ -1733,6 +1744,12 @@ To string conversions:
 | StStk<offset>, ND, S(StkPtr) S(Cell), NF
 
   Store S1 to the stack pointed to by S0, at a given offset (in cells).
+
+| StStkMeta<offset>, ND, S(StkPtr) S(Cell), NF
+
+  Logically store S1 to the stack pointed to by S0, at a given offset (in
+  cells). This is like StStk, but emits no code. It exists to update frame
+  state tracking.
 
 | StStkRange<offsets>, ND, S(StkPtr) S(Cell), NF
 
@@ -2797,9 +2814,15 @@ fields of that struct for holding intermediate values.
   Like CheckMixedArrayOffset, this check is allowed to have false negatives -
   it may fail even if the array has keys of the given type.
 
-| CheckArrayCOW, ND, S(ArrLike), B|LA
+| CheckArrayCOW, DCOW, S(ArrLike), B|PRc|CRc|LP
 
   Check that S0 has a refcount of exactly 1; if not, branch to B.
+
+| CopyArray, DCOW, S(ArrLike), PRc|LP
+
+  Make a copy of S0 (regardless of its refcount). The resultant copy will
+  always be counted with a ref-count of 1. The array must be of a kind that
+  allows for counted variants.
 
 | ProfileDictAccess, ND, S(Dict) S(Int,Str), NF
 
@@ -2821,19 +2844,15 @@ fields of that struct for holding intermediate values.
   that S1 exactly matches the element key of S0 at `pos'.  If any of the checks
   fail, branch to B.  This check is allowed to have false negatives.
 
+| ProfileArrayCOW, ND, S(ArrLike), LA
+
+  Profile whether S0 would require a COW before being mutated.
+
 | CheckMissingKeyInArrLike, ND, S(ArrLike) S(StaticStr), B
 
   Uses the StrKeyTable to check if S1 is guaranteed to be missing in S0.
   If S1 may be present, branches to block B. If we branch here, the key may or
   may not be present.
-
-| ElemVecD, DElemLval, S(Lval) S(Int), NF
-
-| ElemVecU, DElemLval, S(Lval) S(Int), NF
-
-  Similar to ElemX, but the base S0 is a vec and the key S1 is an int. ElemVecD
-  is for Define member instrs and ElemVecU is for Unset. (Other variations can
-  be implemented without special IR instructions).
 
 | ElemDictD, DElemLval, S(Lval) S(Int,Str), NF
 
@@ -2842,13 +2861,11 @@ fields of that struct for holding intermediate values.
   Similar to ElemDX and ElemUX, but specialized for when the base S0 is a
   dict and the key S1 is an int/str.
 
-| ElemDictK, DElemLvalPos, S(Dict) S(Int,Str) S(Int), NF
+| ElemDictK, DElemLvalPos, S(Dict) S(Int,Str) S(Int) S(Dict), NF
 
-  Returns an lval to the element of dict S0 at the known position S2 in S1.
-
-| ElemKeysetK, DElemLvalPos, S(Keyset) S(Int,Str) S(Int), NF
-
-  Returns an lval to the element of keyset S0 at the known position S2 in S1.
+  Returns an lval to the element of dict S0 at the known position S2
+  (corresponding to the key S1).  S3 is S0 with a potentially more refined type
+  and used to calculate the elem type. It is not used at runtime.
 
 | ElemDX, D(LvalToElemOrConst), S(Lval) S(Cell), NF
 
@@ -2984,11 +3001,6 @@ fields of that struct for holding intermediate values.
 | InitObjMemoSlots<class>, ND, S(Obj), NF
 
   Initialize the memoization instance slots for object S0 of the given class.
-
-| VecSet, DArrLikeSet, S(Vec) S(Int) S(InitCell), PRc|CRc
-
-  Set element with key S1 in S0 to S2. The dest will be a new Vec that should
-  replace S0; this op produces a ref on the test and consumes one on S0.
 
 | DictSet, DArrLikeSet, S(Dict) S(Int,Str) S(InitCell), PRc|CRc
 
@@ -3279,13 +3291,14 @@ fields of that struct for holding intermediate values.
   Checks that the index in S1 is within the bounds of the packed array or
   vector array in S0. Branches to B if the index is out of bounds.
 
-| LdVecElemAddr, DElemLvalPos, S(Vec) S(Int), NF
+| LdVecElemAddr, DElemLvalPos, S(Vec) S(Int) S(Vec), NF
 
   Loads the address of the element at index S1 of the vec array in S0. This
   instruction assumes the array actually contains an element at that offset
-  (IE, the array has the proper length).
+  (IE, the array has the proper length). S2 is S0 with a potentially more
+  refined type and used to calculate the elem type. It is not used at runtime.
 
-| ReserveVecNewElem, D(Int), S(Vec), B
+| ReserveVecNewElem, D(Int), S(CountedVec), B
 
   If there is room in the packed or vec array (which is assumed to be mutable),
   increments the array size and returns the index of the new last element

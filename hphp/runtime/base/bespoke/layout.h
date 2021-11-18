@@ -84,6 +84,7 @@ BespokeArray* maybeStructify(ArrayData* ad, const LoggingProfile* profile);
   X(TypedValue, NvGetStr, const T*, const StringData*) \
   X(TypedValue, GetPosKey, const T*, ssize_t pos) \
   X(TypedValue, GetPosVal, const T*, ssize_t pos) \
+  X(bool, PosIsValid, const T*, ssize_t pos) \
   X(ssize_t, IterBegin, const T*) \
   X(ssize_t, IterLast, const T*) \
   X(ssize_t, IterEnd, const T*) \
@@ -101,7 +102,8 @@ BespokeArray* maybeStructify(ArrayData* ad, const LoggingProfile* profile);
   X(ArrayData*, PopMove, T*, Variant&) \
   X(ArrayData*, PreSort, T*, SortFunction sf) \
   X(ArrayData*, PostSort, T*, ArrayData* vad) \
-  X(ArrayData*, SetLegacyArray, T*, bool copy, bool legacy)
+  X(ArrayData*, SetLegacyArray, T*, bool copy, bool legacy) \
+  X(ArrayData*, Copy, const T*)
 
 #define BESPOKE_SYNTHESIZED_LAYOUT_FUNCTIONS(T) \
   X(TypedValue, NvGetIntThrow, const T*, int64_t) \
@@ -188,6 +190,9 @@ struct LayoutFunctionDispatcher {
   static TypedValue GetPosVal(const ArrayData* ad, ssize_t pos) {
     return Array::GetPosVal(Cast(ad, __func__), pos);
   }
+  static bool PosIsValid(const ArrayData* ad, ssize_t pos) {
+    return Array::PosIsValid(Cast(ad, __func__), pos);
+  }
   static arr_lval LvalInt(ArrayData* ad, int64_t k) {
     return Array::LvalInt(Cast(ad, __func__), k);
   }
@@ -246,6 +251,9 @@ struct LayoutFunctionDispatcher {
   }
   static ArrayData* SetLegacyArray(ArrayData* ad, bool copy, bool legacy) {
     return Array::SetLegacyArray(Cast(ad, __func__), copy, legacy);
+  }
+  static ArrayData* Copy(const ArrayData* ad) {
+    return Array::Copy(Cast(ad, __func__));
   }
 };
 

@@ -207,7 +207,7 @@ private:
   void decRefElms();
   void copyHash(const Self* other);
   void initHash();
-  MonotypeDict* copy();
+  MonotypeDict* copy() const;
   MonotypeDict* prepareForInsert();
   MonotypeDict* compactIfNeeded();
   MonotypeDict* resize(uint8_t index, bool copy);

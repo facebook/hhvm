@@ -29,4 +29,12 @@ namespace HPHP { namespace jit { namespace irlower {
  */
 CallSpec destructorForArrayLike(Type arr);
 
+/*
+ * Compute the best copy implementation for the given array-like type,
+ * taking its layout (which may be a bespoke layout) into account.
+ *
+ * Prerequisites: arr <= TArrLike && allowBespokeArrayLikes()
+ */
+CallSpec copyFuncForArrayLike(Type arr);
+
 }}}

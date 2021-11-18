@@ -214,6 +214,11 @@ void EmptyMonotypeDict::Release(Self* ad) {
   always_assert(false);
 }
 
+ArrayData* EmptyMonotypeDict::Copy(const Self*) {
+  // Not possible to have a non-static EmptyMonotypeDict
+  always_assert(false);
+}
+
 //////////////////////////////////////////////////////////////////////////////
 // Accessors
 
@@ -231,6 +236,9 @@ TypedValue EmptyMonotypeDict::GetPosKey(const Self* ad, ssize_t pos) {
 }
 TypedValue EmptyMonotypeDict::GetPosVal(const Self* ad, ssize_t pos) {
   always_assert(false);
+}
+bool EmptyMonotypeDict::PosIsValid(const Self* ad, ssize_t pos) {
+  return false;
 }
 
 ssize_t EmptyMonotypeDict::IterBegin(const Self* ad) {
@@ -876,7 +884,7 @@ void MonotypeDict<Key>::initHash() {
 }
 
 template <typename Key>
-MonotypeDict<Key>* MonotypeDict<Key>::copy() {
+MonotypeDict<Key>* MonotypeDict<Key>::copy() const {
   auto const mem = tl_heap->objMallocIndex(sizeIndex());
   auto const ad = reinterpret_cast<MonotypeDict<Key>*>(mem);
 
@@ -1166,6 +1174,11 @@ void MonotypeDict<Key>::Release(Self* mad) {
   tl_heap->objFreeIndex(mad, mad->sizeIndex());
 }
 
+template <typename Key>
+ArrayData* MonotypeDict<Key>::Copy(const Self* mad) {
+  return mad->copy();
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename Key>
@@ -1225,6 +1238,12 @@ TypedValue MonotypeDict<Key>::GetPosVal(const Self* mad, ssize_t pos) {
   auto const elm = mad->elmAtIndex(pos);
   assertx(elm->key != getTombstone<Key>());
   return make_tv_of_type(elm->val, mad->type());
+}
+
+template <typename Key>
+bool MonotypeDict<Key>::PosIsValid(const Self* mad, ssize_t pos) {
+  if (pos < 0 || pos >= mad->numElms()) return false;
+  return mad->elms()[pos].key != getTombstone<Key>();
 }
 
 template <typename Key>

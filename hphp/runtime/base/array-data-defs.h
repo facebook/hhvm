@@ -86,6 +86,11 @@ inline TypedValue ArrayData::nvGetVal(ssize_t pos) const {
 }
 
 NO_PROFILING
+inline bool ArrayData::posIsValid(ssize_t pos) const {
+  return g_array_funcs.posIsValid[kind()](this, pos);
+}
+
+NO_PROFILING
 inline Variant ArrayData::getKey(ssize_t pos) const {
   return Variant::wrap(nvGetKey(pos));
 }
@@ -201,6 +206,11 @@ NO_PROFILING
 inline ArrayData* ArrayData::makeUncounted(
     const MakeUncountedEnv& env, bool hasApcTv) {
   return g_array_funcs.makeUncounted[kind()](this, env, hasApcTv);
+}
+
+NO_PROFILING
+inline ArrayData* ArrayData::copy() const {
+  return g_array_funcs.copy[kind()](this);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

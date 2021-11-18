@@ -37,6 +37,7 @@ struct ArrayAccessProfile;
 struct ArrayIterProfile;
 struct CallTargetProfile;
 struct ClsCnsProfile;
+struct COWProfile;
 struct DecRefProfile;
 struct IncRefProfile;
 struct IsTypeStructProfile;
@@ -89,6 +90,7 @@ struct StaticMethodF { LowStringPtr name; };
   PR(ArrayIterProfile)    \
   PR(CallTargetProfile)   \
   PR(ClsCnsProfile)       \
+  PR(COWProfile)          \
   PR(DecRefProfile)       \
   PR(IsTypeStructProfile) \
   PR(IncRefProfile)       \

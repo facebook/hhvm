@@ -80,6 +80,8 @@ void cgStLoc(IRLS& env, const IRInstruction* inst) {
   storeTV(vmain(env), fp[off], srcLoc(env, inst, 1), inst->src(1));
 }
 
+void cgStLocMeta(IRLS&, const IRInstruction*) {}
+
 void cgStLocRange(IRLS& env, const IRInstruction* inst) {
   auto const range = inst->extra<StLocRange>();
 
@@ -145,6 +147,8 @@ void cgStStk(IRLS& env, const IRInstruction* inst) {
 
   storeTV(vmain(env), sp[off], srcLoc(env, inst, 1), inst->src(1), type);
 }
+
+void cgStStkMeta(IRLS&, const IRInstruction*) {}
 
 void cgStStkRange(IRLS& env, const IRInstruction* inst) {
   auto const range = inst->extra<StackRange>();
@@ -252,6 +256,8 @@ void cgStMem(IRLS& env, const IRInstruction* inst) {
   storeTV(vmain(env), type, srcLoc,
           memTVTypePtr(ptr, ptrLoc), memTVValPtr(ptr, ptrLoc));
 }
+
+void cgStMemMeta(IRLS&, const IRInstruction*) {}
 
 void cgStImplicitContext(IRLS& env, const IRInstruction* inst) {
   assertx(RO::EvalEnableImplicitContext);

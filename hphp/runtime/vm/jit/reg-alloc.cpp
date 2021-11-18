@@ -107,14 +107,17 @@ bool storesCell(const IRInstruction& inst, uint32_t srcIdx) {
   // VanillaDict elements, and Map elements.
   switch (inst.op()) {
   case StLoc:
+  case StLocMeta:
     return srcIdx == 1;
   case StStk:
+  case StStkMeta:
     return srcIdx == 1;
   case StClsInitElem:
     return srcIdx == 1;
   case InitVecElem:
     return srcIdx == 1 && VanillaVec::stores_typed_values;
   case StMem:
+  case StMemMeta:
     return srcIdx == 1 && inst.src(0)->isA(TPtr);
   default:
     return false;

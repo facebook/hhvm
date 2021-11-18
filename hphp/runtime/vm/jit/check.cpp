@@ -581,6 +581,7 @@ using TypeNames::TCA;
 #define DPropLval
 #define DElemLval
 #define DElemLvalPos
+#define DCOW
 
 #define O(opcode, dstinfo, srcinfo, flags) \
   case opcode: dstinfo srcinfo countCheck(); return true;
@@ -648,6 +649,7 @@ using TypeNames::TCA;
 #undef DPropLval
 #undef DElemLval
 #undef DElemLvalPos
+#undef DCOW
 
   if (inst->is(LdMBase)) {
     auto const& acls = inst->extra<LdMBase>()->acls;
@@ -658,7 +660,7 @@ using TypeNames::TCA;
                LdClsPropAddrOrNull, LdClsPropAddrOrRaise)) {
     always_assert(inst->typeParam() <= TCell);
   }
-  if (inst->is(ElemVecD, ElemDictD, ElemVecU, ElemDictU, BespokeElem)) {
+  if (inst->is(ElemDictD, ElemDictU, BespokeElem)) {
     always_assert(inst->typeParam() <= TArrLike);
   }
   return true;

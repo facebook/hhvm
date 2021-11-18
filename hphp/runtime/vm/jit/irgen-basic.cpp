@@ -79,6 +79,25 @@ void emitClassGetTS(IRGS& env) {
   // Side-exit for now if it has reified generics
   gen(env, JmpNZero, makeExitSlow(env), val);
 
+  auto const finish = [&] (SSATmp* clsName) {
+    auto const name = cond(
+      env,
+      [&] (Block* taken) {
+        return gen(env, CheckType, TStr, taken, clsName);
+      },
+      [&] (SSATmp* name) { return name; },
+      [&] {
+        hint(env, Block::Hint::Unlikely);
+        gen(env, RaiseError, cns(env, s_new_instance_of_not_string.get()));
+        return cns(env, TBottom);
+      }
+    );
+    auto const cls = ldCls(env, name);
+    popDecRef(env);
+    push(env, cls);
+    push(env, cns(env, TInitNull));
+  };
+
   auto const clsName = profiledArrayAccess(
     env, ts, cns(env, s_classname.get()), MOpMode::Warn,
     [&] (SSATmp* base, SSATmp* key, SSATmp* pos) {
@@ -90,25 +109,10 @@ void emitClassGetTS(IRGS& env) {
     },
     [&] (SSATmp* key, SizeHintData) {
       return gen(env, DictGet, ts, key);
-    }
-  );
-
-  SSATmp* name;
-  ifThen(
-    env,
-    [&] (Block* taken) {
-      name = gen(env, CheckType, TStr, taken, clsName);
     },
-    [&] {
-      hint(env, Block::Hint::Unlikely);
-      gen(env, RaiseError, cns(env, s_new_instance_of_not_string.get()));
-    }
+    finish
   );
-
-  auto const cls = ldCls(env, name);
-  popDecRef(env);
-  push(env, cls);
-  push(env, cns(env, TInitNull));
+  finish(clsName);
 }
 
 void emitCGetL(IRGS& env, NamedLocal loc) {

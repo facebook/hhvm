@@ -2955,74 +2955,52 @@ SSATmp* simplifyCheckMissingKeyInArrLike(State& env,
   return gen(env, Jmp, inst->taken());
 }
 
-SSATmp* simplifyCheckDictOffset(State& env, const IRInstruction* inst) {
+SSATmp* simplifyCheckOffsetImpl(State& env, const IRInstruction* inst) {
+  assertx(inst->is(CheckDictOffset, CheckKeysetOffset));
   auto const arr = inst->src(0);
   auto const key = inst->src(1);
   auto const& extra = inst->extra<IndexData>();
-
   assertx(validPos(ssize_t(extra->index)));
-  if (!arr->hasConstVal()) return mergeBranchDests(env, inst);
 
-  auto const mixed = VanillaDict::as(arr->arrLikeVal());
-
-  auto const dataTV = mixed->getArrayElmPtr(extra->index);
-  if (!dataTV) return gen(env, Jmp, inst->taken());
-  assertx(tvIsPlausible(*dataTV));
-
-  auto const keyTV = mixed->getArrayElmKey(extra->index);
-  assertx(isIntType(keyTV.m_type) || isStringType(keyTV.m_type));
-
-  if (key->isA(TInt)) {
-    if (isIntType(keyTV.m_type)) {
-      auto const cmp = gen(env, EqInt, key, cns(env, keyTV));
-      return gen(env, JmpZero, inst->taken(), cmp);
-    }
-    return gen(env, Jmp, inst->taken());
-  } else if (key->isA(TStr)) {
-    if (isStringType(keyTV.m_type)) {
-      auto const cmp = gen(env, EqStrPtr, key, cns(env, keyTV));
-      return gen(env, JmpZero, inst->taken(), cmp);
-    }
-    return gen(env, Jmp, inst->taken());
+  auto const keyType =
+    arrLikePosType(arr->type(), Type::cns(extra->index), true, inst->ctx());
+  assertx(keyType <= (TInt | TStr));
+  assertx(key->isA(TInt | TStr));
+  if (keyType <= TBottom) return gen(env, Jmp, inst->taken());
+  if (keyType <= TInt) {
+    if (!key->type().maybe(TInt)) return gen(env, Jmp, inst->taken());
+  }
+  if (keyType <= TStr) {
+    if (!key->type().maybe(TStr)) return gen(env, Jmp, inst->taken());
   }
 
+  if (key->isA(TInt) && keyType.hasConstVal(TInt)) {
+    auto const idx = keyType.intVal();
+    auto const cmp = gen(env, EqInt, key, cns(env, idx));
+    return gen(env, JmpZero, inst->taken(), cmp);
+  }
+  if (key->isA(TStr) && keyType.hasConstVal(TStr)) {
+    auto const str = keyType.strVal();
+    auto const cmp = gen(env, EqStrPtr, key, cns(env, str));
+    return gen(env, JmpZero, inst->taken(), cmp);
+  }
   return mergeBranchDests(env, inst);
 }
 
+SSATmp* simplifyCheckDictOffset(State& env, const IRInstruction* inst) {
+  return simplifyCheckOffsetImpl(env, inst);
+}
+
 SSATmp* simplifyCheckKeysetOffset(State& env, const IRInstruction* inst) {
-  auto const arr = inst->src(0);
-  auto const key = inst->src(1);
-  auto const& extra = inst->extra<IndexData>();
-
-  assertx(validPos(ssize_t(extra->index)));
-  if (!arr->hasConstVal()) return mergeBranchDests(env, inst);
-
-  auto const set = VanillaKeyset::asSet(arr->keysetVal());
-  auto const tv = set->tvOfPos(extra->index);
-  if (!tv) return gen(env, Jmp, inst->taken());
-  assertx(tvIsPlausible(*tv));
-  assertx(isStringType(tv->m_type) || isIntType(tv->m_type));
-
-  if (key->isA(TInt)) {
-    if (isIntType(tv->m_type)) {
-      auto const cmp = gen(env, EqInt, key, cns(env, *tv));
-      return gen(env, JmpZero, inst->taken(), cmp);
-    }
-    return gen(env, Jmp, inst->taken());
-  } else if (key->isA(TStr)) {
-    if (isStringType(tv->m_type)) {
-      auto const cmp = gen(env, EqStrPtr, key, cns(env, *tv));
-      return gen(env, JmpZero, inst->taken(), cmp);
-    }
-    return gen(env, Jmp, inst->taken());
-  }
-
-  return mergeBranchDests(env, inst);
+  return simplifyCheckOffsetImpl(env, inst);
 }
 
 SSATmp* simplifyCheckArrayCOW(State& env, const IRInstruction* inst) {
   auto const arr = inst->src(0);
-  if (arr->isA(TPersistentArrLike)) return gen(env, Jmp, inst->taken());
+  if (arr->isA(TPersistentArrLike)) {
+    gen(env, Jmp, inst->taken());
+    return cns(env, TBottom);
+  }
   return nullptr;
 }
 
@@ -3048,7 +3026,6 @@ SSATmp* simplifyCount(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
-namespace {
 SSATmp* simplifyCountHelper(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
   if (src->hasConstVal(TArrLike)) return cns(env, src->arrLikeVal()->size());
@@ -3064,7 +3041,6 @@ SSATmp* simplifyCountHelper(State& env, const IRInstruction* inst) {
     break;
   }
   return nullptr;
-}
 }
 
 #define X(Name)                                                 \

@@ -357,6 +357,14 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(GetPosVal)
 
   /*
+   * bool PosIsValid(const ArrayData*, ssize_t pos)
+   *
+   *   Return true if the given iterator position is valid in this
+   *   array.
+   */
+  DISPATCH(PosIsValid)
+
+  /*
    * ArrayData* SetIntMove(ArrayData*, int64_t key, TypedValue v)
    *
    *   Set a value in the array for an integer key. If copy / escalation is
@@ -583,6 +591,14 @@ const ArrayFunctions g_array_funcs = {
    *   will colocate an ApcTypedValue right before the array.
    */
   DISPATCH(MakeUncounted)
+
+  /*
+   * ArrayData* Copy(ArrayData*)
+   *
+   *  Return a counted copy of the array. A copy is made regardless of
+   *  the array's ref-count.
+   */
+  DISPATCH(Copy)
 };
 
 #undef DISPATCH

@@ -135,6 +135,11 @@ bool BespokeArray::IsVectorData(const ArrayData* ad) {
   return g_layout_funcs.fnIsVectorData[getVtableIndex(ad)](ad);
 }
 
+NO_PROFILING
+ArrayData* BespokeArray::Copy(const ArrayData* ad) {
+  return g_layout_funcs.fnCopy[getVtableIndex(ad)](ad);
+}
+
 // RO access
 NO_PROFILING
 TypedValue BespokeArray::NvGetInt(const ArrayData* ad, int64_t key) {
@@ -158,6 +163,9 @@ TypedValue BespokeArray::GetPosKey(const ArrayData* ad, ssize_t pos) {
 NO_PROFILING
 TypedValue BespokeArray::GetPosVal(const ArrayData* ad, ssize_t pos) {
   return g_layout_funcs.fnGetPosVal[getVtableIndex(ad)](ad, pos);
+}
+bool BespokeArray::PosIsValid(const ArrayData* ad, ssize_t pos) {
+  return g_layout_funcs.fnPosIsValid[getVtableIndex(ad)](ad, pos);
 }
 NO_PROFILING
 bool BespokeArray::ExistsInt(const ArrayData* ad, int64_t key) {

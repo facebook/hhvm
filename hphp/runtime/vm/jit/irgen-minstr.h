@@ -26,8 +26,10 @@
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/irgen-state.h"
 #include "hphp/runtime/vm/jit/array-access-profile.h"
+#include "hphp/runtime/vm/jit/decref-profile.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
+#include "hphp/runtime/vm/jit/type-array-elem.h"
 #include "hphp/runtime/vm/jit/type-profile.h"
 
 namespace HPHP { namespace jit { namespace irgen {
@@ -116,15 +118,14 @@ void checkPropDimForReadonly(IRGS& env, SSATmp* propPtr, const Class* cls,
  *    SSATmp* missing(SSATmp* key);
  *    SSATmp* generic(SSATmp* key, SizeHintData data);
  */
-template<class Direct, class Missing, class Generic>
+template<typename Direct, typename Missing, typename Generic, typename Finish>
 SSATmp* profiledArrayAccess(IRGS& env, SSATmp* arr, SSATmp* key, MOpMode mode,
-                            Direct direct, Missing missing, Generic generic) {
-  // These locals should be const, but we need to work around a bug in older
-  // versions of GCC that cause the hhvm-cmake build to fail. See the issue:
-  // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=80543
+                            Direct direct, Missing missing, Generic generic,
+                            Finish finish) {
+  assertx(mode == MOpMode::Warn ||
+          mode == MOpMode::None ||
+          mode == MOpMode::InOut);
   auto const is_dict = arr->isA(TDict);
-  auto const is_define = mode == MOpMode::Define;
-  auto const cow_check = mode == MOpMode::Define || mode == MOpMode::Unset;
   assertx(is_dict || arr->isA(TKeyset));
 
   // If the base and key are constants, the access will likely get
@@ -146,7 +147,8 @@ SSATmp* profiledArrayAccess(IRGS& env, SSATmp* arr, SSATmp* key, MOpMode mode,
 
   if (profile.profiling()) {
     auto const op = is_dict ? ProfileDictAccess : ProfileKeysetAccess;
-    auto const data = ArrayAccessProfileData { profile.handle(), cow_check };
+    auto const data =
+      RDSHandlePairData { profile.handle(), rds::kUninitHandle };
     gen(env, op, data, arr, key);
   }
   if (!profile.optimizing()) return generic(key, SizeHintData{});
@@ -176,13 +178,13 @@ SSATmp* profiledArrayAccess(IRGS& env, SSATmp* arr, SSATmp* key, MOpMode mode,
     );
   };
 
-  if (!is_define && result.empty != Action::None) {
+  if (result.empty != Action::None) {
     return missingCond(result.empty, [&] (Block* taken) {
       auto const count = gen(env, is_dict ? CountDict : CountKeyset, arr);
       gen(env, JmpNZero, taken, count);
     });
   }
-  if (!is_define && is_dict && result.missing != Action::None) {
+  if (is_dict && result.missing != Action::None) {
     return missingCond(result.missing, [&] (Block* taken) {
       // According to the profiling, the key is mostly a TStaticStr.
       // If if the JIT doesn't know that statically, lets check for it.
@@ -199,19 +201,117 @@ SSATmp* profiledArrayAccess(IRGS& env, SSATmp* arr, SSATmp* key, MOpMode mode,
     [&] (Block* taken) {
       auto const op = is_dict ? CheckDictOffset : CheckKeysetOffset;
       gen(env, op, IndexData { result.offset.second }, taken, arr, key);
-      if (cow_check) gen(env, CheckArrayCOW, taken, arr);
     },
     [&] {
-      return direct(arr, key, cns(env, result.offset.second));
+      auto const pos = cns(env, result.offset.second);
+      auto const keyType =
+        arrLikePosType(arr->type(), pos->type(), true, curClass(env));
+      return direct(arr, gen(env, AssertType, keyType, key), pos);
     },
     [&] {
       hint(env, Block::Hint::Unlikely);
       // NOTE: We could pass result.size_hint here, but that's the size hint
       // for the overall distribution, not the conditional distribution when
       // the likely offset profile misses. We pass a default profile instead.
-      if (offset_action == Action::Cold) return generic(key, SizeHintData{});
-      gen(env, Jmp, makeExitSlow(env));
-      return cns(env, TBottom);
+      auto const g = generic(key, SizeHintData{});
+      if (offset_action == Action::Exit) {
+        finish(g);
+        gen(env, Jmp, makeExit(env, nextSrcKey(env)));
+        return cns(env, TBottom);
+      }
+      return g;
+    }
+  );
+}
+
+static constexpr int kProfiledArraySetDecRefProfId = 1000000;
+
+template<typename Direct, typename Generic, typename Finish>
+SSATmp* profiledArraySet(IRGS& env, SSATmp* mbase, SSATmp* arr, SSATmp* key,
+                         MOpMode mode, Direct direct, Generic generic,
+                         Finish finish) {
+  assertx(mode == MOpMode::Define || mode == MOpMode::Unset);
+  auto const is_dict = arr->isA(TDict);
+  assertx(is_dict || arr->isA(TKeyset));
+
+  static const StaticString s_DictAccess{"DictSet"};
+  static const StaticString s_KeysetAccess{"KeysetSet"};
+  auto const profile = TargetProfile<ArrayAccessProfile> {
+    env.context,
+    env.irb->curMarker(),
+    is_dict ? s_DictAccess.get() : s_KeysetAccess.get()
+  };
+
+  if (profile.profiling()) {
+    auto const decRefProf = decRefProfile(
+      env.context,
+      env.irb->curMarker(),
+      kProfiledArraySetDecRefProfId
+    );
+    auto const op = is_dict ? ProfileDictAccess : ProfileKeysetAccess;
+    auto const data =
+      RDSHandlePairData { profile.handle(), decRefProf.handle() };
+    gen(env, op, data, arr, key);
+  }
+  if (!profile.optimizing()) return generic(key, SizeHintData{});
+
+  auto const data = profile.data();
+  auto const result = data.choose();
+  logArrayAccessProfile(env, arr, key, mode, data);
+  annotArrayAccessProfile(env, arr, key, data, result);
+
+  FTRACE_MOD(Trace::idx, 1, "{}\nArrayAccessProfile: {}\n",
+             env.irb->curMarker().show(), data.toString());
+
+  using Action = ArrayAccessProfile::Action;
+  auto const offset_action = result.offset.first;
+  if (offset_action == Action::None) return generic(key, result.size_hint);
+
+  return cond(
+    env,
+    [&] (Block* taken) {
+      auto const op = is_dict ? CheckDictOffset : CheckKeysetOffset;
+      gen(env, op, IndexData { result.offset.second }, taken, arr, key);
+
+      auto const single = cond(
+        env,
+        [&] (Block* taken) { return gen(env, CheckArrayCOW, taken, arr); },
+        [&] (SSATmp* single) {
+          gen(env, StMemMeta, mbase, single);
+          return single;
+        },
+        [&] {
+          if (result.nocow != Action::None) hint(env, Block::Hint::Unlikely);
+          decRefNZ(env, arr);
+          auto const copy = gen(env, CopyArray, arr);
+          gen(env, StMem, mbase, copy);
+          return copy;
+        }
+      );
+      auto const pos = cns(env, result.offset.second);
+      auto const keyType =
+        arrLikePosType(arr->type(), pos->type(), true, curClass(env));
+      return direct(
+        single,
+        gen(env, AssertType, keyType, key),
+        pos,
+        arr,
+        taken
+      );
+    },
+    [&] (SSATmp* ret) { return ret; },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      // NOTE: We could pass result.size_hint here, but that's the size hint
+      // for the overall distribution, not the conditional distribution when
+      // the likely offset profile misses. We pass a default profile instead.
+      auto const g = generic(key, SizeHintData{});
+      if (offset_action == Action::Exit) {
+        finish(g);
+        gen(env, Jmp, makeExit(env, nextSrcKey(env)));
+        return cns(env, TBottom);
+      }
+      return g;
     }
   );
 }

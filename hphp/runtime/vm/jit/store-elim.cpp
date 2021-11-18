@@ -28,6 +28,7 @@
 #include "hphp/util/trace.h"
 
 #include "hphp/runtime/vm/jit/alias-analysis.h"
+#include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/fixup.h"
@@ -415,14 +416,16 @@ bool removeDead(Local& env, IRInstruction& inst, bool trash) {
   if (trash && RuntimeOption::EvalHHIRGenerateAsserts) {
     switch (inst.op()) {
     case StStk:
+    case StStkMeta:
       dbgInst = env.global.unit.gen(
         DbgTrashStk,
         inst.bcctx(),
-        IRSPRelOffsetData { inst.extra<StStk>()->offset },
+        *inst.extra<IRSPRelOffsetData>(),
         inst.src(0)
       );
       break;
     case StMem:
+    case StMemMeta:
       dbgInst = env.global.unit.gen(DbgTrashMem, inst.bcctx(), inst.src(0));
       break;
     default:
@@ -538,7 +541,11 @@ void visit(Local& env, IRInstruction& inst) {
       if (isDead(env, *bit)) {
         if (!removeDead(env, inst, true)) {
           mayStore(env, l.dst);
-          mustStore(env, *bit);
+          // These don't actually perform a store, so they cannot be a
+          // "mustStore" (they cannot kill a previous store).
+          if (!inst.is(StLocMeta, StStkMeta, StMemMeta)) {
+            mustStore(env, *bit);
+          }
         }
         return;
       }
@@ -551,6 +558,7 @@ void visit(Local& env, IRInstruction& inst) {
         set_movable_store(env, *bit, inst);
       }
       mayStore(env, l.dst);
+      if (inst.is(StLocMeta, StStkMeta, StMemMeta)) return;
       mustStore(env, *bit);
       if (!l.value || l.value->inst()->block() != inst.block()) return;
       auto const le = memory_effects(*l.value->inst());

@@ -137,6 +137,7 @@ public:
   static TypedValue NvGetStrThrow(const ArrayData* ad, const StringData* key);
   static TypedValue GetPosKey(const ArrayData* ad, ssize_t pos);
   static TypedValue GetPosVal(const ArrayData* ad, ssize_t pos);
+  static bool PosIsValid(const ArrayData* ad, ssize_t pos);
   static bool ExistsInt(const ArrayData* ad, int64_t key);
   static bool ExistsStr(const ArrayData* ad, const StringData* key);
 
@@ -198,6 +199,7 @@ public:
   // copies and conversions
   static ArrayData* CopyStatic(const ArrayData* ad);
   static ArrayData* SetLegacyArray(ArrayData* ad, bool copy, bool legacy);
+  static ArrayData* Copy(const ArrayData*);
 };
 
 template <typename T>

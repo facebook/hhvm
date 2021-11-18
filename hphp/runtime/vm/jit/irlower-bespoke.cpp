@@ -153,6 +153,12 @@ CallSpec destructorForArrayLike(Type arr) {
   return CALL_TARGET(arr, Release, CallSpec::method(&ArrayData::release));
 }
 
+CallSpec copyFuncForArrayLike(Type arr) {
+  assertx(arr <= TArrLike);
+  assertx(allowBespokeArrayLikes());
+  return CALL_TARGET(arr, Copy, CallSpec::method(&ArrayData::copy));
+}
+
 void cgBespokeGet(IRLS& env, const IRInstruction* inst) {
   using GetInt = TypedValue (ArrayData::*)(int64_t) const;
   using GetStr = TypedValue (ArrayData::*)(const StringData*) const;

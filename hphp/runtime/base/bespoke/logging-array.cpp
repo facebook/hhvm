@@ -396,6 +396,29 @@ void LoggingArray::ZombieRelease(LoggingArray* lad) {
   tl_heap->objFreeIndex(lad, kSizeIndex);
 }
 
+ArrayData* LoggingArray::Copy(const LoggingArray* src) {
+  assertx(src->checkInvariants());
+
+  auto lad = static_cast<LoggingArray*>(tl_heap->objMallocIndex(kSizeIndex));
+  memcpy16_inline(lad, src, sizeof(LoggingArray));
+  lad->m_count = OneReference;
+
+  assertx(lad->kind() == src->kind());
+  assertx(lad->isLegacyArray() == src->isLegacyArray());
+  assertx(lad->m_size == src->m_size);
+  assertx(lad->m_layout_index == src->m_layout_index);
+  assertx(lad->wrapped == src->wrapped);
+  assertx(lad->profile == src->profile);
+  assertx(lad->entryTypes == src->entryTypes);
+  assertx(lad->keyOrder == src->keyOrder);
+  assertx(lad->hasExactlyOneRef());
+
+  lad->wrapped = lad->wrapped->copy();
+  assertx(lad->wrapped->hasExactlyOneRef());
+  assertx(lad->checkInvariants());
+  return lad;
+}
+
 //////////////////////////////////////////////////////////////////////////////
 // Accessors
 
@@ -416,6 +439,10 @@ TypedValue LoggingArray::GetPosKey(const LoggingArray* lad, ssize_t pos) {
 }
 TypedValue LoggingArray::GetPosVal(const LoggingArray* lad, ssize_t pos) {
   return lad->wrapped->nvGetVal(pos);
+}
+
+bool LoggingArray::PosIsValid(const LoggingArray* lad, ssize_t pos) {
+  return lad->wrapped->posIsValid(pos);
 }
 
 ssize_t LoggingArray::IterBegin(const LoggingArray* lad) {

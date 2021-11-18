@@ -486,6 +486,12 @@ TypedValue VanillaKeyset::GetPosVal(const ArrayData* ad, ssize_t pos) {
   return *a->tvOfPos(pos);
 }
 
+bool VanillaKeyset::PosIsValid(const ArrayData* ad, ssize_t pos) {
+  auto a = asSet(ad);
+  if (pos < 0 || pos >= a->m_used) return false;
+  return !a->data()[pos].isTombstone();
+}
+
 bool VanillaKeyset::IsVectorData(const ArrayData* ad) {
   auto a = asSet(ad);
   if (a->m_size == 0) {

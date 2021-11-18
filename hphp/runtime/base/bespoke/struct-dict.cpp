@@ -551,6 +551,10 @@ void StructDict::Release(StructDict* sad) {
   tl_heap->objFreeIndex(sad, sad->sizeIndex());
 }
 
+ArrayData* StructDict::Copy(const StructDict* sad) {
+  return sad->copy();
+}
+
 bool StructDict::IsVectorData(const StructDict* sad) {
   return sad->empty();
 }
@@ -608,6 +612,10 @@ TypedValue StructDict::GetPosKey(const StructDict* sad, ssize_t pos) {
 TypedValue StructDict::GetPosVal(const StructDict* sad, ssize_t pos) {
   auto const slot = sad->getSlotInPos(pos);
   return sad->typedValueUnchecked(slot);
+}
+
+bool StructDict::PosIsValid(const StructDict* sad, ssize_t pos) {
+  return pos >= 0 && pos < sad->m_size;
 }
 
 ssize_t StructDict::IterBegin(const StructDict*) {

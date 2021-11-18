@@ -321,6 +321,7 @@ private:
   SSATmp* preOptimizeLdFrameThis(IRInstruction*);
   SSATmp* preOptimizeLdFrameCls(IRInstruction*);
   SSATmp* preOptimizeStMem(IRInstruction*);
+  SSATmp* preOptimizeStMemMeta(IRInstruction*);
   SSATmp* preOptimizeCheckTypeMem(IRInstruction*);
   SSATmp* preOptimizeCheckInitMem(IRInstruction*);
   SSATmp* preOptimizeIsTypeMem(IRInstruction*);
@@ -328,9 +329,7 @@ private:
   SSATmp* preOptimizeStMROProp(IRInstruction*);
   SSATmp* preOptimizeCheckMROProp(IRInstruction*);
   SSATmp* preOptimizeBaseTypeParam(IRInstruction*);
-  SSATmp* preOptimizeElemVecD(IRInstruction*);
   SSATmp* preOptimizeElemDictD(IRInstruction*);
-  SSATmp* preOptimizeElemVecU(IRInstruction*);
   SSATmp* preOptimizeElemDictU(IRInstruction*);
   SSATmp* preOptimizeBespokeElem(IRInstruction*);
   SSATmp* preOptimizeSetElem(IRInstruction*);

@@ -564,6 +564,10 @@ inline void decRef(IRGS& env, SSATmp* tmp, int locId=-1) {
   gen(env, DecRef, DecRefData(locId), tmp);
 }
 
+inline void decRefNZ(IRGS& env, SSATmp* tmp, int locId=-1) {
+  gen(env, DecRefNZ, DecRefData(locId), tmp);
+}
+
 inline void popDecRef(IRGS& env, GuardConstraint gc = DataTypeGeneric) {
   auto const val = pop(env, gc);
   decRef(env, val);

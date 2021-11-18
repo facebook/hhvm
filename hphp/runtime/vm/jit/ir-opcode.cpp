@@ -84,6 +84,7 @@ TRACE_SET_MOD(hhir);
 #define DPropLval      HasDest
 #define DElemLval      HasDest
 #define DElemLvalPos   HasDest
+#define DCOW           HasDest
 
 namespace {
 template<Opcode op, uint64_t flags>
@@ -160,6 +161,7 @@ OpInfo g_opInfo[] = {
 #undef DPropLval
 #undef DElemLval
 #undef DElemLvalPos
+#undef DCOW
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -310,8 +312,6 @@ bool opcodeMayRaise(Opcode opc) {
   case ElemDictU:
   case ElemDX:
   case ElemUX:
-  case ElemVecD:
-  case ElemVecU:
   case ElemX:
   case EqArrLike:
   case EqObj:
@@ -440,7 +440,6 @@ bool opcodeMayRaise(Opcode opc) {
   case ThrowParameterWrongType:
   case UnsetElem:
   case UnsetProp:
-  case VecSet:
   case VectorSet:
   case VerifyParamCallable:
   case VerifyParamCls:
@@ -551,6 +550,7 @@ bool opcodeMayRaise(Opcode opc) {
   case ConvStrToBool:
   case ConvStrToDbl:
   case ConvStrToInt:
+  case CopyArray:
   case CountCollection:
   case CountDict:
   case CountKeyset:
@@ -598,7 +598,6 @@ bool opcodeMayRaise(Opcode opc) {
   case StVMPC:
   case StVMReturnAddr:
   case ElemDictK:
-  case ElemKeysetK:
   case EndBlock:
   case EndCatch:
   case EndGuards:
@@ -834,6 +833,7 @@ bool opcodeMayRaise(Opcode opc) {
   case OrdStr:
   case OrInt:
   case PairIsset:
+  case ProfileArrayCOW:
   case ProfileArrLikeProps:
   case ProfileCall:
   case ProfileDecRef:
@@ -877,9 +877,11 @@ bool opcodeMayRaise(Opcode opc) {
   case StIterPos:
   case StIterType:
   case StLoc:
+  case StLocMeta:
   case StLocRange:
   case StMBase:
   case StMem:
+  case StMemMeta:
   case StOutValue:
   case StrictlyIntegerConv:
   case StringIsset:
@@ -889,6 +891,7 @@ bool opcodeMayRaise(Opcode opc) {
   case StMROProp:
   case StTypeAt:
   case StStk:
+  case StStkMeta:
   case StStkRange:
   case StVMRegState:
   case StTVInRDS:

@@ -411,7 +411,6 @@ static CallMap s_callMap {
     {PairIsset, MInstrHelpers::pairIsset, DSSA, SNone, {{SSA, 0}, {SSA, 1}}},
     {VectorIsset, MInstrHelpers::vectorIsset, DSSA, SNone,
                   {{SSA, 0}, {SSA, 1}}},
-    {ElemVecU, MInstrHelpers::elemVecIU, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},
     {ThrowOutOfBounds, throwOOBException, DNone, SSync, {{TV, 0}, {TV, 1}}},
     {ThrowInvalidArrayKey, invalidArrayKeyHelper, DNone, SSync,
                  {{SSA, 0}, {TV, 1}}},

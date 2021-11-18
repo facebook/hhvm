@@ -185,6 +185,11 @@ void EmptyMonotypeVec::Release(EmptyMonotypeVec* ead) {
   always_assert(false);
 }
 
+ArrayData* EmptyMonotypeVec::Copy(const EmptyMonotypeVec*) {
+  // Not possible to have a non-static EmptyMonotypeVec
+  always_assert(false);
+}
+
 bool EmptyMonotypeVec::IsVectorData(const EmptyMonotypeVec*) {
   return true;
 }
@@ -204,6 +209,10 @@ TypedValue EmptyMonotypeVec::GetPosKey(const EmptyMonotypeVec*, ssize_t) {
 
 TypedValue EmptyMonotypeVec::GetPosVal(const EmptyMonotypeVec*, ssize_t) {
   always_assert(false);
+}
+
+bool EmptyMonotypeVec::PosIsValid(const EmptyMonotypeVec*, ssize_t) {
+  return false;
 }
 
 arr_lval EmptyMonotypeVec::LvalInt(EmptyMonotypeVec* ead, int64_t k) {
@@ -535,6 +544,10 @@ void MonotypeVec::Release(MonotypeVec* mad) {
   tl_heap->objFreeIndex(mad, mad->sizeIndex());
 }
 
+ArrayData* MonotypeVec::Copy(const MonotypeVec* mad) {
+  return mad->copy();
+}
+
 bool MonotypeVec::IsVectorData(const MonotypeVec* mad) {
   return true;
 }
@@ -556,6 +569,10 @@ TypedValue MonotypeVec::GetPosKey(const MonotypeVec* mad, ssize_t pos) {
 TypedValue MonotypeVec::GetPosVal(const MonotypeVec* mad, ssize_t pos) {
   assertx(size_t(pos) < mad->size());
   return mad->typedValueUnchecked(pos);
+}
+
+bool MonotypeVec::PosIsValid(const MonotypeVec* mad, ssize_t pos) {
+  return pos >= 0 && pos < mad->size();
 }
 
 arr_lval MonotypeVec::LvalInt(MonotypeVec* mad, int64_t k) {

@@ -23,6 +23,7 @@
 
 #include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/array-access-profile.h"
+#include "hphp/runtime/vm/jit/cow-profile.h"
 #include "hphp/runtime/vm/jit/guard-constraint.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/runtime/vm/jit/type-array-elem.h"
@@ -400,21 +401,6 @@ void checkCollectionBounds(IRGS& env, SSATmp* base,
   );
 }
 
-void checkVecBounds(IRGS& env, SSATmp* base, SSATmp* idx) {
-  assertx(base->isA(TVec));
-
-  ifThen(
-    env,
-    [&](Block* taken) {
-      gen(env, CheckVecBounds, taken, base, idx);
-    },
-    [&] {
-      hint(env, Block::Hint::Unlikely);
-      gen(env, ThrowOutOfBounds, base, idx);
-    }
-  );
-}
-
 template<class Finish>
 SSATmp* emitVecGet(IRGS& env, SSATmp* base, SSATmp* key, Finish finish) {
   assertx(base->isA(TVec));
@@ -424,7 +410,16 @@ SSATmp* emitVecGet(IRGS& env, SSATmp* base, SSATmp* key, Finish finish) {
     return cns(env, TBottom);
   }
 
-  checkVecBounds(env, base, key);
+  ifThen(
+    env,
+    [&](Block* taken) {
+      gen(env, CheckVecBounds, taken, base, key);
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      gen(env, ThrowOutOfBounds, base, key);
+    }
+  );
 
   auto finishMe = [&](SSATmp* elem) {
     gen(env, IncRef, elem);
@@ -483,7 +478,8 @@ SSATmp* emitDictKeysetGet(IRGS& env, SSATmp* base, SSATmp* key,
   auto const elem = profiledArrayAccess(
     env, base, key, mode,
     [&] (SSATmp* base, SSATmp* key, SSATmp* pos) {
-      return gen(env, is_dict ? DictGetK : KeysetGetK, base, key, pos);
+      if (is_dict) return gen(env, DictGetK, base, key, pos);
+      return key;
     },
     [&] (SSATmp* key) {
       if (quiet) return cns(env, TInitNull);
@@ -500,7 +496,8 @@ SSATmp* emitDictKeysetGet(IRGS& env, SSATmp* base, SSATmp* key,
         base,
         key
       );
-    }
+    },
+    [&] (SSATmp* elem) { finish(finishMe(elem)); }
   );
   auto const pelem = profiledType(env, elem, [&] { finish(finishMe(elem)); });
   return finishMe(pelem);
@@ -567,22 +564,41 @@ SSATmp* emitVecIsset(IRGS& env, SSATmp* base, SSATmp* key) {
   );
 }
 
-SSATmp* emitDictIsset(IRGS& env, SSATmp* base, SSATmp* key) {
+template <typename Finish>
+SSATmp* emitDictIsset(IRGS& env, SSATmp* base, SSATmp* key, Finish finish) {
   assertx(base->isA(TDict));
   if (!key->isA(TInt | TStr)) {
     gen(env, ThrowInvalidArrayKey, base, key);
     return cns(env, TBottom);
   }
-  return gen(env, DictIsset, base, key);
+
+  return profiledArrayAccess(
+    env, base, key, MOpMode::Warn,
+    [&] (SSATmp* dict, SSATmp* key, SSATmp* pos) {
+      auto const elem = gen(env, DictGetK, dict, key, pos);
+      return gen(env, IsNType, TInitNull, elem);
+    },
+    [&] (SSATmp*) { return cns(env, false); },
+    [&] (SSATmp* key, SizeHintData) { return gen(env, DictIsset, base, key); },
+    finish
+  );
 }
 
-SSATmp* emitKeysetIsset(IRGS& env, SSATmp* base, SSATmp* key) {
+template <typename Finish>
+SSATmp* emitKeysetIsset(IRGS& env, SSATmp* base, SSATmp* key, Finish finish) {
   assertx(base->isA(TKeyset));
   if (!key->isA(TInt | TStr)) {
     gen(env, ThrowInvalidArrayKey, base, key);
     return cns(env, TBottom);
   }
-  return gen(env, KeysetIsset, base, key);
+
+  return profiledArrayAccess(
+    env, base, key, MOpMode::Warn,
+    [&] (SSATmp*, SSATmp*, SSATmp*) { return cns(env, true); },
+    [&] (SSATmp*) { return cns(env, false); },
+    [&] (SSATmp* key, SizeHintData) { return gen(env, KeysetIsset, base, key); },
+    finish
+  );
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -660,14 +676,16 @@ SSATmp* emitCGetElemQuiet(IRGS& env, SSATmp* base, SSATmp* key,
   always_assert(false);
 }
 
-SSATmp* emitIssetElem(IRGS& env, SSATmp* base, SSATmp* key, SimpleOp simpleOp) {
+template <typename Finish>
+SSATmp* emitIssetElem(IRGS& env, SSATmp* base, SSATmp* key,
+                      SimpleOp simpleOp, Finish finish) {
   switch (simpleOp) {
   case SimpleOp::Vec:
     return emitVecIsset(env, base, key);
   case SimpleOp::Dict:
-    return emitDictIsset(env, base, key);
+    return emitDictIsset(env, base, key, finish);
   case SimpleOp::Keyset:
-    return emitKeysetIsset(env, base, key);
+    return emitKeysetIsset(env, base, key, finish);
   case SimpleOp::String:
     return gen(env, StringIsset, base, key);
   case SimpleOp::Vector:
@@ -761,9 +779,11 @@ void baseGImpl(IRGS& env, SSATmp* name, MOpMode mode) {
  * store-elim will usually end up moving these ops off of the main trace.
  */
 SSATmp* baseValueToLval(IRGS& env, SSATmp* base) {
+  assertx(base->isA(TCell));
   auto const temp = tvTempBasePtr(env);
   gen(env, StMem, temp, base);
-  return gen(env, ConvPtrToLval, temp);
+  auto const lval = gen(env, ConvPtrToLval, temp);
+  return lval;
 }
 
 /*
@@ -851,6 +871,49 @@ SSATmp* propImpl(IRGS& env, MOpMode mode, SSATmp* key,
   return propPtr;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+namespace {
+
+SSATmp* cowArray(IRGS& env, SSATmp* base) {
+  assertx(base->isA(TArrLike));
+
+  static const StaticString s_ArrayCOW{"ArrayCOW"};
+  auto const profile = TargetProfile<COWProfile>{
+    env.context,
+    env.irb->curMarker(),
+    s_ArrayCOW.get()
+  };
+
+  if (profile.profiling()) {
+    gen(env, ProfileArrayCOW, RDSHandleData { profile.handle() }, base);
+  }
+
+  using R = COWProfile::Result;
+  auto bias = R::None;
+  if (profile.optimizing()) bias = profile.data().choose();
+
+  return cond(
+    env,
+    [&] (Block* taken) { return gen(env, CheckArrayCOW, taken, base); },
+    [&] (SSATmp* single) {
+      gen(env, StMemMeta, ldMBase(env), single);
+      return single;
+    },
+    [&] {
+      if (bias >= R::RarelyCOW) hint(env, Block::Hint::Unlikely);
+      decRefNZ(env, base);
+      auto const copy = gen(env, CopyArray, base);
+      gen(env, StMem, ldMBase(env), copy);
+      return copy;
+    }
+  );
+}
+
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 SSATmp* vecElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
   assertx(baseType <= TVec);
   assertx(key->isA(TInt) || key->isA(TStr) ||
@@ -859,52 +922,39 @@ SSATmp* vecElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
   auto const warn = mode == MOpMode::Warn || mode == MOpMode::InOut;
   auto const unset = mode == MOpMode::Unset;
   auto const define = mode == MOpMode::Define;
+  auto const quiet = !warn && !unset && !define;
 
-  auto const invalid_key = [&] {
+  if (key->isA(TStr) && (unset || quiet)) return ptrToInitNull(env);
+  if (!key->isA(TInt)) {
     gen(env, ThrowInvalidArrayKey, extractBase(env), key);
     return cns(env, TBottom);
-  };
-
-  if (define) {
-    if (!key->isA(TInt)) return invalid_key();
-    return gen(env, ElemVecD, baseType, ldMBase(env), key);
   }
 
-  if (unset) {
-    if (key->isA(TInt)) return gen(env, ElemVecU, baseType, ldMBase(env), key);
-    if (key->isA(TStr)) return ptrToInitNull(env);
-    return invalid_key();
-  }
-
-  if (warn) {
-    if (key->isA(TInt)) {
-      auto const base = extractBase(env);
-      checkVecBounds(env, base, key);
-      return gen(env, LdVecElemAddr, base, key);
+  auto const base = extractBase(env);
+  return cond(
+    env,
+    [&] (Block* taken) { gen(env, CheckVecBounds, taken, base, key); },
+    [&] {
+      auto const vec = [&] {
+        if (define || unset) return cowArray(env, base);
+        return base;
+      }();
+      return gen(env, LdVecElemAddr, vec, key, base);
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      if (define || warn) {
+        gen(env, ThrowOutOfBounds, base, key);
+        return cns(env, TBottom);
+      }
+      return ptrToInitNull(env);
     }
-    return invalid_key();
-  }
-
-  if (key->isA(TInt)) {
-    auto const base = extractBase(env);
-    return cond(
-      env,
-      [&] (Block* taken) {
-        gen(env, CheckVecBounds, taken, base, key);
-      },
-      [&] {
-        return gen(env, LdVecElemAddr, base, key);
-      },
-      [&] { return ptrToInitNull(env); }
-    );
-  }
-
-  if (key->isA(TStr)) return ptrToInitNull(env);
-
-  return invalid_key();
+  );
 }
 
-SSATmp* dictElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
+template <typename Finish>
+SSATmp* dictElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key,
+                     Finish finish) {
   assertx(baseType <= TDict);
 
   auto const unset = mode == MOpMode::Unset;
@@ -917,34 +967,52 @@ SSATmp* dictElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
     return cns(env, TBottom);
   }
 
-  return profiledArrayAccess(
-    env, base, key, mode,
-    [&] (SSATmp* dict, SSATmp* key, SSATmp* pos) {
-      return gen(env, ElemDictK, dict, key, pos);
-    },
-    [&] (SSATmp* key) {
-      if (unset || mode == MOpMode::None) return ptrToInitNull(env);
-      assertx(mode == MOpMode::Warn || mode == MOpMode::InOut);
-      gen(env, ThrowOutOfBounds, base, key);
-      return cns(env, TBottom);
+  if (!define && !unset) {
+    return profiledArrayAccess(
+      env, base, key, mode,
+      [&] (SSATmp* dict, SSATmp* key, SSATmp* pos) {
+        return gen(env, ElemDictK, dict, key, pos, dict);
+      },
+      [&] (SSATmp* key) {
+        if (mode == MOpMode::None) return ptrToInitNull(env);
+        assertx(mode == MOpMode::Warn || mode == MOpMode::InOut);
+        gen(env, ThrowOutOfBounds, base, key);
+        return cns(env, TBottom);
+      },
+      [&] (SSATmp* key, SizeHintData) {
+        assertx(
+          mode == MOpMode::Warn ||
+          mode == MOpMode::None ||
+          mode == MOpMode::InOut
+        );
+        auto const op = mode == MOpMode::None ? DictGetQuiet : DictGet;
+        return baseValueToLval(env, gen(env, op, base, key));
+      },
+      finish
+    );
+  }
+
+  return profiledArraySet(
+    env, ldMBase(env), base, key, mode,
+    [&] (SSATmp* dict, SSATmp* key, SSATmp* pos, SSATmp* base, Block*) {
+      return gen(env, ElemDictK, dict, key, pos, base);
     },
     [&] (SSATmp* key, SizeHintData) {
-      if (define || unset) {
-        return gen(env, unset ? ElemDictU : ElemDictD,
-                   baseType, ldMBase(env), key);
-      }
-      assertx(
-        mode == MOpMode::Warn ||
-        mode == MOpMode::None ||
-        mode == MOpMode::InOut
+      return gen(
+        env,
+        unset ? ElemDictU : ElemDictD,
+        baseType,
+        ldMBase(env),
+        key
       );
-      auto const op = mode == MOpMode::None ? DictGetQuiet : DictGet;
-      return baseValueToLval(env, gen(env, op, base, key));
-    }
+    },
+    finish
   );
 }
 
-SSATmp* keysetElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
+template <typename Finish>
+SSATmp* keysetElemImpl(IRGS& env, MOpMode mode, Type baseType,
+                       SSATmp* key, Finish finish) {
   assertx(baseType <= TKeyset);
 
   auto const unset = mode == MOpMode::Unset;
@@ -968,8 +1036,8 @@ SSATmp* keysetElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
 
   return profiledArrayAccess(
     env, base, key, mode,
-    [&] (SSATmp* keyset, SSATmp* key, SSATmp* pos) {
-      return gen(env, ElemKeysetK, keyset, key, pos);
+    [&] (SSATmp*, SSATmp* key, SSATmp*) {
+      return baseValueToLval(env, key);
     },
     [&] (SSATmp* key) {
       if (mode == MOpMode::None) return ptrToInitNull(env);
@@ -985,21 +1053,27 @@ SSATmp* keysetElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
       );
       auto const op = mode == MOpMode::None ? KeysetGetQuiet : KeysetGet;
       return baseValueToLval(env, gen(env, op, base, key));
-    }
+    },
+    finish
   );
 }
 
 const StaticString s_OP_NOT_SUPPORTED_STRING(Strings::OP_NOT_SUPPORTED_STRING);
 
-SSATmp* elemImpl(IRGS& env, MOpMode mode, SSATmp* key) {
+template <typename Finish>
+SSATmp* elemImpl(IRGS& env, MOpMode mode, SSATmp* key, Finish finish) {
   auto const unset = mode == MOpMode::Unset;
   auto const define = mode == MOpMode::Define;
 
   auto const baseType = env.irb->fs().mbase().type;
 
+  if (baseType <= TDict) {
+    return dictElemImpl(env, mode, baseType, key, finish);
+  }
   if (baseType <= TVec)    return vecElemImpl(env, mode, baseType, key);
-  if (baseType <= TDict)   return dictElemImpl(env, mode, baseType, key);
-  if (baseType <= TKeyset) return keysetElemImpl(env, mode, baseType, key);
+  if (baseType <= TKeyset) {
+    return keysetElemImpl(env, mode, baseType, key, finish);
+  }
 
   if (unset) {
     constrainBase(env);
@@ -1180,7 +1254,8 @@ void handleStrTestResult(IRGS& env, uint32_t nDiscard, SSATmp* strTestResult) {
   );
 }
 
-SSATmp* emitArrayLikeSet(IRGS& env, SSATmp* key, SSATmp* value) {
+template <typename Finish>
+SSATmp* emitArrayLikeSet(IRGS& env, SSATmp* key, SSATmp* value, Finish finish) {
   auto const baseType = env.irb->fs().mbase().type;
   auto const base = extractBase(env);
   assertx(baseType <= TArrLike);
@@ -1202,14 +1277,49 @@ SSATmp* emitArrayLikeSet(IRGS& env, SSATmp* key, SSATmp* value) {
     return cns(env, TBottom);
   }
 
-  auto const op = isVec ? VecSet : DictSet;
-  auto const newArr = gen(env, op, base, key, value);
+  auto const finishMe = [&] {
+    gen(env, IncRef, value);
+    return value;
+  };
 
-  // Update the base's location with the new array.
-  auto const baseLoc = ldMBase(env);
-  gen(env, StMem, baseLoc, newArr);
-  gen(env, IncRef, value);
-  return value;
+  if (!isVec) {
+    profiledArraySet(
+      env, ldMBase(env), base, key, MOpMode::Define,
+      [&] (SSATmp* dict, SSATmp* key, SSATmp* pos, SSATmp* base, Block*) {
+        auto const elem = gen(env, ElemDictK, dict, key, pos, base);
+        decRef(
+          env,
+          gen(env, LdMem, TInitCell, elem),
+          kProfiledArraySetDecRefProfId
+        );
+        gen(env, StMem, elem, value);
+        return cns(env, TBottom);
+      },
+      [&] (SSATmp* key, SizeHintData) {
+        auto const newArr = gen(env, DictSet, base, key, value);
+        gen(env, StMem, ldMBase(env), newArr);
+        return cns(env, TBottom);
+      },
+      [&] (SSATmp*) { finish(finishMe()); }
+    );
+  } else {
+    ifThenElse(
+      env,
+      [&] (Block* taken) { gen(env, CheckVecBounds, taken, base, key); },
+      [&] {
+        auto const vec = cowArray(env, base);
+        auto const elem = gen(env, LdVecElemAddr, vec, key, base);
+        decRef(env, gen(env, LdMem, TInitCell, elem));
+        gen(env, StMem, elem, value);
+      },
+      [&] {
+        hint(env, Block::Hint::Unlikely);
+        gen(env, ThrowOutOfBounds, base, key);
+      }
+    );
+  }
+
+  return finishMe();
 }
 
 void setNewElemVecImpl(IRGS& env, uint32_t nDiscard, SSATmp* basePtr,
@@ -1219,25 +1329,39 @@ void setNewElemVecImpl(IRGS& env, uint32_t nDiscard, SSATmp* basePtr,
 
   if (maybeCyclic) gen(env, IncRef, value);
 
-  ifThen(
-    env,
-    [&](Block* taken) {
-      auto const base = extractBase(env);
+  static const StaticString s_ArrayCOW{"NewElemVecCOW"};
+  auto const profile = TargetProfile<COWProfile>{
+    env.context,
+    env.irb->curMarker(),
+    s_ArrayCOW.get()
+  };
 
-      gen(env, CheckArrayCOW, taken, base);
-      auto const offset = gen(env, ReserveVecNewElem, taken, base);
-      auto const elemPtr = gen(
-        env,
-        LdVecElemAddr,
-        base,
-        offset
-      );
-      gen(env, StMem, elemPtr, value);
-    },
-    [&] {
-      gen(env, SetNewElemVec, basePtr, value);
-    }
-  );
+  if (profile.profiling()) {
+    auto const base = extractBase(env);
+    gen(env, ProfileArrayCOW, RDSHandleData { profile.handle() }, base);
+  }
+
+  using R = COWProfile::Result;
+  auto bias = R::None;
+  if (profile.optimizing()) bias = profile.data().choose();
+
+  if (bias <= R::UsuallyCOW) {
+    gen(env, SetNewElemVec, basePtr, value);
+  } else {
+    ifThen(
+      env,
+      [&](Block* taken) {
+        auto const base = extractBase(env);
+        auto const vec = gen(env, CheckArrayCOW, taken, base);
+        auto const offset = gen(env, ReserveVecNewElem, taken, vec);
+        auto const elemPtr = gen(env, LdVecElemAddr, vec, offset, base);
+        gen(env, StMem, elemPtr, value);
+      },
+      [&] {
+        gen(env, SetNewElemVec, basePtr, value);
+      }
+    );
+  }
 
   if (!maybeCyclic) gen(env, IncRef, value);
 }
@@ -1275,7 +1399,8 @@ SSATmp* setNewElemImpl(IRGS& env, uint32_t nDiscard) {
   return value;
 }
 
-SSATmp* setElemImpl(IRGS& env, uint32_t nDiscard, SSATmp* key) {
+template <typename Finish>
+SSATmp* setElemImpl(IRGS& env, uint32_t nDiscard, SSATmp* key, Finish finish) {
   auto value = topC(env, BCSPRelOffset{0}, DataTypeGeneric);
 
   auto const baseType = env.irb->fs().mbase().type;
@@ -1303,7 +1428,7 @@ SSATmp* setElemImpl(IRGS& env, uint32_t nDiscard, SSATmp* key) {
     case SimpleOp::Vec:
     case SimpleOp::Dict:
     case SimpleOp::Keyset:
-      return emitArrayLikeSet(env, key, value);
+      return emitArrayLikeSet(env, key, value, finish);
 
     case SimpleOp::Pair:
     case SimpleOp::None:
@@ -1382,6 +1507,328 @@ void mFinalImpl(IRGS& env, int32_t nDiscard, SSATmp* result) {
   for (auto i = 0; i < nDiscard; ++i) popDecRef(env);
   if (result) push(env, result);
   gen(env, FinishMemberOp);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+namespace {
+
+template <typename Finish>
+SSATmp* incDecDictImpl(IRGS& env, IncDecOp op, SSATmp* base, SSATmp* key,
+                       Finish finish) {
+  assertx(base->isA(TDict));
+
+  if (!key->isA(TInt | TStr)) {
+    gen(env, ThrowInvalidArrayKey, base, key);
+    return cns(env, TBottom);
+  }
+
+  if (isIncDecO(op)) {
+    return gen(
+      env,
+      IncDecElem,
+      IncDecData{op},
+      ldMBase(env),
+      key
+    );
+  }
+
+  return profiledArraySet(
+    env, ldMBase(env), base, key, MOpMode::Define,
+    [&] (SSATmp* dict, SSATmp* key, SSATmp* pos, SSATmp* base, Block* taken) {
+      auto const elem = gen(env, ElemDictK, dict, key, pos, base);
+      auto const oldVal = gen(
+        env,
+        CheckType,
+        taken,
+        TInt,
+        gen(env, LdMem, TInitCell, elem)
+      );
+      auto const newVal = gen(
+        env,
+        isInc(op) ? AddInt : SubInt,
+        oldVal,
+        cns(env, 1)
+      );
+      gen(env, StMem, elem, newVal);
+      return isPre(op) ? newVal : oldVal;
+    },
+    [&] (SSATmp* key, SizeHintData) {
+      env.irb->exceptionStackBoundary();
+      return gen(
+        env,
+        IncDecElem,
+        IncDecData{op},
+        ldMBase(env),
+        key
+      );
+    },
+    finish
+  );
+}
+
+SSATmp* incDecVecImpl(IRGS& env, IncDecOp op, SSATmp* base, SSATmp* key) {
+  assertx(base->isA(TVec));
+
+  if (!key->isA(TInt)) {
+    gen(env, ThrowInvalidArrayKey, base, key);
+    return cns(env, TBottom);
+  }
+
+  if (isIncDecO(op)) {
+    return gen(
+      env,
+      IncDecElem,
+      IncDecData{op},
+      ldMBase(env),
+      key
+    );
+  }
+
+  return cond(
+    env,
+    [&] (Block* taken) { gen(env, CheckVecBounds, taken, base, key); },
+    [&] {
+      auto const vec = cowArray(env, base);
+      auto const elem = gen(env, LdVecElemAddr, vec, key, base);
+
+      return cond(
+        env,
+        [&] (Block* taken) {
+          return gen(
+            env,
+            CheckType,
+            taken,
+            TInt,
+            gen(env, LdMem, TInitCell, elem)
+          );
+        },
+        [&] (SSATmp* val) {
+          assertx(val->isA(TInt));
+          auto const newVal = gen(
+            env,
+            isInc(op) ? AddInt : SubInt,
+            val,
+            cns(env, 1)
+          );
+          gen(env, StMem, elem, newVal);
+          return isPre(op) ? newVal : val;
+        },
+        [&] {
+          hint(env, Block::Hint::Unlikely);
+          env.irb->exceptionStackBoundary();
+          return gen(
+            env,
+            IncDecElem,
+            IncDecData{op},
+            ldMBase(env),
+            key
+          );
+        }
+      );
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      gen(env, ThrowOutOfBounds, base, key);
+      return cns(env, TBottom);
+    }
+  );
+}
+
+bool setOpSupported(SetOpOp op, SSATmp* rhs) {
+  switch (op) {
+    case SetOpOp::PlusEqual:
+    case SetOpOp::MinusEqual:
+    case SetOpOp::MulEqual:
+    case SetOpOp::AndEqual:
+    case SetOpOp::OrEqual:
+    case SetOpOp::XorEqual:
+      return rhs->isA(TInt);
+    case SetOpOp::ConcatEqual:
+      return rhs->isA(TStr);
+    case SetOpOp::PlusEqualO:
+    case SetOpOp::MinusEqualO:
+    case SetOpOp::MulEqualO:
+      case SetOpOp::DivEqual:
+    case SetOpOp::ModEqual:
+    case SetOpOp::PowEqual:
+    case SetOpOp::SlEqual:
+    case SetOpOp::SrEqual:
+      return false;
+  }
+  always_assert(false);
+}
+
+SSATmp* setOpAction(IRGS& env, SetOpOp op, SSATmp* v, SSATmp* rhs,
+                    Block* taken) {
+  assertx(setOpSupported(op, rhs));
+
+  auto const lhs = [&] {
+    switch (op) {
+      case SetOpOp::PlusEqual:
+      case SetOpOp::MinusEqual:
+      case SetOpOp::MulEqual:
+      case SetOpOp::AndEqual:
+      case SetOpOp::OrEqual:
+      case SetOpOp::XorEqual:
+        assertx(rhs->isA(TInt));
+        return gen(env, CheckType, TInt, taken, v);
+      case SetOpOp::ConcatEqual:
+        assertx(rhs->isA(TStr));
+        return gen(env, CheckType, TStr, taken, v);
+      case SetOpOp::PlusEqualO:
+      case SetOpOp::MinusEqualO:
+      case SetOpOp::MulEqualO:
+      case SetOpOp::DivEqual:
+      case SetOpOp::ModEqual:
+      case SetOpOp::PowEqual:
+      case SetOpOp::SlEqual:
+      case SetOpOp::SrEqual:
+        break;
+    }
+    always_assert(false);
+  }();
+
+  auto const opc = [&] {
+    switch (op) {
+      case SetOpOp::PlusEqual:   return AddInt;
+      case SetOpOp::MinusEqual:  return SubInt;
+      case SetOpOp::MulEqual:    return MulInt;
+      case SetOpOp::AndEqual:    return AndInt;
+      case SetOpOp::OrEqual:     return OrInt;
+      case SetOpOp::XorEqual:    return XorInt;
+      case SetOpOp::ConcatEqual: return ConcatStrStr;
+      case SetOpOp::PlusEqualO:
+      case SetOpOp::MinusEqualO:
+      case SetOpOp::MulEqualO:
+      case SetOpOp::DivEqual:
+      case SetOpOp::ModEqual:
+      case SetOpOp::PowEqual:
+      case SetOpOp::SlEqual:
+      case SetOpOp::SrEqual:
+        break;
+    }
+    always_assert(false);
+  }();
+  env.irb->exceptionStackBoundary();
+  auto const ret = gen(env, opc, lhs, rhs);
+  gen(env, IncRef, ret);
+  return ret;
+}
+
+template <typename Finish>
+SSATmp* setOpDictImpl(IRGS& env, SetOpOp op, SSATmp* base, SSATmp* key,
+                      SSATmp* rhs, Finish finish) {
+  assertx(base->isA(TDict));
+
+  if (!key->isA(TInt | TStr)) {
+    gen(env, ThrowInvalidArrayKey, base, key);
+    return cns(env, TBottom);
+  }
+
+  if (!setOpSupported(op, rhs)) {
+    return gen(
+      env,
+      SetOpElem,
+      SetOpData{op},
+      ldMBase(env),
+      key,
+      rhs
+    );
+  }
+
+  return profiledArraySet(
+    env, ldMBase(env), base, key, MOpMode::Define,
+    [&] (SSATmp* dict, SSATmp* key, SSATmp* pos, SSATmp* base, Block* taken) {
+      auto const elem = gen(env, ElemDictK, dict, key, pos, base);
+      auto const newVal = setOpAction(
+        env,
+        op,
+        gen(env, LdMem, TInitCell, elem),
+        rhs,
+        taken
+      );
+      gen(env, StMem, elem, newVal);
+      return newVal;
+    },
+    [&] (SSATmp* key, SizeHintData) {
+      env.irb->exceptionStackBoundary();
+      return gen(
+        env,
+        SetOpElem,
+        SetOpData{op},
+        ldMBase(env),
+        key,
+        rhs
+      );
+    },
+    finish
+  );
+}
+
+SSATmp* setOpVecImpl(IRGS& env, SetOpOp op, SSATmp* base, SSATmp* key,
+                     SSATmp* rhs) {
+  assertx(base->isA(TVec));
+
+  if (!key->isA(TInt)) {
+    gen(env, ThrowInvalidArrayKey, base, key);
+    return cns(env, TBottom);
+  }
+
+  if (!setOpSupported(op, rhs)) {
+    return gen(
+      env,
+      SetOpElem,
+      SetOpData{op},
+      ldMBase(env),
+      key,
+      rhs
+    );
+  }
+
+  return cond(
+    env,
+    [&] (Block* taken) { gen(env, CheckVecBounds, taken, base, key); },
+    [&] {
+      auto const vec = cowArray(env, base);
+      auto const elem = gen(env, LdVecElemAddr, vec, key, base);
+
+      return cond(
+        env,
+        [&] (Block* taken) {
+          auto const newVal = setOpAction(
+            env,
+            op,
+            gen(env, LdMem, TInitCell, elem),
+            rhs,
+            taken
+          );
+          gen(env, StMem, elem, newVal);
+          return newVal;
+        },
+        [&] (SSATmp* ret) { return ret; },
+        [&] {
+          hint(env, Block::Hint::Unlikely);
+          env.irb->exceptionStackBoundary();
+          return gen(
+            env,
+            SetOpElem,
+            SetOpData{op},
+            ldMBase(env),
+            key,
+            rhs
+          );
+        }
+      );
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      gen(env, ThrowOutOfBounds, base, key);
+      return cns(env, TBottom);
+    }
+  );
+}
+
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1471,14 +1918,18 @@ void emitBaseH(IRGS& env) {
 
 void emitDim(IRGS& env, MOpMode mode, MemberKey mk) {
   auto const key = memberKey(env, mk);
-  auto const result = [&] {
+
+  auto const finish = [&] (SSATmp* base) {
+    stMBase(env, base);
+    if (mcodeIsElem(mk.mcode)) checkElemDimForReadonly(env);
+  };
+
+  auto const base = [&] {
     if (mcodeIsProp(mk.mcode)) return propImpl(env, mode, key, mk.mcode == MQT, mk.rop);
-    if (mcodeIsElem(mk.mcode)) return elemImpl(env, mode, key);
+    if (mcodeIsElem(mk.mcode)) return elemImpl(env, mode, key, finish);
     PUNT(DimNewElem);
   }();
-
-  stMBase(env, result);
-  if (mcodeIsElem(mk.mcode)) checkElemDimForReadonly(env);
+  finish(base);
 }
 
 void emitQueryM(IRGS& env, uint32_t nDiscard, QueryMOp query, MemberKey mk) {
@@ -1501,6 +1952,10 @@ void emitQueryM(IRGS& env, uint32_t nDiscard, QueryMOp query, MemberKey mk) {
     }
   }
 
+  auto const finish = [&] (SSATmp* result) {
+    mFinalImpl(env, nDiscard, result);
+  };
+
   auto const result = [&]() -> SSATmp* {
     switch (query) {
       case QueryMOp::InOut:
@@ -1512,11 +1967,8 @@ void emitQueryM(IRGS& env, uint32_t nDiscard, QueryMOp query, MemberKey mk) {
         );
         return mcodeIsProp(mk.mcode)
           ? cGetPropImpl(env, extractBase(env), key,
-                         mode, mk.mcode == MQT,
-                         [&](SSATmp* el) { mFinalImpl(env, nDiscard, el); },
-                         mk.rop)
-          : emitCGetElem(env, extractBase(env), key, mode, simpleOp,
-                         [&](SSATmp* el) { mFinalImpl(env, nDiscard, el); });
+                         mode, mk.mcode == MQT, finish, mk.rop)
+          : emitCGetElem(env, extractBase(env), key, mode, simpleOp, finish);
       }
 
       case QueryMOp::CGetQuiet: {
@@ -1524,21 +1976,20 @@ void emitQueryM(IRGS& env, uint32_t nDiscard, QueryMOp query, MemberKey mk) {
         return mcodeIsProp(mk.mcode)
           ? cGetPropImpl(
               env, extractBase(env), key, mode, mk.mcode == MQT,
-              [&](SSATmp* el) { mFinalImpl(env, nDiscard, el); }, mk.rop)
+              finish, mk.rop)
           : emitCGetElemQuiet(
-              env, extractBase(env), key, mode, simpleOp,
-              [&](SSATmp* el) { mFinalImpl(env, nDiscard, el); });
+              env, extractBase(env), key, mode, simpleOp, finish
+            );
       }
 
       case QueryMOp::Isset:
         return mcodeIsProp(mk.mcode)
           ? gen(env, IssetProp, extractBase(env), key)
-          : emitIssetElem(env, extractBase(env), key, simpleOp);
+          : emitIssetElem(env, extractBase(env), key, simpleOp, finish);
     }
     not_reached();
   }();
-
-  mFinalImpl(env, nDiscard, result);
+  finish(result);
 }
 
 void emitSetM(IRGS& env, uint32_t nDiscard, MemberKey mk) {
@@ -1547,13 +1998,17 @@ void emitSetM(IRGS& env, uint32_t nDiscard, MemberKey mk) {
   if (baseType <= TClsMeth) {
     PUNT(SetM_is_ClsMeth);
   }
+
+  auto const finish = [&] (SSATmp* result) {
+    popC(env, DataTypeGeneric);
+    mFinalImpl(env, nDiscard, result);
+  };
+
   auto const result =
     mk.mcode == MW        ? setNewElemImpl(env, nDiscard) :
-    mcodeIsElem(mk.mcode) ? setElemImpl(env, nDiscard, key) :
+    mcodeIsElem(mk.mcode) ? setElemImpl(env, nDiscard, key, finish) :
                             setPropImpl(env, nDiscard, key, mk.rop);
-
-  popC(env, DataTypeGeneric);
-  mFinalImpl(env, nDiscard, result);
+  finish(result);
 }
 
 void emitSetRangeM(IRGS& env,
@@ -1575,18 +2030,33 @@ void emitSetRangeM(IRGS& env,
 void emitIncDecM(IRGS& env, uint32_t nDiscard, IncDecOp incDec, MemberKey mk) {
   auto key = memberKey(env, mk);
 
+  auto const finish = [&] (SSATmp* result) {
+    mFinalImpl(env, nDiscard, result);
+  };
+
   auto const result = [&] {
     if (mcodeIsProp(mk.mcode)) {
       return emitIncDecProp(env, incDec, extractBase(env), key);
     }
     if (mcodeIsElem(mk.mcode)) {
-      auto const base = ldMBase(env);
-      return gen(env, IncDecElem, IncDecData{incDec}, base, key);
+      auto const base = extractBase(env);
+      if (base->isA(TDict)) {
+        return incDecDictImpl(env, incDec, base, key, finish);
+      }
+      if (base->isA(TVec)) return incDecVecImpl(env, incDec, base, key);
+      if (base->isA(TKeyset)) {
+        gen(
+          env,
+          ThrowInvalidOperation,
+          cns(env, s_InvalidKeysetOperationMsg.get())
+        );
+        return cns(env, TBottom);
+      }
+      return gen(env, IncDecElem, IncDecData{incDec}, ldMBase(env), key);
     }
     PUNT(IncDecNewElem);
   }();
-
-  mFinalImpl(env, nDiscard, result);
+  finish(result);
 }
 
 SSATmp* inlineSetOp(IRGS& env, SetOpOp op, SSATmp* lhs, SSATmp* rhs) {
@@ -1727,8 +2197,20 @@ void emitSetOpM(IRGS& env, uint32_t nDiscard, SetOpOp op, MemberKey mk) {
       return setOpPropImpl(env, op, extractBase(env), key, rhs, finish);
     }
     if (mcodeIsElem(mk.mcode)) {
-      auto const base = ldMBase(env);
-      return gen(env, SetOpElem, SetOpData{op}, base, key, rhs);
+      auto const base = extractBase(env);
+      if (base->isA(TDict)) {
+        return setOpDictImpl(env, op, base, key, rhs, finish);
+      }
+      if (base->isA(TVec)) return setOpVecImpl(env, op, base, key, rhs);
+      if (base->isA(TKeyset)) {
+        gen(
+          env,
+          ThrowInvalidOperation,
+          cns(env, s_InvalidKeysetOperationMsg.get())
+        );
+        return cns(env, TBottom);
+      }
+      return gen(env, SetOpElem, SetOpData{op}, ldMBase(env), key, rhs);
     }
     PUNT(SetOpNewElem);
   }();

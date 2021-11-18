@@ -743,8 +743,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   // Instructions that explicitly manipulate locals
 
   case StLoc:
+  case StLocMeta:
     return PureStore {
-      ALocal { inst.src(0), inst.extra<StLoc>()->locId },
+      ALocal { inst.src(0), inst.extra<LocalId>()->locId },
       inst.src(1),
       nullptr
     };
@@ -778,6 +779,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdMem:
     return PureLoad { pointee(inst.src(0)) };
   case StMem:
+  case StMemMeta:
     return PureStore { pointee(inst.src(0)), inst.src(1), inst.src(0) };
 
   case StImplicitContext:
@@ -1082,7 +1084,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return may_load_store(AElemAny, AEmpty);
 
   case ElemDictK:
-  case ElemKeysetK:
     return IrrelevantEffects {};
 
   case VecFirst: {
@@ -1116,6 +1117,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ProfileDictAccess:
   case ProfileKeysetAccess:
   case CheckArrayCOW:
+  case ProfileArrayCOW:
     return may_load_store(AHeapAny, AEmpty);
 
   case SameArrLike:
@@ -1154,8 +1156,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case SetNewElemVec:
   case SetNewElemKeyset:
   case UnsetElem:
-  case ElemVecD:
-  case ElemVecU:
   case ElemDictD:
   case ElemDictU:
   case BespokeElem:
@@ -1262,8 +1262,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return PureLoad { AStack::at(inst.extra<LdStk>()->offset) };
 
   case StStk:
+  case StStkMeta:
     return PureStore {
-      AStack::at(inst.extra<StStk>()->offset),
+      AStack::at(inst.extra<IRSPRelOffsetData>()->offset),
       inst.src(1),
       nullptr
     };
@@ -1733,7 +1734,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case AddNewElemKeyset:   // can re-enter
   case DictGet:
   case KeysetGet:
-  case VecSet:
   case DictSet:
   case BespokeSet:
   case BespokeAppend:
@@ -1789,6 +1789,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case RaiseErrorOnInvalidIsAsExpressionType:
   case IsTypeStruct:
   case RecordReifiedGenericsAndGetTSList:
+  case CopyArray:
     return may_load_store(AElemAny, AEmpty);
 
   case ConvArrLikeToVec:
@@ -2060,7 +2061,7 @@ AliasClass pointee(const SSATmp* tmp) {
         };
 
         if (type <= TMemToElem) {
-          if (sinst->is(LdVecElemAddr, ElemDictK, ElemKeysetK)) return elem();
+          if (sinst->is(LdVecElemAddr, ElemDictK)) return elem();
           return AElemAny;
         }
 
@@ -2226,11 +2227,9 @@ GeneralEffects general_effects_for_vmreg_liveness(
 
 bool hasMInstrBaseEffects(const IRInstruction& inst) {
   switch (inst.op()) {
-    case ElemVecD:
     case ElemDictD:
     case ElemDX:
     case BespokeElem:
-    case ElemVecU:
     case ElemDictU:
     case ElemUX:
     case SetElem:
@@ -2253,7 +2252,6 @@ Optional<Type> mInstrBaseEffects(const IRInstruction& inst, Type old) {
   assertx(hasMInstrBaseEffects(inst));
 
   switch (inst.op()) {
-    case ElemVecD:
     case ElemDictD:
     case ElemDX:
     case SetOpElem:
@@ -2264,7 +2262,6 @@ Optional<Type> mInstrBaseEffects(const IRInstruction& inst, Type old) {
           ((old & TArrLike).modified() & TCounted) | (old - TArrLike)
         )
         : std::nullopt;
-    case ElemVecU:
     case ElemDictU:
     case ElemUX:
     case UnsetElem:

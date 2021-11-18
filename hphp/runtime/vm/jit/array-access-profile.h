@@ -29,6 +29,8 @@ struct StringData;
 
 namespace jit {
 
+struct DecRefProfile;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -59,6 +61,7 @@ struct ArrayAccessProfile {
     SizeHintData size_hint;
     Action empty;
     Action missing;
+    Action nocow;
     std::string toString() const;
   };
 
@@ -70,8 +73,8 @@ struct ArrayAccessProfile {
   /*
    * Update the profile to register an access at `key' in `ad'.
    */
-  void update(const ArrayData* ad, int64_t key, bool cowCheck);
-  void update(const ArrayData* ad, const StringData* key, bool cowCheck);
+  void update(const ArrayData* ad, int64_t key, DecRefProfile*);
+  void update(const ArrayData* ad, const StringData* key, DecRefProfile*);
 
   /*
    * Combine `l' and `r', retaining the kNumTrackedSamples with the highest
@@ -113,6 +116,7 @@ private:
   uint32_t m_small{0};
   uint32_t m_empty{0};
   uint32_t m_missing{0};
+  uint32_t m_nocow{0};
   bool m_init{false};
 };
 

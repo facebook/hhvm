@@ -33,7 +33,10 @@
 #include "hphp/runtime/vm/jit/bc-marker.h"
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
+#include "hphp/runtime/vm/jit/cow-profile.h"
+#include "hphp/runtime/vm/jit/decref-profile.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
+#include "hphp/runtime/vm/jit/irlower-bespoke.h"
 #include "hphp/runtime/vm/jit/minstr-helpers.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
@@ -406,11 +409,16 @@ void implProfileHackArrayAccess(IRLS& env, const IRInstruction* inst,
                                 const CallSpec& target) {
   auto& v = vmain(env);
 
-  auto const extra = inst->extra<ArrayAccessProfileData>();
-  auto args = argGroup(env, inst).ssa(0).ssa(1)
-              .addr(rvmtl(), safe_cast<int32_t>(extra->handle))
-              .imm(extra->cowCheck);
-
+  auto const extra = inst->extra<RDSHandlePairData>();
+  auto args = argGroup(env, inst)
+                .ssa(0)
+                .ssa(1)
+                .addr(rvmtl(), safe_cast<int32_t>(extra->handle));
+  if (extra->extra == rds::kUninitHandle) {
+    args.immPtr(nullptr);
+  } else {
+    args.addr(rvmtl(), safe_cast<int32_t>(extra->extra));
+  }
   cgCallHelper(v, env, target, kVoidDest, SyncOptions::Sync, args);
 }
 
@@ -509,14 +517,6 @@ void cgCheckKeysetOffset(IRLS& env, const IRInstruction* inst) {
   }
 }
 
-void cgCheckArrayCOW(IRLS& env, const IRInstruction* inst) {
-  auto const arr = srcLoc(env, inst, 0).reg();
-  auto& v = vmain(env);
-
-  auto const sf = emitCmpRefCount(v, OneReference, arr);
-  ifThen(v, CC_NE, sf, label(env, inst->taken()));
-}
-
 void cgCheckDictKeys(IRLS& env, const IRInstruction* inst) {
   auto const src = srcLoc(env, inst, 0).reg();
   auto const mask = VanillaDictKeys::getMask(inst->typeParam());
@@ -603,6 +603,50 @@ void cgCheckMissingKeyInArrLike(IRLS& env, const IRInstruction* inst) {
   }
   // If the bit is set(i.e. the key may exist in the array), jump to the branch.
   ifThen(v, CC_NZ, sfmap, branch);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// COW
+
+void cgCheckArrayCOW(IRLS& env, const IRInstruction* inst) {
+  auto const arr = srcLoc(env, inst, 0).reg();
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+
+  auto const sf = emitCmpRefCount(v, OneReference, arr);
+  ifThen(v, CC_NE, sf, label(env, inst->taken()));
+  v << copy{arr, dst};
+}
+
+void cgCopyArray(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  auto const copy = [&] {
+    auto const arr = inst->src(0)->type();
+    if (allowBespokeArrayLikes()) {
+      return copyFuncForArrayLike(arr);
+    }
+    if (arr <= TVec)    return CallSpec::direct(&VanillaVec::Copy);
+    if (arr <= TDict)   return CallSpec::direct(&VanillaDict::Copy);
+    if (arr <= TKeyset) return CallSpec::direct(&VanillaKeyset::Copy);
+    return CallSpec::method(&ArrayData::copy);
+  }();
+  auto const args = argGroup(env, inst).ssa(0);
+  cgCallHelper(v, env, copy, callDest(env, inst), SyncOptions::None, args);
+}
+
+void cgProfileArrayCOW(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  auto const extra = inst->extra<RDSHandleData>();
+  auto const args =
+    argGroup(env, inst).addr(rvmtl(), safe_cast<int32_t>(extra->handle)).ssa(0);
+  cgCallHelper(
+    v,
+    env,
+    CallSpec::method(&COWProfile::update),
+    kVoidDest,
+    SyncOptions::None,
+    args
+  );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -800,14 +844,6 @@ LvalPtrs implPackedLayoutElemAddr(IRLS& env, Vloc arrLoc,
   }
 }
 
-void implVecSet(IRLS& env, const IRInstruction* inst) {
-  auto const target = CallSpec::direct(VanillaVec::SetIntMove);
-  auto const args = argGroup(env, inst).ssa(0).ssa(1).typedValue(2);
-
-  auto& v = vmain(env);
-  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
-}
-
 /*
  * Thread-local RDS packed array access sampling counter.
  */
@@ -832,18 +868,6 @@ void cgLdVecElem(IRLS& env, const IRInstruction* inst) {
   loadTV(vmain(env), inst->dst()->type(), dstLoc(env, inst, 0),
          addr.type, addr.val);
 }
-
-void cgElemVecD(IRLS& env, const IRInstruction* inst) {
-  auto const target = CallSpec::direct(HPHP::ElemDVec<KeyType::Int>);
-  auto const args = argGroup(env, inst).ssa(0).ssa(1);
-
-  auto& v = vmain(env);
-  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
-}
-
-IMPL_OPCODE_CALL(ElemVecU)
-
-void cgVecSet(IRLS& env, const IRInstruction* i)    { implVecSet(env, i); }
 
 void cgReserveVecNewElem(IRLS& env, const IRInstruction* i) {
   static_assert(ArrayData::sizeofSize() == 4, "");
@@ -1001,17 +1025,6 @@ void implKeysetGet(IRLS& env, const IRInstruction* inst) {
   cgCallHelper(v, env, target, callDestTV(env, inst), sync, args);
 }
 
-}
-
-void cgElemKeysetK(IRLS& env, const IRInstruction* inst) {
-  auto const keyset = srcLoc(env, inst, 0).reg();
-  auto const dst = dstLoc(env, inst, 0);
-
-  auto& v = vmain(env);
-  auto const off = getKeysetLayoutOffset(env, inst);
-  v << lea{keyset[off], dst.reg(tv_lval::val_idx)};
-  static_assert(TVOFF(m_data) == 0, "");
-  v << lea{keyset[off + TVOFF(m_type)], dst.reg(tv_lval::type_idx)};
 }
 
 void cgKeysetGet(IRLS& env, const IRInstruction* inst) {

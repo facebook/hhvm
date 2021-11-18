@@ -1876,7 +1876,8 @@ void implDictKeysetIdx(IRGS& env,
     [&] (SSATmp* key, SizeHintData data) {
       return is_dict ? gen(env, DictIdx, data, use_base, key, def)
                      : gen(env, KeysetIdx, use_base, key, def);
-    }
+    },
+    finish
   );
 
   auto const pelem = profiledType(env, elem, [&] { finish(elem); });
@@ -2066,6 +2067,13 @@ void emitAKExists(IRGS& env) {
       return throwBadKey();
     }
 
+    auto const finish = [&] (SSATmp* present) {
+      discard(env, 2);
+      push(env, present);
+      decRef(env, arr);
+      decRef(env, key);
+    };
+
     auto const present = profiledArrayAccess(
       env, arr, key, MOpMode::None,
       [&] (SSATmp*, SSATmp*, SSATmp*) { return cns(env, true); },
@@ -2073,12 +2081,10 @@ void emitAKExists(IRGS& env) {
       [&] (SSATmp* key, SizeHintData) {
         auto const op = arr->isA(TKeyset) ? AKExistsKeyset : AKExistsDict;
         return gen(env, op, arr, key);
-      }
+      },
+      finish
     );
-    discard(env, 2);
-    push(env, present);
-    decRef(env, arr);
-    decRef(env, key);
+    finish(present);
     return;
   }
 

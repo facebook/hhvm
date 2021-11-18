@@ -123,10 +123,15 @@ struct DecRefProfile {
   TYPE_SCAN_IGNORE_ALL;
 };
 
+const StringData* decRefProfileKey(int locId);
 const StringData* decRefProfileKey(const IRInstruction* inst);
 
 TargetProfile<DecRefProfile> decRefProfile(
     const TransContext& context, const IRInstruction* inst);
+
+TargetProfile<DecRefProfile> decRefProfile(const TransContext& context,
+                                           const BCMarker& marker,
+                                           int locId);
 
 ///////////////////////////////////////////////////////////////////////////////
 

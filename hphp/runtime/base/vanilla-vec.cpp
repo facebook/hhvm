@@ -492,6 +492,11 @@ TypedValue VanillaVec::GetPosVal(const ArrayData* ad, ssize_t pos) {
   return *LvalUncheckedInt(const_cast<ArrayData*>(ad), pos);
 }
 
+bool VanillaVec::PosIsValid(const ArrayData* ad, ssize_t pos) {
+  assertx(checkInvariants(ad));
+  return pos >= 0 && pos < ad->m_size;
+}
+
 bool VanillaVec::ExistsInt(const ArrayData* ad, int64_t k) {
   assertx(checkInvariants(ad));
   return size_t(k) < ad->m_size;

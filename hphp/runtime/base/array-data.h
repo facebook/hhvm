@@ -325,6 +325,11 @@ public:
   TypedValue nvGetVal(ssize_t pos) const;
 
   /*
+   * Return true if `pos' refers to a valid array element.
+   */
+  bool posIsValid(ssize_t pos) const;
+
+  /*
    * Variant wrappers around nvGetVal() and nvGetKey(). Both of these methods
    * will inc-ref the value before returning it (so that callers own a copy).
    */
@@ -487,6 +492,8 @@ public:
    * refcounted array - otherwise, we should call persistentIncRef() instead.
    */
   ArrayData* makeUncounted(const MakeUncountedEnv& env, bool hasApcTv);
+
+  ArrayData* copy() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Other functions.
@@ -723,6 +730,7 @@ struct ArrayFunctions {
   TypedValue (*nvGetStr[NK])(const ArrayData*, const StringData* k);
   TypedValue (*getPosKey[NK])(const ArrayData*, ssize_t pos);
   TypedValue (*getPosVal[NK])(const ArrayData*, ssize_t pos);
+  bool (*posIsValid[NK])(const ArrayData*, ssize_t pos);
   ArrayData* (*setIntMove[NK])(ArrayData*, int64_t k, TypedValue v);
   ArrayData* (*setStrMove[NK])(ArrayData*, StringData* k, TypedValue v);
   bool (*isVectorData[NK])(const ArrayData*);
@@ -750,6 +758,7 @@ struct ArrayFunctions {
   void (*onSetEvalScalar[NK])(ArrayData*);
   ArrayData* (*makeUncounted[NK])(
     ArrayData*, const MakeUncountedEnv& env, bool hasApcTv);
+  ArrayData* (*copy[NK])(const ArrayData*);
 };
 
 extern const ArrayFunctions g_array_funcs;

@@ -666,6 +666,37 @@ struct RDSHandleAndType : RDSHandleData {
   Type type;
 };
 
+struct RDSHandlePairData : RDSHandleData {
+  RDSHandlePairData(rds::Handle handle, rds::Handle extra)
+    : RDSHandleData(handle), extra{extra} {}
+
+  std::string show() const {
+    if (extra == rds::kUninitHandle) return RDSHandleData::show();
+    return folly::sformat("{},{}",handle,extra);
+  }
+
+  bool equals(const RDSHandlePairData& o) const {
+    return handle == o.handle && extra == o.extra;
+  }
+  size_t hash() const {
+    return folly::hash::hash_combine(std::hash<uint32_t>()(handle),
+                                     std::hash<uint32_t>()(extra));
+  }
+
+  size_t stableHash() const {
+    auto const h = [&] () -> size_t {
+      if (extra == rds::kUninitHandle) return 0;
+      auto const sym = rds::reverseLink(extra);
+      if (!sym) return 0;
+      return rds::symbol_stable_hash(*sym);
+    }();
+    return folly::hash::hash_combine(RDSHandleData::stableHash(),
+                                     h);
+  }
+
+  rds::Handle extra;
+};
+
 struct TVInRDSHandleData : RDSHandleData {
   TVInRDSHandleData (rds::Handle handle, bool includeAux)
     : RDSHandleData(handle), includeAux(includeAux) {}
@@ -688,33 +719,6 @@ struct TVInRDSHandleData : RDSHandleData {
   }
 
   bool includeAux;
-};
-
-/*
- * Array access profile.
- */
-struct ArrayAccessProfileData : RDSHandleData {
-  ArrayAccessProfileData(rds::Handle handle, bool cowCheck)
-    : RDSHandleData(handle), cowCheck(cowCheck) {}
-
-  std::string show() const {
-    return folly::to<std::string>(handle, ",", cowCheck);
-  }
-
-  bool equals(ArrayAccessProfileData o) const {
-    return handle == o.handle && cowCheck == o.cowCheck;
-  }
-  size_t hash() const {
-    return folly::hash::hash_combine(std::hash<uint32_t>()(handle),
-                                     std::hash<bool>()(cowCheck));
-  }
-
-  size_t stableHash() const {
-    return folly::hash::hash_combine(RDSHandleData::stableHash(),
-                                     std::hash<bool>()(cowCheck));
-  }
-
-  bool cowCheck;
 };
 
 /*
@@ -2691,6 +2695,7 @@ X(LdLoc,                        LocalId);
 X(LdClsInitElem,                IndexData);
 X(StClsInitElem,                IndexData);
 X(StLoc,                        LocalId);
+X(StLocMeta,                    LocalId);
 X(StLocRange,                   LocalIdRange);
 X(AdvanceDictPtrIter,           IterOffsetData);
 X(StFrameFunc,                  FuncData);
@@ -2724,6 +2729,7 @@ X(ResolveTypeStruct,            ResolveTypeStructData);
 X(ExtendsClass,                 ExtendsClassData);
 X(CheckStk,                     IRSPRelOffsetData);
 X(StStk,                        IRSPRelOffsetData);
+X(StStkMeta,                    IRSPRelOffsetData);
 X(StStkRange,                   StackRange);
 X(StOutValue,                   IndexData);
 X(LdOutAddr,                    IndexData);
@@ -2809,8 +2815,9 @@ X(CreateAAWH,                   CreateAAWHData);
 X(CountWHNotDone,               CountWHNotDoneData);
 X(CheckDictOffset,              IndexData);
 X(CheckKeysetOffset,            IndexData);
-X(ProfileDictAccess,            ArrayAccessProfileData);
-X(ProfileKeysetAccess,          ArrayAccessProfileData);
+X(ProfileArrayCOW,              RDSHandleData);
+X(ProfileDictAccess,            RDSHandlePairData);
+X(ProfileKeysetAccess,          RDSHandlePairData);
 X(ProfileType,                  RDSHandleData);
 X(ProfileCall,                  ProfileCallTargetData);
 X(ProfileMethod,                ProfileCallTargetData);

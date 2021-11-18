@@ -287,6 +287,114 @@ std::pair<Type, bool> keysetFirstLastType(Type arr, bool isFirst) {
 
   return {type, !maybeEmpty};
 }
+
+Type dictPosType(Type arr, Type pos, bool isKey, const Class* ctx) {
+  assertx(arr <= TDict);
+  assertx(pos <= TInt);
+
+  if (arr.hasConstVal()) {
+    if (pos.hasConstVal()) {
+      auto const val = arr.arrLikeVal();
+      if (val->empty()) return TBottom;
+      auto const idx = pos.intVal();
+      if (!val->posIsValid(idx)) return TBottom;
+      return Type::cns(isKey ? val->nvGetKey(idx) : val->nvGetVal(idx));
+    }
+
+    // Otherwise we can constrain the type according to the union of
+    // all the types present in the dict.
+    auto type = TBottom;
+    IterateKV(
+      arr.arrLikeVal(),
+      [&] (TypedValue k, TypedValue v) {
+        type |= (isKey ? Type::cns(k) : Type::cns(v));
+      }
+    );
+    return type;
+  }
+
+  auto type = arr <= TUncounted ? TUncountedInit : TInitCell;
+  if (isKey) type &= (TInt | TStr);
+
+  auto const arrTy = arr.arrSpec().type();
+  if (!arrTy) return type;
+
+  using T = RepoAuthType::Array::Tag;
+  switch (arrTy->tag()) {
+    case T::Tuple: {
+      auto const sz = arrTy->size();
+      if (sz == 0) return TBottom;
+      if (pos.hasConstVal()) {
+        auto const idx = pos.intVal();
+        if (idx < 0 || idx >= arrTy->size()) return TBottom;
+        type &= (isKey ? pos : typeFromRAT(arrTy->tupleElem(idx), ctx));
+        return type;
+      }
+      auto all = TBottom;
+      for (auto i = 0; i < arrTy->size(); ++i) {
+        all |= (isKey ? Type::cns(i) : typeFromRAT(arrTy->tupleElem(i), ctx));
+      }
+      type &= all;
+      break;
+    }
+    case T::Packed:
+      if (pos.hasConstVal()) {
+        auto const idx = pos.intVal();
+        if (idx < 0 || idx > VanillaDict::MaxSize) return TBottom;
+      }
+      type &= (isKey ? pos : typeFromRAT(arrTy->packedElems(), ctx));
+      break;
+  }
+
+  return type;
+}
+
+Type keysetPosType(Type arr, Type pos, const Class* ctx) {
+  assertx(arr <= TKeyset);
+  assertx(pos <= TInt);
+
+  if (arr.hasConstVal()) {
+    if (pos.hasConstVal()) {
+      auto const val = arr.arrLikeVal();
+      if (val->empty()) return TBottom;
+      auto const idx = pos.intVal();
+      if (!val->posIsValid(idx)) return TBottom;
+      return Type::cns(val->nvGetKey(idx));
+    }
+
+    auto type = TBottom;
+    IterateKV(
+      arr.arrLikeVal(),
+      [&] (TypedValue k, TypedValue) { type |= Type::cns(k); }
+    );
+  }
+
+  auto type = TStr | TInt;
+  if (arr <= TUncounted) type &= TUncountedInit;
+
+  auto const arrTy = arr.arrSpec().type();
+  if (!arrTy) return type;
+
+  using T = RepoAuthType::Array::Tag;
+  switch (arrTy->tag()) {
+    case T::Tuple: {
+      auto const sz = arrTy->size();
+      if (sz == 0) return TBottom;
+      if (pos.hasConstVal()) {
+        auto const idx = pos.intVal();
+        if (idx < 0 || idx >= arrTy->size()) return TBottom;
+      }
+      type &= pos;
+      break;
+    }
+    case T::Packed:
+      type &= pos;
+      break;
+  }
+
+  return type;
+}
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -324,10 +432,11 @@ std::pair<Type, bool> arrLikeFirstLastType(
 
 Type arrLikePosType(Type arr, Type pos, bool isKey, const Class* ctx) {
   assertx(arr.isKnownDataType());
+  assertx(pos <= TInt);
   auto const deducedType = [&] {
-    if (arr <= TVec)  return isKey ? TInt : vecElemType(arr, pos, ctx).first;
-    if (arr <= TDict) return isKey ? (TInt | TStr) : TInitCell;
-    return TInt | TStr;
+    if (arr <= TVec)  return isKey ? pos : vecElemType(arr, pos, ctx).first;
+    if (arr <= TDict) return dictPosType(arr, pos, isKey, ctx);
+    return keysetPosType(arr, pos, ctx);
   }();
   auto const layoutType = arr.arrSpec().layout().iterPosType(pos, isKey);
   return deducedType & layoutType;

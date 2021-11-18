@@ -90,15 +90,26 @@ std::string DecRefProfile::toString() const {
   );
 }
 
+const StringData* decRefProfileKey(int locId) {
+  return makeStaticString(folly::to<std::string>("DecRefProfile-", locId));
+}
+
 const StringData* decRefProfileKey(const IRInstruction* inst) {
   auto const local = inst->extra<DecRefData>()->locId;
-  return makeStaticString(folly::to<std::string>("DecRefProfile-", local));
+  return decRefProfileKey(local);
 }
 
 TargetProfile<DecRefProfile> decRefProfile(
     const TransContext& context, const IRInstruction* inst) {
   auto const profileKey = decRefProfileKey(inst);
   return TargetProfile<DecRefProfile>(context, inst->marker(), profileKey);
+}
+
+TargetProfile<DecRefProfile> decRefProfile(const TransContext& context,
+                                           const BCMarker& marker,
+                                           int locId) {
+  auto const profileKey = decRefProfileKey(locId);
+  return TargetProfile<DecRefProfile>(context, marker, profileKey);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

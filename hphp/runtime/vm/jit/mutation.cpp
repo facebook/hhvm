@@ -112,10 +112,6 @@ struct RefineTmpsRec {
       }
 
       if (inst.is(CheckType, AssertType)) {
-        // Type information for one use of a pointer can't be transferred to
-        // other uses, because we may overwrite the pointer's target in between
-        // the uses (e.g. due to minstr escalation).
-        if (inst.hasTypeParam() && inst.typeParam() <= TMemToCell) continue;
         if (!saved_state) saved_state = state;
         auto const dst = inst.dst();
         auto const src = inst.src(0);

@@ -1627,52 +1627,7 @@ SSATmp* simplifyCmpRes(State& env, const IRInstruction* inst) {
 }
 
 SSATmp* simplifyCGetPropQ(State& env, const IRInstruction* inst) {
-  if (inst->src(0)->type().derefIfPtr() <= TNull) {
-    return cns(env, TInitNull);
-  }
-  return nullptr;
-}
-
-SSATmp* isTypeImpl(State& env, const IRInstruction* inst, const Type& srcType) {
- assertx(inst->is(IsNType,
-                  IsNTypeMem,
-                  IsType,
-                  IsTypeMem));
-  bool const trueSense = inst->is(IsType, IsTypeMem);
-  auto const type      = inst->typeParam();
-
-  // Testing for StaticStr will make you miss out on CountedStr, and vice versa,
-  // and similarly for arrays. PHP treats both types of string the same, so if
-  // the distinction matters to you here, be careful.
-  assertx(IMPLIES(type <= TStr, type == TStr));
-  assertx(IMPLIES(type <= TVec, type == TVec));
-  assertx(IMPLIES(type <= TDict, type == TDict));
-  assertx(IMPLIES(type <= TKeyset, type == TKeyset));
-
-  // Specially handle checking if an uninit var's type is null. The Type class
-  // doesn't fully correctly handle the fact that the earlier stages of the
-  // compiler consider null to be either initalized or uninitalized, so we need
-  // to do this check first. Right here is really the only place in the backend
-  // it seems to matter, especially since manipulating an uninit is kind of
-  // weird; as of this writing, "$uninitalized_variable ?? 42" is the only
-  // place it really comes up.
-  if (srcType <= TUninit && type <= TNull) {
-    return cns(env, trueSense);
-  }
-
-  // The types are disjoint; the result must be false.
-  if (!srcType.maybe(type)) {
-    return cns(env, !trueSense);
-  }
-
-  // The src type is a subtype of the tested type; the result must be true.
-  if (srcType <= type) {
-    return cns(env, trueSense);
-  }
-
-  // At this point, either the tested type is a subtype of the src type, or they
-  // are non-disjoint but neither is a subtype of the other. We can't simplify
-  // this away.
+  if (inst->src(0)->isA(TNull)) return cns(env, TInitNull);
   return nullptr;
 }
 
@@ -1832,6 +1787,46 @@ SSATmp* simplifyInstanceOfIfaceVtable(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* isTypeImpl(State& env, const IRInstruction* inst, const Type& srcType) {
+  assertx(inst->is(IsNType, IsType));
+  auto const trueSense = inst->is(IsType);
+  auto const type      = inst->typeParam();
+
+  // Testing for StaticStr will make you miss out on CountedStr, and vice versa,
+  // and similarly for arrays. PHP treats both types of string the same, so if
+  // the distinction matters to you here, be careful.
+  assertx(IMPLIES(type <= TStr, type == TStr));
+  assertx(IMPLIES(type <= TVec, type == TVec));
+  assertx(IMPLIES(type <= TDict, type == TDict));
+  assertx(IMPLIES(type <= TKeyset, type == TKeyset));
+
+  // Specially handle checking if an uninit var's type is null. The Type class
+  // doesn't fully correctly handle the fact that the earlier stages of the
+  // compiler consider null to be either initalized or uninitalized, so we need
+  // to do this check first. Right here is really the only place in the backend
+  // it seems to matter, especially since manipulating an uninit is kind of
+  // weird; as of this writing, "$uninitalized_variable ?? 42" is the only
+  // place it really comes up.
+  if (srcType <= TUninit && type <= TNull) {
+    return cns(env, trueSense);
+  }
+
+  // The types are disjoint; the result must be false.
+  if (!srcType.maybe(type)) {
+    return cns(env, !trueSense);
+  }
+
+  // The src type is a subtype of the tested type; the result must be true.
+  if (srcType <= type) {
+    return cns(env, trueSense);
+  }
+
+  // At this point, either the tested type is a subtype of the src type, or they
+  // are non-disjoint but neither is a subtype of the other. We can't simplify
+  // this away.
+  return nullptr;
+}
+
 SSATmp* simplifyIsType(State& env, const IRInstruction* i) {
   auto const src = i->src(0);
   return isTypeImpl(env, i, src->type());
@@ -1840,16 +1835,6 @@ SSATmp* simplifyIsType(State& env, const IRInstruction* i) {
 SSATmp* simplifyIsNType(State& env, const IRInstruction* i) {
   auto const src = i->src(0);
   return isTypeImpl(env, i, src->type());
-}
-
-SSATmp* simplifyIsTypeMem(State& env, const IRInstruction* i) {
-  auto const addr = i->src(0);
-  return isTypeImpl(env, i, addr->type().deref());
-}
-
-SSATmp* simplifyIsNTypeMem(State& env, const IRInstruction* i) {
-  auto const addr = i->src(0);
-  return isTypeImpl(env, i, addr->type().deref());
 }
 
 SSATmp* simplifyMethodExists(State& env, const IRInstruction* inst) {
@@ -2400,7 +2385,7 @@ SSATmp* simplifyCeil(State& env, const IRInstruction* inst) {
 
 SSATmp* simplifyCheckInit(State& env, const IRInstruction* inst) {
   auto const srcType = inst->src(0)->type();
-  assertx(!srcType.maybe(TMemToCell));
+  assertx(!srcType.maybe(TMem));
   assertx(inst->taken());
   if (!srcType.maybe(TUninit)) return gen(env, Nop);
   return mergeBranchDests(env, inst);
@@ -3819,9 +3804,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(InstanceOfIface)
       X(InstanceOfIfaceVtable)
       X(IsNType)
-      X(IsNTypeMem)
       X(IsType)
-      X(IsTypeMem)
       X(IsLegacyArrLike)
       X(IsWaitHandle)
       X(IsCol)

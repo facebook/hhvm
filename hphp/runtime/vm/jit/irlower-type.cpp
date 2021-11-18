@@ -192,7 +192,7 @@ void implIsType(IRLS& env, const IRInstruction* inst, bool negate) {
     v << setcc{negate ? ccNegate(cc) : cc, sf, dst};
   };
 
-  if (src->isA(TPtrToCell) || src->isA(TLvalToCell)) {
+  if (src->isA(TPtr) || src->isA(TLval)) {
     emitTypeTest(v, env, inst->typeParam(), memTVTypePtr(src, loc),
                  memTVValPtr(src, loc), v.makeReg(), doJcc);
     return;

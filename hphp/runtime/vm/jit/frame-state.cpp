@@ -370,8 +370,8 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     // If we ever start using StMem to store to pointers that might be
     // stack/locals, we have to update tracked state here.
     if (!canonical(inst->src(0))->inst()->is(LdOutAddrInlined)) {
-      always_assert(!inst->src(0)->type().maybe(TMemToFrameCell));
-      always_assert(!inst->src(0)->type().maybe(TMemToStkCell));
+      always_assert(!inst->src(0)->type().maybe(TMemToFrame));
+      always_assert(!inst->src(0)->type().maybe(TMemToStk));
     }
     break;
 
@@ -546,7 +546,6 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     auto const mbr = inst->src(0);
     setMBR(mbr);
     setValue(Location::MBase{}, nullptr);
-    setType(Location::MBase{}, mbr->type().deref());
   } break;
 
   case FinishMemberOp:
@@ -572,7 +571,7 @@ void FrameStateMgr::updateMInstr(const IRInstruction* inst) {
   // We don't update tracked local types for pseudomains, but we do care about
   // stack types.
   auto const baseTmp = inst->src(minstrBaseIdx(inst->op()));
-  if (!baseTmp->type().maybe(TLvalToCell)) return;
+  if (!baseTmp->type().maybe(TLval)) return;
 
   auto const base = pointee(baseTmp);
   auto const mbase = cur().mbr.pointee;
@@ -598,9 +597,6 @@ void FrameStateMgr::updateMInstr(const IRInstruction* inst) {
       not_reached();
     }();
 
-    // Skip locations that disagree with our source on type.
-    if (!oldType.derefIfPtr().maybe(baseTmp->type().deref())) return;
-
     if (maxType <= oldType) {
       // Drop the value and don't bother with precise effects.
       return setType(l, oldType);
@@ -615,30 +611,27 @@ void FrameStateMgr::updateMInstr(const IRInstruction* inst) {
     // When the member base register refers to a single known memory location
     // `l' (with corresponding Ptr type `kind'), we apply the effect of `inst'
     // only to `l'.  Returns the base value type if `inst' had an effect.
-    auto const apply_one = [&] (Location l, Ptr kind) -> Optional<Type> {
-      auto const oldTy = typeOf(l) & TCell;  // exclude TCls from ptr()
-      if (auto const ptrTy = effect_on(oldTy.lval(kind))) {
-        auto const baseTy = ptrTy->derefIfPtr();
-        setType(l, baseTy);
-        return baseTy;
+    auto const apply_one = [&] (Location l) {
+      auto const oldTy = typeOf(l);
+      if (auto const updatedTy = effect_on(oldTy)) {
+        assertx(*updatedTy <= TCell);
+        setType(l, *updatedTy);
       }
-      return std::nullopt;
     };
 
     if (auto const blocal = base.local()) {
       auto const l = loc(blocal->ids.singleValue());
-      apply_one(l, Ptr::Frame);
+      apply_one(l);
     }
     if (auto const bstack = base.stack()) {
       assertx(bstack->size() == 1);
       auto const l = stk(bstack->low);
-      apply_one(l, Ptr::Stk);
+      apply_one(l);
     }
 
     if (base.maybe(mbase)) {
       if (mbase.isSingleLocation()) {
-        auto const ptr = cur().mbr.ptrType.ptrKind();
-        apply_one(Location::MBase{}, ptr);
+        apply_one(Location::MBase{});
       } else {
         apply(Location::MBase{});
       }
@@ -1463,6 +1456,10 @@ void FrameStateMgr::clearLocals() {
 
 void FrameStateMgr::setMemberBase(SSATmp* base) {
   setValueImpl(Location::MBase{}, cur().mbase, base, std::nullopt);
+}
+
+void FrameStateMgr::setMemberBaseType(Type t) {
+  setTypeImpl(Location::MBase{}, cur().mbase, t);
 }
 
 void FrameStateMgr::setMBR(SSATmp* mbr) {

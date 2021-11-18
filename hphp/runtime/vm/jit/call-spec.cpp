@@ -54,8 +54,8 @@ void verify_return_type(Type ret, const CallDest& dest, F fail) {
     // Some JIT types are much more specific than what we can express in C++,
     // so treat certain classes of types as equivalent.
     static std::array<Type, 5> constexpr special_types = {
-      TPtrToCell,
-      TLvalToCell,
+      TPtr,
+      TLval,
       TObj,
       TStr,
       TArrLike,
@@ -100,10 +100,10 @@ bool CallSpec::verifySignature(const CallDest& dest,
   for (; parami < type->params.size() && argi < args.size();
        ++parami, ++argi) {
     auto const param = type->params[parami];
-    // TCell (for a TypedValue parameter) and wide TLvalToCell are special: one
+    // TCell (for a TypedValue parameter) and wide TLval are special: one
     // SSATmp represents two argument registers, and the latter is passed as a
     // dummy TBottom argument. Make sure both are present.
-    if (param == TCell || param == TLvalToCell) {
+    if (param == TCell || param == TLval) {
       if (!(args[argi] <= param)) {
         fail("Incompatible type {} for first half of {} parameter {}",
              args[argi], param, parami);
@@ -123,8 +123,8 @@ bool CallSpec::verifySignature(const CallDest& dest,
       if (param <= TArrLike && args[argi].maybe(TNullptr)) continue;
       // Similarly for Obj|Nullptr
       if (param <= TObj && args[argi].maybe(TNullptr)) continue;
-      // Similarly for TPtrToBool|Nullptr
-      if (param <= TPtrToBool && args[argi].maybe(TNullptr)) continue;
+      // Similarly for TPtr|Nullptr
+      if (param <= TPtr && args[argi].maybe(TNullptr)) continue;
       // LdObjMethodS takes a TSmashable as uintptr_t.
       if (param <= TInt && args[argi] <= TSmashable) continue;
       fail(

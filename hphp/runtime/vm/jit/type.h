@@ -47,12 +47,12 @@ struct ProfDataSerializer;
 struct ProfDataDeserializer;
 
 /*
- * The Ptr enum is a lattice that represents the "pointerness" of a type:
- * whether it's a pointer at all, and what kind of location it may point to.
+ * The PtrLocation enum is a lattice that represents what kind of
+ * locations a pointer/lval Type may point to.
  *
- * We have a pointer kind for each of the major segregated locations in which
+ * We have a kind for each of the major segregated locations in which
  * php values can live (eval stack, frame slots, properties, etc...).  These
- * classify PtrTo* types into some categories that cannot possibly alias,
+ * classify MemTo* types into some categories that cannot possibly alias,
  * without any smarter analysis needed to prove it.  There is also a union for
  * the various locations things can point after a fully generic member
  * operation (see Memb below).
@@ -69,7 +69,7 @@ struct ProfDataDeserializer;
  *
  * The hierarchy looks something like this:
  *
- *                            Ptr                            NotPtr
+ *                            All
  *                             |
  *         +-------------------+----+--------+-------+
  *         |                        |        |       |
@@ -87,134 +87,70 @@ struct ProfDataDeserializer;
  *
  */
 
-#define PTR_PRIMITIVE(f,...)                             \
-  f(ClsInit,  1U << 0, __VA_ARGS__)                      \
-  f(ClsCns,   1U << 1, __VA_ARGS__)                      \
-  f(Frame, 1U << 2, __VA_ARGS__)                         \
-  f(Stk,   1U << 3, __VA_ARGS__)                         \
-  f(Gbl,   1U << 4, __VA_ARGS__)                         \
-  f(Prop,  1U << 5, __VA_ARGS__)                         \
-  f(Elem,  1U << 6, __VA_ARGS__)                         \
-  f(SProp, 1U << 7, __VA_ARGS__)                         \
-  f(MIS,   1U << 8, __VA_ARGS__)                         \
-  f(MMisc, 1U << 9, __VA_ARGS__)                         \
-  f(Other, 1U << 10, __VA_ARGS__)                        \
-  f(Field, 1U << 11, __VA_ARGS__)                        \
-  /* NotPtr,  1U << 12, declared below */
+#define PTR_LOCATION_PRIMITIVE(f,...)                       \
+  f(ClsInit,  1U << 0, __VA_ARGS__)                         \
+  f(ClsCns,   1U << 1, __VA_ARGS__)                         \
+  f(Frame,    1U << 2, __VA_ARGS__)                         \
+  f(Stk,      1U << 3, __VA_ARGS__)                         \
+  f(Gbl,      1U << 4, __VA_ARGS__)                         \
+  f(Prop,     1U << 5, __VA_ARGS__)                         \
+  f(Elem,     1U << 6, __VA_ARGS__)                         \
+  f(SProp,    1U << 7, __VA_ARGS__)                         \
+  f(MIS,      1U << 8, __VA_ARGS__)                         \
+  f(MMisc,    1U << 9, __VA_ARGS__)                         \
+  f(Other,    1U << 10, __VA_ARGS__)                        \
+  f(Field,    1U << 11, __VA_ARGS__)
+  // Keep the last bit in sync with PtrLocation::All below
 
-#define PTR_TYPES(f, ...)                                \
-  PTR_PRIMITIVE(f, __VA_ARGS__)                          \
+#define PTR_LOCATION_TYPES(f, ...)                          \
+  PTR_LOCATION_PRIMITIVE(f, __VA_ARGS__)                    \
   f(Memb, Prop | Elem | MIS | MMisc | Other | Field, __VA_ARGS__)
 
-enum class Ptr : uint16_t {
-  /*
-   * The Ptr kinds here are kept out of PTR_TYPES to avoid generating names like
-   * TPtrToNotPtrCell or TPtrToPtrCell. Note that those types do exist, just
-   * with less ridiculous names: TCell and TPtrToCell, respectively.
-   */
-  Bottom = 0,
-  Top    = 0x1fffU, // Keep this in sync with the number of bits used in
-                    // PTR_PRIMITIVE, to keep pretty-printing cleaner.
-  NotPtr = 1U << 12,
-  Ptr    = Top & ~NotPtr,
-
+enum class PtrLocation : uint16_t {
+  Bottom = 0,           // Nothing. Only valid if type is not a Ptr
+  All    = (1U << 12) - 1,
 #define PTRT(name, bits, ...) name = (bits),
-  PTR_TYPES(PTRT)
+  PTR_LOCATION_TYPES(PTRT)
 #undef PTRT
 };
 
-using ptr_t = std::underlying_type<Ptr>::type;
+using ptr_location_t = std::underlying_type<PtrLocation>::type;
 
-constexpr Ptr operator~(Ptr p) {
-  return static_cast<Ptr>(~static_cast<ptr_t>(p));
+constexpr PtrLocation operator~(PtrLocation p) {
+  return static_cast<PtrLocation>(~static_cast<ptr_location_t>(p));
 }
-constexpr Ptr operator|(Ptr a, Ptr b) {
-  return static_cast<Ptr>(static_cast<ptr_t>(a) | static_cast<ptr_t>(b));
+constexpr PtrLocation operator|(PtrLocation a, PtrLocation b) {
+  return static_cast<PtrLocation>(
+    static_cast<ptr_location_t>(a) | static_cast<ptr_location_t>(b)
+  );
 }
-inline Ptr& operator|=(Ptr& a, Ptr b) {
+inline PtrLocation& operator|=(PtrLocation& a, PtrLocation b) {
   return a = a | b;
 }
-constexpr Ptr operator&(Ptr a, Ptr b) {
-  return static_cast<Ptr>(static_cast<ptr_t>(a) & static_cast<ptr_t>(b));
+constexpr PtrLocation operator&(PtrLocation a, PtrLocation b) {
+  return static_cast<PtrLocation>(
+    static_cast<ptr_location_t>(a) & static_cast<ptr_location_t>(b)
+  );
 }
-inline Ptr& operator&=(Ptr& a, Ptr b) {
+inline PtrLocation& operator&=(PtrLocation& a, PtrLocation b) {
   return a = a & b;
 }
-constexpr Ptr operator-(Ptr a, Ptr b) {
-  return static_cast<Ptr>(static_cast<ptr_t>(a) & ~static_cast<ptr_t>(b));
+constexpr PtrLocation operator-(PtrLocation a, PtrLocation b) {
+  return static_cast<PtrLocation>(
+    static_cast<ptr_location_t>(a) & ~static_cast<ptr_location_t>(b)
+  );
 }
 
-constexpr bool operator<=(Ptr a, Ptr b) {
+constexpr bool operator<=(PtrLocation a, PtrLocation b) {
   return (a & b) == a;
 }
-constexpr bool operator>=(Ptr a, Ptr b) {
+constexpr bool operator>=(PtrLocation a, PtrLocation b) {
   return b <= a;
 }
-constexpr bool operator<(Ptr a, Ptr b) {
+constexpr bool operator<(PtrLocation a, PtrLocation b) {
   return a <= b && a != b;
 }
-constexpr bool operator>(Ptr a, Ptr b) {
-  return a >= b && a != b;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-/*
- * Mem is a lattice which supervenes on Ptr describing how to interpret a
- * memory address.
- *
- * Whereas Ptr describes what we know about the memory location, Mem describes
- * what we know about the memory address itself.
- */
-enum class Mem : uint8_t {
-  /* Bottom: No other components of the type are compatible with Mem: TCls,
-   *         TRDSHandle, etc... */
-  Bottom = 0,
-  /* NotMem: Normal values like TInt or TCell. */
-  NotMem = 1U << 0,
-  /* Ptr: TypedValue*: TPtrToInt, TPtrToCell, etc... */
-  Ptr    = 1U << 1,
-  /* Lval: tv_lval: TLvalToInt, TLvalToCell, etc... */
-  Lval   = 1U << 2,
-  /* Mem: Either Ptr or Lval. No concrete values can have this type because
-   * there is no way to distinguish between TPtrToFoo and TLvalToFoo at
-   * runtime. */
-  Mem    = Ptr | Lval,
-  /* Top: Only used in TTop. */
-  Top    = NotMem | Mem,
-};
-
-using mem_t = std::underlying_type<Mem>::type;
-
-constexpr Mem operator~(Mem m) {
-  return static_cast<Mem>(~static_cast<mem_t>(m));
-}
-constexpr Mem operator|(Mem a, Mem b) {
-  return static_cast<Mem>(static_cast<mem_t>(a) | static_cast<mem_t>(b));
-}
-inline Mem& operator|=(Mem& a, Mem b) {
-  return a = a | b;
-}
-constexpr Mem operator&(Mem a, Mem b) {
-  return static_cast<Mem>(static_cast<mem_t>(a) & static_cast<mem_t>(b));
-}
-inline Mem& operator&=(Mem& a, Mem b) {
-  return a = a & b;
-}
-constexpr Mem operator-(Mem a, Mem b) {
-  return static_cast<Mem>(static_cast<mem_t>(a) & ~static_cast<mem_t>(b));
-}
-
-constexpr bool operator<=(Mem a, Mem b) {
-  return (a & b) == a;
-}
-constexpr bool operator>=(Mem a, Mem b) {
-  return b <= a;
-}
-constexpr bool operator<(Mem a, Mem b) {
-  return a <= b && a != b;
-}
-constexpr bool operator>(Mem a, Mem b) {
+constexpr bool operator>(PtrLocation a, PtrLocation b) {
   return a >= b && a != b;
 }
 
@@ -227,57 +163,54 @@ constexpr bool operator>(Mem a, Mem b) {
  * different values of X:
  *
  * IRT(name, bits): A plain type, like Bool or Obj.
- * IRTP(name, ptr, bits): A Ptr type, with Mem::Ptr and a custom Ptr.
- * IRTL(name, ptr, bits): An Lval type, with Mem::Lval and a custom Ptr.
- * IRTM(name, ptr, bits): A Mem type, with Mem::Mem and a custom Ptr.
- * IRTX(name, x, bits): A custom memory type, with Mem::x and Ptr::x.
+ * IRTP(name, ptr): A Ptr type
+ * IRTL(name, ptr): An Lval type
+ * IRTM(name, ptr): A Mem type
+ * IRTX(name, ptr, bits): A type with both bits and ptr location
  */
 
-#define IRTP_FROM_PTR(ptr, ptr_bits, name)                    \
-  IRTP(PtrTo##ptr##name, ptr, k##name)
+#define IRTP_FROM_PTR(ptr, ...)                               \
+  IRTP(PtrTo##ptr, ptr)
 
-#define IRTL_FROM_PTR(ptr, ptr_bits, name)                    \
-  IRTL(LvalTo##ptr##name, ptr, k##name)
+#define IRTL_FROM_PTR(ptr, ...)                               \
+  IRTL(LvalTo##ptr, ptr)
 
-#define IRTM_FROM_PTR(ptr, ptr_bits, name)                    \
-  IRTM(MemTo##ptr##name, ptr, k##name)
+#define IRTM_FROM_PTR(ptr, ...)                               \
+  IRTM(MemTo##ptr, ptr)
 
-#define IRT_PTRS_LVALS(name, bits)                            \
-  IRT(name,               (bits))                             \
-  IRTP(PtrTo##name,       Ptr, k##name)                       \
-  PTR_TYPES(IRTP_FROM_PTR, name)                              \
-  IRTL(LvalTo##name,      Ptr, k##name)                       \
-  PTR_TYPES(IRTL_FROM_PTR, name)                              \
-  IRTM(MemTo##name,       Ptr, k##name)                       \
-  PTR_TYPES(IRTM_FROM_PTR, name)                              \
+#define IRT_PTRS_LVALS                                        \
+  PTR_LOCATION_TYPES(IRTP_FROM_PTR)                           \
+  PTR_LOCATION_TYPES(IRTL_FROM_PTR)                           \
+  PTR_LOCATION_TYPES(IRTM_FROM_PTR)
+
 /**/
 
-#define IRT_PHP(c)                                                      \
-  c(Uninit,          bits_t::bit<0>())                                  \
-  c(InitNull,        bits_t::bit<1>())                                  \
-  c(Bool,            bits_t::bit<2>())                                  \
-  c(Int,             bits_t::bit<3>())                                  \
-  c(Dbl,             bits_t::bit<4>())                                  \
-  c(StaticStr,       bits_t::bit<5>())                                  \
-  c(UncountedStr,    bits_t::bit<6>())                                  \
-  c(CountedStr,      bits_t::bit<7>())                                  \
-  c(StaticVec,       bits_t::bit<8>())                                  \
-  c(UncountedVec,    bits_t::bit<9>())                                  \
-  c(CountedVec,      bits_t::bit<10>())                                 \
-  c(StaticDict,      bits_t::bit<11>())                                 \
-  c(UncountedDict,   bits_t::bit<12>())                                 \
-  c(CountedDict,     bits_t::bit<13>())                                 \
-  c(StaticKeyset,    bits_t::bit<14>())                                 \
-  c(UncountedKeyset, bits_t::bit<15>())                                 \
-  c(CountedKeyset,   bits_t::bit<16>())                                 \
-  c(Obj,             bits_t::bit<17>())                                 \
-  c(Res,             bits_t::bit<18>())                                 \
-  c(Func,            bits_t::bit<19>())                                 \
-  c(Cls,             bits_t::bit<20>())                                 \
-  c(ClsMeth,         bits_t::bit<21>())                                 \
-  c(RFunc,           bits_t::bit<22>())                                 \
-  c(RClsMeth,        bits_t::bit<23>())                                 \
-  c(LazyCls,         bits_t::bit<24>())                                 \
+#define IRT_PHP                                                         \
+  IRT(Uninit,          bits_t::bit<0>())                                \
+  IRT(InitNull,        bits_t::bit<1>())                                \
+  IRT(Bool,            bits_t::bit<2>())                                \
+  IRT(Int,             bits_t::bit<3>())                                \
+  IRT(Dbl,             bits_t::bit<4>())                                \
+  IRT(StaticStr,       bits_t::bit<5>())                                \
+  IRT(UncountedStr,    bits_t::bit<6>())                                \
+  IRT(CountedStr,      bits_t::bit<7>())                                \
+  IRT(StaticVec,       bits_t::bit<8>())                                \
+  IRT(UncountedVec,    bits_t::bit<9>())                                \
+  IRT(CountedVec,      bits_t::bit<10>())                               \
+  IRT(StaticDict,      bits_t::bit<11>())                               \
+  IRT(UncountedDict,   bits_t::bit<12>())                               \
+  IRT(CountedDict,     bits_t::bit<13>())                               \
+  IRT(StaticKeyset,    bits_t::bit<14>())                               \
+  IRT(UncountedKeyset, bits_t::bit<15>())                               \
+  IRT(CountedKeyset,   bits_t::bit<16>())                               \
+  IRT(Obj,             bits_t::bit<17>())                               \
+  IRT(Res,             bits_t::bit<18>())                               \
+  IRT(Func,            bits_t::bit<19>())                               \
+  IRT(Cls,             bits_t::bit<20>())                               \
+  IRT(ClsMeth,         bits_t::bit<21>())                               \
+  IRT(RFunc,           bits_t::bit<22>())                               \
+  IRT(RClsMeth,        bits_t::bit<23>())                               \
+  IRT(LazyCls,         bits_t::bit<24>())                               \
 /**/
 
 #define UNCCOUNTED_INIT_UNION \
@@ -289,28 +222,28 @@ constexpr bool operator>(Mem a, Mem b) {
 /*
  * This list should be in non-decreasing order of specificity.
  */
-#define IRT_PHP_UNIONS(c)                                               \
-  c(Null,                kUninit|kInitNull)                             \
-  c(PersistentStr,       kStaticStr|kUncountedStr)                      \
-  c(Str,                 kPersistentStr|kCountedStr)                    \
-  c(PersistentVec,       kStaticVec|kUncountedVec)                      \
-  c(Vec,                 kPersistentVec|kCountedVec)                    \
-  c(PersistentDict,      kStaticDict|kUncountedDict)                    \
-  c(Dict,                kPersistentDict|kCountedDict)                  \
-  c(PersistentKeyset,    kStaticKeyset|kUncountedKeyset)                \
-  c(Keyset,              kPersistentKeyset|kCountedKeyset)              \
-  c(StaticArrLike,       kStaticVec|kStaticDict|kStaticKeyset)          \
-  c(PersistentArrLike,   kPersistentVec|kPersistentDict|kPersistentKeyset) \
-  c(ArrLike,             kVec|kDict|kKeyset)                            \
-  c(NullableObj,         kObj|kInitNull|kUninit)                        \
-  c(Persistent,          kPersistentStr|kPersistentArrLike)             \
-  c(UncountedInit,       UNCCOUNTED_INIT_UNION)                         \
-  c(Uncounted,           kUninit|kUncountedInit)                        \
-  c(InitCell,            INIT_CELL_UNION)                               \
-  c(Cell,                kUninit|kInitCell)                             \
-  c(FuncLike,            kFunc|kRFunc)                                  \
-  c(ClsMethLike,         kClsMeth|kRClsMeth)                            \
-  c(NonNull,             kInitCell & ~kNull)
+#define IRT_PHP_UNIONS                                                  \
+  IRT(Null,                kUninit|kInitNull)                           \
+  IRT(PersistentStr,       kStaticStr|kUncountedStr)                    \
+  IRT(Str,                 kPersistentStr|kCountedStr)                  \
+  IRT(PersistentVec,       kStaticVec|kUncountedVec)                    \
+  IRT(Vec,                 kPersistentVec|kCountedVec)                  \
+  IRT(PersistentDict,      kStaticDict|kUncountedDict)                  \
+  IRT(Dict,                kPersistentDict|kCountedDict)                \
+  IRT(PersistentKeyset,    kStaticKeyset|kUncountedKeyset)              \
+  IRT(Keyset,              kPersistentKeyset|kCountedKeyset)            \
+  IRT(StaticArrLike,       kStaticVec|kStaticDict|kStaticKeyset)        \
+  IRT(PersistentArrLike,   kPersistentVec|kPersistentDict|kPersistentKeyset) \
+  IRT(ArrLike,             kVec|kDict|kKeyset)                          \
+  IRT(NullableObj,         kObj|kInitNull|kUninit)                      \
+  IRT(Persistent,          kPersistentStr|kPersistentArrLike)           \
+  IRT(UncountedInit,       UNCCOUNTED_INIT_UNION)                       \
+  IRT(Uncounted,           kUninit|kUncountedInit)                      \
+  IRT(InitCell,            INIT_CELL_UNION)                             \
+  IRT(Cell,                kUninit|kInitCell)                           \
+  IRT(FuncLike,            kFunc|kRFunc)                                \
+  IRT(ClsMethLike,         kClsMeth|kRClsMeth)                          \
+  IRT(NonNull,             kInitCell & ~kNull)
 
 /*
  * Adding a new runtime type needs updating numRuntime variable.
@@ -336,26 +269,27 @@ constexpr bool operator>(Mem a, Mem b) {
   kRFunc|kRClsMeth
 
 #define IRT_SPECIAL                                           \
-  /* Bottom and Top use IRTX to specify a custom Ptr kind */  \
+  /* Bottom and Top use IRTX to specify a custom PtrLocation kind */  \
   IRTX(Bottom,         Bottom, kBottom)                       \
-  IRTX(Top,            Top,    kTop)                          \
+  IRTX(Top,            All,    kTop)                          \
+  IRTX(Ptr,            All,    kPtr)                          \
+  IRTX(Lval,           All,    kLval)                         \
+  IRTX(Mem,            All,    kMem)                          \
   IRT(Counted,                 COUNTED_INIT_UNION)            \
-  IRTP(PtrToCounted,   Ptr,    kCounted)                      \
-  IRTL(LvalToCounted,  Ptr,    kCounted)                      \
-  IRTM(MemToCounted,   Ptr,    kCounted)                      \
 /**/
 
 /*
  * All types that represent a non-union type.
  */
-#define IRT_PRIMITIVE IRT_PHP(IRT_PTRS_LVALS) IRT_RUNTIME
+#define IRT_PRIMITIVE IRT_PHP IRT_PTRS_LVALS IRT_RUNTIME
 
 /*
  * All types.
  */
 #define IR_TYPES                  \
-  IRT_PHP(IRT_PTRS_LVALS)         \
-  IRT_PHP_UNIONS(IRT_PTRS_LVALS)  \
+  IRT_PHP                         \
+  IRT_PHP_UNIONS                  \
+  IRT_PTRS_LVALS                  \
   IRT_RUNTIME                     \
   IRT_SPECIAL
 
@@ -380,24 +314,29 @@ constexpr bool operator>(Mem a, Mem b) {
 struct Type {
 private:
   static constexpr size_t kRuntime = 27;
-  static constexpr size_t numRuntime = 10;
-  using bits_t = BitSet<kRuntime + numRuntime>;
+  static constexpr size_t kNumRuntime = 10;
+  static constexpr size_t kNumPtr = 2;
+  using bits_t = BitSet<kRuntime + kNumRuntime + kNumPtr>;
 
 public:
   static constexpr bits_t kBottom{};
   static constexpr bits_t kTop = ~kBottom;
 
 #define IRT(name, bits)       static constexpr bits_t k##name = (bits);
-#define IRTP(name, ptr, bits)
-#define IRTL(name, ptr, bits)
-#define IRTM(name, ptr, bits)
-#define IRTX(name, ptr, bits)
+#define IRTP(name, ...)
+#define IRTL(name, ...)
+#define IRTM(name, ...)
+#define IRTX(name, ...)
     IR_TYPES
 #undef IRT
 #undef IRTP
 #undef IRTL
 #undef IRTM
 #undef IRTX
+
+  static constexpr bits_t kPtr = bits_t::bit<kRuntime+kNumRuntime>();
+  static constexpr bits_t kLval = bits_t::bit<kRuntime+kNumRuntime+1>();
+  static constexpr bits_t kMem = kPtr | kLval;
 
   static constexpr bits_t kArrSpecBits  = kArrLike;
   static constexpr bits_t kClsSpecBits  = kObj | kCls;
@@ -412,9 +351,9 @@ public:
   Type();
 
   /*
-   * Construct from a predefined set of bits, pointer kind, and mem kind.
+   * Construct from a predefined set of bits and pointer location
    */
-  constexpr Type(bits_t bits, Ptr ptr, Mem mem);
+  constexpr Type(bits_t bits, PtrLocation ptr);
 
   /*
    * Hash the Type as a bitfield.
@@ -607,22 +546,6 @@ public:
    * NOTE: Bottom is a type with no value, and Uninit/InitNull/Nullptr are
    * considered types with a single unique value, so this function returns false
    * for those types.  You may want to explicitly check for them as needed.
-   *
-   * NOTE: Constant pointer values differ from other constants in a few ways:
-   *  1. They may be a "union" - i.e. m_bits may have multiple bits set.
-   *  2. The ptrVal result does not necessary point to a valid value.
-   *  3. Constant pointer types never have specializations.
-   *
-   * The motivation for these changes is to provide types for a specialized
-   * pointer iterator's `pos` and `end` fields. Consider the `end` pointer for
-   * some static vec with int and dict values. The type of this pointer is a
-   * constant subtype of the type "PtrToElem{Int|Dict}" (1). It points one
-   * element past the end of the vec, so its target is invalid (2).
-   *
-   * (3) is a consequence of (2). We use the same union field to store constant
-   * types and type specializations. For non-pointer types, we can recover the
-   * specialization from the constant, so this usage is okay, but for pointer
-   * types, we can't, so constant pointers lose the specialization.
    */
   bool hasConstVal() const;
 
@@ -793,25 +716,15 @@ public:
   // Inner types.                                                       [const]
 
   /*
-   * Get a pointer to, or dereference, a Type.
-   *
-   * @requires:
-   *    ptr, lval:  *this <= Cell && kind <= Ptr::Ptr
-   *    mem:        *this <= Cell && kind <= Ptr::Ptr && mem <= Mem::Mem
-   *    deref:      *this <= MemToCell
-   *    derefIfPtr: *this <= (Cell | MemToCell)
+   * Return the pointer location aspect of a Type.
    */
-  Type ptr(Ptr kind) const;
-  Type lval(Ptr kind) const;
-  Type mem(Mem mem, Ptr kind) const;
-  Type deref() const;
-  Type derefIfPtr() const;
+  PtrLocation ptrLocation() const;
 
   /*
-   * Return the pointer or memory category of a Type.
+   * Convert the TPtr branch of the Type (if any) into its equivalent
+   * TLval form.
    */
-  Ptr ptrKind() const;
-  Mem memKind() const;
+  Type ptrToLval() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Internal methods.
@@ -820,7 +733,7 @@ private:
   /*
    * Internal constructors.
    */
-  Type(bits_t bits, Ptr ptr, Mem mem, bool hasConstVal, uintptr_t extra);
+  Type(bits_t bits, PtrLocation ptr, bool hasConstVal, uintptr_t extra);
   Type(Type t, ArraySpec arraySpec);
   Type(Type t, ClassSpec classSpec);
 
@@ -854,8 +767,7 @@ private:
 
 private:
   bits_t m_bits;
-  Ptr m_ptr;
-  Mem m_mem;
+  PtrLocation m_ptr;
   bool m_hasConstVal;
 
   union {

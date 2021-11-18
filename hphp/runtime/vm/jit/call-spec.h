@@ -45,7 +45,7 @@ namespace detail {
  * Type::operator| can't reasonably be made constexpr. This macro constructs a
  * constexpr Type that's the union of two other non-Mem, non-specialized Types.
  */
-#define U(t1, t2) Type(Type::k##t1 | Type::k##t2, Ptr::NotPtr, Mem::NotMem)
+#define U(t1, t2) Type(Type::k##t1 | Type::k##t2, PtrLocation::Bottom)
 
 #define CPP_TYPES                \
   T(ActRec*, TFramePtr)          \
@@ -60,10 +60,10 @@ namespace detail {
   T(ResourceHdr*, TRes)          \
   T(StringData*, TStr)           \
   T(TCA, TTCA)                   \
-  T(TypedValue&, TPtrToCell)     \
-  T(TypedValue*, TPtrToCell)     \
+  T(TypedValue&, TPtr)           \
+  T(TypedValue*, TPtr)           \
   T(TypedValue, TCell)           \
-  T(bool*, TPtrToBool)           \
+  T(bool*, TPtr)                 \
   T(bool, TBool)                 \
   T(double, TDbl)                \
   T(int, TInt)                   \
@@ -72,8 +72,8 @@ namespace detail {
   T(unsigned long, TInt)         \
   T(unsigned long long, TInt)    \
   T(unsigned int, U(Int, RDSHandle)) \
-  T(tv_lval, TLvalToCell)        \
-  T(tv_rval, TLvalToCell)
+  T(tv_lval, TLval)              \
+  T(tv_rval, TLval)
 
 /*
  * jit_cpp_type<> handles all types that are the same for parameters and return

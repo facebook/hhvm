@@ -104,7 +104,7 @@ ArgGroup& ArgGroup::ssa(int i, bool allowFP) {
   if (s->isA(TDbl) && allowFP) {
     push_SIMDarg(ArgDesc{s, loc}, s->type());
   } else {
-    if (s->isA(TLvalToCell) && !s->isA(TBottom)) {
+    if (s->isA(TLval) && !s->isA(TBottom)) {
       // If there's exactly one register argument slot left, the whole tv_lval
       // goes on the stack instead of being split between a register and the
       // stack.

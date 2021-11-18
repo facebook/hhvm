@@ -48,12 +48,12 @@ int typeNeededWords(Type t) {
   if (t.maybe(TNullptr)) {
     return typeNeededWords(t - TNullptr);
   }
-  if (t <= TPtrToCell) {
+  if (t <= TPtr) {
     // PtrTo* may be statically unknown but always need just one
     // register.
     return 1;
   }
-  if (t <= TLvalToCell) {
+  if (t <= TLval) {
     // If tv_val<> is ever anything other than 1 or more normal pointers, this
     // will need to change.
     static_assert(sizeof(tv_lval) % 8 == 0, "");

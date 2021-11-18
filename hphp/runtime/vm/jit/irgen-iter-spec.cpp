@@ -24,6 +24,7 @@
 #include "hphp/runtime/vm/jit/irgen-control.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
+#include "hphp/runtime/vm/jit/type-array-elem.h"
 
 #include "hphp/util/struct-log.h"
 
@@ -382,7 +383,7 @@ struct MixedAccessor : public Accessor {
     if (allowBespokeArrayLikes()) {
       arr_type = arr_type.narrowToVanilla();
     }
-    pos_type = is_ptr_iter ? TPtrToElemCell : TInt;
+    pos_type = is_ptr_iter ? TPtrToElem : TInt;
     key_type = getKeyType(specialization);
     layout = ArrayLayout::Vanilla();
     iter_type = specialization;
@@ -407,7 +408,12 @@ struct MixedAccessor : public Accessor {
   }
 
   SSATmp* getVal(IRGS& env, SSATmp* arr, SSATmp* elm) const override {
-    return gen(env, LdPtrIterVal, key_type, elm);
+    auto const valType = arrLikeElemType(
+      is_ptr_iter ? arr_type : arr->type(),
+      key_type,
+      curClass(env)
+    ).first;
+    return gen(env, LdPtrIterVal, valType, elm);
   }
 
   SSATmp* advancePos(IRGS& env, SSATmp* pos, int16_t offset) const override {

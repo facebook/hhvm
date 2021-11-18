@@ -66,7 +66,7 @@ void checkTypeStack(IRGS& env, BCSPRelOffset idx, Type type, SrcKey dest) {
 }
 
 void checkTypeMBase(IRGS& env, Type type, SrcKey dest) {
-  auto const mbr = gen(env, LdMBase, TLvalToCell);
+  auto const mbr = gen(env, LdMBase, TLval);
   checkTypeImpl(env, type, dest,
     [&](Type test, Block* exit) {
       gen(env, CheckMBase, test, exit, mbr);
@@ -137,8 +137,8 @@ SSATmp* loadLocation(IRGS& env, const Location& loc) {
       return gen(env, LdStk, TCell, soff, sp(env));
     }
     case LTag::MBase: {
-      auto const mbr = gen(env, LdMBase, TLvalToCell);
-      return gen(env, LdMem, mbr->type().deref(), mbr);
+      auto const mbr = gen(env, LdMBase, TLval);
+      return gen(env, LdMem, env.irb->fs().mbase().type, mbr);
     }
   }
   not_reached();

@@ -33,7 +33,7 @@ TEST(PredictionOpts, basic) {
   Block* taken = unit.defBlock();
   Block* end = unit.defBlock();
 
-  auto ptr = unit.gen(Conjure, bcctx, TPtrToCell);
+  auto ptr = unit.gen(Conjure, bcctx, TPtr);
   auto ldm = unit.gen(LdMem, bcctx, TCell, ptr->dst());
   auto inc = unit.gen(IncRef, bcctx, ldm->dst());
   auto ckt = unit.gen(CheckType, bcctx, TInt, taken, ldm->dst());

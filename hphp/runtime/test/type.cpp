@@ -55,12 +55,12 @@ std::unordered_set<Type> allTypes() {
 }
 
 TEST(Type, Equality) {
-  EXPECT_NE(TCls, TPtrToObj);
-  EXPECT_NE(TLazyCls, TPtrToObj);
-  EXPECT_NE(TCls, TLvalToObj);
-  EXPECT_NE(TLazyCls, TLvalToObj);
-  EXPECT_NE(TCls, TMemToObj);
-  EXPECT_NE(TLazyCls, TMemToObj);
+  EXPECT_NE(TCls, TPtr);
+  EXPECT_NE(TLazyCls, TPtr);
+  EXPECT_NE(TCls, TLval);
+  EXPECT_NE(TLazyCls, TLval);
+  EXPECT_NE(TCls, TMem);
+  EXPECT_NE(TLazyCls, TMem);
 }
 
 TEST(Type, Null) {
@@ -245,23 +245,28 @@ TEST(Type, ToString) {
 
   EXPECT_EQ("Obj<=HH\\Iterator", sub.toString());
   EXPECT_EQ("Obj=HH\\Iterator", exact.toString());
-  EXPECT_EQ("PtrToStr", TPtrToStr.toString());
-  EXPECT_EQ("LvalToStr", TLvalToStr.toString());
+  EXPECT_EQ("Ptr", TPtr.toString());
+  EXPECT_EQ("Lval", TLval.toString());
+  EXPECT_EQ("Mem", TMem.toString());
 
-  EXPECT_EQ("PtrTo{Prop|MIS|MMisc|Other|Field}Cell",
-            (TPtrToMembCell - TPtrToElemCell).toString());
-  EXPECT_EQ("LvalTo{Prop|MIS|MMisc|Other|Field}Cell",
-            (TLvalToMembCell - TLvalToElemCell).toString());
-  EXPECT_EQ("PtrToMembCell", TPtrToMembCell.toString());
-  EXPECT_EQ("LvalToMembCell", TLvalToMembCell.toString());
-  EXPECT_EQ("MemToInt", TMemToInt.toString());
-  EXPECT_EQ("PtrTo{Str|Int}|LvalTo{Str|Int}",
-            (TMemToInt | TMemToStr).toString());
+  EXPECT_EQ("PtrTo{Prop|MIS|MMisc|Other|Field}",
+            (TPtrToMemb - TPtrToElem).toString());
+  EXPECT_EQ("LvalTo{Prop|MIS|MMisc|Other|Field}",
+            (TLvalToMemb - TLvalToElem).toString());
+  EXPECT_EQ("MemTo{Prop|MIS|MMisc|Other|Field}",
+            (TMemToMemb - TMemToElem).toString());
+  EXPECT_EQ("PtrToMemb", TPtrToMemb.toString());
+  EXPECT_EQ("LvalToMemb", TLvalToMemb.toString());
+  EXPECT_EQ("MemToMemb", TMemToMemb.toString());
+  EXPECT_EQ("MemToElem", TMemToElem.toString());
+  EXPECT_EQ("LvalToElem", TLvalToElem.toString());
+  EXPECT_EQ("LvalTo{Frame|Gbl}", (TLvalToFrame | TLvalToGbl).toString());
+  EXPECT_EQ("MemTo{Frame|Gbl}", (TLvalToFrame | TPtrToGbl).toString());
 
-  EXPECT_EQ("PtrTo{Int|StaticStr}|{Int|StaticStr}",
-            (TInt | TPtrToStaticStr).toString());
-  EXPECT_EQ("LvalTo{Int|StaticStr}|{Int|StaticStr}",
-            (TInt | TLvalToStaticStr).toString());
+  EXPECT_EQ("Ptr|Int", (TInt | TPtr).toString());
+  EXPECT_EQ("LvalToFrame|Int", (TInt | TLvalToFrame).toString());
+  EXPECT_EQ("LvalTo{Frame|Elem}|Int",
+            (TLvalToElem | TInt | TLvalToFrame).toString());
   EXPECT_EQ("{Obj<=HH\\Iterator|Int}", (TInt | sub).toString());
 
   EXPECT_EQ("Cls<=HH\\Iterator",
@@ -274,159 +279,99 @@ TEST(Type, ToString) {
   EXPECT_EQ("InitNull", TInitNull.constValString());
 
   EXPECT_EQ("InitCell", TInitCell.toString());
-  EXPECT_EQ("PtrToInitCell", TInitCell.ptr(Ptr::Ptr).toString());
-  EXPECT_EQ("PtrToFrameInitCell", TPtrToFrameInitCell.toString());
-  EXPECT_EQ("LvalToFrameInitCell", TLvalToFrameInitCell.toString());
+  EXPECT_EQ("PtrToFrame", TPtrToFrame.toString());
+  EXPECT_EQ("LvalToFrame", TLvalToFrame.toString());
 
-  auto const ptrCns = Type::cns((TypedValue*)0xba5eba11, TPtrToMembInitNull);
-  EXPECT_EQ("PtrToMembInitNull<TV: 0xba5eba11>", ptrCns.toString());
+  auto const ptrCns = Type::cns((TypedValue*)0xba5eba11, TPtrToMemb);
+  EXPECT_EQ("PtrToMemb<TV: 0xba5eba11>", ptrCns.toString());
   EXPECT_EQ("TV: 0xba5eba11", ptrCns.constValString());
 }
 
 TEST(Type, Ptr) {
-  EXPECT_TRUE(TPtrToInt <= TPtrToCell);
+  EXPECT_TRUE(TPtrToFrame <= TPtr);
 
-  EXPECT_EQ(TPtrToInt, TInt.ptr(Ptr::Ptr));
-  EXPECT_EQ(TPtrToCell, TCell.ptr(Ptr::Ptr));
-  EXPECT_EQ(TInt, TPtrToInt.deref());
+  EXPECT_EQ(TPtrToElem, TPtrToElem - TInt);
+  EXPECT_EQ(TInt, (TPtrToElem | TInt) - TPtrToElem);
 
-  EXPECT_EQ(TPtrToInt, TPtrToInt - TInt);
-  EXPECT_EQ(TInt, (TPtrToInt | TInt) - TPtrToInt);
-  EXPECT_EQ(TPtrToUncountedInit, TPtrToUncounted - TPtrToUninit);
+  auto const t = TPtrToFrame | TPtrToElem | TInt | TStr;
+  EXPECT_EQ(TInt | TStr, t - TPtr);
+  EXPECT_EQ(TPtrToFrame | TPtrToElem | TStr, t - TInt);
+  EXPECT_EQ(TPtrToFrame | TPtrToElem, t - (TInt | TStr));
 
-  auto const t = TPtrToInt | TPtrToStr | TInt | TStr;
-  EXPECT_EQ(t, t - TPtrToInt);
-  EXPECT_EQ(t, t - TInt);
-  EXPECT_EQ(TPtrToInt | TPtrToStr, t - (TInt | TStr));
-  EXPECT_EQ(TInt | TStr, t - (TPtrToInt | TPtrToStr));
+  EXPECT_EQ(TBottom, TPtrToFrame & TInt);
+  EXPECT_EQ(TBottom, TPtrToFrame & TPtrToElem);
+  EXPECT_EQ(TPtrToFrame, TPtrToFrame - TPtrToElem);
+  EXPECT_EQ(TBottom, TPtrToElem & TLazyCls);
 
-  EXPECT_EQ(TBottom, TPtrToInt & TInt);
-  auto const a1 = TVec.ptr(Ptr::Frame);
-  auto const a2 = TDict.ptr(Ptr::Frame);
-  EXPECT_EQ(TBottom, a1 & a2);
-  EXPECT_EQ(a1, a1 - a2);
-
-  EXPECT_EQ(TPtrToLazyCls, TLazyCls.ptr(Ptr::Ptr));
-  EXPECT_EQ(TLazyCls, TPtrToLazyCls.deref());
-  EXPECT_EQ(TBottom, TPtrToLazyCls & TLazyCls);
-
-  EXPECT_EQ(TBottom, TBottom.deref());
-
-  auto const vanillaSpec = ArraySpec(ArrayLayout::Vanilla());
-  auto const vecData = ArrayData::GetScalarArray(make_vec_array(1, 2, 3, 4));
-  auto const ptrToConstVec  = Type::cns(vecData).ptr(Ptr::Ptr);
-  EXPECT_TRUE(ptrToConstVec < TPtrToStaticVec);
-  EXPECT_FALSE(ptrToConstVec.hasConstVal());
-  EXPECT_TRUE(ptrToConstVec.isSpecialized());
-  EXPECT_EQ(TPtrToStaticVec, ptrToConstVec.unspecialize());
-  EXPECT_EQ(vanillaSpec, ptrToConstVec.arrSpec());
-
-  auto const ptrToStaticVanillaVec = TStaticVec.narrowToVanilla().ptr(Ptr::Ptr);
-  EXPECT_TRUE(ptrToStaticVanillaVec < TPtrToStaticVec);
-  EXPECT_FALSE(ptrToStaticVanillaVec.hasConstVal());
-  EXPECT_TRUE(ptrToStaticVanillaVec.isSpecialized());
-  EXPECT_EQ(TPtrToStaticVec, ptrToStaticVanillaVec.unspecialize());
-  EXPECT_EQ(vanillaSpec, ptrToStaticVanillaVec.arrSpec());
-
-  auto const ptrToStaticVec = TStaticVec.ptr(Ptr::Ptr);
-  EXPECT_EQ(TPtrToStaticVec, ptrToStaticVec);
-  EXPECT_FALSE(ptrToStaticVec.hasConstVal());
-  EXPECT_FALSE(ptrToStaticVec.isSpecialized());
-  EXPECT_EQ(TPtrToStaticVec, ptrToStaticVec.unspecialize());
-  EXPECT_EQ(ArraySpec::Top(), ptrToStaticVec.arrSpec());
-
-  auto const ptrToVanillaVec = TVanillaVec.ptr(Ptr::Ptr);
-  EXPECT_TRUE(ptrToVanillaVec < TPtrToVec);
-  EXPECT_FALSE(ptrToVanillaVec.hasConstVal());
-  EXPECT_TRUE(ptrToVanillaVec.isSpecialized());
-  EXPECT_EQ(TPtrToVec, ptrToVanillaVec.unspecialize());
-  EXPECT_EQ(vanillaSpec, ptrToVanillaVec.arrSpec());
-
-  auto const ptrToVec = TVec.ptr(Ptr::Ptr);
-  EXPECT_EQ(TPtrToVec, ptrToVec);
-  EXPECT_FALSE(ptrToVec.hasConstVal());
-  EXPECT_FALSE(ptrToVec.isSpecialized());
-  EXPECT_EQ(TPtrToVec, ptrToVec.unspecialize());
-  EXPECT_EQ(ArraySpec::Top(), ptrToVec.arrSpec());
-
-  auto ptrToExactObj =
-    Type::ExactObj(SystemLib::s_HH_IteratorClass).ptr(Ptr::Ptr);
-  auto exactClassSpec =
-    ClassSpec(SystemLib::s_HH_IteratorClass, ClassSpec::ExactTag{});
-  EXPECT_FALSE(ptrToExactObj.hasConstVal());
-  EXPECT_TRUE(ptrToExactObj.isSpecialized());
-  EXPECT_EQ(TPtrToObj, ptrToExactObj.unspecialize());
-  EXPECT_EQ(exactClassSpec, ptrToExactObj.clsSpec());
-
-  auto ptrToSubObj = Type::SubObj(SystemLib::s_HH_IteratorClass).ptr(Ptr::Ptr);
-  auto subClassSpec =
-    ClassSpec(SystemLib::s_HH_IteratorClass, ClassSpec::SubTag{});
-  EXPECT_FALSE(ptrToSubObj.hasConstVal());
-  EXPECT_TRUE(ptrToSubObj.isSpecialized());
-  EXPECT_EQ(TPtrToObj, ptrToSubObj.unspecialize());
-  EXPECT_EQ(subClassSpec, ptrToSubObj.clsSpec());
+  auto const ptrCns = Type::cns((TypedValue*)0xba5eba11, TPtrToMemb);
+  EXPECT_TRUE(ptrCns.hasConstVal());
+  EXPECT_TRUE(ptrCns <= TPtrToMemb);
+  EXPECT_FALSE(ptrCns <= TPtrToElem);
 }
 
 TEST(Type, Lval) {
-  EXPECT_TRUE(TLvalToInt <= TLvalToCell);
+  EXPECT_TRUE(TLvalToFrame <= TLval);
 
-  EXPECT_EQ(TInt, TLvalToInt.deref());
+  EXPECT_EQ(TLvalToFrame, TLvalToFrame - TInt);
+  EXPECT_EQ(TInt, (TLvalToFrame | TInt) - TLvalToFrame);
 
-  EXPECT_EQ(TLvalToInt, TLvalToInt - TInt);
-  EXPECT_EQ(TInt, (TLvalToInt | TInt) - TLvalToInt);
-  EXPECT_EQ(TLvalToUncountedInit, TLvalToUncounted - TLvalToUninit);
+  auto const t = TLvalToFrame | TLvalToElem | TInt | TStr;
+  EXPECT_EQ(TInt | TStr, t - TLval);
+  EXPECT_EQ(TLvalToFrame | TLvalToElem | TStr, t - TInt);
+  EXPECT_EQ(TLvalToFrame | TLvalToElem, t - (TInt | TStr));
 
-  auto const t = TLvalToInt | TLvalToStr | TInt | TStr;
-  EXPECT_EQ(t, t - TLvalToInt);
-  EXPECT_EQ(t, t - TInt);
-  EXPECT_EQ(TLvalToInt | TLvalToStr, t - (TInt | TStr));
-  EXPECT_EQ(TInt | TStr, t - (TLvalToInt | TLvalToStr));
-
-  EXPECT_EQ(TBottom, TLvalToInt & TInt);
+  EXPECT_EQ(TBottom, TLvalToFrame & TInt);
 }
 
 TEST(Type, Mem) {
-  EXPECT_TRUE(TMemToInt <= TMemToCell);
+  EXPECT_TRUE(TMemToFrame <= TMem);
 
-  EXPECT_EQ(TInt, TMemToInt.deref());
+  EXPECT_EQ(TMemToFrame, TMemToFrame - TInt);
+  EXPECT_EQ(TInt, (TMemToFrame | TInt) - TMemToFrame);
 
-  EXPECT_EQ(TMemToInt, TMemToInt - TInt);
-  EXPECT_EQ(TInt, (TMemToInt | TInt) - TMemToInt);
-  EXPECT_EQ(TMemToUncountedInit, TMemToUncounted - TMemToUninit);
+  auto const t = TMemToFrame | TMemToElem | TInt | TStr;
+  EXPECT_EQ(TInt | TStr, t - TMem);
+  EXPECT_EQ(TMemToFrame | TMemToElem | TStr, t - TInt);
+  EXPECT_EQ(TMemToFrame | TMemToElem, t - (TInt | TStr));
 
-  auto const t = TMemToInt | TMemToStr | TInt | TStr;
-  EXPECT_EQ(t, t - TMemToInt);
-  EXPECT_EQ(t, t - TInt);
-  EXPECT_EQ(TMemToInt | TMemToStr, t - (TInt | TStr));
-  EXPECT_EQ(TInt | TStr, t - (TMemToInt | TMemToStr));
-
-  EXPECT_EQ(TBottom, TMemToInt & TInt);
+  EXPECT_EQ(TBottom, TMemToFrame & TInt);
 }
 
 TEST(Type, MemPtrLval) {
-  EXPECT_TRUE(TPtrToInt <= TMemToCell);
-  EXPECT_TRUE(TLvalToInt <= TMemToCell);
-  EXPECT_FALSE(TInt <= TMemToCell);
+  EXPECT_TRUE(TPtr <= TMem);
+  EXPECT_TRUE(TLval <= TMem);
+  EXPECT_FALSE(TInt <= TMem);
 
-  EXPECT_EQ(TBottom, TPtrToInt & TLvalToInt);
-  EXPECT_EQ(TBottom, TPtrToCell & TLvalToCell);
-  EXPECT_EQ(TPtrToInt, TPtrToInt & TMemToCell);
+  EXPECT_EQ(TBottom, TPtr & TLval);
+  EXPECT_EQ(TBottom, TPtrToFrame & TLvalToFrame);
+  EXPECT_EQ(TPtrToFrame, TPtrToFrame & TMem);
 
-  EXPECT_EQ(TPtrToInt, TMemToInt - TLvalToInt);
-  EXPECT_EQ(TLvalToInt, TMemToInt - TPtrToInt);
+  EXPECT_EQ(TPtrToFrame, TMemToFrame - TLvalToFrame);
+  EXPECT_EQ(TLvalToFrame, TMemToFrame - TPtrToFrame);
 
-  auto const t = TInt | TPtrToInt | TLvalToInt;
-  EXPECT_EQ(TInt, t - (TPtrToInt | TLvalToInt));
-  EXPECT_EQ(TPtrToInt, t - (TInt | TLvalToInt));
-  EXPECT_EQ(TLvalToInt, t - (TInt | TPtrToInt));
-  EXPECT_EQ(TPtrToInt | TLvalToInt, t - TInt);
-  EXPECT_EQ(TInt | TLvalToInt, t - TPtrToInt);
-  EXPECT_EQ(TInt | TPtrToInt, t - TLvalToInt);
+  auto const t = TInt | TPtrToFrame | TLvalToFrame;
+  EXPECT_EQ(TInt, t - TMemToFrame);
+  EXPECT_EQ(TPtrToFrame, t - (TInt | TLvalToFrame));
+  EXPECT_EQ(TLvalToFrame, t - (TInt | TPtrToFrame));
+  EXPECT_EQ(TMemToFrame, t - TInt);
+  EXPECT_EQ(TInt | TLvalToFrame, t - TPtrToFrame);
+  EXPECT_EQ(TInt | TPtrToFrame, t - TLvalToFrame);
 
-  EXPECT_EQ(t | TStr | TMemToStr, t | TStr);
-  EXPECT_EQ(t | TStr | TMemToStr, (t | TStr) - TLvalToInt);
+  EXPECT_EQ(TLval, TMem - TPtr);
+  EXPECT_EQ(TPtr, TMem - TLval);
+  EXPECT_EQ(TBottom, TPtr - TMem);
+  EXPECT_EQ(TBottom, TLval - TMem);
+  EXPECT_EQ(TInt, (TInt | TLval) - TMem);
+  EXPECT_EQ(TLval, TLval - TPtr);
+  EXPECT_EQ(TPtr, TPtr - TLval);
+  EXPECT_EQ(TInt, TInt - TMem);
 
-  EXPECT_EQ(TLvalToUncounted, TLvalToUncounted - TPtrToUninit);
+  EXPECT_EQ(TBottom, TPtrToFrame - TMemToFrame);
+  EXPECT_EQ(TPtrToFrame, TPtrToFrame - TLvalToFrame);
+  EXPECT_EQ(TLvalToFrame, TLvalToFrame - TPtrToFrame);
+  EXPECT_EQ(TPtrToFrame, TPtrToFrame - TPtrToStk);
+  EXPECT_EQ(TMemToFrame, (TMemToFrame | TMemToStk) - TPtrToStk);
+  EXPECT_EQ(TLvalToFrame, TMemToFrame - TPtrToFrame);
 }
 
 TEST(Type, Subtypes) {
@@ -549,13 +494,11 @@ TEST(Type, Specialized) {
   EXPECT_EQ(TInt, vecOrInt - TArrLike);
   EXPECT_EQ(TInt, vecOrInt - TVec);
   EXPECT_EQ(TVec, vecOrInt - TInt);
-  EXPECT_EQ(TPtrToVec, TPtrToVec - constVec.ptr(Ptr::Ptr));
 
   auto const iterOrStr = subIter | TStr;
   EXPECT_EQ(TStr, iterOrStr - TObj);
   EXPECT_EQ(TStr, iterOrStr - subIter);
   EXPECT_EQ(subIter, iterOrStr - TStr);
-  EXPECT_EQ(TPtrToObj, TPtrToObj - subIter.ptr(Ptr::Ptr));
 
   auto const subCls = Type::SubCls(SystemLib::s_HH_IteratorClass);
   EXPECT_EQ(TCls, TCls - subCls);
@@ -762,8 +705,7 @@ TEST(Type, Const) {
   EXPECT_EQ(TArrLike, fiveArr - TInt);
   EXPECT_EQ(TBottom, five - TInt);
   EXPECT_EQ(TBottom, five - five);
-  EXPECT_EQ(TPtrToCell,
-            (TPtrToCell|TNullptr) - TNullptr);
+  EXPECT_EQ(TPtr, (TPtr|TNullptr) - TNullptr);
   EXPECT_EQ(TInt, five.dropConstVal());
   EXPECT_TRUE(!five.maybe(Type::cns(2)));
 
@@ -1182,98 +1124,58 @@ TEST(Type, BespokeRanges) {
 }
 
 TEST(Type, PtrKinds) {
-  auto const frameCell    = TCell.ptr(Ptr::Frame);
-  auto const frameUninit = TUninit.ptr(Ptr::Frame);
-  auto const frameBool   = TBool.ptr(Ptr::Frame);
-  auto const unknownBool = TBool.ptr(Ptr::Ptr);
-  auto const unknownCell  = TCell.ptr(Ptr::Ptr);
-  auto const stackObj    = TObj.ptr(Ptr::Stk);
-  auto const stackBool    = TBool.ptr(Ptr::Stk);
+  EXPECT_EQ("PtrToFrame", TPtrToFrame.toString());
+  EXPECT_EQ("Ptr", TPtr.toString());
+  EXPECT_EQ("PtrToStk", TPtrToStk.toString());
+  EXPECT_EQ("Nullptr|PtrToProp",
+    (TPtrToProp|TNullptr).toString());
+  EXPECT_EQ("Nullptr|PtrToField",
+    (TPtrToField|TNullptr).toString());
 
-  EXPECT_EQ("PtrToFrameCell", frameCell.toString());
-  EXPECT_EQ("PtrToFrameBool", frameBool.toString());
-  EXPECT_EQ("PtrToBool", unknownBool.toString());
-  EXPECT_EQ("PtrToStkObj", stackObj.toString());
-  EXPECT_EQ("Nullptr|PtrToPropCell",
-    (TPtrToPropCell|TNullptr).toString());
-  EXPECT_EQ("Nullptr|PtrToFieldCell",
-    (TPtrToFieldCell|TNullptr).toString());
+  EXPECT_EQ(PtrLocation::Frame, TPtrToFrame.ptrLocation());
 
-  EXPECT_EQ(Ptr::Frame, (frameUninit|frameBool).ptrKind());
+  EXPECT_TRUE(TPtrToFrame <= TPtr);
+  EXPECT_TRUE(TPtrToFrame.maybe(TPtr));
+  EXPECT_TRUE(TPtr.maybe(TPtrToFrame));
+  EXPECT_EQ(TPtr, TPtrToFrame | TPtr);
 
-  EXPECT_TRUE(frameBool <= unknownBool);
-  EXPECT_TRUE(frameBool <= frameCell);
-  EXPECT_FALSE(frameBool <= frameUninit);
-  EXPECT_TRUE(frameBool.maybe(frameCell));
-  EXPECT_TRUE(frameBool.maybe(unknownBool));
-  EXPECT_TRUE(!frameUninit.maybe(frameBool));
-  EXPECT_TRUE(frameUninit.maybe(frameCell));
-  EXPECT_TRUE(!frameUninit.maybe(unknownBool));
-  EXPECT_TRUE(!TPtrToUninit.maybe(TPtrToBool));
-  EXPECT_FALSE(unknownBool <= frameBool);
-  EXPECT_EQ(unknownBool, frameBool | unknownBool);
+  EXPECT_EQ(TBottom, TPtrToFrame & TPtrToStk);
+  EXPECT_EQ(TPtrToFrame, TPtrToFrame & TPtr);
 
-  EXPECT_EQ(unknownCell, frameCell | unknownBool);
+  EXPECT_EQ(PtrLocation::Prop,
+            (TPtrToProp|TNullptr).ptrLocation());
+  EXPECT_EQ(TPtrToProp,
+            (TPtrToProp|TNullptr) - TNullptr);
+  EXPECT_EQ(PtrLocation::Field,
+            (TPtrToField|TNullptr).ptrLocation());
+  EXPECT_EQ(TPtrToField,
+            (TPtrToField|TNullptr) - TNullptr);
 
-  EXPECT_EQ(TBottom, frameBool & stackBool);
-  EXPECT_EQ(frameBool, frameBool & unknownBool);
-
-  EXPECT_EQ(Ptr::Prop,
-            (TPtrToPropCell|TNullptr).ptrKind());
-  EXPECT_EQ(TPtrToPropCell,
-            (TPtrToPropCell|TNullptr) - TNullptr);
-  EXPECT_EQ(Ptr::Field,
-            (TPtrToFieldCell|TNullptr).ptrKind());
-  EXPECT_EQ(TPtrToFieldCell,
-            (TPtrToFieldCell|TNullptr) - TNullptr);
-
-  auto const frameCellOrCell = frameCell | TCell;
-  auto const stackOrArrOrInt = TArrLike.ptr(Ptr::Stk) | TInt;
-  EXPECT_EQ(TInt | TArrLike, frameCellOrCell & stackOrArrOrInt);
+  auto const a1 = TPtrToFrame | TInt | TStr;
+  auto const a2 = TPtrToStk | TInt | TStr;
+  EXPECT_EQ(TInt | TStr, a1 & a2);
 }
 
-TEST(Type, ConstantPtrTypes) {
-  std::vector<TypedValue> dicts;
-  for (auto const key : {"foo", "bar"}) {
-    DictInit dinit{1};
-    dinit.set(StringData::Make(key), make_tv<KindOfBoolean>(true));
-    auto const dict = dinit.toArray();
-    VanillaDict::as(dict.get())->onSetEvalScalar();
-    auto const static_dict = VanillaDict::CopyStatic(dict.get());
-    dicts.push_back(make_persistent_array_like_tv(static_dict));
-  }
+TEST(Type, PtrToLval) {
+  EXPECT_EQ(TPtr.ptrToLval(), TLval);
+  EXPECT_EQ(TLval.ptrToLval(), TLval);
+  EXPECT_EQ(TMem.ptrToLval(), TLval);
 
-  // In typical iterator usage, the constant pointer may point to an invalid
-  // TypedValue that's off the end of the array being iterated over.
-  auto const arr_type1 = Type::cns(dicts[0]);
-  auto const arr_type2 = Type::cns(dicts[1]);
-  auto const tv = &dicts[2];
-  auto const spec_ptr_type = (arr_type1 | arr_type2).ptr(Ptr::Elem);
-  auto const base_ptr_type = spec_ptr_type.unspecialize();
-  auto const cons_ptr_type = Type::cns(tv, spec_ptr_type);
+  EXPECT_EQ(TPtrToFrame.ptrToLval(), TLvalToFrame);
+  EXPECT_EQ(TLvalToFrame.ptrToLval(), TLvalToFrame);
+  EXPECT_EQ(TMemToFrame.ptrToLval(), TLvalToFrame);
 
-  EXPECT_EQ("PtrToElemStaticDict=Vanilla", spec_ptr_type.toString());
-  EXPECT_EQ("PtrToElemStaticDict", base_ptr_type.toString());
-  auto const str = folly::format("PtrToElemStaticDict<TV: {}>", tv).str();
-  EXPECT_EQ(str, cons_ptr_type.toString());
+  EXPECT_EQ(TInt.ptrToLval(), TInt);
+  EXPECT_EQ((TPtr | TInt).ptrToLval(), TLval | TInt);
+  EXPECT_EQ((TLval | TInt).ptrToLval(), TLval | TInt);
+  EXPECT_EQ((TMem | TInt).ptrToLval(), TLval | TInt);
 
-  // The specialized ptr type is not constant. The constant ptr type is not
-  // specialized, because we can't represent both.
-  EXPECT_TRUE(spec_ptr_type.isSpecialized());
-  EXPECT_FALSE(spec_ptr_type.hasConstVal());
-  EXPECT_FALSE(base_ptr_type.isSpecialized());
-  EXPECT_FALSE(base_ptr_type.hasConstVal());
-  EXPECT_FALSE(cons_ptr_type.isSpecialized());
-  EXPECT_TRUE(cons_ptr_type.hasConstVal());
-
-  // Because of these representation issues, the intersection of these two
-  // types should just return the constant pointer type alone.
-  EXPECT_FALSE(cons_ptr_type <= spec_ptr_type);
-  EXPECT_TRUE(cons_ptr_type <= base_ptr_type);
-  EXPECT_EQ(cons_ptr_type, cons_ptr_type & spec_ptr_type);
-  EXPECT_EQ(cons_ptr_type, spec_ptr_type & cons_ptr_type);
-  EXPECT_EQ(base_ptr_type, cons_ptr_type | spec_ptr_type);
-  EXPECT_EQ(base_ptr_type, spec_ptr_type | cons_ptr_type);
+  EXPECT_EQ((TPtrToFrame | TPtrToStk).ptrToLval(),
+            TLvalToFrame | TLvalToStk);
+  EXPECT_EQ((TLvalToFrame | TLvalToStk).ptrToLval(),
+            TLvalToFrame | TLvalToStk);
+  EXPECT_EQ((TMemToFrame | TMemToStk).ptrToLval(),
+            TLvalToFrame | TLvalToStk);
 }
 
 } }

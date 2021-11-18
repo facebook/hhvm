@@ -314,8 +314,7 @@ SSATmp* IRBuilder::preOptimizeLdMem(IRInstruction* inst) {
 }
 
 SSATmp* IRBuilder::preOptimizeLdMBase(IRInstruction* inst) {
-  auto const type = m_state.mbase().type.lval(Ptr::Ptr);
-  inst->setTypeParam(inst->typeParam() & type);
+  inst->setTypeParam(inst->typeParam() & m_state.mbr().ptrType);
 
   if (auto const ptr = m_state.mbr().ptr) {
     if (ptr->isA(inst->typeParam())) return ptr;

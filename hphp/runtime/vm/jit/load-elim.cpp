@@ -384,9 +384,8 @@ Flags load(Local& env,
   // Even if we can't make this load redundant, we might be able to refine its
   // type parameter.
   if (refinable_load_eligible(inst)) {
-    if (tracked.knownType < inst.typeParam()) {
-      return FRefinableLoad { tracked.knownType };
-    }
+    auto const refined = tracked.knownType & inst.typeParam();
+    if (refined < inst.typeParam()) return FRefinableLoad { refined };
   }
 
   return FNone{};
@@ -422,13 +421,14 @@ Flags store(Local& env, AliasClass acls, SSATmp* value) {
 bool handle_minstr(Local& env, const IRInstruction& inst, GeneralEffects m) {
   if (!MInstrEffects::supported(&inst)) return false;
   auto const base = inst.src(minstrBaseIdx(inst.op()));
-  if (!base->isA(TLvalToCell)) return false;
+  if (!base->isA(TLval)) return false;
   auto const acls = canonicalize(pointee(base));
   auto const meta = env.global.ainfo.find(acls);
   if (!meta || !env.state.avail[meta->index]) return false;
 
-  // We may not have any type info for old_val, but since base is an LvalToCell
-  // that points to this location, we can at least narrow it to a Cell.
+  // We may not have any type info for old_val, but since base is an
+  // Lval that points to this location, we can at least narrow it to a
+  // Cell.
   auto const old_val = env.state.tracked[meta->index];
   auto const effects = MInstrEffects(inst.op(), old_val.knownType & TCell);
   store(env, m.stores, nullptr);
@@ -466,7 +466,7 @@ Flags handle_general_effects(Local& env,
     return FNone{};
   }
 
-  auto handleCheck = [&](Type typeParam) -> Optional<Flags> {
+  auto const handleCheck = [&](Type typeParam) -> Optional<Flags> {
     assertx(m.inout == AEmpty);
     assertx(m.backtrace == AEmpty);
     assertx(m.coeffect == AEmpty);
@@ -498,78 +498,121 @@ Flags handle_general_effects(Local& env,
     return std::nullopt;
   };
 
-  switch (inst.op()) {
-  case CheckTypeMem:
-  case CheckLoc:
-  case CheckStk:
-  case CheckMBase:
-    if (auto flags = handleCheck(inst.typeParam())) return *flags;
-    break;
-
-  case CheckInitMem:
-    if (auto flags = handleCheck(TInitCell)) return *flags;
-    break;
-
-  case CheckIter: {
-    assertx(m.inout == AEmpty);
-    assertx(m.backtrace == AEmpty);
-    assertx(m.coeffect == AEmpty);
-    auto const meta = env.global.ainfo.find(canonicalize(m.loads));
-    if (!meta || !env.state.avail[meta->index]) break;
-    auto const& type = env.state.tracked[meta->index].knownType;
-    if (!type.hasConstVal(TInt)) break;
-    auto const value = iter_type_immediate(*inst.extra<CheckIter>());
-    auto const match = type.intVal() == value;
-    return match ? Flags{FJmpNext{}} : Flags{FJmpTaken{}};
-  }
-
-  case InitSProps: {
-    auto const handle = inst.extra<ClassData>()->cls->sPropInitHandle();
-    if (env.state.initRDS.count(handle) > 0) return FJmpNext{};
-    env.state.initRDS.insert(handle);
-    break;
-  }
-
-  case InitProps: {
-    auto const handle = inst.extra<ClassData>()->cls->propHandle();
-    if (env.state.initRDS.count(handle) > 0) return FJmpNext{};
-    env.state.initRDS.insert(handle);
-    break;
-  }
-
-  case CheckRDSInitialized: {
-    auto const handle = inst.extra<CheckRDSInitialized>()->handle;
-    if (env.state.initRDS.count(handle) > 0) return FJmpNext{};
-    // set this unconditionally; we record taken state before every
-    // instruction, and next state after each instruction
-    env.state.initRDS.insert(handle);
-    break;
-  }
-
-  case MarkRDSInitialized: {
-    auto const handle = inst.extra<MarkRDSInitialized>()->handle;
-    if (env.state.initRDS.count(handle) > 0) return FRemovable{};
-    env.state.initRDS.insert(handle);
-    break;
-  }
-
-  case CheckVecBounds: {
-    assertx(inst.src(0)->isA(TVec));
-    if (!inst.src(1)->hasConstVal(TInt)) break;
-
-    auto const idx = inst.src(1)->intVal();
-    auto const acls = canonicalize(AElemI { inst.src(0), idx });
+  // Given a pointer, return the best known type for what it points at
+  auto const pointeeType = [&] (SSATmp* ptr) {
+    if (!ptr->isA(TMem)) return TTop;
+    auto const acls = canonicalize(pointee(ptr));
     auto const meta = env.global.ainfo.find(acls);
-    if (!meta) break;
-    if (!env.state.avail[meta->index]) break;
-    if (env.state.tracked[meta->index].knownType.maybe(TUninit)) break;
+    if (!meta || !env.state.avail[meta->index]) return TTop;
+    auto const& tracked = env.state.tracked[meta->index];
+    return tracked.knownType;
+  };
 
-    return Flags{FJmpNext{}};
-  }
+  // Given a pointer, try to reduce an instruction to a constant. The
+  // given lambda will be given the best known type, and must return a
+  // value suitable for cns (or nullopt).
+  auto const reduceToConstantFromPtr =
+    [&] (SSATmp* ptr, auto f) -> Optional<Flags> {
+    auto const type = pointeeType(ptr);
+    auto const r = f(type);
+    if (!r) return std::nullopt;
+    auto const c = env.global.unit.cns(*r);
+    return FRedundant { c, c->type(), kMaxTrackedALocs };
+  };
 
-  default:
-    break;
-  }
+  auto const flags = [&] () -> Optional<Flags> {
+    switch (inst.op()) {
+      case CheckTypeMem:
+      case CheckLoc:
+      case CheckStk:
+      case CheckMBase:
+        return handleCheck(inst.typeParam());
+
+      case CheckInitMem:
+        return handleCheck(TInitCell);
+
+      case CheckIter: {
+        assertx(m.inout == AEmpty);
+        assertx(m.backtrace == AEmpty);
+        assertx(m.coeffect == AEmpty);
+        auto const meta = env.global.ainfo.find(canonicalize(m.loads));
+        if (!meta || !env.state.avail[meta->index]) return std::nullopt;
+        auto const& type = env.state.tracked[meta->index].knownType;
+        if (!type.hasConstVal(TInt)) return std::nullopt;
+        auto const value = iter_type_immediate(*inst.extra<CheckIter>());
+        auto const match = type.intVal() == value;
+        return match ? Flags{FJmpNext{}} : Flags{FJmpTaken{}};
+      }
+
+      case InitSProps: {
+        auto const handle = inst.extra<ClassData>()->cls->sPropInitHandle();
+        if (env.state.initRDS.count(handle) > 0) return FJmpNext{};
+        env.state.initRDS.insert(handle);
+        return std::nullopt;
+      }
+
+      case InitProps: {
+        auto const handle = inst.extra<ClassData>()->cls->propHandle();
+        if (env.state.initRDS.count(handle) > 0) return FJmpNext{};
+        env.state.initRDS.insert(handle);
+        return std::nullopt;
+      }
+
+      case CheckRDSInitialized: {
+        auto const handle = inst.extra<CheckRDSInitialized>()->handle;
+        if (env.state.initRDS.count(handle) > 0) return FJmpNext{};
+        // set this unconditionally; we record taken state before every
+        // instruction, and next state after each instruction
+        env.state.initRDS.insert(handle);
+        return std::nullopt;
+      }
+
+      case MarkRDSInitialized: {
+        auto const handle = inst.extra<MarkRDSInitialized>()->handle;
+        if (env.state.initRDS.count(handle) > 0) return FRemovable{};
+        env.state.initRDS.insert(handle);
+        return std::nullopt;
+      }
+
+      case CheckVecBounds: {
+        assertx(inst.src(0)->isA(TVec));
+        if (!inst.src(1)->hasConstVal(TInt)) return std::nullopt;
+        auto const idx = inst.src(1)->intVal();
+        auto const acls = canonicalize(AElemI { inst.src(0), idx });
+        auto const meta = env.global.ainfo.find(acls);
+        if (!meta) return std::nullopt;
+        if (!env.state.avail[meta->index]) return std::nullopt;
+        if (env.state.tracked[meta->index].knownType.maybe(TUninit)) {
+          return std::nullopt;
+        }
+        return Flags{FJmpNext{}};
+      }
+
+      case IsTypeMem:
+      case IsNTypeMem:
+        return reduceToConstantFromPtr(
+          inst.src(0),
+          [&] (Type type) -> Optional<bool> {
+            if (type <= inst.typeParam()) return inst.is(IsTypeMem);
+            if (!type.maybe(inst.typeParam())) return !inst.is(IsTypeMem);
+            return std::nullopt;
+          }
+        );
+
+      case CGetPropQ:
+        return reduceToConstantFromPtr(
+          inst.src(0),
+          [&] (Type type) -> Optional<Type> {
+            if (!(type <= TNull)) return std::nullopt;
+            return TInitNull;
+          }
+        );
+
+      default:
+        return std::nullopt;
+    }
+  }();
+  if (flags) return *flags;
 
   store(env, m.stores, nullptr);
   store(env, m.inout, nullptr);
@@ -713,10 +756,6 @@ Flags analyze_inst(Local& env, const IRInstruction& inst) {
   case AssertType:
   case CheckType:
   case CheckNonNull:
-    // Type information for one use of a pointer can't be transferred to
-    // other uses, because we may overwrite the pointer's target in between
-    // the uses (e.g. due to minstr escalation).
-    if (inst.hasTypeParam() && inst.typeParam() <= TMemToCell) break;
     refine_value(env, inst.dst(), inst.src(0));
     break;
   case AssertLoc:
@@ -896,9 +935,9 @@ SSATmp* resolve_value(Global& env, const IRInstruction& inst, Flag flags) {
   );
 }
 
-void reduce_inst(Global& env, IRInstruction& inst, const FReducible& flags) {
+bool reduce_inst(Global& env, IRInstruction& inst, const FReducible& flags) {
   auto const resolved = resolve_value(env, inst, flags);
-  if (!resolved) return;
+  if (!resolved) return false;
 
   DEBUG_ONLY Opcode oldOp = inst.op();
   DEBUG_ONLY Opcode newOp;
@@ -947,6 +986,7 @@ void reduce_inst(Global& env, IRInstruction& inst, const FReducible& flags) {
          resolved->toString());
 
   ++env.instrsReduced;
+  return true;
 }
 
 void refine_load(Global& env,
@@ -1039,6 +1079,7 @@ void optimize_end_catch(Global& env, IRInstruction& inst,
 //////////////////////////////////////////////////////////////////////
 
 void optimize_inst(Global& env, IRInstruction& inst, Flags flags) {
+  auto simplify = false;
   match<void>(
     flags,
     [&] (FNone) {},
@@ -1052,18 +1093,34 @@ void optimize_inst(Global& env, IRInstruction& inst, Flags flags) {
              redundantFlags.knownType.toString(),
              resolved->toString());
 
-      if (resolved->type().subtypeOfAny(TCell, TMemToCell)) {
-        env.unit.replace(&inst, AssertType, redundantFlags.knownType, resolved);
-      } else {
+      // If this insttruction had control flow, add a Jmp to the next
+      // block. (We assume that if we're making it redundant, any
+      // taken edge isn't used).
+      if (auto const next = inst.next()) {
+        auto const jmp = env.unit.gen(Jmp, inst.bcctx(), next);
+        auto const block = inst.block();
+        block->insert(++block->iteratorTo(&inst), jmp);
+      }
+
+      if (resolved->inst()->is(DefConst) ||
+          !resolved->type().subtypeOfAny(TCell, TMem)) {
         env.unit.replace(&inst, Mov, resolved);
+      } else {
+        env.unit.replace(&inst, AssertType, redundantFlags.knownType, resolved);
       }
 
       ++env.loadsRemoved;
+      simplify = true;
     },
 
-    [&] (FReducible reducibleFlags) { reduce_inst(env, inst, reducibleFlags); },
+    [&] (FReducible reducibleFlags) {
+      if (reduce_inst(env, inst, reducibleFlags)) simplify = true;
+    },
 
-    [&] (FRefinableLoad f) { refine_load(env, inst, f); },
+    [&] (FRefinableLoad f) {
+      refine_load(env, inst, f);
+      simplify = true;
+    },
 
     [&] (FRemovable) {
       FTRACE(2, "      removable\n");
@@ -1084,8 +1141,7 @@ void optimize_inst(Global& env, IRInstruction& inst, Flags flags) {
     }
   );
 
-  // Re-simplify AssertType if we produced any.
-  if (inst.is(AssertType)) simplifyInPlace(env.unit, &inst);
+  if (simplify) simplifyInPlace(env.unit, &inst);
 }
 
 void optimize_block(Local& env, Global& genv, Block* blk) {

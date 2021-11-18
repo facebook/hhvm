@@ -162,6 +162,8 @@ struct BitSet {
     return n == 0;
   }
 
+  constexpr explicit operator bool() const { return !empty(); }
+
   /*
    * Return a 64-bit hash code.
    */

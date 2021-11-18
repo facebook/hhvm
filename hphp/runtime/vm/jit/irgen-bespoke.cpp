@@ -126,8 +126,16 @@ SSATmp* emitGet(IRGS& env, SSATmp* arr, SSATmp* key, Block* taken) {
   return emitProfiledGet(env, arr, key, taken, [&](SSATmp*) {}, false);
 }
 
-SSATmp* emitElem(IRGS& env, SSATmp* arr, SSATmp* key, bool throwOnMissing) {
-  return gen(env, BespokeElem, arr, key, cns(env, throwOnMissing));
+template <typename Finish>
+void emitElem(IRGS& env, SSATmp* arrLval, SSATmp* key, SSATmp* base,
+              bool throwOnMissing, Finish finish) {
+  auto resultType = arrLikeElemType(base->type(), key->type(), curClass(env));
+  if (!throwOnMissing && !resultType.second) resultType.first |= TInitNull;
+  finish(
+    gen(env, BespokeElem, arrLval, key, cns(env, throwOnMissing)),
+    nullptr,
+    resultType.first
+  );
 }
 
 SSATmp* emitSet(IRGS& env, SSATmp* arr, SSATmp* key, SSATmp* val) {
@@ -163,16 +171,10 @@ SSATmp* emitEscalateToVanilla(
   );
 }
 
-void stMBase(IRGS& env, SSATmp* base) {
-  if (base->isA(TPtrToCell)) base = gen(env, ConvPtrToLval, base);
-  assert_flog(base->isA(TLvalToCell), "Unexpected mbase: {}", *base->inst());
-  gen(env, StMBase, base);
-}
-
 SSATmp* extractBase(IRGS& env) {
   auto const& mbase = env.irb->fs().mbase();
   if (mbase.value) return mbase.value;
-  auto const mbaseLval = gen(env, LdMBase, TLvalToCell);
+  auto const mbaseLval = gen(env, LdMBase, TLval);
   return gen(env, LdMem, mbase.type, mbaseLval);
 }
 
@@ -232,7 +234,7 @@ SSATmp* emitSetNewElem(IRGS& env, SSATmp* origValue) {
     return value;
   }
 
-  auto const baseLoc = gen(env, LdMBase, TLvalToCell);
+  auto const baseLoc = gen(env, LdMBase, TLval);
   if (!canUpdateCanonicalBase(baseLoc)) {
     gen(env, SetNewElem, baseLoc, value);
     return value;
@@ -260,9 +262,9 @@ SSATmp* emitSetElem(IRGS& env, SSATmp* key, SSATmp* value) {
     return cns(env, TBottom);
   }
 
-  auto const baseLoc = gen(env, LdMBase, TLvalToCell);
+  auto const baseLoc = gen(env, LdMBase, TLval);
   if (!canUpdateCanonicalBase(baseLoc)) {
-    gen(env, SetElem, baseLoc, key, value);
+    gen(env, SetElem, baseType, baseLoc, key, value);
     return value;
   }
 
@@ -319,7 +321,7 @@ void emitBespokeUnsetM(IRGS& env, int32_t nDiscard, MemberKey mk) {
   if (!key->isA(TInt | TStr)) {
     gen(env, ThrowInvalidArrayKey, arr, key);
   } else {
-    auto const baseLoc = gen(env, LdMBase, TLvalToCell);
+    auto const baseLoc = gen(env, LdMBase, TLval);
     if (!canUpdateCanonicalBase(baseLoc)) {
       gen(env, UnsetElem, baseLoc, key);
     } else {
@@ -502,46 +504,50 @@ SSATmp* baseValueToLval(IRGS& env, SSATmp* base) {
 }
 
 template <typename Finish>
-SSATmp* bespokeElemImpl(
-    IRGS& env, MOpMode mode, Type baseType, SSATmp* key, Finish finish) {
+void bespokeElemImpl(IRGS& env, MOpMode mode,
+                     Type baseType, SSATmp* key,
+                     Finish finish) {
   auto const base = extractBase(env);
-  auto const baseLval = gen(env, LdMBase, TLvalToCell);
+  auto const baseLval = gen(env, LdMBase, TLval);
   auto const needsLval = mode == MOpMode::Unset || mode == MOpMode::Define;
   auto const shouldThrow = mode == MOpMode::Warn || mode == MOpMode::InOut ||
                            mode == MOpMode::Define;
 
   auto const invalid_key = [&] {
     gen(env, ThrowInvalidArrayKey, extractBase(env), key);
-    return cns(env, TBottom);
+    finish(cns(env, TBottom));
   };
 
   if ((baseType <= TVec) && key->isA(TStr)) {
-    return shouldThrow ? invalid_key() : ptrToInitNull(env);
+    if (shouldThrow) return invalid_key();
+    return finish(ptrToInitNull(env), cns(env, TInitNull));
   }
   if (!key->isA(TInt | TStr)) return invalid_key();
+
   if (baseType <= TKeyset && needsLval) {
     gen(env, ThrowInvalidOperation,
         cns(env, s_InvalidKeysetOperationMsg.get()));
-    return cns(env, TBottom);
+    return finish(cns(env, TBottom));
   }
 
   if (needsLval) {
-    return emitElem(env, baseLval, key, shouldThrow);
+    return emitElem(env, baseLval, key, base, shouldThrow, finish);
   } else if (shouldThrow) {
-    auto const val =  emitProfiledGetThrow(env, base, key, [&](SSATmp* val) {
-      finish(baseValueToLval(env, val));
+    auto const val = emitProfiledGetThrow(env, base, key, [&](SSATmp* val) {
+      finish(baseValueToLval(env, val), val);
     });
-    return baseValueToLval(env, val);
+    return finish(baseValueToLval(env, val), val);
   } else {
-    return cond(
+    ifThen(
       env,
       [&](Block* taken) {
-        return emitProfiledGet(env, base, key, taken, [&](SSATmp* val) {
-          finish(baseValueToLval(env, val));
-        });
+        auto const val = emitProfiledGet(
+          env, base, key, taken,
+          [&](SSATmp* val) { finish(baseValueToLval(env, val), val); }
+        );
+        finish(baseValueToLval(env, val), val);
       },
-      [&](SSATmp* val) { return baseValueToLval(env, val); },
-      [&] { return ptrToInitNull(env); }
+      [&] { finish(ptrToInitNull(env), cns(env, TInitNull)); }
     );
   }
 }
@@ -552,13 +558,23 @@ void emitBespokeDim(IRGS& env, MOpMode mode, MemberKey mk) {
   if (mcodeIsProp(mk.mcode)) PUNT(BespokeDimProp);
   assertx(mcodeIsElem(mk.mcode));
 
-  auto const baseType = env.irb->fs().mbase().type;
-  auto const finish = [&](SSATmp* val) {
-    stMBase(env, val);
+  auto const finish = [&] (SSATmp* basePtr,
+                           SSATmp* base = nullptr,
+                           Type baseType = TCell) {
+    if (basePtr->isA(TPtr)) basePtr = gen(env, ConvPtrToLval, basePtr);
+    assert_flog(basePtr->isA(TLval), "Unexpected mbase: {}", *basePtr->inst());
+    gen(env, StMBase, basePtr);
+    if (base) {
+      env.irb->fs().setMemberBase(base);
+    } else {
+      env.irb->fs().setMemberBaseType(baseType);
+    }
+
     checkElemDimForReadonly(env);
   };
-  auto const val = bespokeElemImpl(env, mode, baseType, key, finish);
-  finish(val);
+
+  auto const baseType = env.irb->fs().mbase().type;
+  bespokeElemImpl(env, mode, baseType, key, finish);
 }
 
 void emitBespokeAddElemC(IRGS& env) {
@@ -1142,7 +1158,7 @@ void profileArrLikeProps(IRGS& env) {
       cns(env, tv.val().parr)
     );
     auto const data = IndexData(index);
-    auto const addr = gen(env, LdPropAddr, data, TLvalToPropCell, obj);
+    auto const addr = gen(env, LdPropAddr, data, obj);
     gen(env, StMem, addr, arr);
   }
 }

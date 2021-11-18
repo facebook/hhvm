@@ -33,26 +33,26 @@ namespace HPHP { namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 // Predefined Types
 
-constexpr inline Type::Type(bits_t bits, Ptr ptr, Mem mem)
+constexpr inline Type::Type(bits_t bits, PtrLocation ptr)
   : m_bits(bits)
   , m_ptr(ptr)
-  , m_mem(mem)
   , m_hasConstVal(false)
   , m_extra(0)
 {}
 
 #define IRT(name, ...) \
-  constexpr Type T##name{Type::k##name, Ptr::NotPtr, Mem::NotMem};
-#define IRTP(name, ptr, bits) \
-  constexpr Type T##name{Type::bits, Ptr::ptr, Mem::Ptr};
-#define IRTL(name, ptr, bits) \
-  constexpr Type T##name{Type::bits, Ptr::ptr, Mem::Lval};
-#define IRTM(name, ptr, bits) \
-  constexpr Type T##name{Type::bits, Ptr::ptr, Mem::Mem};
+  constexpr Type T##name{Type::k##name, PtrLocation::Bottom};
+#define IRTP(name, ptr) \
+  constexpr Type T##name{Type::kPtr, PtrLocation::ptr};
+#define IRTL(name, ptr) \
+  constexpr Type T##name{Type::kLval, PtrLocation::ptr};
+#define IRTM(name, ptr) \
+  constexpr Type T##name{Type::kMem, PtrLocation::ptr};
 #define IRTX(name, x, bits) \
-  constexpr Type T##name{Type::bits, Ptr::x, Mem::x};
-IRT_PHP(IRT_PTRS_LVALS)
-IRT_PHP_UNIONS(IRT_PTRS_LVALS)
+  constexpr Type T##name{Type::bits, PtrLocation::x};
+IRT_PHP
+IRT_PHP_UNIONS
+IRT_PTRS_LVALS
 IRT_SPECIAL
 #undef IRT
 #undef IRTP
@@ -61,7 +61,7 @@ IRT_SPECIAL
 #undef IRTX
 
 #define IRT(name, ...) \
-  constexpr Type T##name{Type::k##name, Ptr::Bottom, Mem::Bottom};
+  constexpr Type T##name{Type::k##name, PtrLocation::Bottom};
 IRT_RUNTIME
 #undef IRT
 
@@ -151,16 +151,14 @@ inline Type for_const(void*)         { return TVoidPtr; }
 
 inline Type::Type()
   : m_bits(kBottom)
-  , m_ptr(Ptr::Bottom)
-  , m_mem(Mem::Bottom)
+  , m_ptr(PtrLocation::Bottom)
   , m_hasConstVal(false)
   , m_extra(0)
 {}
 
 inline Type::Type(DataType outer)
   : m_bits(bitsFromDataType(outer))
-  , m_ptr(Ptr::NotPtr)
-  , m_mem(Mem::NotMem)
+  , m_ptr(PtrLocation::Bottom)
   , m_hasConstVal(false)
   , m_extra(0)
 {}
@@ -169,8 +167,7 @@ inline size_t Type::hash() const {
   return hash_int64_pair(
     hash_int64_pair(
       m_bits.hash(),
-      ((static_cast<uint64_t>(m_ptr) << sizeof(m_mem) * CHAR_BIT) |
-       static_cast<uint64_t>(m_mem)) ^ m_hasConstVal
+      static_cast<uint64_t>(m_ptr) ^ m_hasConstVal
     ),
     m_extra
   );
@@ -182,7 +179,6 @@ inline size_t Type::hash() const {
 inline bool Type::operator==(Type rhs) const {
   return m_bits == rhs.m_bits &&
     m_ptr == rhs.m_ptr &&
-    m_mem == rhs.m_mem &&
     m_hasConstVal == rhs.m_hasConstVal &&
     m_extra == rhs.m_extra;
 }
@@ -351,10 +347,8 @@ inline Optional<Type> Type::tryCns(TypedValue tv) {
 inline Type Type::dropConstVal() const {
   if (!m_hasConstVal) return *this;
 
-  // A constant pointer iterator type will still have a target that's a union
-  // of possible values for the array it points into.
-  assertx(ptrKind() == Ptr::Elem || !isUnion());
-  auto const result = Type(m_bits, ptrKind(), memKind());
+  assertx(!isUnion());
+  auto const result = Type(m_bits, ptrLocation());
 
   if (*this <= TArrLike) {
     return Type(result, ArraySpec(ArrayLayout::FromArray(m_arrVal)));
@@ -407,7 +401,7 @@ IMPLEMENT_CNS_VAL(TClsMeth,    clsmeth,  ClsMethDataRef)
 IMPLEMENT_CNS_VAL(TTCA,        tca,  jit::TCA)
 IMPLEMENT_CNS_VAL(TVoidPtr,    voidPtr, void*)
 IMPLEMENT_CNS_VAL(TRDSHandle,  rdsHandle,  rds::Handle)
-IMPLEMENT_CNS_VAL(TMemToCell,  ptr, const TypedValue*)
+IMPLEMENT_CNS_VAL(TMem,        ptr, const TypedValue*)
 
 #undef IMPLEMENT_CNS_VAL
 
@@ -469,7 +463,7 @@ inline Type Type::ExactCls(const Class* cls) {
 }
 
 inline Type Type::unspecialize() const {
-  return Type(m_bits, ptrKind(), memKind());
+  return Type(m_bits, ptrLocation());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -505,7 +499,7 @@ inline ArraySpec Type::arrSpec() const {
   // For constant pointers, we don't have an array-like val, so return Top.
   // Else, use the layout of the array val. (We pun array-like types here.)
   if (m_hasConstVal) {
-    if (m_ptr != Ptr::NotPtr) return ArraySpec::Top();
+    if (m_bits & kMem) return ArraySpec::Top();
     return ArraySpec(ArrayLayout::FromArray(m_arrVal));
   }
 
@@ -521,7 +515,7 @@ inline ClassSpec Type::clsSpec() const {
   if (supports(SpecKind::Array)) return ClassSpec::Top();
 
   if (m_hasConstVal) {
-    if (m_ptr != Ptr::NotPtr) return ClassSpec::Top();
+    if (m_bits & kMem) return ClassSpec::Top();
     return ClassSpec(clsVal(), ClassSpec::ExactTag{});
   }
 
@@ -536,51 +530,26 @@ inline TypeSpec Type::spec() const {
 ///////////////////////////////////////////////////////////////////////////////
 // Inner types.
 
-inline Type Type::ptr(Ptr kind) const {
-  return mem(Mem::Ptr, kind);
-}
-
-inline Type Type::lval(Ptr kind) const {
-  return mem(Mem::Lval, kind);
-}
-
-inline Type Type::mem(Mem mem, Ptr ptr) const {
-  assertx(*this <= TCell);
-  assertx(ptr <= Ptr::Ptr);
-  assertx(mem <= Mem::Mem);
-  // Enforce a canonical representation for Bottom.
-  if (m_bits == kBottom) return TBottom;
-  return Type(m_bits, ptr, mem).specialize(spec());
-}
-
-inline Type Type::deref() const {
-  assertx(*this <= TMemToCell);
-  if (m_bits == kBottom) return TBottom;
-  auto const extra = isSpecialized() ? m_extra : 0;
-  return Type(m_bits, Ptr::NotPtr, Mem::NotMem, false, extra);
-}
-
-inline Type Type::derefIfPtr() const {
-  assertx(*this <= (TCell | TMemToCell));
-  return *this <= TMemToCell ? deref() : *this;
-}
-
-inline Ptr Type::ptrKind() const {
+inline PtrLocation Type::ptrLocation() const {
   return m_ptr;
 }
 
-inline Mem Type::memKind() const {
-  return m_mem;
+inline Type Type::ptrToLval() const {
+  auto temp = *this;
+  if (temp.m_bits & kPtr) {
+    temp.m_bits &= ~kPtr;
+    temp.m_bits |= kLval;
+  }
+  return temp;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Private constructors.
 
-inline Type::Type(bits_t bits, Ptr ptr, Mem mem, bool hasConstVal,
+inline Type::Type(bits_t bits, PtrLocation ptr, bool hasConstVal,
                   uintptr_t extra)
   : m_bits(bits)
   , m_ptr(ptr)
-  , m_mem(mem)
   , m_hasConstVal(hasConstVal)
   , m_extra(extra)
 {
@@ -590,7 +559,6 @@ inline Type::Type(bits_t bits, Ptr ptr, Mem mem, bool hasConstVal,
 inline Type::Type(Type t, ArraySpec arraySpec)
   : m_bits(t.m_bits)
   , m_ptr(t.m_ptr)
-  , m_mem(t.m_mem)
   , m_hasConstVal(false)
   , m_arrSpec(arraySpec)
 {
@@ -601,7 +569,6 @@ inline Type::Type(Type t, ArraySpec arraySpec)
 inline Type::Type(Type t, ClassSpec classSpec)
   : m_bits(t.m_bits)
   , m_ptr(t.m_ptr)
-  , m_mem(t.m_mem)
   , m_hasConstVal(false)
   , m_clsSpec(classSpec)
 {

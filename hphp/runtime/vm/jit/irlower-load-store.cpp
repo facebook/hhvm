@@ -321,11 +321,6 @@ void cgStMBase(IRLS& env, const IRInstruction* inst) {
   vmain(env) << store{srcLoc.reg(1), rvmtl()[off + sizeof(intptr_t)]};
 }
 
-void cgLdMROPropAddr(IRLS& env, const IRInstruction* inst) {
-  auto const off = rds::kVmMInstrStateOff + offsetof(MInstrState, roProp);
-  vmain(env) << lea{rvmtl()[off], dstLoc(env, inst, 0).reg()};
-}
-
 void cgLdMROProp(IRLS& env, const IRInstruction* inst) {
   auto const off = rds::kVmMInstrStateOff + offsetof(MInstrState, roProp);
   vmain(env) << loadb{rvmtl()[off], dstLoc(env, inst, 0).reg()};

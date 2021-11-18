@@ -40,9 +40,9 @@ AliasClass pointee(
   jit::flat_set<const IRInstruction*>* visited_labels
 ) {
   auto const type = ptr->type();
-  always_assert(type <= TMemToCell);
+  always_assert(type <= TMem);
   auto const canonPtr = canonical(ptr);
-  if (!canonPtr->isA(TMemToCell)) {
+  if (!canonPtr->isA(TMem)) {
     // This can happen when ptr is TBottom from a passthrough instruction with
     // a src that isn't TBottom. The most common cause of this is something
     // like "t5:Bottom = CheckType<Str> t2:Int". It means ptr isn't really a
@@ -88,7 +88,7 @@ AliasClass pointee(
   auto specific = [&] () -> Optional<AliasClass> {
     if (type <= TBottom) return AEmpty;
 
-    if (type <= TMemToFrameCell) {
+    if (type <= TMemToFrame) {
       if (sinst->is(LdLocAddr)) {
         return AliasClass {
           ALocal { sinst->src(0), sinst->extra<LdLocAddr>()->locId }
@@ -97,7 +97,7 @@ AliasClass pointee(
       return ALocalAny;
     }
 
-    if (type <= TMemToStkCell) {
+    if (type <= TMemToStk) {
       if (sinst->is(LdStkAddr)) {
         return AliasClass {
           AStack::at(sinst->extra<LdStkAddr>()->offset)
@@ -113,7 +113,7 @@ AliasClass pointee(
       return AStackAny;
     }
 
-    if (type <= TMemToPropCell) {
+    if (type <= TMemToProp) {
       if (sinst->is(LdPropAddr, LdInitPropAddr)) {
         return AliasClass {
           AProp {
@@ -125,18 +125,9 @@ AliasClass pointee(
       return APropAny;
     }
 
-    if (type <= TPtrToMISBool) {
-      if (ptr->hasConstVal() && ptr->rawVal() == 0) {
-        // nullptr roProp pointer, representing an instruction that doesn't use
-        // it.
-        return AEmpty;
-      }
-      return AMIStateROProp;
-    }
-
-    if (type <= TMemToMISCell) {
+    if (type <= TMemToMIS) {
       if (sinst->is(LdMIStateAddr)) {
-      return mis_from_offset(sinst->src(0)->intVal());
+        return mis_from_offset(sinst->src(0)->intVal());
       }
       if (ptr->hasConstVal() && ptr->rawVal() == 0) {
         // nullptr tvRef pointer, representing an instruction that doesn't use
@@ -163,14 +154,14 @@ AliasClass pointee(
       return AElemAny;
     };
 
-    if (type <= TMemToElemCell) {
+    if (type <= TMemToElem) {
       if (sinst->is(LdVecElemAddr)) return elem();
       return AElemAny;
     }
 
     // The result of ElemArray{,W,U} is either the address of an array element,
     // or &immutable_null_base.
-    if (type <= TMemToMembCell) {
+    if (type <= TMemToMemb) {
       // Takes a PtrToCell as its first operand, so we can't easily grab an
       // array base.
       if (sinst->is(ElemVecU, ElemDictU, ElemKeysetU)) {
@@ -181,7 +172,7 @@ AliasClass pointee(
       // src. Otherwise they can only return pointers to properties or
       // &immutable_null_base.
       if (sinst->is(PropX, PropDX, PropQ)) {
-        assertx(sinst->srcs().back()->isA(TMemToMISCell));
+        assertx(sinst->srcs().back()->isA(TMemToMIS));
         auto const src = sinst->srcs().back();
         return APropAny | pointee(src, visited_labels);
       }
@@ -205,14 +196,14 @@ AliasClass pointee(
    * on the pointer type.
    */
   auto ret = AEmpty;
-  if (type.maybe(TMemToStkCell))     ret = ret | AStackAny;
-  if (type.maybe(TMemToFrameCell))   ret = ret | ALocalAny;
-  if (type.maybe(TMemToPropCell))    ret = ret | APropAny;
-  if (type.maybe(TMemToElemCell))    ret = ret | AElemAny;
-  if (type.maybe(TMemToMISCell))     ret = ret | AMIStateTempBase | AMIStateROProp;
-  if (type.maybe(TMemToClsInitCell)) ret = ret | AHeapAny;
-  if (type.maybe(TMemToClsCnsCell))  ret = ret | AHeapAny;
-  if (type.maybe(TMemToSPropCell))   ret = ret | ARdsAny;
+  if (type.maybe(TMemToStk))     ret = ret | AStackAny;
+  if (type.maybe(TMemToFrame))   ret = ret | ALocalAny;
+  if (type.maybe(TMemToProp))    ret = ret | APropAny;
+  if (type.maybe(TMemToElem))    ret = ret | AElemAny;
+  if (type.maybe(TMemToMIS))     ret = ret | AMIStateTempBase | AMIStateROProp;
+  if (type.maybe(TMemToClsInit)) ret = ret | AHeapAny;
+  if (type.maybe(TMemToClsCns))  ret = ret | AHeapAny;
+  if (type.maybe(TMemToSProp))   ret = ret | ARdsAny;
   return ret;
 }
 
@@ -221,9 +212,7 @@ AliasClass pointee(
 AliasClass all_pointees(folly::Range<SSATmp**> srcs) {
   auto ret = AliasClass{AEmpty};
   for (auto const& src : srcs) {
-    if (src->isA(TMemToCell)) {
-      ret = ret | pointee(src);
-    }
+    if (src->isA(TMem)) ret = ret | pointee(src);
   }
   return ret;
 }
@@ -497,7 +486,7 @@ GeneralEffects interp_one_effects(const IRInstruction& inst) {
  */
 MemEffects minstr_with_tvref(const IRInstruction& inst) {
   auto const srcs = inst.srcs();
-  assertx(srcs.back()->isA(TMemToMISCell));
+  assertx(srcs.back()->isA(TMemToMIS));
   auto const loads = AHeapAny | all_pointees(srcs.subpiece(0, srcs.size() - 2));
   auto const stores = AHeapAny | all_pointees(inst) | AMIStateROProp;
   return may_load_store(loads, stores);
@@ -773,7 +762,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
         auto inout = AEmpty;
         auto const paramOff = callee->isMethod() ? 3 : 2;
         for (auto i = paramOff; i < inst.numSrcs(); ++i) {
-          if (inst.src(i)->type() <= TPtrToCell) {
+          if (inst.src(i)->type() <= TPtr) {
             auto const cls = pointee(inst.src(i));
             if (callee->isInOut(i - paramOff)) {
               inout = inout | cls;
@@ -1258,12 +1247,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     // Array element keys are not tracked by memory effects right now.
     return may_load_store(AEmpty, AEmpty);
 
-  case LdPtrIterVal: {
-    // NOTE: The type param for this op restricts the key, not the value.
-    if (inst.typeParam() <= TInt) return PureLoad { AElemIAny };
-    if (inst.typeParam() <= TStr) return PureLoad { AElemSAny };
+  case LdPtrIterVal:
     return PureLoad { AElemAny };
-  }
 
   case BespokeIterGetVal:
     return may_load_store(AElemAny, AEmpty);

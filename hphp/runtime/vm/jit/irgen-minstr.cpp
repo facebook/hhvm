@@ -70,17 +70,17 @@ enum class SimpleOp {
 
 struct PropInfo {
   using UpperBoundVec = PreClass::UpperBoundVec;
-  explicit PropInfo(Slot slot,
-                    uint16_t index,
-                    bool isConst,
-                    bool readOnly,
-                    bool lateInit,
-                    bool lateInitCheck,
-                    Type knownType,
-                    const HPHP::TypeConstraint* typeConstraint,
-                    const UpperBoundVec* ubs,
-                    const Class* objClass,
-                    const Class* propClass)
+  PropInfo(Slot slot,
+           uint16_t index,
+           bool isConst,
+           bool readOnly,
+           bool lateInit,
+           bool lateInitCheck,
+           Type knownType,
+           const HPHP::TypeConstraint* typeConstraint,
+           const UpperBoundVec* ubs,
+           const Class* objClass,
+           const Class* propClass)
     : slot{slot}
     , index{index}
     , isConst{isConst}
@@ -273,12 +273,17 @@ Optional<GuardConstraint> simpleOpConstraint(SimpleOp op) {
  * Load or store the member base pointer.
  */
 SSATmp* ldMBase(IRGS& env) {
-  return gen(env, LdMBase, TLvalToCell);
+  return gen(env, LdMBase, TLval);
 }
-void stMBase(IRGS& env, SSATmp* base) {
-  if (base->isA(TPtrToCell)) base = gen(env, ConvPtrToLval, base);
-  assert_flog(base->isA(TLvalToCell), "Unexpected mbase: {}", *base->inst());
-  gen(env, StMBase, base);
+void stMBase(IRGS& env, SSATmp* basePtr, SSATmp* base, Type baseType = TCell) {
+  if (basePtr->isA(TPtr)) basePtr = gen(env, ConvPtrToLval, basePtr);
+  assert_flog(basePtr->isA(TLval), "Unexpected mbase: {}", *basePtr->inst());
+  gen(env, StMBase, basePtr);
+  if (base) {
+    env.irb->fs().setMemberBase(base);
+  } else {
+    env.irb->fs().setMemberBaseType(baseType);
+  }
 }
 
 /*
@@ -291,22 +296,14 @@ SSATmp* tvTempBasePtr(IRGS& env) {
 
 SSATmp* propTvRefPtr(IRGS& env, SSATmp* base, const SSATmp* key) {
   return prop_ignores_tvref(env, base, key)
-    ? cns(env, Type::cns(nullptr, TPtrToMISCell))
+    ? cns(env, Type::cns(nullptr, TPtrToMIS))
     : tvTempBasePtr(env);
 }
 
 SSATmp* ptrToUninit(IRGS& env) {
   // Nothing can write to the uninit null variant either, so the inner type
   // here is also always true.
-  return cns(env, Type::cns(&immutable_uninit_base, TLvalToOtherUninit));
-}
-
-bool baseMightPromote(const SSATmp* base) {
-  auto const ty = base->type().derefIfPtr();
-  return
-    ty.maybe(TNull) ||
-    ty.maybe(Type::cns(false)) ||
-    ty.maybe(Type::cns(staticEmptyString()));
+  return cns(env, Type::cns(&immutable_uninit_base, TLvalToOther));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -328,11 +325,11 @@ void specializeObjBase(IRGS& env, SSATmp* base) {
 
 Optional<PropInfo>
 getCurrentPropertyOffset(IRGS& env, SSATmp* base, Type keyType,
-                         bool ignoreLateInit) {
+                         Type baseType, bool ignoreLateInit) {
   // We allow the use of classes from nullable objects because
   // emitPropSpecialized() explicitly checks for null (when needed) before
   // doing the property access.
-  auto const baseType = base->type().derefIfPtr();
+
   if (!(baseType < (TObj | TInitNull) && baseType.clsSpec())) {
     return std::nullopt;
   }
@@ -356,12 +353,13 @@ SSATmp* checkInitProp(IRGS& env,
                       SSATmp* baseAsObj,
                       SSATmp* propAddr,
                       SSATmp* key,
+                      Type propType,
                       bool doWarn) {
   assertx(key->isA(TStaticStr));
   assertx(baseAsObj->isA(TObj));
-  assertx(propAddr->type() <= TLvalToCell);
+  assertx(propAddr->type() <= TLval);
 
-  auto const needsCheck = doWarn && propAddr->type().deref().maybe(TUninit);
+  auto const needsCheck = doWarn && propType.maybe(TUninit);
   if (!needsCheck) return propAddr;
 
   return cond(
@@ -372,11 +370,10 @@ SSATmp* checkInitProp(IRGS& env,
     [&] { // Next: Property isn't Uninit. Do nothing.
       return propAddr;
     },
-    [&] { // Taken: Property is Uninit. Raise a warning and return
-          // &immutable_null_base.
+    [&] { // Taken: Property is Uninit. Throw an exception.
       hint(env, Block::Hint::Unlikely);
       gen(env, ThrowUndefPropException, baseAsObj, key);
-      return ptrToInitNull(env);
+      return cns(env, TBottom);
     }
   );
 }
@@ -391,13 +388,14 @@ std::pair<SSATmp*, SSATmp*> emitPropSpecialized(
   SSATmp* key,
   bool nullsafe,
   MOpMode mode,
-  PropInfo propInfo
+  PropInfo propInfo,
+  Type baseType
 ) {
   auto const doWarn   = mode == MOpMode::Warn;
   auto const doDefine = mode == MOpMode::Define || mode == MOpMode::Unset;
 
   auto const initNull = ptrToInitNull(env);
-  auto const baseType = base->type();
+  auto const baseTmpType = base->type();
 
   auto const getAddr = [&] (SSATmp* obj) {
     if (!propInfo.lateInitCheck) {
@@ -405,7 +403,7 @@ std::pair<SSATmp*, SSATmp*> emitPropSpecialized(
       auto const addr = ldPropAddr(env, obj, nullptr, propInfo.propClass,
                                    propInfo.slot, propInfo.knownType);
       return !propInfo.lateInit
-        ? checkInitProp(env, obj, addr, key, doWarn)
+        ? checkInitProp(env, obj, addr, key, propInfo.knownType, doWarn)
         : addr;
     }
 
@@ -437,7 +435,7 @@ std::pair<SSATmp*, SSATmp*> emitPropSpecialized(
    * analysis.  The caller of this function will use it to know whether it can
    * avoid a generic incref, etc.
    */
-  if (baseType <= TObj) {
+  if (baseTmpType <= TObj) {
     return {
       getAddr(base),
       mode == MOpMode::Define ? base : nullptr
@@ -463,7 +461,7 @@ std::pair<SSATmp*, SSATmp*> emitPropSpecialized(
     },
     [&] {
       // Next: Base is an object. Load property and check for uninit.
-      obj = gen(env, LdMem, baseType.deref() & TObj, base);
+      obj = gen(env, LdMem, baseType & TObj, base);
       return getAddr(obj);
     },
     [&] { // Taken: Base is Null. Raise warnings/errors and return InitNull.
@@ -718,14 +716,16 @@ SSATmp* emitKeysetIsset(IRGS& env, SSATmp* base, SSATmp* key) {
 //////////////////////////////////////////////////////////////////////
 
 SSATmp* emitIncDecProp(IRGS& env, IncDecOp op, SSATmp* base, SSATmp* key) {
+  auto const baseType = env.irb->fs().mbase().type;
   auto const propInfo =
-    getCurrentPropertyOffset(env, base, key->type(), false);
+    getCurrentPropertyOffset(env, base, key->type(), baseType, false);
 
   if (propInfo && !propInfo->isConst) {
     // Special case for when the property is known to be an int.
     if (base->isA(TObj) && propInfo->knownType <= TInt) {
       base = emitPropSpecialized(env, base, key, false,
-                                 MOpMode::Define, *propInfo).first;
+                                 MOpMode::Define, *propInfo,
+                                 base->type()).first;
       auto const prop = gen(env, LdMem, TInt, base);
       auto const result = incDec(env, op, prop);
       // No need for a property type-check because the input is an Int and the
@@ -866,7 +866,7 @@ void baseGImpl(IRGS& env, SSATmp* name, MOpMode mode) {
     name,
     [&] (Block*) { return gen(env, BaseG, MOpModeData{base_mode}, name); },
     [&] (SSATmp* ptr, Type) {
-      stMBase(env, ptr);
+      stMBase(env, ptr, nullptr);
       return cns(env, TBottom);
     },
     [&] {
@@ -874,7 +874,7 @@ void baseGImpl(IRGS& env, SSATmp* name, MOpMode mode) {
         if (base_mode == MOpMode::None) return ptrToInitNull(env);
         return gen(env, BaseG, MOpModeData{base_mode}, name);
       }();
-      stMBase(env, ptr);
+      stMBase(env, ptr, nullptr);
       return cns(env, TBottom);
     },
     true
@@ -938,27 +938,49 @@ SSATmp* extractBaseIfObj(IRGS& env) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-SSATmp* propGenericImpl(IRGS& env, MOpMode mode, SSATmp* base, SSATmp* key,
-                        bool nullsafe, ReadonlyOp rop) {
-  auto const define = mode == MOpMode::Define;
+struct DimResult {
+  DimResult(SSATmp* newBasePtr, SSATmp* newBase, Type newBaseType = TCell)
+    : newBasePtr{newBasePtr}
+    , newBase{newBase}
+    , newBaseType{newBaseType}
+  {}
+
+  SSATmp* newBasePtr;
+  SSATmp* newBase;
+  Type newBaseType;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+DimResult propGenericImpl(IRGS& env, MOpMode mode, SSATmp* base, SSATmp* key,
+                          bool nullsafe, ReadonlyOp rop) {
   auto const tvRef = propTvRefPtr(env, base, key);
-  if (nullsafe) return gen(env, PropQ, PropData{mode, rop}, base, key, tvRef);
-  auto const op = define ? PropDX : PropX;
-  return gen(env, op, PropData { mode, rop }, base, key, tvRef);
+  if (nullsafe) {
+    return DimResult{
+      gen(env, PropQ, PropData { mode, rop }, base, key, tvRef),
+      nullptr
+    };
+  }
+
+  auto const op = (mode == MOpMode::Define) ? PropDX : PropX;
+  return DimResult{
+    gen(env, op, PropData { mode, rop }, base, key, tvRef),
+    nullptr
+  };
 }
 
-SSATmp* propImpl(IRGS& env, MOpMode mode, SSATmp* key, bool nullsafe, ReadonlyOp op) {
+DimResult propImpl(IRGS& env, MOpMode mode, SSATmp* key, bool nullsafe, ReadonlyOp op) {
   auto const baseType = env.irb->fs().mbase().type;
 
   if (mode == MOpMode::Unset && !baseType.maybe(TObj)) {
     constrainBase(env);
-    return ptrToInitNull(env);
+    return DimResult{ptrToInitNull(env), cns(env, TInitNull)};
   }
 
   auto const base = extractBaseIfObj(env);
 
   auto const propInfo =
-    getCurrentPropertyOffset(env, base, key->type(), false);
+    getCurrentPropertyOffset(env, base, key->type(), baseType, false);
   if (!propInfo || propInfo->isConst || mode == MOpMode::Unset) {
     return propGenericImpl(env, mode, base, key, nullsafe, op);
   }
@@ -972,12 +994,12 @@ SSATmp* propImpl(IRGS& env, MOpMode mode, SSATmp* key, bool nullsafe, ReadonlyOp
         gen(env, ThrowOrWarnMustBeEnclosedInReadonly, data, key);
       }
       if (RO::EvalEnableReadonlyPropertyEnforcement == 2) {
-        return cns(env, TBottom);
+        return DimResult{cns(env, TBottom), nullptr};
       }
     } else if (!propInfo->readOnly && op == ReadonlyOp::CheckROCOW) {
       gen(env, ThrowOrWarnMustBeReadonlyException, data, key);
       if (RO::EvalEnableReadonlyPropertyEnforcement == 2) {
-        return cns(env, TBottom);
+        return DimResult{cns(env, TBottom), nullptr};
       }
     }
   }
@@ -990,7 +1012,8 @@ SSATmp* propImpl(IRGS& env, MOpMode mode, SSATmp* key, bool nullsafe, ReadonlyOp
     key,
     nullsafe,
     mode,
-    *propInfo
+    *propInfo,
+    baseType
   );
 
   if (op == ReadonlyOp::CheckROCOW ||
@@ -999,10 +1022,10 @@ SSATmp* propImpl(IRGS& env, MOpMode mode, SSATmp* key, bool nullsafe, ReadonlyOp
   }
 
   assertx(IMPLIES(mode == MOpMode::Define, obj != nullptr));
-  return propPtr;
+  return DimResult{propPtr, nullptr, propInfo->knownType};
 }
 
-SSATmp* vecElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
+DimResult vecElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
   assertx(baseType <= TVec);
   assertx(key->isA(TInt) || key->isA(TStr) ||
           !key->type().maybe(TInt | TStr));
@@ -1013,19 +1036,30 @@ SSATmp* vecElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
 
   auto const invalid_key = [&] {
     gen(env, ThrowInvalidArrayKey, extractBase(env), key);
-    return cns(env, TBottom);
+    return DimResult{cns(env, TBottom), nullptr};
   };
 
   if (define) {
-    return key->isA(TInt)
-      ? gen(env, ElemVecD, baseType, ldMBase(env), key)
-      : invalid_key();
+    if (!key->isA(TInt)) return invalid_key();
+    return DimResult{
+      gen(env, ElemVecD, baseType, ldMBase(env), key),
+      nullptr,
+      TInitCell
+    };
   }
 
   if (unset) {
-    return key->isA(TInt) ? gen(env, ElemVecU, baseType, ldMBase(env), key) :
-           key->isA(TStr) ? ptrToInitNull(env)
-           /* invalid */  : invalid_key();
+    if (key->isA(TInt)) {
+      return DimResult{
+        gen(env, ElemVecU, baseType, ldMBase(env), key),
+        nullptr,
+        TInitCell
+      };
+    }
+    if (key->isA(TStr)) {
+      return DimResult{ptrToInitNull(env), cns(env, TInitNull)};
+    }
+    return invalid_key();
   }
 
   if (warn) {
@@ -1036,37 +1070,46 @@ SSATmp* vecElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
         base->type(),
         key->type(),
         curClass(env)
-      ).first.lval(Ptr::Elem);
-      return gen(env, LdVecElemAddr, elemType, base, key);
+      ).first;
+      return DimResult{
+        gen(env, LdVecElemAddr, base, key),
+        nullptr,
+        elemType
+      };
     }
     return invalid_key();
   }
 
   if (key->isA(TInt)) {
     auto const base = extractBase(env);
-    return cond(
+    auto const ptr = cond(
       env,
       [&] (Block* taken) {
         gen(env, CheckVecBounds, taken, base, key);
       },
       [&] {
-        auto const elemType = arrLikeElemType(
-          base->type(),
-          key->type(),
-          curClass(env)
-        ).first.lval(Ptr::Elem);
-        return gen(env, LdVecElemAddr, elemType, base, key);
+        return gen(env, LdVecElemAddr, base, key);
       },
       [&] { return ptrToInitNull(env); }
     );
+
+    auto elemType = arrLikeElemType(
+      base->type(),
+      key->type(),
+      curClass(env)
+    );
+    if (!elemType.second) elemType.first |= TInitNull;
+    return DimResult{ptr, nullptr, elemType.first};
   }
 
-  if (key->isA(TStr)) return ptrToInitNull(env);
+  if (key->isA(TStr)) {
+    return DimResult{ptrToInitNull(env), cns(env, TInitNull)};
+  }
 
   return invalid_key();
 }
 
-SSATmp* dictElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
+DimResult dictElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
   assertx(baseType <= TDict);
 
   auto const unset = mode == MOpMode::Unset;
@@ -1076,10 +1119,10 @@ SSATmp* dictElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
 
   if (!key->isA(TInt | TStr)) {
     gen(env, ThrowInvalidArrayKey, base, key);
-    return cns(env, TBottom);
+    return DimResult{cns(env, TBottom), nullptr};
   }
 
-  return profiledArrayAccess(
+  auto const ptr = profiledArrayAccess(
     env, base, key, mode,
     [&] (SSATmp* dict, SSATmp* key, SSATmp* pos) {
       return gen(env, ElemDictK, dict, key, pos);
@@ -1104,9 +1147,11 @@ SSATmp* dictElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
       return baseValueToLval(env, gen(env, op, base, key));
     }
   );
+
+  return DimResult{ptr, nullptr, TInitCell};
 }
 
-SSATmp* keysetElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
+DimResult keysetElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
   assertx(baseType <= TKeyset);
 
   auto const unset = mode == MOpMode::Unset;
@@ -1116,7 +1161,7 @@ SSATmp* keysetElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
 
   if (!key->isA(TInt | TStr)) {
     gen(env, ThrowInvalidArrayKey, base, key);
-    return cns(env, TBottom);
+    return DimResult{cns(env, TBottom), nullptr};
   }
 
   if (define || unset) {
@@ -1125,10 +1170,10 @@ SSATmp* keysetElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
       ThrowInvalidOperation,
       cns(env, s_InvalidKeysetOperationMsg.get())
     );
-    return cns(env, TBottom);
+    return DimResult{cns(env, TBottom), nullptr};
   }
 
-  return profiledArrayAccess(
+  auto const ptr = profiledArrayAccess(
     env, base, key, mode,
     [&] (SSATmp* keyset, SSATmp* key, SSATmp* pos) {
       return gen(env, ElemKeysetK, keyset, key, pos);
@@ -1149,11 +1194,13 @@ SSATmp* keysetElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
       return baseValueToLval(env, gen(env, op, base, key));
     }
   );
+
+  return DimResult{ptr, nullptr, TInt | TStr};
 }
 
 const StaticString s_OP_NOT_SUPPORTED_STRING(Strings::OP_NOT_SUPPORTED_STRING);
 
-SSATmp* elemImpl(IRGS& env, MOpMode mode, SSATmp* key) {
+DimResult elemImpl(IRGS& env, MOpMode mode, SSATmp* key) {
   auto const unset = mode == MOpMode::Unset;
   auto const define = mode == MOpMode::Define;
 
@@ -1167,11 +1214,11 @@ SSATmp* elemImpl(IRGS& env, MOpMode mode, SSATmp* key) {
     constrainBase(env);
     if (baseType <= TStr) {
       gen(env, RaiseError, cns(env, s_OP_NOT_SUPPORTED_STRING.get()));
-      return ptrToUninit(env);
+      return DimResult{cns(env, TBottom), nullptr};
     }
 
     if (!baseType.maybe(TClsMeth | TArrLike | TObj)) {
-      return ptrToUninit(env);
+      return DimResult{ptrToUninit(env), cns(env, TUninit)};
     }
   }
 
@@ -1179,17 +1226,21 @@ SSATmp* elemImpl(IRGS& env, MOpMode mode, SSATmp* key) {
   auto const data = MOpModeData { mode };
   if (define || unset) {
     auto const op = define ? ElemDX : ElemUX;
-    return gen(env, op, data, base, key);
+    return DimResult{
+      gen(env, op, data, base, key),
+      nullptr
+    };
   }
   auto const value = gen(env, ElemX, data, base, key);
-  return baseValueToLval(env, value);
+  return DimResult{baseValueToLval(env, value), value};
 }
 
 template<class Finish>
 SSATmp* cGetPropImpl(IRGS& env, SSATmp* base, SSATmp* key,
                      MOpMode mode, bool nullsafe, Finish finish, ReadonlyOp op) {
+  auto const baseType = env.irb->fs().mbase().type;
   auto const propInfo =
-    getCurrentPropertyOffset(env, base, key->type(), false);
+    getCurrentPropertyOffset(env, base, key->type(), baseType, false);
   if (propInfo) {
     if (RO::EvalEnableReadonlyPropertyEnforcement && propInfo->readOnly &&
       op == ReadonlyOp::Mutable) {
@@ -1199,10 +1250,11 @@ SSATmp* cGetPropImpl(IRGS& env, SSATmp* base, SSATmp* key,
         return cns(env, TBottom);
       }
     }
-    auto propAddr =
-      emitPropSpecialized(env, base, key, nullsafe, mode, *propInfo).first;
-    auto const ty = propAddr->type().deref();
-    auto const result = gen(env, LdMem, ty, propAddr);
+    auto propAddr = emitPropSpecialized(
+      env, base, key, nullsafe, mode, *propInfo,
+      baseType
+    ).first;
+    auto const result = gen(env, LdMem, propInfo->knownType, propAddr);
     auto const profres = profiledType(env, result, [&] {
       gen(env, IncRef, result);
       finish(result);
@@ -1268,11 +1320,12 @@ Block* makeCatchSet(IRGS& env, uint32_t nDiscard) {
 SSATmp* setPropImpl(IRGS& env, uint32_t nDiscard, SSATmp* key, ReadonlyOp op) {
   auto const value = topC(env, BCSPRelOffset{0}, DataTypeGeneric);
 
+  auto const baseType = env.irb->fs().mbase().type;
   auto const base = extractBaseIfObj(env);
 
   auto const mode = MOpMode::Define;
   auto const propInfo =
-    getCurrentPropertyOffset(env, base, key->type(), true);
+    getCurrentPropertyOffset(env, base, key->type(), baseType, true);
 
   if (propInfo && !propInfo->isConst) {
     if (RO::EvalEnableReadonlyPropertyEnforcement && !propInfo->readOnly &&
@@ -1291,7 +1344,8 @@ SSATmp* setPropImpl(IRGS& env, uint32_t nDiscard, SSATmp* key, ReadonlyOp op) {
       key,
       false,
       mode,
-      *propInfo
+      *propInfo,
+      baseType
     );
 
     SSATmp* newVal = nullptr;
@@ -1308,8 +1362,7 @@ SSATmp* setPropImpl(IRGS& env, uint32_t nDiscard, SSATmp* key, ReadonlyOp op) {
       &newVal
     );
 
-    auto const propTy = propPtr->type().deref();
-    auto const oldVal = gen(env, LdMem, propTy, propPtr);
+    auto const oldVal = gen(env, LdMem, propInfo->knownType, propPtr);
     gen(env, IncRef, newVal);
     gen(env, StMem, propPtr, newVal);
     decRef(env, oldVal);
@@ -1367,7 +1420,7 @@ SSATmp* emitArrayLikeSet(IRGS& env, SSATmp* key, SSATmp* value) {
 
   auto const baseLoc = ldMBase(env);
   if (!canUpdateCanonicalBase(baseLoc)) {
-    gen(env, SetElem, baseLoc, key, value);
+    gen(env, SetElem, baseType, baseLoc, key, value);
     return value;
   }
 
@@ -1397,7 +1450,6 @@ void setNewElemVecImpl(IRGS& env, uint32_t nDiscard, SSATmp* basePtr,
       auto const elemPtr = gen(
         env,
         LdVecElemAddr,
-        TLvalToElemUninit,
         base,
         offset
       );
@@ -1479,7 +1531,8 @@ SSATmp* setElemImpl(IRGS& env, uint32_t nDiscard, SSATmp* key) {
       // We load the member base pointer before calling makeCatchSet() to avoid
       // mismatched in-states for any catch block edges we emit later on.
       auto const basePtr = ldMBase(env);
-      auto const result = gen(env, SetElem, makeCatchSet(env, nDiscard),
+      auto const result = gen(env, SetElem, baseType,
+                              makeCatchSet(env, nDiscard),
                               basePtr, key, value);
       auto const t = result->type();
       if (!baseType.maybe(TStr) || t == TNullptr) {
@@ -1529,21 +1582,20 @@ SSATmp* memberKey(IRGS& env, MemberKey mk) {
 
 SSATmp* ldPropAddr(IRGS& env, SSATmp* obj, Block* taken,
                    const Class* cls, Slot slot, const Type& type) {
-  assert(type <= TCell);
-  assert(cls != nullptr);
+  assertx(type <= TCell);
+  assertx(cls != nullptr);
   assertx(slot != kInvalidSlot);
 
-  auto const lval = type.lval(Ptr::Prop);
   auto const data = IndexData { cls->propSlotToIndex(slot) };
 
-  return taken ? gen(env, LdInitPropAddr, taken, data, lval, obj)
-               : gen(env, LdPropAddr, data, lval, obj);
+  return taken ? gen(env, LdInitPropAddr, taken, data, obj)
+               : gen(env, LdPropAddr, data, obj);
 }
 
 SSATmp* ptrToInitNull(IRGS& env) {
   // Nothing is allowed to write anything to the init null variant, so this
   // inner type is always true.
-  return cns(env, Type::cns(&immutable_null_base, TLvalToOtherInitNull));
+  return cns(env, Type::cns(&immutable_null_base, TLvalToOther));
 }
 
 bool canUpdateCanonicalBase(SSATmp* baseLoc) {
@@ -1555,8 +1607,7 @@ bool canUpdateCanonicalBase(SSATmp* baseLoc) {
       break;
     default: {
       auto const t = baseLoc->type();
-      if (t.maybe(TMemToFrameCell) ||
-          t.maybe(TMemToStkCell)) {
+      if (t.maybe(TMemToFrame) || t.maybe(TMemToStk)) {
         // We don't handle these, as anything simple would require killing all
         // frame and stack info in frame state (currently framestate asserts we
         // don't stmem to ptrs of this type for this reason).
@@ -1638,16 +1689,12 @@ void emitBaseSC(IRGS& env,
 
   gen(env, StMROProp, cns(env, false));
   const LdClsPropOptions opts { op, true, false, writeMode };
-  auto const spropPtr = ldClsPropAddr(env, cls, name, opts).propPtr;
-  stMBase(env, spropPtr);
+  auto const lookup = ldClsPropAddr(env, cls, name, opts);
+  stMBase(env, lookup.propPtr, nullptr, lookup.knownType);
 }
 
 void emitBaseL(IRGS& env, NamedLocal loc, MOpMode mode, ReadonlyOp op) {
-  stMBase(env, ldLocAddr(env, loc.id));
-  gen(env, StMROProp, cns(env, false));
-
   auto base = ldLoc(env, loc.id, DataTypeGeneric);
-
   if (!base->type().isKnownDataType()) PUNT(unknown-BaseL);
 
   if (base->isA(TUninit) && mode == MOpMode::Warn) {
@@ -1656,6 +1703,8 @@ void emitBaseL(IRGS& env, NamedLocal loc, MOpMode mode, ReadonlyOp op) {
                             "emitBaseL: Uninit base local");
     gen(env, ThrowUninitLoc, cns(env, baseName));
   }
+
+  gen(env, StMROProp, cns(env, false));
 
   if (RO::EvalEnableReadonlyPropertyEnforcement &&
     (op == ReadonlyOp::CheckROCOW || op == ReadonlyOp::CheckMutROCOW)) {
@@ -1666,36 +1715,32 @@ void emitBaseL(IRGS& env, NamedLocal loc, MOpMode mode, ReadonlyOp op) {
     }
   }
 
-  env.irb->fs().setMemberBase(base);
+  stMBase(env, ldLocAddr(env, loc.id), base);
 }
 
 void emitBaseC(IRGS& env, uint32_t idx, MOpMode mode) {
   auto const bcOff = BCSPRelOffset{safe_cast<int32_t>(idx)};
-  stMBase(env, ldStkAddr(env, bcOff));
+  stMBase(env, ldStkAddr(env, bcOff), topC(env, bcOff));
   gen(env, StMROProp, cns(env, false));
-
-  auto base = topC(env, bcOff);
-  env.irb->fs().setMemberBase(base);
 }
 
 void emitBaseH(IRGS& env) {
   if (!curClass(env)) return interpOne(env);
 
   auto const base = ldThis(env);
-  stMBase(env, baseValueToLval(env, base));
+  stMBase(env, baseValueToLval(env, base), base);
   gen(env, StMROProp, cns(env, false));
-  env.irb->fs().setMemberBase(base);
 }
 
 void emitDim(IRGS& env, MOpMode mode, MemberKey mk) {
   auto const key = memberKey(env, mk);
-  auto const base = [&] {
+  auto const result = [&] {
     if (mcodeIsProp(mk.mcode)) return propImpl(env, mode, key, mk.mcode == MQT, mk.rop);
     if (mcodeIsElem(mk.mcode)) return elemImpl(env, mode, key);
     PUNT(DimNewElem);
   }();
 
-  stMBase(env, base);
+  stMBase(env, result.newBasePtr, result.newBase, result.newBaseType);
   if (mcodeIsElem(mk.mcode)) checkElemDimForReadonly(env);
 }
 
@@ -1854,8 +1899,9 @@ SSATmp* inlineSetOp(IRGS& env, SetOpOp op, SSATmp* lhs, SSATmp* rhs) {
 template<class Finish>
 SSATmp* setOpPropImpl(IRGS& env, SetOpOp op, SSATmp* base,
                       SSATmp* key, SSATmp* rhs, Finish finish) {
+  auto const baseType = env.irb->fs().mbase().type;
   auto const propInfo =
-    getCurrentPropertyOffset(env, base, key->type(), false);
+    getCurrentPropertyOffset(env, base, key->type(), baseType, false);
 
   if (propInfo && !propInfo->isConst) {
     SSATmp* propPtr;
@@ -1866,12 +1912,12 @@ SSATmp* setOpPropImpl(IRGS& env, SetOpOp op, SSATmp* base,
       key,
       false,
       MOpMode::Define,
-      *propInfo
+      *propInfo,
+      baseType
     );
     assertx(obj != nullptr);
 
-    auto const lhs = gen(env, LdMem, propPtr->type().deref(), propPtr);
-
+    auto const lhs = gen(env, LdMem, propInfo->knownType, propPtr);
 
     auto const handleShuffle = [&](SSATmp* result) {
       verifyPropType(
@@ -1922,7 +1968,7 @@ SSATmp* setOpPropImpl(IRGS& env, SetOpOp op, SSATmp* base,
         return true;
       }
       if (op != SetOpOp::ConcatEqual) return false;
-      if (propPtr->type().deref() <= TStr) return true;
+      if (propInfo->knownType <= TStr) return true;
       return propInfo->typeConstraint->alwaysPasses(KindOfString);
     }();
 
@@ -1931,7 +1977,7 @@ SSATmp* setOpPropImpl(IRGS& env, SetOpOp op, SSATmp* base,
     } else {
       gen(env, SetOpTV, SetOpData{op}, propPtr, rhs);
     }
-    auto newVal = gen(env, LdMem, propPtr->type().deref(), propPtr);
+    auto newVal = gen(env, LdMem, propInfo->knownType, propPtr);
     auto const pNewVal = profiledType(env, newVal, [&] {
       gen(env, IncRef, newVal);
       finish(newVal);
@@ -2039,7 +2085,7 @@ void checkElemDimForReadonly(IRGS& env) {
     env,
     [&] (Block* taken) {
       gen(env, JmpZero, taken, gen(env, LdMROProp));
-      auto const mbr = gen(env, LdMBase, TLvalToCell);
+      auto const mbr = gen(env, LdMBase, TLval);
       gen(env, CheckMBase, TObj, taken, mbr);
     },
     [&] {

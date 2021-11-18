@@ -121,7 +121,7 @@ using StackStateMap = jit::hash_map<SBInvOffset,StackState,SBInvOffset::Hash>;
 struct MBRState {
   SSATmp* ptr{nullptr};
   AliasClass pointee{AEmpty}; // defaults to "invalid", not "Top"
-  Type ptrType{TLvalToCell};
+  Type ptrType{TLval};
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -396,6 +396,7 @@ struct FrameStateMgr final {
    * Set the value and type for mbase() or mbr().
    */
   void setMemberBase(SSATmp* base);
+  void setMemberBaseType(Type);
   void setMBR(SSATmp* base);
 
   /*

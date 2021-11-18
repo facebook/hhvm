@@ -192,11 +192,11 @@ Instruction set
   If S0 is not a null pointer, branch to block B. This is used to check the
   return value of a native helper that returns a potentially null StringData*.
 
-| AssertType<T>, DRefineS(0), S(Cell,MemToCell), P
+| AssertType<T>, DRefineS(0), S(Cell,Mem), P
 
   Assert that the type of S0 is T, copying it to D.
 
-| CheckTypeMem<T>, ND, S(MemToCell), B
+| CheckTypeMem<T>, ND, S(Mem), B
 
   If the value pointed to by S0 is not type T, branch to the block B.
 
@@ -215,7 +215,7 @@ Instruction set
   Check that the type of the cell on the stack pointed to by S0 at offset (in
   cells) is T; if not, branch to block B.
 
-| CheckMBase<T>, ND, S(LvalToCell), B
+| CheckMBase<T>, ND, S(Lval), B
 
   Check that the value pointed to by the member base register S0 has type T; if
   not, branch to block B.  This is functionally the same as CheckTypeMem.
@@ -248,7 +248,7 @@ Instruction set
 
   If S0's type is Uninit, branch to block B.
 
-| CheckInitMem, ND, S(MemToCell), B
+| CheckInitMem, ND, S(Mem), B
 
   If the value pointed to by S0 has type Uninit, branch to block B.
 
@@ -263,7 +263,7 @@ Instruction set
   A no-op at runtime, this instruction serves to mark the end of the initial
   sequence of guards in a trace.
 
-| CheckNonNull, DSubtract(0, Nullptr), S(Cls|Func|Obj|Str|MemToCell|TCA|Nullptr), B
+| CheckNonNull, DSubtract(0, Nullptr), S(Cls|Func|Obj|Str|Mem|TCA|Nullptr), B
 
   If the value in S0 is Nullptr, branch to block B. If S0 cannot be Nullptr, or
   always is Nullptr, this check may be optimized away.
@@ -464,7 +464,7 @@ To string conversions:
   If S0 is a string representing an integer value (same criteria as array key
   conversion), return that value as an integer. Otherwise return S0.
 
-| ConvPtrToLval,               DLvalOfPtr, S(PtrToCell),                  NF
+| ConvPtrToLval,               DLvalOfPtr, S(Ptr),                        NF
 
   Convert S0 to an equivalent lval.
 
@@ -731,7 +731,7 @@ To string conversions:
   Sets D to true iff S0 holds a value that is not of type T. T must not be a
   specialized type.
 
-| IsTypeMem<T>, D(Bool), S(MemToCell), NF
+| IsTypeMem<T>, D(Bool), S(Mem), NF
 
   Sets D to true iff the value referenced by S0 is of type T. T must not be a
   specialized type.
@@ -739,7 +739,7 @@ To string conversions:
   The value in S0 must not be a pointer into the evaluation stack or frame
   locals.
 
-| IsNTypeMem<T>, D(Bool), S(MemToCell), NF
+| IsNTypeMem<T>, D(Bool), S(Mem), NF
 
   Sets D to true iff the value referenced by S0 is not of type T. T must not be
   a specialized type.
@@ -869,31 +869,29 @@ To string conversions:
   Note that it does not perform the local optimizations that LdLoc does.
   Users of this opcode need to ensure that the local is not optimized away.
 
-| LdStkAddr<offset>, D(PtrToStkCell), S(StkPtr), NF
+| LdStkAddr<offset>, D(PtrToStk), S(StkPtr), NF
 
   Loads the address of the stack slot given by the pointer in S0 at the given
   stack offset (measured in cells).
 
-| LdLocAddr<localId>, D(PtrToFrameCell), S(FramePtr), NF
+| LdLocAddr<localId>, D(PtrToFrame), S(FramePtr), NF
 
   Loads the address of the local slot localId from the frame S0 into D.
 
-| LdRDSAddr<T,RDSHandle>, DParam(PtrToCell), NA, NF
+| LdRDSAddr<T,RDSHandle>, DParam(Ptr), NA, NF
 
-  Load the address of a Cell that lives at the specified RDS handle. The type
-  param must be a subtype of PtrToCell.
+  Load the address of a Cell that lives at the specified RDS handle.
 
-| LdInitRDSAddr<T,RDSHandle>, DParam(PtrToInitCell), NA, B
+| LdInitRDSAddr<T,RDSHandle>, DParam(Ptr), NA, B
 
   Load the address of a Cell that lives at the specified RDS handle. Branch if
-  the value at that address is Uninit. The type param must be a subtype of
-  PtrToInitCell.
+  the value at that address is Uninit.
 
 | LdPairElem, D(InitCell), S(Obj) S(Int), NF
 
   Load the element at S1 out of the Pair collection at S0.
 
-| LdMem<T>, DParam(Cell), S(MemToCell), NF
+| LdMem<T>, DParam(Cell), S(Mem), NF
 
   Loads from S0 and puts the value in D.
 
@@ -907,7 +905,7 @@ To string conversions:
   Loads a property from the object referenced by S0 at the offset given by S1
   and puts the value in D. S0 must be a Generator.
 
-| LdClsInitElem<idx>, D(Cell), S(PtrToClsInitCell), NF
+| LdClsInitElem<idx>, D(Cell), S(PtrToClsInit), NF
 
   Load the cell at index `idx` from the class init vector at S0 into D0.
 
@@ -929,9 +927,9 @@ To string conversions:
   DataTypeSpecific-or-better type for the iterator's base; for example, it may
   be based on an earlier call to CheckIter.
 
-| LdIterPos<T,iterId>, DParam(Int|PtrToElemCell), S(FramePtr), NF
+| LdIterPos<T,iterId>, DParam(Int|PtrToElem), S(FramePtr), NF
 
-| LdIterEnd<T,iterId>, DParam(Int|PtrToElemCell), S(FramePtr), NF
+| LdIterEnd<T,iterId>, DParam(Int|PtrToElem), S(FramePtr), NF
 
   Load the specified field of the iterator at `iterId`. These ops should only
   be generated for iterators known to have a specialized type (via CheckIter).
@@ -995,7 +993,7 @@ To string conversions:
   Loads the class whose name is S0 out of the RDS. If the class is not defined,
   branch to B.
 
-| LdClsInitData, D(PtrToClsInitCell), S(Cls), NF
+| LdClsInitData, D(PtrToClsInit), S(Cls), NF
 
   Loads the pointer to the property initializer array for class S0.
 
@@ -1153,22 +1151,21 @@ To string conversions:
   method. Returns nullptr if it is an instance method defined in S2's class
   hierarchy, indicating that this legacy call should be handled by interpreter.
 
-| LdPropAddr<T,index>, DParam(LvalToPropCell), S(Obj), NF
+| LdPropAddr<T,index>, D(LvalToProp), S(Obj), NF
 
-  Load the address of the object property at physical index `index`. T must be a
-  subtype of PtrToPropInitCell.
+  Load the address of the object property at physical index `index`.
 
-| LdInitPropAddr<T,index>, DParam(LvalToPropCell), S(Obj), B
+| LdInitPropAddr<T,index>, D(LvalToProp), S(Obj), B
 
   Load the address of the object property at physical index `index`. Branch if
-  the value at that address is Uninit. T must be a subtype of PtrToPropInitCell.
+  the value at that address is Uninit.
 
-| LdGblAddr, D(LvalToGblCell|Nullptr), S(Str), NF
+| LdGblAddr, D(LvalToGbl|Nullptr), S(Str), NF
 
   Loads a pointer to a global with name S0, or a null lval if that global is
   not already defined.
 
-| LdGblAddrDef, D(LvalToGblCell), S(Str), NF
+| LdGblAddrDef, D(LvalToGbl), S(Str), NF
 
   Loads a pointer to a global with name S0, defining it to be InitNull if it
   is not already defined.
@@ -1177,7 +1174,7 @@ To string conversions:
 
   Profile an (attempted) access of a global with name S0.
 
-| LdClsPropAddrOrNull<readonly op>, D(PtrToSPropCell|Nullptr), S(Cls) S(Str)
+| LdClsPropAddrOrNull<readonly op>, D(PtrToSProp|Nullptr), S(Cls) S(Str)
 |                     C(Cls|Nullptr) C(Bool) C(Bool), NF
 
   Loads a pointer to a static class property. S0 points to the class, S1 is the
@@ -1189,7 +1186,7 @@ To string conversions:
   and the property is constant. An exception is also thrown if there is a
   readonly violation with the readonly op.
 
-| LdClsPropAddrOrRaise<readonly op>, D(PtrToSPropCell), S(Cls) S(Str)
+| LdClsPropAddrOrRaise<readonly op>, D(PtrToSProp), S(Cls) S(Str)
 |                       C(Cls|Nullptr) C(Bool) C(Bool), NF
 
   Loads a pointer to a static class property. S0 points to the class, S1 is the
@@ -1592,7 +1589,7 @@ To string conversions:
   Execute a call to the native builtin specified by the current function. S0
   and S1 should be the current vmfp and vmsp, respectively.
 
-| CallBuiltin, DBuiltin, S(FramePtr) S(StkPtr) SVar(MemToCell,Cell,Nullptr), PRc
+| CallBuiltin, DBuiltin, S(FramePtr) S(StkPtr) SVar(Mem,Cell,Nullptr), PRc
 
   Call builtin function with N arguments. S0 and S1 should be the current vmfp
   and vmsp, respectively.
@@ -1605,11 +1602,11 @@ To string conversions:
     bool                Bool              source, destination
     int64_t             Int               source, destination
     double              Dbl               source, destination
-    const String&       PtrToStr          source
-    const Array&        PtrToArr          source
-    const Object&       PtrToObj          source
-    const Variant&      PtrToCell         source
-    Variant&            PtrToCell         source (ref param)
+    const String&       Ptr               source
+    const Array&        Ptr               source
+    const Object&       Ptr               source
+    const Variant&      Ptr               source
+    Variant&            Ptr               source (ref param)
     String              {Str|InitNull}    destination
     Array               {Arr|InitNull}    destination
     Object              {Obj|InitNull}    destination
@@ -1705,11 +1702,11 @@ To string conversions:
 
   Store the type of S1 to pointer S0.
 
-| StClsInitElem<idx>, ND, S(PtrToClsInitCell) S(Cell), NF
+| StClsInitElem<idx>, ND, S(PtrToClsInit) S(Cell), NF
 
   Store S1 into the slot at index `idx` in the class init vector at S0.
 
-| StMem, ND, S(MemToCell) S(Cell), NF
+| StMem, ND, S(Mem) S(Cell), NF
 
   Store S1 into the location pointed to by S0.
 
@@ -1741,9 +1738,9 @@ To string conversions:
   Sets the type of the iterator at `iterId` to `iterType`. This type must be a
   specialized type. Also sets auxiliary fields (like next helper index).
 
-| StIterPos<iterId>, ND, S(FramePtr) S(Int|PtrToElemCell), NF
+| StIterPos<iterId>, ND, S(FramePtr) S(Int|PtrToElem), NF
 
-| StIterEnd<iterId>, ND, S(FramePtr) S(Int|PtrToElemCell), NF
+| StIterEnd<iterId>, ND, S(FramePtr) S(Int|PtrToElem), NF
 
   Store S1 to the given field of the iterator at `iterId`. S1 must be an int if
   we're doing index iteration and a pointer if we're doing pointer iteration.
@@ -1761,12 +1758,12 @@ To string conversions:
   Store S1 in a caller allocated out-value vm stack cell index cells above
   S0 on the stack.
 
-| LdOutAddr<index>, D(PtrToOtherCell), S(FramePtr), NF
+| LdOutAddr<index>, D(PtrToOther), S(FramePtr), NF
 
   Load the address of the storage for out parameter `index` provided by the
   callee (the address will be a location on the callee stack).
 
-| LdOutAddrInlined<index>, D(PtrToStkCell), S(FramePtr), NF
+| LdOutAddrInlined<index>, D(PtrToStk), S(FramePtr), NF
 
   Load the address of the storage for out parameter `index`. For an inlined
   frame, this is an address on the caller's stack.
@@ -2318,7 +2315,7 @@ To string conversions:
   Returns a bool indicating whether the class, interface, or trait named by S0
   exists. Invokes autoload if S1 is true.
 
-| SetOpTV<op>, ND, S(LvalToCell) S(Cell), NF
+| SetOpTV<op>, ND, S(Lval) S(Cell), NF
 
   Performs S0 <op>= S1.
 
@@ -2577,7 +2574,7 @@ To string conversions:
   slots starting at the offset (in cells), and going toward higher memory
   addresses.
 
-| DbgTrashMem, ND, S(MemToCell), NF
+| DbgTrashMem, ND, S(Mem), NF
 
   For debugging purposes.  Store kTVTrashJITHeap to a heap slot pointed to by
   S0.
@@ -2661,47 +2658,45 @@ To string conversions:
   We can use this operation to elide stores for iterator fields that do not
   get loaded again. In debug builds, it will write poison values to the fields.
 
-| GetDictPtrIter,  DPtrIter, S(Dict) S(Int), NF
+| GetDictPtrIter, D(PtrToElem), S(Dict) S(Int), NF
 
   Returns a pointer to the elm S1 of a mixed-layout array S0. S1 does not need
   to be a valid array position; for example, it may equal the size of the array
   (so that the "elm" returned is the pointer-iteration end for S0).
 
-| AdvanceDictPtrIter<offset>,  DPtrIter, S(PtrToElemCell), NF
+| AdvanceDictPtrIter<offset>, D(PtrToElem), S(PtrToElem), NF
 
   Increments the pointer S0 to the array element with the given layout `offset`
   positions forward. `offset` is allowed to be negative.
 
-| LdPtrIterKey<T>, DParam(Int|Str), S(PtrToElemCell), NF
+| LdPtrIterKey<T>, DParam(Int|Str), S(PtrToElem), NF
 
-| LdPtrIterVal<T>, DPtrIterVal, S(PtrToElemCell), NF
+| LdPtrIterVal<T>, DParam(InitCell), S(PtrToElem), NF
 
   Loads the key or val from the array element pointed to by S0. S0 must be a
   valid elm; that is, it can't point to the end of the array data. LdPtrIterKey
   can only be used for mixed elms, but LdPtrIterVal supports mixed and packed.
 
-  T must be a valid type for the array's keys - i.e., a subtype of TInt|TStr.
-  For LdPtrIterKey, T is used to type the result; if it's specific enough, we
-  skip doing a check on the type of the elm. For LdPtrIterVal, it's only used
-  to constrain the memory effects of the op.
+  T is used to type the result. For LdPtrIterKey, it must be a valid type for
+  the array's keys - i.e., a subtype of TInt|TStr.
 
-| EqPtrIter, D(Bool), S(PtrToElemCell) S(PtrToElemCell), NF
+| EqPtrIter, D(Bool), S(PtrToElem) S(PtrToElem), NF
 
   Compares two pointer iterators for equality.
 
 
 17. Member instruction support
 
-| LdMIStateAddr, D(PtrToMISCell), C(Int), NF
+| LdMIStateAddr, D(PtrToMIS), C(Int), NF
 
   Load an MInstrState address. Returns a pointer to offset S0 within the
   current MInstrState.
 
-| LdMBase, DParam(LvalToCell), NA, NF
+| LdMBase, DParam(Lval), NA, NF
 
   Load the current value of the member base register.
 
-| StMBase, ND, S(LvalToCell), NF
+| StMBase, ND, S(Lval), NF
 
   Store a new value to the member base register. It is illegal for any
   instruction other than StMBase or InterpOne (when interpreting a member
@@ -2757,56 +2752,56 @@ SetProp will fail if the base is not a subtype of {Obj|Null}.
 Any instructions that take a pointer to an MInstrState struct use the various
 fields of that struct for holding intermediate values.
 
-| BaseG, D(LvalToMembCell), S(Str), NF
+| BaseG, D(LvalToMemb), S(Str), NF
 
   Get a base from global named S0. If it is not a defining BaseG it can also
-  return the init_null_variant, so for now it returns a PtrToMembCell.
+  return the init_null_variant, so for now it returns a LvalToMemb.
 
-| PropX, D(LvalToMembCell), S(Obj,LvalToCell) S(Cell) S(PtrToMISCell), NF
+| PropX, D(LvalToMemb), S(Obj,Lval) S(Cell) S(PtrToMIS), NF
 
   Lookup intermediate property in S0, with key S1. An exception is thrown if
   the property is Readonly when it was required to be Mutable.
 
-| PropQ, D(LvalToMembCell), S(Obj,LvalToCell) S(StaticStr) S(PtrToMISCell), NF
+| PropQ, D(LvalToMemb), S(Obj,Lval) S(StaticStr) S(PtrToMIS), NF
 
   A nullsafe version of PropX, returns null if the base S0 is null. An exception
   is thrown if the property is Readonly when it was required to be Mutable.
 
-| PropDX, D(LvalToMembCell), S(Obj,LvalToCell) S(Cell) S(PtrToMISCell), MProp
+| PropDX, D(LvalToMemb), S(Obj,Lval) S(Cell) S(PtrToMIS), MProp
 
   Like PropX, but used for intermediate element lookups that may modify the
   base. An exception is thrown if the property is Readonly when it was
   required to be Mutable.
 
-| CGetProp, D(InitCell), S(Obj,LvalToCell) S(Cell), PRc
+| CGetProp, D(InitCell), S(Obj,Lval) S(Cell), PRc
 
   Get property with key S1 from S0.
 
-| CGetPropQ, D(InitCell), S(Obj,LvalToCell) S(StaticStr), PRc
+| CGetPropQ, D(InitCell), S(Obj,Lval) S(StaticStr), PRc
 
   A nullsafe version of CGetProp, returns null if the base S0 is null.
 
-| SetProp, ND, S(Obj,LvalToCell) S(Cell) S(Cell), MProp
+| SetProp, ND, S(Obj,Lval) S(Cell) S(Cell), MProp
 
   Set property with key S1 in S0 to S2.
 
-| UnsetProp, ND, S(Obj,LvalToCell) S(Cell), NF
+| UnsetProp, ND, S(Obj,Lval) S(Cell), NF
 
   Unset an object property.
 
-| SetOpProp<op>, D(InitCell), S(Obj,LvalToCell) S(Cell) S(Cell), MProp|PRc
+| SetOpProp<op>, D(InitCell), S(Obj,Lval) S(Cell) S(Cell), MProp|PRc
 
   Set op propery with key S1 in base S0, using S2 as the right hand side.
 
-| IncDecProp<op>, D(InitCell), S(Obj,LvalToCell) S(Cell), MProp|PRc
+| IncDecProp<op>, D(InitCell), S(Obj,Lval) S(Cell), MProp|PRc
 
   Increment/decrement property with key S1 in base S0.
 
-| IssetProp, D(Bool), S(Obj,LvalToCell) S(Cell), NF
+| IssetProp, D(Bool), S(Obj,Lval) S(Cell), NF
 
   Returns true iff the property with key S1 in base S0 is set.
 
-| ElemX, D(InitCell), S(LvalToCell) S(Cell), NF
+| ElemX, D(InitCell), S(Lval) S(Cell), NF
 
   Get intermediate element with key S1 from base S0. The base will not be
   modified and the result will not be inc-ref-ed.
@@ -2848,40 +2843,40 @@ fields of that struct for holding intermediate values.
   If S1 may be present, branches to block B. If we branch here, the key may or
   may not be present.
 
-| ElemVecD, D(LvalToElemInitCell), S(LvalToVec) S(Int), MElem
+| ElemVecD, D(LvalToElem), S(Lval) S(Int), MElem
 
-| ElemVecU, D(LvalToMembInitCell), S(LvalToVec) S(Int), MElem
+| ElemVecU, D(LvalToMemb), S(Lval) S(Int), MElem
 
   Similar to ElemX, but the base S0 is a vec and the key S1 is an int. ElemVecD
   is for Define member instrs and ElemVecU is for Unset. (Other variations can
   be implemented without special IR instructions).
 
-| ElemDictD, D(LvalToElemInitCell), S(LvalToDict) S(Int,Str), MElem
+| ElemDictD, D(LvalToElem), S(Lval) S(Int,Str), MElem
 
-| ElemDictU, D(LvalToMembInitCell), S(LvalToDict) S(Int,Str), MElem
+| ElemDictU, D(LvalToMemb), S(Lval) S(Int,Str), MElem
 
   Similar to ElemDX and ElemUX, but specialized for when the base S0 is a
   dict and the key S1 is an int/str.
 
-| ElemDictK, D(LvalToElemInitCell), S(Dict) S(Int,Str) S(Int), NF
+| ElemDictK, D(LvalToElem), S(Dict) S(Int,Str) S(Int), NF
 
   Returns an lval to the element of dict S0 at the known position S2 in S1.
 
-| ElemKeysetU, D(LvalToMembInitCell), S(LvalToKeyset) S(Int,Str), MElem
+| ElemKeysetU, D(LvalToMemb), S(Lval) S(Int,Str), MElem
 
   Similar to ElemUX, but specialized for when the base S0 is a keyset and the
   key S1 is an int/str. Keysets do not support the define syntax.
 
-| ElemKeysetK, D(LvalToElemInitCell), S(Keyset) S(Int,Str) S(Int), NF
+| ElemKeysetK, D(LvalToElem), S(Keyset) S(Int,Str) S(Int), NF
 
   Returns an lval to the element of keyset S0 at the known position S2 in S1.
 
-| ElemDX, D(LvalToMembCell), S(LvalToCell) S(Cell), MElem
+| ElemDX, D(LvalToMemb), S(Lval) S(Cell), MElem
 
   Like ElemX, but used for intermediate element lookups that may modify the
   base.
 
-| ElemUX, D(LvalToMembCell), S(LvalToCell) S(Cell), MElem
+| ElemUX, D(LvalToMemb), S(Lval) S(Cell), MElem
 
   Like ElemX, but used for intermediate element lookups that may modify the
   base as part of an unset operation.
@@ -2921,7 +2916,7 @@ fields of that struct for holding intermediate values.
 
   Get element with key S1 from base S0.
 
-| CGetElem, D(InitCell), S(LvalToCell) S(Cell), PRc
+| CGetElem, D(InitCell), S(Lval) S(Cell), PRc
 
   Get element with key S1 from S0.
 
@@ -3031,7 +3026,7 @@ fields of that struct for holding intermediate values.
   Get element with key S1 in the array S0, which may have an arbitrary layout.
   This op throws if the key is not in the array.
 
-| BespokeElem, DBespokeElemLval, S(LvalToArrLike) S(Int,Str) C(Bool), LA|MElem
+| BespokeElem, D(LvalToElem), S(Lval) S(Int,Str) C(Bool), LA|MElem
 
   Get a half-lval to an element of type T with key S1 in the array S0, which
   may have an arbitrary layout. The op will copy or escalate the S0 as needed,
@@ -3132,45 +3127,46 @@ fields of that struct for holding intermediate values.
 
   Set element with key S1 in S0 to S2.
 
-| SetElem, DSetElem, S(LvalToCell) S(Cell) S(InitCell), MElem
+| SetElem<T>, DSetElem, S(Lval) S(Cell) S(InitCell), MElem
 
   Set element with key S1 in S0 to S2. SetElem returns a Nullptr in the common
   case, where the logical result of the hhbc SetM is its right hand side. In
   the case of string bases, the SetM returns a new string containing the newly
   inserted character. So the return value of this instruction is Nullptr unless
-  SetM needed to return a static string.
+  SetM needed to return a static string. The type param is the known type of
+  the base that S0 points to.
 
   Furthermore, in the case of "invalid offsets", SetElem may throw an
   InvalidSetMException (see discussion above).
 
-| SetRange, ND, S(LvalToCell) S(Int) S(Cell) S(Int) S(Int), MElem
+| SetRange, ND, S(Lval) S(Int) S(Cell) S(Int) S(Int), MElem
 
-| SetRangeRev, ND, S(LvalToCell) S(Int) S(Cell) S(Int) S(Int), MElem
+| SetRangeRev, ND, S(Lval) S(Int) S(Cell) S(Int) S(Int), MElem
 
   Perform a range set or reverse range set operation, with the same arguments
   and semantics as the RangeSet bytecode instruction.
 
-| UnsetElem, ND, S(LvalToCell) S(Cell), MElem
+| UnsetElem, ND, S(Lval) S(Cell), MElem
 
   Unsets the element at key S1 in the base S0.
 
-| SetOpElem<op>, D(InitCell), S(LvalToCell) S(Cell) S(Cell),  MElem|PRc
+| SetOpElem<op>, D(InitCell), S(Lval) S(Cell) S(Cell),  MElem|PRc
 
   Set op elem with key S1 in base S0, using S2 as the right hand side.
 
-| IncDecElem, D(InitCell), S(LvalToCell) S(Cell), MElem|PRc
+| IncDecElem, D(InitCell), S(Lval) S(Cell), MElem|PRc
 
   Increment/decrement element with key S1 in base S0.
 
-| SetNewElem, ND, S(LvalToCell) S(InitCell), MElem
+| SetNewElem, ND, S(Lval) S(InitCell), MElem
 
   Append the value in S1 to S0.
 
-| SetNewElemDict,   ND, S(LvalToDict) S(InitCell),  MElem
+| SetNewElemDict,   ND, S(Lval) S(InitCell),  MElem
 
-| SetNewElemVec,    ND, S(LvalToVec)  S(InitCell),  MElem
+| SetNewElemVec,    ND, S(Lval)  S(InitCell),  MElem
 
-| SetNewElemKeyset, ND, S(LvalToKeyset) S(Int,Str), MElem
+| SetNewElemKeyset, ND, S(Lval) S(Int,Str), MElem
 
   Specializations of SetNewElem for pointers to dicts, vecs, and keysets.
 
@@ -3198,7 +3194,7 @@ fields of that struct for holding intermediate values.
 
   Returns true iff the element at key S1 in the base S0 is set.
 
-| IssetElem, D(Bool), S(LvalToCell) S(Cell), NF
+| IssetElem, D(Bool), S(Lval) S(Cell), NF
 
   Returns true iff the element at key S1 in S0 is set.
 
@@ -3304,11 +3300,11 @@ fields of that struct for holding intermediate values.
   Checks that the index in S1 is within the bounds of the packed array or
   vector array in S0. Branches to B if the index is out of bounds.
 
-| LdVecElemAddr<T>, DParam(LvalToElemCell), S(Vec) S(Int), NF
+| LdVecElemAddr, D(LvalToElem), S(Vec) S(Int), NF
 
-  Loads the address of the element at index S1 of the packed array or vec array
-  in S0. This instruction assumes the array actually contains an element at
-  that offset (IE, the array has the proper length).
+  Loads the address of the element at index S1 of the vec array in S0. This
+  instruction assumes the array actually contains an element at that offset
+  (IE, the array has the proper length).
 
 | ReserveVecNewElem, D(Int), S(Vec), B
 

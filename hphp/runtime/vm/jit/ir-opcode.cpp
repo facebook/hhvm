@@ -63,7 +63,6 @@ TRACE_SET_MOD(hhir);
 #define DArrLikeAppend HasDest
 #define DKeysetElem    HasDest
 #define DEscalateToVanilla HasDest
-#define DBespokeElemLval  HasDest
 #define DVecKey           HasDest
 #define DFirstElem        HasDest
 #define DLastElem         HasDest
@@ -82,8 +81,6 @@ TRACE_SET_MOD(hhir);
 #define DUnion(...)    HasDest
 #define DMemoKey       HasDest
 #define DLvalOfPtr     HasDest
-#define DPtrIter       HasDest
-#define DPtrIterVal    HasDest
 #define DTypeCnsClsName HasDest
 #define DVerifyParamFail HasDest
 
@@ -136,7 +133,6 @@ OpInfo g_opInfo[] = {
 #undef DDictElem
 #undef DKeysetElem
 #undef DEscalateToVanilla
-#undef DBespokeElemLval
 #undef DVecFirstElem
 #undef DVecLastElem
 #undef DVecKey
@@ -160,8 +156,6 @@ OpInfo g_opInfo[] = {
 #undef DUnion
 #undef DMemoKey
 #undef DLvalOfPtr
-#undef DPtrIter
-#undef DPtrIterVal
 #undef DTypeCnsClsName
 #undef DVerifyParamFail
 

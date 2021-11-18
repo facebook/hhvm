@@ -227,7 +227,7 @@ void cgCheckNonNull(IRLS& env, const IRInstruction* inst) {
   fwdJcc(v, env, CC_Z, sf, inst->taken());
   v << copy{src, dst};
   auto const regs = inst->dst()->numWords();
-  assertx(regs == 1 || (inst->dst()->isA(TLvalToCell) && regs == 2));
+  assertx(regs == 1 || (inst->dst()->isA(TLval) && regs == 2));
   if (regs == 2) {
     v << copy{srcLoc(env, inst, 0).reg(1), dstLoc(env, inst, 0).reg(1)};
   }
@@ -265,7 +265,6 @@ void cgCheckInitMem(IRLS& env, const IRInstruction* inst) {
   assertx(inst->taken());
 
   auto const src = inst->src(0);
-  if (!src->type().deref().maybe(TUninit)) return;
 
   auto const ptrLoc = srcLoc(env, inst, 0);
   auto& v = vmain(env);

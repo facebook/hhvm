@@ -29,8 +29,8 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-void bindMem(IRGS& env, SSATmp* ptr, SSATmp* src) {
-  auto const prevValue = gen(env, LdMem, ptr->type().deref(), ptr);
+void bindMem(IRGS& env, SSATmp* ptr, SSATmp* src, Type prevTy) {
+  auto const prevValue = gen(env, LdMem, prevTy, ptr);
   pushIncRef(env, src);
   gen(env, StMem, ptr, src);
   decRef(env, prevValue);
@@ -84,7 +84,6 @@ ClsPropLookup ldClsPropAddrKnown(IRGS& env,
 
   profileRDSAccess(env, handle);
 
-  auto const ptrTy = knownType.ptr(Ptr::SProp);
   auto data = ClassData { cls };
   auto const readonly = prop.attrs & AttrIsReadonly;
 
@@ -131,13 +130,19 @@ ClsPropLookup ldClsPropAddrKnown(IRGS& env,
 
   auto const addr = [&]{
     if (!(prop.attrs & AttrLateInit) || ignoreLateInit) {
-      return gen(env, LdRDSAddr, RDSHandleData { handle }, ptrTy);
+      return gen(env, LdRDSAddr, RDSHandleData { handle }, TPtrToSProp);
     }
 
     return cond(
       env,
       [&] (Block* taken) {
-        return gen(env, LdInitRDSAddr, RDSHandleData { handle }, taken, ptrTy);
+        return gen(
+          env,
+          LdInitRDSAddr,
+          RDSHandleData { handle },
+          taken,
+          TPtrToSProp
+        );
       },
       [&] (SSATmp* addr) { return addr; },
       [&] {
@@ -158,6 +163,7 @@ ClsPropLookup ldClsPropAddrKnown(IRGS& env,
 
   return {
     checkedAddr,
+    knownType,
     &prop.typeConstraint,
     &prop.ubs,
     slot,
@@ -177,7 +183,7 @@ ClsPropLookup ldClsPropAddr(IRGS& env, SSATmp* ssaCls, SSATmp* ssaName,
    * that it is visible && accessible, or we know it is a property on this
    * class itself.
    */
-  bool const sPropKnown = [&] {
+  auto const sPropKnown = [&] {
     if (!ssaName->hasConstVal()) return false;
     auto const propName = ssaName->strVal();
 
@@ -217,7 +223,13 @@ ClsPropLookup ldClsPropAddr(IRGS& env, SSATmp* ssaCls, SSATmp* ssaName,
     cns(env, opts.ignoreLateInit),
     cns(env, opts.writeMode)
   );
-  return { propAddr, nullptr, nullptr, kInvalidSlot };
+  return {
+    propAddr,
+    opts.ignoreLateInit ? TCell : TInitCell,
+    nullptr,
+    nullptr,
+    kInvalidSlot
+  };
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -230,8 +242,8 @@ void emitCGetS(IRGS& env, ReadonlyOp op) {
   if (!ssaCls->isA(TCls))      PUNT(CGetS-NotClass);
 
   const LdClsPropOptions opts { op, true, false, false };
-  auto const propAddr = ldClsPropAddr(env, ssaCls, ssaPropName, opts).propPtr;
-  auto const ldMem    = gen(env, LdMem, propAddr->type().deref(), propAddr);
+  auto const lookup = ldClsPropAddr(env, ssaCls, ssaPropName, opts);
+  auto const ldMem  = gen(env, LdMem, lookup.knownType, lookup.propPtr);
 
   discard(env);
   destroyName(env, ssaPropName);
@@ -275,7 +287,7 @@ void emitSetS(IRGS& env, ReadonlyOp op) {
 
   discard(env);
   destroyName(env, ssaPropName);
-  bindMem(env, lookup.propPtr, value);
+  bindMem(env, lookup.propPtr, value, lookup.knownType);
 }
 
 void emitSetOpS(IRGS& env, SetOpOp op) {
@@ -289,8 +301,7 @@ void emitSetOpS(IRGS& env, SetOpOp op) {
   const LdClsPropOptions opts { ReadonlyOp::Any, true, false, true };
   auto const lookup = ldClsPropAddr(env, ssaCls, ssaPropName, opts);
 
-  auto const lhs = gen(env, LdMem, lookup.propPtr->type().deref(),
-                       lookup.propPtr);
+  auto const lhs = gen(env, LdMem, lookup.knownType, lookup.propPtr);
 
   auto const finish = [&] (SSATmp* value) {
     if (lookup.tc) {
@@ -370,8 +381,7 @@ void emitIncDecS(IRGS& env, IncDecOp subop) {
   if (!ssaCls->isA(TCls))      PUNT(IncDecS-NotClass);
   const LdClsPropOptions opts { ReadonlyOp::Any, true, false, true };
   auto const lookup = ldClsPropAddr(env, ssaCls, ssaPropName, opts);
-  auto const oldVal =
-    gen(env, LdMem, lookup.propPtr->type().deref(), lookup.propPtr);
+  auto const oldVal = gen(env, LdMem, lookup.knownType, lookup.propPtr);
 
   auto const result = incDec(env, subop, oldVal);
   if (!result) PUNT(IncDecS);
@@ -455,7 +465,7 @@ void emitSetG(IRGS& env) {
 
   discard(env);
   destroyName(env, name);
-  bindMem(env, ptr, value);
+  bindMem(env, ptr, value, TCell);
 }
 
 void emitIssetG(IRGS& env) {
@@ -529,7 +539,7 @@ void emitInitProp(IRGS& env, const StringData* propName, InitPropOp op) {
         env,
         LdRDSAddr,
         RDSHandleData { handle },
-        TPtrToSPropCell
+        TPtrToSProp
       );
       gen(env, StMem, base, val);
     }

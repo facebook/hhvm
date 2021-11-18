@@ -1420,7 +1420,7 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
     auto const targetTy = param_target_type(callee, paramIdx);
 
     if (param.passByAddr) {
-      assertx(param.argValue->type() <= TMemToCell);
+      assertx(param.argValue->type() <= TMem);
       ret[argIdx++] = realize_param(
         env, param, callee, targetTy,
         [&] (const Type& ty, Block* fail) -> SSATmp* {

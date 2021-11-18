@@ -326,23 +326,6 @@ Type arrFirstLastReturn(const IRInstruction* inst, bool first, bool isKey) {
   return elem.first;
 }
 
-Type bespokeElemLvalReturn(const IRInstruction* inst) {
-  assertx(inst->is(BespokeElem));
-  assertx(inst->src(0)->type() <= TLvalToArrLike);
-  assertx(inst->src(2)->hasConstVal(TBool));
-
-  auto resultType = arrLikeElemType(
-      inst->src(0)->type().deref(), inst->src(1)->type(), inst->ctx());
-  auto const presentType = resultType.first;
-  if (inst->src(2)->boolVal()) {
-    return presentType.lval(Ptr::Elem);
-  } else {
-    auto const type = resultType.second ? presentType
-                                        : (presentType | TInitNull);
-    return type.lval(Ptr::Elem);
-  }
-}
-
 Type bespokeElemReturn(const IRInstruction* inst, bool present) {
   assertx(inst->src(0)->type() <= TArrLike);
 
@@ -407,7 +390,12 @@ Type keysetElemReturn(const IRInstruction* inst) {
 
 Type setElemReturn(const IRInstruction* inst) {
   assertx(inst->op() == SetElem);
-  auto baseType = inst->src(minstrBaseIdx(inst->op()))->type().derefIfPtr();
+  auto const baseType = [&] {
+    assertx(inst->hasTypeParam());
+    auto const base = inst->src(0);
+    if (base->isA(TLval)) return inst->typeParam();
+    return base->type();
+  }();
 
   // If the base is a Str, the result will always be a StaticStr (or
   // an exception). If the base might be a str, the result wil be
@@ -479,46 +467,8 @@ Type memoKeyReturn(const IRInstruction* inst) {
 
 Type ptrToLvalReturn(const IRInstruction* inst) {
   auto const ptr = inst->src(0)->type();
-  assertx(ptr <= TPtrToCell);
-  return ptr.deref().mem(Mem::Lval, ptr.ptrKind());
-}
-
-// A pointer iterator type has three components:
-//   - The pointer type: it's always PtrToElem, for now
-//   - The target type: the union of the possible values of the base array
-//   - The constant value: e.g. a specific pointer to the end of a static array
-//
-// The target type is the key aspect of this type. Because it's the union of
-// the possible values of the base array, the type of the pointer iterator
-// doesn't change when we advance it. This definition also allows us to type
-// the pointer to the end of an array (even though its target is invalid).
-//
-// This definition makes sense by analogy to regular int* types in C: the type
-// of the end of the array is an int* even though its target is invalid.
-Type ptrIterReturn(const IRInstruction* inst) {
-  if (inst->is(AdvanceDictPtrIter)) {
-    auto const ptr = inst->src(0)->type();
-    assertx(ptr <= TPtrToElemCell);
-    return ptr;
-  }
-  assertx(inst->is(GetDictPtrIter));
-  auto const arr = inst->src(0)->type();
-  assertx(arr <= TArrLike);
-  auto const value = [&]{
-    if (arr <= TVec) {
-      return arrLikeElemType(arr, TInt, inst->ctx()).first;
-    } else if (arr <= TDict) {
-      return arrLikeElemType(arr, TInt | TStr, inst->ctx()).first;
-    }
-    return TCell;
-  }();
-  return value.ptr(Ptr::Elem);
-}
-
-Type ptrIterValReturn(const IRInstruction* inst) {
-  auto const ptr = inst->src(0)->type();
-  assertx(ptr <= TPtrToElemCell);
-  return ptr.deref();
+  assertx(ptr <= TPtr);
+  return ptr.ptrToLval();
 }
 
 Type loggingArrLikeReturn(const IRInstruction* inst) {
@@ -716,9 +666,6 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #define DUnion(...)     return unionReturn(inst, IdxSeq<__VA_ARGS__>{});
 #define DMemoKey        return memoKeyReturn(inst);
 #define DLvalOfPtr      return ptrToLvalReturn(inst);
-#define DPtrIter        return ptrIterReturn(inst);
-#define DPtrIterVal     return ptrIterValReturn(inst);
-#define DBespokeElemLval return bespokeElemLvalReturn(inst);
 #define DTypeCnsClsName return typeCnsClsName(inst);
 #define DVerifyParamFail return verifyParamFailReturn(inst);
 
@@ -763,9 +710,6 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #undef DUnion
 #undef DMemoKey
 #undef DLvalOfPtr
-#undef DPtrIter
-#undef DPtrIterVal
-#undef DBespokeElemLval
 #undef DTypeCnsClsName
 #undef DVerifyParamFail
 }

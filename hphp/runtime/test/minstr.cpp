@@ -28,8 +28,8 @@ namespace HPHP { namespace jit {
   << folly::format("Expected {}, got {}", (exp).toString(), (act).toString()) \
 
 TEST(MInstrEffects, Basic) {
-  MInstrEffects elem(SetElem, TLvalToDict);
-  EXPECT_TEQ(TLvalToDict, elem.baseType);
+  MInstrEffects elem(SetElem, TDict);
+  EXPECT_TEQ(TDict, elem.baseType);
   EXPECT_FALSE(elem.baseTypeChanged);
   EXPECT_TRUE(elem.baseValChanged);
 
@@ -40,41 +40,41 @@ TEST(MInstrEffects, Basic) {
 }
 
 TEST(MInstrEffects, AddCounted) {
-  MInstrEffects elem(SetElem, TLvalToStaticDict);
-  EXPECT_TEQ((TCountedDict|TStaticDict).lval(Ptr::Ptr), elem.baseType);
+  MInstrEffects elem(SetElem, TStaticDict);
+  EXPECT_TEQ(TCountedDict|TStaticDict, elem.baseType);
   EXPECT_TRUE(elem.baseTypeChanged);
   EXPECT_TRUE(elem.baseValChanged);
 }
 
 TEST(MInstrEffects, NonObjProp) {
-  MInstrEffects effects(SetProp, TLvalToInt);
-  EXPECT_TEQ(TLvalToInt, effects.baseType);
+  MInstrEffects effects(SetProp, TInt);
+  EXPECT_TEQ(TInt, effects.baseType);
   EXPECT_FALSE(effects.baseTypeChanged);
   EXPECT_FALSE(effects.baseValChanged);
 }
 
 TEST(MInstrEffects, NonArrElem) {
-  MInstrEffects effects(SetElem, TLvalToDbl);
-  EXPECT_TEQ(TLvalToDbl, effects.baseType);
+  MInstrEffects effects(SetElem, TDbl);
+  EXPECT_TEQ(TDbl, effects.baseType);
   EXPECT_FALSE(effects.baseTypeChanged);
   EXPECT_FALSE(effects.baseValChanged);
 }
 
 TEST(MInstrEffects, PromoteNull) {
-  MInstrEffects elem(SetElem, TLvalToNull);
+  MInstrEffects elem(SetElem, TNull);
   EXPECT_TEQ(TBottom, elem.baseType);
   EXPECT_TRUE(elem.baseTypeChanged);
   EXPECT_FALSE(elem.baseValChanged);
 
-  MInstrEffects prop(SetProp, TLvalToUninit);
+  MInstrEffects prop(SetProp, TUninit);
   EXPECT_TEQ(TBottom, prop.baseType);
   EXPECT_TRUE(prop.baseTypeChanged);
   EXPECT_FALSE(prop.baseValChanged);
 }
 
 TEST(MInstrEffects, UnknownBase) {
-  MInstrEffects effects(SetElem, TLvalToCell);
-  EXPECT_TEQ(TLvalToCell - TLvalToNull, effects.baseType);
+  MInstrEffects effects(SetElem, TCell);
+  EXPECT_TEQ(TCell - TNull, effects.baseType);
   EXPECT_TRUE(effects.baseTypeChanged);
   EXPECT_TRUE(effects.baseValChanged);
 }

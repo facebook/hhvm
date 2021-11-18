@@ -28,6 +28,9 @@
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/type.h"
 
+#include "hphp/runtime/vm/jit/type.h"
+#include "hphp/runtime/vm/jit/types.h"
+
 namespace HPHP {
 
 struct Class;
@@ -44,6 +47,7 @@ namespace irgen {
 
 struct ClsPropLookup {
   SSATmp* propPtr;
+  Type knownType;
   const TypeConstraint* tc;
   const VMCompactVector<TypeConstraint>* ubs;
   Slot slot;
@@ -130,7 +134,7 @@ SSATmp* profiledGlobalAccess(IRGS& env, SSATmp* name,
     [&] (Block* taken) {
       // Load from RDS:
       gen(env, CheckRDSInitialized, taken, data);
-      auto const ptr = gen(env, LdRDSAddr, data, TPtrToGblCell);
+      auto const ptr = gen(env, LdRDSAddr, data, TPtrToGbl);
       auto const lval = gen(env, ConvPtrToLval, ptr);
 
       if (checkType) {
@@ -140,7 +144,7 @@ SSATmp* profiledGlobalAccess(IRGS& env, SSATmp* name,
         auto const type = predictedTypeForGlobal(name->strVal());
         if (type < TCell) {
           gen(env, CheckTypeMem, type, makeExitSlow(env), lval);
-          return success(gen(env, AssertType, type.lval(Ptr::Gbl), lval), type);
+          return success(lval, type);
         }
       }
       // No type-check, it's just a TCell.

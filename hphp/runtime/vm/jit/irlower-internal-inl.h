@@ -75,9 +75,9 @@ inline CallDest callDest(IRLS& env, const IRInstruction* inst) {
   if (inst->dst()->isA(TBottom)) return kVoidDest;
 
   auto const loc = dstLoc(env, inst, 0);
-  DEBUG_ONLY auto const maybe_lval = inst->dst()->type().maybe(TLvalToCell);
+  DEBUG_ONLY auto const maybe_lval = inst->dst()->type().maybe(TLval);
   assertx(loc.numAllocated() == 1 || (maybe_lval && loc.numAllocated() == 2));
-  assertx(IMPLIES(maybe_lval, inst->dst()->isA(TLvalToCell|TNullptr)));
+  assertx(IMPLIES(maybe_lval, inst->dst()->isA(TLval|TNullptr)));
 
   auto const dst = inst->dst();
   auto const kind = dst->isA(TBool) ? DestType::Byte :

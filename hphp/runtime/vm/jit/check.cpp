@@ -552,7 +552,6 @@ using TypeNames::TCA;
                          },                                                    \
                          IdxSeq<__VA_ARGS__>{}                                 \
                        );
-#define DBespokeElemLval
 #define DLdObjCls
 #define DAllocObj
 #define DBespokeElemUninit
@@ -576,8 +575,6 @@ using TypeNames::TCA;
 #define DCol
 #define DMemoKey
 #define DLvalOfPtr
-#define DPtrIter
-#define DPtrIterVal
 #define DTypeCnsClsName
 #define DVerifyParamFail
 
@@ -614,7 +611,6 @@ using TypeNames::TCA;
 #undef DRefineS
 #undef DEscalateToVanilla
 #undef DParam
-#undef DBespokeElemLval
 #undef DLdObjCls
 #undef DAllocObj
 #undef DBespokeElemUninit
@@ -643,8 +639,6 @@ using TypeNames::TCA;
 #undef DUnion
 #undef DMemoKey
 #undef DLvalOfPtr
-#undef DPtrIter
-#undef DPtrIterVal
 #undef DTypeCnsClsName
 #undef DVerifyParamFail
   return true;

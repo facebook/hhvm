@@ -1215,8 +1215,8 @@ TrackedStore combine_ts(Global& genv, uint32_t id,
       // two types together to elimnate a store.
       auto const& t1 = i1->src(i)->type();
       auto const& t2 = i2->src(i)->type();
-      if ((t1.maybe(TPtrToCell) && t2.maybe(TLvalToCell)) ||
-          (t2.maybe(TPtrToCell) && t1.maybe(TLvalToCell))) {
+      if ((t1.maybe(TPtr) && t2.maybe(TLval)) ||
+          (t2.maybe(TPtr) && t1.maybe(TLval))) {
         return Compat::Bad;
       }
     }

@@ -52,17 +52,21 @@ TRACE_SET_MOD(hhir);
 constexpr Type::bits_t Type::kBottom;
 constexpr Type::bits_t Type::kTop;
 
-#define IRT(name, bits)       constexpr Type::bits_t Type::k##name;
-#define IRTP(name, ptr, bits)
-#define IRTL(name, ptr, bits)
-#define IRTM(name, ptr, bits)
-#define IRTX(name, ptr, bits)
+#define IRT(name, ...)       constexpr Type::bits_t Type::k##name;
+#define IRTP(name, ...)
+#define IRTL(name, ...)
+#define IRTM(name, ...)
+#define IRTX(name, ...)
   IR_TYPES
 #undef IRT
 #undef IRTP
 #undef IRTL
 #undef IRTM
 #undef IRTX
+
+constexpr Type::bits_t Type::kPtr;
+constexpr Type::bits_t Type::kLval;
+constexpr Type::bits_t Type::kMem;
 
 constexpr Type::bits_t Type::kArrSpecBits;
 constexpr Type::bits_t Type::kClsSpecBits;
@@ -160,45 +164,41 @@ std::string Type::constValString() const {
   if (*this <= TRDSHandle) {
     return folly::format("rds::Handle({:#x})", m_rdsHandleVal).str();
   }
-  if (*this <= TPtrToCell) {
+  if (*this <= TPtr) {
     return folly::sformat("TV: {}", m_ptrVal);
   }
-  if (*this <= TLvalToCell) {
+  if (*this <= TLval) {
     return folly::sformat("Lval: {}", m_ptrVal);
   }
-  if (*this <= TMemToCell) {
+  if (*this <= TMem) {
     return folly::sformat("Mem: {}", m_ptrVal);
   }
 
   always_assert_flog(
     false,
-    "Bad type in constValString(): {}:{}:{}:{}:{:#16x}",
+    "Bad type in constValString(): {}:{}:{}:{:#16x}",
     m_bits.hexStr(),
-    static_cast<ptr_t>(m_ptr),
-    static_cast<ptr_t>(m_mem),
+    static_cast<ptr_location_t>(m_ptr),
     m_hasConstVal,
     m_extra
   );
 }
 
-static std::string show(Ptr ptr) {
-  always_assert(ptr <= Ptr::Ptr);
+static std::string show(PtrLocation ptr) {
+  always_assert(ptr <= PtrLocation::All);
 
   switch (ptr) {
-    case Ptr::Bottom:
-    case Ptr::Top:
-    case Ptr::NotPtr: not_reached();
-    case Ptr::Ptr:    return "";
-
-#define PTRT(name, ...) case Ptr::name: return #name;
-    PTR_TYPES(PTRT)
+    case PtrLocation::Bottom:
+    case PtrLocation::All:    not_reached();
+#define PTRT(name, ...) case PtrLocation::name: return #name;
+    PTR_LOCATION_TYPES(PTRT)
 #undef PTRT
   }
 
   std::vector<const char*> parts;
 #define PTRT(name, ...) \
-  if (Ptr::name <= ptr) parts.emplace_back(#name);
-  PTR_PRIMITIVE(PTRT)
+  if (PtrLocation::name <= ptr) parts.emplace_back(#name);
+  PTR_LOCATION_PRIMITIVE(PTRT)
 #undef PTRT
   return folly::sformat("{{{}}}", folly::join('|', parts));
 }
@@ -242,39 +242,38 @@ std::string Type::toString() const {
 
   auto t = *this;
 
-  if (t.maybe(TPtrToCell)) {
+  if (t.maybe(TMem)) {
     assertx(!t.m_hasConstVal);
-    auto ret = "PtrTo" +
-      show(t.ptrKind() & Ptr::Ptr) +
-      (t & TPtrToCell).deref().toString();
-
-    t -= TPtrToCell;
+    auto const kind = t.ptrLocation();
+    assertx(kind != PtrLocation::Bottom);
+    auto ret = [&] () -> std::string {
+      if (t.maybe(TPtr) && t.maybe(TLval)) {
+        if (kind == PtrLocation::All) return "Mem";
+        return "MemTo" + show(kind);
+      }
+      if (t.maybe(TPtr)) {
+        if (kind == PtrLocation::All) return "Ptr";
+        return "PtrTo" + show(kind);
+      }
+      assertx(t.maybe(TLval));
+      if (kind == PtrLocation::All) return "Lval";
+      return "LvalTo" + show(kind);
+    }();
+    t -= TMem;
     if (t != TBottom) ret += "|" + t.toString();
     return ret;
   }
 
-  if (t.maybe(TLvalToCell)) {
-    assertx(!t.m_hasConstVal);
-    auto ret = "LvalTo" +
-      show(t.ptrKind() & Ptr::Ptr) +
-      (t & TLvalToCell).deref().toString();
-
-    t -= TLvalToCell;
-    if (t != TBottom) ret += "|" + t.toString();
-    return ret;
-  }
-
-  assertx(t.ptrKind() <= Ptr::NotPtr);
-  assertx(t.memKind() <= Mem::NotMem);
+  assertx(t.ptrLocation() == PtrLocation::Bottom);
 
   std::vector<std::string> parts;
   if (isSpecialized()) {
     if (auto const cls = t.clsSpec()) {
-      auto const base = Type{m_bits & kClsSpecBits, t.ptrKind(), t.memKind()};
+      auto const base = Type{m_bits & kClsSpecBits, t.ptrLocation()};
       parts.push_back(folly::to<std::string>(base.toString(), cls.toString()));
       t -= base;
     } else if (auto const arr = t.arrSpec()) {
-      auto const base = Type{m_bits & kArrSpecBits, t.ptrKind(), t.memKind()};
+      auto const base = Type{m_bits & kArrSpecBits, t.ptrLocation()};
       parts.push_back(folly::to<std::string>(base.toString(), arr.toString()));
       t -= base;
     } else {
@@ -357,8 +356,7 @@ void Type::serialize(ProfDataSerializer& ser) const {
   Trace::Indent _;
 
   write_raw(ser, m_bits);
-  write_raw(ser, m_ptr);
-  write_raw(ser, m_mem);
+  if (m_bits & kMem) write_raw(ser, m_ptr);
 
   Type t = *this;
   if (t.maybe(TNullptr)) t = t - TNullptr;
@@ -398,8 +396,8 @@ Type Type::deserialize(ProfDataDeserializer& ser) {
     Type t{};
 
     read_raw(ser, t.m_bits);
-    read_raw(ser, t.m_ptr);
-    read_raw(ser, t.m_mem);
+    if (t.m_bits & kMem) read_raw(ser, t.m_ptr);
+
     auto const key = read_raw<TypeKey>(ser);
     if (key == TypeKey::Const) {
       t.m_hasConstVal = true;
@@ -456,8 +454,7 @@ size_t Type::stableHash() const {
   // Base hash
   auto const hash = hash_int64_pair(
     m_bits.hash(),
-    ((static_cast<uint64_t>(m_ptr) << sizeof(m_mem) * CHAR_BIT) |
-     static_cast<uint64_t>(m_mem)) ^ m_hasConstVal
+    static_cast<uint64_t>(m_ptr) ^ m_hasConstVal
   );
 
   // Specialization data
@@ -525,12 +522,9 @@ bool Type::checkValid() const {
                 m_bits.hexStr(), m_ptrVal, m_hasConstVal, m_extra);
   }
 
-  // m_ptr and m_mem should be Bottom iff we have no kCell bits.
-  assertx(((m_bits & kCell) == kBottom) == (m_ptr == Ptr::Bottom));
-  assertx(((m_bits & kCell) == kBottom) == (m_mem == Mem::Bottom));
-
-  // Ptr::NotPtr and Mem::NotMem should imply one another.
-  assertx((m_ptr == Ptr::NotPtr) == (m_mem == Mem::NotMem));
+  // We should have a non-empty set of ptr locations iff any of the
+  // kMem bits are set.
+  assertx(bool(m_bits & kMem) == (m_ptr != PtrLocation::Bottom));
 
   return true;
 }
@@ -566,7 +560,7 @@ Type::bits_t Type::bitsFromDataType(DataType outer) {
 }
 
 DataType Type::toDataType() const {
-  assertx(!maybe(TMemToCell) || m_bits == kBottom);
+  assertx(!maybe(TMem) || m_bits == kBottom);
   assertx(isKnownDataType());
 
   // Order is important here: types must progress from more specific
@@ -690,15 +684,12 @@ bool Type::operator<=(Type rhs) const {
 
   // If `rhs' is a constant, we must be the same constant.
   if (rhs.m_hasConstVal) {
-    assertx(rhs.ptrKind() == Ptr::Elem || !rhs.isUnion());
+    assertx(!rhs.isUnion());
     return lhs.m_hasConstVal && lhs.m_extra == rhs.m_extra;
   }
 
   // Make sure lhs's ptr and mem kinds are subtypes of rhs's.
-  if (!(lhs.ptrKind() <= rhs.ptrKind()) ||
-      !(lhs.memKind() <= rhs.memKind())) {
-    return false;
-  }
+  if (!(lhs.ptrLocation() <= rhs.ptrLocation())) return false;
 
   // Compare specializations only if `rhs' is specialized.
   if (!rhs.isSpecialized()) {
@@ -730,65 +721,40 @@ Type Type::operator|(Type rhs) const {
   rhs = rhs.dropConstVal();
 
   auto const bits = lhs.m_bits | rhs.m_bits;
-  auto const ptr = lhs.ptrKind() | rhs.ptrKind();
-  auto const mem = lhs.memKind() | rhs.memKind();
+  auto const ptr = lhs.ptrLocation() | rhs.ptrLocation();
   auto const spec = lhs.spec() | rhs.spec();
 
-  return Type{bits, ptr, mem}.specialize(spec);
+  return Type{bits, ptr}.specialize(spec);
 }
 
 Type Type::operator&(Type rhs) const {
   auto lhs = *this;
 
-  // When intersecting a constant non-ptr type with another type, the result is
-  // the constant type if the other type is a supertype of the constant, and
-  // Bottom otherwise. However, for pointer types, we have to account for the
-  // fact that we can't have a constant, specialized pointer.
+  // When intersecting a constant type with another type, the result
+  // is the constant type if the other type is a supertype of the
+  // constant, and Bottom otherwise.
   auto const handle_constant = [](const Type& constant, const Type& other) {
-    auto const refines = constant.m_ptr == Ptr::NotPtr
-      ? constant <= other
-      : constant <= other.unspecialize();
-    return refines ? constant : TBottom;
+    if (constant <= other) return constant;
+    return TBottom;
   };
 
   if (lhs.m_hasConstVal) return handle_constant(lhs, rhs);
   if (rhs.m_hasConstVal) return handle_constant(rhs, lhs);
 
   auto bits = lhs.m_bits & rhs.m_bits;
-  auto ptr = lhs.ptrKind() & rhs.ptrKind();
-  auto mem = lhs.memKind() & rhs.memKind();
+  auto ptr = lhs.ptrLocation() & rhs.ptrLocation();
   auto arrSpec = lhs.arrSpec() & rhs.arrSpec();
   auto clsSpec = lhs.clsSpec() & rhs.clsSpec();
 
-  // Certain component sublattices of Type are dependent on one another.  For
-  // each set of such "interfering" components, if any component goes to
-  // Bottom, we have to Bottom out the other components in the set as well.
+  if (ptr == PtrLocation::Bottom) bits &= ~kMem;
+  if (!(bits & kMem)) ptr = PtrLocation::Bottom;
 
-  // Cell bits depend on both Ptr and Mem.
-  if (ptr == Ptr::Bottom || mem == Mem::Bottom) bits &= ~kCell;
-
-  // Arr/Cls bits and specs.
   if (arrSpec == ArraySpec::Bottom()) bits &= ~kArrSpecBits;
   if (clsSpec == ClassSpec::Bottom()) bits &= ~kClsSpecBits;
   if (!supports(bits, SpecKind::Array)) arrSpec = ArraySpec::Bottom();
   if (!supports(bits, SpecKind::Class)) clsSpec = ClassSpec::Bottom();
 
-  // Ptr and Mem also depend on Cell bits. This must come after all possible
-  // fixups of bits.
-  if ((bits & kCell) == kBottom) {
-    ptr = Ptr::Bottom;
-    mem = Mem::Bottom;
-  } else {
-    if ((ptr & Ptr::Ptr) == Ptr::Bottom)    mem &= ~Mem::Mem;
-    if ((mem & Mem::Mem) == Mem::Bottom)    ptr &= ~Ptr::Ptr;
-    if ((ptr & Ptr::NotPtr) == Ptr::Bottom) mem &= ~Mem::NotMem;
-    if ((mem & Mem::NotMem) == Mem::Bottom) ptr &= ~Ptr::NotPtr;
-
-    static_assert(Ptr::Top == (Ptr::Ptr | Ptr::NotPtr), "");
-    static_assert(Mem::Top == (Mem::Mem | Mem::NotMem), "");
-  }
-
-  return Type{bits, ptr, mem}.specialize({arrSpec, clsSpec});
+  return Type{bits, ptr}.specialize({arrSpec, clsSpec});
 }
 
 Type Type::operator-(Type rhs) const {
@@ -809,80 +775,44 @@ Type Type::operator-(Type rhs) const {
     return lhs;
   }
 
-  // For each component C, we should subtract C_rhs from C_lhs iff every other
-  // component of lhs that can intersect with C is subsumed by the
-  // corresponding component of rhs. This prevents us from removing members of
-  // lhs that weren't present in rhs, but would be casualties of removing
-  // certain bits in lhs.
-  //
-  // As an example, consider PtrToRMembInt - PtrToRefStr. Simple subtraction of
-  // each component would yield PtrToMembInt, but that would mean we removed
-  // PtrToRefInt from the lhs despite it not being in rhs. Checking if Int is a
-  // subset of Str shows us that removing Ref from lhs would erase types not
-  // present in rhs.
-  //
-  // In practice, it's more concise to eagerly do each subtraction, then check
-  // for components that went to Bottom as a way of seeing which components of
-  // lhs were subsets of the corresponding components in rhs. When we find a
-  // component that we weren't supposed to subtract, just restore lhs's
-  // original value.
   auto bits = lhs.m_bits & ~rhs.m_bits;
-  auto ptr = lhs.ptrKind() - rhs.ptrKind();
-  auto mem = lhs.memKind() - rhs.memKind();
+  auto ptr = lhs.ptrLocation() - rhs.ptrLocation();
   auto arrSpec = lhs.arrSpec() - rhs.arrSpec();
   auto clsSpec = lhs.clsSpec() - rhs.clsSpec();
 
-  auto const have_gen_bits = (bits & kCell) != kBottom;
-
-  auto const have_ptr     = (ptr & Ptr::Ptr) != Ptr::Bottom;
-  auto const have_not_ptr = (ptr & Ptr::NotPtr) != Ptr::Bottom;
-  auto const have_any_ptr = have_ptr || have_not_ptr;
-  auto const have_mem     = (mem & Mem::Mem) != Mem::Bottom;
-  auto const have_not_mem = (mem & Mem::NotMem) != Mem::Bottom;
-  auto const have_any_mem = have_mem || have_not_mem;
-  auto const have_memness = have_any_ptr || have_any_mem;
-
-  auto const have_arr_bits = supports(bits, SpecKind::Array);
-  auto const have_cls_bits = supports(bits, SpecKind::Class);
-  auto const have_arr_spec = arrSpec != ArraySpec::Bottom();
-  auto const have_cls_spec = clsSpec != ClassSpec::Bottom();
-
-  // ptr and mem can only interact with clsSpec if lhs.m_bits has at least one
-  // kCell member of kClsSpecBits.
-  auto const have_ptr_cls = supports(lhs.m_bits & kCell, SpecKind::Class);
-
-  // bits, ptr, and mem
-  if (have_any_ptr) {
-    bits |= lhs.m_bits & kCell;
-    // The Not{Ptr,Mem} and {Ptr,Mem} components of Ptr and Mem don't interfere
-    // with one another, so keep them separate.
-    if (have_ptr)     mem |= (lhs.memKind() & Mem::Mem);
-    if (have_not_ptr) mem |= (lhs.memKind() & Mem::NotMem);
-  }
-  if (have_any_mem) {
-    bits |= lhs.m_bits & kCell;
-    if (have_mem)     ptr |= (lhs.ptrKind() & Ptr::Ptr);
-    if (have_not_mem) ptr |= (lhs.ptrKind() & Ptr::NotPtr);
-  }
-  if (have_arr_spec) bits |= lhs.m_bits & kArrSpecBits;
-  if (have_cls_spec) bits |= lhs.m_bits & kClsSpecBits;
-
-  // ptr and mem
-  if (have_gen_bits || have_arr_spec ||
-      (have_cls_spec && have_ptr_cls)) {
-    ptr = lhs.ptrKind();
-    mem = lhs.memKind();
+  // Above we subtracted out kPtr or kLval like any other bit in
+  // m_bits. However these bits are special, since their removal is
+  // determined by the corresponding subtraction of the ptr location
+  // bits. We check that here, and fixup the bits as necessary.
+  if (ptr != PtrLocation::Bottom) {
+    // If there are still ptr location bits remaining after the
+    // subtraction, the kMem bits are actually unaffected. This means
+    // the subtraction is just removing particular locations, and not
+    // the entire "ptr-ish" of the type.
+    bits |= lhs.m_bits & kMem;
+    // If there's no intersection between the kMem bits on both sides,
+    // not even the ptr locations are affected.
+    if (!(lhs.m_bits & rhs.m_bits & kMem)) ptr = lhs.ptrLocation();
+  } else if (bits & kMem) {
+    // On the other hand, if there are no ptr location bits remaining,
+    // the subtraction is removing the entire "ptr-ish" from the
+    // type. This means the subtraction on m_bits above is correct and
+    // no fixup is needed.
+    //
+    // If the resultant bits still has any kMem bit set, however, it
+    // means entire kPtr or kLval survives, so restore the ptr
+    // location bits for that half.
+    ptr = lhs.ptrLocation();
   }
 
-  // specs
-  if (have_memness || have_arr_bits) {
-    arrSpec = lhs.arrSpec();
-  }
-  if ((have_memness && have_ptr_cls) || have_cls_bits) {
-    clsSpec = lhs.clsSpec();
-  }
+  auto const supportsArrSpec = supports(bits, SpecKind::Array);
+  auto const supportsClsSpec = supports(bits, SpecKind::Class);
+  if (arrSpec != ArraySpec::Bottom()) bits |= lhs.m_bits & kArrSpecBits;
+  if (clsSpec != ClassSpec::Bottom()) bits |= lhs.m_bits & kClsSpecBits;
+  if (supportsArrSpec) arrSpec = lhs.arrSpec();
+  if (supportsClsSpec) clsSpec = lhs.clsSpec();
 
-  return Type{bits, ptr, mem}.specialize({arrSpec, clsSpec});
+  return Type{bits, ptr}.specialize({arrSpec, clsSpec});
 }
 
 ///////////////////////////////////////////////////////////////////////////////

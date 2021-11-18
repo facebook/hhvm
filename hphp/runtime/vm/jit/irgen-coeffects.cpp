@@ -209,8 +209,7 @@ SSATmp* emitFunParam(IRGS& env, const Func* f, uint32_t numArgsInclUnpack,
           },
           [&] {
             // Rules
-            auto const addr = gen(env, LdPropAddr, IndexData { 0 },
-                                  TInt.lval(Ptr::Prop), obj);
+            auto const addr = gen(env, LdPropAddr, IndexData { 0 }, obj);
             return gen(env, LdMem, TInt, addr);
           },
           [&] {
@@ -273,8 +272,7 @@ SSATmp* emitFunParam(IRGS& env, const Func* f, uint32_t numArgsInclUnpack,
         [&] (SSATmp* ptr)  { return gen(env, LdFuncFromRClsMeth, ptr); },
         [&] {
           gen(env, Jmp, toFail);
-          // To keep JIT type system happy
-          return cns(env, SystemLib::s_nullFunc);
+          return cns(env, TBottom);
         }
       );
     };

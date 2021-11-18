@@ -272,11 +272,11 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
       // pointer, or a lval. It will be a Cell for value types, and a
       // ptr/lval for ref types.
       auto const src = inst->src(srcNum);
-      if (src->isA(TCell) || src->isA(TPtrToCell)) {
+      if (src->isA(TCell) || src->isA(TPtr)) {
         static_assert(TVOFF(m_data) == 0, "");
         args.ssa(srcNum);
       } else {
-        assertx(src->isA(TLvalToCell));
+        assertx(src->isA(TLval));
         auto const loc = srcLoc(env, inst, srcNum);
         args.reg(loc.reg(tv_lval::val_idx));
       }
@@ -288,11 +288,11 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
       // materialize the TypedValue onto the stack and then pass its
       // address.
       auto const src = inst->src(srcNum);
-      if (src->isA(TPtrToCell)) {
+      if (src->isA(TPtr)) {
         static_assert(TVOFF(m_data) == 0, "");
         args.ssa(srcNum);
       } else {
-        assertx(src->isA(TLvalToCell));
+        assertx(src->isA(TLval));
         auto const data = v.makeReg();
         auto const type = v.makeReg();
         auto const loc = srcLoc(env, inst, srcNum);

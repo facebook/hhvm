@@ -307,13 +307,11 @@ bool psimplify(Env&, const Inst& /*inst*/, Vlabel /*b*/, size_t /*i*/) {
  *  - otherwise return sz::qword.
  */
 int value_width(Env& env, Vreg reg) {
-  auto const it = env.unit.regToConst.find(reg);
-  if (it != env.unit.regToConst.end()) {
-    if (!it->second.isUndef &&
-        it->second.kind != Vconst::Double) {
-      if (it->second.val <= 0xff)       return sz::byte;
-      if (it->second.val <= 0xffff)     return sz::word;
-      if (it->second.val <= 0xffffffff) return sz::dword;
+  if (auto const c = env.consts[reg]) {
+    if (!c->isUndef && c->kind != Vconst::Double) {
+      if (c->val <= 0xff)       return sz::byte;
+      if (c->val <= 0xffff)     return sz::word;
+      if (c->val <= 0xffffffff) return sz::dword;
     }
     return sz::qword;
   }
@@ -355,9 +353,8 @@ int value_width(Env& env, Vreg reg) {
  *    so just leave them out.
  */
 Vreg narrow_reg(Env& env, int size, Vreg r, Vlabel b, size_t i) {
-  auto const it = env.unit.regToConst.find(r);
-  if (it != env.unit.regToConst.end()) {
-    assertx(!it->second.isUndef && it->second.kind != Vconst::Double);
+  if (auto const c = env.consts[r]) {
+    assertx(!c->isUndef && c->kind != Vconst::Double);
     return r;
   }
 
@@ -634,7 +631,7 @@ storeq(Env& env, Vreg64 reg, Vlabel b, size_t i) {
 }
 
 bool is_reg_const(Env& env, Vreg reg) {
-  return env.unit.regToConst.find(reg) != env.unit.regToConst.end();
+  return env.consts[reg].has_value();
 }
 
 template <typename Op>
@@ -690,11 +687,11 @@ bool simplify(Env& env, const addq& vadd, Vlabel b, size_t i) {
 bool simplify(Env& env, const lea& vlea, Vlabel b, size_t i) {
   if (vlea.s.disp == 0 && !vlea.s.index.isValid() &&
       arch() != Arch::ARM && vlea.s.base.isValid()) {
-    env.unit.blocks[b].code[i] = copy{ vlea.s.base, vlea.d };
+    simplify_impl(env, b, i, copy { vlea.s.base, vlea.d });
     return true;
   }
   if (!vlea.s.index.isValid() && !vlea.s.base.isValid()) {
-    env.unit.blocks[b].code[i] = copy{env.unit.makeConst(vlea.s.disp), vlea.d };
+    simplify_impl(env, b, i, copy { env.unit.makeConst(vlea.s.disp), vlea.d });
     return true;
   }
   auto xinst = env.unit.blocks[b].code[i];
@@ -1305,12 +1302,12 @@ bool implOrSimplify(
  if (env.use_counts[inst.sf] != 0) return false;
  if (immed == 0) return simplify_impl(env, b, i, copy{inst.s1, inst.d});
 
- auto const it = env.unit.regToConst.find(inst.s1);
- if (it == env.unit.regToConst.end() || it->second.isUndef) return false;
+ auto const c = env.consts[inst.s1];
+ if (!c || c->isUndef) return false;
  return simplify_impl(
    env, b, i,
    [&] (Vout& v) {
-     auto const s = v.cns(immed | it->second.val);
+     auto const s = v.cns(immed | c->val);
      v << copy{s, inst.d};
      return 1;
    }
@@ -1337,21 +1334,21 @@ bool simplify(Env& env, const orqi& inst, Vlabel b, size_t i) {
 bool simplify(Env& env, const orq& inst, Vlabel b, size_t i) {
   if (env.use_counts[inst.sf] != 0) return false;
 
-  auto it0 = env.unit.regToConst.find(inst.s0);
-  auto it1 = env.unit.regToConst.find(inst.s1);
-  if (it0 != env.unit.regToConst.end() && !it0->second.isUndef) {
-    if (it1 != env.unit.regToConst.end() && !it1->second.isUndef) {
+  auto const c0 = env.consts[inst.s0];
+  auto const c1 = env.consts[inst.s1];
+  if (c0 && !c0->isUndef) {
+    if (c1 && !c1->isUndef) {
       return simplify_impl(env, b, i, [&] (Vout& v) {
-        auto s = v.cns(it0->second.val | it1->second.val);
+        auto s = v.cns(c0->val | c1->val);
         v << copy{s, inst.d};
         return 1;
       });
     }
-    if (it0->second.val == 0) {
+    if (c0->val == 0) {
       return simplify_impl(env, b, i, copy{inst.s1, inst.d});
     }
-  } else if (it1 != env.unit.regToConst.end() && !it1->second.isUndef) {
-    if (it1->second.val == 0) {
+  } else if (c1 && c1->isUndef) {
+    if (c1->val == 0) {
       return simplify_impl(env, b, i, copy{inst.s0, inst.d});
     }
   }
@@ -1373,12 +1370,10 @@ template <typename Inst>
 bool cmov_fold_impl(Env& env, const Inst& inst, Vlabel b, size_t i) {
   auto const equivalent = [&]{
     if (inst.t == inst.f) return true;
-
-    auto const t_it = env.unit.regToConst.find(inst.t);
-    if (t_it == env.unit.regToConst.end()) return false;
-    auto const f_it = env.unit.regToConst.find(inst.f);
-    if (f_it == env.unit.regToConst.end()) return false;
-    return t_it->second == f_it->second;
+    auto const ct = env.consts[inst.t];
+    auto const cf = env.consts[inst.f];
+    if (!ct || !cf) return false;
+    return *ct == *cf;
   }();
   if (!equivalent) return false;
 
@@ -1398,10 +1393,9 @@ bool cmov_fold_impl(Env& env, const Inst& inst, Vlabel b, size_t i) {
 template <typename Inst, typename Extend>
 bool cmov_setcc_impl(Env& env, const Inst& inst, Vlabel b,
                      size_t i, Extend extend) {
-  auto const t_it = env.unit.regToConst.find(inst.t);
-  if (t_it == env.unit.regToConst.end()) return false;
-  auto const f_it = env.unit.regToConst.find(inst.f);
-  if (f_it == env.unit.regToConst.end()) return false;
+  auto const ct = env.consts[inst.t];
+  auto const cf = env.consts[inst.f];
+  if (!ct || !cf) return false;
 
   auto const check_const = [](Vconst c, bool& val) {
     if (c.isUndef) return false;
@@ -1425,9 +1419,9 @@ bool cmov_setcc_impl(Env& env, const Inst& inst, Vlabel b,
   };
 
   bool t_val;
-  if (!check_const(t_it->second, t_val)) return false;
+  if (!check_const(*ct, t_val)) return false;
   bool f_val;
-  if (!check_const(f_it->second, f_val)) return false;
+  if (!check_const(*cf, f_val)) return false;
 
   return simplify_impl(env, b, i, [&] (Vout& v) {
     auto const d = env.unit.makeReg();
@@ -1659,8 +1653,7 @@ bool simplify(Env& env, const orlim& vorlim, Vlabel b, size_t i) {
       }
     } else if (Vinstr::storel == xinst.op) {
         const auto srcReg = xinst.storel_.s;
-        const auto it = env.unit.regToConst.find(srcReg);
-        if (it != env.unit.regToConst.end()) {
+        if (auto const c = env.consts[srcReg]) {
           const Vptr32 stDest = xinst.storel_.m;
           if (orDest == stDest) {
             for (auto j = x + 1; j < i; ++j) {
@@ -1668,7 +1661,7 @@ bool simplify(Env& env, const orlim& vorlim, Vlabel b, size_t i) {
                 return false;
               }
             }
-            const auto stOperand = it->second.val;
+            const auto stOperand = c->val;
             const int newOp = stOperand | orOperand;
             return simplify_impl(env, b, i, storeli { newOp, stDest });
           }
@@ -1695,9 +1688,8 @@ struct SimplifyVptrVisit {
     // If the base is a constant, we can fold it into the displacement (if it
     // fits).
     if (ptr.base.isValid()) {
-      auto const it = env.unit.regToConst.find(ptr.base);
-      if (it != env.unit.regToConst.end()) {
-        auto const newDisp = static_cast<int64_t>(ptr.disp) + it->second.val;
+      if (auto const c = env.consts[ptr.base]) {
+        auto const newDisp = static_cast<int64_t>(ptr.disp) + c->val;
         if (deltaFits(newDisp, sz::dword)) {
           ptr.disp = newDisp;
           ptr.base = Vreg{};
@@ -1709,10 +1701,9 @@ struct SimplifyVptrVisit {
     // If the index is a constant, we can fold it into the displacement (if it
     // fits).
     if (ptr.index.isValid()) {
-      auto const it = env.unit.regToConst.find(ptr.index);
-      if (it != env.unit.regToConst.end()) {
+      if (auto const c = env.consts[ptr.index]) {
         auto const newDisp =
-          static_cast<int64_t>(ptr.disp) + it->second.val * ptr.scale;
+          static_cast<int64_t>(ptr.disp) + c->val * ptr.scale;
         if (deltaFits(newDisp, sz::dword)) {
           ptr.disp = newDisp;
           ptr.index = Vreg{};
@@ -1793,6 +1784,7 @@ void simplify(Vunit& unit) {
   Env env { unit };
   env.use_counts.resize(unit.next_vr);
   env.def_insts.resize(unit.next_vr, Vinstr::nop);
+  env.consts.resize(unit.next_vr);
 
   auto const labels = sortBlocks(unit);
 
@@ -1805,6 +1797,9 @@ void simplify(Vunit& unit) {
       visitUses(unit, inst, [&] (Vreg r) { ++env.use_counts[r]; });
     }
   };
+  for (auto const& p : env.unit.regToConst) {
+    env.consts[p.first] = p.second;
+  }
 
   // The simplify() implementations may allocate scratch blocks and modify
   // instruction streams, so we cannot use standard iterators here.

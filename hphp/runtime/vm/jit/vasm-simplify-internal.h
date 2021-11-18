@@ -39,6 +39,9 @@ struct Env {
   // Instruction which def'd each Vreg.  Probably only useful when the def
   // instruction only has a single dst, but that's all we need right now.
   jit::vector<Vinstr::Opcode> def_insts;
+
+  // Vregs which are constants, or copies of constants.
+  jit::vector<Optional<Vconst>> consts;
 };
 
 template<Vinstr::Opcode op>
@@ -89,13 +92,24 @@ auto simplify_impl(Env& env, Vlabel b, size_t i, Simplify simplify)
           env.use_counts.resize(size_t{r} + 1);
         }
         ++env.use_counts[r];
+        if (r >= env.consts.size()) {
+          env.consts.resize(size_t{r} + 1);
+        }
+        auto const it = env.unit.regToConst.find(r);
+        if (it != env.unit.regToConst.end()) env.consts[r] = it->second;
       });
       visitDefs(unit, inst, [&] (Vreg r) {
         if (r >= env.def_insts.size()) {
           env.def_insts.resize(size_t{r} + 1, Vinstr::nop);
         }
         env.def_insts[r] = inst.op;
+        if (r >= env.consts.size()) {
+          env.consts.resize(size_t{r} + 1);
+        }
       });
+      if (inst.op == Vinstr::copy && !inst.copy_.d.isPhys()) {
+        env.consts[inst.copy_.d] = env.consts[inst.copy_.s];
+      }
     }
 
     return nremove;
@@ -115,4 +129,3 @@ namespace arm   { bool simplify(Env& env, Vlabel b, size_t i); }
 ///////////////////////////////////////////////////////////////////////////////
 
 }}
-

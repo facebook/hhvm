@@ -123,13 +123,11 @@ bool cmp_zero_impl(Env& env, const In& inst, Reg r, Vlabel b, size_t i) {
  */
 template <typename In>
 auto get_cmp_zero_reg(Env& env, const In& inst) -> decltype(inst.s0) {
-  auto const& consts = env.unit.regToConst;
-
-  auto const s0_it = consts.find(inst.s0);
-  auto const s1_it = consts.find(inst.s1);
-  if (s0_it != consts.end() && s0_it->second.val == 0) {
+  auto const c0 = env.consts[inst.s0];
+  auto const c1 = env.consts[inst.s1];
+  if (c0 && c0->val == 0) {
     return inst.s1;
-  } else if (s1_it != consts.end() && s1_it->second.val == 0) {
+  } else if (c1 && c1->val == 0) {
     return inst.s0;
   } else {
     return decltype(inst.s0){Vreg::kInvalidReg};
@@ -195,17 +193,13 @@ bool simplify_test_imm(Env& env, Arg0 r0, Arg1 r1, Vreg sf,
                        Vlabel b, size_t i) {
   auto const size = static_cast<int>(width(r0));
   assertx(1 <= size && size <= 8 && !(size & (size - 1)));
-  auto const it = env.unit.regToConst.find(r0);
-  if (it == env.unit.regToConst.end() ||
-      it->second.isUndef ||
-      it->second.kind == Vconst::Double) {
-    return false;
-  }
+  auto const c = env.consts[r0];
+  if (!c || c->isUndef || c->kind == Vconst::Double) return false;
   // andqi/testqi only accepts 32-bit immediates, and will do sign extension.
-  if (size == sz::qword && !deltaFits(it->second.val, sz::dword)) {
+  if (size == sz::qword && !deltaFits(c->val, sz::dword)) {
     return false;
   }
-  const int val = extract_signed_value(it->second.val,
+  const int val = extract_signed_value(c->val,
                                        size < sz::qword ? size * 8 : 32);
   return simplify_impl(env, b, i, testi{ val, r1, sf });
 }

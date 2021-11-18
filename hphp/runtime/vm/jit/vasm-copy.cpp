@@ -728,6 +728,15 @@ struct OptVisit {
       ptr.base = def.base;
       ptr.disp += def.disp;
     });
+    if_rewritable(env, state, ptr.index, [&] (const DefInfo& def) {
+      if (arch() == Arch::ARM) return;
+      auto const newDisp =
+        static_cast<int64_t>(ptr.disp) + ptr.scale * def.disp;
+      if (!deltaFits(newDisp, sz::dword)) return;
+      FTRACE(2, "      rewrite: {} => {}\n", show(ptr.index), show(def));
+      ptr.index = def.base;
+      ptr.disp = newDisp;
+    });
   }
 
   template<class T>

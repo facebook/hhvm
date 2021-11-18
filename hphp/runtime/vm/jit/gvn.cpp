@@ -22,6 +22,7 @@
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
+#include "hphp/runtime/vm/jit/mutation.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/pass-tracer.h"
@@ -676,19 +677,21 @@ void insertIncRefs(PrcEnv& env) {
 
 using ActionMap = jit::fast_map<SSATmp*, std::vector<SSATmp*>>;
 
-void tryReplaceInstruction(
+bool tryReplaceInstruction(
   IRUnit& unit,
   const IdomVector& idoms,
   IRInstruction* inst,
   ValueNumberTable& table,
   ActionMap& actionMap
 ) {
+  auto changed = false;
   if (inst->hasDst()) {
     auto const dst = inst->dst();
     auto const valueNumber = table[dst].value;
     if (valueNumber &&
         valueNumber != dst &&
         is_tmp_usable(idoms, valueNumber, inst->block())) {
+      changed = true;
       if (inst->producesReference()) {
         auto& v = actionMap[valueNumber];
         if (!v.size()) v.push_back(valueNumber);
@@ -740,23 +743,27 @@ void tryReplaceInstruction(
              *valueNumber->inst()
             );
       inst->setSrc(i, valueNumber);
+      changed = true;
     }
   }
+
+  return changed;
 }
 
-void replaceRedundantComputations(
+bool replaceRedundantComputations(
   IRUnit& unit,
   const IdomVector& idoms,
   const BlockList& blocks,
   ValueNumberTable& table
 ) {
   ActionMap actionMap;
+  auto changed = false;
   for (auto block : blocks) {
     for (auto& inst : *block) {
-      tryReplaceInstruction(unit, idoms, &inst, table, actionMap);
+      changed |= tryReplaceInstruction(unit, idoms, &inst, table, actionMap);
     }
   }
-  if (actionMap.empty()) return;
+  if (actionMap.empty()) return changed;
   PrcEnv env(unit, blocks);
   for (auto& elm : actionMap) {
     if (env.insertMap.size() == kMaxTrackedPrcs) {
@@ -784,6 +791,7 @@ void replaceRedundantComputations(
     }
   }
   insertIncRefs(env);
+  return changed;
 }
 
 } // namespace
@@ -810,8 +818,12 @@ void gvn(IRUnit& unit) {
   // algorithm presented in the 1996 paper "SCC-based Value Numbering" by
   // Cooper and Simpson.
   runAnalysis(state, unit, rpoBlocks);
-  replaceRedundantComputations(unit, idoms, rpoBlocks, globalTable);
+  auto const changed =
+    replaceRedundantComputations(unit, idoms, rpoBlocks, globalTable);
   state.globalTable = nullptr;
+  // We might have added a new use of a SSATmp past a CheckType or
+  // AssertType on it, so refine if necessary.
+  if (changed) refineTmps(unit, rpoBlocks, idoms);
 }
 
 }}

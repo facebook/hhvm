@@ -298,9 +298,17 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     cur().mROProp = oldMROProp;
   }
 
-  auto killIterLocals = [&](const std::initializer_list<uint32_t>& ids) {
+  auto const killIterLocals = [&](const std::initializer_list<uint32_t>& ids) {
     for (auto id : ids) {
       setValueAndSyncMBase(loc(id), nullptr, false);
+    }
+  };
+
+  auto const setFrameCtx = [&] (const SSATmp* fp, SSATmp* ctx) {
+    for (auto& frame : m_stack) {
+      if (frame.fpValue != fp) continue;
+      frame.ctx = ctx;
+      frame.ctxType = ctx->type();
     }
   };
 
@@ -309,11 +317,9 @@ void FrameStateMgr::update(const IRInstruction* inst) {
   case EndInlining:    trackEndInlining(); break;
   case InlineCall:     trackInlineCall(inst); break;
   case StFrameCtx:
-    if (cur().fpValue == inst->src(0)) {
-      cur().ctx = inst->src(1);
-      cur().ctxType = inst->src(1)->type();
-    }
+    setFrameCtx(inst->src(0), inst->src(1));
     break;
+
   case Call:
     {
       assertx(cur().checkMInstrStateDead());
@@ -412,6 +418,10 @@ void FrameStateMgr::update(const IRInstruction* inst) {
       }
       for (auto& it : frame.stack) {
         refineValue(it.second, oldVal, newVal);
+      }
+      if (frame.ctx && canonical(frame.ctx) == canonical(inst->src(0))) {
+        frame.ctx = inst->dst();
+        frame.ctxType = inst->dst()->type();
       }
     }
     // MInstrState can only be live for the current frame.

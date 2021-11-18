@@ -298,6 +298,8 @@ bool refinable_load_eligible(const IRInstruction& inst) {
     case LdMBase:
     case LdIterPos:
     case LdIterEnd:
+    case LdFrameThis:
+    case LdFrameCls:
       assertx(inst.hasTypeParam());
       return true;
     default:

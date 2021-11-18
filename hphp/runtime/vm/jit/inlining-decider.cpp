@@ -844,12 +844,24 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
   if (profData()) {
     auto region = selectCalleeCFG(sk, callee, ctxType, argTypes,
                                   RO::EvalJitMaxRegionInstrs, annotationsPtr);
-    if (region &&
-        shouldInline(irgs, sk, callee, *region,
-                     adjustedMaxVasmCost(irgs, *region, depth))) {
-      return region;
+    if (region) {
+      if (shouldInline(irgs, sk, callee, *region,
+                       adjustedMaxVasmCost(irgs, *region, depth))) {
+        return region;
+      }
+      return nullptr;
     }
-    return nullptr;
+
+    // Special case: even if we don't have prof data for this func, if
+    // it takes no arguments and returns a constant, it might be a
+    // trivial function (IE, "return 123;"). Attempt to inline it
+    // anyways using the tracelet selector.
+    if (numArgsInclUnpack > 0) return nullptr;
+    auto const retType =
+      typeFromRAT(callee->repoReturnType(), sk.func()->cls());
+    // Deliberately using hasConstVal, not admitsSingleVal, since we
+    // don't want TInitNull, etc.
+    if (!retType.hasConstVal()) return nullptr;
   }
 
   auto region = selectCalleeTracelet(callee, ctxType, argTypes,

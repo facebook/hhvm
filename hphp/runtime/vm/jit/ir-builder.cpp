@@ -611,22 +611,21 @@ SSATmp* IRBuilder::preOptimizeLdClosureThis(IRInstruction* inst) {
 }
 
 SSATmp* IRBuilder::preOptimizeLdFrameCtx(IRInstruction* inst) {
+  assertx(inst->is(LdFrameCls, LdFrameThis));
+
   auto const func = inst->marker().func();
   assertx(func->cls() || func->isClosureBody());
   if (auto ctx = m_state.ctx()) {
-    assertx(!inst->is(LdFrameCls) || ctx->type() <= TCls);
-    assertx(!inst->is(LdFrameThis) || ctx->type() <= TObj);
+    assertx(IMPLIES(inst->is(LdFrameCls), ctx->type() <= TCls));
+    assertx(IMPLIES(inst->is(LdFrameThis), ctx->type() <= TObj));
     if (ctx->inst()->is(DefConst)) return ctx;
-    if (ctx->hasConstVal() ||
-        ctx->type().subtypeOfAny(TInitNull, TUninit, TNullptr)) {
+    if (ctx->type().admitsSingleVal()) {
       return m_unit.cns(ctx->type());
     }
     return ctx;
   }
 
   if (inst->is(LdFrameCls)) {
-    // ActRec->m_cls of a static function is always a valid class pointer with
-    // the bottom bit set
     assertx(func->cls());
     if (func->cls()->attrs() & AttrNoOverride) {
       return m_unit.cns(func->cls());

@@ -352,6 +352,15 @@ fn check_assignment_nonlocal(
                 }
             }
         }
+
+        // Support self::$x["x"] assignments
+        // Here, if the rhs is readonly we need to be explicit
+        aast::Expr_::ClassGet(_) => match rty_expr(context, &rhs) {
+            Rty::Readonly if !checker.is_typechecker => {
+                explicit_readonly(rhs);
+            }
+            _ => {}
+        },
         // On an array get <expr>[0] = <rhs>, recurse and check compatibility of inner <expr> with <rhs>
         aast::Expr_::ArrayGet(ag) => {
             let (array, _) = &mut **ag;
@@ -440,14 +449,14 @@ fn check_assignment_validity(
 
 struct Checker {
     errors: Vec<SyntaxError>,
-    _is_typechecker: bool, // used for migration purposes
+    is_typechecker: bool, // used for migration purposes
 }
 
 impl Checker {
     fn new(typechecker: bool) -> Self {
         Self {
             errors: vec![],
-            _is_typechecker: typechecker,
+            is_typechecker: typechecker,
         }
     }
 

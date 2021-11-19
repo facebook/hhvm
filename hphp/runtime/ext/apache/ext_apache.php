@@ -65,7 +65,7 @@ function apache_setenv(string $variable,
  *   current request.
  */
 <<__Native>>
-function getallheaders(): darray<string, string>;
+function getallheaders()[read_globals]: darray<string, string>;
 
 <<__Native>>
 function apache_get_config(): darray<string, mixed>;

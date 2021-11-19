@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/vm/func.h"
 
+#include <deque>
 #include <map>
 #include <memory>
 #include <optional>
@@ -53,14 +54,16 @@ struct Path {
 using Value = Optional<Path>;
 
 struct Stack {
-  Stack(const std::vector<Value>& stack = {}) : m_stack(stack) {}
+  Stack(const std::deque<Value>& stack = {}) : m_stack(stack) {}
 
   void push(const Value& value);
+  void pushFront(const Value& value);
 
   Value top() const;
   Value peek(int offset) const;
 
   void pop(int n = 1);
+  void popFront();
   void replaceTop(const Value& value);
 
   size_t size() const;
@@ -69,7 +72,7 @@ struct Stack {
   void clear();
 
  private:
-  std::vector<Value> m_stack;
+  std::deque<Value> m_stack;
 };
 
 /*

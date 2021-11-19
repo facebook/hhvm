@@ -74,6 +74,10 @@ void Stack::push(const Value& value) {
   m_stack.push_back(value);
 }
 
+void Stack::pushFront(const Value& value) {
+  m_stack.push_front(value);
+}
+
 Value Stack::top() const {
   return peek(0);
 }
@@ -105,6 +109,17 @@ void Stack::pop(int n) {
   for (int i = 0; i < n; i++) {
     m_stack.pop_back();
   }
+}
+
+void Stack::popFront() {
+  if (m_stack.empty()) {
+    FTRACE(
+        3,
+        "taint: (WARNING) called `Stack::popFront()` on empty stack\n");
+    return;
+  }
+
+  m_stack.pop_front();
 }
 
 void Stack::replaceTop(const Value& value) {

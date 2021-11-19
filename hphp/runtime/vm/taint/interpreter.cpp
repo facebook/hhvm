@@ -121,10 +121,10 @@ void iopPreamble(const std::string& name) {
         vm_stack_size,
         shadow_stack_size);
     for (int i = shadow_stack_size; i < vm_stack_size; i++) {
-      stack.push(std::nullopt);
+      stack.pushFront(std::nullopt);
     }
     for (int i = shadow_stack_size; i > vm_stack_size; i--) {
-      stack.pop();
+      stack.popFront();
     }
   }
 }

@@ -40,22 +40,22 @@ ExternalProject_Add(
   -DWITH_LZ4=system
   "-DLZ4_SYSTEM_LIBRARY=$<TARGET_PROPERTY:lz4,INTERFACE_LINK_LIBRARIES>"
   "-DPATH_TO_LZ4=$<TARGET_PROPERTY:lz4,INTERFACE_INCLUDE_DIRECTORIES>"
+  -DWITH_RE2=system
+  "-DRE2_SYSTEM_LIBRARY=$<TARGET_PROPERTY:re2,INTERFACE_LINK_LIBRARIES>"
+  "-DPATH_TO_RE2=$<TARGET_PROPERTY:re2,INTERFACE_INCLUDE_DIRECTORIES>"
   -DWITH_ZSTD=system
   "-DZSTD_SYSTEM_LIBRARY=$<TARGET_PROPERTY:zstd,INTERFACE_LINK_LIBRARIES>"
   "-DPATH_TO_ZSTD=$<TARGET_PROPERTY:zstd,INTERFACE_INCLUDE_DIRECTORIES>"
   ${EXTRA_ARGS}
 )
 
-# TODO: re2 is also a dependency, but first it needs to be split into
-# re2 + re2Build -- otherwise putting them here would force
-# them to always be built, instead of using the system ones where available.
-set(DEPS lz4 zstd)
+set(DEPS lz4 re2 zstd)
 add_dependencies(bundled_fbmysqlclient ${DEPS})
 
 # This extra indirection is needed because if the fbmysqlclient target links
 # ${DEPS} directly, the correct linking order is not guaranteed.
-add_library(fbmysqlclientDeps INTERFACE)
-target_link_libraries(fbmysqlclientDeps INTERFACE ${DEPS})
+add_library(fbmysqlclient_deps INTERFACE)
+target_link_libraries(fbmysqlclient_deps INTERFACE ${DEPS})
 
 ExternalProject_Get_Property(bundled_fbmysqlclient INSTALL_DIR)
 
@@ -63,5 +63,5 @@ add_dependencies(fbmysqlclient bundled_fbmysqlclient)
 target_include_directories(fbmysqlclient INTERFACE "${INSTALL_DIR}/include")
 target_link_libraries(fbmysqlclient INTERFACE
   "${INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}mysqlclient${CMAKE_STATIC_LIBRARY_SUFFIX}"
-  fbmysqlclientDeps
+  fbmysqlclient_deps
 )

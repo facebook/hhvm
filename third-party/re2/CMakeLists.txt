@@ -1,15 +1,44 @@
-cmake_minimum_required(VERSION 2.8.0)
-project(re2 CXX C)
+add_library(re2 INTERFACE)
 
-auto_sources(sources "*.cc" "${CMAKE_CURRENT_SOURCE_DIR}/src/re2")
-SET(util_sources
-  src/util/rune.cc
-  src/util/strutil.cc
+find_package(RE2)
+if(RE2_LIBRARY)
+  target_link_libraries(re2 INTERFACE ${RE2_LIBRARY})
+  target_include_directories(re2 INTERFACE ${RE2_INCLUDE_DIR})
+  return() # from File
+endif()
+
+include(ExternalProject)
+include(HPHPFunctions)
+
+SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
+  RE2_SOURCE_ARGS
+  SOURCE_URL
+  "https://github.com/google/re2/archive/refs/tags/2021-11-01.tar.gz"
+  SOURCE_HASH
+  "SHA256=8c45f7fba029ab41f2a7e6545058d9eec94eef97ce70df58e92d85cfc08b4669"
+  FILENAME_PREFIX "re2-"
 )
 
-set(RE2_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src" CACHE STRING "RE2 include path")
-# Blow away the global include directories - eg both hhvm and re2 have a
-# util/arena.h
-SET_PROPERTY(DIRECTORY PROPERTY INCLUDE_DIRECTORIES "${RE2_INCLUDE_DIR}")
-add_library(re2 STATIC ${util_sources} ${sources})
-target_include_directories(re2 PUBLIC ${RE2_INCLUDE_DIR})
+ExternalProject_Add(
+  bundled_re2
+  ${RE2_SOURCE_ARGS}
+  EXCLUDE_FROM_ALL
+  CMAKE_ARGS
+    "-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}"
+    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+    -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+    -DCMAKE_INSTALL_INCLUDEDIR=include
+    -DCMAKE_INSTALL_LIBDIR=lib
+
+    -DBUILD_TESTING=OFF
+    -DRE2_BUILD_TESTING=OFF
+)
+ExternalProject_Get_property(bundled_re2 INSTALL_DIR)
+
+add_dependencies(re2 bundled_re2)
+target_include_directories(re2 INTERFACE "${INSTALL_DIR}/include")
+target_link_libraries(
+  re2
+  INTERFACE
+  "${INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}re2${CMAKE_STATIC_LIBRARY_SUFFIX}"
+)

@@ -9,10 +9,7 @@
 open Hh_prelude
 
 type saved_state_type =
-  | Naming_and_dep_table of {
-      is_64bit: bool;
-      naming_sqlite: bool;
-    }
+  | Naming_and_dep_table of { naming_sqlite: bool }
   | Naming_table
 
 type env = {
@@ -64,10 +61,8 @@ let additional_info_of_json
   match saved_state_type with
   | Saved_state_loader.Naming_table -> ()
   | Saved_state_loader.Symbol_index -> ()
-  | Saved_state_loader.Naming_and_dep_table { is_64bit = _; naming_sqlite = _ }
-    ->
+  | Saved_state_loader.Naming_and_dep_table { naming_sqlite = _ } ->
     let mergebase_global_rev = Jget.int_opt json "mergebase_global_rev" in
-    let dep_table_is_64bit = Jget.bool_exn json "dep_table_is_64bit" in
     let dirty_files = Jget.obj_exn json "dirty_files" in
     let master_changes =
       Jget.string_array_exn dirty_files "master_changes"
@@ -82,7 +77,6 @@ let additional_info_of_json
     Saved_state_loader.Naming_and_dep_table_info.
       {
         mergebase_global_rev;
-        dep_table_is_64bit;
         dirty_files_promise = Future.of_value { master_changes; local_changes };
       }
 
@@ -139,10 +133,9 @@ let make_replay_token_of_additional_info
   match saved_state_type with
   | Saved_state_loader.Naming_table -> Hh_json.JSON_Null
   | Saved_state_loader.Symbol_index -> Hh_json.JSON_Null
-  | Saved_state_loader.Naming_and_dep_table { is_64bit = _; naming_sqlite = _ }
-    ->
+  | Saved_state_loader.Naming_and_dep_table { naming_sqlite = _ } ->
     let Saved_state_loader.Naming_and_dep_table_info.
-          { mergebase_global_rev; dep_table_is_64bit; dirty_files_promise } =
+          { mergebase_global_rev; dirty_files_promise } =
       additional_info
     in
     let Saved_state_loader.Naming_and_dep_table_info.
@@ -153,7 +146,6 @@ let make_replay_token_of_additional_info
     JSON_Object
       [
         ("mergebase_global_rev", opt_int_to_json mergebase_global_rev);
-        ("dep_table_is_64bit", JSON_Bool dep_table_is_64bit);
         ( "dirty_files",
           JSON_Object
             [
@@ -292,9 +284,9 @@ let load_saved_state :
 let main (env : env) : Exit_status.t Lwt.t =
   Relative_path.set_path_prefix Relative_path.Root env.root;
   match env.saved_state_type with
-  | Naming_and_dep_table { is_64bit; naming_sqlite } ->
+  | Naming_and_dep_table { naming_sqlite } ->
     let saved_state_type =
-      Saved_state_loader.Naming_and_dep_table { is_64bit; naming_sqlite }
+      Saved_state_loader.Naming_and_dep_table { naming_sqlite }
     in
     let%lwt result = load_saved_state ~env ~saved_state_type in
     (match result with

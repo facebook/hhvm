@@ -122,7 +122,6 @@ class SavedStateDir(object):
             {
                 "data_dump": {
                     "deptable": self.depgraph_file(),
-                    "deptable_is_64bit": True,
                     "state": self.naming_table_blob_file(),
                     "changes": changed_files,
                     "prechecked_changes": [],

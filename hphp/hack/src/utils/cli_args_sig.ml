@@ -14,7 +14,6 @@ module Types = struct
         [@printer Utils.pp_large_list Relative_path.pp]
     corresponding_base_revision: string;
     deptable_fn: string;
-    deptable_is_64bit: bool;
     prechecked_changes: Relative_path.t list;
         [@printer Utils.pp_large_list Relative_path.pp]
     naming_table_path: string;

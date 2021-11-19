@@ -24,7 +24,6 @@ type native_load_result = {
   is_cached: bool;
   state_distance: int;
   deptable_fn: string;
-  deptable_is_64bit: bool;
   dirty_files: dirty_files Future.t;
   hot_decls_paths: hot_decls_paths;
   errors_path: string;

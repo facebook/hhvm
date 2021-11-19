@@ -47,7 +47,6 @@ module Naming_and_dep_table_info = struct
 
   type additional_info = {
     mergebase_global_rev: Hg.global_rev option;
-    dep_table_is_64bit: bool;
     dirty_files_promise: dirty_files Future.t;
   }
 end
@@ -66,7 +65,6 @@ end
 
 type _ saved_state_type =
   | Naming_and_dep_table : {
-      is_64bit: bool;
       naming_sqlite: bool;
     }
       -> (Naming_and_dep_table_info.main_artifacts

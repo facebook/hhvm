@@ -35,12 +35,7 @@ module SLC = ServerLocalConfig
 
 type deptable = CustomDeptable of string
 
-let deptable_with_filename ~(is_64bit : bool) (fn : string) : deptable =
-  if is_64bit then
-    CustomDeptable fn
-  else
-    (* TODO(hverr): Clean up 32-bit *)
-    failwith "SQLite dep table no longer supported"
+let deptable_with_filename (fn : string) : deptable = CustomDeptable fn
 
 let lock_and_load_deptable
     ~(base_file_name : string)
@@ -160,16 +155,11 @@ let merge_saved_state_futures
       in
       let {
         Saved_state_loader.Naming_and_dep_table_info.mergebase_global_rev;
-        dep_table_is_64bit;
         dirty_files_promise;
       } =
         additional_info
       in
-      let deptable =
-        deptable_with_filename
-          ~is_64bit:dep_table_is_64bit
-          (Path.to_string dep_table_path)
-      in
+      let deptable = deptable_with_filename (Path.to_string dep_table_path) in
       lock_and_load_deptable
         ~base_file_name:(Path.to_string deptable_naming_table_blob_path)
         ~deptable
@@ -229,7 +219,6 @@ let merge_saved_state_futures
           {
             naming_table_fn = Path.to_string deptable_naming_table_blob_path;
             deptable_fn = Path.to_string dep_table_path;
-            deptable_is_64bit = dep_table_is_64bit;
             naming_table_fallback_fn = naming_table_fallback_path;
             corresponding_rev = Hg.Hg_rev corresponding_rev;
             mergebase_rev = mergebase_global_rev;
@@ -354,8 +343,6 @@ let download_and_load_state_exn
         ~saved_state_type:
           (Saved_state_loader.Naming_and_dep_table
              {
-               is_64bit =
-                 genv.local_config.ServerLocalConfig.load_state_natively_64bit;
                naming_sqlite =
                  genv.local_config.ServerLocalConfig.use_hack_64_naming_table;
              })
@@ -384,7 +371,6 @@ let use_precomputed_state_exn
     ServerArgs.naming_table_path;
     corresponding_base_revision;
     deptable_fn;
-    deptable_is_64bit;
     changes;
     naming_changes;
     prechecked_changes;
@@ -392,9 +378,7 @@ let use_precomputed_state_exn
     info
   in
   let ignore_hh_version = ServerArgs.ignore_hh_version genv.ServerEnv.options in
-  let deptable =
-    deptable_with_filename ~is_64bit:deptable_is_64bit deptable_fn
-  in
+  let deptable = deptable_with_filename deptable_fn in
   CgroupProfiler.step_start_end cgroup_steps "load deptable"
   @@ fun _cgroup_step ->
   lock_and_load_deptable
@@ -433,7 +417,6 @@ let use_precomputed_state_exn
   {
     naming_table_fn = naming_table_path;
     deptable_fn;
-    deptable_is_64bit;
     naming_table_fallback_fn = naming_table_fallback_path;
     corresponding_rev =
       Hg.Global_rev (int_of_string corresponding_base_revision);
@@ -1164,7 +1147,6 @@ let post_saved_state_initialization
     mergebase;
     old_errors;
     deptable_fn;
-    deptable_is_64bit;
     naming_table_fn = _;
     corresponding_rev = _;
     state_distance = _;
@@ -1185,22 +1167,18 @@ let post_saved_state_initialization
       env with
       init_env = { env.init_env with mergebase; naming_table_manifold_path };
       deps_mode =
-        (if deptable_is_64bit then
-          match ServerArgs.save_64bit genv.options with
-          | Some new_edges_dir ->
-            let human_readable_dep_map_dir =
-              ServerArgs.save_human_readable_64bit_dep_map genv.options
-            in
-            Typing_deps_mode.SaveCustomMode
-              {
-                graph = Some deptable_fn;
-                new_edges_dir;
-                human_readable_dep_map_dir;
-              }
-          | None -> Typing_deps_mode.CustomMode (Some deptable_fn)
-        else
-          (* TODO(hverr): Fully clean up 32-bit dep graph *)
-          failwith "32-bit deptable is no longer supported");
+        (match ServerArgs.save_64bit genv.options with
+        | Some new_edges_dir ->
+          let human_readable_dep_map_dir =
+            ServerArgs.save_human_readable_64bit_dep_map genv.options
+          in
+          Typing_deps_mode.SaveCustomMode
+            {
+              graph = Some deptable_fn;
+              new_edges_dir;
+              human_readable_dep_map_dir;
+            }
+        | None -> Typing_deps_mode.CustomMode (Some deptable_fn));
     }
   in
 

@@ -296,7 +296,6 @@ auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
             "corresponding_base_revision": "1",
             "is_cached": True,
             "deptable": saved_state_path + ".hhdg",
-            "deptable_is_64bit": True,
             "changes": changed_files,
             "naming_changes": changed_naming_files,
         }

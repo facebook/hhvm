@@ -716,7 +716,6 @@ let load_state
   in
   let naming_table_path = saved_state_dir ^ "/" ^ saved_state_filename in
   let deptable_fn = saved_state_dir ^ "/" ^ saved_state_filename ^ ".hhdg" in
-  let deptable_is_64bit = true in
   let load_state_approach =
     ServerInit.Precomputed
       {
@@ -725,7 +724,6 @@ let load_state
          * which is irrelevant in tests *)
         corresponding_base_revision = "-1";
         deptable_fn;
-        deptable_is_64bit;
         naming_changes = [];
         prechecked_changes;
         changes;

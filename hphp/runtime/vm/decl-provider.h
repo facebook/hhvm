@@ -47,8 +47,8 @@ struct DeclProviderResult {
 };
 
 struct HhvmDeclProvider {
-  explicit HhvmDeclProvider(std::string const& aliased_namespaces)
-    : opts{hackc_create_direct_decl_parse_options(true, true, true, aliased_namespaces)}
+  explicit HhvmDeclProvider(int32_t flags, std::string const& aliased_namespaces)
+    : opts{hackc_create_direct_decl_parse_options(flags, aliased_namespaces)}
   {}
   HhvmDeclProvider(HhvmDeclProvider const&) = delete;
   HhvmDeclProvider& operator=(HhvmDeclProvider const&) = delete;

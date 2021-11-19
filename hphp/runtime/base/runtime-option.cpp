@@ -343,6 +343,15 @@ std::uint32_t RepoOptions::getFactsFlags() const {
   return flags;
 }
 
+std::uint32_t RepoOptions::getDeclFlags() const {
+  int32_t flags =
+    DisableXHPElementMangling << 0 |
+    1 << 1 | // interpret_soft_types_as_like_types
+    AllowNewAttributeSyntax   << 2 |
+    EnableXHPClassModifier    << 3;
+  return flags;
+}
+
 // Mapping must match ParserFlags in compile.rs
 std::uint32_t RepoOptions::getParserFlags() const {
   std::uint32_t parser_flags = 0;

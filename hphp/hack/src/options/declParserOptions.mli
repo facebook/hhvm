@@ -11,6 +11,7 @@ type t = {
   disable_xhp_element_mangling: bool;
   interpret_soft_types_as_like_types: bool;
   allow_new_attribute_syntax: bool;
+  enable_xhp_class_modifier: bool;
   everything_sdt: bool;
   global_inference: bool;
   gi_reinfer_types: string list;

@@ -163,9 +163,10 @@ CompilerResult hackc_compile(
   CompileAbortMode mode
 ) {
   std::string aliased_namespaces = options.getAliasedNamespacesConfig();
+  int32_t decl_flags = options.getDeclFlags();
 
   // (Semi-)Mock HhvmDeclProvider. TODO: Hook up with bytecode cache logic.
-  HhvmDeclProvider decl_provider{aliased_namespaces};
+  HhvmDeclProvider decl_provider{decl_flags, aliased_namespaces};
 
   std::uint8_t flags = make_env_flags(
     !SystemLib::s_inited,           // is_systemlib

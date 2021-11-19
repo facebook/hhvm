@@ -125,6 +125,7 @@ struct RepoOptions {
   std::uint32_t getParserFlags() const;
   std::uint32_t getCompilerFlags() const;
   std::uint32_t getFactsFlags() const;
+  std::uint32_t getDeclFlags() const;
   ParserEnv getParserEnvironment() const;
   std::string getAliasedNamespacesConfig() const;
   struct stat stat() const { return m_stat; }

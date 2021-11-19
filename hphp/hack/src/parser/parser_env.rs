@@ -42,6 +42,7 @@ impl From<&DeclParserOptions<'_>> for ParserEnv {
             disable_xhp_element_mangling: opts.disable_xhp_element_mangling,
             interpret_soft_types_as_like_types: opts.interpret_soft_types_as_like_types,
             allow_new_attribute_syntax: opts.allow_new_attribute_syntax,
+            enable_xhp_class_modifier: opts.enable_xhp_class_modifier,
             ..Default::default()
         }
     }

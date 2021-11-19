@@ -19,7 +19,6 @@ let go errors ctx =
     Typing_deps.save_discovered_edges
       (Provider_context.get_deps_mode ctx)
       ~dest:state_filename
-      ~build_revision:Build_id.build_revision
       ~reset_state_after_saving:true
   in
   Hh_logger.log

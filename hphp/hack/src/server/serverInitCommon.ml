@@ -12,11 +12,7 @@ module Bucket = Hack_bucket
 open ServerEnv
 
 let no_incremental_check (options : ServerArgs.options) : bool =
-  let in_check_mode = ServerArgs.check_mode options in
-  let full_init =
-    Option.is_none (SharedMem.DepTable.loaded_dep_table_filename ())
-  in
-  in_check_mode && full_init
+  ServerArgs.check_mode options
 
 let indexing ?hhi_filter ~(telemetry_label : string) (genv : ServerEnv.genv) :
     Relative_path.t list Bucket.next * float =

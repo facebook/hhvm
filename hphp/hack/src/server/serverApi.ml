@@ -14,7 +14,6 @@ let make_local_server_api
     (naming_table : Naming_table.t)
     ~(root : string)
     ~(init_id : string)
-    ~(ignore_hh_version : bool)
     ~(enable_disk_heap : bool)
     ~(deps_mode : Typing_deps_mode.t) : (module LocalServerApi) =
   (module struct
@@ -28,12 +27,7 @@ let make_local_server_api
       in
       HackEventLogger.with_id ~stage:`Recheck check_id @@ fun () ->
       let start_t = Unix.gettimeofday () in
-      let edges =
-        Typing_deps.load_discovered_edges
-          deps_mode
-          state_filename
-          ~ignore_hh_version
-      in
+      let edges = Typing_deps.load_discovered_edges deps_mode state_filename in
       HackEventLogger.remote_scheduler_update_dependency_graph_end
         ~edges
         start_t;
@@ -241,7 +235,6 @@ let make_remote_server_api
         Typing_deps.save_discovered_edges
           (Provider_context.get_deps_mode ctx)
           ~dest:state_filename
-          ~build_revision:Build_id.build_revision
           ~reset_state_after_saving:true
       in
       let _t : float =

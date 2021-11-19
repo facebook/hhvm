@@ -8,11 +8,9 @@
  *)
 
 open Hh_prelude
-module Set = Stdlib.Set
 module Format = Stdlib.Format
 module Hashtbl = Stdlib.Hashtbl
 module Mode = Typing_deps_mode
-open Reordered_argument_collections
 open Typing_deps_mode
 open Utils
 
@@ -62,39 +60,6 @@ module Dep = struct
 
   external hash2 : Mode.hash_mode -> int -> int -> string -> int = "hash2_ocaml"
     [@@noalloc]
-
-  (** Explicit [equals] function since [=] doesn't work on the [variant] GADT. *)
-  let variant_equals : type a b. a variant -> b variant -> bool =
-   fun lhs rhs ->
-    match (lhs, rhs) with
-    | (GConst lhs, GConst rhs) -> String.(lhs = rhs)
-    | (Type lhs, Type rhs) -> String.(lhs = rhs)
-    | (Fun lhs, Fun rhs) -> String.(lhs = rhs)
-    | (Const (lhs1, lhs2), Const (rhs1, rhs2)) ->
-      String.(lhs1 = rhs1) && String.(lhs2 = rhs2)
-    | (Prop (lhs1, lhs2), Prop (rhs1, rhs2)) ->
-      String.(lhs1 = rhs1) && String.(lhs2 = rhs2)
-    | (SProp (lhs1, lhs2), SProp (rhs1, rhs2)) ->
-      String.(lhs1 = rhs1) && String.(lhs2 = rhs2)
-    | (Method (lhs1, lhs2), Method (rhs1, rhs2)) ->
-      String.(lhs1 = rhs1) && String.(lhs2 = rhs2)
-    | (SMethod (lhs1, lhs2), SMethod (rhs1, rhs2)) ->
-      String.(lhs1 = rhs1) && String.(lhs2 = rhs2)
-    | (GConstName lhs, GConstName rhs) -> String.(lhs = rhs)
-    | (AllMembers lhs, AllMembers rhs) -> String.(lhs = rhs)
-    | (Extends lhs, Extends rhs) -> String.(lhs = rhs)
-    | (GConst _, _) -> false
-    | (Type _, _) -> false
-    | (Fun _, _) -> false
-    | (Constructor _, _) -> false
-    | (Const _, _) -> false
-    | (Prop _, _) -> false
-    | (SProp _, _) -> false
-    | (Method _, _) -> false
-    | (SMethod _, _) -> false
-    | (GConstName _, _) -> false
-    | (AllMembers _, _) -> false
-    | (Extends _, _) -> false
 
   type t = int
 
@@ -254,15 +219,6 @@ let dependency_callbacks = Caml.Hashtbl.create 0
 let add_dependency_callback cb_name cb =
   Caml.Hashtbl.replace dependency_callbacks cb_name cb
 
-(** Set of dependencies as used in the legacy SQLite system. *)
-module SQLiteDepSet = struct
-  include Reordered_argument_set (Set.Make (Dep))
-
-  let make () = empty
-
-  let pp = make_pp (fun fmt -> Format.fprintf fmt "%d")
-end
-
 (** Set of dependencies used for the custom system
 
     The type `t` is an abstract type managed by `typing_deps.rs`.
@@ -320,204 +276,94 @@ end
 
 (** Unified interface for `SQLiteDepSet` and `CustomDepSet`
 
-    The actual representation dependends on the value in `mode`. *)
+    The actual representation dependends on the value in `mode`.
+
+    TODO(hverr): Clean-up 32-bit, no longer necessary. *)
 module DepSet = struct
-  type t =
-    | SQLiteDepSet of SQLiteDepSet.t
-    | CustomDepSet of CustomDepSet.t
+  type t = CustomDepSet of CustomDepSet.t
 
   type elt = Dep.t
 
   let make mode =
     match mode with
-    | SQLiteMode -> SQLiteDepSet (SQLiteDepSet.make ())
     | CustomMode _
     | SaveCustomMode _ ->
       CustomDepSet (CustomDepSet.make ())
 
   let singleton mode elt =
     match mode with
-    | SQLiteMode -> SQLiteDepSet (SQLiteDepSet.singleton elt)
     | CustomMode _
     | SaveCustomMode _ ->
       CustomDepSet (CustomDepSet.singleton elt)
 
   let add s x =
     match s with
-    | SQLiteDepSet s -> SQLiteDepSet (SQLiteDepSet.add s x)
     | CustomDepSet s -> CustomDepSet (CustomDepSet.add s x)
 
   let union s1 s2 =
     match (s1, s2) with
-    | (SQLiteDepSet s1, SQLiteDepSet s2) ->
-      SQLiteDepSet (SQLiteDepSet.union s1 s2)
     | (CustomDepSet s1, CustomDepSet s2) ->
       CustomDepSet (CustomDepSet.union s1 s2)
-    | _ -> failwith "incompatible dependency sets"
 
   let inter s1 s2 =
     match (s1, s2) with
-    | (SQLiteDepSet s1, SQLiteDepSet s2) ->
-      SQLiteDepSet (SQLiteDepSet.inter s1 s2)
     | (CustomDepSet s1, CustomDepSet s2) ->
       CustomDepSet (CustomDepSet.inter s1 s2)
-    | _ -> failwith "incompatible dependency sets"
 
   let diff s1 s2 =
     match (s1, s2) with
-    | (SQLiteDepSet s1, SQLiteDepSet s2) ->
-      SQLiteDepSet (SQLiteDepSet.diff s1 s2)
     | (CustomDepSet s1, CustomDepSet s2) ->
       CustomDepSet (CustomDepSet.diff s1 s2)
-    | _ -> failwith "incompatible dependency sets"
 
   let iter s ~f =
     match s with
-    | SQLiteDepSet s -> SQLiteDepSet.iter s ~f
     | CustomDepSet s -> CustomDepSet.iter s ~f
 
   let fold : 'a. t -> init:'a -> f:(elt -> 'a -> 'a) -> 'a =
    fun s ~init ~f ->
     match s with
-    | SQLiteDepSet s -> SQLiteDepSet.fold s ~init ~f
     | CustomDepSet s -> CustomDepSet.fold s ~init ~f
 
   let mem s elt =
     match s with
-    | SQLiteDepSet s -> SQLiteDepSet.mem s elt
     | CustomDepSet s -> CustomDepSet.mem s elt
 
   let elements s =
     match s with
-    | SQLiteDepSet s -> SQLiteDepSet.elements s
     | CustomDepSet s -> CustomDepSet.elements s
 
   let cardinal s =
     match s with
-    | SQLiteDepSet s -> SQLiteDepSet.cardinal s
     | CustomDepSet s -> CustomDepSet.cardinal s
 
   let is_empty s =
     match s with
-    | SQLiteDepSet s -> SQLiteDepSet.is_empty s
     | CustomDepSet s -> CustomDepSet.is_empty s
 
   let of_list mode xs =
     match mode with
-    | SQLiteMode -> SQLiteDepSet (SQLiteDepSet.of_list xs)
     | CustomMode _
     | SaveCustomMode _ ->
       CustomDepSet (CustomDepSet.of_list xs)
 
   let pp fmt s =
     match s with
-    | SQLiteDepSet s -> SQLiteDepSet.pp fmt s
     | CustomDepSet s -> CustomDepSet.pp fmt s
 end
 
+(* TODO(hverr): Clean up 32-bit, no longer necessary *)
 module VisitedSet = struct
   type custom_t (* abstract type managed by Rust, RefCell<BTreeSet<Dep>> *)
 
   external hh_visited_set_make : unit -> custom_t = "hh_visited_set_make"
 
-  type t =
-    | SQLiteVisitedSet of SQLiteDepSet.t ref
-    | CustomVisitedSet of custom_t
+  type t = CustomVisitedSet of custom_t
 
   let make mode : t =
     match mode with
-    | SQLiteMode -> SQLiteVisitedSet (ref (SQLiteDepSet.make ()))
     | CustomMode _
     | SaveCustomMode _ ->
       CustomVisitedSet (hh_visited_set_make ())
-end
-
-(** Graph management in the legacy SQLite system.
-
-    Consult hh_shared.c for the underlying representation. *)
-module SQLiteGraph = struct
-  module DepSet = SQLiteDepSet
-
-  external hh_add_dep : int -> unit = "hh_add_dep"
-
-  external hh_get_dep : int -> int list = "hh_get_dep"
-
-  external hh_get_dep_sqlite : int -> int list = "hh_get_dep_sqlite"
-
-  external allow_dependency_table_reads : bool -> bool
-    = "hh_allow_dependency_table_reads"
-
-  external assert_allow_dependency_table_reads : unit -> unit
-    = "hh_assert_allow_dependency_table_reads"
-
-  let add x y = hh_add_dep ((x lsl 31) lor y)
-
-  let get x =
-    assert_allow_dependency_table_reads ();
-    let deps = DepSet.make () in
-    let deps = List.fold_left ~init:deps ~f:DepSet.add (hh_get_dep x) in
-    let deps = List.fold_left ~init:deps ~f:DepSet.add (hh_get_dep_sqlite x) in
-    deps
-
-  let get_ideps_from_hash x =
-    (* FIXME: It shouldn't be necessary to add x to the result set here. We do so
-       because historically, we added self-referential edges to the dependency
-       graph (e.g., Class "\Foo" -> Class "\Foo"). We no longer do this in order
-       to save memory, but we aren't yet confident that these edges were not
-       relied upon anywhere. *)
-    SQLiteDepSet.add (get x) x
-
-  let add_idep_directly_to_graph ~(dependent : Dep.t) ~(dependency : Dep.t) :
-      unit =
-    add dependency dependent
-
-  let add_idep
-      (dependent : Dep.dependent Dep.variant)
-      (dependency : Dep.dependency Dep.variant) =
-    if Dep.variant_equals dependent dependency then
-      ()
-    else (
-      Caml.Hashtbl.iter (fun _ f -> f dependent dependency) dependency_callbacks;
-      if !trace then
-        add_idep_directly_to_graph
-          ~dependent:(Dep.make Hash32Bit dependent)
-          ~dependency:(Dep.make Hash32Bit dependency)
-    )
-
-  let rec get_extend_deps ~visited ~source_class ~acc =
-    if DepSet.mem !visited source_class then
-      acc
-    else (
-      visited := DepSet.add !visited source_class;
-      let cid_hash = Dep.extends_of_class source_class in
-      let ideps = get_ideps_from_hash cid_hash in
-      DepSet.fold
-        ~f:
-          begin
-            fun obj acc ->
-            if Dep.is_class obj then
-              let acc = DepSet.add acc obj in
-              get_extend_deps ~visited ~source_class:obj ~acc
-            else
-              acc
-          end
-        ideps
-        ~init:acc
-    )
-
-  let add_extend_deps deps =
-    let trace = ref (DepSet.make ()) in
-    DepSet.fold deps ~init:deps ~f:(fun dep acc ->
-        if not @@ Dep.is_class dep then
-          acc
-        else
-          get_extend_deps ~visited:trace ~source_class:dep ~acc)
-
-  let add_typing_deps deps =
-    DepSet.fold deps ~init:deps ~f:(fun dep acc ->
-        DepSet.union (get_ideps_from_hash dep) acc)
-
-  let add_all_deps x = x |> add_extend_deps |> add_typing_deps
 end
 
 (** Graph management in the new system with custom file format. *)
@@ -877,7 +723,6 @@ let deps_of_file_info (mode : Mode.t) (file_info : FileInfo.t) : Dep.t list =
 module Telemetry = struct
   let depgraph_delta_num_edges mode =
     match mode with
-    | SQLiteMode -> None
     | CustomMode _ -> Some (CustomGraph.dep_graph_delta_num_edges ())
     | SaveCustomMode _ -> None
 end
@@ -893,21 +738,15 @@ type dep_edges = CustomGraph.DepEdgeSet.t option
     either acknowledge that they don't care about accuracy (by setting this flag
     themselves), or plug in to a hh_server mechanic that will delay executing such
     command until dependency table is back up to date.
-
-    TODO: For SQLiteMode, this flag lives in shared memory. Yet, I think dependencies
-    are only read from the master thread (proof: g_db in hh_shared.c is NOT in
-    shared memory!). In any case this mechanism should be cleaned up.
     *)
 let allow_dependency_table_reads mode flag =
   match mode with
-  | SQLiteMode -> SQLiteGraph.allow_dependency_table_reads flag
   | CustomMode _
   | SaveCustomMode _ ->
     CustomGraph.allow_dependency_table_reads flag
 
 let add_idep mode dependent dependency =
   match mode with
-  | SQLiteMode -> SQLiteGraph.add_idep dependent dependency
   | CustomMode _ -> CustomGraph.add_idep mode dependent dependency
   | SaveCustomMode _ -> SaveCustomGraph.add_idep mode dependent dependency
 
@@ -916,22 +755,10 @@ let idep_exists mode dependent dependency =
   | CustomMode _ -> CustomGraph.idep_exists mode dependent dependency
   | _ -> false
 
-let add_idep_directly_to_graph mode ~dependent ~dependency =
-  match mode with
-  | SQLiteMode -> SQLiteGraph.add_idep_directly_to_graph ~dependent ~dependency
-  | CustomMode _
-  | SaveCustomMode _ ->
-    (* TODO(hverr): implement, only used in hh_fanout *)
-    failwith "unimplemented"
-
 let dep_edges_make () : dep_edges = Some CustomGraph.DepEdgeSet.empty
 
 let flush_ideps_batch mode : dep_edges =
   match mode with
-  | SQLiteMode ->
-    (* In SQLite mode, the dependency edges are immediately
-     * added to shared memory. *)
-    None
   | CustomMode _ ->
     (* Make sure we don't miss any dependencies! *)
     CustomGraph.filter_discovered_deps_batch mode;
@@ -952,28 +779,20 @@ let register_discovered_dep_edges : dep_edges -> unit = function
   | None -> ()
   | Some batch -> CustomGraph.register_discovered_dep_edges batch
 
-let save_discovered_edges mode ~dest ~build_revision ~reset_state_after_saving =
+let save_discovered_edges mode ~dest ~reset_state_after_saving =
   match mode with
-  | SQLiteMode ->
-    SharedMem.DepTable.save_dep_table_blob
-      ~fn:dest
-      ~build_revision
-      ~reset_state_after_saving
   | CustomMode _ -> CustomGraph.save_delta dest reset_state_after_saving
   | SaveCustomMode _ ->
     failwith "save_discovered_edges not supported for SaveCustomMode"
 
-let load_discovered_edges mode source ~ignore_hh_version =
+let load_discovered_edges mode source =
   match mode with
-  | SQLiteMode ->
-    SharedMem.DepTable.load_dep_table_blob ~fn:source ~ignore_hh_version
   | CustomMode _ -> CustomGraph.load_delta mode source
   | SaveCustomMode _ -> SaveCustomGraph.save_delta mode ~source
 
 let get_ideps_from_hash mode hash =
   let open DepSet in
   match mode with
-  | SQLiteMode -> SQLiteDepSet (SQLiteGraph.get_ideps_from_hash hash)
   | CustomMode _
   | SaveCustomMode _ ->
     CustomDepSet (CustomGraph.get_ideps_from_hash mode hash)
@@ -985,28 +804,21 @@ let get_extend_deps ~mode ~visited ~source_class ~acc =
   let open DepSet in
   let open VisitedSet in
   match (visited, acc) with
-  | (SQLiteVisitedSet visited, SQLiteDepSet acc) ->
-    let acc = SQLiteGraph.get_extend_deps ~visited ~source_class ~acc in
-    SQLiteDepSet acc
   | (CustomVisitedSet visited, CustomDepSet acc) ->
     let acc = CustomGraph.get_extend_deps mode visited source_class acc in
     CustomDepSet acc
-  | _ -> failwith "incompatible dep set types"
 
 let add_extend_deps mode acc =
   let open DepSet in
   match acc with
-  | SQLiteDepSet acc -> SQLiteDepSet (SQLiteGraph.add_extend_deps acc)
   | CustomDepSet acc -> CustomDepSet (CustomGraph.add_extend_deps mode acc)
 
 let add_typing_deps mode acc =
   let open DepSet in
   match acc with
-  | SQLiteDepSet acc -> SQLiteDepSet (SQLiteGraph.add_typing_deps acc)
   | CustomDepSet acc -> CustomDepSet (CustomGraph.add_typing_deps mode acc)
 
 let add_all_deps mode acc =
   let open DepSet in
   match acc with
-  | SQLiteDepSet acc -> SQLiteDepSet (SQLiteGraph.add_all_deps acc)
   | CustomDepSet acc -> CustomDepSet (CustomGraph.add_all_deps mode acc)

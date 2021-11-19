@@ -180,9 +180,6 @@ val add_idep :
 val idep_exists :
   Mode.t -> Dep.dependent Dep.variant -> Dep.dependency Dep.variant -> bool
 
-val add_idep_directly_to_graph :
-  Mode.t -> dependent:Dep.t -> dependency:Dep.t -> unit
-
 val dep_edges_make : unit -> dep_edges
 
 val flush_ideps_batch : Mode.t -> dep_edges
@@ -193,35 +190,26 @@ val register_discovered_dep_edges : dep_edges -> unit
 
 (** Save discovered edges to a binary file.
   *
-  * - If mode is [SQLiteMode], the full dep table in shared memory is saved.
   * - If mode is [CustomMode], the dep table delta in [typing.rs] is saved.
   * - If mode is [SaveCustomMode], an exception is raised.
   *
-  * Setting [reset_state_after_saving] will empty either shared memory or the
-  * dep table delta in [typing.rs], depending on the mode.
-  *
-  * Currently, [build_revision] is ignored.
+  * Setting [reset_state_after_saving] will empty the dep table delta in
+  * [typing.rs].
   *)
 val save_discovered_edges :
-  Mode.t ->
-  dest:string ->
-  build_revision:string ->
-  reset_state_after_saving:bool ->
-  int
+  Mode.t -> dest:string -> reset_state_after_saving:bool -> int
 
 (** Load discovered edges from a binary file.
   *
-  * - If mode is [SQLiteMode], the binary file is assumed to contain 32-bit
-  *   hashes, and they will all be added to the shared memory table.
   * - If mode is [CustomMode], the binary file is assumed to contain 64-bit
   *   hashes and they will be added to the dep table delta in [typing.rs].
   *   If we have an existing table attached, we will first filter out edges
   *   that are already present in the attached table.
-  * - If mode is [SaveCustomMode], an exception is raised.
-  *
-  * Currently, [ignore_hh_version] is ignored.
+  * - If mode is [SaveCustomMode], the file is assumed to contain 64-bit
+  *   hashes and they will be added ot the current worker's on-disk
+  *   dependency edge file.
   *)
-val load_discovered_edges : Mode.t -> string -> ignore_hh_version:bool -> int
+val load_discovered_edges : Mode.t -> string -> int
 
 val get_ideps_from_hash : Mode.t -> Dep.t -> DepSet.t
 

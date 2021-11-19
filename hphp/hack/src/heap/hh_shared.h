@@ -77,13 +77,6 @@ CAMLprim value hh_add_raw(value key, value heap_entry);
 CAMLprim value hh_serialize_raw(value data);
 CAMLprim value hh_deserialize_raw(value heap_entry);
 
-/*****************************************************************************/
-/* Dependency table operations. */
-/*****************************************************************************/
-void hh_add_dep(value ocaml_dep);
-CAMLprim value hh_dep_used_slots(void);
-CAMLprim value hh_dep_slots(void);
-CAMLprim value hh_get_dep(value ocaml_key);
 
 /*****************************************************************************/
 /* Hashtable operations. */
@@ -104,25 +97,5 @@ value hh_mem(value key);
 void hh_move(value key1, value key2);
 /* Removes a key from the hash table. */
 CAMLprim value hh_remove(value key);
-
-/*****************************************************************************/
-/* Saved State with SQLite */
-/*****************************************************************************/
-void hh_cleanup_sqlite(void);
-
-/* Dependency table. */
-CAMLprim value hh_save_dep_table_sqlite(
-        value out_filename,
-        value build_revision
-);
-CAMLprim value hh_update_dep_table_sqlite(
-    value out_filename,
-    value build_revision
-);
-void hh_load_dep_table_sqlite(
-        value in_filename,
-        value ignore_hh_version
-);
-CAMLprim value hh_get_dep_sqlite(value ocaml_key);
 
 #endif

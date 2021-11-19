@@ -129,9 +129,6 @@ impl UnsafeDepGraph {
         let depgraph = DEPGRAPH.get_or_try_init::<_, String>(|| {
             let mode = mode.to_rust().unwrap();
             match mode {
-                TypingDepsMode::SQLiteMode => {
-                    panic!("programming error: cannot call load in SQLite mode")
-                }
                 TypingDepsMode::CustomMode(None)
                 | TypingDepsMode::SaveCustomMode {
                     graph: None,

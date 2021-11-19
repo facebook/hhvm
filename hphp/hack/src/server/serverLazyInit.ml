@@ -33,45 +33,20 @@ open ServerInitTypes
 open String_utils
 module SLC = ServerLocalConfig
 
-type deptable =
-  | SQLiteDeptable of string
-  | CustomDeptable of string
+type deptable = CustomDeptable of string
 
 let deptable_with_filename ~(is_64bit : bool) (fn : string) : deptable =
   if is_64bit then
     CustomDeptable fn
   else
-    SQLiteDeptable fn
+    (* TODO(hverr): Clean up 32-bit *)
+    failwith "SQLite dep table no longer supported"
 
 let lock_and_load_deptable
     ~(base_file_name : string)
     ~(deptable : deptable)
-    ~(ignore_hh_version : bool)
-    ~(fail_if_missing : bool) : unit =
+    ~(ignore_hh_version : bool) : unit =
   match deptable with
-  | SQLiteDeptable fn ->
-    if String.length fn = 0 && not fail_if_missing then
-      Hh_logger.log "The dependency file was not specified - ignoring"
-    else begin
-      (* The SQLite deptable must be loaded in the master process *)
-
-      (* Take a lock on the info file for the SQLite *)
-      try
-        LoadScriptUtils.lock_saved_state fn;
-        let start_t = Unix.gettimeofday () in
-        SharedMem.DepTable.load_dep_table_sqlite ~fn ~ignore_hh_version;
-        let (_t : float) =
-          Hh_logger.log_duration "Did read the dependency file (sec)" start_t
-        in
-        HackEventLogger.load_deptable_end start_t
-      with
-      | (SharedMem.Sql_assertion_failure 11 | SharedMem.Sql_assertion_failure 14)
-        as e ->
-        (* SQL_corrupt *)
-        let stack = Caml.Printexc.get_raw_backtrace () in
-        LoadScriptUtils.delete_corrupted_saved_state fn;
-        Caml.Printexc.raise_with_backtrace e stack
-    end
   | CustomDeptable fn ->
     let () =
       if not ignore_hh_version then
@@ -161,7 +136,6 @@ let merge_saved_state_futures
       let ignore_hh_version =
         ServerArgs.ignore_hh_version genv.ServerEnv.options
       in
-      let fail_if_missing = not genv.local_config.SLC.can_skip_deptable in
       let {
         Saved_state_loader.main_artifacts;
         additional_info;
@@ -199,8 +173,7 @@ let merge_saved_state_futures
       lock_and_load_deptable
         ~base_file_name:(Path.to_string deptable_naming_table_blob_path)
         ~deptable
-        ~ignore_hh_version
-        ~fail_if_missing;
+        ~ignore_hh_version;
       let load_decls =
         genv.local_config.SLC.load_decls_from_saved_state
         || genv.local_config.SLC.force_load_hot_shallow_decls
@@ -419,7 +392,6 @@ let use_precomputed_state_exn
     info
   in
   let ignore_hh_version = ServerArgs.ignore_hh_version genv.ServerEnv.options in
-  let fail_if_missing = not genv.local_config.SLC.can_skip_deptable in
   let deptable =
     deptable_with_filename ~is_64bit:deptable_is_64bit deptable_fn
   in
@@ -428,8 +400,7 @@ let use_precomputed_state_exn
   lock_and_load_deptable
     ~base_file_name:naming_table_path
     ~deptable
-    ~ignore_hh_version
-    ~fail_if_missing;
+    ~ignore_hh_version;
   let changes = Relative_path.set_of_list changes in
   let naming_changes = Relative_path.set_of_list naming_changes in
   let prechecked_changes = Relative_path.set_of_list prechecked_changes in
@@ -944,7 +915,6 @@ let initialize_naming_table
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
     (cgroup_steps : CgroupProfiler.step_group) : ServerEnv.env * float =
-  SharedMem.DepTable.cleanup_sqlite ();
   ServerProgress.send_progress "%s" progress_message;
   let (get_next, count, t) =
     match fnl with
@@ -1229,7 +1199,8 @@ let post_saved_state_initialization
               }
           | None -> Typing_deps_mode.CustomMode (Some deptable_fn)
         else
-          Typing_deps_mode.SQLiteMode);
+          (* TODO(hverr): Fully clean up 32-bit dep graph *)
+          failwith "32-bit deptable is no longer supported");
     }
   in
 

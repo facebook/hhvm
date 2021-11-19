@@ -204,63 +204,6 @@ module RawAccess = struct
   external serialize_raw : 'a -> serialized = "hh_serialize_raw"
 end
 
-module DepTable = struct
-  external loaded_dep_table_filename_c : unit -> string
-    = "hh_get_loaded_dep_table_filename"
-
-  external get_in_memory_dep_table_entry_count : unit -> int
-    = "hh_get_in_memory_dep_table_entry_count"
-
-  let loaded_dep_table_filename () =
-    let fn = loaded_dep_table_filename_c () in
-    if String.equal "" fn then
-      None
-    else
-      Some fn
-
-  external save_dep_table_blob_c : string -> string -> bool -> int
-    = "hh_save_dep_table_blob"
-
-  external save_dep_table_sqlite_c : string -> string -> int
-    = "hh_save_dep_table_sqlite"
-
-  external update_dep_table_sqlite_c : string -> string -> int
-    = "hh_update_dep_table_sqlite"
-
-  let save_dep_table_sqlite ~fn ~build_revision =
-    if Option.is_some (loaded_dep_table_filename ()) then
-      failwith
-        "save_dep_table_sqlite not supported when server is loaded from a saved state; use update_dep_table_sqlite";
-    Hh_logger.log "Dumping a saved state deptable into a SQLite DB.";
-    save_dep_table_sqlite_c fn build_revision
-
-  let save_dep_table_blob ~fn ~build_revision ~reset_state_after_saving =
-    if Option.is_some (loaded_dep_table_filename ()) then
-      failwith
-        "save_dep_table_blob not supported when the server is loaded from a saved state; use update_dep_table_sqlite";
-    Hh_logger.log "Dumping a saved state deptable as a blob.";
-
-    save_dep_table_blob_c fn build_revision reset_state_after_saving
-
-  let update_dep_table_sqlite ~fn ~build_revision =
-    Hh_logger.log "Updating given saved state deptable.";
-    update_dep_table_sqlite_c fn build_revision
-
-  external load_dep_table_blob_c : string -> bool -> int
-    = "hh_load_dep_table_blob"
-
-  external load_dep_table_sqlite_c : string -> bool -> unit
-    = "hh_load_dep_table_sqlite"
-
-  let load_dep_table_blob ~fn ~ignore_hh_version =
-    load_dep_table_blob_c fn ignore_hh_version
-
-  let load_dep_table_sqlite ~fn ~ignore_hh_version =
-    load_dep_table_sqlite_c fn ignore_hh_version
-
-  external cleanup_sqlite : unit -> unit = "hh_cleanup_sqlite"
-end
-
 module SMTelemetry = struct
   (*****************************************************************************)
   (* Each cache can write telemetry about its current occupancy.
@@ -315,19 +258,11 @@ module SMTelemetry = struct
 
   external hash_slots : unit -> int = "hh_hash_slots"
 
-  external dep_used_slots : unit -> int = "hh_dep_used_slots"
-
-  external dep_slots : unit -> int = "hh_dep_slots"
-
   type table_stats = {
     nonempty_slots: int;
     used_slots: int;
     slots: int;
   }
-
-  let dep_stats () =
-    let used = dep_used_slots () in
-    { nonempty_slots = used; used_slots = used; slots = dep_slots () }
 
   let hash_stats () =
     let (used_slots, nonempty_slots) = hash_used_slots () in

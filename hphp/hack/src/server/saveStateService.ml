@@ -266,38 +266,6 @@ let dump_errors_json (output_filename : string) (errors : Errors.t) : unit =
   Hh_json.json_to_output chan errors_json;
   Stdlib.close_out chan
 
-let dump_dep_graph_32bit ~db_name =
-  let t = Unix.gettimeofday () in
-  match SharedMem.DepTable.loaded_dep_table_filename () with
-  | None ->
-    let dep_table_edges_added =
-      SharedMem.DepTable.save_dep_table_sqlite
-        ~fn:db_name
-        ~build_revision:Build_id.build_revision
-    in
-    let (_ : float) = Hh_logger.log_duration "Saving saved state took" t in
-    { dep_table_edges_added }
-  | Some old_table_filename ->
-    (* If server is running from a loaded saved state, its in-memory
-     * tracked depdnencies are incomplete - most of the actual dependencies
-     * are in the SQL table. We need to copy that file and update it with
-     * the in-memory edges. *)
-    let t = Unix.gettimeofday () in
-    FileUtil.cp [old_table_filename] db_name;
-    let (_ : float) =
-      Hh_logger.log_duration "Made disk copy of loaded saved state. Took" t
-    in
-    if not (RealDisk.file_exists db_name) then
-      failwith
-        "Existing save state SQL file missing; disk copy must have failed";
-    let dep_table_edges_added =
-      SharedMem.DepTable.update_dep_table_sqlite
-        ~fn:db_name
-        ~build_revision:Build_id.build_revision
-    in
-    let (_ : float) = Hh_logger.log_duration "Updating saved state took" t in
-    { dep_table_edges_added }
-
 let saved_state_info_file_name ~base_file_name = base_file_name ^ "_info.json"
 
 let saved_state_build_revision_write ~(base_file_name : string) : unit =
@@ -318,7 +286,6 @@ let dump_dep_graph_64bit ~mode ~db_name ~incremental_info_file =
   let t = Unix.gettimeofday () in
   let base_dep_graph =
     match mode with
-    | Typing_deps_mode.SQLiteMode -> None
     | Typing_deps_mode.CustomMode base_dep_graph -> base_dep_graph
     | Typing_deps_mode.SaveCustomMode { graph; _ } -> graph
   in
@@ -332,7 +299,6 @@ let dump_dep_graph_64bit ~mode ~db_name ~incremental_info_file =
     Typing_deps.save_discovered_edges
       mode
       ~dest:db_name
-      ~build_revision:Build_id.build_revision
       ~reset_state_after_saving:false
   in
   let (_ : float) = Hh_logger.log_duration "Writing discovered edges took" t in
@@ -348,7 +314,6 @@ let save_state
   let () = Sys_utils.mkdir_p (Filename.dirname output_filename) in
   let db_name =
     match env.ServerEnv.deps_mode with
-    | Typing_deps_mode.SQLiteMode -> output_filename ^ ".sql"
     | Typing_deps_mode.CustomMode _
     | Typing_deps_mode.SaveCustomMode _ ->
       output_filename ^ "_64bit_dep_graph.delta"
@@ -380,7 +345,6 @@ let save_state
     Hh_logger.log_duration "Saving saved-state naming/errors/decls took" t
   in
   match env.ServerEnv.deps_mode with
-  | Typing_deps_mode.SQLiteMode -> dump_dep_graph_32bit ~db_name
   | Typing_deps_mode.CustomMode _ ->
     let incremental_info_file = output_filename ^ "_incremental_info.json" in
     dump_errors_json output_filename env.ServerEnv.errorl;
@@ -401,11 +365,6 @@ let save_state
     | Some dir ->
       Hh_logger.warn "saveStateService: human readable dep map dir: %s" dir);
     { dep_table_edges_added = 0 }
-
-let get_in_memory_dep_table_entry_count () : (int, string) result =
-  Utils.try_with_stack (fun () ->
-      SharedMem.DepTable.get_in_memory_dep_table_entry_count ())
-  |> Result.map_error ~f:(fun (exn, _stack) -> Exn.to_string exn)
 
 let go_naming (naming_table : Naming_table.t) (output_filename : string) :
     (save_naming_result, string) result =

@@ -6,21 +6,22 @@
  *
  *)
 
-(***********************************************)
-(* Which dependency graph format are we using? *)
-(***********************************************)
+(** Which dependency graph format are we using? *)
 type t =
-  | SQLiteMode  (** Legacy mode, with SQLite saved-state dependency graph *)
   | CustomMode of string option
-      (** Custom mode, with the new custom dependency graph format.
-        * The parameter is the path to the database. *)
+      (** Keep track of newly discovered edges in an in-memory delta.
+        *
+        * Optionally, the in-memory delta is backed by a pre-computed
+        * dependency graph stored using a custom file format.
+        *)
   | SaveCustomMode of {
       graph: string option;
       new_edges_dir: string;
       human_readable_dep_map_dir: string option;
     }
-      (** Mode to produce both the legacy SQLite saved-state dependency graph,
-        * and, along side it, the new custom 64-bit dependency graph.
+      (** Mode that writes newly discovered edges to binary files on disk
+        * (one file per disk). Those binary files can then be post-processed
+        * using a tool of choice.
         *
         * The first parameter is (optionally) a path to an existing custom 64-bit
         * dependency graph. If it is present, only new edges will be written,
@@ -33,7 +34,6 @@ type hash_mode =
 [@@deriving show, eq]
 
 let hash_mode : t -> hash_mode = function
-  | SQLiteMode -> Hash32Bit
   | CustomMode _ -> Hash64Bit
   | SaveCustomMode _ -> Hash64Bit
 

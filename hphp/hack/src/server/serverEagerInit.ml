@@ -116,7 +116,6 @@ let init
     | _ -> (env, t)
   in
   (* Type-checking everything *)
-  SharedMem.DepTable.cleanup_sqlite ();
   ServerInitCommon.type_check
     genv
     env

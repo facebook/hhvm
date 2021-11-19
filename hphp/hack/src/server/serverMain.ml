@@ -1323,11 +1323,7 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
       in
       Typing_deps_mode.SaveCustomMode
         { graph = None; new_edges_dir; human_readable_dep_map_dir }
-    | None ->
-      if local_config.ServerLocalConfig.no_load_64bit then
-        Typing_deps_mode.CustomMode None
-      else
-        Typing_deps_mode.SQLiteMode
+    | None -> Typing_deps_mode.CustomMode None
   in
 
   (* The OCaml default is 500, but we care about minimizing the memory

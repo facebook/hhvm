@@ -419,8 +419,10 @@ type t = {
   load_state_natively: bool;
   (* make hh_server query and download saved state. *)
   load_state_natively_64bit: bool;
+  (* TODO(hverr): Clean up 32-bit *)
   no_load_64bit: bool;
-  (* if doing a full init, do it in 64-bit mode *)
+  (* if doing a full init, do it in 64-bit mode
+   * TODO(hverr): Clean up 32-bit *)
   load_state_natively_download_timeout: int;
   (* in seconds *)
   load_state_natively_dirty_files_timeout: int;
@@ -439,6 +441,7 @@ type t = {
   io_priority: int;
   cpu_priority: int;
   can_skip_deptable: bool;
+  (* TODO(hverr): Remove can_skip_deptable, 32-bit clean up *)
   shm_dirs: string list;
   shm_use_sharded_hashtbl: bool;
   max_workers: int option;

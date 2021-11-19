@@ -99,11 +99,6 @@ let typecheck_and_get_deps_and_errors_job
     (ctx : Provider_context.t) _acc (paths : Relative_path.t list) :
     Errors.t * dep_graph_delta =
   let deps_mode = Provider_context.get_deps_mode ctx in
-  begin
-    match deps_mode with
-    | Typing_deps_mode.SQLiteMode -> failwith "SQLiteMode not supported"
-    | _ -> ()
-  end;
   List.fold
     paths
     ~init:(Errors.empty, HashSet.create ())
@@ -209,24 +204,14 @@ class cursor ~client_id ~cursor_state =
       in
       helper cursor_state
 
-    method get_deps_mode : Typing_deps_mode.t =
-      match self#get_client_config.deps_mode with
-      | Typing_deps_mode.SQLiteMode -> failwith "SQLiteMode not supported"
-      | deps_mode -> deps_mode
+    method get_deps_mode : Typing_deps_mode.t = self#get_client_config.deps_mode
 
     method private load_dep_table : unit =
       let rec helper cursor_state =
         match cursor_state with
         | Saved_state _ -> ()
         | Saved_state_delta { previous; _ } -> helper previous
-        | Typecheck_result
-            { previous; typecheck_result = { fanout_files_deps; _ } } ->
-          HashSet.iter fanout_files_deps ~f:(fun (dependent, dependency) ->
-              Typing_deps.add_idep_directly_to_graph
-                self#get_deps_mode
-                ~dependent
-                ~dependency);
-          helper previous
+        | Typecheck_result _ -> failwith "not implemented"
       in
       helper cursor_state
 

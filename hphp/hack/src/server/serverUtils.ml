@@ -55,29 +55,6 @@ let log_and_get_sharedmem_load_telemetry () : Telemetry.t =
     | Ok telemetry -> telemetry
     | Error telemetry -> telemetry
   in
-  let (telemetry : Telemetry.t) =
-    Utils.try_with_stack SharedMem.SMTelemetry.dep_stats
-    |> Result.map_error ~f:(fun (exn, Utils.Callstack stack) ->
-           Hh_logger.exc ~stack exn;
-           Telemetry.string_
-             telemetry
-             ~key:"deptable_stats_error"
-             ~value:(Exn.to_string exn))
-    |> Result.map
-         ~f:(fun { SharedMem.SMTelemetry.used_slots; slots; nonempty_slots = _ }
-            ->
-           let load_factor = float_of_int used_slots /. float_of_int slots in
-           Hh_logger.log
-             "Dependency table load factor: %d / %d (%.02f)"
-             used_slots
-             slots
-             load_factor;
-           Telemetry.float_
-             telemetry
-             ~key:"deptable_load_factor"
-             ~value:load_factor)
-    |> unwrap
-  in
   Utils.try_with_stack SharedMem.SMTelemetry.hash_stats
   |> Result.map_error ~f:(fun (exn, Utils.Callstack stack) ->
          Hh_logger.exc ~stack exn;

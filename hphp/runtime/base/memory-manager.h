@@ -1112,6 +1112,7 @@ struct RequestLocalGCData {
   int64_t t_trigger_allocated;
   int64_t t_req_age;
   MemoryUsageStats t_pre_stats;
+  size_t t_total_gc_ns;
 };
 
 extern RDS_LOCAL_NO_CHECK(RequestLocalGCData, rl_gcdata);

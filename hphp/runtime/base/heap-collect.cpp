@@ -287,7 +287,9 @@ inline int64_t cpu_ns() {
 // initially parse the heap to find valid objects and initialize metadata.
 NEVER_INLINE void Collector::init() {
   auto const t0 = cpu_ns();
-  SCOPE_EXIT { init_ns_ = cpu_ns() - t0; };
+  SCOPE_EXIT {
+    init_ns_ = cpu_ns() - t0;
+  };
   tl_heap->initFree();
   initfree_ns_ = cpu_ns() - t0;
 
@@ -638,6 +640,8 @@ void collectImpl(HeapImpl& heap, const char* phase, GCBits& mark_version) {
   if (rl_gcdata->t_enable_samples) {
     logCollection(phase, collector);
   }
+  rl_gcdata->t_total_gc_ns += collector.init_ns_ + collector.initfree_ns_
+    + collector.roots_ns_ + collector.mark_ns_ + collector.sweep_ns_;
   ++rl_gcdata->t_gc_num;
 }
 

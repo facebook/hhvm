@@ -524,6 +524,7 @@ module Rage = struct
       ~rageid:_
       ~desc:_
       ~vscode_bugid:_
+      ~merged_logs:_
       ~root:_
       ~from:_
       ~hhconfig_version:_

@@ -9,7 +9,7 @@ path = "rust_compile_ffi_bridge.rs"
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
-anyhow = "1.0"
+anyhow = "1.0.47"
 arena_deserializer = { path = "../../utils/arena_deserializer" }
 bincode = "1.3.3"
 bumpalo = { version = "3.8", features = ["collections"] }

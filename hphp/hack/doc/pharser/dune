@@ -1,0 +1,28 @@
+(menhir 
+ (flags --explain --table --cmly)
+ (modules phparser))
+
+; (ocamllex (modules phlexer))
+(rule
+ (targets phlexer.ml)
+ (deps    phlexer.mll)
+ (action  (chdir %{workspace_root}
+           (run %{bin:ocamllex} -ml -q -o %{targets} %{deps}))))
+
+(rule
+ (targets describe.ml)
+ (deps    phparser.cmly)
+ (action  (with-stdout-to %{targets}
+           (run %{exe:process.exe} %{deps}))))
+
+(executable
+ (name process)
+ (flags (:standard -w -A))
+ (libraries menhirSdk)
+ (modules process))
+
+(executable
+ (name driver)
+ (flags (:standard -w -A))
+ (libraries menhirLib)
+ (modules driver describe phlexer phparser phparser_driver))

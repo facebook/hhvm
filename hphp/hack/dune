@@ -1,3 +1,5 @@
+(data_only_dirs bin doc facebook man tools)
+
 (alias
  (name all-hack)
  (deps

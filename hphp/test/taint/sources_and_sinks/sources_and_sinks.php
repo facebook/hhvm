@@ -52,6 +52,15 @@ function parameter_as_source_to_sink(int $data): void {
   __sink($data);
 }
 
+class :div {
+  public function __construct(mixed ...$args) {}
+}
+
+async function source_to_xhp_sink(): Awaitable<:div> {
+  $data = __source_returned_from_function();
+  return <div>{$data}</div>;
+}
+
 <<__EntryPoint>> async function main(): Awaitable<void> {
   source_returned_from_function();
   source_returned_from_method();
@@ -60,4 +69,5 @@ function parameter_as_source_to_sink(int $data): void {
   source_from_regex_to_sink();
   await source_to_regex_sink();
   parameter_as_source_to_sink(1);
+  await source_to_xhp_sink();
 }

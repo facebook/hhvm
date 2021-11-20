@@ -260,8 +260,24 @@ void iopNewStructDict(imm_array<int32_t> ids) {
   stack.push(structValue);
 }
 
-void iopNewVec(uint32_t /* n */) {
-  iopUnhandled("NewVec");
+void iopNewVec(uint32_t n) {
+  iopPreamble("NewVec");
+
+  auto& stack = State::instance->stack;
+
+  // Check all arguments to see if they're tainted.
+  // One tainted element taints result.
+  Value value = std::nullopt;
+  for (int i = 0; i < n; i++) {
+    auto argument = stack.peek(i);
+    if (argument) {
+      value = argument;
+      break;
+    }
+  }
+
+  stack.pop(n);
+  stack.push(value);
 }
 
 void iopNewKeysetArray(uint32_t /* n */) {
@@ -313,7 +329,7 @@ void iopLazyClassFromClass() {
 }
 
 void iopFile() {
-  iopUnhandled("File");
+  iopConstant("File");
 }
 
 void iopDir() {
@@ -792,8 +808,11 @@ void iopLockObj() {
 
 void iopFCall(const Func* func, const FCallArgs& fca) {
   auto name = func->fullName()->data();
-
-  FTRACE(1, "taint: entering {}\n", yellow(name));
+  FTRACE(
+      1,
+      "taint: entering {} ({} arguments)\n",
+      yellow(name),
+      fca.numArgs);
 
   const auto sinks = Configuration::get()->sinks(name);
   FTRACE(3, "taint: {} sinks\n", sinks.size());

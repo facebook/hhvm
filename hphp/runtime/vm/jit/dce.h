@@ -17,6 +17,7 @@
 
 namespace HPHP { namespace jit {
 
+struct IRInstruction;
 struct IRUnit;
 
 //////////////////////////////////////////////////////////////////////
@@ -37,7 +38,12 @@ void mandatoryDCE(IRUnit&);
  */
 void fullDCE(IRUnit&);
 
+/*
+ * Whether an instruction is safe to remove by DCE. Instructions with
+ * side-effects or control flow are not safe to remove.
+ */
+bool canDCE(const IRInstruction&);
+
 //////////////////////////////////////////////////////////////////////
 
 }}
-

@@ -52,6 +52,7 @@ $myClass->prop5 = getStr(3);
 $myClass->prop6a = $shared;
 $myClass->prop6b = $shared;
 
+__hhvm_intrinsics\launder_value($myClass);
 $objs = objprof_get_strings(0);
 __hhvm_intrinsics\launder_value($myClass);
 echo get_srefs('one', $objs) === 1 &&
@@ -73,6 +74,7 @@ $myClass = new DynamicClass();
 $myClass->$var = getStr(2);
 $myClass->$var2 = getStr(3);
 
+__hhvm_intrinsics\launder_value($myClass);
 $objs = objprof_get_strings(0);
 __hhvm_intrinsics\launder_value($myClass);
 echo get_path('mykey1', $objs) === "DynamicClass" &&
@@ -90,6 +92,7 @@ $myClass["root"] = darray[];
 $myClass["root"][] = "one";
 $myClass["root"][] = "one";
 $myClass["root"][$two] = getStr(2);
+__hhvm_intrinsics\launder_value($myClass);
 $objs = objprof_get_strings(0);
 __hhvm_intrinsics\launder_value($myClass);
 echo get_path('one', $objs) === "HH\\Map:array():[\"root\"]:array():[0]" &&
@@ -107,6 +110,7 @@ $objs = null;
 
 // TEST: pairs
 $myClass = Pair {'lol', 'whut'};
+__hhvm_intrinsics\launder_value($myClass);
 $objs = objprof_get_strings(0);
 __hhvm_intrinsics\launder_value($myClass);
 echo get_path('lol', $objs) === "HH\\Pair" &&

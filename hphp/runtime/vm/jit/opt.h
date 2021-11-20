@@ -40,6 +40,7 @@ void optimizeVanillaChecks(IRUnit&);
 void cleanCfg(IRUnit&);
 bool optimizePhis(IRUnit&);
 void reorderCheckTypes(IRUnit&);
+void sinkDefs(IRUnit&);
 
 /*
  * For debugging, we can run this pass, which inserts various sanity checking

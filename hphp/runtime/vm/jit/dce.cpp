@@ -40,12 +40,11 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
 namespace HPHP { namespace jit {
-namespace {
 
 TRACE_SET_MOD(hhir_dce);
 
-bool canDCE(IRInstruction* inst) {
-  switch (inst->op()) {
+bool canDCE(const IRInstruction& inst) {
+  switch (inst.op()) {
   case AssertNonNull:
   case AssertType:
   case AbsDbl:
@@ -286,7 +285,7 @@ bool canDCE(IRInstruction* inst) {
   case AllocInitROM:
   case IntAsDataType:
   case CopyArray:
-    assertx(!inst->isControlFlow());
+    assertx(!inst.isControlFlow());
     return true;
 
   // These may raise oom, but its still ok to delete them if the
@@ -317,8 +316,8 @@ bool canDCE(IRInstruction* inst) {
   case ConvObjToKeyset:
   case LdOutAddr:
   case LdOutAddrInlined:
-    return !opcodeMayRaise(inst->op()) &&
-      (!inst->consumesReferences() || inst->producesReference());
+    return !opcodeMayRaise(inst.op()) &&
+      (!inst.consumesReferences() || inst.producesReference());
 
   case DbgTraceCall:
   case AKExistsObj:
@@ -711,16 +710,18 @@ bool canDCE(IRInstruction* inst) {
   case IsTypeStruct:
   case EqStr:
   case NeqStr:
-    return !opcodeMayRaise(inst->op());
+    return !opcodeMayRaise(inst.op());
 
   case EqArrLike:
   case NeqArrLike:
   case SameArrLike:
   case NSameArrLike:
-    return !inst->mayRaiseErrorWithSources();
+    return !inst.mayRaiseErrorWithSources();
   }
   not_reached();
 }
+
+namespace {
 
 /* DceFlags tracks the state of one instruction during dead code analysis. */
 struct DceFlags {
@@ -882,7 +883,7 @@ WorkList initInstructions(const IRUnit& unit, const BlockList& blocks,
     // Instructions that cannot be removed are automatically live. The
     // exception is DefLabels and Jmps that feed a DefLabel. There
     // aren't normally DCEable, but will be dealt with specially.
-    if (!canDCE(inst) &&
+    if (!canDCE(*inst) &&
         !inst->is(DefLabel) &&
         !(inst->is(Jmp) && inst->numSrcs() > 0)) {
       state[inst].setLive();
@@ -1038,9 +1039,9 @@ void processCatchBlock(IRUnit& unit, DceState& state, Block* block,
     } else if (src->type().maybe(TCounted)) {
       auto const srcInst = src->inst();
       if (!srcInst->producesReference() ||
-          !canDCE(srcInst) ||
+          !canDCE(*srcInst) ||
           uses[src] != 1) {
-        if (srcInst->producesReference() && canDCE(srcInst)) {
+        if (srcInst->producesReference() && canDCE(*srcInst)) {
           rcInsts[srcInst].stores.emplace_back(store);
         }
         continue;
@@ -1303,7 +1304,7 @@ void fullDCE(IRUnit& unit) {
       IRInstruction* srcInst = src->inst();
       if (srcInst->op() == DefConst) return;
 
-      if (srcInst->producesReference() && canDCE(srcInst)) {
+      if (srcInst->producesReference() && canDCE(*srcInst)) {
         ++uses[src];
         if (inst->is(DecRef)) {
           rcInsts[srcInst].decs.emplace_back(inst);

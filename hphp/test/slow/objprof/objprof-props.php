@@ -88,6 +88,7 @@ class SimpleClassForExclude {
 <<__EntryPoint>>
 function main_objprof_props() {
 $myClass = new EmptyClass();
+__hhvm_intrinsics\launder_value($myClass);
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
 __hhvm_intrinsics\launder_value($myClass);
 $emptyCount = get_instances("EmptyClass", $objs);
@@ -95,6 +96,7 @@ $ObjSize = get_bytes("EmptyClass", $objs) / $emptyCount;
 $myClass = null;
 $objs = null;
 $myClass = new SimpleProps();
+__hhvm_intrinsics\launder_value($myClass);
 $objs = objprof_get_data(OBJPROF_FLAGS_PER_PROPERTY);
 __hhvm_intrinsics\launder_value($myClass);
 echo get_instances('SimpleProps::prop1', $objs) == 1 &&
@@ -111,6 +113,7 @@ echo get_instances('SimpleProps::prop1', $objs) == 1 &&
 $myClass = null;
 $objs = null;
 $myClass = new SimpleArrays();
+__hhvm_intrinsics\launder_value($myClass);
 $objs = objprof_get_data(OBJPROF_FLAGS_PER_PROPERTY);
 __hhvm_intrinsics\launder_value($myClass);
 echo get_instances('SimpleArrays::arrEmpty', $objs) == 1 &&
@@ -131,6 +134,7 @@ $dynamic_field = 'abcd'; // 20:16
 $dynamic_field2 = 1234;  // 20:16 (dynamic properties - always string)
 $myClass->$dynamic_field = 1; // 16:16
 $myClass->$dynamic_field2 = 1; // 16:16
+__hhvm_intrinsics\launder_value($myClass);
 $objs = objprof_get_data(OBJPROF_FLAGS_PER_PROPERTY);
 __hhvm_intrinsics\launder_value($myClass);
 echo get_instances('DynamicClass::abcd', $objs) == 1 &&
@@ -145,6 +149,7 @@ $myClass = null;
 $objs = null;
 
 $myClass = Map{};
+__hhvm_intrinsics\launder_value($myClass);
 $MapSize = get_bytes('HH\Map', objprof_get_data(OBJPROF_FLAGS_DEFAULT));
 __hhvm_intrinsics\launder_value($myClass);
 
@@ -154,6 +159,7 @@ $myClass = Map {
   1 => "22", // 34:32
   1234123 => 3 // 32:32
 };
+__hhvm_intrinsics\launder_value($myClass);
 $objs = objprof_get_data(OBJPROF_FLAGS_PER_PROPERTY);
 __hhvm_intrinsics\launder_value($myClass);
 echo get_instances('HH\Map::abc', $objs) == 1 &&
@@ -177,6 +183,7 @@ $myClass = Map {
   1 => "22", // 16 + 16 + 2 = 34
   1234123 => 3 // 16 + 16 = 32
 };
+__hhvm_intrinsics\launder_value($myClass);
 $objs =
   objprof_get_data(OBJPROF_FLAGS_PER_PROPERTY | OBJPROF_FLAGS_USER_TYPES_ONLY);
 __hhvm_intrinsics\launder_value($myClass);
@@ -194,6 +201,7 @@ $myClass = Vector {
   "abc", // 19:16
   1, // 16:16
 };
+__hhvm_intrinsics\launder_value($myClass);
 $objs = objprof_get_data(OBJPROF_FLAGS_PER_PROPERTY);
 __hhvm_intrinsics\launder_value($myClass);
 echo get_instances('HH\Vector::<index>', $objs) == 2 &&
@@ -210,6 +218,7 @@ $myClass = Vector {
   "abc", // 19:16
   1, // 16:16
 };
+__hhvm_intrinsics\launder_value($myClass);
 $objs =
   objprof_get_data(OBJPROF_FLAGS_PER_PROPERTY | OBJPROF_FLAGS_USER_TYPES_ONLY);
 __hhvm_intrinsics\launder_value($myClass);
@@ -225,6 +234,9 @@ $objs = null;
 $mystr = getStr(9); // inc 1, 25:16
 $myClass = new SharedStringClass($mystr);
 $myClass2 = new SharedStringClass($mystr);
+__hhvm_intrinsics\launder_value($mystr);
+__hhvm_intrinsics\launder_value($myClass);
+__hhvm_intrinsics\launder_value($myClass2);
 $objs = objprof_get_data(OBJPROF_FLAGS_PER_PROPERTY);
 __hhvm_intrinsics\launder_value($mystr);
 __hhvm_intrinsics\launder_value($myClass);
@@ -238,6 +250,7 @@ $myClass = null;
 $myClass2 = null;
 $objs = null;
 $myClass = new SimpleClassForExclude();
+__hhvm_intrinsics\launder_value($myClass);
 $objs = objprof_get_data(OBJPROF_FLAGS_PER_PROPERTY);
 __hhvm_intrinsics\launder_value($myClass);
 echo get_instances('SimpleClassForExclude::map', $objs) == 1 &&
@@ -261,6 +274,7 @@ $myClass = null;
 $objs = null;
 
 $myClass = new SimpleClassForExclude();
+__hhvm_intrinsics\launder_value($myClass);
 $objs =
   objprof_get_data(OBJPROF_FLAGS_PER_PROPERTY | OBJPROF_FLAGS_USER_TYPES_ONLY);
 __hhvm_intrinsics\launder_value($myClass);

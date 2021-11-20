@@ -311,6 +311,12 @@ struct IRInstruction {
   SSATmp* dst(uint32_t i) const;
 
   /*
+   * Returns the index where the given tmp lies in this instruction's
+   * dst list, or numDsts() if it is not present.
+   */
+  uint32_t findDst(SSATmp* dst) const;
+
+  /*
    * Get the srcs/dsts as a folly::Range.
    */
   folly::Range<SSATmp**> srcs() const;
@@ -419,7 +425,6 @@ struct IRInstruction {
    */
   bool isControlFlow() const;
   bool isBlockEnd() const;
-  bool isRawLoad() const;
 
   /*
    * Clear any outgoing edges this instruction has, if any.
@@ -499,4 +504,3 @@ Type thisTypeFromFunc(const Func* func);
 }}
 
 #include "hphp/runtime/vm/jit/ir-instruction-inl.h"
-

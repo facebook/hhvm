@@ -145,6 +145,7 @@ namespace Trace {
       TM(hhir_loop)     \
       TM(hhir_outline)  \
       TM(hhir_phi)      \
+      TM(hhir_sinkdefs) \
       TM(hhir_refcount) \
       TM(hhir_refineTmps) \
       TM(hhir_store)    \

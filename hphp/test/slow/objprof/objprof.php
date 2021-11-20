@@ -87,6 +87,7 @@ class NestedArrayClass {
 <<__EntryPoint>>
 function main_objprof() {
 $myClass2 = new EmptyClass();              // ++
+__hhvm_intrinsics\launder_value($myClass2);
 $objs = objprof_get_data();
 __hhvm_intrinsics\launder_value($myClass2);
 $emptyCount = get_instances("EmptyClass", $objs);
@@ -96,6 +97,8 @@ $ObjSize = get_bytes("EmptyClass", $objs) / $emptyCount;
 $objs = null;
 $myClass = new EmptyClass2();              // -- ++
 $myClass2 = new EmptyClass2();             // -- ++
+__hhvm_intrinsics\launder_value($myClass);
+__hhvm_intrinsics\launder_value($myClass2);
 $objs = objprof_get_data();
 __hhvm_intrinsics\launder_value($myClass);
 __hhvm_intrinsics\launder_value($myClass2);
@@ -114,6 +117,7 @@ echo $instances_after
   : "(GOOD) Untracking works\n";
 $objs = null;
 $myClass = new SimpleProps();              // ++
+__hhvm_intrinsics\launder_value($myClass);
 $objs = objprof_get_data();
 __hhvm_intrinsics\launder_value($myClass);
 echo get_bytes('SimpleProps', $objs) == $ObjSize + 19 + 16 + 16 && // 83
@@ -122,6 +126,7 @@ echo get_bytes('SimpleProps', $objs) == $ObjSize + 19 + 16 + 16 && // 83
   : "(BAD) Bytes (props) failed: ".var_export($objs, true)."\n";
 $objs = null;
 $myClass = new SimpleArrays();
+__hhvm_intrinsics\launder_value($myClass);
 $objs = objprof_get_data();
 __hhvm_intrinsics\launder_value($myClass);
 echo get_bytes('SimpleArrays', $objs) == $ObjSize + 80 + 110 + 32 && // 254
@@ -134,6 +139,7 @@ $dynamic_field = 'abcd'; // 16 + 4
 $dynamic_field2 = 1234;  // 16 + 4 (dynamic properties - always string)
 $myClass->$dynamic_field = 1; // 16
 $myClass->$dynamic_field2 = 1; // 16
+__hhvm_intrinsics\launder_value($myClass);
 $objs = objprof_get_data();
 __hhvm_intrinsics\launder_value($myClass);
 echo get_bytes('DynamicClass', $objs) == $ObjSize + 20 + 20 + 32 && // 104
@@ -142,6 +148,7 @@ echo get_bytes('DynamicClass', $objs) == $ObjSize + 20 + 20 + 32 && // 104
   : "(BAD) Bytes (dynamic) failed: ".var_export($objs, true)."\n";
 $objs = null;
 $myClass = myAsyncFunc();
+__hhvm_intrinsics\launder_value($myClass);
 $objs = objprof_get_data();
 __hhvm_intrinsics\launder_value($myClass);
 echo get_bytes_eq(StaticWaitHandle::class, $objs) == 16 + $ObjSize // handle size
@@ -151,6 +158,7 @@ $objs = null;
 
 // TEST: map with int and string keys (Mixed)
 $myClass = Map{};
+__hhvm_intrinsics\launder_value($myClass);
 $MapSize = get_bytes('HH\Map', objprof_get_data());
 __hhvm_intrinsics\launder_value($myClass);
 $myClass = Map {
@@ -158,6 +166,7 @@ $myClass = Map {
   1 => "22", // 16 + 16 + 2 = 34
   1234123 => 3 // 16 + 16 = 32
 };
+__hhvm_intrinsics\launder_value($myClass);
 $objs = objprof_get_data();
 __hhvm_intrinsics\launder_value($myClass);
 echo get_bytes('HH\\Map', $objs) == $MapSize + 32 + 34 + 35 && // MapSize+101
@@ -171,6 +180,7 @@ $myClass = Vector {
   "abc", // 3 + 16 = 19
   1, // 16
 };
+__hhvm_intrinsics\launder_value($myClass);
 $objs = objprof_get_data();
 __hhvm_intrinsics\launder_value($myClass);
 echo get_bytes('HH\\Vector', $objs) == $ObjSize + 32 + 3 && // Vec+35
@@ -181,12 +191,14 @@ $objs = null;
 
 // TEST: set with int and string keys
 $myClass = Set{};
+__hhvm_intrinsics\launder_value($myClass);
 $SetSize = get_bytes('HH\Set', objprof_get_data());
 __hhvm_intrinsics\launder_value($myClass);
 $myClass = Set {
   getStr(3), // (3 + 16) * 2 = 38
   getStr(4), // (4 + 16) * 2 = 40
 };
+__hhvm_intrinsics\launder_value($myClass);
 $objs = objprof_get_data();
 __hhvm_intrinsics\launder_value($myClass);
 echo get_bytes('HH\\Set', $objs) == $SetSize + 78 && // SetSize + 38+40
@@ -199,6 +211,7 @@ $objs = null;
 $myClass = Map {
   getStr(19) => getStr(17),
 };
+__hhvm_intrinsics\launder_value($myClass);
 $objs = objprof_get_data();
 __hhvm_intrinsics\launder_value($myClass);
 echo get_bytes_eq('HH\\Map', $objs) == $MapSize + 19+17+16+16 // MapSize+35=109
@@ -210,6 +223,9 @@ $objs = null;
 $mystr = getStr(9); // inc 1
 $myClass = new SharedStringClass($mystr);
 $myClass2 = new SharedStringClass($mystr);
+__hhvm_intrinsics\launder_value($mystr);
+__hhvm_intrinsics\launder_value($myClass);
+__hhvm_intrinsics\launder_value($myClass2);
 $objs = objprof_get_data();
 __hhvm_intrinsics\launder_value($mystr);
 __hhvm_intrinsics\launder_value($myClass);
@@ -228,6 +244,8 @@ $my_arr = darray[ // 32 + 88 = 120
 $myClass = new SharedArrayClass($my_arr);
 $myClass2 = new SharedArrayClass($my_arr);
 $my_arr = null;
+__hhvm_intrinsics\launder_value($myClass);
+__hhvm_intrinsics\launder_value($myClass2);
 $objs = objprof_get_data();
 __hhvm_intrinsics\launder_value($myClass);
 __hhvm_intrinsics\launder_value($myClass2);
@@ -245,6 +263,7 @@ $my_arr = varray[ // 32 + 76 = 108
 ];
 $myClass = new NestedArrayClass($my_arr);
 $my_arr = null;
+__hhvm_intrinsics\launder_value($myClass);
 $objs = objprof_get_data();
 __hhvm_intrinsics\launder_value($myClass);
 echo get_bytes_eq('NestedArrayClass', $objs) == ($ObjSize + 108)   // 140

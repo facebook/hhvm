@@ -131,6 +131,11 @@ struct Block {
   // then return an iterator to the newly inserted instruction.
   iterator prepend(IRInstruction* inst);
 
+  // Insert inst at the end of the block before any branching or terminal
+  // instruction ending the block, then return an iterator to the newly inserted
+  // instruction.
+  iterator append(IRInstruction* inst);
+
   // return iterator to first instruction after any DefFP, DefFrameRelSP,
   // DefRegSP, DefLabel, and/or BeginCatch instructions.
   iterator skipHeader();
@@ -254,6 +259,13 @@ inline Block::iterator Block::erase(IRInstruction* inst) {
 inline Block::iterator Block::prepend(IRInstruction* inst) {
   assertx(inst->marker().valid());
   auto it = skipHeader();
+  return insert(it, inst);
+}
+
+inline Block::iterator Block::append(IRInstruction* inst) {
+  assertx(inst->marker().valid());
+  auto it = backIter();
+  if (!it->isBlockEnd()) ++it;
   return insert(it, inst);
 }
 

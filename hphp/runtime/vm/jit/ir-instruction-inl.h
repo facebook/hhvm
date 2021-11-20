@@ -194,6 +194,13 @@ inline SSATmp* IRInstruction::dst() const {
   return m_dest;
 }
 
+inline uint32_t IRInstruction::findDst(SSATmp* dst) const {
+  for (uint32_t i = 0; i < m_numDsts; ++i) {
+    if (m_dsts[i] == dst) return i;
+  }
+  return m_numDsts;
+}
+
 inline folly::Range<SSATmp**> IRInstruction::srcs() const {
   return folly::Range<SSATmp**>(m_srcs, m_numSrcs);
 }

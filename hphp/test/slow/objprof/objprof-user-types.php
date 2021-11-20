@@ -146,6 +146,7 @@ class SimpleClassForExclude {
 <<__EntryPoint>>
 function main_objprof_user_types() {
 $myClass2 = new EmptyClass();
+__hhvm_intrinsics\launder_value($myClass2);
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
 __hhvm_intrinsics\launder_value($myClass2);
 $emptyCount = get_instances("EmptyClass", $objs);
@@ -157,6 +158,8 @@ $objs = null;
 $myClass2 = null;
 $myClass = new EmptyClass2();
 $myClass2 = new EmptyClass2();
+__hhvm_intrinsics\launder_value($myClass);
+__hhvm_intrinsics\launder_value($myClass2);
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
 __hhvm_intrinsics\launder_value($myClass);
 __hhvm_intrinsics\launder_value($myClass2);
@@ -167,6 +170,8 @@ echo $instances_before == 2 ?
 $objs = null;
 $myClass = null;
 $myClass2 = null;
+__hhvm_intrinsics\launder_value($myClass);
+__hhvm_intrinsics\launder_value($myClass2);
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
 $instances_after = get_instances("EmptyClass2", $objs);
 echo $instances_after ?
@@ -176,6 +181,8 @@ $objs = null;
 $myClass = null;
 $myClass2 = null;
 $myClass = new SimpleProps();
+__hhvm_intrinsics\launder_value($myClass);
+__hhvm_intrinsics\launder_value($myClass2);
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
 __hhvm_intrinsics\launder_value($myClass);
 echo get_bytes('SimpleProps', $objs) == $ObjSize + 51 &&
@@ -185,6 +192,7 @@ echo get_bytes('SimpleProps', $objs) == $ObjSize + 51 &&
 $objs = null;
 $myClass = null;
 $myClass = new SimpleArrays();
+__hhvm_intrinsics\launder_value($myClass);
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
 __hhvm_intrinsics\launder_value($myClass);
 echo get_bytes('SimpleArrays', $objs) == $ObjSize + 80 + 110 + 32 &&
@@ -198,6 +206,7 @@ $dynamic_field = 'abcd'; // 20:16
 $dynamic_field2 = 1234;  // 20:16 (dynamic properties - always string)
 $myClass->$dynamic_field = 1; // 16:16
 $myClass->$dynamic_field2 = 1; // 16:16
+__hhvm_intrinsics\launder_value($myClass);
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
 __hhvm_intrinsics\launder_value($myClass);
 echo get_bytes('DynamicClass', $objs) == $ObjSize + 20 + 20 + 16 + 16 &&
@@ -207,6 +216,7 @@ echo get_bytes('DynamicClass', $objs) == $ObjSize + 20 + 20 + 16 + 16 &&
 $objs = null;
 $myClass = null;
 $myClass = myAsyncFunc();
+__hhvm_intrinsics\launder_value($myClass);
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
 __hhvm_intrinsics\launder_value($myClass);
 echo get_bytes_eq(StaticWaitHandle::class, $objs) == 0 ? // not a user node
@@ -216,6 +226,7 @@ $objs = null;
 
 
 $myClass = Map{};
+__hhvm_intrinsics\launder_value($myClass);
 $MapSize = get_bytes('HH\Map', objprof_get_data(OBJPROF_FLAGS_DEFAULT));
 __hhvm_intrinsics\launder_value($myClass);
 
@@ -225,6 +236,7 @@ $myClass = Map {
   1 => "22", // 16 + 16 + 2 = 34
   1234123 => 3 // 16 + 16 = 32
 };
+__hhvm_intrinsics\launder_value($myClass);
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
 __hhvm_intrinsics\launder_value($myClass);
 echo get_bytes_eq('HH\\Map', $objs) == 0 ? // not a user node
@@ -239,6 +251,7 @@ $myClass = Vector {
   "abc", // 19:16
   1, // 16:16
 };
+__hhvm_intrinsics\launder_value($myClass);
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
 __hhvm_intrinsics\launder_value($myClass);
 echo get_bytes_eq('HH\\Vector', $objs) == 0 ? // not a user node
@@ -250,12 +263,14 @@ $myClass = null;
 
 // TEST: set with int and string keys
 $myClass = Set{};
+__hhvm_intrinsics\launder_value($myClass);
 $SetSize = get_bytes('HH\Set', objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY));
 __hhvm_intrinsics\launder_value($myClass);
 $myClass = Set {
   getStr(3), // (3 + 16) * 2 = 38
   getStr(4), // (4 + 16) * 2 = 40
 };
+__hhvm_intrinsics\launder_value($myClass);
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
 __hhvm_intrinsics\launder_value($myClass);
 echo get_bytes_eq('HH\\Set', $objs) == 0 ? // not a user node
@@ -269,6 +284,7 @@ $myClass = null;
 $myClass = Map {
   getStr(19) => getStr(17),
 };
+__hhvm_intrinsics\launder_value($myClass);
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
 __hhvm_intrinsics\launder_value($myClass);
 echo get_bytes_eq('HH\\Map', $objs) == 0 ? // not a user node
@@ -282,6 +298,9 @@ $myClass = null;
 $mystr = getStr(9); // inc 1, 25:16
 $myClass = new SharedStringClass($mystr);
 $myClass2 = new SharedStringClass($mystr);
+__hhvm_intrinsics\launder_value($mystr);
+__hhvm_intrinsics\launder_value($myClass);
+__hhvm_intrinsics\launder_value($myClass2);
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
 __hhvm_intrinsics\launder_value($mystr);
 __hhvm_intrinsics\launder_value($myClass);
@@ -303,6 +322,8 @@ $my_arr = darray[
 $myClass = new SharedArrayClass($my_arr);
 $myClass2 = new SharedArrayClass($my_arr);
 $my_arr = null;
+__hhvm_intrinsics\launder_value($myClass);
+__hhvm_intrinsics\launder_value($myClass2);
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
 __hhvm_intrinsics\launder_value($myClass);
 __hhvm_intrinsics\launder_value($myClass2);
@@ -321,6 +342,7 @@ $my_arr = varray[ // 16 /*(tv)*/ + 16 /*(ArrayData)*/ + 76 = 108
 ];
 $myClass = new NestedArrayClass($my_arr);
 $my_arr = null;
+__hhvm_intrinsics\launder_value($myClass);
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
 __hhvm_intrinsics\launder_value($myClass);
 echo get_bytes_eq('NestedArrayClass', $objs) == ($ObjSize + 108) ?
@@ -330,6 +352,8 @@ $objs = null;
 $myClass = null;
 $myClass = new SimpleMapClass();
 $myClass2 = new SimpleMapClass();
+__hhvm_intrinsics\launder_value($myClass);
+__hhvm_intrinsics\launder_value($myClass2);
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
 __hhvm_intrinsics\launder_value($myClass);
 __hhvm_intrinsics\launder_value($myClass2);
@@ -354,6 +378,8 @@ $shared_map = Map{ // size = 16(tv)+$MapSize+39+43 = 122
 $my_obj1 = new SharedMapClass($shared_map);
 $my_obj2 = new SharedMapClass($shared_map);
 $shared_map = null;
+__hhvm_intrinsics\launder_value($my_obj1);
+__hhvm_intrinsics\launder_value($my_obj2);
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
 __hhvm_intrinsics\launder_value($my_obj1);
 __hhvm_intrinsics\launder_value($my_obj2);
@@ -367,6 +393,7 @@ $my_obj1 = null;
 $my_obj2 = null;
 $my_obj = new SimpleMapClassWithBackEdge();
 $my_obj->map['foo'] = $my_obj; // size = 19+16(tv) = 35, sized = 16+16(tv) = 32
+__hhvm_intrinsics\launder_value($my_obj);
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
 __hhvm_intrinsics\launder_value($my_obj);
 echo get_bytes('SimpleMapClassWithBackEdge', $objs) ==
@@ -379,6 +406,7 @@ $objs = null;
 $my_obj = null;
 
 $my_obj = new SimpleClassForExclude();
+__hhvm_intrinsics\launder_value($my_obj);
 $objs = objprof_get_data(OBJPROF_FLAGS_DEFAULT);
 __hhvm_intrinsics\launder_value($my_obj);
 $exclude_class_instances_before = get_instances('ExlcudeClass', $objs);
@@ -388,6 +416,7 @@ $parent_class_bytes_before = get_bytes('SimpleClassForExclude', $objs);
 $parent_class_bytesd_before =get_bytesd('SimpleClassForExclude', $objs);
 
 $my_obj = new SimpleClassForExclude();
+__hhvm_intrinsics\launder_value($my_obj);
 $objs = objprof_get_data(OBJPROF_FLAGS_DEFAULT, varray['ExlcudeClass']);
 __hhvm_intrinsics\launder_value($my_obj);
 $exclude_class_instances_after = get_instances('ExlcudeClass', $objs);
@@ -407,6 +436,7 @@ $objs = null;
 $my_obj = null;
 
 $my_obj = new SimpleClassForExclude();
+__hhvm_intrinsics\launder_value($my_obj);
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
 __hhvm_intrinsics\launder_value($my_obj);
 $exclude_class_instances_before = get_instances('ExlcudeClass', $objs);
@@ -416,6 +446,7 @@ $parent_class_bytes_before = get_bytes('SimpleClassForExclude', $objs);
 $parent_class_bytesd_before = get_bytesd('SimpleClassForExclude', $objs);
 
 $my_obj = new SimpleClassForExclude();
+__hhvm_intrinsics\launder_value($my_obj);
 $objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY, varray['ExlcudeClass']);
 __hhvm_intrinsics\launder_value($my_obj);
 $exclude_class_instances_after = get_instances('ExlcudeClass', $objs);

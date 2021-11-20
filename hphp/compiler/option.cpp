@@ -87,9 +87,6 @@ int Option::GetScannerType() {
   return type;
 }
 
-bool Option::WholeProgram = true;
-bool Option::RecordErrors = true;
-
 bool Option::AllVolatile = false;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -238,7 +235,6 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
 
   Config::Bind(RuntimeOption::EvalGenerateDocComments, ini, config,
                "GenerateDocComments", RuntimeOption::EvalGenerateDocComments);
-  Config::Bind(WholeProgram, ini, config, "WholeProgram", true);
   Config::Bind(RuntimeOption::EvalUseHHBBC, ini, config, "UseHHBBC",
                RuntimeOption::EvalUseHHBBC);
 

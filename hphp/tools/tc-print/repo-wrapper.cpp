@@ -54,15 +54,12 @@ RepoWrapper::RepoWrapper(const char* repoSchema,
   hasRepo = !repoFileName.empty();
   if (hasRepo) RepoFile::init(repoFileName);
 
-  hphp_compiler_init();
-
   RuntimeOption::AlwaysUseRelativePath = false;
   RuntimeOption::SafeFileAccess = false;
   RuntimeOption::EvalAllowHhas = true;
   RuntimeOption::SandboxMode = true; // So we get Unit::m_funcTable
   RuntimeOption::RepoAuthoritative = true;
   RuntimeOption::EvalLowStaticArrays = false; // save some low mem
-  Option::WholeProgram = false;
 
   LitstrTable::init();
   LitarrayTable::init();

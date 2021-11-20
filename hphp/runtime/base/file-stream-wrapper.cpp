@@ -32,6 +32,8 @@
 #include <folly/portability/Stdlib.h>
 #include <folly/portability/SysStat.h>
 
+#include <sys/xattr.h>
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -172,6 +174,28 @@ int FileStreamWrapper::mkdir_recursive(const String& path, int mode) {
   }
 
   return 0;
+}
+
+Optional<std::string> FileStreamWrapper::getxattr(const char* path,
+                                                  const char* xattr) {
+#if defined(__linux__)
+  std::string buf;
+  buf.resize(64);
+
+  while (true) {
+    auto const ret = ::getxattr(path, xattr, buf.data(), buf.size());
+    if (ret >= 0) {
+      assertx(ret <= buf.size());
+      buf.resize(ret);
+      return buf;
+    }
+    if (errno != ERANGE) break;
+    auto const actualSize = ::getxattr(path, xattr, nullptr, 0);
+    if (actualSize < 0) break;
+    buf.resize(std::max<size_t>(actualSize, buf.size()));
+  }
+#endif
+  return std::nullopt;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

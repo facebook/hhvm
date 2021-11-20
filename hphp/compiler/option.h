@@ -130,12 +130,6 @@ struct Option {
    */
   static bool AllVolatile;
 
-  /**
-   * Output options
-   */
-  static bool WholeProgram;
-  static bool RecordErrors;
-
 private:
   static StringBag OptionStrings;
 

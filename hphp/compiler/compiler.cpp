@@ -574,13 +574,10 @@ int process(const CompilerOptions &po) {
     }
   };
 
-  bool wp = Option::WholeProgram;
-  Option::WholeProgram = false;
   BuiltinSymbols::s_systemAr = ar;
   hphp_process_init();
   processInitRan = true;
   BuiltinSymbols::s_systemAr.reset();
-  Option::WholeProgram = wp;
 
   // This should be set before parsing anything
   RuntimeOption::EvalLowStaticArrays = false;
@@ -627,9 +624,10 @@ int process(const CompilerOptions &po) {
       if (!package.parse(!po.force)) return 1;
 
       Logger::Info(
-        "%ld total parses, %ld cache hits",
+        "%ld total parses, %ld cache hits, %ld actual file loads",
         package.getTotalParses(),
-        package.getParseCacheHits()
+        package.getParseCacheHits(),
+        package.getParseFileLoads()
       );
     }
   }

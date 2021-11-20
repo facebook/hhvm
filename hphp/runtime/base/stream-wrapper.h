@@ -77,6 +77,11 @@ struct Wrapper {
   }
   virtual String realpath(const String& /*path*/) { return null_string; }
 
+  virtual Optional<std::string> getxattr(const char* /*path*/,
+                                         const char* /*xattr*/) {
+    return std::nullopt;
+  }
+
   // Normal file streams represent local files and must support all of the
   // stream operations.
   virtual bool isNormalFileStream() const { return false; }

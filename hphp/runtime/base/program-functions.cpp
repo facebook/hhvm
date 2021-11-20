@@ -1864,9 +1864,6 @@ static int execute_program_impl(int argc, char** argv) {
     g_context.getCheck();
     SCOPE_EXIT { hphp_thread_exit(); };
 
-    // Initialize compiler state
-    hphp_compiler_init();
-
     if (po.mode == "dumphhas")  RuntimeOption::EvalDumpHhas = true;
     else if (po.mode != "dumpcoverage") RuntimeOption::EvalVerifyOnly = true;
     SystemLib::s_inited = true;
@@ -1874,9 +1871,9 @@ static int execute_program_impl(int argc, char** argv) {
     // Ensure write to SystemLib::s_inited is visible by other threads.
     std::atomic_thread_fence(std::memory_order_release);
 
-    auto compiled = compile_file(str.c_str(), str.size(), sha1, file.c_str(),
-                                 Native::s_noNativeFuncs,
-                                 RepoOptions::defaults(), nullptr);
+    LazyUnitContentsLoader loader{sha1, str, RepoOptions::defaults()};
+    auto compiled =
+      compile_file(loader, file.c_str(), Native::s_noNativeFuncs, nullptr);
 
     if (po.mode == "verify") {
       return 0;
@@ -2035,9 +2032,6 @@ static int execute_program_impl(int argc, char** argv) {
     return 0;
   }
 
-  // Initialize compiler state
-  hphp_compiler_init();
-
   if (!po.lint.empty()) {
     Logger::LogHeader = false;
     Logger::LogLevel = Logger::LogInfo;
@@ -2064,9 +2058,6 @@ static int execute_program_impl(int argc, char** argv) {
     hphp_thread_init();
     g_context.getCheck();
     SCOPE_EXIT { hphp_thread_exit(); };
-
-    // Initialize compiler state
-    hphp_compiler_init();
 
     SystemLib::s_inited = true;
 
@@ -2096,10 +2087,9 @@ static int execute_program_impl(int argc, char** argv) {
       // if we're just going to lint (and they might be expensive).
       g_unit_emitter_cache_hook = nullptr;
 
-      auto const unit = compile_file(
-        str.c_str(), str.size(), sha1, file.c_str(),
-        Native::s_noNativeFuncs, repoOptions, nullptr
-      );
+      LazyUnitContentsLoader loader{sha1, str, repoOptions};
+      auto const unit =
+        compile_file(loader, file.c_str(), Native::s_noNativeFuncs, nullptr);
       if (!unit) {
         std::cerr << "Unable to compile \"" << file << "\"\n";
         return 1;

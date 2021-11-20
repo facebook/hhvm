@@ -22,19 +22,18 @@ namespace HPHP {
 struct Unit;
 struct SHA1;
 struct RepoOptions;
+struct LazyUnitContentsLoader;
 
 namespace Native {
 struct FuncTable;
 }
 
-// Called once at process startup to initialize compiler
-void hphp_compiler_init();
-
 // If set, releaseUnit will contain a pointer to any extraneous unit created due
 // to race-conditions while compiling
-Unit* compile_file(const char* s, size_t sz, const SHA1& sha1,
-                   const char* fname, const Native::FuncTable& nativeFuncs,
-                   const RepoOptions&, Unit** releaseUnit = nullptr);
+Unit* compile_file(LazyUnitContentsLoader& loader,
+                   const char* filename,
+                   const Native::FuncTable& nativeFuncs,
+                   Unit** releaseUnit = nullptr);
 
 // If forDebuggerEval is true, and the unit contains a single expression
 // statement, then we will turn the statement into a return statement while
@@ -59,9 +58,11 @@ Unit* compile_systemlib_string(const char* s, size_t sz, const char* fname,
  * be set up before you use those parts of the runtime.
  */
 
-using CompileStringFn = Unit* (*)(const char*, int, const SHA1&, const char*,
-                                  const Native::FuncTable&, Unit**, bool,
-                                  const RepoOptions&);
+using CompileStringFn = Unit* (*)(LazyUnitContentsLoader&,
+                                  const char*,
+                                  const Native::FuncTable&,
+                                  Unit**,
+                                  bool);
 
 extern CompileStringFn g_hphp_compiler_parse;
 

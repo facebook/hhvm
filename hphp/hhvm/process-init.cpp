@@ -14,8 +14,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/compiler/option.h"
-
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/repo-file.h"
 #include "hphp/runtime/vm/repo-global-data.h"
@@ -83,12 +81,10 @@ void ProcessInit() {
   bool rp = RuntimeOption::AlwaysUseRelativePath;
   bool sf = RuntimeOption::SafeFileAccess;
   bool ah = RuntimeOption::EvalAllowHhas;
-  bool wp = Option::WholeProgram;
   RuntimeOption::EvalDumpBytecode &= ~1;
   RuntimeOption::AlwaysUseRelativePath = false;
   RuntimeOption::SafeFileAccess = false;
   RuntimeOption::EvalAllowHhas = true;
-  Option::WholeProgram = false;
 
   if (RuntimeOption::RepoAuthoritative) {
     LitstrTable::init();
@@ -194,7 +190,6 @@ void ProcessInit() {
   RuntimeOption::SafeFileAccess = sf;
   RuntimeOption::EvalDumpBytecode = db;
   RuntimeOption::EvalAllowHhas = ah;
-  Option::WholeProgram = wp;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

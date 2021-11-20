@@ -169,6 +169,8 @@ way to determine how much progress the server made.
 #include <pwd.h>
 #include <utime.h>
 
+#include <sys/xattr.h>
+
 TRACE_SET_MOD(clisrv);
 
 #include "hphp/runtime/server/cli-server-impl.h"
@@ -421,6 +423,8 @@ struct CLIWrapper final : Stream::ExtendedWrapper {
   bool chgrp(const String& path, int64_t gid) override;
   bool chgrp(const String& path, const String& gid) override;
 
+  Optional<std::string> getxattr(const char* path, const char* xattr) override;
+
   bool isNormalFileStream() const override { return true; }
 
 private:
@@ -440,7 +444,7 @@ struct CLIServer final : folly::AsyncServerSocket::AcceptCallback {
 #else
   void connectionAccepted(folly::NetworkSocket fdNetworkSocket,
                           const folly::SocketAddress&,
-												 	AcceptInfo /* info */) noexcept override {
+                          AcceptInfo /* info */) noexcept override {
 #endif
     int fd = fdNetworkSocket.toFd();
 
@@ -1286,6 +1290,16 @@ bool CLIWrapper::chgrp(const String& path, const String& group) {
   return cli_send_wire(m_cli_fd, "chown", path, (int64_t)-1, id) != -1;
 }
 
+Optional<std::string> CLIWrapper::getxattr(const char* path,
+                                           const char* xattr) {
+  bool status;
+  std::string ret;
+  cli_write(m_cli_fd, "getxattr", path, xattr);
+  cli_read(m_cli_fd, status, ret);
+  if (!status) return std::nullopt;
+  return ret;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 int mkdir_recursive(const char* path, int mode) {
@@ -1583,6 +1597,39 @@ Optional<int> cli_process_command_loop(int fd) {
       cli_write(fd, /* handler recognized = */ true);
       detail::CLIServerInterface server(fd);
       handler->second(server);
+      continue;
+    }
+
+    if (cmd == "getxattr") {
+      std::string path;
+      std::string xattr;
+      cli_read(fd, path, xattr);
+
+#if !defined(__linux__)
+      cli_write(fd, false, std::string{});
+#else
+      std::string buf;
+      buf.resize(64);
+
+      [&] {
+        while (true) {
+          auto const ret =
+            ::getxattr(path.c_str(), xattr.c_str(), buf.data(), buf.size());
+          if (ret >= 0) {
+            assertx(ret <= buf.size());
+            buf.resize(ret);
+            cli_write(fd, true, buf);
+            return;
+          }
+          if (errno != ERANGE) break;
+          auto const actualSize =
+            ::getxattr(path.c_str(), xattr.c_str(), nullptr, 0);
+          if (actualSize < 0) break;
+          buf.resize(std::max<size_t>(actualSize, buf.size()));
+        }
+        cli_write(fd, false, std::string{});
+      }();
+#endif
       continue;
     }
 

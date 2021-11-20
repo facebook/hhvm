@@ -62,6 +62,7 @@ struct Package {
 
   size_t getTotalParses() const { return m_totalParses.load(); }
   size_t getParseCacheHits() const { return m_parseCacheHits.load(); }
+  size_t getParseFileLoads() const { return m_parseFileLoads.load(); }
 
   void saveStatsToFile(const char *filename, int totalSeconds) const;
 
@@ -87,6 +88,7 @@ private:
   int m_charCount;
 
   std::atomic<size_t> m_parseCacheHits;
+  std::atomic<size_t> m_parseFileLoads;
   std::atomic<size_t> m_totalParses;
 
   std::shared_ptr<FileCache> m_fileCache;

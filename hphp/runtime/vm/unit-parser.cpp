@@ -43,6 +43,7 @@
 #include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
+#include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/decl-provider.h"
 #include "hphp/runtime/vm/hhas-parser.h"
@@ -265,35 +266,25 @@ FfpResult ffp_parse_file(
 }
 
 std::unique_ptr<UnitCompiler>
-UnitCompiler::create(const char* code,
-                     int codeLen,
+UnitCompiler::create(LazyUnitContentsLoader& loader,
                      const char* filename,
-                     const SHA1& sha1,
                      const Native::FuncTable& nativeFuncs,
-                     bool forDebuggerEval,
-                     const RepoOptions& options) {
-  auto make = [code, codeLen, filename, sha1, forDebuggerEval,
-               &nativeFuncs, &options] {
+                     bool forDebuggerEval) {
+  auto make = [&loader, &nativeFuncs, filename, forDebuggerEval] {
     return std::make_unique<HackcUnitCompiler>(
-      code,
-      codeLen,
+      loader,
       filename,
-      sha1,
       nativeFuncs,
-      forDebuggerEval,
-      options
+      forDebuggerEval
     );
   };
 
   if (g_unit_emitter_cache_hook && !forDebuggerEval) {
     return std::make_unique<CacheUnitCompiler>(
-      code,
-      codeLen,
+      loader,
       filename,
-      sha1,
       nativeFuncs,
       false,
-      options,
       std::move(make)
     );
   } else {
@@ -306,13 +297,14 @@ std::unique_ptr<UnitEmitter> HackcUnitCompiler::compile(
     CompileAbortMode mode) {
   auto ice = false;
   cacheHit = false;
-  auto res = hackc_compile(m_code,
+
+  auto res = hackc_compile(m_loader.contents().data(),
                            m_filename,
-                           m_sha1,
+                           m_loader.sha1(),
                            m_nativeFuncs,
                            m_forDebuggerEval,
                            ice,
-                           m_options,
+                           m_loader.options(),
                            mode);
   auto unitEmitter = match<std::unique_ptr<UnitEmitter>>(
     res,
@@ -345,7 +337,7 @@ std::unique_ptr<UnitEmitter> HackcUnitCompiler::compile(
       }
       return createFatalUnit(
         makeStaticString(m_filename),
-        m_sha1,
+        m_loader.sha1(),
         FatalOp::Runtime,
         err
       );
@@ -362,8 +354,8 @@ CacheUnitCompiler::compile(bool& cacheHit, CompileAbortMode mode) {
   cacheHit = true;
   return g_unit_emitter_cache_hook(
     m_filename,
-    m_sha1,
-    m_codeLen,
+    m_loader.sha1(),
+    m_loader.fileLength(),
     [&] (bool wantsICE) {
       if (!m_fallback) m_fallback = m_makeFallback();
       assertx(m_fallback);

@@ -29,16 +29,17 @@ TRACE_SET_MOD(runtime);
 
 CompileStringFn g_hphp_compiler_parse;
 
-void hphp_compiler_init() {
-  g_hphp_compiler_parse(nullptr, 0, SHA1(), nullptr, Native::s_noNativeFuncs,
-                        nullptr, false, RepoOptions::defaults());
-}
-
-Unit* compile_file(const char* s, size_t sz, const SHA1& sha1,
-                   const char* fname, const Native::FuncTable& nativeFuncs,
-                   const RepoOptions& options, Unit** releaseUnit) {
-  return g_hphp_compiler_parse(s, sz, sha1, fname, nativeFuncs, releaseUnit,
-                               false, options);
+Unit* compile_file(LazyUnitContentsLoader& loader,
+                   const char* filename,
+                   const Native::FuncTable& nativeFuncs,
+                   Unit** releaseUnit) {
+  return g_hphp_compiler_parse(
+    loader,
+    filename,
+    nativeFuncs,
+    releaseUnit,
+    false
+  );
 }
 
 Unit* compile_string(const char* s,
@@ -47,14 +48,23 @@ Unit* compile_string(const char* s,
                      const Native::FuncTable& nativeFuncs,
                      const RepoOptions& options,
                      bool forDebuggerEval) {
+  // If the file is too large it may OOM the request
+  MemoryManager::SuppressOOM so(*tl_heap);
+
   auto const name = fname ? fname : "";
   auto const sha1 = SHA1{
     mangleUnitSha1(string_sha1(folly::StringPiece{s, sz}), name, options)};
   // NB: fname needs to be long-lived if generating a bytecode repo because it
   // can be cached via a Location ultimately contained by ErrorInfo for printing
   // code errors.
-  return g_hphp_compiler_parse(s, sz, sha1, fname, nativeFuncs, nullptr,
-                               forDebuggerEval, options);
+  LazyUnitContentsLoader loader{sha1, String{s, sz, CopyStringMode{}}, options};
+  return g_hphp_compiler_parse(
+    loader,
+    fname,
+    nativeFuncs,
+    nullptr,
+    forDebuggerEval
+  );
 }
 
 Unit* compile_systemlib_string(const char* s, size_t sz, const char* fname,
@@ -65,7 +75,8 @@ Unit* compile_systemlib_string(const char* s, size_t sz, const char* fname,
       return u;
     }
   }
-  auto const u = compile_string(s, sz, fname, nativeFuncs, RepoOptions::defaults());
+  auto const u =
+    compile_string(s, sz, fname, nativeFuncs, RepoOptions::defaults());
   always_assert(u);
   return u;
 }

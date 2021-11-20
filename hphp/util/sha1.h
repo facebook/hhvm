@@ -38,6 +38,8 @@ struct SHA1 : private boost::totally_ordered<SHA1> {
   // One byte = two ascii hex characters
   static constexpr size_t kQWordHexLen = 2 * kQWordLen;
 
+  static constexpr size_t kStrLen = kQNumWords * kQWordHexLen;
+
   std::array<uint32_t, kQNumWords> q;
 
   SHA1() : q{} {}
@@ -46,7 +48,7 @@ struct SHA1 : private boost::totally_ordered<SHA1> {
    * Build from a SHA1 hexadecimal string
    */
   explicit SHA1(folly::StringPiece str) {
-    assertx(str.size() == kQNumWords * kQWordHexLen);
+    assertx(str.size() == kStrLen);
 
     char buf[kQWordHexLen + 1];
     buf[kQWordHexLen] = '\0';

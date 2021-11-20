@@ -27,7 +27,6 @@
 namespace HPHP {
 
 extern void (*g_vmProcessInit)();
-void hphp_process_init();
 void ProcessInit();
 
 /*
@@ -49,7 +48,6 @@ inline void init_for_unit_test() {
   IniSetting::Map ini = IniSetting::Map::object;
   Hdf config;
   RuntimeOption::Load(ini, config);
-  hphp_compiler_init();
   hphp_process_init();
   hphp_session_init(Treadmill::SessionKind::UnitTests);
 }

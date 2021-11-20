@@ -62,6 +62,9 @@ struct FileStreamWrapper final : Stream::Wrapper {
     ERROR_RAISE_WARNING(::rmdir(File::TranslatePath(path).data()));
     return ret;
   }
+
+  Optional<std::string> getxattr(const char* path, const char* xattr) override;
+
   bool isNormalFileStream() const override { return true; }
 
   req::ptr<Directory> opendir(const String& path) override;

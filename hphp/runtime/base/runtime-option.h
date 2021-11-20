@@ -1347,6 +1347,7 @@ struct RuntimeOption {
   /* More aggresively reuse already compiled units based on SHA1     */ \
   F(bool, CheckUnitSHA1, true)                                          \
   F(bool, ReuseUnitsByHash, false)                                      \
+  F(bool, UseEdenFS, true)                                              \
   /* Arbitrary string to force different unit-cache hashes */           \
   F(std::string, UnitCacheBreaker, "")                                  \
   /* When dynamic_fun is called on a function not marked as

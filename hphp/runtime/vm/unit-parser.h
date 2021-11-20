@@ -28,6 +28,7 @@ namespace Native {
 struct FuncTable;
 }
 
+struct LazyUnitContentsLoader;
 struct SHA1;
 
 void compilers_start();
@@ -70,31 +71,23 @@ enum class CompileAbortMode {
 };
 
 struct UnitCompiler {
-  UnitCompiler(const char* code,
-               int codeLen,
+  UnitCompiler(LazyUnitContentsLoader& loader,
                const char* filename,
-               const SHA1& sha1,
                const Native::FuncTable& nativeFuncs,
-               bool forDebuggerEval,
-               const RepoOptions& options)
-      : m_code(code),
-        m_codeLen(codeLen),
-        m_filename(filename),
-        m_sha1(sha1),
-        m_nativeFuncs(nativeFuncs),
-        m_forDebuggerEval(forDebuggerEval),
-        m_options(options)
-    {}
+               bool forDebuggerEval)
+    : m_loader{loader}
+    , m_filename{filename}
+    , m_nativeFuncs{nativeFuncs}
+    , m_forDebuggerEval{forDebuggerEval}
+  {}
   virtual ~UnitCompiler() = default;
 
   static std::unique_ptr<UnitCompiler> create(
-    const char* code,
-    int codeLen,
+    LazyUnitContentsLoader& loader,
     const char* filename,
-    const SHA1& sha1,
     const Native::FuncTable& nativeFuncs,
-    bool forDebuggerEval,
-    const RepoOptions& options);
+    bool forDebuggerEval
+  );
 
   virtual std::unique_ptr<UnitEmitter> compile(
     bool& cacheHit,
@@ -103,13 +96,10 @@ struct UnitCompiler {
   virtual const char* getName() const = 0;
 
  protected:
-  const char* m_code;
-  int m_codeLen;
+  LazyUnitContentsLoader& m_loader;
   const char* m_filename;
-  SHA1 m_sha1;
   const Native::FuncTable& m_nativeFuncs;
   bool m_forDebuggerEval;
-  const RepoOptions& m_options;
 };
 
 struct HackcUnitCompiler : public UnitCompiler {
@@ -128,17 +118,12 @@ struct HackcUnitCompiler : public UnitCompiler {
 // having to create the fallback UnitEmitter until we need it). The
 // lambda will only be called once. Its output is cached afterwards.
 struct CacheUnitCompiler : public UnitCompiler {
-  explicit CacheUnitCompiler(
-      const char* code,
-      int codeLen,
-      const char* filename,
-      const SHA1& sha1,
-      const Native::FuncTable& nativeFuncs,
-      bool forDebuggerEval,
-      const RepoOptions& options,
-      std::function<std::unique_ptr<UnitCompiler>()> makeFallback)
-    : UnitCompiler{code, codeLen, filename, sha1,
-                   nativeFuncs, forDebuggerEval, options}
+  CacheUnitCompiler(LazyUnitContentsLoader& loader,
+                    const char* filename,
+                    const Native::FuncTable& nativeFuncs,
+                    bool forDebuggerEval,
+                    std::function<std::unique_ptr<UnitCompiler>()> makeFallback)
+    : UnitCompiler{loader, filename, nativeFuncs, forDebuggerEval}
     , m_makeFallback{std::move(makeFallback)} {}
 
   virtual std::unique_ptr<UnitEmitter> compile(

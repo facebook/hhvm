@@ -25,6 +25,7 @@ struct AnalysisResult;
 struct SHA1;
 struct Unit;
 struct RepoOptions;
+struct LazyUnitContentsLoader;
 
 namespace Native {
 struct FuncTable;
@@ -36,14 +37,12 @@ namespace Compiler {
 void emitAllHHBC(std::shared_ptr<AnalysisResult>&&);
 
 extern "C" {
-  Unit* hphp_compiler_parse(const char* code, int codeLen, const SHA1& sha1,
+  Unit* hphp_compiler_parse(LazyUnitContentsLoader&,
                             const char* filename,
                             const Native::FuncTable& nativeFuncs,
                             Unit** releaseUnit,
-                            bool forDebuggerEval,
-                            const RepoOptions&);
+                            bool forDebuggerEval);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 }}
-

@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/request-info.h"
+#include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/vm/disas.h"
 #include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
@@ -436,32 +437,27 @@ extern "C" {
 
 /**
  * This is the entry point from the runtime; i.e. online bytecode generation.
- * The 'filename' parameter may be NULL if there is no file associated with
- * the source code.
- *
- * Before being actually used, hphp_compiler_parse must be called with
- * a NULL `code' parameter to do initialization.
  */
 
-Unit* hphp_compiler_parse(const char* code, int codeLen, const SHA1& sha1,
+Unit* hphp_compiler_parse(LazyUnitContentsLoader& loader,
                           const char* filename,
                           const Native::FuncTable& nativeFuncs,
-                          Unit** releaseUnit, bool forDebuggerEval,
-                          const RepoOptions& options) {
-  if (UNLIKELY(!code)) {
-    // Do initialization when code is null; see above.
-    Option::RecordErrors = false;
-    Option::WholeProgram = false;
-    TypeConstraint tc;
-    return nullptr;
-  }
+                          Unit** releaseUnit,
+                          bool forDebuggerEval) {
+  if (!filename) filename = "";
 
   tracing::Block _{
     "parse",
     [&] {
       return tracing::Props{}
         .add("filename", filename ? filename : "")
-        .add("code_size", codeLen);
+        .add("code_size", loader.fileLength());
+    }
+  };
+  auto const wasLoaded = loader.didLoad();
+  SCOPE_EXIT {
+    if (!wasLoaded && loader.didLoad()) {
+      tracing::updateName("parse-load");
     }
   };
 
@@ -479,8 +475,6 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const SHA1& sha1,
   RID().setJitFolding(true);
   SCOPE_EXIT { RID().setJitFolding(prevFolding); };
 
-  if (!filename) filename = "";
-
   std::unique_ptr<UnitEmitter> ue;
   // Check if this file contains raw hip hop bytecode instead of
   // php.  This is dictated by a special file extension.
@@ -488,7 +482,14 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const SHA1& sha1,
     if (const char* dot = strrchr(filename, '.')) {
       const char hhbc_ext[] = "hhas";
       if (!strcmp(dot + 1, hhbc_ext)) {
-        ue = assemble_string(code, codeLen, filename, sha1, nativeFuncs);
+        auto const& contents = loader.contents();
+        ue = assemble_string(
+          contents.data(),
+          contents.size(),
+          filename,
+          loader.sha1(),
+          nativeFuncs
+        );
       }
     }
   }
@@ -496,10 +497,19 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const SHA1& sha1,
   // If ue != nullptr then we assembled it above, so don't feed it into
   // the extern compiler
   if (!ue) {
-    auto uc = UnitCompiler::create(code, codeLen, filename, sha1,
-                                   nativeFuncs, forDebuggerEval, options);
+    auto uc = UnitCompiler::create(
+      loader,
+      filename,
+      nativeFuncs,
+      forDebuggerEval
+    );
     assertx(uc);
     tracing::BlockNoTrace _{"unit-compiler-run"};
+    SCOPE_EXIT {
+      if (!wasLoaded && loader.didLoad()) {
+        tracing::updateName("unit-compiler-run-load");
+      }
+    };
     bool ignore;
     ue = uc->compile(ignore);
   }

@@ -63,6 +63,8 @@
 #include <folly/portability/SysStat.h>
 #include <folly/synchronization/AtomicNotification.h>
 
+#include <sys/xattr.h>
+
 #ifdef __APPLE__
 #define st_mtim st_mtimespec
 #define st_ctim st_ctimespec
@@ -375,6 +377,10 @@ ServiceData::ExportedCounter* s_unitsPathReaped =
   ServiceData::createCounter("vm.units-path-reaped");
 ServiceData::ExportedCounter* s_unitsEvalReaped =
   ServiceData::createCounter("vm.units-eval-reaped");
+ServiceData::ExportedCounter* s_unitCompileFileLoads =
+  ServiceData::createCounter("vm.unit-compile-file-loads");
+ServiceData::ExportedCounter* s_unitEdenInconsistencies =
+  ServiceData::createCounter("vm.unit-eden-inconsistencies");
 
 }
 
@@ -438,26 +444,6 @@ bool canBeBoundToPath(const CachedFilePtr& cachedUnit,
   if (!RuntimeOption::EvalReuseUnitsByHash) return true;
   if (!cachedUnit || !cachedUnit->cu.unit) return true;
   return canBeBoundToPath(cachedUnit->cu.unit, path);
-}
-
-Optional<String> readFileAsString(const StringData* path,
-                                         Stream::Wrapper* w) {
-  tracing::Block _{
-    "read-file", [&] { return tracing::Props{}.add("path", path); }
-  };
-  // If the file is too large it may OOM the request
-  MemoryManager::SuppressOOM so(*tl_heap);
-  if (w) {
-    // We only allow normal file streams, which cannot re-enter
-    assertx(w->isNormalFileStream());
-    if (auto const f = w->open(StrNR(path), "r", 0, nullptr)) return f->read();
-    return std::nullopt;
-  }
-
-  auto const fd = open(path->data(), O_RDONLY);
-  if (fd < 0) return std::nullopt;
-  auto file = req::make<PlainFile>(fd);
-  return file->read();
 }
 
 /*
@@ -574,164 +560,174 @@ CachedFilePtr createUnitFromFile(const StringData* const path,
                                  const struct stat* statInfo,
                                  CachedFilePtr orig,
                                  bool forPrefetch) {
-  LogTimer readUnitTimer("read_unit_ms", ent);
+  assertx(statInfo);
 
-  tracing::BlockNoTrace _{"create-unit-from-file"};
+  auto const impl = [&] (bool tryLazy) {
+    tracing::BlockNoTrace _{"create-unit-from-file"};
 
-  auto const contents = readFileAsString(path, wrapper);
-  if (!contents) return CachedFilePtr{};
-
-  readUnitTimer.stop();
-
-  LogTimer generateSha1Timer("generate_sha1_ms", ent);
-  auto const sha1 = SHA1{
-    mangleUnitSha1(string_sha1(contents->slice()), path->slice(), options)
-  };
-  generateSha1Timer.stop();
-
-  s_unitCompileAttempts->increment();
-
-  // The stat may have indicated that the file was touched, but the
-  // contents may not have actually changed. In that case, the hash we
-  // just calculated may be the same as the pre-existing Unit's
-  // hash. In that case, we just use the old unit.
-  if (orig && orig->cu.unit && sha1 == orig->cu.unit->sha1()) {
-    return CachedFilePtr{*orig, statInfo};
-  }
-
-  // Compile a new Unit from contents
-  auto const compileNew = [&] {
-    s_unitActualCompiles->increment();
-
-    LogTimer compileTimer("compile_ms", ent);
-    rqtrace::EventGuard trace{"COMPILE_UNIT"};
-    trace.annotate("file_size", folly::to<std::string>(contents->size()));
-    flags = FileLoadFlags::kCompiled;
-    return compile_file(
-      contents->data(),
-      contents->size(),
-      sha1,
-      path->data(),
-      nativeFuncs, options, releaseUnit
-    );
-  };
-
-  // If orig is provided, check if the given Unit has the same bcSha1
-  // as it.
-  auto const sameBC = [&] (Unit* unit) {
-    return
-      orig && orig->cu.unit && unit &&
-      unit->bcSha1() == orig->cu.unit->bcSha1();
-  };
-
-  auto const makeCachedFilePtr = [&] (Unit* unit) {
-    return CachedFilePtr{
-      CachedUnit { unit, unit ? rds::allocBit() : -1 },
-      statInfo,
-      options
+    LazyUnitContentsLoader loader{
+      path->data(), wrapper, options, (size_t)statInfo->st_size, !tryLazy
     };
-  };
+    SCOPE_EXIT {
+      if (loader.didLoad()) {
+        tracing::updateName("create-unit-from-file-load");
+        s_unitCompileFileLoads->increment();
+      }
+    };
+    s_unitCompileAttempts->increment();
 
-  if (RuntimeOption::EvalReuseUnitsByHash) {
-    // We're re-using Units according to their hash:
+    // The stat may have indicated that the file was touched, but the
+    // contents may not have actually changed. In that case, the hash we
+    // just calculated may be the same as the pre-existing Unit's
+    // hash. In that case, we just use the old unit.
+    if (orig && orig->cu.unit && loader.sha1() == orig->cu.unit->sha1()) {
+      return CachedFilePtr{*orig, statInfo};
+    }
 
-    auto const cachedFilePtr = [&] {
-      tracing::BlockNoTrace _{"unit-hash-cache"};
+    // Compile a new Unit from contents
+    auto const compileNew = [&] {
+      s_unitActualCompiles->increment();
+      LogTimer compileTimer("compile_ms", ent);
+      rqtrace::EventGuard trace{"COMPILE_UNIT"};
+      trace.annotate("file_size", folly::to<std::string>(loader.fileLength()));
+      flags = FileLoadFlags::kCompiled;
+      return compile_file(loader, path->data(), nativeFuncs, releaseUnit);
+    };
 
-      UnitByHashCache::const_accessor acc;
-      s_unitByHashCache.insert(acc, sha1);
+    // If orig is provided, check if the given Unit has the same bcSha1
+    // as it.
+    auto const sameBC = [&] (Unit* unit) {
+      return
+        orig && orig->cu.unit && unit &&
+        unit->bcSha1() == orig->cu.unit->bcSha1();
+    };
 
-      auto& cached = acc->second.unit;
+    auto const makeCachedFilePtr = [&] (Unit* unit) {
+      return CachedFilePtr{
+        CachedUnit { unit, unit ? rds::allocBit() : -1 },
+        statInfo,
+        options
+      };
+    };
 
-      auto const hit = [&] (Unit* unit) {
-        assertx(unit->sha1() == sha1);
-        assertx(unit->hasPerRequestFilepath());
-        // Try to re-use the old Unit if we can:
-        if (sameBC(unit)) return CachedFilePtr{*orig, statInfo};
-        if (forPrefetch || canBeBoundToPath(unit, path)) {
-          // We can bind the path so it can be used.
+    if (RuntimeOption::EvalReuseUnitsByHash) {
+      // We're re-using Units according to their hash:
+
+      auto const cachedFilePtr = [&] {
+        tracing::BlockNoTrace _{"unit-hash-cache"};
+
+        UnitByHashCache::const_accessor acc;
+        s_unitByHashCache.insert(acc, loader.sha1());
+
+        auto& cached = acc->second.unit;
+
+        auto const hit = [&] (Unit* unit) {
+          assertx(unit->sha1() == loader.sha1());
+          assertx(unit->hasPerRequestFilepath());
+          // Try to re-use the old Unit if we can:
+          if (sameBC(unit)) return CachedFilePtr{*orig, statInfo};
+          if (forPrefetch || canBeBoundToPath(unit, path)) {
+            // We can bind the path so it can be used.
+            return makeCachedFilePtr(unit);
+          }
+          // Otherwise the Unit has an already bound (and incompatible)
+          // filepath. We'll just create a new Unit instead.
+          return CachedFilePtr{};
+        };
+
+        // First check before acquiring the lock
+        if (auto const unit = cached.copy()) return hit(unit);
+
+        // No entry, so acquire the lock:
+        if (!cached.try_lock_for_update()) {
+          tracing::BlockNoTrace _{"unit-hash-cache-lock-acquire"};
+          cached.lock_for_update();
+        }
+        SCOPE_FAIL { cached.unlock(); };
+
+        // Try again now that we have the lock
+        if (auto const unit = cached.copy()) {
+          // NB: Its safe to unlock first. The Unit can only be freed by
+          // releaseFromHashCache() which acquires an exclusive lock on
+          // this table slot first (so cannot happen concurrently).
+          cached.unlock();
+          return hit(unit);
+        }
+
+        // There's no Unit, compile a new one and store it in the cache.
+        auto unit = compileNew();
+        if (!unit) {
+          cached.unlock();
+          return makeCachedFilePtr(nullptr);
+        }
+        assertx(unit->sha1() == loader.sha1());
+        assertx(!unit->hasCacheRef());
+        assertx(!unit->hasPerRequestFilepath());
+
+        // Try to re-use the original Unit if possible
+        if (sameBC(unit)) {
+          cached.unlock();
+          delete unit;
+          return CachedFilePtr{*orig, statInfo};
+        }
+
+        // For things like HHAS files, the filepath in the Unit may not
+        // match what we requested during compilation. In that case we
+        // can't use per-request filepaths because the filepath of the
+        // Unit has no relation to anything else. Units without
+        // per-request filepaths cannot be stored in this cache.
+        assertx(unit->origFilepath()->isStatic());
+        if (unit->origFilepath() != path) {
+          cached.unlock();
           return makeCachedFilePtr(unit);
         }
-        // Otherwise the Unit has an already bound (and incompatible)
-        // filepath. We'll just create a new Unit instead.
-        return CachedFilePtr{};
-      };
+        unit->makeFilepathPerRequest();
 
-      // First check before acquiring the lock
-      if (auto const unit = cached.copy()) return hit(unit);
-
-      // No entry, so acquire the lock:
-      if (!cached.try_lock_for_update()) {
-        tracing::BlockNoTrace _{"unit-hash-cache-lock-acquire"};
-        cached.lock_for_update();
-      }
-      SCOPE_FAIL { cached.unlock(); };
-
-      // Try again now that we have the lock
-      if (auto const unit = cached.copy()) {
-        // NB: Its safe to unlock first. The Unit can only be freed by
-        // releaseFromHashCache() which acquires an exclusive lock on
-        // this table slot first (so cannot happen concurrently).
-        cached.unlock();
-        return hit(unit);
-      }
-
-      // There's no Unit, compile a new one and store it in the cache.
-      auto unit = compileNew();
-      if (!unit) {
-        cached.unlock();
-        return makeCachedFilePtr(nullptr);
-      }
-      assertx(unit->sha1() == sha1);
-      assertx(!unit->hasCacheRef());
-      assertx(!unit->hasPerRequestFilepath());
-
-      // Try to re-use the original Unit if possible
-      if (sameBC(unit)) {
-        cached.unlock();
-        delete unit;
-        return CachedFilePtr{*orig, statInfo};
-      }
-
-      // For things like HHAS files, the filepath in the Unit may not
-      // match what we requested during compilation. In that case we
-      // can't use per-request filepaths because the filepath of the
-      // Unit has no relation to anything else. Units without
-      // per-request filepaths cannot be stored in this cache.
-      assertx(unit->origFilepath()->isStatic());
-      if (unit->origFilepath() != path) {
-        cached.unlock();
+        // Store the Unit in the cache.
+        auto const DEBUG_ONLY old = cached.update_and_unlock(std::move(unit));
+        assertx(!old);
         return makeCachedFilePtr(unit);
+      }();
+      if (cachedFilePtr) {
+        if (!orig || cachedFilePtr->cu.unit != orig->cu.unit) {
+          flags = FileLoadFlags::kEvicted;
+        }
+        return cachedFilePtr;
       }
-      unit->makeFilepathPerRequest();
-
-      // Store the Unit in the cache.
-      auto const DEBUG_ONLY old = cached.update_and_unlock(std::move(unit));
-      assertx(!old);
-      return makeCachedFilePtr(unit);
-    }();
-    if (cachedFilePtr) {
-      if (!orig || cachedFilePtr->cu.unit != orig->cu.unit) {
-        flags = FileLoadFlags::kEvicted;
-      }
-      return cachedFilePtr;
     }
-  }
 
-  // We're not reusing Units by hash, or one existed but already had a
-  // bound path. Compile a new Unit.
-  auto const unit = compileNew();
-  if (sameBC(unit)) {
-    // If the new Unit has the same bcSha1 as the old one, just re-use
-    // the old one. This saves any JIT work we've already done on the
-    // orig Unit.
-    delete unit;
-    return CachedFilePtr{*orig, statInfo};
+    // We're not reusing Units by hash, or one existed but already had a
+    // bound path. Compile a new Unit.
+    auto const unit = compileNew();
+    if (sameBC(unit)) {
+      // If the new Unit has the same bcSha1 as the old one, just re-use
+      // the old one. This saves any JIT work we've already done on the
+      // orig Unit.
+      delete unit;
+      return CachedFilePtr{*orig, statInfo};
+    }
+    flags = FileLoadFlags::kEvicted;
+    assertx(!unit || !unit->hasCacheRef());
+    assertx(!unit || !unit->hasPerRequestFilepath());
+    return makeCachedFilePtr(unit);
+  };
+
+  // Loading the contents lazily can fail (if the contents of the file
+  // changes after obtaining the hash). So, try loading lazily a fixed
+  // number of times. If we exceed it, give up and load the file
+  // contents eagerly (this should basically never happen).
+  auto attempts = 0;
+  while (true) {
+    try {
+      return impl(attempts < LazyUnitContentsLoader::kMaxLazyAttempts);
+    } catch (const LazyUnitContentsLoader::LoadError&) {
+      return CachedFilePtr{};
+    } catch (const LazyUnitContentsLoader::Inconsistency&) {
+      assertx(attempts < LazyUnitContentsLoader::kMaxLazyAttempts);
+      s_unitEdenInconsistencies->increment();
+    }
+    ++attempts;
   }
-  flags = FileLoadFlags::kEvicted;
-  assertx(!unit || !unit->hasCacheRef());
-  assertx(!unit || !unit->hasPerRequestFilepath());
-  return makeCachedFilePtr(unit);
 }
 
 // When running via the CLI server special access checks may need to be
@@ -2202,6 +2198,115 @@ void clearUnitCacheForExit() {
 void shutdownUnitPrefetcher() {
   if (RO::RepoAuthoritative || !unitPrefetchingEnabled()) return;
   getPrefetchExecutor().join();
+}
+
+//////////////////////////////////////////////////////////////////////
+
+LazyUnitContentsLoader::LazyUnitContentsLoader(const char* path,
+                                               Stream::Wrapper* wrapper,
+                                               const RepoOptions& options,
+                                               size_t fileLength,
+                                               bool forceEager)
+  : m_path{path}
+  , m_wrapper{wrapper}
+  , m_options{options}
+  , m_file_length{fileLength}
+{
+  assertx(m_path);
+
+  auto const file_hash_str = [&] {
+    // If there's no emitter cache hook, we're always going to have to
+    // read the file contents, so there's no point in deferring.
+    if (!forceEager && g_unit_emitter_cache_hook && RO::EvalUseEdenFS) {
+      if (auto const h = getHashFromEden()) return *h;
+    }
+    load();
+    return string_sha1(m_contents->slice());
+  }();
+
+  m_file_hash = SHA1{file_hash_str};
+  m_hash = SHA1{mangleUnitSha1(
+    file_hash_str,
+    m_path,
+    m_options
+  )};
+}
+
+LazyUnitContentsLoader::LazyUnitContentsLoader(SHA1 sha,
+                                               String contents,
+                                               const RepoOptions& options)
+  : m_path{nullptr}
+  , m_wrapper{nullptr}
+  , m_options{options}
+  , m_hash{sha}
+  , m_contents{std::move(contents)}
+  , m_file_length{(size_t)m_contents->size()}
+{
+}
+
+Optional<std::string> LazyUnitContentsLoader::getHashFromEden() const {
+#if !defined(__linux__)
+  return std::nullopt;
+#else
+  assertx(m_path);
+  if (m_wrapper) {
+    // We only allow normal file streams, which cannot re-enter
+    assertx(m_wrapper->isNormalFileStream());
+    auto const xattr = m_wrapper->getxattr(m_path, "user.sha1");
+    if (!xattr || xattr->size() != SHA1::kStrLen) return std::nullopt;
+    return xattr;
+  }
+  char xattr_buf[SHA1::kStrLen];
+  auto const ret = getxattr(m_path, "user.sha1", xattr_buf, sizeof(xattr_buf));
+  if (ret != sizeof(xattr_buf)) return std::nullopt;
+  return std::string{xattr_buf, sizeof(xattr_buf)};
+#endif
+}
+
+const String& LazyUnitContentsLoader::contents() {
+  if (!m_contents.has_value()) {
+    auto const oldSize = m_file_length;
+    load();
+    // The file might have changed after we read the hash from the
+    // xattr. So, calculate the hash from the file contents. If
+    // there's a mismatch, throw Inconsistency to let the caller know
+    // and deal with it (usually by restarting the whole loading
+    // process).
+    auto const read_file_hash = SHA1{string_sha1(m_contents->slice())};
+    if (read_file_hash != m_file_hash) {
+      m_contents.reset();
+      m_file_length = oldSize;
+      throw Inconsistency{};
+    }
+  }
+  return *m_contents;
+}
+
+void LazyUnitContentsLoader::load() {
+  assertx(m_path);
+  m_loaded = true;
+
+  tracing::Block _{
+    "read-file", [&] { return tracing::Props{}.add("path", m_path); }
+  };
+  // If the file is too large it may OOM the request
+  MemoryManager::SuppressOOM so(*tl_heap);
+  if (m_wrapper) {
+    // We only allow normal file streams, which cannot re-enter
+    assertx(m_wrapper->isNormalFileStream());
+    if (auto const f = m_wrapper->open(String{m_path}, "r", 0, nullptr)) {
+      m_contents = f->read();
+      m_file_length = m_contents->size();
+      return;
+    }
+    throw LoadError{};
+  }
+
+  auto const fd = open(m_path, O_RDONLY);
+  if (fd < 0) throw LoadError{};
+  auto file = req::make<PlainFile>(fd);
+  m_contents = file->read();
+  m_file_length = m_contents->size();
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -65,8 +65,6 @@ int main(int argc, char **argv) {
     RuntimeOption::AlwaysPopulateRawPostData = true;
   }
 
-  // Initialize compiler state
-  hphp_compiler_init();
   hphp_process_init();
   SCOPE_EXIT { hphp_process_exit(); };
   Test test;

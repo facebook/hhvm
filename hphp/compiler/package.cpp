@@ -61,7 +61,7 @@ const StaticString s___EntryPoint("__EntryPoint");
 
 Package::Package(const char* root, bool /*bShortTags*/ /* = true */)
     : m_dispatcher(nullptr), m_lineCount(0), m_charCount(0)
-    , m_parseCacheHits{0}, m_totalParses{0} {
+    , m_parseCacheHits{0}, m_parseFileLoads{0}, m_totalParses{0} {
   m_root = FileUtil::normalizeDir(root);
   m_ar = std::make_shared<AnalysisResult>();
   m_fileCache = std::make_shared<FileCache>();
@@ -450,11 +450,10 @@ bool Package::parseImpl(const std::string* fileName) {
     }
   }
 
-  auto report = [&] (int lines) {
-    struct stat fst;
-    // @lint-ignore CLANGTIDY
-    stat(fullPath.c_str(), &fst);
+  struct stat fst;
+  stat(fullPath.c_str(), &fst);
 
+  auto report = [&] (int lines) {
     Lock lock(m_mutex);
     m_lineCount += lines;
     m_charCount += fst.st_size;
@@ -468,48 +467,68 @@ bool Package::parseImpl(const std::string* fileName) {
     }
   };
 
-  std::ifstream s(fullPath);
-  std::string content {
-    std::istreambuf_iterator<char>(s), std::istreambuf_iterator<char>() };
+  auto const impl = [&] (bool tryLazy) {
+    auto const& options = RepoOptions::forFile(fullPath.data());
+    LazyUnitContentsLoader loader{
+      fullPath.c_str(), nullptr, options, (size_t)fst.st_size, !tryLazy
+    };
 
-  auto const& options = RepoOptions::forFile(fullPath.data());
-  auto const sha1 = SHA1{mangleUnitSha1(string_sha1(content),
-                                        *fileName,
-                                        options)};
+    auto const mode =
+      RO::EvalAbortBuildOnCompilerError ? CompileAbortMode::AllErrors :
+      RO::EvalAbortBuildOnVerifyError   ? CompileAbortMode::VerifyErrors :
+      CompileAbortMode::OnlyICE;
 
-  auto const mode =
-    RO::EvalAbortBuildOnCompilerError ? CompileAbortMode::AllErrors :
-    RO::EvalAbortBuildOnVerifyError   ? CompileAbortMode::VerifyErrors :
-                                        CompileAbortMode::OnlyICE;
-
-  // Invoke external compiler. If it fails to compile the file we log an
-  // error and and skip it.
-  auto uc = UnitCompiler::create(
-    content.data(), content.size(), fileName->c_str(), sha1,
-    Native::s_noNativeFuncs, false, options);
-  assertx(uc);
-  ++m_totalParses;
-  auto cacheHit = false;
-  auto ue = uc->compile(cacheHit, mode);
-  if (cacheHit) ++m_parseCacheHits;
-  if (ue && !ue->m_ICE) {
-    if (is_symlink) {
-      ue = createSymlinkWrapper(fullPath, *fileName, std::move(ue));
-      if (!ue) {
-        // If the symlink contains no EntryPoint we don't do anything but it
-        // is still success
-        return true;
+    // Invoke external compiler. If it fails to compile the file we log an
+    // error and and skip it.
+    auto uc = UnitCompiler::create(
+      loader,
+      fileName->c_str(),
+      Native::s_noNativeFuncs,
+      false
+    );
+    assertx(uc);
+    ++m_totalParses;
+    auto cacheHit = false;
+    auto ue = uc->compile(cacheHit, mode);
+    if (cacheHit) ++m_parseCacheHits;
+    if (loader.didLoad()) ++m_parseFileLoads;
+    if (ue && !ue->m_ICE) {
+      if (is_symlink) {
+        ue = createSymlinkWrapper(fullPath, *fileName, std::move(ue));
+        if (!ue) {
+          // If the symlink contains no EntryPoint we don't do anything but it
+          // is still success
+          return true;
+        }
       }
+      addUnitEmitter(std::move(ue));
+      report(0);
+      return true;
+    } else {
+      Logger::Error(
+        "Unable to compile using %s compiler: %s",
+        uc->getName(),
+        fullPath.c_str());
+      return false;
     }
-    addUnitEmitter(std::move(ue));
-    report(0);
-    return true;
-  } else {
-    Logger::Error(
-      "Unable to compile using %s compiler: %s",
-      uc->getName(),
-      fullPath.c_str());
-    return false;
+  };
+
+  // Try using lazy loading a fixed number of times. If we exceed the
+  // number of attempts, give up and load eagerly (which cannot fail).
+  auto attempts = 0;
+  while (true) {
+    try {
+      return impl(attempts < LazyUnitContentsLoader::kMaxLazyAttempts);
+    } catch (const LazyUnitContentsLoader::LoadError&) {
+      Logger::Error(
+        "Unable to load file: %s",
+        fullPath.c_str()
+      );
+      return false;
+    } catch (const LazyUnitContentsLoader::Inconsistency&) {
+      assertx(attempts < LazyUnitContentsLoader::kMaxLazyAttempts);
+    }
+    ++attempts;
   }
 }
 

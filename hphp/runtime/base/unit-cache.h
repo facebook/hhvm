@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include "hphp/runtime/base/stream-wrapper.h"
+
 #include "hphp/util/sha1.h"
 
 #include <string>
@@ -193,6 +195,79 @@ void drainUnitPrefetcher();
  */
 Unit* compileEvalString(const StringData* code,
                         const char* evalFilename = nullptr);
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * If the file system provides a way to query the file hash without
+ * actually loading it, we can (potentially) avoid loading the file
+ * entirely.
+ *
+ * This class wraps the potential lazy loading of a file's
+ * contents. It might load the contents eagerly, or it might defer the
+ * load until the contents are actually requested. If we never request
+ * the contents (for example, if the emitter cache hook is
+ * successful), we avoid the load.
+ */
+struct LazyUnitContentsLoader {
+  LazyUnitContentsLoader(const char* path,
+                         Stream::Wrapper* wrapper,
+                         const RepoOptions& options,
+                         size_t fileLength,
+                         bool forceEager);
+
+  // When we have the contents already
+  LazyUnitContentsLoader(SHA1 sha,
+                         String contents,
+                         const RepoOptions& options);
+
+  LazyUnitContentsLoader(const LazyUnitContentsLoader&) = delete;
+  LazyUnitContentsLoader(LazyUnitContentsLoader&&) = delete;
+  LazyUnitContentsLoader& operator=(const LazyUnitContentsLoader&) = delete;
+  LazyUnitContentsLoader& operator=(LazyUnitContentsLoader&&) = delete;
+
+  const SHA1& sha1() const { return m_hash; }
+  const RepoOptions& options() const { return m_options; }
+  size_t fileLength() const { return m_file_length; }
+
+  // Did we actually perform the load?
+  bool didLoad() const { return m_loaded; }
+
+  // Return the contents of the file. If the contents are already
+  // loaded, this just returns them. Otherwise it performs the I/O to
+  // load the file.
+  const String& contents();
+
+  // Some error happened during file I/O
+  struct LoadError : public std::exception {};
+  // Since the file contents are loaded lazily with the file's hash
+  // calculated first, it's possible for the file to change after we
+  // obtained the hash. When we actually load the file, we detect this
+  // inconsistency and throw this. Catch it and retry the entire
+  // operation.
+  struct Inconsistency : public std::exception {};
+
+  // Max number of times to attempt lazy loading. To avoid live-lock,
+  // you should eventually give up and force eager loading (which
+  // cannot have inconsistencies).
+  static constexpr size_t kMaxLazyAttempts = 3;
+
+private:
+  void load();
+
+  Optional<std::string> getHashFromEden() const;
+
+  const char* m_path;
+  Stream::Wrapper* m_wrapper;
+  const RepoOptions& m_options;
+
+  SHA1 m_hash;
+  SHA1 m_file_hash;
+  Optional<String> m_contents;
+  size_t m_file_length;
+
+  bool m_loaded{false};
+};
 
 //////////////////////////////////////////////////////////////////////
 

@@ -47,6 +47,7 @@
 #include "hphp/runtime/vm/jit/simplify.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/timer.h"
+#include "hphp/runtime/vm/jit/type-array-elem.h"
 
 namespace HPHP { namespace jit {
 
@@ -718,6 +719,90 @@ void refine_value(Local& env, SSATmp* newVal, SSATmp* oldVal) {
   );
 }
 
+// Certain instructions give us knowledge about the type in a location
+// without an explicit store.
+void assert_mem(Local& env, const IRInstruction& inst) {
+  if (!inst.hasDst() || inst.dst()->isA(TBottom)) return;
+
+  auto const update = [&] (Type type) {
+    assertx(inst.dst()->type().maybe(TMem));
+    auto const acls = canonicalize(pointee(inst.dst()));
+    auto const meta = env.global.ainfo.find(acls);
+    if (!meta) return;
+    auto& current = env.state.tracked[meta->index];
+    if (!env.state.avail[meta->index]) {
+      current.knownValue = nullptr;
+      current.knownType = type;
+      env.state.avail.set(meta->index);
+    } else {
+      current.knownType &= type;
+    }
+    if (current.knownType.admitsSingleVal()) {
+      current.knownValue = env.global.unit.cns(current.knownType);
+    }
+    FTRACE(
+      4,"    assert {}: {} <- {}\n",
+      inst.dst()->toString(),
+      show(acls),
+      show(current)
+    );
+  };
+
+  switch (inst.op()) {
+    case LdPropAddr:
+    case LdInitPropAddr:
+    case LdClsPropAddrOrNull:
+    case LdClsPropAddrOrRaise:
+      assertx(inst.typeParam() <= TCell);
+      update(inst.typeParam());
+      break;
+    case LdRDSAddr:
+    case LdInitRDSAddr:
+      update(inst.extra<RDSHandleAndType>()->type);
+      break;
+    case ElemDictD:
+    case ElemDictU:
+    case BespokeElem: {
+      assertx(inst.typeParam() <= TArrLike);
+      auto elem = arrLikeElemType(
+        inst.typeParam(),
+        inst.src(1)->type(),
+        inst.ctx()
+      );
+      if (!elem.second) {
+        if (inst.is(ElemDictU) ||
+            (inst.is(BespokeElem) && !inst.src(2)->boolVal())) {
+          elem.first |= TInitNull;
+        }
+      }
+      assertx(elem.first != TBottom);
+      update(elem.first);
+      break;
+    }
+    case ElemDictK:
+      update(
+        arrLikePosType(
+          inst.src(3)->type(),
+          inst.src(2)->type(),
+          false,
+          inst.ctx()
+        )
+      );
+      break;
+    case LdVecElemAddr:
+      update(
+        arrLikeElemType(
+          inst.src(2)->type(),
+          inst.src(1)->type(),
+          inst.ctx()
+        ).first
+      );
+      break;
+    default:
+      break;
+  }
+}
+
 //////////////////////////////////////////////////////////////////////
 
 Flags analyze_inst(Local& env, const IRInstruction& inst) {
@@ -782,6 +867,7 @@ Flags analyze_inst(Local& env, const IRInstruction& inst) {
     break;
   }
   default:
+    assert_mem(env, inst);
     break;
   }
 
@@ -1260,8 +1346,8 @@ void save_taken_state(Global& genv, const IRInstruction& inst,
   auto& outState = genv.blockInfo[inst.block()].stateOutTaken = state;
 
   // CheckInitMem's pointee is TUninit on the taken branch, so update
-  // outState. Like, CheckMROProp's taken branch means the bit is set
-  // to false.
+  // outState. Likewise, CheckMROProp's taken branch means the bit is
+  // set to false.
   if (inst.is(CheckInitMem, CheckMROProp)) {
     assertx(!inst.maySyncVMRegsWithSources());
     auto const effects = memory_effects(inst);

@@ -1993,8 +1993,8 @@ AliasClass pointee(const SSATmp* tmp) {
   auto acls = AEmpty;
   auto const visit = [&] (const IRInstruction* sinst, const SSATmp* ptr) {
     acls |= [&] () -> AliasClass {
-      auto const type = ptr->type();
-      always_assert(type <= TMem && type != TBottom);
+      auto const type = ptr->type() & TMem;
+      always_assert(type != TBottom);
 
       if (sinst->is(LdMBase)) return sinst->extra<LdMBase>()->acls;
       if (sinst->is(LdRDSAddr, LdInitRDSAddr)) {

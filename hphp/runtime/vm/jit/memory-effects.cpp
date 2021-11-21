@@ -1244,7 +1244,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case AllocInitROM:
   case StValAt:
   case StTypeAt:
-  case IntAsDataType:
+  case VoidPtrAsDataType:
     return IrrelevantEffects {};
 
   case AllocObj:
@@ -1334,6 +1334,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case AddDbl:
   case AddInt:
   case AddIntO:
+  case AddOffset:
   case AdvanceDictPtrIter:
   case AndInt:
   case AssertType:

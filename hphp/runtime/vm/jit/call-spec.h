@@ -64,6 +64,7 @@ namespace detail {
   T(TypedValue*, TPtr)           \
   T(TypedValue, TCell)           \
   T(bool*, TPtr)                 \
+  T(void*, TVoidPtr)             \
   T(bool, TBool)                 \
   T(double, TDbl)                \
   T(int, TInt)                   \
@@ -137,10 +138,6 @@ template<typename T> struct jit_ret_type : jit_cpp_type<T> {};
 template<> struct jit_ret_type<void>  {
   static auto constexpr type() { return TTop; }
 };
-template<> struct jit_ret_type<void*> {
-  static auto constexpr type() { return TTop; }
-};
-
 
 template<typename T>
 struct strip_inner_const { using type = T; };

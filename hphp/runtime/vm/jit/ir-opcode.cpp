@@ -465,6 +465,7 @@ bool opcodeMayRaise(Opcode opc) {
   case AddInt:
   case AddIntO:
   case AddNewElemVec:
+  case AddOffset:
   case AdvanceDictPtrIter:
   case AFWHBlockOn:
   case AFWHPushTailFrame:
@@ -653,7 +654,6 @@ bool opcodeMayRaise(Opcode opc) {
   case InstanceOfBitmask:
   case InstanceOfIface:
   case InstanceOfIfaceVtable:
-  case IntAsDataType:
   case InterfaceSupportsArrLike:
   case InterfaceSupportsDbl:
   case InterfaceSupportsInt:
@@ -904,6 +904,7 @@ bool opcodeMayRaise(Opcode opc) {
   case VecFirst:
   case VecLast:
   case VectorIsset:
+  case VoidPtrAsDataType:
   case XorBool:
   case XorInt:
   case ZeroErrorLevel:

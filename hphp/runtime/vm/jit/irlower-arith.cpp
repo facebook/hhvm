@@ -104,22 +104,23 @@ void implShift(Vout& v, IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#define ARITH_OPS               \
-  AO(AddInt,  BinopSF,  addq)   \
-  AO(SubInt,  BinopSF,  subq)   \
-  AO(MulInt,  BinopSF,  imul)   \
-  AO(AddIntO, ArithO,   addq)   \
-  AO(SubIntO, ArithO,   subq)   \
-  AO(MulIntO, ArithO,   imul)   \
-  AO(AddDbl,  Binop,    addsd)  \
-  AO(SubDbl,  Binop,    subsd)  \
-  AO(MulDbl,  Binop,    mulsd)  \
-  AO(AbsDbl,  Unop,     absdbl) \
-  AO(Sqrt,    Unop,     sqrtsd) \
-  AO(AndInt,  BinopSF,  andq)   \
-  AO(OrInt,   BinopSF,  orq)    \
-  AO(XorInt,  BinopSF,  xorq)   \
-  AO(XorBool, BinopSF,  xorb)   \
+#define ARITH_OPS                  \
+  AO(AddInt,    BinopSF,  addq)    \
+  AO(AddOffset, BinopSF,  addq)    \
+  AO(SubInt,    BinopSF,  subq)    \
+  AO(MulInt,    BinopSF,  imul)    \
+  AO(AddIntO,   ArithO,   addq)    \
+  AO(SubIntO,   ArithO,   subq)    \
+  AO(MulIntO,   ArithO,   imul)    \
+  AO(AddDbl,    Binop,    addsd)   \
+  AO(SubDbl,    Binop,    subsd)   \
+  AO(MulDbl,    Binop,    mulsd)   \
+  AO(AbsDbl,    Unop,     absdbl)  \
+  AO(Sqrt,      Unop,     sqrtsd)  \
+  AO(AndInt,    BinopSF,  andq)    \
+  AO(OrInt,     BinopSF,  orq)     \
+  AO(XorInt,    BinopSF,  xorq)    \
+  AO(XorBool,   BinopSF,  xorb)    \
 
 #define AO(Inst, Impl, vinst)                           \
   void cg##Inst(IRLS& env, const IRInstruction* inst) { \

@@ -46,16 +46,16 @@ struct RenderJIT : ROMRenderer {
     base = gen(env, AllocInitROM, extra);
   }
   void fixupInterior(ptrdiff_t fixupOff, ptrdiff_t targetOff) override {
-    auto const fixupAddr = gen(env, AddInt, base, cns(env, fixupOff));
-    auto const targetAddr = gen(env, AddInt, base, cns(env, targetOff));
+    auto const fixupAddr = gen(env, AddOffset, base, cns(env, fixupOff));
+    auto const targetAddr = gen(env, AddOffset, base, cns(env, targetOff));
     gen(env, StValAt, fixupAddr, targetAddr);
   }
   void breakMystery(
       const MysteryBoxProvenance& provenance, tv_val_offset tv_off) override {
     auto const src = selectMysteryBox(provenance);
-    auto const typeAddr = gen(env, AddInt, base, cns(env, tv_off.typeOffset()));
+    auto const typeAddr = gen(env, AddOffset, base, cns(env, tv_off.typeOffset()));
     gen(env, StTypeAt, typeAddr, src);
-    auto const valAddr = gen(env, AddInt, base, cns(env, tv_off.dataOffset()));
+    auto const valAddr = gen(env, AddOffset, base, cns(env, tv_off.dataOffset()));
     gen(env, StValAt, valAddr, src);
   }
   void incref(const MysteryBoxProvenance& provenance) override {
@@ -70,8 +70,8 @@ struct RenderJIT : ROMRenderer {
   }
   void outputHeapPtr(DataType dt, ptrdiff_t off, uint32_t root) override {
     roots.resize(root + 1);
-    auto const val = gen(env, AddInt, base, cns(env, off));
-    roots[root] = gen(env, IntAsDataType, Type(dt), val);
+    auto const val = gen(env, AddOffset, base, cns(env, off));
+    roots[root] = gen(env, VoidPtrAsDataType, Type(dt), val);
   }
   void outputConstant(TypedValue tv, uint32_t root) override {
     roots.resize(root + 1);

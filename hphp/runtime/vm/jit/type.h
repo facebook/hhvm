@@ -212,7 +212,7 @@ constexpr bool operator>(PtrLocation a, PtrLocation b) {
 /**/
 
 #define UNCCOUNTED_INIT_UNION \
-  kInitNull|kBool|kInt|kDbl|kPersistent|kFunc|kCls|kLazyCls|kClsMeth
+  kInitNull|kBool|kInt|kDbl|kPersistent|kFunc|kCls|kLazyCls|kClsMeth|kVoidPtr
 
 #define INIT_CELL_UNION \
   kUncountedInit|kStr|kArrLike|kObj|kRes|kRFunc|kRClsMeth
@@ -286,9 +286,9 @@ constexpr bool operator>(PtrLocation a, PtrLocation b) {
  */
 #define IR_TYPES                  \
   IRT_PHP                         \
+  IRT_RUNTIME                     \
   IRT_PHP_UNIONS                  \
   IRT_PTRS_LVALS                  \
-  IRT_RUNTIME                     \
   IRT_SPECIAL
 
 ///////////////////////////////////////////////////////////////////////////////

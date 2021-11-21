@@ -28,7 +28,7 @@ TRACE_SET_MOD(irlower);
 namespace {
 ///////////////////////////////////////////////////////////////////////////////
 
-int64_t allocInitROM(uint8_t* source, size_t actualSize) {
+void* allocInitROM(uint8_t* source, size_t actualSize) {
   auto const index = MemoryManager::size2Index(actualSize);
   auto const allocedSize = MemoryManager::sizeIndex2Size(index);
   auto const overAlloced = allocedSize - actualSize;
@@ -37,7 +37,7 @@ int64_t allocInitROM(uint8_t* source, size_t actualSize) {
   if (overAlloced) {
     tl_heap->freeOveralloc(buf + actualSize, overAlloced);
   }
-  return reinterpret_cast<int64_t>(buf);
+  return reinterpret_cast<void*>(buf);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -70,7 +70,7 @@ void cgStTypeAt(IRLS& env, const IRInstruction* inst) {
   storeTVType(v, srcType, src, *dst);
 }
 
-void cgIntAsDataType(IRLS& env, const IRInstruction* inst) {
+void cgVoidPtrAsDataType(IRLS& env, const IRInstruction* inst) {
   auto const src = srcLoc(env, inst, 0);
   auto const dst = dstLoc(env, inst, 0);
 

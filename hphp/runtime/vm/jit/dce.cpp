@@ -283,7 +283,7 @@ bool canDCE(const IRInstruction& inst) {
   case LdResolvedTypeCnsNoCheck:
   case LdResolvedTypeCnsClsName:
   case AllocInitROM:
-  case IntAsDataType:
+  case VoidPtrAsDataType:
   case CopyArray:
     assertx(!inst.isControlFlow());
     return true;
@@ -345,6 +345,7 @@ bool canDCE(const IRInstruction& inst) {
   case DivDbl:
   case DivInt:
   case AddIntO:
+  case AddOffset:
   case SubIntO:
   case MulIntO:
 

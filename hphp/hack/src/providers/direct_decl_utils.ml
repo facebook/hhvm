@@ -162,6 +162,7 @@ let get_file_contents ctx filename =
       ~writeback_disk_contents_in_shmem_provider:enable_disk_heap
 
 let direct_decl_parse ctx file =
+  Counters.count Counters.Category.Get_decl @@ fun () ->
   match get_file_contents ctx file with
   | None -> None
   | Some contents ->

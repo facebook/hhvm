@@ -359,6 +359,9 @@ struct ImmFolder {
       }
     }
   }
+
+  void fold(addqrm& in, Vinstr&) { foldVptr(in.m); }
+
   void fold(load& in, Vinstr& /*out*/) { foldVptr(in.s); }
   void fold(loadb& in, Vinstr& /*out*/) { foldVptr(in.s); }
   void fold(loadw& in, Vinstr& /*out*/) { foldVptr(in.s); }

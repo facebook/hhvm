@@ -1371,7 +1371,8 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
   logging_init init_id ~is_worker:false;
   HackEventLogger.init_start
     ~experiments_config_meta:
-      local_config.ServerLocalConfig.experiments_config_meta;
+      local_config.ServerLocalConfig.experiments_config_meta
+    (Memory_stats.get_host_hw_telemetry ());
   let root_s = Path.to_string root in
   let check_mode = ServerArgs.check_mode options in
   if (not check_mode) && Sys_utils.is_nfs root_s && not enable_on_nfs then (

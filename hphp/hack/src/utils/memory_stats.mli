@@ -9,3 +9,6 @@
 val get_vm_hwm : unit -> int option
 
 val get_vm_rss : unit -> int option
+
+(** A collection of telemetry about the host we're on - cpus, memory etc *)
+val get_host_hw_telemetry : unit -> Telemetry.t

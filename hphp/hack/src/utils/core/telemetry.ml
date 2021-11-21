@@ -96,6 +96,9 @@ let int_list
   let value = List.map ~f:(fun i -> Hh_json.int_ i) value in
   (key, Hh_json.JSON_Array value) :: telemetry
 
+let json_ ~(key : string) ~(value : Hh_json.json) (telemetry : t) : t =
+  (key, value) :: telemetry
+
 let object_ ~(key : string) ~(value : t) (telemetry : t) : t =
   (key, Hh_json.JSON_Object (List.rev value)) :: telemetry
 

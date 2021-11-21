@@ -113,7 +113,7 @@ let saved_state_download_and_load_done
 
 let tried_to_be_hg_aware_with_precomputed_saved_state_warning _ = ()
 
-let init_start ~experiments_config_meta = ignore experiments_config_meta
+let init_start ~experiments_config_meta:_ _ = ()
 
 let nfs_root _ = ()
 

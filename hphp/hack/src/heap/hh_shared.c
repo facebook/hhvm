@@ -251,10 +251,6 @@ static size_t dep_table_pow;
 static size_t hash_table_pow;
 static size_t shm_use_sharded_hashtbl;
 
-/* Used for the dependency hashtable */
-static uint64_t dep_size;
-static size_t dep_size_b;
-
 /* Used for the shared hashtable */
 static uint64_t hashtbl_size;
 static size_t hashtbl_size_b;
@@ -361,110 +357,6 @@ static char* shared_mem = NULL;
  * the data. The size is set to zero when the storage is empty.
  */
 static value* global_storage = NULL;
-
-/* A pair of a 31-bit unsigned number and a tag bit. */
-typedef struct {
-  uint32_t num : 31;
-  uint32_t tag : 1;
-} tagged_uint_t;
-
-/* A deptbl_entry_t is one slot in the deptbl hash table.
- *
- * deptbl maps a 31-bit integer key to a linked list of 31-bit integer values.
- * The key corresponds to a node in a graph and the values correspond to all
- * nodes to which that node has an edge. List order does not matter, and there
- * are no duplicates. Edges are only added, never removed.
- *
- * This data structure, while conceptually simple, is implemented in a
- * complicated way because we store it in shared memory and update it from
- * multiple processes without using any mutexes.  In particular, both the
- * traditional hash table entries and the storage for the linked lists to
- * which they point are stored in the same shared memory array. A tag bit
- * distinguishes the two cases so that hash lookups never accidentally match
- * linked list nodes.
- *
- * Each slot s in deptbl is in one of three states:
- *
- * if s.raw == 0:
- *   empty (the initial state).
- * elif s.key.tag == TAG_KEY:
- *   A traditional hash table entry, where s.key.num is the key
- *   used for hashing/equality and s.next is a "pointer" to a linked
- *   list of all the values for that key, as described below.
- * else (s.key.tag == TAG_VAL):
- *   A node in a linked list of values. s.key.num contains one value and
- *   s.next "points" to the rest of the list, as described below.
- *   Such a slot is NOT matchable by any hash lookup due to the tag bit.
- *
- * To save space, a "next" entry can be one of two things:
- *
- * if next.tag == TAG_NEXT:
- *   next.num is the deptbl slot number of the next node in the linked list
- *   (i.e. just a troditional linked list "next" pointer, shared-memory style).
- * else (next.tag == TAG_VAL):
- *   next.num actually holds the final value in the linked list, rather
- *   than a "pointer" to another entry or some kind of "NULL" sentinel.
- *   This space optimization provides the useful property that each edge
- *   in the graph takes up exactly one slot in deptbl.
- *
- * For example, a mapping from key K to one value V takes one slot S in deptbl:
- *
- *     S = { .key = { K, TAG_KEY }, .val = { V, TAG_VAL } }
- *
- * Mapping K to two values V1 and V2 takes two slots, S1 and S2:
- *
- *     S1 = { .key = { K,  TAG_KEY }, .val = { &S2, TAG_NEXT } }
- *     S2 = { .key = { V1, TAG_VAL }, .val = { V2,  TAG_VAL } }
- *
- * Mapping K to three values V1, V2 and V3 takes three slots:
- *
- *     S1 = { .key = { K,  TAG_KEY }, .val = { &S2, TAG_NEXT } }
- *     S2 = { .key = { V1, TAG_VAL }, .val = { &S3, TAG_NEXT } }
- *     S3 = { .key = { V2, TAG_VAL }, .val = { V3,  TAG_VAL } }
- *
- * ...and so on.
- *
- * You can see that the final node in a linked list always contains
- * two values.
- *
- * As an important invariant, we need to ensure that a non-empty hash table
- * slot can never legally be encoded as all zero bits, because that would look
- * just like an empty slot. How could this happen? Because TAG_VAL == 0,
- * an all-zero slot would look like this:
- *
- *    { .key = { 0, TAG_VAL }, .val = { 0, TAG_VAL } }
- *
- * But fortunately that is impossible -- this entry would correspond to
- * having the same value (0) in the list twice, which is forbidden. Since
- * one of the two values must be nonzero, the entire "raw" uint64_t must
- * be nonzero, and thus distinct from "empty".
- */
-
-enum {
-  /* Valid for both the deptbl_entry_t 'key' and 'next' fields. */
-  TAG_VAL = 0,
-
-  /* Only valid for the deptbl_entry_t 'key' field (so != TAG_VAL). */
-  TAG_KEY = !TAG_VAL,
-
-  /* Only valid for the deptbl_entry_t 'next' field (so != TAG_VAL). */
-  TAG_NEXT = !TAG_VAL
-};
-
-typedef union {
-  struct {
-    /* Tag bit is either TAG_KEY or TAG_VAL. */
-    tagged_uint_t key;
-
-    /* Tag bit is either TAG_VAL or TAG_NEXT. */
-    tagged_uint_t next;
-  } s;
-
-  /* Raw 64 bits of this slot. Useful for atomic operations. */
-  uint64_t raw;
-} deptbl_entry_t;
-
-static deptbl_entry_t* deptbl = NULL;
 
 /* The hashtable containing the shared values. */
 static helt_t* hashtbl = NULL;
@@ -945,10 +837,6 @@ static void define_globals(char * shared_mem_init) {
   global_storage = (value*)mem;
   mem += global_size_b;
 
-  /* Dependencies */
-  deptbl = (deptbl_entry_t*)mem;
-  mem += dep_size_b;
-
   /* Hashtable */
   hashtbl = (helt_t*)mem;
   mem += hashtbl_size_b;
@@ -972,7 +860,7 @@ static void define_globals(char * shared_mem_init) {
  * virtual. */
 static size_t get_shared_mem_size(void) {
   size_t page_size = getpagesize();
-  return (global_size_b + dep_size_b + hashtbl_size_b +
+  return (global_size_b + hashtbl_size_b +
           heap_size + page_size + locals_size_b);
 }
 
@@ -1015,11 +903,10 @@ static void set_sizes(
   global_size = config_global_size;
   global_size_b = sizeof(global_storage[0]) + config_global_size;
   heap_size = config_heap_size;
+  // TODO(hverr): no longer used
   dep_table_pow = config_dep_table_pow;
   hash_table_pow = config_hash_table_pow;
 
-  dep_size        = 1ul << config_dep_table_pow;
-  dep_size_b      = dep_size * sizeof(deptbl[0]);
   hashtbl_size    = 1ul << config_hash_table_pow;
   hashtbl_size_b  = hashtbl_size * sizeof(hashtbl[0]);
 

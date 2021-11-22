@@ -223,14 +223,24 @@ let add_dependency_callback cb_name cb =
 
     The type `t` is an abstract type managed by `typing_deps.rs`.
     It is a pointer to an `OrdSet<Dep>`, a persistent Rust map *)
-module CustomDepSet = struct
+module DepSet = struct
   type t (* Abstract type *)
 
   type elt = Dep.t
 
   external make : unit -> t = "hh_dep_set_make"
 
+  (* TODO(hverr): Clean up, first argument unused *)
+  let make (mode : Typing_deps_mode.t) : t =
+    let _ = mode in
+    make ()
+
   external singleton : elt -> t = "hh_dep_set_singleton"
+
+  (* TODO(hverr): Clean up, first argument unused *)
+  let singleton (mode : Typing_deps_mode.t) (elt : elt) : t =
+    let _ = mode in
+    singleton elt
 
   external add : t -> elt -> t = "hh_dep_set_add"
 
@@ -249,6 +259,11 @@ module CustomDepSet = struct
   external is_empty : t -> bool = "hh_dep_set_is_empty"
 
   external of_list : elt list -> t = "hh_dep_set_of_list"
+
+  (* TODO(hverr): Clean up, first argument unused *)
+  let of_list (mode : Typing_deps_mode.t) (elts : elt list) : t =
+    let _ = mode in
+    of_list elts
 
   let iter s ~f = List.iter (elements s) ~f
 
@@ -274,83 +289,6 @@ module DepHashKey = struct
   let to_string t = string_of_int t
 end
 
-(** Unified interface for `SQLiteDepSet` and `CustomDepSet`
-
-    The actual representation dependends on the value in `mode`.
-
-    TODO(hverr): Clean-up 32-bit, no longer necessary. *)
-module DepSet = struct
-  type t = CustomDepSet of CustomDepSet.t
-
-  type elt = Dep.t
-
-  let make mode =
-    match mode with
-    | CustomMode _
-    | SaveCustomMode _ ->
-      CustomDepSet (CustomDepSet.make ())
-
-  let singleton mode elt =
-    match mode with
-    | CustomMode _
-    | SaveCustomMode _ ->
-      CustomDepSet (CustomDepSet.singleton elt)
-
-  let add s x =
-    match s with
-    | CustomDepSet s -> CustomDepSet (CustomDepSet.add s x)
-
-  let union s1 s2 =
-    match (s1, s2) with
-    | (CustomDepSet s1, CustomDepSet s2) ->
-      CustomDepSet (CustomDepSet.union s1 s2)
-
-  let inter s1 s2 =
-    match (s1, s2) with
-    | (CustomDepSet s1, CustomDepSet s2) ->
-      CustomDepSet (CustomDepSet.inter s1 s2)
-
-  let diff s1 s2 =
-    match (s1, s2) with
-    | (CustomDepSet s1, CustomDepSet s2) ->
-      CustomDepSet (CustomDepSet.diff s1 s2)
-
-  let iter s ~f =
-    match s with
-    | CustomDepSet s -> CustomDepSet.iter s ~f
-
-  let fold : 'a. t -> init:'a -> f:(elt -> 'a -> 'a) -> 'a =
-   fun s ~init ~f ->
-    match s with
-    | CustomDepSet s -> CustomDepSet.fold s ~init ~f
-
-  let mem s elt =
-    match s with
-    | CustomDepSet s -> CustomDepSet.mem s elt
-
-  let elements s =
-    match s with
-    | CustomDepSet s -> CustomDepSet.elements s
-
-  let cardinal s =
-    match s with
-    | CustomDepSet s -> CustomDepSet.cardinal s
-
-  let is_empty s =
-    match s with
-    | CustomDepSet s -> CustomDepSet.is_empty s
-
-  let of_list mode xs =
-    match mode with
-    | CustomMode _
-    | SaveCustomMode _ ->
-      CustomDepSet (CustomDepSet.of_list xs)
-
-  let pp fmt s =
-    match s with
-    | CustomDepSet s -> CustomDepSet.pp fmt s
-end
-
 (* TODO(hverr): Clean up 32-bit, no longer necessary *)
 module VisitedSet = struct
   type custom_t (* abstract type managed by Rust, RefCell<BTreeSet<Dep>> *)
@@ -368,8 +306,6 @@ end
 
 (** Graph management in the new system with custom file format. *)
 module CustomGraph = struct
-  module DepSet = CustomDepSet
-
   external hh_custom_dep_graph_register_custom_types : unit -> unit
     = "hh_custom_dep_graph_register_custom_types"
 
@@ -791,34 +727,22 @@ let load_discovered_edges mode source =
   | SaveCustomMode _ -> SaveCustomGraph.save_delta mode ~source
 
 let get_ideps_from_hash mode hash =
-  let open DepSet in
   match mode with
   | CustomMode _
   | SaveCustomMode _ ->
-    CustomDepSet (CustomGraph.get_ideps_from_hash mode hash)
+    CustomGraph.get_ideps_from_hash mode hash
 
 let get_ideps mode dependency =
   get_ideps_from_hash mode (Dep.make (hash_mode mode) dependency)
 
 let get_extend_deps ~mode ~visited ~source_class ~acc =
-  let open DepSet in
   let open VisitedSet in
   match (visited, acc) with
-  | (CustomVisitedSet visited, CustomDepSet acc) ->
-    let acc = CustomGraph.get_extend_deps mode visited source_class acc in
-    CustomDepSet acc
+  | (CustomVisitedSet visited, acc) ->
+    CustomGraph.get_extend_deps mode visited source_class acc
 
-let add_extend_deps mode acc =
-  let open DepSet in
-  match acc with
-  | CustomDepSet acc -> CustomDepSet (CustomGraph.add_extend_deps mode acc)
+let add_extend_deps mode acc = CustomGraph.add_extend_deps mode acc
 
-let add_typing_deps mode acc =
-  let open DepSet in
-  match acc with
-  | CustomDepSet acc -> CustomDepSet (CustomGraph.add_typing_deps mode acc)
+let add_typing_deps mode acc = CustomGraph.add_typing_deps mode acc
 
-let add_all_deps mode acc =
-  let open DepSet in
-  match acc with
-  | CustomDepSet acc -> CustomDepSet (CustomGraph.add_all_deps mode acc)
+let add_all_deps mode acc = CustomGraph.add_all_deps mode acc

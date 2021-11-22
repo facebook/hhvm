@@ -254,7 +254,6 @@ static size_t shm_use_sharded_hashtbl;
 /* Used for the dependency hashtable */
 static uint64_t dep_size;
 static size_t dep_size_b;
-static size_t bindings_size_b;
 
 /* Used for the shared hashtable */
 static uint64_t hashtbl_size;
@@ -466,12 +465,6 @@ typedef union {
 } deptbl_entry_t;
 
 static deptbl_entry_t* deptbl = NULL;
-
-/* ENCODING:
- * The highest 2 bits are unused.
- * The next 31 bits encode the key the lower 31 bits the value.
- */
-static uint64_t* deptbl_bindings = NULL;
 
 /* The hashtable containing the shared values. */
 static helt_t* hashtbl = NULL;
@@ -956,9 +949,6 @@ static void define_globals(char * shared_mem_init) {
   deptbl = (deptbl_entry_t*)mem;
   mem += dep_size_b;
 
-  deptbl_bindings = (uint64_t*)mem;
-  mem += bindings_size_b;
-
   /* Hashtable */
   hashtbl = (helt_t*)mem;
   mem += hashtbl_size_b;
@@ -982,7 +972,7 @@ static void define_globals(char * shared_mem_init) {
  * virtual. */
 static size_t get_shared_mem_size(void) {
   size_t page_size = getpagesize();
-  return (global_size_b + dep_size_b + bindings_size_b + hashtbl_size_b +
+  return (global_size_b + dep_size_b + hashtbl_size_b +
           heap_size + page_size + locals_size_b);
 }
 
@@ -1030,7 +1020,6 @@ static void set_sizes(
 
   dep_size        = 1ul << config_dep_table_pow;
   dep_size_b      = dep_size * sizeof(deptbl[0]);
-  bindings_size_b = dep_size * sizeof(deptbl_bindings[0]);
   hashtbl_size    = 1ul << config_hash_table_pow;
   hashtbl_size_b  = hashtbl_size * sizeof(hashtbl[0]);
 

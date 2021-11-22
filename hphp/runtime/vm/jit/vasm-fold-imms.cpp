@@ -107,7 +107,17 @@ struct ImmFolder {
   void fold(addq& in, Vinstr& out) {
     int val;
     if (match_int(in.s0, val)) {
-      if (val == 0 && !uses[in.sf]) { // nop sets no flags.
+      int val2;
+      if (!uses[in.sf] && match_int(in.s1, val2)) {
+        // Attempt to const-fold addition of two constants. NB: This
+        // is safe from overflow because val1 and val2 are ints.
+        auto const sum = int64_t(val) + int64_t(val2);
+        out = copy{unit.makeConst(sum), in.d};
+        if (in.d.isVirt()) {
+          valid.set(in.d);
+          vals[in.d] = sum;
+        }
+      } else if (val == 0 && !uses[in.sf]) { // nop sets no flags.
         out = copy{in.s1, in.d};
       } else if (val == 1 && !uses[in.sf]) { // CF not set by inc.
         out = incq{in.s1, in.d, in.sf};

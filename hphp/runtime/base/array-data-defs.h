@@ -262,14 +262,14 @@ inline TypedValue ArrayData::get(const StringData* k) const {
 NO_PROFILING
 inline TypedValue ArrayData::getThrow(int64_t k) const {
   auto const res = get(k);
-  if (!res.is_init()) throw kDummyException;
+  if (!res.is_init()) getNotFound(k);
   return res;
 }
 
 NO_PROFILING
 inline TypedValue ArrayData::getThrow(const StringData* k) const {
   auto const res = get(k);
-  if (!res.is_init()) throw kDummyException;
+  if (!res.is_init()) getNotFound(k);
   return res;
 }
 

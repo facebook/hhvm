@@ -109,6 +109,8 @@ struct ArrayLayout {
   std::pair<Type, bool> elemType(Type key) const;
   std::pair<Type, bool> firstLastType(bool isFirst, bool isKey) const;
 
+  Type getTypeBound(Type slot) const;
+
   Type iterPosType(Type pos, bool isKey) const;
 
   /**************************************************************************

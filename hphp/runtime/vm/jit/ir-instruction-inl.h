@@ -104,7 +104,8 @@ inline bool IRInstruction::producesReference() const {
 
 inline SSATmp* IRInstruction::getPassthroughValue() const {
   assertx(isPassthrough());
-  assertx(is(CheckType, AssertType, AssertNonNull, Mov, ConvPtrToLval));
+  assertx(is(CheckType, AssertType, AssertNonNull,
+             Mov, ConvPtrToLval, StructDictTypeBoundCheck));
   return src(0);
 }
 

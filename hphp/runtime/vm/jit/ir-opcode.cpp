@@ -85,6 +85,7 @@ TRACE_SET_MOD(hhir);
 #define DElemLval      HasDest
 #define DElemLvalPos   HasDest
 #define DCOW           HasDest
+#define DStructTypeBound HasDest
 
 namespace {
 template<Opcode op, uint64_t flags>
@@ -162,6 +163,7 @@ OpInfo g_opInfo[] = {
 #undef DElemLval
 #undef DElemLvalPos
 #undef DCOW
+#undef DStructTypeBound
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -764,7 +766,6 @@ bool opcodeMayRaise(Opcode opc) {
   case LdMonotypeDictKey:
   case LdMonotypeDictVal:
   case LdMonotypeVecElem:
-  case LdStructDictElem:
   case LdVecElem:
   case LdVecElemAddr:
   case LdVectorSize:
@@ -885,8 +886,10 @@ bool opcodeMayRaise(Opcode opc) {
   case StOutValue:
   case StrictlyIntegerConv:
   case StringIsset:
-  case StructDictGetWithColor:
-  case StructDictSet:
+  case StructDictAddNextSlot:
+  case StructDictElemAddr:
+  case StructDictSlot:
+  case StructDictTypeBoundCheck:
   case StructDictUnset:
   case StMROProp:
   case StTypeAt:

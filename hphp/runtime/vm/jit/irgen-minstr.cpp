@@ -1523,7 +1523,13 @@ SSATmp* incDecDictImpl(IRGS& env, IncDecOp op, SSATmp* base, SSATmp* key,
     return cns(env, TBottom);
   }
 
-  if (isIncDecO(op)) {
+  auto const lhsType = arrLikeElemType(
+    base->type(),
+    key->type(),
+    curClass(env)
+  ).first;
+
+  if (isIncDecO(op) || !lhsType.maybe(TInt)) {
     return gen(
       env,
       IncDecElem,
@@ -1554,6 +1560,9 @@ SSATmp* incDecDictImpl(IRGS& env, IncDecOp op, SSATmp* base, SSATmp* key,
       return isPre(op) ? newVal : oldVal;
     },
     [&] (SSATmp* key, SizeHintData) {
+      // We've written the COWed array back to the base already, so
+      // set exception boundary to let frame state know that it's
+      // okay.
       env.irb->exceptionStackBoundary();
       return gen(
         env,
@@ -1575,7 +1584,13 @@ SSATmp* incDecVecImpl(IRGS& env, IncDecOp op, SSATmp* base, SSATmp* key) {
     return cns(env, TBottom);
   }
 
-  if (isIncDecO(op)) {
+  auto const lhsType = arrLikeElemType(
+    base->type(),
+    key->type(),
+    curClass(env)
+  ).first;
+
+  if (isIncDecO(op) || !lhsType.maybe(TInt)) {
     return gen(
       env,
       IncDecElem,
@@ -1616,6 +1631,9 @@ SSATmp* incDecVecImpl(IRGS& env, IncDecOp op, SSATmp* base, SSATmp* key) {
         },
         [&] {
           hint(env, Block::Hint::Unlikely);
+          // We've written the COWed array back to the base already,
+          // so set exception boundary to let frame state know that
+          // it's okay.
           env.irb->exceptionStackBoundary();
           return gen(
             env,
@@ -1635,59 +1653,174 @@ SSATmp* incDecVecImpl(IRGS& env, IncDecOp op, SSATmp* base, SSATmp* key) {
   );
 }
 
-bool setOpSupported(SetOpOp op, SSATmp* rhs) {
+template <typename Finish>
+SSATmp* setOpDictImpl(IRGS& env, SetOpOp op, SSATmp* base, SSATmp* key,
+                      SSATmp* rhs, Finish finish) {
+  assertx(base->isA(TDict));
+
+  if (!key->isA(TInt | TStr)) {
+    gen(env, ThrowInvalidArrayKey, base, key);
+    return cns(env, TBottom);
+  }
+
+  auto const lhsType = arrLikeElemType(
+    base->type(),
+    key->type(),
+    curClass(env)
+  ).first;
+
+  auto const type = simpleSetOpType(op);
+  if (!type || !lhsType.maybe(*type) || !rhs->isA(*type)) {
+    return gen(
+      env,
+      SetOpElem,
+      SetOpData{op},
+      ldMBase(env),
+      key,
+      rhs
+    );
+  }
+
+  return profiledArraySet(
+    env, ldMBase(env), base, key, MOpMode::Define,
+    [&] (SSATmp* dict, SSATmp* key, SSATmp* pos, SSATmp* base, Block* taken) {
+      auto const elem = gen(env, ElemDictK, dict, key, pos, base);
+      auto const oldVal = gen(
+        env,
+        CheckType,
+        taken,
+        *type,
+        gen(env, LdMem, TInitCell, elem)
+      );
+      auto const newVal = simpleSetOpAction(env, op, oldVal, rhs);
+      gen(env, StMem, elem, newVal);
+      return newVal;
+    },
+    [&] (SSATmp* key, SizeHintData) {
+      // We've written the COWed array back to the base already, so
+      // set exception boundary to let frame state know that it's
+      // okay.
+      env.irb->exceptionStackBoundary();
+      return gen(
+        env,
+        SetOpElem,
+        SetOpData{op},
+        ldMBase(env),
+        key,
+        rhs
+      );
+    },
+    finish
+  );
+}
+
+SSATmp* setOpVecImpl(IRGS& env, SetOpOp op, SSATmp* base, SSATmp* key,
+                     SSATmp* rhs) {
+  assertx(base->isA(TVec));
+
+  if (!key->isA(TInt)) {
+    gen(env, ThrowInvalidArrayKey, base, key);
+    return cns(env, TBottom);
+  }
+
+  auto const lhsType = arrLikeElemType(
+    base->type(),
+    key->type(),
+    curClass(env)
+  ).first;
+
+  auto const type = simpleSetOpType(op);
+  if (!type || !lhsType.maybe(*type) || !rhs->isA(*type)) {
+    return gen(
+      env,
+      SetOpElem,
+      SetOpData{op},
+      ldMBase(env),
+      key,
+      rhs
+    );
+  }
+
+  return cond(
+    env,
+    [&] (Block* taken) { gen(env, CheckVecBounds, taken, base, key); },
+    [&] {
+      auto const vec = cowArray(env, base);
+      auto const elem = gen(env, LdVecElemAddr, vec, key, base);
+
+      return cond(
+        env,
+        [&] (Block* taken) {
+          auto const oldVal = gen(
+            env,
+            CheckType,
+            taken,
+            *type,
+            gen(env, LdMem, TInitCell, elem)
+          );
+          auto const newVal = simpleSetOpAction(env, op, oldVal, rhs);
+          gen(env, StMem, elem, newVal);
+          return newVal;
+        },
+        [&] (SSATmp* ret) { return ret; },
+        [&] {
+          hint(env, Block::Hint::Unlikely);
+          // We've written the COWed array back to the base already, so
+          // set exception boundary to let frame state know that it's
+          // okay.
+          env.irb->exceptionStackBoundary();
+          return gen(
+            env,
+            SetOpElem,
+            SetOpData{op},
+            ldMBase(env),
+            key,
+            rhs
+          );
+        }
+      );
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      gen(env, ThrowOutOfBounds, base, key);
+      return cns(env, TBottom);
+    }
+  );
+}
+
+}
+
+//////////////////////////////////////////////////////////////////////
+
+Optional<Type> simpleSetOpType(SetOpOp op) {
   switch (op) {
     case SetOpOp::PlusEqual:
     case SetOpOp::MinusEqual:
     case SetOpOp::MulEqual:
     case SetOpOp::AndEqual:
     case SetOpOp::OrEqual:
-    case SetOpOp::XorEqual:
-      return rhs->isA(TInt);
-    case SetOpOp::ConcatEqual:
-      return rhs->isA(TStr);
+    case SetOpOp::XorEqual:    return TInt;
+    case SetOpOp::ConcatEqual: return TStr;
     case SetOpOp::PlusEqualO:
     case SetOpOp::MinusEqualO:
     case SetOpOp::MulEqualO:
-      case SetOpOp::DivEqual:
+    case SetOpOp::DivEqual:
     case SetOpOp::ModEqual:
     case SetOpOp::PowEqual:
     case SetOpOp::SlEqual:
     case SetOpOp::SrEqual:
-      return false;
+      return std::nullopt;
   }
   always_assert(false);
 }
 
-SSATmp* setOpAction(IRGS& env, SetOpOp op, SSATmp* v, SSATmp* rhs,
-                    Block* taken) {
-  assertx(setOpSupported(op, rhs));
-
-  auto const lhs = [&] {
-    switch (op) {
-      case SetOpOp::PlusEqual:
-      case SetOpOp::MinusEqual:
-      case SetOpOp::MulEqual:
-      case SetOpOp::AndEqual:
-      case SetOpOp::OrEqual:
-      case SetOpOp::XorEqual:
-        assertx(rhs->isA(TInt));
-        return gen(env, CheckType, TInt, taken, v);
-      case SetOpOp::ConcatEqual:
-        assertx(rhs->isA(TStr));
-        return gen(env, CheckType, TStr, taken, v);
-      case SetOpOp::PlusEqualO:
-      case SetOpOp::MinusEqualO:
-      case SetOpOp::MulEqualO:
-      case SetOpOp::DivEqual:
-      case SetOpOp::ModEqual:
-      case SetOpOp::PowEqual:
-      case SetOpOp::SlEqual:
-      case SetOpOp::SrEqual:
-        break;
-    }
-    always_assert(false);
-  }();
+SSATmp* simpleSetOpAction(IRGS& env, SetOpOp op, SSATmp* lhs, SSATmp* rhs) {
+  if (debug) {
+    auto const type = simpleSetOpType(op);
+    always_assert(type.has_value());
+    always_assert(lhs->isA(*type));
+    always_assert(rhs->isA(*type));
+  }
 
   auto const opc = [&] {
     switch (op) {
@@ -1714,121 +1847,6 @@ SSATmp* setOpAction(IRGS& env, SetOpOp op, SSATmp* v, SSATmp* rhs,
   auto const ret = gen(env, opc, lhs, rhs);
   gen(env, IncRef, ret);
   return ret;
-}
-
-template <typename Finish>
-SSATmp* setOpDictImpl(IRGS& env, SetOpOp op, SSATmp* base, SSATmp* key,
-                      SSATmp* rhs, Finish finish) {
-  assertx(base->isA(TDict));
-
-  if (!key->isA(TInt | TStr)) {
-    gen(env, ThrowInvalidArrayKey, base, key);
-    return cns(env, TBottom);
-  }
-
-  if (!setOpSupported(op, rhs)) {
-    return gen(
-      env,
-      SetOpElem,
-      SetOpData{op},
-      ldMBase(env),
-      key,
-      rhs
-    );
-  }
-
-  return profiledArraySet(
-    env, ldMBase(env), base, key, MOpMode::Define,
-    [&] (SSATmp* dict, SSATmp* key, SSATmp* pos, SSATmp* base, Block* taken) {
-      auto const elem = gen(env, ElemDictK, dict, key, pos, base);
-      auto const newVal = setOpAction(
-        env,
-        op,
-        gen(env, LdMem, TInitCell, elem),
-        rhs,
-        taken
-      );
-      gen(env, StMem, elem, newVal);
-      return newVal;
-    },
-    [&] (SSATmp* key, SizeHintData) {
-      env.irb->exceptionStackBoundary();
-      return gen(
-        env,
-        SetOpElem,
-        SetOpData{op},
-        ldMBase(env),
-        key,
-        rhs
-      );
-    },
-    finish
-  );
-}
-
-SSATmp* setOpVecImpl(IRGS& env, SetOpOp op, SSATmp* base, SSATmp* key,
-                     SSATmp* rhs) {
-  assertx(base->isA(TVec));
-
-  if (!key->isA(TInt)) {
-    gen(env, ThrowInvalidArrayKey, base, key);
-    return cns(env, TBottom);
-  }
-
-  if (!setOpSupported(op, rhs)) {
-    return gen(
-      env,
-      SetOpElem,
-      SetOpData{op},
-      ldMBase(env),
-      key,
-      rhs
-    );
-  }
-
-  return cond(
-    env,
-    [&] (Block* taken) { gen(env, CheckVecBounds, taken, base, key); },
-    [&] {
-      auto const vec = cowArray(env, base);
-      auto const elem = gen(env, LdVecElemAddr, vec, key, base);
-
-      return cond(
-        env,
-        [&] (Block* taken) {
-          auto const newVal = setOpAction(
-            env,
-            op,
-            gen(env, LdMem, TInitCell, elem),
-            rhs,
-            taken
-          );
-          gen(env, StMem, elem, newVal);
-          return newVal;
-        },
-        [&] (SSATmp* ret) { return ret; },
-        [&] {
-          hint(env, Block::Hint::Unlikely);
-          env.irb->exceptionStackBoundary();
-          return gen(
-            env,
-            SetOpElem,
-            SetOpData{op},
-            ldMBase(env),
-            key,
-            rhs
-          );
-        }
-      );
-    },
-    [&] {
-      hint(env, Block::Hint::Unlikely);
-      gen(env, ThrowOutOfBounds, base, key);
-      return cns(env, TBottom);
-    }
-  );
-}
-
 }
 
 //////////////////////////////////////////////////////////////////////

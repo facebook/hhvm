@@ -519,6 +519,10 @@ Type Layout::iterPosType(Type pos, bool isKey) const {
   return isKey ? (TInt | TStr) : TInitCell;
 }
 
+Type Layout::getTypeBound(Type) const {
+  return TCell;
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 AbstractLayout::AbstractLayout(LayoutIndex index,
@@ -666,6 +670,11 @@ void eachLayout(std::function<void(Layout& layout)> fn) {
     auto const layout = s_layoutTable[i];
     if (layout) fn(*layout);
   }
+}
+
+Layout** layoutsForJIT() {
+  assertx(s_hierarchyFinal.load(std::memory_order_acquire));
+  return s_layoutTable.data();
 }
 
 //////////////////////////////////////////////////////////////////////////////

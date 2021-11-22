@@ -185,7 +185,6 @@ bool canDCE(const IRInstruction& inst) {
   case LdMonotypeDictKey:
   case LdMonotypeDictVal:
   case LdMonotypeVecElem:
-  case LdStructDictElem:
   case LdVecElem:
   case LdVecElemAddr:
   case NewInstanceRaw:
@@ -278,13 +277,13 @@ bool canDCE(const IRInstruction& inst) {
   case BespokeIterEnd:
   case BespokeIterGetKey:
   case BespokeIterGetVal:
-  case StructDictGetWithColor:
   case LoadBCSP:
   case LdResolvedTypeCnsNoCheck:
   case LdResolvedTypeCnsClsName:
   case AllocInitROM:
   case VoidPtrAsDataType:
   case CopyArray:
+  case StructDictElemAddr:
     assertx(!inst.isControlFlow());
     return true;
 
@@ -602,7 +601,6 @@ bool canDCE(const IRInstruction& inst) {
   case VectorSet:
   case BespokeSet:
   case BespokeUnset:
-  case StructDictSet:
   case StructDictUnset:
   case BespokeAppend:
   case SetElem:
@@ -706,6 +704,9 @@ bool canDCE(const IRInstruction& inst) {
   case CheckFuncNeedsCoverage:
   case RecordFuncCall:
   case SetImplicitContextByValue:
+  case StructDictSlot:
+  case StructDictAddNextSlot:
+  case StructDictTypeBoundCheck:
     return false;
 
   case IsTypeStruct:

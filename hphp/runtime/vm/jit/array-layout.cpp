@@ -264,6 +264,11 @@ Type ArrayLayout::iterPosType(Type pos, bool isKey) const {
   return bespokeLayout()->iterPosType(pos, isKey);
 }
 
+Type ArrayLayout::getTypeBound(Type slot) const {
+  if (isBasicSort(sort)) return TCell;
+  return bespokeLayout()->getTypeBound(slot);
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 namespace {

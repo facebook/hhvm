@@ -919,14 +919,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     };
   }
 
-  case LdStructDictElem: {
-    auto const base = inst.src(0);
-    auto const key = inst.src(1);
-    return PureLoad { AElemS { base, key->strVal() } };
-  }
-  case StructDictGetWithColor:
-    return PureLoad { AElemSAny };
-
   case DictGetK:
   case KeysetGetK:
   case BespokeGet:
@@ -1464,6 +1456,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CheckFuncNeedsCoverage:
   case RecordFuncCall:
   case LoadBCSP:
+  case StructDictSlot:
+  case StructDictElemAddr:
+  case StructDictAddNextSlot:
+  case StructDictTypeBoundCheck:
     return IrrelevantEffects {};
 
   case LookupClsCns:
@@ -1739,7 +1735,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case BespokeSet:
   case BespokeAppend:
   case BespokeUnset:
-  case StructDictSet:
   case StructDictUnset:
   case ConcatStrStr:
   case PrintStr:
@@ -2054,7 +2049,7 @@ AliasClass pointee(const SSATmp* tmp) {
             return AElemIAny;
           }
           if (key->isA(TStr)) {
-            assertx(!base->isA(TVec));
+            assertx(base->isA(TBottom) || !base->isA(TVec));
             if (key->hasConstVal()) return AElemS { base, key->strVal() };
             return AElemSAny;
           }
@@ -2062,7 +2057,9 @@ AliasClass pointee(const SSATmp* tmp) {
         };
 
         if (type <= TMemToElem) {
-          if (sinst->is(LdVecElemAddr, ElemDictK)) return elem();
+          if (sinst->is(LdVecElemAddr, ElemDictK, StructDictElemAddr)) {
+            return elem();
+          }
           return AElemAny;
         }
 

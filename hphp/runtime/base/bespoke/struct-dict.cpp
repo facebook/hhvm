@@ -269,6 +269,11 @@ Slot StructLayout::keySlot(LayoutIndex index, const StringData* key) {
   return keySlotStatic(index, key);
 }
 
+Slot StructLayout::keySlotNonStatic(LayoutIndex index, const StringData* key) {
+  auto const layout = StructLayout::As(Layout::FromIndex(index));
+  return layout->keySlotNonStatic(key);
+}
+
 Slot StructLayout::keySlotStatic(LayoutIndex index, const StringData* key) {
   assertx(key->isStatic());
   auto const& entry = s_hashTableSet[index.raw][key->color()];
@@ -972,6 +977,14 @@ std::pair<Type, bool> StructLayout::firstLastType(
   return {isKey ? TStaticStr : getUnionTypeBound(), false};
 }
 
+Type StructLayout::getTypeBound(Type slot) const {
+  assertx(slot <= TInt);
+  if (!slot.hasConstVal()) return getUnionTypeBound();
+  auto const slotVal = slot.intVal();
+  if (slotVal < 0 || slotVal >= numFields()) return TBottom;
+  return getTypeBound(slotVal);
+}
+
 Type StructLayout::iterPosType(Type pos, bool isKey) const {
   return isKey ? TStaticStr : getUnionTypeBound();
 }
@@ -1000,6 +1013,11 @@ std::pair<Type, bool> TopStructLayout::firstLastType(
 
 Type TopStructLayout::iterPosType(Type pos, bool isKey) const {
   return isKey ? TStaticStr : TInitCell;
+}
+
+Type TopStructLayout::getTypeBound(Type slot) const {
+  assertx(slot <= TInt);
+  return TInitCell;
 }
 
 //////////////////////////////////////////////////////////////////////////////

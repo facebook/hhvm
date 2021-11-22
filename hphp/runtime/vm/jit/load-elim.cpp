@@ -798,6 +798,16 @@ void assert_mem(Local& env, const IRInstruction& inst) {
         ).first
       );
       break;
+    case StructDictElemAddr: {
+      auto elem = arrLikeElemType(
+        inst.src(3)->type(),
+        inst.src(1)->type(),
+        inst.ctx()
+      );
+      if (!elem.second) elem.first |= TUninit;
+      update(elem.first);
+      break;
+    }
     default:
       break;
   }
@@ -817,9 +827,7 @@ Flags analyze_inst(Local& env, const IRInstruction& inst) {
     effects,
     [&] (IrrelevantEffects) {},
     [&] (UnknownEffects)    { clear_everything(env); },
-    [&] (ExitEffects)       {
-      clear_everything(env);
-    },
+    [&] (ExitEffects)       { clear_everything(env); },
     [&] (ReturnEffects)     {},
 
     [&] (PureStore m)       { flags = store(env, m.dst, m.value); },

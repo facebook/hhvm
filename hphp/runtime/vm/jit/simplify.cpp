@@ -154,7 +154,6 @@ DEBUG_ONLY bool validate(const State& env,
   // complicated analysis than belongs in the simplifier right now.
   auto known_available = [&] (SSATmp* src) -> bool {
     if (!src->type().maybe(TCounted)) return true;
-    if (src->inst()->is(LdStructDictElem, StructDictGetWithColor)) return true;
     for (auto& oldSrc : origInst->srcs()) {
       if (oldSrc == src) return true;
 
@@ -3080,18 +3079,6 @@ SSATmp* simplifyBespokeGet(State& env, const IRInstruction* inst) {
     }
   }
 
-  if (arr->type().arrSpec().is_struct()) {
-    auto const elemType =
-      arrLikeElemType(arr->type(), key->type(), inst->ctx());
-    if (elemType.first == TBottom) {
-      return cns(env, TUninit);
-    } else if (key->hasConstVal(TStr)) {
-      return gen(env, LdStructDictElem, arr, key);
-    } else {
-      return gen(env, StructDictGetWithColor, arr, key);
-    }
-  }
-
   return nullptr;
 }
 
@@ -3118,43 +3105,23 @@ SSATmp* simplifyBespokeGetThrow(State& env, const IRInstruction* inst) {
     }
   }
 
-  auto const arrSpec = arr->type().arrSpec();
-  if (arrSpec.is_struct()) {
-    // 'taken' block for BespokeGetThrow is a special catch block that catches
-    // a C++ exception from native helpers and then throws ThrowOutOfBounds.
-    // When we simplify this instruction as follows, we do not need the
-    // BeginCatch in the taken block anymore.
-    auto const taken = inst->taken();
-    auto const n = taken->numPreds();
-    always_assert(taken->isCatch());
-    always_assert(n == 0 || (n == 1 && taken->preds().back().inst() == inst));
-    auto const elemType =
-      arrLikeElemType(arr->type(), key->type(), inst->ctx());
-    if (elemType.first == TBottom) {
-      taken->erase(taken->begin());
-      gen(env, Jmp, taken);
-      return cns(env, TBottom);
-    } else if (arrSpec.is_concrete() && key->hasConstVal(TStr)) {
-      taken->erase(taken->begin());
-      auto const elem = gen(env, LdStructDictElem, arr, key);
-      return gen(env, CheckType, TInitCell, taken, elem);
-    } else {
-      taken->erase(taken->begin());
-      auto const elem = gen(env, StructDictGetWithColor, arr, key);
-      return gen(env, CheckType, TInitCell, taken, elem);
-    }
-  }
-
   return nullptr;
 }
 
-SSATmp* simplifyBespokeSet(State& env, const IRInstruction* inst) {
+SSATmp* simplifyStructDictSlot(State& env, const IRInstruction* inst) {
   auto const arr = inst->src(0);
   auto const key = inst->src(1);
-  auto const val = inst->src(2);
+  assertx(arr->type().arrSpec().is_struct());
 
-  if (arr->type().arrSpec().is_struct() && key->hasConstVal(TStr)) {
-    return gen(env, StructDictSet, arr, key, val);
+  auto const& layout = arr->type().arrSpec().layout();
+  if (key->hasConstVal(TStr) && layout.bespokeLayout()->isConcrete()) {
+    auto const& slayout = bespoke::StructLayout::As(layout.bespokeLayout());
+    auto const slot = slayout->keySlot(key->strVal());
+    if (slot == kInvalidSlot) {
+      gen(env, Jmp, inst->taken());
+      return cns(env, TBottom);
+    }
+    return cns(env, slot);
   }
 
   return nullptr;
@@ -3316,18 +3283,6 @@ SSATmp* simplifyLdMonotypeDictVal(State& env, const IRInstruction* inst) {
   }
   return nullptr;
 }
-
-SSATmp* simplifyStructDictGetWithColor(State& env, const IRInstruction* inst) {
-  auto const arr = inst->src(0);
-  auto const key = inst->src(1);
-
-  if (arr->type().arrSpec().is_concrete() && key->hasConstVal()) {
-    return gen(env, LdStructDictElem, arr, key);
-  }
-
-  return nullptr;
-}
-
 
 SSATmp* simplifyLdMonotypeVecElem(State& env, const IRInstruction* inst) {
   auto const arr = inst->src(0);
@@ -3688,6 +3643,41 @@ SSATmp* simplifyLdFuncFromClsMeth(State& env, const IRInstruction* inst) {
   return cns(env, clsmeth->clsmethVal()->getFunc());
 }
 
+SSATmp* simplifyStructDictTypeBoundCheck(State& env,
+                                         const IRInstruction* inst) {
+  auto const val  = inst->src(0);
+  auto const arr  = inst->src(1);
+  auto const slot = inst->src(2);
+
+  auto const& layout = arr->type().arrSpec().layout();
+  assertx(layout.is_struct());
+  if (!layout.bespokeLayout()->isConcrete()) return nullptr;
+  auto const slayout = bespoke::StructLayout::As(layout.bespokeLayout());
+
+  if (slot->hasConstVal()) {
+    if (slot->intVal() >= slayout->numFields()) return cns(env, TBottom);
+    return gen(
+      env,
+      CheckType,
+      slayout->getTypeBound(slot->intVal()),
+      inst->taken(),
+      val
+    );
+  } else {
+    auto const type = slayout->getUnionTypeBound();
+    if (!type.isKnownDataType()) return nullptr;
+    return gen(
+      env,
+      CheckType,
+      type,
+      inst->taken(),
+      val
+    );
+  }
+
+  return nullptr;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
@@ -3786,9 +3776,9 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(LdClsMethod)
       X(LdStrLen)
       X(BespokeGet)
-      X(BespokeSet)
       X(BespokeUnset)
       X(BespokeGetThrow)
+      X(StructDictSlot)
       X(BespokeIterFirstPos)
       X(BespokeIterLastPos)
       X(BespokeIterEnd)
@@ -3915,11 +3905,11 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(CheckClsMethFunc)
       X(LdClsFromClsMeth)
       X(LdFuncFromClsMeth)
-      X(StructDictGetWithColor)
       X(LdResolvedTypeCns)
       X(LdResolvedTypeCnsNoCheck)
       X(LdResolvedTypeCnsClsName)
       X(CGetPropQ)
+      X(StructDictTypeBoundCheck)
 #undef X
       default: break;
     }

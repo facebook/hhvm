@@ -377,4 +377,14 @@ SSATmp* profiledType(IRGS& env, SSATmp* tmp, Finish finish) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+// Given a SetOpOp, return the type that both the lhs and rhs must be
+// for the SetOp to be safe to perform inline.
+Optional<Type> simpleSetOpType(SetOpOp);
+
+// Emit the necessary action for a simple inline SetOp. The lhs and
+// rhs both must be of the type given by simpleSetOpType.
+SSATmp* simpleSetOpAction(IRGS&, SetOpOp, SSATmp* lhs, SSATmp* rhs);
+
+///////////////////////////////////////////////////////////////////////////////
+
 }}}

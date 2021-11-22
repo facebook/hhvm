@@ -578,132 +578,118 @@ void cgNewBespokeStructDict(IRLS& env, const IRInstruction* inst) {
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None, args);
 }
 
-void cgLdStructDictElem(IRLS& env, const IRInstruction* inst) {
+void cgStructDictSlot(IRLS& env, const IRInstruction* inst) {
   auto const arr = inst->src(0);
   auto const key = inst->src(1);
-  auto const slot = getStructSlot(arr, key);
-
-  if (!slot) return cgBespokeGet(env, inst);
-
-  if (*slot == kInvalidSlot) {
-    always_assert(inst->dst()->isA(TUninit));
-    return;
-  }
-
-  auto const layout = arr->type().arrSpec().layout();
-  auto const slayout = StructLayout::As(layout.bespokeLayout());
-
-  auto const rarr = srcLoc(env, inst, 0).reg();
-  auto const type = rarr[slayout->typeOffsetForSlot(*slot)];
-  auto const data = rarr[slayout->valueOffsetForSlot(*slot)];
-  loadTV(vmain(env), inst->dst()->type(), dstLoc(env, inst, 0), type, data);
-}
-
-void cgStructDictGetWithColor(IRLS& env, const IRInstruction* inst) {
-  auto const arr = inst->src(0);
-  auto const key = inst->src(1);
-  auto const dst = dstLoc(env, inst, 0);
 
   auto const rarr = srcLoc(env, inst, 0).reg();
   auto const rkey = srcLoc(env, inst, 1).reg();
+  auto const dst = dstLoc(env, inst, 0).reg();
 
   auto& v = vmain(env);
 
-  // If the return type is always Uninit, this lookup will always
-  // fail, so just return a constant,
-  if (inst->dst()->type() <= TUninit) {
-    assertx(!dst.hasReg(1));
-    auto const val = materializeConstVal(v, inst->dst()->type());
-    assertx(val != InvalidReg);
-    v << copy{val, dst.reg(0)};
-    return;
-  }
+  auto const& layout = arr->type().arrSpec().layout();
+  assertx(layout.is_struct());
 
-  auto const makeNonstaticCall =
-    [&](Vout& v, const Vreg& value, const Vreg& type) {
-      auto const target = CallSpec::direct(StructDict::NvGetStrNonStatic);
-      auto const args = argGroup(env, inst).ssa(0).ssa(1);
-      auto const dest = callDest(value, type);
-      cgCallHelper(v, env, target, dest, SyncOptions::None, args);
-    };
-
-  // Is the key certain to be non-static? If so, invoke the non-static helper.
-  if (!key->type().maybe(TStaticStr)) {
-    makeNonstaticCall(v, dst.reg(0), dst.reg(1));
-    return;
-  }
-
-  // 1) Read the string's color. This may be junk if the string is non-static.
-  using PerfectHashEntry = StructLayout::PerfectHashEntry;
-  auto constexpr layoutMask = StructLayout::kMaxColor;
-  auto constexpr hashEntrySize = sizeof(PerfectHashEntry);
-  auto const getColor = [&] {
-    auto const colorMasked = [&] {
-      static_assert(folly::isPowTwo(layoutMask + 1));
-      static_assert(layoutMask <= std::numeric_limits<uint8_t>::max());
-      auto const colorPremask = v.makeReg();
-      v << loadzbq{rkey[StringData::colorOffset()], colorPremask};
-      if (layoutMask == std::numeric_limits<uint8_t>::max()) {
-        return colorPremask;
+  // If we know both the layout and the key, we can calculate this as
+  // a constant.
+  if (key->hasConstVal(TStr)) {
+    if (auto const slot = getStructSlot(arr, key)) {
+      if (*slot == kInvalidSlot) {
+        v << jmp{label(env, inst->taken())};
       } else {
-        auto const colorMasked = v.makeReg();
-        v << andqi{uint8_t(layoutMask), colorPremask, colorMasked, v.makeReg()};
-        return colorMasked;
+        v << copy{v.cns(*slot), dst};
       }
-    }();
-
-    static_assert(hashEntrySize == 8 || hashEntrySize == 16);
-    if constexpr (hashEntrySize == 16) {
-      // Without lowptr enabled, we have to use a 16-byte stride.
-      auto const colorFinal = v.makeReg();
-      v << lea{colorMasked[colorMasked], colorFinal};
-      return colorFinal;
-    } else {
-      return colorMasked;
+      return;
     }
+  }
+
+  // Handle the case where the key definitely isn't a static
+  // string. In this case, we rely on C++ to map the key to slot.
+  auto const nonStaticCase = [&] (Vout& v) {
+    auto const slot = v.makeReg();
+    if (layout.bespokeLayout()->isConcrete()) {
+      auto const slayout = StructLayout::As(layout.bespokeLayout());
+      Slot(StructLayout::*fn)(const StringData*) const =
+        &StructLayout::keySlotNonStatic;
+      auto const target = CallSpec::method(fn);
+      auto const args = argGroup(env, inst).immPtr(slayout).ssa(1);
+      cgCallHelper(v, env, target, callDest(slot), SyncOptions::None, args);
+    } else {
+      auto const layoutIndex = v.makeReg();
+      v << loadzwq{rarr[ArrayData::offsetOfBespokeIndex()], layoutIndex};
+      Slot(*fn)(bespoke::LayoutIndex, const StringData*) =
+        &StructLayout::keySlotNonStatic;
+      auto const target = CallSpec::direct(fn);
+      auto const args = argGroup(env, inst).reg(layoutIndex).ssa(1);
+      cgCallHelper(v, env, target, callDest(slot), SyncOptions::None, args);
+    }
+
+    static_assert(sizeof(Slot) == 4);
+    auto const sf = v.makeReg();
+    v << cmpli{int32_t(kInvalidSlot), slot, sf};
+    fwdJcc(v, env, CC_E, sf, inst->taken());
+    return slot;
   };
 
-  auto constexpr strHashOffset  = offsetof(PerfectHashEntry, str);
-  auto constexpr valHashOffset  = offsetof(PerfectHashEntry, valueOffset);
-  auto constexpr slotHashOffset = offsetof(PerfectHashEntry, slot);
-  auto constexpr strHashSize  = sizeof(PerfectHashEntry::str);
-  auto constexpr valHashSize  = sizeof(PerfectHashEntry::valueOffset);
-  auto constexpr slotHashSize = sizeof(PerfectHashEntry::slot);
+  // Is the key certain to be non-static? If so, invoke the non-static
+  // helper.
+  if (!key->type().maybe(TStaticStr)) {
+    auto const slot = nonStaticCase(v);
+    v << copy{slot, dst};
+    return;
+  }
 
-  // 2) Obtain the addresses of the string, value offset, and type offset in
-  // the perfect hash table.
-  auto const tuple = [&] {
-    auto const layout = arr->type().arrSpec().layout();
-    assertx(layout.is_struct());
+  // Calculate pointers to the hash table string and slot value, based
+  // on what we know about the layout and key.
+  auto const pair = [&] {
+    using PerfectHashEntry = StructLayout::PerfectHashEntry;
+    auto constexpr layoutMask = StructLayout::kMaxColor;
+    auto constexpr hashEntrySize = sizeof(PerfectHashEntry);
 
-    // 2a) If the layout is known, we can obtain its perfect hash table address
-    // statically.
+    auto constexpr strHashOffset  = offsetof(PerfectHashEntry, str);
+    auto constexpr slotHashOffset = offsetof(PerfectHashEntry, slot);
+
+    // Read the string's color. This may be junk if the string is
+    // non-static.
+    auto const color = [&] {
+      auto const colorMasked = [&] {
+        static_assert(folly::isPowTwo(layoutMask + 1));
+        static_assert(layoutMask <= std::numeric_limits<uint8_t>::max());
+        auto const colorPremask = v.makeReg();
+        v << loadzbq{rkey[StringData::colorOffset()], colorPremask};
+        if (layoutMask == std::numeric_limits<uint8_t>::max()) {
+          return colorPremask;
+        } else {
+          auto const colorMasked = v.makeReg();
+          v << andqi{
+            uint8_t(layoutMask), colorPremask, colorMasked, v.makeReg()
+          };
+          return colorMasked;
+        }
+      }();
+
+      static_assert(hashEntrySize == 8 || hashEntrySize == 16);
+      if constexpr (hashEntrySize == 16) {
+        // Without lowptr enabled, we have to use a 16-byte stride.
+        auto const colorFinal = v.makeReg();
+        v << lea{colorMasked[colorMasked], colorFinal};
+        return colorFinal;
+      } else {
+        return colorMasked;
+      }
+    };
+
     if (layout.bespokeLayout()->isConcrete()) {
       auto const hashTable = StructLayout::hashTable(layout.bespokeLayout());
       auto const base = v.cns(uintptr_t(hashTable));
-
-      auto const entryWithOffset = [&]() -> std::function<Vptr(size_t)> {
-        if (key->hasConstVal(TStr)) {
-          return [&](size_t off) {
-            auto const offWithColor =
-              (key->strVal()->color() & layoutMask) * hashEntrySize + off;
-            return base[offWithColor];
-          };
-        }
-
-        auto const color = getColor();
-        return [=](size_t off) { return base[color * 8 + off]; };
-      }();
-
-      return std::make_tuple(
-        entryWithOffset(strHashOffset),
-        entryWithOffset(valHashOffset),
-        entryWithOffset(slotHashOffset)
+      auto const c = color();
+      return std::make_pair(
+        base[c * 8 + slotHashOffset],
+        base[c * 8 + strHashOffset]
       );
     }
 
-    // 2b) Otherwise, we'll have to index into the table set to find the
-    // layout's perfect hash table.
     auto const hashTableSet = (uintptr_t) StructLayout::hashTableSet();
     auto const layoutIndex = v.makeReg();
     v << loadzwq{rarr[ArrayData::offsetOfBespokeIndex()], layoutIndex};
@@ -712,243 +698,214 @@ void cgStructDictGetWithColor(IRLS& env, const IRInstruction* inst) {
     static_assert(folly::isPowTwo(hashTableSize));
     auto const layoutShift =
       safe_cast<uint8_t>(folly::findLastSet(hashTableSize) - 1);
-    auto const hashTableOffset = v.makeReg();
 
+    auto const hashTableOffset = v.makeReg();
     v << shlqi{layoutShift, layoutIndex, hashTableOffset, v.makeReg()};
 
-    auto const entryWithOffset = [&]() -> std::function<Vptr(size_t)> {
-      if (key->hasConstVal(TStr)) {
-        return [&](size_t off) {
-          auto const offWithColor =
-            (key->strVal()->color() & layoutMask) * hashEntrySize + off;
-          return hashTableOffset[v.cns(hashTableSet) + offWithColor];
-        };
-      }
-
-      auto const base = v.makeReg();
-      v << lea{hashTableOffset[v.cns(hashTableSet)], base};
-      auto const color = getColor();
-      return [=](size_t off) { return base[color * 8 + off]; };
-    }();
-
-    return std::make_tuple(
-      entryWithOffset(strHashOffset),
-      entryWithOffset(valHashOffset),
-      entryWithOffset(slotHashOffset)
-    );
-  }();
-
-  auto const strPtr = std::get<0>(tuple);
-  auto const valPtr = std::get<1>(tuple);
-  auto const slotPtr = std::get<2>(tuple);
-
-  // Check if the string pointer hash matches that in the hash table.
-  auto const checkHash = [&] (Vreg sf) {
-    static_assert(strHashSize == sizeof(LowStringPtr));
-    auto const hashStr = v.makeReg();
-    emitLdLowPtr(v, strPtr, hashStr, sizeof(LowStringPtr));
-    v << cmpq{rkey, hashStr, sf};
-  };
-
-  // Load the value out of the hash table, and store it in value/type
-  // registers. Type may be InvalidReg if we don't have a type
-  // register.
-  auto const loadFromHashTable = [&] (Vreg value, Vreg type, bool check) {
-    if (debug && check) {
-      // In debug builds, let's check if the string pointer hash
-      // actually matches.
-      auto const sf = v.makeReg();
-      checkHash(sf);
-      unlikelyIfThen(
-        v, vcold(env), CC_NE, sf,
-        [&] (Vout& v) { v << trap{TRAP_REASON}; }
+    if (key->hasConstVal(TStr)) {
+      auto const offWithColor =
+        (key->strVal()->color() & layoutMask) * hashEntrySize;
+      return std::make_pair(
+        hashTableOffset[v.cns(hashTableSet) + (offWithColor + slotHashOffset)],
+        hashTableOffset[v.cns(hashTableSet) + (offWithColor + strHashOffset)]
       );
     }
 
-    static_assert(valHashSize == 2);
-    static_assert(slotHashSize == 1);
-
-    auto const typeOff = StructLayout::staticTypeOffset();
-
-    auto const dstType = inst->dst()->type();
-    assertx(IMPLIES(dstType.needsReg(), type != InvalidReg));
-
-    auto const constVal = materializeConstVal(v, dstType);
-
-    Vreg valueOff;
-    if (constVal == InvalidReg) {
-      valueOff = v.makeReg();
-      v << loadzwq{valPtr, valueOff};
-    }
-
-    Vreg slotValue;
-    if (dstType.needsReg()) {
-      slotValue = v.makeReg();
-      v << loadzbq{slotPtr, slotValue};
-    }
-
-    // If the value is statically known (which we can happen if
-    // dstType is Null, for example), we can avoid loading it.
-    if (constVal == InvalidReg) {
-      v << load{rarr[valueOff], value};
-    } else {
-      v << copy{constVal, value};
-    }
-
-    // If we don't know the type's datatype statically, we need to
-    // load it regardless. If we do, we can materialize a constant if
-    // we have a type register. If we don't have a type register, we
-    // don't need to do anything.
-    if (dstType.needsReg()) {
-      v << loadb{rarr[slotValue + typeOff], type};
-    } else if (type != InvalidReg) {
-      v << copy{v.cns(dstType.toDataType()), type};
-    }
-  };
-
-  // If the return type does not include Uninit, then the lookup will
-  // always succeed. We can use this knowledge to produce more
-  // efficient code.
-  if (!inst->dst()->type().maybe(TUninit)) {
-    if (key->type() <= TStaticStr) {
-      // If the key is a static string, we can load from the hash
-      // table without checking.
-      loadFromHashTable(dst.reg(0), dst.reg(1), true);
-      return;
-    }
-
-    // Otherwise we need to check if it's a static or not,
-    auto const sf = emitCmpRefCount(v, StaticValue, rkey);
-    auto const dstTuple = dst.hasReg(1)
-      ? v.makeTuple({dst.reg(0), dst.reg(1)})
-      : v.makeTuple({dst.reg(0)});
-    cond(
-      v, v, CC_E, sf, dstTuple,
-      [&] (Vout& v) {
-        // Static. As above, load from the hash table without
-        // checking.
-        auto const value = v.makeReg();
-        auto const type = dst.hasReg(1) ? v.makeReg() : Vreg{};
-        loadFromHashTable(value, type, true);
-        if (dst.hasReg(1)) return v.makeTuple({value, type});
-        return v.makeTuple({value});
-      },
-      [&] (Vout& v) {
-        // Non-static. Call the C++ function.
-        auto const value = v.makeReg();
-        auto const type = v.makeReg();
-        makeNonstaticCall(v, value, type);
-        if (dst.hasReg(1)) return v.makeTuple({value, type});
-        return v.makeTuple({value});
-      },
-      StringTag{}
+    auto const base = v.makeReg();
+    v << lea{hashTableOffset[v.cns(hashTableSet)], base};
+    auto const c = color();
+    return std::make_pair(
+      base[c * 8 + slotHashOffset],
+      base[c * 8 + strHashOffset]
     );
+  }();
+  auto const slotPtr = pair.first;
+  auto const strPtr = pair.second;
+
+  auto const hashStr = v.makeReg();
+  auto const hashSF = v.makeReg();
+  // Load the string in the hash table and check if it matches the
+  // key.
+  emitLdLowPtr(v, strPtr, hashStr, sizeof(LowStringPtr));
+  v << cmpq{rkey, hashStr, hashSF};
+
+  // If the key is definitely static, we're done. The key is present
+  // if and only if they match.
+  if (key->isA(TStaticStr)) {
+    fwdJcc(v, env, CC_NE, hashSF, inst->taken());
+    v << loadzbq{slotPtr, dst};
     return;
   }
 
-  // If we get here, the return type includes Uninit, which implies
-  // the type is not statically known, which means we should always
-  // have a register for the type.
-  assertx(dst.hasReg(1));
-
-  // 3) Retrieve the string pointer from the perfect hash table and
-  // check if the string pointer matches.
-  auto const sf = v.makeReg();
-  checkHash(sf);
-
-  cond(v, v, CC_E, sf, v.makeTuple({dst.reg(0), dst.reg(1)}),
+  // Otherwise the the key could be non-static. If they match, we're
+  // good. Otherwise, check if the string is static. If it is, then we
+  // definitely don't have a match. If it's non-static, evoke a C++
+  // helper to do the lookup.
+  cond(
+    v, vcold(env), CC_E, hashSF, dst,
     [&] (Vout& v) {
-      // 4a) The string matched! Load the value and type offsets out of the
-      // perfect hash table, and use them to index into the struct.
-      auto const value = v.makeReg();
-      auto const type = v.makeReg();
-      loadFromHashTable(value, type, false);
-      return v.makeTuple({value, type});
+      auto const slot = v.makeReg();
+      v << loadzbq{slotPtr, slot};
+      return slot;
     },
     [&] (Vout& v) {
-      // 4b) The string did not match. If the key is static, then we know the
-      // field is absent. If the key is non-static, we fall back to the
-      // non-static lookup routine.
-      if (key->type() <= TStaticStr) {
-        auto const val = materializeConstVal(v, TUninit);
-        return v.makeTuple({val, v.cns(KindOfUninit)});
-      }
-      auto const value = v.makeReg();
-      auto const type = v.makeReg();
-      auto const sf = emitCmpRefCount(v, StaticValue, rkey);
-      cond(v, v, CC_E, sf, v.makeTuple({value, type}),
-        [&] (Vout& v) {
-          auto const val = materializeConstVal(v, TUninit);
-          return v.makeTuple({val, v.cns(KindOfUninit)});
-        },
-        [&] (Vout& v) {
-          auto const callValue = v.makeReg();
-          auto const callType = v.makeReg();
-          makeNonstaticCall(v, callValue, callType);
-          return v.makeTuple({callValue, callType});
-        },
-        StringTag{}
-      );
-      return v.makeTuple({value, type});
+      auto const refSF = emitCmpRefCount(v, StaticValue, rkey);
+      fwdJcc(v, env, CC_E, refSF, inst->taken());
+      return nonStaticCase(v);
     },
     StringTag{}
   );
 }
 
-void cgStructDictSet(IRLS& env, const IRInstruction* inst) {
-  auto const arr = inst->src(0);
-  auto const key = inst->src(1);
-  auto const val = inst->src(2);
-  auto const slot = getStructSlot(arr, key);
+void cgStructDictElemAddr(IRLS& env, const IRInstruction* inst) {
+  auto const arr   = inst->src(0);
+  auto const slot  = inst->src(2);
+  auto const rarr  = srcLoc(env, inst, 0).reg();
+  auto const rslot = srcLoc(env, inst, 2).reg();
+  auto const dst   = dstLoc(env, inst, 0);
+  auto& v = vmain(env);
 
-  if (!slot || (*slot == kInvalidSlot)) return cgBespokeSet(env, inst);
+  auto const& layout = arr->type().arrSpec().layout();
+  assertx(layout.is_struct());
 
-  // Before doing a specialized set operation, we have to confirm that the
-  // type bound on this field is satisfied.
-  //
-  // We try to emit a check for this precondition at irgen time, but we may
-  // have produced this instruction late from simplifying a generic set, so
-  // we handle all cases (while still optimizing for the known-good one).
-  auto const layout = arr->type().arrSpec().layout();
-  auto const slayout = StructLayout::As(layout.bespokeLayout());
-  auto const bound = slayout->getTypeBound(*slot);
+  if (layout.bespokeLayout()->isConcrete()) {
+    auto const slayout = StructLayout::As(layout.bespokeLayout());
 
-  // Definitely unsatisfied; do a generic set.
-  if (!val->type().maybe(bound)) return cgBespokeSet(env, inst);
+    if (slot->hasConstVal(TInt)) {
+      v << lea{
+        rarr[slayout->valueOffsetForSlot(slot->intVal())],
+        dst.reg(tv_lval::val_idx)
+      };
+      v << lea{
+        rarr[slayout->typeOffsetForSlot(slot->intVal())],
+        dst.reg(tv_lval::type_idx)
+      };
+      return;
+    }
 
-  // Definitely satisfied; do a specialized set.
-  if (val->isA(bound)) {
-    auto& v = vmain(env);
-    auto const target = CallSpec::direct(StructDict::SetStrInSlot);
-    auto const args = argGroup(env, inst).ssa(0).imm(*slot).typedValue(2);
-    cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None, args);
-    return;
+    auto const valBegin = slayout->valueOffset();
+    v << lea{
+      rarr[rslot * safe_cast<int>(sizeof(Value)) + valBegin],
+      dst.reg(tv_lval::val_idx)
+    };
+  } else {
+    static_assert(StructDict::valueOffsetSize() == 1);
+    auto const valBegin = v.makeReg();
+    auto const valIdx = v.makeReg();
+    v << loadzbq{rarr[StructDict::valueOffsetOffset()], valBegin};
+    v << addq{valBegin, rslot, valIdx, v.makeReg()};
+    v << lea{
+      rarr[valIdx * safe_cast<int>(sizeof(Value))],
+      dst.reg(tv_lval::val_idx)
+    };
   }
 
-  // We need to check, and we can do so with the field's type mask.
-  always_assert(!val->type().isKnownDataType());
+  v << lea{
+    rarr[rslot * safe_cast<int>(sizeof(DataType))
+         + StructLayout::staticTypeOffset()],
+    dst.reg(tv_lval::type_idx)
+  };
+}
+
+void cgStructDictTypeBoundCheck(IRLS& env, const IRInstruction* inst) {
+  auto const val = inst->src(0);
+  auto const arr = inst->src(1);
+
+  auto const rarr  = srcLoc(env, inst, 1).reg();
+  auto const rslot = srcLoc(env, inst, 2).reg();
+
+  auto const valLoc = srcLoc(env, inst, 0);
+  auto const dst    = dstLoc(env, inst, 0);
+
   auto& v = vmain(env);
-  auto const type = srcLoc(env, inst, 2).reg(1);
-  auto const mask = static_cast<int8_t>(slayout->field(*slot).type_mask);
-  auto const sf = v.makeReg();
-  v << testbi{mask, type, sf};
-  unlikelyCond(
-    v, vcold(env), CC_NE, sf, dstLoc(env, inst, 0).reg(),
-    [&](Vout& v) {
-      auto const dst = v.makeReg();
-      auto const target = CallSpec::direct(StructDict::SetStrMove);
-      auto const args = argGroup(env, inst).ssa(0).ssa(1).typedValue(2);
-      cgCallHelper(v, env, target, callDest(dst), SyncOptions::Sync, args);
-      return dst;
-    },
-    [&](Vout& v) {
-      auto const dst = v.makeReg();
-      auto const target = CallSpec::direct(StructDict::SetStrInSlot);
-      auto const args = argGroup(env, inst).ssa(0).imm(*slot).typedValue(2);
-      cgCallHelper(v, env, target, callDest(dst), SyncOptions::None, args);
-      return dst;
+
+  auto const layout = [&] {
+    auto const& layout = arr->type().arrSpec().layout();
+    assertx(layout.is_struct());
+    if (layout.bespokeLayout()->isConcrete()) {
+      auto const slayout = StructLayout::As(layout.bespokeLayout());
+      return v.cns((uintptr_t)slayout);
+    } else {
+      auto const layoutIndex = v.makeReg();
+      auto const layout = v.makeReg();
+      auto const layouts = v.cns((uintptr_t)bespoke::layoutsForJIT());
+      v << loadzwq{rarr[ArrayData::offsetOfBespokeIndex()], layoutIndex};
+      v << load{
+        layouts[layoutIndex * safe_cast<int>(sizeof(bespoke::Layout*))],
+        layout
+      };
+      return layout;
     }
-  );
+  }();
+
+  static_assert(StructLayout::Field::typeMaskSize() == 1);
+  static_assert(sizeof(StructLayout::Field) == 8 ||
+                sizeof(StructLayout::Field) == 16);
+  auto const adjustedSlot = [&] {
+    if (sizeof(StructLayout::Field) == 16) {
+      auto const doubled = v.makeReg();
+      v << addq{rslot, rslot, doubled, v.makeReg()};
+      return doubled;
+    }
+    return rslot;
+  }();
+
+  auto const typeMask = v.makeReg();
+  v << loadb{
+    layout[adjustedSlot * 8 +
+           StructLayout::Field::typeMaskOffset() +
+           StructLayout::fieldsOffset()],
+    typeMask
+  };
+
+  auto const sf = v.makeReg();
+  if (val->type().isKnownDataType()) {
+    auto const dataType = val->type().toDataType();
+    v << testbi{static_cast<int8_t>(dataType), typeMask, sf};
+  } else {
+    auto const rtype = valLoc.reg(1);
+    v << testb{rtype, typeMask, sf};
+  }
+
+  fwdJcc(v, env, CC_NE, sf, inst->taken());
+  copyTV(v, valLoc, dst, inst->dst()->type());
+}
+
+void cgStructDictAddNextSlot(IRLS& env, const IRInstruction* inst) {
+  auto const arr   = inst->src(0);
+  auto const rarr  = srcLoc(env, inst, 0).reg();
+  auto const rslot = srcLoc(env, inst, 1).reg();
+  auto& v = vmain(env);
+
+  auto const& layout = arr->type().arrSpec().layout();
+  assertx(layout.is_struct());
+
+  static_assert(ArrayData::sizeofSize() == 4);
+  static_assert(StructDict::numFieldsSize() == 1);
+
+  auto const size = v.makeReg();
+  v << loadzlq{rarr[ArrayData::offsetofSize()], size};
+
+  if (layout.bespokeLayout()->isConcrete()) {
+    auto const slayout = StructLayout::As(layout.bespokeLayout());
+    auto const smallSlot = v.makeReg();
+    v << movtqb{rslot, smallSlot};
+    v << storeb{smallSlot, rarr[size + slayout->positionOffset()]};
+  } else {
+    auto const numFields = v.makeReg();
+    auto const positionsOffset = v.makeReg();
+    v << loadzbq{rarr[StructDict::numFieldsOffset()], numFields};
+    v << addq{size, numFields, positionsOffset, v.makeReg()};
+    auto const smallSlot = v.makeReg();
+    v << movtqb{rslot, smallSlot};
+    v << storeb{smallSlot, rarr[positionsOffset + sizeof(StructDict)]};
+  }
+
+  auto const newSize = v.makeReg();
+  auto const truncatedSize = v.makeReg();
+  v << incq{size, newSize, v.makeReg()};
+  v << movtql{newSize, truncatedSize};
+  v << storel{truncatedSize, rarr[ArrayData::offsetofSize()]};
 }
 
 void cgStructDictUnset(IRLS& env, const IRInstruction* inst) {

@@ -210,7 +210,7 @@ struct SynthesizedArrayFunctions {
     auto const fn =
       reinterpret_cast<TypedValue(*)(const ArrayData*, int64_t)>(T::NvGetInt);
     auto const res = fn(ad, k);
-    if (!res.is_init()) throw kDummyException;
+    if (!res.is_init()) ad->getNotFound(k);
     return res;
   }
 
@@ -219,7 +219,7 @@ struct SynthesizedArrayFunctions {
     auto const fn =
       reinterpret_cast<TypedValue(*)(const ArrayData*, const StringData*)>(T::NvGetStr);
     auto const res = fn(ad, k);
-    if (!res.is_init()) throw kDummyException;
+    if (!res.is_init()) ad->getNotFound(k);
     return res;
   }
 };

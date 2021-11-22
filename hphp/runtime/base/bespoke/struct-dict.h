@@ -88,6 +88,20 @@ struct StructDict : public BespokeArray {
   Slot getSlotInPos(size_t pos) const;
   bool checkInvariants() const;
 
+  static constexpr size_t valueOffsetOffset() {
+    return offsetof(StructDict, m_extra_hi8);
+  }
+  static constexpr size_t valueOffsetSize() {
+    return sizeof(m_extra_hi8);
+  }
+
+  static constexpr size_t numFieldsOffset() {
+    return offsetof(StructDict, m_extra_lo8);
+  }
+  static constexpr size_t numFieldsSize() {
+    return sizeof(m_extra_lo8);
+  }
+
   static TypedValue NvGetStrNonStatic(
       const StructDict* sad, const StringData* k);
 };
@@ -116,6 +130,13 @@ struct StructLayout : public ConcreteLayout {
     bool operator==(const Field& o) const {
       return key == o.key && required == o.required && type_mask == o.type_mask;
     }
+
+    static constexpr size_t typeMaskOffset() {
+      return offsetof(Field, type_mask);
+    }
+    static constexpr size_t typeMaskSize() {
+      return sizeof(type_mask);
+    }
   };
 
   using FieldVector = std::vector<Field>;
@@ -134,6 +155,7 @@ struct StructLayout : public ConcreteLayout {
 
   static Slot keySlot(LayoutIndex index, const StringData* key);
   static Slot keySlotStatic(LayoutIndex index, const StringData* key);
+  static Slot keySlotNonStatic(LayoutIndex index, const StringData* key);
 
   Slot keySlot(const StringData* key) const;
   Slot keySlotNonStatic(const StringData* key) const;
@@ -165,6 +187,8 @@ struct StructLayout : public ConcreteLayout {
   std::pair<Type, bool> firstLastType(bool isFirst, bool isKey) const override;
   Type iterPosType(Type pos, bool isKey) const override;
 
+  Type getTypeBound(Type slot) const override;
+
   void createColoringHashMap() const;
 
   // Perfect hashing implementation.
@@ -180,6 +204,10 @@ struct StructLayout : public ConcreteLayout {
 
   static PerfectHashTable* hashTable(const Layout* layout);
   static PerfectHashTable* hashTableSet();
+
+  static constexpr size_t fieldsOffset() {
+    return offsetof(StructLayout, m_fields);
+  }
 
 private:
   // Callers must check whether the key is static before using one of these
@@ -237,6 +265,7 @@ struct TopStructLayout : public AbstractLayout {
   std::pair<Type, bool> elemType(Type key) const override;
   std::pair<Type, bool> firstLastType(bool isFirst, bool isKey) const override;
   Type iterPosType(Type pos, bool isKey) const override;
+  Type getTypeBound(Type slot) const override;
 };
 
 }}

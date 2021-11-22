@@ -3090,27 +3090,35 @@ fields of that struct for holding intermediate values.
   assumes that the vec actually contains an element at that offset (i.e. the
   index is within bounds).
 
-| LdStructDictElem, DBespokeElemUninit, SStructDict C(StaticStr), NF
-
-  Loads the element of the StructDict in S0 at the constant string key S1.
-
-| StructDictSet, DArrLikeSet, SStructDict C(StaticStr) S(InitCell), PRc|CRc
-
-  Set element with key S1 in the struct-layout dict S0 to the value S2.
-  This op has SetMove semantics; it consumes a refcount on the input array
-  and produces one on the output, and does no refcounting to the value S2.
-
 | StructDictUnset, DArrLikeUnset, SStructDict C(StaticStr), PRc|CRc
 
   Unset element with key S1 in the struct-layout dict S0. This op has move
   semantics: it consumes a refcount on S0 and produces one on the output.
 
-| StructDictGetWithColor, DBespokeElemUninit, SStructDict S(Str), NF
+| StructDictSlot, D(Int), SStructDict S(Str), B
 
-  Loads the element of the StructDict in S0 at the string key S1. If S1 is
-  static at runtime, the StructDict perfect hash table will be used. Otherwise,
-  we use the standard accessor method. This is only valid to use after the
-  bespoke hierarcy is finalized.
+  Calculate the slot corresponding to key S1 in struct dict S0, branching if
+  that key is not present.
+
+| StructDictElemAddr, D(LvalToElem), SStructDict S(Str) S(Int) SStructDict, NF
+
+  Calculate the pointer to the value in struct dict S0 corresponding to slot
+  S2. S1 is the corresponding key used to calculate the slot, and S3 is the
+  struct dict to use for type calculations (if the struct dict has been COWed,
+  this will correspond to the pre-COW version). S1 and S3 are only used for
+  type calculations and not used at runtime.
+
+| StructDictAddNextSlot, ND, SStructDict S(Int), NF
+
+  Mark the slot S1 as being used in struct dict S0. The slot must not have been
+  previously in use (its corresponding value must have been Uninit).
+
+| StructDictTypeBoundCheck, DStructTypeBound, S(InitCell) SStructDict S(Int), B|P
+
+  Check if S0 passes the type bound associated with slot S2 in struct dict
+  S1. If not, branch. The returned value is a passthrough of S0, possibly
+  refined with what we know statically of the type-bound. This is like a
+  CheckType, but the type isn't known statically.
 
 | MapSet, ND, S(Obj) S(Int,Str) S(InitCell), CRc
 

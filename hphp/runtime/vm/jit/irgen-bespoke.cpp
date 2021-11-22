@@ -48,91 +48,272 @@ StaticString s_ColFromArray("ColFromArray");
 // helpers here consume a ref on the input and produce one on the output.
 
 template <typename Finish>
-SSATmp* emitProfiledGet(
-    IRGS& env, SSATmp* arr, SSATmp* key, Block* taken, Finish finish,
-    bool profiled = true) {
-  if (arr->isA(TVec)) {
-    gen(env, CheckVecBounds, taken, arr, key);
-    auto const data = BespokeGetData { BespokeGetData::KeyState::Present };
-    auto const val = gen(env, BespokeGet, data, arr, key);
-    return profiled ? profiledType(env, val, [&] { finish(val); }) : val;
-  }
+SSATmp* emitProfiledGet(IRGS& env, SSATmp* arr, SSATmp* key,
+                        Block* taken, Finish finish,
+                        bool profiled = true) {
+  auto const val = [&] {
+    if (arr->isA(TVec)) {
+      gen(env, CheckVecBounds, taken, arr, key);
+      auto const data = BespokeGetData { BespokeGetData::KeyState::Present };
+      return gen(env, BespokeGet, data, arr, key);
+    }
+    if (arr->type().arrSpec().is_struct()) {
+      if (key->isA(TInt)) return cns(env, TUninit);
+      auto const slot = gen(env, StructDictSlot, taken, arr, key);
+      auto const elem = gen(env, StructDictElemAddr, arr, key, slot, arr);
+      return gen(env, LdMem, TCell, elem);
+    }
+    auto const data = BespokeGetData { BespokeGetData::KeyState::Unknown };
+    return gen(env, BespokeGet, data, arr, key);
+  }();
 
-  auto const data = BespokeGetData { BespokeGetData::KeyState::Unknown };
-  auto const val = gen(env, BespokeGet, data, arr, key);
   auto const pval = [&] {
     if (!profiled) return val;
-
     // We prefer to test the profiledType first, as this will rule out
     // TUninit when we have profiledType information. In this case, the
     // latter test will be optimized out.
-    return profiledType(env, val, [&] {
-      gen(env, CheckType, TInitCell, taken, val);
-      finish(val);
-    });
+    return profiledType(
+      env, val,
+      [&] { finish(gen(env, CheckType, TInitCell, taken, val)); }
+    );
   }();
 
   auto const ival = gen(env, CheckType, TInitCell, taken, pval);
-  // We need this assertion because we lose const-val information about the
-  // output type when we union it with TUninit for the "missing key" case.
+  // We need this assertion because we lose const-val information
+  // about the output type when we union it with TUninit for the
+  // "missing key" case.
   auto const resultType =
     arrLikeElemType(arr->type(), key->type(), curClass(env));
   return gen(env, AssertType, resultType.first, ival);
 }
 
-template <typename T>
-Block* makeCatchBlock(IRGS& env, T genBody) {
-  auto block = defBlock(env, Block::Hint::Unused);
-
-  BlockPusher bp(*env.irb, makeMarker(env, curSrcKey(env)), block);
-  gen(env, BeginCatch);
-
-  genBody();
-
-  return block;
-}
-
 template <typename Finish>
-SSATmp* emitProfiledGetThrow(
-    IRGS& env, SSATmp* arr, SSATmp* key, Finish finish, bool profiled = true) {
+SSATmp* emitProfiledGetThrow(IRGS& env, SSATmp* arr, SSATmp* key,
+                             Finish finish, bool profiled = true) {
   if (arr->isA(TVec)) {
     return cond(
       env,
-      [&](Block* taken) {
-        gen(env, CheckVecBounds, taken, arr, key);
-      },
+      [&](Block* taken) { gen(env, CheckVecBounds, taken, arr, key); },
       [&] {
         auto const data = BespokeGetData { BespokeGetData::KeyState::Present };
         auto const val = gen(env, BespokeGet, data, arr, key);
-        return profiled ? profiledType(env, val, [&] { finish(val); })
-                        : val;
+        return profiled
+          ? profiledType(env, val, [&] { finish(val); })
+          : val;
       },
       [&] {
         gen(env, ThrowOutOfBounds, arr, key);
         return cns(env, TBottom);
       }
     );
-  } else {
-    auto const catchBlock = makeCatchBlock(env, [&] {
-      gen(env, ThrowOutOfBounds, arr, key);
-    });
-    auto const val = gen(env, BespokeGetThrow, catchBlock, arr, key);
-    if (!profiled) return val;
-    return profiledType(env, val, [&] { finish(val); });
   }
+
+  if (arr->type().arrSpec().is_struct()) {
+    if (key->isA(TInt)) {
+      gen(env, ThrowOutOfBounds, arr, key);
+      return cns(env, TBottom);
+    }
+    return cond(
+      env,
+      [&] (Block* taken) {
+        auto const slot = gen(env, StructDictSlot, taken, arr, key);
+        auto const elem = gen(env, StructDictElemAddr, arr, key, slot, arr);
+        auto const val = gen(env, LdMem, TCell, elem);
+        auto const pval = [&] {
+          if (!profiled) return val;
+          return profiledType(
+            env, val,
+            [&] { finish(gen(env, CheckType, TInitCell, taken, val)); }
+          );
+        }();
+        auto const ival = gen(env, CheckType, TInitCell, taken, pval);
+        // We need this assertion because we lose const-val
+        // information about the output type when we union it with
+        // TUninit for the "missing key" case.
+        auto const resultType =
+          arrLikeElemType(arr->type(), key->type(), curClass(env));
+        return gen(env, AssertType, resultType.first, ival);
+      },
+      [&] (SSATmp* val) { return val; },
+      [&] {
+        gen(env, ThrowOutOfBounds, arr, key);
+        return cns(env, TBottom);
+      }
+    );
+  }
+
+  auto const val = gen(env, BespokeGetThrow, arr, key);
+  if (!profiled) return val;
+  return profiledType(env, val, [&] { finish(val); });
 }
 
 SSATmp* emitGet(IRGS& env, SSATmp* arr, SSATmp* key, Block* taken) {
   return emitProfiledGet(env, arr, key, taken, [&](SSATmp*) {}, false);
 }
 
-SSATmp* emitElem(IRGS& env, SSATmp* arrLval, Type baseType, SSATmp* key,
-                 bool throwOnMissing) {
-  return gen(env, BespokeElem, baseType, arrLval, key, cns(env, throwOnMissing));
+template <typename Pre, typename Success, typename Fail>
+SSATmp* structDictMutation(IRGS& env,
+                           SSATmp* arr,
+                           SSATmp* key,
+                           SSATmp* basePtr,
+                           Pre pre,
+                           Success success,
+                           Fail fail) {
+  assertx(arr->type().arrSpec().is_struct());
+  assertx(key->isA(TStr));
+
+  SSATmp* preVal = nullptr;
+  return cond(
+    env,
+    [&] (Block* taken) {
+      auto const slot = gen(env, StructDictSlot, taken, arr, key);
+      preVal = pre(slot, taken);
+      return slot;
+    },
+    [&] (SSATmp* slot) {
+      auto const copy = cond(
+        env,
+        [&] (Block* taken) { return gen(env, CheckArrayCOW, taken, arr); },
+        [&] (SSATmp* single) {
+          gen(env, StMemMeta, basePtr, single);
+          return single;
+        },
+        [&] {
+          decRefNZ(env, arr);
+          auto const copy = gen(env, CopyArray, arr);
+          gen(env, StMem, basePtr, copy);
+          return copy;
+        }
+      );
+
+      auto const elem = gen(env, StructDictElemAddr, copy, key, slot, arr);
+      return cond(
+        env,
+        [&] (Block* taken) {
+          return success(copy, elem, slot, preVal, taken);
+        },
+        [&] (SSATmp* s) { return s; },
+        [&] { return fail(copy); }
+      );
+    },
+    [&] { return fail(arr); }
+  );
 }
 
-SSATmp* emitSet(IRGS& env, SSATmp* arr, SSATmp* key, SSATmp* val) {
-  return gen(env, BespokeSet, arr, key, val);
+SSATmp* emitElem(IRGS& env, SSATmp* arrLval, Type baseType, SSATmp* key,
+                 bool throwOnMissing) {
+  auto const arr = gen(env, LdMem, baseType, arrLval);
+
+  if (arr->type().arrSpec().is_struct() && key->isA(TStr)) {
+    return structDictMutation(
+      env, arr, key, arrLval,
+      [] (SSATmp*, Block*) { return nullptr; },
+      [&] (SSATmp*, SSATmp* elem, SSATmp*, SSATmp*, Block* fail) {
+        gen(env, CheckInitMem, fail, elem);
+        return elem;
+      },
+      [&] (SSATmp* arr) {
+        hint(env, Block::Hint::Unlikely);
+        if (throwOnMissing) {
+          gen(env, ThrowOutOfBounds, arr, key);
+          return cns(env, TBottom);
+        }
+        return ptrToInitNull(env);
+      }
+    );
+  }
+
+  return gen(
+    env,
+    BespokeElem,
+    baseType,
+    arrLval,
+    key,
+    cns(env, throwOnMissing)
+  );
+}
+
+template <typename Finish>
+void emitSet(IRGS& env, SSATmp* arr, SSATmp* key, SSATmp* uncheckedVal,
+             SSATmp* basePtr, Finish finish) {
+  auto const sideExit = [&] {
+    hint(env, Block::Hint::Unlikely);
+    gen(env, StMem, basePtr, gen(env, BespokeSet, arr, key, uncheckedVal));
+    finish(uncheckedVal);
+    gen(env, Jmp, makeExit(env, nextSrcKey(env)));
+    return cns(env, TBottom);
+  };
+
+  if (arr->type().arrSpec().is_struct() && key->isA(TStr)) {
+    structDictMutation(
+      env, arr, key, basePtr,
+      [&] (SSATmp* slot, Block* fail) {
+        return gen(
+          env,
+          StructDictTypeBoundCheck,
+          fail,
+          uncheckedVal,
+          arr,
+          slot
+        );
+      },
+      [&] (SSATmp* cowed, SSATmp* elem, SSATmp* slot, SSATmp* val, Block*) {
+        ifThen(
+          env,
+          [&] (Block* taken) {
+            auto const oldVal = gen(
+              env,
+              CheckType,
+              TInitCell,
+              taken,
+              gen(env, LdMem, TCell, elem)
+            );
+            decRef(env, oldVal, kProfiledArraySetDecRefProfId);
+          },
+          [&] { gen(env, StructDictAddNextSlot, cowed, slot); }
+        );
+        gen(env, StMem, elem, val);
+        finish(val);
+        return cns(env, TBottom);
+      },
+      [&] (SSATmp*) { return sideExit(); }
+    );
+    return;
+  }
+
+  // Emit a type check if the base's layout places type bounds on
+  // values. Doing the check here is useful because it can
+  // potentially save an IncRef if we push val onto the stack.
+  //
+  // We don't want to over-constrain the type here, so we relax type
+  // bounds to either DataTypeSpecific (if applicable) or
+  // TUncounted. We also don't do the check if profiling is awry and
+  // the bound is definitely violated.
+  auto const layout = arr->type().arrSpec().layout();
+  auto const bound = layout.elemType(key->type()).first;
+  auto const type = [&]{
+    if (bound.isKnownDataType()) {
+      return Type(dt_modulo_persistence(bound.toDataType()));
+    }
+    if (bound == TUncountedInit) return TUncounted;
+    return TCell;
+  }();
+
+  auto const val = [&] {
+    if (uncheckedVal->type().maybe(type) && !uncheckedVal->isA(type)) {
+      return cond(
+        env,
+        [&] (Block* taken) {
+          return gen(env, CheckType, type, taken, uncheckedVal);
+        },
+        [&] (SSATmp* v) { return v; },
+        sideExit
+      );
+    }
+    return uncheckedVal;
+  }();
+  gen(env, StMem, basePtr, gen(env, BespokeSet, arr, key, val));
+  finish(val);
 }
 
 SSATmp* emitAppend(IRGS& env, SSATmp* arr, SSATmp* val) {
@@ -257,51 +438,33 @@ bool keyCheckForSet(IRGS& env, SSATmp* key) {
   return true;
 }
 
-SSATmp* emitSetElem(IRGS& env, SSATmp* key, SSATmp* value) {
+template <typename Finish>
+void emitSetElem(IRGS& env, SSATmp* key, SSATmp* value, Finish finish) {
   assertx(key->type().isKnownDataType());
-  if (!keyCheckForSet(env, key)) return cns(env, TBottom);
+  if (!keyCheckForSet(env, key)) return finish(cns(env, TBottom));
   auto const base = extractBase(env);
 
-  // Emit a type check if the base's layout places type bounds on values.
-  // Doing the check here is useful because it can save us an IncRef below.
-  //
-  // We don't want to over-constrain the type here, so we relax type bounds
-  // to either DataTypeSpecific (if applicable) or TUncounted. We also don't
-  // do the check if profiling is awry and the bound is definitely violated.
-  auto const layout = base->type().arrSpec().layout();
-  auto const bound = layout.elemType(key->type()).first;
-  auto const type = [&]{
-    if (bound.isKnownDataType()) {
-      return Type(dt_modulo_persistence(bound.toDataType()));
-    }
-    if (bound == TUncountedInit) return TUncounted;
-    return TCell;
-  }();
-  if (value->type().maybe(type) && !value->isA(type)) {
-    value = gen(env, CheckType, type, makeExitSlow(env), value);
-  }
-
-  auto const newArr = emitSet(env, base, key, value);
-  // Update the base's location with the new array.
-  gen(env, StMem, ldMBase(env), newArr);
-  gen(env, IncRef, value);
-  return value;
+  auto const finish2 = [&] (SSATmp* v) {
+    gen(env, IncRef, v);
+    finish(v);
+  };
+  emitSet(env, base, key, value, ldMBase(env), finish2);
 }
 
 void emitBespokeSetM(IRGS& env, uint32_t nDiscard, MemberKey mk) {
   auto const value = topC(env, BCSPRelOffset{0}, DataTypeGeneric);
-  auto const result = [&] () -> SSATmp* {
-    if (mcodeIsProp(mk.mcode)) PUNT(BespokeSetMProp);
-    if (mk.mcode == MW) {
-      return emitSetNewElem(env, value);
-    }
 
-    assertx(mcodeIsElem(mk.mcode));
-    auto const key = memberKey(env, mk);
-    return emitSetElem(env, key, value);
-  }();
-  popC(env, DataTypeGeneric);
-  mFinalImpl(env, nDiscard, result);
+  auto const finish = [&] (SSATmp* result) {
+    popC(env, DataTypeGeneric);
+    mFinalImpl(env, nDiscard, result);
+  };
+
+  if (mcodeIsProp(mk.mcode)) PUNT(BespokeSetMProp);
+  if (mk.mcode == MW) return finish(emitSetNewElem(env, value));
+
+  assertx(mcodeIsElem(mk.mcode));
+  auto const key = memberKey(env, mk);
+  emitSetElem(env, key, value, finish);
 }
 
 void emitBespokeUnsetM(IRGS& env, int32_t nDiscard, MemberKey mk) {
@@ -321,26 +484,164 @@ void emitBespokeUnsetM(IRGS& env, int32_t nDiscard, MemberKey mk) {
   mFinalImpl(env, nDiscard, nullptr);
 }
 
+template <typename Finish>
+void structDictIncDec(IRGS& env, IncDecOp op, SSATmp* arr, SSATmp* key,
+                      Finish finish) {
+  assertx(arr->type().arrSpec().is_struct());
+  assertx(key->isA(TStr));
+
+  auto const lhsType = arrLikeElemType(
+    arr->type(),
+    key->type(),
+    curClass(env)
+  ).first;
+
+  if (isIncDecO(op) || !lhsType.maybe(TInt)) {
+    return finish(gen(env, IncDecElem, IncDecData{op}, ldMBase(env), key));
+  }
+
+  auto const result = structDictMutation(
+    env, arr, key, ldMBase(env),
+    [&] (SSATmp*, Block*) { return nullptr; },
+    [&] (SSATmp*, SSATmp* elem, SSATmp*, SSATmp*, Block* fail) {
+      auto const oldVal = [&] {
+        auto const v = gen(env, LdMem, TCell, elem);
+        if (v->isA(TInt | TUninit)) {
+          return gen(env, CheckType, TInt, fail, v);
+        } else {
+          return cond(
+            env,
+            [&] (Block* taken) {
+              return gen(env, CheckType, TInt, taken, v);
+            },
+            [&] (SSATmp* r) { return r; },
+            [&] {
+              hint(env, Block::Hint::Unlikely);
+              // We've written the COWed array back to the base already,
+              // so set exception boundary to let frame state know that
+              // it's okay.
+              env.irb->exceptionStackBoundary();
+              finish(gen(env, IncDecElem, IncDecData{op}, ldMBase(env), key));
+              gen(env, Jmp, makeExit(env, nextSrcKey(env)));
+              return cns(env, TBottom);
+            }
+          );
+        }
+      }();
+
+      auto const newVal = gen(
+        env,
+        isInc(op) ? AddInt : SubInt,
+        oldVal,
+        cns(env, 1)
+      );
+      gen(env, StMem, elem, newVal);
+      return isPre(op) ? newVal : oldVal;
+    },
+    [&] (SSATmp* arr) {
+      hint(env, Block::Hint::Unlikely);
+      gen(env, ThrowOutOfBounds, arr, key);
+      return cns(env, TBottom);
+    }
+  );
+  finish(result);
+}
+
+template <typename Finish>
+void structDictSetOp(IRGS& env, SetOpOp op, SSATmp* arr,
+                     SSATmp* key, SSATmp* rhs, Finish finish) {
+  assertx(arr->type().arrSpec().is_struct());
+  assertx(key->isA(TStr));
+
+  auto const lhsType = arrLikeElemType(
+    arr->type(),
+    key->type(),
+    curClass(env)
+  ).first;
+
+  auto const type = simpleSetOpType(op);
+  if (!type || !lhsType.maybe(*type) || !rhs->isA(*type)) {
+    return finish(gen(env, SetOpElem, SetOpData{op}, ldMBase(env), key, rhs));
+  }
+
+  auto const result = structDictMutation(
+    env, arr, key, ldMBase(env),
+    [&] (SSATmp*, Block*) { return nullptr; },
+    [&] (SSATmp*, SSATmp* elem, SSATmp*, SSATmp*, Block* fail) {
+      auto const oldVal = [&] {
+        auto const v = gen(env, LdMem, TCell, elem);
+        if (v->isA(*type | TUninit)) {
+          return gen(env, CheckType, *type, fail, v);
+        } else {
+          return cond(
+            env,
+            [&] (Block* taken) {
+              return gen(env, CheckType, *type, taken, v);
+            },
+            [&] (SSATmp* r) { return r; },
+            [&] {
+              hint(env, Block::Hint::Unlikely);
+              // We've written the COWed array back to the base already,
+              // so set exception boundary to let frame state know that
+              // it's okay.
+              env.irb->exceptionStackBoundary();
+              finish(
+                gen(env, SetOpElem, SetOpData{op}, ldMBase(env), key, rhs)
+              );
+              gen(env, Jmp, makeExit(env, nextSrcKey(env)));
+              return cns(env, TBottom);
+            }
+          );
+        }
+      }();
+
+      auto const newVal = simpleSetOpAction(env, op, oldVal, rhs);
+      gen(env, StMem, elem, newVal);
+      return newVal;
+    },
+    [&] (SSATmp* arr) {
+      hint(env, Block::Hint::Unlikely);
+      gen(env, ThrowOutOfBounds, arr, key);
+      return cns(env, TBottom);
+    }
+  );
+  finish(result);
+}
+
 void emitBespokeIncDecM(IRGS& env, int32_t nDiscard, IncDecOp incDec,
                         MemberKey mk) {
-  auto const result = [&] {
-    if (!mcodeIsElem(mk.mcode)) PUNT(BespokeIncDecM);
-    auto const key = memberKey(env, mk);
-    if (!keyCheckForSet(env, key)) return cns(env, TBottom);
-    return gen(env, IncDecElem, IncDecData{incDec}, ldMBase(env), key);
-  }();
-  mFinalImpl(env, nDiscard, result);
+  if (!mcodeIsElem(mk.mcode)) PUNT(BespokeIncDecM);
+  auto const key = memberKey(env, mk);
+
+  auto const finish = [&] (SSATmp* result) {
+    mFinalImpl(env, nDiscard, result);
+  };
+
+  if (!keyCheckForSet(env, key)) return finish(cns(env, TBottom));
+
+  auto const baseType = env.irb->fs().mbase().type;
+  if (baseType.arrSpec().is_struct() && key->isA(TStr)) {
+    return structDictIncDec(env, incDec, extractBase(env), key, finish);
+  }
+  finish(gen(env, IncDecElem, IncDecData{incDec}, ldMBase(env), key));
 }
 
 void emitBespokeSetOpM(IRGS& env, int32_t nDiscard, SetOpOp op, MemberKey mk) {
-  auto const result = [&] {
-    if (!mcodeIsElem(mk.mcode)) PUNT(BespokeSetOpM);
-    auto const key = memberKey(env, mk);
-    if (!keyCheckForSet(env, key)) return cns(env, TBottom);
-    return gen(env, SetOpElem, SetOpData{op}, ldMBase(env), key, topC(env));
-  }();
-  popDecRef(env);
-  mFinalImpl(env, nDiscard, result);
+  if (!mcodeIsElem(mk.mcode)) PUNT(BespokeSetOpM);
+  auto const key = memberKey(env, mk);
+
+  auto const finish = [&] (SSATmp* result) {
+    popDecRef(env);
+    mFinalImpl(env, nDiscard, result);
+  };
+
+  if (!keyCheckForSet(env, key)) return finish(cns(env, TBottom));
+
+  auto const baseType = env.irb->fs().mbase().type;
+  if (baseType.arrSpec().is_struct() && key->isA(TStr)) {
+    return structDictSetOp(env, op, extractBase(env), key, topC(env), finish);
+  }
+  finish(gen(env, SetOpElem, SetOpData{op}, ldMBase(env), key, topC(env)));
 }
 
 SSATmp* emitIsset(IRGS& env, SSATmp* key) {
@@ -591,10 +892,11 @@ void emitBespokeAddElemC(IRGS& env) {
 
   auto const value = popC(env, DataTypeGeneric);
   auto const key = classConvertPuntOnRaise(env, popC(env));
-  auto const arr = popC(env);
-  auto const newArr = emitSet(env, arr, key, value);
-  push(env, newArr);
-  decRef(env, key);
+  auto const arrLoc = ldStkAddr(env, BCSPRelOffset{0});
+  auto const arr = gen(env, LdMem, arrType, arrLoc);
+
+  auto const finish = [&] (SSATmp*) { decRef(env, key); };
+  emitSet(env, arr, key, value, arrLoc, finish);
 }
 
 void emitBespokeAddNewElemC(IRGS& env) {
@@ -1100,18 +1402,18 @@ void emitLoggingDiamond(
         auto const opChangePC = opcodeChangesPC(op);
         always_assert(IMPLIES(opChangePC, opcodeBreaksBB(op, false)));
 
-        for (uint32_t i = 0; i < vanillaLocalTypes.size(); i ++) {
-          always_assert_flog(
-            env.irb->fs().local(i).type <= vanillaLocalTypes[i],
-            "Local {}: expected type: {}, inferred type: {}",
-            i, vanillaLocalTypes[i], env.irb->fs().local(i).type
-          );
-        }
-
         // IncDecM and SetOpM might produce worse stack types right
         // now, as irgen-minstr optimizes certain cases while
         // irgen-bespoke does not yet.
         if (ni.op() != Op::IncDecM && ni.op() != Op::SetOpM) {
+          for (uint32_t i = 0; i < vanillaLocalTypes.size(); i ++) {
+            always_assert_flog(
+              env.irb->fs().local(i).type <= vanillaLocalTypes[i],
+              "Local {}: expected type: {}, inferred type: {}",
+              i, vanillaLocalTypes[i], env.irb->fs().local(i).type
+            );
+          }
+
           for (int32_t i = 0; i < vanillaStackTypes.size(); i ++) {
             auto const offset = offsetFromIRSP(env, BCSPRelOffset{-i});
             always_assert_flog(

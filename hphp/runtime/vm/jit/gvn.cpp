@@ -299,7 +299,6 @@ bool supportsGVN(const IRInstruction* inst) {
   case LdMonotypeDictKey:
   case LdMonotypeDictVal:
   case LdMonotypeVecElem:
-  case LdStructDictElem:
   case Select:
   case StrictlyIntegerConv:
   case LookupSPropSlot:
@@ -327,8 +326,9 @@ bool supportsGVN(const IRInstruction* inst) {
   case LdFuncRequiredCoeffects:
   case FuncHasAttr:
   case ClassHasAttr:
-  case StructDictGetWithColor:
   case LdTVFromRDS:
+  case StructDictSlot:
+  case StructDictElemAddr:
     return true;
 
   case EqArrLike:

@@ -1532,7 +1532,15 @@ Type FrameStateMgr::typeOfPointeeFromDefs(SSATmp* ptr, Type limit) const {
           inst->src(1)->type(),
           inst->ctx()
         ).first;
-
+      case StructDictElemAddr: {
+        auto elem = arrLikeElemType(
+          inst->src(3)->type(),
+          inst->src(1)->type(),
+          inst->ctx()
+        );
+        if (!elem.second) elem.first |= TUninit;
+        return elem.first;
+      }
       default:
         // Otherwise something we can't say anything about.
         return TCell;

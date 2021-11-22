@@ -129,8 +129,7 @@ TCA lookup_catch_trace(TCA rip) {
  * updating the unwind RDS info, as well as the IP in `ctx'.
  */
 void install_catch_trace(_Unwind_Context* ctx, TCA rip,
-                         bool do_side_exit, bool dummy_exn,
-                         TypedValue unwinder_tv) {
+                         bool do_side_exit, TypedValue unwinder_tv) {
   auto catchTrace = lookup_catch_trace(rip);
   if (!catchTrace) {
     FTRACE(1, "no catch trace entry for ip {}; installing default catch trace "
@@ -152,8 +151,7 @@ void install_catch_trace(_Unwind_Context* ctx, TCA rip,
   // things to the handler using the RDS. This also simplifies the handler code
   // because it doesn't have to worry about saving its arguments somewhere
   // while executing the exit trace.
-  assertx(int(do_side_exit) + int(dummy_exn) <= 1);
-  if (do_side_exit || dummy_exn) {
+  if (do_side_exit) {
     __cxxabiv1::__cxa_end_catch();
     g_unwind_rds->exn = nullptr;
     g_unwind_rds->tv = unwinder_tv;
@@ -254,8 +252,7 @@ tc_unwind_personality(int version,
 
   // If we have a catch trace at the IP in the frame given by `context',
   // install it otherwise install the default catch trace.
-  bool cde = ti == typeid(CppDummyException);
-  install_catch_trace(context, ip, bool(ism), cde, tv);
+  install_catch_trace(context, ip, bool(ism), tv);
   return _URC_INSTALL_CONTEXT;
 }
 

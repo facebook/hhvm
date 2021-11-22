@@ -177,7 +177,6 @@ bool consumesRefImpl(const IRInstruction* inst, int srcNo) {
 
     case DictSet:
     case BespokeSet:
-    case StructDictSet:
       // Consumes the reference to its input array, and moves input value
       return move == Consume && (srcNo == 0 || srcNo == 2);
 
@@ -560,7 +559,7 @@ Type structDictReturn(const IRInstruction* inst) {
 }
 
 Type arrLikeSetReturn(const IRInstruction* inst) {
-  assertx(inst->is(BespokeSet, StructDictSet, DictSet));
+  assertx(inst->is(BespokeSet, DictSet));
   auto const arr = inst->src(0)->type();
   auto const key = inst->src(1)->type();
   auto const val = inst->src(2)->type();
@@ -665,6 +664,18 @@ Type cowReturn(const IRInstruction* inst) {
   return modified.narrowToLayout(arr.arrSpec().layout());
 }
 
+Type structDictTypeBoundCheckReturn(const IRInstruction* inst) {
+  assertx(inst->is(StructDictTypeBoundCheck));
+
+  auto const type = [&] {
+    auto const arr = inst->src(1);
+    auto const& layout = arr->type().arrSpec().layout();
+    assertx(layout.is_struct());
+    return layout.getTypeBound(inst->src(2)->type());
+  }();
+  return inst->src(0)->type() & type;
+}
+
 // Is this instruction an array cast that always modifies the type of the
 // input array? Such casts are guaranteed to return vanilla arrays.
 bool isNontrivialArrayCast(const IRInstruction* inst) {
@@ -756,6 +767,7 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #define DElemLval       return elemLval(inst);
 #define DElemLvalPos    return elemLvalPos(inst);
 #define DCOW            return cowReturn(inst);
+#define DStructTypeBound return structDictTypeBoundCheckReturn(inst);
 
 #define O(name, dstinfo, srcinfo, flags) case name: dstinfo not_reached();
 
@@ -804,6 +816,7 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #undef DElemLval
 #undef DElemLvalPos
 #undef DCOW
+#undef DStructTypeBound
 
 }
 
@@ -836,7 +849,6 @@ bool IRInstruction::maySyncVMRegsWithSources() const {
     case EqStr:
     case NeqStr:
     case IsTypeStruct:
-    case StructDictSet:
     case StructDictUnset:
       return true;
 

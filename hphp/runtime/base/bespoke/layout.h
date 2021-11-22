@@ -396,6 +396,13 @@ struct Layout {
   virtual std::pair<Type, bool> elemType(Type key) const;
 
   /*
+   * Returns the type bound for a slot of a struct dict (returns TCell
+   * for non-struct dicts). If the slot is not known specifically, the
+   * union of all possible slots is returned.
+   */
+  virtual Type getTypeBound(Type slot) const;
+
+  /*
    * Returns the most specific type known for the first or last key or value
    * for this bespoke layout. The pair returned contains this type, along with
    * a boolean indicating if key/value is statically known to be present.
@@ -473,5 +480,8 @@ struct ConcreteLayout : public Layout {
 
 // Global view, used for debugging and serialization.
 void eachLayout(std::function<void(Layout& layout)> fn);
+
+// Array of all layout pointers. Useful for accessing from the TC.
+Layout** layoutsForJIT();
 
 }}

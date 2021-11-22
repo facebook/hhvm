@@ -531,8 +531,6 @@ static size_t worker_id;
 static size_t allow_hashtable_writes_by_current_process = 1;
 static size_t worker_can_exit = 1;
 
-static char *db_filename = NULL;
-
 /* Where the heap started (bottom) */
 static char* heap_init = NULL;
 /* Where the heap will end (top) */
@@ -959,14 +957,6 @@ static void define_globals(char * shared_mem_init) {
   locals = mem;
   mem += locals_size_b;
 
-  /* File name we get in hh_load_dep_table_sqlite needs to be smaller than
-   * page_size - it should be since page_size is quite big for a string
-   *
-   * TODO(hverr): Clean up 32-bit
-   */
-  db_filename = (char*)mem;
-  mem += page_size;
-
   /* END OF THE SMALL OBJECTS PAGE */
 
   /* Global storage initialization */
@@ -1004,7 +994,7 @@ static void define_globals(char * shared_mem_init) {
 static size_t get_shared_mem_size(void) {
   size_t page_size = getpagesize();
   return (global_size_b + dep_size_b + bindings_size_b + hashtbl_size_b +
-          heap_size + 2 * page_size + locals_size_b);
+          heap_size + page_size + locals_size_b);
 }
 
 static void init_shared_globals(
@@ -1034,10 +1024,6 @@ static void init_shared_globals(
 
   // Initialize top heap pointers
   *heap = heap_init;
-
-  // Zero out this shared memory for a string
-  size_t page_size = getpagesize();
-  memset(db_filename, 0, page_size);
 }
 
 static void set_sizes(

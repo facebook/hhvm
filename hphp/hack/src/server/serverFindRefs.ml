@@ -71,13 +71,9 @@ let handle_prechecked_files genv env dep f =
     (env, Retry)
 
 let search_function ctx function_name include_defs genv env =
-  let deps_mode = Provider_context.get_deps_mode ctx in
   let function_name = add_ns function_name in
   Hh_logger.debug "ServerFindRefs.search_function: %s" function_name;
-  handle_prechecked_files
-    genv
-    env
-    Typing_deps.(Dep.(make (hash_mode deps_mode) (Fun function_name)))
+  handle_prechecked_files genv env Typing_deps.(Dep.(make (Fun function_name)))
   @@ fun () ->
   let files =
     FindRefsService.get_dependent_files_function
@@ -93,11 +89,7 @@ let search_member ctx class_name member include_defs genv env =
   let class_name =
     FindRefsService.get_origin_class_name ctx class_name member
   in
-  let deps_mode = Provider_context.get_deps_mode ctx in
-  handle_prechecked_files
-    genv
-    env
-    Typing_deps.(Dep.(make (hash_mode deps_mode) (Type class_name)))
+  handle_prechecked_files genv env Typing_deps.(Dep.(make (Type class_name)))
   @@ fun () ->
   (* Find all the classes that extend this one *)
   let files = FindRefsService.get_child_classes_files ctx class_name in
@@ -117,11 +109,7 @@ let search_member ctx class_name member include_defs genv env =
 
 let search_gconst ctx cst_name include_defs genv env =
   let cst_name = add_ns cst_name in
-  let deps_mode = Provider_context.get_deps_mode ctx in
-  handle_prechecked_files
-    genv
-    env
-    Typing_deps.(Dep.(make (hash_mode deps_mode) (GConst cst_name)))
+  handle_prechecked_files genv env Typing_deps.(Dep.(make (GConst cst_name)))
   @@ fun () ->
   let files =
     FindRefsService.get_dependent_files_gconst
@@ -140,11 +128,7 @@ let search_class ctx class_name include_defs include_all_ci_types genv env =
     else
       FindRefsService.IExplicitClass class_name
   in
-  let deps_mode = Provider_context.get_deps_mode ctx in
-  handle_prechecked_files
-    genv
-    env
-    Typing_deps.(Dep.(make (hash_mode deps_mode) (Type class_name)))
+  handle_prechecked_files genv env Typing_deps.(Dep.(make (Type class_name)))
   @@ fun () ->
   let files =
     FindRefsService.get_dependent_files
@@ -157,11 +141,7 @@ let search_class ctx class_name include_defs include_all_ci_types genv env =
 
 let search_record ctx record_name include_defs genv env =
   let record_name = add_ns record_name in
-  let deps_mode = Provider_context.get_deps_mode ctx in
-  handle_prechecked_files
-    genv
-    env
-    Typing_deps.(Dep.(make (hash_mode deps_mode) (Type record_name)))
+  handle_prechecked_files genv env Typing_deps.(Dep.(make (Type record_name)))
   @@ fun () ->
   let files =
     FindRefsService.get_dependent_files

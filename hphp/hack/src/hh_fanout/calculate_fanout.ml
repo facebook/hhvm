@@ -120,9 +120,7 @@ let file_info_to_dep_set
     (get_symbol_edges_for_file_info file_info)
     ~init:(Typing_deps.(DepSet.make ()), [])
     ~f:(fun (dep_set, changed_symbols) symbol_edge ->
-      let symbol_dep =
-        Typing_deps.(Dep.make (hash_mode deps_mode) symbol_edge.symbol_dep)
-      in
+      let symbol_dep = Typing_deps.(Dep.make symbol_edge.symbol_dep) in
       let dep_set = Typing_deps.DepSet.add dep_set symbol_dep in
       let changed_symbol =
         match detail_level with

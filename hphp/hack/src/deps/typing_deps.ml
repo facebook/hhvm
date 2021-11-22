@@ -86,8 +86,7 @@ module Dep = struct
     b
 
   (* Keep in sync with the tags for `DepType` in `typing_deps_hash.rs`. *)
-  let make : type a. Mode.hash_mode -> a variant -> t =
-   fun _ -> function
+  let make : type a. a variant -> t = function
     | GConst name1 -> hash1 (dep_kind_to_enum KGConst) name1
     | Fun name1 -> hash1 (dep_kind_to_enum KFun) name1
     | Type name1 -> hash1 (dep_kind_to_enum KType) name1
@@ -121,8 +120,8 @@ module Dep = struct
     | AllMembers name1 -> hash1 (dep_kind_to_enum KAllMembers) name1
     | GConstName name1 -> hash1 (dep_kind_to_enum KGConstName) name1
 
-  let make_dep_with_type_hash : Mode.hash_mode -> t -> string -> dep_kind -> t =
-   fun _ type_hash member_name -> function
+  let make_dep_with_type_hash : t -> string -> dep_kind -> t =
+   fun type_hash member_name -> function
     | KGConst -> type_hash
     | KFun -> type_hash
     | KType -> type_hash
@@ -386,8 +385,8 @@ module CustomGraph = struct
       s
 
   let add_idep mode dependent dependency =
-    let idependent = Dep.make Hash64Bit dependent in
-    let idependency = Dep.make Hash64Bit dependency in
+    let idependent = Dep.make dependent in
+    let idependency = Dep.make dependency in
     if idependent = idependency then
       ()
     else (
@@ -400,8 +399,8 @@ module CustomGraph = struct
     )
 
   let idep_exists mode dependent dependency =
-    let idependent = Dep.make Hash64Bit dependent in
-    let idependency = Dep.make Hash64Bit dependency in
+    let idependent = Dep.make dependent in
+    let idependency = Dep.make dependency in
     hh_custom_dep_graph_has_edge mode idependent idependency
 end
 
@@ -540,8 +539,8 @@ module SaveCustomGraph = struct
     Hashtbl.clear discovered_deps_batch
 
   let add_idep mode dependent dependency =
-    let idependent = Dep.make Hash64Bit dependent in
-    let idependency = Dep.make Hash64Bit dependency in
+    let idependent = Dep.make dependent in
+    let idependency = Dep.make dependency in
     if idependent = idependency then
       ()
     else (
@@ -568,7 +567,7 @@ let () = CustomGraph.hh_custom_dep_graph_register_custom_types ()
 
 let hash_mode = Typing_deps_mode.hash_mode
 
-let deps_of_file_info (mode : Mode.t) (file_info : FileInfo.t) : Dep.t list =
+let deps_of_file_info (file_info : FileInfo.t) : Dep.t list =
   let {
     FileInfo.funs;
     classes;
@@ -581,14 +580,13 @@ let deps_of_file_info (mode : Mode.t) (file_info : FileInfo.t) : Dep.t list =
   } =
     file_info
   in
-  let hash_mode = Mode.hash_mode mode in
   let defs =
     List.fold_left
       consts
       ~f:
         begin
           fun acc (_, const_id, _) ->
-          Dep.make hash_mode (Dep.GConst const_id) :: acc
+          Dep.make (Dep.GConst const_id) :: acc
         end
       ~init:[]
   in
@@ -598,7 +596,7 @@ let deps_of_file_info (mode : Mode.t) (file_info : FileInfo.t) : Dep.t list =
       ~f:
         begin
           fun acc (_, fun_id, _) ->
-          Dep.make hash_mode (Dep.Fun fun_id) :: acc
+          Dep.make (Dep.Fun fun_id) :: acc
         end
       ~init:defs
   in
@@ -608,7 +606,7 @@ let deps_of_file_info (mode : Mode.t) (file_info : FileInfo.t) : Dep.t list =
       ~f:
         begin
           fun acc (_, class_id, _) ->
-          Dep.make hash_mode (Dep.Type class_id) :: acc
+          Dep.make (Dep.Type class_id) :: acc
         end
       ~init:defs
   in
@@ -618,7 +616,7 @@ let deps_of_file_info (mode : Mode.t) (file_info : FileInfo.t) : Dep.t list =
       ~f:
         begin
           fun acc (_, type_id, _) ->
-          Dep.make hash_mode (Dep.Type type_id) :: acc
+          Dep.make (Dep.Type type_id) :: acc
         end
       ~init:defs
   in
@@ -628,7 +626,7 @@ let deps_of_file_info (mode : Mode.t) (file_info : FileInfo.t) : Dep.t list =
       ~f:
         begin
           fun acc (_, type_id, _) ->
-          Dep.make hash_mode (Dep.Type type_id) :: acc
+          Dep.make (Dep.Type type_id) :: acc
         end
       ~init:defs
   in
@@ -710,8 +708,7 @@ let get_ideps_from_hash mode hash =
   | SaveCustomMode _ ->
     CustomGraph.get_ideps_from_hash mode hash
 
-let get_ideps mode dependency =
-  get_ideps_from_hash mode (Dep.make (hash_mode mode) dependency)
+let get_ideps mode dependency = get_ideps_from_hash mode (Dep.make dependency)
 
 let get_extend_deps ~mode ~visited ~source_class ~acc =
   let open VisitedSet in

@@ -616,16 +616,13 @@ let save_file_info db stmt_cache relative_path file_info :
       =
     let decl_hash = Option.value decl_hash ~default:Int64.zero in
     let hash =
-      name
-      |> dep_ctor
-      |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit
-      |> Typing_deps.Dep.to_int64
+      name |> dep_ctor |> Typing_deps.Dep.make |> Typing_deps.Dep.to_int64
     in
     let canon_hash =
       name
       |> to_canon_name_key
       |> dep_ctor
-      |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit
+      |> Typing_deps.Dep.make
       |> Typing_deps.Dep.to_int64
     in
     match
@@ -888,8 +885,7 @@ let get_type_path_by_name (db_path : db_path) name =
   SymbolTable.get
     db
     stmt_cache
-    (Typing_deps.Dep.Type name
-    |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit)
+    (Typing_deps.Dep.Type name |> Typing_deps.Dep.make)
     SymbolTable.get_sqlite
   |> get_type_wrapper
 
@@ -901,7 +897,7 @@ let get_itype_path_by_name (db_path : db_path) name =
     db
     stmt_cache
     (Typing_deps.Dep.Type (Caml.String.lowercase_ascii name)
-    |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit)
+    |> Typing_deps.Dep.make)
     SymbolTable.get_sqlite_case_insensitive
   |> get_type_wrapper
 
@@ -910,7 +906,7 @@ let get_fun_path_by_name (db_path : db_path) name =
   SymbolTable.get
     db
     stmt_cache
-    (Typing_deps.Dep.Fun name |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit)
+    (Typing_deps.Dep.Fun name |> Typing_deps.Dep.make)
     SymbolTable.get_sqlite
   |> get_fun_wrapper
 
@@ -920,7 +916,7 @@ let get_ifun_path_by_name (db_path : db_path) name =
     db
     stmt_cache
     (Typing_deps.Dep.Fun (Caml.String.lowercase_ascii name)
-    |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit)
+    |> Typing_deps.Dep.make)
     SymbolTable.get_sqlite_case_insensitive
   |> get_fun_wrapper
 
@@ -929,8 +925,7 @@ let get_const_path_by_name (db_path : db_path) name =
   SymbolTable.get
     db
     stmt_cache
-    (Typing_deps.Dep.GConst name
-    |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit)
+    (Typing_deps.Dep.GConst name |> Typing_deps.Dep.make)
     SymbolTable.get_sqlite
   |> get_const_wrapper
 

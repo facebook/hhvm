@@ -1501,7 +1501,7 @@ let dump_debug_glean_deps
 let dump_dep_hashes (nast : Nast.program) : unit =
   let process_variant x =
     let open Typing_deps in
-    let dep = Dep.make Typing_deps_mode.Hash64Bit x in
+    let dep = Dep.make x in
     Printf.printf "%s %s\n" (Dep.to_hex_string dep) (Dep.variant_to_string x)
   in
   let handler =

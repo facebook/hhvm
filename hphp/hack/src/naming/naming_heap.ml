@@ -122,12 +122,11 @@ module Types = struct
         let capacity = 1000
       end)
 
-  let hash name =
-    Typing_deps.Dep.Type name |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit
+  let hash name = Typing_deps.Dep.Type name |> Typing_deps.Dep.make
 
   let canon_hash name =
     Typing_deps.Dep.Type (Naming_sqlite.to_canon_name_key name)
-    |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit
+    |> Typing_deps.Dep.make
 
   let add id pos =
     TypePosHeap.write_around (hash id) pos;
@@ -255,12 +254,11 @@ module Funs = struct
         let description = "Naming_FunBlocked"
       end)
 
-  let hash name =
-    Typing_deps.Dep.Fun name |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit
+  let hash name = Typing_deps.Dep.Fun name |> Typing_deps.Dep.make
 
   let canon_hash name =
     Typing_deps.Dep.Fun (Naming_sqlite.to_canon_name_key name)
-    |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit
+    |> Typing_deps.Dep.make
 
   let add id pos =
     FunCanonHeap.add (canon_hash id) id;
@@ -352,13 +350,11 @@ module Consts = struct
         let description = "Naming_ConstBlocked"
       end)
 
-  let hash name =
-    Typing_deps.Dep.GConst name
-    |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit
+  let hash name = Typing_deps.Dep.GConst name |> Typing_deps.Dep.make
 
   let canon_hash name =
     Typing_deps.Dep.GConst (Naming_sqlite.to_canon_name_key name)
-    |> Typing_deps.Dep.make Typing_deps.Mode.Hash64Bit
+    |> Typing_deps.Dep.make
 
   let add id pos = ConstPosHeap.add (hash id) pos
 

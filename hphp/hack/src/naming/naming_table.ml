@@ -271,7 +271,7 @@ let get_64bit_dep_set_files
         | Naming_sqlite.Deleted -> Relative_path.Set.remove acc path
         | Naming_sqlite.Modified file_info ->
           let file_deps =
-            Typing_deps.deps_of_file_info mode file_info
+            Typing_deps.deps_of_file_info file_info
             |> Typing_deps.DepSet.of_list
           in
           if

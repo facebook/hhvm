@@ -17,4 +17,4 @@ val go :
   path:Relative_path.t ->
   result
 
-val result_to_json : deps_mode:Typing_deps_mode.t -> result -> Hh_json.json
+val result_to_json : result -> Hh_json.json

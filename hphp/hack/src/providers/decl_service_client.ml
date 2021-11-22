@@ -67,7 +67,7 @@ let get_and_cache_decl (t : t) (symbol_hash : Typing_deps.Dep.t) =
   decl_opt
 
 let rpc_get_fun (t : t) (name : string) : Typing_defs.fun_elt option =
-  let key = Typing_deps.(Dep.make Mode.Hash64Bit (Dep.Fun name)) in
+  let key = Typing_deps.(Dep.make (Dep.Fun name)) in
   match SymbolMap.find_opt t.current_file_decls key with
   | Some (Fun decl) -> Some decl
   | _ ->
@@ -81,7 +81,7 @@ let rpc_get_fun (t : t) (name : string) : Typing_defs.fun_elt option =
 
 let rpc_get_class (t : t) (name : string) :
     Shallow_decl_defs.shallow_class option =
-  let key = Typing_deps.(Dep.make Mode.Hash64Bit (Dep.Type name)) in
+  let key = Typing_deps.(Dep.make (Dep.Type name)) in
   match SymbolMap.find_opt t.current_file_decls key with
   | Some (Class decl) -> Some decl
   | _ ->
@@ -94,7 +94,7 @@ let rpc_get_class (t : t) (name : string) :
       | _ -> None))
 
 let rpc_get_typedef (t : t) (name : string) : Typing_defs.typedef_type option =
-  let key = Typing_deps.(Dep.make Mode.Hash64Bit (Dep.Type name)) in
+  let key = Typing_deps.(Dep.make (Dep.Type name)) in
   match SymbolMap.find_opt t.current_file_decls key with
   | Some (Typedef decl) -> Some decl
   | _ ->
@@ -108,7 +108,7 @@ let rpc_get_typedef (t : t) (name : string) : Typing_defs.typedef_type option =
 
 let rpc_get_record_def (t : t) (name : string) :
     Typing_defs.record_def_type option =
-  let key = Typing_deps.(Dep.make Mode.Hash64Bit (Dep.Type name)) in
+  let key = Typing_deps.(Dep.make (Dep.Type name)) in
   match SymbolMap.find_opt t.current_file_decls key with
   | Some (Record decl) -> Some decl
   | _ ->
@@ -121,7 +121,7 @@ let rpc_get_record_def (t : t) (name : string) :
       | _ -> None))
 
 let rpc_get_gconst (t : t) (name : string) : Typing_defs.const_decl option =
-  let key = Typing_deps.(Dep.make Mode.Hash64Bit (Dep.GConst name)) in
+  let key = Typing_deps.(Dep.make (Dep.GConst name)) in
   match SymbolMap.find_opt t.current_file_decls key with
   | Some (Const decl) -> Some decl
   | _ ->
@@ -148,15 +148,15 @@ let get_filename (t : t) (key : Typing_deps.Dep.t) :
   | Some (path, name_type) -> Some (FileInfo.File (name_type, path), name_type)
 
 let rpc_get_gconst_path t name =
-  let key = Typing_deps.(Dep.make Mode.Hash64Bit (Dep.GConst name)) in
+  let key = Typing_deps.(Dep.make (Dep.GConst name)) in
   get_filename t key
 
 let rpc_get_fun_path t name =
-  let key = Typing_deps.(Dep.make Mode.Hash64Bit (Dep.Fun name)) in
+  let key = Typing_deps.(Dep.make (Dep.Fun name)) in
   get_filename t key
 
 let rpc_get_type_path t name =
-  let key = Typing_deps.(Dep.make Mode.Hash64Bit (Dep.Type name)) in
+  let key = Typing_deps.(Dep.make (Dep.Type name)) in
   get_filename t key
 
 let rpc_get_fun_canon_name (t : t) (name : string) : string option =
@@ -169,7 +169,7 @@ let parse_and_cache_decls_in
     (t : t) (filename : Relative_path.t) (contents : string) : unit =
   let file = Direct_decl_parser.parse_decls t.opts filename contents in
   let decls = file.Direct_decl_parser.pf_decls in
-  let hash dep = Typing_deps.(Dep.make Mode.Hash64Bit dep) in
+  let hash dep = Typing_deps.(Dep.make dep) in
   t.current_file_decls <-
     List.fold decls ~init:SymbolMap.empty ~f:(fun map (name, decl) ->
         let key =

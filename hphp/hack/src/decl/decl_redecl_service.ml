@@ -410,7 +410,7 @@ let get_dependent_classes_files (ctx : Provider_context.t) (classes : SSet.t) :
     classes
     ~init:Typing_deps.(DepSet.make ())
     ~f:(fun c acc ->
-      let source_class = Dep.make (hash_mode mode) (Dep.Type c) in
+      let source_class = Dep.make (Dep.Type c) in
       Typing_deps.get_extend_deps ~mode ~visited ~source_class ~acc)
   |> Naming_provider.ByHash.get_files ctx
 

@@ -518,15 +518,14 @@ let get_dirty_fast
       end
     ~init:Relative_path.Map.empty
 
-let names_to_deps (deps_mode : Typing_deps_mode.t) (names : FileInfo.names) :
-    Typing_deps.DepSet.t =
+let names_to_deps (names : FileInfo.names) : Typing_deps.DepSet.t =
   let open Typing_deps in
   let { FileInfo.n_funs; n_classes; n_record_defs; n_types; n_consts } =
     names
   in
   let add_deps_of_sset dep_ctor sset depset =
     SSet.fold sset ~init:depset ~f:(fun n acc ->
-        DepSet.add acc (Dep.make (hash_mode deps_mode) (dep_ctor n)))
+        DepSet.add acc (Dep.make (dep_ctor n)))
   in
   let deps = add_deps_of_sset (fun n -> Dep.Fun n) n_funs (DepSet.make ()) in
   let deps = add_deps_of_sset (fun n -> Dep.Type n) n_classes deps in
@@ -685,13 +684,8 @@ let type_check_dirty
       ~init:FileInfo.empty_names
   in
   let ctx = Provider_utils.ctx_from_server_env env in
-  let deps_mode = Provider_context.get_deps_mode ctx in
-  let master_deps =
-    names dirty_master_files_changed_hash |> names_to_deps deps_mode
-  in
-  let local_deps =
-    names dirty_local_files_changed_hash |> names_to_deps deps_mode
-  in
+  let master_deps = names dirty_master_files_changed_hash |> names_to_deps in
+  let local_deps = names dirty_local_files_changed_hash |> names_to_deps in
   (* Include similar_files in the dirty_fast used to determine which loaded
      declarations to oldify. This is necessary because the positions of
      declarations may have changed, which affects error messages and FIXMEs. *)

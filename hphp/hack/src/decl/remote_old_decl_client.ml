@@ -38,11 +38,8 @@ let get_hh_version () =
 let db_path_of_ctx (ctx : Provider_context.t) : Naming_sqlite.db_path option =
   ctx |> Provider_context.get_backend |> Db_path_provider.get_naming_db_path
 
-let name_to_decl_hash_opt
-    ~(name : string)
-    ~(db_path : Naming_sqlite.db_path)
-    ~(mode : Typing_deps_mode.t) : string option =
-  let dep = Typing_deps.(Dep.make (hash_mode mode) (Dep.Type name)) in
+let name_to_decl_hash_opt ~(name : string) ~(db_path : Naming_sqlite.db_path) =
+  let dep = Typing_deps.(Dep.make (Dep.Type name)) in
   let decl_hash = Naming_sqlite.get_decl_hash_by_64bit_dep db_path dep in
   if Option.is_some decl_hash then
     Hh_logger.log
@@ -52,7 +49,6 @@ let name_to_decl_hash_opt
 
 let fetch_old_decls ~(ctx : Provider_context.t) (names : string list) :
     Shallow_decl_defs.shallow_class option SMap.t =
-  let mode = Provider_context.get_deps_mode ctx in
   let db_path_opt =
     db_path_of_ctx ctx
     (*
@@ -79,7 +75,7 @@ let fetch_old_decls ~(ctx : Provider_context.t) (names : string list) :
   | Some db_path ->
     let decl_hashes =
       List.filter_map
-        ~f:(fun name -> name_to_decl_hash_opt ~name ~db_path ~mode)
+        ~f:(fun name -> name_to_decl_hash_opt ~name ~db_path)
         names
     in
     let hh_config_version = get_hh_version () in

@@ -144,7 +144,7 @@ let go (genv : ServerEnv.genv) (env : ServerEnv.env) (prefixes : string list) =
         List.fold_left
           ~init:(DepSet.make ())
           ~f:(fun acc (_, class_id, _) ->
-            DepSet.add acc (Dep.make (hash_mode deps_mode) (Dep.Type class_id)))
+            DepSet.add acc (Dep.make (Dep.Type class_id)))
           classes
       in
       let deps =

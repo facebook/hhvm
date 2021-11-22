@@ -24,16 +24,14 @@ type result = {
   relevant_dep_edges: dep_edge list;
 }
 
-let result_to_json ~(deps_mode : Typing_deps_mode.t) (result : result) :
-    Hh_json.json =
+let result_to_json (result : result) : Hh_json.json =
   let dep_to_json dep =
     Hh_json.JSON_Object
       [
         ("variant", Hh_json.JSON_String (Typing_deps.Dep.variant_to_string dep));
         ( "hash",
           Hh_json.JSON_String
-            (Typing_deps.(Dep.make (hash_mode deps_mode) dep)
-            |> Typing_deps.Dep.to_debug_string) );
+            (Typing_deps.(Dep.make dep) |> Typing_deps.Dep.to_debug_string) );
       ]
   in
   let dep_edge_to_json { dependent; dependency } =
@@ -130,7 +128,7 @@ let go
   in
   HashSet.filter relevant_dep_edges ~f:(fun { dependent; _ } ->
       let open Typing_deps in
-      DepSet.mem fanout_dependents (Dep.make (hash_mode deps_mode) dependent));
+      DepSet.mem fanout_dependents (Dep.make dependent));
   let relevant_dep_edges = HashSet.to_list relevant_dep_edges in
 
   { dependencies; fanout_dependents; relevant_dep_edges }

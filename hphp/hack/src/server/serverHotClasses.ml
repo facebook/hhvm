@@ -29,9 +29,7 @@ let go
   let add_hot_classes acc cids =
     List.fold cids ~init:acc ~f:(fun acc cid ->
         let open Typing_deps in
-        let deps =
-          DepSet.singleton @@ Dep.make (hash_mode deps_mode) (Dep.Type cid)
-        in
+        let deps = DepSet.singleton @@ Dep.make (Dep.Type cid) in
         let deps = Typing_deps.add_all_deps deps_mode deps in
         if DepSet.cardinal deps > threshold then
           cid :: acc

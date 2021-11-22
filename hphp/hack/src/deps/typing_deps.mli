@@ -75,14 +75,14 @@ module Dep : sig
     | KGConstName [@value 12]
   [@@deriving enum]
 
-  (** either 31bit or 63bit hash, depending on the mode *)
+  (** A 63bit hash *)
   type t
 
-  val make : Mode.hash_mode -> 'a variant -> t
+  val make : 'a variant -> t
 
-  val make_dep_with_type_hash : Mode.hash_mode -> t -> string -> dep_kind -> t
+  val make_dep_with_type_hash : t -> string -> dep_kind -> t
 
-  (** a 64bit representation of the 31bit/63bit hash, padded with leading 0 bits *)
+  (** A 64bit representation of the 63bit hash. *)
   val to_int64 : t -> int64
 
   val is_class : t -> bool
@@ -154,7 +154,7 @@ module VisitedSet : sig
   val make : Mode.t -> t
 end
 
-val deps_of_file_info : Mode.t -> FileInfo.t -> Dep.t list
+val deps_of_file_info : FileInfo.t -> Dep.t list
 
 type dep_edge
 

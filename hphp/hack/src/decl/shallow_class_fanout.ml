@@ -13,11 +13,10 @@ open Reordered_argument_collections
 open Typing_deps
 
 let class_names_from_deps ~ctx ~get_classes_in_file deps =
-  let mode = Provider_context.get_deps_mode ctx in
   let filenames = Naming_provider.ByHash.get_files ctx deps in
   Relative_path.Set.fold filenames ~init:SSet.empty ~f:(fun file acc ->
       SSet.fold (get_classes_in_file file) ~init:acc ~f:(fun cid acc ->
-          if DepSet.mem deps Dep.(make (hash_mode mode) (Type cid)) then
+          if DepSet.mem deps Dep.(make (Type cid)) then
             SSet.add acc cid
           else
             acc))
@@ -28,7 +27,7 @@ let add_minor_change_fanout
     (class_name : string)
     (minor_change : ClassDiff.minor_change) : AffectedDeps.t =
   let mode = Provider_context.get_deps_mode ctx in
-  let dep = Dep.make (hash_mode mode) (Dep.Type class_name) in
+  let dep = Dep.make (Dep.Type class_name) in
   let changed = DepSet.singleton dep in
   let acc = AffectedDeps.mark_changed acc changed in
   let acc = AffectedDeps.mark_as_needing_recheck acc changed in
@@ -77,10 +76,7 @@ let add_minor_change_fanout
       AffectedDeps.mark_all_dependents_as_needing_recheck_from_hash
         mode
         acc
-        (make_dep
-           (Typing_deps.Dep.make
-              (hash_mode mode)
-              (Typing_deps.Dep.Type class_name)))
+        (make_dep (Typing_deps.Dep.make (Typing_deps.Dep.Type class_name)))
     else
       recheck_descendants_and_their_member_dependents acc make_dep
   in
@@ -106,51 +102,27 @@ let add_minor_change_fanout
           | _ -> acc
         in
         add_member_fanout acc change (fun type_hash ->
-            Typing_deps.Dep.make_dep_with_type_hash
-              (hash_mode mode)
-              type_hash
-              name
-              Dep.KConst))
+            Typing_deps.Dep.make_dep_with_type_hash type_hash name Dep.KConst))
   in
   let acc =
     add_member_fanouts acc typeconsts (fun mid type_hash ->
-        Typing_deps.Dep.make_dep_with_type_hash
-          (hash_mode mode)
-          type_hash
-          mid
-          Dep.KConst)
+        Typing_deps.Dep.make_dep_with_type_hash type_hash mid Dep.KConst)
   in
   let acc =
     add_member_fanouts acc props (fun mid type_hash ->
-        Typing_deps.Dep.make_dep_with_type_hash
-          (hash_mode mode)
-          type_hash
-          mid
-          Dep.KProp)
+        Typing_deps.Dep.make_dep_with_type_hash type_hash mid Dep.KProp)
   in
   let acc =
     add_member_fanouts acc sprops (fun mid type_hash ->
-        Typing_deps.Dep.make_dep_with_type_hash
-          (hash_mode mode)
-          type_hash
-          mid
-          Dep.KProp)
+        Typing_deps.Dep.make_dep_with_type_hash type_hash mid Dep.KProp)
   in
   let acc =
     add_member_fanouts acc methods (fun mid type_hash ->
-        Typing_deps.Dep.make_dep_with_type_hash
-          (hash_mode mode)
-          type_hash
-          mid
-          Dep.KMethod)
+        Typing_deps.Dep.make_dep_with_type_hash type_hash mid Dep.KMethod)
   in
   let acc =
     add_member_fanouts acc smethods (fun mid type_hash ->
-        Typing_deps.Dep.make_dep_with_type_hash
-          (hash_mode mode)
-          type_hash
-          mid
-          Dep.KMethod)
+        Typing_deps.Dep.make_dep_with_type_hash type_hash mid Dep.KMethod)
   in
   let acc =
     Option.value_map constructor ~default:acc ~f:(fun change ->
@@ -161,10 +133,7 @@ let add_minor_change_fanout
 let add_maximum_fanout
     (ctx : Provider_context.t) (acc : AffectedDeps.t) (class_name : string) =
   let mode = Provider_context.get_deps_mode ctx in
-  AffectedDeps.add_maximum_fanout
-    mode
-    acc
-    (Dep.make (hash_mode mode) (Dep.Type class_name))
+  AffectedDeps.add_maximum_fanout mode acc (Dep.make (Dep.Type class_name))
 
 let add_fanout
     ~(ctx : Provider_context.t) (acc : AffectedDeps.t) (class_name, diff) :

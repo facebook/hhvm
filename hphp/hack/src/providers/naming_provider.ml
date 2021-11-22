@@ -856,17 +856,17 @@ module ByHash = struct
 
   let update_file ctx filename info ~old =
     if need_update_files ctx then begin
-      let mode = Provider_context.get_deps_mode ctx in
-      (* remove old typing deps *)
-      (* Note: if a file has two definitions of a symbol name, our construction of
-         ifiles will only include symbol->filename once for that file. We'll
-         turn the deps into a set right now so we can remove it only once; that way,
-         other unexpected "remove_absent_deps" violations will still be flagged.
-         Note: we're using our own DepSet here, because Typing_deps.DepSet.t
-         is very inefficient due to its Rust interop. *)
-      let module DepSet = Caml.Set.Make (Typing_deps.DepHashKey) in
+      let module (* remove old typing deps *)
+                 (* Note: if a file has two definitions of a symbol name, our construction of
+                    ifiles will only include symbol->filename once for that file. We'll
+                    turn the deps into a set right now so we can remove it only once; that way,
+                    other unexpected "remove_absent_deps" violations will still be flagged.
+                    Note: we're using our own DepSet here, because Typing_deps.DepSet.t
+                    is very inefficient due to its Rust interop. *)
+          DepSet =
+        Caml.Set.Make (Typing_deps.DepHashKey) in
       let deps =
-        Option.value_map old ~default:[] ~f:(Typing_deps.deps_of_file_info mode)
+        Option.value_map old ~default:[] ~f:Typing_deps.deps_of_file_info
         |> DepSet.of_list
       in
       DepSet.iter
@@ -890,7 +890,7 @@ module ByHash = struct
               (Telemetry.create ()))
         deps;
       (* add new typing deps *)
-      List.iter (Typing_deps.deps_of_file_info mode info) ~f:(fun def ->
+      List.iter (Typing_deps.deps_of_file_info info) ~f:(fun def ->
           let previous =
             match Caml.Hashtbl.find_opt !ifiles def with
             | Some files -> files

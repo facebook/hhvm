@@ -710,7 +710,7 @@ let mode_debug ~(env : env) ~(path : Path.t) ~(cursor_id : string option) :
       ~new_naming_table
       ~file_deltas
       ~path
-    |> Debug_fanout.result_to_json ~deps_mode:cursor#get_deps_mode
+    |> Debug_fanout.result_to_json
   in
   let json =
     Hh_json.JSON_Object

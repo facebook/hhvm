@@ -252,7 +252,7 @@ module ClassEltDiff = struct
     |> compare_smeths mode class1 class2
 end
 
-let add_changed mode acc dep = DepSet.add acc (Dep.make (hash_mode mode) dep)
+let add_changed acc dep = DepSet.add acc (Dep.make dep)
 
 (*****************************************************************************)
 (* Determines if there is a "big" difference between two classes
@@ -296,7 +296,7 @@ let class_big_diff class1 class2 =
 
 and get_all_dependencies ~mode trace cid (changed, to_redecl, to_recheck) =
   let dep = Dep.Type cid in
-  let cid_hash = Typing_deps.(Dep.make (hash_mode mode) dep) in
+  let cid_hash = Typing_deps.(Dep.make dep) in
   (* Why can't we just use `Typing_deps.get_ideps dep` here? See test case
      hphp/hack/test/integration_ml/saved_state/test_changed_type_in_base_class.ml
      for an example. *)
@@ -313,7 +313,7 @@ and get_all_dependencies ~mode trace cid (changed, to_redecl, to_recheck) =
       ~source_class:cid_hash
       ~acc:to_redecl
   in
-  (add_changed mode changed dep, to_redecl, to_recheck)
+  (add_changed changed dep, to_redecl, to_recheck)
 
 let get_extend_deps mode cid_hash to_redecl =
   Typing_deps.get_extend_deps
@@ -341,7 +341,7 @@ let get_fun_deps
     let dep = Dep.Fun fid in
     let where_fun_is_used = Typing_deps.get_ideps mode dep in
     let to_recheck = DepSet.union where_fun_is_used to_recheck in
-    ((add_changed mode changed dep, to_redecl, to_recheck), old_funs_missing + 1)
+    ((add_changed changed dep, to_redecl, to_recheck), old_funs_missing + 1)
   | (Some fe1, Some fe2) ->
     let fe1 = Decl_pos_utils.NormalizeSig.fun_elt fe1 in
     let fe2 = Decl_pos_utils.NormalizeSig.fun_elt fe2 in
@@ -350,7 +350,7 @@ let get_fun_deps
     else
       let dep = Dep.Fun fid in
       let where_fun_is_used = Typing_deps.get_ideps mode dep in
-      ( ( add_changed mode changed dep,
+      ( ( add_changed changed dep,
           to_redecl,
           DepSet.union where_fun_is_used to_recheck ),
         old_funs_missing )
@@ -374,8 +374,7 @@ let get_type_deps ~mode old_types tid ((changed, to_recheck), old_types_missing)
   | (_, None) ->
     let dep = Dep.Type tid in
     let where_typedef_was_used = Typing_deps.get_ideps mode dep in
-    ( ( add_changed mode changed dep,
-        DepSet.union where_typedef_was_used to_recheck ),
+    ( (add_changed changed dep, DepSet.union where_typedef_was_used to_recheck),
       old_types_missing + 1 )
   | (Some tdef1, Some tdef2) ->
     let tdef1 = Decl_pos_utils.NormalizeSig.typedef tdef1 in
@@ -387,7 +386,7 @@ let get_type_deps ~mode old_types tid ((changed, to_recheck), old_types_missing)
       let dep = Dep.Type tid in
       let where_type_is_used = Typing_deps.get_ideps mode dep in
       let to_recheck = DepSet.union where_type_is_used to_recheck in
-      ((add_changed mode changed dep, to_recheck), old_types_missing)
+      ((add_changed changed dep, to_recheck), old_types_missing)
 
 let get_types_deps ~ctx old_types types =
   let mode = Provider_context.get_deps_mode ctx in
@@ -415,9 +414,7 @@ let get_gconst_deps
     let where_const_is_used = Typing_deps.get_ideps mode dep in
     let to_recheck = DepSet.union where_const_is_used to_recheck in
     let const_name = Typing_deps.get_ideps mode (Dep.GConstName cst_id) in
-    ( ( add_changed mode changed dep,
-        to_redecl,
-        DepSet.union const_name to_recheck ),
+    ( (add_changed changed dep, to_redecl, DepSet.union const_name to_recheck),
       old_gconsts_missing + 1 )
   | (Some cst1, Some cst2) ->
     let is_same_signature = Poly.( = ) cst1 cst2 in
@@ -427,8 +424,7 @@ let get_gconst_deps
       let dep = Dep.GConst cst_id in
       let where_type_is_used = Typing_deps.get_ideps mode dep in
       let to_recheck = DepSet.union where_type_is_used to_recheck in
-      ( (add_changed mode changed dep, to_redecl, to_recheck),
-        old_gconsts_missing )
+      ((add_changed changed dep, to_redecl, to_recheck), old_gconsts_missing)
 
 let get_gconsts_deps ~ctx old_gconsts gconsts =
   let mode = Provider_context.get_deps_mode ctx in
@@ -463,7 +459,7 @@ let get_class_deps
     let nclass2 = Decl_pos_utils.NormalizeSig.class_type class2 in
     let (deps, is_unchanged) = ClassDiff.compare mode cid nclass1 nclass2 in
     let dep = Dep.Type cid in
-    let cid_hash = Typing_deps.(Dep.make (hash_mode mode) dep) in
+    let cid_hash = Typing_deps.(Dep.make dep) in
     let (changed, to_redecl, to_recheck) =
       if is_unchanged then
         let (_, is_unchanged) = ClassDiff.compare mode cid class1 class2 in
@@ -497,7 +493,7 @@ let get_class_deps
             (Typing_deps.get_ideps mode (Dep.AllMembers cid))
             to_recheck
         in
-        ( add_changed mode changed dep,
+        ( add_changed changed dep,
           DepSet.union deps to_redecl,
           DepSet.union deps to_recheck )
     in
@@ -510,7 +506,7 @@ let get_class_deps
     let is_changed = phys_equal is_changed `Changed in
     let changed =
       if is_changed then
-        add_changed mode changed dep
+        add_changed changed dep
       else
         changed
     in
@@ -555,7 +551,7 @@ let get_record_def_deps
     let dep = Dep.Type rdid in
     let where_record_is_used = Typing_deps.get_ideps mode dep in
     let to_recheck = DepSet.union where_record_is_used to_recheck in
-    ( (add_changed mode changed dep, to_redecl, to_recheck),
+    ( (add_changed changed dep, to_redecl, to_recheck),
       old_record_defs_missing + 1 )
   | (Some rd1, Some rd2) ->
     if Poly.( = ) rd1 rd2 then
@@ -564,8 +560,7 @@ let get_record_def_deps
       let dep = Dep.Type rdid in
       let where_record_is_used = Typing_deps.get_ideps mode dep in
       let to_recheck = DepSet.union where_record_is_used to_recheck in
-      ( (add_changed mode changed dep, to_redecl, to_recheck),
-        old_record_defs_missing )
+      ((add_changed changed dep, to_redecl, to_recheck), old_record_defs_missing)
 
 let get_record_defs_deps ~ctx old_record_defs record_defs =
   let mode = Provider_context.get_deps_mode ctx in

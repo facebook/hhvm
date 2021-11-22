@@ -98,7 +98,6 @@ let make_cursor_id (id : int) (client_config : client_config) : cursor_id =
 let typecheck_and_get_deps_and_errors_job
     (ctx : Provider_context.t) _acc (paths : Relative_path.t list) :
     Errors.t * dep_graph_delta =
-  let deps_mode = Provider_context.get_deps_mode ctx in
   List.fold
     paths
     ~init:(Errors.empty, HashSet.create ())
@@ -110,12 +109,8 @@ let typecheck_and_get_deps_and_errors_job
         Typing_deps.add_dependency_callback
           "typecheck_and_get_deps_and_errors_job"
           (fun dependent dependency ->
-            let dependent =
-              Typing_deps.(Dep.make (hash_mode deps_mode) dependent)
-            in
-            let dependency =
-              Typing_deps.(Dep.make (hash_mode deps_mode) dependency)
-            in
+            let dependent = Typing_deps.Dep.make dependent in
+            let dependency = Typing_deps.Dep.make dependency in
             HashSet.add deps (dependent, dependency));
         let { Tast_provider.Compute_tast_and_errors.errors; _ } =
           Tast_provider.compute_tast_and_errors_unquarantined ~ctx ~entry

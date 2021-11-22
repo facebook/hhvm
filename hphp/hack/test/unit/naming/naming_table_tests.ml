@@ -17,8 +17,6 @@ open Hh_prelude
 
 let deps_mode = Typing_deps_mode.CustomMode None
 
-let hash_mode = Typing_deps_mode.hash_mode deps_mode
-
 module Types_pos_asserter = Asserter.Make_asserter (struct
   type t = FileInfo.pos * Naming_types.kind_of_type
 
@@ -651,7 +649,7 @@ let test_naming_table_query_by_dep_hash () =
         (Typing_deps.Dep.GConst "\\Qux"
         |> Typing_deps.Dep.make
         |> Typing_deps.DepSet.singleton
-        |> Naming_table.get_64bit_dep_set_files backed_naming_table deps_mode
+        |> Naming_table.get_64bit_dep_set_files backed_naming_table
         |> Relative_path.Set.elements)
         "Bulk lookup for const should be correct";
       Asserter.Relative_path_asserter.assert_list_equals
@@ -659,7 +657,7 @@ let test_naming_table_query_by_dep_hash () =
         (Typing_deps.Dep.Fun "\\bar"
         |> Typing_deps.Dep.make
         |> Typing_deps.DepSet.singleton
-        |> Naming_table.get_64bit_dep_set_files backed_naming_table deps_mode
+        |> Naming_table.get_64bit_dep_set_files backed_naming_table
         |> Relative_path.Set.elements)
         "Bulk lookup for fun should be correct";
       Asserter.Relative_path_asserter.assert_list_equals
@@ -667,7 +665,7 @@ let test_naming_table_query_by_dep_hash () =
         (Typing_deps.Dep.Type "\\Baz"
         |> Typing_deps.Dep.make
         |> Typing_deps.DepSet.singleton
-        |> Naming_table.get_64bit_dep_set_files backed_naming_table deps_mode
+        |> Naming_table.get_64bit_dep_set_files backed_naming_table
         |> Relative_path.Set.elements)
         "Bulk lookup for class should be correct";
 
@@ -690,7 +688,7 @@ let test_naming_table_query_by_dep_hash () =
              (Typing_deps.Dep.Type "\\Baz"
              |> Typing_deps.Dep.make
              |> Typing_deps.DepSet.singleton)
-        |> Naming_table.get_64bit_dep_set_files backed_naming_table deps_mode
+        |> Naming_table.get_64bit_dep_set_files backed_naming_table
         |> Relative_path.Set.elements)
         "Bulk lookup for multiple elements should be correct";
 
@@ -730,7 +728,7 @@ let test_naming_table_query_by_dep_hash () =
         (Typing_deps.Dep.Type "\\Baz"
         |> Typing_deps.Dep.make
         |> Typing_deps.DepSet.singleton
-        |> Naming_table.get_64bit_dep_set_files new_naming_table deps_mode
+        |> Naming_table.get_64bit_dep_set_files new_naming_table
         |> Relative_path.Set.elements)
         "\\Baz should now be located in bar.php";
 

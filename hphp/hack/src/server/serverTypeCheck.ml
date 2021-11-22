@@ -1531,10 +1531,6 @@ functor
         |> Telemetry.bool_
              ~key:"direct_decl"
              ~value:(use_direct_decl_parser ctx)
-        |> Telemetry.bool_
-             ~key:"ss_64bit"
-             ~value:
-               (Typing_deps_mode.is_64bit @@ Provider_context.get_deps_mode ctx)
       in
 
       if not (shallow_decl_enabled ctx) then (

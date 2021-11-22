@@ -3,16 +3,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e1a8baeed85f8d3a1ef29f8ce1081b25>>
+// @generated SignedSource<<eda91fc96670a2d02a4cc386f3a70aca>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
 
-use arena_trait::TrivialDrop;
 use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
 use ocamlrep_derive::FromOcamlRep;
-use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
@@ -56,28 +54,3 @@ pub enum TypingDepsMode {
         human_readable_dep_map_dir: Option<String>,
     },
 }
-
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(C)]
-pub enum HashMode {
-    Hash32Bit,
-    Hash64Bit,
-}
-impl TrivialDrop for HashMode {}
-arena_deserializer::impl_deserialize_in_arena!(HashMode);

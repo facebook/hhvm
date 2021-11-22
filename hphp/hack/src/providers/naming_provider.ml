@@ -816,16 +816,12 @@ module ByHash = struct
   cache/delta also uses 64bit dephashes. Condition (2) is only met by shared memory.
   Fortunately, 64bit+sharedmem is the only scenario where we ever look up dephashes! *)
   let need_update_files (ctx : Provider_context.t) : bool =
-    let hash_mode =
-      Provider_context.get_deps_mode ctx |> Typing_deps_mode.hash_mode
-    in
-    match (hash_mode, Provider_context.get_backend ctx) with
-    | (Typing_deps_mode.Hash64Bit, Provider_backend.Shared_memory) -> false
-    | (hash_mode, backend) ->
+    match Provider_context.get_backend ctx with
+    | Provider_backend.Shared_memory -> false
+    | backend ->
       let desc =
         Printf.sprintf
-          "dephash_lookup_%s_%s"
-          (Typing_deps_mode.show_hash_mode hash_mode)
+          "dephash_lookup_%s"
           (Provider_backend.t_to_string backend)
       in
       Hh_logger.log "INVARIANT_VIOLATION_BUG [%s]" desc;

@@ -243,16 +243,13 @@ let get_file_info_unsafe a key =
   | Some info -> info
   | None -> raise File_info_not_found
 
-let get_64bit_dep_set_files
-    (naming_table : t) (mode : Typing_deps_mode.t) (deps : Typing_deps.DepSet.t)
-    : Relative_path.Set.t =
-  match (naming_table, Typing_deps_mode.hash_mode mode) with
-  | (Unbacked _, _) ->
+let get_64bit_dep_set_files (naming_table : t) (deps : Typing_deps.DepSet.t) :
+    Relative_path.Set.t =
+  match naming_table with
+  | Unbacked _ ->
     failwith
       "get_64bit_dep_set_files not supported for unbacked naming tables. Use Typing_deps.get_ifiles instead."
-  | (_, Typing_deps.Mode.Hash32Bit) ->
-    failwith "get_64bit_dep_set_files not supported for 32bit deps."
-  | (Backed (local_changes, db_path), Typing_deps.Mode.Hash64Bit) ->
+  | Backed (local_changes, db_path) ->
     let base_results =
       Typing_deps.DepSet.fold
         deps

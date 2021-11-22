@@ -565,8 +565,6 @@ end
 (** Registeres Rust custom types with the OCaml runtime, supporting deserialization *)
 let () = CustomGraph.hh_custom_dep_graph_register_custom_types ()
 
-let hash_mode = Typing_deps_mode.hash_mode
-
 let deps_of_file_info (file_info : FileInfo.t) : Dep.t list =
   let {
     FileInfo.funs;

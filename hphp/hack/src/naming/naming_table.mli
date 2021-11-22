@@ -51,8 +51,7 @@ val get_file_info_unsafe : t -> Relative_path.t -> FileInfo.t
 
 (** Look up the files declaring the symbols provided in the given set of
 dependency hashes. Only works for backed naming tables, and 64bit dep_sets *)
-val get_64bit_dep_set_files :
-  t -> Typing_deps_mode.t -> Typing_deps.DepSet.t -> Relative_path.Set.t
+val get_64bit_dep_set_files : t -> Typing_deps.DepSet.t -> Relative_path.Set.t
 
 val has_file : t -> Relative_path.t -> bool
 

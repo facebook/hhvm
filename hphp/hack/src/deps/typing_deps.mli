@@ -160,8 +160,6 @@ type dep_edge
 
 type dep_edges
 
-val hash_mode : Typing_deps_mode.t -> Typing_deps_mode.hash_mode
-
 val worker_id : int option ref
 
 val trace : bool ref

@@ -27,18 +27,3 @@ type t =
         * dependency graph. If it is present, only new edges will be written,
         * of not, all edges will be written. *)
 [@@deriving show]
-
-type hash_mode =
-  | Hash32Bit
-  | Hash64Bit
-[@@deriving show, eq]
-
-let hash_mode : t -> hash_mode = function
-  | CustomMode _ -> Hash64Bit
-  | SaveCustomMode _ -> Hash64Bit
-
-let is_64bit : t -> bool =
- fun mode ->
-  match hash_mode mode with
-  | Hash32Bit -> false
-  | Hash64Bit -> true

@@ -25,7 +25,6 @@ exception C_assertion_failure of string
 type config = {
   global_size: int;
   heap_size: int;
-  dep_table_pow: int;
   hash_table_pow: int;
   shm_use_sharded_hashtbl: bool;
   shm_dirs: string list;
@@ -58,7 +57,6 @@ type handle = private {
   h_fd: Unix.file_descr;
   h_global_size: int;
   h_heap_size: int;
-  h_dep_table_pow_val: int;
   h_hash_table_pow_val: int;
   h_num_workers_val: int;
   h_shm_use_sharded_hashtbl: bool;

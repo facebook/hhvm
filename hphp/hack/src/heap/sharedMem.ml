@@ -21,7 +21,6 @@ let ref_has_done_init = ref false
 type config = {
   global_size: int;
   heap_size: int;
-  dep_table_pow: int;
   hash_table_pow: int;
   shm_use_sharded_hashtbl: bool;
   shm_dirs: string list;
@@ -38,8 +37,6 @@ let default_config =
   {
     global_size = gig;
     heap_size = 20 * gig;
-    dep_table_pow = 17;
-    (* 1 << 17 *)
     hash_table_pow = 18;
     (* 1 << 18 *)
     shm_dirs = [GlobalConfig.shm_dir; GlobalConfig.tmp_dir];
@@ -55,7 +52,6 @@ let empty_config =
   {
     global_size = 0;
     heap_size = 0;
-    dep_table_pow = 0;
     hash_table_pow = 0;
     shm_dirs = [];
     shm_use_sharded_hashtbl = false;
@@ -70,7 +66,6 @@ type handle = private {
   h_fd: Unix.file_descr;
   h_global_size: int;
   h_heap_size: int;
-  h_dep_table_pow_val: int;
   h_hash_table_pow_val: int;
   h_num_workers_val: int;
   h_shm_use_sharded_hashtbl: bool;

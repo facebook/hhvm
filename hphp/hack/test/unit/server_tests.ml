@@ -314,7 +314,6 @@ let () =
       {
         global_size = 1024;
         heap_size = 1024 * 8;
-        dep_table_pow = 16;
         hash_table_pow = 10;
         shm_dirs = [];
         shm_use_sharded_hashtbl = false;

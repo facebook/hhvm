@@ -247,7 +247,6 @@ extern value shmffi_num_entries();
 static size_t global_size_b;
 static size_t global_size;
 static size_t heap_size;
-static size_t dep_table_pow;
 static size_t hash_table_pow;
 static size_t shm_use_sharded_hashtbl;
 
@@ -894,7 +893,6 @@ static void init_shared_globals(
 static void set_sizes(
   uint64_t config_global_size,
   uint64_t config_heap_size,
-  uint64_t config_dep_table_pow,
   uint64_t config_hash_table_pow,
   uint64_t config_num_workers) {
 
@@ -903,8 +901,6 @@ static void set_sizes(
   global_size = config_global_size;
   global_size_b = sizeof(global_storage[0]) + config_global_size;
   heap_size = config_heap_size;
-  // TODO(hverr): no longer used
-  dep_table_pow = config_dep_table_pow;
   hash_table_pow = config_hash_table_pow;
 
   hashtbl_size    = 1ul << config_hash_table_pow;
@@ -928,24 +924,21 @@ CAMLprim value hh_shared_init(
 ) {
   CAMLparam3(config_val, shm_dir_val, num_workers_val);
   CAMLlocal1(connector);
-  CAMLlocal5(
+  CAMLlocal4(
     config_global_size_val,
     config_heap_size_val,
-    config_dep_table_pow_val,
     config_hash_table_pow_val,
     config_shm_use_sharded_hashtbl
   );
 
   config_global_size_val = Field(config_val, 0);
   config_heap_size_val = Field(config_val, 1);
-  config_dep_table_pow_val = Field(config_val, 2);
-  config_hash_table_pow_val = Field(config_val, 3);
-  config_shm_use_sharded_hashtbl = Field(config_val, 4);
+  config_hash_table_pow_val = Field(config_val, 2);
+  config_shm_use_sharded_hashtbl = Field(config_val, 3);
 
   set_sizes(
     Long_val(config_global_size_val),
     Long_val(config_heap_size_val),
-    Long_val(config_dep_table_pow_val),
     Long_val(config_hash_table_pow_val),
     Long_val(num_workers_val)
   );
@@ -961,7 +954,7 @@ CAMLprim value hh_shared_init(
   memfd_init(
     shm_dir,
     shared_mem_size,
-    Long_val(Field(config_val, 6))
+    Long_val(Field(config_val, 5))
   );
   assert(memfd_shared_mem >= 0);
   char *shared_mem_init = memfd_map(memfd_shared_mem, SHARED_MEM_INIT, shared_mem_size);
@@ -984,9 +977,9 @@ CAMLprim value hh_shared_init(
 #endif
 
   init_shared_globals(
-    Long_val(Field(config_val, 7)),
-    Double_val(Field(config_val, 8)),
-    Long_val(Field(config_val, 9))
+    Long_val(Field(config_val, 6)),
+    Double_val(Field(config_val, 7)),
+    Long_val(Field(config_val, 8))
   );
   // Checking that we did the maths correctly.
   assert(*heap + heap_size == shared_mem + shared_mem_size);
@@ -1007,11 +1000,10 @@ CAMLprim value hh_shared_init(
   Store_field(connector, 0, Val_handle(memfd_shared_mem));
   Store_field(connector, 1, config_global_size_val);
   Store_field(connector, 2, config_heap_size_val);
-  Store_field(connector, 3, config_dep_table_pow_val);
-  Store_field(connector, 4, config_hash_table_pow_val);
-  Store_field(connector, 5, num_workers_val);
-  Store_field(connector, 6, config_shm_use_sharded_hashtbl);
-  Store_field(connector, 7, Val_handle(memfd_shmffi));
+  Store_field(connector, 3, config_hash_table_pow_val);
+  Store_field(connector, 4, num_workers_val);
+  Store_field(connector, 5, config_shm_use_sharded_hashtbl);
+  Store_field(connector, 6, Val_handle(memfd_shmffi));
 
   CAMLreturn(connector);
 }
@@ -1024,11 +1016,10 @@ value hh_connect(value connector, value worker_id_val) {
     Long_val(Field(connector, 1)),
     Long_val(Field(connector, 2)),
     Long_val(Field(connector, 3)),
-    Long_val(Field(connector, 4)),
-    Long_val(Field(connector, 5))
+    Long_val(Field(connector, 4))
   );
-  shm_use_sharded_hashtbl = Bool_val(Field(connector, 6));
-  memfd_shmffi = Handle_val(Field(connector, 7));
+  shm_use_sharded_hashtbl = Bool_val(Field(connector, 5));
+  memfd_shmffi = Handle_val(Field(connector, 6));
   worker_id = Long_val(worker_id_val);
 #ifdef _WIN32
   my_pid = 1; // Trick
@@ -1058,11 +1049,10 @@ value hh_get_handle(void) {
   Store_field(connector, 0, Val_handle(memfd_shared_mem));
   Store_field(connector, 1, Val_long(global_size));
   Store_field(connector, 2, Val_long(heap_size));
-  Store_field(connector, 3, Val_long(dep_table_pow));
-  Store_field(connector, 4, Val_long(hash_table_pow));
-  Store_field(connector, 5, Val_long(num_workers));
-  Store_field(connector, 6, Val_bool(shm_use_sharded_hashtbl));
-  Store_field(connector, 7, Val_bool(memfd_shmffi));
+  Store_field(connector, 3, Val_long(hash_table_pow));
+  Store_field(connector, 4, Val_long(num_workers));
+  Store_field(connector, 5, Val_bool(shm_use_sharded_hashtbl));
+  Store_field(connector, 6, Val_bool(memfd_shmffi));
 
   CAMLreturn(connector);
 }

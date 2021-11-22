@@ -17,7 +17,6 @@ let () =
       {
         SharedMem.global_size = 0;
         heap_size = 0;
-        dep_table_pow = 0;
         hash_table_pow = 0;
         shm_dirs = [];
         shm_use_sharded_hashtbl = false;

@@ -72,7 +72,6 @@ let make_sharedmem_config config options local_config =
   let shm_dirs = local_config.ServerLocalConfig.shm_dirs in
   let global_size = int_ "sharedmem_global_size" ~default:global_size config in
   let heap_size = int_ "sharedmem_heap_size" ~default:heap_size config in
-  let dep_table_pow = int_ "sharedmem_dep_table_pow" ~default:17 config in
   let hash_table_pow = int_ "sharedmem_hash_table_pow" ~default:18 config in
   let log_level = int_ "sharedmem_log_level" ~default:0 config in
   let sample_rate = float_ "sharedmem_sample_rate" ~default:0.0 config in
@@ -84,22 +83,19 @@ let make_sharedmem_config config options local_config =
   let shm_min_avail =
     int_ "sharedmem_minimum_available" ~default:shm_min_avail config
   in
-  let (global_size, heap_size, dep_table_pow, hash_table_pow, compression) =
+  let (global_size, heap_size, hash_table_pow, compression) =
     match ServerArgs.ai_mode options with
-    | None ->
-      (global_size, heap_size, dep_table_pow, hash_table_pow, compression)
+    | None -> (global_size, heap_size, hash_table_pow, compression)
     | Some ai_options ->
       Ai_options.modify_shared_mem_sizes
         global_size
         heap_size
-        dep_table_pow
         hash_table_pow
         ai_options
   in
   {
     SharedMem.global_size;
     heap_size;
-    dep_table_pow;
     hash_table_pow;
     log_level;
     sample_rate;

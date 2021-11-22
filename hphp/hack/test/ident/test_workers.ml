@@ -33,7 +33,6 @@ let () =
         SharedMem.global_size = 0;
         heap_size = 10 * 1024 * 1024;
         (* 10 MiB *)
-        dep_table_pow = 0;
         hash_table_pow = 14;
         (* 256 KiB *)
         shm_dirs = [];

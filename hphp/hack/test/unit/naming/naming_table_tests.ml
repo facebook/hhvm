@@ -15,7 +15,7 @@
 
 open Hh_prelude
 
-let deps_mode = Typing_deps_mode.CustomMode None
+let deps_mode = Typing_deps_mode.InMemoryMode None
 
 module Types_pos_asserter = Asserter.Make_asserter (struct
   type t = FileInfo.pos * Naming_types.kind_of_type

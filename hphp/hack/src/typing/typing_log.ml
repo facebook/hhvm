@@ -74,7 +74,7 @@ let lastenv =
        (Provider_context.empty_for_debugging
           ~popt:ParserOptions.default
           ~tcopt:TypecheckerOptions.default
-          ~deps_mode:(Typing_deps_mode.CustomMode None))
+          ~deps_mode:(Typing_deps_mode.InMemoryMode None))
        Relative_path.default
        ~droot:None)
 

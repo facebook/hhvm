@@ -1321,9 +1321,9 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
       let human_readable_dep_map_dir =
         ServerArgs.save_human_readable_64bit_dep_map options
       in
-      Typing_deps_mode.SaveCustomMode
+      Typing_deps_mode.SaveToDiskMode
         { graph = None; new_edges_dir; human_readable_dep_map_dir }
-    | None -> Typing_deps_mode.CustomMode None
+    | None -> Typing_deps_mode.InMemoryMode None
   in
 
   (* The OCaml default is 500, but we care about minimizing the memory

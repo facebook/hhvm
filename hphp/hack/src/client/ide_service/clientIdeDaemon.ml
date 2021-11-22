@@ -410,7 +410,7 @@ let initialize1 (param : ClientIdeMessage.Initialize_from_saved_state.t) :
   let { ServerEnv.tcopt; popt; gleanopt; _ } =
     ServerEnvBuild.make_env
       ~init_id
-      ~deps_mode:(Typing_deps_mode.CustomMode None)
+      ~deps_mode:(Typing_deps_mode.InMemoryMode None)
       genv.ServerEnv.config
   in
 
@@ -528,7 +528,7 @@ let make_empty_ctx (istate : istate) : Provider_context.t =
     ~popt:istate.icommon.popt
     ~tcopt:istate.icommon.tcopt
     ~backend:(Provider_backend.Local_memory istate.icommon.local_memory)
-    ~deps_mode:(Typing_deps_mode.CustomMode None)
+    ~deps_mode:(Typing_deps_mode.InMemoryMode None)
 
 (** Constructs a temporary ctx with just one entry. *)
 let make_singleton_ctx (istate : istate) (entry : Provider_context.entry) :
@@ -702,7 +702,7 @@ let handle_request :
                    ~tcopt:dstate.dcommon.tcopt
                    ~backend:
                      (Provider_backend.Local_memory dstate.dcommon.local_memory)
-                   ~deps_mode:(Typing_deps_mode.CustomMode None))
+                   ~deps_mode:(Typing_deps_mode.InMemoryMode None))
                 ~root:param.root
                 ~naming_table_load_info:param.naming_table_load_info
             in

@@ -129,8 +129,8 @@ impl UnsafeDepGraph {
         let depgraph = DEPGRAPH.get_or_try_init::<_, String>(|| {
             let mode = mode.to_rust().unwrap();
             match mode {
-                TypingDepsMode::CustomMode(None)
-                | TypingDepsMode::SaveCustomMode {
+                TypingDepsMode::InMemoryMode(None)
+                | TypingDepsMode::SaveToDiskMode {
                     graph: None,
                     new_edges_dir: _,
                     human_readable_dep_map_dir: _,
@@ -138,8 +138,8 @@ impl UnsafeDepGraph {
                     // Enabled, but we don't have a saved-state, so we can't open it
                     Ok(None)
                 }
-                TypingDepsMode::CustomMode(Some(depgraph_fn))
-                | TypingDepsMode::SaveCustomMode {
+                TypingDepsMode::InMemoryMode(Some(depgraph_fn))
+                | TypingDepsMode::SaveToDiskMode {
                     graph: Some(depgraph_fn),
                     new_edges_dir: _,
                     human_readable_dep_map_dir: _,

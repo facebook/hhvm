@@ -188,8 +188,8 @@ val register_discovered_dep_edges : dep_edges -> unit
 
 (** Save discovered edges to a binary file.
   *
-  * - If mode is [CustomMode], the dep table delta in [typing.rs] is saved.
-  * - If mode is [SaveCustomMode], an exception is raised.
+  * - If mode is [InMemoryMode], the dep table delta in [typing.rs] is saved.
+  * - If mode is [SaveToDiskMode], an exception is raised.
   *
   * Setting [reset_state_after_saving] will empty the dep table delta in
   * [typing.rs].
@@ -199,11 +199,11 @@ val save_discovered_edges :
 
 (** Load discovered edges from a binary file.
   *
-  * - If mode is [CustomMode], the binary file is assumed to contain 64-bit
+  * - If mode is [InMemoryMode], the binary file is assumed to contain 64-bit
   *   hashes and they will be added to the dep table delta in [typing.rs].
   *   If we have an existing table attached, we will first filter out edges
   *   that are already present in the attached table.
-  * - If mode is [SaveCustomMode], the file is assumed to contain 64-bit
+  * - If mode is [SaveToDiskMode], the file is assumed to contain 64-bit
   *   hashes and they will be added ot the current worker's on-disk
   *   dependency edge file.
   *)

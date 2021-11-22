@@ -86,13 +86,13 @@ let setup_server ?custom_config ?(hhi_files = []) ?edges_dir () =
   let deps_mode =
     match edges_dir with
     | Some edges_dir ->
-      Typing_deps_mode.SaveCustomMode
+      Typing_deps_mode.SaveToDiskMode
         {
           graph = None;
           new_edges_dir = edges_dir;
           human_readable_dep_map_dir = None;
         }
-    | None -> Typing_deps_mode.CustomMode None
+    | None -> Typing_deps_mode.InMemoryMode None
   in
   let result =
     match custom_config with
@@ -733,7 +733,7 @@ let load_state
   let env =
     ServerEnvBuild.make_env
       ~init_id
-      ~deps_mode:(Typing_deps_mode.CustomMode (Some deptable_fn))
+      ~deps_mode:(Typing_deps_mode.InMemoryMode (Some deptable_fn))
       !genv.ServerEnv.config
   in
   match

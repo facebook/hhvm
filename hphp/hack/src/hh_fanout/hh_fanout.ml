@@ -140,7 +140,7 @@ let load_saved_state ~(env : env) : saved_state_result Lwt.t =
   in
 
   let deps_mode =
-    Typing_deps_mode.CustomMode (Some (Path.to_string dep_table_path))
+    Typing_deps_mode.InMemoryMode (Some (Path.to_string dep_table_path))
   in
   let setup_result = set_up_global_environment env ~deps_mode in
 

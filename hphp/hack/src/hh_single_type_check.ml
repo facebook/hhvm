@@ -1943,7 +1943,7 @@ let handle_mode
       {
         (ServerEnvBuild.make_env
            ~init_id
-           ~deps_mode:(Typing_deps_mode.CustomMode None)
+           ~deps_mode:(Typing_deps_mode.InMemoryMode None)
            genv.ServerEnv.config)
         with
         ServerEnv.naming_table;
@@ -1985,7 +1985,7 @@ let handle_mode
       {
         (ServerEnvBuild.make_env
            ~init_id
-           ~deps_mode:(Typing_deps_mode.CustomMode None)
+           ~deps_mode:(Typing_deps_mode.InMemoryMode None)
            genv.ServerEnv.config)
         with
         ServerEnv.naming_table;
@@ -2491,7 +2491,7 @@ let decl_and_run_mode
     Provider_context.empty_for_test
       ~popt
       ~tcopt
-      ~deps_mode:(Typing_deps_mode.CustomMode None)
+      ~deps_mode:(Typing_deps_mode.InMemoryMode None)
   in
   (* We make the following call for the side-effect of updating ctx's "naming-table fallback"
      so it will look in the sqlite database for names it doesn't know.

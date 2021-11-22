@@ -1164,13 +1164,13 @@ let post_saved_state_initialization
           let human_readable_dep_map_dir =
             ServerArgs.save_human_readable_64bit_dep_map genv.options
           in
-          Typing_deps_mode.SaveCustomMode
+          Typing_deps_mode.SaveToDiskMode
             {
               graph = Some deptable_fn;
               new_edges_dir;
               human_readable_dep_map_dir;
             }
-        | None -> Typing_deps_mode.CustomMode (Some deptable_fn));
+        | None -> Typing_deps_mode.InMemoryMode (Some deptable_fn));
     }
   in
 

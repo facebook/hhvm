@@ -84,4 +84,4 @@ let init_with_defaults =
     ~shmem_config:SharedMem.default_config
     ~popt:ParserOptions.default
     ~tcopt:TypecheckerOptions.default
-    ~deps_mode:(Typing_deps_mode.CustomMode None)
+    ~deps_mode:(Typing_deps_mode.InMemoryMode None)

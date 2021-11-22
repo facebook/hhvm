@@ -8,13 +8,13 @@
 
 (** Which dependency graph format are we using? *)
 type t =
-  | CustomMode of string option
+  | InMemoryMode of string option
       (** Keep track of newly discovered edges in an in-memory delta.
         *
         * Optionally, the in-memory delta is backed by a pre-computed
         * dependency graph stored using a custom file format.
         *)
-  | SaveCustomMode of {
+  | SaveToDiskMode of {
       graph: string option;
       new_edges_dir: string;
       human_readable_dep_map_dir: string option;

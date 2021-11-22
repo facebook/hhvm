@@ -286,8 +286,8 @@ let dump_dep_graph_64bit ~mode ~db_name ~incremental_info_file =
   let t = Unix.gettimeofday () in
   let base_dep_graph =
     match mode with
-    | Typing_deps_mode.CustomMode base_dep_graph -> base_dep_graph
-    | Typing_deps_mode.SaveCustomMode { graph; _ } -> graph
+    | Typing_deps_mode.InMemoryMode base_dep_graph -> base_dep_graph
+    | Typing_deps_mode.SaveToDiskMode { graph; _ } -> graph
   in
   let () =
     let open Hh_json in
@@ -314,8 +314,8 @@ let save_state
   let () = Sys_utils.mkdir_p (Filename.dirname output_filename) in
   let db_name =
     match env.ServerEnv.deps_mode with
-    | Typing_deps_mode.CustomMode _
-    | Typing_deps_mode.SaveCustomMode _ ->
+    | Typing_deps_mode.InMemoryMode _
+    | Typing_deps_mode.SaveToDiskMode _ ->
       output_filename ^ "_64bit_dep_graph.delta"
   in
   let () =
@@ -345,7 +345,7 @@ let save_state
     Hh_logger.log_duration "Saving saved-state naming/errors/decls took" t
   in
   match env.ServerEnv.deps_mode with
-  | Typing_deps_mode.CustomMode _ ->
+  | Typing_deps_mode.InMemoryMode _ ->
     let incremental_info_file = output_filename ^ "_incremental_info.json" in
     dump_errors_json output_filename env.ServerEnv.errorl;
     saved_state_build_revision_write ~base_file_name:output_filename;
@@ -353,7 +353,7 @@ let save_state
       ~mode:env.ServerEnv.deps_mode
       ~db_name
       ~incremental_info_file
-  | Typing_deps_mode.SaveCustomMode
+  | Typing_deps_mode.SaveToDiskMode
       { graph = _; new_edges_dir; human_readable_dep_map_dir } ->
     dump_errors_json output_filename env.ServerEnv.errorl;
     saved_state_build_revision_write ~base_file_name:output_filename;

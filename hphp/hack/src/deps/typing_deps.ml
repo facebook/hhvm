@@ -276,8 +276,8 @@ module VisitedSet = struct
 
   let make mode : t =
     match mode with
-    | CustomMode _
-    | SaveCustomMode _ ->
+    | InMemoryMode _
+    | SaveToDiskMode _ ->
       CustomVisitedSet (hh_visited_set_make ())
 end
 
@@ -407,7 +407,7 @@ end
 module SaveHumanReadableDepMap = struct
   let should_save mode =
     match mode with
-    | SaveCustomMode { human_readable_dep_map_dir = Some _; _ } -> true
+    | SaveToDiskMode { human_readable_dep_map_dir = Some _; _ } -> true
     | _ -> false
 
   let human_readable_dep_map_channel_ref : Out_channel.t option ref = ref None
@@ -417,7 +417,7 @@ module SaveHumanReadableDepMap = struct
     | None ->
       let directory =
         match mode with
-        | SaveCustomMode { human_readable_dep_map_dir = Some d; _ } -> d
+        | SaveToDiskMode { human_readable_dep_map_dir = Some d; _ } -> d
         | _ -> failwith "programming error: no human_readable_dep_map_dir"
       in
       let () =
@@ -495,7 +495,7 @@ module SaveCustomGraph = struct
 
   let destination_filepath mode =
     match mode with
-    | SaveCustomMode { new_edges_dir; _ } ->
+    | SaveToDiskMode { new_edges_dir; _ } ->
       let worker_id = Base.Option.value_exn !worker_id in
       Filename.concat
         new_edges_dir
@@ -633,8 +633,8 @@ let deps_of_file_info (file_info : FileInfo.t) : Dep.t list =
 module Telemetry = struct
   let depgraph_delta_num_edges mode =
     match mode with
-    | CustomMode _ -> Some (CustomGraph.dep_graph_delta_num_edges ())
-    | SaveCustomMode _ -> None
+    | InMemoryMode _ -> Some (CustomGraph.dep_graph_delta_num_edges ())
+    | SaveToDiskMode _ -> None
 end
 
 type dep_edge = CustomGraph.dep_edge
@@ -651,31 +651,31 @@ type dep_edges = CustomGraph.DepEdgeSet.t option
     *)
 let allow_dependency_table_reads mode flag =
   match mode with
-  | CustomMode _
-  | SaveCustomMode _ ->
+  | InMemoryMode _
+  | SaveToDiskMode _ ->
     CustomGraph.allow_dependency_table_reads flag
 
 let add_idep mode dependent dependency =
   match mode with
-  | CustomMode _ -> CustomGraph.add_idep mode dependent dependency
-  | SaveCustomMode _ -> SaveCustomGraph.add_idep mode dependent dependency
+  | InMemoryMode _ -> CustomGraph.add_idep mode dependent dependency
+  | SaveToDiskMode _ -> SaveCustomGraph.add_idep mode dependent dependency
 
 let idep_exists mode dependent dependency =
   match mode with
-  | CustomMode _ -> CustomGraph.idep_exists mode dependent dependency
+  | InMemoryMode _ -> CustomGraph.idep_exists mode dependent dependency
   | _ -> false
 
 let dep_edges_make () : dep_edges = Some CustomGraph.DepEdgeSet.empty
 
 let flush_ideps_batch mode : dep_edges =
   match mode with
-  | CustomMode _ ->
+  | InMemoryMode _ ->
     (* Make sure we don't miss any dependencies! *)
     CustomGraph.filter_discovered_deps_batch mode;
     let old_batch = !CustomGraph.filtered_deps_batch in
     CustomGraph.filtered_deps_batch := CustomGraph.DepEdgeSet.empty;
     Some old_batch
-  | SaveCustomMode _ ->
+  | SaveToDiskMode _ ->
     SaveCustomGraph.filter_discovered_deps_batch ~flush:true mode;
     SaveHumanReadableDepMap.export_to_disk ~flush:true mode;
     None
@@ -691,19 +691,19 @@ let register_discovered_dep_edges : dep_edges -> unit = function
 
 let save_discovered_edges mode ~dest ~reset_state_after_saving =
   match mode with
-  | CustomMode _ -> CustomGraph.save_delta dest reset_state_after_saving
-  | SaveCustomMode _ ->
-    failwith "save_discovered_edges not supported for SaveCustomMode"
+  | InMemoryMode _ -> CustomGraph.save_delta dest reset_state_after_saving
+  | SaveToDiskMode _ ->
+    failwith "save_discovered_edges not supported for SaveToDiskMode"
 
 let load_discovered_edges mode source =
   match mode with
-  | CustomMode _ -> CustomGraph.load_delta mode source
-  | SaveCustomMode _ -> SaveCustomGraph.save_delta mode ~source
+  | InMemoryMode _ -> CustomGraph.load_delta mode source
+  | SaveToDiskMode _ -> SaveCustomGraph.save_delta mode ~source
 
 let get_ideps_from_hash mode hash =
   match mode with
-  | CustomMode _
-  | SaveCustomMode _ ->
+  | InMemoryMode _
+  | SaveToDiskMode _ ->
     CustomGraph.get_ideps_from_hash mode hash
 
 let get_ideps mode dependency = get_ideps_from_hash mode (Dep.make dependency)

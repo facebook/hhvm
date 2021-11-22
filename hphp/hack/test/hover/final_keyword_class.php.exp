@@ -1,0 +1,4 @@
+final
+A `final` class cannot be extended by other classes.
+
+To restrict which classes can extend this, use `<<__Sealed()>>`.

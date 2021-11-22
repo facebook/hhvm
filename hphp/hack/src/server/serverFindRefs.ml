@@ -208,6 +208,7 @@ let get_action symbol (filename, file_content, line, char) =
   | SO.GConst -> Some (GConst name)
   | SO.LocalVar -> Some (LocalVar { filename; file_content; line; char })
   | SO.Attribute _ -> Some (Class name)
+  | SO.Keyword _
   | SO.Method (SO.UnknownClass, _)
   | SO.Property (SO.UnknownClass, _)
   | SO.ClassConst (SO.UnknownClass, _) ->

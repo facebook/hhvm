@@ -151,6 +151,7 @@ let go ctx ast result =
         get_member_def ctx (Static_method, m.ce_origin, method_name)
     )
   | SO.Method (SO.UnknownClass, _) -> None
+  | SO.Keyword _ -> None
   | SO.Property (SO.ClassName c_name, property_name)
   | SO.XhpLiteralAttr (c_name, property_name) ->
     Decl_provider.get_class ctx c_name >>= fun class_ ->

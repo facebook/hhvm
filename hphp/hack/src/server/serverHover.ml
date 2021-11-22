@@ -255,6 +255,13 @@ let make_hover_attr_docs name =
     ]
   | _ -> []
 
+let keyword_info (khi : SymbolOccurrence.keyword_with_hover_docs) : string =
+  match khi with
+  | SymbolOccurrence.FinalOnClass ->
+    "A `final` class cannot be extended by other classes.\n\nTo restrict which classes can extend this, use `<<__Sealed()>>`."
+  | SymbolOccurrence.FinalOnMethod ->
+    "A `final` method cannot be overridden in child classes."
+
 let make_hover_info ctx env_and_ty entry occurrence def_opt =
   SymbolOccurrence.(
     Typing_defs.(
@@ -293,6 +300,7 @@ let make_hover_info ctx env_and_ty entry occurrence def_opt =
               make_hover_doc_block ctx entry occurrence def_opt;
               make_hover_const_definition entry def_opt;
             ]
+        | { type_ = Keyword info; _ } -> [keyword_info info]
         | _ ->
           List.concat
             [

@@ -24,6 +24,11 @@ type receiver_class =
   | UnknownClass (* invoked dynamically *)
 [@@deriving ord, eq]
 
+type keyword_with_hover_docs =
+  | FinalOnClass
+  | FinalOnMethod
+[@@deriving ord, eq]
+
 type kind =
   | Class of class_id_type
   | Record
@@ -39,6 +44,7 @@ type kind =
   | Attribute of override_info option
   (* enum class name, label name *)
   | EnumClassLabel of string * string
+  | Keyword of keyword_with_hover_docs
 [@@deriving ord, eq]
 
 type 'a t = {
@@ -65,6 +71,7 @@ let kind_to_string = function
   | GConst -> "global_const"
   | Attribute _ -> "attribute"
   | EnumClassLabel _ -> "enum_class_label"
+  | Keyword _ -> "keyword"
 
 let enclosing_class occurrence =
   match occurrence.type_ with

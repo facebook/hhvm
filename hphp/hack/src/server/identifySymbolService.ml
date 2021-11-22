@@ -570,6 +570,57 @@ let visitor =
       self#plus acc (super#on_user_attribute env ua)
   end
 
+type keyword_context =
+  | Decl
+  | Method
+
+(** Get keyword positions from the FFP for every keyword that has hover
+    documentation. **)
+let keywords ctx entry : Result_set.elt list =
+  let cst = Ast_provider.compute_cst ~ctx ~entry in
+  let tree = Provider_context.PositionedSyntaxTree.root cst in
+
+  let open Full_fidelity_positioned_syntax in
+  let token_pos (t : Token.t) =
+    let offset = t.Token.offset + t.Token.leading_width in
+    Full_fidelity_source_text.relative_pos
+      entry.Provider_context.path
+      t.Token.source_text
+      offset
+      (offset + t.Token.width)
+  in
+
+  let rec aux (ctx : keyword_context) acc s =
+    match s.syntax with
+    | Script s -> aux ctx acc s.script_declarations
+    | ClassishDeclaration cd ->
+      let acc = aux ctx acc cd.classish_modifiers in
+      aux ctx acc cd.classish_body
+    | ClassishBody cb -> aux ctx acc cb.classish_body_elements
+    | MethodishDeclaration md ->
+      aux Method acc md.methodish_function_decl_header
+    | FunctionDeclarationHeader fdh -> aux ctx acc fdh.function_modifiers
+    | SyntaxList sl -> List.fold sl ~init:acc ~f:(aux ctx)
+    | Token t ->
+      (match t.Token.kind with
+      | Token.TokenKind.Final ->
+        {
+          name = "final";
+          type_ =
+            Keyword
+              (match ctx with
+              | Decl -> FinalOnClass
+              | Method -> FinalOnMethod);
+          is_declaration = false;
+          pos = token_pos t;
+        }
+        :: acc
+      | _ -> acc)
+    | _ -> acc
+  in
+
+  aux Decl [] tree
+
 let all_symbols ctx tast =
   Errors.ignore_ (fun () -> visitor#go ctx tast |> Result_set.elements)
 
@@ -578,10 +629,11 @@ let all_symbols_ctx
     Result_set.elt list =
   match entry.Provider_context.symbols with
   | None ->
+    let keyword_symbols = keywords ctx entry in
     let { Tast_provider.Compute_tast.tast; _ } =
       Tast_provider.compute_tast_quarantined ~ctx ~entry
     in
-    let symbols = all_symbols ctx tast in
+    let symbols = keyword_symbols @ all_symbols ctx tast in
     entry.Provider_context.symbols <- Some symbols;
     symbols
   | Some symbols -> symbols

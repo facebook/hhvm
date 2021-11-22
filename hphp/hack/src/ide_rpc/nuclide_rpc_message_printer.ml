@@ -93,7 +93,8 @@ let identify_symbol_response_to_json results =
       | Typeconst _ -> "typeconst"
       | GConst -> "global_const"
       | Attribute _ -> "attribute"
-      | EnumClassLabel _ -> "enum_class_label")
+      | EnumClassLabel _ -> "enum_class_label"
+      | Keyword _ -> "keyword")
   in
   let symbol_to_json (occurrence, definition) =
     let (definition_pos, definition_span, definition_id) =

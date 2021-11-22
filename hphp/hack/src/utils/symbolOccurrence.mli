@@ -30,6 +30,11 @@ type receiver_class =
   | UnknownClass (* invoked dynamically *)
 [@@deriving ord, eq]
 
+type keyword_with_hover_docs =
+  | FinalOnClass
+  | FinalOnMethod
+[@@deriving ord, eq]
+
 type kind =
   | Class of class_id_type
   | Record
@@ -52,6 +57,7 @@ type kind =
   | GConst
   | Attribute of override_info option
   | EnumClassLabel of string * string
+  | Keyword of keyword_with_hover_docs
 [@@deriving eq]
 
 type 'a t = {

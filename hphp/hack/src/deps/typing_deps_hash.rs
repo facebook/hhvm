@@ -7,7 +7,7 @@ use std::hash::Hasher;
 
 use fnv::FnvHasher;
 
-use oxidized::{file_info::NameType, typing_deps_mode::HashMode};
+use oxidized::file_info::NameType;
 
 /// Variant types used in the naming table.
 ///
@@ -80,7 +80,7 @@ fn make_hasher() -> FnvHasher {
     Default::default()
 }
 
-fn postprocess_hash(mode: HashMode, dep_type: DepType, hash: u64) -> u64 {
+fn postprocess_hash(dep_type: DepType, hash: u64) -> u64 {
     let hash: u64 = match dep_type {
         DepType::Type => {
             // For class dependencies, set the lowest bit to 1. For extends
@@ -96,21 +96,7 @@ fn postprocess_hash(mode: HashMode, dep_type: DepType, hash: u64) -> u64 {
             hash << 1
         }
     };
-
-    match mode {
-        HashMode::Hash32Bit => {
-            // We are in the legacy dependency graph system:
-            //
-            // The shared-memory dependency graph stores edges as pairs of vertices.
-            // Each vertex has 31 bits of actual content and 1 bit of OCaml bookkeeping.
-            // Thus, we truncate the hash to 31 bits.
-            hash & ((1 << 31) - 1)
-        }
-        HashMode::Hash64Bit => {
-            // One bit is used for OCaml bookkeeping!
-            hash & !(1 << 63)
-        }
-    }
+    hash & !(1 << 63)
 }
 
 fn get_dep_type_hash_key(dep_type: DepType) -> u8 {
@@ -125,18 +111,18 @@ fn get_dep_type_hash_key(dep_type: DepType) -> u8 {
 }
 
 /// Hash a one-argument `Typing_deps.Dep.variant`'s fields.
-pub fn hash1(mode: HashMode, dep_type: DepType, name1: &[u8]) -> u64 {
+pub fn hash1(dep_type: DepType, name1: &[u8]) -> u64 {
     let mut hasher = make_hasher();
     hasher.write_u8(get_dep_type_hash_key(dep_type));
     hasher.write(name1);
-    postprocess_hash(mode, dep_type, hasher.finish())
+    postprocess_hash(dep_type, hasher.finish())
 }
 
 /// Hash a two-argument `Typing_deps.Dep.variant`'s fields.
-pub fn hash2(mode: HashMode, dep_type: DepType, type_hash: u64, name2: &[u8]) -> u64 {
+pub fn hash2(dep_type: DepType, type_hash: u64, name2: &[u8]) -> u64 {
     let mut hasher = make_hasher();
     hasher.write_u8(get_dep_type_hash_key(dep_type));
     hasher.write_u64(type_hash);
     hasher.write(name2);
-    postprocess_hash(mode, dep_type, hasher.finish())
+    postprocess_hash(dep_type, hasher.finish())
 }

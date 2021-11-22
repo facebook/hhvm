@@ -55,11 +55,9 @@ module Dep = struct
     | KGConstName [@value 12]
   [@@deriving enum]
 
-  external hash1 : Mode.hash_mode -> int -> string -> int = "hash1_ocaml"
-    [@@noalloc]
+  external hash1 : int -> string -> int = "hash1_ocaml" [@@noalloc]
 
-  external hash2 : Mode.hash_mode -> int -> int -> string -> int = "hash2_ocaml"
-    [@@noalloc]
+  external hash2 : int -> int -> string -> int = "hash2_ocaml" [@@noalloc]
 
   type t = int
 
@@ -89,57 +87,52 @@ module Dep = struct
 
   (* Keep in sync with the tags for `DepType` in `typing_deps_hash.rs`. *)
   let make : type a. Mode.hash_mode -> a variant -> t =
-   fun mode -> function
-    | GConst name1 -> hash1 mode (dep_kind_to_enum KGConst) name1
-    | Fun name1 -> hash1 mode (dep_kind_to_enum KFun) name1
-    | Type name1 -> hash1 mode (dep_kind_to_enum KType) name1
-    | Extends name1 -> hash1 mode (dep_kind_to_enum KExtends) name1
+   fun _ -> function
+    | GConst name1 -> hash1 (dep_kind_to_enum KGConst) name1
+    | Fun name1 -> hash1 (dep_kind_to_enum KFun) name1
+    | Type name1 -> hash1 (dep_kind_to_enum KType) name1
+    | Extends name1 -> hash1 (dep_kind_to_enum KExtends) name1
     | Const (name1, name2) ->
       hash2
-        mode
         (dep_kind_to_enum KConst)
-        (hash1 mode (dep_kind_to_enum KType) name1)
+        (hash1 (dep_kind_to_enum KType) name1)
         name2
-    | Constructor name1 -> hash1 mode (dep_kind_to_enum KConstructor) name1
+    | Constructor name1 -> hash1 (dep_kind_to_enum KConstructor) name1
     | Prop (name1, name2) ->
       hash2
-        mode
         (dep_kind_to_enum KProp)
-        (hash1 mode (dep_kind_to_enum KType) name1)
+        (hash1 (dep_kind_to_enum KType) name1)
         name2
     | SProp (name1, name2) ->
       hash2
-        mode
         (dep_kind_to_enum KSProp)
-        (hash1 mode (dep_kind_to_enum KType) name1)
+        (hash1 (dep_kind_to_enum KType) name1)
         name2
     | Method (name1, name2) ->
       hash2
-        mode
         (dep_kind_to_enum KMethod)
-        (hash1 mode (dep_kind_to_enum KType) name1)
+        (hash1 (dep_kind_to_enum KType) name1)
         name2
     | SMethod (name1, name2) ->
       hash2
-        mode
         (dep_kind_to_enum KSMethod)
-        (hash1 mode (dep_kind_to_enum KType) name1)
+        (hash1 (dep_kind_to_enum KType) name1)
         name2
-    | AllMembers name1 -> hash1 mode (dep_kind_to_enum KAllMembers) name1
-    | GConstName name1 -> hash1 mode (dep_kind_to_enum KGConstName) name1
+    | AllMembers name1 -> hash1 (dep_kind_to_enum KAllMembers) name1
+    | GConstName name1 -> hash1 (dep_kind_to_enum KGConstName) name1
 
   let make_dep_with_type_hash : Mode.hash_mode -> t -> string -> dep_kind -> t =
-   fun mode type_hash member_name -> function
+   fun _ type_hash member_name -> function
     | KGConst -> type_hash
     | KFun -> type_hash
     | KType -> type_hash
     | KExtends -> type_hash
-    | KConst -> hash2 mode (dep_kind_to_enum KConst) type_hash member_name
+    | KConst -> hash2 (dep_kind_to_enum KConst) type_hash member_name
     | KConstructor -> type_hash
-    | KProp -> hash2 mode (dep_kind_to_enum KProp) type_hash member_name
-    | KSProp -> hash2 mode (dep_kind_to_enum KSProp) type_hash member_name
-    | KMethod -> hash2 mode (dep_kind_to_enum KMethod) type_hash member_name
-    | KSMethod -> hash2 mode (dep_kind_to_enum KSMethod) type_hash member_name
+    | KProp -> hash2 (dep_kind_to_enum KProp) type_hash member_name
+    | KSProp -> hash2 (dep_kind_to_enum KSProp) type_hash member_name
+    | KMethod -> hash2 (dep_kind_to_enum KMethod) type_hash member_name
+    | KSMethod -> hash2 (dep_kind_to_enum KSMethod) type_hash member_name
     | KAllMembers -> type_hash
     | KGConstName -> type_hash
 

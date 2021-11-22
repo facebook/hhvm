@@ -11,7 +11,7 @@ use ocamlrep::{FromError, FromOcamlRep, Value};
 use ocamlrep_custom::{caml_serialize_default_impls, CamlSerialize, Custom};
 use ocamlrep_ocamlpool::ocaml_ffi;
 use once_cell::sync::OnceCell;
-use oxidized::typing_deps_mode::{HashMode, TypingDepsMode};
+use oxidized::typing_deps_mode::TypingDepsMode;
 use std::cell::RefCell;
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::ffi::OsString;
@@ -365,8 +365,8 @@ fn tag_to_dep_type(tag: u8) -> DepType {
 /// do not spawn threads in our OCaml code, so the pointed-to value will not be
 /// concurrently modified.
 #[no_mangle]
-unsafe extern "C" fn hash1_ocaml(mode: usize, dep_type_tag: usize, name1: usize) -> usize {
-    fn do_hash(mode: HashMode, dep_type_tag: Value<'_>, name1: Value<'_>) -> Value<'static> {
+unsafe extern "C" fn hash1_ocaml(dep_type_tag: usize, name1: usize) -> usize {
+    fn do_hash(dep_type_tag: Value<'_>, name1: Value<'_>) -> Value<'static> {
         let dep_type_tag = dep_type_tag
             .as_int()
             .expect("dep_type_tag could not be converted to int");
@@ -375,7 +375,7 @@ unsafe extern "C" fn hash1_ocaml(mode: usize, dep_type_tag: usize, name1: usize)
             .as_byte_string()
             .expect("name1 could not be converted to byte string");
 
-        let result: u64 = hash1(mode, dep_type, name1);
+        let result: u64 = hash1(dep_type, name1);
 
         // In Rust, a numeric cast between two integers of the same size
         // is a no-op. We require a 64-bit word size.
@@ -384,10 +384,9 @@ unsafe extern "C" fn hash1_ocaml(mode: usize, dep_type_tag: usize, name1: usize)
         Value::int(result)
     }
 
-    let mode = HashMode::from_ocaml(mode).unwrap();
     let dep_type_tag = Value::from_bits(dep_type_tag);
     let name1 = Value::from_bits(name1);
-    let result = do_hash(mode, dep_type_tag, name1);
+    let result = do_hash(dep_type_tag, name1);
     Value::to_bits(result)
 }
 
@@ -407,13 +406,11 @@ unsafe extern "C" fn hash1_ocaml(mode: usize, dep_type_tag: usize, name1: usize)
 /// concurrently modified.
 #[no_mangle]
 unsafe extern "C" fn hash2_ocaml(
-    mode: usize,
     dep_type_tag: usize,
     type_hash: usize,
     member_name: usize,
 ) -> usize {
     fn do_hash(
-        mode: HashMode,
         dep_type_tag: Value<'_>,
         type_hash: Value<'_>,
         member_name: Value<'_>,
@@ -429,7 +426,7 @@ unsafe extern "C" fn hash2_ocaml(
             .as_byte_string()
             .expect("member_name could not be converted to byte string");
 
-        let result: u64 = hash2(mode, dep_type, type_hash, member_name);
+        let result: u64 = hash2(dep_type, type_hash, member_name);
 
         // In Rust, a numeric cast between two integers of the same size
         // is a no-op. We require a 64-bit word size.
@@ -438,11 +435,10 @@ unsafe extern "C" fn hash2_ocaml(
         Value::int(result)
     }
 
-    let mode = HashMode::from_ocaml(mode).unwrap();
     let dep_type_tag = Value::from_bits(dep_type_tag);
     let type_hash = Value::from_bits(type_hash);
     let member_name = Value::from_bits(member_name);
-    let result = do_hash(mode, dep_type_tag, type_hash, member_name);
+    let result = do_hash(dep_type_tag, type_hash, member_name);
     Value::to_bits(result)
 }
 
@@ -829,48 +825,38 @@ mod tests {
 
     use super::*;
     use ocamlrep::{Arena, ToOcamlRep, Value};
-    use oxidized::typing_deps_mode::HashMode;
     use test::Bencher;
 
     const SHORT_CLASS_NAME: &str = "\\Foo";
     const LONG_CLASS_NAME: &str = "\\EntReasonablyLongClassNameSinceSomeClassNamesAreLong";
 
-    const HASH_MODE: HashMode = HashMode::Hash32Bit;
-
     #[bench]
     fn bench_hash1_short(b: &mut Bencher) {
         b.iter(|| {
-            crate::hash1(HASH_MODE, crate::DepType::Type, SHORT_CLASS_NAME.as_bytes());
+            crate::hash1(crate::DepType::Type, SHORT_CLASS_NAME.as_bytes());
         });
     }
 
     #[bench]
     fn bench_hash1_long(b: &mut Bencher) {
         b.iter(|| {
-            crate::hash1(HASH_MODE, crate::DepType::Type, LONG_CLASS_NAME.as_bytes());
+            crate::hash1(crate::DepType::Type, LONG_CLASS_NAME.as_bytes());
         });
     }
 
     #[bench]
     fn bench_hash2_short(b: &mut Bencher) {
         b.iter(|| {
-            let type_hash =
-                crate::hash1(HASH_MODE, crate::DepType::Type, SHORT_CLASS_NAME.as_bytes());
-            crate::hash2(HASH_MODE, crate::DepType::Const, type_hash, b"\\T");
+            let type_hash = crate::hash1(crate::DepType::Type, SHORT_CLASS_NAME.as_bytes());
+            crate::hash2(crate::DepType::Const, type_hash, b"\\T");
         });
     }
 
     #[bench]
     fn bench_hash2_long(b: &mut Bencher) {
         b.iter(|| {
-            let type_hash =
-                crate::hash1(HASH_MODE, crate::DepType::Type, LONG_CLASS_NAME.as_bytes());
-            crate::hash2(
-                HASH_MODE,
-                crate::DepType::Const,
-                type_hash,
-                b"\\TSomeTypeConstant",
-            );
+            let type_hash = crate::hash1(crate::DepType::Type, LONG_CLASS_NAME.as_bytes());
+            crate::hash2(crate::DepType::Const, type_hash, b"\\TSomeTypeConstant");
         });
     }
 
@@ -880,11 +866,7 @@ mod tests {
         let dep_type = crate::DepType::Type;
         let name1 = arena.add(&String::from(LONG_CLASS_NAME));
         b.iter(|| unsafe {
-            crate::hash1_ocaml(
-                HASH_MODE.to_ocamlrep(&arena).to_bits(),
-                Value::int(dep_type as isize).to_bits(),
-                name1.to_bits(),
-            )
+            crate::hash1_ocaml(Value::int(dep_type as isize).to_bits(), name1.to_bits())
         });
     }
 
@@ -892,11 +874,10 @@ mod tests {
     fn bench_hash2_ocaml(b: &mut Bencher) {
         let arena = Arena::new();
         let dep_type = crate::DepType::Const;
-        let type_hash = crate::hash1(HASH_MODE, crate::DepType::Type, LONG_CLASS_NAME.as_bytes());
+        let type_hash = crate::hash1(crate::DepType::Type, LONG_CLASS_NAME.as_bytes());
         let member_name = arena.add(&String::from("\\TSomeTypeConstant"));
         b.iter(|| unsafe {
             crate::hash2_ocaml(
-                HASH_MODE.to_ocamlrep(&arena).to_bits(),
                 Value::int(dep_type as isize).to_bits(),
                 type_hash.to_ocamlrep(&arena).to_bits(),
                 member_name.to_bits(),

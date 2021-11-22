@@ -504,8 +504,6 @@ static size_t* workers_should_exit = NULL;
 
 static size_t* allow_removes = NULL;
 
-static size_t* allow_dependency_table_reads = NULL;
-
 /* Worker-local storage is cache line aligned. */
 static char* locals;
 #define LOCAL(id) ((local_t *)(locals + id * CACHE_ALIGN(sizeof(local_t))))
@@ -938,14 +936,11 @@ static void define_globals(char * shared_mem_init) {
   allow_removes = (size_t*)(mem + 9*CACHE_LINE_SIZE);
 
   assert (CACHE_LINE_SIZE >= sizeof(size_t));
-  allow_dependency_table_reads = (size_t*)(mem + 10*CACHE_LINE_SIZE);
-
-  assert (CACHE_LINE_SIZE >= sizeof(size_t));
-  hcounter_filled = (size_t*)(mem + 11*CACHE_LINE_SIZE);
+  hcounter_filled = (size_t*)(mem + 10*CACHE_LINE_SIZE);
 
   mem += page_size;
   // Just checking that the page is large enough.
-  assert(page_size > 12*CACHE_LINE_SIZE + (int)sizeof(int));
+  assert(page_size > 11*CACHE_LINE_SIZE + (int)sizeof(int));
 
   assert (CACHE_LINE_SIZE >= sizeof(local_t));
   locals = mem;
@@ -1009,7 +1004,6 @@ static void init_shared_globals(
   *workers_should_exit = 0;
   *wasted_heap_size = 0;
   *allow_removes = 1;
-  *allow_dependency_table_reads = 1;
 
   for (uint64_t i = 0; i <= num_workers; i++) {
     LOCAL(i)->counter = 0;
@@ -1249,10 +1243,6 @@ void assert_allow_removes(void) {
 
 void assert_allow_hashtable_writes_by_current_process(void) {
   assert(allow_hashtable_writes_by_current_process);
-}
-
-void assert_allow_dependency_table_reads(void) {
-  assert(*allow_dependency_table_reads);
 }
 
 /*****************************************************************************/

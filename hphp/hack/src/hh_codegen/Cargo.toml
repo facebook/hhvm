@@ -9,7 +9,7 @@ name = "hh_codegen"
 path = "hh_codegen.rs"
 
 [dependencies]
-anyhow = "1.0.47"
+anyhow = "1.0.48"
 hex = "0.4.3"
 itertools = "0.10.1"
 md-5 = "0.8"

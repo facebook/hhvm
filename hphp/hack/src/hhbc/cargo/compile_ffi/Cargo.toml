@@ -11,7 +11,7 @@ doctest = false
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
-anyhow = "1.0.47"
+anyhow = "1.0.48"
 bumpalo = { version = "3.8", features = ["collections"] }
 decl_provider = { path = "../../decl_provider" }
 hhbc_by_ref_compile = { path = "../../hhbc_by_ref/cargo/hhbc_by_ref_compile" }

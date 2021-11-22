@@ -8,7 +8,7 @@ edition = "2021"
 path = "../multifile.rs"
 
 [dependencies]
-anyhow = "1.0.47"
+anyhow = "1.0.48"
 itertools = "0.10.1"
 lazy_static = "1.0"
 regex = "1.5.4"

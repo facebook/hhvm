@@ -92,6 +92,13 @@ function sodium_crypto_kdf_derive_from_key(
   string $key,
 ): string;
 
+<<__PHPStdLib>>
+function sodium_crypto_core_hchacha20(
+  string $in,
+  string $k,
+  ?string $c = null,
+): string;
+
 ///// Password hashing for storage
 
 <<__PHPStdLib>>
@@ -530,6 +537,11 @@ const int SODIUM_CRYPTO_KDF_BYTES_MIN = 0;
 const int SODIUM_CRYPTO_KDF_BYTES_MAX = 0;
 const int SODIUM_CRYPTO_KDF_BYTES_CONTEXTBYTES = 0;
 const int SODIUM_CRYPTO_KDF_BYTES_KEYBYTES  = 0;
+
+const int SODIUM_CRYPTO_CORE_HCHACHA20_INPUTBYTES = 0;
+const int SODIUM_CRYPTO_CORE_HCHACHA20_KEYBYTES = 0;
+const int SODIUM_CRYPTO_CORE_HCHACHA20_OUTPUTBYTES = 0;
+const int SODIUM_CRYPTO_CORE_HCHACHA20_CONSTBYTES = 0;
 
 const int SODIUM_CRYPTO_KX_PUBLICKEYBYTES = 0;
 const int SODIUM_CRYPTO_KX_SESSIONKEYBYTES = 0;

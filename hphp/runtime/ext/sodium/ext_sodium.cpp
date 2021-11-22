@@ -1758,6 +1758,50 @@ String HHVM_FUNCTION(sodium_crypto_kdf_derive_from_key,
 }
 #endif // crypto_kdf_KEYBYTES
 
+#ifdef crypto_core_hchacha20_KEYBYTES
+const StaticString
+  s_crypto_core_hchacha20_input_size(
+    "input must be CRYPTO_CORE_HCHACHA20_INPUTBYTES bytes"),
+  s_crypto_core_hchacha20_key_size(
+    "key must be CRYPTO_CORE_HCHACHA20_KEYBYTES bytes"),
+  s_crypto_core_hchacha20_constant_size(
+    "constant must be CRYPTO_CORE_HCHACHA20_CONSTBYTES bytes or null");
+
+String HHVM_FUNCTION(sodium_crypto_core_hchacha20,
+                     const String& in,
+                     const String& k,
+                     const Variant& /* ?string */ c) {
+  if (in.size() != crypto_core_hchacha20_INPUTBYTES) {
+    throwSodiumException(s_crypto_core_hchacha20_input_size);
+  }
+  if (k.size() != crypto_core_hchacha20_KEYBYTES) {
+    throwSodiumException(s_crypto_core_hchacha20_key_size);
+  }
+
+  const unsigned char* c_data = nullptr;
+  if (c.isString()) {
+    if (c.asCStrRef().size() != crypto_core_hchacha20_CONSTBYTES) {
+      throwSodiumException(s_crypto_core_hchacha20_constant_size);
+    }
+    c_data = reinterpret_cast<const unsigned char*>(c.asCStrRef().data());
+  }
+
+  String out(crypto_core_hchacha20_OUTPUTBYTES, ReserveString);
+  const auto result = crypto_core_hchacha20(
+    reinterpret_cast<unsigned char*>(out.mutableData()),
+    reinterpret_cast<const unsigned char*>(in.data()),
+    reinterpret_cast<const unsigned char*>(k.data()),
+    c_data
+  );
+  if (result != 0) {
+    sodium_memzero(out.mutableData(), crypto_core_hchacha20_OUTPUTBYTES);
+    throwSodiumException(s_internal_error);
+  }
+  out.setSize(crypto_core_hchacha20_OUTPUTBYTES);
+  return out;
+}
+#endif // crypto_core_hchacha20_KEYBYTES
+
 #define HHVM_SODIUM_AEAD_DECRYPT_FUNCTION(lowercase, uppercase) \
 const StaticString\
   s_##lowercase##_decrypt_nonce_size(\
@@ -2251,6 +2295,14 @@ struct SodiumExtension final : Extension {
     HHVM_RC_INT(SODIUM_CRYPTO_KDF_BYTES_MAX, crypto_kdf_BYTES_MAX);
     HHVM_RC_INT(SODIUM_CRYPTO_KDF_CONTEXTBYTES, crypto_kdf_CONTEXTBYTES);
     HHVM_RC_INT(SODIUM_CRYPTO_KDF_KEYBYTES, crypto_kdf_KEYBYTES);
+#endif
+
+#ifdef crypto_core_hchacha20_KEYBYTES
+    HHVM_FE(sodium_crypto_core_hchacha20);
+    HHVM_RC_INT(SODIUM_CRYPTO_CORE_HCHACHA20_INPUTBYTES, crypto_core_hchacha20_INPUTBYTES);
+    HHVM_RC_INT(SODIUM_CRYPTO_CORE_HCHACHA20_KEYBYTES, crypto_core_hchacha20_KEYBYTES);
+    HHVM_RC_INT(SODIUM_CRYPTO_CORE_HCHACHA20_OUTPUTBYTES, crypto_core_hchacha20_OUTPUTBYTES);
+    HHVM_RC_INT(SODIUM_CRYPTO_CORE_HCHACHA20_CONSTBYTES, crypto_core_hchacha20_CONSTBYTES);
 #endif
 
 #ifdef crypto_kx_SEEDBYTES

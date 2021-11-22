@@ -492,6 +492,13 @@ function sodium_crypto_kdf_derive_from_key(
   string $key,
 ): string;
 
+<<__Native>>
+function sodium_crypto_core_hchacha20(
+  string $in,
+  string $k,
+  ?string $c = null,
+): string;
+
 ///// Ristretto
 
 <<__Native>>

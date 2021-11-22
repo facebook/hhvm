@@ -110,7 +110,6 @@ let update_rechecked_files env rechecked =
 
 let update_after_recheck genv env rechecked ~start_time =
   let ctx = Provider_utils.ctx_from_server_env env in
-  let deps_mode = Provider_context.get_deps_mode ctx in
   let telemetry =
     Telemetry.create ()
     |> Telemetry.duration ~key:"start" ~start_time
@@ -162,7 +161,7 @@ let update_after_recheck genv env rechecked ~start_time =
         { env with init_env; full_check_status }
     in
     let clean_local_deps = dirty_local_deps in
-    let dirty_local_deps = Typing_deps.DepSet.make deps_mode in
+    let dirty_local_deps = Typing_deps.DepSet.make () in
     HackEventLogger.prechecked_evaluate_init t size;
     let telemetry =
       telemetry
@@ -323,7 +322,4 @@ let expand_all env =
     set
       env
       (Prechecked_files_ready
-         {
-           dirty_deps with
-           dirty_master_deps = Typing_deps.DepSet.make deps_mode;
-         })
+         { dirty_deps with dirty_master_deps = Typing_deps.DepSet.make () })

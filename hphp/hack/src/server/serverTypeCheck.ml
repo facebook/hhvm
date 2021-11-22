@@ -568,7 +568,7 @@ module LazyCheckKind : CheckKindType = struct
   let get_related_files ctx dep =
     let deps_mode = Provider_context.get_deps_mode ctx in
     Typing_deps.(
-      add_typing_deps deps_mode (DepSet.singleton deps_mode dep)
+      add_typing_deps deps_mode (DepSet.singleton dep)
       |> Naming_provider.ByHash.get_files ctx)
 
   let get_to_recheck2_approximation ~to_redecl_phase2_deps ~env ~ctx =
@@ -1570,7 +1570,7 @@ functor
             errors_after_phase2 = errors;
             needs_phase2_redecl = Relative_path.Set.empty;
             to_recheck2 = Relative_path.Set.empty;
-            to_recheck2_deps = Typing_deps.DepSet.make env.deps_mode;
+            to_recheck2_deps = Typing_deps.DepSet.make ();
             time_errors_pushed = None;
             old_decl_missing_count = 0;
           }

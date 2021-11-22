@@ -29,7 +29,7 @@ let add_minor_change_fanout
     (minor_change : ClassDiff.minor_change) : AffectedDeps.t =
   let mode = Provider_context.get_deps_mode ctx in
   let dep = Dep.make (hash_mode mode) (Dep.Type class_name) in
-  let changed = DepSet.singleton mode dep in
+  let changed = DepSet.singleton dep in
   let acc = AffectedDeps.mark_changed acc changed in
   let acc = AffectedDeps.mark_as_needing_recheck acc changed in
   let {
@@ -64,7 +64,7 @@ let add_minor_change_fanout
     let changed_and_descendants = Lazy.force changed_and_descendants in
     DepSet.fold changed_and_descendants ~init:acc ~f:(fun dep acc ->
         let needs_recheck =
-          Typing_deps.add_typing_deps mode (DepSet.singleton mode dep)
+          Typing_deps.add_typing_deps mode (DepSet.singleton dep)
         in
         let acc = AffectedDeps.mark_as_needing_recheck acc needs_recheck in
         AffectedDeps.mark_all_dependents_as_needing_recheck_from_hash
@@ -178,5 +178,4 @@ let add_fanout
 let fanout_of_changes
     ~(ctx : Provider_context.t) (changes : (string * ClassDiff.t) list) :
     AffectedDeps.t =
-  let mode = Provider_context.get_deps_mode ctx in
-  List.fold changes ~init:(AffectedDeps.empty mode) ~f:(add_fanout ~ctx)
+  List.fold changes ~init:(AffectedDeps.empty ()) ~f:(add_fanout ~ctx)

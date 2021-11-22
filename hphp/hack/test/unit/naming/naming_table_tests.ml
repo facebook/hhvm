@@ -650,7 +650,7 @@ let test_naming_table_query_by_dep_hash () =
         [Relative_path.from_root ~suffix:"qux.php"]
         (Typing_deps.Dep.GConst "\\Qux"
         |> Typing_deps.Dep.make hash_mode
-        |> Typing_deps.DepSet.singleton deps_mode
+        |> Typing_deps.DepSet.singleton
         |> Naming_table.get_64bit_dep_set_files backed_naming_table deps_mode
         |> Relative_path.Set.elements)
         "Bulk lookup for const should be correct";
@@ -658,7 +658,7 @@ let test_naming_table_query_by_dep_hash () =
         [Relative_path.from_root ~suffix:"bar.php"]
         (Typing_deps.Dep.Fun "\\bar"
         |> Typing_deps.Dep.make hash_mode
-        |> Typing_deps.DepSet.singleton deps_mode
+        |> Typing_deps.DepSet.singleton
         |> Naming_table.get_64bit_dep_set_files backed_naming_table deps_mode
         |> Relative_path.Set.elements)
         "Bulk lookup for fun should be correct";
@@ -666,7 +666,7 @@ let test_naming_table_query_by_dep_hash () =
         [Relative_path.from_root ~suffix:"baz.php"]
         (Typing_deps.Dep.Type "\\Baz"
         |> Typing_deps.Dep.make hash_mode
-        |> Typing_deps.DepSet.singleton deps_mode
+        |> Typing_deps.DepSet.singleton
         |> Naming_table.get_64bit_dep_set_files backed_naming_table deps_mode
         |> Relative_path.Set.elements)
         "Bulk lookup for class should be correct";
@@ -677,19 +677,19 @@ let test_naming_table_query_by_dep_hash () =
           Relative_path.from_root ~suffix:"baz.php";
           Relative_path.from_root ~suffix:"qux.php";
         ]
-        (Typing_deps.DepSet.make deps_mode
+        (Typing_deps.DepSet.make ()
         |> Typing_deps.DepSet.union
              (Typing_deps.Dep.GConst "\\Qux"
              |> Typing_deps.Dep.make hash_mode
-             |> Typing_deps.DepSet.singleton deps_mode)
+             |> Typing_deps.DepSet.singleton)
         |> Typing_deps.DepSet.union
              (Typing_deps.Dep.Fun "\\bar"
              |> Typing_deps.Dep.make hash_mode
-             |> Typing_deps.DepSet.singleton deps_mode)
+             |> Typing_deps.DepSet.singleton)
         |> Typing_deps.DepSet.union
              (Typing_deps.Dep.Type "\\Baz"
              |> Typing_deps.Dep.make hash_mode
-             |> Typing_deps.DepSet.singleton deps_mode)
+             |> Typing_deps.DepSet.singleton)
         |> Naming_table.get_64bit_dep_set_files backed_naming_table deps_mode
         |> Relative_path.Set.elements)
         "Bulk lookup for multiple elements should be correct";
@@ -729,7 +729,7 @@ let test_naming_table_query_by_dep_hash () =
         [Relative_path.from_root ~suffix:"bar.php"]
         (Typing_deps.Dep.Type "\\Baz"
         |> Typing_deps.Dep.make hash_mode
-        |> Typing_deps.DepSet.singleton deps_mode
+        |> Typing_deps.DepSet.singleton
         |> Naming_table.get_64bit_dep_set_files new_naming_table deps_mode
         |> Relative_path.Set.elements)
         "\\Baz should now be located in bar.php";

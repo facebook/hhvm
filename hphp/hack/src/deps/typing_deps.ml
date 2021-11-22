@@ -230,17 +230,7 @@ module DepSet = struct
 
   external make : unit -> t = "hh_dep_set_make"
 
-  (* TODO(hverr): Clean up, first argument unused *)
-  let make (mode : Typing_deps_mode.t) : t =
-    let _ = mode in
-    make ()
-
   external singleton : elt -> t = "hh_dep_set_singleton"
-
-  (* TODO(hverr): Clean up, first argument unused *)
-  let singleton (mode : Typing_deps_mode.t) (elt : elt) : t =
-    let _ = mode in
-    singleton elt
 
   external add : t -> elt -> t = "hh_dep_set_add"
 
@@ -259,11 +249,6 @@ module DepSet = struct
   external is_empty : t -> bool = "hh_dep_set_is_empty"
 
   external of_list : elt list -> t = "hh_dep_set_of_list"
-
-  (* TODO(hverr): Clean up, first argument unused *)
-  let of_list (mode : Typing_deps_mode.t) (elts : elt list) : t =
-    let _ = mode in
-    of_list elts
 
   let iter s ~f = List.iter (elements s) ~f
 

@@ -40,8 +40,8 @@ let force_shallow_decl_fanout_enabled (ctx : Provider_context.t) =
 (*****************************************************************************)
 let on_the_fly_neutral = Errors.empty
 
-let compute_deps_neutral mode =
-  let empty = DepSet.make mode in
+let compute_deps_neutral () =
+  let empty = DepSet.make () in
   ((empty, empty, empty), 0)
 
 (*****************************************************************************)
@@ -167,7 +167,7 @@ let compute_deps ctx fast (filel : Relative_path.t list) =
   let { FileInfo.n_classes; n_record_defs; n_funs; n_types; n_consts } =
     names
   in
-  let empty = DepSet.make (Provider_context.get_deps_mode ctx) in
+  let empty = DepSet.make () in
   let acc = (empty, empty, empty) in
   (* Fetching everything at once is faster *)
   let old_funs = Decl_heap.Funs.get_old_batch n_funs in
@@ -310,7 +310,7 @@ let parallel_on_the_fly_decl
       MultiWorker.call
         workers
         ~job:(load_and_compute_deps ctx)
-        ~neutral:(compute_deps_neutral (Provider_context.get_deps_mode ctx))
+        ~neutral:(compute_deps_neutral ())
         ~merge:(merge_compute_deps files_initial_count files_computed_count)
         ~next:(MultiWorker.next ~max_size:bucket_size workers fnl)
     in
@@ -408,7 +408,7 @@ let get_dependent_classes_files (ctx : Provider_context.t) (classes : SSet.t) :
   let visited = VisitedSet.make mode in
   SSet.fold
     classes
-    ~init:Typing_deps.(DepSet.make mode)
+    ~init:Typing_deps.(DepSet.make ())
     ~f:(fun c acc ->
       let source_class = Dep.make (hash_mode mode) (Dep.Type c) in
       Typing_deps.get_extend_deps ~mode ~visited ~source_class ~acc)

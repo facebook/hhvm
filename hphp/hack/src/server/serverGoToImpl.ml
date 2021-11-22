@@ -126,7 +126,6 @@ let search_class
   let class_name = ServerFindRefs.add_ns class_name in
   let deps_mode = Provider_context.get_deps_mode ctx in
   ServerFindRefs.handle_prechecked_files
-    ctx
     genv
     env
     Typing_deps.(Dep.(make (hash_mode deps_mode) (Type class_name)))
@@ -151,7 +150,6 @@ let search_member
     in
     let deps_mode = Provider_context.get_deps_mode ctx in
     ServerFindRefs.handle_prechecked_files
-      ctx
       genv
       env
       Typing_deps.(Dep.(make (hash_mode deps_mode) (Type class_name)))

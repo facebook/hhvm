@@ -20,13 +20,10 @@ let deps_of_paths ctx workers naming_table relative_paths =
       List.filter_map ~f:(Naming_table.get_file_info naming_table) paths
     in
     let initial_deps =
-      List.fold_left
-        fileinfos
-        ~init:(DepSet.make deps_mode)
-        ~f:(fun acc fileinfo ->
+      List.fold_left fileinfos ~init:(DepSet.make ()) ~f:(fun acc fileinfo ->
           let deps =
             Typing_deps.deps_of_file_info deps_mode fileinfo
-            |> Typing_deps.DepSet.of_list deps_mode
+            |> Typing_deps.DepSet.of_list
           in
           DepSet.union acc deps)
     in
@@ -36,7 +33,7 @@ let deps_of_paths ctx workers naming_table relative_paths =
     MultiWorker.call
       workers
       ~job:find_dependencies
-      ~neutral:(DepSet.make deps_mode)
+      ~neutral:(DepSet.make ())
       ~merge:DepSet.union
       ~next:(MultiWorker.next workers relative_paths)
   in

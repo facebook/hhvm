@@ -168,7 +168,7 @@ let get_child_classes_files ctx class_name =
       Decl_compare.get_extend_deps
         deps_mode
         cid_hash
-        (Typing_deps.DepSet.singleton deps_mode cid_hash)
+        (Typing_deps.DepSet.singleton cid_hash)
     in
     Naming_provider.ByHash.get_files ctx extend_deps
   | _ -> Relative_path.Set.empty

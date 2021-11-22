@@ -16,8 +16,8 @@ type t = {
   needs_recheck: DepSet.t;
 }
 
-let empty mode =
-  let empty = DepSet.make mode in
+let empty () =
+  let empty = DepSet.make () in
   { changed = empty; mro_invalidated = empty; needs_recheck = empty }
 
 let mark_changed (deps : t) (changed : DepSet.t) : t =
@@ -41,7 +41,7 @@ let mark_all_dependents_as_needing_recheck_from_hash
   mark_as_needing_recheck deps (Typing_deps.get_ideps_from_hash mode hash)
 
 let add_maximum_fanout (mode : Mode.t) (deps : t) (changed_dep : Dep.t) : t =
-  let changed = DepSet.singleton mode changed_dep in
+  let changed = DepSet.singleton changed_dep in
   let changed_and_descendants = Typing_deps.add_extend_deps mode changed in
   let needs_recheck =
     Typing_deps.add_typing_deps mode changed_and_descendants

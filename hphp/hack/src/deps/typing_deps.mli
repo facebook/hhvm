@@ -119,9 +119,9 @@ module DepSet : sig
 
   type elt = Dep.t
 
-  val make : Mode.t -> t
+  val make : unit -> t
 
-  val singleton : Mode.t -> elt -> t
+  val singleton : elt -> t
 
   val add : t -> elt -> t
 
@@ -143,7 +143,7 @@ module DepSet : sig
 
   val is_empty : t -> bool
 
-  val of_list : Mode.t -> elt list -> t
+  val of_list : elt list -> t
 
   val pp : Format.formatter -> t -> unit
 end

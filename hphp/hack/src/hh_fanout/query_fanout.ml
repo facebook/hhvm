@@ -33,7 +33,7 @@ let go
          let paths =
            Naming_provider.ByHash.get_files
              ctx
-             (Typing_deps.DepSet.singleton deps_mode hash)
+             (Typing_deps.DepSet.singleton hash)
          in
          { hash; paths })
 

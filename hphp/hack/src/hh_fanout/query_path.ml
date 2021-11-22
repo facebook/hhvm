@@ -33,7 +33,7 @@ let rec search
     ~(dest : Typing_deps.Dep.t) : dep_path_acc option =
   let current_direct_deps =
     current
-    |> Typing_deps.DepSet.singleton deps_mode
+    |> Typing_deps.DepSet.singleton
     |> Typing_deps.add_typing_deps deps_mode
   in
   if Typing_deps.DepSet.mem current_direct_deps dest then
@@ -46,7 +46,7 @@ let rec search
     let extends_deps =
       current
       |> Typing_deps.Dep.extends_of_class
-      |> Typing_deps.DepSet.singleton deps_mode
+      |> Typing_deps.DepSet.singleton
       |> Typing_deps.add_typing_deps deps_mode
       |> Typing_deps.DepSet.elements
     in
@@ -71,14 +71,14 @@ let go
   search
     ~deps_mode
     ~dep_path_acc:[]
-    ~seen_acc:Typing_deps.(DepSet.make deps_mode)
+    ~seen_acc:Typing_deps.(DepSet.make ())
     ~current:source
     ~dest
   |> Option.map ~f:(fun dep_path ->
          List.rev_map dep_path ~f:(fun dep ->
              let paths =
                dep
-               |> Typing_deps.DepSet.singleton deps_mode
+               |> Typing_deps.DepSet.singleton
                |> Naming_provider.ByHash.get_files ctx
              in
              { dep; paths }))

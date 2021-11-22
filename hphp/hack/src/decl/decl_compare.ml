@@ -53,7 +53,7 @@ module ClassDiff = struct
     SSet.fold (add_inverted_dep mode build_obj) xset acc
 
   let compare mode cid class1 class2 =
-    let acc = DepSet.make mode in
+    let acc = DepSet.make () in
     let is_unchanged = true in
     (* compare class constants *)
     let consts_diff = smap class1.dc_consts class2.dc_consts in
@@ -238,11 +238,11 @@ module ClassEltDiff = struct
         let fe1 = Decl_pos_utils.NormalizeSig.fun_elt fe1 in
         let fe2 = Decl_pos_utils.NormalizeSig.fun_elt fe2 in
         if Poly.( = ) fe1 fe2 then
-          (DepSet.make mode, `Unchanged)
+          (DepSet.make (), `Unchanged)
         else
           (Typing_deps.get_ideps mode (Dep.Constructor cid), `Changed)
     else
-      (DepSet.make mode, `Unchanged)
+      (DepSet.make (), `Unchanged)
 
   let compare mode class1 class2 =
     compare_cstrs mode class1 class2
@@ -301,7 +301,7 @@ and get_all_dependencies ~mode trace cid (changed, to_redecl, to_recheck) =
      hphp/hack/test/integration_ml/saved_state/test_changed_type_in_base_class.ml
      for an example. *)
   let where_class_and_subclasses_were_used =
-    Typing_deps.add_all_deps mode (DepSet.singleton mode cid_hash)
+    Typing_deps.add_all_deps mode (DepSet.singleton cid_hash)
   in
   let to_recheck =
     DepSet.union where_class_and_subclasses_were_used to_recheck
@@ -360,7 +360,7 @@ let get_funs_deps ~ctx old_funs funs =
   SSet.fold
     (get_fun_deps ~mode old_funs)
     funs
-    ((DepSet.make mode, DepSet.make mode, DepSet.make mode), 0)
+    ((DepSet.make (), DepSet.make (), DepSet.make ()), 0)
 
 (*****************************************************************************)
 (* Determine which functions/classes have to be rechecked after comparing
@@ -394,7 +394,7 @@ let get_types_deps ~ctx old_types types =
   SSet.fold
     (get_type_deps ~mode old_types)
     types
-    ((DepSet.make mode, DepSet.make mode), 0)
+    ((DepSet.make (), DepSet.make ()), 0)
 
 (*****************************************************************************)
 (* Determine which top level definitions have to be rechecked if the constant
@@ -435,7 +435,7 @@ let get_gconsts_deps ~ctx old_gconsts gconsts =
   SSet.fold
     (get_gconst_deps ~mode old_gconsts)
     gconsts
-    ((DepSet.make mode, DepSet.make mode, DepSet.make mode), 0)
+    ((DepSet.make (), DepSet.make (), DepSet.make ()), 0)
 
 (*****************************************************************************)
 (* Determine which functions/classes have to be rechecked after comparing
@@ -537,7 +537,7 @@ let get_classes_deps ~ctx old_classes new_classes classes =
   SSet.fold
     (get_class_deps ctx old_classes new_classes (VisitedSet.make mode))
     classes
-    ((DepSet.make mode, DepSet.make mode, DepSet.make mode), 0)
+    ((DepSet.make (), DepSet.make (), DepSet.make ()), 0)
 
 (*****************************************************************************)
 (* Determine which top level definitions have to be rechecked if the record
@@ -572,4 +572,4 @@ let get_record_defs_deps ~ctx old_record_defs record_defs =
   SSet.fold
     (get_record_def_deps ~mode old_record_defs)
     record_defs
-    ((DepSet.make mode, DepSet.make mode, DepSet.make mode), 0)
+    ((DepSet.make (), DepSet.make (), DepSet.make ()), 0)

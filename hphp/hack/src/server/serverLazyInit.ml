@@ -528,9 +528,7 @@ let names_to_deps (deps_mode : Typing_deps_mode.t) (names : FileInfo.names) :
     SSet.fold sset ~init:depset ~f:(fun n acc ->
         DepSet.add acc (Dep.make (hash_mode deps_mode) (dep_ctor n)))
   in
-  let deps =
-    add_deps_of_sset (fun n -> Dep.Fun n) n_funs (DepSet.make deps_mode)
-  in
+  let deps = add_deps_of_sset (fun n -> Dep.Fun n) n_funs (DepSet.make ()) in
   let deps = add_deps_of_sset (fun n -> Dep.Type n) n_classes deps in
   let deps = add_deps_of_sset (fun n -> Dep.Type n) n_record_defs deps in
   let deps = add_deps_of_sset (fun n -> Dep.Type n) n_types deps in
@@ -728,7 +726,7 @@ let type_check_dirty
                rechecked_files = Relative_path.Set.empty;
                dirty_local_deps = local_deps;
                dirty_master_deps = master_deps;
-               clean_local_deps = Typing_deps.(DepSet.make deps_mode);
+               clean_local_deps = Typing_deps.(DepSet.make ());
              }),
         to_undecl,
         to_recheck )

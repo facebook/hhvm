@@ -466,8 +466,6 @@ typedef union {
 } deptbl_entry_t;
 
 static deptbl_entry_t* deptbl = NULL;
-static uint64_t* dcounter = NULL;
-
 
 /* ENCODING:
  * The highest 2 bits are unused.
@@ -915,43 +913,39 @@ static void define_globals(char * shared_mem_init) {
   assert(CACHE_LINE_SIZE >= sizeof(uint64_t));
   hcounter = (uint64_t*)(mem + CACHE_LINE_SIZE);
 
-  // The number of elements in the deptable
-  assert(CACHE_LINE_SIZE >= sizeof(uint64_t));
-  dcounter = (uint64_t*)(mem + 2*CACHE_LINE_SIZE);
-
   assert (CACHE_LINE_SIZE >= sizeof(uintptr_t));
-  counter = (uintptr_t*)(mem + 3*CACHE_LINE_SIZE);
+  counter = (uintptr_t*)(mem + 2*CACHE_LINE_SIZE);
 
   assert (CACHE_LINE_SIZE >= sizeof(pid_t));
-  master_pid = (pid_t*)(mem + 4*CACHE_LINE_SIZE);
+  master_pid = (pid_t*)(mem + 3*CACHE_LINE_SIZE);
 
   assert (CACHE_LINE_SIZE >= sizeof(size_t));
-  log_level = (size_t*)(mem + 5*CACHE_LINE_SIZE);
+  log_level = (size_t*)(mem + 4*CACHE_LINE_SIZE);
 
   assert (CACHE_LINE_SIZE >= sizeof(double));
-  sample_rate = (double*)(mem + 6*CACHE_LINE_SIZE);
+  sample_rate = (double*)(mem + 5*CACHE_LINE_SIZE);
 
   assert (CACHE_LINE_SIZE >= sizeof(size_t));
-  compression = (size_t*)(mem + 7*CACHE_LINE_SIZE);
+  compression = (size_t*)(mem + 6*CACHE_LINE_SIZE);
 
   assert (CACHE_LINE_SIZE >= sizeof(size_t));
-  workers_should_exit = (size_t*)(mem + 8*CACHE_LINE_SIZE);
+  workers_should_exit = (size_t*)(mem + 7*CACHE_LINE_SIZE);
 
   assert (CACHE_LINE_SIZE >= sizeof(size_t));
-  wasted_heap_size = (size_t*)(mem + 9*CACHE_LINE_SIZE);
+  wasted_heap_size = (size_t*)(mem + 8*CACHE_LINE_SIZE);
 
   assert (CACHE_LINE_SIZE >= sizeof(size_t));
-  allow_removes = (size_t*)(mem + 10*CACHE_LINE_SIZE);
+  allow_removes = (size_t*)(mem + 9*CACHE_LINE_SIZE);
 
   assert (CACHE_LINE_SIZE >= sizeof(size_t));
-  allow_dependency_table_reads = (size_t*)(mem + 11*CACHE_LINE_SIZE);
+  allow_dependency_table_reads = (size_t*)(mem + 10*CACHE_LINE_SIZE);
 
   assert (CACHE_LINE_SIZE >= sizeof(size_t));
-  hcounter_filled = (size_t*)(mem + 12*CACHE_LINE_SIZE);
+  hcounter_filled = (size_t*)(mem + 11*CACHE_LINE_SIZE);
 
   mem += page_size;
   // Just checking that the page is large enough.
-  assert(page_size > 13*CACHE_LINE_SIZE + (int)sizeof(int));
+  assert(page_size > 12*CACHE_LINE_SIZE + (int)sizeof(int));
 
   assert (CACHE_LINE_SIZE >= sizeof(local_t));
   locals = mem;
@@ -1007,7 +1001,6 @@ static void init_shared_globals(
   // Initialize the number of element in the table
   *hcounter = 0;
   *hcounter_filled = 0;
-  *dcounter = 0;
   // Ensure the global counter starts on a COUNTER_RANGE boundary
   *counter = ALIGN(early_counter + 1, COUNTER_RANGE);
   *log_level = config_log_level;

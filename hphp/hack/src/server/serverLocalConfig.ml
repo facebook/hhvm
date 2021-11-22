@@ -1433,7 +1433,6 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
     {
       use_direct_decl_parser = options.use_direct_decl_parser;
       longlived_workers = options.longlived_workers;
-      symbolindex_search_provider = options.symbolindex_search_provider;
       require_saved_state = options.require_saved_state;
       stream_errors = options.stream_errors;
       force_shallow_decl_fanout = options.force_shallow_decl_fanout;

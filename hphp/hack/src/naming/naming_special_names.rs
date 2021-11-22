@@ -591,6 +591,18 @@ pub mod typehints {
 
     pub const WILDCARD: &str = "_";
 
+    // matches definition in Tprim
+    pub fn is_primitive_type_hint(x: &str) -> bool {
+        lazy_static! {
+            static ref PRIMITIVE_TYPEHINTS: HashSet<&'static str> = vec![
+                NULL, VOID, INT, BOOL, FLOAT, STRING, RESOURCE, NUM, ARRAYKEY, NORETURN
+            ]
+            .into_iter()
+            .collect();
+        }
+        PRIMITIVE_TYPEHINTS.contains(x)
+    }
+
     pub fn is_reserved_type_hint(x: &str) -> bool {
         lazy_static! {
             static ref RESERVED_TYPEHINTS: HashSet<&'static str> = vec![

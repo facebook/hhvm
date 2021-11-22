@@ -7,6 +7,7 @@
 use aast::Expr_ as E_;
 use hh_autoimport_rust::is_hh_autoimport_fun;
 use naming_special_names_rust::special_idents;
+use naming_special_names_rust::typehints;
 use naming_special_names_rust::user_attributes;
 use oxidized::{
     aast,
@@ -70,15 +71,17 @@ struct Context {
     readonly_return: Rty,
     this_ty: Rty,
     inout_params: HashSet<String>,
+    is_typechecker: bool,
 }
 
 impl Context {
-    fn new(readonly_ret: Rty, this_ty: Rty) -> Self {
+    fn new(readonly_ret: Rty, this_ty: Rty, is_typechecker: bool) -> Self {
         Self {
             locals: Lenv::new(),
             readonly_return: readonly_ret,
             this_ty,
             inout_params: HashSet::new(),
+            is_typechecker,
         }
     }
 
@@ -193,8 +196,19 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
         //
         As(a) => {
             // Readonlyness of inner expression
-            let (exp, _, _) = &**a;
-            rty_expr(context, &exp)
+            let (exp, hint, _) = &**a;
+            let hint_ = &*hint.1;
+            match hint_ {
+                // Primitives are always mutable
+                // Unfortunately, we don't make Hprim as a hint type until naming
+                // so we have to look at Happly
+                aast::Hint_::Happly(cn, _)
+                    if !context.is_typechecker && typehints::is_primitive_type_hint(cn.name()) =>
+                {
+                    Rty::Mutable
+                }
+                _ => rty_expr(context, &exp),
+            }
         }
         Upcast(a) => {
             // Readonlyness of inner expression
@@ -535,7 +549,7 @@ impl<'ast> VisitorMut<'ast> for Checker {
         } else {
             Rty::Mutable
         };
-        let mut context = Context::new(readonly_return, readonly_this);
+        let mut context = Context::new(readonly_return, readonly_this, self.is_typechecker);
 
         for p in m.params.iter() {
             let is_inout = match p.callconv {
@@ -564,7 +578,7 @@ impl<'ast> VisitorMut<'ast> for Checker {
         }
         let readonly_return = ro_kind_to_rty(f.readonly_ret);
         let readonly_this = ro_kind_to_rty(f.readonly_this);
-        let mut new_context = Context::new(readonly_return, readonly_this);
+        let mut new_context = Context::new(readonly_return, readonly_this, self.is_typechecker);
         // Add the old context's stuff into the new context, as readonly if needed
         for (local, rty) in context.locals.lenv.iter() {
             if readonly_this == Rty::Readonly {
@@ -596,7 +610,7 @@ impl<'ast> VisitorMut<'ast> for Checker {
         f: &mut aast::FunDef<(), ()>,
     ) -> Result<(), ()> {
         // Clear the context completely on a fun_def
-        let mut context = Context::new(Rty::Mutable, Rty::Mutable);
+        let mut context = Context::new(Rty::Mutable, Rty::Mutable, self.is_typechecker);
         f.recurse(&mut context, self.object())
     }
 
@@ -833,7 +847,7 @@ pub fn check_program(
     is_typechecker: bool,
 ) -> Vec<SyntaxError> {
     let mut checker = Checker::new(is_typechecker);
-    let mut context = Context::new(Rty::Mutable, Rty::Mutable);
+    let mut context = Context::new(Rty::Mutable, Rty::Mutable, is_typechecker);
     visit_mut(&mut checker, &mut context, program).unwrap();
     checker.errors
 }

@@ -102,6 +102,7 @@ pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl>(
     flags.set(HhasFunctionFlags::ASYNC, f.fun_kind.is_fasync());
     let is_interceptable = is_interceptable(emitter.options());
     flags.set(HhasFunctionFlags::INTERCEPTABLE, is_interceptable);
+    flags.set(HhasFunctionFlags::READONLY_RETURN, f.readonly_ret.is_some());
 
     Ok(HhasFunction {
         attributes: Slice::fill_iter(alloc, attributes.into_iter()),

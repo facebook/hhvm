@@ -179,6 +179,11 @@ fn make_memoize_wrapper_method<'a, 'arena, 'decl>(
     flags.set(HhasMethodFlags::IS_FINAL, method.final_);
     flags.set(HhasMethodFlags::IS_ASYNC, is_async);
     flags.set(HhasMethodFlags::IS_INTERCEPTABLE, is_interceptable);
+    flags.set(
+        HhasMethodFlags::IS_READONLY_RETURN,
+        method.readonly_ret.is_some(),
+    );
+    flags.set(HhasMethodFlags::IS_READONLY_THIS, method.readonly_this);
     Ok(HhasMethod {
         attributes: Slice::fill_iter(alloc, attributes.into_iter()),
         visibility: Visibility::from(method.visibility),

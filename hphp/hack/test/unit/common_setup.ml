@@ -114,7 +114,7 @@ let setup ~(sqlite : bool) (tcopt : GlobalOptions.t) : setup =
       in
       (* Now, I want a fresh ctx with no reverse-naming entries in it,
          and I want it to be backed by a sqlite naming database. *)
-      Provider_backend.set_local_memory_backend_with_defaults ();
+      Provider_backend.set_local_memory_backend_with_defaults_for_test ();
       let sqlite_ctx =
         Provider_context.empty_for_tool
           ~popt:(Provider_context.get_popt ctx)

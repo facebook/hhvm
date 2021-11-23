@@ -46,6 +46,10 @@ end
 
 module Decl_cache = Lru_cache.Cache (Decl_cache_entry)
 
+(** TODO(ljw): I'm storing this just here as a global, because it's a temporary
+thing not worth threading through. *)
+let use_bytesize_for_shallow_decl_size_calculation = ref false
+
 module Shallow_decl_cache_entry = struct
   type _ t = Shallow_class_decl : string -> Shallow_decl_defs.shallow_class t
 
@@ -54,9 +58,13 @@ module Shallow_decl_cache_entry = struct
   type 'a value = 'a
 
   let get_size ~key:_ ~value =
-    let words = Obj.reachable_words (Obj.repr value) in
-    let bytes = words * Sys.word_size / 8 in
-    bytes
+    (* TODO(ljw): remove this test, and always use "1" *)
+    if !use_bytesize_for_shallow_decl_size_calculation then
+      let words = Obj.reachable_words (Obj.repr value) in
+      let bytes = words * Sys.word_size / 8 in
+      bytes
+    else
+      1
 
   let key_to_log_string : type a. a key -> string =
    (fun (Shallow_class_decl key) -> "ClasssShallow" ^ key)
@@ -209,16 +217,16 @@ let set_analysis_backend () : unit = backend_ref := Analysis
 
 let set_shared_memory_backend () : unit = backend_ref := Shared_memory
 
-let set_local_memory_backend
+let set_local_memory_backend_internal
     ~(max_num_decls : int)
-    ~(max_bytes_shallow_decls : int)
+    ~(max_num_shallow_decls : int)
     ~(max_num_linearizations : int) : unit =
   backend_ref :=
     Local_memory
       {
         decl_cache = Decl_cache.make ~max_size:max_num_decls;
         shallow_decl_cache =
-          Shallow_decl_cache.make ~max_size:max_bytes_shallow_decls;
+          Shallow_decl_cache.make ~max_size:max_num_shallow_decls;
         linearization_cache =
           Linearization_cache.make ~max_size:max_num_linearizations;
         reverse_naming_table_delta = Reverse_naming_table_delta.make ();
@@ -226,18 +234,37 @@ let set_local_memory_backend
         naming_db_path_ref = ref None;
       }
 
-let set_local_memory_backend_with_defaults () : unit =
-  (* Shallow decls: some files read ~5k shallow decls, at about 16k / shallow dec,
-     fitting into 73Mb. Hence we guess at 140Mb. *)
-  let max_bytes_shallow_decls = 140 * 1024 * 1024 in
-  (* Linearizations: such files will pick up ~6k linearizations. *)
-  let max_num_linearizations = 10000 in
-  (* TODO: justify max_num_decls *)
-  let max_num_decls = 5000 in
-  set_local_memory_backend
+let set_local_memory_backend
+    ~(max_num_decls : int)
+    ~(max_num_shallow_decls : int)
+    ~(max_num_linearizations : int) =
+  Hh_logger.log
+    "Provider_backend.Local_memory cache sizes: max_num_decls=%d max_num_shallow_decls=%d max_num_linearizations=%d"
+    max_num_decls
+    max_num_shallow_decls
+    max_num_linearizations;
+  (* TODO(ljw): special case -1, will be removed shortly, uses the previous default. *)
+  let max_num_shallow_decls =
+    if max_num_shallow_decls = -1 then begin
+      use_bytesize_for_shallow_decl_size_calculation := true;
+      140 * 1024 * 1024
+    end else
+      max_num_shallow_decls
+  in
+  set_local_memory_backend_internal
     ~max_num_decls
-    ~max_bytes_shallow_decls
+    ~max_num_shallow_decls
     ~max_num_linearizations
+
+let set_local_memory_backend_with_defaults_for_test () : unit =
+  (* TODO(ljw): special case, will be removed shortly: *)
+  use_bytesize_for_shallow_decl_size_calculation := true;
+  (* These are all arbitrary, so that test can spin up the backend easily;
+     they haven't been tuned and shouldn't be used in production. *)
+  set_local_memory_backend_internal
+    ~max_num_decls:5000
+    ~max_num_shallow_decls:(140 * 1024 * 1024)
+    ~max_num_linearizations:10000
 
 let set_decl_service_backend (decl : Decl_service_client.t) : unit =
   backend_ref := Decl_service { decl; fixmes = empty_fixmes }

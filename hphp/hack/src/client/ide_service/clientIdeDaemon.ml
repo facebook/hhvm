@@ -397,7 +397,12 @@ let initialize1 (param : ClientIdeMessage.Initialize_from_saved_state.t) :
   HackEventLogger.set_rollout_flags
     (ServerLocalConfig.to_rollout_flags local_config);
 
-  Provider_backend.set_local_memory_backend_with_defaults ();
+  Provider_backend.set_local_memory_backend
+    ~max_num_decls:local_config.ServerLocalConfig.ide_max_num_decls
+    ~max_num_shallow_decls:
+      local_config.ServerLocalConfig.ide_max_num_shallow_decls
+    ~max_num_linearizations:
+      local_config.ServerLocalConfig.ide_max_num_linearizations;
   let local_memory =
     match Provider_backend.get () with
     | Provider_backend.Local_memory local_memory -> local_memory

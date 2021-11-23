@@ -148,7 +148,7 @@ let run_naming_table_test f =
         Naming_table.load_from_sqlite ctx_for_sqlite_load db_name
       in
 
-      Provider_backend.set_local_memory_backend_with_defaults ();
+      Provider_backend.set_local_memory_backend_with_defaults_for_test ();
       let ctx =
         Provider_context.empty_for_tool
           ~popt

@@ -465,6 +465,12 @@ type t = {
   ide_ranked_autocomplete: bool;
   (* whether clientLsp should use ffp-autocomplete *)
   ide_ffp_autocomplete: bool;
+  ide_max_num_decls: int;
+  (* tuning of clientIdeDaemon local cache *)
+  ide_max_num_shallow_decls: int;
+  (* tuning of clientIdeDaemon local cache *)
+  ide_max_num_linearizations: int;
+  (* tuning of clientIdeDaemon local cache *)
   (* like [symbolindex_search_provider] but for IDE *)
   ide_symbolindex_search_provider: string;
   (* Let the user configure which files to type check and
@@ -628,6 +634,9 @@ let default =
     ide_serverless = false;
     ide_ranked_autocomplete = false;
     ide_ffp_autocomplete = false;
+    ide_max_num_decls = 5000;
+    ide_max_num_shallow_decls = 10000;
+    ide_max_num_linearizations = 10000;
     predeclare_ide = false;
     max_typechecker_worker_memory_mb = None;
     longlived_workers = false;
@@ -1002,6 +1011,21 @@ let load_ fn ~silent ~current_version overrides =
   (* ide_ffp_autocomplete CANNOT use bool_if_min_version, since it's needed before we yet know root/version *)
   let ide_ffp_autocomplete =
     bool_ "ide_ffp_autocomplete" ~default:default.ide_ffp_autocomplete config
+  in
+  let ide_max_num_decls =
+    int_ "ide_max_num_decls" ~default:default.ide_max_num_decls config
+  in
+  let ide_max_num_shallow_decls =
+    int_
+      "ide_max_num_shallow_decls"
+      ~default:default.ide_max_num_shallow_decls
+      config
+  in
+  let ide_max_num_linearizations =
+    int_
+      "ide_max_num_lineariations"
+      ~default:default.ide_max_num_linearizations
+      config
   in
   let predeclare_ide =
     bool_if_min_version
@@ -1385,6 +1409,9 @@ let load_ fn ~silent ~current_version overrides =
     ide_serverless;
     ide_ranked_autocomplete;
     ide_ffp_autocomplete;
+    ide_max_num_decls;
+    ide_max_num_shallow_decls;
+    ide_max_num_linearizations;
     ide_symbolindex_search_provider;
     predeclare_ide;
     max_typechecker_worker_memory_mb;
@@ -1460,4 +1487,7 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       naming_sqlite_in_hack_64 = options.naming_sqlite_in_hack_64;
       use_hack_64_naming_table = options.use_hack_64_naming_table;
       enable_disk_heap = options.enable_disk_heap;
+      ide_max_num_decls = options.ide_max_num_decls;
+      ide_max_num_shallow_decls = options.ide_max_num_shallow_decls;
+      ide_max_num_linearizations = options.ide_max_num_linearizations;
     }

@@ -160,7 +160,7 @@ let test_compute_tast_counting () =
   (* Now try the same with local_memory backend *)
   Utils.with_context
     ~enter:(fun () ->
-      Provider_backend.set_local_memory_backend_with_defaults ())
+      Provider_backend.set_local_memory_backend_with_defaults_for_test ())
     ~exit:(fun () ->
       (* restore it back to shared_mem for the rest of the tests *)
       Provider_backend.set_shared_memory_backend ())
@@ -224,7 +224,7 @@ let test_should_enable_deferring () =
 
 (* This test verifies quarantine. *)
 let test_quarantine () =
-  Provider_backend.set_local_memory_backend_with_defaults ();
+  Provider_backend.set_local_memory_backend_with_defaults_for_test ();
   let { Common_setup.ctx; foo_path; foo_contents; nonexistent_path; _ } =
     Common_setup.setup ~sqlite:false tcopt_with_defer
   in

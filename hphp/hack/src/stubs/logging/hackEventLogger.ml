@@ -21,6 +21,9 @@ type rollout_flags = {
   naming_sqlite_in_hack_64: bool;
   use_hack_64_naming_table: bool;
   enable_disk_heap: bool;
+  ide_max_num_decls: int;
+  ide_max_num_shallow_decls: int;
+  ide_max_num_linearizations: int;
 }
 
 let flush () = ()

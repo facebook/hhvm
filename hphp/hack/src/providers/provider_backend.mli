@@ -174,7 +174,16 @@ val set_analysis_backend : unit -> unit
 
 val set_shared_memory_backend : unit -> unit
 
-val set_local_memory_backend_with_defaults : unit -> unit
+val set_local_memory_backend_with_defaults_for_test : unit -> unit
+
+(** TOOD(ljw): for now, max_num_shallow_decls accepts a special value "-1"
+which reflects the status quo ante, a max size of 140mb in bytes rather than
+a max number. This will be removed shortly. *)
+val set_local_memory_backend :
+  max_num_decls:int ->
+  max_num_shallow_decls:int ->
+  max_num_linearizations:int ->
+  unit
 
 val set_decl_service_backend : Decl_service_client.t -> unit
 

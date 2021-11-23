@@ -26,9 +26,6 @@ thread_local! {
   static CMAP: OnceCell<HackMap> = OnceCell::new();
 }
 
-pub const MAX_EVICTABLE_MEMORY_TOTAL: usize = 1024 * 1024 * 1024;
-pub const MAX_EVICTABLE_MEMORY_PER_SHARD: usize = MAX_EVICTABLE_MEMORY_TOTAL / NUM_SHARDS;
-
 extern "C" {
     fn caml_input_value_from_block(data: *const u8, size: usize) -> usize;
     fn caml_alloc_initialized_string(size: usize, data: *const u8) -> usize;
@@ -360,7 +357,11 @@ fn empty_shard<'a, K, S>(shard: &mut Shard<'_, 'a, K, HeapValue, S>) {
 }
 
 #[no_mangle]
-pub extern "C" fn shmffi_init(mmap_address: *mut libc::c_void, file_size: libc::size_t) {
+pub extern "C" fn shmffi_init(
+    mmap_address: *mut libc::c_void,
+    file_size: libc::size_t,
+    max_evictable_bytes: libc::size_t,
+) {
     catch_unwind(|| {
         CMAP.with(move |cell| {
             assert!(cell.get().is_none());
@@ -372,7 +373,7 @@ pub extern "C" fn shmffi_init(mmap_address: *mut libc::c_void, file_size: libc::
                     BuildHasherDefault::default(),
                     mmap_address,
                     file_size,
-                    MAX_EVICTABLE_MEMORY_PER_SHARD,
+                    max_evictable_bytes / NUM_SHARDS,
                 )
             });
         });
@@ -390,7 +391,7 @@ pub extern "C" fn shmffi_attach(mmap_address: *mut libc::c_void, file_size: libc
             // Safety:
             //  - Should be already initialized by the master process.
             unsafe {
-                CMap::attach(mmap_address, file_size, MAX_EVICTABLE_MEMORY_PER_SHARD)
+                CMap::attach(mmap_address, file_size)
             });
         });
 
@@ -414,7 +415,7 @@ pub extern "C" fn shmffi_add(evictable: bool, hash: u64, data: usize) -> usize {
                             .to_heap_value_in(evictable, shard.alloc(evictable))
                             .unwrap(),
                     )
-                } else if compressed.as_slice().len() < MAX_EVICTABLE_MEMORY_PER_SHARD / 2 {
+                } else if compressed.as_slice().len() < cmap.max_evictable_bytes_per_shard / 2 {
                     match compressed.to_heap_value_in(evictable, shard.alloc(evictable)) {
                         Ok(heap_value) => Some(heap_value),
                         Err(AllocError) => {

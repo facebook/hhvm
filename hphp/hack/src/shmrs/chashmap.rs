@@ -69,6 +69,7 @@ impl<'shm, 'a, K, V, S> Shard<'shm, 'a, K, V, S> {
 ///      shard allocator is an invariant violation.
 pub struct CMap<'shm, K, V, S = DefaultHashBuilder> {
     hash_builder: S,
+    max_evictable_bytes_per_shard: usize,
     file_alloc: FileAlloc,
     shard_allocs_non_evictable: [RwLock<MapAllocControlData>; NUM_SHARDS],
     shard_allocs_evictable: [RwLock<MapAllocControlData>; NUM_SHARDS],
@@ -83,6 +84,7 @@ pub struct CMap<'shm, K, V, S = DefaultHashBuilder> {
 /// Obtained by calling `initialize` or `attach` on `CMap`.
 pub struct CMapRef<'shm, K, V, S = DefaultHashBuilder> {
     hash_builder: S,
+    pub max_evictable_bytes_per_shard: usize,
     file_alloc: &'shm FileAlloc,
     shard_allocs_non_evictable: Vec<MapAlloc<'shm>>,
     shard_allocs_evictable: Vec<MapAlloc<'shm>>,
@@ -157,6 +159,7 @@ impl<'shm, K, V, S: Clone> CMap<'shm, K, V, S> {
 
         cmap.as_mut_ptr().write(CMap {
             hash_builder,
+            max_evictable_bytes_per_shard,
             file_alloc: FileAlloc::new(file_start, file_size, next_free_byte),
             shard_allocs_non_evictable: MaybeUninit::array_assume_init(shard_allocs_non_evictable),
             shard_allocs_evictable: MaybeUninit::array_assume_init(shard_allocs_evictable),
@@ -202,6 +205,7 @@ impl<'shm, K, V, S: Clone> CMap<'shm, K, V, S> {
 
         CMapRef {
             hash_builder: cmap.hash_builder.clone(),
+            max_evictable_bytes_per_shard: cmap.max_evictable_bytes_per_shard,
             file_alloc: &cmap.file_alloc,
             shard_allocs_non_evictable,
             shard_allocs_evictable,
@@ -217,7 +221,6 @@ impl<'shm, K, V, S: Clone> CMap<'shm, K, V, S> {
     pub unsafe fn attach(
         file_start: *mut libc::c_void,
         file_size: usize,
-        max_evictable_bytes_per_shard: usize,
     ) -> CMapRef<'shm, K, V, S> {
         let (self_ptr, _) =
             Self::maybe_uninit_ptr_and_initial_next_free_byte(file_start, file_size);
@@ -245,13 +248,14 @@ impl<'shm, K, V, S: Clone> CMap<'shm, K, V, S> {
             shard_allocs_evictable.push(MapAlloc::new(
                 lock.attach(),
                 &cmap.file_alloc,
-                max_evictable_bytes_per_shard,
+                cmap.max_evictable_bytes_per_shard,
                 true,
             ));
         }
 
         CMapRef {
             hash_builder: cmap.hash_builder.clone(),
+            max_evictable_bytes_per_shard: cmap.max_evictable_bytes_per_shard,
             file_alloc: &cmap.file_alloc,
             shard_allocs_non_evictable,
             shard_allocs_evictable,
@@ -387,7 +391,7 @@ mod integration_tests {
                 ForkResult::Child => {
                     // Exercise attach as well.
                     let cmap: CMapRef<'static, u64, u64> =
-                        unsafe { CMap::attach(mmap_ptr, MEM_HEAP_SIZE, 128) };
+                        unsafe { CMap::attach(mmap_ptr, MEM_HEAP_SIZE) };
 
                     for &(key, value) in scenario.iter() {
                         cmap.write_map(&key, |shard| {

@@ -882,11 +882,11 @@ Remove this `debug` request once you're done debugging.
         # Similar to the standard library's `unittest` module:
         # https://github.com/python/cpython/blob/35d9c37e271c35b87d64cc7422600e573f3ee244/Lib/unittest/case.py#L1147-L1149  # noqa B950
         return (
-            "(+ is expected lines, - is actual lines)\n"
+            "(- is expected lines, + is actual lines)\n"
             + "\n".join(
                 difflib.ndiff(
-                    pprint.pformat(actual).splitlines(),
                     pprint.pformat(expected).splitlines(),
+                    pprint.pformat(actual).splitlines(),
                 )
             )
             + "\n"

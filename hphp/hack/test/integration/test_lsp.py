@@ -6121,12 +6121,12 @@ Error 1/1:
 Description: Request with ID 5 (comment: 'hover over function invocation') \
 got an incorrect result:
 
-(+ is expected lines, - is actual lines)
-- {'contents': [{'language': 'hack', 'value': 'int'},
-+ {'contents': [{'language': 'hack', 'value': 'int'}, 'INCORRECT COMMENT HERE'],
-?                                                    +++++++++++++++++++++++++++
+(- is expected lines, + is actual lines)
+- {'contents': [{'language': 'hack', 'value': 'int'}, 'INCORRECT COMMENT HERE'],
+?                                                    ---------------------------
 
--               'A comment describing b_hover.'],
++ {'contents': [{'language': 'hack', 'value': 'int'},
++               'A comment describing b_hover.'],
    'range': {'end': {'character': 16, 'line': 3},
              'start': {'character': 9, 'line': 3}}}
 

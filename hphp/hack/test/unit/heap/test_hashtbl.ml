@@ -10,7 +10,7 @@
 
 type key = OpaqueDigest.t
 
-external hh_add : key -> string -> unit = "hh_add"
+external hh_add : evictable:bool -> key -> string -> unit = "hh_add"
 
 external hh_mem : key -> bool = "hh_mem"
 
@@ -34,7 +34,7 @@ let expect ~msg bool =
 
 let to_key = OpaqueDigest.string
 
-let add key value = hh_add (to_key key) value
+let add key value = hh_add ~evictable:false (to_key key) value
 
 let mem key = hh_mem (to_key key)
 

@@ -1604,8 +1604,8 @@ static void raise_hash_table_full(void) {
  * number if no new memory was allocated.
  */
 /*****************************************************************************/
-value hh_add(value key, value data) {
-  CAMLparam2(key, data);
+value hh_add(value evictable, value key, value data) {
+  CAMLparam3(evictable, key, data);
   uint64_t hash = get_hash(key);
   if (shm_use_sharded_hashtbl != 0) {
     CAMLreturn(shmffi_add(hash, data));

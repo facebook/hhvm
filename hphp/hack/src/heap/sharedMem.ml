@@ -381,7 +381,8 @@ functor
   struct
     (* Returns the number of bytes allocated in the heap, or a negative number
      * if no new memory was allocated *)
-    external hh_add : KeyHasher.hash -> Value.t -> int * int * int = "hh_add"
+    external hh_add :
+      evictable:bool -> KeyHasher.hash -> Value.t -> int * int * int = "hh_add"
 
     external hh_mem : KeyHasher.hash -> bool = "hh_mem"
 
@@ -446,7 +447,9 @@ functor
       ()
 
     let add key value =
-      let (compressed_size, original_size, total_size) = hh_add key value in
+      let (compressed_size, original_size, total_size) =
+        hh_add ~evictable:false key value
+      in
       (* compressed_size is a negative number if nothing new was added *)
       if SMTelemetry.hh_log_level () > 0 && compressed_size > 0 then
         log_serialize compressed_size original_size total_size

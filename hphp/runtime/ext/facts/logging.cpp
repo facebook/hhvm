@@ -20,6 +20,8 @@
 #include <memory>
 #include <string>
 
+#include <unistd.h>
+
 #include <folly/Conv.h>
 #include <folly/SynchronizedPtr.h>
 #include <folly/futures/FutureSplitter.h>
@@ -54,11 +56,23 @@ folly::SynchronizedPtr<std::unique_ptr<Cronolog>> make_synchronized_crono(
     throw std::runtime_error("File template and link are required settings.");
   }
 
+  // First, let's attempt to honor the logging settings as specified by the
+  // logging config.
   auto crono = std::make_unique<Cronolog>();
   crono->m_template = file_template;
   crono->m_linkName = link;
   crono->setPeriodicity();
   crono->m_periodMultiple = period_multiple;
+
+  // Next, let's test if we can actually create the file and use it.  If the
+  // user doesn't have permissions on the file, we'll use a temp file instead.
+  // The common case for this would be the user running a command line script
+  // which won't be able to write to a file owned by apache.
+  if (crono->getOutputFile() == nullptr) {
+    crono->m_template =
+        folly::sformat("/tmp/facts.%Y-%m-%d.log_{}.log", ::getpid());
+    crono->m_linkName.clear();
+  }
 
 #if !defined(SKIP_USER_CHANGE)
   if (!owner.empty()) {
@@ -67,6 +81,10 @@ folly::SynchronizedPtr<std::unique_ptr<Cronolog>> make_synchronized_crono(
 #endif
 
   return folly::SynchronizedPtr<std::unique_ptr<Cronolog>>(std::move(crono));
+}
+
+bool isTtyHelper(FILE* fp) {
+  return (fp != nullptr) && (::isatty(::fileno(fp)) == 1);
 }
 
 /*
@@ -92,16 +110,19 @@ public:
             options.link,
             options.owner,
             options.period_multiple)}
-      , m_tty{isatty(fileno(m_crono.wlock()->getOutputFile())) == 1}
+      , m_tty{isTtyHelper(m_crono.wlock()->getOutputFile())}
       , m_flush{options.flush_after_write} {
   }
 
   void writeMessage(folly::StringPiece buffer, uint32_t flags = 0) override {
     auto crono = m_crono.wlock();
+
     FILE* output = crono->getOutputFile();
-    always_assert(::fwrite(buffer.data(), buffer.size(), 1, output) == 1);
-    if (m_flush || (flags & folly::LogWriter::Flags::NEVER_DISCARD)) {
-      always_assert(::fflush(output) == 0);
+    if (output != nullptr) {
+      always_assert(::fwrite(buffer.data(), buffer.size(), 1, output) == 1);
+      if (m_flush || (flags & folly::LogWriter::Flags::NEVER_DISCARD)) {
+        always_assert(::fflush(output) == 0);
+      }
     }
   }
 
@@ -110,7 +131,12 @@ public:
   }
 
   void flush() override {
-    always_assert(::fflush(m_crono.wlock()->getOutputFile()) == 0);
+    auto wlock = m_crono.wlock();
+
+    FILE* output = wlock->getOutputFile();
+    if (output != nullptr) {
+      always_assert(::fflush(output) == 0);
+    }
   }
 
   bool ttyOutput() const override {

@@ -507,7 +507,12 @@ pub extern "C" fn shmffi_mem_status(hash: u64) -> usize {
 
 #[no_mangle]
 pub extern "C" fn shmffi_get_size(hash: u64) -> usize {
-    let size = with(|cmap| cmap.read_map(&hash, |map| map[&hash].header.buffer_size()));
+    let size = with(|cmap| {
+        cmap.read_map(&hash, |map| {
+            map.get(&hash).map(|value| value.header.buffer_size())
+        })
+    });
+    let size = size.unwrap_or(0);
     Value::int(size as isize).to_bits()
 }
 

@@ -42,8 +42,8 @@ impl HeapValueHeader {
     fn new(buffer_size: usize, uncompressed_size: usize, is_serialized: bool) -> Self {
         let buffer_size: u32 = buffer_size.try_into().unwrap();
         let uncompressed_size: u32 = uncompressed_size.try_into().unwrap();
-        // Make sure the MSB are 0 because we will need 1 additional bits for
-        // another field and 1 bit for OCaml's internals.
+        // Make sure the MSB are 0. We only have 31 bits for the sizes as we need
+        // one additional bit for `is_serialized`.
         assert_eq!(buffer_size & (1 << 31), 0);
         assert_eq!(uncompressed_size & (1 << 31), 0);
 

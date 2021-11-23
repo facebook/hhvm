@@ -14,3 +14,21 @@ File "invalid_operator.php", line 29, characters 32-36:
 Unsupported expression tree syntax. (Parsing[1002])
 File "invalid_operator.php", line 32, characters 28-34:
 Expression trees do not support compound assignments. Try the long form style `$foo = $foo + $bar` instead. (Parsing[1002])
+File "invalid_operator.php", line 29, characters 32-33:
+Variable `$x` is undefined, or not always defined. (Naming[2050])
+  File "invalid_operator.php", line 26, characters 3-51:
+  Did you mean `$f` instead?
+File "invalid_operator.php", line 16, characters 13-24:
+You are trying to access the method `__plus` but this is an int (Typing[4062])
+  File "invalid_operator.php", line 9, characters 7-9:
+  Definition is here
+File "invalid_operator.php", line 26, characters 25-26:
+Wrong type hint (Typing[4331])
+  File "invalid_operator.php", line 26, characters 14-23:
+  Expected `ExampleInt`
+  File "invalid_operator.php", line 26, characters 30-30:
+  But got `int`
+File "invalid_operator.php", line 32, characters 28-34:
+You are trying to access the method `__unsupported` but this is an int (Typing[4062])
+  File "invalid_operator.php", line 32, characters 14-16:
+  Definition is here

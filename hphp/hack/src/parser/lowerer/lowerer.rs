@@ -2104,17 +2104,12 @@ where
 
                 let hint = Self::p_hint(&c.prefix, env)?;
 
-                let et = match desugar(&hint, src_expr, env) {
-                    Ok(et) => et,
-                    Err((pos, msg)) => {
-                        Self::raise_parsing_error_pos(&pos, env, &msg);
-                        // Discard the source AST and just use a null
-                        // literal, to prevent cascading errors.
-                        return Ok(E_::Null);
-                    }
-                };
+                let desugar_result = desugar(&hint, src_expr, env);
+                for (pos, msg) in desugar_result.errors {
+                    Self::raise_parsing_error_pos(&pos, env, &msg);
+                }
 
-                Ok(et.2)
+                Ok(desugar_result.expr.2)
             }
             ConditionalExpression(c) => {
                 let alter = Self::p_expr(&c.alternative, env)?;

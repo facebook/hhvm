@@ -226,7 +226,7 @@ static int win32_getpagesize(void) {
 
 extern void shmffi_init(void* mmap_address, size_t file_size);
 extern void shmffi_attach(void* mmap_address, size_t file_size);
-extern value shmffi_add(uint64_t hash, value data);
+extern value shmffi_add(_Bool evictable, uint64_t hash, value data);
 extern value shmffi_mem(uint64_t hash);
 extern value shmffi_get_and_deserialize(uint64_t hash);
 extern value shmffi_mem_status(uint64_t hash);
@@ -1608,7 +1608,7 @@ value hh_add(value evictable, value key, value data) {
   CAMLparam3(evictable, key, data);
   uint64_t hash = get_hash(key);
   if (shm_use_sharded_hashtbl != 0) {
-    CAMLreturn(shmffi_add(hash, data));
+    CAMLreturn(shmffi_add(Bool_val(evictable), hash, data));
   }
   check_should_exit();
   unsigned int slot = hash & (hashtbl_size - 1);

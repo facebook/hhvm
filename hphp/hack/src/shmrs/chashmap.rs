@@ -19,21 +19,33 @@ use crate::sync::{RwLock, RwLockRef};
 /// same under the assumption of 40 processors.
 ///
 /// Must be a power of 2, as we use `trailing_zeros` for bitshifting.
-const NUM_SHARDS: usize = 256;
+pub const NUM_SHARDS: usize = 256;
 static_assertions::const_assert!(NUM_SHARDS.is_power_of_two());
 
 /// The non-evictable allocator itself allocates regions of memory in chunks.
 const NON_EVICTABLE_CHUNK_SIZE: usize = 1024 * 1024;
 
-/// The evictable allocator is of a fixed size and only allocates one chunk.
-const EVICTABLE_CHUNK_SIZE: usize = (10 * 1024 * 1024 * 1024) / NUM_SHARDS;
-
 /// This struct gives access to a shard, including its hashmap and its
 /// allocators.
 pub struct Shard<'shm, 'a, K, V, S> {
     pub map: &'a mut Map<'shm, K, V, S>,
-    pub alloc_non_evictable: &'a MapAlloc<'shm>,
-    pub alloc_evictable: &'a MapAlloc<'shm>,
+    alloc_non_evictable: &'a MapAlloc<'shm>,
+    alloc_evictable: &'a MapAlloc<'shm>,
+}
+
+impl<'shm, 'a, K, V, S> Shard<'shm, 'a, K, V, S> {
+    /// Return an allocator.
+    ///
+    /// If the argument is true, return the allocator for evictable values.
+    /// If the argument is false, return the allocator for non-evictable values.
+    #[inline(always)]
+    pub fn alloc(&self, evictable: bool) -> &'a MapAlloc<'shm> {
+        if evictable {
+            self.alloc_evictable
+        } else {
+            self.alloc_non_evictable
+        }
+    }
 }
 
 /// A concurrent hash map implemented as multiple sharded non-concurrent
@@ -84,8 +96,14 @@ impl<'shm, K, V> CMap<'shm, K, V, DefaultHashBuilder> {
     pub unsafe fn initialize(
         file_start: *mut libc::c_void,
         file_size: usize,
+        max_evictable_bytes_per_shard: usize,
     ) -> CMapRef<'shm, K, V, DefaultHashBuilder> {
-        Self::initialize_with_hasher(DefaultHashBuilder::new(), file_start, file_size)
+        Self::initialize_with_hasher(
+            DefaultHashBuilder::new(),
+            file_start,
+            file_size,
+            max_evictable_bytes_per_shard,
+        )
     }
 }
 
@@ -107,6 +125,7 @@ impl<'shm, K, V, S: Clone> CMap<'shm, K, V, S> {
         hash_builder: S,
         file_start: *mut libc::c_void,
         file_size: usize,
+        max_evictable_bytes_per_shard: usize,
     ) -> CMapRef<'shm, K, V, S> {
         let (self_ptr, next_free_byte) =
             Self::maybe_uninit_ptr_and_initial_next_free_byte(file_start, file_size);
@@ -169,7 +188,7 @@ impl<'shm, K, V, S: Clone> CMap<'shm, K, V, S> {
             shard_allocs_evictable.push(MapAlloc::new(
                 lock.initialize().unwrap(),
                 &cmap.file_alloc,
-                EVICTABLE_CHUNK_SIZE,
+                max_evictable_bytes_per_shard,
                 true,
             ));
         }
@@ -198,6 +217,7 @@ impl<'shm, K, V, S: Clone> CMap<'shm, K, V, S> {
     pub unsafe fn attach(
         file_start: *mut libc::c_void,
         file_size: usize,
+        max_evictable_bytes_per_shard: usize,
     ) -> CMapRef<'shm, K, V, S> {
         let (self_ptr, _) =
             Self::maybe_uninit_ptr_and_initial_next_free_byte(file_start, file_size);
@@ -225,7 +245,7 @@ impl<'shm, K, V, S: Clone> CMap<'shm, K, V, S> {
             shard_allocs_evictable.push(MapAlloc::new(
                 lock.attach(),
                 &cmap.file_alloc,
-                EVICTABLE_CHUNK_SIZE,
+                max_evictable_bytes_per_shard,
                 true,
             ));
         }
@@ -356,7 +376,7 @@ mod integration_tests {
             )
         };
         assert_ne!(mmap_ptr, libc::MAP_FAILED);
-        let cmap = unsafe { CMap::initialize(mmap_ptr, MEM_HEAP_SIZE) };
+        let cmap = unsafe { CMap::initialize(mmap_ptr, MEM_HEAP_SIZE, 128) };
 
         let mut child_procs = vec![];
         for scenario in &scenarios {
@@ -367,7 +387,7 @@ mod integration_tests {
                 ForkResult::Child => {
                     // Exercise attach as well.
                     let cmap: CMapRef<'static, u64, u64> =
-                        unsafe { CMap::attach(mmap_ptr, MEM_HEAP_SIZE) };
+                        unsafe { CMap::attach(mmap_ptr, MEM_HEAP_SIZE, 128) };
 
                     for &(key, value) in scenario.iter() {
                         cmap.write_map(&key, |shard| {

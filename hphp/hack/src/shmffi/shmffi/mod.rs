@@ -4,7 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 #![feature(allocator_api)]
 
-use std::alloc::{Allocator, Layout};
+use std::alloc::{AllocError, Allocator, Layout};
+use std::convert::TryInto;
 use std::hash::BuildHasherDefault;
 use std::ptr::NonNull;
 
@@ -12,7 +13,7 @@ use lz4::liblz4;
 use nohash_hasher::NoHashHasher;
 use once_cell::unsync::OnceCell;
 
-use shmrs::chashmap::{CMap, CMapRef};
+use shmrs::chashmap::{CMap, CMapRef, Shard, NUM_SHARDS};
 use shmrs::mapalloc::MapAlloc;
 
 use ocamlrep::{ptr::UnsafeOcamlPtr, Value, STRING_TAG};
@@ -24,6 +25,9 @@ type HackMap = CMapRef<'static, u64, HeapValue, HashBuilder>;
 thread_local! {
   static CMAP: OnceCell<HackMap> = OnceCell::new();
 }
+
+pub const MAX_EVICTABLE_MEMORY_TOTAL: usize = 1024 * 1024 * 1024;
+pub const MAX_EVICTABLE_MEMORY_PER_SHARD: usize = MAX_EVICTABLE_MEMORY_TOTAL / NUM_SHARDS;
 
 extern "C" {
     fn caml_input_value_from_block(data: *const u8, size: usize) -> usize;
@@ -95,7 +99,6 @@ impl HeapValueHeader {
     }
 
     /// Is the value evictable?
-    #[allow(dead_code)] // TODO(hverr): Remove
     fn is_evictable(&self) -> bool {
         ((self.0 >> 63) & 1) == 1
     }
@@ -146,18 +149,18 @@ impl HeapValue {
         }
     }
 
-    fn clone_in(&self, alloc: &MapAlloc<'static>) -> HeapValue {
+    fn clone_in(&self, alloc: &MapAlloc<'static>) -> Result<HeapValue, AllocError> {
         let layout = Layout::from_size_align(self.header.buffer_size(), 1).unwrap();
-        let mut data = alloc.allocate(layout).unwrap();
+        let mut data = alloc.allocate(layout)?;
         // Safety: we are the only ones with access to the allocated chunk.
         unsafe {
             data.as_mut().copy_from_slice(self.as_slice())
         };
 
-        HeapValue {
+        Ok(HeapValue {
             header: self.header,
             data: data.cast(),
-        }
+        })
     }
 
     fn as_slice(&self) -> &[u8] {
@@ -269,11 +272,15 @@ impl<'a> SerializedValue<'a> {
         }
     }
 
-    fn to_heap_value_in(&self, alloc: &MapAlloc<'static>) -> HeapValue {
+    fn to_heap_value_in(
+        &self,
+        is_evictable: bool,
+        alloc: &MapAlloc<'static>,
+    ) -> Result<HeapValue, AllocError> {
         let slice = self.as_slice();
 
         let layout = Layout::from_size_align(slice.len(), 1).unwrap();
-        let mut data = alloc.allocate(layout).unwrap();
+        let mut data = alloc.allocate(layout)?;
         // Safety: we are the only ones with access to the allocated chunk.
         unsafe {
             data.as_mut().copy_from_slice(slice)
@@ -285,13 +292,13 @@ impl<'a> SerializedValue<'a> {
                 buffer_size: slice.len(),
                 uncompressed_size: slice.len(),
                 is_serialized: false,
-                is_evictable: false,
+                is_evictable,
             },
             Serialized { .. } => HeapValueHeaderFields {
                 buffer_size: slice.len(),
                 uncompressed_size: slice.len(),
                 is_serialized: true,
-                is_evictable: false,
+                is_evictable,
             },
             Compressed {
                 uncompressed_size, ..
@@ -299,14 +306,14 @@ impl<'a> SerializedValue<'a> {
                 buffer_size: slice.len(),
                 uncompressed_size: *uncompressed_size as usize,
                 is_serialized: true,
-                is_evictable: false,
+                is_evictable,
             },
         };
 
-        HeapValue {
+        Ok(HeapValue {
             header: header.into(),
             data: data.cast(),
-        }
+        })
     }
 
     pub fn uncompressed_size(&self) -> usize {
@@ -340,6 +347,18 @@ fn with<R>(f: impl FnOnce(&HackMap) -> R) -> R {
     CMAP.with(|cell| f(cell.get().unwrap()))
 }
 
+#[inline(always)]
+fn empty_shard<'a, K, S>(shard: &mut Shard<'_, 'a, K, HeapValue, S>) {
+    let alloc = shard.alloc(true);
+    // Remove all evictable values from the hashmap.
+    shard.map.retain(|_, value| !value.header.is_evictable());
+
+    // Safety: We've just removed all pointers to values in the allocator.
+    unsafe {
+        alloc.reset();
+    }
+}
+
 #[no_mangle]
 pub extern "C" fn shmffi_init(mmap_address: *mut libc::c_void, file_size: libc::size_t) {
     catch_unwind(|| {
@@ -353,6 +372,7 @@ pub extern "C" fn shmffi_init(mmap_address: *mut libc::c_void, file_size: libc::
                     BuildHasherDefault::default(),
                     mmap_address,
                     file_size,
+                    MAX_EVICTABLE_MEMORY_PER_SHARD,
                 )
             });
         });
@@ -370,7 +390,7 @@ pub extern "C" fn shmffi_attach(mmap_address: *mut libc::c_void, file_size: libc
             // Safety:
             //  - Should be already initialized by the master process.
             unsafe {
-                CMap::attach(mmap_address, file_size)
+                CMap::attach(mmap_address, file_size, MAX_EVICTABLE_MEMORY_PER_SHARD)
             });
         });
 
@@ -379,28 +399,58 @@ pub extern "C" fn shmffi_attach(mmap_address: *mut libc::c_void, file_size: libc
 }
 
 #[no_mangle]
-pub extern "C" fn shmffi_add(hash: u64, data: usize) -> usize {
+pub extern "C" fn shmffi_add(evictable: bool, hash: u64, data: usize) -> usize {
     catch_unwind(|| {
         let data = unsafe { Value::from_bits(data) };
         let serialized = SerializedValue::from(data);
         let compressed = serialized.maybe_compress();
         let compressed_size = compressed.compressed_size();
         let uncompressed_size = compressed.uncompressed_size();
-        with(|cmap| {
-            cmap.write_map(&hash, |shard| {
-                let heap_value = compressed.to_heap_value_in(shard.alloc_non_evictable);
-                shard.map.insert(hash, heap_value);
+        let did_insert = with(|cmap| {
+            cmap.write_map(&hash, |mut shard| {
+                let heap_value = if !evictable {
+                    Some(
+                        compressed
+                            .to_heap_value_in(evictable, shard.alloc(evictable))
+                            .unwrap(),
+                    )
+                } else if compressed.as_slice().len() < MAX_EVICTABLE_MEMORY_PER_SHARD / 2 {
+                    match compressed.to_heap_value_in(evictable, shard.alloc(evictable)) {
+                        Ok(heap_value) => Some(heap_value),
+                        Err(AllocError) => {
+                            empty_shard(&mut shard);
+                            Some(
+                                compressed
+                                    .to_heap_value_in(evictable, shard.alloc(evictable))
+                                    .unwrap(),
+                            )
+                        }
+                    }
+                } else {
+                    None
+                };
+                match heap_value {
+                    None => false,
+                    Some(heap_value) => {
+                        shard.map.insert(hash, heap_value);
+                        true
+                    }
+                }
             })
         });
         compressed.free();
 
         // TODO(hverr): We don't have access to "total_size" (which includes
         // alignment overhead), remove the third field.
-        let ret: (isize, isize, isize) = (
-            compressed_size as isize,
-            uncompressed_size as isize,
-            compressed_size as isize,
-        );
+        let ret: (isize, isize, isize) = if did_insert {
+            (
+                compressed_size as isize,
+                uncompressed_size as isize,
+                compressed_size as isize,
+            )
+        } else {
+            (-1, -1, -1)
+        };
         unsafe { ocamlrep_ocamlpool::to_ocaml(&ret) }
     })
 }
@@ -464,8 +514,19 @@ pub extern "C" fn shmffi_get_size(hash: u64) -> usize {
 pub extern "C" fn shmffi_move(hash1: u64, hash2: u64) {
     with(|cmap| {
         let value = cmap.write_map(&hash1, |shard1| shard1.map.remove(&hash1).unwrap());
-        cmap.write_map(&hash2, |shard2| {
-            let cloned_value = value.clone_in(shard2.alloc_non_evictable);
+        cmap.write_map(&hash2, |mut shard2| {
+            let evictable = value.header.is_evictable();
+            let cloned_value = if !evictable {
+                value.clone_in(shard2.alloc(evictable)).unwrap()
+            } else {
+                match value.clone_in(shard2.alloc(evictable)) {
+                    Ok(cloned_value) => cloned_value,
+                    Err(AllocError) => {
+                        empty_shard(&mut shard2);
+                        value.clone_in(shard2.alloc(evictable)).unwrap()
+                    }
+                }
+            };
             shard2.map.insert(hash2, cloned_value);
         });
     });

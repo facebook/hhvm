@@ -496,8 +496,6 @@ val closure : env -> (env -> env * 'a) -> env * 'a
 
 val in_try : env -> (env -> env * 'a) -> env * 'a
 
-val in_case : env -> (env -> env * 'a) -> env * 'a
-
 val save : TPEnv.t -> env -> Tast.saved_env
 
 val set_condition_type : env -> SMap.key -> Typing_defs.decl_ty -> env

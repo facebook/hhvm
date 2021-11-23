@@ -1292,12 +1292,6 @@ let in_try env f =
   let (env, result) = f env in
   ({ env with in_try = old_in_try }, result)
 
-let in_case env f =
-  let old_in_case = env.in_case in
-  let env = { env with in_case = true } in
-  let (env, result) = f env in
-  ({ env with in_case = old_in_case }, result)
-
 (* Return the subset of env which is saved in the Typed AST's EnvAnnotation. *)
 let save local_tpenv env =
   {

@@ -52,7 +52,6 @@ type env = {
   decl_env: Decl_env.env;
   in_loop: bool;
   in_try: bool;
-  in_case: bool;
   in_expr_tree: bool;
   inside_constructor: bool;
   in_support_dynamic_type_method_check: bool;
@@ -99,7 +98,6 @@ let empty ?origin ?(mode = FileInfo.Mstrict) ctx file ~droot =
     lenv = initial_local Type_parameter_env.empty;
     in_loop = false;
     in_try = false;
-    in_case = false;
     in_expr_tree = false;
     inside_constructor = false;
     in_support_dynamic_type_method_check = false;

@@ -1932,12 +1932,7 @@ and stmt_ env pos st =
   @@
   match st with
   | Fallthrough ->
-    let env =
-      if env.in_case then
-        LEnv.move_and_merge_next_in_cont env C.Fallthrough
-      else
-        env
-    in
+    let env = LEnv.move_and_merge_next_in_cont env C.Fallthrough in
     (env, Aast.Fallthrough)
   | Noop -> (env, Aast.Noop)
   | AssertEnv _ -> (env, Aast.Noop)
@@ -2192,8 +2187,7 @@ and stmt_ env pos st =
     let (env, (te, tcl)) =
       LEnv.stash_and_do env [C.Continue; C.Break] (fun env ->
           let parent_locals = LEnv.get_all_locals env in
-          let case_list env = case_list parent_locals ty env pos cl in
-          let (env, tcl) = Env.in_case env case_list in
+          let (env, tcl) = case_list parent_locals ty env pos cl in
           let env =
             LEnv.update_next_from_conts env [C.Continue; C.Break; C.Next]
           in

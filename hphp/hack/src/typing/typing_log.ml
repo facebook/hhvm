@@ -573,7 +573,6 @@ let env_as_value env =
     tracing_info = _;
     in_loop;
     in_try;
-    in_case;
     in_expr_tree;
     inside_constructor;
     in_support_dynamic_type_method_check;
@@ -594,7 +593,6 @@ let env_as_value env =
       ("genv", genv_as_value env genv);
       ("in_loop", bool_as_value in_loop);
       ("in_try", bool_as_value in_try);
-      ("in_case", bool_as_value in_case);
       ("in_expr_tree", bool_as_value in_expr_tree);
       ("inside_constructor", bool_as_value inside_constructor);
       ( "in_support_dynamic_type_method_check",

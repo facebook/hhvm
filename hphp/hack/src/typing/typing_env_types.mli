@@ -23,7 +23,6 @@ type env = {
   decl_env: Decl_env.env;
   in_loop: bool;
   in_try: bool;
-  in_case: bool;
   in_expr_tree: bool;
   inside_constructor: bool;
   in_support_dynamic_type_method_check: bool;

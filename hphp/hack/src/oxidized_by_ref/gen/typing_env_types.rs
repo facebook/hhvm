@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3f8a5ba13754fc18b99401a72bf56108>>
+// @generated SignedSource<<bc8f4192e202d0aac06b5374e08d0b55>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -71,7 +71,6 @@ pub struct Env<'a> {
     pub decl_env: &'a decl_env::Env<'a>,
     pub in_loop: bool,
     pub in_try: bool,
-    pub in_case: bool,
     pub in_expr_tree: bool,
     pub inside_constructor: bool,
     pub in_support_dynamic_type_method_check: bool,

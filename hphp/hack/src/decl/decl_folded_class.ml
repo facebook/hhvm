@@ -227,6 +227,402 @@ let check_if_cyclic (class_env : class_env) ((pos, cid) : Pos.t * string) : bool
   if is_cyclic then Errors.cyclic_class_def stack pos;
   is_cyclic
 
+let class_is_abstract (c : Shallow_decl_defs.shallow_class) : bool =
+  match c.sc_kind with
+  | Ast_defs.Cclass k -> Ast_defs.is_abstract k
+  | Ast_defs.Cenum_class k -> Ast_defs.is_abstract k
+  | Ast_defs.Cinterface
+  | Ast_defs.Ctrait
+  | Ast_defs.Cenum ->
+    true
+
+let synthesize_const_defaults c =
+  let open Typing_defs in
+  match c.cc_abstract with
+  | CCAbstract true -> { c with cc_abstract = CCConcrete }
+  | _ -> c
+
+(* When all type constants have been inherited and declared, this step synthesizes
+ * the defaults of abstract type constants into concrete type constants. *)
+let synthesize_typeconst_defaults
+    (k : string)
+    (tc : Typing_defs.typeconst_type)
+    ((typeconsts, consts) :
+      Typing_defs.typeconst_type SMap.t * Typing_defs.class_const SMap.t) :
+    Typing_defs.typeconst_type SMap.t * Typing_defs.class_const SMap.t =
+  match tc.ttc_kind with
+  | TCAbstract { atc_default = Some default; _ } ->
+    let concrete =
+      {
+        tc with
+        ttc_kind = TCConcrete { tc_type = default };
+        ttc_concretized = true;
+      }
+    in
+    let typeconsts = SMap.add k concrete typeconsts in
+    (* OCaml 4.06 has an update method that makes this operation much more ergonomic *)
+    let constant = SMap.find_opt k consts in
+    let consts =
+      Option.value_map constant ~default:consts ~f:(fun c ->
+          SMap.add k { c with cc_abstract = CCConcrete } consts)
+    in
+    (typeconsts, consts)
+  | _ -> (typeconsts, consts)
+
+let get_sealed_whitelist (c : Shallow_decl_defs.shallow_class) : SSet.t option =
+  match Attributes.find SN.UserAttributes.uaSealed c.sc_user_attributes with
+  | None -> None
+  | Some { ua_classname_params; _ } -> Some (SSet.of_list ua_classname_params)
+
+let get_implements (env : Decl_env.env) parent_cache (ht : Typing_defs.decl_ty)
+    : Typing_defs.decl_ty SMap.t =
+  let (_r, (_p, c), paraml) = Decl_utils.unwrap_class_type ht in
+  let class_ = Decl_env.get_class_add_dep env c ~cache:parent_cache in
+  match class_ with
+  | None ->
+    (* The class lives in PHP land *)
+    SMap.singleton c ht
+  | Some class_ ->
+    let subst = Inst.make_subst class_.dc_tparams paraml in
+    let sub_implements =
+      SMap.map (fun ty -> Inst.instantiate subst ty) class_.dc_ancestors
+    in
+    SMap.add c ht sub_implements
+
+let visibility
+    (class_id : string)
+    (module_ : Typing_modules.t)
+    (visibility : Aast_defs.visibility) : Typing_defs.ce_visibility =
+  match visibility with
+  | Public -> Vpublic
+  | Protected -> Vprotected class_id
+  | Private -> Vprivate class_id
+  | Internal ->
+    (match module_ with
+    | Some m -> Vinternal m
+    | None -> Vpublic)
+
+let build_constructor
+    ~(write_shmem : bool)
+    (class_ : Shallow_decl_defs.shallow_class)
+    (method_ : Shallow_decl_defs.shallow_method) :
+    (Decl_defs.element * Typing_defs.fun_elt option) option =
+  let (_, class_name) = class_.sc_name in
+  let vis = visibility class_name class_.sc_module method_.sm_visibility in
+  let pos = fst method_.sm_name in
+  let cstr =
+    {
+      elt_flags =
+        make_ce_flags
+          ~xhp_attr:None
+          ~final:(sm_final method_)
+          ~abstract:(sm_abstract method_)
+          ~lateinit:false
+          ~const:false
+          ~lsb:false
+          ~synthesized:false
+          ~override:false
+          ~dynamicallycallable:false
+          ~readonly_prop:false
+          ~support_dynamic_type:false
+          ~needs_init:false;
+      elt_visibility = vis;
+      elt_origin = class_name;
+      elt_deprecated = method_.sm_deprecated;
+    }
+  in
+  let fe =
+    {
+      fe_module = None;
+      fe_pos = pos;
+      fe_internal = false;
+      fe_deprecated = method_.sm_deprecated;
+      fe_type = method_.sm_type;
+      fe_php_std_lib = false;
+      fe_support_dynamic_type = false;
+    }
+  in
+  (if write_shmem then Decl_store.((get ()).add_constructor class_name fe));
+  Some (cstr, Some fe)
+
+let constructor_decl
+    ~(sh : SharedMem.uses)
+    ((parent_cstr, pconsist) :
+      (Decl_defs.element * Typing_defs.fun_elt option) option
+      * Typing_defs.consistent_kind)
+    (class_ : Shallow_decl_defs.shallow_class) :
+    (Decl_defs.element * Typing_defs.fun_elt option) option
+    * Typing_defs.consistent_kind =
+  let SharedMem.Uses = sh in
+  (* constructors in children of class_ must be consistent? *)
+  let cconsist =
+    if class_.sc_final then
+      FinalClass
+    else if
+      Attrs.mem
+        SN.UserAttributes.uaConsistentConstruct
+        class_.sc_user_attributes
+    then
+      ConsistentConstruct
+    else
+      Inconsistent
+  in
+  let cstr =
+    match class_.sc_constructor with
+    | None -> parent_cstr
+    | Some method_ -> build_constructor ~write_shmem:true class_ method_
+  in
+  (cstr, Decl_utils.coalesce_consistent pconsist cconsist)
+
+let class_const_fold
+    (c : Shallow_decl_defs.shallow_class)
+    (acc : Typing_defs.class_const SMap.t)
+    (scc : Shallow_decl_defs.shallow_class_const) :
+    Typing_defs.class_const SMap.t =
+  let c_name = snd c.sc_name in
+  let cc =
+    {
+      cc_synthesized = false;
+      cc_abstract = scc.scc_abstract;
+      cc_pos = fst scc.scc_name;
+      cc_type = scc.scc_type;
+      cc_origin = c_name;
+      cc_refs = scc.scc_refs;
+    }
+  in
+  let acc = SMap.add (snd scc.scc_name) cc acc in
+  acc
+
+(* Every class, interface, and trait implicitly defines a ::class to
+ * allow accessing its fully qualified name as a string *)
+let class_class_decl (class_id : Typing_defs.pos_id) : Typing_defs.class_const =
+  let (pos, name) = class_id in
+  let reason = Reason.Rclass_class (pos, name) in
+  let classname_ty =
+    mk (reason, Tapply ((pos, SN.Classes.cClassname), [mk (reason, Tthis)]))
+  in
+  {
+    cc_abstract = CCConcrete;
+    cc_pos = pos;
+    cc_synthesized = true;
+    cc_type = classname_ty;
+    cc_origin = name;
+    cc_refs = [];
+  }
+
+let prop_decl
+    ~(write_shmem : bool)
+    (c : Shallow_decl_defs.shallow_class)
+    (acc : (Decl_defs.element * Typing_defs.decl_ty option) SMap.t)
+    (sp : Shallow_decl_defs.shallow_prop) :
+    (Decl_defs.element * Typing_defs.decl_ty option) SMap.t =
+  let (sp_pos, sp_name) = sp.sp_name in
+  let ty =
+    match sp.sp_type with
+    | None -> mk (Reason.Rwitness_from_decl sp_pos, Typing_defs.make_tany ())
+    | Some ty' -> ty'
+  in
+  let vis = visibility (snd c.sc_name) c.sc_module sp.sp_visibility in
+  let elt =
+    {
+      elt_flags =
+        make_ce_flags
+          ~xhp_attr:sp.sp_xhp_attr
+          ~final:true
+          ~lsb:false
+          ~synthesized:false
+          ~override:false
+          ~const:(sp_const sp)
+          ~lateinit:(sp_lateinit sp)
+          ~abstract:(sp_abstract sp)
+          ~dynamicallycallable:false
+          ~readonly_prop:(sp_readonly sp)
+          ~support_dynamic_type:false
+          ~needs_init:(sp_needs_init sp);
+      elt_visibility = vis;
+      elt_origin = snd c.sc_name;
+      elt_deprecated = None;
+    }
+  in
+  (if write_shmem then
+    Decl_store.((get ()).add_prop (elt.elt_origin, sp_name) ty));
+  let acc = SMap.add sp_name (elt, Some ty) acc in
+  acc
+
+let static_prop_decl
+    ~(write_shmem : bool)
+    (c : Shallow_decl_defs.shallow_class)
+    (acc : (Decl_defs.element * Typing_defs.decl_ty option) SMap.t)
+    (sp : Shallow_decl_defs.shallow_prop) :
+    (Decl_defs.element * Typing_defs.decl_ty option) SMap.t =
+  let (sp_pos, sp_name) = sp.sp_name in
+  let ty =
+    match sp.sp_type with
+    | None -> mk (Reason.Rwitness_from_decl sp_pos, Typing_defs.make_tany ())
+    | Some ty' -> ty'
+  in
+  let vis = visibility (snd c.sc_name) c.sc_module sp.sp_visibility in
+  let elt =
+    {
+      elt_flags =
+        make_ce_flags
+          ~xhp_attr:sp.sp_xhp_attr
+          ~final:true
+          ~const:(sp_const sp)
+          ~lateinit:(sp_lateinit sp)
+          ~lsb:(sp_lsb sp)
+          ~override:false
+          ~abstract:(sp_abstract sp)
+          ~synthesized:false
+          ~dynamicallycallable:false
+          ~readonly_prop:(sp_readonly sp)
+          ~support_dynamic_type:false
+          ~needs_init:false;
+      elt_visibility = vis;
+      elt_origin = snd c.sc_name;
+      elt_deprecated = None;
+    }
+  in
+  (if write_shmem then
+    Decl_store.((get ()).add_static_prop (elt.elt_origin, sp_name) ty));
+  let acc = SMap.add sp_name (elt, Some ty) acc in
+  acc
+
+(* each concrete type constant T = <sometype> implicitly defines a
+class constant with the same name which is TypeStructure<sometype> *)
+let typeconst_structure
+    (c : Shallow_decl_defs.shallow_class)
+    (stc : Shallow_decl_defs.shallow_typeconst) : Typing_defs.class_const =
+  let pos = fst stc.stc_name in
+  let r = Reason.Rwitness_from_decl pos in
+  let tsid = (pos, SN.FB.cTypeStructure) in
+  let ts_ty =
+    mk (r, Tapply (tsid, [mk (r, Taccess (mk (r, Tthis), stc.stc_name))]))
+  in
+  let abstract =
+    match stc.stc_kind with
+    | TCAbstract { atc_default = default; _ } ->
+      CCAbstract (Option.is_some default)
+    | _ -> CCConcrete
+  in
+  {
+    cc_abstract = abstract;
+    cc_pos = pos;
+    cc_synthesized = true;
+    cc_type = ts_ty;
+    cc_origin = snd c.sc_name;
+    cc_refs = [];
+  }
+
+let typeconst_fold
+    (c : Shallow_decl_defs.shallow_class)
+    (acc : Typing_defs.typeconst_type SMap.t * Typing_defs.class_const SMap.t)
+    (stc : Shallow_decl_defs.shallow_typeconst) :
+    Typing_defs.typeconst_type SMap.t * Typing_defs.class_const SMap.t =
+  let (typeconsts, consts) = acc in
+  match c.sc_kind with
+  | Ast_defs.Cenum_class _
+  | Ast_defs.Cenum ->
+    acc
+  | Ast_defs.Ctrait
+  | Ast_defs.Cinterface
+  | Ast_defs.Cclass _ ->
+    let name = snd stc.stc_name in
+    let c_name = snd c.sc_name in
+    let ts = typeconst_structure c stc in
+    let consts = SMap.add name ts consts in
+    let ptc_opt = SMap.find_opt name typeconsts in
+    let enforceable =
+      (* Without the positions, this is a simple OR, but this way allows us to
+       * report the position of the <<__Enforceable>> attribute to the user *)
+      if snd stc.stc_enforceable then
+        stc.stc_enforceable
+      else
+        match ptc_opt with
+        | Some ptc -> ptc.ttc_enforceable
+        | None -> (Pos_or_decl.none, false)
+    in
+    let reifiable =
+      if Option.is_some stc.stc_reifiable then
+        stc.stc_reifiable
+      else
+        Option.bind ptc_opt ~f:(fun ptc -> ptc.ttc_reifiable)
+    in
+    let tc =
+      {
+        ttc_synthesized = false;
+        ttc_name = stc.stc_name;
+        ttc_kind = stc.stc_kind;
+        ttc_origin = c_name;
+        ttc_enforceable = enforceable;
+        ttc_reifiable = reifiable;
+        ttc_concretized = false;
+        ttc_is_ctx = stc.stc_is_ctx;
+      }
+    in
+    let typeconsts = SMap.add (snd stc.stc_name) tc typeconsts in
+    (typeconsts, consts)
+
+let method_decl_acc
+    ~(write_shmem : bool)
+    ~(is_static : bool)
+    (c : Shallow_decl_defs.shallow_class)
+    ((acc, condition_types) :
+      (Decl_defs.element * Typing_defs.fun_elt option) SMap.t * SSet.t)
+    (m : Shallow_decl_defs.shallow_method) :
+    (Decl_defs.element * Typing_defs.fun_elt option) SMap.t * SSet.t =
+  (* If method doesn't override anything but has the <<__Override>> attribute, then
+   * set the override flag in ce_flags and let typing emit an appropriate error *)
+  let check_override = sm_override m && not (SMap.mem (snd m.sm_name) acc) in
+  let (pos, id) = m.sm_name in
+  let vis =
+    match (SMap.find_opt id acc, m.sm_visibility) with
+    | (Some ({ elt_visibility = Vprotected _ as parent_vis; _ }, _), Protected)
+      ->
+      parent_vis
+    | _ -> visibility (snd c.sc_name) c.sc_module m.sm_visibility
+  in
+  let support_dynamic_type = sm_support_dynamic_type m in
+  let elt =
+    {
+      elt_flags =
+        make_ce_flags
+          ~xhp_attr:None
+          ~final:(sm_final m)
+          ~abstract:(sm_abstract m)
+          ~override:check_override
+          ~synthesized:false
+          ~lsb:false
+          ~const:false
+          ~lateinit:false
+          ~dynamicallycallable:(sm_dynamicallycallable m)
+          ~readonly_prop:false
+          ~support_dynamic_type
+          ~needs_init:false;
+      elt_visibility = vis;
+      elt_origin = snd c.sc_name;
+      elt_deprecated = m.sm_deprecated;
+    }
+  in
+  let fe =
+    {
+      fe_module = None;
+      fe_pos = pos;
+      fe_internal = false;
+      fe_deprecated = None;
+      fe_type = m.sm_type;
+      fe_php_std_lib = false;
+      fe_support_dynamic_type = support_dynamic_type;
+    }
+  in
+  (if write_shmem then
+    if is_static then
+      Decl_store.((get ()).add_static_method (elt.elt_origin, id) fe)
+    else
+      Decl_store.((get ()).add_method (elt.elt_origin, id) fe));
+  let acc = SMap.add id (elt, Some fe) acc in
+  (acc, condition_types)
+
 let rec declare_class_and_parents
     ~(sh : SharedMem.uses)
     (class_env : class_env)
@@ -288,48 +684,6 @@ and class_decl_if_missing
       in
       Errors.run_in_context fn Errors.Decl @@ fun () ->
       Some (declare_class_and_parents ~sh class_env shallow_class))
-
-and class_is_abstract (c : Shallow_decl_defs.shallow_class) : bool =
-  match c.sc_kind with
-  | Ast_defs.Cclass k -> Ast_defs.is_abstract k
-  | Ast_defs.Cenum_class k -> Ast_defs.is_abstract k
-  | Ast_defs.Cinterface
-  | Ast_defs.Ctrait
-  | Ast_defs.Cenum ->
-    true
-
-and synthesize_const_defaults c =
-  let open Typing_defs in
-  match c.cc_abstract with
-  | CCAbstract true -> { c with cc_abstract = CCConcrete }
-  | _ -> c
-
-(* When all type constants have been inherited and declared, this step synthesizes
- * the defaults of abstract type constants into concrete type constants. *)
-and synthesize_typeconst_defaults
-    (k : string)
-    (tc : Typing_defs.typeconst_type)
-    ((typeconsts, consts) :
-      Typing_defs.typeconst_type SMap.t * Typing_defs.class_const SMap.t) :
-    Typing_defs.typeconst_type SMap.t * Typing_defs.class_const SMap.t =
-  match tc.ttc_kind with
-  | TCAbstract { atc_default = Some default; _ } ->
-    let concrete =
-      {
-        tc with
-        ttc_kind = TCConcrete { tc_type = default };
-        ttc_concretized = true;
-      }
-    in
-    let typeconsts = SMap.add k concrete typeconsts in
-    (* OCaml 4.06 has an update method that makes this operation much more ergonomic *)
-    let constant = SMap.find_opt k consts in
-    let consts =
-      Option.value_map constant ~default:consts ~f:(fun c ->
-          SMap.add k { c with cc_abstract = CCConcrete } consts)
-    in
-    (typeconsts, consts)
-  | _ -> (typeconsts, consts)
 
 and class_decl
     ~(sh : SharedMem.uses)
@@ -501,360 +855,6 @@ and class_decl
     end
     impl;
   (tc, member_heaps_values)
-
-and get_sealed_whitelist (c : Shallow_decl_defs.shallow_class) : SSet.t option =
-  match Attributes.find SN.UserAttributes.uaSealed c.sc_user_attributes with
-  | None -> None
-  | Some { ua_classname_params; _ } -> Some (SSet.of_list ua_classname_params)
-
-and get_implements (env : Decl_env.env) parent_cache (ht : Typing_defs.decl_ty)
-    : Typing_defs.decl_ty SMap.t =
-  let (_r, (_p, c), paraml) = Decl_utils.unwrap_class_type ht in
-  let class_ = Decl_env.get_class_add_dep env c ~cache:parent_cache in
-  match class_ with
-  | None ->
-    (* The class lives in PHP land *)
-    SMap.singleton c ht
-  | Some class_ ->
-    let subst = Inst.make_subst class_.dc_tparams paraml in
-    let sub_implements =
-      SMap.map (fun ty -> Inst.instantiate subst ty) class_.dc_ancestors
-    in
-    SMap.add c ht sub_implements
-
-and constructor_decl
-    ~(sh : SharedMem.uses)
-    ((parent_cstr, pconsist) :
-      (Decl_defs.element * Typing_defs.fun_elt option) option
-      * Typing_defs.consistent_kind)
-    (class_ : Shallow_decl_defs.shallow_class) :
-    (Decl_defs.element * Typing_defs.fun_elt option) option
-    * Typing_defs.consistent_kind =
-  let SharedMem.Uses = sh in
-  (* constructors in children of class_ must be consistent? *)
-  let cconsist =
-    if class_.sc_final then
-      FinalClass
-    else if
-      Attrs.mem
-        SN.UserAttributes.uaConsistentConstruct
-        class_.sc_user_attributes
-    then
-      ConsistentConstruct
-    else
-      Inconsistent
-  in
-  let cstr =
-    match class_.sc_constructor with
-    | None -> parent_cstr
-    | Some method_ -> build_constructor ~write_shmem:true class_ method_
-  in
-  (cstr, Decl_utils.coalesce_consistent pconsist cconsist)
-
-and build_constructor
-    ~(write_shmem : bool)
-    (class_ : Shallow_decl_defs.shallow_class)
-    (method_ : Shallow_decl_defs.shallow_method) :
-    (Decl_defs.element * Typing_defs.fun_elt option) option =
-  let (_, class_name) = class_.sc_name in
-  let vis = visibility class_name class_.sc_module method_.sm_visibility in
-  let pos = fst method_.sm_name in
-  let cstr =
-    {
-      elt_flags =
-        make_ce_flags
-          ~xhp_attr:None
-          ~final:(sm_final method_)
-          ~abstract:(sm_abstract method_)
-          ~lateinit:false
-          ~const:false
-          ~lsb:false
-          ~synthesized:false
-          ~override:false
-          ~dynamicallycallable:false
-          ~readonly_prop:false
-          ~support_dynamic_type:false
-          ~needs_init:false;
-      elt_visibility = vis;
-      elt_origin = class_name;
-      elt_deprecated = method_.sm_deprecated;
-    }
-  in
-  let fe =
-    {
-      fe_module = None;
-      fe_pos = pos;
-      fe_internal = false;
-      fe_deprecated = method_.sm_deprecated;
-      fe_type = method_.sm_type;
-      fe_php_std_lib = false;
-      fe_support_dynamic_type = false;
-    }
-  in
-  (if write_shmem then Decl_store.((get ()).add_constructor class_name fe));
-  Some (cstr, Some fe)
-
-and class_const_fold
-    (c : Shallow_decl_defs.shallow_class)
-    (acc : Typing_defs.class_const SMap.t)
-    (scc : Shallow_decl_defs.shallow_class_const) :
-    Typing_defs.class_const SMap.t =
-  let c_name = snd c.sc_name in
-  let cc =
-    {
-      cc_synthesized = false;
-      cc_abstract = scc.scc_abstract;
-      cc_pos = fst scc.scc_name;
-      cc_type = scc.scc_type;
-      cc_origin = c_name;
-      cc_refs = scc.scc_refs;
-    }
-  in
-  let acc = SMap.add (snd scc.scc_name) cc acc in
-  acc
-
-(* Every class, interface, and trait implicitly defines a ::class to
- * allow accessing its fully qualified name as a string *)
-and class_class_decl (class_id : Typing_defs.pos_id) : Typing_defs.class_const =
-  let (pos, name) = class_id in
-  let reason = Reason.Rclass_class (pos, name) in
-  let classname_ty =
-    mk (reason, Tapply ((pos, SN.Classes.cClassname), [mk (reason, Tthis)]))
-  in
-  {
-    cc_abstract = CCConcrete;
-    cc_pos = pos;
-    cc_synthesized = true;
-    cc_type = classname_ty;
-    cc_origin = name;
-    cc_refs = [];
-  }
-
-and prop_decl
-    ~(write_shmem : bool)
-    (c : Shallow_decl_defs.shallow_class)
-    (acc : (Decl_defs.element * Typing_defs.decl_ty option) SMap.t)
-    (sp : Shallow_decl_defs.shallow_prop) :
-    (Decl_defs.element * Typing_defs.decl_ty option) SMap.t =
-  let (sp_pos, sp_name) = sp.sp_name in
-  let ty =
-    match sp.sp_type with
-    | None -> mk (Reason.Rwitness_from_decl sp_pos, Typing_defs.make_tany ())
-    | Some ty' -> ty'
-  in
-  let vis = visibility (snd c.sc_name) c.sc_module sp.sp_visibility in
-  let elt =
-    {
-      elt_flags =
-        make_ce_flags
-          ~xhp_attr:sp.sp_xhp_attr
-          ~final:true
-          ~lsb:false
-          ~synthesized:false
-          ~override:false
-          ~const:(sp_const sp)
-          ~lateinit:(sp_lateinit sp)
-          ~abstract:(sp_abstract sp)
-          ~dynamicallycallable:false
-          ~readonly_prop:(sp_readonly sp)
-          ~support_dynamic_type:false
-          ~needs_init:(sp_needs_init sp);
-      elt_visibility = vis;
-      elt_origin = snd c.sc_name;
-      elt_deprecated = None;
-    }
-  in
-  (if write_shmem then
-    Decl_store.((get ()).add_prop (elt.elt_origin, sp_name) ty));
-  let acc = SMap.add sp_name (elt, Some ty) acc in
-  acc
-
-and static_prop_decl
-    ~(write_shmem : bool)
-    (c : Shallow_decl_defs.shallow_class)
-    (acc : (Decl_defs.element * Typing_defs.decl_ty option) SMap.t)
-    (sp : Shallow_decl_defs.shallow_prop) :
-    (Decl_defs.element * Typing_defs.decl_ty option) SMap.t =
-  let (sp_pos, sp_name) = sp.sp_name in
-  let ty =
-    match sp.sp_type with
-    | None -> mk (Reason.Rwitness_from_decl sp_pos, Typing_defs.make_tany ())
-    | Some ty' -> ty'
-  in
-  let vis = visibility (snd c.sc_name) c.sc_module sp.sp_visibility in
-  let elt =
-    {
-      elt_flags =
-        make_ce_flags
-          ~xhp_attr:sp.sp_xhp_attr
-          ~final:true
-          ~const:(sp_const sp)
-          ~lateinit:(sp_lateinit sp)
-          ~lsb:(sp_lsb sp)
-          ~override:false
-          ~abstract:(sp_abstract sp)
-          ~synthesized:false
-          ~dynamicallycallable:false
-          ~readonly_prop:(sp_readonly sp)
-          ~support_dynamic_type:false
-          ~needs_init:false;
-      elt_visibility = vis;
-      elt_origin = snd c.sc_name;
-      elt_deprecated = None;
-    }
-  in
-  (if write_shmem then
-    Decl_store.((get ()).add_static_prop (elt.elt_origin, sp_name) ty));
-  let acc = SMap.add sp_name (elt, Some ty) acc in
-  acc
-
-and visibility
-    (class_id : string)
-    (module_ : Typing_modules.t)
-    (visibility : Aast_defs.visibility) : Typing_defs.ce_visibility =
-  match visibility with
-  | Public -> Vpublic
-  | Protected -> Vprotected class_id
-  | Private -> Vprivate class_id
-  | Internal ->
-    (match module_ with
-    | Some m -> Vinternal m
-    | None -> Vpublic)
-
-(* each concrete type constant T = <sometype> implicitly defines a
-class constant with the same name which is TypeStructure<sometype> *)
-and typeconst_structure
-    (c : Shallow_decl_defs.shallow_class)
-    (stc : Shallow_decl_defs.shallow_typeconst) : Typing_defs.class_const =
-  let pos = fst stc.stc_name in
-  let r = Reason.Rwitness_from_decl pos in
-  let tsid = (pos, SN.FB.cTypeStructure) in
-  let ts_ty =
-    mk (r, Tapply (tsid, [mk (r, Taccess (mk (r, Tthis), stc.stc_name))]))
-  in
-  let abstract =
-    match stc.stc_kind with
-    | TCAbstract { atc_default = default; _ } ->
-      CCAbstract (Option.is_some default)
-    | _ -> CCConcrete
-  in
-  {
-    cc_abstract = abstract;
-    cc_pos = pos;
-    cc_synthesized = true;
-    cc_type = ts_ty;
-    cc_origin = snd c.sc_name;
-    cc_refs = [];
-  }
-
-and typeconst_fold
-    (c : Shallow_decl_defs.shallow_class)
-    (acc : Typing_defs.typeconst_type SMap.t * Typing_defs.class_const SMap.t)
-    (stc : Shallow_decl_defs.shallow_typeconst) :
-    Typing_defs.typeconst_type SMap.t * Typing_defs.class_const SMap.t =
-  let (typeconsts, consts) = acc in
-  match c.sc_kind with
-  | Ast_defs.Cenum_class _
-  | Ast_defs.Cenum ->
-    acc
-  | Ast_defs.Ctrait
-  | Ast_defs.Cinterface
-  | Ast_defs.Cclass _ ->
-    let name = snd stc.stc_name in
-    let c_name = snd c.sc_name in
-    let ts = typeconst_structure c stc in
-    let consts = SMap.add name ts consts in
-    let ptc_opt = SMap.find_opt name typeconsts in
-    let enforceable =
-      (* Without the positions, this is a simple OR, but this way allows us to
-       * report the position of the <<__Enforceable>> attribute to the user *)
-      if snd stc.stc_enforceable then
-        stc.stc_enforceable
-      else
-        match ptc_opt with
-        | Some ptc -> ptc.ttc_enforceable
-        | None -> (Pos_or_decl.none, false)
-    in
-    let reifiable =
-      if Option.is_some stc.stc_reifiable then
-        stc.stc_reifiable
-      else
-        Option.bind ptc_opt ~f:(fun ptc -> ptc.ttc_reifiable)
-    in
-    let tc =
-      {
-        ttc_synthesized = false;
-        ttc_name = stc.stc_name;
-        ttc_kind = stc.stc_kind;
-        ttc_origin = c_name;
-        ttc_enforceable = enforceable;
-        ttc_reifiable = reifiable;
-        ttc_concretized = false;
-        ttc_is_ctx = stc.stc_is_ctx;
-      }
-    in
-    let typeconsts = SMap.add (snd stc.stc_name) tc typeconsts in
-    (typeconsts, consts)
-
-and method_decl_acc
-    ~(write_shmem : bool)
-    ~(is_static : bool)
-    (c : Shallow_decl_defs.shallow_class)
-    ((acc, condition_types) :
-      (Decl_defs.element * Typing_defs.fun_elt option) SMap.t * SSet.t)
-    (m : Shallow_decl_defs.shallow_method) :
-    (Decl_defs.element * Typing_defs.fun_elt option) SMap.t * SSet.t =
-  (* If method doesn't override anything but has the <<__Override>> attribute, then
-   * set the override flag in ce_flags and let typing emit an appropriate error *)
-  let check_override = sm_override m && not (SMap.mem (snd m.sm_name) acc) in
-  let (pos, id) = m.sm_name in
-  let vis =
-    match (SMap.find_opt id acc, m.sm_visibility) with
-    | (Some ({ elt_visibility = Vprotected _ as parent_vis; _ }, _), Protected)
-      ->
-      parent_vis
-    | _ -> visibility (snd c.sc_name) c.sc_module m.sm_visibility
-  in
-  let support_dynamic_type = sm_support_dynamic_type m in
-  let elt =
-    {
-      elt_flags =
-        make_ce_flags
-          ~xhp_attr:None
-          ~final:(sm_final m)
-          ~abstract:(sm_abstract m)
-          ~override:check_override
-          ~synthesized:false
-          ~lsb:false
-          ~const:false
-          ~lateinit:false
-          ~dynamicallycallable:(sm_dynamicallycallable m)
-          ~readonly_prop:false
-          ~support_dynamic_type
-          ~needs_init:false;
-      elt_visibility = vis;
-      elt_origin = snd c.sc_name;
-      elt_deprecated = m.sm_deprecated;
-    }
-  in
-  let fe =
-    {
-      fe_module = None;
-      fe_pos = pos;
-      fe_internal = false;
-      fe_deprecated = None;
-      fe_type = m.sm_type;
-      fe_php_std_lib = false;
-      fe_support_dynamic_type = support_dynamic_type;
-    }
-  in
-  (if write_shmem then
-    if is_static then
-      Decl_store.((get ()).add_static_method (elt.elt_origin, id) fe)
-    else
-      Decl_store.((get ()).add_method (elt.elt_origin, id) fe));
-  let acc = SMap.add id (elt, Some fe) acc in
-  (acc, condition_types)
 
 let class_decl_if_missing
     ~(sh : SharedMem.uses) (ctx : Provider_context.t) (class_name : string) :

@@ -51,7 +51,7 @@ final class LocaleTest extends HackTest {
       // Make sure the `\setlocale()` worked
       expect(\sprintf("%.02f", 1.23))->toEqual('1.23');
 
-      $l = Locale\create('fr_FR.UTF8');
+      $l = Locale\create('fr_FR.UTF-8');
       expect(_Str\strlen_l("💩", $l))->toEqual(1);
       expect(_Str\vsprintf_l($l, "%.02f", vec[1.23]))->toEqual('1,23');
     } finally {

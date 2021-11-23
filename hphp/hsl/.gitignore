@@ -1,9 +1,14 @@
-vendor/
+/vendor/
 *.hhast.parser-cache
 *.swp
 *~
-.var/
+/.var/
 composer.lock
+
+# If you checkout the github repository on an FB-issued Machine, you'll need
+# to create this file with `echo '{}' > .watchmanconfig`, due to the
+# Facebook-specific configuration in /etc
+/.watchmanconfig
 
 # Dune aggressivly cleans its' build directory, so the generated HHIs have to
 # be outside of Dune's build directory

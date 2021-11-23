@@ -444,6 +444,7 @@ type t = {
   (* TODO(hverr): Remove can_skip_deptable, 32-bit clean up *)
   shm_dirs: string list;
   shm_use_sharded_hashtbl: bool;
+  shm_enable_eviction: bool;
   max_workers: int option;
   (* max_bucket_size is the default bucket size for ALL users of MultiWorker unless they provide a specific override max_size *)
   max_bucket_size: int;
@@ -610,6 +611,7 @@ let default =
     can_skip_deptable = true;
     shm_dirs = [GlobalConfig.shm_dir; GlobalConfig.tmp_dir];
     shm_use_sharded_hashtbl = false;
+    shm_enable_eviction = false;
     max_workers = None;
     max_bucket_size = Bucket.max_size ();
     use_dummy_informant = true;
@@ -915,6 +917,13 @@ let load_ fn ~silent ~current_version overrides =
     bool_if_min_version
       "shm_use_sharded_hashtbl"
       ~default:default.shm_use_sharded_hashtbl
+      ~current_version
+      config
+  in
+  let shm_enable_eviction =
+    bool_if_min_version
+      "shm_enable_eviction"
+      ~default:default.shm_enable_eviction
       ~current_version
       config
   in
@@ -1352,6 +1361,7 @@ let load_ fn ~silent ~current_version overrides =
     can_skip_deptable;
     shm_dirs;
     shm_use_sharded_hashtbl;
+    shm_enable_eviction;
     max_workers;
     max_bucket_size;
     use_dummy_informant;

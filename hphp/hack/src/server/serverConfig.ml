@@ -65,6 +65,7 @@ let make_sharedmem_config config options local_config =
     heap_size;
     shm_min_avail;
     shm_use_sharded_hashtbl;
+    shm_enable_eviction;
     _;
   } =
     SharedMem.default_config
@@ -79,6 +80,9 @@ let make_sharedmem_config config options local_config =
   let shm_dirs = string_list "sharedmem_dirs" ~default:shm_dirs config in
   let shm_use_sharded_hashtbl =
     bool_ "shm_use_sharded_hashtbl" ~default:shm_use_sharded_hashtbl config
+  in
+  let shm_enable_eviction =
+    bool_ "shm_enable_eviction" ~default:shm_enable_eviction config
   in
   let shm_min_avail =
     int_ "sharedmem_minimum_available" ~default:shm_min_avail config
@@ -101,6 +105,7 @@ let make_sharedmem_config config options local_config =
     sample_rate;
     shm_dirs;
     shm_use_sharded_hashtbl;
+    shm_enable_eviction;
     shm_min_avail;
     compression;
   }

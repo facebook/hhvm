@@ -6460,6 +6460,7 @@ and dispatch_call
   | Class_const (class_id, m) -> dispatch_class_const env class_id m
   (* Readonly Expressions do not affect the type, but need to be threaded through when they're part of a call *)
   | ReadonlyExpr r ->
+    let env = Env.set_readonly env true in
     (* Recurse onto the inner call *)
     let ((env, expr, ty), s) =
       dispatch_call

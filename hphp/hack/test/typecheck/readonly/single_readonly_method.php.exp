@@ -1,0 +1,4 @@
+File "single_readonly_method.php", line 8, characters 10-14:
+This expression is readonly, so it can only call readonly methods (Typing[4413])
+  File "single_readonly_method.php", line 4, characters 19-21:
+  This method is not readonly

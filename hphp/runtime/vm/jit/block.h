@@ -264,6 +264,7 @@ inline Block::iterator Block::prepend(IRInstruction* inst) {
 
 inline Block::iterator Block::append(IRInstruction* inst) {
   assertx(inst->marker().valid());
+  if (empty()) return insert(end(), inst);
   auto it = backIter();
   if (!it->isBlockEnd()) ++it;
   return insert(it, inst);

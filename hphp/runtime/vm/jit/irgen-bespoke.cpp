@@ -102,6 +102,7 @@ SSATmp* emitProfiledGetThrow(IRGS& env, SSATmp* arr, SSATmp* key,
           : val;
       },
       [&] {
+        hint(env, Block::Hint::Unlikely);
         gen(env, ThrowOutOfBounds, arr, key);
         return cns(env, TBottom);
       }
@@ -136,6 +137,7 @@ SSATmp* emitProfiledGetThrow(IRGS& env, SSATmp* arr, SSATmp* key,
       },
       [&] (SSATmp* val) { return val; },
       [&] {
+        hint(env, Block::Hint::Unlikely);
         gen(env, ThrowOutOfBounds, arr, key);
         return cns(env, TBottom);
       }
@@ -1732,4 +1734,186 @@ void translateDispatchBespoke(IRGS& env, const NormalizedInstruction& ni,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void lowerStructBespokeGet(IRUnit& unit, IRInstruction* inst) {
+  assertx(inst->is(BespokeGet));
+
+  auto const arr = inst->src(0);
+  auto const key = inst->src(1);
+  auto const block = inst->block();
+
+  assertx(arr->type().arrSpec().is_struct());
+  assertx(key->isA(TStr));
+
+  /*
+   * Before:
+   *
+   * B1:
+   *   Foo
+   *   t3:Uninit|InitCell = BespokeGet t2:Dict, t1:Str
+   *   Bar
+   *
+   * After:
+   *
+   * B1:
+   *   Foo
+   *   t4:Int = StructDictSlot t2:Dict, t1:Str -> B2, B3
+   *
+   * B2:
+   *   t5:Lval = StructDictElemAddr t2:Dict, t1:Str, t4:Int
+   *   t6:Cell = LdMem t5:Lval
+   *   Jmp B4 t6
+   *
+   * B3:
+   *   Jmp B4 Uninit
+   *
+   * B4:
+   *   t7:Uninit|InitCell = DefLabel
+   *   Bar
+   *
+   * This is the same logic as irgen, but we produce a diamond where
+   * irgen might not.
+   */
+  auto const present = unit.defBlock(block->profCount(), block->hint());
+  auto const notPresent = unit.defBlock(block->profCount(), block->hint());
+  auto const join = unit.defBlock(block->profCount(), block->hint());
+
+  auto const slot = unit.gen(
+    StructDictSlot,
+    inst->bcctx(),
+    notPresent,
+    arr,
+    key
+  );
+  slot->setNext(present);
+
+  auto elemType = arrLikeElemType(arr->type(), key->type(), inst->ctx());
+  auto const& layout = arr->type().arrSpec().layout();
+  if (!elemType.second && !layout.slotAlwaysPresent(slot->dst()->type())) {
+    elemType.first |= TUninit;
+  }
+
+  auto const elemAddr = unit.gen(
+    StructDictElemAddr,
+    inst->bcctx(),
+    arr,
+    key,
+    slot->dst(),
+    arr
+  );
+  auto const load =
+    unit.gen(LdMem, inst->bcctx(), elemType.first, elemAddr->dst());
+  auto const jmp = unit.gen(Jmp, inst->bcctx(), join, load->dst());
+  present->append(elemAddr);
+  present->append(load);
+  present->append(jmp);
+
+  notPresent->append(unit.gen(Jmp, inst->bcctx(), join, unit.cns(TUninit)));
+
+  auto const defLabel = unit.defLabel(1, join, inst->bcctx());
+  auto const val = inst->dst();
+  val->setInstruction(defLabel);
+  defLabel->setDst(val, 0);
+  val->setType(elemType.first | TUninit);
+
+  auto iter = block->iteratorTo(inst);
+  ++iter;
+  join->splice(join->end(), block, iter, block->end());
+  block->erase(inst);
+  block->append(slot);
+  inst->convertToNop();
+}
+
+void lowerStructBespokeGetThrow(IRUnit& unit, IRInstruction* inst) {
+  assertx(inst->is(BespokeGetThrow));
+
+  auto const arr = inst->src(0);
+  auto const key = inst->src(1);
+  auto const block = inst->block();
+  auto const catchBlock = inst->taken();
+  auto const next = inst->next();
+
+  assertx(arr->type().arrSpec().is_struct());
+  assertx(key->isA(TStr));
+  assertx(catchBlock->isCatch());
+
+  /*
+   * Before:
+   *
+   * B1:
+   *   Foo
+   *   t3:InitCell = BespokeGetThrow t2:Dict, t1:Str -> B2, B3<Catch>
+   *
+   * After:
+   *
+   * B1:
+   *   t4:Int = StructDictSlot t2:Dict, t1:Str -> B4, B5
+   *
+   * B4:
+   *   t5:Lval = StructDictElemAddr t2:Dict, t1:Str, t4:Int
+   *   t6:Cell = LdMem t5:Lval
+   *   t7:InitCell = CheckType InitCell t6 -> B2, B5
+   *
+   * B5:
+   *   ThrowOutOfBounds -> B3<Catch>
+   *
+   * This is the same logic as irgen, but we produce a diamond where
+   * irgen might not.
+   */
+
+  auto const check = unit.defBlock(block->profCount(), block->hint());
+  auto const notPresent =
+    unit.defBlock(block->profCount(), Block::Hint::Unlikely);
+
+  auto const slot = unit.gen(
+    StructDictSlot,
+    inst->bcctx(),
+    notPresent,
+    arr,
+    key
+  );
+  slot->setNext(check);
+
+  auto elemType = arrLikeElemType(arr->type(), key->type(), inst->ctx());
+  auto const& layout = arr->type().arrSpec().layout();
+  if (!elemType.second && !layout.slotAlwaysPresent(slot->dst()->type())) {
+    elemType.first |= TUninit;
+  }
+
+  auto const elemAddr = unit.gen(
+    StructDictElemAddr,
+    inst->bcctx(),
+    arr,
+    key,
+    slot->dst(),
+    arr
+  );
+  auto const load =
+    unit.gen(LdMem, inst->bcctx(), elemType.first, elemAddr->dst());
+  auto const checkType =
+    unit.gen(CheckType, inst->bcctx(), TInitCell, notPresent, load->dst());
+  checkType->setNext(next);
+
+  auto const val = inst->dst();
+  val->setInstruction(checkType);
+  checkType->setDst(val);
+  val->setType(elemType.first & TInitCell);
+
+  check->append(elemAddr);
+  check->append(load);
+  check->append(checkType);
+
+  notPresent->append(
+    unit.gen(ThrowOutOfBounds, inst->bcctx(), catchBlock, arr, key)
+  );
+
+  block->erase(inst);
+  block->append(slot);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+}}

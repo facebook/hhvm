@@ -111,6 +111,8 @@ struct ArrayLayout {
 
   Type getTypeBound(Type slot) const;
 
+  bool slotAlwaysPresent(const Type&) const;
+
   Type iterPosType(Type pos, bool isKey) const;
 
   /**************************************************************************

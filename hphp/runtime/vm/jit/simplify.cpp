@@ -41,6 +41,7 @@
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/mutation.h"
 #include "hphp/runtime/vm/jit/simple-propagation.h"
+#include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 #include "hphp/runtime/vm/jit/type-array-elem.h"
 #include "hphp/runtime/vm/jit/type.h"
@@ -3105,6 +3106,11 @@ SSATmp* simplifyBespokeGetThrow(State& env, const IRInstruction* inst) {
     }
   }
 
+  if (arr->type().arrSpec().is_struct() && key->isA(TInt)) {
+    gen(env, ThrowOutOfBounds, inst->taken(), arr, key);
+    return cns(env, TBottom);
+  }
+
   return nullptr;
 }
 
@@ -4106,6 +4112,8 @@ void simplifyInPlace(IRUnit& unit, IRInstruction* origInst) {
 ////////////////////////////////////////////////////////////////////////////////
 
 void simplifyPass(IRUnit& unit) {
+  Timer timer{Timer::optimize_simplify, unit.logEntry().get_pointer()};
+
   auto reachable = boost::dynamic_bitset<>(unit.numBlocks());
   reachable.set(unit.entry()->id());
 

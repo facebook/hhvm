@@ -972,6 +972,21 @@ std::pair<Type, bool> StructLayout::elemType(Type key) const {
     : std::pair{getTypeBound(slot), field(slot).required};
 }
 
+bool StructLayout::slotAlwaysPresent(const Type& slot) const {
+  assertx(slot <= TInt);
+
+  if (slot.hasConstVal()) {
+    auto const idx = slot.intVal();
+    if (idx < 0 || idx >= numFields()) return true;
+    return field(idx).required;
+  }
+
+  for (auto slot = 0; slot < numFields(); slot++) {
+    if (!field(slot).required) return false;
+  }
+  return true;
+}
+
 std::pair<Type, bool> StructLayout::firstLastType(
     bool isFirst, bool isKey) const {
   return {isKey ? TStaticStr : getUnionTypeBound(), false};
@@ -1004,6 +1019,10 @@ ArrayLayout TopStructLayout::setType(Type key, Type val) const {
 std::pair<Type, bool> TopStructLayout::elemType(Type key) const {
   return key <= TInt ? std::pair{TBottom, false}
                      : std::pair{TInitCell, false};
+}
+
+bool TopStructLayout::slotAlwaysPresent(const Type&) const {
+  return false;
 }
 
 std::pair<Type, bool> TopStructLayout::firstLastType(

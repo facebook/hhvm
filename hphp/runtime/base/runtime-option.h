@@ -939,6 +939,7 @@ struct RuntimeOption {
   F(uint32_t, HHIRLoadThrowMaxDecrefs, 64)                              \
   F(bool, HHIRStorePRE,                true)                            \
   F(bool, HHIRSinkDefs,                true)                            \
+  F(bool, HHIRLowerBespokesPostIRGen,  true)                            \
   F(bool, HHIROutlineGenericIncDecRef, true)                            \
   /* How many elements to inline for packed- or mixed-array inits. */   \
   F(uint32_t, HHIRMaxInlineInitPackedElements, 8)                       \

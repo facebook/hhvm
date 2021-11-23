@@ -184,6 +184,7 @@ struct StructLayout : public ConcreteLayout {
   ArrayLayout removeType(Type key) const override;
   ArrayLayout setType(Type key, Type val) const override;
   std::pair<Type, bool> elemType(Type key) const override;
+  bool slotAlwaysPresent(const Type&) const override;
   std::pair<Type, bool> firstLastType(bool isFirst, bool isKey) const override;
   Type iterPosType(Type pos, bool isKey) const override;
 
@@ -263,6 +264,7 @@ struct TopStructLayout : public AbstractLayout {
   ArrayLayout removeType(Type key) const override;
   ArrayLayout setType(Type key, Type val) const override;
   std::pair<Type, bool> elemType(Type key) const override;
+  bool slotAlwaysPresent(const Type&) const override;
   std::pair<Type, bool> firstLastType(bool isFirst, bool isKey) const override;
   Type iterPosType(Type pos, bool isKey) const override;
   Type getTypeBound(Type slot) const override;

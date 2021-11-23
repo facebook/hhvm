@@ -403,6 +403,12 @@ struct Layout {
   virtual Type getTypeBound(Type slot) const;
 
   /*
+   * Returns true if the given slot of a struct dict will always have
+   * a value present.
+   */
+  virtual bool slotAlwaysPresent(const Type& slot) const;
+
+  /*
    * Returns the most specific type known for the first or last key or value
    * for this bespoke layout. The pair returned contains this type, along with
    * a boolean indicating if key/value is statically known to be present.

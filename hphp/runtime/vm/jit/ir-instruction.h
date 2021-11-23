@@ -335,6 +335,7 @@ struct IRInstruction {
    * instruction has NaryDst).
    */
   void setDst(SSATmp* newDst);
+  void setDst(SSATmp* newDst, uint32_t i);
   void setDsts(uint32_t numDsts, SSATmp** newDsts);
   void deleteDst(uint32_t i);
 

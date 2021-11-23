@@ -1503,8 +1503,8 @@ bool sink_pass(IRUnit& unit,
 
 // Pass entry point.
 void sinkDefs(IRUnit& unit) {
-  Timer timer{Timer::optimize_sinkDefs};
   PassTracer tracer{&unit, Trace::hhir_sinkdefs, "sinkDefs"};
+  Timer timer{Timer::optimize_sinkDefs, unit.logEntry().get_pointer()};
 
   // Algorithm relies on the lack of critical edges, so remove them.
   splitCriticalEdges(unit);

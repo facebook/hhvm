@@ -253,6 +253,11 @@ std::pair<Type, bool> ArrayLayout::elemType(Type key) const {
   return bespokeLayout()->elemType(key);
 }
 
+bool ArrayLayout::slotAlwaysPresent(const Type& slot) const {
+  if (!is_struct()) return false;
+  return bespokeLayout()->slotAlwaysPresent(slot);
+}
+
 std::pair<Type, bool> ArrayLayout::firstLastType(
     bool isFirst, bool isKey) const {
   if (isBasicSort(sort)) return {isKey ? (TInt | TStr) : TInitCell, false};

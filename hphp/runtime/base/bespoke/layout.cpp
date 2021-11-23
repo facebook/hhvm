@@ -511,6 +511,10 @@ std::pair<Type, bool> Layout::elemType(Type key) const {
   return {TInitCell, false};
 }
 
+bool Layout::slotAlwaysPresent(const Type&) const {
+  return false;
+}
+
 std::pair<Type, bool> Layout::firstLastType(bool isFirst, bool isKey) const {
   return {isKey ? (TInt | TStr) : TInitCell, false};
 }

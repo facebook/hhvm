@@ -238,6 +238,17 @@ inline void IRInstruction::setDst(SSATmp* newDst) {
   m_numDsts = newDst ? 1 : 0;
 }
 
+inline void IRInstruction::setDst(SSATmp* newDst, uint32_t i) {
+  assertx(i < numDsts());
+  assertx(newDst);
+  if (naryDst()) {
+    m_dsts[i] = newDst;
+  } else {
+    assertx(i == 0);
+    setDst(newDst);
+  }
+}
+
 inline void IRInstruction::setDsts(uint32_t numDsts, SSATmp** newDsts) {
   assertx(naryDst());
   m_numDsts = numDsts;

@@ -26,6 +26,7 @@
   TIMER_NAME(optimize)                          \
   TIMER_NAME(optimize_dce)                      \
   TIMER_NAME(optimize_cleancfg)                 \
+  TIMER_NAME(optimize_lowerBespokes)            \
   TIMER_NAME(optimize_predictionOpts)           \
   TIMER_NAME(optimize_realxGuards)              \
   TIMER_NAME(optimize_refcountOpts)             \
@@ -37,6 +38,7 @@
   TIMER_NAME(optimize_gvn)                      \
   TIMER_NAME(optimize_phis)                     \
   TIMER_NAME(optimize_licm)                     \
+  TIMER_NAME(optimize_simplify)                 \
   TIMER_NAME(hoist_type_checks)                 \
   TIMER_NAME(regionizeFunc)                     \
   TIMER_NAME(selectTracelet)                    \

@@ -45,4 +45,13 @@ void translateDispatchBespoke(IRGS&, const NormalizedInstruction&,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}}
+}
+
+// Lower BespokeGet/BespokeGetThrow instructions on struct dicts with
+// string keys into more optimized sequences, post-irgen.
+void lowerStructBespokeGet(IRUnit&, IRInstruction*);
+void lowerStructBespokeGetThrow(IRUnit&, IRInstruction*);
+
+///////////////////////////////////////////////////////////////////////////////
+
+}}

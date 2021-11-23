@@ -11,15 +11,3 @@ path = "lib.rs"
 bstr = { version = "0.2", features = ["serde1"] }
 bumpalo = { version = "3.8", features = ["collections"] }
 serde = { version = "1.0.126", features = ["derive", "rc"] }
-
-[profile.release]
-incremental = false
-
-[profile.dev]
-incremental = false
-
-[profile.test]
-incremental = false
-
-[profile.bench]
-incremental = false

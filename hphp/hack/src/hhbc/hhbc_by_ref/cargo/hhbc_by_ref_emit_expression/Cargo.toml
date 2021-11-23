@@ -37,15 +37,3 @@ lazy_static = "1.0"
 naming_special_names_rust = { path = "../../../../naming" }
 oxidized = { path = "../../../../oxidized" }
 regex = "1.5.4"
-
-[profile.release]
-incremental = false
-
-[profile.dev]
-incremental = false
-
-[profile.test]
-incremental = false
-
-[profile.bench]
-incremental = false

@@ -14,15 +14,3 @@ proc-macro = true
 proc-macro2 = "1.0"
 quote = "1.0"
 synstructure = "0.12"
-
-[profile.release]
-incremental = false
-
-[profile.dev]
-incremental = false
-
-[profile.test]
-incremental = false
-
-[profile.bench]
-incremental = false

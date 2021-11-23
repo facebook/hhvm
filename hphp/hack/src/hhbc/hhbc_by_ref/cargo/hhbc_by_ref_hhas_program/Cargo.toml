@@ -19,15 +19,3 @@ hhbc_by_ref_hhas_record_def = { path = "../hhbc_by_ref_hhas_record_def" }
 hhbc_by_ref_hhas_symbol_refs = { path = "../hhbc_by_ref_hhas_symbol_refs" }
 hhbc_by_ref_hhas_typedef = { path = "../hhbc_by_ref_hhas_typedef" }
 hhbc_by_ref_hhbc_ast = { path = "../hhbc_by_ref_hhbc_ast" }
-
-[profile.release]
-incremental = false
-
-[profile.dev]
-incremental = false
-
-[profile.test]
-incremental = false
-
-[profile.bench]
-incremental = false

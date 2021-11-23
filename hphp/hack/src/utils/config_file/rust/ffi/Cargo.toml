@@ -14,15 +14,3 @@ crate-type = ["lib", "staticlib"]
 config_file = { path = ".." }
 ocamlrep_custom = { path = "../../../../ocamlrep_custom" }
 ocamlrep_ocamlpool = { path = "../../../../ocamlrep_ocamlpool" }
-
-[profile.release]
-incremental = false
-
-[profile.dev]
-incremental = false
-
-[profile.test]
-incremental = false
-
-[profile.bench]
-incremental = false

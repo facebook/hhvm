@@ -12,15 +12,3 @@ crate-type = ["lib", "staticlib"]
 im-rc = { version = "14.2", features = ["serde"] }
 memmap = "0.7"
 ocamlrep = { path = "../../../ocamlrep" }
-
-[profile.release]
-incremental = false
-
-[profile.dev]
-incremental = false
-
-[profile.test]
-incremental = false
-
-[profile.bench]
-incremental = false

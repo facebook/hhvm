@@ -13,15 +13,3 @@ bumpalo = { version = "3.8", features = ["collections"] }
 bytes = { version = "1.1", features = ["serde"] }
 nohash-hasher = "0.2"
 serde = { version = "1.0.126", features = ["derive", "rc"] }
-
-[profile.release]
-incremental = false
-
-[profile.dev]
-incremental = false
-
-[profile.test]
-incremental = false
-
-[profile.bench]
-incremental = false

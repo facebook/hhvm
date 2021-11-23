@@ -9,15 +9,3 @@ path = "../../profile.rs"
 
 [dependencies]
 libc = "0.2.98"
-
-[profile.release]
-incremental = false
-
-[profile.dev]
-incremental = false
-
-[profile.test]
-incremental = false
-
-[profile.bench]
-incremental = false

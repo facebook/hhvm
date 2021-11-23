@@ -9,15 +9,3 @@ path = "../../unique_list.rs"
 
 [dependencies]
 indexmap = { version = "1.7.0", features = ["rayon", "serde-1"] }
-
-[profile.release]
-incremental = false
-
-[profile.dev]
-incremental = false
-
-[profile.test]
-incremental = false
-
-[profile.bench]
-incremental = false

@@ -21,15 +21,3 @@ indexmap = { version = "1.7.0", features = ["rayon", "serde-1"] }
 itertools = "0.10.1"
 naming_special_names_rust = { path = "../../../../naming" }
 oxidized = { path = "../../../../oxidized" }
-
-[profile.release]
-incremental = false
-
-[profile.dev]
-incremental = false
-
-[profile.test]
-incremental = false
-
-[profile.bench]
-incremental = false

@@ -17,15 +17,3 @@ serde = { version = "1.0.126", features = ["derive", "rc"] }
 
 [dev-dependencies]
 quickcheck = "1.0"
-
-[profile.release]
-incremental = false
-
-[profile.dev]
-incremental = false
-
-[profile.test]
-incremental = false
-
-[profile.bench]
-incremental = false

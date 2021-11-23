@@ -20,15 +20,3 @@ serde_json = { version = "1.0.64", features = ["float_roundtrip", "unbounded_dep
 
 [dev-dependencies]
 pretty_assertions = "0.6"
-
-[profile.release]
-incremental = false
-
-[profile.dev]
-incremental = false
-
-[profile.test]
-incremental = false
-
-[profile.bench]
-incremental = false

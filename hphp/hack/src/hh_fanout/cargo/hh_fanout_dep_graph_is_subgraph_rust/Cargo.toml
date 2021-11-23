@@ -15,15 +15,3 @@ depgraph = { path = "../../../depgraph/cargo/depgraph" }
 env_logger = "0.7"
 log = { version = "0.4.14", features = ["kv_unstable", "kv_unstable_std"] }
 ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
-
-[profile.release]
-incremental = false
-
-[profile.dev]
-incremental = false
-
-[profile.test]
-incremental = false
-
-[profile.bench]
-incremental = false

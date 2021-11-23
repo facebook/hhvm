@@ -16,15 +16,3 @@ rayon = "1.2"
 
 [dev-dependencies]
 tempfile = "3.2"
-
-[profile.release]
-incremental = false
-
-[profile.dev]
-incremental = false
-
-[profile.test]
-incremental = false
-
-[profile.bench]
-incremental = false

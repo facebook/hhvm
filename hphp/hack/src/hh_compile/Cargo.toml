@@ -30,15 +30,3 @@ structopt = "0.3.23"
 strum = "0.21"
 strum_macros = "0.21"
 unified_decl_provider = { path = "../hhbc/unified_decl_provider" }
-
-[profile.release]
-incremental = false
-
-[profile.dev]
-incremental = false
-
-[profile.test]
-incremental = false
-
-[profile.bench]
-incremental = false

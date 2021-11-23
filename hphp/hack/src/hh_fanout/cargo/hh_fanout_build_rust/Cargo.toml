@@ -19,15 +19,3 @@ log = { version = "0.4.14", features = ["kv_unstable", "kv_unstable_std"] }
 ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
 parking_lot = "0.10.2"
 rayon = "1.2"
-
-[profile.release]
-incremental = false
-
-[profile.dev]
-incremental = false
-
-[profile.test]
-incremental = false
-
-[profile.bench]
-incremental = false

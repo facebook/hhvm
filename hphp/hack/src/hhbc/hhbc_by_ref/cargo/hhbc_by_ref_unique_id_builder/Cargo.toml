@@ -9,15 +9,3 @@ path = "../../unique_id_builder.rs"
 
 [dependencies]
 hhbc_by_ref_ast_scope = { path = "../hhbc_by_ref_ast_scope" }
-
-[profile.release]
-incremental = false
-
-[profile.dev]
-incremental = false
-
-[profile.test]
-incremental = false
-
-[profile.bench]
-incremental = false

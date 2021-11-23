@@ -10,15 +10,3 @@ path = "../../ast_body.rs"
 [dependencies]
 itertools = "0.10.1"
 oxidized = { path = "../../../../oxidized" }
-
-[profile.release]
-incremental = false
-
-[profile.dev]
-incremental = false
-
-[profile.test]
-incremental = false
-
-[profile.bench]
-incremental = false

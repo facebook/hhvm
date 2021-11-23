@@ -16,15 +16,3 @@ env_logger = "0.7"
 json = "0.12.1"
 log = { version = "0.4.14", features = ["kv_unstable", "kv_unstable_std"] }
 ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
-
-[profile.release]
-incremental = false
-
-[profile.dev]
-incremental = false
-
-[profile.test]
-incremental = false
-
-[profile.bench]
-incremental = false

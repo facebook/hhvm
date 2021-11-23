@@ -17,15 +17,3 @@ test = false
 [dependencies]
 structopt = "0.3.23"
 walkdir = "2.3"
-
-[profile.release]
-incremental = false
-
-[profile.dev]
-incremental = false
-
-[profile.test]
-incremental = false
-
-[profile.bench]
-incremental = false

@@ -11,15 +11,3 @@ path = "lib.rs"
 decl_provider = { path = "../decl_provider" }
 external_decl_provider = { path = "../hhvm_decl_provider" }
 oxidized_by_ref = { path = "../../oxidized_by_ref" }
-
-[profile.release]
-incremental = false
-
-[profile.dev]
-incremental = false
-
-[profile.test]
-incremental = false
-
-[profile.bench]
-incremental = false

@@ -48,15 +48,3 @@ ocaml_helper = { path = "../../utils/ocaml_helper" }
 oxidized = { path = "../../oxidized" }
 regex = "1.5.4"
 thiserror = "1.0.29"
-
-[profile.release]
-incremental = false
-
-[profile.dev]
-incremental = false
-
-[profile.test]
-incremental = false
-
-[profile.bench]
-incremental = false

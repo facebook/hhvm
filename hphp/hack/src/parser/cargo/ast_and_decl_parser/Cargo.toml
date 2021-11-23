@@ -15,15 +15,3 @@ oxidized_by_ref = { path = "../../../oxidized_by_ref" }
 parser_core_types = { path = "../core_types" }
 rust_aast_parser_types = { path = "../rust_aast_parser_types" }
 stack_limit = { path = "../../../utils/stack_limit" }
-
-[profile.release]
-incremental = false
-
-[profile.dev]
-incremental = false
-
-[profile.test]
-incremental = false
-
-[profile.bench]
-incremental = false

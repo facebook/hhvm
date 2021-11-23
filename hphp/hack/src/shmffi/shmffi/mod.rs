@@ -35,22 +35,42 @@ extern "C" {
     fn malloc(size: libc::size_t) -> *mut u8;
 }
 
+/// A struct to make sure we don't mix up fields in `HeapValueHeader` that
+/// have the same type.
+struct HeapValueHeaderFields {
+    buffer_size: usize,
+    uncompressed_size: usize,
+    is_serialized: bool,
+    is_evictable: bool,
+}
+
+impl From<HeapValueHeaderFields> for HeapValueHeader {
+    fn from(fields: HeapValueHeaderFields) -> Self {
+        HeapValueHeader::new(fields)
+    }
+}
+
 #[derive(Clone, Copy)]
 struct HeapValueHeader(u64);
 
 impl HeapValueHeader {
-    fn new(buffer_size: usize, uncompressed_size: usize, is_serialized: bool) -> Self {
-        let buffer_size: u32 = buffer_size.try_into().unwrap();
-        let uncompressed_size: u32 = uncompressed_size.try_into().unwrap();
+    fn new(fields: HeapValueHeaderFields) -> Self {
+        let buffer_size: u32 = fields.buffer_size.try_into().unwrap();
+        let uncompressed_size: u32 = fields.uncompressed_size.try_into().unwrap();
         // Make sure the MSB are 0. We only have 31 bits for the sizes as we need
-        // one additional bit for `is_serialized`.
+        // one additional bit for `is_serialized` and one bit to mark a value as
+        // evictable or not.
+        //
+        // Note that we can use the full 64-bits. This header never escapes into the
+        // OCaml world.
         assert_eq!(buffer_size & (1 << 31), 0);
         assert_eq!(uncompressed_size & (1 << 31), 0);
 
         let mut result: u64 = 0;
         result |= buffer_size as u64;
         result |= (uncompressed_size as u64) << 31;
-        result |= (is_serialized as u64) << 62;
+        result |= (fields.is_serialized as u64) << 62;
+        result |= (fields.is_evictable as u64) << 63;
         Self(result)
     }
 
@@ -72,6 +92,12 @@ impl HeapValueHeader {
     /// Was the buffer compressed?
     fn is_compressed(&self) -> bool {
         self.uncompressed_size() != self.buffer_size()
+    }
+
+    /// Is the value evictable?
+    #[allow(dead_code)] // TODO(hverr): Remove
+    fn is_evictable(&self) -> bool {
+        ((self.0 >> 63) & 1) == 1
     }
 }
 
@@ -255,15 +281,30 @@ impl<'a> SerializedValue<'a> {
 
         use SerializedValue::*;
         let header = match self {
-            String(..) => HeapValueHeader::new(slice.len(), slice.len(), false),
-            Serialized { .. } => HeapValueHeader::new(slice.len(), slice.len(), true),
+            String(..) => HeapValueHeaderFields {
+                buffer_size: slice.len(),
+                uncompressed_size: slice.len(),
+                is_serialized: false,
+                is_evictable: false,
+            },
+            Serialized { .. } => HeapValueHeaderFields {
+                buffer_size: slice.len(),
+                uncompressed_size: slice.len(),
+                is_serialized: true,
+                is_evictable: false,
+            },
             Compressed {
                 uncompressed_size, ..
-            } => HeapValueHeader::new(slice.len(), *uncompressed_size as usize, true),
+            } => HeapValueHeaderFields {
+                buffer_size: slice.len(),
+                uncompressed_size: *uncompressed_size as usize,
+                is_serialized: true,
+                is_evictable: false,
+            },
         };
 
         HeapValue {
-            header,
+            header: header.into(),
             data: data.cast(),
         }
     }
@@ -476,13 +517,21 @@ mod tests {
                 (rng.gen::<u32>() & ((1 << 31) - 1)) as usize
             };
             let is_serialized = rng.gen_bool(0.5);
+            let is_evictable = rng.gen_bool(0.5);
 
-            let header = HeapValueHeader::new(buffer_size, uncompressed_size, is_serialized);
+            let header = HeapValueHeaderFields {
+                buffer_size,
+                uncompressed_size,
+                is_serialized,
+                is_evictable,
+            };
+            let header: HeapValueHeader = header.into();
 
             assert_eq!(header.buffer_size(), buffer_size);
             assert_eq!(header.uncompressed_size(), uncompressed_size);
             assert_eq!(header.is_serialized(), is_serialized);
             assert_eq!(header.is_compressed(), buffer_size != uncompressed_size);
+            assert_eq!(header.is_evictable(), is_evictable);
         }
     }
 }

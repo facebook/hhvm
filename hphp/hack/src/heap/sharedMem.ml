@@ -361,6 +361,18 @@ module type Value = sig
   val description : string
 end
 
+module type Evictability = sig
+  val evictable : bool
+end
+
+module Evictable : Evictability = struct
+  let evictable = true
+end
+
+module NonEvictable : Evictability = struct
+  let evictable = false
+end
+
 module type Backend = functor (KeyHasher : KeyHasher) (Value : Value) -> sig
   val add : KeyHasher.hash -> Value.t -> unit
 
@@ -377,7 +389,7 @@ module type Capacity = sig
   val capacity : int
 end
 
-module ImmediateBackend : Backend =
+module ImmediateBackend (Evictability : Evictability) : Backend =
 functor
   (KeyHasher : KeyHasher)
   (Value : Value)
@@ -452,7 +464,7 @@ functor
 
     let add key value =
       let (compressed_size, original_size, total_size) =
-        hh_add ~evictable:false key value
+        hh_add ~evictable:Evictability.evictable key value
       in
       (* compressed_size is a negative number if nothing new was added *)
       if SMTelemetry.hh_log_level () > 0 && compressed_size > 0 then
@@ -528,7 +540,7 @@ type 'a profiled_value =
       write_time: float;
     }
 
-module ProfiledBackend : Backend =
+module ProfiledBackend (Evictability : Evictability) : Backend =
 functor
   (KeyHasher : KeyHasher)
   (Value : Value)
@@ -544,7 +556,8 @@ functor
       let description = Value.description
     end
 
-    module Immediate = ImmediateBackend (KeyHasher) (ProfiledValue)
+    module Immediate =
+      ImmediateBackend (Evictability) (KeyHasher) (ProfiledValue)
 
     let add x y =
       let sample_rate = SMTelemetry.hh_sample_rate () in

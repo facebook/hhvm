@@ -207,6 +207,15 @@ module type Value = sig
   val description : string
 end
 
+(** Whether or not a backend is evictable. *)
+module type Evictability
+
+(** Used to indicate that values can be evicted at all times. *)
+module Evictable : Evictability
+
+(** used to indicate that values must never be evicted from the backend. *)
+module NonEvictable : Evictability
+
 (** Module type for a shared-memory backend for a heap.
 
     Each backend provided raw access to the underlying shared hash table. *)
@@ -223,7 +232,7 @@ module type Backend = functor (KeyHasher : KeyHasher) (Value : Value) -> sig
 end
 
 (** Backend that provides immediate access to the underlying hashtable. *)
-module ImmediateBackend : Backend
+module ImmediateBackend (_ : Evictability) : Backend
 
 type 'a profiled_value =
   | RawValue of 'a
@@ -233,7 +242,7 @@ type 'a profiled_value =
     }
 
 (** Backend that provides profiled access to the underlying hashtable. *)
-module ProfiledBackend : Backend
+module ProfiledBackend (_ : Evictability) : Backend
 
 (** A heap for a user-defined type.
 

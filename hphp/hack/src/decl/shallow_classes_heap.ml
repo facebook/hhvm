@@ -20,7 +20,9 @@ module Class = struct
 end
 
 module Classes =
-  SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (StringKey) (Class)
+  SharedMem.HeapWithLocalCache
+    (SharedMem.ProfiledBackend (SharedMem.Evictable)) (StringKey)
+    (Class)
     (Capacity)
 
 module FilterCapacity = struct
@@ -37,7 +39,8 @@ end
 
 module MemberFilters = struct
   include
-    SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (StringKey)
+    SharedMem.HeapWithLocalCache
+      (SharedMem.ProfiledBackend (SharedMem.Evictable)) (StringKey)
       (Filter)
       (FilterCapacity)
 

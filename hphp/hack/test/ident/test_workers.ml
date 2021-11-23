@@ -11,7 +11,8 @@ module IntKey = struct
 end
 
 module Ids =
-  SharedMem.Heap (SharedMem.ImmediateBackend) (IntKey)
+  SharedMem.Heap
+    (SharedMem.ImmediateBackend (SharedMem.NonEvictable)) (IntKey)
     (struct
       type t = int array
 

@@ -38,59 +38,70 @@ module ClassEltKey : SharedMem.Key with type t = string * string
 
 module Funs :
     module type of
-      SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (StringKey) (Fun)
+      SharedMem.HeapWithLocalCache
+        (SharedMem.ProfiledBackend (SharedMem.NonEvictable)) (StringKey)
+        (Fun)
         (Capacity)
 
 module Classes :
     module type of
-      SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (StringKey)
+      SharedMem.HeapWithLocalCache
+        (SharedMem.ProfiledBackend (SharedMem.NonEvictable)) (StringKey)
         (Class)
         (Capacity)
 
 module RecordDefs :
     module type of
-      SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (StringKey)
+      SharedMem.HeapWithLocalCache
+        (SharedMem.ProfiledBackend (SharedMem.NonEvictable)) (StringKey)
         (RecordDef)
         (Capacity)
 
 module Typedefs :
     module type of
-      SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (StringKey)
+      SharedMem.HeapWithLocalCache
+        (SharedMem.ProfiledBackend (SharedMem.NonEvictable)) (StringKey)
         (Typedef)
         (Capacity)
 
 module GConsts :
     module type of
-      SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (StringKey)
+      SharedMem.HeapWithLocalCache
+        (SharedMem.ProfiledBackend (SharedMem.NonEvictable)) (StringKey)
         (GConst)
         (Capacity)
 
 module Props :
     module type of
-      SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (ClassEltKey)
+      SharedMem.HeapWithLocalCache
+        (SharedMem.ProfiledBackend (SharedMem.NonEvictable)) (ClassEltKey)
         (Property)
         (Capacity)
 
 module StaticProps :
     module type of
-      SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (ClassEltKey)
+      SharedMem.HeapWithLocalCache
+        (SharedMem.ProfiledBackend (SharedMem.NonEvictable)) (ClassEltKey)
         (StaticProperty)
         (Capacity)
 
 module Methods :
     module type of
-      SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (ClassEltKey)
+      SharedMem.HeapWithLocalCache
+        (SharedMem.ProfiledBackend (SharedMem.NonEvictable)) (ClassEltKey)
         (Method)
         (Capacity)
 
 module StaticMethods :
     module type of
-      SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (ClassEltKey)
+      SharedMem.HeapWithLocalCache
+        (SharedMem.ProfiledBackend (SharedMem.NonEvictable)) (ClassEltKey)
         (StaticMethod)
         (Capacity)
 
 module Constructors :
     module type of
-      SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (StringKey)
+      SharedMem.HeapWithLocalCache
+        (SharedMem.ProfiledBackend (SharedMem.NonEvictable)) (StringKey)
         (Constructor)
         (Capacity)

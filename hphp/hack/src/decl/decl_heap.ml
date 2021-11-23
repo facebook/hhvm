@@ -57,12 +57,16 @@ module GConst = struct
 end
 
 module Funs =
-  SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (StringKey) (Fun)
+  SharedMem.HeapWithLocalCache
+    (SharedMem.ProfiledBackend (SharedMem.NonEvictable)) (StringKey)
+    (Fun)
     (Capacity)
 
 module Classes = struct
   include
-    SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (StringKey) (Class)
+    SharedMem.HeapWithLocalCache
+      (SharedMem.ProfiledBackend (SharedMem.NonEvictable)) (StringKey)
+      (Class)
       (Capacity)
 
   let add class_name decl =
@@ -80,14 +84,19 @@ module Classes = struct
 end
 
 module RecordDefs =
-  SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (StringKey)
+  SharedMem.HeapWithLocalCache
+    (SharedMem.ProfiledBackend (SharedMem.NonEvictable)) (StringKey)
     (RecordDef)
     (Capacity)
 module Typedefs =
-  SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (StringKey) (Typedef)
+  SharedMem.HeapWithLocalCache
+    (SharedMem.ProfiledBackend (SharedMem.NonEvictable)) (StringKey)
+    (Typedef)
     (Capacity)
 module GConsts =
-  SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (StringKey) (GConst)
+  SharedMem.HeapWithLocalCache
+    (SharedMem.ProfiledBackend (SharedMem.NonEvictable)) (StringKey)
+    (GConst)
     (Capacity)
 
 module Property = struct
@@ -134,22 +143,27 @@ module ClassEltKey = struct
 end
 
 module Props =
-  SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (ClassEltKey)
+  SharedMem.HeapWithLocalCache
+    (SharedMem.ProfiledBackend (SharedMem.NonEvictable)) (ClassEltKey)
     (Property)
     (Capacity)
 module StaticProps =
-  SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (ClassEltKey)
+  SharedMem.HeapWithLocalCache
+    (SharedMem.ProfiledBackend (SharedMem.NonEvictable)) (ClassEltKey)
     (StaticProperty)
     (Capacity)
 module Methods =
-  SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (ClassEltKey)
+  SharedMem.HeapWithLocalCache
+    (SharedMem.ProfiledBackend (SharedMem.NonEvictable)) (ClassEltKey)
     (Method)
     (Capacity)
 module StaticMethods =
-  SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (ClassEltKey)
+  SharedMem.HeapWithLocalCache
+    (SharedMem.ProfiledBackend (SharedMem.NonEvictable)) (ClassEltKey)
     (StaticMethod)
     (Capacity)
 module Constructors =
-  SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (StringKey)
+  SharedMem.HeapWithLocalCache
+    (SharedMem.ProfiledBackend (SharedMem.NonEvictable)) (StringKey)
     (Constructor)
     (Capacity)

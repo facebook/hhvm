@@ -98,21 +98,26 @@ module Types = struct
 
   module TypePosHeap =
     SharedMem.HeapWithLocalCache
-      (SharedMem.ProfiledBackend)
-      (Typing_deps.DepHashKey)
+      (SharedMem.ProfiledBackend
+         (SharedMem.NonEvictable))
+         (Typing_deps.DepHashKey)
       (Position)
       (struct
         let capacity = 1000
       end)
 
   module TypeCanonHeap =
-    SharedMem.Heap (SharedMem.ProfiledBackend) (Typing_deps.DepHashKey)
+    SharedMem.Heap
+      (SharedMem.ProfiledBackend
+         (SharedMem.NonEvictable))
+         (Typing_deps.DepHashKey)
       (CanonName)
 
   module BlockedEntries =
     SharedMem.HeapWithLocalCache
-      (SharedMem.ProfiledBackend)
-      (Typing_deps.DepHashKey)
+      (SharedMem.ProfiledBackend
+         (SharedMem.NonEvictable))
+         (Typing_deps.DepHashKey)
       (struct
         type t = blocked_entry
 
@@ -240,14 +245,23 @@ module Funs = struct
   end
 
   module FunPosHeap =
-    SharedMem.Heap (SharedMem.ProfiledBackend) (Typing_deps.DepHashKey)
+    SharedMem.Heap
+      (SharedMem.ProfiledBackend
+         (SharedMem.NonEvictable))
+         (Typing_deps.DepHashKey)
       (Position)
   module FunCanonHeap =
-    SharedMem.Heap (SharedMem.ProfiledBackend) (Typing_deps.DepHashKey)
+    SharedMem.Heap
+      (SharedMem.ProfiledBackend
+         (SharedMem.NonEvictable))
+         (Typing_deps.DepHashKey)
       (CanonName)
 
   module BlockedEntries =
-    SharedMem.Heap (SharedMem.ProfiledBackend) (Typing_deps.DepHashKey)
+    SharedMem.Heap
+      (SharedMem.ProfiledBackend
+         (SharedMem.NonEvictable))
+         (Typing_deps.DepHashKey)
       (struct
         type t = blocked_entry
 
@@ -339,11 +353,17 @@ module Consts = struct
   end
 
   module ConstPosHeap =
-    SharedMem.Heap (SharedMem.ProfiledBackend) (Typing_deps.DepHashKey)
+    SharedMem.Heap
+      (SharedMem.ProfiledBackend
+         (SharedMem.NonEvictable))
+         (Typing_deps.DepHashKey)
       (Position)
 
   module BlockedEntries =
-    SharedMem.Heap (SharedMem.ProfiledBackend) (Typing_deps.DepHashKey)
+    SharedMem.Heap
+      (SharedMem.ProfiledBackend
+         (SharedMem.NonEvictable))
+         (Typing_deps.DepHashKey)
       (struct
         type t = blocked_entry
 

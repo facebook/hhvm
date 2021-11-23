@@ -25,7 +25,8 @@ type file_type =
 exception File_provider_stale
 
 module FileHeap =
-  SharedMem.Heap (SharedMem.ProfiledBackend) (Relative_path.S)
+  SharedMem.Heap
+    (SharedMem.ProfiledBackend (SharedMem.Evictable)) (Relative_path.S)
     (struct
       type t = file_type
 

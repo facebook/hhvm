@@ -147,7 +147,8 @@ let test_local_changes
 
 module type HeapWithLocalCache =
     module type of
-      SharedMem.HeapWithLocalCache (SharedMem.ImmediateBackend) (StringKey)
+      SharedMem.HeapWithLocalCache
+        (SharedMem.ImmediateBackend (SharedMem.NonEvictable)) (StringKey)
         (IntVal)
         (Capacity)
 
@@ -179,14 +180,20 @@ let test_cache_behavior (module IntHeap : HeapWithLocalCache) () =
    in the combined cache. *)
 
 module TestNoCache =
-  SharedMem.Heap (SharedMem.ImmediateBackend) (StringKey) (IntVal)
+  SharedMem.Heap
+    (SharedMem.ImmediateBackend (SharedMem.NonEvictable)) (StringKey)
+    (IntVal)
 
 (* We shall not mix compressions, so create 2 separate caches  *)
 module TestWithCacheLz4 =
-  SharedMem.HeapWithLocalCache (SharedMem.ImmediateBackend) (StringKey) (IntVal)
+  SharedMem.HeapWithLocalCache
+    (SharedMem.ImmediateBackend (SharedMem.NonEvictable)) (StringKey)
+    (IntVal)
     (Capacity)
 module TestWithCacheZstd =
-  SharedMem.HeapWithLocalCache (SharedMem.ImmediateBackend) (StringKey) (IntVal)
+  SharedMem.HeapWithLocalCache
+    (SharedMem.ImmediateBackend (SharedMem.NonEvictable)) (StringKey)
+    (IntVal)
     (Capacity)
 
 let tests () =

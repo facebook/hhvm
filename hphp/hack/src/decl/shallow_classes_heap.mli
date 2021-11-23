@@ -19,7 +19,8 @@ module Class : SharedMem.Value with type t = shallow_class
 
 module Classes :
     module type of
-      SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (StringKey)
+      SharedMem.HeapWithLocalCache
+        (SharedMem.ProfiledBackend (SharedMem.Evictable)) (StringKey)
         (Class)
         (Capacity)
 
@@ -31,7 +32,8 @@ module Filter : SharedMem.Value with type t = BloomFilter.t
 
 module MemberFilters : sig
   include module type of
-      SharedMem.HeapWithLocalCache (SharedMem.ProfiledBackend) (StringKey)
+      SharedMem.HeapWithLocalCache
+        (SharedMem.ProfiledBackend (SharedMem.Evictable)) (StringKey)
         (Filter)
         (FilterCapacity)
 

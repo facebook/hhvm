@@ -275,6 +275,18 @@ function reverse_l(Locale\Locale $locale, string $string)[]: string {
  * If the length is omitted or exceeds the upper bound of the string, the
  * remainder of the string will be replaced. If the length is zero, the
  * replacement will be inserted at the offset.
+ *
+ *
+ * Offset can be positive or negative. When positive, replacement starts from the
+ * beginning of the string; when negative, replacement starts from the end of the string.
+ *
+ * Some examples:
+ * - `Str\splice_l($l, "apple", "orange", 0)` without `$length`, `$string` is replaced, resolving to `"orange"`
+ * - `Str\splice_l($l, "apple", "orange", 3)` inserting at `$offset` `3` from the start of `$string` resolves to `"apporange"`
+ * - `Str\splice_l($l, "apple", "orange", -2)` inserting at `$offset` `-2` from the end of `$string` resolves to `"apporange"`
+ * - `Str\splice_l($l, "apple", "orange", 0, 0)` with `$length` `0`, `$replacement` is appended at `$offset` `0` and resolves to `"orangeapple"`
+ * - `Str\splice_l($l, "apple", "orange", 5, 0)` with `$length` `0`, `$replacement` is appended at `$offset` `5` and resolves to `"appleorange"`
+ *
  */
 function splice_l(
   Locale\Locale $locale,

@@ -813,16 +813,7 @@ functor
       let start_t = Unix.gettimeofday () in
       let count = Relative_path.Map.cardinal fast_parsed in
       CgroupProfiler.step_start_end cgroup_steps "naming" @@ fun _cgroup_step ->
-      (* 1. Update dephash->filenames reverse naming table (global,mutable) *)
-      if Naming_provider.ByHash.need_update_files ctx then
-        Relative_path.Map.iter fast_parsed ~f:(fun file fi ->
-            let old = Naming_table.get_file_info env.naming_table file in
-            Naming_provider.ByHash.update_file ctx file fi ~old);
-      HackEventLogger.updating_deps_end ~count ~desc:"serverTypeCheck" ~start_t;
-      let t1 =
-        Hh_logger.log_duration "UPDATING_DEPS_END (dephash->filename)" start_t
-      in
-      (* 2. Update name->filename reverse naming table (global, mutable),
+      (* Update name->filename reverse naming table (global, mutable),
          and gather "duplicate name" errors *)
       remove_decls env fast_parsed;
       let (duplicate_name_errors, failed_naming) =
@@ -835,8 +826,10 @@ functor
             in
             (Errors.merge errorl' errorl, Relative_path.Set.union failed' failed))
       in
-      let t2 = Hh_logger.log_duration "Declare_names (name->filename)" t1 in
-      (* 3. Update filename->FileInfo.t forward naming table (into this local variable) *)
+      let t2 =
+        Hh_logger.log_duration "Declare_names (name->filename)" start_t
+      in
+      (* Update filename->FileInfo.t forward naming table (into this local variable) *)
       let naming_table =
         Naming_table.update_many env.naming_table fast_parsed
       in
@@ -846,8 +839,7 @@ functor
       HackEventLogger.naming_end ~count start_t heap_size;
       let telemetry =
         telemetry
-        |> Telemetry.float_ ~key:"update_dephash_duration" ~value:(t1 -. start_t)
-        |> Telemetry.float_ ~key:"update_reverse_duration" ~value:(t2 -. t1)
+        |> Telemetry.float_ ~key:"update_reverse_duration" ~value:(t2 -. start_t)
         |> Telemetry.float_ ~key:"update_fwd_duration" ~value:(t3 -. t2)
         |> Telemetry.int_ ~key:"end_heap_mb" ~value:heap_size
         |> Telemetry.float_ ~key:"total_duration" ~value:(t3 -. start_t)

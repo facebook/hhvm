@@ -85,16 +85,6 @@ let init
     SearchServiceRunner.update_fileinfo_map
       env.naming_table
       ~source:SearchUtils.Init;
-  let ctx = Provider_utils.ctx_from_server_env env in
-  let t =
-    ServerInitCommon.update_files
-      genv
-      env.naming_table
-      ctx
-      t
-      ~telemetry_label:"eager.init.update"
-      ~cgroup_steps
-  in
   let (env, t) =
     ServerInitCommon.naming
       env

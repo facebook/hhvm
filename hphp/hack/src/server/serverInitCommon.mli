@@ -27,15 +27,6 @@ val parsing :
   cgroup_steps:CgroupProfiler.step_group ->
   ServerEnv.env * float
 
-val update_files :
-  ServerEnv.genv ->
-  Naming_table.t ->
-  Provider_context.t ->
-  float ->
-  telemetry_label:string ->
-  cgroup_steps:CgroupProfiler.step_group ->
-  float
-
 val naming :
   ServerEnv.env ->
   float ->

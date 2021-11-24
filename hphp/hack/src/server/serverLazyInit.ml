@@ -921,24 +921,14 @@ let initialize_naming_table
       ~telemetry_label:"lazy.nt.parsing"
       ~cgroup_steps
   in
-  if not do_naming then
-    (env, t)
-  else
-    let ctx = Provider_utils.ctx_from_server_env env in
-    let t =
-      ServerInitCommon.update_files
-        genv
-        env.naming_table
-        ctx
-        t
-        ~telemetry_label:"lazy.nt.do_naming.update"
-        ~cgroup_steps
-    in
+  if do_naming then
     ServerInitCommon.naming
       env
       t
       ~telemetry_label:"lazy.nt.do_naming.naming"
       ~cgroup_steps
+  else
+    (env, t)
 
 let write_symbol_info_init
     (genv : ServerEnv.genv)
@@ -951,16 +941,6 @@ let write_symbol_info_init
       genv
       env
       cgroup_steps
-  in
-  let ctx = Provider_utils.ctx_from_server_env env in
-  let t =
-    ServerInitCommon.update_files
-      genv
-      env.naming_table
-      ctx
-      t
-      ~telemetry_label:"write_symbol_info.update"
-      ~cgroup_steps
   in
   let (env, t) =
     ServerInitCommon.naming
@@ -1242,15 +1222,6 @@ let post_saved_state_initialization
     ~source:SearchUtils.TypeChecker;
   let ctx = Provider_utils.ctx_from_server_env env in
   let t =
-    ServerInitCommon.update_files
-      genv
-      env.naming_table
-      ctx
-      t
-      ~telemetry_label:"post_ss1.update"
-      ~cgroup_steps
-  in
-  let t =
     naming_from_saved_state
       ctx
       old_naming_table
@@ -1319,16 +1290,6 @@ let post_saved_state_initialization
       needs_recheck =
         Relative_path.Set.union env.needs_recheck decl_and_typing_error_files;
     }
-  in
-  (* Update the fileinfo object's dependencies now that we have full fast *)
-  let t =
-    ServerInitCommon.update_files
-      genv
-      env.naming_table
-      ctx
-      t
-      ~telemetry_label:"post_ss2.update"
-      ~cgroup_steps
   in
   type_check_dirty
     genv

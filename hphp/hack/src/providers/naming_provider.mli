@@ -167,18 +167,7 @@ val local_changes_pop_sharedmem_stack : unit -> unit
 (** Resolve a decl position to a raw position using a provider context. *)
 val resolve_position : Provider_context.t -> Pos_or_decl.t -> Pos.t
 
-(** In addition to the main reverse naming table, there's a second reverse naming table
-that does basically the same thing except you look up by hash. *)
 module ByHash : sig
-  val need_update_files : Provider_context.t -> bool
-
-  val update_file :
-    Provider_context.t ->
-    Relative_path.t ->
-    FileInfo.t ->
-    old:FileInfo.t option ->
-    unit
-
   val get_files :
     Provider_context.t -> Typing_deps.DepSet.t -> Relative_path.Set.t
 end

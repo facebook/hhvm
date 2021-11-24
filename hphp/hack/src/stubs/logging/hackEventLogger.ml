@@ -277,8 +277,6 @@ let parsing_end_for_init _ _ ~parsed_count:_ ~desc:_ = ()
 
 let parsing_end_for_typecheck _ _ ~parsed_count:_ = ()
 
-let updating_deps_end ~count:_ ~desc:_ ~start_t:_ = ()
-
 let naming_costly_iter ~start_t:_ = ()
 
 let naming_end ~count:_ _ _ = ()

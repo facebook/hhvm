@@ -807,17 +807,10 @@ let local_changes_pop_sharedmem_stack () : unit =
   Naming_heap.pop_local_changes ()
 
 module ByHash = struct
-  (** There are two different implementations of the "dephash -> filename" map.
-  The legacy implementation "ifiles" is just a Hashtbl.t which we initialize
-  in serverInitCommon.update_files, and update in serverTypeCheck.update_naming_table.
-  The newer implementation is to use the existing reverse-naming-table, i.e. the
-  one typically backed by sqlite. This newer implementation only applies if
-  (1) our dependency mode is 64bit dephashes, (2) the in-memory reverse naming table
-  cache/delta also uses 64bit dephashes. Condition (2) is only met by shared memory.
-  Fortunately, 64bit+sharedmem is the only scenario where we ever look up dephashes! *)
-  let need_update_files (ctx : Provider_context.t) : bool =
+  let get_files ctx deps =
     match Provider_context.get_backend ctx with
-    | Provider_backend.Shared_memory -> false
+    | Provider_backend.Shared_memory ->
+      Naming_heap.get_filenames_by_hash (db_path_of_ctx ctx) deps
     | backend ->
       let desc =
         Printf.sprintf
@@ -830,62 +823,5 @@ module ByHash = struct
         ~path:Relative_path.default
         ~pos:""
         (Telemetry.create ());
-      true
-
-  let ifiles : (Typing_deps.Dep.t, Relative_path.Set.t) Caml.Hashtbl.t ref =
-    ref (Caml.Hashtbl.create 23)
-
-  let get_files ctx deps =
-    if need_update_files ctx then
-      failwith "no ifiles"
-    else
-      Naming_heap.get_filenames_by_hash (db_path_of_ctx ctx) deps
-
-  let update_file ctx filename info ~old =
-    if need_update_files ctx then begin
-      let module (* remove old typing deps *)
-                 (* Note: if a file has two definitions of a symbol name, our construction of
-                    ifiles will only include symbol->filename once for that file. We'll
-                    turn the deps into a set right now so we can remove it only once; that way,
-                    other unexpected "remove_absent_deps" violations will still be flagged.
-                    Note: we're using our own DepSet here, because Typing_deps.DepSet.t
-                    is very inefficient due to its Rust interop. *)
-          DepSet =
-        Caml.Set.Make (Typing_deps.DepHashKey) in
-      let deps =
-        Option.value_map old ~default:[] ~f:Typing_deps.deps_of_file_info
-        |> DepSet.of_list
-      in
-      DepSet.iter
-        (fun def ->
-          match Caml.Hashtbl.find_opt !ifiles def with
-          | Some files when Relative_path.Set.mem files filename ->
-            Caml.Hashtbl.replace
-              !ifiles
-              def
-              (Relative_path.Set.remove files filename)
-          | _ ->
-            let desc = "remove_absent_dep" in
-            Hh_logger.log
-              "INVARIANT_VIOLATION_BUG [%s] file=%s"
-              desc
-              (Relative_path.to_absolute filename);
-            HackEventLogger.invariant_violation_bug
-              ~desc
-              ~path:filename
-              ~pos:""
-              (Telemetry.create ()))
-        deps;
-      (* add new typing deps *)
-      List.iter (Typing_deps.deps_of_file_info info) ~f:(fun def ->
-          let previous =
-            match Caml.Hashtbl.find_opt !ifiles def with
-            | Some files -> files
-            | None -> Relative_path.Set.empty
-          in
-          Caml.Hashtbl.replace
-            !ifiles
-            def
-            (Relative_path.Set.add previous filename))
-    end
+      failwith "need_update_files"
 end

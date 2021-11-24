@@ -11,9 +11,6 @@ open Hh_prelude
 module Bucket = Hack_bucket
 open ServerEnv
 
-let no_incremental_check (options : ServerArgs.options) : bool =
-  ServerArgs.check_mode options
-
 let indexing ?hhi_filter ~(telemetry_label : string) (genv : ServerEnv.genv) :
     Relative_path.t list Bucket.next * float =
   ServerProgress.send_progress "indexing";
@@ -99,31 +96,6 @@ let parsing
     { env with naming_table; errorl = Errors.merge errorl env.errorl }
   in
   (env, Hh_logger.log_duration ("Parsing " ^ telemetry_label) t)
-
-let update_files
-    (genv : ServerEnv.genv)
-    (naming_table : Naming_table.t)
-    (ctx : Provider_context.t)
-    (t : float)
-    ~(telemetry_label : string)
-    ~(cgroup_steps : CgroupProfiler.step_group) : float =
-  if no_incremental_check genv.options then
-    t
-  else (
-    Hh_logger.log "Updating dep->filename [%s]... " telemetry_label;
-    let count = ref 0 in
-    CgroupProfiler.step_start_end cgroup_steps telemetry_label
-    @@ fun _cgroup_step ->
-    if Naming_provider.ByHash.need_update_files ctx then
-      Naming_table.iter naming_table ~f:(fun path fi ->
-          Naming_provider.ByHash.update_file ctx path fi ~old:None;
-          count := !count + 1);
-    HackEventLogger.updating_deps_end
-      ~count:!count
-      ~desc:telemetry_label
-      ~start_t:t;
-    Hh_logger.log_duration "Updated dep->filename" t
-  )
 
 let naming
     (env : ServerEnv.env)

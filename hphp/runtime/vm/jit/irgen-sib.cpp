@@ -48,7 +48,7 @@ struct RenderJIT : ROMRenderer {
   void fixupInterior(ptrdiff_t fixupOff, ptrdiff_t targetOff) override {
     auto const fixupAddr = gen(env, AddOffset, base, cns(env, fixupOff));
     auto const targetAddr = gen(env, AddOffset, base, cns(env, targetOff));
-    gen(env, StValAt, fixupAddr, targetAddr);
+    gen(env, StPtrAt, fixupAddr, targetAddr);
   }
   void breakMystery(
       const MysteryBoxProvenance& provenance, tv_val_offset tv_off) override {
@@ -56,7 +56,7 @@ struct RenderJIT : ROMRenderer {
     auto const typeAddr = gen(env, AddOffset, base, cns(env, tv_off.typeOffset()));
     gen(env, StTypeAt, typeAddr, src);
     auto const valAddr = gen(env, AddOffset, base, cns(env, tv_off.dataOffset()));
-    gen(env, StValAt, valAddr, src);
+    gen(env, StPtrAt, valAddr, src);
   }
   void incref(const MysteryBoxProvenance& provenance) override {
     auto const src = selectMysteryBox(provenance);

@@ -211,8 +211,8 @@ constexpr bool operator>(PtrLocation a, PtrLocation b) {
   IRT(LazyCls,         bits_t::bit<24>())                               \
 /**/
 
-#define UNCCOUNTED_INIT_UNION \
-  kInitNull|kBool|kInt|kDbl|kPersistent|kFunc|kCls|kLazyCls|kClsMeth|kVoidPtr
+#define UNCOUNTED_INIT_UNION \
+  kInitNull|kBool|kInt|kDbl|kPersistent|kFunc|kCls|kLazyCls|kClsMeth
 
 #define INIT_CELL_UNION \
   kUncountedInit|kStr|kArrLike|kObj|kRes|kRFunc|kRClsMeth
@@ -235,7 +235,7 @@ constexpr bool operator>(PtrLocation a, PtrLocation b) {
   IRT(ArrLike,             kVec|kDict|kKeyset)                          \
   IRT(NullableObj,         kObj|kInitNull|kUninit)                      \
   IRT(Persistent,          kPersistentStr|kPersistentArrLike)           \
-  IRT(UncountedInit,       UNCCOUNTED_INIT_UNION)                       \
+  IRT(UncountedInit,       UNCOUNTED_INIT_UNION)                        \
   IRT(Uncounted,           kUninit|kUncountedInit)                      \
   IRT(InitCell,            INIT_CELL_UNION)                             \
   IRT(Cell,                kUninit|kInitCell)                           \
@@ -286,9 +286,9 @@ constexpr bool operator>(PtrLocation a, PtrLocation b) {
  */
 #define IR_TYPES                  \
   IRT_PHP                         \
-  IRT_RUNTIME                     \
   IRT_PHP_UNIONS                  \
   IRT_PTRS_LVALS                  \
+  IRT_RUNTIME                     \
   IRT_SPECIAL
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1681,9 +1681,9 @@ To string conversions:
 
 9. Stores
 
-| StValAt, ND, S(VoidPtr) S(Cell), NF
+| StPtrAt, ND, S(VoidPtr) S(VoidPtr), NF
 
-  Store the value of S1 to pointer S0.
+  Store the pointer address S1 to pointer S0.
 
 | StTypeAt, ND, S(VoidPtr) S(Cell), NF
 

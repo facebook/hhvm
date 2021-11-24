@@ -52,7 +52,7 @@ void cgAllocInitROM(IRLS& env, const IRInstruction* inst) {
                argGroup(env, inst).imm(extra->rom).imm(extra->size));
 }
 
-void cgStValAt(IRLS& env, const IRInstruction* inst) {
+void cgStPtrAt(IRLS& env, const IRInstruction* inst) {
   auto const dst = srcLoc(env, inst, 0).reg();
   auto const src = srcLoc(env, inst, 1);
   auto const srcType = inst->src(1)->type();

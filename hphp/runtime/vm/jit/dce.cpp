@@ -460,6 +460,7 @@ bool canDCE(const IRInstruction& inst) {
   case StLoc:
   case StLocMeta:
   case StLocRange:
+  case StPtrAt:
   case StVMFP:
   case StVMSP:
   case StVMPC:
@@ -467,7 +468,6 @@ bool canDCE(const IRInstruction& inst) {
   case StVMRegState:
   case StTVInRDS:
   case StTypeAt:
-  case StValAt:
   case ReqBindJmp:
   case ReqInterpBBNoTranslate:
   case ReqRetranslate:

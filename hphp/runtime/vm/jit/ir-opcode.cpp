@@ -892,13 +892,13 @@ bool opcodeMayRaise(Opcode opc) {
   case StructDictTypeBoundCheck:
   case StructDictUnset:
   case StMROProp:
+  case StPtrAt:
   case StTypeAt:
   case StStk:
   case StStkMeta:
   case StStkRange:
   case StVMRegState:
   case StTVInRDS:
-  case StValAt:
   case SubDbl:
   case SubInt:
   case SubIntO:

@@ -1234,7 +1234,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvIntToStr:
   case InitStructPositions:
   case AllocInitROM:
-  case StValAt:
+  case StPtrAt:
   case StTypeAt:
   case VoidPtrAsDataType:
     return IrrelevantEffects {};

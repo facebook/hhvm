@@ -837,16 +837,7 @@ module ByHash = struct
 
   let get_files ctx deps =
     if need_update_files ctx then
-      Typing_deps.DepSet.fold
-        ~f:
-          begin
-            fun dep acc ->
-            match Caml.Hashtbl.find_opt !ifiles dep with
-            | Some files -> Relative_path.Set.union files acc
-            | None -> acc
-          end
-        deps
-        ~init:Relative_path.Set.empty
+      failwith "no ifiles"
     else
       Naming_heap.get_filenames_by_hash (db_path_of_ctx ctx) deps
 

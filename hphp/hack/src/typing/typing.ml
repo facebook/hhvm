@@ -4194,55 +4194,43 @@ and expr_
     | None -> make_result env p txml (TUtils.terr env (Reason.Runknown_class p))
     | Some _ -> make_result env p txml obj)
   | Shape fdm ->
-    let (env, fdm_with_expected) =
+    let expr_helper ?expected env (k, e) =
+      let (env, et, ty) = expr ?expected env e in
+      (env, (k, et, ty))
+    in
+    let (env, tfdm) =
       match expand_expected_and_get_node env expected with
       | (env, Some (pos, ur, _, Tshape (_, expected_fdm))) ->
-        let fdme =
-          List.map
-            ~f:(fun (k, v) ->
-              let tk = TShapeField.of_ast Pos_or_decl.of_raw_pos k in
+        List.map_env
+          env
+          ~f:(fun env ((k, _) as ke) ->
+            let tk = TShapeField.of_ast Pos_or_decl.of_raw_pos k in
+            let expected =
               match TShapeMap.find_opt tk expected_fdm with
-              | None -> (k, (v, None))
-              | Some sft -> (k, (v, Some (ExpectedTy.make pos ur sft.sft_ty))))
-            fdm
-        in
-        (env, fdme)
-      | _ -> (env, List.map ~f:(fun (k, v) -> (k, (v, None))) fdm)
-    in
-    (* allow_inter adds a type-variable *)
-    let (env, tfdm) =
-      List.map_env
-        ~f:(fun env (key, (e, expected)) ->
-          let (env, te, ty) = expr ?expected env e in
-          (env, (key, (te, ty))))
-        env
-        fdm_with_expected
-    in
-    let (env, fdm) =
-      let convert_expr_and_type_to_shape_field_type env (key, (_, ty)) =
-        (* An expression evaluation always corresponds to a shape_field_type
-             with sft_optional = false. *)
-        (env, (key, { sft_optional = false; sft_ty = ty }))
-      in
-      List.map_env ~f:convert_expr_and_type_to_shape_field_type env tfdm
+              | None -> None
+              | Some sft -> Some (ExpectedTy.make pos ur sft.sft_ty)
+            in
+            expr_helper ?expected env ke)
+          fdm
+      | _ -> List.map_env env ~f:expr_helper fdm
     in
     let fdm =
       List.fold_left
-        ~f:(fun acc (k, v) ->
+        ~f:(fun acc (k, _, ty) ->
           let tk = TShapeField.of_ast Pos_or_decl.of_raw_pos k in
-          TShapeMap.add tk v acc)
+          TShapeMap.add tk { sft_optional = false; sft_ty = ty } acc)
         ~init:TShapeMap.empty
-        fdm
+        tfdm
     in
     let env =
-      Typing_shapes.check_shape_keys_validity env (List.map tfdm ~f:fst)
+      Typing_shapes.check_shape_keys_validity env (List.map tfdm ~f:fst3)
     in
     (* Fields are fully known, because this shape is constructed
      * using shape keyword and we know exactly what fields are set. *)
     make_result
       env
       p
-      (Aast.Shape (List.map ~f:(fun (k, (te, _)) -> (k, te)) tfdm))
+      (Aast.Shape (List.map ~f:(fun (k, te, _) -> (k, te)) tfdm))
       (mk (Reason.Rwitness p, Tshape (Closed_shape, fdm)))
   | ET_Splice e ->
     Typing_env.with_in_expr_tree env false (fun env -> et_splice env p e)

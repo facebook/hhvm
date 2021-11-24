@@ -13,7 +13,7 @@ fnv = "1.0"
 hhbc_by_ref_options_serde = { path = "../hhbc_by_ref_options_serde" }
 itertools = "0.10.1"
 lazy_static = "1.0"
-lru = "0.6.5"
+lru = "0.7.0"
 serde = { version = "1.0.126", features = ["derive", "rc"] }
 serde_derive = "1.0"
 serde_json = { version = "1.0.64", features = ["float_roundtrip", "unbounded_depth"] }

@@ -564,7 +564,8 @@ let rec array_get
                       (TUtils.get_printable_shape_field_name field);
                     (env, err_witness env p, dflt_arr_res, Ok ty2)
                   ) else
-                    (env, sft_ty, dflt_arr_res, Ok ty2)
+                    let (env, pess_sft_ty) = maybe_pessimise_type env sft_ty in
+                    (env, pess_sft_ty, dflt_arr_res, Ok ty2)
               end
           end
       | Toption ty ->
@@ -1213,8 +1214,17 @@ let assign_array_get_with_err
           | None -> (env, ety1, Ok ety1, Ok tkey, Ok ty2)
           | Some field ->
             let field = TShapeField.of_ast Pos_or_decl.of_raw_pos field in
+            let (env, pess_ty2) =
+              if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
+                pessimised_tup_assign expr_pos env ty2
+              else
+                (env, ty2)
+            in
             let fdm' =
-              TShapeMap.add field { sft_optional = false; sft_ty = ty2 } fdm
+              TShapeMap.add
+                field
+                { sft_optional = false; sft_ty = pess_ty2 }
+                fdm
             in
             let ty = mk (r, Tshape (shape_kind, fdm')) in
             (env, ty, Ok ty, Ok tkey, Ok ty2)

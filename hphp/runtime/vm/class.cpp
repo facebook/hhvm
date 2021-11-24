@@ -989,9 +989,9 @@ void Class::initSProps() const {
 Slot Class::lsbMemoSlot(const Func* func, bool forValue) const {
   assertx(m_extra);
   if (forValue) {
-    assertx(func->numParams() == 0);
+    assertx(func->numKeysForMemoize() == 0);
   } else {
-    assertx(func->numParams() > 0);
+    assertx(func->numKeysForMemoize() > 0);
   }
   const auto& slots = m_extra->m_lsbMemoExtra.m_slots;
   auto it = slots.find(func->getFuncId());
@@ -4088,7 +4088,7 @@ void Class::initLSBMemoHandles() {
       auto const func = Func::fromFuncId(kv.first);
       auto const slot = kv.second;
       assertx(slot >= 0 && slot < numSlots);
-      if (func->numParams() == 0) {
+      if (func->numKeysForMemoize() == 0) {
         handles[slot] = rds::bindLSBMemoValue(this, func).handle();
         mx.m_symbols.emplace_back(
           std::make_pair(rds::LSBMemoValue { this, kv.first }, handles[slot])

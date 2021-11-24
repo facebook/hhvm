@@ -453,7 +453,7 @@ let worker_exception _ = ()
 module ProfileTypeCheck = struct
   let process_file ~recheck_id:_ ~path:_ ~telemetry:_ = ()
 
-  let compute_tast ~path:_ ~telemetry:_ = ()
+  let compute_tast ~path:_ ~telemetry:_ ~start_time:_ = ()
 
   let get_telemetry_url ~init_id:_ ~recheck_id:_ = ""
 end

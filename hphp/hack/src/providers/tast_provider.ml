@@ -54,7 +54,7 @@ let compute_tast_and_errors_unquarantined_internal
     let prev_gc_telemetry = Telemetry.quick_gc_stat () in
     Decl_counters.set_mode Typing_service_types.DeclingTopCounts;
     let prev_tally_state = Counters.reset () in
-    let t = Unix.gettimeofday () in
+    let start_time = Unix.gettimeofday () in
 
     (* do the work *)
     let ({ Parser_return.ast; content; _ }, ast_errors) =
@@ -119,7 +119,7 @@ let compute_tast_and_errors_unquarantined_internal
       |> Telemetry.int_ ~key:"errors.tast" ~value:(Errors.count typing_errors)
       |> Telemetry.float_
            ~key:"duration_decl_and_typecheck"
-           ~value:(Unix.gettimeofday () -. t)
+           ~value:(Unix.gettimeofday () -. start_time)
       |> Telemetry.int_
            ~key:"filesize"
            ~value:
@@ -134,7 +134,8 @@ let compute_tast_and_errors_unquarantined_internal
       (Telemetry.to_string telemetry);
     HackEventLogger.ProfileTypeCheck.compute_tast
       ~telemetry
-      ~path:entry.Provider_context.path;
+      ~path:entry.Provider_context.path
+      ~start_time;
 
     (match mode with
     | Compute_tast_and_errors ->

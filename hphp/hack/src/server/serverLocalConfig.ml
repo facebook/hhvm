@@ -557,6 +557,7 @@ type t = {
   tico_invalidate_smart: bool;
   (* Enable use of the direct decl parser for parsing type signatures. *)
   use_direct_decl_parser: bool;
+  profile_log: bool;  (** Log per-file performance information. *)
   (* If --profile-log, we'll record telemetry on typechecks that took longer than the threshold (in seconds). In case of profile_type_check_twice we judge by the second type check. *)
   profile_type_check_duration_threshold: float;
   (* If --profile-log, we'll record telemetry on any file which allocated more than this many mb on the ocaml heap. In case of profile_type_check_twice we judge by the second type check. *)
@@ -680,6 +681,7 @@ let default =
     tico_invalidate_files = false;
     tico_invalidate_smart = false;
     use_direct_decl_parser = false;
+    profile_log = false;
     profile_type_check_duration_threshold = 0.05;
     (* seconds *)
     profile_type_check_memory_threshold_mb = 100;
@@ -1247,6 +1249,13 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
+  let profile_log =
+    bool_if_min_version
+      "profile_log"
+      ~default:default.profile_log
+      ~current_version
+      config
+  in
   let profile_type_check_duration_threshold =
     float_
       "profile_type_check_duration_threshold"
@@ -1453,6 +1462,7 @@ let load_ fn ~silent ~current_version overrides =
     tico_invalidate_files;
     tico_invalidate_smart;
     use_direct_decl_parser;
+    profile_log;
     profile_type_check_duration_threshold;
     profile_type_check_memory_threshold_mb;
     profile_type_check_twice;

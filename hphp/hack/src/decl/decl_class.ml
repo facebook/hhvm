@@ -80,17 +80,19 @@ let map_element dc_substs find name elt =
   in
   element_to_class_elt pty elt
 
-let map_property dc = map_element dc.dc_substs (find_property dc.dc_name)
+let lookup_property_type_lazy dc =
+  map_element dc.dc_substs (find_property dc.dc_name)
 
-let map_static_property dc =
+let lookup_static_property_type_lazy dc =
   map_element dc.dc_substs (find_static_property dc.dc_name)
 
-let map_method dc = map_element dc.dc_substs (find_method dc.dc_name)
+let lookup_method_type_lazy dc =
+  map_element dc.dc_substs (find_method dc.dc_name)
 
-let map_static_method dc =
+let lookup_static_method_type_lazy dc =
   map_element dc.dc_substs (find_static_method dc.dc_name)
 
-let map_constructor dc_substs dc_construct =
+let lookup_constructor_lazy dc_substs dc_construct =
   match dc_construct with
   | (None, consistent) -> (None, consistent)
   | (Some elt, consistent) ->

@@ -94,7 +94,7 @@ let make_eager_class_decl decl =
         static_props = String.Table.create ();
         construct =
           lazy
-            (Decl_class.map_constructor
+            (Decl_class.lookup_constructor_lazy
                decl.Decl_defs.dc_substs
                decl.Decl_defs.dc_construct);
       } )
@@ -391,7 +391,7 @@ module ApiLazy = struct
         (match SMap.find_opt id c.Decl_defs.dc_props with
         | None -> None
         | Some elt ->
-          let elt = Decl_class.map_property c id elt in
+          let elt = Decl_class.lookup_property_type_lazy c id elt in
           String.Table.add_exn members.props ~key:id ~data:elt;
           Some elt))
 
@@ -412,7 +412,7 @@ module ApiLazy = struct
         (match SMap.find_opt id c.Decl_defs.dc_sprops with
         | None -> None
         | Some elt ->
-          let elt = Decl_class.map_static_property c id elt in
+          let elt = Decl_class.lookup_static_property_type_lazy c id elt in
           String.Table.add_exn members.static_props ~key:id ~data:elt;
           Some elt))
 
@@ -433,7 +433,7 @@ module ApiLazy = struct
         (match SMap.find_opt id c.Decl_defs.dc_methods with
         | None -> None
         | Some elt ->
-          let elt = Decl_class.map_method c id elt in
+          let elt = Decl_class.lookup_method_type_lazy c id elt in
           String.Table.add_exn members.methods ~key:id ~data:elt;
           Some elt))
 
@@ -454,7 +454,7 @@ module ApiLazy = struct
         (match SMap.find_opt id c.Decl_defs.dc_smethods with
         | None -> None
         | Some elt ->
-          let elt = Decl_class.map_static_method c id elt in
+          let elt = Decl_class.lookup_static_method_type_lazy c id elt in
           String.Table.add_exn members.static_methods ~key:id ~data:elt;
           Some elt))
 
@@ -537,7 +537,8 @@ module ApiEager = struct
     | Lazy (_sc, lc) -> LSTable.to_list (Lazy.force lc).ih.props
     | Eager (c, _) ->
       SMap.bindings c.Decl_defs.dc_props
-      |> List.map ~f:(fun (id, elt) -> (id, Decl_class.map_property c id elt))
+      |> List.map ~f:(fun (id, elt) ->
+             (id, Decl_class.lookup_property_type_lazy c id elt))
 
   let sprops (decl, t) =
     Decl_counters.count_subdecl decl Decl_counters.SProps @@ fun () ->
@@ -546,7 +547,7 @@ module ApiEager = struct
     | Eager (c, _) ->
       SMap.bindings c.Decl_defs.dc_sprops
       |> List.map ~f:(fun (id, elt) ->
-             (id, Decl_class.map_static_property c id elt))
+             (id, Decl_class.lookup_static_property_type_lazy c id elt))
 
   let methods (decl, t) =
     Decl_counters.count_subdecl decl Decl_counters.Methods @@ fun () ->
@@ -554,7 +555,8 @@ module ApiEager = struct
     | Lazy (_sc, lc) -> LSTable.to_list (Lazy.force lc).ih.methods
     | Eager (c, _) ->
       SMap.bindings c.Decl_defs.dc_methods
-      |> List.map ~f:(fun (id, elt) -> (id, Decl_class.map_method c id elt))
+      |> List.map ~f:(fun (id, elt) ->
+             (id, Decl_class.lookup_method_type_lazy c id elt))
 
   let smethods (decl, t) =
     Decl_counters.count_subdecl decl Decl_counters.SMethods @@ fun () ->
@@ -563,7 +565,7 @@ module ApiEager = struct
     | Eager (c, _) ->
       SMap.bindings c.Decl_defs.dc_smethods
       |> List.map ~f:(fun (id, elt) ->
-             (id, Decl_class.map_static_method c id elt))
+             (id, Decl_class.lookup_static_method_type_lazy c id elt))
 
   let all_inherited_methods (decl, t) id =
     Decl_counters.count_subdecl decl Decl_counters.All_inherited_methods

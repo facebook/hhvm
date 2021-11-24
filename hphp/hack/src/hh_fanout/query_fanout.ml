@@ -31,9 +31,7 @@ let go
   |> Typing_deps.DepSet.elements
   |> List.map ~f:(fun hash ->
          let paths =
-           Naming_provider.ByHash.get_files
-             ctx
-             (Typing_deps.DepSet.singleton hash)
+           Naming_provider.get_files ctx (Typing_deps.DepSet.singleton hash)
          in
          { hash; paths })
 

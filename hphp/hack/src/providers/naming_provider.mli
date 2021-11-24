@@ -167,7 +167,5 @@ val local_changes_pop_sharedmem_stack : unit -> unit
 (** Resolve a decl position to a raw position using a provider context. *)
 val resolve_position : Provider_context.t -> Pos_or_decl.t -> Pos.t
 
-module ByHash : sig
-  val get_files :
-    Provider_context.t -> Typing_deps.DepSet.t -> Relative_path.Set.t
-end
+val get_files :
+  Provider_context.t -> Typing_deps.DepSet.t -> Relative_path.Set.t

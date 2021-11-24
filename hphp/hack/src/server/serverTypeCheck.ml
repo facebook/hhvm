@@ -569,7 +569,7 @@ module LazyCheckKind : CheckKindType = struct
     let deps_mode = Provider_context.get_deps_mode ctx in
     Typing_deps.(
       add_typing_deps deps_mode (DepSet.singleton dep)
-      |> Naming_provider.ByHash.get_files ctx)
+      |> Naming_provider.get_files ctx)
 
   let get_to_recheck2_approximation ~to_redecl_phase2_deps ~env ~ctx =
     (* We didn't do the full fan-out from to_redecl_phase2_deps, so the
@@ -899,7 +899,7 @@ functor
       let oldified_defs =
         snd @@ Decl_utils.split_defs oldified_defs defs_to_redecl
       in
-      let to_recheck1 = Naming_provider.ByHash.get_files ctx to_recheck1_deps in
+      let to_recheck1 = Naming_provider.get_files ctx to_recheck1_deps in
       {
         changed;
         oldified_defs;
@@ -984,7 +984,7 @@ functor
           (* Redeclarations completed now. *)
           fast_redecl_phase2_now
       in
-      let to_recheck2 = Naming_provider.ByHash.get_files ctx to_recheck2_deps in
+      let to_recheck2 = Naming_provider.get_files ctx to_recheck2_deps in
       let to_recheck2 =
         Relative_path.Set.union
           to_recheck2
@@ -1455,7 +1455,7 @@ functor
       in
 
       let to_redecl_phase2 =
-        Naming_provider.ByHash.get_files ctx to_redecl_phase2_deps
+        Naming_provider.get_files ctx to_redecl_phase2_deps
       in
       let hs = SharedMem.SMTelemetry.heap_size () in
       HackEventLogger.first_redecl_end t hs;

@@ -37,7 +37,7 @@ let intersect_with_master_deps
   in
   let t4 = Unix.gettimeofday () in
   (* Translate the dependencies to files that need to be rechecked. *)
-  let needs_recheck0 = Naming_provider.ByHash.get_files ctx more_deps in
+  let needs_recheck0 = Naming_provider.get_files ctx more_deps in
   let t5 = Unix.gettimeofday () in
   let needs_recheck = Relative_path.Set.diff needs_recheck0 rechecked_files in
   let t6 = Unix.gettimeofday () in
@@ -302,7 +302,7 @@ let expand_all env =
     let deps =
       Typing_deps.add_all_deps deps_mode dirty_deps.dirty_master_deps
     in
-    let needs_recheck = Naming_provider.ByHash.get_files ctx deps in
+    let needs_recheck = Naming_provider.get_files ctx deps in
     let needs_recheck =
       Relative_path.Set.diff needs_recheck dirty_deps.rechecked_files
     in

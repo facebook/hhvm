@@ -616,8 +616,8 @@ let get_files_to_undecl_and_recheck
   Decl_redecl_service.remove_old_defs ctx ~bucket_size genv.workers dirty_names;
   let to_recheck_deps = Typing_deps.add_all_deps env.deps_mode to_redecl in
   let to_recheck_deps = Typing_deps.DepSet.union to_recheck_deps to_recheck in
-  let files_to_undecl = Naming_provider.ByHash.get_files ctx to_redecl in
-  let files_to_recheck = Naming_provider.ByHash.get_files ctx to_recheck_deps in
+  let files_to_undecl = Naming_provider.get_files ctx to_redecl in
+  let files_to_recheck = Naming_provider.get_files ctx to_recheck_deps in
   log_fanout_information to_recheck_deps files_to_recheck;
 
   (files_to_undecl, files_to_recheck)
@@ -709,7 +709,7 @@ let type_check_dirty
           get_files_to_undecl_and_recheck dirty_local_files_changed_hash
         else
           let deps = Typing_deps.add_all_deps env.deps_mode local_deps in
-          let files = Naming_provider.ByHash.get_files ctx deps in
+          let files = Naming_provider.get_files ctx deps in
           log_fanout_information deps files;
           (Relative_path.Set.empty, files)
       in
@@ -736,7 +736,7 @@ let type_check_dirty
         else
           let deps = Typing_deps.DepSet.union master_deps local_deps in
           let deps = Typing_deps.add_all_deps env.deps_mode deps in
-          let files = Naming_provider.ByHash.get_files ctx deps in
+          let files = Naming_provider.get_files ctx deps in
           log_fanout_information deps files;
           (Relative_path.Set.empty, files)
       in

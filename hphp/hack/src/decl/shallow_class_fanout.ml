@@ -13,7 +13,7 @@ open Reordered_argument_collections
 open Typing_deps
 
 let class_names_from_deps ~ctx ~get_classes_in_file deps =
-  let filenames = Naming_provider.ByHash.get_files ctx deps in
+  let filenames = Naming_provider.get_files ctx deps in
   Relative_path.Set.fold filenames ~init:SSet.empty ~f:(fun file acc ->
       SSet.fold (get_classes_in_file file) ~init:acc ~f:(fun cid acc ->
           if DepSet.mem deps Dep.(make (Type cid)) then

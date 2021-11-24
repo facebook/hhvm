@@ -79,7 +79,7 @@ let go
              let paths =
                dep
                |> Typing_deps.DepSet.singleton
-               |> Naming_provider.ByHash.get_files ctx
+               |> Naming_provider.get_files ctx
              in
              { dep; paths }))
 

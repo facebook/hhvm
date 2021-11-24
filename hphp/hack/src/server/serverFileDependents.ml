@@ -36,7 +36,7 @@ let deps_of_paths ctx workers naming_table relative_paths =
       ~merge:DepSet.union
       ~next:(MultiWorker.next workers relative_paths)
   in
-  all_deps |> Naming_provider.ByHash.get_files ctx |> Relative_path.Set.elements
+  all_deps |> Naming_provider.get_files ctx |> Relative_path.Set.elements
 
 let go (genv : ServerEnv.genv) (env : ServerEnv.env) (filenames : string list) =
   let ctx = Provider_utils.ctx_from_server_env env in

@@ -412,7 +412,7 @@ let get_dependent_classes_files (ctx : Provider_context.t) (classes : SSet.t) :
     ~f:(fun c acc ->
       let source_class = Dep.make (Dep.Type c) in
       Typing_deps.get_extend_deps ~mode ~visited ~source_class ~acc)
-  |> Naming_provider.ByHash.get_files ctx
+  |> Naming_provider.get_files ctx
 
 let filter_dependent_classes
     (ctx : Provider_context.t)
@@ -626,7 +626,7 @@ let redo_type_decl
       let to_recheck = DepSet.union to_recheck needs_recheck in
       let mro_invalidated =
         mro_invalidated
-        |> Naming_provider.ByHash.get_files ctx
+        |> Naming_provider.get_files ctx
         |> Relative_path.Set.fold ~init:SSet.empty ~f:(fun path acc ->
                SSet.union acc (get_classes path))
       in

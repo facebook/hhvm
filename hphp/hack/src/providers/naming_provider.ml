@@ -806,22 +806,18 @@ let local_changes_push_sharedmem_stack () : unit =
 let local_changes_pop_sharedmem_stack () : unit =
   Naming_heap.pop_local_changes ()
 
-module ByHash = struct
-  let get_files ctx deps =
-    match Provider_context.get_backend ctx with
-    | Provider_backend.Shared_memory ->
-      Naming_heap.get_filenames_by_hash (db_path_of_ctx ctx) deps
-    | backend ->
-      let desc =
-        Printf.sprintf
-          "dephash_lookup_%s"
-          (Provider_backend.t_to_string backend)
-      in
-      Hh_logger.log "INVARIANT_VIOLATION_BUG [%s]" desc;
-      HackEventLogger.invariant_violation_bug
-        ~desc
-        ~path:Relative_path.default
-        ~pos:""
-        (Telemetry.create ());
-      failwith "need_update_files"
-end
+let get_files ctx deps =
+  match Provider_context.get_backend ctx with
+  | Provider_backend.Shared_memory ->
+    Naming_heap.get_filenames_by_hash (db_path_of_ctx ctx) deps
+  | backend ->
+    let desc =
+      Printf.sprintf "dephash_lookup_%s" (Provider_backend.t_to_string backend)
+    in
+    Hh_logger.log "INVARIANT_VIOLATION_BUG [%s]" desc;
+    HackEventLogger.invariant_violation_bug
+      ~desc
+      ~path:Relative_path.default
+      ~pos:""
+      (Telemetry.create ());
+    failwith "need_update_files"

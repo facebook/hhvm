@@ -1096,7 +1096,7 @@ let call_param
 
 let bad_call env p ty = Errors.bad_call p (Typing_print.error env ty)
 
-let rec make_a_local_of env e =
+let rec make_a_local_of ~include_this env e =
   match e with
   | (_, p, Class_get ((_, _, cname), CGstring (_, member_name), _)) ->
     let (env, local) = Env.FakeMembers.make_static env cname member_name p in
@@ -1113,7 +1113,8 @@ let rec make_a_local_of env e =
   | (_, _, Lvar x)
   | (_, _, Dollardollar x) ->
     (env, Some x)
-  | (_, _, Hole (e, _, _, _)) -> make_a_local_of env e
+  | (_, p, This) when include_this -> (env, Some (p, this))
+  | (_, _, Hole (e, _, _, _)) -> make_a_local_of ~include_this env e
   | _ -> (env, None)
 
 (* This function captures the common bits of logic behind refinement
@@ -1132,7 +1133,7 @@ let rec make_a_local_of env e =
 let refine_lvalue_type env ((ty, _, _) as te) ~refine =
   let (env, ty) = refine env ty in
   let e = Tast.to_nast_expr te in
-  let (env, localopt) = make_a_local_of env e in
+  let (env, localopt) = make_a_local_of ~include_this:false env e in
   (* TODO TAST: generate an assignment to the fake local in the TAST *)
   match localopt with
   | Some lid -> (set_local env lid ty, Local_id.Set.singleton (snd lid))
@@ -1329,34 +1330,6 @@ let safely_refine_class_type
     mk (get_reason obj_ty, Tclass (class_name, Nonexact, tyl_fresh))
   in
   (env, obj_ty_simplified)
-
-let rec is_instance_var = function
-  | (_, _, Hole (e, _, _, _)) -> is_instance_var e
-  | (_, _, (Lvar _ | This | Dollardollar _)) -> true
-  | (_, _, Obj_get ((_, _, This), (_, _, Id _), _, _)) -> true
-  | (_, _, Obj_get ((_, _, Lvar _), (_, _, Id _), _, _)) -> true
-  | (_, _, Class_get (_, _, _)) -> true
-  | _ -> false
-
-let rec get_instance_var env = function
-  | (_, p, Class_get ((_, _, cname), CGstring (_, member_name), _)) ->
-    let (env, local) = Env.FakeMembers.make_static env cname member_name p in
-    (env, (p, local))
-  | ( _,
-      p,
-      Obj_get
-        ( (((_, _, This) | (_, _, Lvar _)) as obj),
-          (_, _, Id (_, member_name)),
-          _,
-          _ ) ) ->
-    let (env, local) = Env.FakeMembers.make env obj member_name p in
-    (env, (p, local))
-  | (_, _, Dollardollar (p, x))
-  | (_, _, Lvar (p, x)) ->
-    (env, (p, x))
-  | (_, p, This) -> (env, (p, this))
-  | (_, _, Hole (e, _, _, _)) -> get_instance_var env e
-  | _ -> failwith "Should only be called when is_instance_var is true"
 
 (** Transform a hint like `A<_>` to a localized type like `A<T#1>` for refinement of
 an instance variable. ivar_ty is the previous type of that instance variable. Return
@@ -4102,26 +4075,27 @@ and expr_
           else
             env
         in
+        let (env, locl) = make_a_local_of ~include_this:true env e in
         let env =
-          if is_instance_var e then
-            let (env, ivar) = get_instance_var env e in
-            set_local env ivar hint_ty
-          else
-            env
+          match locl with
+          | Some ivar -> set_local env ivar hint_ty
+          | None -> env
         in
         (env, hint_ty)
       else if is_nullable then
         let (_, e_p, _) = e in
         let (env, hint_ty) = refine_type env e_p expr_ty hint_ty in
         (env, MakeType.nullable_locl (Reason.Rwitness p) hint_ty)
-      else if is_instance_var e then
-        let (env, ((ivar_pos, _) as ivar)) = get_instance_var env e in
-        let (env, hint_ty) = refine_type env ivar_pos expr_ty hint_ty in
-        let env = set_local env ivar hint_ty in
-        (env, hint_ty)
       else
-        let (_, e_p, _) = e in
-        refine_type env e_p expr_ty hint_ty
+        let (env, locl) = make_a_local_of ~include_this:true env e in
+        match locl with
+        | Some ((ivar_pos, _) as ivar) ->
+          let (env, hint_ty) = refine_type env ivar_pos expr_ty hint_ty in
+          let env = set_local env ivar hint_ty in
+          (env, hint_ty)
+        | None ->
+          let (_, e_p, _) = e in
+          refine_type env e_p expr_ty hint_ty
     in
     make_result env p (Aast.As (te, hint, is_nullable)) hint_ty
   | Upcast (e, hint) ->
@@ -8285,11 +8259,9 @@ and condition ?lhs_of_null_coalesce env tparamet ((ty, p, e) as te : Tast.expr)
   | Aast.Unop (Ast_defs.Unot, e) -> condition env (not tparamet) e
   | Aast.Is (ivar, h) ->
     let reason = Reason.Ris (fst h) in
-    let refine_type env hint_ty =
-      let (ivar_ty, ivar_pos, _) = ivar in
-      let (env, ivar) = get_instance_var env (Tast.to_nast_expr ivar) in
+    let refine_type env ivar ivar_ty hint_ty =
       let (env, refined_ty) =
-        refine_and_simplify_intersection env p reason ivar_pos ivar_ty hint_ty
+        refine_and_simplify_intersection env p reason (fst ivar) ivar_ty hint_ty
       in
       (set_local env ivar refined_ty, Local_id.Set.singleton (snd ivar))
     in
@@ -8299,7 +8271,11 @@ and condition ?lhs_of_null_coalesce env tparamet ((ty, p, e) as te : Tast.expr)
       | Aast.Hprim Tnull -> condition_nullity ~nonnull:(not tparamet) env ivar
       | _ -> (env, Local_id.Set.empty)
     in
-    if is_instance_var (Tast.to_nast_expr ivar) then
+    let (env, locl) =
+      make_a_local_of ~include_this:true env (Tast.to_nast_expr ivar)
+    in
+    (match locl with
+    | Some locl_ivar ->
       let (env, hint_ty) =
         Phase.localize_hint_no_subst env ~ignore_errors:false h
       in
@@ -8309,9 +8285,8 @@ and condition ?lhs_of_null_coalesce env tparamet ((ty, p, e) as te : Tast.expr)
         else
           (env, hint_ty)
       in
-      refine_type env hint_ty
-    else
-      (env, lset)
+      refine_type env locl_ivar (fst3 ivar) hint_ty
+    | None -> (env, lset))
   | _ -> (env, Local_id.Set.empty)
 
 and string2 env idl =

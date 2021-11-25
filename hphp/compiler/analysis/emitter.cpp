@@ -182,6 +182,7 @@ RepoGlobalData getGlobalData() {
   gd.EnableReadonlyPropertyEnforcement = RuntimeOption::EvalEnableReadonlyPropertyEnforcement;
   gd.DiamondTraitMethods = RuntimeOption::EvalDiamondTraitMethods;
   gd.EvalCoeffectEnforcementLevels = RO::EvalCoeffectEnforcementLevels;
+  gd.EnableImplicitContext = RO::EvalEnableImplicitContext;
 
   for (auto const& elm : RuntimeOption::ConstantFunctions) {
     auto const s = internal_serialize(tvAsCVarRef(elm.second));

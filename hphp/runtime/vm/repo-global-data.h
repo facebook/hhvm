@@ -167,6 +167,8 @@ struct RepoGlobalData {
    */
   bool DiamondTraitMethods = false;
 
+  bool EnableImplicitContext = false;
+
   // Load the appropriate options into their matching
   // RuntimeOptions. If `loadConstantFuncs' is true, also deserialize
   // ConstantFunctions and store it in RuntimeOptions (this can only
@@ -212,6 +214,7 @@ struct RepoGlobalData {
       (EnableReadonlyPropertyEnforcement)
       (DiamondTraitMethods)
       (EvalCoeffectEnforcementLevels)
+      (EnableImplicitContext)
       ;
   }
 };

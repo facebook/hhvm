@@ -1368,7 +1368,6 @@ std::string mangleUnitSha1(const std::string& fileSha1,
     + (RuntimeOption::EvalFoldLazyClassKeys ? '1' : '0')
     + (RuntimeOption::EvalEnableAbstractContextConstants ? '1': '0')
     + (RuntimeOption::EvalTraitConstantInterfaceBehavior ? '1' : '0')
-    + (RuntimeOption::EvalEnableImplicitContext ? '1' : '0')
     + RuntimeOption::EvalUnitCacheBreaker + '\0'
     + (RuntimeOption::EvalDiamondTraitMethods ? '1' : '0')
     + CoeffectsConfig::mangle()

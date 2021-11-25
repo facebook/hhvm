@@ -1385,12 +1385,18 @@ let refine_and_simplify_intersection env p reason ivar_pos ivar_ty hint_ty =
     in
     Inter.intersect env ~r:reason ivar_ty hint_ty
 
+type legacy_arrays =
+  | PHPArray
+  | AnyArray
+  | HackDictOrDArray
+  | HackVecOrVArray
+
 (* Refine type for is_array, is_vec, is_keyset and is_dict tests
  * `pred_name` is the function name itself (e.g. 'is_vec')
  * `p` is position of the function name in the source
  * `arg_expr` is the argument to the function
  *)
-and safely_refine_is_array env ty p pred_name arg_expr =
+let safely_refine_is_array env ty p pred_name arg_expr =
   refine_lvalue_type env arg_expr ~refine:(fun env arg_ty ->
       let r = Reason.Rpredicated (p, pred_name) in
       let (env, tarrkey_name) =
@@ -1434,16 +1440,13 @@ and safely_refine_is_array env ty p pred_name arg_expr =
       (* This is the refined type of e inside the branch *)
       let hint_ty =
         match ty with
-        | `HackDict -> MakeType.dict r tarrkey tfresh
-        | `HackVec -> MakeType.vec r tfresh
-        | `HackKeyset -> MakeType.keyset r tarrkey
-        | `PHPArray -> array_ty
-        | `AnyArray -> MakeType.any_array r tarrkey tfresh
-        | `HackDictOrDArray ->
+        | PHPArray -> array_ty
+        | AnyArray -> MakeType.any_array r tarrkey tfresh
+        | HackDictOrDArray ->
           MakeType.union
             r
             [MakeType.dict r tarrkey tfresh; MakeType.darray r tarrkey tfresh]
-        | `HackVecOrVArray ->
+        | HackVecOrVArray ->
           MakeType.union r [MakeType.vec r tfresh; MakeType.varray r tfresh]
       in
       let (_, arg_pos, _) = arg_expr in
@@ -8234,16 +8237,16 @@ and condition ?lhs_of_null_coalesce env tparamet ((ty, p, e) as te : Tast.expr)
     (env, Local_id.Set.union lset1 lset2)
   | Aast.Call ((_, p, Aast.Id (_, f)), _, [(_, lv)], None)
     when tparamet && String.equal f SN.StdlibFunctions.is_dict_or_darray ->
-    safely_refine_is_array env `HackDictOrDArray p f lv
+    safely_refine_is_array env HackDictOrDArray p f lv
   | Aast.Call ((_, p, Aast.Id (_, f)), _, [(_, lv)], None)
     when tparamet && String.equal f SN.StdlibFunctions.is_vec_or_varray ->
-    safely_refine_is_array env `HackVecOrVArray p f lv
+    safely_refine_is_array env HackVecOrVArray p f lv
   | Aast.Call ((_, p, Aast.Id (_, f)), _, [(_, lv)], None)
     when tparamet && String.equal f SN.StdlibFunctions.is_any_array ->
-    safely_refine_is_array env `AnyArray p f lv
+    safely_refine_is_array env AnyArray p f lv
   | Aast.Call ((_, p, Aast.Id (_, f)), _, [(_, lv)], None)
     when tparamet && String.equal f SN.StdlibFunctions.is_php_array ->
-    safely_refine_is_array env `PHPArray p f lv
+    safely_refine_is_array env PHPArray p f lv
   | Aast.Call
       ( ( _,
           _,

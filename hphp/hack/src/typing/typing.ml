@@ -4115,9 +4115,8 @@ and expr_
         let (env, hint_ty) = refine_type env e_p expr_ty hint_ty in
         (env, MakeType.nullable_locl (Reason.Rwitness p) hint_ty)
       else if is_instance_var e then
-        let (env, _, ivar_ty) = raw_expr env e in
         let (env, ((ivar_pos, _) as ivar)) = get_instance_var env e in
-        let (env, hint_ty) = refine_type env ivar_pos ivar_ty hint_ty in
+        let (env, hint_ty) = refine_type env ivar_pos expr_ty hint_ty in
         let env = set_local env ivar hint_ty in
         (env, hint_ty)
       else

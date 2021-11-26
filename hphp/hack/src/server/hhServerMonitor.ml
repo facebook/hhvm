@@ -87,7 +87,18 @@ let monitor_daemon_main
   (try ignore (Sys_utils.setsid ()) with
   | Unix.Unix_error _ -> ());
   ignore (make_tmp_dir ());
-  ignore (Hhi.get_hhi_root ());
+
+  (match ServerArgs.custom_hhi_path options with
+  | None -> ignore (Hhi.get_hhi_root ())
+  | Some path ->
+    if Disk.file_exists path && Disk.is_directory path then (
+      Hh_logger.log "Custom hhi directory set to %s." path;
+      Hhi.set_custom_hhi_root (Path.make path)
+    ) else (
+      Hh_logger.log "Custom hhi directory %s not found." path;
+      Exit.exit Exit_status.Input_error
+    ));
+
   Typing_global_inference.set_path ();
 
   if ServerArgs.check_mode options then (

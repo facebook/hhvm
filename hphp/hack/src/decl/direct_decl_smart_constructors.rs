@@ -5448,6 +5448,22 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         )
     }
 
+    fn make_attribute_specification(&mut self, attributes: Self::R) -> Self::R {
+        if self.retain_or_omit_user_attributes_for_facts {
+            attributes
+        } else {
+            Node::Ignored(SK::AttributeSpecification)
+        }
+    }
+
+    fn make_attribute(&mut self, _at: Self::R, attribute: Self::R) -> Self::R {
+        if self.retain_or_omit_user_attributes_for_facts {
+            attribute
+        } else {
+            Node::Ignored(SK::Attribute)
+        }
+    }
+
     // A type specifier preceded by an attribute list. At the time of writing,
     // only the <<__Soft>> attribute is permitted here.
     fn make_attributized_specifier(&mut self, attributes: Self::R, hint: Self::R) -> Self::R {

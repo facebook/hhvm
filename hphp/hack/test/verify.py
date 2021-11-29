@@ -871,6 +871,22 @@ if __name__ == "__main__":
     if not os.path.isfile(args.program):
         raise Exception("Could not find program at %s" % args.program)
 
+    # 'args.test_path' is a path relative to the current working
+    # directory. buck1 runs this test from fbsource/fbocde, buck2 runs
+    # it from fbsource.
+    if os.path.basename(os.getcwd()) != "fbsource":
+
+        # If running under buck1 then we are in fbcode, if running
+        # under dune then some ancestor directory of fbcode. These two
+        # cases are handled by the logic of this script and
+        # 'review.sh' and there are no adjustments to make.
+        pass
+    else:
+
+        # The buck2 case has us running in fbsource. This puts us in
+        # fbcode.
+        os.chdir("fbcode")
+
     files: List[str] = list_test_files(
         args.test_path, args.disabled_extension, args.in_extension
     )

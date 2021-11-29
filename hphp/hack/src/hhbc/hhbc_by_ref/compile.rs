@@ -9,7 +9,7 @@ use aast_parser::{
     rust_aast_parser_types::{Env as AastEnv, Result as AastResult},
     AastParser, Error as AastError,
 };
-use anyhow::{anyhow, *};
+use anyhow::anyhow;
 use bitflags::bitflags;
 use bytecode_printer::{print_program, Context, Write};
 use decl_provider::DeclProvider;

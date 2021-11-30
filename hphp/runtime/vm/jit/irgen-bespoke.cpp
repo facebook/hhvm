@@ -1811,14 +1811,14 @@ void lowerStructBespokeGet(IRUnit& unit, IRInstruction* inst) {
   present->append(load);
   present->append(jmp);
 
-  if (elemType.first.maybe(TUninit)) {
+  auto const val = inst->dst();
+  if (val->type().maybe(TUninit)) {
     notPresent->append(unit.gen(Jmp, inst->bcctx(), join, unit.cns(TUninit)));
   } else {
     notPresent->append(unit.gen(Unreachable, inst->bcctx(), ASSERT_REASON));
   }
 
   auto const defLabel = unit.defLabel(1, join, inst->bcctx());
-  auto const val = inst->dst();
   val->setInstruction(defLabel);
   defLabel->setDst(val, 0);
   val->setType(elemType.first);

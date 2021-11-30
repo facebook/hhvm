@@ -404,7 +404,9 @@ struct Layout {
 
   /*
    * Returns true if the given slot of a struct dict will always have
-   * a value present.
+   * a value present. Note: this does not check if the slot is
+   * actually present. (IE: if you pass just TInt as the slot, and all
+   * slots in the layout as required, it will return true).
    */
   virtual bool slotAlwaysPresent(const Type& slot) const;
 

@@ -40,8 +40,15 @@ using PropertyCounts = tbb::concurrent_hash_map<
   uint32_t,
   StringDataPairHashICompare
 >;
-
 PropertyCounts s_counts;
+
+// It's not safe to iterate across a concurrent_hash_map, so store the
+// keys separately (protected by a lock). When we need to serialize
+// the map, we can safely iterate across the key list and do normal
+// gets on the map. The lock shouldn't be an issue because we only
+// insert into it the first time a key is seen.
+std::mutex s_count_keys_lock;
+std::vector<ClassMethodPair> s_count_keys;
 
 }
 
@@ -53,6 +60,9 @@ void incCount(const StringData* cls, const StringData* prop) {
   PropertyCounts::accessor acc;
   if (!s_counts.insert(acc, PropertyCounts::value_type(fullName, 1))) {
     acc->second++;
+  } else {
+    std::lock_guard<std::mutex> _{s_count_keys_lock};
+    s_count_keys.emplace_back(fullName);
   }
 }
 
@@ -65,14 +75,29 @@ uint32_t getCount(const StringData* cls, const StringData* prop) {
 }
 
 void serialize(jit::ProfDataSerializer& ser) {
-  write_raw(ser, s_counts.size());
-  FTRACE(1, "PropertyProfile::serialize ({} entries):\n", s_counts.size());
-  for (auto const& elm : s_counts) {
+  // Grab our own copy of the keys so we can iterate at will
+  auto const keys = [&] {
+    std::lock_guard<std::mutex> _{s_count_keys_lock};
+    return s_count_keys;
+  }();
+
+  // Keys should be unique. Verify it.
+  hphp_fast_set<ClassMethodPair> seen;
+
+  write_raw(ser, keys.size());
+  FTRACE(1, "PropertyProfile::serialize ({} entries):\n", keys.size());
+  for (auto const& key : keys) {
+    always_assert_flog(
+      seen.emplace(key).second,
+      "Attempting to serialize duplicate PropertyProfile entry: {}::{}",
+      key.first->data(), key.second->data()
+    );
+    auto const count = getCount(key.first, key.second);
     FTRACE(1, "  {}::{} = {}\n",
-           elm.first.first->data(), elm.first.second->data(), elm.second);
-    write_string(ser, elm.first.first);
-    write_string(ser, elm.first.second);
-    write_raw(ser, elm.second);
+           key.first->data(), key.second->data(), count);
+    write_string(ser, key.first);
+    write_string(ser, key.second);
+    write_raw(ser, count);
   }
 }
 
@@ -90,7 +115,9 @@ void deserialize(jit::ProfDataDeserializer& ser) {
     PropertyCounts::accessor acc;
     if (!s_counts.insert(acc, PropertyCounts::value_type(fullName, count))) {
       always_assert_flog(
-        0, "found duplicate entry while deserializing PropertyProfile"
+        false,
+        "found duplicate entry {}::{} while deserializing PropertyProfile",
+        fullName.first->data(), fullName.second->data()
       );
     }
   }

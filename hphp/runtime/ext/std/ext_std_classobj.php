@@ -35,7 +35,7 @@ function get_class_constants(string $class_name)[]: darray<string, mixed>;
  *   specified by class_name. In case of an error, it returns NULL.
  */
 <<__Native>>
-function get_class_methods(mixed $class_name)[]: ?varray;
+function get_class_methods(readonly mixed $class_name)[]: ?varray;
 
 /**
  * Get the default properties of the class
@@ -120,7 +120,7 @@ function get_object_vars(object $object)[]: darray<string, mixed>;
  *   returns FALSE.
  */
 <<__Native>>
-function get_parent_class(mixed $object = null)[]: mixed;
+function get_parent_class(readonly mixed $object = null)[]: mixed;
 
 /**
  * Checks if the interface has been defined
@@ -149,7 +149,7 @@ function interface_exists(string $interface_name,
  *   class as one of its parents, FALSE otherwise.
  */
 <<__Native>>
-function is_a(mixed $object,
+function is_a(readonly mixed $object,
               string $class_name,
               bool $allow_string = false)[]: bool;
 
@@ -166,7 +166,7 @@ function is_a(mixed $object,
  *   belongs to a class which is a subclass of class_name, FALSE otherwise.
  */
 <<__Native>>
-function is_subclass_of(mixed $object,
+function is_subclass_of(readonly mixed $object,
                         string $class_name,
                         bool $allow_string = true)[]: bool;
 
@@ -180,7 +180,7 @@ function is_subclass_of(mixed $object,
  *   been defined for the given object, FALSE otherwise.
  */
 <<__Native>>
-function method_exists(mixed $object,
+function method_exists(readonly mixed $object,
                        string $method_name)[]: bool;
 
 /**
@@ -194,7 +194,7 @@ function method_exists(mixed $object,
  *   doesn't exist or NULL in case of an error.
  */
 <<__Native>>
-function property_exists(mixed $class,
+function property_exists(readonly mixed $class,
                          string $property)[]: ?bool;
 
 /**
@@ -232,7 +232,7 @@ namespace HH {
  * @return class name
  */
 <<__Native>>
-function class_meth_get_class(mixed $class_meth)[]: string;
+function class_meth_get_class(readonly mixed $class_meth)[]: string;
 
 /**
  * Get class name from class
@@ -240,7 +240,7 @@ function class_meth_get_class(mixed $class_meth)[]: string;
  * @return class name
  */
 <<__Native>>
-function class_get_class_name(mixed $class)[]: string;
+function class_get_class_name(readonly mixed $class)[]: string;
 
 /**
  * Get method name from class_meth
@@ -248,7 +248,7 @@ function class_get_class_name(mixed $class)[]: string;
  * @return method name
  */
 <<__Native>>
-function class_meth_get_method(mixed $class_meth)[]: string;
+function class_meth_get_method(readonly mixed $class_meth)[]: string;
 
 /**
  * Get class name from meth_caller
@@ -256,7 +256,7 @@ function class_meth_get_method(mixed $class_meth)[]: string;
  * @return class name
  */
 <<__Native, __IsFoldable>>
-function meth_caller_get_class(mixed $meth_caller)[]: string;
+function meth_caller_get_class(readonly mixed $meth_caller)[]: string;
 
 /**
  * Get method name from meth_caller
@@ -264,5 +264,5 @@ function meth_caller_get_class(mixed $meth_caller)[]: string;
  * @return method name
  */
 <<__Native, __IsFoldable>>
-function meth_caller_get_method(mixed $meth_caller)[]: string;
+function meth_caller_get_method(readonly mixed $meth_caller)[]: string;
 }

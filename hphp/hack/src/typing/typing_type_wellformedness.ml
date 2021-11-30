@@ -139,12 +139,7 @@ let check_happly ?(via_label = false) unchecked_tparams env h =
       | None -> env)
     | _ -> env)
 
-let rec hint ?(via_label = false) ?(in_signature = true) env (p, h) =
-  (* Do not use this one recursively to avoid quadratic runtime! *)
-  Typing_kinding.Simple.check_well_kinded_hint ~in_signature env.tenv (p, h);
-  hint_ ~via_label ~in_signature env p h
-
-and context_hint ?(via_label = false) ?(in_signature = true) env (p, h) =
+let rec context_hint ?(via_label = false) ?(in_signature = true) env (p, h) =
   Typing_kinding.Simple.check_well_kinded_context_hint
     ~in_signature
     env.tenv
@@ -239,6 +234,11 @@ and hint_ ~via_label ~in_signature env p h_ =
     ()
 
 and contexts env (_, hl) = List.iter ~f:(context_hint env) hl
+
+let hint ?(via_label = false) ?(in_signature = true) env (p, h) =
+  (* Do not use this one recursively to avoid quadratic runtime! *)
+  Typing_kinding.Simple.check_well_kinded_hint ~in_signature env.tenv (p, h);
+  hint_ ~via_label ~in_signature env p h
 
 let type_hint ?via_label env th =
   maybe (hint ?via_label) env (hint_of_type_hint th)

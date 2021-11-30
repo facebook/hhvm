@@ -27,7 +27,7 @@ function trait_exists(string $trait_name, bool $autoload = true)[]: bool;
 function get_class_methods($class_or_object)[]: ?varray_or_darray<string>;
 <<__PHPStdLib>>
 function get_class_vars(string $class_name);
-function get_class($object)[];
+function get_class(readonly $object)[];
 function get_parent_class($object = null)[];
 <<__PHPStdLib>>
 function is_a($class_or_object, string $class_name, bool $allow_string = false)[]: bool;

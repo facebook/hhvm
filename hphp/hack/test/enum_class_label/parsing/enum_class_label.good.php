@@ -1,5 +1,4 @@
 <?hh
-<<file:__EnableUnstableFeatures('enum_class_label')>>
 
 function foo(): void {
   bar1#A(arg1, arg2);

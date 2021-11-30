@@ -1,5 +1,4 @@
 <?hh
-<<file:__EnableUnstableFeatures('enum_class_label')>>
 
 // Make sure that enum class constants are allowed to be used as labels.
 // Right now they are both 'self.require_name_allow_all_keywords'

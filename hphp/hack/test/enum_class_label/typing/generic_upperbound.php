@@ -1,8 +1,5 @@
 <?hh
 
-<<file:__EnableUnstableFeatures("enum_class_label")>>
-
-
 enum class E : mixed {}
 
 abstract class I {

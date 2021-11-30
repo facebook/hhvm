@@ -1,5 +1,4 @@
 <?hh
-<<file:__EnableUnstableFeatures('enum_class_label')>>
 
 #top_level_label;
 

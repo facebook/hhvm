@@ -1,5 +1,5 @@
 <?hh
-<<file:__EnableUnstableFeatures('enum_class_label', 'abstract_enum_class')>>
+<<file:__EnableUnstableFeatures('abstract_enum_class')>>
 
 abstract enum class E : mixed {
   abstract int X;

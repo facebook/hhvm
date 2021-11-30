@@ -1,5 +1,4 @@
 <?hh
-<<file:__EnableUnstableFeatures('enum_class_label')>>
 
 enum class Something: mixed {
   mixed a = 5;

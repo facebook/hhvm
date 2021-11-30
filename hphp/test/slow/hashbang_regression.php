@@ -1,6 +1,6 @@
 #! this is ok, hashbang is supported
 <?hh
-# not-a-hashbang
+# not_a_hashbang
 
 <<__EntryPoint>>
 function main_hashbang_regression() : void {

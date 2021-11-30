@@ -1,1 +1,1 @@
-Fatal error: Cannot use unstable feature: `enum_class_label` in %s/test/slow/hashbang_regression.php on line 3
+Fatal error: Encountered unexpected token `main_hashbang_regression`. in %s/test/slow/hashbang_regression.php on line 6

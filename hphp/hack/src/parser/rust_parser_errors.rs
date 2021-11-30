@@ -5486,14 +5486,6 @@ where
                 }
                 _ => {}
             },
-            FunctionCallExpression(x) => {
-                if !x.enum_class_label.is_missing() {
-                    self.check_can_use_feature(node, &UnstableFeatures::EnumClassLabel)
-                }
-            }
-            EnumClassLabelExpression(_) => {
-                self.check_can_use_feature(node, &UnstableFeatures::EnumClassLabel)
-            }
             UpcastExpression(_) => {
                 self.check_can_use_feature(node, &UnstableFeatures::UpcastExpression)
             }

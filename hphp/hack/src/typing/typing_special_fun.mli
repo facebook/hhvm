@@ -9,4 +9,8 @@
 
 (** Transform the types of special functions whose type is not denotable in hack, e.g. idx *)
 val transform_special_fun_ty :
-  Typing_defs.decl_fun_type -> Aast.sid -> int -> Typing_defs.decl_fun_type
+  pessimise:bool ->
+  Typing_defs.decl_fun_type ->
+  Aast.sid ->
+  int ->
+  Typing_defs.decl_fun_type

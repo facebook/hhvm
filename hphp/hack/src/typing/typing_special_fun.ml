@@ -15,6 +15,12 @@ module MakeType = Typing_make_type
 let update_param : decl_fun_param -> decl_ty -> decl_fun_param =
  (fun param ty -> { param with fp_type = { param.fp_type with et_type = ty } })
 
+let wrap_with_like_type (pessimise : bool) (ty : decl_ty) =
+  if pessimise then
+    MakeType.like (Reason.Renforceable (get_pos ty)) ty
+  else
+    ty
+
 (** Transform the special function `idx` according to the number
     of arguments actually passed to the function
 
@@ -30,8 +36,9 @@ let update_param : decl_fun_param -> decl_ty -> decl_fun_param =
       (?KeyedContainer<Tk, Tv> $collection, ?Tk $index, $default = null)
 
     so this needs to be munged into the above. *)
-let transform_idx_fun_ty : decl_fun_type -> int -> decl_fun_type =
- fun fty nargs ->
+let transform_idx_fun_ty :
+    pessimise:bool -> decl_fun_type -> int -> decl_fun_type =
+ fun ~pessimise fty nargs ->
   let (param1, param2, param3) =
     match fty.ft_params with
     | [param1; param2; param3] -> (param1, param2, param3)
@@ -43,6 +50,7 @@ let transform_idx_fun_ty : decl_fun_type -> int -> decl_fun_type =
     | 2 ->
       (* Return type should be ?Tv *)
       let ret = MakeType.nullable_decl rret (MakeType.generic rret "Tv") in
+      let ret = wrap_with_like_type pessimise ret in
       ([param1; param2], ret)
     | 3 ->
       (* Third parameter should have type Tv *)
@@ -52,6 +60,7 @@ let transform_idx_fun_ty : decl_fun_type -> int -> decl_fun_type =
       in
       (* Return type should be Tv *)
       let ret = MakeType.generic rret "Tv" in
+      let ret = wrap_with_like_type pessimise ret in
       ([param1; param2; param3], ret)
     (* Shouldn't happen! *)
     | _ -> (fty.ft_params, fty.ft_ret.et_type)
@@ -59,11 +68,11 @@ let transform_idx_fun_ty : decl_fun_type -> int -> decl_fun_type =
   { fty with ft_params = params; ft_ret = { fty.ft_ret with et_type = ret } }
 
 (** Transform the types of special functions whose type is not denotable in hack, e.g. idx *)
-let transform_special_fun_ty : decl_fun_type -> Aast.sid -> int -> decl_fun_type
-    =
- fun fty id nargs ->
+let transform_special_fun_ty :
+    pessimise:bool -> decl_fun_type -> Aast.sid -> int -> decl_fun_type =
+ fun ~pessimise fty id nargs ->
   if String.equal (snd id) SN.FB.idx || String.equal (snd id) SN.Readonly.idx
   then
-    transform_idx_fun_ty fty nargs
+    transform_idx_fun_ty ~pessimise fty nargs
   else
     fty

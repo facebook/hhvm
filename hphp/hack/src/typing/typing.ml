@@ -870,7 +870,14 @@ let fun_type_of_id env x tal el =
     (match get_node fe_type with
     | Tfun ft ->
       let ft =
-        Typing_special_fun.transform_special_fun_ty ft x (List.length el)
+        let pessimise =
+          TypecheckerOptions.pessimise_builtins (Env.get_tcopt env)
+        in
+        Typing_special_fun.transform_special_fun_ty
+          ~pessimise
+          ft
+          x
+          (List.length el)
       in
       let ety_env = empty_expand_env in
       let (env, tal) =

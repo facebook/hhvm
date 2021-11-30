@@ -1956,7 +1956,6 @@ fn emit_call<'a, 'arena, 'decl>(
         _ => false,
     };
     let fcall_args = get_fcall_args(
-        e,
         alloc,
         args,
         uarg,
@@ -2763,7 +2762,6 @@ fn emit_args_inout_setters<'a, 'arena, 'decl>(
 /// predicates (is this an `inout` argument, is this `readonly`) we build up an `FcallArgs` for the
 /// given function call.
 fn get_fcall_args_common<'arena, 'decl, T>(
-    e: &mut Emitter<'arena, 'decl>,
     alloc: &'arena bumpalo::Bump,
     args: &[T],
     uarg: Option<&ast::Expr>,
@@ -2780,15 +2778,8 @@ fn get_fcall_args_common<'arena, 'decl, T>(
     flags.set(FcallFlags::LOCK_WHILE_UNWINDING, lock_while_unwinding);
     flags.set(FcallFlags::ENFORCE_MUTABLE_RETURN, !readonly_return);
     flags.set(FcallFlags::ENFORCE_READONLY_THIS, readonly_this);
-    let is_readonly_arg = |expr| {
-        e.options()
-            .hhvm
-            .flags
-            .contains(HhvmFlags::ENABLE_READONLY_IN_EMITTER)
-            && readonly_predicate(expr)
-    };
-    let readonly_args = if args.iter().any(is_readonly_arg) {
-        Slice::fill_iter(alloc, args.iter().map(is_readonly_arg))
+    let readonly_args = if args.iter().any(readonly_predicate) {
+        Slice::fill_iter(alloc, args.iter().map(readonly_predicate))
     } else {
         Slice::empty()
     };
@@ -2805,7 +2796,6 @@ fn get_fcall_args_common<'arena, 'decl, T>(
 }
 
 fn get_fcall_args_no_inout<'arena, 'decl>(
-    e: &mut Emitter<'arena, 'decl>,
     alloc: &'arena bumpalo::Bump,
     args: &[ast::Expr],
     uarg: Option<&ast::Expr>,
@@ -2816,7 +2806,6 @@ fn get_fcall_args_no_inout<'arena, 'decl>(
     readonly_this: bool,
 ) -> FcallArgs<'arena> {
     get_fcall_args_common(
-        e,
         alloc,
         args,
         uarg,
@@ -2831,7 +2820,6 @@ fn get_fcall_args_no_inout<'arena, 'decl>(
 }
 
 fn get_fcall_args<'arena, 'decl>(
-    e: &mut Emitter<'arena, 'decl>,
     alloc: &'arena bumpalo::Bump,
     args: &[(ParamKind, ast::Expr)],
     uarg: Option<&ast::Expr>,
@@ -2842,7 +2830,6 @@ fn get_fcall_args<'arena, 'decl>(
     readonly_this: bool,
 ) -> FcallArgs<'arena> {
     get_fcall_args_common(
-        e,
         alloc,
         args,
         uarg,
@@ -3989,7 +3976,6 @@ fn emit_new<'a, 'arena, 'decl>(
                         instr::fcallctor(
                             alloc,
                             get_fcall_args_no_inout(
-                                e,
                                 alloc,
                                 args,
                                 uarg.as_ref(),

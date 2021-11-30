@@ -308,7 +308,6 @@ std::uint32_t RepoOptions::getCompilerFlags() const {
   #define HHBC_FLAGS()                                          \
     SETFLAGS(LTRAssign, 0)                                      \
     SETFLAGS(UVS, 1)                                            \
-    SETFLAGS(RuntimeOption::EvalEnableReadonlyInEmitter, 2)     \
     SETFLAGS(RuntimeOption::RepoAuthoritative, 4)               \
     SETFLAGS(RuntimeOption::EvalJitEnableRenameFunction, 5)     \
     SETFLAGS(RuntimeOption::EvalLogExternCompilerPerf, 6)       \

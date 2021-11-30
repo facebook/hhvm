@@ -1409,7 +1409,6 @@ struct RuntimeOption {
   F(uint32_t, ThrowOnIterationOverObjects, 0)                           \
   F(string, TaintConfigurationPath, std::string(""))                    \
   F(string, TaintOutputDirectory, std::string(""))                           \
-  F(bool, EnableReadonlyInEmitter, true)                                \
   F(bool, DiamondTraitMethods, false)                                   \
   /* */
 

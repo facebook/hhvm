@@ -1,3 +1,1 @@
--v Hack.Lang.AllowUnstableFeatures=1
 -v Eval.EnableReadonlyPropertyEnforcement=2
--v Eval.EnableReadonlyInEmitter=1

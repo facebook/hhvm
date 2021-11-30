@@ -53,7 +53,6 @@ type t = {
   option_allow_unstable_features: bool;
   option_disallow_fun_and_cls_meth_pseudo_funcs: bool;
   option_disallow_inst_meth: bool;
-  option_enable_readonly_in_emitter: bool;
   option_escape_brace: bool;
 }
 [@@deriving eq, ord]
@@ -104,7 +103,6 @@ let default =
     option_allow_unstable_features = false;
     option_disallow_fun_and_cls_meth_pseudo_funcs = false;
     option_disallow_inst_meth = false;
-    option_enable_readonly_in_emitter = false;
     option_escape_brace = false;
   }
 
@@ -195,8 +193,6 @@ let disallow_fun_and_cls_meth_pseudo_funcs o =
 
 let disallow_inst_meth o = o.option_disallow_inst_meth
 
-let enable_readonly_in_emitter o = o.option_enable_readonly_in_emitter
-
 let escape_brace o = o.option_escape_brace
 
 let canonical_aliased_namespaces an =
@@ -275,8 +271,6 @@ let to_string o =
       Printf.sprintf "disallow_fun_and_cls_meth_pseudo_funcs: %B"
       @@ disallow_fun_and_cls_meth_pseudo_funcs o;
       Printf.sprintf "disallow_inst_meth: %B" @@ disallow_inst_meth o;
-      Printf.sprintf "enable_readonly_in_emitter: %B"
-      @@ enable_readonly_in_emitter o;
       Printf.sprintf "escape_brace: %B" @@ escape_brace o;
     ]
 
@@ -374,8 +368,6 @@ let set_option options name value =
     }
   | "hhvm.hack.lang.disallow_inst_meth" ->
     { options with option_disallow_inst_meth = as_bool value }
-  | "hhvm.hack.lang.enable_readonly_in_emitter" ->
-    { options with option_enable_readonly_in_emitter = as_bool value }
   | "hhvm.hack.lang.escape_brace" ->
     { options with option_escape_brace = as_bool value }
   | _ -> options
@@ -565,8 +557,6 @@ let value_setters =
       { opts with option_disallow_fun_and_cls_meth_pseudo_funcs = v = 1 } );
     ( set_value "hhvm.hack.lang.disallow_inst_meth" get_value_from_config_int
     @@ fun opts v -> { opts with option_disallow_inst_meth = v = 1 } );
-    ( set_value "hhvm.enable_readonly_in_emitter" get_value_from_config_int
-    @@ fun opts v -> { opts with option_enable_readonly_in_emitter = v = 1 } );
     ( set_value "hhvm.hack.lang.escape_brace" get_value_from_config_int
     @@ fun opts v -> { opts with option_escape_brace = v = 1 } );
   ]

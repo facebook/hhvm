@@ -271,8 +271,6 @@ type t = {
   po_disallow_fun_and_cls_meth_pseudo_funcs: bool;
   (* Disable parsing of inst_meth() *)
   po_disallow_inst_meth: bool;
-  (* Enable readonly enforcement while parsing *)
-  po_enable_readonly_in_emitter: bool;
   (* Escape brace in \{$x} *)
   po_escape_brace: bool;
   (* Enable use of the direct decl parser for parsing type signatures. *)
@@ -433,7 +431,6 @@ val make :
   ?tco_enable_sound_dynamic:bool ->
   ?po_disallow_fun_and_cls_meth_pseudo_funcs:bool ->
   ?po_disallow_inst_meth:bool ->
-  ?po_enable_readonly_in_emitter:bool ->
   ?po_escape_brace:bool ->
   ?tco_use_direct_decl_parser:bool ->
   ?tco_ifc_enabled:string list ->
@@ -699,8 +696,6 @@ val tco_enable_sound_dynamic : t -> bool
 val po_disallow_fun_and_cls_meth_pseudo_funcs : t -> bool
 
 val po_disallow_inst_meth : t -> bool
-
-val po_enable_readonly_in_emitter : t -> bool
 
 val po_escape_brace : t -> bool
 

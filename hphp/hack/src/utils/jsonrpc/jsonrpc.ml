@@ -205,6 +205,17 @@ let has_message (queue : queue) : bool =
   in
   is_readable || not (Queue.is_empty queue.messages)
 
+let find_already_queued_message ~(f : timestamped_json -> bool) (queue : queue)
+    : timestamped_json option =
+  Queue.fold
+    (fun found message ->
+      match (found, message) with
+      | (Some found, _) -> Some found
+      | (None, Timestamped_json message) when f message -> Some message
+      | _ -> None)
+    None
+    queue.messages
+
 let get_message (queue : queue) =
   (* Read one in a blocking manner to ensure that we have one. *)
   let%lwt () =

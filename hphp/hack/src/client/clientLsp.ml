@@ -3791,19 +3791,58 @@ let cancel_if_stale
     (client : Jsonrpc.queue) (timestamp : float) (timeout : float) : unit Lwt.t
     =
   let time_elapsed = Unix.gettimeofday () -. timestamp in
-  if Float.(time_elapsed >= timeout) then
-    if Jsonrpc.has_message client then
+  if Float.(time_elapsed >= timeout) && Jsonrpc.has_message client then
+    raise
+      (Error.LspException
+         {
+           Error.code = Error.RequestCancelled;
+           message = "request timed out";
+           data = None;
+         })
+  else
+    Lwt.return_unit
+
+(** This is called before we even start processing a message. Its purpose:
+if the Jsonrpc queue has already previously read off stdin a cancellation
+request for the message we're about to handle, then throw an exception.
+There are races, e.g. we might start handling this request because we haven't
+yet gotten around to reading a cancellation message off stdin. But
+that's inevitable. Think of this only as best-effort. *)
+let cancel_if_has_pending_cancel_request
+    (client : Jsonrpc.queue) (message : lsp_message) : unit =
+  match message with
+  | ResponseMessage _ -> ()
+  | NotificationMessage _ -> ()
+  | RequestMessage (id, _request) ->
+    (* Scan the queue for any pending (future) cancellation messages that are requesting
+       cancellation of the same id as our current request *)
+    let pending_cancel_request_opt =
+      Jsonrpc.find_already_queued_message client ~f:(fun { Jsonrpc.json; _ } ->
+          try
+            let peek =
+              Lsp_fmt.parse_lsp json (fun _ ->
+                  failwith "not resolving responses")
+            in
+            match peek with
+            | NotificationMessage
+                (CancelRequestNotification { Lsp.CancelRequest.id = peek_id })
+              ->
+              Lsp.IdKey.compare id peek_id = 0
+            | _ -> false
+          with
+          | _ -> false)
+    in
+    (* If there is a future cancellation request, we won't even embark upon this message *)
+    if Option.is_some pending_cancel_request_opt then
       raise
         (Error.LspException
            {
              Error.code = Error.RequestCancelled;
-             message = "request timed out";
+             message = "request cancelled";
              data = None;
            })
     else
-      Lwt.return_unit
-  else
-    Lwt.return_unit
+      ()
 
 (************************************************************************)
 (* Message handling                                                     *)
@@ -3961,6 +4000,7 @@ let handle_client_message
     ~(message : lsp_message)
     ~(ref_unblocked_time : float ref) : result_telemetry option Lwt.t =
   let open Main_env in
+  cancel_if_has_pending_cancel_request client message;
   let%lwt result_telemetry_opt =
     (* make sure to wrap any exceptions below in the promise *)
     let tracking_id = metadata.tracking_id in
@@ -3987,7 +4027,12 @@ let handle_client_message
       Lwt.return_none
     (* cancel notification *)
     | (_, _, NotificationMessage (CancelRequestNotification _)) ->
-      (* For now, we'll ignore it. *)
+      (* In [cancel_if_has_pending_cancel_request] above, when we received request ID "x",
+         then at that time then we scanned through the queue for any CancelRequestNotification
+         of the same ID. We didn't remove that CancelRequestNotification though.
+         If we worked through the queue long enough to handle a CancelRequestNotification,
+         it means that either we've earlier cancelled it, or that processing was done
+         before the cancel request got into the queue. Either way, there's nothing to do now! *)
       Lwt.return_none
     (* exit notification *)
     | (_, _, NotificationMessage ExitNotification) ->

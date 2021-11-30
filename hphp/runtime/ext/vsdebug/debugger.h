@@ -50,6 +50,7 @@ struct Debugger;
 enum ProgramState {
   LoaderBreakpoint,
   Paused,
+  AsyncPaused,
   Running
 };
 
@@ -551,7 +552,7 @@ private:
   void resumeTarget();
 
   // Halts execution of all request threads.
-  void pauseTarget(DebuggerRequestInfo* ri, const char* stopReason);
+  void pauseTarget(DebuggerRequestInfo* ri, bool isAsyncPause);
 
   // Attempts to resolve and install a breakpoint for the current request.
   // Returns true if the bp was resolved, false if it is unresolved and pending.
@@ -775,4 +776,3 @@ struct DebuggerNoBreakContext {
 
 }
 }
-

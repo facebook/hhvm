@@ -740,6 +740,15 @@ void Debugger::enterDebuggerIfPaused(DebuggerRequestInfo* requestInfo) {
         true,
         -1
       );
+    } else if (m_state == ProgramState::AsyncPaused) {
+      processCommandQueue(
+        getCurrentThreadId(),
+        requestInfo,
+        "async-pause",
+        "async-pause",
+        true,
+        -1
+      );
     } else {
       processCommandQueue(
         getCurrentThreadId(),
@@ -1175,7 +1184,9 @@ Debugger::PrepareToPauseResult
 Debugger::prepareToPauseTarget(DebuggerRequestInfo* requestInfo) {
   m_lock.assertOwnedBySelf();
 
-  if (m_state == ProgramState::Paused && isStepInProgress(requestInfo)) {
+  if ((m_state == ProgramState::Paused ||
+       m_state == ProgramState::AsyncPaused) &&
+      isStepInProgress(requestInfo)) {
     // A step operation for a single request is still in the middle of
     // handling whatever caused us to break execution of the other threads
     // in the first place. We don't need to wait for resume here.
@@ -1240,10 +1251,10 @@ Debugger::prepareToPauseTarget(DebuggerRequestInfo* requestInfo) {
   return clientConnected() ? ReadyToPause : ErrorNoClient;
 }
 
-void Debugger::pauseTarget(DebuggerRequestInfo* ri, const char* stopReason) {
+void Debugger::pauseTarget(DebuggerRequestInfo* ri, bool isAsyncPause) {
   m_lock.assertOwnedBySelf();
 
-  m_state = ProgramState::Paused;
+  m_state = isAsyncPause ? ProgramState::AsyncPaused : ProgramState::Paused;
 
   if (ri != nullptr) {
     clearStepOperation(ri);
@@ -1995,7 +2006,7 @@ void Debugger::onBreakpointHit(
         );
 
         // Breakpoint hit!
-        pauseTarget(ri, stopReason.c_str());
+        pauseTarget(ri, false);
         bpMgr->onBreakpointHit(bpId);
 
         processCommandQueue(
@@ -2044,7 +2055,7 @@ void Debugger::onBreakpointHit(
       removeBreakpoint(BreakpointType::Source);
     }
 
-    pauseTarget(ri, stopReason.c_str());
+    pauseTarget(ri, false);
     processCommandQueue(
       getCurrentThreadId(),
       ri,
@@ -2099,7 +2110,7 @@ void Debugger::onExceptionBreakpointHit(
     return;
   }
 
-  pauseTarget(ri, stopReason.c_str());
+  pauseTarget(ri, false);
   processCommandQueue(
     getCurrentThreadId(),
     ri,
@@ -2135,7 +2146,7 @@ bool Debugger::onHardBreak() {
     return false;
   }
 
-  pauseTarget(ri, stopReason);
+  pauseTarget(ri, false);
   processCommandQueue(
     getCurrentThreadId(),
     ri,
@@ -2156,7 +2167,7 @@ bool Debugger::onHardBreak() {
 void Debugger::onAsyncBreak() {
   Lock lock(m_lock);
 
-  if (m_state == ProgramState::Paused) {
+  if (m_state == ProgramState::Paused || m_state == ProgramState::AsyncPaused) {
     // Already paused.
     return;
   }
@@ -2170,11 +2181,11 @@ void Debugger::onAsyncBreak() {
     "Debugger paused due to async-break request from client."
   );
 
-  constexpr char* reason = "Async-break";
-  pauseTarget(nullptr, reason);
+  pauseTarget(nullptr, true);
 
   if (m_debuggerOptions.showDummyOnAsyncPause) {
     // Show the dummy request as stopped.
+    constexpr char* reason = "Async-break";
     sendStoppedEvent(reason, reason, 0, false, -1);
   }
 }

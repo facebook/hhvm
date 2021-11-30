@@ -1038,34 +1038,16 @@ let global_inference_merge_and_solve
   print_solved_global_inference_env ~verbosity gienv error_format max_errors;
   gienv
 
-let check_file ctx ~verbosity errors files_info error_format max_errors =
-  let (errors, tasts, genvs) =
-    Relative_path.Map.fold
-      files_info
-      ~f:
-        begin
-          fun fn fileinfo (errors, tasts, genvs) ->
-          let (new_tasts, new_genvs, new_errors) =
-            Typing_check_utils.type_file_with_global_tvenvs ctx fn fileinfo
-          in
-          ( errors @ Errors.get_sorted_error_list new_errors,
-            new_tasts @ tasts,
-            Lazy.force new_genvs @ genvs )
-        end
-      ~init:(errors, [], [])
-  in
-  let gienvs =
-    Typing_global_inference.StateSubConstraintGraphs.build ctx tasts genvs
-  in
-  let _gienv =
-    global_inference_merge_and_solve
-      ctx
-      ~verbosity:(verbosity + 1)
-      gienvs
-      ~error_format
-      ?max_errors
-  in
-  errors
+let check_file ctx errors files_info =
+  Relative_path.Map.fold
+    files_info
+    ~f:
+      begin
+        fun fn fileinfo errors ->
+        let (_, new_errors) = Typing_check_utils.type_file ctx fn fileinfo in
+        errors @ Errors.get_sorted_error_list new_errors
+      end
+    ~init:errors
 
 let create_nasts ctx files_info =
   let build_nast fn _ =
@@ -1614,9 +1596,7 @@ let handle_mode
       let files_contents = Multifile.file_to_files filename in
       let (parse_errors, file_info) = parse_name_and_decl ctx files_contents in
       let error_list = Errors.get_sorted_error_list parse_errors in
-      let check_errors =
-        check_file ~verbosity ctx error_list file_info error_format max_errors
-      in
+      let check_errors = check_file ctx error_list file_info in
       if not (List.is_empty check_errors) then
         print_errors check_errors
       else
@@ -1657,7 +1637,7 @@ let handle_mode
       let (parse_errors, file_info) = parse_name_and_decl ctx files_contents in
       let check_errors =
         let error_list = Errors.get_sorted_error_list parse_errors in
-        check_file ~verbosity ctx error_list file_info error_format max_errors
+        check_file ctx error_list file_info
       in
       if not (List.is_empty check_errors) then
         print_errors check_errors
@@ -2039,11 +2019,8 @@ let handle_mode
               let errors =
                 check_file
                   ctx
-                  ~verbosity
                   (Errors.get_sorted_error_list parse_errors)
                   individual_file_info
-                  error_format
-                  max_errors
               in
               write_error_list error_format errors oc max_errors)
         ))
@@ -2077,9 +2054,7 @@ let handle_mode
         Out_channel.close oc)
   | Errors ->
     (* Don't typecheck builtins *)
-    let errors =
-      check_file ctx ~verbosity parse_errors files_info error_format max_errors
-    in
+    let errors = check_file ctx parse_errors files_info in
     print_error_list error_format errors max_errors;
     if not (List.is_empty errors) then exit 2
   | Decl_compare ->

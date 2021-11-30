@@ -355,6 +355,10 @@ let to_collection env shape_ty res return_type =
         let (env, tyl) = List.fold_map tyl ~init:env ~f:self#on_type in
         Typing_union.union_list env r tyl
 
+      method! on_tintersection env r tyl =
+        let (env, tyl) = List.fold_map tyl ~init:env ~f:self#on_type in
+        Typing_intersection.intersect_list env r tyl
+
       method! on_type env ty =
         match get_node ty with
         | Tdynamic ->
@@ -364,7 +368,8 @@ let to_collection env shape_ty res return_type =
           (env, ty)
         | Tvar _
         | Tshape _
-        | Tunion _ ->
+        | Tunion _
+        | Tintersection _ ->
           super#on_type env ty
         | _ -> (env, res)
     end

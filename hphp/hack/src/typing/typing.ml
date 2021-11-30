@@ -2952,7 +2952,7 @@ and expr_
       compute_exprs_and_supertype
         ~expected:vexpected
         ~use_pos:p
-        ~reason:Reason.URvalue
+        ~reason:(Reason.URvalue name)
         ~can_pessimise:true
         ~coerce_for_op:false
         ~bound:None

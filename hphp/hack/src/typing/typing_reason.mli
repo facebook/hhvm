@@ -195,7 +195,7 @@ type ureason =
   | URthrow
   | URvector
   | URkey of string
-  | URvalue
+  | URvalue of string
   | URawait
   | URyield
   | URxhp of string * string  (** Name of XHP class, Name of XHP attribute *)

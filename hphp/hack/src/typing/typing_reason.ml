@@ -841,7 +841,7 @@ type ureason =
   | URthrow
   | URvector
   | URkey of string
-  | URvalue
+  | URvalue of string
   | URawait
   | URyield
   | URxhp of string * string  (** Name of XHP class, Name of XHP attribute *)
@@ -888,7 +888,7 @@ let string_of_ureason = function
   | URthrow -> "Invalid exception"
   | URvector -> "Some elements in this collection are incompatible"
   | URkey s -> "The keys of this " ^ strip_ns s ^ " are incompatible"
-  | URvalue -> "The values of this `Map` are incompatible"
+  | URvalue s -> "The values of this `" ^ strip_ns s ^ "` are incompatible"
   | URawait -> "`await` can only operate on an `Awaitable`"
   | URyield -> "Invalid `yield`"
   | URxhp (cls, attr) ->

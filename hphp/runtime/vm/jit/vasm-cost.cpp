@@ -74,6 +74,14 @@ Vcost computeVunitCost(const Vunit& unit) {
     }
   }
 
+  // If this unit is for an Optimize region, we should trust the profile data
+  // that was used to form the region.  Even if there are apparent exits in the
+  // main portion of the translation, we assume that they are rarely take and
+  // don't regard the unit as incomplete.
+  if (unit.context && unit.context->kind == TransKind::Optimize) {
+    incomplete = false;
+  }
+
   return {cost, incomplete};
 }
 

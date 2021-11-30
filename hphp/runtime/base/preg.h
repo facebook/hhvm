@@ -63,7 +63,7 @@ struct pcre_literal_data {
   pcre_literal_data(const char* pattern, int coptions);
 
   bool isLiteral() const;
-  bool match_start() const { return options & PCRE_ANCHORED; }
+  bool match_start_of_string() const { return options & PCRE_ANCHORED; }
   bool match_end() const { return options & PCRE_DOLLAR_ENDONLY; }
   bool case_insensitive() const { return options & PCRE_CASELESS; }
   bool matches(const StringData* subject, int pos, int* offsets,
@@ -71,6 +71,7 @@ struct pcre_literal_data {
 
   Optional<std::string> literal_str;
   int options;
+  bool match_start_of_line = false; // ^
 };
 
 struct pcre_cache_entry {

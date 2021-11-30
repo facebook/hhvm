@@ -277,7 +277,7 @@ pcre_literal_data::pcre_literal_data(const char* pattern, int coptions) {
   options = coptions;
 
   if (*p == '^') {
-    options |= PCRE_ANCHORED;
+    match_start_of_line = true;
     p++;
   }
 
@@ -300,7 +300,7 @@ pcre_literal_data::pcre_literal_data(const char* pattern, int coptions) {
   }
   if (!*p) {
     /* This is an encoding of a literal string. */
-    ITRACE(2, "Literal pattern: {}\n", pattern_buffer);
+     ITRACE(2, "Literal pattern: {}\n", pattern_buffer);
     literal_str = std::move(pattern_buffer);
   }
 }
@@ -327,20 +327,30 @@ bool pcre_literal_data::matches(const StringData* subject,
   if (g_empty && !literal_strlen) return false;
   auto const subject_c = subject->data();
   auto const literal_c = literal_str->c_str();
-  if (match_start()) {
-    // Make sure an exact match has the right length.
-    if (pos || (match_end() && subject->size() != literal_strlen)) {
+
+  // Compare the literal pattern at an offset of the subject.
+  auto const subject_substr = subject_c + pos;
+
+  auto const match_start = [&]() {
+    if (match_end() && (subject->size() - pos) != literal_strlen) {
       return false;
     }
     // If only matching the start (^), compare the strings
     // for the length of the literal pattern.
     if (case_insensitive() ?
-        bstrcaseeq(subject_c, literal_c, literal_strlen) :
-        memcmp(subject_c, literal_c, literal_strlen) == 0) {
-      offsets[0] = 0;
-      offsets[1] = literal_strlen * sizeof(char);
+        bstrcaseeq(subject_substr, literal_c, literal_strlen) :
+        memcmp(subject_substr, literal_c, literal_strlen) == 0) {
+      offsets[0] = pos * sizeof(char);
+      offsets[1] = offsets[0] + literal_strlen * sizeof(char);
       return true;
     }
+    return false;
+  };
+
+  if (match_start_of_line) {
+    return !pos && match_start();
+  } else if (match_start_of_string()) {
+    return match_start();
   } else if (match_end()) {
     // Compare the literal pattern against the tail end of the subject.
     auto const subject_tail = subject_c + (subject->size() - literal_strlen);

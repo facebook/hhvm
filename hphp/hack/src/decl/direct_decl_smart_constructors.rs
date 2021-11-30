@@ -5560,6 +5560,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         _right_double_angle: Self::R,
     ) -> Self::R {
         if self.retain_or_omit_user_attributes_for_facts {
+            self.file_attributes = List::empty();
             for attr in attributes.iter() {
                 match attr {
                     Node::Attribute(attr) => self

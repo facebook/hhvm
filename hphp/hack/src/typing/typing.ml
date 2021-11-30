@@ -756,18 +756,24 @@ let requires_consistent_construct = function
  * tuples). First expand the expected type and elide single union; also
  * strip nullables, so ?t becomes t, as context will always accept a t if a ?t
  * is expected.
+ *
+ * Note: we currently do not generally expand ?t into (null | t), so ~?t is (dynamic | Toption t).
  *)
 let expand_expected_and_get_node env (expected : ExpectedTy.t option) =
+  let rec unbox ty =
+    match get_node ty with
+    | Tunion [ty1; ty2] when is_dynamic ty1 -> unbox ty2
+    | Tunion [ty1; ty2] when is_dynamic ty2 -> unbox ty1
+    | Tunion [ty] -> unbox ty
+    | Toption ty -> unbox ty
+    | _ -> ty
+  in
   match expected with
   | None -> (env, None)
   | Some ExpectedTy.{ pos = p; reason = ur; ty = { et_type = ty; _ }; _ } ->
     let (env, ty) = Env.expand_type env ty in
-    (match get_node ty with
-    | Tunion [ty1; ty2] when is_dynamic ty1 ->
-      (env, Some (p, ur, ty2, get_node ty2))
-    | Tunion [ty] -> (env, Some (p, ur, ty, get_node ty))
-    | Toption ty -> (env, Some (p, ur, ty, get_node ty))
-    | _ -> (env, Some (p, ur, ty, get_node ty)))
+    let uty = unbox ty in
+    (env, Some (p, ur, uty, get_node uty))
 
 let uninstantiable_error env reason_pos cid c_tc_pos c_name c_usage_pos c_ty =
   let reason =
@@ -4618,7 +4624,7 @@ and lambda ~is_anon ?expected p env f idl =
         Typing_log.increment_feature_count env FL.Lambda.untyped_context;
         check_body_under_known_params env declared_ft
       | Some ExpectedTy.{ ty = { et_type; _ }; _ }
-        when TUtils.is_mixed env et_type || TUtils.is_dynamic env et_type ->
+        when TUtils.is_mixed env et_type || is_dynamic et_type ->
         (* If the expected type of a lambda is mixed or dynamic, we
          * decompose the expected type into a function type where the
          * undeclared parameters and the return type are set to the expected

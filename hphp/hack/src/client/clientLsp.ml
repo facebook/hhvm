@@ -4351,6 +4351,7 @@ let handle_client_message
       Lwt.return_some { result_count; result_extra_telemetry = None }
     (* textDocument/codeAction request *)
     | (_, Some ide_service, RequestMessage (id, CodeActionRequest params)) ->
+      let%lwt () = cancel_if_stale client timestamp short_timeout in
       let%lwt result =
         do_codeAction_local
           ide_service
@@ -4365,6 +4366,7 @@ let handle_client_message
         { result_count = List.length result; result_extra_telemetry = None }
     (* textDocument/codeAction request, when not in serverless IDE mode *)
     | (Main_loop menv, None, RequestMessage (id, CodeActionRequest params)) ->
+      let%lwt () = cancel_if_stale client timestamp short_timeout in
       let%lwt result = do_codeAction menv.conn ref_unblocked_time params in
       respond_jsonrpc ~powered_by:Hh_server id (CodeActionResult result);
       Lwt.return_some

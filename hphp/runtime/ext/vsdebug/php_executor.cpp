@@ -59,6 +59,15 @@ void PHPExecutor::execute()
   }
 
   m_ri = m_debugger->getRequestInfo();
+  if (!m_ri) {
+    // A thread acquires the debugger lock before executing client commands,
+    // preventing the client from disconnecting in the middle of executing the
+    // command. However, a client command may execute multiple php codes and it
+    // drops the lock before executing any php code (and requires it afterwards)
+    // allowing clients to be disconnected in the middle. When that happens,
+    // request info may be null.
+    return;
+  }
   assertx(m_ri->m_evaluateCommandDepth >= 0);
   m_ri->m_evaluateCommandDepth++;
 

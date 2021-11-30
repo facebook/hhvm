@@ -348,7 +348,9 @@ std::uint32_t RepoOptions::getDeclFlags() const {
     DisableXHPElementMangling << 0 |
     1 << 1 | // interpret_soft_types_as_like_types
     AllowNewAttributeSyntax   << 2 |
-    EnableXHPClassModifier    << 3;
+    EnableXHPClassModifier    << 3 |
+    1 << 4 |  //php5_compat_mode
+    1 << 5;   //hhvm_compat_mode
   return flags;
 }
 

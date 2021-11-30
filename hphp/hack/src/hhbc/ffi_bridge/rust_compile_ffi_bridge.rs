@@ -367,6 +367,8 @@ pub fn hackc_create_direct_decl_parse_options(
         interpret_soft_types_as_like_types: ((1 << 1) & flags) != 0,
         allow_new_attribute_syntax: ((1 << 2) & flags) != 0,
         enable_xhp_class_modifier: ((1 << 3) & flags) != 0,
+        php5_compat_mode: ((1 << 4) & flags) != 0,
+        hhvm_compat_mode: ((1 << 5) & flags) != 0,
         ..Default::default()
     };
 

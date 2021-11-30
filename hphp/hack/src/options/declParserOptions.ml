@@ -15,6 +15,8 @@ type t = {
   everything_sdt: bool;
   global_inference: bool;
   gi_reinfer_types: string list;
+  php5_compat_mode: bool;
+  hhvm_compat_mode: bool;
 }
 [@@deriving show]
 
@@ -30,6 +32,8 @@ let from_parser_options popt =
     everything_sdt = popt.tco_everything_sdt;
     global_inference = popt.tco_global_inference;
     gi_reinfer_types = popt.tco_gi_reinfer_types;
+    php5_compat_mode = false;
+    hhvm_compat_mode = false;
   }
 
 let default = from_parser_options ParserOptions.default

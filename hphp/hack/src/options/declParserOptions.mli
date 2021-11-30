@@ -15,6 +15,8 @@ type t = {
   everything_sdt: bool;
   global_inference: bool;
   gi_reinfer_types: string list;
+  php5_compat_mode: bool;
+  hhvm_compat_mode: bool;
 }
 [@@deriving show]
 

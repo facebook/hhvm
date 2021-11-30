@@ -39,6 +39,8 @@ impl From<FullFidelityParserEnv> for ParserEnv {
 impl From<&DeclParserOptions<'_>> for ParserEnv {
     fn from(opts: &DeclParserOptions<'_>) -> Self {
         Self {
+            hhvm_compat_mode: opts.hhvm_compat_mode,
+            php5_compat_mode: opts.php5_compat_mode,
             disable_xhp_element_mangling: opts.disable_xhp_element_mangling,
             interpret_soft_types_as_like_types: opts.interpret_soft_types_as_like_types,
             allow_new_attribute_syntax: opts.allow_new_attribute_syntax,

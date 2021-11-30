@@ -34,6 +34,8 @@ impl DeclParserOptions<'_> {
             everything_sdt: opts.tco_everything_sdt,
             global_inference: opts.tco_global_inference,
             gi_reinfer_types: opts.tco_gi_reinfer_types,
+            php5_compat_mode: false,
+            hhvm_compat_mode: false,
         }
     }
 
@@ -60,6 +62,8 @@ impl DeclParserOptions<'_> {
             everything_sdt: opts.tco_everything_sdt,
             global_inference: opts.tco_global_inference,
             gi_reinfer_types: reinferred_types.into_bump_slice(),
+            php5_compat_mode: false,
+            hhvm_compat_mode: false,
         }
     }
 }

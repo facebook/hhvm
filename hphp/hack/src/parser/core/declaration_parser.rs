@@ -2478,7 +2478,7 @@ where
         // any keyword.  Consider making this more strict.
         self.sc_mut().begin_enum_class_enumerator();
         let modifiers = self.parse_modifiers();
-        let ty = self.parse_type_specifier(/*allow_var*/ false, /*allow_attr*/ true);
+        let ty = self.parse_type_specifier(/*allow_var*/ false, /*allow_attr*/ false);
         let name = self.require_name_allow_all_keywords();
         let initializer_ = self.parse_simple_initializer_opt();
         let semicolon = self.require_semicolon();

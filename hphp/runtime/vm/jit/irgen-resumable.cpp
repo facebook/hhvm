@@ -210,7 +210,7 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset suspendOffset,
       );
     }();
 
-    if (RO::EvalEnableImplicitContext) gen(env, StImplicitContext, waitHandle);
+    if (RO::EvalEnableImplicitContext) gen(env, StImplicitContextWH, waitHandle);
 
     if (isInlining(env)) {
       suspendFromInlined(env, waitHandle);
@@ -233,7 +233,7 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset suspendOffset,
       gen(env, SuspendHookAwaitEG, fp(env), waitHandle);
     });
 
-    if (RO::EvalEnableImplicitContext) gen(env, StImplicitContext, waitHandle);
+    if (RO::EvalEnableImplicitContext) gen(env, StImplicitContextWH, waitHandle);
 
     // Return control to the caller (AG::next()).
     auto const spAdjust = offsetFromIRSP(env, BCSPRelOffset{-1});

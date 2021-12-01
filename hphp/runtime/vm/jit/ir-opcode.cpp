@@ -402,7 +402,6 @@ bool opcodeMayRaise(Opcode opc) {
   case ReturnHook:
   case SameArrLike:
   case SetElem:
-  case SetImplicitContextByValue:
   case SetNewElem:
   case SetNewElemDict:
   case SetNewElemKeyset:
@@ -724,6 +723,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LdGenericsFromRClsMeth:
   case LdGenericsFromRFunc:
   case LdIfaceMethod:
+  case LdImplicitContext:
   case LdInitPropAddr:
   case LdInitRDSAddr:
   case LdIterBase:
@@ -873,6 +873,7 @@ bool opcodeMayRaise(Opcode opc) {
   case StFrameFunc:
   case StFrameMeta:
   case StImplicitContext:
+  case StImplicitContextWH:
   case StIterBase:
   case StIterEnd:
   case StIterPos:

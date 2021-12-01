@@ -5071,16 +5071,26 @@ OPTBLD_INLINE void iopWHResult() {
 
 OPTBLD_INLINE void iopSetImplicitContextByValue() {
   if (!RO::EvalEnableImplicitContext) {
-    vmStack().replaceC<KindOfInt64>(ImplicitContext::kEmptyIndex);
+    vmStack().popC();
+    vmStack().pushNull();
     return;
   }
   auto const tv = vmStack().topC();
-  if (UNLIKELY(!tvIsInt(tv))) {
-    SystemLib::throwInvalidArgumentExceptionObject(
-      "Invalid input to SetImplicitContextByValue");
+  auto const obj = [&]() -> ObjectData* {
+    if (tvIsNull(tv)) return nullptr;
+    if (UNLIKELY(!tvIsObject(tv))) {
+      SystemLib::throwInvalidArgumentExceptionObject(
+        "Invalid input to SetImplicitContextByValue");
+    }
+    return tv->m_data.pobj;
+  }();
+  vmStack().discard(); // ref-count will be transferred
+  auto result = ImplicitContext::setByValue(Object::attach(obj));
+  if (result.isNull()) {
+    vmStack().pushNull();
+  } else {
+    vmStack().pushObjectNoRc(result.detach());
   }
-  auto const result = jit::setImplicitContextByValue(tv->m_data.num);
-  vmStack().replaceC<KindOfInt64>(result);
 }
 
 OPTBLD_INLINE void iopCheckProp(const StringData* propName) {

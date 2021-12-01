@@ -3213,12 +3213,9 @@ RaiseClassStringConversionWarning [] -> []
   Raises a warning indicating an implicit class to string conversion.
   This warning can be downgraded to a noop through a runtime option.
 
-SetImplicitContextByValue [C:Int] -> [C:Int]
+SetImplicitContextByValue [C:?Obj] -> [C:?Obj]
 
-  Sets the implicit context to %1 index on the g_context->m_implicitContexts
-  table and returns the index of the previous implicit context.
-  If %1 is equal to ImplicitContext::kEmptyIndex, implicit context is set to
-  null.
+  Sets the implicit context to %1 and returns the previous implicit context.
 
 14. Generator creation and execution
 ---------------------------------------

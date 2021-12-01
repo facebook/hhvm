@@ -16,9 +16,17 @@
 
 #include "hphp/runtime/base/implicit-context.h"
 #include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/base/type-object.h"
 
 namespace HPHP {
 
-rds::Link<ImplicitContext*, rds::Mode::Normal> ImplicitContext::activeCtx;
+rds::Link<ObjectData*, rds::Mode::Normal> ImplicitContext::activeCtx;
+
+Object ImplicitContext::setByValue(Object&& obj) {
+  assertx(RO::EvalEnableImplicitContext);
+  auto const prev = *ImplicitContext::activeCtx;
+  *ImplicitContext::activeCtx = obj.detach();
+  return Object::attach(prev);
+}
 
 } // namespace HPHP

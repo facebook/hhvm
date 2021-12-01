@@ -172,8 +172,6 @@ void profileIsTypeStructHelper(ArrayData*, IsTypeStructProfile*);
 [[noreturn]] void throwAsTypeStructExceptionHelper(ArrayData*, TypedValue);
 ArrayData* errorOnIsAsExpressionInvalidTypesHelper(ArrayData*);
 
-int64_t setImplicitContextByValue(int64_t index);
-
 /* Reified generics helpers
  * Both functions decref the input array by turning it into a static array
  */

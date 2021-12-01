@@ -1313,6 +1313,10 @@ To string conversions:
 
   Load the ArrayData* containing the generics attached to the RFuncData in S0
 
+| LdImplicitContext, D(Obj|InitNull), NA, NF
+
+  Loads implicit context from RDS.
+
 7. Allocation
 
 | AllocInitROM<rom>, D(VoidPtr), NA, NF
@@ -1707,7 +1711,11 @@ To string conversions:
   Store the TypedValue in S0 into the specified RDS handle. Must store the aux
   bits if `includeAux` is true.
 
-| StImplicitContext, ND, S(Obj), NF
+| StImplicitContext, ND, S(Obj|InitNull), NF
+
+  Sets the implicit context to S0.
+
+| StImplicitContextWH, ND, S(Obj), NF
 
   Stores the implicit context from RDS to the WaitHandle in S0.
 
@@ -1959,13 +1967,6 @@ To string conversions:
 | RecordFuncCall<Func>, ND, NA, NF
 
   Records a call to Func for a function call based code coverage report.
-
-| SetImplicitContextByValue, D(Int), S(Int), NF
-
-  Sets the implicit context to S0 index on the g_context->m_implicitContexts
-  table and returns the index of the previous implicit context.
-  If S0 is equal to ImplicitContext::kEmptyIndex, implicit context is set to
-  null.
 
 13. Runtime helpers
 

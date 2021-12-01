@@ -5168,7 +5168,7 @@ void in(ISS& env, const bc::AwaitAll& op) {
 
 void in(ISS& env, const bc::SetImplicitContextByValue&) {
   popC(env);
-  push(env, TInt);
+  push(env, Type{BObj | BInitNull});
 }
 
 void in(ISS& env, const bc::Idx&) {

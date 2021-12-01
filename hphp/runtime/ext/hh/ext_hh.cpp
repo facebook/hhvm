@@ -1079,8 +1079,9 @@ TypedValue HHVM_FUNCTION(get_implicit_context, StringArg key) {
   if (!RO::EvalEnableImplicitContext) {
     throw_implicit_context_exception("Implicit context feature is not enabled");
   }
-  auto const context = *ImplicitContext::activeCtx;
-  if (!context) return make_tv<KindOfNull>();
+  auto const obj = *ImplicitContext::activeCtx;
+  if (!obj) return make_tv<KindOfNull>();
+  auto const context = Native::data<ImplicitContext>(obj);
   auto const it = context->m_map.find(key.get());
   if (it == context->m_map.end()) return make_tv<KindOfNull>();
   auto const result = it->second.first;
@@ -1088,8 +1089,13 @@ TypedValue HHVM_FUNCTION(get_implicit_context, StringArg key) {
   return result;
 }
 
-int64_t HHVM_FUNCTION(set_implicit_context, StringArg keyarg,
-                                            TypedValue data) {
+Class* s_ImplicitContextDataClass = nullptr;
+const StaticString
+  s_ImplicitContext("ImplicitContext"),
+  s_ImplicitContextDataClassName("HH\\ImplicitContext\\_Private\\ImplicitContextData");
+
+Object HHVM_FUNCTION(set_implicit_context, StringArg keyarg,
+                                           TypedValue data) {
   if (!RO::EvalEnableImplicitContext) {
     throw_implicit_context_exception("Implicit context feature is not enabled");
   }
@@ -1102,9 +1108,17 @@ int64_t HHVM_FUNCTION(set_implicit_context, StringArg keyarg,
       "Implicit context keys cannot be empty or start with _");
   }
   auto const prev = *ImplicitContext::activeCtx;
-  auto const context = req::make_raw<ImplicitContext>();
-  assertx(context);
-  if (prev) context->m_map = prev->m_map;
+
+  assertx(s_ImplicitContextDataClass);
+  auto obj = Object{s_ImplicitContextDataClass};
+  auto const context = Native::data<ImplicitContext>(obj.get());
+
+  // PURPOSEFULLY LEAK MEMORY: When the data is stored/restored during the
+  // suspend/resume routine, we should properly refcount the data but that is
+  // expensive. Leak and let the GC take care of it.
+  obj.get()->incRefCount();
+
+  if (prev) context->m_map = Native::data<ImplicitContext>(prev)->m_map;
   // Leak `data`, `key` and `memokey` to the end of the request
   if (isRefcountedType(data.m_type)) tvIncRefCountable(data);
   key->incRefCount();
@@ -1128,19 +1142,17 @@ int64_t HHVM_FUNCTION(set_implicit_context, StringArg keyarg,
     serialize_memoize_tv(sb, 0, e.second);
   }
   context->m_memokey = sb.detach().detach();
-  context->m_index = g_context->m_implicitContexts.size();
-  *ImplicitContext::activeCtx = context;
-  g_context->m_implicitContexts.push_back(context);
-  return prev ? prev->m_index : ImplicitContext::kEmptyIndex;
+
+  return ImplicitContext::setByValue(std::move(obj));
 }
 
 String HHVM_FUNCTION(get_implicit_context_memo_key) {
   if (!RO::EvalEnableImplicitContext) {
     throw_implicit_context_exception("Implicit context feature is not enabled");
   }
-  auto const context = *ImplicitContext::activeCtx;
-  if (!context) return "";
-  assertx(context->m_index != ImplicitContext::kEmptyIndex);
+  auto const obj = *ImplicitContext::activeCtx;
+  if (!obj) return "";
+  auto const context = Native::data<ImplicitContext>(obj);
   assertx(context->m_memokey);
   return String{context->m_memokey};
 }
@@ -1339,6 +1351,7 @@ Variant HHVM_FUNCTION(unwrap_opaque_value, int64_t id,
 static struct HHExtension final : Extension {
   HHExtension(): Extension("hh", NO_EXTENSION_VERSION_YET) { }
   void moduleInit() override {
+    Native::registerNativeDataInfo<ImplicitContext>(s_ImplicitContext.get());
 #define X(nm) HHVM_NAMED_FE(HH\\nm, HHVM_FN(nm))
     X(autoload_is_native);
     X(autoload_set_paths);
@@ -1412,6 +1425,10 @@ static struct HHExtension final : Extension {
 #undef X
 
     loadSystemlib();
+
+    s_ImplicitContextDataClass =
+      Class::lookup(s_ImplicitContextDataClassName.get());
+    assertx(s_ImplicitContextDataClass);
   }
 } s_hh_extension;
 

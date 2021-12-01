@@ -357,9 +357,8 @@ function clear_all_coverage_data(): void {
 
 namespace ImplicitContext\_Private {
 
-final class Consts {
-  const EMPTY_CONTEXT = -1;
-}
+<<__NativeData("ImplicitContext")>>
+final class ImplicitContextData {}
 
 /**
  * Returns the implicit context keyed by $key or null if such doesn't exist
@@ -369,13 +368,13 @@ function get_implicit_context(string $key)[policied]: mixed;
 
 /**
  * Sets implicit context $context keyed by $key.
- * Returns the previous implicit context's index.
+ * Returns the previous implicit context.
  */
 <<__Native>>
 function set_implicit_context(
   string $key,
   mixed $context,
-)[policied]: int;
+)[policied]: object /* ImplicitContextData */;
 
 /*
  * Returns the currently implicit context hash or emptry string if
@@ -571,9 +570,7 @@ namespace HH\Coeffects {
   function backdoor<Tout>(
     (function()[defaults]: Tout) $fn
   )[/* 86backdoor */]: Tout {
-    $prev = \HH\ImplicitContext\_Private\set_implicit_context_by_value(
-      \HH\ImplicitContext\_Private\Consts::EMPTY_CONTEXT
-    );
+    $prev = \HH\ImplicitContext\_Private\set_implicit_context_by_value(null);
     try {
       return $fn();
     } finally {
@@ -588,9 +585,7 @@ namespace HH\Coeffects {
   async function backdoor_async<Tout>(
     (function()[defaults]: Awaitable<Tout>) $fn
   )[/* 86backdoor */]: Awaitable<Tout> {
-    $prev = \HH\ImplicitContext\_Private\set_implicit_context_by_value(
-      \HH\ImplicitContext\_Private\Consts::EMPTY_CONTEXT
-    );
+    $prev = \HH\ImplicitContext\_Private\set_implicit_context_by_value(null);
     try {
       $result = $fn();
     } finally {

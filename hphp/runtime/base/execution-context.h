@@ -48,7 +48,6 @@
 namespace HPHP {
 struct RequestEventHandler;
 struct EventHook;
-struct ImplicitContext;
 struct Resumable;
 }
 
@@ -639,8 +638,6 @@ private:
 
   Array m_debuggerEnv; // variables read/written in the REPL
 public:
-  req::vector<ImplicitContext*> m_implicitContexts;
-
   VMParserFrame* m_parserFrame{nullptr};
 
   Optional<struct timespec> m_requestStartForTearing;

@@ -20,7 +20,6 @@
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/enum-cache.h"
 #include "hphp/runtime/base/file-util.h"
-#include "hphp/runtime/base/implicit-context.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/vm/func.h"
@@ -2458,16 +2457,32 @@ void emitSilence(IRGS& env, Id localId, SilenceOp subop) {
 void emitSetImplicitContextByValue(IRGS& env) {
   if (!RO::EvalEnableImplicitContext) {
     popDecRef(env);
-    push(env, cns(env, ImplicitContext::kEmptyIndex));
+    push(env, cns(env, make_tv<KindOfNull>()));
     return;
   }
   auto const tv = topC(env);
-  if (!tv->isA(TInt)) {
-    return interpOne(env);
-  }
-  auto const result = gen(env, SetImplicitContextByValue, tv);
-  popDecRef(env);
-  push(env, result);
+  auto const prev_ctx = cond(
+    env,
+    [&] (Block* taken) { return gen(env, CheckType, TInitNull, taken, tv); },
+    [&] (SSATmp* null) {
+      auto const prev = gen(env, LdImplicitContext);
+      gen(env, StImplicitContext, null);
+      return prev;
+    },
+    [&] (Block* taken) { return gen(env, CheckType, TObj, taken, tv); },
+    [&] (SSATmp* obj) {
+      auto const prev = gen(env, LdImplicitContext);
+      gen(env, StImplicitContext, obj);
+      return prev;
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      interpOne(env);
+      return cns(env, TBottom);
+    }
+  );
+  popC(env);
+  push(env, prev_ctx);
 }
 
 //////////////////////////////////////////////////////////////////////

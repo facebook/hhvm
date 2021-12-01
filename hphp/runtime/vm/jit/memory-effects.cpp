@@ -19,6 +19,8 @@
 #include "hphp/util/safe-cast.h"
 #include "hphp/util/assertions.h"
 
+#include "hphp/runtime/base/implicit-context.h"
+
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
@@ -514,9 +516,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case NativeImpl:
     return UnknownEffects {};
 
-  case SetImplicitContextByValue:
-    // throws exceptions
-    return may_load_store(AHeapAny, AHeapAny);
 
   // These C++ helpers can invoke the user error handler and go do whatever
   // they want to non-frame locations.
@@ -781,9 +780,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case StMem:
   case StMemMeta:
     return PureStore { pointee(inst.src(0)), inst.src(1), inst.src(0) };
-
-  case StImplicitContext:
-    return may_load_store(AEmpty, AEmpty);
 
   case LdClsInitElem:
     return PureLoad { AHeapAny };
@@ -1317,6 +1313,20 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return PureLoad {
       ARds { inst.extra<LdUnitPerRequestFilepath>()->handle },
     };
+
+  case LdImplicitContext:
+    return PureLoad { ARds { ImplicitContext::activeCtx.handle() } };
+
+  case StImplicitContext:
+    return PureStore {
+      ARds { ImplicitContext::activeCtx.handle() }, inst.src(0), nullptr
+    };
+
+  case StImplicitContextWH:
+    return may_load_store(
+      ARds { ImplicitContext::activeCtx.handle() },
+      AEmpty
+    );
 
   //////////////////////////////////////////////////////////////////////
   // Instructions that never read or write memory locations tracked by this

@@ -23,7 +23,6 @@
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/implicit-context.h"
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/string-data.h"
@@ -624,23 +623,6 @@ StringData* loadClsTypeCnsClsNameHelper(const Class* cls,
   assertx(isStringType(type(classname)));
   assertx(val(classname).pstr->isStatic());
   return val(classname).pstr;
-}
-
-int64_t setImplicitContextByValue(int64_t index) {
-  assertx(RO::EvalEnableImplicitContext);
-  auto const prev = *ImplicitContext::activeCtx;
-  auto const prev_index = prev ? prev->m_index : ImplicitContext::kEmptyIndex;
-  if (index == ImplicitContext::kEmptyIndex) {
-    *ImplicitContext::activeCtx = nullptr;
-    return prev_index;
-  }
-  if (index < 0 || index >= g_context->m_implicitContexts.size()) {
-    throw_implicit_context_exception(
-        folly::to<std::string>("Implicit context at index ", index,
-          " does not exist"));
-  }
-  *ImplicitContext::activeCtx = g_context->m_implicitContexts[index];
-  return prev_index;
 }
 
 void raiseCoeffectsCallViolationHelper(const Func* callee,

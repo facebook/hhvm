@@ -284,6 +284,7 @@ bool canDCE(const IRInstruction& inst) {
   case VoidPtrAsDataType:
   case CopyArray:
   case StructDictElemAddr:
+  case LdImplicitContext:
     assertx(!inst.isControlFlow());
     return true;
 
@@ -450,9 +451,10 @@ bool canDCE(const IRInstruction& inst) {
   case AsyncSwitchFast:
   case GenericRetDecRefs:
   case StClsInitElem:
+  case StImplicitContext:
+  case StImplicitContextWH:
   case StMem:
   case StMemMeta:
-  case StImplicitContext:
   case StIterBase:
   case StIterType:
   case StIterEnd:
@@ -703,7 +705,6 @@ bool canDCE(const IRInstruction& inst) {
   case ProfileArrLikeProps:
   case CheckFuncNeedsCoverage:
   case RecordFuncCall:
-  case SetImplicitContextByValue:
   case StructDictSlot:
   case StructDictAddNextSlot:
   case StructDictTypeBoundCheck:

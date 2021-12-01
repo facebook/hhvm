@@ -25,19 +25,16 @@ namespace HPHP {
 
 struct ImplicitContext {
 
-static rds::Link<ImplicitContext*, rds::Mode::Normal> activeCtx;
+static rds::Link<ObjectData*, rds::Mode::Normal> activeCtx;
 
-// Denotes that the index does not exist on the g_context->m_implicitContexts
-static constexpr int64_t kEmptyIndex = -1;
-
-// Index of the current implicit context on g_context->m_implicitContexts
-int64_t m_index;
 // Combination of the instance keys
 StringData* m_memokey;
 
 // HashMap of TypedValues and their instance keys
 req::fast_map<const StringData*, std::pair<TypedValue, TypedValue>,
               string_data_hash, string_data_same> m_map;
+
+static Object setByValue(Object&&);
 
 /*
  * RAII wrapper for saving implicit context
@@ -54,7 +51,7 @@ struct Saver {
   }
 
 private:
-  ImplicitContext* m_context;
+  ObjectData* m_context;
 };
 
 };

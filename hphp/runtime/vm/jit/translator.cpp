@@ -363,7 +363,7 @@ static const struct {
   // TODO (T61651936): ResolveClass may return a classptr or a string
   { OpResolveClass,{None,             Stack1,       OutUnknown      }},
   { OpSetImplicitContextByValue,
-                   {Stack1,           Stack1,       OutInt64        }},
+                   {Stack1,           Stack1,       OutUnknown      }},
 
   /*** 14. Generator instructions ***/
 

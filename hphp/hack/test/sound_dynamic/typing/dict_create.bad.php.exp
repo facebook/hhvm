@@ -1,5 +1,5 @@
 File "dict_create.bad.php", line 4, characters 3-25:
-The keys of this dict are incompatible (Typing[4110])
+The keys of this `dict` are incompatible (Typing[4110])
   File "dict_create.bad.php", line 4, characters 8-10:
   Expected `int`
   File "dict_create.bad.php", line 3, characters 12-18:

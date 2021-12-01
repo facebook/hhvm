@@ -887,7 +887,7 @@ let string_of_ureason = function
   | URforeach -> "Invalid `foreach`"
   | URthrow -> "Invalid exception"
   | URvector -> "Some elements in this collection are incompatible"
-  | URkey s -> "The keys of this " ^ strip_ns s ^ " are incompatible"
+  | URkey s -> "The keys of this `" ^ strip_ns s ^ "` are incompatible"
   | URvalue s -> "The values of this `" ^ strip_ns s ^ "` are incompatible"
   | URawait -> "`await` can only operate on an `Awaitable`"
   | URyield -> "Invalid `yield`"

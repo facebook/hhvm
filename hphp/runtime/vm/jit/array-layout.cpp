@@ -274,6 +274,11 @@ Type ArrayLayout::getTypeBound(Type slot) const {
   return bespokeLayout()->getTypeBound(slot);
 }
 
+Optional<int64_t> ArrayLayout::numElements() const {
+  if (isBasicSort(sort)) return std::nullopt;
+  return bespokeLayout()->numElements();
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 namespace {

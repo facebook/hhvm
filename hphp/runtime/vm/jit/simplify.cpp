@@ -3030,6 +3030,9 @@ SSATmp* simplifyCountHelper(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
   if (src->hasConstVal(TArrLike)) return cns(env, src->arrLikeVal()->size());
 
+  auto const layout = src->type().arrSpec().layout();
+  if (auto const num = layout.numElements()) return cns(env, *num);
+
   auto const at = src->type().arrSpec().type();
   if (!at) return nullptr;
   using A = RepoAuthType::Array;

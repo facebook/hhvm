@@ -115,6 +115,8 @@ struct ArrayLayout {
 
   Type iterPosType(Type pos, bool isKey) const;
 
+  Optional<int64_t> numElements() const;
+
   /**************************************************************************
    * Representation as a simple uint16_t
    **************************************************************************/

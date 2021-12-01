@@ -424,6 +424,12 @@ struct Layout {
    */
   virtual Type iterPosType(Type pos, bool isKey) const;
 
+  /*
+   * If this layout contains a definite number of elements, return
+   * that number.
+   */
+  virtual Optional<int64_t> numElements() const;
+
   ///////////////////////////////////////////////////////////////////////////
 
 protected:

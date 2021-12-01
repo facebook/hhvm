@@ -1004,6 +1004,13 @@ Type StructLayout::iterPosType(Type pos, bool isKey) const {
   return isKey ? TStaticStr : getUnionTypeBound();
 }
 
+Optional<int64_t> StructLayout::numElements() const {
+  for (auto slot = 0; slot < numFields(); slot++) {
+    if (!field(slot).required) return std::nullopt;
+  }
+  return numFields();
+}
+
 ArrayLayout TopStructLayout::appendType(Type val) const {
   return ArrayLayout::Vanilla();
 }

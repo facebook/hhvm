@@ -527,6 +527,10 @@ Type Layout::getTypeBound(Type) const {
   return TCell;
 }
 
+Optional<int64_t> Layout::numElements() const {
+  return std::nullopt;
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 AbstractLayout::AbstractLayout(LayoutIndex index,

@@ -190,6 +190,8 @@ struct StructLayout : public ConcreteLayout {
 
   Type getTypeBound(Type slot) const override;
 
+  Optional<int64_t> numElements() const override;
+
   void createColoringHashMap() const;
 
   // Perfect hashing implementation.

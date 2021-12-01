@@ -25,14 +25,13 @@ module Status : sig
     | Processing_files of ClientIdeMessage.Processing_files.t
         (** The IDE services are available, but are also in the middle of
         processing files. *)
-    | Rpc
+    | Rpc of Telemetry.t list
         (** The IDE services will be available once they're done handling
-        an existing request *)
+        one or more existing requests. The telemetry items are information
+        about each received request currently being performed. *)
     | Ready  (** The IDE services are available. *)
     | Stopped of ClientIdeMessage.stopped_reason
         (** The IDE services are not available. *)
-
-  val to_string : t -> string
 end
 
 module Stop_reason : sig
@@ -46,7 +45,7 @@ module Stop_reason : sig
     | Testing
         (** test harnesses can tell clientLsp to shut down clientIdeService *)
 
-  val to_string : t -> string
+  val to_log_string : t -> string
 end
 
 (** Create an uninitialized IDE service. All queries made to this service will

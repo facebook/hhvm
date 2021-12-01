@@ -1112,6 +1112,7 @@ module ShowStatusFB = struct
     progress: int option;
     total: int option;
     shortMessage: string option;
+    telemetry: Hh_json.json option;
   }
 end
 

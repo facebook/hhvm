@@ -839,11 +839,17 @@ module ShowStatusFB : sig
 
   and result = ShowMessageRequest.messageActionItem option
 
+  (** the showStatus LSP request will be handled by our VSCode extension.
+  It's a facebook-specific extension to the LSP spec. How it's rendered
+  is currently [shortMessage] in the status-bar, and "[progress]/[total] [message]"
+  in the tooltip. The [telemetry] field isn't displayed to the user, but might
+  be useful to someone debugging an LSP transcript. *)
   and showStatusParams = {
     request: ShowMessageRequest.showMessageRequestParams;
     progress: int option;
     total: int option;
     shortMessage: string option;
+    telemetry: Hh_json.json option;
   }
 end
 

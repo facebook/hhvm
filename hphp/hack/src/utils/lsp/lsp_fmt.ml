@@ -626,6 +626,7 @@ let print_showStatus (r : ShowStatusFB.showStatusParams) : json =
       );
       ("message", Some (JSON_String rr.ShowMessageRequest.message));
       ("shortMessage", Option.map r.ShowStatusFB.shortMessage ~f:string_);
+      ("telemetry", r.ShowStatusFB.telemetry);
       ( "progress",
         Option.map r.ShowStatusFB.progress ~f:(fun progress ->
             Jprint.object_opt

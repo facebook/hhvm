@@ -1485,6 +1485,7 @@ let report_connect_end (ienv : In_init_env.t) : state =
             progress = None;
             total = None;
             shortMessage = None;
+            telemetry = None;
           };
       }
     in
@@ -1590,7 +1591,7 @@ let stop_ide_service
     ~(stop_reason : ClientIdeService.Stop_reason.t) : unit Lwt.t =
   log
     "Stopping IDE service process: %s"
-    (ClientIdeService.Stop_reason.to_string stop_reason);
+    (ClientIdeService.Stop_reason.to_log_string stop_reason);
   let%lwt () =
     ClientIdeService.stop ide_service ~tracking_id ~stop_reason ~exn:None
   in
@@ -1659,29 +1660,39 @@ let on_status_restart_action
 
 let get_client_ide_status (ide_service : ClientIdeService.t) :
     ShowStatusFB.params option =
-  let (type_, shortMessage, message, actions) =
+  let (type_, shortMessage, message, actions, telemetry) =
     match ClientIdeService.get_status ide_service with
     | ClientIdeService.Status.Initializing ->
       ( MessageType.WarningMessage,
         "Hack: initializing",
         "Hack IDE: initializing.",
-        [] )
+        [],
+        None )
     | ClientIdeService.Status.Processing_files p ->
       let open ClientIdeMessage.Processing_files in
       ( MessageType.WarningMessage,
         "Hack",
         Printf.sprintf "Hack IDE: processing %d files." p.total,
-        [] )
-    | ClientIdeService.Status.Rpc ->
-      (MessageType.WarningMessage, "Hack", "Hack IDE: working...", [])
+        [],
+        None )
+    | ClientIdeService.Status.Rpc requests ->
+      let telemetry =
+        Hh_json.JSON_Array (List.map requests ~f:Telemetry.to_json)
+      in
+      ( MessageType.WarningMessage,
+        "Hack",
+        "Hack IDE: working...",
+        [],
+        Some telemetry )
     | ClientIdeService.Status.Ready ->
-      (MessageType.InfoMessage, "Hack: ready", "Hack IDE: ready.", [])
+      (MessageType.InfoMessage, "Hack: ready", "Hack IDE: ready.", [], None)
     | ClientIdeService.Status.Stopped s ->
       let open ClientIdeMessage in
       ( MessageType.ErrorMessage,
         "Hack: " ^ s.short_user_message,
         s.medium_user_message ^ see_output_hack,
-        [{ ShowMessageRequest.title = client_ide_restart_button_text }] )
+        [{ ShowMessageRequest.title = client_ide_restart_button_text }],
+        None )
   in
   Some
     {
@@ -1689,6 +1700,7 @@ let get_client_ide_status (ide_service : ClientIdeService.t) :
       request = { ShowMessageRequest.type_; message; actions };
       progress = None;
       total = None;
+      telemetry;
     }
 
 (** This function blocks while it attempts to connect to the monitor to read status.
@@ -1749,6 +1761,7 @@ let get_hh_server_status (state : state) : ShowStatusFB.params option =
         progress = None;
         total = None;
         shortMessage = Some "Hack: initializing";
+        telemetry = None;
       }
   | Main_loop { Main_env.hh_server_status; _ } ->
     (* This shows whether the connected hh_server is busy or ready.
@@ -1767,6 +1780,7 @@ let get_hh_server_status (state : state) : ShowStatusFB.params option =
           };
         progress = None;
         total = None;
+        telemetry = None;
       }
 
 (** Makes a diagnostic messages for cases where the server status is not fully running. *)
@@ -3441,6 +3455,7 @@ let do_server_busy (state : state) (status : ServerCommandTypes.busy_status) :
         request = { ShowMessageRequest.type_; message; actions = [] };
         total = None;
         progress = None;
+        telemetry = None;
       }
     in
     Main_loop { menv with hh_server_status }

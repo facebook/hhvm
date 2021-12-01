@@ -13,7 +13,7 @@ module Status = struct
   type t =
     | Initializing
     | Processing_files of ClientIdeMessage.Processing_files.t
-    | Rpc
+    | Rpc of Telemetry.t list
     | Ready
     | Stopped of ClientIdeMessage.stopped_reason
 
@@ -22,14 +22,17 @@ module Status = struct
     | Ready -> true
     | _ -> false
 
-  let to_string (t : t) : string =
+  let to_log_string (t : t) : string =
     match t with
     | Initializing -> "Initializing"
     | Processing_files p ->
       Printf.sprintf
         "Processing_files(%s)"
         (ClientIdeMessage.Processing_files.to_string p)
-    | Rpc -> "Rpc"
+    | Rpc requests ->
+      Printf.sprintf
+        "Rpc [%s]"
+        (requests |> List.map ~f:Telemetry.to_string |> String.concat ~sep:",")
     | Ready -> "Ready"
     | Stopped { ClientIdeMessage.short_user_message; _ } ->
       Printf.sprintf "Stopped(%s)" short_user_message
@@ -43,7 +46,7 @@ module Stop_reason = struct
     | Restarting
     | Testing
 
-  let to_string (t : t) : string =
+  let to_log_string (t : t) : string =
     match t with
     | Crashed -> "crashed"
     | Closed -> "closed"
@@ -69,13 +72,13 @@ type state =
       from actions on our side; all the other states arose from
       responses from clientIdeDaemon. *)
 
-let state_to_string (state : state) : string =
+let state_to_log_string (state : state) : string =
   match state with
   | Uninitialized -> "Uninitialized"
   | Failed_to_initialize { ClientIdeMessage.short_user_message; _ } ->
     Printf.sprintf "Failed_to_initialize(%s)" short_user_message
   | Initialized env ->
-    Printf.sprintf "Initialized(%s)" (Status.to_string env.status)
+    Printf.sprintf "Initialized(%s)" (Status.to_log_string env.status)
   | Stopped (reason, _) ->
     Printf.sprintf "Stopped(%s)" reason.ClientIdeMessage.medium_user_message
 
@@ -95,12 +98,37 @@ type response_emitter = response_wrapper Lwt_message_queue.t
 
 type notification_emitter = ClientIdeMessage.notification Lwt_message_queue.t
 
+module Active_rpc_requests = struct
+  type t = {
+    requests: Telemetry.t IMap.t;
+        (** These are requests which have been sent to the daemon but we haven't yet had
+          a response, e.g. if we sent requests #3 and #4 and #5 and a response #5 has come
+          back, then active would be #3 and #4. *)
+    counter: int;
+        (** Monotonically increasing counter, used as indices in [requests]. E.g. we might
+          at one moment have requests #3 and #4 active, while the counter is at #6. *)
+  }
+
+  let new_ () : t = { requests = IMap.empty; counter = 0 }
+
+  let add (telemetry : Telemetry.t) (t : t) : t * int =
+    let id = t.counter in
+    ({ requests = IMap.add id telemetry t.requests; counter = id + 1 }, id)
+
+  let remove (id : int) (t : t) : t =
+    { t with requests = IMap.remove id t.requests }
+
+  let is_empty (t : t) : bool = IMap.is_empty t.requests
+
+  let values (t : t) : Telemetry.t list = IMap.values t.requests
+end
+
 type t = {
   mutable state: state;
-  mutable active_rpc_count: int;
+  mutable active_rpc_requests: Active_rpc_requests.t;
   state_changed_cv: unit Lwt_condition.t;
       (** Used to notify tasks when the state changes, so that they can wait for the
-    IDE service to be initialized. *)
+      IDE service to be initialized. *)
   daemon_handle: (unit, unit) Daemon.handle;
       (** The handle to the daemon process backing the IDE service.
 
@@ -128,8 +156,8 @@ let log_debug s = Hh_logger.debug ("[ide-service] " ^^ s)
 let set_state (t : t) (new_state : state) : unit =
   log
     "ClientIdeService.set_state %s -> %s"
-    (state_to_string t.state)
-    (state_to_string new_state);
+    (state_to_log_string t.state)
+    (state_to_log_string new_state);
   t.state <- new_state;
   Lwt_condition.broadcast t.state_changed_cv ()
 
@@ -146,7 +174,7 @@ let make (args : ClientIdeMessage.daemon_args) : t =
   let out_fd = Lwt_unix.of_unix_file_descr (Daemon.descr_of_out_channel oc) in
   {
     state = Uninitialized;
-    active_rpc_count = 0;
+    active_rpc_requests = Active_rpc_requests.new_ ();
     state_changed_cv = Lwt_condition.create ();
     daemon_handle;
     in_fd;
@@ -203,7 +231,17 @@ let rpc
 
       (* If any rpc takes too long, we'll ask clientLsp to refresh status
          a short time in, and then again when it's done. *)
-      t.active_rpc_count <- t.active_rpc_count + 1;
+      let telemetry =
+        Telemetry.create ()
+        |> Telemetry.string_ ~key:"tracking_id" ~value:tracking_id
+        |> Telemetry.string_
+             ~key:"message"
+             ~value:(ClientIdeMessage.t_to_string message)
+      in
+      let (active, id) =
+        Active_rpc_requests.add telemetry t.active_rpc_requests
+      in
+      t.active_rpc_requests <- active;
       let (pingPromise : unit Lwt.t) =
         let%lwt () = Lwt_unix.sleep 0.2 in
         progress ();
@@ -212,9 +250,10 @@ let rpc
       let%lwt (response : response_wrapper option) =
         Lwt_message_queue.pop t.response_emitter
       in
-      t.active_rpc_count <- t.active_rpc_count - 1;
+      t.active_rpc_requests <-
+        Active_rpc_requests.remove id t.active_rpc_requests;
       Lwt.cancel pingPromise;
-      if t.active_rpc_count = 0 then progress ();
+      if Active_rpc_requests.is_empty t.active_rpc_requests then progress ();
 
       (* when might t.active_rpc_count <> 0? well, if the caller did
          Lwt.pick [rpc t message1, rpc t message2], then active_rpc_count will
@@ -354,7 +393,7 @@ let process_status_notification
       Printf.sprintf
         "Unexpected notification '%s' in state '%s'"
         (ClientIdeMessage.notification_to_string notification)
-        (state_to_string t.state)
+        (state_to_log_string t.state)
     in
     ClientIdeUtils.log_bug message ~telemetry:true;
     ()
@@ -422,7 +461,7 @@ let stop
     | Some json -> [("data", json)]
   in
   let items =
-    ("stop_reason", stop_reason |> Stop_reason.to_string |> Hh_json.string_)
+    ("stop_reason", stop_reason |> Stop_reason.to_log_string |> Hh_json.string_)
     :: items
   in
   let e = { e with Lsp.Error.data = Some (Hh_json.JSON_Object items) } in
@@ -535,7 +574,10 @@ let get_status (t : t) : Status.t =
   | Failed_to_initialize error_data -> Status.Stopped error_data
   | Stopped (reason, _) -> Status.Stopped reason
   | Initialized { status } ->
-    if Status.is_ready status && t.active_rpc_count > 0 then
-      Status.Rpc
+    if
+      Status.is_ready status
+      && not (Active_rpc_requests.is_empty t.active_rpc_requests)
+    then
+      Status.Rpc (Active_rpc_requests.values t.active_rpc_requests)
     else
       status

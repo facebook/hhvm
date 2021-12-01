@@ -279,8 +279,22 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
         FunctionPointer(_) => Rty::Mutable,
         // This is really just a statement, does not have a value
         Yield(_) => Rty::Mutable,
-        // Operators are all primitive in result
-        Unop(_) | Binop(_) => Rty::Mutable,
+        Binop(b) => {
+            let (bop, e1, e2) = &**b;
+            match bop {
+                // Make more strict in typechecker first, then HHVM
+                ast_defs::Bop::QuestionQuestion if context.is_typechecker => {
+                    match (rty_expr(context, e1), rty_expr(context, e2)) {
+                        (Rty::Readonly, _) | (_, Rty::Readonly) => Rty::Readonly,
+                        (Rty::Mutable, Rty::Mutable) => Rty::Mutable,
+                    }
+                }
+                // All other operators are all primitive in result
+                _ => Rty::Mutable,
+            }
+        }
+        // Unary operators are all primitive in result
+        Unop(_) => Rty::Mutable,
         Pipe(p) => {
             let (lid, left, _) = &**p;
             // The only time the id number matters is for Dollardollar

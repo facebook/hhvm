@@ -1,0 +1,2 @@
+File "null_coalesce2.php", line 5, characters 13-26:
+This expression is readonly, but we expected a mutable value because this function does not return readonly. Please mark it to return readonly if needed. (Parsing[1002])

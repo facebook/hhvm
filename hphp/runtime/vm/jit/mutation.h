@@ -95,27 +95,39 @@ bool retypeDests(IRInstruction*, const IRUnit*);
 void insertNegativeAssertTypes(IRUnit&, const BlockList&);
 
 /*
- * Pass that walks over the dominator tree and replaces uses of SSATmps that
- * have more-refined versions available with uses of the more refined versions.
+ * Pass that rewrites the unit and replaces any SSATmp that has a more
+ * refined version available with that more refined version. A SSATmp
+ * is considered more refined if it is the destination of a
+ * pass-through instruction.
+ *
  * This basically fixes patterns like this:
  *
  *    t1 = LdLoc<Cell>
  *    t2 = CheckType<Obj> t1 -> ...
  *    IncRef t1
  *
- * So that we can replace t1 with t2 in the parts of the code dominated by the
- * definition of t2.
+ * This pass guarantees that no instruction reachable from a
+ * pass-through instruction (on the next edge if a branch) uses the
+ * source of the pass-through instruction. Other passes are allowed to
+ * rely on this post invariant.
+ *
+ * Not only does this ensure we always rely on the most refined type,
+ * it ensures that only one logical copy of a given value is live at a
+ * given time.
  */
-void refineTmps(IRUnit&, const BlockList&, const IdomVector&);
+void refineTmps(IRUnit&);
 
 /*
  * Insert a phi for inputs in blk. none of blk's input edges may be
  * critical, blk->numPreds() must be equal to inputs.size(), and
  * inputs.size() must be greater than 1.
- * If there's already a suitable phi, it will be returned.
+ *
+ * If `forceNew' is false, and if there's already a suitable phi, it
+ * will be returned. If true, a new SSATmp will always be created.
  */
 SSATmp* insertPhi(IRUnit&, Block* blk,
-                  const jit::hash_map<Block*, SSATmp*>& inputs);
+                  const jit::hash_map<Block*, SSATmp*>& inputs,
+                  bool forceNew = false);
 
 /*
  * Remove the i'th dest from `label' and all incoming Jmps, returning its
@@ -127,4 +139,3 @@ SSATmp* deletePhiDest(IRInstruction* label, unsigned i);
 //////////////////////////////////////////////////////////////////////
 
 }}
-

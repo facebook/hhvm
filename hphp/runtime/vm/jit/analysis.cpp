@@ -65,6 +65,10 @@ Block* findDefiningBlock(const SSATmp* t, const IdomVector& idoms) {
       "hasEdges instruction defining a dst had no edges:\n  {}\n",
       srcInst->toString()
     );
+    // A branch which goes to the same block on both edges will pass
+    // the below dominance check, but the SSATmp it produces is never
+    // usable.
+    if (next == taken) return nullptr;
     for (const auto& arc : next->preds()) {
       auto pred = arc.from();
       if (pred != srcInst->block() && !dominates(next, pred, idoms)) {

@@ -21,6 +21,7 @@
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/containers.h"
+#include "hphp/runtime/vm/jit/dce.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/mutation.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
@@ -823,7 +824,11 @@ void gvn(IRUnit& unit) {
   state.globalTable = nullptr;
   // We might have added a new use of a SSATmp past a CheckType or
   // AssertType on it, so refine if necessary.
-  if (changed) refineTmps(unit, rpoBlocks, idoms);
+  if (changed) {
+    // Restore basic invariants before refining.
+    mandatoryDCE(unit);
+    refineTmps(unit);
+  }
 }
 
 }}

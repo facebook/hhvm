@@ -204,6 +204,8 @@ void fixBlockHints(IRUnit& unit) {
   } while (changed);
 }
 
+//////////////////////////////////////////////////////////////////////
+
 void mandatoryPropagation(IRUnit& unit) {
   forEachInst(
     rpoSortCfg(unit),
@@ -213,6 +215,13 @@ void mandatoryPropagation(IRUnit& unit) {
       retypeDests(inst, &unit);
      }
   );
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void refineTmpsPass(IRUnit& unit) {
+  splitCriticalEdges(unit);
+  refineTmps(unit);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -263,6 +272,8 @@ void optimize(IRUnit& unit, TransKind kind) {
       rqtrace::EventGuard trace{"OPT_LOAD"};
       doPass(unit, optimizeLoads, DCE::Full);
       printUnit(6, unit, " after optimizeLoads ");
+
+      doPass(unit, refineTmpsPass, DCE::None);
 
       // Load-elim may have propagated array layout information where
       // it wasn't before.
@@ -323,6 +334,11 @@ void optimize(IRUnit& unit, TransKind kind) {
       RuntimeOption::EvalHHIRGlobalValueNumbering) {
     rqtrace::EventGuard trace{"OPT_GVN"};
     doPass(unit, gvn, DCE::Full);
+  }
+
+  if (kind != TransKind::Profile) {
+    doPass(unit, refineTmpsPass, DCE::None);
+    doPass(unit, cleanCfg, DCE::None);
   }
 
   if (kind != TransKind::Profile && RuntimeOption::EvalHHIRSimplification) {

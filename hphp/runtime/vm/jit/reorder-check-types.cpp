@@ -17,14 +17,11 @@
 #include "hphp/runtime/vm/jit/opt.h"
 
 #include "hphp/runtime/vm/jit/cfg.h"
+#include "hphp/runtime/vm/jit/dce.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/mutation.h"
 #include "hphp/runtime/vm/jit/timer.h"
-
-#include <folly/Lazy.h>
-
-#include <iterator>
 
 namespace HPHP { namespace jit {
 
@@ -64,15 +61,11 @@ void reorderCheckTypes(IRUnit& unit) {
   FTRACE(5, "ReorderCheckTypes:vvvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(5, "ReorderCheckTypes:^^^^^^^^^^^^^^^^^^^^^\n"); };
 
+  splitCriticalEdges(unit);
+
+  auto changed = false;
+
   auto const blocks = rpoSortCfg(unit);
-
-  // This transformation assumes that any use of tmp1 that is dominated by tmp2
-  // actually uses tmp2 (which provides a more refined type) and not tmp1. Thus
-  // we run refineTmps to make sure that this invariant applies.
-  auto const idoms = findDominators(unit, blocks,
-                                    numberBlocks(unit, blocks));
-  refineTmps(unit, blocks, idoms);
-
   for (auto& block : blocks) {
     auto& ct1 = block->back();
     if (!ct1.is(CheckType)) continue;
@@ -83,6 +76,19 @@ void reorderCheckTypes(IRUnit& unit) {
     auto const type1 = ct1.typeParam();
     auto const type2 = ct2.typeParam();
     if (!(type2 < type1)) continue;
+
+    if (!changed) {
+      // This transformation assumes that any use of tmp1 that is
+      // dominated by tmp2 actually uses tmp2 (which provides a more
+      // refined type) and not tmp1. Thus we run refineTmps to make
+      // sure that this invariant applies.
+      //
+      // This can be expensive, so we defer it until we know we're
+      // going to make a change. This does not modify the CFG, so it's
+      // safe to do so.
+      refineTmps(unit);
+    }
+    changed = true;
 
     FTRACE(5, "  - reordering these 2 instructions:\n   - {}\n   - {}\n",
            ct1, ct2);

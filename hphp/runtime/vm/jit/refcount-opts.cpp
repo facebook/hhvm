@@ -2471,7 +2471,7 @@ bool can_sink_inc_through(const IRInstruction& inst) {
   }
 }
 
-void sink_incs(Env& env) {
+bool sink_incs(Env& env) {
   FTRACE(2, "sink_incs ---------------------------------\n");
   jit::vector<IRInstruction*> incs;
 
@@ -2486,6 +2486,7 @@ void sink_incs(Env& env) {
 
   // Process each of the IncRefs, including new ones that are created
   // along the way.
+  auto sunk = false;
   while (!incs.empty()) {
     auto inc = incs.back();
     incs.pop_back();
@@ -2517,7 +2518,7 @@ void sink_incs(Env& env) {
       FTRACE(2, "    ** sink_incs: {} -> {}, {}\n",
              *inc, *new_taken, *new_next);
       remove_helper(env.unit, inc);
-
+      sunk = true;
     } else if (succ.is(Jmp)) {
       // try to sink through trivial jumps (to blocks with one predecessor)
       assertx(block->taken() != nullptr);
@@ -2537,6 +2538,8 @@ void sink_incs(Env& env) {
       remove_helper(env.unit, inc);
     }
   }
+
+  return sunk;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -3382,13 +3385,15 @@ void optimizeRefcounts(IRUnit& unit) {
     pre_incdecs(env, rca, true);
     pre_incdecs(env, rca, false);
   }
-  sink_incs(env);
+  auto const sunk = sink_incs(env);
   weaken_decrefs(env);
 
-  // We may have pushed IncRefs past CheckTypes, which could allow us to
-  // specialize them.
-  insertNegativeAssertTypes(unit, env.rpoBlocks);
-  refineTmps(unit, env.rpoBlocks, env.idoms);
+  if (sunk) {
+    // We sunk IncRefs past CheckTypes, which could allow us to
+    // specialize them.
+    insertNegativeAssertTypes(unit, env.rpoBlocks);
+    refineTmps(unit);
+  }
 }
 
 /*

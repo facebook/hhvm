@@ -1307,7 +1307,7 @@ tv_lval resolveMemberKey(const MemberKey& memberKey) {
   return Prop<MOpMode::None>(
       instructionState.tvTempBase,
       arGetContextClass(vmfp()),
-      instructionState.base,
+      *instructionState.base,
       key,
       ReadonlyOp::Readonly);
 }

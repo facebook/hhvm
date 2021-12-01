@@ -174,8 +174,7 @@ class ReflectionParameter implements Reflector {
    * argument list is available.
    *
    */
-  <<__Pure, __MaybeMutable>>
-  public function toString() {
+  public function toString()[] {
     $type = $this->getTypeText();
     if ($type !== '') {
       if ($this->isOptional() && $this->getDefaultValue() === null) {

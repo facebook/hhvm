@@ -377,12 +377,11 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   }
 
   // Implementation of __toString
-  <<__Pure, __MaybeMutable>>
   final protected function __toStringHelper(
     $type,
     varray<string> $preAttrs = varray[],
     varray<string> $funcAttrs = varray[],
-  ): string {
+  )[]: string {
     $ret = '';
     if ($doc = $this->getDocComment()) {
       $ret .= $doc . "\n";

@@ -4115,21 +4115,27 @@ void simplifyPass(IRUnit& unit) {
   Timer timer{Timer::optimize_simplify, unit.logEntry().get_pointer()};
 
   auto reachable = boost::dynamic_bitset<>(unit.numBlocks());
-  reachable.set(unit.entry()->id());
 
-  auto const sortedBlocks = rpoSortCfg(unit);
-  for (auto block : sortedBlocks) {
-    if (!reachable.test(block->id())) continue;
+  {
+    jit::stack<Block*> worklist;
+    worklist.push(unit.entry());
+    while (!worklist.empty()) {
+      auto const block = worklist.top();
+      worklist.pop();
 
-    if (!block->isUnreachable()) {
-      for (auto& inst : *block) simplifyInPlace(unit, &inst);
-    }
+      if (reachable.test(block->id())) continue;
+      reachable.set(block->id());
 
-    if (auto const b = block->next()) {
-      if (!b->isUnreachable()) reachable.set(b->id());
-    }
-    if (auto const b = block->taken()) {
-      if (!b->isUnreachable()) reachable.set(b->id());
+      if (!block->isUnreachable()) {
+        for (auto& inst : *block) simplifyInPlace(unit, &inst);
+      }
+
+      if (auto const b = block->next()) {
+        if (!b->isUnreachable()) worklist.push(b);
+      }
+      if (auto const b = block->taken()) {
+        if (!b->isUnreachable()) worklist.push(b);
+      }
     }
   }
 

@@ -602,6 +602,16 @@ Flags handle_general_effects(Local& env,
           }
         );
 
+      case LdInitPropAddr: {
+        // If know the location can't be Uninit, we can dispense with
+        // the check (this will be lowered into a LdPropAddr).
+        auto const meta = env.global.ainfo.find(canonicalize(m.loads));
+        if (!meta || !env.state.avail[meta->index]) return std::nullopt;
+        auto const& type = env.state.tracked[meta->index].knownType;
+        if (type.maybe(TUninit)) return std::nullopt;
+        return FJmpNext{};
+      }
+
       default:
         return std::nullopt;
     }
@@ -1184,7 +1194,7 @@ void optimize_inst(Global& env, IRInstruction& inst, Flags flags) {
              redundantFlags.knownType.toString(),
              resolved->toString());
 
-      // If this insttruction had control flow, add a Jmp to the next
+      // If this instruction had control flow, add a Jmp to the next
       // block. (We assume that if we're making it redundant, any
       // taken edge isn't used).
       if (auto const next = inst.next()) {
@@ -1221,7 +1231,20 @@ void optimize_inst(Global& env, IRInstruction& inst, Flags flags) {
 
     [&] (FJmpNext) {
       FTRACE(2, "      unnecessary\n");
-      env.unit.replace(&inst, Jmp, inst.next());
+      if (inst.is(LdInitPropAddr)) {
+        // Special case: Since LdInitPropAddr produces a result, if
+        // the init check is unnecessary, turn it into a LdPropAddr
+        // and Jmp. If the Lval it produces is also unnecessary, it
+        // will be later DCEd away.
+        auto const block = inst.block();
+        auto const jmp = env.unit.gen(Jmp, inst.bcctx(), inst.next());
+        block->insert(++block->iteratorTo(&inst), jmp);
+        inst.setOpcode(LdPropAddr);
+        inst.setNext(nullptr);
+        inst.setTaken(nullptr);
+      } else {
+        env.unit.replace(&inst, Jmp, inst.next());
+      }
       ++env.jumpsRemoved;
     },
 

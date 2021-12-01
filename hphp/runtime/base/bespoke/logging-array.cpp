@@ -129,21 +129,22 @@ ArrayData* makeArrayOfSelectedLayout(ArrayData* ad) {
 
   auto const cached = profile->getStaticBespokeArray();
   if (cached) {
-    ad->decReleaseCheck();
+    FTRACE(2, "  Using static bespoke array: {}\n",
+           Layout::FromIndex(cached->layoutIndex())->describe());
     return cached;
   }
 
   auto const layout = profile->getLayout().bespokeLayout();
-  if (!layout) return ad;
+  if (!layout) return maybeMakeLoggingArray(ad, profile);
 
-  FTRACE_MOD(Trace::sib, 2, "  Trying layout: {}\n", layout->describe());
   auto const bespoke = layout->coerce(ad);
   if (!bespoke) {
-    // XXX: Perhaps we should stop inline interp here since the bespoke profile
-    // appears not to fit well.
-    FTRACE_MOD(Trace::sib, 2, "  Coercion to layout failed.\n");
+    // TODO(kshaunak): If we're doing inline interp, we may want to stop here
+    // because the profiled layoutappears not to fit well.
+    FTRACE(2, "  Layout coercion failed: {}\n", layout->describe());
     return ad;
   }
+  FTRACE(2, "  Using bespoke layout: {}\n", layout->describe());
   ad->decReleaseCheck();
   return bespoke;
 }

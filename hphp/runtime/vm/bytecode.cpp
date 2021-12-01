@@ -1102,9 +1102,7 @@ void profileArrLikePropsForInterp(ObjectData* obj) {
 }
 
 ArrayData* maybeMakeBespokeArray(ArrayData* ad) {
-  return g_context->doingInlineInterp()
-    ? bespoke::makeArrayOfSelectedLayout(ad)
-    : bespoke::maybeMakeLoggingArray(ad);
+  return bespoke::makeArrayOfSelectedLayout(ad);
 }
 
 const ArrayData* maybeMakeBespokeArray(const ArrayData* ad) {

@@ -1,6 +1,7 @@
 # pyre-strict
 
 import abc
+import os
 import unittest
 from typing import Generic, Optional, TypeVar
 
@@ -57,6 +58,16 @@ class TestCase(unittest.TestCase, Generic[T]):
         test_driver.tearDownClass()
 
     def setUp(self) -> None:
+
+        # These scripts assume working directory fbcode.
+        cwd = os.path.basename(os.getcwd())
+        if cwd == "fbcode":
+            pass  # buck
+        elif cwd == "fbsource":
+            os.chdir("fbcode")  # buck2
+        else:
+            raise RuntimeError("Invalid working directory")
+
         self.test_driver.setUp()
 
     def tearDown(self) -> None:

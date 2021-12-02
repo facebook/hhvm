@@ -550,6 +550,9 @@ impl<'a> NamespaceBuilder<'a> {
             let name = xhp_name_opt.map_or(name, |s| self.arena.alloc_str(&s));
             if !name.starts_with('\\') {
                 namespaces::elaborate_into_current_ns_in(self.arena, env, name)
+            } else if self.simplify_naming_for_facts {
+                // allow :foo:bar to be elaborated into \currentnamespace\foo\bar
+                namespaces::elaborate_into_current_ns_in(self.arena, env, &name[1..])
             } else {
                 name
             }
@@ -4910,7 +4913,21 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
     ) -> Self::R {
         let pos = self.merge_positions(class_name, value);
         let Id(class_name_pos, class_name_str) = match self.expect_name(class_name) {
-            Some(id) => self.elaborate_id(id),
+            Some(id) => {
+                if matches!(class_name, Node::XhpName(..))
+                    && self.opts.disable_xhp_element_mangling
+                    && self.retain_or_omit_user_attributes_for_facts
+                {
+                    // for facts, allow xhp class consts to be mangled later
+                    // on even when xhp_element_mangling is disabled
+                    let mut qualified = String::with_capacity_in(id.1.len() + 1, self.arena);
+                    qualified.push_str("\\");
+                    qualified.push_str(id.1);
+                    Id(id.0, self.arena.alloc_str(&qualified))
+                } else {
+                    self.elaborate_id(id)
+                }
+            }
             None => return Node::Ignored(SK::ScopeResolutionExpression),
         };
         let class_id = self.alloc(aast::ClassId(
@@ -5057,7 +5074,19 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                     (_, "class"),
                 )),
             )) => {
-                let name = self.elaborate_id(Id(pos, class_name));
+                let name = if class_name.starts_with(':')
+                    && self.opts.disable_xhp_element_mangling
+                    && self.retain_or_omit_user_attributes_for_facts
+                {
+                    // for facts, allow xhp class consts to be mangled later on
+                    // even when xhp_element_mangling is disabled
+                    let mut qualified = String::with_capacity_in(class_name.len() + 1, self.arena);
+                    qualified.push_str("\\");
+                    qualified.push_str(class_name);
+                    Id(pos, self.arena.alloc_str(&qualified))
+                } else {
+                    self.elaborate_id(Id(pos, class_name))
+                };
                 Some(ClassNameParam { name, full_pos })
             }
             Node::StringLiteral((name, full_pos))

@@ -175,6 +175,7 @@ pub mod compile_ffi {
         fn hackc_facts_to_json_cpp_ffi(facts: FactsResult, source_text: &CxxString) -> String;
 
         unsafe fn hackc_decls_to_facts_cpp_ffi(
+            decl_flags: i32,
             decl_result: &DeclResult,
             source_text: &CxxString,
         ) -> FactsResult;
@@ -604,6 +605,7 @@ pub fn hackc_facts_to_json_cpp_ffi(
 }
 
 pub fn hackc_decls_to_facts_cpp_ffi(
+    decl_flags: i32,
     decl_result: &compile_ffi::DeclResult,
     source_text: &CxxString,
 ) -> compile_ffi::FactsResult {
@@ -615,9 +617,11 @@ pub fn hackc_decls_to_facts_cpp_ffi(
             ..Default::default()
         }
     } else {
+        let disable_xhp_element_mangling = ((1 << 0) & decl_flags) != 0;
         let facts = compile_ffi::Facts::from(facts::Facts::facts_of_decls(
             &(*decl_result.decls).0,
             &(*decl_result.attributes).0,
+            disable_xhp_element_mangling,
         ));
         compile_ffi::FactsResult {
             facts: facts.into(),

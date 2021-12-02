@@ -7,7 +7,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use digest::Digest;
-use hhbc_by_ref_hhbc_string_utils::strip_global_ns;
+use hhbc_by_ref_hhbc_string_utils::{mangle_xhp_id, strip_global_ns};
 use naming_special_names_rust::user_attributes;
 use oxidized_by_ref::{
     ast_defs::{Abstraction, ClassishKind},
@@ -98,16 +98,22 @@ impl Facts {
         self.file_attributes.is_empty()
     }
 
-    pub fn facts_of_decls(decls: &Decls<'_>, file_attributes: &[&UserAttribute<'_>]) -> Facts {
+    pub fn facts_of_decls(
+        decls: &Decls<'_>,
+        file_attributes: &[&UserAttribute<'_>],
+        disable_xhp_element_mangling: bool,
+    ) -> Facts {
         // 10/15/2021 TODO(T103413083): Fill out the implementation
 
         let mut types = TypeFactsByName::new();
-        decls.classes().for_each(|(name, decl)| {
-            let name = if decl.is_xhp && !decl.has_xhp_keyword {
-                format_xhp(name)
-            } else {
-                format(name)
-            };
+        decls.classes().for_each(|(class_name, decl)| {
+            let mut name = format(class_name);
+            if !disable_xhp_element_mangling && decl.is_xhp {
+                // strips the namespace and mangles the class id
+                if let Some(id) = name.rsplit('\\').next() {
+                    name = id.to_string();
+                }
+            }
             let type_fact = TypeFacts::of_class_decl(decl);
             add_or_update_classish_decl(name, type_fact, &mut types);
         });
@@ -379,20 +385,16 @@ fn extract_type_name<'a>(ty: &Ty<'a>) -> String {
     }
 }
 
-fn format<'a>(type_name: &'a str) -> String {
-    let name = strip_global_ns(type_name);
-    let is_xhp = !name.is_empty() && name.starts_with(':');
-    if type_name.starts_with('\\') && is_xhp {
-        format_xhp(name)
-    } else {
-        String::from(name)
+fn format<'a>(original_name: &'a str) -> String {
+    let unqualified = strip_global_ns(original_name);
+    match unqualified.rsplit('\\').next() {
+        Some(id) if original_name.starts_with('\\') && id.starts_with(':') => {
+            // only mangle already qualified xhp ids - avoid mangling string literals
+            // containing an xhp name, for example an attribute param ':foo:bar'
+            mangle_xhp_id(id.to_string())
+        }
+        _ => String::from(unqualified),
     }
-}
-
-fn format_xhp<'a>(name: &'a str) -> String {
-    let name = strip_global_ns(name);
-    assert!(name.starts_with(':'));
-    format!("xhp_{}", name[1..].replace(":", "__").replace("-", "_"))
 }
 
 fn modifiers_to_flags(flags: isize, is_final: bool, abstraction: &Abstraction) -> isize {

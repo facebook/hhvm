@@ -152,7 +152,16 @@ fn elaborate_raw_id<'a>(
     simplify_naming_for_facts: bool,
 ) -> Cow<'a, str> {
     let id = if kind == ElaborateKind::Class && nsenv.disable_xhp_element_mangling() {
-        elaborate_xhp_namespace(id).map_or(Cow::Borrowed(id), Cow::Owned)
+        let qualified = elaborate_xhp_namespace(id);
+        match qualified {
+            None => Cow::Borrowed(id),
+            Some(s) if id.starts_with(":") && simplify_naming_for_facts => {
+                // allow :foo:bar to be elaborated into
+                // \currentnamespace\foo\bar rather than \foo\bar
+                Cow::Owned(s.get(1..).unwrap().to_string())
+            }
+            Some(s) => Cow::Owned(s),
+        }
     } else {
         Cow::Borrowed(id)
     };

@@ -24,7 +24,6 @@ let validate_classname (pos, hint) =
   | Aast.Habstr _
   | Aast.Haccess _
   | Aast.Hdynamic
-  | Aast.Hsupportdynamic
   | Aast.Hsoft _
   | Aast.Hlike _
   | Aast.Hnothing ->
@@ -85,7 +84,6 @@ let rec check_hint env (pos, hint) =
   | Aast.Hany
   | Aast.Herr
   | Aast.Hdynamic
-  | Aast.Hsupportdynamic
   | Aast.Hnonnull
   | Aast.Hmixed
   | Aast.Hthis

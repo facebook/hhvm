@@ -1152,6 +1152,16 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         self.node_to_ty_(node, true)
     }
 
+    fn make_supportdynamic(&self, pos: &'a Pos<'a>) -> Ty_<'a> {
+        let name = "\\HH\\supportdyn";
+        Ty_::Tapply(self.alloc((
+            (pos, name),
+            self.alloc([self.alloc(Ty(
+                self.alloc(Reason::witness_from_decl(pos)),
+                Ty_::Tnonnull,
+            ))]),
+        )))
+    }
     fn node_to_ty_(&self, node: Node<'a>, allow_non_ret_ty: bool) -> Option<&'a Ty<'a>> {
         match node {
             Node::Ty(Ty(reason, Ty_::Tprim(aast::Tprim::Tvoid))) if !allow_non_ret_ty => {
@@ -1254,13 +1264,13 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                         "nothing" => Ty_::Tunion(&[]),
                         "nonnull" => {
                             if self.opts.everything_sdt {
-                                Ty_::Tsupportdynamic
+                                self.make_supportdynamic(pos)
                             } else {
                                 Ty_::Tnonnull
                             }
                         }
                         "dynamic" => Ty_::Tdynamic,
-                        "supportdynamic" => Ty_::Tsupportdynamic,
+                        "supportdynamic" => self.make_supportdynamic(pos),
                         "varray_or_darray" | "vec_or_dict" => {
                             let key_type = self.vec_or_dict_key(pos);
                             let value_type = self.alloc(Ty(self.alloc(Reason::hint(pos)), TANY_));
@@ -2632,7 +2642,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                         self.alloc(Reason::hint(token_pos(self))),
                         Ty_::Toption(self.alloc(Ty(
                             self.alloc(Reason::hint(token_pos(self))),
-                            Ty_::Tsupportdynamic,
+                            self.make_supportdynamic(token_pos(self)),
                         ))),
                     )))
                 } else {

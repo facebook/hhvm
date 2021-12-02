@@ -1335,7 +1335,6 @@ and get_tyvars_i env (ty : internal_type) =
     | Tnonnull
     | Terr
     | Tdynamic
-    | Tsupportdynamic
     | Tprim _
     | Tneg _ ->
       (env, ISet.empty, ISet.empty)

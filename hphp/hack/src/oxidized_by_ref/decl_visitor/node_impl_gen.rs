@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a59491f5be83c3a72265063fc40e7ba1>>
+// @generated SignedSource<<3138e5839940a93732ad4586e0c7be40>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1031,7 +1031,6 @@ impl<'a> Node<'a> for Ty_<'a> {
             Ty_::Terr => {}
             Ty_::Tnonnull => {}
             Ty_::Tdynamic => {}
-            Ty_::Tsupportdynamic => {}
             Ty_::Toption(ref __binding_0) => __binding_0.accept(v),
             Ty_::Tprim(ref __binding_0) => __binding_0.accept(v),
             Ty_::Tfun(ref __binding_0) => __binding_0.accept(v),

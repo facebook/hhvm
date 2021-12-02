@@ -602,7 +602,7 @@ end = struct
       | Aast_defs.Hshape shape_info -> aux_shape acc shape_info
       | Aast_defs.(
           ( Hany | Herr | Hmixed | Hnonnull | Hprim _ | Hthis | Hdynamic
-          | Hsupportdynamic | Hnothing | Hfun_context _ | Hvar _ )) ->
+          | Hnothing | Hfun_context _ | Hvar _ )) ->
         acc
     and auxs acc = function
       | [] -> acc
@@ -1279,7 +1279,6 @@ end = struct
       Fmt.string ppf __ANY__
     | Aast.Hthis -> Fmt.string ppf "this"
     | Aast.Hdynamic -> Fmt.string ppf "dynamic"
-    | Aast.Hsupportdynamic -> Fmt.string ppf "supportdynamic"
     | Aast.Hnothing -> Fmt.string ppf "nothing"
     | Aast.Hmixed -> Fmt.string ppf "mixed"
     | Aast.Hnonnull -> Fmt.string ppf "nonnull"
@@ -1912,7 +1911,6 @@ end = struct
         | Hprim _
         | Hthis
         | Hdynamic
-        | Hsupportdynamic
         | Hnothing
         | Hunion _
         | Hintersection _

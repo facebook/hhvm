@@ -19,8 +19,6 @@ class type ['a] decl_type_visitor_type =
 
     method on_tdynamic : 'a -> Typing_reason.decl_t -> 'a
 
-    method on_tsupportdynamic : 'a -> Typing_reason.decl_t -> 'a
-
     method on_tthis : 'a -> Typing_reason.decl_t -> 'a
 
     method on_tvarray_or_darray :
@@ -104,8 +102,6 @@ class type ['a] locl_type_visitor_type =
     method on_tnonnull : 'a -> Typing_reason.t -> 'a
 
     method on_tdynamic : 'a -> Typing_reason.t -> 'a
-
-    method on_tsupportdynamic : 'a -> Typing_reason.t -> 'a
 
     method on_toption : 'a -> Typing_reason.t -> Typing_defs.locl_ty -> 'a
 

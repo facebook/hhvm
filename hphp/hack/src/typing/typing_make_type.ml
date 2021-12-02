@@ -102,11 +102,13 @@ let nonnull r = mk (r, Tnonnull)
 
 let dynamic r = mk (r, Tdynamic)
 
-let supportdynamic r = mk (r, Tsupportdynamic)
-
 let like r ty = mk (r, Tlike ty)
 
 let locl_like r ty = mk (r, Tunion [dynamic r; ty])
+
+let supportdyn r ty = mk (r, Tnewtype (SN.Classes.cSupportDyn, [ty], ty))
+
+let supportdynamic r = supportdyn r (nonnull r)
 
 let mixed r = mk (r, Toption (nonnull r))
 

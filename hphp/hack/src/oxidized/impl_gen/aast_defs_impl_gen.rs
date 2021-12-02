@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<07243a70fe7bd489c5a9fa65450a8caa>>
+// @generated SignedSource<<bef73ac508a97f10fede49cf09df7a88>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -247,9 +247,6 @@ impl Hint_ {
     pub fn mk_hdynamic() -> Self {
         Hint_::Hdynamic
     }
-    pub fn mk_hsupportdynamic() -> Self {
-        Hint_::Hsupportdynamic
-    }
     pub fn mk_hnothing() -> Self {
         Hint_::Hnothing
     }
@@ -382,12 +379,6 @@ impl Hint_ {
     pub fn is_hdynamic(&self) -> bool {
         match self {
             Hint_::Hdynamic => true,
-            _ => false,
-        }
-    }
-    pub fn is_hsupportdynamic(&self) -> bool {
-        match self {
-            Hint_::Hsupportdynamic => true,
             _ => false,
         }
     }

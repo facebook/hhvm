@@ -108,7 +108,6 @@ let rec truthiness env ty =
   | Tany _
   | Terr
   | Tdynamic
-  | Tsupportdynamic
   | Tvar _ ->
     Unknown
   | Tnonnull
@@ -253,7 +252,6 @@ let rec find_sketchy_types env acc ty =
   | Tany _
   | Tnonnull
   | Tdynamic
-  | Tsupportdynamic
   | Terr
   | Tprim _
   | Tfun _

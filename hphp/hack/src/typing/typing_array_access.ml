@@ -647,7 +647,6 @@ let rec array_get
       | Tunapplied_alias _ ->
         Typing_defs.error_Tunapplied_alias_in_illegal_context ()
       | Tnonnull
-      | Tsupportdynamic
       | Tprim _
       | Tfun _
       | Tclass _
@@ -840,10 +839,10 @@ let assign_array_append_with_err ~array_pos ~expr_pos ur env ty1 ty2 =
       | (_, Tunapplied_alias _) ->
         Typing_defs.error_Tunapplied_alias_in_illegal_context ()
       | ( _,
-          ( Tnonnull | Tsupportdynamic | Tdarray _ | Tvec_or_dict _
-          | Tvarray_or_darray _ | Toption _ | Tprim _ | Tvar _ | Tfun _
-          | Tclass _ | Ttuple _ | Tshape _ | Tunion _ | Tintersection _
-          | Tgeneric _ | Tnewtype _ | Tdependent _ | Taccess _ | Tneg _ ) ) ->
+          ( Tnonnull | Tdarray _ | Tvec_or_dict _ | Tvarray_or_darray _
+          | Toption _ | Tprim _ | Tvar _ | Tfun _ | Tclass _ | Ttuple _
+          | Tshape _ | Tunion _ | Tintersection _ | Tgeneric _ | Tnewtype _
+          | Tdependent _ | Taccess _ | Tneg _ ) ) ->
         let (env, ty) = error_assign_array_append env expr_pos ty1 in
         let ty_nothing = Typing_make_type.nothing Reason.none in
         (env, ty, Error (ty, ty_nothing), Error (ty2, ty_nothing)))
@@ -1233,7 +1232,6 @@ let assign_array_get_with_err
         Typing_defs.error_Tunapplied_alias_in_illegal_context ()
       | Toption _
       | Tnonnull
-      | Tsupportdynamic
       | Tprim _
       | Tunion _
       | Tintersection _

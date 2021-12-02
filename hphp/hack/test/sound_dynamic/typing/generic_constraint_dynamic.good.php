@@ -16,6 +16,6 @@ function make<<<__RequireDynamic>>T as dynamic>(T $x): C<T> {
 function testit():void {
   $x = new C<int>(3);
   $y = make<string>("A");
-  //$a = new C(3);
-  //$b = make("A");
+  $a = new C(3);
+  $b = make("A");
 }

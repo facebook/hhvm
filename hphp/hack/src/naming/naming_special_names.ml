@@ -74,6 +74,8 @@ module Classes = struct
 
   (* Classes that can be spliced into ExpressionTrees *)
   let cSpliceable = "\\Spliceable"
+
+  let cSupportDyn = "\\HH\\supportdyn"
 end
 
 module Collections = struct
@@ -608,7 +610,6 @@ module Typehints = struct
           nonnull;
           this;
           dynamic;
-          supportdynamic;
           nothing;
           int;
           bool;
@@ -641,7 +642,6 @@ module Typehints = struct
     || String.equal x mixed
     || String.equal x arraykey
     || String.equal x dynamic
-    || String.equal x supportdynamic
     || String.equal x wildcard
     || String.equal x null
     || String.equal x nonnull

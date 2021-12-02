@@ -55,7 +55,6 @@ let overload_extract_from_awaitable env ~p opt_ty_maybe =
     | Tvarray_or_darray _
     | Tvec_or_dict _
     | Tnonnull
-    | Tsupportdynamic
     | Tprim _
     | Tvar _
     | Tfun _
@@ -77,7 +76,6 @@ let overload_extract_from_awaitable env ~p opt_ty_maybe =
         | Tunapplied_alias _ ->
           Typing_defs.error_Tunapplied_alias_in_illegal_context ()
         | Tnonnull
-        | Tsupportdynamic
         | Tvarray _
         | Tdarray _
         | Tvarray_or_darray _

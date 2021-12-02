@@ -34,7 +34,6 @@ let check_param : env -> Nast.fun_param -> unit =
       | Tany _
       | Terr
       | Tdynamic
-      | Tsupportdynamic
       | Tneg _ ->
         let (_ : Typing_env_types.env) =
           Typing_local_ops.enforce_memoize_object pos env

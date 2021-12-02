@@ -23,8 +23,6 @@ class type ['a] decl_type_visitor_type =
 
     method on_tdynamic : 'a -> decl_phase Reason.t_ -> 'a
 
-    method on_tsupportdynamic : 'a -> decl_phase Reason.t_ -> 'a
-
     method on_tthis : 'a -> decl_phase Reason.t_ -> 'a
 
     method on_tvarray_or_darray :
@@ -83,8 +81,6 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
     method on_tnonnull acc _ = acc
 
     method on_tdynamic acc _ = acc
-
-    method on_tsupportdynamic acc _ = acc
 
     method on_tthis acc _ = acc
 
@@ -154,7 +150,6 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
       | Tmixed -> this#on_tmixed acc r
       | Tnonnull -> this#on_tnonnull acc r
       | Tdynamic -> this#on_tdynamic acc r
-      | Tsupportdynamic -> this#on_tsupportdynamic acc r
       | Tthis -> this#on_tthis acc r
       | Tdarray (ty1, ty2) -> this#on_tdarray acc r ty1 ty2
       | Tvarray ty -> this#on_tvarray acc r ty
@@ -183,8 +178,6 @@ class type ['a] locl_type_visitor_type =
     method on_tnonnull : 'a -> Reason.t -> 'a
 
     method on_tdynamic : 'a -> Reason.t -> 'a
-
-    method on_tsupportdynamic : 'a -> Reason.t -> 'a
 
     method on_toption : 'a -> Reason.t -> locl_ty -> 'a
 
@@ -248,8 +241,6 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
     method on_tnonnull acc _ = acc
 
     method on_tdynamic acc _ = acc
-
-    method on_tsupportdynamic acc _ = acc
 
     method on_toption acc _ ty = this#on_type acc ty
 
@@ -333,7 +324,6 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
       | Terr -> this#on_terr acc r
       | Tnonnull -> this#on_tnonnull acc r
       | Tdynamic -> this#on_tdynamic acc r
-      | Tsupportdynamic -> this#on_tsupportdynamic acc r
       | Toption ty -> this#on_toption acc r ty
       | Tprim prim -> this#on_tprim acc r prim
       | Tvar id -> this#on_tvar acc r id

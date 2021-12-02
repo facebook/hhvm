@@ -53,6 +53,8 @@ pub static TYPES: &[&str] = &[
     "Shapes",
     "SleepWaitHandle",
     "StaticWaitHandle",
+    "supportdyn",
+    "supportdynamic",
     "Traversable",
     "typename",
     "TypeStructure",

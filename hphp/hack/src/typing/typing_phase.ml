@@ -115,7 +115,7 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
   | Terr -> (env, TUtils.terr env r)
   | Tany _ -> (env, mk (r, TUtils.tany env))
   | Tvar _var -> Env.new_global_tyvar env r
-  | (Tnonnull | Tprim _ | Tdynamic | Tsupportdynamic) as x -> (env, mk (r, x))
+  | (Tnonnull | Tprim _ | Tdynamic) as x -> (env, mk (r, x))
   | Tmixed -> (env, MakeType.mixed r)
   | Tthis ->
     let ty =

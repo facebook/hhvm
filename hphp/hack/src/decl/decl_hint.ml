@@ -99,7 +99,6 @@ and hint_ p env = function
   | Hnonnull -> Tnonnull
   | Hthis -> Tthis
   | Hdynamic -> Tdynamic
-  | Hsupportdynamic -> Tsupportdynamic
   | Hnothing -> Tunion []
   | Hdarray (h1, h2) -> Tdarray (hint env h1, hint env h2)
   | Hvarray h -> Tvarray (hint env h)

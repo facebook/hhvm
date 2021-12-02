@@ -138,9 +138,7 @@ struct
     mk (reason p, ty_ x)
 
   and ty_ : decl_phase ty_ -> decl_phase ty_ = function
-    | ( Tany _ | Tthis | Terr | Tmixed | Tnonnull | Tdynamic | Tsupportdynamic
-      | Tvar _ ) as x ->
-      x
+    | (Tany _ | Tthis | Terr | Tmixed | Tnonnull | Tdynamic | Tvar _) as x -> x
     | Tdarray (ty1, ty2) -> Tdarray (ty ty1, ty ty2)
     | Tvarray root_ty -> Tvarray (ty root_ty)
     | Tvarray_or_darray (ty1, ty2) -> Tvarray_or_darray (ty ty1, ty ty2)

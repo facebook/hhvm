@@ -4,7 +4,7 @@
 <<__SupportDynamicType>>
 class C { }
 function returnSD(?C $c): C {
-  if ($c is supportdynamic) {
+  if ($c is nonnull) {
     return $c;
   }
   else return new C();

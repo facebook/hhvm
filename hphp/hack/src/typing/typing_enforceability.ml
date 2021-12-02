@@ -108,7 +108,6 @@ let get_enforcement (env : env) (ty : decl_ty) : Typing_defs.enforcement =
         Enforced
       else
         Unenforced
-    | Tsupportdynamic -> Unenforced
     | Tfun _ -> Unenforced
     | Ttuple _ -> Unenforced
     | Tunion [] -> Enforced

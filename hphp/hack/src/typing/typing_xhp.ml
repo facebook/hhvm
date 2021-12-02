@@ -46,7 +46,6 @@ let rec walk_and_gather_xhp_ ~env ~pos cty =
   match get_node cty with
   | Tany _
   | Terr
-  | Tsupportdynamic
   | Tdynamic ->
     (env, [], [])
   | Tunion tyl ->

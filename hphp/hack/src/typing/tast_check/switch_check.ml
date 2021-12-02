@@ -150,7 +150,6 @@ let rec check_exhaustiveness_ env pos ty caselist enum_coming_from_unresolved =
   | Ttuple _
   | Tshape _
   | Tdynamic
-  | Tsupportdynamic
   | Taccess _
   | Tneg _ ->
     env

@@ -35,7 +35,6 @@ let rec of_decl_ty (ty : decl_ty) : string =
     "mixed"
   | Tnonnull -> "nonnull"
   | Tdynamic -> "dynamic"
-  | Tsupportdynamic -> "supportdynamic"
   | Tthis -> "this"
   | Toption ty ->
     (match get_node ty with

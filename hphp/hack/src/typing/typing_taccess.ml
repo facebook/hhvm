@@ -425,7 +425,6 @@ let rec expand ctx env root : _ * result =
   | Tvarray_or_darray _
   | Tfun _
   | Tdynamic
-  | Tsupportdynamic
   | Toption _
   | Tneg _ ->
     (env, Missing err)

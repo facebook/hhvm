@@ -44,7 +44,6 @@ let rec is_stringish env ty =
   | Tany _
   | Terr
   | Tdynamic
-  | Tsupportdynamic
   | Tnonnull
   | Tprim _
   | Tneg _ ->

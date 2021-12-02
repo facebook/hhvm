@@ -428,10 +428,9 @@ and simplify_union_ ~approx_cancel_neg env ty1 ty2 r =
           | _ -> (env, Some (MakeType.intersection r (union_ty :: common_tyl))))))
     (* TODO with Tclass, union type arguments if covariant *)
     | ( ( _,
-          ( Tprim _ | Tdynamic | Tsupportdynamic | Tgeneric _ | Tnewtype _
-          | Tdependent _ | Tclass _ | Ttuple _ | Tfun _ | Tshape _ | Terr
-          | Tvar _ | Tvarray _ | Tdarray _ | Tvarray_or_darray _
-          | Tvec_or_dict _
+          ( Tprim _ | Tdynamic | Tgeneric _ | Tnewtype _ | Tdependent _
+          | Tclass _ | Ttuple _ | Tfun _ | Tshape _ | Terr | Tvar _ | Tvarray _
+          | Tdarray _ | Tvarray_or_darray _ | Tvec_or_dict _
           (* If T cannot be null, `union T nonnull = nonnull`. However, it's hard
            * to say whether a given T can be null - e.g. opaque newtypes, dependent
            * types, etc. - so for now we leave it here.

@@ -88,7 +88,6 @@ pub(crate) fn has_reified_type_constraint<'a, 'arena>(
         | Hint_::Hthis
         | Hint_::Hnothing
         | Hint_::Hdynamic
-        | Hint_::Hsupportdynamic
         | Hint_::Htuple(_)
         | Hint_::Hunion(_)
         | Hint_::Hintersection(_)
@@ -139,7 +138,6 @@ fn remove_awaitable(h: aast::Hint) -> aast::Hint {
         | Hint_::Hprim(_)
         | Hint_::Hthis
         | Hint_::Hnothing
-        | Hint_::Hsupportdynamic
         | Hint_::Hdynamic => panic!("TODO Unimplemented Did not exist on legacy AST"),
     }
 }
@@ -243,7 +241,6 @@ pub(crate) fn remove_erased_generics<'a, 'arena>(
             | Hint_::Hprim(_)
             | Hint_::Hthis
             | Hint_::Hnothing
-            | Hint_::Hsupportdynamic
             | Hint_::Hdynamic => panic!("TODO Unimplemented Did not exist on legacy AST"),
             Hint_::HfunContext(_) | Hint_::Hvar(_) => {
                 panic!("Coeffects are currently erased during compilation")

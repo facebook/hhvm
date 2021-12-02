@@ -11,22 +11,14 @@ Some type arguments violate their constraints (Typing[4323])
   File "generic_constraint_dynamic.bad.php", line 20, characters 13-13:
   Type `D` is not a subtype of `dynamic` under dynamic-aware subtyping
 File "generic_constraint_dynamic.bad.php", line 21, characters 14-20:
-Invalid argument (Typing[4323])
-  File "generic_constraint_dynamic.bad.php", line 5, characters 29-29:
-  `T` is a constrained type parameter
+Invalid argument (Typing[4110])
   File "generic_constraint_dynamic.bad.php", line 5, characters 34-40:
-  This type constraint is violated
-  File "generic_constraint_dynamic.bad.php", line 5, characters 34-40:
-  Expected `supportdynamic`
+  Expected `dynamic`
   File "generic_constraint_dynamic.bad.php", line 21, characters 18-18:
-  But got `D`
+  Type `D` is not a subtype of `dynamic` under dynamic-aware subtyping
 File "generic_constraint_dynamic.bad.php", line 22, characters 13-19:
-Invalid argument (Typing[4323])
-  File "generic_constraint_dynamic.bad.php", line 12, characters 35-35:
-  `T` is a constrained type parameter
+Invalid argument (Typing[4110])
   File "generic_constraint_dynamic.bad.php", line 12, characters 40-46:
-  This type constraint is violated
-  File "generic_constraint_dynamic.bad.php", line 12, characters 40-46:
-  Expected `supportdynamic`
+  Expected `dynamic`
   File "generic_constraint_dynamic.bad.php", line 22, characters 17-17:
-  But got `D`
+  Type `D` is not a subtype of `dynamic` under dynamic-aware subtyping

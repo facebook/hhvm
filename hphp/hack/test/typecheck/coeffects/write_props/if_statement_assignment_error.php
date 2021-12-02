@@ -16,5 +16,9 @@ class Foo {
 }
 
 function pure_function(Foo $x)[] : void {
-  if ($x->prop_int = 5) {} // No error
+  if ($x->prop_int = 5) {} // write_props error
+}
+
+function write_props_function(Foo $x)[write_props] : void {
+  if ($x->prop_int = 5) {} // No write_props error
 }

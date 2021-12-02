@@ -10,6 +10,7 @@ use naming_special_names_rust::{coeffects, coeffects::Ctx, members, user_attribu
 use oxidized::{
     aast,
     aast::Hint_,
+    aast_defs,
     aast_defs::Hint,
     aast_visitor::{visit, AstParams, Node, Visitor},
     ast, ast_defs,
@@ -27,6 +28,47 @@ fn is_pure(ctxs: &Option<ast::Contexts>) -> bool {
     }
 }
 
+// This distinguishes between specified not-pure contexts and unspecified contexts (both of which are not pure).
+// The latter is important because for e.g. lambdas without contexts, they should inherit from enclosing functions.
+fn is_pure_with_inherited_val(c: &Context, ctxs: &Option<ast::Contexts>) -> bool {
+    match ctxs {
+        Some(_) => is_pure(ctxs),
+        None => c.is_pure(),
+    }
+}
+
+fn hints_contain_capability(hints: &Vec<aast_defs::Hint>, capability: Ctx) -> bool {
+    for hint in hints {
+        if let aast::Hint_::Happly(ast_defs::Id(_, id), _) = &*hint.1 {
+            let (_, name) = utils::split_ns_from_name(&id);
+            let c = coeffects::ctx_str_to_enum(&name);
+            match c {
+                Some(val) => match capability {
+                    Ctx::WriteProps => {
+                        if val == Ctx::WriteThisProps || coeffects::contains_write_props(val) {
+                            return true;
+                        }
+                    }
+                    _ => continue,
+                },
+                None => continue,
+            }
+        }
+    }
+    return false;
+}
+
+fn has_capability(ctxs: &Option<ast::Contexts>, capability: Ctx) -> bool {
+    match ctxs {
+        Some(c) => hints_contain_capability(&c.1, capability),
+        // No capabilities context is the same as defaults in scenarios where contexts are not inherited
+        None => match capability {
+            Ctx::WriteProps => true,
+            _ => false,
+        },
+    }
+}
+
 fn is_mutating_unop(unop: &ast_defs::Uop) -> bool {
     use ast_defs::Uop::*;
     match unop {
@@ -35,12 +77,19 @@ fn is_mutating_unop(unop: &ast_defs::Uop) -> bool {
     }
 }
 
-// This distinguishes between specified not-pure contexts and unspecified contexts (both of which are not pure).
-// The latter is important because for e.g. lambdas without contexts, they should inherit from enclosing functions.
-fn is_pure_with_inherited_val(c: &Context, ctxs: &Option<ast::Contexts>) -> bool {
+// This distinguishes between contexts which explicitly do not have write_props and unspecified contexts which may implicitly lack write_props.
+// The latter is important because for e.g. a lambda without contexts, it should inherit context from its enclosing function.
+fn has_capability_with_inherited_val(
+    c: &Context,
+    ctxs: &Option<ast::Contexts>,
+    capability: Ctx,
+) -> bool {
     match ctxs {
-        Some(_) => is_pure(ctxs),
-        None => c.is_pure(),
+        Some(_) => has_capability(ctxs, capability),
+        None => match capability {
+            Ctx::WriteProps => c.has_write_props(),
+            _ => false,
+        },
     }
 }
 
@@ -127,7 +176,9 @@ bitflags! {
         const IS_PURE = 1 << 1;
         const IS_CONSTRUCTOR = 1 << 2;
         const IGNORE_COEFFECT_LOCAL_ERRORS = 1 << 3;
-        const HAS_DEFAULTS = 1 << 4;
+        const IS_TYPECHECKER = 1 << 4;
+        const HAS_DEFAULTS = 1 << 5;
+        const HAS_WRITE_PROPS = 1 << 6;
     }
 }
 
@@ -158,6 +209,14 @@ impl Context {
         return self.bitflags.contains(ContextFlags::HAS_DEFAULTS);
     }
 
+    fn is_typechecker(&self) -> bool {
+        return self.bitflags.contains(ContextFlags::IS_TYPECHECKER);
+    }
+
+    fn has_write_props(&self) -> bool {
+        return self.bitflags.contains(ContextFlags::HAS_WRITE_PROPS);
+    }
+
     fn set_in_methodish(&mut self, in_methodish: bool) {
         self.bitflags.set(ContextFlags::IN_METHODISH, in_methodish);
     }
@@ -181,6 +240,16 @@ impl Context {
     fn set_has_defaults(&mut self, has_defaults: bool) {
         self.bitflags.set(ContextFlags::HAS_DEFAULTS, has_defaults);
     }
+
+    fn set_is_typechecker(&mut self, is_typechecker: bool) {
+        self.bitflags
+            .set(ContextFlags::IS_TYPECHECKER, is_typechecker);
+    }
+
+    fn set_has_write_props(&mut self, has_write_props: bool) {
+        self.bitflags
+            .set(ContextFlags::HAS_WRITE_PROPS, has_write_props);
+    }
 }
 
 struct Checker {
@@ -198,12 +267,8 @@ impl Checker {
             .push(SyntaxError::make(start_offset, end_offset, msg));
     }
 
-    fn check_pure_fn_contexts(&mut self, c: &mut Context, e: &aast::Expr<(), ()>) {
-        if !c.is_pure()
-            || c.is_constructor()
-            || c.ignore_coeffect_local_errors()
-            || c.has_defaults()
-        {
+    fn do_write_props_check(&mut self, c: &mut Context, e: &aast::Expr<(), ()>) {
+        if c.is_constructor() {
             return;
         }
         if let Some((bop, lhs, _)) = e.2.as_binop() {
@@ -250,6 +315,7 @@ impl<'ast> Visitor<'ast> for Checker {
             &m.user_attributes,
         ));
         c.set_has_defaults(has_defaults(&m.ctxs));
+        c.set_has_write_props(has_capability(&m.ctxs, Ctx::WriteProps));
         m.recurse(
             &mut Context {
                 bitflags: c.bitflags,
@@ -262,6 +328,7 @@ impl<'ast> Visitor<'ast> for Checker {
         c.set_is_pure(is_pure(&d.fun.ctxs));
         c.set_has_defaults(has_defaults(&d.fun.ctxs));
         c.set_is_constructor(is_constructor(&d.fun.name));
+        c.set_has_write_props(has_capability(&d.fun.ctxs, Ctx::WriteProps));
         d.recurse(
             &mut Context {
                 bitflags: c.bitflags,
@@ -277,6 +344,11 @@ impl<'ast> Visitor<'ast> for Checker {
             &f.user_attributes,
         ));
         c.set_has_defaults(has_defaults_with_inherited_val(c, &f.ctxs));
+        c.set_has_write_props(has_capability_with_inherited_val(
+            c,
+            &f.ctxs,
+            Ctx::WriteProps,
+        ));
         f.recurse(
             &mut Context {
                 bitflags: c.bitflags,
@@ -286,17 +358,25 @@ impl<'ast> Visitor<'ast> for Checker {
     }
 
     fn visit_expr(&mut self, c: &mut Context, p: &aast::Expr<(), ()>) -> Result<(), ()> {
-        if c.in_methodish() {
-            self.check_pure_fn_contexts(c, &p);
+        if c.in_methodish()
+            && !c.ignore_coeffect_local_errors()
+            && !c.has_defaults()
+            && !c.has_write_props()
+            // TODO(T106528721) Turn on coeffect enforcement in runtime outside of pure functions
+            && (c.is_typechecker() || c.is_pure())
+        {
+            self.do_write_props_check(c, &p);
         }
         p.recurse(c, self)
     }
 }
 
-pub fn check_program(program: &aast::Program<(), ()>) -> Vec<SyntaxError> {
+pub fn check_program(program: &aast::Program<(), ()>, is_typechecker: bool) -> Vec<SyntaxError> {
     let mut checker = Checker::new();
-    let bitflags = ContextFlags::from_bits_truncate(0 as u8);
-    let mut context = Context { bitflags };
+    let mut context = Context {
+        bitflags: ContextFlags::from_bits_truncate(0 as u8),
+    };
+    context.set_is_typechecker(is_typechecker);
     visit(&mut checker, &mut context, program).unwrap();
     checker.errors
 }

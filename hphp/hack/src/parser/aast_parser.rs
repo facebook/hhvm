@@ -200,7 +200,7 @@ impl<'src> AastParser {
             }
             errors.extend(aast_check::check_program(&aast, !env.codegen));
             errors.extend(expression_tree_check::check_splices(&aast));
-            errors.extend(coeffects_check::check_program(&aast));
+            errors.extend(coeffects_check::check_program(&aast, !env.codegen));
 
             errors
         };

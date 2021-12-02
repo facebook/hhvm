@@ -816,6 +816,7 @@ pub mod coeffects {
         POLICIED_SET.contains(x)
     }
 
+    #[derive(PartialEq, Eq, Hash)]
     pub enum Ctx {
         Defaults,
 
@@ -860,6 +861,26 @@ pub mod coeffects {
             READ_GLOBALS => Some(Ctx::ReadGlobals),
             _ => None,
         }
+    }
+
+    pub fn contains_write_props(x: Ctx) -> bool {
+        lazy_static! {
+            static ref WRITE_PROPS_SET: HashSet<Ctx> = vec![
+                Ctx::Defaults,
+                Ctx::RxLocal,
+                Ctx::RxShallow,
+                Ctx::Rx,
+                Ctx::WriteProps,
+                Ctx::Controlled,
+                Ctx::PoliciedLocal,
+                Ctx::PoliciedShallow,
+                Ctx::Policied,
+                Ctx::PoliciedOf,
+            ]
+            .into_iter()
+            .collect();
+        }
+        WRITE_PROPS_SET.contains(&x)
     }
 }
 

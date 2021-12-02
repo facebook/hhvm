@@ -10,4 +10,7 @@ class Foo {
     $x->prop_int = 4; // Error
   }
 
+  public static function write_props_static_method(Foo $x)[write_props] : void {
+    $x->prop_int = 4; // No error
+  }
 }

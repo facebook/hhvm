@@ -6,6 +6,7 @@ version = 3
 name = "aast_parser"
 version = "0.0.0"
 dependencies = [
+ "bitflags",
  "bumpalo",
  "core_utils_rust",
  "decl_mode_parser",

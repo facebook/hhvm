@@ -4,6 +4,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use bitflags::bitflags;
 use core_utils_rust as utils;
 use naming_special_names_rust::{coeffects, coeffects::Ctx, members, user_attributes};
 use oxidized::{
@@ -39,14 +40,14 @@ fn is_mutating_unop(unop: &ast_defs::Uop) -> bool {
 fn is_pure_with_inherited_val(c: &Context, ctxs: &Option<ast::Contexts>) -> bool {
     match ctxs {
         Some(_) => is_pure(ctxs),
-        None => c.is_pure,
+        None => c.is_pure(),
     }
 }
 
 fn has_defaults_with_inherited_val(c: &Context, ctxs: &Option<ast::Contexts>) -> bool {
     match ctxs {
         Some(_) => has_defaults(ctxs),
-        None => c.has_defaults,
+        None => c.has_defaults(),
     }
 }
 
@@ -120,12 +121,66 @@ fn has_ignore_coeffect_local_errors_attr(attrs: &Vec<aast::UserAttribute<(), ()>
     false
 }
 
+bitflags! {
+    pub struct ContextFlags: u8 {
+        const IN_METHODISH = 1 << 0;
+        const IS_PURE = 1 << 1;
+        const IS_CONSTRUCTOR = 1 << 2;
+        const IGNORE_COEFFECT_LOCAL_ERRORS = 1 << 3;
+        const HAS_DEFAULTS = 1 << 4;
+    }
+}
+
 struct Context {
-    in_methodish: bool,
-    is_pure: bool,
-    is_constructor: bool,
-    ignore_coeffect_local_errors: bool,
-    has_defaults: bool,
+    bitflags: ContextFlags,
+}
+
+impl Context {
+    fn in_methodish(&self) -> bool {
+        return self.bitflags.contains(ContextFlags::IN_METHODISH);
+    }
+
+    fn is_pure(&self) -> bool {
+        return self.bitflags.contains(ContextFlags::IS_PURE);
+    }
+
+    fn is_constructor(&self) -> bool {
+        return self.bitflags.contains(ContextFlags::IS_CONSTRUCTOR);
+    }
+
+    fn ignore_coeffect_local_errors(&self) -> bool {
+        return self
+            .bitflags
+            .contains(ContextFlags::IGNORE_COEFFECT_LOCAL_ERRORS);
+    }
+
+    fn has_defaults(&self) -> bool {
+        return self.bitflags.contains(ContextFlags::HAS_DEFAULTS);
+    }
+
+    fn set_in_methodish(&mut self, in_methodish: bool) {
+        self.bitflags.set(ContextFlags::IN_METHODISH, in_methodish);
+    }
+
+    fn set_is_pure(&mut self, is_pure: bool) {
+        self.bitflags.set(ContextFlags::IS_PURE, is_pure);
+    }
+
+    fn set_is_constructor(&mut self, is_constructor: bool) {
+        self.bitflags
+            .set(ContextFlags::IS_CONSTRUCTOR, is_constructor);
+    }
+
+    fn set_ignore_coeffect_local_errors(&mut self, ignore_coeffect_local_errors: bool) {
+        self.bitflags.set(
+            ContextFlags::IGNORE_COEFFECT_LOCAL_ERRORS,
+            ignore_coeffect_local_errors,
+        );
+    }
+
+    fn set_has_defaults(&mut self, has_defaults: bool) {
+        self.bitflags.set(ContextFlags::HAS_DEFAULTS, has_defaults);
+    }
 }
 
 struct Checker {
@@ -144,7 +199,11 @@ impl Checker {
     }
 
     fn check_pure_fn_contexts(&mut self, c: &mut Context, e: &aast::Expr<(), ()>) {
-        if !c.is_pure || c.is_constructor || c.ignore_coeffect_local_errors || c.has_defaults {
+        if !c.is_pure()
+            || c.is_constructor()
+            || c.ignore_coeffect_local_errors()
+            || c.has_defaults()
+        {
             return;
         }
         if let Some((bop, lhs, _)) = e.2.as_binop() {
@@ -184,50 +243,50 @@ impl<'ast> Visitor<'ast> for Checker {
     }
 
     fn visit_method_(&mut self, c: &mut Context, m: &aast::Method_<(), ()>) -> Result<(), ()> {
+        c.set_in_methodish(true);
+        c.set_is_pure(is_pure(&m.ctxs));
+        c.set_is_constructor(is_constructor(&m.name));
+        c.set_ignore_coeffect_local_errors(has_ignore_coeffect_local_errors_attr(
+            &m.user_attributes,
+        ));
+        c.set_has_defaults(has_defaults(&m.ctxs));
         m.recurse(
             &mut Context {
-                in_methodish: true,
-                is_pure: is_pure(&m.ctxs),
-                is_constructor: is_constructor(&m.name),
-                ignore_coeffect_local_errors: has_ignore_coeffect_local_errors_attr(
-                    &m.user_attributes,
-                ),
-                has_defaults: has_defaults(&m.ctxs),
-                ..*c
+                bitflags: c.bitflags,
             },
             self,
         )
     }
 
     fn visit_fun_def(&mut self, c: &mut Context, d: &aast::FunDef<(), ()>) -> Result<(), ()> {
+        c.set_is_pure(is_pure(&d.fun.ctxs));
+        c.set_has_defaults(has_defaults(&d.fun.ctxs));
+        c.set_is_constructor(is_constructor(&d.fun.name));
         d.recurse(
             &mut Context {
-                is_pure: is_pure(&d.fun.ctxs),
-                has_defaults: has_defaults(&d.fun.ctxs),
-                ..*c
+                bitflags: c.bitflags,
             },
             self,
         )
     }
 
     fn visit_fun_(&mut self, c: &mut Context, f: &aast::Fun_<(), ()>) -> Result<(), ()> {
+        c.set_in_methodish(true);
+        c.set_is_pure(is_pure_with_inherited_val(c, &f.ctxs));
+        c.set_ignore_coeffect_local_errors(has_ignore_coeffect_local_errors_attr(
+            &f.user_attributes,
+        ));
+        c.set_has_defaults(has_defaults_with_inherited_val(c, &f.ctxs));
         f.recurse(
             &mut Context {
-                in_methodish: true,
-                is_pure: is_pure_with_inherited_val(c, &f.ctxs),
-                is_constructor: is_constructor(&f.name),
-                ignore_coeffect_local_errors: has_ignore_coeffect_local_errors_attr(
-                    &f.user_attributes,
-                ),
-                has_defaults: has_defaults_with_inherited_val(c, &f.ctxs),
-                ..*c
+                bitflags: c.bitflags,
             },
             self,
         )
     }
 
     fn visit_expr(&mut self, c: &mut Context, p: &aast::Expr<(), ()>) -> Result<(), ()> {
-        if c.in_methodish {
+        if c.in_methodish() {
             self.check_pure_fn_contexts(c, &p);
         }
         p.recurse(c, self)
@@ -236,13 +295,8 @@ impl<'ast> Visitor<'ast> for Checker {
 
 pub fn check_program(program: &aast::Program<(), ()>) -> Vec<SyntaxError> {
     let mut checker = Checker::new();
-    let mut context = Context {
-        in_methodish: false,
-        is_pure: false,
-        is_constructor: false,
-        ignore_coeffect_local_errors: false,
-        has_defaults: false,
-    };
+    let bitflags = ContextFlags::from_bits_truncate(0 as u8);
+    let mut context = Context { bitflags };
     visit(&mut checker, &mut context, program).unwrap();
     checker.errors
 }

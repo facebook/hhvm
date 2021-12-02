@@ -60,15 +60,7 @@ let make_gc_control config =
   { GlobalConfig.gc_control with Gc.Control.minor_heap_size; space_overhead }
 
 let make_sharedmem_config config options local_config =
-  let {
-    SharedMem.global_size;
-    heap_size;
-    shm_min_avail;
-    shm_use_sharded_hashtbl;
-    shm_enable_eviction;
-    shm_max_evictable_bytes;
-    _;
-  } =
+  let { SharedMem.global_size; heap_size; shm_min_avail; _ } =
     SharedMem.default_config
   in
   let shm_dirs = local_config.ServerLocalConfig.shm_dirs in
@@ -80,13 +72,22 @@ let make_sharedmem_config config options local_config =
   let compression = int_ "sharedmem_compression" ~default:0 config in
   let shm_dirs = string_list "sharedmem_dirs" ~default:shm_dirs config in
   let shm_use_sharded_hashtbl =
-    bool_ "shm_use_sharded_hashtbl" ~default:shm_use_sharded_hashtbl config
+    bool_
+      "shm_use_sharded_hashtbl"
+      ~default:local_config.ServerLocalConfig.shm_use_sharded_hashtbl
+      config
   in
   let shm_enable_eviction =
-    bool_ "shm_enable_eviction" ~default:shm_enable_eviction config
+    bool_
+      "shm_enable_eviction"
+      ~default:local_config.ServerLocalConfig.shm_enable_eviction
+      config
   in
   let shm_max_evictable_bytes =
-    int_ "shm_max_evictable_bytes" ~default:shm_max_evictable_bytes config
+    int_
+      "shm_max_evictable_bytes"
+      ~default:local_config.ServerLocalConfig.shm_max_evictable_bytes
+      config
   in
   let shm_min_avail =
     int_ "sharedmem_minimum_available" ~default:shm_min_avail config

@@ -41,7 +41,24 @@ let add_position_to_results
           Some { name = r.si_fullname; pos; result_type = r.si_kind }
         | None -> None))
 
+(* When autocompletion is called, we insert an autocomplete token
+   "AUTO332" at the position of the cursor. When we walk the TAST, we
+   record the context that we saw a symbol containing this token.
+
+   For example, if the user has this in their IDE, with | showing their
+   cursor:
+
+       $x = new Fo|
+
+   We see the following TAST:
+
+       $x = new FoAUTO332
+
+   and we set argument_global_type to Acnew because we're completing in
+   a class instantiation. *)
 let (argument_global_type : autocomplete_type option ref) = ref None
+
+let max_results = 100
 
 let auto_complete_for_global = ref ""
 
@@ -160,6 +177,49 @@ let get_class_elt_types env class_ cid elts =
   elts
   |> List.filter ~f:is_visible
   |> List.map ~f:(fun (id, { ce_type = (lazy ty); _ }) -> (id, ty))
+
+let get_pos_for (env : Tast_env.env) (ty : Typing_defs.phase_ty) : Pos.absolute
+    =
+  (match ty with
+  | LoclTy loclt -> loclt |> Typing_defs.get_pos
+  | DeclTy declt -> declt |> Typing_defs.get_pos)
+  |> ServerPos.resolve env
+  |> Pos.to_absolute
+
+(* Convert a `TFun` into a func details structure *)
+let tfun_to_func_details (env : Tast_env.t) (ft : Typing_defs.locl_fun_type) :
+    func_details_result =
+  let param_to_record ?(is_variadic = false) param =
+    {
+      param_name =
+        (match param.fp_name with
+        | Some n -> n
+        | None -> "");
+      param_ty = Tast_env.print_ty env param.fp_type.et_type;
+      param_variadic = is_variadic;
+    }
+  in
+  {
+    return_ty = Tast_env.print_ty env ft.ft_ret.et_type;
+    min_arity = arity_min ft;
+    params =
+      (List.map ft.ft_params ~f:param_to_record
+      @
+      match ft.ft_arity with
+      | Fvariadic p -> [param_to_record ~is_variadic:true p]
+      | Fstandard -> []);
+  }
+
+(* Convert a `ty` into a func details structure *)
+let get_func_details_for env ty =
+  let (env, ty) =
+    match ty with
+    | DeclTy ty -> Tast_env.localize_no_subst env ~ignore_errors:true ty
+    | LoclTy ty -> (env, ty)
+  in
+  match Typing_defs.get_node ty with
+  | Tfun ft -> Some (tfun_to_func_details env ft)
+  | _ -> None
 
 let autocomplete_shape_key env fields id =
   if is_auto_complete (snd id) then (
@@ -433,41 +493,6 @@ let get_desc_string_for env ty kind =
     result
   | _ -> kind_to_string kind
 
-(* Convert a `TFun` into a func details structure *)
-let tfun_to_func_details (env : Tast_env.t) (ft : Typing_defs.locl_fun_type) :
-    func_details_result =
-  let param_to_record ?(is_variadic = false) param =
-    {
-      param_name =
-        (match param.fp_name with
-        | Some n -> n
-        | None -> "");
-      param_ty = Tast_env.print_ty env param.fp_type.et_type;
-      param_variadic = is_variadic;
-    }
-  in
-  {
-    return_ty = Tast_env.print_ty env ft.ft_ret.et_type;
-    min_arity = arity_min ft;
-    params =
-      (List.map ft.ft_params ~f:param_to_record
-      @
-      match ft.ft_arity with
-      | Fvariadic p -> [param_to_record ~is_variadic:true p]
-      | Fstandard -> []);
-  }
-
-(* Convert a `ty` into a func details structure *)
-let get_func_details_for env ty =
-  let (env, ty) =
-    match ty with
-    | DeclTy ty -> Tast_env.localize_no_subst env ~ignore_errors:true ty
-    | LoclTy ty -> (env, ty)
-  in
-  match Typing_defs.get_node ty with
-  | Tfun ft -> Some (tfun_to_func_details env ft)
-  | _ -> None
-
 (* Here we turn partial_autocomplete_results into complete_autocomplete_results *)
 (* by using typing environment to convert ty information into strings. *)
 let resolve_ty
@@ -500,15 +525,8 @@ let resolve_ty
       (n, x.name)
     | _ -> (x.name, x.name)
   in
-  let pos =
-    match x.ty with
-    | LoclTy loclt ->
-      loclt |> Typing_defs.get_pos |> ServerPos.resolve env |> Pos.to_absolute
-    | DeclTy declt ->
-      declt |> Typing_defs.get_pos |> ServerPos.resolve env |> Pos.to_absolute
-  in
   {
-    res_pos = pos;
+    res_pos = get_pos_for env x.ty;
     res_replace_pos = replace_pos;
     res_base_class = x.base_class;
     res_ty = get_desc_string_for env x.ty x.kind_;
@@ -656,6 +674,216 @@ let autocomplete_shape_literal_in_call
             | _ -> ())
       | _ -> ())
     (zip_truncate args ft.ft_params)
+
+let builtins =
+  [
+    ( "string",
+      "A sequence of zero or more characters. Strings are usually manipulated with functions from the `Str\\` namespace ",
+      SI_Typedef,
+      [Actype] );
+    ("int", "A signed integer of at least 64bits.", SI_Typedef, [Actype]);
+    ( "float",
+      "Allows the use of real numbers, and includes the special values minus infinity, plus infinity, and Not-a-Number (NaN).",
+      SI_Typedef,
+      [Actype] );
+    ( "num",
+      "Can represent any `int` or `float` value, or an enum backed by `int`. To find out which, use the `is` operator.",
+      SI_Typedef,
+      [Actype] );
+    ("bool", "Is either the value `true` or `false`.", SI_Typedef, [Actype]);
+    ( "arraykey",
+      "Can represent any integer or string value.",
+      SI_Typedef,
+      [Actype] );
+    ( "void",
+      "Used to declare that a function does not return any value.",
+      SI_Typedef,
+      [Actype] );
+    ( "null",
+      "Has only one possible value, the value `null`. You can use the `null` type when refining with `is`.",
+      SI_Typedef,
+      [Actype] );
+    ( "mixed",
+      "Represents any value at all in Hack. We recommend you avoid using `mixed` whenever you can use a more specific type.",
+      SI_Typedef,
+      [Actype] );
+    ("nonnull", "Supports any value except `null`.", SI_Typedef, [Actype]);
+    ( "noreturn",
+      "Used to declare that a function either loops forever, throws an an error, or calls another `noreturn` function.",
+      SI_Typedef,
+      [Actype] );
+    ( "dynamic",
+      "Primarily used as a parameter type, where it's used to help capture dynamism in a more manageable manner than `mixed`.",
+      SI_Typedef,
+      [Actype] );
+  ]
+
+(* Find global autocomplete results *)
+let find_global_results
+    ~(kind_filter : SearchUtils.si_kind option ref)
+    ~(completion_type : SearchUtils.autocomplete_type option)
+    ~(autocomplete_context : AutocompleteTypes.legacy_autocomplete_context)
+    ~(sienv : SearchUtils.si_env)
+    ~(tast_env : Tast_env.t) : unit =
+  (* First step: Check obvious cases where autocomplete is not warranted.   *)
+  (*                                                                        *)
+  (* is_after_single_colon : XHP vs switch statements                       *)
+  (* is_after_open_square_bracket : shape field names vs container keys     *)
+  (* is_after_quote: shape field names vs arbitrary strings                 *)
+  (*                                                                        *)
+  (* We can recognize these cases by whether the prefix is empty.           *)
+  (* We do this by checking the identifier length, as the string will       *)
+  (* include the current namespace.                                         *)
+  let have_user_prefix =
+    match !autocomplete_identifier with
+    | None -> failwith "No autocomplete position was set"
+    | Some (pos, _) ->
+      Pos.length pos > AutocompleteTypes.autocomplete_token_length
+  in
+  let ctx = autocomplete_context in
+  if
+    (not ctx.is_manually_invoked)
+    && (not have_user_prefix)
+    && (ctx.is_after_single_colon
+       || ctx.is_after_open_square_bracket
+       || ctx.is_after_quote)
+  then
+    ()
+  else if ctx.is_after_double_right_angle_bracket then
+    (* <<__Override>>AUTO332 *)
+    ()
+  else if ctx.is_open_curly_without_equals then
+    (* In the case that we trigger autocompletion with an open curly brace,
+       we only want to perform autocompletion if it is preceded by an equal sign.
+
+       i.e. if (true) {
+         --> Do not autocomplete
+
+       i.e. <foo:bar my-attribute={
+         --> Allow autocompletion
+    *)
+    ()
+  else (
+    (kind_filter :=
+       match completion_type with
+       | Some Acnew -> Some SI_Class
+       | Some Actrait_only -> Some SI_Trait
+       | _ -> None);
+    let replace_pos = get_replace_pos_exn () in
+    (* Ensure that we do not have a leading backslash for Hack classes,
+     * while ensuring that we have colons for XHP classes.  That's how we
+     * differentiate between them. *)
+    let query_text = strip_suffix !auto_complete_for_global in
+    let query_text =
+      if autocomplete_context.is_xhp_classname then
+        Utils.add_xhp_ns query_text
+      else
+        Utils.strip_ns query_text
+    in
+    auto_complete_for_global := query_text;
+    let (ns, _) = Utils.split_ns_from_name query_text in
+    let absolute_none = Pos.none |> Pos.to_absolute in
+    let results =
+      SymbolIndex.find_matching_symbols
+        ~sienv
+        ~query_text
+        ~max_results
+        ~kind_filter:!kind_filter
+        ~context:completion_type
+    in
+    (* Looking up a function signature using Tast_env.get_fun consumes ~67KB
+     * and can cause complex typechecking which can take from 2-100 milliseconds
+     * per result.  When tested in summer 2019 it was possible to load 1.4GB of data
+     * if get_fun was called on every function in the WWW codebase.
+     *
+     * Therefore, this feature is only available via the option sie_resolve_signatures
+     * - and please be careful not to turn it on unless you really want to consume
+     * memory and performance.
+     *)
+    List.iter results ~f:(fun r ->
+        (* If we are autocompleting XHP using "$x = <" then the suggestions we
+         * return should omit the leading colon *)
+        let (res_name, res_fullname) =
+          if autocomplete_context.is_xhp_classname then
+            (Utils.strip_xhp_ns r.si_name, Utils.add_xhp_ns r.si_fullname)
+          else
+            (r.si_name, r.si_fullname)
+        in
+        (* Only load func details if the flag sie_resolve_signatures is true *)
+        let (func_details, res_ty) =
+          if sienv.sie_resolve_signatures && equal_si_kind r.si_kind SI_Function
+          then
+            let fixed_name = ns ^ r.si_name in
+            match Tast_env.get_fun tast_env fixed_name with
+            | None -> (None, kind_to_string r.si_kind)
+            | Some fe ->
+              let ty = fe.fe_type in
+              let details = get_func_details_for tast_env (DeclTy ty) in
+              let res_ty = Tast_env.print_decl_ty tast_env ty in
+              (details, res_ty)
+          else
+            (None, kind_to_string r.si_kind)
+        in
+        (* Only load exact positions if specially requested *)
+        let res_pos =
+          if sienv.sie_resolve_positions then
+            let fixed_name = ns ^ r.si_name in
+            match Tast_env.get_fun tast_env fixed_name with
+            | None -> absolute_none
+            | Some fe ->
+              Typing_defs.get_pos fe.fe_type
+              |> ServerPos.resolve tast_env
+              |> Pos.to_absolute
+          else
+            absolute_none
+        in
+        (* Figure out how to display them *)
+        let complete =
+          {
+            res_pos;
+            res_replace_pos = replace_pos;
+            res_base_class = None;
+            res_ty;
+            res_name;
+            res_fullname;
+            res_kind = r.si_kind;
+            func_details;
+            ranking_details = None;
+            res_documentation = None;
+          }
+        in
+        add_res (Complete complete));
+    autocomplete_is_complete := List.length !autocomplete_results < max_results;
+
+    (* Add any builtins that match *)
+    builtins
+    |> List.filter ~f:(fun (_, _, _, allowed_actypes) ->
+           match completion_type with
+           | Some actype
+             when List.mem allowed_actypes actype ~equal:equal_autocomplete_type
+             ->
+             true
+           | None -> true
+           | _ -> false)
+    |> List.filter ~f:(fun (name, _, _, _) ->
+           String_utils.string_starts_with name query_text)
+    |> List.iter ~f:(fun (name, documentation, kind, _) ->
+           add_res
+             (Complete
+                {
+                  res_pos = absolute_none;
+                  res_replace_pos = replace_pos;
+                  res_base_class = None;
+                  res_ty = "builtin";
+                  res_name = name;
+                  res_fullname = name;
+                  res_kind = kind;
+                  func_details = None;
+                  ranking_details = None;
+                  res_documentation = Some documentation;
+                }));
+    ()
+  )
 
 let visitor =
   object (self)
@@ -893,217 +1121,6 @@ let reset () =
   autocomplete_results := [];
   autocomplete_is_complete := true
 
-let builtins =
-  [
-    ( "string",
-      "A sequence of zero or more characters. Strings are usually manipulated with functions from the `Str\\` namespace ",
-      SI_Typedef,
-      [Actype] );
-    ("int", "A signed integer of at least 64bits.", SI_Typedef, [Actype]);
-    ( "float",
-      "Allows the use of real numbers, and includes the special values minus infinity, plus infinity, and Not-a-Number (NaN).",
-      SI_Typedef,
-      [Actype] );
-    ( "num",
-      "Can represent any `int` or `float` value, or an enum backed by `int`. To find out which, use the `is` operator.",
-      SI_Typedef,
-      [Actype] );
-    ("bool", "Is either the value `true` or `false`.", SI_Typedef, [Actype]);
-    ( "arraykey",
-      "Can represent any integer or string value.",
-      SI_Typedef,
-      [Actype] );
-    ( "void",
-      "Used to declare that a function does not return any value.",
-      SI_Typedef,
-      [Actype] );
-    ( "null",
-      "Has only one possible value, the value `null`. You can use the `null` type when refining with `is`.",
-      SI_Typedef,
-      [Actype] );
-    ( "mixed",
-      "Represents any value at all in Hack. We recommend you avoid using `mixed` whenever you can use a more specific type.",
-      SI_Typedef,
-      [Actype] );
-    ("nonnull", "Supports any value except `null`.", SI_Typedef, [Actype]);
-    ( "noreturn",
-      "Used to declare that a function either loops forever, throws an an error, or calls another `noreturn` function.",
-      SI_Typedef,
-      [Actype] );
-    ( "dynamic",
-      "Primarily used as a parameter type, where it's used to help capture dynamism in a more manageable manner than `mixed`.",
-      SI_Typedef,
-      [Actype] );
-  ]
-
-(* Find global autocomplete results *)
-let find_global_results
-    ~(kind_filter : SearchUtils.si_kind option ref)
-    ~(max_results : int)
-    ~(completion_type : SearchUtils.autocomplete_type option)
-    ~(autocomplete_context : AutocompleteTypes.legacy_autocomplete_context)
-    ~(sienv : SearchUtils.si_env)
-    ~(tast_env : Tast_env.t) : unit =
-  (* First step: Check obvious cases where autocomplete is not warranted.   *)
-  (*                                                                        *)
-  (* is_after_single_colon : XHP vs switch statements                       *)
-  (* is_after_open_square_bracket : shape field names vs container keys     *)
-  (* is_after_quote: shape field names vs arbitrary strings                 *)
-  (*                                                                        *)
-  (* We can recognize these cases by whether the prefix is empty.           *)
-  (* We do this by checking the identifier length, as the string will       *)
-  (* include the current namespace.                                         *)
-  let have_user_prefix =
-    match !autocomplete_identifier with
-    | None -> failwith "No autocomplete position was set"
-    | Some (pos, _) ->
-      Pos.length pos > AutocompleteTypes.autocomplete_token_length
-  in
-  let ctx = autocomplete_context in
-  if
-    (not ctx.is_manually_invoked)
-    && (not have_user_prefix)
-    && (ctx.is_after_single_colon
-       || ctx.is_after_open_square_bracket
-       || ctx.is_after_quote)
-  then
-    ()
-  else if ctx.is_after_double_right_angle_bracket then
-    (* <<__Override>>AUTO332 *)
-    ()
-  else if ctx.is_open_curly_without_equals then
-    (* In the case that we trigger autocompletion with an open curly brace,
-       we only want to perform autocompletion if it is preceded by an equal sign.
-
-       i.e. if (true) {
-         --> Do not autocomplete
-
-       i.e. <foo:bar my-attribute={
-         --> Allow autocompletion
-    *)
-    ()
-  else (
-    (kind_filter :=
-       match completion_type with
-       | Some Acnew -> Some SI_Class
-       | Some Actrait_only -> Some SI_Trait
-       | _ -> None);
-    let replace_pos = get_replace_pos_exn () in
-    (* Ensure that we do not have a leading backslash for Hack classes,
-     * while ensuring that we have colons for XHP classes.  That's how we
-     * differentiate between them. *)
-    let query_text = strip_suffix !auto_complete_for_global in
-    let query_text =
-      if autocomplete_context.is_xhp_classname then
-        Utils.add_xhp_ns query_text
-      else
-        Utils.strip_ns query_text
-    in
-    auto_complete_for_global := query_text;
-    let (ns, _) = Utils.split_ns_from_name query_text in
-    let absolute_none = Pos.none |> Pos.to_absolute in
-    let results =
-      SymbolIndex.find_matching_symbols
-        ~sienv
-        ~query_text
-        ~max_results
-        ~kind_filter:!kind_filter
-        ~context:completion_type
-    in
-    (* Looking up a function signature using Tast_env.get_fun consumes ~67KB
-     * and can cause complex typechecking which can take from 2-100 milliseconds
-     * per result.  When tested in summer 2019 it was possible to load 1.4GB of data
-     * if get_fun was called on every function in the WWW codebase.
-     *
-     * Therefore, this feature is only available via the option sie_resolve_signatures
-     * - and please be careful not to turn it on unless you really want to consume
-     * memory and performance.
-     *)
-    List.iter results ~f:(fun r ->
-        (* If we are autocompleting XHP using "$x = <" then the suggestions we
-         * return should omit the leading colon *)
-        let (res_name, res_fullname) =
-          if autocomplete_context.is_xhp_classname then
-            (Utils.strip_xhp_ns r.si_name, Utils.add_xhp_ns r.si_fullname)
-          else
-            (r.si_name, r.si_fullname)
-        in
-        (* Only load func details if the flag sie_resolve_signatures is true *)
-        let (func_details, res_ty) =
-          if sienv.sie_resolve_signatures && equal_si_kind r.si_kind SI_Function
-          then
-            let fixed_name = ns ^ r.si_name in
-            match Tast_env.get_fun tast_env fixed_name with
-            | None -> (None, kind_to_string r.si_kind)
-            | Some fe ->
-              let ty = fe.fe_type in
-              let details = get_func_details_for tast_env (DeclTy ty) in
-              let res_ty = Tast_env.print_decl_ty tast_env ty in
-              (details, res_ty)
-          else
-            (None, kind_to_string r.si_kind)
-        in
-        (* Only load exact positions if specially requested *)
-        let res_pos =
-          if sienv.sie_resolve_positions then
-            let fixed_name = ns ^ r.si_name in
-            match Tast_env.get_fun tast_env fixed_name with
-            | None -> absolute_none
-            | Some fe ->
-              Typing_defs.get_pos fe.fe_type
-              |> ServerPos.resolve tast_env
-              |> Pos.to_absolute
-          else
-            absolute_none
-        in
-        (* Figure out how to display them *)
-        let complete =
-          {
-            res_pos;
-            res_replace_pos = replace_pos;
-            res_base_class = None;
-            res_ty;
-            res_name;
-            res_fullname;
-            res_kind = r.si_kind;
-            func_details;
-            ranking_details = None;
-            res_documentation = None;
-          }
-        in
-        add_res (Complete complete));
-    autocomplete_is_complete := List.length !autocomplete_results < max_results;
-
-    (* Add any builtins that match *)
-    builtins
-    |> List.filter ~f:(fun (_, _, _, allowed_actypes) ->
-           match completion_type with
-           | Some actype
-             when List.mem allowed_actypes actype ~equal:equal_autocomplete_type
-             ->
-             true
-           | None -> true
-           | _ -> false)
-    |> List.filter ~f:(fun (name, _, _, _) ->
-           String_utils.string_starts_with name query_text)
-    |> List.iter ~f:(fun (name, documentation, kind, _) ->
-           add_res
-             (Complete
-                {
-                  res_pos = absolute_none;
-                  res_replace_pos = replace_pos;
-                  res_base_class = None;
-                  res_ty = "builtin";
-                  res_name = name;
-                  res_fullname = name;
-                  res_kind = kind;
-                  func_details = None;
-                  ranking_details = None;
-                  res_documentation = Some documentation;
-                }));
-    ()
-  )
-
 (* Main entry point for autocomplete *)
 let go_ctx
     ~(ctx : Provider_context.t)
@@ -1117,7 +1134,6 @@ let go_ctx
   visitor#go ctx tast;
   Errors.ignore_ (fun () ->
       let start_time = Unix.gettimeofday () in
-      let max_results = 100 in
       let kind_filter = ref None in
       let tast_env =
         match !ac_env with
@@ -1134,7 +1150,6 @@ let go_ctx
       then
         find_global_results
           ~kind_filter
-          ~max_results
           ~completion_type
           ~autocomplete_context
           ~sienv

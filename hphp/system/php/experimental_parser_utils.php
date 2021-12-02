@@ -308,7 +308,7 @@ namespace HH\ExperimentalParserUtils {
     return $shape;
   }
 
-  function find_class_method(darray $class_body, string $name): ?darray {
+  function find_class_method(darray $class_body, string $name)[]: ?darray {
     $elements = $class_body["classish_body_elements"];
     if ($elements["kind"] === "missing") {
       return null;

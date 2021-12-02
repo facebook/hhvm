@@ -476,12 +476,28 @@ functor
 
     let mem key = hh_mem key
 
+    let log_hit_rate ~hit =
+      Measure.sample
+        (Value.description ^ " (shmem cache hit rate)")
+        (if hit then
+          1.
+        else
+          0.);
+      Measure.sample
+        "(ALL shmem cache hit rate)"
+        (if hit then
+          1.
+        else
+          0.)
+
     let get (key : KeyHasher.hash) : Value.t option =
       let v = hh_get_and_deserialize key in
-      if SMTelemetry.hh_log_level () > 0 then
+      if SMTelemetry.hh_log_level () > 0 then begin
+        log_hit_rate ~hit:(Option.is_some v);
         Option.iter
           ~f:(fun v -> log_deserialize (hh_get_size key) (Obj.repr v))
-          v;
+          v
+      end;
       v
 
     let remove key =

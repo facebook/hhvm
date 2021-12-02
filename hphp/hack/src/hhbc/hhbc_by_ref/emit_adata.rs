@@ -42,7 +42,7 @@ fn rewrite_typed_value<'arena, 'decl>(
                 let classid: hhbc_by_ref_hhbc_ast::ClassId<'arena> =
                     hhbc_by_ref_hhbc_id::class::ClassType::from_ast_name_and_mangle(
                         alloc,
-                        s.as_str(),
+                        s.unsafe_as_str(),
                     );
                 InstructLitConst::LazyClass(classid)
             }
@@ -71,7 +71,7 @@ fn rewrite_typed_value<'arena, 'decl>(
             }
             TypedValue::HhasAdata(d) => {
                 let arrayid = Str::from(get_array_identifier(alloc, e, tv));
-                let d = d.as_str();
+                let d = d.unsafe_as_str();
                 match &d[..1] {
                     VARRAY_PREFIX | VEC_PREFIX => InstructLitConst::Vec(arrayid),
                     DARRAY_PREFIX | DICT_PREFIX => InstructLitConst::Dict(arrayid),

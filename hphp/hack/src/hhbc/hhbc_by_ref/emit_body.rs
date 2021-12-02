@@ -669,7 +669,7 @@ mod atom_helpers {
         label_not_a_class: Label,
         label_done: Label,
     ) -> Result<InstrSeq<'arena>> {
-        let loc = Named(Str::new_str(alloc, param.name.as_ref()));
+        let loc = Named(Str::new_str(alloc, param.name.unsafe_as_str()));
         Ok(InstrSeq::gather(
             alloc,
             vec![
@@ -899,7 +899,7 @@ pub fn emit_method_prolog<'a, 'arena, 'decl>(
     let alloc = env.arena;
     let mut make_param_instr =
         |(param, ast_param): (&HhasParam<'arena>, &ast::FunParam)| -> Result<Option<InstrSeq<'arena>>> {
-            let param_name = || ParamId::ParamNamed(Str::new_str(alloc, param.name.as_ref()));
+            let param_name = || ParamId::ParamNamed(Str::new_str(alloc, param.name.unsafe_as_str()));
             if param.is_variadic {
                 Ok(None)
             } else {
@@ -925,7 +925,7 @@ pub fn emit_method_prolog<'a, 'arena, 'decl>(
                         (L::Definitely, Some(h)) => {
                             let check = instr::istypel(
                                 alloc,
-                                Local::Named(Str::new_str(alloc, param.name.as_str())),
+                                Local::Named(Str::new_str(alloc, param.name.unsafe_as_str())),
                                 IstypeOp::OpNull,
                             );
                             let verify_instr = instr::verify_param_type_ts(alloc, param_name());
@@ -1018,7 +1018,7 @@ pub fn emit_deprecation_info<'a, 'arena>(
                 + (if args.is_empty() {
                     "deprecated function"
                 } else if let TypedValue::String(s) = &args[0] {
-                    s.as_str()
+                    s.unsafe_as_str()
                 } else {
                     return Err(Error::Unrecoverable(
                         "deprecated attribute first argument is not a string".into(),
@@ -1088,7 +1088,7 @@ fn set_emit_statement_state<'arena, 'decl>(
     is_generator: bool,
 ) {
     let verify_return = match &return_type_info.user_type {
-        Just(s) if s.as_str() == "" => None,
+        Just(s) if s.unsafe_as_str() == "" => None,
         _ if return_type_info.has_type_constraint() && !is_generator => {
             return_type.map(|h| h.clone())
         }
@@ -1136,12 +1136,15 @@ fn emit_verify_out<'arena>(
                 Some(InstrSeq::gather(
                     alloc,
                     vec![
-                        instr::cgetl(alloc, Local::Named(Str::new_str(alloc, p.name.as_str()))),
+                        instr::cgetl(
+                            alloc,
+                            Local::Named(Str::new_str(alloc, p.name.unsafe_as_str())),
+                        ),
                         match p.type_info.as_ref() {
                             Just(HhasTypeInfo { user_type, .. })
                                 if user_type.as_ref().map_or(true, |t| {
-                                    !(t.as_str().ends_with("HH\\mixed")
-                                        || t.as_str().ends_with("HH\\dynamic"))
+                                    !(t.unsafe_as_str().ends_with("HH\\mixed")
+                                        || t.unsafe_as_str().ends_with("HH\\dynamic"))
                                 }) =>
                             {
                                 instr::verify_out_type(alloc, ParamId::ParamUnnamed(i as isize))

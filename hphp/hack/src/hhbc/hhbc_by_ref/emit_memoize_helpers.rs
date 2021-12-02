@@ -40,7 +40,7 @@ pub fn param_code_sets<'arena>(
         params
             .iter()
             .enumerate()
-            .map(|(i, (param, _))| get_memo_key_list(alloc, local, i, &param.name))
+            .map(|(i, (param, _))| get_memo_key_list(alloc, local, i, &param.name.unsafe_as_str()))
             .flatten()
             .collect(),
     )
@@ -57,7 +57,7 @@ pub fn param_code_gets<'arena>(
             .map(|(param, _)| {
                 instr::cgetl(
                     alloc,
-                    Local::Named(Str::new_str(alloc, param.name.as_ref())),
+                    Local::Named(Str::new_str(alloc, param.name.unsafe_as_str())),
                 )
             })
             .collect(),

@@ -42,7 +42,9 @@ pub fn emit_function<'a, 'arena, 'decl>(
     let mut attrs: Vec<HhasAttribute<'arena>> =
         emit_attribute::from_asts(alloc, e, &f.user_attributes)?;
     attrs.extend(emit_attribute::add_reified_attribute(alloc, &f.tparams));
-    let memoized = attrs.iter().any(|a| ua::is_memoized(a.name.as_str()));
+    let memoized = attrs
+        .iter()
+        .any(|a| ua::is_memoized(a.name.unsafe_as_str()));
     flags.set(HhasFunctionFlags::MEMOIZE_IMPL, memoized);
     flags.set(
         HhasFunctionFlags::NO_INJECTION,
@@ -111,7 +113,7 @@ pub fn emit_function<'a, 'arena, 'decl>(
     let deprecation_info = hhas_attribute::deprecation_info(attrs.iter());
     let (body, is_gen, is_pair_gen) = {
         let deprecation_info = if memoized { None } else { deprecation_info };
-        let native = attrs.iter().any(|a| ua::is_native(a.name.as_str()));
+        let native = attrs.iter().any(|a| ua::is_native(a.name.unsafe_as_str()));
         use emit_body::{Args as EmitBodyArgs, Flags as EmitBodyFlags};
         let mut body_flags = EmitBodyFlags::empty();
         body_flags.set(

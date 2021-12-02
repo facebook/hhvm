@@ -47,9 +47,9 @@ impl<'arena> IncludePath<'arena> {
     ) -> IncludePath<'arena> {
         if let IncludePath::IncludeRootRelative(var, lit) = &self {
             use std::path::Path;
-            match include_roots.get(var.as_str()) {
+            match include_roots.get(var.unsafe_as_str()) {
                 Some(prefix) => {
-                    let path = Path::new(prefix).join(lit.as_str());
+                    let path = Path::new(prefix).join(lit.unsafe_as_str());
                     let relative = path.is_relative();
                     let path_str = Str::new_str(alloc, path.to_str().expect("non UTF-8 path"));
                     return if relative {
@@ -67,8 +67,8 @@ impl<'arena> IncludePath<'arena> {
     fn extract_str(&self) -> (&str, &str) {
         use IncludePath::*;
         match self {
-            Absolute(s) | SearchPathRelative(s) | DocRootRelative(s) => (s.as_str(), ""),
-            IncludeRootRelative(s1, s2) => (s1.as_str(), s2.as_str()),
+            Absolute(s) | SearchPathRelative(s) | DocRootRelative(s) => (s.unsafe_as_str(), ""),
+            IncludeRootRelative(s1, s2) => (s1.unsafe_as_str(), s2.unsafe_as_str()),
         }
     }
 }

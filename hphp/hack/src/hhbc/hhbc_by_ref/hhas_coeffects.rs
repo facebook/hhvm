@@ -101,7 +101,7 @@ impl<'arena> HhasCoeffects<'arena> {
             HhasCoeffects::vec_to_string(coeffects.get_static_coeffects(), |c| c.to_string());
         let unenforced_static_coeffects =
             HhasCoeffects::vec_to_string(coeffects.get_unenforced_static_coeffects(), |c| {
-                c.as_str().to_string()
+                c.unsafe_as_str().to_string()
             });
         match (static_coeffect, unenforced_static_coeffects) {
             (None, None) => {}
@@ -114,18 +114,18 @@ impl<'arena> HhasCoeffects<'arena> {
             results.push(format!(".coeffects_fun_param {};", str));
         }
         if let Some(str) = HhasCoeffects::vec_to_string(coeffects.get_cc_param(), |c| {
-            format!("{} {}", c.0, c.1.as_str())
+            format!("{} {}", c.0, c.1.unsafe_as_str())
         }) {
             results.push(format!(".coeffects_cc_param {};", str));
         }
         for v in coeffects.get_cc_this() {
-            match HhasCoeffects::vec_to_string(v.as_ref(), |c| c.as_str().to_string()) {
+            match HhasCoeffects::vec_to_string(v.as_ref(), |c| c.unsafe_as_str().to_string()) {
                 Some(str) => results.push(format!(".coeffects_cc_this {};", str)),
                 None => panic!("Not possible"),
             }
         }
         for v in coeffects.get_cc_reified() {
-            match HhasCoeffects::vec_to_string(v.2.as_ref(), |c| c.as_str().to_string()) {
+            match HhasCoeffects::vec_to_string(v.2.as_ref(), |c| c.unsafe_as_str().to_string()) {
                 Some(str) => results.push(format!(
                     ".coeffects_cc_reified {}{} {};",
                     if v.0 { "isClass " } else { "" },

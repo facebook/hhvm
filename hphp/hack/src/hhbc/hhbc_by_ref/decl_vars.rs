@@ -253,7 +253,7 @@ pub fn from_ast<'arena>(
 ) -> Result<Vec<String>, String> {
     let decl_vars = uls_from_ast(
         params,
-        |(param, _)| param.name.as_str(),
+        |(param, _)| param.name.unsafe_as_str(),
         |(_, default_value)| Maybe::from(default_value.as_ref().map(|x| &x.1)),
         Some(explicit_use_set),
         body,

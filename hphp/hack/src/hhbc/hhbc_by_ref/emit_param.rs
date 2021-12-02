@@ -67,7 +67,8 @@ fn rename_params<'arena>(
                 param_counts.insert(param.name, 0);
             }
             Some(count) => {
-                let newname = Str::new_str(alloc, &format!("{}{}", param.name.as_str(), count));
+                let newname =
+                    Str::new_str(alloc, &format!("{}{}", param.name.unsafe_as_str(), count));
                 *count += 1;
                 if names.contains(&newname) {
                     rename(alloc, names, param_counts, param);
@@ -215,7 +216,7 @@ pub fn emit_param_default_value_setter<'a, 'arena, 'decl>(
                     emit_pos::emit_pos(alloc, pos),
                     instr::setl(
                         alloc,
-                        Local::Named(Str::new_str(alloc, param.name.as_str())),
+                        Local::Named(Str::new_str(alloc, param.name.unsafe_as_str())),
                     ),
                     instr::popc(alloc),
                 ],
@@ -300,7 +301,7 @@ fn default_type_check<'arena>(
 }
 
 fn get_hint_display_name<'arena>(hint: Option<&Str<'arena>>) -> Option<&'static str> {
-    hint.map(|h| match h.as_str() {
+    hint.map(|h| match h.unsafe_as_str() {
         "HH\\bool" => "bool",
         "HH\\varray" => "HH\\varray",
         "HH\\darray" => "HH\\darray",

@@ -152,7 +152,9 @@ fn make_memoize_wrapper_method<'a, 'arena, 'decl>(
         .flags
         .contains(HhvmFlags::ENABLE_IMPLICIT_CONTEXT)
         && attributes.iter().any(|a| {
-            naming_special_names_rust::user_attributes::is_memoized_policy_sharded(a.name.as_str())
+            naming_special_names_rust::user_attributes::is_memoized_policy_sharded(
+                a.name.unsafe_as_str(),
+            )
         });
     let is_interceptable = is_method_interceptable(emitter.options());
     let mut arg_flags = Flags::empty();

@@ -164,7 +164,7 @@ mod inout_locals {
     ) -> bool {
         match local {
             Local::Named(name) => aliases
-                .get(name.as_str())
+                .get(name.unsafe_as_str())
                 .map_or(true, |alias| alias.has_single_ref()),
             Local::Unnamed(_) => false,
         }
@@ -797,7 +797,11 @@ fn emit_import<'a, 'arena, 'decl>(
         ImportFlavor::RequireOnce => {
             match inc.into_doc_root_relative(alloc, e.options().hhvm.include_roots.get()) {
                 IncludePath::DocRootRelative(path) => {
-                    let expr = ast::Expr((), pos.clone(), ast::Expr_::String(path.as_str().into()));
+                    let expr = ast::Expr(
+                        (),
+                        pos.clone(),
+                        ast::Expr_::String(path.unsafe_as_str().into()),
+                    );
                     (emit_expr(e, env, &expr)?, instr::reqdoc(alloc))
                 }
                 _ => (emit_expr(e, env, expr)?, instr::reqonce(alloc)),

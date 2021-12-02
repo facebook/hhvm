@@ -67,7 +67,7 @@ impl<'arena> std::convert::From<TypedValue<'arena>> for bool {
             TypedValue::Uninit => false, // Should not happen
             TypedValue::Bool(b) => b,
             TypedValue::Null => false,
-            TypedValue::String(s) => !s.is_empty() && s.as_str() != "0",
+            TypedValue::String(s) => !s.is_empty() && s.unsafe_as_str() != "0",
             TypedValue::LazyClass(_) => true,
             TypedValue::Int(i) => i != 0,
             TypedValue::Float(f) => f.to_f64() != 0.0,
@@ -137,8 +137,8 @@ impl<'arena> TryFrom<TypedValue<'arena>> for std::string::String {
             TypedValue::Bool(true) => Ok("1".into()),
             TypedValue::Null => Ok("".into()),
             TypedValue::Int(i) => Ok(i.to_string()),
-            TypedValue::String(s) => Ok(s.as_str().into()),
-            TypedValue::LazyClass(s) => Ok(s.as_str().into()),
+            TypedValue::String(s) => Ok(s.unsafe_as_str().into()),
+            TypedValue::LazyClass(s) => Ok(s.unsafe_as_str().into()),
             _ => Err(()),
         }
     }

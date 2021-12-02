@@ -71,7 +71,9 @@ pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl>(
         .flags
         .contains(HhvmFlags::ENABLE_IMPLICIT_CONTEXT)
         && attributes.iter().any(|a| {
-            naming_special_names_rust::user_attributes::is_memoized_policy_sharded(a.name.as_str())
+            naming_special_names_rust::user_attributes::is_memoized_policy_sharded(
+                a.name.unsafe_as_str(),
+            )
         });
     let mut env = Env::default(alloc, RcOc::clone(&fd.namespace)).with_scope(scope);
     let body_instrs = make_memoize_function_code(

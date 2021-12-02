@@ -492,13 +492,13 @@ pub fn emit_type_constraint_for_native_function<'arena>(
             ConstraintFlags::EXTENDED_HINT,
         ),
         (Just(t), _) => {
-            if t.as_str() == "HH\\mixed" || t.as_str() == "callable" {
+            if t.unsafe_as_str() == "HH\\mixed" || t.unsafe_as_str() == "callable" {
                 (Nothing, ConstraintFlags::default())
             } else {
                 let Hint(_, h) = ret_opt.as_ref().unwrap();
                 let name = Just(
                     string_utils::strip_type_list(
-                        t.as_str()
+                        t.unsafe_as_str()
                             .trim_start_matches('?')
                             .trim_start_matches('@')
                             .trim_start_matches('?'),

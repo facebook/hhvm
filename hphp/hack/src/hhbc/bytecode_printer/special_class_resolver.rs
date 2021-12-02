@@ -37,12 +37,12 @@ impl<'arena, 'decl> SpecialClassResolver for Emitter<'arena, 'decl> {
                 body_env
                     .class_info
                     .as_ref()
-                    .map(|Pair(k, s)| (k.clone().into(), s.as_str()))
+                    .map(|Pair(k, s)| (k.clone().into(), s.unsafe_as_str()))
                     .into(),
                 body_env
                     .parent_name
                     .clone()
-                    .map(|s| s.as_str().to_owned())
+                    .map(|s| s.unsafe_as_str().to_owned())
                     .into(),
                 ast::Expr(
                     (),

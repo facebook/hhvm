@@ -149,7 +149,7 @@ impl<'a, T: 'a> Default for Slice<'a, T> {
 impl<'a, T> AsRef<[T]> for Slice<'a, T> {
     fn as_ref(&self) -> &[T] {
         // Safety: Assumes `self` has been constructed via `Slice<'a,
-        // T>::new()` from some `&'a[T]` and so the call to
+        // T>::new()` from some `&'a [T]` and so the call to
         // `from_raw_parts` is a valid.
         unsafe { std::slice::from_raw_parts(self.data, self.len) }
     }
@@ -267,16 +267,11 @@ impl<'a> Str<'a> {
     }
 
     /// Cast a `Str<'a>` back into a `&'a str`.
-    pub fn as_str(&self) -> &'a str {
+    pub fn unsafe_as_str(&self) -> &'a str {
         // Safety: Assumes `self` has been constructed via `Slice<'a,
         // T>::new()` from some `&'a str` and so the calls to
         // `from_raw_parts` and `from_utf8_unchecked` are valid.
         unsafe { std::str::from_utf8_unchecked(std::slice::from_raw_parts(self.data, self.len)) }
-    }
-}
-impl<'a> AsRef<str> for Str<'a> {
-    fn as_ref(&self) -> &str {
-        self.as_str()
     }
 }
 

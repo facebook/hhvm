@@ -131,7 +131,7 @@ fn print_program_<W: Write>(
                 " ",
                 get_fatal_op(fop),
                 " \"",
-                escape(msg.as_str()).as_ref(),
+                escape(msg.unsafe_as_str()).as_ref(),
                 "\";",
             ],
         )?;
@@ -172,19 +172,19 @@ fn print_include_region<W: Write>(
         let include_roots = ctx.include_roots;
         let alloc = bumpalo::Bump::new();
         match inc.into_doc_root_relative(&alloc, include_roots) {
-            IncludePath::Absolute(p) => print_if_exists(w, Path::new(&p.as_str())),
+            IncludePath::Absolute(p) => print_if_exists(w, Path::new(&p.unsafe_as_str())),
             IncludePath::SearchPathRelative(p) => {
                 let path_from_cur_dirname = ctx
                     .path
                     .and_then(|p| p.path().parent())
                     .unwrap_or_else(|| Path::new(""))
-                    .join(&p.as_str());
+                    .join(&p.unsafe_as_str());
                 if path_from_cur_dirname.exists() {
                     print_path(w, &path_from_cur_dirname)
                 } else {
                     let search_paths = ctx.include_search_paths;
                     for prefix in search_paths.iter() {
-                        let path = Path::new(prefix).join(&p.as_str());
+                        let path = Path::new(prefix).join(&p.unsafe_as_str());
                         if path.exists() {
                             return print_path(w, &path);
                         }
@@ -195,11 +195,11 @@ fn print_include_region<W: Write>(
             IncludePath::IncludeRootRelative(v, p) => {
                 if !p.is_empty() {
                     include_roots
-                        .get(&v.as_str().to_owned())
+                        .get(&v.unsafe_as_str().to_owned())
                         .iter()
                         .try_for_each(|ir| {
                             let doc_root = ctx.doc_root;
-                            let resolved = Path::new(doc_root).join(ir).join(&p.as_str());
+                            let resolved = Path::new(doc_root).join(ir).join(&p.unsafe_as_str());
                             print_if_exists(w, &resolved)
                         })?
                 }
@@ -207,7 +207,7 @@ fn print_include_region<W: Write>(
             }
             IncludePath::DocRootRelative(p) => {
                 let doc_root = ctx.doc_root;
-                let resolved = Path::new(doc_root).join(&p.as_str());
+                let resolved = Path::new(doc_root).join(&p.unsafe_as_str());
                 print_if_exists(w, &resolved)
             }
         }
@@ -237,7 +237,7 @@ fn print_symbol_ref_regions<'arena, W: Write>(
             ctx.block(w, |c, w| {
                 for s in refs.as_ref().iter() {
                     c.newline(w)?;
-                    w.write(s)?;
+                    w.write(s.unsafe_as_str())?;
                 }
                 Ok(())
             })?;
@@ -256,7 +256,7 @@ fn print_adata_region<W: Write>(
     w: &mut W,
     adata: &HhasAdata<'_>,
 ) -> Result<(), W::Error> {
-    concat_str_by(w, " ", [".adata", adata.id.as_str(), "= "])?;
+    concat_str_by(w, " ", [".adata", adata.id.unsafe_as_str(), "= "])?;
     triple_quotes(w, |w| print_adata(ctx, w, &adata.value))?;
     w.write(";")?;
     ctx.newline(w)
@@ -368,7 +368,7 @@ fn print_type_constant<W: Write>(
     c: &HhasTypeConstant<'_>,
 ) -> Result<(), W::Error> {
     ctx.newline(w)?;
-    concat_str_by(w, " ", [".const", c.name.as_str(), "isType"])?;
+    concat_str_by(w, " ", [".const", c.name.unsafe_as_str(), "isType"])?;
     if c.is_abstract {
         w.write(" isAbstract")?;
     }
@@ -385,7 +385,7 @@ fn print_ctx_constant<W: Write>(
     c: &HhasCtxConstant<'_>,
 ) -> Result<(), W::Error> {
     ctx.newline(w)?;
-    concat_str_by(w, " ", [".ctx", &c.name.as_str()])?;
+    concat_str_by(w, " ", [".ctx", &c.name.unsafe_as_str()])?;
     if c.is_abstract {
         w.write(" isAbstract")?;
     }
@@ -396,7 +396,7 @@ fn print_ctx_constant<W: Write>(
         w.write(coeffects)?;
     }
     if let Some(coeffects) =
-        HhasCoeffects::vec_to_string(&c.coeffects.1.as_ref(), |c| c.as_str().to_string())
+        HhasCoeffects::vec_to_string(&c.coeffects.1.as_ref(), |c| c.unsafe_as_str().to_string())
     {
         w.write(" ")?;
         w.write(coeffects)?;
@@ -407,7 +407,7 @@ fn print_ctx_constant<W: Write>(
 
 fn print_property_doc_comment<W: Write>(w: &mut W, p: &HhasProperty<'_>) -> Result<(), W::Error> {
     if let Just(s) = p.doc_comment.as_ref() {
-        w.write(triple_quote_string(s.as_str()))?;
+        w.write(triple_quote_string(s.unsafe_as_str()))?;
         w.write(" ")?;
     }
     Ok(())
@@ -534,7 +534,7 @@ fn print_doc_comment<'arena, W: Write>(
 ) -> Result<(), W::Error> {
     if let Just(cmt) = doc_comment {
         ctx.newline(w)?;
-        write!(w, ".doc {};", triple_quote_string(cmt.as_str()))?;
+        write!(w, ".doc {};", triple_quote_string(cmt.unsafe_as_str()))?;
     }
     Ok(())
 }
@@ -608,7 +608,7 @@ fn print_uses<'arena, W: Write>(
             .uses
             .as_ref()
             .iter()
-            .map(|e| strip_global_ns(e.as_str()))
+            .map(|e| strip_global_ns(e.unsafe_as_str()))
             .collect();
         let unique_ids: Vec<_> = unique_ids.into_iter().collect();
 
@@ -751,7 +751,14 @@ fn print_shadowed_tparams<'arena, W: Write>(
     w: &mut W,
     shadowed_tparams: impl AsRef<[Str<'arena>]>,
 ) -> Result<(), W::Error> {
-    braces(w, |w| concat_str_by(w, ", ", shadowed_tparams))
+    braces(w, |w| {
+        let tps: Vec<&str> = shadowed_tparams
+            .as_ref()
+            .iter()
+            .map(|s| s.unsafe_as_str())
+            .collect();
+        concat_str_by(w, ", ", tps)
+    })
 }
 
 fn print_method_def<W: Write>(
@@ -948,7 +955,7 @@ fn print_prop_id<W: Write>(w: &mut W, id: &PropId<'_>) -> Result<(), W::Error> {
 }
 
 fn print_adata_id<W: Write>(w: &mut W, id: &AdataId<'_>) -> Result<(), W::Error> {
-    concat_str(w, ["@", id.as_str()])
+    concat_str(w, ["@", id.unsafe_as_str()])
 }
 
 fn print_adata_mapped_argument<W: Write, F, V>(
@@ -1002,10 +1009,20 @@ fn print_adata<W: Write>(
         TypedValue::Uninit => w.write("uninit"),
         TypedValue::Null => w.write("N;"),
         TypedValue::String(s) => {
-            write!(w, "s:{}:{};", s.len(), quote_string_with_escape(s.as_str()))
+            write!(
+                w,
+                "s:{}:{};",
+                s.len(),
+                quote_string_with_escape(s.unsafe_as_str())
+            )
         }
         TypedValue::LazyClass(s) => {
-            write!(w, "l:{}:{};", s.len(), quote_string_with_escape(s.as_str()))
+            write!(
+                w,
+                "l:{}:{};",
+                s.len(),
+                quote_string_with_escape(s.unsafe_as_str())
+            )
         }
         TypedValue::Float(f) => write!(w, "d:{};", float::to_string(*f)),
         TypedValue::Int(i) => write!(w, "i:{};", i),
@@ -1021,7 +1038,7 @@ fn print_adata<W: Write>(
         TypedValue::Keyset(values) => {
             print_adata_collection_argument(ctx, w, KEYSET_PREFIX, &None, values.as_ref())
         }
-        TypedValue::HhasAdata(s) => w.write(escaped(s.as_str())),
+        TypedValue::HhasAdata(s) => w.write(escaped(s.unsafe_as_str())),
     }
 }
 
@@ -1033,7 +1050,7 @@ fn print_attribute<W: Write>(
     write!(
         w,
         "\"{}\"(\"\"\"{}:{}:{{",
-        a.name.as_str(),
+        a.name.unsafe_as_str(),
         VEC_PREFIX,
         a.arguments.len()
     )?;
@@ -1050,7 +1067,12 @@ fn print_attributes<'a, W: Write>(
     let al: Vec<&HhasAttribute<'_>> = al
         .as_ref()
         .iter()
-        .sorted_by_key(|a| (!a.name.as_str().starts_with("__"), a.name.as_str()))
+        .sorted_by_key(|a| {
+            (
+                !a.name.unsafe_as_str().starts_with("__"),
+                a.name.unsafe_as_str(),
+            )
+        })
         .collect();
     concat_by(w, " ", &al, |w, a| print_attribute(ctx, w, a))
 }
@@ -1100,10 +1122,10 @@ fn print_body<W: Write>(
         ctx.newline(w)?;
         w.write(".declvars ")?;
         concat_by(w, " ", &body.decl_vars, |w, var| {
-            if var.as_str().as_bytes().iter().all(is_bareword_char) {
-                w.write(var)
+            if var.unsafe_as_str().as_bytes().iter().all(is_bareword_char) {
+                w.write(var.unsafe_as_str())
             } else {
-                quotes(w, |w| w.write(escaper::escape(var.as_str())))
+                quotes(w, |w| w.write(escaper::escape(var.unsafe_as_str())))
             }
         })?;
         w.write(";")?;
@@ -1201,7 +1223,7 @@ fn print_fcall_args<W: Write>(
     option_or(w, async_eager_label.as_ref(), print_label, "-")?;
     w.write(" ")?;
     match context {
-        Just(s) => quotes(w, |w| w.write(s)),
+        Just(s) => quotes(w, |w| w.write(s.unsafe_as_str())),
         Nothing => w.write("\"\""),
     }
 }
@@ -1366,7 +1388,7 @@ fn print_instr<W: Write>(w: &mut W, instr: &Instruct<'_>) -> Result<(), W::Error
         IBase(i) => print_base(w, i),
         IFinal(i) => print_final(w, i),
         ITry(itry) => print_try(w, itry),
-        IComment(s) => concat_str_by(w, " ", ["#", s.as_str()]),
+        IComment(s) => concat_str_by(w, " ", ["#", s.unsafe_as_str()]),
         ISrcLoc(p) => write!(
             w,
             ".srcloc {}:{},{}:{};",
@@ -1460,7 +1482,7 @@ fn print_member_key<W: Write>(w: &mut W, mk: &MemberKey<'_>) -> Result<(), W::Er
         }
         M::ET(s, op) => {
             w.write("ET:")?;
-            quotes(w, |w| w.write(escape(s.as_str())))?;
+            quotes(w, |w| w.write(escape(s.unsafe_as_str())))?;
             w.write(" ")?;
             print_readonly_op(w, op)
         }
@@ -1926,11 +1948,13 @@ fn print_misc<W: Write>(w: &mut W, misc: &InstructMisc<'_>) -> Result<(), W::Err
             w.write("AssertRATL ")?;
             print_local(w, local)?;
             w.write(" ")?;
-            w.write(s)
+            w.write(s.unsafe_as_str())
         }
-        M::AssertRATStk(n, s) => {
-            concat_str_by(w, " ", ["AssertRATStk", n.to_string().as_str(), s.as_str()])
-        }
+        M::AssertRATStk(n, s) => concat_str_by(
+            w,
+            " ",
+            ["AssertRATStk", n.to_string().as_str(), s.unsafe_as_str()],
+        ),
         M::GetMemoKeyL(local) => {
             w.write("GetMemoKeyL ")?;
             print_local(w, local)
@@ -1983,7 +2007,7 @@ fn print_control_flow<W: Write>(w: &mut W, cf: &InstructControlFlow<'_>) -> Resu
                 w.write("SSwitch ")?;
                 angle(w, |w| {
                     concat_by(w, " ", rest, |w, Pair(s, l)| {
-                        concat_str(w, [quote_string(s.as_ref()).as_str(), ":"])?;
+                        concat_str(w, [quote_string(s.unsafe_as_str()).as_str(), ":"])?;
                         print_label(w, l)
                     })?;
                     w.write(" -:")?;
@@ -2017,7 +2041,7 @@ fn print_lit_const<W: Write>(w: &mut W, lit: &InstructLitConst<'_>) -> Result<()
         LC::Int(i) => concat_str_by(w, " ", ["Int", i.to_string().as_str()]),
         LC::String(s) => {
             w.write("String ")?;
-            quotes(w, |w| w.write(escape(s.as_str())))
+            quotes(w, |w| w.write(escape(s.unsafe_as_str())))
         }
         LC::LazyClass(id) => {
             w.write("LazyClass ")?;
@@ -2025,7 +2049,7 @@ fn print_lit_const<W: Write>(w: &mut W, lit: &InstructLitConst<'_>) -> Result<()
         }
         LC::True => w.write("True"),
         LC::False => w.write("False"),
-        LC::Double(d) => concat_str_by(w, " ", ["Double", d.as_str()]),
+        LC::Double(d) => concat_str_by(w, " ", ["Double", d.unsafe_as_str()]),
         LC::AddElemC => w.write("AddElemC"),
         LC::AddNewElemC => w.write("AddNewElemC"),
         LC::NewPair => w.write("NewPair"),
@@ -2049,12 +2073,12 @@ fn print_lit_const<W: Write>(w: &mut W, lit: &InstructLitConst<'_>) -> Result<()
         LC::NewVec(i) => concat_str_by(w, " ", ["NewVec", i.to_string().as_str()]),
         LC::NewKeysetArray(i) => concat_str_by(w, " ", ["NewKeysetArray", i.to_string().as_str()]),
         LC::NewStructDict(l) => {
-            let ls: Vec<&str> = l.as_ref().into_iter().map(|s| s.as_str()).collect();
+            let ls: Vec<&str> = l.as_ref().into_iter().map(|s| s.unsafe_as_str()).collect();
             w.write("NewStructDict ")?;
             angle(w, |w| print_shape_fields(w, &ls[0..]))
         }
         LC::NewRecord(cid, l) => {
-            let ls: Vec<&str> = l.as_ref().into_iter().map(|s| s.as_str()).collect();
+            let ls: Vec<&str> = l.as_ref().into_iter().map(|s| s.unsafe_as_str()).collect();
             w.write("NewRecord ")?;
             print_class_id(w, cid)?;
             w.write(" ")?;
@@ -2258,7 +2282,7 @@ fn print_param<'arena, W: Write>(
         print_type_info(w, ty)?;
         w.write(" ")
     })?;
-    w.write(&param.name)?;
+    w.write(&param.name.unsafe_as_str())?;
     option(
         w,
         &Option::from(param.default_value.map(|x| (x.0, x.1))),
@@ -2269,7 +2293,7 @@ fn print_param<'arena, W: Write>(
 fn print_param_id<W: Write>(w: &mut W, param_id: &ParamId<'_>) -> Result<(), W::Error> {
     match param_id {
         ParamId::ParamUnnamed(i) => w.write(i.to_string()),
-        ParamId::ParamNamed(s) => w.write(s),
+        ParamId::ParamNamed(s) => w.write(s.unsafe_as_str()),
     }
 }
 
@@ -2279,7 +2303,9 @@ fn print_param_default_value<'arena, W: Write>(
 ) -> Result<(), W::Error> {
     w.write(" = ")?;
     print_label(w, &default_val.0)?;
-    paren(w, |w| triple_quotes(w, |w| w.write(default_val.1.as_str())))
+    paren(w, |w| {
+        triple_quotes(w, |w| w.write(default_val.1.unsafe_as_str()))
+    })
 }
 
 fn print_label<W: Write>(w: &mut W, label: &Label) -> Result<(), W::Error> {
@@ -2301,7 +2327,7 @@ fn print_local<W: Write>(w: &mut W, local: &Local<'_>) -> Result<(), W::Error> {
             w.write("_")?;
             print_int(w, id)
         }
-        Local::Named(id) => w.write(id),
+        Local::Named(id) => w.write(id.unsafe_as_str()),
     }
 }
 
@@ -3272,7 +3298,7 @@ fn print_upper_bound<'arena, W: Write>(
     Pair(id, tys): &Pair<Str<'arena>, Slice<'arena, HhasTypeInfo<'_>>>,
 ) -> Result<(), W::Error> {
     paren(w, |w| {
-        concat_str_by(w, " ", [id.as_str(), "as", ""])?;
+        concat_str_by(w, " ", [id.unsafe_as_str(), "as", ""])?;
         concat_by(w, ", ", &tys, print_type_info)
     })
 }
@@ -3289,7 +3315,7 @@ fn print_upper_bound_<'arena, W: Write>(
     Pair(id, tys): &Pair<Str<'arena>, Slice<'arena, HhasTypeInfo<'arena>>>,
 ) -> Result<(), W::Error> {
     paren(w, |w| {
-        concat_str_by(w, " ", [id.as_str(), "as", ""])?;
+        concat_str_by(w, " ", [id.unsafe_as_str(), "as", ""])?;
         concat_by(w, ", ", &tys, print_type_info)
     })
 }
@@ -3361,13 +3387,17 @@ fn print_type_info_<W: Write>(
     angle(w, |w| {
         print_quote_str(
             w,
-            &Option::from(ti.user_type.map(|n| n.as_str().to_owned())),
+            &Option::from(ti.user_type.map(|n| n.unsafe_as_str().to_owned())),
         )?;
         w.write(" ")?;
         if !is_enum {
             print_quote_str(
                 w,
-                &Option::from(ti.type_constraint.name.map(|n| n.as_str().to_owned())),
+                &Option::from(
+                    ti.type_constraint
+                        .name
+                        .map(|n| n.unsafe_as_str().to_owned()),
+                ),
             )?;
             w.write(" ")?;
         }
@@ -3378,7 +3408,10 @@ fn print_type_info_<W: Write>(
 fn print_typedef_info<W: Write>(w: &mut W, ti: &HhasTypeInfo<'_>) -> Result<(), W::Error> {
     angle(w, |w| {
         w.write(quote_string(
-            ti.type_constraint.name.as_ref().map_or("", |n| n.as_str()),
+            ti.type_constraint
+                .name
+                .as_ref()
+                .map_or("", |n| n.unsafe_as_str()),
         ))?;
         let flags = ti.type_constraint.flags & constraint::ConstraintFlags::NULLABLE;
         if !flags.is_empty() {
@@ -3412,7 +3445,7 @@ fn print_record_field<W: Write>(
         Nothing => w.write("[public sys_initial_val] ")?,
     }
     print_type_info(w, type_info)?;
-    concat_str_by(w, " ", ["", name.as_str(), "="])?;
+    concat_str_by(w, " ", ["", name.unsafe_as_str(), "="])?;
 
     ctx.block(w, |c, w| {
         c.newline(w)?;

@@ -45,9 +45,13 @@ pub fn from_ast<'ast, 'arena, 'decl>(
     let attributes = emit_attribute::from_asts(alloc, emitter, args.user_attributes)?;
 
     let is_const = (!args.is_static && class_is_const)
-        || attributes.iter().any(|a| a.name.as_str() == ua::CONST);
-    let is_lsb = attributes.iter().any(|a| a.name.as_str() == ua::LSB);
-    let is_late_init = attributes.iter().any(|a| a.name.as_str() == ua::LATE_INIT);
+        || attributes
+            .iter()
+            .any(|a| a.name.unsafe_as_str() == ua::CONST);
+    let is_lsb = attributes.iter().any(|a| a.name.unsafe_as_str() == ua::LSB);
+    let is_late_init = attributes
+        .iter()
+        .any(|a| a.name.unsafe_as_str() == ua::LATE_INIT);
 
     let is_cabstract = match class.kind {
         ast_defs::ClassishKind::Cclass(k) => k.is_abstract(),
@@ -201,9 +205,9 @@ fn valid_for_prop(tc: &constraint::Constraint<'_>) -> bool {
     match &tc.name {
         Nothing => true,
         Just(s) => {
-            !(s.as_str().eq_ignore_ascii_case("hh\\nothing")
-                || s.as_str().eq_ignore_ascii_case("hh\\noreturn")
-                || s.as_str().eq_ignore_ascii_case("callable"))
+            !(s.unsafe_as_str().eq_ignore_ascii_case("hh\\nothing")
+                || s.unsafe_as_str().eq_ignore_ascii_case("hh\\noreturn")
+                || s.unsafe_as_str().eq_ignore_ascii_case("callable"))
         }
     }
 }

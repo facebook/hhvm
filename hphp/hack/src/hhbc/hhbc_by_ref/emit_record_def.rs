@@ -19,10 +19,10 @@ fn valid_tc_for_record_field(tc: &constraint::Constraint<'_>) -> bool {
     match &tc.name {
         Nothing => true,
         Just(name) => {
-            !(name.as_str().eq_ignore_ascii_case("hh\\this")
-                || name.as_str().eq_ignore_ascii_case("callable")
-                || name.as_str().eq_ignore_ascii_case("hh\\nothing")
-                || name.as_str().eq_ignore_ascii_case("hh\\noreturn"))
+            !(name.unsafe_as_str().eq_ignore_ascii_case("hh\\this")
+                || name.unsafe_as_str().eq_ignore_ascii_case("callable")
+                || name.unsafe_as_str().eq_ignore_ascii_case("hh\\nothing")
+                || name.unsafe_as_str().eq_ignore_ascii_case("hh\\noreturn"))
         }
     }
 }

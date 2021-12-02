@@ -29,7 +29,7 @@ pub struct HhasAttribute<'arena> {
 
 impl<'arena> HhasAttribute<'arena> {
     pub fn is<F: Fn(&str) -> bool>(&self, f: F) -> bool {
-        f(self.name.as_str())
+        f(self.name.unsafe_as_str())
     }
 }
 
@@ -57,7 +57,7 @@ fn is_native_arg<'arena>(s: &str, attrs: impl AsRef<[HhasAttribute<'arena>]>) ->
     attrs.as_ref().iter().any(|attr| {
         attr.is(ua::is_native)
             && attr.arguments.as_ref().iter().any(|tv| match *tv {
-                TypedValue::String(s0) => s0.as_str() == s,
+                TypedValue::String(s0) => s0.unsafe_as_str() == s,
                 _ => false,
             })
     })
@@ -110,12 +110,13 @@ fn is_enum_class<'arena>(attr: &HhasAttribute<'arena>) -> bool {
 
 #[allow(clippy::needless_lifetimes)]
 fn is_memoize<'arena>(attr: &HhasAttribute<'arena>) -> bool {
-    ua::is_memoized(attr.name.as_str())
+    ua::is_memoized(attr.name.unsafe_as_str())
 }
 
 #[allow(clippy::needless_lifetimes)]
 fn is_memoize_lsb<'arena>(attr: &HhasAttribute<'arena>) -> bool {
-    attr.name.as_str() == ua::MEMOIZE_LSB || attr.name.as_str() == ua::POLICY_SHARDED_MEMOIZE_LSB
+    attr.name.unsafe_as_str() == ua::MEMOIZE_LSB
+        || attr.name.unsafe_as_str() == ua::POLICY_SHARDED_MEMOIZE_LSB
 }
 
 #[allow(clippy::needless_lifetimes)]
@@ -177,7 +178,7 @@ pub fn deprecation_info<'a, 'arena>(
     mut iter: impl Iterator<Item = &'a HhasAttribute<'arena>>,
 ) -> Option<&'a [TypedValue<'arena>]> {
     iter.find_map(|attr| {
-        if attr.name.as_str() == ua::DEPRECATED {
+        if attr.name.unsafe_as_str() == ua::DEPRECATED {
             Some(attr.arguments.as_ref())
         } else {
             None
@@ -225,7 +226,7 @@ mod tests {
         let attrs = vec![mk_attr(ua::CONST), mk_attr(ua::DYNAMICALLY_CALLABLE)];
         let has_result = attrs
             .iter()
-            .any(|a| a.name.as_str() == ua::DYNAMICALLY_CALLABLE);
+            .any(|a| a.name.unsafe_as_str() == ua::DYNAMICALLY_CALLABLE);
         assert_eq!(true, has_result);
     }
 }

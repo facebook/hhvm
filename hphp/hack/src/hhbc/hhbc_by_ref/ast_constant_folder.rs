@@ -590,7 +590,7 @@ fn value_to_expr_<'local_arena>(v: TypedValue<'local_arena>) -> Result<ast::Expr
         Float(i) => Expr_::Float(hhbc_by_ref_hhbc_string_utils::float::to_string(i)),
         Bool(false) => Expr_::False,
         Bool(true) => Expr_::True,
-        String(s) => Expr_::String(s.as_str().into()),
+        String(s) => Expr_::String(s.unsafe_as_str().into()),
         LazyClass(_) => return Err(Error::unrecoverable("value_to_expr: lazyclass NYI")),
         Null => Expr_::Null,
         Uninit => return Err(Error::unrecoverable("value_to_expr: uninit value")),

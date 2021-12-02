@@ -42,7 +42,7 @@ macro_rules! impl_id {
             const MANGLE: bool = $mangle;
 
             fn to_raw_string(&self) -> &'arena str {
-                self.0.as_str()
+                self.0.unsafe_as_str()
             }
 
             fn to_raw_ffi_str(&self) -> ffi::Str<'arena> {
@@ -76,7 +76,7 @@ macro_rules! impl_id {
 
         impl<'arena> Into<std::string::String> for $type<'arena> {
             fn into(self) -> std::string::String {
-                self.0.as_str().into()
+                self.0.unsafe_as_str().into()
             }
         }
   }
@@ -87,7 +87,7 @@ macro_rules! impl_add_suffix {
         // ok (multiple impl Struct blocks are allowed if needed)
         impl<'arena> $type<'arena> {
             pub fn add_suffix(alloc: &'arena bumpalo::Bump, id: &Self, suffix: &str) -> Self {
-                from_raw_string_with_suffix(alloc, id.0.as_str(), suffix)
+                from_raw_string_with_suffix(alloc, id.0.unsafe_as_str(), suffix)
             }
         }
     };

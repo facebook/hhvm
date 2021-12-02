@@ -233,10 +233,22 @@ ParseFactsResult extract_facts(
 ) {
   auto const get_facts = [&](const std::string& source_text) -> ParseFactsResult {
     try {
-      auto facts = hackc_extract_facts_as_json_cpp_ffi(options.getFactsFlags(),
-                                                 filename,
-                                                 source_text);
-      return FactsJSONString { std::string(facts) };
+      if (RuntimeOption::EvalExtractFactsFromDecls) {
+        std::int32_t decl_flags = options.getDeclFlags();
+        ::rust::Box<DeclParserOptions> decl_opts =
+          hackc_create_direct_decl_parse_options(
+            decl_flags,
+            options.getAliasedNamespacesConfig());
+        DeclResult decls = hackc_direct_decl_parse(*decl_opts, filename, source_text);
+        FactsResult facts = hackc_decls_to_facts_cpp_ffi(decl_flags, decls, source_text);
+        ::rust::String facts_as_json = hackc_facts_to_json_cpp_ffi(facts, source_text);
+        return FactsJSONString { std::string(facts_as_json) };
+      } else {
+        auto facts = hackc_extract_facts_as_json_cpp_ffi(options.getFactsFlags(),
+                                                  filename,
+                                                  source_text);
+        return FactsJSONString { std::string(facts) };
+      }
     } catch (const std::exception& e) {
       return FactsJSONString { "" }; // Swallow errors from HackC
     }

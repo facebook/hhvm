@@ -658,7 +658,7 @@ fn emit_id<'a, 'arena, 'decl>(
         _ => {
             // panic!("TODO: uncomment after D19350786 lands")
             // let cid: ConstId = r#const::ConstType::from_ast_name(&s);
-            let cid: ConstId<'_> = (alloc, string_utils::strip_global_ns(&s)).into();
+            let cid = r#const::ConstType(Str::new_str(alloc, string_utils::strip_global_ns(&s)));
             emit_symbol_refs::add_constant(alloc, emitter, cid.clone());
             return Ok(emit_pos_then(alloc, p, instr::lit_const(alloc, CnsE(cid))));
         }
@@ -737,13 +737,13 @@ fn parse_include<'arena>(alloc: &'arena bumpalo::Bump, e: &ast::Expr) -> Include
     }
     if var.is_empty() {
         if std::path::Path::new(lit.as_str()).is_relative() {
-            IncludePath::SearchPathRelative(Str::new_str(alloc, lit))
+            IncludePath::SearchPathRelative(Str::new_str(alloc, &lit))
         } else {
-            IncludePath::Absolute(Str::new_str(alloc, lit))
+            IncludePath::Absolute(Str::new_str(alloc, &lit))
         }
     } else {
         strip_backslash(&mut lit);
-        IncludePath::IncludeRootRelative(Str::new_str(alloc, var), Str::new_str(alloc, lit))
+        IncludePath::IncludeRootRelative(Str::new_str(alloc, &var), Str::new_str(alloc, &lit))
     }
 }
 
@@ -2220,8 +2220,8 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                 null_flavor: &ast::OgNullFlavor,
                 mut fcall_args,
             | {
-                let name: method::MethodType<'arena> =
-                    (alloc, string_utils::strip_global_ns(id)).into();
+                let name =
+                    method::MethodType(Str::new_str(alloc, string_utils::strip_global_ns(id)));
                 let obj = emit_object_expr(e, env, obj)?;
                 let generics = emit_generics(e, env, &mut fcall_args)?;
                 let null_flavor = from_ast_null_flavor(*null_flavor);
@@ -2339,8 +2339,8 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                     cexpr = reified_var_cexpr;
                 }
             }
-            let method_id: method::MethodType<'_> =
-                (alloc, string_utils::strip_global_ns(&id)).into();
+            let method_id =
+                method::MethodType(Str::new_str(alloc, string_utils::strip_global_ns(&id)));
             Ok(match cexpr {
                 // Statically known
                 ClassExpr::Id(ast_defs::Id(_, cname)) => {
@@ -2565,7 +2565,10 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                 "max" if num_args == 2 && !flags.contains(FcallFlags::HAS_UNPACK) => {
                     function::FunctionType::<'arena>::from_ast_name(alloc, "__SystemLib\\max2")
                 }
-                _ => (alloc, string_utils::strip_global_ns(&id.1)).into(),
+                _ => function::FunctionType(Str::new_str(
+                    alloc,
+                    string_utils::strip_global_ns(&id.1),
+                )),
             };
             let generics = emit_generics(e, env, &mut fcall_args)?;
             Ok((
@@ -2581,7 +2584,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
         }
         E_::String(s) => {
             // TODO(hrust) should be able to accept `let fq_id = function::from_raw_string(s);`
-            let fq_id = (alloc, s.to_string().as_str()).into();
+            let fq_id = function::FunctionType(Str::new_str(alloc, s.to_string().as_str()));
             let generics = emit_generics(e, env, &mut fcall_args)?;
             Ok((
                 InstrSeq::gather(
@@ -3022,15 +3025,14 @@ fn emit_special_function<'a, 'arena, 'decl>(
                 // like: `foo(inout "literal")`
                 [(_, E(_, _, E_::String(ref func_name)))] => Ok(Some(instr::resolve_meth_caller(
                     alloc,
-                    (
+                    function::FunctionType(Str::new_str(
                         alloc,
                         string_utils::strip_global_ns(
                             // FIXME: This is not safe--string literals are binary strings.
                             // There's no guarantee that they're valid UTF-8.
                             unsafe { std::str::from_utf8_unchecked(func_name.as_slice()) },
                         ),
-                    )
-                        .into(),
+                    )),
                 ))),
                 _ => Err(emit_fatal::raise_fatal_runtime(
                     pos,
@@ -3286,7 +3288,9 @@ fn emit_class_meth<'a, 'arena, 'decl>(
         .contains(HhvmFlags::EMIT_CLS_METH_POINTERS)
     {
         let method_id = match &meth.2 {
-            E_::String(method_name) => (alloc, method_name.to_string().as_str()).into(),
+            E_::String(method_name) => {
+                method::MethodType(Str::new_str(alloc, method_name.to_string().as_str()))
+            }
             _ => return Err(unrecoverable("emit_class_meth: unhandled method")),
         };
         if let Some((cid, (_, id))) = cls.2.as_class_const() {
@@ -3306,15 +3310,14 @@ fn emit_class_meth<'a, 'arena, 'decl>(
         if let Some(class_name) = cls.2.as_string() {
             return Ok(instr::resolveclsmethodd(
                 alloc,
-                (
+                class::ClassType(Str::new_str(
                     alloc,
                     string_utils::strip_global_ns(
                         // FIXME: This is not safe--string literals are binary strings.
                         // There's no guarantee that they're valid UTF-8.
                         unsafe { std::str::from_utf8_unchecked(class_name.as_slice()) },
                     ),
-                )
-                    .into(),
+                )),
                 method_id,
             ));
         }
@@ -3450,8 +3453,10 @@ fn emit_function_pointer<'a, 'arena, 'decl>(
         // class_meth
         ast::FunctionPtrId::FPClassConst(cid, method_id) => {
             // TODO(hrust) should accept `let method_id = method::MethodType::from_ast_name(&(cc.1).1);`
-            let method_id: method::MethodType<'arena> =
-                (alloc, string_utils::strip_global_ns(&method_id.1)).into();
+            let method_id = method::MethodType(Str::new_str(
+                alloc,
+                string_utils::strip_global_ns(&method_id.1),
+            ));
             emit_class_meth_native(e, env, pos, cid, method_id, targs)?
         }
     };
@@ -3480,10 +3485,16 @@ fn emit_hh_fun<'a, 'arena, 'decl>(
         )?;
         Ok(InstrSeq::gather(
             alloc,
-            vec![generics, instr::resolve_rfunc(alloc, (alloc, fname).into())],
+            vec![
+                generics,
+                instr::resolve_rfunc(alloc, function::FunctionType(Str::new_str(alloc, fname))),
+            ],
         ))
     } else {
-        Ok(instr::resolve_func(alloc, (alloc, fname).into()))
+        Ok(instr::resolve_func(
+            alloc,
+            function::FunctionType(Str::new_str(alloc, fname)),
+        ))
     }
 }
 
@@ -4813,8 +4824,8 @@ fn emit_class_const<'a, 'arena, 'decl>(
                 emit_symbol_refs::add_class(alloc, e, cid.clone());
                 // TODO(hrust) enabel `let const_id = r#const::ConstType::from_ast_name(&id.1);`,
                 // `from_ast_name` should be able to accpet Cow<str>
-                let const_id: r#const::ConstType<'_> =
-                    (alloc, string_utils::strip_global_ns(&id.1)).into();
+                let const_id =
+                    r#const::ConstType(Str::new_str(alloc, string_utils::strip_global_ns(&id.1)));
                 emit_pos_then(alloc, &pos, instr::clscnsd(alloc, const_id, cid))
             })
         }
@@ -4828,8 +4839,8 @@ fn emit_class_const<'a, 'arena, 'decl>(
             } else {
                 // TODO(hrust) enabel `let const_id = r#const::ConstType::from_ast_name(&id.1);`,
                 // `from_ast_name` should be able to accpet Cow<str>
-                let const_id: r#const::ConstType<'_> =
-                    (alloc, string_utils::strip_global_ns(&id.1)).into();
+                let const_id =
+                    r#const::ConstType(Str::new_str(alloc, string_utils::strip_global_ns(&id.1)));
                 instr::clscns(alloc, const_id)
             };
             if string_utils::is_class(&id.1) && e.options().emit_class_pointers() == 1 {

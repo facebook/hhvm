@@ -462,6 +462,7 @@ pub fn make_body<'a, 'arena, 'decl>(
                     (cd.get_kind().into(), Str::new_str(alloc, cd.get_name_str())).into(),
                 ),
                 parent_name: ClassExpr::get_parent_class_name(cd)
+                    .as_ref()
                     .map(|s| Str::new_str(alloc, s))
                     .into(),
             })
@@ -486,7 +487,7 @@ pub fn make_body<'a, 'arena, 'decl>(
                     };
                     let mut buf = String::new();
                     print_expr(&mut ctx, &mut buf, &expr_env, &expr)
-                        .map(|_| Pair(l.clone(), Str::new_str(alloc, buf)))
+                        .map(|_| Pair(l.clone(), Str::new_str(alloc, &buf)))
                         .ok()
                 })
                 .flatten(),
@@ -495,7 +496,10 @@ pub fn make_body<'a, 'arena, 'decl>(
 
     Ok(HhasBody {
         body_instrs,
-        decl_vars: Slice::fill_iter(alloc, decl_vars.into_iter().map(|s| Str::new_str(alloc, s))),
+        decl_vars: Slice::fill_iter(
+            alloc,
+            decl_vars.into_iter().map(|s| Str::new_str(alloc, &s)),
+        ),
         num_iters,
         is_memoize_wrapper,
         is_memoize_wrapper_lsb,
@@ -503,7 +507,9 @@ pub fn make_body<'a, 'arena, 'decl>(
         upper_bounds: Slice::fill_iter(alloc, upper_bounds.into_iter()),
         shadowed_tparams: Slice::fill_iter(
             alloc,
-            shadowed_tparams.into_iter().map(|s| Str::new_str(alloc, s)),
+            shadowed_tparams
+                .into_iter()
+                .map(|s| Str::new_str(alloc, &s)),
         ),
         params: Slice::fill_iter(alloc, params.into_iter().map(|x| x.0.to_owned())),
         return_type_info: Maybe::from(return_type_info),
@@ -663,8 +669,7 @@ mod atom_helpers {
         label_not_a_class: Label,
         label_done: Label,
     ) -> Result<InstrSeq<'arena>> {
-        let param_name = &param.name;
-        let loc = Named(Str::new_str(alloc, param_name));
+        let loc = Named(Str::new_str(alloc, param.name.as_ref()));
         Ok(InstrSeq::gather(
             alloc,
             vec![
@@ -894,8 +899,7 @@ pub fn emit_method_prolog<'a, 'arena, 'decl>(
     let alloc = env.arena;
     let mut make_param_instr =
         |(param, ast_param): (&HhasParam<'arena>, &ast::FunParam)| -> Result<Option<InstrSeq<'arena>>> {
-            let param_name = &param.name;
-            let param_name = || ParamId::ParamNamed(Str::new_str(alloc, param_name));
+            let param_name = || ParamId::ParamNamed(Str::new_str(alloc, param.name.as_ref()));
             if param.is_variadic {
                 Ok(None)
             } else {

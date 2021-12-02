@@ -67,7 +67,7 @@ fn rename_params<'arena>(
                 param_counts.insert(param.name, 0);
             }
             Some(count) => {
-                let newname = Str::new_str(alloc, format!("{}{}", param.name.as_str(), count));
+                let newname = Str::new_str(alloc, &format!("{}{}", param.name.as_str(), count));
                 *count += 1;
                 if names.contains(&newname) {
                     rename(alloc, names, param_counts, param);

@@ -262,7 +262,7 @@ impl<'a> Str<'a> {
     /// Make a copy of a `&str` in an `'a Bump` and return it as a `Str<'a>`.
     //  Don't use this if you have an `&'a str` already, prefer
     //  `Str::from` in that case and avoid a copy.
-    pub fn new_str(alloc: &'a bumpalo::Bump, src: impl AsRef<str>) -> Str<'a> {
+    pub fn new_str(alloc: &'a bumpalo::Bump, src: &str) -> Str<'a> {
         Slice::new(alloc.alloc_str(src.as_ref()).as_bytes())
     }
 

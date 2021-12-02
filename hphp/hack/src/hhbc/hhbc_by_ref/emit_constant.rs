@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use core_utils_rust as utils;
-use ffi::Slice;
+use ffi::{Slice, Str};
 use hhbc_by_ref_emit_body as emit_body;
 use hhbc_by_ref_emit_type_hint::{self as emit_type_hint, Kind};
 use hhbc_by_ref_env::{emitter::Emitter, Env};
@@ -27,7 +27,7 @@ fn emit_constant_cinit<'a, 'arena, 'decl>(
     let const_id = r#const::ConstType::from_ast_name(alloc, &constant.name.1);
     let (ns, name) = utils::split_ns_from_name(const_id.to_raw_string());
     let name = String::new() + strip_global_ns(ns) + "86cinit_" + name;
-    let original_id: function::FunctionType<'_> = (alloc, name.as_ref()).into();
+    let original_id = function::FunctionType(Str::new_str(alloc, &name));
     let ret = constant.type_.as_ref();
     let return_type_info = ret
         .map(|h| {

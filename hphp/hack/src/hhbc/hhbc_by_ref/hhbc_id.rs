@@ -53,7 +53,7 @@ macro_rules! impl_id {
         }
 
         pub fn from_raw_string<'arena>(alloc: &'arena bumpalo::Bump, s: &str) -> $type<'arena> {
-            (alloc, s).into()
+            $type(Str::new_str(alloc, s))
         }
 
         #[allow(dead_code)]
@@ -65,15 +65,6 @@ macro_rules! impl_id {
             r.push_str(s);
             r.push_str(suffix);
             $type(ffi::Slice::new(r.into_bump_str().as_bytes()))
-        }
-
-        impl<'arena, 'a, S> std::convert::From<(&'arena bumpalo::Bump, S)> for $type<'arena>
-        where
-            S: std::convert::Into<&'a str>,
-        {
-            fn from((alloc, s): (&'arena bumpalo::Bump, S)) -> $type<'arena> {
-                $type(Str::new_str(alloc, s.into()))
-            }
         }
 
         impl<'arena> std::fmt::Debug for $type<'arena> {
@@ -111,13 +102,12 @@ pub mod class {
 
     impl_id!(ClassType, mangle = true, {
         fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> ClassType<'arena> {
-            (
+            ClassType(Str::new_str(
                 alloc,
                 hhbc_by_ref_hhbc_string_utils::strip_global_ns(
                     &hhbc_by_ref_hhbc_string_utils::mangle(s.to_string()),
                 ),
-            )
-                .into()
+            ))
         }
     });
 
@@ -141,7 +131,10 @@ pub mod prop {
 
     impl_id!(PropType, mangle = false, {
         fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> PropType<'arena> {
-            (alloc, hhbc_by_ref_hhbc_string_utils::strip_global_ns(s)).into()
+            PropType(Str::new_str(
+                alloc,
+                hhbc_by_ref_hhbc_string_utils::strip_global_ns(s),
+            ))
         }
     });
     impl_add_suffix!(PropType);
@@ -156,7 +149,10 @@ pub mod method {
 
     impl_id!(MethodType, mangle = false, {
         fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> MethodType<'arena> {
-            (alloc, hhbc_by_ref_hhbc_string_utils::strip_global_ns(s)).into()
+            MethodType(Str::new_str(
+                alloc,
+                hhbc_by_ref_hhbc_string_utils::strip_global_ns(s),
+            ))
         }
     });
     impl_add_suffix!(MethodType);
@@ -185,7 +181,10 @@ pub mod function {
 
     impl_id!(FunctionType, mangle = false, {
         fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> FunctionType<'arena> {
-            (alloc, hhbc_by_ref_hhbc_string_utils::strip_global_ns(s)).into()
+            FunctionType(Str::new_str(
+                alloc,
+                hhbc_by_ref_hhbc_string_utils::strip_global_ns(s),
+            ))
         }
     });
     impl_add_suffix!(FunctionType);
@@ -201,7 +200,10 @@ pub mod r#const {
 
     impl_id!(ConstType, mangle = false, {
         fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> ConstType<'arena> {
-            (alloc, hhbc_by_ref_hhbc_string_utils::strip_global_ns(s)).into()
+            ConstType(Str::new_str(
+                alloc,
+                hhbc_by_ref_hhbc_string_utils::strip_global_ns(s),
+            ))
         }
     });
 }
@@ -215,7 +217,10 @@ pub mod record {
 
     impl_id!(RecordType, mangle = false, {
         fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> RecordType<'arena> {
-            (alloc, hhbc_by_ref_hhbc_string_utils::strip_global_ns(s)).into()
+            RecordType(Str::new_str(
+                alloc,
+                hhbc_by_ref_hhbc_string_utils::strip_global_ns(s),
+            ))
         }
     });
 }
@@ -233,7 +238,7 @@ mod tests {
     #[test]
     fn test_add_suffix() {
         let alloc = bumpalo::Bump::new();
-        let id: prop::PropType<'_> = (&alloc, "Some").into();
+        let id = prop::PropType(ffi::Str::new_str(&alloc, "Some"));
         let id = prop::PropType::add_suffix(&alloc, &id, "Property");
         assert_eq!("SomeProperty", id.to_raw_string());
     }

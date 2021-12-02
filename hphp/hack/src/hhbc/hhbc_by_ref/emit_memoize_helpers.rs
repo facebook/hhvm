@@ -54,7 +54,12 @@ pub fn param_code_gets<'arena>(
         alloc,
         params
             .iter()
-            .map(|(param, _)| instr::cgetl(alloc, Local::Named(Str::new_str(alloc, &param.name))))
+            .map(|(param, _)| {
+                instr::cgetl(
+                    alloc,
+                    Local::Named(Str::new_str(alloc, param.name.as_ref())),
+                )
+            })
             .collect(),
     )
 }

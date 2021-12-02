@@ -334,7 +334,7 @@ fn type_application_helper<'arena>(
     } else {
         let name: String = class::ClassType::from_ast_name(alloc, name).into();
         Ok(Constraint::make(
-            Just(Str::new_str(alloc, name)),
+            Just(Str::new_str(alloc, &name)),
             ConstraintFlags::empty(),
         ))
     }
@@ -369,7 +369,7 @@ fn make_type_info<'arena>(
     let type_info_user_type = fmt_hint(alloc, tparams, false, h)?;
     let type_info_type_constraint = constraint::Constraint::make(tc_name, tc_flags);
     Ok(HhasTypeInfo::make(
-        Just(Str::new_str(alloc, type_info_user_type)),
+        Just(Str::new_str(alloc, &type_info_user_type)),
         type_info_type_constraint,
     ))
 }
@@ -509,7 +509,7 @@ pub fn emit_type_constraint_for_native_function<'arena>(
             }
         }
     };
-    let tc = constraint::Constraint::make(name.map(|n| Str::new_str(alloc, n)), flags);
+    let tc = constraint::Constraint::make(name.map(|n| Str::new_str(alloc, &n)), flags);
     HhasTypeInfo::make(ti.user_type, tc)
 }
 

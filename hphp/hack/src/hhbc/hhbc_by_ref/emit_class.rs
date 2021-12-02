@@ -211,7 +211,7 @@ fn from_type_constant<'a, 'arena, 'decl>(
     };
 
     Ok(HhasTypeConstant {
-        name: Str::new_str(alloc, name),
+        name: Str::new_str(alloc, &name),
         initializer: Maybe::from(initializer),
         is_abstract,
     })
@@ -245,7 +245,7 @@ fn from_ctx_constant<'a, 'arena>(
         _ => true,
     };
     Ok(HhasCtxConstant {
-        name: Str::new_str(alloc, name),
+        name: Str::new_str(alloc, &name),
         coeffects: Pair::from(coeffects),
         is_abstract,
     })
@@ -340,7 +340,7 @@ fn from_enum_type<'arena>(
     opt.map(|e| {
         let type_info_user_type = Just(Str::new_str(
             alloc,
-            emit_type_hint::fmt_hint(alloc, &[], true, &e.base)?,
+            &emit_type_hint::fmt_hint(alloc, &[], true, &e.base)?,
         ));
         let type_info_type_constraint = Constraint::make(Nothing, ConstraintFlags::EXTENDED_HINT);
         Ok(HhasTypeInfo::make(
@@ -528,7 +528,7 @@ fn emit_reified_init_method<'a, 'arena, 'decl>(
         Ok(Some(make_86method(
             alloc,
             emitter,
-            (alloc, string_utils::reified::INIT_METH_NAME).into(),
+            method::MethodType(Str::new_str(alloc, string_utils::reified::INIT_METH_NAME)),
             params,
             false, // is_static
             Visibility::Protected,
@@ -575,7 +575,7 @@ where
         Ok(Some(make_86method(
             alloc,
             emitter,
-            (alloc, name).into(),
+            method::MethodType(Str::new_str(alloc, name)),
             vec![],
             true, // is_static
             Visibility::Private,
@@ -645,10 +645,11 @@ pub fn emit_class<'a, 'arena, 'decl>(
             .iter()
             .map(|ast::UseAsAlias(ido1, id, ido2, vis)| {
                 let id1 = Maybe::from(ido1.as_ref()).map(|x| elaborate_namespace_id(x));
-                let id2 = Maybe::from(ido2.as_ref()).map(|x| (alloc, x.1.as_ref()).into());
+                let id2 = Maybe::from(ido2.as_ref())
+                    .map(|x| hhbc_id::class::ClassType(Str::new_str(alloc, &x.1)));
                 (
                     id1,
-                    (alloc, id.1.as_ref()).into(),
+                    hhbc_id::class::ClassType(Str::new_str(alloc, &id.1)),
                     id2,
                     Slice::fill_iter(alloc, vis.iter().map(|&v| UseAsVisibility::from(v))),
                 )
@@ -663,7 +664,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
             .iter()
             .map(|ast::InsteadofAlias(id1, id2, ids)| {
                 let id1 = elaborate_namespace_id(id1);
-                let id2: ClassType<'arena> = (alloc, id2.1.as_ref()).into();
+                let id2 = ClassType(Str::new_str(alloc, &id2.1));
                 let ids = Slice::fill_iter(alloc, ids.iter().map(|x| elaborate_namespace_id(x)));
                 (id1, id2, ids).into()
             }),
@@ -874,7 +875,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
         Some(make_86method(
             alloc,
             emitter,
-            (alloc, "86cinit").into(),
+            method::MethodType(Str::new_str(alloc, "86cinit")),
             params,
             true, /* is_static */
             Visibility::Private,

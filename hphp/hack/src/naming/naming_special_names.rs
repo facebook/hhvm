@@ -815,6 +815,52 @@ pub mod coeffects {
         }
         POLICIED_SET.contains(x)
     }
+
+    pub enum Ctx {
+        Defaults,
+
+        // Shared
+        WriteThisProps,
+        WriteProps,
+
+        // Rx hierarchy
+        RxLocal,
+        RxShallow,
+        Rx,
+
+        // Policied hierarchy
+        PoliciedOf,
+        PoliciedLocal,
+        PoliciedShallow,
+        Policied,
+
+        Controlled,
+
+        ReadGlobals,
+        Globals,
+
+        // Pure
+        Pure,
+    }
+
+    pub fn ctx_str_to_enum(s: &str) -> Option<Ctx> {
+        match s {
+            DEFAULTS => Some(Ctx::Defaults),
+            RX_LOCAL => Some(Ctx::RxLocal),
+            RX_SHALLOW => Some(Ctx::RxShallow),
+            RX => Some(Ctx::Rx),
+            WRITE_THIS_PROPS => Some(Ctx::WriteThisProps),
+            WRITE_PROPS => Some(Ctx::WriteProps),
+            POLICIED_OF => Some(Ctx::PoliciedOf),
+            POLICIED_LOCAL => Some(Ctx::PoliciedLocal),
+            POLICIED_SHALLOW => Some(Ctx::PoliciedShallow),
+            POLICIED => Some(Ctx::Policied),
+            CONTROLLED => Some(Ctx::Controlled),
+            GLOBALS => Some(Ctx::Globals),
+            READ_GLOBALS => Some(Ctx::ReadGlobals),
+            _ => None,
+        }
+    }
 }
 
 pub mod shapes {

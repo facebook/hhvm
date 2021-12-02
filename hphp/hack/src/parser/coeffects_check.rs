@@ -4,9 +4,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use naming_special_names_rust::{members, user_attributes};
+use core_utils_rust as utils;
+use naming_special_names_rust::{coeffects, coeffects::Ctx, members, user_attributes};
 use oxidized::{
     aast,
+    aast::Hint_,
+    aast_defs::Hint,
     aast_visitor::{visit, AstParams, Node, Visitor},
     ast, ast_defs,
     pos::Pos,
@@ -40,6 +43,68 @@ fn is_pure_with_inherited_val(c: &Context, ctxs: &Option<ast::Contexts>) -> bool
     }
 }
 
+fn has_defaults_with_inherited_val(c: &Context, ctxs: &Option<ast::Contexts>) -> bool {
+    match ctxs {
+        Some(_) => has_defaults(ctxs),
+        None => c.has_defaults,
+    }
+}
+
+fn has_defaults_implicitly(hints: &Vec<Hint>) -> bool {
+    for hint in hints {
+        let Hint(_, h) = hint;
+        match &**h {
+            Hint_::Happly(ast_defs::Id(_, id), _) => {
+                let (_, name) = utils::split_ns_from_name(&id);
+                match coeffects::ctx_str_to_enum(name) {
+                    Some(c) => match c {
+                        Ctx::Defaults => {
+                            return true;
+                        }
+                        _ => {
+                            continue;
+                        }
+                    },
+                    None => {
+                        return true;
+                    }
+                }
+            }
+            aast::Hint_::HfunContext(_) => {
+                continue;
+            }
+            aast::Hint_::Haccess(Hint(_, hint), sids) => match &**hint {
+                Hint_::Happly(ast_defs::Id(..), _) if !sids.is_empty() => {
+                    continue;
+                }
+                Hint_::Hvar(_) if sids.len() == 1 => {
+                    continue;
+                }
+                _ => {
+                    return true;
+                }
+            },
+            _ => {
+                return true;
+            }
+        }
+    }
+    false
+}
+
+fn has_defaults(ctxs: &Option<ast::Contexts>) -> bool {
+    match ctxs {
+        None => true,
+        Some(c) => {
+            if c.1.is_empty() {
+                false
+            } else {
+                has_defaults_implicitly(&c.1)
+            }
+        }
+    }
+}
+
 fn is_constructor(s: &ast_defs::Id) -> bool {
     let ast_defs::Id(_, name) = s;
     return name == members::__CONSTRUCT;
@@ -60,6 +125,7 @@ struct Context {
     is_pure: bool,
     is_constructor: bool,
     ignore_coeffect_local_errors: bool,
+    has_defaults: bool,
 }
 
 struct Checker {
@@ -78,7 +144,7 @@ impl Checker {
     }
 
     fn check_pure_fn_contexts(&mut self, c: &mut Context, e: &aast::Expr<(), ()>) {
-        if !c.is_pure || c.is_constructor || c.ignore_coeffect_local_errors {
+        if !c.is_pure || c.is_constructor || c.ignore_coeffect_local_errors || c.has_defaults {
             return;
         }
         if let Some((bop, lhs, _)) = e.2.as_binop() {
@@ -126,6 +192,7 @@ impl<'ast> Visitor<'ast> for Checker {
                 ignore_coeffect_local_errors: has_ignore_coeffect_local_errors_attr(
                     &m.user_attributes,
                 ),
+                has_defaults: has_defaults(&m.ctxs),
                 ..*c
             },
             self,
@@ -136,6 +203,7 @@ impl<'ast> Visitor<'ast> for Checker {
         d.recurse(
             &mut Context {
                 is_pure: is_pure(&d.fun.ctxs),
+                has_defaults: has_defaults(&d.fun.ctxs),
                 ..*c
             },
             self,
@@ -151,6 +219,7 @@ impl<'ast> Visitor<'ast> for Checker {
                 ignore_coeffect_local_errors: has_ignore_coeffect_local_errors_attr(
                     &f.user_attributes,
                 ),
+                has_defaults: has_defaults_with_inherited_val(c, &f.ctxs),
                 ..*c
             },
             self,
@@ -172,6 +241,7 @@ pub fn check_program(program: &aast::Program<(), ()>) -> Vec<SyntaxError> {
         is_pure: false,
         is_constructor: false,
         ignore_coeffect_local_errors: false,
+        has_defaults: false,
     };
     visit(&mut checker, &mut context, program).unwrap();
     checker.errors

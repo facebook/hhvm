@@ -1,3 +1,3 @@
-Fatal error: Uncaught exception 'InvalidOperationException' with message 'Local w must be a value type.' in %s:19
+Fatal error: Uncaught exception 'ReadonlyViolationException' with message 'Local w must be a value type.' in %s:19
 Stack trace:
 %A

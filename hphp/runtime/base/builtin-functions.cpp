@@ -883,7 +883,7 @@ void throw_or_warn_local_must_be_value_type(const char* locName)
   if (RO::EvalEnableReadonlyPropertyEnforcement == 1) {
     raise_warning(msg);
   } else if (RO::EvalEnableReadonlyPropertyEnforcement > 1) {
-    SystemLib::throwInvalidOperationExceptionObject(msg);
+    SystemLib::throwReadonlyViolationExceptionObject(msg);
   }
 }
 
@@ -897,7 +897,7 @@ void throw_or_warn_readonly_violation(const char* className, const char* propNam
     assertx(RO::EvalEnableReadonlyPropertyEnforcement == 2);
     std::string fmtMsg;
     string_printf(fmtMsg, msg, propName, className);
-    SystemLib::throwInvalidOperationExceptionObject(fmtMsg);
+    SystemLib::throwReadonlyViolationExceptionObject(fmtMsg);
   }
 }
 }
@@ -923,7 +923,7 @@ void throw_or_warn_cannot_modify_readonly_collection() {
   if (RO::EvalEnableReadonlyPropertyEnforcement == 1) {
     raise_warning(Strings::READONLY_COLLECTIONS_CANNOT_BE_MODIFIED);
   } else {
-    SystemLib::throwInvalidOperationExceptionObject(
+    SystemLib::throwReadonlyViolationExceptionObject(
       Strings::READONLY_COLLECTIONS_CANNOT_BE_MODIFIED
     );
   }

@@ -1,5 +1,5 @@
 
-Fatal error: Uncaught exception 'InvalidOperationException' with message 'Local x must be a value type.' in %s:15
+Fatal error: Uncaught exception 'ReadonlyViolationException' with message 'Local x must be a value type.' in %s:15
 Stack trace:
 #0 (): bar()
 #1 (): Closure$__SystemLib\enter_async_entry_point()

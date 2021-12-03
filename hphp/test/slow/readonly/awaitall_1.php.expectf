@@ -1,5 +1,5 @@
 
-Fatal error: Uncaught exception 'InvalidOperationException' with message 'Cannot store readonly value in a non-readonly property prop of class Bar.' in %s:19
+Fatal error: Uncaught exception 'ReadonlyViolationException' with message 'Cannot store readonly value in a non-readonly property prop of class Bar.' in %s:19
 Stack trace:
 #0 (): bar()
 #1 (): Closure$__SystemLib\enter_async_entry_point()

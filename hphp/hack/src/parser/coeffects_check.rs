@@ -196,6 +196,25 @@ struct Context {
 }
 
 impl Context {
+    fn new() -> Self {
+        Self {
+            bitflags: ContextFlags::from_bits_truncate(0 as u8),
+        }
+    }
+
+    fn from_context(&self) -> Self {
+        let mut c = Context::new();
+        c.set_in_methodish(self.in_methodish());
+        c.set_is_pure(self.is_pure());
+        c.set_is_constructor(self.is_constructor());
+        c.set_ignore_coeffect_local_errors(self.ignore_coeffect_local_errors());
+        c.set_is_typechecker(self.is_typechecker());
+        c.set_has_defaults(self.has_defaults());
+        c.set_has_write_props(self.has_write_props());
+        c.set_has_write_this_props(self.has_write_this_props());
+        c
+    }
+
     fn in_methodish(&self) -> bool {
         return self.bitflags.contains(ContextFlags::IN_METHODISH);
     }
@@ -358,60 +377,48 @@ impl<'ast> Visitor<'ast> for Checker {
     }
 
     fn visit_method_(&mut self, c: &mut Context, m: &aast::Method_<(), ()>) -> Result<(), ()> {
-        c.set_in_methodish(true);
-        c.set_is_pure(is_pure(&m.ctxs));
-        c.set_is_constructor(is_constructor(&m.name));
-        c.set_ignore_coeffect_local_errors(has_ignore_coeffect_local_errors_attr(
+        let mut new_context = Context::from_context(c);
+        new_context.set_in_methodish(true);
+        new_context.set_is_pure(is_pure(&m.ctxs));
+        new_context.set_is_constructor(is_constructor(&m.name));
+        new_context.set_ignore_coeffect_local_errors(has_ignore_coeffect_local_errors_attr(
             &m.user_attributes,
         ));
-        c.set_has_defaults(has_defaults(&m.ctxs));
-        c.set_has_write_props(has_capability(&m.ctxs, Ctx::WriteProps));
-        c.set_has_write_this_props(has_capability(&m.ctxs, Ctx::WriteThisProps));
-        m.recurse(
-            &mut Context {
-                bitflags: c.bitflags,
-            },
-            self,
-        )
+        new_context.set_has_defaults(has_defaults(&m.ctxs));
+        new_context.set_has_write_props(has_capability(&m.ctxs, Ctx::WriteProps));
+        new_context.set_has_write_this_props(has_capability(&m.ctxs, Ctx::WriteThisProps));
+        m.recurse(&mut new_context, self)
     }
 
     fn visit_fun_def(&mut self, c: &mut Context, d: &aast::FunDef<(), ()>) -> Result<(), ()> {
-        c.set_is_pure(is_pure(&d.fun.ctxs));
-        c.set_has_defaults(has_defaults(&d.fun.ctxs));
-        c.set_is_constructor(is_constructor(&d.fun.name));
-        c.set_has_write_props(has_capability(&d.fun.ctxs, Ctx::WriteProps));
-        c.set_has_write_this_props(has_capability(&d.fun.ctxs, Ctx::WriteThisProps));
-        d.recurse(
-            &mut Context {
-                bitflags: c.bitflags,
-            },
-            self,
-        )
+        let mut new_context = Context::from_context(c);
+        new_context.set_is_pure(is_pure(&d.fun.ctxs));
+        new_context.set_has_defaults(has_defaults(&d.fun.ctxs));
+        new_context.set_is_constructor(is_constructor(&d.fun.name));
+        new_context.set_has_write_props(has_capability(&d.fun.ctxs, Ctx::WriteProps));
+        new_context.set_has_write_this_props(has_capability(&d.fun.ctxs, Ctx::WriteThisProps));
+        d.recurse(&mut new_context, self)
     }
 
     fn visit_fun_(&mut self, c: &mut Context, f: &aast::Fun_<(), ()>) -> Result<(), ()> {
-        c.set_in_methodish(true);
-        c.set_is_pure(is_pure_with_inherited_val(c, &f.ctxs));
-        c.set_ignore_coeffect_local_errors(has_ignore_coeffect_local_errors_attr(
+        let mut new_context = Context::from_context(c);
+        new_context.set_in_methodish(true);
+        new_context.set_is_pure(is_pure_with_inherited_val(c, &f.ctxs));
+        new_context.set_ignore_coeffect_local_errors(has_ignore_coeffect_local_errors_attr(
             &f.user_attributes,
         ));
-        c.set_has_defaults(has_defaults_with_inherited_val(c, &f.ctxs));
-        c.set_has_write_props(has_capability_with_inherited_val(
+        new_context.set_has_defaults(has_defaults_with_inherited_val(c, &f.ctxs));
+        new_context.set_has_write_props(has_capability_with_inherited_val(
             c,
             &f.ctxs,
             Ctx::WriteProps,
         ));
-        c.set_has_write_this_props(has_capability_with_inherited_val(
+        new_context.set_has_write_this_props(has_capability_with_inherited_val(
             c,
             &f.ctxs,
             Ctx::WriteThisProps,
         ));
-        f.recurse(
-            &mut Context {
-                bitflags: c.bitflags,
-            },
-            self,
-        )
+        f.recurse(&mut new_context, self)
     }
 
     fn visit_expr(&mut self, c: &mut Context, p: &aast::Expr<(), ()>) -> Result<(), ()> {
@@ -433,9 +440,7 @@ impl<'ast> Visitor<'ast> for Checker {
 
 pub fn check_program(program: &aast::Program<(), ()>, is_typechecker: bool) -> Vec<SyntaxError> {
     let mut checker = Checker::new();
-    let mut context = Context {
-        bitflags: ContextFlags::from_bits_truncate(0 as u8),
-    };
+    let mut context = Context::new();
     context.set_is_typechecker(is_typechecker);
     visit(&mut checker, &mut context, program).unwrap();
     checker.errors

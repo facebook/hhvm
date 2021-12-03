@@ -61,7 +61,6 @@ let get_hh_version ~(repo : Path.t) : (string, string) result Future.Promise.t =
 let go
     (env : ServerEnv.env)
     (genv : ServerEnv.genv)
-    (dir : string)
     (workers : MultiWorker.worker list option) : unit =
   let ctx = Provider_utils.ctx_from_server_env env in
   let repo = Wwwroot.get None in
@@ -77,7 +76,6 @@ let go
     ^ "/shallow_decls"
   in
   ignore (Sys.command cmd);
-  let dir = Filename.concat dir hh_version in
 
   let get_next =
     ServerUtils.make_next
@@ -107,25 +105,19 @@ let go
               ~init:acc
               ~f:(fun acc (name, decl_hash) ->
                 let shallow_decl_opt = Shallow_classes_provider.get ctx name in
-                if Option.is_some shallow_decl_opt then (
+                if Option.is_some shallow_decl_opt then
                   let shallow_decl = Option.value_exn shallow_decl_opt in
                   let shallow_decls_in_file = SMap.empty in
                   let shallow_decls_in_file =
                     SMap.add name shallow_decl shallow_decls_in_file
                   in
-                  let shallow_decls_dir = Filename.concat dir "shallow_decls" in
-                  let file =
-                    Int64.to_string decl_hash
-                    |> Filename.concat shallow_decls_dir
-                  in
-                  Sys_utils.mkdir_p (Filename.dirname file);
                   List.rev_append
                     acc
                     [
                       ( Int64.to_string decl_hash,
                         Marshal.to_string shallow_decls_in_file [] );
                     ]
-                ) else
+                else
                   acc)
               names_and_decl_hashes)
         fnl

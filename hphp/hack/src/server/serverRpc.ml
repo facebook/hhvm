@@ -518,7 +518,9 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
   | GEN_HOT_CLASSES threshold ->
     (env, ServerHotClasses.go genv.workers env threshold)
   | GEN_PREFETCH_DIR dir ->
-    (env, ServerGenPrefetchDir.go env genv dir genv.workers)
+    (* TODO(bobren) remove dir entirely from saved state job invocation *)
+    let _ = dir in
+    (env, ServerGenPrefetchDir.go env genv genv.workers)
   | FUN_DEPS_BATCH positions ->
     (env, ServerFunDepsBatch.go genv.workers positions env)
   | LIST_FILES_WITH_ERRORS -> (env, ServerEnv.list_files env)

@@ -590,7 +590,7 @@ final class Vector implements \MutableVector {
   /** Shuffles the values of the Vector randomly in place.
    */
   <<__Native>>
-  public function shuffle()[controlled]: void;
+  public function shuffle()[leak_safe]: void;
 
   /** @return string
    */

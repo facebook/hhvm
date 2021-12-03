@@ -599,7 +599,7 @@ function array_values(
  *
  */
 <<__Native>>
-function shuffle(inout mixed $array)[controlled]: bool;
+function shuffle(inout mixed $array)[leak_safe]: bool;
 
 /**
  * Counts all elements in an array, or properties in an object. For objects,

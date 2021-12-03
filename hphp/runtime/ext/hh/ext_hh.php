@@ -364,7 +364,7 @@ final class ImplicitContextData {}
  * Returns the implicit context keyed by $key or null if such doesn't exist
  */
 <<__Native>>
-function get_implicit_context(string $key)[policied]: mixed;
+function get_implicit_context(string $key)[zoned]: mixed;
 
 /**
  * Sets implicit context $context keyed by $key.
@@ -374,14 +374,14 @@ function get_implicit_context(string $key)[policied]: mixed;
 function set_implicit_context(
   string $key,
   mixed $context,
-)[policied]: object /* ImplicitContextData */;
+)[zoned]: object /* ImplicitContextData */;
 
 /*
  * Returns the currently implicit context hash or emptry string if
  * no implicit context is set
  */
 <<__Native>>
-function get_implicit_context_memo_key()[policied]: string;
+function get_implicit_context_memo_key()[zoned]: string;
 
 } // namespace ImplicitContext\_Private
 
@@ -391,7 +391,7 @@ abstract class ImplicitContext {
   protected static async function setAsync<Tout>(
     this::T $context,
     (function (): Awaitable<Tout>) $f
-  )[policied]: Awaitable<Tout> {
+  )[zoned]: Awaitable<Tout> {
     $prev = ImplicitContext\_Private\set_implicit_context(
       static::class,
       $context,
@@ -409,7 +409,7 @@ abstract class ImplicitContext {
   protected static function set<Tout>(
     this::T $context,
     (function (): Tout) $f
-  )[policied]: Tout {
+  )[zoned]: Tout {
     $prev = ImplicitContext\_Private\set_implicit_context(
       static::class,
       $context,
@@ -421,7 +421,7 @@ abstract class ImplicitContext {
     }
   }
 
-  protected static function get()[policied]: this::T {
+  protected static function get()[zoned]: this::T {
     return ImplicitContext\_Private\get_implicit_context(static::class);
   }
 }
@@ -604,7 +604,7 @@ namespace HH\Coeffects {
   <<__Native>>
   function enter_zoned_with<Tout, Tpolicy>(
     (function()[zoned_with<Tpolicy>]: Tout) $f
-  )[policied]: mixed /* Tout */;
+  )[zoned]: mixed /* Tout */;
 
   } // namespace _Private
 
@@ -615,10 +615,10 @@ namespace HH\Coeffects {
     classname<Tcontext> $cls,
     Tval $value,
     (function()[zoned_with<Tval>]: Tout) $f,
-  )[policied]: Tout where Tval = Tcontext::T {
+  )[zoned]: Tout where Tval = Tcontext::T {
     return $cls::set(
       $value,
-      ()[policied] ==> _Private\enter_zoned_with($f)
+      ()[zoned] ==> _Private\enter_zoned_with($f)
     );
   }
 
@@ -633,10 +633,10 @@ namespace HH\Coeffects {
     classname<Tcontext> $cls,
     Tval $value,
     (function()[zoned_with<Tval>]: Awaitable<Tout>) $f,
-  )[policied]: Awaitable<Tout> where Tval = Tcontext::T {
+  )[zoned]: Awaitable<Tout> where Tval = Tcontext::T {
     return await $cls::setAsync(
       $value,
-      ()[policied] ==> _Private\enter_zoned_with($f)
+      ()[zoned] ==> _Private\enter_zoned_with($f)
     );
   }
 

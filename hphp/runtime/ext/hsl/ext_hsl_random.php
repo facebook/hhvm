@@ -35,7 +35,7 @@ namespace HH\Lib\_Private\Native {
  *
  */
 <<__Native>>
-function pseudorandom_int(int $min = \PHP_INT_MIN, int $max = \PHP_INT_MAX)[controlled]: int;
+function pseudorandom_int(int $min = \PHP_INT_MIN, int $max = \PHP_INT_MAX)[leak_safe]: int;
 
 /**
  * Seeds the pseudorandom number generator used by `pseudorandom_int`. This
@@ -63,6 +63,6 @@ function pseudorandom_seed(int $seed): void;
  *
  */
 <<__Native>>
-function random_int(int $min = \PHP_INT_MIN, int $max = \PHP_INT_MAX)[controlled]: int;
+function random_int(int $min = \PHP_INT_MIN, int $max = \PHP_INT_MAX)[leak_safe]: int;
 
 }

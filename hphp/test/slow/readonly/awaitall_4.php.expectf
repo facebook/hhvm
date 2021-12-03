@@ -1,5 +1,5 @@
 
-Fatal error: Uncaught exception 'InvalidArgumentException' with message 'takes_mutable() does not allow for parameter 1 to be passed readonly, but the argument was annotated with 'readonly'' in %s:15
+Fatal error: Uncaught exception 'ReadonlyViolationException' with message 'takes_mutable() does not allow for parameter 1 to be passed readonly, but the argument was annotated with 'readonly'' in %s:15
 Stack trace:
 #0 (): bar()
 #1 (): Closure$__SystemLib\enter_async_entry_point()

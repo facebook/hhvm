@@ -65,7 +65,8 @@ namespace HPHP { namespace SystemLib {
   x(InvalidForeachArgumentException)            \
   x(UndefinedPropertyException)                 \
   x(UndefinedVariableException)                 \
-  x(TypecastException)
+  x(TypecastException)                          \
+  x(ReadonlyViolationException)
 
 #define SYSTEMLIB_HH_CLASSES(x) \
   x(Traversable)                \
@@ -163,6 +164,7 @@ void throwSoapFaultObject(const Variant& code,
 [[noreturn]] void throwUndefinedPropertyExceptionObject(const Variant& message);
 [[noreturn]] void throwUndefinedVariableExceptionObject(const Variant& message);
 [[noreturn]] void throwTypecastExceptionObject(const Variant& message);
+[[noreturn]] void throwReadonlyViolationExceptionObject(const Variant& message);
 
 /**
  * Register a persistent unit to be re-merged (in non-repo mode)

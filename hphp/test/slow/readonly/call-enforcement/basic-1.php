@@ -14,12 +14,12 @@ function main() {
   $ro = readonly new C();
 
   f($mut);
-  try { f($ro); } catch (Exception $e) { echo $e->getMessage()."\n"; }
+  try { f($ro); } catch (ReadonlyViolationException $e) { echo $e->getMessage()."\n"; }
 
   g($mut, $mut);
   g($ro, $mut);
-  try { g($mut, $ro); } catch (Exception $e) { echo $e->getMessage()."\n"; }
-  try { g($ro, $ro); } catch (Exception $e) { echo $e->getMessage()."\n"; }
+  try { g($mut, $ro); } catch (ReadonlyViolationException $e) { echo $e->getMessage()."\n"; }
+  try { g($ro, $ro); } catch (ReadonlyViolationException $e) { echo $e->getMessage()."\n"; }
 
-  try { h($ro, $ro); } catch (Exception $e) { echo $e->getMessage()."\n"; }
+  try { h($ro, $ro); } catch (ReadonlyViolationException $e) { echo $e->getMessage()."\n"; }
 }

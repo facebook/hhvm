@@ -1,5 +1,5 @@
 memoized_method
 
-Fatal error: Uncaught exception 'InvalidArgumentException' with message 'memoized_return_readonly() returns readonly, but the caller expects a mutable value' in %s:23
+Fatal error: Uncaught exception 'ReadonlyViolationException' with message 'memoized_return_readonly() returns readonly, but the caller expects a mutable value' in %s:23
 Stack trace:
 %A

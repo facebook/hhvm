@@ -277,7 +277,7 @@ void throwReadonlyMismatch(const Func* func, int32_t index) {
     raise_warning(msg);
     return;
   }
-  SystemLib::throwInvalidArgumentExceptionObject(msg);
+  SystemLib::throwReadonlyViolationExceptionObject(msg);
 }
 
 void checkReadonlyMismatch(const Func* func, uint32_t numArgs,

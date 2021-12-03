@@ -171,3 +171,8 @@ final class UndefinedVariableException extends LogicException {}
  * Exception thrown when attempting to access a property on a non-object.
  */
 final class AccessPropertyOnNonObjectException extends LogicException {}
+
+/**
+ * Exception thrown when a readonly violation occurs.
+ */
+final class ReadonlyViolationException extends LogicException {}

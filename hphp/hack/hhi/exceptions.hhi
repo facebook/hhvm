@@ -136,6 +136,7 @@ final class TypecastException extends LogicException {}
 final class UndefinedPropertyException extends LogicException {}
 final class UndefinedVariableException extends LogicException {}
 final class AccessPropertyOnNonObjectException extends LogicException {}
+final class ReadonlyViolationException extends LogicException {}
 
 class RuntimeException extends Exception {
   use ExceptionWithPureGetMessageTrait;

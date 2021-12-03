@@ -62,8 +62,10 @@ class TestCase(unittest.TestCase, Generic[T]):
         # These scripts assume working directory fbcode.
         cwd = os.path.basename(os.getcwd())
         if cwd == "fbcode":
+            self.undo_chdir = None
             pass  # buck
         elif cwd == "fbsource":
+            self.undo_chdir = os.getcwd()
             os.chdir("fbcode")  # buck2
         else:
             raise RuntimeError("Invalid working directory")
@@ -71,4 +73,10 @@ class TestCase(unittest.TestCase, Generic[T]):
         self.test_driver.setUp()
 
     def tearDown(self) -> None:
+        if self.undo_chdir is not None:
+            # If we chdir then TPX/Buck2 get confused, so make sure we
+            # put things back to how they were.
+            # T107261961 to fix this on the TPX/Buck2 side.
+            os.chdir(self.undo_chdir)
+            self.undo_chdir = None
         self.test_driver.tearDown()

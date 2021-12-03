@@ -28,13 +28,13 @@ pub enum Ctx {
     RxShallow,
     Rx,
 
-    // Policied hierarchy
-    PoliciedOf,
-    PoliciedLocal,
-    PoliciedShallow,
-    Policied,
+    // Zoned hierarchy
+    ZonedWith,
+    ZonedLocal,
+    ZonedShallow,
+    Zoned,
 
-    Controlled,
+    LeakSafe,
 
     ReadGlobals,
     Globals,
@@ -48,17 +48,17 @@ impl fmt::Display for Ctx {
         use Ctx::*;
         match self {
             Defaults => write!(f, "{}", c::DEFAULTS),
+            Pure => write!(f, "{}", c::PURE),
             RxLocal => write!(f, "{}", c::RX_LOCAL),
             RxShallow => write!(f, "{}", c::RX_SHALLOW),
             Rx => write!(f, "{}", c::RX),
             WriteThisProps => write!(f, "{}", c::WRITE_THIS_PROPS),
             WriteProps => write!(f, "{}", c::WRITE_PROPS),
-            PoliciedOf => write!(f, "{}", c::POLICIED_OF),
-            PoliciedLocal => write!(f, "{}", c::POLICIED_LOCAL),
-            PoliciedShallow => write!(f, "{}", c::POLICIED_SHALLOW),
-            Policied => write!(f, "{}", c::POLICIED),
-            Pure => write!(f, "{}", c::PURE),
-            Controlled => write!(f, "{}", c::CONTROLLED),
+            ZonedWith => write!(f, "{}", c::ZONED_WITH),
+            ZonedLocal => write!(f, "{}", c::ZONED_LOCAL),
+            ZonedShallow => write!(f, "{}", c::ZONED_SHALLOW),
+            Zoned => write!(f, "{}", c::ZONED),
+            LeakSafe => write!(f, "{}", c::LEAK_SAFE),
             ReadGlobals => write!(f, "{}", c::READ_GLOBALS),
             Globals => write!(f, "{}", c::GLOBALS),
         }
@@ -157,11 +157,11 @@ impl<'arena> HhasCoeffects<'arena> {
                 c::RX => Some(Ctx::Rx),
                 c::WRITE_THIS_PROPS => Some(Ctx::WriteThisProps),
                 c::WRITE_PROPS => Some(Ctx::WriteProps),
-                c::POLICIED_OF => Some(Ctx::PoliciedOf),
-                c::POLICIED_LOCAL => Some(Ctx::PoliciedLocal),
-                c::POLICIED_SHALLOW => Some(Ctx::PoliciedShallow),
-                c::POLICIED => Some(Ctx::Policied),
-                c::CONTROLLED => Some(Ctx::Controlled),
+                c::POLICIED_OF | c::ZONED_WITH => Some(Ctx::ZonedWith),
+                c::POLICIED_LOCAL | c::ZONED_LOCAL => Some(Ctx::ZonedLocal),
+                c::POLICIED_SHALLOW | c::ZONED_SHALLOW => Some(Ctx::ZonedShallow),
+                c::POLICIED | c::ZONED => Some(Ctx::Zoned),
+                c::CONTROLLED | c::LEAK_SAFE => Some(Ctx::LeakSafe),
                 c::GLOBALS => Some(Ctx::Globals),
                 c::READ_GLOBALS => Some(Ctx::ReadGlobals),
                 _ => None,
@@ -176,7 +176,7 @@ impl<'arena> HhasCoeffects<'arena> {
         for c in coeffects.iter() {
             result.push(match c {
                 RxLocal => RxShallow,
-                PoliciedLocal => PoliciedShallow,
+                ZonedLocal => ZonedShallow,
                 _ => *c,
             })
         }

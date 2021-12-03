@@ -1,127 +1,127 @@
-Warning: Call to main() requires [defaults, policied_of] coeffects but [vm-entry]() provided [defaults]
-non_policied -> non_policied: ok
-non_policied -> policied_local: ok
-non_policied -> policied_shallow: ok
-non_policied -> policied: ok
-non_policied -> policied_of:
-Warning: Call to policied_of() requires [policied_of] coeffects but non_policied() provided [defaults] in %s on line 4
+Warning: Call to main() requires [defaults, zoned_with] coeffects but [vm-entry]() provided [defaults]
+non_zoned -> non_zoned: ok
+non_zoned -> zoned_local: ok
+non_zoned -> zoned_shallow: ok
+non_zoned -> zoned: ok
+non_zoned -> zoned_with:
+Warning: Call to zoned_with() requires [zoned_with] coeffects but non_zoned() provided [defaults] in %s on line 4
  ok
-non_policied -> controlled: ok
-non_policied -> globals: ok
-non_policied -> read_globals: ok
-non_policied -> write_props: ok
-non_policied -> write_this_props: ok
-non_policied -> pure: ok
-policied_local -> non_policied: ok
-policied_local -> policied_local: ok
-policied_local -> policied_shallow: ok
-policied_local -> policied: ok
-policied_local -> policied_of:
-Warning: Call to policied_of() requires [policied_of] coeffects but policied_local() provided [defaults] in %s on line 8
+non_zoned -> leak_safe: ok
+non_zoned -> globals: ok
+non_zoned -> read_globals: ok
+non_zoned -> write_props: ok
+non_zoned -> write_this_props: ok
+non_zoned -> pure: ok
+zoned_local -> non_zoned: ok
+zoned_local -> zoned_local: ok
+zoned_local -> zoned_shallow: ok
+zoned_local -> zoned: ok
+zoned_local -> zoned_with:
+Warning: Call to zoned_with() requires [zoned_with] coeffects but zoned_local() provided [defaults] in %s on line 8
  ok
-policied_local -> controlled: ok
-policied_local -> globals: ok
-policied_local -> read_globals: ok
-policied_local -> write_props: ok
-policied_local -> write_this_props: ok
-policied_local -> pure: ok
-policied_shallow -> non_policied:
-Warning: Call to non_policied() requires [defaults] coeffects but policied_shallow() provided [policied_shallow] in %s on line 12
+zoned_local -> leak_safe: ok
+zoned_local -> globals: ok
+zoned_local -> read_globals: ok
+zoned_local -> write_props: ok
+zoned_local -> write_this_props: ok
+zoned_local -> pure: ok
+zoned_shallow -> non_zoned:
+Warning: Call to non_zoned() requires [defaults] coeffects but zoned_shallow() provided [zoned_shallow] in %s on line 12
  ok
-policied_shallow -> policied_local: ok
-policied_shallow -> policied_shallow: ok
-policied_shallow -> policied: ok
-policied_shallow -> policied_of:
-Warning: Call to policied_of() requires [policied_of] coeffects but policied_shallow() provided [policied_shallow] in %s on line 12
+zoned_shallow -> zoned_local: ok
+zoned_shallow -> zoned_shallow: ok
+zoned_shallow -> zoned: ok
+zoned_shallow -> zoned_with:
+Warning: Call to zoned_with() requires [zoned_with] coeffects but zoned_shallow() provided [zoned_shallow] in %s on line 12
  ok
-policied_shallow -> controlled: ok
-policied_shallow -> globals:
-Warning: Call to globals() requires [globals] coeffects but policied_shallow() provided [policied_shallow] in %s on line 12
+zoned_shallow -> leak_safe: ok
+zoned_shallow -> globals:
+Warning: Call to globals() requires [globals] coeffects but zoned_shallow() provided [zoned_shallow] in %s on line 12
  ok
-policied_shallow -> read_globals: ok
-policied_shallow -> write_props: ok
-policied_shallow -> write_this_props: ok
-policied_shallow -> pure: ok
-policied -> non_policied:
-Warning: Call to non_policied() requires [defaults] coeffects but policied() provided [policied] in %s on line 16
+zoned_shallow -> read_globals: ok
+zoned_shallow -> write_props: ok
+zoned_shallow -> write_this_props: ok
+zoned_shallow -> pure: ok
+zoned -> non_zoned:
+Warning: Call to non_zoned() requires [defaults] coeffects but zoned() provided [zoned] in %s on line 16
  ok
-policied -> policied_local:
-Warning: Call to policied_local() requires [policied_shallow] coeffects but policied() provided [policied] in %s on line 16
+zoned -> zoned_local:
+Warning: Call to zoned_local() requires [zoned_shallow] coeffects but zoned() provided [zoned] in %s on line 16
  ok
-policied -> policied_shallow:
-Warning: Call to policied_shallow() requires [policied_shallow] coeffects but policied() provided [policied] in %s on line 16
+zoned -> zoned_shallow:
+Warning: Call to zoned_shallow() requires [zoned_shallow] coeffects but zoned() provided [zoned] in %s on line 16
  ok
-policied -> policied: ok
-policied -> policied_of:
-Warning: Call to policied_of() requires [policied_of] coeffects but policied() provided [policied] in %s on line 16
+zoned -> zoned: ok
+zoned -> zoned_with:
+Warning: Call to zoned_with() requires [zoned_with] coeffects but zoned() provided [zoned] in %s on line 16
  ok
-policied -> controlled: ok
-policied -> globals:
-Warning: Call to globals() requires [globals] coeffects but policied() provided [policied] in %s on line 16
+zoned -> leak_safe: ok
+zoned -> globals:
+Warning: Call to globals() requires [globals] coeffects but zoned() provided [zoned] in %s on line 16
  ok
-policied -> read_globals: ok
-policied -> write_props: ok
-policied -> write_this_props: ok
-policied -> pure: ok
-policied_of -> non_policied:
-Warning: Call to non_policied() requires [defaults] coeffects but policied_of() provided [policied_of] in %s on line 20
+zoned -> read_globals: ok
+zoned -> write_props: ok
+zoned -> write_this_props: ok
+zoned -> pure: ok
+zoned_with -> non_zoned:
+Warning: Call to non_zoned() requires [defaults] coeffects but zoned_with() provided [zoned_with] in %s on line 20
  ok
-policied_of -> policied_local:
-Warning: Call to policied_local() requires [policied_shallow] coeffects but policied_of() provided [policied_of] in %s on line 20
+zoned_with -> zoned_local:
+Warning: Call to zoned_local() requires [zoned_shallow] coeffects but zoned_with() provided [zoned_with] in %s on line 20
  ok
-policied_of -> policied_shallow:
-Warning: Call to policied_shallow() requires [policied_shallow] coeffects but policied_of() provided [policied_of] in %s on line 20
+zoned_with -> zoned_shallow:
+Warning: Call to zoned_shallow() requires [zoned_shallow] coeffects but zoned_with() provided [zoned_with] in %s on line 20
  ok
-policied_of -> policied: ok
-policied_of -> policied_of: ok
-policied_of -> controlled: ok
-policied_of -> globals:
-Warning: Call to globals() requires [globals] coeffects but policied_of() provided [policied_of] in %s on line 20
+zoned_with -> zoned: ok
+zoned_with -> zoned_with: ok
+zoned_with -> leak_safe: ok
+zoned_with -> globals:
+Warning: Call to globals() requires [globals] coeffects but zoned_with() provided [zoned_with] in %s on line 20
  ok
-policied_of -> read_globals: ok
-policied_of -> write_props: ok
-policied_of -> write_this_props: ok
-policied_of -> pure: ok
-controlled -> non_policied:
-Warning: Call to non_policied() requires [defaults] coeffects but controlled() provided [controlled] in %s on line 24
+zoned_with -> read_globals: ok
+zoned_with -> write_props: ok
+zoned_with -> write_this_props: ok
+zoned_with -> pure: ok
+leak_safe -> non_zoned:
+Warning: Call to non_zoned() requires [defaults] coeffects but leak_safe() provided [leak_safe] in %s on line 24
  ok
-controlled -> policied_local:
-Warning: Call to policied_local() requires [policied_shallow] coeffects but controlled() provided [controlled] in %s on line 24
+leak_safe -> zoned_local:
+Warning: Call to zoned_local() requires [zoned_shallow] coeffects but leak_safe() provided [leak_safe] in %s on line 24
  ok
-controlled -> policied_shallow:
-Warning: Call to policied_shallow() requires [policied_shallow] coeffects but controlled() provided [controlled] in %s on line 24
+leak_safe -> zoned_shallow:
+Warning: Call to zoned_shallow() requires [zoned_shallow] coeffects but leak_safe() provided [leak_safe] in %s on line 24
  ok
-controlled -> policied:
-Warning: Call to policied() requires [policied] coeffects but controlled() provided [controlled] in %s on line 24
+leak_safe -> zoned:
+Warning: Call to zoned() requires [zoned] coeffects but leak_safe() provided [leak_safe] in %s on line 24
  ok
-controlled -> policied_of:
-Warning: Call to policied_of() requires [policied_of] coeffects but controlled() provided [controlled] in %s on line 24
+leak_safe -> zoned_with:
+Warning: Call to zoned_with() requires [zoned_with] coeffects but leak_safe() provided [leak_safe] in %s on line 24
  ok
-controlled -> controlled: ok
-controlled -> globals:
-Warning: Call to globals() requires [globals] coeffects but controlled() provided [controlled] in %s on line 24
+leak_safe -> leak_safe: ok
+leak_safe -> globals:
+Warning: Call to globals() requires [globals] coeffects but leak_safe() provided [leak_safe] in %s on line 24
  ok
-controlled -> read_globals: ok
-controlled -> write_props: ok
-controlled -> write_this_props: ok
-controlled -> pure: ok
-globals -> non_policied:
-Warning: Call to non_policied() requires [defaults] coeffects but globals() provided [globals] in %s on line 32
+leak_safe -> read_globals: ok
+leak_safe -> write_props: ok
+leak_safe -> write_this_props: ok
+leak_safe -> pure: ok
+globals -> non_zoned:
+Warning: Call to non_zoned() requires [defaults] coeffects but globals() provided [globals] in %s on line 32
  ok
-globals -> policied_local:
-Warning: Call to policied_local() requires [policied_shallow] coeffects but globals() provided [globals] in %s on line 32
+globals -> zoned_local:
+Warning: Call to zoned_local() requires [zoned_shallow] coeffects but globals() provided [globals] in %s on line 32
  ok
-globals -> policied_shallow:
-Warning: Call to policied_shallow() requires [policied_shallow] coeffects but globals() provided [globals] in %s on line 32
+globals -> zoned_shallow:
+Warning: Call to zoned_shallow() requires [zoned_shallow] coeffects but globals() provided [globals] in %s on line 32
  ok
-globals -> policied:
-Warning: Call to policied() requires [policied] coeffects but globals() provided [globals] in %s on line 32
+globals -> zoned:
+Warning: Call to zoned() requires [zoned] coeffects but globals() provided [globals] in %s on line 32
  ok
-globals -> policied_of:
-Warning: Call to policied_of() requires [policied_of] coeffects but globals() provided [globals] in %s on line 32
+globals -> zoned_with:
+Warning: Call to zoned_with() requires [zoned_with] coeffects but globals() provided [globals] in %s on line 32
  ok
-globals -> controlled:
-Warning: Call to controlled() requires [controlled] coeffects but globals() provided [globals] in %s on line 32
+globals -> leak_safe:
+Warning: Call to leak_safe() requires [leak_safe] coeffects but globals() provided [globals] in %s on line 32
  ok
 globals -> globals: ok
 globals -> read_globals: ok
@@ -132,23 +132,23 @@ globals -> write_this_props:
 Warning: Call to write_this_props() requires [write_this_props] coeffects but globals() provided [globals] in %s on line 32
  ok
 globals -> pure: ok
-read_globals -> non_policied:
-Warning: Call to non_policied() requires [defaults] coeffects but read_globals() provided [read_globals] in %s on line 28
+read_globals -> non_zoned:
+Warning: Call to non_zoned() requires [defaults] coeffects but read_globals() provided [read_globals] in %s on line 28
  ok
-read_globals -> policied_local:
-Warning: Call to policied_local() requires [policied_shallow] coeffects but read_globals() provided [read_globals] in %s on line 28
+read_globals -> zoned_local:
+Warning: Call to zoned_local() requires [zoned_shallow] coeffects but read_globals() provided [read_globals] in %s on line 28
  ok
-read_globals -> policied_shallow:
-Warning: Call to policied_shallow() requires [policied_shallow] coeffects but read_globals() provided [read_globals] in %s on line 28
+read_globals -> zoned_shallow:
+Warning: Call to zoned_shallow() requires [zoned_shallow] coeffects but read_globals() provided [read_globals] in %s on line 28
  ok
-read_globals -> policied:
-Warning: Call to policied() requires [policied] coeffects but read_globals() provided [read_globals] in %s on line 28
+read_globals -> zoned:
+Warning: Call to zoned() requires [zoned] coeffects but read_globals() provided [read_globals] in %s on line 28
  ok
-read_globals -> policied_of:
-Warning: Call to policied_of() requires [policied_of] coeffects but read_globals() provided [read_globals] in %s on line 28
+read_globals -> zoned_with:
+Warning: Call to zoned_with() requires [zoned_with] coeffects but read_globals() provided [read_globals] in %s on line 28
  ok
-read_globals -> controlled:
-Warning: Call to controlled() requires [controlled] coeffects but read_globals() provided [read_globals] in %s on line 28
+read_globals -> leak_safe:
+Warning: Call to leak_safe() requires [leak_safe] coeffects but read_globals() provided [read_globals] in %s on line 28
  ok
 read_globals -> globals:
 Warning: Call to globals() requires [globals] coeffects but read_globals() provided [read_globals] in %s on line 28
@@ -161,23 +161,23 @@ read_globals -> write_this_props:
 Warning: Call to write_this_props() requires [write_this_props] coeffects but read_globals() provided [read_globals] in %s on line 28
  ok
 read_globals -> pure: ok
-write_props -> non_policied:
-Warning: Call to non_policied() requires [defaults] coeffects but write_props() provided [write_props] in %s on line 36
+write_props -> non_zoned:
+Warning: Call to non_zoned() requires [defaults] coeffects but write_props() provided [write_props] in %s on line 36
  ok
-write_props -> policied_local:
-Warning: Call to policied_local() requires [policied_shallow] coeffects but write_props() provided [write_props] in %s on line 36
+write_props -> zoned_local:
+Warning: Call to zoned_local() requires [zoned_shallow] coeffects but write_props() provided [write_props] in %s on line 36
  ok
-write_props -> policied_shallow:
-Warning: Call to policied_shallow() requires [policied_shallow] coeffects but write_props() provided [write_props] in %s on line 36
+write_props -> zoned_shallow:
+Warning: Call to zoned_shallow() requires [zoned_shallow] coeffects but write_props() provided [write_props] in %s on line 36
  ok
-write_props -> policied:
-Warning: Call to policied() requires [policied] coeffects but write_props() provided [write_props] in %s on line 36
+write_props -> zoned:
+Warning: Call to zoned() requires [zoned] coeffects but write_props() provided [write_props] in %s on line 36
  ok
-write_props -> policied_of:
-Warning: Call to policied_of() requires [policied_of] coeffects but write_props() provided [write_props] in %s on line 36
+write_props -> zoned_with:
+Warning: Call to zoned_with() requires [zoned_with] coeffects but write_props() provided [write_props] in %s on line 36
  ok
-write_props -> controlled:
-Warning: Call to controlled() requires [controlled] coeffects but write_props() provided [write_props] in %s on line 36
+write_props -> leak_safe:
+Warning: Call to leak_safe() requires [leak_safe] coeffects but write_props() provided [write_props] in %s on line 36
  ok
 write_props -> globals:
 Warning: Call to globals() requires [globals] coeffects but write_props() provided [write_props] in %s on line 36
@@ -188,23 +188,23 @@ Warning: Call to read_globals() requires [read_globals] coeffects but write_prop
 write_props -> write_props: ok
 write_props -> write_this_props: ok
 write_props -> pure: ok
-write_this_props -> non_policied:
-Warning: Call to non_policied() requires [defaults] coeffects but write_this_props() provided [write_this_props] in %s on line 40
+write_this_props -> non_zoned:
+Warning: Call to non_zoned() requires [defaults] coeffects but write_this_props() provided [write_this_props] in %s on line 40
  ok
-write_this_props -> policied_local:
-Warning: Call to policied_local() requires [policied_shallow] coeffects but write_this_props() provided [write_this_props] in %s on line 40
+write_this_props -> zoned_local:
+Warning: Call to zoned_local() requires [zoned_shallow] coeffects but write_this_props() provided [write_this_props] in %s on line 40
  ok
-write_this_props -> policied_shallow:
-Warning: Call to policied_shallow() requires [policied_shallow] coeffects but write_this_props() provided [write_this_props] in %s on line 40
+write_this_props -> zoned_shallow:
+Warning: Call to zoned_shallow() requires [zoned_shallow] coeffects but write_this_props() provided [write_this_props] in %s on line 40
  ok
-write_this_props -> policied:
-Warning: Call to policied() requires [policied] coeffects but write_this_props() provided [write_this_props] in %s on line 40
+write_this_props -> zoned:
+Warning: Call to zoned() requires [zoned] coeffects but write_this_props() provided [write_this_props] in %s on line 40
  ok
-write_this_props -> policied_of:
-Warning: Call to policied_of() requires [policied_of] coeffects but write_this_props() provided [write_this_props] in %s on line 40
+write_this_props -> zoned_with:
+Warning: Call to zoned_with() requires [zoned_with] coeffects but write_this_props() provided [write_this_props] in %s on line 40
  ok
-write_this_props -> controlled:
-Warning: Call to controlled() requires [controlled] coeffects but write_this_props() provided [write_this_props] in %s on line 40
+write_this_props -> leak_safe:
+Warning: Call to leak_safe() requires [leak_safe] coeffects but write_this_props() provided [write_this_props] in %s on line 40
  ok
 write_this_props -> globals:
 Warning: Call to globals() requires [globals] coeffects but write_this_props() provided [write_this_props] in %s on line 40
@@ -217,23 +217,23 @@ Warning: Call to write_props() requires [write_props] coeffects but write_this_p
  ok
 write_this_props -> write_this_props: ok
 write_this_props -> pure: ok
-pure -> non_policied:
-Warning: Call to non_policied() requires [defaults] coeffects but pure() provided [] in %s on line 44
+pure -> non_zoned:
+Warning: Call to non_zoned() requires [defaults] coeffects but pure() provided [] in %s on line 44
  ok
-pure -> policied_local:
-Warning: Call to policied_local() requires [policied_shallow] coeffects but pure() provided [] in %s on line 44
+pure -> zoned_local:
+Warning: Call to zoned_local() requires [zoned_shallow] coeffects but pure() provided [] in %s on line 44
  ok
-pure -> policied_shallow:
-Warning: Call to policied_shallow() requires [policied_shallow] coeffects but pure() provided [] in %s on line 44
+pure -> zoned_shallow:
+Warning: Call to zoned_shallow() requires [zoned_shallow] coeffects but pure() provided [] in %s on line 44
  ok
-pure -> policied:
-Warning: Call to policied() requires [policied] coeffects but pure() provided [] in %s on line 44
+pure -> zoned:
+Warning: Call to zoned() requires [zoned] coeffects but pure() provided [] in %s on line 44
  ok
-pure -> policied_of:
-Warning: Call to policied_of() requires [policied_of] coeffects but pure() provided [] in %s on line 44
+pure -> zoned_with:
+Warning: Call to zoned_with() requires [zoned_with] coeffects but pure() provided [] in %s on line 44
  ok
-pure -> controlled:
-Warning: Call to controlled() requires [controlled] coeffects but pure() provided [] in %s on line 44
+pure -> leak_safe:
+Warning: Call to leak_safe() requires [leak_safe] coeffects but pure() provided [] in %s on line 44
  ok
 pure -> globals:
 Warning: Call to globals() requires [globals] coeffects but pure() provided [] in %s on line 44

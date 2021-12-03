@@ -2,16 +2,16 @@
 
 abstract final class IntContext extends HH\ImplicitContext {
   const type T = int;
-  public static function set(int $context, (function (): int) $f)[policied] {
+  public static function set(int $context, (function (): int) $f)[zoned] {
     echo 'Setting context to ' . $context . "\n";
     return parent::set($context, $f);
   }
-  public static function getContext()[policied]: ?int {
+  public static function getContext()[zoned]: ?int {
     return parent::get();
   }
 }
 
-function addFive()[policied_of] {
+function addFive()[zoned_with] {
   return IntContext::getContext() + 5;
 }
 
@@ -19,6 +19,6 @@ function addFive()[policied_of] {
 function main() {
   $result = IntContext::set(5, addFive<>); // FAIL
   var_dump($result);
-  $result = HH\Coeffects\enter_policied_of('IntContext', 5, addFive<>);
+  $result = HH\Coeffects\enter_zoned_with('IntContext', 5, addFive<>);
   var_dump($result);
 }

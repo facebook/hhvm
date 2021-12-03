@@ -998,14 +998,14 @@ pub fn effect_polymorphic_memoized(kind: &str) -> Error {
 
 pub fn effect_policied_memoized(kind: &str) -> Error {
     Cow::Owned(format!(
-        "This {} can only be memoized using __PolicyShardedMemoize or __PolicyShardedMemoizeLSB because it has policied context",
+        "This {} can only be memoized using __PolicyShardedMemoize or __PolicyShardedMemoizeLSB because it has zoned context",
         kind
     ))
 }
 
 pub fn policy_sharded_memoized_without_policied(kind: &str) -> Error {
     Cow::Owned(format!(
-        "This {} requires a policied context to be memoized using __PolicyShardedMemoize or __PolicyShardedMemoizeLSB",
+        "This {} requires a zoned context to be memoized using __PolicyShardedMemoize or __PolicyShardedMemoizeLSB",
         kind
     ))
 }

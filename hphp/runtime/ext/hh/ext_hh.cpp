@@ -1185,10 +1185,10 @@ Variant coeffects_call_helper(const Variant& function, const char* name,
 
 } // namespace
 
-Variant HHVM_FUNCTION(enter_policied_of, const Variant& function) {
+Variant HHVM_FUNCTION(enter_zoned_with, const Variant& function) {
   return coeffects_call_helper(function,
-                               "HH\\Coeffects\\_Private\\enter_policied_of",
-                               RuntimeCoeffects::policied_of(), false);
+                               "HH\\Coeffects\\_Private\\enter_zoned_with",
+                               RuntimeCoeffects::zoned_with(), false);
 }
 
 namespace {
@@ -1410,8 +1410,8 @@ static struct HHExtension final : Extension {
     HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\get_implicit_context_memo_key,
                   HHVM_FN(get_implicit_context_memo_key));
 
-    HHVM_NAMED_FE(HH\\Coeffects\\_Private\\enter_policied_of,
-                  HHVM_FN(enter_policied_of));
+    HHVM_NAMED_FE(HH\\Coeffects\\_Private\\enter_zoned_with,
+                  HHVM_FN(enter_zoned_with));
 
 #define X(nm) HHVM_NAMED_FE(__SystemLib\\nm, HHVM_FN(nm))
     X(is_dynamically_callable_inst_method);

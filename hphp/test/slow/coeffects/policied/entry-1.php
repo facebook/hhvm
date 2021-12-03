@@ -1,11 +1,11 @@
 <?hh
 
-function policied_of()[policied_of]: void {
-  echo "in policied_of\n";
+function zoned_with()[zoned_with]: void {
+  echo "in zoned_with\n";
 }
 
 <<__EntryPoint>>
 function main() {
-  policied_of();
-  HH\Coeffects\_Private\enter_policied_of(policied_of<>);
+  zoned_with();
+  HH\Coeffects\_Private\enter_zoned_with(zoned_with<>);
 }

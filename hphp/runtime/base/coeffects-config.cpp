@@ -56,20 +56,20 @@ static std::vector<CapabilityCombinator>& getCapabilityCombinator() {
   X(rx_shallow)      \
   X(rx)
 
-#define POLICIED_COEFFECTS \
-  X(policied_of)           \
-  X(policied_local)        \
-  X(policied_shallow)      \
-  X(policied)              \
-  X(controlled)            \
-  X(globals)               \
-  X(read_globals)          \
-  X(write_this_props)      \
+#define ZONED_COEFFECTS \
+  X(zoned_with)         \
+  X(zoned_local)        \
+  X(zoned_shallow)      \
+  X(zoned)              \
+  X(leak_safe)          \
+  X(globals)            \
+  X(read_globals)       \
+  X(write_this_props)   \
   X(write_props)
 
 #define COEFFECTS    \
   RX_COEFFECTS       \
-  POLICIED_COEFFECTS
+  ZONED_COEFFECTS
 
 struct Coeffects {
   static constexpr auto s_defaults = "defaults";
@@ -84,11 +84,11 @@ struct Coeffects {
 
 struct Capabilities {
   static constexpr auto s_rx_defaults = "rx_defaults";
-  static constexpr auto s_policied_defaults = "policied_defaults";
-  static constexpr auto s_policied_unreachable = "policied_unreachable";
+  static constexpr auto s_zoned_defaults = "zoned_defaults";
+  static constexpr auto s_zoned_unreachable = "zoned_unreachable";
 
   static constexpr auto s_rx_pure = "rx_pure";
-  static constexpr auto s_policied_maybe = "policied_maybe";
+  static constexpr auto s_zoned_maybe = "zoned_maybe";
 
 #define X(x) static constexpr auto s_##x = #x;
   COEFFECTS
@@ -99,15 +99,15 @@ using C = Coeffects;
 using Cap = Capabilities;
 
 const hphp_fast_string_map<hphp_fast_set<std::string>> s_coeffects_to_capabilities{
-  {C::s_defaults, {Cap::s_rx_defaults, Cap::s_policied_defaults}},
-  {C::s_pure, {Cap::s_rx_pure, Cap::s_policied_maybe}},
+  {C::s_defaults, {Cap::s_rx_defaults, Cap::s_zoned_defaults}},
+  {C::s_pure, {Cap::s_rx_pure, Cap::s_zoned_maybe}},
 
-#define X(x) {C::s_##x, {Cap::s_##x, Cap::s_policied_defaults}},
+#define X(x) {C::s_##x, {Cap::s_##x, Cap::s_zoned_defaults}},
   RX_COEFFECTS
 #undef X
 
 #define X(x) {C::s_##x, {Cap::s_rx_defaults, Cap::s_##x}},
-  POLICIED_COEFFECTS
+  ZONED_COEFFECTS
 #undef X
 
 };
@@ -166,22 +166,22 @@ void initCapabilityGraphs() {
            addEdges(createNode(Cap::s_rx, true),
                     rx_pure));
 
-  auto policied = createNode(Cap::s_policied, true);
+  auto zoned = createNode(Cap::s_zoned, true);
   auto read_globals = createNode(Cap::s_read_globals);
-  auto policied_maybe = createNode(Cap::s_policied_maybe, false, true);
-  addEdges(createNode(Cap::s_policied_unreachable),
-           addEdges(createNode(Cap::s_policied_defaults),
+  auto zoned_maybe = createNode(Cap::s_zoned_maybe, false, true);
+  addEdges(createNode(Cap::s_zoned_unreachable),
+           addEdges(createNode(Cap::s_zoned_defaults),
                     addEdges(createNode(Cap::s_globals),
                              read_globals),
-                    policied),
-           addEdges(createNode(Cap::s_policied_of, true),
-                    addEdges(policied,
-                             addEdges(createNode(Cap::s_controlled),
+                    zoned),
+           addEdges(createNode(Cap::s_zoned_with, true),
+                    addEdges(zoned,
+                             addEdges(createNode(Cap::s_leak_safe),
                                       addEdges(createNode(Cap::s_write_props),
                                                addEdges(createNode(Cap::s_write_this_props),
-                                                        policied_maybe)),
+                                                        zoned_maybe)),
                                       addEdges(read_globals,
-                                               policied_maybe)))));
+                                               zoned_maybe)))));
 }
 
 } //namespace
@@ -201,10 +201,10 @@ void CoeffectsConfig::initEnforcementLevel(
   // enforcement otherwise the whole coeffect system breaks
   s_instance->m_pureLevel = 0;
   s_instance->m_rxLevel = 0;
-  s_instance->m_policiedLevel = 0;
+  s_instance->m_zonedLevel = 0;
   for (auto const& [name, level] : map) {
     if (name == C::s_rx) s_instance->m_rxLevel = level;
-    else if (name == C::s_policied) s_instance->m_policiedLevel = level;
+    else if (name == C::s_zoned || name == "policied") s_instance->m_zonedLevel = level;
     s_instance->m_pureLevel = std::max(s_instance->m_pureLevel, level);
   }
 }
@@ -301,14 +301,14 @@ void CoeffectsConfig::initCapabilities() {
 
   if (CoeffectsConfig::enabled()) {
     storage_t rxMask = getCapabilityMap().find(Cap::s_rx_defaults)->second;
-    storage_t policiedMask =
-      getCapabilityMap().find(Cap::s_policied_unreachable)->second;
+    storage_t zonedMask =
+      getCapabilityMap().find(Cap::s_zoned_unreachable)->second;
     if (CoeffectsConfig::pureEnforcementLevel() == 1) {
-      warningMask = (rxMask | policiedMask);
+      warningMask = (rxMask | zonedMask);
     } else if (CoeffectsConfig::rxEnforcementLevel() == 1) {
         warningMask |= rxMask;
-    } else if (CoeffectsConfig::policiedEnforcementLevel() == 1) {
-        warningMask |= policiedMask;
+    } else if (CoeffectsConfig::zonedEnforcementLevel() == 1) {
+        warningMask |= zonedMask;
     }
   }
 
@@ -321,7 +321,7 @@ std::string CoeffectsConfig::mangle() {
   return folly::to<std::string>(
     C::s_pure, std::to_string(s_instance->m_pureLevel),
     C::s_rx, std::to_string(s_instance->m_rxLevel),
-    C::s_policied, std::to_string(s_instance->m_policiedLevel)
+    C::s_zoned, std::to_string(s_instance->m_zonedLevel)
   );
 }
 
@@ -345,9 +345,9 @@ StaticCoeffects CoeffectsConfig::fromName(const std::string& coeffect) {
 #undef X
   }
 
-  if (!CoeffectsConfig::policiedEnforcementLevel()) {
+  if (!CoeffectsConfig::zonedEnforcementLevel()) {
 #define X(x) if (coeffect == C::s_##x) return StaticCoeffects::defaults();
-  POLICIED_COEFFECTS
+  ZONED_COEFFECTS
 #undef X
   }
 
@@ -371,8 +371,8 @@ RuntimeCoeffects CoeffectsConfig::escapesTo(const std::string& coeffect) {
   if (CoeffectsConfig::rxEnforcementLevel()) {
     if (coeffect == C::s_rx_local) return RuntimeCoeffects::defaults();
   }
-  if (CoeffectsConfig::policiedEnforcementLevel()) {
-    if (coeffect == C::s_policied_local) return RuntimeCoeffects::defaults();
+  if (CoeffectsConfig::zonedEnforcementLevel()) {
+    if (coeffect == C::s_zoned_local) return RuntimeCoeffects::defaults();
   }
   if (coeffect == C::s_86backdoor) return RuntimeCoeffects::defaults();
   return RuntimeCoeffects::none();

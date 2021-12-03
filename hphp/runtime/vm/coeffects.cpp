@@ -49,7 +49,7 @@ RuntimeCoeffects RuntimeCoeffects::defaults() {
 
 #define COEFFECTS     \
   X(pure)             \
-  X(policied_of)      \
+  X(zoned_with)      \
   X(write_this_props) \
 
 #define X(x)                                                             \

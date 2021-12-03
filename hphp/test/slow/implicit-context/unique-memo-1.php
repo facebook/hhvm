@@ -1,7 +1,7 @@
 <?hh
 
 <<__PolicyShardedMemoize>>
-function memo()[policied] {
+function memo()[zoned] {
   echo "memo called\n";
 }
 

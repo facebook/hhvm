@@ -1,26 +1,26 @@
 <?hh
 
-function non_policied($fn) {
+function non_zoned($fn) {
   if ($fn) $fn(null);
 }
 
-function policied_local($fn)[policied_local] {
+function zoned_local($fn)[zoned_local] {
   if ($fn) $fn(null);
 }
 
-function policied_shallow($fn)[policied_shallow] {
+function zoned_shallow($fn)[zoned_shallow] {
   if ($fn) $fn(null);
 }
 
-function policied($fn)[policied] {
+function zoned($fn)[zoned] {
   if ($fn) $fn(null);
 }
 
-function policied_of($fn)[policied_of] {
+function zoned_with($fn)[zoned_with] {
   if ($fn) $fn(null);
 }
 
-function controlled($fn)[controlled] {
+function leak_safe($fn)[leak_safe] {
   if ($fn) $fn(null);
 }
 
@@ -45,14 +45,14 @@ function pure($fn)[] {
 }
 
 <<__EntryPoint>>
-function main()[policied_of, defaults] {
+function main()[zoned_with, defaults] {
   $functions = vec[
-    'non_policied',
-    'policied_local',
-    'policied_shallow',
-    'policied',
-    'policied_of',
-    'controlled',
+    'non_zoned',
+    'zoned_local',
+    'zoned_shallow',
+    'zoned',
+    'zoned_with',
+    'leak_safe',
     'globals',
     'read_globals',
     'write_props',

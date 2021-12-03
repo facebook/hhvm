@@ -5,7 +5,7 @@ trait T {
 }
 
 trait T1 {
-  const ctx C = [policied];
+  const ctx C = [zoned];
 }
 
 class Something {

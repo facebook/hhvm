@@ -599,44 +599,44 @@ namespace HH\Coeffects {
   namespace _Private {
 
   /**
-   * The internal entry point for policied_of functions
+   * The internal entry point for zoned_with functions
    */
   <<__Native>>
-  function enter_policied_of<Tout, Tpolicy>(
-    (function()[policied_of<Tpolicy>]: Tout) $f
+  function enter_zoned_with<Tout, Tpolicy>(
+    (function()[zoned_with<Tpolicy>]: Tout) $f
   )[policied]: mixed /* Tout */;
 
   } // namespace _Private
 
   /**
-   * The public entry point for policied_of functions
+   * The public entry point for zoned_with functions
    */
-  function enter_policied_of<Tout, Tcontext as ImplicitContext, Tval>(
+  function enter_zoned_with<Tout, Tcontext as ImplicitContext, Tval>(
     classname<Tcontext> $cls,
     Tval $value,
-    (function()[policied_of<Tval>]: Tout) $f,
+    (function()[zoned_with<Tval>]: Tout) $f,
   )[policied]: Tout where Tval = Tcontext::T {
     return $cls::set(
       $value,
-      ()[policied] ==> _Private\enter_policied_of($f)
+      ()[policied] ==> _Private\enter_zoned_with($f)
     );
   }
 
   /**
-   * The public entry point for async policied_of functions
+   * The public entry point for async zoned_with functions
    */
-  async function enter_policied_of_async<
+  async function enter_zoned_with_async<
     Tout,
     Tcontext as ImplicitContext,
     Tval
   >(
     classname<Tcontext> $cls,
     Tval $value,
-    (function()[policied_of<Tval>]: Awaitable<Tout>) $f,
+    (function()[zoned_with<Tval>]: Awaitable<Tout>) $f,
   )[policied]: Awaitable<Tout> where Tval = Tcontext::T {
     return await $cls::setAsync(
       $value,
-      ()[policied] ==> _Private\enter_policied_of($f)
+      ()[policied] ==> _Private\enter_zoned_with($f)
     );
   }
 

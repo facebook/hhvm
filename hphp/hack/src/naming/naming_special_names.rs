@@ -796,6 +796,16 @@ pub mod coeffects {
 
     pub const POLICIED_OF: &str = "policied_of";
 
+    pub const LEAK_SAFE: &str = "leak_safe";
+
+    pub const ZONED_LOCAL: &str = "zoned_local";
+
+    pub const ZONED_SHALLOW: &str = "zoned_shallow";
+
+    pub const ZONED: &str = "zoned";
+
+    pub const ZONED_WITH: &str = "zoned_with";
+
     pub const PURE: &str = "pure";
 
     pub const READ_GLOBALS: &str = "read_globals";
@@ -808,12 +818,14 @@ pub mod coeffects {
 
     pub const CAPABILITIES: &str = "HH\\Capabilities";
 
-    pub fn is_any_policied(x: &str) -> bool {
+    pub fn is_any_zoned(x: &str) -> bool {
         lazy_static! {
-            static ref POLICIED_SET: HashSet<&'static str> =
-                vec![POLICIED, POLICIED_OF,].into_iter().collect();
+            static ref ZONED_SET: HashSet<&'static str> =
+                vec![POLICIED, POLICIED_OF, ZONED, ZONED_WITH]
+                    .into_iter()
+                    .collect();
         }
-        POLICIED_SET.contains(x)
+        ZONED_SET.contains(x)
     }
 
     #[derive(PartialEq, Eq, Hash)]

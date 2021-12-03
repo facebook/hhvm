@@ -41,9 +41,9 @@ struct CoeffectsConfig {
     assertx(s_instance);
     return s_instance->m_rxLevel;
   }
-  static int policiedEnforcementLevel() {
+  static int zonedEnforcementLevel() {
     assertx(s_instance);
-    return s_instance->m_policiedLevel;
+    return s_instance->m_zonedLevel;
   }
 
   static RuntimeCoeffects::storage_t escapeMask() {
@@ -81,7 +81,7 @@ private:
   RuntimeCoeffects::storage_t m_warningMask;
   int m_pureLevel;
   int m_rxLevel;
-  int m_policiedLevel;
+  int m_zonedLevel;
   int m_numUsedBits;
 };
 

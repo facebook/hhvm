@@ -15,5 +15,5 @@ async function main()[] {
   await defaults_async();
   HH\Coeffects\backdoor(defaults_async<>);
 
-  HH\Coeffects\backdoor(()[policied_of] ==> { echo "in policied_of\n"; });
+  HH\Coeffects\backdoor(()[zoned_with] ==> { echo "in zoned_with\n"; });
 }

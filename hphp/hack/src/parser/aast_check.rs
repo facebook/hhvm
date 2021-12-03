@@ -42,7 +42,9 @@ fn is_policied_local(ctxs: &Option<ast::Contexts>) -> bool {
         Some(c) => {
             for hint in &c.1 {
                 if let aast::Hint_::Happly(ast_defs::Id(_, id), _) = &*hint.1 {
-                    if id.as_str() == coeffects::POLICIED_LOCAL {
+                    if id.as_str() == coeffects::POLICIED_LOCAL
+                        || id.as_str() == coeffects::ZONED_LOCAL
+                    {
                         return true;
                     }
                 }

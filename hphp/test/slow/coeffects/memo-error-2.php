@@ -1,4 +1,4 @@
 <?hh
 
 <<__Memoize>>
-function f(mixed $arg)[policied] {}
+function f(mixed $arg)[zoned] {}

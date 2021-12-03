@@ -1,7 +1,7 @@
 <?hh
 
 <<__PolicyShardedMemoize>>
-function f()[policied] {
+function f()[zoned] {
   echo "ok\n";
 }
 

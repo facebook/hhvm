@@ -41,7 +41,7 @@ struct RuntimeCoeffects {
 
   static RuntimeCoeffects defaults();
   static RuntimeCoeffects pure();
-  static RuntimeCoeffects policied_of();
+  static RuntimeCoeffects zoned_with();
   static RuntimeCoeffects write_this_props();
 
   // This function is a placeholder to indicate that the correct coeffect needs

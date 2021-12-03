@@ -3318,7 +3318,7 @@ where
         if let Some(ast::Contexts(_, ref context_hints)) = contexts {
             return context_hints.iter().any(|hint| match &*hint.1 {
                 ast::Hint_::Happly(ast::Id(_, id), _) => {
-                    naming_special_names_rust::coeffects::is_any_policied(&id)
+                    naming_special_names_rust::coeffects::is_any_zoned(&id)
                 }
                 _ => false,
             });

@@ -3,7 +3,7 @@
 class Foo {
   static Foo $x;
   <<__PolicyShardedMemoize>>
-  function memo($a, $b)[policied] {
+  function memo($a, $b)[zoned] {
     $hash = quoted_printable_encode(
       HH\ImplicitContext\_Private\get_implicit_context_memo_key()
     );

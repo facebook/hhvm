@@ -6,5 +6,5 @@ Warning: Call to defaults_async() requires [defaults] coeffects but main() provi
 in defaults_async
 in defaults_async
 
-Warning: Call to Closure$main() requires [policied_of] coeffects but HH\Coeffects\backdoor() provided [defaults] in %s on line 18
-in policied_of
+Warning: Call to Closure$main() requires [zoned_with] coeffects but HH\Coeffects\backdoor() provided [defaults] in %s on line 18
+in zoned_with

@@ -1,7 +1,7 @@
 <?hh
 
 <<__PolicyShardedMemoize>>
-function memo<reify T>($a, $b)[policied] {
+function memo<reify T>($a, $b)[zoned] {
   $hash = quoted_printable_encode(
     HH\ImplicitContext\_Private\get_implicit_context_memo_key()
   );

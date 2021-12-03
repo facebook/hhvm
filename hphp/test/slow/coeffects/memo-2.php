@@ -2,11 +2,11 @@
 
 class A {
   <<__PolicyShardedMemoize>>
-  static function f()[policied] {
+  static function f()[zoned] {
     echo "ok: " . static::class ."\n";
   }
   <<__PolicyShardedMemoizeLSB>>
-  static function f_lsb()[policied] {
+  static function f_lsb()[zoned] {
     echo "ok_lsb: " . static::class ."\n";
   }
 }

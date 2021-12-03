@@ -9,7 +9,7 @@
  */
 
 const IMAGETYPE_BMP = 6;
-const IMAGETYPE_COUNT = 18;
+const IMAGETYPE_COUNT = 19;
 const IMAGETYPE_GIF = 1;
 const IMAGETYPE_IFF = 14;
 const IMAGETYPE_JB2 = 12;
@@ -28,6 +28,7 @@ const IMAGETYPE_UNKNOWN = 0;
 const IMAGETYPE_WBMP = 15;
 const IMAGETYPE_XBM = 16;
 const IMAGETYPE_ICO = 17;
+const IMAGETYPE_WEBP = 18;
 
 <<__PHPStdLib>>
 function gd_info();
@@ -118,7 +119,10 @@ function imagecreatefromstring(string $data);
 <<__PHPStdLib>>
 function imagecreatefromwbmp(string $filename);
 <<__PHPStdLib>>
+function imagecreatefromwebp(string $filename);
+<<__PHPStdLib>>
 function imagecreatefromxbm(string $filename);
+<<__PHPStdLib>>
 function imagecreatefromxpm(string $filename);
 <<__PHPStdLib>>
 function imagecreatetruecolor(int $width, int $height);
@@ -220,9 +224,9 @@ function imagettftext(resource $image, $size, $angle, int $x, int $y, int $color
 function imagetypes();
 <<__PHPStdLib>>
 function imagewbmp(resource $image, string $filename = "", int $foreground = -1);
-
+<<__PHPStdLib>>
 function imagewebp(resource $image, string $filename = "", int $quality = 80);
-
+<<__PHPStdLib>>
 function imagexbm(resource $image, string $filename = "", int $foreground = -1);
 <<__PHPStdLib>>
 function iptcembed(string $iptcdata, string $jpeg_file_name, int $spool = 0);

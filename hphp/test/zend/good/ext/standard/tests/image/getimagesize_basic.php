@@ -30,7 +30,9 @@ $imagetype_filenames = darray[
       "JP2 image file" => "test1pix.jp2",
 
       //IFF file
-      "IFF image file" => "test4pix.iff"
+      "IFF image file" => "test4pix.iff",
+
+      "WEBP image file" => "200x100.webp",
 ];
 
 echo "*** Testing getimagesize() : basic functionality ***\n";

@@ -23,6 +23,7 @@ $image_types = varray [
     IMAGETYPE_JB2,
     IMAGETYPE_IFF,
     IMAGETYPE_WBMP,
+    IMAGETYPE_WEBP,
     IMAGETYPE_JPEG2000,
     IMAGETYPE_XBM
 ];

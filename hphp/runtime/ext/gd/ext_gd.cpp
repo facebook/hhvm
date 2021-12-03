@@ -72,6 +72,7 @@
 #define IMAGE_TYPE_PNG 4
 #define IMAGE_TYPE_WBMP 8
 #define IMAGE_TYPE_XPM 16
+#define IMAGE_TYPE_WEBP 32
 
 // #define IM_MEMORY_CHECK
 
@@ -421,6 +422,7 @@ typedef enum {
   /* IMAGE_FILETYPE_JPEG2000 is a userland alias for IMAGE_FILETYPE_JPC */
   IMAGE_FILETYPE_XBM,
   IMAGE_FILETYPE_ICO,
+  IMAGE_FILETYPE_WEBP,
 
   IMAGE_FILETYPE_COUNT /* Must remain last */
 } image_filetype;
@@ -447,6 +449,8 @@ static const char php_sig_jp2[12] =
 static const char php_sig_iff[4] = {'F','O','R','M'};
 static const char php_sig_ico[4] = {(char)0x00, (char)0x00, (char)0x01,
                                     (char)0x00};
+static const char php_sig_riff[4] = {'R', 'I', 'F', 'F'};
+static const char php_sig_webp[4] = {'W', 'E', 'B', 'P'};
 
 static struct gfxinfo *php_handle_gif(const req::ptr<File>& stream) {
   struct gfxinfo *result = nullptr;
@@ -1460,6 +1464,51 @@ static struct gfxinfo *php_handle_ico(const req::ptr<File>& stream) {
   return result;
 }
 
+static struct gfxinfo *php_handle_webp(const req::ptr<File>& stream) {
+  struct gfxinfo *result = nullptr;
+  const char sig[3] = {'V', 'P', '8'};
+  char format;
+
+  String buf_str = stream->read(18);
+  if (buf_str.length() != 18) {
+    return nullptr;
+  }
+
+  const unsigned char *buf = (unsigned char *)buf_str.c_str();
+  if (memcmp(buf, sig, 3)) {
+    return nullptr;
+  }
+  switch (buf[3]) {
+    case ' ':
+    case 'L':
+    case 'X':
+      format = buf[3];
+      break;
+    default:
+      return nullptr;
+  }
+
+  result = (struct gfxinfo *)IM_CALLOC(1, sizeof(struct gfxinfo));
+
+  switch (format) {
+    case ' ':
+      result->width = buf[14] + ((buf[15] & 0x3F) << 8);
+      result->height = buf[16] + ((buf[17] & 0x3F) << 8);
+      break;
+    case 'L':
+      result->width = buf[9] + ((buf[10] & 0x3F) << 8) + 1;
+      result->height = (buf[10] >> 6) + (buf[11] << 2) + ((buf[12] & 0xF) << 10) + 1;
+      break;
+    case 'X':
+      result->width = buf[12] + (buf[13] << 8) + (buf[14] << 16) + 1;
+      result->height = buf[15] + (buf[16] << 8) + (buf[17] << 16) + 1;
+      break;
+  }
+  result->bits = 8; /* always 1 byte */
+
+  return result;
+}
+
 /* Convert internal image_type to mime type */
 static char *php_image_type_to_mime_type(int image_type) {
   switch( image_type) {
@@ -1491,6 +1540,8 @@ static char *php_image_type_to_mime_type(int image_type) {
     return "image/xbm";
   case IMAGE_FILETYPE_ICO:
     return "image/vnd.microsoft.icon";
+  case IMAGE_FILETYPE_WEBP:
+    return "image/webp";
   default:
   case IMAGE_FILETYPE_UNKNOWN:
     return "application/octet-stream"; /* suppose binary format */
@@ -1532,6 +1583,18 @@ static int php_getimagetype(const req::ptr<File>& file) {
     return IMAGE_FILETYPE_BMP;
   } else if (!memcmp(fileType.c_str(), php_sig_jpc, 3)) {
     return IMAGE_FILETYPE_JPC;
+  } else if (!memcmp(fileType.c_str(), php_sig_riff, 3)) {
+    String data = file->read(9);
+    if (data.length() != 9) {
+      raise_notice("Read error!");
+      return IMAGE_FILETYPE_UNKNOWN;
+    }
+    fileType += data;
+    if (!memcmp(fileType.c_str() + 8, php_sig_webp, 4)) {
+      return IMAGE_FILETYPE_WEBP;
+    } else {
+      return IMAGE_FILETYPE_UNKNOWN;
+    }
   }
 
   String data = file->read(1);
@@ -1604,6 +1667,8 @@ String HHVM_FUNCTION(image_type_to_mime_type, int64_t imagetype) {
       return "image/xbm";
     case IMAGE_FILETYPE_ICO:
       return "image/vnd.microsoft.icon";
+    case IMAGE_FILETYPE_WEBP:
+      return "image/webp";
     default:
     case IMAGE_FILETYPE_UNKNOWN:
       return "application/octet-stream"; /* suppose binary format */
@@ -1644,6 +1709,8 @@ Variant HHVM_FUNCTION(image_type_to_extension,
     return include_dot ? String(".xbm") : String("xbm");
   case IMAGE_FILETYPE_ICO:
     return include_dot ? String(".ico") : String("ico");
+  case IMAGE_FILETYPE_WEBP:
+    return include_dot ? String(".webp") : String("webp");
   default:
     return false;
   }
@@ -1716,6 +1783,9 @@ Variant getImageSize(const req::ptr<File>& stream, Array& imageinfo) {
     break;
   case IMAGE_FILETYPE_ICO:
     result = php_handle_ico(stream);
+    break;
+  case IMAGE_FILETYPE_WEBP:
+    result = php_handle_webp(stream);
     break;
   default:
   case IMAGE_FILETYPE_UNKNOWN:
@@ -3411,6 +3481,9 @@ int64_t HHVM_FUNCTION(imagetypes) {
   ret |= IMAGE_TYPE_WBMP;
 #if defined(HAVE_GD_XPM) && defined(HAVE_GD_BUNDLED)
   ret |= IMAGE_TYPE_XPM;
+#endif
+#ifdef HAVE_LIBVPX
+  ret |= IMAGE_TYPE_WEBP;
 #endif
   return ret;
 }
@@ -8251,6 +8324,7 @@ struct GdExtension final : Extension {
     HHVM_RC_INT(IMG_PNG, IMAGE_TYPE_PNG);
     HHVM_RC_INT(IMG_WBMP, IMAGE_TYPE_WBMP);
     HHVM_RC_INT(IMG_XPM, IMAGE_TYPE_XPM);
+    HHVM_RC_INT(IMG_WEBP, IMAGE_TYPE_XPM);
 
     /* special colours for gd */
     HHVM_RC_INT(IMG_COLOR_TILED, gdTiled);
@@ -8341,6 +8415,7 @@ struct GdExtension final : Extension {
     HHVM_RC_INT(IMAGETYPE_WBMP, IMAGE_FILETYPE_WBMP);
     HHVM_RC_INT(IMAGETYPE_XBM, IMAGE_FILETYPE_XBM);
     HHVM_RC_INT(IMAGETYPE_ICO, IMAGE_FILETYPE_ICO);
+    HHVM_RC_INT(IMAGETYPE_WEBP, IMAGE_FILETYPE_WEBP);
     HHVM_RC_INT(IMAGETYPE_UNKNOWN, IMAGE_FILETYPE_UNKNOWN);
     HHVM_RC_INT(IMAGETYPE_COUNT, IMAGE_FILETYPE_COUNT);
     HHVM_RC_INT(IMAGETYPE_SWC, IMAGE_FILETYPE_SWC);

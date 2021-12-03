@@ -882,6 +882,27 @@ pub mod coeffects {
         }
         WRITE_PROPS_SET.contains(&x)
     }
+
+    pub fn contains_write_this_props(x: Ctx) -> bool {
+        lazy_static! {
+            static ref WRITE_THIS_PROPS_SET: HashSet<Ctx> = vec![
+                Ctx::Defaults,
+                Ctx::RxLocal,
+                Ctx::RxShallow,
+                Ctx::Rx,
+                Ctx::WriteProps,
+                Ctx::WriteThisProps,
+                Ctx::Controlled,
+                Ctx::PoliciedLocal,
+                Ctx::PoliciedShallow,
+                Ctx::Policied,
+                Ctx::PoliciedOf,
+            ]
+            .into_iter()
+            .collect();
+        }
+        WRITE_THIS_PROPS_SET.contains(&x)
+    }
 }
 
 pub mod shapes {

@@ -6,14 +6,16 @@
 
 use bitflags::bitflags;
 use core_utils_rust as utils;
-use naming_special_names_rust::{coeffects, coeffects::Ctx, members, user_attributes};
+use naming_special_names_rust::{
+    coeffects, coeffects::Ctx, members, special_idents, user_attributes,
+};
 use oxidized::{
     aast,
     aast::Hint_,
     aast_defs,
     aast_defs::Hint,
     aast_visitor::{visit, AstParams, Node, Visitor},
-    ast, ast_defs,
+    ast, ast_defs, local_id,
     pos::Pos,
 };
 use parser_core_types::{
@@ -41,11 +43,16 @@ fn hints_contain_capability(hints: &Vec<aast_defs::Hint>, capability: Ctx) -> bo
     for hint in hints {
         if let aast::Hint_::Happly(ast_defs::Id(_, id), _) = &*hint.1 {
             let (_, name) = utils::split_ns_from_name(&id);
-            let c = coeffects::ctx_str_to_enum(&name);
+            let c = coeffects::ctx_str_to_enum(name);
             match c {
                 Some(val) => match capability {
                     Ctx::WriteProps => {
-                        if val == Ctx::WriteThisProps || coeffects::contains_write_props(val) {
+                        if coeffects::contains_write_props(val) {
+                            return true;
+                        }
+                    }
+                    Ctx::WriteThisProps => {
+                        if coeffects::contains_write_this_props(val) {
                             return true;
                         }
                     }
@@ -63,7 +70,7 @@ fn has_capability(ctxs: &Option<ast::Contexts>, capability: Ctx) -> bool {
         Some(c) => hints_contain_capability(&c.1, capability),
         // No capabilities context is the same as defaults in scenarios where contexts are not inherited
         None => match capability {
-            Ctx::WriteProps => true,
+            Ctx::WriteProps | Ctx::WriteThisProps => true,
             _ => false,
         },
     }
@@ -88,6 +95,7 @@ fn has_capability_with_inherited_val(
         Some(_) => has_capability(ctxs, capability),
         None => match capability {
             Ctx::WriteProps => c.has_write_props(),
+            Ctx::WriteThisProps => c.has_write_this_props(),
             _ => false,
         },
     }
@@ -179,6 +187,7 @@ bitflags! {
         const IS_TYPECHECKER = 1 << 4;
         const HAS_DEFAULTS = 1 << 5;
         const HAS_WRITE_PROPS = 1 << 6;
+        const HAS_WRITE_THIS_PROPS = 1 << 7;
     }
 }
 
@@ -217,6 +226,10 @@ impl Context {
         return self.bitflags.contains(ContextFlags::HAS_WRITE_PROPS);
     }
 
+    fn has_write_this_props(&self) -> bool {
+        return self.bitflags.contains(ContextFlags::HAS_WRITE_THIS_PROPS);
+    }
+
     fn set_in_methodish(&mut self, in_methodish: bool) {
         self.bitflags.set(ContextFlags::IN_METHODISH, in_methodish);
     }
@@ -250,6 +263,11 @@ impl Context {
         self.bitflags
             .set(ContextFlags::HAS_WRITE_PROPS, has_write_props);
     }
+
+    fn set_has_write_this_props(&mut self, has_write_this_props: bool) {
+        self.bitflags
+            .set(ContextFlags::HAS_WRITE_THIS_PROPS, has_write_this_props);
+    }
 }
 
 struct Checker {
@@ -267,18 +285,37 @@ impl Checker {
             .push(SyntaxError::make(start_offset, end_offset, msg));
     }
 
-    fn do_write_props_check(&mut self, c: &mut Context, e: &aast::Expr<(), ()>) {
+    fn do_write_props_check(&mut self, e: &aast::Expr<(), ()>) {
+        if let Some((bop, lhs, _)) = e.2.as_binop() {
+            if let ast_defs::Bop::Eq(_) = bop {
+                self.check_is_obj_property_write_expr(&e, &lhs, true /* ignore_this_writes */);
+            }
+        }
+        if let Some((unop, expr)) = e.2.as_unop() {
+            if is_mutating_unop(&unop) {
+                self.check_is_obj_property_write_expr(
+                    &e, &expr, true, /* ignore_this_writes */
+                );
+            }
+        }
+    }
+
+    fn do_write_this_props_check(&mut self, c: &mut Context, e: &aast::Expr<(), ()>) {
         if c.is_constructor() {
             return;
         }
         if let Some((bop, lhs, _)) = e.2.as_binop() {
             if let ast_defs::Bop::Eq(_) = bop {
-                self.check_is_obj_property_write_expr(&e, &lhs);
+                self.check_is_obj_property_write_expr(
+                    &e, &lhs, false, /* ignore_this_writes */
+                );
             }
         }
         if let Some((unop, expr)) = e.2.as_unop() {
             if is_mutating_unop(&unop) {
-                self.check_is_obj_property_write_expr(&e, &expr);
+                self.check_is_obj_property_write_expr(
+                    &e, &expr, false, /* ignore_this_writes */
+                );
             }
         }
     }
@@ -287,15 +324,28 @@ impl Checker {
         &mut self,
         top_level_expr: &aast::Expr<(), ()>,
         expr: &aast::Expr<(), ()>,
+        ignore_this_writes: bool,
     ) {
-        if let Some(_) = expr.2.as_obj_get() {
+        if let Some((lhs, ..)) = expr.2.as_obj_get() {
+            if let Some(v) = lhs.2.as_lvar() {
+                if local_id::get_name(&v.1) == special_idents::THIS {
+                    if ignore_this_writes {
+                        return;
+                    } else {
+                        self.add_error(
+                            &top_level_expr.1,
+                            syntax_error::write_props_without_capability,
+                        );
+                    }
+                }
+            }
             self.add_error(
                 &top_level_expr.1,
                 syntax_error::write_props_without_capability,
             );
             return;
         } else if let Some((arr, _)) = expr.2.as_array_get() {
-            self.check_is_obj_property_write_expr(top_level_expr, &arr);
+            self.check_is_obj_property_write_expr(top_level_expr, &arr, ignore_this_writes);
         }
     }
 }
@@ -316,6 +366,7 @@ impl<'ast> Visitor<'ast> for Checker {
         ));
         c.set_has_defaults(has_defaults(&m.ctxs));
         c.set_has_write_props(has_capability(&m.ctxs, Ctx::WriteProps));
+        c.set_has_write_this_props(has_capability(&m.ctxs, Ctx::WriteThisProps));
         m.recurse(
             &mut Context {
                 bitflags: c.bitflags,
@@ -329,6 +380,7 @@ impl<'ast> Visitor<'ast> for Checker {
         c.set_has_defaults(has_defaults(&d.fun.ctxs));
         c.set_is_constructor(is_constructor(&d.fun.name));
         c.set_has_write_props(has_capability(&d.fun.ctxs, Ctx::WriteProps));
+        c.set_has_write_this_props(has_capability(&d.fun.ctxs, Ctx::WriteThisProps));
         d.recurse(
             &mut Context {
                 bitflags: c.bitflags,
@@ -349,6 +401,11 @@ impl<'ast> Visitor<'ast> for Checker {
             &f.ctxs,
             Ctx::WriteProps,
         ));
+        c.set_has_write_this_props(has_capability_with_inherited_val(
+            c,
+            &f.ctxs,
+            Ctx::WriteThisProps,
+        ));
         f.recurse(
             &mut Context {
                 bitflags: c.bitflags,
@@ -365,7 +422,10 @@ impl<'ast> Visitor<'ast> for Checker {
             // TODO(T106528721) Turn on coeffect enforcement in runtime outside of pure functions
             && (c.is_typechecker() || c.is_pure())
         {
-            self.do_write_props_check(c, &p);
+            self.do_write_props_check(&p);
+            if !c.has_write_this_props() {
+                self.do_write_this_props_check(c, &p);
+            }
         }
         p.recurse(c, self)
     }

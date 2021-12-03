@@ -12,7 +12,6 @@ use aast_parser::{
 use anyhow::anyhow;
 use bitflags::bitflags;
 use bytecode_printer::{print_program, Context, Write};
-use decl_provider::DeclProvider;
 use decl_provider::NoDeclProvider;
 use hhbc_by_ref_emit_program::{self as emit_program, emit_program, FromAstFlags};
 use hhbc_by_ref_env::emitter::Emitter;
@@ -26,7 +25,6 @@ use hhbc_by_ref_rewrite_program::rewrite_program;
 use itertools::{Either, Either::*};
 use ocamlrep::{rc::RcOc, FromError, FromOcamlRep, Value};
 use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
-use oxidized::file_info::NameType;
 use oxidized::{
     ast, namespace_env::Env as NamespaceEnv, parser_options::ParserOptions, pos::Pos,
     relative_path::RelativePath,
@@ -70,7 +68,6 @@ bitflags! {
         const DISABLE_TOPLEVEL_ELABORATION = 1 << 4;
         const ENABLE_DECL = 1 << 5;
     }
-
 }
 
 bitflags! {
@@ -300,6 +297,7 @@ where
         opts,
         is_systemlib,
         env.flags.contains(EnvFlags::FOR_DEBUGGER_EVAL),
+        env.flags.contains(EnvFlags::ENABLE_DECL),
         unified_decl_provider::DeclProvider::NoDeclProvider(NoDeclProvider),
     );
     let alloc = &bumpalo::Bump::new();
@@ -441,18 +439,6 @@ fn emit_prog_from_ast<'p, 'arena, 'decl, S: AsRef<str>>(
         flags |= FromAstFlags::IS_SYSTEMLIB;
     }
 
-    // TODO: Currently decls are not used anywhere in emitter, so
-    //   we can't tell from bytecode whether decl provider can resolve
-    //   symbol successfully. So for ad hoc testing, output decl provider
-    //   result to file. Why output to a file, since here we can't access
-    //   HHVM's logger. REMOVE THIS AFTER FRIST DECL PROVIDER IS USED IN
-    //   EMITTER.
-    if !env.flags.contains(EnvFlags::IS_SYSTEMLIB) && env.flags.contains(EnvFlags::ENABLE_DECL) {
-        let _ = emitter
-            .decl_provider
-            .get_decl(NameType::Class, "\\DeclTest");
-    }
-
     emit_program(alloc, emitter, flags, namespace, ast)
 }
 
@@ -539,6 +525,7 @@ fn create_emitter<'arena, 'decl, S: AsRef<str>>(
         opts,
         env.flags.contains(EnvFlags::IS_SYSTEMLIB),
         env.flags.contains(EnvFlags::FOR_DEBUGGER_EVAL),
+        env.flags.contains(EnvFlags::ENABLE_DECL),
         decl_provider,
     ))
 }
@@ -684,6 +671,7 @@ pub fn expr_to_string_lossy<S: AsRef<str>>(env: &Env<S>, expr: &ast::Expr) -> St
         opts,
         env.flags.contains(EnvFlags::IS_SYSTEMLIB),
         env.flags.contains(EnvFlags::FOR_DEBUGGER_EVAL),
+        env.flags.contains(EnvFlags::ENABLE_DECL),
         unified_decl_provider::DeclProvider::NoDeclProvider(NoDeclProvider),
     );
     let ctx = Context::new(

@@ -1374,6 +1374,7 @@ dependencies = [
  "naming_special_names_rust",
  "ocamlrep",
  "oxidized",
+ "oxidized_by_ref",
  "regex",
 ]
 
@@ -1807,6 +1808,7 @@ version = "0.0.0"
 dependencies = [
  "bitflags",
  "bumpalo",
+ "decl_provider",
  "hhbc_by_ref_adata_state",
  "hhbc_by_ref_ast_body",
  "hhbc_by_ref_ast_scope",
@@ -1819,6 +1821,7 @@ dependencies = [
  "hhbc_by_ref_symbol_refs_state",
  "ocamlrep",
  "oxidized",
+ "oxidized_by_ref",
  "unified_decl_provider",
 ]
 

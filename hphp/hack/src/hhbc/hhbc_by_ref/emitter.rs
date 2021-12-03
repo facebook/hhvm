@@ -10,6 +10,7 @@ use hhbc_by_ref_adata_state::AdataState;
 use hhbc_by_ref_global_state::GlobalState;
 use hhbc_by_ref_statement_state::StatementState;
 use hhbc_by_ref_symbol_refs_state::SymbolRefsState;
+use oxidized_by_ref::{file_info::NameType, shallow_decl_defs};
 use unified_decl_provider::DeclProvider;
 
 #[derive(Debug)]
@@ -18,6 +19,8 @@ pub struct Emitter<'arena, 'decl> {
     opts: Options,
     /// systemlib is part of context, changed externally
     systemlib: bool,
+    // controls whether we shell out to the decl provider for testing purposes
+    use_decls: bool,
     // the rest is being mutated during emittance
     label_gen: hhbc_by_ref_label::Gen,
     local_gen: hhbc_by_ref_local::Gen<'arena>,
@@ -31,7 +34,7 @@ pub struct Emitter<'arena, 'decl> {
     /// State is also frozen and set after closure conversion
     pub global_state_: Option<GlobalState<'arena>>,
 
-    pub decl_provider: DeclProvider<'decl>,
+    decl_provider: DeclProvider<'decl>,
 }
 
 impl<'arena, 'decl> Emitter<'arena, 'decl> {
@@ -39,6 +42,7 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
         opts: Options,
         systemlib: bool,
         for_debugger_eval: bool,
+        use_decls: bool,
         decl_provider: unified_decl_provider::DeclProvider<'decl>,
     ) -> Emitter<'arena, 'decl> {
         Emitter {
@@ -46,6 +50,7 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
             systemlib,
             for_debugger_eval,
             decl_provider,
+            use_decls,
 
             label_gen: Default::default(),
             local_gen: Default::default(),
@@ -146,5 +151,16 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
     }
     pub fn emit_global_state_mut(&mut self) -> &mut GlobalState<'arena> {
         self.global_state_.get_or_insert_with(GlobalState::init)
+    }
+    pub fn get_decl(
+        &self,
+        kind: NameType,
+        sym: &str,
+    ) -> Result<shallow_decl_defs::Decl<'decl>, decl_provider::Error> {
+        if self.use_decls {
+            decl_provider::DeclProvider::get_decl(&self.decl_provider, kind, sym)
+        } else {
+            Err(decl_provider::Error::NotFound)
+        }
     }
 }

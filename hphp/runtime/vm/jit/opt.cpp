@@ -244,10 +244,21 @@ void optimize(IRUnit& unit, TransKind kind) {
   printUnit(6, unit, " after initial DCE ");
   assertx(checkEverything(unit));
 
-  if (RuntimeOption::EvalHHIRReorderCheckTypes) {
-    rqtrace::EventGuard trace{"OPT_REORDER_CHECK_TYPES"};
-    doPass(unit, reorderCheckTypes, DCE::None);
-  }
+  auto const doCheckTypes = [&] {
+    if (kind != TransKind::Profile && RO::EvalHHIROptimizeCheckTypes) {
+      rqtrace::EventGuard trace{"OPT_OPTIMIZE_CHECK_TYPES"};
+      while (true) {
+        if (!doPass(unit, optimizeCheckTypes, DCE::None)) {
+          printUnit(6, unit, "  after optimizeCheckTypes ");
+          break;
+        }
+        doPass(unit, simplifyPass, DCE::Minimal);
+        doPass(unit, optimizePhis, DCE::Full);
+        doPass(unit, cleanCfg, DCE::None);
+        printUnit(6, unit, "  after optimizeCheckTypes ");
+      }
+    }
+  };
 
   if (RuntimeOption::EvalHHIRPredictionOpts) {
     rqtrace::EventGuard trace{"OPT_PRED"};
@@ -259,6 +270,8 @@ void optimize(IRUnit& unit, TransKind kind) {
     doPass(unit, simplifyPass, DCE::Full);
     doPass(unit, cleanCfg, DCE::None);
   }
+
+  doCheckTypes();
 
   if (RuntimeOption::EvalHHIRGlobalValueNumbering) {
     rqtrace::EventGuard trace{"OPT_GVN"};
@@ -281,6 +294,7 @@ void optimize(IRUnit& unit, TransKind kind) {
         if (doPass(unit, lowerBespokes, DCE::None)) {
           doPass(unit, simplifyPass, DCE::Full);
           doPass(unit, cleanCfg, DCE::None);
+          doCheckTypes();
           again = true;
         }
       }
@@ -340,6 +354,8 @@ void optimize(IRUnit& unit, TransKind kind) {
     doPass(unit, refineTmpsPass, DCE::None);
     doPass(unit, cleanCfg, DCE::None);
   }
+
+  doCheckTypes();
 
   if (kind != TransKind::Profile && RuntimeOption::EvalHHIRSimplification) {
     rqtrace::EventGuard trace{"OPT_SIMPLIFY"};

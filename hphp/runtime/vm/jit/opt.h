@@ -39,7 +39,7 @@ void optimizeStores(IRUnit&);
 void optimizeVanillaChecks(IRUnit&);
 void cleanCfg(IRUnit&);
 bool optimizePhis(IRUnit&);
-void reorderCheckTypes(IRUnit&);
+bool optimizeCheckTypes(IRUnit&);
 void sinkDefs(IRUnit&);
 
 /*

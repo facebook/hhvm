@@ -33,6 +33,7 @@
   TIMER_NAME(optimize_refineTmps)               \
   TIMER_NAME(optimize_reoptimize)               \
   TIMER_NAME(optimize_reorderCheckTypes)        \
+  TIMER_NAME(optimize_hoistCheckTypes)          \
   TIMER_NAME(optimize_sinkDefs)                 \
   TIMER_NAME(optimize_loads)                    \
   TIMER_NAME(optimize_stores)                   \

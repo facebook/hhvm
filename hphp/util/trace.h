@@ -149,6 +149,7 @@ namespace Trace {
       TM(hhir_sinkdefs) \
       TM(hhir_refcount) \
       TM(hhir_refineTmps) \
+      TM(hhir_checkTypes) \
       TM(hhir_store)    \
       TM(hhir_unreachable) \
       TM(hhir_vanilla)  \

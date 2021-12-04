@@ -48,8 +48,8 @@
                              []))),
                          [], [], None)));
                      et_runtime_expr =
-                     ((), [5:8-14],
-                      (Call (((), [5:8-14], (Class_const (((), [5:8-14], (CI ([5:8-14], "\\Code"))), ([5:8-14], "makeTree")))), 
+                     ((), [5:3-7],
+                      (Call (((), [5:3-7], (Class_const (((), [5:3-7], (CI ([5:3-7], "\\Code"))), ([5:3-7], "makeTree")))), 
                          [],
                          [(Pnormal,
                            ((), [5:8-14],
@@ -60,11 +60,11 @@
                                  (SFlit_str ([5:8-14], "start_column")), ((), [5:8-14], (Int "7"))); (
                                  (SFlit_str ([5:8-14], "end_column")), ((), [5:8-14], (Int "13")))])));
                            (Pnormal,
-                            ((), [5:8-14],
+                            ((), [5:3-7],
                              (Shape
-                                [((SFlit_str ([5:8-14], "splices")), ((), [5:8-14], (KeyValCollection (Dict, None, []))));
-                                  ((SFlit_str ([5:8-14], "functions")), ((), [5:8-14], (ValCollection (Vec, None, []))));
-                                  ((SFlit_str ([5:8-14], "static_methods")), ((), [5:8-14], (ValCollection (Vec, None, []))))])));
+                                [((SFlit_str ([5:3-7], "splices")), ((), [5:3-7], (KeyValCollection (Dict, None, []))));
+                                  ((SFlit_str ([5:3-7], "functions")), ((), [5:3-7], (ValCollection (Vec, None, []))));
+                                  ((SFlit_str ([5:3-7], "static_methods")), ((), [5:3-7], (ValCollection (Vec, None, []))))])));
                            (Pnormal,
                             ((), [5:8-14],
                              (Lfun (

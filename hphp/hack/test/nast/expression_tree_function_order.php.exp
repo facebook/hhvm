@@ -83,7 +83,7 @@
                                  };
                                f_fun_kind = FSync; f_user_attributes = []; 
                                f_external = false; f_doc_comment = None },
-                             [([5:5-11:4], $0fp0); ([5:5-11:4], $0fp1); ([5:5-11:4], $0fp2); ([5:5-11:4], $0fp3); ([5:5-11:4], $0fp4)]))),
+                             [([4:3-7], $0fp0); ([4:3-7], $0fp1); ([4:3-7], $0fp2); ([4:3-7], $0fp3); ([4:3-7], $0fp4)]))),
                          [], [], None)));
                      et_runtime_expr =
                      ((), [5:5-11:4],
@@ -100,8 +100,8 @@
                                { fb_ast =
                                  [([5:5-11:4],
                                    (Return
-                                      (Some ((), [5:5-11:4],
-                                             (Call (((), [5:5-11:4], (Class_const (((), [5:5-11:4], (CI ([5:5-11:4], "\\Code"))), ([5:5-11:4], "makeTree")))), 
+                                      (Some ((), [4:3-7],
+                                             (Call (((), [4:3-7], (Class_const (((), [4:3-7], (CI ([4:3-7], "\\Code"))), ([4:3-7], "makeTree")))), 
                                                 [],
                                                 [(Pnormal,
                                                   ((), [5:5-11:4],
@@ -112,11 +112,11 @@
                                                         (SFlit_str ([5:5-11:4], "start_column")), ((), [5:5-11:4], (Int "4"))); (
                                                         (SFlit_str ([5:5-11:4], "end_column")), ((), [5:5-11:4], (Int "3")))])));
                                                   (Pnormal,
-                                                   ((), [5:5-11:4],
+                                                   ((), [4:3-7],
                                                     (Shape
-                                                       [((SFlit_str ([5:5-11:4], "splices")), ((), [5:5-11:4], (KeyValCollection (Dict, None, []))));
-                                                         ((SFlit_str ([5:5-11:4], "functions")),
-                                                          ((), [5:5-11:4],
+                                                       [((SFlit_str ([4:3-7], "splices")), ((), [4:3-7], (KeyValCollection (Dict, None, []))));
+                                                         ((SFlit_str ([4:3-7], "functions")),
+                                                          ((), [4:3-7],
                                                            (ValCollection (Vec, None,
                                                               [((), [7:9-12], (Lvar ([7:9-12], $0fp0))); (
                                                                 (), [8:9-12], (Lvar ([8:9-12], $0fp1))); (
@@ -124,7 +124,7 @@
                                                                 (), [10:7-11], (Lvar ([10:7-11], $0fp3))); (
                                                                 (), [5:5-8], (Lvar ([5:5-8], $0fp4)))]
                                                               ))));
-                                                         ((SFlit_str ([5:5-11:4], "static_methods")), ((), [5:5-11:4], (ValCollection (Vec, None, []))))])));
+                                                         ((SFlit_str ([4:3-7], "static_methods")), ((), [4:3-7], (ValCollection (Vec, None, []))))])));
                                                   (Pnormal,
                                                    ((), [5:5-11:4],
                                                     (Lfun (

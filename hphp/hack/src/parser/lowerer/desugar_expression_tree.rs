@@ -82,6 +82,7 @@ pub fn desugar<TF>(hint: &aast::Hint, e: Expr, env: &Env<'_, TF>) -> DesugarResu
         }
     };
     let et_literal_pos = e.1.clone();
+    let et_hint_pos = hint.0.clone();
 
     let mut temps = Temporaries {
         splices: vec![],
@@ -97,7 +98,7 @@ pub fn desugar<TF>(hint: &aast::Hint, e: Expr, env: &Env<'_, TF>) -> DesugarResu
     let static_method_count = temps.static_method_pointers.len();
 
     let metadata = maketree_metadata(
-        &et_literal_pos,
+        &et_hint_pos,
         &temps.splices,
         &temps.global_function_pointers,
         &temps.static_method_pointers,
@@ -136,25 +137,20 @@ pub fn desugar<TF>(hint: &aast::Hint, e: Expr, env: &Env<'_, TF>) -> DesugarResu
         let typing_fun_ = wrap_fun_(typing_fun_body, vec![], et_literal_pos.clone());
         let mut spliced_vars: Vec<ast::Lid> = (0..splice_count)
             .into_iter()
-            .map(|i| ast::Lid(et_literal_pos.clone(), (0, temp_splice_lvar_string(i))))
+            .map(|i| ast::Lid(et_hint_pos.clone(), (0, temp_splice_lvar_string(i))))
             .collect();
         let function_pointer_vars: Vec<ast::Lid> = (0..function_count)
             .into_iter()
             .map(|i| {
                 ast::Lid(
-                    et_literal_pos.clone(),
+                    et_hint_pos.clone(),
                     (0, temp_function_pointer_lvar_string(i)),
                 )
             })
             .collect();
         let static_method_vars: Vec<ast::Lid> = (0..static_method_count)
             .into_iter()
-            .map(|i| {
-                ast::Lid(
-                    et_literal_pos.clone(),
-                    (0, temp_static_method_lvar_string(i)),
-                )
-            })
+            .map(|i| ast::Lid(et_hint_pos.clone(), (0, temp_static_method_lvar_string(i))))
             .collect();
         spliced_vars.extend(function_pointer_vars);
         spliced_vars.extend(static_method_vars);
@@ -192,7 +188,7 @@ pub fn desugar<TF>(hint: &aast::Hint, e: Expr, env: &Env<'_, TF>) -> DesugarResu
         &visitor_name,
         et::MAKE_TREE,
         vec![exprpos(&et_literal_pos), metadata, visitor_lambda],
-        &et_literal_pos.clone(),
+        &et_hint_pos.clone(),
     );
 
     let runtime_expr = if splice_assignments.is_empty() && function_pointers.is_empty() {

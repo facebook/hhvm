@@ -1,4 +1,4 @@
-File "default_parameter.php", line 5, characters 64-64:
+File "default_parameter.php", line 5, characters 59-62:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
   File "default_parameter.php", line 5, characters 54-55:
   From this declaration, the context of this function body provides the capability AccessGlobals
@@ -16,7 +16,7 @@ This call is not allowed because its coeffects are incompatible with the context
   From this declaration, the context of this function body provides the capability AccessGlobals
   File "expr_tree.hhi", line 44, characters 19-26:
   But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, System, WriteProperty}
-File "default_parameter.php", line 9, characters 54-54:
+File "default_parameter.php", line 9, characters 49-52:
 This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
   File "default_parameter.php", line 9, characters 44-45:
   From this declaration, the context of this function body provides the capability AccessGlobals

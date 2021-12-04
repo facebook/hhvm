@@ -15,6 +15,7 @@
 */
 #pragma once
 
+#include "hphp/runtime/vm/type-profile.h"
 #include "hphp/util/compilation-flags.h"
 #include "hphp/util/safe-cast.h"
 
@@ -406,7 +407,8 @@ inline void uninitHandle(Handle handle) {
 ////////////////////////////////////////////////////////////////////////////////
 
 inline bool shouldProfileAccesses() {
-  return isJitSerializing() && RO::EvalReorderRDS;
+  return isJitSerializing() && RO::EvalReorderRDS && isFullyInitialized() &&
+    isStandardRequest();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

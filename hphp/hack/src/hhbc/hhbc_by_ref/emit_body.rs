@@ -929,14 +929,18 @@ pub fn emit_method_prolog<'a, 'arena, 'decl>(
                             }
                         }
                         (L::Definitely, Some(h)) => {
-                            let check = instr::istypel(
-                                alloc,
-                                Local::Named(Str::new_str(alloc, param.name.unsafe_as_str())),
-                                IstypeOp::OpNull,
-                            );
-                            let verify_instr = instr::verify_param_type_ts(alloc, param_name());
-                            RGH::simplify_verify_type(emitter, env, pos, check, &h, verify_instr)
-                                .map(Some)
+                            if RGH::happly_decl_has_no_reified_generics(emitter, &h) {
+                                Ok(Some(instr::verify_param_type(alloc, param_name())))
+                            } else {
+                                let check = instr::istypel(
+                                    alloc,
+                                    Local::Named(Str::new_str(alloc, param.name.unsafe_as_str())),
+                                    IstypeOp::OpNull,
+                                );
+                                let verify_instr = instr::verify_param_type_ts(alloc, param_name());
+                                RGH::simplify_verify_type(emitter, env, pos, check, &h, verify_instr)
+                                    .map(Some)
+                            }
                         }
                         _ => Err(unrecoverable("impossible")),
                     }?;

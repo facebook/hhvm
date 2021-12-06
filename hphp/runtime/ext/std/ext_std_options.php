@@ -13,19 +13,19 @@ function dl(string $_library): int { return 0; }
 /* Finds out whether the extension is loaded.
  */
 <<__Native>>
-function extension_loaded(string $name): bool;
+function extension_loaded(string $name)[read_globals]: bool;
 
 /* This function returns the names of all the modules compiled and loaded in
  * the PHP interpreter.
  */
 <<__Native>>
-function get_loaded_extensions(bool $zend_extensions = false): varray;
+function get_loaded_extensions(bool $zend_extensions = false)[read_globals]: varray;
 
 /* This function returns the names of all the functions defined in the module
  * indicated by module_name or false if $module_name is not a valid extension.
  */
 <<__Native>>
-function get_extension_funcs(string $module_name): mixed;
+function get_extension_funcs(string $module_name)[read_globals]: mixed;
 
 /* Gets the value of a PHP configuration option.  This function will not
  * return configuration information set when the PHP was compiled, or read

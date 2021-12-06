@@ -1078,6 +1078,7 @@ functor
         genv.local_config.ServerLocalConfig.longlived_workers
       in
 
+      let cgroup_typecheck_telemetry = ref None in
       let ( errorl',
             telemetry,
             adhoc_profiling,
@@ -1085,7 +1086,10 @@ functor
             cancelled,
             time_first_typing_error ) =
         let ctx = Provider_utils.ctx_from_server_env env in
-        CgroupProfiler.step_start_end cgroup_steps "type check"
+        CgroupProfiler.step_start_end
+          cgroup_steps
+          ~telemetry_ref:cgroup_typecheck_telemetry
+          "type check"
         @@ fun cgroup_step ->
         let ( ( env,
                 {
@@ -1125,6 +1129,11 @@ functor
           env,
           cancelled,
           time_first_typing_error )
+      in
+      let telemetry =
+        telemetry
+        |> Telemetry.object_opt ~key:"cgroup" ~value:!cgroup_typecheck_telemetry
+        |> Telemetry.object_ ~key:"gc" ~value:(Telemetry.quick_gc_stat ())
       in
 
       let files_checked = files_to_check in

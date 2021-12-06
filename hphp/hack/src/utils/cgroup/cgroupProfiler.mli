@@ -24,11 +24,16 @@ then each step will be logged to the server log. *)
 val step_group : string -> log:bool -> (step_group -> 'a) -> 'a
 
 (** This records cgroup stats at a point in time *)
-val step : step_group -> string -> unit
+val step : step_group -> ?telemetry_ref:Telemetry.t option ref -> string -> unit
 
 (** `step_start_end phase "bar" callback` records cgroup stats
 immediately, then executes the callback, then records cgroup a second time. *)
-val step_start_end : step_group -> string -> (step -> 'a) -> 'a
+val step_start_end :
+  step_group ->
+  ?telemetry_ref:Telemetry.t option ref ->
+  string ->
+  (step -> 'a) ->
+  'a
 
 (** Sometimes for long-running steps it's not enough merely to log cgroup
 stats at at the start and end; we might also want to record the "high water mark"

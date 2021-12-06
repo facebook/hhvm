@@ -81,18 +81,27 @@ let log_cgroup_total cgroup ~step_group ~step ~suffix ~hwm =
     end
 
 (** Records to HackEventLogger *)
-let log_telemetry ~step_group ~step ~start_time ~hwm ~start_cgroup ~cgroup =
+let log_telemetry
+    ~step_group ~step ~start_time ~hwm ~start_cgroup ~cgroup ~telemetry_ref =
   let open CGroup in
   match (start_cgroup, cgroup) with
-  | (Some (Error s), _)
-  | (_, Error s) ->
-    if SSet.mem s !has_logged_error then
+  | (Some (Error e), _)
+  | (_, Error e) ->
+    telemetry_ref := Telemetry.create () |> Telemetry.error ~e |> Option.some;
+    if SSet.mem e !has_logged_error then
       ()
     else begin
-      has_logged_error := SSet.add s !has_logged_error;
-      HackEventLogger.CGroup.error s
+      has_logged_error := SSet.add e !has_logged_error;
+      HackEventLogger.CGroup.error e
     end
   | (Some (Ok start_cgroup), Ok cgroup) ->
+    let total_hwm = max (max start_cgroup.total cgroup.total) hwm in
+    telemetry_ref :=
+      Telemetry.create ()
+      |> Telemetry.int_ ~key:"start_bytes" ~value:start_cgroup.total
+      |> Telemetry.int_ ~key:"end_bytes" ~value:cgroup.total
+      |> Telemetry.int_ ~key:"hwm_bytes" ~value:total_hwm
+      |> Option.some;
     HackEventLogger.CGroup.step
       ~cgroup:cgroup.cgroup_name
       ~step_group:step_group.name
@@ -103,13 +112,17 @@ let log_telemetry ~step_group ~step ~start_time ~hwm ~start_cgroup ~cgroup =
       ~anon_start:(Some start_cgroup.anon)
       ~shmem_start:(Some start_cgroup.shmem)
       ~file_start:(Some start_cgroup.file)
-      ~total_hwm:(max cgroup.total hwm)
+      ~total_hwm
       ~total:cgroup.total
       ~totalswap:cgroup.total_swap
       ~anon:cgroup.anon
       ~shmem:cgroup.shmem
       ~file:cgroup.file
   | (None, Ok cgroup) ->
+    telemetry_ref :=
+      Telemetry.create ()
+      |> Telemetry.int_ ~key:"end" ~value:cgroup.total
+      |> Option.some;
     HackEventLogger.CGroup.step
       ~cgroup:cgroup.cgroup_name
       ~step_group:step_group.name
@@ -140,7 +153,7 @@ let step_group name ~log f =
   in
   f profiling
 
-let step step_group name =
+let step step_group ?(telemetry_ref = ref None) name =
   if not step_group.log then
     ()
   else begin
@@ -155,9 +168,10 @@ let step step_group name =
       ~hwm:0
       ~start_cgroup:None
       ~cgroup
+      ~telemetry_ref
   end
 
-let step_start_end step_group name f =
+let step_start_end step_group ?(telemetry_ref = ref None) name f =
   if not step_group.log then
     f { total_hwm_ref = ref 0 }
   else begin
@@ -185,9 +199,12 @@ let step_start_end step_group name f =
             ~hwm:!(hwm.total_hwm_ref)
             ~start_cgroup:(Some start_cgroup)
             ~cgroup
+            ~telemetry_ref
         with
         | exn ->
           let e = Exception.wrap exn in
+          telemetry_ref :=
+            Telemetry.create () |> Telemetry.exception_ ~e |> Option.some;
           Hh_logger.log "cgroup - failed to log. %s" (Exception.to_string e))
   end
 

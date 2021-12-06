@@ -1025,7 +1025,7 @@ let load_ fn ~silent ~current_version overrides =
   in
   let ide_max_num_linearizations =
     int_
-      "ide_max_num_lineariations"
+      "ide_max_num_linearizations"
       ~default:default.ide_max_num_linearizations
       config
   in

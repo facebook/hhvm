@@ -106,7 +106,7 @@ function error_log(string $message,
  *   level if no level parameter is given.
  */
 <<__Native>>
-function error_reporting(?int $level = null): int;
+function error_reporting(?int $level = null)[controlled]: int;
 
 /**
  * Restores the previous error handler function

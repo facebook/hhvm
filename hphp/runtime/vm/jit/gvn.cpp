@@ -367,8 +367,6 @@ bool visitInstruction(
   auto& localTable = *env.localTable;
   auto& nameTable = *env.nameTable;
 
-  if (isCallOp(inst->op())) nameTable.clear();
-
   if (!supportsGVN(inst)) return false;
 
   bool changed = false;

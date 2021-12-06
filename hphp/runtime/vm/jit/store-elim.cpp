@@ -349,8 +349,6 @@ struct Local {
   ALocBits delLoc;     // Copied to BlockAnalysis::delLoc
 
   ALocBits reStores;
-
-  bool containsCall{false}; // If there's a Call instruction in this block
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -373,17 +371,6 @@ std::string show(TrackedStore ts) {
   if (auto b = ts.block()) return folly::sformat("P{}", b->id());
   if (auto b = ts.pending()) return folly::sformat("P*{}", b->id());
   not_reached();
-}
-
-bool srcsCanSpanCall(const IRInstruction& inst) {
-  if (inst.is(StFrameCtx)) return true;
-  for (auto i = inst.numSrcs(); i--; ) {
-    auto const src = inst.src(i);
-    if (!src->isA(TStkPtr) &&
-        !src->isA(TFramePtr) &&
-        !src->inst()->is(DefConst)) return false;
-  }
-  return true;
 }
 
 Optional<uint32_t> pure_store_bit(Local& env, AliasClass acls) {
@@ -551,9 +538,7 @@ void visit(Local& env, IRInstruction& inst) {
       }
       if (!env.antLoc[*bit] &&
           !env.mayLoad[*bit] &&
-          !env.mayStore[*bit] &&
-          (!env.containsCall ||
-           srcsCanSpanCall(inst))) {
+          !env.mayStore[*bit]) {
         env.avlLoc[*bit] = 1;
         set_movable_store(env, *bit, inst);
       }
@@ -679,11 +664,10 @@ void visit(Local& env, IRInstruction& inst) {
      * everything else.
      */
     [&] (CallEffects l) {
-      env.containsCall = true;
-
       store(env, l.outputs);
       load(env, AHeapAny);
       load(env, AVMRegState);
+      load(env, ARdsAny);
       load(env, l.locals);
       load(env, l.inputs);
       store(env, l.actrec);
@@ -719,7 +703,6 @@ struct BlockAnalysis {
   ALocBits alteredAvl;
   ALocBits avlLoc;
   ALocBits delLoc;
-  bool containsCall;
 };
 
 BlockAnalysis analyze_block(Global& genv, Block* block) {
@@ -736,8 +719,7 @@ BlockAnalysis analyze_block(Global& genv, Block* block) {
     // env.antLoc and env.delLoc is required for correctness here.
     env.mayLoad | env.mayStore | env.antLoc | env.delLoc,
     env.avlLoc,
-    env.delLoc,
-    env.containsCall
+    env.delLoc
   };
 }
 
@@ -1299,17 +1281,7 @@ void compute_available_stores(
           auto& tsOut =
             genv.trackedStoreMap[StoreKey { blk, StoreKey::Out, i }];
           assertx(!tsIn.isUnseen());
-
-          // Prevent tmps from spanning calls by not propagating tracked stores
-          // thru any block which contains a call. The exception is if the store
-          // only uses constants as those do not create a problem.
-          if (transfer.containsCall &&
-              (!tsIn.instruction() || !srcsCanSpanCall(*tsIn.instruction()))) {
-            tsOut.setBad();
-          } else {
-            tsOut = tsIn;
-          }
-
+          tsOut = tsIn;
           if (tsOut.isBad()) {
             state.ppOut[i] = false;
           }

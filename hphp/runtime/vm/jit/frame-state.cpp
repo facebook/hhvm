@@ -339,7 +339,6 @@ void FrameStateMgr::update(const IRInstruction* inst) {
           : TInitCell;
         setType(stk(base + i), ty);
       }
-      trackCall();
       // We consider popping an ActRec and args to be synced to memory.
       assertx(cur().bcSPOff == inst->marker().bcSPOff());
       cur().bcSPOff -= numCells;
@@ -348,7 +347,6 @@ void FrameStateMgr::update(const IRInstruction* inst) {
 
   case ContEnter:
     assertx(cur().checkMInstrStateDead());
-    trackCall();
     break;
 
   case DefFP:
@@ -1078,27 +1076,6 @@ void FrameStateMgr::trackEndInlining() {
 void FrameStateMgr::trackInlineCall(const IRInstruction* inst) {
   assertx(cur().fixupFPValue == inst->src(1));
   cur().fixupFPValue = inst->src(0);
-}
-
-/*
- * Clear the tracked values at a Call instruction.
- *
- * Keeping a value live across a Call requires spilling, so we avoid it---but
- * we do continue keeping track of types.
- */
-void FrameStateMgr::trackCall() {
-  for (auto& state : m_stack) {
-    for (auto& loc : state.locals) {
-      auto& lState = loc.second;
-      if (lState.value && !lState.value->inst()->is(DefConst)) {
-        lState.value = nullptr;
-      }
-    }
-    for (auto& it : state.stack) {
-      auto& sState = it.second;
-      sState.value = nullptr;
-    }
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

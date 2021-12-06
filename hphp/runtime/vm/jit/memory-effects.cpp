@@ -1068,8 +1068,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case BespokeIterGetKey:
   case LdPtrIterKey:
-    // Array element keys are not tracked by memory effects right now.
-    return may_load_store(AEmpty, AEmpty);
+    // Array element keys are not tracked by memory effects right
+    // now. Be conservative and use AElemAny.
+    return may_load_store(AElemAny, AEmpty);
 
   case LdPtrIterVal:
     return PureLoad { AElemAny };

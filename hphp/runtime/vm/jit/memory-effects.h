@@ -209,8 +209,8 @@ MemEffects memory_effects(const IRInstruction&);
 MemEffects canonicalize(MemEffects);
 
 /*
- * Return an alias class representing the pointee of the given value, which
- * must be <= TMem.
+ * Return an alias class representing the pointee of the given value,
+ * which must maybe be a TMem.
  */
 AliasClass pointee(const SSATmp*);
 AliasClass pointee(const Type&);

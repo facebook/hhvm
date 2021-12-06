@@ -440,13 +440,23 @@ using PhiMap = jit::fast_map<Block*, SSATmp*>;
   here.
 */
 
-bool conflicts(const IRInstruction& instr, const IrrelevantEffects&) {
+bool conflicts(const IRInstruction& instr,
+               const IRInstruction& sinkee,
+               const IrrelevantEffects&) {
   auto const effects = canonicalize(memory_effects(instr));
   return match<bool>(
     effects,
     [&] (const IrrelevantEffects&)   { return false; },
     [&] (const ReturnEffects&)       { return true; },
-    [&] (const CallEffects&)         { return false; },
+    [&] (const CallEffects&)         {
+      // A Call can potentially dec-ref any counted value, so it's not
+      // safe to sink an instruction which uses a counted value past
+      // it.
+      for (auto const src : sinkee.srcs()) {
+        if (src->type().maybe(TCounted)) return true;
+      }
+      return false;
+    },
     [&] (const GeneralEffects&)      { return false; },
     [&] (const PureLoad&)            { return false; },
     [&] (const PureStore&)           { return false; },
@@ -456,17 +466,27 @@ bool conflicts(const IRInstruction& instr, const IrrelevantEffects&) {
   );
 }
 
-bool conflicts(const IRInstruction& instr, const PureLoad& load) {
+bool conflicts(const IRInstruction& instr,
+               const IRInstruction& sinkee,
+               const PureLoad& load) {
   auto const effects = canonicalize(memory_effects(instr));
   return match<bool>(
     effects,
     [&] (const IrrelevantEffects&)   { return false; },
     [&] (const ReturnEffects&)       { return true; },
     [&] (const CallEffects& call)    {
+      // A Call can potentially dec-ref any counted value, so it's not
+      // safe to sink an instruction which uses a counted value past
+      // it.
+      for (auto const src : sinkee.srcs()) {
+        if (src->type().maybe(TCounted)) return true;
+      }
       return
         load.src.maybe(call.kills) ||
         load.src.maybe(call.actrec) ||
-        load.src.maybe(call.outputs);
+        load.src.maybe(call.outputs) ||
+        load.src.maybe(AHeapAny) ||
+        load.src.maybe(ARdsAny);
     },
     [&] (const GeneralEffects& g)    {
       return
@@ -483,7 +503,9 @@ bool conflicts(const IRInstruction& instr, const PureLoad& load) {
   );
 }
 
-bool conflicts(const IRInstruction& instr, const GeneralEffects& g) {
+bool conflicts(const IRInstruction& instr,
+               const IRInstruction& sinkee,
+               const GeneralEffects& g) {
   assertx(g.stores == AEmpty && g.kills == AEmpty &&
           g.inout == AEmpty && g.coeffect == AEmpty);
 
@@ -497,10 +519,18 @@ bool conflicts(const IRInstruction& instr, const GeneralEffects& g) {
     [&] (const IrrelevantEffects&)   { return false; },
     [&] (const ReturnEffects&)       { return true; },
     [&] (const CallEffects& call)    {
+      // A Call can potentially dec-ref any counted value, so it's not
+      // safe to sink an instruction which uses a counted value past
+      // it.
+      for (auto const src : sinkee.srcs()) {
+        if (src->type().maybe(TCounted)) return true;
+      }
       return
         test_reads(call.kills) ||
         test_reads(call.actrec) ||
-        test_reads(call.outputs);
+        test_reads(call.outputs) ||
+        test_reads(AHeapAny) ||
+        test_reads(ARdsAny);
     },
     [&] (const GeneralEffects& g2)   {
       return
@@ -532,8 +562,7 @@ bool conflicts(const IRInstruction& sinkee, const IRInstruction& barrier) {
   if (barrier.consumesReferences() && !barrier.is(DecRefNZ)) {
     // We need to check if the barrier can potentially trigger a
     // DecRef which would release sinkee's def.
-    for (int i = 0; i < sinkee.numSrcs(); ++i) {
-      auto const src = sinkee.src(i);
+    for (auto const src : sinkee.srcs()) {
       if (!src->type().maybe(TCounted)) continue;
       for (int j = 0; j < barrier.numSrcs(); ++j) {
         if (!barrier.consumesReference(j)) continue;
@@ -550,9 +579,9 @@ bool conflicts(const IRInstruction& sinkee, const IRInstruction& barrier) {
   auto const effects = canonicalize(memory_effects(sinkee));
   auto const memory_effect_conflict = match<bool>(
     effects,
-    [&] (const IrrelevantEffects& x) { return conflicts(barrier, x); },
-    [&] (const GeneralEffects& x)    { return conflicts(barrier, x); },
-    [&] (const PureLoad& x)          { return conflicts(barrier, x); },
+    [&] (const IrrelevantEffects& x) { return conflicts(barrier, sinkee, x); },
+    [&] (const GeneralEffects& x)    { return conflicts(barrier, sinkee, x); },
+    [&] (const PureLoad& x)          { return conflicts(barrier, sinkee, x); },
     [&] (const ReturnEffects&)       { always_assert(false); return true; },
     [&] (const CallEffects&)         { always_assert(false); return true; },
     [&] (const PureStore&)           { always_assert(false); return true; },
@@ -579,8 +608,8 @@ TriBool will_conflict(const IRInstruction& inst) {
   if (inst.is(CheckSurpriseFlags)) return TriBool::Yes;
 
   // Be conservative for anything ref-counted
-  for (int i = 0; i < inst.numSrcs(); ++i) {
-    if (inst.src(i)->type().maybe(TCounted)) return TriBool::Maybe;
+  for (auto const src : inst.srcs()) {
+    if (src->type().maybe(TCounted)) return TriBool::Maybe;
   }
 
   auto const effects = canonicalize(memory_effects(inst));
@@ -592,6 +621,8 @@ TriBool will_conflict(const IRInstruction& inst) {
           g.inout != AEmpty || g.coeffect != AEmpty) {
         return TriBool::Maybe;
       }
+      // A load out something ref-counted can be blocked.
+      if (g.loads.maybe(AHeapAny)) return TriBool::Maybe;
       return TriBool::No;
     },
     [&] (const PureLoad& x)          { return TriBool::Maybe; },

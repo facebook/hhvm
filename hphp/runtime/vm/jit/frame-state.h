@@ -483,7 +483,6 @@ private:
   void trackBeginInlining(const IRInstruction* inst);
   void trackEndInlining();
   void trackInlineCall(const IRInstruction* inst);
-  void trackCall();
 
   void pointerLoad(SSATmp*, SSATmp*);
   void pointerStore(SSATmp*, SSATmp*);

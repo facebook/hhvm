@@ -1868,13 +1868,13 @@ let class_def ctx c =
          c.c_user_attributes)
   in
   Typing_type_wellformedness.class_ env c;
-  NastInitCheck.class_ env c;
   match tc with
   | None ->
     (* This can happen if there was an error during the declaration
      * of the class. *)
     None
   | Some tc ->
+    NastInitCheck.class_ env c;
     (* If there are duplicate definitions of the class then we will end up
      * checking one AST with respect to the decl corresponding to the other definition.
      * Naming has already detected duplicates, so let's just avoid cascading unhelpful

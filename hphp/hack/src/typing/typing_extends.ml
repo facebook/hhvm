@@ -1209,11 +1209,10 @@ let check_implements_extends_uses
   let implements = List.fold ~f:get_interfaces ~init:[] implements in
   let name = Cls.name class_ in
   List.fold ~init:env parents ~f:(fun env parent_type ->
-      let (_, parent_name, parent_tparaml) =
+      let (_, (parent_name_pos, parent_name), parent_tparaml) =
         TUtils.unwrap_class_type parent_type
       in
-      let (parent_name_pos, parent_name_str) = parent_name in
-      let parent_class = Env.get_class env (snd parent_name) in
+      let parent_class = Env.get_class env parent_name in
       match parent_class with
       | None -> env
       | Some parent_class ->
@@ -1226,12 +1225,12 @@ let check_implements_extends_uses
           (fun ?code:_ ?quickfixes:_ reasons ->
             (* sadly, enum error reporting requires this to keep the error in the file
                with the enum *)
-            if String.equal parent_name_str SN.Classes.cHH_BuiltinEnum then
+            if String.equal parent_name SN.Classes.cHH_BuiltinEnum then
               Errors.bad_enum_decl name_pos reasons
             else
               Errors.bad_decl_override
                 parent_name_pos
-                parent_name_str
+                parent_name
                 name_pos
                 name
                 reasons))

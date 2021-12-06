@@ -64,7 +64,7 @@ let declare_folded_class_in_file
            Decl_folded_class.class_decl_if_missing ~sh:SharedMem.Uses ctx name)
      with
     | None -> err_not_found file name
-    | Some (_name, decl_and_members) -> decl_and_members)
+    | Some decl_and_members -> decl_and_members)
 
 let lookup_or_populate_class_cache class_name populate =
   match Cache.get class_name with

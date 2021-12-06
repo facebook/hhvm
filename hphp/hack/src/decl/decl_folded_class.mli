@@ -18,7 +18,7 @@ val class_decl_if_missing :
   sh:SharedMem.uses ->
   Provider_context.t ->
   string ->
-  (string * Decl_store.class_entries) option
+  Decl_store.class_entries option
 
 val class_decl :
   sh:SharedMem.uses ->

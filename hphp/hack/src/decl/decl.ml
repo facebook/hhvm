@@ -23,7 +23,7 @@ let class_decl_if_missing_DEPRECATED
     in
     ()
   else
-    let (_ : (_ * _) option) =
+    let (_ : _ option) =
       Decl_folded_class.class_decl_if_missing ~sh ctx (snd c.Aast.c_name)
     in
     ()
@@ -87,7 +87,7 @@ let make_env
       if not (shallow_decl_enabled ctx) then
         List.iter parsed_file.Direct_decl_utils.pfh_decls ~f:(function
             | (name, Shallow_decl_defs.Class _, _) ->
-              let (_ : (_ * _) option) =
+              let (_ : _ option) =
                 Decl_folded_class.class_decl_if_missing ~sh ctx name
               in
               ()

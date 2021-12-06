@@ -626,8 +626,8 @@ let method_decl_acc
 let rec declare_class_and_parents
     ~(sh : SharedMem.uses)
     (class_env : class_env)
-    (shallow_class : Shallow_decl_defs.shallow_class) :
-    string * Decl_store.class_entries =
+    (shallow_class : Shallow_decl_defs.shallow_class) : Decl_store.class_entries
+    =
   let (_, name) = shallow_class.sc_name in
   let class_env = { class_env with stack = SSet.add name class_env.stack } in
   let (errors, (tc, member_heaps_values)) =
@@ -636,7 +636,7 @@ let rec declare_class_and_parents
         class_decl ~sh class_env.ctx shallow_class ~parents)
   in
   let class_ = { tc with dc_decl_errors = Some errors } in
-  (name, (class_, Some member_heaps_values))
+  (class_, Some member_heaps_values)
 
 and class_parents_decl
     ~(sh : SharedMem.uses)
@@ -652,7 +652,7 @@ and class_parents_decl
       else (
         match class_decl_if_missing ~sh class_env class_name with
         | None -> acc
-        | Some (class_name, decls) -> SMap.add class_name decls acc
+        | Some decls -> SMap.add class_name decls acc
       )
     | _ -> acc
   in
@@ -671,9 +671,9 @@ and class_parents_decl
 
 and class_decl_if_missing
     ~(sh : SharedMem.uses) (class_env : class_env) (class_name : string) :
-    (string * Decl_store.class_entries) option =
+    Decl_store.class_entries option =
   match Decl_store.((get ()).get_class class_name) with
-  | Some decl -> Some (class_name, (decl, None))
+  | Some decl -> Some (decl, None)
   | None ->
     (match Shallow_classes_provider.get class_env.ctx class_name with
     | None -> None
@@ -682,10 +682,10 @@ and class_decl_if_missing
         Pos.filename (fst shallow_class.sc_name |> Pos_or_decl.unsafe_to_raw_pos)
       in
       Errors.run_in_context fn Errors.Decl @@ fun () ->
-      let ((name, (class_, _)) as result) =
+      let ((class_, _) as result) =
         declare_class_and_parents ~sh class_env shallow_class
       in
-      Decl_store.((get ()).add_class name class_);
+      Decl_store.((get ()).add_class class_name class_);
       Some result)
 
 and class_decl
@@ -861,9 +861,9 @@ and class_decl
 
 let class_decl_if_missing
     ~(sh : SharedMem.uses) (ctx : Provider_context.t) (class_name : string) :
-    (string * Decl_store.class_entries) option =
+    Decl_store.class_entries option =
   match Decl_store.((get ()).get_class class_name) with
-  | Some class_ -> Some (class_name, (class_, None))
+  | Some class_ -> Some (class_, None)
   | None ->
     (* Class elements are in memory if and only if the class itself is there.
      * Exiting before class declaration is ready would break this invariant *)

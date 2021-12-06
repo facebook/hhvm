@@ -7,8 +7,10 @@
  *
  *)
 
-(** Checks that a class implements its interfaces, extends its base class, and
-    uses its traits. *)
+(** Checks that a classish type implements its interfaces, extends its base class, and
+    uses its traits.
+    [implements] is the list of interfaces the classish type directly implements.
+    [parents] is the list of direct ancestors and traits the class directly uses. *)
 val check_implements_extends_uses :
   Typing_env_types.env ->
   (* All directly implemented interfaces *)

@@ -636,7 +636,6 @@ let rec declare_class_and_parents
         class_decl ~sh class_env.ctx shallow_class ~parents)
   in
   let class_ = { tc with dc_decl_errors = Some errors } in
-  Decl_store.((get ()).add_class name class_);
   (name, (class_, Some member_heaps_values))
 
 and class_parents_decl
@@ -683,7 +682,11 @@ and class_decl_if_missing
         Pos.filename (fst shallow_class.sc_name |> Pos_or_decl.unsafe_to_raw_pos)
       in
       Errors.run_in_context fn Errors.Decl @@ fun () ->
-      Some (declare_class_and_parents ~sh class_env shallow_class))
+      let ((name, (class_, _)) as result) =
+        declare_class_and_parents ~sh class_env shallow_class
+      in
+      Decl_store.((get ()).add_class name class_);
+      Some result)
 
 and class_decl
     ~(sh : SharedMem.uses)

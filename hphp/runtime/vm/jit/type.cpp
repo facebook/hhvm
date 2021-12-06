@@ -710,8 +710,8 @@ bool Type::operator<=(Type rhs) const {
 Type Type::operator|(Type rhs) const {
   auto lhs = *this;
 
-  if (lhs == rhs || rhs == TBottom) return lhs;
-  if (lhs == TBottom) return rhs;
+  if (lhs <= rhs) return rhs;
+  if (rhs <= lhs) return lhs;
 
   // Representing types like {Int<12>|Arr} could get messy and isn't useful in
   // practice, so unless we hit one of the trivial cases above, drop the
@@ -728,6 +728,9 @@ Type Type::operator|(Type rhs) const {
 
 Type Type::operator&(Type rhs) const {
   auto lhs = *this;
+
+  if (lhs <= rhs) return lhs;
+  if (rhs <= lhs) return rhs;
 
   // When intersecting a constant type with another type, the result
   // is the constant type if the other type is a supertype of the

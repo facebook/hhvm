@@ -783,6 +783,16 @@ TEST(Type, Const) {
   auto const constDict = Type::cns(dictData);
   EXPECT_TRUE(constDict < TDict);
 
+  auto const ratArray3 = Type::StaticDict(rat2);
+  auto const dict2 = make_dict_array(0, 0, 1, 1, 2, 2, 3, 3, 4, 4);
+  auto const dictData2 = ArrayData::GetScalarArray(std::move(dict2));
+  auto const constDict2 = Type::cns(dictData2);
+  EXPECT_TRUE(constDict2 < ratArray3);
+  EXPECT_EQ(constDict2 | ratArray3, ratArray3);
+  EXPECT_EQ(ratArray3 | constDict2, ratArray3);
+  EXPECT_EQ(constDict2 & ratArray3, constDict2);
+  EXPECT_EQ(ratArray3 & constDict2, constDict2);
+
   auto const keyset = make_keyset_array(1, 2, 3, 4);
   auto const keysetData = ArrayData::GetScalarArray(std::move(keyset));
   auto const constKeyset = Type::cns(keysetData);

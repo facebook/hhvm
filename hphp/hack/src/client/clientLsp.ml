@@ -4131,6 +4131,10 @@ let handle_client_message
       ref_local_config := Some local_config;
       HackEventLogger.set_rollout_flags
         (ServerLocalConfig.to_rollout_flags local_config);
+      HackEventLogger.set_rollout_group
+        local_config.ServerLocalConfig.rollout_group;
+      HackEventLogger.set_machine_class
+        local_config.ServerLocalConfig.machine_class;
 
       let%lwt version = read_hhconfig_version () in
       HackEventLogger.set_hhconfig_version

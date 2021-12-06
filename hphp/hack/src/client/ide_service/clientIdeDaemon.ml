@@ -396,6 +396,8 @@ let initialize1 (param : ClientIdeMessage.Initialize_from_saved_state.t) :
     (ServerConfig.version config |> Config_file.version_to_string_opt);
   HackEventLogger.set_rollout_flags
     (ServerLocalConfig.to_rollout_flags local_config);
+  HackEventLogger.set_rollout_group local_config.ServerLocalConfig.rollout_group;
+  HackEventLogger.set_machine_class local_config.ServerLocalConfig.machine_class;
 
   Provider_backend.set_local_memory_backend
     ~max_num_decls:local_config.ServerLocalConfig.ide_max_num_decls

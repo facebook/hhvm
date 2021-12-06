@@ -94,6 +94,8 @@ struct Vout {
   void use(Vlabel b)                     { m_block = b; }
   void setOrigin(const IRInstruction* i) { m_irctx.origin = i; }
 
+  const IRInstruction* getOrigin() const { return m_irctx.origin; }
+
   /*
    * Add a scaling factor. The weight of the current block and all
    * future blocks created from this Vout will be multiplied by the

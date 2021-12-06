@@ -310,20 +310,7 @@ let profile_log
       ~recheck_id:check_info.recheck_id
       ~path:file.path
       ~telemetry;
-    Hh_logger.log
-      "%s [%s] %fs %dMiB->%dMiB%s"
-      (Relative_path.suffix file.path)
-      (if List.is_empty result.deferred_decls then
-        "type-check"
-      else
-        "discover-decl-deps")
-      (Option.value duration_second_run ~default:duration)
-      start_heap_mb
-      end_heap_mb
-      (if SharedMem.SMTelemetry.hh_log_level () > 0 then
-        "\n" ^ Telemetry.to_string telemetry
-      else
-        "")
+    ()
   end
 
 let read_counters () : Counters.time_in_sec * Telemetry.t =

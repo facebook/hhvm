@@ -245,7 +245,7 @@ function php_ini_scanned_files(): mixed {
 }
 
 <<__Native>>
-function php_sapi_name(): string;
+function php_sapi_name()[read_globals]: string;
 
 /* php_uname() returns a description of the operating system PHP is running
  * on. This is the same string you see at the very top of the phpinfo()

@@ -593,6 +593,73 @@ let filter_privates members =
   List.filter members ~f:(fun (_name, class_elt) ->
       (not (is_private class_elt)) || is_lsb class_elt)
 
+let add_member_dep
+    env class_ (member_source, member_name, member_origin, origin_pos) =
+  if not (Pos_or_decl.is_hhi origin_pos) then
+    let dep =
+      match member_source with
+      | `FromMethod -> Dep.Method (member_origin, member_name)
+      | `FromSMethod -> Dep.SMethod (member_origin, member_name)
+      | `FromSProp -> Dep.SProp (member_origin, member_name)
+      | `FromProp -> Dep.Prop (member_origin, member_name)
+      | `FromConstructor -> Dep.Constructor member_origin
+    in
+    Typing_deps.add_idep
+      (Env.get_deps_mode env)
+      (Dep.Type (Cls.name class_))
+      dep
+
+let check_inherited_member_is_dynamically_callable
+    env
+    inheriting_class
+    parent_class
+    (member_source, member_name, parent_class_elt) =
+  let (inheriting_class_pos, inheriting_class) = inheriting_class in
+  if
+    TypecheckerOptions.enable_sound_dynamic
+      (Provider_context.get_tcopt (Env.get_ctx env))
+    && Cls.get_support_dynamic_type inheriting_class
+    && not (Cls.get_support_dynamic_type parent_class)
+    (* TODO: ideally refactor so the last test is not systematically performed on all methods *)
+  then
+    match Cls.kind parent_class with
+    | Ast_defs.Cclass _
+    | Ast_defs.Ctrait ->
+      begin
+        match member_source with
+        | `FromMethod ->
+          if not (Typing_defs.get_ce_support_dynamic_type parent_class_elt) then
+            (* since the attribute is missing run the inter check *)
+            let (lazy (ty : decl_ty)) = parent_class_elt.ce_type in
+            (match get_node ty with
+            | Tfun fun_ty ->
+              if
+                not
+                  (Typing_dynamic.sound_dynamic_interface_check_from_fun_ty
+                     env
+                     fun_ty)
+              then
+                Errors.method_is_not_dynamically_callable
+                  inheriting_class_pos
+                  member_name
+                  (Cls.name inheriting_class)
+                  false
+                  (Some
+                     ( Lazy.force parent_class_elt.ce_pos,
+                       parent_class_elt.ce_origin ))
+                  None
+            | _ -> ())
+        | `FromSMethod
+        | `FromSProp
+        | `FromProp
+        | `FromConstructor ->
+          ()
+      end
+    | Ast_defs.Cinterface
+    | Ast_defs.Cenum_class _
+    | Ast_defs.Cenum ->
+      ()
+
 let check_members
     check_private
     env
@@ -637,24 +704,16 @@ let check_members
       | Some class_elt
         when String.( <> ) parent_class_elt.ce_origin class_elt.ce_origin ->
         let parent_class_elt = Inst.instantiate_ce psubst parent_class_elt in
-        let check_member_unique =
-          should_check_member_unique class_elt parent_class_elt
-        in
-        let dep =
-          match mem_source with
-          | `FromMethod -> Dep.Method (parent_class_elt.ce_origin, member_name)
-          | `FromSMethod -> Dep.SMethod (parent_class_elt.ce_origin, member_name)
-          | `FromSProp -> Dep.SProp (parent_class_elt.ce_origin, member_name)
-          | `FromProp -> Dep.Prop (parent_class_elt.ce_origin, member_name)
-          | `FromConstructor -> Dep.Constructor parent_class_elt.ce_origin
-        in
-        if not (Pos_or_decl.is_hhi (Cls.pos parent_class)) then
-          Typing_deps.add_idep
-            (Env.get_deps_mode env)
-            (Dep.Type (Cls.name class_))
-            dep;
+        add_member_dep
+          env
+          class_
+          ( mem_source,
+            member_name,
+            parent_class_elt.ce_origin,
+            Cls.pos parent_class );
         check_override
-          ~check_member_unique
+          ~check_member_unique:
+            (should_check_member_unique class_elt parent_class_elt)
           env
           member_name
           mem_source
@@ -664,53 +723,11 @@ let check_members
           on_error
       | _ ->
         (* if class implements dynamic, all inherited methods should be dynamically callable *)
-        (if
-         TypecheckerOptions.enable_sound_dynamic
-           (Provider_context.get_tcopt (Env.get_ctx env))
-         && Cls.get_support_dynamic_type class_
-         && not (Cls.get_support_dynamic_type parent_class)
-         (* TODO: ideally refactor so the last test is not systematically performed on all methods *)
-        then
-          match Cls.kind parent_class with
-          | Ast_defs.Cclass _
-          | Ast_defs.Ctrait ->
-            begin
-              match mem_source with
-              | `FromMethod ->
-                if
-                  not (Typing_defs.get_ce_support_dynamic_type parent_class_elt)
-                then
-                  (* since the attribute is missing run the inter check *)
-                  let (lazy (ty : decl_ty)) = parent_class_elt.ce_type in
-                  (match get_node ty with
-                  | Tfun fun_ty ->
-                    if
-                      not
-                        (Typing_dynamic
-                         .sound_dynamic_interface_check_from_fun_ty
-                           env
-                           fun_ty)
-                    then
-                      Errors.method_is_not_dynamically_callable
-                        class_pos
-                        member_name
-                        (Cls.name class_)
-                        false
-                        (Some
-                           ( Lazy.force parent_class_elt.ce_pos,
-                             parent_class_elt.ce_origin ))
-                        None
-                  | _ -> ())
-              | `FromSMethod
-              | `FromSProp
-              | `FromProp
-              | `FromConstructor ->
-                ()
-            end
-          | Ast_defs.Cinterface
-          | Ast_defs.Cenum_class _
-          | Ast_defs.Cenum ->
-            ());
+        check_inherited_member_is_dynamically_callable
+          env
+          (class_pos, class_)
+          parent_class
+          (mem_source, member_name, parent_class_elt);
         env)
 
 let make_all_members ~child_class ~parent_class =

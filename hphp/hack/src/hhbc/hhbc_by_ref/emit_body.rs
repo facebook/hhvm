@@ -10,8 +10,7 @@ use emit_statement::emit_final_stmts;
 use reified_generics_helpers as RGH;
 
 use aast::TypeHint;
-use aast_defs::{Hint, Hint_::*, ReifyKind};
-use ast_defs::Id;
+use aast_defs::{Hint, Hint_::*};
 use bytecode_printer::{print_expr, Context, ExprEnv};
 use hash::HashSet;
 use hhbc_by_ref_ast_body::AstBody;
@@ -47,12 +46,7 @@ use hhbc_by_ref_unique_id_builder::*;
 use naming_special_names_rust::user_attributes as ua;
 
 use ocamlrep::rc::RcOc;
-use oxidized::{
-    aast, aast_defs, ast, ast_defs, doc_comment::DocComment, file_info::NameType, namespace_env,
-    pos::Pos,
-};
-
-use oxidized_by_ref::shallow_decl_defs::Decl;
+use oxidized::{aast, aast_defs, ast, ast_defs, doc_comment::DocComment, namespace_env, pos::Pos};
 
 use ffi::{Maybe, Maybe::*, Pair, Slice, Str};
 
@@ -894,17 +888,6 @@ fn atom_instrs<'a, 'arena, 'decl>(
     }
 }
 
-fn get_happly_class_name<'arena>(hint: &Hint) -> Option<&String> {
-    let Hint(_, h) = hint;
-    match h.as_ref() {
-        Happly(Id(_, id), _) => Some(id),
-        // What kinds of other hints can we skip the TS for?
-        Hoption(_) | Hlike(_) | Hfun(_) | Htuple(_) | Hshape(_) | Haccess(_, _) | Hsoft(_) => None,
-        // The rest are not found on the AST at this stage
-        _ => None,
-    }
-}
-
 pub fn emit_method_prolog<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
@@ -926,16 +909,9 @@ pub fn emit_method_prolog<'a, 'arena, 'decl>(
                         (L::Unconstrained, _) => Ok(None),
                         (L::Not, _) => Ok(Some(instr::verify_param_type(alloc, param_name()))),
                         (L::Maybe, Some(h)) => {
-                            let res = (|| {
-                                // Check to see if class is actually reified
-                                if let Some(class_name) = get_happly_class_name(&h) {
-                                    if let Ok(Decl::Class(class_decl)) = emitter.get_decl(NameType::Class, &class_name) {
-                                        if class_decl.tparams.iter().all(|tparam| -> bool { tparam.reified == ReifyKind::Erased }) {
-                                            return Ok(Some(instr::verify_param_type(alloc, param_name())));
-                                        }
-                                    }
-                                }
-                                // Fallback or if class actually is reified
+                            if RGH::happly_decl_has_no_reified_generics(emitter, &h) {
+                                Ok(Some(instr::verify_param_type(alloc, param_name())))
+                            } else {
                                 Ok(Some(InstrSeq::gather(alloc, vec![
                                     emit_expression::get_type_structure_for_hint(
                                         alloc,
@@ -950,9 +926,7 @@ pub fn emit_method_prolog<'a, 'arena, 'decl>(
                                     )?,
                                     instr::verify_param_type_ts(alloc, param_name()),
                                 ])))
-                            })()?;
-
-                            Ok(res)
+                            }
                         }
                         (L::Definitely, Some(h)) => {
                             let check = instr::istypel(

@@ -7,9 +7,10 @@ use hhbc_by_ref_emit_expression::{emit_reified_arg, is_reified_tparam};
 use hhbc_by_ref_env::{emitter::Emitter, Env};
 use hhbc_by_ref_instruction_sequence::*;
 use naming_special_names_rust as sn;
-use oxidized::{aast, ast_defs::Id, pos::Pos};
+use oxidized::{aast, ast_defs::Id, file_info, pos::Pos};
 
 use hash::HashSet;
+use oxidized_by_ref::shallow_decl_defs;
 
 #[derive(Debug, Clone)]
 pub enum ReificationLevel {
@@ -249,4 +250,39 @@ pub(crate) fn remove_erased_generics<'a, 'arena>(
         Hint(pos, Box::new(h_))
     }
     rec(env, h)
+}
+
+/// Warning: Experimental usage of decls in compilation
+/// Given a hint, if the hint is an Happly(id, _), checks if the id is a class that has reified generics
+pub(crate) fn happly_decl_has_no_reified_generics<'arena, 'decl>(
+    emitter: &mut Emitter<'arena, 'decl>,
+    hint: &aast::Hint,
+) -> bool {
+    use aast::*;
+    let Hint(_, h) = hint;
+    match h.as_ref() {
+        Hint_::Happly(Id(_, id), _) => {
+            if let Ok(shallow_decl_defs::Decl::Class(class_decl)) =
+                emitter.get_decl(file_info::NameType::Class, &id)
+            {
+                if class_decl
+                    .tparams
+                    .iter()
+                    .all(|tparam| -> bool { tparam.reified == ReifyKind::Erased })
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        Hint_::Hoption(_)
+        | Hint_::Hlike(_)
+        | Hint_::Hfun(_)
+        | Hint_::Htuple(_)
+        | Hint_::Hshape(_)
+        | Hint_::Haccess(_, _)
+        | Hint_::Hsoft(_) => false,
+        // The rest are not found on the AST at this stage
+        _ => false,
+    }
 }

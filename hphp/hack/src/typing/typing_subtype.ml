@@ -3064,7 +3064,7 @@ and props_to_env env remain props on_error =
            *)
           let ty_super =
             match get_node ty_super with
-            | Tdynamic -> MakeType.nullable_locl r (MakeType.supportdynamic r)
+            | Tdynamic -> MakeType.nullablesupportdynamic r
             | _ -> ty_super
           in
           let (env, prop) =

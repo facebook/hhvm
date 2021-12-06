@@ -169,6 +169,20 @@ let rec intersect env ~r ty1 ty2 =
             (env, mk (r, Tshape (shape_kind, fdm)))
           | ((_, Tintersection tyl1), (_, Tintersection tyl2)) ->
             intersect_lists env r tyl1 tyl2
+          (* Simplify `supportdyn<t> & u` to `supportdyn<t & u>`. Do not apply if `u` is
+           * a type variable, else we end up with recursion in constraints. *)
+          | ((r, Tnewtype (name1, [ty1arg], _)), _)
+            when String.equal name1 Naming_special_names.Classes.cSupportDyn
+                 && not (is_tyvar ty2) ->
+            let (env, ty) = intersect ~r env ty1arg ty2 in
+            let res = mk (r, Tnewtype (name1, [ty], ty)) in
+            (env, res)
+          | (_, (r, Tnewtype (name1, [ty2arg], _)))
+            when String.equal name1 Naming_special_names.Classes.cSupportDyn
+                 && not (is_tyvar ty1) ->
+            let (env, ty) = intersect ~r env ty1 ty2arg in
+            let res = mk (r, Tnewtype (name1, [ty], ty)) in
+            (env, res)
           | ((_, Tintersection tyl), _) -> intersect_lists env r [ty2] tyl
           | (_, (_, Tintersection tyl)) -> intersect_lists env r [ty1] tyl
           | ((r1, Tunion tyl1), (r2, Tunion tyl2)) ->

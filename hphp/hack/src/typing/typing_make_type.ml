@@ -112,6 +112,8 @@ let supportdynamic r = supportdyn r (nonnull r)
 
 let mixed r = mk (r, Toption (nonnull r))
 
+let nullablesupportdynamic r = supportdyn r (mixed r)
+
 let resource r = prim_type r Nast.Tresource
 
 let tyvar r v = mk (r, Tvar v)

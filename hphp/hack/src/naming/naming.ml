@@ -631,6 +631,23 @@ and hint_id
         then
           Errors.experimental_feature p "supportdynamic type hint";
         N.Happly ((p, SN.Typehints.supportdynamic), [])
+      | x when String.equal x SN.Classes.cSupportDyn && not (Pos.is_hhi p) ->
+        if
+          not
+            (TypecheckerOptions.experimental_feature_enabled
+               (Provider_context.get_tcopt (fst env).ctx)
+               TypecheckerOptions.experimental_supportdynamic_type_hint)
+        then
+          Errors.experimental_feature p "supportdyn type hint";
+        N.Happly
+          ( id,
+            hintl
+              ~allow_wildcard
+              ~forbid_this
+              ~allow_retonly:true
+              ~tp_depth:(tp_depth + 1)
+              env
+              hl )
       | x when String.equal x SN.Typehints.nothing -> N.Hnothing
       | x when String.equal x SN.Typehints.this && not forbid_this ->
         if not (List.is_empty hl) then Errors.this_no_argument p;

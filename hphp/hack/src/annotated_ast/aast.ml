@@ -735,10 +735,6 @@ and ('ex, 'en) fun_variadicity =
       (** Named variadic argument.
 
       function foo(int ...$args): void {} *)
-  | FVellipsis of pos
-      (** Unnamed variaidic argument. Partial mode only.
-
-          function foo(...): void {} *)
   | FVnonVariadic
       (** Function is not variadic, takes an exact number of arguments. *)
 

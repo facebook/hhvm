@@ -218,9 +218,6 @@ let build_signature_json ctx source_map params vararg ret_ty =
   let parameters =
     match vararg with
     | FVnonVariadic -> parameters
-    | FVellipsis _ ->
-      parameters
-      @ [build_parameter_json source_map "..." None None false true []]
     | FVvariadicArg vararg -> parameters @ [build_param vararg]
   in
   let return_type_name =

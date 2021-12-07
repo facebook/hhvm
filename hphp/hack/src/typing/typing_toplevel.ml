@@ -63,7 +63,7 @@ and get_decl_method_header tcopt cls method_id ~is_static =
   else
     None
 
-let get_callable_variadicity ~pos env variadicity_decl_ty = function
+let get_callable_variadicity env variadicity_decl_ty = function
   | FVvariadicArg vparam ->
     let (env, ty) =
       Typing_param.make_param_local_ty env variadicity_decl_ty vparam
@@ -71,9 +71,6 @@ let get_callable_variadicity ~pos env variadicity_decl_ty = function
     Typing_param.check_param_has_hint env vparam ty;
     let (env, t_variadic) = Typing.bind_param env (ty, vparam) in
     (env, Aast.FVvariadicArg t_variadic)
-  | FVellipsis p ->
-    Errors.ellipsis_strict_mode ~require:`Type_and_param_name pos;
-    (env, Aast.FVellipsis p)
   | FVnonVariadic -> (env, Aast.FVnonVariadic)
 
 let merge_hint_with_decl_hint env type_hint decl_ty =
@@ -252,7 +249,7 @@ let fun_def ctx fd :
     List.map_env env (List.zip_exn param_tys f.f_params) ~f:bind_param_and_check
   in
   let (env, t_variadic) =
-    get_callable_variadicity ~pos env variadicity_decl_ty f.f_variadic
+    get_callable_variadicity env variadicity_decl_ty f.f_variadic
   in
   let env =
     set_tyvars_variance_in_callable env return_ty param_tys t_variadic
@@ -401,7 +398,6 @@ let method_dynamically_callable
     let pos = fst m.m_name in
     let (env, t_variadic) =
       get_callable_variadicity
-        ~pos
         env
         (Some (make_dynamic @@ Pos_or_decl.of_raw_pos pos))
         m.m_variadic
@@ -580,7 +576,7 @@ let method_def ~is_disposable env cls m =
     List.map_env env (List.zip_exn param_tys m.m_params) ~f:bind_param_and_check
   in
   let (env, t_variadic) =
-    get_callable_variadicity ~pos env variadicity_decl_ty m.m_variadic
+    get_callable_variadicity env variadicity_decl_ty m.m_variadic
   in
   let env = set_tyvars_variance_in_callable env locl_ty param_tys t_variadic in
   let nb = m.m_body in

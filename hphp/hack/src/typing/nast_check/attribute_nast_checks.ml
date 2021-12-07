@@ -25,7 +25,6 @@ let has_attribute (name : string) (attrs : Nast.user_attribute list) : bool =
 let variadic_pos v : pos option =
   match v with
   | FVvariadicArg param -> Some param.param_pos
-  | FVellipsis p -> Some p
   | FVnonVariadic -> None
 
 let check_attribute_arity attrs attr_name arg_spec =

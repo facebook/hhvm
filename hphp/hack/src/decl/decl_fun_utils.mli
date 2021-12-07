@@ -24,10 +24,6 @@ val make_param_ty :
   Nast.fun_param ->
   Typing_defs.decl_ty Typing_defs_core.fun_param
 
-(** Make function parameter for the partial-mode ellipsis parameter (unnamed, and untyped) *)
-val make_ellipsis_param_ty :
-  Decl_env.env -> Pos.t -> 'a Typing_defs.ty Typing_defs_core.fun_param
-
 val ret_from_fun_kind :
   ?is_constructor:bool ->
   is_lambda:bool ->

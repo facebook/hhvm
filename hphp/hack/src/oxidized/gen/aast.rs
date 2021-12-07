@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<adaa178f800bd12b674bc78b5de23a9b>>
+// @generated SignedSource<<d697722ece0befe5fc4d3eafe53615d6>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1055,10 +1055,6 @@ pub enum FunVariadicity<Ex, En> {
     ///
     /// function foo(int ...$args): void {}
     FVvariadicArg(FunParam<Ex, En>),
-    /// Unnamed variaidic argument. Partial mode only.
-    ///
-    /// function foo(...): void {}
-    FVellipsis(Pos),
     /// Function is not variadic, takes an exact number of arguments.
     FVnonVariadic,
 }

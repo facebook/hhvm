@@ -1954,7 +1954,6 @@ end = struct
 
   let pp_variadic_fun_param ppf = function
     | Aast.FVvariadicArg fp -> Fmt.pf ppf {|%a|} pp_fun_param fp
-    | Aast.FVellipsis _ -> Fmt.string ppf "..."
     | Aast.FVnonVariadic -> ()
 
   let pp_fun_params ppf = function

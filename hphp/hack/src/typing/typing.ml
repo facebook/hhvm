@@ -4322,16 +4322,13 @@ and class_const ?(incl_tc = false) env p (cid, mid) =
   in
   make_result env p (Aast.Class_const (ce, mid)) const_ty
 
-and get_callable_variadicity ~pos env variadicity_decl_ty = function
+and get_callable_variadicity env variadicity_decl_ty = function
   | FVvariadicArg vparam ->
     let (env, ty) =
       Typing_param.make_param_local_ty env variadicity_decl_ty vparam
     in
     let (env, t_variadic) = bind_param env (ty, vparam) in
     (env, Aast.FVvariadicArg t_variadic)
-  | FVellipsis p ->
-    Errors.ellipsis_strict_mode ~require:`Type_and_param_name pos;
-    (env, Aast.FVellipsis p)
   | FVnonVariadic -> (env, Aast.FVnonVariadic)
 
 and function_dynamically_callable
@@ -4413,7 +4410,6 @@ and function_dynamically_callable
     let pos = fst f.f_name in
     let (env, t_variadic) =
       get_callable_variadicity
-        ~pos
         env
         (Some (make_dynamic @@ Pos_or_decl.of_raw_pos pos))
         f.f_variadic
@@ -4597,7 +4593,6 @@ and lambda ~is_anon ?expected p env f idl =
       match f.f_variadic with
       | FVvariadicArg { param_type_hint; _ } ->
         Option.is_some (hint_of_type_hint param_type_hint)
-      | FVellipsis _ -> false
       | _ -> true
     in
     (* If all parameters are annotated with explicit types, then type-check
@@ -4964,7 +4959,6 @@ and closure_make
     | (FVvariadicArg arg, Fvariadic variadic) ->
       make_variadic_arg env arg [variadic.fp_type.et_type]
     | (FVvariadicArg arg, Fstandard) -> make_variadic_arg env arg []
-    | (FVellipsis pos, _) -> (env, Aast.FVellipsis pos)
     | (_, _) -> (env, Aast.FVnonVariadic)
   in
   let params = ref f.f_params in
@@ -4986,32 +4980,13 @@ and closure_make
   let env = List.fold_left ~f:closure_check_param ~init:env f.f_params in
   let env =
     match el with
-    | None ->
-      (*iter2_shortest
-              Unify.unify_param_modes
-              ft.ft_params
-              supplied_params; *)
-      env
+    | None -> env
     | Some x ->
-      let var_param =
-        match f.f_variadic with
-        | FVellipsis pos ->
-          let param =
-            TUtils.default_fun_param
-              ~pos:(Pos_or_decl.of_raw_pos pos)
-              (mk (Reason.Rvar_param pos, Typing_defs.make_tany ()))
-          in
-          Some param
-        | _ -> None
-      in
       let rec iter l1 l2 =
-        match (l1, l2, var_param) with
-        | (_, [], _) -> ()
-        | ([], _, None) -> ()
-        | ([], (pkx_2, x2) :: rl2, Some def1) ->
-          param_modes ~is_variadic:true def1 x2 pkx_2;
-          iter [] rl2
-        | (x1 :: rl1, (pkx_2, x2) :: rl2, _) ->
+        match (l1, l2) with
+        | (_, []) -> ()
+        | ([], _) -> ()
+        | (x1 :: rl1, (pkx_2, x2) :: rl2) ->
           param_modes x1 x2 pkx_2;
           iter rl1 rl2
       in

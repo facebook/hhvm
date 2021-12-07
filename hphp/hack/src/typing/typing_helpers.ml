@@ -142,9 +142,7 @@ let set_tyvars_variance_in_callable env return_ty param_tys variadic_param_ty =
     | FVvariadicArg vparam ->
       let ty = vparam.param_annotation in
       set_variance env ty ~flip:true
-    | FVellipsis _
-    | FVnonVariadic ->
-      env
+    | FVnonVariadic -> env
   in
   env
 

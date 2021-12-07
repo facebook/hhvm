@@ -160,7 +160,12 @@ let make_param_ty env ~is_lambda param =
   let mode = get_param_mode param.param_callconv in
   {
     fp_pos = param_pos;
-    fp_name = Some param.param_name;
+    fp_name =
+      (* The parser uses ... for variadic parameters that lack a name *)
+      (if String.equal param.param_name "..." then
+        None
+      else
+        Some param.param_name);
     fp_type = { et_type = ty; et_enforced = Unenforced };
     fp_flags =
       make_fp_flags
@@ -172,28 +177,6 @@ let make_param_ty env ~is_lambda param =
         ~ifc_can_call:(has_can_call_attribute param.param_user_attributes)
         ~via_label:(has_via_label_attribute param.param_user_attributes)
         ~readonly:(Option.is_some param.param_readonly);
-  }
-
-(** Make FunParam for the partial-mode ellipsis parameter (unnamed, and untyped) *)
-let make_ellipsis_param_ty :
-    Decl_env.env -> Pos.t -> 'phase ty Typing_defs_core.fun_param =
- fun env pos ->
-  let pos = Decl_env.make_decl_pos env pos in
-  let r = Reason.Rwitness_from_decl pos in
-  let ty = mk (r, Typing_defs.make_tany ()) in
-  {
-    fp_pos = pos;
-    fp_name = None;
-    fp_type = { et_type = ty; et_enforced = Unenforced };
-    fp_flags =
-      make_fp_flags
-        ~mode:FPnormal
-        ~accept_disposable:false
-        ~has_default:false
-        ~ifc_external:false
-        ~ifc_can_call:false
-        ~via_label:false
-        ~readonly:false;
   }
 
 let ret_from_fun_kind

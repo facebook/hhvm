@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f6e0d2ca637a15b578169c6f4954f8eb>>
+// @generated SignedSource<<619a175fde72979d2a3e2f04b860848d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2676,21 +2676,12 @@ impl<Ex, En> FunVariadicity<Ex, En> {
     pub fn mk_fvvariadic_arg(p0: FunParam<Ex, En>) -> Self {
         FunVariadicity::FVvariadicArg(p0)
     }
-    pub fn mk_fvellipsis(p0: Pos) -> Self {
-        FunVariadicity::FVellipsis(p0)
-    }
     pub fn mk_fvnon_variadic() -> Self {
         FunVariadicity::FVnonVariadic
     }
     pub fn is_fvvariadic_arg(&self) -> bool {
         match self {
             FunVariadicity::FVvariadicArg(..) => true,
-            _ => false,
-        }
-    }
-    pub fn is_fvellipsis(&self) -> bool {
-        match self {
-            FunVariadicity::FVellipsis(..) => true,
             _ => false,
         }
     }
@@ -2706,33 +2697,15 @@ impl<Ex, En> FunVariadicity<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_fvellipsis(&self) -> Option<&Pos> {
-        match self {
-            FunVariadicity::FVellipsis(p0) => Some(p0),
-            _ => None,
-        }
-    }
     pub fn as_fvvariadic_arg_mut(&mut self) -> Option<&mut FunParam<Ex, En>> {
         match self {
             FunVariadicity::FVvariadicArg(p0) => Some(p0),
             _ => None,
         }
     }
-    pub fn as_fvellipsis_mut(&mut self) -> Option<&mut Pos> {
-        match self {
-            FunVariadicity::FVellipsis(p0) => Some(p0),
-            _ => None,
-        }
-    }
     pub fn as_fvvariadic_arg_into(self) -> Option<FunParam<Ex, En>> {
         match self {
             FunVariadicity::FVvariadicArg(p0) => Some(p0),
-            _ => None,
-        }
-    }
-    pub fn as_fvellipsis_into(self) -> Option<Pos> {
-        match self {
-            FunVariadicity::FVellipsis(p0) => Some(p0),
             _ => None,
         }
     }

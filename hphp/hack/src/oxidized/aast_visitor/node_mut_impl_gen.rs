@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<487953282df60bc535a70cd3f3bf7384>>
+// @generated SignedSource<<9b11c128a144feecf79f0fcedc8df6aa>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1191,10 +1191,6 @@ impl<P: Params> NodeMut<P> for FunVariadicity<P::Ex, P::En> {
     ) -> Result<(), P::Error> {
         match self {
             FunVariadicity::FVvariadicArg(a0) => {
-                a0.accept(c, v)?;
-                Ok(())
-            }
-            FunVariadicity::FVellipsis(a0) => {
                 a0.accept(c, v)?;
                 Ok(())
             }

@@ -1522,9 +1522,7 @@ and method_ genv m =
       let env = List.fold_left ~f:Env.add_param m.N.m_params ~init:env in
       let env =
         match m.N.m_variadic with
-        | N.FVellipsis _
-        | N.FVnonVariadic ->
-          env
+        | N.FVnonVariadic -> env
         | N.FVvariadicArg param -> Env.add_param env param
       in
       let fub_ast = block env m.N.m_body.N.fb_ast in
@@ -1567,12 +1565,10 @@ and determine_variadicity env paraml =
   match paraml with
   | [] -> (N.FVnonVariadic, [])
   | [x] ->
-    begin
-      match (x.Aast.param_is_variadic, x.Aast.param_name) with
-      | (false, _) -> (N.FVnonVariadic, paraml)
-      | (true, "...") -> (N.FVellipsis x.Aast.param_pos, [])
-      | (true, _) -> (N.FVvariadicArg (fun_param env x), [])
-    end
+    if x.Aast.param_is_variadic then
+      (N.FVvariadicArg (fun_param env x), [])
+    else
+      (N.FVnonVariadic, paraml)
   | x :: rl ->
     let (variadicity, rl) = determine_variadicity env rl in
     (variadicity, x :: rl)
@@ -1648,9 +1644,7 @@ and fun_ genv f =
       let env = List.fold_left ~f:Env.add_param paraml ~init:env in
       let env =
         match variadicity with
-        | N.FVellipsis _
-        | N.FVnonVariadic ->
-          env
+        | N.FVnonVariadic -> env
         | N.FVvariadicArg param -> Env.add_param env param
       in
       let fb_ast = block env f.Aast.f_body.Aast.fb_ast in

@@ -687,9 +687,7 @@ let fun_param : Env.t -> variance -> Nast.fun_param -> unit =
 let fun_variadicity : Env.t -> variance -> Nast.fun_variadicity -> unit =
  fun env variance variadicity ->
   match variadicity with
-  | Aast.FVnonVariadic
-  | Aast.FVellipsis _ ->
-    ()
+  | Aast.FVnonVariadic -> ()
   | Aast.FVvariadicArg param -> fun_param env variance param
 
 let fun_where_constraint : Env.t -> Aast.where_constraint_hint -> unit =

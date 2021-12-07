@@ -254,7 +254,6 @@ let method_type ~support_dynamic_type env m =
     | FVvariadicArg param ->
       assert param.param_is_variadic;
       Fvariadic (FunUtils.make_param_ty env ~is_lambda:false param)
-    | FVellipsis p -> Fvariadic (FunUtils.make_ellipsis_param_ty env p)
     | FVnonVariadic -> Fstandard
   in
   let tparams = List.map m.m_tparams ~f:(FunUtils.type_param env) in

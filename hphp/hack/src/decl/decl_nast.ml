@@ -66,7 +66,6 @@ and fun_decl_in_env (env : Decl_env.env) ~(is_lambda : bool) (f : Nast.fun_) :
     | FVvariadicArg param ->
       assert param.param_is_variadic;
       Fvariadic (FunUtils.make_param_ty env ~is_lambda param)
-    | FVellipsis p -> Fvariadic (FunUtils.make_ellipsis_param_ty env p)
     | FVnonVariadic -> Fstandard
   in
   let tparams = List.map f.f_tparams ~f:(FunUtils.type_param env) in

@@ -3936,10 +3936,10 @@ where
     fn determine_variadicity(params: &[ast::FunParam]) -> ast::FunVariadicity {
         use aast::FunVariadicity::*;
         if let Some(x) = params.last() {
-            match (x.is_variadic, &x.name) {
-                (false, _) => FVnonVariadic,
-                (true, name) if name == "..." => FVellipsis(x.pos.clone()),
-                (true, _) => FVvariadicArg(x.clone()),
+            if x.is_variadic {
+                FVvariadicArg(x.clone())
+            } else {
+                FVnonVariadic
             }
         } else {
             FVnonVariadic

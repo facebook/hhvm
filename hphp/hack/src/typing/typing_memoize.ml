@@ -165,9 +165,7 @@ let check :
     List.iter ~f:(check_param env) params;
     match variadic with
     | FVvariadicArg vparam -> check_param env vparam
-    | FVellipsis _
-    | FVnonVariadic ->
-      ()
+    | FVnonVariadic -> ()
   )
 
 let check_function : env -> Nast.fun_ -> unit =

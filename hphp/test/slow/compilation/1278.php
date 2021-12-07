@@ -1,7 +1,7 @@
 <?hh
 
 class T {
- function __toString() {
+ function __toString()[] {
  return 123;
 }
 }

@@ -40,7 +40,7 @@ function type_hint_stringishObject(StringishObject $x) {
 }
 
 class C {
-  public function __toString() {
+  public function __toString()[] {
     return 'C';
   }
 }

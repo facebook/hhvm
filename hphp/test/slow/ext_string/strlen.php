@@ -2,7 +2,7 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class StrlenTest {
-  public function __toString() {
+  public function __toString()[] {
     return 'StrlenTest__toString!';
   }
 }

@@ -9,7 +9,7 @@ class Struct1 {
     ],
   ];
   public $value = null;
-  public function __construct($value) { $this->value = $value; }
+  public function __construct($value)[] { $this->value = $value; }
   public static function withDefaultValues()[]: this {
     return new static();
   }
@@ -25,7 +25,7 @@ class Struct2 {
     ],
   ];
   public $value = null;
-  public function __construct($value) { $this->value = $value; }
+  public function __construct($value)[] { $this->value = $value; }
   public static function withDefaultValues()[]: this {
     return new static();
   }

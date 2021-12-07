@@ -1,6 +1,6 @@
 <?hh
 
-class C { function __toString() { return 'C'; } }
+class C { function __toString()[] { return 'C'; } }
 
 class D { public function __construct(public $x)[] {} }
 

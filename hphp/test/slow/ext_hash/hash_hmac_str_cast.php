@@ -1,6 +1,6 @@
 <?hh
 class Stringy {
-  public function __toString() { return "hello"; }
+  public function __toString()[] { return "hello"; }
 }
 
 <<__EntryPoint>>

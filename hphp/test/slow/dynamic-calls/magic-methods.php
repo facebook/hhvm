@@ -7,7 +7,7 @@ class A {
   public function __sleep() { echo "A::__sleep\n"; return varray[]; }
   public function __wakeup() { echo "A::__wakeup\n"; }
 
-  public function __toString() { echo "A::__toString\n"; return ""; }
+  public function __toString()[] { echo "A::__toString\n"; return ""; }
 
   public function __invoke() { echo "A::__invoke\n"; }
 

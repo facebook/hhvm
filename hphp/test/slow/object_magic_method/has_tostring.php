@@ -3,7 +3,7 @@
 class X {}
 
 class Y extends X {
-  function __toString() { return 'Y'; }
+  function __toString()[] { return 'Y'; }
 }
 
 function test(X $obj, string $s) {

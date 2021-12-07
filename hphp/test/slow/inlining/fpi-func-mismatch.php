@@ -1,11 +1,11 @@
 <?hh
 
 class A implements StringishObject{
-  function __toString() { return "I'M A"; }
+  function __toString()[] { return "I'M A"; }
 }
 
 class B implements StringishObject{
-  function __toString() { return "I'M B"; }
+  function __toString()[] { return "I'M B"; }
 }
 
 function stringish_cast($value): string {

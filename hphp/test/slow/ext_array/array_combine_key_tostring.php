@@ -1,6 +1,6 @@
 <?hh
 
-class Foo { function __toString() { return 'Hello'; } }
+class Foo { function __toString()[] { return 'Hello'; } }
 
 <<__EntryPoint>>
 function main_array_combine_key_tostring() {

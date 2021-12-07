@@ -1,7 +1,7 @@
 <?hh
 
 class X {
-  function __toString() { return __METHOD__; }
+  function __toString()[] { return __METHOD__; }
 }
 
 function test($a) {

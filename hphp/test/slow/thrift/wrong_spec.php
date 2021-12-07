@@ -8,7 +8,7 @@ class InnerStruct {
     ],
   ];
   public $value = null;
-  public function __construct($value = null) { $this->value = $value; }
+  public function __construct($value = null)[] { $this->value = $value; }
   public static function withDefaultValues()[]: this {
     return new static();
   }

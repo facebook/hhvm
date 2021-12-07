@@ -1,6 +1,6 @@
 <?hh
 
-class C { public function __toString() { return "lol"; } }
+class C { public function __toString()[] { return "lol"; } }
 
 <<__EntryPoint>>
 function test() {

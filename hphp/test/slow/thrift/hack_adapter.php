@@ -9,7 +9,7 @@ class ThriftStruct {
   ];
   public ?int $int_value = null;
 
-  public function __construct(?int $int_value = null) {
+  public function __construct(?int $int_value = null)[] {
     $this->int_value = $int_value;
   }
   public static function withDefaultValues()[]: this {
@@ -20,7 +20,7 @@ class ThriftStruct {
 class HackStruct {
   public ?string $str_value = null;
 
-  public function __construct(?string $str_value = null) {
+  public function __construct(?string $str_value = null)[] {
     $this->str_value = $str_value;
   }
 }

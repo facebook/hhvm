@@ -29,7 +29,7 @@ class NodeObject {
   public $type = null;
   public $owner = null;
 
-  public function __construct($vals=null) {
+  public function __construct($vals=null)[] {
     if (is_array($vals)) {
       if (isset($vals['fbid'])) {
         $this->fbid = $vals['fbid'];
@@ -113,8 +113,8 @@ class EdgeObject {
   public $actionSource = null;
   public $appId = null;
 
-  public function __construct($vals=null) {
-    if (is_array($vals)) {
+  public function __construct($vals=null)[] {
+    if (is_dict($vals)) {
       if (isset($vals['source'])) {
         $this->source = $vals['source'];
       }

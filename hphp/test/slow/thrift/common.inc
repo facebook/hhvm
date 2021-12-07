@@ -28,14 +28,14 @@ class TProtocolException extends Exception {
   const SIZE_LIMIT = 3;
   const BAD_VERSION = 4;
 
-  function __construct($message=null, $code=0) {
+  function __construct($message=null, $code=0)[] {
     parent::__construct($message, $code);
   }
 }
 
 class DummyProtocol {
   public $t;
-  function __construct() {
+  function __construct()[] {
     $this->t = new DummyTransport();
   }
   function getTransport() {

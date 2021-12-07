@@ -4,7 +4,7 @@
 // away if they can invoke side-effects. See task #3725260.
 
 class A {
-  public function __toString() { echo "__toString()\n"; return "heh"; }
+  public function __toString()[] { echo "__toString()\n"; return "heh"; }
 }
 
 

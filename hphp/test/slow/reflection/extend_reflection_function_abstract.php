@@ -1,7 +1,7 @@
 <?hh
 
 class MyReflectionFunction extends ReflectionFunctionAbstract {
-  public function __toString() {
+  public function __toString()[] {
     return "MyReflectionFunction";
   }
 }

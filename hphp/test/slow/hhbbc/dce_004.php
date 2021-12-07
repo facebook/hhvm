@@ -1,9 +1,9 @@
 <?hh
 
 class str {}
-class str1 extends str { public function __toString() { return "a"; } }
+class str1 extends str { public function __toString()[] { return "a"; } }
 class str2 extends str {
-  public function __toString() { throw new Exception('a'); }
+  public function __toString()[] { throw new Exception('a'); }
 }
 
 function bar(str $k) {

@@ -1,7 +1,7 @@
 <?hh
 
 class ReturnsString {
-  public function __toString() {
+  public function __toString()[] {
     return self::class;
   }
 }
@@ -13,13 +13,13 @@ class ReturnsThis {
 }
 
 class ReturnsInt {
-  public function __toString() {
+  public function __toString()[] {
     return 42;
   }
 }
 
 class ReturnsNull {
-  public function __toString() {
+  public function __toString()[] {
     return null;
   }
 }

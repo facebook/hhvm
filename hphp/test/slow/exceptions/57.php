@@ -6,7 +6,7 @@ class E extends Exception {
 }
 }
  class F extends E {
- function __toString() {
+ function __toString()[] {
  return 'F';
 }
 }

@@ -1,7 +1,7 @@
 <?hh
 
 class :script {
-  public function __toString() {
+  public function __toString()[] {
     return "Hello World\n";
   }
 }

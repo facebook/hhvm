@@ -11,7 +11,7 @@ class foo implements Throwable {
   function getTrace() {}
   function getTraceAsString() {}
   function getPrevious() {}
-  function __toString() {}
+  function __toString()[] {}
 }
 <<__EntryPoint>> function main(): void {
 try {

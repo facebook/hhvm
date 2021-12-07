@@ -1,6 +1,6 @@
 <?hh
 
-class StringableObj { function __toString() { return 'Hello'; } }
+class StringableObj { function __toString()[] { return 'Hello'; } }
 
 <<__EntryPoint>>
 function main() {

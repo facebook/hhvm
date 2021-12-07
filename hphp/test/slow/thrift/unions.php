@@ -23,7 +23,7 @@ class TType {
 }
 class DummyProtocol {
   public $t;
-  function __construct() {
+  function __construct()[] {
     $this->t = new DummyTransport();
   }
   function getTransport() {
@@ -73,7 +73,7 @@ class ComplexUnion {
   public ?string $stringValue;
   protected ComplexUnionEnum $_type = ComplexUnionEnum::_EMPTY_;
 
-  public function __construct(?int $intValue = null, ?string $stringValue = null) {
+  public function __construct(?int $intValue = null, ?string $stringValue = null)[] {
     $this->_type = ComplexUnionEnum::_EMPTY_;
     if ($intValue !== null) {
       $this->intValue = $intValue;

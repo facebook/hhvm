@@ -1,7 +1,7 @@
 <?hh
 
 class :foo {
-  public function __toString() {
+  public function __toString()[] {
     return "foo";
   }
 }

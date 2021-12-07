@@ -9,19 +9,19 @@ function err($code, $msg) {
 }
 
 class CExplicit implements StringishObject{
-  public function __toString() {
+  public function __toString()[] {
     return __CLASS__;
   }
 }
 
 class CImplicit {
-  public function __toString() {
+  public function __toString()[] {
     return __CLASS__;
   }
 }
 
 trait TStringishObject {
-  public function __toString() { return __TRAIT__; }
+  public function __toString()[] { return __TRAIT__; }
 }
 
 interface IStringishObject {

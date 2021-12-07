@@ -1,7 +1,7 @@
 <?hh
 
 class C {
-  public function __toString() {
+  public function __toString()[] {
     echo "__toString called\n";
     return "string";
   }

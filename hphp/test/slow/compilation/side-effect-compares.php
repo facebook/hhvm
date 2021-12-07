@@ -5,7 +5,7 @@
 // side-effects.
 
 class Cls1 {
-  public function __toString() {
+  public function __toString()[] {
     echo "Cls1::__toString()\n";
     return "FOO";
   }

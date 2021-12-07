@@ -1,6 +1,6 @@
 <?hh
 class C {
-  public function __toString() {
+  public function __toString()[] {
     return 123;
   }
 }

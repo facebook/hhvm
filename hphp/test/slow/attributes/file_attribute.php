@@ -4,7 +4,7 @@
 <<file: MyAttribute('abc123')>>
 
 class MyAttribute implements HH\FileAttribute {
-  public function __construct(public string $s) { }
+  public function __construct(public string $s)[] { }
 }
 
 function reflect(): void {

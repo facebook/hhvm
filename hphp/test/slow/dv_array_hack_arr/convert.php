@@ -3,7 +3,7 @@
 
 class IterableObj implements Iterator {
   private int $position = 0;
-  public function __construct() { $this->position = 0; }
+  public function __construct()[] { $this->position = 0; }
   public function rewind() { $this->position = 0; }
   public function current() {
     if ($this->position == 0) return "abc";
@@ -21,7 +21,7 @@ class IterableObj implements Iterator {
 
 class ThrowIterableObj implements Iterator {
   private int $position = 0;
-  public function __construct() { $this->position = 0; }
+  public function __construct()[] { $this->position = 0; }
   public function rewind() { $this->position = 0; }
   public function current() {
     if ($this->position == 0) return "abc";
@@ -41,7 +41,7 @@ class ThrowIterableObj implements Iterator {
 }
 
 class AggregateObj implements IteratorAggregate {
-  public function getIterator() {
+  public function getIterator()[] {
     return new IterableObj();
   }
 }

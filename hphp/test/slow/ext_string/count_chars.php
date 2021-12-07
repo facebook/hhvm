@@ -12,7 +12,7 @@ function charsAsHexSeq($s) {
 }
 
 class CountCharsTest {
-  function __toString() {
+  function __toString()[] {
     return 'hhvm';
   }
 }

@@ -10,19 +10,19 @@ function err($code, $msg) {
 
 <<__MockClass>> // to bypass sealing
 class CExplicit implements Stringish {
-  public function __toString() {
+  public function __toString()[] {
     return __CLASS__;
   }
 }
 
 class CImplicit {
-  public function __toString() {
+  public function __toString()[] {
     return __CLASS__;
   }
 }
 
 trait TStringish {
-  public function __toString() { return __TRAIT__; }
+  public function __toString()[] { return __TRAIT__; }
 }
 
 interface IStringish {

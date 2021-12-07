@@ -80,7 +80,7 @@ class OuterStruct implements IThriftStruct{
     \MyFieldAdapter::assign<?int>($this->value as nonnull, $value);
   }
 
-  public function __construct() {
+  public function __construct()[] {
     $this->value = \MyFieldAdapter::fromThrift<?int>(null, 1, $this);
   }
 
@@ -120,7 +120,7 @@ class OuterStructNoAdapter {
   }
 }
 
-function getStruct() {
+function getStruct()[write_props] {
   $v = new OuterStruct();
   $v->set_value(42);
   return $v;

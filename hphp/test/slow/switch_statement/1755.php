@@ -1,7 +1,7 @@
 <?hh
 
 class Evil {
-  public function __toString() { return "Evil"; }
+  public function __toString()[] { return "Evil"; }
 }
 function f_1($x) {
   switch (HH\Lib\Legacy_FIXME\string_cast_for_switch($x, "123", "0", "0", dict[

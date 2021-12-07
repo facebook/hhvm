@@ -65,7 +65,7 @@ class TestStruct {
     public darray<string, darray<string, string>> $darray = darray[],
     public darray<string, bool> $darraySet = darray[],
     public varray<TestStruct> $structVarray = varray[],
-  ) {}
+  )[] {}
   public static function withDefaultValues()[]: this {
     return new static();
   }

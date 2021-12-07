@@ -10,10 +10,13 @@ mod utils;
 use ::anyhow::Result;
 use structopt::StructOpt;
 
-#[derive(StructOpt, Clone, Debug)]
+#[derive(StructOpt, Debug)]
 #[structopt(no_version)] // don't consult CARGO_PKG_VERSION (Buck doesn't set it)
 pub enum Opts {
+    /// Compile one Hack source file or a list of files to HHAS
     Compile(compile::Opts),
+
+    /// Parse many files whose filenames are read from stdin
     Parse(parse::Opts),
 }
 

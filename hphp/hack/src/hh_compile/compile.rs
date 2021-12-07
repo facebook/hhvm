@@ -51,6 +51,10 @@ pub struct Opts {
     #[structopt(long)]
     dump_config: bool,
 
+    /// Dump symbol ref sections of HHAS
+    #[structopt(long)]
+    dump_symbol_refs: bool,
+
     /// The level of verbosity (can be set multiple times)
     #[structopt(long = "verbose", parse(from_occurrences))]
     verbosity: isize,
@@ -147,6 +151,10 @@ fn process_single_file_impl(
     flags.set(
         hhbc_by_ref_compile::EnvFlags::DISABLE_TOPLEVEL_ELABORATION,
         opts.disable_toplevel_elaboration,
+    );
+    flags.set(
+        hhbc_by_ref_compile::EnvFlags::DUMP_SYMBOL_REFS,
+        opts.dump_symbol_refs,
     );
     let env: hhbc_by_ref_compile::Env<String> = hhbc_by_ref_compile::Env {
         filepath: rel_path,

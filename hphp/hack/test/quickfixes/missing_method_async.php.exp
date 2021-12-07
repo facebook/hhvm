@@ -1,0 +1,12 @@
+<?hh
+
+interface IFoo {
+  public function genBar(): Awaitable<int>;
+}
+
+class Foo implements IFoo {
+  public async function genBar(): Awaitable<int> {}
+
+
+  public function otherMethod(): void {}
+}

@@ -118,6 +118,14 @@ let param_source (param : decl_ty fun_param) ~(variadic : bool) : string =
       "")
     name
 
+(* Is this type of the form Awaitable<something> ? *)
+let is_awaitable (ty : decl_ty) : bool =
+  match get_node ty with
+  | Tapply ((_, name), _)
+    when String.equal name Naming_special_names.Classes.cAwaitable ->
+    true
+  | _ -> false
+
 let params_source (arity : decl_ty fun_arity) (params : decl_ty fun_params) :
     string =
   let explicit_params = List.map params ~f:(param_source ~variadic:false) in
@@ -130,16 +138,22 @@ let params_source (arity : decl_ty fun_arity) (params : decl_ty fun_params) :
 
 let of_method (name : string) (meth : class_elt) : string =
   let (_, ty_) = deref (Lazy.force meth.ce_type) in
-  let (params, return_ty) =
+  let (params, return_ty, async_modifier) =
     match ty_ with
     | Tfun ft ->
-      (params_source ft.ft_arity ft.ft_params, of_decl_ty ft.ft_ret.et_type)
-    | _ -> ("", "mixed")
+      ( params_source ft.ft_arity ft.ft_params,
+        of_decl_ty ft.ft_ret.et_type,
+        if is_awaitable ft.ft_ret.et_type then
+          "async "
+        else
+          "" )
+    | _ -> ("", "mixed", "")
   in
 
   Printf.sprintf
-    "\n  %s function %s(%s): %s {}\n\n"
+    "\n  %s %sfunction %s(%s): %s {}\n\n"
     (Typing_defs.string_of_visibility meth.ce_visibility)
+    async_modifier
     name
     params
     return_ty

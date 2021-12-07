@@ -763,15 +763,13 @@ struct AutoloadDBImpl final : public AutoloadDB {
       TypeKind kind,
       int flags) override {
     assertx(path.is_relative());
-    {
-      auto query = txn.query(m_typeStmts.m_insertDetails);
-      query.bindString("@name", type);
-      query.bindString("@path", path.native());
-      query.bindString("@kind_of", toString(kind));
-      query.bindInt("@flags", flags);
-      XLOGF(DBG9, "Running {}", query.sql());
-      query.step();
-    }
+    auto query = txn.query(m_typeStmts.m_insertDetails);
+    query.bindString("@name", type);
+    query.bindString("@path", path.native());
+    query.bindString("@kind_of", toString(kind));
+    query.bindInt("@flags", flags);
+    XLOGF(DBG9, "Running {}", query.sql());
+    query.step();
   }
 
   std::vector<folly::fs::path>

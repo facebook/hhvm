@@ -32,7 +32,7 @@ function count(readonly mixed $x, int $mode = COUNT_NORMAL)[]: int; // count tak
 <<__PHPStdLib>>
 function dechex(int $number)[]: string;
 <<__PHPStdLib>>
-function implode(string $glue, $pieces)[]: string; // could be Container<Stringish>
+function implode(string $glue, readonly $pieces)[]: string; // could be Container<Stringish>
 <<__PHPStdLib>>
 function explode(string $delimiter, string $str, int $limit = 0x7FFFFFFF)[]: varray<string>; // : array<string> & false for '' delimiter
 }

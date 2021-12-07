@@ -174,7 +174,14 @@ let merge_saved_state_futures
         || genv.local_config.SLC.force_shallow_decl_fanout
       in
       let naming_table_fallback_path =
-        get_naming_table_fallback_path genv downloaded_naming_table_path
+        if
+          genv.local_config.SLC.use_hack_64_naming_table
+          && Sys.file_exists (Path.to_string naming_sqlite_table_path)
+        then (
+          Hh_logger.log "Using sqlite naming table from hack/64 saved state";
+          Some (Path.to_string naming_sqlite_table_path)
+        ) else
+          get_naming_table_fallback_path genv downloaded_naming_table_path
       in
       let (old_naming_table, old_errors) =
         SaveStateService.load_saved_state
@@ -205,16 +212,6 @@ let merge_saved_state_futures
         let dirty_naming_files = Relative_path.Set.of_list dirty_naming_files in
         let dirty_master_files = dirty_master_files in
         let dirty_local_files = dirty_local_files in
-        let naming_table_fallback_path =
-          if
-            genv.local_config.SLC.use_hack_64_naming_table
-            && Sys.file_exists (Path.to_string naming_sqlite_table_path)
-          then (
-            Hh_logger.log "Using sqlite naming table from hack/64 saved state";
-            Some (Path.to_string naming_sqlite_table_path)
-          ) else
-            naming_table_fallback_path
-        in
         Ok
           {
             naming_table_fn = Path.to_string deptable_naming_table_blob_path;

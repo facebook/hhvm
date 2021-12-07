@@ -405,7 +405,6 @@ struct SimpleParser {
   SimpleParser(TypedValue* buffer, JSONContainerType container_type,
                bool is_tsimplejson)
     : top(buffer)
-    , array_depth(-kMaxArrayDepth) /* Start negative to simplify check. */
     , container_type(container_type)
     , is_tsimplejson(is_tsimplejson)
   { }
@@ -417,9 +416,31 @@ struct SimpleParser {
     for (;;) {
       char ch = *p++;
       switch (ch) {
-        case '{': return parseMixed(p);
-        case '[': return parsePacked(p);
-        case '\"': return parseString(p);
+        case '{': {
+          if (matchSeparator(&p, '}')) {
+            if (!pushMixed(top)) return {false, p};  // push empty.
+            break;
+          }
+          if (!beginMixed()) return {false, p};
+          ParseResult result = parseMixedKey(p);
+          p = result.p;
+          if (!result.ok) return result;
+          continue;
+        }
+        case '[': {
+          if (matchSeparator(&p, ']')) {
+            pushPacked(top);
+            break;
+          }
+          if (!beginPacked()) return {false, p};
+          continue;
+        }
+        case '\"': {
+          ParseResult result = parseString(p);
+          p = result.p;
+          if (!result.ok) return result;
+          break;
+        }
         case '-':
         case '0':
         case '1':
@@ -430,18 +451,62 @@ struct SimpleParser {
         case '6':
         case '7':
         case '8':
-        case '9': return parseNumber(p, ch);
-        case 't': return parseRue(p);
-        case 'f': return parseAlse(p);
-        case 'n': return parseUll(p);
+        case '9': {
+          ParseResult result = parseNumber(p, ch);
+          p = result.p;
+          if (!result.ok) return result;
+          break;
+        }
+        case 't': {
+          ParseResult result = parseRue(p);
+          p = result.p;
+          if (!result.ok) return result;
+          break;
+        }
+        case 'f': {
+          ParseResult result = parseAlse(p);
+          p = result.p;
+          if (!result.ok) return result;
+          break;
+        }
+        case 'n': {
+          ParseResult result = parseUll(p);
+          p = result.p;
+          if (!result.ok) return result;
+          break;
+        }
         case ' ':
         case '\t':
         case '\n':
         case '\r':
           p = skipSpace(p);
           continue;
+        default:
+          return {false, p};
       }
-      return {false, p};
+
+      // We parsed a JSON element at this point, add it to the surrounding list,
+      // dictionary or return.
+      for (;;) {
+        if (stack_top == 0) {
+          return {true, p};
+        } else if (stack[stack_top - 1].is_packed) {
+          if (matchSeparator(&p, ',')) break;
+          if (!matchSeparator(&p, ']')) return {false, p};
+          finishPacked();
+          continue;
+        } else {
+          if (matchSeparator(&p, ',')) {
+            ParseResult result = parseMixedKey(p);
+            p = result.p;
+            if (!result.ok) return {false, p};
+            break;
+          }
+          if (!matchSeparator(&p, '}')) return {false, p};
+          if (!finishMixed()) return {false, p};
+          continue;
+        }
+      }
     }
   }
 
@@ -546,6 +611,7 @@ struct SimpleParser {
   }
 
   ParseResult parseMixedKey(const char* p) {
+    if (!matchSeparator(&p, '\"')) return {false, p};
     ParseStringResult result = parseRawString(p);
     p = result.p;
     int len = result.len;
@@ -564,21 +630,11 @@ struct SimpleParser {
     } else {
       pushStringData(StringData::Make(start, len, CopyString));
     }
+    if (!matchSeparator(&p, ':')) return {false, p};
     return {true, p};
   }
 
-  ParseResult parsePacked(const char* p) {
-    auto const fp = top;
-    if (!matchSeparator(&p, ']')) {
-      if (++array_depth >= 0) return {false, p};
-      do {
-        ParseResult result = parseValue(p);
-        p = result.p;
-        if (!result.ok) return {false, p};
-      } while (matchSeparator(&p, ','));
-      --array_depth;
-      if (!matchSeparator(&p, ']')) return {false, p};  // Trailing ',' not supported.
-    }
+  void pushPacked(TypedValue* fp) {
     auto arr = [&] {
       if (container_type == JSONContainerType::HACK_ARRAYS) {
         return top == fp
@@ -598,27 +654,21 @@ struct SimpleParser {
     top = fp;
     pushArrayData(arr);
     check_non_safepoint_surprise();
-    return {true, p};
   }
 
-  ParseResult parseMixed(const char* p) {
-    auto const fp = top;
-    if (!matchSeparator(&p, '}')) {
-      if (++array_depth >= 0) return {false, p};
-      do {
-        if (!matchSeparator(&p, '\"')) return {false, p};  // Only support string keys.
-        ParseResult result = parseMixedKey(p);
-        p = result.p;
-        if (!result.ok) return {false, p};
-        // TODO(14491721): Precompute and save hash to avoid deref in MakeMixed.
-        if (!matchSeparator(&p, ':')) return {false, p};
-        result = parseValue(p);
-        p = result.p;
-        if (!result.ok) return {false, p};
-      } while (matchSeparator(&p, ','));
-      --array_depth;
-      if (!matchSeparator(&p, '}')) return {false, p};  // Trailing ',' not supported.
-    }
+  bool beginPacked() {
+    if (stack_top >= kMaxArrayDepth) return false;
+    stack[stack_top++] = StackEntry{top, true};
+    return true;
+  }
+
+  void finishPacked() {
+    assertx(stack_top > 0 && stack[stack_top - 1].is_packed);
+    TypedValue* fp = stack[--stack_top].values;
+    pushPacked(fp);
+  }
+
+  bool pushMixed(TypedValue* fp) {
     auto arr = [&] {
       if (container_type == JSONContainerType::HACK_ARRAYS) {
         return top == fp
@@ -632,11 +682,24 @@ struct SimpleParser {
         : VanillaDict::MakeDict((top - fp) >> 1, fp)->asArrayData();
     }();
     // VanillaDict::MakeMixed can return nullptr if there are duplicate keys
-    if (!arr) return {false, p};
+    if (!arr) return false;
     top = fp;
     pushArrayData(arr);
     check_non_safepoint_surprise();
-    return {true, p};
+    return true;
+  }
+
+  bool beginMixed() {
+    // Register on stack.
+    if (stack_top >= kMaxArrayDepth) return false;
+    stack[stack_top++] = StackEntry{top, false};
+    return true;
+  }
+
+  bool finishMixed() {
+    assertx(stack_top > 0 && !stack[stack_top - 1].is_packed);
+    TypedValue* fp = stack[--stack_top].values;
+    return pushMixed(fp);
   }
 
   /*
@@ -723,9 +786,15 @@ struct SimpleParser {
   }
 
   TypedValue* top;
-  int array_depth;
   JSONContainerType container_type;
   bool is_tsimplejson;
+
+  int stack_top = 0;
+  struct StackEntry {
+    TypedValue *values;
+    bool is_packed;
+  };
+  StackEntry stack[kMaxArrayDepth];
 };
 
 /*

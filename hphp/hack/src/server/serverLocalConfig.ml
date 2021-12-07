@@ -405,52 +405,46 @@ type quantile = {
 
 type t = {
   min_log_level: Hh_logger.Level.t;
-  (* Indicates whether we attempt to fix the credentials if they're broken *)
   attempt_fix_credentials: bool;
+      (** Indicates whether we attempt to fix the credentials if they're broken *)
   log_categories: string list;
-  (* the list of experiments from the experiments config *)
   experiments: string list;
-  (* a free-form diagnostic string *)
-  experiments_config_meta: string;
+      (** the list of experiments from the experiments config *)
+  experiments_config_meta: string;  (** a free-form diagnostic string *)
   use_saved_state: bool;
-  (* should we attempt to load saved-state? (subject to further options) *)
+      (** should we attempt to load saved-state? (subject to further options) *)
   require_saved_state: bool;
-  (* if attempting saved-state, should we fail upon failure? *)
+      (** if attempting saved-state, should we fail upon failure? *)
   load_state_natively: bool;
-  (* make hh_server query and download saved state. *)
-  load_state_natively_64bit: bool;
-  (* TODO(hverr): Clean up 32-bit *)
+      (** make hh_server query and download saved state. *)
+  load_state_natively_64bit: bool;  (** TODO(hverr): Clean up 32-bit *)
   no_load_64bit: bool;
-  (* if doing a full init, do it in 64-bit mode
-   * TODO(hverr): Clean up 32-bit *)
-  load_state_natively_download_timeout: int;
-  (* in seconds *)
-  load_state_natively_dirty_files_timeout: int;
-  (* in seconds *)
+      (** if doing a full init, do it in 64-bit mode
+      TODO(hverr): Clean up 32-bit *)
+  load_state_natively_download_timeout: int;  (** in seconds *)
+  load_state_natively_dirty_files_timeout: int;  (** in seconds *)
   type_decl_bucket_size: int;
   extend_fast_bucket_size: int;
   enable_on_nfs: bool;
   enable_fuzzy_search: bool;
   lazy_parse: bool;
   lazy_init: bool;
-  (* Monitor: Limit the number of clients that can sit in purgatory waiting
-   * for a server to be started because we don't want this to grow
-   * unbounded. *)
   max_purgatory_clients: int;
+      (** Monitor: Limit the number of clients that can sit in purgatory waiting
+      for a server to be started because we don't want this to grow unbounded. *)
   search_chunk_size: int;
   io_priority: int;
   cpu_priority: int;
   can_skip_deptable: bool;
-  (* TODO(hverr): Remove can_skip_deptable, 32-bit clean up *)
+      (** TODO(hverr): Remove can_skip_deptable, 32-bit clean up *)
   shm_dirs: string list;
   shm_use_sharded_hashtbl: bool;
   shm_enable_eviction: bool;
   shm_max_evictable_bytes: int;
   max_workers: int option;
-  (* max_bucket_size is the default bucket size for ALL users of MultiWorker unless they provide a specific override max_size *)
   max_bucket_size: int;
-  (* See HhMonitorInformant. *)
-  use_dummy_informant: bool;
+      (** max_bucket_size is the default bucket size for ALL users of MultiWorker unless they provide a specific override max_size *)
+  use_dummy_informant: bool;  (** See HhMonitorInformant. *)
   informant_min_distance_restart: int;
   use_full_fidelity_parser: bool;
   interrupt_on_watchman: bool;
@@ -458,25 +452,21 @@ type t = {
   trace_parsing: bool;
   prechecked_files: bool;
   enable_type_check_filter_files: bool;
+      (** Let the user configure which files to type check and
+      which files to ignore. This flag is not expected to be
+      rolled out broadly, rather it is meant to be used by
+      power users only. *)
   re_worker: bool;
-  (* whether clientLsp should use serverless-ide *)
-  ide_serverless: bool;
-  (* whether clientLsp should use ranked autocomplete *)
+  ide_serverless: bool;  (** whether clientLsp should use serverless-ide *)
   ide_ranked_autocomplete: bool;
-  (* whether clientLsp should use ffp-autocomplete *)
+      (** whether clientLsp should use ranked autocomplete *)
   ide_ffp_autocomplete: bool;
-  ide_max_num_decls: int;
-  (* tuning of clientIdeDaemon local cache *)
-  ide_max_num_shallow_decls: int;
-  (* tuning of clientIdeDaemon local cache *)
-  ide_max_num_linearizations: int;
-  (* tuning of clientIdeDaemon local cache *)
-  (* like [symbolindex_search_provider] but for IDE *)
+      (** whether clientLsp should use ffp-autocomplete *)
+  ide_max_num_decls: int;  (** tuning of clientIdeDaemon local cache *)
+  ide_max_num_shallow_decls: int;  (** tuning of clientIdeDaemon local cache *)
+  ide_max_num_linearizations: int;  (** tuning of clientIdeDaemon local cache *)
   ide_symbolindex_search_provider: string;
-  (* Let the user configure which files to type check and
-   * which files to ignore. This flag is not expected to be
-   * rolled out broadly, rather it is meant to be used by
-   * power users only. *)
+      (** like [symbolindex_search_provider] but for IDE *)
   predeclare_ide: bool;
   max_typechecker_worker_memory_mb: int option;
   longlived_workers: bool;
@@ -485,100 +475,98 @@ type t = {
   hg_aware_parsing_restart_threshold: int;
   hg_aware_redecl_restart_threshold: int;
   hg_aware_recheck_restart_threshold: int;
-  (* forces Hulk *)
-  force_remote_type_check: bool;
+  force_remote_type_check: bool;  (** forces Hulk *)
   ide_parser_cache: bool;
-  (* When enabled, save hot class declarations (for now, specified in a special
-     file in the repository) when generating a saved state. *)
   store_decls_in_saved_state: bool;
-  (* When enabled, load class declarations stored in the saved state, if any, on
-     server init. *)
+      (** When enabled, save hot class declarations (for now, specified in a special
+      file in the repository) when generating a saved state. *)
   load_decls_from_saved_state: bool;
-  (* Size of Gc.major_slice to be performed when server is idle. 0 to disable *)
+      (** When enabled, load class declarations stored in the saved state, if any, on
+      server init. *)
   idle_gc_slice: int;
-  (* Look up class members lazily from shallow declarations instead of eagerly
-     computing folded declarations representing the entire class type. *)
+      (** Size of Gc.major_slice to be performed when server is idle. 0 to disable *)
   shallow_class_decl: bool;
-  (* Use fanout algorithm based solely on shallow decl comparison. This is the
-     default in shallow decl mode. Use this option if using folded decls. *)
+      (** Look up class members lazily from shallow declarations instead of eagerly
+      computing folded declarations representing the entire class type. *)
   force_shallow_decl_fanout: bool;
-  (* Always load hot shallow decls from saved state. *)
+      (** Use fanout algorithm based solely on shallow decl comparison. This is the
+      default in shallow decl mode. Use this option if using folded decls. *)
   force_load_hot_shallow_decls: bool;
-  (* Option to fetch old decls from remote decl store *)
+      (** Always load hot shallow decls from saved state. *)
   fetch_remote_old_decls: bool;
-  (* Load naming table from hack/64 saved state. *)
+      (** Option to fetch old decls from remote decl store *)
   use_hack_64_naming_table: bool;
-  (* Skip checks on hierarchy e.g. overrides, require extend, etc.
-     Set to true only for debugging purposes! *)
+      (** Load naming table from hack/64 saved state. *)
   skip_hierarchy_checks: bool;
-  (* If false, only the type check delegate's logic will be used.
-     If the delegate fails to type check, the typing check service as a whole
-     will fail. *)
+      (** Skip checks on hierarchy e.g. overrides, require extend, etc.
+      Set to true only for debugging purposes! *)
   num_local_workers: int option;
-  (* If the number of files to type check is fewer than this value, the files
-     will be type checked sequentially (in the master process). Otherwise,
-     the files will be type checked in parallel (in MultiWorker workers). *)
+      (** If None, only the type check delegate's logic will be used.
+      If the delegate fails to type check, the typing check service as a whole
+      will fail. *)
   parallel_type_checking_threshold: int;
-  (* If set, defers class declarations after N lazy declarations; if not set,
-     always lazily declares classes not already in cache. *)
+      (** If the number of files to type check is fewer than this value, the files
+      will be type checked sequentially (in the master process). Otherwise,
+      the files will be type checked in parallel (in MultiWorker workers). *)
   defer_class_declaration_threshold: int option;
-  (* If set, defers class declaration if worker memory exceeds threshold. *)
+      (** If set, defers class declarations after N lazy declarations; if not set,
+      always lazily declares classes not already in cache. *)
   defer_class_memory_mb_threshold: int option;
-  (* The whether to use the hook that prefetches files on an Eden checkout *)
+      (** If set, defers class declaration if worker memory exceeds threshold. *)
   prefetch_deferred_files: bool;
-  (* Settings controlling how and whether we capture the recheck environment *)
+      (** The whether to use the hook that prefetches files on an Eden checkout *)
   recheck_capture: RecheckCapture.t;
-  (* The version of the Remote Execution CLI tool to use *)
+      (** Settings controlling how and whether we capture the recheck environment *)
   recli_version: string;
-  (* The unique identifier of a particular remote typechecking run *)
+      (** The version of the Remote Execution CLI tool to use *)
   remote_nonce: Int64.t;
-  (* Remote type check settings that can be changed, e.g., by GK *)
+      (** The unique identifier of a particular remote typechecking run *)
   remote_type_check: RemoteTypeCheck.t;
-  (* If set, uses the key to fetch type checking jobs *)
+      (** Remote type check settings that can be changed, e.g., by GK *)
   remote_worker_key: string option;
-  (* If set, uses the check ID when logging events in the context of remove init/work *)
+      (** If set, uses the key to fetch type checking jobs *)
   remote_check_id: string option;
-  (* Indicates whether the remote version specifier is required for remote type check from non-prod server *)
+      (** If set, uses the check ID when logging events in the context of remove init/work *)
   remote_version_specifier_required: bool;
-  (* The version of the package the remote worker is to install *)
+      (** Indicates whether the remote version specifier is required for remote type check from non-prod server *)
   remote_version_specifier: string option;
-  (* Name of the transport channel used by remote type checking. TODO: move into remote_type_check. *)
+      (** The version of the package the remote worker is to install *)
   remote_transport_channel: string option;
-  (* Enables the reverse naming table to fall back to SQLite for queries. *)
+      (** Name of the transport channel used by remote type checking. TODO: move into remote_type_check. *)
   naming_sqlite_path: string option;
+      (** Enables the reverse naming table to fall back to SQLite for queries. *)
   enable_naming_table_fallback: bool;
-  (* Selects a search provider for autocomplete and symbol search; see also [ide_symbolindex_search_provider] *)
   symbolindex_search_provider: string;
+      (** Selects a search provider for autocomplete and symbol search; see also [ide_symbolindex_search_provider] *)
   symbolindex_quiet: bool;
   symbolindex_file: string option;
-  (* Allows hh_server to invalidate units in hhvm based on local changes *)
   tico_invalidate_files: bool;
-  (* Use finer grain hh_server dependencies *)
-  tico_invalidate_smart: bool;
-  (* Enable use of the direct decl parser for parsing type signatures. *)
+      (** Allows hh_server to invalidate units in hhvm based on local changes *)
+  tico_invalidate_smart: bool;  (** Use finer grain hh_server dependencies *)
   use_direct_decl_parser: bool;
+      (** Enable use of the direct decl parser for parsing type signatures. *)
   profile_log: bool;  (** Log per-file performance information. *)
-  (* If --profile-log, we'll record telemetry on typechecks that took longer than the threshold (in seconds). In case of profile_type_check_twice we judge by the second type check. *)
   profile_type_check_duration_threshold: float;
-  (* If --profile-log, we'll record telemetry on any file which allocated more than this many mb on the ocaml heap. In case of profile_type_check_twice we judge by the second type check. *)
+      (** If --profile-log, we'll record telemetry on typechecks that took longer than the threshold (in seconds). In case of profile_type_check_twice we judge by the second type check. *)
   profile_type_check_memory_threshold_mb: int;
-  (* The flag "--config profile_type_check_twice=true" causes each file to be typechecked twice in succession. If --profile-log then both times are logged. *)
+      (** If --profile-log, we'll record telemetry on any file which allocated more than this many mb on the ocaml heap. In case of profile_type_check_twice we judge by the second type check. *)
   profile_type_check_twice: bool;
-  (* The flag "--config profile_decling=..." says what kind of instrumentation we want for each decl *)
+      (** The flag "--config profile_type_check_twice=true" causes each file to be typechecked twice in succession. If --profile-log then both times are logged. *)
   profile_decling: Typing_service_types.profile_decling;
-  (* If --profile-log, we can use "--config profile_owner=<str>" to send an arbitrary "owner" along with the telemetry *)
+      (** The flag "--config profile_decling=..." says what kind of instrumentation we want for each decl *)
   profile_owner: string option;
-  (* If --profile-log, we can use "--config profile_desc=<str>" to send an arbitrary "desc" along with telemetry *)
+      (** If --profile-log, we can use "--config profile_owner=<str>" to send an arbitrary "owner" along with the telemetry *)
   profile_desc: string;
-  (* Allows the IDE to show the 'find all implementations' button *)
+      (** If --profile-log, we can use "--config profile_desc=<str>" to send an arbitrary "desc" along with telemetry *)
   go_to_implementation: bool;
-  (* Allows unstabled features to be enabled within a file via the '__EnableUnstableFeatures' attribute *)
+      (** Allows the IDE to show the 'find all implementations' button *)
   allow_unstable_features: bool;
+      (** Allows unstabled features to be enabled within a file via the '__EnableUnstableFeatures' attribute *)
   stream_errors: bool;
       (** Whether to send errors to client as soon as they are discovered. *)
   watchman: Watchman.t;
-  (* If enabled, saves naming table into a temp folder and uploads it to the remote typechecker *)
   save_and_upload_naming_table: bool;
+      (** If enabled, saves naming table into a temp folder and uploads it to the remote typechecker *)
   log_from_client_when_slow_monitor_connections: bool;
       (**  Alerts hh users what processes are using hh_server when hh_client is slow to connect. *)
   naming_sqlite_in_hack_64: bool;
@@ -587,8 +575,8 @@ type t = {
       (** Allows to typecheck only a certain quantile of the workload. *)
   enable_disk_heap: bool;
       (** After reading the contents of a file from the filesystem, store them
-          in shared memory. True by default. Disabling this saves memory at the
-          risk of increasing the rate of consistency errors. *)
+      in shared memory. True by default. Disabling this saves memory at the
+      risk of increasing the rate of consistency errors. *)
   rollout_group: string option;
       (** A string from hh.conf, written to HackEvengLogger telemetry. Before it got
        into here, [t], it was first used as a lookup in ServerLocalConfigKnobs.

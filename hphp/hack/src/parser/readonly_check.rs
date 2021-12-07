@@ -282,8 +282,7 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
         Binop(b) => {
             let (bop, e1, e2) = &**b;
             match bop {
-                // Make more strict in typechecker first, then HHVM
-                ast_defs::Bop::QuestionQuestion if context.is_typechecker => {
+                ast_defs::Bop::QuestionQuestion => {
                     match (rty_expr(context, e1), rty_expr(context, e2)) {
                         (Rty::Readonly, _) | (_, Rty::Readonly) => Rty::Readonly,
                         (Rty::Mutable, Rty::Mutable) => Rty::Mutable,

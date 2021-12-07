@@ -10,7 +10,7 @@ namespace {
  * @return void -
  */
 <<__Native>>
-function curl_close(resource $ch): ?bool;
+function curl_close(resource $ch)[controlled]: ?bool;
 
 /**
  * Copy a cURL handle along with all of its preferences
@@ -42,7 +42,7 @@ function curl_errno(resource $ch): mixed;
  *   no error occurred.
  */
 <<__Native>>
-function curl_error(resource $ch): mixed;
+function curl_error(resource $ch)[]: mixed;
 
 /**
  * Returns a string description of a cURL error code
@@ -129,7 +129,7 @@ function curl_getinfo(resource $ch,
  * @return resource - Returns a cURL handle on success, FALSE on errors.
  */
 <<__Native>>
-function curl_init(?string $url = null): mixed;
+function curl_init(?string $url = null)[controlled]: mixed;
 
 /**
  * Add a normal cURL handle to a cURL multi handle
@@ -318,7 +318,7 @@ function curl_setopt_array(resource $ch,
 <<__Native>>
 function curl_setopt(resource $ch,
                      int $option,
-                     mixed $value): bool;
+                     mixed $value)[write_props]: bool;
 
 /**
  * Gets cURL version information

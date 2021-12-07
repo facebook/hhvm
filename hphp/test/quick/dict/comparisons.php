@@ -75,13 +75,13 @@ class ToString {
   function __construct($str) {
     $this->str = $str;
   }
-  function __toString() {
+  function __toString()[] {
     return $this->str;
   }
 }
 
 class Thrower {
-  function __toString() {
+  function __toString()[] {
     throw new Exception("Compare exception");
   }
 }

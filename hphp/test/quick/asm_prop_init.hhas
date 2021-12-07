@@ -30,6 +30,7 @@
   }
 
   .method [static public] 86sinit() {
+    .coeffects_static pure;
     String "default ::foo value"
     InitProp "foo" Static
 
@@ -38,6 +39,7 @@
   }
 
   .method [static public] 86pinit() {
+    .coeffects_static pure;
     CheckProp "nonstat"
     JmpNZ isset
     String "code-created prop value"

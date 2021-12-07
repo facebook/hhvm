@@ -396,7 +396,7 @@ struct SimpleParser {
   NEVER_INLINE
   void skipSpace() { while (isSpace(*p)) p++; }
   bool isSpace(char ch) const {
-    return ch == ' ' || ch == '\n' || ch == '\t' || ch == '\f';
+    return ch == ' ' || ch == '\n' || ch == '\t' || ch == '\r';
   }
 
   /*

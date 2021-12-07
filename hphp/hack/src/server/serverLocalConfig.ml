@@ -720,19 +720,20 @@ let path =
   Filename.concat dir "hh.conf"
 
 let apply_overrides ~silent ~current_version ~config ~overrides =
-  (* Override on-disk values with values from JustKnobs (if present). Allow CLI
-     overrides to take precedence over JustKnobs overrides. *)
+  (* We'll apply CLI overrides now at the start so that JustKnobs and experiments_config
+     can be informed about them, e.g. "--config rollout_group=foo" will be able
+     to guide the manner in which JustKnobs picks up values. Don't worry though --
+     we'll apply CLI overrides again at the end, so they overwrite any changes
+     brought by JustKnobs and experiments_config. *)
+  let config = Config_file.apply_overrides ~silent ~config ~overrides in
+  (* Now is the time for JustKnobs (though it's skipped for tests) *)
   let config =
-    (* Do not use values from JustKnobs in tests. *)
     if Sys_utils.is_test_mode () then
       config
     else
       ServerLocalConfigKnobs.apply_justknobs_overrides ~silent config
   in
-  (* Apply the CLI overrides before experiments overrides, so that
-     experiments_config settings can be specified via the CLI, even though the
-     CLI overrides take precedence over the experiments overrides. *)
-  let config = Config_file.apply_overrides ~silent ~config ~overrides in
+  (* Now is the time for experiments_config overrides *)
   let enabled =
     bool_if_min_version
       "experiments_config_enabled"
@@ -776,7 +777,7 @@ let apply_overrides ~silent ~current_version ~config ~overrides =
           ~overrides:experiment_overrides
       in
       (* Finally, reapply the CLI overrides, since they should take
-          precedence over the experiments overrides *)
+          precedence over the experiments_config and JustKnobs. *)
       (meta, Config_file.apply_overrides ~silent ~config ~overrides)
     else
       ("Experimental config not found on disk", config)
@@ -1516,4 +1517,8 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       ide_max_num_decls = options.ide_max_num_decls;
       ide_max_num_shallow_decls = options.ide_max_num_shallow_decls;
       ide_max_num_linearizations = options.ide_max_num_linearizations;
+      max_bucket_size = options.max_bucket_size;
+      max_workers = Option.value options.max_workers ~default:(-1);
+      max_typechecker_worker_memory_mb =
+        Option.value options.max_typechecker_worker_memory_mb ~default:(-1);
     }

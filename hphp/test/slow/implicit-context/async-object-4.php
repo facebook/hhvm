@@ -1,6 +1,6 @@
 <?hh
 
-async function g() {
+async function g()[zoned] {
   echo "in g should be D got ";
   echo ClassContext::getContext()->name() . "\n";
   await RescheduleWaitHandle::create(RescheduleWaitHandle::QUEUE_DEFAULT,0);
@@ -8,7 +8,7 @@ async function g() {
   echo ClassContext::getContext()->name() . "\n";
 }
 
-async function f() {
+async function f()[zoned] {
   echo "in f should be C got ";
   echo ClassContext::getContext()->name() . "\n";
   $a = ClassContext::genStart(new D, g<>);

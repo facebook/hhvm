@@ -5,7 +5,7 @@ function memo()[zoned] {
   echo "memo called\n";
 }
 
-function f() {
+function f()[zoned] {
   $key = HH\ImplicitContext\_Private\get_implicit_context_memo_key();
   echo quoted_printable_encode($key) . "\n";
   memo();

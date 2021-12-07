@@ -12,14 +12,14 @@ class Foo {
   }
 }
 
-function g() {
+function g()[zoned] {
   Foo::$x->memo<int>(1, 2);
   Foo::$x->memo<int>(1, 3);
   Foo::$x->memo<string>(1, 2);
   Foo::$x->memo<string>(1, 3);
 }
 
-function f() {
+function f()[zoned] {
   Foo::$x->memo<int>(1, 2);
   Foo::$x->memo<int>(1, 3);
   Foo::$x->memo<string>(1, 2);

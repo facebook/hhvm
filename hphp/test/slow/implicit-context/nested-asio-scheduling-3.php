@@ -23,7 +23,7 @@ async function x() {
   ClassContext::genStart(new D, z<>);
 }
 
-async function f() {
+async function f()[zoned] {
   \HH\Asio\join(AwaitAllWaitHandle::fromVec(vec[x(), Foo::$bar]));
   echo 'Expecting C got ' . ClassContext::getContext()->name() . "\n";
 }

@@ -1,12 +1,12 @@
 <?hh
 
-async function f($n = 'D') {
+async function f($n = 'D')[zoned] {
   echo "Expecting {$n} got " . ClassContext::getContext()->name() . "\n";
   await RescheduleWaitHandle::create(RescheduleWaitHandle::QUEUE_DEFAULT,0);
   echo "Expecting {$n} got " . ClassContext::getContext()->name() . "\n";
 }
 
-async function g() {
+async function g()[zoned] {
   await ClassContext::genStart(new C, async () ==> {
     echo 'Expecting C got ' . ClassContext::getContext()->name() . "\n";
     // Async entry point already has an instance of the scheduler

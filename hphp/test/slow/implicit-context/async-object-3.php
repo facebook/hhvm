@@ -1,6 +1,6 @@
 <?hh
 
-async function g($i, $s) {
+async function g($i, $s)[zoned] {
   if ($i > 1) return;
   echo "in g should be {$s} got ";
   echo ClassContext::getContext()->name() . "\n";
@@ -22,7 +22,7 @@ async function g($i, $s) {
   echo ClassContext::getContext()->name() . "\n";
 }
 
-async function f() {
+async function f()[zoned] {
   echo "in f should be C got ";
   echo ClassContext::getContext()->name() . "\n";
   concurrent {

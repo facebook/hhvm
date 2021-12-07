@@ -1,6 +1,6 @@
 <?hh
 
-function addFive() {
+function addFive()[zoned] {
   return IntContext::getContext() + 5;
 }
 

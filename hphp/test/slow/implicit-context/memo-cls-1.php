@@ -11,12 +11,12 @@ class Foo {
   }
 }
 
-function g() {
+function g()[zoned] {
   Foo::$x->memo(1, 2);
   Foo::$x->memo(1, 3);
 }
 
-function f() {
+function f()[zoned] {
   Foo::$x->memo(1, 2);
   Foo::$x->memo(1, 3);
   ClassContext2::start(new B, g<>);

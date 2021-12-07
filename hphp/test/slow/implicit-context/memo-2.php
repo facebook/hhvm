@@ -9,14 +9,14 @@ function memo<reify T>($a, $b)[zoned] {
   echo "args: $a, $b hash: $hash, kind: $kind\n";
 }
 
-function g() {
+function g()[zoned] {
   memo<int>(1, 2);
   memo<int>(1, 3);
   memo<string>(1, 2);
   memo<string>(1, 3);
 }
 
-function f() {
+function f()[zoned] {
   memo<int>(1, 2);
   memo<int>(1, 3);
   memo<string>(1, 2);

@@ -1,6 +1,6 @@
 <?hh
 
-async function f() {
+async function f()[zoned] {
   echo ClassContext::getContext()->name() . "\n";
   echo ClassContext::getContext()->name() . "\n";
 }

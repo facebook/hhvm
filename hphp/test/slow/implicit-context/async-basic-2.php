@@ -1,11 +1,11 @@
 <?hh
 
-async function printImplicit() {
+async function printImplicit()[zoned] {
   var_dump(IntContext::getContext());
   return 0;
 }
 
-async function addFive() {
+async function addFive()[zoned] {
   return IntContext::getContext() + await IntContext::genStart(4, printImplicit<>);
 }
 

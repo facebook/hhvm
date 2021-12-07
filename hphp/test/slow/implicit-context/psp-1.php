@@ -1,8 +1,8 @@
 <?hh
 
-async function f() {
+async function f()[zoned] {
   echo 'Expecting C got ' . ClassContext::getContext()->name() . "\n";
-  set_time_limit(1);
+  HH\Coeffects\backdoor(()[defaults] ==> set_time_limit(1));
   // throw C++ exception so that the context does not get unset
   while(1) {}
 }

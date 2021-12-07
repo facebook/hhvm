@@ -1,6 +1,6 @@
 <?hh
 
-function aux() {
+function aux()[zoned] {
   $x = IntContext::getContext();
   if ($x > 10) return;
   var_dump($x);

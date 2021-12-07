@@ -8,12 +8,12 @@ function memo()[zoned] {
   echo "hash: $hash\n";
 }
 
-function g() {
+function g()[zoned] {
   memo();
   memo();
 }
 
-function f() {
+function f()[zoned] {
   memo();
   memo();
   ClassContext2::start(new B, g<>);

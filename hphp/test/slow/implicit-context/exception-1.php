@@ -1,6 +1,6 @@
 <?hh
 
-function throwExn() {
+function throwExn()[zoned] {
   throw new Exception();
 }
 
@@ -8,7 +8,7 @@ function throwExn() {
 function main() {
   include 'implicit.inc';
 
-  IntContext::start(1, () ==> {
+  IntContext::start(1, ()[zoned] ==> {
     try {
       IntContext::start(2, () ==> {
         var_dump(IntContext::getContext());

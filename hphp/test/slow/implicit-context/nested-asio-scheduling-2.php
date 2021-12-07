@@ -23,7 +23,7 @@ async function x() {
   ClassContext::genStart(new D, z<>);
 }
 
-async function g() {
+async function g()[zoned] {
   await ClassContext::genStart(new C, async () ==> {
     echo 'Expecting C got ' . ClassContext::getContext()->name() . "\n";
     // Async entry point already has an instance of the scheduler

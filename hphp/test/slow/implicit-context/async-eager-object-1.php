@@ -1,6 +1,6 @@
 <?hh
 
-async function g() {
+async function g()[zoned] {
   echo "in g 1 should be C got ";
   echo ClassContext::getContext()->name() . "\n";
   echo "in g 2 should be C got ";
@@ -22,7 +22,7 @@ async function h() {
   echo ClassContext::getContext()->name() . "\n";
 }
 
-async function f() {
+async function f()[zoned] {
   echo "in f should be C got ";
   echo ClassContext::getContext()->name() . "\n";
   concurrent {

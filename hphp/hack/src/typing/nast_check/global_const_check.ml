@@ -9,9 +9,17 @@
 open Hh_prelude
 open Aast
 
-let error_if_no_typehint { cst_mode; cst_type; cst_name; _ } =
+let error_if_no_typehint { cst_mode; cst_type; cst_name; cst_value; _ } =
   if (not (FileInfo.is_hhi cst_mode)) && Option.is_none cst_type then
-    Errors.const_without_typehint cst_name
+    let (_, _, expr) = cst_value in
+    let type_ =
+      match expr with
+      | String _ -> "string"
+      | Int _ -> "int"
+      | Float _ -> "float"
+      | _ -> "mixed"
+    in
+    Errors.const_without_typehint cst_name type_
 
 let error_if_pseudo_constant gconst =
   if Option.is_some gconst.cst_namespace.Namespace_env.ns_name then

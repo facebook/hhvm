@@ -308,6 +308,27 @@ int dehexchar(char c) {
   return -1;
 }
 
+bool isSpace(char ch) {
+  return ch == ' ' || ch == '\n' || ch == '\t' || ch == '\r';
+}
+
+const char* skipSpace(const char* p) {
+  while (isSpace(*p)) p++;
+  return p;
+}
+
+/*
+ * Skip whitespace, then if next char is 'ch', consume it and return true,
+ * otherwise let it be and return false.
+ */
+bool matchSeparator(const char** pp, char ch) {
+  const char* p = *pp;
+  if (LIKELY(*p == ch)) { *pp = p + 1; return true; };
+  p = skipSpace(p);
+  if (LIKELY(*p == ch)) { *pp = p + 1; return true; }
+  return false;
+}
+
 NEVER_INLINE
 void tvDecRefRange(TypedValue* begin, TypedValue* end) {
   assertx(begin <= end);
@@ -329,6 +350,20 @@ void appendToContainer(JSONContainerType container_type,
     }
   }
 }
+
+/* Holds a pair indicating success of parsing and the new position of the
+ * buffer pointer. */
+struct ParseResult {
+  bool ok;
+  const char* p;
+};
+
+/* Holds a pair with the length of the parsed string and the new position of
+ * the buffer pointer. Length will be set to -1 in case of failure. */
+struct ParseStringResult {
+  int len;
+  const char* p;
+};
 
 /*
  * Parses a subset of JSON. Currently unsupported:
@@ -353,10 +388,11 @@ struct SimpleParser {
   static bool TryParse(const char* inp, int length,
                        TypedValue* buf, Variant& out,
                        JSONContainerType container_type, bool is_tsimplejson) {
-    SimpleParser parser(inp, length, buf, container_type, is_tsimplejson);
-    bool ok = parser.parseValue();
-    if (!ok ||
-        (parser.skipSpace(), parser.p != inp + length)) {
+    assertx(inp[length] == 0);  // Parser relies on sentinel to avoid checks.
+    SimpleParser parser(buf, container_type, is_tsimplejson);
+    ParseResult result = parser.parseValue(inp);
+    const char* p = result.p;
+    if (!result.ok || (p = skipSpace(p), p != inp + length)) {
       // Unsupported, malformed, or trailing garbage. Release entire stack.
       tvDecRefRange(buf, parser.top);
       return false;
@@ -366,49 +402,24 @@ struct SimpleParser {
   }
 
  private:
-  SimpleParser(const char* input, int length, TypedValue* buffer,
-               JSONContainerType container_type, bool is_tsimplejson)
-    : p(input)
-    , top(buffer)
+  SimpleParser(TypedValue* buffer, JSONContainerType container_type,
+               bool is_tsimplejson)
+    : top(buffer)
     , array_depth(-kMaxArrayDepth) /* Start negative to simplify check. */
     , container_type(container_type)
     , is_tsimplejson(is_tsimplejson)
-  {
-    assertx(input[length] == 0);  // Parser relies on sentinel to avoid checks.
-  }
-
-  /*
-   * Skip whitespace, then if next char is 'ch', consume it and return true,
-   * otherwise let it be and return false.
-   */
-  bool matchSeparator(char ch) {
-    if (LIKELY(*p++ == ch)) return true;
-    return matchSeparatorSlow(ch);
-  }
-  NEVER_INLINE
-  bool matchSeparatorSlow(char ch) {
-    --p;
-    skipSpace();
-    if (LIKELY(*p++ == ch)) return true;
-    --p;
-    return false;
-  }
-  NEVER_INLINE
-  void skipSpace() { while (isSpace(*p)) p++; }
-  bool isSpace(char ch) const {
-    return ch == ' ' || ch == '\n' || ch == '\t' || ch == '\r';
-  }
+  { }
 
   /*
    * Variant parser.
    */
-  bool parseValue() {
+  ParseResult parseValue(const char* p) {
     for (;;) {
       char ch = *p++;
       switch (ch) {
-        case '{': return parseMixed();
-        case '[': return parsePacked();
-        case '\"': return parseString();
+        case '{': return parseMixed(p);
+        case '[': return parsePacked(p);
+        case '\"': return parseString(p);
         case '-':
         case '0':
         case '1':
@@ -419,125 +430,130 @@ struct SimpleParser {
         case '6':
         case '7':
         case '8':
-        case '9': return parseNumber(ch);
-        case 't': return parseRue();
-        case 'f': return parseAlse();
-        case 'n': return parseUll();
+        case '9': return parseNumber(p, ch);
+        case 't': return parseRue(p);
+        case 'f': return parseAlse(p);
+        case 'n': return parseUll(p);
         case ' ':
         case '\t':
         case '\n':
         case '\r':
-          skipSpace();
+          p = skipSpace(p);
           continue;
       }
-      return false;
+      return {false, p};
     }
   }
 
-  bool parseRue() {
-    if (*p++ != 'r') return false;
-    if (*p++ != 'u') return false;
-    if (*p++ != 'e') return false;
+  ParseResult parseRue(const char* p) {
+    if (*p++ != 'r') return {false, p};
+    if (*p++ != 'u') return {false, p};
+    if (*p++ != 'e') return {false, p};
     auto const tv = top++;
     tv->m_type = KindOfBoolean;
     tv->m_data.num = true;
-    return true;
+    return {true, p};
   }
 
-  bool parseAlse() {
-    if (*p++ != 'a') return false;
-    if (*p++ != 'l') return false;
-    if (*p++ != 's') return false;
-    if (*p++ != 'e') return false;
+  ParseResult parseAlse(const char* p) {
+    if (*p++ != 'a') return {false, p};
+    if (*p++ != 'l') return {false, p};
+    if (*p++ != 's') return {false, p};
+    if (*p++ != 'e') return {false, p};
     auto const tv = top++;
     tv->m_type = KindOfBoolean;
     tv->m_data.num = false;
-    return true;
+    return {true, p};
   }
 
-  bool parseUll() {
-    if (*p++ != 'u') return false;
-    if (*p++ != 'l') return false;
-    if (*p++ != 'l') return false;
+  ParseResult parseUll(const char* p) {
+    if (*p++ != 'u') return {false, p};
+    if (*p++ != 'l') return {false, p};
+    if (*p++ != 'l') return {false, p};
     top++->m_type = KindOfNull;
-    return true;
+    return {true, p};
   }
 
-  bool handleBackslash(signed char& out) {
+  ParseResult handleBackslash(const char* p, signed char& out) {
     char ch = *p++;
     switch (ch) {
-      case 0: return false;
-      case '"': out = ch; return true;
-      case '\\': out = ch; return true;
-      case '/': out = ch; return true;
-      case 'b': out = '\b'; return true;
-      case 'f': out = '\f'; return true;
-      case 'n': out = '\n'; return true;
-      case 'r': out = '\r'; return true;
-      case 't': out = '\t'; return true;
+      case 0: return {false, p};
+      case '"': out = ch; return {true, p};
+      case '\\': out = ch; return {true, p};
+      case '/': out = ch; return {true, p};
+      case 'b': out = '\b'; return {true, p};
+      case 'f': out = '\f'; return {true, p};
+      case 'n': out = '\n'; return {true, p};
+      case 'r': out = '\r'; return {true, p};
+      case 't': out = '\t'; return {true, p};
       case 'u': {
         if (UNLIKELY(is_tsimplejson)) {
           auto const ch1 = *p++;
-          if (UNLIKELY(ch1 != '0')) return false;
+          if (UNLIKELY(ch1 != '0')) return {false, p};
           auto const ch2 = *p++;
-          if (UNLIKELY(ch2 != '0')) return false;
+          if (UNLIKELY(ch2 != '0')) return {false, p};
           auto const dch3 = dehexchar(*p++);
-          if (UNLIKELY(dch3 < 0)) return false;
+          if (UNLIKELY(dch3 < 0)) return {false, p};
           auto const dch4 = dehexchar(*p++);
-          if (UNLIKELY(dch4 < 0)) return false;
+          if (UNLIKELY(dch4 < 0)) return {false, p};
           out = (dch3 << 4) | dch4;
-          return true;
+          return {true, p};
         } else {
           uint16_t u16cp = 0;
           for (int i = 0; i < 4; i++) {
             auto const hexv = dehexchar(*p++);
-            if (hexv < 0) return false; // includes check for end of string
+            if (hexv < 0) return {false, p}; // includes check for end of string
             u16cp <<= 4;
             u16cp |= hexv;
           }
           if (u16cp > 0x7f) {
-            return false;
+            return {false, p};
           } else {
             out = u16cp;
-            return true;
+            return {true, p};
           }
         }
       }
-      default: return false;
+      default: return {false, p};
     }
   }
 
-  bool parseRawString(int* len) {
+  ParseStringResult parseRawString(const char* p) {
     assertx(p[-1] == '"'); // SimpleParser only handles "-quoted strings
-    *len = 0;
+    int len = 0;
     auto const charTop = reinterpret_cast<signed char*>(top);
     for (signed char ch = *p++; ch != '\"'; ch = *p++) {
-      charTop[(*len)++] = ch; // overwritten later if `ch == '\\'`
+      charTop[len++] = ch; // overwritten later if `ch == '\\'`
       if (ch < ' ') {
         // `ch < ' '` catches null and also non-ASCII (since signed char)
-        return false;
+        return {-1, p};
       } else if (ch == '\\') {
-        if (!handleBackslash(charTop[*len - 1])) return false;
+        ParseResult result = handleBackslash(p, charTop[len - 1]);
+        p = result.p;
+        if (!result.ok) return {-1, p};
       }
     }
-    return true;
+    return {len, p};
   }
 
-  bool parseString() {
-    int len;
-    if (!parseRawString(&len)) return false;
+  ParseResult parseString(const char* p) {
+    ParseStringResult result = parseRawString(p);
+    p = result.p;
+    if (result.len < 0) return {false, p};
     auto const start = reinterpret_cast<char*>(top);
-    pushStringData(StringData::Make(start, len, CopyString));
-    return true;
+    pushStringData(StringData::Make(start, result.len, CopyString));
+    return {true, p};
   }
 
-  bool parseMixedKey() {
-    int len;
-    int64_t num;
-    if (!parseRawString(&len)) return false;
+  ParseResult parseMixedKey(const char* p) {
+    ParseStringResult result = parseRawString(p);
+    p = result.p;
+    int len = result.len;
+    if (len < 0) return {false, p};
     auto const start = reinterpret_cast<char*>(top);
     auto const slice = folly::StringPiece(start, len);
     start[len] = '\0';
+    int64_t num;
     if (container_type != JSONContainerType::HACK_ARRAYS &&
         is_strictly_integer(start, len, num)) {
       pushInt64(num);
@@ -548,18 +564,20 @@ struct SimpleParser {
     } else {
       pushStringData(StringData::Make(start, len, CopyString));
     }
-    return true;
+    return {true, p};
   }
 
-  bool parsePacked() {
+  ParseResult parsePacked(const char* p) {
     auto const fp = top;
-    if (!matchSeparator(']')) {
-      if (++array_depth >= 0) return false;
+    if (!matchSeparator(&p, ']')) {
+      if (++array_depth >= 0) return {false, p};
       do {
-        if (!parseValue()) return false;
-      } while (matchSeparator(','));
+        ParseResult result = parseValue(p);
+        p = result.p;
+        if (!result.ok) return {false, p};
+      } while (matchSeparator(&p, ','));
       --array_depth;
-      if (!matchSeparator(']')) return false;  // Trailing ',' not supported.
+      if (!matchSeparator(&p, ']')) return {false, p};  // Trailing ',' not supported.
     }
     auto arr = [&] {
       if (container_type == JSONContainerType::HACK_ARRAYS) {
@@ -580,22 +598,26 @@ struct SimpleParser {
     top = fp;
     pushArrayData(arr);
     check_non_safepoint_surprise();
-    return true;
+    return {true, p};
   }
 
-  bool parseMixed() {
+  ParseResult parseMixed(const char* p) {
     auto const fp = top;
-    if (!matchSeparator('}')) {
-      if (++array_depth >= 0) return false;
+    if (!matchSeparator(&p, '}')) {
+      if (++array_depth >= 0) return {false, p};
       do {
-        if (!matchSeparator('\"')) return false;  // Only support string keys.
-        if (!parseMixedKey()) return false;
+        if (!matchSeparator(&p, '\"')) return {false, p};  // Only support string keys.
+        ParseResult result = parseMixedKey(p);
+        p = result.p;
+        if (!result.ok) return {false, p};
         // TODO(14491721): Precompute and save hash to avoid deref in MakeMixed.
-        if (!matchSeparator(':')) return false;
-        if (!parseValue()) return false;
-      } while (matchSeparator(','));
+        if (!matchSeparator(&p, ':')) return {false, p};
+        result = parseValue(p);
+        p = result.p;
+        if (!result.ok) return {false, p};
+      } while (matchSeparator(&p, ','));
       --array_depth;
-      if (!matchSeparator('}')) return false;  // Trailing ',' not supported.
+      if (!matchSeparator(&p, '}')) return {false, p};  // Trailing ',' not supported.
     }
     auto arr = [&] {
       if (container_type == JSONContainerType::HACK_ARRAYS) {
@@ -610,17 +632,17 @@ struct SimpleParser {
         : VanillaDict::MakeDict((top - fp) >> 1, fp)->asArrayData();
     }();
     // VanillaDict::MakeMixed can return nullptr if there are duplicate keys
-    if (!arr) return false;
+    if (!arr) return {false, p};
     top = fp;
     pushArrayData(arr);
     check_non_safepoint_surprise();
-    return true;
+    return {true, p};
   }
 
   /*
    * Parse remainder of number after initial character firstChar (maybe '-').
    */
-  bool parseNumber(char firstChar) {
+  ParseResult parseNumber(const char* p, char firstChar) {
     uint64_t x = 0;
     bool neg = false;
     const char* begin = p - 1;
@@ -637,14 +659,14 @@ struct SimpleParser {
     }
     if (*p == '.' || *p == 'e' || *p == 'E') {
       pushDouble(zend_strtod(begin, &p));
-      return true;
+      return {true, p};
     }
 
     auto len = p - begin;
 
     // JSON does not permit leading 0's in numbers.
     if (UNLIKELY(len > 1 && firstChar == '0')) {
-      return false;
+      return {false, p};
     }
 
     // Now 'x' is the usigned absolute value of a naively parsed integer, but
@@ -653,16 +675,16 @@ struct SimpleParser {
       int64_t sx = x;
       pushInt64(neg ? -sx : sx);
     } else {
-      parseBigInt(len);
+      p = parseBigInt(p, len);
     }
-    return true;
+    return {true, p};
   }
 
   /*
    * Assuming 'len' characters ('0'-'9', maybe prefix '-') have been read,
    * re-parse and push as an int64_t if possible, otherwise as a double.
    */
-  void parseBigInt(int len) {
+  const char* parseBigInt(const char* p, int len) {
     assertx(*p > '9' || *p < '0');  // Aleady read maximal digit sequence.
     errno = 0;
     const int64_t sx = strtoll(p - len, nullptr, 10);
@@ -673,6 +695,7 @@ struct SimpleParser {
     } else {
       pushInt64(sx);
     }
+    return p;
   }
 
   void pushDouble(double data) {
@@ -699,7 +722,6 @@ struct SimpleParser {
     tv->m_data.parr = data;
   }
 
-  const char* p;
   TypedValue* top;
   int array_depth;
   JSONContainerType container_type;

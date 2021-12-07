@@ -169,7 +169,7 @@ function stream_get_line(resource $handle,
  *
  */
 <<__Native>>
-function stream_get_meta_data(resource $stream): mixed;
+function stream_get_meta_data(resource $stream)[]: mixed;
 
 /**
  * @return array - Returns an indexed array of socket transports names.
@@ -264,7 +264,7 @@ function stream_select(inout mixed $read,
                        inout mixed $write,
                        inout mixed $except,
                        mixed $vtv_sec,
-                       int $tv_usec = 0): mixed;
+                       int $tv_usec = 0)[controlled]: mixed;
 
 /**
  * Awaitable version of stream_select()
@@ -302,7 +302,7 @@ function stream_await(resource $fp,
  *
  */
 <<__Native>>
-function stream_set_blocking(resource $stream, bool $mode): bool;
+function stream_set_blocking(resource $stream, bool $mode)[controlled]: bool;
 
 /**
  * Set read file buffering on the given stream.
@@ -347,7 +347,7 @@ function stream_set_chunk_size(resource $stream, int $chunk_size): mixed;
 <<__Native>>
 function stream_set_timeout(resource $stream,
                             int $seconds,
-                            int $microseconds = 0): bool;
+                            int $microseconds = 0)[controlled]: bool;
 
 /**
  * Sets the buffering for write operations on the given stream to buffer
@@ -391,7 +391,7 @@ function set_file_buffer(resource $stream, int $buffer): int;
 function stream_socket_accept(resource $server_socket,
                               float $timeout,
                               <<__OutOnly>>
-                              inout mixed $peername): mixed;
+                              inout mixed $peername)[controlled]: mixed;
 
 /**
  * Creates a stream or datagram socket on the specified local_socket.  This
@@ -432,7 +432,7 @@ function stream_socket_server(string $local_socket,
                               inout mixed $errstr,
                               int $flags = STREAM_SERVER_BIND |
                                 STREAM_SERVER_LISTEN,
-                              ?resource $context = null): mixed;
+                              ?resource $context = null)[controlled]: mixed;
 
 /**
  * Initiates a stream or datagram connection to the destination specified by

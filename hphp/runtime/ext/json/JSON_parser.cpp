@@ -401,23 +401,20 @@ struct SimpleParser {
 
   /*
    * Variant parser.
-   *
-   * JSON arrays don't permit leading 0's in numbers, so we have to thread that
-   * context through here to parseNumber().
    */
-  bool parseValue(bool array_elem = false) {
+  bool parseValue() {
     auto const ch = *p++;
     if (ch == '{') return parseMixed();
     else if (ch == '[') return parsePacked();
     else if (ch == '\"') return parseString();
     else if ((ch >= '0' && ch <= '9') ||
-              ch == '-') return parseNumber(ch, array_elem);
+              ch == '-') return parseNumber(ch);
     else if (ch == 't') return parseRue();
     else if (ch == 'f') return parseAlse();
     else if (ch == 'n') return parseUll();
     else if (isSpace(ch)) {
       skipSpace();
-      return parseValue(array_elem);
+      return parseValue();
     }
     else return false;
   }
@@ -544,7 +541,7 @@ struct SimpleParser {
     if (!matchSeparator(']')) {
       if (++array_depth >= 0) return false;
       do {
-        if (!parseValue(true)) return false;
+        if (!parseValue()) return false;
       } while (matchSeparator(','));
       --array_depth;
       if (!matchSeparator(']')) return false;  // Trailing ',' not supported.
@@ -580,7 +577,7 @@ struct SimpleParser {
         if (!parseMixedKey()) return false;
         // TODO(14491721): Precompute and save hash to avoid deref in MakeMixed.
         if (!matchSeparator(':')) return false;
-        if (!parseValue(true)) return false;
+        if (!parseValue()) return false;
       } while (matchSeparator(','));
       --array_depth;
       if (!matchSeparator('}')) return false;  // Trailing ',' not supported.
@@ -608,12 +605,13 @@ struct SimpleParser {
   /*
    * Parse remainder of number after initial character firstChar (maybe '-').
    */
-  bool parseNumber(char firstChar, bool array_elem = false) {
+  bool parseNumber(char firstChar) {
     uint64_t x = 0;
     bool neg = false;
     const char* begin = p - 1;
     if (firstChar == '-') {
       neg = true;
+      firstChar = *p;
     } else {
       x = firstChar - '0';  // first digit
     }
@@ -629,8 +627,8 @@ struct SimpleParser {
 
     auto len = p - begin;
 
-    // JSON arrays don't permit leading 0's in numbers.
-    if (UNLIKELY(len > 1 && firstChar == '0' && array_elem)) {
+    // JSON does not permit leading 0's in numbers.
+    if (UNLIKELY(len > 1 && firstChar == '0')) {
       return false;
     }
 

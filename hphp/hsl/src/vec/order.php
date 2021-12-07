@@ -66,7 +66,7 @@ function reverse<Tv>(
  */
 function shuffle<Tv>(
   Traversable<Tv> $traversable,
-)[defaults]: vec<Tv> {
+)[controlled]: vec<Tv> {
   $vec = cast_clear_legacy_array_mark($traversable);
   \shuffle(inout $vec);
   return $vec;

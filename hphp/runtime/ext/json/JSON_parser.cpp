@@ -403,20 +403,35 @@ struct SimpleParser {
    * Variant parser.
    */
   bool parseValue() {
-    auto const ch = *p++;
-    if (ch == '{') return parseMixed();
-    else if (ch == '[') return parsePacked();
-    else if (ch == '\"') return parseString();
-    else if ((ch >= '0' && ch <= '9') ||
-              ch == '-') return parseNumber(ch);
-    else if (ch == 't') return parseRue();
-    else if (ch == 'f') return parseAlse();
-    else if (ch == 'n') return parseUll();
-    else if (isSpace(ch)) {
-      skipSpace();
-      return parseValue();
+    for (;;) {
+      char ch = *p++;
+      switch (ch) {
+        case '{': return parseMixed();
+        case '[': return parsePacked();
+        case '\"': return parseString();
+        case '-':
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9': return parseNumber(ch);
+        case 't': return parseRue();
+        case 'f': return parseAlse();
+        case 'n': return parseUll();
+        case ' ':
+        case '\t':
+        case '\n':
+        case '\r':
+          skipSpace();
+          continue;
+      }
+      return false;
     }
-    else return false;
   }
 
   bool parseRue() {

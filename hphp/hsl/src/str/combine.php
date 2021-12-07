@@ -19,11 +19,11 @@ use namespace HH\Lib\Vec;
  * Previously known as `implode` in PHP.
  */
 function join(
-  Traversable<arraykey> $pieces,
+  readonly Traversable<arraykey> $pieces,
   string $glue,
 )[]: string {
   if ($pieces is Container<_>) {
     return \implode($glue, $pieces);
   }
-  return \implode($glue, Vec\cast_clear_legacy_array_mark($pieces));
+  return \implode($glue, vec($pieces));
 }

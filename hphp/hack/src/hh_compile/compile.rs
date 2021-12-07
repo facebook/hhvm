@@ -51,31 +51,37 @@ pub struct Opts {
     #[structopt(long)]
     dump_config: bool,
 
-    /// Dump symbol ref sections of HHAS
-    #[structopt(long)]
-    dump_symbol_refs: bool,
-
-    /// The level of verbosity (can be set multiple times)
-    #[structopt(long = "verbose", parse(from_occurrences))]
-    verbosity: isize,
-
     /// The path to an input Hack file (omit if --daemon or --input-file-list)
     #[structopt(name = "FILENAME", required_unless_one = &["daemon", "input-file-list"])]
     filename: Option<PathBuf>,
 
-    /// Disable toplevel definition elaboration
-    #[structopt(long)]
-    disable_toplevel_elaboration: bool,
+    #[structopt(flatten)]
+    single_file_opts: SingleFileOpts,
 
     /// Number of parallel worker threads. By default, or if set to 0 or 1, use num-cpu threads.
     #[structopt(long)]
     thread_num: Option<usize>,
 }
 
+#[derive(StructOpt, Clone, Debug)]
+pub(crate) struct SingleFileOpts {
+    /// Dump symbol ref sections of HHAS
+    #[structopt(long)]
+    pub(crate) dump_symbol_refs: bool,
+
+    /// Disable toplevel definition elaboration
+    #[structopt(long)]
+    pub(crate) disable_toplevel_elaboration: bool,
+
+    /// The level of verbosity (can be set multiple times)
+    #[structopt(long = "verbose", parse(from_occurrences))]
+    pub(crate) verbosity: isize,
+}
+
 pub fn run(opts: Opts) -> anyhow::Result<()> {
     type SyncWrite = Mutex<Box<dyn Write + Sync + Send>>;
 
-    if opts.verbosity > 1 {
+    if opts.single_file_opts.verbosity > 1 {
         eprintln!("hh_compile options/flags: {:#?}", opts);
     }
     let config = Config::new(&opts);
@@ -105,7 +111,7 @@ pub fn run(opts: Opts) -> anyhow::Result<()> {
             let files = multifile::to_files(f, content)?;
             for (f, content) in files {
                 let f = f.as_ref();
-                match process_single_file(&opts, f.into(), content) {
+                match process_single_file(&opts.single_file_opts, f.into(), content) {
                     Err(e) => write!(
                         writer.lock().unwrap(),
                         "Error in file {}: {}",
@@ -135,7 +141,7 @@ pub fn run(opts: Opts) -> anyhow::Result<()> {
 }
 
 fn process_single_file_impl(
-    opts: &Opts,
+    opts: &SingleFileOpts,
     filepath: &Path,
     content: &[u8],
     stack_limit: &StackLimit,
@@ -176,7 +182,7 @@ fn process_single_file_impl(
 }
 
 fn process_single_file_with_retry(
-    opts: &Opts,
+    opts: &SingleFileOpts,
     filepath: PathBuf,
     content: Vec<u8>,
 ) -> anyhow::Result<(String, Option<Profile>)> {
@@ -201,8 +207,8 @@ fn process_single_file_with_retry(
     job.with_elastic_stack(retryable, on_retry, stack_slack)?
 }
 
-fn process_single_file(
-    opts: &Opts,
+pub(crate) fn process_single_file(
+    opts: &SingleFileOpts,
     filepath: PathBuf,
     content: Vec<u8>,
 ) -> anyhow::Result<(String, Option<Profile>)> {

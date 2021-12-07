@@ -1103,8 +1103,11 @@ dependencies = [
  "bumpalo",
  "decl_provider",
  "direct_decl_parser",
+ "env_logger 0.7.1",
  "hhbc_by_ref_compile",
  "hhbc_by_ref_options",
+ "jwalk",
+ "log",
  "multifile_rust",
  "ocamlrep",
  "oxidized",
@@ -2347,6 +2350,16 @@ name = "json"
 version = "0.12.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "078e285eafdfb6c4b434e0d31e8cfcb5115b651496faca5749b88fafd4f23bfd"
+
+[[package]]
+name = "jwalk"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "172752e853a067cbce46427de8470ddf308af7fd8ceaf9b682ef31a5021b6bb9"
+dependencies = [
+ "crossbeam",
+ "rayon",
+]
 
 [[package]]
 name = "lazy_static"

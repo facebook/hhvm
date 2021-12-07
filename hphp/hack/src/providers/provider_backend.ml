@@ -46,10 +46,6 @@ end
 
 module Decl_cache = Lru_cache.Cache (Decl_cache_entry)
 
-(** TODO(ljw): I'm storing this just here as a global, because it's a temporary
-thing not worth threading through. *)
-let use_bytesize_for_shallow_decl_size_calculation = ref false
-
 module Shallow_decl_cache_entry = struct
   type _ t = Shallow_class_decl : string -> Shallow_decl_defs.shallow_class t
 
@@ -57,14 +53,7 @@ module Shallow_decl_cache_entry = struct
 
   type 'a value = 'a
 
-  let get_size ~key:_ ~value =
-    (* TODO(ljw): remove this test, and always use "1" *)
-    if !use_bytesize_for_shallow_decl_size_calculation then
-      let words = Obj.reachable_words (Obj.repr value) in
-      let bytes = words * Sys.word_size / 8 in
-      bytes
-    else
-      1
+  let get_size ~key:_ ~value:_ = 1
 
   let key_to_log_string : type a. a key -> string =
    (fun (Shallow_class_decl key) -> "ClasssShallow" ^ key)
@@ -243,22 +232,12 @@ let set_local_memory_backend
     max_num_decls
     max_num_shallow_decls
     max_num_linearizations;
-  (* TODO(ljw): special case -1, will be removed shortly, uses the previous default. *)
-  let max_num_shallow_decls =
-    if max_num_shallow_decls = -1 then begin
-      use_bytesize_for_shallow_decl_size_calculation := true;
-      140 * 1024 * 1024
-    end else
-      max_num_shallow_decls
-  in
   set_local_memory_backend_internal
     ~max_num_decls
     ~max_num_shallow_decls
     ~max_num_linearizations
 
 let set_local_memory_backend_with_defaults_for_test () : unit =
-  (* TODO(ljw): special case, will be removed shortly: *)
-  use_bytesize_for_shallow_decl_size_calculation := true;
   (* These are all arbitrary, so that test can spin up the backend easily;
      they haven't been tuned and shouldn't be used in production. *)
   set_local_memory_backend_internal

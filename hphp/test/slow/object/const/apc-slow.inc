@@ -2,5 +2,5 @@
 
 <<__Const>>
 class C {
-  public function __construct(public int $i) {}
+  public function __construct(public int $i)[] {}
 }

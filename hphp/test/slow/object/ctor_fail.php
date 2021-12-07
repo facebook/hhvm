@@ -2,7 +2,7 @@
 
 function err($x, $y) { echo $y; echo "\n"; }
 class Asd {
-  private function __construct() {}
+  private function __construct()[] {}
 }
 
 function x() { new Asd(); } <<__EntryPoint>>

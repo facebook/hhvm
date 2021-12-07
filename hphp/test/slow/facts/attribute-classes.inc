@@ -7,24 +7,24 @@ class BaseClassForAttributeFiltering implements IBaseForAttributeFiltering {}
 class NoArgAttr implements HH\ClassAttribute {}
 
 class TwoArgAttr implements HH\ClassAttribute {
-  public function __construct(dynamic $arg0, dynamic $arg1) {}
+  public function __construct(dynamic $arg0, dynamic $arg1)[] {}
 }
 
 class NoArgMethodAttr implements HH\MethodAttribute {}
 
 class TwoArgMethodAttr implements HH\MethodAttribute {
-  public function __construct(dynamic $arg0, dynamic $arg1) {}
+  public function __construct(dynamic $arg0, dynamic $arg1)[] {}
 }
 
 // Not included in the `IndexedMethodAttributes` list in `.hhvmconfig.hdf`
 class DontIndexThisMethodAttr implements HH\MethodAttribute {
-  public function __construct() {}
+  public function __construct()[] {}
 }
 
 class NoArgFileAttr implements HH\FileAttribute {}
 
 class TwoArgFileAttr implements HH\FileAttribute {
-  public function __construct(dynamic $arg0, dynamic $arg1) {}
+  public function __construct(dynamic $arg0, dynamic $arg1)[] {}
 }
 
 <<file: NoArgFileAttr, TwoArgFileAttr("Hello", "There")>>

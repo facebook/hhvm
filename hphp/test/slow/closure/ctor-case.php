@@ -1,7 +1,7 @@
 <?hh
 
 class X extends CLOSURE {
-  public function __construct() {}
+  public function __construct()[] {}
   public static function __invoke() { return 42; }
 }
 

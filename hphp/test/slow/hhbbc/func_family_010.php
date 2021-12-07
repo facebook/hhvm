@@ -11,7 +11,7 @@ class B {
 }
 
 class C {
-  function __construct(private string $x) {}
+  function __construct(private string $x)[] {}
   function heh() { echo $this->x; }
 }
 

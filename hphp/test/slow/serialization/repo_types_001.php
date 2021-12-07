@@ -2,7 +2,7 @@
 
 class Foob {
   private $x = false;
-  public function __construct() {}
+  public function __construct()[] {}
 }
 
 function main(Foob $y) {

@@ -3,7 +3,7 @@
 function busy() { sleep(0); }
 
 class Ref {
-  public function __construct(public int $cnt) {}
+  public function __construct(public int $cnt)[] {}
 }
 
 <<__EntryPoint>>

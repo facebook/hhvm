@@ -107,7 +107,7 @@ class OuterStructNoAdapter {
     ],
   ];
   public ?int $value = null;
-  public function __construct() {}
+  public function __construct()[] {}
   public static function withDefaultValues()[]: this {
     return new static();
   }

@@ -2,7 +2,7 @@
 
 class C { function __toString() { return 'C'; } }
 
-class D { public function __construct(public $x) {} }
+class D { public function __construct(public $x)[] {} }
 
 class E {
   public int $int = 0;
@@ -76,7 +76,7 @@ function test_type_constraints(mixed $y, arraykey $x): E {
 }
 
 class F {
-  public function __construct(private int $x) {}
+  public function __construct(private int $x)[] {}
   public function getX(): int { return $this->x; }
 }
 

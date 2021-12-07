@@ -15,7 +15,7 @@ function construct() {
 }
 
 class ConstructClass {
-  public function __construct() {}
+  public function __construct()[] {}
 }
 
 function magic_construct() {

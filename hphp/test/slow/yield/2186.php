@@ -1,7 +1,7 @@
 <?hh
 
 class Ref {
-  function __construct(public $value) {}
+  function __construct(public $value)[] {}
 }
 function gen($x) {
   $x->value = 1;

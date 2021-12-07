@@ -4,7 +4,7 @@
 class C {
   public static ?C $c = null;
 
-  public function __construct(public int $i) {}
+  public function __construct(public int $i)[] {}
   public function __clone(): void {
     $this->i++;
 

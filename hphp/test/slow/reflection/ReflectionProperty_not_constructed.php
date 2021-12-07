@@ -1,7 +1,7 @@
 <?hh
 
 class X extends ReflectionProperty {
-  function __construct() {}
+  function __construct()[] {}
 }
 <<__EntryPoint>> function main(): void {
 $x = new X;

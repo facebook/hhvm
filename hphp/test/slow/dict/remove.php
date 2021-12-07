@@ -1,6 +1,6 @@
 <?hh
 
-class C { public function __construct(public $x) {} }
+class C { public function __construct(public $x)[] {} }
 
 // Returns a permutation of the set {0, 1, ... 2^n - 1} that is Hamiltonion
 // in the hypercube on n vertices.

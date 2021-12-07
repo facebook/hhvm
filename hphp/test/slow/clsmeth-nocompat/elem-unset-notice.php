@@ -1,7 +1,7 @@
 <?hh
 
 class Foo { static function bar() {} }
-class P { function __construct(public mixed $m) {} }
+class P { function __construct(public mixed $m)[] {} }
 
 function LV(mixed $m): mixed { return __hhvm_intrinsics\launder_value($m); }
 

@@ -82,7 +82,7 @@ class OuterStruct {
   public ?StringToIntStructAdapter::THackType $nested = null;
   public ?vec<StringToIntStructAdapter::THackType> $vec = null;
   public ?StringToIntStructAdapter::THackType $unset = null;
-  public function __construct() {}
+  public function __construct()[] {}
   public static function withDefaultValues()[]: this {
     return new static();
   }
@@ -122,7 +122,7 @@ class OuterStructNoAdapter {
   public ?ThriftStruct $nested = null;
   public ?vec<ThriftStruct> $vec = null;
   public ?ThriftStruct $unset = null;
-  public function __construct() {}
+  public function __construct()[] {}
   public static function withDefaultValues()[]: this {
     return new static();
   }

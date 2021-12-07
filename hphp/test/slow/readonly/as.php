@@ -3,7 +3,7 @@
 class Bar {}
 
 class Foo extends Bar {
-  public function __construct(public int $prop = 3) {}
+  public function __construct(public int $prop = 3)[] {}
 }
 
 function main(readonly Foo $ro, Foo $mut, bool $b): Foo {

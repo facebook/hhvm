@@ -3,10 +3,10 @@
 class foobar {}
 function foobar() {}
 class StrObj {
-  public function __construct(private string $s) {}
+  public function __construct(private string $s)[] {}
   public function __toString(): string { return $this->s; }
 }
-class Wrapper { public function __construct(private mixed $w) {} }
+class Wrapper { public function __construct(private mixed $w)[] {} }
 
 function LV($x)  { return __hhvm_intrinsics\launder_value($x); }
 function CLS($c) { return __hhvm_intrinsics\create_class_pointer($c); }

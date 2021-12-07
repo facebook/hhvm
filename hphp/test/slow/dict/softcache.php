@@ -5,7 +5,7 @@ final class SimpleSoftCache2<Tk1, Tk2, Tv> {
 
   private dict<Tk1, dict<Tk2, Tv>> $cache = dict[];
 
-  public function __construct() {}
+  public function __construct()[] {}
 
   public function get(Tk1 $key): ?dict<Tk2, Tv> {
     return idx($this->cache, $key);

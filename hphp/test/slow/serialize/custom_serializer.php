@@ -1,7 +1,7 @@
 <?hh
 
 class MySerializable implements Serializable {
-  public function __construct(public $foo) {}
+  public function __construct(public $foo)[] {}
 
   public function serialize() {
     return serialize($this->foo);

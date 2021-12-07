@@ -2,15 +2,15 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class Cat implements HH\ClassAttribute {
-  public function __construct(public string $sprop) {}
+  public function __construct(public string $sprop)[] {}
 }
 
 class Dog implements HH\ClassAttribute {
-  public function __construct(public int $j, public string $opt = "default") {}
+  public function __construct(public int $j, public string $opt = "default")[] {}
 }
 
 class Emu implements HH\EnumAttribute {
-  public function __construct(public int $k) {}
+  public function __construct(public int $k)[] {}
 }
 
 <<Cat("especial")>>

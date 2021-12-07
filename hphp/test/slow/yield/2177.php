@@ -1,7 +1,7 @@
 <?hh
 
 class IntRef {
-  public function __construct(public int $val) {}
+  public function __construct(public int $val)[] {}
 }
 
 function makeClosureCont() {

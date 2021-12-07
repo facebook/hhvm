@@ -1,7 +1,7 @@
 <?hh
 
 class MyDoc extends DOMDocument {
-  function __construct($version, $encoding) {}
+  function __construct($version, $encoding)[] {}
 }
 
 class MyOtherDoc extends DOMDocument {

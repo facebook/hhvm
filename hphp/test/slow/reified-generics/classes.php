@@ -2,7 +2,7 @@
 
 // With __construct method
 class C<reify C1, reify C2> {
-  public function __construct() {}
+  public function __construct()[] {}
   public function g<reify T1>(){
     var_dump(HH\ReifiedGenerics\get_type_structure<T1>());
   }

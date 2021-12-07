@@ -2,7 +2,7 @@
 
 interface IBox {}
 class Box<T> implements IBox {
-  public function __construct(public T $data) {}
+  public function __construct(public T $data)[] {}
 }
 enum class E : IBox {
    Box<string> A = new Box("world");

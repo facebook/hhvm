@@ -5,7 +5,7 @@ trait B {}
 interface C {}
 abstract class D {}
 class E {
-  protected function __construct() {}
+  protected function __construct()[] {}
 }
 
 <<__EntryPoint>>

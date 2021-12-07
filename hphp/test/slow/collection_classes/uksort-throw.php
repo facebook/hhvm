@@ -1,6 +1,6 @@
 <?hh
 
-class Ref { public function __construct(public $v) {} }
+class Ref { public function __construct(public $v)[] {} }
 
 <<__EntryPoint>>
 function main() {

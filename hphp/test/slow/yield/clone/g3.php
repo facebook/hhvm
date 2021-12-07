@@ -1,7 +1,7 @@
 <?hh
 
 class Ref {
-  function __construct(public $value) {}
+  function __construct(public $value)[] {}
 }
 <<__EntryPoint>>
 function main_g3() {

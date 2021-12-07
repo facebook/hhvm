@@ -2,7 +2,7 @@
 
 <<__Const>>
 class C {
-  public function __construct(public int $i, public int $j) {}
+  public function __construct(public int $i, public int $j)[] {}
 }
 
 <<__EntryPoint>>

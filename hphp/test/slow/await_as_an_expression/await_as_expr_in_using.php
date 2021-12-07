@@ -1,7 +1,7 @@
 <?hh
 
 class MyDisposable implements IDisposable {
-  public function __construct(int $i) {}
+  public function __construct(int $i)[] {}
   public function __dispose() {}
 }
 async function async_int(int $x): Awaitable<int> { return $x; }

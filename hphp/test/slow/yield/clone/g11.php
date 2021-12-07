@@ -1,7 +1,7 @@
 <?hh
 
 class Ref {
-  function __construct(public $value) {}
+  function __construct(public $value)[] {}
 }
 function f($a) {
   ++$a->value;

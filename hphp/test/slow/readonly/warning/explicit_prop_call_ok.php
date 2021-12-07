@@ -1,7 +1,7 @@
 <?hh
 
 class Foo {
-  public function __construct(public readonly (readonly function(): void) $prop) {}
+  public function __construct(public readonly (readonly function(): void) $prop)[] {}
 }
 
 <<__EntryPoint>>

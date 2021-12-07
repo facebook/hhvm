@@ -4,7 +4,7 @@
 
 class Bar {}
 class Foo {
-  public function __construct(public int $prop) {}
+  public function __construct(public int $prop)[] {}
   public readonly function get(): int {
     return $this->prop + 0;
   }

@@ -2,15 +2,15 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class FA implements HH\FunctionAttribute {
-  public function __construct(public int $i = 4) {}
+  public function __construct(public int $i = 4)[] {}
 }
 
 class FAmissing implements HH\FunctionAttribute {
-  public function __construct() {}
+  public function __construct()[] {}
 }
 
 class PA implements HH\ParameterAttribute {
-  public function __construct() {}
+  public function __construct()[] {}
 }
 
 <<FA>>

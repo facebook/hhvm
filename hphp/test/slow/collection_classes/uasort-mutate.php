@@ -4,7 +4,7 @@ function nonstatic_string(string $a): string {
   return __hhvm_intrinsics\launder_value($a) . $a;
 }
 
-class Ref { public function __construct(public $v) {} }
+class Ref { public function __construct(public $v)[] {} }
 
 <<__EntryPoint>>
 function main() {

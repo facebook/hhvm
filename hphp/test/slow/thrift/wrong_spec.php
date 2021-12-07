@@ -40,7 +40,7 @@ class OldStruct {
   ];
   public $field1 = null;
   public $field2 = null;
-  public function __construct() {}
+  public function __construct()[] {}
   public static function withDefaultValues()[]: this {
     return new static();
   }
@@ -67,7 +67,7 @@ class NewStruct {
   ];
   public $field1 = null;
   public $field2 = null;
-  public function __construct() {}
+  public function __construct()[] {}
   public static function withDefaultValues()[]: this {
     return new static();
   }

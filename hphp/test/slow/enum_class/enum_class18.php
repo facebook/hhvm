@@ -3,7 +3,7 @@
 
 interface IBox {}
 class Box<T> implements IBox {
-  public function __construct(public T $data) {}
+  public function __construct(public T $data)[] {}
 }
 type E = string;
 function f<T>(<<__ViaLabel>> HH\MemberOf<E, Box<T>> $elt) : T {

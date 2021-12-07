@@ -1,6 +1,6 @@
 <?hh
 
 class Foo {
-  function __construct(inout $x) {}
+  function __construct(inout $x)[] {}
 }
 

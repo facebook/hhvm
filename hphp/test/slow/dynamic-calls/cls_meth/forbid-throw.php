@@ -31,7 +31,7 @@ class B {
 }
 
 class A extends B {
-  public function __construct() {}
+  public function __construct()[] {}
 
   public function func() {}
   public async function async_func() { return 5; }

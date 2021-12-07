@@ -42,7 +42,7 @@ class OuterStruct {
   public $value = null;
   public $nested = null;
   public $collection = null;
-  public function __construct() {}
+  public function __construct()[] {}
   public static function withDefaultValues()[]: this {
     return new static();
   }

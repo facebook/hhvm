@@ -32,7 +32,7 @@ function main() {
 class Derp {}
 
 class Herp {
-  public function __construct(public $x) {}
+  public function __construct(public $x)[] {}
 }
 
 function f($arg) {

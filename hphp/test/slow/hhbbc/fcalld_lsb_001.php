@@ -1,6 +1,6 @@
 <?hh
 
-class someJunk { public function __construct(private $blah) {} }
+class someJunk { public function __construct(private $blah)[] {} }
 
 class Foo {
   private static $foo = varray[];
@@ -15,7 +15,7 @@ class Bar extends Foo {
 }
 
 class Baz extends Foo {
-  private function __construct() {}
+  private function __construct()[] {}
   protected static function createInstance() { return new Baz(); }
 }
 

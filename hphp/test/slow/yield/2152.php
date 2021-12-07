@@ -1,7 +1,7 @@
 <?hh
 
 class Ref {
-  function __construct(public $value) {}
+  function __construct(public $value)[] {}
 }
 function f($a1, $a2) {
   foreach ($a1 as $k1 => $v1) {

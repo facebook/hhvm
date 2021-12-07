@@ -2,7 +2,7 @@
 
 class C { function __toString() { return 'C'; } }
 
-class D { public function __construct(public $x) {} }
+class D { public function __construct(public $x)[] {} }
 
 class E {
   public int $int = 0;

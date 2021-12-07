@@ -1,6 +1,6 @@
 <?hh
 
-class C { public function __construct(public $x) {} }
+class C { public function __construct(public $x)[] {} }
 
 function test($a, C $b) {
   $xs = varray[];

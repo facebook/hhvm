@@ -1,17 +1,17 @@
 <?hh
 
 class Cls1 implements IMemoizeParam {
-  public function __construct(public string $x) {}
+  public function __construct(public string $x)[] {}
   public function getInstanceKey(): string {
     echo "Cls1::getInstanceKey\n"; return $this->x;
   }
 }class Cls2 implements IMemoizeParam {
-  public function __construct(public int $x) {}
+  public function __construct(public int $x)[] {}
   public function getInstanceKey(): int {
     echo "Cls2::getInstanceKey\n"; return $this->x;
   }
 }class Cls3 implements IMemoizeParam {
-  public function __construct(public $x) {}
+  public function __construct(public $x)[] {}
   public function getInstanceKey() {
     echo "Cls3::getInstanceKey\n"; return $this->x;
   }

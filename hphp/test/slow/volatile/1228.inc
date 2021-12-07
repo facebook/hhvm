@@ -1,5 +1,5 @@
 <?hh
 
 class CaT {
-  function __construct() {}
+  function __construct()[] {}
 }

@@ -1,7 +1,7 @@
 <?hh
 
 trait T {
-  function __construct(inout $x) {}
+  function __construct(inout $x)[] {}
 }
 
 class C {

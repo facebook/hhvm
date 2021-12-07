@@ -1,35 +1,35 @@
 <?hh
 
 class FuncAttr1 implements HH\FunctionAttribute {
-  public function __construct(public string $str) {}
+  public function __construct(public string $str)[] {}
 }
 
 class FuncAttr2 implements HH\FunctionAttribute {
-  public function __construct(public string $str) {}
+  public function __construct(public string $str)[] {}
 }
 
 class ClassAttr1 implements HH\ClassAttribute {
-  public function __construct(public string $str) {}
+  public function __construct(public string $str)[] {}
 }
 
 class ClassAttr2 implements HH\ClassAttribute {
-  public function __construct(public string $str) {}
+  public function __construct(public string $str)[] {}
 }
 
 class MethodAttr1 implements HH\MethodAttribute {
-  public function __construct(public string $str) {}
+  public function __construct(public string $str)[] {}
 }
 
 class MethodAttr2 implements HH\MethodAttribute {
-  public function __construct(public string $str) {}
+  public function __construct(public string $str)[] {}
 }
 
 class ParamAttr1 implements HH\ParameterAttribute {
-  public function __construct(public string $str) {}
+  public function __construct(public string $str)[] {}
 }
 
 class ParamAttr2 implements HH\ParameterAttribute {
-  public function __construct(public string $str) {}
+  public function __construct(public string $str)[] {}
 }
 
 @ClassAttr1('before') @ClassAttr2('i')

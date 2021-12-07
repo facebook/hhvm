@@ -3,7 +3,7 @@
 
 namespace X\Y {
   class C implements \HH\FunctionAttribute {
-    public function __construct(public int $i) {}
+    public function __construct(public int $i)[] {}
   }
 
   <<C(6)>>
@@ -25,7 +25,7 @@ namespace {
   use X\Y\C;
 
   class B implements HH\FunctionAttribute {
-    public function __construct(public int $i) {}
+    public function __construct(public int $i)[] {}
   }
 
   <<B(4)>>

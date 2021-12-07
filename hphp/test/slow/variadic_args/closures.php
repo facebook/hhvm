@@ -7,7 +7,7 @@ function block() { // simulates blocking I/O
   );
 }
 class CWithClosures {
-  public function __construct(private $a) {}
+  public function __construct(private $a)[] {}
 
   public function test($a) {
     $f = function (...$args) use ($a) {

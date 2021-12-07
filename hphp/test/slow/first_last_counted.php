@@ -1,6 +1,6 @@
 <?hh
 
-class C { public function __construct(public $x) {} }
+class C { public function __construct(public $x)[] {} }
 
 <<__EntryPoint>>
 function main() {

@@ -75,7 +75,7 @@ class TestStruct {
   public $anI16 = null;
   public $aFloat = null;
 
-  public function __construct($vals=null) {}
+  public function __construct($vals=null)[] {}
   public static function withDefaultValues()[]: this {
     return new static();
   }

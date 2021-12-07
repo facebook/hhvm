@@ -1,7 +1,7 @@
 <?hh
 
 class ctor {
-  async function __construct() {}
+  async function __construct()[] {}
 }
 
 <<__EntryPoint>>

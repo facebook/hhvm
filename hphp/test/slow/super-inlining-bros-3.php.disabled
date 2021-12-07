@@ -1,7 +1,7 @@
 <?hh
 
 class C {
-  public function __construct() {}
+  public function __construct()[] {}
   public function store($x) {
     return vec[$x, $this, new C()];
   }

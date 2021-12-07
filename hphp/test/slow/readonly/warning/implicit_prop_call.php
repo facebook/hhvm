@@ -1,7 +1,7 @@
 <?hh
 
 class Foo {
-  public function __construct(public (function(): void) $prop) {}
+  public function __construct(public (function(): void) $prop)[] {}
 }
 
 <<__EntryPoint>>

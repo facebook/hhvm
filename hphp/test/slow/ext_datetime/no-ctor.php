@@ -2,15 +2,15 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class MyDateTime extends DateTime {
-  public function __construct() {}
+  public function __construct()[] {}
 }
 
 class MyDateTimeZone extends DateTimeZone {
-  public function __construct() {}
+  public function __construct()[] {}
 }
 
 class MyDateInterval extends DateInterval {
-  public function __construct() {}
+  public function __construct()[] {}
 }
 
 <<__EntryPoint>> function test(): void {

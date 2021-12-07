@@ -27,7 +27,7 @@ class C1 extends Super implements I1 {
 }
 
 class Param<T> {
-  public function __construct(private ?T $data = null) {}
+  public function __construct(private ?T $data = null)[] {}
   protected function foo() {
     echo get_class($this), " ",__METHOD__, "\n";
   }

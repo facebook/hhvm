@@ -36,15 +36,15 @@ class C
 
 // constructors
 
-    function __construct() {}               // OK on its own; implicitly public
-//  public function __construct() {}        // OK on its own
-//  protected function __construct() {}     // OK on its own
-//  private function __construct() {}       // OK on its own
+    function __construct()[] {}               // OK on its own; implicitly public
+//  public function __construct()[] {}        // OK on its own
+//  protected function __construct()[] {}     // OK on its own
+//  private function __construct()[] {}       // OK on its own
 
-//  static function __construct() {}            // constructors can't be static
-//  public static function __construct() {}
-//  protected static function __construct() {}
-//  private static function __construct() {}
+//  static function __construct()[] {}            // constructors can't be static
+//  public static function __construct()[] {}
+//  protected static function __construct()[] {}
+//  private static function __construct()[] {}
 }
 
 abstract class D1

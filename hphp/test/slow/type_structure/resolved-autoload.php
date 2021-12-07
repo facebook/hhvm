@@ -1,7 +1,7 @@
 <?hh
 
 class A {
-  final public function __construct(private $h) {}
+  final public function __construct(private $h)[] {}
   public function foo() { return $this->h['r'] as E; }
 }
 

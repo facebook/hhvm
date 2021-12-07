@@ -42,7 +42,7 @@ function multiArgTopLevel($a, $b, $c) {return MultiargtoplevelStatics::$i++;}
 function passthrough($a) {return $a;}
 
 class O implements HH\IMemoizeParam {
-  public function __construct(public string $a) {}
+  public function __construct(public string $a)[] {}
   public function getInstanceKey(): string { return $this->a; }
 }
 

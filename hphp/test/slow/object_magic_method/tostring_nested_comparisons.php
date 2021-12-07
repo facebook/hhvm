@@ -8,7 +8,7 @@ class C {
 }
 
 class Box {
-  public function __construct(public $p) {}
+  public function __construct(public $p)[] {}
 }
 
 <<__EntryPoint>>

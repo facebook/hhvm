@@ -333,7 +333,7 @@ Facts in attribute-classes.inc:
   functions: []
   constants: []
   attributes: [{"name":"NoArgFileAttr","args":[]},{"name":"TwoArgFileAttr","args":["Hello","There"]}]
-  sha1sum: 3204e667c4853260d1c7780f04a7863812833f8c
+  sha1sum: fe4faa5bf21efb6db5dc8931206d2d1c9a31f1be
 Facts in attribute-namespace.inc:
   types:
     name: AnnoyingNS\TerribleClass
@@ -874,7 +874,7 @@ Facts in attribute-classes.inc:
   functions: []
   constants: []
   attributes: [{"name":"NoArgFileAttr","args":[]},{"name":"TwoArgFileAttr","args":["Hello","There"]}]
-  sha1sum: 3204e667c4853260d1c7780f04a7863812833f8c
+  sha1sum: fe4faa5bf21efb6db5dc8931206d2d1c9a31f1be
 Facts in attribute-namespace.inc:
   types:
     name: AnnoyingNS\TerribleClass

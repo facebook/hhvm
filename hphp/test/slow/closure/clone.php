@@ -5,7 +5,7 @@ function g($func) {
 }
 
 class StrRef {
-  public function __construct(public string $val) {}
+  public function __construct(public string $val)[] {}
 }
 
 <<__EntryPoint>>

@@ -119,7 +119,7 @@ function boolNoRet(bool $a) {return ($a ? 42 : -42) + BoolnoretStatics::$i++;}
 interface I extends HH\IMemoizeParam {}
 
 class O implements I {
-  public function __construct(public string $a) {}
+  public function __construct(public string $a)[] {}
   public function getInstanceKey(): string { return $this->a; }
 }
 

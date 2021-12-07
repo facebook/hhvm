@@ -13,7 +13,7 @@ const inout = 12;
 class Cls {
   const int inout = 12;
 
-  function __construct() {}
+  function __construct()[] {}
   function Cls(inout $foo) {} // not a constructor because of __construct
 }
 

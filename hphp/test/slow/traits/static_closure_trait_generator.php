@@ -1,7 +1,7 @@
 <?hh
 
 class Ref {
-  public function __construct(public $val) {}
+  public function __construct(public $val)[] {}
 }
 
 class Foo { const Bar = 12; }

@@ -1,7 +1,7 @@
 <?hh
 
 class Foo {
-  public function __construct() {}
+  public function __construct()[] {}
   public function method() {}
   public function __toString() { throw new Exception('No string casts');}
 }

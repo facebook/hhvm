@@ -1,6 +1,6 @@
 <?hh
 class Foo {
-  public function __construct(int $prop = 4) {}
+  public function __construct(int $prop = 4)[] {}
 }
 
 <<__EntryPoint>>

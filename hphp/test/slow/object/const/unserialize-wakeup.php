@@ -2,7 +2,7 @@
 
 <<__Const>>
 class C {
-  public function __construct(public int $i) {}
+  public function __construct(public int $i)[] {}
   public function __wakeup(): void {
     echo "-- in C::__wakeup --\n";
     $this->i++;
@@ -11,7 +11,7 @@ class C {
 
 <<__Const>>
 class D {
-  public function __construct(public int $i, public C $c) {}
+  public function __construct(public int $i, public C $c)[] {}
   public function __wakeup(): void {
     echo "-- in D::__wakeup --\n";
     $this->i++;

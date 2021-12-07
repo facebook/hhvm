@@ -16,7 +16,7 @@ class OldStruct {
     ],
   ];
   public $features = null;
-  public function __construct($vals=null) {}
+  public function __construct($vals=null)[] {}
   public static function withDefaultValues()[]: this {
     return new static();
   }
@@ -38,7 +38,7 @@ class NewStruct {
     ],
   ];
   public $features = null;
-  public function __construct($vals=null) {}
+  public function __construct($vals=null)[] {}
   public static function withDefaultValues()[]: this {
     return new static();
   }

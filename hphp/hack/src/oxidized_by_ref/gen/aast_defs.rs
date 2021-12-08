@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5b7b8bc651d4d39ad172c16a1ff70483>>
+// @generated SignedSource<<747705742e2d21930389160ae35b577b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -260,12 +260,6 @@ pub enum Hint_<'a> {
     Hnonnull,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Habstr(&'a (&'a str, &'a [&'a Hint<'a>])),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Hdarray(&'a (&'a Hint<'a>, &'a Hint<'a>)),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Hvarray(&'a Hint<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    HvarrayOrDarray(&'a (Option<&'a Hint<'a>>, &'a Hint<'a>)),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     HvecOrDict(&'a (Option<&'a Hint<'a>>, &'a Hint<'a>)),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

@@ -73,11 +73,6 @@ let rec array_get ~array_pos ~expr_pos ~index_pos env array_ty index_ty =
   | Tunion tyl ->
     List.iter tyl ~f:(fun ty ->
         array_get ~array_pos ~expr_pos ~index_pos env ty index_ty)
-  | Tdarray (key_ty, _) ->
-    let (_ : (unit, unit) result) =
-      type_index env index_ty key_ty Reason.index_array
-    in
-    ()
   | Tclass ((_, cn), _, key_ty :: _)
     when cn = SN.Collections.cDict || cn = SN.Collections.cKeyset ->
     (* dict and keyset are both covariant in their key types so it is only
@@ -131,8 +126,6 @@ let rec array_get ~array_pos ~expr_pos ~index_pos env array_ty index_ty =
   | Terr
   | Tdynamic
   | Tany _
-  | Tvarray _
-  | Tvarray_or_darray _
   | Tnewtype _
   | Tdependent _
   | _ ->

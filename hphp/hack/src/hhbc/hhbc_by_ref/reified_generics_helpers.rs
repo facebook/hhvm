@@ -82,9 +82,6 @@ pub(crate) fn has_reified_type_constraint<'a, 'arena>(
         Hint_::Hprim(_)
         | Hint_::Hmixed
         | Hint_::Hnonnull
-        | Hint_::Hdarray(_, _)
-        | Hint_::Hvarray(_)
-        | Hint_::HvarrayOrDarray(_, _)
         | Hint_::HvecOrDict(_, _)
         | Hint_::Hthis
         | Hint_::Hnothing
@@ -132,9 +129,6 @@ fn remove_awaitable(h: aast::Hint) -> aast::Hint {
         | Hint_::Hmixed
         | Hint_::Hnonnull
         | Hint_::Habstr(_, _)
-        | Hint_::Hdarray(_, _)
-        | Hint_::Hvarray(_)
-        | Hint_::HvarrayOrDarray(_, _)
         | Hint_::HvecOrDict(_, _)
         | Hint_::Hprim(_)
         | Hint_::Hthis
@@ -235,9 +229,6 @@ pub(crate) fn remove_erased_generics<'a, 'arena>(
             | Hint_::Hmixed
             | Hint_::Hnonnull
             | Hint_::Habstr(_, _)
-            | Hint_::Hdarray(_, _)
-            | Hint_::Hvarray(_)
-            | Hint_::HvarrayOrDarray(_, _)
             | Hint_::HvecOrDict(_, _)
             | Hint_::Hprim(_)
             | Hint_::Hthis

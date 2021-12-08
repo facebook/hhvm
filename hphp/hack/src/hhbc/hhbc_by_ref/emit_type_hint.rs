@@ -151,9 +151,6 @@ fn hint_to_string<'a>(h: &'a Hint_) -> &'a str {
         Hprim(p) => prim_to_string(p),
         Hmixed | Hunion(_) | Hintersection(_) => typehints::MIXED,
         Hnonnull => typehints::NONNULL,
-        Hdarray(_, _) => typehints::DARRAY,
-        Hvarray(_) => typehints::VARRAY,
-        HvarrayOrDarray(_, _) => typehints::VARRAY_OR_DARRAY,
         Hthis => typehints::THIS,
         Hdynamic => typehints::DYNAMIC,
         Hnothing => typehints::NOTHING,
@@ -384,14 +381,7 @@ fn param_hint_to_type_info<'arena>(
 ) -> std::result::Result<HhasTypeInfo<'arena>, hhbc_by_ref_instruction_sequence::Error> {
     let Hint(_, h) = hint;
     let is_simple_hint = match h.as_ref() {
-        Hsoft(_)
-        | Hoption(_)
-        | Haccess(_, _)
-        | Hfun(_)
-        | Hdynamic
-        | Hnonnull
-        | Hmixed
-        | Hdarray(_, _) => false,
+        Hsoft(_) | Hoption(_) | Haccess(_, _) | Hfun(_) | Hdynamic | Hnonnull | Hmixed => false,
         Happly(Id(_, s), hs) => {
             if !hs.is_empty() {
                 false

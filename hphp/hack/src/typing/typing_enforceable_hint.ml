@@ -141,26 +141,6 @@ let validator =
           r
           "a type with generics, because generics are erased at runtime"
 
-    method! on_tvarray acc r tk =
-      if acc.Type_validator.like_context then
-        this#on_type acc tk
-      else
-        this#invalid acc r "an array type"
-
-    method! on_tdarray acc r tk tv =
-      if acc.Type_validator.like_context then
-        let acc = this#on_type acc tk in
-        this#on_type acc tv
-      else
-        this#invalid acc r "an array type"
-
-    method! on_tvarray_or_darray acc r tk tv =
-      if acc.Type_validator.like_context then
-        let acc = this#on_type acc tk in
-        this#on_type acc tv
-      else
-        this#invalid acc r "an array type"
-
     method! on_tunion acc r tyl =
       match tyl with
       | [] -> this#invalid acc r "the `nothing` type"

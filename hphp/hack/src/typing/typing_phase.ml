@@ -126,20 +126,6 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
           | reason -> Reason.Rinstantiate (reason, SN.Typehints.this, r))
     in
     (env, ty)
-  | Tdarray (tk, tv) ->
-    let (env, tk) = tvar_or_localize ~ety_env env r tk ~i:0 in
-    let (env, tv) = tvar_or_localize ~ety_env env r tv ~i:1 in
-    let ty = Tdarray (tk, tv) in
-    (env, mk (r, ty))
-  | Tvarray tv ->
-    let (env, tv) = tvar_or_localize ~ety_env env r tv ~i:0 in
-    let ty = Tvarray tv in
-    (env, mk (r, ty))
-  | Tvarray_or_darray (tk, tv) ->
-    let (env, tk) = tvar_or_localize ~ety_env env r tk ~i:0 in
-    let (env, tv) = tvar_or_localize ~ety_env env r tv ~i:1 in
-    (* Explicit decl Tvarray_or_darray should not exist when unification is true *)
-    (env, MakeType.varray_or_darray r tk tv)
   | Tvec_or_dict (tk, tv) ->
     let (env, tk) = tvar_or_localize ~ety_env env r tk ~i:0 in
     let (env, tv) = tvar_or_localize ~ety_env env r tv ~i:1 in

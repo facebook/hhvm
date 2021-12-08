@@ -289,17 +289,6 @@ and simplify_union_ ~approx_cancel_neg env ty1 ty2 r =
       when String.equal name1 name2 ->
       (* TODO(T69551141) handle type arguments above and below properly *)
       (env, Some (mk (r, Tgeneric (name1, []))))
-    | ((_, Tvarray ty1), (_, Tvarray ty2)) ->
-      let (env, ty) = union ~approx_cancel_neg env ty1 ty2 in
-      (env, Some (mk (r, Tvarray ty)))
-    | ((_, Tdarray (tk1, tv1)), (_, Tdarray (tk2, tv2))) ->
-      let (env, tk) = union ~approx_cancel_neg env tk1 tk2 in
-      let (env, tv) = union ~approx_cancel_neg env tv1 tv2 in
-      (env, Some (mk (r, Tdarray (tk, tv))))
-    | ((_, Tvarray_or_darray (tk1, tv1)), (_, Tvarray_or_darray (tk2, tv2))) ->
-      let (env, tk) = union ~approx_cancel_neg env tk1 tk2 in
-      let (env, tv) = union ~approx_cancel_neg env tv1 tv2 in
-      (env, Some (mk (r, Tvarray_or_darray (tk, tv))))
     | ((_, Tvec_or_dict (tk1, tv1)), (_, Tvec_or_dict (tk2, tv2))) ->
       let (env, tk) = union ~approx_cancel_neg env tk1 tk2 in
       let (env, tv) = union ~approx_cancel_neg env tv1 tv2 in
@@ -429,8 +418,8 @@ and simplify_union_ ~approx_cancel_neg env ty1 ty2 r =
     (* TODO with Tclass, union type arguments if covariant *)
     | ( ( _,
           ( Tprim _ | Tdynamic | Tgeneric _ | Tnewtype _ | Tdependent _
-          | Tclass _ | Ttuple _ | Tfun _ | Tshape _ | Terr | Tvar _ | Tvarray _
-          | Tdarray _ | Tvarray_or_darray _ | Tvec_or_dict _
+          | Tclass _ | Ttuple _ | Tfun _ | Tshape _ | Terr | Tvar _
+          | Tvec_or_dict _
           (* If T cannot be null, `union T nonnull = nonnull`. However, it's hard
            * to say whether a given T can be null - e.g. opaque newtypes, dependent
            * types, etc. - so for now we leave it here.

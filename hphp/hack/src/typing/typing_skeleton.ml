@@ -76,11 +76,6 @@ let rec of_decl_ty (ty : decl_ty) : string =
   | Tunion [] -> "nothing"
   | Tunion _ -> "mixed"
   | Tintersection _ -> "mixed"
-  | Tdarray (key_ty, val_ty) ->
-    (* Prefer newer dict/vec over darray/varray names. *)
-    Printf.sprintf "dict<%s, %s>" (of_decl_ty key_ty) (of_decl_ty val_ty)
-  | Tvarray ty -> Printf.sprintf "vec<%s>" (of_decl_ty ty)
-  | Tvarray_or_darray (key_ty, val_ty)
   | Tvec_or_dict (key_ty, val_ty) ->
     Printf.sprintf "vec_or_dict<%s, %s>" (of_decl_ty key_ty) (of_decl_ty val_ty)
   | Tlike ty -> of_decl_ty ty

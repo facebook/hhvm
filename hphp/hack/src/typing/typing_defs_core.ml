@@ -312,11 +312,6 @@ and _ ty_ =
        *   Tunion [null;t] is the same as Toption t
        *)
   | Tintersection : 'phase ty list -> 'phase ty_
-  | Tdarray : 'phase ty * 'phase ty -> 'phase ty_
-      (** Tdarray (ty1, ty2) => "darray<ty1, ty2>" *)
-  | Tvarray : 'phase ty -> 'phase ty_  (** Tvarray (ty) => "varray<ty>" *)
-  | Tvarray_or_darray : 'phase ty * 'phase ty -> 'phase ty_
-      (** Tvarray_or_darray (ty1, ty2) => "varray_or_darray<ty1, ty2>" *)
   | Tvec_or_dict : 'phase ty * 'phase ty -> 'phase ty_
       (** Tvec_or_dict (ty1, ty2) => "vec_or_dict<ty1, ty2>" *)
   | Taccess : 'phase taccess_type -> 'phase ty_
@@ -588,22 +583,6 @@ module Pp = struct
     | Taccess a0 ->
       Format.fprintf fmt "(@[<2>Taccess@ ";
       pp_taccess_type fmt a0;
-      Format.fprintf fmt "@])"
-    | Tdarray (a0, a1) ->
-      Format.fprintf fmt "(@[<2>Tdarray (@,";
-      pp_ty fmt a0;
-      Format.fprintf fmt ",@ ";
-      pp_ty fmt a1;
-      Format.fprintf fmt "@,))@]"
-    | Tvarray a0 ->
-      Format.fprintf fmt "(@[<2>Tvarray@ ";
-      pp_ty fmt a0;
-      Format.fprintf fmt "@])"
-    | Tvarray_or_darray (a0, a1) ->
-      Format.fprintf fmt "(@[<2>Tvarray_or_darray@ ";
-      pp_ty fmt a0;
-      Format.fprintf fmt ",@ ";
-      pp_ty fmt a1;
       Format.fprintf fmt "@])"
     | Tvec_or_dict (a0, a1) ->
       Format.fprintf fmt "(@[<2>Tvec_or_dict@ ";

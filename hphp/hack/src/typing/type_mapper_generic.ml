@@ -64,13 +64,6 @@ class type ['env] type_mapper_type =
       locl_phase shape_field_type TShapeMap.t ->
       'env * locl_ty
 
-    method on_tvarray : 'env -> Reason.t -> locl_ty -> 'env * locl_ty
-
-    method on_tdarray : 'env -> Reason.t -> locl_ty -> locl_ty -> 'env * locl_ty
-
-    method on_tvarray_or_darray :
-      'env -> Reason.t -> locl_ty -> locl_ty -> 'env * locl_ty
-
     method on_tvec_or_dict :
       'env -> Reason.t -> locl_ty -> locl_ty -> 'env * locl_ty
 
@@ -123,13 +116,6 @@ class ['env] shallow_type_mapper : ['env] type_mapper_type =
     method on_tshape env r shape_kind fdm =
       (env, mk (r, Tshape (shape_kind, fdm)))
 
-    method on_tvarray env r ty = (env, mk (r, Tvarray ty))
-
-    method on_tdarray env r ty1 ty2 = (env, mk (r, Tdarray (ty1, ty2)))
-
-    method on_tvarray_or_darray env r ty1 ty2 =
-      (env, mk (r, Tvarray_or_darray (ty1, ty2)))
-
     method on_tvec_or_dict env r ty1 ty2 = (env, mk (r, Tvec_or_dict (ty1, ty2)))
 
     method on_taccess env r ty id = (env, mk (r, Taccess (ty, id)))
@@ -155,9 +141,6 @@ class ['env] shallow_type_mapper : ['env] type_mapper_type =
       | Tclass (x, e, tyl) -> this#on_tclass env r x e tyl
       | Tdynamic -> this#on_tdynamic env r
       | Tshape (shape_kind, fdm) -> this#on_tshape env r shape_kind fdm
-      | Tvarray ty -> this#on_tvarray env r ty
-      | Tdarray (ty1, ty2) -> this#on_tdarray env r ty1 ty2
-      | Tvarray_or_darray (ty1, ty2) -> this#on_tvarray_or_darray env r ty1 ty2
       | Tvec_or_dict (ty1, ty2) -> this#on_tvec_or_dict env r ty1 ty2
       | Tunapplied_alias name -> this#on_tunapplied_alias env r name
       | Taccess (ty, id) -> this#on_taccess env r ty id

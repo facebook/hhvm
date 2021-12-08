@@ -66,7 +66,6 @@ let rec ty ?prefix ?lump renv (t : T.locl_ty) =
     Ttuple (List.map ~f:ty tyl)
   | T.Tunion tyl -> Tunion (List.map ~f:ty tyl)
   | T.Tintersection tyl -> Tinter (List.map ~f:ty tyl)
-  | T.Tvarray element_ty
   | T.Tclass ((_, "\\HH\\ConstSet"), _, [element_ty])
   | T.Tclass ((_, "\\HH\\ConstVector"), _, [element_ty])
   | T.Tclass ((_, "\\HH\\ImmSet"), _, [element_ty])
@@ -80,9 +79,7 @@ let rec ty ?prefix ?lump renv (t : T.locl_ty) =
         a_value = ty element_ty;
         a_length = get_policy ~prefix:"len" lump renv;
       }
-  | T.Tvarray_or_darray (key_ty, value_ty)
   | T.Tvec_or_dict (key_ty, value_ty)
-  | T.Tdarray (key_ty, value_ty)
   | T.Tclass ((_, "\\HH\\ConstMap"), _, [key_ty; value_ty])
   | T.Tclass ((_, "\\HH\\ImmMap"), _, [key_ty; value_ty])
   | T.Tclass ((_, "\\HH\\dict"), _, [key_ty; value_ty]) ->

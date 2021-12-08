@@ -30,10 +30,7 @@ let rec type_non_nullable env ty =
   | Tfun _
   | Ttuple _
   | Tshape _
-  | Tclass _
-  | Tvarray _
-  | Tdarray _
-  | Tvarray_or_darray _ ->
+  | Tclass _ ->
     true
   | Tnewtype (_, _, ty)
   | Tdependent (_, ty)
@@ -112,9 +109,6 @@ let rec truthiness env ty =
     Unknown
   | Tnonnull
   | Tneg _
-  | Tvarray _
-  | Tdarray _
-  | Tvarray_or_darray _
   | Toption _ ->
     Possibly_falsy
   | Tnewtype (id, _, _) when Env.is_enum env id -> Possibly_falsy
@@ -258,10 +252,7 @@ let rec find_sketchy_types env acc ty =
   | Ttuple _
   | Tshape _
   | Tvar _
-  | Tvarray _
-  | Tdarray _
   | Tvec_or_dict _
-  | Tvarray_or_darray _
   | Tunapplied_alias _
   | Taccess _
   | Tneg _ ->

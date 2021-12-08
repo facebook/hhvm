@@ -116,11 +116,8 @@ let get_enforcement (env : env) (ty : decl_ty) : Typing_defs.enforcement =
     | Tshape _ -> Unenforced
     | Tmixed -> Enforced
     | Tvar _ -> Unenforced
-    | Tdarray _ -> Unenforced
-    | Tvarray _ -> Unenforced
     (* With no parameters, we enforce varray_or_darray just like array *)
-    | Tvec_or_dict (_, ty)
-    | Tvarray_or_darray (_, ty) ->
+    | Tvec_or_dict (_, ty) ->
       if is_any ty then
         Enforced
       else

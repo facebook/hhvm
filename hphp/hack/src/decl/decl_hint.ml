@@ -100,18 +100,6 @@ and hint_ p env = function
   | Hthis -> Tthis
   | Hdynamic -> Tdynamic
   | Hnothing -> Tunion []
-  | Hdarray (h1, h2) -> Tdarray (hint env h1, hint env h2)
-  | Hvarray h -> Tvarray (hint env h)
-  | Hvarray_or_darray (h1, h2) ->
-    let t1 =
-      match h1 with
-      | Some h -> hint env h
-      | None ->
-        mk
-          ( Typing_reason.Rvarray_or_darray_key (Decl_env.make_decl_pos env p),
-            Tprim Aast.Tarraykey )
-    in
-    Tvarray_or_darray (t1, hint env h2)
   | Hvec_or_dict (h1, h2) ->
     let t1 =
       match h1 with

@@ -473,10 +473,7 @@ let is_union_or_inter_type (ty : locl_ty) =
   | Tdependent _
   | Tgeneric _
   | Tclass _
-  | Tvarray _
-  | Tdarray _
   | Tunapplied_alias _
-  | Tvarray_or_darray _
   | Tvec_or_dict _
   | Taccess _ ->
     false
@@ -593,9 +590,6 @@ let ty_con_ordinal_ : type a. a ty_ -> int = function
   | Tgeneric _ -> 11
   | Tunion _ -> 13
   | Tintersection _ -> 14
-  | Tvarray _ -> 20
-  | Tdarray _ -> 21
-  | Tvarray_or_darray _ -> 22
   | Taccess _ -> 24
   | Tvec_or_dict _ -> 25
   (* only locl constructors *)
@@ -641,12 +635,8 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
       ty_con_ordinal_ ty_1 - ty_con_ordinal_ ty_2
     (* Both or in Localized Phase *)
     | (Tprim ty1, Tprim ty2) -> Aast_defs.compare_tprim ty1 ty2
-    | (Toption ty, Toption ty2)
-    | (Tvarray ty, Tvarray ty2) ->
-      ty_compare ty ty2
-    | (Tdarray (tk, tv), Tdarray (tk2, tv2))
-    | (Tvec_or_dict (tk, tv), Tvec_or_dict (tk2, tv2))
-    | (Tvarray_or_darray (tk, tv), Tvarray_or_darray (tk2, tv2)) ->
+    | (Toption ty, Toption ty2) -> ty_compare ty ty2
+    | (Tvec_or_dict (tk, tv), Tvec_or_dict (tk2, tv2)) ->
       begin
         match ty_compare tk tk2 with
         | 0 -> ty_compare tv tv2
@@ -715,11 +705,10 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
     | (Tnonnull, Tnonnull) -> 0
     | (Tdynamic, Tdynamic) -> 0
     | (Terr, Terr) -> 0
-    | ( ( Tprim _ | Toption _ | Tvarray _ | Tdarray _ | Tvarray_or_darray _
-        | Tvec_or_dict _ | Tfun _ | Tintersection _ | Tunion _ | Ttuple _
-        | Tgeneric _ | Tnewtype _ | Tdependent _ | Tclass _ | Tshape _ | Tvar _
-        | Tunapplied_alias _ | Tnonnull | Tdynamic | Terr | Taccess _ | Tany _
-        | Tneg _ ),
+    | ( ( Tprim _ | Toption _ | Tvec_or_dict _ | Tfun _ | Tintersection _
+        | Tunion _ | Ttuple _ | Tgeneric _ | Tnewtype _ | Tdependent _
+        | Tclass _ | Tshape _ | Tvar _ | Tunapplied_alias _ | Tnonnull
+        | Tdynamic | Terr | Taccess _ | Tany _ | Tneg _ ),
         _ ) ->
       ty_con_ordinal_ ty_1 - ty_con_ordinal_ ty_2
   and shape_field_type_compare :

@@ -7,8 +7,6 @@
  *
  *)
 
-open Aast
-open Typing_defs
 module Env = Tast_env
 module TCO = TypecheckerOptions
 
@@ -19,20 +17,7 @@ let handler =
   object
     inherit Tast_visitor.handler_base
 
-    method! at_hint env (_, hint_) =
+    method! at_hint _env (_, hint_) =
       match hint_ with
-      | Hdarray (((p, _) as hkey), _) when should_enforce env ->
-        let (env, ty) =
-          hkey
-          |> Env.hint_to_ty env
-          |> Env.localize_no_subst env ~ignore_errors:true
-        in
-        let (env, bound) =
-          Typing_make_type.arraykey Reason.Rnone
-          |> Typing_make_type.like Reason.Rnone
-          |> Env.localize_no_subst env ~ignore_errors:true
-        in
-        if not (Env.can_subtype env ty bound) then
-          Errors.invalid_arraykey_constraint p (Env.print_error_ty env ty)
       | _ -> ()
   end

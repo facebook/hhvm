@@ -1355,24 +1355,10 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                         {
                             if must_reinfer_type(ty.1) {
                                 let tvar = mk(r, Ty_::Tvar(0));
-                                mk(r, Ty_::TvarrayOrDarray(this.alloc((tvar, tvar))))
+                                mk(r, Ty_::TvecOrDict(this.alloc((tvar, tvar))))
                             } else {
                                 ty
                             }
-                        }
-                        Ty(r, Ty_::Tvarray(ty)) => {
-                            let ty = create_vars_for_reinfer_types(this, ty, tvar);
-                            mk(r, Ty_::Tvarray(ty))
-                        }
-                        Ty(r, Ty_::Tdarray((tyk, tyv))) => {
-                            let tyk = create_vars_for_reinfer_types(this, tyk, tvar);
-                            let tyv = create_vars_for_reinfer_types(this, tyv, tvar);
-                            mk(r, Ty_::Tdarray(this.alloc((tyk, tyv))))
-                        }
-                        Ty(r, Ty_::TvarrayOrDarray((tyk, tyv))) => {
-                            let tyk = create_vars_for_reinfer_types(this, tyk, tvar);
-                            let tyv = create_vars_for_reinfer_types(this, tyv, tvar);
-                            mk(r, Ty_::TvarrayOrDarray(this.alloc((tyk, tyv))))
                         }
                         Ty(_r, ty_) => {
                             if must_reinfer_type(ty_) {
@@ -2042,15 +2028,6 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                 }
                 Ty_::Tshape(self.alloc((kind, converted_fields.into())))
             }
-            Ty_::Tdarray(&(tk, tv)) => Ty_::Tdarray(self.alloc((
-                self.convert_tapply_to_tgeneric(tk),
-                self.convert_tapply_to_tgeneric(tv),
-            ))),
-            Ty_::Tvarray(ty) => Ty_::Tvarray(self.convert_tapply_to_tgeneric(ty)),
-            Ty_::TvarrayOrDarray(&(tk, tv)) => Ty_::TvarrayOrDarray(self.alloc((
-                self.convert_tapply_to_tgeneric(tk),
-                self.convert_tapply_to_tgeneric(tv),
-            ))),
             Ty_::TvecOrDict(&(tk, tv)) => Ty_::TvecOrDict(self.alloc((
                 self.convert_tapply_to_tgeneric(tk),
                 self.convert_tapply_to_tgeneric(tv),

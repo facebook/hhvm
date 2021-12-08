@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<bef73ac508a97f10fede49cf09df7a88>>
+// @generated SignedSource<<66949fc7205fdfd72d8ab0207b637ef9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -226,15 +226,6 @@ impl Hint_ {
     pub fn mk_habstr(p0: String, p1: Vec<Hint>) -> Self {
         Hint_::Habstr(p0, p1)
     }
-    pub fn mk_hdarray(p0: Hint, p1: Hint) -> Self {
-        Hint_::Hdarray(p0, p1)
-    }
-    pub fn mk_hvarray(p0: Hint) -> Self {
-        Hint_::Hvarray(p0)
-    }
-    pub fn mk_hvarray_or_darray(p0: Option<Hint>, p1: Hint) -> Self {
-        Hint_::HvarrayOrDarray(p0, p1)
-    }
     pub fn mk_hvec_or_dict(p0: Option<Hint>, p1: Hint) -> Self {
         Hint_::HvecOrDict(p0, p1)
     }
@@ -337,24 +328,6 @@ impl Hint_ {
     pub fn is_habstr(&self) -> bool {
         match self {
             Hint_::Habstr(..) => true,
-            _ => false,
-        }
-    }
-    pub fn is_hdarray(&self) -> bool {
-        match self {
-            Hint_::Hdarray(..) => true,
-            _ => false,
-        }
-    }
-    pub fn is_hvarray(&self) -> bool {
-        match self {
-            Hint_::Hvarray(..) => true,
-            _ => false,
-        }
-    }
-    pub fn is_hvarray_or_darray(&self) -> bool {
-        match self {
-            Hint_::HvarrayOrDarray(..) => true,
             _ => false,
         }
     }
@@ -466,24 +439,6 @@ impl Hint_ {
             _ => None,
         }
     }
-    pub fn as_hdarray(&self) -> Option<(&Hint, &Hint)> {
-        match self {
-            Hint_::Hdarray(p0, p1) => Some((p0, p1)),
-            _ => None,
-        }
-    }
-    pub fn as_hvarray(&self) -> Option<&Hint> {
-        match self {
-            Hint_::Hvarray(p0) => Some(p0),
-            _ => None,
-        }
-    }
-    pub fn as_hvarray_or_darray(&self) -> Option<(&Option<Hint>, &Hint)> {
-        match self {
-            Hint_::HvarrayOrDarray(p0, p1) => Some((p0, p1)),
-            _ => None,
-        }
-    }
     pub fn as_hvec_or_dict(&self) -> Option<(&Option<Hint>, &Hint)> {
         match self {
             Hint_::HvecOrDict(p0, p1) => Some((p0, p1)),
@@ -574,24 +529,6 @@ impl Hint_ {
             _ => None,
         }
     }
-    pub fn as_hdarray_mut(&mut self) -> Option<(&mut Hint, &mut Hint)> {
-        match self {
-            Hint_::Hdarray(p0, p1) => Some((p0, p1)),
-            _ => None,
-        }
-    }
-    pub fn as_hvarray_mut(&mut self) -> Option<&mut Hint> {
-        match self {
-            Hint_::Hvarray(p0) => Some(p0),
-            _ => None,
-        }
-    }
-    pub fn as_hvarray_or_darray_mut(&mut self) -> Option<(&mut Option<Hint>, &mut Hint)> {
-        match self {
-            Hint_::HvarrayOrDarray(p0, p1) => Some((p0, p1)),
-            _ => None,
-        }
-    }
     pub fn as_hvec_or_dict_mut(&mut self) -> Option<(&mut Option<Hint>, &mut Hint)> {
         match self {
             Hint_::HvecOrDict(p0, p1) => Some((p0, p1)),
@@ -679,24 +616,6 @@ impl Hint_ {
     pub fn as_habstr_into(self) -> Option<(String, Vec<Hint>)> {
         match self {
             Hint_::Habstr(p0, p1) => Some((p0, p1)),
-            _ => None,
-        }
-    }
-    pub fn as_hdarray_into(self) -> Option<(Hint, Hint)> {
-        match self {
-            Hint_::Hdarray(p0, p1) => Some((p0, p1)),
-            _ => None,
-        }
-    }
-    pub fn as_hvarray_into(self) -> Option<Hint> {
-        match self {
-            Hint_::Hvarray(p0) => Some(p0),
-            _ => None,
-        }
-    }
-    pub fn as_hvarray_or_darray_into(self) -> Option<(Option<Hint>, Hint)> {
-        match self {
-            Hint_::HvarrayOrDarray(p0, p1) => Some((p0, p1)),
             _ => None,
         }
     }

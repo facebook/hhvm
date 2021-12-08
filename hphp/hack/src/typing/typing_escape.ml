@@ -287,17 +287,6 @@ and refresh_type renv v ty_orig =
         (renv, ty, changed)
       | Unchanged -> (renv, ty_orig, Unchanged)
     end
-  | (r, Tdarray (ty1, ty2)) ->
-    let (renv, ty1, ch1) = refresh_type renv v ty1 in
-    let (renv, ty2, ch2) = refresh_type renv v ty2 in
-    (renv, mk (r, Tdarray (ty1, ty2)), ch1 || ch2)
-  | (r, Tvarray ty1) ->
-    let (renv, ty1, ch1) = refresh_type renv v ty1 in
-    (renv, mk (r, Tvarray ty1), ch1)
-  | (r, Tvarray_or_darray (ty1, ty2)) ->
-    let (renv, ty1, ch1) = refresh_type renv v ty1 in
-    let (renv, ty2, ch2) = refresh_type renv v ty2 in
-    (renv, mk (r, Tvarray_or_darray (ty1, ty2)), ch1 || ch2)
   | (r, Tvec_or_dict (ty1, ty2)) ->
     let (renv, ty1, ch1) = refresh_type renv v ty1 in
     let (renv, ty2, ch2) = refresh_type renv v ty2 in

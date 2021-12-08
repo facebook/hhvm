@@ -124,9 +124,6 @@ and hint_ =
   | Hmixed
   | Hnonnull
   | Habstr of string * hint list
-  | Hdarray of hint * hint
-  | Hvarray of hint
-  | Hvarray_or_darray of hint option * hint
   | Hvec_or_dict of hint option * hint
   | Hprim of tprim
   | Hthis

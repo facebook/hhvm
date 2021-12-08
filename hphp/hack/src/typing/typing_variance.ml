@@ -311,8 +311,7 @@ and get_typarams ~tracked tenv (ty : decl_ty) =
     empty
   | Toption ty
   | Tlike ty
-  | Taccess (ty, _)
-  | Tvarray ty ->
+  | Taccess (ty, _) ->
     get_typarams ty
   | Tunion tyl
   | Tintersection tyl
@@ -491,10 +490,7 @@ and get_typarams ~tracked tenv (ty : decl_ty) =
       get_class_variance tenv (Positioned.unsafe_to_raw_positioned pos_name)
     in
     get_typarams_variance_list empty variancel tyl
-  | Tdarray (ty1, ty2)
-  | Tvarray_or_darray (ty1, ty2)
-  | Tvec_or_dict (ty1, ty2) ->
-    union (get_typarams ty1) (get_typarams ty2)
+  | Tvec_or_dict (ty1, ty2) -> union (get_typarams ty1) (get_typarams ty2)
 
 let get_positive_negative_generics ~tracked ~is_mutable env acc ty =
   let r = get_typarams ~tracked env ty in
@@ -569,12 +565,7 @@ let rec hint : Env.t -> variance -> Aast_defs.hint -> unit =
   | Hfun_context _
   | Hprim _ ->
     ()
-  | Hvarray h -> hint env variance h
-  | Hdarray (hk, hv) ->
-    hint env variance hk;
-    hint env variance hv
-  | Hvec_or_dict (hk, hv)
-  | Hvarray_or_darray (hk, hv) ->
+  | Hvec_or_dict (hk, hv) ->
     Option.iter hk ~f:(hint env variance);
     hint env variance hv
   | Hthis ->

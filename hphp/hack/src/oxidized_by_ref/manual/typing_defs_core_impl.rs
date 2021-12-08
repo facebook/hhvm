@@ -143,13 +143,6 @@ impl std::fmt::Debug for Ty_<'_> {
             Tgeneric(name) => write!(f, "Tgeneric({:?})", name),
             Tunion(tys) => f.debug_tuple("Tunion").field(tys).finish(),
             Tintersection(tys) => f.debug_tuple("Tintersection").field(tys).finish(),
-            Tdarray((tk, tv)) => f.debug_tuple("Tdarray").field(tk).field(tv).finish(),
-            Tvarray(ty) => f.debug_tuple("Tvarray").field(ty).finish(),
-            TvarrayOrDarray((tk, tv)) => f
-                .debug_tuple("TvarrayOrDarray")
-                .field(tk)
-                .field(tv)
-                .finish(),
             TvecOrDict((tk, tv)) => f.debug_tuple("TvecOrDict").field(tk).field(tv).finish(),
             Tnewtype((name, tys, constraint)) => f
                 .debug_tuple("Tnewtype")

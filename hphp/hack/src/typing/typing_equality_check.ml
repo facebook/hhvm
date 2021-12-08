@@ -108,22 +108,14 @@ let rec assert_nontrivial p bop env ty1 ty2 =
     | ((_, Toption ty1), (_, Tprim _)) -> assert_nontrivial p bop env ty1 ty2
     | ((_, Tprim _), (_, Toption ty2)) -> assert_nontrivial p bop env ty1 ty2
     | ( ( _,
-          ( Terr | Tany _ | Tnonnull | Tvarray _ | Tdarray _
-          | Tvarray_or_darray _ | Tvec_or_dict _ | Tprim _ | Toption _
+          ( Terr | Tany _ | Tnonnull | Tvec_or_dict _ | Tprim _ | Toption _
           | Tdynamic | Tvar _ | Tfun _ | Tgeneric _ | Tnewtype _ | Tdependent _
           | Tclass _ | Ttuple _ | Tunion _ | Tintersection _ | Tshape _
           | Taccess _ | Tunapplied_alias _ | Tneg _ ) ),
         _ ) ->
       ())
 
-let assert_nullable p bop env ty =
+let assert_nullable _p _bop env ty =
   let (_, ty) = Env.expand_type env ty in
   match deref ty with
-  | (r, (Tvarray _ | Tdarray _ | Tvarray_or_darray _)) ->
-    let trivial_result = trivial_result_str bop in
-    let ty_str = Typing_print.error env ty in
-    let msgl =
-      Reason.to_string ("This is " ^ ty_str ^ " and cannot be null") r
-    in
-    Errors.trivial_strict_not_nullable_compare_null p trivial_result msgl
   | (_, _) -> ()

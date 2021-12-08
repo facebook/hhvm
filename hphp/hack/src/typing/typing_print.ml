@@ -235,12 +235,6 @@ module Full = struct
     | Nast.Tarraykey -> "arraykey"
     | Nast.Tnoreturn -> "noreturn"
 
-  let tdarray k x y = list "darray<" k [x; y] ">"
-
-  let tvarray k x = list "varray<" k [x] ">"
-
-  let tvarray_or_darray k x y = list "varray_or_darray<" k [x; y] ">"
-
   let tfun ~ty to_doc st penv ft =
     let sdt =
       match penv with
@@ -353,9 +347,6 @@ module Full = struct
     | Tmixed -> text "mixed"
     | Tdynamic -> text "dynamic"
     | Tnonnull -> text "nonnull"
-    | Tdarray (x, y) -> tdarray k x y
-    | Tvarray x -> tvarray k x
-    | Tvarray_or_darray (x, y) -> tvarray_or_darray k x y
     | Tvec_or_dict (x, y) -> list "vec_or_dict<" k [x; y] ">"
     | Tapply ((_, s), []) -> to_doc s
     | Tgeneric (s, []) -> to_doc s
@@ -424,10 +415,7 @@ module Full = struct
     | Terr -> terr ()
     | Tdynamic -> text "dynamic"
     | Tnonnull -> text "nonnull"
-    | Tvarray_or_darray (x, y) -> tvarray_or_darray k x y
     | Tvec_or_dict (x, y) -> list "vec_or_dict<" k [x; y] ">"
-    | Tvarray x -> tvarray k x
-    | Tdarray (x, y) -> tdarray k x y
     | Tclass ((_, s), Exact, []) when !debug_mode ->
       Concat [text "exact"; Space; to_doc s]
     | Tclass ((_, s), _, []) -> to_doc s
@@ -801,12 +789,6 @@ module ErrorString = struct
     | Nast.Tarraykey -> "an array key (int | string)"
     | Nast.Tnoreturn -> "noreturn (throws or exits)"
 
-  let varray = "a varray"
-
-  let darray = "a darray"
-
-  let varray_or_darray = "a varray_or_darray"
-
   let rec type_ ?(ignore_dynamic = false) env ty =
     match ty with
     | Tany _ -> "an untyped value"
@@ -817,10 +799,7 @@ module ErrorString = struct
     | Tunion l -> union env l
     | Tintersection [] -> "a mixed value"
     | Tintersection l -> intersection env l
-    | Tvarray_or_darray _ -> varray_or_darray
     | Tvec_or_dict _ -> "a vec_or_dict"
-    | Tvarray _ -> varray
-    | Tdarray (_, _) -> darray
     | Ttuple l -> "a tuple of size " ^ string_of_int (List.length l)
     | Tnonnull -> "a nonnull value"
     | Toption x ->
@@ -1043,12 +1022,8 @@ module Json = struct
       in
       let params fps = [("params", JSON_Array (List.map fps ~f:param))] in
       obj @@ fun_kind p @ params ft.ft_params @ result ft.ft_ret.et_type
-    | (p, Tvarray_or_darray (ty1, ty2)) ->
-      obj @@ kind p "varray_or_darray" @ args [ty1; ty2]
     | (p, Tvec_or_dict (ty1, ty2)) ->
       obj @@ kind p "vec_or_dict" @ args [ty1; ty2]
-    | (p, Tdarray (ty1, ty2)) -> obj @@ kind p "darray" @ args [ty1; ty2]
-    | (p, Tvarray ty) -> obj @@ kind p "varray" @ args [ty]
     (* TODO akenn *)
     | (p, Taccess (ty, _id)) -> obj @@ kind p "type_constant" @ args [ty]
 
@@ -1174,75 +1149,6 @@ module Json = struct
               deserialization_error
                 ~message:("Unknown path kind: " ^ path_kind)
                 ~keytrace:path_kind_keytrace
-          end
-        | "darray" ->
-          get_array "args" (json, keytrace) >>= fun (args, keytrace) ->
-          begin
-            match args with
-            | [ty1; ty2] ->
-              aux ty1 ~keytrace:("0" :: keytrace) >>= fun ty1 ->
-              aux ty2 ~keytrace:("1" :: keytrace) >>= fun ty2 ->
-              ty (Tdarray (ty1, ty2))
-            | _ ->
-              deserialization_error
-                ~message:
-                  (Printf.sprintf
-                     "Invalid number of type arguments to darray (expected 2): %d"
-                     (List.length args))
-                ~keytrace
-          end
-        | "varray" ->
-          get_array "args" (json, keytrace) >>= fun (args, keytrace) ->
-          begin
-            match args with
-            | [ty1] ->
-              aux ty1 ~keytrace:("0" :: keytrace) >>= fun ty1 ->
-              ty (Tvarray ty1)
-            | _ ->
-              deserialization_error
-                ~message:
-                  (Printf.sprintf
-                     "Invalid number of type arguments to varray (expected 1): %d"
-                     (List.length args))
-                ~keytrace
-          end
-        | "varray_or_darray" ->
-          get_array "args" (json, keytrace) >>= fun (args, keytrace) ->
-          begin
-            match args with
-            | [ty1; ty2] ->
-              aux ty1 ~keytrace:("0" :: keytrace) >>= fun ty1 ->
-              aux ty2 ~keytrace:("1" :: keytrace) >>= fun ty2 ->
-              ty (Tvarray_or_darray (ty1, ty2))
-            | _ ->
-              deserialization_error
-                ~message:
-                  (Printf.sprintf
-                     "Invalid number of type arguments to varray_or_darray (expected 2): %d"
-                     (List.length args))
-                ~keytrace
-          end
-        | "array" ->
-          get_array "args" (json, keytrace) >>= fun (args, _args_keytrace) ->
-          begin
-            match args with
-            | [] ->
-              let tany = mk (Reason.Rnone, Typing_defs.make_tany ()) in
-              ty (Tvarray_or_darray (tany, tany))
-            | [ty1] ->
-              aux ty1 ~keytrace:("0" :: keytrace) >>= fun ty1 ->
-              ty (Tvarray ty1)
-            | [ty1; ty2] ->
-              aux ty1 ~keytrace:("0" :: keytrace) >>= fun ty1 ->
-              aux ty2 ~keytrace:("1" :: keytrace) >>= fun ty2 ->
-              ty (Tdarray (ty1, ty2))
-            | _ ->
-              deserialization_error
-                ~message:
-                  (Printf.sprintf
-                     "Invalid number of type arguments to array (expected 0-2): %d"
-                     (List.length args))
-                ~keytrace
           end
         | "tuple" ->
           get_array "args" (json, keytrace) >>= fun (args, args_keytrace) ->

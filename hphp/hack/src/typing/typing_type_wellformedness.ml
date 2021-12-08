@@ -174,14 +174,9 @@ and hint_ ~via_label ~in_signature env p h_ =
   | Hoption (_, Hprim Tnoreturn) ->
     Errors.option_return_only_typehint p `noreturn
   | Hoption (_, Hmixed) -> Errors.option_mixed p
-  | Hdarray (ty1, ty2) ->
-    hint env ty1;
-    hint env ty2
-  | Hvec_or_dict (ty1, ty2)
-  | Hvarray_or_darray (ty1, ty2) ->
+  | Hvec_or_dict (ty1, ty2) ->
     maybe hint env ty1;
     hint env ty2
-  | Hvarray ty -> hint env ty
   | Htuple hl
   | Hunion hl
   | Hintersection hl ->

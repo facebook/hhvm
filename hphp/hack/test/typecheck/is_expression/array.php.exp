@@ -1,30 +1,11 @@
 File "array.php", line 5, characters 5-15:
-  varray<_>
+  vec<mixed>
 File "array.php", line 7, characters 5-15:
-  darray<_, _>
+  dict<arraykey, mixed>
 File "array.php", line 9, characters 5-15:
-  varray<_>
+  nothing
 File "array.php", line 11, characters 5-15:
-  darray<_, _>
+  nothing
 File "array.php", line 13, characters 5-15:
-  vec_or_dict<arraykey, _>
-File "array.php", line 4, characters 13-21:
-Invalid `is` expression hint (Typing[4195])
-  File "array.php", line 4, characters 13-21:
-  The `is` operator cannot be used with an array type
-File "array.php", line 6, characters 20-31:
-Invalid `is` expression hint (Typing[4195])
-  File "array.php", line 6, characters 20-31:
-  The `is` operator cannot be used with an array type
-File "array.php", line 8, characters 20-28:
-Invalid `is` expression hint (Typing[4195])
-  File "array.php", line 8, characters 20-28:
-  The `is` operator cannot be used with an array type
-File "array.php", line 10, characters 20-31:
-Invalid `is` expression hint (Typing[4195])
-  File "array.php", line 10, characters 20-31:
-  The `is` operator cannot be used with an array type
-File "array.php", line 12, characters 20-38:
-Invalid `is` expression hint (Typing[4195])
-  File "array.php", line 12, characters 20-38:
-  The `is` operator cannot be used with an array type
+  (not dict & not vec & vec_or_dict<arraykey, _>)
+No errors

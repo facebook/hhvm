@@ -202,12 +202,9 @@ let rec this_appears_covariantly ~contra env ty =
         this_appears_covariantly ~contra env f.sft_ty)
   | Taccess (ty, _)
   | Tlike ty
-  | Toption ty
-  | Tvarray ty ->
+  | Toption ty ->
     this_appears_covariantly ~contra env ty
-  | Tdarray (ty1, ty2)
-  | Tvec_or_dict (ty1, ty2)
-  | Tvarray_or_darray (ty1, ty2) ->
+  | Tvec_or_dict (ty1, ty2) ->
     this_appears_covariantly ~contra env ty1
     || this_appears_covariantly ~contra env ty2
   | Tapply (pos_name, tyl) ->

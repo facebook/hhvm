@@ -61,11 +61,7 @@ let check_param : env -> Nast.fun_param -> unit =
       | Tunion tyl
       | Tintersection tyl ->
         List.iter tyl ~f:(check_memoizable env)
-      | Tvarray ty
-      | Tdarray (_, ty)
-      | Tvec_or_dict (_, ty)
-      | Tvarray_or_darray (_, ty) ->
-        check_memoizable env ty
+      | Tvec_or_dict (_, ty) -> check_memoizable env ty
       | Tshape (_, fdm) ->
         TShapeMap.iter
           begin

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e693511f812fd0b1e5a6f018ab65cea7>>
+// @generated SignedSource<<bef7311dcf05358993c0fd36b802891c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -686,15 +686,6 @@ pub enum Ty_<'a> {
     Tunion(&'a [&'a Ty<'a>]),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Tintersection(&'a [&'a Ty<'a>]),
-    /// Tdarray (ty1, ty2) => "darray<ty1, ty2>"
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Tdarray(&'a (&'a Ty<'a>, &'a Ty<'a>)),
-    /// Tvarray (ty) => "varray<ty>"
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Tvarray(&'a Ty<'a>),
-    /// Tvarray_or_darray (ty1, ty2) => "varray_or_darray<ty1, ty2>"
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    TvarrayOrDarray(&'a (&'a Ty<'a>, &'a Ty<'a>)),
     /// Tvec_or_dict (ty1, ty2) => "vec_or_dict<ty1, ty2>"
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     TvecOrDict(&'a (&'a Ty<'a>, &'a Ty<'a>)),

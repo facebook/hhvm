@@ -41,10 +41,6 @@ let expand_ty ?var_hook ?pos env ty =
       | (p, Tdependent (n, ty)) -> mk (p, Tdependent (n, exp_ty ty))
       | (p, Tshape (shape_kind, fields)) ->
         mk (p, Tshape (shape_kind, TShapeMap.map exp_sft fields))
-      | (p, Tvarray ty) -> mk (p, Tvarray (exp_ty ty))
-      | (p, Tdarray (ty1, ty2)) -> mk (p, Tdarray (exp_ty ty1, exp_ty ty2))
-      | (p, Tvarray_or_darray (ty1, ty2)) ->
-        mk (p, Tvarray_or_darray (exp_ty ty1, exp_ty ty2))
       | (p, Tvec_or_dict (ty1, ty2)) ->
         mk (p, Tvec_or_dict (exp_ty ty1, exp_ty ty2))
       | (p, Tvar v) ->

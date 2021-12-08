@@ -25,15 +25,8 @@ class type ['a] decl_type_visitor_type =
 
     method on_tthis : 'a -> decl_phase Reason.t_ -> 'a
 
-    method on_tvarray_or_darray :
-      'a -> decl_phase Reason.t_ -> decl_ty -> decl_ty -> 'a
-
     method on_tvec_or_dict :
       'a -> decl_phase Reason.t_ -> decl_ty -> decl_ty -> 'a
-
-    method on_tvarray : 'a -> decl_phase Reason.t_ -> decl_ty -> 'a
-
-    method on_tdarray : 'a -> decl_phase Reason.t_ -> decl_ty -> decl_ty -> 'a
 
     method on_tgeneric :
       'a -> decl_phase Reason.t_ -> string -> decl_ty list -> 'a
@@ -84,17 +77,7 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
 
     method on_tthis acc _ = acc
 
-    method on_tvarray_or_darray acc _ ty1 ty2 =
-      let acc = this#on_type acc ty1 in
-      this#on_type acc ty2
-
     method on_tvec_or_dict acc _ ty1 ty2 =
-      let acc = this#on_type acc ty1 in
-      this#on_type acc ty2
-
-    method on_tvarray acc _ ty = this#on_type acc ty
-
-    method on_tdarray acc _ ty1 ty2 =
       let acc = this#on_type acc ty1 in
       this#on_type acc ty2
 
@@ -151,9 +134,6 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
       | Tnonnull -> this#on_tnonnull acc r
       | Tdynamic -> this#on_tdynamic acc r
       | Tthis -> this#on_tthis acc r
-      | Tdarray (ty1, ty2) -> this#on_tdarray acc r ty1 ty2
-      | Tvarray ty -> this#on_tvarray acc r ty
-      | Tvarray_or_darray (ty1, ty2) -> this#on_tvarray_or_darray acc r ty1 ty2
       | Tvec_or_dict (ty1, ty2) -> this#on_tvec_or_dict acc r ty1 ty2
       | Tgeneric (s, args) -> this#on_tgeneric acc r s args
       | Toption ty -> this#on_toption acc r ty
@@ -206,13 +186,7 @@ class type ['a] locl_type_visitor_type =
 
     method on_tintersection : 'a -> Reason.t -> locl_ty list -> 'a
 
-    method on_tvarray_or_darray : 'a -> Reason.t -> locl_ty -> locl_ty -> 'a
-
     method on_tvec_or_dict : 'a -> Reason.t -> locl_ty -> locl_ty -> 'a
-
-    method on_tvarray : 'a -> Reason.t -> locl_ty -> 'a
-
-    method on_tdarray : 'a -> Reason.t -> locl_ty -> locl_ty -> 'a
 
     method on_tshape :
       'a ->
@@ -294,17 +268,7 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
 
     method on_tlist acc _ tyl = List.fold_left tyl ~f:this#on_type ~init:acc
 
-    method on_tvarray_or_darray acc _ ty1 ty2 =
-      let acc = this#on_type acc ty1 in
-      this#on_type acc ty2
-
     method on_tvec_or_dict acc _ ty1 ty2 =
-      let acc = this#on_type acc ty1 in
-      this#on_type acc ty2
-
-    method on_tvarray acc _ ty = this#on_type acc ty
-
-    method on_tdarray acc _ ty1 ty2 =
       let acc = this#on_type acc ty1 in
       this#on_type acc ty2
 
@@ -336,9 +300,6 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
       | Tintersection tyl -> this#on_tintersection acc r tyl
       | Tshape (shape_kind, fdm) -> this#on_tshape acc r shape_kind fdm
       | Tclass (cls, exact, tyl) -> this#on_tclass acc r cls exact tyl
-      | Tvarray ty -> this#on_tvarray acc r ty
-      | Tdarray (ty1, ty2) -> this#on_tdarray acc r ty1 ty2
-      | Tvarray_or_darray (ty1, ty2) -> this#on_tvarray_or_darray acc r ty1 ty2
       | Tvec_or_dict (ty1, ty2) -> this#on_tvec_or_dict acc r ty1 ty2
       | Tunapplied_alias n -> this#on_tunapplied_alias acc r n
       | Taccess (ty, ids) -> this#on_taccess acc r (ty, ids)

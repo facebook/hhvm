@@ -577,22 +577,15 @@ end = struct
   let class_names hint =
     let rec aux acc = function
       | Aast_defs.Happly ((_, nm), hints) -> auxs (nm :: acc) hints
-      | Aast_defs.(
-          ( Haccess (hint, _)
-          | Hlike hint
-          | Hsoft hint
-          | Hvarray hint
-          | Hoption hint )) ->
+      | Aast_defs.(Haccess (hint, _) | Hlike hint | Hsoft hint | Hoption hint)
+        ->
         aux acc @@ snd hint
       | Aast_defs.Habstr (_, hints)
       | Aast_defs.Hunion hints
       | Aast_defs.Hintersection hints
       | Aast_defs.Htuple hints ->
         auxs acc hints
-      | Aast_defs.Hdarray (hint_k, hint_v) ->
-        aux (aux acc @@ snd hint_k) @@ snd hint_v
-      | Aast_defs.(
-          Hvarray_or_darray (hint_opt, hint) | Hvec_or_dict (hint_opt, hint)) ->
+      | Aast_defs.(Hvec_or_dict (hint_opt, hint)) ->
         let acc = aux acc @@ snd hint in
         Option.value_map
           ~default:acc
@@ -1138,11 +1131,7 @@ end = struct
         | Hprim prim -> pp_prim ppf prim
         | Hoption _ -> Fmt.string ppf "null"
         | Hlike hint -> pp tparams ppf hint
-        | Hdarray _ -> Fmt.string ppf "darray[]"
-        | Hvec_or_dict _
-        | Hvarray_or_darray _
-        | Hvarray _ ->
-          Fmt.string ppf "varray[]"
+        | Hvec_or_dict _ -> Fmt.string ppf "varray[]"
         | Htuple hs ->
           Fmt.(
             prefix (const string "tuple")
@@ -1306,24 +1295,6 @@ end = struct
         @@ list ~sep:dbl_colon string)
         ppf
         (root, List.map ~f:snd ids)
-    | Aast.Hvarray hint ->
-      Fmt.(prefix (const string "varray") @@ angles @@ pp_hint ~is_ctx:false)
-        ppf
-        hint
-    | Aast.Hvarray_or_darray (None, vhint) ->
-      Fmt.(
-        prefix (const string "varray_or_darray")
-        @@ angles
-        @@ pp_hint ~is_ctx:false)
-        ppf
-        vhint
-    | Aast.Hvarray_or_darray (Some khint, vhint) ->
-      Fmt.(
-        prefix (const string "varray_or_darray")
-        @@ angles
-        @@ pair ~sep:comma (pp_hint ~is_ctx:false) (pp_hint ~is_ctx:false))
-        ppf
-        (khint, vhint)
     | Aast.Hvec_or_dict (None, vhint) ->
       Fmt.(
         prefix (const string "vec_or_dict") @@ angles @@ pp_hint ~is_ctx:false)
@@ -1332,13 +1303,6 @@ end = struct
     | Aast.Hvec_or_dict (Some khint, vhint) ->
       Fmt.(
         prefix (const string "vec_or_dict")
-        @@ angles
-        @@ pair ~sep:comma (pp_hint ~is_ctx:false) (pp_hint ~is_ctx:false))
-        ppf
-        (khint, vhint)
-    | Aast.Hdarray (khint, vhint) ->
-      Fmt.(
-        prefix (const string "darray")
         @@ angles
         @@ pair ~sep:comma (pp_hint ~is_ctx:false) (pp_hint ~is_ctx:false))
         ppf
@@ -1904,9 +1868,6 @@ end = struct
         | Hmixed
         | Hnonnull
         | Habstr _
-        | Hdarray _
-        | Hvarray _
-        | Hvarray_or_darray _
         | Hvec_or_dict _
         | Hprim _
         | Hthis

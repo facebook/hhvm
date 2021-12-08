@@ -283,12 +283,6 @@ and _ ty_ =
    *)
   | Tunion : 'phase ty list -> 'phase ty_
   | Tintersection : 'phase ty list -> 'phase ty_
-  (* Tdarray (ty1, ty2) => "darray<ty1, ty2>" *)
-  | Tdarray : 'phase ty * 'phase ty -> 'phase ty_
-  (* Tvarray (ty) => "varray<ty>" *)
-  | Tvarray : 'phase ty -> 'phase ty_
-  (* Tvarray_or_darray (ty1, ty2) => "varray_or_darray<ty1, ty2>" *)
-  | Tvarray_or_darray : 'phase ty * 'phase ty -> 'phase ty_
   (* Tvec_or_dict (ty1, ty2) => "vec_or_dict<ty1, ty2>" *)
   | Tvec_or_dict : 'phase ty * 'phase ty -> 'phase ty_
   (* Name of class, name of type const, remaining names of type consts *)

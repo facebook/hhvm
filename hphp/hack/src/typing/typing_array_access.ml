@@ -76,7 +76,7 @@ let widen_for_array_get ~lhs_of_null_coalesce ~expr_pos index_expr env ty =
     let ty = MakeType.keyed_container r index_ty element_ty in
     (env, Some ty)
   (* The same is true of PHP arrays *)
-  | (r, (Tvarray _ | Tdarray _ | Tvec_or_dict _ | Tvarray_or_darray _)) ->
+  | (r, Tvec_or_dict _) ->
     let (env, element_ty) = Env.fresh_type_invariant env expr_pos in
     let (env, index_ty) = Env.fresh_type_invariant env expr_pos in
     let ty = MakeType.keyed_container r index_ty element_ty in
@@ -319,13 +319,6 @@ let rec array_get
              Errors.index_type_mismatch
       in
       match ety1_ with
-      | Tvarray ty ->
-        let (_, p2, _) = e2 in
-        let ty1 = MakeType.enforced (MakeType.int (Reason.Ridx (p2, r))) in
-        let (env, idx_err_res) =
-          type_index env expr_pos ty2 ty1 Reason.index_array
-        in
-        (env, ty, dflt_arr_res, idx_err_res)
       | Tclass (((_, cn) as id), _, argl)
         when String.equal cn SN.Collections.cVector
              || String.equal cn SN.Collections.cVec ->
@@ -435,9 +428,7 @@ let rec array_get
           Typing_make_type.class_type Reason.none SN.Collections.cVector tys
         in
         (env, ty1, Error (ty1, ty_vector), Ok ty2)
-      | Tdarray (_k, v)
-      | Tvec_or_dict (_k, v)
-      | Tvarray_or_darray (_k, v) ->
+      | Tvec_or_dict (_k, v) ->
         let (env, idx_err_res) =
           check_arraykey_index_read env expr_pos ty1 ty2
         in
@@ -703,9 +694,6 @@ let widen_for_assign_array_append ~expr_pos env ty =
     in
     let ty = mk (r, Tclass (id, Nonexact, params)) in
     (env, Some ty)
-  | (r, Tvarray _) ->
-    let (env, element_ty) = Env.fresh_type_invariant env expr_pos in
-    (env, Some (mk (r, Tvarray element_ty)))
   | _ -> (env, None)
 
 let assign_array_append_with_err ~array_pos ~expr_pos ur env ty1 ty2 =
@@ -815,10 +803,6 @@ let assign_array_append_with_err ~array_pos ~expr_pos ur env ty1 ty2 =
                  Errors.unify_error
         in
         (env, ty1, Ok ty1, err_res)
-      | (r, Tvarray tv) ->
-        let (env, tv') = Typing_union.union env tv ty2 in
-        let ty = mk (r, Tvarray tv') in
-        (env, ty, Ok ty, Ok ty2)
       | (r, Tdynamic)
         when Typing_env_types.(
                TypecheckerOptions.enable_sound_dynamic env.genv.tcopt) ->
@@ -839,10 +823,9 @@ let assign_array_append_with_err ~array_pos ~expr_pos ur env ty1 ty2 =
       | (_, Tunapplied_alias _) ->
         Typing_defs.error_Tunapplied_alias_in_illegal_context ()
       | ( _,
-          ( Tnonnull | Tdarray _ | Tvec_or_dict _ | Tvarray_or_darray _
-          | Toption _ | Tprim _ | Tvar _ | Tfun _ | Tclass _ | Ttuple _
-          | Tshape _ | Tunion _ | Tintersection _ | Tgeneric _ | Tnewtype _
-          | Tdependent _ | Taccess _ | Tneg _ ) ) ->
+          ( Tnonnull | Tvec_or_dict _ | Toption _ | Tprim _ | Tvar _ | Tfun _
+          | Tclass _ | Ttuple _ | Tshape _ | Tunion _ | Tintersection _
+          | Tgeneric _ | Tnewtype _ | Tdependent _ | Taccess _ | Tneg _ ) ) ->
         let (env, ty) = error_assign_array_append env expr_pos ty1 in
         let ty_nothing = Typing_make_type.nothing Reason.none in
         (env, ty, Error (ty, ty_nothing), Error (ty2, ty_nothing)))
@@ -869,17 +852,6 @@ let widen_for_assign_array_get ~expr_pos index_expr env ty =
     in
     let ty = mk (r, Tclass (id, Nonexact, params)) in
     (env, Some ty)
-  | (r, Tvarray _) ->
-    let (env, tv) = Env.fresh_type_invariant env expr_pos in
-    (env, Some (mk (r, Tvarray tv)))
-  | (r, Tvarray_or_darray _) ->
-    let (env, tk) = Env.fresh_type_invariant env expr_pos in
-    let (env, tv) = Env.fresh_type_invariant env expr_pos in
-    (env, Some (mk (r, Tvarray_or_darray (tk, tv))))
-  | (r, Tdarray _) ->
-    let (env, tk) = Env.fresh_type_invariant env expr_pos in
-    let (env, tv) = Env.fresh_type_invariant env expr_pos in
-    (env, Some (mk (r, Tdarray (tk, tv))))
   | (r, Ttuple tyl) ->
     (* requires integer literal *)
     begin
@@ -929,15 +901,6 @@ let assign_array_get_with_err
              Errors.index_type_mismatch
       in
       match ety1_ with
-      | Tvarray tv ->
-        let (_, p, _) = key in
-        let tk = MakeType.enforced (MakeType.int (Reason.Ridx (p, r))) in
-        let (env, idx_err) =
-          type_index env expr_pos tkey tk Reason.index_array
-        in
-        let (env, tv') = Typing_union.union env tv ty2 in
-        let ty = mk (r, Tvarray tv') in
-        (env, ty, Ok ty, idx_err, Ok ty2)
       | Tclass (((_, cn) as id), _, argl)
         when String.equal cn SN.Collections.cVector ->
         let (env, tv) =
@@ -1110,22 +1073,6 @@ let assign_array_get_with_err
           (Typing_print.error env ety1);
         let ty_expect = MakeType.nothing Reason.none in
         (env, ety1, Error (ety1, ty_expect), Ok tkey, Ok ty2)
-      | Tdarray (tk, tv) ->
-        let (env, idx_err) =
-          check_arraykey_index_write env expr_pos ety1 tkey
-        in
-        let (env, tk') = Typing_union.union env tk tkey in
-        let (env, tv') = Typing_union.union env tv ty2 in
-        let ty = mk (r, Tdarray (tk', tv')) in
-        (env, ty, Ok ty, idx_err, Ok ty2)
-      | Tvarray_or_darray (tk, tv) ->
-        let (env, idx_err) =
-          check_arraykey_index_write env expr_pos ety1 tkey
-        in
-        let (env, tk') = Typing_union.union env tk tkey in
-        let (env, tv') = Typing_union.union env tv ty2 in
-        let ty = mk (r, Tvarray_or_darray (tk', tv')) in
-        (env, ty, Ok ty, idx_err, Ok ty2)
       | Tvec_or_dict (tk, tv) ->
         let (env, tv) = maybe_pessimise_type env tv in
         let (env, idx_err) =

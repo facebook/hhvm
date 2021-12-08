@@ -419,10 +419,7 @@ let rec expand ctx env root : _ * result =
   | Tprim _
   | Tshape _
   | Ttuple _
-  | Tvarray _
-  | Tdarray _
   | Tvec_or_dict _
-  | Tvarray_or_darray _
   | Tfun _
   | Tdynamic
   | Toption _

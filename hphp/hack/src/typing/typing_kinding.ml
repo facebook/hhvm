@@ -60,13 +60,6 @@ module Locl_Inst = struct
   and instantiate_ subst x =
     match x with
     | Tgeneric _ -> assert false
-    | Tdarray (ty1, ty2) ->
-      Tdarray (instantiate subst ty1, instantiate subst ty2)
-    | Tvarray ty -> Tvarray (instantiate subst ty)
-    | Tvarray_or_darray (ty1, ty2) ->
-      let ty1 = instantiate subst ty1 in
-      let ty2 = instantiate subst ty2 in
-      Tvarray_or_darray (ty1, ty2)
     | Tvec_or_dict (ty1, ty2) ->
       let ty1 = instantiate subst ty1 in
       let ty2 = instantiate subst ty2 in
@@ -362,12 +355,7 @@ module Simple = struct
     | Tmixed
     | Tthis ->
       ()
-    | Tdarray (tk, tv) ->
-      check tk;
-      check tv
-    | Tvarray tv -> check tv
-    | Tvec_or_dict (tk, tv)
-    | Tvarray_or_darray (tk, tv) ->
+    | Tvec_or_dict (tk, tv) ->
       check tk;
       check tv
     | Tlike ty

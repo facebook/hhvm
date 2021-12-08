@@ -142,21 +142,10 @@ let rec freshen_inside_ty env ty =
         let (env, tyl) = freshen_tparams env variancel tyl in
         (env, mk (r, Tclass ((p, cid), e, tyl)))
     end
-  | Tvarray ty ->
-    let (env, ty) = freshen_ty env ty in
-    (env, mk (r, Tvarray ty))
-  | Tvarray_or_darray (ty1, ty2) ->
-    let (env, ty1) = freshen_ty env ty1 in
-    let (env, ty2) = freshen_ty env ty2 in
-    (env, mk (r, Tvarray_or_darray (ty1, ty2)))
   | Tvec_or_dict (ty1, ty2) ->
     let (env, ty1) = freshen_ty env ty1 in
     let (env, ty2) = freshen_ty env ty2 in
     (env, mk (r, Tvec_or_dict (ty1, ty2)))
-  | Tdarray (ty1, ty2) ->
-    let (env, ty1) = freshen_ty env ty1 in
-    let (env, ty2) = freshen_ty env ty2 in
-    (env, mk (r, Tdarray (ty1, ty2)))
   | Tvar _ -> default ()
   | Taccess (ty, ids) ->
     let (env, ty) = freshen_ty env ty in
@@ -324,10 +313,7 @@ let ty_equal_shallow env ty1 ty2 =
   | (Tnonnull, Tnonnull)
   | (Terr, Terr)
   | (Tdynamic, Tdynamic)
-  | (Ttuple _, Ttuple _)
-  | (Tvarray _, Tvarray _)
-  | (Tvarray_or_darray _, Tvarray_or_darray _)
-  | (Tdarray _, Tdarray _) ->
+  | (Ttuple _, Ttuple _) ->
     true
   | (Tprim p1, Tprim p2) -> Aast_defs.equal_tprim p1 p2
   | (Tclass (x_sub, exact_sub, _), Tclass (x_super, exact_super, _)) ->

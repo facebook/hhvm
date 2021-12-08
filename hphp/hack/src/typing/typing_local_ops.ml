@@ -101,9 +101,6 @@ let rec is_byval_collection_or_string_or_any_type env ty =
       String.equal x SN.Collections.cVec
       || String.equal x SN.Collections.cDict
       || String.equal x SN.Collections.cKeyset
-    | Tvarray _
-    | Tdarray _
-    | Tvarray_or_darray _
     | Tvec_or_dict _
     | Ttuple _
     | Tshape _

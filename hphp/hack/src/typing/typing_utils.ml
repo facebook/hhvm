@@ -554,11 +554,9 @@ let unwrap_class_type ty =
   match deref ty with
   | (r, Tapply (name, tparaml)) -> (r, name, tparaml)
   | ( _,
-      ( Terr | Tdynamic | Tany _ | Tmixed | Tnonnull
-      | Tdarray (_, _)
-      | Tvarray _ | Tvarray_or_darray _ | Tvec_or_dict _ | Tgeneric _
-      | Toption _ | Tlike _ | Tprim _ | Tfun _ | Ttuple _ | Tshape _ | Tunion _
-      | Tintersection _
+      ( Terr | Tdynamic | Tany _ | Tmixed | Tnonnull | Tvec_or_dict _
+      | Tgeneric _ | Toption _ | Tlike _ | Tprim _ | Tfun _ | Ttuple _
+      | Tshape _ | Tunion _ | Tintersection _
       | Taccess (_, _)
       | Tthis | Tvar _ ) ) ->
     raise @@ Invalid_argument "unwrap_class_type got non-class"

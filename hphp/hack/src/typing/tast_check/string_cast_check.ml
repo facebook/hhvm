@@ -48,9 +48,6 @@ let rec is_stringish env ty =
   | Tprim _
   | Tneg _ ->
     true
-  | Tvarray _
-  | Tdarray _
-  | Tvarray_or_darray _
   | Tvec_or_dict _
   | Tvar _
   | Ttuple _

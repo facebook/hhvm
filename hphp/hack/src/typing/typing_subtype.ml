@@ -918,7 +918,6 @@ and simplify_subtype_i
                    || String.equal x SN.Collections.cVec
                    || String.equal x SN.Collections.cConstVector ->
               env |> destructure_array elt_type
-            | (_, Tvarray elt_type) -> env |> destructure_array elt_type
             | (_, Tdynamic) -> env |> destructure_array ty_sub
             (* TODO: should remove these any cases *)
             | (r, Tany _) ->
@@ -1215,8 +1214,7 @@ and simplify_subtype_i
             Typing_defs.error_Tunapplied_alias_in_illegal_context ()
           | ( ( _,
                 ( Tdynamic | Tprim _ | Tnonnull | Tfun _ | Ttuple _ | Tshape _
-                | Tclass _ | Tvarray _ | Tdarray _ | Tvarray_or_darray _
-                | Tvec_or_dict _ | Tany _ | Terr | Taccess _ ) ),
+                | Tclass _ | Tvec_or_dict _ | Tany _ | Terr | Taccess _ ) ),
               _ ) ->
             simplify_subtype ~subtype_env ~this_ty lty_sub arg_ty_super env
           (* This is treating the option as a union, and using the sound, but incomplete,
@@ -1340,9 +1338,8 @@ and simplify_subtype_i
                 Nast.(
                   ( Tint | Tbool | Tfloat | Tstring | Tresource | Tnum
                   | Tarraykey | Tnoreturn ))
-            | Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tclass _ | Tvarray _
-            | Tdarray _ | Tvarray_or_darray _ | Tvec_or_dict _ | Taccess _ ) )
-          ->
+            | Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tclass _
+            | Tvec_or_dict _ | Taccess _ ) ) ->
           valid env
         (* supportdyn<t> <: nonnull iff t <: nonnull *)
         | (_, Tnewtype (name, [tyarg], _))
@@ -1406,10 +1403,7 @@ and simplify_subtype_i
         | (_, Tgeneric _)
         | (_, Tneg _) ->
           default_subtype env
-        | (_, Tdarray (_, ty))
-        | (_, Tvarray ty)
-        | (_, Tvec_or_dict (_, ty))
-        | (_, Tvarray_or_darray (_, ty)) ->
+        | (_, Tvec_or_dict (_, ty)) ->
           simplify_dynamic_aware_subtype ~subtype_env ty ty_super env
         | (_, Tfun ft_sub) ->
           if get_ft_support_dynamic_type ft_sub then
@@ -1668,30 +1662,18 @@ and simplify_subtype_i
             (r_sub, shape_kind_sub, fdm_sub)
             (r_super, shape_kind_super, fdm_super)
         | _ -> default_subtype env))
-    | (_, (Tvarray _ | Tdarray _ | Tvarray_or_darray _ | Tvec_or_dict _)) ->
+    | (_, Tvec_or_dict _) ->
       (match ety_sub with
       | ConstraintType _ -> default_subtype env
       | LoclType lty ->
         (match (get_node lty, get_node ty_super) with
-        | (Tvarray ty_sub, Tvarray ty_super) ->
-          simplify_subtype ~subtype_env ~this_ty ty_sub ty_super env
-        | ( Tvarray_or_darray (tk_sub, tv_sub),
-            Tvarray_or_darray (tk_super, tv_super) )
-        | (Tvec_or_dict (tk_sub, tv_sub), Tvec_or_dict (tk_super, tv_super))
-        | (Tdarray (tk_sub, tv_sub), Tdarray (tk_super, tv_super))
-        | (Tdarray (tk_sub, tv_sub), Tvarray_or_darray (tk_super, tv_super)) ->
+        | (Tvec_or_dict (tk_sub, tv_sub), Tvec_or_dict (tk_super, tv_super)) ->
           env
           |> simplify_subtype ~subtype_env ~this_ty tk_sub tk_super
           &&& simplify_subtype ~subtype_env ~this_ty tv_sub tv_super
         | ( Tclass ((_, n), _, [tk_sub; tv_sub]),
             Tvec_or_dict (tk_super, tv_super) )
           when String.equal n SN.Collections.cDict ->
-          env
-          |> simplify_subtype ~subtype_env ~this_ty tk_sub tk_super
-          &&& simplify_subtype ~subtype_env ~this_ty tv_sub tv_super
-        | (Tvarray tv_sub, Tvarray_or_darray (tk_super, tv_super)) ->
-          let pos = get_pos lty in
-          let tk_sub = MakeType.int (Reason.Ridx_vector_from_decl pos) in
           env
           |> simplify_subtype ~subtype_env ~this_ty tk_sub tk_super
           &&& simplify_subtype ~subtype_env ~this_ty tv_sub tv_super
@@ -1702,11 +1684,6 @@ and simplify_subtype_i
           env
           |> simplify_subtype ~subtype_env ~this_ty tk_sub tk_super
           &&& simplify_subtype ~subtype_env ~this_ty tv_sub tv_super
-        | (Tvarray _, Tdarray _)
-        | (Tdarray _, Tvarray _)
-        | (Tvarray_or_darray _, Tdarray _)
-        | (Tvarray_or_darray _, Tvarray _) ->
-          invalid_env env
         | _ -> default_subtype env))
       (* If t supports dynamic, and t <: u, then t <: supportdyn<u> *)
     | (r_supportdyn, Tnewtype (name_super, [tyarg_super], _))
@@ -1794,10 +1771,7 @@ and simplify_subtype_i
           else
             invalid_env env
         (* All of these are definitely disjoint from primitive types *)
-        | ( _,
-            ( Tfun _ | Ttuple _ | Tshape _ | Tvarray _ | Tdarray _
-            | Tvarray_or_darray _ | Tclass _ ) ) ->
-          valid env
+        | (_, (Tfun _ | Ttuple _ | Tshape _ | Tclass _)) -> valid env
         | _ -> default_subtype env))
     | (_, Tneg (Neg_class (_, c_super))) ->
       (match ety_sub with
@@ -1819,10 +1793,7 @@ and simplify_subtype_i
           else
             invalid_env env
         (* All of these are definitely disjoint from class types *)
-        | ( _,
-            ( Tfun _ | Ttuple _ | Tshape _ | Tvarray _ | Tdarray _
-            | Tvarray_or_darray _ | Tprim _ ) ) ->
-          valid env
+        | (_, (Tfun _ | Ttuple _ | Tshape _ | Tprim _)) -> valid env
         | _ -> default_subtype env))
     | (_, Tclass (((_, class_name) as x_super), exact_super, tyl_super)) ->
       (match ety_sub with
@@ -1845,9 +1816,7 @@ and simplify_subtype_i
           when (String.equal enum_name class_name && Env.is_enum env enum_name)
                || String.equal class_name SN.Classes.cXHPChild ->
           valid env
-        | ( _,
-            ( Tvarray _ | Tdarray _ | Tvarray_or_darray _
-            | Tprim Nast.(Tstring | Tarraykey | Tint | Tfloat | Tnum) ) )
+        | (_, Tprim Nast.(Tstring | Tarraykey | Tint | Tfloat | Tnum))
           when String.equal class_name SN.Classes.cXHPChild
                && equal_exact exact_super Nonexact ->
           valid env
@@ -1971,11 +1940,7 @@ and simplify_subtype_i
                     env
                 else
                   invalid_env env))
-        | ( r_sub,
-            ( Tvarray tv
-            | Tdarray (_, tv)
-            | Tvarray_or_darray (_, tv)
-            | Tvec_or_dict (_, tv) ) ) ->
+        | (_r_sub, Tvec_or_dict (_, tv)) ->
           (match (exact_super, tyl_super) with
           | (Nonexact, [tv_super])
             when String.equal class_name SN.Collections.cTraversable
@@ -1992,17 +1957,7 @@ and simplify_subtype_i
                  || String.equal class_name SN.Collections.cKeyedContainer
                  || String.equal class_name SN.Collections.cAnyArray ->
             (match get_node ty_sub with
-            | Tvarray _ ->
-              env
-              |> simplify_subtype
-                   ~subtype_env
-                   ~this_ty
-                   (MakeType.int r_sub)
-                   tk_super
-              &&& simplify_subtype ~subtype_env ~this_ty tv tv_super
-            | Tvarray_or_darray (tk, _)
-            | Tvec_or_dict (tk, _)
-            | Tdarray (tk, _) ->
+            | Tvec_or_dict (tk, _) ->
               env
               |> simplify_subtype ~subtype_env ~this_ty tk tk_super
               &&& simplify_subtype ~subtype_env ~this_ty tv tv_super
@@ -3346,7 +3301,7 @@ let is_type_disjoint env ty1 ty2 =
          However, intersection already detects this and simplifies to nothing, so it's not
          so important here. *)
       false
-    | ((Tshape _ | Tdarray _), _) ->
+    | (Tshape _, _) ->
       (* Treat shapes as dict<arraykey, mixed> because that implementation detail
          leaks through when doing is dict<_, _> on them, and they are also
          Traversable, KeyedContainer, etc. (along with darrays).
@@ -3359,7 +3314,7 @@ let is_type_disjoint env ty1 ty2 =
         env
         MakeType.(dict r (arraykey r) (mixed r))
         ty2
-    | (_, (Tshape _ | Tdarray _)) ->
+    | (_, Tshape _) ->
       let r = get_reason ty2 in
       is_type_disjoint
         visited_tyvars
@@ -3372,7 +3327,7 @@ let is_type_disjoint env ty1 ty2 =
        with
       | List.Or_unequal_lengths.Ok res -> res
       | List.Or_unequal_lengths.Unequal_lengths -> true)
-    | ((Ttuple _ | Tvarray _), _) ->
+    | (Ttuple _, _) ->
       (* Treat tuples as vec<mixed> because that implementation detail
          leaks through when doing is vec<_> on them, and they are also
          Traversable, Container, etc. along with varrays.
@@ -3381,17 +3336,17 @@ let is_type_disjoint env ty1 ty2 =
          look at it. *)
       let r = get_reason ty1 in
       is_type_disjoint visited_tyvars env MakeType.(vec r (mixed r)) ty2
-    | (_, (Ttuple _ | Tvarray _)) ->
+    | (_, Ttuple _) ->
       let r = get_reason ty2 in
       is_type_disjoint visited_tyvars env ty1 MakeType.(vec r (mixed r))
-    | ((Tvec_or_dict (tyk, tyv) | Tvarray_or_darray (tyk, tyv)), _) ->
+    | (Tvec_or_dict (tyk, tyv), _) ->
       let r = get_reason ty1 in
       is_type_disjoint
         visited_tyvars
         env
         MakeType.(union r [vec r tyv; dict r tyk tyv])
         ty2
-    | (_, (Tvec_or_dict (tyk, tyv) | Tvarray_or_darray (tyk, tyv))) ->
+    | (_, Tvec_or_dict (tyk, tyv)) ->
       let r = get_reason ty2 in
       is_type_disjoint
         visited_tyvars

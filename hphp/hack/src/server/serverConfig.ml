@@ -272,12 +272,10 @@ let prepare_allowed_decl_fixme_codes config =
 let load ~silent config_filename options : t * ServerLocalConfig.t =
   let config_overrides = Config_file.of_list @@ ServerArgs.config options in
   let (config_hash, config) =
-    Config_file.parse_hhconfig
-      ~silent:true
-      (Relative_path.to_absolute config_filename)
+    Config_file.parse_hhconfig (Relative_path.to_absolute config_filename)
   in
   let config =
-    Config_file.apply_overrides ~silent:true ~config ~overrides:config_overrides
+    Config_file.apply_overrides ~from:None ~config ~overrides:config_overrides
   in
   process_untrusted_mode config;
   let version =

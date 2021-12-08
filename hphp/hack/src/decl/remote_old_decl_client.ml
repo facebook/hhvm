@@ -24,7 +24,7 @@ let get_hh_version () =
   in
   let version =
     if Disk.file_exists hhconfig_path then
-      let (_, config) = Config_file.parse_hhconfig hhconfig_path ~silent:true in
+      let (_, config) = Config_file.parse_hhconfig hhconfig_path in
       Config_file.Getters.string_opt "version" config
     else
       None

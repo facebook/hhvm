@@ -17,12 +17,14 @@ let file_path_relative_to_repo_root =
 
 let empty = Config_file_common.empty
 
+let print_to_stderr = Config_file_common.print_to_stderr
+
 let apply_overrides = Config_file_common.apply_overrides
 
 let parse_contents = Config_file_common.parse_contents
 
-let parse_hhconfig ~silent (fn : string) : string * t =
-  try Config_file_common.parse ~silent fn with
+let parse_hhconfig (fn : string) : string * t =
+  try Config_file_common.parse fn with
   | e ->
     let stack = Printexc.get_backtrace () in
     Hh_logger.exc ~prefix:".hhconfig deleted: " ~stack e;
@@ -39,12 +41,9 @@ module Getters = Config_file_common.Getters
 module Utils = struct
   let parse_hhconfig_and_hh_conf_to_json
       ~(root : Path.t) ~(server_local_config_path : string) =
-    let server_local_config =
-      parse_local_config ~silent:true server_local_config_path
-    in
+    let server_local_config = parse_local_config server_local_config_path in
     let hh_config =
       parse_local_config
-        ~silent:true
         (Path.to_string (Path.concat root file_path_relative_to_repo_root))
     in
     Hh_json.JSON_Object

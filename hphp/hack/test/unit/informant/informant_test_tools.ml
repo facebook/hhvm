@@ -73,9 +73,7 @@ let set_xdb ~state_global_rev ~for_global_rev ~everstore_handle =
       Printf.eprintf "Error: Invalid global_rev number\n";
       assert false
   in
-  let (hhconfig_hash, _config) =
-    Config_file.parse_hhconfig ~silent:true "/tmp/.hhconfig"
-  in
+  let (hhconfig_hash, _config) = Config_file.parse_hhconfig "/tmp/.hhconfig" in
   let result =
     {
       Xdb.global_rev = state_global_rev;

@@ -40,7 +40,7 @@ let get_hh_version ~(repo : Path.t) : (string, string) result Future.Promise.t =
       (Path.concat repo Config_file.file_path_relative_to_repo_root)
   in
   (if Disk.file_exists hhconfig_path then
-    return_ok (Config_file.parse_hhconfig hhconfig_path ~silent:true)
+    return_ok (Config_file.parse_hhconfig hhconfig_path)
   else
     let error =
       "Attempted to parse .hhconfig.\nBut it doesn't exist at this path:\n"

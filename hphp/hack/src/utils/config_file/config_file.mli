@@ -28,13 +28,15 @@ val parse_version : string option -> version
 
 val empty : unit -> t
 
+val print_to_stderr : t -> unit
+
 val parse_contents : string -> t
 
-val parse_hhconfig : silent:bool -> string -> string * t
+val parse_hhconfig : string -> string * t
 
-val parse_local_config : silent:bool -> string -> t
+val parse_local_config : string -> t
 
-val apply_overrides : silent:bool -> config:t -> overrides:t -> t
+val apply_overrides : from:string option -> config:t -> overrides:t -> t
 
 val of_list : (string * string) list -> t
 

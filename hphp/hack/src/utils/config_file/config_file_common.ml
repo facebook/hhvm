@@ -21,17 +21,15 @@ let is_empty = Config_file_ffi_externs.is_empty
 let print_to_stderr (config : t) : unit =
   Config_file_ffi_externs.print_to_stderr config
 
-let apply_overrides ~silent ~(config : t) ~(overrides : t) : t =
+let apply_overrides ~(from : string option) ~(config : t) ~(overrides : t) : t =
   if is_empty overrides then
     config
   else
     let config = Config_file_ffi_externs.apply_overrides config overrides in
-    if not silent then (
-      Printf.eprintf "Config overrides:\n%!";
-      print_to_stderr overrides;
-      Printf.eprintf "\nThe combined config:\n%!";
-      print_to_stderr config
-    );
+    Option.iter from ~f:(fun from ->
+        Printf.eprintf "*** Overrides from %s:\n%!" from;
+        print_to_stderr overrides;
+        Printf.eprintf "\n%!");
     config
 
 (*
@@ -42,17 +40,15 @@ let apply_overrides ~silent ~(config : t) ~(overrides : t) : t =
 let parse_contents (contents : string) : t =
   Config_file_ffi_externs.parse_contents contents
 
-let parse ~silent (fn : string) : string * t =
+let parse (fn : string) : string * t =
   let contents = Sys_utils.cat fn in
-  if not silent then
-    Printf.eprintf "%s on-file-system contents:\n%s\n" fn contents;
   let parsed = parse_contents contents in
   let hash = Sha1.digest contents in
   (hash, parsed)
 
-let parse_local_config ~silent (fn : string) : t =
+let parse_local_config (fn : string) : t =
   try
-    let (_hash, config) = parse ~silent fn in
+    let (_hash, config) = parse fn in
     config
   with
   | e ->

@@ -744,7 +744,6 @@ let parse_options () =
       (* Following will throw an exception if .hhconfig not found *)
       let (_config_hash, config) =
         Config_file.parse_hhconfig
-          ~silent:true
           (Filename.concat root Config_file.file_path_relative_to_repo_root)
       in
       (* We will pick up values from .hhconfig, unless they've been overridden at the command-line. *)

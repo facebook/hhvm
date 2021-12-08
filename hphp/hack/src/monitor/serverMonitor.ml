@@ -243,9 +243,7 @@ struct
         ~suffix:Config_file.file_path_relative_to_repo_root
     in
     let (_hash, config) =
-      Config_file.parse_hhconfig
-        ~silent:true
-        (Relative_path.to_absolute filename)
+      Config_file.parse_hhconfig (Relative_path.to_absolute filename)
     in
     let new_version =
       Config_file.parse_version

@@ -713,7 +713,7 @@ let apply_overrides ~silent ~current_version ~config ~overrides =
      to guide the manner in which JustKnobs picks up values. Don't worry though --
      we'll apply CLI overrides again at the end, so they overwrite any changes
      brought by JustKnobs and experiments_config. *)
-  let config = Config_file.apply_overrides ~silent ~config ~overrides in
+  let config = Config_file.apply_overrides ~from:None ~config ~overrides in
   (* Now is the time for JustKnobs (though it's skipped for tests) *)
   let config =
     if Sys_utils.is_test_mode () then
@@ -722,61 +722,79 @@ let apply_overrides ~silent ~current_version ~config ~overrides =
       ServerLocalConfigKnobs.apply_justknobs_overrides ~silent config
   in
   (* Now is the time for experiments_config overrides *)
-  let enabled =
+  let experiments_enabled =
     bool_if_min_version
       "experiments_config_enabled"
       ~default:false
       ~current_version
       config
   in
-  if enabled then (
-    Disk.mkdir_p GlobalConfig.tmp_dir;
-    let dir =
-      string_ "experiments_config_path" ~default:GlobalConfig.tmp_dir config
-    in
-    let owner = Sys_utils.get_primary_owner () in
-    let file = Filename.concat dir (Printf.sprintf "hh.%s.experiments" owner) in
-    let update =
-      bool_if_min_version
-        "experiments_config_update"
-        ~default:false
-        ~current_version
-        config
-    in
-    let ttl =
-      float_of_int (int_ "experiments_config_ttl_seconds" ~default:86400 config)
-    in
-    let source = string_opt "experiments_config_source" config in
-    let meta =
-      if update then
-        match Experiments_config_file.update ~file ~source ~ttl with
-        | Ok meta -> meta
-        | Error message -> message
-      else
-        "Updating experimental config not enabled"
-    in
-    if Disk.file_exists file then
-      (* Apply the experiments overrides *)
-      let experiment_overrides = Config_file.parse_local_config ~silent file in
-      let config =
-        Config_file.apply_overrides
-          ~silent
-          ~config
-          ~overrides:experiment_overrides
+  let (experiments_meta, config) =
+    if experiments_enabled then begin
+      Disk.mkdir_p GlobalConfig.tmp_dir;
+      let dir =
+        string_ "experiments_config_path" ~default:GlobalConfig.tmp_dir config
       in
-      (* Finally, reapply the CLI overrides, since they should take
-          precedence over the experiments_config and JustKnobs. *)
-      (meta, Config_file.apply_overrides ~silent ~config ~overrides)
-    else
-      ("Experimental config not found on disk", config)
-  ) else
-    ("Experimental config not enabled", config)
+      let owner = Sys_utils.get_primary_owner () in
+      let file =
+        Filename.concat dir (Printf.sprintf "hh.%s.experiments" owner)
+      in
+      let update =
+        bool_if_min_version
+          "experiments_config_update"
+          ~default:false
+          ~current_version
+          config
+      in
+      let ttl =
+        float_of_int
+          (int_ "experiments_config_ttl_seconds" ~default:86400 config)
+      in
+      let source = string_opt "experiments_config_source" config in
+      let meta =
+        if update then
+          match Experiments_config_file.update ~file ~source ~ttl with
+          | Ok meta -> meta
+          | Error message -> message
+        else
+          "Updating experimental config not enabled"
+      in
+      if Disk.file_exists file then
+        (* Apply the experiments overrides *)
+        let experiment_overrides = Config_file.parse_local_config file in
+        let config =
+          Config_file.apply_overrides
+            ~from:(Option.some_if (not silent) "Experiment_overrides")
+            ~config
+            ~overrides:experiment_overrides
+        in
+        (meta, config)
+      else
+        ("Experimental config not found on disk", config)
+    end else
+      ("Experimental config not enabled", config)
+  in
+  (* Finally, reapply the CLI overrides, since they should take
+     precedence over the experiments_config and JustKnobs. *)
+  let config =
+    Config_file.apply_overrides
+      ~from:(Option.some_if (not silent) "--config")
+      ~config
+      ~overrides
+  in
+  (experiments_meta, config)
 
 let load_ fn ~silent ~current_version overrides =
-  let config = Config_file.parse_local_config ~silent fn in
+  let config = Config_file.parse_local_config fn in
   let (experiments_config_meta, config) =
     apply_overrides ~silent ~current_version ~config ~overrides
   in
+  if not silent then begin
+    Printf.eprintf "** Combined config:\n%!";
+    Config_file.print_to_stderr config;
+    Printf.eprintf "\n%!"
+  end;
+
   let experiments =
     string_list "experiments" ~default:default.experiments config
   in
@@ -1486,6 +1504,9 @@ let load_ fn ~silent ~current_version overrides =
     machine_class;
   }
 
+(** Loads the config from [path]. Uses JustKnobs and ExperimentsConfig to override.
+On top of that, applies [config_overrides]. If [silent] then prints what it's doing
+to stderr. *)
 let load ~silent ~current_version config_overrides =
   load_ path ~silent ~current_version config_overrides
 

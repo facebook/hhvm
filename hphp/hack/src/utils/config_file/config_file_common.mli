@@ -14,13 +14,13 @@ val empty : unit -> t
 
 val print_to_stderr : t -> unit
 
-val apply_overrides : silent:bool -> config:t -> overrides:t -> t
+val apply_overrides : from:string option -> config:t -> overrides:t -> t
 
 val parse_contents : string -> t
 
-val parse : silent:bool -> string -> string * t
+val parse : string -> string * t
 
-val parse_local_config : silent:bool -> string -> t
+val parse_local_config : string -> t
 
 val to_json : t -> Hh_json.json
 

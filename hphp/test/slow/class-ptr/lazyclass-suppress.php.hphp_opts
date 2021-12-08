@@ -3,3 +3,4 @@
 -vRuntime.Eval.ClassAsStringVarDump=false
 -vRuntime.Eval.ClassAsStringVarExport=false
 -vRuntime.Eval.ClassPassesClassname=true
+-vRuntime.Eval.CoeffectEnforcementLevels.zoned=0

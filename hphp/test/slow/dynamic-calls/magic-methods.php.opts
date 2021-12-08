@@ -2,3 +2,4 @@
 -vEval.ForbidDynamicCallsToInstMeth=2
 -vEval.ForbidDynamicCallsToClsMeth=2
 -vEval.ForbidDynamicConstructs=2
+-vEval.CoeffectEnforcementLevels.zoned=0

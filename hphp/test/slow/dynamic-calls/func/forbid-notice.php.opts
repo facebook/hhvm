@@ -1,1 +1,2 @@
 -vEval.ForbidDynamicCallsToFunc=1
+-vEval.CoeffectEnforcementLevels.zoned=0

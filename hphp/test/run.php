@@ -913,6 +913,7 @@ function hhvm_cmd_impl(
       '-vEval.HHIRInliningIgnoreHints=false',
       '-vEval.HHIRAlwaysInterpIgnoreHint=false',
       '-vEval.FoldLazyClassKeys=false',
+      '-vEval.CoeffectEnforcementLevels.zoned=1',
       $mode,
       isset($options['wholecfg']) ? '-vEval.JitPGORegionSelector=wholecfg' : '',
 
@@ -1146,6 +1147,7 @@ function hphp_cmd(
     '-vRuntime.Eval.EnableIntrinsicsExtension=true',
     '-vRuntime.Eval.EnableArgsInBacktraces=true',
     '-vRuntime.Eval.FoldLazyClassKeys=false',
+    '-vRuntime.Eval.CoeffectEnforcementLevels.zoned=1',
     '-vParserThreadCount=' . ($options['repo-threads'] ?? 1),
     '--nofork=1 -thhbc -l1 -k1',
     '-o "' . test_repo($options, $test) . '"',

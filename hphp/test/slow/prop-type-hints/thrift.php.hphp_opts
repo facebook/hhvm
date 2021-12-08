@@ -1,1 +1,2 @@
 -vCheckPropTypeHints=1
+-vRuntime.Eval.CoeffectEnforcementLevels.zoned=0

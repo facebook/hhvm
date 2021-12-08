@@ -1,3 +1,4 @@
 -vRuntime.Eval.EmitClassPointers=2
 -vRuntime.Eval.RaiseClassConversionWarning=true
 -vRuntime.Eval.ClassStringHintNotices=true
+-vRuntime.Eval.CoeffectEnforcementLevels.zoned=0

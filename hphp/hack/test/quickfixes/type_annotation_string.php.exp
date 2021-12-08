@@ -1,0 +1,4 @@
+<?hh
+
+const string MY_CONST = "";
+

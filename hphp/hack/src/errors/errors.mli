@@ -513,7 +513,7 @@ val interface_typeconst_multiple_defs :
   error_from_reasons_callback ->
   unit
 
-val const_without_typehint : Pos.t * string -> unit
+val const_without_typehint : Pos.t * string -> string -> unit
 
 val prop_without_typehint : string -> Pos.t * string -> unit
 

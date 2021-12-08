@@ -1790,14 +1790,22 @@ let typeconst_concrete_concrete_override pos parent_pos =
       (parent_pos, "Previously defined here");
     ]
 
-let const_without_typehint sid =
+let const_without_typehint sid type_ =
   let (pos, name) = sid in
-  let msg =
-    Printf.sprintf
-      "Please add a type hint `const SomeType %s`"
-      (Utils.strip_all_ns name)
+  let name = Utils.strip_all_ns name in
+  let msg = Printf.sprintf "Please add a type hint `const SomeType %s`" name in
+  let (title, new_text) =
+    match type_ with
+    | "string" -> ("Add string type annotation", "string " ^ name)
+    | "int" -> ("Add integer type annotation", "int " ^ name)
+    | "float" -> ("Add float type annotation", "float " ^ name)
+    | _ -> ("Add mixed type annotation", "mixed " ^ name)
   in
-  add (Naming.err_code Naming.AddATypehint) pos msg
+  add_list
+    (Naming.err_code Naming.AddATypehint)
+    ~quickfixes:[Quickfix.make ~title ~new_text pos]
+    (pos, msg)
+    []
 
 let prop_without_typehint visibility sid =
   let (pos, name) = sid in

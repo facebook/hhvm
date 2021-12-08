@@ -1,0 +1,4 @@
+<?hh
+
+const mixed MY_CONST = vec[1,2,3];
+

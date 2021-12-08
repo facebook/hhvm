@@ -533,6 +533,12 @@ function facts(): void {
   print_method_attrs(ClassWithMethodAttrs::class, 'methodWithNoArgAttr');
   print_method_attrs(ClassWithMethodAttrs::class, 'methodWithTwoArgAttr');
 
+  print
+    "\nThese should be empty, otherwise we're mixing types and type aliases ".
+    "up again\n";
+  print_type_alias_attrs(ClassWithTwoAttrs::class);
+  print_type_attrs(TypeAliasWithAttr::class);
+
   print "\nGetting types with attribute\n";
   print_attr_types(NoArgAttr::class);
   print_attr_types(TwoArgAttr::class);

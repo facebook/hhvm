@@ -863,7 +863,7 @@ Array HHVM_FUNCTION(facts_type_attributes, const String& type) {
 }
 
 Array HHVM_FUNCTION(facts_type_alias_attributes, const String& typeAlias) {
-  return Facts::getFactsOrThrow().getTypeAttributes(typeAlias);
+  return Facts::getFactsOrThrow().getTypeAliasAttributes(typeAlias);
 }
 
 Array HHVM_FUNCTION(

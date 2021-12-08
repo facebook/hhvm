@@ -1255,6 +1255,44 @@ TEST_P(SymbolMapTest, MoveAndCopySymbol) {
   EXPECT_EQ(m2.getTypeFile("SomeClass"), path2.native());
 }
 
+TEST_P(SymbolMapTest, AttrQueriesDoNotConfuseTypeAndTypeAlias) {
+  auto& m1 = make("/var/www", m_exec);
+  folly::fs::path p = "foo.php";
+  FileFacts ffTypeAliasWithAttr{
+      .m_types =
+          {{.m_name = "SomeClass",
+            .m_kind = TypeKind::Class,
+            .m_attributes = {{.m_name = "ClassAttr"}}},
+           {.m_name = "SomeTypeAlias",
+            .m_kind = TypeKind::TypeAlias,
+            .m_attributes = {{.m_name = "AliasAttr"}}}},
+      .m_sha1hex = kSHA};
+  update(m1, "", "1", {p}, {}, {ffTypeAliasWithAttr});
+
+  EXPECT_THAT(m1.getAttributesOfType("SomeClass"), ElementsAre("ClassAttr"));
+  // Empty because we ask for a type alias, not a type
+  EXPECT_THAT(m1.getAttributesOfTypeAlias("SomeClass"), ElementsAre());
+
+  EXPECT_THAT(
+      m1.getAttributesOfTypeAlias("SomeTypeAlias"), ElementsAre("AliasAttr"));
+  // Empty because we ask for a type, not a type alias
+  EXPECT_THAT(m1.getAttributesOfType("SomeTypeAlias"), ElementsAre());
+
+  // Create a second map and fill it from the DB
+  waitForDB(m1, m_exec);
+  auto& m2 = make("/var/www", m_exec);
+  update(m2, "1", "1", {}, {}, {});
+
+  EXPECT_THAT(m2.getAttributesOfType("SomeClass"), ElementsAre("ClassAttr"));
+  // Empty because we ask for a type alias, not a type
+  EXPECT_THAT(m2.getAttributesOfTypeAlias("SomeClass"), ElementsAre());
+
+  // Empty because we ask for a type, not a type alias
+  EXPECT_THAT(m2.getAttributesOfType("SomeTypeAlias"), ElementsAre());
+  EXPECT_THAT(
+      m2.getAttributesOfTypeAlias("SomeTypeAlias"), ElementsAre("AliasAttr"));
+}
+
 TEST_P(SymbolMapTest, TwoFilesDisagreeOnBaseTypes) {
   auto& m = make("/var/www", m_exec);
 

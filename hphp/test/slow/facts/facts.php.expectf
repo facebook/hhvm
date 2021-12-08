@@ -65,6 +65,10 @@ Attributes of TypeAliasWithAttr: {"TypeAliasAttr":["42","a"]}
 Attributes of ClassWithMethodAttrs::methodWithNoArgAttr: {"NoArgMethodAttr":[]}
 Attributes of ClassWithMethodAttrs::methodWithTwoArgAttr: {"TwoArgMethodAttr":["42","banana"]}
 
+These should be empty, otherwise we're mixing types and type aliases up again
+Attributes of ClassWithTwoAttrs: {}
+Attributes of TypeAliasWithAttr: {}
+
 Getting types with attribute
 Types decorated with NoArgAttr: ["AnnoyingNS\\TerribleClass","ClassWithTwoAttrs"]
 Types decorated with TwoArgAttr: ["AppleThenBanana","AppleThenCarrot","BananaThenApple","ClassWithTwoAttrs"]
@@ -605,6 +609,10 @@ Attributes of ClassWithTwoAttrs: {"NoArgAttr":[],"TwoArgAttr":["abc","def"]}
 Attributes of TypeAliasWithAttr: {"TypeAliasAttr":["42","a"]}
 Attributes of ClassWithMethodAttrs::methodWithNoArgAttr: {"NoArgMethodAttr":[]}
 Attributes of ClassWithMethodAttrs::methodWithTwoArgAttr: {"TwoArgMethodAttr":["42","banana"]}
+
+These should be empty, otherwise we're mixing types and type aliases up again
+Attributes of ClassWithTwoAttrs: {}
+Attributes of TypeAliasWithAttr: {}
 
 Getting types with attribute
 Types decorated with NoArgAttr: ["AnnoyingNS\\TerribleClass","ClassWithTwoAttrs"]

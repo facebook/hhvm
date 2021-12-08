@@ -670,7 +670,7 @@ struct FactsStoreImpl final
   }
 
   Array getTypeAliasAttributes(const String& typeAlias) override {
-    return makeVecOfString(m_map.getAttributesOfType(*typeAlias.get()));
+    return makeVecOfString(m_map.getAttributesOfTypeAlias(*typeAlias.get()));
   }
 
   Array getMethodAttributes(const String& type, const String& method) override {

@@ -19,6 +19,7 @@
 #include <cstdint>
 
 #include "hphp/runtime/ext/facts/symbol-types.h"
+#include "hphp/util/assertions.h"
 #include "hphp/util/hash-map.h"
 
 namespace HPHP {
@@ -32,7 +33,8 @@ namespace Facts {
 struct PathVersions {
 
   void bumpVersion(Path path) noexcept {
-    always_assert(++m_versionMap[path] != 0);
+    auto& version = ++m_versionMap[path];
+    always_assert(version != 0);
   }
 
   std::uint64_t getVersion(Path path) const noexcept {

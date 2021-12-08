@@ -447,6 +447,12 @@ SymbolMap::getAttributesOfType(Symbol<SymKind::Type> type) {
       },
       [&](AutoloadDB& db,
           SQLiteTxn& txn) -> std::vector<Symbol<SymKind::Type>> {
+        // If `type` is actually a type alias in `path`, and we don't do this
+        // check, we'll pollute our in-memory map
+        auto [kind, _] = db.getKindAndFlags(txn, type.slice(), path.native());
+        if (kind == TypeKind::TypeAlias) {
+          return {};
+        }
         auto const attrStrs =
             db.getAttributesOfType(txn, type.slice(), path.native());
         std::vector<Symbol<SymKind::Type>> attrs;
@@ -493,6 +499,13 @@ SymbolMap::getAttributesOfTypeAlias(Symbol<SymKind::Type> typeAlias) {
       },
       [&](AutoloadDB& db,
           SQLiteTxn& txn) -> std::vector<Symbol<SymKind::Type>> {
+        // If `typeAlias` is actually a type in `path`, and we don't do this
+        // check, we'll pollute our in-memory map
+        auto [kind, _] =
+            db.getKindAndFlags(txn, typeAlias.slice(), path.native());
+        if (kind != TypeKind::TypeAlias) {
+          return {};
+        }
         auto const attrStrs =
             db.getAttributesOfType(txn, typeAlias.slice(), path.native());
         std::vector<Symbol<SymKind::Type>> attrs;

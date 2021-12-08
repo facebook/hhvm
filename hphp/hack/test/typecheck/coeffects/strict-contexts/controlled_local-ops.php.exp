@@ -1,3 +1,5 @@
+File "controlled_local-ops.php", line 14, characters 3-12:
+Writing to static properties requires the capability Globals, which is not provided by the context (Parsing[1002])
 File "controlled_local-ops.php", line 13, characters 3-6:
 `echo` or `print` builtin requires the capability IO, which is not provided by the context. (Typing[4401])
   File "controlled_local-ops.php", line 12, characters 31-40:

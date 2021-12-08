@@ -46,21 +46,12 @@ fn hints_contain_capability(hints: &Vec<aast_defs::Hint>, capability: Ctx) -> bo
             let c = coeffects::ctx_str_to_enum(name);
             match c {
                 Some(val) => match capability {
-                    Ctx::WriteProps => {
-                        if coeffects::contains_write_props(val) {
-                            return true;
-                        }
+                    Ctx::WriteProps if coeffects::contains_write_props(&val) => return true,
+                    Ctx::WriteThisProps if coeffects::contains_write_this_props(&val) => {
+                        return true;
                     }
-                    Ctx::WriteThisProps => {
-                        if coeffects::contains_write_this_props(val) {
-                            return true;
-                        }
-                    }
-                    Ctx::ReadGlobals => {
-                        if coeffects::contains_read_globals(val) {
-                            return true;
-                        }
-                    }
+                    Ctx::ReadGlobals if coeffects::contains_read_globals(&val) => return true,
+                    Ctx::Globals if coeffects::contains_access_globals(&val) => return true,
                     _ => continue,
                 },
                 None => continue,
@@ -75,7 +66,7 @@ fn has_capability(ctxs: &Option<ast::Contexts>, capability: Ctx) -> bool {
         Some(c) => hints_contain_capability(&c.1, capability),
         // No capabilities context is the same as defaults in scenarios where contexts are not inherited
         None => match capability {
-            Ctx::WriteProps | Ctx::WriteThisProps | Ctx::ReadGlobals => true,
+            Ctx::WriteProps | Ctx::WriteThisProps | Ctx::ReadGlobals | Ctx::Globals => true,
             _ => false,
         },
     }
@@ -102,6 +93,7 @@ fn has_capability_with_inherited_val(
             Ctx::WriteProps => c.has_write_props(),
             Ctx::WriteThisProps => c.has_write_this_props(),
             Ctx::ReadGlobals => c.has_read_globals(),
+            Ctx::Globals => c.has_access_globals(),
             _ => false,
         },
     }
@@ -195,6 +187,7 @@ bitflags! {
         const HAS_WRITE_PROPS = 1 << 6;
         const HAS_WRITE_THIS_PROPS = 1 << 7;
         const HAS_READ_GLOBALS = 1 << 8;
+        const HAS_ACCESS_GLOBALS = 1 << 9;
     }
 }
 
@@ -260,6 +253,10 @@ impl Context {
         return self.bitflags.contains(ContextFlags::HAS_READ_GLOBALS);
     }
 
+    fn has_access_globals(&self) -> bool {
+        return self.bitflags.contains(ContextFlags::HAS_ACCESS_GLOBALS);
+    }
+
     fn set_in_methodish(&mut self, in_methodish: bool) {
         self.bitflags.set(ContextFlags::IN_METHODISH, in_methodish);
     }
@@ -302,6 +299,11 @@ impl Context {
     fn set_has_read_globals(&mut self, has_read_globals: bool) {
         self.bitflags
             .set(ContextFlags::HAS_READ_GLOBALS, has_read_globals);
+    }
+
+    fn set_has_access_globals(&mut self, has_access_globals: bool) {
+        self.bitflags
+            .set(ContextFlags::HAS_ACCESS_GLOBALS, has_access_globals);
     }
 }
 
@@ -355,14 +357,27 @@ impl Checker {
         }
     }
 
-    fn do_read_globals_check(&mut self, e: &aast::Expr<(), ()>) {
-        self.check_is_static_property(e);
+    fn do_access_globals_check(&mut self, e: &aast::Expr<(), ()>) {
+        if let Some((bop, lhs, _)) = e.2.as_binop() {
+            if let ast_defs::Bop::Eq(_) = bop {
+                self.check_is_static_property(&lhs, Ctx::Globals);
+            }
+        }
     }
 
-    fn check_is_static_property(&mut self, e: &aast::Expr<(), ()>) {
+    fn do_read_globals_check(&mut self, e: &aast::Expr<(), ()>) {
+        self.check_is_static_property(e, Ctx::ReadGlobals);
+    }
+
+    fn check_is_static_property(&mut self, e: &aast::Expr<(), ()>, capability: Ctx) {
         if let Some((_, _, prop_or_method)) = e.2.as_class_get() {
             if let ast_defs::PropOrMethod::IsProp = prop_or_method {
-                self.add_error(&e.1, syntax_error::read_globals_without_capability)
+                if capability == Ctx::ReadGlobals {
+                    self.add_error(&e.1, syntax_error::read_globals_without_capability)
+                }
+                if capability == Ctx::Globals {
+                    self.add_error(&e.1, syntax_error::access_globals_without_capability)
+                }
             }
         }
     }
@@ -416,6 +431,7 @@ impl<'ast> Visitor<'ast> for Checker {
         new_context.set_has_write_props(has_capability(&m.ctxs, Ctx::WriteProps));
         new_context.set_has_write_this_props(has_capability(&m.ctxs, Ctx::WriteThisProps));
         new_context.set_has_read_globals(has_capability(&m.ctxs, Ctx::ReadGlobals));
+        new_context.set_has_access_globals(has_capability(&m.ctxs, Ctx::Globals));
         m.recurse(&mut new_context, self)
     }
 
@@ -427,6 +443,7 @@ impl<'ast> Visitor<'ast> for Checker {
         new_context.set_has_write_props(has_capability(&d.fun.ctxs, Ctx::WriteProps));
         new_context.set_has_write_this_props(has_capability(&d.fun.ctxs, Ctx::WriteThisProps));
         new_context.set_has_read_globals(has_capability(&d.fun.ctxs, Ctx::ReadGlobals));
+        new_context.set_has_access_globals(has_capability(&d.fun.ctxs, Ctx::Globals));
         d.recurse(&mut new_context, self)
     }
 
@@ -453,6 +470,11 @@ impl<'ast> Visitor<'ast> for Checker {
             &f.ctxs,
             Ctx::ReadGlobals,
         ));
+        new_context.set_has_access_globals(has_capability_with_inherited_val(
+            c,
+            &f.ctxs,
+            Ctx::Globals,
+        ));
         f.recurse(&mut new_context, self)
     }
 
@@ -467,8 +489,11 @@ impl<'ast> Visitor<'ast> for Checker {
                     self.do_write_this_props_check(c, &p);
                 }
             }
-            if !c.has_read_globals() && c.is_typechecker() {
-                self.do_read_globals_check(&p);
+            if !c.has_access_globals() && c.is_typechecker() {
+                self.do_access_globals_check(&p);
+                if !c.has_read_globals() {
+                    self.do_read_globals_check(&p);
+                }
             }
         }
         p.recurse(c, self)

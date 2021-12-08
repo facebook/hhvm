@@ -1,0 +1,36 @@
+File "write_static_prop_errors.php", line 8, characters 5-12:
+Reading static properties requires the capability ReadGlobals, which is not provided by the context (Parsing[1002])
+File "write_static_prop_errors.php", line 8, characters 5-12:
+Writing to static properties requires the capability Globals, which is not provided by the context (Parsing[1002])
+File "write_static_prop_errors.php", line 18, characters 3-9:
+Reading static properties requires the capability ReadGlobals, which is not provided by the context (Parsing[1002])
+File "write_static_prop_errors.php", line 18, characters 3-9:
+Writing to static properties requires the capability Globals, which is not provided by the context (Parsing[1002])
+File "write_static_prop_errors.php", line 28, characters 3-10:
+Reading static properties requires the capability ReadGlobals, which is not provided by the context (Parsing[1002])
+File "write_static_prop_errors.php", line 28, characters 3-10:
+Writing to static properties requires the capability Globals, which is not provided by the context (Parsing[1002])
+File "write_static_prop_errors.php", line 8, characters 5-16:
+Modifying static properties requires the capability AccessGlobals, which is not provided by the context. (Typing[4401])
+  File "write_static_prop_errors.php", line 7, characters 32-33:
+  The local (enclosing) context provides the capability set {}
+File "write_static_prop_errors.php", line 8, characters 11-12:
+Reading static properties requires the capability ReadGlobals, which is not provided by the context. (Typing[4401])
+  File "write_static_prop_errors.php", line 7, characters 32-33:
+  The local (enclosing) context provides the capability set {}
+File "write_static_prop_errors.php", line 18, characters 3-13:
+Modifying static properties requires the capability AccessGlobals, which is not provided by the context. (Typing[4401])
+  File "write_static_prop_errors.php", line 17, characters 43-44:
+  The local (enclosing) context provides the capability set {}
+File "write_static_prop_errors.php", line 18, characters 8-9:
+Reading static properties requires the capability ReadGlobals, which is not provided by the context. (Typing[4401])
+  File "write_static_prop_errors.php", line 17, characters 43-44:
+  The local (enclosing) context provides the capability set {}
+File "write_static_prop_errors.php", line 28, characters 3-14:
+Modifying static properties requires the capability AccessGlobals, which is not provided by the context. (Typing[4401])
+  File "write_static_prop_errors.php", line 26, characters 37-38:
+  The local (enclosing) context provides the capability set {}
+File "write_static_prop_errors.php", line 28, characters 9-10:
+Reading static properties requires the capability ReadGlobals, which is not provided by the context. (Typing[4401])
+  File "write_static_prop_errors.php", line 26, characters 37-38:
+  The local (enclosing) context provides the capability set {}

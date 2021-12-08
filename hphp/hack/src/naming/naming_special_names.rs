@@ -875,7 +875,7 @@ pub mod coeffects {
         }
     }
 
-    pub fn contains_write_props(x: Ctx) -> bool {
+    pub fn contains_write_props(x: &Ctx) -> bool {
         lazy_static! {
             static ref WRITE_PROPS_SET: HashSet<Ctx> = vec![
                 Ctx::Defaults,
@@ -892,10 +892,10 @@ pub mod coeffects {
             .into_iter()
             .collect();
         }
-        WRITE_PROPS_SET.contains(&x)
+        WRITE_PROPS_SET.contains(x)
     }
 
-    pub fn contains_write_this_props(x: Ctx) -> bool {
+    pub fn contains_write_this_props(x: &Ctx) -> bool {
         lazy_static! {
             static ref WRITE_THIS_PROPS_SET: HashSet<Ctx> = vec![
                 Ctx::Defaults,
@@ -913,10 +913,10 @@ pub mod coeffects {
             .into_iter()
             .collect();
         }
-        WRITE_THIS_PROPS_SET.contains(&x)
+        WRITE_THIS_PROPS_SET.contains(x)
     }
 
-    pub fn contains_read_globals(x: Ctx) -> bool {
+    pub fn contains_read_globals(x: &Ctx) -> bool {
         lazy_static! {
             static ref READ_GLOBALS_SET: HashSet<Ctx> = vec![
                 Ctx::Defaults,
@@ -931,7 +931,15 @@ pub mod coeffects {
             .into_iter()
             .collect();
         }
-        READ_GLOBALS_SET.contains(&x)
+        READ_GLOBALS_SET.contains(x)
+    }
+
+    pub fn contains_access_globals(x: &Ctx) -> bool {
+        lazy_static! {
+            static ref ACCESS_GLOBALS_SET: HashSet<Ctx> =
+                vec![Ctx::Defaults, Ctx::Globals,].into_iter().collect();
+        }
+        ACCESS_GLOBALS_SET.contains(x)
     }
 }
 

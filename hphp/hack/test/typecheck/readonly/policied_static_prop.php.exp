@@ -1,3 +1,5 @@
+File "policied_static_prop.php", line 12, characters 3-8:
+Writing to static properties requires the capability Globals, which is not provided by the context (Parsing[1002])
 File "policied_static_prop.php", line 10, characters 12-13:
 Creating mutable references to static properties requires the capability AccessGlobals, which is not provided by the context. (Typing[4401])
   File "policied_static_prop.php", line 7, characters 25-32:

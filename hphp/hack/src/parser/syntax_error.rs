@@ -1115,3 +1115,7 @@ pub const closure_in_local_context: Error = Cow::Borrowed(
 pub const read_globals_without_capability: Error = Cow::Borrowed(
     "Reading static properties requires the capability ReadGlobals, which is not provided by the context",
 );
+
+pub const access_globals_without_capability: Error = Cow::Borrowed(
+    "Writing to static properties requires the capability Globals, which is not provided by the context",
+);

@@ -134,20 +134,19 @@ void HHVM_METHOD(
   apache::thrift::PayloadExceptionMetadata exceptionMetadata;
   apache::thrift::PayloadExceptionMetadataBase exceptionMetadataBase;
   if (ex_msg.isNull()) {
-    exceptionMetadata.set_declaredException(
-        apache::thrift::PayloadDeclaredExceptionMetadata());
+    exceptionMetadata.declaredException_ref() = apache::thrift::PayloadDeclaredExceptionMetadata();
   } else if (ex_msg.isString()) {
     exceptionMetadataBase.what_utf8_ref() = ex_msg.toString().c_str();
     apache::thrift::PayloadAppUnknownExceptionMetdata aue;
     aue.errorClassification_ref().ensure().blame_ref() =
         apache::thrift::ErrorBlame::CLIENT;
-    exceptionMetadata.set_appUnknownException(std::move(aue));
+    exceptionMetadata.appUnknownException_ref() = std::move(aue);
   }
 
   exceptionMetadataBase.metadata_ref() = std::move(exceptionMetadata);
   apache::thrift::StreamPayloadMetadata streamPayloadMetadata;
   apache::thrift::PayloadMetadata payloadMetadata;
-  payloadMetadata.set_exceptionMetadata(std::move(exceptionMetadataBase));
+  payloadMetadata.exceptionMetadata_ref() = std::move(exceptionMetadataBase);
   streamPayloadMetadata.payloadMetadata_ref() = std::move(payloadMetadata);
   data->sinkBridge_->push(folly::Try<apache::thrift::StreamPayload>(
             folly::make_exception_wrapper<apache::thrift::detail::EncodedStreamError>(

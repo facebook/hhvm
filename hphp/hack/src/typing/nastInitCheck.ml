@@ -159,27 +159,29 @@ module Env = struct
     let (_, _, methods) = split_methods c.c_methods in
     let methods = List.fold_left ~f:method_ ~init:SMap.empty methods in
     let sc =
-      if use_direct_decl_parser ctx then
-        Option.value_exn (Shallow_classes_provider.get ctx (snd c.c_name))
-      else
-        Shallow_decl.class_DEPRECATED ctx c
+      lazy
+        (assert (shallow_decl_enabled ctx);
+         if use_direct_decl_parser ctx then
+           Option.value_exn (Shallow_classes_provider.get ctx (snd c.c_name))
+         else
+           Shallow_decl.class_DEPRECATED ctx c)
     in
 
     (* Error when an abstract class has private properties but lacks a constructor *)
-    (let open Shallow_decl_defs in
     let has_own_cstr =
-      match sc.sc_constructor with
-      | Some s -> not (sm_abstract s)
+      let (c_constructor, _, _) = split_methods c.c_methods in
+      match c_constructor with
+      | Some s -> not s.m_abstract
       | None -> false
     in
     let (private_props, _) =
       if shallow_decl_enabled ctx then
-        DeferredMembers.class_ tenv sc
+        DeferredMembers.class_ tenv (Lazy.force sc)
       else
-        DICheck.class_ ~has_own_cstr tenv.Typing_env_types.decl_env sc
+        (DICheck.private_deferred_init_props ~has_own_cstr c, SSet.empty)
     in
     let private_props = lookup_props tenv (snd c.c_name) private_props in
-    if Ast_defs.is_c_abstract sc.sc_kind && not has_own_cstr then
+    (if Ast_defs.is_c_abstract c.c_kind && not has_own_cstr then
       let uninit =
         SMap.filter
           (fun _ ty_opt -> not (type_does_not_require_init tenv ty_opt))
@@ -194,38 +196,37 @@ module Env = struct
           add_trait_props,
           add_parent_props,
           add_parent,
-          add_parent_props_set_during_cstr ) =
+          parent_cstr_props ) =
       if shallow_decl_enabled ctx then
-        ( DeferredMembers.init_not_required_props,
-          DeferredMembers.trait_props tenv,
-          DeferredMembers.parent_props tenv,
-          DeferredMembers.parent tenv,
-          parent_props_set_during_cstr tenv )
+        let sc = Lazy.force sc in
+        ( DeferredMembers.init_not_required_props sc,
+          DeferredMembers.trait_props tenv sc,
+          DeferredMembers.parent_props tenv sc,
+          DeferredMembers.parent tenv sc,
+          parent_props_set_during_cstr tenv sc )
       else
         let decl_env = tenv.Typing_env_types.decl_env in
-        ( DICheck.init_not_required_props,
-          DICheck.trait_props decl_env,
-          DICheck.parent_props decl_env,
-          DICheck.parent decl_env,
-          fun c ->
-            DICheck.parent_initialized_members decl_env c
-            |> filter_props_by_type tenv (snd c.Shallow_decl_defs.sc_name) )
+        ( DICheck.init_not_required_props c,
+          DICheck.trait_props decl_env c,
+          DICheck.parent_props decl_env c,
+          DICheck.parent decl_env c,
+          DICheck.parent_initialized_members decl_env c
+          |> filter_props_by_type tenv (snd c.c_name) )
     in
-    let init_not_required_props = add_init_not_required_props sc SSet.empty in
+    let init_not_required_props = add_init_not_required_props SSet.empty in
     let props =
       SSet.empty
-      |> DeferredMembers.own_props sc
+      |> DICheck.own_props c
       (* If we define our own constructor, we need to pretend any traits we use
        * did *not* define a constructor, because they are not reachable through
        * parent::__construct or similar functions. *)
-      |> add_trait_props sc
-      |> add_parent_props sc
-      |> add_parent sc
+      |> add_trait_props
+      |> add_parent_props
+      |> add_parent
       |> lookup_props tenv (snd c.c_name)
       |> SMap.filter (fun _ ty_opt ->
              not (type_does_not_require_init tenv ty_opt))
     in
-    let parent_cstr_props = add_parent_props_set_during_cstr sc in
     { methods; props; parent_cstr_props; tenv; init_not_required_props }
 
   and method_ acc m =

@@ -799,7 +799,11 @@ and class_decl
   in
   let has_own_cstr = has_concrete_cstr && Option.is_some c.sc_constructor in
   let deferred_members =
-    snd (Decl_init_check.class_ ~has_own_cstr ~class_cache:parents env c)
+    Decl_init_check.nonprivate_deferred_init_props
+      ~has_own_cstr
+      ~class_cache:parents
+      env
+      c
   in
   let sealed_whitelist = get_sealed_whitelist c in
   let tc =

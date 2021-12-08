@@ -481,7 +481,6 @@ function get_options(
     'write-to-checkout' => '',
     'bespoke' => '',
     'lazyclass' => '',
-    'hn' => '',
   ];
   $options = dict[];
   $files = vec[];
@@ -1005,9 +1004,6 @@ function hhvm_cmd(
        ? '-c ' . $test . $hdf_suffix
        : "";
   $extra_opts = read_opts_file(find_test_ext($test, 'opts'));
-  if (isset($options['hn'])) {
-    $extra_opts = read_opts_file("$test.hn_opts")." ".$extra_opts;
-  }
   $cmds = hhvm_cmd_impl(
     $options,
     find_test_ext($test, 'ini'),

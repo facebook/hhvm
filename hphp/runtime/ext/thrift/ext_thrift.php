@@ -43,51 +43,45 @@ function thrift_protocol_read_compact_struct(object $transportobj,
 
 <<__NativeData("InteractionId")>>
 class InteractionId {
-  private function __construct(): void {}
+  private function __construct()[]: void {}
 }
 
 <<__NativeData("RpcOptions")>>
 final class RpcOptions {
-  public function __construct(): void {}
-
-  /* Shared empty object for default use, e.g. in a generated code. */
-  <<__Memoize>>
-  public static function getSharedEmpty(): RpcOptions {
-    return new RpcOptions();
-  }
+  public function __construct()[]: void {}
 
   <<__Native>>
-  public function setChunkBufferSize(int $chunk_buffer_size): RpcOptions;
+  public function setChunkBufferSize(int $chunk_buffer_size)[write_props]: RpcOptions;
 
   <<__Native>>
-  public function setRoutingKey(string $routing_key): RpcOptions;
+  public function setRoutingKey(string $routing_key)[write_props]: RpcOptions;
 
   <<__Native>>
-  public function setShardId(string $shard_id): RpcOptions;
+  public function setShardId(string $shard_id)[write_props]: RpcOptions;
 
   <<__Native>>
-  public function setWriteHeader(string $key, string $value): RpcOptions;
+  public function setWriteHeader(string $key, string $value)[write_props]: RpcOptions;
 
   <<__Native>>
-  public function setHeader(string $key, string $value): RpcOptions;
+  public function setHeader(string $key, string $value)[write_props]: RpcOptions;
 
   <<__Native>>
-  public function setLoggingContext(string $logging_metadata): RpcOptions;
+  public function setLoggingContext(string $logging_metadata)[write_props]: RpcOptions;
 
   <<__Native>>
-  public function setOverallTimeout(int $overall_timeout): RpcOptions;
+  public function setOverallTimeout(int $overall_timeout)[write_props]: RpcOptions;
 
   <<__Native>>
-  public function setProcessingTimeout(int $processing_timeout): RpcOptions;
+  public function setProcessingTimeout(int $processing_timeout)[write_props]: RpcOptions;
 
   <<__Native>>
-  public function setChunkTimeout(int $chunk_timeout): RpcOptions;
+  public function setChunkTimeout(int $chunk_timeout)[write_props]: RpcOptions;
 
   <<__Native>>
-  public function setInteractionId(InteractionId $interaction_id): RpcOptions;
+  public function setInteractionId(InteractionId $interaction_id)[write_props]: RpcOptions;
 
   <<__Native>>
-  public function __toString(): string;
+  public function __toString()[]: string;
 }
 
 <<__NativeData("TClientBufferedStream")>>

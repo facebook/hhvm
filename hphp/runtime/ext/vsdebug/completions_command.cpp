@@ -652,7 +652,9 @@ void CompletionsCommand::addFuncConstantCompletions(
     "while"
   };
 
-  for (int i = 0; i < ARRAY_SIZE(suggestionKeywords); i++) {
+  const auto count = sizeof(suggestionKeywords) / sizeof(suggestionKeywords[0]);
+
+  for (int i = 0; i < count; i++) {
     addIfMatch(
       suggestionKeywords[i],
       context.matchPrefix,

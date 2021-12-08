@@ -92,29 +92,24 @@ let make_sharedmem_config config options local_config =
   let shm_min_avail =
     int_ "sharedmem_minimum_available" ~default:shm_min_avail config
   in
-  let (global_size, heap_size, hash_table_pow, compression) =
-    match ServerArgs.ai_mode options with
-    | None -> (global_size, heap_size, hash_table_pow, compression)
-    | Some ai_options ->
-      Ai_options.modify_shared_mem_sizes
-        global_size
-        heap_size
-        hash_table_pow
-        ai_options
+  let config =
+    {
+      SharedMem.global_size;
+      heap_size;
+      hash_table_pow;
+      log_level;
+      sample_rate;
+      shm_dirs;
+      shm_use_sharded_hashtbl;
+      shm_enable_eviction;
+      shm_max_evictable_bytes;
+      shm_min_avail;
+      compression;
+    }
   in
-  {
-    SharedMem.global_size;
-    heap_size;
-    hash_table_pow;
-    log_level;
-    sample_rate;
-    shm_dirs;
-    shm_use_sharded_hashtbl;
-    shm_enable_eviction;
-    shm_max_evictable_bytes;
-    shm_min_avail;
-    compression;
-  }
+  match ServerArgs.ai_mode options with
+  | None -> config
+  | Some ai_options -> Ai_options.modify_shared_mem ai_options config
 
 let config_list_regexp = Str.regexp "[, \t]+"
 

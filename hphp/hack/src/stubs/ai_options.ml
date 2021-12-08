@@ -11,7 +11,4 @@ type t = { analyses: string list }
 
 let prepare ~server:_ _ = { analyses = [] }
 
-let set_json_mode opt _ = opt
-
-let modify_shared_mem_sizes global_size heap_size hash_table_pow _ =
-  (global_size, heap_size, hash_table_pow, 0)
+let modify_shared_mem _options config = config

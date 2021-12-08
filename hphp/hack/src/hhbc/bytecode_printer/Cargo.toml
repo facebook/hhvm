@@ -41,7 +41,7 @@ hhbc_by_ref_label = { path = "../hhbc_by_ref/cargo/hhbc_by_ref_label" }
 hhbc_by_ref_local = { path = "../hhbc_by_ref/cargo/hhbc_by_ref_local" }
 hhbc_by_ref_runtime = { path = "../hhbc_by_ref/cargo/hhbc_by_ref_runtime" }
 indexmap = { version = "1.7.0", features = ["rayon", "serde-1"] }
-itertools = "0.10.1"
+itertools = "0.10.3"
 lazy_static = "1.0"
 naming_special_names_rust = { path = "../../naming" }
 ocaml_helper = { path = "../../utils/ocaml_helper" }

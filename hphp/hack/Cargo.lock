@@ -279,7 +279,7 @@ dependencies = [
  "hhbc_by_ref_local",
  "hhbc_by_ref_runtime",
  "indexmap",
- "itertools 0.10.1",
+ "itertools 0.10.3",
  "lazy_static",
  "naming_special_names_rust",
  "ocaml_helper",
@@ -475,7 +475,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d00996de9f2f7559f7f4dc286073197f83e92256a59ed395f9aac01fe717da57"
 dependencies = [
  "cast",
- "itertools 0.10.1",
+ "itertools 0.10.3",
 ]
 
 [[package]]
@@ -1085,7 +1085,7 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "hex",
- "itertools 0.10.1",
+ "itertools 0.10.3",
  "md-5",
  "proc-macro2",
  "quote",
@@ -1180,7 +1180,7 @@ dependencies = [
 name = "hhbc_by_ref_ast_body"
 version = "0.0.0"
 dependencies = [
- "itertools 0.10.1",
+ "itertools 0.10.3",
  "oxidized",
 ]
 
@@ -1211,7 +1211,7 @@ dependencies = [
  "hhbc_by_ref_options",
  "hhbc_by_ref_runtime",
  "indexmap",
- "itertools 0.10.1",
+ "itertools 0.10.3",
  "naming_special_names_rust",
  "oxidized",
 ]
@@ -1222,7 +1222,7 @@ version = "0.0.0"
 dependencies = [
  "bumpalo",
  "hhbc_by_ref_hhas_coeffects",
- "itertools 0.10.1",
+ "itertools 0.10.3",
  "oxidized",
 ]
 
@@ -1247,7 +1247,7 @@ dependencies = [
  "hhbc_by_ref_options",
  "hhbc_by_ref_unique_id_builder",
  "hhbc_by_ref_unique_list",
- "itertools 0.10.1",
+ "itertools 0.10.3",
  "naming_special_names_rust",
  "ocamlrep",
  "oxidized",
@@ -1271,7 +1271,7 @@ dependencies = [
  "hhbc_by_ref_instruction_sequence",
  "hhbc_by_ref_options",
  "hhbc_by_ref_rewrite_program",
- "itertools 0.10.1",
+ "itertools 0.10.3",
  "ocamlrep",
  "ocamlrep_derive",
  "oxidized",
@@ -1372,7 +1372,7 @@ dependencies = [
  "hhbc_by_ref_statement_state",
  "hhbc_by_ref_unique_id_builder",
  "indexmap",
- "itertools 0.10.1",
+ "itertools 0.10.3",
  "lazy_static",
  "naming_special_names_rust",
  "ocamlrep",
@@ -1469,7 +1469,7 @@ dependencies = [
  "hhbc_by_ref_scope",
  "hhbc_by_ref_symbol_refs_state",
  "indexmap",
- "itertools 0.10.1",
+ "itertools 0.10.3",
  "lazy_static",
  "naming_special_names_rust",
  "oxidized",
@@ -1496,7 +1496,7 @@ dependencies = [
  "hhbc_by_ref_env",
  "hhbc_by_ref_hhas_attribute",
  "hhbc_by_ref_instruction_sequence",
- "itertools 0.10.1",
+ "itertools 0.10.3",
  "oxidized",
 ]
 
@@ -1528,7 +1528,7 @@ dependencies = [
  "hhbc_by_ref_local",
  "hhbc_by_ref_options",
  "hhbc_by_ref_runtime",
- "itertools 0.10.1",
+ "itertools 0.10.3",
  "naming_special_names_rust",
  "ocamlrep",
  "oxidized",
@@ -1606,7 +1606,7 @@ dependencies = [
  "hhbc_by_ref_hhbc_string_utils",
  "hhbc_by_ref_instruction_sequence",
  "hhbc_by_ref_options",
- "itertools 0.10.1",
+ "itertools 0.10.3",
  "naming_special_names_rust",
  "ocamlrep",
  "oxidized",
@@ -2106,7 +2106,7 @@ dependencies = [
  "hhbc_by_ref_label",
  "hhbc_by_ref_local",
  "hhbc_by_ref_runtime",
- "itertools 0.10.1",
+ "itertools 0.10.3",
  "oxidized",
  "pretty_assertions",
  "thiserror",
@@ -2151,7 +2151,7 @@ dependencies = [
  "bitflags",
  "fnv",
  "hhbc_by_ref_options_serde",
- "itertools 0.10.1",
+ "itertools 0.10.3",
  "lazy_static",
  "lru",
  "pretty_assertions",
@@ -2323,9 +2323,9 @@ dependencies = [
 
 [[package]]
 name = "itertools"
-version = "0.10.1"
+version = "0.10.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "69ddb889f9d0d08a67338271fa9b62996bc788c7796a5c18cf057420aaed5eaf"
+checksum = "a9a9d19fa1e79b6215ff29b9d6880b706147f16e9b1dbb1e4e5947b5b02bc5e3"
 dependencies = [
  "either",
 ]
@@ -2447,7 +2447,7 @@ dependencies = [
  "escaper",
  "hash",
  "html_entities",
- "itertools 0.10.1",
+ "itertools 0.10.3",
  "lazy_static",
  "lint_rust",
  "naming_special_names_rust",
@@ -2549,7 +2549,7 @@ name = "multifile_rust"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "itertools 0.10.1",
+ "itertools 0.10.3",
  "lazy_static",
  "pretty_assertions",
  "regex",
@@ -2760,7 +2760,7 @@ dependencies = [
  "bstr",
  "eq_modulo_pos",
  "hh_autoimport_rust",
- "itertools 0.10.1",
+ "itertools 0.10.3",
  "no_pos_hash",
  "ocamlrep",
  "ocamlrep_derive",
@@ -2841,7 +2841,7 @@ version = "0.0.0"
 dependencies = [
  "bitflags",
  "bumpalo",
- "itertools 0.10.1",
+ "itertools 0.10.3",
  "line_break_map",
  "naming_special_names_rust",
  "ocaml_helper",
@@ -3233,7 +3233,7 @@ dependencies = [
  "escaper",
  "hash",
  "hh_autoimport_rust",
- "itertools 0.10.1",
+ "itertools 0.10.3",
  "naming_special_names_rust",
  "oxidized",
  "parser_core_types",

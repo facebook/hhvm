@@ -13,7 +13,7 @@ bumpalo = { version = "3.8", features = ["collections"] }
 escaper = { path = "../../utils/escaper" }
 hash = { path = "../../utils/hash" }
 html_entities = { path = "../../utils/html_entities" }
-itertools = "0.10.1"
+itertools = "0.10.3"
 lazy_static = "1.0"
 lint_rust = { path = "../../utils/lint" }
 naming_special_names_rust = { path = "../../naming" }

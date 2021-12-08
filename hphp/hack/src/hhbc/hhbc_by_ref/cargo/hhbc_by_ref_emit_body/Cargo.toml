@@ -44,7 +44,7 @@ hhbc_by_ref_scope = { path = "../hhbc_by_ref_scope" }
 hhbc_by_ref_statement_state = { path = "../hhbc_by_ref_statement_state" }
 hhbc_by_ref_unique_id_builder = { path = "../hhbc_by_ref_unique_id_builder" }
 indexmap = { version = "1.7.0", features = ["rayon", "serde-1"] }
-itertools = "0.10.1"
+itertools = "0.10.3"
 lazy_static = "1.0"
 naming_special_names_rust = { path = "../../../../naming" }
 ocamlrep = { path = "../../../../ocamlrep" }

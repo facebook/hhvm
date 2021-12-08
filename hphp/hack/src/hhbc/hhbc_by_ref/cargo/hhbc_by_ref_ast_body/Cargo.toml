@@ -8,5 +8,5 @@ edition = "2021"
 path = "../../ast_body.rs"
 
 [dependencies]
-itertools = "0.10.1"
+itertools = "0.10.3"
 oxidized = { path = "../../../../oxidized" }

@@ -9,7 +9,7 @@ path = "../multifile.rs"
 
 [dependencies]
 anyhow = "1.0.51"
-itertools = "0.10.1"
+itertools = "0.10.3"
 lazy_static = "1.0"
 regex = "1.5.4"
 

@@ -45,15 +45,11 @@ fn hints_contain_capability(hints: &Vec<aast_defs::Hint>, capability: Ctx) -> bo
             let (_, name) = utils::split_ns_from_name(&id);
             let c = coeffects::ctx_str_to_enum(name);
             match c {
-                Some(val) => match capability {
-                    Ctx::WriteProps if coeffects::contains_write_props(&val) => return true,
-                    Ctx::WriteThisProps if coeffects::contains_write_this_props(&val) => {
+                Some(val) => {
+                    if coeffects::capability_matches_name(&capability, &val) {
                         return true;
                     }
-                    Ctx::ReadGlobals if coeffects::contains_read_globals(&val) => return true,
-                    Ctx::Globals if coeffects::contains_access_globals(&val) => return true,
-                    _ => continue,
-                },
+                }
                 None => continue,
             }
         }

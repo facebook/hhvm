@@ -875,71 +875,78 @@ pub mod coeffects {
         }
     }
 
-    pub fn contains_write_props(x: &Ctx) -> bool {
-        lazy_static! {
-            static ref WRITE_PROPS_SET: HashSet<Ctx> = vec![
-                Ctx::Defaults,
-                Ctx::RxLocal,
-                Ctx::RxShallow,
-                Ctx::Rx,
-                Ctx::WriteProps,
-                Ctx::Controlled,
-                Ctx::PoliciedLocal,
-                Ctx::PoliciedShallow,
-                Ctx::Policied,
-                Ctx::PoliciedOf,
-            ]
-            .into_iter()
-            .collect();
+    pub fn capability_matches_name(c: &Ctx, name: &Ctx) -> bool {
+        // Either the capability we are searching for matches exactly, is a subtype
+        // of, or is contained in the capability/context we are visiting
+        if c == name
+            || self::capability_contained_in_ctx(&c, &name)
+            || self::capability_is_subtype_of_capability(&c, &name)
+        {
+            return true;
         }
-        WRITE_PROPS_SET.contains(x)
+        false
     }
 
-    pub fn contains_write_this_props(x: &Ctx) -> bool {
-        lazy_static! {
-            static ref WRITE_THIS_PROPS_SET: HashSet<Ctx> = vec![
-                Ctx::Defaults,
-                Ctx::RxLocal,
-                Ctx::RxShallow,
-                Ctx::Rx,
-                Ctx::WriteProps,
-                Ctx::WriteThisProps,
-                Ctx::Controlled,
-                Ctx::PoliciedLocal,
-                Ctx::PoliciedShallow,
-                Ctx::Policied,
-                Ctx::PoliciedOf,
-            ]
-            .into_iter()
-            .collect();
+    pub fn capability_contained_in_ctx(c: &Ctx, ctx: &Ctx) -> bool {
+        match ctx {
+            Ctx::Defaults => self::capability_in_defaults_ctx(c),
+            Ctx::Rx | Ctx::RxLocal | Ctx::RxShallow => self::capability_in_rx_ctx(c),
+            Ctx::Controlled => self::capability_in_controlled_ctx(c),
+            Ctx::Policied | Ctx::PoliciedLocal | Ctx::PoliciedShallow | Ctx::PoliciedOf => {
+                self::capability_in_policied_ctx(c)
+            }
+            // By definition, granular capabilities are not contexts and cannot
+            // contain other capabilities. Also included in the fall through here
+            // are pure, namespaced, polymorphic, and encapsulated contexts; oldrx related
+            // contexts; and illformed symbols (e.g. primitive type used as a context)
+            _ => false,
         }
-        WRITE_THIS_PROPS_SET.contains(x)
     }
 
-    pub fn contains_read_globals(x: &Ctx) -> bool {
-        lazy_static! {
-            static ref READ_GLOBALS_SET: HashSet<Ctx> = vec![
-                Ctx::Defaults,
-                Ctx::Controlled,
-                Ctx::PoliciedLocal,
-                Ctx::PoliciedShallow,
-                Ctx::Policied,
-                Ctx::PoliciedOf,
-                Ctx::ReadGlobals,
-                Ctx::Globals,
-            ]
-            .into_iter()
-            .collect();
+    pub fn capability_is_subtype_of_capability(s: &Ctx, c: &Ctx) -> bool {
+        match c {
+            Ctx::WriteProps => *s == Ctx::WriteThisProps,
+            Ctx::Globals => *s == Ctx::ReadGlobals,
+            // By definition, contexts which contain multiple capabilities are not
+            // themselves granular capabilities and therefore not subject to this
+            // logic. Also included in the fall through here are capabilities which do
+            // not have "subtype" capabilities and illformed symbols (e.g. primitive
+            // type used as a context)
+            _ => false,
         }
-        READ_GLOBALS_SET.contains(x)
     }
 
-    pub fn contains_access_globals(x: &Ctx) -> bool {
+    pub fn capability_in_defaults_ctx(c: &Ctx) -> bool {
         lazy_static! {
-            static ref ACCESS_GLOBALS_SET: HashSet<Ctx> =
-                vec![Ctx::Defaults, Ctx::Globals,].into_iter().collect();
+            static ref DEFAULTS_SET: HashSet<Ctx> =
+                vec![Ctx::WriteProps, Ctx::Globals,].into_iter().collect();
         }
-        ACCESS_GLOBALS_SET.contains(x)
+        DEFAULTS_SET.contains(c)
+    }
+
+    pub fn capability_in_policied_ctx(c: &Ctx) -> bool {
+        lazy_static! {
+            static ref POLICIED_SET: HashSet<Ctx> = vec![Ctx::WriteProps, Ctx::ReadGlobals,]
+                .into_iter()
+                .collect();
+        }
+        POLICIED_SET.contains(c)
+    }
+
+    pub fn capability_in_rx_ctx(c: &Ctx) -> bool {
+        lazy_static! {
+            static ref RX_SET: HashSet<Ctx> = vec![Ctx::WriteProps,].into_iter().collect();
+        }
+        RX_SET.contains(c)
+    }
+
+    pub fn capability_in_controlled_ctx(c: &Ctx) -> bool {
+        lazy_static! {
+            static ref CONTROLLED_SET: HashSet<Ctx> = vec![Ctx::WriteProps, Ctx::ReadGlobals,]
+                .into_iter()
+                .collect();
+        }
+        CONTROLLED_SET.contains(c)
     }
 }
 

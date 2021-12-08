@@ -7,6 +7,8 @@
  *
  *)
 
+external disable_ASLR : string array -> unit = "caml_disable_ASLR"
+
 module Option = Base.Option
 
 type 'a in_channel = Timeout.in_channel
@@ -350,6 +352,7 @@ let devnull () =
  * point.
  *)
 let check_entry_point () =
+  disable_ASLR Sys.argv;
   try
     let (entry, param, (ic, oc)) = Entry.get_context () in
     Entry.clear_context ();

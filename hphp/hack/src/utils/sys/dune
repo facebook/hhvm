@@ -7,6 +7,7 @@
  (foreign_stubs
   (language c)
   (names
+   daemon_stubs
    files
    gc_profiling
    getrusage

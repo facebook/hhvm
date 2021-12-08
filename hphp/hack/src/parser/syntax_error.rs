@@ -1111,3 +1111,7 @@ pub const write_props_without_capability: Error = Cow::Borrowed(
 pub const closure_in_local_context: Error = Cow::Borrowed(
     "Closures in policied local contexts require explicit annotation. Consider adding [policied_local] or [defaults].",
 );
+
+pub const read_globals_without_capability: Error = Cow::Borrowed(
+    "Reading static properties requires the capability ReadGlobals, which is not provided by the context",
+);

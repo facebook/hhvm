@@ -56,6 +56,11 @@ fn hints_contain_capability(hints: &Vec<aast_defs::Hint>, capability: Ctx) -> bo
                             return true;
                         }
                     }
+                    Ctx::ReadGlobals => {
+                        if coeffects::contains_read_globals(val) {
+                            return true;
+                        }
+                    }
                     _ => continue,
                 },
                 None => continue,
@@ -70,7 +75,7 @@ fn has_capability(ctxs: &Option<ast::Contexts>, capability: Ctx) -> bool {
         Some(c) => hints_contain_capability(&c.1, capability),
         // No capabilities context is the same as defaults in scenarios where contexts are not inherited
         None => match capability {
-            Ctx::WriteProps | Ctx::WriteThisProps => true,
+            Ctx::WriteProps | Ctx::WriteThisProps | Ctx::ReadGlobals => true,
             _ => false,
         },
     }
@@ -96,6 +101,7 @@ fn has_capability_with_inherited_val(
         None => match capability {
             Ctx::WriteProps => c.has_write_props(),
             Ctx::WriteThisProps => c.has_write_this_props(),
+            Ctx::ReadGlobals => c.has_read_globals(),
             _ => false,
         },
     }
@@ -179,7 +185,7 @@ fn has_ignore_coeffect_local_errors_attr(attrs: &Vec<aast::UserAttribute<(), ()>
 }
 
 bitflags! {
-    pub struct ContextFlags: u8 {
+    pub struct ContextFlags: u16 {
         const IN_METHODISH = 1 << 0;
         const IS_PURE = 1 << 1;
         const IS_CONSTRUCTOR = 1 << 2;
@@ -188,6 +194,7 @@ bitflags! {
         const HAS_DEFAULTS = 1 << 5;
         const HAS_WRITE_PROPS = 1 << 6;
         const HAS_WRITE_THIS_PROPS = 1 << 7;
+        const HAS_READ_GLOBALS = 1 << 8;
     }
 }
 
@@ -198,7 +205,7 @@ struct Context {
 impl Context {
     fn new() -> Self {
         Self {
-            bitflags: ContextFlags::from_bits_truncate(0 as u8),
+            bitflags: ContextFlags::from_bits_truncate(0 as u16),
         }
     }
 
@@ -249,6 +256,10 @@ impl Context {
         return self.bitflags.contains(ContextFlags::HAS_WRITE_THIS_PROPS);
     }
 
+    fn has_read_globals(&self) -> bool {
+        return self.bitflags.contains(ContextFlags::HAS_READ_GLOBALS);
+    }
+
     fn set_in_methodish(&mut self, in_methodish: bool) {
         self.bitflags.set(ContextFlags::IN_METHODISH, in_methodish);
     }
@@ -286,6 +297,11 @@ impl Context {
     fn set_has_write_this_props(&mut self, has_write_this_props: bool) {
         self.bitflags
             .set(ContextFlags::HAS_WRITE_THIS_PROPS, has_write_this_props);
+    }
+
+    fn set_has_read_globals(&mut self, has_read_globals: bool) {
+        self.bitflags
+            .set(ContextFlags::HAS_READ_GLOBALS, has_read_globals);
     }
 }
 
@@ -339,6 +355,18 @@ impl Checker {
         }
     }
 
+    fn do_read_globals_check(&mut self, e: &aast::Expr<(), ()>) {
+        self.check_is_static_property(e);
+    }
+
+    fn check_is_static_property(&mut self, e: &aast::Expr<(), ()>) {
+        if let Some((_, _, prop_or_method)) = e.2.as_class_get() {
+            if let ast_defs::PropOrMethod::IsProp = prop_or_method {
+                self.add_error(&e.1, syntax_error::read_globals_without_capability)
+            }
+        }
+    }
+
     fn check_is_obj_property_write_expr(
         &mut self,
         top_level_expr: &aast::Expr<(), ()>,
@@ -387,6 +415,7 @@ impl<'ast> Visitor<'ast> for Checker {
         new_context.set_has_defaults(has_defaults(&m.ctxs));
         new_context.set_has_write_props(has_capability(&m.ctxs, Ctx::WriteProps));
         new_context.set_has_write_this_props(has_capability(&m.ctxs, Ctx::WriteThisProps));
+        new_context.set_has_read_globals(has_capability(&m.ctxs, Ctx::ReadGlobals));
         m.recurse(&mut new_context, self)
     }
 
@@ -397,6 +426,7 @@ impl<'ast> Visitor<'ast> for Checker {
         new_context.set_is_constructor(is_constructor(&d.fun.name));
         new_context.set_has_write_props(has_capability(&d.fun.ctxs, Ctx::WriteProps));
         new_context.set_has_write_this_props(has_capability(&d.fun.ctxs, Ctx::WriteThisProps));
+        new_context.set_has_read_globals(has_capability(&d.fun.ctxs, Ctx::ReadGlobals));
         d.recurse(&mut new_context, self)
     }
 
@@ -418,20 +448,27 @@ impl<'ast> Visitor<'ast> for Checker {
             &f.ctxs,
             Ctx::WriteThisProps,
         ));
+        new_context.set_has_read_globals(has_capability_with_inherited_val(
+            c,
+            &f.ctxs,
+            Ctx::ReadGlobals,
+        ));
         f.recurse(&mut new_context, self)
     }
 
     fn visit_expr(&mut self, c: &mut Context, p: &aast::Expr<(), ()>) -> Result<(), ()> {
-        if c.in_methodish()
-            && !c.ignore_coeffect_local_errors()
-            && !c.has_defaults()
-            && !c.has_write_props()
+        if c.in_methodish() && !c.ignore_coeffect_local_errors() && !c.has_defaults() {
+            if !c.has_write_props()
             // TODO(T106528721) Turn on coeffect enforcement in runtime outside of pure functions
             && (c.is_typechecker() || c.is_pure())
-        {
-            self.do_write_props_check(&p);
-            if !c.has_write_this_props() {
-                self.do_write_this_props_check(c, &p);
+            {
+                self.do_write_props_check(&p);
+                if !c.has_write_this_props() {
+                    self.do_write_this_props_check(c, &p);
+                }
+            }
+            if !c.has_read_globals() && c.is_typechecker() {
+                self.do_read_globals_check(&p);
             }
         }
         p.recurse(c, self)

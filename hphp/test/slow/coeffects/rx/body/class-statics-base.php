@@ -2,7 +2,7 @@
 
 class C { public static $p; }
 
-function test()[rx] {
+function test()[rx, globals] {
   C::$p['a'] = 'b';
 }
 

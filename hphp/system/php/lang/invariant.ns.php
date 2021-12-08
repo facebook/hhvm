@@ -89,6 +89,7 @@ function invariant(mixed $test, $format_str, ...$args)[]: void {
  *                      fails.
  * @param $args - Actual values to placeholders in your format string.
  */
+<<__IgnoreCoeffectLocalErrors>>
 function invariant_violation(string $format_str, ...$args)[]: void {
   // TODO(T94673071): The callback only ever gets set once at the beginning of
   // the request for FB WWW. This means that this global read is technically

@@ -915,6 +915,24 @@ pub mod coeffects {
         }
         WRITE_THIS_PROPS_SET.contains(&x)
     }
+
+    pub fn contains_read_globals(x: Ctx) -> bool {
+        lazy_static! {
+            static ref READ_GLOBALS_SET: HashSet<Ctx> = vec![
+                Ctx::Defaults,
+                Ctx::Controlled,
+                Ctx::PoliciedLocal,
+                Ctx::PoliciedShallow,
+                Ctx::Policied,
+                Ctx::PoliciedOf,
+                Ctx::ReadGlobals,
+                Ctx::Globals,
+            ]
+            .into_iter()
+            .collect();
+        }
+        READ_GLOBALS_SET.contains(&x)
+    }
 }
 
 pub mod shapes {

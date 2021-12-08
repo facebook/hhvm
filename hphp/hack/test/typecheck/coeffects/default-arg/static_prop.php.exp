@@ -1,3 +1,9 @@
+File "static_prop.php", line 11, characters 19-28:
+Reading static properties requires the capability ReadGlobals, which is not provided by the context (Parsing[1002])
+File "static_prop.php", line 19, characters 19-26:
+Reading static properties requires the capability ReadGlobals, which is not provided by the context (Parsing[1002])
+File "static_prop.php", line 28, characters 17-22:
+Reading static properties requires the capability ReadGlobals, which is not provided by the context (Parsing[1002])
 File "static_prop.php", line 11, characters 27-28:
 Reading static properties requires the capability ReadGlobals, which is not provided by the context. (Typing[4401])
   File "static_prop.php", line 11, characters 14-15:

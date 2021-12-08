@@ -3,7 +3,7 @@
 class C {
   public static int $x = 42;
 
-  private function m_allowed()[\HH\Capabilities\AccessGlobals]: int {
+  private function m_allowed()[\HH\Capabilities\AccessGlobals, globals]: int {
     return static::$x; // ok (context defaults has the AccessGlobals capability)
   }
   private function m_banned()[]: int {
@@ -11,12 +11,12 @@ class C {
   }
 }
 
-function f_allowed()[\HH\Capabilities\AccessGlobals]: int {
+function f_allowed()[\HH\Capabilities\AccessGlobals, globals]: int {
   $l_disallowed = ()[] ==> C::$x; // error
   return C::$x; // ok
 }
 
 function f_banned()[write_props]: int {
-  $l_allowed = ()[\HH\Capabilities\AccessGlobals] ==> C::$x; // ok
+  $l_allowed = ()[\HH\Capabilities\AccessGlobals, globals] ==> C::$x; // ok
   return C::$x; // error
 }

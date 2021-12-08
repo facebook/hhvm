@@ -1,9 +1,9 @@
+//// here.php
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+<<file:__EnableUnstableFeatures('modules'), __Module('here')>>
 
-<<file:__EnableUnstableFeatures('modules')>>
-
-<<__Module('here'), __Internal>>
+<<__Internal>>
 class C {
   public function bar(mixed $m):void {
     // All not ok
@@ -21,7 +21,12 @@ class C {
   public static function foo():void { }
 }
 
-<<__Module('there'), __Internal>>
+//// there.php
+<?hh
+// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+<<file:__EnableUnstableFeatures('modules'), __Module('there')>>
+
+<<__Internal>>
 class D {
   public static function foo():void { }
 }

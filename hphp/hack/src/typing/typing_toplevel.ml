@@ -155,7 +155,7 @@ let fun_def ctx fd :
   let env =
     Env.set_module env
     @@ Typing_modules.of_maybe_string
-    @@ Naming_attributes_params.get_module_attribute f.f_user_attributes
+    @@ Naming_attributes_params.get_module_attribute fd.fd_file_attributes
   in
   let env =
     Env.set_internal
@@ -1849,7 +1849,7 @@ let class_def ctx c =
   let env =
     Env.set_module env
     @@ Typing_modules.of_maybe_string
-    @@ Naming_attributes_params.get_module_attribute c.c_user_attributes
+    @@ Naming_attributes_params.get_module_attribute c.c_file_attributes
   in
   let env =
     Env.set_internal

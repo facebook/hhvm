@@ -413,6 +413,7 @@ let typedef tenv t =
     t_span = _;
     t_emit_id = _;
     t_is_ctx = _;
+    t_file_attributes = _;
   } =
     t
   in

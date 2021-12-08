@@ -1,4 +1,4 @@
-File "module_bad_override.php", line 12, characters 21-26:
+File "module_bad_override.php--B.php", line 4, characters 21-26:
 Cannot override this member outside module `A` (Typing[4444])
-  File "module_bad_override.php", line 8, characters 21-26:
+  File "module_bad_override.php--A.php", line 6, characters 21-26:
   This member is internal to module `A`

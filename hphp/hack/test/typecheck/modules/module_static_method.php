@@ -1,24 +1,32 @@
+//// A.php
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-<<file:__EnableUnstableFeatures('modules')>>
+<<file:__EnableUnstableFeatures('modules'), __Module('A')>>
 
-<<__Module("A")>>
 class A {
   <<__Internal>>
   public static function f(): void {}
 }
 
-function none(): void {
-  A::f();
-}
-
-<<__Module("A")>>
 function a(): void {
   A::f();
 }
 
-<<__Module("B")>>
+//// B.php
+<?hh
+// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+
+<<file:__EnableUnstableFeatures('modules'), __Module('B')>>
+
 function b(): void {
+  A::f();
+}
+
+//// none.php
+<?hh
+// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+
+function none(): void {
   A::f();
 }

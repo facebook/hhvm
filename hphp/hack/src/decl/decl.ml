@@ -35,6 +35,13 @@ let rec name_and_declare_types_program_DEPRECATED
     (prog : Nast.program) : Direct_decl_parser.decls =
   let with_sh f = Option.value_map ~default:() ~f:(fun sh -> f sh) sh in
   let open Aast in
+  let module_ =
+    List.filter_map prog ~f:(function
+        | FileAttributes f -> Some f
+        | _ -> None)
+    |> Naming_attributes_params.get_module_attribute
+    |> Typing_modules.of_maybe_string
+  in
   List.fold prog ~init:acc ~f:(fun acc def ->
       match def with
       | Namespace (_, prog) ->
@@ -53,7 +60,7 @@ let rec name_and_declare_types_program_DEPRECATED
         :: acc
       | RecordDef rd ->
         let (name, decl) =
-          Decl_nast.record_def_naming_and_decl_DEPRECATED ctx rd
+          Decl_nast.record_def_naming_and_decl_DEPRECATED ctx rd module_
         in
         with_sh (fun _ -> Decl_store.((get ()).add_recorddef name decl));
         (name, Shallow_decl_defs.Record decl) :: acc

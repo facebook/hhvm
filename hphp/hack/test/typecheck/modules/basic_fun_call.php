@@ -1,17 +1,22 @@
+//// A.php
 <?hh
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
-<<file:__EnableUnstableFeatures('modules')>>
+<<file:__EnableUnstableFeatures('modules'), __Module("A")>>
 
-<<__Module("A"), __Internal>>
+<<__Internal>>
 function a(): void {}
 
-<<__Module("A")>>
 function a2(): void { a(); /* ok */ }
 
-<<__Module("B")>>
+//// B.php
+<?hh
+
+<<file:__EnableUnstableFeatures('modules'), __Module("B")>>
+
 function b(): void { a(); /* error */ }
 
-<<__Module("B")>>
 function b2(): void { a2(); /* ok */ }
+
+//// main.php
+<?hh
 
 function main(): void { a(); /* error */ }

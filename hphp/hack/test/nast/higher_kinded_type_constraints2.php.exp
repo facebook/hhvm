@@ -1,7 +1,7 @@
 [(Typedef
     { t_annotation = (); t_name = ([11:6-8], "\\T7"); t_tparams = []; 
       t_constraint = None; t_kind = ([11:11-16], Hmixed); t_user_attributes = []; 
-      t_mode = Mstrict; t_vis = Transparent;
+      t_file_attributes = []; t_mode = Mstrict; t_vis = Transparent;
       t_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 

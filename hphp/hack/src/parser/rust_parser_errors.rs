@@ -1587,9 +1587,6 @@ where
                     if self.is_ifc_attribute(n) {
                         self.check_can_use_feature(node, &UnstableFeatures::IFC)
                     }
-                    if self.is_module_attribute(n) {
-                        self.check_can_use_feature(node, &UnstableFeatures::Modules)
-                    }
                     if (sn::user_attributes::ignore_readonly_local_errors(n)
                         || sn::user_attributes::ignore_coeffect_local_errors(n)
                         || sn::user_attributes::is_native(n))
@@ -5258,8 +5255,8 @@ where
                 self.env.context.active_classish = Some(node)
             }
             FileAttributeSpecification(_) => Self::attr_spec_to_node_list(node).for_each(|ref node| {
-                if self.attr_name(node).as_deref()
-                    == Some(sn::user_attributes::ENABLE_UNSTABLE_FEATURES)
+                match self.attr_name(node) {
+                    Some(sn::user_attributes::ENABLE_UNSTABLE_FEATURES) =>
                 {
                     if let Some(args) = self.attr_args(node) {
                         let mut args = args.peekable();
@@ -5279,6 +5276,10 @@ where
                         }
                     }
                 }
+                Some(name) if self.is_module_attribute(name) =>
+                        self.check_can_use_feature(node, &UnstableFeatures::Modules),
+                Some(_) | None => ()
+            }
             }),
             _ => (),
         };

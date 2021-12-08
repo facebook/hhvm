@@ -1,8 +1,7 @@
 <?hh
 
-<<file:__EnableUnstableFeatures('modules')>>
+<<file:__EnableUnstableFeatures('modules'), __Module('A')>>
 
-<<__Module('A')>>
 class A {
   <<__Internal>>
   private function bad1(): void {}

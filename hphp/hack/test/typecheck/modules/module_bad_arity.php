@@ -1,21 +1,23 @@
+//// no-module.php
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// TODO(T106200480)
+<<file:__EnableUnstableFeatures('modules'), __Module>>
 
-<<file:__EnableUnstableFeatures('modules')>>
+//// too-many-modules.php
+<?hh
+// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+<<file:__EnableUnstableFeatures('modules'), __Module('A', 'B')>>
 
-<<__Module>>
-class A {}
+//// bad-internal.php
+<?hh
+// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+<<file:__EnableUnstableFeatures('modules'), __Module('C')>>
 
-<<__Module('A', 'B')>>
-class B {}
-
-<<__Module('C'), __Internal(42)>>
+<<__Internal(42)>>
 function c(): void {}
 
-<<__Module('D')>>
 class D {
-
   <<__Internal('lol')>>
   public function foobar(): void {}
-
 }

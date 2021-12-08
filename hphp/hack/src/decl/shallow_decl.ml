@@ -347,7 +347,7 @@ let class_DEPRECATED ctx c =
     in
     let sc_module =
       Typing_modules.of_maybe_string
-      @@ Naming_attributes_params.get_module_attribute c.c_user_attributes
+      @@ Naming_attributes_params.get_module_attribute c.c_file_attributes
     in
     let where_constraints =
       List.map c.c_where_constraints ~f:(FunUtils.where_constraint env)

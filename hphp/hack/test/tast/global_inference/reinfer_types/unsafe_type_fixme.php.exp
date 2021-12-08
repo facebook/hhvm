@@ -2,7 +2,8 @@
     { t_annotation = (); t_name = ([2:6-27], "\\UNSAFE_TYPE_HH_FIXME_");
       t_tparams = [{ tp_variance = Invariant; tp_name = ([2:28-29], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }]; 
       t_constraint = None; t_kind = ([2:33-34], (Habstr ("T", []))); 
-      t_user_attributes = []; t_mode = Mstrict; t_vis = Transparent;
+      t_user_attributes = []; t_file_attributes = []; t_mode = Mstrict; 
+      t_vis = Transparent;
       t_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 
@@ -10,7 +11,8 @@
       t_span = [2:1-35]; t_emit_id = None; t_is_ctx = false })[(Typedef
     { t_annotation = (); t_name = ([4:6-26], "\\UNSAFE_TYPE_HH_FIXME"); 
       t_tparams = []; t_constraint = None; t_kind = ([4:29-50], (Happly (([4:29-50], "\\UNSAFE_TYPE_HH_FIXME_"), []))); 
-      t_user_attributes = []; t_mode = Mstrict; t_vis = Transparent;
+      t_user_attributes = []; t_file_attributes = []; t_mode = Mstrict; 
+      t_vis = Transparent;
       t_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>; 

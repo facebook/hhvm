@@ -1,7 +1,6 @@
+//// X.php
 <?hh
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
-
-<<file:__EnableUnstableFeatures('modules')>>
+<<file:__EnableUnstableFeatures('modules'), __Module("X")>>
 
 <<__Module("X"), __Internal>>
 enum X: int {
@@ -10,20 +9,11 @@ enum X: int {
   C = 2;
 }
 
-// Using Enum Types ////////////////////////////////////////
-
 <<__Module("X"), __Internal>>
 function f1(X $x): void {} // ok
 
 <<__Module("X")>>
 function f2(X $x): void {} // error
-
-<<__Module("Y")>>
-function f3(X $x): void {} // error
-
-function f4(X $x): void {} // error
-
-// Using Enum Values ///////////////////////////////////////
 
 <<__Module("X"), __Internal>>
 function f5(): void {
@@ -35,10 +25,23 @@ function f6(): void {
   $x = X::A; // ok
 }
 
+//// Y.php
+<?hh
+<<file:__EnableUnstableFeatures('modules'), __Module("Y")>>
+
+<<__Module("Y")>>
+function f3(X $x): void {} // error
+
+
 <<__Module("Y")>>
 function f7(): void {
   $x = X::A; // error
 }
+
+//// no-module.php
+<?hh
+
+function f4(X $x): void {} // error
 
 function f8(): void {
   $x = X::A; // error

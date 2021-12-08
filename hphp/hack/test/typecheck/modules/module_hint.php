@@ -1,13 +1,9 @@
+//// here.php
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+<<file:__EnableUnstableFeatures('modules'), __Module('here')>>
 
-<<file:__EnableUnstableFeatures('modules')>>
-
-function genfun<T>(?T $x):?T { return $x; }
-
-class MyList<T> { }
-
-<<__Module('here'), __Internal>>
+<<__Internal>>
 class C {
   public function bar(mixed $m):void {
     // All not ok
@@ -28,13 +24,26 @@ class C {
   }
 }
 
-<<__Module('there'), __Internal>>
+//// there.php
+<?hh
+// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+<<file:__EnableUnstableFeatures('modules'), __Module('there')>>
+
+<<__Internal>>
 class D {
 }
-<<__Module('there'), __Internal>>
+<<__Internal>>
 class G<T> {
 }
-<<__Module('there'), __Internal>>
+<<__Internal>>
 enum E : int {
   A = 1;
 }
+
+//// everywhere.php
+<?hh
+// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+
+function genfun<T>(?T $x):?T { return $x; }
+
+class MyList<T> { }

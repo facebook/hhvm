@@ -1,11 +1,7 @@
+//// here.php
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
-
-<<file:__EnableUnstableFeatures('modules')>>
-
-function genfun<T>(?T $x):?T { return $x; }
-
-class MyList<T> { }
+<<file:__EnableUnstableFeatures('modules'), __Module('here')>>
 
 <<__Module('here'), __Internal>>
 class C {
@@ -28,6 +24,10 @@ class C {
   }
 }
 
+//// there.php
+<?hh
+<<file:__EnableUnstableFeatures('modules'), __Module('there')>>
+
 <<__Module('there'), __Internal>>
 class D {
 }
@@ -38,3 +38,10 @@ class G<T> {
 enum E : int {
   A = 1;
 }
+
+//// everywhere.php
+<?hh
+
+function genfun<T>(?T $x):?T { return $x; }
+
+class MyList<T> { }

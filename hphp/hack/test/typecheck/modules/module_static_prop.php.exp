@@ -1,8 +1,8 @@
-File "module_static_prop.php", line 13, characters 6-7:
-You cannot access internal members outside of a module (Typing[4112])
-  File "module_static_prop.php", line 9, characters 17-19:
-  This member is internal
-File "module_static_prop.php", line 23, characters 6-7:
+File "module_static_prop.php--B.php", line 7, characters 6-7:
 You cannot access internal members from module `A` in module `B` (Typing[4112])
-  File "module_static_prop.php", line 9, characters 17-19:
+  File "module_static_prop.php--A.php", line 8, characters 17-19:
+  This member is internal
+File "module_static_prop.php--no-module.php", line 5, characters 6-7:
+You cannot access internal members outside of a module (Typing[4112])
+  File "module_static_prop.php--A.php", line 8, characters 17-19:
   This member is internal

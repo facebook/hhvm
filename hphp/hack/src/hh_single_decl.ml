@@ -85,7 +85,8 @@ let rec shallow_declare_ast ctx decls prog =
         (name, Shallow_decl_defs.Class decl) :: decls
       | RecordDef rd ->
         let (name, decl) =
-          Decl_nast.record_def_naming_and_decl_DEPRECATED ctx rd
+          (* TODO(T106202074): Modules and records? *)
+          Decl_nast.record_def_naming_and_decl_DEPRECATED ctx rd None
         in
         (name, Shallow_decl_defs.Record decl) :: decls
       | Typedef typedef ->

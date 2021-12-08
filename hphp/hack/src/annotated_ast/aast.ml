@@ -989,6 +989,7 @@ and ('ex, 'en) typedef = {
   t_constraint: hint option;
   t_kind: hint;
   t_user_attributes: ('ex, 'en) user_attribute list;
+  t_file_attributes: ('ex, 'en) file_attribute list;
   t_mode: FileInfo.mode; [@visitors.opaque]
   t_vis: typedef_visibility;
   t_namespace: nsenv;

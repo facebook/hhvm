@@ -1,14 +1,14 @@
+//// A.php
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-<<file:__EnableUnstableFeatures('modules')>>
+<<file:__EnableUnstableFeatures('modules'), __Module('A')>>
 
-<<__Module("A"), __Internal>>
+<<__Internal>>
 type Ty = int;
 
-// In Signatures /////////////////////////////////
+// In Signatures
 
-<<__Module("A")>>
 class A {
   public function a(Ty $x): void {} // error
 
@@ -16,14 +16,22 @@ class A {
   public function b(Ty $x): void {} // ok
 }
 
-// Visibility ////////////////////////////////////
+// Visibility
 
-<<__Module("A")>>
 function f(): void {
   $x = 1 as Ty; // ok
 }
 
-<<__Module("B")>>
+
+//// B.php
+<?hh
+// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+
+<<file:__EnableUnstableFeatures('modules'), __Module('B')>>
+
 function g(Ty $x): void {} // error
+
+//// no-module.php
+<?hh
 
 function h(Ty $x): void {} // error

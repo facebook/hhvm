@@ -1,16 +1,16 @@
+//// here.php
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-<<file:__EnableUnstableFeatures('modules')>>
+<<file:__EnableUnstableFeatures('modules'), __Module('here')>>
 
-<<__Module('here'), __Internal>>
+<<__Internal>>
 class C {
   public function bar():void { }
 }
-<<__Module('here')>>
+
 interface I { }
 
-<<__Module('here')>>
 class D
 // Bad
 extends C
@@ -30,10 +30,19 @@ implements I {
   <<__Internal>> public function good3():C { return new C(); }
 }
 
-<<__Module('here'), __Internal>>
+<<__Internal>>
 class E extends C {} // Ok!
 
-<<__Module('there')>>
+
+//// there.php
+<?hh
+
+<<file:__EnableUnstableFeatures('modules'), __Module('there')>>
+
 class F extends C {} // Bad!
+
+
+//// everywhere.php
+<?hh
 
 class G extends C {} // Bad!

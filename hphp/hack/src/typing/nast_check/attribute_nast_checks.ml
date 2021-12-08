@@ -133,10 +133,6 @@ let handler =
         params;
       check_attribute_arity
         f.f_user_attributes
-        SN.UserAttributes.uaModule
-        (`Exact 1);
-      check_attribute_arity
-        f.f_user_attributes
         SN.UserAttributes.uaInternal
         (`Exact 0)
 
@@ -168,10 +164,4 @@ let handler =
         SN.UserAttributes.uaInternal
         (`Exact 0);
       check_internal_method_visibility m
-
-    method! at_class_ _env c =
-      check_attribute_arity
-        c.c_user_attributes
-        SN.UserAttributes.uaModule
-        (`Exact 1)
   end

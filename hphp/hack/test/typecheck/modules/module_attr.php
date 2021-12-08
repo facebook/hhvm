@@ -1,23 +1,28 @@
+//// here.php
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+<<file:__EnableUnstableFeatures('modules'), __Module("here")>>
 
-<<file:__EnableUnstableFeatures('modules')>>
+function foo(): void { }
 
-<<__Module('here')>>
-function foo():void { }
-
-<<__Module('there')>>
-class C {
-  public function bar():void { }
-}
-
-<<__Module('here')>>
 type Talias = int;
 
-<<__Module('another')>>
+newtype Tnew = string;
+
+//// there.php
+<?hh
+// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+<<file:__EnableUnstableFeatures('modules'), __Module("there")>>
+
+class C {
+  public function bar(): void { }
+}
+
+//// another.php
+<?hh
+// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+<<file:__EnableUnstableFeatures('modules'), __Module("another")>>
+
 enum E : int {
   A = 3;
 }
-
-<<__Module('here')>>
-newtype Tnew = string;

@@ -29,7 +29,10 @@ let deprecated ~kind (_, name) attrs =
   | _ -> None
 
 let get_module_attribute attrs =
-  let attr = Naming_attributes.find SN.UserAttributes.uaModule attrs in
+  let attr =
+    List.bind attrs ~f:(fun attr -> attr.Aast.fa_user_attributes)
+    |> Naming_attributes.find SN.UserAttributes.uaModule
+  in
   let open Aast in
   match attr with
   | Some { ua_name = _; ua_params = name :: _ } ->

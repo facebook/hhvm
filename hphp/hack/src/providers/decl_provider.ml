@@ -268,7 +268,8 @@ let declare_record_def_in_file_DEPRECATED
   match Ast_provider.find_record_def_in_file ctx file name with
   | Some rd ->
     let (_name, decl) =
-      Decl_nast.record_def_naming_and_decl_DEPRECATED ctx rd
+      (* TODO(T106202074): Modules and records? *)
+      Decl_nast.record_def_naming_and_decl_DEPRECATED ctx rd None
     in
     decl
   | None -> err_not_found file name

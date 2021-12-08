@@ -83,6 +83,7 @@ pub struct DirectDeclSmartConstructors<'a, 'text, S: SourceTextAllocator<'text, 
     previous_token_kind: TokenKind,
 
     source_text_allocator: S,
+    module: Option<&'a Module_<'a>>,
 }
 
 impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'a, 'text, S> {
@@ -127,6 +128,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
             source_text_allocator,
             retain_or_omit_user_attributes_for_facts,
             simplify_naming_for_facts,
+            module: None,
         }
     }
 
@@ -1395,7 +1397,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
             via_label: false,
             soft: false,
             support_dynamic_type: false,
-            module: None,
+            module: self.module,
             internal: false,
         };
 
@@ -1481,22 +1483,6 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                     }
                     "__SupportDynamicType" => {
                         attributes.support_dynamic_type = true;
-                    }
-                    "__Module" => {
-                        attributes.module = attribute
-                            .string_literal_params
-                            .first()
-                            .map(|&x| self.str_from_utf8_for_bytes_in_arena(x))
-                            .and_then(|x| {
-                                let mut chars = x.split('.');
-                                match chars.next() {
-                                    None => None,
-                                    Some(s) => {
-                                        let rest = chars.collect::<std::vec::Vec<_>>();
-                                        Some(self.alloc(Module_(s, self.alloc(rest))))
-                                    }
-                                }
-                            });
                     }
                     "__Internal" => {
                         attributes.internal = true;
@@ -2084,6 +2070,30 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
             name: attr.name.into(),
             classname_params: self.slice(attr.classname_params.iter().map(|p| p.name.1)),
         })
+    }
+
+    fn set_module(&mut self, attributes: &Node<'a>) {
+        for attr in attributes.iter() {
+            if let Node::Attribute(attr) = attr {
+                if attr.name.1 == "__Module" {
+                    self.module = attr
+                        .string_literal_params
+                        .first()
+                        .map(|&x| self.str_from_utf8_for_bytes_in_arena(x))
+                        .and_then(|x| {
+                            let mut chars = x.split('.');
+                            match chars.next() {
+                                None => None,
+                                Some(s) => {
+                                    let rest = chars.collect::<std::vec::Vec<_>>();
+                                    Some(self.alloc(Module_(s, self.alloc(rest))))
+                                }
+                            }
+                        });
+                    break;
+                }
+            }
+        }
     }
 
     fn namespace_use_kind(use_kind: &Node<'_>) -> Option<NamespaceUseKind> {
@@ -5586,6 +5596,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                 }
             }
         }
+        self.set_module(&attributes);
         Node::Ignored(SK::FileAttributeSpecification)
     }
 

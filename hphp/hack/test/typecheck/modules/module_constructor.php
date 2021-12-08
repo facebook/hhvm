@@ -1,24 +1,31 @@
+//// A.php
 <?hh
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
-<<file:__EnableUnstableFeatures('modules')>>
+<<file:__EnableUnstableFeatures('modules'), __Module('A')>>
 
-<<__Module("A")>>
 class A {
   <<__Internal>>
   public function __construct() {}
 }
 
-function none(): void {
-  $a = new A();
+function a(): void {
+  $a = new A(); // ok
 }
 
-<<__Module("A")>>
-function a(): void {
-  $a = new A();
-}
+//// B.php
+<?hh
+
+<<file:__EnableUnstableFeatures('modules'), __Module('B')>>
 
 <<__Module("B")>>
 function b(): void {
-  $a = new A();
+  $a = new A(); // bad
+}
+
+//// none.php
+<?hh
+
+function none(): void {
+  $a = new A(); // bad
 }

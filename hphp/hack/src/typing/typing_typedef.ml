@@ -22,7 +22,7 @@ let typedef_def ctx typedef =
   let env =
     Env.set_module env
     @@ Typing_modules.of_maybe_string
-    @@ Naming_attributes_params.get_module_attribute typedef.t_user_attributes
+    @@ Naming_attributes_params.get_module_attribute typedef.t_file_attributes
   in
   let env =
     Phase.localize_and_add_ast_generic_parameters_and_where_constraints
@@ -46,6 +46,7 @@ let typedef_def ctx typedef =
     t_span = _;
     t_emit_id = _;
     t_is_ctx = _;
+    t_file_attributes = _;
   } =
     typedef
   in
@@ -89,6 +90,9 @@ let typedef_def ctx typedef =
   let (env, tparams) =
     List.map_env env typedef.t_tparams ~f:Typing.type_param
   in
+  let (env, file_attributes) =
+    Typing.file_attributes env typedef.t_file_attributes
+  in
   {
     Aast.t_annotation = Env.save (Env.get_tpenv env) env;
     Aast.t_name = typedef.t_name;
@@ -102,4 +106,5 @@ let typedef_def ctx typedef =
     Aast.t_span = typedef.t_span;
     Aast.t_emit_id = typedef.t_emit_id;
     Aast.t_is_ctx = typedef.t_is_ctx;
+    Aast.t_file_attributes = file_attributes;
   }

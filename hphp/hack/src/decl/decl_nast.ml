@@ -36,14 +36,21 @@ and fun_decl (ctx : Provider_context.t) (f : Nast.fun_def) : Typing_defs.fun_elt
     =
   let dep = Dep.Fun (snd f.fd_fun.f_name) in
   let env = { Decl_env.mode = f.fd_mode; droot = Some dep; ctx } in
-  fun_decl_in_env env ~is_lambda:false f.fd_fun
+  let module_ =
+    Typing_modules.of_maybe_string
+    @@ Naming_attributes_params.get_module_attribute f.fd_file_attributes
+  in
+  fun_decl_in_env env ~is_lambda:false f.fd_fun module_
 
 and lambda_decl_in_env (env : Decl_env.env) (f : Nast.fun_) :
     Typing_defs.fun_elt =
-  fun_decl_in_env env ~is_lambda:true f
+  fun_decl_in_env env ~is_lambda:true f None
 
-and fun_decl_in_env (env : Decl_env.env) ~(is_lambda : bool) (f : Nast.fun_) :
-    Typing_defs.fun_elt =
+and fun_decl_in_env
+    (env : Decl_env.env)
+    ~(is_lambda : bool)
+    (f : Nast.fun_)
+    (module_ : Typing_modules.t) : Typing_defs.fun_elt =
   let ifc_decl = FunUtils.find_policied_attribute f.f_user_attributes in
   let return_disposable =
     FunUtils.has_return_disposable_attribute f.f_user_attributes
@@ -86,11 +93,6 @@ and fun_decl_in_env (env : Decl_env.env) ~(is_lambda : bool) (f : Nast.fun_) :
       SN.UserAttributes.uaSupportDynamicType
       f.f_user_attributes
   in
-  let fe_module =
-    Typing_modules.of_maybe_string
-    @@ Naming_attributes_params.get_module_attribute f.f_user_attributes
-  in
-
   let fe_internal =
     Naming_attributes_params.has_internal_attribute f.f_user_attributes
   in
@@ -119,7 +121,7 @@ and fun_decl_in_env (env : Decl_env.env) ~(is_lambda : bool) (f : Nast.fun_) :
   in
   {
     fe_pos;
-    fe_module;
+    fe_module = module_;
     fe_internal;
     fe_type;
     fe_deprecated;
@@ -131,8 +133,10 @@ and fun_decl_in_env (env : Decl_env.env) ~(is_lambda : bool) (f : Nast.fun_) :
 (* Dealing with records *)
 (*****************************************************************************)
 
-let record_def_decl (ctx : Provider_context.t) (rd : Nast.record_def) :
-    Typing_defs.record_def_type =
+let record_def_decl
+    (ctx : Provider_context.t)
+    (rd : Nast.record_def)
+    (module_ : Typing_modules.t) : Typing_defs.record_def_type =
   let {
     rd_annotation = _;
     rd_name;
@@ -143,7 +147,7 @@ let record_def_decl (ctx : Provider_context.t) (rd : Nast.record_def) :
     rd_fields;
     rd_namespace = _;
     rd_span;
-    rd_user_attributes;
+    _;
   } =
     rd
   in
@@ -168,12 +172,8 @@ let record_def_decl (ctx : Provider_context.t) (rd : Nast.record_def) :
         | Some _ -> (id, Typing_defs.HasDefaultValue)
         | None -> (id, ValueRequired))
   in
-  let rdt_module =
-    Typing_modules.of_maybe_string
-    @@ Naming_attributes_params.get_module_attribute rd_user_attributes
-  in
   {
-    rdt_module;
+    rdt_module = module_;
     rdt_name = Decl_env.make_decl_posed env rd_name;
     rdt_extends = Option.map ~f:(Decl_env.make_decl_posed env) extends;
     rdt_fields = fields;
@@ -182,10 +182,11 @@ let record_def_decl (ctx : Provider_context.t) (rd : Nast.record_def) :
   }
 
 let record_def_naming_and_decl_DEPRECATED
-    (ctx : Provider_context.t) (rd : Nast.record_def) :
-    string * Typing_defs.record_def_type =
+    (ctx : Provider_context.t)
+    (rd : Nast.record_def)
+    (module_ : Typing_modules.t) : string * Typing_defs.record_def_type =
   let rd = Errors.ignore_ (fun () -> Naming.record_def ctx rd) in
-  let tdecl = record_def_decl ctx rd in
+  let tdecl = record_def_decl ctx rd module_ in
   (snd rd.rd_name, tdecl)
 
 (*****************************************************************************)
@@ -200,6 +201,7 @@ and typedef_decl (ctx : Provider_context.t) (tdef : Nast.typedef) :
     t_constraint = tcstr;
     t_kind = concrete_type;
     t_user_attributes;
+    t_file_attributes;
     t_namespace = _;
     t_mode = mode;
     t_vis = td_vis;
@@ -215,15 +217,16 @@ and typedef_decl (ctx : Provider_context.t) (tdef : Nast.typedef) :
   let td_type = Decl_hint.hint env concrete_type in
   let td_constraint = Option.map tcstr ~f:(Decl_hint.hint env) in
   let td_pos = Decl_env.make_decl_pos env name_pos in
-  let td_module =
-    Typing_modules.of_maybe_string
-    @@ Naming_attributes_params.get_module_attribute t_user_attributes
-  in
   let td_vis =
     if Naming_attributes_params.has_internal_attribute t_user_attributes then
       Tinternal
     else
       td_vis
+  in
+  let td_module =
+    t_file_attributes
+    |> Naming_attributes_params.get_module_attribute
+    |> Typing_modules.of_maybe_string
   in
   let td_attributes =
     List.map

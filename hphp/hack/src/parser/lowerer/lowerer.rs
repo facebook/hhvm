@@ -5276,6 +5276,7 @@ where
                             .map(|attr| Self::p_user_attribute(attr, env))
                             .collect::<Result<Vec<Vec<_>>, _>>()?,
                     ),
+                    file_attributes: vec![],
                     namespace: Self::mk_empty_ns_env(env),
                     mode: env.file_mode(),
                     vis: match Self::token_kind(&c.keyword) {
@@ -5334,6 +5335,7 @@ where
                     ),
                     namespace: Self::mk_empty_ns_env(env),
                     mode: env.file_mode(),
+                    file_attributes: vec![],
                     vis: ast::TypedefVisibility::Opaque,
                     kind,
                     span: Self::p_pos(node, env),

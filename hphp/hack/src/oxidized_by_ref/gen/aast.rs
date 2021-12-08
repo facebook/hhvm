@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d34042a54f25bdc94a2162cddaffc8e9>>
+// @generated SignedSource<<b9697c0d15efe221081da8d95b301df6>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2169,6 +2169,8 @@ pub struct Typedef<'a, Ex, En> {
     pub kind: &'a Hint<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub user_attributes: &'a [&'a UserAttribute<'a, Ex, En>],
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub file_attributes: &'a [&'a FileAttribute<'a, Ex, En>],
     pub mode: oxidized::file_info::Mode,
     pub vis: oxidized::aast::TypedefVisibility,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

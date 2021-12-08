@@ -28,10 +28,10 @@ function implicit_sdt_enforced():void {
 
 function intpred(int $x):bool { return false; }
 
-// Implicit SDT lambda, inferred parameter type
+// Implicit SDT lambda, inferred return type
 <<__SupportDynamicType>>
 function implicit_inferred():void {
-  $f = ($x) ==> intpred($x);
+  $f = (int $x) ==> intpred($x);
   expectSupportDynamic($f);
   expectDynamic($f upcast dynamic);
   expectPrecise<int,bool>($f);

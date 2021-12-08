@@ -4465,9 +4465,11 @@ and lambda ~is_anon ?expected p env f idl =
         env
         declared_decl_ft)
   in
+
+  (* Check that none of the explicit capture variables are from a using clause *)
   List.iter idl ~f:(check_escaping_var env);
 
-  (* Ensure lambda arity is not ellipsis in strict mode *)
+  (* Ensure that variadic parameter has a name *)
   begin
     match declared_ft.ft_arity with
     | Fvariadic { fp_name = None; _ } ->
@@ -5054,6 +5056,7 @@ and closure_make
   let env =
     Env.unset_local env (Local_id.make_unscoped SN.SpecialIdents.dollardollar)
   in
+  let sound_dynamic_check_saved_env = env in
   let (env, tb) = block env nb.fb_ast in
   let has_implicit_return = LEnv.has_next env in
   let env =
@@ -5067,7 +5070,6 @@ and closure_make
     Typing_env.set_fun_tast_info env Tast.{ has_implicit_return; has_readonly }
   in
   let (env, tparams) = List.map_env env f.f_tparams ~f:type_param in
-  let sound_dynamic_check_saved_env = env in
   let params_decl_ty =
     List.map decl_ft.ft_params ~f:(fun { fp_type = { et_type; _ }; _ } ->
         match get_node et_type with

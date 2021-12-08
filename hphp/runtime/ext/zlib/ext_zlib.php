@@ -291,7 +291,7 @@ function gztell(resource $zp): mixed;
  *   the optional parameter length.
  */
 <<__Native>>
-function gzuncompress(string $data, int $length = 0): mixed;
+function gzuncompress(string $data, int $length = 0)[]: mixed;
 
 /**
  * Binary-safe gz-file write

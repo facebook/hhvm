@@ -3529,8 +3529,7 @@ function start_server_proc(
 
     // The default test config uses a small TC but we'll be running thousands
     // of tests against the same process:
-    '-vEval.JitASize=142606336',
-    '-vEval.JitAProfSize=251658240',
+    '-vEval.JitASize=394264576',
     '-vEval.JitAColdSize=201326592',
     '-vEval.JitAFrozenSize=251658240',
     '-vEval.JitGlobalDataSize=32000000',

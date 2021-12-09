@@ -1,6 +1,6 @@
 Log.Level = Verbose
 Eval {
-  JitAHotSize = 2323232
+  JitASize = 2323232
 }
 Server {
   ThreadCount = 100

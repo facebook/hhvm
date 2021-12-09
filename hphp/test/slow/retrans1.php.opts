@@ -1,2 +1,2 @@
--vEval.JitMaxTranslations=2 -vEval.JitAProfSize=800 -vEval.JitPGOThreshold=3
+-vEval.JitMaxTranslations=2 -vEval.JitPGOThreshold=3
 

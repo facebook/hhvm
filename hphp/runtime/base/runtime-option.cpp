@@ -2130,9 +2130,7 @@ void RuntimeOption::Load(
   {
     // CodeCache
     using jit::CodeCache;
-    Config::Bind(CodeCache::AHotSize, ini, config, "Eval.JitAHotSize", 0);
     Config::Bind(CodeCache::ASize, ini, config, "Eval.JitASize", 60 << 20);
-    Config::Bind(CodeCache::AProfSize, ini, config, "Eval.JitAProfSize", 0);
     Config::Bind(CodeCache::AColdSize, ini, config, "Eval.JitAColdSize",
                  24 << 20);
     Config::Bind(CodeCache::AFrozenSize, ini, config, "Eval.JitAFrozenSize",

@@ -877,7 +877,6 @@ struct RuntimeOption {
   F(bool,     JitLayoutExtTSPForPrologues, false)                       \
   F(double,   JitLayoutMaxMergeRatio,  1000000)                         \
   F(bool,     JitLayoutPruneCatchArcs, true)                            \
-  F(bool,     JitAHotSizeRoundUp,      true)                            \
   F(uint32_t, GdbSyncChunks,           128)                             \
   F(bool, JitKeepDbgFiles,             false)                           \
   /* despite the unfortunate name, this enables function renaming and

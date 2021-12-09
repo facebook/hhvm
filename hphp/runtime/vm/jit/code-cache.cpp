@@ -39,9 +39,7 @@ TRACE_SET_MOD(mcg);
 static constexpr size_t kRoundUp = 2ull << 20;
 
 /* Initialized by RuntimeOption. */
-uint32_t CodeCache::AHotSize = 0;
 uint32_t CodeCache::ASize = 0;
-uint32_t CodeCache::AProfSize = 0;
 uint32_t CodeCache::AColdSize = 0;
 uint32_t CodeCache::AFrozenSize = 0;
 uint32_t CodeCache::ABytecodeSize = 0;
@@ -59,11 +57,6 @@ static size_t ru(size_t sz) { return sz + (-sz & (kRoundUp - 1)); }
 
 static size_t rd(size_t sz) { return sz & ~(kRoundUp - 1); }
 
-static size_t mainAdjustedSize(size_t hotSize, size_t mainSize,
-                               size_t profSize) {
-  return hotSize + mainSize + profSize;
-}
-
 CodeCache::CodeCache()
 {
 
@@ -77,9 +70,7 @@ CodeCache::CodeCache()
     RuntimeOption::EvalThreadTCDataBufferSize
   );
 
-  auto const kASize       = ru(mainAdjustedSize(CodeCache::AHotSize,
-                                                CodeCache::ASize,
-                                                CodeCache::AProfSize));
+  auto const kASize       = ru(CodeCache::ASize);
   auto const kAColdSize   = ru(CodeCache::AColdSize);
   auto const kAFrozenSize = ru(CodeCache::AFrozenSize);
   auto const kABytecodeSize = ru(CodeCache::ABytecodeSize);
@@ -102,29 +93,25 @@ CodeCache::CodeCache()
   auto const cutTCSizeTo = [] (size_t targetSize) {
     assertx(targetSize < (2ull << 30));
     // Make sure the result if size_t to avoid 32-bit overflow
-    auto const total = mainAdjustedSize(AHotSize, ASize, AProfSize) +
-                       AColdSize + AFrozenSize + GlobalDataSize;
+    auto const total = ASize + AColdSize + AFrozenSize + GlobalDataSize;
     if (total <= targetSize) return;
 
-    AHotSize = rd(AHotSize * targetSize / total);
     ASize = rd(ASize * targetSize / total);
-    AProfSize = rd(AProfSize * targetSize / total);
     AColdSize = rd(AColdSize * targetSize / total);
     AFrozenSize = rd(AFrozenSize * targetSize / total);
     GlobalDataSize = rd(GlobalDataSize * targetSize / total);
 
-    AMaxUsage = maxUsage(mainAdjustedSize(AHotSize, ASize, AProfSize));
+    AMaxUsage = maxUsage(ASize);
     AColdMaxUsage = maxUsage(AColdSize);
     AFrozenMaxUsage = maxUsage(AFrozenSize);
 
-    assertx(mainAdjustedSize(AHotSize, ASize, AProfSize) + AColdSize +
-            AFrozenSize + GlobalDataSize <= targetSize);
+    assertx(ASize + AColdSize + AFrozenSize + GlobalDataSize <= targetSize);
 
     if (RuntimeOption::ServerExecutionMode()) {
-      Logger::FWarning("Adjusted TC sizes to fit in {} bytes: AHotSize = {}, "
-                       "ASize = {}, AProfSize = {}, AColdSize = {}, "
+      Logger::FWarning("Adjusted TC sizes to fit in {} bytes: "
+                       "ASize = {}, AColdSize = {}, "
                        "AFrozenSize = {}, GlobalDataSize = {}",
-                       targetSize, AHotSize, ASize, AProfSize, AColdSize,
+                       targetSize, ASize, AColdSize,
                        AFrozenSize, GlobalDataSize);
     }
   };
@@ -275,7 +262,7 @@ CodeCache::CodeCache()
   }
   m_threadLocalSize = thread_local_size;
 
-  AMaxUsage = maxUsage(mainAdjustedSize(AHotSize, ASize, AProfSize));
+  AMaxUsage = maxUsage(ASize);
   AColdMaxUsage = maxUsage(AColdSize);
   AFrozenMaxUsage = maxUsage(AFrozenSize);
 

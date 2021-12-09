@@ -110,7 +110,7 @@ function header(string $str, bool $replace = true, int $http_response_code = 0);
 <<__PHPStdLib>>
 function http_response_code(int $response_code = 0);
 <<__PHPStdLib>>
-function headers_list();
+function headers_list()[read_globals];
 <<__PHPStdLib>>
 function get_http_request_size();
 <<__PHPStdLib>>

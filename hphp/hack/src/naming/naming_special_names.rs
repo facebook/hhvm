@@ -841,13 +841,13 @@ pub mod coeffects {
         RxShallow,
         Rx,
 
-        // Policied hierarchy
-        PoliciedOf,
-        PoliciedLocal,
-        PoliciedShallow,
-        Policied,
+        // Zoned hierarchy
+        ZonedWith,
+        ZonedLocal,
+        ZonedShallow,
+        Zoned,
 
-        Controlled,
+        LeakSafe,
 
         ReadGlobals,
         Globals,
@@ -864,11 +864,11 @@ pub mod coeffects {
             RX => Some(Ctx::Rx),
             WRITE_THIS_PROPS => Some(Ctx::WriteThisProps),
             WRITE_PROPS => Some(Ctx::WriteProps),
-            POLICIED_OF => Some(Ctx::PoliciedOf),
-            POLICIED_LOCAL => Some(Ctx::PoliciedLocal),
-            POLICIED_SHALLOW => Some(Ctx::PoliciedShallow),
-            POLICIED => Some(Ctx::Policied),
-            CONTROLLED => Some(Ctx::Controlled),
+            POLICIED_OF | ZONED_WITH => Some(Ctx::ZonedWith),
+            POLICIED_LOCAL | ZONED_LOCAL => Some(Ctx::ZonedLocal),
+            POLICIED_SHALLOW | ZONED_SHALLOW => Some(Ctx::ZonedShallow),
+            POLICIED | ZONED => Some(Ctx::Zoned),
+            CONTROLLED | LEAK_SAFE => Some(Ctx::LeakSafe),
             GLOBALS => Some(Ctx::Globals),
             READ_GLOBALS => Some(Ctx::ReadGlobals),
             _ => None,
@@ -891,8 +891,8 @@ pub mod coeffects {
         match ctx {
             Ctx::Defaults => self::capability_in_defaults_ctx(c),
             Ctx::Rx | Ctx::RxLocal | Ctx::RxShallow => self::capability_in_rx_ctx(c),
-            Ctx::Controlled => self::capability_in_controlled_ctx(c),
-            Ctx::Policied | Ctx::PoliciedLocal | Ctx::PoliciedShallow | Ctx::PoliciedOf => {
+            Ctx::LeakSafe => self::capability_in_controlled_ctx(c),
+            Ctx::Zoned | Ctx::ZonedLocal | Ctx::ZonedShallow | Ctx::ZonedWith => {
                 self::capability_in_policied_ctx(c)
             }
             // By definition, granular capabilities are not contexts and cannot

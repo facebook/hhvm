@@ -95,17 +95,22 @@ function preg_replace_with_count_and_error(
   inout ?int $error,
 )[];
 <<__PHPStdLib>>
-function preg_replace_callback($pattern, $callback, $subject, int $limit,
-                               inout ?int $count)[defaults];
+function preg_replace_callback(
+  mixed $pattern,
+  (function(darray<arraykey, string>)[_]: string) $callback,
+  mixed $subject,
+  int $limit,
+  inout ?int $count,
+)[ctx $callback];
 <<__PHPStdLib>>
 function preg_replace_callback_with_error(
-  $pattern,
-  $callback,
-  $subject,
+  mixed $pattern,
+  (function(darray<arraykey, string>)[_]: string) $callback,
+  mixed $subject,
   int $limit,
   inout ?int $count,
   inout ?int $error,
-)[defaults];
+)[ctx $callback];
 <<__PHPStdLib>>
 function preg_replace_callback_array($patterns_and_callbacks, $subject,
                                      int $limit, inout ?int $count)[defaults];

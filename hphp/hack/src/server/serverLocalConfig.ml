@@ -1523,6 +1523,7 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       naming_sqlite_in_hack_64 = options.naming_sqlite_in_hack_64;
       use_hack_64_naming_table = options.use_hack_64_naming_table;
       enable_disk_heap = options.enable_disk_heap;
+      fetch_remote_old_decls = options.fetch_remote_old_decls;
       ide_max_num_decls = options.ide_max_num_decls;
       ide_max_num_shallow_decls = options.ide_max_num_shallow_decls;
       ide_max_num_linearizations = options.ide_max_num_linearizations;

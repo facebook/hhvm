@@ -28,18 +28,19 @@ CAMLprim value caml_disable_ASLR(value args) {
   CAMLparam1(args);
 
 #if defined(__linux__)
-  int p = personality((unsigned long)0xffffffff);
-  if (! (p & ADDR_NO_RANDOMIZE)) {
-    if(personality((unsigned long)(p | ADDR_NO_RANDOMIZE)) == -1) {
+  int res = personality((unsigned long)0xffffffff);
+  if (res == -1) {
+      fprintf(stderr, "error: daemon_stubs.c: caml_disable_ASLR: failed to get personality\n");
+      exit(1);
+  }
+  if (! (res & ADDR_NO_RANDOMIZE)) {
+    res = personality((unsigned long)(res | ADDR_NO_RANDOMIZE));
+    if(res == -1) {
       fprintf(stderr, "error: daemon_stubs.c: caml_disable_ASLR: failed to set personality\n");
       exit(1);
     }
     int i, argc = Wosize_val(args);
-    char const* argv[256]; /* Technically, should be ARG_MAX + 1. */
-    if (argc > 255) {
-      fprintf(stderr, "error: daemon_stubs.c: caml_disable_ASLR: argument list too long\n");
-      exit(1);
-    }
+    char const** argv = (char const**)(malloc ((argc + 1) * sizeof(char const*)));
     for (i = 0; i < argc; ++i) {
       argv[i] = String_val(Field(args, i));
     }

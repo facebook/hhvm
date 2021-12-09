@@ -1,0 +1,6 @@
+File "parse_error_and_bad_fixme.php", line 5, characters 3-4:
+`HH_FIXME` wrong format, expected `/* HH_FIXME[ERROR_NUMBER] */` (Parsing[1001])
+File "parse_error_and_bad_fixme.php", line 8, characters 27-27:
+A type specifier is expected here. (Parsing[1002])
+File "parse_error_and_bad_fixme.php", line 8, characters 27-27:
+Encountered unexpected text ``, was expecting a constraint operator. (Parsing[1002])

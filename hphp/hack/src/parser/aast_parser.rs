@@ -138,7 +138,6 @@ impl<'src> AastParser {
             env.keep_errors,
             env.show_all_errors,
             env.fail_open,
-            !scoured_comments.error_pos.is_empty(), /* disable_lowering_parsing_error */
             mode,
             indexed_source_text,
             &env.parser_options,

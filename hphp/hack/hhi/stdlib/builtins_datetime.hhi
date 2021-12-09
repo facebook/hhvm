@@ -155,7 +155,7 @@ class DateTime implements DateTimeInterface {
   const RSS = '';
   const W3C = '';
 
-  public function __construct(string $time = 'now', ?DateTimeZone $timezone = null);
+  public function __construct(string $time = 'now', ?DateTimeZone $timezone = null)[controlled];
   public function add(DateInterval $interval);
   public function modify(string $modify);
   public function getOffset(): int;

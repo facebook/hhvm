@@ -1,0 +1,16 @@
+dict(2) {
+  ["my_data"]=>
+  object(HH\Vector) (3) {
+    [0]=>
+    int(3)
+    [1]=>
+    int(3)
+    [2]=>
+    int(3)
+  }
+  ["my_map"]=>
+  object(HH\Map) (1) {
+    ["foo"]=>
+    string(3) "bar"
+  }
+}

@@ -356,6 +356,24 @@ struct RefineTmps {
                 2, "{} now maps to {} (via DefLabel {})\n",
                 *from, *to, inst.toString()
               );
+              // Compute a best type for the Phi dest before making it a
+              // remap target.
+              auto type = TBottom;
+              inst.block()->forEachSrc(i, [&] (IRInstruction*, SSATmp* tmp) {
+                auto const srcBlock = tmp->inst()->block();
+                if (!srcBlock) return; // This src instruction is unreachable.
+                // This src's canonical representation is the phidef itself.
+                VisitedSet visited;
+                visited.emplace(block, i);
+                if (!canonicalize(tmp, &visited)) return;
+                type = type | tmp->type();
+              });
+              if (to->type() != type) {
+                to->setType(type);
+                ITRACE(
+                  2, "to type updated {}\n", *to
+                );
+              }
               remaps.insert_or_assign(from, RemapTo{to});
             }
           }

@@ -19,7 +19,7 @@ function apache_response_headers(): darray<string, string> { }
 <<__PHPStdLib>>
 function apache_setenv(string $variable, string $value, bool $walk_to_top = false) { }
 <<__PHPStdLib>>
-function getallheaders() { }
+function getallheaders()[read_globals] { }
 <<__PHPStdLib>>
 function virtual($filename) { }
 <<__PHPStdLib>>

@@ -390,7 +390,19 @@ let use_precomputed_state_exn
     || genv.local_config.SLC.force_load_hot_shallow_decls
   in
   let shallow_decls = genv.local_config.SLC.shallow_class_decl in
-  let naming_table_fallback_path = get_naming_table_fallback_path genv None in
+  let naming_sqlite_table_path =
+    ServerArgs.naming_sqlite_path_for_target_info info
+  in
+  let naming_table_fallback_path =
+    if
+      genv.local_config.SLC.use_hack_64_naming_table
+      && Sys.file_exists naming_sqlite_table_path
+    then (
+      Hh_logger.log "Using sqlite naming table from hack/64 saved state";
+      Some naming_sqlite_table_path
+    ) else
+      get_naming_table_fallback_path genv None
+  in
   let legacy_hot_decls_path =
     ServerArgs.legacy_hot_decls_path_for_target_info info
   in

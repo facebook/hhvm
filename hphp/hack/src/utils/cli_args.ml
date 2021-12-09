@@ -262,5 +262,8 @@ let legacy_hot_decls_path_for_target_info { naming_table_path; _ } =
 let shallow_hot_decls_path_for_target_info { naming_table_path; _ } =
   naming_table_path ^ ".shallowdecls"
 
+let naming_sqlite_path_for_target_info { naming_table_path; _ } =
+  naming_table_path ^ "_naming.sql"
+
 let errors_path_for_target_info { naming_table_path; _ } =
   naming_table_path ^ ".err"

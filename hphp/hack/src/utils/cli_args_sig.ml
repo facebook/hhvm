@@ -61,5 +61,7 @@ module type S = sig
 
   val shallow_hot_decls_path_for_target_info : saved_state_target_info -> string
 
+  val naming_sqlite_path_for_target_info : saved_state_target_info -> string
+
   val errors_path_for_target_info : saved_state_target_info -> string
 end

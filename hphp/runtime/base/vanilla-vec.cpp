@@ -410,7 +410,7 @@ ArrayData* VanillaVec::MakeVecFromAPC(const APCArray* apc, bool isLegacy) {
   auto const apcSize = apc->size();
   VecInit init{apcSize};
   for (uint32_t i = 0; i < apcSize; ++i) {
-    init.append(apc->getValue(i)->toLocal());
+    init.append(apc->getPackedVal(i)->toLocal());
   }
   auto const ad = init.create();
   ad->setLegacyArrayInPlace(isLegacy);

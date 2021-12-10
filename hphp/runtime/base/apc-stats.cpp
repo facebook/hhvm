@@ -125,19 +125,17 @@ size_t getMemSize(const APCHandle* handle) {
 
 size_t getMemSize(const APCArray* arr) {
   auto memSize = sizeof(APCArray);
-  auto size = arr->size();
+  auto const size = arr->size();
   if (arr->isPacked()) {
     memSize += sizeof(APCHandle*) * size;
     for (auto i = 0; i < size; i++) {
-      memSize += getMemSize(arr->getValue(i));
+      memSize += getMemSize(arr->getPackedVal(i));
     }
   } else {
-    memSize += sizeof(int) * (arr->m.m_capacity_mask + 1) +
-               sizeof(APCArray::Bucket) * size;
-    auto b = arr->buckets();
+    memSize += sizeof(APCHandle*) * size * 2;
     for (auto i = 0; i < size; i++) {
-      memSize += getMemSize(b[i].key);
-      memSize += getMemSize(b[i].val);
+      memSize += getMemSize(arr->getHashedKey(i));
+      memSize += getMemSize(arr->getHashedVal(i));
     }
   }
   return memSize;

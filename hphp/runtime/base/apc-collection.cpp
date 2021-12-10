@@ -33,17 +33,25 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-void fillMap(BaseMap* map, const APCArray* ar) {
-  for (auto i = uint32_t{0}; i < ar->size(); ++i) {
-    map->set(*ar->getKey(i).asTypedValue(),
-             *ar->getValue(i)->toLocal().asTypedValue());
+void fillMap(BaseMap* map, const APCArray* apc) {
+  assertx(apc->isHashed());
+  for (auto i = uint32_t{0}; i < apc->size(); ++i) {
+    map->set(*apc->getHashedKey(i)->toLocal().asTypedValue(),
+             *apc->getHashedVal(i)->toLocal().asTypedValue());
   }
 }
 
-template<class T>
-void fillCollection(T* coll, const APCArray* ar) {
-  for (auto i = uint32_t{0}; i < ar->size(); ++i) {
-    coll->add(*ar->getValue(i)->toLocal().asTypedValue());
+void fillSet(BaseSet* coll, const APCArray* apc) {
+  assertx(apc->isHashed());
+  for (auto i = uint32_t{0}; i < apc->size(); ++i) {
+    coll->add(*apc->getHashedVal(i)->toLocal().asTypedValue());
+  }
+}
+
+void fillVector(BaseVector* coll, const APCArray* apc) {
+  assertx(apc->isPacked());
+  for (auto i = uint32_t{0}; i < apc->size(); ++i) {
+    coll->add(*apc->getPackedVal(i)->toLocal().asTypedValue());
   }
 }
 
@@ -160,11 +168,11 @@ Object APCCollection::createObject() const {
   switch (m_colType) {
   case CollectionType::ImmVector:
   case CollectionType::Vector:
-    fillCollection(static_cast<BaseVector*>(col.get()), apcArr);
+    fillVector(static_cast<BaseVector*>(col.get()), apcArr);
     break;
   case CollectionType::ImmSet:
   case CollectionType::Set:
-    fillCollection(static_cast<BaseSet*>(col.get()), apcArr);
+    fillSet(static_cast<BaseSet*>(col.get()), apcArr);
     break;
   case CollectionType::ImmMap:
   case CollectionType::Map:

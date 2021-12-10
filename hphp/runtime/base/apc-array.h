@@ -88,36 +88,25 @@ struct APCArray {
   //
 
   size_t size() const {
-    return isPacked() ? m_size : m.m_num;
+    return m_size;
   }
 
-  Variant getKey(ssize_t pos) const {
-    if (isPacked()) {
-      assertx(static_cast<size_t>(pos) < m_size);
-      return pos;
-    }
-    assertx(static_cast<size_t>(pos) < m.m_num);
-    return buckets()[pos].key->toLocal();
+  APCHandle* getHashedKey(ssize_t pos) const {
+    assertx(isHashed());
+    assertx(static_cast<size_t>(pos) < m_size);
+    return vals()[2 * pos];
   }
 
-  APCHandle* getValue(ssize_t pos) const {
-    if (isPacked()) {
-      assertx(static_cast<size_t>(pos) < m_size);
-      return vals()[pos];
-    }
-    assertx(static_cast<size_t>(pos) < m.m_num);
-    return buckets()[pos].val;
+  APCHandle* getHashedVal(ssize_t pos) const {
+    assertx(isHashed());
+    assertx(static_cast<size_t>(pos) < m_size);
+    return vals()[2 * pos + 1];
   }
 
-  ssize_t getIndex(const StringData* key) const {
-    return isPacked() ? -1 : indexOf(key);
-  }
-
-  ssize_t getIndex(int64_t key) const {
-    if (isPacked()) {
-      return (static_cast<uint64_t>(key) >= m_size) ? -1 : key;
-    }
-    return indexOf(key);
+  APCHandle* getPackedVal(ssize_t pos) const {
+    assertx(isPacked());
+    assertx(static_cast<size_t>(pos) < m_size);
+    return vals()[pos];
   }
 
   bool isPacked() const {
@@ -147,15 +136,6 @@ struct APCArray {
   }
 
 private:
-  struct Bucket {
-    /** index of the next bucket, or -1 if the end of a chain */
-    int next;
-    /** the value of this bucket */
-    APCHandle *key;
-    APCHandle *val;
-  };
-
-private:
   enum class PackedCtor {};
   APCArray(PackedCtor, APCKind kind, size_t size)
     : m_handle(kind, kInvalidDataType), m_size(size) {
@@ -163,10 +143,9 @@ private:
   }
 
   enum class HashedCtor {};
-  APCArray(HashedCtor, APCKind kind, unsigned int cap) : m_handle(kind) {
+  APCArray(HashedCtor, APCKind kind, size_t size)
+    : m_handle(kind, kInvalidDataType), m_size(size) {
     assertx(isHashed());
-    m.m_capacity_mask = cap - 1;
-    m.m_num = 0;
   }
   ~APCArray();
 
@@ -185,15 +164,8 @@ private:
 private:
   friend size_t getMemSize(const APCArray*);
 
-  void add(APCHandle* key, APCHandle* val);
-  ssize_t indexOf(const StringData* key) const;
-  ssize_t indexOf(int64_t key) const;
-
-  /* index of the beginning of each hash chain */
-  int* hash() const { return (int*)(this + 1); }
-  /* buckets, stored in index order */
-  Bucket* buckets() const { return (Bucket*)(hash() + m.m_capacity_mask + 1); }
-  /* start of the data for packed array */
+  // For isHashed() - i.e. dicts - an array of alternating (key, value) pairs;
+  // for isPacked() - i.e. vecs and keysets - an array of elements;
   APCHandle** vals() const { return (APCHandle**)(this + 1); }
 
   APCHandle* getHandle() {
@@ -205,15 +177,7 @@ private:
 
 private:
   APCHandle m_handle;
-  union {
-    // for map style arrays
-    struct {
-      unsigned int m_capacity_mask;
-      unsigned int m_num;
-    } m;
-    // for packed arrays
-    size_t m_size;
-  };
+  uint32_t m_size;
 };
 
 //////////////////////////////////////////////////////////////////////

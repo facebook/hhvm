@@ -143,34 +143,33 @@ APCHandle::Pair APCArray::MakeSharedEmptyVec() {
 
 APCHandle::Pair APCArray::MakeHash(ArrayData* arr, APCKind kind,
                                    bool unserializeObj) {
-  auto const num = arr->size();
-  auto const cap = num > 2 ? folly::nextPowTwo(num) : 2;
-  auto const allocSize = sizeof(APCArray)
-                       + sizeof(int) * cap
-                       + sizeof(Bucket) * num;
-  auto p = reinterpret_cast<char*>(apc_malloc(allocSize));
-  auto ret = new (p) APCArray(HashedCtor{}, kind, cap);
+  auto const num_elems = arr->size();
+  auto const allocSize = sizeof(APCArray) + sizeof(APCHandle*) * num_elems * 2;
+  auto mem = reinterpret_cast<char*>(apc_malloc(allocSize));
+  auto ret = new (mem) APCArray(HashedCtor{}, kind, num_elems);
 
-  for (int i = 0; i < cap; i++) ret->hash()[i] = -1;
-
+  size_t i = 0;
   auto size = allocSize;
   try {
     IterateKV(
       arr,
       [&](TypedValue k, TypedValue v) {
-        auto key = APCHandle::Create(VarNR(k), APCHandleLevel::Inner,
-                                     unserializeObj);
+        auto const key = APCHandle::Create(
+            VarNR(k), APCHandleLevel::Inner, unserializeObj);
+        auto const val = APCHandle::Create(
+            VarNR(v), APCHandleLevel::Inner, unserializeObj);
+        ret->vals()[i++] = key.handle;
+        ret->vals()[i++] = val.handle;
         size += key.size;
-        auto val = APCHandle::Create(VarNR(v), APCHandleLevel::Inner,
-                                     unserializeObj);
         size += val.size;
-        ret->add(key.handle, val.handle);
         return false;
       }
     );
+    assertx(i == num_elems * 2);
   } catch (...) {
+    ret->m_size = i / 2;
     ret->~APCArray();
-    apc_sized_free(p, allocSize);
+    apc_sized_free(mem, allocSize);
     throw;
   }
 
@@ -189,8 +188,8 @@ APCHandle::Pair APCArray::MakePacked(ArrayData* arr, APCKind kind,
                                      bool unserializeObj) {
   auto const num_elems = arr->size();
   auto const allocSize = sizeof(APCArray) + sizeof(APCHandle*) * num_elems;
-  auto p = reinterpret_cast<char*>(apc_malloc(allocSize));
-  auto ret = new (p) APCArray(PackedCtor{}, kind, num_elems);
+  auto mem = reinterpret_cast<char*>(apc_malloc(allocSize));
+  auto ret = new (mem) APCArray(PackedCtor{}, kind, num_elems);
 
   size_t i = 0;
   auto size = allocSize;
@@ -198,10 +197,10 @@ APCHandle::Pair APCArray::MakePacked(ArrayData* arr, APCKind kind,
     IterateV(
       arr,
       [&](TypedValue v) {
-        auto val = APCHandle::Create(VarNR(v), APCHandleLevel::Inner,
-                                     unserializeObj);
-        size += val.size;
+        auto const val = APCHandle::Create(
+            VarNR(v), APCHandleLevel::Inner, unserializeObj);
         ret->vals()[i++] = val.handle;
+        size += val.size;
         return false;
       }
     );
@@ -209,7 +208,7 @@ APCHandle::Pair APCArray::MakePacked(ArrayData* arr, APCKind kind,
   } catch (...) {
     ret->m_size = i;
     ret->~APCArray();
-    apc_sized_free(p, allocSize);
+    apc_sized_free(mem, allocSize);
     throw;
   }
 
@@ -225,69 +224,12 @@ void APCArray::Delete(APCHandle* handle) {
 APCArray::~APCArray() {
   // This array is refcounted, but keys/values might be uncounted strings, so
   // we must use unreferenceRoot here (corresponding to Create calls above).
-  if (isPacked()) {
-    APCHandle** v = vals();
-    for (size_t i = 0, n = m_size; i < n; i++) {
-      v[i]->unreferenceRoot();
-    }
-  } else {
-    Bucket* bks = buckets();
-    for (int i = 0; i < m.m_num; i++) {
-      bks[i].key->unreferenceRoot();
-      bks[i].val->unreferenceRoot();
-    }
+  auto const num_vals = isPacked() ? m_size : m_size * 2;
+  for (size_t i = 0; i < num_vals; i++) {
+    vals()[i]->unreferenceRoot();
   }
-}
-
-void APCArray::add(APCHandle *key, APCHandle *val) {
-  int hash_pos;
-  auto kind = key->kind();
-  if (kind == APCKind::Int) {
-    hash_pos = APCTypedValue::fromHandle(key)->getInt64();
-  } else {
-    assertx(kind == APCKind::StaticString || kind == APCKind::UncountedString);
-    hash_pos = APCTypedValue::fromHandle(key)->getStringData()->hash();
-  }
-  // NOTE: no check on duplication because we assume the original array has no
-  // duplication
-  int& hp = hash()[hash_pos & m.m_capacity_mask];
-  int pos = m.m_num++;
-  Bucket* bucket = buckets() + pos;
-  bucket->key = key;
-  bucket->val = val;
-  bucket->next = hp;
-  hp = pos;
-}
-
-ssize_t APCArray::indexOf(const StringData* key) const {
-  strhash_t h = key->hash();
-  Bucket* b = buckets();
-  for (ssize_t bucket = hash()[h & m.m_capacity_mask]; bucket != -1;
-       bucket = b[bucket].next) {
-    auto kind = b[bucket].key->kind();
-    if (kind == APCKind::StaticString || kind == APCKind::UncountedString) {
-      auto const k = APCTypedValue::fromHandle(b[bucket].key);
-      if (key->same(k->getStringData())) {
-        return bucket;
-      }
-    }
-  }
-  return -1;
-}
-
-ssize_t APCArray::indexOf(int64_t key) const {
-  Bucket* b = buckets();
-  for (ssize_t bucket = hash()[key & m.m_capacity_mask]; bucket != -1;
-       bucket = b[bucket].next) {
-    auto key_handle = b[bucket].key;
-    auto kind = key_handle->kind();
-    if (kind == APCKind::Int &&
-        key == APCTypedValue::fromHandle(key_handle)->getInt64()) {
-      return bucket;
-    }
-  }
-  return -1;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
 }

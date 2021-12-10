@@ -449,7 +449,8 @@ ArrayData* VanillaDict::MakeDictFromAPC(const APCArray* apc, bool isLegacy) {
   auto const apcSize = apc->size();
   DictInit init{apcSize};
   for (uint32_t i = 0; i < apcSize; ++i) {
-    init.setValidKey(apc->getKey(i), apc->getValue(i)->toLocal());
+    init.setValidKey(apc->getHashedKey(i)->toLocal(),
+                     apc->getHashedVal(i)->toLocal());
   }
   auto const ad = init.create();
   ad->setLegacyArrayInPlace(isLegacy);

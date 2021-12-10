@@ -8,7 +8,7 @@ use std::{
 };
 use thiserror::Error;
 
-pub type Result<T, WE> = std::result::Result<T, Error<WE>>;
+pub type Result<T> = std::result::Result<T, Error>;
 
 #[macro_export]
 macro_rules! not_impl {
@@ -18,9 +18,9 @@ macro_rules! not_impl {
 }
 
 #[derive(Error, Debug)]
-pub enum Error<WE: Debug> {
+pub enum Error {
     #[error("write error: {0:?}")]
-    WriteError(WE),
+    WriteError(anyhow::Error),
 
     #[error("a string may contain invalid utf-8")]
     InvalidUTF8,
@@ -33,30 +33,42 @@ pub enum Error<WE: Debug> {
     Fail(String),
 }
 
-impl<WE: Debug> Error<WE> {
+impl Error {
     pub fn fail(s: impl Into<String>) -> Self {
         Self::Fail(s.into())
     }
 }
 
-pub trait Write {
-    type Error: Debug;
-    fn write(&mut self, s: impl AsRef<str>) -> Result<(), Self::Error>;
-    fn write_fmt(&mut self, fmt: Arguments<'_>) -> Result<(), Self::Error>;
+impl From<std::io::Error> for Error {
+    fn from(e: std::io::Error) -> Self {
+        Error::WriteError(e.into())
+    }
+}
 
-    fn write_if(&mut self, cond: bool, s: impl AsRef<str>) -> Result<(), Self::Error> {
+impl From<fmt::Error> for Error {
+    fn from(e: fmt::Error) -> Self {
+        Error::WriteError(e.into())
+    }
+}
+
+pub trait Write {
+    fn write(&mut self, s: impl AsRef<str>) -> Result<()>;
+    fn write_fmt(&mut self, fmt: Arguments<'_>) -> Result<()>;
+
+    fn write_if(&mut self, cond: bool, s: impl AsRef<str>) -> Result<()> {
         if cond { self.write(s) } else { Ok(()) }
     }
 }
 
 impl<W: fmt::Write> Write for W {
-    type Error = fmt::Error;
-    fn write(&mut self, s: impl AsRef<str>) -> Result<(), Self::Error> {
-        self.write_str(s.as_ref()).map_err(Error::WriteError)
+    fn write(&mut self, s: impl AsRef<str>) -> Result<()> {
+        self.write_str(s.as_ref())?;
+        Ok(())
     }
 
-    fn write_fmt(&mut self, fmt: Arguments<'_>) -> Result<(), Self::Error> {
-        self.write_fmt(fmt).map_err(Error::WriteError)
+    fn write_fmt(&mut self, fmt: Arguments<'_>) -> Result<()> {
+        self.write_fmt(fmt)?;
+        Ok(())
     }
 }
 
@@ -73,48 +85,48 @@ impl IoWrite {
 }
 
 impl Write for IoWrite {
-    type Error = std::io::Error;
-    fn write(&mut self, s: impl AsRef<str>) -> Result<(), Self::Error> {
-        self.0
-            .write_all(s.as_ref().as_bytes())
-            .map_err(Error::WriteError)
+    fn write(&mut self, s: impl AsRef<str>) -> Result<()> {
+        self.0.write_all(s.as_ref().as_bytes())?;
+        Ok(())
     }
 
-    fn write_fmt(&mut self, fmt: Arguments<'_>) -> Result<(), Self::Error> {
-        self.0.write_fmt(fmt).map_err(Error::WriteError)
+    fn write_fmt(&mut self, fmt: Arguments<'_>) -> Result<()> {
+        self.0.write_fmt(fmt)?;
+        Ok(())
     }
 }
 
-pub(crate) fn newline<W: Write>(w: &mut W) -> Result<(), W::Error> {
-    w.write("\n")
+pub(crate) fn newline<W: Write>(w: &mut W) -> Result<()> {
+    w.write("\n")?;
+    Ok(())
 }
 
-pub(crate) fn wrap_by_<W, F>(w: &mut W, s: &str, e: &str, f: F) -> Result<(), W::Error>
+pub(crate) fn wrap_by_<W, F>(w: &mut W, s: &str, e: &str, f: F) -> Result<()>
 where
     W: Write,
-    F: FnOnce(&mut W) -> Result<(), W::Error>,
+    F: FnOnce(&mut W) -> Result<()>,
 {
     w.write(s)?;
     f(w)?;
     w.write(e)
 }
 
-pub(crate) fn wrap_by<W, F>(w: &mut W, s: &str, f: F) -> Result<(), W::Error>
+pub(crate) fn wrap_by<W, F>(w: &mut W, s: &str, f: F) -> Result<()>
 where
     W: Write,
-    F: FnOnce(&mut W) -> Result<(), W::Error>,
+    F: FnOnce(&mut W) -> Result<()>,
 {
     wrap_by_(w, s, s, f)
 }
 
 macro_rules! wrap_by {
     ($name:ident, $left:expr, $right:expr) => {
-        pub(crate) fn $name<W, F>(w: &mut W, f: F) -> Result<(), W::Error>
+        pub(crate) fn $name<W, F>(w: &mut W, f: F) -> Result<()>
         where
             W: Write,
-            F: FnOnce(&mut W) -> Result<(), W::Error>,
+            F: FnOnce(&mut W) -> Result<()>,
         {
-            wrap_by_(w, $left, $right, f)
+            $crate::write::wrap_by_(w, $left, $right, f)
         }
     };
 }
@@ -126,25 +138,28 @@ wrap_by!(triple_quotes, "\"\"\"", "\"\"\"");
 wrap_by!(angle, "<", ">");
 wrap_by!(square, "[", "]");
 
-pub(crate) fn concat_str<W: Write, I: AsRef<str>>(
-    w: &mut W,
-    ss: impl AsRef<[I]>,
-) -> Result<(), W::Error> {
-    concat(w, ss, |w, s| w.write(s))
+pub(crate) fn concat_str<W: Write, I: AsRef<str>>(w: &mut W, ss: impl AsRef<[I]>) -> Result<()> {
+    concat(w, ss, |w, s| {
+        w.write(s)?;
+        Ok(())
+    })
 }
 
 pub(crate) fn concat_str_by<W: Write, I: AsRef<str>>(
     w: &mut W,
     sep: impl AsRef<str>,
     ss: impl AsRef<[I]>,
-) -> Result<(), W::Error> {
-    concat_by(w, sep, ss, |w, s| w.write(s))
+) -> Result<()> {
+    concat_by(w, sep, ss, |w, s| {
+        w.write(s)?;
+        Ok(())
+    })
 }
 
-pub(crate) fn concat<W, T, F>(w: &mut W, items: impl AsRef<[T]>, f: F) -> Result<(), W::Error>
+pub(crate) fn concat<W, T, F>(w: &mut W, items: impl AsRef<[T]>, f: F) -> Result<()>
 where
     W: Write,
-    F: FnMut(&mut W, &T) -> Result<(), W::Error>,
+    F: FnMut(&mut W, &T) -> Result<()>,
 {
     concat_by(w, "", items, f)
 }
@@ -154,10 +169,10 @@ pub(crate) fn concat_by<W, T, F>(
     sep: impl AsRef<str>,
     items: impl AsRef<[T]>,
     mut f: F,
-) -> Result<(), W::Error>
+) -> Result<()>
 where
     W: Write,
-    F: FnMut(&mut W, &T) -> Result<(), W::Error>,
+    F: FnMut(&mut W, &T) -> Result<()>,
 {
     let mut first = true;
     let sep = sep.as_ref();
@@ -171,10 +186,10 @@ where
     })
 }
 
-pub(crate) fn option<W, T, F>(w: &mut W, i: impl Into<Option<T>>, mut f: F) -> Result<(), W::Error>
+pub(crate) fn option<W, T, F>(w: &mut W, i: impl Into<Option<T>>, mut f: F) -> Result<()>
 where
     W: Write,
-    F: FnMut(&mut W, T) -> Result<(), W::Error>,
+    F: FnMut(&mut W, T) -> Result<()>,
 {
     match i.into() {
         None => Ok(()),
@@ -187,10 +202,10 @@ pub(crate) fn option_or<W, T, F>(
     i: impl Into<Option<T>>,
     f: F,
     default: impl AsRef<str>,
-) -> Result<(), W::Error>
+) -> Result<()>
 where
     W: Write,
-    F: Fn(&mut W, T) -> Result<(), W::Error>,
+    F: Fn(&mut W, T) -> Result<()>,
 {
     match i.into() {
         None => w.write(default),

@@ -288,7 +288,6 @@ pub fn emit_fatal_program<W, S: AsRef<str>>(
 ) -> anyhow::Result<()>
 where
     W: Write,
-    W::Error: Send + Sync + 'static, // required by anyhow::Error
 {
     let is_systemlib = env.flags.contains(EnvFlags::IS_SYSTEMLIB);
     let opts =
@@ -327,7 +326,6 @@ pub fn from_text<'arena, 'decl, W, S: AsRef<str>>(
 ) -> anyhow::Result<Option<Profile>>
 where
     W: Write,
-    W::Error: Send + Sync + 'static, // required by anyhow::Error
 {
     let mut emitter = create_emitter(env, native_env, decl_provider)?;
     let (program, profile) =

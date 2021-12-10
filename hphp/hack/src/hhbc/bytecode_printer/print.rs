@@ -67,7 +67,7 @@ pub fn print_program<W: Write>(
     ctx: &mut Context<'_>,
     w: &mut W,
     prog: &HhasProgram<'_>,
-) -> Result<(), W::Error> {
+) -> Result<()> {
     match ctx.path {
         Some(p) => {
             let abs = p.to_absolute();
@@ -114,7 +114,7 @@ fn print_program_<W: Write>(
     ctx: &mut Context<'_>,
     w: &mut W,
     prog: &HhasProgram<'_>,
-) -> Result<(), W::Error> {
+) -> Result<()> {
     if let Just(Triple(fop, p, msg)) = &prog.fatal {
         newline(w)?;
         let HhasPos {
@@ -158,18 +158,18 @@ fn print_include_region<W: Write>(
     ctx: &mut Context<'_>,
     w: &mut W,
     includes: &Slice<'_, IncludePath<'_>>,
-) -> Result<(), W::Error> {
-    fn print_path<W: Write>(w: &mut W, p: &Path) -> Result<(), W::Error> {
+) -> Result<()> {
+    fn print_path<W: Write>(w: &mut W, p: &Path) -> Result<()> {
         option(w, p.to_str(), |w, p: &str| write!(w, "\n  {}", p))
     }
-    fn print_if_exists<W: Write>(w: &mut W, p: &Path) -> Result<(), W::Error> {
+    fn print_if_exists<W: Write>(w: &mut W, p: &Path) -> Result<()> {
         if p.exists() { print_path(w, p) } else { Ok(()) }
     }
     fn print_include<W: Write>(
         ctx: &mut Context<'_>,
         w: &mut W,
         inc: IncludePath<'_>,
-    ) -> Result<(), W::Error> {
+    ) -> Result<()> {
         let include_roots = ctx.include_roots;
         let alloc = bumpalo::Bump::new();
         match inc.into_doc_root_relative(&alloc, include_roots) {
@@ -220,17 +220,16 @@ fn print_include_region<W: Write>(
             // hhas_symbol_refs_rust::IncludePath::into_doc_root_relative
             print_include(ctx, w, inc.clone())?;
         }
-        w.write("\n}\n")
-    } else {
-        Ok(())
+        w.write("\n}\n")?;
     }
+    Ok(())
 }
 
 fn print_symbol_ref_regions<'arena, W: Write>(
     ctx: &mut Context<'_>,
     w: &mut W,
     symbol_refs: &HhasSymbolRefs<'arena>,
-) -> Result<(), W::Error> {
+) -> Result<()> {
     let mut print_region = |name, refs: &Slice<'arena, Str<'arena>>| {
         if !refs.is_empty() {
             ctx.newline(w)?;
@@ -256,18 +255,14 @@ fn print_adata_region<W: Write>(
     ctx: &mut Context<'_>,
     w: &mut W,
     adata: &HhasAdata<'_>,
-) -> Result<(), W::Error> {
+) -> Result<()> {
     concat_str_by(w, " ", [".adata", adata.id.unsafe_as_str(), "= "])?;
     triple_quotes(w, |w| print_adata(ctx, w, &adata.value))?;
     w.write(";")?;
     ctx.newline(w)
 }
 
-fn print_typedef<W: Write>(
-    ctx: &mut Context<'_>,
-    w: &mut W,
-    td: &HhasTypedef<'_>,
-) -> Result<(), W::Error> {
+fn print_typedef<W: Write>(ctx: &mut Context<'_>, w: &mut W, td: &HhasTypedef<'_>) -> Result<()> {
     newline(w)?;
     w.write(".alias ")?;
     print_typedef_attributes(ctx, w, td)?;
@@ -285,7 +280,7 @@ fn print_typedef_attributes<W: Write>(
     ctx: &mut Context<'_>,
     w: &mut W,
     td: &HhasTypedef<'_>,
-) -> Result<(), W::Error> {
+) -> Result<()> {
     let mut specials = vec![];
     if ctx.is_system_lib() {
         specials.push("persistent");
@@ -293,27 +288,25 @@ fn print_typedef_attributes<W: Write>(
     print_special_and_user_attrs(ctx, w, &specials[..], td.attributes.as_ref())
 }
 
-fn handle_not_impl<E, F>(f: F) -> Result<(), E>
+fn handle_not_impl<F>(f: F) -> Result<()>
 where
-    E: std::fmt::Debug,
-    F: FnOnce() -> Result<(), E>,
+    F: FnOnce() -> Result<()>,
 {
-    let r = f();
-    match &r {
-        Err(Error::NotImpl(msg)) => {
+    f().or_else(|e| match e {
+        Error::NotImpl(msg) => {
             println!("#### NotImpl: {}", msg);
             eprintln!("NotImpl: {}", msg);
             Ok(())
         }
-        _ => r,
-    }
+        _ => Err(e),
+    })
 }
 
 fn print_fun_def<W: Write>(
     ctx: &mut Context<'_>,
     w: &mut W,
     fun_def: &HhasFunction<'_>,
-) -> Result<(), W::Error> {
+) -> Result<()> {
     let body = &fun_def.body;
     newline(w)?;
     w.write(".function ")?;
@@ -354,7 +347,7 @@ fn print_requirement<W: Write>(
     ctx: &mut Context<'_>,
     w: &mut W,
     r: &Pair<ClassType<'_>, hhas_class::TraitReqKind>,
-) -> Result<(), W::Error> {
+) -> Result<()> {
     ctx.newline(w)?;
     w.write(".require ")?;
     match r {
@@ -371,7 +364,7 @@ fn print_type_constant<W: Write>(
     ctx: &mut Context<'_>,
     w: &mut W,
     c: &HhasTypeConstant<'_>,
-) -> Result<(), W::Error> {
+) -> Result<()> {
     ctx.newline(w)?;
     concat_str_by(w, " ", [".const", c.name.unsafe_as_str(), "isType"])?;
     if c.is_abstract {
@@ -388,7 +381,7 @@ fn print_ctx_constant<W: Write>(
     ctx: &mut Context<'_>,
     w: &mut W,
     c: &HhasCtxConstant<'_>,
-) -> Result<(), W::Error> {
+) -> Result<()> {
     ctx.newline(w)?;
     concat_str_by(w, " ", [".ctx", &c.name.unsafe_as_str()])?;
     if c.is_abstract {
@@ -410,7 +403,7 @@ fn print_ctx_constant<W: Write>(
     Ok(())
 }
 
-fn print_property_doc_comment<W: Write>(w: &mut W, p: &HhasProperty<'_>) -> Result<(), W::Error> {
+fn print_property_doc_comment<W: Write>(w: &mut W, p: &HhasProperty<'_>) -> Result<()> {
     if let Just(s) = p.doc_comment.as_ref() {
         w.write(triple_quote_string(s.unsafe_as_str()))?;
         w.write(" ")?;
@@ -422,7 +415,7 @@ fn print_property_attributes<W: Write>(
     ctx: &mut Context<'_>,
     w: &mut W,
     property: &HhasProperty<'_>,
-) -> Result<(), W::Error> {
+) -> Result<()> {
     let mut special_attributes = vec![];
     if property.is_late_init() {
         special_attributes.push("late_init")
@@ -466,7 +459,7 @@ fn print_property_attributes<W: Write>(
     w.write("] ")
 }
 
-fn print_property_type_info<W: Write>(w: &mut W, p: &HhasProperty<'_>) -> Result<(), W::Error> {
+fn print_property_type_info<W: Write>(w: &mut W, p: &HhasProperty<'_>) -> Result<()> {
     print_type_info(w, &p.type_info)?;
     w.write(" ")
 }
@@ -476,7 +469,7 @@ fn print_property<W: Write>(
     w: &mut W,
     class_def: &HhasClass<'_>,
     property: &HhasProperty<'_>,
-) -> Result<(), W::Error> {
+) -> Result<()> {
     newline(w)?;
     w.write("  .property ")?;
     print_property_attributes(ctx, w, property)?;
@@ -496,11 +489,7 @@ fn print_property<W: Write>(
     }
 }
 
-fn print_constant<W: Write>(
-    ctx: &mut Context<'_>,
-    w: &mut W,
-    c: &HhasConstant<'_>,
-) -> Result<(), W::Error> {
+fn print_constant<W: Write>(ctx: &mut Context<'_>, w: &mut W, c: &HhasConstant<'_>) -> Result<()> {
     ctx.newline(w)?;
     w.write(".const ")?;
     w.write(c.name.to_raw_string())?;
@@ -518,11 +507,7 @@ fn print_constant<W: Write>(
     w.write(";")
 }
 
-fn print_enum_ty<W: Write>(
-    ctx: &mut Context<'_>,
-    w: &mut W,
-    c: &HhasClass<'_>,
-) -> Result<(), W::Error> {
+fn print_enum_ty<W: Write>(ctx: &mut Context<'_>, w: &mut W, c: &HhasClass<'_>) -> Result<()> {
     if let Just(et) = c.enum_type.as_ref() {
         ctx.newline(w)?;
         w.write(".enum_ty ")?;
@@ -536,7 +521,7 @@ fn print_doc_comment<'arena, W: Write>(
     ctx: &mut Context<'_>,
     w: &mut W,
     doc_comment: &Maybe<Str<'arena>>,
-) -> Result<(), W::Error> {
+) -> Result<()> {
     if let Just(cmt) = doc_comment {
         ctx.newline(w)?;
         write!(w, ".doc {};", triple_quote_string(cmt.unsafe_as_str()))?;
@@ -552,7 +537,7 @@ fn print_use_precedence<'arena, W: Write>(
         ClassType<'arena>,
         Slice<'arena, ClassType<'arena>>,
     >,
-) -> Result<(), W::Error> {
+) -> Result<()> {
     ctx.newline(w)?;
     concat_str(w, [id1.to_raw_string(), "::", id2.to_raw_string()])?;
     w.write(" insteadof ")?;
@@ -561,7 +546,7 @@ fn print_use_precedence<'arena, W: Write>(
     w.write(";")
 }
 
-fn print_use_as_visibility<W: Write>(w: &mut W, u: UseAsVisibility) -> Result<(), W::Error> {
+fn print_use_as_visibility<W: Write>(w: &mut W, u: UseAsVisibility) -> Result<()> {
     w.write(match u {
         UseAsVisibility::UseAsPublic => "public",
         UseAsVisibility::UseAsPrivate => "private",
@@ -579,7 +564,7 @@ fn print_use_alias<'arena, W: Write>(
         Maybe<ClassType<'arena>>,
         Slice<'arena, UseAsVisibility>,
     >,
-) -> Result<(), W::Error> {
+) -> Result<()> {
     ctx.newline(w)?;
     let id = id.to_raw_string();
     option_or(
@@ -605,7 +590,7 @@ fn print_uses<'arena, W: Write>(
     ctx: &mut Context<'_>,
     w: &mut W,
     c: &HhasClass<'arena>,
-) -> Result<(), W::Error> {
+) -> Result<()> {
     if c.uses.is_empty() {
         Ok(())
     } else {
@@ -655,7 +640,7 @@ fn print_class_special_attributes<W: Write>(
     ctx: &mut Context<'_>,
     w: &mut W,
     c: &HhasClass<'_>,
-) -> Result<(), W::Error> {
+) -> Result<()> {
     let user_attrs = c.attributes.as_ref();
     let is_system_lib = ctx.is_system_lib();
 
@@ -717,7 +702,7 @@ fn print_class_special_attributes<W: Write>(
     })
 }
 
-fn print_implements<W: Write>(w: &mut W, implements: &[ClassType<'_>]) -> Result<(), W::Error> {
+fn print_implements<W: Write>(w: &mut W, implements: &[ClassType<'_>]) -> Result<()> {
     if implements.is_empty() {
         return Ok(());
     }
@@ -733,10 +718,7 @@ fn print_implements<W: Write>(w: &mut W, implements: &[ClassType<'_>]) -> Result
     w.write(")")
 }
 
-fn print_enum_includes<W: Write>(
-    w: &mut W,
-    enum_includes: &[ClassType<'_>],
-) -> Result<(), W::Error> {
+fn print_enum_includes<W: Write>(w: &mut W, enum_includes: &[ClassType<'_>]) -> Result<()> {
     if enum_includes.is_empty() {
         return Ok(());
     }
@@ -755,7 +737,7 @@ fn print_enum_includes<W: Write>(
 fn print_shadowed_tparams<'arena, W: Write>(
     w: &mut W,
     shadowed_tparams: impl AsRef<[Str<'arena>]>,
-) -> Result<(), W::Error> {
+) -> Result<()> {
     braces(w, |w| {
         let tps: Vec<&str> = shadowed_tparams
             .as_ref()
@@ -770,7 +752,7 @@ fn print_method_def<W: Write>(
     ctx: &mut Context<'_>,
     w: &mut W,
     method_def: &HhasMethod<'_>,
-) -> Result<(), W::Error> {
+) -> Result<()> {
     let body = &method_def.body;
     newline(w)?;
     w.write("  .method ")?;
@@ -813,7 +795,7 @@ fn print_method_attrs<W: Write>(
     ctx: &mut Context<'_>,
     w: &mut W,
     m: &HhasMethod<'_>,
-) -> Result<(), W::Error> {
+) -> Result<()> {
     use hhas_attribute::*;
     let user_attrs = m.attributes.as_ref();
     let mut special_attrs = vec![];
@@ -865,7 +847,7 @@ fn print_class_def<'arena, W: Write>(
     ctx: &mut Context<'_>,
     w: &mut W,
     class_def: &HhasClass<'arena>,
-) -> Result<(), W::Error> {
+) -> Result<()> {
     newline(w)?;
     w.write(".class ")?;
     print_upper_bounds(w, class_def.upper_bounds.as_ref())?;
@@ -914,7 +896,7 @@ fn print_pos_as_prov_tag<W: Write>(
     ctx: &Context<'_>,
     w: &mut W,
     loc: &Option<ast_defs::Pos>,
-) -> Result<(), W::Error> {
+) -> Result<()> {
     match loc {
         Some(l) if ctx.array_provenance => {
             let (line, ..) = l.info_pos();
@@ -935,31 +917,31 @@ fn print_pos_as_prov_tag<W: Write>(
     }
 }
 
-fn print_hhbc_id<'a, W: Write>(w: &mut W, id: &impl Id<'a>) -> Result<(), W::Error> {
+fn print_hhbc_id<'a, W: Write>(w: &mut W, id: &impl Id<'a>) -> Result<()> {
     quotes(w, |w| w.write(escape(id.to_raw_string())))
 }
 
-fn print_function_id<W: Write>(w: &mut W, id: &FunctionId<'_>) -> Result<(), W::Error> {
+fn print_function_id<W: Write>(w: &mut W, id: &FunctionId<'_>) -> Result<()> {
     print_hhbc_id(w, id)
 }
 
-fn print_class_id<W: Write>(w: &mut W, id: &ClassId<'_>) -> Result<(), W::Error> {
+fn print_class_id<W: Write>(w: &mut W, id: &ClassId<'_>) -> Result<()> {
     print_hhbc_id(w, id)
 }
 
-fn print_method_id<W: Write>(w: &mut W, id: &MethodId<'_>) -> Result<(), W::Error> {
+fn print_method_id<W: Write>(w: &mut W, id: &MethodId<'_>) -> Result<()> {
     print_hhbc_id(w, id)
 }
 
-fn print_const_id<W: Write>(w: &mut W, id: &ConstId<'_>) -> Result<(), W::Error> {
+fn print_const_id<W: Write>(w: &mut W, id: &ConstId<'_>) -> Result<()> {
     print_hhbc_id(w, id)
 }
 
-fn print_prop_id<W: Write>(w: &mut W, id: &PropId<'_>) -> Result<(), W::Error> {
+fn print_prop_id<W: Write>(w: &mut W, id: &PropId<'_>) -> Result<()> {
     print_hhbc_id(w, id)
 }
 
-fn print_adata_id<W: Write>(w: &mut W, id: &AdataId<'_>) -> Result<(), W::Error> {
+fn print_adata_id<W: Write>(w: &mut W, id: &AdataId<'_>) -> Result<()> {
     concat_str(w, ["@", id.unsafe_as_str()])
 }
 
@@ -970,10 +952,10 @@ fn print_adata_mapped_argument<W, F, V>(
     loc: &Option<ast_defs::Pos>,
     values: &[V],
     f: F,
-) -> Result<(), W::Error>
+) -> Result<()>
 where
     W: Write,
-    F: Fn(&mut Context<'_>, &mut W, &V) -> Result<(), W::Error>,
+    F: Fn(&mut Context<'_>, &mut W, &V) -> Result<()>,
 {
     write!(w, "{}:{}:{{", col_type, values.len(),)?;
     print_pos_as_prov_tag(ctx, w, loc)?;
@@ -989,7 +971,7 @@ fn print_adata_collection_argument<W: Write>(
     col_type: &str,
     loc: &Option<ast_defs::Pos>,
     values: &[TypedValue<'_>],
-) -> Result<(), W::Error> {
+) -> Result<()> {
     print_adata_mapped_argument(ctx, w, col_type, loc, values, &print_adata)
 }
 
@@ -999,18 +981,14 @@ fn print_adata_dict_collection_argument<W: Write>(
     col_type: &str,
     loc: &Option<ast_defs::Pos>,
     pairs: &[Pair<TypedValue<'_>, TypedValue<'_>>],
-) -> Result<(), W::Error> {
+) -> Result<()> {
     print_adata_mapped_argument(ctx, w, col_type, loc, pairs, |ctx, w, Pair(v1, v2)| {
         print_adata(ctx, w, v1)?;
         print_adata(ctx, w, v2)
     })
 }
 
-fn print_adata<W: Write>(
-    ctx: &mut Context<'_>,
-    w: &mut W,
-    tv: &TypedValue<'_>,
-) -> Result<(), W::Error> {
+fn print_adata<W: Write>(ctx: &mut Context<'_>, w: &mut W, tv: &TypedValue<'_>) -> Result<()> {
     match tv {
         TypedValue::Uninit => w.write("uninit"),
         TypedValue::Null => w.write("N;"),
@@ -1052,7 +1030,7 @@ fn print_attribute<W: Write>(
     ctx: &mut Context<'_>,
     w: &mut W,
     a: &HhasAttribute<'_>,
-) -> Result<(), W::Error> {
+) -> Result<()> {
     write!(
         w,
         "\"{}\"(\"\"\"{}:{}:{{",
@@ -1068,7 +1046,7 @@ fn print_attributes<'a, W: Write>(
     ctx: &mut Context<'_>,
     w: &mut W,
     al: impl AsRef<[HhasAttribute<'a>]>,
-) -> Result<(), W::Error> {
+) -> Result<()> {
     // Adjust for underscore coming before alphabet
     let al: Vec<&HhasAttribute<'_>> = al
         .as_ref()
@@ -1087,7 +1065,7 @@ fn print_file_attributes<W: Write>(
     ctx: &mut Context<'_>,
     w: &mut W,
     al: &[HhasAttribute<'_>],
-) -> Result<(), W::Error> {
+) -> Result<()> {
     if al.is_empty() {
         return Ok(());
     }
@@ -1110,7 +1088,7 @@ fn print_body<W: Write>(
     w: &mut W,
     body: &HhasBody<'_>,
     coeffects: &HhasCoeffects<'_>,
-) -> Result<(), W::Error> {
+) -> Result<()> {
     print_doc_comment(ctx, w, &body.doc_comment)?;
     if body.is_memoize_wrapper {
         ctx.newline(w)?;
@@ -1151,7 +1129,7 @@ fn print_instructions<W: Write>(
     ctx: &mut Context<'_>,
     w: &mut W,
     instr_seq: &InstrSeq<'_>,
-) -> Result<(), W::Error> {
+) -> Result<()> {
     use Instruct::*;
     use InstructTry::*;
     for instr in instr_seq.compact_iter() {
@@ -1201,7 +1179,7 @@ fn print_fcall_args<W: Write>(
     FcallArgs(fls, num_args, num_rets, inouts, readonly, async_eager_label, context): &FcallArgs<
         '_,
     >,
-) -> Result<(), W::Error> {
+) -> Result<()> {
     use FcallFlags as F;
     let mut flags = vec![];
     if_then(fls.contains(F::HAS_UNPACK), || flags.push("Unpack"));
@@ -1237,7 +1215,7 @@ fn print_fcall_args<W: Write>(
     }
 }
 
-fn print_special_cls_ref<W: Write>(w: &mut W, cls_ref: &SpecialClsRef) -> Result<(), W::Error> {
+fn print_special_cls_ref<W: Write>(w: &mut W, cls_ref: &SpecialClsRef) -> Result<()> {
     w.write(match cls_ref {
         SpecialClsRef::Static => "Static",
         SpecialClsRef::Self_ => "Self",
@@ -1245,15 +1223,15 @@ fn print_special_cls_ref<W: Write>(w: &mut W, cls_ref: &SpecialClsRef) -> Result
     })
 }
 
-fn print_null_flavor<W: Write>(w: &mut W, f: &ObjNullFlavor) -> Result<(), W::Error> {
+fn print_null_flavor<W: Write>(w: &mut W, f: &ObjNullFlavor) -> Result<()> {
     w.write(match f {
         ObjNullFlavor::NullThrows => "NullThrows",
         ObjNullFlavor::NullSafe => "NullSafe",
     })
 }
 
-fn print_instr<W: Write>(w: &mut W, instr: &Instruct<'_>) -> Result<(), W::Error> {
-    fn print_call<W: Write>(w: &mut W, call: &InstructCall<'_>) -> Result<(), W::Error> {
+fn print_instr<W: Write>(w: &mut W, instr: &Instruct<'_>) -> Result<()> {
+    fn print_call<W: Write>(w: &mut W, call: &InstructCall<'_>) -> Result<()> {
         use InstructCall as I;
         match call {
             I::NewObj => w.write("NewObj"),
@@ -1338,7 +1316,7 @@ fn print_instr<W: Write>(w: &mut W, instr: &Instruct<'_>) -> Result<(), W::Error
         }
     }
 
-    fn print_get<W: Write>(w: &mut W, get: &InstructGet<'_>) -> Result<(), W::Error> {
+    fn print_get<W: Write>(w: &mut W, get: &InstructGet<'_>) -> Result<()> {
         use InstructGet as IG;
         match get {
             IG::CGetL(id) => {
@@ -1410,7 +1388,7 @@ fn print_instr<W: Write>(w: &mut W, instr: &Instruct<'_>) -> Result<(), W::Error
     }
 }
 
-fn print_base<W: Write>(w: &mut W, i: &InstructBase<'_>) -> Result<(), W::Error> {
+fn print_base<W: Write>(w: &mut W, i: &InstructBase<'_>) -> Result<()> {
     use InstructBase as I;
     match i {
         I::BaseGC(si, m) => {
@@ -1459,11 +1437,11 @@ fn print_base<W: Write>(w: &mut W, i: &InstructBase<'_>) -> Result<(), W::Error>
     }
 }
 
-fn print_stack_index<W: Write>(w: &mut W, si: &StackIndex) -> Result<(), W::Error> {
+fn print_stack_index<W: Write>(w: &mut W, si: &StackIndex) -> Result<()> {
     w.write(si.to_string())
 }
 
-fn print_member_opmode<W: Write>(w: &mut W, m: &MemberOpMode) -> Result<(), W::Error> {
+fn print_member_opmode<W: Write>(w: &mut W, m: &MemberOpMode) -> Result<()> {
     use MemberOpMode as M;
     w.write(match m {
         M::ModeNone => "None",
@@ -1474,7 +1452,7 @@ fn print_member_opmode<W: Write>(w: &mut W, m: &MemberOpMode) -> Result<(), W::E
     })
 }
 
-fn print_member_key<W: Write>(w: &mut W, mk: &MemberKey<'_>) -> Result<(), W::Error> {
+fn print_member_key<W: Write>(w: &mut W, mk: &MemberKey<'_>) -> Result<()> {
     use MemberKey as M;
     match mk {
         M::EC(si, op) => {
@@ -1528,7 +1506,7 @@ fn print_member_key<W: Write>(w: &mut W, mk: &MemberKey<'_>) -> Result<(), W::Er
     }
 }
 
-fn print_iterator<W: Write>(w: &mut W, i: &InstructIterator<'_>) -> Result<(), W::Error> {
+fn print_iterator<W: Write>(w: &mut W, i: &InstructIterator<'_>) -> Result<()> {
     use InstructIterator as I;
     match i {
         I::IterInit(iter_args, label) => {
@@ -1550,7 +1528,7 @@ fn print_iterator<W: Write>(w: &mut W, i: &InstructIterator<'_>) -> Result<(), W
     }
 }
 
-fn print_iter_args<W: Write>(w: &mut W, iter_args: &IterArgs<'_>) -> Result<(), W::Error> {
+fn print_iter_args<W: Write>(w: &mut W, iter_args: &IterArgs<'_>) -> Result<()> {
     print_iterator_id(w, &iter_args.iter_id)?;
     w.write(" ")?;
     match &iter_args.key_id {
@@ -1565,11 +1543,11 @@ fn print_iter_args<W: Write>(w: &mut W, iter_args: &IterArgs<'_>) -> Result<(), 
     print_local(w, &iter_args.val_id)
 }
 
-fn print_iterator_id<W: Write>(w: &mut W, i: &IterId) -> Result<(), W::Error> {
+fn print_iterator_id<W: Write>(w: &mut W, i: &IterId) -> Result<()> {
     write!(w, "{}", i)
 }
 
-fn print_async<W: Write>(w: &mut W, a: &AsyncFunctions<'_>) -> Result<(), W::Error> {
+fn print_async<W: Write>(w: &mut W, a: &AsyncFunctions<'_>) -> Result<()> {
     use AsyncFunctions as A;
     match a {
         A::WHResult => w.write("WHResult"),
@@ -1582,7 +1560,7 @@ fn print_async<W: Write>(w: &mut W, a: &AsyncFunctions<'_>) -> Result<(), W::Err
     }
 }
 
-fn print_query_op<W: Write>(w: &mut W, q: QueryOp) -> Result<(), W::Error> {
+fn print_query_op<W: Write>(w: &mut W, q: QueryOp) -> Result<()> {
     w.write(match q {
         QueryOp::CGet => "CGet",
         QueryOp::CGetQuiet => "CGetQuiet",
@@ -1591,7 +1569,7 @@ fn print_query_op<W: Write>(w: &mut W, q: QueryOp) -> Result<(), W::Error> {
     })
 }
 
-fn print_final<W: Write>(w: &mut W, f: &InstructFinal<'_>) -> Result<(), W::Error> {
+fn print_final<W: Write>(w: &mut W, f: &InstructFinal<'_>) -> Result<()> {
     use InstructFinal as F;
     match f {
         F::QueryM(n, op, mk) => {
@@ -1644,7 +1622,7 @@ fn print_final<W: Write>(w: &mut W, f: &InstructFinal<'_>) -> Result<(), W::Erro
     }
 }
 
-fn print_isset<W: Write>(w: &mut W, isset: &InstructIsset<'_>) -> Result<(), W::Error> {
+fn print_isset<W: Write>(w: &mut W, isset: &InstructIsset<'_>) -> Result<()> {
     use InstructIsset as I;
     match isset {
         I::IssetC => w.write("IssetC"),
@@ -1671,7 +1649,7 @@ fn print_isset<W: Write>(w: &mut W, isset: &InstructIsset<'_>) -> Result<(), W::
     }
 }
 
-fn print_istype_op<W: Write>(w: &mut W, op: &IstypeOp) -> Result<(), W::Error> {
+fn print_istype_op<W: Write>(w: &mut W, op: &IstypeOp) -> Result<()> {
     use IstypeOp as Op;
     match op {
         Op::OpNull => w.write("Null"),
@@ -1693,7 +1671,7 @@ fn print_istype_op<W: Write>(w: &mut W, op: &IstypeOp) -> Result<(), W::Error> {
     }
 }
 
-fn print_try<W: Write>(w: &mut W, itry: &InstructTry) -> Result<(), W::Error> {
+fn print_try<W: Write>(w: &mut W, itry: &InstructTry) -> Result<()> {
     use InstructTry as T;
     match itry {
         T::TryCatchBegin => w.write(".try {"),
@@ -1702,7 +1680,7 @@ fn print_try<W: Write>(w: &mut W, itry: &InstructTry) -> Result<(), W::Error> {
     }
 }
 
-fn print_mutator<W: Write>(w: &mut W, mutator: &InstructMutator<'_>) -> Result<(), W::Error> {
+fn print_mutator<W: Write>(w: &mut W, mutator: &InstructMutator<'_>) -> Result<()> {
     use InstructMutator as M;
     match mutator {
         M::SetL(local) => {
@@ -1768,7 +1746,7 @@ fn print_mutator<W: Write>(w: &mut W, mutator: &InstructMutator<'_>) -> Result<(
     }
 }
 
-fn print_eq_op<W: Write>(w: &mut W, op: &EqOp) -> Result<(), W::Error> {
+fn print_eq_op<W: Write>(w: &mut W, op: &EqOp) -> Result<()> {
     w.write(match op {
         EqOp::PlusEqual => "PlusEqual",
         EqOp::MinusEqual => "MinusEqual",
@@ -1788,7 +1766,7 @@ fn print_eq_op<W: Write>(w: &mut W, op: &EqOp) -> Result<(), W::Error> {
     })
 }
 
-fn print_readonly_op<W: Write>(w: &mut W, op: &ReadonlyOp) -> Result<(), W::Error> {
+fn print_readonly_op<W: Write>(w: &mut W, op: &ReadonlyOp) -> Result<()> {
     w.write(match op {
         ReadonlyOp::Readonly => "Readonly",
         ReadonlyOp::Mutable => "Mutable",
@@ -1798,7 +1776,7 @@ fn print_readonly_op<W: Write>(w: &mut W, op: &ReadonlyOp) -> Result<(), W::Erro
     })
 }
 
-fn print_incdec_op<W: Write>(w: &mut W, op: &IncdecOp) -> Result<(), W::Error> {
+fn print_incdec_op<W: Write>(w: &mut W, op: &IncdecOp) -> Result<()> {
     w.write(match op {
         IncdecOp::PreInc => "PreInc",
         IncdecOp::PostInc => "PostInc",
@@ -1811,10 +1789,7 @@ fn print_incdec_op<W: Write>(w: &mut W, op: &IncdecOp) -> Result<(), W::Error> {
     })
 }
 
-fn print_gen_creation_execution<W: Write>(
-    w: &mut W,
-    gen: &GenCreationExecution,
-) -> Result<(), W::Error> {
+fn print_gen_creation_execution<W: Write>(w: &mut W, gen: &GenCreationExecution) -> Result<()> {
     use GenCreationExecution as G;
     match gen {
         G::CreateCont => w.write("CreateCont"),
@@ -1831,7 +1806,7 @@ fn print_gen_creation_execution<W: Write>(
     }
 }
 
-fn print_misc<W: Write>(w: &mut W, misc: &InstructMisc<'_>) -> Result<(), W::Error> {
+fn print_misc<W: Write>(w: &mut W, misc: &InstructMisc<'_>) -> Result<()> {
     use InstructMisc as M;
     match misc {
         M::This => w.write("This"),
@@ -1971,10 +1946,7 @@ fn print_misc<W: Write>(w: &mut W, misc: &InstructMisc<'_>) -> Result<(), W::Err
     }
 }
 
-fn print_include_eval_define<W: Write>(
-    w: &mut W,
-    ed: &InstructIncludeEvalDefine,
-) -> Result<(), W::Error> {
+fn print_include_eval_define<W: Write>(w: &mut W, ed: &InstructIncludeEvalDefine) -> Result<()> {
     use InstructIncludeEvalDefine::*;
     match ed {
         Incl => w.write("Incl"),
@@ -1986,7 +1958,7 @@ fn print_include_eval_define<W: Write>(
     }
 }
 
-fn print_control_flow<W: Write>(w: &mut W, cf: &InstructControlFlow<'_>) -> Result<(), W::Error> {
+fn print_control_flow<W: Write>(w: &mut W, cf: &InstructControlFlow<'_>) -> Result<()> {
     use InstructControlFlow as CF;
     match cf {
         CF::Jmp(l) => {
@@ -2032,7 +2004,7 @@ fn print_switch<W: Write>(
     kind: &Switchkind,
     base: &isize,
     labels: &[Label],
-) -> Result<(), W::Error> {
+) -> Result<()> {
     w.write("Switch ")?;
     w.write(match kind {
         Switchkind::Bounded => "Bounded ",
@@ -2043,7 +2015,7 @@ fn print_switch<W: Write>(
     angle(w, |w| concat_by(w, " ", labels, print_label))
 }
 
-fn print_lit_const<W: Write>(w: &mut W, lit: &InstructLitConst<'_>) -> Result<(), W::Error> {
+fn print_lit_const<W: Write>(w: &mut W, lit: &InstructLitConst<'_>) -> Result<()> {
     use InstructLitConst as LC;
     match lit {
         LC::Null => w.write("Null"),
@@ -2124,7 +2096,7 @@ fn print_lit_const<W: Write>(w: &mut W, lit: &InstructLitConst<'_>) -> Result<()
     }
 }
 
-fn print_collection_type<W: Write>(w: &mut W, ct: &CollectionType) -> Result<(), W::Error> {
+fn print_collection_type<W: Write>(w: &mut W, ct: &CollectionType) -> Result<()> {
     use CollectionType as CT;
     match ct {
         CT::Vector => w.write("Vector"),
@@ -2141,11 +2113,11 @@ fn print_collection_type<W: Write>(w: &mut W, ct: &CollectionType) -> Result<(),
     }
 }
 
-fn print_shape_fields<W: Write>(w: &mut W, sf: &[&str]) -> Result<(), W::Error> {
+fn print_shape_fields<W: Write>(w: &mut W, sf: &[&str]) -> Result<()> {
     concat_by(w, " ", sf, |w, f| quotes(w, |w| w.write(escape(*f))))
 }
 
-fn print_op<W: Write>(w: &mut W, op: &InstructOperator<'_>) -> Result<(), W::Error> {
+fn print_op<W: Write>(w: &mut W, op: &InstructOperator<'_>) -> Result<()> {
     use InstructOperator as I;
     match op {
         I::Concat => w.write("Concat"),
@@ -2260,7 +2232,7 @@ fn print_op<W: Write>(w: &mut W, op: &InstructOperator<'_>) -> Result<(), W::Err
     }
 }
 
-fn print_fatal_op<W: Write>(w: &mut W, f: &FatalOp) -> Result<(), W::Error> {
+fn print_fatal_op<W: Write>(w: &mut W, f: &FatalOp) -> Result<()> {
     match f {
         FatalOp::Parse => w.write("Fatal Parse"),
         FatalOp::Runtime => w.write("Fatal Runtime"),
@@ -2272,7 +2244,7 @@ fn print_params<'arena, W: Write>(
     ctx: &mut Context<'_>,
     w: &mut W,
     params: impl AsRef<[HhasParam<'arena>]>,
-) -> Result<(), W::Error> {
+) -> Result<()> {
     paren(w, |w| {
         concat_by(w, ", ", params, |w, i| print_param(ctx, w, i))
     })
@@ -2282,7 +2254,7 @@ fn print_param<'arena, W: Write>(
     ctx: &mut Context<'_>,
     w: &mut W,
     param: &HhasParam<'arena>,
-) -> Result<(), W::Error> {
+) -> Result<()> {
     print_param_user_attributes(ctx, w, param)?;
     w.write_if(param.is_inout, "inout ")?;
     w.write_if(param.is_readonly, "readonly ")?;
@@ -2299,7 +2271,7 @@ fn print_param<'arena, W: Write>(
     )
 }
 
-fn print_param_id<W: Write>(w: &mut W, param_id: &ParamId<'_>) -> Result<(), W::Error> {
+fn print_param_id<W: Write>(w: &mut W, param_id: &ParamId<'_>) -> Result<()> {
     match param_id {
         ParamId::ParamUnnamed(i) => w.write(i.to_string()),
         ParamId::ParamNamed(s) => w.write(s.unsafe_as_str()),
@@ -2309,7 +2281,7 @@ fn print_param_id<W: Write>(w: &mut W, param_id: &ParamId<'_>) -> Result<(), W::
 fn print_param_default_value<'arena, W: Write>(
     w: &mut W,
     default_val: &(Label, Str<'arena>),
-) -> Result<(), W::Error> {
+) -> Result<()> {
     w.write(" = ")?;
     print_label(w, &default_val.0)?;
     paren(w, |w| {
@@ -2317,7 +2289,7 @@ fn print_param_default_value<'arena, W: Write>(
     })
 }
 
-fn print_label<W: Write>(w: &mut W, label: &Label) -> Result<(), W::Error> {
+fn print_label<W: Write>(w: &mut W, label: &Label) -> Result<()> {
     match label {
         Label::Regular(id) => {
             w.write("L")?;
@@ -2330,7 +2302,7 @@ fn print_label<W: Write>(w: &mut W, label: &Label) -> Result<(), W::Error> {
     }
 }
 
-fn print_local<W: Write>(w: &mut W, local: &Local<'_>) -> Result<(), W::Error> {
+fn print_local<W: Write>(w: &mut W, local: &Local<'_>) -> Result<()> {
     match local {
         Local::Unnamed(id) => {
             w.write("_")?;
@@ -2340,7 +2312,7 @@ fn print_local<W: Write>(w: &mut W, local: &Local<'_>) -> Result<(), W::Error> {
     }
 }
 
-fn print_int<W: Write>(w: &mut W, i: &usize) -> Result<(), W::Error> {
+fn print_int<W: Write>(w: &mut W, i: &usize) -> Result<()> {
     write!(w, "{}", i)
 }
 
@@ -2350,7 +2322,7 @@ fn print_key_value<W: Write>(
     env: &ExprEnv<'_, '_>,
     k: &ast::Expr,
     v: &ast::Expr,
-) -> Result<(), W::Error> {
+) -> Result<()> {
     print_key_value_(ctx, w, env, k, print_expr, v)
 }
 
@@ -2361,9 +2333,9 @@ fn print_key_value_<W: Write, K, KeyPrinter>(
     k: K,
     mut kp: KeyPrinter,
     v: &ast::Expr,
-) -> Result<(), W::Error>
+) -> Result<()>
 where
-    KeyPrinter: FnMut(&mut Context<'_>, &mut W, &ExprEnv<'_, '_>, K) -> Result<(), W::Error>,
+    KeyPrinter: FnMut(&mut Context<'_>, &mut W, &ExprEnv<'_, '_>, K) -> Result<()>,
 {
     kp(ctx, w, env, k)?;
     w.write(" => ")?;
@@ -2375,7 +2347,7 @@ fn print_afield<W: Write>(
     w: &mut W,
     env: &ExprEnv<'_, '_>,
     afield: &ast::Afield,
-) -> Result<(), W::Error> {
+) -> Result<()> {
     use ast::Afield as A;
     match afield {
         A::AFvalue(e) => print_expr(ctx, w, env, &e),
@@ -2388,11 +2360,11 @@ fn print_afields<W: Write>(
     w: &mut W,
     env: &ExprEnv<'_, '_>,
     afields: impl AsRef<[ast::Afield]>,
-) -> Result<(), W::Error> {
+) -> Result<()> {
     concat_by(w, ", ", afields, |w, i| print_afield(ctx, w, env, i))
 }
 
-fn print_uop<W: Write>(w: &mut W, op: ast::Uop) -> Result<(), W::Error> {
+fn print_uop<W: Write>(w: &mut W, op: ast::Uop) -> Result<()> {
     use ast::Uop as U;
     w.write(match op {
         U::Utild => "~",
@@ -2415,7 +2387,7 @@ fn print_key_values<W: Write>(
     w: &mut W,
     env: &ExprEnv<'_, '_>,
     kvs: impl AsRef<[(ast::Expr, ast::Expr)]>,
-) -> Result<(), W::Error> {
+) -> Result<()> {
     print_key_values_(ctx, w, env, print_expr, kvs)
 }
 
@@ -2425,9 +2397,9 @@ fn print_key_values_<W: Write, K, KeyPrinter>(
     env: &ExprEnv<'_, '_>,
     mut kp: KeyPrinter,
     kvs: impl AsRef<[(K, ast::Expr)]>,
-) -> Result<(), W::Error>
+) -> Result<()>
 where
-    KeyPrinter: Fn(&mut Context<'_>, &mut W, &ExprEnv<'_, '_>, &K) -> Result<(), W::Error>,
+    KeyPrinter: Fn(&mut Context<'_>, &mut W, &ExprEnv<'_, '_>, &K) -> Result<()>,
 {
     concat_by(w, ", ", kvs, |w, (k, v)| {
         print_key_value_(ctx, w, env, k, &mut kp, v)
@@ -2440,9 +2412,9 @@ fn print_expr_darray<W: Write, K, KeyPrinter>(
     env: &ExprEnv<'_, '_>,
     kp: KeyPrinter,
     kvs: impl AsRef<[(K, ast::Expr)]>,
-) -> Result<(), W::Error>
+) -> Result<()>
 where
-    KeyPrinter: Fn(&mut Context<'_>, &mut W, &ExprEnv<'_, '_>, &K) -> Result<(), W::Error>,
+    KeyPrinter: Fn(&mut Context<'_>, &mut W, &ExprEnv<'_, '_>, &K) -> Result<()>,
 {
     wrap_by_(w, "darray[", "]", |w| {
         print_key_values_(ctx, w, env, kp, kvs)
@@ -2454,7 +2426,7 @@ fn print_expr_varray<W: Write>(
     w: &mut W,
     env: &ExprEnv<'_, '_>,
     varray: &[ast::Expr],
-) -> Result<(), W::Error> {
+) -> Result<()> {
     wrap_by_(w, "varray[", "]", |w| {
         concat_by(w, ", ", varray, |w, e| print_expr(ctx, w, env, e))
     })
@@ -2465,7 +2437,7 @@ fn print_shape_field_name<W: Write>(
     w: &mut W,
     _: &ExprEnv<'_, '_>,
     field: &ast::ShapeFieldName,
-) -> Result<(), W::Error> {
+) -> Result<()> {
     use ast::ShapeFieldName as S;
     match field {
         S::SFlitInt((_, s)) => print_expr_int(w, s.as_ref()),
@@ -2474,14 +2446,14 @@ fn print_shape_field_name<W: Write>(
     }
 }
 
-fn print_expr_int<W: Write>(w: &mut W, i: &str) -> Result<(), W::Error> {
+fn print_expr_int<W: Write>(w: &mut W, i: &str) -> Result<()> {
     match integer::to_decimal(i) {
         Ok(s) => w.write(s),
         Err(_) => Err(Error::fail("ParseIntError")),
     }
 }
 
-fn print_expr_string<W: Write>(w: &mut W, s: &[u8]) -> Result<(), W::Error> {
+fn print_expr_string<W: Write>(w: &mut W, s: &[u8]) -> Result<()> {
     fn escape_char(c: u8) -> Option<Cow<'static, [u8]>> {
         match c {
             b'\n' => Some((&b"\\\\n"[..]).into()),
@@ -2508,7 +2480,7 @@ fn print_expr_to_string<W: Write>(
     ctx: &mut Context<'_>,
     env: &ExprEnv<'_, '_>,
     expr: &ast::Expr,
-) -> Result<String, W::Error> {
+) -> Result<String> {
     let mut buf = String::new();
     print_expr(ctx, &mut buf, env, expr).map_err(|e| match e {
         Error::NotImpl(m) => Error::NotImpl(m),
@@ -2522,7 +2494,7 @@ pub fn print_expr<W: Write>(
     w: &mut W,
     env: &ExprEnv<'_, '_>,
     ast::Expr(_, _, expr): &ast::Expr,
-) -> Result<(), W::Error> {
+) -> Result<()> {
     fn adjust_id<'a>(env: &ExprEnv<'_, '_>, id: &'a str) -> Cow<'a, str> {
         let s: Cow<'a, str> = match env.codegen_env {
             Some(env) => {
@@ -2542,11 +2514,7 @@ pub fn print_expr<W: Write>(
         };
         escaper::escape(s)
     }
-    fn print_expr_id<'a, W: Write>(
-        w: &mut W,
-        env: &ExprEnv<'_, '_>,
-        s: &'a str,
-    ) -> Result<(), W::Error> {
+    fn print_expr_id<'a, W: Write>(w: &mut W, env: &ExprEnv<'_, '_>, s: &'a str) -> Result<()> {
         w.write(adjust_id(env, s))
     }
     fn fmt_class_name<'a>(is_class_constant: bool, id: Cow<'a, str>) -> Cow<'a, str> {
@@ -2599,7 +2567,7 @@ pub fn print_expr<W: Write>(
         env: &ExprEnv<'_, '_>,
         is_array_get: bool,
         e_: &ast::Expr_,
-    ) -> Result<Option<()>, W::Error> {
+    ) -> Result<Option<()>> {
         match e_.as_class_const() {
             Some((
                 ast::ClassId(_, _, ast::ClassId_::CIexpr(ast::Expr(_, _, ast::Expr_::Id(id)))),
@@ -2969,10 +2937,10 @@ fn print_xml<W: Write>(
     env: &ExprEnv<'_, '_>,
     id: &str,
     es: &[ast::Expr],
-) -> Result<(), W::Error> {
+) -> Result<()> {
     use ast::{Expr as E, Expr_ as E_};
 
-    fn syntax_error<W: Write>(_: &W) -> crate::write::Error<<W as crate::write::Write>::Error> {
+    fn syntax_error<W: Write>(_: &W) -> crate::write::Error {
         Error::NotImpl(String::from("print_xml: unexpected syntax"))
     }
     fn print_xhp_attr<W: Write>(
@@ -2980,7 +2948,7 @@ fn print_xml<W: Write>(
         w: &mut W,
         env: &ExprEnv<'_, '_>,
         attr: &(ast_defs::ShapeFieldName, ast::Expr),
-    ) -> Result<(), W::Error> {
+    ) -> Result<()> {
         match attr {
             (ast_defs::ShapeFieldName::SFlitStr(s), e) => print_key_value_(
                 ctx,
@@ -3022,7 +2990,7 @@ fn print_efun<W: Write>(
     env: &ExprEnv<'_, '_>,
     f: &ast::Fun_,
     use_list: &[ast::Lid],
-) -> Result<(), W::Error> {
+) -> Result<()> {
     w.write_if(
         f.fun_kind.is_fasync() || f.fun_kind.is_fasync_generator(),
         "async ",
@@ -3050,7 +3018,7 @@ fn print_block<W: Write>(
     env: &ExprEnv<'_, '_>,
     block: &[ast::Stmt],
     ident: Option<&str>,
-) -> Result<(), W::Error> {
+) -> Result<()> {
     match &block[..] {
         [] | [ast::Stmt(_, ast::Stmt_::Noop)] => Ok(()),
         [ast::Stmt(_, ast::Stmt_::Block(b))] if b.len() == 1 => print_block_(ctx, w, env, b, ident),
@@ -3065,7 +3033,7 @@ fn print_block_<W: Write>(
     env: &ExprEnv<'_, '_>,
     block: &[ast::Stmt],
     ident: Option<&str>,
-) -> Result<(), W::Error> {
+) -> Result<()> {
     wrap_by_(w, "{\\n", "}\\n", |w| {
         concat(w, block, |w, stmt| {
             option(w, ident, |w, i: &str| w.write(i))?;
@@ -3081,7 +3049,7 @@ fn print_statement<W: Write>(
     env: &ExprEnv<'_, '_>,
     stmt: &ast::Stmt,
     ident: Option<&str>,
-) -> Result<(), W::Error> {
+) -> Result<()> {
     use ast::Stmt_ as S_;
     match &stmt.1 {
         S_::Return(expr) => {
@@ -3144,7 +3112,7 @@ fn print_fparam<W: Write>(
     w: &mut W,
     env: &ExprEnv<'_, '_>,
     param: &ast::FunParam,
-) -> Result<(), W::Error> {
+) -> Result<()> {
     if param.callconv.is_pinout() {
         w.write("inout ")?;
     }
@@ -3162,7 +3130,7 @@ fn print_fparam<W: Write>(
     })
 }
 
-fn print_bop<W: Write>(w: &mut W, bop: &ast_defs::Bop) -> Result<(), W::Error> {
+fn print_bop<W: Write>(w: &mut W, bop: &ast_defs::Bop) -> Result<()> {
     use ast_defs::Bop;
     match bop {
         Bop::Plus => w.write("+"),
@@ -3197,7 +3165,7 @@ fn print_bop<W: Write>(w: &mut W, bop: &ast_defs::Bop) -> Result<(), W::Error> {
     }
 }
 
-fn print_hint<W: Write>(w: &mut W, ns: bool, hint: &ast::Hint) -> Result<(), W::Error> {
+fn print_hint<W: Write>(w: &mut W, ns: bool, hint: &ast::Hint) -> Result<()> {
     let alloc = bumpalo::Bump::new();
     let h = emit_type_hint::fmt_hint(&alloc, &[], false, hint).map_err(|e| match e {
         Unrecoverable(s) => Error::fail(s),
@@ -3210,7 +3178,7 @@ fn print_hint<W: Write>(w: &mut W, ns: bool, hint: &ast::Hint) -> Result<(), W::
     }
 }
 
-fn print_import_flavor<W: Write>(w: &mut W, flavor: &ast::ImportFlavor) -> Result<(), W::Error> {
+fn print_import_flavor<W: Write>(w: &mut W, flavor: &ast::ImportFlavor) -> Result<()> {
     use ast::ImportFlavor as F;
     w.write(match flavor {
         F::Include => "include",
@@ -3224,25 +3192,18 @@ fn print_param_user_attributes<W: Write>(
     ctx: &mut Context<'_>,
     w: &mut W,
     param: &HhasParam<'_>,
-) -> Result<(), W::Error> {
+) -> Result<()> {
     match param.user_attributes.as_ref()[..] {
         [] => Ok(()),
         _ => square(w, |w| print_attributes(ctx, w, &param.user_attributes)),
     }
 }
 
-fn print_span<W: Write>(
-    w: &mut W,
-    &HhasSpan(line_begin, line_end): &HhasSpan,
-) -> Result<(), W::Error> {
+fn print_span<W: Write>(w: &mut W, &HhasSpan(line_begin, line_end): &HhasSpan) -> Result<()> {
     write!(w, "({},{})", line_begin, line_end)
 }
 
-fn print_fun_attrs<W: Write>(
-    ctx: &mut Context<'_>,
-    w: &mut W,
-    f: &HhasFunction<'_>,
-) -> Result<(), W::Error> {
+fn print_fun_attrs<W: Write>(ctx: &mut Context<'_>, w: &mut W, f: &HhasFunction<'_>) -> Result<()> {
     use hhas_attribute::*;
     let user_attrs = f.attributes.as_ref();
     let mut special_attrs = vec![];
@@ -3281,7 +3242,7 @@ fn print_special_and_user_attrs<W: Write>(
     w: &mut W,
     specials: &[&str],
     users: &[HhasAttribute<'_>],
-) -> Result<(), W::Error> {
+) -> Result<()> {
     if !users.is_empty() || !specials.is_empty() {
         square(w, |w| {
             concat_str_by(w, " ", specials)?;
@@ -3298,14 +3259,14 @@ fn print_special_and_user_attrs<W: Write>(
 fn print_upper_bounds<'arena, W: Write>(
     w: &mut W,
     ubs: impl AsRef<[Pair<Str<'arena>, Slice<'arena, HhasTypeInfo<'arena>>>]>,
-) -> Result<(), W::Error> {
+) -> Result<()> {
     braces(w, |w| concat_by(w, ", ", ubs, print_upper_bound))
 }
 
 fn print_upper_bound<'arena, W: Write>(
     w: &mut W,
     Pair(id, tys): &Pair<Str<'arena>, Slice<'arena, HhasTypeInfo<'_>>>,
-) -> Result<(), W::Error> {
+) -> Result<()> {
     paren(w, |w| {
         concat_str_by(w, " ", [id.unsafe_as_str(), "as", ""])?;
         concat_by(w, ", ", &tys, print_type_info)
@@ -3315,30 +3276,27 @@ fn print_upper_bound<'arena, W: Write>(
 fn print_upper_bounds_<'arena, W: Write>(
     w: &mut W,
     ubs: impl AsRef<[Pair<Str<'arena>, Slice<'arena, HhasTypeInfo<'arena>>>]>,
-) -> Result<(), W::Error> {
+) -> Result<()> {
     braces(w, |w| concat_by(w, ", ", ubs, print_upper_bound_))
 }
 
 fn print_upper_bound_<'arena, W: Write>(
     w: &mut W,
     Pair(id, tys): &Pair<Str<'arena>, Slice<'arena, HhasTypeInfo<'arena>>>,
-) -> Result<(), W::Error> {
+) -> Result<()> {
     paren(w, |w| {
         concat_str_by(w, " ", [id.unsafe_as_str(), "as", ""])?;
         concat_by(w, ", ", &tys, print_type_info)
     })
 }
 
-fn print_type_info<W: Write>(w: &mut W, ti: &HhasTypeInfo<'_>) -> Result<(), W::Error> {
+fn print_type_info<W: Write>(w: &mut W, ti: &HhasTypeInfo<'_>) -> Result<()> {
     print_type_info_(w, false, ti)
 }
 
-fn print_type_flags<W: Write>(
-    w: &mut W,
-    flag: constraint::ConstraintFlags,
-) -> Result<(), W::Error> {
+fn print_type_flags<W: Write>(w: &mut W, flag: constraint::ConstraintFlags) -> Result<()> {
     let mut first = true;
-    let mut print_space = |w: &mut W| -> Result<(), W::Error> {
+    let mut print_space = |w: &mut W| -> Result<()> {
         if !first {
             w.write(" ")
         } else {
@@ -3380,11 +3338,7 @@ fn print_type_flags<W: Write>(
     Ok(())
 }
 
-fn print_type_info_<W: Write>(
-    w: &mut W,
-    is_enum: bool,
-    ti: &HhasTypeInfo<'_>,
-) -> Result<(), W::Error> {
+fn print_type_info_<W: Write>(w: &mut W, is_enum: bool, ti: &HhasTypeInfo<'_>) -> Result<()> {
     let print_quote_str = |w: &mut W, opt: &Option<String>| {
         option_or(
             w,
@@ -3414,7 +3368,7 @@ fn print_type_info_<W: Write>(
     })
 }
 
-fn print_typedef_info<W: Write>(w: &mut W, ti: &HhasTypeInfo<'_>) -> Result<(), W::Error> {
+fn print_typedef_info<W: Write>(w: &mut W, ti: &HhasTypeInfo<'_>) -> Result<()> {
     angle(w, |w| {
         w.write(quote_string(
             ti.type_constraint
@@ -3435,7 +3389,7 @@ fn print_typedef_info<W: Write>(w: &mut W, ti: &HhasTypeInfo<'_>) -> Result<(), 
     })
 }
 
-fn print_extends<W: Write>(w: &mut W, base: Option<&str>) -> Result<(), W::Error> {
+fn print_extends<W: Write>(w: &mut W, base: Option<&str>) -> Result<()> {
     match base {
         None => Ok(()),
         Some(b) => concat_str_by(w, " ", [" extends", b]),
@@ -3446,7 +3400,7 @@ fn print_record_field<W: Write>(
     ctx: &mut Context<'_>,
     w: &mut W,
     Field(name, type_info, intial_value): &Field<'_>,
-) -> Result<(), W::Error> {
+) -> Result<()> {
     ctx.newline(w)?;
     w.write(".property ")?;
     match intial_value {
@@ -3470,7 +3424,7 @@ fn print_record_def<W: Write>(
     ctx: &mut Context<'_>,
     w: &mut W,
     record: &HhasRecord<'_>,
-) -> Result<(), W::Error> {
+) -> Result<()> {
     newline(w)?;
     if record.is_abstract {
         concat_str_by(w, " ", [".record", record.name.to_raw_string()])?;

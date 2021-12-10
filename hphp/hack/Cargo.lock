@@ -246,6 +246,7 @@ checksum = "e3b5ca7a04898ad4bcd41c90c5285445ff5b791899bb1b0abdd2a2aa791211d7"
 name = "bytecode_printer"
 version = "0.0.0"
 dependencies = [
+ "anyhow",
  "bumpalo",
  "core_utils_rust",
  "escaper",

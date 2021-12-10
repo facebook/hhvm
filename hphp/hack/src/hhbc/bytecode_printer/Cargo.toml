@@ -8,6 +8,7 @@ edition = "2021"
 path = "lib.rs"
 
 [dependencies]
+anyhow = "1.0.51"
 bumpalo = { version = "3.8", features = ["collections"] }
 core_utils_rust = { path = "../../utils/core" }
 escaper = { path = "../../utils/escaper" }

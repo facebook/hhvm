@@ -1334,7 +1334,7 @@ char mangleExtension(const folly::StringPiece fileName) {
 std::string mangleUnitSha1(const std::string& fileSha1,
                            const folly::StringPiece fileName,
                            const RepoOptions& opts) {
-  std::string t = fileSha1 + '\0'
+  std::string t = fileSha1 + '|'
     + repoSchemaId().toString()
     + (RuntimeOption::EnableClassLevelWhereClauses ? '1' : '0')
     + (RuntimeOption::EvalGenerateDocComments ? '1' : '0')
@@ -1367,7 +1367,7 @@ std::string mangleUnitSha1(const std::string& fileSha1,
     + (RuntimeOption::EvalFoldLazyClassKeys ? '1' : '0')
     + (RuntimeOption::EvalEnableAbstractContextConstants ? '1': '0')
     + (RuntimeOption::EvalTraitConstantInterfaceBehavior ? '1' : '0')
-    + RuntimeOption::EvalUnitCacheBreaker + '\0'
+    + RuntimeOption::EvalUnitCacheBreaker + '|'
     + (RuntimeOption::EvalDiamondTraitMethods ? '1' : '0')
     + CoeffectsConfig::mangle()
     + opts.cacheKeySha1().toString()

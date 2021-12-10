@@ -1334,7 +1334,8 @@ val inout_params_memoize : Pos.t -> Pos.t -> unit
 
 val inout_annotation_missing : Pos.t -> Pos_or_decl.t -> unit
 
-val inout_annotation_unexpected : Pos.t -> Pos_or_decl.t -> bool -> unit
+val inout_annotation_unexpected :
+  Pos.t -> Pos_or_decl.t -> bool -> Pos.t -> unit
 
 val inoutness_mismatch :
   Pos_or_decl.t -> Pos_or_decl.t -> error_from_reasons_callback -> unit

@@ -1026,7 +1026,7 @@ let param_modes
   | (FPnormal, Ast_defs.Pnormal) -> ()
   | (FPinout, Ast_defs.Pinout _) -> ()
   | (FPnormal, Ast_defs.Pinout p) ->
-    Errors.inout_annotation_unexpected (Pos.merge p pos) fp_pos is_variadic
+    Errors.inout_annotation_unexpected (Pos.merge p pos) fp_pos is_variadic p
   | (FPinout, Ast_defs.Pnormal) -> Errors.inout_annotation_missing pos fp_pos
 
 let split_remaining_params_required_optional ft remaining_params =

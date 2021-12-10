@@ -4758,9 +4758,16 @@ let override_no_default_typeconst pos_child pos_parent =
 let inout_annotation_missing pos1 pos2 =
   let msg1 = (pos1, "This argument should be annotated with `inout`") in
   let msg2 = (pos2, "Because this is an `inout` parameter") in
-  add_list (Typing.err_code Typing.InoutAnnotationMissing) msg1 [msg2]
+  let (_, start_column) = Pos.line_column pos1 in
+  let pos = Pos.set_col_end start_column pos1 in
+  add_list
+    (Typing.err_code Typing.InoutAnnotationMissing)
+    ~quickfixes:
+      [Quickfix.make ~title:"Insert `inout` annotation" ~new_text:"inout " pos]
+    msg1
+    [msg2]
 
-let inout_annotation_unexpected pos1 pos2 pos2_is_variadic =
+let inout_annotation_unexpected pos1 pos2 pos2_is_variadic pos3 =
   let msg1 = (pos1, "Unexpected `inout` annotation for argument") in
   let msg2 =
     ( pos2,
@@ -4769,7 +4776,12 @@ let inout_annotation_unexpected pos1 pos2 pos2_is_variadic =
       else
         "This is a normal parameter (does not have `inout`)" )
   in
-  add_list (Typing.err_code Typing.InoutAnnotationUnexpected) msg1 [msg2]
+  add_list
+    (Typing.err_code Typing.InoutAnnotationUnexpected)
+    ~quickfixes:
+      [Quickfix.make ~title:"Remove `inout` annotation" ~new_text:"" pos3]
+    msg1
+    [msg2]
 
 let inoutness_mismatch pos1 pos2 (on_error : error_from_reasons_callback) =
   let msg1 = (pos1, "This is an `inout` parameter") in

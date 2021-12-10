@@ -80,6 +80,7 @@ let init
       ~cache_decls:true
       ~telemetry_label:"eager.init.parsing"
       ~cgroup_steps
+      ~worker_call:MultiWorker.wrapper
   in
   if not (ServerArgs.check_mode genv.options) then
     SearchServiceRunner.update_fileinfo_map

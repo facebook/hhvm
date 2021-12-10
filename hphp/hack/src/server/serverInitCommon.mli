@@ -25,6 +25,7 @@ val parsing :
   cache_decls:bool ->
   telemetry_label:string ->
   cgroup_steps:CgroupProfiler.step_group ->
+  worker_call:MultiWorker.call_wrapper ->
   ServerEnv.env * float
 
 val naming :

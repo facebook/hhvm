@@ -929,6 +929,7 @@ let initialize_naming_table
       ~cache_decls
       ~telemetry_label:"lazy.nt.parsing"
       ~cgroup_steps
+      ~worker_call:MultiWorker.wrapper
   in
   if do_naming then
     ServerInitCommon.naming
@@ -1225,6 +1226,7 @@ let post_saved_state_initialization
       ~cache_decls:false (* Don't overwrite old decls loaded from saved state *)
       ~telemetry_label:"post_ss1.parsing"
       ~cgroup_steps
+      ~worker_call:MultiWorker.wrapper
   in
   SearchServiceRunner.update_fileinfo_map
     env.naming_table

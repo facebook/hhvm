@@ -348,7 +348,7 @@ let provide_ast_hint
     (path : Relative_path.t) (program : Nast.program) (parse_type : parse_type)
     : unit =
   match Provider_backend.get () with
-  | Provider_backend.Analysis -> failwith "invalid"
+  | Provider_backend.Analysis
   | Provider_backend.Shared_memory ->
     ParserHeap.write_around path (program, parse_type)
   | Provider_backend.Local_memory _

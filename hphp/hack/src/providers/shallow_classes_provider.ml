@@ -71,7 +71,9 @@ let decl_DEPRECATED (ctx : Provider_context.t) (class_ : Nast.class_) :
 let get (ctx : Provider_context.t) (name : string) : shallow_class option =
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis ->
-    failwith "'invalid attempt to get a shallow class'"
+    (match Shallow_classes_heap.Classes.get name with
+    | Some _ as decl_opt -> decl_opt
+    | None -> failwith (Printf.sprintf "failed to get shallow class %S" name))
   | Provider_backend.Shared_memory ->
     (match Shallow_classes_heap.Classes.get name with
     | Some _ as decl_opt -> decl_opt

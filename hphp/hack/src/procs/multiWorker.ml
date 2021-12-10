@@ -118,3 +118,16 @@ let next ?progress_fn ?max_size workers =
     ?max_size
 
 let make = WorkerController.make
+
+type call_wrapper = {
+  f:
+    'a 'b 'c.
+    worker list option ->
+    job:('c -> 'a -> 'b) ->
+    merge:('b -> 'c -> 'c) ->
+    neutral:'c ->
+    next:'a Hh_bucket.next ->
+    'c;
+}
+
+let wrapper = { f = call }

@@ -84,7 +84,7 @@ let cache_decls ctx file decls =
     |> remove_naming_conflict_losers ctx file
   in
   match Provider_context.get_backend ctx with
-  | Provider_backend.Analysis -> failwith "invalid"
+  | Provider_backend.Analysis
   | Provider_backend.Shared_memory ->
     Sequence.iter decls ~f:(function
         | (name, Class decl) ->

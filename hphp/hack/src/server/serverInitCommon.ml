@@ -36,7 +36,8 @@ let parsing
     ~(trace : bool)
     ~(cache_decls : bool)
     ~(telemetry_label : string)
-    ~(cgroup_steps : CgroupProfiler.step_group) : ServerEnv.env * float =
+    ~(cgroup_steps : CgroupProfiler.step_group)
+    ~(worker_call : MultiWorker.call_wrapper) : ServerEnv.env * float =
   CgroupProfiler.step_start_end cgroup_steps telemetry_label
   @@ fun _cgroup_step ->
   begin
@@ -57,6 +58,7 @@ let parsing
           ~get_next
           ~trace
           ~cache_decls
+          ~worker_call
           env.popt
       else
         ( Direct_decl_service.go

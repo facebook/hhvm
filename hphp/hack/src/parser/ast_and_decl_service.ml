@@ -131,9 +131,10 @@ let go
     ~(get_next : Relative_path.t list MultiWorker.Hh_bucket.next)
     (popt : ParserOptions.t)
     ~(trace : bool)
-    ~(cache_decls : bool) :
+    ~(cache_decls : bool)
+    ~(worker_call : MultiWorker.call_wrapper) :
     FileInfo.t Relative_path.Map.t * Errors.t * Relative_path.Set.t =
-  MultiWorker.call
+  worker_call.MultiWorker.f
     workers
     ~job:(fun init ->
       List.fold_left

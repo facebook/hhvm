@@ -60,6 +60,19 @@ val call :
   next:'a Hh_bucket.next ->
   'c
 
+type call_wrapper = {
+  f:
+    'a 'b 'c.
+    worker list option ->
+    job:('c -> 'a -> 'b) ->
+    merge:('b -> 'c -> 'c) ->
+    neutral:'c ->
+    next:'a Hh_bucket.next ->
+    'c;
+}
+
+val wrapper : call_wrapper
+
 (* Can raise MultiThreadedCall.Coalesced_failures unless in single-threaded mode. *)
 val call_with_worker_id :
   worker list option ->

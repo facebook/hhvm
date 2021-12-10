@@ -1090,7 +1090,7 @@ functor
           cgroup_steps
           ~telemetry_ref:cgroup_typecheck_telemetry
           "type check"
-        @@ fun cgroup_step ->
+        @@ fun () ->
         let ( ( env,
                 {
                   Typing_check_service.errors = errorl;
@@ -1113,7 +1113,6 @@ functor
             ~longlived_workers
             ~remote_execution:env.ServerEnv.remote_execution
             ~check_info:(get_check_info genv env)
-            ~cgroup_step:(Some cgroup_step)
         in
         let env =
           {

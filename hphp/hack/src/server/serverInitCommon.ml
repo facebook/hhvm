@@ -207,8 +207,7 @@ let type_check
       in
       let remote_execution = env.ServerEnv.remote_execution in
       let ctx = Provider_utils.ctx_from_server_env env in
-      CgroupProfiler.step_start_end cgroup_steps telemetry_label
-      @@ fun cgroup_step ->
+      CgroupProfiler.step_start_end cgroup_steps telemetry_label @@ fun () ->
       Typing_check_service.go
         ctx
         genv.workers
@@ -219,7 +218,6 @@ let type_check
         ~longlived_workers
         ~remote_execution
         ~check_info:(ServerCheckUtils.get_check_info genv env)
-        ~cgroup_step:(Some cgroup_step)
     in
     let env =
       {

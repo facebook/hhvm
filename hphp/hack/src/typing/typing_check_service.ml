@@ -433,17 +433,7 @@ let process_files
 
     match progress.remaining with
     | [] -> (errors, progress, tally, heap_mb, max_heap_mb)
-    | _ when exit_now ->
-      let cgroup_stats = CGroup.get_stats () in
-      (match cgroup_stats with
-      | Error _ -> ()
-      | Ok { CGroup.total; _ } ->
-        (* Here each worker will measure cgroup total at the end of it processing a file.
-           We want to get the maximum measurement from any workers all back to the main server
-           process. The easiest way to do this is stick it inside "Measure", which already
-           gets marshalled appropriately back to the main process. *)
-        Measure.sample "worker_cgroup_total" (float_of_int total));
-      (errors, progress, tally, heap_mb, max_heap_mb)
+    | _ when exit_now -> (errors, progress, tally, heap_mb, max_heap_mb)
     | fn :: fns ->
       let (errors, deferred, tally) =
         match fn with
@@ -1099,8 +1089,7 @@ let go_with_interrupt
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
     ~(remote_execution : ReEnv.t option)
-    ~(check_info : check_info)
-    ~(cgroup_step : CgroupProfiler.step option) : (_ * result) job_result =
+    ~(check_info : check_info) : (_ * result) job_result =
   let opts = Provider_context.get_tcopt ctx in
   let sample_rate = GlobalOptions.tco_typecheck_sample_rate opts in
   let fnl = BigList.create fnl in
@@ -1192,18 +1181,6 @@ let go_with_interrupt
     typing_result
   in
   Typing_deps.register_discovered_dep_edges dep_edges;
-  (* We want to record the highest cgroup total recorded by any worker processes
-     at any stage in its execution. The laziest way to aggregate that number is by using
-     Measure, since it (1) already calculates maximum, (2) already marshals information
-     of each worker process and aggregates it here into the main process. *)
-  begin
-    match (cgroup_step, Measure.get_max "worker_cgroup_total") with
-    | (Some cgroup_step, Some worker_cgroup_total) ->
-      CgroupProfiler.update_cgroup_total
-        (int_of_float worker_cgroup_total)
-        cgroup_step
-    | _ -> ()
-  end;
 
   if check_info.profile_log then
     Hh_logger.log
@@ -1239,8 +1216,7 @@ let go
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
     ~(remote_execution : ReEnv.t option)
-    ~(check_info : check_info)
-    ~(cgroup_step : CgroupProfiler.step option) : result =
+    ~(check_info : check_info) : result =
   let interrupt = MultiThreadedCall.no_interrupt () in
   let (((), result), cancelled) =
     go_with_interrupt
@@ -1255,7 +1231,6 @@ let go
       ~longlived_workers
       ~remote_execution
       ~check_info
-      ~cgroup_step
   in
   assert (List.is_empty cancelled);
   result

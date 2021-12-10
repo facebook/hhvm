@@ -15,9 +15,6 @@ which is made up of steps "update naming table" then "update depgraph". *)
 (** Represents a step-group that's underway; created by [step_group] *)
 type step_group
 
-(** Represents a step that's underway; created by [step] *)
-type step
-
 (** `step_group "foo" ~log:true callback` indicates that group "foo"
 will span all the steps created within callback. If [log] is true
 then each step will be logged to the server log. *)
@@ -32,11 +29,5 @@ val step_start_end :
   step_group ->
   ?telemetry_ref:Telemetry.t option ref ->
   string ->
-  (step -> 'a) ->
+  (unit -> 'a) ->
   'a
-
-(** Sometimes for long-running steps it's not enough merely to log cgroup
-stats at at the start and end; we might also want to record the "high water mark"
-cgroup total ever reached within that step. This method is to record a
-moment's cgroup total, in case it bumps up the high water mark. *)
-val update_cgroup_total : int -> step -> unit

@@ -490,7 +490,9 @@ module CGroup = struct
       ~totalswap:_
       ~anon:_
       ~shmem:_
-      ~file:_ =
+      ~file:_
+      ~gbs:_
+      ~secs_above:_ =
     ()
 end
 

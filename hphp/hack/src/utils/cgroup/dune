@@ -3,5 +3,8 @@
  (wrapped false)
  (modules CGroup CgroupProfiler)
  (libraries core_kernel logging procfs utils_core)
+ (foreign_stubs
+  (language c)
+  (names cgroupWatcher))
  (preprocess
   (pps lwt_ppx)))

@@ -78,7 +78,6 @@ let test () =
       ~longlived_workers:false
       ~remote_execution:None
       ~check_info
-      ~cgroup_step:None
   in
   Test.assert_errors errors "";
   let { Typing_check_service.errors; delegate_state; telemetry; _ } =
@@ -92,7 +91,6 @@ let test () =
       ~longlived_workers:false
       ~remote_execution:None
       ~check_info
-      ~cgroup_step:None
   in
   Test.assert_errors errors "";
 
@@ -107,7 +105,6 @@ let test () =
       ~longlived_workers:false
       ~remote_execution:None
       ~check_info
-      ~cgroup_step:None
   in
   Test.assert_errors errors expected_errors;
   let { Typing_check_service.errors; _ } =
@@ -121,7 +118,6 @@ let test () =
       ~longlived_workers:false
       ~remote_execution:None
       ~check_info
-      ~cgroup_step:None
   in
   Test.assert_errors errors expected_errors;
 

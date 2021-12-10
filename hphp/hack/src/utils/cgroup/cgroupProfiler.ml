@@ -1,5 +1,10 @@
 open Hh_prelude
 
+external cgroup_watcher_start : string -> unit = "cgroup_watcher_start"
+
+external cgroup_watcher_get : unit -> int * int * float array
+  = "cgroup_watcher_get"
+
 type step_summary = {
   time: float;
   log_label_and_suffix: string;
@@ -19,8 +24,6 @@ type step_group = {
 
 (** We'll only bother writing to the log if the total has changed by at least this many bytes *)
 let threshold_for_logging = 100 * 1024 * 1024
-
-type step = { total_hwm_ref: int ref }
 
 (** to avoid flooding logs with errors *)
 let has_logged_error = ref SSet.empty
@@ -80,9 +83,34 @@ let log_cgroup_total cgroup ~step_group ~step ~suffix ~hwm =
         prev
     end
 
+(** Given a float array [gbs] where gbs[0] says how many secs were spent at cgroup memory 0gb,
+gbs[1] says how many secs were spent at cgroup memory 1gb, and so on, produces an SMap
+where keys are some arbitrary thresholds "secs_above_20gb" and values are (int) number of seconds
+spent at that memory or higher. We pick just a few arbitrary thresholds that we think are useful
+for telemetry, and their sole purpose is telemetry. *)
+let secs_above (gbs : float array) : int SMap.t =
+  if Array.is_empty gbs then
+    SMap.empty
+  else
+    List.init 27 ~f:(fun i -> i * 5) (* 0gb, 5gb, ..., 130gb) *)
+    |> List.map ~f:(fun threshold ->
+           let title = Printf.sprintf "secs_above_%dgb" threshold in
+           let secs =
+             Array.foldi gbs ~init:0. ~f:(fun i acc s ->
+                 acc
+                 +.
+                 if i < threshold then
+                   0.
+                 else
+                   s)
+           in
+           (title, Float.round secs |> int_of_float))
+    |> SMap.of_list
+
 (** Records to HackEventLogger *)
 let log_telemetry
-    ~step_group ~step ~start_time ~hwm ~start_cgroup ~cgroup ~telemetry_ref =
+    ~step_group ~step ~start_time ~hwm ~start_cgroup ~cgroup ~telemetry_ref ~gbs
+    =
   let open CGroup in
   match (start_cgroup, cgroup) with
   | (Some (Error e), _)
@@ -96,8 +124,10 @@ let log_telemetry
     end
   | (Some (Ok start_cgroup), Ok cgroup) ->
     let total_hwm = max (max start_cgroup.total cgroup.total) hwm in
+    let secs_above = secs_above gbs in
     telemetry_ref :=
       Telemetry.create ()
+      |> SMap.fold (fun key value -> Telemetry.int_ ~key ~value) secs_above
       |> Telemetry.int_ ~key:"start_bytes" ~value:start_cgroup.total
       |> Telemetry.int_ ~key:"end_bytes" ~value:cgroup.total
       |> Telemetry.int_ ~key:"hwm_bytes" ~value:total_hwm
@@ -118,6 +148,8 @@ let log_telemetry
       ~anon:cgroup.anon
       ~shmem:cgroup.shmem
       ~file:cgroup.file
+      ~gbs:(Some (gbs |> Array.to_list))
+      ~secs_above
   | (None, Ok cgroup) ->
     telemetry_ref :=
       Telemetry.create ()
@@ -139,6 +171,8 @@ let log_telemetry
       ~anon:cgroup.anon
       ~shmem:cgroup.shmem
       ~file:cgroup.file
+      ~gbs:None
+      ~secs_above:SMap.empty
 
 let step_group name ~log f =
   let log = log && not (Sys_utils.is_test_mode ()) in
@@ -169,37 +203,36 @@ let step step_group ?(telemetry_ref = ref None) name =
       ~start_cgroup:None
       ~cgroup
       ~telemetry_ref
+      ~gbs:[||]
   end
 
 let step_start_end step_group ?(telemetry_ref = ref None) name f =
   if not step_group.log then
-    f { total_hwm_ref = ref 0 }
+    f ()
   else begin
     step_group.step_count := !(step_group.step_count) + 1;
     let step = Printf.sprintf "%02d_%s" !(step_group.step_count) name in
     let start_time = Unix.gettimeofday () in
     let start_cgroup = CGroup.get_stats () in
     log_cgroup_total start_cgroup ~step_group ~step ~suffix:" start" ~hwm:0;
-    let hwm = { total_hwm_ref = ref 0 } in
-    Utils.try_finally
-      ~f:(fun () -> f hwm)
-      ~finally:(fun () ->
+    Result.iter start_cgroup ~f:(fun { CGroup.cgroup_name; _ } ->
+        let path = "/sys/fs/cgroup/" ^ cgroup_name ^ "/memory.current" in
+        cgroup_watcher_start path);
+    Utils.try_finally ~f ~finally:(fun () ->
         try
           let cgroup = CGroup.get_stats () in
-          log_cgroup_total
-            cgroup
-            ~step_group
-            ~step
-            ~suffix:" end"
-            ~hwm:!(hwm.total_hwm_ref);
+          let (hwm_kb, _num_readings, gbs) = cgroup_watcher_get () in
+          let hwm = hwm_kb * 1024 in
+          log_cgroup_total cgroup ~step_group ~step ~suffix:" end" ~hwm;
           log_telemetry
             ~step_group
             ~step
             ~start_time:(Some start_time)
-            ~hwm:!(hwm.total_hwm_ref)
+            ~hwm
             ~start_cgroup:(Some start_cgroup)
             ~cgroup
             ~telemetry_ref
+            ~gbs
         with
         | exn ->
           let e = Exception.wrap exn in
@@ -207,7 +240,3 @@ let step_start_end step_group ?(telemetry_ref = ref None) name f =
             Telemetry.create () |> Telemetry.exception_ ~e |> Option.some;
           Hh_logger.log "cgroup - failed to log. %s" (Exception.to_string e))
   end
-
-let update_cgroup_total total { total_hwm_ref } =
-  total_hwm_ref := max !total_hwm_ref total;
-  ()

@@ -260,6 +260,12 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
             let var_name = format!("{}{}", dollardollar.clone(), id);
             context.get_rty(&var_name)
         }
+        // First put it in typechecker, then HHVM
+        Clone(e) if context.is_typechecker => {
+            // Clone only clones shallowly, so we need to respect readonly even if you clone it
+            let expr = &**e;
+            rty_expr(context, expr)
+        }
         Clone(_) => Rty::Mutable,
         Call(c) => {
             if let (aast::Expr(_, _, Id(i)), _, args, _) = &**c {

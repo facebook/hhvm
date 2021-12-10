@@ -85,11 +85,11 @@ impl Write for IoWrite {
     }
 }
 
-pub fn newline<W: Write>(w: &mut W) -> Result<(), W::Error> {
+pub(crate) fn newline<W: Write>(w: &mut W) -> Result<(), W::Error> {
     w.write("\n")
 }
 
-pub fn wrap_by_<W, F>(w: &mut W, s: &str, e: &str, f: F) -> Result<(), W::Error>
+pub(crate) fn wrap_by_<W, F>(w: &mut W, s: &str, e: &str, f: F) -> Result<(), W::Error>
 where
     W: Write,
     F: FnOnce(&mut W) -> Result<(), W::Error>,
@@ -99,8 +99,9 @@ where
     w.write(e)
 }
 
-pub fn wrap_by<W: Write, F>(w: &mut W, s: &str, f: F) -> Result<(), W::Error>
+pub(crate) fn wrap_by<W, F>(w: &mut W, s: &str, f: F) -> Result<(), W::Error>
 where
+    W: Write,
     F: FnOnce(&mut W) -> Result<(), W::Error>,
 {
     wrap_by_(w, s, s, f)
@@ -108,8 +109,9 @@ where
 
 macro_rules! wrap_by {
     ($name:ident, $left:expr, $right:expr) => {
-        pub fn $name<W: Write, F>(w: &mut W, f: F) -> Result<(), W::Error>
+        pub(crate) fn $name<W, F>(w: &mut W, f: F) -> Result<(), W::Error>
         where
+            W: Write,
             F: FnOnce(&mut W) -> Result<(), W::Error>,
         {
             wrap_by_(w, $left, $right, f)
@@ -124,11 +126,14 @@ wrap_by!(triple_quotes, "\"\"\"", "\"\"\"");
 wrap_by!(angle, "<", ">");
 wrap_by!(square, "[", "]");
 
-pub fn concat_str<W: Write, I: AsRef<str>>(w: &mut W, ss: impl AsRef<[I]>) -> Result<(), W::Error> {
+pub(crate) fn concat_str<W: Write, I: AsRef<str>>(
+    w: &mut W,
+    ss: impl AsRef<[I]>,
+) -> Result<(), W::Error> {
     concat(w, ss, |w, s| w.write(s))
 }
 
-pub fn concat_str_by<W: Write, I: AsRef<str>>(
+pub(crate) fn concat_str_by<W: Write, I: AsRef<str>>(
     w: &mut W,
     sep: impl AsRef<str>,
     ss: impl AsRef<[I]>,
@@ -136,7 +141,7 @@ pub fn concat_str_by<W: Write, I: AsRef<str>>(
     concat_by(w, sep, ss, |w, s| w.write(s))
 }
 
-pub fn concat<W, T, F>(w: &mut W, items: impl AsRef<[T]>, f: F) -> Result<(), W::Error>
+pub(crate) fn concat<W, T, F>(w: &mut W, items: impl AsRef<[T]>, f: F) -> Result<(), W::Error>
 where
     W: Write,
     F: FnMut(&mut W, &T) -> Result<(), W::Error>,
@@ -144,7 +149,7 @@ where
     concat_by(w, "", items, f)
 }
 
-pub fn concat_by<W, T, F>(
+pub(crate) fn concat_by<W, T, F>(
     w: &mut W,
     sep: impl AsRef<str>,
     items: impl AsRef<[T]>,
@@ -166,8 +171,9 @@ where
     })
 }
 
-pub fn option<W: Write, T, F>(w: &mut W, i: impl Into<Option<T>>, mut f: F) -> Result<(), W::Error>
+pub(crate) fn option<W, T, F>(w: &mut W, i: impl Into<Option<T>>, mut f: F) -> Result<(), W::Error>
 where
+    W: Write,
     F: FnMut(&mut W, T) -> Result<(), W::Error>,
 {
     match i.into() {
@@ -176,13 +182,14 @@ where
     }
 }
 
-pub fn option_or<W: Write, T, F>(
+pub(crate) fn option_or<W, T, F>(
     w: &mut W,
     i: impl Into<Option<T>>,
     f: F,
     default: impl AsRef<str>,
 ) -> Result<(), W::Error>
 where
+    W: Write,
     F: Fn(&mut W, T) -> Result<(), W::Error>,
 {
     match i.into() {

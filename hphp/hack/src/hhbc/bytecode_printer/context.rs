@@ -15,19 +15,19 @@ use oxidized::relative_path::RelativePath;
 struct Indent(usize);
 
 impl Indent {
-    pub fn new() -> Self {
+    fn new() -> Self {
         Self(0)
     }
 
-    pub fn inc(&mut self) {
+    fn inc(&mut self) {
         self.0 += 1;
     }
 
-    pub fn dec(&mut self) {
+    fn dec(&mut self) {
         self.0 -= 1;
     }
 
-    pub fn write<W: Write>(&self, w: &mut W) -> Result<(), W::Error> {
+    fn write<W: Write>(&self, w: &mut W) -> Result<(), W::Error> {
         Ok(for _ in 0..self.0 {
             w.write("  ")?;
         })
@@ -35,18 +35,18 @@ impl Indent {
 }
 
 pub struct Context<'a> {
-    pub special_class_resolver: &'a dyn SpecialClassResolver,
-    pub path: Option<&'a RelativePath>,
+    pub(crate) special_class_resolver: &'a dyn SpecialClassResolver,
+    pub(crate) path: Option<&'a RelativePath>,
 
     dump_symbol_refs: bool,
-    pub dump_lambdas: bool,
+    pub(crate) dump_lambdas: bool,
     indent: Indent,
     is_system_lib: bool,
 
-    pub include_roots: &'a BTreeMap<String, String>,
-    pub include_search_paths: &'a [String],
-    pub doc_root: &'a str,
-    pub array_provenance: bool,
+    pub(crate) include_roots: &'a BTreeMap<String, String>,
+    pub(crate) include_search_paths: &'a [String],
+    pub(crate) doc_root: &'a str,
+    pub(crate) array_provenance: bool,
 }
 
 impl<'a> Context<'a> {
@@ -76,18 +76,18 @@ impl<'a> Context<'a> {
         }
     }
 
-    pub fn dump_symbol_refs(&self) -> bool {
+    pub(crate) fn dump_symbol_refs(&self) -> bool {
         self.dump_symbol_refs
     }
 
     /// Insert a newline with indentation
-    pub fn newline<W: Write>(&self, w: &mut W) -> Result<(), W::Error> {
+    pub(crate) fn newline<W: Write>(&self, w: &mut W) -> Result<(), W::Error> {
         newline(w)?;
         self.indent.write(w)
     }
 
     /// Start a new indented block
-    pub fn block<W, F>(&mut self, w: &mut W, f: F) -> Result<(), W::Error>
+    pub(crate) fn block<W, F>(&mut self, w: &mut W, f: F) -> Result<(), W::Error>
     where
         W: Write,
         F: FnOnce(&mut Self, &mut W) -> Result<(), W::Error>,
@@ -98,7 +98,7 @@ impl<'a> Context<'a> {
         r
     }
 
-    pub fn unblock<W, F>(&mut self, w: &mut W, f: F) -> Result<(), W::Error>
+    pub(crate) fn unblock<W, F>(&mut self, w: &mut W, f: F) -> Result<(), W::Error>
     where
         W: Write,
         F: FnOnce(&mut Self, &mut W) -> Result<(), W::Error>,
@@ -111,15 +111,15 @@ impl<'a> Context<'a> {
 
     /// Printing instruction list requies manually control indentation,
     /// where indent_inc/indent_dec are called
-    pub fn indent_inc(&mut self) {
+    pub(crate) fn indent_inc(&mut self) {
         self.indent.inc();
     }
 
-    pub fn indent_dec(&mut self) {
+    pub(crate) fn indent_dec(&mut self) {
         self.indent.dec();
     }
 
-    pub fn is_system_lib(&self) -> bool {
+    pub(crate) fn is_system_lib(&self) -> bool {
         self.is_system_lib
     }
 }

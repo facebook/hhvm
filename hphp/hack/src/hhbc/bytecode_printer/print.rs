@@ -2,18 +2,20 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-mod context;
-mod special_class_resolver;
-mod write;
-
-pub use context::Context;
-pub use write::{Error, IoWrite, Result, Write};
 
 use ffi::{Maybe, Maybe::*, Pair, Quadruple, Slice, Str, Triple};
 
 use indexmap::IndexSet;
 use itertools::Itertools;
 
+use crate::{
+    context::Context,
+    not_impl,
+    write::{
+        angle, braces, concat, concat_by, concat_str, concat_str_by, newline, option, option_or,
+        paren, quotes, square, triple_quotes, wrap_by, wrap_by_, Error, Result, Write,
+    },
+};
 use core_utils_rust::add_ns;
 use escaper::{escape, escape_by, is_lit_printable};
 use hhbc_by_ref_emit_type_hint as emit_type_hint;
@@ -54,7 +56,6 @@ use oxidized::{
     local_id,
 };
 use regex::Regex;
-use write::*;
 
 use std::{borrow::Cow, io::Write as _, path::Path, write};
 
@@ -292,7 +293,11 @@ fn print_typedef_attributes<W: Write>(
     print_special_and_user_attrs(ctx, w, &specials[..], td.attributes.as_ref())
 }
 
-fn handle_not_impl<E: std::fmt::Debug, F: FnOnce() -> Result<(), E>>(f: F) -> Result<(), E> {
+fn handle_not_impl<E, F>(f: F) -> Result<(), E>
+where
+    E: std::fmt::Debug,
+    F: FnOnce() -> Result<(), E>,
+{
     let r = f();
     match &r {
         Err(Error::NotImpl(msg)) => {
@@ -958,7 +963,7 @@ fn print_adata_id<W: Write>(w: &mut W, id: &AdataId<'_>) -> Result<(), W::Error>
     concat_str(w, ["@", id.unsafe_as_str()])
 }
 
-fn print_adata_mapped_argument<W: Write, F, V>(
+fn print_adata_mapped_argument<W, F, V>(
     ctx: &mut Context<'_>,
     w: &mut W,
     col_type: &str,
@@ -967,6 +972,7 @@ fn print_adata_mapped_argument<W: Write, F, V>(
     f: F,
 ) -> Result<(), W::Error>
 where
+    W: Write,
     F: Fn(&mut Context<'_>, &mut W, &V) -> Result<(), W::Error>,
 {
     write!(w, "{}:{}:{{", col_type, values.len(),)?;
@@ -1183,7 +1189,10 @@ fn print_instructions<W: Write>(
     Ok(())
 }
 
-fn if_then<F: FnOnce() -> R, R>(cond: bool, f: F) -> Option<R> {
+fn if_then<F, R>(cond: bool, f: F) -> Option<R>
+where
+    F: FnOnce() -> R,
+{
     if cond { Some(f()) } else { None }
 }
 

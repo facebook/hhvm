@@ -5,7 +5,7 @@ version = "0.0.0"
 edition = "2021"
 
 [lib]
-path = "print.rs"
+path = "lib.rs"
 
 [dependencies]
 bumpalo = { version = "3.8", features = ["collections"] }

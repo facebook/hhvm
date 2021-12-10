@@ -511,10 +511,10 @@ let check =
       | (_, _, ReadonlyExpr (_, _, Class_get (class_, get, x))) ->
         (* Skip the recursive step into ReadonlyExpr to avoid erroring *)
         self#on_Class_get env class_ get x
-      | (_, _, Obj_get (obj, get, _nullable, _is_prop_call)) ->
+      | (_, _, Obj_get (obj, get, _nullable, Is_prop)) ->
         check_readonly_property env obj get Mut;
         super#on_expr env e
-      | (_, pos, Class_get (class_, get, _is_prop_call)) ->
+      | (_, pos, Class_get (class_, get, Is_prop)) ->
         check_static_readonly_property pos env class_ get Mut;
         super#on_expr env e
       | (_, pos, New (_, _, args, unpacked_arg, constructor_fty)) ->
@@ -528,6 +528,8 @@ let check =
           Mut
           (List.map ~f:(fun e -> (Ast_defs.Pnormal, e)) args)
           unpacked_arg
+      | (_, _, Obj_get _)
+      | (_, _, Class_get _)
       | (_, _, This)
       | (_, _, ValCollection (_, _, _))
       | (_, _, KeyValCollection (_, _, _))

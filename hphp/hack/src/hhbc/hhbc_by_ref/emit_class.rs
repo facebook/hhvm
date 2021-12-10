@@ -222,7 +222,7 @@ fn from_ctx_constant<'a, 'arena>(
     tc: &'a ast::ClassTypeconstDef,
 ) -> Result<HhasCtxConstant<'arena>> {
     use ast::ClassTypeconst::*;
-    use hhbc_by_ref_hhas_coeffects::Ctx;
+    use special_names::coeffects::Ctx;
     let name = tc.name.1.to_string();
     let coeffects = match &tc.kind {
         TCAbstract(ast::ClassAbstractTypeconst { default: None, .. }) => {

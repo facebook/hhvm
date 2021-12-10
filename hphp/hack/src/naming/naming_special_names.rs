@@ -773,6 +773,7 @@ pub mod readonly {
 pub mod coeffects {
     use lazy_static::lazy_static;
     use std::collections::HashSet;
+    use std::fmt;
 
     pub const DEFAULTS: &str = "defaults";
 
@@ -828,7 +829,8 @@ pub mod coeffects {
         ZONED_SET.contains(x)
     }
 
-    #[derive(PartialEq, Eq, Hash)]
+    #[derive(PartialEq, Eq, Hash, Debug, Copy, Clone)]
+    #[repr(C)]
     pub enum Ctx {
         Defaults,
 
@@ -854,6 +856,28 @@ pub mod coeffects {
 
         // Pure
         Pure,
+    }
+
+    impl fmt::Display for Ctx {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            use Ctx::*;
+            match self {
+                Defaults => write!(f, "{}", DEFAULTS),
+                Pure => write!(f, "{}", PURE),
+                RxLocal => write!(f, "{}", RX_LOCAL),
+                RxShallow => write!(f, "{}", RX_SHALLOW),
+                Rx => write!(f, "{}", RX),
+                WriteThisProps => write!(f, "{}", WRITE_THIS_PROPS),
+                WriteProps => write!(f, "{}", WRITE_PROPS),
+                ZonedWith => write!(f, "{}", ZONED_WITH),
+                ZonedLocal => write!(f, "{}", ZONED_LOCAL),
+                ZonedShallow => write!(f, "{}", ZONED_SHALLOW),
+                Zoned => write!(f, "{}", ZONED),
+                LeakSafe => write!(f, "{}", LEAK_SAFE),
+                ReadGlobals => write!(f, "{}", READ_GLOBALS),
+                Globals => write!(f, "{}", GLOBALS),
+            }
+        }
     }
 
     pub fn ctx_str_to_enum(s: &str) -> Option<Ctx> {

@@ -157,8 +157,19 @@ foreach(src ${HHBC_AST_SRCS})
   string(APPEND HHBC_AST_SRC_ARG "${HHBC_PREFIX}/${src},")
 endforeach()
 
+set(NAMING_SPECIAL_NAMES_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/src/naming")
+set(NAMING_SPECIAL_NAMES_SRCS
+   "naming_special_names.rs"
+   "naming_special_names_ffi.rs"
+)
+
+foreach(src ${NAMING_SPECIAL_NAMES_SRCS})
+  string(APPEND NAMING_SPECIAL_NAMES_SRC_ARG "${NAMING_SPECIAL_NAMES_PREFIX}/${src},")
+endforeach()
+
 set(HHBC_AST_HEADER "${RUST_FFI_BUILD_ROOT}/hphp/hack/src/hhbc/hhbc_by_ref/hhbc-ast.h")
 set(FFI_HEADER "${RUST_FFI_BUILD_ROOT}/hphp/hack/src/utils/ffi.h")
+set(NAMING_SPECIAL_NAMES_HEADER "${RUST_FFI_BUILD_ROOT}/hphp/hack/src/naming/naming-special-names.h")
 add_custom_command(
   OUTPUT ${HHBC_AST_HEADER}
   COMMAND
@@ -167,8 +178,11 @@ add_custom_command(
       --header "${FFI_HEADER}" --srcs "${CMAKE_CURRENT_SOURCE_DIR}/src/utils/ffi/ffi.rs"
       --namespaces "HPHP,hackc" &&
     ${CARGO_BUILD} ffi_cbindgen ffi_cbindgen --exe
+      --header "${NAMING_SPECIAL_NAMES_HEADER}" --srcs "${NAMING_SPECIAL_NAMES_SRC_ARG}" --namespaces "HPHP,hackc,hhbc"
+      --namespaces "HPHP,hackc" &&
+    ${CARGO_BUILD} ffi_cbindgen ffi_cbindgen --exe
       --header "${HHBC_AST_HEADER}" --srcs "${HHBC_AST_SRC_ARG}" --namespaces "HPHP,hackc,hhbc"
-      --includes "${FFI_HEADER}"
+      --includes "${FFI_HEADER},${NAMING_SPECIAL_NAMES_HEADER}"
   DEPENDS rustc cargo
   COMMENT "Generating hhbc-ast.h"
 )

@@ -6,64 +6,12 @@
 use ffi::{Pair, Slice, Str, Triple};
 use hhbc_by_ref_hhbc_string_utils as string_utils;
 use hhbc_by_ref_hhbc_string_utils::strip_ns;
-use naming_special_names_rust::{self as sn, coeffects as c};
+use naming_special_names_rust::{self as sn, coeffects as c, coeffects::Ctx};
 use oxidized::{
     aast as a,
     aast_defs::{Hint, Hint_},
     ast_defs::Id,
 };
-use std::fmt;
-
-#[derive(Debug, Clone, Copy, PartialEq)]
-#[repr(C)]
-pub enum Ctx {
-    Defaults,
-
-    // Shared
-    WriteThisProps,
-    WriteProps,
-
-    // Rx hierarchy
-    RxLocal,
-    RxShallow,
-    Rx,
-
-    // Zoned hierarchy
-    ZonedWith,
-    ZonedLocal,
-    ZonedShallow,
-    Zoned,
-
-    LeakSafe,
-
-    ReadGlobals,
-    Globals,
-
-    // Pure
-    Pure,
-}
-
-impl fmt::Display for Ctx {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        use Ctx::*;
-        match self {
-            Defaults => write!(f, "{}", c::DEFAULTS),
-            Pure => write!(f, "{}", c::PURE),
-            RxLocal => write!(f, "{}", c::RX_LOCAL),
-            RxShallow => write!(f, "{}", c::RX_SHALLOW),
-            Rx => write!(f, "{}", c::RX),
-            WriteThisProps => write!(f, "{}", c::WRITE_THIS_PROPS),
-            WriteProps => write!(f, "{}", c::WRITE_PROPS),
-            ZonedWith => write!(f, "{}", c::ZONED_WITH),
-            ZonedLocal => write!(f, "{}", c::ZONED_LOCAL),
-            ZonedShallow => write!(f, "{}", c::ZONED_SHALLOW),
-            Zoned => write!(f, "{}", c::ZONED),
-            LeakSafe => write!(f, "{}", c::LEAK_SAFE),
-            ReadGlobals => write!(f, "{}", c::READ_GLOBALS),
-            Globals => write!(f, "{}", c::GLOBALS),
-        }
-    }
-}
 
 #[derive(Debug)]
 #[repr(C)]

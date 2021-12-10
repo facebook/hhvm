@@ -97,6 +97,9 @@ let rec grab_class_elts_from_ty ~static ?(seen = SSet.empty) env ty prop_id =
   | Tdependent (_, ty) ->
     (* Dependent types have an upper bound that's a class or generic *)
     grab_class_elts_from_ty ~static ~seen env ty prop_id
+  | Toption ty ->
+    (* If it's nullable, take the *)
+    grab_class_elts_from_ty ~static ~seen env ty prop_id
   | _ -> []
 
 (* Return a list of possible static prop elts given a class_get expression *)

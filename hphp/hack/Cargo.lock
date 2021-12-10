@@ -760,7 +760,6 @@ version = "0.0.0"
 dependencies = [
  "depgraph",
  "indicatif",
- "rusqlite",
  "structopt",
 ]
 

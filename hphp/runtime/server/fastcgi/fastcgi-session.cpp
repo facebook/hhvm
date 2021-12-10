@@ -37,9 +37,9 @@ using folly::io::QueueAppender;
 namespace fcgi {
 void KVParser::reset() {
   m_phase = Phase::READ_KEY_LENGTH;
-  m_readBuf.clear();
-  m_keyBuf.clear();
-  m_valueBuf.clear();
+  m_readBuf.move();
+  m_keyBuf.move();
+  m_valueBuf.move();
 }
 
 std::tuple<

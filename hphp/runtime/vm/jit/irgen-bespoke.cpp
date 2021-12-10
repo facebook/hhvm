@@ -217,6 +217,10 @@ SSATmp* emitElem(IRGS& env, SSATmp* arrLval, Type baseType, SSATmp* key,
       [&] (SSATmp* arr) {
         hint(env, Block::Hint::Unlikely);
         if (throwOnMissing) {
+          // We've written the COWed array back to the base already, so
+          // set exception boundary to let frame state know that it's
+          // okay.
+          env.irb->exceptionStackBoundary();
           gen(env, ThrowOutOfBounds, arr, key);
           return cns(env, TBottom);
         }
@@ -542,6 +546,10 @@ void structDictIncDec(IRGS& env, IncDecOp op, SSATmp* arr, SSATmp* key,
     },
     [&] (SSATmp* arr) {
       hint(env, Block::Hint::Unlikely);
+      // We've written the COWed array back to the base already, so
+      // set exception boundary to let frame state know that it's
+      // okay.
+      env.irb->exceptionStackBoundary();
       gen(env, ThrowOutOfBounds, arr, key);
       return cns(env, TBottom);
     }
@@ -603,6 +611,10 @@ void structDictSetOp(IRGS& env, SetOpOp op, SSATmp* arr,
     },
     [&] (SSATmp* arr) {
       hint(env, Block::Hint::Unlikely);
+      // We've written the COWed array back to the base already, so
+      // set exception boundary to let frame state know that it's
+      // okay.
+      env.irb->exceptionStackBoundary();
       gen(env, ThrowOutOfBounds, arr, key);
       return cns(env, TBottom);
     }

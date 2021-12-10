@@ -1372,8 +1372,6 @@ let saved_state_init
       (match state_result with
       | Error _ -> None
       | Ok (i, _) -> Some (show_loaded_info i))
-    ~load_state_natively_64bit:
-      genv.local_config.ServerLocalConfig.load_state_natively_64bit
     t;
   match state_result with
   | Error err -> Error err

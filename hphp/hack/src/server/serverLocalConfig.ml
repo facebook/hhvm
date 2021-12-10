@@ -417,10 +417,6 @@ type t = {
       (** if attempting saved-state, should we fail upon failure? *)
   load_state_natively: bool;
       (** make hh_server query and download saved state. *)
-  load_state_natively_64bit: bool;  (** TODO(hverr): Clean up 32-bit *)
-  no_load_64bit: bool;
-      (** if doing a full init, do it in 64-bit mode
-      TODO(hverr): Clean up 32-bit *)
   load_state_natively_download_timeout: int;  (** in seconds *)
   load_state_natively_dirty_files_timeout: int;  (** in seconds *)
   type_decl_bucket_size: int;
@@ -435,8 +431,6 @@ type t = {
   search_chunk_size: int;
   io_priority: int;
   cpu_priority: int;
-  can_skip_deptable: bool;
-      (** TODO(hverr): Remove can_skip_deptable, 32-bit clean up *)
   shm_dirs: string list;
   shm_use_sharded_hashtbl: bool;
   shm_enable_eviction: bool;
@@ -600,8 +594,6 @@ let default =
     use_saved_state = false;
     require_saved_state = false;
     load_state_natively = false;
-    load_state_natively_64bit = false;
-    no_load_64bit = false;
     load_state_natively_download_timeout = 60;
     load_state_natively_dirty_files_timeout = 200;
     type_decl_bucket_size = 1000;
@@ -614,7 +606,6 @@ let default =
     search_chunk_size = 0;
     io_priority = 7;
     cpu_priority = 10;
-    can_skip_deptable = true;
     shm_dirs = [GlobalConfig.shm_dir; GlobalConfig.tmp_dir];
     shm_use_sharded_hashtbl = false;
     shm_enable_eviction = false;
@@ -884,20 +875,6 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
-  let load_state_natively_64bit =
-    bool_if_min_version
-      "load_state_natively_64bit"
-      ~default:default.load_state_natively_64bit
-      ~current_version
-      config
-  in
-  let no_load_64bit =
-    bool_if_min_version
-      "no_load_64bit"
-      ~default:default.no_load_64bit
-      ~current_version
-      config
-  in
   let load_state_natively_download_timeout =
     int_
       "load_state_natively_download_timeout"
@@ -934,13 +911,6 @@ let load_ fn ~silent ~current_version overrides =
   in
   let io_priority = int_ "io_priority" ~default:default.io_priority config in
   let cpu_priority = int_ "cpu_priority" ~default:default.cpu_priority config in
-  let can_skip_deptable =
-    bool_if_min_version
-      "can_skip_deptable"
-      ~default:default.can_skip_deptable
-      ~current_version
-      config
-  in
   let shm_dirs =
     string_list "shm_dirs" ~default:default.shm_dirs config
     |> List.map ~f:(fun dir -> Path.(to_string @@ make dir))
@@ -1406,8 +1376,6 @@ let load_ fn ~silent ~current_version overrides =
     use_saved_state;
     require_saved_state;
     load_state_natively;
-    load_state_natively_64bit;
-    no_load_64bit;
     load_state_natively_download_timeout;
     load_state_natively_dirty_files_timeout;
     max_purgatory_clients;
@@ -1420,7 +1388,6 @@ let load_ fn ~silent ~current_version overrides =
     search_chunk_size;
     io_priority;
     cpu_priority;
-    can_skip_deptable;
     shm_dirs;
     shm_use_sharded_hashtbl;
     shm_enable_eviction;

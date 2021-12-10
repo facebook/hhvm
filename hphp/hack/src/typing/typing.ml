@@ -3943,6 +3943,13 @@ and expr_
       (Aast.Yield taf)
       (MakeType.nullable_locl (Reason.Ryield_send p) send)
   | Await e ->
+    begin
+      match e with
+      | (_, p, Aast.Call ((_, _, Aast.Id (_, func)), _, _, _))
+        when String.equal func SN.PseudoFunctions.unsafe_cast ->
+        Errors.unsafe_cast_await p
+      | _ -> ()
+    end;
     let env = might_throw env in
     (* Await is permitted in a using clause e.g. using (await make_handle()) *)
     let (env, te, rty) =

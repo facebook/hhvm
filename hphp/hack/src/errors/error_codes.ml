@@ -653,6 +653,7 @@ module Typing = struct
     | HHExpectEquivalentFailure [@value 4452]
     | HHExpectFailure [@value 4453]
     | UnsafeCastLvalue [@value 4454]
+    | UnsafeCastAwait [@value 4455]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

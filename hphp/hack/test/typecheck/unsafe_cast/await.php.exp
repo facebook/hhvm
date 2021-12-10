@@ -1,0 +1,2 @@
+File "await.php", line 6, characters 14-74:
+UNSAFE_CAST cannot be used as the operand of an await operation (Typing[4455])

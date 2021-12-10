@@ -4193,6 +4193,12 @@ let unsafe_cast_lvalue pos =
     pos
     "UNSAFE_CAST cannot be used on a collection in an update or append operation"
 
+let unsafe_cast_await pos =
+  add
+    (Typing.err_code Typing.UnsafeCastAwait)
+    pos
+    "UNSAFE_CAST cannot be used as the operand of an await operation"
+
 let mutating_const_property pos =
   add
     (Typing.err_code Typing.AssigningToConst)

@@ -151,7 +151,7 @@ end
 module VisitedSet : sig
   type t
 
-  val make : Mode.t -> t
+  val make : unit -> t
 end
 
 val deps_of_file_info : FileInfo.t -> Dep.t list

@@ -318,7 +318,7 @@ and get_all_dependencies ~mode trace cid (changed, to_redecl, to_recheck) =
 let get_extend_deps mode cid_hash to_redecl =
   Typing_deps.get_extend_deps
     ~mode
-    ~visited:(VisitedSet.make mode)
+    ~visited:(VisitedSet.make ())
     ~source_class:cid_hash
     ~acc:to_redecl
 
@@ -529,9 +529,8 @@ let get_class_deps
     ((changed, to_redecl, DepSet.union deps to_recheck), old_classes_missing)
 
 let get_classes_deps ~ctx old_classes new_classes classes =
-  let mode = Provider_context.get_deps_mode ctx in
   SSet.fold
-    (get_class_deps ctx old_classes new_classes (VisitedSet.make mode))
+    (get_class_deps ctx old_classes new_classes (VisitedSet.make ()))
     classes
     ((DepSet.make (), DepSet.make (), DepSet.make ()), 0)
 

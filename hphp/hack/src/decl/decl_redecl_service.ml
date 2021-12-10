@@ -405,7 +405,7 @@ let get_maybe_dependent_classes
 let get_dependent_classes_files (ctx : Provider_context.t) (classes : SSet.t) :
     Relative_path.Set.t =
   let mode = Provider_context.get_deps_mode ctx in
-  let visited = VisitedSet.make mode in
+  let visited = VisitedSet.make () in
   SSet.fold
     classes
     ~init:Typing_deps.(DepSet.make ())

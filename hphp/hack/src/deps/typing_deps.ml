@@ -266,19 +266,12 @@ module DepHashKey = struct
   let to_string t = string_of_int t
 end
 
-(* TODO(hverr): Clean up 32-bit, no longer necessary *)
 module VisitedSet = struct
-  type custom_t (* abstract type managed by Rust, RefCell<BTreeSet<Dep>> *)
+  type t (* abstract type managed by Rust, RefCell<BTreeSet<Dep>> *)
 
-  external hh_visited_set_make : unit -> custom_t = "hh_visited_set_make"
+  external hh_visited_set_make : unit -> t = "hh_visited_set_make"
 
-  type t = CustomVisitedSet of custom_t
-
-  let make mode : t =
-    match mode with
-    | InMemoryMode _
-    | SaveToDiskMode _ ->
-      CustomVisitedSet (hh_visited_set_make ())
+  let make () : t = hh_visited_set_make ()
 end
 
 (** Graph management in the new system with custom file format. *)
@@ -310,7 +303,7 @@ module CustomGraph = struct
     = "hh_custom_dep_graph_add_extend_deps"
 
   external get_extend_deps :
-    Mode.t -> VisitedSet.custom_t -> Dep.t -> DepSet.t -> DepSet.t
+    Mode.t -> VisitedSet.t -> Dep.t -> DepSet.t -> DepSet.t
     = "hh_custom_dep_graph_get_extend_deps"
 
   external register_discovered_dep_edge : Dep.t -> Dep.t -> unit
@@ -709,10 +702,8 @@ let get_ideps_from_hash mode hash =
 let get_ideps mode dependency = get_ideps_from_hash mode (Dep.make dependency)
 
 let get_extend_deps ~mode ~visited ~source_class ~acc =
-  let open VisitedSet in
   match (visited, acc) with
-  | (CustomVisitedSet visited, acc) ->
-    CustomGraph.get_extend_deps mode visited source_class acc
+  | (visited, acc) -> CustomGraph.get_extend_deps mode visited source_class acc
 
 let add_extend_deps mode acc = CustomGraph.add_extend_deps mode acc
 

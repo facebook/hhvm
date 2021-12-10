@@ -3477,7 +3477,7 @@ let read_before_write (pos, v) =
          " before initialization";
        ])
 
-let implement_abstract ~is_final pos1 pos2 kind x =
+let implement_abstract ?(quickfixes = []) ~is_final pos1 pos2 kind x =
   let name = "abstract " ^ kind ^ " " ^ Markdown_lite.md_codify x in
   let msg1 =
     if is_final then
@@ -3488,6 +3488,7 @@ let implement_abstract ~is_final pos1 pos2 kind x =
       ^ name
   in
   add_list
+    ~quickfixes
     (Typing.err_code Typing.ImplementAbstract)
     (pos1, msg1)
     [(pos2, "Declaration is here")]

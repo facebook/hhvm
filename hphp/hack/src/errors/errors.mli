@@ -719,7 +719,13 @@ val trait_prop_const_class : Pos.t -> string -> unit
 val read_before_write : Pos.t * string -> unit
 
 val implement_abstract :
-  is_final:bool -> Pos.t -> Pos_or_decl.t -> string -> string -> unit
+  ?quickfixes:Quickfix.t list ->
+  is_final:bool ->
+  Pos.t ->
+  Pos_or_decl.t ->
+  string ->
+  string ->
+  unit
 
 val generic_static : Pos.t -> string -> unit
 

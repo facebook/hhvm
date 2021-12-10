@@ -960,12 +960,25 @@ let check_static_class_element get_dyn_elt element_name static_pos ~elt_type =
       ~elt_type
 
 (** Error if there are abstract methods that this class is supposed to provide
-    implementation for. *)
-let check_extend_abstract_meth ~is_final p seq =
-  List.iter seq ~f:(fun (x, ce) ->
+    an implementation for. *)
+let check_extend_abstract_meth ~is_final c_name seq =
+  List.iter seq ~f:(fun (meth_name, ce) ->
       match ce.ce_type with
       | (lazy ty) when get_ce_abstract ce && is_fun ty ->
-        Errors.implement_abstract ~is_final p (get_pos ty) "method" x
+        let title =
+          Printf.sprintf "Add stub method `%s::%s`" ce.ce_origin meth_name
+        in
+        let new_text = Typing_skeleton.of_method meth_name ce in
+        let quickfixes =
+          [Quickfix.make_classish ~title ~new_text ~classish_name:(snd c_name)]
+        in
+        Errors.implement_abstract
+          ~quickfixes
+          ~is_final
+          (fst c_name)
+          (get_pos ty)
+          "method"
+          meth_name
       | _ -> ())
 
 let check_extend_abstract_prop ~is_final p seq =
@@ -998,7 +1011,7 @@ let check_extend_abstract_const ~is_final p seq =
 
 (** Error if there are abstract members that this class is supposed to provide
     implementation for. *)
-let check_extend_abstract (pc, tc) =
+let check_extend_abstract c_name tc =
   let is_concrete =
     let open Ast_defs in
     match Cls.kind tc with
@@ -1017,15 +1030,15 @@ let check_extend_abstract (pc, tc) =
       >>| (fun cstr -> (SN.Members.__construct, cstr))
       |> Option.to_list
     in
-    check_extend_abstract_meth ~is_final pc (Cls.methods tc);
+    check_extend_abstract_meth ~is_final c_name (Cls.methods tc);
     check_extend_abstract_meth
       ~is_final
-      pc
+      c_name
       (Cls.construct tc |> constructor_as_list);
-    check_extend_abstract_meth ~is_final pc (Cls.smethods tc);
-    check_extend_abstract_prop ~is_final pc (Cls.sprops tc);
-    check_extend_abstract_const ~is_final pc (Cls.consts tc);
-    check_extend_abstract_typeconst ~is_final pc (Cls.typeconsts tc)
+    check_extend_abstract_meth ~is_final c_name (Cls.smethods tc);
+    check_extend_abstract_prop ~is_final (fst c_name) (Cls.sprops tc);
+    check_extend_abstract_const ~is_final (fst c_name) (Cls.consts tc);
+    check_extend_abstract_typeconst ~is_final (fst c_name) (Cls.typeconsts tc)
   )
 
 exception Found of Pos_or_decl.t
@@ -1725,7 +1738,7 @@ let class_def_ env c tc =
   let (_ : env) =
     check_generic_class_with_SupportDynamicType env c (extends @ implements)
   in
-  if not (skip_hierarchy_checks ctx) then check_extend_abstract (pc, tc);
+  if not (skip_hierarchy_checks ctx) then check_extend_abstract c.c_name tc;
   if (not (skip_hierarchy_checks ctx)) && Cls.const tc then
     List.iter c.c_uses ~f:(check_non_const_trait_members pc env);
   let (static_vars, vars) = split_vars c.c_vars in

@@ -393,7 +393,7 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   bool hasToString();
 
   Variant invokeSleep(RuntimeCoeffects);
-  Variant invokeToDebugDisplay();
+  Variant invokeToDebugDisplay(RuntimeCoeffects);
   Variant invokeWakeup(RuntimeCoeffects);
   Variant invokeDebugInfo(RuntimeCoeffects);
 

@@ -74,7 +74,7 @@ void DebugSummaryPHPExecutor::callPHPCode()
       info->m_flags.doNotBreak = prev;
     };
 
-    m_debugDisplay = m_obj->invokeToDebugDisplay();
+    m_debugDisplay = m_obj->invokeToDebugDisplay(RuntimeCoeffects::fixme());
   } catch (...) {
     // NB if we get here it's because __toDebugDisplay threw, so we'll
     // fall back to the default action.

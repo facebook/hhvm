@@ -1659,9 +1659,8 @@ Variant ObjectData::invokeSleep(RuntimeCoeffects provided) {
   return InvokeSimple(this, s___sleep, provided);
 }
 
-Variant ObjectData::invokeToDebugDisplay() {
-  CoeffectsAutoGuard _;
-  return InvokeSimple(this, s___toDebugDisplay, RuntimeCoeffects::automatic());
+Variant ObjectData::invokeToDebugDisplay(RuntimeCoeffects provided) {
+  return InvokeSimple(this, s___toDebugDisplay, provided);
 }
 
 Variant ObjectData::invokeWakeup(RuntimeCoeffects provided) {

@@ -2274,10 +2274,12 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
       Array properties = getSerializeProps(obj);
       if (type == VariableSerializer::Type::DebuggerSerialize) {
         try {
-           auto val = const_cast<ObjectData*>(obj)->invokeToDebugDisplay();
-           if (val.isInitialized()) {
-             properties.set(s_PHP_DebugDisplay, *val.asTypedValue());
-           }
+          CoeffectsAutoGuard _;
+          auto val = const_cast<ObjectData*>(obj)->invokeToDebugDisplay(
+            RuntimeCoeffects::automatic());
+          if (val.isInitialized()) {
+            properties.set(s_PHP_DebugDisplay, *val.asTypedValue());
+          }
         } catch (const Object &e) {
           assertx(e->instanceof(SystemLib::s_ErrorClass) ||
                   e->instanceof(SystemLib::s_ExceptionClass));
@@ -2318,7 +2320,9 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
           return;
         }
         // Otherwise compute it if we have a __toDebugDisplay method.
-        auto val = const_cast<ObjectData*>(obj)->invokeToDebugDisplay();
+        CoeffectsAutoGuard _;
+        auto val = const_cast<ObjectData*>(obj)->invokeToDebugDisplay(
+          RuntimeCoeffects::automatic());
         if (val.isInitialized()) {
           serializeVariant(val.asTypedValue(), false, false, true);
           return;

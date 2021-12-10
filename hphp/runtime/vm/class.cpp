@@ -1286,6 +1286,7 @@ Class::PropSlotLookup Class::getDeclPropSlot(
         (ctx->m_declProperties[ctxPropSlot].attrs & AttrPrivate)) {
       // A private property from ctx trumps any other property we may
       // have found.
+      readonly = bool(ctx->m_declProperties[ctxPropSlot].attrs & AttrIsReadonly);
       return PropSlotLookup { ctxPropSlot, true, false, readonly };
     }
   }

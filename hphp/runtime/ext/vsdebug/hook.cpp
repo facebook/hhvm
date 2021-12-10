@@ -97,7 +97,8 @@ void VSDebugHook::onExceptionThrown(ObjectData* exception) {
   BreakContext breakContext(true);
 
   const StringData* name = exception->getVMClass()->name();
-  const Variant msg = exception->o_invoke(s_getMsg, init_null(), false);
+  const Variant msg = exception->o_invoke_few_args(
+    s_getMsg, RuntimeCoeffects::fixme(), 0);
   const HPHP::String msg_str = msg.isNull() ? empty_string() : msg.toString();
 
   if (breakContext.m_debugger != nullptr &&

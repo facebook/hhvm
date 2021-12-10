@@ -1,7 +1,7 @@
 File "if_statement_assignment_error.php", line 19, characters 7-18:
 Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
 File "if_statement_assignment_error.php", line 19, characters 7-22:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context (Parsing[1002])
+Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
 File "if_statement_assignment_error.php", line 23, characters 7-18:
 Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
 File "if_statement_assignment_error.php", line 19, characters 7-18:

@@ -1,41 +1,41 @@
 File "test_unary_and_binary_operators.php", line 15, characters 3-18:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context (Parsing[1002])
+Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
 File "test_unary_and_binary_operators.php", line 16, characters 3-19:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context (Parsing[1002])
+Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
 File "test_unary_and_binary_operators.php", line 17, characters 3-19:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context (Parsing[1002])
+Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
 File "test_unary_and_binary_operators.php", line 18, characters 3-19:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context (Parsing[1002])
+Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
 File "test_unary_and_binary_operators.php", line 19, characters 3-19:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context (Parsing[1002])
+Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
 File "test_unary_and_binary_operators.php", line 20, characters 3-20:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context (Parsing[1002])
+Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
 File "test_unary_and_binary_operators.php", line 21, characters 3-19:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context (Parsing[1002])
+Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
 File "test_unary_and_binary_operators.php", line 22, characters 3-19:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context (Parsing[1002])
+Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
 File "test_unary_and_binary_operators.php", line 23, characters 3-19:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context (Parsing[1002])
+Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
 File "test_unary_and_binary_operators.php", line 24, characters 3-20:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context (Parsing[1002])
+Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
 File "test_unary_and_binary_operators.php", line 25, characters 3-20:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context (Parsing[1002])
+Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
 File "test_unary_and_binary_operators.php", line 26, characters 3-19:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context (Parsing[1002])
+Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
 File "test_unary_and_binary_operators.php", line 27, characters 3-28:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context (Parsing[1002])
+Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
 File "test_unary_and_binary_operators.php", line 28, characters 3-30:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context (Parsing[1002])
+Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
 File "test_unary_and_binary_operators.php", line 29, characters 3-29:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context (Parsing[1002])
+Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
 File "test_unary_and_binary_operators.php", line 30, characters 3-16:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context (Parsing[1002])
+Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
 File "test_unary_and_binary_operators.php", line 31, characters 3-16:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context (Parsing[1002])
+Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
 File "test_unary_and_binary_operators.php", line 32, characters 3-16:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context (Parsing[1002])
+Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
 File "test_unary_and_binary_operators.php", line 33, characters 3-16:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context (Parsing[1002])
+Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
 File "test_unary_and_binary_operators.php", line 15, characters 3-14:
 This object's property is being mutated (used as an lvalue)
 Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])

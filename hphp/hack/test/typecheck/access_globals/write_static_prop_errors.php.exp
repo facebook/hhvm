@@ -1,15 +1,15 @@
 File "write_static_prop_errors.php", line 8, characters 5-12:
-Reading static properties requires the capability ReadGlobals, which is not provided by the context (Parsing[1002])
+Reading static properties requires the capability ReadGlobals, which is not provided by the context. Add the context `[read_globals]` after the function parameter list (or amend an existing context with a new comma delineated entry `read_globals`). (Parsing[1002])
 File "write_static_prop_errors.php", line 8, characters 5-12:
-Writing to static properties requires the capability Globals, which is not provided by the context (Parsing[1002])
+Writing to static properties requires the capability Globals, which is not provided by the context. Add the context `[globals]` after the function parameter list (or amend an existing context with a new comma delineated entry `globals`). (Parsing[1002])
 File "write_static_prop_errors.php", line 18, characters 3-9:
-Reading static properties requires the capability ReadGlobals, which is not provided by the context (Parsing[1002])
+Reading static properties requires the capability ReadGlobals, which is not provided by the context. Add the context `[read_globals]` after the function parameter list (or amend an existing context with a new comma delineated entry `read_globals`). (Parsing[1002])
 File "write_static_prop_errors.php", line 18, characters 3-9:
-Writing to static properties requires the capability Globals, which is not provided by the context (Parsing[1002])
+Writing to static properties requires the capability Globals, which is not provided by the context. Add the context `[globals]` after the function parameter list (or amend an existing context with a new comma delineated entry `globals`). (Parsing[1002])
 File "write_static_prop_errors.php", line 28, characters 3-10:
-Reading static properties requires the capability ReadGlobals, which is not provided by the context (Parsing[1002])
+Reading static properties requires the capability ReadGlobals, which is not provided by the context. Add the context `[read_globals]` after the function parameter list (or amend an existing context with a new comma delineated entry `read_globals`). (Parsing[1002])
 File "write_static_prop_errors.php", line 28, characters 3-10:
-Writing to static properties requires the capability Globals, which is not provided by the context (Parsing[1002])
+Writing to static properties requires the capability Globals, which is not provided by the context. Add the context `[globals]` after the function parameter list (or amend an existing context with a new comma delineated entry `globals`). (Parsing[1002])
 File "write_static_prop_errors.php", line 8, characters 5-16:
 Modifying static properties requires the capability AccessGlobals, which is not provided by the context. (Typing[4401])
   File "write_static_prop_errors.php", line 7, characters 32-33:

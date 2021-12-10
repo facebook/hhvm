@@ -1,7 +1,7 @@
 File "pure_lambda_inherited_error.php", line 11, characters 7-18:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context (Parsing[1002])
+Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
 File "pure_lambda_inherited_error.php", line 18, characters 5-16:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context (Parsing[1002])
+Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
 File "pure_lambda_inherited_error.php", line 11, characters 7-14:
 This object's property is being mutated (used as an lvalue)
 Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])

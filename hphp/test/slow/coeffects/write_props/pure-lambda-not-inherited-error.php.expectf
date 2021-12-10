@@ -1,1 +1,1 @@
-Fatal error: Writing to object properties requires the capability WriteProperty, which is not provided by the context in %s on line 13
+Fatal error: Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). in %s on line 13

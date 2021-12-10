@@ -1105,7 +1105,7 @@ pub const readonly_on_xhp: Error =
     Cow::Borrowed("Readonly values cannot be written to xhp attributes at this time.");
 
 pub const write_props_without_capability: Error = Cow::Borrowed(
-    "Writing to object properties requires the capability WriteProperty, which is not provided by the context",
+    "Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`).",
 );
 
 pub const closure_in_local_context: Error = Cow::Borrowed(
@@ -1113,9 +1113,9 @@ pub const closure_in_local_context: Error = Cow::Borrowed(
 );
 
 pub const read_globals_without_capability: Error = Cow::Borrowed(
-    "Reading static properties requires the capability ReadGlobals, which is not provided by the context",
+    "Reading static properties requires the capability ReadGlobals, which is not provided by the context. Add the context `[read_globals]` after the function parameter list (or amend an existing context with a new comma delineated entry `read_globals`).",
 );
 
 pub const access_globals_without_capability: Error = Cow::Borrowed(
-    "Writing to static properties requires the capability Globals, which is not provided by the context",
+    "Writing to static properties requires the capability Globals, which is not provided by the context. Add the context `[globals]` after the function parameter list (or amend an existing context with a new comma delineated entry `globals`).",
 );

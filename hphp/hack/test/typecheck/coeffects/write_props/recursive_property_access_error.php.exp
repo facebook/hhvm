@@ -1,5 +1,5 @@
 File "recursive_property_access_error.php", line 19, characters 3-33:
-Writing to object properties requires the capability WriteProperty, which is not provided by the context (Parsing[1002])
+Writing to object properties requires the capability WriteProperty, which is not provided by the context. Add the context `[write_props]` after the function parameter list (or amend an existing context with a new comma delineated entry `write_props`). (Parsing[1002])
 File "recursive_property_access_error.php", line 19, characters 3-25:
 This object's property is being mutated (used as an lvalue)
 Setting non-mutable object properties requires the capability WriteProperty, which is not provided by the context. (Typing[4401])

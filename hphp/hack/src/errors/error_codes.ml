@@ -652,6 +652,7 @@ module Typing = struct
     | TraitParentConstructInconsistent [@value 4451]
     | HHExpectEquivalentFailure [@value 4452]
     | HHExpectFailure [@value 4453]
+    | UnsafeCastLvalue [@value 4454]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

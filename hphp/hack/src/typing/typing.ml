@@ -3528,6 +3528,7 @@ and expr_
       dispatch_call
         ~is_using_clause
         ~expected
+        ~valkind
         ?in_await
         p
         env
@@ -5962,6 +5963,7 @@ and call_parent_construct pos env el unpacked_element =
 and dispatch_call
     ~(expected : ExpectedTy.t option)
     ~is_using_clause
+    ~valkind
     ?in_await
     p
     env
@@ -6123,6 +6125,11 @@ and dispatch_call
       (* `unsafe_cast` *)
       | unsafe_cast when String.equal unsafe_cast SN.PseudoFunctions.unsafe_cast
         ->
+        (match valkind with
+        | `lvalue
+        | `lvalue_subexpr ->
+          Errors.unsafe_cast_lvalue p
+        | `other -> ());
         let result =
           match el with
           | [(Ast_defs.Pnormal, original_expr)]
@@ -6425,6 +6432,7 @@ and dispatch_call
       dispatch_call
         ~expected
         ~is_using_clause
+        ~valkind
         ?in_await
         p
         env

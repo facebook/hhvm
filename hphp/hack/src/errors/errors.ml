@@ -4187,6 +4187,12 @@ let dollardollar_lvalue pos =
     pos
     "Cannot assign a value to the special pipe variable `$$`"
 
+let unsafe_cast_lvalue pos =
+  add
+    (Typing.err_code Typing.UnsafeCastLvalue)
+    pos
+    "UNSAFE_CAST cannot be used on a collection in an update or append operation"
+
 let mutating_const_property pos =
   add
     (Typing.err_code Typing.AssigningToConst)

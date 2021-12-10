@@ -1,0 +1,2 @@
+File "lvalue.php", line 4, characters 3-52:
+UNSAFE_CAST cannot be used on a collection in an update or append operation (Typing[4454])

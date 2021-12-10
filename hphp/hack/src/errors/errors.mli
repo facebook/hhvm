@@ -1316,6 +1316,8 @@ val this_as_lexical_variable : Pos.t -> unit
 
 val dollardollar_lvalue : Pos.t -> unit
 
+val unsafe_cast_lvalue : Pos.t -> unit
+
 val duplicate_using_var : Pos.t -> unit
 
 val illegal_disposable : Pos.t -> string -> unit

@@ -23,6 +23,7 @@ val process_file :
   Provider_context.t ->
   Errors.t ->
   Typing_service_types.check_file_computation ->
+  decl_cap_mb:int option ->
   process_file_results
 
 type result = {

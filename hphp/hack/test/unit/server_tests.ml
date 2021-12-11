@@ -92,7 +92,7 @@ let test_process_file_deferring () =
   Decl_counters.set_mode Typing_service_types.DeclingTopCounts;
   let prev_counter_state = Counters.reset () in
   let { Typing_check_service.deferred_decls; _ } =
-    Typing_check_service.process_file ctx errors file
+    Typing_check_service.process_file ctx errors file ~decl_cap_mb:None
   in
   Counters.restore_state prev_counter_state;
 

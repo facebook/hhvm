@@ -117,6 +117,7 @@ type job_progress = {
 type check_info = {
   init_id: string;
   recheck_id: string option;
+  use_max_typechecker_worker_memory_for_decl_deferral: bool;
   profile_log: bool;
   profile_decling: profile_decling;
   profile_type_check_twice: bool;

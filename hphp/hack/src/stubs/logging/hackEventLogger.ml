@@ -28,6 +28,7 @@ type rollout_flags = {
   max_bucket_size: int;
   max_typechecker_worker_memory_mb: int;
   max_workers: int;
+  use_max_typechecker_worker_memory_for_decl_deferral: bool;
 }
 
 let flush () = ()

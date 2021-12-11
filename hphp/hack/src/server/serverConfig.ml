@@ -324,8 +324,6 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
         local_config.max_typechecker_worker_memory_mb
       ?tco_defer_class_declaration_threshold:
         local_config.defer_class_declaration_threshold
-      ?tco_defer_class_memory_mb_threshold:
-        local_config.defer_class_memory_mb_threshold
       ?tco_prefetch_deferred_files:(Some local_config.prefetch_deferred_files)
       ?tco_remote_type_check_threshold:
         ServerLocalConfig.RemoteTypeCheck.(

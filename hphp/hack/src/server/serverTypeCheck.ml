@@ -1839,11 +1839,12 @@ functor
              ~value:
                genv.local_config
                  .ServerLocalConfig.defer_class_declaration_threshold
-        |> Telemetry.int_opt
-             ~key:"typecheck_defer_mem_threshold"
+        |> Telemetry.bool_
+             ~key:"use_max_typechecker_worker_memory_for_decl_deferral"
              ~value:
                genv.local_config
-                 .ServerLocalConfig.defer_class_memory_mb_threshold
+                 .ServerLocalConfig
+                  .use_max_typechecker_worker_memory_for_decl_deferral
         |> Telemetry.bool_
              ~key:"enable_type_check_filter_files"
              ~value:

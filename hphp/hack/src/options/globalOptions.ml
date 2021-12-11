@@ -14,7 +14,6 @@ type t = {
   tco_parallel_type_checking_threshold: int;
   tco_max_typechecker_worker_memory_mb: int option;
   tco_defer_class_declaration_threshold: int option;
-  tco_defer_class_memory_mb_threshold: int option;
   tco_prefetch_deferred_files: bool;
   tco_remote_type_check_threshold: int option;
   tco_remote_type_check: bool;
@@ -211,7 +210,6 @@ let default =
     tco_parallel_type_checking_threshold = 10;
     tco_max_typechecker_worker_memory_mb = None;
     tco_defer_class_declaration_threshold = None;
-    tco_defer_class_memory_mb_threshold = None;
     tco_prefetch_deferred_files = false;
     tco_remote_type_check_threshold = None;
     tco_remote_type_check = true;
@@ -348,7 +346,6 @@ let make
       default.tco_parallel_type_checking_threshold)
     ?tco_max_typechecker_worker_memory_mb
     ?tco_defer_class_declaration_threshold
-    ?tco_defer_class_memory_mb_threshold
     ?(tco_prefetch_deferred_files = default.tco_prefetch_deferred_files)
     ?tco_remote_type_check_threshold
     ?(tco_remote_type_check = default.tco_remote_type_check)
@@ -498,7 +495,6 @@ let make
     tco_parallel_type_checking_threshold;
     tco_max_typechecker_worker_memory_mb;
     tco_defer_class_declaration_threshold;
-    tco_defer_class_memory_mb_threshold;
     tco_prefetch_deferred_files;
     tco_remote_type_check_threshold;
     tco_remote_type_check;
@@ -637,9 +633,6 @@ let tco_max_typechecker_worker_memory_mb t =
 
 let tco_defer_class_declaration_threshold t =
   t.tco_defer_class_declaration_threshold
-
-let tco_defer_class_memory_mb_threshold t =
-  t.tco_defer_class_memory_mb_threshold
 
 let tco_prefetch_deferred_files t = t.tco_prefetch_deferred_files
 

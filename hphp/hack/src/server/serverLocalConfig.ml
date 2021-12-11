@@ -463,6 +463,10 @@ type t = {
       (** like [symbolindex_search_provider] but for IDE *)
   predeclare_ide: bool;
   max_typechecker_worker_memory_mb: int option;
+      (** if set, the worker will stop early at the end of a file if its heap exceeds this number *)
+  use_max_typechecker_worker_memory_for_decl_deferral: bool;
+      (** if set, the worker will perform the same check as for [max_typechecker_worker_memory_mb] after each decl
+      and, if over the limit, will defer *)
   longlived_workers: bool;
   remote_execution: bool;
   hg_aware: bool;
@@ -505,8 +509,6 @@ type t = {
   defer_class_declaration_threshold: int option;
       (** If set, defers class declarations after N lazy declarations; if not set,
       always lazily declares classes not already in cache. *)
-  defer_class_memory_mb_threshold: int option;
-      (** If set, defers class declaration if worker memory exceeds threshold. *)
   prefetch_deferred_files: bool;
       (** The whether to use the hook that prefetches files on an Eden checkout *)
   recheck_capture: RecheckCapture.t;
@@ -629,6 +631,7 @@ let default =
     ide_max_num_linearizations = 10000;
     predeclare_ide = false;
     max_typechecker_worker_memory_mb = None;
+    use_max_typechecker_worker_memory_for_decl_deferral = false;
     longlived_workers = false;
     remote_execution = false;
     hg_aware = false;
@@ -648,7 +651,6 @@ let default =
     num_local_workers = None;
     parallel_type_checking_threshold = 10;
     defer_class_declaration_threshold = None;
-    defer_class_memory_mb_threshold = None;
     prefetch_deferred_files = false;
     recheck_capture = RecheckCapture.default;
     recli_version = "STABLE";
@@ -1028,6 +1030,12 @@ let load_ fn ~silent ~current_version overrides =
   let max_typechecker_worker_memory_mb =
     int_opt "max_typechecker_worker_memory_mb" config
   in
+  let use_max_typechecker_worker_memory_for_decl_deferral =
+    bool_
+      "use_max_typechecker_worker_memory_for_decl_deferral"
+      ~default:default.use_max_typechecker_worker_memory_for_decl_deferral
+      config
+  in
   let longlived_workers =
     bool_if_min_version
       "longlived_workers"
@@ -1142,9 +1150,6 @@ let load_ fn ~silent ~current_version overrides =
   let num_local_workers = int_opt "num_local_workers" config in
   let defer_class_declaration_threshold =
     int_opt "defer_class_declaration_threshold" config
-  in
-  let defer_class_memory_mb_threshold =
-    int_opt "defer_class_memory_mb_threshold" config
   in
   let prefetch_deferred_files =
     bool_if_min_version
@@ -1412,6 +1417,7 @@ let load_ fn ~silent ~current_version overrides =
     ide_symbolindex_search_provider;
     predeclare_ide;
     max_typechecker_worker_memory_mb;
+    use_max_typechecker_worker_memory_for_decl_deferral;
     longlived_workers;
     remote_execution;
     hg_aware;
@@ -1431,7 +1437,6 @@ let load_ fn ~silent ~current_version overrides =
     num_local_workers;
     parallel_type_checking_threshold;
     defer_class_declaration_threshold;
-    defer_class_memory_mb_threshold;
     prefetch_deferred_files;
     recheck_capture;
     recli_version;
@@ -1498,4 +1503,6 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       max_workers = Option.value options.max_workers ~default:(-1);
       max_typechecker_worker_memory_mb =
         Option.value options.max_typechecker_worker_memory_mb ~default:(-1);
+      use_max_typechecker_worker_memory_for_decl_deferral =
+        options.use_max_typechecker_worker_memory_for_decl_deferral;
     }

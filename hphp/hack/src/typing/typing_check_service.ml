@@ -160,7 +160,8 @@ let scrape_class_names (ast : Nast.program) : SSet.t =
 let process_file
     (ctx : Provider_context.t)
     (errors : Errors.t)
-    (file : check_file_computation) : process_file_results =
+    (file : check_file_computation)
+    ~(decl_cap_mb : int option) : process_file_results =
   let fn = file.path in
   let (errors', ast) = Ast_provider.get_ast_with_error ~full:true ctx fn in
   if not (Errors.is_empty errors') then
@@ -182,8 +183,7 @@ let process_file
           ~enable:(should_enable_deferring file)
           ~declaration_threshold_opt:
             (GlobalOptions.tco_defer_class_declaration_threshold opts)
-          ~memory_mb_threshold_opt:
-            (GlobalOptions.tco_defer_class_memory_mb_threshold opts)
+          ~memory_mb_threshold_opt:decl_cap_mb
         @@ fun () ->
         Errors.do_with_context fn Errors.Typing @@ fun () ->
         let snd (_, x, _) = x in
@@ -395,6 +395,12 @@ let process_files
   if not longlived_workers then SharedMem.invalidate_local_caches ();
   File_provider.local_changes_push_sharedmem_stack ();
   Ast_provider.local_changes_push_sharedmem_stack ();
+  let decl_cap_mb =
+    if check_info.use_max_typechecker_worker_memory_for_decl_deferral then
+      memory_cap
+    else
+      None
+  in
 
   Decl_counters.set_mode check_info.profile_decling;
   let _prev_counters_state = Counters.reset () in
@@ -438,7 +444,7 @@ let process_files
       let (errors, deferred, tally) =
         match fn with
         | Check file ->
-          let process_file () = process_file ctx errors file in
+          let process_file () = process_file ctx errors file ~decl_cap_mb in
           let result =
             if check_info.profile_log then (
               let start_counters = read_counters () in

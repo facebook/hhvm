@@ -982,103 +982,6 @@ void emit_ehent_tree(FuncEmitter& fe, const php::WideFunc& func,
   fe.setEHTabIsSorted();
 }
 
-void merge_repo_auth_type(UnitEmitter& ue, RepoAuthType rat) {
-  using T = RepoAuthType::Tag;
-
-  switch (rat.tag()) {
-  case T::OptBool:
-  case T::UninitBool:
-  case T::OptInt:
-  case T::UninitInt:
-  case T::OptSStr:
-  case T::UninitSStr:
-  case T::OptStr:
-  case T::UninitStr:
-  case T::OptDbl:
-  case T::OptRes:
-  case T::OptObj:
-  case T::UninitObj:
-  case T::OptFunc:
-  case T::OptCls:
-  case T::OptClsMeth:
-  case T::OptLazyCls:
-  case T::OptUncArrKey:
-  case T::OptArrKey:
-  case T::OptUncArrKeyCompat:
-  case T::OptArrKeyCompat:
-  case T::OptUncStrLike:
-  case T::OptStrLike:
-  case T::Null:
-  case T::Cell:
-  case T::InitUnc:
-  case T::Unc:
-  case T::UncArrKey:
-  case T::ArrKey:
-  case T::UncArrKeyCompat:
-  case T::ArrKeyCompat:
-  case T::UncStrLike:
-  case T::StrLike:
-  case T::InitCell:
-  case T::Uninit:
-  case T::InitNull:
-  case T::Bool:
-  case T::Int:
-  case T::Dbl:
-  case T::Res:
-  case T::SStr:
-  case T::Str:
-  case T::Obj:
-  case T::Func:
-  case T::Cls:
-  case T::ClsMeth:
-  case T::LazyCls:
-  case T::Num:
-  case T::OptNum:
-  case T::InitPrim:
-  case T::NonNull:
-    return;
-
-  case T::OptSVec:
-  case T::OptVec:
-  case T::SVec:
-  case T::Vec:
-  case T::OptSDict:
-  case T::OptDict:
-  case T::SDict:
-  case T::Dict:
-  case T::OptSKeyset:
-  case T::OptKeyset:
-  case T::SKeyset:
-  case T::Keyset:
-  case T::SArrLike:
-  case T::ArrLike:
-  case T::OptSArrLike:
-  case T::OptArrLike:
-
-  case T::VecCompat:
-  case T::ArrLikeCompat:
-  case T::OptVecCompat:
-  case T::OptArrLikeCompat:
-    // NOTE: In repo mode, RAT's in Array's might only contain global litstr
-    // id's. No need to merge. In non-repo mode, RAT's in Array's might contain
-    // local litstr id's.
-    return;
-
-  case T::OptSubObj:
-  case T::OptExactObj:
-  case T::UninitSubObj:
-  case T::UninitExactObj:
-  case T::SubObj:
-  case T::ExactObj:
-  case T::OptSubCls:
-  case T::OptExactCls:
-  case T::SubCls:
-  case T::ExactCls:
-    ue.mergeLitstr(rat.clsName());
-    return;
-  }
-}
-
 void emit_finish_func(EmitUnitState& state, FuncEmitter& fe,
                       php::WideFunc& wf, const EmitBcInfo& info) {
   auto const& func = *wf;
@@ -1111,7 +1014,6 @@ void emit_finish_func(EmitUnitState& state, FuncEmitter& fe,
   auto const retTy = state.index.lookup_return_type_raw(&func).first;
   if (!retTy.subtypeOf(BBottom)) {
     auto const rat = make_repo_type(*state.index.array_table_builder(), retTy);
-    merge_repo_auth_type(fe.ue(), rat);
     fe.repoReturnType = rat;
   }
 
@@ -1122,7 +1024,6 @@ void emit_finish_func(EmitUnitState& state, FuncEmitter& fe,
         *state.index.array_table_builder(),
         awaitedTy
       );
-      merge_repo_auth_type(fe.ue(), rat);
       fe.repoAwaitedReturnType = rat;
     }
   }
@@ -1287,9 +1188,7 @@ void emit_class(EmitUnitState& state, UnitEmitter& ue, PreClassEmitter* pce,
         return RepoAuthType{};
       }
 
-      auto const rat = make_repo_type(*state.index.array_table_builder(), ty);
-      merge_repo_auth_type(ue, rat);
-      return rat;
+      return make_repo_type(*state.index.array_table_builder(), ty);
     };
 
     auto const privPropTy = [&] (const PropState& ps) -> std::pair<Type, bool> {

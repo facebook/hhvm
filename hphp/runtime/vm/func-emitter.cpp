@@ -714,11 +714,7 @@ void FuncEmitter::serdeMetaData(SerDe& sd) {
     (coeffectRules)
     ;
 
-  if (SerDe::deserializing) {
-    repoReturnType.resolveArray(ue());
-    repoAwaitedReturnType.resolveArray(ue());
-    attrs = fix_attrs(a);
-  }
+  if (SerDe::deserializing) attrs = fix_attrs(a);
 }
 
 template void FuncEmitter::serdeMetaData<>(BlobDecoder&);

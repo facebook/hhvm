@@ -447,12 +447,6 @@ template<class SerDe> void PreClassEmitter::serdeMetaData(SerDe& sd) {
     (m_constMap, [](Const c) { return c.name(); })
     (m_enumBaseTy)
     ;
-
-    if (SerDe::deserializing) {
-      for (unsigned i = 0; i < m_propMap.size(); ++i) {
-        m_propMap[i].updateAfterDeserialize(this);
-      }
-    }
 }
 
 template void PreClassEmitter::serdeMetaData<>(BlobDecoder&);

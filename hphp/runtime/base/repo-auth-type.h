@@ -22,17 +22,19 @@
 #include "hphp/util/compact-tagged-ptrs.h"
 
 #include "hphp/runtime/base/datatype.h"
+#include "hphp/runtime/base/repo-auth-type-tags.h"
 #include "hphp/runtime/base/types.h"
 
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
+struct BlobDecoder;
+struct BlobEncoder;
 struct StringData;
 struct TypedValue;
 struct Unit;
 struct UnitEmitter;
-struct RepoAuthType;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -47,289 +49,92 @@ struct RepoAuthType;
 
 //////////////////////////////////////////////////////////////////////
 
-constexpr uint16_t kRATPtrBit = 0x4000;
-
 struct RepoAuthType {
   struct Array;
 
-#define REPO_AUTH_TYPE_TAGS                       \
-    TAG(Uninit)                                   \
-    TAG(InitNull)                                 \
-    TAG(Null)                                     \
-    TAG(Int)                                      \
-    TAG(OptInt)                                   \
-    TAG(UninitInt)                                \
-    TAG(Dbl)                                      \
-    TAG(OptDbl)                                   \
-    TAG(Res)                                      \
-    TAG(OptRes)                                   \
-    TAG(Bool)                                     \
-    TAG(OptBool)                                  \
-    TAG(UninitBool)                               \
-    TAG(SStr)                                     \
-    TAG(OptSStr)                                  \
-    TAG(UninitSStr)                               \
-    TAG(Str)                                      \
-    TAG(OptStr)                                   \
-    TAG(UninitStr)                                \
-    TAG(Obj)                                      \
-    TAG(OptObj)                                   \
-    TAG(UninitObj)                                \
-    TAG(Func)                                     \
-    TAG(OptFunc)                                  \
-    TAG(Cls)                                      \
-    TAG(OptCls)                                   \
-    TAG(ClsMeth)                                  \
-    TAG(OptClsMeth)                               \
-    TAG(LazyCls)                                  \
-    TAG(OptLazyCls)                               \
-    TAG(Num)                                      \
-    TAG(OptNum)                                   \
-    TAG(InitPrim)                                 \
-    TAG(InitUnc)                                  \
-    TAG(Unc)                                      \
-    TAG(UncArrKey)                                \
-    TAG(ArrKey)                                   \
-    TAG(OptUncArrKey)                             \
-    TAG(OptArrKey)                                \
-    TAG(UncStrLike)                               \
-    TAG(StrLike)                                  \
-    TAG(OptUncStrLike)                            \
-    TAG(OptStrLike)                               \
-    TAG(UncArrKeyCompat)                          \
-    TAG(ArrKeyCompat)                             \
-    TAG(OptUncArrKeyCompat)                       \
-    TAG(OptArrKeyCompat)                          \
-    TAG(NonNull)                                  \
-    TAG(InitCell)                                 \
-    TAG(Cell)                                     \
-    /* Types where array() may be non-null. */    \
-    TAG(VecCompat)                                \
-    TAG(OptVecCompat)                             \
-    TAG(SVec)                                     \
-    TAG(OptSVec)                                  \
-    TAG(Vec)                                      \
-    TAG(OptVec)                                   \
-    TAG(SDict)                                    \
-    TAG(OptSDict)                                 \
-    TAG(Dict)                                     \
-    TAG(OptDict)                                  \
-    TAG(SKeyset)                                  \
-    TAG(OptSKeyset)                               \
-    TAG(Keyset)                                   \
-    TAG(OptKeyset)                                \
-    TAG(SArrLike)                                 \
-    TAG(OptSArrLike)                              \
-    TAG(ArrLike)                                  \
-    TAG(OptArrLike)                               \
-    TAG(ArrLikeCompat)                            \
-    TAG(OptArrLikeCompat)                         \
-    /* Types where clsName() will be non-null. */ \
-    TAG(ExactObj)                                 \
-    TAG(SubObj)                                   \
-    TAG(OptExactObj)                              \
-    TAG(OptSubObj)                                \
-    TAG(UninitExactObj)                           \
-    TAG(UninitSubObj)                             \
-    TAG(ExactCls)                                 \
-    TAG(SubCls)                                   \
-    TAG(OptExactCls)                              \
-    TAG(OptSubCls)                                \
-
-  enum class Tag : uint16_t {
-#define TAG(x) x,
-    REPO_AUTH_TYPE_TAGS
+  enum class Tag : uint8_t {
+#define TAG(x, ...) x,
+    REPO_AUTH_TYPE_TAGS(TAG)
 #undef TAG
   };
 
   explicit RepoAuthType(Tag tag = Tag::Cell, const StringData* sd = nullptr) {
-    m_data.set(static_cast<uint16_t>(tag), sd);
-    switch (tag) {
-    case Tag::OptSubObj: case Tag::OptExactObj:
-    case Tag::UninitSubObj: case Tag::UninitExactObj:
-    case Tag::SubObj:    case Tag::ExactObj:
-    case Tag::OptSubCls: case Tag::OptExactCls:
-    case Tag::SubCls:    case Tag::ExactCls:
-      assertx(sd != nullptr);
-      break;
-    default:
-      break;
-    }
+    assertx(tagHasName(tag) == (sd != nullptr));
+    assertx(!tagHasArrData(tag));
+    m_data.set(tag, sd);
   }
 
   explicit RepoAuthType(Tag tag, const Array* ar) {
-    m_data.set(static_cast<uint16_t>(tag), ar);
-    assertx(mayHaveArrData());
+    assertx(ar != nullptr);
+    assertx(tagHasArrData(tag));
+    m_data.set(tag, ar);
   }
 
-  Tag tag() const { return toResolvedTag(m_data.tag()); }
+  Tag tag() const { return m_data.tag(); }
 
   bool operator==(RepoAuthType) const;
   bool operator!=(RepoAuthType o) const { return !(*this == o); }
   size_t hash() const;
 
-  /*
-   * Class Names.
-   */
-
-  const StringData* clsName() const {
-    assertx(hasClassName());
-    return static_cast<const StringData*>(m_data.ptr());
+  const StringData* name() const {
+    if (!tagHasName(tag())) return nullptr;
+    auto const s = static_cast<const StringData*>(m_data.ptr());
+    assertx(s);
+    return s;
   }
-
-  bool hasClassName() const {
-    switch (tag()) {
-    case Tag::SubObj:    case Tag::ExactObj:
-    case Tag::OptSubObj: case Tag::OptExactObj:
-    case Tag::UninitSubObj: case Tag::UninitExactObj:
-    case Tag::SubCls:    case Tag::ExactCls:
-    case Tag::OptSubCls: case Tag::OptExactCls:
-      return true;
-    default:
-      return false;
-    }
-    not_reached();
-  }
-
-  /*
-   * Arrays.
-   */
 
   const Array* array() const {
-    assertx(resolved());
-    return static_cast<const Array*>(m_data.ptr());
+    if (!tagHasArrData(tag())) return nullptr;
+    auto const a = static_cast<const Array*>(m_data.ptr());
+    assertx(a != nullptr);
+    return a;
   }
 
-  // Returns a valid id if there is a corresponding Array* somewhere,
-  // or return kInvalidArrayId if Array* is null or if it is unresolved.
-  const uint32_t arrayId() const;
-  static constexpr auto kInvalidArrayId = std::numeric_limits<uint32_t>::max();
+  template<typename SerDe> void serde(SerDe&);
 
-  // Turn an array RAT represented by ID into equivalent array RAT represented
-  // by its actual Array*. Should only be called when it is indeed not resolved
-  // yet, which should be the place where an RAT is initally loaded from Repo.
-  void resolveArray(const UnitEmitter& ue);
-
-  bool mayHaveArrData() const {
-    switch (tag()) {
-    case Tag::OptVec:  case Tag::OptSVec:  case Tag::Vec:  case Tag::SVec:
-    case Tag::OptDict: case Tag::OptSDict: case Tag::Dict: case Tag::SDict:
-    case Tag::OptKeyset: case Tag::OptSKeyset:
-    case Tag::Keyset:    case Tag::SKeyset:
-    case Tag::VecCompat: case Tag::OptVecCompat:
-    case Tag::OptArrLike: case Tag::OptSArrLike:
-    case Tag::ArrLike:    case Tag::SArrLike:
-    case Tag::ArrLikeCompat: case Tag::OptArrLikeCompat:
-      return true;
-    default:
-      return false;
+  static bool tagHasName(Tag t) {
+    switch (t) {
+      #define TAG(x, ...) case Tag::x: return true;
+      REPO_AUTH_TYPE_TAGS_HAS_NAME(TAG)
+      #undef TAG
+      default: return false;
     }
-    not_reached();
   }
 
-  // Return true if m_data contains non-null Array*.
-  bool hasArrData() const {
-    return mayHaveArrData() && resolved() && m_data.ptr();
+  static bool tagHasArrData(Tag t) {
+    switch (t) {
+      #define TAG(x, ...) case Tag::x: return true;
+      REPO_AUTH_TYPE_TAGS_HAS_ARRSPEC(TAG)
+      #undef TAG
+      default: return false;
+    }
   }
 
-  /*
-   * Serialization/Deserialization
-   */
-
-  template <class SerDe>
-  void serde(SerDe& sd) {
-    auto t = tag();
-    sd(t);
-
-    if (SerDe::deserializing) {
-      // mayHaveArrData and hasClassName need to read tag().
-      m_data.set(static_cast<uint16_t>(t), nullptr);
+  static bool tagIsSubName(Tag t) {
+    switch (t) {
+      #define TAG(x, ...) case Tag::x: return true;
+      REPO_AUTH_TYPE_TAGS_SUB_NAME(TAG)
+      #undef TAG
+      default: return false;
     }
+  }
 
-    // the kRATPtrBit bit for resolved/unresolved Array* should not be visible
-    // to the outside world.
-    assertx(resolved());
-
-    if (mayHaveArrData()) {
-      // serialization
-      if (!SerDe::deserializing) {
-        // either a valid id for non-null array, or a kInvalidArrayId for null
-        uint32_t id = arrayId();
-        sd(id);
-        return;
-      }
-
-      // deserialization
-      uint32_t id;
-      sd(id);
-
-      // nullptr case, already done
-      if (id == kInvalidArrayId) return;
-
-      // id case
-      // this is the only case where we set the kRATPtrBit bit
-      auto ptr = reinterpret_cast<const void*>(id);
-      m_data.set(toIdTag(t), ptr);
-      return;
-    }
-
-    if (hasClassName()) {
-      // Use a LowStringPtr for the blob encoder/decoder so we take advantage
-      // of the litstr table.
-      LowStringPtr lc;
-      if (!SerDe::deserializing) {
-        lc = clsName();
-      }
-      sd(lc);
-      if (SerDe::deserializing) {
-        m_data.set(static_cast<uint16_t>(t),
-                   reinterpret_cast<const void*>(lc.get()));
-      }
+  static bool tagIsExactName(Tag t) {
+    switch (t) {
+      #define TAG(x, ...) case Tag::x: return true;
+      REPO_AUTH_TYPE_TAGS_EXACT_NAME(TAG)
+      #undef TAG
+      default: return false;
     }
   }
 
 private:
-   #define TAG(x) \
-    static_assert((static_cast<uint16_t>(Tag::x) & kRATPtrBit) == 0, "");
-     REPO_AUTH_TYPE_TAGS
-   #undef TAG
+  friend struct ArrayTypeTable;
+  friend struct Array;
 
-   friend struct ArrayTypeTable;
-   friend struct Array;
-
-   template <class LookupFn>
-   void doResolve(LookupFn fn) {
-     if (!mayHaveArrData() || resolved()) return;
-
-     auto const id = arrayId();
-     assertx(id != kInvalidArrayId); // this case is handled in deser time.
-     auto const array = fn(id);
-     m_data.set(static_cast<uint16_t>(tag()), array);
-   }
-
-   // false if m_data contains an uint32_t id for array type.
-   // true otherwise (it may not even be an array type).
-   // Note that the kRATArrayDataBit bit is used by encodeRAT and decodeRAT,
-   // and the 0x20 bit is used in the Tag enum.
-   const bool resolved() const {
-     return (m_data.tag() & kRATPtrBit) == 0;
-   }
-   static uint16_t toIdTag(Tag tag) {
-     return static_cast<uint16_t>(tag) | kRATPtrBit;
-   }
-   static Tag toResolvedTag(uint16_t tag) {
-     return static_cast<Tag>(tag & ~kRATPtrBit);
-   }
-
-private:
-  // This is the type tag (for the lower 6 bits) plus two flag bits (
-  // kRATArrayDataBit used by encodeRAT/decodeRAT and
-  // kRATPtrBit used by ourselves), plus an optional pointer to a class name
-  // (for the obj_* types), or an optional pointer to
-  // array information for array types, or alternatively, an optional id to the
-  // array information with kRATPtrBit flag set to 1 to differentiate from the
-  // pointer case.
-  CompactTaggedPtr<const void,uint16_t> m_data;
+  // The type tag, along with optional pointer to RepoAuthType::Array
+  // or StringData (depending on tag).
+  CompactTaggedPtr<const void,Tag> m_data;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -341,10 +146,7 @@ private:
  * with changed private property types).
  *
  * Note: this function returns true on array types without checking
- * every element.  This is ok for private properties for now because
- * we don't ever infer inner-array types on properties, but if that
- * changes new mechanisms may be needed.  Relevant to both:
- * TODO(#3696042,#2516227).
+ * every element.
  */
 bool tvMatchesRepoAuthType(TypedValue, RepoAuthType);
 

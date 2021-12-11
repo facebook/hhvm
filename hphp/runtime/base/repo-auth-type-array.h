@@ -54,10 +54,12 @@ struct ArrayTypeTable {
 
   bool empty() const { return m_arrTypes.empty(); }
 
+  using Id = uint32_t;
+
   /*
    * Find an array type description by id.
    */
-  const RepoAuthType::Array* lookup(uint32_t id) const {
+  const RepoAuthType::Array* lookup(Id id) const {
     assertx(id < m_arrTypes.size());
     return m_arrTypes[id];
   }
@@ -70,11 +72,6 @@ struct ArrayTypeTable {
   iterator begin() const { return m_arrTypes.begin(); }
   iterator end() const { return m_arrTypes.end(); }
   size_t size() const { return m_arrTypes.size(); }
-private:
-  /*
-   * Check that the ArrayTypeTable is fully resolved after deserialization.
-   */
-  bool check(const RepoAuthType::Array*) const;
 
 private:
   Table m_arrTypes;
@@ -119,9 +116,9 @@ struct RepoAuthType::Array {
    * just serializes the ids.  These functions are what the
    * ArrayTypeTable uses to (de)serialize the actual data.
    */
-  template <class SerDe>
+  template <typename SerDe>
   static Array* deserialize(SerDe&, const ArrayTypeTable&);
-  template <class SerDe>
+  template <typename SerDe>
   void serialize(SerDe&) const;
 
   // These are variable-sized heap allocated objects.  We can't copy
@@ -134,7 +131,7 @@ struct RepoAuthType::Array {
    * which is accessible here.  This is a key that can be used to find
    * it in the ArrayTypeTable.
    */
-  uint32_t id() const { return m_id; }
+  ArrayTypeTable::Id id() const { return m_id; }
 
   /*
    * In addition to the specific information about array structure,
@@ -207,7 +204,7 @@ private:
 private:
   Tag m_tag;
   Empty m_emptiness;
-  uint32_t m_id;
+  ArrayTypeTable::Id m_id;
   uint32_t m_size;
 };
 

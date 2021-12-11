@@ -26,246 +26,68 @@ namespace HPHP {
 
 namespace {
 
-template <class LookupStr, class LookupArrayType>
-RepoAuthType decodeRATImpl(const unsigned char*& pc, LookupStr lookupStr,
-                           LookupArrayType lookupArrayType) {
+template <typename LookupStr>
+RepoAuthType decodeRATImpl(const unsigned char*& pc, LookupStr lookupStr) {
   using T = RepoAuthType::Tag;
-  uint16_t permutatedTag = static_cast<uint8_t>(*pc++);
-  if (permutatedTag == 0xff) {
-    uint8_t tmp = static_cast<uint8_t>(*pc++);
-    assertx(tmp != 0xff);
-    permutatedTag = tmp + 0xff;
+  static_assert(sizeof(T) == sizeof(uint8_t));
+  auto const tag = static_cast<T>(*pc++);
+
+  if (RepoAuthType::tagHasArrData(tag)) {
+    auto const id = static_cast<ArrayTypeTable::Id>(decode_iva(pc));
+    return RepoAuthType{tag, globalArrayTypeTable().lookup(id)};
   }
 
-  // Move the kRATPtrBit(0x4000) and kRATArrayDataBit(0x8000) bit back
-  auto rawTag = (permutatedTag >> 2) | (permutatedTag << 14);
-  bool const highBitSet = rawTag & kRATArrayDataBit;
-  auto const tag = static_cast<T>(rawTag & ~kRATArrayDataBit);
-  switch (tag) {
-  case T::Uninit:
-  case T::InitNull:
-  case T::Null:
-  case T::Int:
-  case T::OptInt:
-  case T::UninitInt:
-  case T::Dbl:
-  case T::OptDbl:
-  case T::Res:
-  case T::OptRes:
-  case T::Bool:
-  case T::OptBool:
-  case T::UninitBool:
-  case T::SStr:
-  case T::OptSStr:
-  case T::UninitSStr:
-  case T::Str:
-  case T::OptStr:
-  case T::UninitStr:
-  case T::Obj:
-  case T::OptObj:
-  case T::UninitObj:
-  case T::Func:
-  case T::OptFunc:
-  case T::Cls:
-  case T::OptCls:
-  case T::ClsMeth:
-  case T::OptClsMeth:
-  case T::LazyCls:
-  case T::OptLazyCls:
-  case T::UncArrKey:
-  case T::ArrKey:
-  case T::OptUncArrKey:
-  case T::OptArrKey:
-  case T::UncStrLike:
-  case T::StrLike:
-  case T::OptUncStrLike:
-  case T::OptStrLike:
-  case T::UncArrKeyCompat:
-  case T::ArrKeyCompat:
-  case T::OptUncArrKeyCompat:
-  case T::OptArrKeyCompat:
-  case T::Num:
-  case T::OptNum:
-  case T::InitPrim:
-  case T::InitUnc:
-  case T::Unc:
-  case T::NonNull:
-  case T::InitCell:
-  case T::Cell:
-    assertx(!highBitSet);
-    return RepoAuthType{tag};
-
-  case T::SVec:
-  case T::OptSVec:
-  case T::Vec:
-  case T::OptVec:
-  case T::SDict:
-  case T::OptSDict:
-  case T::Dict:
-  case T::OptDict:
-  case T::SKeyset:
-  case T::OptSKeyset:
-  case T::Keyset:
-  case T::OptKeyset:
-  case T::SArrLike:
-  case T::ArrLike:
-  case T::OptSArrLike:
-  case T::OptArrLike:
-  case T::VecCompat:
-  case T::OptVecCompat:
-  case T::ArrLikeCompat:
-  case T::OptArrLikeCompat:
-    if (highBitSet) {
-      uint32_t id = decode_iva(pc);
-      auto const arr = lookupArrayType(id);
-      return RepoAuthType{tag, arr};
-    }
-    return RepoAuthType{tag};
-
-  case T::ExactObj:
-  case T::SubObj:
-  case T::OptExactObj:
-  case T::OptSubObj:
-  case T::UninitExactObj:
-  case T::UninitSubObj:
-  case T::ExactCls:
-  case T::SubCls:
-  case T::OptExactCls:
-  case T::OptSubCls:
-    assertx(!highBitSet);
-    {
-      uint32_t id = decode_iva(pc);
-      const StringData* const name = lookupStr(id);
-      return RepoAuthType{tag, name};
-    }
+  if (RepoAuthType::tagHasName(tag)) {
+    auto const id = decode_iva(pc);
+    return RepoAuthType{tag, lookupStr(id)};
   }
-  not_reached();
+
+  return RepoAuthType{tag};
 }
+
+//////////////////////////////////////////////////////////////////////
 
 }
 
 RepoAuthType decodeRAT(const Unit* unit, const unsigned char*& pc) {
   return decodeRATImpl(
     pc,
-    [&](uint32_t id) { return unit->lookupLitstrId(id); },
-    [&](uint32_t id) { return unit->lookupArrayTypeId(id); }
+    [&] (uint32_t id) { return unit->lookupLitstrId(id); }
   );
 }
 
 RepoAuthType decodeRAT(const UnitEmitter& ue, const unsigned char*& pc) {
   return decodeRATImpl(
     pc,
-    [&](uint32_t id) { return ue.lookupLitstr(id); },
-    [&](uint32_t id) { return ue.lookupArrayType(id); }
+    [&] (uint32_t id) { return ue.lookupLitstr(id); }
   );
 }
 
 void encodeRAT(FuncEmitter& fe, RepoAuthType rat) {
-  auto rawTag = static_cast<uint16_t>(rat.tag());
-  if (rat.hasArrData()) rawTag |= kRATArrayDataBit;
-
-  // Move the kRATPtrBit(0x4000) and kRATArrayDataBit(0x8000) last
-  uint16_t permutatedTag = (rawTag << 2) | (rawTag >> 14);
-  if (permutatedTag >= 0xff) {
-    // Write a 0xff signal byte
-    fe.emitByte(static_cast<uint8_t>(0xff));
-    permutatedTag -= 0xff;
-  }
-  assertx(permutatedTag < 0xff);
-  fe.emitByte(static_cast<uint8_t>(permutatedTag));
-
   using T = RepoAuthType::Tag;
-  switch (rat.tag()) {
-  case T::Uninit:
-  case T::InitNull:
-  case T::Null:
-  case T::Int:
-  case T::OptInt:
-  case T::UninitInt:
-  case T::Dbl:
-  case T::OptDbl:
-  case T::Res:
-  case T::OptRes:
-  case T::Bool:
-  case T::OptBool:
-  case T::UninitBool:
-  case T::SStr:
-  case T::OptSStr:
-  case T::UninitSStr:
-  case T::Str:
-  case T::OptStr:
-  case T::UninitStr:
-  case T::Obj:
-  case T::OptObj:
-  case T::UninitObj:
-  case T::Func:
-  case T::OptFunc:
-  case T::Cls:
-  case T::OptCls:
-  case T::ClsMeth:
-  case T::OptClsMeth:
-  case T::LazyCls:
-  case T::OptLazyCls:
-  case T::UncArrKey:
-  case T::ArrKey:
-  case T::OptUncArrKey:
-  case T::OptArrKey:
-  case T::UncStrLike:
-  case T::StrLike:
-  case T::OptUncStrLike:
-  case T::OptStrLike:
-  case T::UncArrKeyCompat:
-  case T::ArrKeyCompat:
-  case T::OptUncArrKeyCompat:
-  case T::OptArrKeyCompat:
-  case T::OptNum:
-  case T::Num:
-  case T::InitPrim:
-  case T::InitUnc:
-  case T::Unc:
-  case T::NonNull:
-  case T::InitCell:
-  case T::Cell:
-    break;
+  static_assert(sizeof(T) == sizeof(uint8_t));
 
-  case T::SVec:
-  case T::OptSVec:
-  case T::Vec:
-  case T::OptVec:
-  case T::SDict:
-  case T::OptSDict:
-  case T::Dict:
-  case T::OptDict:
-  case T::SKeyset:
-  case T::OptSKeyset:
-  case T::Keyset:
-  case T::OptKeyset:
-  case T::SArrLike:
-  case T::ArrLike:
-  case T::OptSArrLike:
-  case T::OptArrLike:
-  case T::VecCompat:
-  case T::OptVecCompat:
-  case T::ArrLikeCompat:
-  case T::OptArrLikeCompat:
-    if (rat.hasArrData()) {
-      fe.emitIVA(rat.arrayId());
-    }
-    break;
-
-  case T::ExactObj:
-  case T::SubObj:
-  case T::OptExactObj:
-  case T::OptSubObj:
-  case T::UninitExactObj:
-  case T::UninitSubObj:
-  case T::ExactCls:
-  case T::SubCls:
-  case T::OptExactCls:
-  case T::OptSubCls:
-    fe.emitIVA(fe.ue().mergeLitstr(rat.clsName()));
-    break;
+  fe.emitByte((uint8_t)rat.tag());
+  if (auto const a = rat.array()) {
+    fe.emitIVA(a->id());
+  } else if (auto const n = rat.name()) {
+    fe.emitIVA(fe.ue().mergeLitstr(n));
   }
+}
+
+size_t encodedRATSize(const unsigned char* pc) {
+  using T = RepoAuthType::Tag;
+  static_assert(sizeof(T) == sizeof(uint8_t));
+  auto const tag = static_cast<T>(*pc++);
+
+  if (!RepoAuthType::tagHasArrData(tag) && !RepoAuthType::tagHasName(tag)) {
+    return 1;
+  }
+
+  auto const start = pc;
+  decode_iva(pc);
+  return
+    reinterpret_cast<uintptr_t>(pc) - reinterpret_cast<uintptr_t>(start) + 1;
 }
 
 //////////////////////////////////////////////////////////////////////

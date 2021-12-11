@@ -1858,7 +1858,7 @@ bool propertyMayBeCountable(const Class::Prop& prop) {
   // because subtypes of Object are going to be countable anyway.
   auto const& tc = prop.typeConstraint;
   if (tc.isObject() || tc.isThis()) return true;
-  if (prop.repoAuthType.hasClassName()) return true;
+  if (prop.repoAuthType.name()) return true;
   auto const type = knownTypeForProp(prop, nullptr, nullptr, true);
   return type.maybe(jit::TCounted);
 }

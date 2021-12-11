@@ -235,12 +235,6 @@ inline const ArrayData* Unit::lookupArrayId(Id id) const {
   return getExtended()->m_arrays[unitID];
 }
 
-inline const RepoAuthType::Array* Unit::lookupArrayTypeId(Id id) const {
-  return RuntimeOption::RepoAuthoritative ?
-    globalArrayTypeTable().lookup(id) :
-    getExtended()->m_arrayTypeTable.lookup(id);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // PreClasses
 

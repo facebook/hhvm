@@ -963,191 +963,36 @@ RepoAuthType read_repo_auth_type(folly::StringPiece parse, AsmState* as) {
    * emits a single unit, so it can't really be involved in creating a
    * ArrayTypeTable.)
    */
-
   using T = RepoAuthType::Tag;
 
-#define X(what, tag) \
-  if (parse.startsWith(what)) return RepoAuthType{tag}
+  auto const [tag, what] = [&] {
+    #define TAG(x, name) \
+      if (parse.startsWith(name)) return std::make_pair(T::x, name);
+      REPO_AUTH_TYPE_TAGS(TAG)
+    #undef TAG
+    auto const msg = "unrecognized RepoAuthType format";
+    if (as) as->error(msg);
+    throw std::runtime_error(msg);
+    not_reached();
+  }();
 
-#define Y(what, tag)                                  \
-  if (parse.startsWith(what)) {                       \
-    parse.removePrefix(what);                         \
-    auto const name = makeStaticString(parse.data()); \
-    if (as) as->ue->mergeLitstr(name);                \
-    return RepoAuthType{tag, name};                   \
+  if (RepoAuthType::tagHasArrData(tag)) {
+    auto const msg =
+      "assembler does not support RepoAuthTypes "
+      "with array specializations";
+    if (as) as->error(msg);
+    throw std::runtime_error(msg);
+    not_reached();
   }
 
-  Y("Obj=",     T::ExactObj);
-  Y("?Obj=",    T::OptExactObj);
-  Y("UninitObj=",T::UninitExactObj);
-  Y("?Obj<=",   T::OptSubObj);
-  Y("UninitObj<=",T::UninitSubObj);
-  Y("Obj<=",    T::SubObj);
-  Y("Cls=",     T::ExactCls);
-  Y("?Cls=",    T::OptExactCls);
-  Y("?Cls<=",   T::OptSubCls);
-  Y("Cls<=",    T::SubCls);
-  X("Vec",      T::Vec);
-  X("?Vec",     T::OptVec);
-  X("Dict",     T::Dict);
-  X("?Dict",    T::OptDict);
-  X("Keyset",   T::Keyset);
-  X("?Keyset",  T::OptKeyset);
-  X("Bool",     T::Bool);
-  X("?Bool",    T::OptBool);
-  X("UninitBool",T::UninitBool);
-  X("Cell",     T::Cell);
-  X("Dbl",      T::Dbl);
-  X("?Dbl",     T::OptDbl);
-  X("InitCell", T::InitCell);
-  X("InitNull", T::InitNull);
-  X("InitUnc",  T::InitUnc);
-  X("Int",      T::Int);
-  X("?Int",     T::OptInt);
-  X("UninitInt",T::UninitInt);
-  X("Null",     T::Null);
-  X("Obj",      T::Obj);
-  X("?Obj",     T::OptObj);
-  X("UninitObj",T::UninitObj);
-  X("Cls",      T::Cls);
-  X("?Cls",     T::OptCls);
-  X("ClsMeth",  T::ClsMeth);
-  X("?ClsMeth", T::OptClsMeth);
-  X("LazyCls",  T::LazyCls);
-  X("?LazyCls", T::OptLazyCls);
-  X("?Res",     T::OptRes);
-  X("Res",      T::Res);
-  X("?SVec",    T::OptSVec);
-  X("SVec",     T::SVec);
-  X("?SDict",   T::OptSDict);
-  X("SDict",    T::SDict);
-  X("?SKeyset", T::OptSKeyset);
-  X("SKeyset",  T::SKeyset);
-  X("?SStr",    T::OptSStr);
-  X("UninitSStr",T::UninitSStr);
-  X("SStr",     T::SStr);
-  X("?Str",     T::OptStr);
-  X("UninitStr",T::UninitStr);
-  X("Str",      T::Str);
-  X("Unc",      T::Unc);
-  X("?UncArrKey", T::OptUncArrKey);
-  X("?ArrKey",  T::OptArrKey);
-  X("UncArrKey",T::UncArrKey);
-  X("ArrKey",   T::ArrKey);
-  X("?UncStrLike",T::OptUncStrLike);
-  X("?StrLike",T::OptStrLike);
-  X("UncStrLike",T::UncStrLike);
-  X("StrLike",T::StrLike);
-  X("?UncArrKeyCompat", T::OptUncArrKeyCompat);
-  X("?ArrKeyCompat",  T::OptArrKeyCompat);
-  X("UncArrKeyCompat",T::UncArrKeyCompat);
-  X("ArrKeyCompat",   T::ArrKeyCompat);
-  X("VecCompat",T::VecCompat);
-  X("?VecCompat",T::OptVecCompat);
-  X("Uninit",   T::Uninit);
-  X("SArrLike", T::SArrLike);
-  X("?SArrLike", T::OptSArrLike);
-  X("ArrLike", T::ArrLike);
-  X("?ArrLike", T::OptArrLike);
-  X("ArrLikeCompat", T::ArrLikeCompat);
-  X("?ArrLikeCompat", T::OptArrLikeCompat);
-  X("Num", T::Num);
-  X("?Num", T::OptNum);
-  X("InitPrim", T::InitPrim);
-  X("NonNull", T::NonNull);
-#undef X
-#undef Y
-
-  // Make sure the above parsing code is revisited when new tags are
-  // added (we'll get a warning for a missing case label):
-  if (debug) switch (RepoAuthType{}.tag()) {
-  case T::Uninit:
-  case T::InitNull:
-  case T::Null:
-  case T::Int:
-  case T::OptInt:
-  case T::UninitInt:
-  case T::Dbl:
-  case T::OptDbl:
-  case T::Res:
-  case T::OptRes:
-  case T::Bool:
-  case T::OptBool:
-  case T::UninitBool:
-  case T::SStr:
-  case T::OptSStr:
-  case T::UninitSStr:
-  case T::Str:
-  case T::OptStr:
-  case T::UninitStr:
-  case T::SVec:
-  case T::OptSVec:
-  case T::Vec:
-  case T::OptVec:
-  case T::SDict:
-  case T::OptSDict:
-  case T::Dict:
-  case T::OptDict:
-  case T::SKeyset:
-  case T::OptSKeyset:
-  case T::Keyset:
-  case T::OptKeyset:
-  case T::SArrLike:
-  case T::ArrLike:
-  case T::OptSArrLike:
-  case T::OptArrLike:
-  case T::Obj:
-  case T::OptObj:
-  case T::UninitObj:
-  case T::Func:
-  case T::OptFunc:
-  case T::Cls:
-  case T::OptCls:
-  case T::ClsMeth:
-  case T::OptClsMeth:
-  case T::LazyCls:
-  case T::OptLazyCls:
-  case T::InitUnc:
-  case T::Unc:
-  case T::OptUncArrKey:
-  case T::OptArrKey:
-  case T::UncArrKey:
-  case T::ArrKey:
-  case T::OptUncStrLike:
-  case T::OptStrLike:
-  case T::UncStrLike:
-  case T::StrLike:
-  case T::OptUncArrKeyCompat:
-  case T::OptArrKeyCompat:
-  case T::UncArrKeyCompat:
-  case T::ArrKeyCompat:
-  case T::OptVecCompat:
-  case T::VecCompat:
-  case T::ArrLikeCompat:
-  case T::OptArrLikeCompat:
-  case T::Num:
-  case T::OptNum:
-  case T::InitPrim:
-  case T::NonNull:
-  case T::InitCell:
-  case T::Cell:
-  case T::ExactObj:
-  case T::SubObj:
-  case T::OptExactObj:
-  case T::OptSubObj:
-  case T::UninitExactObj:
-  case T::UninitSubObj:
-  case T::ExactCls:
-  case T::SubCls:
-  case T::OptExactCls:
-  case T::OptSubCls:
-    break;
+  if (RepoAuthType::tagHasName(tag)) {
+    parse.removePrefix(what);
+    auto const name = makeStaticString(parse.data());
+    if (as) as->ue->mergeLitstr(name);
+    return RepoAuthType{tag, name};
   }
 
-  auto const msg = folly::sformat("Unknown RepoAuthType: {}", parse);
-  if (as) as->error(msg);
-  throw std::runtime_error(msg);
-  not_reached();
+  return RepoAuthType{tag};
 }
 
 RepoAuthType read_repo_auth_type(AsmState& as) {

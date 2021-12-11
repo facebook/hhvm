@@ -6642,21 +6642,19 @@ make_repo_type_arr(ArrayTypeTable::Builder& arrTable,
   assertx(t.subtypeOf(BOptArrLike));
   assertx(is_specialized_array_like(t));
 
-  auto const tag = [&]() -> Optional<RepoAuthType::Tag> {
-    if (t.subtypeOf(BSVec))     return RepoAuthType::Tag::SVec;
-    if (t.subtypeOf(BVec))      return RepoAuthType::Tag::Vec;
-    if (t.subtypeOf(BOptSVec))  return RepoAuthType::Tag::OptSVec;
-    if (t.subtypeOf(BOptVec))   return RepoAuthType::Tag::OptVec;
+  using T = RepoAuthType::Tag;
 
-    if (t.subtypeOf(BSDict))    return RepoAuthType::Tag::SDict;
-    if (t.subtypeOf(BDict))     return RepoAuthType::Tag::Dict;
-    if (t.subtypeOf(BOptSDict)) return RepoAuthType::Tag::OptSDict;
-    if (t.subtypeOf(BOptDict))  return RepoAuthType::Tag::OptDict;
+  auto const tag = [&]() -> Optional<T> {
+    #define X(tag)                                            \
+      if (t.subtypeOf(BS##tag))    return T::S##tag##Spec;    \
+      if (t.subtypeOf(B##tag))     return T::tag##Spec;       \
+      if (t.subtypeOf(BOptS##tag)) return T::OptS##tag##Spec; \
+      if (t.subtypeOf(BOpt##tag))  return T::Opt##tag##Spec;  \
 
-    if (t.subtypeOf(BSKeyset))    return RepoAuthType::Tag::SKeyset;
-    if (t.subtypeOf(BKeyset))     return RepoAuthType::Tag::Keyset;
-    if (t.subtypeOf(BOptSKeyset)) return RepoAuthType::Tag::OptSKeyset;
-    if (t.subtypeOf(BOptKeyset))  return RepoAuthType::Tag::OptKeyset;
+    X(Vec)
+    X(Dict)
+    X(Keyset)
+    #undef X
 
     // The JIT doesn't (currently) take advantage of specializations
     // for any array types except the above, so there's no point in
@@ -6706,6 +6704,7 @@ make_repo_type_arr(ArrayTypeTable::Builder& arrTable,
     }
     always_assert(false);
   }();
+  if (!arr) return std::nullopt;
 
   return RepoAuthType { *tag, arr };
 }
@@ -6746,80 +6745,63 @@ RepoAuthType make_repo_type(ArrayTypeTable::Builder& arrTable, const Type& t) {
     if (auto const rat = make_repo_type_arr(arrTable, t)) return *rat;
   }
 
-#define X(x) if (t.subtypeOf(B##x)) return RepoAuthType{T::x};
-#define Y(x, y) if (t.subtypeOf(x)) return RepoAuthType{T::y};
+#define X(tag) if (t.subtypeOf(B##tag)) return RepoAuthType{T::tag};
+
+#define O(tag)                                                          \
+  if (t.subtypeOf(B##tag)) return RepoAuthType{T::tag};                 \
+  if (t.subtypeOf(BOpt##tag)) return RepoAuthType{T::Opt##tag};         \
+
+#define U(tag)                                                            \
+  O(tag)                                                                  \
+  if (t.subtypeOf(BUninit | B##tag)) return RepoAuthType{T::Uninit##tag}; \
+
+#define A(tag)                                \
+  O(S##tag)                                   \
+  O(tag)                                      \
+
+#define Y(types, tag)                                                   \
+  if (t.subtypeOf(types)) return RepoAuthType{T::tag};                  \
+  if (t.subtypeOf(BInitNull | types)) return RepoAuthType{T::Opt##tag}; \
+
   X(Uninit)
   X(InitNull)
   X(Null)
-  X(Int)
-  X(OptInt)
-  Y(BUninit|BInt, UninitInt)
-  X(Dbl)
-  X(OptDbl)
-  X(Num)
-  X(OptNum)
-  X(Res)
-  X(OptRes)
-  X(Bool)
-  X(OptBool)
-  Y(BUninit|BBool, UninitBool)
+  U(Int)
+  O(Dbl)
+  O(Num)
+  O(Res)
+  U(Bool)
   X(InitPrim)
-  X(SStr)
-  X(OptSStr)
-  Y(BUninit|BSStr, UninitSStr)
-  X(Str)
-  X(OptStr)
-  Y(BUninit|BStr, UninitStr)
-  X(SVec)
-  X(OptSVec)
-  X(Vec)
-  X(OptVec)
-  X(SDict)
-  X(OptSDict)
-  X(Dict)
-  X(OptDict)
-  X(SKeyset)
-  X(OptSKeyset)
-  X(Keyset)
-  X(OptKeyset)
-  X(SArrLike)
-  X(OptSArrLike)
-  X(ArrLike)
-  X(OptArrLike)
-  X(Obj)
-  X(OptObj)
-  Y(BUninit|BObj, UninitObj)
-  X(Func)
-  X(OptFunc)
-  X(Cls)
-  X(OptCls)
-  X(LazyCls)
-  X(OptLazyCls)
-  X(ClsMeth)
-  X(OptClsMeth)
-  X(UncArrKey)
-  X(ArrKey)
-  X(OptUncArrKey)
-  X(OptArrKey)
-  Y(BSStr|BCls|BLazyCls, UncStrLike)
-  Y(BStr|BCls|BLazyCls, StrLike)
-  Y(BInitNull|BSStr|BCls|BLazyCls, OptUncStrLike)
-  Y(BInitNull|BStr|BCls|BLazyCls, OptStrLike)
+  U(SStr)
+  U(Str)
+  A(Vec)
+  A(Dict)
+  A(Keyset)
+  A(ArrLike)
+  U(Obj)
+  O(Func)
+  O(Cls)
+  O(LazyCls)
+  O(ClsMeth)
+  O(UncArrKey)
+  O(ArrKey)
+  Y(BSStr|BCls|BLazyCls,      UncStrLike)
+  Y(BStr|BCls|BLazyCls,       StrLike)
   Y(BUncArrKey|BCls|BLazyCls, UncArrKeyCompat)
-  Y(BArrKey|BCls|BLazyCls, ArrKeyCompat)
-  Y(BInitNull|BUncArrKey|BCls|BLazyCls, OptUncArrKeyCompat)
-  Y(BInitNull|BArrKey|BCls|BLazyCls, OptArrKeyCompat)
-  Y(BVec|BClsMeth, VecCompat)
-  Y(BInitNull|BVec|BClsMeth, OptVecCompat)
-  Y(BArrLike|BClsMeth, ArrLikeCompat)
-  Y(BInitNull|BArrLike|BClsMeth, OptArrLikeCompat)
+  Y(BArrKey|BCls|BLazyCls,    ArrKeyCompat)
+  Y(BVec|BClsMeth,            VecCompat)
+  Y(BArrLike|BClsMeth,        ArrLikeCompat)
   X(InitUnc)
   X(Unc)
   X(NonNull)
   X(InitCell)
   X(Cell)
-#undef X
+
 #undef Y
+#undef A
+#undef U
+#undef O
+#undef X
   always_assert(false);
 }
 

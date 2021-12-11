@@ -59,6 +59,3 @@ void encodeRAT(FuncEmitter& fe, RepoAuthType rat);
 //////////////////////////////////////////////////////////////////////
 
 }
-
-#include "hphp/runtime/base/repo-auth-type-codec-inl.h"
-

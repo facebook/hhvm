@@ -381,11 +381,6 @@ public:
    */
   const ArrayData* lookupArrayId(Id id) const;
 
-  /*
-   * Look up a RepoAuthType::Array by ID
-   */
-  const RepoAuthType::Array* lookupArrayTypeId(Id id) const;
-
   /////////////////////////////////////////////////////////////////////////////
   // PreClasses.
 
@@ -565,7 +560,6 @@ struct UnitExtended : Unit {
 
   NamedEntityPairTable m_namedInfo;
   VMFixedVector<const ArrayData*> m_arrays;
-  ArrayTypeTable m_arrayTypeTable;
 
   // Used by Unit prefetcher:
   SymbolRefs m_symbolRefsForPrefetch;

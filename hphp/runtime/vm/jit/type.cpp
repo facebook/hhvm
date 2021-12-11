@@ -877,163 +877,96 @@ bool ratArrIsCounted(const RepoAuthType::Array* arr, const Class* ctx) {
 
 Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
   using T = RepoAuthType::Tag;
+
+  #define O(tag, type)                               \
+    case T::Opt##tag: return type | TInitNull;       \
+    case T::tag:      return type;                   \
+
+  #define U(tag, type)                          \
+    case T::Uninit##tag: return type | TUninit; \
+    O(tag, type)                                \
+
+  #define NAME_SPEC(type, spec)                                         \
+    [&] {                                                               \
+      assertx(ty.name() != nullptr);                                    \
+      auto const cls =                                                  \
+        Class::lookupUniqueInContext(ty.name(), ctx, nullptr);          \
+      return cls ? Type::spec(cls) : type;                              \
+    }()                                                                 \
+
+  #define N(tag, type, sub, exact)                                    \
+    O(tag, type)                                                      \
+    case T::OptExact##tag: return NAME_SPEC(type, exact) | TInitNull; \
+    case T::Exact##tag:    return NAME_SPEC(type, exact);             \
+    case T::OptSub##tag:   return NAME_SPEC(type, sub) | TInitNull;   \
+    case T::Sub##tag:      return NAME_SPEC(type, sub);               \
+
+  #define UN(tag, type, sub, exact)                                    \
+    N(tag, type, sub, exact)                                           \
+    case T::Uninit##tag:      return type | TUninit;                   \
+    case T::UninitExact##tag: return NAME_SPEC(type, exact) | TUninit; \
+    case T::UninitSub##tag:   return NAME_SPEC(type, sub) | TUninit;   \
+
+  #define ARR_SPEC(spec, counted)                                              \
+    [&] {                                                                      \
+      auto const arr = ty.array();                                             \
+      assertx(arr != nullptr);                                                 \
+      return ratArrIsCounted(arr, ctx) ? Type::counted(arr) : Type::spec(arr); \
+    }()                                                                        \
+
+  #define A(tag, type, spec, counted)                                   \
+    O(tag, type)                                                        \
+    case T::Opt##tag##Spec: return ARR_SPEC(spec, counted) | TInitNull; \
+    case T::tag##Spec:      return ARR_SPEC(spec, counted);             \
+
   switch (ty.tag()) {
-    case T::OptBool:        return TBool       | TInitNull;
-    case T::OptInt:         return TInt        | TInitNull;
-    case T::OptSStr:        return TStaticStr  | TInitNull;
-    case T::OptStr:         return TStr        | TInitNull;
-    case T::OptDbl:         return TDbl        | TInitNull;
-    case T::OptRes:         return TRes        | TInitNull;
-    case T::OptObj:         return TObj        | TInitNull;
-    case T::OptFunc:        return TFunc       | TInitNull;
-    case T::OptCls:         return TCls        | TInitNull;
-    case T::OptLazyCls:     return TLazyCls    | TInitNull;
-    case T::OptClsMeth:     return TClsMeth    | TInitNull;
-    case T::OptArrKey:      return TInt | TStr | TInitNull;
-    case T::OptUncArrKey:   return TInt | TPersistentStr | TInitNull;
-    case T::OptUncStrLike:
-      return TCls | TLazyCls | TPersistentStr | TInitNull;
-    case T::OptStrLike:
-      return TCls | TLazyCls | TStr | TInitNull;
-    case T::OptArrKeyCompat:
-      return TInt | TStr | TCls | TLazyCls | TInitNull;
-    case T::OptUncArrKeyCompat:
-      return TInt | TPersistentStr | TCls | TLazyCls | TInitNull;
-
-    case T::UninitBool:     return TBool      | TUninit;
-    case T::UninitInt:      return TInt       | TUninit;
-    case T::UninitStr:      return TStr       | TUninit;
-    case T::UninitSStr:     return TStaticStr | TUninit;
-    case T::UninitObj:      return TObj       | TUninit;
-
+    U(Bool,            TBool)
+    U(Int,             TInt)
+    U(Str,             TStr)
+    U(SStr,            TStaticStr)
+    O(Dbl,             TDbl)
+    O(Res,             TRes)
+    O(Func,            TFunc)
+    O(LazyCls,         TLazyCls)
+    O(ClsMeth,         TClsMeth)
+    O(ArrKey,          TInt | TStr)
+    O(UncArrKey,       TInt | TPersistentStr)
+    O(ArrKeyCompat,    TInt | TStr | TCls | TLazyCls)
+    O(UncArrKeyCompat, TInt | TPersistentStr | TCls | TLazyCls)
+    O(StrLike,         TCls | TLazyCls | TStr)
+    O(UncStrLike,      TCls | TLazyCls | TPersistentStr)
+    O(Num,             TInt | TDbl)
+    O(VecCompat,       TVec | TClsMeth)
+    O(ArrLikeCompat,   TArrLike | TClsMeth)
+    O(ArrLike,         TArrLike)
+    O(SArrLike,        TStaticArrLike)
+    N(Cls,  TCls, SubCls, ExactCls)
+    UN(Obj, TObj, SubObj, ExactObj)
+    A(Vec,     TVec,          Vec,          CountedVec)
+    A(SVec,    TStaticVec,    StaticVec,    CountedVec)
+    A(Dict,    TDict,         Dict,         CountedDict)
+    A(SDict,   TStaticDict,   StaticDict,   CountedDict)
+    A(Keyset,  TKeyset,       Keyset,       CountedKeyset)
+    A(SKeyset, TStaticKeyset, StaticKeyset, CountedKeyset)
+    case T::InitPrim:       return TInitNull | TBool | TInt | TDbl;
     case T::Uninit:         return TUninit;
     case T::InitNull:       return TInitNull;
     case T::Null:           return TNull;
-    case T::Bool:           return TBool;
-    case T::Int:            return TInt;
-    case T::Dbl:            return TDbl;
-    case T::Res:            return TRes;
-    case T::SStr:           return TStaticStr;
-    case T::Str:            return TStr;
-    case T::Obj:            return TObj;
-    case T::Func:           return TFunc;
-    case T::Cls:            return TCls;
-    case T::LazyCls:        return TLazyCls;
-    case T::ClsMeth:        return TClsMeth;
-
-    case T::Cell:           return TCell;
-    case T::UncArrKey:      return TInt | TPersistentStr;
-    case T::ArrKey:         return TInt | TStr;
-    case T::UncStrLike:
-      return TCls | TLazyCls | TPersistentStr;
-    case T::StrLike:
-      return TCls | TLazyCls | TStr;
-    case T::UncArrKeyCompat:
-      return TInt | TPersistentStr | TCls | TLazyCls;
-    case T::ArrKeyCompat:
-      return TInt | TStr | TCls | TLazyCls;
-    case T::Num:            return TInt | TDbl;
-    case T::OptNum:         return TInitNull | TInt | TDbl;
-    case T::InitPrim:       return TInitNull | TBool | TInt | TDbl;
     case T::InitUnc:        return TUncountedInit;
     case T::Unc:            return TUncounted;
     case T::NonNull:        return TNonNull;
     case T::InitCell:       return TInitCell;
-
-#define X(A, B, C)                                                      \
-      [&]{                                                              \
-        if (auto const arr = ty.array()) {                              \
-          if (ratArrIsCounted(arr, ctx)) {                              \
-            return Type::C(arr);                                        \
-          } else {                                                      \
-            return Type::B(arr);                                        \
-          }                                                             \
-        } else {                                                        \
-          return A;                                                     \
-        }                                                               \
-      }()
-
-    case T::SVec:           return X(TStaticVec, StaticVec, StaticVec);
-    case T::Vec:            return X(TVec, Vec, CountedVec);
-    case T::SDict:          return X(TStaticDict, StaticDict, StaticDict);
-    case T::Dict:           return X(TDict, Dict, CountedDict);
-    case T::SKeyset:        return X(TStaticKeyset, StaticKeyset, StaticKeyset);
-    case T::Keyset:         return X(TKeyset, Keyset, Keyset);
-    case T::VecCompat:      return X(TVec, Vec, CountedVec) | TClsMeth;
-
-    case T::OptSVec:        return X(TStaticVec, StaticVec, StaticVec)
-                                   | TInitNull;
-    case T::OptVec:         return X(TVec, Vec, CountedVec)
-                                   | TInitNull;
-    case T::OptSDict:       return X(TStaticDict, StaticDict, StaticDict)
-                                   | TInitNull;
-    case T::OptDict:        return X(TDict, Dict, CountedDict)
-                                   | TInitNull;
-    case T::OptSKeyset:     return X(TStaticKeyset, StaticKeyset, StaticKeyset)
-                                   | TInitNull;
-    case T::OptKeyset:      return X(TKeyset, Keyset, Keyset)
-                                   | TInitNull;
-    case T::OptVecCompat:   return X(TVec, Vec, CountedVec)
-                                   | TClsMeth | TInitNull;
-
-    // If these have specializations, its not clear which type to
-    // apply them to. Ignore them for now.
-    case T::ArrLike:          return TArrLike;
-    case T::OptArrLike:       return TArrLike | TInitNull;
-    case T::SArrLike:         return TStaticArrLike;
-    case T::OptSArrLike:      return TStaticArrLike | TInitNull;
-    case T::ArrLikeCompat:    return TArrLike | TClsMeth;
-    case T::OptArrLikeCompat: return TArrLike | TClsMeth | TInitNull;
-
-#undef X
-
-    case T::SubObj:
-    case T::ExactObj:
-    case T::OptSubObj:
-    case T::OptExactObj:
-    case T::UninitSubObj:
-    case T::UninitExactObj: {
-      auto base = TObj;
-
-      if (auto const cls = Class::lookupUniqueInContext(ty.clsName(),
-                                                        ctx, nullptr)) {
-        if (ty.tag() == T::ExactObj ||
-            ty.tag() == T::OptExactObj ||
-            ty.tag() == T::UninitExactObj) {
-          base = Type::ExactObj(cls);
-        } else {
-          base = Type::SubObj(cls);
-        }
-      }
-      if (ty.tag() == T::OptSubObj || ty.tag() == T::OptExactObj) {
-        base |= TInitNull;
-      } else if (ty.tag() == T::UninitSubObj || ty.tag() == T::UninitExactObj) {
-        base |= TUninit;
-      }
-      return base;
-    }
-
-    case T::SubCls:
-    case T::ExactCls:
-    case T::OptSubCls:
-    case T::OptExactCls: {
-      auto base = TCls;
-
-      if (auto const cls = Class::lookupUniqueInContext(ty.clsName(),
-                                                            ctx, nullptr)) {
-        if (ty.tag() == T::ExactCls || ty.tag() == T::OptExactCls) {
-          base = Type::ExactCls(cls);
-        } else {
-          base = Type::SubCls(cls);
-        }
-      }
-      if (ty.tag() == T::OptSubCls || ty.tag() == T::OptExactCls) {
-        base |= TInitNull;
-      }
-      return base;
-    }
+    case T::Cell:           return TCell;
   }
   not_reached();
+
+  #undef A
+  #undef ARR_SPEC
+  #undef UN
+  #undef N
+  #undef NAME_SPEC
+  #undef U
+  #undef O
 }
 
 Type typeFromPropTC(const HPHP::TypeConstraint& tc,

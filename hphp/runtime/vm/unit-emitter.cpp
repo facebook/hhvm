@@ -107,17 +107,6 @@ const ArrayData* UnitEmitter::lookupArray(Id id) const {
   return m_arrays[unitId];
 }
 
-const RepoAuthType::Array* UnitEmitter::lookupArrayType(Id id) const {
-  return RuntimeOption::RepoAuthoritative
-           ? globalArrayTypeTable().lookup(id)
-           : m_arrayTypeTable.lookup(id);
-}
-
-void UnitEmitter::repopulateArrayTypeTable(
-  const ArrayTypeTable::Builder& builder) {
-  m_arrayTypeTable.repopulate(builder);
-}
-
 Id UnitEmitter::mergeLitstr(const StringData* litstr) {
   if (m_useGlobalIds) {
     return LitstrTable::get().mergeLitstr(litstr);
@@ -364,7 +353,7 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
 
   std::unique_ptr<Unit> u {
     RuntimeOption::RepoAuthoritative && !RuntimeOption::SandboxMode &&
-      m_litstrs.empty() && m_arrayTypeTable.empty() && m_arrays.empty() ?
+      m_litstrs.empty() && m_arrays.empty() ?
     new Unit : new UnitExtended
   };
 
@@ -404,7 +393,6 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
       ux->m_namedInfo.emplace_back(LowStringPtr{s});
     }
     ux->m_arrays = m_arrays;
-    ux->m_arrayTypeTable = m_arrayTypeTable;
 
     // If prefetching is enabled, store the symbol refs in the Unit so
     // the prefetcher can claim them. Reset the atomic flag to mark
@@ -418,7 +406,6 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
     }
   } else {
     assertx(!m_litstrs.size());
-    assertx(m_arrayTypeTable.empty());
   }
 
   if (RuntimeOption::EvalDumpHhas > 1 ||
@@ -544,9 +531,6 @@ void UnitEmitter::serde(SerDe& sd, bool lazy) {
       sd(str);
     }
   );
-
-  // HHBBC array types
-  sd(m_arrayTypeTable);
 
   auto serdeFuncEmitters = [&](auto& funcs, auto create) {
     seq(

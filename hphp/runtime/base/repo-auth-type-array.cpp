@@ -102,31 +102,6 @@ ArrayTypeTable& globalArrayTypeTable() {
 
 //////////////////////////////////////////////////////////////////////
 
-bool ArrayTypeTable::check(const RepoAuthType::Array* arr) const {
-  if (!arr) return true;
-
-  switch (arr->tag()) {
-    case RepoAuthType::Array::Tag::Tuple: {
-      for (uint32_t idx = 0; idx < arr->size(); ++idx) {
-        auto rat = arr->tupleElem(idx);
-        assertx(rat.resolved());
-        if (rat.mayHaveArrData()) check(rat.array());
-      }
-      break;
-    }
-    case RepoAuthType::Array::Tag::Packed: {
-      auto rat = arr->packedElems();
-      assertx(rat.resolved());
-      if (rat.mayHaveArrData()) check(rat.array());
-      break;
-    }
-  }
-
-  return true;
-}
-
-//////////////////////////////////////////////////////////////////////
-
 /*
  * Note about nested array types in the builder:
  *

@@ -109,7 +109,6 @@ struct UnitEmitter {
    */
   const StringData* lookupLitstr(Id id) const;
   const ArrayData* lookupArray(Id id) const;
-  const RepoAuthType::Array* lookupArrayType(Id id) const;
 
   Id numArrays() const { return m_arrays.size(); }
   Id numLitstrs() const { return m_litstrs.size(); }
@@ -135,11 +134,6 @@ struct UnitEmitter {
    * Merge a scalar array into the table for the Unit.
    */
   Id mergeUnitArray(const ArrayData* a);
-
-  /*
-   * Clear and rebuild the array type table from the builder.
-   */
-  void repopulateArrayTypeTable(const ArrayTypeTable::Builder&);
 
   /////////////////////////////////////////////////////////////////////////////
   // FuncEmitters.
@@ -283,11 +277,6 @@ private:
    */
   hphp_hash_map<const ArrayData*, Id> m_array2id;
   std::vector<const ArrayData*> m_arrays;
-
-  /*
-   * Unit local array type table.
-   */
-  ArrayTypeTable m_arrayTypeTable;
 
   /*
    * Type alias table.

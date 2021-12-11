@@ -95,12 +95,8 @@ struct PreClassEmitter {
     }
 
   private:
-    friend PreClassEmitter;
-    void updateAfterDeserialize(const PreClassEmitter* pce) {
-      m_repoAuthType.resolveArray(pce->ue());
-    }
+    friend struct PreClassEmitter;
 
-  private:
     LowStringPtr m_name;
     Attr m_attrs;
     LowStringPtr m_userType;

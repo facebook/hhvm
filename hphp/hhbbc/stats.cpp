@@ -97,8 +97,8 @@ struct ISameCmp {
   }
 };
 
-#define TAG(x) 1 +
-constexpr uint32_t kNumRATTags = REPO_AUTH_TYPE_TAGS 0 ;
+#define TAG(x,...) 1 +
+constexpr uint32_t kNumRATTags = REPO_AUTH_TYPE_TAGS(TAG) 0 ;
 #undef TAG
 
 }
@@ -205,7 +205,7 @@ std::string show(const Stats& stats) {
   ret += "\n";
   using T = RepoAuthType::Tag;
   using U = std::underlying_type<T>::type;
-#define TAG(x)                                                          \
+#define TAG(x, ...)                                                     \
   if (stats.ratL_tags[static_cast<U>(T::x)].load() > 0 ||               \
       stats.ratStk_tags[static_cast<U>(T::x)].load() > 0) {             \
     folly::format(&ret,                                                 \
@@ -216,7 +216,7 @@ std::string show(const Stats& stats) {
                   "RATStk_" #x,                                         \
                   stats.ratStk_tags[static_cast<U>(T::x)].load());      \
   }
-  REPO_AUTH_TYPE_TAGS
+  REPO_AUTH_TYPE_TAGS(TAG)
 #undef TAG
 
   if (stats.ratL_specialized_array.load() > 0 ||
@@ -341,13 +341,11 @@ void collect_simple(Stats& stats, const Bytecode& bc) {
     ++stats.ratStk_tags[tagInt];
   }
 
-  if (rat.mayHaveArrData()) {
-    if (rat.hasArrData()) {
-      if (bc.op == Op::AssertRATL) {
-        ++stats.ratL_specialized_array;
-      } else {
-        ++stats.ratStk_specialized_array;
-      }
+  if (rat.array()) {
+    if (bc.op == Op::AssertRATL) {
+      ++stats.ratL_specialized_array;
+    } else {
+      ++stats.ratStk_specialized_array;
     }
   }
 }

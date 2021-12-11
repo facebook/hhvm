@@ -4,6 +4,6 @@
 
 class MyClass {
   public function foo(): void {
-    Code`$this`;
+    ExampleDsl`$this`;
   }
 }

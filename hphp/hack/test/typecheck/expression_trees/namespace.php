@@ -4,7 +4,7 @@
 
 namespace Bar {
 
-class MyCode {
+class MyExampleDsl {
   const type TAst = mixed;
 
   public static function makeTree<<<__Explicit>> TInfer>(
@@ -14,8 +14,8 @@ class MyCode {
       'functions' => vec<mixed>,
       'static_methods' => vec<mixed>,
     ) $metadata,
-    (function(MyCode): MyCode::TAst) $ast,
-  ): \ExprTree<MyCode, MyCode::TAst, TInfer> {
+    (function(MyExampleDsl): MyExampleDsl::TAst) $ast,
+  ): \ExprTree<MyExampleDsl, MyExampleDsl::TAst, TInfer> {
     throw new \Exception();
   }
 
@@ -25,7 +25,7 @@ class MyCode {
   }
 
   // Desugared nodes (These should be implemented)
-  public function visitInt(?\ExprPos $_, int $_): MyCode::TAst {
+  public function visitInt(?\ExprPos $_, int $_): MyExampleDsl::TAst {
     throw new \Exception();
   }
 }
@@ -35,7 +35,7 @@ class MyCode {
 namespace {
 
 function test(): void {
-    Bar\MyCode`1`;
+    Bar\MyExampleDsl`1`;
 }
 
 } // namespace

@@ -6,7 +6,7 @@ abstract class MyClass {
   private function foo(ExampleInt $x): void {}
 
   public function test(): void {
-    Code`(MyClass $x) ==> {
+    ExampleDsl`(MyClass $x) ==> {
       $x->foo(1);
     }`;
   }

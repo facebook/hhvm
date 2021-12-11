@@ -8,7 +8,7 @@ abstract class MyBaseClass {
 
 abstract class MyClass extends MyBaseClass {
   public function test(): void {
-    Code`(MyClass $x) ==> {
+    ExampleDsl`(MyClass $x) ==> {
       $x->prop;
     }`;
   }

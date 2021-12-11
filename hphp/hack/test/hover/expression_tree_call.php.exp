@@ -1,8 +1,8 @@
 async function bar(ExampleContext $_): Awaitable<
   ExprTree<
-    Code,
+    ExampleDsl,
     mixed,
     (function(ExampleString): ExampleInt)
   >
 >
-Return type: `Awaitable<ExprTree<Code, mixed, (function(ExampleString): ExampleInt)>>`
+Return type: `Awaitable<ExprTree<ExampleDsl, mixed, (function(ExampleString): ExampleInt)>>`

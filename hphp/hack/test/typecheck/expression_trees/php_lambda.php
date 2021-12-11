@@ -3,7 +3,7 @@
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
 function test(): void {
-  Code`function () {
+  ExampleDsl`function () {
     return 1;
   }`;
 }

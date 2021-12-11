@@ -6,8 +6,8 @@ abstract class MyClass {
   public ExampleInt $prop;
 }
 
-function test(ExprTree<Code, Code::TAst, string> $splice_var): void {
-  Code`(MyClass $x) ==> {
+function test(ExprTree<ExampleDsl, ExampleDsl::TAst, string> $splice_var): void {
+  ExampleDsl`(MyClass $x) ==> {
     $z = ${ $splice_var };
     $x->$z;
   }`;

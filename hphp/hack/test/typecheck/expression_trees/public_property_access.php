@@ -7,7 +7,7 @@ abstract class MyClass {
 }
 
 function test(): void {
-  Code`(MyClass $x) ==> {
+  ExampleDsl`(MyClass $x) ==> {
     $x->prop;
   }`;
 }

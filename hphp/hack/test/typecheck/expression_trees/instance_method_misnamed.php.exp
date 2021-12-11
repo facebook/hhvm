@@ -2,7 +2,7 @@ File "instance_method_misnamed.php", line 7, characters 11-14:
 No instance method `fooo` in `MyClass` (Typing[4053])
   File "instance_method_misnamed.php", line 12, characters 19-21:
   Did you mean `foo` instead?
-  File "instance_method_misnamed.php", line 6, characters 11-17:
+  File "instance_method_misnamed.php", line 6, characters 17-23:
   This is why I think it is an object of type MyClass
   File "instance_method_misnamed.php", line 11, characters 16-22:
   Declaration of `MyClass` is here

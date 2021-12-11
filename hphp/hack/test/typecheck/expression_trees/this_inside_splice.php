@@ -9,6 +9,6 @@ function return_nothing(mixed $_): nothing {
 class MyClass {
   public function foo(): void {
     // We should be able to use $this inside splices.
-    Code`${return_nothing($this)}`;
+    ExampleDsl`${return_nothing($this)}`;
   }
 }

@@ -1,4 +1,4 @@
-File "unbound_variables.php", line 9, characters 13-14:
+File "unbound_variables.php", line 9, characters 19-20:
 Variable `$x` is undefined, or not always defined. (Naming[2050])
-File "unbound_variables.php", line 15, characters 10-11:
+File "unbound_variables.php", line 15, characters 16-17:
 Variable `$x` is undefined, or not always defined. (Naming[2050])

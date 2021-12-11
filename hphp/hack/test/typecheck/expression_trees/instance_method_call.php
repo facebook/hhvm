@@ -9,7 +9,7 @@ final class MyClass {
 }
 
 function foo(): void {
-  $fun_call = Code`(MyClass $foo) ==> {
+  $fun_call = ExampleDsl`(MyClass $foo) ==> {
     $foo->bar("baz");
   }`;
 }

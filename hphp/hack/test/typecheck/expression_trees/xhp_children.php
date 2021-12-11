@@ -21,9 +21,9 @@ class :my-child implements XHPChild {
 }
 
 function foo(): void {
-  $s = Code`"abc"`;
+  $s = ExampleDsl`"abc"`;
 
-  $x = Code`() ==> {
+  $x = ExampleDsl`() ==> {
     $y = "foo";
     $z = <my-child />;
 

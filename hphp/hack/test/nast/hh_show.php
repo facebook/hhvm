@@ -3,7 +3,7 @@
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
 function test(): void {
-  Code`() ==> {
+  ExampleDsl`() ==> {
     $x = 1;
     hh_show($x);
   }`;

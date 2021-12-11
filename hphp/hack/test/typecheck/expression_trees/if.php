@@ -3,9 +3,9 @@
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
 function foo(): void {
-  $if = Code`(ExampleBool $x) ==> { if($x) { return 1; } return 2; }`;
+  $if = ExampleDsl`(ExampleBool $x) ==> { if($x) { return 1; } return 2; }`;
 
-  $if_else = Code`(ExampleBool $x, ExampleBool $y) ==> {
+  $if_else = ExampleDsl`(ExampleBool $x, ExampleBool $y) ==> {
     if ($x) {
       return 1;
     } else if ($y) {

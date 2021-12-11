@@ -1,1 +1,10 @@
-No errors
+File "spliceable_interface.php", line 6, characters 25-28:
+Unbound name: `Code` (Naming[2049])
+File "spliceable_interface.php", line 6, characters 19-23:
+The method `visit` is not compatible with the overridden method (Typing[4341])
+  File "spliceable_interface.php", line 6, characters 25-28:
+  Expected `Code`
+  File "spliceable_interface.php", line 5, characters 47-56:
+  But got `ExampleDsl`
+  File "expr_tree.hhi", line 210, characters 25-32:
+    via this generic `TVisitor`

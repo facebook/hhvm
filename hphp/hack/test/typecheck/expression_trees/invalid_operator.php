@@ -10,24 +10,24 @@ const int MY_CONST = 1;
 
 function foo(): void {
   // Ban instantiation.
-  $z = Code`new Foo()`;
+  $z = ExampleDsl`new Foo()`;
 
   // Ban globals.
-  $g = Code`MY_CONST + 1`;
+  $g = ExampleDsl`MY_CONST + 1`;
 
   // Ban PHP-style lambdas.
-  $f = Code`function() { return 1; }`;
+  $f = ExampleDsl`function() { return 1; }`;
 
   // Ban do-while and foreach loops.
-  $f = Code`() ==> { do {} while(true); }`;
-  $f = Code`(vec<int> $items) ==> { foreach ($items as $_) {} }`;
+  $f = ExampleDsl`() ==> { do {} while(true); }`;
+  $f = ExampleDsl`(vec<int> $items) ==> { foreach ($items as $_) {} }`;
 
   // Ban lambdas with default arguments.
-  $f = Code`(ExampleInt $x = 1) ==> { return $x; }`;
+  $f = ExampleDsl`(ExampleInt $x = 1) ==> { return $x; }`;
 
   // Ban assignment to things that aren't simple variables.
-  $f = Code`(dynamic $x) ==> { $x[0] = 1; }`;
+  $f = ExampleDsl`(dynamic $x) ==> { $x[0] = 1; }`;
 
   // Ban assignments that mutate a local.
-  $f = Code`(int $x) ==> { $x += 1; }`;
+  $f = ExampleDsl`(int $x) ==> { $x += 1; }`;
 }

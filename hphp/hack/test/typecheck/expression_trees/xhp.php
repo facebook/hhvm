@@ -12,5 +12,5 @@ class :my:xhp {
 }
 
 function foo(): void {
-  $x = Code`<my:xhp />`;
+  $x = ExampleDsl`<my:xhp />`;
 }

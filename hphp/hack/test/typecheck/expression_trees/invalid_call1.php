@@ -5,13 +5,13 @@
 final class MyClass {
   public static function bar(
     ExampleContext $_,
-  ): ExprTree<Code, Code::TAst, (function(ExampleString): ExampleInt)> {
+  ): ExprTree<ExampleDsl, ExampleDsl::TAst, (function(ExampleString): ExampleInt)> {
     throw new Exception();
   }
 }
 
 function foo(): void {
-  $fun_call = Code`(MyClass $y) ==> {
+  $fun_call = ExampleDsl`(MyClass $y) ==> {
     $y::bar("baz");
   }`;
 }

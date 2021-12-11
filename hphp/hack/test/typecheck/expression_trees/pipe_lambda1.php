@@ -2,22 +2,22 @@
 
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
-function foo(int $_): ExprTree<Code, Code::TAst, ExampleInt> {
+function foo(int $_): ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt> {
   throw new Exception();
 }
 
-function bar(ExprTree<Code, Code::TAst, ExampleInt> $x): ExprTree<Code, Code::TAst, ExampleString> {
+function bar(ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt> $x): ExampleDsl<ExampleDsl, ExampleDsl::TAst, ExampleString> {
   throw new Exception();
 }
 
 function helper_baz(ExampleContext $_):
-  Awaitable<ExprTree<Code, Code::TAst, (function(ExampleString): ExampleFloat)>>
+  Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, (function(ExampleString): ExampleFloat)>>
 {
   throw new Exception();
 }
 
-function test(): ExprTree<Code, Code::TAst, ExampleInt> {
+function test(): ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt> {
   // Lambdas don't capture $$, so we should error here
-  $et = 1 |> Code`${ (() ==> { return foo($$); })() }`;
+  $et = 1 |> ExampleDsl`${ (() ==> { return foo($$); })() }`;
   return $et;
 }

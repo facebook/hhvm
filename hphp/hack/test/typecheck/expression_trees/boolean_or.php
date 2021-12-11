@@ -3,5 +3,5 @@
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
 function foo(): void {
-  $n = Code`true || false`;
+  $n = ExampleDsl`true || false`;
 }

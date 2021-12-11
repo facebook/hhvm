@@ -2,10 +2,10 @@
 
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
-function lift<T>(T $_): ExprTree<Code, Code::TAst, T> {
+function lift<T>(T $_): ExprTree<ExampleDsl, ExampleDsl::TAst, T> {
   throw new Exception();
 }
 
 function test(): void {
-  Code`${lift(1 << 4)}`;
+  ExampleDsl`${lift(1 << 4)}`;
 }

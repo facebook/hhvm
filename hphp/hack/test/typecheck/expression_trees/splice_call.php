@@ -3,7 +3,7 @@
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
 function foo(
-  ExprTree<Code, Code::TAst, (function(ExampleString): ExampleInt)> $x,
+  ExprTree<ExampleDsl, ExampleDsl::TAst, (function(ExampleString): ExampleInt)> $x,
 ): void {
-  $fun_call = Code`(${$x})("baz")`;
+  $fun_call = ExampleDsl`(${$x})("baz")`;
 }

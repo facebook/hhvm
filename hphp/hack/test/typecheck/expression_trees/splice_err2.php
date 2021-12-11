@@ -3,8 +3,8 @@
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
 function foo(): void {
-  $x = Code`'Hello'`;
+  $x = ExampleDsl`'Hello'`;
 
   // Inferred type needs to be compatible
-  $y = Code`4 + ${$x}`;
+  $y = ExampleDsl`4 + ${$x}`;
 }

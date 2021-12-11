@@ -2,10 +2,10 @@
 
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
-function test(ExprTree<Code, Code::TAst, ExampleInt> $x = Code`1`): void {}
+function test(ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt> $x = ExampleDsl`1`): void {}
 
 class MyTestClass {
   public function test(
-    ExprTree<Code, Code::TAst, ExampleInt> $x = Code`1`,
+    ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt> $x = ExampleDsl`1`,
   ): void {}
 }

@@ -1,12 +1,12 @@
-File "splice_err1.php", line 9, characters 13-17:
+File "splice_err1.php", line 9, characters 19-23:
 Typing error (Typing[4110])
-  File "splice_err1.php", line 9, characters 13-17:
+  File "splice_err1.php", line 9, characters 19-23:
   Expected `Spliceable<[unresolved], [unresolved], [unresolved]>` because this is being spliced into another Expression Tree
   File "splice_err1.php", line 6, characters 8-8:
   But got `int`
-File "splice_err1.php", line 9, characters 15-16:
+File "splice_err1.php", line 9, characters 21-22:
 Invalid argument (Typing[4110])
-  File "expr_tree.hhi", line 189, characters 5-35:
-  Expected `Spliceable<Code, mixed, [unresolved]>`
+  File "expr_tree.hhi", line 203, characters 5-47:
+  Expected `Spliceable<ExampleDsl, mixed, [unresolved]>`
   File "splice_err1.php", line 6, characters 8-8:
   But got `int`

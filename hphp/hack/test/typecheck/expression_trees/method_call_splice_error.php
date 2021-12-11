@@ -8,5 +8,5 @@ class Foo {
 
 function test(): void {
   $x = new Foo();
-  Code`${ $x->bar() }`;
+  ExampleDsl`${ $x->bar() }`;
 }

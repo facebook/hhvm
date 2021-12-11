@@ -2,10 +2,10 @@
 
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
-function bar(string $_): ExprTree<Code, Code::TAst, ExampleInt> {
+function bar(string $_): ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt> {
   throw new Exception();
 }
 
 function foo(): void {
-  $z = Code`4 + ${bar('hello' + 1)}`;
+  $z = ExampleDsl`4 + ${bar('hello' + 1)}`;
 }

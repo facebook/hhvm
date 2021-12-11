@@ -4,7 +4,7 @@
 
 function foo(): void {
   $infinite_for =
-    Code`() ==> {
+    ExampleDsl`() ==> {
       for (;;) {}
     }`;
 }

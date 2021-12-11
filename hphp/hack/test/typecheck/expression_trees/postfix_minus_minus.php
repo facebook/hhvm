@@ -10,16 +10,16 @@ final class MyClassWithPostfixMinusMinus {
 
 // These should all work without problem
 function test(): void {
-  Code`() ==> {
+  ExampleDsl`() ==> {
     $x = 1;
     $x--;
   }`;
 
-  Code`(ExampleInt $x) ==> {
+  ExampleDsl`(ExampleInt $x) ==> {
     $x--;
   }`;
 
-  Code`() ==> {
+  ExampleDsl`() ==> {
     $j = 0;
     for ($i = 10; $i > 0; $i--) {
       $j = $j + $i;
@@ -27,7 +27,7 @@ function test(): void {
     return $j;
   }`;
 
-  Code`(MyClassWithPostfixMinusMinus $i) ==> {
+  ExampleDsl`(MyClassWithPostfixMinusMinus $i) ==> {
     $i--;
   }`;
 }

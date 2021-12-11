@@ -14,12 +14,12 @@ class IntBox extends MyBox {
 
 async function setState<T as MyBox, TVal>(
   ExampleContext $_visitor,
-): Awaitable<ExprTree<Code, Code::TAst, (function(Wrapper<T>, TVal): void)>>
+): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, (function(Wrapper<T>, TVal): void)>>
 where
   TVal = T::TInner {
   throw new \Exception();
 }
 
-function test(ExprTree<Code, Code::TAst, Wrapper<IntBox>> $x): void {
-  Code`setState(${$x}, 1)`;
+function test(ExprTree<ExampleDsl, ExampleDsl::TAst, Wrapper<IntBox>> $x): void {
+  ExampleDsl`setState(${$x}, 1)`;
 }

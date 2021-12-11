@@ -4,5 +4,5 @@
 
 function test(): void {
   // Error, should be ExampleVoid since we virtualize void
-  Code`(): void ==> {}`;
+  ExampleDsl`(): void ==> {}`;
 }

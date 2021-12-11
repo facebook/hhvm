@@ -4,11 +4,11 @@
 
 async function bar(
   ExampleContext $_,
-): Awaitable<ExprTree<Code, Code::TAst, (function(ExampleString): ExampleInt)>> {
+): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, (function(ExampleString): ExampleInt)>> {
   throw new Exception();
 }
 
 function foo(): void {
-  Code`bar("abc")`;
-     // ^ hover-at-caret
+  ExampleDsl`bar("abc")`;
+           // ^ hover-at-caret
 }

@@ -1,4 +1,4 @@
-File "method_call_splice_error.php", line 11, characters 15-17:
+File "method_call_splice_error.php", line 11, characters 21-23:
 No instance method `bar` in `Foo` (Typing[4053])
   File "method_call_splice_error.php", line 6, characters 19-21:
   Did you mean `boo` instead?

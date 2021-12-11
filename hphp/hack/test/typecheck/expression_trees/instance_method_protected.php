@@ -2,8 +2,8 @@
 
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
-function test(ExprTree<Code, Code::TAst, string> $y): void {
-  Code`(MyState $x) ==> {
+function test(ExprTree<ExampleDsl, ExampleDsl::TAst, string> $y): void {
+  ExampleDsl`(MyState $x) ==> {
     $x->foo(1);
   }`;
 }

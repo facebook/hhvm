@@ -3,5 +3,5 @@
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
 function test(): void {
-  Code`10 % 3`;
+  ExampleDsl`10 % 3`;
 }

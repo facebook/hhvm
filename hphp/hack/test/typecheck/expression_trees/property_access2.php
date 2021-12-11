@@ -3,7 +3,7 @@
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
 function test(): void {
-  Code`(MyState $x): ExampleInt ==> {
+  ExampleDsl`(MyState $x): ExampleInt ==> {
     return $x->my_prop + 1;
   }`;
 }

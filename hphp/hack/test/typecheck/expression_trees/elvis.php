@@ -4,5 +4,5 @@
 
 function test(): void {
   // Currently no support for Elvis operator
-  $_ = Code`true ?: "Hello"`;
+  $_ = ExampleDsl`true ?: "Hello"`;
 }

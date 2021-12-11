@@ -3,5 +3,5 @@
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
 function foo(): void {
-  $neg_int = Code`-1`;
+  $neg_int = ExampleDsl`-1`;
 }

@@ -4,12 +4,12 @@
 
 class Foo {
   public static async function bar(ExampleContext $_):
-    Awaitable<ExprTree<Code, Code::TAst, (function(): void)>>
+    Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, (function(): void)>>
   {
     throw new Exception();
   }
 }
 
 function takes_reified<reify T as Foo>(): void {
-  Code`T::bar()`;
+  ExampleDsl`T::bar()`;
 }

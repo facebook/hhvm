@@ -2,18 +2,18 @@
 
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
-function foo(int $_): ExprTree<Code, Code::TAst, ExampleInt> {
+function foo(int $_): ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt> {
   throw new Exception();
 }
 
-function bar(ExprTree<Code, Code::TAst, ExampleInt> $x): ExprTree<Code, Code::TAst, ExampleString> {
+function bar(ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt> $x): ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleString> {
   throw new Exception();
 }
 
-function test(): ExprTree<Code, Code::TAst, ExampleFloat> {
+function test(): ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleFloat> {
   // Ensure that we still get some errors
   $et = 1
-    |> Code`${ foo($$) |> bar($$) |> bar($$) }`;
+    |> ExampleDsl`${ foo($$) |> bar($$) |> bar($$) }`;
 
   return $et;
 }

@@ -1,2 +1,2 @@
-File "hint_wellformed.php", line 6, characters 9-14:
+File "hint_wellformed.php", line 6, characters 15-20:
 `?mixed` is a redundant typehint - just use `mixed` (Typing[4068])

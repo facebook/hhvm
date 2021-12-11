@@ -3,7 +3,7 @@
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
 function foo(): void {
-  Code`
+  ExampleDsl`
     () ==> {
       $x = "Hello";
 

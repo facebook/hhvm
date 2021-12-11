@@ -8,21 +8,21 @@ interface Foo {}
 class FooSubtypeA implements Foo {}
 class FooSubtypeB implements Foo {}
 
-function lift_int(int $i): ExprTree<Code, Code::TAst, FooSubtypeA> {
+function lift_int(int $i): ExprTree<ExampleDsl, ExampleDsl::TAst, FooSubtypeA> {
   throw new Exception();
 }
 
-function lift_string(string $s): ExprTree<Code, Code::TAst, FooSubtypeB> {
+function lift_string(string $s): ExprTree<ExampleDsl, ExampleDsl::TAst, FooSubtypeB> {
   throw new Exception();
 }
 
-function uniontest(bool $b): ExprTree<Code, Code::TAst, Foo> {
+function uniontest(bool $b): ExprTree<ExampleDsl, ExampleDsl::TAst, Foo> {
   if ($b) {
     $arg = lift_string("foo");
   } else {
     $arg = lift_int(10);
   }
   // Without a covariant TInfer parameter of ExprTree, this will throw a type error
-  $r = Code`${$arg}`;
+  $r = ExampleDsl`${$arg}`;
   return $r;
 }

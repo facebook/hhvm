@@ -9,7 +9,7 @@ class Foo {
   }
 }
 
-function lift<T>(T $_): ExprTree<Code, Code::TAst, T> {
+function lift<T>(T $_): ExprTree<ExampleDsl, ExampleDsl::TAst, T> {
   throw new Exception();
 }
 
@@ -20,7 +20,7 @@ function test(): void {
   $x = new Foo();
 
   if ($x->x !== null) {
-    $_ = Code`() ==> {
+    $_ = ExampleDsl`() ==> {
       // We know that $x->x is not null
       ${lift($x->x + 1)};
       return;

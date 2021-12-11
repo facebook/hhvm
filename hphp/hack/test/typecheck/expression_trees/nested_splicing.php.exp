@@ -1,2 +1,2 @@
-File "nested_splicing.php", line 6, characters 10-13:
+File "nested_splicing.php", line 6, characters 16-19:
 Encountered unexpected text `${4}`, was expecting a expression. (Parsing[1002])

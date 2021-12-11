@@ -1,7 +1,7 @@
 <?hh
 
 function test(): void {
-  Code`
+  ExampleDsl`
     foo(
       bar(
         baz(),

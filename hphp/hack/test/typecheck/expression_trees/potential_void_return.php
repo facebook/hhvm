@@ -4,14 +4,14 @@
 
 async function potential_void_return<T>(
   ExampleContext $_,
-): Awaitable<ExprTree<Code, Code::TAst, (function((function(): T)): T)>> {
-  return Code`((function(): T) $x): T ==> {
+): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, (function((function(): T)): T)>> {
+  return ExampleDsl`((function(): T) $x): T ==> {
     return $x();
   }`;
 }
 
 function test(): void {
-  Code`
+  ExampleDsl`
     (ExampleBool $b) ==> {
       // Lambda that return ExampleVoid
       $x = () ==> {};
@@ -27,7 +27,7 @@ function test(): void {
 }
 
 function test2(): void {
-  Code`
+  ExampleDsl`
     (ExampleBool $b) ==> {
       // Lambda that returns ExampleVoid
       $x = () ==> {};

@@ -6,7 +6,7 @@ abstract class MyClass {
   private ExampleInt $prop;
 
   public function test(): void {
-    Code`(MyClass $x) ==> {
+    ExampleDsl`(MyClass $x) ==> {
       $x->prop;
     }`;
   }

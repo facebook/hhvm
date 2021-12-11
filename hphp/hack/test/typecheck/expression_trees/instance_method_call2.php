@@ -10,12 +10,12 @@ final class MyClass {
 
 function getMyClass(
   ExampleContext $_,
-): Awaitable<ExprTree<Code, Code::TAst, (function(): MyClass)>> {
+): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, (function(): MyClass)>> {
   throw new Exception();
 }
 
 function foo(): void {
-  $fun_call = Code`() ==> {
+  $fun_call = ExampleDsl`() ==> {
     getMyClass()->bar("baz");
   }`;
 }

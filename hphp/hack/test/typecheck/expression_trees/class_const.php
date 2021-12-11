@@ -6,6 +6,6 @@ final class MyTestClass {
   const MYCONST = 'Hello';
 
   public function test(): void {
-    Code`MyTestClass::MYCONST`;
+    ExampleDsl`MyTestClass::MYCONST`;
   }
 }

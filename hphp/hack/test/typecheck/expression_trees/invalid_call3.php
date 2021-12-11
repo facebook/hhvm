@@ -3,5 +3,5 @@
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
 function foo(): void {
-  Code`(2 + 2)(4)`;
+  ExampleDsl`(2 + 2)(4)`;
 }

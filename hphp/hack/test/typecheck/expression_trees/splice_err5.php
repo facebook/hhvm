@@ -3,8 +3,8 @@
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
 function foo(): void {
-  $x = Code`'Hello'`;
-  $y = Code`4`;
+  $x = ExampleDsl`'Hello'`;
+  $y = ExampleDsl`4`;
 
-  $z = Code`4 + ${$x}`;
+  $z = ExampleDsl`4 + ${$x}`;
 }

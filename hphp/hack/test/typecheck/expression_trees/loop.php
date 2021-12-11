@@ -4,16 +4,16 @@
 
 async function bar(
   ExampleContext $_,
-): Awaitable<ExprTree<Code, Code::TAst, (function(): void)>> {
+): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, (function(): void)>> {
   throw new Exception();
 }
 async function baz(
   ExampleContext $_,
-): Awaitable<ExprTree<Code, Code::TAst, (function(ExampleInt): void)>> {
+): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, (function(ExampleInt): void)>> {
   throw new Exception();
 }
 
 function foo(): void {
-  $loop = Code`() ==> { while(true) { bar(); } }`;
-  $for = Code`() ==> { for($x = 0; true; $x = $x + 1) { baz($x); } }`;
+  $loop = ExampleDsl`() ==> { while(true) { bar(); } }`;
+  $for = ExampleDsl`() ==> { for($x = 0; true; $x = $x + 1) { baz($x); } }`;
 }

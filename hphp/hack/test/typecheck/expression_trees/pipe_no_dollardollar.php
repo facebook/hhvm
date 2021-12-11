@@ -7,6 +7,6 @@
 // not whether it is being used
 // For assignments to occur in expression trees,
 // a splice will cause an evaluation of an assignment
-function test(ExprTree<Code, Code::TAst, ExampleInt> $x): void {
-  1 |> Code`${$x}`;
+function test(ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt> $x): void {
+  1 |> ExampleDsl`${$x}`;
 }

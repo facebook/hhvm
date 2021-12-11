@@ -4,11 +4,11 @@
 
 function foo(bool $z): void {
   if ($z) {
-    $x = Code`'Hello'`;
+    $x = ExampleDsl`'Hello'`;
   } else {
-    $x = Code`4`;
+    $x = ExampleDsl`4`;
   }
 
   // Inferred type needs to be compatible
-  $y = Code`4 + ${$x}`;
+  $y = ExampleDsl`4 + ${$x}`;
 }

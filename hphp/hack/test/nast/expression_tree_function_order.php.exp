@@ -15,7 +15,7 @@
             (Expr
                ((), [4:3-11:5],
                 (ExpressionTree
-                   { et_hint = ([4:3-7], (Happly (([4:3-7], "\\Code"), []))); 
+                   { et_hint = ([4:3-13], (Happly (([4:3-13], "\\ExampleDsl"), []))); 
                      et_splices = [];
                      et_function_pointers =
                      [([7:9-12], (Expr ((), [7:9-12], (Binop ((Eq None), ((), [7:9-12], (Lvar ([7:9-12], $0fp0))), ((), [7:9-12], (FunctionPointer ((FP_id ([7:9-12], "\\baz")), []))))))));
@@ -41,14 +41,14 @@
                                       (Some ((), [5:5-11:4],
                                              (Call (
                                                 ((), [5:5-11:4],
-                                                 (Call (((), [5:5-11:4], (Class_const (((), [5:5-11:4], (CI ([5:5-11:4], "\\Code"))), ([5:5-11:4], "symbolType")))), 
+                                                 (Call (((), [5:5-11:4], (Class_const (((), [5:5-11:4], (CI ([5:5-11:4], "\\ExampleDsl"))), ([5:5-11:4], "symbolType")))), 
                                                     [], [(Pnormal, ((), [5:5-8], (Lvar ([5:5-8], $0fp4))))], None))),
                                                 [],
                                                 [(Pnormal,
                                                   ((), [6:7-9:8],
                                                    (Call (
                                                       ((), [6:7-9:8],
-                                                       (Call (((), [6:7-9:8], (Class_const (((), [6:7-9:8], (CI ([6:7-9:8], "\\Code"))), ([6:7-9:8], "symbolType")))), 
+                                                       (Call (((), [6:7-9:8], (Class_const (((), [6:7-9:8], (CI ([6:7-9:8], "\\ExampleDsl"))), ([6:7-9:8], "symbolType")))), 
                                                           [], [(Pnormal, ((), [6:7-10], (Lvar ([6:7-10], $0fp2))))], None))),
                                                       [],
                                                       [(Pnormal,
@@ -56,7 +56,7 @@
                                                          (Call (
                                                             ((), [7:9-14],
                                                              (Call ((
-                                                                (), [7:9-14], (Class_const (((), [7:9-14], (CI ([7:9-14], "\\Code"))), ([7:9-14], "symbolType")))), 
+                                                                (), [7:9-14], (Class_const (((), [7:9-14], (CI ([7:9-14], "\\ExampleDsl"))), ([7:9-14], "symbolType")))), 
                                                                 [], [(Pnormal, ((), [7:9-12], (Lvar ([7:9-12], $0fp0))))], None))),
                                                             [], [], None))));
                                                         (Pnormal,
@@ -64,7 +64,7 @@
                                                           (Call (
                                                              ((), [8:9-14],
                                                               (Call ((
-                                                                 (), [8:9-14], (Class_const (((), [8:9-14], (CI ([8:9-14], "\\Code"))), ([8:9-14], "symbolType")))), 
+                                                                 (), [8:9-14], (Class_const (((), [8:9-14], (CI ([8:9-14], "\\ExampleDsl"))), ([8:9-14], "symbolType")))), 
                                                                  [], 
                                                                  [(Pnormal, ((), [8:9-12], (Lvar ([8:9-12], $0fp1))))], None))),
                                                              [], [], None))))
@@ -74,7 +74,7 @@
                                                    ((), [10:7-13],
                                                     (Call (
                                                        ((), [10:7-13],
-                                                        (Call (((), [10:7-13], (Class_const (((), [10:7-13], (CI ([10:7-13], "\\Code"))), ([10:7-13], "symbolType")))), 
+                                                        (Call (((), [10:7-13], (Class_const (((), [10:7-13], (CI ([10:7-13], "\\ExampleDsl"))), ([10:7-13], "symbolType")))), 
                                                            [], [(Pnormal, ((), [10:7-11], (Lvar ([10:7-11], $0fp3))))], None))),
                                                        [], [], None))))
                                                   ],
@@ -83,7 +83,7 @@
                                  };
                                f_fun_kind = FSync; f_user_attributes = []; 
                                f_external = false; f_doc_comment = None },
-                             [([4:3-7], $0fp0); ([4:3-7], $0fp1); ([4:3-7], $0fp2); ([4:3-7], $0fp3); ([4:3-7], $0fp4)]))),
+                             [([4:3-13], $0fp0); ([4:3-13], $0fp1); ([4:3-13], $0fp2); ([4:3-13], $0fp3); ([4:3-13], $0fp4)]))),
                          [], [], None)));
                      et_runtime_expr =
                      ((), [5:5-11:4],
@@ -100,8 +100,8 @@
                                { fb_ast =
                                  [([5:5-11:4],
                                    (Return
-                                      (Some ((), [4:3-7],
-                                             (Call (((), [4:3-7], (Class_const (((), [4:3-7], (CI ([4:3-7], "\\Code"))), ([4:3-7], "makeTree")))), 
+                                      (Some ((), [4:3-13],
+                                             (Call (((), [4:3-13], (Class_const (((), [4:3-13], (CI ([4:3-13], "\\ExampleDsl"))), ([4:3-13], "makeTree")))), 
                                                 [],
                                                 [(Pnormal,
                                                   ((), [5:5-11:4],
@@ -112,11 +112,11 @@
                                                         (SFlit_str ([5:5-11:4], "start_column")), ((), [5:5-11:4], (Int "4"))); (
                                                         (SFlit_str ([5:5-11:4], "end_column")), ((), [5:5-11:4], (Int "3")))])));
                                                   (Pnormal,
-                                                   ((), [4:3-7],
+                                                   ((), [4:3-13],
                                                     (Shape
-                                                       [((SFlit_str ([4:3-7], "splices")), ((), [4:3-7], (KeyValCollection (Dict, None, []))));
-                                                         ((SFlit_str ([4:3-7], "functions")),
-                                                          ((), [4:3-7],
+                                                       [((SFlit_str ([4:3-13], "splices")), ((), [4:3-13], (KeyValCollection (Dict, None, []))));
+                                                         ((SFlit_str ([4:3-13], "functions")),
+                                                          ((), [4:3-13],
                                                            (ValCollection (Vec, None,
                                                               [((), [7:9-12], (Lvar ([7:9-12], $0fp0))); (
                                                                 (), [8:9-12], (Lvar ([8:9-12], $0fp1))); (
@@ -124,7 +124,7 @@
                                                                 (), [10:7-11], (Lvar ([10:7-11], $0fp3))); (
                                                                 (), [5:5-8], (Lvar ([5:5-8], $0fp4)))]
                                                               ))));
-                                                         ((SFlit_str ([4:3-7], "static_methods")), ((), [4:3-7], (ValCollection (Vec, None, []))))])));
+                                                         ((SFlit_str ([4:3-13], "static_methods")), ((), [4:3-13], (ValCollection (Vec, None, []))))])));
                                                   (Pnormal,
                                                    ((), [5:5-11:4],
                                                     (Lfun (
@@ -139,9 +139,9 @@
                                                          f_variadic = FVnonVariadic;
                                                          f_params =
                                                          [{ param_annotation = (); 
-                                                            param_type_hint = ((), (Some ([4:3-7], (Happly (([4:3-7], "\\Code"), []))))); 
+                                                            param_type_hint = ((), (Some ([4:3-13], (Happly (([4:3-13], "\\ExampleDsl"), []))))); 
                                                             param_is_variadic = false; 
-                                                            param_pos = [4:3-7]; 
+                                                            param_pos = [4:3-13]; 
                                                             param_name = "$0v"; 
                                                             param_expr = None; 
                                                             param_readonly = None; 

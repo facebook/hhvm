@@ -4,8 +4,8 @@
 
 function foo(): void {
   // I am a comment associated with $one.
-  $one = Code`1`;
+  $one = ExampleDsl`1`;
 
-  $one_splice = Code`${$one}`;
+  $one_splice = ExampleDsl`${$one}`;
   //                    ^ hover-at-caret
 }

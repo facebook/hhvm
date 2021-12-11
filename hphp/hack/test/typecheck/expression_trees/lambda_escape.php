@@ -10,31 +10,31 @@
 // This should throw an error, but it was not
 function test_error(): (function(): nothing) {
   $x = () ==> {
-    return Code`1`;
+    return ExampleDsl`1`;
   };
   return $x;
 }
 
 // This should not throw an error
-function test(): (function(): ExprTree<Code, Code::TAst, ExampleInt>) {
+function test(): (function(): ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt>) {
   $x = () ==> {
-    return Code`1`;
+    return ExampleDsl`1`;
   };
   return $x;
 }
 
-function test2(): (function(): ExprTree<Code, Code::TAst, ExampleInt>) {
+function test2(): (function(): ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt>) {
   // The expression tree could be constructed outside of the lambda and this would be okay
-  $y = Code`1`;
+  $y = ExampleDsl`1`;
   $x = () ==> {
     return $y;
   };
   return $x;
 }
 
-function test3(): (function(): ExprTree<Code, Code::TAst, ExampleInt>) {
+function test3(): (function(): ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt>) {
   // The expression tree could be returned directly and this would also okay
   return () ==> {
-    return Code`1`;
+    return ExampleDsl`1`;
   };
 }

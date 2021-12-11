@@ -1,5 +1,5 @@
 <?hh
 
 function test(): void {
-  1 |> Code`${ $$ |> $$ |> $$ }`;
+  1 |> ExampleDsl`${ $$ |> $$ |> $$ }`;
 }

@@ -5,5 +5,5 @@
 const int MY_CONST = 123;
 
 function test(): void {
-  $g = Code`1 + MY_CONST`;
+  $g = ExampleDsl`1 + MY_CONST`;
 }

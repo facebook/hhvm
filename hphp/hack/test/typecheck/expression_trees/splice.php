@@ -3,6 +3,6 @@
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
 function test(): void {
-  $x = Code`4`;
-  Code`${$x}`;
+  $x = ExampleDsl`4`;
+  ExampleDsl`${$x}`;
 }

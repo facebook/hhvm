@@ -3,5 +3,5 @@
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
 function foo(): void {
-  $n = Code`null`;
+  $n = ExampleDsl`null`;
 }

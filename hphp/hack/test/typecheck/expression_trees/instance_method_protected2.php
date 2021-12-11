@@ -4,7 +4,7 @@
 
 abstract class MyParent {
   public function test(): void {
-    Code`(MyClass $x) ==> {
+    ExampleDsl`(MyClass $x) ==> {
       $x->foo();
     }`;
   }

@@ -15,7 +15,7 @@ class :my:xhp {
 }
 
 function foo(): void {
-  $x = Code`() ==> {
+  $x = ExampleDsl`() ==> {
     $x = 1;
     return <my:xhp my-str="bar" my-number={$x} />;
   }`;

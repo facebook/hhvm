@@ -4,34 +4,34 @@
 
 function foo(
   ExampleContext $_,
-): Awaitable<ExprTree<Code, Code::TAst, (function(int, string): void)>> {
+): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, (function(int, string): void)>> {
   throw new Exception();
 }
 
 function bar(
   ExampleContext $_,
-): Awaitable<ExprTree<Code, Code::TAst, (function(float, bool): int)>> {
+): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, (function(float, bool): int)>> {
   throw new Exception();
 }
 
 function baz(
   ExampleContext $_,
-): Awaitable<ExprTree<Code, Code::TAst, (function(): float)>> {
+): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, (function(): float)>> {
   throw new Exception();
 }
 
 function qux(
   ExampleContext $_,
-): Awaitable<ExprTree<Code, Code::TAst, (function(): bool)>> {
+): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, (function(): bool)>> {
   throw new Exception();
 }
 
 function qaal(
   ExampleContext $_,
-): Awaitable<ExprTree<Code, Code::TAst, (function(): string)>> {
+): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, (function(): string)>> {
   throw new Exception();
 }
 
 function test(): void {
-  Code`foo(bar(baz(), qux()), qaal())`;
+  ExampleDsl`foo(bar(baz(), qux()), qaal())`;
 }

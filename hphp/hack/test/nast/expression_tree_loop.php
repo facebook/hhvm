@@ -1,5 +1,5 @@
 <?hh
 
 function test(): void {
-  Code`() ==> { while(true) { foo(); } }`;
+  ExampleDsl`() ==> { while(true) { foo(); } }`;
 }

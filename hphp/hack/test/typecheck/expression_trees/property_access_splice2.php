@@ -2,19 +2,19 @@
 
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
-function foo(): ExprTree<Code, Code::TAst, ExampleInt> {
+function foo(): ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt> {
   throw new Exception();
 }
 
 abstract class MyClass {
-  private ExprTree<Code, Code::TAst, ExampleInt> $prop;
+  private ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt> $prop;
 
   public function __construct() {
     $this->prop = foo();
   }
 
   public function test(MyClass $x): void {
-    Code`(): ExampleInt ==> {
+    ExampleDsl`(): ExampleInt ==> {
       return ${ $this->prop };
     }`;
   }

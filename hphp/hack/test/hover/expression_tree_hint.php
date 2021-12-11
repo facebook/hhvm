@@ -3,6 +3,6 @@
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
 function foo(): void {
-  Code`"abcd"`;
+  ExampleDsl`"abcd"`;
 // ^ hover-at-caret
 }

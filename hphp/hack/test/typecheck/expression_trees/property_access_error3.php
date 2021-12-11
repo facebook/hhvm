@@ -3,12 +3,12 @@
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
 function test(): void {
-  Code`(MyState $x) ==> {
+  ExampleDsl`(MyState $x) ==> {
     foo(1)->my_prop = 1;
   }`;
 }
 
-async function foo(ExampleContext $_): Awaitable<ExprTree<Code, Code::TAst, (function(ExampleInt): ExampleInt)>> {
+async function foo(ExampleContext $_): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, (function(ExampleInt): ExampleInt)>> {
   throw new Exception();
 }
 

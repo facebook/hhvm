@@ -4,13 +4,13 @@
 
 async function nullable_bool(
   ExampleContext $_,
-): Awaitable<ExprTree<Code, Code::TAst, (function(): ?ExampleBool)>> {
+): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, (function(): ?ExampleBool)>> {
   throw new Exception();
 }
 
 async function a_bool(
   ExampleContext $_,
-): Awaitable<ExprTree<Code, Code::TAst, (function(): ExampleBool)>> {
+): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, (function(): ExampleBool)>> {
   throw new Exception();
 }
 
@@ -21,7 +21,7 @@ async function a_bool(
  * only accept types that may be coerced to booleans.
  */
 function test(): void {
-  $y = Code`
+  $y = ExampleDsl`
     () ==> {
       // Boolean ||
       nullable_bool() || a_bool();

@@ -2,45 +2,45 @@
 
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
-function foo(int $_): ExprTree<Code, Code::TAst, ExampleInt> {
+function foo(int $_): ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt> {
   throw new Exception();
 }
 
-function bar(ExprTree<Code, Code::TAst, ExampleInt> $x): ExprTree<Code, Code::TAst, ExampleString> {
+function bar(ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt> $x): ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleString> {
   throw new Exception();
 }
 
 function helper_baz(ExampleContext $_):
-  Awaitable<ExprTree<Code, Code::TAst, (function(ExampleString): ExampleFloat)>>
+  Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, (function(ExampleString): ExampleFloat)>>
 {
   throw new Exception();
 }
 
 function helper_foo(ExampleContext $_):
-  Awaitable<ExprTree<Code, Code::TAst, (function(ExampleInt): ExampleInt)>>
+  Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, (function(ExampleInt): ExampleInt)>>
 {
   throw new Exception();
 }
 
 function helper_quux(ExampleContext $_):
-  Awaitable<ExprTree<Code, Code::TAst, (function(ExampleFloat): ExampleInt)>>
+  Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, (function(ExampleFloat): ExampleInt)>>
 {
   throw new Exception();
 }
 
 // Ensure that multiple pipes work
-function test(): ExprTree<Code, Code::TAst, ExampleInt> {
+function test(): ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt> {
   $et = 1
     |> foo($$)
-    |> Code`${ $$ }`
+    |> ExampleDsl`${ $$ }`
     |> bar($$)
-    |> Code`helper_baz(${ $$ })`;
+    |> ExampleDsl`helper_baz(${ $$ })`;
 
   $et = "hello"
     |> ($$ . 4 . $$)
     |> (int)$$
-    |> Code`${ foo($$) } + ${ foo($$) }`
-    |> Code`helper_quux(${ $et }) + helper_foo(${ $$ })`;
+    |> ExampleDsl`${ foo($$) } + ${ foo($$) }`
+    |> ExampleDsl`helper_quux(${ $et }) + helper_foo(${ $$ })`;
 
   return $et;
 }

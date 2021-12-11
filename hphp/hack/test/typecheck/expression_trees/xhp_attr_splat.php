@@ -12,7 +12,7 @@ class :my:xhp {
 }
 
 function foo(): void {
-  $x = Code`() ==> {
+  $x = ExampleDsl`() ==> {
     $x = 1;
     // Should be a parse error before we even type check.
     return <my:xhp {...$x} />;

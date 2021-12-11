@@ -1,2 +1,2 @@
-File "dollar_this.php", line 7, characters 10-14:
+File "dollar_this.php", line 7, characters 16-20:
 `$this` is not bound inside expression trees (Typing[4095])

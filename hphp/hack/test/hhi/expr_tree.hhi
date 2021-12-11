@@ -1,8 +1,19 @@
 <?hh
 
-class Code {
+/**
+ * An example DSL for testing expression trees (ETs).
+ *
+ * Any class can be used an an expression tree visitor. It needs to implement 
+ * the methods shown here, and expression tree literals MyClass`...` will be 
+ * converted (at compile time) to calls on these methods.
+ *
+ * This .hhi file is only used when testing the type checker. Otherwise
+ * every test file would need to include a class with all these methods.
+ */
+class ExampleDsl {
   const type TAst = mixed;
 
+  // The desugared expression tree literal will call this method.
   public static function makeTree<<<__Explicit>> TInfer>(
     ?ExprPos $pos,
     shape(
@@ -10,12 +21,13 @@ class Code {
       'functions' => vec<mixed>,
       'static_methods' => vec<mixed>,
     ) $metadata,
-    (function(Code): Code::TAst) $ast,
-  ): ExprTree<Code, Code::TAst, TInfer> {
+    (function(ExampleDsl): ExampleDsl::TAst) $ast,
+  ): ExprTree<ExampleDsl, ExampleDsl::TAst, TInfer> {
     throw new Exception();
   }
 
-  // Virtual types (These do not have to be implemented)
+  // The fooType() methods are used to typecheck the expression tree literals.
+  // They do not require implementations.
   public static function intType(): ExampleInt {
     throw new Exception();
   }
@@ -35,159 +47,161 @@ class Code {
     throw new Exception();
   }
   public static function symbolType<T>(
-    (function(ExampleContext): Awaitable<ExprTree<Code, Code::TAst, T>>) $_,
+    (function(ExampleContext): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, T>>) $_,
   ): T {
     throw new Exception();
   }
 
-  // Desugared nodes (These should be implemented)
-  public function visitInt(?ExprPos $_, int $_): Code::TAst {
+  // The visitFoo methods are called at runtime when the expression tree literal
+  // is evaluated. You will need to provide implementations of these methods,
+  // but we've stubbed them for the sake of Hack tests.
+  public function visitInt(?ExprPos $_, int $_): ExampleDsl::TAst {
     throw new Exception();
   }
-  public function visitFloat(?ExprPos $_, float $_): Code::TAst {
+  public function visitFloat(?ExprPos $_, float $_): ExampleDsl::TAst {
     throw new Exception();
   }
-  public function visitBool(?ExprPos $_, bool $_): Code::TAst {
+  public function visitBool(?ExprPos $_, bool $_): ExampleDsl::TAst {
     throw new Exception();
   }
-  public function visitString(?ExprPos $_, string $_): Code::TAst {
+  public function visitString(?ExprPos $_, string $_): ExampleDsl::TAst {
     throw new Exception();
   }
-  public function visitNull(?ExprPos $_): Code::TAst {
+  public function visitNull(?ExprPos $_): ExampleDsl::TAst {
     throw new Exception();
   }
 
   public function visitBinop(
     ?ExprPos $_,
-    Code::TAst $lhs,
+    ExampleDsl::TAst $lhs,
     string $op,
-    Code::TAst $rhs,
-  ): Code::TAst {
+    ExampleDsl::TAst $rhs,
+  ): ExampleDsl::TAst {
     throw new Exception();
   }
 
   public function visitUnop(
     ?ExprPos $_,
-    Code::TAst $operand,
+    ExampleDsl::TAst $operand,
     string $operator,
-  ): Code::TAst {
+  ): ExampleDsl::TAst {
     throw new Exception();
   }
 
-  public function visitLocal(?ExprPos $_, string $_): Code::TAst {
+  public function visitLocal(?ExprPos $_, string $_): ExampleDsl::TAst {
     throw new Exception();
   }
 
   public function visitLambda(
     ?ExprPos $_,
     vec<string> $_args,
-    vec<Code::TAst> $_body,
-  ): Code::TAst {
+    vec<ExampleDsl::TAst> $_body,
+  ): ExampleDsl::TAst {
     throw new Exception();
   }
 
   public function visitGlobalFunction<T>(
     ?ExprPos $_,
-    (function(ExampleContext): Awaitable<ExprTree<Code, Code::TAst, T>>) $_,
-  ): Code::TAst {
+    (function(ExampleContext): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, T>>) $_,
+  ): ExampleDsl::TAst {
     throw new Exception();
   }
 
   public function visitStaticMethod<T>(
     ?ExprPos $_,
-    (function(ExampleContext): Awaitable<ExprTree<Code, Code::TAst, T>>) $_,
-  ): Code::TAst {
+    (function(ExampleContext): Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, T>>) $_,
+  ): ExampleDsl::TAst {
     throw new Exception();
   }
 
   public function visitCall(
     ?ExprPos $_,
-    Code::TAst $_callee,
-    vec<Code::TAst> $_args,
-  ): Code::TAst {
+    ExampleDsl::TAst $_callee,
+    vec<ExampleDsl::TAst> $_args,
+  ): ExampleDsl::TAst {
     throw new Exception();
   }
 
   public function visitAssign(
     ?ExprPos $_,
-    Code::TAst $_,
-    Code::TAst $_,
-  ): Code::TAst {
+    ExampleDsl::TAst $_,
+    ExampleDsl::TAst $_,
+  ): ExampleDsl::TAst {
     throw new Exception();
   }
 
   public function visitTernary(
     ?ExprPos $_,
-    Code::TAst $_condition,
-    ?Code::TAst $_truthy,
-    Code::TAst $_falsy,
-  ): Code::TAst {
+    ExampleDsl::TAst $_condition,
+    ?ExampleDsl::TAst $_truthy,
+    ExampleDsl::TAst $_falsy,
+  ): ExampleDsl::TAst {
     throw new Exception();
   }
 
   // Statements.
   public function visitIf(
     ?ExprPos $_,
-    Code::TAst $_cond,
-    vec<Code::TAst> $_then_body,
-    vec<Code::TAst> $_else_body,
-  ): Code::TAst {
+    ExampleDsl::TAst $_cond,
+    vec<ExampleDsl::TAst> $_then_body,
+    vec<ExampleDsl::TAst> $_else_body,
+  ): ExampleDsl::TAst {
     throw new Exception();
   }
   public function visitWhile(
     ?ExprPos $_,
-    Code::TAst $_cond,
-    vec<Code::TAst> $_body,
-  ): Code::TAst {
+    ExampleDsl::TAst $_cond,
+    vec<ExampleDsl::TAst> $_body,
+  ): ExampleDsl::TAst {
     throw new Exception();
   }
-  public function visitReturn(?ExprPos $_, ?Code::TAst $_): Code::TAst {
+  public function visitReturn(?ExprPos $_, ?ExampleDsl::TAst $_): ExampleDsl::TAst {
     throw new Exception();
   }
   public function visitFor(
     ?ExprPos $_,
-    vec<Code::TAst> $_,
-    ?Code::TAst $_,
-    vec<Code::TAst> $_,
-    vec<Code::TAst> $_,
-  ): Code::TAst {
+    vec<ExampleDsl::TAst> $_,
+    ?ExampleDsl::TAst $_,
+    vec<ExampleDsl::TAst> $_,
+    vec<ExampleDsl::TAst> $_,
+  ): ExampleDsl::TAst {
     throw new Exception();
   }
-  public function visitBreak(?ExprPos $_): Code::TAst {
+  public function visitBreak(?ExprPos $_): ExampleDsl::TAst {
     throw new Exception();
   }
-  public function visitContinue(?ExprPos $_): Code::TAst {
+  public function visitContinue(?ExprPos $_): ExampleDsl::TAst {
     throw new Exception();
   }
   public function visitPropertyAccess(
     ?ExprPos $_,
-    Code::TAst $_,
+    ExampleDsl::TAst $_,
     string $_,
-  ): Code::TAst {
+  ): ExampleDsl::TAst {
     throw new Exception();
   }
   public function visitXhp(
     ?ExprPos $_,
     string $_,
-    dict<string, Code::TAst> $_,
-    vec<Code::TAst> $_,
-  ): Code::TAst {
+    dict<string, ExampleDsl::TAst> $_,
+    vec<ExampleDsl::TAst> $_,
+  ): ExampleDsl::TAst {
     throw new Exception();
   }
 
   public function visitInstanceMethod(
     ?ExprPos $_,
-    Code::TAst $_obj,
+    ExampleDsl::TAst $_obj,
     string $_method_name,
-  ): Code::TAst {
+  ): ExampleDsl::TAst {
     throw new Exception();
   }
 
   public function splice<T>(
     ?ExprPos $_,
     string $_key,
-    Spliceable<Code, Code::TAst, T> $_,
-  ): Code::TAst {
+    Spliceable<ExampleDsl, ExampleDsl::TAst, T> $_,
+  ): ExampleDsl::TAst {
     throw new Exception();
   }
 }
@@ -214,8 +228,10 @@ final class ExprTree<TVisitor, TResult, +TInfer>
   }
 }
 
+// The type of positions passed to the expression tree visitor.
 type ExprPos = shape(...);
 
+// Type declarations used when checking DSL expressions.
 interface ExampleMixed {
   public function __tripleEquals(ExampleMixed $_): ExampleBool;
   public function __notTripleEquals(ExampleMixed $_): ExampleBool;

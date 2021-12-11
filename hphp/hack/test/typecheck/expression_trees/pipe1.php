@@ -2,26 +2,26 @@
 
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
-function foo(int $_): ExprTree<Code, Code::TAst, ExampleInt> {
+function foo(int $_): ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt> {
   throw new Exception();
 }
 
-function bar(ExprTree<Code, Code::TAst, ExampleInt> $x): ExprTree<Code, Code::TAst, ExampleString> {
+function bar(ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt> $x): ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleString> {
   throw new Exception();
 }
 
 function helper_baz(ExampleContext $_):
-  Awaitable<ExprTree<Code, Code::TAst, (function(ExampleString): ExampleFloat)>>
+  Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, (function(ExampleString): ExampleFloat)>>
 {
   throw new Exception();
 }
 
-function test(): ExprTree<Code, Code::TAst, ExampleFloat> {
+function test(): ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleFloat> {
   $et = 1
     |> foo($$)
-    |> Code`${ $$ }`
+    |> ExampleDsl`${ $$ }`
     |> bar($$)
-    |> Code`helper_baz(${ $$ })`;
+    |> ExampleDsl`helper_baz(${ $$ })`;
 
   return $et;
 }

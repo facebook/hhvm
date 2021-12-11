@@ -3,7 +3,7 @@
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
 function foo(): void {
-  $n = Code`() ==> {
+  $n = ExampleDsl`() ==> {
     while(true) {
       continue;
     }

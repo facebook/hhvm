@@ -2,24 +2,24 @@
 
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
-function foo(int $_): ExprTree<Code, Code::TAst, ExampleInt> {
+function foo(int $_): ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt> {
   throw new Exception();
 }
 
-function bar(ExprTree<Code, Code::TAst, ExampleInt> $x): ExprTree<Code, Code::TAst, ExampleString> {
+function bar(ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt> $x): ExampleDsl<ExampleDsl, ExampleDsl::TAst, ExampleString> {
   throw new Exception();
 }
 
 function helper_baz(ExampleContext $_):
-  Awaitable<ExprTree<Code, Code::TAst, (function(ExampleString): ExampleFloat)>>
+  Awaitable<ExprTree<ExampleDsl, ExampleDsl::TAst, (function(ExampleString): ExampleFloat)>>
 {
   throw new Exception();
 }
 
-function test(): ExprTree<Code, Code::TAst, ExampleInt> {
+function test(): ExprTree<ExampleDsl, ExampleDsl::TAst, ExampleInt> {
   // PHP lambda bodies should not be traversed to find $$
   // But PHP lambda call arguments should
-  $et = 1 |> Code`${ (function($arg) {
+  $et = 1 |> ExampleDsl`${ (function($arg) {
       $x = $arg |> foo($$);
       return $x;
     })($$) }`;

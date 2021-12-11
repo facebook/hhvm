@@ -4,7 +4,7 @@
 
 function test(): void {
   // We append a return; to the end of these but should not affect their correctness
-  Code`
+  ExampleDsl`
     (ExampleBool $b): ExampleInt ==> {
       if ($b) {
         return 1;
@@ -14,7 +14,7 @@ function test(): void {
     }
   `;
 
-  Code`
+  ExampleDsl`
     (): ExampleInt ==> {
       return 1;
       1;

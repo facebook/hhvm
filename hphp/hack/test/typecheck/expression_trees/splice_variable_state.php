@@ -9,7 +9,7 @@ class Foo {
   }
 }
 
-function lift<T>(T $_): ExprTree<Code, Code::TAst, T> {
+function lift<T>(T $_): ExprTree<ExampleDsl, ExampleDsl::TAst, T> {
   throw new Exception();
 }
 
@@ -18,5 +18,5 @@ function test(): void {
 
   // Expression Trees do not inherit local variables from the outer scope
   // But splices do
-  $_ = Code`${lift($x + 1)}`;
+  $_ = ExampleDsl`${lift($x + 1)}`;
 }

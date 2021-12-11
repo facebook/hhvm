@@ -3,7 +3,7 @@
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
 function test(): void {
-  Code`(MyClass $x) ==> {
+  ExampleDsl`(MyClass $x) ==> {
     $x->foo(1);
   }`;
 }

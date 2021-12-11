@@ -10,16 +10,16 @@ final class MyClassWithPostfixPlusPlus {
 
 // These should all work without problem
 function test(): void {
-  Code`() ==> {
+  ExampleDsl`() ==> {
     $x = 1;
     $x++;
   }`;
 
-  Code`(ExampleInt $x) ==> {
+  ExampleDsl`(ExampleInt $x) ==> {
     $x++;
   }`;
 
-  Code`() ==> {
+  ExampleDsl`() ==> {
     $j = 0;
     for ($i = 0; $i < 10; $i++) {
       $j = $j + $i;
@@ -27,7 +27,7 @@ function test(): void {
     return $j;
   }`;
 
-  Code`(MyClassWithPostfixPlusPlus $i) ==> {
+  ExampleDsl`(MyClassWithPostfixPlusPlus $i) ==> {
     $i++;
   }`;
 }

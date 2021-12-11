@@ -108,7 +108,11 @@ let test () =
     let get_name i = "test" ^ string_of_int i ^ ".php" in
     Test.setup_disk env
     @@ List.mapi
-         (fun i contents -> (get_name i, contents))
+         (fun i contents ->
+           let clean_contents =
+             Str.global_replace (Str.regexp_string "AUTO332") "" contents
+           in
+           (get_name i, clean_contents))
          [
            autocomplete_contents0;
            autocomplete_contents1;
@@ -131,8 +135,8 @@ let test () =
       String_utils.substring_index AutocompleteTypes.autocomplete_token contents
     in
     let position = File_content.offset_to_position contents offset in
-    let line = position.File_content.line - 1 in
-    let column = position.File_content.column - 1 in
+    let line = position.File_content.line in
+    let column = position.File_content.column in
     let (_, loop_output) = Test.ide_autocomplete env (path, line, column) in
     Test.assert_ide_autocomplete loop_output expected
   in

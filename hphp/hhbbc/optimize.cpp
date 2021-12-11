@@ -82,10 +82,38 @@ bool ignoresStackInput(Op op) {
   not_reached();
 }
 
+/*
+ * Some ops are marked as "reading" a local, but we don't actually
+ * want to emit an AssertRATL for them.
+ */
+bool ignoresReadLocal(const Bytecode& bcode, LocalId l) {
+  auto const key = [&] (auto const& o) {
+    switch (o.mkey.mcode) {
+      case MEL:
+      case MPL:
+        return o.mkey.local.id != l;
+      default:
+        return true;
+    }
+  };
+
+  switch (bcode.op) {
+    // These might "read" a local because they can update a local base
+    // type, but they don't actual read the local.
+    case Op::Dim:       return key(bcode.Dim);
+    case Op::SetM:      return key(bcode.SetM);
+    case Op::IncDecM:   return key(bcode.IncDecM);
+    case Op::SetOpM:    return key(bcode.SetOpM);
+    case Op::UnsetM:    return key(bcode.UnsetM);
+    case Op::SetRangeM: return true;
+    default:            return false;
+  }
+}
+
 template<class TyBC, class ArgType>
 Optional<Bytecode> makeAssert(ArrayTypeTable::Builder& arrTable,
-                                     ArgType arg,
-                                     Type t) {
+                              ArgType arg,
+                              Type t) {
   if (t.subtypeOf(BBottom)) return std::nullopt;
   auto const rat = make_repo_type(arrTable, t);
   using T = RepoAuthType::Tag;
@@ -115,6 +143,7 @@ void insert_assertions_step(ArrayTypeTable::Builder& arrTable,
       if (i >= mayReadLocalSet.size()) break;
       if (!mayReadLocalSet.test(i)) continue;
     }
+    if (ignoresReadLocal(bcode, i)) continue;
     auto const realT = state.locals[i];
     auto const op = makeAssert<bc::AssertRATL>(arrTable, i, realT);
     if (op) gen(*op);

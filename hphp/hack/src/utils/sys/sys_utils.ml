@@ -520,6 +520,45 @@ external uptime : unit -> int = "hh_sysinfo_uptime"
 
 external nproc : unit -> int = "nproc"
 
+let ncores_linux_only cpuinfo =
+  (* How do cores and processors work?
+     There are S sockets, each with an L2 cache.
+     Each socket has C cores, sharing the L2 cache. These are true units of concurrent execution.
+     Each core has H hyperthreads, which share silicon and hence interleave.
+     This makes for S*C*H processors in total reported by nproc.
+     This function merely returns S*C. *)
+  (* Implementation strategy: read /proc/cpuinfo (which is linux-specific), which has a
+     load of entries for each processor. Each processor has an entry for 'physical id' which is
+     a unique identifier for which socket it's on, followed by "cpu cores" which is how many cores that
+     socket has. We'll gather up how many cpu cores each socket has. *)
+  let colon_re = Str.regexp_string ":" in
+  let lines = cpuinfo |> split_lines in
+  let current_socket_id = ref None in
+  let current_cores = ref None in
+  let sockets = ref SMap.empty in
+  let push () =
+    match !current_socket_id with
+    | None -> ()
+    | Some socket_id ->
+      sockets := SMap.add socket_id (Option.value_exn !current_cores) !sockets;
+      current_socket_id := None;
+      current_cores := None
+  in
+  List.iter lines ~f:(fun line ->
+      match Str.split colon_re line with
+      | [key; value] ->
+        let (key, value) = (String.strip key, String.strip value) in
+        if String.equal key "physical id" then begin
+          push ();
+          current_socket_id := Some value
+        end else if String.equal key "cpu cores" then
+          current_cores := Some (int_of_string value)
+        else
+          ()
+      | _ -> ());
+  push ();
+  SMap.fold (fun _physical_id cores total -> total + cores) !sockets 0
+
 let total_ram = get_total_ram ()
 
 let nbr_procs = nproc ()

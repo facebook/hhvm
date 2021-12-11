@@ -170,8 +170,17 @@ external get_total_ram : unit -> int = "hh_sysinfo_totalram"
 
 external uptime : unit -> int = "hh_sysinfo_uptime"
 
+(** returns the number of processors (which includes hyperthreads),
+as reported by  sysconf(_SC_NPROCESSORS_ONLN) *)
 external nproc : unit -> int = "nproc"
 
+(** linux: returns the number of cores (which doesn't include hyperthreads)
+by parsing the content of /proc/cpuinfo, which you pass as argument.
+If you're on a platform without /proc/cpuinfo, you won't even be able to call this!
+It will throw of /proc/cpuinfo is malformed. *)
+val ncores_linux_only : string -> int
+
+(** in bytes, as reported by sysinifo().totalram *)
 val total_ram : int
 
 val nbr_procs : int

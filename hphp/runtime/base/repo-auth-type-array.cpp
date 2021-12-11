@@ -213,6 +213,8 @@ void ArrayTypeTable::repopulate(const Builder& builder) {
 std::string show(const RepoAuthType::Array& ar) {
   auto ret = std::string{};
 
+  static constexpr size_t kPrintLimit = 4000;
+
   using A = RepoAuthType::Array;
   using T = A::Tag;
   switch (ar.emptiness()) {
@@ -229,6 +231,7 @@ std::string show(const RepoAuthType::Array& ar) {
     for (auto i = uint32_t{0}; i < ar.size(); ++i) {
       ret += show(ar.tupleElem(i));
       if (i != ar.size() - 1) ret += ',';
+      if (ret.size() > kPrintLimit) break;
     }
     break;
   case T::Packed:
@@ -237,6 +240,10 @@ std::string show(const RepoAuthType::Array& ar) {
   }
 
   ret += ')';
+  if (ret.size() > kPrintLimit) {
+    ret.resize(kPrintLimit);
+    ret += " <truncated>";
+  }
   return ret;
 }
 

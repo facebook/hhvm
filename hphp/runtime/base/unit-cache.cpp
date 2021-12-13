@@ -1308,15 +1308,6 @@ CachedUnit checkoutFile(
                             alreadyRealpath, forPrefetch);
 }
 
-const std::string mangleUnitPHP7Options() {
-  // As the list of options increases, we may want to do something smarter here?
-  std::string s;
-  s += (RuntimeOption::PHP7_NoHexNumerics ? '1' : '0') +
-      (RuntimeOption::PHP7_Builtins ? '1' : '0') +
-      (RuntimeOption::PHP7_Substr ? '1' : '0');
-  return s;
-}
-
 char mangleExtension(const folly::StringPiece fileName) {
   if (fileName.endsWith(".hack")) return '0';
   if (fileName.endsWith(".hackpartial")) return '1';
@@ -1336,43 +1327,9 @@ std::string mangleUnitSha1(const std::string& fileSha1,
                            const RepoOptions& opts) {
   std::string t = fileSha1 + '|'
     + repoSchemaId().toString()
-    + (RuntimeOption::EnableClassLevelWhereClauses ? '1' : '0')
-    + (RuntimeOption::EvalGenerateDocComments ? '1' : '0')
-    + (RuntimeOption::EnableXHP ? '1' : '0')
-    + (RuntimeOption::EvalEnableCallBuiltin ? '1' : '0')
-    + (RuntimeOption::EvalHackArrCompatSerializeNotices ? '1' : '0')
-    + (RuntimeOption::EvalHackCompilerVerboseErrors ? '1' : '0')
-    + (RuntimeOption::EvalJitEnableRenameFunction ? '1' : '0')
-    + (RuntimeOption::EvalLoadFilepathFromUnitCache ? '1' : '0')
-    + std::to_string(RuntimeOption::EvalForbidDynamicCallsToFunc)
-    + std::to_string(RuntimeOption::EvalForbidDynamicCallsToClsMeth)
-    + std::to_string(RuntimeOption::EvalForbidDynamicCallsToInstMeth)
-    + std::to_string(RuntimeOption::EvalForbidDynamicConstructs)
-    + (RuntimeOption::EvalForbidDynamicCallsWithAttr ? '1' : '0')
-    + (RuntimeOption::EvalLogKnownMethodsAsDynamicCalls ? '1' : '0')
-    + (RuntimeOption::EvalNoticeOnBuiltinDynamicCalls ? '1' : '0')
-    + std::to_string(RuntimeOption::EvalEnableReadonlyPropertyEnforcement)
-    + (RuntimeOption::EvalAssemblerFoldDefaultValues ? '1' : '0')
-    + (RuntimeOption::RepoDebugInfo ? '1' : '0')
-    + std::to_string(RuntimeOption::CheckIntOverflow)
-    + (RuntimeOption::DisableNontoplevelDeclarations ? '1' : '0')
-    + (RuntimeOption::EvalEnableImplicitContext ? '1' : '0')
-    + (RuntimeOption::EvalEmitClsMethPointers ? '1' : '0')
-    + (RuntimeOption::EvalIsVecNotices ? '1' : '0')
-    + (RuntimeOption::EvalAllowHhas ? '1' : '0')
-    + std::to_string(RuntimeOption::EvalEnforceGenericsUB)
-    + (RuntimeOption::EvalEmitMethCallerFuncPointers ? '1' : '0')
-    + std::to_string(RuntimeOption::EvalAssemblerMaxScalarSize)
-    + std::to_string(RuntimeOption::EvalEmitClassPointers)
-    + (RuntimeOption::EvalFoldLazyClassKeys ? '1' : '0')
-    + (RuntimeOption::EvalEnableAbstractContextConstants ? '1': '0')
-    + (RuntimeOption::EvalTraitConstantInterfaceBehavior ? '1' : '0')
-    + RuntimeOption::EvalUnitCacheBreaker + '|'
-    + (RuntimeOption::EvalDiamondTraitMethods ? '1' : '0')
-    + CoeffectsConfig::mangle()
+    + RuntimeOption::getUnitCacheBreakingOptions()
     + opts.cacheKeySha1().toString()
-    + mangleExtension(fileName)
-    + mangleUnitPHP7Options();
+    + mangleExtension(fileName);
   return string_sha1(t);
 }
 

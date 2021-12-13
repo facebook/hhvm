@@ -24,6 +24,7 @@
 #include <string_view>
 #include <sys/types.h>
 
+#include <folly/Conv.h>
 #include <folly/Hash.h>
 #include <folly/concurrency/ConcurrentHashMap.h>
 #include <folly/executors/GlobalExecutor.h>
@@ -91,6 +92,25 @@ folly::fs::path getRepoRoot(const RepoOptions& options) {
   return folly::fs::canonical(folly::fs::path{options.path()}.parent_path());
 }
 
+std::string
+getCacheBreakerSchemaHash(std::string_view root, const RepoOptions& opts) {
+  std::string repoSchemaIdHash = repoSchemaId().toString();
+  std::string runtimeOpts = RuntimeOption::getUnitCacheBreakingOptions();
+  std::string optsHash = opts.cacheKeySha1().toString();
+  XLOG(INFO) << "Native Facts DB cache breaker."
+             << "\n Repo Schema ID: " << repoSchemaIdHash
+             << "\n RuntimeOptions: " << runtimeOpts << "\n Root: " << root
+             << "\n RepoOpts hash: " << optsHash;
+  std::string runtimeOptsHash = string_sha1(runtimeOpts);
+  std::string rootHash = string_sha1(root);
+  repoSchemaIdHash.resize(10);
+  runtimeOptsHash.resize(10);
+  optsHash.resize(10);
+  rootHash.resize(10);
+  return folly::to<std::string>(
+      repoSchemaIdHash, '_', runtimeOptsHash, '_', optsHash, '_', rootHash);
+}
+
 folly::fs::path getDBPath(const RepoOptions& repoOptions) {
   always_assert(!RuntimeOption::AutoloadDBPath.empty());
   std::string pathTemplate{RuntimeOption::AutoloadDBPath};
@@ -111,7 +131,7 @@ folly::fs::path getDBPath(const RepoOptions& repoOptions) {
       pathTemplate.replace(
           idx,
           kSchemaPlaceholder.size(),
-          mangleUnitSha1(root.native(), repoOptions.path(), repoOptions));
+          getCacheBreakerSchemaHash(root.native(), repoOptions));
     }
   }
 

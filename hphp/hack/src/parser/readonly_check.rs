@@ -533,11 +533,17 @@ impl Checker {
         context: &mut Context,
         lenv: Lenv,
         b: &mut aast::Block<(), ()>,
+        as_expr_var_info: Option<(String, Rty)>,
     ) -> Lenv {
+        let mut new_lenv = lenv.clone();
+        // Reassign the as_expr_var_info on every iteration of the loop
+        if let Some((ref var_name, rty)) = as_expr_var_info {
+            new_lenv.insert(var_name.clone(), rty);
+        }
         // run the block once and merge the environment
-        let new_lenv = merge_lenvs(&lenv, &self.handle_single_block(context, lenv.clone(), b));
+        let new_lenv = merge_lenvs(&lenv, &self.handle_single_block(context, new_lenv, b));
         if new_lenv.num_readonly > lenv.num_readonly {
-            self.handle_loop(context, new_lenv, b)
+            self.handle_loop(context, new_lenv, b, as_expr_var_info)
         } else {
             new_lenv
         }
@@ -634,6 +640,10 @@ impl<'ast> VisitorMut<'ast> for Checker {
     }
 
     fn visit_expr(&mut self, context: &mut Context, p: &mut aast::Expr<(), ()>) -> Result<(), ()> {
+        if !self.is_typechecker {
+            // recurse on inner members first, then assign to value
+            p.recurse(context, self.object())?;
+        }
         match &mut p.2 {
             aast::Expr_::Binop(x) => {
                 let (bop, e_lhs, e_rhs) = x.as_mut();
@@ -674,12 +684,13 @@ impl<'ast> VisitorMut<'ast> for Checker {
                 let left_rty = rty_expr(context, left);
                 context.add_local(&dollardollar, left_rty);
             }
-
             _ => {}
         }
-
-
-        p.recurse(context, self.object())
+        if self.is_typechecker {
+            p.recurse(context, self.object())
+        } else {
+            Ok(())
+        }
     }
 
     fn visit_xhp_simple(
@@ -771,11 +782,17 @@ impl<'ast> VisitorMut<'ast> for Checker {
             }
             aast::Stmt_::Foreach(f) => {
                 let (e, as_expr, b) = &mut **f;
+                // Tracks what variable is being assigned each iteration of the loop
+                let mut as_expr_var_info = None;
                 match as_expr {
                     aast::AsExpr::AsV(aast::Expr(_, _, E_::Lvar(id))) => {
                         let var_name = local_id::get_name(&id.1);
                         let rty = rty_expr(context, e);
-                        context.add_local(var_name, rty)
+                        if !context.is_typechecker {
+                            as_expr_var_info = Some((var_name.to_string(), rty));
+                        } else {
+                            context.add_local(var_name, rty)
+                        }
                     }
                     aast::AsExpr::AsKv(
                         _, // key is arraykey and does not need to be readonly
@@ -783,12 +800,20 @@ impl<'ast> VisitorMut<'ast> for Checker {
                     ) => {
                         let var_name = local_id::get_name(&value_id.1);
                         let rty = rty_expr(context, e);
-                        context.add_local(var_name, rty);
+                        if !context.is_typechecker {
+                            as_expr_var_info = Some((var_name.to_string(), rty));
+                        } else {
+                            context.add_local(var_name, rty)
+                        }
                     }
                     aast::AsExpr::AwaitAsV(_, aast::Expr(_, _, E_::Lvar(id))) => {
                         let var_name = local_id::get_name(&id.1);
                         let rty = rty_expr(context, e);
-                        context.add_local(var_name, rty)
+                        if !context.is_typechecker {
+                            as_expr_var_info = Some((var_name.to_string(), rty));
+                        } else {
+                            context.add_local(var_name, rty)
+                        }
                     }
                     aast::AsExpr::AwaitAsKv(
                         _,
@@ -797,7 +822,11 @@ impl<'ast> VisitorMut<'ast> for Checker {
                     ) => {
                         let var_name = local_id::get_name(&value_id.1);
                         let rty = rty_expr(context, e);
-                        context.add_local(var_name, rty);
+                        if !context.is_typechecker {
+                            as_expr_var_info = Some((var_name.to_string(), rty));
+                        } else {
+                            context.add_local(var_name, rty)
+                        }
                     }
                     // Any other Foreach here would mean no Lvar
                     // where an Lvar is needed. In those cases
@@ -809,7 +838,7 @@ impl<'ast> VisitorMut<'ast> for Checker {
                 self.visit_expr(context, e)?;
                 as_expr.recurse(context, self.object())?;
                 let old_lenv = context.locals.clone();
-                let new_lenv = self.handle_loop(context, old_lenv, b);
+                let new_lenv = self.handle_loop(context, old_lenv, b, as_expr_var_info);
                 context.locals = new_lenv;
                 Ok(())
             }
@@ -817,7 +846,7 @@ impl<'ast> VisitorMut<'ast> for Checker {
                 let (b, cond) = &mut **d;
                 // loop runs at least once
                 let new_lenv = self.handle_single_block(context, context.locals.clone(), b);
-                let block_lenv = self.handle_loop(context, new_lenv, b);
+                let block_lenv = self.handle_loop(context, new_lenv, b, None);
                 context.locals = block_lenv;
                 self.visit_expr(context, cond)
             }
@@ -825,7 +854,7 @@ impl<'ast> VisitorMut<'ast> for Checker {
                 let (cond, b) = &mut **w;
                 self.visit_expr(context, cond)?;
                 let old_lenv = context.locals.clone();
-                let new_lenv = self.handle_loop(context, old_lenv, b);
+                let new_lenv = self.handle_loop(context, old_lenv, b, None);
                 context.locals = new_lenv;
                 Ok(())
             }
@@ -844,7 +873,9 @@ impl<'ast> VisitorMut<'ast> for Checker {
                     self.visit_expr(context, inc)?;
                 }
                 let old_lenv = context.locals.clone();
-                let new_lenv = self.handle_loop(context, old_lenv, b);
+                // Technically, for loops can have an as_expr_var_info as well, but it's very rare to write
+                // one where this occurs, so we will just be conservative
+                let new_lenv = self.handle_loop(context, old_lenv, b, None);
                 context.locals = new_lenv;
                 Ok(())
             }

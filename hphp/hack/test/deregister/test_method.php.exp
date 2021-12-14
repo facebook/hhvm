@@ -1,6 +1,6 @@
 File "test_method.php", line 4, characters 13-29:
 No static method `getUnicodeVersion` in `IntlChar` (Typing[4090])
-  File "stdlib/builtins_icu_uchar.hhi", line 694, characters 26-38:
-  Did you mean `charDirection` instead?
+  File "stdlib/builtins_icu_uchar.hhi", line 663, characters 26-32:
+  Did you mean `charAge` instead?
   File "stdlib/builtins_icu_uchar.hhi", line 3, characters 7-14:
   Declaration of `IntlChar` is here

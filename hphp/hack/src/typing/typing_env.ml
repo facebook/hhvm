@@ -761,12 +761,13 @@ let most_similar (name : string) (possibilities : 'a list) (f : 'a -> string) :
   | [] -> None
   | [x] -> Some x
   | x :: xs ->
+    (* The initial distance upper bound here is chosen practically. It reduces
+       the amount of work we do while computing the Levenshtein distance, but
+       does not regress any of the suggestions in the test suite. *)
+    let init = (x, distance 10 (f x) name) in
     Some
       (fst
-      @@ List.fold
-           xs
-           ~init:(x, distance (Int.max_value - 1) (f x) name)
-           ~f:(fun (current_best, best_distance) possibility ->
+      @@ List.fold xs ~init ~f:(fun (current_best, best_distance) possibility ->
              let (new_best, new_best_distance) =
                choose_closest ~best:(current_best, best_distance) possibility
              in

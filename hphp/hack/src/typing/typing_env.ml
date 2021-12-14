@@ -749,17 +749,28 @@ let get_static_member is_method env class_ mid =
    the item whose name is closest to `name`. *)
 let most_similar (name : string) (possibilities : 'a list) (f : 'a -> string) :
     'a option =
-  let distance = String_utils.levenshtein_distance in
-  let choose_closest x y =
-    if distance (f x) name < distance (f y) name then
-      x
+  let distance upper_bound = String_utils.levenshtein_distance ~upper_bound in
+  let choose_closest ~best:(best, best_distance) candidate =
+    let candidate_distance = distance (best_distance + 1) (f candidate) name in
+    if best_distance <= candidate_distance then
+      (best, best_distance)
     else
-      y
+      (candidate, candidate_distance)
   in
-  List.fold possibilities ~init:None ~f:(fun acc possibility ->
-      match acc with
-      | None -> Some possibility
-      | Some current_best -> Some (choose_closest current_best possibility))
+  match possibilities with
+  | [] -> None
+  | [x] -> Some x
+  | x :: xs ->
+    Some
+      (fst
+      @@ List.fold
+           xs
+           ~init:(x, distance (Int.max_value - 1) (f x) name)
+           ~f:(fun (current_best, best_distance) possibility ->
+             let (new_best, new_best_distance) =
+               choose_closest ~best:(current_best, best_distance) possibility
+             in
+             (new_best, new_best_distance)))
 
 let suggest_member members mid =
   let pairs =

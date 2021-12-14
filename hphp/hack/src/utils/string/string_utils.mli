@@ -163,4 +163,4 @@ module CharSet : sig
   val to_string : t -> string
 end
 
-val levenshtein_distance : string -> string -> int
+val levenshtein_distance : ?upper_bound:int -> string -> string -> int

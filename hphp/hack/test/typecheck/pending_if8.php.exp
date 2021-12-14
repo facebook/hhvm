@@ -1,4 +1,4 @@
 File "pending_if8.php", line 20, characters 10-11:
 Variable `$x` is undefined, or not always defined. (Naming[2050])
-File "pending_if8.php", line 12, characters 17-18:
-Did you mean `$b` instead?
+  File "pending_if8.php", line 12, characters 26-27:
+  Did you mean `$c` instead?

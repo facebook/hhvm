@@ -276,39 +276,45 @@ https://bitbucket.org/camlspotter/ocaml_levenshtein/src/default/
 
  *)
 
-let levenshtein_distance (xs : string) (ys : string) =
+let levenshtein_distance ?(upper_bound = max_int) (xs : string) (ys : string) =
+  let xs_len = String.length xs in
+  let ys_len = String.length ys in
   let min3 (x : int) y z =
     let m' (a : int) b =
-      if a < b then
+      if a <= b then
         a
       else
         b
     in
     m' (m' x y) z
   in
-  let cache =
-    Array.init
-      (String.length xs + 1)
-      (fun _ -> Array.make (String.length ys + 1) (-1))
-  in
+  let cache = Array.init (xs_len + 1) (fun _ -> Array.make (ys_len + 1) (-1)) in
   let rec d i j =
     match (i, j) with
     | (0, _) -> j
     | (_, 0) -> i
     | _ ->
-      let cache_i = Array.unsafe_get cache i in
-      (match Array.unsafe_get cache_i j with
+      let i' = i - 1 in
+      let cache_i = Array.unsafe_get cache i' in
+      let j' = j - 1 in
+      (match Array.unsafe_get cache_i j' with
       | -1 ->
         let res =
-          let i' = i - 1 in
-          let j' = j - 1 in
-          min3
-            (d i' j + 1)
-            (d i j' + 1)
-            (d i' j' + abs (compare xs.[i'] ys.[j']))
+          let upleft = d i' j' in
+          if upleft >= upper_bound then
+            upper_bound
+          else
+            let cost = abs (compare xs.[i'] ys.[j']) in
+            let upleft' = upleft + cost in
+            if upleft' >= upper_bound then
+              upper_bound
+            else
+              (* This is not tail recursive *)
+              min3 (d i' j + 1) (d i j' + 1) upleft'
         in
-        Array.unsafe_set cache_i j res;
+        Array.unsafe_set cache_i j' res;
         res
       | res -> res)
   in
-  d (String.length xs) (String.length ys)
+  let res = min (d xs_len ys_len) upper_bound in
+  res

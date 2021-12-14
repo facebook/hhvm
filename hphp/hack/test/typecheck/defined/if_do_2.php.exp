@@ -1,4 +1,4 @@
 File "if_do_2.php", line 14, characters 10-11:
 Variable `$y` is undefined, or not always defined. (Naming[2050])
-File "if_do_2.php", line 3, characters 19-20:
-Did you mean `$b` instead?
+  File "if_do_2.php", line 6, characters 7-12:
+  Did you mean `$x` instead?

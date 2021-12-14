@@ -1,20 +1,20 @@
 File "finally_naming.php", line 20, characters 12-13:
 Variable `$b` is undefined, or not always defined. (Naming[2050])
-File "finally_naming.php", line 16, characters 5-12:
-Did you mean `$a` instead?
+  File "finally_naming.php", line 19, characters 26-27:
+  Did you mean `$e` instead?
 File "finally_naming.php", line 24, characters 10-11:
 Variable `$b` is undefined, or not always defined. (Naming[2050])
-File "finally_naming.php", line 16, characters 5-12:
-Did you mean `$a` instead?
+  File "finally_naming.php", line 16, characters 5-12:
+  Did you mean `$a` instead?
 File "finally_naming.php", line 20, characters 12-19:
 Invalid return type (Typing[4110])
-File "finally_naming.php", line 13, characters 28-30:
-Expected `int`
-File "finally_naming.php", line 20, characters 12-19:
-But got `bool` because this is the result of a comparison
+  File "finally_naming.php", line 13, characters 28-30:
+  Expected `int`
+  File "finally_naming.php", line 20, characters 12-19:
+  But got `bool` because this is the result of a comparison
 File "finally_naming.php", line 22, characters 12-20:
 Invalid return type (Typing[4110])
-File "finally_naming.php", line 13, characters 28-30:
-Expected `int`
-File "finally_naming.php", line 22, characters 12-20:
-But got `bool` because this is the result of a comparison
+  File "finally_naming.php", line 13, characters 28-30:
+  Expected `int`
+  File "finally_naming.php", line 22, characters 12-20:
+  But got `bool` because this is the result of a comparison

@@ -25,6 +25,7 @@
 #include <folly/ScopeGuard.h>
 
 #include "hphp/runtime/vm/unit-emitter.h"
+#include "hphp/util/struct-log.h"
 
 #include "hphp/hhbbc/analyze.h"
 #include "hphp/hhbbc/class-util.h"
@@ -554,6 +555,7 @@ void whole_program(php::ProgramPtr program,
                    std::unique_ptr<ArrayTypeTable::Builder>& arrTable,
                    int num_threads,
                    std::promise<void>* arrTableReady) {
+  StructuredLogEntry sample;
   trace_time tracer("whole program");
 
   if (options.TestCompression || RO::EvalHHBBCTestCompression) {
@@ -615,6 +617,8 @@ void whole_program(php::ProgramPtr program,
     );
   }
 
+  auto num_units = program->units.size();
+
   auto const logging = Trace::moduleEnabledRelease(Trace::hhbbc_time, 1);
   // running cleanup_for_emit can take a while... start it as early as
   // possible, and run in its own thread.
@@ -636,7 +640,14 @@ void whole_program(php::ProgramPtr program,
   cleanup_pre.join();
   cleanup_post.join();
 
-  summarize_memory();
+  summarize_memory(sample);
+  if (num_units >= RuntimeOption::EvalHHBBCMinUnitsToLog) {
+    // num_units includes systemlib, around 200 units. Only log big builds.
+    sample.setInt("num_units", num_units);
+    sample.setInt(tracer.label(), tracer.elapsed_ms());
+    sample.force_init = true;
+    StructuredLog::log("hhvm_whole_program", sample);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

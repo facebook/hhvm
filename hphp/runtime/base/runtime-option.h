@@ -767,6 +767,10 @@ struct RuntimeOption {
   F(bool, UseHHBBC,                    !getenv("HHVM_DISABLE_HHBBC"))   \
   /* Equivalent to setting the --test-compression HHBBC-only flag. */   \
   F(bool, HHBBCTestCompression,        false)                           \
+  /* Threshold number of units to log to hhvm_whole_program table.
+     systemlib has around 200 units, so use a larger default to avoid
+     logging for unit tests. */                                         \
+  F(uint32_t, HHBBCMinUnitsToLog,      1000)                            \
   F(bool, EnablePerRepoOptions,        true)                            \
   F(bool, CachePerRepoOptionsPath,     true)                            \
   F(bool, LogHackcMemStats,            false)                           \

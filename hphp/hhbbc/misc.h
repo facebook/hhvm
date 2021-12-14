@@ -32,7 +32,11 @@ struct StringData;
 struct ArrayData;
 }
 
-namespace HPHP { namespace HHBBC {
+namespace HPHP {
+
+struct StructuredLogEntry;
+
+namespace HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -102,7 +106,7 @@ constexpr int kStatsBump = 50;
 //////////////////////////////////////////////////////////////////////
 
 void profile_memory(const char* what, const char* when, const std::string&);
-void summarize_memory();
+void summarize_memory(StructuredLogEntry&);
 
 struct trace_time {
   using clock      = std::chrono::system_clock;
@@ -148,6 +152,15 @@ struct trace_time {
 
   trace_time(const trace_time&) = delete;
   trace_time& operator=(const trace_time&) = delete;
+
+  const char* label() const {
+    return what;
+  }
+
+  int64_t elapsed_ms() const {
+    namespace C = std::chrono;
+    return C::duration_cast<C::milliseconds>(clock::now() - start).count();
+  }
 
 private:
   std::string ts(time_point t) {

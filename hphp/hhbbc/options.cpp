@@ -99,20 +99,34 @@ void profile_memory(const char* what, const char* when,
   jemalloc_pprof_dump(name, true);
 }
 
-void summarize_memory() {
-  std::lock_guard<std::mutex> _{s_maxMemMutex};
-  if (!s_maxMemUsageMb) return;
+void summarize_memory(StructuredLogEntry& sample) {
+  std::string phase, lowPhase;
+  int64_t usageMb;
+  size_t lowMb, sstrMb;
+
+  {
+    // Snapshot the values to log while holding lock.
+    std::lock_guard<std::mutex> _{s_maxMemMutex};
+    if (!s_maxMemUsageMb) return;
+    phase = s_maxMemPhase;
+    usageMb = s_maxMemUsageMb;
+    lowPhase = s_maxLowMemPhase;
+    lowMb = s_maxLowMemMb;
+    sstrMb = s_maxSStringMb;
+  }
+
   Logger::Info("%s", folly::sformat(
-    "Max RSS at {}: {} Mb",
-    s_maxMemPhase,
-    s_maxMemUsageMb
+    "Max RSS at {}: {} Mb", phase, usageMb
   ).c_str());
   Logger::Info("%s", folly::sformat(
-    "Max low-mem at {}: {} Mb [{} Mb sstrings]",
-    s_maxLowMemPhase,
-    s_maxLowMemMb,
-    s_maxSStringMb
+    "Max low-mem at {}: {} Mb [{} Mb sstrings]", lowPhase, lowMb, sstrMb
   ).c_str());
+
+  sample.setStr("max_rss_phase", phase);
+  sample.setInt("max_rss", usageMb << 20);
+  sample.setStr("max_lowmem_phase", lowPhase);
+  sample.setInt("max_lowmem", lowMb << 20);
+  sample.setInt("max_sstr", sstrMb << 20);
 }
 
 //////////////////////////////////////////////////////////////////////

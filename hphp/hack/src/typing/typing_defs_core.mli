@@ -393,6 +393,8 @@ module Flags : sig
 
   val get_ft_readonly_this : 'a fun_type -> bool
 
+  val set_ft_readonly_this : 'a fun_type -> bool -> 'a fun_type
+
   val get_ft_support_dynamic_type : 'a fun_type -> bool
 
   val get_fp_ifc_can_call : 'a fun_param -> bool

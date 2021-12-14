@@ -650,6 +650,13 @@ let set_function_pointer ty =
     mk (get_reason ty, Tfun ft)
   | _ -> ty
 
+let set_readonly_this ty =
+  match get_node ty with
+  | Tfun ft ->
+    let ft = set_ft_readonly_this ft true in
+    mk (get_reason ty, Tfun ft)
+  | _ -> ty
+
 let xhp_attribute_decl_ty env sid obj attr =
   let (namepstr, valpty) = attr in
   let (valp, valty) = valpty in
@@ -3224,6 +3231,8 @@ and expr_
     in
     let env = Env.set_tyvar_variance env fpty in
     let fpty = set_function_pointer fpty in
+    (* All function pointers are readonly_this since they are either toplevel or static *)
+    let fpty = set_readonly_this fpty in
     make_result
       env
       p
@@ -3550,6 +3559,8 @@ and expr_
     let (env, fty, targs) = fun_type_of_id env fid targs [] in
     let e = Aast.FunctionPointer (FP_id fid, targs) in
     let fty = set_function_pointer fty in
+    (* All function pointers are readonly_this since they are always a toplevel function or static method *)
+    let fty = set_readonly_this fty in
     make_result env p e fty
   | Binop (Ast_defs.QuestionQuestion, e1, e2) ->
     let (_, e1_pos, _) = e1 in

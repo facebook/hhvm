@@ -1589,33 +1589,37 @@ let update_variance_after_bind env var ty =
 let set_tyvar_variance_i env ?(flip = false) ?(for_all_vars = false) ty =
   log_env_change "set_tyvar_variance" env
   @@
-  let (env, positive, negative) = get_tyvars_i env ty in
-  let (positive, negative) =
-    if flip then
-      (negative, positive)
-    else
-      (positive, negative)
-  in
-  let tyvars =
-    if for_all_vars then
-      ISet.union positive negative |> ISet.elements
-    else
-      get_current_tyvars env
-  in
-  List.fold_left tyvars ~init:env ~f:(fun env var ->
-      let env =
-        if ISet.mem var positive then
-          set_tyvar_appears_covariantly env var
-        else
-          env
-      in
-      let env =
-        if ISet.mem var negative then
-          set_tyvar_appears_contravariantly env var
-        else
-          env
-      in
-      env)
+  let current = get_current_tyvars env in
+  if (not for_all_vars) && List.is_empty current then
+    env
+  else
+    let (env, positive, negative) = get_tyvars_i env ty in
+    let (positive, negative) =
+      if flip then
+        (negative, positive)
+      else
+        (positive, negative)
+    in
+    let tyvars =
+      if for_all_vars then
+        ISet.union positive negative |> ISet.elements
+      else
+        current
+    in
+    List.fold_left tyvars ~init:env ~f:(fun env var ->
+        let env =
+          if ISet.mem var positive then
+            set_tyvar_appears_covariantly env var
+          else
+            env
+        in
+        let env =
+          if ISet.mem var negative then
+            set_tyvar_appears_contravariantly env var
+          else
+            env
+        in
+        env)
 
 let set_tyvar_variance env ?(flip = false) ?(for_all_vars = false) ty =
   set_tyvar_variance_i env ~flip ~for_all_vars (LoclType ty)

@@ -41,6 +41,10 @@ static int num_readings;
 // including the leading "/sys/fs/group/" and the trailing "/memory.current"
 static char *path = NULL;
 
+// The seconds_at_gb array will be relative to this, e.g. a reading of Xgb
+// would increment the tally kept at seconds_at_gb[X-subtract_kb_for_array/1GiB].
+static int subtract_kb_for_array;
+
 // 1 or 0 for whether the thread has been launched
 static int thread_is_running = 0;
 
@@ -72,11 +76,23 @@ static void *threadfunc(void *arg) {
       const double seconds = (double)( t.tv_sec - tprev.tv_sec ) + (((double)(t.tv_nsec - tprev.tv_nsec)) / 1000000000.0);
       tprev = t;
 
-      const int kb = get_mem_kb();
+      int kb = get_mem_kb();
+      int kb0 = kb;
       if (kb >= 0) {
         hwm_kb = kb > hwm_kb ? kb : hwm_kb;
-        const int gb = kb / 1024 / 1024;
-        seconds_at_gb[gb >= GB_MAX ? GB_MAX-1 : gb] += seconds;
+        kb -= subtract_kb_for_array;
+        if (kb < 0) {
+          // Underflow, because the value dropped below what it was initially.
+          // We'll "clip" it, tallying it under seconds_at_gb[0]
+          kb = 0;
+        }
+        int gb = kb / 1024 / 1024;
+        if (gb >= GB_MAX) {
+          // Overflow, because the value was higher than we ever dreamt.
+          // We'll "clip" it, tallying it under seconds_at_gb[GB_MAX-1]
+          gb = GB_MAX-1;
+        }
+        seconds_at_gb[gb] += seconds;
         num_readings += 1;
       }
 
@@ -90,14 +106,16 @@ static void *threadfunc(void *arg) {
 // This will (1) reset the counters and update [path] so threadfunc will pick up the new value next tick,
 // (2) starts the thread if it's not already running.
 // Any failures aren't reported here; they're manifest in [cgroup_watcher_get]
-CAMLprim value cgroup_watcher_start(value p) {
-  CAMLparam1(p);
-  const char *cpath = String_val(p);
+CAMLprim value cgroup_watcher_start(value path_, value subtract_kb_for_array_) {
+  CAMLparam2(path_, subtract_kb_for_array_);
+  const char *cpath = String_val(path_);
+  int csubtract_kb_for_array = Int_val(subtract_kb_for_array_);
   int rc;
   if (pthread_mutex_lock(&lock) == 0) {
     if (path != NULL) free(path);
     path = malloc(strlen(cpath) + 1);
     strcpy(path, cpath);
+    subtract_kb_for_array = csubtract_kb_for_array;
     hwm_kb = 0;
     num_readings = 0;
     for (int i=0; i<GB_MAX; i++) {

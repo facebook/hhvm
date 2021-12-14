@@ -20,6 +20,7 @@ type t = {
   paths_to_ignore: Str.regexp list;
   no_load: bool;
   logging_init: unit -> unit;
+  cgroup_initial_reading: CgroupProfiler.initial_reading;
 }
 
 let save ~logging_init =
@@ -36,6 +37,7 @@ let save ~logging_init =
     paths_to_ignore = FilesToIgnore.get_paths_to_ignore ();
     no_load = ServerLoadFlag.get_no_load ();
     logging_init;
+    cgroup_initial_reading = CgroupProfiler.get_initial_reading ();
   }
 
 let worker_id_str ~(worker_id : int) =
@@ -58,6 +60,7 @@ let restore
       paths_to_ignore;
       no_load;
       logging_init;
+      cgroup_initial_reading;
     }
     ~(worker_id : int) =
   Hh_logger.set_id (worker_id_str ~worker_id);
@@ -74,6 +77,7 @@ let restore
   FilesToIgnore.set_paths_to_ignore paths_to_ignore;
   ServerLoadFlag.set_no_load no_load;
   Errors.set_allow_errors_in_default_path false;
+  CgroupProfiler.use_initial_reading cgroup_initial_reading;
   logging_init ()
 
 let to_string
@@ -90,6 +94,7 @@ let to_string
       paths_to_ignore = _;
       no_load = _;
       logging_init = _;
+      cgroup_initial_reading = _;
     } =
   let saved_root = Path.to_string saved_root in
   let saved_hhi = Path.to_string saved_hhi in

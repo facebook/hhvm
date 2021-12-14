@@ -156,12 +156,15 @@ let start () =
   (* TODO: Catch all exceptions that make it this high, log them, and exit with
    * the proper code *)
   try
-    (* This avoids dying if SIGUSR{1,2} is received by accident *)
+    (* This avoids dying if SIGUSR{1,2} is received by accident: *)
     Sys_utils.set_signal Sys.sigusr1 Sys.Signal_ignore;
     Sys_utils.set_signal Sys.sigusr2 Sys.Signal_ignore;
+    (* This call might not return: *)
     Daemon.check_entry_point ();
+    (* This allows us to measure cgroups relative to what it was at startup: *)
+    CgroupProfiler.get_initial_reading () |> CgroupProfiler.use_initial_reading;
+    (* Yet more initialization: *)
     Folly.ensure_folly_init ();
-    (* this call might not return *)
     let proc_stack =
       match Proc.get_proc_stack ~max_length:1000 (Unix.getpid ()) with
       | Ok proc_stack -> proc_stack

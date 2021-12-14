@@ -477,6 +477,11 @@ module CGroup = struct
       ~step_group:_
       ~step:_
       ~start_time:_
+      ~total_relative_to:_
+      ~totalswap_relative_to:_
+      ~anon_relative_to:_
+      ~shmem_relative_to:_
+      ~file_relative_to:_
       ~total_start:_
       ~totalswap_start:_
       ~anon_start:_
@@ -488,8 +493,8 @@ module CGroup = struct
       ~anon:_
       ~shmem:_
       ~file:_
-      ~gbs:_
-      ~secs_above:_ =
+      ~secs_at_total_gb:_
+      ~secs_above_total_gb_summary:_ =
     ()
 end
 

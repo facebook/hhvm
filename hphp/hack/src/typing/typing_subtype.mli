@@ -49,7 +49,7 @@ val sub_type :
   ?is_coeffect:bool ->
   locl_ty ->
   locl_ty ->
-  Errors.error_from_reasons_callback ->
+  Errors.Reasons_callback.t ->
   env
 
 (**
@@ -71,32 +71,28 @@ val sub_type_res :
   ?coerce:Typing_logic.coercion_direction option ->
   locl_ty ->
   locl_ty ->
-  Errors.error_from_reasons_callback ->
+  Errors.Reasons_callback.t ->
   (env, env) result
 
 val sub_type_with_dynamic_as_bottom :
-  env -> locl_ty -> locl_ty -> Errors.error_from_reasons_callback -> env
+  env -> locl_ty -> locl_ty -> Errors.Reasons_callback.t -> env
 
 val sub_type_with_dynamic_as_bottom_res :
-  env ->
-  locl_ty ->
-  locl_ty ->
-  Errors.error_from_reasons_callback ->
-  (env, env) result
+  env -> locl_ty -> locl_ty -> Errors.Reasons_callback.t -> (env, env) result
 
 val sub_type_i :
   env ->
   ?is_coeffect:bool ->
   internal_type ->
   internal_type ->
-  Errors.error_from_reasons_callback ->
+  Errors.Reasons_callback.t ->
   env
 
 val sub_type_i_res :
   env ->
   internal_type ->
   internal_type ->
-  Errors.error_from_reasons_callback ->
+  Errors.Reasons_callback.t ->
   (env, env) result
 
 val add_constraint :
@@ -104,7 +100,7 @@ val add_constraint :
   Ast_defs.constraint_kind ->
   locl_ty ->
   locl_ty ->
-  Errors.error_from_reasons_callback ->
+  Errors.Reasons_callback.t ->
   env
 
 val add_constraints :
@@ -118,12 +114,12 @@ val simplify_subtype_i :
   env ->
   internal_type ->
   internal_type ->
-  on_error:Errors.error_from_reasons_callback ->
+  on_error:Errors.Reasons_callback.t ->
   env * Typing_logic.subtype_prop
 
 val subtype_funs :
   check_return:bool ->
-  on_error:Errors.error_from_reasons_callback ->
+  on_error:Errors.Reasons_callback.t ->
   Reason.t ->
   locl_fun_type ->
   Reason.t ->
@@ -141,5 +137,5 @@ val subtype_funs :
 val prop_to_env :
   env ->
   Typing_logic.subtype_prop ->
-  Errors.error_from_reasons_callback ->
+  Errors.Reasons_callback.t ->
   env * Typing_logic.subtype_prop

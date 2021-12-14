@@ -69,7 +69,7 @@ let typedef_def ctx typedef =
         env
         ty
         cstr
-        Errors.newtype_alias_must_satisfy_constraint
+        Errors.Callback.newtype_alias_must_satisfy_constraint
     | _ -> env
   in
   let env =

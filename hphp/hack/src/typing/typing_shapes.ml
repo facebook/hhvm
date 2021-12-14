@@ -236,7 +236,7 @@ let idx
             env
             shape_ty
             { et_type = super_shape; et_enforced = Unenforced }
-            Errors.unify_error
+            Errors.Callback.unify_error
         in
         TUtils.union env res (MakeType.null fun_pos)
       | Some (default_pos, default_ty) ->
@@ -247,7 +247,7 @@ let idx
             env
             shape_ty
             { et_type = super_shape; et_enforced = Unenforced }
-            Errors.unify_error
+            Errors.Callback.unify_error
         in
         let env =
           Type.sub_type
@@ -256,7 +256,7 @@ let idx
             env
             default_ty
             res
-            Errors.unify_error
+            Errors.Callback.unify_error
         in
         (env, res))
   in
@@ -295,7 +295,7 @@ let at env ~expr_pos ~shape_pos shape_ty ((_, field_p, _) as field) =
           env
           shape_ty
           { et_type = super_shape_ty; et_enforced = Unenforced }
-          Errors.unify_error
+          Errors.Callback.unify_error
       in
       (env, res)
   in
@@ -431,7 +431,7 @@ let check_shape_keys_validity env keys =
               ~is_function_pointer:false
               cd
               y
-              Errors.unify_error;
+              Errors.Callback.unify_error;
             (env, key_pos, Some (cls, TUtils.terr env Reason.Rnone))
           | Some { cc_type; _ } ->
             let (env, ty) =
@@ -439,18 +439,13 @@ let check_shape_keys_validity env keys =
             in
             let r = Reason.Rwitness key_pos in
             let env =
-              Type.sub_type
-                key_pos
-                Reason.URnone
-                env
-                ty
-                (MakeType.arraykey r)
-                (fun ?code:_ ?quickfixes:_ _ _ ->
-                  Errors.invalid_shape_field_type
-                    key_pos
-                    (get_pos ty)
-                    (Typing_print.error env ty)
-                    [])
+              Type.sub_type key_pos Reason.URnone env ty (MakeType.arraykey r)
+              @@ Errors.Callback.always (fun _ ->
+                     Errors.invalid_shape_field_type
+                       key_pos
+                       (get_pos ty)
+                       (Typing_print.error env ty)
+                       [])
             in
             (env, key_pos, Some (cls, ty)))
       end

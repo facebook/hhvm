@@ -134,7 +134,13 @@ let force_return_kind ?(is_toplevel = true) env p ty =
   | _ ->
     let (env, wrapped_ty) = make_fresh_return_type env p in
     let env =
-      Typing_ops.sub_type p Reason.URreturn env wrapped_ty ty Errors.unify_error
+      Typing_ops.sub_type
+        p
+        Reason.URreturn
+        env
+        wrapped_ty
+        ty
+        Errors.Callback.unify_error
     in
     (env, wrapped_ty)
 
@@ -148,7 +154,7 @@ let make_default_return ~is_method env name =
 
 let implicit_return env pos ~expected ~actual =
   let reason = Reason.URreturn in
-  let error = Errors.missing_return in
+  let error = Errors.Callback.missing_return in
   let open Typing_env_types in
   if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then
     Typing_utils.sub_type
@@ -156,8 +162,9 @@ let implicit_return env pos ~expected ~actual =
       ~coerce:(Some Typing_logic.CoerceToDynamic)
       actual
       expected
-      (fun ?code ?quickfixes reasons ->
-        error ?code ?quickfixes (pos, Reason.string_of_ureason reason) reasons)
+    @@ Errors.Reasons_callback.with_claim
+         error
+         ~claim:(pos, Reason.string_of_ureason reason)
   else
     Typing_ops.sub_type pos reason env actual expected error
 
@@ -186,7 +193,7 @@ let check_inout_return ret_pos env =
           env
           ety
           param_ty
-          Errors.inout_return_type_mismatch
+          Errors.Callback.inout_return_type_mismatch
       | _ -> env)
 
 let rec remove_like_for_return ty =

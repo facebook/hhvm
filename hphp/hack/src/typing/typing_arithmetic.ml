@@ -161,9 +161,9 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
     when not contains_any ->
     let err =
       if TypecheckerOptions.math_new_code (Env.get_tcopt env) then
-        Errors.math_invalid_argument
+        Errors.Callback.math_invalid_argument
       else
-        Errors.unify_error
+        Errors.Callback.unify_error
     in
     let (env, is_dynamic1, err_opt1) =
       check_dynamic_or_enforce_num env p1 ty1 (Reason.Rarith p) err
@@ -281,9 +281,9 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
     when not contains_any ->
     let err =
       if TypecheckerOptions.math_new_code (Env.get_tcopt env) then
-        Errors.math_invalid_argument
+        Errors.Callback.math_invalid_argument
       else
-        Errors.unify_error
+        Errors.Callback.unify_error
     in
     let (env, is_dynamic1, err_opt1) =
       check_dynamic_or_enforce_num env p1 ty1 (Reason.Rarith p) err
@@ -329,10 +329,10 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
       match bop with
       | Ast_defs.Percent ->
         if TypecheckerOptions.math_new_code (Env.get_tcopt env) then
-          Errors.math_invalid_argument
+          Errors.Callback.math_invalid_argument
         else
-          Errors.unify_error
-      | _ -> Errors.bitwise_math_invalid_argument
+          Errors.Callback.unify_error
+      | _ -> Errors.Callback.bitwise_math_invalid_argument
     in
     let (env, _, err_opt1) =
       check_dynamic_or_enforce_int env p1 ty1 (Reason.Rarith p) err
@@ -356,7 +356,7 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
         p
         ty1
         (Reason.Rbitwise p1)
-        Errors.bitwise_math_invalid_argument
+        Errors.Callback.bitwise_math_invalid_argument
     in
     let (env, is_dynamic2, err_opt2) =
       check_dynamic_or_enforce_int
@@ -364,7 +364,7 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
         p
         ty2
         (Reason.Rbitwise p2)
-        Errors.bitwise_math_invalid_argument
+        Errors.Callback.bitwise_math_invalid_argument
     in
     let result_ty =
       if is_dynamic1 && is_dynamic2 then
@@ -524,7 +524,7 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
              env
              ty
              stringlike
-             Errors.strict_str_concat_type_mismatch
+             Errors.Callback.strict_str_concat_type_mismatch
       in
       let (env, err_opt1) = sub_arraykey env p1 ty1 in
       let (env, err_opt2) = sub_arraykey env p2 ty2 in
@@ -574,7 +574,7 @@ let unop p env uop te ty =
           p
           ty
           (Reason.Rbitwise p)
-          Errors.bitwise_math_invalid_argument
+          Errors.Callback.bitwise_math_invalid_argument
       in
       let result_ty =
         if is_dynamic then
@@ -599,7 +599,7 @@ let unop p env uop te ty =
           p
           ty
           (Reason.Rarith p)
-          Errors.inc_dec_invalid_argument
+          Errors.Callback.inc_dec_invalid_argument
       in
       let result_ty =
         if is_dynamic then
@@ -625,7 +625,7 @@ let unop p env uop te ty =
           p
           ty
           (Reason.Rarith p)
-          Errors.unify_error
+          Errors.Callback.unify_error
       in
       let (env, ty) = expand_type_and_narrow_to_int env p ty in
       let result_ty =

@@ -101,7 +101,7 @@ type subtype_env = {
           coercion to or from dynamic. For coercion to dynamic, types that implement
           dynamic are considered sub-types of dynamic. For coercion from dynamic,
           dynamic is treated as a sub-type of all types. *)
-  on_error: Errors.error_from_reasons_callback;
+  on_error: Errors.Reasons_callback.t;
   tparam_constraints: (Pos_or_decl.t * Typing_defs.pos_id) list;
       (** This is used for better error reporting to flag violated
           constraints on type parameters, if any. *)
@@ -719,7 +719,10 @@ and simplify_subtype_i
         subtype_env.tparam_constraints
         (left @ right)
         subtype_env.on_error
-    | _ -> subtype_env.on_error (left @ right)
+    | _ ->
+      Errors.Reasons_callback.apply_with_reasons
+        subtype_env.on_error
+        ~reasons:(left @ right)
   in
   let fail () = fail_with_suffix [] in
   let ( ||| ) = ( ||| ) ~fail in
@@ -2314,7 +2317,7 @@ and simplify_subtype_has_member
               ~explicit_targs
               ~class_id
               ~member_id:name
-              ~on_error:Errors.unify_error
+              ~on_error:Errors.Callback.unify_error
               env
               ty_sub)
       in
@@ -2495,15 +2498,15 @@ and simplify_subtype_implicit_params
       {
         subtype_env with
         on_error =
-          (fun ?code:_ ?quickfixes:_ _ ->
-            let expected = Typing_coeffects.get_type sub_cap in
-            let got = Typing_coeffects.get_type super_cap in
-            Errors.coeffect_subtyping_error
-              (get_pos expected)
-              (Typing_coeffects.pretty env expected)
-              (get_pos got)
-              (Typing_coeffects.pretty env got)
-              subtype_env.on_error);
+          Errors.Reasons_callback.always (fun _ ->
+              let expected = Typing_coeffects.get_type sub_cap in
+              let got = Typing_coeffects.get_type super_cap in
+              Errors.coeffect_subtyping_error
+                (get_pos expected)
+                (Typing_coeffects.pretty env expected)
+                (get_pos got)
+                (Typing_coeffects.pretty env got)
+                subtype_env.on_error);
       }
     in
     match (sub_cap, super_cap) with
@@ -3098,7 +3101,7 @@ and is_sub_type_alt_i ~ignore_generic_params ~no_top_bottom ~coerce env ty1 ty2
            ~ignore_generic_params
            ~no_top_bottom
            ~coerce
-           Errors.ignore_error)
+           Errors.Reasons_callback.ignore_error)
       ~this_ty
       (* It is weird that this can cause errors, but I am wary to discard them.
        * Using the generic unify_error to maintain current behavior. *)
@@ -3504,7 +3507,7 @@ let rec decompose_subtype
     (env : env)
     (ty_sub : locl_ty)
     (ty_super : locl_ty)
-    (on_error : Errors.error_from_reasons_callback) : env =
+    (on_error : Errors.Reasons_callback.t) : env =
   log_subtype
     ~level:2
     ~this_ty:None
@@ -3632,7 +3635,7 @@ let add_constraint
 
 let add_constraints p env constraints =
   let add_constraint env (ty1, ck, ty2) =
-    add_constraint env ck ty1 ty2 (Errors.unify_error_at p)
+    add_constraint env ck ty1 ty2 (Errors.Reasons_callback.unify_error_at p)
   in
   List.fold_left constraints ~f:add_constraint ~init:env
 
@@ -3640,7 +3643,7 @@ let sub_type_with_dynamic_as_bottom_res
     (env : env)
     (ty_sub : locl_ty)
     (ty_super : locl_ty)
-    (on_error : Errors.error_from_reasons_callback) : (env, env) result =
+    (on_error : Errors.Reasons_callback.t) : (env, env) result =
   let env_change_log = Env.log_env_change "coercion" env in
   log_subtype
     ~level:1
@@ -3671,7 +3674,7 @@ let sub_type_with_dynamic_as_bottom
     (env : env)
     (ty_sub : locl_ty)
     (ty_super : locl_ty)
-    (on_error : Errors.error_from_reasons_callback) : env =
+    (on_error : Errors.Reasons_callback.t) : env =
   match sub_type_with_dynamic_as_bottom_res env ty_sub ty_super on_error with
   | Ok env -> env
   | Error env -> env
@@ -3732,10 +3735,10 @@ let subtype_funs
     old_env
 
 let sub_type_or_fail env ty1 ty2 fail =
-  sub_type env ty1 ty2 (fun ?code:_ ?quickfixes:_ _ -> fail ())
+  sub_type env ty1 ty2 @@ Errors.Reasons_callback.always fail
 
 let sub_type_or_fail_res env ty1 ty2 fail =
-  sub_type_res env ty1 ty2 (fun ?code:_ ?quickfixes:_ _ -> fail ())
+  sub_type_res env ty1 ty2 @@ Errors.Reasons_callback.always fail
 
 let set_fun_refs () =
   Typing_utils.sub_type_ref := sub_type;

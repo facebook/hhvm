@@ -178,7 +178,7 @@ let check_arraykey_index error env pos container_ty index_ty =
          env
          ty_actual
          ty_expected
-         (fun ?code:_ ?quickfixes:_ _ _ ->
+    @@ Errors.Callback.always (fun _ ->
            error pos (Lazy.force container_info) (Lazy.force index_info))
   else
     (env, Ok index_ty)
@@ -207,8 +207,9 @@ let pessimised_tup_assign p env arg_ty =
   let (env, pess_ty) = pessimise_type env ty in
   (* There can't be an error since the type variable is fresh *)
   let env =
-    SubType.sub_type env arg_ty pess_ty (fun ?code:_ ?quickfixes:_ _ ->
-        Errors.internal_error p "Subtype of fresh type variable")
+    SubType.sub_type env arg_ty pess_ty
+    @@ Errors.Reasons_callback.always (fun _ ->
+           Errors.internal_error p "Subtype of fresh type variable")
   in
   (env, ty)
 
@@ -317,7 +318,7 @@ let rec array_get
              env
              ty_have
              ty_expect
-             Errors.index_type_mismatch
+             Errors.Callback.index_type_mismatch
       in
       match ety1_ with
       | Tclass (((_, cn) as id), _, argl)
@@ -449,7 +450,7 @@ let rec array_get
                ~coerce:(Some Typing_logic.CoerceToDynamic)
                ty2
                tv
-               (Errors.unify_error_at expr_pos)
+               (Errors.Reasons_callback.unify_error_at expr_pos)
         in
         (env, ty1, idx_err_res, dflt_arr_res)
       | Tdynamic -> (env, ty1, Ok ty2, dflt_arr_res)
@@ -671,7 +672,7 @@ let rec array_get
                env
                ty1
                keyed_container
-               (Errors.index_type_mismatch_at expr_pos)
+               (Errors.Reasons_callback.index_type_mismatch_at expr_pos)
         in
         (env, value, arr_res, Ok ty2))
 
@@ -717,7 +718,13 @@ let assign_array_append_with_err ~array_pos ~expr_pos ur env ty1 ty2 =
           Result.fold
             ~ok:(fun env -> (env, Ok ty2))
             ~error:(fun env -> (env, Error (ty2, tv)))
-          @@ Typing_ops.sub_type_res expr_pos ur env ty2 tv Errors.unify_error
+          @@ Typing_ops.sub_type_res
+               expr_pos
+               ur
+               env
+               ty2
+               tv
+               Errors.Callback.unify_error
         in
         (env, ty1, Ok ty1, val_err_res)
       (* Handle the case where Vector or Set was used as a typehint
@@ -801,7 +808,7 @@ let assign_array_append_with_err ~array_pos ~expr_pos ur env ty1 ty2 =
                  env
                  ty2
                  tv'
-                 Errors.unify_error
+                 Errors.Callback.unify_error
         in
         (env, ty1, Ok ty1, err_res)
       | (r, Tdynamic)
@@ -817,7 +824,7 @@ let assign_array_append_with_err ~array_pos ~expr_pos ur env ty1 ty2 =
                ~coerce:(Some Typing_logic.CoerceToDynamic)
                ty2
                tv
-               (Errors.unify_error_at expr_pos)
+               (Errors.Reasons_callback.unify_error_at expr_pos)
         in
         (env, ty1, Ok ty1, val_err_res)
       | (_, Tdynamic) -> (env, ty1, Ok ty1, Ok ty2)
@@ -899,7 +906,7 @@ let assign_array_get_with_err
              env
              ty_have
              ty_expect
-             Errors.index_type_mismatch
+             Errors.Callback.index_type_mismatch
       in
       match ety1_ with
       | Tclass (((_, cn) as id), _, argl)
@@ -920,7 +927,13 @@ let assign_array_get_with_err
           Result.fold
             ~ok:(fun env -> (env, Ok ty2))
             ~error:(fun env -> (env, Error (ty2, tv)))
-          @@ Typing_ops.sub_type_res expr_pos ur env ty2 tv Errors.unify_error
+          @@ Typing_ops.sub_type_res
+               expr_pos
+               ur
+               env
+               ty2
+               tv
+               Errors.Callback.unify_error
         in
         (env, ety1, Ok ety1, idx_err, err_res)
       | Tclass (((_, cn) as id), e, argl)
@@ -985,7 +998,13 @@ let assign_array_get_with_err
           Result.fold
             ~ok:(fun env -> (env, Ok ty2))
             ~error:(fun env -> (env, Error (ty2, tv)))
-          @@ Typing_ops.sub_type_res expr_pos ur env ty2 tv Errors.unify_error
+          @@ Typing_ops.sub_type_res
+               expr_pos
+               ur
+               env
+               ty2
+               tv
+               Errors.Callback.unify_error
         in
         (env, ety1, Ok ety1, idx_err, err_res)
       | Tclass (((_, cn) as id), e, argl)
@@ -1097,7 +1116,7 @@ let assign_array_get_with_err
                env
                tkey
                tv
-               (Errors.unify_error_at expr_pos)
+               (Errors.Reasons_callback.unify_error_at expr_pos)
         in
         let (env, val_err_res) =
           Result.fold
@@ -1108,7 +1127,7 @@ let assign_array_get_with_err
                env
                ty2
                tv
-               (Errors.unify_error_at expr_pos)
+               (Errors.Reasons_callback.unify_error_at expr_pos)
         in
         (env, ety1, Ok ety1, idx_err_res, val_err_res)
       | Tdynamic -> (env, ety1, Ok ety1, Ok tkey, Ok ty2)
@@ -1124,7 +1143,13 @@ let assign_array_get_with_err
           Result.fold
             ~ok:(fun env -> (env, Ok ty2))
             ~error:(fun env -> (env, Error (ty2, tv)))
-          @@ Typing_ops.sub_type_res expr_pos ur env ty2 tv Errors.unify_error
+          @@ Typing_ops.sub_type_res
+               expr_pos
+               ur
+               env
+               ty2
+               tv
+               Errors.Callback.unify_error
         in
         (env, ety1, Ok ety1, idx_err, err_res)
       | Ttuple tyl ->

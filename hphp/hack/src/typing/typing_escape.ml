@@ -104,14 +104,14 @@ type remove_map = rigid_tvar -> elim_info option
 
 type refresh_env = {
   env: Typing_env_types.env;  (** the underlying typing env *)
-  tvars: Errors.error_from_reasons_callback IMap.t;
+  tvars: Errors.Reasons_callback.t IMap.t;
       (** an accumulator used to remember all the type variabes
           that appeared when refreshing a type; the map is used as a
           set, and error callbacks are merely used for reporting *)
   remove: remove_map;
       (** the list of all the type parameters to eliminate with their
           bounds *)
-  on_error: Errors.error_from_reasons_callback;
+  on_error: Errors.Reasons_callback.t;
       (** sometimes eliminating a rigid type is not possible and we must
           surface an error to the user *)
   scope_kind: string * Pos.t;
@@ -188,7 +188,9 @@ let rec eliminate ~ty_orig ~rtv_pos ~name ~ubs ~lbs renv v =
     (renv, ubty, Elim (rtv_pos, name))
   | Ast_defs.Invariant ->
     let name = Markdown_lite.md_codify name in
-    renv.on_error [(rtv_pos, "Rigid type variable " ^ name ^ " is escaping")];
+    Errors.Reasons_callback.apply_with_reasons
+      renv.on_error
+      ~reasons:[(rtv_pos, "Rigid type variable " ^ name ^ " is escaping")];
     (renv, ty_orig, Unchanged)
 
 and refresh_type renv v ty_orig =
@@ -393,14 +395,18 @@ let refresh_bounds renv v tys =
     tys
     (renv, ITySet.empty, [])
 
-let refresh_tvar tv (on_error : Errors.error_from_reasons_callback) renv =
+let refresh_tvar tv (on_error : Errors.Reasons_callback.t) renv =
   (* restore the error context of one local variable causing us to visit
      this tvar *)
   let renv = { renv with on_error } in
   let tv_ity = LoclType (mk (Reason.none, Tvar tv)) in
-  let elim_on_error pos name ?code:_ ?quickfixes:_ _ =
+  let elim_on_error pos name =
     let name = Markdown_lite.md_codify name in
-    on_error [(pos, "Could not remove rigid type variable " ^ name)]
+    Errors.Reasons_callback.(
+      with_reasons
+        ~reasons:[(pos, "Could not remove rigid type variable " ^ name)]
+      @@ retain_code
+      @@ retain_quickfixes on_error)
   in
   let renv =
     let ubs = Env.get_tyvar_upper_bounds renv.env tv in
@@ -459,13 +465,11 @@ let refresh_locals renv =
   let on_error = renv.on_error in
   Local_id.Map.fold
     (fun local (lty, pos, _expr_id) renv ->
-      let on_error ?code ?quickfixes reasons =
+      let on_error =
         let pos = Pos_or_decl.of_raw_pos pos in
         let name = Markdown_lite.md_codify (Local_id.to_string local) in
-        on_error
-          ?code
-          ?quickfixes
-          (reasons @ [(pos, "in the type of local " ^ name)])
+        let reason = (pos, "in the type of local " ^ name) in
+        Errors.Reasons_callback.append_reason on_error ~reason
       in
       let renv = { renv with on_error } in
       let (renv, lty, changed) = refresh_type renv Ast_defs.Covariant lty in
@@ -486,7 +490,7 @@ let refresh_env_and_type ~remove:(types, remove) ~pos env ty =
       "Clearing escaping types:"
       types;
     let what = "lambda" in
-    let on_error = Errors.rigid_tvar_escape_at pos what in
+    let on_error = Errors.Reasons_callback.rigid_tvar_escape_at pos what in
     let renv =
       {
         env;
@@ -498,12 +502,11 @@ let refresh_env_and_type ~remove:(types, remove) ~pos env ty =
       }
     in
     let renv = refresh_locals renv in
-    let on_error ?code ?quickfixes reasons =
+    let on_error =
       let pos = Pos_or_decl.of_raw_pos pos in
-      on_error
-        ?code
-        ?quickfixes
-        (reasons @ [(pos, "in the return type of this lambda")])
+      Errors.Reasons_callback.append_reason
+        on_error
+        ~reason:(pos, "in the return type of this lambda")
     in
     let renv = { renv with on_error } in
     let (renv, ty, _) = refresh_type renv Ast_defs.Covariant ty in

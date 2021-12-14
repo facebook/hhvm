@@ -480,7 +480,11 @@ let rec obj_get_concrete_ty
                           use_pos = id_pos;
                           explicit_targs;
                         }
-                      ~ety_env:{ ety_env with on_error = Errors.ignore_error }
+                      ~ety_env:
+                        {
+                          ety_env with
+                          on_error = Errors.Reasons_callback.ignore_error;
+                        }
                       ~def_pos:mem_pos
                       env
                       ft)
@@ -505,7 +509,10 @@ let rec obj_get_concrete_ty
                               explicit_targs;
                             }
                           ~ety_env:
-                            { ety_env with on_error = Errors.ignore_error }
+                            {
+                              ety_env with
+                              on_error = Errors.Reasons_callback.ignore_error;
+                            }
                           ~def_pos:mem_pos
                           env
                           ft)
@@ -563,6 +570,11 @@ let rec obj_get_concrete_ty
               else
                 (env, (member_ty, tal))
             in
+            let eff () =
+              let open Typing_env_types in
+              if env.in_support_dynamic_type_method_check then
+                Typing_log.log_pessimise_prop env mem_pos id_str
+            in
             let (env, rval_err) =
               Option.value_map
                 coerce_from_ty
@@ -577,11 +589,7 @@ let rec obj_get_concrete_ty
                        env
                        ty
                        { et_type = member_ty; et_enforced }
-                       (fun ?code ?quickfixes claim reasons ->
-                         let open Typing_env_types in
-                         if env.in_support_dynamic_type_method_check then
-                           Typing_log.log_pessimise_prop env mem_pos id_str;
-                         Errors.unify_error ?code ?quickfixes claim reasons))
+                       Errors.Callback.(with_side_effect ~eff unify_error))
             in
             (env, (member_ty, tal), dflt_lval_err, rval_err)
         end

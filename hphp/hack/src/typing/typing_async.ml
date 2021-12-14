@@ -97,7 +97,7 @@ let overload_extract_from_awaitable env ~p opt_ty_maybe =
           env
           opt_ty_maybe
           expected_type
-          Errors.unify_error
+          Errors.Callback.unify_error
       in
       (env, return_type)
   in

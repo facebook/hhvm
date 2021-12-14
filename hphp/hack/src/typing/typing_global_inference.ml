@@ -33,20 +33,19 @@ module StateErrors = struct
   let cardinal t = IdentMap.fold (fun _ l acc -> acc + List.length l) !t 0
 end
 
-let convert_on_error :
-    (Errors.error -> unit) -> Pos.t -> Errors.error_from_reasons_callback =
- fun on_error pos ?code ?quickfixes reasons ->
-  let code =
-    Option.value code ~default:Error_codes.Typing.(err_code UnifyError)
-  in
-  on_error (User_error.make code ?quickfixes (pos, "Typing_error") reasons)
+let convert_on_error on_error pos =
+  Errors.(
+    Reasons_callback.with_claim ~claim:(pos, "Typing_error")
+    @@ Callback.from_on_error
+         on_error
+         ~dflt_code:Error_codes.Typing.(err_code UnifyError))
 
 let catch_exc
     pos
     (on_error : Errors.error -> unit)
     (r : 'a)
     ?(verbose = false)
-    (f : Errors.error_from_reasons_callback -> 'a) : 'a =
+    (f : Errors.Reasons_callback.t -> 'a) : 'a =
   try
     let (other_errors, v) =
       Errors.do_with_context (Pos.filename pos) Errors.Typing (fun () ->

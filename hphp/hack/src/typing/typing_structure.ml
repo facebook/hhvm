@@ -42,7 +42,7 @@ let make_ts : Typing_env_types.env -> locl_ty -> Typing_env_types.env * locl_ty
     let ety_env =
       {
         (empty_expand_env_with_on_error
-           (Errors.invalid_type_hint
+           (Errors.Reasons_callback.invalid_type_hint
               (Reason.to_pos r |> Pos_or_decl.unsafe_to_raw_pos)))
         with
         substs = Subst.make_locl td_tparams [ty];

@@ -54,11 +54,12 @@ let rec array_get ~array_pos ~expr_pos ~index_pos env array_ty index_ty =
         let ty_have_str = Env.print_error_ty env ty_have in
         let err =
           if is_covariant_index then
-            Errors.covariant_index_type_mismatch
+            Errors.Callback.covariant_index_type_mismatch
           else
-            Errors.index_type_mismatch
+            Errors.Callback.index_type_mismatch
         in
-        err
+        Errors.Callback.apply
+          err
           (expr_pos, Reason.string_of_ureason reason)
           (Typing_reason.to_string
              ("This is " ^ ty_expect_str)

@@ -78,10 +78,13 @@ let check_param : env -> Nast.fun_param -> unit =
             env
             (LoclType ty)
             (LoclType container_type)
-            ~on_error:(Errors.unify_error_at pos)
+            ~on_error:(Errors.Reasons_callback.unify_error_at pos)
         in
         let (env, prop) =
-          SubType.prop_to_env env props (Errors.unify_error_at pos)
+          SubType.prop_to_env
+            env
+            props
+            (Errors.Reasons_callback.unify_error_at pos)
         in
         let is_container = Typing_logic.is_valid prop in
 
@@ -124,7 +127,7 @@ let check_param : env -> Nast.fun_param -> unit =
                      param_pos,
                      Lvar (param_pos, Local_id.make_unscoped param_name) ))
               ~member_id:(pos, SN.Members.mGetInstanceKey)
-              ~on_error:(fun ?code:_ ?quickfixes:_ _ _ -> error ty)
+              ~on_error:Errors.Callback.(always (fun _ -> error ty))
               env
               ty
           in

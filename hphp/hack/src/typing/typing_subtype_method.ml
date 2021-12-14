@@ -25,7 +25,7 @@ let subtype_method
     (ft_sub : locl_fun_type)
     (r_super : Reason.t)
     (ft_super : locl_fun_type)
-    (on_error : Errors.error_from_reasons_callback) : env =
+    (on_error : Errors.Reasons_callback.t) : env =
   (* This is (1) and (2) below *)
   let env =
     subtype_funs ~on_error ~check_return r_sub ft_sub r_super ft_super env
@@ -130,7 +130,7 @@ let subtype_method_decl
     (ft_sub : decl_fun_type)
     (r_super : Reason.t)
     (ft_super : decl_fun_type)
-    (on_error : Errors.error_from_reasons_callback) : env =
+    (on_error : Errors.Reasons_callback.t) : env =
   let p_sub = Reason.to_pos r_sub in
   let p_super = Reason.to_pos r_super in
   let ety_env = empty_expand_env in

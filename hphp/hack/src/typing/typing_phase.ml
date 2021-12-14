@@ -762,7 +762,7 @@ and localize_missing_tparams_class_for_global_inference env r sid class_ =
       empty_expand_env with
       this_ty = c_ty;
       substs = Subst.make_locl tparams tyl;
-      on_error = Errors.unify_error_at Pos.none;
+      on_error = Errors.Reasons_callback.unify_error_at Pos.none;
     }
   in
   let env = check_tparams_constraints ~use_pos:Pos.none ~ety_env env tparams in
@@ -812,7 +812,7 @@ let localize_targ_with_kind
     let (env, ty) =
       localize_no_subst_and_kind
         env
-        ~on_error:(Errors.invalid_type_hint hint_pos)
+        ~on_error:(Errors.Reasons_callback.invalid_type_hint hint_pos)
         ty
         kind
     in
@@ -1000,10 +1000,11 @@ let localize_hint_no_subst env ~ignore_errors ?report_cycle h =
   localize_no_subst_
     env
     ~on_error:
-      (if ignore_errors then
-        Errors.ignore_error
-      else
-        Errors.invalid_type_hint pos)
+      Errors.Reasons_callback.(
+        if ignore_errors then
+          ignore_error
+        else
+          invalid_type_hint pos)
     ?report_cycle
     h
 
@@ -1011,10 +1012,11 @@ let localize_no_subst env ~ignore_errors ty =
   localize_no_subst_
     env
     ~on_error:
-      (if ignore_errors then
-        Errors.ignore_error
-      else
-        Errors.invalid_type_hint (Pos_or_decl.unsafe_to_raw_pos @@ get_pos ty))
+      Errors.Reasons_callback.(
+        if ignore_errors then
+          ignore_error
+        else
+          invalid_type_hint (Pos_or_decl.unsafe_to_raw_pos @@ get_pos ty))
     ty
 
 let localize_possibly_enforced_no_subst env ~ignore_errors ety =
@@ -1054,7 +1056,7 @@ let localize_targs_and_check_constraints
       empty_expand_env with
       this_ty;
       substs = Subst.make_locl tparaml targs_tys;
-      on_error = Errors.unify_error_at use_pos;
+      on_error = Errors.Reasons_callback.unify_error_at use_pos;
     }
   in
   let env = check_tparams_constraints ~use_pos ~ety_env env tparaml in
@@ -1115,7 +1117,7 @@ let localize_and_add_ast_generic_parameters_and_where_constraints
   let ety_env =
     empty_expand_env_with_on_error
       (if ignore_errors then
-        Errors.ignore_error
+        Errors.Reasons_callback.ignore_error
       else
         Env.invalid_type_hint_assert_primary_pos_in_current_decl env)
   in

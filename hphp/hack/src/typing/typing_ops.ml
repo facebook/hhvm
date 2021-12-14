@@ -42,25 +42,19 @@ let sub_type_i
     env
     ty_sub
     ty_super
-    (on_error : Errors.typing_error_callback) =
+    (on_error : Errors.Callback.t) =
   log_sub_type env p ty_sub ty_super;
-  Typing_utils.sub_type_i
-    ~is_coeffect
-    env
-    ty_sub
-    ty_super
-    (fun ?code ?quickfixes reasons ->
-      on_error ?code ?quickfixes (p, Reason.string_of_ureason ur) reasons)
+  Typing_utils.sub_type_i ~is_coeffect env ty_sub ty_super
+  @@ Errors.Reasons_callback.with_claim
+       on_error
+       ~claim:(p, Reason.string_of_ureason ur)
 
-let sub_type_i_res
-    p ur env ty_sub ty_super (on_error : Errors.typing_error_callback) =
+let sub_type_i_res p ur env ty_sub ty_super (on_error : Errors.Callback.t) =
   log_sub_type env p ty_sub ty_super;
-  Typing_utils.sub_type_i_res
-    env
-    ty_sub
-    ty_super
-    (fun ?code ?quickfixes reasons ->
-      on_error ?code ?quickfixes (p, Reason.string_of_ureason ur) reasons)
+  Typing_utils.sub_type_i_res env ty_sub ty_super
+  @@ Errors.Reasons_callback.with_claim
+       on_error
+       ~claim:(p, Reason.string_of_ureason ur)
 
 let sub_type p ur env ty_sub ty_super on_error =
   sub_type_i p ur env (LoclType ty_sub) (LoclType ty_super) on_error
@@ -73,13 +67,10 @@ let sub_type_decl ?(is_coeffect = false) ~on_error p ur env ty_sub ty_super =
   let (env, ty_super) = localize_no_subst env ty_super in
   let (env, ty_sub) = localize_no_subst env ty_sub in
   let env =
-    Typing_utils.sub_type
-      env
-      ~is_coeffect
-      ty_sub
-      ty_super
-      (fun ?code ?quickfixes reasons ->
-        on_error ?code ?quickfixes ((p, Reason.string_of_ureason ur) :: reasons))
+    Typing_utils.sub_type env ~is_coeffect ty_sub ty_super
+    @@ Errors.Reasons_callback.prepend_reason
+         on_error
+         ~reason:(p, Reason.string_of_ureason ur)
   in
   env
 
@@ -89,11 +80,15 @@ let unify_decl p ur env on_error ty1 ty2 =
   let (env, ty1) = localize_no_subst env ty1 in
   let (env, ty2) = localize_no_subst env ty2 in
   let env =
-    Typing_utils.sub_type env ty2 ty1 (fun ?code ?quickfixes reasons ->
-        on_error ?code ?quickfixes ((p, Reason.string_of_ureason ur) :: reasons))
+    Typing_utils.sub_type env ty2 ty1
+    @@ Errors.Reasons_callback.prepend_reason
+         on_error
+         ~reason:(p, Reason.string_of_ureason ur)
   in
   let env =
-    Typing_utils.sub_type env ty1 ty2 (fun ?code ?quickfixes reasons ->
-        on_error ?code ?quickfixes ((p, Reason.string_of_ureason ur) :: reasons))
+    Typing_utils.sub_type env ty1 ty2
+    @@ Errors.Reasons_callback.prepend_reason
+         on_error
+         ~reason:(p, Reason.string_of_ureason ur)
   in
   env

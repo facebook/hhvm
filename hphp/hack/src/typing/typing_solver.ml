@@ -235,7 +235,9 @@ let bind_to_lower_bound ~freshen env r var lower_bounds =
          * add such conflicting bounds to avoid cascading errors, so in theory,
          * the following subtype calls should not fail, and the error callback
          * should not matter. *)
-        let on_error = Errors.unify_error_at @@ Env.get_tyvar_pos env var in
+        let on_error =
+          Errors.Reasons_callback.unify_error_at @@ Env.get_tyvar_pos env var
+        in
         let env = Typing_utils.sub_type env ty newty on_error in
         (env, newty)
       else
@@ -405,7 +407,10 @@ let try_bind_to_equal_bound ~freshen env r var =
              * add such conflicting bounds to avoid cascading errors, so in theory,
              * the following subtype calls should not fail, and the error callback
              * should not matter. *)
-            let on_error = Errors.unify_error_at @@ Env.get_tyvar_pos env var in
+            let on_error =
+              Errors.Reasons_callback.unify_error_at
+              @@ Env.get_tyvar_pos env var
+            in
             let env = Typing_utils.sub_type env ty var_ty on_error in
             let env = Typing_utils.sub_type env var_ty ty on_error in
             let (env, ty) =
@@ -698,7 +703,11 @@ let expand_type_and_narrow
       Errors.try_
         (fun () ->
           let env =
-            Typing_utils.sub_type env ty widened_ty (Errors.unify_error_at p)
+            Typing_utils.sub_type
+              env
+              ty
+              widened_ty
+              (Errors.Reasons_callback.unify_error_at p)
           in
           (env, widened_ty))
         (fun _ ->

@@ -182,7 +182,8 @@ let check_dynamically_callable member_name parent_class_elt class_elt on_error =
         (pos, "This method is **not**.");
       ]
     in
-    Errors.bad_method_override pos member_name errorl on_error
+    let err = Errors.bad_method_override on_error ~pos ~member_name in
+    Errors.Reasons_callback.apply err errorl
 
 (** Check that we are not overriding an __LSB property *)
 let check_lsb_overrides
@@ -331,15 +332,14 @@ let check_override
       else
         `property)
       ~current_decl_and_file:(Env.get_current_decl_and_file env);
-  let on_error ?code:_ ?quickfixes:_ reasons =
+  let on_error =
     (if is_method then
       Errors.bad_method_override
     else
       Errors.bad_prop_override)
-      pos
-      member_name
-      reasons
       on_error
+      ~pos
+      ~member_name
   in
   let (lazy fty_child) = class_elt.ce_type in
   let (lazy fty_parent) = parent_class_elt.ce_type in
@@ -586,7 +586,7 @@ let check_const_override
       env
       class_const_type
       parent_class_const_type
-      (Errors.class_constant_type_mismatch on_error)
+      (Errors.Reasons_callback.class_constant_type_mismatch on_error)
 
 (* Privates are only visible in the parent, we don't need to check them *)
 let filter_privates members =
@@ -1239,15 +1239,13 @@ let check_implements_extends_uses
           implements
           parent_class
           (c_name, name_pos, class_)
-          (fun ?code:_ ?quickfixes:_ reasons ->
-            (* sadly, enum error reporting requires this to keep the error in the file
-               with the enum *)
-            if String.equal parent_name SN.Classes.cHH_BuiltinEnum then
-              Errors.bad_enum_decl name_pos reasons
-            else
-              Errors.bad_decl_override
-                parent_name_pos
-                parent_name
-                name_pos
-                name
-                reasons))
+          (* sadly, enum error reporting requires this to keep the error in the file
+             with the enum *)
+          (if String.equal parent_name SN.Classes.cHH_BuiltinEnum then
+            Errors.Reasons_callback.bad_enum_decl name_pos
+          else
+            Errors.Reasons_callback.bad_decl_override
+              name_pos
+              ~name
+              ~parent_pos:parent_name_pos
+              ~parent_name))

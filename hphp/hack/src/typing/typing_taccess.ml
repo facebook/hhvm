@@ -162,7 +162,9 @@ let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
       in
       (* Don't report errors in expanded definition or constraint.
        * These will have been reported at the definition site already. *)
-      let ety_env = { ety_env with on_error = Errors.ignore_error } in
+      let ety_env =
+        { ety_env with on_error = Errors.Reasons_callback.ignore_error }
+      in
       (match typeconst.ttc_kind with
       (* Concrete type constants *)
       | TCConcrete { tc_type = ty } ->

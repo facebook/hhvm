@@ -442,7 +442,7 @@ let check_expected_ty_res
       env
       inferred_ty
       ty
-      Errors.unify_error
+      Errors.Callback.unify_error
 
 let check_expected_ty message env inferred_ty expected =
   Result.fold ~ok:Fn.id ~error:Fn.id
@@ -536,8 +536,12 @@ let as_expr env ty1 pe e =
     | _ ->
       if SubType.is_sub_type_for_union env ty (MakeType.dynamic Reason.Rnone)
       then
-        let env = SubType.sub_type env ty tk (Errors.unify_error_at pe) in
-        let env = SubType.sub_type env ty tv (Errors.unify_error_at pe) in
+        let env =
+          SubType.sub_type env ty tk (Errors.Reasons_callback.unify_error_at pe)
+        in
+        let env =
+          SubType.sub_type env ty tv (Errors.Reasons_callback.unify_error_at pe)
+        in
         (env, Ok ty)
       else
         let ur = Reason.URforeach in
@@ -545,7 +549,13 @@ let as_expr env ty1 pe e =
           Result.fold
             ~ok:(fun env -> (env, Ok ty))
             ~error:(fun env -> (env, Error (ty, expected_ty)))
-          @@ Type.sub_type_res pe ur env ty expected_ty Errors.unify_error
+          @@ Type.sub_type_res
+               pe
+               ur
+               env
+               ty
+               expected_ty
+               Errors.Callback.unify_error
         in
         (env, err)
   in
@@ -589,7 +599,7 @@ let do_hh_expect ~equivalent env use_pos explicit_targs p tys =
           env
           expr_ty
           (fst expected_ty)
-          (Errors.hh_expect_error ~equivalent p)
+          (Errors.Reasons_callback.hh_expect_error ~equivalent p)
       in
       (match res with
       | Ok env ->
@@ -598,7 +608,7 @@ let do_hh_expect ~equivalent env use_pos explicit_targs p tys =
             env
             (fst expected_ty)
             expr_ty
-            (Errors.hh_expect_error ~equivalent p)
+            (Errors.Reasons_callback.hh_expect_error ~equivalent p)
         else
           env
       | Error env -> env)
@@ -671,7 +681,7 @@ let xhp_attribute_decl_ty env sid obj attr =
       ~explicit_targs:[]
       ~class_id:(CI sid)
       ~member_id:namepstr
-      ~on_error:Errors.unify_error
+      ~on_error:Errors.Callback.unify_error
       env
       obj
   in
@@ -686,7 +696,7 @@ let xhp_attribute_decl_ty env sid obj attr =
          env
          valty
          (MakeType.unenforced declty)
-         Errors.xhp_attribute_does_not_match_hint
+         Errors.Callback.xhp_attribute_does_not_match_hint
   in
   (env, declty, err_opt)
 
@@ -706,7 +716,7 @@ let closure_check_param env param =
         env
         paramty
         (MakeType.unenforced hty)
-        Errors.unify_error
+        Errors.Callback.unify_error
     in
     env
 
@@ -800,7 +810,7 @@ let coerce_to_throwable pos env exn_ty =
     env
     exn_ty
     { et_type = throwable_ty; et_enforced = Unenforced }
-    Errors.unify_error
+    Errors.Callback.unify_error
 
 let set_valid_rvalue p env x ty =
   let env = set_local env (p, x) ty in
@@ -1100,6 +1110,10 @@ let call_param
     | Ast_defs.Pnormal -> pos
     | Ast_defs.Pinout pk_pos -> Pos.merge pk_pos pos
   in
+  let eff () =
+    if env.in_support_dynamic_type_method_check then
+      Typing_log.log_pessimise_param env param.fp_pos param.fp_name
+  in
   Result.fold
     ~ok:(fun env -> (env, None))
     ~error:(fun env -> (env, Some (dep_ty, param.fp_type.et_type)))
@@ -1109,10 +1123,7 @@ let call_param
        env
        dep_ty
        param.fp_type
-       (fun ?code ?quickfixes claim reasons ->
-         if env.in_support_dynamic_type_method_check then
-           Typing_log.log_pessimise_param env param.fp_pos param.fp_name;
-         Errors.unify_error ?code ?quickfixes claim reasons)
+       Errors.Callback.(with_side_effect ~eff unify_error)
 
 let bad_call env p ty = Errors.bad_call p (Typing_print.error env ty)
 
@@ -1279,7 +1290,12 @@ let safely_refine_class_type
         (* Substitute fresh type parameters for
          * original formals in constraint *)
         let (env, ty) = Phase.localize ~ety_env env ty in
-        SubType.add_constraint env ck ty_fresh ty (Errors.unify_error_at p))
+        SubType.add_constraint
+          env
+          ck
+          ty_fresh
+          ty
+          (Errors.Reasons_callback.unify_error_at p))
   in
   let env =
     List.fold_left (List.zip_exn tparams tyl_fresh) ~f:add_bounds ~init:env
@@ -1319,7 +1335,7 @@ let safely_refine_class_type
             Ast_defs.Constraint_as
             obj_ty
             ty
-            (Errors.unify_error_at p)
+            (Errors.Reasons_callback.unify_error_at p)
         else
           env)
   in
@@ -1436,7 +1452,7 @@ let safely_refine_is_array env ty p pred_name arg_expr =
           Ast_defs.Constraint_as
           tarrkey
           (MakeType.arraykey r)
-          (Errors.unify_error_at p)
+          (Errors.Reasons_callback.unify_error_at p)
       in
       let (env, tfresh_name) =
         Env.add_fresh_generic_parameter
@@ -1488,7 +1504,7 @@ let safely_refine_is_array env ty p pred_name arg_expr =
               Ast_defs.Constraint_as
               hint_ty
               ty
-              (Errors.unify_error_at p))
+              (Errors.Reasons_callback.unify_error_at p))
       in
       Inter.intersect ~r env refined_ty arg_ty)
 
@@ -1699,7 +1715,7 @@ let rec bind_param
               env
               ty2
               ty1_enforced
-              Errors.parameter_default_value_wrong_type
+              Errors.Callback.parameter_default_value_wrong_type
           in
           (env, ty1)
       in
@@ -1817,7 +1833,7 @@ and has_dispose_method env has_await p e ty =
       ~explicit_targs:[]
       ~class_id:(CIexpr e)
       ~member_id:(p, meth)
-      ~on_error:(Errors.using_error p has_await)
+      ~on_error:(Errors.Callback.using_error p has_await)
       env
       ty
   in
@@ -2031,7 +2047,7 @@ and stmt_ env pos st =
            env
            rty
            return_type
-           Errors.unify_error
+           Errors.Callback.unify_error
     in
     let env = LEnv.move_and_merge_next_in_cont env C.Exit in
     (env, Aast.Return (Some (hole_on_err ~err_opt te)))
@@ -2654,8 +2670,11 @@ and expr_
           | None -> env
           | Some ty ->
             (* There can't be an error because the type is fresh *)
-            SubType.sub_type env supertype ty (fun ?code:_ ?quickfixes:_ _ ->
-                Errors.internal_error use_pos "Subtype of fresh type variable")
+            SubType.sub_type env supertype ty
+            @@ Errors.Reasons_callback.always (fun _ ->
+                   Errors.internal_error
+                     use_pos
+                     "Subtype of fresh type variable")
         in
         (env, supertype)
       | Some ExpectedTy.{ ty = { et_type = ty; _ }; _ } -> (env, ty)
@@ -3002,7 +3021,7 @@ and expr_
         ~explicit_targs:[]
         ~class_id:(CIexpr e)
         ~member_id:(p, SN.Members.__clone)
-        ~on_error:Errors.unify_error
+        ~on_error:Errors.Callback.unify_error
         env
         ty
     in
@@ -3108,7 +3127,7 @@ and expr_
         ~explicit_targs:[]
         ~class_id:(CIexpr instance)
         ~member_id:meth
-        ~on_error:Errors.unify_error
+        ~on_error:Errors.Callback.unify_error
         env
         ty1
     in
@@ -3148,7 +3167,9 @@ and expr_
       in
       let ety_env =
         {
-          (empty_expand_env_with_on_error (Errors.invalid_type_hint pos)) with
+          (empty_expand_env_with_on_error
+             (Errors.Reasons_callback.invalid_type_hint pos))
+          with
           substs = TUtils.make_locl_subst_for_class_tparams class_ tvarl;
         }
       in
@@ -3164,7 +3185,7 @@ and expr_
           ~explicit_targs:[]
           ~class_id:(CI (pos, class_name))
           ~member_id:meth_name
-          ~on_error:Errors.unify_error
+          ~on_error:Errors.Callback.unify_error
           env
           local_obj_ty
       in
@@ -3272,7 +3293,7 @@ and expr_
           ~is_function_pointer:false
           class_
           (snd meth)
-          Errors.unify_error;
+          Errors.Callback.unify_error;
         expr_error env Reason.Rnone outer
       | Some ({ ce_type = (lazy ty); ce_pos = (lazy ce_pos); _ } as ce) ->
         let () =
@@ -3575,15 +3596,27 @@ and expr_
         env
         ty1
         (MakeType.nullable_locl Reason.Rnone ty1')
-        (Errors.unify_error_at e1_pos)
+        (Errors.Reasons_callback.unify_error_at e1_pos)
     in
     (* Essentially mimic a call to
      *   function coalesce<Tr, Ta as Tr, Tb as Tr>(?Ta, Tb): Tr
      * That way we let the constraint solver take care of the union logic.
      *)
     let (env, ty_result) = Env.fresh_type env e2_pos in
-    let env = SubType.sub_type env ty1' ty_result (Errors.unify_error_at p) in
-    let env = SubType.sub_type env ty2 ty_result (Errors.unify_error_at p) in
+    let env =
+      SubType.sub_type
+        env
+        ty1'
+        ty_result
+        (Errors.Reasons_callback.unify_error_at p)
+    in
+    let env =
+      SubType.sub_type
+        env
+        ty2
+        ty_result
+        (Errors.Reasons_callback.unify_error_at p)
+    in
     make_result
       env
       p
@@ -3836,7 +3869,7 @@ and expr_
             env
             lty1
             has_member_ty
-            Errors.unify_error
+            Errors.Callback.unify_error
         in
         let (env, err_opt) =
           Result.fold
@@ -3860,7 +3893,7 @@ and expr_
             env
             lty1
             null_has_mem_ty
-            Errors.unify_error
+            Errors.Callback.unify_error
         in
         let (env, err_opt) =
           Result.fold
@@ -3946,7 +3979,7 @@ and expr_
         env
         rty
         expected_return
-        Errors.unify_error
+        Errors.Callback.unify_error
     in
     let env = Env.forget_members env Reason.(Blame (p, BScall)) in
     let env = LEnv.save_and_merge_next_in_cont env C.Exit in
@@ -4108,7 +4141,7 @@ and expr_
               env
               expr_ty
               hint_ty
-              (Errors.unify_error_at p)
+              (Errors.Reasons_callback.unify_error_at p)
           else
             env
         in
@@ -4146,7 +4179,7 @@ and expr_
         env
         expr_ty
         hint_ty
-        (Errors.unify_error_at p)
+        (Errors.Reasons_callback.unify_error_at p)
     in
     make_result env p (Aast.Upcast (te, hint)) hint_ty
   | Efun (f, idl) -> lambda ~is_anon:true ?expected p env f idl
@@ -4283,7 +4316,8 @@ and expr_
                 Format.sprintf "Unexpected enum class label: `#%s`" s );
             ]
         in
-        Errors.unify_error (p, "Enum class label/member mismatch") reason
+        Errors.Callback.(
+          apply unify_error (p, "Enum class label/member mismatch") reason)
     in
     make_result
       env
@@ -4827,7 +4861,7 @@ and closure_bind_param params (env, t_params) ty : env * Tast.fun_param list =
           env
           ty
           (MakeType.unenforced h)
-          Errors.unify_error
+          Errors.Callback.unify_error
       in
       (* Closures are allowed to have explicit type-hints. When
        * that is the case we should check that the argument passed
@@ -4866,7 +4900,7 @@ and closure_bind_variadic env vparam variadic_ty =
           env
           variadic_ty
           (MakeType.unenforced h)
-          Errors.unify_error
+          Errors.Callback.unify_error
       in
       (env, h, Pos_or_decl.of_raw_pos vparam.param_pos)
   in
@@ -5265,7 +5299,13 @@ and et_splice env p e =
   let spliceable_type =
     MakeType.spliceable (Reason.Rsplice p) ty_visitor ty_res ty_infer
   in
-  let env = SubType.sub_type env ty spliceable_type (Errors.unify_error_at p) in
+  let env =
+    SubType.sub_type
+      env
+      ty
+      spliceable_type
+      (Errors.Reasons_callback.unify_error_at p)
+  in
   make_result env p (Aast.ET_Splice te) ty_infer
 
 (*****************************************************************************)
@@ -5414,7 +5454,13 @@ and new_object
        * through the 'new $foo()' iff the constructed obj_ty is a
        * supertype of the variable-dictated c_ty *)
       let env =
-        Typing_ops.sub_type p Reason.URnone env c_ty obj_ty Errors.unify_error
+        Typing_ops.sub_type
+          p
+          Reason.URnone
+          env
+          c_ty
+          obj_ty
+          Errors.Callback.unify_error
       in
       ( (env, tel, typed_unpack_element, should_forget_fakes_acc),
         (c_ty, ctor_fty) )
@@ -5639,7 +5685,13 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
           in
           (env, te, ty, Some (ty2, nothing)))
       @@ Result.map ~f:(fun env -> Env.set_tyvar_variance_i env destructure_ty)
-      @@ Type.sub_type_i_res p ur env lty2 destructure_ty Errors.unify_error
+      @@ Type.sub_type_i_res
+           p
+           ur
+           env
+           lty2
+           destructure_ty
+           Errors.Callback.unify_error
     | ( _,
         pobj,
         Obj_get
@@ -5667,7 +5719,7 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
           ~explicit_targs:[]
           ~class_id:(CIexpr e1)
           ~member_id:m
-          ~on_error:Errors.unify_error
+          ~on_error:Errors.Callback.unify_error
           env
           obj_ty
       in
@@ -5710,7 +5762,7 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
              env
              ty2
              (MakeType.unenforced exp_real_type)
-             Errors.unify_error
+             Errors.Callback.unify_error
       in
       (env, te1, ty2, err_opt)
     | (_, _, Class_get (_, CGexpr _, _)) ->
@@ -5818,7 +5870,7 @@ and assign_simple pos ur env e1 ty2 =
          env
          ty2
          (MakeType.unenforced ty1)
-         Errors.unify_error
+         Errors.Callback.unify_error
   in
   (env, te1, ty2, err_opt)
 
@@ -5880,7 +5932,8 @@ and arraykey_value
               in
               (* We actually failed so generate the error we should
                  have seen *)
-              Errors.unify_error (p, Reason.string_of_ureason reason) r;
+              Errors.Callback.(
+                apply unify_error (p, Reason.string_of_ureason reason) r);
 
               (env, Some (ty, ty_inner))),
             ty_inner )
@@ -5895,7 +5948,7 @@ and arraykey_value
              env
              ty_actual
              ty_expected
-             Errors.unify_error
+             Errors.Callback.unify_error
       in
       (env, hole_on_err ~err_opt te)
     else
@@ -5907,7 +5960,7 @@ and arraykey_value
           env
           ty
           ty_expected
-          Errors.unify_error
+          Errors.Callback.unify_error
       in
       (env, te)
   in
@@ -5941,10 +5994,22 @@ and check_parent_construct pos env el unpacked_element env_parent =
   in
   (* Not sure why we need to equate these types *)
   let env =
-    Type.sub_type pos Reason.URnone env env_parent parent Errors.unify_error
+    Type.sub_type
+      pos
+      Reason.URnone
+      env
+      env_parent
+      parent
+      Errors.Callback.unify_error
   in
   let env =
-    Type.sub_type pos Reason.URnone env parent env_parent Errors.unify_error
+    Type.sub_type
+      pos
+      Reason.URnone
+      env
+      parent
+      env_parent
+      Errors.Callback.unify_error
   in
   ( env,
     tel,
@@ -6078,7 +6143,7 @@ and dispatch_call
           ~explicit_targs:[]
           ~class_id:e1_
           ~member_id:m
-          ~on_error:Errors.unify_error
+          ~on_error:Errors.Callback.unify_error
           ~parent_ty:ty1
           env
           this_ty
@@ -6142,7 +6207,7 @@ and dispatch_call
                      env
                      ty
                      like_ak_ty
-                     (Errors.invalid_echo_argument_at pos)
+                     (Errors.Reasons_callback.invalid_echo_argument_at pos)
               in
               (env, (pk, hole_on_err ~err_opt te) :: tel))
         in
@@ -6503,7 +6568,7 @@ and dispatch_call
         ~explicit_targs
         ~class_id:(CIexpr e1)
         ~member_id:m
-        ~on_error:Errors.unify_error
+        ~on_error:Errors.Callback.unify_error
         env
         ty1
     in
@@ -6579,7 +6644,7 @@ and dispatch_call
         env
         (LoclType receiver_ty)
         has_method_super_ty
-        Errors.unify_error
+        Errors.Callback.unify_error
     in
     let ty_nothing = MakeType.nothing Reason.none in
     let (env, err_opt) =
@@ -6925,7 +6990,7 @@ and class_get_inner
               ~is_function_pointer
               class_info
               mid
-              Errors.unify_error;
+              Errors.Callback.unify_error;
             (env, (TUtils.terr env Reason.Rnone, []), dflt_rval_err))
       in
       if is_const then (
@@ -6950,7 +7015,7 @@ and class_get_inner
             ~is_function_pointer
             class_
             mid
-            Errors.unify_error;
+            Errors.Callback.unify_error;
           (env, (TUtils.terr env Reason.Rnone, []), dflt_rval_err)
         | Some { cc_type; cc_abstract; cc_pos; _ } ->
           let (env, cc_locl_type) = Phase.localize ~ety_env env cc_type in
@@ -6980,7 +7045,7 @@ and class_get_inner
             ~is_function_pointer
             class_
             mid
-            Errors.unify_error;
+            Errors.Callback.unify_error;
           (env, (TUtils.terr env Reason.Rnone, []), dflt_rval_err)
         | Some
             ({
@@ -7079,7 +7144,7 @@ and class_get_inner
                    env
                    ty
                    { et_type = member_ty; et_enforced }
-                   Errors.unify_error
+                   Errors.Callback.unify_error
           in
           (env, (member_ty, tal), rval_err)))
   | (_, Tunapplied_alias _) ->
@@ -7408,7 +7473,7 @@ and call_construct p env class_ params el unpacked_element cid cid_ty =
       empty_expand_env with
       this_ty = cid_ty;
       substs = TUtils.make_locl_subst_for_class_tparams class_ params;
-      on_error = Errors.unify_error_at p;
+      on_error = Errors.Reasons_callback.unify_error_at p;
     }
   in
   let env =
@@ -7576,7 +7641,7 @@ and call
                    env
                    e_ty
                    ty
-                   (Errors.unify_error_at pos)
+                   (Errors.Reasons_callback.unify_error_at pos)
             in
             (env, (pk, hole_on_err ~err_opt te)))
       in
@@ -7615,7 +7680,7 @@ and call
                        env
                        ty
                        (MakeType.unenforced efty)
-                       Errors.unify_error
+                       Errors.Callback.unify_error
                 | _ -> (env, None)
               else
                 (env, None)
@@ -7895,20 +7960,15 @@ and call
           let env_capability =
             Env.get_local_check_defined env (pos, Typing_coeffects.capability_id)
           in
-          Type.sub_type
-            pos
-            Reason.URnone
-            env
-            env_capability
-            capability
-            (fun ?code:_ ?quickfixes:_ _ _ ->
-              Errors.call_coeffect_error
-                pos
-                ~available_incl_unsafe:
-                  (Typing_coeffects.pretty env env_capability)
-                ~available_pos:(Typing_defs.get_pos env_capability)
-                ~required_pos:(Typing_defs.get_pos capability)
-                ~required:(Typing_coeffects.pretty env capability))
+          Type.sub_type pos Reason.URnone env env_capability capability
+          @@ Errors.Callback.always (fun _ ->
+                 Errors.call_coeffect_error
+                   pos
+                   ~available_incl_unsafe:
+                     (Typing_coeffects.pretty env env_capability)
+                   ~available_pos:(Typing_defs.get_pos env_capability)
+                   ~required_pos:(Typing_defs.get_pos capability)
+                   ~required:(Typing_coeffects.pretty env capability))
       in
       let should_forget_fakes =
         (* If the function doesn't have write priveleges to properties, fake
@@ -7987,7 +8047,7 @@ and call
               env
               (LoclType ty)
               destructure_ty
-              Errors.unify_error
+              Errors.Callback.unify_error
           in
           let (env, te) =
             match env_res with
@@ -8158,7 +8218,13 @@ and call
         mk_function_supertype env pos (type_of_el, type_of_unpacked_element)
       in
       let env =
-        Type.sub_type pos Reason.URnone env efty fun_type Errors.unify_error
+        Type.sub_type
+          pos
+          Reason.URnone
+          env
+          efty
+          fun_type
+          Errors.Callback.unify_error
       in
       let should_forget_fakes = true in
       (env, (typed_el, typed_unpacked_element, return_ty, should_forget_fakes))
@@ -8187,7 +8253,7 @@ and call_untyped_unpack env f_pos unpacked_element =
       env
       (LoclType ety)
       destructure_ty
-      Errors.unify_error
+      Errors.Callback.unify_error
 
 (**
  * Build an environment for the true or false branch of
@@ -8349,7 +8415,7 @@ and string2 env idl =
                  env
                  ty
                  stringlike
-                 Errors.strict_str_interp_type_mismatch
+                 Errors.Callback.strict_str_interp_type_mismatch
           in
           (env, hole_on_err ~err_opt te :: tel)
         else

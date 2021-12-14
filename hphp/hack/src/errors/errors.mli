@@ -38,19 +38,6 @@ type format =
   | Raw
   | Highlighted
 
-type typing_error_callback =
-  ?code:int ->
-  ?quickfixes:Quickfix.t list ->
-  Pos.t * string ->
-  (Pos_or_decl.t * string) list ->
-  unit
-
-type error_from_reasons_callback =
-  ?code:int ->
-  ?quickfixes:Quickfix.t list ->
-  (Pos_or_decl.t * string) list ->
-  unit
-
 (** Type representing the errors for a single file. *)
 type per_file_errors
 
@@ -62,24 +49,6 @@ module ErrorSet : Caml.Set.S with type elt := error
 module FinalizedErrorSet : Caml.Set.S with type elt := finalized_error
 
 val phases_up_to_excl : phase -> phase list
-
-(** This will check that the first position of the given reasons is in the
-    current decl and if yes use it as primary error position. If no,
-    it will error at a default position in the current file and log the failed
-    assertion.
-    This also sets the error code to the code for unification error
-    if none is provided. *)
-val unify_error_assert_primary_pos_in_current_decl :
-  current_decl_and_file:Pos_or_decl.ctx -> error_from_reasons_callback
-
-(** This will check that the first position of the given reasons is in the
-    current decl and if yes use it as primary error position. If no,
-    it will error at a default position in the current file and log the failed
-    assertion.
-    This also sets the error code to the code for invalid type hint error
-    if none is provided. *)
-val invalid_type_hint_assert_primary_pos_in_current_decl :
-  current_decl_and_file:Pos_or_decl.ctx -> error_from_reasons_callback
 
 module Parsing : Error_category.S
 
@@ -178,8 +147,6 @@ val merge : t -> t -> t
 
 val merge_into_current : t -> unit
 
-val apply_callback_to_errors : t -> error_from_reasons_callback -> unit
-
 val incremental_update :
   old:t -> new_:t -> rechecked:Relative_path.Set.t -> phase -> t
 
@@ -233,11 +200,168 @@ val sort : error list -> error list
 
 val get_applied_fixmes : t -> applied_fixme list
 
+module Callback : sig
+  type t
+
+  val apply :
+    t ->
+    ?code:int ->
+    ?quickfixes:Quickfix.t list ->
+    Pos.t * string ->
+    (Pos_or_decl.t * string) list ->
+    unit
+
+  val from_on_error : (error -> unit) -> dflt_code:int -> t
+
+  val always : (unit -> unit) -> t
+
+  val with_side_effect : t -> eff:(unit -> unit) -> t
+
+  val with_default_code : dflt_code:Typing.t -> t
+
+  val retain_code : t -> t
+
+  val current_claim_as_reason : t -> new_claim:Pos.t * string -> t
+
+  val unify_error : t
+
+  val index_type_mismatch : t
+
+  val covariant_index_type_mismatch : t
+
+  val expected_stringlike : t
+
+  val constant_does_not_match_enum_type : t
+
+  val enum_underlying_type_must_be_arraykey : t
+
+  val enum_constraint_must_be_arraykey : t
+
+  val enum_subtype_must_have_compatible_constraint : t
+
+  val parameter_default_value_wrong_type : t
+
+  val newtype_alias_must_satisfy_constraint : t
+
+  val missing_return : t
+
+  val inout_return_type_mismatch : t
+
+  val class_constant_value_does_not_match_hint : t
+
+  val class_property_initializer_type_does_not_match_hint : t
+
+  val xhp_attribute_does_not_match_hint : t
+
+  val record_init_value_does_not_match_hint : t
+
+  val strict_str_concat_type_mismatch : t
+
+  val strict_str_interp_type_mismatch : t
+
+  val bitwise_math_invalid_argument : t
+
+  val inc_dec_invalid_argument : t
+
+  val math_invalid_argument : t
+
+  val using_error : Pos.t -> bool -> t
+end
+
+module Reasons_callback : sig
+  type t
+
+  val apply :
+    t ->
+    ?code:int ->
+    ?quickfixes:Quickfix.t list ->
+    (Pos_or_decl.t * string) list ->
+    unit
+
+  val apply_with_reasons : t -> reasons:(Pos_or_decl.t * string) list -> unit
+
+  val ignore_error : t
+
+  val always : (unit -> unit) -> t
+
+  val with_claim : Callback.t -> claim:Pos.t * string -> t
+
+  val of_error : Typing.t -> Pos.t * string -> t
+
+  val error_assert_primary_pos_in_current_decl_callback :
+    default_code:Typing.t -> current_decl_and_file:Pos_or_decl.ctx -> t
+
+  val with_code : t -> code:int -> t
+
+  val with_default_code : t -> dflt_code:int -> t
+
+  val retain_code : t -> t
+
+  val with_reasons : t -> reasons:(Pos_or_decl.t * string) list -> t
+
+  val append_reason : t -> reason:Pos_or_decl.t * string -> t
+
+  val prepend_reason : t -> reason:Pos_or_decl.t * string -> t
+
+  val prepend_reasons : t -> reasons:(Pos_or_decl.t * string) list -> t
+
+  val retain_quickfixes : t -> t
+
+  val unify_error_assert_primary_pos_in_current_decl :
+    current_decl_and_file:Pos_or_decl.ctx -> t
+
+  val invalid_type_hint_assert_primary_pos_in_current_decl :
+    current_decl_and_file:Pos_or_decl.ctx -> t
+
+  val unify_error_at : Pos.t -> t
+
+  val hh_expect_error : equivalent:bool -> Pos.t -> t
+
+  val bad_enum_decl : Pos.t -> t
+
+  val bad_conditional_support_dynamic :
+    Pos.t ->
+    child:string ->
+    parent:string ->
+    ty_str:string ->
+    self_ty_str:string ->
+    t
+
+  val bad_decl_override :
+    Pos.t -> name:string -> parent_pos:Pos_or_decl.t -> parent_name:string -> t
+
+  val explain_where_constraint :
+    Pos.t -> in_class:bool -> decl_pos:Pos_or_decl.t -> t
+
+  val explain_constraint : use_pos:Pos.t -> t
+
+  val rigid_tvar_escape_at : Pos.t -> string -> t
+
+  val invalid_type_hint : Pos.t -> t
+
+  val type_constant_mismatch : t -> t
+
+  val class_constant_type_mismatch : t -> t
+
+  val unsatisfied_req_callback :
+    class_pos:Pos.t ->
+    trait_pos:Pos_or_decl.t ->
+    req_pos:Pos_or_decl.t ->
+    string ->
+    t
+
+  val invalid_echo_argument_at : Pos.t -> t
+
+  val index_type_mismatch_at : Pos.t -> t
+end
+
 (***************************************
  *                                     *
  *       Specific errors               *
  *                                     *
  ***************************************)
+
+val apply_callback_to_errors : t -> Reasons_callback.t -> unit
 
 val internal_error : Pos.t -> string -> unit
 
@@ -246,21 +370,15 @@ val unimplemented_feature : Pos.t -> string -> unit
 val experimental_feature : Pos.t -> string -> unit
 
 val missing_field :
-  Pos_or_decl.t ->
-  Pos_or_decl.t ->
-  string ->
-  error_from_reasons_callback ->
-  unit
+  Pos_or_decl.t -> Pos_or_decl.t -> string -> Reasons_callback.t -> unit
 
 val violated_constraint :
   (Pos_or_decl.t * (Pos_or_decl.t * string)) list ->
   (Pos_or_decl.t * string) list ->
-  error_from_reasons_callback ->
+  Reasons_callback.t ->
   unit
 
 val method_variance : Pos.t -> unit
-
-val explain_constraint : use_pos:Pos.t -> error_from_reasons_callback
 
 val explain_where_constraint :
   in_class:bool ->
@@ -276,19 +394,14 @@ val explain_tconst_where_constraint :
   unit
 
 val abstract_tconst_not_allowed :
-  Pos_or_decl.t -> Pos_or_decl.t * string -> error_from_reasons_callback -> unit
+  Pos_or_decl.t -> Pos_or_decl.t * string -> Reasons_callback.t -> unit
 
 val mutating_const_property : Pos.t -> unit
 
 val self_const_parent_not : Pos.t -> unit
 
 val overriding_prop_const_mismatch :
-  Pos_or_decl.t ->
-  bool ->
-  Pos_or_decl.t ->
-  bool ->
-  error_from_reasons_callback ->
-  unit
+  Pos_or_decl.t -> bool -> Pos_or_decl.t -> bool -> Reasons_callback.t -> unit
 
 val unexpected_record_field_name :
   field_name:string ->
@@ -323,7 +436,7 @@ val concrete_const_interface_override :
   Pos_or_decl.t ->
   string ->
   string ->
-  error_from_reasons_callback ->
+  Reasons_callback.t ->
   unit
 
 val interface_or_trait_const_multiple_defs :
@@ -332,7 +445,7 @@ val interface_or_trait_const_multiple_defs :
   string ->
   string ->
   string ->
-  error_from_reasons_callback ->
+  Reasons_callback.t ->
   unit
 
 val typeconst_concrete_concrete_override :
@@ -348,7 +461,7 @@ val interface_typeconst_multiple_defs :
   string ->
   string ->
   bool ->
-  error_from_reasons_callback ->
+  Reasons_callback.t ->
   unit
 
 val format_string :
@@ -432,17 +545,13 @@ val unset_nonidx_in_strict : Pos.t -> (Pos_or_decl.t * string) list -> unit
 val unpacking_disallowed_builtin_function : Pos.t -> string -> unit
 
 val invalid_destructure :
-  Pos_or_decl.t ->
-  Pos_or_decl.t ->
-  string ->
-  error_from_reasons_callback ->
-  unit
+  Pos_or_decl.t -> Pos_or_decl.t -> string -> Reasons_callback.t -> unit
 
 val unpack_array_required_argument :
-  Pos_or_decl.t -> Pos_or_decl.t -> error_from_reasons_callback -> unit
+  Pos_or_decl.t -> Pos_or_decl.t -> Reasons_callback.t -> unit
 
 val unpack_array_variadic_argument :
-  Pos_or_decl.t -> Pos_or_decl.t -> error_from_reasons_callback -> unit
+  Pos_or_decl.t -> Pos_or_decl.t -> Reasons_callback.t -> unit
 
 val array_get_arity : Pos.t -> string -> Pos_or_decl.t -> unit
 
@@ -471,7 +580,7 @@ val smember_not_found :
   Pos_or_decl.t * string ->
   string ->
   ([< `instance | `static ] * Pos_or_decl.t * string) option ->
-  typing_error_callback ->
+  Callback.t ->
   unit
 
 val smember_not_found_ :
@@ -480,7 +589,7 @@ val smember_not_found_ :
   Pos_or_decl.t * string ->
   string ->
   ([< `instance | `static ] * Pos_or_decl.t * string) option ->
-  error_from_reasons_callback ->
+  Reasons_callback.t ->
   unit
 
 val member_not_found :
@@ -490,7 +599,7 @@ val member_not_found :
   string ->
   ([< `instance | `static ] * Pos_or_decl.t * string) option ->
   (Pos_or_decl.t * string) list ->
-  typing_error_callback ->
+  Callback.t ->
   unit
 
 val expr_tree_unsupported_operator : string -> string -> Pos.t -> unit
@@ -506,22 +615,12 @@ val visibility : Pos.t -> string -> Pos_or_decl.t -> string -> unit
 val typing_too_many_args : int -> int -> Pos.t -> Pos_or_decl.t -> unit
 
 val typing_too_many_args_w_callback :
-  int ->
-  int ->
-  Pos_or_decl.t ->
-  Pos_or_decl.t ->
-  error_from_reasons_callback ->
-  unit
+  int -> int -> Pos_or_decl.t -> Pos_or_decl.t -> Reasons_callback.t -> unit
 
 val typing_too_few_args : int -> int -> Pos.t -> Pos_or_decl.t -> unit
 
 val typing_too_few_args_w_callback :
-  int ->
-  int ->
-  Pos_or_decl.t ->
-  Pos_or_decl.t ->
-  error_from_reasons_callback ->
-  unit
+  int -> int -> Pos_or_decl.t -> Pos_or_decl.t -> Reasons_callback.t -> unit
 
 val bad_call : Pos.t -> string -> unit
 
@@ -550,32 +649,22 @@ val implement_abstract :
 val generic_static : Pos.t -> string -> unit
 
 val fun_too_many_args :
-  int ->
-  int ->
-  Pos_or_decl.t ->
-  Pos_or_decl.t ->
-  error_from_reasons_callback ->
-  unit
+  int -> int -> Pos_or_decl.t -> Pos_or_decl.t -> Reasons_callback.t -> unit
 
 val fun_too_few_args :
-  int ->
-  int ->
-  Pos_or_decl.t ->
-  Pos_or_decl.t ->
-  error_from_reasons_callback ->
-  unit
+  int -> int -> Pos_or_decl.t -> Pos_or_decl.t -> Reasons_callback.t -> unit
 
 val fun_unexpected_nonvariadic :
-  Pos_or_decl.t -> Pos_or_decl.t -> error_from_reasons_callback -> unit
+  Pos_or_decl.t -> Pos_or_decl.t -> Reasons_callback.t -> unit
 
 val fun_variadicity_hh_vs_php56 :
-  Pos_or_decl.t -> Pos_or_decl.t -> error_from_reasons_callback -> unit
+  Pos_or_decl.t -> Pos_or_decl.t -> Reasons_callback.t -> unit
 
 val expected_tparam :
   use_pos:Pos.t ->
   definition_pos:Pos_or_decl.t ->
   int ->
-  error_from_reasons_callback option ->
+  Reasons_callback.t option ->
   unit
 
 val object_string : Pos.t -> Pos_or_decl.t -> unit
@@ -589,7 +678,7 @@ val type_arity_mismatch :
   string ->
   Pos_or_decl.t ->
   string ->
-  error_from_reasons_callback ->
+  Reasons_callback.t ->
   unit
 
 val this_final :
@@ -599,67 +688,6 @@ val exact_class_final :
   Pos_or_decl.t * string -> Pos_or_decl.t -> (Pos_or_decl.t * string) list
 
 val discarded_awaitable : Pos.t -> Pos_or_decl.t -> unit
-
-(** Ignore and drops the error. *)
-val ignore_error : error_from_reasons_callback
-
-val unify_error : typing_error_callback
-
-val unify_error_at : Pos.t -> error_from_reasons_callback
-
-val rigid_tvar_escape_at : Pos.t -> string -> error_from_reasons_callback
-
-val invalid_type_hint : Pos.t -> error_from_reasons_callback
-
-val index_type_mismatch : typing_error_callback
-
-val covariant_index_type_mismatch : typing_error_callback
-
-val index_type_mismatch_at : Pos.t -> error_from_reasons_callback
-
-val expected_stringlike : typing_error_callback
-
-val type_constant_mismatch :
-  error_from_reasons_callback -> error_from_reasons_callback
-
-val class_constant_type_mismatch :
-  error_from_reasons_callback -> error_from_reasons_callback
-
-val constant_does_not_match_enum_type : typing_error_callback
-
-val enum_underlying_type_must_be_arraykey : typing_error_callback
-
-val enum_constraint_must_be_arraykey : typing_error_callback
-
-val enum_subtype_must_have_compatible_constraint : typing_error_callback
-
-val parameter_default_value_wrong_type : typing_error_callback
-
-val newtype_alias_must_satisfy_constraint : typing_error_callback
-
-val missing_return : typing_error_callback
-
-val inout_return_type_mismatch : typing_error_callback
-
-val class_constant_value_does_not_match_hint : typing_error_callback
-
-val class_property_initializer_type_does_not_match_hint : typing_error_callback
-
-val xhp_attribute_does_not_match_hint : typing_error_callback
-
-val record_init_value_does_not_match_hint : typing_error_callback
-
-val strict_str_concat_type_mismatch : typing_error_callback
-
-val strict_str_interp_type_mismatch : typing_error_callback
-
-val bitwise_math_invalid_argument : typing_error_callback
-
-val inc_dec_invalid_argument : typing_error_callback
-
-val math_invalid_argument : typing_error_callback
-
-val using_error : Pos.t -> bool -> typing_error_callback
 
 val static_redeclared_as_dynamic :
   Pos.t -> Pos_or_decl.t -> string -> elt_type:[ `Method | `Property ] -> unit
@@ -697,7 +725,7 @@ val non_object_member_read :
   Pos.t ->
   string ->
   Pos_or_decl.t ->
-  typing_error_callback ->
+  Callback.t ->
   unit
 
 val non_object_member_read_ :
@@ -706,7 +734,7 @@ val non_object_member_read_ :
   Pos_or_decl.t ->
   string ->
   Pos_or_decl.t ->
-  error_from_reasons_callback ->
+  Reasons_callback.t ->
   unit
 
 val non_object_member_write :
@@ -715,7 +743,7 @@ val non_object_member_write :
   Pos.t ->
   string ->
   Pos_or_decl.t ->
-  typing_error_callback ->
+  Callback.t ->
   unit
 
 val non_object_member_write_ :
@@ -724,7 +752,7 @@ val non_object_member_write_ :
   Pos_or_decl.t ->
   string ->
   Pos_or_decl.t ->
-  error_from_reasons_callback ->
+  Reasons_callback.t ->
   unit
 
 val unknown_object_member :
@@ -767,13 +795,6 @@ val unsatisfied_req :
   string ->
   unit
 
-val unsatisfied_req_callback :
-  class_pos:Pos.t ->
-  trait_pos:Pos_or_decl.t ->
-  req_pos:Pos_or_decl.t ->
-  string ->
-  error_from_reasons_callback
-
 val cyclic_class_def : SSet.t -> Pos.t -> unit
 
 val cyclic_record_def : string list -> Pos.t -> unit
@@ -807,14 +828,14 @@ val invalid_newable_type_param_constraints :
 val override_final :
   parent:Pos_or_decl.t ->
   child:Pos_or_decl.t ->
-  on_error:error_from_reasons_callback ->
+  on_error:Reasons_callback.t ->
   unit
 
 val override_lsb :
   member_name:string ->
   parent:Pos_or_decl.t ->
   child:Pos_or_decl.t ->
-  error_from_reasons_callback ->
+  Reasons_callback.t ->
   unit
 
 val should_be_override :
@@ -838,7 +859,7 @@ val visibility_extends :
   Pos_or_decl.t ->
   Pos_or_decl.t ->
   string ->
-  error_from_reasons_callback ->
+  Reasons_callback.t ->
   unit
 
 val visibility_override_internal :
@@ -846,7 +867,7 @@ val visibility_override_internal :
   Pos_or_decl.t ->
   string option ->
   string ->
-  error_from_reasons_callback ->
+  Reasons_callback.t ->
   unit
 
 val member_not_implemented :
@@ -870,22 +891,20 @@ val method_import_via_diamond :
   unit
 
 val bad_method_override :
-  Pos_or_decl.t ->
-  string ->
-  (Pos_or_decl.t * string) list ->
-  error_from_reasons_callback ->
-  unit
+  Reasons_callback.t ->
+  pos:Pos_or_decl.t ->
+  member_name:string ->
+  Reasons_callback.t
 
 val bad_prop_override :
-  Pos_or_decl.t ->
-  string ->
-  (Pos_or_decl.t * string) list ->
-  error_from_reasons_callback ->
-  unit
+  Reasons_callback.t ->
+  pos:Pos_or_decl.t ->
+  member_name:string ->
+  Reasons_callback.t
 
 val bad_enum_decl : Pos.t -> (Pos_or_decl.t * string) list -> unit
 
-val missing_constructor : Pos_or_decl.t -> error_from_reasons_callback -> unit
+val missing_constructor : Pos_or_decl.t -> Reasons_callback.t -> unit
 
 val enum_constant_type_bad :
   Pos.t -> Pos_or_decl.t -> string -> Pos_or_decl.t list -> unit
@@ -920,7 +939,7 @@ val shape_field_class_mismatch : Pos.t -> Pos.t -> string -> string -> unit
 val shape_field_type_mismatch : Pos.t -> Pos.t -> string -> string -> unit
 
 val shape_fields_unknown :
-  Pos_or_decl.t -> Pos_or_decl.t -> error_from_reasons_callback -> unit
+  Pos_or_decl.t -> Pos_or_decl.t -> Reasons_callback.t -> unit
 
 val invalid_shape_remove_key : Pos.t -> unit
 
@@ -959,12 +978,7 @@ val cannot_declare_constant :
   [< `enum | `record ] -> Pos.t -> Pos.t * string -> unit
 
 val ambiguous_inheritance :
-  Pos_or_decl.t ->
-  string ->
-  string ->
-  error ->
-  error_from_reasons_callback ->
-  unit
+  Pos_or_decl.t -> string -> string -> error -> Reasons_callback.t -> unit
 
 val duplicate_interface : Pos.t -> string -> Pos_or_decl.t list -> unit
 
@@ -983,8 +997,7 @@ val local_variable_modified_twice : Pos.t -> Pos.t list -> unit
 
 val assign_during_case : Pos.t -> unit
 
-val cyclic_enum_constraint :
-  Pos_or_decl.t -> error_from_reasons_callback -> unit
+val cyclic_enum_constraint : Pos_or_decl.t -> Reasons_callback.t -> unit
 
 val invalid_classname : Pos.t -> unit
 
@@ -1029,18 +1042,14 @@ val invalid_return_disposable : Pos.t -> unit
 val invalid_switch_case_value_type : Pos.t -> string -> string -> unit
 
 val required_field_is_optional :
-  Pos_or_decl.t ->
-  Pos_or_decl.t ->
-  string ->
-  error_from_reasons_callback ->
-  unit
+  Pos_or_decl.t -> Pos_or_decl.t -> string -> Reasons_callback.t -> unit
 
 val array_get_with_optional_field : Pos.t -> Pos_or_decl.t -> string -> unit
 
 val nullable_cast : Pos.t -> string -> Pos_or_decl.t -> unit
 
 val return_disposable_mismatch :
-  bool -> Pos_or_decl.t -> Pos_or_decl.t -> error_from_reasons_callback -> unit
+  bool -> Pos_or_decl.t -> Pos_or_decl.t -> Reasons_callback.t -> unit
 
 val dollardollar_lvalue : Pos.t -> unit
 
@@ -1061,10 +1070,10 @@ val escaping_this : Pos.t -> unit
 val must_extend_disposable : Pos.t -> unit
 
 val accept_disposable_invariant :
-  Pos_or_decl.t -> Pos_or_decl.t -> error_from_reasons_callback -> unit
+  Pos_or_decl.t -> Pos_or_decl.t -> Reasons_callback.t -> unit
 
 val ifc_external_contravariant :
-  Pos_or_decl.t -> Pos_or_decl.t -> error_from_reasons_callback -> unit
+  Pos_or_decl.t -> Pos_or_decl.t -> Reasons_callback.t -> unit
 
 val inout_annotation_missing : Pos.t -> Pos_or_decl.t -> unit
 
@@ -1072,7 +1081,7 @@ val inout_annotation_unexpected :
   Pos.t -> Pos_or_decl.t -> bool -> Pos.t -> unit
 
 val inoutness_mismatch :
-  Pos_or_decl.t -> Pos_or_decl.t -> error_from_reasons_callback -> unit
+  Pos_or_decl.t -> Pos_or_decl.t -> Reasons_callback.t -> unit
 
 val xhp_required : Pos.t -> string -> (Pos_or_decl.t * string) list -> unit
 
@@ -1095,8 +1104,7 @@ val wrong_expression_kind_attribute :
 
 val wrong_expression_kind_builtin_attribute : string -> Pos.t -> string -> unit
 
-val decl_override_missing_hint :
-  Pos_or_decl.t -> error_from_reasons_callback -> unit
+val decl_override_missing_hint : Pos_or_decl.t -> Reasons_callback.t -> unit
 
 val shapes_key_exists_always_true : Pos.t -> string -> Pos_or_decl.t -> unit
 
@@ -1151,14 +1159,14 @@ val invalid_arraykey_constraint : Pos.t -> string -> unit
 val lateinit_with_default : Pos.t -> unit
 
 val bad_lateinit_override :
-  bool -> Pos_or_decl.t -> Pos_or_decl.t -> error_from_reasons_callback -> unit
+  bool -> Pos_or_decl.t -> Pos_or_decl.t -> Reasons_callback.t -> unit
 
 val bad_xhp_attr_required_override :
   string ->
   string ->
   Pos_or_decl.t ->
   Pos_or_decl.t ->
-  error_from_reasons_callback ->
+  Reasons_callback.t ->
   unit
 
 val multiple_concrete_defs :
@@ -1168,7 +1176,7 @@ val multiple_concrete_defs :
   string ->
   string ->
   string ->
-  error_from_reasons_callback ->
+  Reasons_callback.t ->
   unit
 
 val require_args_reify : Pos_or_decl.t -> Pos.t -> unit
@@ -1271,7 +1279,7 @@ val coeffect_subtyping_error :
   string ->
   Pos_or_decl.t ->
   string ->
-  error_from_reasons_callback ->
+  Reasons_callback.t ->
   unit
 
 val op_coeffect_error :
@@ -1335,7 +1343,7 @@ val ifc_policy_mismatch :
   Pos_or_decl.t ->
   string ->
   string ->
-  error_from_reasons_callback ->
+  Reasons_callback.t ->
   unit
 
 val override_method_support_dynamic_type :
@@ -1343,7 +1351,7 @@ val override_method_support_dynamic_type :
   Pos_or_decl.t ->
   string ->
   string ->
-  error_from_reasons_callback ->
+  Reasons_callback.t ->
   unit
 
 val parent_support_dynamic_type :
@@ -1400,7 +1408,7 @@ val readonly_mismatch_on_error :
   Pos_or_decl.t ->
   reason_sub:(Pos_or_decl.t * string) list ->
   reason_super:(Pos_or_decl.t * string) list ->
-  error_from_reasons_callback ->
+  Reasons_callback.t ->
   unit
 
 val explicit_readonly_cast : string -> Pos.t -> Pos_or_decl.t -> unit
@@ -1443,8 +1451,6 @@ val function_pointer_with_via_label : Pos.t -> Pos_or_decl.t -> unit
 
 val reified_static_method_in_expr_tree : Pos.t -> unit
 
-val invalid_echo_argument_at : Pos.t -> error_from_reasons_callback
-
 val module_mismatch : Pos.t -> Pos_or_decl.t -> string option -> string -> unit
 
 val module_hint : def_pos:Pos_or_decl.t -> use_pos:Pos.t -> unit
@@ -1456,11 +1462,9 @@ val not_sub_dynamic :
   (Pos_or_decl.t * string) list ->
   Pos_or_decl.t ->
   string ->
-  error_from_reasons_callback ->
+  Reasons_callback.t ->
   unit
 
 val trait_parent_construct_inconsistent : Pos.t -> Pos_or_decl.t -> unit
 
 val explicit_consistent_constructor : Ast_defs.classish_kind -> Pos.t -> unit
-
-val hh_expect_error : equivalent:bool -> Pos.t -> error_from_reasons_callback

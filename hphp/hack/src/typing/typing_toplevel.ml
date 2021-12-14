@@ -1142,7 +1142,7 @@ let typeconst_def
             env
             ty
             as_
-            Errors.unify_error
+            Errors.Callback.unify_error
         | None -> env
       in
       let env =
@@ -1157,7 +1157,7 @@ let typeconst_def
             env
             super
             ty
-            Errors.unify_error
+            Errors.Callback.unify_error
         | None -> env
       in
       env
@@ -1268,7 +1268,7 @@ let class_const_def ~in_enum_class c env cc =
       env
       ty'
       hint_ty
-      Errors.class_constant_value_does_not_match_hint
+      Errors.Callback.class_constant_value_does_not_match_hint
   in
   let type_and_check env e =
     let (env, (te, ty')) =
@@ -1372,7 +1372,7 @@ let class_var_def ~is_static cls env cv =
             env
             ty
             cty
-            Errors.class_property_initializer_type_does_not_match_hint
+            Errors.Callback.class_property_initializer_type_does_not_match_hint
       in
       (env, Some te)
   in
@@ -1522,7 +1522,7 @@ let check_generic_class_with_SupportDynamicType env c parents =
                     Ast_defs.Constraint_as
                     lty
                     dynamic_ty
-                    (Errors.unify_error_at pc)
+                    (Errors.Reasons_callback.unify_error_at pc)
                 in
                 begin
                   match Env.get_self_ty env with
@@ -1532,19 +1532,12 @@ let check_generic_class_with_SupportDynamicType env c parents =
                       env_with_assumptions
                       self_ty
                       dynamic_ty
-                      (fun ?code:_ ?quickfixes:_ reasons ->
-                        let message =
-                          Typing_print.full_strip_ns_decl env ty
-                          ^ " is subtype of dynamic implies "
-                          ^ Typing_print.full_strip_ns env self_ty
-                          ^ " is subtype of dynamic"
-                        in
-                        Errors.bad_conditional_support_dynamic
-                          pc
-                          ~child:c_name
-                          ~parent:name
-                          message
-                          reasons)
+                    @@ Errors.Reasons_callback.bad_conditional_support_dynamic
+                         pc
+                         ~child:c_name
+                         ~parent:name
+                         ~ty_str:(Typing_print.full_strip_ns_decl env ty)
+                         ~self_ty_str:(Typing_print.full_strip_ns env self_ty)
                   | _ -> env
                 end
               | _ -> env
@@ -1940,7 +1933,7 @@ let gconst_def ctx cst =
           env
           value_type
           dty
-          Errors.unify_error
+          Errors.Callback.unify_error
       in
       (te, env)
     | None ->
@@ -1976,7 +1969,7 @@ let record_field env f =
         env
         ty
         (MakeType.unenforced cty)
-        Errors.record_init_value_does_not_match_hint
+        Errors.Callback.record_init_value_does_not_match_hint
     in
     (env, (id, hint, Some te))
   | None -> (env, (id, hint, None))

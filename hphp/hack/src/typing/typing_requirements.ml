@@ -27,7 +27,7 @@ let check_fulfillment env class_pos get_impl (trait_pos, req_ty) =
         env
         impl_ty
         req_ty
-        (Errors.unsatisfied_req_callback
+        (Errors.Reasons_callback.unsatisfied_req_callback
            ~class_pos
            ~trait_pos
            ~req_pos

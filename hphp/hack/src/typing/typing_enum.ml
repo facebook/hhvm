@@ -73,7 +73,7 @@ let enum_check_const ty_exp env cc t =
     env
     t
     ty_exp
-    Errors.constant_does_not_match_enum_type
+    Errors.Callback.constant_does_not_match_enum_type
 
 (* Check that the `as` bound or the underlying type of an enum is a subtype of
  * arraykey. For enum class, check that it is a denotable closed type:
@@ -118,12 +118,12 @@ let enum_check_type env (pos : Pos_or_decl.t) ur ty_interface ty _on_error =
       env
       ty
       ty_arraykey
-      (fun ?code:_ ?quickfixes:_ _ _ ->
-        Errors.enum_type_bad
-          (Pos_or_decl.unsafe_to_raw_pos pos)
-          false
-          (Typing_print.full_strip_ns env ty)
-          [])
+    @@ Errors.Callback.always (fun _ ->
+           Errors.enum_type_bad
+             (Pos_or_decl.unsafe_to_raw_pos pos)
+             false
+             (Typing_print.full_strip_ns env ty)
+             [])
 
 (* Check an enum declaration of the form
  *    enum E : <ty_exp> as <ty_constraint>
@@ -179,7 +179,7 @@ let enum_class_check env tc consts const_types =
         Reason.URenum_underlying
         ty_interface
         ty_exp
-        Errors.enum_underlying_type_must_be_arraykey
+        Errors.Callback.enum_underlying_type_must_be_arraykey
     in
     (* Check that ty_exp <: ty_constraint <: arraykey *)
     let env =
@@ -194,7 +194,7 @@ let enum_class_check env tc consts const_types =
             Reason.URenum_cstr
             None (* Enum classes do not have constraints *)
             ty
-            Errors.enum_constraint_must_be_arraykey
+            Errors.Callback.enum_constraint_must_be_arraykey
         in
         Typing_ops.sub_type
           (Pos_or_decl.unsafe_to_raw_pos pos)
@@ -202,7 +202,7 @@ let enum_class_check env tc consts const_types =
           env
           ty_exp
           ty
-          Errors.enum_subtype_must_have_compatible_constraint
+          Errors.Callback.enum_subtype_must_have_compatible_constraint
     in
     List.fold2_exn ~f:(enum_check_const ty_exp) ~init:env consts const_types
   | None -> env

@@ -43,11 +43,8 @@ open Typing_env_types
 
 (* does coercion, including subtyping *)
 let coerce_type_impl
-    ~coerce_for_op
-    env
-    ty_have
-    ty_expect
-    (on_error : Errors.error_from_reasons_callback) =
+    ~coerce_for_op env ty_have ty_expect (on_error : Errors.Reasons_callback.t)
+    =
   let is_expected_enforced = equal_enforcement ty_expect.et_enforced Enforced in
   if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then
     if coerce_for_op && is_expected_enforced then
@@ -110,15 +107,12 @@ let coerce_type
     env
     ty_have
     ty_expect
-    (on_error : Errors.typing_error_callback) =
+    (on_error : Errors.Callback.t) =
   result ~on_ok:Fn.id ~on_err:Fn.id
-  @@ coerce_type_impl
-       ~coerce_for_op
-       env
-       ty_have
-       ty_expect
-       (fun ?code ?quickfixes reasons ->
-         on_error ?code ?quickfixes (p, Reason.string_of_ureason ur) reasons)
+  @@ coerce_type_impl ~coerce_for_op env ty_have ty_expect
+  @@ Errors.Reasons_callback.with_claim
+       on_error
+       ~claim:(p, Reason.string_of_ureason ur)
 
 let coerce_type_res
     ?(coerce_for_op = false)
@@ -127,14 +121,11 @@ let coerce_type_res
     env
     ty_have
     ty_expect
-    (on_error : Errors.typing_error_callback) =
-  coerce_type_impl
-    ~coerce_for_op
-    env
-    ty_have
-    ty_expect
-    (fun ?code ?quickfixes reasons ->
-      on_error ?code ?quickfixes (p, Reason.string_of_ureason ur) reasons)
+    (on_error : Errors.Callback.t) =
+  coerce_type_impl ~coerce_for_op env ty_have ty_expect
+  @@ Errors.Reasons_callback.with_claim
+       on_error
+       ~claim:(p, Reason.string_of_ureason ur)
 
 (* does coercion if possible, returning Some env with resultant coercion constraints
  * otherwise suppresses errors from attempted coercion and returns None *)
@@ -156,7 +147,7 @@ let try_coerce env ty_have ty_expect =
                env
                ty_have
                ty_expect
-               (Errors.unify_error_at pos)))
+               (Errors.Reasons_callback.unify_error_at pos)))
       (fun _ -> None)
   in
   Errors.is_hh_fixme := f;

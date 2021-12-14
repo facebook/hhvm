@@ -132,8 +132,8 @@ let check_arraykey_index error env pos container_ty index_ty =
       | _ -> Reason.index_array
     in
     let info_of_type ty = (get_pos ty, Typing_print.error env ty) in
-    let container_info = info_of_type container_ty
-    and index_info = info_of_type index_ty in
+    let container_info = lazy (info_of_type container_ty) in
+    let index_info = lazy (info_of_type index_ty) in
     let ty_arraykey = MakeType.arraykey (Reason.Ridx_dict pos) in
     let ty_expected = { et_type = ty_arraykey; et_enforced = Enforced } in
     (* If we have an error in coercion here, we will add a `Hole` indicating the
@@ -165,7 +165,7 @@ let check_arraykey_index error env pos container_ty index_ty =
         ( (fun env ->
             (* We actually failed to subtype against arraykey so generate
                the error we would have seen *)
-            error pos container_info index_info;
+            error pos (Lazy.force container_info) (Lazy.force index_info);
             (env, Error (index_ty, inner_ty))),
           inner_ty )
       | _ -> ((fun env -> (env, Ok index_ty)), index_ty)
@@ -178,7 +178,8 @@ let check_arraykey_index error env pos container_ty index_ty =
          env
          ty_actual
          ty_expected
-         (fun ?code:_ ?quickfixes:_ _ _ -> error pos container_info index_info)
+         (fun ?code:_ ?quickfixes:_ _ _ ->
+           error pos (Lazy.force container_info) (Lazy.force index_info))
   else
     (env, Ok index_ty)
 

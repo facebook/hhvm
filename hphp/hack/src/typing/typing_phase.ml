@@ -798,7 +798,9 @@ let localize_targ_with_kind
   | (_, Aast.Happly ((p, id), [])) when String.equal id SN.Typehints.wildcard ->
     let is_higher_kinded = KindDefs.Simple.get_arity kind > 0 in
     if is_higher_kinded then
-      let () = Errors.wildcard_for_higher_kinded_type (fst hint) in
+      let () =
+        Errors.add_naming_error @@ Naming_error.HKT_wildcard (fst hint)
+      in
       (env, (mk (Reason.none, Terr), hint))
     else
       let (env, ty) = Env.fresh_type env p in
@@ -913,10 +915,13 @@ let localize_targs_with_kinds
         (* We only throw an error if the user didn't provide any type arguments at all.
            Otherwise, if they provided some, but not all of them, n arity mismatch
            triggers earlier in this function, independently from higher-kindedness *)
-        Errors.implicit_type_argument_for_higher_kinded_type
-          ~use_pos
-          ~def_pos:(fst kind_name)
-          (snd kind_name);
+        Errors.add_naming_error
+        @@ Naming_error.HKT_implicit_argument
+             {
+               pos = use_pos;
+               decl_pos = fst kind_name;
+               param_name = snd kind_name;
+             };
         (env, (mk (Reason.none, Terr), wildcard_hint))
       ) else
         let (env, tvar) =

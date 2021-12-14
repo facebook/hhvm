@@ -185,14 +185,17 @@ let check_typedef_usable_as_hk_type env use_pos typedef_name typedef_info =
       let typedef_tparam_name = SSet.min_elt intersection in
       let (used_class_in_def_pos, used_class_in_def_name) = used_class in
       let typedef_pos = typedef_info.td_pos in
-      Errors.alias_with_implicit_constraints_as_hk_type
-        ~use_pos
-        ~typedef_pos
-        ~used_class_in_def_pos
-        ~typedef_name
-        ~typedef_tparam_name
-        ~used_class_in_def_name
-        ~used_class_tparam_name
+      Errors.add_naming_error
+      @@ Naming_error.HKT_alias_with_implicit_constraints
+           {
+             pos = use_pos;
+             typedef_pos;
+             used_class_in_def_pos;
+             typedef_name;
+             typedef_tparam_name;
+             used_class_in_def_name;
+             used_class_tparam_name;
+           }
   in
   let check_tapply r class_sid type_args =
     let decl_ty = Typing_make_type.apply r class_sid type_args in
@@ -244,14 +247,15 @@ let check_typedef_usable_as_hk_type env use_pos typedef_name typedef_info =
   on their arguments.
   For now, we reject using any class as a HK type that has any constraints on its type parameters.
   *)
-let check_class_usable_as_hk_type use_pos class_info =
-  let name = Cls.name class_info in
+let check_class_usable_as_hk_type pos class_info =
+  let class_name = Cls.name class_info in
   let tparams = Cls.tparams class_info in
   let has_tparam_constraints =
     List.exists tparams ~f:(fun tp -> not (List.is_empty tp.tp_constraints))
   in
   if has_tparam_constraints then
-    Errors.class_with_constraints_used_as_hk_type use_pos name
+    Errors.add_naming_error
+    @@ Naming_error.HKT_class_with_constraints_used { pos; class_name }
 
 let report_kind_error ~use_pos ~def_pos ~tparam_name ~expected ~actual =
   let actual_kind_repr = Simple.description_of_kind actual in
@@ -314,7 +318,7 @@ module Simple = struct
         let pos =
           get_reason tyarg |> Reason.to_pos |> Pos_or_decl.unsafe_to_raw_pos
         in
-        Errors.wildcard_for_higher_kinded_type pos;
+        Errors.add_naming_error @@ Naming_error.HKT_wildcard pos;
         check_well_kinded ~in_signature env tyarg nkind
       )
     | _ -> check_well_kinded ~in_signature env tyarg nkind
@@ -466,9 +470,12 @@ module Simple = struct
         end
       | Tgeneric (_, targs)
       | Tapply (_, targs) ->
-        Errors.higher_kinded_partial_application
-          (Reason.to_pos r |> Pos_or_decl.unsafe_to_raw_pos)
-          (List.length targs)
+        Errors.add_naming_error
+        @@ Naming_error.HKT_partial_application
+             {
+               pos = Reason.to_pos r |> Pos_or_decl.unsafe_to_raw_pos;
+               count = List.length targs;
+             }
       | Terr
       | Tany _ ->
         ()

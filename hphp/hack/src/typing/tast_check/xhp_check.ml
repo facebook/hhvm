@@ -36,7 +36,10 @@ let handler =
         begin
           match Env.get_class env name with
           | Some _ -> ()
-          | None -> Errors.unbound_name p name Errors.ClassContext
+          | None ->
+            Errors.add_naming_error
+            @@ Naming_error.Unbound_name
+                 { pos = p; name; kind = Name_context.ClassContext }
         end
       | _ -> ()
   end

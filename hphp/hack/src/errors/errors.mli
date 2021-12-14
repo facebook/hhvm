@@ -81,14 +81,6 @@ val unify_error_assert_primary_pos_in_current_decl :
 val invalid_type_hint_assert_primary_pos_in_current_decl :
   current_decl_and_file:Pos_or_decl.ctx -> error_from_reasons_callback
 
-type name_context =
-  | FunctionNamespace
-  | ConstantNamespace
-  | TypeNamespace
-  | TraitContext
-  | ClassContext
-  | RecordContext
-
 module Parsing : Error_category.S
 
 module Naming : Error_category.S
@@ -104,6 +96,8 @@ val num_digits : int -> int
 val add_error : error -> unit
 
 val add_parsing_error : Parsing_error.t -> unit
+
+val add_naming_error : Naming_error.t -> unit
 
 (* Error codes that can be suppressed in strict mode with a FIXME based on configuration. *)
 val allowed_fixme_codes_strict : ISet.t ref
@@ -130,8 +124,6 @@ val get_hh_fixme_pos : (Pos.t -> int -> Pos.t option) ref
 val phase_to_string : phase -> string
 
 val phase_of_string : string -> phase option
-
-val name_context_to_string : name_context -> string
 
 val convert_errors_to_string :
   ?include_filename:bool -> error list -> string list
@@ -284,16 +276,6 @@ val explain_tconst_where_constraint :
 val abstract_tconst_not_allowed :
   Pos_or_decl.t -> Pos_or_decl.t * string -> error_from_reasons_callback -> unit
 
-val unexpected_arrow : Pos.t -> string -> unit
-
-val missing_arrow : Pos.t -> string -> unit
-
-val disallowed_xhp_type : Pos.t -> string -> unit
-
-val name_is_reserved : string -> Pos.t -> unit
-
-val dollardollar_unused : Pos.t -> unit
-
 val mutating_const_property : Pos.t -> unit
 
 val self_const_parent_not : Pos.t -> unit
@@ -305,28 +287,6 @@ val overriding_prop_const_mismatch :
   bool ->
   error_from_reasons_callback ->
   unit
-
-val method_name_already_bound : Pos.t -> string -> unit
-
-val error_name_already_bound : string -> string -> Pos.t -> Pos.t -> unit
-
-val unbound_name : Pos.t -> string -> name_context -> unit
-
-val invalid_fun_pointer : Pos.t -> string -> unit
-
-val undefined : Pos.t -> string -> (string * Pos.t) option -> unit
-
-val this_reserved : Pos.t -> unit
-
-val start_with_T : Pos.t -> unit
-
-val already_bound : Pos.t -> string -> unit
-
-val unexpected_typedef : Pos.t -> Pos.t -> name_context -> unit
-
-val fd_name_already_bound : Pos.t -> unit
-
-val mk_fd_name_already_bound : Pos.t -> error
 
 val repeated_record_field : string -> Pos.t -> Pos_or_decl.t -> unit
 
@@ -346,73 +306,7 @@ val missing_record_field_name :
 
 val type_not_record : string -> Pos.t -> unit
 
-val primitive_toplevel : Pos.t -> unit
-
-val primitive_invalid_alias : Pos.t -> string -> string -> unit
-
-val dynamic_new_in_strict_mode : Pos.t -> unit
-
-val xhp_optional_required_attr : Pos.t -> string -> unit
-
-val xhp_required_with_default : Pos.t -> string -> unit
-
-val array_typehints_disallowed : Pos.t -> unit
-
-val wildcard_hint_disallowed : Pos.t -> unit
-
-val wildcard_param_disallowed : Pos.t -> unit
-
-val object_cast : Pos.t -> unit
-
-val this_no_argument : Pos.t -> unit
-
-val this_hint_outside_class : Pos.t -> unit
-
-val this_type_forbidden : Pos.t -> unit
-
-val nonstatic_property_with_lsb : Pos.t -> unit
-
-val lowercase_this : Pos.t -> string -> unit
-
-val classname_param : Pos.t -> unit
-
-val typaram_applied_to_type : Pos.t -> string -> unit
-
-val tparam_with_tparam : Pos.t -> string -> unit
-
-val shadowed_type_param : Pos.t -> Pos.t -> string -> unit
-
-val missing_typehint : Pos.t -> unit
-
-val expected_variable : Pos.t -> unit
-
-val naming_too_few_arguments : Pos.t -> unit
-
-val naming_too_many_arguments : Pos.t -> unit
-
-val expected_collection : Pos.t -> string -> unit
-
-val illegal_CLASS : Pos.t -> unit
-
-val illegal_TRAIT : Pos.t -> unit
-
 val nullsafe_property_write_context : Pos.t -> unit
-
-val illegal_fun : Pos.t -> unit
-
-val illegal_member_variable_class : Pos.t -> unit
-
-val illegal_meth_fun : Pos.t -> unit
-
-val illegal_inst_meth : Pos.t -> unit
-
-val illegal_meth_caller : Pos.t -> unit
-
-val illegal_class_meth : Pos.t -> unit
-
-val class_meth_non_final_self : Pos.t -> string -> unit
-
-val class_meth_non_final_CLASS : Pos.t -> bool -> string -> unit
 
 val unexpected_ty_in_tast :
   Pos.t -> actual_ty:string -> expected_ty:string -> unit
@@ -474,7 +368,7 @@ val bad_regex_pattern : Pos.t -> string -> unit
 
 val generic_array_strict : Pos.t -> unit
 
-val option_return_only_typehint : Pos.t -> [< `void | `noreturn ] -> unit
+val option_return_only_typehint : Pos.t -> [ `void | `noreturn ] -> unit
 
 val tuple_syntax : Pos.t -> unit
 
@@ -490,15 +384,7 @@ val field_kinds : Pos.t -> Pos_or_decl.t -> unit
 
 val unbound_name_typing : Pos.t -> string -> unit
 
-val did_you_mean_naming : Pos.t -> string -> Pos.t -> string -> unit
-
 val previous_default : Pos.t -> unit
-
-val return_only_typehint : Pos.t -> [< `void | `noreturn ] -> unit
-
-val unexpected_type_arguments : Pos.t -> unit
-
-val too_many_type_arguments : Pos.t -> unit
 
 val return_in_void : Pos.t -> Pos.t -> unit
 
@@ -961,10 +847,6 @@ val call_before_init : Pos.t -> string -> unit
 
 val type_arity : Pos.t -> Pos_or_decl.t -> expected:int -> actual:int -> unit
 
-val invalid_req_implements : Pos.t -> unit
-
-val invalid_req_extends : Pos.t -> unit
-
 val abstract_with_body : Pos.t * 'a -> unit
 
 val private_and_final : Pos.t -> unit
@@ -1100,8 +982,6 @@ val shape_fields_unknown :
 
 val invalid_shape_remove_key : Pos.t -> unit
 
-val using_internal_class : Pos.t -> string -> unit
-
 val trivial_strict_eq :
   Pos.t ->
   string ->
@@ -1133,12 +1013,6 @@ val not_abstract_without_typeconst : Pos.t * string -> unit
 val mk_not_abstract_without_typeconst : Pos.t * string -> error
 
 val typeconst_depends_on_external_tparam : Pos.t -> Pos.t -> string -> unit
-
-val invalid_type_access_root : Pos.t * string -> unit
-
-val duplicate_user_attribute : Pos.t * string -> Pos.t -> unit
-
-val unbound_attribute_name : Pos.t -> string -> unit
 
 val attribute_too_many_arguments : Pos.t -> string -> int -> unit
 
@@ -1224,8 +1098,6 @@ val invalid_return_disposable : Pos.t -> unit
 
 val invalid_switch_case_value_type : Pos.t -> string -> string -> unit
 
-val too_few_type_arguments : Pos.t -> unit
-
 val required_field_is_optional :
   Pos_or_decl.t ->
   Pos_or_decl.t ->
@@ -1235,12 +1107,6 @@ val required_field_is_optional :
 
 val array_get_with_optional_field : Pos.t -> Pos_or_decl.t -> string -> unit
 
-val method_needs_visibility : Pos.t -> unit
-
-val mk_method_needs_visibility : Pos.t -> error
-
-val dynamic_class_name_in_strict_mode : Pos.t -> unit
-
 val reading_from_append : Pos.t -> unit
 
 val list_rvalue : Pos.t -> unit
@@ -1249,10 +1115,6 @@ val nullable_cast : Pos.t -> string -> Pos_or_decl.t -> unit
 
 val return_disposable_mismatch :
   bool -> Pos_or_decl.t -> Pos_or_decl.t -> error_from_reasons_callback -> unit
-
-val lvar_in_obj_get : Pos.t -> unit
-
-val this_as_lexical_variable : Pos.t -> unit
 
 val dollardollar_lvalue : Pos.t -> unit
 
@@ -1320,16 +1182,7 @@ val wrong_expression_kind_builtin_attribute : string -> Pos.t -> string -> unit
 val decl_override_missing_hint :
   Pos_or_decl.t -> error_from_reasons_callback -> unit
 
-val illegal_use_of_dynamically_callable : Pos.t -> Pos.t -> string -> unit
-
 val dynamically_callable_reified : Pos.t -> unit
-
-val parent_in_function_pointer : Pos.t -> string option -> string -> unit
-
-val self_in_non_final_function_pointer :
-  Pos.t -> string option -> string -> unit
-
-val invalid_wildcard_context : Pos.t -> unit
 
 val shapes_key_exists_always_true : Pos.t -> string -> Pos_or_decl.t -> unit
 
@@ -1446,18 +1299,6 @@ val switch_multiple_default : Pos.t -> unit
 
 val switch_non_terminal_default : Pos.t -> unit
 
-val unsupported_trait_use_as : Pos.t -> unit
-
-val mk_unsupported_trait_use_as : Pos.t -> error
-
-val unsupported_instead_of : Pos.t -> unit
-
-val mk_unsupported_instead_of : Pos.t -> error
-
-val invalid_trait_use_as_visibility : Pos.t -> unit
-
-val mk_invalid_trait_use_as_visibility : Pos.t -> error
-
 val unresolved_type_variable : Pos.t -> unit
 
 val invalid_sub_string : Pos.t -> string -> unit
@@ -1479,9 +1320,6 @@ val invariant_violation :
 val redundant_covariant : Pos.t -> string -> string -> unit
 
 val meth_caller_trait : Pos.t -> string -> unit
-
-val unsupported_hk_feature :
-  because_nested:bool -> Pos.t -> string -> string -> unit
 
 val tparam_non_shadowing_reuse : Pos.t -> string -> unit
 
@@ -1506,31 +1344,12 @@ val reified_function_reference : Pos.t -> unit
 val class_meth_abstract_call :
   string -> string -> Pos.t -> Pos_or_decl.t -> unit
 
-val higher_kinded_partial_application : Pos.t -> int -> unit
-
-val wildcard_for_higher_kinded_type : Pos.t -> unit
-
-val implicit_type_argument_for_higher_kinded_type :
-  use_pos:Pos.t -> def_pos:Pos_or_decl.t -> string -> unit
-
 val kind_mismatch :
   use_pos:Pos.t ->
   def_pos:Pos_or_decl.t ->
   tparam_name:string ->
   expected_kind_repr:string ->
   actual_kind_repr:string ->
-  unit
-
-val class_with_constraints_used_as_hk_type : Pos.t -> string -> unit
-
-val alias_with_implicit_constraints_as_hk_type :
-  use_pos:Pos.t ->
-  typedef_pos:Pos_or_decl.t ->
-  used_class_in_def_pos:Pos_or_decl.t ->
-  typedef_name:string ->
-  typedef_tparam_name:string ->
-  used_class_in_def_name:string ->
-  used_class_tparam_name:string ->
   unit
 
 val reinheriting_classish_const :

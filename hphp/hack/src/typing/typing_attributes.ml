@@ -62,8 +62,10 @@ let check_implements
       then
         ()
       else
-        Errors.unbound_attribute_name attr_pos attr_name
+        Errors.add_naming_error
+        @@ Naming_error.Unbound_attribute_name { pos = attr_pos; attr_name }
     in
+
     env
   else
     match
@@ -100,7 +102,8 @@ let check_implements
       ) else
         check_new_object attr_pos env attr_cid params
     | _ ->
-      Errors.unbound_attribute_name attr_pos attr_name;
+      Errors.add_naming_error
+      @@ Naming_error.Unbound_attribute_name { pos = attr_pos; attr_name };
       env
 
 let check_def env check_new_object (kind : attribute_interface_name) attributes

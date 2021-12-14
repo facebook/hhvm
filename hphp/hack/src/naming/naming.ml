@@ -278,7 +278,9 @@ let elaborate_namespaces =
 
 let check_repetition s param =
   let name = param.Aast.param_name in
-  if SSet.mem name s then Errors.already_bound param.Aast.param_pos name;
+  if SSet.mem name s then
+    Errors.add_naming_error
+    @@ Naming_error.Already_bound { pos = param.Aast.param_pos; name };
   if not (String.equal name SN.SpecialIdents.placeholder) then
     SSet.add name s
   else
@@ -293,7 +295,8 @@ let check_name (p, name) =
     || String.equal name SN.Classes.cHH_BuiltinAbstractEnumClass)
     && not (string_ends_with (Relative_path.suffix (Pos.filename p)) ".hhi")
   then
-    Errors.using_internal_class p (strip_ns name)
+    Errors.add_naming_error
+    @@ Naming_error.Using_internal_class { pos = p; class_name = strip_ns name }
 
 let convert_shape_name env = function
   | Ast_defs.SFlit_int (pos, s) -> Ast_defs.SFlit_int (pos, s)
@@ -317,7 +320,7 @@ let convert_shape_name env = function
 let arg_unpack_unexpected = function
   | None -> ()
   | Some (_, pos, _) ->
-    Errors.naming_too_few_arguments pos;
+    Errors.add_naming_error @@ Naming_error.Too_few_arguments pos;
     ()
 
 (************************************************************************)
@@ -362,7 +365,7 @@ and contexts env ctxs =
           when String.equal wildcard SN.Typehints.wildcard ->
           (* More helpful wildcard error for coeffects. We expect all valid
            * wildcard hints to be transformed into Hfun_context *)
-          Errors.invalid_wildcard_context p;
+          Errors.add_naming_error @@ Naming_error.Invalid_wildcard_context p;
           (p, N.Herr)
         | _ -> hint ~in_context:true env h)
       hl
@@ -439,7 +442,8 @@ and hint_
     | N.Hnonnull
     | N.Hdynamic
     | N.Hnothing ->
-      if not (List.is_empty hl) then Errors.unexpected_type_arguments p
+      if not (List.is_empty hl) then
+        Errors.add_naming_error @@ Naming_error.Unexpected_type_arguments p
     | _ -> ());
     hint_id
   | Aast.Haccess ((pos, root_id), ids) ->
@@ -453,10 +457,11 @@ and hint_
             N.Herr
           | Some (cid, _, _) -> N.Happly (cid, [])
         end
-      | Aast.Happly ((pos, x), _)
-        when String.equal x SN.Classes.cStatic
-             || String.equal x SN.Classes.cParent ->
-        Errors.invalid_type_access_root (pos, x);
+      | Aast.Happly ((pos, id), _)
+        when String.equal id SN.Classes.cStatic
+             || String.equal id SN.Classes.cParent ->
+        Errors.add_naming_error
+        @@ Naming_error.Invalid_type_access_root { pos; id };
         N.Herr
       | Aast.Happly (root, _) ->
         let h =
@@ -476,7 +481,9 @@ and hint_
             h
           | N.Habstr _ when in_where_clause || in_context -> h
           | _ ->
-            Errors.invalid_type_access_root root;
+            let (pos, id) = root in
+            Errors.add_naming_error
+            @@ Naming_error.Invalid_type_access_root { pos; id };
             N.Herr
         end
       | Aast.Hvar n -> N.Hvar n
@@ -525,7 +532,8 @@ and hint_id
   let params = (fst env).type_params in
   (* some common Xhp screw ups *)
   if String.equal x "Xhp" || String.equal x ":Xhp" || String.equal x "XHP" then
-    Errors.disallowed_xhp_type p x;
+    Errors.add_naming_error
+    @@ Naming_error.Disallowed_xhp_type { pos = p; ty_name = x };
   match try_castable_hint ~forbid_this ~allow_wildcard ~tp_depth env p x hl with
   | Some h -> h
   | None ->
@@ -534,12 +542,13 @@ and hint_id
       | x when String.equal x SN.Typehints.wildcard ->
         if allow_wildcard && tp_depth >= 1 (* prevents 3 as _ *) then
           if not (List.is_empty hl) then (
-            Errors.typaram_applied_to_type p x;
+            Errors.add_naming_error
+            @@ Naming_error.Tparam_applied_to_type { pos = p; tparam_name = x };
             N.Herr
           ) else
             N.Happly (id, [])
         else (
-          Errors.wildcard_hint_disallowed p;
+          Errors.add_naming_error @@ Naming_error.Wildcard_hint_disallowed p;
           N.Herr
         )
       | x
@@ -555,20 +564,22 @@ and hint_id
              || String.equal x ("\\" ^ SN.Typehints.mixed)
              || String.equal x ("\\" ^ SN.Typehints.nonnull)
              || String.equal x ("\\" ^ SN.Typehints.arraykey) ->
-        Errors.primitive_toplevel p;
+        Errors.add_naming_error @@ Naming_error.Primitive_top_level p;
         N.Herr
       | x when String.equal x ("\\" ^ SN.Typehints.nothing) ->
-        Errors.primitive_toplevel p;
+        Errors.add_naming_error @@ Naming_error.Primitive_top_level p;
         N.Herr
       | x when String.equal x SN.Typehints.void && allow_retonly ->
         N.Hprim N.Tvoid
       | x when String.equal x SN.Typehints.void ->
-        Errors.return_only_typehint p `void;
+        Errors.add_naming_error
+        @@ Naming_error.Return_only_typehint { pos = p; kind = `void };
         N.Herr
       | x when String.equal x SN.Typehints.noreturn && allow_retonly ->
         N.Hprim N.Tnoreturn
       | x when String.equal x SN.Typehints.noreturn ->
-        Errors.return_only_typehint p `noreturn;
+        Errors.add_naming_error
+        @@ Naming_error.Return_only_typehint { pos = p; kind = `noreturn };
         N.Herr
       | x when String.equal x SN.Typehints.null -> N.Hprim N.Tnull
       | x when String.equal x SN.Typehints.num -> N.Hprim N.Tnum
@@ -619,20 +630,22 @@ and hint_id
               hl )
       | x when String.equal x SN.Typehints.nothing -> N.Hnothing
       | x when String.equal x SN.Typehints.this && not forbid_this ->
-        if not (List.is_empty hl) then Errors.this_no_argument p;
+        if not (List.is_empty hl) then
+          Errors.add_naming_error @@ Naming_error.This_no_argument p;
         N.Hthis
       | x when String.equal x SN.Typehints.this ->
-        Errors.this_type_forbidden p;
+        Errors.add_naming_error @@ Naming_error.This_type_forbidden p;
         N.Herr
       (* TODO: Duplicate of a Typing[4101] error if namespaced correctly
        * T56198838 *)
       | x
         when (String.equal x SN.Classes.cClassname || String.equal x "classname")
              && List.length hl <> 1 ->
-        Errors.classname_param p;
+        Errors.add_naming_error @@ Naming_error.Classname_param p;
         N.Hprim N.Tstring
       | _ when String.(lowercase x = SN.Typehints.this) ->
-        Errors.lowercase_this p x;
+        Errors.add_naming_error
+        @@ Naming_error.Lowercase_this { pos = p; ty_name = x };
         N.Herr
       | _ when SSet.mem x params ->
         let tcopt = Provider_context.get_tcopt (fst env).ctx in
@@ -641,7 +654,8 @@ and hint_id
             (not (TypecheckerOptions.higher_kinded_types tcopt))
             && not (List.is_empty hl)
           then (
-            Errors.typaram_applied_to_type p x;
+            Errors.add_naming_error
+            @@ Naming_error.Tparam_applied_to_type { pos = p; tparam_name = x };
             []
           ) else
             hl
@@ -694,59 +708,61 @@ and try_castable_hint
         (match hl with
         | [] ->
           if not @@ FileInfo.is_hhi (fst env).in_mode then
-            Errors.too_few_type_arguments p;
+            Errors.add_naming_error @@ Naming_error.Too_few_type_arguments p;
           N.Happly ((p, SN.Collections.cDict), [(p, N.Hany); (p, N.Hany)])
         | [_] ->
           if not @@ FileInfo.is_hhi (fst env).in_mode then
-            Errors.too_few_type_arguments p;
+            Errors.add_naming_error @@ Naming_error.Too_few_type_arguments p;
           N.Hany
         | [key_; val_] ->
           N.Happly ((p, SN.Collections.cDict), [hint env key_; hint env val_])
         | _ ->
-          Errors.too_many_type_arguments p;
+          Errors.add_naming_error @@ Naming_error.Too_many_type_arguments p;
           N.Hany)
     | nm when String.equal nm SN.Typehints.varray ->
       Some
         (match hl with
         | [] ->
           if not @@ FileInfo.is_hhi (fst env).in_mode then
-            Errors.too_few_type_arguments p;
+            Errors.add_naming_error @@ Naming_error.Too_few_type_arguments p;
           N.Happly ((p, SN.Collections.cVec), [(p, N.Hany)])
         | [val_] -> N.Happly ((p, SN.Collections.cVec), [hint env val_])
         | _ ->
-          Errors.too_many_type_arguments p;
+          Errors.add_naming_error @@ Naming_error.Too_many_type_arguments p;
           N.Hany)
     | nm when String.equal nm SN.Typehints.varray_or_darray ->
       Some
         (match hl with
         | [] ->
           if not @@ FileInfo.is_hhi (fst env).in_mode then
-            Errors.too_few_type_arguments p;
+            Errors.add_naming_error @@ Naming_error.Too_few_type_arguments p;
           N.Hvec_or_dict (None, (p, N.Hany))
         | [val_] -> N.Hvec_or_dict (None, hint env val_)
         | [key; val_] -> N.Hvec_or_dict (Some (hint env key), hint env val_)
         | _ ->
-          Errors.too_many_type_arguments p;
+          Errors.add_naming_error @@ Naming_error.Too_many_type_arguments p;
           N.Hany)
     | nm when String.equal nm SN.Typehints.vec_or_dict ->
       Some
         (match hl with
         | [] ->
           if not @@ FileInfo.is_hhi (fst env).in_mode then
-            Errors.too_few_type_arguments p;
+            Errors.add_naming_error @@ Naming_error.Too_few_type_arguments p;
 
           N.Hvec_or_dict (None, (p, N.Hany))
         | [val_] -> N.Hvec_or_dict (None, hint env val_)
         | [key; val_] -> N.Hvec_or_dict (Some (hint env key), hint env val_)
         | _ ->
-          Errors.too_many_type_arguments p;
+          Errors.add_naming_error @@ Naming_error.Too_many_type_arguments p;
           N.Hany)
     | _ -> None
   in
   let () =
     match opt_hint with
     | Some _ when not (String.equal canon x) ->
-      Errors.primitive_invalid_alias p x canon
+      Errors.add_naming_error
+      @@ Naming_error.Primitive_invalid_alias
+           { pos = p; ty_name_used = x; ty_name_canon = canon }
     | _ -> ()
   in
   opt_hint
@@ -836,7 +852,8 @@ let interface c constructor methods smethods =
 let ensure_name_not_dynamic e =
   match e with
   | (_, _, (Aast.Id _ | Aast.Lvar _)) -> ()
-  | (_, p, _) -> Errors.dynamic_class_name_in_strict_mode p
+  | (_, p, _) ->
+    Errors.add_naming_error @@ Naming_error.Dynamic_class_name_in_strict_mode p
 
 let make_sdt ctx pos attrs =
   if TypecheckerOptions.everything_sdt (Provider_context.get_tcopt ctx) then
@@ -916,7 +933,9 @@ let rec class_ ctx c =
     (not (List.is_empty c_req_implements))
     && not (Ast_defs.is_c_trait c.Aast.c_kind)
   then
-    Errors.invalid_req_implements (fst (List.hd_exn c_req_implements));
+    Errors.add_naming_error
+    @@ Naming_error.Invalid_require_implements
+         (fst (List.hd_exn c_req_implements));
   let e =
     TypecheckerOptions.explicit_consistent_constructors
       (Provider_context.get_tcopt ctx)
@@ -938,7 +957,8 @@ let rec class_ ctx c =
     && (not (Ast_defs.is_c_trait c.Aast.c_kind))
     && not (Ast_defs.is_c_interface c.Aast.c_kind)
   then
-    Errors.invalid_req_extends (fst (List.hd_exn c_req_extends));
+    Errors.add_naming_error
+    @@ Naming_error.Invalid_require_extends (fst (List.hd_exn c_req_extends));
   let req_extends = List.map ~f:(hint env) c_req_extends in
   let req_extends = List.map ~f:(fun h -> (h, true)) req_extends in
   (* Setting a class type parameters constraint to the 'this' type is weird
@@ -1018,8 +1038,10 @@ and user_attributes env attrl =
     let (pos, name) = ua_name in
     let existing_attr_pos = Caml.Hashtbl.find_opt seen name in
     match existing_attr_pos with
-    | Some p ->
-      Errors.duplicate_user_attribute ua_name p;
+    | Some prev_pos ->
+      let (pos, attr_name) = ua_name in
+      Errors.add_naming_error
+      @@ Naming_error.Duplicate_user_attribute { pos; prev_pos; attr_name };
       false
     | None ->
       Caml.Hashtbl.add seen name pos;
@@ -1050,7 +1072,8 @@ and xhp_attribute_decl env (h, cv, tag, maybe_enum) =
   let default = cv.Aast.cv_expr in
   let is_required = Option.is_some tag in
   if is_required && Option.is_some default then
-    Errors.xhp_required_with_default p id;
+    Errors.add_naming_error
+    @@ Naming_error.Xhp_required_with_default { pos = p; attr_name = id };
   let hint_ =
     match maybe_enum with
     | Some (pos, items) ->
@@ -1079,7 +1102,9 @@ and xhp_attribute_decl env (h, cv, tag, maybe_enum) =
   let hint_ =
     match hint_ with
     | Some (p, Aast.Hoption _) ->
-      if is_required then Errors.xhp_optional_required_attr p id;
+      if is_required then
+        Errors.add_naming_error
+        @@ Naming_error.Xhp_optional_required_attr { pos = p; attr_name = id };
       hint_
     | Some (_, Aast.Happly ((_, "mixed"), [])) -> hint_
     | Some (p, h) ->
@@ -1178,14 +1203,18 @@ and type_param ~forbid_this (genv, lenv) t =
       match Naming_provider.get_type_pos genv.ctx name with
       | Some def_pos ->
         let (def_pos, _) = GEnv.get_type_full_pos genv.ctx (def_pos, name) in
-        Errors.error_name_already_bound name name pos def_pos
+        Errors.add_naming_error
+        @@ Naming_error.Error_name_already_bound
+             { pos; name; prev_name = name; prev_pos = def_pos }
       | None ->
         (match Naming_provider.get_type_canon_name genv.ctx name with
         | Some canonical ->
           let def_pos =
             Option.value ~default:Pos.none (GEnv.type_pos genv.ctx canonical)
           in
-          Errors.error_name_already_bound name canonical pos def_pos
+          Errors.add_naming_error
+          @@ Naming_error.Error_name_already_bound
+               { pos; name; prev_name = canonical; prev_pos = def_pos }
         | None -> ())
   end;
   let hk_types_enabled =
@@ -1193,7 +1222,8 @@ and type_param ~forbid_this (genv, lenv) t =
   in
   (if (not hk_types_enabled) && (not @@ List.is_empty t.Aast.tp_parameters) then
     let (pos, name) = t.Aast.tp_name in
-    Errors.tparam_with_tparam pos name);
+    Errors.add_naming_error
+    @@ Naming_error.Tparam_with_tparam { pos; tparam_name = name });
 
   (* Bring all type parameters into scope at once before traversing nested tparams,
      as per the note above *)
@@ -1329,7 +1359,7 @@ and check_constant_expr env expr =
     begin
       match op with
       | Ast_defs.Eq _ ->
-        Errors.illegal_constant pos;
+        Errors.add_naming_error @@ Naming_error.Illegal_constant pos;
         false
       | _ -> check_constant_expr env e1 && check_constant_expr env e2
     end
@@ -1362,7 +1392,7 @@ and check_constant_expr env expr =
     then
       List.for_all l ~f:(check_afield_constant_expr env)
     else (
-      Errors.illegal_constant p;
+      Errors.add_naming_error @@ Naming_error.Illegal_constant p;
       false
     )
   | Aast.As (e, (_, Aast.Hlike _), _) -> check_constant_expr env e
@@ -1371,11 +1401,11 @@ and check_constant_expr env expr =
     if String.equal cn SN.FB.cIncorrectType then
       check_constant_expr env e
     else (
-      Errors.illegal_constant p;
+      Errors.add_naming_error @@ Naming_error.Illegal_constant p;
       false
     )
   | _ ->
-    Errors.illegal_constant pos;
+    Errors.add_naming_error @@ Naming_error.Illegal_constant pos;
     false
 
 and check_afield_constant_expr env afield =
@@ -1663,7 +1693,7 @@ and stmt env (pos, st) =
         match el with
         | []
         | [_] ->
-          Errors.naming_too_few_arguments p;
+          Errors.add_naming_error @@ Naming_error.Too_few_arguments p;
           N.Expr (invalid_expr p)
         | (pk, (_, cond_p, cond)) :: el ->
           begin
@@ -1766,7 +1796,7 @@ and as_expr env ae =
   let handle_v ev =
     match ev with
     | (_, p, Aast.Id _) ->
-      Errors.expected_variable p;
+      Errors.add_naming_error @@ Naming_error.Expected_variable p;
       ((), p, N.Lvar (Env.new_lvar env (p, "__internal_placeholder")))
     | ev ->
       let vars = get_lvalues SMap.empty ev in
@@ -1779,7 +1809,7 @@ and as_expr env ae =
       let x = (p, Local_id.get_name lid) in
       ((), p, N.Lvar (Env.new_lvar env x))
     | (_, p, _) ->
-      Errors.expected_variable p;
+      Errors.add_naming_error @@ Naming_error.Expected_variable p;
       ((), p, N.Lvar (Env.new_lvar env (p, "__internal_placeholder")))
   in
   match ae with
@@ -1876,7 +1906,7 @@ and expr_ env p (e : Nast.expr_) =
           match tal with
           | Some (Aast.CollectionTV tv) -> Some (targ env tv)
           | Some (Aast.CollectionTKV _) ->
-            Errors.naming_too_many_arguments p;
+            Errors.add_naming_error @@ Naming_error.Too_many_arguments p;
             None
           | None -> None
         in
@@ -1886,7 +1916,7 @@ and expr_ env p (e : Nast.expr_) =
         let ta =
           match tal with
           | Some (Aast.CollectionTV _) ->
-            Errors.naming_too_few_arguments p;
+            Errors.add_naming_error @@ Naming_error.Too_few_arguments p;
             None
           | Some (Aast.CollectionTKV (tk, tv)) -> Some (targ env tk, targ env tv)
           | None -> None
@@ -1897,7 +1927,7 @@ and expr_ env p (e : Nast.expr_) =
         let ta =
           match tal with
           | Some (Aast.CollectionTV _) ->
-            Errors.naming_too_few_arguments p;
+            Errors.add_naming_error @@ Naming_error.Too_few_arguments p;
             None
           | Some (Aast.CollectionTKV (tk, tv)) -> Some (targ env tk, targ env tv)
           | None -> None
@@ -1905,17 +1935,18 @@ and expr_ env p (e : Nast.expr_) =
         begin
           match l with
           | [] ->
-            Errors.naming_too_few_arguments p;
+            Errors.add_naming_error @@ Naming_error.Too_few_arguments p;
             invalid_expr_ p
           | [e1; e2] ->
             let pn = SN.Collections.cPair in
             N.Pair (ta, afield_value env pn e1, afield_value env pn e2)
           | _ ->
-            Errors.naming_too_many_arguments p;
+            Errors.add_naming_error @@ Naming_error.Too_many_arguments p;
             invalid_expr_ p
         end
       | _ ->
-        Errors.expected_collection p cn;
+        Errors.add_naming_error
+        @@ Naming_error.Expected_collection { pos = p; cname = cn };
         invalid_expr_ p
     end
   | Aast.Clone e -> N.Clone (expr env e)
@@ -1996,7 +2027,7 @@ and expr_ env p (e : Nast.expr_) =
     begin
       match el with
       | [] ->
-        Errors.naming_too_few_arguments p;
+        Errors.add_naming_error @@ Naming_error.Too_few_arguments p;
         invalid_expr_ p
       | (Ast_defs.Pnormal, f) :: el ->
         N.Call (expr env f, targl env p tal, expr_call_args env el, None)
@@ -2012,14 +2043,14 @@ and expr_ env p (e : Nast.expr_) =
     begin
       match el with
       | [] ->
-        Errors.naming_too_few_arguments p;
+        Errors.add_naming_error @@ Naming_error.Too_few_arguments p;
         invalid_expr_ p
       | [(Ast_defs.Pnormal, (_, p, Aast.String x))] -> N.Fun_id (p, x)
       | [(_, (_, p, _))] ->
-        Errors.illegal_fun p;
+        Errors.add_naming_error @@ Naming_error.Illegal_fun p;
         invalid_expr_ p
       | _ ->
-        Errors.naming_too_many_arguments p;
+        Errors.add_naming_error @@ Naming_error.Too_many_arguments p;
         invalid_expr_ p
     end
   | Aast.Call ((_, p, Aast.Id (_, cn)), _, el, unpacked_element)
@@ -2029,17 +2060,17 @@ and expr_ env p (e : Nast.expr_) =
       match el with
       | []
       | [_] ->
-        Errors.naming_too_few_arguments p;
+        Errors.add_naming_error @@ Naming_error.Too_few_arguments p;
         invalid_expr_ p
       | [
        (Ast_defs.Pnormal, instance); (Ast_defs.Pnormal, (_, p, Aast.String meth));
       ] ->
         N.Method_id (expr env instance, (p, meth))
       | [(_, (_, p, _)); _] ->
-        Errors.illegal_inst_meth p;
+        Errors.add_naming_error @@ Naming_error.Illegal_inst_meth p;
         invalid_expr_ p
       | _ ->
-        Errors.naming_too_many_arguments p;
+        Errors.add_naming_error @@ Naming_error.Too_many_arguments p;
         invalid_expr_ p
     end
   | Aast.Call ((_, p, Aast.Id (_, cn)), _, el, unpacked_element)
@@ -2049,7 +2080,7 @@ and expr_ env p (e : Nast.expr_) =
       match el with
       | []
       | [_] ->
-        Errors.naming_too_few_arguments p;
+        Errors.add_naming_error @@ Naming_error.Too_few_arguments p;
         invalid_expr_ p
       | [(Ast_defs.Pnormal, e1); (Ast_defs.Pnormal, e2)] ->
         begin
@@ -2063,15 +2094,15 @@ and expr_ env p (e : Nast.expr_) =
             let () = check_name cl in
             N.Method_caller (cl, (pm, meth))
           | ((_, p, _), _) ->
-            Errors.illegal_meth_caller p;
+            Errors.add_naming_error @@ Naming_error.Illegal_meth_caller p;
             invalid_expr_ p
         end
       | [(Ast_defs.Pinout _, _); _]
       | [_; (Ast_defs.Pinout _, _)] ->
-        Errors.illegal_meth_caller p;
+        Errors.add_naming_error @@ Naming_error.Illegal_meth_caller p;
         invalid_expr_ p
       | _ ->
-        Errors.naming_too_many_arguments p;
+        Errors.add_naming_error @@ Naming_error.Too_many_arguments p;
         invalid_expr_ p
     end
   | Aast.Call ((_, p, Aast.Id (_, cn)), _, el, unpacked_element)
@@ -2081,7 +2112,7 @@ and expr_ env p (e : Nast.expr_) =
       match el with
       | []
       | [_] ->
-        Errors.naming_too_few_arguments p;
+        Errors.add_naming_error @@ Naming_error.Too_few_arguments p;
         invalid_expr_ p
       | [(Ast_defs.Pnormal, e1); (Ast_defs.Pnormal, e2)] ->
         begin
@@ -2104,10 +2135,14 @@ and expr_ env p (e : Nast.expr_) =
               N.Smethod_id (((), p, cid), (pm, meth))
             | Some (cid, kind, false) ->
               let is_trait = Ast_defs.is_c_trait kind in
-              Errors.class_meth_non_final_CLASS p is_trait (snd cid);
+              let class_name = snd cid in
+              Errors.add_naming_error
+              @@ Naming_error.Class_meth_non_final_CLASS
+                   { pos = p; is_trait; class_name };
+
               invalid_expr_ p
             | None ->
-              Errors.illegal_class_meth p;
+              Errors.add_naming_error @@ Naming_error.Illegal_class_meth p;
               invalid_expr_ p)
           | ( (_, _, N.Class_const ((_, pc, N.CI cl), (_, mem))),
               (_, pm, N.String meth) )
@@ -2122,10 +2157,12 @@ and expr_ env p (e : Nast.expr_) =
             | Some (_cid, _, true) ->
               N.Smethod_id (((), pc, N.CIself), (pm, meth))
             | Some (cid, _, false) ->
-              Errors.class_meth_non_final_self p (snd cid);
+              let class_name = snd cid in
+              Errors.add_naming_error
+              @@ Naming_error.Class_meth_non_final_self { pos = p; class_name };
               invalid_expr_ p
             | None ->
-              Errors.illegal_class_meth p;
+              Errors.add_naming_error @@ Naming_error.Illegal_class_meth p;
               invalid_expr_ p)
           | ( (_, p, N.Class_const ((_, pc, N.CIstatic), (_, mem))),
               (_, pm, N.String meth) )
@@ -2134,24 +2171,24 @@ and expr_ env p (e : Nast.expr_) =
             | Some (_cid, _, _) ->
               N.Smethod_id (((), pc, N.CIstatic), (pm, meth))
             | None ->
-              Errors.illegal_class_meth p;
+              Errors.add_naming_error @@ Naming_error.Illegal_class_meth p;
               invalid_expr_ p)
           | ((_, p, _), _) ->
-            Errors.illegal_class_meth p;
+            Errors.add_naming_error @@ Naming_error.Illegal_class_meth p;
             invalid_expr_ p
         end
       | [(Ast_defs.Pinout _, _); _]
       | [_; (Ast_defs.Pinout _, _)] ->
-        Errors.illegal_class_meth p;
+        Errors.add_naming_error @@ Naming_error.Illegal_class_meth p;
         invalid_expr_ p
       | _ ->
-        Errors.naming_too_many_arguments p;
+        Errors.add_naming_error @@ Naming_error.Too_many_arguments p;
         invalid_expr_ p
     end
   | Aast.Tuple el ->
     (match el with
     | [] ->
-      Errors.naming_too_few_arguments p;
+      Errors.add_naming_error @@ Naming_error.Too_few_arguments p;
       invalid_expr_ p
     | el -> N.Tuple (exprl env el))
   | Aast.Call ((_, p, Aast.Id f), tal, el, unpacked_element) ->
@@ -2213,7 +2250,7 @@ and expr_ env p (e : Nast.expr_) =
       | Some ty -> (p, ty)
       | None ->
         let h = hint env ty in
-        Errors.object_cast p;
+        Errors.add_naming_error @@ Naming_error.Object_cast p;
         h
     in
     N.Cast (ty, expr env e2)
@@ -2281,7 +2318,7 @@ and expr_ env p (e : Nast.expr_) =
         oexpr env unpacked_element,
         p )
   | Aast.New ((_, _, Aast.CIexpr (_, p, _e)), tal, el, unpacked_element, _) ->
-    Errors.dynamic_new_in_strict_mode p;
+    Errors.add_naming_error @@ Naming_error.Dynamic_new_in_strict_mode p;
     N.New
       ( make_class_id env (p, SN.Classes.cUnknown),
         targl env p tal,
@@ -2297,7 +2334,7 @@ and expr_ env p (e : Nast.expr_) =
     let idl =
       List.fold_right idl ~init:[] ~f:(fun ((p, x) as id) acc ->
           if String.equal (Local_id.to_string x) SN.SpecialIdents.this then (
-            Errors.this_as_lexical_variable p;
+            Errors.add_naming_error @@ Naming_error.This_as_lexical_variable p;
             acc
           ) else
             id :: acc)
@@ -2456,13 +2493,13 @@ and afield_value env cname field =
   match field with
   | Aast.AFvalue e -> expr env e
   | Aast.AFkvalue (((_, p, _) as e1), _e2) ->
-    Errors.unexpected_arrow p cname;
+    Errors.add_naming_error @@ Naming_error.Unexpected_arrow { pos = p; cname };
     expr env e1
 
 and afield_kvalue env cname field =
   match field with
   | Aast.AFvalue ((_, p, _) as e) ->
-    Errors.missing_arrow p cname;
+    Errors.add_naming_error @@ Naming_error.Missing_arrow { pos = p; cname };
     ( expr env e,
       expr
         env

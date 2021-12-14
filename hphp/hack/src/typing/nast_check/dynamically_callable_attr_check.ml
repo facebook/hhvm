@@ -39,11 +39,17 @@ let handler =
         Naming_attributes.mem_pos SN.UserAttributes.uaDynamicallyCallable attr
       with
       | Some p ->
-        if not (Aast.equal_visibility vis Public) then
-          Errors.illegal_use_of_dynamically_callable
-            p
-            pos
-            (string_of_visibility vis);
+        (if not (Aast.equal_visibility vis Public) then
+          let vis =
+            match vis with
+            | Public -> `public
+            | Private -> `private_
+            | Protected -> `protected
+            | Internal -> `internal
+          in
+          Errors.add_naming_error
+          @@ Naming_error.Illegal_use_of_dynamically_callable
+               { attr_pos = p; meth_pos = pos; vis });
         if has_reified_generics m.m_tparams then
           Errors.dynamically_callable_reified p;
         ()

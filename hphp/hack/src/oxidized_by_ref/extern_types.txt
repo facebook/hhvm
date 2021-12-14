@@ -48,7 +48,7 @@ oxidized::error_codes::Parsing
 oxidized::error_codes::Typing
 oxidized::errors::ErrorCode
 oxidized::errors::Format
-oxidized::errors::NameContext
+oxidized::name_context::NameContext
 oxidized::errors::Phase
 oxidized::file_info::Mode
 oxidized::file_info::Names

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<653bf404cf29c608350b71adf16da3c0>>
+// @generated SignedSource<<a5ae4718a5de99528dfc0881edde99c5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -29,8 +29,6 @@ pub use oxidized::errors::ErrorCode;
 pub use oxidized::errors::Phase;
 
 pub use oxidized::errors::Format;
-
-pub use oxidized::errors::NameContext;
 
 /// Results of single file analysis.
 pub type FileT<'a, A> = phase_map::PhaseMap<'a, &'a [A]>;

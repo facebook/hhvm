@@ -1067,7 +1067,9 @@ let get_local_in_ctx ?error_if_undef_at_pos:p x ctx_opt =
         | Some (k, (_, pos, _)) -> Some (LID.to_string k, pos)
         | None -> None
       in
-      Errors.undefined p lid (suggest_most_similar lid)
+      Errors.add_naming_error
+      @@ Naming_error.Undefined
+           { pos = p; var_name = lid; did_you_mean = suggest_most_similar lid }
     | None -> ()
   in
   match ctx_opt with

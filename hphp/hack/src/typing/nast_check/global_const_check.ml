@@ -27,7 +27,7 @@ let error_if_pseudo_constant gconst =
     let name = Utils.strip_all_ns name in
     if Naming_special_names.PseudoConsts.is_pseudo_const (Utils.add_ns name)
     then
-      Errors.name_is_reserved name pos
+      Errors.add_naming_error @@ Naming_error.Name_is_reserved { pos; name }
 
 let handler =
   object

@@ -33,6 +33,7 @@ let handler =
              || Tast_env.is_sub_type_for_union env ty (MakeType.err Reason.none)
         ->
         ()
-      | (_, _, Obj_get (_, (_, p, Lvar _), _, _)) -> Errors.lvar_in_obj_get p
+      | (_, _, Obj_get (_, (_, p, Lvar _), _, _)) ->
+        Errors.add_naming_error @@ Naming_error.Lvar_in_obj_get p
       | _ -> ()
   end

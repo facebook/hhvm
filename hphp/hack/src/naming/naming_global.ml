@@ -202,8 +202,8 @@ module Env = struct
       SN.Typehints.is_reserved_hh_name x
       || SN.Typehints.is_reserved_global_name x
     then (
-      let (p, name) = GEnv.get_type_full_pos ctx (p, name) in
-      Errors.name_is_reserved name p;
+      let (pos, name) = GEnv.get_type_full_pos ctx (p, name) in
+      Errors.add_naming_error @@ Naming_error.Name_is_reserved { pos; name };
       false
     ) else
       true
@@ -247,9 +247,13 @@ module Env = struct
           ~id
           ~canonical_id:(pc, canonical, None)
        then
-          let (p, name) = GEnv.get_fun_full_pos ctx (p, name) in
-          let (pc, canonical) = GEnv.get_fun_full_pos ctx (pc, canonical) in
-          Errors.error_name_already_bound name canonical p pc
+          let (pos, name) = GEnv.get_fun_full_pos ctx (p, name) in
+          let (prev_pos, prev_name) =
+            GEnv.get_fun_full_pos ctx (pc, canonical)
+          in
+          Errors.add_naming_error
+          @@ Naming_error.Error_name_already_bound
+               { pos; name; prev_pos; prev_name }
       end;
       current_file_symbols_acc
     | None ->
@@ -281,9 +285,13 @@ module Env = struct
             ~id
             ~canonical_id:(pc, canonical, None)
          then
-            let (p, name) = GEnv.get_type_full_pos ctx (p, name) in
-            let (pc, canonical) = GEnv.get_type_full_pos ctx (pc, canonical) in
-            Errors.error_name_already_bound name canonical p pc
+            let (pos, name) = GEnv.get_type_full_pos ctx (p, name) in
+            let (prev_pos, prev_name) =
+              GEnv.get_type_full_pos ctx (pc, canonical)
+            in
+            Errors.add_naming_error
+            @@ Naming_error.Error_name_already_bound
+                 { pos; prev_pos; name; prev_name }
         end;
         current_file_symbols_acc
       | None ->
@@ -308,9 +316,11 @@ module Env = struct
           ~id
           ~canonical_id:(pc, name, None)
        then
-          let (p, name) = GEnv.get_const_full_pos ctx (p, name) in
-          let (pc, name) = GEnv.get_const_full_pos ctx (pc, name) in
-          Errors.error_name_already_bound name name p pc
+          let (pos, name) = GEnv.get_const_full_pos ctx (p, name) in
+          let (prev_pos, name) = GEnv.get_const_full_pos ctx (pc, name) in
+          Errors.add_naming_error
+          @@ Naming_error.Error_name_already_bound
+               { name; prev_name = name; pos; prev_pos }
       end;
       current_file_symbols_acc
     | None ->

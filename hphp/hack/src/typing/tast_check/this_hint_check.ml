@@ -15,7 +15,8 @@ let handler =
       let report_error_if_outside_class env =
         match Tast_env.get_self_id env with
         | Some _ -> ()
-        | None -> Errors.this_hint_outside_class pos
+        | None ->
+          Errors.add_naming_error @@ Naming_error.This_hint_outside_class pos
       in
       match hint with
       | Aast.Hthis -> report_error_if_outside_class env

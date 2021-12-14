@@ -26,7 +26,7 @@ let is_magic =
 (* Class consts and typeconsts cannot be named "class" *)
 let error_if_is_named_class (pos, name) =
   if String.equal (String.lowercase name) "class" then
-    Errors.illegal_member_variable_class pos
+    Errors.add_naming_error @@ Naming_error.Illegal_member_variable_class pos
 
 let handler =
   object
@@ -46,7 +46,7 @@ let handler =
         else if
           String.equal const SN.PseudoConsts.g__CLASS__ && Option.is_none ck
         then
-          Errors.illegal_CLASS pos
+          Errors.add_naming_error @@ Naming_error.Illegal_CLASS pos
         else if
           String.equal const SN.PseudoConsts.g__TRAIT__
           && not
@@ -55,7 +55,7 @@ let handler =
                   ck
                   (Some Ast_defs.Ctrait))
         then
-          Errors.illegal_TRAIT pos
+          Errors.add_naming_error @@ Naming_error.Illegal_TRAIT pos
       | Class_const ((_, _, CIexpr (_, _, Id (_, "parent"))), (_, m_name))
         when Option.equal String.equal env.function_name (Some m_name) ->
         ()

@@ -48,15 +48,18 @@ let handler =
             (Aast.FP_class_const ((_, p, Aast.CIself), (_, meth_name)), _) ->
           if not env.in_final_class then
             if env.is_trait then
-              Errors.self_in_non_final_function_pointer p None meth_name
+              Errors.add_naming_error
+              @@ Naming_error.Self_in_non_final_function_pointer
+                   { pos = p; class_name = None; meth_name }
             else
-              Errors.self_in_non_final_function_pointer
-                p
-                env.class_name
-                meth_name
+              Errors.add_naming_error
+              @@ Naming_error.Self_in_non_final_function_pointer
+                   { pos = p; class_name = env.class_name; meth_name }
         | Aast.FunctionPointer
             (Aast.FP_class_const ((_, p, Aast.CIparent), (_, meth_name)), _) ->
-          Errors.parent_in_function_pointer p env.parent_name meth_name
+          Errors.add_naming_error
+          @@ Naming_error.Parent_in_function_pointer
+               { pos = p; parent_name = env.parent_name; meth_name }
         | _ -> ()
       in
       env

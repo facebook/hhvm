@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3873086b14ae7a794e854cc1fc6d52b2>>
+// @generated SignedSource<<9cf97539acc5ed6e5428b54c00d62d7c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -80,36 +80,6 @@ pub enum Format {
 }
 impl TrivialDrop for Format {}
 arena_deserializer::impl_deserialize_in_arena!(Format);
-
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(C)]
-pub enum NameContext {
-    FunctionNamespace,
-    ConstantNamespace,
-    /// Classes, interfaces, traits, records and type aliases.
-    TypeNamespace,
-    TraitContext,
-    ClassContext,
-    RecordContext,
-}
-impl TrivialDrop for NameContext {}
-arena_deserializer::impl_deserialize_in_arena!(NameContext);
 
 /// Results of single file analysis.
 pub type FileT<A> = phase_map::PhaseMap<Vec<A>>;

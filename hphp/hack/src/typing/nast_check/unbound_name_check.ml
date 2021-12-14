@@ -28,7 +28,7 @@ type env = {
   (* Contexts where typedefs are valid typenames *)
   class_id_allow_typedef: bool;
   hint_allow_typedef: bool;
-  hint_context: Errors.name_context;
+  hint_context: Name_context.t;
 }
 
 let handle_unbound_name env (pos, name) kind =
@@ -36,16 +36,17 @@ let handle_unbound_name env (pos, name) kind =
   if String.equal name Naming_special_names.Classes.cUnknown then
     ()
   else begin
-    Errors.unbound_name pos name kind;
+    Errors.add_naming_error @@ Naming_error.Unbound_name { pos; name; kind };
     (* In addition to reporting errors, we also add to the global dependency table *)
     let dep =
+      let open Name_context in
       match kind with
-      | Errors.FunctionNamespace -> Typing_deps.Dep.Fun name
-      | Errors.TypeNamespace -> Typing_deps.Dep.Type name
-      | Errors.ConstantNamespace -> Typing_deps.Dep.GConst name
-      | Errors.TraitContext -> Typing_deps.Dep.Type name
-      | Errors.RecordContext -> Typing_deps.Dep.Type name
-      | Errors.ClassContext -> Typing_deps.Dep.Type name
+      | FunctionNamespace -> Typing_deps.Dep.Fun name
+      | TypeNamespace -> Typing_deps.Dep.Type name
+      | ConstantNamespace -> Typing_deps.Dep.GConst name
+      | TraitContext -> Typing_deps.Dep.Type name
+      | RecordContext -> Typing_deps.Dep.Type name
+      | ClassContext -> Typing_deps.Dep.Type name
     in
     Typing_deps.add_idep (Provider_context.get_deps_mode env.ctx) env.droot dep
   end
@@ -53,12 +54,13 @@ let handle_unbound_name env (pos, name) kind =
 let has_canon_name env get_name get_pos (pos, name) =
   match get_name env.ctx name with
   | None -> false
-  | Some canon_name ->
+  | Some suggest_name ->
     begin
-      match get_pos env.ctx canon_name with
+      match get_pos env.ctx suggest_name with
       | None -> false
-      | Some canon_pos ->
-        Errors.did_you_mean_naming pos name canon_pos canon_name;
+      | Some suggest_pos ->
+        Errors.add_naming_error
+        @@ Naming_error.Did_you_mean { pos; name; suggest_pos; suggest_name };
         true
     end
 
@@ -76,16 +78,16 @@ let check_fun_name env ((_, name) as id) =
   then
     ()
   else
-    handle_unbound_name env id Errors.FunctionNamespace
+    handle_unbound_name env id Name_context.FunctionNamespace
 
 let check_const_name env ((_, name) as id) =
   if Naming_provider.const_exists env.ctx name then
     ()
   else
-    handle_unbound_name env id Errors.ConstantNamespace
+    handle_unbound_name env id Name_context.ConstantNamespace
 
 let check_type_name
-    ?(kind = Errors.TypeNamespace)
+    ?(kind = Name_context.TypeNamespace)
     env
     ((pos, name) as id)
     ~allow_typedef
@@ -107,10 +109,12 @@ let check_type_name
       begin
         match Naming_provider.get_type_pos_and_kind env.ctx name with
         | Some (def_pos, Naming_types.TTypedef) when not allow_typedef ->
-          let (full_pos, _) =
+          let (decl_pos, _) =
             Naming_global.GEnv.get_type_full_pos env.ctx (def_pos, name)
           in
-          Errors.unexpected_typedef pos full_pos kind
+          Errors.add_naming_error
+          @@ Naming_error.Unexpected_typedef
+               { pos; decl_pos; expected_kind = kind }
         | Some _ -> ()
         | None ->
           if
@@ -126,7 +130,7 @@ let check_type_name
       end
 
 let check_type_hint
-    ?(kind = Errors.TypeNamespace)
+    ?(kind = Name_context.TypeNamespace)
     env
     ((_, name) as id)
     ~allow_typedef
@@ -157,7 +161,7 @@ let handler ctx =
         seen_names = SMap.empty;
         class_id_allow_typedef = false;
         hint_allow_typedef = true;
-        hint_context = Errors.TypeNamespace;
+        hint_context = Name_context.TypeNamespace;
       }
 
     method! at_class_ env c =
@@ -221,21 +225,21 @@ let handler ctx =
     method! at_class_hint env _ =
       {
         env with
-        hint_context = Errors.ClassContext;
+        hint_context = Name_context.ClassContext;
         hint_allow_typedef = false;
       }
 
     method! at_trait_hint env _ =
       {
         env with
-        hint_context = Errors.TraitContext;
+        hint_context = Name_context.TraitContext;
         hint_allow_typedef = false;
       }
 
     method! at_record_hint env _ =
       {
         env with
-        hint_context = Errors.RecordContext;
+        hint_context = Name_context.RecordContext;
         hint_allow_typedef = false;
       }
 
@@ -266,7 +270,7 @@ let handler ctx =
             env
             ~allow_typedef:false
             ~allow_generics:false
-            ~kind:Errors.ClassContext
+            ~kind:Name_context.ClassContext
             id
         in
         env
@@ -276,7 +280,7 @@ let handler ctx =
             env
             ~allow_typedef:false
             ~allow_generics:false
-            ~kind:Errors.RecordContext
+            ~kind:Name_context.RecordContext
             id
         in
         env
@@ -292,7 +296,7 @@ let handler ctx =
             env
             ~allow_typedef
             ~allow_generics:false
-            ~kind:Errors.ClassContext
+            ~kind:Name_context.ClassContext
             cname
         in
         env
@@ -306,7 +310,7 @@ let handler ctx =
             env
             ~allow_typedef:false
             ~allow_generics:false
-            ~kind:Errors.ClassContext
+            ~kind:Name_context.ClassContext
             id
         | _ -> ()
       in
@@ -320,7 +324,7 @@ let handler ctx =
             env
             ~allow_typedef:false
             ~allow_generics:false
-            ~kind:Errors.ClassContext
+            ~kind:Name_context.ClassContext
             ua_name
       in
       env
@@ -333,7 +337,7 @@ let handler ctx =
             env
             ~allow_typedef:env.class_id_allow_typedef
             ~allow_generics:true
-            ~kind:Errors.ClassContext
+            ~kind:Name_context.ClassContext
             id
         in
         env
@@ -345,7 +349,7 @@ let handler ctx =
           env
           ~allow_typedef:true
           ~allow_generics:false
-          ~kind:Errors.ClassContext
+          ~kind:Name_context.ClassContext
           id
       in
       env

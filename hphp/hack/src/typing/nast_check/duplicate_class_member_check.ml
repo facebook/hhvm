@@ -16,7 +16,10 @@ let error_if_repeated_name member_or_const =
   let seen = Caml.Hashtbl.create 0 in
   List.iter member_or_const ~f:(fun (pos, name) ->
       match Caml.Hashtbl.find_opt seen name with
-      | Some p' -> Errors.error_name_already_bound name name pos p'
+      | Some p' ->
+        Errors.add_naming_error
+        @@ Naming_error.Error_name_already_bound
+             { pos; name; prev_name = name; prev_pos = p' }
       | None -> Caml.Hashtbl.replace seen name pos)
 
 let handler =

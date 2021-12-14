@@ -27,7 +27,8 @@ let error_if_nonstatic_prop_with_lsb cv =
     let lsb_pos =
       Naming_attributes.mem_pos SN.UserAttributes.uaLSB cv.cv_user_attributes
     in
-    Option.iter lsb_pos ~f:Errors.nonstatic_property_with_lsb
+    Option.iter lsb_pos ~f:(fun pos ->
+        Errors.add_naming_error @@ Naming_error.Nonstatic_property_with_lsb pos)
 
 let unnecessary_lsb c cv =
   let attr = SN.UserAttributes.uaLSB in

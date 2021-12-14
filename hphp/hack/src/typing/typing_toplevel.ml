@@ -1232,7 +1232,7 @@ let class_const_def ~in_enum_class c env cc =
             && (not (is_enum_or_enum_class c.c_kind))
             && not (Env.is_hhi env)
           then
-            Errors.missing_typehint (fst id)
+            Errors.add_naming_error @@ Naming_error.Missing_typehint (fst id)
       end;
       let (env, ty) = Env.fresh_type env (fst id) in
       (env, MakeType.unenforced ty, None)
@@ -1387,11 +1387,19 @@ let class_var_def ~is_static cls env cv =
       cv.cv_user_attributes
   in
 
-  if (not (Env.is_hhi env)) && Option.is_none (hint_of_type_hint cv.cv_type)
+  (if (not (Env.is_hhi env)) && Option.is_none (hint_of_type_hint cv.cv_type)
   then
-    Errors.prop_without_typehint
-      (Aast.string_of_visibility cv.cv_visibility)
-      cv.cv_id;
+    let vis =
+      match cv.cv_visibility with
+      | Public -> `public
+      | Private -> `private_
+      | Internal -> `internal
+      | Protected -> `protected
+    in
+    let (pos, prop_name) = cv.cv_id in
+    Errors.add_naming_error
+    @@ Naming_error.Prop_without_typehint { vis; pos; prop_name });
+
   let (env, global_inference_env) = Env.extract_global_inference_env env in
   let ((cv_type_ty, _) as cv_type) =
     match expected with
@@ -1937,7 +1945,8 @@ let gconst_def ctx cst =
       (te, env)
     | None ->
       if (not (is_literal_expr value)) && not (Env.is_hhi env) then
-        Errors.missing_typehint (fst cst.cst_name);
+        Errors.add_naming_error
+        @@ Naming_error.Missing_typehint (fst cst.cst_name);
       let (env, te, _value_type) = Typing.expr_with_pure_coeffects env value in
       (te, env)
   in
@@ -1996,7 +2005,13 @@ let record_def_parent env rd parent_hint =
     | None ->
       (* Something exists with this name (naming succeeded), but it's
          not a record. *)
-      Errors.unbound_name parent_pos parent_name Errors.RecordContext)
+      Errors.add_naming_error
+      @@ Naming_error.Unbound_name
+           {
+             pos = parent_pos;
+             name = parent_name;
+             kind = Name_context.RecordContext;
+           })
   | _ ->
     failwith
       "Record parent was not an Happly. This should have been a syntax error."

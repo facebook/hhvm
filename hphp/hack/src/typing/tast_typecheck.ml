@@ -24,9 +24,11 @@ let expect_ty_equal
     env (pos : Pos.t) (ty : locl_ty) (expected_ty : locl_phase ty_) =
   let expected_ty = mk (Reason.none, expected_ty) in
   if not @@ ty_equal ~normalize_lists:true ty expected_ty then
-    let actual_ty = Typing_print.debug env ty in
-    let expected_ty = Typing_print.debug env expected_ty in
-    Errors.unexpected_ty_in_tast pos ~actual_ty ~expected_ty
+    let actual_ty = lazy (Typing_print.debug env ty) in
+    let expected_ty = lazy (Typing_print.debug env expected_ty) in
+    Errors.add_typing_error
+      Typing_error.(
+        primary @@ Primary.Unexpected_ty_in_tast { pos; actual_ty; expected_ty })
 
 let refine (cond_ty, _, cond_expr) _cond_is_true gamma =
   let cond_ty_ = get_node cond_ty in

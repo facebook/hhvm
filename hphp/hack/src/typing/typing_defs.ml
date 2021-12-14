@@ -316,7 +316,7 @@ type expand_env = {
       (** The type that is substituted for `this` in signatures. It should be
        * set to an expression dependent type if appropriate
        *)
-  on_error: Errors.Reasons_callback.t;
+  on_error: Typing_error.Reasons_callback.t;
 }
 
 let empty_expand_env =
@@ -326,7 +326,7 @@ let empty_expand_env =
     substs = SMap.empty;
     this_ty =
       mk (Reason.none, Tgeneric (Naming_special_names.Typehints.this, []));
-    on_error = Errors.Reasons_callback.ignore_error;
+    on_error = Typing_error.Reasons_callback.ignore_error;
   }
 
 let empty_expand_env_with_on_error on_error = { empty_expand_env with on_error }

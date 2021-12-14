@@ -105,13 +105,18 @@ let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
     ( env,
       Missing
         (fun () ->
-          Errors.smember_not_found_
-            `class_typeconst
-            id_pos
-            (Cls.pos class_, class_name)
-            id_name
-            None
-            ctx.ety_env.on_error) )
+          Errors.add_typing_error
+            Typing_error.(
+              apply_reasons ~on_error:ctx.ety_env.on_error
+              @@ Secondary.Smember_not_found
+                   {
+                     pos = id_pos;
+                     kind = `class_typeconst;
+                     class_name;
+                     class_pos = Cls.pos class_;
+                     member_name = id_name;
+                     hint = None;
+                   })) )
   | Some typeconst ->
     let name = tp_name class_name id in
     let (ety_env, has_cycle) =
@@ -124,7 +129,12 @@ let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
           let seen =
             Typing_defs.Type_expansions.ids ctx.ety_env.type_expansions
           in
-          Errors.cyclic_typeconst initial_taccess_pos seen);
+          Errors.add_typing_error
+            Typing_error.(
+              primary
+              @@ Primary.Cyclic_typeconst
+                   { pos = initial_taccess_pos; tyconst_names = seen }));
+
       (* This is a cycle through a type constant that we are using *)
       (env, Missing (fun () -> ()))
     | None ->
@@ -144,10 +154,12 @@ let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
       let abstract_or_exact env ~lower_bounds ~upper_bounds =
         (if not ctx.allow_abstract then
           let tc_pos = fst typeconst.ttc_name in
-          Errors.abstract_tconst_not_allowed
-            id_pos
-            (tc_pos, id_name)
-            ctx.ety_env.on_error);
+
+          Errors.add_typing_error
+            Typing_error.(
+              apply_reasons ~on_error:ctx.ety_env.on_error
+              @@ Secondary.Abstract_tconst_not_allowed
+                   { pos = id_pos; decl_pos = tc_pos; tconst_name = id_name }));
         (* TODO(T59448452): this treatment of abstract type constants is unsound *)
         abstract_or_exact
           env
@@ -163,7 +175,7 @@ let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
       (* Don't report errors in expanded definition or constraint.
        * These will have been reported at the definition site already. *)
       let ety_env =
-        { ety_env with on_error = Errors.Reasons_callback.ignore_error }
+        { ety_env with on_error = Typing_error.Reasons_callback.ignore_error }
       in
       (match typeconst.ttc_kind with
       (* Concrete type constants *)
@@ -316,14 +328,20 @@ let rec expand ctx env root : _ * result =
   let (env, root) = Env.expand_type env root in
   let err () =
     let (pos, tconst) = ctx.id in
-    let ty = Typing_print.error env root in
-    Errors.non_object_member_read_
-      ~kind:`class_typeconst
-      tconst
-      pos
-      ty
-      (get_pos root)
-      ctx.ety_env.on_error
+    let ty_name = lazy (Typing_print.error env root) in
+    let reason =
+      Typing_error.Secondary.Non_object_member
+        {
+          pos;
+          ctxt = `read;
+          kind = `class_typeconst;
+          member_name = tconst;
+          ty_name;
+          decl_pos = get_pos root;
+        }
+    in
+    Errors.add_typing_error
+    @@ Typing_error.apply_reasons ~on_error:ctx.ety_env.on_error reason
   in
 
   match get_node root with

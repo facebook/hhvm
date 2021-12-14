@@ -320,7 +320,16 @@ let check_reuse_final_method tgenv (c : Nast.class_) : unit =
           let dupe = lowermost_classish tgenv dupes in
           let using_class = find_using_class tgenv cls_name dupe in
           let trace = relevant_positions tgenv using_class type_name dupe in
-          Errors.trait_reuse_with_final_method p dupe using_class trace;
+          Errors.add_typing_error
+            Typing_error.(
+              primary
+              @@ Primary.Trait_reuse_with_final_method
+                   {
+                     pos = p;
+                     trait_name = dupe;
+                     parent_cls_name = using_class;
+                     trace;
+                   });
           SSet.empty)
   in
   ()
@@ -349,7 +358,16 @@ let check_reuse_final_method_allow_diamond tgenv (c : Nast.class_) : unit =
           let dupe = lowermost_classish tgenv (SSet.elements dupes) in
           let using_class = find_using_class tgenv cls_name dupe in
           let trace = relevant_positions tgenv using_class type_name dupe in
-          Errors.trait_reuse_with_final_method p dupe using_class trace)
+          Errors.add_typing_error
+            Typing_error.(
+              primary
+              @@ Primary.Trait_reuse_with_final_method
+                   {
+                     pos = p;
+                     trait_name = dupe;
+                     parent_cls_name = using_class;
+                     trace;
+                   }))
   | None -> ()
 
 (* check reuse of a trait with a non-overridden non-abstract method *)
@@ -373,23 +391,28 @@ let check_reuse_method_without_override tgenv (c : Nast.class_) : unit =
               && not (SSet.mem m_name local_method_names)
             then
               let (cls_pos, cls_name) = c.c_name in
-              let trace_1 =
+              let trace1 =
                 class_to_trait_via_trait tgenv cls_name ut_name m.ce_origin
               in
-              let trace_2 =
+              let trace2 =
                 class_to_trait_via_trait
                   tgenv
                   cls_name
                   (SMap.find m.ce_origin !seen_method_origins)
                   m.ce_origin
               in
-              Errors.method_import_via_diamond
-                cls_pos
-                cls_name
-                (force m.ce_pos)
-                m_name
-                trace_1
-                trace_2
+              Errors.add_typing_error
+                Typing_error.(
+                  primary
+                  @@ Primary.Method_import_via_diamond
+                       {
+                         pos = cls_pos;
+                         class_name = cls_name;
+                         method_pos = force m.ce_pos;
+                         method_name = m_name;
+                         trace1;
+                         trace2;
+                       })
             else begin
               seen_method_origins :=
                 SMap.add m.ce_origin ut_name !seen_method_origins;

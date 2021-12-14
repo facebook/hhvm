@@ -250,10 +250,16 @@ let check_final_this_pos_variance : variance -> Pos.t -> Nast.class_ -> unit =
     List.iter class_.Aast.c_tparams ~f:(fun t ->
         match (env_variance, t.Aast.tp_variance) with
         | (Vcontravariant _, (Ast_defs.Covariant | Ast_defs.Contravariant)) ->
-          Errors.contravariant_this
-            rpos
-            (Utils.strip_ns (Ast_defs.get_id class_.Aast.c_name))
-            (snd t.Aast.tp_name)
+          Errors.add_typing_error
+            Typing_error.(
+              primary
+              @@ Primary.Contravariant_this
+                   {
+                     pos = rpos;
+                     class_name =
+                       Utils.strip_ns (Ast_defs.get_id class_.Aast.c_name);
+                     typaram_name = snd t.Aast.tp_name;
+                   })
         | _ -> ())
 
 (*****************************************************************************)
@@ -517,12 +523,20 @@ let generic_ : Env.type_parameter_env -> variance -> string -> _ -> unit =
     let (pos1, _, _) = List.hd_exn stack1 in
     let (pos2, _, _) = List.hd_exn stack2 in
     let emsg = detailed_message "contravariant (-)" pos2 stack2 in
-    Errors.declared_covariant pos1 pos2 emsg
+    Errors.add_typing_error
+      Typing_error.(
+        primary
+        @@ Primary.Declared_covariant
+             { param_pos = pos1; pos = pos2; msgs = emsg })
   | (Vcontravariant stack1, (Vcovariant stack2 | Vinvariant (stack2, _))) ->
     let (pos1, _, _) = List.hd_exn stack1 in
     let (pos2, _, _) = List.hd_exn stack2 in
     let emsg = detailed_message "covariant (+)" pos2 stack2 in
-    Errors.declared_contravariant pos1 pos2 emsg
+    Errors.add_typing_error
+      Typing_error.(
+        primary
+        @@ Primary.Declared_contravariant
+             { param_pos = pos2; pos = pos1; msgs = emsg })
 
 (*****************************************************************************)
 (* Used for the arguments of function. *)

@@ -10,6 +10,8 @@
     and convert to `Pos.absolute message` before sending it to the client *)
 type 'a t = 'a * string [@@deriving eq, ord, show]
 
+let map (pos, msg) ~f = (f pos, msg)
+
 let get_message_pos (pos, _) = pos
 
 let get_message_str (_, str) = str

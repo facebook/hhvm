@@ -22,22 +22,31 @@ let is_reified tparam = not (equal_reify_kind tparam.tp_reified Erased)
 
 let tparams_has_reified tparams = List.exists tparams ~f:is_reified
 
-let valid_newable_hint env tp (pos, hint) =
-  match hint with
-  | Aast.Happly ((p, h), _) ->
-    begin
-      match Env.get_class_or_typedef env h with
-      | Some (Env.ClassResult cls) ->
-        if not Ast_defs.(is_c_normal (Cls.kind cls)) then
-          Errors.invalid_newable_type_argument tp p
-      | _ ->
-        (* This case should never happen *)
-        Errors.invalid_newable_type_argument tp p
-    end
-  | Aast.Habstr (name, []) ->
-    if not @@ Env.get_newable env name then
-      Errors.invalid_newable_type_argument tp pos
-  | _ -> Errors.invalid_newable_type_argument tp pos
+let valid_newable_hint env (tp_pos, tp_name) (pos, hint) =
+  let err_opt =
+    let open Typing_error.Primary in
+    match hint with
+    | Aast.Happly ((p, h), _) ->
+      begin
+        match Env.get_class_or_typedef env h with
+        | Some (Env.ClassResult cls) ->
+          if not Ast_defs.(is_c_normal (Cls.kind cls)) then
+            Some (Invalid_newable_type_argument { tp_pos; tp_name; pos = p })
+          else
+            None
+        | _ ->
+          (* This case should never happen *)
+          Some (Invalid_newable_type_argument { tp_pos; tp_name; pos = p })
+      end
+    | Aast.Habstr (name, []) ->
+      if not @@ Env.get_newable env name then
+        Some (Invalid_newable_type_argument { tp_pos; tp_name; pos })
+      else
+        None
+    | _ -> Some (Invalid_newable_type_argument { tp_pos; tp_name; pos })
+  in
+  Option.iter err_opt ~f:(fun err ->
+      Errors.add_typing_error @@ Typing_error.primary err)
 
 let verify_has_consistent_bound env (tparam : Tast.tparam) =
   let upper_bounds =
@@ -52,8 +61,13 @@ let verify_has_consistent_bound env (tparam : Tast.tparam) =
   in
   let valid_classes = List.filter bound_classes ~f:Cls.valid_newable_class in
   if Int.( <> ) 1 (List.length valid_classes) then
-    let cbs = List.map ~f:Cls.name valid_classes in
-    Errors.invalid_newable_type_param_constraints tparam.tp_name cbs
+    let constraints = List.map ~f:Cls.name valid_classes in
+    let (pos, tp_name) = tparam.tp_name in
+    Errors.add_typing_error
+      Typing_error.(
+        primary
+        @@ Primary.Invalid_newable_typaram_constraints
+             { pos; tp_name; constraints })
 
 let is_wildcard (_, hint) =
   match hint with
@@ -78,7 +92,14 @@ let verify_targ_valid env reification tparam targ =
     match tparam.tp_reified with
     | Nast.Reified
     | Nast.SoftReified ->
-      let emit_error = Errors.invalid_reified_argument tparam.tp_name in
+      let (decl_pos, param_name) = tparam.tp_name in
+      let emit_error pos arg_info =
+        Errors.add_typing_error
+          Typing_error.(
+            primary
+            @@ Primary.Invalid_reified_arg
+                 { pos; param_name; decl_pos; arg_info })
+      in
       validator#validate_hint
         (Tast_env.tast_env_as_typing_env env)
         (snd targ)
@@ -90,7 +111,13 @@ let verify_targ_valid env reification tparam targ =
     Typing_enforceable_hint.validate_hint
       (Tast_env.tast_env_as_typing_env env)
       (snd targ)
-      (Errors.invalid_enforceable_type "parameter" tparam.tp_name);
+      (fun pos ty_info ->
+        let (tp_pos, tp_name) = tparam.tp_name in
+        Errors.add_typing_error
+          Typing_error.(
+            primary
+            @@ Primary.Invalid_enforceable_type
+                 { kind = `param; pos; ty_info; tp_pos; tp_name }));
 
   if Attributes.mem UA.uaNewable tparam.tp_user_attributes then
     valid_newable_hint env tparam.tp_name (snd targ)
@@ -101,14 +128,18 @@ let verify_call_targs env expr_pos decl_pos tparams targs =
     let targs_length = List.length targs in
     if Int.( <> ) tparams_length targs_length then
       if Int.( = ) targs_length 0 then
-        Errors.require_args_reify decl_pos expr_pos
+        Errors.add_typing_error
+          Typing_error.(
+            primary @@ Primary.Require_args_reify { decl_pos; pos = expr_pos })
       else
         (* mismatches with targs_length > 0 are not specific to reification and handled
                   elsewhere *)
         ());
   let all_wildcards = List.for_all ~f:is_wildcard targs in
   if all_wildcards && tparams_has_reified tparams then
-    Errors.require_args_reify decl_pos expr_pos
+    Errors.add_typing_error
+      Typing_error.(
+        primary @@ Primary.Require_args_reify { decl_pos; pos = expr_pos })
   else
     (* Unequal_lengths case handled elsewhere *)
     List.iter2 tparams targs ~f:(verify_targ_valid env Type_validator.Resolved)
@@ -123,7 +154,8 @@ let handler =
       match x with
       | (_, call_pos, Class_get ((_, _, CI (_, t)), _, _)) ->
         if equal_reify_kind (Env.get_reified env t) Reified then
-          Errors.class_get_reified call_pos
+          Errors.add_typing_error
+            Typing_error.(primary @@ Primary.Class_get_reified call_pos)
       | (fun_ty, pos, Method_caller _)
       | (fun_ty, pos, Fun_id _)
       | (fun_ty, pos, Method_id _)
@@ -132,7 +164,8 @@ let handler =
           match get_node fun_ty with
           | Tfun { ft_tparams; _ } ->
             if tparams_has_reified ft_tparams then
-              Errors.reified_function_reference pos
+              Errors.add_typing_error
+                Typing_error.(primary @@ Primary.Reified_function_reference pos)
           | _ -> ()
         end
       | ( _,
@@ -144,7 +177,10 @@ let handler =
           match get_node ty with
           (* If we get Tgeneric here, the underlying type was reified *)
           | Tgeneric (ci, _) when String.equal ci class_id ->
-            Errors.reified_static_method_in_expr_tree pos
+            Errors.add_typing_error
+              Typing_error.(
+                expr_tree
+                @@ Primary.Expr_tree.Reified_static_method_in_expr_tree pos)
           | _ -> ()
         end
       | (fun_ty, pos, FunctionPointer (_, targs)) ->
@@ -168,7 +204,10 @@ let handler =
           (* ignoring type arguments here: If we get a Tgeneric here, the underlying type
              parameter must have been newable and reified, neither of which his allowed for
              higher-kinded type-parameters *)
-          if not (Env.get_newable env ci) then Errors.new_without_newable pos ci
+          if not (Env.get_newable env ci) then
+            Errors.add_typing_error
+              Typing_error.(
+                primary @@ Primary.New_without_newable { pos; name = ci })
         (* No need to report a separate error here if targs is non-empty:
              If targs is not empty then there are two cases:
              - ci is indeed higher-kinded, in which case it is not allowed to be newable
@@ -194,14 +233,18 @@ let handler =
           in
           Option.iter t ~f:(fun has_reified ->
               if has_reified then
-                let (class_type, suggested_class) =
+                let (class_kind, suggested_class_name) =
                   match cid with
                   | CIstatic -> ("static", None)
                   | CIself -> ("self", Env.get_self_id env)
                   | CIparent -> ("parent", Env.get_parent_id env)
                   | _ -> failwith "Unexpected match"
                 in
-                Errors.new_class_reified pos class_type suggested_class))
+                Errors.add_typing_error
+                  Typing_error.(
+                    primary
+                    @@ Primary.New_class_reified
+                         { pos; class_kind; suggested_class_name })))
       | (_, pos, New ((ty, _, _), targs, _, _, _)) ->
         let (env, ty) = Env.expand_type env ty in
         begin
@@ -253,7 +296,9 @@ let handler =
                 ~f:(fun t -> not (equal_reify_kind t.tp_reified Erased))
                 (Cls.tparams cls)
             then
-              Errors.consistent_construct_reified pos
+              Errors.add_typing_error
+                Typing_error.(
+                  primary @@ Primary.Consistent_construct_reified pos)
           | _ -> ()
         end
       | None -> ()

@@ -29,18 +29,32 @@ let catch_ifc_internal_errors pos f =
         Hh_logger.log
           "Timed out running IFC analysis on %s"
           (Relative_path.suffix (Pos.filename pos));
-        Errors.ifc_internal_error pos "Timed out running IFC analysis")
+        Errors.add_typing_error
+          Typing_error.(
+            ifc
+            @@ Primary.Ifc.Ifc_internal_error
+                 { pos; msg = "Timed out running IFC analysis" }))
   with
   (* Solver exceptions*)
   | IFCError error ->
-    Errors.ifc_internal_error pos (Ifc_pretty.ifc_error_to_string error)
+    Errors.add_typing_error
+      Typing_error.(
+        ifc
+        @@ Primary.Ifc.Ifc_internal_error
+             { pos; msg = Ifc_pretty.ifc_error_to_string error })
   (* Failwith exceptions *)
   | Failure s ->
-    Errors.ifc_internal_error pos ("IFC internal assertion failure: " ^ s)
+    Errors.add_typing_error
+      Typing_error.(
+        ifc
+        @@ Primary.Ifc.Ifc_internal_error
+             { pos; msg = "IFC internal assertion failure: " ^ s })
   | e ->
-    Errors.ifc_internal_error
-      pos
-      ("Unexpected IFC exception: " ^ Exn.to_string e)
+    Errors.add_typing_error
+      Typing_error.(
+        ifc
+        @@ Primary.Ifc.Ifc_internal_error
+             { pos; msg = "Unexpected IFC exception: " ^ Exn.to_string e })
 
 let decl_env : decl_env = { de_class = SMap.empty }
 

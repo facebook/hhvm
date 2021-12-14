@@ -14,9 +14,13 @@ module Env = Tast_env
 
 let check_xhp_children env pos ty =
   if not @@ Env.is_xhp_child env pos ty then
-    let ty_str = Env.print_error_ty ~ignore_dynamic:true env ty in
-    let msgl = Reason.to_string ("This is " ^ ty_str) (get_reason ty) in
-    Errors.illegal_xhp_child pos msgl
+    let ty_str = lazy (Env.print_error_ty ~ignore_dynamic:true env ty) in
+    let ty_reason_msg =
+      Lazy.map ty_str ~f:(fun ty_str ->
+          Reason.to_string ("This is " ^ ty_str) (get_reason ty))
+    in
+    Errors.add_typing_error
+      Typing_error.(xhp @@ Primary.Xhp.Illegal_xhp_child { pos; ty_reason_msg })
 
 let handler =
   object

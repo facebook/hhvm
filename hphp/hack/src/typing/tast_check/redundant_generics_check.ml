@@ -63,15 +63,25 @@ let ft_redundant_generics env tparams ty =
           begin
             match super_bounds with
             | [] ->
-              Errors.redundant_covariant
-                (Pos_or_decl.unsafe_to_raw_pos pos)
-                bounds_message
-                "nothing"
+              Errors.add_typing_error
+                Typing_error.(
+                  primary
+                  @@ Primary.Redundant_covariant
+                       {
+                         pos = Pos_or_decl.unsafe_to_raw_pos pos;
+                         msg = bounds_message;
+                         suggest = "nothing";
+                       })
             | [(_, t)] ->
-              Errors.redundant_covariant
-                (Pos_or_decl.unsafe_to_raw_pos pos)
-                bounds_message
-                (Tast_env.print_decl_ty env t)
+              Errors.add_typing_error
+                Typing_error.(
+                  primary
+                  @@ Primary.Redundant_covariant
+                       {
+                         pos = Pos_or_decl.unsafe_to_raw_pos pos;
+                         msg = bounds_message;
+                         suggest = Tast_env.print_decl_ty env t;
+                       })
             | _ -> ()
           end
         | (None, Some _positions) -> ()

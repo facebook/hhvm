@@ -178,24 +178,26 @@ let check_typedef_usable_as_hk_type env use_pos typedef_name typedef_info =
     if SSet.is_empty intersection then
       (* Just violated constraints inside the typedef that do not involve
          the type parameters of the typedef we are looking at. Nothing to report at this point *)
-      ()
+      Typing_error.Reasons_callback.ignore_error
     else
       (* We choose an arbitrary element. If a constraint violation were to contain multiple
          tparams of the typedef, we can live with only showing the user one of them. *)
       let typedef_tparam_name = SSet.min_elt intersection in
       let (used_class_in_def_pos, used_class_in_def_name) = used_class in
       let typedef_pos = typedef_info.td_pos in
-      Errors.add_naming_error
-      @@ Naming_error.HKT_alias_with_implicit_constraints
-           {
-             pos = use_pos;
-             typedef_pos;
-             used_class_in_def_pos;
-             typedef_name;
-             typedef_tparam_name;
-             used_class_in_def_name;
-             used_class_tparam_name;
-           }
+      Typing_error.(
+        Reasons_callback.always
+        @@ primary
+        @@ Primary.HKT_alias_with_implicit_constraints
+             {
+               pos = use_pos;
+               typedef_pos;
+               used_class_in_def_pos;
+               typedef_name;
+               typedef_tparam_name;
+               used_class_in_def_name;
+               used_class_tparam_name;
+             })
   in
   let check_tapply r class_sid type_args =
     let decl_ty = Typing_make_type.apply r class_sid type_args in
@@ -217,8 +219,7 @@ let check_typedef_usable_as_hk_type env use_pos typedef_name typedef_info =
                 let (env, cstr_ty) = TUtils.localize ~ety_env env cstr_ty in
                 let (_ : Typing_env_types.env) =
                   TGenConstraint.check_constraint env ck ty ~cstr_ty
-                  @@ Errors.Reasons_callback.always (fun _ ->
-                         report_constraint ty cls_name x)
+                  @@ report_constraint ty cls_name x
                 in
                 ())
           end
@@ -254,14 +255,19 @@ let check_class_usable_as_hk_type pos class_info =
     @@ Naming_error.HKT_class_with_constraints_used { pos; class_name }
 
 let report_kind_error ~use_pos ~def_pos ~tparam_name ~expected ~actual =
-  let actual_kind_repr = Simple.description_of_kind actual in
-  let expected_kind_repr = Simple.description_of_kind expected in
-  Errors.kind_mismatch
-    ~use_pos
-    ~def_pos
-    ~tparam_name
-    ~expected_kind_repr
-    ~actual_kind_repr
+  let actual_kind = Simple.description_of_kind actual in
+  let expected_kind = Simple.description_of_kind expected in
+  Errors.add_typing_error
+  @@ Typing_error.(
+       primary
+       @@ Primary.Kind_mismatch
+            {
+              pos = use_pos;
+              decl_pos = def_pos;
+              tparam_name;
+              actual_kind;
+              expected_kind;
+            })
 
 module Simple = struct
   (* TODO(T70068435) Once we support constraints on higher-kinded types, this should only be used
@@ -299,7 +305,16 @@ module Simple = struct
     let act_len = List.length tyargs in
     let arity_mistmatch_okay = Int.equal act_len 0 && allow_missing_targs in
     if Int.( <> ) exp_len act_len && not arity_mistmatch_okay then
-      Errors.type_arity use_pos def_pos ~expected:exp_len ~actual:act_len;
+      Errors.add_typing_error
+        Typing_error.(
+          primary
+          @@ Primary.Type_arity_mismatch
+               {
+                 pos = use_pos;
+                 decl_pos = def_pos;
+                 expected = exp_len;
+                 actual = act_len;
+               });
     let length = min exp_len act_len in
     let (tyargs, nkinds) = (List.take tyargs length, List.take nkinds length) in
     List.iter2_exn tyargs nkinds ~f:(check_targ_well_kinded ~in_signature env)

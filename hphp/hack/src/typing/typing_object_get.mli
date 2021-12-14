@@ -28,7 +28,7 @@ val obj_get :
   explicit_targs:Nast.targ list ->
   class_id:Nast.class_id_ ->
   member_id:Nast.sid ->
-  on_error:Errors.Callback.t ->
+  on_error:Typing_error.Callback.t ->
   ?parent_ty:Typing_defs.locl_ty ->
   Typing_env_types.env ->
   Typing_defs.locl_ty ->
@@ -48,7 +48,7 @@ val obj_get_with_err :
   explicit_targs:Nast.targ list ->
   class_id:Nast.class_id_ ->
   member_id:Nast.sid ->
-  on_error:Errors.Callback.t ->
+  on_error:Typing_error.Callback.t ->
   ?parent_ty:Typing_defs.locl_ty ->
   Typing_env_types.env ->
   Typing_defs.locl_ty ->
@@ -64,5 +64,5 @@ val smember_not_found :
   is_function_pointer:bool ->
   Decl_provider.Class.t ->
   string ->
-  Errors.Callback.t ->
+  Typing_error.Callback.t ->
   unit

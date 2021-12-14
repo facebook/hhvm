@@ -22,7 +22,11 @@ let check_expr env (_, pos, e) =
     | Some parent_class
       when Ast_defs.is_c_abstract (Cls.kind parent_class)
            && Option.is_none (fst (Cls.construct parent_class)) ->
-      Errors.parent_abstract_call construct pos (Cls.pos parent_class)
+      Errors.add_typing_error
+        Typing_error.(
+          primary
+          @@ Primary.Parent_abstract_call
+               { meth_name = construct; pos; decl_pos = Cls.pos parent_class })
     | _ -> ())
   | _ -> ()
 

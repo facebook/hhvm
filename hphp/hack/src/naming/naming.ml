@@ -309,7 +309,8 @@ let convert_shape_name env = function
         match (fst env).current_cls with
         | Some ((_class_decl_pos, class_name), _, _) -> class_name
         | None ->
-          Errors.self_outside_class class_pos;
+          Errors.add_typing_error
+            Typing_error.(primary @@ Primary.Self_outside_class class_pos);
           SN.Classes.cUnknown
       ) else
         let () = check_name (class_pos, class_name) in
@@ -453,7 +454,8 @@ and hint_
         begin
           match (fst env).current_cls with
           | None ->
-            Errors.self_outside_class pos;
+            Errors.add_typing_error
+              Typing_error.(primary @@ Primary.Self_outside_class pos);
             N.Herr
           | Some (cid, _, _) -> N.Happly (cid, [])
         end
@@ -2019,11 +2021,18 @@ and expr_ env p (e : Nast.expr_) =
         None )
   | Aast.Call ((_, p, Aast.Id (_, cn)), tal, el, _)
     when String.equal cn SN.StdlibFunctions.call_user_func ->
-    Errors.deprecated_use
-      p
-      ("The builtin "
-      ^ Markdown_lite.md_codify (Utils.strip_ns cn)
-      ^ " is deprecated.");
+    Errors.add_typing_error
+      Typing_error.(
+        primary
+        @@ Primary.Deprecated_use
+             {
+               pos = p;
+               decl_pos_opt = None;
+               msg =
+                 "The builtin "
+                 ^ Markdown_lite.md_codify (Utils.strip_ns cn)
+                 ^ " is deprecated.";
+             });
     begin
       match el with
       | [] ->
@@ -2431,19 +2440,28 @@ and make_class_id env ((p, x) as cid) =
     match x with
     | x when String.equal x SN.Classes.cParent ->
       if Option.is_none (fst env).current_cls then
-        let () = Errors.parent_outside_class p in
+        let () =
+          Errors.add_typing_error
+            Typing_error.(primary @@ Primary.Parent_outside_class p)
+        in
         N.CI (p, SN.Classes.cUnknown)
       else
         N.CIparent
     | x when String.equal x SN.Classes.cSelf ->
       if Option.is_none (fst env).current_cls then
-        let () = Errors.self_outside_class p in
+        let () =
+          Errors.add_typing_error
+            Typing_error.(primary @@ Primary.Self_outside_class p)
+        in
         N.CI (p, SN.Classes.cUnknown)
       else
         N.CIself
     | x when String.equal x SN.Classes.cStatic ->
       if Option.is_none (fst env).current_cls then
-        let () = Errors.static_outside_class p in
+        let () =
+          Errors.add_typing_error
+            Typing_error.(primary @@ Primary.Static_outside_class p)
+        in
         N.CI (p, SN.Classes.cUnknown)
       else
         N.CIstatic

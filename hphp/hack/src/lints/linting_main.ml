@@ -23,7 +23,8 @@ let typed_linters =
     Linter_equality_check.handler;
     Linter_disjoint_types.handler;
     Linter_is_checks.handler;
-    Switch_check.handler (fun _ : (Aast.pos -> string -> string -> unit) ->
+    Switch_check.handler
+      (fun _ : (Aast.pos -> string Lazy.t -> string Lazy.t -> unit) ->
         Lints_errors.invalid_switch_case_value_type);
     Linter_missing_override_attribute.handler;
     Linter_missing_via_label_attribute.handler;

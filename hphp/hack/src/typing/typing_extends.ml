@@ -58,21 +58,33 @@ let check_visibility parent_vis c_vis parent_pos pos on_error =
       | Vinternal m' -> Some m'
       | _ -> None
     in
-    (match Typing_modules.can_access ~current ~target:(Some parent_m) with
-    | `Yes -> ()
-    | `Disjoint (current, target) ->
-      Errors.visibility_override_internal
-        pos
-        parent_pos
-        (Some current)
-        target
-        on_error
-    | `Outside target ->
-      Errors.visibility_override_internal pos parent_pos None target on_error)
+    let err_opt =
+      match Typing_modules.can_access ~current ~target:(Some parent_m) with
+      | `Yes -> None
+      | `Disjoint (current, target) ->
+        Some
+          (Typing_error.Secondary.Visibility_override_internal
+             {
+               pos;
+               module_name = Some current;
+               parent_pos;
+               parent_module = target;
+             })
+      | `Outside target ->
+        Some
+          (Typing_error.Secondary.Visibility_override_internal
+             { pos; module_name = None; parent_pos; parent_module = target })
+    in
+    Option.iter err_opt ~f:(fun err ->
+        Errors.add_typing_error @@ Typing_error.(apply_reasons ~on_error err))
   | _ ->
     let parent_vis = Typing_defs.string_of_visibility parent_vis in
     let vis = Typing_defs.string_of_visibility c_vis in
-    Errors.visibility_extends vis pos parent_pos parent_vis on_error
+    let err =
+      Typing_error.Secondary.Visibility_extends
+        { pos; vis; parent_pos; parent_vis }
+    in
+    Errors.add_typing_error @@ Typing_error.(apply_reasons ~on_error err)
 
 let check_class_elt_visibility parent_class_elt class_elt on_error =
   let parent_vis = parent_class_elt.ce_visibility in
@@ -111,12 +123,22 @@ let check_members_implemented
         ()
       | _ when Option.is_none (get_member member_name) ->
         let (lazy defn_pos) = class_elt.ce_pos in
-        Errors.member_not_implemented
-          member_name
-          parent_reason
-          reason
-          defn_pos
+        let quickfixes =
           [stub_meth_quickfix class_name parent_name member_name class_elt]
+        in
+        let err =
+          Typing_error.(
+            primary
+            @@ Primary.Member_not_implemented
+                 {
+                   member_name;
+                   parent_pos = parent_reason;
+                   pos = reason;
+                   decl_pos = defn_pos;
+                   quickfixes;
+                 })
+        in
+        Errors.add_typing_error err
       | _ -> ())
 
 (* An abstract member can be declared in multiple ancestors. Sometimes these
@@ -165,7 +187,9 @@ let check_override_final_method parent_class_elt class_elt on_error =
     (* we have a final method being overridden by a user-declared method *)
     let (lazy parent_pos) = parent_class_elt.ce_pos in
     let (lazy pos) = class_elt.ce_pos in
-    Errors.override_final ~parent:parent_pos ~child:pos ~on_error
+    Errors.add_typing_error
+      Typing_error.(
+        apply_reasons ~on_error @@ Secondary.Override_final { pos; parent_pos })
 
 (** Checks that methods annotated with __DynamicallyCallable are only overridden with
     dynamically callable method. *)
@@ -183,7 +207,7 @@ let check_dynamically_callable member_name parent_class_elt class_elt on_error =
       ]
     in
     let err = Errors.bad_method_override on_error ~pos ~member_name in
-    Errors.Reasons_callback.apply err errorl
+    Errors.apply_error_from_reasons_callback err ~reasons:errorl
 
 (** Check that we are not overriding an __LSB property *)
 let check_lsb_overrides
@@ -198,7 +222,10 @@ let check_lsb_overrides
     (* __LSB attribute is being overridden *)
     let (lazy parent_pos) = parent_class_elt.ce_pos in
     let (lazy pos) = class_elt.ce_pos in
-    Errors.override_lsb ~member_name ~parent:parent_pos ~child:pos on_error
+    Errors.add_typing_error
+    @@ Typing_error.(
+         apply_reasons ~on_error
+         @@ Secondary.Override_lsb { pos; parent_pos; member_name })
 
 (** Check that __LateInit annotation on members are consistent between parents and children. *)
 let check_lateinit parent_class_elt class_elt on_error =
@@ -208,11 +235,15 @@ let check_lateinit parent_class_elt class_elt on_error =
   if lateinit_diff then
     let (lazy parent_pos) = parent_class_elt.ce_pos in
     let (lazy child_pos) = class_elt.ce_pos in
-    Errors.bad_lateinit_override
-      (get_ce_lateinit parent_class_elt)
-      parent_pos
-      child_pos
-      on_error
+    Errors.add_typing_error
+    @@ Typing_error.(
+         apply_reasons ~on_error
+         @@ Secondary.Bad_lateinit_override
+              {
+                pos = child_pos;
+                parent_pos;
+                parent_is_lateinit = get_ce_lateinit parent_class_elt;
+              })
 
 let check_xhp_attr_required env parent_class_elt class_elt on_error =
   if not (TypecheckerOptions.check_xhp_attribute (Env.get_tcopt env)) then
@@ -240,12 +271,16 @@ let check_xhp_attr_required env parent_class_elt class_elt on_error =
         | Some Required -> required
         | Some Lateinit -> lateinit
       in
-      Errors.bad_xhp_attr_required_override
-        (show parent_tag)
-        (show tag)
-        parent_pos
-        child_pos
-        on_error
+      Errors.add_typing_error
+      @@ Typing_error.(
+           apply_reasons ~on_error
+           @@ Secondary.Bad_xhp_attr_required_override
+                {
+                  pos = child_pos;
+                  tag = show tag;
+                  parent_pos;
+                  parent_tag = show parent_tag;
+                })
     | (_, _) -> ()
 
 (* Check that overriding is correct *)
@@ -278,12 +313,16 @@ let check_override
     then
       let (lazy pos) = class_elt.ce_pos in
       let (lazy parent_pos) = parent_class_elt.ce_pos in
-      Errors.override_method_support_dynamic_type
-        pos
-        parent_pos
-        parent_class_elt.ce_origin
-        member_name
-        on_error
+      Errors.add_typing_error
+      @@ Typing_error.(
+           apply_reasons ~on_error
+           @@ Secondary.Override_method_support_dynamic_type
+                {
+                  pos;
+                  parent_pos;
+                  parent_origin = parent_class_elt.ce_origin;
+                  method_name = member_name;
+                })
   in
 
   if is_method mem_source then begin
@@ -314,12 +353,17 @@ let check_override
   in
 
   if Bool.( <> ) (get_ce_const class_elt) (get_ce_const parent_class_elt) then
-    Errors.overriding_prop_const_mismatch
-      parent_pos
-      (get_ce_const parent_class_elt)
-      pos
-      (get_ce_const class_elt)
-      on_error;
+    Errors.add_typing_error
+      Typing_error.(
+        apply_reasons ~on_error
+        @@ Secondary.Overriding_prop_const_mismatch
+             {
+               pos;
+               is_const = get_ce_const class_elt;
+               parent_pos;
+               parent_is_const = get_ce_const parent_class_elt;
+             });
+
   if (not (get_ce_abstract parent_class_elt)) && get_ce_abstract class_elt then
     (* It is valid for abstract class to extend a concrete class, but it cannot
      * redefine already concrete members as abstract.
@@ -350,21 +394,32 @@ let check_override
     && not (get_ce_abstract class_elt)
   then
     (* Multiple concrete trait definitions, error *)
-    Errors.multiple_concrete_defs
-      pos
-      parent_pos
-      class_elt.ce_origin
-      parent_class_elt.ce_origin
-      member_name
-      (Cls.name class_)
-      on_error;
+    Errors.add_typing_error
+      Typing_error.(
+        apply_reasons ~on_error
+        @@ Secondary.Multiple_concrete_defs
+             {
+               pos;
+               parent_pos;
+               origin = class_elt.ce_origin;
+               parent_origin = parent_class_elt.ce_origin;
+               name = member_name;
+               class_name = Cls.name class_;
+             });
+
   match (deref fty_parent, deref fty_child) with
   | ((_, Tany _), (_, Tany _)) -> env
   | ((_, Tany _), _) ->
-    Errors.decl_override_missing_hint parent_pos on_error;
+    Errors.add_typing_error
+      Typing_error.(
+        apply_reasons ~on_error
+        @@ Secondary.Decl_override_missing_hint parent_pos);
+
     env
   | (_, (_, Tany _)) ->
-    Errors.decl_override_missing_hint pos on_error;
+    Errors.add_typing_error
+      Typing_error.(
+        apply_reasons ~on_error @@ Secondary.Decl_override_missing_hint pos);
     env
   | ((r_parent, Tfun ft_parent), (r_child, Tfun ft_child)) ->
     let check (r1, ft1) (r2, ft2) () =
@@ -561,20 +616,28 @@ let check_const_override
     in
 
     if const_interface_or_trait_member_not_unique then
-      Errors.interface_or_trait_const_multiple_defs
-        class_const.cc_pos
-        parent_class_const.cc_pos
-        class_const.cc_origin
-        parent_class_const.cc_origin
-        const_name
-        on_error
+      let snd_err =
+        Typing_error.Secondary.Interface_or_trait_const_multiple_defs
+          {
+            pos = class_const.cc_pos;
+            name = const_name;
+            origin = class_const.cc_origin;
+            parent_pos = parent_class_const.cc_pos;
+            parent_origin = parent_class_const.cc_origin;
+          }
+      in
+      Errors.add_typing_error @@ Typing_error.(apply_reasons ~on_error snd_err)
     else if is_bad_interface_const_override then
-      Errors.concrete_const_interface_override
-        class_const.cc_pos
-        parent_class_const.cc_pos
-        parent_class_const.cc_origin
-        const_name
-        on_error
+      let snd_err =
+        Typing_error.Secondary.Concrete_const_interface_override
+          {
+            pos = class_const.cc_pos;
+            name = const_name;
+            parent_pos = parent_class_const.cc_pos;
+            parent_origin = parent_class_const.cc_origin;
+          }
+      in
+      Errors.add_typing_error @@ Typing_error.(apply_reasons ~on_error snd_err)
     else if is_abstract_concrete_override then
       Errors.abstract_concrete_override
         class_const.cc_pos
@@ -586,7 +649,7 @@ let check_const_override
       env
       class_const_type
       parent_class_const_type
-      (Errors.Reasons_callback.class_constant_type_mismatch on_error)
+      (Typing_error.Reasons_callback.class_constant_type_mismatch on_error)
 
 (* Privates are only visible in the parent, we don't need to check them *)
 let filter_privates members =
@@ -805,7 +868,9 @@ let check_constructors env parent_class class_ psubst on_error =
     | (Some parent_cstr, _) when get_ce_synthesized parent_cstr -> env
     | (Some parent_cstr, None) ->
       let (lazy pos) = parent_cstr.ce_pos in
-      Errors.missing_constructor pos on_error;
+      Errors.add_typing_error
+        Typing_error.(
+          apply_reasons ~on_error @@ Secondary.Missing_constructor pos);
       env
     | (_, Some cstr) when get_ce_override cstr ->
       (* <<__UNSAFE_Construct>> *)
@@ -973,10 +1038,14 @@ let tconst_subsumption
       ()
     else
       match (child_typeconst.ttc_kind, parent_tconst_enforceable) with
-      | (TCAbstract { atc_default = Some ty; _ }, (pos, true))
-      | (TCConcrete { tc_type = ty }, (pos, true)) ->
-        let emit_error =
-          Errors.invalid_enforceable_type "constant" (pos, name)
+      | (TCAbstract { atc_default = Some ty; _ }, (tp_pos, true))
+      | (TCConcrete { tc_type = ty }, (tp_pos, true)) ->
+        let emit_error pos ty_info =
+          Errors.add_typing_error
+            Typing_error.(
+              primary
+              @@ Primary.Invalid_enforceable_type
+                   { pos; ty_info; kind = `constant; tp_pos; tp_name = name })
         in
         Typing_enforceable_hint.validate_type
           env
@@ -1107,14 +1176,18 @@ let check_typeconst_override
           | TCConcrete _ -> false
           | TCAbstract _ -> true
         in
-        Errors.interface_typeconst_multiple_defs
-          pos
-          parent_pos
-          tconst.ttc_origin
-          parent_tconst.ttc_origin
-          name
-          child_is_abstract
-          on_error
+        let err =
+          Typing_error.Secondary.Interface_typeconst_multiple_defs
+            {
+              pos;
+              name;
+              is_abstract = child_is_abstract;
+              origin = tconst.ttc_origin;
+              parent_pos;
+              parent_origin = parent_tconst.ttc_origin;
+            }
+        in
+        Errors.add_typing_error @@ Typing_error.(apply_reasons ~on_error err)
     | _ -> ());
     env
 
@@ -1137,12 +1210,19 @@ let check_typeconsts env implements parent_class class_ on_error =
           parent_class
           on_error
       | None ->
-        Errors.member_not_implemented
-          tconst_name
-          parent_pos
-          pos
-          (fst parent_tconst.ttc_name)
-          [];
+        let err =
+          Typing_error.(
+            primary
+            @@ Primary.Member_not_implemented
+                 {
+                   member_name = tconst_name;
+                   parent_pos;
+                   pos;
+                   decl_pos = fst parent_tconst.ttc_name;
+                   quickfixes = [];
+                 })
+        in
+        Errors.add_typing_error err;
         env)
 
 let check_consts env implements parent_class (name_pos, class_) psubst on_error
@@ -1167,12 +1247,19 @@ let check_consts env implements parent_class (name_pos, class_) psubst on_error
               on_error
           | Some _ -> env)
         | None ->
-          Errors.member_not_implemented
-            const_name
-            parent_const.cc_pos
-            name_pos
-            (Cls.pos parent_class)
-            [];
+          let err =
+            Typing_error.(
+              primary
+              @@ Primary.Member_not_implemented
+                   {
+                     member_name = const_name;
+                     parent_pos = parent_const.cc_pos;
+                     pos = name_pos;
+                     decl_pos = Cls.pos parent_class;
+                     quickfixes = [];
+                   })
+          in
+          Errors.add_typing_error err;
           env
       ) else
         env)
@@ -1242,9 +1329,9 @@ let check_implements_extends_uses
           (* sadly, enum error reporting requires this to keep the error in the file
              with the enum *)
           (if String.equal parent_name SN.Classes.cHH_BuiltinEnum then
-            Errors.Reasons_callback.bad_enum_decl name_pos
+            Typing_error.Reasons_callback.bad_enum_decl name_pos
           else
-            Errors.Reasons_callback.bad_decl_override
+            Typing_error.Reasons_callback.bad_decl_override
               name_pos
               ~name
               ~parent_pos:parent_name_pos

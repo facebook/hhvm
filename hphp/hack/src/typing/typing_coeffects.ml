@@ -90,8 +90,9 @@ let rec validate_capability env pos ty =
          { pos; name = Typing_print.full_decl ty }
 
 let pretty env ty =
-  let (env, ty) = Typing_intersection.simplify_intersections env ty in
-  Typing_print.coeffects env ty
+  lazy
+    (let (env, ty) = Typing_intersection.simplify_intersections env ty in
+     Typing_print.coeffects env ty)
 
 let is_generated_generic =
   String.is_prefix ~prefix:SN.Coeffects.generated_generic_prefix

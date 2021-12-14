@@ -180,12 +180,13 @@ type expand_env = {
           True by default. *)
   substs: locl_ty SMap.t;
   this_ty: locl_ty;
-  on_error: Errors.Reasons_callback.t;
+  on_error: Typing_error.Reasons_callback.t;
 }
 
 val empty_expand_env : expand_env
 
-val empty_expand_env_with_on_error : Errors.Reasons_callback.t -> expand_env
+val empty_expand_env_with_on_error :
+  Typing_error.Reasons_callback.t -> expand_env
 
 (** Returns:
     - [None] if there was no cycle

@@ -20,6 +20,14 @@ let verb_to_string = function
   | `implement -> "implement"
   | `use -> "use"
 
+let string_of_class_member_kind = function
+  | `class_constant -> "class constant"
+  | `static_method -> "static method"
+  | `class_variable -> "class variable"
+  | `class_typeconst -> "type constant"
+  | `method_ -> "method"
+  | `property -> "property"
+
 (* Given two equal-length strings, highlights the characters in
    the second that differ from the first *)
 let highlight_differences base to_highlight =
@@ -54,3 +62,11 @@ let suggestion_message ?(modifier = "") orig hint hint_pos =
         (Markdown_lite.md_codify hint)
   in
   (hint_pos, s)
+
+let pluralize_arguments n =
+  string_of_int n
+  ^
+  if n = 1 then
+    " argument"
+  else
+    " arguments"

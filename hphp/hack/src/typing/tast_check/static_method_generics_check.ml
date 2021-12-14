@@ -18,7 +18,11 @@ let static_method_check reified_params m =
         match h with
         | Aast.Habstr (t, args) ->
           if SSet.mem t reified_params then
-            Errors.static_meth_with_class_reified_generic m.m_span pos;
+            Errors.add_typing_error
+              Typing_error.(
+                primary
+                @@ Primary.Static_meth_with_class_reified_generic
+                     { pos = m.m_span; generic_pos = pos });
           List.iter args ~f:(this#on_hint env)
         | _ -> super#on_hint env (pos, h)
     end

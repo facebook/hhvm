@@ -43,10 +43,14 @@ let strip_awaitable fun_kind env et =
 
 let enforce_return_not_disposable ret_pos fun_kind env et =
   let stripped_et = strip_awaitable fun_kind env et in
-  match Typing_disposable.is_disposable_type env stripped_et.et_type with
-  | Some class_name ->
-    Errors.invalid_disposable_return_hint ret_pos (Utils.strip_ns class_name)
-  | None -> ()
+  Option.iter ~f:Errors.add_typing_error
+  @@ Option.map
+       (Typing_disposable.is_disposable_type env stripped_et.et_type)
+       ~f:(fun class_name ->
+         let open Typing_error in
+         primary
+         @@ Primary.Invalid_disposable_return_hint
+              { pos = ret_pos; class_name = Utils.strip_ns class_name })
 
 let has_attribute attr l =
   List.exists l ~f:(fun { Aast.ua_name; _ } -> String.equal attr (snd ua_name))
@@ -140,7 +144,7 @@ let force_return_kind ?(is_toplevel = true) env p ty =
         env
         wrapped_ty
         ty
-        Errors.Callback.unify_error
+        Typing_error.Callback.unify_error
     in
     (env, wrapped_ty)
 
@@ -154,7 +158,9 @@ let make_default_return ~is_method env name =
 
 let implicit_return env pos ~expected ~actual =
   let reason = Reason.URreturn in
-  let error = Errors.Callback.missing_return in
+  let error =
+    Typing_error.Primary.(Wellformedness (Wellformedness.Missing_return pos))
+  in
   let open Typing_env_types in
   if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then
     Typing_utils.sub_type
@@ -162,11 +168,10 @@ let implicit_return env pos ~expected ~actual =
       ~coerce:(Some Typing_logic.CoerceToDynamic)
       actual
       expected
-    @@ Errors.Reasons_callback.with_claim
-         error
-         ~claim:(pos, Reason.string_of_ureason reason)
+    @@ Typing_error.Reasons_callback.of_primary_error error
   else
-    Typing_ops.sub_type pos reason env actual expected error
+    Typing_ops.sub_type pos reason env actual expected
+    @@ Typing_error.Callback.of_primary_error error
 
 let check_inout_return ret_pos env =
   let params = Local_id.Map.elements (Env.get_params env) in
@@ -193,15 +198,15 @@ let check_inout_return ret_pos env =
           env
           ety
           param_ty
-          Errors.Callback.inout_return_type_mismatch
+          Typing_error.Callback.inout_return_type_mismatch
       | _ -> env)
 
 let rec remove_like_for_return ty =
   match get_node ty with
   | Tunion [ty1; ty2] when is_dynamic ty1 -> ty2
   | Tunion [ty1; ty2] when is_dynamic ty2 ->
-    (* We do not expect this case to catch like types because fun_implicit_return is 
-     * called on a type constructed directly from a decl ty, which for a ~T would have 
+    (* We do not expect this case to catch like types because fun_implicit_return is
+     * called on a type constructed directly from a decl ty, which for a ~T would have
      * the shape (dynamic | T). *)
     ty1
   | Tclass ((p, class_name), exact, [ty])

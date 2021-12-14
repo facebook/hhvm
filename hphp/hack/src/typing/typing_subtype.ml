@@ -101,7 +101,7 @@ type subtype_env = {
           coercion to or from dynamic. For coercion to dynamic, types that implement
           dynamic are considered sub-types of dynamic. For coercion from dynamic,
           dynamic is treated as a sub-type of all types. *)
-  on_error: Errors.Reasons_callback.t;
+  on_error: Typing_error.Reasons_callback.t;
   tparam_constraints: (Pos_or_decl.t * Typing_defs.pos_id) list;
       (** This is used for better error reporting to flag violated
           constraints on type parameters, if any. *)
@@ -333,7 +333,7 @@ let describe_ty ~is_coeffect : env -> internal_type -> string =
     describe_ty_default
   else
     fun env -> function
-     | LoclType ty -> Typing_coeffects.pretty env ty
+     | LoclType ty -> Lazy.force @@ Typing_coeffects.pretty env ty
      | ty -> describe_ty_default env ty
 
 let rec describe_ty_super ~is_coeffect env ty =
@@ -715,12 +715,16 @@ and simplify_subtype_i
     let right = Reason.to_string ("But got " ^ ty_sub_descr) r_sub @ suffix in
     match subtype_env.tparam_constraints with
     | _ :: _ ->
-      Errors.violated_constraint
-        subtype_env.tparam_constraints
-        (left @ right)
-        subtype_env.on_error
+      let reasons =
+        Typing_error.Secondary.Violated_constraint
+          { cstrs = subtype_env.tparam_constraints; reasons = left @ right }
+      in
+      let error =
+        Typing_error.apply_reasons ~on_error:subtype_env.on_error reasons
+      in
+      Errors.add_typing_error error
     | _ ->
-      Errors.Reasons_callback.apply_with_reasons
+      Errors.apply_error_from_reasons_callback
         subtype_env.on_error
         ~reasons:(left @ right)
   in
@@ -826,16 +830,18 @@ and simplify_subtype_i
             (* return the env so as not to discard the type variable that might
                have been created for the Traversable type created below. *)
             invalid_env_with env (fun () ->
-                Errors.unpack_array_required_argument
-                  (Reason.to_pos r_super)
-                  fpos
-                  subtype_env.on_error)
+                Errors.add_typing_error
+                @@ Typing_error.(
+                     apply_reasons ~on_error:subtype_env.on_error
+                     @@ Secondary.Unpack_array_required_argument
+                          { pos = Reason.to_pos r_super; decl_pos = fpos }))
           | (SplatUnpack, [], None) ->
             invalid_env_with env (fun () ->
-                Errors.unpack_array_variadic_argument
-                  (Reason.to_pos r_super)
-                  fpos
-                  subtype_env.on_error)
+                Errors.add_typing_error
+                  Typing_error.(
+                    apply_reasons ~on_error:subtype_env.on_error
+                    @@ Secondary.Unpack_array_variadic_argument
+                         { pos = Reason.to_pos r_super; decl_pos = fpos }))
           | (SplatUnpack, [], Some _)
           | (ListDestructure, _, _) ->
             List.fold d_required ~init:(env, TL.valid) ~f:(fun res ty_dest ->
@@ -877,7 +883,13 @@ and simplify_subtype_i
                   subtype_env.on_error)
           in
           if len_ts < len_required then
-            arity_error Errors.typing_too_few_args_w_callback
+            arity_error (fun expected actual pos decl_pos on_error ->
+                let base_err =
+                  Typing_error.Secondary.Typing_too_few_args
+                    { pos; decl_pos; expected; actual }
+                in
+                Errors.add_typing_error
+                @@ Typing_error.(apply_reasons ~on_error base_err))
           else
             let len_optional = List.length d_optional in
             let (ts_required, remain) = List.split_n ts len_required in
@@ -910,7 +922,12 @@ and simplify_subtype_i
             | ([], None) -> valid env
             | (_, None) ->
               (* Elements remain but we have nowhere to put them *)
-              arity_error Errors.typing_too_many_args_w_callback
+              arity_error (fun expected actual pos decl_pos on_error ->
+                  Errors.add_typing_error
+                  @@ Typing_error.(
+                       apply_reasons ~on_error
+                       @@ Secondary.Typing_too_many_args
+                            { pos; decl_pos; expected; actual }))
         in
 
         begin
@@ -948,17 +965,22 @@ and simplify_subtype_i
                   &&& destructure_array ty_inner
                 | ListDestructure ->
                   let ty_sub_descr =
-                    Typing_print.with_blank_tyvars (fun () ->
-                        Typing_print.full_strip_ns env ty_sub)
+                    lazy
+                      (Typing_print.with_blank_tyvars (fun () ->
+                           Typing_print.full_strip_ns env ty_sub))
                   in
                   default_subtype env
                   |> if_unsat @@ fun env ->
                      invalid_env_with env (fun () ->
-                         Errors.invalid_destructure
-                           (Reason.to_pos r_super)
-                           (get_pos ty_sub)
-                           ty_sub_descr
-                           subtype_env.on_error)
+                         Errors.add_typing_error
+                         @@ Typing_error.(
+                              apply_reasons ~on_error:subtype_env.on_error
+                              @@ Secondary.Invalid_destructure
+                                   {
+                                     pos = Reason.to_pos r_super;
+                                     decl_pos = get_pos ty_sub;
+                                     ty_name = ty_sub_descr;
+                                   }))
               end)
         end
       | (r, Thas_member has_member_ty) ->
@@ -1374,12 +1396,13 @@ and simplify_subtype_i
                  let dyn = describe_ty_super ~is_coeffect:false env ety_super in
                  let dynamic_part =
                    Reason.to_string ("Expected " ^ dyn) r_dynamic
-                 in
-                 Errors.not_sub_dynamic
-                   dynamic_part
-                   (Reason.to_pos (get_reason lty_sub))
-                   (describe_ty_default env ety_sub)
-                   subtype_env.on_error))
+                 and ty_name = lazy (describe_ty_default env ety_sub)
+                 and pos = Reason.to_pos (get_reason lty_sub) in
+                 Errors.add_typing_error
+                 @@ Typing_error.(
+                      apply_reasons ~on_error:subtype_env.on_error
+                      @@ Secondary.Not_sub_dynamic
+                           { pos; ty_name; dynamic_part })))
         in
         postprocess
         @@
@@ -1861,15 +1884,21 @@ and simplify_subtype_i
                 (* We handle the case where a generic A<T> is used as A *)
                 Int.( <> ) (List.length tyl_sub) (List.length tyl_super)
               then
-                let n_sub = String_utils.soi (List.length tyl_sub) in
-                let n_super = String_utils.soi (List.length tyl_super) in
+                let n_sub = List.length tyl_sub in
+                let n_super = List.length tyl_super in
                 invalid_env_with env (fun () ->
-                    Errors.type_arity_mismatch
-                      (fst x_super)
-                      n_super
-                      (fst x_sub)
-                      n_sub
-                      subtype_env.on_error)
+                    let err =
+                      Typing_error.(
+                        apply_reasons ~on_error:subtype_env.on_error
+                        @@ Secondary.Type_arity_mismatch
+                             {
+                               pos = fst x_super;
+                               actual = n_super;
+                               decl_pos = fst x_sub;
+                               expected = n_sub;
+                             })
+                    in
+                    Errors.add_typing_error err)
               else
                 let variance_reifiedl =
                   if List.is_empty tyl_sub then
@@ -2048,27 +2077,43 @@ and simplify_subtype_shape
     | (`Optional _, `Absent) ->
       res
       |> with_error (fun () ->
-             Errors.missing_field
-               (Reason.to_pos r_super)
-               (Reason.to_pos r_sub)
-               printable_name
-               subtype_env.on_error)
+             let err =
+               Typing_error.Secondary.Missing_field
+                 {
+                   pos = Reason.to_pos r_super;
+                   decl_pos = Reason.to_pos r_sub;
+                   name = printable_name;
+                 }
+             in
+             Errors.add_typing_error
+             @@ Typing_error.(apply_reasons ~on_error:subtype_env.on_error err))
     | (`Optional _, `Required _) ->
       res
       |> with_error (fun () ->
-             Errors.required_field_is_optional
-               (Reason.to_pos r_sub)
-               (Reason.to_pos r_super)
-               printable_name
-               subtype_env.on_error)
+             let base_err =
+               Typing_error.Secondary.Required_field_is_optional
+                 {
+                   pos = Reason.to_pos r_sub;
+                   decl_pos = Reason.to_pos r_super;
+                   name = printable_name;
+                 }
+             in
+             Errors.add_typing_error
+             @@ Typing_error.(
+                  apply_reasons ~on_error:subtype_env.on_error base_err))
     | (`Absent, `Required _) ->
       res
       |> with_error (fun () ->
-             Errors.missing_field
-               (Reason.to_pos r_sub)
-               (Reason.to_pos r_super)
-               printable_name
-               subtype_env.on_error)
+             let err =
+               Typing_error.Secondary.Missing_field
+                 {
+                   decl_pos = Reason.to_pos r_super;
+                   pos = Reason.to_pos r_sub;
+                   name = printable_name;
+                 }
+             in
+             Errors.add_typing_error
+             @@ Typing_error.(apply_reasons ~on_error:subtype_env.on_error err))
   in
   (* Helper function to project out a field and then simplify subtype *)
   let shape_project_and_simplify_subtype
@@ -2093,10 +2138,12 @@ and simplify_subtype_shape
   | (Open_shape, Closed_shape) ->
     invalid
       ~fail:(fun () ->
-        Errors.shape_fields_unknown
-          (Reason.to_pos r_sub)
-          (Reason.to_pos r_super)
-          subtype_env.on_error)
+        let err =
+          Typing_error.Secondary.Shape_fields_unknown
+            { pos = Reason.to_pos r_sub; decl_pos = Reason.to_pos r_super }
+        in
+        Errors.add_typing_error
+        @@ Typing_error.(apply_reasons ~on_error:subtype_env.on_error err))
       env
   (* Otherwise, all projections must subtype *)
   | _ ->
@@ -2191,11 +2238,23 @@ and simplify_subtype_has_member
         valid env
       else
         invalid env ~fail:(fun () ->
-            Errors.null_member_read
-              ~is_method
-              name_
-              name_pos
-              (Reason.to_string "This can be null" r_null))
+            let err =
+              Typing_error.(
+                primary
+                @@ Primary.Null_member
+                     {
+                       pos = name_pos;
+                       member_name = name_;
+                       reason = Reason.to_string "This can be null" r_null;
+                       kind =
+                         (if is_method then
+                           `method_
+                         else
+                           `property);
+                       ctxt = `read;
+                     })
+            in
+            Errors.add_typing_error err)
     | (r_option, Toption option_ty) when using_new_method_call_inference ->
       if Option.is_some nullsafe then
         simplify_subtype_has_member
@@ -2211,20 +2270,42 @@ and simplify_subtype_has_member
         (match get_node option_ty with
         | Tnonnull ->
           invalid env ~fail:(fun () ->
-              Errors.top_member_read
-                ~is_method
-                ~is_nullable:true
-                name_
-                name_pos
-                (Typing_print.error env ty_sub)
-                (Reason.to_pos r_option))
+              Errors.add_typing_error
+                Typing_error.(
+                  primary
+                  @@ Primary.Top_member
+                       {
+                         pos = name_pos;
+                         name = name_;
+                         ctxt = `read;
+                         kind =
+                           (if is_method then
+                             `method_
+                           else
+                             `property);
+                         is_nullable = true;
+                         decl_pos = Reason.to_pos r_option;
+                         ty_name = lazy (Typing_print.error env ty_sub);
+                       }))
         | _ ->
           invalid env ~fail:(fun () ->
-              Errors.null_member_read
-                ~is_method
-                name_
-                name_pos
-                (Reason.to_string "This can be null" r_option)))
+              let err =
+                Typing_error.(
+                  primary
+                  @@ Primary.Null_member
+                       {
+                         pos = name_pos;
+                         member_name = name_;
+                         reason = Reason.to_string "This can be null" r_option;
+                         kind =
+                           (if is_method then
+                             `method_
+                           else
+                             `property);
+                         ctxt = `read;
+                       })
+              in
+              Errors.add_typing_error err))
     | (_, Tintersection tyl)
       when let (_, non_ty_opt, _) = find_type_with_exact_negation env tyl in
            Option.is_some non_ty_opt ->
@@ -2233,13 +2314,23 @@ and simplify_subtype_has_member
     | (r_inter, Tintersection []) ->
       (* Tintersection [] = mixed *)
       invalid env ~fail:(fun () ->
-          Errors.top_member_read
-            ~is_method
-            ~is_nullable:true
-            name_
-            name_pos
-            (Typing_print.error env ty_sub)
-            (Reason.to_pos r_inter))
+          Errors.add_typing_error
+          @@ Typing_error.(
+               primary
+               @@ Primary.Top_member
+                    {
+                      pos = name_pos;
+                      name = name_;
+                      is_nullable = true;
+                      kind =
+                        (if is_method then
+                          `method_
+                        else
+                          `property);
+                      ctxt = `read;
+                      decl_pos = Reason.to_pos r_inter;
+                      ty_name = lazy (Typing_print.error env ty_sub);
+                    }))
     | (r_inter, Tintersection tyl) when using_new_method_call_inference ->
       let (env, tyl) = List.map_env ~f:Env.expand_type env tyl in
       let subtype_fresh_has_member_ty env ty_sub =
@@ -2317,7 +2408,7 @@ and simplify_subtype_has_member
               ~explicit_targs
               ~class_id
               ~member_id:name
-              ~on_error:Errors.Callback.unify_error
+              ~on_error:Typing_error.Callback.unify_error
               env
               ty_sub)
       in
@@ -2494,29 +2585,27 @@ and simplify_subtype_params_with_variadic
 and simplify_subtype_implicit_params
     ~subtype_env { capability = sub_cap } { capability = super_cap } env =
   if TypecheckerOptions.any_coeffects (Env.get_tcopt env) then
-    let subtype_env =
-      {
-        subtype_env with
-        on_error =
-          Errors.Reasons_callback.always (fun _ ->
-              let expected = Typing_coeffects.get_type sub_cap in
-              let got = Typing_coeffects.get_type super_cap in
-              Errors.coeffect_subtyping_error
-                (get_pos expected)
-                (Typing_coeffects.pretty env expected)
-                (get_pos got)
-                (Typing_coeffects.pretty env got)
-                subtype_env.on_error);
-      }
+    let expected = Typing_coeffects.get_type sub_cap in
+    let got = Typing_coeffects.get_type super_cap in
+    let reasons =
+      Typing_error.Secondary.Coeffect_subtyping
+        {
+          pos = get_pos got;
+          cap = Typing_coeffects.pretty env got;
+          pos_expected = get_pos expected;
+          cap_expected = Typing_coeffects.pretty env expected;
+        }
     in
+    let err =
+      Typing_error.apply_reasons ~on_error:subtype_env.on_error reasons
+    in
+    let on_error = Typing_error.(Reasons_callback.always err) in
+    let subtype_env = { subtype_env with on_error } in
     match (sub_cap, super_cap) with
     | (CapTy sub, CapTy super) -> simplify_subtype ~subtype_env sub super env
-    | (CapTy sub, CapDefaults _p) ->
-      let super = Typing_coeffects.get_type super_cap in
-      simplify_subtype ~subtype_env sub super env
+    | (CapTy sub, CapDefaults _p) -> simplify_subtype ~subtype_env sub got env
     | (CapDefaults _p, CapTy super) ->
-      let sub = Typing_coeffects.get_type sub_cap in
-      simplify_subtype ~subtype_env sub super env
+      simplify_subtype ~subtype_env expected super env
     | (CapDefaults _p1, CapDefaults _p2) -> valid env
   else
     valid env
@@ -2548,11 +2637,19 @@ and simplify_param_modes ~subtype_env param1 param2 env =
     valid env
   | (FPnormal, FPinout) ->
     invalid
-      ~fail:(fun () -> Errors.inoutness_mismatch pos2 pos1 subtype_env.on_error)
+      ~fail:(fun () ->
+        Errors.add_typing_error
+          Typing_error.(
+            apply_reasons ~on_error:subtype_env.on_error
+            @@ Secondary.Inoutness_mismatch { pos = pos2; decl_pos = pos1 }))
       env
   | (FPinout, FPnormal) ->
     invalid
-      ~fail:(fun () -> Errors.inoutness_mismatch pos1 pos2 subtype_env.on_error)
+      ~fail:(fun () ->
+        Errors.add_typing_error
+          Typing_error.(
+            apply_reasons ~on_error:subtype_env.on_error
+            @@ Secondary.Inoutness_mismatch { pos = pos1; decl_pos = pos2 }))
       env
 
 and simplify_param_accept_disposable ~subtype_env param1 param2 env =
@@ -2562,24 +2659,35 @@ and simplify_param_accept_disposable ~subtype_env param1 param2 env =
   | (true, false) ->
     invalid
       ~fail:(fun () ->
-        Errors.accept_disposable_invariant pos1 pos2 subtype_env.on_error)
+        Errors.add_typing_error
+          Typing_error.(
+            apply_reasons ~on_error:subtype_env.on_error
+            @@ Secondary.Accept_disposable_invariant
+                 { pos = pos1; decl_pos = pos2 }))
       env
   | (false, true) ->
     invalid
       ~fail:(fun () ->
-        Errors.accept_disposable_invariant pos2 pos1 subtype_env.on_error)
+        Errors.add_typing_error
+          Typing_error.(
+            apply_reasons ~on_error:subtype_env.on_error
+            @@ Secondary.Accept_disposable_invariant
+                 { pos = pos2; decl_pos = pos1 }))
       env
   | (_, _) -> valid env
 
 and simplify_param_ifc ~subtype_env sub super env =
-  let { fp_pos = pos1; _ } = sub in
-  let { fp_pos = pos2; _ } = super in
+  let { fp_pos = pos_sub; _ } = sub in
+  let { fp_pos = pos_super; _ } = super in
   (* TODO: also handle <<CanCall>> *)
   match (get_fp_ifc_external sub, get_fp_ifc_external super) with
   | (true, false) ->
     invalid
       ~fail:(fun () ->
-        Errors.ifc_external_contravariant pos2 pos1 subtype_env.on_error)
+        Errors.add_typing_error
+        @@ Typing_error.(
+             apply_reasons ~on_error:subtype_env.on_error
+             @@ Secondary.Ifc_external_contravariant { pos_super; pos_sub }))
       env
   | _ -> valid env
 
@@ -2592,12 +2700,16 @@ and simplify_param_readonly ~subtype_env sub super env =
   if not (readonly_subtype (get_fp_readonly sub) (get_fp_readonly super)) then
     invalid
       ~fail:(fun () ->
-        Errors.readonly_mismatch_on_error
-          "Mismatched parameter readonlyness"
-          pos1
-          ~reason_sub:[(pos1, "This parameter is mutable")]
-          ~reason_super:[(pos2, "But this parameter is readonly")]
-          subtype_env.on_error)
+        Errors.add_typing_error
+        @@ Typing_error.(
+             apply_reasons ~on_error:subtype_env.on_error
+             @@ Secondary.Readonly_mismatch
+                  {
+                    pos = pos1;
+                    kind = `param;
+                    reason_sub = [(pos1, "This parameter is mutable")];
+                    reason_super = [(pos2, "But this parameter is readonly")];
+                  }))
       env
   else
     valid env
@@ -2641,56 +2753,83 @@ and simplify_subtype_funs_attributes
   |> check_with
        (ifc_policy_matches ft_sub.ft_ifc_decl ft_super.ft_ifc_decl)
        (fun () ->
-         Errors.ifc_policy_mismatch
-           p_sub
-           p_super
-           (ifc_policy_err_str ft_sub.ft_ifc_decl)
-           (ifc_policy_err_str ft_super.ft_ifc_decl)
-           subtype_env.on_error)
+         Errors.add_typing_error
+         @@ Typing_error.(
+              apply_reasons ~on_error:subtype_env.on_error
+              @@ Secondary.Ifc_policy_mismatch
+                   {
+                     pos = p_sub;
+                     policy = ifc_policy_err_str ft_sub.ft_ifc_decl;
+                     pos_super = p_super;
+                     policy_super = ifc_policy_err_str ft_super.ft_ifc_decl;
+                   }))
   |> check_with
        (readonly_subtype
           (* Readonly this is contravariant, so check ft_super_ro <: ft_sub_ro *)
           (get_ft_readonly_this ft_super)
           (get_ft_readonly_this ft_sub))
        (fun () ->
-         Errors.readonly_mismatch_on_error
-           "Function readonly mismatch"
-           p_sub
-           ~reason_sub:[(p_sub, "This function is not marked readonly")]
-           ~reason_super:[(p_super, "This function is marked readonly")]
-           subtype_env.on_error)
+         Errors.add_typing_error
+         @@ Typing_error.(
+              apply_reasons ~on_error:subtype_env.on_error
+              @@ Secondary.Readonly_mismatch
+                   {
+                     pos = p_sub;
+                     kind = `fn;
+                     reason_sub =
+                       [(p_sub, "This function is not marked readonly")];
+                     reason_super =
+                       [(p_super, "This function is marked readonly")];
+                   }))
   |> check_with
        (readonly_subtype
           (* Readonly return is covariant, so check ft_sub <: ft_super *)
           (get_ft_returns_readonly ft_sub)
           (get_ft_returns_readonly ft_super))
        (fun () ->
-         Errors.readonly_mismatch_on_error
-           "Function readonly return mismatch"
-           p_sub
-           ~reason_sub:[(p_sub, "This function returns a readonly value")]
-           ~reason_super:
-             [(p_super, "This function does not return a readonly value")]
-           subtype_env.on_error)
+         Errors.add_typing_error
+         @@ Typing_error.(
+              apply_reasons ~on_error:subtype_env.on_error
+              @@ Secondary.Readonly_mismatch
+                   {
+                     pos = p_sub;
+                     kind = `fn_return;
+                     reason_sub =
+                       [(p_sub, "This function returns a readonly value")];
+                     reason_super =
+                       [
+                         ( p_super,
+                           "This function does not return a readonly value" );
+                       ];
+                   }))
   |> check_with
        (Bool.equal
           (get_ft_return_disposable ft_sub)
           (get_ft_return_disposable ft_super))
        (fun () ->
-         Errors.return_disposable_mismatch
-           (get_ft_return_disposable ft_super)
-           p_super
-           p_sub
-           subtype_env.on_error)
+         Errors.add_typing_error
+         @@ Typing_error.(
+              apply_reasons ~on_error:subtype_env.on_error
+              @@ Secondary.Return_disposable_mismatch
+                   {
+                     pos_super = p_super;
+                     pos_sub = p_sub;
+                     is_marked_return_disposable =
+                       get_ft_return_disposable ft_super;
+                   }))
   |> check_with
        (arity_min ft_sub <= arity_min ft_super)
        (fun () ->
-         Errors.fun_too_many_args
-           (arity_min ft_super)
-           (arity_min ft_sub)
-           p_sub
-           p_super
-           subtype_env.on_error)
+         Errors.add_typing_error
+           Typing_error.(
+             apply_reasons ~on_error:subtype_env.on_error
+             @@ Secondary.Fun_too_many_args
+                  {
+                    expected = arity_min ft_super;
+                    actual = arity_min ft_sub;
+                    pos = p_sub;
+                    decl_pos = p_super;
+                  }))
   |> fun res ->
   match (ft_sub.ft_arity, ft_super.ft_arity) with
   | (Fvariadic { fp_name = None; _ }, Fvariadic { fp_name = Some _; _ }) ->
@@ -2701,7 +2840,11 @@ and simplify_subtype_funs_attributes
      * compatibility errors at runtime. *)
     with_error
       (fun () ->
-        Errors.fun_variadicity_hh_vs_php56 p_sub p_super subtype_env.on_error)
+        Errors.add_typing_error
+        @@ Typing_error.(
+             apply_reasons ~on_error:subtype_env.on_error
+             @@ Secondary.Fun_variadicity_hh_vs_php56
+                  { pos = p_sub; decl_pos = p_super }))
       res
   | (Fstandard, Fstandard) ->
     let sub_max = List.length ft_sub.ft_params in
@@ -2709,19 +2852,27 @@ and simplify_subtype_funs_attributes
     if sub_max < super_max then
       with_error
         (fun () ->
-          Errors.fun_too_few_args
-            super_max
-            sub_max
-            p_sub
-            p_super
-            subtype_env.on_error)
+          Errors.add_typing_error
+          @@ Typing_error.(
+               apply_reasons ~on_error:subtype_env.on_error
+               @@ Secondary.Fun_too_few_args
+                    {
+                      pos = p_sub;
+                      decl_pos = p_super;
+                      expected = super_max;
+                      actual = sub_max;
+                    }))
         res
     else
       res
   | (Fstandard, _) ->
     with_error
       (fun () ->
-        Errors.fun_unexpected_nonvariadic p_sub p_super subtype_env.on_error)
+        Errors.add_typing_error
+        @@ Typing_error.(
+             apply_reasons ~on_error:subtype_env.on_error
+             @@ Secondary.Fun_unexpected_nonvariadic
+                  { pos = p_sub; decl_pos = p_super }))
       res
   | (_, _) -> res
 
@@ -3101,7 +3252,7 @@ and is_sub_type_alt_i ~ignore_generic_params ~no_top_bottom ~coerce env ty1 ty2
            ~ignore_generic_params
            ~no_top_bottom
            ~coerce
-           Errors.Reasons_callback.ignore_error)
+           Typing_error.Reasons_callback.ignore_error)
       ~this_ty
       (* It is weird that this can cause errors, but I am wary to discard them.
        * Using the generic unify_error to maintain current behavior. *)
@@ -3507,7 +3658,7 @@ let rec decompose_subtype
     (env : env)
     (ty_sub : locl_ty)
     (ty_super : locl_ty)
-    (on_error : Errors.Reasons_callback.t) : env =
+    (on_error : Typing_error.Reasons_callback.t) : env =
   log_subtype
     ~level:2
     ~this_ty:None
@@ -3635,7 +3786,12 @@ let add_constraint
 
 let add_constraints p env constraints =
   let add_constraint env (ty1, ck, ty2) =
-    add_constraint env ck ty1 ty2 (Errors.Reasons_callback.unify_error_at p)
+    add_constraint
+      env
+      ck
+      ty1
+      ty2
+      (Typing_error.Reasons_callback.unify_error_at p)
   in
   List.fold_left constraints ~f:add_constraint ~init:env
 
@@ -3643,7 +3799,7 @@ let sub_type_with_dynamic_as_bottom_res
     (env : env)
     (ty_sub : locl_ty)
     (ty_super : locl_ty)
-    (on_error : Errors.Reasons_callback.t) : (env, env) result =
+    (on_error : Typing_error.Reasons_callback.t) : (env, env) result =
   let env_change_log = Env.log_env_change "coercion" env in
   log_subtype
     ~level:1
@@ -3674,7 +3830,7 @@ let sub_type_with_dynamic_as_bottom
     (env : env)
     (ty_sub : locl_ty)
     (ty_super : locl_ty)
-    (on_error : Errors.Reasons_callback.t) : env =
+    (on_error : Typing_error.Reasons_callback.t) : env =
   match sub_type_with_dynamic_as_bottom_res env ty_sub ty_super on_error with
   | Ok env -> env
   | Error env -> env
@@ -3734,11 +3890,19 @@ let subtype_funs
   else
     old_env
 
-let sub_type_or_fail env ty1 ty2 fail =
-  sub_type env ty1 ty2 @@ Errors.Reasons_callback.always fail
+let sub_type_or_fail env ty1 ty2 err_opt =
+  sub_type env ty1 ty2
+  @@ Option.value_map
+       ~default:Typing_error.Reasons_callback.ignore_error
+       ~f:Typing_error.Reasons_callback.always
+       err_opt
 
-let sub_type_or_fail_res env ty1 ty2 fail =
-  sub_type_res env ty1 ty2 @@ Errors.Reasons_callback.always fail
+let sub_type_or_fail_res env ty1 ty2 err_opt =
+  sub_type_res env ty1 ty2
+  @@ Option.value_map
+       ~default:Typing_error.Reasons_callback.ignore_error
+       ~f:Typing_error.Reasons_callback.always
+       err_opt
 
 let set_fun_refs () =
   Typing_utils.sub_type_ref := sub_type;

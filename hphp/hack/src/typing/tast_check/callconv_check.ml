@@ -45,9 +45,14 @@ let check_types env (_, p, te) =
       if iter ty1 then
         check_types_helper te1
       else
-        let ty_str = Env.print_error_ty env ty1 in
-        let msgl = Reason.to_string ("This is " ^ ty_str) (get_reason ty1) in
-        Errors.inout_argument_bad_type p msgl
+        let ty_str = lazy (Env.print_error_ty env ty1) in
+        let reasons =
+          Lazy.map ty_str ~f:(fun ty_str ->
+              Reason.to_string ("This is " ^ ty_str) (get_reason ty1))
+        in
+        Errors.add_typing_error
+          Typing_error.(
+            primary @@ Primary.Inout_argument_bad_type { pos = p; reasons })
     (* Other invalid expressions are caught in Nast_check. *)
     | _ -> ()
   in

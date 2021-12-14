@@ -13,7 +13,7 @@ open Typing_defs
 module Env = Tast_env
 module Reason = Typing_reason
 
-let check_valid_rvalue p env ty =
+let check_valid_rvalue pos env ty =
   let rec iter_over_types env tyl =
     match tyl with
     | [] -> env
@@ -21,14 +21,30 @@ let check_valid_rvalue p env ty =
       let (env, ety) = Env.expand_type env ty in
       (match deref ety with
       | (r, Tprim Tnoreturn) ->
-        Errors.noreturn_usage
-          p
-          (Reason.to_string "A `noreturn` function always throws or exits." r);
+        Errors.add_typing_error
+          Typing_error.(
+            wellformedness
+            @@ Primary.Wellformedness.Noreturn_usage
+                 {
+                   pos;
+                   reason =
+                     Reason.to_string
+                       "A `noreturn` function always throws or exits."
+                       r;
+                 });
         env
       | (r, Tprim Tvoid) ->
-        Errors.void_usage
-          p
-          (Reason.to_string "A `void` function doesn't return a value." r);
+        Errors.add_typing_error
+          Typing_error.(
+            wellformedness
+            @@ Primary.Wellformedness.Void_usage
+                 {
+                   pos;
+                   reason =
+                     Reason.to_string
+                       "A `void` function doesn't return a value."
+                       r;
+                 });
         env
       | (_, Tunion tyl2) -> iter_over_types env (tyl2 @ tyl)
       | (_, _) -> iter_over_types env tyl)

@@ -124,7 +124,11 @@ let with_timeout env fun_name (do_ : env -> 'b) : 'b option =
         (*List.iter !big_envs (fun (p, env) ->
             Typing_log.log_key "WARN: environment is too big.";
             Typing_log.hh_show_env p env); *)
-        Errors.typechecker_timeout fun_name timeout;
+        let (pos, fn_name) = fun_name in
+        Errors.add_typing_error
+          Typing_error.(
+            primary
+            @@ Primary.Typechecker_timeout { pos; fn_name; seconds = timeout });
         None)
       ~do_:(fun _ -> Some (do_ env))
 

@@ -199,11 +199,12 @@ let bind env var (ty : locl_ty) =
    * nothing, as it will lead to type holes.
    *)
   (if Typing_utils.is_nothing env ty && not (SMap.is_empty tconsts) then
-    let (_, ((proj_pos, name), _)) = SMap.choose tconsts in
-    Errors.unresolved_type_variable_projection
-      (Env.get_tyvar_pos env var)
-      name
-      ~proj_pos);
+    let (_, ((proj_pos, tconst_name), _)) = SMap.choose tconsts
+    and pos = Env.get_tyvar_pos env var in
+    Errors.add_typing_error
+      Typing_error.(
+        primary
+        @@ Primary.Unresolved_tyvar_projection { pos; tconst_name; proj_pos }));
   env
 
 (* Solve type variable var by assigning it to the union of its lower bounds.
@@ -236,7 +237,8 @@ let bind_to_lower_bound ~freshen env r var lower_bounds =
          * the following subtype calls should not fail, and the error callback
          * should not matter. *)
         let on_error =
-          Errors.Reasons_callback.unify_error_at @@ Env.get_tyvar_pos env var
+          Typing_error.Reasons_callback.unify_error_at
+          @@ Env.get_tyvar_pos env var
         in
         let env = Typing_utils.sub_type env ty newty on_error in
         (env, newty)
@@ -408,7 +410,7 @@ let try_bind_to_equal_bound ~freshen env r var =
              * the following subtype calls should not fail, and the error callback
              * should not matter. *)
             let on_error =
-              Errors.Reasons_callback.unify_error_at
+              Typing_error.Reasons_callback.unify_error_at
               @@ Env.get_tyvar_pos env var
             in
             let env = Typing_utils.sub_type env ty var_ty on_error in
@@ -581,10 +583,15 @@ let expand_type_and_solve env ?(freshen = true) ~description_of_expected p ty =
   | (_ :: _, Tunion []) ->
     let env =
       List.fold !vars_solved_to_nothing ~init:env ~f:(fun env (r, v) ->
-          Errors.unknown_type
-            description_of_expected
-            p
-            (Reason.to_string "It is unknown" r);
+          Errors.add_typing_error
+            Typing_error.(
+              primary
+              @@ Primary.Unknown_type
+                   {
+                     expected = description_of_expected;
+                     pos = p;
+                     reason = Reason.to_string "It is unknown" r;
+                   });
           Env.set_tyvar_eager_solve_fail env v)
     in
     (env, TUtils.terr env (Reason.Rsolve_fail (Pos_or_decl.of_raw_pos p)))
@@ -707,7 +714,7 @@ let expand_type_and_narrow
               env
               ty
               widened_ty
-              (Errors.Reasons_callback.unify_error_at p)
+              (Typing_error.Reasons_callback.unify_error_at p)
           in
           (env, widened_ty))
         (fun _ ->

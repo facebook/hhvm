@@ -7,7 +7,7 @@ val make_all_type_consts_equal :
   env ->
   Ident.t ->
   internal_type ->
-  on_error:Errors.Reasons_callback.t ->
+  on_error:Typing_error.Reasons_callback.t ->
   as_tyvar_with_cnstr:bool ->
   env
 
@@ -20,5 +20,5 @@ val get_tyvar_type_const :
   env ->
   Ident.t ->
   pos_id ->
-  on_error:Errors.Reasons_callback.t ->
+  on_error:Typing_error.Reasons_callback.t ->
   env * locl_ty

@@ -67,10 +67,18 @@ let trivial_shapes_key_exists_check pos1 env (shape, _, _) field_name =
    *)
   if not optional then
     match status with
-    | `DoesExist pos2 ->
-      Errors.shapes_key_exists_always_true pos1 (snd field_name) pos2
-    | `DoesNotExist (pos2, reason) ->
-      Errors.shapes_key_exists_always_false pos1 (snd field_name) pos2 reason
+    | `DoesExist decl_pos ->
+      Errors.add_typing_error
+        Typing_error.(
+          shape
+          @@ Primary.Shape.Shapes_key_exists_always_true
+               { pos = pos1; field_name = snd field_name; decl_pos })
+    | `DoesNotExist (decl_pos, reason) ->
+      Errors.add_typing_error
+        Typing_error.(
+          shape
+          @@ Primary.Shape.Shapes_key_exists_always_false
+               { pos = pos1; field_name = snd field_name; decl_pos; reason })
     | `Unknown -> ()
 
 let shapes_method_access_with_non_existent_field
@@ -81,13 +89,18 @@ let shapes_method_access_with_non_existent_field
   match (status, optional_shape) with
   | (`DoesExist _, false) ->
     Lint.shape_idx_access_required_field pos1 (snd field_name)
-  | (`DoesNotExist (pos2, reason), false) ->
-    Errors.shapes_method_access_with_non_existent_field
-      pos1
-      (snd field_name)
-      pos2
-      method_name
-      reason
+  | (`DoesNotExist (decl_pos, reason), false) ->
+    Errors.add_typing_error
+      Typing_error.(
+        shape
+        @@ Primary.Shape.Shapes_method_access_with_non_existent_field
+             {
+               pos = pos1;
+               field_name = snd field_name;
+               decl_pos;
+               method_name;
+               reason;
+             })
   | (`DoesNotExist _, true) when String.equal method_name SN.Shapes.idx ->
     (* Shapes::at only supports non optional shapes *)
     Lint.opt_closed_shape_idx_missing_field (Some method_name) pos1
@@ -101,12 +114,12 @@ let shape_access_with_non_existent_field pos1 env (shape, _, _) field_name =
     shapes_key_exists env shape (TSFlit_str field_name)
   in
   match (status, optional) with
-  | (`DoesNotExist (pos2, reason), false) ->
-    Errors.shape_access_with_non_existent_field
-      pos1
-      (snd field_name)
-      pos2
-      reason
+  | (`DoesNotExist (decl_pos, reason), false) ->
+    Errors.add_typing_error
+      Typing_error.(
+        shape
+        @@ Primary.Shape.Shapes_access_with_non_existent_field
+             { pos = pos1; field_name = snd field_name; decl_pos; reason })
   | (`DoesNotExist _, true) -> Lint.opt_closed_shape_idx_missing_field None pos1
   | (`DoesExist _, _)
   | (`Unknown, _) ->

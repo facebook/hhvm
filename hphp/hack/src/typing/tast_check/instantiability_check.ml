@@ -38,7 +38,8 @@ let validate_classname (pos, hint) =
   | Aast.Hshape _
   | Aast.Hfun_context _
   | Aast.Hvar _ ->
-    Errors.invalid_classname pos
+    Errors.add_typing_error
+      Typing_error.(primary @@ Primary.Invalid_classname pos)
 
 let rec check_hint env (pos, hint) =
   match hint with
@@ -55,7 +56,18 @@ let rec check_hint env (pos, hint) =
              && String.( <> ) tc_name SN.Collections.cVec ->
         let tc_pos = Cls.pos cls in
         let tc_name = Cls.name cls in
-        Errors.uninstantiable_class pos tc_pos tc_name None
+        let err =
+          Typing_error.(
+            primary
+            @@ Primary.Uninstantiable_class
+                 {
+                   pos;
+                   class_name = tc_name;
+                   decl_pos = tc_pos;
+                   reason_ty_opt = None;
+                 })
+        in
+        Errors.add_typing_error err
       | _ -> ()
     end;
     if String.equal class_id SN.Classes.cClassname then

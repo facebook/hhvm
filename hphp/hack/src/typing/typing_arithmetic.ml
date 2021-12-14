@@ -161,9 +161,9 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
     when not contains_any ->
     let err =
       if TypecheckerOptions.math_new_code (Env.get_tcopt env) then
-        Errors.Callback.math_invalid_argument
+        Typing_error.Callback.math_invalid_argument
       else
-        Errors.Callback.unify_error
+        Typing_error.Callback.unify_error
     in
     let (env, is_dynamic1, err_opt1) =
       check_dynamic_or_enforce_num env p1 ty1 (Reason.Rarith p) err
@@ -281,9 +281,9 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
     when not contains_any ->
     let err =
       if TypecheckerOptions.math_new_code (Env.get_tcopt env) then
-        Errors.Callback.math_invalid_argument
+        Typing_error.Callback.math_invalid_argument
       else
-        Errors.Callback.unify_error
+        Typing_error.Callback.unify_error
     in
     let (env, is_dynamic1, err_opt1) =
       check_dynamic_or_enforce_num env p1 ty1 (Reason.Rarith p) err
@@ -329,10 +329,10 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
       match bop with
       | Ast_defs.Percent ->
         if TypecheckerOptions.math_new_code (Env.get_tcopt env) then
-          Errors.Callback.math_invalid_argument
+          Typing_error.Callback.math_invalid_argument
         else
-          Errors.Callback.unify_error
-      | _ -> Errors.Callback.bitwise_math_invalid_argument
+          Typing_error.Callback.unify_error
+      | _ -> Typing_error.Callback.bitwise_math_invalid_argument
     in
     let (env, _, err_opt1) =
       check_dynamic_or_enforce_int env p1 ty1 (Reason.Rarith p) err
@@ -356,7 +356,7 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
         p
         ty1
         (Reason.Rbitwise p1)
-        Errors.Callback.bitwise_math_invalid_argument
+        Typing_error.Callback.bitwise_math_invalid_argument
     in
     let (env, is_dynamic2, err_opt2) =
       check_dynamic_or_enforce_int
@@ -364,7 +364,7 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
         p
         ty2
         (Reason.Rbitwise p2)
-        Errors.Callback.bitwise_math_invalid_argument
+        Typing_error.Callback.bitwise_math_invalid_argument
     in
     let result_ty =
       if is_dynamic1 && is_dynamic2 then
@@ -432,12 +432,21 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
         TypecheckerOptions.strict_value_equality (Env.get_tcopt env)
         && not (strict_equatable env ty1 ty2)
       then
-        let tys1 = Typing_print.error env ty1 in
-        let tys2 = Typing_print.error env ty2 in
-        Errors.strict_eq_value_incompatible_types
-          p
-          (Reason.to_string ("This is " ^ tys1) (get_reason ty1))
-          (Reason.to_string ("This is " ^ tys2) (get_reason ty2))
+        let tys1 = lazy (Typing_print.error env ty1)
+        and tys2 = lazy (Typing_print.error env ty2) in
+        Errors.add_typing_error
+          Typing_error.(
+            primary
+            @@ Primary.Strict_eq_value_incompatible_types
+                 {
+                   pos = p;
+                   left =
+                     Lazy.map tys1 ~f:(fun tys1 ->
+                         Reason.to_string ("This is " ^ tys1) (get_reason ty1));
+                   right =
+                     Lazy.map tys2 ~f:(fun tys2 ->
+                         Reason.to_string ("This is " ^ tys2) (get_reason ty2));
+                 })
     end;
     make_result env te1 None te2 None (MakeType.bool (Reason.Rcomp p))
   | Ast_defs.Eqeqeq
@@ -488,14 +497,23 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
                   (Reason.Rcomp p)
                   [ty_datetime; ty_datetimeimmutable; ty_dynamic]))
     then
-      let ty1 = Typing_expand.fully_expand env ty1 in
-      let ty2 = Typing_expand.fully_expand env ty2 in
-      let tys1 = Typing_print.error env ty1 in
-      let tys2 = Typing_print.error env ty2 in
-      Errors.comparison_invalid_types
-        p
-        (Reason.to_string ("This is " ^ tys1) (get_reason ty1))
-        (Reason.to_string ("This is " ^ tys2) (get_reason ty2)));
+      let ty1 = lazy (Typing_expand.fully_expand env ty1)
+      and ty2 = lazy (Typing_expand.fully_expand env ty2) in
+      let tys1 = Lazy.map ty1 ~f:(fun ty -> (ty, Typing_print.error env ty))
+      and tys2 = Lazy.map ty2 ~f:(fun ty -> (ty, Typing_print.error env ty)) in
+      Errors.add_typing_error
+        Typing_error.(
+          primary
+          @@ Primary.Comparison_invalid_types
+               {
+                 pos = p;
+                 left =
+                   Lazy.map tys1 ~f:(fun (ty1, tys1) ->
+                       Reason.to_string ("This is " ^ tys1) (get_reason ty1));
+                 right =
+                   Lazy.map tys2 ~f:(fun (ty2, tys2) ->
+                       Reason.to_string ("This is " ^ tys2) (get_reason ty2));
+               }));
     make_result env te1 None te2 None ty_result
   | Ast_defs.Dot ->
     (* A bit weird, this one:
@@ -524,7 +542,7 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
              env
              ty
              stringlike
-             Errors.Callback.strict_str_concat_type_mismatch
+             Typing_error.Callback.strict_str_concat_type_mismatch
       in
       let (env, err_opt1) = sub_arraykey env p1 ty1 in
       let (env, err_opt2) = sub_arraykey env p2 ty2 in
@@ -574,7 +592,7 @@ let unop p env uop te ty =
           p
           ty
           (Reason.Rbitwise p)
-          Errors.Callback.bitwise_math_invalid_argument
+          Typing_error.Callback.bitwise_math_invalid_argument
       in
       let result_ty =
         if is_dynamic then
@@ -599,7 +617,7 @@ let unop p env uop te ty =
           p
           ty
           (Reason.Rarith p)
-          Errors.Callback.inc_dec_invalid_argument
+          Typing_error.Callback.inc_dec_invalid_argument
       in
       let result_ty =
         if is_dynamic then
@@ -625,7 +643,7 @@ let unop p env uop te ty =
           p
           ty
           (Reason.Rarith p)
-          Errors.Callback.unify_error
+          Typing_error.Callback.unify_error
       in
       let (env, ty) = expand_type_and_narrow_to_int env p ty in
       let result_ty =

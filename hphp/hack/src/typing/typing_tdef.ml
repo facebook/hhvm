@@ -43,7 +43,11 @@ let expand_typedef_ ?(force_expand = false) ety_env env r (x : string) argl =
   | Some initial_taccess_pos_opt ->
     (* Only report a cycle if it's through the specified definition *)
     Option.iter initial_taccess_pos_opt ~f:(fun initial_taccess_pos ->
-        Errors.cyclic_typedef initial_taccess_pos pos);
+        Errors.add_typing_error
+          Typing_error.(
+            primary
+            @@ Primary.Cyclic_typedef
+                 { pos = initial_taccess_pos; decl_pos = pos }));
     (env, (ety_env, MakeType.err r))
   | None ->
     let should_expand =
@@ -60,7 +64,7 @@ let expand_typedef_ ?(force_expand = false) ety_env env r (x : string) argl =
         on_error =
           (* Don't report errors in expanded definition.
            * These will have been reported at the definition site already. *)
-          Errors.Reasons_callback.ignore_error;
+          Typing_error.Reasons_callback.ignore_error;
       }
     in
     let (env, expanded_ty) =

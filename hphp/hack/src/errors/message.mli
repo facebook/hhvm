@@ -8,6 +8,8 @@
 
 type 'a t = 'a * string [@@deriving eq, ord, show]
 
+val map : 'a t -> f:('a -> 'b) -> 'b t
+
 val get_message_pos : 'a t -> 'a
 
 val get_message_str : 'a t -> string

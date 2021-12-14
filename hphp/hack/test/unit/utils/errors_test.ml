@@ -139,23 +139,55 @@ let test_get_sorted_error_list () =
   let key_pos2 = Pos.make_from (create_path "K2") |> Pos_or_decl.of_raw_pos in
   let (errors, ()) =
     Errors.do_with_context file_with_errors Errors.Typing (fun () ->
-        Errors.invalid_arraykey_read
-          err_pos
-          (container_pos2, "C2_Type")
-          (key_pos2, "K2_Type");
-        Errors.invalid_arraykey_read
-          err_pos
-          (container_pos1, "C1_Type")
-          (key_pos1, "K1_Type");
+        Errors.add_typing_error
+          Typing_error.(
+            primary
+            @@ Primary.Invalid_arraykey
+                 {
+                   pos = err_pos;
+                   ctxt = `read;
+                   container_pos = container_pos2;
+                   container_ty_name = lazy "C2_Type";
+                   key_pos = key_pos2;
+                   key_ty_name = lazy "K2_Type";
+                 });
+        Errors.add_typing_error
+          Typing_error.(
+            primary
+            @@ Primary.Invalid_arraykey
+                 {
+                   pos = err_pos;
+                   ctxt = `read;
+                   container_pos = container_pos1;
+                   container_ty_name = lazy "C1_Type";
+                   key_pos = key_pos1;
+                   key_ty_name = lazy "K1_Type";
+                 });
         error_in "FileWithErrors.php";
-        Errors.invalid_arraykey_read
-          err_pos
-          (container_pos2, "C2_Type")
-          (key_pos2, "K2_Type");
-        Errors.invalid_arraykey_read
-          err_pos
-          (container_pos1, "C1_Type")
-          (key_pos1, "K1_Type");
+        Errors.add_typing_error
+          Typing_error.(
+            primary
+            @@ Primary.Invalid_arraykey
+                 {
+                   pos = err_pos;
+                   ctxt = `read;
+                   container_pos = container_pos2;
+                   container_ty_name = lazy "C2_Type";
+                   key_pos = key_pos2;
+                   key_ty_name = lazy "K2_Type";
+                 });
+        Errors.add_typing_error
+          Typing_error.(
+            primary
+            @@ Primary.Invalid_arraykey
+                 {
+                   pos = err_pos;
+                   ctxt = `read;
+                   container_pos = container_pos1;
+                   container_ty_name = lazy "C1_Type";
+                   key_pos = key_pos1;
+                   key_ty_name = lazy "K1_Type";
+                 });
         ())
   in
   Asserter.String_asserter.assert_equals
@@ -261,7 +293,11 @@ let test_phases () =
             @@ Parsing_error.Parsing_error
                  { pos = Pos.make_from a_path; msg = "" });
         Errors.run_in_context a_path Errors.Typing (fun () ->
-            Errors.typing_error (Pos.make_from a_path) "");
+            Errors.add_typing_error
+              Typing_error.(
+                primary
+                @@ Primary.Generic_unify
+                     { pos = Pos.make_from a_path; msg = "" }));
         ())
   in
   let expected =

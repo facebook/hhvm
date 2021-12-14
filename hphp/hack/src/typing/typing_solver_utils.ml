@@ -185,9 +185,17 @@ let var_occurs_in_ty env var ty =
 let err_if_var_in_ty env var ty =
   let (env, var_occurs_in_ty) = var_occurs_in_ty env var ty in
   if var_occurs_in_ty then begin
-    Errors.unification_cycle
-      (get_pos ty |> Pos_or_decl.unsafe_to_raw_pos)
-      Typing_print.(with_blank_tyvars (fun () -> full_rec env var ty));
+    Errors.add_typing_error
+      Typing_error.(
+        primary
+        @@ Primary.Unification_cycle
+             {
+               pos = get_pos ty |> Pos_or_decl.unsafe_to_raw_pos;
+               ty_name =
+                 lazy
+                   Typing_print.(
+                     with_blank_tyvars (fun () -> full_rec env var ty));
+             });
     MakeType.err (get_reason ty)
   end else
     ty

@@ -66,15 +66,20 @@ let check_attrs pos env sid attrs =
   else
     SMap.iter
       (fun attr origin_sid ->
-        let msg =
-          match Env.get_class env origin_sid with
-          | None -> []
-          | Some ty ->
-            Reason.to_string
-              ("The attribute " ^ attr ^ " is declared in this class.")
-              (Reason.Rwitness_from_decl (Cls.pos ty))
+        let ty_reason_msg =
+          lazy
+            (match Env.get_class env origin_sid with
+            | None -> []
+            | Some ty ->
+              Reason.to_string
+                ("The attribute " ^ attr ^ " is declared in this class.")
+                (Reason.Rwitness_from_decl (Cls.pos ty)))
         in
-        Errors.missing_xhp_required_attr pos attr msg)
+        Errors.add_typing_error
+          Typing_error.(
+            xhp
+            @@ Primary.Xhp.Missing_xhp_required_attr
+                 { pos; attr; ty_reason_msg }))
       missing_attrs
 
 let make_handler ctx =

@@ -51,7 +51,8 @@ let expand_ty ?var_hook ?pos env ty =
             TypecheckerOptions.disallow_unresolved_type_variables
               (Tast_env.get_tcopt env)
           then
-            Errors.unresolved_type_variable pos;
+            Errors.add_typing_error
+              Typing_error.(primary @@ Primary.Unresolved_tyvar pos);
           mk (p, Tvar v))
       | (p, Terr) -> MakeType.err p
       (* TODO(T36532263) see if that needs updating *)

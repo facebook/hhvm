@@ -16,10 +16,18 @@ let unwrap_class_hint = function
   | (_, Happly ((pos, class_name), type_parameters)) ->
     (pos, class_name, type_parameters)
   | (p, Habstr _) ->
-    Errors.expected_class ~suffix:" or interface but got a generic" p;
+    Errors.add_typing_error
+      Typing_error.(
+        primary
+        @@ Primary.Expected_class
+             { suffix = Some (lazy " or interface but got a generic"); pos = p });
     (Pos.none, "", [])
   | (p, _) ->
-    Errors.expected_class ~suffix:" or interface" p;
+    Errors.add_typing_error
+      Typing_error.(
+        primary
+        @@ Primary.Expected_class
+             { suffix = Some (lazy " or interface"); pos = p });
     (Pos.none, "", [])
 
 let unwrap_class_type ty =

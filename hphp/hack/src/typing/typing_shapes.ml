@@ -236,7 +236,7 @@ let idx
             env
             shape_ty
             { et_type = super_shape; et_enforced = Unenforced }
-            Errors.Callback.unify_error
+            Typing_error.Callback.unify_error
         in
         TUtils.union env res (MakeType.null fun_pos)
       | Some (default_pos, default_ty) ->
@@ -247,7 +247,7 @@ let idx
             env
             shape_ty
             { et_type = super_shape; et_enforced = Unenforced }
-            Errors.Callback.unify_error
+            Typing_error.Callback.unify_error
         in
         let env =
           Type.sub_type
@@ -256,7 +256,7 @@ let idx
             env
             default_ty
             res
-            Errors.Callback.unify_error
+            Typing_error.Callback.unify_error
         in
         (env, res))
   in
@@ -295,7 +295,7 @@ let at env ~expr_pos ~shape_pos shape_ty ((_, field_p, _) as field) =
           env
           shape_ty
           { et_type = super_shape_ty; et_enforced = Unenforced }
-          Errors.Callback.unify_error
+          Typing_error.Callback.unify_error
       in
       (env, res)
   in
@@ -414,8 +414,12 @@ let check_shape_keys_validity env keys =
     match key with
     | Ast_defs.SFlit_int _ -> (env, key_pos, None)
     | Ast_defs.SFlit_str (_, key_name) ->
-      if Int.equal 0 (String.length key_name) then
-        Errors.invalid_shape_field_name_empty key_pos;
+      (if Int.equal 0 (String.length key_name) then
+        Errors.add_typing_error
+        @@ Typing_error.(
+             shape
+             @@ Primary.Shape.Invalid_shape_field_name
+                  { pos = key_pos; is_empty = true }));
       (env, key_pos, None)
     | Ast_defs.SFclass_const ((_p, cls), (p, y)) ->
       begin
@@ -431,7 +435,7 @@ let check_shape_keys_validity env keys =
               ~is_function_pointer:false
               cd
               y
-              Errors.Callback.unify_error;
+              Typing_error.Callback.unify_error;
             (env, key_pos, Some (cls, TUtils.terr env Reason.Rnone))
           | Some { cc_type; _ } ->
             let (env, ty) =
@@ -440,44 +444,75 @@ let check_shape_keys_validity env keys =
             let r = Reason.Rwitness key_pos in
             let env =
               Type.sub_type key_pos Reason.URnone env ty (MakeType.arraykey r)
-              @@ Errors.Callback.always (fun _ ->
-                     Errors.invalid_shape_field_type
-                       key_pos
-                       (get_pos ty)
-                       (Typing_print.error env ty)
-                       [])
+              @@ Typing_error.(
+                   Callback.always
+                     Primary.(
+                       Shape
+                         (Shape.Invalid_shape_field_type
+                            {
+                              pos = key_pos;
+                              ty_pos = get_pos ty;
+                              ty_name = lazy (Typing_print.error env ty);
+                              trail = [];
+                            })))
             in
             (env, key_pos, Some (cls, ty)))
       end
   in
   let check_field witness_pos witness_info env key =
     let (env, key_pos, key_info) = get_field_info env key in
-    match (witness_info, key_info) with
-    | (Some _, None) ->
-      Errors.invalid_shape_field_literal key_pos witness_pos;
-      env
-    | (None, Some _) ->
-      Errors.invalid_shape_field_const key_pos witness_pos;
-      env
-    | (None, None) -> env
-    | (Some (cls1, ty1), Some (cls2, ty2)) ->
-      if String.( <> ) cls1 cls2 then
-        Errors.shape_field_class_mismatch
-          key_pos
-          witness_pos
-          (Utils.strip_ns cls2)
-          (Utils.strip_ns cls1);
-      if
-        not
-          (Typing_solver.is_sub_type env ty1 ty2
-          && Typing_solver.is_sub_type env ty2 ty1)
-      then
-        Errors.shape_field_type_mismatch
-          key_pos
-          witness_pos
-          (Typing_print.error env ty2)
-          (Typing_print.error env ty1);
-      env
+    let prim_errs =
+      let open Typing_error in
+      match (witness_info, key_info) with
+      | (Some _, None) ->
+        [
+          shape
+          @@ Primary.Shape.Invalid_shape_field_literal
+               { pos = key_pos; witness_pos };
+        ]
+      | (None, Some _) ->
+        [
+          shape
+          @@ Primary.Shape.Invalid_shape_field_const
+               { pos = key_pos; witness_pos };
+        ]
+      | (None, None) -> []
+      | (Some (cls1, ty1), Some (cls2, ty2)) ->
+        List.filter_map
+          ~f:Fn.id
+          [
+            (if String.( <> ) cls1 cls2 then
+              Some
+                (shape
+                   (Primary.Shape.Shape_field_class_mismatch
+                      {
+                        pos = key_pos;
+                        witness_pos;
+                        class_name = Utils.strip_ns cls2;
+                        witness_class_name = Utils.strip_ns cls1;
+                      }))
+            else
+              None);
+            (if
+             not
+               (Typing_solver.is_sub_type env ty1 ty2
+               && Typing_solver.is_sub_type env ty2 ty1)
+            then
+              Some
+                (shape
+                   (Primary.Shape.Shape_field_type_mismatch
+                      {
+                        pos = key_pos;
+                        witness_pos;
+                        ty_name = lazy (Typing_print.error env ty2);
+                        witness_ty_name = lazy (Typing_print.error env ty1);
+                      }))
+            else
+              None);
+          ]
+    in
+    List.iter prim_errs ~f:Errors.add_typing_error;
+    env
   in
   (* Sort the keys by their positions since the error messages will make
    * more sense if we take the one that appears first as canonical and if

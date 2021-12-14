@@ -29,12 +29,17 @@ let handler =
             if Ast_defs.is_c_normal (Cls.kind cls) then
               match c_tconst_kind with
               | TCAbstract _ ->
-                Errors.implement_abstract
-                  ~is_final:(Cls.final cls)
-                  (Cls.pos cls |> Pos_or_decl.unsafe_to_raw_pos)
-                  (p |> Pos_or_decl.of_raw_pos)
-                  "type constant"
-                  name
+                Errors.add_typing_error
+                  Typing_error.(
+                    primary
+                    @@ Primary.Implement_abstract
+                         {
+                           is_final = Cls.final cls;
+                           pos = Cls.pos cls |> Pos_or_decl.unsafe_to_raw_pos;
+                           decl_pos = p |> Pos_or_decl.of_raw_pos;
+                           kind = `ty_const;
+                           name;
+                         })
               | _ -> ()
           end;
           begin
@@ -45,7 +50,7 @@ let handler =
                 match tc.ttc_kind with
                 | TCAbstract { atc_default = Some ty; _ }
                 | TCConcrete { tc_type = ty } ->
-                  let (pos, enforceable) =
+                  let (tp_pos, enforceable) =
                     Option.value_exn (Cls.get_typeconst_enforceability cls name)
                   in
                   if enforceable then
@@ -53,7 +58,18 @@ let handler =
                       (Tast_env.tast_env_as_typing_env env)
                       (fst tc.ttc_name |> Pos_or_decl.unsafe_to_raw_pos)
                       ty
-                      (Errors.invalid_enforceable_type "constant" (pos, name))
+                      (fun pos ty_info ->
+                        Errors.add_typing_error
+                          Typing_error.(
+                            primary
+                            @@ Primary.Invalid_enforceable_type
+                                 {
+                                   pos;
+                                   ty_info;
+                                   kind = `constant;
+                                   tp_pos;
+                                   tp_name = name;
+                                 }))
                 | _ -> ()
               end;
               if String.equal tc.ttc_origin (Cls.name cls) then

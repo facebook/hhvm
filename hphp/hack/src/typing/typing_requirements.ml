@@ -20,14 +20,18 @@ let check_fulfillment env class_pos get_impl (trait_pos, req_ty) =
     let req_pos = Typing_defs.get_pos req_ty in
     (match get_impl req_name with
     | None ->
-      Errors.unsatisfied_req ~class_pos ~trait_pos ~req_pos req_name;
+      (Errors.add_typing_error
+      @@ Typing_error.(
+           primary
+           @@ Primary.Unsatisfied_req
+                { pos = class_pos; trait_pos; req_pos; req_name }));
       env
     | Some impl_ty ->
       Typing_phase.sub_type_decl
         env
         impl_ty
         req_ty
-        (Errors.Reasons_callback.unsatisfied_req_callback
+        (Typing_error.Reasons_callback.unsatisfied_req_callback
            ~class_pos
            ~trait_pos
            ~req_pos

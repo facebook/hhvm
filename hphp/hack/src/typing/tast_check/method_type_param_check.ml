@@ -14,7 +14,9 @@ let check_tparams tps =
   let check_tparam tp =
     match tp.tp_variance with
     | Ast_defs.Invariant -> ()
-    | _ -> Errors.method_variance (fst tp.tp_name)
+    | _ ->
+      Errors.add_typing_error
+        Typing_error.(primary @@ Primary.Method_variance (fst tp.tp_name))
   in
   List.iter tps ~f:check_tparam
 

@@ -85,9 +85,12 @@ let validate_state fun_kind env s =
     if is_void_super_ty || is_awaitable_void_super_ty then
       ( false,
         lazy
-          (Errors.non_void_annotation_on_return_void_function
-             is_async
-             s.fun_def_pos) )
+          (Errors.add_typing_error
+             Typing_error.(
+               wellformedness
+               @@ Primary.Wellformedness
+                  .Non_void_annotation_on_return_void_function
+                    { is_async; pos = s.fun_def_pos })) )
     else
       (true, lazy ())
   in
@@ -131,10 +134,12 @@ let validate_state fun_kind env s =
       let fun_pos = s.fun_def_pos in
       ( false,
         lazy
-          (Errors.returns_with_and_without_value
-             ~fun_pos
-             ~with_value_pos
-             ~without_value_pos_opt) )
+          (Errors.add_typing_error
+             Typing_error.(
+               wellformedness
+               @@ Primary.Wellformedness.Returns_with_and_without_value
+                    { pos = fun_pos; with_value_pos; without_value_pos_opt }))
+      )
     | _ -> (true, lazy ())
   in
   (* Don't report violations of property 2 if prop 3 is also violated *)
@@ -228,7 +233,10 @@ let visitor =
           match !state.return_type with
           | Some (pos2, Hprim Tvoid) ->
             (* Property 1 *)
-            Errors.return_in_void return_pos pos2
+            Errors.add_typing_error
+              Typing_error.(
+                primary
+                @@ Primary.Return_in_void { pos = return_pos; decl_pos = pos2 })
           | _ -> ()
         end
       | (return_pos, Return None) ->

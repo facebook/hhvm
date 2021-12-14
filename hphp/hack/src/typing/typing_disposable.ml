@@ -63,6 +63,7 @@ let enforce_is_disposable env hint =
         if
           not (is_disposable_class env c || Ast_defs.is_c_interface (Cls.kind c))
         then
-          Errors.must_extend_disposable p
+          Errors.add_typing_error
+            Typing_error.(primary @@ Primary.Must_extend_disposable p)
     end
   | _ -> ()

@@ -68,7 +68,10 @@ let check_via_label_on_param env pos dty lty =
     if is_taccess_this || is_reified then
       ()
     else
-      Errors.via_label_invalid_generic pos name
+      Errors.add_typing_error
+        Typing_error.(
+          wellformedness
+          @@ Primary.Wellformedness.Via_label_invalid_generic { pos; name })
   in
   match get_node lty with
   | Tnewtype (name, [ty_enum; _ty_interface], _)
@@ -80,19 +83,33 @@ let check_via_label_on_param env pos dty lty =
       let (env, upper_bounds) =
         Typing_utils.collect_enum_class_upper_bounds env name
       in
+      let err =
+        Typing_error.(
+          wellformedness
+          @@ Primary.Wellformedness.Via_label_invalid_param_in_enum_class pos)
+      in
       let () =
         match upper_bounds with
         | Some upper_bound ->
           if Typing_utils.is_tintersection env upper_bound then
-            Errors.via_label_invalid_parameter_in_enum_class pos
-        | None -> Errors.via_label_invalid_parameter_in_enum_class pos
+            Errors.add_typing_error err
+        | None -> Errors.add_typing_error err
       in
       env
     | _ ->
-      let () = Errors.via_label_invalid_parameter_in_enum_class pos in
+      let err =
+        Typing_error.(
+          wellformedness
+          @@ Primary.Wellformedness.Via_label_invalid_param_in_enum_class pos)
+      in
+      let () = Errors.add_typing_error err in
       env)
   | _ ->
-    let () = Errors.via_label_invalid_parameter pos in
+    let err =
+      Typing_error.(
+        wellformedness @@ Primary.Wellformedness.Via_label_invalid_param pos)
+    in
+    let () = Errors.add_typing_error err in
     env
 
 let check_tparams_constraints env use_pos tparams targs =
@@ -155,7 +172,10 @@ and hint_ ~via_label ~in_signature env p h_ =
        *)
       match h_ with
       | Happly _ -> () (* checked in check_happly *)
-      | _ -> Errors.via_label_invalid_parameter p
+      | _ ->
+        Errors.add_typing_error
+          Typing_error.(
+            wellformedness @@ Primary.Wellformedness.Via_label_invalid_param p)
   in
   match h_ with
   | Hany
@@ -169,11 +189,19 @@ and hint_ ~via_label ~in_signature env p h_ =
   | Hdynamic
   | Hnothing ->
     ()
-  | Hoption (_, Hprim Tnull) -> Errors.option_null p
-  | Hoption (_, Hprim Tvoid) -> Errors.option_return_only_typehint p `void
+  | Hoption (_, Hprim Tnull) ->
+    Errors.add_typing_error Typing_error.(primary @@ Primary.Option_null p)
+  | Hoption (_, Hprim Tvoid) ->
+    Errors.add_typing_error
+      Typing_error.(
+        primary @@ Primary.Option_return_only_typehint { pos = p; kind = `void })
   | Hoption (_, Hprim Tnoreturn) ->
-    Errors.option_return_only_typehint p `noreturn
-  | Hoption (_, Hmixed) -> Errors.option_mixed p
+    Errors.add_typing_error
+      Typing_error.(
+        primary
+        @@ Primary.Option_return_only_typehint { pos = p; kind = `noreturn })
+  | Hoption (_, Hmixed) ->
+    Errors.add_typing_error Typing_error.(primary @@ Primary.Option_mixed p)
   | Hvec_or_dict (ty1, ty2) ->
     maybe hint env ty1;
     hint env ty2
@@ -201,7 +229,8 @@ and hint_ ~via_label ~in_signature env p h_ =
     Option.iter ~f:(contexts env) hf_ctxs
   | Happly ((p, "\\Tuple"), _)
   | Happly ((p, "\\tuple"), _) ->
-    Errors.tuple_syntax p
+    Errors.add_typing_error
+      Typing_error.(wellformedness @@ Primary.Wellformedness.Tuple_syntax p)
   | Happly ((_, x), hl) as h ->
     begin
       match Env.get_class_or_typedef env.tenv x with

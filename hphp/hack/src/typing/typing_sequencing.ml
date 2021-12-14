@@ -144,9 +144,17 @@ let sequence_visitor ~require_used used_vars =
       in
       let cleanup = List.map ~f:fst in
       if not (List.is_empty conflicting_reads) then
-        Errors.local_variable_modified_and_used p (cleanup conflicting_reads);
+        Errors.add_typing_error
+          Typing_error.(
+            primary
+            @@ Primary.Local_variable_modified_and_used
+                 { pos = p; pos_useds = cleanup conflicting_reads });
       if not (List.is_empty conflicting_writes) then
-        Errors.local_variable_modified_twice p (cleanup conflicting_writes)
+        Errors.add_typing_error
+          Typing_error.(
+            primary
+            @@ Primary.Local_variable_modified_twice
+                 { pos = p; pos_modifieds = cleanup conflicting_writes })
     in
     (* reversing the lists makes things sorted more naturally in the output *)
     let (reads1, writes1) = (List.rev env1.used, List.rev env1.assigned) in
@@ -260,7 +268,9 @@ let sequence_visitor ~require_used used_vars =
         acc
       | Case (e, b) ->
         let env = this#on_expr tracking_env e in
-        List.iter env.assigned ~f:(fun (p, _) -> Errors.assign_during_case p);
+        List.iter env.assigned ~f:(fun (p, _) ->
+            Errors.add_typing_error
+              Typing_error.(primary @@ Primary.Assign_during_case p));
         let acc = this#on_block acc b in
         acc
   end

@@ -34,18 +34,16 @@ module StateErrors = struct
 end
 
 let convert_on_error on_error pos =
-  Errors.(
-    Reasons_callback.with_claim ~claim:(pos, "Typing_error")
-    @@ Callback.from_on_error
-         on_error
-         ~dflt_code:Error_codes.Typing.(err_code UnifyError))
+  let on_error ?code ?quickfixes reasons =
+    let code =
+      Option.value code ~default:Error_codes.Typing.(err_code UnifyError)
+    in
+    on_error (User_error.make code ?quickfixes (pos, "Typing_error") reasons)
+  in
+  (Typing_error.Reasons_callback.from_on_error on_error [@alert "-deprecated"])
 
 let catch_exc
-    pos
-    (on_error : Errors.error -> unit)
-    (r : 'a)
-    ?(verbose = false)
-    (f : Errors.Reasons_callback.t -> 'a) : 'a =
+    pos (on_error : Errors.error -> unit) (r : 'a) ?(verbose = false) f : 'a =
   try
     let (other_errors, v) =
       Errors.do_with_context (Pos.filename pos) Errors.Typing (fun () ->

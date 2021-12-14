@@ -83,11 +83,17 @@ let check_trait_override_annotations env class_pos cls ~static =
                     String.( <> ) meth.ce_origin parent_meth.ce_origin)
               in
               if not parent_method_exists then
-                Errors.override_per_trait
-                  (class_pos, Cls.name cls)
-                  id
-                  meth.ce_origin
-                  (get_pos ty)
+                Errors.add_typing_error
+                  Typing_error.(
+                    primary
+                    @@ Primary.Override_per_trait
+                         {
+                           pos = class_pos;
+                           class_name = Cls.name cls;
+                           meth_name = id;
+                           trait_name = meth.ce_origin;
+                           meth_pos = get_pos ty;
+                         })
           ))
 
 (** Error if any member of the class was detected to be cyclic
@@ -101,7 +107,9 @@ let check_if_cyclic class_pos cls =
   | None -> ()
   | Some classes ->
     let classes = SSet.add classes (Cls.name cls) in
-    Errors.cyclic_class_def classes class_pos
+    Errors.add_typing_error
+      Typing_error.(
+        primary @@ Primary.Cyclic_class_def { stack = classes; pos = class_pos })
 
 let check_extend_kind
     parent_pos parent_kind parent_name child_pos child_kind child_name =
@@ -115,21 +123,31 @@ let check_extend_kind
     | (Cclass k, (Cenum | Cenum_class _)) when is_abstract k -> ()
     | (Cenum_class _, Cenum_class _) -> ()
     | ((Cenum | Cenum_class _), (Cenum | Cenum_class _)) ->
-      Errors.wrong_extend_kind
-        ~parent_pos
-        ~parent_kind
-        ~parent_name
-        ~child_pos
-        ~child_kind
-        ~child_name
+      Errors.add_typing_error
+        Typing_error.(
+          primary
+          @@ Primary.Wrong_extend_kind
+               {
+                 parent_pos;
+                 parent_kind;
+                 parent_name;
+                 pos = child_pos;
+                 kind = child_kind;
+                 name = child_name;
+               })
     | _ ->
-      Errors.wrong_extend_kind
-        ~parent_pos
-        ~parent_kind
-        ~parent_name
-        ~child_pos
-        ~child_kind
-        ~child_name)
+      Errors.add_typing_error
+        Typing_error.(
+          primary
+          @@ Primary.Wrong_extend_kind
+               {
+                 parent_pos;
+                 parent_kind;
+                 parent_name;
+                 pos = child_pos;
+                 kind = child_kind;
+                 name = child_name;
+               }))
 
 (** Check that the [extends] keyword is between two classes or two interfaces, but not
     between a class and an interface or vice-versa. *)
@@ -164,11 +182,17 @@ let check_trait_reuse ctx class_pos cls =
              |> Option.value_map ~default:Pos_or_decl.none ~f:(fun p ->
                     fst p.sc_name)
            in
-           Errors.trait_reuse
-             parent_pos
-             parent_name
-             (class_pos, Cls.name cls)
-             mro.mro_name)
+           Errors.add_typing_error
+             Typing_error.(
+               primary
+               @@ Primary.Trait_reuse
+                    {
+                      parent_pos;
+                      parent_name;
+                      pos = class_pos;
+                      class_name = Cls.name cls;
+                      trait_name = mro.mro_name;
+                    }))
 
 let check_class env class_pos cls =
   check_if_cyclic class_pos cls;

@@ -9,4 +9,4 @@ open Typing_env_types
 
 val merge_graphs : env -> Typing_inference_env.t_global_with_pos list -> env
 
-val solve_env : env -> (Ident.t -> Errors.Reasons_callback.t) -> env
+val solve_env : env -> (Ident.t -> Typing_error.Reasons_callback.t) -> env

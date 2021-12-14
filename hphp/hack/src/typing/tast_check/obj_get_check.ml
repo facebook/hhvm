@@ -18,9 +18,15 @@ let handler =
     method! at_expr env =
       function
       | (_, _, Obj_get (_, (_, p, This), _, _)) ->
-        Errors.nonsense_member_selection p "$this"
+        Errors.add_typing_error
+          Typing_error.(
+            primary
+            @@ Primary.Nonsense_member_selection { pos = p; kind = "$this" })
       | (_, _, Obj_get (_, (_, p, Lplaceholder _), _, _)) ->
-        Errors.nonsense_member_selection p "$_"
+        Errors.add_typing_error
+          Typing_error.(
+            primary
+            @@ Primary.Nonsense_member_selection { pos = p; kind = "$_" })
       | (_, _, Obj_get ((ty, _, _), _, _, _))
         when Tast_env.is_sub_type_for_union
                env

@@ -58,12 +58,14 @@ let fill_in_pos_filename_if_in_current_decl env pos =
     pos
 
 let unify_error_assert_primary_pos_in_current_decl env =
-  Errors.Reasons_callback.unify_error_assert_primary_pos_in_current_decl
-    ~current_decl_and_file:(get_current_decl_and_file env)
+  (Typing_error.Reasons_callback.from_on_error [@alert "-deprecated"])
+  @@ Errors.unify_error_assert_primary_pos_in_current_decl
+       ~current_decl_and_file:(get_current_decl_and_file env)
 
 let invalid_type_hint_assert_primary_pos_in_current_decl env =
-  Errors.Reasons_callback.invalid_type_hint_assert_primary_pos_in_current_decl
-    ~current_decl_and_file:(get_current_decl_and_file env)
+  (Typing_error.Reasons_callback.from_on_error [@alert "-deprecated"])
+  @@ Errors.invalid_type_hint_assert_primary_pos_in_current_decl
+       ~current_decl_and_file:(get_current_decl_and_file env)
 
 let get_tracing_info env = env.tracing_info
 
@@ -1137,7 +1139,9 @@ let set_local_expr_id env x new_eid =
       match LID.Map.find_opt x next_cont.LEnvC.local_types with
       | Some (type_, pos, eid)
         when not (Typing_local_types.equal_expression_id eid new_eid) ->
-        if LID.is_immutable eid then Errors.immutable_local pos;
+        if LID.is_immutable eid then
+          Errors.add_typing_error
+            Typing_error.(primary @@ Primary.Immutable_local pos);
         let local = (type_, pos, new_eid) in
         let per_cont_env = LEnvC.add_to_cont C.Next x local per_cont_env in
         let env = { env with lenv = { env.lenv with per_cont_env } } in

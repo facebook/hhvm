@@ -125,13 +125,18 @@ let parse_printf_string env s pos (class_ : locl_ty) : env * locl_fun_params =
       let (env, xs) = read_modifier env (i + 1) next i0 in
       (env, add_reason good_args @ xs)
     | (env, None) ->
-      Errors.format_string
-        pos
-        snippet
-        s
-        (get_pos class_)
-        fname
-        (Print.full_strip_ns env class_);
+      Errors.add_typing_error
+        Typing_error.(
+          primary
+          @@ Primary.Format_string
+               {
+                 pos;
+                 snippet;
+                 fmt_string = s;
+                 class_pos = get_pos class_;
+                 fn_name = fname;
+                 class_suggest = Print.full_strip_ns env class_;
+               });
       let (env, xs) = read_text env (i + 1) in
       (env, add_reason xs)
   in
@@ -218,7 +223,9 @@ let retype_magic_func
                  }
                  :: argl) )
           | (env, Left pos) ->
-            Errors.expected_literal_format_string pos;
+            Errors.add_typing_error
+              Typing_error.(
+                primary @@ Primary.Expected_literal_format_string pos);
             (env, None))
         | None -> (env, None)
       end

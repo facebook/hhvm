@@ -24,10 +24,14 @@ let handler =
         Typing_enforceable_hint.validate_hint
           (Tast_env.tast_env_as_typing_env env)
           hint
-          (Errors.invalid_is_as_expression_hint op)
+          (fun pos reasons ->
+            Errors.add_typing_error
+              Typing_error.(
+                primary
+                @@ Primary.Invalid_is_as_expression_hint { op; pos; reasons }))
       in
       match e with
-      | Is (_, hint) -> validate hint "is"
-      | As (_, hint, _) -> validate hint "as"
+      | Is (_, hint) -> validate hint `is
+      | As (_, hint, _) -> validate hint `as_
       | _ -> ()
   end

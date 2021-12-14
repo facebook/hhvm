@@ -10,5 +10,5 @@ val subtype_method_decl :
   decl_fun_type ->
   Reason.t ->
   decl_fun_type ->
-  Errors.Reasons_callback.t ->
+  Typing_error.Reasons_callback.t ->
   env

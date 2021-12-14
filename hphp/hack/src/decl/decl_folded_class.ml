@@ -51,22 +51,34 @@ let check_extend_kind
   | (Ast_defs.Cenum_class _, Ast_defs.Cenum_class _) -> ()
   | ( (Ast_defs.Cenum | Ast_defs.Cenum_class _),
       (Ast_defs.Cenum | Ast_defs.Cenum_class _) ) ->
-    Errors.wrong_extend_kind
-      ~parent_pos
-      ~parent_kind
-      ~parent_name
-      ~child_pos:(Pos_or_decl.unsafe_to_raw_pos child_pos) (* TODO: T87242856 *)
-      ~child_kind
-      ~child_name
+    Errors.add_typing_error
+      Typing_error.(
+        primary
+        @@ Primary.Wrong_extend_kind
+             {
+               parent_pos;
+               parent_kind;
+               parent_name;
+               pos =
+                 Pos_or_decl.unsafe_to_raw_pos child_pos (* TODO: T87242856 *);
+               kind = child_kind;
+               name = child_name;
+             })
   | _ ->
     (* What is disallowed *)
-    Errors.wrong_extend_kind
-      ~parent_pos
-      ~parent_kind
-      ~parent_name
-      ~child_pos:(Pos_or_decl.unsafe_to_raw_pos child_pos) (* TODO: T87242856 *)
-      ~child_kind
-      ~child_name
+    Errors.add_typing_error
+      Typing_error.(
+        primary
+        @@ Primary.Wrong_extend_kind
+             {
+               parent_pos;
+               parent_kind;
+               parent_name;
+               pos =
+                 Pos_or_decl.unsafe_to_raw_pos child_pos (* TODO: T87242856 *);
+               kind = child_kind;
+               name = child_name;
+             })
 
 (*****************************************************************************)
 (* Functions used retrieve everything implemented in parent classes
@@ -83,11 +95,22 @@ let disallow_trait_reuse (env : Decl_env.env) : bool =
 
 let report_reused_trait
     (parent_type : Decl_defs.decl_class_type)
-    (shallow_class : Shallow_decl_defs.shallow_class) : string -> unit =
-  Errors.trait_reuse
-    parent_type.dc_pos
-    parent_type.dc_name
-    (Positioned.unsafe_to_raw_positioned shallow_class.sc_name)
+    (shallow_class : Shallow_decl_defs.shallow_class)
+    trait_name =
+  let (pos, class_name) =
+    Positioned.unsafe_to_raw_positioned shallow_class.sc_name
+  in
+  Errors.add_typing_error
+    Typing_error.(
+      primary
+      @@ Primary.Trait_reuse
+           {
+             parent_pos = parent_type.dc_pos;
+             parent_name = parent_type.dc_name;
+             pos;
+             class_name;
+             trait_name;
+           })
 
 (**
  * Verifies that a class never reuses the same trait throughout its hierarchy.
@@ -224,7 +247,9 @@ let check_if_cyclic (class_env : class_env) ((pos, cid) : Pos.t * string) : bool
     =
   let stack = class_env.stack in
   let is_cyclic = SSet.mem cid stack in
-  if is_cyclic then Errors.cyclic_class_def stack pos;
+  if is_cyclic then
+    Errors.add_typing_error
+      Typing_error.(primary @@ Primary.Cyclic_class_def { stack; pos });
   is_cyclic
 
 let class_is_abstract (c : Shallow_decl_defs.shallow_class) : bool =

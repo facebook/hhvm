@@ -54,19 +54,20 @@ let rec array_get ~array_pos ~expr_pos ~index_pos env array_ty index_ty =
         let ty_have_str = Env.print_error_ty env ty_have in
         let err =
           if is_covariant_index then
-            Errors.Callback.covariant_index_type_mismatch
+            Typing_error.Callback.covariant_index_type_mismatch
           else
-            Errors.Callback.index_type_mismatch
+            Typing_error.Callback.index_type_mismatch
         in
-        Errors.Callback.apply
+        Errors.apply_typing_error_callback
           err
-          (expr_pos, Reason.string_of_ureason reason)
-          (Typing_reason.to_string
-             ("This is " ^ ty_expect_str)
-             (get_reason ty_expect)
-          @ Typing_reason.to_string
-              ("It is incompatible with " ^ ty_have_str)
-              (get_reason ty_have));
+          ~claim:(expr_pos, Reason.string_of_ureason reason)
+          ~reasons:
+            (Typing_reason.to_string
+               ("This is " ^ ty_expect_str)
+               (get_reason ty_expect)
+            @ Typing_reason.to_string
+                ("It is incompatible with " ^ ty_have_str)
+                (get_reason ty_have));
         Error ()
   in
   let (_, ety) = Env.expand_type env array_ty in

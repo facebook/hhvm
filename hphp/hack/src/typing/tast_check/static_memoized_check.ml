@@ -33,7 +33,10 @@ let unnecessary_memoize_lsb c m =
            "Try using the attribute `%s` instead"
            SN.UserAttributes.uaMemoize)
     in
-    Errors.unnecessary_attribute pos ~attr ~reason ~suggestion
+    Errors.add_typing_error
+      Typing_error.(
+        primary
+        @@ Primary.Unnecessary_attribute { pos; attr; reason; suggestion })
 
 let handler =
   object

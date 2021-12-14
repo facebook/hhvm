@@ -18,9 +18,13 @@ module MakeType = Typing_make_type
 let check_param : env -> Nast.fun_param -> unit =
  fun env { param_type_hint; param_pos; param_name; _ } ->
   let error ty =
-    let ty_str = Typing_print.error env ty in
-    let msgl = Reason.to_string ("This is " ^ ty_str) (get_reason ty) in
-    Errors.invalid_memoized_param param_pos msgl
+    let ty_name = lazy (Typing_print.error env ty) in
+    let msgl =
+      Lazy.map ty_name ~f:(fun ty_name ->
+          Reason.to_string ("This is " ^ ty_name) (get_reason ty))
+    in
+    Typing_error.Primary.Invalid_memoized_param
+      { pos = param_pos; reason = msgl; ty_name }
   in
   let check_memoizable env pos ty =
     let rec check_memoizable : env -> locl_ty -> unit =
@@ -39,7 +43,8 @@ let check_param : env -> Nast.fun_param -> unit =
           Typing_local_ops.enforce_memoize_object pos env
         in
         ()
-      | Tprim (Tvoid | Tresource | Tnoreturn) -> error ty
+      | Tprim (Tvoid | Tresource | Tnoreturn) ->
+        Errors.add_typing_error @@ Typing_error.primary @@ error ty
       | Toption ty -> check_memoizable env ty
       | Ttuple tyl -> List.iter tyl ~f:(check_memoizable env)
       (* Just accept all generic types for now. Stricter check_memoizables to come later. *)
@@ -78,13 +83,13 @@ let check_param : env -> Nast.fun_param -> unit =
             env
             (LoclType ty)
             (LoclType container_type)
-            ~on_error:(Errors.Reasons_callback.unify_error_at pos)
+            ~on_error:(Typing_error.Reasons_callback.unify_error_at pos)
         in
         let (env, prop) =
           SubType.prop_to_env
             env
             props
-            (Errors.Reasons_callback.unify_error_at pos)
+            (Typing_error.Reasons_callback.unify_error_at pos)
         in
         let is_container = Typing_logic.is_valid prop in
 
@@ -112,6 +117,7 @@ let check_param : env -> Nast.fun_param -> unit =
         if is_container then
           check_memoizable env type_param
         else
+          let base_error = error ty in
           let (env, (tfty, _tal)) =
             Typing_object_get.obj_get
               ~obj_pos:param_pos
@@ -127,7 +133,7 @@ let check_param : env -> Nast.fun_param -> unit =
                      param_pos,
                      Lvar (param_pos, Local_id.make_unscoped param_name) ))
               ~member_id:(pos, SN.Members.mGetInstanceKey)
-              ~on_error:Errors.Callback.(always (fun _ -> error ty))
+              ~on_error:Typing_error.Callback.(always base_error)
               env
               ty
           in
@@ -137,7 +143,7 @@ let check_param : env -> Nast.fun_param -> unit =
       | Taccess _ -> ()
       | Tfun _
       | Tvar _ ->
-        error ty
+        Errors.add_typing_error @@ Typing_error.primary @@ error ty
     in
     check_memoizable env ty
   in

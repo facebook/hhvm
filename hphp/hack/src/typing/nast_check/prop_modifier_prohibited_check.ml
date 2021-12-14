@@ -39,7 +39,10 @@ let unnecessary_lsb c cv =
     let name_class = Utils.strip_ns name_class in
     let reason = (pos_class, sprintf "the class `%s` is final" name_class) in
     let suggestion = None in
-    Errors.unnecessary_attribute pos ~attr ~reason ~suggestion
+    Errors.add_typing_error
+      Typing_error.(
+        primary
+        @@ Primary.Unnecessary_attribute { pos; attr; reason; suggestion })
 
 let handler =
   object

@@ -15,14 +15,19 @@ module Cls = Decl_provider.Class
 
 let error_inherited_base member_type base_name parent_name base_elt parent_elt :
     unit =
-  Errors.inherited_class_member_with_different_case
-    member_type
-    base_name
-    parent_name
-    (Lazy.force base_elt.ce_pos |> Pos_or_decl.unsafe_to_raw_pos)
-    base_elt.ce_origin
-    parent_elt.ce_origin
-    (Lazy.force parent_elt.ce_pos)
+  Errors.add_typing_error
+    Typing_error.(
+      primary
+      @@ Primary.Inherited_class_member_with_different_case
+           {
+             member_type;
+             name = base_name;
+             name_prev = parent_name;
+             pos = Lazy.force base_elt.ce_pos |> Pos_or_decl.unsafe_to_raw_pos;
+             child_class = base_elt.ce_origin;
+             prev_class = parent_elt.ce_origin;
+             prev_class_pos = Lazy.force parent_elt.ce_pos;
+           })
 
 let check_inheritance_case
     (member_type : string)
@@ -44,16 +49,21 @@ let check_inheritance_case
       error_inherited_base member_type prev_name name prev_elt elt
     (* Otherwise, this class inherited two methods that differ only by case *)
     | (class1, class2) ->
-      Errors.multiple_inherited_class_member_with_different_case
-        ~member_type
-        ~name1:name
-        ~name2:prev_name
-        ~class1
-        ~class2
-        ~child_class:cls_name
-        ~child_p:p
-        ~p1:(Lazy.force elt.ce_pos)
-        ~p2:(Lazy.force prev_elt.ce_pos))
+      Errors.add_typing_error
+        Typing_error.(
+          primary
+          @@ Primary.Multiple_inherited_class_member_with_different_case
+               {
+                 member_type;
+                 name1 = name;
+                 name2 = prev_name;
+                 class1_name = class1;
+                 class2_name = class2;
+                 child_class_name = cls_name;
+                 pos = p;
+                 class1_pos = Lazy.force elt.ce_pos;
+                 class2_pos = Lazy.force prev_elt.ce_pos;
+               }))
   | _ -> ());
   SMap.add canonical_name (name, elt) acc
 

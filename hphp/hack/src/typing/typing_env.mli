@@ -220,7 +220,7 @@ val fill_in_pos_filename_if_in_current_decl :
     This also sets the error code to the code for unification error
     if none is provided. *)
 val unify_error_assert_primary_pos_in_current_decl :
-  env -> Errors.Reasons_callback.t
+  env -> Typing_error.Reasons_callback.t
 
 (** This will check that the first position of the given reasons is in the
     current decl and if yes use it as primary error position. If no,
@@ -229,7 +229,7 @@ val unify_error_assert_primary_pos_in_current_decl :
     This also sets the error code to the code for invalid type hint error
     if none is provided. *)
 val invalid_type_hint_assert_primary_pos_in_current_decl :
-  env -> Errors.Reasons_callback.t
+  env -> Typing_error.Reasons_callback.t
 
 val set_fn_kind : env -> Ast_defs.fun_kind -> env
 

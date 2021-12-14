@@ -92,10 +92,17 @@ let duplicated_used_traits c =
   Hashtbl.iteri
     ~f:(fun ~key ~data ->
       if List.length data > 1 then
-        Errors.trait_reuse_inside_class
-          c.c_name
-          key
-          (List.rev_map data ~f:Pos_or_decl.of_raw_pos))
+        let (pos, class_name) = c.c_name in
+        Errors.add_typing_error
+          Typing_error.(
+            primary
+            @@ Primary.Trait_reuse_inside_class
+                 {
+                   class_name;
+                   pos;
+                   trait_name = key;
+                   occurrences = List.rev_map data ~f:Pos_or_decl.of_raw_pos;
+                 }))
     traits
 
 let handler =

@@ -13,20 +13,20 @@ open Typing_env_types
 module Env = Typing_env
 module SN = Naming_special_names
 
-let check_local_capability (mk_required : env -> env * locl_ty) callback env =
+let check_local_capability (mk_required : env -> env * locl_ty) mk_err_opt env =
   (* gate the check behavior on coeffects TC option *)
   if TypecheckerOptions.local_coeffects (Env.get_tcopt env) then
     let available = Env.get_local env Typing_coeffects.local_capability_id in
     let (env, required) = mk_required env in
-    Typing_subtype.sub_type_or_fail env available required (fun () ->
-        callback available required)
+    let err_opt = mk_err_opt available required in
+    Typing_subtype.sub_type_or_fail env available required err_opt
   else
     env
 
 let enforce_local_capability
     ?((* Run-time enforced ops must have the default as it's unfixmeable *)
-    err_code = Error_codes.Typing.err_code Error_codes.Typing.OpCoeffects)
-    ?(suggestion = [])
+    err_code = Error_codes.Typing.OpCoeffects)
+    ?suggestion
     (mk_required : env -> env * locl_ty)
     (op : string)
     (op_pos : Pos.t)
@@ -34,14 +34,19 @@ let enforce_local_capability
   check_local_capability
     mk_required
     (fun available required ->
-      Errors.op_coeffect_error
-        ~locally_available:(Typing_coeffects.pretty env available)
-        ~available_pos:(Typing_defs.get_pos available)
-        ~required:(Typing_coeffects.pretty env required)
-        ~err_code
-        ~suggestion
-        op
-        op_pos)
+      Some
+        Typing_error.(
+          coeffect
+          @@ Primary.Coeffect.Op_coeffect_error
+               {
+                 pos = op_pos;
+                 op_name = op;
+                 locally_available = Typing_coeffects.pretty env available;
+                 available_pos = Typing_defs.get_pos available;
+                 required = Typing_coeffects.pretty env required;
+                 err_code;
+                 suggestion;
+               }))
     env
 
 module Capabilities = struct
@@ -76,9 +81,7 @@ let enforce_mutable_static_variable ?msg (op_pos : Pos.t) env =
 we can change this *)
 let enforce_memoize_object =
   enforce_local_capability
-    ~err_code:
-      (Error_codes.Typing.err_code
-         Error_codes.Typing.MemoizeObjectWithoutGlobals)
+    ~err_code:Error_codes.Typing.MemoizeObjectWithoutGlobals
     Capabilities.(mk accessGlobals)
     "Memoizing object parameters"
 
@@ -176,12 +179,21 @@ let rec check_assignment_or_unset_target
     te1
     capability_available
     capability_required =
-  let fail =
-    Errors.op_coeffect_error
-      ~locally_available:(Typing_coeffects.pretty env capability_available)
-      ~available_pos:(Typing_defs.get_pos capability_available)
-      ~required:(Typing_coeffects.pretty env capability_required)
-      ~err_code:(Error_codes.Typing.err_code Error_codes.Typing.OpCoeffects)
+  let fail ?suggestion op_name pos =
+    Some
+      Typing_error.(
+        coeffect
+        @@ Primary.Coeffect.Op_coeffect_error
+             {
+               pos;
+               op_name;
+               suggestion;
+               locally_available =
+                 Typing_coeffects.pretty env capability_available;
+               available_pos = Typing_defs.get_pos capability_available;
+               required = Typing_coeffects.pretty env capability_required;
+               err_code = Error_codes.Typing.OpCoeffects;
+             })
   in
   let (_, p, expr_) = te1 in
   let open Aast in
@@ -194,7 +206,7 @@ let rec check_assignment_or_unset_target
       e
       capability_available
       capability_required
-  | Obj_get (e1, _, _, _) when mutating_this_in_ctor env e1 -> ()
+  | Obj_get (e1, _, _, _) when mutating_this_in_ctor env e1 -> None
   | Array_get ((ty1, _, _), i)
     when is_assignment && not (is_valid_append_target env ty1) ->
     let is_append = Option.is_none i in
@@ -207,9 +219,9 @@ let rec check_assignment_or_unset_target
     fail msg_prefix (Option.value append_pos_opt ~default:p)
   | Array_get (e1, _) when is_valid_mutable_subscript_expression_target env e1
     ->
-    ()
+    None
   (* we already report errors about statics in rx context, no need to do it twice *)
-  | Class_get _ -> ()
+  | Class_get _ -> None
   | Obj_get _
   | Array_get _ ->
     if is_assignment then
@@ -219,7 +231,7 @@ let rec check_assignment_or_unset_target
         p
     else
       fail "Non-mutable argument for `unset`" p
-  | _ -> ()
+  | _ -> None
 
 (* END logic from Typed AST check in basic_reactivity_check *)
 

@@ -91,24 +91,30 @@ let make_param_local_ty env decl_hint param =
   (env, ty)
 
 let enforce_param_not_disposable env param ty =
+  (* Option.iter
+     ~f:Errors.add_typing_error *)
   if has_accept_disposable_attribute param then
-    ()
+    None
   else
-    let p = param.param_pos in
-    match Typing_disposable.is_disposable_type env ty with
-    | Some class_name ->
-      Errors.invalid_disposable_hint p (Utils.strip_ns class_name)
-    | None -> ()
+    Option.map
+      (Typing_disposable.is_disposable_type env ty)
+      ~f:(fun class_name ->
+        Typing_error.Primary.Invalid_disposable_hint
+          { pos = param.param_pos; class_name = Utils.strip_ns class_name })
 
 (* In strict mode, we force you to give a type declaration on a parameter *)
 (* But the type checker is nice: it makes a suggestion :-) *)
 let check_param_has_hint env param ty =
-  match hint_of_type_hint param.param_type_hint with
-  | None when param.param_is_variadic && not (Env.is_hhi env) ->
-    Errors.expecting_type_hint_variadic param.param_pos
-  | None when not @@ Env.is_hhi env ->
-    Errors.expecting_type_hint param.param_pos
-  | Some _ when not @@ Env.is_hhi env ->
-    (* We do not permit hints to implement IDisposable or IAsyncDisposable *)
-    enforce_param_not_disposable env param ty
-  | _ -> ()
+  let prim_err_opt =
+    match hint_of_type_hint param.param_type_hint with
+    | None when param.param_is_variadic && not (Env.is_hhi env) ->
+      Some (Typing_error.Primary.Expecting_type_hint_variadic param.param_pos)
+    | None when not @@ Env.is_hhi env ->
+      Some (Typing_error.Primary.Expecting_type_hint param.param_pos)
+    | Some _ when not @@ Env.is_hhi env ->
+      (* We do not permit hints to implement IDisposable or IAsyncDisposable *)
+      enforce_param_not_disposable env param ty
+    | _ -> None
+  in
+  Option.iter prim_err_opt ~f:(fun err ->
+      Errors.add_typing_error @@ Typing_error.primary err)

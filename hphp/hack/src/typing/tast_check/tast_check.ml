@@ -48,7 +48,12 @@ let visitor ctx =
                    .disallow_scrutinee_case_value_type_mismatch
                      t
                  then
-                   Errors.invalid_switch_case_value_type
+                   fun pos case_value_ty scrutinee_ty ->
+                 Errors.add_typing_error
+                   Typing_error.(
+                     primary
+                     @@ Primary.Invalid_switch_case_value_type
+                          { pos; case_value_ty; scrutinee_ty })
                  else
                    fun _ _ _ ->
                  ()));

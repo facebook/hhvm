@@ -20,9 +20,20 @@ module Cls = Decl_provider.Class
 module SN = Naming_special_names
 
 let raise_xhp_required env pos ureason ty =
-  let ty_str = Typing_print.error env ty in
-  let msgl = Reason.to_string ("This is " ^ ty_str) (get_reason ty) in
-  Errors.xhp_required pos (Reason.string_of_ureason ureason) msgl
+  let ty_str = lazy (Typing_print.error env ty) in
+  let msgl =
+    Lazy.map ty_str ~f:(fun ty_str ->
+        Reason.to_string ("This is " ^ ty_str) (get_reason ty))
+  in
+  Errors.add_typing_error
+    Typing_error.(
+      xhp
+      @@ Primary.Xhp.Xhp_required
+           {
+             pos;
+             why_xhp = Reason.string_of_ureason ureason;
+             ty_reason_msg = msgl;
+           })
 
 (**
  * Given class info, produces the subset of props that are XHP attributes

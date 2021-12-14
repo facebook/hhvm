@@ -22,16 +22,18 @@ let handler =
       match (expr_, get_node ty) with
       | (FunctionPointer _, Tfun fun_ty) ->
         let params = fun_ty.ft_params in
-        (match
-           List.find
-             ~f:(fun fp ->
-               Typing_defs_flags.(is_set fp_flags_via_label fp.fp_flags))
-             params
-         with
-        | Some fp ->
-          let fpos = fp.fp_pos in
-          Errors.function_pointer_with_via_label pos fpos
-        | None -> ())
+        let err_opt =
+          Option.map ~f:(fun Typing_defs.{ fp_pos = decl_pos; _ } ->
+              Typing_error.(
+                wellformedness
+                @@ Primary.Wellformedness.Fn_ptr_with_via_label
+                     { pos; decl_pos }))
+          @@ List.find
+               ~f:(fun fp ->
+                 Typing_defs_flags.(is_set fp_flags_via_label fp.fp_flags))
+               params
+        in
+        Option.iter err_opt ~f:(fun err -> Errors.add_typing_error err)
       | _ -> ()
 
     method! at_class_ env c =
@@ -40,5 +42,6 @@ let handler =
       let is_enum_class = Aast.is_enum_class c in
       let pos = fst c.Aast.c_name in
       if (not enabled) && is_enum_class then
-        Errors.enum_classes_reserved_syntax pos
+        Errors.add_typing_error
+          Typing_error.(enum @@ Primary.Enum.Enum_classes_reserved_syntax pos)
   end

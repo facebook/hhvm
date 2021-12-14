@@ -31,10 +31,11 @@ let check_parameters =
             | FPinout -> "`inout`"
             | FPnormal -> "normal"
           in
-          Errors.invalid_meth_caller_calling_convention
-            pos
-            fparam.fp_pos
-            convention
+          Errors.add_typing_error
+            Typing_error.(
+              primary
+              @@ Primary.Invalid_meth_caller_calling_convention
+                   { pos; decl_pos = fparam.fp_pos; convention })
         | None -> ()
       end
     | _ -> ()

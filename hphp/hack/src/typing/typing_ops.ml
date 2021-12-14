@@ -42,17 +42,18 @@ let sub_type_i
     env
     ty_sub
     ty_super
-    (on_error : Errors.Callback.t) =
+    (on_error : Typing_error.Callback.t) =
   log_sub_type env p ty_sub ty_super;
   Typing_utils.sub_type_i ~is_coeffect env ty_sub ty_super
-  @@ Errors.Reasons_callback.with_claim
+  @@ Typing_error.Reasons_callback.with_claim
        on_error
        ~claim:(p, Reason.string_of_ureason ur)
 
-let sub_type_i_res p ur env ty_sub ty_super (on_error : Errors.Callback.t) =
+let sub_type_i_res p ur env ty_sub ty_super (on_error : Typing_error.Callback.t)
+    =
   log_sub_type env p ty_sub ty_super;
   Typing_utils.sub_type_i_res env ty_sub ty_super
-  @@ Errors.Reasons_callback.with_claim
+  @@ Typing_error.Reasons_callback.with_claim
        on_error
        ~claim:(p, Reason.string_of_ureason ur)
 
@@ -68,7 +69,7 @@ let sub_type_decl ?(is_coeffect = false) ~on_error p ur env ty_sub ty_super =
   let (env, ty_sub) = localize_no_subst env ty_sub in
   let env =
     Typing_utils.sub_type env ~is_coeffect ty_sub ty_super
-    @@ Errors.Reasons_callback.prepend_reason
+    @@ Typing_error.Reasons_callback.prepend_reason
          on_error
          ~reason:(p, Reason.string_of_ureason ur)
   in
@@ -79,16 +80,13 @@ let unify_decl p ur env on_error ty1 ty2 =
   let localize_no_subst = Typing_utils.localize_no_subst ~ignore_errors:true in
   let (env, ty1) = localize_no_subst env ty1 in
   let (env, ty2) = localize_no_subst env ty2 in
+  let reason = (p, Reason.string_of_ureason ur) in
   let env =
     Typing_utils.sub_type env ty2 ty1
-    @@ Errors.Reasons_callback.prepend_reason
-         on_error
-         ~reason:(p, Reason.string_of_ureason ur)
+    @@ Typing_error.Reasons_callback.prepend_reason on_error ~reason
   in
   let env =
     Typing_utils.sub_type env ty1 ty2
-    @@ Errors.Reasons_callback.prepend_reason
-         on_error
-         ~reason:(p, Reason.string_of_ureason ur)
+    @@ Typing_error.Reasons_callback.prepend_reason on_error ~reason
   in
   env

@@ -21,7 +21,7 @@ val get_type : Typing_defs.locl_ty Typing_defs.capability -> Typing_defs.locl_ty
 val validate_capability :
   Typing_env_types.env -> Pos.t -> Typing_defs.decl_ty -> unit
 
-val pretty : Typing_env_types.env -> Typing_defs.locl_ty -> string
+val pretty : Typing_env_types.env -> Typing_defs.locl_ty -> string Lazy.t
 
 val is_generated_generic : string -> bool
 

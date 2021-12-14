@@ -27,17 +27,18 @@ let handler =
             TypecheckerOptions.allowed_expression_tree_visitors tcopt
           in
           let (_pos, hint) = et.et_hint in
-          begin
+          let err_opt =
             match hint with
-            | Happly ((_pos, id), _) ->
-              if
-                List.exists allowed_expression_tree_visitors ~f:(fun s ->
-                    String.equal s id)
-              then
-                ()
-              else
-                Errors.experimental_expression_trees pos
-            | _ -> Errors.experimental_expression_trees pos
-          end
+            | Happly ((_, id), _)
+              when List.exists allowed_expression_tree_visitors ~f:(fun s ->
+                       String.equal s id) ->
+              None
+            | _ ->
+              Some
+                Typing_error.(
+                  expr_tree
+                  @@ Primary.Expr_tree.Experimental_expression_trees pos)
+          in
+          Option.iter err_opt ~f:Errors.add_typing_error
       | _ -> ()
   end

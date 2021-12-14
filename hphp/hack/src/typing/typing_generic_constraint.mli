@@ -13,7 +13,7 @@ val check_constraint :
   Ast_defs.constraint_kind ->
   Typing_defs.locl_ty ->
   cstr_ty:Typing_defs.locl_ty ->
-  Errors.Reasons_callback.t ->
+  Typing_error.Reasons_callback.t ->
   Typing_env_types.env
 
 (** Add an [as] or [super] constraint to the environment.

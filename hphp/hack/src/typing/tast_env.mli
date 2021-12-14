@@ -206,7 +206,7 @@ val assert_subtype :
   env ->
   Tast.ty ->
   Tast.ty ->
-  Errors.Callback.t ->
+  Typing_error.Callback.t ->
   env
 
 (** Return {true} when the first type is a subtype of the second type

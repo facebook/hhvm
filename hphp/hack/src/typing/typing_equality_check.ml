@@ -19,29 +19,47 @@ module N = Aast
 
 let trivial_result_str bop =
   match bop with
-  | Ast_defs.Eqeqeq -> Markdown_lite.md_codify "false"
-  | Ast_defs.Diff2 -> Markdown_lite.md_codify "true"
+  | Ast_defs.Eqeqeq -> false
+  | Ast_defs.Diff2 -> true
   | _ -> assert false
 
 let trivial_comparison_error env p bop ty1 ty2 trail1 trail2 =
-  let trivial_result = trivial_result_str bop in
-  let tys1 = Typing_print.error env ty1 in
-  let tys2 = Typing_print.error env ty2 in
-  Errors.trivial_strict_eq
-    p
-    trivial_result
-    (Reason.to_string ("This is " ^ tys1) (get_reason ty1))
-    (Reason.to_string ("This is " ^ tys2) (get_reason ty2))
-    trail1
-    trail2
+  let result = trivial_result_str bop
+  and tys1 = lazy (Typing_print.error env ty1)
+  and tys2 = lazy (Typing_print.error env ty2) in
+  Errors.add_typing_error
+    Typing_error.(
+      primary
+      @@ Primary.Trivial_strict_eq
+           {
+             pos = p;
+             result;
+             left =
+               Lazy.map tys1 ~f:(fun tys1 ->
+                   Reason.to_string ("This is " ^ tys1) (get_reason ty1));
+             right =
+               Lazy.map tys2 ~f:(fun tys2 ->
+                   Reason.to_string ("This is " ^ tys2) (get_reason ty2));
+             left_trail = trail1;
+             right_trail = trail2;
+           })
 
 let eq_incompatible_types env p ty1 ty2 =
-  let tys1 = Typing_print.error env ty1 in
-  let tys2 = Typing_print.error env ty2 in
-  Errors.eq_incompatible_types
-    p
-    (Reason.to_string ("This is " ^ tys1) (get_reason ty1))
-    (Reason.to_string ("This is " ^ tys2) (get_reason ty2))
+  let tys1 = lazy (Typing_print.error env ty1)
+  and tys2 = lazy (Typing_print.error env ty2) in
+  Errors.add_typing_error
+    Typing_error.(
+      primary
+      @@ Primary.Eq_incompatible_types
+           {
+             pos = p;
+             left =
+               Lazy.map tys1 ~f:(fun tys1 ->
+                   Reason.to_string ("This is " ^ tys1) (get_reason ty1));
+             right =
+               Lazy.map tys2 ~f:(fun tys2 ->
+                   Reason.to_string ("This is " ^ tys2) (get_reason ty2));
+           })
 
 let is_arraykey t =
   match get_node t with
@@ -92,11 +110,22 @@ let rec assert_nontrivial p bop env ty1 ty2 =
       ()
     | ((r, Tprim N.Tnoreturn), _)
     | (_, (r, Tprim N.Tnoreturn)) ->
-      Errors.noreturn_usage p (Reason.to_string "This always throws or exits" r)
+      Errors.add_typing_error
+        Typing_error.(
+          wellformedness
+          @@ Primary.Wellformedness.Noreturn_usage
+               {
+                 pos = p;
+                 reason = Reason.to_string "This always throws or exits" r;
+               })
     | ((r, Tprim N.Tvoid), _)
     | (_, (r, Tprim N.Tvoid)) ->
       (* Ideally we shouldn't hit this case, but well... *)
-      Errors.void_usage p (Reason.to_string "This is `void`" r)
+      Errors.add_typing_error
+        Typing_error.(
+          wellformedness
+          @@ Primary.Wellformedness.Void_usage
+               { pos = p; reason = Reason.to_string "This is `void`" r })
     | ((_, Tprim a), (_, Tnewtype (e, _, bound)))
       when Env.is_enum env e && bad_compare_prim_to_enum a bound ->
       trivial_comparison_error env p bop ty1 bound trail1 trail2

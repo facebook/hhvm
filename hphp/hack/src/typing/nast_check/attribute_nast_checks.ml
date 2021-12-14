@@ -29,21 +29,35 @@ let variadic_pos v : pos option =
 
 let check_attribute_arity attrs attr_name arg_spec =
   let attr = Naming_attributes.find attr_name attrs in
-  match (arg_spec, attr) with
-  | (`Range (min_args, _), Some { ua_name = (pos, _); ua_params })
-    when List.length ua_params < min_args ->
-    Errors.attribute_too_few_arguments pos attr_name min_args
-  | (`Range (_, max_args), Some { ua_name = (pos, _); ua_params })
-    when List.length ua_params > max_args ->
-    Errors.attribute_too_many_arguments pos attr_name max_args
-  | (`Exact expected_args, Some { ua_name = (pos, _); ua_params })
-    when List.length ua_params <> expected_args ->
-    Errors.attribute_not_exact_number_of_args
-      pos
-      ~attr_name
-      ~expected_args
-      ~actual_args:(List.length ua_params)
-  | _ -> ()
+  let prim_err_opt =
+    match (arg_spec, attr) with
+    | (`Range (min_args, _), Some { ua_name = (pos, _); ua_params })
+      when List.length ua_params < min_args ->
+      Some
+        (Typing_error.Primary.Attribute_too_few_arguments
+           { pos; name = attr_name; expected = min_args })
+      (* Errors.attribute_too_few_arguments pos attr_name min_args *)
+    | (`Range (_, max_args), Some { ua_name = (pos, _); ua_params })
+      when List.length ua_params > max_args ->
+      Some
+        (Typing_error.Primary.Attribute_too_many_arguments
+           { pos; name = attr_name; expected = max_args })
+      (* Errors.attribute_too_many_arguments pos attr_name max_args *)
+    | (`Exact expected_args, Some { ua_name = (pos, _); ua_params })
+      when List.length ua_params <> expected_args ->
+      Some
+        (Typing_error.Primary.Attribute_not_exact_number_of_args
+           {
+             pos;
+             name = attr_name;
+             expected = expected_args;
+             actual = List.length ua_params;
+           })
+    | _ -> None
+  in
+  Option.iter
+    (fun err -> Errors.add_typing_error @@ Typing_error.primary err)
+    prim_err_opt
 
 let check_deprecated_static attrs =
   let attr = Naming_attributes.find SN.UserAttributes.uaDeprecated attrs in
@@ -52,7 +66,12 @@ let check_deprecated_static attrs =
   | Some { ua_name = _; ua_params = [msg; _] } ->
     begin
       match Nast_eval.static_string msg with
-      | Error p -> Errors.attribute_param_type p "static string literal"
+      | Error p ->
+        Errors.add_typing_error
+          Typing_error.(
+            primary
+            @@ Primary.Attribute_param_type
+                 { pos = p; x = "static string literal" })
       | _ -> ()
     end
   | _ -> ()

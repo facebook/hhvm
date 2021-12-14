@@ -219,10 +219,15 @@ let check_readonly_return_call pos caller_ty is_readonly =
     let open Typing_defs in
     match get_node caller_ty with
     | Tfun fty when get_ft_returns_readonly fty ->
-      Errors.explicit_readonly_cast
-        "function call"
-        pos
-        (Typing_defs.get_pos caller_ty)
+      Errors.add_typing_error
+        Typing_error.(
+          readonly
+          @@ Primary.Readonly.Explicit_readonly_cast
+               {
+                 pos;
+                 kind = `fn_call;
+                 decl_pos = Typing_defs.get_pos caller_ty;
+               })
     | _ -> ()
 
 let check_readonly_property env obj get obj_ro =
@@ -233,10 +238,15 @@ let check_readonly_property env obj get obj_ro =
   let readonly_prop = List.find ~f:get_ce_readonly_prop prop_elts in
   match (readonly_prop, obj_ro) with
   | (Some elt, Mut) ->
-    Errors.explicit_readonly_cast
-      "property"
-      (Tast.get_position get)
-      (Lazy.force elt.ce_pos)
+    Errors.add_typing_error
+      Typing_error.(
+        readonly
+        @@ Primary.Readonly.Explicit_readonly_cast
+             {
+               pos = Tast.get_position get;
+               kind = `property;
+               decl_pos = Lazy.force elt.ce_pos;
+             })
   | _ -> ()
 
 let check_static_readonly_property pos env (class_ : Tast.class_id) get obj_ro =
@@ -246,10 +256,15 @@ let check_static_readonly_property pos env (class_ : Tast.class_id) get obj_ro =
   let readonly_prop = List.find ~f:Typing_defs.get_ce_readonly_prop prop_elts in
   match (readonly_prop, obj_ro) with
   | (Some elt, Mut) when Typing_defs.get_ce_readonly_prop elt ->
-    Errors.explicit_readonly_cast
-      "static property"
-      pos
-      (Lazy.force elt.Typing_defs.ce_pos)
+    Errors.add_typing_error
+      Typing_error.(
+        readonly
+        @@ Primary.Readonly.Explicit_readonly_cast
+             {
+               pos;
+               kind = `static_property;
+               decl_pos = Lazy.force elt.Typing_defs.ce_pos;
+             })
   | _ -> ()
 
 let is_method_caller (caller : Tast.expr) =
@@ -278,19 +293,16 @@ let rec assign env lval rval =
     in
     match mutable_prop with
     | Some elt when not (Typing_defs.get_ce_readonly_prop elt) ->
-      Errors.readonly_mismatch
-        "Invalid property assignment"
-        (Tast.get_position lval)
-        ~reason_sub:
-          [
-            ( Tast.get_position rval |> Pos_or_decl.of_raw_pos,
-              "This expression is readonly" );
-          ]
-        ~reason_super:
-          [
-            ( Lazy.force elt.Typing_defs.ce_pos,
-              "But it's being assigned to a mutable property" );
-          ]
+      Errors.add_typing_error
+        Typing_error.(
+          readonly
+          @@ Primary.Readonly.Readonly_mismatch
+               {
+                 pos = Tast.get_position lval;
+                 what = `prop_assign;
+                 pos_sub = Tast.get_position rval |> Pos_or_decl.of_raw_pos;
+                 pos_super = Lazy.force elt.Typing_defs.ce_pos;
+               })
     | _ -> ()
   in
   match lval with
@@ -308,20 +320,22 @@ let rec assign env lval rval =
           assign env array rval
         | _ -> ())
       | (Mut, Readonly) ->
-        Errors.readonly_mismatch
-          "Invalid collection modification"
-          (Tast.get_position lval)
-          ~reason_sub:
-            [
-              ( Tast.get_position rval |> Pos_or_decl.of_raw_pos,
-                "This expression is readonly" );
-            ]
-          ~reason_super:
-            [
-              ( Tast.get_position array |> Pos_or_decl.of_raw_pos,
-                "But this value is mutable" );
-            ]
-      | (Readonly, _) -> Errors.readonly_modified (Tast.get_position array)
+        Errors.add_typing_error
+          Typing_error.(
+            readonly
+            @@ Primary.Readonly.Readonly_mismatch
+                 {
+                   pos = Tast.get_position lval;
+                   what = `collection_mod;
+                   pos_sub = Tast.get_position rval |> Pos_or_decl.of_raw_pos;
+                   pos_super = Tast.get_position array |> Pos_or_decl.of_raw_pos;
+                 })
+      | (Readonly, _) ->
+        Errors.add_typing_error
+          Typing_error.(
+            readonly
+            @@ Primary.Readonly.Readonly_modified
+                 { pos = Tast.get_position array; reason_opt = None })
       | (Mut, Mut) -> ()
     end
   | (_, _, Class_get (id, expr, Is_prop)) ->
@@ -334,7 +348,12 @@ let rec assign env lval rval =
     (* Here to check for nested property accesses that are accessing readonly values *)
     begin
       match ty_expr env obj with
-      | Readonly -> Errors.readonly_modified (Tast.get_position obj)
+      | Readonly ->
+        Errors.add_typing_error
+          Typing_error.(
+            readonly
+            @@ Primary.Readonly.Readonly_modified
+                 { pos = Tast.get_position obj; reason_opt = None })
       | Mut -> ()
     end;
     (match ty_expr env rval with
@@ -354,7 +373,11 @@ let method_call caller =
   | (ty, _, ReadonlyExpr (_, _, Obj_get (e1, _, _, Is_method))) ->
     (match get_node ty with
     | Tfun fty when not (get_ft_readonly_this fty) ->
-      Errors.readonly_method_call (Tast.get_position e1) (get_pos ty)
+      Errors.add_typing_error
+        Typing_error.(
+          readonly
+          @@ Primary.Readonly.Readonly_method_call
+               { pos = Tast.get_position e1; decl_pos = get_pos ty })
     | _ -> ())
   | _ -> ()
 
@@ -364,7 +387,8 @@ let check_special_function env caller args =
     when String.equal (Utils.strip_ns x) (Utils.strip_ns SN.Readonly.as_mut) ->
     let arg_ty = Tast.get_type arg in
     if not (is_safe_mut_ty env SSet.empty arg_ty) then
-      Errors.readonly_invalid_as_mut pos
+      Errors.add_typing_error
+        Typing_error.(readonly @@ Primary.Readonly.Readonly_invalid_as_mut pos)
     else
       ()
   | _ -> ()
@@ -404,7 +428,11 @@ let call
         (* Otherwise, it's likely from a Rwitness, but we suggest declaring it as readonly *)
         | _ -> "declaring this as a `readonly` function"
       in
-      Errors.readonly_closure_call pos f_pos suggestion
+      Errors.add_typing_error
+        Typing_error.(
+          readonly
+          @@ Primary.Readonly.Readonly_closure_call
+               { pos; decl_pos = f_pos; suggestion })
     | _ -> ()
   in
   (* Checks a single arg against a parameter *)
@@ -412,20 +440,19 @@ let call
     let param_rty = param_to_rty param in
     let arg_rty = ty_expr env arg in
     if not (subtype_rty arg_rty param_rty) then
-      Errors.readonly_mismatch
-        "Invalid argument"
-        (Tast.get_position arg)
-        ~reason_sub:
-          [
-            ( Tast.get_position arg |> Pos_or_decl.of_raw_pos,
-              "This expression is " ^ rty_to_str arg_rty );
-          ]
-        ~reason_super:
-          [
-            ( param.fp_pos,
-              "It is incompatible with this parameter, which is "
-              ^ rty_to_str param_rty );
-          ]
+      Errors.add_typing_error
+        Typing_error.(
+          readonly
+          @@ Primary.Readonly.Readonly_mismatch
+               {
+                 pos = Tast.get_position arg;
+                 what =
+                   (match arg_rty with
+                   | Readonly -> `arg_readonly
+                   | Mut -> `arg_mut);
+                 pos_sub = Tast.get_position arg |> Pos_or_decl.of_raw_pos;
+                 pos_super = param.fp_pos;
+               })
   in
 
   (* Check that readonly arguments match their parameters *)

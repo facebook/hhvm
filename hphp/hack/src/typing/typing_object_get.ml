@@ -36,8 +36,13 @@ let smember_not_found
       `class_variable
   in
   let error hint =
-    let cid = (Cls.pos class_, Cls.name class_) in
-    Errors.smember_not_found kind pos cid member_name hint on_error
+    let (class_pos, class_name) = (Cls.pos class_, Cls.name class_) in
+    Errors.add_typing_error
+      Typing_error.(
+        apply ~on_error
+        @@ primary
+        @@ Primary.Smember_not_found
+             { pos; kind; class_name; class_pos; member_name; hint })
   in
   let static_suggestion =
     Env.suggest_static_member is_method class_ member_name
@@ -47,7 +52,11 @@ let smember_not_found
   (* If there is a normal method of the same name and the
    * syntax is a function pointer, suggest meth_caller *)
   | (_, Some (_, v)) when is_function_pointer && String.equal v member_name ->
-    Errors.consider_meth_caller pos (Cls.name class_) member_name
+    Errors.add_typing_error
+      Typing_error.(
+        primary
+        @@ Primary.Consider_meth_caller
+             { pos; class_name = Cls.name class_; meth_name = member_name })
   (* If there is a normal method of the same name, suggest it *)
   | (Some _, Some (def_pos, v)) when String.equal v member_name ->
     error (Some (`instance, def_pos, v))
@@ -60,40 +69,57 @@ let smember_not_found
 let member_not_found
     (env : Typing_env_types.env) pos ~is_method class_ member_name r on_error =
   let cls_name = strip_ns (Cls.name class_) in
-  if
-    env.Typing_env_types.in_expr_tree
-    && is_method
-    && String_utils.string_starts_with member_name "__"
-  then
-    Errors.expr_tree_unsupported_operator cls_name member_name pos
-  else
-    let kind =
-      if is_method then
-        `method_
-      else
-        `property
-    in
-    let cid = (Cls.pos class_, Cls.name class_) in
-    let reason =
-      Reason.to_string
-        ("This is why I think it is an object of type " ^ cls_name)
-        r
-    in
-    let error hint =
-      Errors.member_not_found kind pos cid member_name hint reason on_error
-    in
-    let method_suggestion = Env.suggest_member is_method class_ member_name in
-    let static_suggestion =
-      Env.suggest_static_member is_method class_ member_name
-    in
-    match (method_suggestion, static_suggestion) with
-    (* Prefer suggesting a different method, unless there's a
-       static method whose name matches exactly. *)
-    | (Some _, Some (def_pos, v)) when String.equal v member_name ->
-      error (Some (`static, def_pos, v))
-    | (Some (def_pos, v), _) -> error (Some (`instance, def_pos, v))
-    | (None, Some (def_pos, v)) -> error (Some (`static, def_pos, v))
-    | (None, None) -> error None
+  let err =
+    if
+      env.Typing_env_types.in_expr_tree
+      && is_method
+      && String_utils.string_starts_with member_name "__"
+    then
+      Typing_error.(
+        expr_tree
+        @@ Primary.Expr_tree.Expression_tree_unsupported_operator
+             { class_name = cls_name; member_name; pos })
+    else
+      let (class_pos, class_name) = (Cls.pos class_, Cls.name class_) in
+      let reason =
+        Reason.to_string
+          ("This is why I think it is an object of type " ^ cls_name)
+          r
+      in
+      let method_suggestion = Env.suggest_member is_method class_ member_name in
+      let static_suggestion =
+        Env.suggest_static_member is_method class_ member_name
+      in
+      let hint =
+        lazy
+          (match (method_suggestion, static_suggestion) with
+          (* Prefer suggesting a different method, unless there's a
+             static method whose name matches exactly. *)
+          | (Some _, Some (def_pos, v)) when String.equal v member_name ->
+            Some (`static, def_pos, v)
+          | (Some (def_pos, v), _) -> Some (`instance, def_pos, v)
+          | (None, Some (def_pos, v)) -> Some (`static, def_pos, v)
+          | (None, None) -> None)
+      in
+      Typing_error.(
+        apply ~on_error
+        @@ primary
+        @@ Primary.Member_not_found
+             {
+               pos;
+               kind =
+                 (if is_method then
+                   `method_
+                 else
+                   `property);
+               class_name;
+               class_pos;
+               member_name;
+               hint;
+               reason;
+             })
+  in
+  Errors.add_typing_error err
 
 let widen_class_for_obj_get ~is_method ~nullsafe member_name env ty =
   match deref ty with
@@ -427,14 +453,19 @@ let rec obj_get_concrete_ty
                     _;
                   } ->
                 if not (String.equal member_ce.ce_origin ce_origin) then
-                  Errors.ambiguous_object_access
-                    id_pos
-                    id_str
-                    (get_pos member_)
-                    (Typing_defs.string_of_visibility old_vis)
-                    (get_pos old_member)
-                    self_id
-                    (snd x)
+                  Errors.add_typing_error
+                    Typing_error.(
+                      primary
+                      @@ Primary.Ambiguous_object_access
+                           {
+                             pos = id_pos;
+                             name = id_str;
+                             self_pos = get_pos member_;
+                             vis = Typing_defs.string_of_visibility old_vis;
+                             subclass_pos = get_pos old_member;
+                             class_self = self_id;
+                             class_subclass = snd x;
+                           })
               | _ -> ());
             TVis.check_obj_access ~use_pos:id_pos ~def_pos:mem_pos env vis;
             TVis.check_deprecated ~use_pos:id_pos ~def_pos:mem_pos ce_deprecated;
@@ -444,7 +475,11 @@ let rec obj_get_concrete_ty
               env
               vis;
             if is_parent_call && get_ce_abstract member_ce then
-              Errors.parent_abstract_call id_str id_pos mem_pos;
+              Errors.add_typing_error
+                Typing_error.(
+                  primary
+                  @@ Primary.Parent_abstract_call
+                       { meth_name = id_str; pos = id_pos; decl_pos = mem_pos });
             let member_decl_ty = Typing_enum.member_type env member_ce in
             let widen_this =
               this_appears_covariantly ~contra:true env member_decl_ty
@@ -483,7 +518,7 @@ let rec obj_get_concrete_ty
                       ~ety_env:
                         {
                           ety_env with
-                          on_error = Errors.Reasons_callback.ignore_error;
+                          on_error = Typing_error.Reasons_callback.ignore_error;
                         }
                       ~def_pos:mem_pos
                       env
@@ -511,7 +546,8 @@ let rec obj_get_concrete_ty
                           ~ety_env:
                             {
                               ety_env with
-                              on_error = Errors.Reasons_callback.ignore_error;
+                              on_error =
+                                Typing_error.Reasons_callback.ignore_error;
                             }
                           ~def_pos:mem_pos
                           env
@@ -589,7 +625,10 @@ let rec obj_get_concrete_ty
                        env
                        ty
                        { et_type = member_ty; et_enforced }
-                       Errors.Callback.(with_side_effect ~eff unify_error))
+                       Typing_error.Callback.(
+                         (with_side_effect
+                            ~eff
+                            unify_error [@alert "-deprecated"])))
             in
             (env, (member_ty, tal), dflt_lval_err, rval_err)
         end
@@ -615,14 +654,24 @@ let rec obj_get_concrete_ty
               Phase.localize_no_subst ~ignore_errors:true env ty
             in
             Typing_dynamic.check_property_sound_for_dynamic_read
-              ~on_error:Errors.private_property_is_not_dynamic
+              ~on_error:(fun pos prop_name class_name (prop_pos, prop_type) ->
+                Errors.add_typing_error
+                  Typing_error.(
+                    primary
+                    @@ Primary.Private_property_is_not_dynamic
+                         { pos; prop_name; class_name; prop_pos; prop_type }))
               env
               (Cls.name self_class)
               (id_pos, id_str)
               locl_ty);
           if not read_context then
             Typing_dynamic.check_property_sound_for_dynamic_write
-              ~on_error:Errors.private_property_is_not_enforceable
+              ~on_error:(fun pos prop_name class_name (prop_pos, prop_type) ->
+                Errors.add_typing_error
+                  Typing_error.(
+                    primary
+                    @@ Primary.Private_property_is_not_enforceable
+                         { pos; prop_name; class_name; prop_pos; prop_type }))
               env
               (Cls.name self_class)
               (id_pos, id_str)
@@ -637,39 +686,54 @@ let rec obj_get_concrete_ty
     default ()
   | (_, Tnonnull) ->
     let err =
-      if read_context then
-        Errors.top_member_read
-      else
-        Errors.top_member_write
+      Typing_error.(
+        primary
+        @@ Primary.Top_member
+             {
+               pos = id_pos;
+               name = id_str;
+               ctxt =
+                 (if read_context then
+                   `read
+                 else
+                   `write);
+               kind =
+                 (if is_method then
+                   `method_
+                 else
+                   `property);
+               is_nullable = false;
+               decl_pos = get_pos concrete_ty;
+               ty_name = lazy (Typing_print.error env concrete_ty);
+             })
     in
-    err
-      ~is_method
-      ~is_nullable:false
-      id_str
-      id_pos
-      (Typing_print.error env concrete_ty)
-      (get_pos concrete_ty);
+    Errors.add_typing_error err;
     let ty_nothing = MakeType.nothing Reason.none in
     let lval_err = Error (concrete_ty, ty_nothing) in
     default ~lval_err ()
   | _ ->
     let err =
-      if read_context then
-        Errors.non_object_member_read
-      else
-        Errors.non_object_member_write
+      Typing_error.(
+        primary
+        @@ Primary.Non_object_member
+             {
+               pos = id_pos;
+               ctxt =
+                 (if read_context then
+                   `read
+                 else
+                   `write);
+               kind =
+                 (if is_method then
+                   `method_
+                 else
+                   `property);
+               member_name = id_str;
+               ty_name = lazy (Typing_print.error env concrete_ty);
+               decl_pos = get_pos concrete_ty;
+             })
     in
-    err
-      ~kind:
-        (if is_method then
-          `method_
-        else
-          `property)
-      id_str
-      id_pos
-      (Typing_print.error env concrete_ty)
-      (get_pos concrete_ty)
-      on_error;
+    Errors.add_typing_error @@ Typing_error.apply ~on_error err;
     let ty_nothing = MakeType.nothing Reason.none in
     let lval_err = Error (concrete_ty, ty_nothing) in
     default ~lval_err ()
@@ -730,37 +794,76 @@ and nullable_obj_get
           match get_node opt_ty with
           | Tnonnull ->
             let err =
-              if read_context then
-                Errors.top_member_read
-              else
-                Errors.top_member_write
+              Typing_error.(
+                primary
+                @@ Primary.Top_member
+                     {
+                       pos = id_pos;
+                       name = id_str;
+                       ctxt =
+                         (if read_context then
+                           `read
+                         else
+                           `write);
+                       kind =
+                         (if is_method then
+                           `method_
+                         else
+                           `property);
+                       is_nullable = true;
+                       decl_pos = Reason.to_pos r;
+                       ty_name = lazy (Typing_print.error env ety1);
+                     })
             in
-            err
-              ~is_method
-              ~is_nullable:true
-              id_str
-              id_pos
-              (Typing_print.error env ety1)
-              (Reason.to_pos r);
+            Errors.add_typing_error err;
             MakeType.nothing Reason.none
           | _ ->
             let err =
-              if read_context then
-                Errors.null_member_read
-              else
-                Errors.null_member_write
+              Typing_error.(
+                primary
+                @@ Primary.Null_member
+                     {
+                       pos = id_pos;
+                       member_name = id_str;
+                       reason = Reason.to_string "This can be null" r;
+                       kind =
+                         (if is_method then
+                           `method_
+                         else
+                           `property);
+                       ctxt =
+                         (if read_context then
+                           `read
+                         else
+                           `write);
+                     })
             in
-            err ~is_method id_str id_pos (Reason.to_string "This can be null" r);
+            Errors.add_typing_error err;
+
             MakeType.nothing Reason.none
         end
       | (r, _) ->
         let err =
-          if read_context then
-            Errors.null_member_read
-          else
-            Errors.null_member_write
+          Typing_error.(
+            primary
+            @@ Primary.Null_member
+                 {
+                   pos = id_pos;
+                   member_name = id_str;
+                   reason = Reason.to_string "This can be null" r;
+                   kind =
+                     (if is_method then
+                       `method_
+                     else
+                       `property);
+                   ctxt =
+                     (if read_context then
+                       `read
+                     else
+                       `write);
+                 })
         in
-        err ~is_method id_str id_pos (Reason.to_string "This can be null" r);
+        Errors.add_typing_error err;
         MakeType.nothing Reason.none
     in
     ( env,
@@ -1017,23 +1120,28 @@ and obj_get_inner
       TUtils.get_concrete_supertypes ~abstract_enum:true env ety1
     in
     if List.is_empty tyl then (
-      let err =
-        if read_context then
-          Errors.non_object_member_read
-        else
-          Errors.non_object_member_write
+      let prim_err =
+        Typing_error.(
+          primary
+          @@ Primary.Non_object_member
+               {
+                 pos = id_pos;
+                 ctxt =
+                   (if read_context then
+                     `read
+                   else
+                     `write);
+                 kind =
+                   (if is_method then
+                     `method_
+                   else
+                     `property);
+                 member_name = id_str;
+                 ty_name = lazy (Typing_print.error env ety1);
+                 decl_pos = Reason.to_pos r;
+               })
       in
-      err
-        ~kind:
-          (if is_method then
-            `method_
-          else
-            `property)
-        id_str
-        id_pos
-        (Typing_print.error env ety1)
-        (Reason.to_pos r)
-        on_error;
+      Errors.add_typing_error @@ Typing_error.apply ~on_error prim_err;
       (env, (err_witness env id_pos, []), dflt_lval_err, dflt_rval_err)
     ) else
       let (env, ty) = Typing_intersection.intersect_list env r tyl in
@@ -1066,11 +1174,20 @@ and obj_get_inner
     nullable_obj_get ~read_context ty
   (* We are trying to access a member through a value of unknown type *)
   | (r, Tvar _) ->
-    Errors.unknown_object_member
-      ~is_method
-      id_str
-      id_pos
-      (Reason.to_string "It is unknown" r);
+    Errors.add_typing_error
+      Typing_error.(
+        primary
+        @@ Primary.Unknown_object_member
+             {
+               elt =
+                 (if is_method then
+                   `meth
+                 else
+                   `prop);
+               member_name = id_str;
+               pos = id_pos;
+               reason = Reason.to_string "It is unknown" r;
+             });
     let ty_nothing = MakeType.nothing Reason.none in
     ( env,
       (TUtils.terr env r, []),

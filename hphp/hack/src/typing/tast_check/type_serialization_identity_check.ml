@@ -118,35 +118,58 @@ let handler =
           let ty = strip_ty ty in
           let deserialized_ty = strip_ty deserialized_ty in
           if not (ty_equal ty deserialized_ty) then
-            Errors.unserializable_type
-              p
-              (Printf.sprintf
-                 "unequal types: %s vs %s (%s vs %s)"
-                 (Tast_env.print_ty env ty)
-                 (Tast_env.print_ty env deserialized_ty)
-                 (Tast_env.ty_to_json env ty |> Hh_json.json_to_string)
-                 (Tast_env.ty_to_json env deserialized_ty
-                 |> Hh_json.json_to_string))
+            Errors.add_typing_error
+              Typing_error.(
+                primary
+                @@ Primary.Unserializable_type
+                     {
+                       pos = p;
+                       message =
+                         Printf.sprintf
+                           "unequal types: %s vs %s (%s vs %s)"
+                           (Tast_env.print_ty env ty)
+                           (Tast_env.print_ty env deserialized_ty)
+                           (Tast_env.ty_to_json env ty |> Hh_json.json_to_string)
+                           (Tast_env.ty_to_json env deserialized_ty
+                           |> Hh_json.json_to_string);
+                     })
         | Error (Not_supported _) -> ()
         | Error (Wrong_phase message) ->
-          Errors.unserializable_type
-            p
-            (Printf.sprintf
-               "type %s (%s) was not in the locl phase: %s"
-               message
-               (Tast_env.print_ty env ty)
-               (Tast_env.ty_to_json env ty |> Hh_json.json_to_string))
+          Errors.add_typing_error
+            Typing_error.(
+              primary
+              @@ Primary.Unserializable_type
+                   {
+                     pos = p;
+                     message =
+                       Printf.sprintf
+                         "type %s (%s) was not in the locl phase: %s"
+                         message
+                         (Tast_env.print_ty env ty)
+                         (Tast_env.ty_to_json env ty |> Hh_json.json_to_string);
+                   })
         | Error (Deserialization_error message) ->
-          Errors.unserializable_type
-            p
-            (Printf.sprintf
-               "type %s (%s) could not be deserialized to a locl type: %s"
-               message
-               (Tast_env.print_ty env ty)
-               (Tast_env.ty_to_json env ty |> Hh_json.json_to_string))
+          Errors.add_typing_error
+            Typing_error.(
+              primary
+              @@ Primary.Unserializable_type
+                   {
+                     pos = p;
+                     message =
+                       Printf.sprintf
+                         "type %s (%s) could not be deserialized to a locl type: %s"
+                         message
+                         (Tast_env.print_ty env ty)
+                         (Tast_env.ty_to_json env ty |> Hh_json.json_to_string);
+                   })
       with
       | e ->
-        Errors.unserializable_type
-          p
-          (Printf.sprintf "exception: %s" (Exn.to_string e))
+        Errors.add_typing_error
+          Typing_error.(
+            primary
+            @@ Primary.Unserializable_type
+                 {
+                   pos = p;
+                   message = Printf.sprintf "exception: %s" (Exn.to_string e);
+                 })
   end

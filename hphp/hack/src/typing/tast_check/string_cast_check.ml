@@ -68,7 +68,11 @@ let handler =
       | Cast ((_, Hprim Tstring), te) ->
         let (ty, _, _) = te in
         if not (is_stringish env ty) then
-          Errors.string_cast p (Env.print_ty env ty)
+          Errors.add_typing_error
+            Typing_error.(
+              primary
+              @@ Primary.String_cast
+                   { pos = p; ty_name = lazy (Env.print_ty env ty) })
       | _ -> ()
 
     method! at_method_ _ m = check__toString m

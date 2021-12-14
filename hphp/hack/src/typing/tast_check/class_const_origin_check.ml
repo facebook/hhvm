@@ -112,5 +112,13 @@ let handler =
                 (Tast_env.fill_in_pos_filename_if_in_current_decl env cc.cc_pos)
                 ~f:(fun cc_pos ->
                   if find_cycle env c_name cc_name then
-                    Errors.cyclic_class_constant cc_pos c_name cc_name))
+                    Errors.add_typing_error
+                      Typing_error.(
+                        primary
+                        @@ Primary.Cyclic_class_constant
+                             {
+                               pos = cc_pos;
+                               class_name = c_name;
+                               const_name = cc_name;
+                             })))
   end

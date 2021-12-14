@@ -47,10 +47,11 @@ let check_implements
           check_locations
           && (not @@ List.mem intfs attr_interface ~equal:String.equal)
         then
-          Errors.wrong_expression_kind_builtin_attribute
-            expr_kind
-            attr_pos
-            attr_name;
+          Errors.add_typing_error
+            Typing_error.(
+              primary
+              @@ Primary.Wrong_expression_kind_builtin_attribute
+                   { expr_kind; pos = attr_pos; attr_name });
         true
       | None -> false
     in
@@ -91,13 +92,18 @@ let check_implements
       in
       if not (Typing_subtype.is_sub_type env attr_locl_ty interface_locl_ty)
       then (
-        Errors.wrong_expression_kind_attribute
-          expr_kind
-          attr_pos
-          attr_name
-          (Cls.pos attr_class)
-          (Cls.name attr_class)
-          (Cls.name intf_class);
+        Errors.add_typing_error
+          Typing_error.(
+            primary
+            @@ Primary.Wrong_expression_kind_attribute
+                 {
+                   expr_kind;
+                   pos = attr_pos;
+                   attr_name;
+                   attr_class_pos = Cls.pos attr_class;
+                   attr_class_name = Cls.name attr_class;
+                   intf_name = Cls.name intf_class;
+                 });
         env
       ) else
         check_new_object attr_pos env attr_cid params

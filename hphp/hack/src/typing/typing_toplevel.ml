@@ -265,7 +265,9 @@ let fun_def ctx fd :
   begin
     match hint_of_type_hint f.f_ret with
     | None ->
-      if not @@ Env.is_hhi env then Errors.expecting_return_type_hint pos
+      if not @@ Env.is_hhi env then
+        Errors.add_typing_error
+          Typing_error.(primary @@ Primary.Expecting_return_type_hint pos)
     | Some _ -> ()
   end;
   let (env, tparams) = List.map_env env f.f_tparams ~f:Typing.type_param in
@@ -594,7 +596,9 @@ let method_def ~is_disposable env cls m =
     | None when String.equal (snd m.m_name) SN.Members.__construct ->
       Some (pos, Hprim Tvoid)
     | None ->
-      if not @@ Env.is_hhi env then Errors.expecting_return_type_hint pos;
+      if not @@ Env.is_hhi env then
+        Errors.add_typing_error
+          Typing_error.(primary @@ Primary.Expecting_return_type_hint pos);
       None
     | Some _ -> hint_of_type_hint m.m_ret
   in
@@ -657,9 +661,18 @@ let check_parent env class_def class_type =
   | Some parent_type ->
     let position = fst class_def.c_name in
     if Cls.const class_type && not (Cls.const parent_type) then
-      Errors.self_const_parent_not position;
+      Errors.add_typing_error
+        Typing_error.(primary @@ Primary.Self_const_parent_not position);
     if Cls.final parent_type then
-      Errors.extend_final position (Cls.pos parent_type) (Cls.name parent_type)
+      Errors.add_typing_error
+        Typing_error.(
+          primary
+          @@ Primary.Extend_final
+               {
+                 pos = position;
+                 decl_pos = Cls.pos parent_type;
+                 name = Cls.name parent_type;
+               })
   | None -> ()
 
 let sealed_subtype ctx (c : Nast.class_) ~is_enum ~hard_error =
@@ -696,8 +709,9 @@ let sealed_subtype ctx (c : Nast.class_) ~is_enum ~hard_error =
             let parent_pos = pos in
             let child_pos = Cls.pos decl in
             let child_name = Cls.name decl in
+            let class_kind = Cls.kind decl in
             let (child_kind, verb) =
-              match Cls.kind decl with
+              match class_kind with
               | Ast_defs.Cclass _ -> ("Class", "extend")
               | Ast_defs.Cinterface -> ("Interface", "implement")
               | Ast_defs.Ctrait -> ("Trait", "use")
@@ -705,13 +719,17 @@ let sealed_subtype ctx (c : Nast.class_) ~is_enum ~hard_error =
               | Ast_defs.Cenum_class _ -> ("Enum Class", "extend")
             in
             if hard_error then
-              Errors.sealed_not_subtype
-                verb
-                parent_pos
-                child_pos
-                parent_name
-                child_name
-                child_kind
+              Errors.add_typing_error
+                Typing_error.(
+                  primary
+                  @@ Primary.Sealed_not_subtype
+                       {
+                         pos = parent_pos;
+                         child_pos;
+                         name = parent_name;
+                         child_name;
+                         child_kind = class_kind;
+                       })
             else
               Lint.sealed_not_subtype
                 verb
@@ -731,18 +749,22 @@ let check_parent_sealed (child_pos, child_type) parent_type =
     let parent_pos = Cls.pos parent_type in
     let parent_name = Cls.name parent_type in
     let child_name = Cls.name child_type in
-    let check kind action =
+    let check parent_kind verb =
       if not (SSet.mem child_name whitelist) then
-        Errors.extend_sealed child_pos parent_pos parent_name kind action
+        Errors.add_typing_error
+          Typing_error.(
+            primary
+            @@ Primary.Extend_sealed
+                 { pos = child_pos; parent_pos; parent_name; parent_kind; verb })
     in
     begin
       match (Cls.kind parent_type, Cls.kind child_type) with
-      | (Ast_defs.Cinterface, Ast_defs.Cinterface) -> check "interface" "extend"
-      | (Ast_defs.Cinterface, _) -> check "interface" "implement"
-      | (Ast_defs.Ctrait, _) -> check "trait" "use"
-      | (Ast_defs.Cclass _, _) -> check "class" "extend"
-      | (Ast_defs.Cenum_class _, _) -> check "enum class" "extend"
-      | (Ast_defs.Cenum, _) -> check "enum" "use"
+      | (Ast_defs.Cinterface, Ast_defs.Cinterface) -> check `intf `extend
+      | (Ast_defs.Cinterface, _) -> check `intf `implement
+      | (Ast_defs.Ctrait, _) -> check `trait `use
+      | (Ast_defs.Cclass _, _) -> check `class_ `extend
+      | (Ast_defs.Cenum_class _, _) -> check `enum_class `extend
+      | (Ast_defs.Cenum, _) -> check `enum `use
     end
 
 let check_parents_sealed env child_def child_type =
@@ -782,7 +804,12 @@ let rec check_implements_or_extends_unique impl =
             | _ -> Second (h, ty))
       in
       if not (List.is_empty pos_list) then
-        Errors.duplicate_interface (fst hint) name pos_list;
+        Errors.add_typing_error
+          Typing_error.(
+            primary
+            @@ Primary.Duplicate_interface
+                 { pos = fst hint; name; others = pos_list });
+
       check_implements_or_extends_unique rest
     | _ -> check_implements_or_extends_unique rest)
 
@@ -792,8 +819,20 @@ let check_constructor_dep env deps =
       | Tapply ((_, class_name), _) ->
         Env.make_depend_on_constructor env class_name
       | Tgeneric _ ->
-        Errors.expected_class ~suffix:" or interface but got a generic" p
-      | _ -> Errors.expected_class ~suffix:" or interface" p)
+        Errors.add_typing_error
+          Typing_error.(
+            primary
+            @@ Primary.Expected_class
+                 {
+                   suffix = Some (lazy " or interface but got a generic");
+                   pos = p;
+                 })
+      | _ ->
+        Errors.add_typing_error
+          Typing_error.(
+            primary
+            @@ Primary.Expected_class
+                 { suffix = Some (lazy " or interface"); pos = p }))
 
 (** For const classes, check that members from traits are all constant. *)
 let check_non_const_trait_members pos env use_list =
@@ -801,7 +840,10 @@ let check_non_const_trait_members pos env use_list =
   match Env.get_class env trait with
   | Some c when Ast_defs.is_c_trait (Cls.kind c) ->
     List.iter (Cls.props c) ~f:(fun (x, ce) ->
-        if not (get_ce_const ce) then Errors.trait_prop_const_class pos x)
+        if not (get_ce_const ce) then
+          Errors.add_typing_error
+            Typing_error.(
+              primary @@ Primary.Trait_prop_const_class { pos; name = x }))
   | _ -> ()
 
 let check_consistent_enum_inclusion
@@ -812,35 +854,55 @@ let check_consistent_enum_inclusion
   | (Some included_e, Some dest_e) ->
     (* ensure that the base types are identical *)
     if not (Typing_defs.equal_decl_ty included_e.te_base dest_e.te_base) then
-      Errors.incompatible_enum_inclusion_base
-        dest_cls_pos
-        (Cls.name dest_cls)
-        (Cls.name included_cls);
+      Errors.add_typing_error
+        Typing_error.(
+          enum
+          @@ Primary.Enum.Incompatible_enum_inclusion_base
+               {
+                 pos = dest_cls_pos;
+                 classish_name = Cls.name dest_cls;
+                 src_classish_name = Cls.name included_cls;
+               });
     (* ensure that the visibility constraint are compatible *)
     (match (included_e.te_constraint, dest_e.te_constraint) with
     | (None, Some _) ->
-      Errors.incompatible_enum_inclusion_constraint
-        dest_cls_pos
-        (Cls.name dest_cls)
-        (Cls.name included_cls)
+      Errors.add_typing_error
+        Typing_error.(
+          enum
+          @@ Primary.Enum.Incompatible_enum_inclusion_constraint
+               {
+                 pos = dest_cls_pos;
+                 classish_name = Cls.name dest_cls;
+                 src_classish_name = Cls.name included_cls;
+               })
     | (_, _) -> ());
     (* ensure normal enums can't include enum classes *)
     if
       Ast_defs.is_c_enum_class included_kind
       && not (Ast_defs.is_c_enum_class dest_kind)
     then
-      Errors.wrong_extend_kind
-        ~parent_pos:(Cls.pos included_cls)
-        ~parent_kind:included_kind
-        ~parent_name:(Cls.name included_cls)
-        ~child_pos:dest_cls_pos
-        ~child_kind:dest_kind
-        ~child_name:(Cls.name dest_cls)
+      Errors.add_typing_error
+        Typing_error.(
+          primary
+          @@ Primary.Wrong_extend_kind
+               {
+                 parent_pos = Cls.pos included_cls;
+                 parent_kind = included_kind;
+                 parent_name = Cls.name included_cls;
+                 pos = dest_cls_pos;
+                 kind = dest_kind;
+                 name = Cls.name dest_cls;
+               })
   | (None, _) ->
-    Errors.enum_inclusion_not_enum
-      dest_cls_pos
-      (Cls.name dest_cls)
-      (Cls.name included_cls)
+    Errors.add_typing_error
+      Typing_error.(
+        enum
+        @@ Primary.Enum.Enum_inclusion_not_enum
+             {
+               pos = dest_cls_pos;
+               classish_name = Cls.name dest_cls;
+               src_classish_name = Cls.name included_cls;
+             })
   | (_, _) -> ()
 
 let is_enum_or_enum_class k = Ast_defs.is_c_enum k || Ast_defs.is_c_enum_class k
@@ -892,21 +954,31 @@ let check_enum_includes env cls =
               in
               if String.equal origin_class_name dest_class_name then
                 (* redeclare *)
-                Errors.redeclaring_classish_const
-                  dest_class_pos
-                  dest_class_name
-                  origin_const_pos
-                  src_class_name
-                  const_name
+                Errors.add_typing_error
+                  Typing_error.(
+                    primary
+                    @@ Primary.Redeclaring_classish_const
+                         {
+                           pos = dest_class_pos;
+                           classish_name = dest_class_name;
+                           redeclaration_pos = origin_const_pos;
+                           existing_const_origin = src_class_name;
+                           const_name;
+                         })
               else if String.( <> ) origin_class_name class_const.cc_origin then
                 (* check for diamond inclusion, if not raise an error about multiple inherit *)
-                Errors.reinheriting_classish_const
-                  dest_class_pos
-                  dest_class_name
-                  ie_pos
-                  src_class_name
-                  origin_class_name
-                  const_name);
+                Errors.add_typing_error
+                  Typing_error.(
+                    primary
+                    @@ Primary.Reinheriting_classish_const
+                         {
+                           pos = dest_class_pos;
+                           classish_name = dest_class_name;
+                           src_pos = ie_pos;
+                           src_classish_name = src_class_name;
+                           existing_const_origin = origin_class_name;
+                           const_name;
+                         }));
             enum_constant_map :=
               SMap.add
                 const_name
@@ -930,18 +1002,23 @@ let check_dynamic_class_element get_static_elt element_name dyn_pos ~elt_type =
      static properties we want to look up do, so add it. *)
   let id =
     match elt_type with
-    | `Method -> element_name
-    | `Property -> "$" ^ element_name
+    | `meth -> element_name
+    | `prop -> "$" ^ element_name
   in
   match get_static_elt id with
   | None -> ()
   | Some static_element ->
     let (lazy ty) = static_element.ce_type in
-    Errors.static_redeclared_as_dynamic
-      dyn_pos
-      (get_pos ty)
-      element_name
-      ~elt_type
+    Errors.add_typing_error
+      Typing_error.(
+        primary
+        @@ Primary.Static_redeclared_as_dynamic
+             {
+               pos = dyn_pos;
+               static_pos = get_pos ty;
+               member_name = element_name;
+               elt = elt_type;
+             })
 
 (** Checks that a static element is also static in the parents. *)
 let check_static_class_element get_dyn_elt element_name static_pos ~elt_type =
@@ -953,11 +1030,16 @@ let check_static_class_element get_dyn_elt element_name static_pos ~elt_type =
   | None -> ()
   | Some dyn_element ->
     let (lazy ty) = dyn_element.ce_type in
-    Errors.dynamic_redeclared_as_static
-      static_pos
-      (get_pos ty)
-      element_name
-      ~elt_type
+    Errors.add_typing_error
+      Typing_error.(
+        primary
+        @@ Primary.Dynamic_redeclared_as_static
+             {
+               pos = static_pos;
+               dyn_pos = get_pos ty;
+               member_name = element_name;
+               elt = elt_type;
+             })
 
 (** Error if there are abstract methods that this class is supposed to provide
     an implementation for. *)
@@ -985,7 +1067,17 @@ let check_extend_abstract_prop ~is_final p seq =
   List.iter seq ~f:(fun (x, ce) ->
       if get_ce_abstract ce then
         let ce_pos = Lazy.force ce.ce_type |> get_pos in
-        Errors.implement_abstract ~is_final p ce_pos "property" x)
+        Errors.add_typing_error
+          Typing_error.(
+            primary
+            @@ Primary.Implement_abstract
+                 {
+                   is_final;
+                   pos = p;
+                   decl_pos = ce_pos;
+                   kind = `prop;
+                   name = x;
+                 }))
 
 (* Type constants must be bound to a concrete type for non-abstract classes.
  *)
@@ -993,12 +1085,17 @@ let check_extend_abstract_typeconst ~is_final p seq =
   List.iter seq ~f:(fun (x, tc) ->
       match tc.ttc_kind with
       | TCAbstract _ ->
-        Errors.implement_abstract
-          ~is_final
-          p
-          (fst tc.ttc_name)
-          "type constant"
-          x
+        Errors.add_typing_error
+          Typing_error.(
+            primary
+            @@ Primary.Implement_abstract
+                 {
+                   is_final;
+                   pos = p;
+                   decl_pos = fst tc.ttc_name;
+                   kind = `ty_const;
+                   name = x;
+                 })
       | _ -> ())
 
 let check_extend_abstract_const ~is_final p seq =
@@ -1006,7 +1103,17 @@ let check_extend_abstract_const ~is_final p seq =
       match cc.cc_abstract with
       | CCAbstract _ when not cc.cc_synthesized ->
         let cc_pos = get_pos cc.cc_type in
-        Errors.implement_abstract ~is_final p cc_pos "constant" x
+        Errors.add_typing_error
+          Typing_error.(
+            primary
+            @@ Primary.Implement_abstract
+                 {
+                   is_final;
+                   pos = p;
+                   decl_pos = cc_pos;
+                   kind = `const;
+                   name = x;
+                 })
       | _ -> ())
 
 (** Error if there are abstract members that this class is supposed to provide
@@ -1071,7 +1178,7 @@ let check_no_generic_static_property env tc =
     Cls.sprops tc
     |> List.iter ~f:(fun (_prop_name, prop) ->
            let (lazy ty) = prop.ce_type in
-           let var_type_pos = get_pos ty in
+           let var_ty_pos = get_pos ty in
            let class_pos = Cls.pos tc in
            match contains_generic ty with
            | None -> ()
@@ -1081,10 +1188,11 @@ let check_no_generic_static_property env tc =
                 * in a different file. *)
                (Env.fill_in_pos_filename_if_in_current_decl env generic_pos)
                ~f:(fun generic_pos ->
-                 Errors.static_property_type_generic_param
-                   ~class_pos
-                   ~var_type_pos
-                   ~generic_pos))
+                 Errors.add_typing_error
+                   Typing_error.(
+                     primary
+                     @@ Primary.Static_prop_type_generic_param
+                          { class_pos; var_ty_pos; pos = generic_pos })))
 
 let get_decl_prop_ty env cls ~is_static prop_id =
   let is_global_inference_on = TCO.global_inference (Env.get_tcopt env) in
@@ -1113,8 +1221,13 @@ let typeconst_def
       c_tconst_doc_comment;
       c_tconst_is_ctx;
     } =
-  if is_enum_or_enum_class cls.c_kind then
-    Errors.cannot_declare_constant `enum pos cls.c_name;
+  (if is_enum_or_enum_class cls.c_kind then
+    let (class_pos, class_name) = cls.c_name in
+    Errors.add_typing_error
+      Typing_error.(
+        primary
+        @@ Primary.Cannot_declare_constant
+             { kind = `enum; pos; class_pos; class_name }));
 
   let name = snd cls.c_name ^ "::" ^ snd id in
   (* Check constraints and report cycles through the definition *)
@@ -1142,7 +1255,7 @@ let typeconst_def
             env
             ty
             as_
-            Errors.Callback.unify_error
+            Typing_error.Callback.unify_error
         | None -> env
       in
       let env =
@@ -1157,7 +1270,7 @@ let typeconst_def
             env
             super
             ty
-            Errors.Callback.unify_error
+            Typing_error.Callback.unify_error
         | None -> env
       in
       env
@@ -1268,7 +1381,7 @@ let class_const_def ~in_enum_class c env cc =
       env
       ty'
       hint_ty
-      Errors.Callback.class_constant_value_does_not_match_hint
+      Typing_error.Callback.class_constant_value_does_not_match_hint
   in
   let type_and_check env e =
     let (env, (te, ty')) =
@@ -1372,7 +1485,8 @@ let class_var_def ~is_static cls env cv =
             env
             ty
             cty
-            Errors.Callback.class_property_initializer_type_does_not_match_hint
+            Typing_error.Callback
+            .class_property_initializer_type_does_not_match_hint
       in
       (env, Some te)
   in
@@ -1420,14 +1534,24 @@ let class_var_def ~is_static cls env cv =
     in
     Option.iter decl_cty ~f:(fun ty ->
         Typing_dynamic.check_property_sound_for_dynamic_write
-          ~on_error:Errors.property_is_not_enforceable
+          ~on_error:(fun pos prop_name class_name (prop_pos, prop_type) ->
+            Errors.add_typing_error
+              Typing_error.(
+                primary
+                @@ Primary.Property_is_not_enforceable
+                     { pos; prop_name; class_name; prop_pos; prop_type }))
           env_with_require_dynamic
           (Cls.name cls)
           cv.cv_id
           ty
           (Some cv_type_ty));
     Typing_dynamic.check_property_sound_for_dynamic_read
-      ~on_error:Errors.property_is_not_dynamic
+      ~on_error:(fun pos prop_name class_name (prop_pos, prop_type) ->
+        Errors.add_typing_error
+          Typing_error.(
+            primary
+            @@ Primary.Property_is_not_dynamic
+                 { pos; prop_name; class_name; prop_pos; prop_type }))
       env_with_require_dynamic
       (Cls.name cls)
       cv.cv_id
@@ -1522,7 +1646,7 @@ let check_generic_class_with_SupportDynamicType env c parents =
                     Ast_defs.Constraint_as
                     lty
                     dynamic_ty
-                    (Errors.Reasons_callback.unify_error_at pc)
+                    (Typing_error.Reasons_callback.unify_error_at pc)
                 in
                 begin
                   match Env.get_self_ty env with
@@ -1532,12 +1656,15 @@ let check_generic_class_with_SupportDynamicType env c parents =
                       env_with_assumptions
                       self_ty
                       dynamic_ty
-                    @@ Errors.Reasons_callback.bad_conditional_support_dynamic
+                    @@ Typing_error.Reasons_callback
+                       .bad_conditional_support_dynamic
                          pc
                          ~child:c_name
                          ~parent:name
-                         ~ty_str:(Typing_print.full_strip_ns_decl env ty)
-                         ~self_ty_str:(Typing_print.full_strip_ns env self_ty)
+                         ~ty_name:
+                           (lazy (Typing_print.full_strip_ns_decl env ty))
+                         ~self_ty_name:
+                           (lazy (Typing_print.full_strip_ns env self_ty))
                   | _ -> env
                 end
               | _ -> env
@@ -1565,12 +1692,19 @@ let check_SupportDynamicType env c =
           | (_, Happly ((_, name), _)) -> Some name
           | _ -> None)
     in
-    let error_parent_support_dynamic_type parent f =
-      Errors.parent_support_dynamic_type
-        (fst c.c_name)
-        (snd c.c_name, c.c_kind)
-        (Cls.name parent, Cls.kind parent)
-        f
+    let error_parent_support_dynamic_type parent child_support_dyn =
+      Errors.add_typing_error
+        Typing_error.(
+          primary
+          @@ Primary.Parent_support_dynamic_type
+               {
+                 pos = fst c.c_name;
+                 child_name = snd c.c_name;
+                 child_kind = c.c_kind;
+                 parent_name = Cls.name parent;
+                 parent_kind = Cls.kind parent;
+                 child_support_dyn;
+               })
     in
     match c.c_kind with
     | Ast_defs.(Cenum | Cenum_class _) ->
@@ -1650,7 +1784,18 @@ let class_def_ env c tc =
             if not Ast_defs.(is_c_trait (Cls.kind parent_class)) then
               ()
             else
-              Errors.override_per_trait c.c_name id ce.ce_origin pos
+              let (class_pos, class_name) = c.c_name in
+              Errors.add_typing_error
+                Typing_error.(
+                  primary
+                  @@ Primary.Override_per_trait
+                       {
+                         pos = class_pos;
+                         class_name;
+                         meth_name = id;
+                         trait_name = ce.ce_origin;
+                         meth_pos = pos;
+                       })
     in
 
     List.iter (Cls.methods tc) ~f:(check_override ~is_static:false);
@@ -1746,13 +1891,13 @@ let class_def_ env c tc =
   let (constructor, static_methods, methods) = split_methods c.c_methods in
   if not (skip_hierarchy_checks ctx) then (
     List.iter static_vars ~f:(fun { cv_id = (p, id); _ } ->
-        check_static_class_element (Cls.get_prop tc) ~elt_type:`Property id p);
+        check_static_class_element (Cls.get_prop tc) ~elt_type:`prop id p);
     List.iter vars ~f:(fun { cv_id = (p, id); _ } ->
-        check_dynamic_class_element (Cls.get_sprop tc) ~elt_type:`Property id p);
+        check_dynamic_class_element (Cls.get_sprop tc) ~elt_type:`prop id p);
     List.iter static_methods ~f:(fun { m_name = (p, id); _ } ->
-        check_static_class_element (Cls.get_method tc) ~elt_type:`Method id p);
+        check_static_class_element (Cls.get_method tc) ~elt_type:`meth id p);
     List.iter methods ~f:(fun { m_name = (p, id); _ } ->
-        check_dynamic_class_element (Cls.get_smethod tc) ~elt_type:`Method id p)
+        check_dynamic_class_element (Cls.get_smethod tc) ~elt_type:`meth id p)
   );
   let env =
     if skip_hierarchy_checks ctx then
@@ -1933,7 +2078,7 @@ let gconst_def ctx cst =
           env
           value_type
           dty
-          Errors.Callback.unify_error
+          Typing_error.Callback.unify_error
       in
       (te, env)
     | None ->
@@ -1969,7 +2114,7 @@ let record_field env f =
         env
         ty
         (MakeType.unenforced cty)
-        Errors.Callback.record_init_value_does_not_match_hint
+        Typing_error.Callback.record_init_value_does_not_match_hint
     in
     (env, (id, hint, Some te))
   | None -> (env, (id, hint, None))
@@ -1982,10 +2127,15 @@ let record_def_parent env rd parent_hint =
       (* We can only inherit from abstract records. *)
       (if not parent_rd.rdt_abstract then
         let (parent_pos, parent_name) = parent_rd.rdt_name in
-        Errors.extend_non_abstract_record
-          parent_name
-          (fst rd.rd_name)
-          parent_pos);
+        Errors.add_typing_error
+          Typing_error.(
+            primary
+            @@ Primary.Extend_non_abstract_record
+                 {
+                   name = parent_name;
+                   pos = fst rd.rd_name;
+                   decl_pos = parent_pos;
+                 }));
 
       (* Ensure we aren't defining fields that overlap with
          inherited fields. *)
@@ -2019,7 +2169,9 @@ let check_record_inheritance_cycle env ((rd_pos, rd_name) : Aast.sid) : unit =
       (match rd.rdt_extends with
       | Some (_, parent_name) when String.equal parent_name rd_name ->
         (* This record is in an inheritance cycle.*)
-        Errors.cyclic_record_def trace rd_pos
+        Errors.add_typing_error
+          Typing_error.(
+            primary @@ Primary.Cyclic_record_def { names = trace; pos = rd_pos })
       | Some (_, parent_name) when SSet.mem parent_name seen ->
         (* There's an inheritance cycle higher in the chain. *)
         ()

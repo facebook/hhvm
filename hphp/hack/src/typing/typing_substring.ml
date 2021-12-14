@@ -38,11 +38,16 @@ let sub_string_err (p : Pos.t) (env : env) (ty : locl_ty) :
   Result.fold
     ~ok:(fun env -> (env, None))
     ~error:(fun env -> (env, Some (ty, stringlike)))
-  @@ Typing_subtype.sub_type_or_fail_res env ty stringlike (fun () ->
+  @@ Typing_subtype.sub_type_or_fail_res env ty stringlike
+  @@ Some
+       Typing_error.(
+         primary
+         @@
          if Typing_solver.is_sub_type env ty stringish then
-           Errors.object_string_deprecated p
+           Primary.Object_string_deprecated p
          else
-           Errors.invalid_sub_string p (Typing_print.error env ty))
+           Primary.Invalid_substring
+             { pos = p; ty_name = lazy (Typing_print.error env ty) })
 
 let sub_string (p : Pos.t) (env : env) (ty : locl_ty) : env =
   fst @@ sub_string_err p env ty

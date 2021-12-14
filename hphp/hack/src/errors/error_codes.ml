@@ -243,6 +243,7 @@ end
 
 module Typing = struct
   type t =
+    | InternalError [@value 0]
     (* | AbstractClassFinalDEPRECATED [@value 4001] [@value 4001] *)
     | UninstantiableClass [@value 4002]
     (* | AnonymousRecursiveDEPRECATED [@value 4003] *)
@@ -654,6 +655,7 @@ module Typing = struct
     | HHExpectFailure [@value 4453]
     | UnsafeCastLvalue [@value 4454]
     | UnsafeCastAwait [@value 4455]
+    | HigherKindedTypesUnsupportedFeature [@value 4456]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

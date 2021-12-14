@@ -98,11 +98,20 @@ let check_type_name
     match SMap.find_opt name env.type_params with
     | Some reified ->
       (* TODO: These throw typing errors instead of naming errors *)
-      if not allow_generics then Errors.generics_not_allowed pos;
+      if not allow_generics then
+        Errors.add_typing_error
+          Typing_error.(primary @@ Primary.Generics_not_allowed pos);
       begin
         match reified with
-        | Aast.Erased -> Errors.generic_at_runtime pos "Erased"
-        | Aast.SoftReified -> Errors.generic_at_runtime pos "Soft reified"
+        | Aast.Erased ->
+          Errors.add_typing_error
+            Typing_error.(
+              primary @@ Primary.Generic_at_runtime { pos; prefix = "Erased" })
+        | Aast.SoftReified ->
+          Errors.add_typing_error
+            Typing_error.(
+              primary
+              @@ Primary.Generic_at_runtime { pos; prefix = "Soft reified" })
         | Aast.Reified -> ()
       end
     | None ->

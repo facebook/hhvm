@@ -38,7 +38,7 @@ type sub_type =
   ?is_coeffect:bool ->
   locl_ty ->
   locl_ty ->
-  Errors.Reasons_callback.t ->
+  Typing_error.Reasons_callback.t ->
   env
 
 let (sub_type_ref : sub_type ref) = ref (not_implemented "sub_type")
@@ -50,7 +50,7 @@ type sub_type_res =
   ?coerce:Typing_logic.coercion_direction option ->
   locl_ty ->
   locl_ty ->
-  Errors.Reasons_callback.t ->
+  Typing_error.Reasons_callback.t ->
   (env, env) result
 
 let (sub_type_res_ref : sub_type_res ref) = ref (not_implemented "sub_type_res")
@@ -62,7 +62,7 @@ type sub_type_i =
   ?is_coeffect:bool ->
   internal_type ->
   internal_type ->
-  Errors.Reasons_callback.t ->
+  Typing_error.Reasons_callback.t ->
   env
 
 let (sub_type_i_ref : sub_type_i ref) = ref (not_implemented "sub_type_i")
@@ -73,7 +73,7 @@ type sub_type_i_res =
   env ->
   internal_type ->
   internal_type ->
-  Errors.Reasons_callback.t ->
+  Typing_error.Reasons_callback.t ->
   (env, env) result
 
 let (sub_type_i_res_ref : sub_type_i_res ref) =
@@ -82,7 +82,7 @@ let (sub_type_i_res_ref : sub_type_i_res ref) =
 let sub_type_i_res x = !sub_type_i_res_ref x
 
 type sub_type_with_dynamic_as_bottom =
-  env -> locl_ty -> locl_ty -> Errors.Reasons_callback.t -> env
+  env -> locl_ty -> locl_ty -> Typing_error.Reasons_callback.t -> env
 
 let (sub_type_with_dynamic_as_bottom_ref : sub_type_with_dynamic_as_bottom ref)
     =
@@ -91,7 +91,11 @@ let (sub_type_with_dynamic_as_bottom_ref : sub_type_with_dynamic_as_bottom ref)
 let sub_type_with_dynamic_as_bottom x = !sub_type_with_dynamic_as_bottom_ref x
 
 type sub_type_with_dynamic_as_bottom_res =
-  env -> locl_ty -> locl_ty -> Errors.Reasons_callback.t -> (env, env) result
+  env ->
+  locl_ty ->
+  locl_ty ->
+  Typing_error.Reasons_callback.t ->
+  (env, env) result
 
 let (sub_type_with_dynamic_as_bottom_res_ref :
       sub_type_with_dynamic_as_bottom_res ref) =
@@ -148,7 +152,7 @@ type add_constraint =
   Ast_defs.constraint_kind ->
   locl_ty ->
   locl_ty ->
-  Errors.Reasons_callback.t ->
+  Typing_error.Reasons_callback.t ->
   env
 
 let (add_constraint_ref : add_constraint ref) =
@@ -537,10 +541,16 @@ let shape_field_name :
   match shape_field_name_ this (p, field) with
   | Ok x -> Some x
   | Error `Expected_class ->
-    Errors.expected_class p;
+    Errors.add_typing_error
+      Typing_error.(
+        primary @@ Primary.Expected_class { pos = p; suffix = None });
     None
   | Error `Invalid_shape_field_name ->
-    Errors.invalid_shape_field_name p;
+    let err =
+      Typing_error.Primary.Shape.(
+        Invalid_shape_field_name { pos = p; is_empty = false })
+    in
+    Errors.add_typing_error (Typing_error.shape err);
     None
 
 (*****************************************************************************)

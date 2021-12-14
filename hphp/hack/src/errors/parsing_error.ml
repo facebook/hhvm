@@ -18,34 +18,13 @@ type t =
       msg: string;
     }
 
-let fixme_format pos = Fixme_format pos
-
-let parsing_error pos ~msg = Parsing_error { pos; msg }
-
-let xhp_parsing_error pos ~msg = Xhp_parsing_error { pos; msg }
-
-(* -- Phase error implementation -------------------------------------------- *)
-let error_code = function
-  | Fixme_format _ -> Error_code.FixmeFormat
-  | Parsing_error _ -> Error_code.ParsingError
-  | Xhp_parsing_error _ -> Error_code.XhpParsingError
-
-let claim err =
-  match err with
+let to_user_error = function
   | Fixme_format pos ->
-    (pos, "`HH_FIXME` wrong format, expected `/* HH_FIXME[ERROR_NUMBER] */`")
-  | Parsing_error { pos; msg }
+    User_error.make
+      Error_code.(to_enum FixmeFormat)
+      (pos, "`HH_FIXME` wrong format, expected `/* HH_FIXME[ERROR_NUMBER] */`")
+      []
+  | Parsing_error { pos; msg } ->
+    User_error.make Error_code.(to_enum ParsingError) (pos, msg) []
   | Xhp_parsing_error { pos; msg } ->
-    (pos, msg)
-
-let reasons = function
-  | Fixme_format _
-  | Parsing_error _
-  | Xhp_parsing_error _ ->
-    []
-
-let quickfixes = function
-  | Fixme_format _
-  | Parsing_error _
-  | Xhp_parsing_error _ ->
-    []
+    User_error.make Error_code.(to_enum XhpParsingError) (pos, msg) []

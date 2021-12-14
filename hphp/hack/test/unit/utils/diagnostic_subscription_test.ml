@@ -26,7 +26,9 @@ let error_list_to_string errors =
 
 let create_path x = Relative_path.(create Root ("/" ^ x))
 
-let error_in path message = Errors.parsing_error (Pos.make_from path, message)
+let error_in path msg =
+  Errors.add_parsing_error
+  @@ Parsing_error.Parsing_error { pos = Pos.make_from path; msg }
 
 let test_update () =
   let a_path = create_path "A" in

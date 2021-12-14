@@ -90,7 +90,8 @@ let pos_of_error path source_text error =
     (SyntaxError.end_offset error)
 
 let process_scour_comments (env : env) (sc : Scoured_comments.t) =
-  List.iter sc.sc_error_pos ~f:Errors.fixme_format;
+  List.iter sc.sc_error_pos ~f:(fun pos ->
+      Errors.add_parsing_error @@ Parsing_error.Fixme_format pos);
   if (not env.disable_global_state_mutation) && env.keep_errors then (
     Fixme_provider.provide_disallowed_fixmes env.file sc.sc_misuses;
     if env.quick_mode then
@@ -101,7 +102,10 @@ let process_scour_comments (env : env) (sc : Scoured_comments.t) =
 
 let process_lowpri_errors (env : env) (lowpri_errors : (Pos.t * string) list) =
   if should_surface_errors env then
-    List.iter ~f:Errors.parsing_error lowpri_errors
+    List.iter
+      ~f:(fun (pos, msg) ->
+        Errors.add_parsing_error @@ Parsing_error.Parsing_error { pos; msg })
+      lowpri_errors
 
 let process_non_syntax_errors (_ : env) (errors : Errors.error list) =
   List.iter ~f:Errors.add_error errors
@@ -127,7 +131,9 @@ let process_syntax_errors
     (errors : Full_fidelity_syntax_error.t list) =
   let relative_pos = pos_of_error env.file source_text in
   let report_error e =
-    Errors.parsing_error (relative_pos e, SyntaxError.message e)
+    Errors.add_parsing_error
+    @@ Parsing_error.Parsing_error
+         { pos = relative_pos e; msg = SyntaxError.message e }
   in
   List.iter ~f:report_error errors
 

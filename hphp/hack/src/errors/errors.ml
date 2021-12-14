@@ -769,13 +769,7 @@ and get_applied_fixmes (_err, fixmes) = files_t_to_list fixmes
 
 and from_error_list err = (list_to_files_t err, Relative_path.Map.empty)
 
-let add_parsing_error err =
-  add_error
-  @@ User_error.make
-       Parsing_error.(Error_code.to_enum @@ error_code err)
-       (Parsing_error.claim err)
-       (Parsing_error.reasons err)
-       ~quickfixes:(Parsing_error.quickfixes err)
+let add_parsing_error err = add_error @@ Parsing_error.to_user_error err
 
 let incremental_update ~old ~new_ ~rechecked phase =
   let fold init g =
@@ -991,18 +985,6 @@ let on_error_or_add
   match on_error with
   | None -> add_error @@ User_error.make code claim reasons
   | Some f -> f ~code (claim_as_reason claim :: reasons)
-
-(*****************************************************************************)
-(* Parsing errors. *)
-(*****************************************************************************)
-
-let fixme_format pos = add_parsing_error @@ Parsing_error.fixme_format pos
-
-let parsing_error (pos, msg) =
-  add_parsing_error @@ Parsing_error.parsing_error pos ~msg
-
-let xhp_parsing_error (pos, msg) =
-  add_parsing_error @@ Parsing_error.xhp_parsing_error pos ~msg
 
 (*****************************************************************************)
 (* Legacy AST / AAST errors *)

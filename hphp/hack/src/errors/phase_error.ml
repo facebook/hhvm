@@ -11,11 +11,5 @@ module type S = sig
 
   module Error_code : Error_category.S
 
-  val error_code : t -> Error_code.t
-
-  val claim : t -> Pos.t * string
-
-  val reasons : t -> (Pos_or_decl.t * string) list
-
-  val quickfixes : t -> Quickfix.t list
+  val to_user_error : t -> (Pos.t, Pos_or_decl.t) User_error.t
 end

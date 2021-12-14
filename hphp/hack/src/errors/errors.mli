@@ -103,6 +103,8 @@ val num_digits : int -> int
 
 val add_error : error -> unit
 
+val add_parsing_error : Parsing_error.t -> unit
+
 (* Error codes that can be suppressed in strict mode with a FIXME based on configuration. *)
 val allowed_fixme_codes_strict : ISet.t ref
 
@@ -248,8 +250,6 @@ val internal_error : Pos.t -> string -> unit
 val unimplemented_feature : Pos.t -> string -> unit
 
 val experimental_feature : Pos.t -> string -> unit
-
-val fixme_format : Pos.t -> unit
 
 val missing_field :
   Pos_or_decl.t ->
@@ -462,10 +462,6 @@ val const_without_typehint : Pos.t * string -> string -> unit
 val prop_without_typehint : string -> Pos.t * string -> unit
 
 val illegal_constant : Pos.t -> unit
-
-val parsing_error : Pos.t * string -> unit
-
-val xhp_parsing_error : Pos.t * string -> unit
 
 val format_string :
   Pos.t -> string -> string -> Pos_or_decl.t -> string -> string -> unit

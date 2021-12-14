@@ -6,10 +6,16 @@
  *
  *)
 
-include Phase_error.S with module Error_code = Error_codes.Parsing
+type t =
+  | Fixme_format of Pos.t
+  | Parsing_error of {
+      pos: Pos.t;
+      msg: string;
+    }
+  | Xhp_parsing_error of {
+      pos: Pos.t;
+      msg: string;
+    }
 
-val fixme_format : Pos.t -> t
-
-val parsing_error : Pos.t -> msg:string -> t
-
-val xhp_parsing_error : Pos.t -> msg:string -> t
+include
+  Phase_error.S with type t := t and module Error_code = Error_codes.Parsing

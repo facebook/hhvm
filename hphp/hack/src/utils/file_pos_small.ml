@@ -95,8 +95,8 @@ let of_lexing_pos lp =
     lp.Lexing.pos_lnum
     (lp.Lexing.pos_cnum - lp.Lexing.pos_bol)
 
-let of_lnum_bol_cnum ~pos_lnum ~pos_bol ~pos_cnum =
-  bol_line_col pos_bol pos_lnum (pos_cnum - pos_bol)
+let of_lnum_bol_offset ~pos_lnum ~pos_bol ~pos_offset =
+  bol_line_col pos_bol pos_lnum (pos_offset - pos_bol)
 
 (* accessors *)
 
@@ -126,11 +126,11 @@ let to_lexing_pos pos_fname t =
 
 let as_large_pos p =
   let (lnum, col, bol) = line_column_beg p in
-  File_pos_large.of_lnum_bol_cnum
+  File_pos_large.of_lnum_bol_offset
     ~pos_lnum:lnum
     ~pos_bol:bol
-    ~pos_cnum:(bol + col)
+    ~pos_offset:(bol + col)
 
 let of_large_pos : File_pos_large.t -> t option =
- fun { File_pos_large.pos_bol; pos_cnum; pos_lnum } ->
-  of_lnum_bol_cnum ~pos_lnum ~pos_bol ~pos_cnum
+ fun { File_pos_large.pos_bol; pos_offset; pos_lnum } ->
+  of_lnum_bol_offset ~pos_lnum ~pos_bol ~pos_offset

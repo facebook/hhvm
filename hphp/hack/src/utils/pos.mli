@@ -27,9 +27,9 @@ val none : t
 
 val filename : 'a pos -> 'a
 
-val start_cnum : 'a pos -> int
+val start_offset : 'a pos -> int
 
-val end_cnum : 'a pos -> int
+val end_offset : 'a pos -> int
 
 val line : 'a pos -> int
 
@@ -143,7 +143,7 @@ val set_file : 'a -> 'b pos -> 'a pos
 
 val set_col_end : int -> 'a pos -> 'a pos
 
-val make_from_lnum_bol_cnum :
+val make_from_lnum_bol_offset :
   pos_file:Relative_path.t ->
   pos_start:int * int * int ->
   pos_end:int * int * int ->

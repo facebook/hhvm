@@ -960,15 +960,15 @@ let visitor =
                     mid
                     (offset + AutocompleteTypes.autocomplete_token_length)
                 in
-                let (line, bol, cnum) = Pos.line_beg_offset pos in
+                let (line, bol, start_offset) = Pos.line_beg_offset pos in
                 let pos =
-                  Pos.make_from_lnum_bol_cnum
+                  Pos.make_from_lnum_bol_offset
                     ~pos_file:(Pos.filename pos)
-                    ~pos_start:(line, bol, cnum)
+                    ~pos_start:(line, bol, start_offset)
                     ~pos_end:
                       ( line,
                         bol,
-                        cnum
+                        start_offset
                         + offset
                         + AutocompleteTypes.autocomplete_token_length )
                 in

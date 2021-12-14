@@ -92,7 +92,7 @@ let test_build_xrefs _test_ctxt =
   let ref_pos =
     Pos.set_file
       file
-      (Pos.make_from_lnum_bol_cnum
+      (Pos.make_from_lnum_bol_offset
          ~pos_file:file
          ~pos_start:(2, 5, 10)
          ~pos_end:(2, 5, 15))
@@ -100,7 +100,7 @@ let test_build_xrefs _test_ctxt =
   let dup_ref_pos =
     Pos.set_file
       file
-      (Pos.make_from_lnum_bol_cnum
+      (Pos.make_from_lnum_bol_offset
          ~pos_file:file
          ~pos_start:(2, 5, 10)
          ~pos_end:(2, 5, 15))
@@ -108,7 +108,7 @@ let test_build_xrefs _test_ctxt =
   let next_ref_pos =
     Pos.set_file
       file
-      (Pos.make_from_lnum_bol_cnum
+      (Pos.make_from_lnum_bol_offset
          ~pos_file:file
          ~pos_start:(3, 25, 40)
          ~pos_end:(3, 25, 45))

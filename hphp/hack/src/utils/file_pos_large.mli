@@ -17,10 +17,10 @@ type t = {
   pos_lnum: int;  (** line number. Starts at 1. *)
   pos_bol: int;
       (** character number of the beginning of line of this position.
-          The column number is therefore cnum - bol.
+          The column number is therefore offset - bol.
           Starts at 0. *)
-  pos_cnum: int;
-      (** character number. Count starts at beginning of file, not at beginning of line. Starts at 0. *)
+  pos_offset: int;
+      (** character offset from the beginning of the file. Starts at 0. *)
 }
 [@@deriving eq]
 
@@ -40,7 +40,7 @@ val of_line_column_offset : line:int -> column:int -> offset:int -> t
 
 val of_lexing_pos : Lexing.position -> t
 
-val of_lnum_bol_cnum : pos_lnum:int -> pos_bol:int -> pos_cnum:int -> t
+val of_lnum_bol_offset : pos_lnum:int -> pos_bol:int -> pos_offset:int -> t
 
 val offset : t -> int
 

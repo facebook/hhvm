@@ -27,7 +27,8 @@ val beg_of_file : t
 
 val of_lexing_pos : Lexing.position -> t option
 
-val of_lnum_bol_cnum : pos_lnum:int -> pos_bol:int -> pos_cnum:int -> t option
+val of_lnum_bol_offset :
+  pos_lnum:int -> pos_bol:int -> pos_offset:int -> t option
 
 val offset : t -> int
 

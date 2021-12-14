@@ -15,12 +15,11 @@ pub struct FilePosLarge {
     /// line number. Starts at 1.
     lnum: usize,
     /// character number of the beginning of line of this position.
-    /// The column number is therefore cnum - bol
+    /// The column number is therefore offset - bol
     /// Starts at 0
     bol: usize,
-    /// character number. Count starts at beginning of file, not at beginning of line.
-    /// Starts at 0.
-    cnum: usize,
+    /// character offset from the beginning of the file. Starts at 0.
+    offset: usize,
 }
 arena_deserializer::impl_deserialize_in_arena!(FilePosLarge);
 
@@ -29,7 +28,7 @@ impl arena_trait::TrivialDrop for FilePosLarge {}
 const DUMMY: FilePosLarge = FilePosLarge {
     lnum: 0,
     bol: 0,
-    cnum: usize::max_value(),
+    offset: usize::max_value(),
 };
 
 impl FilePosLarge {
@@ -48,7 +47,7 @@ impl FilePosLarge {
         FilePosLarge {
             lnum: 1,
             bol: 0,
-            cnum: 0,
+            offset: 0,
         }
     }
 
@@ -59,13 +58,13 @@ impl FilePosLarge {
         FilePosLarge {
             lnum: line,
             bol: offset - column,
-            cnum: offset,
+            offset,
         }
     }
 
     #[inline]
-    pub const fn from_lnum_bol_cnum(lnum: usize, bol: usize, cnum: usize) -> Self {
-        FilePosLarge { lnum, bol, cnum }
+    pub const fn from_lnum_bol_offset(lnum: usize, bol: usize, offset: usize) -> Self {
+        FilePosLarge { lnum, bol, offset }
     }
 
     // accessors
@@ -77,7 +76,7 @@ impl FilePosLarge {
 
     #[inline]
     pub const fn column(self) -> usize {
-        self.cnum - self.bol
+        self.offset - self.bol
     }
 
     #[inline]
@@ -90,7 +89,7 @@ impl FilePosLarge {
         FilePosLarge {
             lnum: self.lnum,
             bol: self.bol,
-            cnum: self.bol + col,
+            offset: self.bol + col,
         }
     }
 
@@ -101,29 +100,29 @@ impl FilePosLarge {
 
     #[inline]
     pub const fn line_column(self) -> (usize, usize) {
-        (self.lnum, self.cnum - self.bol)
+        (self.lnum, self.offset - self.bol)
     }
 
     #[inline]
     pub const fn line_column_offset(self) -> (usize, usize, usize) {
-        (self.lnum, self.cnum - self.bol, self.cnum)
+        (self.lnum, self.offset - self.bol, self.offset)
     }
 
     #[inline]
     pub const fn line_beg_offset(self) -> (usize, usize, usize) {
-        (self.lnum, self.bol, self.cnum)
+        (self.lnum, self.bol, self.offset)
     }
 }
 
 impl FilePos for FilePosLarge {
     #[inline]
     fn offset(&self) -> usize {
-        self.cnum
+        self.offset
     }
 
     #[inline]
     fn line_column_beg(&self) -> (usize, usize, usize) {
-        (self.lnum, self.cnum - self.bol, self.bol)
+        (self.lnum, self.offset - self.bol, self.bol)
     }
 }
 
@@ -141,8 +140,8 @@ impl PartialOrd for FilePosLarge {
 
 impl From<FilePosSmall> for FilePosLarge {
     fn from(pos: FilePosSmall) -> Self {
-        let (lnum, bol, cnum) = pos.line_beg_offset();
-        Self::from_lnum_bol_cnum(lnum, bol, cnum)
+        let (lnum, bol, offset) = pos.line_beg_offset();
+        Self::from_lnum_bol_offset(lnum, bol, offset)
     }
 }
 
@@ -151,7 +150,7 @@ impl ToOcamlRep for FilePosLarge {
         let mut block = alloc.block_with_size(3);
         alloc.set_field(&mut block, 0, alloc.add(&self.lnum));
         alloc.set_field(&mut block, 1, alloc.add(&self.bol));
-        alloc.set_field(&mut block, 2, alloc.add(&(self.cnum as isize)));
+        alloc.set_field(&mut block, 2, alloc.add(&(self.offset as isize)));
         block.build()
     }
 }
@@ -161,11 +160,11 @@ impl FromOcamlRep for FilePosLarge {
         let block = ocamlrep::from::expect_tuple(value, 3)?;
         let lnum = ocamlrep::from::field(block, 0)?;
         let bol = ocamlrep::from::field(block, 1)?;
-        let cnum: isize = ocamlrep::from::field(block, 2)?;
+        let offset: isize = ocamlrep::from::field(block, 2)?;
         Ok(Self {
             lnum,
             bol,
-            cnum: cnum as usize,
+            offset: offset as usize,
         })
     }
 }

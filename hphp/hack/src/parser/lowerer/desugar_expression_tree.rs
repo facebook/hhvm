@@ -593,8 +593,8 @@ fn exprpos(pos: &Pos) -> Expr {
     if pos.is_none() || !pos.is_valid() {
         null_literal(pos.clone())
     } else {
-        let ((start_lnum, start_bol, start_cnum), (end_lnum, end_bol, end_cnum)) =
-            pos.to_start_and_end_lnum_bol_cnum();
+        let ((start_lnum, start_bol, start_offset), (end_lnum, end_bol, end_offset)) =
+            pos.to_start_and_end_lnum_bol_offset();
 
         let fields = vec![
             (
@@ -609,9 +609,9 @@ fn exprpos(pos: &Pos) -> Expr {
             ("end_line", int_literal(pos.clone(), end_lnum)),
             (
                 "start_column",
-                int_literal(pos.clone(), start_cnum - start_bol),
+                int_literal(pos.clone(), start_offset - start_bol),
             ),
-            ("end_column", int_literal(pos.clone(), end_cnum - end_bol)),
+            ("end_column", int_literal(pos.clone(), end_offset - end_bol)),
         ];
 
         shape_literal(pos, fields)

@@ -153,7 +153,7 @@ let get_pos_for_item_opt (ctx : Provider_context.t) (item : si_item) :
   | Some (relpath, line, col) ->
     let symbol_len = String.length item.si_fullname in
     let pos =
-      Pos.make_from_lnum_bol_cnum
+      Pos.make_from_lnum_bol_offset
         ~pos_file:relpath
         ~pos_start:(line, 1, col)
         ~pos_end:(line, 1, col + symbol_len)

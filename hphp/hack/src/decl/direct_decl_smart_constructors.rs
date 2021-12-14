@@ -156,7 +156,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         }
         // If there's no internal trivia, then we can just reference the
         // qualified name in the original source text instead of copying it.
-        let source_len = pos.end_cnum() - pos.start_cnum();
+        let source_len = pos.end_offset() - pos.start_offset();
         if source_len == len {
             let qualified_name: &'a str = self.str_from_utf8(self.source_text_at_pos(pos));
             return Id(pos, qualified_name);
@@ -1120,7 +1120,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         let end = start + token.width();
         let start = self.source_text.offset_to_file_pos_triple(start);
         let end = self.source_text.offset_to_file_pos_triple(end);
-        Pos::from_lnum_bol_cnum(self.arena, self.filename, start, end)
+        Pos::from_lnum_bol_offset(self.arena, self.filename, start, end)
     }
 
     fn node_to_expr(&self, node: Node<'a>) -> Option<&'a nast::Expr<'a>> {
@@ -1948,8 +1948,8 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
     }
 
     fn source_text_at_pos(&self, pos: &'a Pos<'a>) -> &'text [u8] {
-        let start = pos.start_cnum();
-        let end = pos.end_cnum();
+        let start = pos.start_offset();
+        let end = pos.end_offset();
         self.source_text.source_text().sub(start, end - start)
     }
 
@@ -2523,7 +2523,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             let end = this
                 .source_text
                 .offset_to_file_pos_triple(token.end_offset());
-            Pos::from_lnum_bol_cnum(this.arena, this.filename, start, end)
+            Pos::from_lnum_bol_offset(this.arena, this.filename, start, end)
         };
         let kind = token.kind();
 

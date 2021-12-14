@@ -40,8 +40,8 @@ let check_utf8 str =
   Buffer.contents b
 
 let source_at_span source_text pos =
-  let st = Pos.start_cnum pos in
-  let fi = Pos.end_cnum pos in
+  let st = Pos.start_offset pos in
+  let fi = Pos.end_offset pos in
   let source_text = Full_fidelity_source_text.sub source_text st (fi - st) in
   check_utf8 source_text
 

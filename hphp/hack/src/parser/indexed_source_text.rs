@@ -38,7 +38,7 @@ impl<'a> IndexedSourceText<'a> {
     pub fn relative_pos(&self, start_offset: usize, end_offset: usize) -> Pos {
         let pos_start = self.0.offset_map.offset_to_file_pos_triple(start_offset);
         let pos_end = self.0.offset_map.offset_to_file_pos_triple(end_offset);
-        Pos::from_lnum_bol_cnum(self.0.source_text.file_path_rc(), pos_start, pos_end)
+        Pos::from_lnum_bol_offset(self.0.source_text.file_path_rc(), pos_start, pos_end)
     }
 
     pub fn offset_to_file_pos_triple(&self, offset: usize) -> (usize, usize, usize) {

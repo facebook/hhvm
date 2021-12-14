@@ -14,7 +14,7 @@ module Test = Integration_test_base
 
 let pos_at (line1, column1) (line2, column2) =
   Some
-    (Pos.make_from_lnum_bol_cnum
+    (Pos.make_from_lnum_bol_offset
        ~pos_file:Relative_path.default
        ~pos_start:(line1, 0, column1 - 1)
        ~pos_end:(line2, 0, column2))

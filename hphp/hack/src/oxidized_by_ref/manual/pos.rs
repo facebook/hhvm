@@ -73,10 +73,10 @@ impl<'a> Pos<'a> {
         if let Some(span) = PosSpanTiny::make(&span.start, &span.end) {
             return b.alloc(Pos(Tiny { file, span }));
         }
-        let (lnum, bol, cnum) = span.start.line_beg_offset();
-        if let Some(start) = FilePosSmall::from_lnum_bol_cnum(lnum, bol, cnum) {
-            let (lnum, bol, cnum) = span.end.line_beg_offset();
-            if let Some(end) = FilePosSmall::from_lnum_bol_cnum(lnum, bol, cnum) {
+        let (lnum, bol, offset) = span.start.line_beg_offset();
+        if let Some(start) = FilePosSmall::from_lnum_bol_offset(lnum, bol, offset) {
+            let (lnum, bol, offset) = span.end.line_beg_offset();
+            if let Some(end) = FilePosSmall::from_lnum_bol_offset(lnum, bol, offset) {
                 return b.alloc(Pos(Small { file, start, end }));
             }
         }
@@ -145,7 +145,7 @@ impl<'a> Pos<'a> {
     }
 
     pub fn info_raw(&self) -> (usize, usize) {
-        (self.start_cnum(), self.end_cnum())
+        (self.start_offset(), self.end_offset())
     }
 
     pub fn line(&self) -> usize {
@@ -156,20 +156,22 @@ impl<'a> Pos<'a> {
         }
     }
 
-    pub fn from_lnum_bol_cnum(
+    pub fn from_lnum_bol_offset(
         b: &'a Bump,
         file: &'a RelativePath<'a>,
         start: (usize, usize, usize),
         end: (usize, usize, usize),
     ) -> &'a Self {
-        let (start_line, start_bol, start_cnum) = start;
-        let (end_line, end_bol, end_cnum) = end;
-        let start = FilePosLarge::from_lnum_bol_cnum(start_line, start_bol, start_cnum);
-        let end = FilePosLarge::from_lnum_bol_cnum(end_line, end_bol, end_cnum);
+        let (start_line, start_bol, start_offset) = start;
+        let (end_line, end_bol, end_offset) = end;
+        let start = FilePosLarge::from_lnum_bol_offset(start_line, start_bol, start_offset);
+        let end = FilePosLarge::from_lnum_bol_offset(end_line, end_bol, end_offset);
         Self::from_raw_span(b, file, PosSpanRaw { start, end })
     }
 
-    pub fn to_start_and_end_lnum_bol_cnum(&self) -> ((usize, usize, usize), (usize, usize, usize)) {
+    pub fn to_start_and_end_lnum_bol_offset(
+        &self,
+    ) -> ((usize, usize, usize), (usize, usize, usize)) {
         match &self.0 {
             Small { start, end, .. } => (start.line_beg_offset(), end.line_beg_offset()),
             Large { start, end, .. } => (start.line_beg_offset(), end.line_beg_offset()),
@@ -213,11 +215,11 @@ impl<'a> Pos<'a> {
                 + &x1.filename().to_string()
                 + " and "
                 + &x2.filename().to_string())
-        } else if x1.end_cnum() > x2.end_cnum() {
+        } else if x1.end_offset() > x2.end_offset() {
             Err(String::from("btw: invalid positions")
-                + &x1.end_cnum().to_string()
+                + &x1.end_offset().to_string()
                 + "and"
-                + &x2.end_cnum().to_string())
+                + &x2.end_offset().to_string())
         } else {
             Ok(Self::btw_nocheck(b, x1, x2))
         }
@@ -287,26 +289,26 @@ impl<'a> Pos<'a> {
         }
     }
 
-    pub fn end_cnum(&self) -> usize {
+    pub fn end_offset(&self) -> usize {
         match &self.0 {
             Small { end, .. } => end.offset(),
             Large { end, .. } => end.offset(),
-            Tiny { span, .. } => span.end_character_number(),
+            Tiny { span, .. } => span.end_offset(),
         }
     }
 
-    pub fn start_cnum(&self) -> usize {
+    pub fn start_offset(&self) -> usize {
         match &self.0 {
             Small { start, .. } => start.offset(),
             Large { start, .. } => start.offset(),
-            Tiny { span, .. } => span.start_character_number(),
+            Tiny { span, .. } => span.start_offset(),
         }
     }
 
     pub fn to_owned(&self) -> oxidized::pos::Pos {
         let file = self.filename();
         let PosSpanRaw { start, end } = self.to_raw_span();
-        oxidized::pos::Pos::from_lnum_bol_cnum(
+        oxidized::pos::Pos::from_lnum_bol_offset(
             ocamlrep::rc::RcOc::new(file.to_oxidized()),
             start.line_beg_offset(),
             end.line_beg_offset(),
@@ -317,8 +319,8 @@ impl<'a> Pos<'a> {
 impl<'a> Pos<'a> {
     pub fn from_oxidized_in(pos: &oxidized::pos::Pos, arena: &'a Bump) -> &'a Self {
         let file = RelativePath::from_oxidized_in(pos.filename(), arena);
-        let (start, end) = pos.to_start_and_end_lnum_bol_cnum();
-        Self::from_lnum_bol_cnum(arena, file, start, end)
+        let (start, end) = pos.to_start_and_end_lnum_bol_offset();
+        Self::from_lnum_bol_offset(arena, file, start, end)
     }
 
     pub fn from_oxidized_with_file_in(
@@ -328,8 +330,8 @@ impl<'a> Pos<'a> {
     ) -> &'a Self {
         debug_assert!(pos.filename().prefix() == file.prefix());
         debug_assert!(pos.filename().path() == file.path());
-        let (start, end) = pos.to_start_and_end_lnum_bol_cnum();
-        Self::from_lnum_bol_cnum(arena, file, start, end)
+        let (start, end) = pos.to_start_and_end_lnum_bol_offset();
+        Self::from_lnum_bol_offset(arena, file, start, end)
     }
 }
 
@@ -407,8 +409,8 @@ impl Ord for Pos<'_> {
     fn cmp(&self, other: &Pos<'_>) -> Ordering {
         self.filename()
             .cmp(&other.filename())
-            .then(self.start_cnum().cmp(&other.start_cnum()))
-            .then(self.end_cnum().cmp(&other.end_cnum()))
+            .then(self.start_offset().cmp(&other.start_offset()))
+            .then(self.end_offset().cmp(&other.end_offset()))
     }
 }
 
@@ -479,7 +481,7 @@ mod tests {
         start: (usize, usize, usize),
         end: (usize, usize, usize),
     ) -> &'a Pos<'a> {
-        b.alloc(Pos::from_lnum_bol_cnum(b, name, start, end))
+        b.alloc(Pos::from_lnum_bol_offset(b, name, start, end))
     }
 
     #[test]
@@ -488,12 +490,12 @@ mod tests {
         assert_eq!(Pos::none().is_none(), true);
         let path_a = b.alloc(RelativePath::make(Prefix::Dummy, "a"));
         assert_eq!(
-            Pos::from_lnum_bol_cnum(&b, path_a, (0, 0, 0), (0, 0, 0)).is_none(),
+            Pos::from_lnum_bol_offset(&b, path_a, (0, 0, 0), (0, 0, 0)).is_none(),
             false
         );
         let empty_path = b.alloc(RelativePath::make(Prefix::Dummy, ""));
         assert_eq!(
-            Pos::from_lnum_bol_cnum(&b, empty_path, (1, 0, 0), (0, 0, 0)).is_none(),
+            Pos::from_lnum_bol_offset(&b, empty_path, (1, 0, 0), (0, 0, 0)).is_none(),
             false
         );
     }
@@ -507,7 +509,7 @@ mod tests {
         let b = Bump::new();
         let path = b.alloc(RelativePath::make(Prefix::Dummy, "a.php"));
         assert_eq!(
-            Pos::from_lnum_bol_cnum(&b, path, (5, 100, 117), (5, 100, 142))
+            Pos::from_lnum_bol_offset(&b, path, (5, 100, 117), (5, 100, 142))
                 .string()
                 .to_string(),
             r#"File "a.php", line 5, characters 18-42:"#

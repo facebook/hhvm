@@ -123,7 +123,7 @@ let test_get_sorted_error_list () =
 
   let file_with_errors = create_path "FileWithErrors.php" in
   let err_pos =
-    Pos.make_from_lnum_bol_cnum
+    Pos.make_from_lnum_bol_offset
       ~pos_file:file_with_errors
       ~pos_start:(1, 5, 8)
       ~pos_end:(2, 10, 12)

@@ -150,8 +150,7 @@ let rec info_raw p =
   | Pos_large { pos_start; pos_end; _ } ->
     (File_pos_large.offset pos_start, File_pos_large.offset pos_end)
   | Pos_tiny { pos_span; pos_file = _ } ->
-    ( Pos_span_tiny.start_character_number pos_span,
-      Pos_span_tiny.end_character_number pos_span )
+    (Pos_span_tiny.start_offset pos_span, Pos_span_tiny.end_offset pos_span)
   | Pos_from_reason p -> info_raw p
 
 let rec length p =
@@ -161,23 +160,22 @@ let rec length p =
   | Pos_large { pos_start; pos_end; _ } ->
     File_pos_large.offset pos_end - File_pos_large.offset pos_start
   | Pos_tiny { pos_span; pos_file = _ } ->
-    Pos_span_tiny.end_character_number pos_span
-    - Pos_span_tiny.start_character_number pos_span
+    Pos_span_tiny.end_offset pos_span - Pos_span_tiny.start_offset pos_span
   | Pos_from_reason p -> length p
 
-let rec start_cnum p =
+let rec start_offset p =
   match p with
   | Pos_small { pos_start; _ } -> File_pos_small.offset pos_start
   | Pos_large { pos_start; _ } -> File_pos_large.offset pos_start
-  | Pos_tiny { pos_span; _ } -> Pos_span_tiny.start_character_number pos_span
-  | Pos_from_reason p -> start_cnum p
+  | Pos_tiny { pos_span; _ } -> Pos_span_tiny.start_offset pos_span
+  | Pos_from_reason p -> start_offset p
 
-let rec end_cnum p =
+let rec end_offset p =
   match p with
   | Pos_small { pos_end; _ } -> File_pos_small.offset pos_end
   | Pos_large { pos_end; _ } -> File_pos_large.offset pos_end
-  | Pos_tiny { pos_span; _ } -> Pos_span_tiny.end_character_number pos_span
-  | Pos_from_reason p -> end_cnum p
+  | Pos_tiny { pos_span; _ } -> Pos_span_tiny.end_offset pos_span
+  | Pos_from_reason p -> end_offset p
 
 let rec line p =
   match p with
@@ -407,7 +405,7 @@ let to_relative p = set_file (Relative_path.create_detect_prefix (filename p)) p
 let btw x1 x2 =
   if not (Relative_path.equal (filename x1) (filename x2)) then
     failwith "Position in separate files";
-  if end_cnum x1 > end_cnum x2 then
+  if end_offset x1 > end_offset x2 then
     failwith
       (Printf.sprintf
          "btw: invalid positions %s and %s"
@@ -424,7 +422,7 @@ let rec merge x1 x2 =
         start2
       else if File_pos_small.is_dummy start2 then
         start1
-      else if start_cnum x1 < start_cnum x2 then
+      else if start_offset x1 < start_offset x2 then
         start1
       else
         start2
@@ -434,7 +432,7 @@ let rec merge x1 x2 =
         end2
       else if File_pos_small.is_dummy end2 then
         end1
-      else if end_cnum x1 < end_cnum x2 then
+      else if end_offset x1 < end_offset x2 then
         end2
       else
         end1
@@ -447,7 +445,7 @@ let rec merge x1 x2 =
         start2
       else if File_pos_large.is_dummy start2 then
         start1
-      else if start_cnum x1 < start_cnum x2 then
+      else if start_offset x1 < start_offset x2 then
         start1
       else
         start2
@@ -457,7 +455,7 @@ let rec merge x1 x2 =
         end2
       else if File_pos_large.is_dummy end2 then
         end1
-      else if end_cnum x1 < end_cnum x2 then
+      else if end_offset x1 < end_offset x2 then
         end2
       else
         end1
@@ -505,7 +503,7 @@ let to_relative_string p = set_file (Relative_path.suffix (filename p)) p
 
 let get_text_from_pos ~content pos =
   let pos_length = length pos in
-  let offset = start_cnum pos in
+  let offset = start_offset pos in
   String.sub content ~pos:offset ~len:pos_length
 
 (** Compare by filename, then tie-break by start position, and finally by the
@@ -651,23 +649,23 @@ let rec end_line_beg_offset p =
     File_pos_large.line_beg_offset pos_end
   | Pos_from_reason p -> end_line_beg_offset p
 
-let make_from_lnum_bol_cnum ~pos_file ~pos_start ~pos_end =
-  let (lnum_start, bol_start, cnum_start) = pos_start in
-  let (lnum_end, bol_end, cnum_end) = pos_end in
+let make_from_lnum_bol_offset ~pos_file ~pos_start ~pos_end =
+  let (lnum_start, bol_start, offset_start) = pos_start in
+  let (lnum_end, bol_end, offset_end) = pos_end in
   compress
   @@ Pos_large
        {
          pos_file;
          pos_start =
-           File_pos_large.of_lnum_bol_cnum
+           File_pos_large.of_lnum_bol_offset
              ~pos_lnum:lnum_start
              ~pos_bol:bol_start
-             ~pos_cnum:cnum_start;
+             ~pos_offset:offset_start;
          pos_end =
-           File_pos_large.of_lnum_bol_cnum
+           File_pos_large.of_lnum_bol_offset
              ~pos_lnum:lnum_end
              ~pos_bol:bol_end
-             ~pos_cnum:cnum_end;
+             ~pos_offset:offset_end;
        }
 
 let pessimize_enabled pos pessimize_coefficient =

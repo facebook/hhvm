@@ -11,14 +11,14 @@
 type t = {
   pos_lnum: int;
   pos_bol: int;
-  pos_cnum: int;
+  pos_offset: int;
 }
 [@@deriving eq, ord]
 
 let pp fmt pos =
   Format.pp_print_int fmt pos.pos_lnum;
   Format.pp_print_string fmt ":";
-  Format.pp_print_int fmt (pos.pos_cnum - pos.pos_bol + 1)
+  Format.pp_print_int fmt (pos.pos_offset - pos.pos_bol + 1)
 
 let show : t -> string =
  fun pos ->
@@ -27,54 +27,54 @@ let show : t -> string =
 
 let compare : t -> t -> int = compare
 
-let dummy = { pos_lnum = 0; pos_bol = 0; pos_cnum = -1 }
+let dummy = { pos_lnum = 0; pos_bol = 0; pos_offset = -1 }
 
 let is_dummy t = t = dummy
 
-let beg_of_file = { pos_lnum = 1; pos_bol = 0; pos_cnum = 0 }
+let beg_of_file = { pos_lnum = 1; pos_bol = 0; pos_offset = 0 }
 
 (* constructors *)
 
 let of_line_column_offset ~line ~column ~offset =
-  { pos_lnum = line; pos_bol = offset - column; pos_cnum = offset }
+  { pos_lnum = line; pos_bol = offset - column; pos_offset = offset }
 
 let of_lexing_pos lp =
   {
     pos_lnum = lp.Lexing.pos_lnum;
     pos_bol = lp.Lexing.pos_bol;
-    pos_cnum = lp.Lexing.pos_cnum;
+    pos_offset = lp.Lexing.pos_cnum;
   }
 
-let of_lnum_bol_cnum ~pos_lnum ~pos_bol ~pos_cnum =
-  { pos_lnum; pos_bol; pos_cnum }
+let of_lnum_bol_offset ~pos_lnum ~pos_bol ~pos_offset =
+  { pos_lnum; pos_bol; pos_offset }
 
 (* accessors *)
 
-let offset t = t.pos_cnum
+let offset t = t.pos_offset
 
 let line t = t.pos_lnum
 
-let column t = t.pos_cnum - t.pos_bol
+let column t = t.pos_offset - t.pos_bol
 
 let beg_of_line t = t.pos_bol
 
 let set_column c p =
-  { pos_lnum = p.pos_lnum; pos_bol = p.pos_bol; pos_cnum = p.pos_bol + c }
+  { pos_lnum = p.pos_lnum; pos_bol = p.pos_bol; pos_offset = p.pos_bol + c }
 
 let line_beg t = (t.pos_lnum, t.pos_bol)
 
-let line_column t = (t.pos_lnum, t.pos_cnum - t.pos_bol)
+let line_column t = (t.pos_lnum, t.pos_offset - t.pos_bol)
 
-let line_column_beg t = (t.pos_lnum, t.pos_cnum - t.pos_bol, t.pos_bol)
+let line_column_beg t = (t.pos_lnum, t.pos_offset - t.pos_bol, t.pos_bol)
 
-let line_column_offset t = (t.pos_lnum, t.pos_cnum - t.pos_bol, t.pos_cnum)
+let line_column_offset t = (t.pos_lnum, t.pos_offset - t.pos_bol, t.pos_offset)
 
-let line_beg_offset t = (t.pos_lnum, t.pos_bol, t.pos_cnum)
+let line_beg_offset t = (t.pos_lnum, t.pos_bol, t.pos_offset)
 
 let to_lexing_pos pos_fname t =
   {
     Lexing.pos_fname;
     Lexing.pos_lnum = t.pos_lnum;
     Lexing.pos_bol = t.pos_bol;
-    Lexing.pos_cnum = t.pos_cnum;
+    Lexing.pos_cnum = t.pos_offset;
   }

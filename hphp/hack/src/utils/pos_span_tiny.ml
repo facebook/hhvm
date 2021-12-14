@@ -118,17 +118,16 @@ let width (span : t) =
   else
     mask_by ~bits:width_bits (span lsr width_offset)
 
-let start_character_number span =
-  start_beginning_of_line span + start_column span
+let start_offset span = start_beginning_of_line span + start_column span
 
 let end_line_number span = start_line_number span + line_number_increment span
 
 let end_beginning_of_line span =
   start_beginning_of_line span + beginning_of_line_increment span
 
-let end_character_number span = start_character_number span + width span
+let end_offset span = start_offset span + width span
 
-let end_column span = end_character_number span - end_beginning_of_line span
+let end_column span = end_offset span - end_beginning_of_line span
 
 let make : pos_start:File_pos_large.t -> pos_end:File_pos_large.t -> t option =
  fun ~pos_start ~pos_end ->
@@ -138,29 +137,29 @@ let make : pos_start:File_pos_large.t -> pos_end:File_pos_large.t -> t option =
     let {
       File_pos_large.pos_lnum = start_line;
       pos_bol = start_bol;
-      pos_cnum = start_cnum;
+      pos_offset = start_offset;
     } =
       pos_start
     in
     let {
       File_pos_large.pos_lnum = end_line;
       pos_bol = end_bol;
-      pos_cnum = end_cnum;
+      pos_offset = end_offset;
     } =
       pos_end
     in
     if
-      start_cnum < start_bol
+      start_offset < start_bol
       || end_bol < start_bol
       || end_line < start_line
-      || end_cnum < start_cnum
+      || end_offset < start_offset
     then
       None
     else
-      let start_col = start_cnum - start_bol in
+      let start_col = start_offset - start_bol in
       let bol_increment = end_bol - start_bol in
       let line_increment = end_line - start_line in
-      let width = end_cnum - start_cnum in
+      let width = end_offset - start_offset in
       if
         start_bol > max_start_beginning_of_line
         || start_line > max_start_line_number
@@ -186,22 +185,22 @@ let as_large_span : t -> File_pos_large.t * File_pos_large.t =
   else
     let start_lnum = start_line_number span in
     let start_bol = start_beginning_of_line span in
-    let start_cnum = start_character_number span in
+    let start_offset = start_offset span in
     let end_lnum = end_line_number span in
     let end_bol = end_beginning_of_line span in
-    let end_cnum = end_character_number span in
+    let end_offset = end_offset span in
     let pos_start =
       {
         File_pos_large.pos_lnum = start_lnum;
         pos_bol = start_bol;
-        pos_cnum = start_cnum;
+        pos_offset = start_offset;
       }
     in
     let pos_end =
       {
         File_pos_large.pos_lnum = end_lnum;
         pos_bol = end_bol;
-        pos_cnum = end_cnum;
+        pos_offset = end_offset;
       }
     in
     (pos_start, pos_end)

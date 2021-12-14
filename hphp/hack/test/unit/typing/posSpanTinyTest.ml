@@ -12,13 +12,13 @@ open OUnit2
 let test_small _ =
   let line = 30 in
   let bol = 2349 in
-  let start_cnum = 2398 in
-  let end_cnum = 2450 in
+  let start_offset = 2398 in
+  let end_offset = 2450 in
   let pos_start =
-    { File_pos_large.pos_lnum = line; pos_bol = bol; pos_cnum = start_cnum }
+    { File_pos_large.pos_lnum = line; pos_bol = bol; pos_offset = start_offset }
   in
   let pos_end =
-    { File_pos_large.pos_lnum = line; pos_bol = bol; pos_cnum = end_cnum }
+    { File_pos_large.pos_lnum = line; pos_bol = bol; pos_offset = end_offset }
   in
   match Pos_span_tiny.make ~pos_start ~pos_end with
   | None -> assert_failure "Could not create tiny span."
@@ -28,10 +28,10 @@ let test_small _ =
     assert_equal line @@ Pos_span_tiny.end_line_number span;
     assert_equal bol @@ Pos_span_tiny.start_beginning_of_line span;
     assert_equal bol @@ Pos_span_tiny.end_beginning_of_line span;
-    assert_equal start_cnum @@ Pos_span_tiny.start_character_number span;
-    assert_equal end_cnum @@ Pos_span_tiny.end_character_number span;
-    assert_equal (start_cnum - bol) @@ Pos_span_tiny.start_column span;
-    assert_equal (end_cnum - bol) @@ Pos_span_tiny.end_column span;
+    assert_equal start_offset @@ Pos_span_tiny.start_offset span;
+    assert_equal end_offset @@ Pos_span_tiny.end_offset span;
+    assert_equal (start_offset - bol) @@ Pos_span_tiny.start_column span;
+    assert_equal (end_offset - bol) @@ Pos_span_tiny.end_column span;
     let (pos_start', pos_end') = Pos_span_tiny.as_large_span span in
     assert_equal ~msg:(File_pos_large.show pos_start') pos_start pos_start';
     assert_equal pos_end pos_end';
@@ -40,8 +40,8 @@ let test_small _ =
 let test_dummy _ =
   let line = 0 in
   let bol = 0 in
-  let start_cnum = -1 in
-  let end_cnum = -1 in
+  let start_offset = -1 in
+  let end_offset = -1 in
   let pos_start = File_pos_large.dummy in
   let pos_end = File_pos_large.dummy in
   let span = Pos_span_tiny.dummy in
@@ -49,10 +49,10 @@ let test_dummy _ =
   assert_equal line @@ Pos_span_tiny.end_line_number span;
   assert_equal bol @@ Pos_span_tiny.start_beginning_of_line span;
   assert_equal bol @@ Pos_span_tiny.end_beginning_of_line span;
-  assert_equal start_cnum @@ Pos_span_tiny.start_character_number span;
-  assert_equal end_cnum @@ Pos_span_tiny.end_character_number span;
-  assert_equal (start_cnum - bol) @@ Pos_span_tiny.start_column span;
-  assert_equal (end_cnum - bol) @@ Pos_span_tiny.end_column span;
+  assert_equal start_offset @@ Pos_span_tiny.start_offset span;
+  assert_equal end_offset @@ Pos_span_tiny.end_offset span;
+  assert_equal (start_offset - bol) @@ Pos_span_tiny.start_column span;
+  assert_equal (end_offset - bol) @@ Pos_span_tiny.end_column span;
   let (pos_start', pos_end') = Pos_span_tiny.as_large_span span in
   assert_equal pos_start pos_start';
   assert_equal pos_end pos_end';
@@ -62,13 +62,13 @@ let test_large _ =
   let max_int = Int.max_value in
   let line = max_int in
   let bol = max_int in
-  let start_cnum = max_int in
-  let end_cnum = max_int in
+  let start_offset = max_int in
+  let end_offset = max_int in
   let pos_start =
-    { File_pos_large.pos_lnum = line; pos_bol = bol; pos_cnum = start_cnum }
+    { File_pos_large.pos_lnum = line; pos_bol = bol; pos_offset = start_offset }
   in
   let pos_end =
-    { File_pos_large.pos_lnum = line; pos_bol = bol; pos_cnum = end_cnum }
+    { File_pos_large.pos_lnum = line; pos_bol = bol; pos_offset = end_offset }
   in
   match Pos_span_tiny.make ~pos_start ~pos_end with
   | None -> (* expected *) ()
@@ -79,10 +79,10 @@ let test_large _ =
     assert_equal line @@ Pos_span_tiny.end_line_number span;
     assert_equal bol @@ Pos_span_tiny.start_beginning_of_line span;
     assert_equal bol @@ Pos_span_tiny.end_beginning_of_line span;
-    assert_equal start_cnum @@ Pos_span_tiny.start_character_number span;
-    assert_equal end_cnum @@ Pos_span_tiny.end_character_number span;
-    assert_equal (start_cnum - bol) @@ Pos_span_tiny.start_column span;
-    assert_equal (end_cnum - bol) @@ Pos_span_tiny.end_column span;
+    assert_equal start_offset @@ Pos_span_tiny.start_offset span;
+    assert_equal end_offset @@ Pos_span_tiny.end_offset span;
+    assert_equal (start_offset - bol) @@ Pos_span_tiny.start_column span;
+    assert_equal (end_offset - bol) @@ Pos_span_tiny.end_column span;
     let (pos_start', pos_end') = Pos_span_tiny.as_large_span span in
     assert_equal ~msg:(File_pos_large.show pos_start') pos_start pos_start';
     assert_equal pos_end pos_end';

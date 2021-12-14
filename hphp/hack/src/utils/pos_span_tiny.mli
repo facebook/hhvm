@@ -22,7 +22,7 @@ val start_beginning_of_line : t -> int
 
 val start_column : t -> int
 
-val start_character_number : t -> int
+val start_offset : t -> int
 
 val end_line_number : t -> int
 
@@ -30,4 +30,4 @@ val end_beginning_of_line : t -> int
 
 val end_column : t -> int
 
-val end_character_number : t -> int
+val end_offset : t -> int

@@ -76,8 +76,6 @@ let pos_to_range x =
     ed = { line = ed_line; column = ed_column };
   }
 
-let pos_to_ide_pos x = { line = Pos.line x; column = Pos.start_cnum x }
-
 let pos_to_file_range x =
   { range_filename = Pos.filename x; file_range = pos_to_range x }
 

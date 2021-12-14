@@ -113,9 +113,9 @@ let position_to_offset source_text position =
 
 (* Create a Pos.t from two offsets in a source_text (given a path) *)
 let relative_pos pos_file source_text start_offset end_offset =
-  let offset_to_lnum_bol_cnum offset =
+  let offset_to_lnum_bol_offset offset =
     OffsetMap.offset_to_file_pos_triple source_text.offset_map offset
   in
-  let pos_start = offset_to_lnum_bol_cnum start_offset in
-  let pos_end = offset_to_lnum_bol_cnum end_offset in
-  Pos.make_from_lnum_bol_cnum ~pos_file ~pos_start ~pos_end
+  let pos_start = offset_to_lnum_bol_offset start_offset in
+  let pos_end = offset_to_lnum_bol_offset end_offset in
+  Pos.make_from_lnum_bol_offset ~pos_file ~pos_start ~pos_end

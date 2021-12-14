@@ -66,7 +66,7 @@ fn find_et_literals(program: ast::Program) -> Vec<(Pos, ast::ExpressionTree)> {
 }
 
 fn sort_by_start_pos<T>(items: &mut Vec<(Pos, T)>) {
-    items.sort_by(|(p1, _), (p2, _)| p1.start_cnum().cmp(&p2.start_cnum()));
+    items.sort_by(|(p1, _), (p2, _)| p1.start_offset().cmp(&p2.start_offset()));
 }
 
 /// The source code of `program` with expression tree literals

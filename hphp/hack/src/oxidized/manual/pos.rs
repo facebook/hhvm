@@ -87,10 +87,10 @@ impl Pos {
         if let Some(span) = PosSpanTiny::make(&span.start, &span.end) {
             return Pos(Tiny { file, span });
         }
-        let (lnum, bol, cnum) = span.start.line_beg_offset();
-        if let Some(start) = FilePosSmall::from_lnum_bol_cnum(lnum, bol, cnum) {
-            let (lnum, bol, cnum) = span.end.line_beg_offset();
-            if let Some(end) = FilePosSmall::from_lnum_bol_cnum(lnum, bol, cnum) {
+        let (lnum, bol, offset) = span.start.line_beg_offset();
+        if let Some(start) = FilePosSmall::from_lnum_bol_offset(lnum, bol, offset) {
+            let (lnum, bol, offset) = span.end.line_beg_offset();
+            if let Some(end) = FilePosSmall::from_lnum_bol_offset(lnum, bol, offset) {
                 return Pos(Small { file, start, end });
             }
         }
@@ -174,7 +174,7 @@ impl Pos {
     }
 
     pub fn info_raw(&self) -> (usize, usize) {
-        (self.start_cnum(), self.end_cnum())
+        (self.start_offset(), self.end_offset())
     }
 
     pub fn line(&self) -> usize {
@@ -186,19 +186,21 @@ impl Pos {
         }
     }
 
-    pub fn from_lnum_bol_cnum(
+    pub fn from_lnum_bol_offset(
         file: RcOc<RelativePath>,
         start: (usize, usize, usize),
         end: (usize, usize, usize),
     ) -> Self {
-        let (start_line, start_bol, start_cnum) = start;
-        let (end_line, end_bol, end_cnum) = end;
-        let start = FilePosLarge::from_lnum_bol_cnum(start_line, start_bol, start_cnum);
-        let end = FilePosLarge::from_lnum_bol_cnum(end_line, end_bol, end_cnum);
+        let (start_line, start_bol, start_offset) = start;
+        let (end_line, end_bol, end_offset) = end;
+        let start = FilePosLarge::from_lnum_bol_offset(start_line, start_bol, start_offset);
+        let end = FilePosLarge::from_lnum_bol_offset(end_line, end_bol, end_offset);
         Self::from_raw_span(file, PosSpanRaw { start, end })
     }
 
-    pub fn to_start_and_end_lnum_bol_cnum(&self) -> ((usize, usize, usize), (usize, usize, usize)) {
+    pub fn to_start_and_end_lnum_bol_offset(
+        &self,
+    ) -> ((usize, usize, usize), (usize, usize, usize)) {
         match &self.0 {
             Small { start, end, .. } => (start.line_beg_offset(), end.line_beg_offset()),
             Large { start, end, .. } => (start.line_beg_offset(), end.line_beg_offset()),
@@ -240,11 +242,11 @@ impl Pos {
                 + &x1.filename().to_string()
                 + " and "
                 + &x2.filename().to_string())
-        } else if x1.end_cnum() > x2.end_cnum() {
+        } else if x1.end_offset() > x2.end_offset() {
             Err(String::from("btw: invalid positions")
-                + &x1.end_cnum().to_string()
+                + &x1.end_offset().to_string()
                 + "and"
-                + &x2.end_cnum().to_string())
+                + &x2.end_offset().to_string())
         } else {
             Ok(Self::btw_nocheck(x1.clone(), x2.clone()))
         }
@@ -312,20 +314,20 @@ impl Pos {
         }
     }
 
-    pub fn end_cnum(&self) -> usize {
+    pub fn end_offset(&self) -> usize {
         match &self.0 {
             Small { end, .. } => end.offset(),
             Large { end, .. } => end.offset(),
-            Tiny { span, .. } => span.end_character_number(),
+            Tiny { span, .. } => span.end_offset(),
             FromReason(_p) => unimplemented!(),
         }
     }
 
-    pub fn start_cnum(&self) -> usize {
+    pub fn start_offset(&self) -> usize {
         match &self.0 {
             Small { start, .. } => start.offset(),
             Large { start, .. } => start.offset(),
-            Tiny { span, .. } => span.start_character_number(),
+            Tiny { span, .. } => span.start_offset(),
             FromReason(_p) => unimplemented!(),
         }
     }
@@ -369,8 +371,8 @@ impl Ord for Pos {
     fn cmp(&self, other: &Pos) -> Ordering {
         self.filename()
             .cmp(other.filename())
-            .then(self.start_cnum().cmp(&other.start_cnum()))
-            .then(self.end_cnum().cmp(&other.end_cnum()))
+            .then(self.start_offset().cmp(&other.start_offset()))
+            .then(self.end_offset().cmp(&other.end_offset()))
     }
 }
 
@@ -435,7 +437,7 @@ mod tests {
     use pretty_assertions::assert_eq;
 
     fn make_pos(name: &str, start: (usize, usize, usize), end: (usize, usize, usize)) -> Pos {
-        Pos::from_lnum_bol_cnum(
+        Pos::from_lnum_bol_offset(
             RcOc::new(RelativePath::make(Prefix::Dummy, PathBuf::from(name))),
             start,
             end,
@@ -446,7 +448,7 @@ mod tests {
     fn test_pos() {
         assert_eq!(Pos::make_none().is_none(), true);
         assert_eq!(
-            Pos::from_lnum_bol_cnum(
+            Pos::from_lnum_bol_offset(
                 RcOc::new(RelativePath::make(Prefix::Dummy, PathBuf::from("a"))),
                 (0, 0, 0),
                 (0, 0, 0)
@@ -455,7 +457,7 @@ mod tests {
             false
         );
         assert_eq!(
-            Pos::from_lnum_bol_cnum(
+            Pos::from_lnum_bol_offset(
                 RcOc::new(RelativePath::make(Prefix::Dummy, PathBuf::from(""))),
                 (1, 0, 0),
                 (0, 0, 0)
@@ -473,7 +475,7 @@ mod tests {
         );
         let path = RcOc::new(RelativePath::make(Prefix::Dummy, PathBuf::from("a.php")));
         assert_eq!(
-            Pos::from_lnum_bol_cnum(path, (5, 100, 117), (5, 100, 142))
+            Pos::from_lnum_bol_offset(path, (5, 100, 117), (5, 100, 142))
                 .string()
                 .to_string(),
             r#"File "a.php", line 5, characters 18-42:"#

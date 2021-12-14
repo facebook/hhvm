@@ -127,8 +127,8 @@ impl FilePosSmall {
     }
 
     #[inline]
-    pub fn from_lnum_bol_cnum(lnum: usize, bol: usize, cnum: usize) -> Option<Self> {
-        Self::bol_line_col(bol, lnum, cnum - bol)
+    pub fn from_lnum_bol_offset(lnum: usize, bol: usize, offset: usize) -> Option<Self> {
+        Self::bol_line_col(bol, lnum, offset - bol)
     }
 
     // accessors

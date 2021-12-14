@@ -526,7 +526,8 @@ let shape_field_name_ this field =
       | None -> Error `Expected_class)
     | _ -> Error `Invalid_shape_field_name)
 
-let shape_field_name : env -> Nast.expr -> Ast_defs.shape_field_name option =
+let shape_field_name :
+    env -> ('a, 'b) Aast.expr -> Ast_defs.shape_field_name option =
  fun env (_, p, field) ->
   let this =
     lazy

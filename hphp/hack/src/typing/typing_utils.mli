@@ -276,7 +276,7 @@ val shape_field_name_ :
   result
 
 val shape_field_name :
-  Typing_env_types.env -> Nast.expr -> Ast_defs.shape_field_name option
+  Typing_env_types.env -> ('a, 'b) Aast.expr -> Ast_defs.shape_field_name option
 
 val simplify_constraint_type :
   Typing_env_types.env ->

@@ -6277,11 +6277,9 @@ and dispatch_call
           method_id
           el
           unpacked_element
-          (fun env fty res el ->
-            match el with
-            | [(_, shape); (_, field)] ->
-              let (env, _ts, shape_ty) = expr env shape in
-              let (_, shape_pos, _) = shape in
+          (fun env fty res el tel ->
+            match (el, tel) with
+            | (_, [(_, (shape_ty, shape_pos, _)); (_, field)]) ->
               Typing_shapes.idx
                 env
                 shape_ty
@@ -6290,11 +6288,17 @@ and dispatch_call
                 ~expr_pos:p
                 ~fun_pos:(get_reason fty)
                 ~shape_pos
-            | [(_, shape); (_, field); (_, default)] ->
-              let (env, _ts, shape_ty) = expr env shape in
+            | ( [_; _; (_, default)],
+                [
+                  (_, (shape_ty, shape_pos, _));
+                  (_, field);
+                  (_, (_, default_pos, _));
+                ] ) ->
+              (* We reevaluate the default argument rather than using the one
+                 evaluated during the typechecking wrt to the overloaded
+                 function signature in the HHI file because bidirectional
+                 typechecking introduces TAnys to the system otherwise. *)
               let (env, _td, default_ty) = expr env default in
-              let (_, shape_pos, _) = shape in
-              let (_, default_pos, _) = default in
               Typing_shapes.idx
                 env
                 shape_ty
@@ -6313,11 +6317,9 @@ and dispatch_call
           method_id
           el
           unpacked_element
-          (fun env _fty res el ->
-            match el with
-            | [(_, shape); (_, field)] ->
-              let (env, _te, shape_ty) = expr env shape in
-              let (_, shape_pos, _) = shape in
+          (fun env _fty res _el tel ->
+            match tel with
+            | [(_, (shape_ty, shape_pos, _)); (_, field)] ->
               Typing_shapes.at env ~expr_pos:p ~shape_pos shape_ty field
             | _ -> (env, res))
       (* Special function `Shapes::keyExists` *)
@@ -6329,14 +6331,12 @@ and dispatch_call
           method_id
           el
           unpacked_element
-          (fun env fty res el ->
-            match el with
-            | [(_, shape); (_, field)] ->
-              let (env, _te, shape_ty) = expr env shape in
+          (fun env fty res _el tel ->
+            match tel with
+            | [(_, (shape_ty, shape_pos, _)); (_, field)] ->
               (* try accessing the field, to verify existence, but ignore
                  * the returned type and keep the one coming from function
                  * return type hint *)
-              let (_, shape_pos, _) = shape in
               let (env, _) =
                 Typing_shapes.idx
                   env
@@ -6358,21 +6358,26 @@ and dispatch_call
           method_id
           el
           unpacked_element
-          (fun env _ res el ->
+          (fun env _ res el _tel ->
             match el with
             | [(Ast_defs.Pinout _, shape); (_, field)] ->
               begin
                 match shape with
                 | (_, _, Lvar (_, lvar))
                 | (_, _, Hole ((_, _, Lvar (_, lvar)), _, _, _)) ->
+                  (* We reevaluate the shape instead of using the shape type
+                     evaluated during typechecking against the HHI signature
+                     because this argument is inout and bidirectional
+                     typechecking causes a union with the open shape type
+                     which defeats the purpose of this extra-logical function.
+                  *)
                   let (env, _te, shape_ty) = expr env shape in
                   let (env, shape_ty) =
                     Typing_shapes.remove_key p env shape_ty field
                   in
                   let env = set_valid_rvalue p env lvar shape_ty in
                   (env, res)
-                | _ ->
-                  let (_, shape_pos, _) = shape in
+                | (_, shape_pos, _) ->
                   Errors.invalid_shape_remove_key shape_pos;
                   (env, res)
               end
@@ -6386,10 +6391,9 @@ and dispatch_call
           method_id
           el
           unpacked_element
-          (fun env _ res el ->
-            match el with
-            | [(_, shape)] ->
-              let (env, _te, shape_ty) = expr env shape in
+          (fun env _ res _el tel ->
+            match tel with
+            | [(_, (shape_ty, _, _))] ->
               Typing_shapes.to_array env p shape_ty res
             | _ -> (env, res))
       (* Special function `Shapes::toDict` *)
@@ -6401,10 +6405,9 @@ and dispatch_call
           method_id
           el
           unpacked_element
-          (fun env _ res el ->
-            match el with
-            | [(_, shape)] ->
-              let (env, _te, shape_ty) = expr env shape in
+          (fun env _ res _el tel ->
+            match tel with
+            | [(_, (shape_ty, _, _))] ->
               Typing_shapes.to_dict env p shape_ty res
             | _ -> (env, res))
       | _ -> dispatch_class_const env class_id method_id
@@ -8390,7 +8393,7 @@ and overload_function
   let (env, (tel, typed_unpack_element, res, should_forget_fakes)) =
     call ~expected:None p env fty el unpacked_element
   in
-  let (env, ty) = f env fty res el in
+  let (env, ty) = f env fty res el tel in
   let (env, fty) = Env.expand_type env fty in
   let fty =
     map_ty fty ~f:(function

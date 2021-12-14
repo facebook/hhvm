@@ -19,7 +19,7 @@ val idx :
   fun_pos:Typing_defs.locl_phase Typing_reason.t_ ->
   shape_pos:Pos.t ->
   Typing_defs.locl_ty ->
-  Nast.expr ->
+  ('a, 'b) Aast.expr ->
   (Pos.t * Typing_defs.locl_ty) option ->
   Typing_env_types.env * Typing_defs.locl_ty
 
@@ -34,14 +34,14 @@ val at :
   expr_pos:Pos.t ->
   shape_pos:Pos.t ->
   Typing_defs.locl_ty ->
-  Nast.expr ->
+  ('a, 'b) Aast.expr ->
   Typing_env_types.env * Typing_defs.locl_ty
 
 val remove_key :
   Pos.t ->
   Typing_env_types.env ->
   Typing_defs.locl_ty ->
-  Nast.expr ->
+  ('a, 'b) Aast.expr ->
   Typing_env_types.env * Typing_reason.locl_phase Typing_defs.ty
 
 val to_array :

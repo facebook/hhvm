@@ -35,7 +35,7 @@ val array_get :
   is_variadic ->
   Typing_env_types.env ->
   locl_ty ->
-  Nast.expr ->
+  ('a, 'b) Aast.expr ->
   locl_ty ->
   Typing_env_types.env
   * locl_ty

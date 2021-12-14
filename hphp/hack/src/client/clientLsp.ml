@@ -1079,7 +1079,9 @@ let hack_errors_to_lsp_diagnostic
     ({ Location.uri; range }, Markdown_lite.render message)
   in
   let hack_error_to_lsp_diagnostic (error : Errors.finalized_error) =
-    let all_messages = Errors.to_list error |> List.map ~f:location_message in
+    let all_messages =
+      User_error.to_list error |> List.map ~f:location_message
+    in
     let (first_message, additional_messages) =
       match all_messages with
       | hd :: tl -> (hd, tl)
@@ -1103,14 +1105,15 @@ let hack_errors_to_lsp_diagnostic
              })
     in
     let severity =
-      match Errors.get_severity error with
-      | Errors.Error -> Some PublishDiagnostics.Error
-      | Errors.Warning -> Some PublishDiagnostics.Warning
+      User_error.(
+        match get_severity error with
+        | Error -> Some PublishDiagnostics.Error
+        | Warning -> Some PublishDiagnostics.Warning)
     in
     {
       Lsp.PublishDiagnostics.range;
       severity;
-      code = PublishDiagnostics.IntCode (Errors.get_code error);
+      code = PublishDiagnostics.IntCode (User_error.get_code error);
       source = Some "Hack";
       message;
       relatedInformation;

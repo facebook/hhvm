@@ -457,7 +457,7 @@ let print_ast_check_errors errors =
   let error_list = Errors.get_error_list errors in
   List.iter
     (fun e ->
-      let text = Errors.to_string (Errors.to_absolute e) in
+      let text = Errors.to_string (User_error.to_absolute e) in
       if
         Core_kernel.String.is_substring
           text

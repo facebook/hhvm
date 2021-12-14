@@ -89,7 +89,7 @@ let write_and_parse_test_files ctx =
   if not (Errors.is_empty errors) then (
     Errors.iter_error_list
       (fun e ->
-        List.iter (Errors.to_list_ e) ~f:(fun (pos, msg) ->
+        List.iter (User_error.to_list_ e) ~f:(fun (pos, msg) ->
             eprintf
               "%s: %s\n"
               (Pos.string

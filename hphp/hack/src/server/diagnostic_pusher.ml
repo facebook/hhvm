@@ -298,7 +298,7 @@ end = struct
         let path = Relative_path.to_absolute path in
         let file_errors =
           PhaseMap.fold phase_map ~init:[] ~f:(fun _phase -> ( @ ))
-          |> List.map ~f:Errors.to_absolute
+          |> List.map ~f:User_error.to_absolute
         in
         SMap.add path file_errors errors_acc)
 

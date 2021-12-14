@@ -366,7 +366,7 @@ let list_files env =
       ~f:
         begin
           fun error (acc : SSet.t) ->
-          let pos = Errors.get_pos error in
+          let pos = User_error.get_pos error in
           SSet.add (Relative_path.to_absolute (Pos.filename pos)) acc
         end
       ~init:SSet.empty

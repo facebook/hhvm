@@ -76,9 +76,9 @@ let print_error format ?(oc = stderr) l =
   in
   let absolute_errors =
     if use_canonical_filenames () then
-      Errors.to_absolute l
+      User_error.to_absolute l
     else
-      Errors.to_absolute_for_test l
+      User_error.to_absolute_for_test l
   in
   Out_channel.output_string oc (formatter absolute_errors)
 

@@ -175,7 +175,7 @@ let get_files_with_stale_errors
   List.fold phases ~init:Relative_path.Set.empty ~f:(fun acc phase ->
       fold phase acc (fun source error acc ->
           if
-            List.exists (Errors.to_list_ error) ~f:(fun e ->
+            List.exists (User_error.to_list_ error) ~f:(fun e ->
                 Relative_path.Set.mem
                   reparsed
                   (fst e |> Naming_provider.resolve_position ctx |> Pos.filename))

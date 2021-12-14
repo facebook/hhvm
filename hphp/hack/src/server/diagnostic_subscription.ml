@@ -168,7 +168,7 @@ let pop_errors ds ~global_errors =
           SMap.add
             acc
             ~key:(Relative_path.to_absolute path)
-            ~data:(List.map el ~f:Errors.to_absolute))
+            ~data:(List.map el ~f:User_error.to_absolute))
     in
     ( { ds with pushed_errors = new_pushed_errors; has_new_errors = false },
       errors_to_send,

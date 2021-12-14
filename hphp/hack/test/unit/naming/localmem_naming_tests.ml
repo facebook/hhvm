@@ -13,10 +13,10 @@ let tcopt_with_shallow =
 
 let errors_to_string (errors : Errors.t) : string list =
   let error_to_string (error : Errors.error) : string =
-    let error = Errors.to_absolute_for_test error in
-    let code = Errors.get_code error in
+    let error = User_error.to_absolute_for_test error in
+    let code = User_error.get_code error in
     let message =
-      error |> Errors.to_list |> List.map ~f:snd |> String.concat ~sep:"; "
+      error |> User_error.to_list |> List.map ~f:snd |> String.concat ~sep:"; "
     in
     Printf.sprintf "[%d] %s" code message
   in

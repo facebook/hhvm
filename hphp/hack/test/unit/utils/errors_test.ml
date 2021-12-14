@@ -10,7 +10,10 @@ open Hh_prelude
 
 let error_list_to_string_buffer buf x =
   List.iter x ~f:(fun error ->
-      Printf.bprintf buf "%s\n" Errors.(error |> to_absolute |> to_string))
+      Printf.bprintf
+        buf
+        "%s\n"
+        (error |> User_error.to_absolute |> Errors.to_string))
 
 let error_list_to_string errors =
   let buf = Buffer.create 1024 in

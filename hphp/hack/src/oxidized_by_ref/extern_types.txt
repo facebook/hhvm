@@ -50,7 +50,6 @@ oxidized::errors::ErrorCode
 oxidized::errors::Format
 oxidized::errors::NameContext
 oxidized::errors::Phase
-oxidized::errors::Severity
 oxidized::file_info::Mode
 oxidized::file_info::Names
 oxidized::file_info::NameType
@@ -58,3 +57,4 @@ oxidized::full_fidelity_parser_env::FullFidelityParserEnv
 oxidized::naming_types::KindOfType
 oxidized::naming_types::NameKind
 oxidized::parser_options::FfiT
+oxidized::user_error::Severity

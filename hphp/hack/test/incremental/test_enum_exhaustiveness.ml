@@ -40,7 +40,8 @@ function test(
 
 let errors_to_string errors =
   List.fold_left
-    (fun str error -> str ^ Errors.(error |> to_absolute |> to_string))
+    (fun str error ->
+      str ^ (error |> User_error.to_absolute |> Errors.to_string))
     ""
   @@ errors
 

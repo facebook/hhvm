@@ -69,7 +69,7 @@ let add_lint lint =
 let to_absolute ({ pos; _ } as lint) = { lint with pos = Pos.to_absolute pos }
 
 let to_string lint =
-  let code = Errors.error_code_to_string lint.code in
+  let code = User_error.error_code_to_string lint.code in
   Printf.sprintf "%s\n%s (%s)" (Pos.string lint.pos) lint.message code
 
 let to_contextual_string lint =
@@ -79,11 +79,11 @@ let to_contextual_string lint =
     | Lint_warning -> Tty.Yellow
     | Lint_advice -> Tty.Default
   in
-  Errors.make_absolute_error lint.code [(lint.pos, lint.message)]
+  User_error.make_absolute lint.code [(lint.pos, lint.message)]
   |> Contextual_error_formatter.to_string ~claim_color
 
 let to_highlighted_string (lint : string Pos.pos t) =
-  Errors.make_absolute_error lint.code [(lint.pos, lint.message)]
+  User_error.make_absolute lint.code [(lint.pos, lint.message)]
   |> Highlighted_error_formatter.to_string
 
 let to_json

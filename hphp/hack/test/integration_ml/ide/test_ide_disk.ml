@@ -42,7 +42,7 @@ let check_has_no_errors env =
     List.iter
       (fun e ->
         Buffer.add_string buf "\n  - ";
-        let str = Errors.to_string (Errors.to_absolute e) in
+        let str = Errors.to_string (User_error.to_absolute e) in
         Buffer.add_string buf str)
       es;
     let msg = Buffer.contents buf in

@@ -15,7 +15,7 @@ type marker = int * Tty.raw_color
 type marked_message = {
   original_index: int;
   marker: marker;
-  message: Pos.absolute Errors.message;
+  message: Pos.absolute Message.t;
 }
 
 (* A position_group is a record composed of a position (we'll call
@@ -129,12 +129,12 @@ let markers_and_positions_for_line
     (position_group : position_group) (line_num : int) :
     (marker * Pos.absolute) list =
   List.filter position_group.messages ~f:(fun mm ->
-      pos_contains (Errors.get_message_pos mm.message) line_num)
+      pos_contains (Message.get_message_pos mm.message) line_num)
   |> List.dedup_and_sort ~compare:(fun mm1 mm2 ->
          let (mk1, _) = mm1.marker in
          let (mk2, _) = mm2.marker in
          Int.compare mk1 mk2)
-  |> List.map ~f:(fun mm -> (mm.marker, Errors.get_message_pos mm.message))
+  |> List.map ~f:(fun mm -> (mm.marker, Message.get_message_pos mm.message))
 
 (* Gets the string containing the markers that should be displayed next to this line,
    e.g. something like "[1,4,5]" *)
@@ -319,7 +319,7 @@ let format_context_highlighted
 let col_width_for_highlighted (position_groups : position_group list) =
   let largest_line_length =
     let message_positions (messages : marked_message list) =
-      List.map messages ~f:(fun mm -> Errors.get_message_pos mm.message)
+      List.map messages ~f:(fun mm -> Message.get_message_pos mm.message)
     in
     let line_nums =
       List.map position_groups ~f:(fun pg -> pg.messages |> message_positions)
@@ -357,15 +357,15 @@ let col_width_for_highlighted (position_groups : position_group list) =
 let position_groups_by_file marker_and_msgs : position_group list list =
   let msgs_by_file : marked_message list list =
     List.group marker_and_msgs ~break:(fun mm1 mm2 ->
-        let p1 = Errors.get_message_pos mm1.message in
-        let p2 = Errors.get_message_pos mm2.message in
+        let p1 = Message.get_message_pos mm1.message in
+        let p2 = Message.get_message_pos mm2.message in
         String.compare (Pos.filename p1) (Pos.filename p2) <> 0)
     (* Must make sure list of positions is ordered *)
     |> List.map ~f:(fun msgs ->
            List.sort
              ~compare:(fun mm1 mm2 ->
-               let p1 = Errors.get_message_pos mm1.message in
-               let p2 = Errors.get_message_pos mm2.message in
+               let p1 = Message.get_message_pos mm1.message in
+               let p2 = Message.get_message_pos mm2.message in
                Int.compare (Pos.line p1) (Pos.line p2))
              msgs)
   in
@@ -405,8 +405,8 @@ let position_groups_by_file marker_and_msgs : position_group list list =
   let grouped_messages (messages : marked_message list) :
       marked_message list list =
     List.group messages ~break:(fun prev_mm curr_mm ->
-        let prev_pos = Errors.get_message_pos prev_mm.message in
-        let curr_pos = Errors.get_message_pos curr_mm.message in
+        let prev_pos = Message.get_message_pos prev_mm.message in
+        let curr_pos = Message.get_message_pos curr_mm.message in
         not (close_enough prev_pos curr_pos))
   in
   List.map msgs_by_file ~f:(fun (mmsgl : marked_message list) ->
@@ -415,7 +415,7 @@ let position_groups_by_file marker_and_msgs : position_group list list =
              {
                aggregate_position =
                  List.map
-                   ~f:(fun mm -> Errors.get_message_pos mm.message)
+                   ~f:(fun mm -> Message.get_message_pos mm.message)
                    messages
                  |> List.reduce_exn ~f:Pos.merge;
                messages;
@@ -435,7 +435,7 @@ let format_file_name_and_pos (pgl : position_group list) =
            let (mk2, _) = mm2.marker in
            Int.compare mk1 mk2)
     |> List.hd_exn
-    |> fun { message; _ } -> message |> Errors.get_message_pos
+    |> fun { message; _ } -> message |> Message.get_message_pos
   in
   let filename = relative_path (Pos.filename primary_pos) in
   let (line, col) = Pos.line_column primary_pos in
@@ -487,7 +487,9 @@ let format_claim_highlighted
   let suffix = single_marker_highlighted marker in
   let (_, color) = marker in
   let pretty_error_code =
-    Tty.apply_color (Tty.Bold color) (Errors.error_code_to_string error_code)
+    Tty.apply_color
+      (Tty.Bold color)
+      (User_error.error_code_to_string error_code)
   in
   (* The color of any highlighted text in the message itself should match
      the marker color, unless it's a Lint message (Yellow), in which case
@@ -508,7 +510,7 @@ let format_reason_highlighted marked_msg : string =
   let pretty_msg =
     Markdown_lite.render
       ~color:(snd marked_msg.marker)
-      (Errors.get_message_str marked_msg.message)
+      (Message.get_message_str marked_msg.message)
   in
   Printf.sprintf "%s %s %s" pretty_arrow pretty_msg suffix
 
@@ -542,15 +544,14 @@ let make_marker n error_code : marker =
    by assigning each their original index in the list and a marker.
    Any messages that have the same position (meaning exact location
    and size) share the same marker. *)
-let mark_messages
-    (error_code : error_code) (msgl : Pos.absolute Errors.message list) :
-    marked_message list =
+let mark_messages (error_code : error_code) (msgl : Pos.absolute Message.t list)
+    : marked_message list =
   List.folding_mapi
     msgl
     ~init:(1, [])
     ~f:(fun original_index (next_marker_n, existing_markers) message ->
       let (next_marker_n, existing_markers, marker) =
-        let curr_msg_pos = Errors.get_message_pos message in
+        let curr_msg_pos = Message.get_message_pos message in
         match
           List.find existing_markers ~f:(fun (_, pos) ->
               Pos.equal_absolute curr_msg_pos pos)
@@ -563,15 +564,15 @@ let mark_messages
       ((next_marker_n, existing_markers), { original_index; marker; message }))
 
 let to_string (error : Errors.finalized_error) : string =
-  let error_code = Errors.get_code error in
+  let error_code = User_error.get_code error in
   (* Assign messages markers according to order of original error list
      and then sort these marked messages such that messages in the same
      file are together. Does not reorder the files or messages within a file. *)
   let marked_messages =
-    Errors.get_messages error
+    User_error.get_messages error
     |> mark_messages error_code
     |> Errors.combining_sort ~f:(fun mm ->
-           Errors.get_message_pos mm.message |> Pos.filename)
+           Message.get_message_pos mm.message |> Pos.filename)
   in
 
   (* Typing[4110] Invalid return type [1]   <claim>
@@ -591,7 +592,7 @@ let to_string (error : Errors.finalized_error) : string =
       ( format_claim_highlighted
           error_code
           mm.marker
-          (Errors.get_message_str mm.message),
+          (Message.get_message_str mm.message),
         List.map msgs ~f:format_reason_highlighted )
     | [] ->
       failwith "Impossible: an error always has non-empty list of messages"

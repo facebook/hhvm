@@ -395,7 +395,7 @@ let mode_calculate_errors
   in
 
   let error_list =
-    errors |> Errors.get_sorted_error_list |> List.map ~f:Errors.to_absolute
+    errors |> Errors.get_sorted_error_list |> List.map ~f:User_error.to_absolute
   in
   (if pretty_print then
     ServerError.print_error_list

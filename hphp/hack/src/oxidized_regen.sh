@@ -44,8 +44,10 @@ summary "Write oxidized/gen/"
   hphp/hack/src/decl/pos/pos_or_decl.ml                                       \
   hphp/hack/src/deps/fileInfo.ml                                              \
   hphp/hack/src/deps/typing_deps_mode.ml                                      \
+  hphp/hack/src/errors/user_error.ml                                        \
   hphp/hack/src/errors/errors.ml                                              \
   hphp/hack/src/errors/error_codes.ml                                         \
+  hphp/hack/src/errors/message.ml                                             \
   hphp/hack/src/errors/quickfix.ml                                            \
   hphp/hack/src/naming/naming_types.ml                                        \
   hphp/hack/src/naming/nast.ml                                                \
@@ -102,8 +104,10 @@ summary "Write oxidized_by_ref/gen/"
   hphp/hack/src/decl/pos/pos_or_decl.ml                                       \
   hphp/hack/src/decl/shallow_decl_defs.ml                                     \
   hphp/hack/src/deps/fileInfo.ml                                              \
+  hphp/hack/src/errors/user_error.ml                                        \
   hphp/hack/src/errors/error_codes.ml                                         \
   hphp/hack/src/errors/errors.ml                                              \
+  hphp/hack/src/errors/message.ml                                             \
   hphp/hack/src/errors/quickfix.ml                                            \
   hphp/hack/src/naming/naming_types.ml                                        \
   hphp/hack/src/naming/nast.ml                                                \

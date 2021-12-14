@@ -30,17 +30,17 @@ module Constants = struct
 
   let files12 : Relative_path.Set.t = Relative_path.Set.of_list [file1; file2]
 
-  let error1 : Errors.error = Errors.make_error 123 (Pos.none, "error1") []
+  let error1 : Errors.error = User_error.make 123 (Pos.none, "error1") []
 
-  let error1_absolute : Errors.finalized_error = Errors.to_absolute error1
+  let error1_absolute : Errors.finalized_error = User_error.to_absolute error1
 
-  let error2 : Errors.error = Errors.make_error 124 (Pos.none, "error2") []
+  let error2 : Errors.error = User_error.make 124 (Pos.none, "error2") []
 
-  let error2_absolute : Errors.finalized_error = Errors.to_absolute error2
+  let error2_absolute : Errors.finalized_error = User_error.to_absolute error2
 
-  let error3 : Errors.error = Errors.make_error 125 (Pos.none, "error3") []
+  let error3 : Errors.error = User_error.make 125 (Pos.none, "error3") []
 
-  let error3_absolute : Errors.finalized_error = Errors.to_absolute error3
+  let error3_absolute : Errors.finalized_error = User_error.to_absolute error3
 
   let no_errors : Errors.t = Errors.from_file_error_list []
 

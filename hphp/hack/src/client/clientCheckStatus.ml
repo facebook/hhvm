@@ -82,8 +82,8 @@ let go status output_json from error_format max_errors =
   if
     List.exists
       ~f:(fun e ->
-        match Errors.get_severity e with
-        | Errors.Error -> true
+        match User_error.get_severity e with
+        | User_error.Error -> true
         | _ -> false)
       error_list
   then

@@ -278,7 +278,7 @@ let assert_errors_in_phase
   env
 
 let error_strings err_list =
-  List.map ~f:(fun x -> Errors.(to_string (to_absolute x))) err_list
+  List.map ~f:(fun x -> Errors.to_string (User_error.to_absolute x)) err_list
 
 let assertSingleError expected err_list =
   let error_strings = error_strings err_list in
@@ -510,7 +510,7 @@ let print_telemetries env =
 let assert_errors errors expected =
   let buf = Buffer.create 1024 in
   Errors.get_error_list errors
-  |> List.map ~f:Errors.to_absolute
+  |> List.map ~f:User_error.to_absolute
   |> errors_to_string buf;
   assertEqual expected (Buffer.contents buf)
 

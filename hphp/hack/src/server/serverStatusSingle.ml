@@ -34,4 +34,4 @@ let go file_input ctx =
       in
       errors
   in
-  errors |> Errors.get_sorted_error_list |> List.map ~f:Errors.to_absolute
+  errors |> Errors.get_sorted_error_list |> List.map ~f:User_error.to_absolute

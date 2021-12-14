@@ -39,7 +39,7 @@ let convert_on_error :
   let code =
     Option.value code ~default:Error_codes.Typing.(err_code UnifyError)
   in
-  on_error (Errors.make_error code ?quickfixes (pos, "Typing_error") reasons)
+  on_error (User_error.make code ?quickfixes (pos, "Typing_error") reasons)
 
 let catch_exc
     pos
@@ -63,7 +63,7 @@ let catch_exc
     );
     let e = Printf.sprintf "Exception: %s" (Exn.to_string e) in
     on_error
-      (Errors.make_error Error_codes.Typing.(err_code UnifyError) (pos, e) []);
+      (User_error.make Error_codes.Typing.(err_code UnifyError) (pos, e) []);
     r
 
 let is_ordered_solving env = GlobalOptions.tco_ordered_solving env.genv.tcopt

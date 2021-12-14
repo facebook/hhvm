@@ -36,12 +36,12 @@ let format_msg file_clr err_clr ((p, s) : Pos.absolute * string) =
 let format_error_code code =
   [
     (Tty.Normal Tty.Default, " (");
-    (Tty.Normal Tty.Yellow, Errors.error_code_to_string code);
+    (Tty.Normal Tty.Yellow, User_error.error_code_to_string code);
     (Tty.Normal Tty.Default, ")");
   ]
 
 let to_string (error : Errors.finalized_error) : string =
-  let (error_code, msgl) = (Errors.get_code error, Errors.to_list error) in
+  let (error_code, msgl) = User_error.(get_code error, to_list error) in
   match msgl with
   | [] ->
     failwith "Impossible: an error always has a non-empty list of messages"

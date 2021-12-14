@@ -109,7 +109,7 @@ let print_error format ?(oc = stderr) l =
     | Errors.Raw -> (fun e -> Errors.to_string e)
     | Errors.Highlighted -> Highlighted_error_formatter.to_string
   in
-  let absolute_errors = Errors.to_absolute l in
+  let absolute_errors = User_error.to_absolute l in
   Out_channel.output_string oc (formatter absolute_errors)
 
 let write_error_list format errors oc max_errors =
@@ -2287,7 +2287,7 @@ let handle_mode
     let src = Relative_path.Map.find files_contents path in
     let quickfixes =
       Errors.get_error_list errors
-      |> List.map ~f:Errors.quickfixes
+      |> List.map ~f:User_error.quickfixes
       |> List.concat
     in
 

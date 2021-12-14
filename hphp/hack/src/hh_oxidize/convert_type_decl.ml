@@ -100,7 +100,7 @@ end = struct
     match ty with
     (* A custom implementation of Ord for Error_ matches the sorting behavior of
        errors in OCaml. *)
-    | "errors::Error_" -> ["Ord"; "PartialOrd"]
+    | "user_error::UserError" -> ["Ord"; "PartialOrd"]
     (* GlobalOptions contains a couple floats, which only implement PartialEq
        and PartialOrd, and do not implement Hash. *)
     | "global_options::GlobalOptions" ->

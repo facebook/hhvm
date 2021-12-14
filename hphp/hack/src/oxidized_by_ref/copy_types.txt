@@ -33,6 +33,7 @@ ast_defs::PropOrMethod
 ast_defs::ParamKind
 ast_defs::ShapeFieldName
 ast_defs::XhpEnumValue
+user_error::Severity
 decl_defs::ConditionTypeName
 decl_defs::LinearizationKind
 decl_defs::MethodReactivity
@@ -99,7 +100,6 @@ oxidized::errors::ErrorCode
 oxidized::errors::Format
 oxidized::errors::NameContext
 oxidized::errors::Phase
-oxidized::errors::Severity
 oxidized::file_info::Mode
 oxidized::file_info::NameType
 oxidized::naming_types::KindOfType

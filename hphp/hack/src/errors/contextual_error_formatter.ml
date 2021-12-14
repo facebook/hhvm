@@ -115,19 +115,19 @@ let format_message (msg : string) (pos : Pos.absolute) ~is_first ~col_width :
 
 (* Work out the column width needed for each file. Files with many
    lines need a wider column due to the higher line numbers. *)
-let col_widths (msgs : Pos.absolute Errors.message list) :
+let col_widths (msgs : Pos.absolute Message.t list) :
     int Core_kernel.String.Map.t =
   (* Find the longest line number for every file in msgs. *)
   let longest_lines =
     List.fold msgs ~init:String.Map.empty ~f:(fun acc msg ->
-        let filename = Pos.filename (Errors.get_message_pos msg) in
+        let filename = Pos.filename (Message.get_message_pos msg) in
         let current_max =
           Option.value (String.Map.find acc filename) ~default:0
         in
         String.Map.set
           acc
           ~key:filename
-          ~data:(max current_max (Pos.line (Errors.get_message_pos msg))))
+          ~data:(max current_max (Pos.line (Message.get_message_pos msg))))
   in
   String.Map.map longest_lines ~f:column_width
 
@@ -138,9 +138,9 @@ let format_error (error : Errors.finalized_error) : string =
   (* Sort messages such that messages in the same file are together.
      Does not reorder the files or messages within a file. *)
   let msgs =
-    Errors.get_messages error
+    User_error.get_messages error
     |> Errors.combining_sort ~f:(fun msg ->
-           Errors.get_message_pos msg |> Pos.filename)
+           Message.get_message_pos msg |> Pos.filename)
   in
   (* The first message is the 'primary' message, so add a boolean to distinguish it. *)
   let rec label_first msgs is_first =
@@ -153,13 +153,13 @@ let format_error (error : Errors.finalized_error) : string =
   let cmp (m1, _) (m2, _) =
     match
       String.compare
-        (Errors.get_message_pos m1 |> Pos.filename)
-        (Errors.get_message_pos m2 |> Pos.filename)
+        (Message.get_message_pos m1 |> Pos.filename)
+        (Message.get_message_pos m2 |> Pos.filename)
     with
     | 0 ->
       Int.compare
-        (Errors.get_message_pos m1 |> Pos.line)
-        (Errors.get_message_pos m2 |> Pos.line)
+        (Message.get_message_pos m1 |> Pos.line)
+        (Message.get_message_pos m2 |> Pos.line)
     | _ -> 0
   in
   let sorted_msgs = List.stable_sort ~compare:cmp labelled_msgs in
@@ -169,12 +169,12 @@ let format_error (error : Errors.finalized_error) : string =
   let rec aux msgs prev : string list =
     match msgs with
     | (msg, is_first) :: msgs ->
-      let pos = Errors.get_message_pos msg in
+      let pos = Message.get_message_pos msg in
       let filename = Pos.filename pos in
       let line = Pos.line pos in
       let col_width = String.Map.find col_widths filename in
       let (pretty_ctx, pretty_msg) =
-        format_message (Errors.get_message_str msg) pos ~is_first ~col_width
+        format_message (Message.get_message_str msg) pos ~is_first ~col_width
       in
       let formatted : string list =
         match prev with
@@ -195,8 +195,8 @@ let format_error (error : Errors.finalized_error) : string =
 let to_string
     ?(claim_color : Tty.raw_color option) (error : Errors.finalized_error) :
     string =
-  let error_code = Errors.get_code error in
-  let msgl = Errors.to_list error in
+  let error_code = User_error.get_code error in
+  let msgl = User_error.to_list error in
   let buf = Buffer.create 50 in
   let color = Option.value claim_color ~default:Tty.Red in
   (match msgl with
@@ -208,7 +208,7 @@ let to_string
          "%s %s\n"
          (Tty.apply_color
             (Tty.Bold color)
-            (Errors.error_code_to_string error_code))
+            (User_error.error_code_to_string error_code))
          (Tty.apply_color (Tty.Bold Tty.Default) msg)));
   (try Buffer.add_string buf (format_error error) with
   | _ ->

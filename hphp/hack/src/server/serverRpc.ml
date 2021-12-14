@@ -43,9 +43,9 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
  fun genv env ~is_stale -> function
   | STATUS { max_errors; _ } ->
     HackEventLogger.check_response
-      (Errors.get_error_list env.errorl |> List.map ~f:Errors.get_code);
+      (Errors.get_error_list env.errorl |> List.map ~f:User_error.get_code);
     let error_list = Errors.get_sorted_error_list env.errorl in
-    let error_list = List.map ~f:Errors.to_absolute error_list in
+    let error_list = List.map ~f:User_error.to_absolute error_list in
     let (error_list, dropped_count) = take_max_errors error_list max_errors in
     let liveness =
       if is_stale then
@@ -341,7 +341,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
   | REMOVE_DEAD_FIXMES codes ->
     if genv.ServerEnv.options |> ServerArgs.no_load then (
       HackEventLogger.check_response
-        (Errors.get_error_list env.errorl |> List.map ~f:Errors.get_code);
+        (Errors.get_error_list env.errorl |> List.map ~f:User_error.get_code);
       (env, `Ok (ServerRefactor.get_fixme_patches codes env))
     ) else
       (env, `Error remove_dead_fixme_warning)

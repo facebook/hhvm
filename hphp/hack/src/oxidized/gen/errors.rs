@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6cc39092bc1131ba476b975fa71447b3>>
+// @generated SignedSource<<3873086b14ae7a794e854cc1fc6d52b2>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -26,10 +26,6 @@ pub use crate::error_codes::Parsing;
 pub use crate::error_codes::Typing;
 
 pub type ErrorCode = isize;
-
-/// We use `Pos.t message` and `Pos_or_decl.t message` on the server
-/// and convert to `Pos.absolute message` before sending it to the client
-pub type Message<A> = (A, String);
 
 #[derive(
     Clone,
@@ -58,31 +54,6 @@ pub enum Phase {
 }
 impl TrivialDrop for Phase {}
 arena_deserializer::impl_deserialize_in_arena!(Phase);
-
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(C)]
-pub enum Severity {
-    Warning,
-    Error,
-}
-impl TrivialDrop for Severity {}
-arena_deserializer::impl_deserialize_in_arena!(Severity);
 
 #[derive(
     Clone,
@@ -146,28 +117,7 @@ pub type FileT<A> = phase_map::PhaseMap<Vec<A>>;
 /// Results of multi-file analysis.
 pub type FilesT<A> = relative_path::map::Map<FileT<A>>;
 
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    Hash,
-    NoPosHash,
-    PartialEq,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(C)]
-pub struct Error_<PrimPos, Pos> {
-    pub code: ErrorCode,
-    pub claim: Message<PrimPos>,
-    pub reasons: Vec<Message<Pos>>,
-    pub quickfixes: Vec<quickfix::Quickfix>,
-}
-
-pub type Error = Error_<pos::Pos, pos_or_decl::PosOrDecl>;
+pub type Error = user_error::UserError<pos::Pos, pos_or_decl::PosOrDecl>;
 
 #[derive(
     Clone,

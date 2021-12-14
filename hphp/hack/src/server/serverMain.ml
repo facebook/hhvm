@@ -89,7 +89,7 @@ module Program = struct
       ~stale_msg:None
       ~output_json:(ServerArgs.json_mode genv.options)
       ~error_list:
-        (List.map (Errors.get_error_list env.errorl) ~f:Errors.to_absolute)
+        (List.map (Errors.get_error_list env.errorl) ~f:User_error.to_absolute)
       ~save_state_result
       ~recheck_stats;
 
@@ -99,8 +99,8 @@ module Program = struct
     let has_errors =
       List.exists
         ~f:(fun e ->
-          match Errors.get_severity e with
-          | Errors.Error -> true
+          match User_error.get_severity e with
+          | User_error.Error -> true
           | _ -> false)
         (Errors.get_error_list env.errorl)
     in

@@ -129,10 +129,12 @@ let actions_for_errors
   let errors = Errors.get_error_list errors in
   let errors_here =
     List.filter errors ~f:(fun e ->
-        let e_pos = Errors.get_pos e in
+        let e_pos = User_error.get_pos e in
         Pos.inside e_pos start_line start_col)
   in
-  let quickfixes = List.map ~f:Errors.quickfixes errors_here |> List.concat in
+  let quickfixes =
+    List.map ~f:User_error.quickfixes errors_here |> List.concat
+  in
   List.map quickfixes ~f:(fun qf -> fix_action path classish_starts qf)
 
 let go

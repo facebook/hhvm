@@ -13,5 +13,5 @@ open ServerEnv
 let go : ServerEnv.env -> Errors.finalized_error list =
  fun env ->
   let error_list = Errors.get_sorted_error_list env.errorl in
-  let error_list = List.map ~f:Errors.to_absolute error_list in
+  let error_list = List.map ~f:User_error.to_absolute error_list in
   error_list

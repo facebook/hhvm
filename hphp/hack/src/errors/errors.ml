@@ -11,15 +11,7 @@ open Hh_prelude
 open Reordered_argument_collections
 open String_utils
 
-type error_code = int [@@deriving eq, ord, show]
-
-(** We use `Pos.t message` and `Pos_or_decl.t message` on the server
-    and convert to `Pos.absolute message` before sending it to the client *)
-type 'a message = 'a * string [@@deriving eq, ord, show]
-
-let get_message_pos (msg : 'a message) = fst msg
-
-let get_message_str (msg : 'a message) = snd msg
+type error_code = int
 
 type phase =
   | Init
@@ -45,10 +37,6 @@ let phases_up_to_excl : phase -> phase list =
   range_incl_excl min_phase (phase_to_enum phase)
   |> List.map ~f:(fun enum -> Option.value_exn (phase_of_enum enum))
 
-type severity =
-  | Warning
-  | Error
-
 type format =
   | Context
   | Raw
@@ -67,7 +55,7 @@ type error_from_reasons_callback =
   (Pos_or_decl.t * string) list ->
   unit
 
-let claim_as_reason : Pos.t message -> Pos_or_decl.t message =
+let claim_as_reason : Pos.t Message.t -> Pos_or_decl.t Message.t =
  (fun (p, m) -> (Pos_or_decl.of_raw_pos p, m))
 
 type name_context =
@@ -147,15 +135,6 @@ let list_to_files_t = function
       Relative_path.default
       (PhaseMap.singleton Typing x)
 
-let get_code_severity code =
-  if
-    code
-    = Error_codes.Init.err_code Error_codes.Init.ForwardCompatibilityNotCurrent
-  then
-    Warning
-  else
-    Error
-
 (* Get most recently-ish added error. *)
 let get_last error_map =
   (* If this map has more than one element, we pick an arbitrary file. Because
@@ -171,18 +150,10 @@ let get_last error_map =
     | [] -> None
     | e :: _ -> Some e)
 
-type ('prim_pos, 'pos) error_ = {
-  code: error_code;
-  claim: 'prim_pos message;
-  reasons: 'pos message list;
-  quickfixes: Quickfix.t list;
-}
+type finalized_error = (Pos.absolute, Pos.absolute) User_error.t
 [@@deriving eq, ord, show]
 
-type finalized_error = (Pos.absolute, Pos.absolute) error_
-[@@deriving eq, ord, show]
-
-type error = (Pos.t, Pos_or_decl.t) error_ [@@deriving eq, ord, show]
+type error = (Pos.t, Pos_or_decl.t) User_error.t [@@deriving eq, ord, show]
 
 type applied_fixme = Pos.t * int [@@deriving eq]
 
@@ -248,7 +219,7 @@ let try_with_result f1 (f2 : 'res -> error -> 'res) : 'res =
   in
   match get_last errors with
   | None -> result
-  | Some { code; claim; reasons; quickfixes } ->
+  | Some User_error.{ code; claim; reasons; quickfixes } ->
     (* Remove bad position sentinel if present: we might be about to add a new primary
      * error position. *)
     let (claim, reasons) =
@@ -261,7 +232,7 @@ let try_with_result f1 (f2 : 'res -> error -> 'res) : 'res =
       else
         (claim, reasons)
     in
-    f2 result { code; claim; reasons; quickfixes }
+    f2 result @@ User_error.make code claim reasons ~quickfixes
 
 (* Reset errors before running [f] so that we can return the errors
  * caused by f. These errors are not added in the global list of errors. *)
@@ -324,22 +295,6 @@ let lazy_decl_error_logging error error_map to_absolute to_string =
 (*****************************************************************************)
 (* Error code printing. *)
 (*****************************************************************************)
-
-let error_kind error_code =
-  match error_code / 1000 with
-  | 1 -> "Parsing"
-  | 2 -> "Naming"
-  | 3 -> "NastCheck"
-  | 4 -> "Typing"
-  | 5 -> "Lint"
-  | 8 -> "Init"
-  | _ -> "Other"
-
-let error_code_to_string error_code =
-  let error_kind = error_kind error_code in
-  let error_number = Printf.sprintf "%04d" error_code in
-  error_kind ^ "[" ^ error_number ^ "]"
-
 let phase_to_string (phase : phase) : string =
   match phase with
   | Init -> "Init"
@@ -365,16 +320,17 @@ let (name_context_to_string : name_context -> string) = function
   | ClassContext -> "class"
   | RecordContext -> "record"
 
-let quickfixes (error : error) : Quickfix.t list = error.quickfixes
-
-let get_pos { claim; _ } = fst claim
+(* let get_pos { claim; _ } = fst claim *)
 
 let sort : error list -> error list =
  fun err ->
-  let compare_reasons = List.compare (compare_message Pos_or_decl.compare) in
+  let compare_reasons = List.compare (Message.compare Pos_or_decl.compare) in
   let compare
-      { code = x_code; claim = x_claim; reasons = x_messages; quickfixes = _ }
-      { code = y_code; claim = y_claim; reasons = y_messages; quickfixes = _ } =
+      User_error.
+        { code = x_code; claim = x_claim; reasons = x_messages; quickfixes = _ }
+      User_error.
+        { code = y_code; claim = y_claim; reasons = y_messages; quickfixes = _ }
+      =
     (* The primary sort order is by file *)
     let comparison =
       Relative_path.compare
@@ -450,40 +406,6 @@ let run_in_decl_mode filename f =
   in_lazy_decl := Some filename;
   Utils.try_finally ~f ~finally:(fun () -> in_lazy_decl := old_in_lazy_decl)
 
-and make_error code ?(quickfixes = []) claim reasons : error =
-  { code; claim; reasons; quickfixes }
-
-(*****************************************************************************)
-(* Accessors. *)
-(*****************************************************************************)
-and get_code ({ code; _ } : ('pp, 'p) error_) : error_code = code
-
-let get_severity (error : ('pp, 'p) error_) = get_code_severity (get_code error)
-
-let to_list : ('p, 'p) error_ -> 'p message list =
- (fun { claim; reasons; _ } -> claim :: reasons)
-
-let to_list_ : error -> Pos_or_decl.t message list =
- fun { claim = (pos, claim); reasons; _ } ->
-  (Pos_or_decl.of_raw_pos pos, claim) :: reasons
-
-let get_messages = to_list
-
-let to_absolute : error -> finalized_error =
- fun { code; claim; reasons; quickfixes } ->
-  let claim = (fst claim |> Pos.to_absolute, snd claim) in
-  let reasons =
-    List.map reasons ~f:(fun (p, s) ->
-        (p |> Pos_or_decl.unsafe_to_raw_pos |> Pos.to_absolute, s))
-  in
-  { code; claim; reasons; quickfixes }
-
-let make_absolute_error code (x : (Pos.absolute * string) list) :
-    finalized_error =
-  match x with
-  | [] -> failwith "an error must have at least one message"
-  | claim :: reasons -> { code; claim; reasons; quickfixes = [] }
-
 let read_lines path =
   try In_channel.read_lines path with
   | Sys_error _ ->
@@ -540,50 +462,9 @@ let format_summary format errors dropped_count max_errors : string option =
     Some (formatted_total ^ truncated)
   | Raw -> None
 
-let to_absolute_for_test : error -> finalized_error =
- fun { code; claim; reasons; quickfixes } ->
-  let f (p, s) =
-    let p = Pos_or_decl.unsafe_to_raw_pos p in
-    let path = Pos.filename p in
-    let path_without_prefix = Relative_path.suffix path in
-    let p =
-      Pos.set_file
-        (Relative_path.create Relative_path.Dummy path_without_prefix)
-        p
-    in
-    (Pos.to_absolute p, s)
-  in
-  let claim = f @@ claim_as_reason claim in
-  let reasons = List.map ~f reasons in
-  { code; claim; reasons; quickfixes }
-
 let report_pos_from_reason = ref false
 
-let to_string ({ code; claim; reasons; quickfixes = _ } : finalized_error) :
-    string =
-  let buf = Buffer.create 50 in
-  let (pos1, msg1) = claim in
-  Buffer.add_string
-    buf
-    begin
-      let error_code = error_code_to_string code in
-      let reason_msg =
-        if !report_pos_from_reason && Pos.get_from_reason pos1 then
-          " [FROM REASON INFO]"
-        else
-          ""
-      in
-      Printf.sprintf
-        "%s\n%s (%s)%s\n"
-        (Pos.string pos1)
-        msg1
-        error_code
-        reason_msg
-    end;
-  List.iter reasons ~f:(fun (p, w) ->
-      let msg = Printf.sprintf "  %s\n  %s\n" (Pos.string p) w in
-      Buffer.add_string buf msg);
-  Buffer.contents buf
+let to_string error = User_error.to_string !report_pos_from_reason error
 
 let add_error_impl error =
   if !accumulate_errors then
@@ -605,9 +486,10 @@ let add_error_impl error =
     | _ -> set_current_list error_map (error :: error_list)
   else
     (* We have an error, but haven't handled it in any way *)
-    let msg = error |> to_absolute |> to_string in
+    let msg = error |> User_error.to_absolute |> to_string in
     match !in_lazy_decl with
-    | Some _ -> lazy_decl_error_logging msg error_map to_absolute to_string
+    | Some _ ->
+      lazy_decl_error_logging msg error_map User_error.to_absolute to_string
     | None -> Utils.assert_false_log_backtrace (Some msg)
 
 (* Whether we've found at least one error *)
@@ -697,8 +579,8 @@ let wrap_error_in_different_file ~current_file ~current_span claim reasons =
 
 (* If primary position in error list isn't in current file, wrap with a sentinel error *)
 let check_pos_msg :
-    Pos.t message * Pos_or_decl.t message list ->
-    Pos.t message * Pos_or_decl.t message list =
+    Pos.t Message.t * Pos_or_decl.t Message.t list ->
+    Pos.t Message.t * Pos_or_decl.t Message.t list =
  fun (claim, reasons) ->
   let pos = fst claim in
   let current_file = fst !current_context in
@@ -721,11 +603,11 @@ let check_pos_msg :
       reasons
 
 let add_error_with_fixme_error error explanation =
-  let { code; claim; reasons = _; quickfixes } = error in
+  let User_error.{ code; claim; reasons = _; quickfixes } = error in
   let (pos, _) = claim in
   let pos = Option.value (!get_hh_fixme_pos pos code) ~default:pos in
   add_error_impl error;
-  add_error_impl { code; claim = (pos, explanation); reasons = []; quickfixes }
+  add_error_impl @@ User_error.make code (pos, explanation) [] ~quickfixes
 
 let rec add_applied_fixme code (pos : Pos.t) =
   if ServerLoadFlag.get_no_load () then
@@ -739,13 +621,13 @@ and add code pos msg = add_list code (pos, msg) []
 and fixme_present (pos : Pos.t) code =
   !is_hh_fixme pos code || !is_hh_fixme_disallowed pos code
 
-and add_list code ?(quickfixes = []) (claim : _ message) reasons =
-  add_error { code; claim; reasons; quickfixes }
+and add_list code ?quickfixes (claim : _ Message.t) reasons =
+  add_error @@ User_error.make code claim reasons ?quickfixes
 
 and add_error (error : error) =
-  let { code; claim; reasons; quickfixes } = error in
+  let User_error.{ code; claim; reasons; quickfixes } = error in
   let (claim, reasons) = check_pos_msg (claim, reasons) in
-  let error = { code; claim; reasons; quickfixes } in
+  let error = User_error.make code claim reasons ~quickfixes in
 
   let pos = fst claim in
 
@@ -889,13 +771,11 @@ and from_error_list err = (list_to_files_t err, Relative_path.Map.empty)
 
 let add_parsing_error err =
   add_error
-  @@ Parsing_error.
-       {
-         code = Error_code.to_enum @@ error_code err;
-         claim = claim err;
-         reasons = reasons err;
-         quickfixes = quickfixes err;
-       }
+  @@ User_error.make
+       Parsing_error.(Error_code.to_enum @@ error_code err)
+       (Parsing_error.claim err)
+       (Parsing_error.reasons err)
+       ~quickfixes:(Parsing_error.quickfixes err)
 
 let incremental_update ~old ~new_ ~rechecked phase =
   let fold init g =
@@ -945,7 +825,7 @@ let add_error_assert_primary_pos_in_current_decl :
     current_decl_and_file:Pos_or_decl.ctx ->
     ?quickfixes:Quickfix.t list ->
     error_code ->
-    Pos_or_decl.t message list ->
+    Pos_or_decl.t Message.t list ->
     unit =
  fun ~current_decl_and_file ?quickfixes code reasons ->
   match reasons with
@@ -996,7 +876,7 @@ let merge_into_current errors =
 
 let apply_callback_to_errors : t -> error_from_reasons_callback -> unit =
  fun (errors, _fixmes) on_error ->
-  let on_error { code; claim; reasons; quickfixes = _ } =
+  let on_error User_error.{ code; claim; reasons; quickfixes = _ } =
     on_error ~code (claim_as_reason claim :: reasons)
   in
   Relative_path.Map.iter errors ~f:(fun _ ->
@@ -1071,7 +951,10 @@ let first_5_distinct_error_codes : t -> error_code list =
         ~init:ISet.empty
         ~f:(fun _path errors codes ->
           PhaseMap.fold errors ~init:codes ~f:(fun _phase errors codes ->
-              List.fold errors ~init:codes ~f:(fun codes { code; _ } ->
+              List.fold
+                errors
+                ~init:codes
+                ~f:(fun codes User_error.{ code; _ } ->
                   let codes = ISet.add code codes in
                   if ISet.cardinal codes >= 5 then
                     raise (Done codes)
@@ -1106,7 +989,7 @@ let strip_ns id = id |> Utils.strip_ns |> Hh_autoimport.reverse_type
 let on_error_or_add
     (on_error : error_from_reasons_callback option) code claim reasons =
   match on_error with
-  | None -> add_error { code; claim; reasons; quickfixes = [] }
+  | None -> add_error @@ User_error.make code claim reasons
   | Some f -> f ~code (claim_as_reason claim :: reasons)
 
 (*****************************************************************************)
@@ -1126,35 +1009,28 @@ let xhp_parsing_error (pos, msg) =
 (*****************************************************************************)
 
 let mk_unsupported_trait_use_as pos =
-  {
-    code = Naming.err_code Naming.UnsupportedTraitUseAs;
-    claim =
-      ( pos,
-        "Aliasing with `as` within a trait `use` is a PHP feature that is unsupported in Hack"
-      );
-    reasons = [];
-    quickfixes = [];
-  }
+  User_error.make
+    (Naming.err_code Naming.UnsupportedTraitUseAs)
+    ( pos,
+      "Aliasing with `as` within a trait `use` is a PHP feature that is unsupported in Hack"
+    )
+    []
 
 let unsupported_trait_use_as pos = add_error (mk_unsupported_trait_use_as pos)
 
 let mk_unsupported_instead_of pos =
-  {
-    code = Naming.err_code Naming.UnsupportedInsteadOf;
-    claim = (pos, "`insteadof` is a PHP feature that is unsupported in Hack");
-    reasons = [];
-    quickfixes = [];
-  }
+  User_error.make
+    (Naming.err_code Naming.UnsupportedInsteadOf)
+    (pos, "`insteadof` is a PHP feature that is unsupported in Hack")
+    []
 
 let unsupported_instead_of pos = add_error (mk_unsupported_instead_of pos)
 
 let mk_invalid_trait_use_as_visibility pos =
-  {
-    code = Naming.err_code Naming.InvalidTraitUseAsVisibility;
-    claim = (pos, "Cannot redeclare trait method's visibility in this manner");
-    reasons = [];
-    quickfixes = [];
-  }
+  User_error.make
+    (Naming.err_code Naming.InvalidTraitUseAsVisibility)
+    (pos, "Cannot redeclare trait method's visibility in this manner")
+    []
 
 let invalid_trait_use_as_visibility pos =
   add_error (mk_invalid_trait_use_as_visibility pos)
@@ -1349,12 +1225,10 @@ let unexpected_typedef pos def_pos expected_kind =
     [(Pos_or_decl.of_raw_pos def_pos, "Alias definition is here.")]
 
 let mk_fd_name_already_bound pos =
-  {
-    code = Naming.err_code Naming.FdNameAlreadyBound;
-    claim = (pos, "Field name already bound");
-    reasons = [];
-    quickfixes = [];
-  }
+  User_error.make
+    (Naming.err_code Naming.FdNameAlreadyBound)
+    (pos, "Field name already bound")
+    []
 
 let fd_name_already_bound pos = add_error (mk_fd_name_already_bound pos)
 
@@ -1855,13 +1729,10 @@ let too_few_type_arguments p =
     "Too few type arguments for this type"
 
 let mk_method_needs_visibility pos =
-  {
-    code = Naming.err_code Naming.MethodNeedsVisibility;
-    claim =
-      (pos, "Methods need to be marked `public`, `private`, or `protected`.");
-    reasons = [];
-    quickfixes = [];
-  }
+  User_error.make
+    (Naming.err_code Naming.MethodNeedsVisibility)
+    (pos, "Methods need to be marked `public`, `private`, or `protected`.")
+    []
 
 let method_needs_visibility pos = add_error (mk_method_needs_visibility pos)
 
@@ -2043,15 +1914,12 @@ let abstract_with_body (p, _) =
     "This method is declared as abstract, but has a body"
 
 let mk_not_abstract_without_typeconst (p, _) =
-  {
-    code = NastCheck.err_code NastCheck.NotAbstractWithoutTypeconst;
-    claim =
-      ( p,
-        "This type constant is not declared as abstract, it must have"
-        ^ " an assigned type" );
-    reasons = [];
-    quickfixes = [];
-  }
+  User_error.make
+    (NastCheck.err_code NastCheck.NotAbstractWithoutTypeconst)
+    ( p,
+      "This type constant is not declared as abstract, it must have"
+      ^ " an assigned type" )
+    []
 
 let not_abstract_without_typeconst node =
   add_error (mk_not_abstract_without_typeconst node)
@@ -2075,12 +1943,10 @@ let interface_with_partial_typeconst tconst_pos =
     "An interface cannot contain a partially abstract type constant"
 
 let mk_multiple_xhp_category pos =
-  {
-    code = NastCheck.err_code NastCheck.MultipleXhpCategory;
-    claim = (pos, "XHP classes can only contain one category declaration");
-    reasons = [];
-    quickfixes = [];
-  }
+  User_error.make
+    (NastCheck.err_code NastCheck.MultipleXhpCategory)
+    (pos, "XHP classes can only contain one category declaration")
+    []
 
 let multiple_xhp_category pos = add_error (mk_multiple_xhp_category pos)
 
@@ -4661,7 +4527,7 @@ let cannot_declare_constant kind pos (class_pos, class_name) =
 
 let ambiguous_inheritance
     pos class_ origin error (on_error : error_from_reasons_callback) =
-  let { code; claim; reasons; quickfixes = _ } = error in
+  let User_error.{ code; claim; reasons; quickfixes = _ } = error in
   let origin = strip_ns origin in
   let class_ = strip_ns class_ in
   let message =
@@ -5664,7 +5530,7 @@ let parent_support_dynamic_type
 
 let function_is_not_dynamically_callable pos function_name error =
   let function_name = Markdown_lite.md_codify (strip_ns function_name) in
-  let nested_error_reason = claim_as_reason error.claim :: error.reasons in
+  let nested_error_reason = User_error.to_list_ error in
   add_list
     (Typing.err_code Typing.ImplementsDynamic)
     (pos, "Function  " ^ function_name ^ " is not dynamically callable.")
@@ -5683,7 +5549,7 @@ let method_is_not_dynamically_callable
   let nested_error_reason =
     match error_opt with
     | None -> []
-    | Some e -> claim_as_reason e.claim :: e.reasons
+    | Some e -> User_error.to_list_ e
   in
 
   let parent_class_reason =
@@ -6056,29 +5922,12 @@ let hh_expect_error
 (* Printing *)
 (*****************************************************************************)
 
-let to_json (error : finalized_error) =
-  let (error_code, msgl) = (get_code error, to_list error) in
-  let elts =
-    List.map msgl ~f:(fun (p, w) ->
-        let (line, scol, ecol) = Pos.info_pos p in
-        Hh_json.JSON_Object
-          [
-            ("descr", Hh_json.JSON_String w);
-            ("path", Hh_json.JSON_String (Pos.filename p));
-            ("line", Hh_json.int_ line);
-            ("start", Hh_json.int_ scol);
-            ("end", Hh_json.int_ ecol);
-            ("code", Hh_json.int_ error_code);
-          ])
-  in
-  Hh_json.JSON_Object [("message", Hh_json.JSON_Array elts)]
-
 let convert_errors_to_string ?(include_filename = false) (errors : error list) :
     string list =
   List.fold_right
     ~init:[]
     ~f:(fun err acc_out ->
-      let { code = _; claim; reasons; quickfixes = _ } = err in
+      let User_error.{ code = _; claim; reasons; quickfixes = _ } = err in
       List.fold_right
         ~init:acc_out
         ~f:(fun (pos, msg) acc_in ->

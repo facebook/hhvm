@@ -7,17 +7,10 @@
  *
  *)
 
-type ('prim_pos, 'pos) error_
+type error = (Pos.t, Pos_or_decl.t) User_error.t [@@deriving eq, show]
 
-type 'a message
-
-val get_message_pos : 'a message -> 'a
-
-val get_message_str : 'a message -> string
-
-type error = (Pos.t, Pos_or_decl.t) error_ [@@deriving eq, show]
-
-type finalized_error = (Pos.absolute, Pos.absolute) error_ [@@deriving eq, show]
+type finalized_error = (Pos.absolute, Pos.absolute) User_error.t
+[@@deriving eq, show]
 
 type applied_fixme = Pos.t * int
 
@@ -39,10 +32,6 @@ module PhaseMap : sig
 
   val show : (Format.formatter -> 'a -> unit) -> 'a t -> string
 end
-
-type severity =
-  | Warning
-  | Error
 
 type format =
   | Context
@@ -114,8 +103,6 @@ val num_digits : int -> int
 
 val add_error : error -> unit
 
-val quickfixes : error -> Quickfix.t list
-
 (* Error codes that can be suppressed in strict mode with a FIXME based on configuration. *)
 val allowed_fixme_codes_strict : ISet.t ref
 
@@ -138,36 +125,11 @@ val is_hh_fixme_disallowed : (Pos.t -> int -> bool) ref
 
 val get_hh_fixme_pos : (Pos.t -> int -> Pos.t option) ref
 
-val to_list : ('p, 'p) error_ -> ('p * string) list
-
-val to_list_ : error -> (Pos_or_decl.t * string) list
-
-val get_messages : ('p, 'p) error_ -> 'p message list
-
-val get_code : ('pp, 'p) error_ -> int
-
-val get_pos : error -> Pos.t
-
-val get_severity : ('pp, 'p) error_ -> severity
-
-val make_error :
-  int ->
-  ?quickfixes:Quickfix.t list ->
-  Pos.t * string ->
-  (Pos_or_decl.t * string) list ->
-  error
-
-val make_absolute_error : int -> (Pos.absolute * string) list -> finalized_error
-
-val error_code_to_string : int -> string
-
 val phase_to_string : phase -> string
 
 val phase_of_string : string -> phase option
 
 val name_context_to_string : name_context -> string
-
-val to_json : finalized_error -> Hh_json.json
 
 val convert_errors_to_string :
   ?include_filename:bool -> error list -> string list
@@ -177,7 +139,7 @@ val combining_sort : 'a list -> f:('a -> string) -> 'a list
 val to_string : finalized_error -> string
 
 val format_summary :
-  format -> ('pp, 'p) error_ list -> int -> int option -> string option
+  format -> ('pp, 'p) User_error.t list -> int -> int option -> string option
 
 val try_ : (unit -> 'a) -> (error -> 'a) -> 'a
 
@@ -215,10 +177,6 @@ val has_no_errors : (unit -> 'a) -> bool
 val currently_has_errors : unit -> bool
 
 val try_if_no_errors : (unit -> 'a) -> ('a -> 'a) -> 'a
-
-val to_absolute : error -> finalized_error
-
-val to_absolute_for_test : error -> finalized_error
 
 val merge : t -> t -> t
 

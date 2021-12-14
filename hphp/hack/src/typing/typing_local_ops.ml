@@ -251,14 +251,14 @@ let rec check_assignment env (x, append_pos_opt, te_) =
   | _ -> env
 
 let check_unset_target env (tel : (Ast_defs.param_kind * Tast.expr) list) =
-  check_local_capability
-    Capabilities.(mk writeProperty)
-    (fun available required ->
-      List.iter tel ~f:(fun (_, te) ->
+  List.fold ~init:env tel ~f:(fun env (_, te) ->
+      check_local_capability
+        Capabilities.(mk writeProperty)
+        (fun available required ->
           check_assignment_or_unset_target
             ~is_assignment:false
             env
             te
             available
-            required))
-    env
+            required)
+        env)

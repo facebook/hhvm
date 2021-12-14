@@ -188,7 +188,6 @@ struct RefineTmps {
       ITRACE(2, "Rewriting {} -> {} in {}\n",
              *inst->src(idx), *it->second, inst->toString());
       inst->setSrc(idx, it->second);
-      retypeDests(inst, &unit);
     }
 
     return true;
@@ -296,7 +295,6 @@ struct RefineTmps {
         // Perform rewrites. If we have none, we don't have to visit
         // the sources.
         if (!remaps.empty()) {
-          auto retype = false;
           for (uint32_t i = 0; i < inst.numSrcs(); ++i) {
             auto const from = canonicalize(inst.src(i));
             auto const it = remaps.find(from);
@@ -308,7 +306,7 @@ struct RefineTmps {
                 ITRACE(2, "Rewriting {} -> {} in {}\n",
                        *inst.src(i), *to, inst.toString());
                 inst.setSrc(i, to);
-                retype = true;
+                changed = true;
               }
             } else {
               // Rewrites to a phi. Record the phi as used and record
@@ -320,12 +318,6 @@ struct RefineTmps {
               ITRACE(2, "Would rewrite {} to phi B{} in {}\n",
                      *inst.src(i), phi->id(), inst.toString());
             }
-          }
-
-          // If we changed a source, we have to retype the dest.
-          if (retype) {
-            retypeDests(&inst, &unit);
-            changed = true;
           }
         }
 
@@ -356,24 +348,6 @@ struct RefineTmps {
                 2, "{} now maps to {} (via DefLabel {})\n",
                 *from, *to, inst.toString()
               );
-              // Compute a best type for the Phi dest before making it a
-              // remap target.
-              auto type = TBottom;
-              inst.block()->forEachSrc(i, [&] (IRInstruction*, SSATmp* tmp) {
-                auto const srcBlock = tmp->inst()->block();
-                if (!srcBlock) return; // This src instruction is unreachable.
-                // This src's canonical representation is the phidef itself.
-                VisitedSet visited;
-                visited.emplace(block, i);
-                if (!canonicalize(tmp, &visited)) return;
-                type = type | tmp->type();
-              });
-              if (to->type() != type) {
-                to->setType(type);
-                ITRACE(
-                  2, "to type updated {}\n", *to
-                );
-              }
               remaps.insert_or_assign(from, RemapTo{to});
             }
           }
@@ -753,40 +727,63 @@ bool retypeDests(IRInstruction* inst, const IRUnit* /*unit*/) {
 
 /*
  * Algorithm for reflow:
- * 1. for each block in reverse postorder:
- * 2.   compute dest types of each instruction in forwards order
- * 3.   if the block ends with a jmp that passes types to a label,
- *      and the jmp is a loop edge,
- *      and any passed types cause the target label's type to widen,
- *      then set again=true
- * 4. if again==true, goto step 1
+ *   1) Set DefLabel dsts to TBottom.  We will widen their types from there.
+ *   2) Flow types forward through the unit using retypeDests. Propagate types
+ *   through Jmps unioning them into the target DefLabel's dst types.  If the
+ *   target was earlier in RPO we have to schedule another loop to start at or
+ *   earlier than that target block.
  */
 void reflowTypes(IRUnit& unit) {
-  auto const blocks = rpoSortCfg(unit);
-  auto const ids    = numberBlocks(unit, blocks);
+  using RPOId = uint32_t;
+  auto const rpoBlocks = rpoSortCfg(unit);
+  auto const ids = numberBlocks(unit, rpoBlocks);
 
-  auto isBackEdge = [&] (Block* from, Block* to) {
-    return ids[from] > ids[to];
-  };
+  RPOId firstUnstable = 0;
+  for (auto const block : rpoBlocks) {
+    auto const inst = &block->front();
+    if (inst->is(DefLabel)) {
+      for (auto const dst : inst->dsts()) {
+        dst->setType(TBottom);
+      }
+    }
+  }
 
-  for (bool again = true; again;) {
-    again = false;
-    for (auto* block : blocks) {
-      FTRACE(5, "reflowTypes: visiting block {}\n", block->id());
-      for (auto& inst : *block) retypeDests(&inst, &unit);
-      auto& jmp = block->back();
-      auto n = jmp.numSrcs();
-      if (!again && jmp.is(Jmp) && n > 0 && isBackEdge(block, jmp.taken())) {
-        // if we pass a widening type to a label, loop again.
-        auto srcs = jmp.srcs();
-        auto dsts = jmp.taken()->front().dsts();
-        for (unsigned i = 0; i < n; ++i) {
-          if (srcs[i]->type() <= dsts[i]->type()) continue;
-          again = true;
-          break;
+  while (firstUnstable < rpoBlocks.size()) {
+    auto nextFirstUnstable = safe_cast<RPOId>(rpoBlocks.size());
+    FTRACE(5, "reflowTypes: starting iteration at {}/{})\n",
+           firstUnstable, rpoBlocks.size());
+    for (auto id = firstUnstable; id < rpoBlocks.size(); ++id) {
+      auto const block = rpoBlocks[id];
+      FTRACE(5, "reflowTypes: visiting block {} (rpo: {}, firstUnstable: {})\n",
+             block->id(), ids[block], nextFirstUnstable);
+
+      for (auto& inst : *block) {
+        if (inst.is(DefLabel)) continue;
+        retypeDests(&inst, &unit);
+      }
+
+      auto const jmp = &block->back();
+      auto const n = jmp->numSrcs();
+      if (jmp->is(Jmp) && n > 0) {
+        // If we pass a wider type to a label, we need to update its dst type
+        // and then restart the next iteration at that block (or earlier).
+        auto srcs = jmp->srcs();
+        auto const taken = jmp->taken();
+        auto dsts = taken->front().dsts();
+        for (auto i = 0; i < n; ++i) {
+          auto const type = srcs[i]->type() | dsts[i]->type();
+          if (type == dsts[i]->type()) continue;
+          FTRACE(5, "reflowTypes: widening phi {} to {} (at rpo: {})\n",
+                 dsts[i]->toString(), type.toString(), ids[taken]);
+          auto const takenId = ids[taken];
+          if (takenId <= id) {
+            nextFirstUnstable = std::min(nextFirstUnstable, takenId);
+          }
+          dsts[i]->setType(type);
         }
       }
     }
+    firstUnstable = nextFirstUnstable;
   }
 }
 

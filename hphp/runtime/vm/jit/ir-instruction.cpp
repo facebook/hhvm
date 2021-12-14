@@ -701,6 +701,10 @@ inline Type unionReturn(const IRInstruction* inst, IdxSeq<Idx, Rest...>) {
 } // namespace
 
 Type outputType(const IRInstruction* inst, int /*dstId*/) {
+  for (auto const src : inst->srcs()) {
+    if (src->type() == TBottom) return TBottom;
+  }
+
   // Don't produce vanilla types if the bespoke runtime checks flag is off,
   // because we never use these types. Otherwise, apply layout-dependence.
   auto const checkLayoutFlags = [&](Type t) {

@@ -207,7 +207,8 @@ bool SetBreakpointsCommand::executeImpl(
             folly::dynamic bpInfo = folly::dynamic::object;
             bpInfo["id"] = bp->m_id;
             bpInfo["line"] = responseLine;
-            bpInfo["verified"] = verified;
+            // See the comment for newBreakpointInfo.
+            bpInfo["verified"] = true;
             responseBps.push_back(bpInfo);
 
             // Remove this bp from oldBpLines so that after processing this

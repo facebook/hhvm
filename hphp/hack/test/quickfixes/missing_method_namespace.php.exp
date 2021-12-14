@@ -1,3 +1,5 @@
+Add stub method \Foo\IFoo::bar
+
 <?hh
 
 namespace Foo {

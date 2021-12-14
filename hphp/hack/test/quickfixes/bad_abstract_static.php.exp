@@ -1,3 +1,5 @@
+Change to -> static::childImplements
+
 <?hh
 
 abstract class MyClass {

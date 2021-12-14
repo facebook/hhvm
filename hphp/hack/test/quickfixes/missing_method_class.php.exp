@@ -1,3 +1,5 @@
+Add stub method `\FooParent::bar`
+
 <?hh
 
 abstract class FooParent {

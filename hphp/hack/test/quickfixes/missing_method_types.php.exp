@@ -1,3 +1,5 @@
+Add stub method \IFoo::bar
+
 <?hh
 
 interface IFoo {

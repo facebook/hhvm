@@ -1,3 +1,5 @@
+Change to $my_var
+
 <?hh
 
 function foo(): void {

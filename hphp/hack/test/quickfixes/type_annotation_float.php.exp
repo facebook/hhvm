@@ -1,3 +1,5 @@
+Add float type annotation
+
 <?hh
 
 const float MY_CONST = 1.0;

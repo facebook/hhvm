@@ -1,3 +1,5 @@
+Add stub method \IFoo::genBar
+
 <?hh
 
 interface IFoo {

@@ -2304,7 +2304,12 @@ let handle_mode
       | None -> SMap.empty
     in
 
-    Printf.printf "%s" (Quickfix.apply_all src classish_starts quickfixes)
+    (* Print the title of each quickfix, so we can see text changes in tests. *)
+    List.iter quickfixes ~f:(fun qf ->
+        Printf.printf "%s\n" (Quickfix.get_title qf));
+
+    (* Print the source code after applying all these quickfixes. *)
+    Printf.printf "\n%s" (Quickfix.apply_all src classish_starts quickfixes)
 
 (*****************************************************************************)
 (* Main entry point *)

@@ -1,3 +1,5 @@
+Insert `inout` annotation
+
 <?hh
 
 function takes_param(inout int $x): void {}

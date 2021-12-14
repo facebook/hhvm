@@ -135,6 +135,7 @@ type t =
   | Const_without_typehint of {
       pos: Pos.t;
       const_name: string;
+      ty_name: string;
     }
   | Prop_without_typehint of {
       pos: Pos.t;

@@ -12,14 +12,16 @@ open Aast
 let error_if_no_typehint { cst_mode; cst_type; cst_name; cst_value; _ } =
   if (not (FileInfo.is_hhi cst_mode)) && Option.is_none cst_type then
     let (_, _, expr) = cst_value in
-    let type_ =
+    let (pos, const_name) = cst_name
+    and ty_name =
       match expr with
       | String _ -> "string"
       | Int _ -> "int"
       | Float _ -> "float"
       | _ -> "mixed"
     in
-    Errors.const_without_typehint cst_name type_
+    Errors.add_naming_error
+      (Naming_error.Const_without_typehint { pos; const_name; ty_name })
 
 let error_if_pseudo_constant gconst =
   if Option.is_some gconst.cst_namespace.Namespace_env.ns_name then

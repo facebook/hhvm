@@ -95,7 +95,6 @@ type client_check_env = {
   output_json: bool;
   prechecked: bool option;
   mini_state: string option;
-  profile_log: bool;
   remote: bool;
   root: Path.t;
   sort_results: bool;

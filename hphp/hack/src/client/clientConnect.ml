@@ -30,7 +30,6 @@ type env = {
   watchman_debug_logging: bool;
   log_inference_constraints: bool;
   log_on_slow_monitor_connect: bool;
-  profile_log: bool;
   remote: bool;
   ai_mode: string option;
   progress_callback: (string option -> unit) option;
@@ -443,7 +442,6 @@ let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
           watchman_debug_logging;
           log_inference_constraints;
           log_on_slow_monitor_connect = _;
-          profile_log;
           remote = _;
           ai_mode;
           progress_callback = _;
@@ -471,7 +469,6 @@ let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
               no_load;
               watchman_debug_logging;
               log_inference_constraints;
-              profile_log;
               silent = false;
               exit_on_failure = false;
               ai_mode;

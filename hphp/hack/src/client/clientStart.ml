@@ -30,7 +30,6 @@ type env = {
   no_load: bool;
   watchman_debug_logging: bool;
   log_inference_constraints: bool;
-  profile_log: bool;
   silent: bool;
   exit_on_failure: bool;
   ai_mode: string option;
@@ -84,7 +83,6 @@ let start_server (env : env) =
     no_load;
     watchman_debug_logging;
     log_inference_constraints;
-    profile_log;
     silent;
     exit_on_failure;
     ai_mode;
@@ -140,10 +138,6 @@ let start_server (env : env) =
           [||]);
         (if log_inference_constraints then
           [| "--log-inference-constraints" |]
-        else
-          [||]);
-        (if profile_log then
-          [| "--profile-log" |]
         else
           [||]);
         ai_options;

@@ -66,8 +66,6 @@ module type S = sig
 
   val prechecked : options -> bool option
 
-  val profile_log : options -> bool
-
   val remote : options -> bool
 
   val root : options -> Path.t

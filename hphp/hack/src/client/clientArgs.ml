@@ -129,7 +129,6 @@ let parse_check_args cmd =
   let output_json = ref false in
   let prechecked = ref None in
   let mini_state : string option ref = ref None in
-  let profile_log = ref false in
   let refactor_before = ref "" in
   let refactor_mode = ref "" in
   let remote = ref false in
@@ -526,7 +525,9 @@ let parse_check_args cmd =
       ( "--pause",
         Arg.Unit (fun () -> set_mode (MODE_PAUSE true)),
         " (mode) pause recheck-on-file-change [EXPERIMENTAL]" );
-      ("--profile-log", Arg.Set profile_log, " enable profile logging");
+      ( "--profile-log",
+        Arg.Unit (fun () -> config := ("profile_log", "true") :: !config),
+        " enable profile logging" );
       ( "--refactor",
         Arg.Tuple
           [
@@ -831,7 +832,6 @@ let parse_check_args cmd =
       output_json = !output_json;
       prechecked = !prechecked;
       mini_state = !mini_state;
-      profile_log = !profile_log;
       remote = !remote;
       root;
       sort_results = !sort_results;
@@ -853,7 +853,6 @@ let parse_start_env command =
   let log_inference_constraints = ref false in
   let no_load = ref false in
   let watchman_debug_logging = ref false in
-  let profile_log = ref false in
   let ai_mode = ref None in
   let ignore_hh_version = ref false in
   let saved_state_ignore_hhconfig = ref false in
@@ -888,7 +887,9 @@ let parse_start_env command =
       Common_argspecs.no_prechecked prechecked;
       Common_argspecs.prechecked prechecked;
       Common_argspecs.with_mini_state mini_state;
-      ("--profile-log", Arg.Set profile_log, " enable profile logging");
+      ( "--profile-log",
+        Arg.Unit (fun () -> config := ("profile_log", "true") :: !config),
+        " enable profile logging" );
       ( "--saved-state-ignore-hhconfig",
         Arg.Set saved_state_ignore_hhconfig,
         " ignore hhconfig hash when loading saved states (default: false)" );
@@ -925,7 +926,6 @@ let parse_start_env command =
     no_load = !no_load;
     prechecked = !prechecked;
     mini_state = !mini_state;
-    profile_log = !profile_log;
     root;
     silent = false;
     watchman_debug_logging = !watchman_debug_logging;

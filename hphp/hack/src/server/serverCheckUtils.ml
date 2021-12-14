@@ -101,9 +101,7 @@ let get_check_info genv env : Typing_service_types.check_info =
     use_max_typechecker_worker_memory_for_decl_deferral =
       genv.local_config
         .ServerLocalConfig.use_max_typechecker_worker_memory_for_decl_deferral;
-    profile_log =
-      ServerArgs.profile_log genv.options
-      || genv.local_config.ServerLocalConfig.profile_log;
+    profile_log = genv.local_config.ServerLocalConfig.profile_log;
     profile_decling = genv.local_config.ServerLocalConfig.profile_decling;
     profile_type_check_twice =
       genv.local_config.ServerLocalConfig.profile_type_check_twice;

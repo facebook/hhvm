@@ -34,7 +34,6 @@ type options = {
   max_procs: int option;
   no_load: bool;
   prechecked: bool option;
-  profile_log: bool;
   remote: bool;
   root: Path.t;
   save_filename: string option;
@@ -161,7 +160,6 @@ let parse_options () : options =
   let max_procs = ref None in
   let no_load = ref false in
   let prechecked = ref None in
-  let profile_log = ref false in
   let remote = ref false in
   let root = ref "" in
   let save = ref None in
@@ -228,7 +226,9 @@ let parse_options () : options =
       ( "--prechecked",
         Arg.Unit (fun () -> prechecked := Some true),
         Messages.prechecked );
-      ("--profile-log", Arg.Set profile_log, Messages.profile_log);
+      ( "--profile-log",
+        Arg.Unit (fun () -> config := ("profile_log", "true") :: !config),
+        Messages.profile_log );
       ("--remote", Arg.Set remote, Messages.remote);
       ("--save-mini", Arg.String set_save_state, Messages.save_state);
       ("--save-naming", Arg.String set_save_naming, Messages.save_naming);
@@ -315,7 +315,6 @@ let parse_options () : options =
     max_procs = !max_procs;
     no_load = !no_load;
     prechecked = !prechecked;
-    profile_log = !profile_log;
     remote = !remote;
     root = root_path;
     save_filename = !save;
@@ -350,7 +349,6 @@ let default_options ~root =
     max_procs = None;
     no_load = true;
     prechecked = None;
-    profile_log = false;
     remote = false;
     root = Path.make root;
     save_filename = None;
@@ -407,8 +405,6 @@ let max_procs options = options.max_procs
 let no_load options = options.no_load
 
 let prechecked options = options.prechecked
-
-let profile_log options = options.profile_log
 
 let remote options = options.remote
 
@@ -479,7 +475,6 @@ let to_string
       max_procs;
       no_load;
       prechecked;
-      profile_log;
       remote;
       root;
       save_filename;
@@ -619,9 +614,6 @@ let to_string
     ", ";
     "prechecked: ";
     prechecked_str;
-    "profile_log: ";
-    string_of_bool profile_log;
-    ", ";
     "remote: ";
     string_of_bool remote;
     ", ";

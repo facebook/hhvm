@@ -543,17 +543,17 @@ type t = {
       (** Enable use of the direct decl parser for parsing type signatures. *)
   profile_log: bool;  (** Log per-file performance information. *)
   profile_type_check_duration_threshold: float;
-      (** If --profile-log, we'll record telemetry on typechecks that took longer than the threshold (in seconds). In case of profile_type_check_twice we judge by the second type check. *)
+      (** If profile_log, we'll record telemetry on typechecks that took longer than the threshold (in seconds). In case of profile_type_check_twice we judge by the second type check. *)
   profile_type_check_memory_threshold_mb: int;
-      (** If --profile-log, we'll record telemetry on any file which allocated more than this many mb on the ocaml heap. In case of profile_type_check_twice we judge by the second type check. *)
+      (** If profile_log, we'll record telemetry on any file which allocated more than this many mb on the ocaml heap. In case of profile_type_check_twice we judge by the second type check. *)
   profile_type_check_twice: bool;
-      (** The flag "--config profile_type_check_twice=true" causes each file to be typechecked twice in succession. If --profile-log then both times are logged. *)
+      (** The flag "--config profile_type_check_twice=true" causes each file to be typechecked twice in succession. If profile_log then both times are logged. *)
   profile_decling: Typing_service_types.profile_decling;
       (** The flag "--config profile_decling=..." says what kind of instrumentation we want for each decl *)
   profile_owner: string option;
-      (** If --profile-log, we can use "--config profile_owner=<str>" to send an arbitrary "owner" along with the telemetry *)
+      (** If profile_log, we can use "--config profile_owner=<str>" to send an arbitrary "owner" along with the telemetry *)
   profile_desc: string;
-      (** If --profile-log, we can use "--config profile_desc=<str>" to send an arbitrary "desc" along with telemetry *)
+      (** If profile_log, we can use "--config profile_desc=<str>" to send an arbitrary "desc" along with telemetry *)
   go_to_implementation: bool;
       (** Allows the IDE to show the 'find all implementations' button *)
   allow_unstable_features: bool;

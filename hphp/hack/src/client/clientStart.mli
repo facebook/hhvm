@@ -13,7 +13,6 @@ type env = {
   no_load: bool;
   watchman_debug_logging: bool;
   log_inference_constraints: bool;
-  profile_log: bool;
   silent: bool;
   exit_on_failure: bool;
   ai_mode: string option;

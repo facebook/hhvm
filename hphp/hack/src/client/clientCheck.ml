@@ -113,7 +113,6 @@ let connect ?(use_priority_pipe = false) args =
     no_load;
     watchman_debug_logging;
     log_inference_constraints;
-    profile_log;
     remote;
     ai_mode;
     show_spinner;
@@ -155,7 +154,6 @@ let connect ?(use_priority_pipe = false) args =
         log_on_slow_monitor_connect =
           local_config
             .ServerLocalConfig.log_from_client_when_slow_monitor_connections;
-        profile_log;
         remote;
         ai_mode;
         progress_callback =

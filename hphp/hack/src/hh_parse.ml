@@ -601,7 +601,7 @@ let handle_existing_file args filename =
   begin
     let dump_needed = args.full_fidelity_ast_s_expr in
     let lowered =
-      if dump_needed || print_errors then
+      if dump_needed || print_errors then (
         let env =
           Full_fidelity_ast.make_env
             ~codegen:args.codegen
@@ -621,8 +621,18 @@ let handle_existing_file args filename =
           if print_errors then print_ast_check_errors errors;
           Some res
         with
-        | _ when print_errors -> None
-      else
+        | e when print_errors ->
+          let err = Base.Exn.to_string e in
+          let fn = Relative_path.suffix file in
+          (* If we've already found a parsing error, it's okay for lowering to fail *)
+          if not (Errors.currently_has_errors ()) then
+            Printf.eprintf
+              "Warning, lowering failed for %s\n  - error: %s\n"
+              fn
+              err;
+
+          None
+      ) else
         None
     in
     match lowered with

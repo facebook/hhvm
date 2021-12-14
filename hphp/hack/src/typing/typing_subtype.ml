@@ -427,6 +427,11 @@ let describe_ty_sub ~is_coeffect env ety =
   in
   Markdown_lite.md_codify (ty_descr ^ ty_constraints)
 
+let simplify_subtype_by_physical_equality env ty_sub ty_super simplify_subtype =
+  match (ty_sub, ty_super) with
+  | (LoclType ty1, LoclType ty2) when phys_equal ty1 ty2 -> (env, TL.valid)
+  | _ -> simplify_subtype ()
+
 (** Process the constraint proposition. There should only be errors left now,
     i.e. empty disjunction with error functions we call here. *)
 let rec process_simplify_subtype_result prop =
@@ -680,8 +685,10 @@ and simplify_subtype_i
     env
     ty_sub
     ty_super;
+  simplify_subtype_by_physical_equality env ty_sub ty_super @@ fun () ->
   let (env, ety_super) = Env.expand_internal_type env ty_super in
   let (env, ety_sub) = Env.expand_internal_type env ty_sub in
+  simplify_subtype_by_physical_equality env ety_sub ety_super @@ fun () ->
   let subtype_env =
     possibly_add_violated_constraint
       subtype_env

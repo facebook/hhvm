@@ -5276,8 +5276,15 @@ where
                         }
                     }
                 }
-                Some(name) if self.is_module_attribute(name) =>
-                        self.check_can_use_feature(node, &UnstableFeatures::Modules),
+                Some(name) if self.is_module_attribute(name) => {
+                    self.check_can_use_feature(node, &UnstableFeatures::Modules);
+                    if let Some(args) = self.attr_args(node) {
+                        let arity = args.count();
+                        if arity != 1 {
+                            self.errors.push(Self::make_error_from_node(node, errors::module_attr_arity(arity)));
+                        }
+                    }
+                },
                 Some(_) | None => ()
             }
             }),

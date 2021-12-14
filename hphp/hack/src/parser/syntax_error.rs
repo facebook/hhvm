@@ -1119,3 +1119,7 @@ pub const read_globals_without_capability: Error = Cow::Borrowed(
 pub const access_globals_without_capability: Error = Cow::Borrowed(
     "Writing to static properties requires the capability Globals, which is not provided by the context. Add the context `[globals]` after the function parameter list (or amend an existing context with a new comma delineated entry `globals`).",
 );
+
+pub fn module_attr_arity(len: usize) -> Error {
+    Cow::Owned(format!("`__Module` takes 1 argument, but got {}", len))
+}

@@ -1,3 +1,7 @@
+File "module_bad_arity.php--no-module.php", line 4, characters 45-52:
+`__Module` takes 1 argument, but got 0 (Parsing[1002])
+File "module_bad_arity.php--too-many-modules.php", line 3, characters 45-62:
+`__Module` takes 1 argument, but got 2 (Parsing[1002])
 File "module_bad_arity.php--bad-internal.php", line 5, characters 3-12:
 The attribute `__Internal` expects no arguments (Typing[4126])
 File "module_bad_arity.php--bad-internal.php", line 9, characters 5-14:

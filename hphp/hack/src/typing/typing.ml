@@ -8377,9 +8377,6 @@ and type_param env t =
 and overload_function
     make_call fpos p env class_id method_id el unpacked_element f =
   let (env, _tal, tcid, ty) = class_expr env [] class_id in
-  let (env, _tel, _) =
-    argument_list_exprs (expr ~allow_awaitable:false (*?*)) env el
-  in
   let (env, (fty, tal)) =
     class_get
       ~is_method:true

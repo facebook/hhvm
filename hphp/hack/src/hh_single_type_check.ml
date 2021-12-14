@@ -2251,12 +2251,8 @@ let handle_mode
                   else
                     Printf.sprintf " (%s)" modifiers))
             in
-            let member_linearization =
-              Sequence.map lin_members ~f:display |> Sequence.to_list
-            in
-            let ancestor_linearization =
-              Sequence.map lin_ancestors ~f:display |> Sequence.to_list
-            in
+            let member_linearization = List.map lin_members ~f:display in
+            let ancestor_linearization = List.map lin_ancestors ~f:display in
             Printf.printf "Member Linearization %s:\n" classname;
             List.iter member_linearization ~f:(Printf.printf "  %s\n");
             Printf.printf "Ancestor Linearization %s:\n" classname;

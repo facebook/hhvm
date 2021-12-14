@@ -560,8 +560,8 @@ and get_linearization (env : env) (class_name : string) : mro_element list =
       | None -> [])
 
 type linearizations = {
-  lin_members: Decl_defs.linearization;
-  lin_ancestors: Decl_defs.linearization;
+  lin_members: Decl_defs.mro_element list;
+  lin_ancestors: Decl_defs.mro_element list;
 }
 
 let get_linearizations (ctx : Provider_context.t) (class_name : string) :
@@ -581,7 +581,6 @@ let get_linearizations (ctx : Provider_context.t) (class_name : string) :
         linearization_kind = Decl_defs.Member_resolution;
       }
       class_name
-    |> Sequence.of_list
   in
   let lin_ancestors =
     get_linearization
@@ -591,6 +590,5 @@ let get_linearizations (ctx : Provider_context.t) (class_name : string) :
         linearization_kind = Decl_defs.Ancestor_types;
       }
       class_name
-    |> Sequence.of_list
   in
   { lin_ancestors; lin_members }

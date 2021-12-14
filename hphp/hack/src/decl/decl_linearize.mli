@@ -10,8 +10,8 @@
 type class_name = string
 
 type linearizations = {
-  lin_members: Decl_defs.linearization;
-  lin_ancestors: Decl_defs.linearization;
+  lin_members: Decl_defs.mro_element list;
+  lin_ancestors: Decl_defs.mro_element list;
 }
 
 val get_linearizations : Provider_context.t -> class_name -> linearizations

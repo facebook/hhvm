@@ -16,8 +16,8 @@ module LSTable = Lazy_string_table
 module SN = Naming_special_names
 
 type lazy_class_type = {
-  lin_members: Decl_defs.linearization;
-  lin_ancestors: Decl_defs.linearization;
+  lin_members: Decl_defs.mro_element list;
+  lin_ancestors: Decl_defs.mro_element list;
   ih: inherited_members;
   ancestors: decl_ty LSTable.t;  (** Types of parents, interfaces, and traits *)
   req_ancestor_names: unit LSTable.t;
@@ -58,7 +58,11 @@ let make_lazy_class_type ctx class_name =
         (let { Decl_linearize.lin_members; lin_ancestors } =
            Decl_linearize.get_linearizations ctx class_name
          in
-         let lin_ancestors_drop_one = Sequence.drop_eagerly lin_ancestors 1 in
+         let lin_members_seq = Sequence.of_list lin_members in
+         let lin_ancestors_seq = Sequence.of_list lin_ancestors in
+         let lin_ancestors_drop_one =
+           Sequence.drop_eagerly lin_ancestors_seq 1
+         in
          let is_canonical _ = true in
          let merge ~earlier ~later:_ = earlier in
          let ancestors =
@@ -71,15 +75,16 @@ let make_lazy_class_type ctx class_name =
            lin_members;
            lin_ancestors;
            ih =
-             Decl_inheritance.make ctx class_name lin_members (fun x ->
+             Decl_inheritance.make ctx class_name lin_members_seq (fun x ->
                  LSTable.get ancestors x);
            ancestors;
            req_ancestor_names =
              LSTable.make
-               (Decl_ancestors.req_ancestor_names ~lin_members)
+               (Decl_ancestors.req_ancestor_names ~lin_members:lin_members_seq)
                ~is_canonical
                ~merge;
-           all_requirements = Decl_ancestors.all_requirements ~lin_members;
+           all_requirements =
+             Decl_ancestors.all_requirements ~lin_members:lin_members_seq;
          })
     in
     Some (Lazy (sc, remainder))
@@ -479,9 +484,9 @@ module ApiEager = struct
     Decl_counters.count_subdecl decl Decl_counters.Linearization @@ fun () ->
     match (t, kind) with
     | (Lazy (_sc, lc), Decl_defs.Member_resolution) ->
-      (Lazy.force lc).lin_members |> Sequence.to_list
+      (Lazy.force lc).lin_members
     | (Lazy (_sc, lc), Decl_defs.Ancestor_types) ->
-      (Lazy.force lc).lin_ancestors |> Sequence.to_list
+      (Lazy.force lc).lin_ancestors
     | (Eager _, _) -> failwith "shallow_class_decl is disabled"
 
   let all_ancestor_req_names (decl, t) =

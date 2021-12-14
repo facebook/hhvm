@@ -412,6 +412,7 @@ fn read_member_modifiers<'a: 'b, 'b>(modifiers: impl Iterator<Item = &'b Node<'a
 struct NamespaceBuilder<'a> {
     arena: &'a Bump,
     stack: Vec<'a, NamespaceEnv<'a>>,
+    #[allow(dead_code)]
     auto_ns_map: &'a [(&'a str, &'a str)],
     simplify_naming_for_facts: bool,
 }
@@ -665,7 +666,9 @@ pub struct TypeParameterDecl<'a> {
 
 #[derive(Debug)]
 pub struct ClosureTypeHint<'a> {
+    #[allow(dead_code)]
     args: Node<'a>,
+    #[allow(dead_code)]
     ret_hint: Node<'a>,
 }
 
@@ -726,6 +729,7 @@ pub struct ShapeFieldNode<'a> {
 #[derive(Copy, Clone, Debug)]
 struct ClassNameParam<'a> {
     name: Id<'a>,
+    #[allow(dead_code)]
     full_pos: &'a Pos<'a>, // Position of the full expression `Foo::class`
 }
 

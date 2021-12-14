@@ -26,6 +26,7 @@ type SyncWrite = Mutex<Box<dyn Write + Sync + Send>>;
 #[derive(StructOpt, Clone, Debug)]
 #[structopt(no_version)] // don't consult CARGO_PKG_VERSION (Buck doesn't set it)
 pub struct Opts {
+    #[allow(dead_code)]
     #[structopt(flatten)]
     single_file_opts: SingleFileOpts,
 

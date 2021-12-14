@@ -150,6 +150,7 @@ where
 #[derive(Debug)]
 struct Profile {
     provider: &'static str,
+    #[allow(dead_code)]
     filepath: PathBuf,
     se_in_ns: u128,
     de_in_ns: u128,
@@ -158,8 +159,11 @@ struct Profile {
 
 #[derive(Debug)]
 struct Error {
+    #[allow(dead_code)]
     provider: &'static str,
+    #[allow(dead_code)]
     filepath: PathBuf,
+    #[allow(dead_code)]
     msg: String,
 }
 

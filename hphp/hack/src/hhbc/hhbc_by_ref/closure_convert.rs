@@ -65,8 +65,10 @@ struct Env<'a, 'arena> {
     /// How many existing classes are there?
     defined_class_count: usize,
     /// How many existing records are there?
+    #[allow(dead_code)]
     defined_record_count: usize,
     /// How many existing functions are there?
+    #[allow(dead_code)]
     defined_function_count: usize,
     /// Are we immediately in a using statement?
     in_using: bool,

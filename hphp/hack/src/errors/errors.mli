@@ -21,20 +21,6 @@ type finalized_error = (Pos.absolute, Pos.absolute) error_ [@@deriving eq, show]
 
 type applied_fixme = Pos.t * int
 
-module type Error_category = sig
-  type t
-
-  val min : int
-
-  val max : int
-
-  val of_enum : int -> t option
-
-  val show : t -> string
-
-  val err_code : t -> int
-end
-
 (* The analysis phase that the error is coming from. *)
 type phase =
   | Init
@@ -114,13 +100,13 @@ type name_context =
   | ClassContext
   | RecordContext
 
-module Parsing : Error_category
+module Parsing : Error_category.S
 
-module Naming : Error_category
+module Naming : Error_category.S
 
-module NastCheck : Error_category
+module NastCheck : Error_category.S
 
-module Typing : Error_category
+module Typing : Error_category.S
 
 val read_lines : string -> string list
 

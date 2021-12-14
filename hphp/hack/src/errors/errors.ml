@@ -622,19 +622,7 @@ module Typing = Error_codes.Typing
 (* Types *)
 (*****************************************************************************)
 
-module type Error_category = sig
-  type t
-
-  val min : int
-
-  val max : int
-
-  val of_enum : int -> t option
-
-  val show : t -> string
-
-  val err_code : t -> int
-end
+module type Error_category = Error_category.S
 
 (*****************************************************************************)
 (* HH_FIXMEs hook *)
@@ -899,6 +887,16 @@ and get_applied_fixmes (_err, fixmes) = files_t_to_list fixmes
 
 and from_error_list err = (list_to_files_t err, Relative_path.Map.empty)
 
+let add_parsing_error err =
+  add_error
+  @@ Parsing_error.
+       {
+         code = Error_code.to_enum @@ error_code err;
+         claim = claim err;
+         reasons = reasons err;
+         quickfixes = quickfixes err;
+       }
+
 let incremental_update ~old ~new_ ~rechecked phase =
   let fold init g =
     Relative_path.Set.fold
@@ -1115,16 +1113,13 @@ let on_error_or_add
 (* Parsing errors. *)
 (*****************************************************************************)
 
-let fixme_format pos =
-  add
-    (Parsing.err_code Parsing.FixmeFormat)
-    pos
-    "`HH_FIXME` wrong format, expected `/* HH_FIXME[ERROR_NUMBER] */`"
+let fixme_format pos = add_parsing_error @@ Parsing_error.fixme_format pos
 
-let parsing_error (p, msg) = add (Parsing.err_code Parsing.ParsingError) p msg
+let parsing_error (pos, msg) =
+  add_parsing_error @@ Parsing_error.parsing_error pos ~msg
 
-let xhp_parsing_error (p, msg) =
-  add (Parsing.err_code Parsing.XhpParsingError) p msg
+let xhp_parsing_error (pos, msg) =
+  add_parsing_error @@ Parsing_error.xhp_parsing_error pos ~msg
 
 (*****************************************************************************)
 (* Legacy AST / AAST errors *)

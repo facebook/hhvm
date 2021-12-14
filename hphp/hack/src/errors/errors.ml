@@ -1145,10 +1145,6 @@ let typeconst_concrete_concrete_override pos parent_pos =
       (parent_pos, "Previously defined here");
     ]
 
-(*****************************************************************************)
-(* Init check errors *)
-(*****************************************************************************)
-
 let type_arity use_pos def_pos ~expected ~actual =
   add_list
     (Typing.err_code Typing.TypeArityMismatch)

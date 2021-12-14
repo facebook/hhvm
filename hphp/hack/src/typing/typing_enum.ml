@@ -82,6 +82,10 @@ let enum_check_const ty_exp env cc t =
  * naming (Unbound name), so we only check the kind of type that is used.
  *)
 let enum_check_type env (pos : Pos_or_decl.t) ur ty_interface ty _on_error =
+  let sd env =
+    (* Allow pessimised enum class types when sound dynamic is enabled *)
+    TypecheckerOptions.enable_sound_dynamic (Typing_env.get_tcopt env)
+  in
   let ty_arraykey =
     MakeType.arraykey (Reason.Rimplicit_upper_bound (pos, "arraykey"))
   in
@@ -94,6 +98,8 @@ let enum_check_type env (pos : Pos_or_decl.t) ur ty_interface ty _on_error =
     | Ttuple ltys -> List.for_all ~f:is_valid_base ltys
     | Tnewtype (_, ltys, lty) -> List.for_all ~f:is_valid_base (lty :: ltys)
     | Tclass (_, _, ltys) -> List.for_all ~f:is_valid_base ltys
+    | Tunion [ty1; ty2] when is_dynamic ty1 && sd env -> is_valid_base ty2
+    | Tunion [ty1; ty2] when is_dynamic ty2 && sd env -> is_valid_base ty1
     | _ -> false
   in
   match ty_interface with

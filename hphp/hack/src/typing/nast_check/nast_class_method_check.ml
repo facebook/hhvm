@@ -28,7 +28,8 @@ let error_if_duplicate_method_names methods =
 
 let error_if_abstract_method_is_memoized method_ =
   if method_.m_abstract && is_memoizable method_.m_user_attributes then
-    Errors.abstract_method_memoize (fst method_.m_name)
+    Errors.add_nast_check_error
+    @@ Nast_check_error.Abstract_method_memoize (fst method_.m_name)
 
 let handler =
   object

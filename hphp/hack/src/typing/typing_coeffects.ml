@@ -56,7 +56,10 @@ let rec validate_capability env pos ty =
     (match Env.get_class_or_typedef env n with
     | None -> () (* unbound name error *)
     | Some (Typing_env.TypedefResult { Typing_defs.td_is_ctx = true; _ }) -> ()
-    | _ -> Errors.illegal_context pos (Typing_print.full_decl ty))
+    | _ ->
+      Errors.add_nast_check_error
+      @@ Nast_check_error.Illegal_context
+           { pos; name = Typing_print.full_decl ty })
   | Tgeneric (name, []) when SN.Coeffects.is_generated_generic name -> ()
   | Taccess (root, (_p, c)) ->
     let (env, root) =
@@ -73,13 +76,18 @@ let rec validate_capability env pos ty =
           (match Env.get_typeconst env cls c with
           | Some tc ->
             if not tc.Typing_defs.ttc_is_ctx then
-              Errors.illegal_context pos (Typing_print.full_decl ty)
+              Errors.add_nast_check_error
+              @@ Nast_check_error.Illegal_context
+                   { pos; name = Typing_print.full_decl ty }
           | None -> () (* typeconst not found *))
         | None -> () (* unbound name error *))
       | _ -> ()
     in
     List.iter ~f:check_ctx_const candidates
-  | _ -> Errors.illegal_context pos (Typing_print.full_decl ty)
+  | _ ->
+    Errors.add_nast_check_error
+    @@ Nast_check_error.Illegal_context
+         { pos; name = Typing_print.full_decl ty }
 
 let pretty env ty =
   let (env, ty) = Typing_intersection.simplify_intersections env ty in

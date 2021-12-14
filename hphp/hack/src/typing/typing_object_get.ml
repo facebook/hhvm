@@ -400,7 +400,10 @@ let rec obj_get_concrete_ty
             (env, (mk (Reason.Rnone, Tfun ft), []), dflt_lval_err, dflt_rval_err)
           | None when String.equal id_str SN.Members.__construct ->
             (* __construct is not an instance method and shouldn't be invoked directly *)
-            let () = Errors.magic (id_pos, id_str) in
+            let () =
+              Errors.add_nast_check_error
+              @@ Nast_check_error.Magic { pos = id_pos; meth_name = id_str }
+            in
             default ()
           | None ->
             member_not_found env id_pos ~is_method class_info id_str r on_error;

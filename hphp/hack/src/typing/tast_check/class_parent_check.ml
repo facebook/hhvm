@@ -22,15 +22,21 @@ let check_is_class env (p, h) =
         let kind = Cls.kind cls in
         let name = Cls.name cls in
         if Ast_defs.is_c_class kind then (
-          if Cls.final cls then Errors.requires_final_class p name
+          if Cls.final cls then
+            Errors.add_nast_check_error
+            @@ Nast_check_error.Requires_final_class { pos = p; name }
         ) else
-          Errors.requires_non_class
-            p
-            name
-            (Ast_defs.string_of_classish_kind kind)
+          Errors.add_nast_check_error
+          @@ Nast_check_error.Requires_non_class
+               { pos = p; name; kind = Ast_defs.string_of_classish_kind kind }
     end
-  | Aast.Habstr (name, _) -> Errors.requires_non_class p name "a generic"
-  | _ -> Errors.requires_non_class p "This" "an invalid type hint"
+  | Aast.Habstr (name, _) ->
+    Errors.add_nast_check_error
+    @@ Nast_check_error.Requires_non_class { pos = p; name; kind = "a generic" }
+  | _ ->
+    Errors.add_nast_check_error
+    @@ Nast_check_error.Requires_non_class
+         { pos = p; name = "This"; kind = "an invalid type hint" }
 
 let check_is_interface (env, error_verb) (p, h) =
   match h with
@@ -39,10 +45,19 @@ let check_is_interface (env, error_verb) (p, h) =
       match Env.get_class env name with
       | None -> ()
       | Some cls when Ast_defs.is_c_interface (Cls.kind cls) -> ()
-      | Some cls -> Errors.non_interface p (Cls.name cls) error_verb
+      | Some cls ->
+        Errors.add_nast_check_error
+        @@ Nast_check_error.Non_interface
+             { pos = p; name = Cls.name cls; verb = error_verb }
     end
-  | Aast.Habstr _ -> Errors.non_interface p "generic" error_verb
-  | _ -> Errors.non_interface p "invalid type hint" error_verb
+  | Aast.Habstr _ ->
+    Errors.add_nast_check_error
+    @@ Nast_check_error.Non_interface
+         { pos = p; name = "generic"; verb = error_verb }
+  | _ ->
+    Errors.add_nast_check_error
+    @@ Nast_check_error.Non_interface
+         { pos = p; name = "invalid type hint"; verb = error_verb }
 
 let check_is_trait env (p, h) =
   match h with
@@ -55,7 +70,9 @@ let check_is_trait env (p, h) =
       | Some cls ->
         let name = Cls.name cls in
         let kind = Cls.kind cls in
-        Errors.uses_non_trait p name (Ast_defs.string_of_classish_kind kind)
+        Errors.add_nast_check_error
+        @@ Nast_check_error.Uses_non_trait
+             { pos = p; name; kind = Ast_defs.string_of_classish_kind kind }
     end
   | _ -> failwith "assertion failure: trait isn't an Happly"
 
@@ -90,8 +107,6 @@ let handler =
       List.iter c.c_uses ~f:(check_is_trait env);
       duplicated_used_traits c;
       List.iter req_extends ~f:(check_is_class env);
-      List.iter c.c_implements ~f:(check_is_interface (env, "implement"));
-      List.iter
-        req_implements
-        ~f:(check_is_interface (env, "require implementation of"))
+      List.iter c.c_implements ~f:(check_is_interface (env, `implement));
+      List.iter req_implements ~f:(check_is_interface (env, `req_implement))
   end

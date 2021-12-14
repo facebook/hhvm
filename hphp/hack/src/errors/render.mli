@@ -7,6 +7,8 @@
  *)
 val strip_ns : string -> string
 
+val verb_to_string : [< `extend | `implement | `use ] -> string
+
 val vis_to_string : [< `internal | `private_ | `protected | `public ] -> string
 
 val highlight_differences : string -> string -> string

@@ -751,6 +751,8 @@ let add_parsing_error err = add_error @@ Parsing_error.to_user_error err
 
 let add_naming_error err = add_error @@ Naming_error.to_user_error err
 
+let add_nast_check_error err = add_error @@ Nast_check_error.to_user_error err
+
 let incremental_update ~old ~new_ ~rechecked phase =
   let fold init g =
     Relative_path.Set.fold
@@ -964,15 +966,6 @@ let on_error_or_add
   | None -> add_error @@ User_error.make code claim reasons
   | Some f -> f ~code (claim_as_reason claim :: reasons)
 
-let repeated_record_field name pos prev_pos =
-  let msg =
-    Printf.sprintf "Duplicate record field %s" (Markdown_lite.md_codify name)
-  in
-  add_list
-    (NastCheck.err_code NastCheck.RepeatedRecordFieldName)
-    (pos, msg)
-    [(prev_pos, "Previous field is here")]
-
 let unexpected_record_field_name ~field_name ~field_pos ~record_name ~decl_pos =
   let msg =
     Printf.sprintf
@@ -1152,82 +1145,8 @@ let typeconst_concrete_concrete_override pos parent_pos =
       (parent_pos, "Previously defined here");
     ]
 
-let dynamically_callable_reified attr_pos =
-  add
-    (NastCheck.err_code NastCheck.DynamicallyCallableReified)
-    attr_pos
-    "`__DynamicallyCallable` cannot be used on reified functions or methods"
-
 (*****************************************************************************)
 (* Init check errors *)
-(*****************************************************************************)
-
-let no_construct_parent pos =
-  add
-    (NastCheck.err_code NastCheck.NoConstructParent)
-    pos
-    (Utils.sl
-       [
-         "You are extending a class that needs to be initialized\n";
-         "Make sure you call `parent::__construct`.\n";
-       ])
-
-let nonstatic_method_in_abstract_final_class pos =
-  add
-    (NastCheck.err_code NastCheck.NonstaticMethodInAbstractFinalClass)
-    pos
-    "Abstract final classes cannot have nonstatic methods or constructors."
-
-let constructor_required (pos, name) prop_names =
-  let name = Render.strip_ns name in
-  let props_str =
-    List.map ~f:Markdown_lite.md_codify prop_names |> String.concat ~sep:" "
-  in
-  add
-    (NastCheck.err_code NastCheck.ConstructorRequired)
-    pos
-    ("Lacking `__construct`, class "
-    ^ Markdown_lite.md_codify name
-    ^ " does not initialize its private member(s): "
-    ^ props_str)
-
-let not_initialized (pos, cname) props =
-  let cname = Render.strip_ns cname in
-  let prop_msgs =
-    List.map props ~f:(fun (pos, prop) ->
-        ( pos,
-          Markdown_lite.md_codify ("$this->" ^ prop) ^ " is not initialized." ))
-  in
-  add_list
-    (NastCheck.err_code NastCheck.NotInitialized)
-    ( pos,
-      "Class "
-      ^ Markdown_lite.md_codify cname
-      ^ " has properties that cannot be null and aren't always set in `__construct`."
-    )
-    prop_msgs
-
-let call_before_init pos cv =
-  add
-    (NastCheck.err_code NastCheck.CallBeforeInit)
-    pos
-    (Utils.sl
-       ([
-          "Until the initialization of `$this` is over,";
-          " you can only call private methods\n";
-          "The initialization is not over because ";
-        ]
-       @
-       if String.equal cv "parent::__construct" then
-         ["you forgot to call `parent::__construct`"]
-       else
-         [
-           Markdown_lite.md_codify ("$this->" ^ cv);
-           " can still potentially be null";
-         ]))
-
-(*****************************************************************************)
-(* Nast errors check *)
 (*****************************************************************************)
 
 let type_arity use_pos def_pos ~expected ~actual =
@@ -1239,302 +1158,6 @@ let type_arity use_pos def_pos ~expected ~actual =
         expected
         actual )
     [(def_pos, "Definition is here")]
-
-let abstract_with_body (p, _) =
-  add
-    (NastCheck.err_code NastCheck.AbstractWithBody)
-    p
-    "This method is declared as abstract, but has a body"
-
-let mk_not_abstract_without_typeconst (p, _) =
-  User_error.make
-    (NastCheck.err_code NastCheck.NotAbstractWithoutTypeconst)
-    ( p,
-      "This type constant is not declared as abstract, it must have"
-      ^ " an assigned type" )
-    []
-
-let not_abstract_without_typeconst node =
-  add_error (mk_not_abstract_without_typeconst node)
-
-let typeconst_depends_on_external_tparam pos ext_pos ext_name =
-  add_list
-    (NastCheck.err_code NastCheck.TypeconstDependsOnExternalTparam)
-    ( pos,
-      "A type constant can only use type parameters declared in its own"
-      ^ " type parameter list" )
-    [
-      ( Pos_or_decl.of_raw_pos ext_pos,
-        Markdown_lite.md_codify ext_name
-        ^ " was declared as a type parameter here" );
-    ]
-
-let interface_with_partial_typeconst tconst_pos =
-  add
-    (NastCheck.err_code NastCheck.InterfaceWithPartialTypeconst)
-    tconst_pos
-    "An interface cannot contain a partially abstract type constant"
-
-let mk_multiple_xhp_category pos =
-  User_error.make
-    (NastCheck.err_code NastCheck.MultipleXhpCategory)
-    (pos, "XHP classes can only contain one category declaration")
-    []
-
-let multiple_xhp_category pos = add_error (mk_multiple_xhp_category pos)
-
-let private_and_final p =
-  add
-    (NastCheck.err_code NastCheck.PrivateAndFinal)
-    p
-    "Class methods cannot be both `private` and `final`."
-
-let return_in_gen p =
-  add
-    (NastCheck.err_code NastCheck.ReturnInGen)
-    p
-    ("You cannot return a value in a generator (a generator"
-    ^ " is a function that uses `yield`)")
-
-let return_in_finally p =
-  add
-    (NastCheck.err_code NastCheck.ReturnInFinally)
-    p
-    ("Don't use `return` in a `finally` block;"
-    ^ " there's nothing to receive the return value")
-
-let toplevel_break p =
-  add
-    (NastCheck.err_code NastCheck.ToplevelBreak)
-    p
-    "`break` can only be used inside loops or `switch` statements"
-
-let toplevel_continue p =
-  add
-    (NastCheck.err_code NastCheck.ToplevelContinue)
-    p
-    "`continue` can only be used inside loops"
-
-let continue_in_switch p =
-  add
-    (NastCheck.err_code NastCheck.ContinueInSwitch)
-    p
-    ("In PHP, `continue;` inside a switch statement is equivalent to `break;`."
-    ^ " Hack does not support this; use `break` if that is what you meant.")
-
-let await_in_sync_function p =
-  add
-    (NastCheck.err_code NastCheck.AwaitInSyncFunction)
-    p
-    "`await` can only be used inside `async` functions"
-
-let interface_use_trait p =
-  add
-    (NastCheck.err_code NastCheck.InterfaceUsesTrait)
-    p
-    "Interfaces cannot use traits"
-
-let static_memoized_function p =
-  add
-    (NastCheck.err_code NastCheck.StaticMemoizedFunction)
-    p
-    "`memoize` is not allowed on static methods in classes that aren't final "
-
-let magic (p, s) =
-  add
-    (NastCheck.err_code NastCheck.Magic)
-    p
-    (Markdown_lite.md_codify s
-    ^ " is a magic method and cannot be called directly")
-
-let non_interface (p : Pos.t) (c2 : string) (verb : string) : 'a =
-  add
-    (NastCheck.err_code NastCheck.NonInterface)
-    p
-    ("Cannot "
-    ^ verb
-    ^ " "
-    ^ (Render.strip_ns c2 |> Markdown_lite.md_codify)
-    ^ " - it is not an interface")
-
-let toString_returns_string pos =
-  add
-    (NastCheck.err_code NastCheck.ToStringReturnsString)
-    pos
-    "`__toString` should return a string"
-
-let toString_visibility pos =
-  add
-    (NastCheck.err_code NastCheck.ToStringVisibility)
-    pos
-    "`__toString` must have public visibility and cannot be static"
-
-let uses_non_trait (p : Pos.t) (n : string) (t : string) =
-  add
-    (NastCheck.err_code NastCheck.UsesNonTrait)
-    p
-    ((Render.strip_ns n |> Markdown_lite.md_codify)
-    ^ " is not a trait. It is "
-    ^ t
-    ^ ".")
-
-let requires_non_class (p : Pos.t) (n : string) (t : string) =
-  add
-    (NastCheck.err_code NastCheck.RequiresNonClass)
-    p
-    ((Render.strip_ns n |> Markdown_lite.md_codify)
-    ^ " is not a class. It is "
-    ^ t
-    ^ ".")
-
-let requires_final_class (p : Pos.t) (n : string) =
-  add
-    (NastCheck.err_code NastCheck.RequiresFinalClass)
-    p
-    ((Render.strip_ns n |> Markdown_lite.md_codify)
-    ^ " is not an extendable class.")
-
-let abstract_body pos =
-  add
-    (NastCheck.err_code NastCheck.AbstractBody)
-    pos
-    "This method shouldn't have a body"
-
-let interface_with_member_variable pos =
-  add
-    (NastCheck.err_code NastCheck.InterfaceWithMemberVariable)
-    pos
-    "Interfaces cannot have member variables"
-
-let interface_with_static_member_variable pos =
-  add
-    (NastCheck.err_code NastCheck.InterfaceWithStaticMemberVariable)
-    pos
-    "Interfaces cannot have static variables"
-
-let illegal_function_name pos mname =
-  add
-    (NastCheck.err_code NastCheck.IllegalFunctionName)
-    pos
-    ("Illegal function name: "
-    ^ (Render.strip_ns mname |> Markdown_lite.md_codify))
-
-let entrypoint_arguments pos =
-  add
-    (NastCheck.err_code NastCheck.EntryPointArguments)
-    pos
-    "`__EntryPoint` functions cannot take arguments."
-
-let entrypoint_generics pos =
-  add
-    (NastCheck.err_code NastCheck.EntryPointGenerics)
-    pos
-    "`__EntryPoint` functions cannot have generic parameters."
-
-let variadic_memoize pos =
-  add
-    (NastCheck.err_code NastCheck.VariadicMemoize)
-    pos
-    "Memoized functions cannot be variadic."
-
-let abstract_method_memoize pos =
-  add
-    (NastCheck.err_code NastCheck.AbstractMethodMemoize)
-    pos
-    "Abstract methods cannot be memoized."
-
-let instance_property_in_abstract_final_class pos =
-  add
-    (NastCheck.err_code NastCheck.InstancePropertyInAbstractFinalClass)
-    pos
-    "Abstract final classes cannot have instance properties."
-
-let inout_params_special pos =
-  add
-    (NastCheck.err_code NastCheck.InoutParamsSpecial)
-    pos
-    "Methods with special semantics cannot have `inout` parameters."
-
-let inout_params_memoize fpos pos =
-  let msg1 = (fpos, "Functions with `inout` parameters cannot be memoized") in
-  let msg2 = (Pos_or_decl.of_raw_pos pos, "This is an `inout` parameter") in
-  add_list (NastCheck.err_code NastCheck.InoutParamsMemoize) msg1 [msg2]
-
-let reading_from_append pos =
-  add
-    (NastCheck.err_code NastCheck.ReadingFromAppend)
-    pos
-    "Cannot use `[]` for reading"
-
-let list_rvalue pos =
-  add
-    (NastCheck.err_code NastCheck.ListRvalue)
-    pos
-    "`list()` can only be used for destructuring assignment. Did you mean `tuple()` or `vec[]`?"
-
-let inout_argument_bad_expr pos =
-  add
-    (NastCheck.err_code NastCheck.InoutArgumentBadExpr)
-    pos
-    "`inout` arguments may only be local variables or array indexing expressions "
-
-let inout_in_transformed_pseudofunction pos fn =
-  add
-    (NastCheck.err_code NastCheck.InoutInTransformedPsuedofunction)
-    pos
-    (Printf.sprintf "Unexpected `inout` argument for `%s`" fn)
-
-let illegal_destructor pos =
-  add
-    (NastCheck.err_code NastCheck.IllegalDestructor)
-    pos
-    ("Destructors are not supported in Hack; use other patterns like "
-    ^ "`IDisposable`/`using` or `try`/`catch` instead.")
-
-let switch_non_terminal_default pos =
-  add
-    (NastCheck.err_code NastCheck.SwitchNonTerminalDefault)
-    pos
-    "Default case in `switch` must be terminal"
-
-let switch_multiple_default pos =
-  add
-    (NastCheck.err_code NastCheck.SwitchMultipleDefault)
-    pos
-    "There can be only one `default` case in `switch`"
-
-let illegal_context pos name =
-  add_list
-    NastCheck.(err_code IllegalContext)
-    ( pos,
-      "Illegal context: "
-      ^ (name |> Markdown_lite.md_codify)
-      ^ "\nCannot use a context defined outside namespace "
-      ^ Naming_special_names.Coeffects.contexts )
-    []
-
-(*****************************************************************************)
-(* Nast terminality *)
-(*****************************************************************************)
-
-let case_fallthrough pos1 pos2 =
-  add_list
-    (NastCheck.err_code NastCheck.CaseFallthrough)
-    ( pos1,
-      "This `switch` has a `case` that implicitly falls through and is "
-      ^ "not annotated with `// FALLTHROUGH`" )
-    [
-      ( Pos_or_decl.of_raw_pos pos2,
-        "This `case` implicitly falls through. Did you forget to add `break` or `return`?"
-      );
-    ]
-
-let default_fallthrough pos =
-  add
-    (NastCheck.err_code NastCheck.DefaultFallthrough)
-    pos
-    ("This `switch` has a default case that implicitly falls "
-    ^ "through and is not annotated with `// FALLTHROUGH`")
 
 (*****************************************************************************)
 (* Typing errors *)
@@ -3405,12 +3028,6 @@ let overriding_prop_const_mismatch
           m2 );
     ]
 
-let php_lambda_disallowed pos =
-  add
-    (NastCheck.err_code NastCheck.PhpLambdaDisallowed)
-    pos
-    "PHP style anonymous functions are not allowed."
-
 (*****************************************************************************)
 (* Typing decl errors *)
 (*****************************************************************************)
@@ -5092,15 +4709,6 @@ let expression_tree_non_public_member ~use_pos ~def_pos =
     (Typing.err_code Typing.ExpressionTreeNonPublicProperty)
     (use_pos, "Cannot access non-public members within expression trees.")
     [(def_pos, "Member defined here")]
-
-let internal_method_with_invalid_visibility ~attr_pos ~visibility =
-  let open Markdown_lite in
-  add (NastCheck.err_code NastCheck.InternalProtectedOrPrivate) attr_pos
-  @@ md_codify "__Internal"
-  ^ " methods must be public, they cannot be "
-  ^ String.lowercase
-  @@ md_codify
-  @@ Ast_defs.show_visibility visibility
 
 let trait_parent_construct_inconsistent pos def_pos =
   add_list

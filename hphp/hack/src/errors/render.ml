@@ -15,6 +15,11 @@ let vis_to_string = function
   | `internal -> "internal"
   | `protected -> "protected"
 
+let verb_to_string = function
+  | `extend -> "extend"
+  | `implement -> "implement"
+  | `use -> "use"
+
 (* Given two equal-length strings, highlights the characters in
    the second that differ from the first *)
 let highlight_differences base to_highlight =

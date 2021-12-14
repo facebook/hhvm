@@ -51,7 +51,8 @@ let handler =
           @@ Naming_error.Illegal_use_of_dynamically_callable
                { attr_pos = p; meth_pos = pos; vis });
         if has_reified_generics m.m_tparams then
-          Errors.dynamically_callable_reified p;
+          Errors.add_nast_check_error
+          @@ Nast_check_error.Dynamically_callable_reified p;
         ()
       | _ -> ()
 
@@ -62,7 +63,8 @@ let handler =
       with
       | Some p ->
         if has_reified_generics f.f_tparams then
-          Errors.dynamically_callable_reified p;
+          Errors.add_nast_check_error
+          @@ Nast_check_error.Dynamically_callable_reified p;
         ()
       | _ -> ()
   end

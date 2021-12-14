@@ -15,14 +15,16 @@ let check_multiple_default casel =
     | _ -> false
   in
   match List.filter casel ~f:is_default with
-  | _ :: Default (pos, _) :: _ -> Errors.switch_multiple_default pos
+  | _ :: Default (pos, _) :: _ ->
+    Errors.add_nast_check_error @@ Nast_check_error.Switch_multiple_default pos
   | _ -> ()
 
 let check_non_terminal_default casel =
   let raise_if_non_terminal (has_default, already_raised) = function
     | Default _ -> (true, already_raised)
     | Case ((_, pos, _), _) when has_default && not already_raised ->
-      Errors.switch_non_terminal_default pos;
+      Errors.add_nast_check_error
+      @@ Nast_check_error.Switch_non_terminal_default pos;
       (has_default, true)
     | _ -> (has_default, already_raised)
   in

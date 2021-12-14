@@ -16,10 +16,14 @@ let handler =
 
     method! at_stmt env s =
       let p = fst s in
-      match (snd s, env.control_context) with
-      | (Break, Toplevel) -> Errors.toplevel_break p
-      | (Continue, Toplevel) -> Errors.toplevel_continue p
-      | (Continue, SwitchContext) -> Errors.continue_in_switch p
-      | (Return _, _) when env.is_finally -> Errors.return_in_finally p
-      | _ -> ()
+      let err_opt =
+        let open Nast_check_error in
+        match (snd s, env.control_context) with
+        | (Break, Toplevel) -> Some (Toplevel_break p)
+        | (Continue, Toplevel) -> Some (Toplevel_continue p)
+        | (Continue, SwitchContext) -> Some (Continue_in_switch p)
+        | (Return _, _) when env.is_finally -> Some (Return_in_finally p)
+        | _ -> None
+      in
+      Option.iter Errors.add_nast_check_error err_opt
   end

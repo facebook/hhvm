@@ -2323,10 +2323,12 @@ and case_list parent_locals ty env switch_pos cl =
     if (not (List.is_empty block)) && not (List.is_empty rest_of_list) then
       match LEnv.get_cont_option env C.Next with
       | Some _ ->
+        Errors.add_nast_check_error
+        @@
         if is_default then
-          Errors.default_fallthrough switch_pos
+          Nast_check_error.Default_fallthrough switch_pos
         else
-          Errors.case_fallthrough switch_pos case_pos
+          Nast_check_error.Case_fallthrough { switch_pos; case_pos }
       | None -> ()
   in
   let env =

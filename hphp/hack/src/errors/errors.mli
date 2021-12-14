@@ -99,6 +99,8 @@ val add_parsing_error : Parsing_error.t -> unit
 
 val add_naming_error : Naming_error.t -> unit
 
+val add_nast_check_error : Nast_check_error.t -> unit
+
 (* Error codes that can be suppressed in strict mode with a FIXME based on configuration. *)
 val allowed_fixme_codes_strict : ISet.t ref
 
@@ -287,8 +289,6 @@ val overriding_prop_const_mismatch :
   bool ->
   error_from_reasons_callback ->
   unit
-
-val repeated_record_field : string -> Pos.t -> Pos_or_decl.t -> unit
 
 val unexpected_record_field_name :
   field_name:string ->
@@ -831,59 +831,7 @@ val missing_assign : Pos.t -> unit
 
 val invalid_memoized_param : Pos.t -> (Pos_or_decl.t * string) list -> unit
 
-val no_construct_parent : Pos.t -> unit
-
-val constructor_required : Pos.t * string -> string list -> unit
-
-val not_initialized : Pos.t * string -> (Pos_or_decl.t * string) list -> unit
-
-val call_before_init : Pos.t -> string -> unit
-
 val type_arity : Pos.t -> Pos_or_decl.t -> expected:int -> actual:int -> unit
-
-val abstract_with_body : Pos.t * 'a -> unit
-
-val private_and_final : Pos.t -> unit
-
-val return_in_gen : Pos.t -> unit
-
-val return_in_finally : Pos.t -> unit
-
-val toplevel_break : Pos.t -> unit
-
-val toplevel_continue : Pos.t -> unit
-
-val continue_in_switch : Pos.t -> unit
-
-val await_in_sync_function : Pos.t -> unit
-
-val static_memoized_function : Pos.t -> unit
-
-val magic : Pos.t * string -> unit
-
-val non_interface : Pos.t -> string -> string -> unit
-
-val toString_returns_string : Pos.t -> unit
-
-val toString_visibility : Pos.t -> unit
-
-val uses_non_trait : Pos.t -> string -> string -> unit
-
-val requires_non_class : Pos.t -> string -> string -> unit
-
-val requires_final_class : Pos.t -> string -> unit
-
-val abstract_body : Pos.t -> unit
-
-val interface_with_member_variable : Pos.t -> unit
-
-val interface_with_static_member_variable : Pos.t -> unit
-
-val illegal_function_name : Pos.t -> string -> unit
-
-val case_fallthrough : Pos.t -> Pos.t -> unit
-
-val default_fallthrough : Pos.t -> unit
 
 val visibility_extends :
   string ->
@@ -996,18 +944,6 @@ val generic_at_runtime : Pos.t -> string -> unit
 
 val generics_not_allowed : Pos.t -> unit
 
-val interface_with_partial_typeconst : Pos.t -> unit
-
-val multiple_xhp_category : Pos.t -> unit
-
-val mk_multiple_xhp_category : Pos.t -> error
-
-val not_abstract_without_typeconst : Pos.t * string -> unit
-
-val mk_not_abstract_without_typeconst : Pos.t * string -> error
-
-val typeconst_depends_on_external_tparam : Pos.t -> Pos.t -> string -> unit
-
 val attribute_too_many_arguments : Pos.t -> string -> int -> unit
 
 val attribute_too_few_arguments : Pos.t -> string -> int -> unit
@@ -1101,10 +1037,6 @@ val required_field_is_optional :
 
 val array_get_with_optional_field : Pos.t -> Pos_or_decl.t -> string -> unit
 
-val reading_from_append : Pos.t -> unit
-
-val list_rvalue : Pos.t -> unit
-
 val nullable_cast : Pos.t -> string -> Pos_or_decl.t -> unit
 
 val return_disposable_mismatch :
@@ -1134,10 +1066,6 @@ val accept_disposable_invariant :
 val ifc_external_contravariant :
   Pos_or_decl.t -> Pos_or_decl.t -> error_from_reasons_callback -> unit
 
-val inout_params_special : Pos.t -> unit
-
-val inout_params_memoize : Pos.t -> Pos.t -> unit
-
 val inout_annotation_missing : Pos.t -> Pos_or_decl.t -> unit
 
 val inout_annotation_unexpected :
@@ -1153,13 +1081,7 @@ val illegal_xhp_child : Pos.t -> (Pos_or_decl.t * string) list -> unit
 val missing_xhp_required_attr :
   Pos.t -> string -> (Pos_or_decl.t * string) list -> unit
 
-val inout_argument_bad_expr : Pos.t -> unit
-
-val inout_in_transformed_pseudofunction : Pos.t -> string -> unit
-
 val inout_argument_bad_type : Pos.t -> (Pos_or_decl.t * string) list -> unit
-
-val illegal_destructor : Pos.t -> unit
 
 val ambiguous_lambda : Pos.t -> (Pos_or_decl.t * string) list -> unit
 
@@ -1175,8 +1097,6 @@ val wrong_expression_kind_builtin_attribute : string -> Pos.t -> string -> unit
 
 val decl_override_missing_hint :
   Pos_or_decl.t -> error_from_reasons_callback -> unit
-
-val dynamically_callable_reified : Pos.t -> unit
 
 val shapes_key_exists_always_true : Pos.t -> string -> Pos_or_decl.t -> unit
 
@@ -1228,16 +1148,6 @@ val invalid_set_value :
 
 val invalid_arraykey_constraint : Pos.t -> string -> unit
 
-val entrypoint_arguments : Pos.t -> unit
-
-val entrypoint_generics : Pos.t -> unit
-
-val variadic_memoize : Pos.t -> unit
-
-val abstract_method_memoize : Pos.t -> unit
-
-val instance_property_in_abstract_final_class : Pos.t -> unit
-
 val lateinit_with_default : Pos.t -> unit
 
 val bad_lateinit_override :
@@ -1250,10 +1160,6 @@ val bad_xhp_attr_required_override :
   Pos_or_decl.t ->
   error_from_reasons_callback ->
   unit
-
-val interface_use_trait : Pos.t -> unit
-
-val nonstatic_method_in_abstract_final_class : Pos.t -> unit
 
 val multiple_concrete_defs :
   Pos_or_decl.t ->
@@ -1289,15 +1195,9 @@ val new_without_newable : Pos.t -> string -> unit
 
 val typechecker_timeout : Pos.t * string -> int -> unit
 
-val switch_multiple_default : Pos.t -> unit
-
-val switch_non_terminal_default : Pos.t -> unit
-
 val unresolved_type_variable : Pos.t -> unit
 
 val invalid_sub_string : Pos.t -> string -> unit
-
-val php_lambda_disallowed : Pos.t -> unit
 
 val static_meth_with_class_reified_generic : Pos.t -> Pos.t -> unit
 
@@ -1383,8 +1283,6 @@ val op_coeffect_error :
   string ->
   Pos.t ->
   unit
-
-val illegal_context : Pos.t -> string -> unit
 
 val abstract_function_pointer :
   string -> string -> Pos.t -> Pos_or_decl.t -> unit
@@ -1553,9 +1451,6 @@ val module_hint : def_pos:Pos_or_decl.t -> use_pos:Pos.t -> unit
 
 val expression_tree_non_public_member :
   use_pos:Pos.t -> def_pos:Pos_or_decl.t -> unit
-
-val internal_method_with_invalid_visibility :
-  attr_pos:Pos.t -> visibility:Ast_defs.visibility -> unit
 
 val not_sub_dynamic :
   (Pos_or_decl.t * string) list ->

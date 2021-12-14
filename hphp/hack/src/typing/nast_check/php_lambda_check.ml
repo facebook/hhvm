@@ -17,6 +17,8 @@ let handler =
     method! at_expr env (_, pos, expr) =
       if TypecheckerOptions.error_php_lambdas (get_tcopt env) then
         match expr with
-        | Efun _ -> Errors.php_lambda_disallowed pos
+        | Efun _ ->
+          Errors.add_nast_check_error
+          @@ Nast_check_error.Php_lambda_disallowed pos
         | _ -> ()
   end

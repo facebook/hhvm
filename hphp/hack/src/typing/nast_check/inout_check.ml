@@ -16,7 +16,9 @@ let check_param _env params p user_attributes name =
       match param.param_callconv with
       | Ast_defs.Pinout _ ->
         let pos = param.param_pos in
-        if SSet.mem name SN.Members.as_set then Errors.inout_params_special pos
+        if SSet.mem name SN.Members.as_set then
+          Errors.add_nast_check_error
+          @@ Nast_check_error.Inout_params_special pos
       | Ast_defs.Pnormal -> ());
   let inout =
     List.find params ~f:(fun x ->
@@ -32,7 +34,9 @@ let check_param _env params p user_attributes name =
         SN.UserAttributes.uaMemoizeLSB
         user_attributes
     then
-      Errors.inout_params_memoize p param.param_pos
+      Errors.add_nast_check_error
+      @@ Nast_check_error.Inout_params_memoize
+           { pos = p; param_pos = param.param_pos }
   | _ -> ()
 
 let check_callconv_expr ((_, p, _) as e) =
@@ -46,7 +50,8 @@ let check_callconv_expr ((_, p, _) as e) =
                   SN.SpecialIdents.dollardollar) ->
       ()
     | Array_get (e2, Some _) -> check_callconv_expr_helper e2
-    | _ -> Errors.inout_argument_bad_expr p
+    | _ ->
+      Errors.add_nast_check_error @@ Nast_check_error.Inout_argument_bad_expr p
   in
   check_callconv_expr_helper e
 

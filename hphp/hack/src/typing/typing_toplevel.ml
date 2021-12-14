@@ -2000,7 +2000,9 @@ let record_def_parent env rd parent_hint =
       List.iter rd.rd_fields ~f:(fun ((pos, name), _, _) ->
           match SMap.find_opt name inherited_fields with
           | Some ((prev_pos, _), _) ->
-            Errors.repeated_record_field name pos prev_pos
+            Errors.add_nast_check_error
+            @@ Nast_check_error.Repeated_record_field_name
+                 { name; pos; prev_pos }
           | None -> ())
     | None ->
       (* Something exists with this name (naming succeeded), but it's

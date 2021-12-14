@@ -59,13 +59,18 @@ let handler =
       | Class_const ((_, _, CIexpr (_, _, Id (_, "parent"))), (_, m_name))
         when Option.equal String.equal env.function_name (Some m_name) ->
         ()
-      | Class_const (_, ((_, m_name) as mid))
+      | Class_const (_, ((pos, meth_name) as mid))
         when is_magic mid
-             && not (Option.equal String.equal env.function_name (Some m_name))
+             && not
+                  (Option.equal String.equal env.function_name (Some meth_name))
         ->
-        Errors.magic mid
-      | Obj_get (_, (_, _, Id s), _, _) when is_magic s -> Errors.magic s
-      | Method_caller (_, meth) when is_magic meth -> Errors.magic meth
+        Errors.add_nast_check_error @@ Nast_check_error.Magic { pos; meth_name }
+      | Obj_get (_, (_, _, Id s), _, _) when is_magic s ->
+        let (pos, meth_name) = s in
+        Errors.add_nast_check_error @@ Nast_check_error.Magic { pos; meth_name }
+      | Method_caller (_, meth) when is_magic meth ->
+        let (pos, meth_name) = meth in
+        Errors.add_nast_check_error @@ Nast_check_error.Magic { pos; meth_name }
       | _ -> ()
 
     method! at_fun_ _ f =
@@ -75,12 +80,13 @@ let handler =
         String.equal fname_lower SN.Members.__construct
         || String.equal fname_lower "using"
       then
-        Errors.illegal_function_name pos fname
+        Errors.add_nast_check_error
+        @@ Nast_check_error.Illegal_function_name { pos; name = fname }
 
     method! at_method_ env m =
       let (pos, name) = m.m_name in
       if String.equal name SN.Members.__destruct then
-        Errors.illegal_destructor pos;
+        Errors.add_nast_check_error @@ Nast_check_error.Illegal_destructor pos;
       match env.class_name with
       | Some _ -> ()
       | None -> assert false

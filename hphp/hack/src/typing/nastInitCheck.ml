@@ -188,9 +188,10 @@ module Env = struct
           private_props
       in
       if not @@ SMap.is_empty uninit then
-        SMap.bindings uninit
-        |> List.map ~f:fst
-        |> Errors.constructor_required c.c_name);
+        let prop_names = SMap.bindings uninit |> List.map ~f:fst
+        and (pos, class_name) = c.c_name in
+        Errors.add_nast_check_error
+        @@ Nast_check_error.Constructor_required { pos; class_name; prop_names });
 
     let ( add_init_not_required_props,
           add_trait_props,
@@ -426,11 +427,13 @@ and block env acc l =
 and are_all_init env set =
   SMap.fold (fun cv _ acc -> acc && S.mem cv set) env.props true
 
-and check_all_init p env acc =
+and check_all_init pos env acc =
   SMap.iter
     begin
-      fun cv _ ->
-      if not (S.mem cv acc) then Errors.call_before_init p cv
+      fun prop_name _ ->
+      if not (S.mem prop_name acc) then
+        Errors.add_nast_check_error
+        @@ Nast_check_error.Call_before_init { pos; prop_name }
     end
     env.props
 
@@ -672,7 +675,7 @@ let class_ tenv c =
       in
       if not (SMap.is_empty uninit_props) then
         if SMap.mem DeferredMembers.parent_init_prop uninit_props then
-          Errors.no_construct_parent p
+          Errors.add_nast_check_error @@ Nast_check_error.No_construct_parent p
         else
           let class_uninit_props =
             SMap.filter
@@ -680,17 +683,22 @@ let class_ tenv c =
               uninit_props
           in
           if not (SMap.is_empty class_uninit_props) then
-            Errors.not_initialized
-              (p, snd c.c_name)
-              (SMap.bindings class_uninit_props
-              |> List.map ~f:(fun (name, _) ->
-                     let pos =
-                       class_prop_pos
-                         (snd c.c_name)
-                         name
-                         (Typing_env.get_ctx tenv)
-                     in
-                     (pos, name)))
+            Errors.add_nast_check_error
+            @@ Nast_check_error.Not_initialized
+                 {
+                   pos = p;
+                   class_name = snd c.c_name;
+                   props =
+                     SMap.bindings class_uninit_props
+                     |> List.map ~f:(fun (name, _) ->
+                            let pos =
+                              class_prop_pos
+                                (snd c.c_name)
+                                name
+                                (Typing_env.get_ctx tenv)
+                            in
+                            (pos, name));
+                 }
     in
     let check_throws_or_init_all inits =
       match inits with

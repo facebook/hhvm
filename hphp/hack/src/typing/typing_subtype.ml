@@ -2495,8 +2495,7 @@ and simplify_subtype_implicit_params
       {
         subtype_env with
         on_error =
-          begin
-            fun ?code:_ ?quickfixes:_ _ ->
+          (fun ?code:_ ?quickfixes:_ _ ->
             let expected = Typing_coeffects.get_type sub_cap in
             let got = Typing_coeffects.get_type super_cap in
             Errors.coeffect_subtyping_error
@@ -2504,8 +2503,7 @@ and simplify_subtype_implicit_params
               (Typing_coeffects.pretty env expected)
               (get_pos got)
               (Typing_coeffects.pretty env got)
-              subtype_env.on_error
-          end;
+              subtype_env.on_error);
       }
     in
     match (sub_cap, super_cap) with

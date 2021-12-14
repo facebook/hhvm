@@ -16,7 +16,8 @@ let attribute_exists x1 attrs =
 
 let static_memoized_check m =
   if attribute_exists SN.UserAttributes.uaMemoize m.m_user_attributes then
-    Errors.static_memoized_function (fst m.m_name)
+    Errors.add_nast_check_error
+    @@ Nast_check_error.Static_memoized_function (fst m.m_name)
 
 let unnecessary_memoize_lsb c m =
   let attr = SN.UserAttributes.uaMemoizeLSB in

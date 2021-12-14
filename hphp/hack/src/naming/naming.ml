@@ -1700,9 +1700,9 @@ and stmt env (pos, st) =
             match pk with
             | Ast_defs.Pnormal -> ()
             | Ast_defs.Pinout pk_p ->
-              Errors.inout_in_transformed_pseudofunction
-                (Pos.merge pk_p p)
-                "invariant"
+              Errors.add_nast_check_error
+              @@ Nast_check_error.Inout_in_transformed_pseudofunction
+                   { pos = Pos.merge pk_p p; fn_name = "invariant" }
           end;
           let violation =
             ( (),
@@ -2032,9 +2032,9 @@ and expr_ env p (e : Nast.expr_) =
       | (Ast_defs.Pnormal, f) :: el ->
         N.Call (expr env f, targl env p tal, expr_call_args env el, None)
       | (Ast_defs.Pinout pk_pos, ((_, f_pos, _) as f)) :: el ->
-        Errors.inout_in_transformed_pseudofunction
-          (Pos.merge pk_pos f_pos)
-          "call_user_func";
+        Errors.add_nast_check_error
+        @@ Nast_check_error.Inout_in_transformed_pseudofunction
+             { pos = Pos.merge pk_pos f_pos; fn_name = "call_user_func" };
         N.Call (expr env f, targl env p tal, expr_call_args env el, None)
     end
   | Aast.Call ((_, p, Aast.Id (_, cn)), _, el, unpacked_element)

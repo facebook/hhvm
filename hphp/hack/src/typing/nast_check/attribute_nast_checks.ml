@@ -76,9 +76,9 @@ let check_internal_method_visibility m =
   match (attr, m.m_visibility) with
   | (Some { ua_name = (pos, _); _ }, Aast.Private)
   | (Some { ua_name = (pos, _); _ }, Aast.Protected) ->
-    Errors.internal_method_with_invalid_visibility
-      ~attr_pos:pos
-      ~visibility:m.m_visibility
+    Errors.add_nast_check_error
+    @@ Nast_check_error.Internal_method_with_invalid_visibility
+         { pos; vis = m.m_visibility }
   | (_, _) -> ()
 
 (* TODO: error if both Governed and InferFlows are attributes on a function or method *)
@@ -92,18 +92,24 @@ let handler =
       if has_attribute "__EntryPoint" f.f_user_attributes then begin
         (match f.f_params with
         | [] -> ()
-        | param :: _ -> Errors.entrypoint_arguments param.param_pos);
+        | param :: _ ->
+          Errors.add_nast_check_error
+          @@ Nast_check_error.Entrypoint_arguments param.param_pos);
         (match variadic_pos f.f_variadic with
-        | Some p -> Errors.entrypoint_arguments p
+        | Some p ->
+          Errors.add_nast_check_error @@ Nast_check_error.Entrypoint_arguments p
         | None -> ());
         match f.f_tparams with
         | [] -> ()
-        | tparam :: _ -> Errors.entrypoint_generics (fst tparam.tp_name)
+        | tparam :: _ ->
+          Errors.add_nast_check_error
+          @@ Nast_check_error.Entrypoint_generics (fst tparam.tp_name)
       end;
       (* Ban variadic arguments on memoized functions. *)
       (if has_attribute "__Memoize" f.f_user_attributes then
         match variadic_pos f.f_variadic with
-        | Some p -> Errors.variadic_memoize p
+        | Some p ->
+          Errors.add_nast_check_error @@ Nast_check_error.Variadic_memoize p
         | None -> ());
       check_attribute_arity
         f.f_user_attributes
@@ -157,7 +163,8 @@ let handler =
        || has_attribute "__MemoizeLSB" m.m_user_attributes
       then
         match variadic_pos m.m_variadic with
-        | Some p -> Errors.variadic_memoize p
+        | Some p ->
+          Errors.add_nast_check_error @@ Nast_check_error.Variadic_memoize p
         | None -> ());
       check_attribute_arity
         m.m_user_attributes

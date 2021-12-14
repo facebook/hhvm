@@ -21,10 +21,9 @@ let check_duplicates (ids : Aast.sid list) : unit =
     List.fold ids ~init:SMap.empty ~f:(fun acc (pos, name) ->
         (match SMap.find_opt name acc with
         | Some prev_pos ->
-          Errors.repeated_record_field
-            name
-            pos
-            (Pos_or_decl.of_raw_pos prev_pos)
+          Errors.add_nast_check_error
+          @@ Nast_check_error.Repeated_record_field_name
+               { name; pos; prev_pos = Pos_or_decl.of_raw_pos prev_pos }
         | None -> ());
         SMap.add name pos acc)
   in

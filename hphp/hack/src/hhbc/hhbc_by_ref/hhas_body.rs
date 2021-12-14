@@ -50,10 +50,3 @@ pub fn default_with_body_instrs<'arena>(body_instrs: InstrSeq<'arena>) -> HhasBo
         env: Maybe::<HhasBodyEnv<'arena>>::default(),
     }
 }
-
-// For cbindgen
-#[allow(clippy::needless_lifetimes)]
-#[no_mangle]
-pub unsafe extern "C" fn no_call_compile_only_USED_TYPES_hhas_body<'arena>(_: HhasBody<'arena>) {
-    unimplemented!()
-}

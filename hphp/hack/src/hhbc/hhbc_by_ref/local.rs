@@ -153,6 +153,3 @@ impl Counter {
         }
     }
 }
-
-#[no_mangle]
-pub unsafe extern "C" fn no_call_compile_only_USED_TYPES_hhbc_local<'a, 'arena>(_: Local<'arena>) {}

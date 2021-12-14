@@ -371,10 +371,3 @@ mod typed_value_tests {
         assert_eq!(res, std::i64::MIN);
     }
 }
-
-#[allow(clippy::needless_lifetimes)]
-#[no_mangle]
-pub unsafe extern "C" fn no_call_compile_only_USED_TYPES_hhbc_runtime<'arena>(
-    _: TypedValue<'arena>,
-) {
-}

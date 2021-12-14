@@ -191,15 +191,6 @@ pub mod native_arg {
     pub const NO_INJECTION: &str = "NoInjection";
 }
 
-// For cbindgen
-#[allow(clippy::needless_lifetimes)]
-#[no_mangle]
-pub unsafe extern "C" fn no_call_compile_only_USED_TYPES_hhas_attribute<'arena>(
-    _: HhasAttribute<'arena>,
-) {
-    unimplemented!()
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -87,11 +87,3 @@ impl<'arena> PartialEq for IncludePath<'arena> {
         self.extract_str().eq(&other.extract_str())
     }
 }
-// For cbindgen
-#[allow(clippy::needless_lifetimes)]
-#[no_mangle]
-pub unsafe extern "C" fn no_call_compile_only_USED_TYPES_symbol_refs_state<'arena>(
-    _: IncludePath<'arena>,
-) {
-    unimplemented!()
-}

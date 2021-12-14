@@ -145,6 +145,7 @@ set(HHBC_AST_SRCS
   "hhas_type_const.rs"
   "hhas_typedef.rs"
   "hhbc_ast.rs"
+  "hhbc_ast_ffi_cbindgen.rs"
   "hhbc_id.rs"
   "instruction_sequence.rs"
   "label.rs"
@@ -152,7 +153,6 @@ set(HHBC_AST_SRCS
   "symbol_refs_state.rs"
   "typed_value.rs"
 )
-
 foreach(src ${HHBC_AST_SRCS})
   string(APPEND HHBC_AST_SRC_ARG "${HHBC_PREFIX}/${src},")
 endforeach()
@@ -160,11 +160,19 @@ endforeach()
 set(NAMING_SPECIAL_NAMES_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/src/naming")
 set(NAMING_SPECIAL_NAMES_SRCS
    "naming_special_names.rs"
-   "naming_special_names_ffi.rs"
+   "naming_special_names_ffi_cbindgen.rs"
 )
-
 foreach(src ${NAMING_SPECIAL_NAMES_SRCS})
   string(APPEND NAMING_SPECIAL_NAMES_SRC_ARG "${NAMING_SPECIAL_NAMES_PREFIX}/${src},")
+endforeach()
+
+set(FFI_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/src/utils/ffi")
+set(FFI_SRCS
+   "ffi.rs"
+   "ffi_ffi_cbindgen.rs"
+)
+foreach(src ${FFI_SRCS})
+  string(APPEND FFI_SRC_ARG "${FFI_PREFIX}/${src},")
 endforeach()
 
 set(HHBC_AST_HEADER "${RUST_FFI_BUILD_ROOT}/hphp/hack/src/hhbc/hhbc_by_ref/hhbc-ast.h")
@@ -175,7 +183,7 @@ add_custom_command(
   COMMAND
    . "${CMAKE_CURRENT_BINARY_DIR}/dev_env_rust_only.sh" &&
     ${CARGO_BUILD} ffi_cbindgen ffi_cbindgen --exe
-      --header "${FFI_HEADER}" --srcs "${CMAKE_CURRENT_SOURCE_DIR}/src/utils/ffi/ffi.rs"
+      --header "${FFI_HEADER}" --srcs "${FFI_SRC_ARG}"
       --namespaces "HPHP,hackc" &&
     ${CARGO_BUILD} ffi_cbindgen ffi_cbindgen --exe
       --header "${NAMING_SPECIAL_NAMES_HEADER}" --srcs "${NAMING_SPECIAL_NAMES_SRC_ARG}" --namespaces "HPHP,hackc,hhbc"

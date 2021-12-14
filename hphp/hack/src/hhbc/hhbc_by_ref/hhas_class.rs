@@ -108,9 +108,3 @@ impl<'arena> HhasClass<'arena> {
         self.methods.as_ref().iter().any(|x| x.is_closure_body())
     }
 }
-
-#[allow(clippy::needless_lifetimes)]
-#[no_mangle]
-pub unsafe extern "C" fn no_call_compile_only_USED_TYPES_hhas_class<'arena>(_: HhasClass<'arena>) {
-    unimplemented!()
-}

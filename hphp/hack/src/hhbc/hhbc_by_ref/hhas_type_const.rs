@@ -13,12 +13,3 @@ pub struct HhasTypeConstant<'arena> {
     pub initializer: Maybe<TypedValue<'arena>>,
     pub is_abstract: bool,
 }
-
-// For cbindgen
-#[allow(clippy::needless_lifetimes)]
-#[no_mangle]
-pub unsafe extern "C" fn no_call_compile_only_USED_TYPES_hhas_type_const<'arena>(
-    _: HhasTypeConstant<'arena>,
-) {
-    unimplemented!()
-}

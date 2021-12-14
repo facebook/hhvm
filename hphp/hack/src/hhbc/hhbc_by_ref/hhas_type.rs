@@ -99,12 +99,3 @@ mod test {
         assert_eq!("type_var soft", typevar_and_soft.to_string());
     }
 }
-
-// For cbindgen
-#[allow(clippy::needless_lifetimes)]
-#[no_mangle]
-pub unsafe extern "C" fn no_call_compile_only_USED_TYPES_hhas_type<'arena>(
-    _: HhasTypeInfo<'arena>,
-) {
-    unimplemented!()
-}

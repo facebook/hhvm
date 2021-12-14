@@ -60,11 +60,3 @@ impl<'a, 'arena> HhasMethod<'arena> {
         self.flags.contains(HhasMethodFlags::IS_INTERCEPTABLE)
     }
 }
-
-#[allow(clippy::needless_lifetimes)]
-#[no_mangle]
-pub unsafe extern "C" fn no_call_compile_only_USED_TYPES_hhas_method<'arena>(
-    _: HhasMethod<'arena>,
-) {
-    unimplemented!()
-}

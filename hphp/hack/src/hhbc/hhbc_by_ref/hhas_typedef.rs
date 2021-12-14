@@ -19,12 +19,3 @@ pub struct HhasTypedef<'arena> {
     pub type_structure: TypedValue<'arena>,
     pub span: HhasSpan,
 }
-
-// For cbindgen
-#[allow(clippy::needless_lifetimes)]
-#[no_mangle]
-pub unsafe extern "C" fn no_call_compile_only_USED_TYPES_hhas_typedef<'arena>(
-    _: HhasTypedef<'arena>,
-) {
-    unimplemented!()
-}

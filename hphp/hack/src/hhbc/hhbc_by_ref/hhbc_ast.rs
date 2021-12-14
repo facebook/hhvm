@@ -737,8 +737,3 @@ pub enum Instruct<'arena> {
     IGenerator(GenCreationExecution),
     IIncludeEvalDefine(InstructIncludeEvalDefine),
 }
-
-#[no_mangle]
-pub unsafe extern "C" fn no_call_compile_only_USED_TYPES_hhbc_ast<'a, 'arena>(_: Instruct<'arena>) {
-    unimplemented!()
-}

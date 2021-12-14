@@ -250,15 +250,3 @@ mod tests {
         assert_eq!("meth", id.to_raw_string());
     }
 }
-
-#[no_mangle]
-pub unsafe extern "C" fn no_call_compile_only_USED_TYPES_hhbc_id<'a, 'arena>(
-    _: class::ClassType<'arena>,
-    _: function::FunctionType<'arena>,
-    _: method::MethodType<'arena>,
-    _: prop::PropType<'arena>,
-    _: r#const::ConstType<'arena>,
-    _: record::RecordType<'arena>,
-) {
-    unimplemented!()
-}

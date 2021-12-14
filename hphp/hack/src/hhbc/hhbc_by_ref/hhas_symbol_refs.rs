@@ -36,12 +36,3 @@ impl<'arena> HhasSymbolRefs<'arena> {
         }
     }
 }
-
-// For cbindgen
-#[allow(clippy::needless_lifetimes)]
-#[no_mangle]
-pub unsafe extern "C" fn no_call_compile_only_USED_TYPES_hhas_symbol_refs<'arena>(
-    _: HhasSymbolRefs<'arena>,
-) {
-    unimplemented!()
-}

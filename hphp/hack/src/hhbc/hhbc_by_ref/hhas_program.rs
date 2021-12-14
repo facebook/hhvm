@@ -28,11 +28,3 @@ pub struct HhasProgram<'arena> {
     pub constants: Slice<'arena, HhasConstant<'arena>>,
     pub fatal: Maybe<Triple<FatalOp, HhasPos, Str<'arena>>>,
 }
-
-#[allow(clippy::needless_lifetimes)]
-#[no_mangle]
-pub unsafe extern "C" fn no_call_compile_only_USED_TYPES_hhas_program<'arena>(
-    _: HhasProgram<'arena>,
-) {
-    unimplemented!()
-}

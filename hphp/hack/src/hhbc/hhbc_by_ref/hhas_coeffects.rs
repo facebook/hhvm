@@ -384,19 +384,3 @@ impl<'arena> HhasCoeffects<'arena> {
                 == string_utils::coeffects::CALLER.into()
     }
 }
-
-#[allow(clippy::needless_lifetimes)]
-#[no_mangle]
-pub unsafe extern "C" fn no_call_compile_only_USED_TYPES_hhas_ctx_constant<'arena>(
-    _: HhasCtxConstant<'arena>,
-) {
-    unimplemented!()
-}
-
-#[allow(clippy::needless_lifetimes)]
-#[no_mangle]
-pub unsafe extern "C" fn no_call_compile_only_USED_TYPES_hhas_coeffects<'arena>(
-    _: HhasCoeffects<'arena>,
-) {
-    unimplemented!()
-}

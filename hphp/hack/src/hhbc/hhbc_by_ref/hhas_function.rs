@@ -81,11 +81,3 @@ impl<'arena> HhasFunction<'arena> {
         self.body.params.as_ref()
     }
 }
-
-#[allow(clippy::needless_lifetimes)]
-#[no_mangle]
-pub unsafe extern "C" fn no_call_compile_only_USED_TYPES_hhas_function<'arena>(
-    _: HhasFunction<'arena>,
-) {
-    unimplemented!()
-}

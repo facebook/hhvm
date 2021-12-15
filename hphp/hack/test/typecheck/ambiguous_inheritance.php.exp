@@ -1,5 +1,5 @@
 File "ambiguous_inheritance.php", line 11, characters 16-16:
-Class `C` does not correctly implement all required members  (Typing[4340])
+Class `C` does not correctly implement all required members  (Typing[4341])
   File "ambiguous_inheritance.php", line 11, characters 33-34:
   Some members are incompatible with those declared in type `I2`
   File "ambiguous_inheritance.php", line 4, characters 19-21:

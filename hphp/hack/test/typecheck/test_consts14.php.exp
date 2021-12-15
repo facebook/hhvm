@@ -1,5 +1,5 @@
 File "test_consts14.php", line 15, characters 7-7:
-Class `B` does not correctly implement all required members  (Typing[4340])
+Class `B` does not correctly implement all required members  (Typing[4348])
   File "test_consts14.php", line 15, characters 17-17:
   Some members are incompatible with those declared in type `A`
   File "test_consts14.php", line 4, characters 9-11:
@@ -7,7 +7,7 @@ Class `B` does not correctly implement all required members  (Typing[4340])
   File "test_consts14.php", line 10, characters 9-14:
   But got `string`
 File "test_consts14.php", line 15, characters 7-7:
-Class `B` does not correctly implement all required members  (Typing[4340])
+Class `B` does not correctly implement all required members  (Typing[4374])
   File "test_consts14.php", line 15, characters 17-17:
   Some members are incompatible with those declared in type `A`
   File "test_consts14.php", line 10, characters 16-17:

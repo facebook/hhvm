@@ -1,5 +1,5 @@
 File "linearization.php", line 11, characters 7-11:
-Class `child` does not correctly implement all required members  (Typing[4340])
+Class `child` does not correctly implement all required members  (Typing[4374])
   File "linearization.php", line 11, characters 28-29:
   Some members are incompatible with those declared in type `I1`
   File "linearization.php", line 8, characters 14-14:

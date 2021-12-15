@@ -1,5 +1,5 @@
 File "interface_override_parent.php", line 11, characters 7-7:
-Class `B` does not correctly implement all required members  (Typing[4340])
+Class `B` does not correctly implement all required members  (Typing[4374])
   File "interface_override_parent.php", line 11, characters 17-17:
   Some members are incompatible with those declared in type `A`
   File "interface_override_parent.php", line 8, characters 14-14:

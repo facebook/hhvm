@@ -1,5 +1,5 @@
 File "ifc_inheritance7.php", line 18, characters 7-7:
-Class `M` does not correctly implement all required members  (Typing[4340])
+Class `M` does not correctly implement all required members  (Typing[4341])
   File "ifc_inheritance7.php", line 18, characters 17-17:
   Some members are incompatible with those declared in type `N`
   File "ifc_inheritance7.php", line 7, characters 19-21:

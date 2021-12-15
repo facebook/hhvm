@@ -5,7 +5,7 @@ The method `f` is not compatible with the overridden method (Typing[4341])
   File "trait_bad_pos.php--foo.php", line 3, characters 21-23:
   But got `int`
 File "trait_bad_pos.php--tboth_traits.php", line 2, characters 7-17:
-Class `TBothTraits` does not correctly implement all required members  (Typing[4340])
+Class `TBothTraits` does not correctly implement all required members  (Typing[4341])
   File "trait_bad_pos.php--tboth_traits.php", line 3, characters 7-18:
   Some members are incompatible with those declared in type `TReqExtChild`
   File "trait_bad_pos.php--foo.php", line 3, characters 19-19:

@@ -1,5 +1,5 @@
 File "trait_trait_1.bad.php", line 14, characters 7-7:
-Class `C` does not correctly implement all required members  (Typing[4340])
+Class `C` does not correctly implement all required members  (Typing[4374])
   File "trait_trait_1.bad.php", line 15, characters 7-8:
   Some members are incompatible with those declared in type `T1`
   File "trait_trait_1.bad.php", line 11, characters 13-13:

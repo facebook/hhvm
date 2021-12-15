@@ -6593,7 +6593,6 @@ end = struct
 
   let bad_decl_override pos ~name ~parent_pos ~parent_name =
     append_incoming_reasons
-    @@ retain_code
     @@ retain_quickfixes
     @@ of_primary_error
     @@ Primary.Bad_decl_override { pos; name; parent_pos; parent_name }

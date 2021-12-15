@@ -1,5 +1,5 @@
 File "interface_override_trait.php", line 11, characters 7-7:
-Class `A` does not correctly implement all required members  (Typing[4340])
+Class `A` does not correctly implement all required members  (Typing[4374])
   File "interface_override_trait.php", line 12, characters 7-7:
   Some members are incompatible with those declared in type `T`
   File "interface_override_trait.php", line 8, characters 9-12:

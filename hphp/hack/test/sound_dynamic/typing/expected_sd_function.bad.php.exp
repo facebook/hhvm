@@ -1,0 +1,8 @@
+File "expected_sd_function.bad.php", line 15, characters 16-133:
+Function  `;anonymous` is not dynamically callable. (Typing[4402])
+  File "expected_sd_function.bad.php", line 18, characters 13-14:
+  Invalid argument
+  File "expected_sd_function.bad.php", line 12, characters 18-18:
+  Expected `D`
+  File "expected_sd_function.bad.php", line 16, characters 10-21:
+  But got `dynamic`, the result of calling a `dynamic` type as a function

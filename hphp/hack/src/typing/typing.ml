@@ -802,23 +802,33 @@ let requires_consistent_construct = function
  * strip nullables, so ?t becomes t, as context will always accept a t if a ?t
  * is expected.
  *
+ * If allow_supportdyn is true, then decompose supportdyn<t> and return true to
+ * indicate that the type supports dynamic.
+ *
  * Note: we currently do not generally expand ?t into (null | t), so ~?t is (dynamic | Toption t).
  *)
-let expand_expected_and_get_node env (expected : ExpectedTy.t option) =
+let expand_expected_and_get_node
+    ?(allow_supportdyn = false) env (expected : ExpectedTy.t option) =
   let rec unbox ty =
     match get_node ty with
     | Tunion [ty1; ty2] when is_dynamic ty1 -> unbox ty2
     | Tunion [ty1; ty2] when is_dynamic ty2 -> unbox ty1
     | Tunion [ty] -> unbox ty
     | Toption ty -> unbox ty
-    | _ -> ty
+    | Tnewtype (name, [ty], _) when String.equal name SN.Classes.cSupportDyn ->
+      let (ty, _) = unbox ty in
+      (ty, true)
+    | _ -> (ty, false)
   in
   match expected with
   | None -> (env, None)
   | Some ExpectedTy.{ pos = p; reason = ur; ty = { et_type = ty; _ }; _ } ->
     let (env, ty) = Env.expand_type env ty in
-    let uty = unbox ty in
-    (env, Some (p, ur, uty, get_node uty))
+    let (uty, supportdyn) = unbox ty in
+    if supportdyn && not allow_supportdyn then
+      (env, None)
+    else
+      (env, Some (p, ur, supportdyn, uty, get_node uty))
 
 let uninstantiable_error env reason_pos cid c_tc_pos c_name c_usage_pos c_ty =
   let reason_ty_opt =
@@ -3038,7 +3048,7 @@ and expr_
       | _ ->
         begin
           match expand_expected_and_get_node env expected with
-          | (env, Some (pos, ur, ety, _)) ->
+          | (env, Some (pos, ur, _, ety, _)) ->
             begin
               match get_expected_kind ety with
               | Some vty -> (env, Some (ExpectedTy.make pos ur vty), None)
@@ -3105,7 +3115,7 @@ and expr_
         (* no explicit typehint, fallback to supplied expect *)
         begin
           match expand_expected_and_get_node env expected with
-          | (env, Some (pos, reason, ety, _)) ->
+          | (env, Some (pos, reason, _, ety, _)) ->
             begin
               match get_expected_kind ety with
               | Some (kty, vty) ->
@@ -3581,7 +3591,7 @@ and expr_
     let (env, expected) = expand_expected_and_get_node env expected in
     let (env, tel, tyl) =
       match expected with
-      | Some (pos, ur, _, Ttuple expected_tyl) ->
+      | Some (pos, ur, _, _, Ttuple expected_tyl) ->
         let (env, pess_expected_tyl) =
           if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
             List.map_env env expected_tyl ~f:Typing_array_access.pessimise_type
@@ -3608,7 +3618,7 @@ and expr_
       | `other ->
         let (env, expected) = expand_expected_and_get_node env expected in
         (match expected with
-        | Some (pos, ur, _, Ttuple expected_tyl) ->
+        | Some (pos, ur, _, _, Ttuple expected_tyl) ->
           exprs_expected (pos, ur, expected_tyl) env el
         | _ -> exprs env el)
     in
@@ -3624,7 +3634,7 @@ and expr_
       | None ->
         (* Use expected type to determine expected element types *)
         (match expand_expected_and_get_node env expected with
-        | (env, Some (pos, reason, _ty, Tclass ((_, k), _, [ty1; ty2])))
+        | (env, Some (pos, reason, _, _ty, Tclass ((_, k), _, [ty1; ty2])))
           when String.equal k SN.Collections.cPair ->
           let ty1_expected = ExpectedTy.make pos reason ty1 in
           let ty2_expected = ExpectedTy.make pos reason ty2 in
@@ -4459,7 +4469,7 @@ and expr_
     in
     let (env, tfdm) =
       match expand_expected_and_get_node env expected with
-      | (env, Some (pos, ur, _, Tshape (_, expected_fdm))) ->
+      | (env, Some (pos, ur, _, _, Tshape (_, expected_fdm))) ->
         List.map_env
           env
           ~f:(fun env ((k, _) as ke) ->
@@ -4605,11 +4615,16 @@ and get_callable_variadicity env variadicity_decl_ty = function
 and function_dynamically_callable
     env f params_decl_ty variadicity_decl_ty ret_locl_ty =
   let env = { env with in_support_dynamic_type_method_check = true } in
+  (* If any of the parameters doesn't have an explicit hint, then we have
+   * to treat this is non-enforceable and therefore not dynamically callable
+   * based purely on the signature *)
   let interface_check =
-    Typing_dynamic.sound_dynamic_interface_check
-      env
-      (variadicity_decl_ty :: params_decl_ty)
-      ret_locl_ty
+    List.for_all f.f_params ~f:(fun param ->
+        Option.is_some (snd param.param_type_hint))
+    && Typing_dynamic.sound_dynamic_interface_check
+         env
+         (variadicity_decl_ty :: params_decl_ty)
+         ret_locl_ty
   in
   let function_body_check () =
     (* Here the body of the function is typechecked again to ensure it is safe
@@ -4753,9 +4768,10 @@ and lambda ~is_anon ?expected p env f idl =
 
   (* Is the return type declared? *)
   let is_explicit_ret = Option.is_some (hint_of_type_hint f.f_ret) in
-  let check_body_under_known_params env ?ret_ty ft : env * _ * locl_ty =
+  let check_body_under_known_params ~supportdyn env ?ret_ty ft :
+      env * _ * locl_ty =
     let (env, (tefun, ty, ft)) =
-      closure_make ?ret_ty env p declared_decl_ft f ft idl is_anon
+      closure_make ~supportdyn ?ret_ty env p declared_decl_ft f ft idl is_anon
     in
     let inferred_ty =
       mk
@@ -4772,9 +4788,11 @@ and lambda ~is_anon ?expected p env f idl =
     in
     (env, tefun, inferred_ty)
   in
-  let (env, eexpected) = expand_expected_and_get_node env expected in
+  let (env, eexpected) =
+    expand_expected_and_get_node ~allow_supportdyn:true env expected
+  in
   match eexpected with
-  | Some (_pos, _ur, tdyn, Tdynamic)
+  | Some (_pos, _ur, _, tdyn, Tdynamic)
     when env.in_support_dynamic_type_method_check ->
     let make_dynamic { et_type; et_enforced } =
       let et_type =
@@ -4796,8 +4814,9 @@ and lambda ~is_anon ?expected p env f idl =
     check_body_under_known_params
       env
       ~ret_ty:tdyn
+      ~supportdyn:false
       { declared_ft with ft_params }
-  | Some (_pos, _ur, ty, Tfun expected_ft) ->
+  | Some (_pos, _ur, supportdyn, ty, Tfun expected_ft) ->
     (* First check that arities match up *)
     check_lambda_arity p (get_pos ty) declared_ft expected_ft;
     (* Use declared types for parameters in preference to those determined
@@ -4863,7 +4882,7 @@ and lambda ~is_anon ?expected p env f idl =
       | _ -> Some expected_ft.ft_ret.et_type
     in
     Typing_log.increment_feature_count env FL.Lambda.contextual_params;
-    check_body_under_known_params env ?ret_ty expected_ft
+    check_body_under_known_params ~supportdyn env ?ret_ty expected_ft
   | _ ->
     let explicit_variadic_param_or_non_variadic =
       match f.f_variadic with
@@ -4884,7 +4903,7 @@ and lambda ~is_anon ?expected p env f idl =
           FL.Lambda.no_params
         else
           FL.Lambda.explicit_params);
-      check_body_under_known_params env declared_ft
+      check_body_under_known_params ~supportdyn:false env declared_ft
     ) else (
       match expected with
       | Some ExpectedTy.{ ty = { et_type; _ }; _ } when is_any et_type ->
@@ -4893,7 +4912,7 @@ and lambda ~is_anon ?expected p env f idl =
          * Tany.
          * Note: we should be using 'nothing' to type the arguments. *)
         Typing_log.increment_feature_count env FL.Lambda.untyped_context;
-        check_body_under_known_params env declared_ft
+        check_body_under_known_params ~supportdyn:false env declared_ft
       | Some ExpectedTy.{ ty = { et_type; _ }; _ }
         when TUtils.is_mixed env et_type || is_dynamic et_type ->
         (* If the expected type of a lambda is mixed or dynamic, we
@@ -4925,7 +4944,7 @@ and lambda ~is_anon ?expected p env f idl =
           { declared_ft with ft_params }
         in
         let ret_ty = et_type in
-        check_body_under_known_params env ~ret_ty expected_ft
+        check_body_under_known_params ~supportdyn:false env ~ret_ty expected_ft
       | Some _ ->
         (* If the expected type is something concrete but not a function
          * then we should reject in strict mode. Check body anyway.
@@ -4935,7 +4954,7 @@ and lambda ~is_anon ?expected p env f idl =
         Typing_log.increment_feature_count
           env
           FL.Lambda.non_function_typed_context;
-        check_body_under_known_params env declared_ft
+        check_body_under_known_params ~supportdyn:false env declared_ft
       | None ->
         Typing_log.increment_feature_count env FL.Lambda.fresh_tyvar_params;
 
@@ -4980,6 +4999,7 @@ and lambda ~is_anon ?expected p env f idl =
            but is actually inferred from the surrounding context
            (don't think this matters in practice, since we check lambdas separately) *)
         check_body_under_known_params
+          ~supportdyn:false
           env
           ~ret_ty:declared_ft.ft_ret.et_type
           declared_ft
@@ -5146,8 +5166,17 @@ and closure_bind_opt_param env param : env =
 (* Here ret_ty should include Awaitable wrapper *)
 (* TODO: ?el is never set; so we need to fix variadic use of lambda *)
 and closure_make
-    ?el ?ret_ty ?(check_escapes = true) env lambda_pos decl_ft f ft idl is_anon
-    =
+    ?el
+    ?ret_ty
+    ?(check_escapes = true)
+    ~supportdyn
+    env
+    lambda_pos
+    decl_ft
+    f
+    ft
+    idl
+    is_anon =
   let type_closure f =
     (* Wrap the function f so that it can freely clobber function-specific
        parts of the environment; the clobbered parts are restored before
@@ -5249,9 +5278,15 @@ and closure_make
   let (env, user_attributes) =
     attributes_check_def env SN.AttributeKinds.lambda f.f_user_attributes
   in
+  (* Regard a lambda as supporting dynamic if
+   *   it has the attribute <<__SupportDynamicType>>;
+   *   or its enclosing method, function or class has the attribute <<__SupportDynamicType>>;
+   *   or it must support dynamic because of the expected type
+   *)
   let support_dynamic_type =
     Naming_attributes.mem SN.UserAttributes.uaSupportDynamicType user_attributes
     || Env.get_support_dynamic_type env
+    || supportdyn
   in
   let env = List.fold_left ~f:closure_bind_opt_param ~init:env !params in
   let env = List.fold_left ~f:closure_check_param ~init:env f.f_params in

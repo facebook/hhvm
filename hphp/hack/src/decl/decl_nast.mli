@@ -22,7 +22,7 @@ val fun_naming_and_decl_DEPRECATED :
 val record_def_naming_and_decl_DEPRECATED :
   Provider_context.t ->
   Nast.record_def ->
-  Typing_modules.t ->
+  Ast_defs.id option ->
   string * Typing_defs.record_def_type
 
 (** DEPRECATED: When TypecheckerOptions.use_direct_decl_parser is enabled, parse

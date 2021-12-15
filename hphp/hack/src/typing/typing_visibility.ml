@@ -96,7 +96,7 @@ let is_internal_visible env target =
     Module.can_access ~current:(Env.get_module env) ~target:(Some target)
   with
   | `Yes -> None
-  | `Disjoint (current, target) ->
+  | `Disjoint ((_, current), (_, target)) ->
     Some
       (Printf.sprintf
          "You cannot access internal members from module `%s` in module `%s`"

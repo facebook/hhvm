@@ -5,6 +5,9 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+
+open Hh_prelude
+
 (**
   * [module_] represents when a top level symbol is _definitely_ in a module.
   * The "root" of the module tree is the first element, with any children
@@ -14,15 +17,15 @@
 type module_ = string * string list [@@deriving eq, show]
 
 let of_string s =
-  match String.split_on_char '.' s with
+  match String.split ~on:'.' s with
   | [] -> None
   | root :: children -> Some (root, children)
 
-let of_maybe_string s = Option.bind s of_string
+let of_maybe_string = Option.bind ~f:of_string
 
 type t = module_ option [@@deriving eq, show]
 
-let name_of (m, ms) = String.concat "." (m :: ms)
+let name_of (m, ms) = String.concat ~sep:"." (m :: ms)
 
 (** [relate ~left ~right] returns the relate is between [left] and
  * [right] from the following options:
@@ -43,21 +46,22 @@ let rec relate ~(left : string list) ~(right : string list) =
   | (l :: ls, r :: rs) when String.equal l r -> relate ~left:ls ~right:rs
   | _ -> (* This is the case when l and r are disjoint *) `Disjoint
 
-let can_access ~current ~target =
-  let normalize m =
-    Option.map (fun (m, ms) -> m :: ms) m |> Option.value ~default:[]
-  in
-  let current = normalize current in
-  let target = normalize target in
-  let concat = String.concat "." in
-  match relate ~left:current ~right:target with
-  | `Same
-  | `LeftSubRight ->
+let can_access ~(current : Ast_defs.id option) ~(target : Ast_defs.id option) =
+  match (current, target) with
+  | (None, None)
+  | (Some _, None) ->
     `Yes
-  | `RightSubLeft ->
-    begin
-      match current with
-      | [] -> `Outside (concat target)
-      | _ :: _ -> `Disjoint (concat current, concat target)
-    end
-  | `Disjoint -> `Disjoint (concat current, concat target)
+  | (None, Some m) -> `Outside m
+  | (Some ((_, m_current) as current), Some ((_, m_target) as target)) ->
+    let normalize m =
+      of_string m
+      |> Option.map ~f:(fun (m, ms) -> m :: ms)
+      |> Option.value ~default:[]
+    in
+    (match relate ~left:(normalize m_current) ~right:(normalize m_target) with
+    | `Same
+    | `LeftSubRight ->
+      `Yes
+    | `Disjoint
+    | `RightSubLeft ->
+      `Disjoint (current, target))

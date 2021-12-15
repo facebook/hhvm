@@ -154,7 +154,6 @@ let fun_def ctx fd :
   in
   let env =
     Env.set_module env
-    @@ Typing_modules.of_maybe_string
     @@ Naming_attributes_params.get_module_attribute fd.fd_file_attributes
   in
   let env =
@@ -2010,7 +2009,6 @@ let class_def ctx c =
   Typing_helpers.add_decl_errors (Option.bind tc ~f:Cls.decl_errors);
   let env =
     Env.set_module env
-    @@ Typing_modules.of_maybe_string
     @@ Naming_attributes_params.get_module_attribute c.c_file_attributes
   in
   let env =

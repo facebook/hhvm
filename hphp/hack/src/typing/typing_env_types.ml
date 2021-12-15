@@ -80,7 +80,7 @@ and genv = {
   val_kind: Typing_defs.val_kind;
   fun_is_ctor: bool;
   file: Relative_path.t;
-  this_module: Typing_modules.t;
+  this_module: Ast_defs.id option;
   this_internal: bool;
   this_support_dynamic_type: bool;
 }

@@ -40,8 +40,7 @@ let base_visibility origin_class_name module_ = function
     | Some m -> Vinternal m
     | None -> failwith "internal outside of a module")
 
-let shallow_method_to_class_elt
-    child_class (mname : Typing_modules.t) mro subst meth : class_elt =
+let shallow_method_to_class_elt child_class mname mro subst meth : class_elt =
   let {
     sm_name = (pos, _);
     sm_type = ty;

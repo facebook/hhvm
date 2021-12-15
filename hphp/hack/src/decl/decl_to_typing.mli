@@ -20,7 +20,7 @@ type tagged_elt = {
 val shallow_method_to_class_elt :
   string ->
   (* class name *)
-  Typing_modules.t ->
+  Ast_defs.id option ->
   (* module name *)
   Decl_defs.mro_element ->
   Typing_defs.decl_ty SMap.t ->
@@ -30,7 +30,7 @@ val shallow_method_to_class_elt :
 val shallow_method_to_telt :
   string ->
   (* class name *)
-  Typing_modules.t ->
+  Ast_defs.id option ->
   (* module name *)
   Decl_defs.mro_element ->
   Typing_defs.decl_ty SMap.t ->
@@ -40,7 +40,7 @@ val shallow_method_to_telt :
 val shallow_prop_to_telt :
   string ->
   (* class name *)
-  Typing_modules.t ->
+  Ast_defs.id option ->
   (* module name *)
   Decl_defs.mro_element ->
   Typing_defs.decl_ty SMap.t ->

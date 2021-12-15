@@ -48,7 +48,6 @@ use oxidized_by_ref::{
         TypedefType, WhereConstraint, XhpAttrTag,
     },
     typing_defs_flags::{FunParamFlags, FunTypeFlags},
-    typing_modules::Module_,
     typing_reason::Reason,
 };
 use parser_core_types::{
@@ -83,7 +82,7 @@ pub struct DirectDeclSmartConstructors<'a, 'text, S: SourceTextAllocator<'text, 
     previous_token_kind: TokenKind,
 
     source_text_allocator: S,
-    module: Option<&'a Module_<'a>>,
+    module: Option<Id<'a>>,
 }
 
 impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'a, 'text, S> {
@@ -737,7 +736,8 @@ struct ClassNameParam<'a> {
 pub struct UserAttributeNode<'a> {
     name: Id<'a>,
     classname_params: &'a [ClassNameParam<'a>],
-    string_literal_params: &'a [&'a BStr], // this is only used for __Deprecated attribute message and Cipp parameters
+    /// This is only used for __Deprecated attribute message and CIPP parameters
+    string_literal_params: &'a [(&'a Pos<'a>, &'a BStr)],
 }
 
 mod fixed_width_token {
@@ -1011,7 +1011,7 @@ struct Attributes<'a> {
     via_label: bool,
     soft: bool,
     support_dynamic_type: bool,
-    module: Option<&'a Module_<'a>>,
+    module: Option<Id<'a>>,
     internal: bool,
 }
 
@@ -1420,7 +1420,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                         attributes.deprecated = attribute
                             .string_literal_params
                             .first()
-                            .map(|&x| self.str_from_utf8_for_bytes_in_arena(x));
+                            .map(|&(_, x)| self.str_from_utf8_for_bytes_in_arena(x));
                     }
                     "__Reifiable" => attributes.reifiable = Some(attribute.name.0),
                     "__LateInit" => {
@@ -1458,7 +1458,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                             attribute
                                 .string_literal_params
                                 .first()
-                                .map(|&x| self.str_from_utf8_for_bytes_in_arena(x))
+                                .map(|&(_, x)| self.str_from_utf8_for_bytes_in_arena(x))
                         };
                         // Take the classname param by default
                         attributes.ifc_attribute =
@@ -2080,20 +2080,9 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         for attr in attributes.iter() {
             if let Node::Attribute(attr) = attr {
                 if attr.name.1 == "__Module" {
-                    self.module = attr
-                        .string_literal_params
-                        .first()
-                        .map(|&x| self.str_from_utf8_for_bytes_in_arena(x))
-                        .and_then(|x| {
-                            let mut chars = x.split('.');
-                            match chars.next() {
-                                None => None,
-                                Some(s) => {
-                                    let rest = chars.collect::<std::vec::Vec<_>>();
-                                    Some(self.alloc(Module_(s, self.alloc(rest))))
-                                }
-                            }
-                        });
+                    self.module = attr.string_literal_params.first().map(|&(p, m)| {
+                        oxidized_by_ref::ast::Id(p, self.str_from_utf8_for_bytes_in_arena(m))
+                    });
                     break;
                 }
             }
@@ -3116,7 +3105,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         self.add_record(
             name.1,
             self.alloc(typing_defs::RecordDefType {
-                module: self.alloc(parsed_attributes.module),
+                module: parsed_attributes.module,
                 name: name.into(),
                 extends: self
                     .expect_name(extends_opt)
@@ -3193,7 +3182,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             &[][..]
         };
         let typedef = self.alloc(TypedefType {
-            module: self.alloc(parsed_attributes.module),
+            module: parsed_attributes.module,
             pos,
             vis: if parsed_attributes.internal {
                 aast::TypedefVisibility::Tinternal
@@ -3268,7 +3257,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             &[][..]
         };
         let typedef = self.alloc(TypedefType {
-            module: self.alloc(parsed_attributes.module),
+            module: parsed_attributes.module,
             pos,
             vis: if parsed_attributes.internal {
                 aast::TypedefVisibility::Tinternal
@@ -3519,7 +3508,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                     s.into_bump_str()
                 });
                 let fun_elt = self.alloc(FunElt {
-                    module: self.alloc(parsed_attributes.module),
+                    module: parsed_attributes.module,
                     internal: parsed_attributes.internal,
                     deprecated,
                     type_,
@@ -4140,7 +4129,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             is_xhp,
             has_xhp_keyword: xhp_keyword.is_token(TokenKind::XHP),
             kind: class_kind,
-            module: self.alloc(module),
+            module,
             name: (pos, name),
             tparams,
             where_constraints,
@@ -4562,7 +4551,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             is_xhp: false,
             has_xhp_keyword: false,
             kind: ClassishKind::Cenum,
-            module: self.alloc(parsed_attributes.module),
+            module: parsed_attributes.module,
             name: id.into(),
             tparams: &[],
             where_constraints: &[],
@@ -4723,7 +4712,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             is_xhp: false,
             has_xhp_keyword: false,
             kind: class_kind,
-            module: &None, // TODO: grab module from attributes
+            module: None, // TODO: grab module from attributes
             name: name.into(),
             tparams: &[],
             where_constraints: &[],
@@ -5123,11 +5112,11 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             }
 
             self.slice(args.iter().filter_map(|expr| match expr {
-                Node::StringLiteral((x, _)) => Some(*x),
-                Node::Expr(e @ aast::Expr(_, _, aast::Expr_::Binop(_))) => {
+                Node::StringLiteral((x, p)) => Some((*p, *x)),
+                Node::Expr(e @ aast::Expr(_, p, aast::Expr_::Binop(_))) => {
                     let mut acc = Vec::new_in(self.arena);
                     fold_string_concat(e, &mut acc);
-                    Some(acc.into_bump_slice().into())
+                    Some((p, acc.into_bump_slice().into()))
                 }
                 _ => None,
             }))

@@ -35,10 +35,10 @@ let get_module_attribute attrs =
   in
   let open Aast in
   match attr with
-  | Some { ua_name = _; ua_params = name :: _ } ->
+  | Some { ua_name = _; ua_params = ((_, p, _) as name) :: _ } ->
     begin
       match Nast_eval.static_string name with
-      | Ok name -> Some name
+      | Ok name -> Some (p, name)
       | Error _ -> None
     end
   | _ -> None

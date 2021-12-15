@@ -1,7 +1,7 @@
 File root|submodules.php--A.php
 [("\\internal_function_in_parent",
   (Shallow_decl_defs.Fun
-     { Typing_defs.fe_deprecated = None; fe_module = (Some ("A", []));
+     { Typing_defs.fe_deprecated = None; fe_module = (Some ([4:54-57], "A"));
        fe_internal = true;
        fe_type =
        (Rwitness_from_decl ([7:10-37]),
@@ -24,8 +24,8 @@ File root|submodules.php--A.php
 File root|submodules.php--AB.php
 [("\\call_internal_functions",
   (Shallow_decl_defs.Fun
-     { Typing_defs.fe_deprecated = None; fe_module = (Some ("A", ["B"]));
-       fe_internal = false;
+     { Typing_defs.fe_deprecated = None;
+       fe_module = (Some ([3:54-59], "A.B")); fe_internal = false;
        fe_type =
        (Rwitness_from_decl ([6:10-33]),
         (Tfun
@@ -48,7 +48,7 @@ File root|submodules.php--ABC.php
 [("\\internal_function_in_child",
   (Shallow_decl_defs.Fun
      { Typing_defs.fe_deprecated = None;
-       fe_module = (Some ("A", ["B"; "C"])); fe_internal = true;
+       fe_module = (Some ([3:54-61], "A.B.C")); fe_internal = true;
        fe_type =
        (Rwitness_from_decl ([6:10-36]),
         (Tfun
@@ -70,7 +70,7 @@ File root|submodules.php--ABC.php
 File root|submodules.php--D.php
 [("\\disjoint_module_call_non_internal",
   (Shallow_decl_defs.Fun
-     { Typing_defs.fe_deprecated = None; fe_module = (Some ("D", []));
+     { Typing_defs.fe_deprecated = None; fe_module = (Some ([3:54-57], "D"));
        fe_internal = false;
        fe_type =
        (Rwitness_from_decl ([6:10-43]),

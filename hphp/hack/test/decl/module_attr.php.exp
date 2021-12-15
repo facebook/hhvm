@@ -4,8 +4,8 @@ File root|module_attr.php--here.php
 @@ -1,33 +1,33 @@
  [("\\foo",
    (Shallow_decl_defs.Fun
-      { Typing_defs.fe_deprecated = None; fe_module = (Some ("here", []));
-        fe_internal = false;
+      { Typing_defs.fe_deprecated = None;
+        fe_module = (Some ([2:54-60], "here")); fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([4:10-13]),
          (Tfun
@@ -25,18 +25,23 @@ File root|module_attr.php--here.php
    ("\\Talias",
     (Shallow_decl_defs.Typedef
 -      { Typing_defs.td_module = None; td_pos = [6:6-12];
-+      { Typing_defs.td_module = (Some ("here", [])); td_pos = [6:6-12];
-         td_vis = Transparent; td_tparams = []; td_constraint = None;
-         td_type = (Rhint ([6:15-18]), (Tprim Tint)); td_is_ctx = false;
-         td_attributes = [] }));
+-        td_vis = Transparent; td_tparams = []; td_constraint = None;
+-        td_type = (Rhint ([6:15-18]), (Tprim Tint)); td_is_ctx = false;
+-        td_attributes = [] }));
++      { Typing_defs.td_module = (Some ([2:54-60], "here"));
++        td_pos = [6:6-12]; td_vis = Transparent; td_tparams = [];
++        td_constraint = None; td_type = (Rhint ([6:15-18]), (Tprim Tint));
++        td_is_ctx = false; td_attributes = [] }));
    ("\\Topaque",
     (Shallow_decl_defs.Typedef
 -      { Typing_defs.td_module = None; td_pos = [8:9-16]; td_vis = Opaque;
 -        td_tparams = []; td_constraint = None;
-+      { Typing_defs.td_module = (Some ("here", [])); td_pos = [8:9-16];
-+        td_vis = Opaque; td_tparams = []; td_constraint = None;
-         td_type = (Rhint ([8:19-25]), (Tprim Tstring)); td_is_ctx = false;
-         td_attributes = [] }))
+-        td_type = (Rhint ([8:19-25]), (Tprim Tstring)); td_is_ctx = false;
+-        td_attributes = [] }))
++      { Typing_defs.td_module = (Some ([2:54-60], "here"));
++        td_pos = [8:9-16]; td_vis = Opaque; td_tparams = [];
++        td_constraint = None; td_type = (Rhint ([8:19-25]), (Tprim Tstring));
++        td_is_ctx = false; td_attributes = [] }))
    ]
 
 File root|module_attr.php--there.php
@@ -44,7 +49,7 @@ File root|module_attr.php--there.php
   (Shallow_decl_defs.Class
      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
        sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
-       sc_kind = (Cclass Concrete); sc_module = (Some ("there", []));
+       sc_kind = (Cclass Concrete); sc_module = (Some ([2:54-61], "there"));
        sc_name = ([4:7-8], "\\C"); sc_tparams = [];
        sc_where_constraints = []; sc_extends = []; sc_uses = [];
        sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
@@ -79,7 +84,7 @@ File root|module_attr.php--elsewhere.php
   (Shallow_decl_defs.Class
      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
        sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
-       sc_kind = Cenum; sc_module = (Some ("elsewhere", []));
+       sc_kind = Cenum; sc_module = (Some ([2:54-65], "elsewhere"));
        sc_name = ([5:6-7], "\\E"); sc_tparams = [];
        sc_where_constraints = [];
        sc_extends =

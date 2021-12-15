@@ -316,7 +316,7 @@ let get_implements (env : Decl_env.env) parent_cache (ht : Typing_defs.decl_ty)
 
 let visibility
     (class_id : string)
-    (module_ : Typing_modules.t)
+    (module_ : Ast_defs.id option)
     (visibility : Aast_defs.visibility) : Typing_defs.ce_visibility =
   match visibility with
   | Public -> Vpublic

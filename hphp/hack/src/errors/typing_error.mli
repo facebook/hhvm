@@ -297,9 +297,9 @@ module Primary : sig
         }
       | Module_mismatch of {
           pos: Pos.t;
-          current_module_opt: string option;
+          current_module_opt: Ast_defs.id option;
           decl_pos: Pos_or_decl.t;
-          target_module: string;
+          target_module: Ast_defs.id;
         }
   end
 
@@ -1340,9 +1340,9 @@ module Secondary : sig
       }
     | Visibility_override_internal of {
         pos: Pos_or_decl.t;
-        module_name: string option;
+        module_name: Ast_defs.id option;
         parent_pos: Pos_or_decl.t;
-        parent_module: string;
+        parent_module: Ast_defs.id;
       }
     | Abstract_tconst_not_allowed of {
         pos: Pos_or_decl.t;

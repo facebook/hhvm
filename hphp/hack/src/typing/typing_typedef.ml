@@ -21,7 +21,6 @@ let typedef_def ctx typedef =
   let env = EnvFromDef.typedef_env ~origin:Decl_counters.TopLevel ctx typedef in
   let env =
     Env.set_module env
-    @@ Typing_modules.of_maybe_string
     @@ Naming_attributes_params.get_module_attribute typedef.t_file_attributes
   in
   let env =

@@ -1206,9 +1206,9 @@ module Primary = struct
         }
       | Module_mismatch of {
           pos: Pos.t;
-          current_module_opt: string option;
+          current_module_opt: Ast_defs.id option;
           decl_pos: Pos_or_decl.t;
-          target_module: string;
+          target_module: Ast_defs.id;
         }
 
     let module_hint pos decl_pos =
@@ -1216,14 +1216,14 @@ module Primary = struct
       and reason = [(decl_pos, "It is declared as `internal` here")] in
       (Error_code.ModuleHintError, claim, reason, [])
 
-    let module_mismatch pos current_module_opt decl_pos target_module =
+    let module_mismatch pos current_module_opt decl_pos (_, target_module) =
       let claim =
         ( pos,
           Printf.sprintf
             "Cannot access an internal element from module `%s` %s"
             target_module
             (match current_module_opt with
-            | Some m -> Printf.sprintf "in module `%s`" m
+            | Some (_, m) -> Printf.sprintf "in module `%s`" m
             | None -> "outside of a module") )
       and reason =
         [(decl_pos, Printf.sprintf "This is from module `%s`" target_module)]
@@ -5264,9 +5264,9 @@ and Secondary : sig
       }
     | Visibility_override_internal of {
         pos: Pos_or_decl.t;
-        module_name: string option;
+        module_name: Ast_defs.id option;
         parent_pos: Pos_or_decl.t;
-        parent_module: string;
+        parent_module: Ast_defs.id;
       }
     | Abstract_tconst_not_allowed of {
         pos: Pos_or_decl.t;
@@ -5490,9 +5490,9 @@ end = struct
       }
     | Visibility_override_internal of {
         pos: Pos_or_decl.t;
-        module_name: string option;
+        module_name: Ast_defs.id option;
         parent_pos: Pos_or_decl.t;
-        parent_module: string;
+        parent_module: Ast_defs.id;
       }
     | Abstract_tconst_not_allowed of {
         pos: Pos_or_decl.t;
@@ -5855,14 +5855,14 @@ end = struct
       in
       Some (Error_code.VisibilityExtends, reasons)
     | Visibility_override_internal
-        { pos; module_name; parent_module; parent_pos } ->
+        { pos; module_name; parent_module = (_, parent_module); parent_pos } ->
       let msg =
         match module_name with
         | None ->
           Printf.sprintf
             "Cannot override this member outside module `%s`"
             parent_module
-        | Some m ->
+        | Some (_, m) ->
           Printf.sprintf "Cannot override this member in module `%s`" m
       in
       let reasons =

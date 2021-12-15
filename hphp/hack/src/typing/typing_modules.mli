@@ -5,6 +5,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+
 type module_ [@@deriving eq, show]
 
 val of_string : string -> module_ option
@@ -20,6 +21,6 @@ type t = module_ option [@@deriving eq, show]
   * [target] under [env].
   *)
 val can_access :
-  current:t ->
-  target:t ->
-  [ `Yes | `Disjoint of string * string | `Outside of string ]
+  current:Ast_defs.id option ->
+  target:Ast_defs.id option ->
+  [ `Yes | `Disjoint of Ast_defs.id * Ast_defs.id | `Outside of Ast_defs.id ]

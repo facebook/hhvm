@@ -532,10 +532,7 @@ let genv_as_value env genv =
      ]
     @ (match this_module with
       | Some this_module ->
-        [
-          ( "this_module",
-            string_as_value @@ Typing_modules.show_module_ this_module );
-        ]
+        [("this_module", string_as_value @@ Ast_defs.show_id this_module)]
       | None -> [])
     @ (match parent with
       | Some (parent_id, parent_ty) ->

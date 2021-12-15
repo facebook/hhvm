@@ -40,7 +40,6 @@ let rec name_and_declare_types_program_DEPRECATED
         | FileAttributes f -> Some f
         | _ -> None)
     |> Naming_attributes_params.get_module_attribute
-    |> Typing_modules.of_maybe_string
   in
   List.fold prog ~init:acc ~f:(fun acc def ->
       match def with

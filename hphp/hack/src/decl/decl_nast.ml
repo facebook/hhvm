@@ -37,8 +37,7 @@ and fun_decl (ctx : Provider_context.t) (f : Nast.fun_def) : Typing_defs.fun_elt
   let dep = Dep.Fun (snd f.fd_fun.f_name) in
   let env = { Decl_env.mode = f.fd_mode; droot = Some dep; ctx } in
   let module_ =
-    Typing_modules.of_maybe_string
-    @@ Naming_attributes_params.get_module_attribute f.fd_file_attributes
+    Naming_attributes_params.get_module_attribute f.fd_file_attributes
   in
   fun_decl_in_env env ~is_lambda:false f.fd_fun module_
 
@@ -50,7 +49,7 @@ and fun_decl_in_env
     (env : Decl_env.env)
     ~(is_lambda : bool)
     (f : Nast.fun_)
-    (module_ : Typing_modules.t) : Typing_defs.fun_elt =
+    (module_ : Ast_defs.id option) : Typing_defs.fun_elt =
   let ifc_decl = FunUtils.find_policied_attribute f.f_user_attributes in
   let return_disposable =
     FunUtils.has_return_disposable_attribute f.f_user_attributes
@@ -136,7 +135,7 @@ and fun_decl_in_env
 let record_def_decl
     (ctx : Provider_context.t)
     (rd : Nast.record_def)
-    (module_ : Typing_modules.t) : Typing_defs.record_def_type =
+    (module_ : Ast_defs.id option) : Typing_defs.record_def_type =
   let {
     rd_annotation = _;
     rd_name;
@@ -184,7 +183,7 @@ let record_def_decl
 let record_def_naming_and_decl_DEPRECATED
     (ctx : Provider_context.t)
     (rd : Nast.record_def)
-    (module_ : Typing_modules.t) : string * Typing_defs.record_def_type =
+    (module_ : Ast_defs.id option) : string * Typing_defs.record_def_type =
   let rd = Errors.ignore_ (fun () -> Naming.record_def ctx rd) in
   let tdecl = record_def_decl ctx rd module_ in
   (snd rd.rd_name, tdecl)
@@ -224,9 +223,7 @@ and typedef_decl (ctx : Provider_context.t) (tdef : Nast.typedef) :
       td_vis
   in
   let td_module =
-    t_file_attributes
-    |> Naming_attributes_params.get_module_attribute
-    |> Typing_modules.of_maybe_string
+    Naming_attributes_params.get_module_attribute t_file_attributes
   in
   let td_attributes =
     List.map

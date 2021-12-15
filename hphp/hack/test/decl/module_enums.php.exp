@@ -3,7 +3,7 @@ File root|module_enums.php--X.php
   (Shallow_decl_defs.Class
      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
        sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
-       sc_kind = Cenum; sc_module = (Some ("X", []));
+       sc_kind = Cenum; sc_module = (Some ([2:54-57], "X"));
        sc_name = ([5:6-7], "\\X"); sc_tparams = [];
        sc_where_constraints = [];
        sc_extends =
@@ -42,8 +42,8 @@ File root|module_enums.php--X.php
        }));
   ("\\f1",
    (Shallow_decl_defs.Fun
-      { Typing_defs.fe_deprecated = None; fe_module = (Some ("X", []));
-        fe_internal = true;
+      { Typing_defs.fe_deprecated = None;
+        fe_module = (Some ([2:54-57], "X")); fe_internal = true;
         fe_type =
         (Rwitness_from_decl ([12:10-12]),
          (Tfun
@@ -74,8 +74,8 @@ File root|module_enums.php--X.php
         fe_support_dynamic_type = false }));
   ("\\f2",
    (Shallow_decl_defs.Fun
-      { Typing_defs.fe_deprecated = None; fe_module = (Some ("X", []));
-        fe_internal = false;
+      { Typing_defs.fe_deprecated = None;
+        fe_module = (Some ([2:54-57], "X")); fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([15:10-12]),
          (Tfun
@@ -106,8 +106,8 @@ File root|module_enums.php--X.php
         fe_support_dynamic_type = false }));
   ("\\f5",
    (Shallow_decl_defs.Fun
-      { Typing_defs.fe_deprecated = None; fe_module = (Some ("X", []));
-        fe_internal = true;
+      { Typing_defs.fe_deprecated = None;
+        fe_module = (Some ([2:54-57], "X")); fe_internal = true;
         fe_type =
         (Rwitness_from_decl ([18:10-12]),
          (Tfun
@@ -126,8 +126,8 @@ File root|module_enums.php--X.php
         fe_support_dynamic_type = false }));
   ("\\f6",
    (Shallow_decl_defs.Fun
-      { Typing_defs.fe_deprecated = None; fe_module = (Some ("X", []));
-        fe_internal = false;
+      { Typing_defs.fe_deprecated = None;
+        fe_module = (Some ([2:54-57], "X")); fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([23:10-12]),
          (Tfun
@@ -149,7 +149,7 @@ File root|module_enums.php--X.php
 File root|module_enums.php--Y.php
 [("\\f3",
   (Shallow_decl_defs.Fun
-     { Typing_defs.fe_deprecated = None; fe_module = (Some ("Y", []));
+     { Typing_defs.fe_deprecated = None; fe_module = (Some ([2:54-57], "Y"));
        fe_internal = false;
        fe_type =
        (Rwitness_from_decl ([5:10-12]),
@@ -181,8 +181,8 @@ File root|module_enums.php--Y.php
        fe_support_dynamic_type = false }));
   ("\\f7",
    (Shallow_decl_defs.Fun
-      { Typing_defs.fe_deprecated = None; fe_module = (Some ("Y", []));
-        fe_internal = false;
+      { Typing_defs.fe_deprecated = None;
+        fe_module = (Some ([2:54-57], "Y")); fe_internal = false;
         fe_type =
         (Rwitness_from_decl ([9:10-12]),
          (Tfun

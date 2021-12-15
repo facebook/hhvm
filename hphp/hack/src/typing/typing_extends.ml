@@ -30,6 +30,7 @@ module MemberKind = struct
     | Method
     | Static_method
     | Constructor
+  [@@deriving eq]
 end
 
 (*****************************************************************************)
@@ -153,6 +154,20 @@ let check_members_implemented
         in
         Errors.add_typing_error err
       | _ -> ())
+
+let check_subtype_methods
+    env ~check_return on_error (r_ancestor, ft_ancestor) (r_child, ft_child) ()
+    =
+  Typing_subtype_method.(
+    (* Add deps here when we override *)
+    subtype_method_decl
+      ~check_return
+      env
+      r_child
+      ft_child
+      r_ancestor
+      ft_ancestor
+      on_error)
 
 (* An abstract member can be declared in multiple ancestors. Sometimes these
  * declarations can be different, but yet compatible depending on which ancestor
@@ -419,7 +434,11 @@ let check_override
                name = member_name;
                class_name = Cls.name class_;
              });
-
+  if not (MemberKind.equal mem_source MemberKind.Constructor) then
+    check_compatible_sound_dynamic_attributes
+      member_name
+      parent_class_elt
+      class_elt;
   match (deref fty_parent, deref fty_child) with
   | ((_, Tany _), (_, Tany _)) -> env
   | ((_, Tany _), _) ->
@@ -435,37 +454,24 @@ let check_override
         apply_reasons ~on_error @@ Secondary.Decl_override_missing_hint pos);
     env
   | ((r_parent, Tfun ft_parent), (r_child, Tfun ft_child)) ->
-    let check (r1, ft1) (r2, ft2) () =
-      match mem_source with
-      | MemberKind.Constructor ->
-        (* we don't check that constructor signatures follow
+    (match mem_source with
+    | MemberKind.Constructor ->
+      (* we don't check that constructor signatures follow
          * subtyping rules except with __ConsistentConstruct,
          * which is checked elsewhere *)
-        env
-      | _ ->
-        check_compatible_sound_dynamic_attributes
-          member_name
-          parent_class_elt
-          class_elt;
-        Typing_subtype_method.(
-          (* Add deps here when we override *)
-          subtype_method_decl
-            ~check_return:(not ignore_fun_return)
-            env
-            r2
-            ft2
-            r1
-            ft1
-            on_error)
-    in
-    check_ambiguous_inheritance
-      check
-      (Typing_reason.localize r_parent, ft_parent)
-      (Typing_reason.localize r_child, ft_child)
-      pos
-      class_
-      class_elt.ce_origin
-      on_error
+      env
+    | _ ->
+      check_ambiguous_inheritance
+        (check_subtype_methods
+           env
+           ~check_return:(not ignore_fun_return)
+           on_error)
+        (Typing_reason.localize r_parent, ft_parent)
+        (Typing_reason.localize r_child, ft_child)
+        pos
+        class_
+        class_elt.ce_origin
+        on_error)
   | _ ->
     if get_ce_const class_elt then
       Typing_phase.sub_type_decl env fty_child fty_parent on_error

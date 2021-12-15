@@ -98,7 +98,11 @@ let stub_meth_quickfix
     (parent_name : string)
     (meth_name : string)
     (meth : class_elt) : Quickfix.t =
-  let title = Printf.sprintf "Add stub method %s::%s" parent_name meth_name in
+  let title =
+    Printf.sprintf
+      "Add stub method %s"
+      (Markdown_lite.md_codify (Utils.strip_ns parent_name ^ "::" ^ meth_name))
+  in
   let new_text = Typing_skeleton.of_method meth_name meth in
   Quickfix.make_classish ~title ~new_text ~classish_name:class_name
 

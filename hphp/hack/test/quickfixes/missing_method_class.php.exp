@@ -1,4 +1,4 @@
-Add stub method `\FooParent::bar`
+Add stub method `FooParent::bar`
 
 <?hh
 

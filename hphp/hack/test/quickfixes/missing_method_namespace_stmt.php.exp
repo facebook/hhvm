@@ -1,4 +1,4 @@
-Add stub method \Bar\IFoo::bar
+Add stub method `Bar\IFoo::bar`
 
 <?hh
 

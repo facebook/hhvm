@@ -3944,7 +3944,8 @@ module Primary = struct
     let quickfixes =
       [
         Quickfix.make
-          ~title:("Change to -> static::" ^ meth_name)
+          ~title:
+            ("Change to " ^ Markdown_lite.md_codify ("static::" ^ meth_name))
           ~new_text:"static"
           self_pos;
       ]

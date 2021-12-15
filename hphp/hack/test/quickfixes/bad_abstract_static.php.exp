@@ -1,11 +1,11 @@
-Change to -> static::childImplements
+Change to `static::childImplements`
 
 <?hh
 
 abstract class MyClass {
-    abstract public static function childImplements(): void;
+  abstract public static function childImplements(): void;
 
-    public static function foo(): void {
+  public static function foo(): void {
     static::childImplements();
-    }
+  }
 }

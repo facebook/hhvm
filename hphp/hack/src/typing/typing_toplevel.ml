@@ -1048,7 +1048,10 @@ let check_extend_abstract_meth ~is_final c_name seq =
       match ce.ce_type with
       | (lazy ty) when get_ce_abstract ce && is_fun ty ->
         let title =
-          Printf.sprintf "Add stub method `%s::%s`" ce.ce_origin meth_name
+          Printf.sprintf
+            "Add stub method %s"
+            (Markdown_lite.md_codify
+               (Utils.strip_ns ce.ce_origin ^ "::" ^ meth_name))
         in
         let new_text = Typing_skeleton.of_method meth_name ce in
         let quickfixes =

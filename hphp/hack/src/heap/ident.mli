@@ -30,3 +30,7 @@ val pp : Format.formatter -> t -> unit
 val not_equal : t -> t -> bool
 
 val from_string_hash : string -> t
+
+val is_immutable : int -> bool
+
+val make_immutable : int -> int

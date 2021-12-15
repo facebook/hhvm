@@ -52,11 +52,5 @@ let tmp () =
   let res = next () in
   (res, "__tmp" ^ string_of_int res)
 
-let immutable_mask = 1 lsl 62
-
-let is_immutable i = i land immutable_mask <> 0
-
-let make_immutable i = i lor immutable_mask
-
 module Set = Set.Make (S)
 module Map = WrappedMap.Make (S)

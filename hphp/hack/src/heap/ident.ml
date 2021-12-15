@@ -67,3 +67,9 @@ let from_string_hash s =
   (* make this an int between hash_range_min and hash_range_max - 1 *)
   let hash = (hash % (hash_range_max - hash_range_min)) + hash_range_min in
   hash
+
+let immutable_mask = 1 lsl 62
+
+let is_immutable i = i land immutable_mask <> 0
+
+let make_immutable i = i lor immutable_mask

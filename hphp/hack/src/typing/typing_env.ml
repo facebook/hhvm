@@ -1014,7 +1014,7 @@ let set_local ?(immutable = false) env x new_type pos =
     in
     let expr_id =
       if immutable then
-        LID.make_immutable expr_id
+        Ident.make_immutable expr_id
       else
         expr_id
     in
@@ -1139,7 +1139,7 @@ let set_local_expr_id env x new_eid =
       match LID.Map.find_opt x next_cont.LEnvC.local_types with
       | Some (type_, pos, eid)
         when not (Typing_local_types.equal_expression_id eid new_eid) ->
-        if LID.is_immutable eid then
+        if Ident.is_immutable eid then
           Errors.add_typing_error
             Typing_error.(primary @@ Primary.Immutable_local pos);
         let local = (type_, pos, new_eid) in

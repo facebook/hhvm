@@ -380,6 +380,15 @@ let rec set_file pos_file pos =
   | Pos_tiny { pos_span; pos_file = _ } -> Pos_tiny { pos_file; pos_span }
   | Pos_from_reason p -> Pos_from_reason (set_file pos_file p)
 
+let set_line_end line pos =
+  let pos = as_large_pos pos in
+  match pos with
+  | Pos_large { pos_file; pos_start; pos_end } ->
+    let (_, column, offset) = File_pos_large.line_column_offset pos_end in
+    let pos_end = File_pos_large.of_line_column_offset ~line ~column ~offset in
+    Pos_large { pos_file; pos_start; pos_end }
+  | _ -> pos
+
 let set_col_end pos_cnum pos =
   let pos = as_large_pos pos in
   match pos with

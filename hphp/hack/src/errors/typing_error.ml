@@ -711,6 +711,15 @@ module Primary = struct
       (Error_code.ReadonlyException, claim, [], [])
 
     let explicit_readonly_cast pos decl_pos kind =
+      let (start_line, start_column) = Pos.line_column pos in
+      (* Create a zero-width position at the start of the offending
+         expression, so we can insert text without overwriting anything. *)
+      let qf_pos =
+        pos |> Pos.set_line_end start_line |> Pos.set_col_end start_column
+      in
+      let quickfixes =
+        [Quickfix.make ~title:"Insert `readonly`" ~new_text:"readonly " qf_pos]
+      in
       let kind_str =
         match kind with
         | `fn_call -> "function call"
@@ -724,7 +733,7 @@ module Primary = struct
           ^ " returns a readonly value. It must be explicitly wrapped in a readonly expression."
         )
       and reason = [(decl_pos, "The " ^ kind_str ^ " is defined here.")] in
-      (Error_code.ExplicitReadonlyCast, claim, reason, [])
+      (Error_code.ExplicitReadonlyCast, claim, reason, quickfixes)
 
     let readonly_method_call pos decl_pos =
       let claim =

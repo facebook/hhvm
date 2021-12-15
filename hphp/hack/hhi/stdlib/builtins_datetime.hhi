@@ -138,7 +138,7 @@ interface DateTimeInterface {
   public function diff(DateTimeInterface $datetime2, bool $absolute = false);
   public function format(string $format);
   public function getOffset();
-  public function getTimestamp();
+  public function getTimestamp()[];
   public function getTimezone();
 }
 

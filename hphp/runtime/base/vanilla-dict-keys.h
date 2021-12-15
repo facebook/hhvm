@@ -80,23 +80,20 @@ struct VanillaDictKeys {
   static Optional<uint8_t> getMask(const jit::Type& type);
 
   /*
-   * Call these methods to get key types in m_aux format. We initialize m_aux
-   * in a single store when we write a header, so we can't use the APIs below.
+   * Call these methods to get a version of this bitset that can be stored
+   * directly to a free byte in an ArrayData.
    */
-  uint16_t packForAux() const {
-    return m_bits << 8;
+  static VanillaDictKeys Empty() {
+    return Init(0);
   }
-  static uint16_t packIntsForAux() {
-    return kIntKey << 8;
+  static VanillaDictKeys Ints() {
+    return Init(kIntKey);
   }
-  static uint16_t packStaticStrsForAux() {
-    return kStaticStrKey << 8;
+  static VanillaDictKeys StaticStrs() {
+    return Init(kStaticStrKey);
   }
-  static uint16_t packStrsForAux() {
-    return packStaticStrsForAux() | (kNonStaticStrKey << 8);
-  }
-  static uint16_t compactPacked(uint16_t aux) {
-    return aux & ~(static_cast<uint16_t>(kTombstoneKey) << 8);
+  static VanillaDictKeys Strs() {
+    return Init(static_cast<uint8_t>(kStaticStrKey | kNonStaticStrKey));
   }
 
   /*
@@ -140,6 +137,12 @@ struct VanillaDictKeys {
   bool checkInvariants(const VanillaDict* ad) const;
 
 private:
+  static VanillaDictKeys Init(uint8_t bits) {
+    auto result = VanillaDictKeys{};
+    result.m_bits = bits;
+    return result;
+  }
+
   static constexpr uint8_t kNonStaticStrKey = 0b0001;
   static constexpr uint8_t kStaticStrKey    = 0b0010;
   static constexpr uint8_t kIntKey          = 0b0100;

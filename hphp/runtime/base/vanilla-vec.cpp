@@ -117,7 +117,8 @@ VanillaDict* VanillaVec::ToMixedHeader(const ArrayData* old,
   auto const scale   = VanillaDict::computeScaleFromSize(neededSize);
   auto const ad      = VanillaDict::reqAlloc(scale);
   auto const kind    = HeaderKind::Dict;
-  ad->initHeader_16(kind, OneReference, VanillaDictKeys::packIntsForAux());
+  ad->initHeader(kind, OneReference);
+  *ad->mutableKeyTypes() = VanillaDictKeys::Ints();
   ad->m_size          = oldSize;
   ad->m_layout_index  = old->m_layout_index;
   ad->m_scale_used    = scale | uint64_t{oldSize} << 32; // used=oldSize

@@ -209,7 +209,7 @@ private:
   static VanillaDict* MakeMixedImpl(uint32_t size, const TypedValue* kvs);
 
 public:
-  static constexpr size_t kKeyTypesOffset = 7;
+  static constexpr size_t kKeyTypesOffset = offsetof(ArrayData, m_extra_lo8);
 
   const VanillaDictKeys& keyTypes() const {
     auto const pointer = uintptr_t(this) + kKeyTypesOffset;

@@ -501,8 +501,6 @@ pub mod pseudo_functions {
 
     pub const DIE: &str = "\\die";
 
-    pub const UNSAFE_CAST: &str = "\\HH\\FIXME\\UNSAFE_CAST";
-
     pub static ALL_PSEUDO_FUNCTIONS: &[&str] = &[
         ISSET,
         UNSET,
@@ -517,7 +515,6 @@ pub mod pseudo_functions {
         EMPTY,
         EXIT,
         DIE,
-        UNSAFE_CAST,
     ];
 
     lazy_static! {

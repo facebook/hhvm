@@ -23,6 +23,15 @@ module Cls = Decl_provider.Class
 module MakeType = Typing_make_type
 module TCO = TypecheckerOptions
 
+module MemberKind = struct
+  type t =
+    | Property
+    | Static_property
+    | Method
+    | Static_method
+    | Constructor
+end
+
 (*****************************************************************************)
 (* Helpers *)
 (*****************************************************************************)
@@ -176,8 +185,8 @@ let check_ambiguous_inheritance f parent child pos class_ origin on_error =
 
 let is_method member_source =
   match member_source with
-  | `FromMethod
-  | `FromSMethod ->
+  | MemberKind.Method
+  | MemberKind.Static_method ->
     true
   | _ -> false
 
@@ -218,7 +227,7 @@ let check_lsb_overrides
     member_source member_name parent_class_elt class_elt on_error =
   let is_sprop =
     match member_source with
-    | `FromSProp -> true
+    | MemberKind.Static_property -> true
     | _ -> false
   in
   let parent_is_lsb = get_ce_lsb parent_class_elt in
@@ -347,12 +356,12 @@ let check_override
   let (lazy parent_pos) = parent_class_elt.ce_pos in
   let is_method =
     match mem_source with
-    | `FromMethod
-    | `FromSMethod
-    | `FromConstructor ->
+    | MemberKind.Method
+    | MemberKind.Static_method
+    | MemberKind.Constructor ->
       true
-    | `FromProp
-    | `FromSProp ->
+    | MemberKind.Property
+    | MemberKind.Static_property ->
       false
   in
 
@@ -428,7 +437,7 @@ let check_override
   | ((r_parent, Tfun ft_parent), (r_child, Tfun ft_child)) ->
     let check (r1, ft1) (r2, ft2) () =
       match mem_source with
-      | `FromConstructor ->
+      | MemberKind.Constructor ->
         (* we don't check that constructor signatures follow
          * subtyping rules except with __ConsistentConstruct,
          * which is checked elsewhere *)
@@ -665,11 +674,11 @@ let add_member_dep
   if not (Pos_or_decl.is_hhi origin_pos) then
     let dep =
       match member_source with
-      | `FromMethod -> Dep.Method (member_origin, member_name)
-      | `FromSMethod -> Dep.SMethod (member_origin, member_name)
-      | `FromSProp -> Dep.SProp (member_origin, member_name)
-      | `FromProp -> Dep.Prop (member_origin, member_name)
-      | `FromConstructor -> Dep.Constructor member_origin
+      | MemberKind.Method -> Dep.Method (member_origin, member_name)
+      | MemberKind.Static_method -> Dep.SMethod (member_origin, member_name)
+      | MemberKind.Static_property -> Dep.SProp (member_origin, member_name)
+      | MemberKind.Property -> Dep.Prop (member_origin, member_name)
+      | MemberKind.Constructor -> Dep.Constructor member_origin
     in
     Typing_deps.add_idep
       (Env.get_deps_mode env)
@@ -694,7 +703,7 @@ let check_inherited_member_is_dynamically_callable
     | Ast_defs.Ctrait ->
       begin
         match member_source with
-        | `FromMethod ->
+        | MemberKind.Method ->
           if not (Typing_defs.get_ce_support_dynamic_type parent_class_elt) then
             (* since the attribute is missing run the inter check *)
             let (lazy (ty : decl_ty)) = parent_class_elt.ce_type in
@@ -716,10 +725,10 @@ let check_inherited_member_is_dynamically_callable
                        parent_class_elt.ce_origin ))
                   None
             | _ -> ())
-        | `FromSMethod
-        | `FromSProp
-        | `FromProp
-        | `FromConstructor ->
+        | MemberKind.Static_method
+        | MemberKind.Static_property
+        | MemberKind.Property
+        | MemberKind.Constructor ->
           ()
       end
     | Ast_defs.Cinterface
@@ -803,11 +812,15 @@ let make_all_members ~child_class ~parent_class =
     | Some x -> [(Naming_special_names.Members.__construct, x)]
   in
   [
-    (`FromProp, Cls.props parent_class, Cls.get_prop child_class);
-    (`FromSProp, Cls.sprops parent_class, Cls.get_sprop child_class);
-    (`FromMethod, Cls.methods parent_class, Cls.get_method child_class);
-    (`FromSMethod, Cls.smethods parent_class, Cls.get_smethod child_class);
-    ( `FromConstructor,
+    (MemberKind.Property, Cls.props parent_class, Cls.get_prop child_class);
+    ( MemberKind.Static_property,
+      Cls.sprops parent_class,
+      Cls.get_sprop child_class );
+    (MemberKind.Method, Cls.methods parent_class, Cls.get_method child_class);
+    ( MemberKind.Static_method,
+      Cls.smethods parent_class,
+      Cls.get_smethod child_class );
+    ( MemberKind.Constructor,
       fst (Cls.construct parent_class) |> wrap_constructor,
       (fun _ -> fst (Cls.construct child_class)) );
   ]
@@ -902,7 +915,7 @@ let check_constructors env parent_class class_ psubst on_error =
           env
           ~check_member_unique:false
           "__construct"
-          `FromMethod
+          MemberKind.Method
           ~ignore_fun_return:true
           class_
           parent_cstr

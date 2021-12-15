@@ -107,7 +107,9 @@ let get_host_hw_telemetry () =
       (Telemetry.create ())
   in
   let sandcastle_capabilities =
-    match Sys_utils.cat_or_failed "/tmp/sandcastle.capabilities" with
+    match
+      Sys_utils.cat_or_failed "/data/sandcastle/run/sandcastle.capabilities"
+    with
     | None -> Hh_json.JSON_Null
     | Some s ->
       (try Hh_json.json_of_string s with

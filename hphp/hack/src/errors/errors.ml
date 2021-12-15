@@ -169,7 +169,7 @@ let badpos_message_2 =
     "Incomplete position information! We couldn't find the exact line of your type error in this definition. %s"
     Error_message_sentinel.please_file_a_bug_message
 
-let try_with_result f1 (f2 : 'res -> error -> 'res) : 'res =
+let try_with_result (f1 : unit -> 'res) (f2 : 'res -> error -> 'res) : 'res =
   let error_map_copy = !error_map in
   let accumulate_errors_copy = !accumulate_errors in
   let is_hh_fixme_copy = !is_hh_fixme in
@@ -1301,9 +1301,9 @@ let ignore_ f =
   ignore_pos_outside_current_span := ignore_pos_outside_current_span_copy;
   result
 
-let try_when f ~when_ ~do_ =
+let try_when f ~if_error_and:condition ~then_:do_ =
   try_with_result f (fun result error ->
-      if when_ () then
+      if condition () then
         do_ error
       else
         add_error error;

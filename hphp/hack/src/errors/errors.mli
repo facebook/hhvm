@@ -153,15 +153,16 @@ val run_in_decl_mode : Relative_path.t -> (unit -> 'a) -> 'a
 val run_with_span : Pos.t -> (unit -> 'a) -> 'a
 
 (** ignore errors produced by function passed in argument. *)
-val ignore_ : (unit -> 'a) -> 'a
+val ignore_ : (unit -> 'res) -> 'res
 
-val try_when : (unit -> 'a) -> when_:(unit -> bool) -> do_:(error -> unit) -> 'a
+val try_when :
+  (unit -> 'res) -> if_error_and:(unit -> bool) -> then_:(error -> unit) -> 'res
 
-val has_no_errors : (unit -> 'a) -> bool
+val has_no_errors : (unit -> 'res) -> bool
 
 val currently_has_errors : unit -> bool
 
-val try_if_no_errors : (unit -> 'a) -> ('a -> 'a) -> 'a
+val try_if_no_errors : (unit -> 'res) -> ('res -> 'res) -> 'res
 
 val merge : t -> t -> t
 

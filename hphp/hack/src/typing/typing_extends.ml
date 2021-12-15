@@ -192,10 +192,10 @@ let check_subtype_methods
 let check_ambiguous_inheritance f parent child pos class_ origin on_error =
   Errors.try_when
     (f parent child)
-    ~when_:(fun () ->
+    ~if_error_and:(fun () ->
       String.( <> ) (Cls.name class_) origin
       && Errors.has_no_errors (f child parent))
-    ~do_:(fun error ->
+    ~then_:(fun error ->
       Errors.ambiguous_inheritance pos (Cls.name class_) origin error on_error)
 
 let is_method member_source =

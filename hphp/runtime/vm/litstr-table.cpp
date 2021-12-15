@@ -81,4 +81,30 @@ StringData* loadLitstrById(Id id) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void BlobEncoderHelper<LowStringPtr>::serde(BlobEncoder& encoder,
+                                            LowStringPtr s) {
+  if (encoder.usesGlobalIds()) {
+    Id id = LitstrTable::get().mergeLitstr(s.get());
+    encoder(id);
+    return;
+  }
+  auto const sd = s.get();
+  encoder(sd);
+}
+
+void BlobEncoderHelper<LowStringPtr>::serde(BlobDecoder& decoder,
+                                            LowStringPtr& s) {
+  if (decoder.usesGlobalIds()) {
+    Id id;
+    decoder(id);
+    s = LitstrTable::get().lookupLitstrId(id);
+    return;
+  }
+  const StringData* sd;
+  decoder(sd);
+  s = sd;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 }

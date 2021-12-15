@@ -23,7 +23,6 @@
 
 #include "hphp/runtime/ext/extension.h"
 
-#include "hphp/runtime/vm/blob-helper.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
@@ -39,6 +38,7 @@
 #include "hphp/system/systemlib.h"
 
 #include "hphp/util/atomic-vector.h"
+#include "hphp/util/blob-encoder.h"
 #include "hphp/util/file.h"
 #include "hphp/util/trace.h"
 

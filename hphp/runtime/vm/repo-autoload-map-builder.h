@@ -17,7 +17,8 @@
 
 #include "hphp/runtime/base/repo-autoload-map.h"
 #include "hphp/runtime/base/string-data.h"
-#include "hphp/runtime/vm/blob-helper.h"
+
+#include "hphp/util/blob-encoder.h"
 #include "hphp/util/hash-map.h"
 
 namespace HPHP {

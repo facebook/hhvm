@@ -16,12 +16,13 @@
 
 #pragma once
 
-#include <cstdint>
-#include <folly/Format.h>
+#include "hphp/runtime/vm/func-id.h"
 
+#include "hphp/util/blob-encoder.h"
 #include "hphp/util/low-ptr.h"
 
-#include "hphp/runtime/vm/func-id.h"
+#include <cstdint>
+#include <folly/Format.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -42,8 +43,17 @@ extern const Array null_array;
 // Or use these if you need to pass by const reference:
 extern const StaticString empty_string_ref; // const StaticString&
 
+///////////////////////////////////////////////////////////////////////////////
+
 struct StringData;
 using LowStringPtr = LowPtr<const StringData>;
+
+template<>
+struct BlobEncoderHelper<LowStringPtr> {
+  // Implemented in litstr-table.cpp
+  static void serde(BlobEncoder&, LowStringPtr);
+  static void serde(BlobDecoder&, LowStringPtr&);
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 

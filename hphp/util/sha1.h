@@ -151,6 +151,10 @@ struct SHA1 : private boost::totally_ordered<SHA1> {
     // All the bits here are fantastically good.
     return (uint64_t(q[0]) << 32) + q[1];
   }
+
+  template <typename SerDe> void serde(SerDe& serde) {
+    for (auto& w : q) serde(w);
+  }
 };
 
 //////////////////////////////////////////////////////////////////////

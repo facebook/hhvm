@@ -28,10 +28,10 @@
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/base/variable-serializer.h"
+#include "hphp/runtime/base/variable-unserializer.h"
 
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 
-#include "hphp/runtime/vm/blob-helper.h"
 #include "hphp/runtime/vm/disas.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/func-emitter.h"
@@ -47,6 +47,7 @@
 #include "hphp/runtime/vm/verifier/check.h"
 
 #include "hphp/util/alloc.h"
+#include "hphp/util/blob-encoder.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/read-only-arena.h"
 #include "hphp/util/sha1.h"

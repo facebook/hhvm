@@ -18,9 +18,11 @@
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/ext/extension.h"
-#include "hphp/runtime/vm/blob-helper.h"
+
+#include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/unit-parser.h"
 
+#include "hphp/util/blob-encoder.h"
 #include "hphp/util/build-info.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/sqlite-wrapper.h"

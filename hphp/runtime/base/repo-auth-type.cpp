@@ -26,9 +26,10 @@
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/typed-value.h"
-#include "hphp/runtime/vm/blob-helper.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 #include "hphp/runtime/vm/unit.h"
+
+#include "hphp/util/blob-encoder.h"
 
 namespace HPHP {
 

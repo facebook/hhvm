@@ -44,6 +44,9 @@ struct RFuncData;
 struct Class;
 struct RClsMethData;
 
+struct BlobEncoder;
+struct BlobDecoder;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -150,6 +153,9 @@ struct TypedValue {
   DataType type() const { return m_type; }
   Value val() const { return m_data; }
 
+  void serde(BlobEncoder&) const;
+  void serde(BlobDecoder&);
+
   TYPE_SCAN_CUSTOM() {
     if (isRefcountedType(m_type)) scanner.scan(m_data.pcnt);
   }
@@ -200,6 +206,9 @@ struct TypedValueAux : TypedValue {
 
   const bool& dynamic() const { return m_aux.u_dynamic; }
         bool& dynamic()       { return m_aux.u_dynamic; }
+
+  void serde(BlobEncoder&) const = delete;
+  void serde(BlobDecoder&) = delete;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

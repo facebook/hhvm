@@ -19,7 +19,6 @@
 #include "hphp/runtime/vm/jit/relocation.h"
 
 #include "hphp/runtime/base/zend-string.h"
-#include "hphp/runtime/vm/blob-helper.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/treadmill.h"
 

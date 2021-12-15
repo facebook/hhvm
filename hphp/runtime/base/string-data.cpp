@@ -873,6 +873,52 @@ StringData::substr(int start, int length /* = StringData::MaxSize */) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// Serialization
+
+void BlobEncoderHelper<const StringData*>::serde(BlobEncoder& encoder,
+                                                 const StringData* sd) {
+  if (!sd) {
+    encoder(uint32_t(0));
+    return;
+  }
+  auto const sz = sd->size();
+  encoder(static_cast<uint32_t>(sz + 1));
+  if (!sz) return;
+  encoder.writeRaw(sd->data(), sz);
+}
+
+void BlobEncoderHelper<const StringData*>::serde(BlobDecoder& decoder,
+                                                 const StringData*& sd) {
+  uint32_t size;
+  decoder(size);
+  if (size == 0) {
+    sd = nullptr;
+    return;
+  }
+  --size;
+  if (size == 0) {
+    sd = staticEmptyString();
+    return;
+  }
+
+  assertx(decoder.remaining() >= size);
+  auto const data = decoder.data();
+  sd = makeStaticString(std::string{data, data+size});
+  decoder.advance(size);
+}
+
+void BlobEncoderHelper<const StringData*>::skip(BlobDecoder& decoder) {
+  uint32_t size;
+  decoder(size);
+  // Any size less than 2 has no data (0 is a nullptr, and 1 is an
+  // empty string).
+  if (size <= 1) return;
+  --size;
+  assertx(decoder.remaining() >= size);
+  decoder.advance(size);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Debug
 
 std::string StringData::toCppString() const {

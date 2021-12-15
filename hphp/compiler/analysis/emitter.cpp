@@ -26,6 +26,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/unit-cache.h"
+#include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/vm/disas.h"
 #include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/preclass-emitter.h"

@@ -15,12 +15,14 @@
 */
 #include "hphp/runtime/vm/type-alias-emitter.h"
 
+#include "hphp/runtime/base/static-string-table.h"
+
+#include "hphp/runtime/vm/type-alias.h"
+
+#include "hphp/util/blob-encoder.h"
+
 #include <limits>
 #include <sstream>
-
-
-#include "hphp/runtime/vm/blob-helper.h"
-#include "hphp/runtime/vm/type-alias.h"
 
 namespace HPHP {
 

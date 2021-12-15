@@ -23,9 +23,10 @@
 #include "hphp/runtime/base/coeffects-config.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/repo-autoload-map-builder.h"
-#include "hphp/runtime/vm/blob-helper.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/native-data.h"
+
+#include "hphp/util/blob-encoder.h"
 
 namespace HPHP {
 

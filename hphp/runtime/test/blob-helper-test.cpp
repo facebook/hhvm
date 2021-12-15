@@ -13,8 +13,9 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/vm/blob-helper.h"
 #include "hphp/runtime/base/type-string.h"
+
+#include "hphp/util/blob-encoder.h"
 
 #include <gtest/gtest.h>
 #include <limits>

@@ -14,6 +14,10 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/base/typed-value.h"
+
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/variable-serializer.h"
+
 #include "hphp/runtime/vm/coeffects.h"
 
 #include "hphp/util/trace.h"
@@ -41,6 +45,40 @@ StaticCoeffects ConstModifiers::getCoeffects() const {
 void ConstModifiers::setCoeffects(StaticCoeffects coeffects) {
   rawData = (uintptr_t)(coeffects.value() << ConstModifiers::kDataShift)
               | (rawData & ~ConstModifiers::kMask);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void TypedValue::serde(BlobEncoder& encoder) const {
+  if (m_type == KindOfUninit) {
+    encoder(static_cast<uint32_t>(0));
+    return;
+  }
+  auto const s = internal_serialize(tvAsCVarRef(this));
+  assertx(s.get());
+  auto const sz = s.size();
+  encoder(static_cast<uint32_t>(sz));
+  if (!sz) return;
+  encoder.writeRaw(s.data(), sz);
+}
+
+void TypedValue::serde(BlobDecoder& decoder) {
+  tvWriteUninit(*this);
+
+  uint32_t size;
+  decoder(size);
+  if (size == 0) return;
+
+  auto const data = decoder.data();
+  std::string str{data, data+size};
+  decoder.advance(size);
+
+  tvAsVariant(this) = unserialize_from_buffer(
+    str.data(),
+    str.size(),
+    VariableUnserializer::Type::Internal
+  );
+  tvAsVariant(this).setEvalScalar();
 }
 
 //////////////////////////////////////////////////////////////////////

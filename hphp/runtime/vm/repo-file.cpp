@@ -17,13 +17,16 @@
 #include "hphp/runtime/vm/repo-file.h"
 
 #include "hphp/runtime/base/autoload-handler.h"
+#include "hphp/runtime/base/variable-serializer.h"
+#include "hphp/runtime/base/variable-unserializer.h"
 
-#include "hphp/runtime/vm/blob-helper.h"
 #include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/litarray-table.h"
 #include "hphp/runtime/vm/repo-autoload-map-builder.h"
+#include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 
+#include "hphp/util/blob-encoder.h"
 #include "hphp/util/build-info.h"
 #include "hphp/util/htonll.h"
 #include "hphp/util/lock-free-ptr-wrapper.h"
@@ -795,7 +798,7 @@ void RepoFile::loadGlobalTables(bool lazyLiterals) {
         blob.decoder(litstr);
         table.setLitstr(id, litstr);
       } else {
-        blob.decoder.skipString();
+        BlobEncoderHelper<const StringData*>::skip(blob.decoder);
       }
       auto const post = blob.decoder.advanced();
       assertx(post >= offset);

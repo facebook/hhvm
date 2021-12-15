@@ -35,6 +35,7 @@
 
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/vm-worker.h"
 #include "hphp/hhvm/process-init.h"
 #include "hphp/runtime/vm/native.h"

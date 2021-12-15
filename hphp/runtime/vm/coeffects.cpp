@@ -18,7 +18,6 @@
 
 #include "hphp/runtime/base/coeffects-config.h"
 #include "hphp/runtime/base/backtrace.h"
-#include "hphp/runtime/vm/blob-helper.h"
 #include "hphp/runtime/vm/runtime.h"
 
 #include "hphp/runtime/vm/jit/translator-runtime.h"
@@ -26,6 +25,7 @@
 #include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/ext/std/ext_std_classobj.h"
 
+#include "hphp/util/blob-encoder.h"
 #include "hphp/util/trace.h"
 
 TRACE_SET_MOD(coeffects);

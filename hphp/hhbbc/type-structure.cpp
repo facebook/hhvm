@@ -20,6 +20,7 @@
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/type-system.h"
 
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/type-structure.h"
 #include "hphp/runtime/base/type-structure-helpers-defs.h"
 

@@ -48,6 +48,13 @@ struct Location {
       if (char1 > other.char1) return 1;
       return 0;
     }
+
+    template <typename SerDe> void serde(SerDe& sd) {
+      sd(line0);
+      sd(char0);
+      sd(line1);
+      sd(char1);
+    }
   };
 
   const char *file{""};

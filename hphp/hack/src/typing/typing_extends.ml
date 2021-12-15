@@ -116,14 +116,22 @@ let stub_meth_quickfix
   let new_text = Typing_skeleton.of_method meth_name meth in
   Quickfix.make_classish ~title ~new_text ~classish_name:class_name
 
+let get_member member_kind class_ =
+  match member_kind with
+  | MemberKind.Property -> Cls.get_prop class_
+  | MemberKind.Static_property -> Cls.get_sprop class_
+  | MemberKind.Method -> Cls.get_method class_
+  | MemberKind.Static_method -> Cls.get_smethod class_
+  | MemberKind.Constructor -> (fun _ -> fst (Cls.construct class_))
+
 (* Check that all the required members are implemented *)
 let check_members_implemented
-    class_name
+    class_
     parent_name
     check_private
     parent_reason
     reason
-    (_, parent_members, get_member) =
+    (mem_source, parent_members) =
   List.iter parent_members ~f:(fun (member_name, class_elt) ->
       match class_elt.ce_visibility with
       | Vprivate _ when not check_private -> ()
@@ -135,10 +143,16 @@ let check_members_implemented
          * won't have access to private members of the grandparent
          * trait *)
         ()
-      | _ when Option.is_none (get_member member_name) ->
+      | _ when Option.is_none (get_member mem_source class_ member_name) ->
         let (lazy defn_pos) = class_elt.ce_pos in
         let quickfixes =
-          [stub_meth_quickfix class_name parent_name member_name class_elt]
+          [
+            stub_meth_quickfix
+              (Cls.name class_)
+              parent_name
+              member_name
+              class_elt;
+          ]
         in
         let err =
           Typing_error.(
@@ -748,7 +762,7 @@ let check_members
     (parent_class, psubst)
     (class_pos, class_)
     on_error
-    (mem_source, parent_members, get_member) =
+    (mem_source, parent_members) =
   let parent_members =
     if check_private then
       parent_members
@@ -780,7 +794,7 @@ let check_members
     ~init:env
     parent_members
     ~f:(fun env (member_name, parent_class_elt) ->
-      match get_member member_name with
+      match get_member mem_source class_ member_name with
       (* We can skip this check if the class elements have the same origin, as we are
        * essentially comparing a method against itself *)
       | Some class_elt
@@ -812,23 +826,18 @@ let check_members
           (mem_source, member_name, parent_class_elt);
         env)
 
-let make_all_members ~child_class ~parent_class =
+let make_all_members ~parent_class =
   let wrap_constructor = function
     | None -> []
     | Some x -> [(Naming_special_names.Members.__construct, x)]
   in
   [
-    (MemberKind.Property, Cls.props parent_class, Cls.get_prop child_class);
-    ( MemberKind.Static_property,
-      Cls.sprops parent_class,
-      Cls.get_sprop child_class );
-    (MemberKind.Method, Cls.methods parent_class, Cls.get_method child_class);
-    ( MemberKind.Static_method,
-      Cls.smethods parent_class,
-      Cls.get_smethod child_class );
+    (MemberKind.Property, Cls.props parent_class);
+    (MemberKind.Static_property, Cls.sprops parent_class);
+    (MemberKind.Method, Cls.methods parent_class);
+    (MemberKind.Static_method, Cls.smethods parent_class);
     ( MemberKind.Constructor,
-      fst (Cls.construct parent_class) |> wrap_constructor,
-      (fun _ -> fst (Cls.construct child_class)) );
+      fst (Cls.construct parent_class) |> wrap_constructor );
   ]
 
 (* The phantom class element that represents the default constructor:
@@ -1292,7 +1301,7 @@ let check_consts env implements parent_class (name_pos, class_) psubst on_error
  * message pointing at the class being checked.
  *)
 let check_class_implements
-    env implements parent_class (name, name_pos, class_) on_error =
+    env implements parent_class (name_pos, class_) on_error =
   let env =
     check_typeconsts env implements parent_class (name_pos, class_) on_error
   in
@@ -1301,14 +1310,14 @@ let check_class_implements
   let env =
     check_consts env implements parent_class (name_pos, class_) psubst on_error
   in
-  let memberl = make_all_members ~parent_class ~child_class:class_ in
+  let memberl = make_all_members ~parent_class in
   let env = check_constructors env parent_class class_ psubst on_error in
   let check_privates : bool = Ast_defs.is_c_trait (Cls.kind parent_class) in
   List.iter
     memberl
     ~f:
       (check_members_implemented
-         name
+         class_
          (Cls.name parent_class)
          check_privates
          parent_pos
@@ -1325,8 +1334,7 @@ let check_class_implements
 (* The externally visible function *)
 (*****************************************************************************)
 
-let check_implements_extends_uses
-    env ~implements ~parents (c_name, name_pos, class_) =
+let check_implements_extends_uses env ~implements ~parents (name_pos, class_) =
   let get_interfaces acc x =
     let (_, (_, name), _) = TUtils.unwrap_class_type x in
     match Env.get_class env name with
@@ -1348,7 +1356,7 @@ let check_implements_extends_uses
           env
           implements
           parent_class
-          (c_name, name_pos, class_)
+          (name_pos, class_)
           (* sadly, enum error reporting requires this to keep the error in the file
              with the enum *)
           (if String.equal parent_name SN.Classes.cHH_BuiltinEnum then

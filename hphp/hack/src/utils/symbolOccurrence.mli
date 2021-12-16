@@ -35,6 +35,9 @@ type keyword_with_hover_docs =
   | FinalOnMethod
   | ExtendsOnClass
   | ExtendsOnInterface
+  | ReadonlyOnMethod
+  | ReadonlyOnParameter
+  | ReadonlyOnReturnType
 [@@deriving ord, eq]
 
 type kind =

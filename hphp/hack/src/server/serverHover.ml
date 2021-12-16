@@ -272,6 +272,12 @@ let keyword_info (khi : SymbolOccurrence.keyword_with_hover_docs) : string =
   | SymbolOccurrence.ExtendsOnInterface ->
     "Extending an interface allows your interface to include methods from other interfaces."
     ^ "\n\nAn interface can extend multiple interfaces."
+  | SymbolOccurrence.ReadonlyOnMethod ->
+    "A `readonly` method treats `$this` as `readonly`."
+  | SymbolOccurrence.ReadonlyOnParameter ->
+    "A `readonly` value is a reference that cannot modify the underlying value."
+  | SymbolOccurrence.ReadonlyOnReturnType ->
+    "This function/method may return a `readonly` value."
 
 let make_hover_info ctx env_and_ty entry occurrence def_opt =
   SymbolOccurrence.(

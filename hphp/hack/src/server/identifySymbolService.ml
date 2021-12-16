@@ -578,6 +578,8 @@ type decl_kind =
 type keyword_context =
   | Decl of decl_kind
   | Method
+  | Parameter
+  | ReturnType
 
 (** Get keyword positions from the FFP for every keyword that has hover
     documentation. **)
@@ -615,8 +617,14 @@ let keywords ctx entry : Result_set.elt list =
     | ClassishBody cb -> aux ctx acc cb.classish_body_elements
     | MethodishDeclaration md ->
       aux (Some Method) acc md.methodish_function_decl_header
-    | FunctionDeclarationHeader fdh -> aux ctx acc fdh.function_modifiers
+    | FunctionDeclaration fd -> aux ctx acc fd.function_declaration_header
+    | FunctionDeclarationHeader fdh ->
+      let acc = aux ctx acc fdh.function_modifiers in
+      let acc = aux ctx acc fdh.function_parameter_list in
+      aux (Some ReturnType) acc fdh.function_readonly_return
     | SyntaxList sl -> List.fold sl ~init:acc ~f:(aux ctx)
+    | ListItem li -> aux ctx acc li.list_item
+    | ParameterDeclaration pd -> aux (Some Parameter) acc pd.parameter_readonly
     | Token t ->
       (match t.Token.kind with
       | Token.TokenKind.Extends ->
@@ -640,6 +648,20 @@ let keywords ctx entry : Result_set.elt list =
               (match ctx with
               | Some Method -> FinalOnMethod
               | _ -> FinalOnClass);
+          is_declaration = false;
+          pos = token_pos t;
+        }
+        :: acc
+      | Token.TokenKind.Readonly ->
+        {
+          name = "readonly";
+          type_ =
+            Keyword
+              (match ctx with
+              | Some Method -> ReadonlyOnMethod
+              | Some Parameter -> ReadonlyOnParameter
+              | Some ReturnType -> ReadonlyOnReturnType
+              | _ -> ReadonlyOnParameter);
           is_declaration = false;
           pos = token_pos t;
         }

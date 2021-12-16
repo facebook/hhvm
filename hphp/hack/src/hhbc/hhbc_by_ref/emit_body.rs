@@ -485,9 +485,9 @@ pub fn make_body<'a, 'arena, 'decl>(
                     let expr_env = ExprEnv {
                         codegen_env: body_env.as_ref(),
                     };
-                    let mut buf = String::new();
+                    let mut buf = Vec::new();
                     print_expr(&mut ctx, &mut buf, &expr_env, &expr)
-                        .map(|_| Pair(l.clone(), Str::new_str(alloc, &buf)))
+                        .map(|_| Pair(l.clone(), Str::from_vec(alloc, buf)))
                         .ok()
                 })
                 .flatten(),

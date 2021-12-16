@@ -134,7 +134,7 @@ pub mod compile_ffi {
         fn hackc_compile_from_text_cpp_ffi(
             env: &NativeEnv,
             source_text: &CxxString,
-        ) -> Result<String>;
+        ) -> Result<Vec<u8>>;
 
         fn hackc_create_direct_decl_parse_options(
             flags: i32,
@@ -158,7 +158,7 @@ pub mod compile_ffi {
         fn hackc_hhas_to_string_cpp_ffi(
             env: &NativeEnv,
             prog: &HhasProgramWrapper,
-        ) -> Result<String>;
+        ) -> Result<Vec<u8>>;
 
         fn hackc_extract_facts_as_json_cpp_ffi(
             flags: i32,
@@ -261,7 +261,7 @@ impl compile_ffi::NativeEnv {
 fn hackc_compile_from_text_cpp_ffi<'a>(
     env: &compile_ffi::NativeEnv,
     source_text: &CxxString,
-) -> Result<String, String> {
+) -> Result<Vec<u8>, String> {
     stack_limit::with_elastic_stack(|stack_limit| {
         let native_env: hhbc_by_ref_compile::NativeEnv<&str> =
             compile_ffi::NativeEnv::to_compile_env(&env).unwrap();
@@ -276,7 +276,7 @@ fn hackc_compile_from_text_cpp_ffi<'a>(
             ocamlrep::rc::RcOc::new(native_env.filepath.clone()),
             source_text.as_bytes(),
         );
-        let mut output = String::new();
+        let mut output = Vec::new();
         let alloc = bumpalo::Bump::new();
         let decl_getter_ptr = env.decl_getter as *const ();
         let hhvm_provider_ptr = env.decl_provider as *const ();
@@ -516,7 +516,7 @@ fn hackc_compile_hhas_from_text_cpp_ffi(
 pub fn hackc_hhas_to_string_cpp_ffi(
     env: &compile_ffi::NativeEnv,
     prog: &HhasProgramWrapper,
-) -> Result<String, String> {
+) -> Result<Vec<u8>, String> {
     let native_env: hhbc_by_ref_compile::NativeEnv<&str> =
         compile_ffi::NativeEnv::to_compile_env(env).unwrap();
     let env = hhbc_by_ref_compile::Env::<&str> {
@@ -525,7 +525,7 @@ pub fn hackc_hhas_to_string_cpp_ffi(
         config_list: vec![],
         flags: native_env.flags,
     };
-    let mut output = String::new();
+    let mut output = Vec::new();
     hhbc_by_ref_compile::hhas_to_string(&env, Some(&native_env), &mut output, &prog.0)
         .map(|_| output)
         .map_err(|e| e.to_string())

@@ -50,7 +50,7 @@ fn process_one_file(writer: &SyncWrite, f: &PathBuf) -> Result<()> {
             verbosity: 0,
         };
         match crate::compile::process_single_file(&compile_opts, f.into(), content) {
-            Err(e) => write!(writer.lock().unwrap(), "{}: error ({})", f.display(), e)?,
+            Err(e) => writeln!(writer.lock().unwrap(), "{}: error ({})", f.display(), e)?,
             Ok((output, _profile)) => {
                 let mut hasher = std::collections::hash_map::DefaultHasher::new();
                 output.hash(&mut hasher);

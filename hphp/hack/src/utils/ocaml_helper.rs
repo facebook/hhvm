@@ -158,8 +158,16 @@ pub fn int_of_str_opt(s: impl AsRef<str>) -> Option<i64> {
 /// ported from supercaml/share/dotopam/default/lib/ocaml/bytes.ml
 /// github link: https://github.com/ocaml/ocaml/blob/4.09.1/stdlib/bytes.ml#L170-L208
 pub fn escaped(s: &str) -> Cow<'_, str> {
+    let es = escaped_bytes(s.as_bytes());
+    match es {
+        Cow::Borrowed(_) => s.into(),
+        Cow::Owned(es) => unsafe { String::from_utf8_unchecked(es) }.into(),
+    }
+}
+
+pub fn escaped_bytes(s: &[u8]) -> Cow<'_, [u8]> {
     let mut n: usize = 0;
-    for i in s.as_bytes() {
+    for i in s {
         n += match i {
             b'"' | b'\\' | b'\n' | b'\t' | b'\r' | 8 => 2,
             b' '..=b'~' => 1,
@@ -171,7 +179,7 @@ pub fn escaped(s: &str) -> Cow<'_, str> {
     } else {
         let mut es: Vec<u8> = Vec::with_capacity(n);
         n = 0;
-        for i in s.as_bytes() {
+        for i in s {
             match i {
                 b'"' | b'\\' => {
                     es.push(b'\\');
@@ -211,7 +219,7 @@ pub fn escaped(s: &str) -> Cow<'_, str> {
             }
             n += 1;
         }
-        unsafe { String::from_utf8_unchecked(es) }.into()
+        es.into()
     }
 }
 

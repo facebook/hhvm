@@ -3,15 +3,17 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::collections::BTreeMap;
-
-use crate::special_class_resolver::SpecialClassResolver;
-use crate::write::*;
+use crate::{
+    special_class_resolver::SpecialClassResolver,
+    write::{newline, Result, Write},
+};
 use hhbc_by_ref_env::emitter::Emitter;
 use oxidized::relative_path::RelativePath;
+use std::collections::BTreeMap;
 
 /// Indent is an abstraction of indentation. Configurable indentation
 /// and perf tweaking will be easier.
+#[derive(Clone)]
 struct Indent(usize);
 
 impl Indent {
@@ -34,6 +36,7 @@ impl Indent {
     }
 }
 
+#[derive(Clone)]
 pub struct Context<'a> {
     pub(crate) special_class_resolver: &'a dyn SpecialClassResolver,
     pub(crate) path: Option<&'a RelativePath>,

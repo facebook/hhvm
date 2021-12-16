@@ -11,7 +11,7 @@ use aast_parser::{
 };
 use anyhow::anyhow;
 use bitflags::bitflags;
-use bytecode_printer::{print_program, Context, Write};
+use bytecode_printer::{print_program, Context};
 use decl_provider::NoDeclProvider;
 use hhbc_by_ref_emit_program::{self as emit_program, emit_program, FromAstFlags};
 use hhbc_by_ref_env::emitter::Emitter;
@@ -281,14 +281,11 @@ pub struct Profile {
     pub printing_t: f64,
 }
 
-pub fn emit_fatal_program<W, S: AsRef<str>>(
+pub fn emit_fatal_program<S: AsRef<str>>(
     env: &Env<S>,
-    writer: &mut W,
+    writer: &mut dyn std::io::Write,
     err_msg: &str,
-) -> anyhow::Result<()>
-where
-    W: Write,
-{
+) -> anyhow::Result<()> {
     let is_systemlib = env.flags.contains(EnvFlags::IS_SYSTEMLIB);
     let opts =
         Options::from_configs(&env.config_jsons, &env.config_list).map_err(anyhow::Error::msg)?;
@@ -315,18 +312,15 @@ where
     Ok(())
 }
 
-pub fn from_text<'arena, 'decl, W, S: AsRef<str>>(
+pub fn from_text<'arena, 'decl, S: AsRef<str>>(
     alloc: &'arena bumpalo::Bump,
     env: &Env<S>,
     stack_limit: &StackLimit,
-    writer: &mut W,
+    writer: &mut dyn std::io::Write,
     source_text: SourceText<'_>,
     native_env: Option<&NativeEnv<S>>,
     decl_provider: unified_decl_provider::DeclProvider<'decl>,
-) -> anyhow::Result<Option<Profile>>
-where
-    W: Write,
-{
+) -> anyhow::Result<Option<Profile>> {
     let mut emitter = create_emitter(env, native_env, decl_provider)?;
     let (program, profile) =
         emit_prog_from_text(alloc, &mut emitter, env, stack_limit, source_text)?;
@@ -393,7 +387,7 @@ pub fn hhas_from_text<'arena, 'decl, S: AsRef<str>>(
     emit_prog_from_text(alloc, &mut emitter, env, stack_limit, source_text)
 }
 
-pub fn hhas_to_string<W: std::fmt::Write, S: AsRef<str>>(
+pub fn hhas_to_string<W: std::io::Write, S: AsRef<str>>(
     env: &Env<S>,
     native_env: Option<&NativeEnv<S>>,
     writer: &mut W,

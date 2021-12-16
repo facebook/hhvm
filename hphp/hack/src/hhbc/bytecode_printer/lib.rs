@@ -9,5 +9,8 @@ mod special_class_resolver;
 mod write;
 
 pub use context::Context;
-pub use print::{expr_to_string_lossy, print_expr, print_program, ExprEnv};
-pub use write::{Error, IoWrite, Write};
+pub use print::{
+    expr_to_string_lossy, external_print_expr as print_expr,
+    external_print_program as print_program, ExprEnv,
+};
+pub use write::{Error, Write};

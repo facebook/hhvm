@@ -199,8 +199,8 @@ CompilerResult hackc_compile(
     ITRACE(2, "AssembleHhasProgram: Found {} functions. \n", num_elems);
   }
 
-  auto const hhas =
-    std::string(hackc_compile_from_text_cpp_ffi(native_env, code));
+  ::rust::Vec<std::uint8_t> hhas_vec = hackc_compile_from_text_cpp_ffi(native_env, code);
+  auto const hhas = std::string(hhas_vec.begin(), hhas_vec.end());
 
   return assemble_string_handle_errors(code,
                                        hhas,

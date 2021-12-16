@@ -3,21 +3,17 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ffi::{Maybe, Maybe::*, Pair, Quadruple, Slice, Str, Triple};
-
-use indexmap::IndexSet;
-use itertools::Itertools;
-
 use crate::{
     context::Context,
     not_impl,
     write::{
-        angle, braces, concat, concat_by, concat_str, concat_str_by, newline, option, option_or,
-        paren, quotes, square, triple_quotes, wrap_by, wrap_by_, Error, Result, Write,
+        self, angle, braces, concat, concat_by, concat_str, concat_str_by, newline, option,
+        option_or, paren, quotes, square, triple_quotes, wrap_by, wrap_by_, Error, Result, Write,
     },
 };
 use core_utils_rust::add_ns;
 use escaper::{escape, escape_by, is_lit_printable};
+use ffi::{Maybe, Maybe::*, Pair, Quadruple, Slice, Str, Triple};
 use hhbc_by_ref_emit_type_hint as emit_type_hint;
 use hhbc_by_ref_hhas_adata::{HhasAdata, DICT_PREFIX, KEYSET_PREFIX, VEC_PREFIX};
 use hhbc_by_ref_hhas_attribute::{self as hhas_attribute, HhasAttribute};
@@ -47,6 +43,8 @@ use hhbc_by_ref_iterator::Id as IterId;
 use hhbc_by_ref_label::Label;
 use hhbc_by_ref_local::Local;
 use hhbc_by_ref_runtime::TypedValue;
+use indexmap::IndexSet;
+use itertools::Itertools;
 use lazy_static::lazy_static;
 use naming_special_names_rust::classes;
 use ocaml_helper::escaped;
@@ -56,18 +54,13 @@ use oxidized::{
     local_id,
 };
 use regex::Regex;
-
 use std::{borrow::Cow, io::Write as _, path::Path, write};
 
 pub struct ExprEnv<'arena, 'e> {
     pub codegen_env: Option<&'e HhasBodyEnv<'arena>>,
 }
 
-pub fn print_program<W: Write>(
-    ctx: &mut Context<'_>,
-    w: &mut W,
-    prog: &HhasProgram<'_>,
-) -> Result<()> {
+fn print_program<W: Write>(ctx: &mut Context<'_>, w: &mut W, prog: &HhasProgram<'_>) -> Result<()> {
     match ctx.path {
         Some(p) => {
             let abs = p.to_absolute();
@@ -2489,7 +2482,7 @@ fn print_expr_to_string<W: Write>(
     Ok(buf)
 }
 
-pub fn print_expr<W: Write>(
+fn print_expr<W: Write>(
     ctx: &mut Context<'_>,
     w: &mut W,
     env: &ExprEnv<'_, '_>,
@@ -3466,4 +3459,29 @@ pub fn expr_to_string_lossy(mut ctx: Context<'_>, expr: &ast::Expr) -> String {
     let bs = escaper::unescape_double(&escaped_src).expect("Unescaping failed");
     let s = String::from_utf8_lossy(&bs);
     s.to_string()
+}
+
+pub fn external_print_program(
+    ctx: &Context<'_>,
+    w: &mut dyn std::io::Write,
+    prog: &HhasProgram<'_>,
+) -> std::result::Result<(), Error> {
+    let mut ctx = ctx.clone();
+    let mut w2 = write::IoWrite(w);
+    print_program(&mut ctx, &mut w2, prog)?;
+    w2.flush()?;
+    Ok(())
+}
+
+pub fn external_print_expr(
+    ctx: &Context<'_>,
+    w: &mut dyn std::io::Write,
+    env: &ExprEnv<'_, '_>,
+    expr: &ast::Expr,
+) -> std::result::Result<(), Error> {
+    let mut ctx = ctx.clone();
+    let mut w2 = write::IoWrite(w);
+    print_expr(&mut ctx, &mut w2, env, expr)?;
+    w2.flush()?;
+    Ok(())
 }

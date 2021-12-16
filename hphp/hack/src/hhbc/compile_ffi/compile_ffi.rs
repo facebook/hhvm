@@ -51,7 +51,7 @@ extern "C" fn compile_from_text_ffi(
                     unsafe { RustOutputConfig::from_ocaml(rust_output_config).unwrap() };
                 let env =
                     unsafe { hhbc_by_ref_compile::Env::<OcamlStr<'_>>::from_ocaml(env).unwrap() };
-                let mut w = String::new();
+                let mut w = Vec::new();
                 let alloc = bumpalo::Bump::new();
                 match hhbc_by_ref_compile::from_text(
                     &alloc,
@@ -83,7 +83,7 @@ extern "C" fn compile_from_text_ffi(
             let output_config =
                 unsafe { RustOutputConfig::from_ocaml(rust_output_config).unwrap() };
 
-            let mut w = String::new();
+            let mut w = Vec::new();
             let env = unsafe { hhbc_by_ref_compile::Env::<OcamlStr<'_>>::from_ocaml(env).unwrap() };
             hhbc_by_ref_compile::emit_fatal_program(&env, &mut w, panic_msg)
                 .and_then(|_| print_output(w, output_config, &env.filepath, None))
@@ -94,7 +94,7 @@ extern "C" fn compile_from_text_ffi(
 }
 
 fn print_output(
-    bytecode: String,
+    bytecode: Vec<u8>,
     config: RustOutputConfig,
     file: &RelativePath,
     // TODO:(shiqicao) change following tuple to Profile after hhbc remove
@@ -124,11 +124,11 @@ fn print_output(
                 .ok_or_else(|| anyhow!("invalid char in file path"))?,
         );
         insert(&mut obj, "type", "success");
-        insert(&mut obj, "bytes", bytecode.as_bytes().len());
+        insert(&mut obj, "bytes", bytecode.len());
         write!(writer, "{}\n", Value::Object(obj))?;
     }
 
-    writer.write_all(bytecode.as_bytes())?;
+    writer.write_all(&bytecode)?;
     writer.flush()?;
     Ok(())
 }

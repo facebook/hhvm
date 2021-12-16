@@ -72,19 +72,15 @@ impl<W: fmt::Write> Write for W {
     }
 }
 
-pub struct IoWrite(Box<dyn io::Write + Send>);
+pub(crate) struct IoWrite<'a>(pub(crate) &'a mut dyn io::Write);
 
-impl IoWrite {
-    pub fn new(w: impl io::Write + 'static + Send) -> Self {
-        Self(Box::new(w))
-    }
-
-    pub fn flush(&mut self) -> std::result::Result<(), io::Error> {
+impl IoWrite<'_> {
+    pub(crate) fn flush(&mut self) -> std::result::Result<(), io::Error> {
         self.0.flush()
     }
 }
 
-impl Write for IoWrite {
+impl Write for IoWrite<'_> {
     fn write(&mut self, s: impl AsRef<str>) -> Result<()> {
         self.0.write_all(s.as_ref().as_bytes())?;
         Ok(())

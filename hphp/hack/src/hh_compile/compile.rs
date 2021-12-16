@@ -118,9 +118,7 @@ pub fn run(opts: Opts) -> anyhow::Result<()> {
                         f.display(),
                         e
                     )?,
-                    Ok((output, _profile)) => {
-                        writer.lock().unwrap().write_all(output.as_bytes())?
-                    }
+                    Ok((output, _profile)) => writer.lock().unwrap().write_all(&output)?,
                 }
             }
             Ok(())
@@ -145,14 +143,14 @@ fn process_single_file_impl(
     filepath: &Path,
     content: &[u8],
     stack_limit: &StackLimit,
-) -> anyhow::Result<(String, Option<Profile>)> {
+) -> anyhow::Result<(Vec<u8>, Option<Profile>)> {
     if opts.verbosity > 1 {
         eprintln!("processing file: {}", filepath.display());
     }
 
     let rel_path = RelativePath::make(relative_path::Prefix::Dummy, filepath.to_owned());
     let source_text = SourceText::make(RcOc::new(rel_path.clone()), content);
-    let mut output = String::new();
+    let mut output = Vec::new();
     let mut flags = hhbc_by_ref_compile::EnvFlags::empty();
     flags.set(
         hhbc_by_ref_compile::EnvFlags::DISABLE_TOPLEVEL_ELABORATION,
@@ -185,7 +183,7 @@ fn process_single_file_with_retry(
     opts: &SingleFileOpts,
     filepath: PathBuf,
     content: Vec<u8>,
-) -> anyhow::Result<(String, Option<Profile>)> {
+) -> anyhow::Result<(Vec<u8>, Option<Profile>)> {
     let ctx = &Arc::new((opts.clone(), filepath, content));
     let retryable = |stack_limit: &StackLimit, _nonmain_stack_size: Option<usize>| {
         let new_ctx = Arc::clone(ctx);
@@ -211,7 +209,7 @@ pub(crate) fn process_single_file(
     opts: &SingleFileOpts,
     filepath: PathBuf,
     content: Vec<u8>,
-) -> anyhow::Result<(String, Option<Profile>)> {
+) -> anyhow::Result<(Vec<u8>, Option<Profile>)> {
     match std::panic::catch_unwind(|| process_single_file_with_retry(opts, filepath, content)) {
         Ok(r) => r,
         Err(panic) => match panic.downcast::<String>() {

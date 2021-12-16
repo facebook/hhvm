@@ -261,6 +261,17 @@ let keyword_info (khi : SymbolOccurrence.keyword_with_hover_docs) : string =
     "A `final` class cannot be extended by other classes.\n\nTo restrict which classes can extend this, use `<<__Sealed()>>`."
   | SymbolOccurrence.FinalOnMethod ->
     "A `final` method cannot be overridden in child classes."
+  | SymbolOccurrence.ExtendsOnClass ->
+    "Extending a class allows your class to inherit methods from another class."
+    ^ "\n\nInheritance allows your class to:"
+    ^ "\n * Reuse methods from the parent class"
+    ^ "\n * Call `protected` methods on the parent class"
+    ^ "\n * Be passed as a parameter whenever an instance of the parent class is expected"
+    ^ "\n\nHack does not support multiple inheritance on classes. If you need to share functionality between"
+    ^ " unrelated classes, use traits."
+  | SymbolOccurrence.ExtendsOnInterface ->
+    "Extending an interface allows your interface to include methods from other interfaces."
+    ^ "\n\nAn interface can extend multiple interfaces."
 
 let make_hover_info ctx env_and_ty entry occurrence def_opt =
   SymbolOccurrence.(

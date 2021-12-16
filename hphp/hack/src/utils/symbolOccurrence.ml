@@ -27,6 +27,8 @@ type receiver_class =
 type keyword_with_hover_docs =
   | FinalOnClass
   | FinalOnMethod
+  | ExtendsOnClass
+  | ExtendsOnInterface
 [@@deriving ord, eq]
 
 type kind =

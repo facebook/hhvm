@@ -1,0 +1,4 @@
+extends
+Extending an interface allows your interface to include methods from other interfaces.
+
+An interface can extend multiple interfaces.

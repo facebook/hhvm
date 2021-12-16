@@ -1,0 +1,9 @@
+extends
+Extending a class allows your class to inherit methods from another class.
+
+Inheritance allows your class to:
+ * Reuse methods from the parent class
+ * Call `protected` methods on the parent class
+ * Be passed as a parameter whenever an instance of the parent class is expected
+
+Hack does not support multiple inheritance on classes. If you need to share functionality between unrelated classes, use traits.

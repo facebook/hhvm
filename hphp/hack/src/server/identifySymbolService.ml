@@ -570,8 +570,13 @@ let visitor =
       self#plus acc (super#on_user_attribute env ua)
   end
 
+(* Types of decls used in keyword extraction.*)
+type decl_kind =
+  | DKclass
+  | DKinterface
+
 type keyword_context =
-  | Decl
+  | Decl of decl_kind
   | Method
 
 (** Get keyword positions from the FFP for every keyword that has hover
@@ -590,27 +595,51 @@ let keywords ctx entry : Result_set.elt list =
       (offset + t.Token.width)
   in
 
-  let rec aux (ctx : keyword_context) acc s =
+  let rec aux ctx acc s =
     match s.syntax with
     | Script s -> aux ctx acc s.script_declarations
     | ClassishDeclaration cd ->
+      let decl_kind =
+        match cd.classish_keyword.syntax with
+        | Token t ->
+          (match t.Token.kind with
+          | Token.TokenKind.Class -> DKclass
+          | Token.TokenKind.Interface -> DKinterface
+          | _ -> DKclass)
+        | _ -> DKclass
+      in
+      let ctx = Some (Decl decl_kind) in
       let acc = aux ctx acc cd.classish_modifiers in
+      let acc = aux ctx acc cd.classish_extends_keyword in
       aux ctx acc cd.classish_body
     | ClassishBody cb -> aux ctx acc cb.classish_body_elements
     | MethodishDeclaration md ->
-      aux Method acc md.methodish_function_decl_header
+      aux (Some Method) acc md.methodish_function_decl_header
     | FunctionDeclarationHeader fdh -> aux ctx acc fdh.function_modifiers
     | SyntaxList sl -> List.fold sl ~init:acc ~f:(aux ctx)
     | Token t ->
       (match t.Token.kind with
+      | Token.TokenKind.Extends ->
+        {
+          name = "extends";
+          type_ =
+            Keyword
+              (match ctx with
+              | Some (Decl DKclass) -> ExtendsOnClass
+              | Some (Decl DKinterface) -> ExtendsOnInterface
+              | _ -> ExtendsOnClass);
+          is_declaration = false;
+          pos = token_pos t;
+        }
+        :: acc
       | Token.TokenKind.Final ->
         {
           name = "final";
           type_ =
             Keyword
               (match ctx with
-              | Decl -> FinalOnClass
-              | Method -> FinalOnMethod);
+              | Some Method -> FinalOnMethod
+              | _ -> FinalOnClass);
           is_declaration = false;
           pos = token_pos t;
         }
@@ -619,7 +648,7 @@ let keywords ctx entry : Result_set.elt list =
     | _ -> acc
   in
 
-  aux Decl [] tree
+  aux None [] tree
 
 let all_symbols ctx tast =
   Errors.ignore_ (fun () -> visitor#go ctx tast |> Result_set.elements)

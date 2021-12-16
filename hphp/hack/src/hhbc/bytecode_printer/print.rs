@@ -2912,7 +2912,7 @@ fn print_expr(
                         })
                     })?;
                     w.write_all(b" ==> ")?;
-                    print_block_(ctx, w, env, &fun_.body.fb_ast, None)
+                    print_block_(ctx, w, env, &fun_.body.fb_ast)
                 })
             } else {
                 Err(Error::fail(
@@ -3009,7 +3009,7 @@ fn print_efun(
         })?;
         w.write_all(b" ")?;
     }
-    print_block_(ctx, w, env, &f.body.fb_ast, None)
+    print_block_(ctx, w, env, &f.body.fb_ast)
 }
 
 fn print_block(
@@ -3017,13 +3017,12 @@ fn print_block(
     w: &mut dyn Write,
     env: &ExprEnv<'_, '_>,
     block: &[ast::Stmt],
-    ident: Option<&str>,
 ) -> Result<()> {
     match &block[..] {
         [] | [ast::Stmt(_, ast::Stmt_::Noop)] => Ok(()),
-        [ast::Stmt(_, ast::Stmt_::Block(b))] if b.len() == 1 => print_block_(ctx, w, env, b, ident),
-        [_, _, ..] => print_block_(ctx, w, env, block, ident),
-        [stmt] => print_statement(ctx, w, env, stmt, None),
+        [ast::Stmt(_, ast::Stmt_::Block(b))] if b.len() == 1 => print_block_(ctx, w, env, b),
+        [_, _, ..] => print_block_(ctx, w, env, block),
+        [stmt] => print_statement(ctx, w, env, stmt),
     }
 }
 
@@ -3032,14 +3031,15 @@ fn print_block_(
     w: &mut dyn Write,
     env: &ExprEnv<'_, '_>,
     block: &[ast::Stmt],
-    ident: Option<&str>,
 ) -> Result<()> {
     wrap_by_(w, "{\\n", "}\\n", |w| {
         concat(w, block, |w, stmt| {
-            option(w, ident, |w, i: &str| w.write_all(i.as_bytes()))?;
-            print_statement(ctx, w, env, stmt, Some("  "))
-        })?;
-        option(w, ident, |w, i: &str| w.write_all(i.as_bytes()))
+            if !matches!(stmt.1, ast::Stmt_::Noop) {
+                w.write_all(b"  ")?;
+                print_statement(ctx, w, env, stmt)?;
+            }
+            Ok(())
+        })
     })
 }
 
@@ -3048,63 +3048,44 @@ fn print_statement(
     w: &mut dyn Write,
     env: &ExprEnv<'_, '_>,
     stmt: &ast::Stmt,
-    ident: Option<&str>,
 ) -> Result<()> {
     use ast::Stmt_ as S_;
     match &stmt.1 {
-        S_::Return(expr) => {
-            option(w, ident, |w, i: &str| w.write_all(i.as_bytes()))?;
-            wrap_by_(w, "return", ";\\n", |w| {
-                option(w, &**expr, |w, e| {
-                    w.write_all(b" ")?;
-                    print_expr(ctx, w, env, e)
-                })
+        S_::Return(expr) => wrap_by_(w, "return", ";\\n", |w| {
+            option(w, &**expr, |w, e| {
+                w.write_all(b" ")?;
+                print_expr(ctx, w, env, e)
             })
-        }
+        }),
         S_::Expr(expr) => {
-            option(w, ident, |w, i: &str| w.write_all(i.as_bytes()))?;
             print_expr(ctx, w, env, &**expr)?;
             w.write_all(b";\\n")
         }
-        S_::Throw(expr) => {
-            option(w, ident, |w, i: &str| w.write_all(i.as_bytes()))?;
-            wrap_by_(w, "throw ", ";\\n", |w| print_expr(ctx, w, env, &**expr))
-        }
-        S_::Break => {
-            option(w, ident, |w, i: &str| w.write_all(i.as_bytes()))?;
-            w.write_all(b"break;\\n")
-        }
-        S_::Continue => {
-            option(w, ident, |w, i: &str| w.write_all(i.as_bytes()))?;
-            w.write_all(b"continue;\\n")
-        }
+        S_::Throw(expr) => wrap_by_(w, "throw ", ";\\n", |w| print_expr(ctx, w, env, &**expr)),
+        S_::Break => w.write_all(b"break;\\n"),
+        S_::Continue => w.write_all(b"continue;\\n"),
         S_::While(x) => {
             let (cond, block) = &**x;
-            option(w, ident, |w, i: &str| w.write_all(i.as_bytes()))?;
             wrap_by_(w, "while (", ") ", |w| print_expr(ctx, w, env, cond))?;
-            print_block(ctx, w, env, block.as_ref(), ident)
+            print_block(ctx, w, env, block.as_ref())
         }
         S_::If(x) => {
             let (cond, if_block, else_block) = &**x;
-            option(w, ident, |w, i: &str| w.write_all(i.as_bytes()))?;
             wrap_by_(w, "if (", ") ", |w| print_expr(ctx, w, env, cond))?;
-            print_block(ctx, w, env, if_block, ident)?;
+            print_block(ctx, w, env, if_block)?;
             let mut buf = Vec::new();
-            print_block(ctx, &mut buf, env, else_block, ident).map_err(
-                |e| match write::into_error(e) {
+            print_block(ctx, &mut buf, env, else_block).map_err(|e| {
+                match write::into_error(e) {
                     e @ Error::NotImpl(_) => e,
                     e => Error::Fail(format!("Failed: {}", e)),
-                },
-            )?;
+                }
+            })?;
             write_if!(!buf.is_empty(), w, " else ")?;
             write_if!(!buf.is_empty(), w, "{}", unsafe {
                 std::str::from_utf8_unchecked(&buf)
             })
         }
-        S_::Block(block) => {
-            option(w, ident, |w, i: &str| w.write_all(i.as_bytes()))?;
-            print_block_(ctx, w, env, block, ident)
-        }
+        S_::Block(block) => print_block_(ctx, w, env, block),
         S_::Noop => Ok(()),
         /* TODO(T29869930) */
         _ => w.write_all(b"TODO Unimplemented NYI: Default value printing"),

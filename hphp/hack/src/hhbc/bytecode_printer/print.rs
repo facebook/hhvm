@@ -8,7 +8,7 @@ use crate::{
     not_impl,
     write::{
         self, angle, braces, concat, concat_by, concat_str, concat_str_by, newline, option,
-        option_or, paren, quotes, square, triple_quotes, wrap_by, wrap_by_, Error, Result, Write,
+        option_or, paren, quotes, square, triple_quotes, wrap_by, wrap_by_, Error,
     },
 };
 use core_utils_rust::add_ns;
@@ -54,7 +54,12 @@ use oxidized::{
     local_id,
 };
 use regex::Regex;
-use std::{borrow::Cow, io::Write as _, path::Path, write};
+use std::{
+    borrow::Cow,
+    io::{self, Result, Write},
+    path::Path,
+    write,
+};
 
 macro_rules! write_if {
     ($pred:expr, $($rest:tt)*) => {
@@ -70,7 +75,10 @@ fn print_program<W: Write>(ctx: &mut Context<'_>, w: &mut W, prog: &HhasProgram<
     match ctx.path {
         Some(p) => {
             let abs = p.to_absolute();
-            let p = escape(abs.to_str().ok_or(Error::InvalidUTF8)?);
+            let p = escape(
+                abs.to_str()
+                    .ok_or(<io::Error as From<Error>>::from(Error::InvalidUTF8))?,
+            );
 
             concat_str_by(w, " ", ["#", p.as_ref(), "starts here"])?;
 
@@ -291,13 +299,16 @@ fn handle_not_impl<F>(f: F) -> Result<()>
 where
     F: FnOnce() -> Result<()>,
 {
-    f().or_else(|e| match e {
-        Error::NotImpl(msg) => {
-            println!("#### NotImpl: {}", msg);
-            eprintln!("NotImpl: {}", msg);
-            Ok(())
+    f().or_else(|e| {
+        match write::get_embedded_error(&e) {
+            Some(Error::NotImpl(msg)) => {
+                println!("#### NotImpl: {}", msg);
+                eprintln!("NotImpl: {}", msg);
+                return Ok(());
+            }
+            _ => {}
         }
-        _ => Err(e),
+        Err(e)
     })
 }
 
@@ -1138,7 +1149,9 @@ fn print_instructions<W: Write>(
     use InstructTry::*;
     for instr in instr_seq.compact_iter() {
         match instr {
-            ISpecialFlow(_) => return Err(Error::fail("Cannot break/continue 1 level")),
+            ISpecialFlow(_) => {
+                return Err(Error::fail("Cannot break/continue 1 level").into());
+            }
             IComment(_) => {
                 // indetation = 0
                 newline(w)?;
@@ -1392,7 +1405,7 @@ fn print_instr<W: Write>(w: &mut W, instr: &Instruct<'_>) -> Result<()> {
         IAsync(a) => print_async(w, a),
         IGenerator(gen) => print_gen_creation_execution(w, gen),
         IIncludeEvalDefine(ed) => print_include_eval_define(w, ed),
-        _ => Err(Error::fail("invalid instruction")),
+        _ => Err(Error::fail("invalid instruction").into()),
     }
 }
 
@@ -1564,7 +1577,7 @@ fn print_async<W: Write>(w: &mut W, a: &AsyncFunctions<'_>) -> Result<()> {
             write!(w, "AwaitAll L:{}+{}", id, count)
         }
         A::AwaitAll(Nothing) => w.write_all(b"AwaitAll L:0+0"),
-        _ => Err(Error::fail("AwaitAll needs an unnamed local")),
+        _ => Err(Error::fail("AwaitAll needs an unnamed local").into()),
     }
 }
 
@@ -1892,13 +1905,13 @@ fn print_misc<W: Write>(w: &mut W, misc: &InstructMisc<'_>) -> Result<()> {
             print_label(w, label)?;
             w.write_all(b" L:0+0")
         }
-        M::MemoGet(_, _) => Err(Error::fail("MemoGet needs an unnamed local")),
+        M::MemoGet(_, _) => Err(Error::fail("MemoGet needs an unnamed local").into()),
 
         M::MemoSet(Just(Pair(Local::Unnamed(first), local_count))) => {
             write!(w, "MemoSet L:{}+{}", first, local_count)
         }
         M::MemoSet(Nothing) => w.write_all(b"MemoSet L:0+0"),
-        M::MemoSet(_) => Err(Error::fail("MemoSet needs an unnamed local")),
+        M::MemoSet(_) => Err(Error::fail("MemoSet needs an unnamed local").into()),
 
         M::MemoGetEager(label1, label2, Just(Pair(Local::Unnamed(first), local_count))) => {
             w.write_all(b"MemoGetEager ")?;
@@ -1914,13 +1927,13 @@ fn print_misc<W: Write>(w: &mut W, misc: &InstructMisc<'_>) -> Result<()> {
             print_label(w, label2)?;
             w.write_all(b" L:0+0")
         }
-        M::MemoGetEager(_, _, _) => Err(Error::fail("MemoGetEager needs an unnamed local")),
+        M::MemoGetEager(_, _, _) => Err(Error::fail("MemoGetEager needs an unnamed local").into()),
 
         M::MemoSetEager(Just(Pair(Local::Unnamed(first), local_count))) => {
             write!(w, "MemoSetEager L:{}+{}", first, local_count)
         }
         M::MemoSetEager(Nothing) => w.write_all(b"MemoSetEager L:0+0"),
-        M::MemoSetEager(_) => Err(Error::fail("MemoSetEager needs an unnamed local")),
+        M::MemoSetEager(_) => Err(Error::fail("MemoSetEager needs an unnamed local").into()),
 
         M::OODeclExists(k) => concat_str_by(
             w,
@@ -1991,7 +2004,7 @@ fn print_control_flow<W: Write>(w: &mut W, cf: &InstructControlFlow<'_>) -> Resu
         CF::Throw => w.write_all(b"Throw"),
         CF::Switch(kind, base, labels) => print_switch(w, kind, base, labels.as_ref()),
         CF::SSwitch(cases) => match cases.as_ref() {
-            [] => Err(Error::fail("sswitch should have at least one case")),
+            [] => Err(Error::fail("sswitch should have at least one case").into()),
             [rest @ .., Pair(_, lastlabel)] => {
                 w.write_all(b"SSwitch ")?;
                 angle(w, |w| {
@@ -2100,7 +2113,7 @@ fn print_lit_const<W: Write>(w: &mut W, lit: &InstructLitConst<'_>) -> Result<()
             print_collection_type(w, ct)
         }
         LC::NullUninit => w.write_all(b"NullUninit"),
-        LC::TypedValue(_) => Err(Error::fail("print_lit_const: TypedValue")),
+        LC::TypedValue(_) => Err(Error::fail("print_lit_const: TypedValue").into()),
     }
 }
 
@@ -2385,9 +2398,7 @@ fn print_uop<W: Write>(w: &mut W, op: ast::Uop) -> Result<()> {
         U::Udecr => b"--",
         U::Usilence => b"@",
         U::Upincr | U::Updecr => {
-            return Err(Error::fail(
-                "string_of_uop - should have been captures earlier",
-            ));
+            return Err(Error::fail("string_of_uop - should have been captures earlier").into());
         }
     })
 }
@@ -2459,7 +2470,7 @@ fn print_shape_field_name<W: Write>(
 fn print_expr_int<W: Write>(w: &mut W, i: &str) -> Result<()> {
     match integer::to_decimal(i) {
         Ok(s) => w.write_all(s.as_bytes()),
-        Err(_) => Err(Error::fail("ParseIntError")),
+        Err(_) => Err(Error::fail("ParseIntError").into()),
     }
 }
 
@@ -2494,9 +2505,9 @@ fn print_expr_to_string<W: Write>(
     expr: &ast::Expr,
 ) -> Result<String> {
     let mut buf = Vec::new();
-    print_expr(ctx, &mut write::IoWrite(&mut buf), env, expr).map_err(|e| match e {
+    print_expr(ctx, &mut buf, env, expr).map_err(|e| match write::into_error(e) {
         Error::NotImpl(m) => Error::NotImpl(m),
-        _ => Error::Fail(format!("Failed: {}", e)),
+        e => Error::Fail(format!("Failed: {}", e)),
     })?;
     Ok(unsafe { String::from_utf8_unchecked(buf) })
 }
@@ -2653,10 +2664,10 @@ fn print_expr<W: Write>(
                         })
                     })
                 }
-                _ => Err(Error::fail(format!(
-                    "Default value for an unknow collection - {}",
-                    name
-                ))),
+                _ => Err(
+                    Error::fail(format!("Default value for an unknow collection - {}", name))
+                        .into(),
+                ),
             }
         }
         E_::Shape(fl) => print_expr_darray(ctx, w, env, print_shape_field_name, fl),
@@ -2682,7 +2693,7 @@ fn print_expr<W: Write>(
             paren(w, |w| {
                 concat_by(w, ", ", &es, |w, (pk, e)| match pk {
                     ParamKind::Pnormal => print_expr(ctx, w, env, e),
-                    ParamKind::Pinout(_) => Err(Error::fail("illegal default value")),
+                    ParamKind::Pinout(_) => Err(Error::fail("illegal default value").into()),
                 })?;
                 match unpacked_element {
                     None => Ok(()),
@@ -2760,7 +2771,7 @@ fn print_expr<W: Write>(
                     )?,
                     _ => print_expr(ctx, w, env, e)?,
                 },
-                _ => return Err(Error::fail("TODO Unimplemented unexpected non-CIexpr")),
+                _ => return Err(Error::fail("TODO Unimplemented unexpected non-CIexpr").into()),
             }
             w.write_all(b"::")?;
             match &cg.1 {
@@ -2789,7 +2800,7 @@ fn print_expr<W: Write>(
                     Ok,
                 )
             } else {
-                Err(Error::fail("TODO: Only expected CIexpr in class_const"))
+                Err(Error::fail("TODO: Only expected CIexpr in class_const").into())
             }
         }
         E_::Unop(u) => match u.0 {
@@ -2882,9 +2893,9 @@ fn print_expr<W: Write>(
             w.write_all(b" ")?;
             print_expr(ctx, w, env, &i.1)
         }
-        E_::Xml(_) => Err(Error::fail(
-            "expected Xml to be converted to New during rewriting",
-        )),
+        E_::Xml(_) => {
+            Err(Error::fail("expected Xml to be converted to New during rewriting").into())
+        }
         E_::Efun(f) => print_efun(ctx, w, env, &f.0, &f.1),
         E_::FunctionPointer(fp) => {
             let (fp_id, targs) = &**fp;
@@ -2910,7 +2921,8 @@ fn print_expr<W: Write>(
                         _ => {
                             return Err(Error::fail(
                                 "TODO Unimplemented unexpected non-CIexpr in function pointer",
-                            ));
+                            )
+                            .into());
                         }
                     }
                     w.write_all(b"::")?;
@@ -2937,7 +2949,8 @@ fn print_expr<W: Write>(
             } else {
                 Err(Error::fail(
                     "expected Lfun to be converted to Efun during closure conversion print_expr",
-                ))
+                )
+                .into())
             }
         }
         E_::ETSplice(splice) => {
@@ -2945,10 +2958,7 @@ fn print_expr<W: Write>(
             print_expr(ctx, w, env, splice)?;
             w.write_all(b"}")
         }
-        _ => Err(Error::fail(format!(
-            "TODO Unimplemented: Cannot print: {:?}",
-            expr
-        ))),
+        _ => Err(Error::fail(format!("TODO Unimplemented: Cannot print: {:?}", expr)).into()),
     }
 }
 
@@ -2961,7 +2971,7 @@ fn print_xml<W: Write>(
 ) -> Result<()> {
     use ast::{Expr as E, Expr_ as E_};
 
-    fn syntax_error<W: Write>(_: &W) -> crate::write::Error {
+    fn syntax_error() -> Error {
         Error::NotImpl(String::from("print_xml: unexpected syntax"))
     }
     fn print_xhp_attr<W: Write>(
@@ -2979,18 +2989,18 @@ fn print_xml<W: Write>(
                 |_, w, _, k| print_expr_string(w, k.as_slice()),
                 e,
             ),
-            _ => Err(syntax_error(w)),
+            _ => Err(syntax_error().into()),
         }
     }
 
     let (attrs, children) = if es.len() < 2 {
-        Err(syntax_error(w))
+        return Err(syntax_error().into());
     } else {
         match (&es[0], &es[1]) {
-            (E(_, _, E_::Shape(attrs)), E(_, _, E_::Varray(children))) => Ok((attrs, &children.1)),
-            _ => Err(syntax_error(w)),
+            (E(_, _, E_::Shape(attrs)), E(_, _, E_::Varray(children))) => (attrs, &children.1),
+            _ => return Err(syntax_error().into()),
         }
-    }?;
+    };
     let env = ExprEnv {
         codegen_env: env.codegen_env,
     };
@@ -3112,10 +3122,10 @@ fn print_statement<W: Write>(
             wrap_by_(w, "if (", ") ", |w| print_expr(ctx, w, env, cond))?;
             print_block(ctx, w, env, if_block, ident)?;
             let mut buf = Vec::new();
-            print_block(ctx, &mut write::IoWrite(&mut buf), env, else_block, ident).map_err(
-                |e| match e {
-                    Error::NotImpl(m) => Error::NotImpl(m),
-                    _ => Error::Fail(format!("Failed: {}", e)),
+            print_block(ctx, &mut buf, env, else_block, ident).map_err(
+                |e| match write::into_error(e) {
+                    e @ Error::NotImpl(_) => e,
+                    e => Error::Fail(format!("Failed: {}", e)),
                 },
             )?;
             write_if!(!buf.is_empty(), w, " else ")?;
@@ -3194,7 +3204,7 @@ fn print_bop<W: Write>(w: &mut W, bop: &ast_defs::Bop) -> Result<()> {
 fn print_hint<W: Write>(w: &mut W, ns: bool, hint: &ast::Hint) -> Result<()> {
     let alloc = bumpalo::Bump::new();
     let h = emit_type_hint::fmt_hint(&alloc, &[], false, hint).map_err(|e| match e {
-        Unrecoverable(s) => Error::fail(s),
+        Unrecoverable(s) => Error::fail(s).into(),
         _ => Error::fail("Error printing hint"),
     })?;
     if ns {
@@ -3490,8 +3500,7 @@ pub fn expr_to_string_lossy(mut ctx: Context<'_>, expr: &ast::Expr) -> String {
 
     let env = ExprEnv { codegen_env: None };
     let mut escaped_src = Vec::new();
-    print_expr(&mut ctx, &mut write::IoWrite(&mut escaped_src), &env, expr)
-        .expect("Printing failed");
+    print_expr(&mut ctx, &mut escaped_src, &env, expr).expect("Printing failed");
 
     let bs = escaper::unescape_double(unsafe { std::str::from_utf8_unchecked(&escaped_src) })
         .expect("Unescaping failed");
@@ -3505,9 +3514,9 @@ pub fn external_print_program(
     prog: &HhasProgram<'_>,
 ) -> std::result::Result<(), Error> {
     let mut ctx = ctx.clone();
-    let mut w2 = write::IoWrite(w);
-    print_program(&mut ctx, &mut w2, prog)?;
-    w2.flush()?;
+    let mut w = Box::new(w);
+    print_program(&mut ctx, &mut w, prog).map_err(write::into_error)?;
+    w.flush().map_err(write::into_error)?;
     Ok(())
 }
 
@@ -3518,8 +3527,8 @@ pub fn external_print_expr(
     expr: &ast::Expr,
 ) -> std::result::Result<(), Error> {
     let mut ctx = ctx.clone();
-    let mut w2 = write::IoWrite(w);
-    print_expr(&mut ctx, &mut w2, env, expr)?;
-    w2.flush()?;
+    let mut w = Box::new(w);
+    print_expr(&mut ctx, &mut w, env, expr).map_err(write::into_error)?;
+    w.flush().map_err(write::into_error)?;
     Ok(())
 }

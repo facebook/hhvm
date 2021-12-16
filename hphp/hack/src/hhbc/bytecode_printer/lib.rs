@@ -13,4 +13,4 @@ pub use print::{
     expr_to_string_lossy, external_print_expr as print_expr,
     external_print_program as print_program, ExprEnv,
 };
-pub use write::{Error, Write};
+pub use write::Error;

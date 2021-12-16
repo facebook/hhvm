@@ -3,17 +3,15 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use std::{
-    fmt::{self, Arguments, Debug},
-    io,
+    fmt::Debug,
+    io::{self, Result, Write},
 };
 use thiserror::Error;
-
-pub type Result<T> = std::result::Result<T, Error>;
 
 #[macro_export]
 macro_rules! not_impl {
     () => {
-        Err(Error::NotImpl(format!("{}:{}", file!(), line!())))
+        Err(Error::NotImpl(format!("{}:{}", file!(), line!())).into())
     };
 }
 
@@ -39,40 +37,29 @@ impl Error {
     }
 }
 
-impl From<std::io::Error> for Error {
-    fn from(e: std::io::Error) -> Self {
-        Error::WriteError(e.into())
+pub(crate) fn get_embedded_error(e: &io::Error) -> Option<&Error> {
+    if e.kind() == io::ErrorKind::Other {
+        if let Some(e) = e.get_ref() {
+            if e.is::<Error>() {
+                let err = e.downcast_ref::<Error>();
+                return err;
+            }
+        }
     }
+    None
 }
 
-impl From<fmt::Error> for Error {
-    fn from(e: fmt::Error) -> Self {
-        Error::WriteError(e.into())
+pub(crate) fn into_error(e: io::Error) -> Error {
+    if e.kind() == io::ErrorKind::Other && e.get_ref().map_or(false, |e| e.is::<Error>()) {
+        let err: Error = *e.into_inner().unwrap().downcast::<Error>().unwrap();
+        return err;
     }
+    Error::WriteError(e.into())
 }
 
-pub trait Write {
-    fn write_all(&mut self, s: &[u8]) -> Result<()>;
-    fn write_fmt(&mut self, fmt: Arguments<'_>) -> Result<()>;
-}
-
-pub(crate) struct IoWrite<'a>(pub(crate) &'a mut dyn io::Write);
-
-impl IoWrite<'_> {
-    pub(crate) fn flush(&mut self) -> std::result::Result<(), io::Error> {
-        self.0.flush()
-    }
-}
-
-impl Write for IoWrite<'_> {
-    fn write_all(&mut self, s: &[u8]) -> Result<()> {
-        self.0.write_all(s)?;
-        Ok(())
-    }
-
-    fn write_fmt(&mut self, fmt: Arguments<'_>) -> Result<()> {
-        self.0.write_fmt(fmt)?;
-        Ok(())
+impl From<Error> for std::io::Error {
+    fn from(e: Error) -> Self {
+        io::Error::new(io::ErrorKind::Other, e)
     }
 }
 

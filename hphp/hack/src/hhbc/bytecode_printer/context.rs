@@ -3,13 +3,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{
-    special_class_resolver::SpecialClassResolver,
-    write::{newline, Result, Write},
-};
+use crate::{special_class_resolver::SpecialClassResolver, write::newline};
 use hhbc_by_ref_env::emitter::Emitter;
 use oxidized::relative_path::RelativePath;
 use std::collections::BTreeMap;
+use std::io::{Result, Write};
 
 /// Indent is an abstraction of indentation. Configurable indentation
 /// and perf tweaking will be easier.

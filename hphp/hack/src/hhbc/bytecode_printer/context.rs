@@ -27,7 +27,7 @@ impl Indent {
         self.0 -= 1;
     }
 
-    fn write<W: Write>(&self, w: &mut W) -> Result<()> {
+    fn write(&self, w: &mut dyn Write) -> Result<()> {
         for _ in 0..self.0 {
             w.write_all(b"  ")?;
         }
@@ -83,26 +83,24 @@ impl<'a> Context<'a> {
     }
 
     /// Insert a newline with indentation
-    pub(crate) fn newline<W: Write>(&self, w: &mut W) -> Result<()> {
+    pub(crate) fn newline(&self, w: &mut dyn Write) -> Result<()> {
         newline(w)?;
         self.indent.write(w)
     }
 
     /// Start a new indented block
-    pub(crate) fn block<W, F>(&self, w: &mut W, f: F) -> Result<()>
+    pub(crate) fn block<F>(&self, w: &mut dyn Write, f: F) -> Result<()>
     where
-        W: Write,
-        F: FnOnce(&Self, &mut W) -> Result<()>,
+        F: FnOnce(&Self, &mut dyn Write) -> Result<()>,
     {
         let mut ctx = self.clone();
         ctx.indent.inc();
         f(&ctx, w)
     }
 
-    pub(crate) fn unblock<W, F>(&self, w: &mut W, f: F) -> Result<()>
+    pub(crate) fn unblock<F>(&self, w: &mut dyn Write, f: F) -> Result<()>
     where
-        W: Write,
-        F: FnOnce(&Self, &mut W) -> Result<()>,
+        F: FnOnce(&Self, &mut dyn Write) -> Result<()>,
     {
         let mut ctx = self.clone();
         ctx.indent.dec();

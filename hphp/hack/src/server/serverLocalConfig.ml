@@ -574,15 +574,18 @@ type t = {
       in shared memory. True by default. Disabling this saves memory at the
       risk of increasing the rate of consistency errors. *)
   rollout_group: string option;
-      (** A string from hh.conf, written to HackEvengLogger telemetry. Before it got
+      (** A string from hh.conf, written to HackEventLogger telemetry. Before it got
        into here, [t], it was first used as a lookup in ServerLocalConfigKnobs.
        Intended meaning: what class of user is running hh_server, hence what experiments
        should they be subject to. *)
   machine_class: string option;
-      (** A string from hh.conf, written to HackEvengLogger telemetry. Before it got
+      (** A string from hh.conf, written to HackEventLogger telemetry. Before it got
        into here, [t], it was first used as a lookup in ServerLocalConfigKnobs.
        Intended meaning: what kind of hardware this machine has, hence what settings
        for workers should be used. *)
+  saved_state_manifold_api_key: string option;
+      (** A string from hh.conf. The API key is used for saved state downloads
+       when we call out to manifold *)
 }
 
 let default =
@@ -691,6 +694,7 @@ let default =
     enable_disk_heap = true;
     rollout_group = None;
     machine_class = None;
+    saved_state_manifold_api_key = None;
   }
 
 let path =
@@ -1372,6 +1376,9 @@ let load_ fn ~silent ~current_version overrides =
   in
   let rollout_group = string_opt "rollout_group" config in
   let machine_class = string_opt "machine_class" config in
+  let saved_state_manifold_api_key =
+    string_opt "saved_state_manifold_api_key" config
+  in
   {
     min_log_level;
     attempt_fix_credentials;
@@ -1474,6 +1481,7 @@ let load_ fn ~silent ~current_version overrides =
     enable_disk_heap;
     rollout_group;
     machine_class;
+    saved_state_manifold_api_key;
   }
 
 (** Loads the config from [path]. Uses JustKnobs and ExperimentsConfig to override.

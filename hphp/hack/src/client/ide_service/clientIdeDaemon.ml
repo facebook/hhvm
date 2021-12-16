@@ -263,8 +263,12 @@ let load_saved_state
               is_cached = true;
             }
         | None ->
+          let env : Saved_state_loader.env =
+            { Saved_state_loader.saved_state_manifold_api_key = None }
+          in
           let%lwt result =
             State_loader_lwt.load
+              ~env
               ~progress_callback:(fun _ -> ())
               ~watchman_opts:
                 Saved_state_loader.Watchman_options.{ root; sockname = None }

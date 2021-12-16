@@ -7,6 +7,7 @@
  *)
 
 let load
+    ~env:_
     ~progress_callback:_
     ~watchman_opts:_
     ~ignore_hh_version:_

@@ -56,9 +56,13 @@ let find_saved_symbolindex ~(ignore_hh_version : bool) :
     (string, string) Core_kernel.result =
   try
     let repo = Path.make (Relative_path.path_of_prefix Relative_path.Root) in
+    let env : Saved_state_loader.env =
+      { Saved_state_loader.saved_state_manifold_api_key = None }
+    in
     let res =
       Future.get_exn
         (State_loader_futures.load
+           ~env
            ~progress_callback:(fun _ -> ())
            ~watchman_opts:
              Saved_state_loader.Watchman_options.

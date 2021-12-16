@@ -14,6 +14,8 @@
   *
   *)
 
+type env = { saved_state_manifold_api_key: string option }
+
 type process_success = {
   command_line: string;
   stdout: string;

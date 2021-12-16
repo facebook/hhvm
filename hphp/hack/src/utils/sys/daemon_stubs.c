@@ -28,6 +28,11 @@ CAMLprim value caml_disable_ASLR(value args) {
   CAMLparam1(args);
 
 #if defined(__linux__)
+  /* Allow users to opt out of this behavior in restricted environments, e.g.
+     docker with default seccomp profile */
+  if (getenv("HHVM_DISABLE_PERSONALITY")) {
+    CAMLreturn(Val_unit);
+  }
   int p = personality((unsigned long)0xffffffff);
   if (! (p & ADDR_NO_RANDOMIZE)) {
     if(personality((unsigned long)(p | ADDR_NO_RANDOMIZE)) == -1) {
@@ -44,9 +49,9 @@ CAMLprim value caml_disable_ASLR(value args) {
       argv[i] = String_val(Field(args, i));
     }
     argv[argc] = (char const*)0;
-    (void)execv(argv[0], (char *const *)argv); /* No return. */
+    (void)execv(argv[0], (char *const *)argv); /* Usually no return. */
   }
 #endif
-
+  /* Reachable on MacOS, or if the execv fails. */
   CAMLreturn(Val_unit);
 }
